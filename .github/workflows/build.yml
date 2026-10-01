@@ -23,7 +23,7 @@ jobs:
       matrix:
         profile: [rev1_3, rev3_x]
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: tools
         run: apt-get update && apt-get install -y --no-install-recommends zsh zip binutils
       - name: firmware
@@ -51,7 +51,7 @@ jobs:
             (cd out && zip -qr apps.zip apps && rm -r apps)
             zip -qr out/lang.zip lang/en lang/de
           fi
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: p4os-${{ matrix.profile }}
           path: out/*
@@ -63,7 +63,7 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@v5
         with:
           path: dist
           merge-multiple: true

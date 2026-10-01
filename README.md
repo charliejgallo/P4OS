@@ -1,138 +1,257 @@
 # P4OS
 
-An iPhone-style operating system for the **Waveshare ESP32-P4-WIFI6-Touch-LCD-5**,
-a 5" 720×1280 board with an ESP32-P4 (two RISC-V cores at 400 MHz, 32 MB of
-PSRAM) and an ESP32-C6 that does its Wi-Fi.
+An iPhone-style operating system for the
+[**Waveshare ESP32-P4-WIFI6-Touch-LCD-5**](https://www.waveshare.com/esp32-p4-wifi6-touch-lcd-5.htm)
+([wiki](https://docs.waveshare.com/ESP32-P4-WIFI6-Touch-LCD-5)). It is a 5"
+720×1280 touch board with an ESP32-P4 (two RISC-V cores at 400 MHz and
+32 MB of PSRAM) and an ESP32-C6 that does the Wi-Fi.
 
 It has a home screen with pages, folders and a dock, a control centre and
-notifications, and runs in portrait or landscape. There are twenty-odd
-built-in apps and thirty more loaded from the microSD as shared objects:
-games with art rendered in Blender, Doom, a 3D viewer, a street map, video,
-a Lua interpreter. It also has:
+notifications, and runs in portrait or landscape. There are twenty built-in
+apps and thirty more on the microSD, loaded as shared objects:
 
-- a web portal;
-- a USB port that is a keyboard, mouse, gamepad, MIDI device, network and
-  disk to a computer;
-- a Wi-Fi network of its own for when there is none;
-- a workshop side for the 40-pin header: I2C, SPI, GPIO, a serial terminal,
-  an ESP32 programmer, Modbus, a bench supply and a scope;
-- a desktop simulator that runs the same UI code, so most of it can be built
-  without the board.
+- **Games:** twenty-one, among them Mila (a Sokoban with a black cat in
+  Blender 3D), Monster Hop, a racing game, golf, a robot RPG, and Doom at
+  35 fps.
+- **Tools:** a street map with offline zones, internet radio, IP cameras,
+  video, a 3D viewer, a tuner and Lua.
+- **A web portal** for files, updates and the log.
+- **USB:** the port becomes a keyboard, mouse, gamepad, MIDI device, network
+  or disk for a computer.
+- **A Wi-Fi network of its own,** joined with a QR code.
+- **The workshop:** I2C, SPI and GPIO on the 40-pin header, a serial
+  terminal, an ESP32 programmer, Modbus, and a bench supply and scope.
 
-It descends from [AmoledOS](https://github.com/charliejgallo/ESP32S3_AmoledOS), a
-smartwatch firmware for a 1.8" board. The app model, the portal and many of
-the apps came from there and were redrawn for a screen five times larger.
+A desktop simulator runs the same UI code, so most of it can be built and
+tried without the board.
+
+It descends from [AmoledOS](https://github.com/charliejgallo/ESP32S3_AmoledOS),
+a smartwatch firmware for a 1.8" board. The app model, the portal and many
+of the apps came from there, redrawn for a screen five times larger.
 
 <p align="center">
   <img src="docs/img/sim-home.png" width="230" alt="The home screen">
-  <img src="docs/img/sim-mila.png" width="230" alt="Mila, a Sokoban with a black cat">
-  <img src="docs/img/sim-macropad.png" width="230" alt="The macro pad: the board as a keyboard for a computer">
+  <img src="docs/img/sim-mila.jpg" width="230" alt="Mila, a Sokoban with a black cat">
+  <img src="docs/img/app-monsterhop.jpg" width="230" alt="Monster Hop">
 </p>
 <p align="center">
   <img src="docs/img/sim-home-landscape.png" width="700" alt="The home screen in landscape">
 </p>
 
-<p align="center"><em>Captures from the simulator, which draws the same
-pixels as the board.</em></p>
+<p align="center"><em>The captures come from the simulator, which draws the
+same pixels as the board. Photos of the board itself are on the way.</em></p>
 
 ---
 
 ## What it does
 
-**The shell.** It has icon pages and folders, and a dock. Swiping down from
-the top opens the control centre and the notifications. The status bar shows
-the Wi-Fi, the card and the USB. The board has no accelerometer, so the
-orientation is chosen in Settings or the control centre. Apps that only make
-sense one way turn the screen while they are open.
+### The shell
 
-**Built-in apps.** These are in the firmware:
+The home screen has icon pages, folders, a dock and widgets.
 
-| Group | Apps |
-|---|---|
-| Everyday | Settings, Files, Photos, Music, Clock (world clock, alarms, stopwatch, timer, pomodoro), Calendar, Calculator, Converter |
-| Home | Home Assistant, MQTT, Claude (your plan's usage; unofficial, see [CLAUDE-APP.md](docs/CLAUDE-APP.md)) |
-| Workshop | Bus (I2C, SPI, GPIO), Modules, Terminal, Programmer, Modbus, Bench (Riden supply and Rigol scope), Electronics calculators |
-| System | Monitor (CPU, tasks, memory, temperature), Network tools, Macro pad |
+- **Swiping down** from the top opens the control centre (Wi-Fi, Bluetooth,
+  do not disturb, orientation, brightness, volume, the music playing) and
+  the notifications.
+- **The status bar** shows the Wi-Fi or the board's own network, the card
+  and the USB.
+- **The orientation** is chosen in Settings or the control centre, because
+  the board has no accelerometer. Apps that only make sense one way turn the
+  screen while they are open.
+- **The BOOT button** goes home with a tap and takes a screenshot with a long
+  press; screenshots go to an album in Photos. Held during the boot screen,
+  it starts in safe mode, without the card's apps.
 
-**Apps from the card.** These are `.so` files loaded at boot, with their art
-in packs:
+| Settings in landscape | Macro pad | Photos |
+|---|---|---|
+| <img src="docs/img/sim-settings-landscape.png" width="300"> | <img src="docs/img/land-macropad.png" width="300"> | <img src="docs/img/land-photos.png" width="300"> |
+
+### Built-in apps
+
+Every day:
+
+| Files | Photos | Music | Clock | Calendar |
+|---|---|---|---|---|
+| <img src="docs/img/app-files.png" width="150"> | <img src="docs/img/app-photos.png" width="150"> | <img src="docs/img/app-music.png" width="150"> | <img src="docs/img/app-clock.png" width="150"> | <img src="docs/img/app-calendar.png" width="150"> |
+
+| Calculator | Converter | Home Assistant | Claude | Monitor |
+|---|---|---|---|---|
+| <img src="docs/img/app-calc.png" width="150"> | <img src="docs/img/app-convert.png" width="150"> | <img src="docs/img/app-ha.png" width="150"> | <img src="docs/img/app-claude.png" width="150"> | <img src="docs/img/app-sysmon.png" width="150"> |
+
+- **Files:** the card's explorer, with search, copy, move and folders, and
+  firmware opened straight in the Programmer.
+- **Photos:** albums, the screenshots among them.
+- **Music:** MP3, gapless, with the covers.
+- **Clock:** world clock, alarms, stopwatch, timer and pomodoro.
+- **Home Assistant:** favourites and the calendar, over its WebSocket API.
+- **Claude:** the usage of your own Claude plan, the numbers Claude Code's
+  `/usage` shows. It is unofficial; see [CLAUDE-APP.md](docs/CLAUDE-APP.md).
+- **Monitor:** CPU per core, the tasks, memory, temperature and the network.
+- **Also built in:** MQTT, network tools (ping, a host and port scan,
+  mDNS, Wi-Fi) and Conway's Life.
+
+### The workshop
+
+The 40-pin rear header is described in `modules.txt`: which pins make each
+port (`i2c.ext`, `spi.a`, `uart.*`, GPIO) and which modules hang from them.
+While an app uses a port it owns it, and Settings, Expansion draws the
+header with who holds each pin.
+
+| Bus (I2C scan) | Modules | Terminal | Programmer | Modbus | Electronics |
+|---|---|---|---|---|---|
+| <img src="docs/img/app-bus.png" width="125"> | <img src="docs/img/app-modules.png" width="125"> | <img src="docs/img/app-serial.png" width="125"> | <img src="docs/img/app-flasher.png" width="125"> | <img src="docs/img/app-modbus.png" width="125"> | <img src="docs/img/app-elec.png" width="125"> |
+
+- **Bus:** scans I2C and names what answers, talks to SPI chips with presets,
+  and reads and drives GPIO.
+- **Modules:** live readings from the sensors in `modules.txt` (SHT3x,
+  INA219, BME280...).
+- **Terminal:** two serial ports, hex, filters and alerts.
+- **Programmer:** flashes another ESP32 from firmware on the card
+  (esp-serial-flasher).
+- **Modbus:** a Riden RD60xx supply over RTU, and a gateway.
+- **Bench:** a Rigol scope over the LAN, the Riden, a UNI-T generator over
+  USB, and a logger to CSV.
+- **Electronics:** resistor colours, Ohm's law, dividers, LEDs, the 555 and
+  SMD codes.
+
+The simulator has fake chips and fake servers for all of it
+([docs/MODULES.md](docs/MODULES.md)).
+
+<p align="center"><img src="docs/img/land-bench.png" width="600" alt="Bench in landscape"></p>
+
+### Apps from the card
+
+These are `.so` files that the firmware loads at boot. Their code runs
+straight from PSRAM (on the P4, data and instructions share its addresses),
+and their art comes in packs.
+
+| Mila | Monster Hop | Turbo | Golf | Chatarra | Arkanos |
+|---|---|---|---|---|---|
+| <img src="docs/img/sim-mila.jpg" width="125"> | <img src="docs/img/app-monsterhop.jpg" width="125"> | <img src="docs/img/app-turbo.jpg" width="125"> | <img src="docs/img/app-golf.jpg" width="125"> | <img src="docs/img/app-chatarra.png" width="125"> | <img src="docs/img/app-arkanos.png" width="125"> |
+
+| Bubbles | Gems | 2043 | Claude Jump | Neon Snakes | Whack-a-Mole |
+|---|---|---|---|---|---|
+| <img src="docs/img/app-burbujas.png" width="125"> | <img src="docs/img/app-gemas.png" width="125"> | <img src="docs/img/app-2043.png" width="125"> | <img src="docs/img/app-cjump.png" width="125"> | <img src="docs/img/app-neon.png" width="125"> | <img src="docs/img/app-topos.png" width="125"> |
+
+| Truco | Blackjack | Minesweeper | Simon | Traffic Jam | Claudito |
+|---|---|---|---|---|---|
+| <img src="docs/img/app-truco.png" width="125"> | <img src="docs/img/app-blackjack.jpg" width="125"> | <img src="docs/img/app-mines.png" width="125"> | <img src="docs/img/app-simon.png" width="125"> | <img src="docs/img/app-atasco.png" width="125"> | <img src="docs/img/app-claudito.png" width="125"> |
+
+There are also Flappy, Dice, and Doom (doomgeneric, with OPL2 music). Doom
+needs a WAD of your own, and none is included.
+
+| Maps | Radio | Video | 3D Viewer | Pixel Art | Tuner |
+|---|---|---|---|---|---|
+| <img src="docs/img/app-mapas.jpg" width="125"> | <img src="docs/img/app-radio.png" width="125"> | <img src="docs/img/app-video.png" width="125"> | <img src="docs/img/app-visor3d.png" width="125"> | <img src="docs/img/app-pixel.png" width="125"> | <img src="docs/img/app-tuner.png" width="125"> |
+
+- **Maps:** OpenFreeMap vector tiles, drawn on the board, with offline zones
+  made in the portal and place search.
+- **Radio:** MP3, AAC and HLS stations, with a dial.
+- **Video:** MJPEG + WAV from the card, up to 1280×720.
+- **3D Viewer:** STL and the games' models, with up to 100 000 triangles.
+- **Also from the card:** Cameras (RTSP H.264 and MJPEG), Recorder, Weather,
+  Quotes, and Lua, where a script on the card is an app.
+
+| Golf | Monster Hop | Maps | Turbo |
+|---|---|---|---|
+| <img src="docs/img/land-golf.jpg" width="230"> | <img src="docs/img/land-monsterhop.jpg" width="230"> | <img src="docs/img/land-mapas.jpg" width="230"> | <img src="docs/img/land-turbo.jpg" width="230"> |
+
+Frame rates measured on the board:
+
+| App | Portrait | Landscape |
+|---|---|---|
+| Doom | – | 35 fps |
+| Video | 640×360 at 30 fps; 720×1280 at 24 fps | 1280×720 at 20 fps |
+| Visor 3D | ~28 fps with ~16 000 triangles | same |
+| Monster Hop | 22 fps | ~20 fps |
+| Turbo | 18–19 fps | ~15.7 fps |
+| Lua (24 cubes) | 34 fps | |
+
+[docs/APPS-P4.md](docs/APPS-P4.md) has them all, and explains how to write
+an app.
+
+### Connected
 
 | | |
 |---|---|
-| Games | Mila (Sokoban with a black cat, 3D in Blender), Monster Hop, Turbo, Golf, Chatarra (an RPG), Arkanos, Burbujas, Gemas, 2043, Claude Jump, Neon Snakes, Topos, Truco, Blackjack, Buscaminas, Simon, Flappy, Atasco, Dados, Claudito, Doom |
-| Tools | Maps (vector, with offline zones), Radio (MP3, AAC, HLS), Cameras (RTSP and MJPEG), Video, Visor 3D, Pixel Art, Recorder, Tuner, Weather, Quotes, Lua |
+| **Web portal** | at `p4os.local`: a file explorer, the firmware (updates, both slots, the last crash dump), the log (including the tail of the previous boot), and pages for the radio, maps, Lua, Pixel Art and the 3D viewer |
+| **Updates over the air** | two slots: an update is written into the idle one and boots on trial. If the board restarts in the first 30 s, the bootloader goes back by itself. Settings, Update can go back on purpose |
+| **USB** | the OTG port is high speed (480 Mbit/s). **Keyboard and mouse:** keyboard, media keys, mouse, a gamepad, a MIDI keyboard, and a network over the cable (the portal at `192.168.7.1`, 6.7 MB/s). **Disk:** the microSD as a USB drive. The mode is kept across restarts |
+| **Its own Wi-Fi** | an access point, `P4OS-XXXX`, next to the home network or alone. Two QR codes: one joins the phone, the other opens the portal at `192.168.4.1`. A phone downloaded from it at ~3 MB/s |
+| **Home** | Home Assistant over WebSocket, MQTT, Wi-Fi at 2.4 GHz through the C6 |
 
-<p align="center">
-  <img src="docs/img/sim-mila-landscape.png" width="560" alt="Mila in landscape">
-</p>
+### Settings
 
-**The web portal.** At `p4os.local` it has a file explorer, firmware updates
-and the log, among other pages. The log includes the tail of the previous
-boot, which survives a software restart. If the firmware panicked, its crash
-dump is there too.
+The pages are Wi-Fi (with the access point), Bluetooth, USB (each mode
+explained), Display, Sound, Wallpaper, Expansion, Language, Date and time,
+Storage, Update, Diagnostics and About.
 
-**Updates over the air.** The flash has two slots. An update is written into
-the idle one and boots on trial. If the board restarts in the first 30 s,
-the bootloader goes back to the previous image by itself. Settings, Update
-shows both slots and can go back on purpose.
+- **Storage:** what fills the card by kind of file, and eject.
+- **Update:** both slots, and going back.
+- **Diagnostics:** chip temperature, CPU, memory, the reset reason, safe mode,
+  and the crash dump.
+- **About:** the portal's addresses, with a QR code for the phone.
 
-**USB.** The OTG port is high speed (480 Mbit/s) and has three modes, chosen
-in Settings:
+The interface is written in Spanish and translated by the language packs on
+the card: English and German are complete, and a pseudo-locale is used to
+test layouts.
 
-- **Keyboard and mouse:** keyboard, media keys, mouse, a gamepad and a MIDI
-  keyboard for the computer. The Macro pad app drives them. The same mode
-  also opens a network over the cable, so the portal answers at
-  `192.168.7.1` with no Wi-Fi around (6.7 MB/s).
-- **Disk:** the microSD appears on the computer as a USB drive. It comes back
-  to the board when the computer ejects it.
-- **Off.**
+## What was tested, and what not yet
 
-The mode is kept across restarts. [docs/USB.md](docs/USB.md) has the
-descriptors and the three bugs it took to get them past macOS.
+**On the board, working:**
 
-**Its own Wi-Fi.** Settings, Wi-Fi can bring up an access point
-(`P4OS-XXXX`). It shows two QR codes: one joins the phone to it, the other
-opens the portal at `192.168.4.1`. It works next to the home network, or
-alone where there is none.
+- Boot in ~4 s with the card's apps.
+- Wi-Fi as a station, and as an access point with a phone on it.
+- The portal, and OTA with rollback, tested with an image that panicked on
+  purpose.
+- The crash dump.
+- USB against a Mac: keyboard, mouse, media keys, the gamepad, MIDI, the
+  network over the cable, and disk mode. Reads at 8.2 MB/s and writes at
+  4.8 MB/s.
+- The microSD, music and the speaker.
+- The games and most of the tools, in both orientations.
+- The BOOT button and safe mode.
+- An I2C and SPI scan of the header with nothing attached.
+- Settings' Storage page and the QR codes.
 
-**The workshop.** The 40-pin rear header is described in `modules.txt`. Each
-port (`i2c.ext`, `spi.a`, `uart.*`, GPIO) has an owner while an app uses it,
-and Settings, Expansion draws the header with who holds each pin. Bus scans
-I2C and names what answers, talks to SPI chips, and reads and drives GPIO.
-The simulator has fake chips to try all of it without hardware
-([docs/MODULES.md](docs/MODULES.md)).
+**Waiting for hardware on the bench:**
 
-<p align="center">
-  <img src="docs/img/sim-bus.png" width="230" alt="Bus: an I2C scan">
-  <img src="docs/img/sim-sysmon.png" width="230" alt="Monitor">
-  <img src="docs/img/sim-settings-landscape.png" width="460" alt="Settings in landscape, the USB page">
-</p>
+- Real I2C and SPI chips.
+- The programmer against another ESP32.
+- The Riden over TTL, the Rigol over the LAN, and the terminal at 460800.
+- The IP cameras.
+- The microphone's gain, and the speaker's latency and heating.
+- The real-time clock with a cell.
 
-**Languages.** The interface is written in Spanish and translated by
-language packs on the card: English and German are complete, and a
-pseudo-locale is used for testing layouts.
+**Not done yet:**
+
+- **Bluetooth:** the C6 can do it; it is next.
+- **ESP-NOW:** esp_hosted 1.4 does not carry it, so the two-device games of
+  AmoledOS run alone here.
+- **USB host:** the OTG port does not supply 5 V.
+- **A Developer section** in Settings.
+- **A rare hang after a software restart:** it leaves no network and no USB,
+  and needs a RESET. It is instrumented but not understood
+  ([docs/BUILDING.md](docs/BUILDING.md)).
+
+The board-side checklist is in
+[docs/plan/PRUEBAS-PLACA.md](docs/plan/PRUEBAS-PLACA.md) (Spanish).
 
 ## The hardware
 
 | | |
 |---|---|
-| Board | Waveshare ESP32-P4-WIFI6-Touch-LCD-5 (the model without a camera) |
-| SoC | ESP32-P4, chip rev 1.3 here. Rev 3.x builds as a separate profile; a binary for one does not boot on the other |
-| Display | 720×1280 MIPI-DSI (HX8394), GT911 touch with two fingers |
+| Board | [Waveshare ESP32-P4-WIFI6-Touch-LCD-5](https://www.waveshare.com/esp32-p4-wifi6-touch-lcd-5.htm), the model without a camera ([schematic and docs](https://docs.waveshare.com/ESP32-P4-WIFI6-Touch-LCD-5)) |
+| SoC | ESP32-P4, chip rev 1.3 here. Rev 3.x builds as a separate profile, and a binary for one does not boot on the other |
+| Display | 720×1280 MIPI-DSI (HX8394) with three frame buffers, and GT911 touch with two fingers |
 | Memory | 768 KB internal RAM, 32 MB PSRAM, 32 MB flash |
-| Radio | ESP32-C6 over SDIO (esp_hosted 1.4): Wi-Fi 6 at 2.4 GHz. Bluetooth is not used yet, and ESP-NOW does not pass through |
-| Other | microSD (4-bit), ES8311 + ES7210 audio, CH340 serial, RS485, USB 2.0 OTG, the BOOT button (home; long press: a screenshot; held during boot: safe mode) |
-
-Internal RAM is the scarce resource. Since the audit of 2026-09-30, about
-290 KB of it stays free with everything running. Almost everything else lives
-in PSRAM: task stacks, LVGL's objects and buffers, lwIP's statics and the USB
-buffers. [docs/MEMORY.md](docs/MEMORY.md) says what must stay internal and
-why, and has every number.
+| Radio | ESP32-C6 over SDIO (esp_hosted 1.4): Wi-Fi 6 at 2.4 GHz |
+| Audio | ES8311 (speaker) + ES7210 (two microphones), full duplex |
+| Other | microSD (4-bit), CH340 serial, RS485, USB 2.0 OTG, the 40-pin header, BOOT, RESET and POWER |
 
 ## Building
 
-You need ESP-IDF **v5.5** (the C6 link is validated on 5.5 with esp_hosted
-1.4). [docs/BUILDING.md](docs/BUILDING.md) has the details.
+You need ESP-IDF **v5.5**, because the C6 link is validated on 5.5 with
+esp_hosted 1.4. [docs/BUILDING.md](docs/BUILDING.md) has the details.
 
     tools/build_fw.sh rev1_3                 # the firmware (or rev3_x)
     tools/build_apps.sh                      # every app in apps/, checked against that firmware
@@ -151,38 +270,53 @@ ffmpeg`) and LVGL 9.5.0 in `sim/lvgl`. The firmware build has to have
 run once first, because it fetches the components whose headers the
 simulator shares.
 
-## The card
+Each push builds both firmware profiles and every app on GitHub Actions. The
+releases carry the firmware, a full-flash bundle, the apps and the language
+packs; the games' art packs are attached by hand.
 
-    /apps/        <app>.so and <app>_p4.pak (the packs, from the release)
-    /lang/        en/, de/ — the language packs (tools/install_lang.sh)
+### The card
+
+    /apps/        <app>.so and <app>_p4.pak (the art packs)
+    /lang/        en/, de/ — the language packs
     /music/ /photos/ /videos/ /maps/
     menu.txt      the home screen's order and folders
+    modules.txt   what is wired to the header
 
-[docs/APPS-P4.md](docs/APPS-P4.md) covers writing an app: the API, drawing a
-frame of your own, and the frame rates measured per app.
+## A note on what is written down
 
-## Status
+Most comments in this repository explain *why*, not *what*, and many of them
+record something that was measured on the board. A few examples:
 
-Version **0.5.0**, the first public one: much of the base is done, and the
-rest is listed below. [CHANGELOG.md](CHANGELOG.md) has what it contains.
-It runs on the board every day. On the board itself:
+- **USB descriptors.** The Mac never configured the device until the
+  network's notification interval changed from 50 to 9: at high speed that
+  field is an exponent, not a count of frames. A MIDI OUT endpoint of 512
+  bytes stalled `SET_CONFIGURATION` because esp_tinyusb's receive buffer is a
+  fixed 64. And macOS does not list a gamepad that rides inside the keyboard's
+  HID interface ([docs/USB.md](docs/USB.md)).
+- **Internal RAM.** The free internal RAM went from 112 KB to ~300 KB: code
+  out of IRAM, and statics, LVGL's buffers and the USB buffers moved to
+  PSRAM. One thing cannot move: a task's control block in PSRAM panics at
+  boot ([docs/MEMORY.md](docs/MEMORY.md)).
+- **PSRAM bandwidth.** The panel's refresh reads PSRAM at ~100 MB/s, and a
+  large `memcpy` there competes with it and flashes the screen. The games'
+  bands stay in internal RAM: in PSRAM, Mila's frames took 22–27 ms against
+  8–12.
+- **Wi-Fi.** Modem sleep put the ping at ~200 ms and TCP at 170 KB/s, so on
+  a wall plug the radio stays awake. With the board's own access point up,
+  the station stops looking for the home network, because each search scans
+  every channel and drops the phone.
+- **The C6.** An RPC to the C6 made under LVGL's lock timed out once, froze
+  the screen, and panicked inside esp_hosted. Since then the signal strength
+  is a cached reading.
+- **Listing a folder.** On FAT, a `stat()` per file is O(n²), tens of seconds
+  for a few thousand files. Folders are read in one pass of FatFs's own
+  records.
+- **The build.** A fresh checkout used to build a firmware that had never
+  been on the board, because four Wi-Fi settings lived only in the local
+  build's `sdkconfig`. They are in `sdkconfig.defaults` now, and a clean build
+  matches the board byte for byte in size.
 
-- **Tested:** Wi-Fi (station and access point), the portal, OTA with
-  rollback, the USB modes against a Mac, the microSD, audio out, the games
-  and most of the tools above, SPI and I2C scans with nothing attached, and
-  the BOOT button.
-- **Waiting for hardware on the bench:** real I2C and SPI chips, the
-  programmer against another ESP32, the cameras, and the Riden over TTL.
-  The list is in
-  [docs/plan/PRUEBAS-PLACA.md](docs/plan/PRUEBAS-PLACA.md) (Spanish).
-
-Known gaps:
-
-- **Bluetooth:** not done yet.
-- **A rare hang after a software restart:** neither the network nor the USB
-  comes back, and it needs a RESET. It is instrumented but not understood
-  ([docs/BUILDING.md](docs/BUILDING.md)).
-- **Settings, Developer:** planned.
+Where something is a guess, it says so.
 
 ## Documentation
 
@@ -192,12 +326,13 @@ Known gaps:
 | [MEMORY.md](docs/MEMORY.md) | internal RAM vs PSRAM, the panel's three frame buffers, PSRAM bandwidth, the audit |
 | [APPS-P4.md](docs/APPS-P4.md) | writing and installing `.so` apps, drawing a frame, measured fps |
 | [USB.md](docs/USB.md) | the OTG port's modes, descriptors and measurements |
-| [MODULES.md](docs/MODULES.md) | the 40-pin header, `modules.txt`, I2C/SPI/GPIO from apps |
+| [MODULES.md](docs/MODULES.md) | the 40-pin header, `modules.txt`, I2C, SPI and GPIO from apps |
 | [MACROPAD.md](docs/MACROPAD.md) | the macro pad: pages, buttons, the gamepad and MIDI faces |
 | [CAMERAS.md](docs/CAMERAS.md) | RTSP and MJPEG cameras on this board |
 | [HOME-ASSISTANT.md](docs/HOME-ASSISTANT.md), [MQTT.md](docs/MQTT.md), [CLAUDE-APP.md](docs/CLAUDE-APP.md) | the home and service apps |
 | [BENCH.md](docs/BENCH.md), [RETRO.md](docs/RETRO.md) | the hardware bench and the retro canvas |
 | [docs/plan/](docs/plan) | the plan, the hardware survey, the UI and the expansion header (Spanish) |
+| [CHANGELOG.md](CHANGELOG.md) | what each version brought |
 
 ## Names and marks
 
@@ -216,14 +351,16 @@ GNU GPL v2, and no WAD is included.
 
 ## En castellano
 
-P4OS es un sistema tipo iPhone para la placa de 5" de Waveshare con ESP32-P4.
+P4OS es un sistema tipo iPhone para la
+[placa de 5" de Waveshare con ESP32-P4](https://www.waveshare.com/esp32-p4-wifi6-touch-lcd-5.htm).
 La interfaz está escrita en castellano y se traduce con los paquetes de
 idioma de la tarjeta. Los documentos del plan y de las pruebas en la placa
 (`docs/plan/`) están en castellano; el resto, en inglés.
 
 | | |
 |---|---|
-| Qué hace | inicio con carpetas, 20 apps propias y 30 de la tarjeta, portal web, USB como teclado/mouse/disco, red Wi-Fi propia con QR, taller con I2C/SPI/GPIO |
+| Qué hace | inicio con carpetas, 20 apps propias y 30 de la tarjeta (juegos, mapas, radio, video, Lua), portal web, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, y taller con I2C, SPI y GPIO |
+| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el botón BOOT |
+| Qué falta | Bluetooth, probar chips reales en el conector, las cámaras, y un cuelgue raro tras reiniciar |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
 | Cómo se instala | la primera vez por el CH340; después `tools/ota.sh p4os.local` o el portal |
-| Qué falta | Bluetooth, probar chips reales en el conector, un cuelgue raro tras reiniciar |
