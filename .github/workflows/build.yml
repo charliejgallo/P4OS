@@ -13,6 +13,12 @@ on:
     tags: ['v*']
   pull_request:
 
+# a new push to the same branch cancels the run still going: the apps take
+# ~45 minutes and only the last commit matters
+concurrency:
+  group: build-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   firmware:
     runs-on: ubuntu-latest

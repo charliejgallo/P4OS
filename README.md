@@ -221,7 +221,7 @@ test layouts.
 - The games and most of the tools, in both orientations.
 - The BOOT button and safe mode.
 - I2C with a real BME280 on the header: found by itself, read once a second
-  without errors. SPI with MOSI looped to MISO at 1, 10 and 40 MHz.
+  without errors. SPI with MOSI looped to MISO at 40 MHz, the port's top speed.
 - Settings' Storage page and the QR codes.
 
 **Waiting for hardware on the bench:**
