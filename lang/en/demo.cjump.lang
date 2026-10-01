@@ -1,0 +1,130 @@
+# amoledos-lang 1   es -> en
+# demo.cjump.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/cjump/main/cj_skins.c:32
+Clásico	Classic
+
+#: apps/cjump/main/cj_skins.c:33
+Nerd	Nerd
+
+#: apps/cjump/main/cj_skins.c:34
+Café	Coffee
+
+#: apps/cjump/main/cj_skins.c:35
+Idea	Idea
+
+#: apps/cjump/main/cj_skins.c:36
+Auriculares	Headphones
+
+#: apps/cjump/main/cj_skins.c:37
+Obrero	Builder
+
+#: apps/cjump/main/cj_skins.c:38
+Dormilón	Sleepy
+
+#: apps/cjump/main/cj_skins.c:39
+Graduado	Graduate
+
+#: apps/cjump/main/cj_skins.c:40
+Hipnótico	Hypnotic
+
+#: apps/cjump/main/cj_skins.c:41
+Navegador	Browser
+
+#: apps/cjump/main/cj_skins.c:42
+Forzudo	Strong
+
+#: apps/cjump/main/cj_skins.c:43
+Mago	Wizard
+
+#: apps/cjump/main/cj_skins.c:44
+Ninja	Ninja
+
+#: apps/cjump/main/cj_skins.c:45
+Rey	King
+
+#: apps/cjump/main/cj_skins.c:46
+Astronauta	Astronaut
+
+#: apps/cjump/main/cj_skins.c:47
+Fiesta	Party
+
+#: apps/cjump/main/cjump.c:474
+SONIDO	SOUND
+
+#: apps/cjump/main/cjump.c:478
+Botones a los costados, o arrastrá el dedo	Buttons on the sides, or drag your finger
+
+#: apps/cjump/main/cjump.c:486
+Récord	Best
+
+#: apps/cjump/main/cjump.c:489
+#: apps/cjump/main/cjump.c:512
+Monedas	Coins
+
+#: apps/cjump/main/cjump.c:519
+#: apps/cjump/main/cjump.c:709
+monedas	coins
+
+#: apps/cjump/main/cjump.c:525
+Comprar	Buy
+
+#: apps/cjump/main/cjump.c:525
+No alcanza	Not enough
+
+#: apps/cjump/main/cjump.c:531
+Puesto	Wearing
+
+#: apps/cjump/main/cjump.c:534
+Comprado	Owned
+
+#: apps/cjump/main/cjump.c:536
+Ponerme este	Wear this
+
+#: apps/cjump/main/cjump.c:564
+Todavía no alcanza	Not enough coins yet
+
+#: apps/cjump/main/cjump.c:572
+Disfraz desbloqueado	Skin unlocked
+
+#: apps/cjump/main/cjump.c:701
+Nuevo récord	New best
+
+#: apps/cjump/main/cjump.c:702
+Se acabó	Game over
+
+#: apps/cjump/main/cjump.c:713
+Juntadas	Picked up
+
+#: apps/cjump/main/cjump.c:714
+por altura	for height
+
+#: apps/cjump/main/cjump.c:976
+Jugar	Play
+
+#: apps/cjump/main/cjump.c:978
+#: apps/cjump/main/cjump.c:996
+Tienda	Shop
+
+#: apps/cjump/main/cjump.c:1015
+Deslizá para ver los demás	Swipe to see the others
+
+#: apps/cjump/main/cjump.c:1026
+Pausa	Paused
+
+#: apps/cjump/main/cjump.c:1028
+Seguir	Resume
+
+#: apps/cjump/main/cjump.c:1030
+#: apps/cjump/main/cjump.c:1050
+Menú	Menu
+
+#: apps/cjump/main/cjump.c:1032
+Salir	Exit
+
+#: apps/cjump/main/cjump.c:1048
+Otra vez	Again

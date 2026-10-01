@@ -1,0 +1,65 @@
+# amoledos-lang 1   es -> de
+# demo.neon.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/neon/main/neon.c:451
+Deslizá el dedo hacia donde quieras ir: alcanza con un toque corto, y un mismo trazo puede doblar varias veces. También podés tocar al costado de la cabeza.	Wische in die gewünschte Richtung: ein kurzer Wisch reicht, und ein Strich kann mehrmals abbiegen. Du kannst auch neben den Kopf tippen.
+
+#: apps/neon/main/neon.c:559
+NORMAL	NORMAL
+
+#: apps/neon/main/neon.c:560
+COMBATE	KAMPF
+
+#: apps/neon/main/neon.c:565
+UN JUGADOR	EIN SPIELER
+
+#: apps/neon/main/neon.c:567
+MULTIJUGADOR	MEHRSPIELER
+
+#: apps/neon/main/neon.c:568
+VOLVER	ZURÜCK
+
+#: apps/neon/main/neon.c:570
+#: apps/neon/main/neon.c:1220
+El juego de a dos necesita el enlace, y este equipo todavía no lo tiene	Zu zweit braucht es die Verbindung, und dieses Gerät hat sie noch nicht
+
+#: apps/neon/main/neon.c:577
+CANCELAR	ABBRECHEN
+
+#: apps/neon/main/neon.c:604
+SEGUIR	WEITER
+
+#: apps/neon/main/neon.c:605
+#: apps/neon/main/neon.c:610
+#: apps/neon/main/neon.c:615
+MENÚ	MENÜ
+
+#: apps/neon/main/neon.c:609
+OTRA VEZ	NOCHMAL
+
+#: apps/neon/main/neon.c:856
+#: apps/neon/main/neon.c:1389
+Sin memoria	Kein Speicher
+
+#: apps/neon/main/neon.c:978
+#: apps/neon/main/neon.c:1384
+Buscando al otro equipo...	Suche das andere Gerät...
+
+#: apps/neon/main/neon.c:1014
+#: apps/neon/main/neon.c:1069
+#: apps/neon/main/neon.c:1119
+%s salió del juego	%s hat das Spiel verlassen
+
+#: apps/neon/main/neon.c:1082
+#: apps/neon/main/neon.c:1120
+Sin señal de %s	Kein Signal von %s
+
+#: apps/neon/main/neon.c:1097
+Sin pareja: apareá los equipos en Enlace	Kein Partner: Geräte in Verbindung koppeln
+
+#: apps/neon/main/neon.c:1105
+Esperando a %s...	Warte auf %s...

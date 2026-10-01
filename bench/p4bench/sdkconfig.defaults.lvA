@@ -1,0 +1,3 @@
+# LVGL variant A: no OS, one software draw unit (what AmoledOS uses)
+CONFIG_LV_OS_NONE=y
+CONFIG_LV_DRAW_SW_DRAW_UNIT_CNT=1

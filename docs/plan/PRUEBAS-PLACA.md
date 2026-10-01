@@ -1,0 +1,418 @@
+# P4OS: lo que falta confirmar en la placa
+
+La placa llegó el 2026-09-28. Hasta ese día todo se escribió y se probó en el
+simulador, contra servidores falsos en la Mac. Este archivo junta, en un solo
+lugar, lo que **sólo la placa puede confirmar**, para ir tachando a medida que
+se prueba.
+
+## Estado al 2026-09-30
+
+- **La placa corre P4OS entero:** rev 1.3 del chip, perfil `rev1_3`, firmware
+  por `tools/build_fw.sh rev1_3 … app-flash`, portal en `p4os.local`.
+- **Arranque:** pantalla de arranque con el avance real y el sistema listo a los
+  4,2 s con 40 apps de la tarjeta (04c5309).
+- **Memoria:** todo lo que puede va a PSRAM: pilas, estáticos, esp_hosted,
+  cJSON y mDNS. La RAM interna libre pasó de 46 a ~120 KB (`docs/MEMORY.md`).
+- **Pantalla:** tres framebuffers del panel, con cambio de búfer para las apps
+  (`aos_hal_display_back/flip/blit_into`). Además, reparto de un cuadro entre
+  los dos núcleos con `aos_hal_worker_split`.
+- **Apps en la tarjeta** (`docs/APPS-P4.md` tiene la tabla con los fps):
+  - los juegos retro a pantalla completa;
+  - Doom, Visor 3D (con modelos HD de 100 000 triángulos), Mapas, Video, Lua
+    y Pixel Art;
+  - Chatarra con arte 2×;
+  - Monster Hop, Turbo, Mila y Golf con arte HD de Blender;
+  - Blackjack, Truco y Neon Snakes.
+- **Inicio:** carpetas completas (agregar, quitar, renombrar) y la página
+  `#inicio` del portal para ordenarlo desde la computadora.
+- **Firmware por Wi-Fi:** `tools/ota.sh` o la página **Firmware** del portal,
+  con arranque a prueba y vuelta sola a la imagen anterior; el registro del
+  arranque anterior y el volcado del último cuelgue se leen desde el portal
+  (`docs/BUILDING.md`).
+
+### Pendientes, en resumen
+
+Hecho el 2026-09-30:
+- [x] Traducciones completas en/de (3821 textos, `lang/`), instaladas con
+      `tools/install_lang.sh`; la app en primer plano ahora carga su catálogo.
+- [x] Páginas del portal `#3d`, `#mapas`, `#lua` y `#pixel` (09a5414).
+- [x] Casita de Mila más grande, en los dos sentidos (1,92×, f0cabee).
+- [x] OTA por el portal y `tools/ota.sh`: ~25 s para 5,7 MB, arranque a
+      prueba confirmado a los 30 s y vuelta atrás probada con una imagen
+      que se colgaba a propósito (la ranura quedó "aborted").
+- [x] Registro del arranque anterior (64 KB, sobrevive un reinicio, no un
+      corte de luz) y volcado del cuelgue descargable (`tools/coredump.sh`);
+      Registro con filtro, colores y descarga.
+- [x] Perro guardián de la red: si a los 60 s no conectó, reinicia (dos veces
+      como mucho). La causa de que a veces no vuelva tras un reinicio por
+      software sigue sin encontrarse.
+
+Del sistema:
+- [x] Juegos acostados: girar franjas de RAM interna con el PPA (hecho por la
+      auditoría de RAM interna del 2026-09-30: Monster Hop toma dos franjas
+      de 9 filas acostado, Mila las suyas), que necesita
+      dos bloques de 20 KB internos por app. Acostada faltan los ~57 KB del
+      búfer de rotación de LVGL (sólo existe así): la idea es que el HAL se
+      lo preste al juego mientras se juega y lo recupere en los menús
+      (medido: vertical 169 KB libres, acostada 112).
+- [x] Un cambio de búfer para las apps que redibujan por partes (Mila):
+      `aos_hal_display_back_age()` (011dc81) y Mila con un anillo de daños
+      (5a05606). Parada, la casita cambia de búfer en todos los cuadros.
+- [x] Mila acostada cambia de búfer (2026-09-30, después de la auditoría de
+      RAM interna: el bloque DMA más grande pasó de 30 a 139 KB). Medido:
+      franjas de 44 KB internas, mapa 139 cuadros por cambio de búfer y 0
+      empujados, 46 fps, dibujo 11 ms; nivel 8-12 ms por cuadro, cambio de
+      búfer ~20 µs. Antes: Mila acostada no cambiaba de búfer: caía sola al envío de siempre (0
+      cambios, todo "pushed") y se ve bien. La causa: acostada quedan ~36 KB
+      de RAM interna apta para DMA, en pedazos de 10,7 KB como máximo, y el
+      PPA necesita franjas de 8 filas (20 KB). Para arreglarlo hay que ver
+      quién usa la RAM interna DMA (búferes de LVGL 2 x 80 KB, Wi-Fi, audio,
+      SD) y liberar un bloque. El bloque de 31 KB que muestra el monitor es la
+      LP SRAM, que no sirve.
+- [x] `AOS_APP_FLAG_KEEP_AWAKE` que dure mientras la app está al frente, con
+      el apagado automático nuevo en Ajustes → Pantalla (e58844d).
+- [x] `aos_ui_overlay()` para las apps que escriben en la pantalla: Monster Hop,
+      Turbo, Doom, Video, Visor 3D, Mapas y Golf se pausan debajo de un
+      panel, y Doom, Video, Visor 3D y Mapas cambian de búfer (sin cortes).
+      Doom medido: 35 fps con cambio de búfer.
+- [x] El servicio del lienzo retro: `LR_SPLIT`, dedos sobre controles, A/B
+      (15ff279); Claude Jump usa ya los botones del servicio.
+- [ ] Exportar `open`/`read`/`close` en la tabla de símbolos, que pidieron Mila
+      y Golf.
+- [ ] Chicos: `i2s_channel_disable … not enabled` al reabrir el códec; `curl
+      p4os.local` sin `-4` espera 5 s por un AAAA; el teclado de LVGL sale
+      claro sobre la hoja oscura (renombrar una carpeta).
+- [ ] Simulador:
+  - `LUAI_MAXCCALLS=100` para `aos_lua`, como en la placa (el simulador usa
+    el valor de Lua);
+  - que informe la PSRAM y los fps reales;
+  - agregar las apps nuevas a `P4OS_SIM_APPS` (`sim/CMakeLists.txt`);
+  - que llame a `aos_hal_sim_link_tick()`.
+- [x] Claudito por filas que cambian (quieto ~3 % de un núcleo, antes ~15 %).
+- [ ] 2043 a 30 fps: ~24 fps presentando sólo las baldosas que cambian (antes
+      26 medido con otro decorado; 20,7 presentando todo). El techo es LVGL
+      refrescando por tandas con el PPA: un camino directo al búfer libre
+      necesitaría dibujar los botones dentro del lienzo.
+- [x] Doom con cambio de búfer: 35 fps y sin corte posible entre cuadros.
+
+Que necesitan la mano del usuario o equipos:
+- [ ] SPI en el conector (2026-09-30, `docs/MODULES.md`): Bus → SPI → "Lazo"
+      con un cable del pin 34 (MOSI) al 36 (MISO); después un chip real
+      (memoria flash, MAX31855, MCP3008). Sin nada conectado ya contesta
+      todo 0xFF, como debe. **Para la próxima tanda con equipos, junto con
+      los módulos I2C reales y el Programador contra un ESP32.**
+- [x] Punto de acceso propio (2026-10-01): el C6 de fábrica hace SoftAP en
+      APSTA; el usuario se unió con el QR desde el teléfono y abrió el portal
+      con el otro. Con el AP prendido la RAM interna no cambió (291 KB) y la
+      red de casa siguió igual (1,59 MB/s por Wi-Fi contra 1,7 de antes).
+      Del teléfono a la placa por el AP: los 7,5 MB de mila_p4.pak en 2-3 s
+      (~3 MB/s, cronometrado a mano: el doble que por el router). El
+      contador de Ajustes y el registro vieron al teléfono entrar.
+- [x] Ajustes nuevos (2026-09-30), en vertical y acostada (Almacenamiento y el QR probados por el usuario):
+      Almacenamiento (la barra por tipo, el recuento de la tarjeta real,
+      Expulsar y Montar), Actualización (las dos ranuras; "Volver a esta
+      versión" pide dos toques y reinicia con la otra), Diagnóstico
+      (temperatura, CPU, motivo del reinicio, modo seguro, volcado) y el QR
+      del portal en Acerca de, leído con el teléfono.
+- [x] El botón BOOT (2026-09-30): toque = inicio (y despierta la pantalla
+      apagada), largo = captura en `/sdcard/photos/Capturas` (un álbum de
+      Fotos), apretado durante la pantalla de arranque = modo seguro. Los
+      tres probados por el usuario. Una vez, tras el reinicio de una OTA,
+      el pin no dio ningún flanco hasta el RESET (`docs/BUILDING.md`, el
+      vigilante de cuelgues).
+- [x] El primer login real de Claude (anduvo a la primera).
+- [x] USB como teclado, mouse y macro pad (2026-09-30): enumera en HS,
+      los tres reports, despierta la Mac y la placa se alimenta por el OTG.
+- [x] USB como disco (2026-09-30): la tarjeta en la Mac y de vuelta.
+- [ ] Cámaras (timbre y exterior).
+- [ ] Ganancia del micrófono (ES7210), calentamiento del amplificador y
+      latencia.
+- [ ] Riden por TTL y Rigol por la LAN, Terminal a 460800 y Programador contra
+      un ESP32.
+- [ ] HA con `wss://` real, Mosquitto real y módulos I2C reales.
+- [ ] La prueba 17: la hora con una pila en H3.
+- [ ] Jugar a mano en la placa lo que no se puede tocar por el portal: Mila y
+      Golf leen el táctil del panel.
+
+Apps del reloj que no se pasan (necesitan IMU o el enlace ESP-NOW): escáner,
+laberinto, pong, radar, walkie, remoto y sensores.
+
+## Punto de partida
+
+- **Estado del repo:** 54 commits, hasta `94f04c6`.
+- **Firmware:** compila con `tools/build_fw.sh rev3_x` y deja 42 % libre en la
+  partición.
+- **RAM interna:** 215 KB en uso de 512.
+- **Hecho en la Fase 1** (el detalle está en PLAN.md, puntos 1 a 8):
+  - el shell completo;
+  - 23 apps portadas;
+  - Ajustes, Home Assistant, Terminal, Programador, Bus, Modbus y Banco;
+  - MQTT, Red, Monitor, Archivos, Claude, Cámaras, Macro pad y Módulos;
+  - el lienzo retro con cinco juegos;
+  - el portal web.
+- **Documentación por tema:** `docs/BENCH.md`, `CAMERAS.md`, `CLAUDE-APP.md`,
+  `HOME-ASSISTANT.md`, `MACROPAD.md`, `MODULES.md`, `MQTT.md` y `RETRO.md`.
+
+## Orden
+
+1. **Fase 2, el banco de pruebas** (`bench/README.md`, `docs/plan/HARDWARE.md`):
+   - chip_id y respaldo completo del firmware de fábrica;
+   - `p4bench`, las 21 pruebas y las variantes de LVGL;
+   - congelar las decisiones marcadas con 🔒.
+2. **P4OS en la placa** (Fase 3), en este orden:
+   1. arranque y pantalla;
+   2. táctil y rotación;
+   3. tarjeta, NVS y hora;
+   4. Wi-Fi por el C6;
+   5. portal;
+   6. el resto.
+3. **Las apps**, con los equipos de verdad: la lista de abajo.
+
+## Plataforma
+
+- [x] **Qué chip vino:** revisión del chip (perfil `rev3_x` o `rev1_3`) y
+      tamaño de la flash.
+- [x] **Pantalla:**
+  - [x] el panel DSI con LVGL;
+  - [x] la rotación: por CPU a un buffer interno y DMA2D al panel (el PPA
+        escribiendo PSRAM era 11 veces más lento);
+  - [x] el doble framebuffer: queda uno solo (con dos, `esp_async_fbcpy`
+        dibujaba basura); **cambiado el 2026-09-29**: tres framebuffers para
+        que las apps cambien de uno a otro (`aos_hal_display_back/flip`),
+        LVGL sigue copiando al que se ve;
+  - [x] la variante de LVGL: lvB, 35 fps vertical y 22 horizontal.
+- [x] **Táctil:** el GT911, con dos dedos (pinch, y scroll a dos dedos en el
+      Macro pad). Probado por el usuario: pinch en Chatarra y Mila, pinch y
+      giro con dos dedos en el Visor 3D (2026-09-29).
+- [x] **Almacenamiento:** tarjeta SD (SDMMC), NVS, SNTP.
+  - [x] SD (10,8 MB/s de lectura), NVS y SNTP con la zona horaria. No hay
+        chip RTC en esta placa (HARDWARE.md): queda la prueba 17.
+  - [x] Un montaje de la SD falló una vez tras un reinicio por software
+        (2026-09-29): ahora se intenta tres veces (d2e1955).
+- [ ] **Wi-Fi por el C6:**
+  - [x] que esp_hosted funcione con el firmware de fábrica del C6 (en modo
+        streaming, el de paquete corta el enlace);
+  - [x] throughput y ventana TCP (2026-09-29): 1,1 MB/s de subida y 1,8
+        de bajada por el portal, detalle en `docs/MEMORY.md`;
+  - [ ] cuántos sockets entran a la vez: portal + HA + MQTT + cámaras;
+    `aos_tcp` ahora tiene 6.
+- [ ] **Audio:**
+  - [ ] calentamiento del amplificador;
+  - [ ] curva de volumen: la de esp_codec_dev (-50..0 dB, lineal) dejaba
+        mudo el medio; ahora -36/-20/-10/-4/0 dB en 1/25/50/75/100, a
+        confirmar de oído;
+  - [ ] ganancia del ES7210;
+  - [x] CPU que usa el decodificador MP3: 10-11 % de un núcleo con un MP3
+        de 320 kbps a 44,1 kHz pasado a 48 (AAC sin medir);
+  - [ ] latencia del parlante.
+- [ ] **Imágenes:**
+  - [x] el motor JPEG anda (una sonda real de 64x64 en lugar de la de 16x16
+        que daba timeout, 02ddfb0): 640x360 en 3 ms;
+  - [ ] el orden de colores del motor JPEG (se detecta solo);
+  - [ ] la regla de relleno del motor;
+  - [ ] la velocidad para fotos de 12 MP.
+  - [x] Fotos en la placa (2026-09-29): 348 fotos y 3 álbumes, colores bien,
+        PNG bien. El JPEG progresivo no abría (ni el motor ni esp_new_jpeg
+        los decodifican): ahora va por stb_image, hasta 2,5 MP.
+- [x] **PSRAM:** que `AOS_BSS_PSRAM` (con
+      `CONFIG_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY`) no rompa nada, porque
+      la tabla de apps y el servicio de HA viven ahí ahora.
+  - [x] Pilas de los hilos, de esp_hosted, de mDNS y los estáticos de las
+        apps en PSRAM (2026-09-29): la RAM interna libre pasó de 46,5 a
+        ~117 KB. Las reglas están en `docs/MEMORY.md`.
+  - [x] Preferencias escritas desde un hilo con pila en PSRAM (el portal),
+        sin el assert de la flash.
+  - [x] Recorrer las apps una por una con las pilas en PSRAM, mirando que no
+        haya destellos ni reinicios: 16 apps seguidas sin reinicio (APPS-P4.md).
+- [x] **Cargador de apps .so para RISC-V** (Fase 3), `build_apps.sh` para el
+      P4 y `aos_symbols.c` regenerado (5ba450e, c04ef3c): 34 módulos y 40
+      apps en la tarjeta (2026-09-30). Detalle en `docs/APPS-P4.md`.
+
+## Por app
+
+**Terminal y Programador**
+- [ ] El UART a 460800 por el header.
+- [ ] EN/BOOT reales para programar otra placa.
+- [ ] esp-serial-flasher contra un ESP32 de verdad.
+
+**Modbus y Banco**
+- [ ] La Riden por TTL: los 20 ms entre pedidos y las escrituras que rechaza en
+      silencio.
+- [ ] El Rigol por la LAN:
+  - [ ] trazas por segundo (en el simulador dio entre 11 y 16);
+  - [ ] la pausa entre comandos;
+  - [ ] que `*OPC?` espere al autoscale;
+  - [ ] el tamaño y el tiempo de la captura PNG;
+  - [ ] lo que le cuesta a LVGL dibujar el lienzo de la traza.
+
+**Home Assistant**
+- [ ] `wss://` con un certificado real.
+- [ ] Cerrar una notificación en la P4 y ver que se cierra también en HA.
+
+**MQTT**
+- [ ] Un Mosquitto de verdad: usuario y contraseña, y los rechazos por ACL.
+- [ ] Una ráfaga de mensajes.
+- [ ] Que el Wi-Fi se corte y se reconecte.
+
+**Red**
+- [ ] ICMP por lwIP.
+- [x] La tabla ARP (10 entradas) durante el barrido de la /24 (terminó bien
+      el 2026-09-29, después de pasar los buffers de esp_hosted a PSRAM).
+- [ ] mDNS con 15 búsquedas a la vez.
+- [ ] Que el C6 pase el ancho de canal; el C6 es sólo 2,4 GHz.
+
+**Monitor**
+- [x] La carga por núcleo.
+- [x] Pila y CPU por tarea (las pilas en PSRAM se miden de a una por vuelta).
+- [x] El sensor de temperatura del chip (~34 °C en reposo).
+- [x] heap_caps DMA y EXEC (EXEC da 0: el P4 no tiene montón ejecutable).
+- [x] Los datos de la tarjeta (CID).
+
+**Archivos**
+- [x] `aos_hal_dir_scan` sobre FatFs: 3000 archivos listados de una pasada
+      (el portal tardaba por un `stat` por archivo). Falta ver que las
+      fechas lleguen en hora local (se vieron archivos de "1980-12-31"
+      subidos antes de que llegue el SNTP).
+- [x] Copiar con un buffer de 32 KB en PSRAM: 2,8 MB/s con `aos_hal_io_alloc`,
+      el bounce buffer fijo y `read()` (MEMORY.md).
+
+**Claude**
+- [x] El primer login real, que confirma o corrige (2026-09-30, a la primera,
+      con las direcciones por defecto):
+  - [x] la dirección de canje del token;
+  - [x] el redirect;
+  - [x] los scopes;
+  - [x] la forma de la respuesta de `/api/oauth/usage`: 5 h al 3 % y semana al
+        82 %, con los mismos reinicios que muestra Claude Code.
+  - [x] Que siga andando solo: a la noche del 2026-09-30, horas después del
+        login y una docena de reinicios y OTAs, trajo los números a la
+        primera. (El servicio arranca cuando algo lo consulta: la app, el
+        widget o el portal.)
+  - [ ] Que el ritmo aparezca después de 20 minutos de historial.
+
+  Si algo falla, el portal muestra el error del servidor y las direcciones se
+  cambian en las preferencias (`claude_*`) sin grabar firmware.
+
+**Cámaras**
+- [ ] tinyh264 a la resolución del timbre.
+- [ ] El motor JPEG con los MJPEG.
+- [ ] El escalado por CPU (si no alcanza, pasar al PPA).
+- [ ] Cuatro cámaras a la vez con la RAM interna que queda.
+
+**Macro pad (USB OTG en modo dispositivo)** (probado el 2026-09-30, todo seguido
+por el Registro del portal sin cable serie)
+- [x] Que la Mac enumere el dispositivo HS: "P4OS p4os" a 480 Mbit/s, a la
+      primera (macOS pide aceptar el accesorio; configurado ~12 s después).
+- [x] Los reports de teclado, multimedia y mouse: volumen 63 → 69 → 63
+      medido desde la Mac, ⌘⇧3 dejó las capturas, Spotlight, pegar, puntero,
+      clic con un toque y scroll a dos dedos para el lado correcto.
+- [x] Que una tecla de 8 ms no se pierda: "hello world", Enter, dos borrados,
+      exactos; ningún report fallido en el registro.
+- [x] Los LEDs de vuelta: la Mac manda el report de salida (se ve en el
+      registro).
+- [x] Despertar a la Mac dormida: un botón del Macro pad la despierta (pide
+      la clave, como debe ser). No llegó ningún "suspended": con la placa
+      colgada del puerto, macOS no suspendió el bus, así que despertó con el
+      report mismo y el remote wakeup no se usó. Falta verlo con un bus que
+      sí se suspenda.
+- [x] Alimentarse por el OTG: desenchufada la consola, la placa sigue sola
+      con el OTG desde la Mac, sin reiniciarse.
+- [x] **Modo disco** (2026-09-30, `docs/USB.md`): la microSD como pendrive
+      desde Ajustes → USB; lectura 8,2 MB/s, escritura 3,3 MB/s, 64 MB
+      íntegros, y expulsarla en la Mac la devuelve sola a la placa. Spotlight
+      trababa la expulsión: ahora la placa deja `.metadata_never_index`.
+- [x] **Mando, MIDI y red por el cable** (2026-09-30, `docs/USB.md`): el
+      Macro pad suma las caras Mando y MIDI; la red da el portal en
+      192.168.7.1 a 7,4 MB/s (4 veces el Wi-Fi). Tres arreglos de
+      descriptor hasta que la Mac lo tomó (intervalo de NCM en HS, MIDI de
+      un solo sentido, mando en su propia interfaz).
+- [x] El modo del puerto se guarda (pref `usb_mode`): tras una OTA vuelve
+      solo a Teclado y mouse a los 4,1 s y la Mac lo toma a los 4,5 s. El
+      modo Disco no se guarda (el arranque lee la tarjeta).
+- [ ] Visto de paso: `E i2s_common: i2s_channel_disable … not enabled` al
+      reabrir el códec para el sonido de las teclas; inofensivo, a limpiar.
+
+**Módulos**
+- [ ] Abrir y cerrar el bus I2C en cada vuelta.
+- [ ] Más de 8 dispositivos en un puerto.
+- [ ] Que los chips reales se identifiquen como supone el código (SHT4x,
+      INA219, AHT20).
+- [ ] Precisión contra un instrumento de referencia.
+
+**Lienzo retro**
+- [ ] Si el escalado ×3 del PPA (bilineal) se ve aceptable. Si no,
+      `retro_hw=0` escala por CPU.
+- [ ] Que el PPA acepte los buffers de LVGL.
+- [ ] Que no haya costuras entre franjas.
+- [ ] Jugar con dos dedos.
+
+## Pendientes anotados en la placa
+
+- [x] **Traducciones al inglés** (visto en la placa en inglés, 2026-09-29;
+      hechas el 2026-09-30 en 1b7c445, en/de completas; queda sólo lo del
+      teclado de LVGL claro sobre la hoja oscura, en "Chicos" arriba):
+  varios nombres de apps en el inicio siguen en castellano (Reloj, Red,
+  Banco, Módulos, entre otros) y dentro de Ajustes hay textos sin traducir.
+  Revisar que los nombres pasen por `N_()`/`_()` y que estén en el paquete de
+  idioma (`tools/gen_lang.py`); se hace junto con la próxima compilación del
+  firmware.
+  Nuevos de las carpetas (2026-09-29): "Editar", "Nombre de la carpeta",
+  "Carpeta vacía"; y el teclado de LVGL sale claro sobre la hoja oscura.
+- [x] **Servicio del lienzo retro** (hecho en 15ff279), pedido por los juegos
+      pasados a pantalla completa (2026-09-29): 2043 y Claude Jump dibujan y
+      leen sus propios botones porque el servicio no alcanza.
+  - En modo `OVERLAY`, un dedo sobre un botón también se informa como dedo del
+    lienzo (se elige el primero que tocó): excluir de `aos_retro_touch()` y
+    `aos_retro_tap()` los dedos que caen sobre un control.
+  - Un flag `AOS_RETRO_LR_SPLIT`: IZQUIERDA abajo a la izquierda y DERECHA
+    abajo a la derecha (a los lados de la píldora de pausa; en horizontal,
+    uno por columna lateral).
+  - A/B abajo a la derecha en vertical (hoy se centran si no hay control a la
+    izquierda).
+  - `docs/RETRO.md` sigue diciendo que los juegos fuerzan vertical y describe
+    ARKANOS con slider y botón A: ya no es así.
+- [x] **Claudito** (hecho: por filas que cambian) redibujaba casi todo el lienzo en cada cuadro (~9,6 pantallas
+      por segundo, 15 % de un núcleo): pasar a rectángulos sucios.
+- [ ] **2043** en la placa: ~24 fps (apunta a 30); sigue en "Del sistema"
+      arriba.
+- [x] **Pantalla de arranque de P4OS** (pedido del usuario, 2026-09-29): al
+      arrancar se ven aparecer los íconos de las apps de a uno mientras se lee
+      la tarjeta. Una animación de arranque (~5 s) que cubra hasta que el
+      inicio esté completo. Se hace cuando haya más apps portadas, para medir
+      cuánto tarda de verdad todo en estar cargado. Punto de partida medido:
+      19 apps de la tarjeta registradas en 3,3 s (casi 2 s de eso es dar de
+      alta los íconos, `aos_dynapp` "register"), más ~5 s hasta que el Wi-Fi
+      conecta. Que termine cuando el escaneo termine, no por reloj.
+      Hecho el 2026-09-30 (04c5309): la minimalista que eligió el usuario
+      (P4OS en blanco sobre negro y una barra fina con el avance real del
+      escaneo), y el inicio se arma una sola vez al final del escaneo: con
+      40 apps el escaneo bajó de 8,3 s a 1,5 s y el sistema queda listo a
+      los 4,2 s. Visto: sin hora real hasta que llega el SNTP ("--:--",
+      "WED 31 DEC"): la placa no tiene chip RTC (HARDWARE.md), sólo el
+      RTC interno del P4; queda la prueba 17 (si guarda la hora con una pila
+      en H3).
+- [x] **Pedidos al sistema de las apps portadas** (2026-09-29; hechos salvo
+      el simulador, que sigue en "Del sistema" arriba):
+  - `AOS_APP_FLAG_KEEP_AWAKE` sólo despierta la pantalla al abrir la app
+    (`aos_ui.c`): que la mantenga despierta mientras la app esté al frente
+    (Doom lo esquiva llamando a `aos_hal_activity()` cada 5 s).
+  - Las apps que vuelcan directo al framebuffer no saben cuándo hay un panel,
+    banner o el selector de apps encima, y los pisan: un
+    `aos_ui_overlay_active()` o un aviso de pausa/reanudar.
+  - Doom en la placa: 34 fps, volcado 7,1 ms. En una captura del framebuffer
+    se vio un corte vertical entre dos cuadros (el PPA escribiendo mientras
+    se lee): mirar si se nota como desgarro en el vidrio.
+  - `aos_retro_begin()` borra `s.gen` con el `memset` (visto por Lua).
+  - Simulador: `aos_hal_sim_link_tick()` no se llama nunca (el enlace del sim
+    no entrega tramas) y `LUAI_MAXCCALLS=100` para `aos_lua` como en la placa.
+  - Página `/lua` en el portal (sólo `components/aos_portal/web/app.js`, con
+    la API de archivos que ya existe) y `/pixel`.
+- [x] **Juegos acostados, techo del PPA** (medido con Monster Hop, 2026-09-29):
+  parado va a 20 fps y acostado a 15,4, porque girar el cuadro de 1280x720
+  con el PPA tarda 62 ms. Girarlo con la CPU cuesta más (~42 ms por núcleo,
+  PSRAM). Hecho el 2026-09-29: tres framebuffers del panel con
+  `aos_hal_display_back/flip` (parado 20 -> 22 fps, sin cortes; acostado
+  sigue en ~15,5 porque el PPA y el dibujo se pelean la PSRAM). Falta: que
+  una app consiga dos bloques de 20 KB de RAM interna para girar franjas
+  con el PPA (32 ms el cuadro, medido); con franjas de 4 filas el PPA se
+  cuelga.

@@ -1,0 +1,24 @@
+# amoledos-lang 1   es -> en
+# aos.dice.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/dados/main/dados.c:426
+1 dado	1 die
+
+#: apps/dados/main/dados.c:428
+%d dados	%d dice
+
+#: apps/dados/main/dados.c:664
+TIRAR	ROLL
+
+#: apps/dados/main/dados.c:679
+Últimas	Recent
+
+#: apps/dados/main/dados.c:694
+Agitá la placa o tocá los dados	Shake the board or tap the dice
+
+#: apps/dados/main/dados.c:695
+Tocá los dados para tirar	Tap the dice to roll

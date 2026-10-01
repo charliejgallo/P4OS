@@ -1,0 +1,88 @@
+# amoledos-lang 1   es -> de
+# app.recorder.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/recorder/main/rec_files.c:204
+Grabación	Aufnahme
+
+#: apps/recorder/main/rec_files.c:275
+sin fecha	kein Datum
+
+#: apps/recorder/main/rec_files.c:291
+hoy %02d:%02d	heute %02d:%02d
+
+#: apps/recorder/main/rec_files.c:293
+ayer %02d:%02d	gestern %02d:%02d
+
+#: apps/recorder/main/recorder.c:289
+Borrar	Löschen
+
+#: apps/recorder/main/recorder.c:358
+en pausa: el archivo sigue abierto	pausiert: Datei bleibt offen
+
+#: apps/recorder/main/recorder.c:359
+grabando	nimmt auf
+
+#: apps/recorder/main/recorder.c:360
+PAUSA	PAUSE
+
+#: apps/recorder/main/recorder.c:368
+tocá el botón rojo para grabar	roten Knopf antippen zum Aufnehmen
+
+#: apps/recorder/main/recorder.c:369
+LISTO	BEREIT
+
+#: apps/recorder/main/recorder.c:389
+quedan %u h	noch %u h
+
+#: apps/recorder/main/recorder.c:391
+quedan %u min	noch %u Min.
+
+#: apps/recorder/main/recorder.c:394
+sin tarjeta	keine Karte
+
+#: apps/recorder/main/recorder.c:401
+estéreo	Stereo
+
+#: apps/recorder/main/recorder.c:401
+mono	Mono
+
+#: apps/recorder/main/recorder.c:425
+No hay tarjeta	Keine Karte
+
+#: apps/recorder/main/recorder.c:436
+No se pudo grabar	Aufnahme fehlgeschlagen
+
+#: apps/recorder/main/recorder.c:464
+Guardado	Gespeichert
+
+#: apps/recorder/main/recorder.c:515
+No se pudo reproducir	Wiedergabe fehlgeschlagen
+
+#: apps/recorder/main/recorder.c:535
+Primero pará la grabación	Erst die Aufnahme stoppen
+
+#: apps/recorder/main/recorder.c:603
+Tocá de nuevo para borrar	Zum Löschen erneut tippen
+
+#: apps/recorder/main/recorder.c:611
+No se pudo borrar	Löschen fehlgeschlagen
+
+#: apps/recorder/main/recorder.c:615
+Borrada	Gelöscht
+
+#: apps/recorder/main/recorder.c:656
+Se cortó la grabación	Aufnahme abgebrochen
+
+#: apps/recorder/main/recorder.c:812
+#: apps/recorder/main/recorder.c:870
+Grabaciones	Aufnahmen
+
+#: apps/recorder/main/recorder.c:827
+Todavía no grabaste nada.\nLo que grabes aparece acá.	Noch nichts aufgenommen.\nDeine Aufnahmen erscheinen hier.
+
+#: apps/recorder/main/recorder.c:903
+tocá la onda para saltar	Welle antippen zum Springen

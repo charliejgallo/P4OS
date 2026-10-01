@@ -1,0 +1,46 @@
+# P4OS - demo home screen for the simulator (docs/MENU.md, plus the P4OS
+# lines: dock ... end, page, widget <type> <w>x<h>)
+dock
+  app aos.settings
+  app aos.files
+  app aos.music
+  app aos.calc
+end
+widget clock 4x2
+app aos.ha
+app aos.serial
+app aos.flasher
+app aos.bus
+folder taller 5E6B80 3A4150 v tools w Taller
+  app aos.modbus
+  app aos.bench
+  app aos.elec
+  app aos.mqtt
+  app aos.net
+  app aos.modules
+end
+app aos.clock
+app aos.photos
+app aos.calendar
+app aos.cameras
+app aos.claude
+app aos.macropad
+app aos.sysmon
+page
+widget ha 4x2
+app aos.cotiz
+app aos.clima
+app aos.radio
+app app.recorder
+app aos.tuner
+app aos.convert
+app aos.life
+folder juegos 30D158 1B7A3A v gamepad-variant w Juegos
+  app demo.burbujas
+  app demo.gemas
+  app aos.simon
+  app aos.dice
+  app demo.flappy
+  app aos.mines
+  app demo.atasco
+end

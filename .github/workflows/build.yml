@@ -1,0 +1,73 @@
+# Builds the firmware for both chip profiles and every app against it, on
+# each push and pull request. A tag v* also makes a release with them.
+#
+# What it does not build: the apps' art packs (<app>_p4.pak). Their sources
+# are Blender renders and art that do not live in this repository; the packs
+# are made on the author's machine (apps/<app>/tools/pack_p4.py) and attached
+# to the release by hand.
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+
+jobs:
+  firmware:
+    runs-on: ubuntu-latest
+    # IDF 5.5: the ESP32-C6 link (esp_hosted 1.4) is only validated there
+    container: espressif/idf:release-v5.5
+    strategy:
+      fail-fast: false
+      matrix:
+        profile: [rev1_3, rev3_x]
+    steps:
+      - uses: actions/checkout@v4
+      - name: tools
+        run: apt-get update && apt-get install -y --no-install-recommends zsh zip binutils
+      - name: firmware
+        shell: bash
+        run: |
+          . $IDF_PATH/export.sh
+          tools/build_fw.sh ${{ matrix.profile }}
+      - name: apps
+        if: matrix.profile == 'rev1_3'
+        shell: bash
+        run: |
+          . $IDF_PATH/export.sh
+          PROFILE=rev1_3 tools/build_apps.sh
+      - name: bundle
+        shell: bash
+        run: |
+          p=${{ matrix.profile }}
+          mkdir -p out
+          # the image an OTA takes, and what a first flash over the CH340 needs
+          cp build/$p/p4os.bin out/p4os-$p.bin
+          (cd build/$p && zip -q ../../out/p4os-$p-full.zip p4os.bin bootloader/bootloader.bin \
+              partition_table/partition-table.bin ota_data_initial.bin flash_args)
+          if [ "$p" = rev1_3 ]; then
+            mkdir -p out/apps && cp apps/*/build/*.so out/apps/
+            (cd out && zip -qr apps.zip apps && rm -r apps)
+            zip -qr out/lang.zip lang/en lang/de
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: p4os-${{ matrix.profile }}
+          path: out/*
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: firmware
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "${{ github.ref_name }}" dist/* --repo "${{ github.repository }}" --draft --title "P4OS ${{ github.ref_name }}" --notes "Draft: write the notes, attach the packs, then publish."

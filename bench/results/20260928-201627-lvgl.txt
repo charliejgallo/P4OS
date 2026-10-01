@@ -1,0 +1,4 @@
+# p4bench lvgl, 20260928-201627
+BENCH lvgl.cfg rot=0 copy=ppa fbs=2 rows=80 bmem=internal logical=720x1280 draw_units=2 os=1 ppa_draw=0
+BENCH mem int_free=276507 int_largest=188416 psram_free=26911248 psram_largest=26738688 dma_free=236935
+BENCH lvgl.stats frames=14 flushes=74 flush_ms_per_frame=14.37 sync_ms_per_frame=16.33 touch_reads=192 touch_hits=0

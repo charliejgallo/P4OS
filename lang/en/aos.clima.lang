@@ -1,0 +1,164 @@
+# amoledos-lang 1   es -> en
+# aos.clima.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/clima/main/clima.c:374
+dia\x04Dom	Sun
+
+#: apps/clima/main/clima.c:374
+dia\x04Lun	Mon
+
+#: apps/clima/main/clima.c:375
+dia\x04Mar	Tue
+
+#: apps/clima/main/clima.c:375
+dia\x04Mie	Wed
+
+#: apps/clima/main/clima.c:376
+dia\x04Jue	Thu
+
+#: apps/clima/main/clima.c:376
+dia\x04Vie	Fri
+
+#: apps/clima/main/clima.c:377
+dia\x04Sab	Sat
+
+#: apps/clima/main/clima.c:279
+#: apps/clima/main/clima.c:601
+Clima	Weather
+
+#: apps/clima/main/clima.c:553
+Hoy	Today
+
+#: apps/clima/main/clima.c:606
+Sin datos todavia	No data yet
+
+#: apps/clima/main/clima.c:606
+Elegi una ciudad	Pick a city
+
+#: apps/clima/main/clima.c:636
+ST %s\xC2\xB0     HUM %d%%     %d km/h	FL %s\xC2\xB0     HUM %d%%     %d km/h
+
+#: apps/clima/main/clima.c:664
+actualizando...	updating...
+
+#: apps/clima/main/clima.c:667
+sin datos	no data
+
+#: apps/clima/main/clima.c:668
+sin conexion	offline
+
+#: apps/clima/main/clima.c:671
+guardado	cached
+
+#: apps/clima/main/clima.c:673
+%s   -   recien	%s   -   just now
+
+#: apps/clima/main/clima.c:675
+%s   -   hace %d min	%s   -   %d min ago
+
+#: apps/clima/main/clima.c:758
+No se pudo actualizar	Could not update
+
+#: apps/clima/main/clima.c:891
+No hay ninguna ciudad asi	No city by that name
+
+#: apps/clima/main/clima.c:892
+#: apps/clima/main/clima.c:915
+No se pudo buscar	Search failed
+
+#: apps/clima/main/clima.c:900
+Escribi al menos dos letras	Type at least two letters
+
+#: apps/clima/main/clima.c:904
+Sin conexion a la red	No network connection
+
+#: apps/clima/main/clima.c:915
+Buscando...	Searching...
+
+#: apps/clima/main/clima.c:938
+Ciudad	City
+
+#: apps/clima/main/clima.c:949
+Buscar una ciudad	Search for a city
+
+#: apps/clima/main/clima.c:1004
+Buscar otra ciudad	Search another city
+
+#: apps/clima/main/clima.c:1005
+Buscar tu ciudad	Search your city
+
+#: apps/clima/main/clima.c:1009
+o desde http://%s/clima	or from http://%s/clima
+
+#: apps/clima/main/clima.c:1012
+sin conexion a la red	no network connection
+
+#: apps/clima/main/clima.c:1206
+Demostracion	Demo
+
+#: apps/clima/main/wx_api.c:385
+Despejado	Clear
+
+#: apps/clima/main/wx_api.c:386
+Mayormente despejado	Mostly clear
+
+#: apps/clima/main/wx_api.c:387
+Parcialmente nublado	Partly cloudy
+
+#: apps/clima/main/wx_api.c:388
+Nublado	Cloudy
+
+#: apps/clima/main/wx_api.c:389
+Niebla	Fog
+
+#: apps/clima/main/wx_api.c:391
+Llovizna	Drizzle
+
+#: apps/clima/main/wx_api.c:392
+Llovizna helada	Freezing drizzle
+
+#: apps/clima/main/wx_api.c:393
+Lluvia debil	Light rain
+
+#: apps/clima/main/wx_api.c:394
+Lluvia	Rain
+
+#: apps/clima/main/wx_api.c:395
+Lluvia fuerte	Heavy rain
+
+#: apps/clima/main/wx_api.c:396
+Lluvia helada	Freezing rain
+
+#: apps/clima/main/wx_api.c:397
+Nieve debil	Light snow
+
+#: apps/clima/main/wx_api.c:398
+Nieve	Snow
+
+#: apps/clima/main/wx_api.c:399
+Nieve fuerte	Heavy snow
+
+#: apps/clima/main/wx_api.c:400
+Granizo fino	Snow grains
+
+#: apps/clima/main/wx_api.c:401
+Chaparrones	Showers
+
+#: apps/clima/main/wx_api.c:402
+Chaparrones fuertes	Heavy showers
+
+#: apps/clima/main/wx_api.c:403
+Chaparrones de nieve	Snow showers
+
+#: apps/clima/main/wx_api.c:404
+Tormenta	Thunderstorm
+
+#: apps/clima/main/wx_api.c:405
+Tormenta con granizo	Thunderstorm with hail
+
+#: apps/clima/main/wx_api.c:406
+Sin datos	No data

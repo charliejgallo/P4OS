@@ -1,0 +1,12 @@
+# p4bench hands, 20260928-210227
+BENCH touch.int gpio=2 edges=0 wired=0
+BENCH touch.rate reports_per_s=0.0 polls_per_s=1478 max_points=0
+BENCH touch.paint samples=0 max_points=0 min_x=9999 max_x=-1 min_y=9999 max_y=-1
+BENCH lcd.blsweep done=1
+BENCH mic.level second=1 rms_dbfs=-58.8 peak_dbfs=-46.5
+BENCH mic.level second=2 rms_dbfs=-58.9 peak_dbfs=-47.2
+BENCH mic.level second=3 rms_dbfs=-58.6 peak_dbfs=-47.0
+BENCH mic.level second=4 rms_dbfs=-59.2 peak_dbfs=-48.7
+BENCH mic.level second=5 rms_dbfs=-58.4 peak_dbfs=-45.8
+BENCH mic secs=5 gain_db=30 loudest_rms=-58.4 quietest_rms=-59.2 wav=/sdcard/bench/mic.wav
+BENCH audio.sweep from_hz=100 to_hz=8000 secs=6

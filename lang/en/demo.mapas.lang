@@ -1,0 +1,296 @@
+# amoledos-lang 1   es -> en
+# demo.mapas.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/mapas/main/mapas.c:1127
+Sin memoria	Out of memory
+
+#: apps/mapas/main/mp_frame.c:287
+#: apps/mapas/main/mp_ui.c:553
+Buscar un lugar o una calle	Search for a place or street
+
+#: apps/mapas/main/mp_frame.c:365
+Descargando	Downloading
+
+#: apps/mapas/main/mp_frame.c:367
+Sin datos aquí	No data here
+
+#: apps/mapas/main/mp_frame.c:369
+#: apps/mapas/main/mp_ui.c:276
+Sin conexión	No connection
+
+#: apps/mapas/main/mp_frame.c:371
+Esperando la hora	Waiting for the time
+
+#: apps/mapas/main/mp_frame.c:373
+Error de descarga	Download error
+
+#: apps/mapas/main/mp_ui.c:197
+Zona	Zone
+
+#: apps/mapas/main/mp_ui.c:200
+Guardada	Saved
+
+#: apps/mapas/main/mp_ui.c:203
+No se pudo guardar	Could not save
+
+#: apps/mapas/main/mp_ui.c:215
+#: apps/mapas/main/mp_ui.c:298
+Descargar: sí	Download: yes
+
+#: apps/mapas/main/mp_ui.c:215
+#: apps/mapas/main/mp_ui.c:298
+Descargar: no	Download: no
+
+#: apps/mapas/main/mp_ui.c:224
+Caché borrada	Cache cleared
+
+#: apps/mapas/main/mp_ui.c:243
+Mapas	Maps
+
+#: apps/mapas/main/mp_ui.c:259
+Buscar	Search
+
+#: apps/mapas/main/mp_ui.c:260
+Guardar esta vista	Save this view
+
+#: apps/mapas/main/mp_ui.c:262
+Zonas	Zones
+
+#: apps/mapas/main/mp_ui.c:272
+Ciudad de Clima	Weather's city
+
+#: apps/mapas/main/mp_ui.c:292
+teselas	tiles
+
+#: apps/mapas/main/mp_ui.c:297
+Ajustes	Settings
+
+#: apps/mapas/main/mp_ui.c:299
+Borrar caché	Clear cache
+
+#: apps/mapas/main/mp_ui.c:303
+Datos: OpenFreeMap, OpenMapTiles, OpenStreetMap	Data: OpenFreeMap, OpenMapTiles, OpenStreetMap
+
+#: apps/mapas/main/mp_ui.c:304
+Descargado:	Downloaded:
+
+#: apps/mapas/main/mp_ui.c:324
+#: apps/mapas/main/mp_ui.c:334
+parque	park
+
+#: apps/mapas/main/mp_ui.c:325
+aeropuerto	airport
+
+#: apps/mapas/main/mp_ui.c:326
+cerro	hill
+
+#: apps/mapas/main/mp_ui.c:327
+comercio	shop
+
+#: apps/mapas/main/mp_ui.c:328
+escuela	school
+
+#: apps/mapas/main/mp_ui.c:329
+restaurante	restaurant
+
+#: apps/mapas/main/mp_ui.c:330
+oficina	office
+
+#: apps/mapas/main/mp_ui.c:331
+autos	cars
+
+#: apps/mapas/main/mp_ui.c:332
+ropa	clothes
+
+#: apps/mapas/main/mp_ui.c:333
+almacén	grocery
+
+#: apps/mapas/main/mp_ui.c:335
+café	café
+
+#: apps/mapas/main/mp_ui.c:336
+hospital	hospital
+
+#: apps/mapas/main/mp_ui.c:337
+comida rápida	fast food
+
+#: apps/mapas/main/mp_ui.c:338
+farmacia	pharmacy
+
+#: apps/mapas/main/mp_ui.c:339
+carnicería	butcher
+
+#: apps/mapas/main/mp_ui.c:340
+peluquería	hairdresser
+
+#: apps/mapas/main/mp_ui.c:341
+panadería	bakery
+
+#: apps/mapas/main/mp_ui.c:342
+templo	place of worship
+
+#: apps/mapas/main/mp_ui.c:343
+club deportivo	sports centre
+
+#: apps/mapas/main/mp_ui.c:344
+bar	bar
+
+#: apps/mapas/main/mp_ui.c:345
+alojamiento	lodging
+
+#: apps/mapas/main/mp_ui.c:346
+universidad	college
+
+#: apps/mapas/main/mp_ui.c:347
+edificio público	town hall
+
+#: apps/mapas/main/mp_ui.c:348
+heladería	ice cream
+
+#: apps/mapas/main/mp_ui.c:349
+galería de arte	art gallery
+
+#: apps/mapas/main/mp_ui.c:350
+biblioteca	library
+
+#: apps/mapas/main/mp_ui.c:351
+policía	police
+
+#: apps/mapas/main/mp_ui.c:352
+bicis de alquiler	bike rental
+
+#: apps/mapas/main/mp_ui.c:353
+veterinaria	vet
+
+#: apps/mapas/main/mp_ui.c:354
+estación	station
+
+#: apps/mapas/main/mp_ui.c:355
+cancha	pitch
+
+#: apps/mapas/main/mp_ui.c:356
+estacionamiento	parking
+
+#: apps/mapas/main/mp_ui.c:357
+consultorio	doctor
+
+#: apps/mapas/main/mp_ui.c:358
+bicicletería	bike shop
+
+#: apps/mapas/main/mp_ui.c:359
+cervecería	brewery
+
+#: apps/mapas/main/mp_ui.c:360
+museo	museum
+
+#: apps/mapas/main/mp_ui.c:361
+lavandería	laundry
+
+#: apps/mapas/main/mp_ui.c:362
+vinoteca	off-licence
+
+#: apps/mapas/main/mp_ui.c:363
+teatro	theatre
+
+#: apps/mapas/main/mp_ui.c:364
+dentista	dentist
+
+#: apps/mapas/main/mp_ui.c:365
+atracción	attraction
+
+#: apps/mapas/main/mp_ui.c:366
+banco	bank
+
+#: apps/mapas/main/mp_ui.c:367
+estación de servicio	petrol station
+
+#: apps/mapas/main/mp_ui.c:368
+estadio	stadium
+
+#: apps/mapas/main/mp_ui.c:369
+bomberos	fire station
+
+#: apps/mapas/main/mp_ui.c:370
+música	music
+
+#: apps/mapas/main/mp_ui.c:371
+cajero	cash machine
+
+#: apps/mapas/main/mp_ui.c:372
+monumento	monument
+
+#: apps/mapas/main/mp_ui.c:373
+cine	cinema
+
+#: apps/mapas/main/mp_ui.c:374
+cementerio	cemetery
+
+#: apps/mapas/main/mp_ui.c:375
+juegos infantiles	playground
+
+#: apps/mapas/main/mp_ui.c:376
+información	information
+
+#: apps/mapas/main/mp_ui.c:377
+correo	post office
+
+#: apps/mapas/main/mp_ui.c:378
+pileta	swimming pool
+
+#: apps/mapas/main/mp_ui.c:379
+jardín	garden
+
+#: apps/mapas/main/mp_ui.c:380
+puerto	harbour
+
+#: apps/mapas/main/mp_ui.c:381
+parque temático	theme park
+
+#: apps/mapas/main/mp_ui.c:382
+terminal de ferry	ferry terminal
+
+#: apps/mapas/main/mp_ui.c:383
+cárcel	prison
+
+#: apps/mapas/main/mp_ui.c:384
+camping	campsite
+
+#: apps/mapas/main/mp_ui.c:385
+castillo	castle
+
+#: apps/mapas/main/mp_ui.c:386
+baños	toilets
+
+#: apps/mapas/main/mp_ui.c:387
+zoológico	zoo
+
+#: apps/mapas/main/mp_ui.c:388
+acuario	aquarium
+
+#: apps/mapas/main/mp_ui.c:394
+lugar	place
+
+#: apps/mapas/main/mp_ui.c:395
+calle	street
+
+#: apps/mapas/main/mp_ui.c:396
+agua	water
+
+#: apps/mapas/main/mp_ui.c:434
+Escribí un lugar, una calle o un comercio.	Type a place, a street or a shop.
+
+#: apps/mapas/main/mp_ui.c:436
+Buscando...	Searching...
+
+#: apps/mapas/main/mp_ui.c:438
+Nada con ese nombre.	Nothing by that name.
+
+#: apps/mapas/main/mp_ui.c:438
+Nada con ese nombre en las zonas descargadas.	Nothing by that name in the downloaded zones.
+
+#: apps/mapas/main/mp_ui.c:444
+Buscando en línea...	Searching online...

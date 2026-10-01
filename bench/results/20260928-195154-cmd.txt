@@ -1,0 +1,8 @@
+# p4bench cmd, 20260928-195154
+BENCH lvgl.cfg rot=0 copy=ppa fbs=2 rows=80 bmem=internal logical=720x1280 draw_units=2 os=1 ppa_draw=0
+BENCH mem int_free=276507 int_largest=188416 psram_free=26912272 psram_largest=26738688 dma_free=236935
+BENCH sd.raw mb=8 blk_kb=4 read_MBps=7.30 ms_per_blk=0.56 err=ESP_OK
+BENCH sd.raw error=nomem
+BENCH sd.mount khz=20000 ok=1 err=ESP_OK
+BENCH sd.raw mb=8 blk_kb=64 read_MBps=9.20 ms_per_blk=7.12 err=ESP_OK
+BENCH sd.mount khz=40000 ok=1 err=ESP_OK

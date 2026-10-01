@@ -1,0 +1,117 @@
+# amoledos-lang 1   es -> de
+# demo.blackjack.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/blackjack/main/blackjack.c:461
+BLACKJACK PAGA 3 A 2	BLACKJACK ZAHLT 3 ZU 2
+
+#: apps/blackjack/main/blackjack.c:463
+LA BANCA SE PLANTA EN 17	DIE BANK STEHT AB 17
+
+#: apps/blackjack/main/blackjack.c:794
+Blackjack	Blackjack
+
+#: apps/blackjack/main/blackjack.c:795
+Ganás	Gewonnen
+
+#: apps/blackjack/main/blackjack.c:796
+#: apps/blackjack/main/blackjack.c:1068
+Empate	Unentschieden
+
+#: apps/blackjack/main/blackjack.c:797
+Perdés	Verloren
+
+#: apps/blackjack/main/blackjack.c:798
+Te pasaste	Überkauft
+
+#: apps/blackjack/main/blackjack.c:853
+Banca	Bank
+
+#: apps/blackjack/main/blackjack.c:941
+#: apps/blackjack/main/blackjack.c:1475
+#: apps/blackjack/main/blackjack.c:1480
+Seguro	Versichern
+
+#: apps/blackjack/main/blackjack.c:943
+La banca muestra un as. ¿Seguro?	Die Bank zeigt ein Ass. Versicherung?
+
+#: apps/blackjack/main/blackjack.c:949
+#: apps/blackjack/main/blackjack.c:1502
+#: apps/blackjack/main/blackjack.c:1505
+Apuesta	Einsatz
+
+#: apps/blackjack/main/blackjack.c:980
+Mezclando el sabot	Der Schlitten wird gemischt
+
+#: apps/blackjack/main/blackjack.c:1025
+El seguro paga	Versicherung zahlt
+
+#: apps/blackjack/main/blackjack.c:1028
+Seguro perdido	Versicherung verloren
+
+#: apps/blackjack/main/blackjack.c:1208
+Banca nueva: 1000	Neue Bank: 1000
+
+#: apps/blackjack/main/blackjack.c:1230
+Manos	Hände
+
+#: apps/blackjack/main/blackjack.c:1231
+Ganadas	Gewonnen
+
+#: apps/blackjack/main/blackjack.c:1232
+Blackjacks	Blackjacks
+
+#: apps/blackjack/main/blackjack.c:1233
+Mejor banca	Beste Bank
+
+#: apps/blackjack/main/blackjack.c:1237
+Sonido	Ton
+
+#: apps/blackjack/main/blackjack.c:1237
+Mudo	Stumm
+
+#: apps/blackjack/main/blackjack.c:1238
+Consejo	Tipp
+
+#: apps/blackjack/main/blackjack.c:1460
+#: apps/blackjack/main/blackjack.c:1465
+Borrar	Löschen
+
+#: apps/blackjack/main/blackjack.c:1462
+#: apps/blackjack/main/blackjack.c:1467
+Repartir	Geben
+
+#: apps/blackjack/main/blackjack.c:1477
+#: apps/blackjack/main/blackjack.c:1482
+No	Nein
+
+#: apps/blackjack/main/blackjack.c:1488
+Doblar	Verdoppeln
+
+#: apps/blackjack/main/blackjack.c:1490
+Dividir	Teilen
+
+#: apps/blackjack/main/blackjack.c:1492
+Pedir	Karte
+
+#: apps/blackjack/main/blackjack.c:1494
+Plantarse	Halten
+
+#: apps/blackjack/main/blackjack.c:1500
+#: apps/blackjack/main/blackjack.c:1507
+Otra mano	Nochmal
+
+#: apps/blackjack/main/blackjack.c:1510
+Banca nueva	Neue Bank
+
+#: apps/blackjack/main/blackjack.c:1566
+Seguir	Weiter
+
+#: apps/blackjack/main/blackjack.c:1568
+Salir	Beenden
+
+#: apps/blackjack/main/blackjack.c:1571
+La estrategia básica marca en dorado la jugada que sugiere.	Die Grundstrategie markiert ihren Zug in Gold.

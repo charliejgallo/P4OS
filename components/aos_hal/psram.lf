@@ -1,0 +1,74 @@
+# P4OS - the statics of the shell and the apps go to PSRAM (2026-09-29).
+#
+# The same as tagging each one AOS_BSS_PSRAM, for whole libraries: their
+# zero-initialised data (.bss) lands in .ext_ram.bss. None of it is touched
+# by an interrupt, by DMA from internal-only peripherals, or while the cache
+# is off. Initialised data (.data) cannot move this way; the few big ones are
+# zero-initialised and set up at start instead. aos_hal is split by object:
+# the display (its interrupts) and the notifications stay internal; the
+# audio moved out on 2026-09-30 (paths and metadata, no interrupt reads them).
+
+[scheme:aos_extram_bss]
+entries:
+    if SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY = y:
+        bss -> extern_ram
+        common -> extern_ram
+    else:
+        bss -> dram0_bss
+        common -> dram0_bss
+
+[mapping:aos_apps_psram]
+archive: libaos_apps.a
+entries:
+    * (aos_extram_bss)
+
+[mapping:aos_ui_psram]
+archive: libaos_ui.a
+entries:
+    * (aos_extram_bss)
+
+[mapping:aos_io_psram]
+archive: libaos_io.a
+entries:
+    * (aos_extram_bss)
+
+[mapping:aos_portal_psram]
+archive: libaos_portal.a
+entries:
+    * (aos_extram_bss)
+
+[mapping:aos_flasher_psram]
+archive: libaos_flasher.a
+entries:
+    * (aos_extram_bss)
+
+[mapping:aos_hal_psram]
+archive: libaos_hal.a
+entries:
+    aos_tasks_p4 (aos_extram_bss)
+    aos_radio (aos_extram_bss)
+    aos_tls (aos_extram_bss)
+    aos_audio_p4 (aos_extram_bss)
+
+# lwIP's and mDNS's statics (sockets, the DNS table, IPv6 neighbours, mDNS's
+# packet buffer: ~7 KB, internal RAM audit of 2026-09-30). Both run in tasks
+# only: nothing of theirs is touched by an interrupt or with the cache off.
+#
+# NOT a static FreeRTOS object: a task's control block (StaticTask_t) and
+# the lists of a static queue, semaphore or event group must be in internal
+# RAM (xPortCheckValidTCBMem / xPortCheckValidListMem assert). mdns_service.c
+# keeps its task's StaticTask_t in .bss, so it stays out of this mapping: the
+# first try moved the whole library and the board rebooted at mDNS's start.
+# Before adding a library here, grep it for "Static".
+[mapping:lwip_psram]
+archive: liblwip.a
+entries:
+    * (aos_extram_bss)
+
+[mapping:mdns_psram]
+archive: libespressif__mdns.a
+entries:
+    mdns_send (aos_extram_bss)
+    mdns_receive (aos_extram_bss)
+    mdns_pcb (aos_extram_bss)
+    mdns_utils (aos_extram_bss)

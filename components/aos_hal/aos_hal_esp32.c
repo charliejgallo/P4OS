@@ -1,0 +1,7432 @@
+/*
+ * AmoledOS - HAL on the Waveshare ESP32-S3-Touch-AMOLED-1.8 board.
+ *
+ * Joins the official BSP (display, touch, I2C, audio, SD, SPIFFS) with
+ * aos_board's own drivers (PMU, RTC, IMU) and exposes it all through the
+ * single interface the UI and the apps consume.
+ */
+#include "aos_hal.h"
+#include "aos_ble.h"
+#include "aos_board.h"
+#include "aos_audio.h"
+#include "aos_radio.h"
+#include "aos_http_stream.h"
+#include "axp2101.h"
+#include "aos_soc.h"
+
+#include "bsp/esp-bsp.h"
+#include "esp_vfs_fat.h"
+
+#include "esp_log.h"
+#include "esp_timer.h"
+#include "esp_ipc.h"
+#include "esp_system.h"
+#include "esp_heap_caps.h"
+#include "esp_cache.h"
+#include "esp_memory_utils.h"
+#include "esp_mac.h"
+#include "esp_random.h"
+#include "esp_wifi.h"
+#include "mdns.h"
+#include "esp_netif.h"
+#include "esp_netif_sntp.h"
+#include "esp_event.h"
+#include "nvs_flash.h"
+#include "esp_ota_ops.h"
+#include "esp_app_desc.h"
+#include "nvs.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "freertos/queue.h"
+#include "freertos/semphr.h"
+#include "driver/i2s_std.h"
+#include "driver/gpio.h"
+#include "esp_lcd_panel_io.h"
+#include "esp_lcd_panel_ops.h"
+#include "esp_lcd_panel_commands.h"
+#include "esp_pm.h"
+#include "esp_sleep.h"
+#include "driver/rtc_io.h"
+#include "soc/rtc.h"
+#include "esp_lcd_touch.h"
+#include "esp_lvgl_port.h"
+#include "esp_lvgl_port_touch.h"
+#include "bsp/display.h"
+#include "bsp/touch.h"
+
+#include <string.h>
+#include <math.h>
+#include <sys/time.h>
+#include <sys/stat.h>
+
+#include "aos_wifi_internal.h"
+
+#define FIRMWARE_VERSION        "0.1.0-dev"
+#define BOOT_BUTTON_GPIO        GPIO_NUM_0
+#define BUTTON_LONG_MS          800
+#define NVS_NAMESPACE           "amoledos"
+/* Idle timeouts. With always-on, the screen never switches itself off unless
+ * the battery is very low. */
+#define AOD_TIMEOUT_MS          60000       /* active -> dimmed           */
+#define OFF_TIMEOUT_MS          300000      /* dimmed -> off              */
+#define OFF_NO_AOD_MS           30000       /* active -> off, without AOD */
+#define AOD_LOW_BATTERY_PCT     15
+
+/* --- Battery policy -----------------------------------------------------------
+ * The cell Waveshare ships is a 3.7 V 300 mAh pouch. The charger's factory
+ * programme (300 mA, 4.2 V, terminate at 125 mA) is 1 C into it and stops
+ * early; what is below is 0.5 C and a proper termination, which is what the
+ * cell's own datasheet asks for. See docs/POWER.md.
+ * -------------------------------------------------------------------------- */
+/* The cell was assumed to be 300 mAh in v0.2.0 without checking. A full charge
+ * on 2026-09-25 put it at about 130 mAh usable; the estimator (aos_soc.c)
+ * starts from that and measures it on every charge that starts low. */
+/* The cell's label (opened on 2026-09-26): 302530, 200 mAh, 4.2 V. Battery
+ * care charges at 0.5 C; without it 1 C, not the chip's own 300 mA, which
+ * is 1.5 C for this cell. */
+#define AOS_CHARGE_MA_CARE          100     /* 0.5 C                              */
+#define AOS_CHARGE_MA_FULL          200     /* 1 C                                */
+#define AOS_CHARGE_MV_CARE          4100    /* ~10% less capacity, ~2x the cycles */
+#define AOS_CHARGE_MV_FULL          4200
+#define AOS_PRECHARGE_MA            50
+#define AOS_TERMINATION_MA          25      /* C/12                               */
+#define AOS_LOW_BATTERY_WARN_PCT    10      /* the PMU raises an IRQ here         */
+#define AOS_LOW_BATTERY_OFF_PCT     3       /* and here; we power off cleanly     */
+#define AOS_POWEROFF_MV             2900    /* VOFF: the PMU's own cut, was 2.6 V */
+#define AOS_CRITICAL_VBAT           3.30f   /* software backstop, at rest         */
+/* Under load the voltage of this small cell sags far: with the radio flat out
+ * the 3.30 V backstop switched the watch off twice on 2026-09-25 with a fifth
+ * of the charge still in it. With the screen lit, audio or the radio busy,
+ * the backstop waits for 3.20 V; the PMU's own cut is 2.9 V. */
+#define AOS_CRITICAL_VBAT_LOADED    3.20f
+#define AOS_CRITICAL_SOC_VBAT       3.45f   /* our 2 % only counts below this     */
+#define AOS_SOC_EMPTY_PCT           2       /* our own percent, see aos_soc.c     */
+#define AOS_LOW_BATTERY_SAVING_PCT  20      /* power saving switches itself on    */
+#define AOS_PANEL_WAKE_MS           120     /* sleep-out to display-on            */
+#define AOS_DFS_MIN_MHZ             80
+#define AOS_DFS_MAX_MHZ             240
+
+/* Stack of the housekeeping task. Measured on the board: while running it has
+ * ~2.0 KB of the 4 to spare, so its peak is about 2 KB. Left at 3 KB, which
+ * keeps 1 KB of headroom over what was measured. Shrinking a stack is a better
+ * deal than sending it to PSRAM: it frees internal RAM and pays no cache. */
+/* 4 K, not 3: measured at a 2,384 B peak with 688 B to spare (RAM audit,
+ * 2026-09-12). 5 K since v0.5.1: aos_stats_tick() writes the battery history
+ * to the card from here, and a FAT write goes deep. */
+#define HK_STACK            5120
+
+
+/* --------------------------------------------------------------------------
+ * QSPI clock of the panel
+ *
+ * Measured: pushing one screen to the panel is 16.5 ms, which is half of a
+ * 33 ms frame. It follows from CO5300_PANEL_IO_QSPI_CONFIG setting pclk_hz to
+ * 40 MHz: over four lines that is 20 MB/s, and a screen is 322 KB.
+ *
+ * The macro lives in a managed component and the BSP uses it inside
+ * bsp_display_new(), so there is no parameter to touch. Rather than forking
+ * the BSP, panel creation is intercepted with -Wl,--wrap, the same device
+ * aos_dynapp already uses for esp_elf_malloc.
+ *
+ * Only the configuration carrying exactly the macro's 40 MHz is overridden:
+ * that is the panel's signature and it avoids touching any other SPI device
+ * that may turn up later.
+ *
+ * 2026-09-04: LOWERED FROM 80 TO 40 MHz, and this is what the comment that
+ * used to be here said: "if the image comes out with garbage at 80 MHz, lower
+ * AOS_LCD_PCLK_HZ". It did come out with garbage, but that took a while to
+ * see because until now every app had a black background, and a corrupt pixel
+ * on black is indistinguishable from a pixel that is off. With Truco's green
+ * baize they showed up at once: isolated dark dots ALONG THE PATH of the
+ * moving cards, that is, exactly where the bus is pushing the most bytes, and
+ * there they stay because LVGL considers that area drawn and does not touch
+ * it again.
+ *
+ * What pointed at the bus and not at the drawing:
+ *   - It NEVER happens in the simulator, not even in partial-flush mode, which
+ *     is the only one where a missing repaint stays stuck. Measured by counting
+ *     pixels of the capture, not by looking at it: zero anomalies on the baize.
+ *   - More of them appear the more cards move at once.
+ *   - They do not depend on what is drawn, but on how much is transferred.
+ *
+ * The cost of going back to 40 MHz is measured and acceptable: pushing a whole
+ * screen goes from 8 to 16.5 ms, and the startup benchmark had already
+ * concluded that the QSPI clock was NOT the frame's bottleneck (see
+ * DECISIONES.md, "El reloj del QSPI no era el cuello"). In other words, image
+ * integrity was being paid for time that was not being used.
+ *
+ * If speed is ever to be recovered, it has to be RAISED IN SMALL STEPS while
+ * watching a light-coloured background -not a black one-, which is where it
+ * shows. */
+#define AOS_LCD_PCLK_DEFAULT_HZ     (40 * 1000 * 1000)
+#define AOS_LCD_PCLK_HZ             (40 * 1000 * 1000)
+
+esp_err_t __real_esp_lcd_new_panel_io_spi(esp_lcd_spi_bus_handle_t bus,
+                                          const esp_lcd_panel_io_spi_config_t *io_config,
+                                          esp_lcd_panel_io_handle_t *ret_io);
+
+esp_err_t __wrap_esp_lcd_new_panel_io_spi(esp_lcd_spi_bus_handle_t bus,
+                                          const esp_lcd_panel_io_spi_config_t *io_config,
+                                          esp_lcd_panel_io_handle_t *ret_io)
+{
+    if (io_config && io_config->pclk_hz == AOS_LCD_PCLK_DEFAULT_HZ) {
+        esp_lcd_panel_io_spi_config_t cfg = *io_config;
+        cfg.pclk_hz = AOS_LCD_PCLK_HZ;
+        ESP_EARLY_LOGW("aos_hal", "panel qspi: %d -> %d MHz",
+                       (int)(io_config->pclk_hz / 1000000),
+                       (int)(cfg.pclk_hz / 1000000));
+        return __real_esp_lcd_new_panel_io_spi(bus, &cfg, ret_io);
+    }
+    ESP_EARLY_LOGW("aos_hal", "qspi panel left alone: %d MHz",
+                   io_config ? (int)(io_config->pclk_hz / 1000000) : -1);
+    return __real_esp_lcd_new_panel_io_spi(bus, io_config, ret_io);
+}
+
+static const char *TAG = "aos_hal";
+
+/* The I2S channels, caught on their way out of the BSP. esp_codec_dev enables
+ * a channel on open and NEVER disables it on close (close only switches the
+ * codec chip off), and an enabled channel holds an APB_FREQ_MAX pm lock,
+ * which forbids light sleep for good. With the handles in hand the policy
+ * can disable both whenever no audio is running; the codec enables them
+ * again on its next open. */
+static i2s_chan_handle_t s_i2s_tx, s_i2s_rx;
+static bool              s_i2s_idle;
+
+esp_err_t __real_i2s_new_channel(const i2s_chan_config_t *chan_cfg,
+                                 i2s_chan_handle_t *tx, i2s_chan_handle_t *rx);
+esp_err_t __wrap_i2s_new_channel(const i2s_chan_config_t *chan_cfg,
+                                 i2s_chan_handle_t *tx, i2s_chan_handle_t *rx)
+{
+    esp_err_t ret = __real_i2s_new_channel(chan_cfg, tx, rx);
+    if (ret == ESP_OK) {
+        if (tx) s_i2s_tx = *tx;
+        if (rx) s_i2s_rx = *rx;
+    }
+    return ret;
+}
+
+static lv_display_t *s_display;
+static int           s_brightness = 80;
+static int           s_volume     = 60;
+static int64_t       s_last_activity_us;
+
+static aos_display_state_t s_display_state = AOS_DISPLAY_ACTIVE;
+static bool          s_aod_enabled = true;
+static int           s_aod_brightness = 10;
+static uint32_t      s_active_s = 0;        /* 0 = AOD_TIMEOUT_MS / OFF_NO_AOD_MS */
+static uint32_t      s_aod_s    = OFF_TIMEOUT_MS / 1000;   /* 0 = never          */
+static bool          s_raise_wake = true;
+static void        (*s_display_cb)(aos_display_state_t state);
+static char          s_board_name[48] = "desconocida";
+
+/* Panel handles: display_start() gets them from the BSP and keeps them so the
+ * driver IC can be put to sleep and woken. */
+static esp_lcd_panel_handle_t    s_panel;
+static esp_lcd_panel_io_handle_t s_panel_io;
+static bool                      s_panel_asleep;
+static bool                      s_panel_sleep_enabled = false;  /* off: SLPOUT flashes, see POWER.md 6b */
+static esp_err_t                 s_panel_last_err;   /* of the last wake sequence */
+
+/* Power policy */
+static bool                 s_power_saving = true;      /* preference          */
+static bool                 s_battery_care = true;      /* preference          */
+static bool                 s_low_battery_saving;       /* forced under 20%    */
+static bool                 s_light_sleep_enabled = true;   /* preference       */
+#define AOS_LVGL_CORE       1       /* the panel's SPI, LVGL, housekeeping and the workers */
+static volatile bool        s_speaker_open;             /* held by tone_task   */
+/* the streaming speaker (aos_hal_spk_*) */
+static TaskHandle_t         s_spk_task;
+static volatile bool        s_spk_stop;
+static volatile bool        s_spk_running;
+static int16_t             *s_spk_ring;                 /* one second, PSRAM */
+static volatile uint32_t    s_spk_head, s_spk_tail;     /* samples */
+static uint32_t             s_spk_ring_n;
+static uint32_t             s_spk_rate;
+static volatile bool        s_mic_holds_codec;          /* the capture took the codec */
+static bool                 s_light_sleep_on;           /* what esp_pm has now */
+static esp_pm_lock_handle_t s_pm_max_lock;
+static bool                 s_pm_max_held;
+static int                  s_wifi_ps = -1;
+static bool                 s_net_low_latency;      /* aos_hal_net_low_latency() */
+/* The radio's say in the WiFi's power save (branch radio): 0 none; 1 while a
+ * station plays, never the deepest modem sleep (with the screen off it is
+ * the one the watch picks, and its long listen interval starves a stream);
+ * 2 while one connects, none at all, because a TLS handshake is a dozen
+ * round trips and modem sleep makes each one 200-300 ms. Since v0.8.1 also
+ * 2 while it reconnects or fetches an HLS segment (aos_radio_busy()). */
+static volatile int         s_radio_ps;
+/* An OTA upload in progress (branch aac): the WiFi stays out of power save
+ * until it ends. On 2026-09-26 four of seven uploads were cut halfway by
+ * bcn_timeout - the access point's beacons missed while the flash writes
+ * held the chip - and the log showed modem sleep during every one. */
+static volatile bool        s_ota_ps;
+static void               (*s_power_cb)(aos_power_event_t event, int percent);
+static int                  s_gyro_users;
+
+/* Battery bookkeeping */
+static bool     s_usb_last = true;
+static int64_t  s_unplug_us;
+static int      s_unplug_pct = -1;
+static float    s_drain_pct_h = NAN;
+static float    s_hours_left  = NAN;
+static uint32_t s_battery_minutes;      /* lifetime, NVS "bat_min"   */
+static uint32_t s_charge_cycles;        /* lifetime, NVS "chg_cyc"   */
+static uint32_t s_unsaved_minutes;
+static bool     s_low_warned;
+static bool     s_charge_counted;
+static int      s_critical_strikes;
+static int64_t  s_display_off_since_us;
+static aos_soc_t s_soc;                 /* our own state of charge          */
+static int      s_gauge_pct = -1;       /* the AXP2101's, for comparison    */
+static bool     s_shutting_down;
+
+static void pm_policy_apply(void);
+static bool panel_sleep(bool sleep);
+static void lvgl_timers_idle(aos_display_state_t state);
+static bool power_saving_active(void);
+static int  cpu_mhz_now(void);
+static void net_retry_kick(const char *why);
+static SemaphoreHandle_t s_main_wake;   /* given on every display change */
+static TaskHandle_t s_touch_task;       /* the CST820 reader, v2 only    */
+static void night_check(void);
+static TaskHandle_t s_player_task;
+static TaskHandle_t s_mic_task;
+
+static esp_codec_dev_handle_t s_speaker;
+static esp_codec_dev_handle_t s_mic;
+
+static void (*s_button_cb)(aos_button_t button, aos_button_action_t action);
+static int64_t s_button_down_us;
+
+static aos_net_state_t s_net_state = AOS_NET_OFF;
+static bool     s_link_parked;       /* off the access point, on a fixed channel */
+static bool     s_wifi_started;
+static volatile bool s_scan_hold;     /* a scan borrowed the radio: do not reconnect */
+static int64_t  s_unpark_at_us;
+static uint32_t s_rejoin_ms;
+static char            s_net_ssid[33];
+static esp_netif_t    *s_netif_ap;
+static bool            s_ap_active;
+static bool            s_ftm_resp;          /* the softAP goes up as FTM responder */
+static bool            s_ftm_ap_mine;       /* the responder brought the AP up, so it takes it down */
+static aos_ftm_result_t s_ftm;
+static char            s_ap_ssid[33];
+static char            s_ap_pass[65];
+static char            s_ap_ip[16] = "192.168.4.1";
+static char            s_net_ip[16] = "0.0.0.0";
+
+/* -------------------------------------------------------------------------- */
+/* Preferences (NVS)                                                           */
+/* -------------------------------------------------------------------------- */
+
+bool aos_hal_pref_get_i32(const char *key, int32_t *out)
+{
+    nvs_handle_t handle;
+    if (nvs_open(NVS_NAMESPACE, NVS_READONLY, &handle) != ESP_OK) {
+        return false;
+    }
+    bool ok = nvs_get_i32(handle, key, out) == ESP_OK;
+    nvs_close(handle);
+    return ok;
+}
+
+bool aos_hal_pref_set_i32(const char *key, int32_t value)
+{
+    nvs_handle_t handle;
+    if (nvs_open(NVS_NAMESPACE, NVS_READWRITE, &handle) != ESP_OK) {
+        return false;
+    }
+    bool ok = nvs_set_i32(handle, key, value) == ESP_OK && nvs_commit(handle) == ESP_OK;
+    nvs_close(handle);
+    return ok;
+}
+
+bool aos_hal_pref_get_str(const char *key, char *out, size_t out_len)
+{
+    nvs_handle_t handle;
+    if (nvs_open(NVS_NAMESPACE, NVS_READONLY, &handle) != ESP_OK) {
+        return false;
+    }
+    size_t len = out_len;
+    bool ok = nvs_get_str(handle, key, out, &len) == ESP_OK;
+    nvs_close(handle);
+    return ok;
+}
+
+bool aos_hal_pref_set_str(const char *key, const char *value)
+{
+    nvs_handle_t handle;
+    if (nvs_open(NVS_NAMESPACE, NVS_READWRITE, &handle) != ESP_OK) {
+        return false;
+    }
+    bool ok = nvs_set_str(handle, key, value) == ESP_OK && nvs_commit(handle) == ESP_OK;
+    nvs_close(handle);
+    return ok;
+}
+
+int aos_hal_pref_foreach(aos_hal_pref_visit_t visit, void *ctx)
+{
+    nvs_handle_t handle;
+    if (nvs_open(NVS_NAMESPACE, NVS_READONLY, &handle) != ESP_OK) {
+        return 0;
+    }
+    int n = 0;
+    nvs_iterator_t it = NULL;
+    esp_err_t err = nvs_entry_find(NVS_DEFAULT_PART_NAME, NVS_NAMESPACE, NVS_TYPE_ANY, &it);
+    while (err == ESP_OK) {
+        nvs_entry_info_t info;
+        nvs_entry_info(it, &info);
+        /* The preferences are only ever i32 or strings (aos_hal_pref_*);
+         * anything else in the namespace is not ours to hand out. */
+        if (info.type == NVS_TYPE_I32) {
+            int32_t v;
+            if (nvs_get_i32(handle, info.key, &v) == ESP_OK) {
+                visit(info.key, false, v, NULL, ctx);
+                n++;
+            }
+        } else if (info.type == NVS_TYPE_STR) {
+            char s[256];
+            size_t len = sizeof(s);
+            if (nvs_get_str(handle, info.key, s, &len) == ESP_OK) {
+                visit(info.key, true, 0, s, ctx);
+                n++;
+            }
+        }
+        err = nvs_entry_next(&it);
+    }
+    nvs_release_iterator(it);
+    nvs_close(handle);
+    return n;
+}
+
+bool aos_hal_pref_erase(const char *key)
+{
+    nvs_handle_t handle;
+    if (nvs_open(NVS_NAMESPACE, NVS_READWRITE, &handle) != ESP_OK) {
+        return false;
+    }
+    bool ok = nvs_erase_key(handle, key) == ESP_OK && nvs_commit(handle) == ESP_OK;
+    nvs_close(handle);
+    return ok;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Display and power                                                           */
+/* -------------------------------------------------------------------------- */
+
+bool aos_hal_lock(uint32_t timeout_ms)
+{
+    return bsp_display_lock(timeout_ms);
+}
+
+void aos_hal_unlock(void)
+{
+    bsp_display_unlock();
+}
+
+/* --------------------------------------------------------------------------
+ * The panel's SPI bus is one device, and esp_lcd is not thread-safe
+ *
+ * bsp_display_brightness_set() is an esp_lcd tx_param on the same SPI device
+ * the LVGL flush uses for its pixels. esp_lcd acquires the bus around every
+ * transaction, and the bus lock is per DEVICE: a second task acquiring the
+ * same device while the first holds it is let through as if it already owned
+ * the bus, and whichever of the two releases second trips
+ * `assert(ret == ESP_OK)` in spi_device_release_bus() (spi_master.c, the
+ * acquire_end of a lock it does not hold). Measured on 2026-09-15: the
+ * housekeeping task turning the panel off on the idle timeout while LVGL was
+ * flushing, and reproduced in ten cycles of wake / menu / off over the portal.
+ *
+ * So every brightness write goes through here, under the LVGL lock: the flush
+ * runs inside lv_timer_handler() under that same (recursive) mutex, and a
+ * tx_param taken with it held finds the bus idle or waits for the queued
+ * colour transfers itself, which is the one order esp_lcd supports.
+ * panel_sleep() already did this for its own commands; brightness did not.
+ * -------------------------------------------------------------------------- */
+/* The two commands that reach the panel's SPI from outside the LVGL task,
+ * run on the panel's core. The bus lock's ISR side lives on AOS_LVGL_CORE
+ * (display_start_pinned) and IDF's spi_bus_lock reads `acquiring_dev`
+ * twice (espressif/esp-idf#18527): a polling transaction from the portal's
+ * httpd task or the BLE host on core 0 would be the other reader. The
+ * caller keeps holding the LVGL lock, so the IPC task itself takes nothing
+ * that could be held by whoever called us. */
+typedef struct {
+    int       cmd;              /* -1: brightness */
+    int       arg;
+    esp_err_t ret;
+} panel_ipc_t;
+
+static void panel_ipc_fn(void *p)
+{
+    panel_ipc_t *a = (panel_ipc_t *)p;
+    if (a->cmd < 0) {
+        bsp_display_brightness_set(a->arg);
+        a->ret = ESP_OK;
+    } else {
+        a->ret = esp_lcd_panel_io_tx_param(s_panel_io, (0x02 << 24) | (a->cmd << 8), NULL, 0);
+    }
+}
+
+static esp_err_t panel_tx_on_core(int cmd, int arg)
+{
+    panel_ipc_t a = { .cmd = cmd, .arg = arg, .ret = ESP_FAIL };
+    if (xPortGetCoreID() == AOS_LVGL_CORE) {
+        panel_ipc_fn(&a);
+    } else if (esp_ipc_call_blocking(AOS_LVGL_CORE, panel_ipc_fn, &a) != ESP_OK) {
+        ESP_LOGW(TAG, "panel command %d: ipc to core %d failed", cmd, AOS_LVGL_CORE);
+    }
+    return a.ret;
+}
+
+static void panel_brightness(int percent)
+{
+#if AOS_TEST_UNLOCKED_BRIGHTNESS
+    /* The pre-fix behaviour, for the A side of the A/B with /api/mem?spin=N.
+     * idf.py -DAOS_TEST_UNLOCKED_BRIGHTNESS=1 build; never ship it. */
+    bsp_display_brightness_set(percent);
+#else
+    if (!aos_hal_lock(2000)) {
+        ESP_LOGW(TAG, "brightness %d: could not take the LVGL lock, skipped", percent);
+        return;
+    }
+    panel_tx_on_core(-1, percent);
+    aos_hal_unlock();
+#endif
+}
+
+int aos_hal_brightness_get(void)
+{
+    return s_brightness;
+}
+
+void aos_hal_brightness_set(int percent)
+{
+    if (percent < 0)   percent = 0;
+    if (percent > 100) percent = 100;
+    s_brightness = percent;
+    panel_brightness(percent);
+    aos_hal_pref_set_i32("bright", percent);
+}
+
+
+
+
+aos_display_state_t aos_hal_display_state(void)
+{
+    return s_display_state;
+}
+
+void aos_hal_display_set_state(aos_display_state_t state)
+{
+    if (state == s_display_state) {
+        return;
+    }
+    s_display_state = state;
+
+    switch (state) {
+    case AOS_DISPLAY_ACTIVE:
+        panel_sleep(false);
+        panel_brightness(s_brightness);
+        net_retry_kick("screen lit");
+        break;
+    case AOS_DISPLAY_AOD:
+        panel_sleep(false);
+        panel_brightness(s_aod_brightness);
+        break;
+    case AOS_DISPLAY_OFF:
+        panel_brightness(0);
+        panel_sleep(true);
+        break;
+    }
+    lvgl_timers_idle(state);
+    pm_policy_apply();
+    if (state == AOS_DISPLAY_OFF) {
+        s_display_off_since_us = esp_timer_get_time();
+    }
+    if (s_main_wake) {
+        xSemaphoreGive(s_main_wake);     /* the main loop applies it to the UI now */
+    }
+
+    ESP_LOGI(TAG, "display -> %s",
+             state == AOS_DISPLAY_ACTIVE ? "active" :
+             state == AOS_DISPLAY_AOD    ? "dimmed" : "off");
+
+    if (s_display_cb) {
+        s_display_cb(state);
+    }
+}
+
+/* The main loop's pause: 200 ms with the screen lit, a second otherwise
+ * (dimmed, the face changes once a minute),
+ * cut short by any change of the display so the UI follows at once. */
+void aos_hal_main_wait(void)
+{
+    if (!s_main_wake) {
+        s_main_wake = xSemaphoreCreateBinary();
+    }
+    uint32_t ms = s_display_state != AOS_DISPLAY_ACTIVE ? 1000 : 200;
+    if (s_main_wake) {
+        xSemaphoreTake(s_main_wake, pdMS_TO_TICKS(ms));
+    } else {
+        vTaskDelay(pdMS_TO_TICKS(ms));
+    }
+}
+
+void aos_hal_set_display_state_cb(void (*cb)(aos_display_state_t state))
+{
+    s_display_cb = cb;
+}
+
+void aos_hal_aod_enable(bool enable)
+{
+    s_aod_enabled = enable;
+    aos_hal_pref_set_i32("aod", enable ? 1 : 0);
+    if (!enable && s_display_state == AOS_DISPLAY_AOD) {
+        aos_hal_display_set_state(AOS_DISPLAY_OFF);
+    }
+}
+
+bool aos_hal_aod_enabled(void)
+{
+    return s_aod_enabled;
+}
+
+void aos_hal_aod_brightness_set(int percent)
+{
+    if (percent < 1)  percent = 1;
+    if (percent > 50) percent = 50;
+    s_aod_brightness = percent;
+    aos_hal_pref_set_i32("aod_bright", percent);
+    if (s_display_state == AOS_DISPLAY_AOD) {
+        panel_brightness(s_aod_brightness);
+    }
+}
+
+void aos_hal_screen_timeouts_set(uint32_t active_s, uint32_t aod_s)
+{
+    if (active_s > 3600) active_s = 3600;
+    if (aod_s > 24 * 3600) aod_s = 24 * 3600;
+    s_active_s = active_s;
+    s_aod_s = aod_s;
+    aos_hal_pref_set_i32("scr_on_s", (int32_t)active_s);
+    aos_hal_pref_set_i32("aod_off_s", (int32_t)aod_s);
+}
+
+void aos_hal_screen_timeouts_get(uint32_t *active_s, uint32_t *aod_s)
+{
+    if (active_s) *active_s = s_active_s;
+    if (aod_s)    *aod_s = s_aod_s;
+}
+
+void aos_hal_raise_wake_enable(bool on)
+{
+    s_raise_wake = on;
+    aos_hal_pref_set_i32("raise_wake", on ? 1 : 0);
+}
+
+bool aos_hal_raise_wake_enabled(void)
+{
+    return s_raise_wake;
+}
+
+int aos_hal_aod_brightness_get(void)
+{
+    return s_aod_brightness;
+}
+
+void aos_hal_display_on(bool on)
+{
+    aos_hal_display_set_state(on ? AOS_DISPLAY_ACTIVE : AOS_DISPLAY_OFF);
+}
+
+bool aos_hal_display_is_on(void)
+{
+    return s_display_state != AOS_DISPLAY_OFF;
+}
+
+void aos_hal_activity(void)
+{
+    s_last_activity_us = esp_timer_get_time();
+    aos_hal_display_set_state(AOS_DISPLAY_ACTIVE);
+}
+
+void aos_hal_sleep(void)
+{
+    aos_hal_display_on(false);
+}
+
+static void battery_stats_save(void);
+
+void aos_hal_shutdown(void)
+{
+    ESP_LOGI(TAG, "powering off through the PMU");
+    battery_stats_save();
+    aos_steps_flush();
+    aos_board_pmu_shutdown();
+}
+
+void aos_hal_reboot(void)
+{
+    esp_restart();
+}
+
+void aos_hal_set_button_cb(void (*cb)(aos_button_t button, aos_button_action_t action))
+{
+    s_button_cb = cb;
+}
+
+/* Polling of the BOOT button (GPIO0, active low). Called from the background
+ * task every 40 ms, which is already enough as a debounce. */
+static void button_poll(void)
+{
+    bool down = gpio_get_level(BOOT_BUTTON_GPIO) == 0;
+    int64_t now = esp_timer_get_time();
+
+    if (down && s_button_down_us == 0) {
+        s_button_down_us = now;
+        aos_hal_activity();
+        if (s_button_cb) {
+            s_button_cb(AOS_BUTTON_BOOT, AOS_BUTTON_PRESS);
+        }
+    } else if (!down && s_button_down_us != 0) {
+        int64_t held_ms = (now - s_button_down_us) / 1000;
+        s_button_down_us = 0;
+        /* The release event is always emitted, even if the pulse was very
+         * short: if we announced a press, the listener needs the complete pair
+         * or it is left with the button held down forever. */
+        if (s_button_cb) {
+            s_button_cb(AOS_BUTTON_BOOT,
+                        held_ms >= BUTTON_LONG_MS ? AOS_BUTTON_LONG : AOS_BUTTON_CLICK);
+        }
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Battery and IMU                                                             */
+/* -------------------------------------------------------------------------- */
+
+/* A full PMU read is eleven I2C transactions, and the status bar, several
+ * watchfaces, the statistics and the portal all ask for it, some of them on
+ * every UI tick. Nothing on the battery changes that fast: one real read a
+ * second is shared by all. power_watch() reads fresh and refreshes it. */
+static aos_pmu_state_t s_pmu_cache;
+static int64_t         s_pmu_cache_us;
+static portMUX_TYPE    s_pmu_cache_lock = portMUX_INITIALIZER_UNLOCKED;
+
+static void pmu_cache_store(const aos_pmu_state_t *pmu)
+{
+    portENTER_CRITICAL(&s_pmu_cache_lock);
+    s_pmu_cache = *pmu;
+    s_pmu_cache_us = esp_timer_get_time();
+    portEXIT_CRITICAL(&s_pmu_cache_lock);
+}
+
+static bool pmu_read_cached(aos_pmu_state_t *out)
+{
+    int64_t now = esp_timer_get_time();
+    portENTER_CRITICAL(&s_pmu_cache_lock);
+    bool fresh = s_pmu_cache_us && now - s_pmu_cache_us < 1000000 && s_pmu_cache.valid;
+    if (fresh) {
+        *out = s_pmu_cache;
+    }
+    portEXIT_CRITICAL(&s_pmu_cache_lock);
+    if (fresh) {
+        return true;
+    }
+    if (!aos_board_pmu_read(out) || !out->valid) {
+        return false;
+    }
+    pmu_cache_store(out);
+    return true;
+}
+
+bool aos_hal_battery_read(aos_battery_t *out)
+{
+    if (!out) {
+        return false;
+    }
+    aos_pmu_state_t pmu;
+    if (!pmu_read_cached(&pmu)) {
+        out->percent = -1;
+        return false;
+    }
+    /* Our own estimate (aos_soc.c) once it exists; the PMU's gauge reads
+     * high on this cell and was at 49 % when it ran flat. */
+    int own = aos_soc_percent(&s_soc);
+    out->percent     = own >= 0 ? own : pmu.percent;
+    out->voltage     = pmu.vbat;
+    /* The AXP2101 does not measure battery current; we leave it at NAN rather
+     * than invent a number. */
+    out->current     = NAN;
+    out->temperature = pmu.temperature;
+    out->charging    = pmu.charging;
+    out->usb_present = pmu.usb_present;
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Power API                                                                   */
+/* -------------------------------------------------------------------------- */
+
+bool aos_hal_power_info(aos_power_info_t *out)
+{
+    if (!out) {
+        return false;
+    }
+    memset(out, 0, sizeof(*out));
+    aos_pmu_state_t pmu;
+    if (!pmu_read_cached(&pmu)) {
+        return false;
+    }
+    out->charge_state      = (aos_charge_state_t)pmu.charge_state;
+    out->vbus              = pmu.vbus;
+    out->vsys              = pmu.vsys;
+    out->board_temperature = pmu.board_temperature;
+    out->battery_present   = pmu.battery_present;
+
+    aos_pmu_charger_t chg;
+    if (aos_board_pmu_charger_get(&chg)) {
+        out->charge_ma        = chg.charge_ma;
+        out->charge_target_mv = chg.target_mv;
+        out->warn_pct         = chg.warn_pct;
+        out->shutdown_pct     = chg.shutdown_pct;
+        out->poweroff_mv      = chg.poweroff_mv;
+    }
+    out->drain_pct_per_hour    = s_drain_pct_h;
+    out->hours_left            = s_hours_left;
+    out->on_battery_s          = s_unplug_us ? (uint32_t)((esp_timer_get_time() - s_unplug_us) / 1000000) : 0;
+    out->battery_minutes_total = s_battery_minutes;
+    out->charge_cycles         = s_charge_cycles;
+    out->power_on_reason       = aos_board_pmu_power_on_reason();
+    out->power_off_reason      = aos_board_pmu_power_off_reason();
+    out->cpu_mhz               = cpu_mhz_now();
+    out->panel_asleep          = s_panel_asleep;
+    out->power_saving_active   = power_saving_active();
+    out->light_sleep           = s_light_sleep_on;
+    out->gauge_pct             = s_gauge_pct;
+    out->soc_sag_mv            = s_soc.sag_mv;
+    out->soc_sag_samples       = s_soc.sag_samples;
+    out->capacity_mah          = s_soc.cap_mah;
+    out->capacity_samples      = s_soc.cap_samples;
+    return true;
+}
+
+void aos_hal_set_power_event_cb(void (*cb)(aos_power_event_t event, int percent))
+{
+    s_power_cb = cb;
+}
+
+void aos_hal_power_saving_enable(bool on)
+{
+    s_power_saving = on;
+    aos_hal_pref_set_i32("pwr_save", on ? 1 : 0);
+    pm_policy_apply();
+}
+
+bool aos_hal_power_saving_enabled(void)
+{
+    return s_power_saving;
+}
+
+void aos_hal_battery_care_enable(bool on)
+{
+    s_battery_care = on;
+    aos_hal_pref_set_i32("batt_care", on ? 1 : 0);
+    aos_board_pmu_charge_target_set(on ? AOS_CHARGE_MV_CARE : AOS_CHARGE_MV_FULL);
+    aos_board_pmu_charge_current_set(on ? AOS_CHARGE_MA_CARE : AOS_CHARGE_MA_FULL);
+    ESP_LOGI(TAG, "battery care %s: charging to %d mV at %d mA", on ? "on" : "off",
+             on ? AOS_CHARGE_MV_CARE : AOS_CHARGE_MV_FULL,
+             on ? AOS_CHARGE_MA_CARE : AOS_CHARGE_MA_FULL);
+}
+
+bool aos_hal_battery_care_enabled(void)
+{
+    return s_battery_care;
+}
+
+void aos_hal_panel_sleep_enable(bool on)
+{
+    s_panel_sleep_enabled = on;
+    aos_hal_pref_set_i32("panel_slp", on ? 1 : 0);
+    if (!on) {
+        panel_sleep(false);
+    } else if (s_display_state == AOS_DISPLAY_OFF) {
+        panel_sleep(true);
+    }
+}
+
+bool aos_hal_panel_sleep_enabled(void)
+{
+    return s_panel_sleep_enabled;
+}
+
+void aos_hal_light_sleep_enable(bool on)
+{
+    s_light_sleep_enabled = on;
+    aos_hal_pref_set_i32("light_slp", on ? 1 : 0);
+    pm_policy_apply();
+}
+
+bool aos_hal_light_sleep_enabled(void)
+{
+    return s_light_sleep_enabled;
+}
+
+void aos_hal_imu_gyro_request(bool on)
+{
+    s_gyro_users += on ? 1 : -1;
+    if (s_gyro_users < 0) {
+        s_gyro_users = 0;
+    }
+    aos_board_imu_gyro_enable(s_gyro_users > 0);
+}
+
+int aos_hal_pmu_rail_count(void)                       { return aos_board_pmu_rail_count(); }
+bool aos_hal_pmu_rail_get(int idx, const char **name, bool *on, int *mv)
+{
+    return aos_board_pmu_rail_get(idx, name, on, mv);
+}
+int aos_hal_pmu_rail_find(const char *name)             { return aos_board_pmu_rail_find(name); }
+bool aos_hal_pmu_rail_set(int idx, bool on)             { return aos_board_pmu_rail_set(idx, on) == ESP_OK; }
+int aos_hal_pmu_register_read(int reg)                  { return aos_board_pmu_register_read((uint8_t)reg); }
+bool aos_hal_pmu_register_write(int reg, int value)
+{
+    return aos_board_pmu_register_write((uint8_t)reg, (uint8_t)value) == ESP_OK;
+}
+float aos_hal_pmu_ts_voltage(void)                      { return aos_board_pmu_ts_voltage(); }
+int aos_hal_probe_devices(char *out, size_t len)
+{
+    i2c_master_bus_handle_t bus = bsp_i2c_get_handle();
+    static const struct { const char *name; uint8_t addr; } devs[] = {
+        { "pmu", 0x34 }, { "expander", 0x20 }, { "touch", 0x15 }, { "touch_v1", 0x38 },
+        { "rtc", 0x51 }, { "imu", 0x6B }, { "imu_low", 0x6A }, { "codec", 0x18 }, { "codec_alt", 0x30 },
+    };
+    int n = snprintf(out, len, "{");
+    for (unsigned i = 0; i < sizeof(devs) / sizeof(devs[0]) && n < (int)len - 32; i++) {
+        bool ok = bus && i2c_master_probe(bus, devs[i].addr, 50) == ESP_OK;
+        n += snprintf(out + n, len - n, "%s\"%s\":%s", i ? "," : "", devs[i].name, ok ? "true" : "false");
+    }
+    aos_imu_t imu;
+    bool have = aos_hal_imu_read(&imu);
+    n += snprintf(out + n, len - n, ",\"imu_read\":%s,\"ax\":%.3f,\"ay\":%.3f,\"az\":%.3f",
+                  have ? "true" : "false", have ? imu.ax : 0.0f, have ? imu.ay : 0.0f, have ? imu.az : 0.0f);
+
+    /* The panel: its tearing-effect line (GPIO13, enabled by the BSP's init
+     * with 0x35) toggles at the refresh rate only while the driver IC is
+     * powered and awake. Woken first, because sleep-in stops TE too. */
+    aos_hal_activity();
+    vTaskDelay(pdMS_TO_TICKS(250));
+    gpio_config_t te = {
+        .pin_bit_mask = 1ULL << GPIO_NUM_13, .mode = GPIO_MODE_INPUT,
+        .pull_up_en = GPIO_PULLUP_DISABLE, .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&te);
+    gpio_sleep_sel_dis(GPIO_NUM_13);
+    int edges = 0, last = gpio_get_level(GPIO_NUM_13), highs = 0, samples = 0;
+    int64_t until = esp_timer_get_time() + 100000;
+    while (esp_timer_get_time() < until) {
+        int now = gpio_get_level(GPIO_NUM_13);
+        highs += now; samples++;
+        if (now != last) { edges++; last = now; }
+    }
+    n += snprintf(out + n, len - n, ",\"te_edges_100ms\":%d,\"te_high_pct\":%d,"
+                  "\"panel_asleep\":%s,\"panel_wake_err\":\"%s\",\"display\":%d",
+                  edges, samples ? 100 * highs / samples : -1,
+                  s_panel_asleep ? "true" : "false", esp_err_to_name(s_panel_last_err),
+                  (int)s_display_state);
+
+    /* The microphone: open, let the capture task fill, take the RMS. A dead
+     * analogue side gives a flat zero; a live one gives room noise. */
+    float rms = -1.0f;
+    if (aos_hal_mic_open(16000)) {
+        vTaskDelay(pdMS_TO_TICKS(400));
+        static int16_t pcm[1024];
+        int got = aos_hal_mic_read(pcm, 1024);
+        if (got > 0) {
+            double acc = 0;
+            for (int i = 0; i < got; i++) acc += (double)pcm[i] * pcm[i];
+            rms = (float)sqrt(acc / got);
+        }
+        aos_hal_mic_close();
+    }
+    n += snprintf(out + n, len - n, ",\"mic_rms\":%.1f}", rms);
+    return n;
+}
+
+/* The same dump into a buffer, for the web portal: with light sleep on the
+ * USB console drops, so the log is not where the numbers can be read. */
+int aos_hal_pm_dump_text(char *out, size_t len)
+{
+    if (!out || len < 64) {
+        return 0;
+    }
+    int n = snprintf(out, len, "cpu %d MHz, max lock %s, saving %s, light sleep %s, display %d, audio %s\n",
+                     cpu_mhz_now(), s_pm_max_held ? "held" : "released",
+                     power_saving_active() ? "on" : "off", s_light_sleep_on ? "on" : "off",
+                     (int)s_display_state,
+                     (s_player_task || s_mic_task || s_speaker_open || s_mic_holds_codec) ? "yes" : "no");
+    FILE *f = fmemopen(out + n, len - n - 1, "w");
+    if (f) {
+        esp_pm_dump_locks(f);
+        fclose(f);
+        out[len - 1] = '\0';
+        n += (int)strlen(out + n);
+    }
+    return n;
+}
+
+const char *aos_hal_boot_reason(void)
+{
+    switch (esp_reset_reason()) {
+    case ESP_RST_POWERON:  return "power-on";
+    case ESP_RST_SW:       return "software";
+    case ESP_RST_PANIC:    return "PANIC";
+    case ESP_RST_TASK_WDT: return "task watchdog";
+    case ESP_RST_INT_WDT:  return "interrupt watchdog";
+    case ESP_RST_WDT:      return "watchdog";
+    case ESP_RST_BROWNOUT: return "brownout";
+    case ESP_RST_USB:      return "usb";
+    case ESP_RST_DEEPSLEEP: return "deep sleep";
+    default:               return "other";
+    }
+}
+
+void aos_hal_panel_hw_reset(void)
+{
+    aos_board_panel_hw_reset();
+}
+
+void aos_hal_pm_dump_locks(void)
+{
+    ESP_LOGI(TAG, "pm: cpu %d MHz, our max lock %s, saving %s, light sleep %s, display %d, player %p mic %p",
+             cpu_mhz_now(), s_pm_max_held ? "HELD" : "released",
+             power_saving_active() ? "on" : "off", s_light_sleep_on ? "on" : "off",
+             (int)s_display_state, (void *)s_player_task, (void *)s_mic_task);
+    esp_pm_dump_locks(stdout);
+}
+
+bool aos_hal_imu_read(aos_imu_t *out)
+{
+    if (!out) {
+        return false;
+    }
+    aos_imu_sample_t sample;
+    if (!aos_board_imu_read(&sample) || !sample.valid) {
+        return false;
+    }
+    out->ax = sample.ax; out->ay = sample.ay; out->az = sample.az;
+    out->gx = sample.gx; out->gy = sample.gy; out->gz = sample.gz;
+    out->temperature = sample.temperature;
+    return true;
+}
+
+aos_orientation_t aos_hal_imu_orientation(void)
+{
+    return (aos_orientation_t)aos_board_imu_orientation();
+}
+
+uint32_t aos_hal_imu_steps(void)
+{
+    return aos_board_imu_steps();
+}
+
+void aos_hal_imu_steps_reset(void)
+{
+    aos_board_imu_steps_reset();
+}
+
+/* -------------------------------------------------------------------------- */
+/* Time                                                                        */
+/* -------------------------------------------------------------------------- */
+
+void aos_hal_time_now(struct tm *out)
+{
+    time_t now = time(NULL);
+    localtime_r(&now, out);
+}
+
+bool aos_hal_time_set(const struct tm *value)
+{
+    if (!value) {
+        return false;
+    }
+    struct tm copy = *value;
+    time_t epoch = mktime(&copy);
+    struct timeval tv = { .tv_sec = epoch, .tv_usec = 0 };
+    settimeofday(&tv, NULL);
+    aos_board_rtc_set(value);
+    aos_hal_pref_set_i32("time_ok", 1);
+    return true;
+}
+
+bool aos_hal_time_is_valid(void)
+{
+    int32_t flag = 0;
+    return aos_hal_pref_get_i32("time_ok", &flag) && flag == 1;
+}
+
+void aos_hal_timezone_set(const char *tz)
+{
+    if (!tz) {
+        return;
+    }
+    setenv("TZ", tz, 1);
+    tzset();
+    aos_hal_pref_set_str("tz", tz);
+}
+
+const char *aos_hal_timezone_get(void)
+{
+    static char tz[40] = "ART3";
+    if (!aos_hal_pref_get_str("tz", tz, sizeof(tz))) {
+        strcpy(tz, "ART3");
+    }
+    return tz;
+}
+
+bool aos_hal_rtc_alarm_set(const struct tm *when)
+{
+    return when ? aos_board_rtc_alarm_set(when->tm_hour, when->tm_min) : false;
+}
+
+void aos_hal_rtc_alarm_clear(void)
+{
+    aos_board_rtc_alarm_clear();
+}
+
+/* -------------------------------------------------------------------------- */
+/* Storage                                                                     */
+/* -------------------------------------------------------------------------- */
+
+static bool s_sd_mounted;
+
+const char *aos_hal_path_apps(void)
+{
+    return s_sd_mounted ? BSP_SD_MOUNT_POINT "/apps" : BSP_SPIFFS_MOUNT_POINT "/apps";
+}
+
+const char *aos_hal_path_photos(void)
+{
+    return s_sd_mounted ? BSP_SD_MOUNT_POINT "/photos" : BSP_SPIFFS_MOUNT_POINT "/photos";
+}
+
+const char *aos_hal_path_music(void)
+{
+    return s_sd_mounted ? BSP_SD_MOUNT_POINT "/music" : BSP_SPIFFS_MOUNT_POINT "/music";
+}
+
+const char *aos_hal_path_recordings(void)
+{
+    return s_sd_mounted ? BSP_SD_MOUNT_POINT "/recordings"
+                        : BSP_SPIFFS_MOUNT_POINT "/recordings";
+}
+
+const char *aos_hal_path_data(void)
+{
+    return BSP_SPIFFS_MOUNT_POINT "/data";
+}
+
+/* No SPIFFS fallback on purpose: see the comment in aos_hal.h. With the card
+ * out, this points at a directory that does not exist, opendir() fails and the
+ * system stays in Spanish, which is what the source says. */
+const char *aos_hal_path_lang(void)
+{
+    return BSP_SD_MOUNT_POINT "/lang";
+}
+
+const char *aos_hal_path_icons(void)
+{
+    return s_sd_mounted ? BSP_SD_MOUNT_POINT "/icons" : BSP_SPIFFS_MOUNT_POINT "/icons";
+}
+
+const char *aos_hal_path_menu(void)
+{
+    return s_sd_mounted ? BSP_SD_MOUNT_POINT "/menu.txt" : BSP_SPIFFS_MOUNT_POINT "/menu.txt";
+}
+
+/* Network surveys DO go to the card and not to SPIFFS: they are files that
+ * grow, that pile up and that you want to be able to take away with you. */
+const char *aos_hal_path_scans(void)
+{
+    return s_sd_mounted ? BSP_SD_MOUNT_POINT "/redes"
+                        : BSP_SPIFFS_MOUNT_POINT "/redes";
+}
+
+bool aos_hal_sd_present(void)
+{
+    return s_sd_mounted;
+}
+
+bool aos_hal_sd_usage(uint64_t *total_bytes, uint64_t *free_bytes)
+{
+    /* FatFs walks the FAT to count free clusters: on a 32 GB card that is a
+     * few hundred ms the first time and cached by FatFs afterwards (FSINFO).
+     * Called from the portal's status handler, never from the UI task. */
+    if (!s_sd_mounted) {
+        return false;
+    }
+    return esp_vfs_fat_info(BSP_SD_MOUNT_POINT, total_bytes, free_bytes) == ESP_OK;
+}
+
+const char *aos_hal_path_sd_root(void)
+{
+    return s_sd_mounted ? BSP_SD_MOUNT_POINT : NULL;
+}
+
+bool aos_hal_sd_release(void)
+{
+    if (!s_sd_mounted) {
+        return false;
+    }
+    /* the player reads the card: an open file under an unmount does not end well */
+    aos_hal_player_stop();
+    /* esp_vfs_fat_sdcard_unmount() also deinits the SDMMC host and frees the
+     * card: whoever takes over starts from a cold host. */
+    esp_err_t e = bsp_sdcard_unmount();
+    if (e != ESP_OK) {
+        ESP_LOGW(TAG, "card unmount for disk mode: %s", esp_err_to_name(e));
+        return false;
+    }
+    s_sd_mounted = false;
+    ESP_LOGI(TAG, "microSD released");
+    return true;
+}
+
+bool aos_hal_sd_reclaim(void)
+{
+    if (s_sd_mounted) {
+        return true;
+    }
+    s_sd_mounted = (bsp_sdcard_mount() == ESP_OK);
+    ESP_LOGI(TAG, "microSD %s", s_sd_mounted ? "mounted again" : "did not come back");
+    return s_sd_mounted;
+}
+
+void aos_hal_sd_mark_mounted(bool mounted)
+{
+    s_sd_mounted = mounted;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Audio                                                                       */
+/* -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+ * Tones
+ *
+ * aos_hal_beep() enqueues and returns straight away. It used to write the tone
+ * to the codec directly, so a 60 ms beep froze its caller for 60 ms, and the
+ * caller is always an LVGL timer: two notes in a row and the game stutters.
+ * Now this task plays them.
+ *
+ * The codec is left open between notes and closed after half a second of
+ * silence: opening and closing it on every note adds a click and makes it
+ * impossible to play a melody.
+ * -------------------------------------------------------------------------- */
+
+#define TONE_RATE       16000
+#define TONE_QUEUE_LEN  16
+
+/* --------------------------------------------------------------------------
+ * Arbitration of the shared codec
+ *
+ * The speaker and the microphone are the SAME ES8311 hanging off the SAME pair
+ * of I2S channels, and the BSP creates the speaker as
+ * ESP_CODEC_DEV_TYPE_IN_OUT (esp32_s3_touch_amoled_1_8.c:
+ * bsp_audio_codec_speaker_init). With that type, opening or closing the
+ * speaker goes through this branch of esp_codec_dev:
+ *
+ *     if (dev_type == ESP_CODEC_DEV_TYPE_IN_OUT) {
+ *         _i2s_drv_enable(i2s_data, true,  enable);   // TX
+ *         _i2s_drv_enable(i2s_data, false, enable);   // RX  <-- the microphone
+ *     }
+ *
+ * that is, it enables and disables BOTH channels, without the protection the
+ * one-way path does have ("when RX is working TX disable should be blocked",
+ * audio_codec_data_i2s.c). Translated: a beep in the middle of a recording
+ * tears the input channel away from the microphone and the read fails.
+ *
+ * So, while the microphone is capturing, the speaker is left alone: the tone
+ * task releases the codec and drops the notes. While recording nothing is lost
+ * —a beep would end up inside the file—, and with the raw microphone open it
+ * is the price of listening: a tuner cannot give the reference tone while it
+ * listens.
+ *
+ * The arbitration is deliberately binary: microphone against speaker. It works
+ * for both consumers of the capture (the recorder and aos_hal_mic_open), so
+ * there is no need for an owner with more states than the hardware has.
+ * -------------------------------------------------------------------------- */
+
+
+typedef struct {
+    uint16_t freq;
+    uint16_t ms;
+} tone_note_t;
+
+static QueueHandle_t s_tone_queue;
+static volatile bool s_tone_open;       /* tone_task holds the codec */
+
+/* RAM audit (E1b): with AOS_AUDIT_PSRAM_STACKS the tone task gets its stack
+ * in PSRAM: it only writes PCM to I2S and never touches flash. The http,
+ * player and mic tasks were moved too at first and the http one crashed the
+ * board the moment Clima ran: it reads a preference (NVS) before the request,
+ * and the flash driver asserts when the calling task's stack is in PSRAM
+ * (cache_utils.c, esp_task_stack_is_sane_cache_disabled). Any task that may
+ * reach NVS, SPIFFS or OTA stays internal. */
+#ifdef AOS_AUDIT_PSRAM_STACKS
+#define AOS_XTASKCREATE(fn, name, stack, arg, prio, handle) \
+    xTaskCreateWithCaps(fn, name, stack, arg, prio, handle, MALLOC_CAP_SPIRAM)
+#else
+#define AOS_XTASKCREATE(fn, name, stack, arg, prio, handle) \
+    xTaskCreate(fn, name, stack, arg, prio, handle)
+#endif
+/* Only the tone task, which never exits, is created through AOS_XTASKCREATE.
+ * (A first fix here defined a macro NAMED vTaskDelete by mistake, turning every
+ * vTaskDelete() of this file into vTaskDeleteWithCaps(): the mic task, created
+ * with plain xTaskCreate, then died in FreeRTOS's assert at the end of a
+ * recording. Measured on the board 2026-09-12.) */
+
+static void tone_task(void *arg)
+{
+    (void)arg;
+    static int16_t buffer[256];
+    bool open = false;
+    int  idle_rounds = 0;
+    int  phase = 0;             /* samples played of the note in flight */
+
+    while (1) {
+        /* If the recorder asked for the codec, release it before anything
+         * else. We get here promptly because rec_start pushes an empty note to
+         * wake the queue. */
+        if ((s_mic_holds_codec || aos_hal_audio_is_playing()) && open) {
+            esp_codec_dev_close(s_speaker);
+            open = false;
+            s_tone_open = false;
+            s_speaker_open = false;
+            idle_rounds = 0;
+        }
+
+        tone_note_t note;
+        if (xQueueReceive(s_tone_queue, &note, pdMS_TO_TICKS(500)) != pdTRUE) {
+            /* Closing the codec after half a second turned out to be very
+             * expensive: every isolated note switched the amplifier back on,
+             * which takes tens of ms to start, and a 40 ms note was consumed
+             * entirely by that ramp. Measured: the notes were played
+             * (open=ESP_OK, none dropped) but could not be heard except when
+             * they came in a burst. Now it is kept open for 10 rounds =
+             * 5 seconds. */
+            if (open && ++idle_rounds >= 10) {
+                esp_codec_dev_close(s_speaker);
+                open = false;
+                s_tone_open = false;
+                s_speaker_open = false;
+                idle_rounds = 0;
+            }
+            continue;
+        }
+        idle_rounds = 0;
+
+        /* while music is playing the speaker belongs to the player, and while
+         * recording it belongs to nobody: a 40 ms note is not worth breaking
+         * the capture for */
+        if (!s_speaker || aos_hal_audio_is_playing() || s_mic_holds_codec || s_spk_task) {
+            continue;                   /* the streaming speaker holds the codec: no note */
+        }
+        if (note.freq == 0) {
+            continue;       /* empty note: it only served to wake the queue */
+        }
+
+        if (!open) {
+            esp_codec_dev_sample_info_t fs = {
+                .bits_per_sample = 16,
+                .channel         = 1,
+                .sample_rate     = TONE_RATE,
+            };
+            s_speaker_open = true;      /* before the open: see s_i2s_idle */
+            if (esp_codec_dev_open(s_speaker, &fs) != ESP_OK) {
+                continue;
+            }
+            esp_codec_dev_set_out_vol(s_speaker, s_volume);
+            open = true;
+            s_tone_open = true;
+            s_speaker_open = true;
+
+            /* A breath of silence so the amplifier settles before the note;
+             * without it, the first one after a while is lost. */
+            memset(buffer, 0, sizeof(buffer));
+            for (int i = 0; i < 3; i++) {      /* ~48 ms at 16 kHz */
+                esp_codec_dev_write(s_speaker, buffer, sizeof(buffer));
+            }
+        }
+
+        int samples = TONE_RATE * note.ms / 1000;
+        int chunk = (int)(sizeof(buffer) / sizeof(buffer[0]));
+        phase = 0;
+
+        for (int written = 0; written < samples; written += chunk) {
+            int count = (samples - written) < chunk ? (samples - written) : chunk;
+            for (int i = 0; i < count; i++) {
+                float t = (float)(written + i) / (float)samples;
+                /* short attack and exponential decay: it sounds like a bell
+                 * and not like a buzzer, and it also avoids the click of a
+                 * hard cut */
+                float env = (t < 0.04f) ? (t / 0.04f) : expf(-3.5f * (t - 0.04f));
+                float ph = 2.0f * (float)M_PI * (float)note.freq *
+                           (float)(phase + i) / (float)TONE_RATE;
+                buffer[i] = (int16_t)((sinf(ph) + 0.22f * sinf(3.0f * ph)) *
+                                      env * 5500.0f);
+            }
+            esp_codec_dev_write(s_speaker, buffer,
+                                count * (int)sizeof(int16_t));
+            phase += count;
+        }
+    }
+}
+
+void aos_hal_beep(int freq_hz, int ms)
+{
+    if (freq_hz <= 0 || ms <= 0 || ms > 2000) {
+        return;
+    }
+    if (!s_tone_queue) {
+        return;             /* the HAL has not started yet */
+    }
+
+    tone_note_t note = { (uint16_t)freq_hz, (uint16_t)ms };
+    /* if the queue is full the note is lost: better that than stalling the
+     * caller, which is nearly always a frame of a game */
+    xQueueSend(s_tone_queue, &note, 0);
+}
+
+/* --------------------------------------------------------------------------
+ * Player
+ *
+ * Two tasks and a ring between them.
+ *
+ *   player_task       file -> aos_audio (WAV, MP3) -> mono -> ring
+ *   player_out_task   ring -> codec, 20 ms at a time
+ *
+ * The ring is two seconds of mono PCM in PSRAM, and it is what lets the
+ * decoder give way: while the ring is more than half full it runs at
+ * priority 2, under LVGL (4), the workers (5) and anything else an app
+ * does, and only when it falls under half does it rise to 5, level with the
+ * workers, before the writer runs dry. The WRITER moves it: the decoder
+ * raising itself was the first version, and with Visor 3D spinning a model
+ * both cores stayed busy above 2, the decoder never ran to raise itself and
+ * the ring emptied (3 underruns in 12 s, measured). Opening an app, loading its pak or a
+ * burst of drawing is paid out of the ring; a game that keeps both cores
+ * busy for seconds on end is where the music gives way (the writer counts
+ * those as underruns, visible in /api/player).
+ *
+ * Mono because the board has one speaker behind a mono DAC. Fed a stereo
+ * stream the ES8311 plays one slot, the one REG09's SDP_IN_SEL picks, and
+ * esp_codec_dev leaves it at 0, the left: a track mixed wide lost whatever
+ * was only on the right (from the datasheet and the driver; the ear test is
+ * music/prueba-canales/ on the card). Now it gets (L+R)/2, and I2S moves
+ * half the data.
+ *
+ * The writer owns the codec. It lets go of it when paused, when the
+ * microphone takes it, and when an app opens the streaming speaker
+ * (aos_hal_spk_open), which pauses the music and gets it back on close:
+ * the app in front wins, and the music comes back without being asked.
+ *
+ * After a track, the next one of its folder (aos_hal_player_play_folder),
+ * in name order and round again, or at random with shuffle. This lives here
+ * and not in the Music app so the music goes on with the app closed.
+ * -------------------------------------------------------------------------- */
+
+#define PLAYER_RING_S       2           /* seconds of mono PCM in PSRAM */
+#define PLAYER_CHUNK        1152        /* frames per decode: one MPEG-1 frame */
+#define PLAYER_BLOCK_MS     20
+#define PLAYER_PREFILL_MS   200         /* the writer starts (and restarts) with this much */
+#define PLAYER_PRIO_LOW     2
+#define PLAYER_PRIO_HIGH    5
+#define PLAYER_OUT_PRIO     6
+#define PLAYER_MAX_TRACKS   512
+
+static aos_player_state_t s_player_state;
+static volatile bool      s_player_abort;
+static TaskHandle_t       s_player_out_task;
+static portMUX_TYPE       s_player_mux = portMUX_INITIALIZER_UNLOCKED;
+
+/* what is being heard (published by player_task under s_player_mux) */
+static char             s_player_path[256];
+static char             s_player_title[96];
+static char             s_player_artist[96];
+static char             s_player_album[64];
+static aos_audio_info_t s_player_info;
+static uint32_t         s_player_rate = 44100;
+static uint8_t          s_player_channels = 2;
+
+/* the folder */
+static aos_audio_list_t s_player_list;
+static int              s_player_index = -1;     /* -1: a single file */
+static bool             s_player_shuffle;
+
+/* requests to player_task */
+static volatile int32_t s_player_seek_ms = -1;
+static volatile int     s_player_skip;           /* +1 next, -1 previous */
+
+/* the ring: mono samples; head and tail count samples forever */
+static int16_t          *s_pring;
+static uint32_t          s_pring_n;
+static volatile uint32_t s_pring_head, s_pring_tail;
+static volatile uint32_t s_track_start;          /* tail value at 0:00 of the track heard */
+static volatile uint32_t s_out_rate;
+static volatile bool     s_dec_done;             /* nothing more will come */
+static volatile bool     s_out_hold;             /* park the writer, codec open */
+static volatile bool     s_out_parked;
+static portMUX_TYPE      s_out_mux = portMUX_INITIALIZER_UNLOCKED;   /* hold + parked */
+static volatile bool     s_expect_empty;         /* a flush or the end of a track: not an underrun */
+static volatile int      s_yield_refs;           /* the app's speaker, the microphone */
+static volatile int64_t  s_yield_until_us;       /* ...and a moment after they let go */
+static portMUX_TYPE      s_yield_mux = portMUX_INITIALIZER_UNLOCKED;
+static bool              s_player_yielded_pause; /* ...and paused us for it */
+
+/* figures for /api/player */
+static volatile uint32_t s_player_underruns;
+static volatile uint32_t s_dec_frames, s_dec_us_total, s_dec_us_max;
+static volatile uint32_t s_cost_frames;          /* aos_audio_cost(): decoding alone */
+static volatile uint64_t s_cost_us;
+static volatile uint32_t s_ring_min_ms = UINT32_MAX;
+static bool              s_ring_primed;          /* was 3/4 full since the last flush */
+static int               s_dec_prio;
+
+static void player_title_from(const char *path, const aos_audio_info_t *info)
+{
+    const char *slash = strrchr(path, '/');
+    char name[96];
+    snprintf(name, sizeof(name), "%s", slash ? slash + 1 : path);
+    char *dot = strrchr(name, '.');
+    if (dot) {
+        *dot = '\0';
+    }
+
+    /* The tags when there are any; otherwise the file name, which in most
+     * collections is "Artist - Title". */
+    char title[96] = "", artist[96] = "";
+    const char *sep = strstr(name, " - ");
+    const char *after = sep ? sep + 3 : NULL;
+    while (after && *after == ' ') {
+        after++;                        /* "Aman Anand -  Raikou": two spaces */
+    }
+    if (info->title[0]) {
+        snprintf(title, sizeof(title), "%s", info->title);
+    } else if (sep) {
+        snprintf(title, sizeof(title), "%s", after);
+    } else {
+        snprintf(title, sizeof(title), "%s", name);
+    }
+    if (info->artist[0]) {
+        snprintf(artist, sizeof(artist), "%s", info->artist);
+    } else if (sep && !(info->title[0] && strcmp(info->title, name) != 0)) {
+        snprintf(artist, sizeof(artist), "%.*s", (int)(sep - name), name);
+        /* a title tag that is just the file name again: split that too */
+        if (info->title[0]) {
+            snprintf(title, sizeof(title), "%s", after);
+        }
+    }
+    portENTER_CRITICAL(&s_player_mux);
+    memcpy(s_player_title, title, sizeof(title));
+    memcpy(s_player_artist, artist, sizeof(artist));
+    memcpy(s_player_album, info->album, sizeof(s_player_album));
+    portEXIT_CRITICAL(&s_player_mux);
+}
+
+/* Copies at most 'len' bytes of a UTF-8 string without cutting a character
+ * in half (the status's title is 64 bytes; ours, 96). */
+static void utf8_copy(char *dst, size_t len, const char *src)
+{
+    size_t n = strnlen(src, len - 1);
+    if (n == len - 1) {
+        while (n > 0 && ((unsigned char)src[n] & 0xC0) == 0x80) {
+            n--;
+        }
+    }
+    memcpy(dst, src, n);
+    dst[n] = '\0';
+}
+
+static uint32_t ring_used(void)
+{
+    return s_pring_head - s_pring_tail;
+}
+
+/* Parks the writer between two blocks, so the ring can be emptied under it. */
+static bool player_parked(void)
+{
+    portENTER_CRITICAL(&s_out_mux);
+    bool parked = s_out_parked;
+    portEXIT_CRITICAL(&s_out_mux);
+    return parked;
+}
+
+/* Parks the writer between two blocks, so the ring can be emptied under it.
+ * The hold and the writer's "parked" change under one lock: with two plain
+ * flags a skip that came right after another could read a "parked" left over
+ * from the last time while the writer had already decided to write, and the
+ * tail would end up past the head. No time limit: the writer comes back to
+ * the check within a block, or an open of the codec. */
+static void player_park(bool park)
+{
+    portENTER_CRITICAL(&s_out_mux);
+    s_out_hold = park;
+    portEXIT_CRITICAL(&s_out_mux);
+    while (park && s_player_out_task && !player_parked()) {
+        vTaskDelay(pdMS_TO_TICKS(2));
+    }
+}
+
+static void player_decoder_prio(void);
+static uint32_t player_boundary(uint32_t n);
+static bool spk_ring_prepare(uint32_t sample_rate);
+static bool spk_task_start(void);
+static void spk_unmix(void);
+
+static bool player_yielded(void)
+{
+    return s_yield_refs > 0 || esp_timer_get_time() < s_yield_until_us;
+}
+
+/* ---- mixing an app's sound over the music ------------------------------------
+ *
+ * With Settings -> Sound -> "Mix music and apps" on, an app that opens the
+ * streaming speaker while music plays does not pause it: its ring is read by
+ * the player's writer instead of a task of its own, brought from the app's
+ * rate (16 kHz, every app here) to the music's by linear interpolation, and
+ * added over the music at half volume (MIX_MUSIC_GAIN) for as long as the
+ * app holds the speaker. The walkie-talkie is never mixed: a voice over music
+ * is not something anyone asked for. Off, the default: the music pauses. */
+#define MIX_MUSIC_GAIN_Q8   128         /* 0.5 */
+
+static volatile bool s_spk_mixed;       /* the app's speaker rides in the writer */
+static uint32_t      s_mix_phase;       /* 16.16, in app samples past s_spk_tail */
+static int           s_mix_pref = -1;   /* the setting, read once */
+static volatile bool s_fg_voice;        /* the app in front is the walkie-talkie */
+
+bool aos_hal_player_mix(void)
+{
+    if (s_mix_pref < 0) {
+        int32_t v = 0;
+        aos_hal_pref_get_i32("mus_mix", &v);
+        s_mix_pref = v != 0;
+    }
+    return s_mix_pref == 1;
+}
+
+void aos_hal_player_set_mix(bool on)
+{
+    s_mix_pref = on ? 1 : 0;
+    aos_hal_pref_set_i32("mus_mix", on ? 1 : 0);
+}
+
+void aos_hal_audio_foreground(const char *app_id)
+{
+    s_fg_voice = app_id && strcmp(app_id, "aos.walkie") == 0;
+}
+
+/* One block of output: 'n' samples of music from the ring (or silence when
+ * 'music' is false), plus the app's stream when mixed. Returns the buffer to
+ * write. */
+static const int16_t *player_mix(int16_t *out, const int16_t *music, uint32_t n, uint32_t rate)
+{
+    uint32_t step = (uint32_t)(((uint64_t)s_spk_rate << 16) / rate);
+    uint32_t head = s_spk_head, tail = s_spk_tail;
+    uint32_t phase = s_mix_phase;
+    for (uint32_t i = 0; i < n; i++) {
+        int32_t m = music ? (music[i] * MIX_MUSIC_GAIN_Q8) >> 8 : 0;
+        uint32_t k = tail + (phase >> 16);
+        int32_t a = 0;
+        if ((int32_t)(head - k) >= 2) {
+            int32_t s0 = s_spk_ring[k % s_spk_ring_n];
+            int32_t s1 = s_spk_ring[(k + 1) % s_spk_ring_n];
+            a = s0 + (((s1 - s0) * (int32_t)(phase & 0xFFFF)) >> 16);
+            phase += step;
+        } else if ((int32_t)(head - k) == 1) {
+            a = s_spk_ring[k % s_spk_ring_n];
+            phase += step;
+        }
+        /* with nothing waiting the phase stays put: the app is late, not done */
+        int32_t v = m + a;
+        out[i] = (int16_t)(v > 32767 ? 32767 : (v < -32768 ? -32768 : v));
+    }
+    uint32_t used = phase >> 16;
+    if (used > head - tail) {
+        used = head - tail;
+    }
+    s_spk_tail = tail + used;
+    s_mix_phase = phase & 0xFFFF;
+    return out;
+}
+
+static void player_out_task(void *arg)
+{
+    (void)arg;
+    bool     open = false;
+    uint32_t open_rate = 0;
+    int      open_vol = -1;
+    bool     filling = true;            /* waiting for PLAYER_PREFILL_MS */
+    const uint32_t block_max = 48000 * PLAYER_BLOCK_MS / 1000;
+    int16_t *mixbuf = heap_caps_malloc(block_max * sizeof(int16_t), MALLOC_CAP_SPIRAM);
+
+    while (!s_player_abort) {
+        bool mixed = s_spk_mixed && mixbuf;
+        bool paused = s_player_state == AOS_PLAYER_PAUSED;
+        /* paused but mixing: the app's sound goes on, over silence */
+        bool release = (paused && !mixed) || s_mic_holds_codec || player_yielded();
+        portENTER_CRITICAL(&s_out_mux);
+        bool hold = s_out_hold;
+        s_out_parked = release || hold;     /* decided together: see player_park() */
+        portEXIT_CRITICAL(&s_out_mux);
+        if (release || hold) {
+            if (release && open) {
+                esp_codec_dev_close(s_speaker);
+                open = false;
+                s_speaker_open = false;
+            }
+            vTaskDelay(pdMS_TO_TICKS(10));
+            continue;
+        }
+        player_decoder_prio();
+
+        uint32_t used = ring_used();
+        uint32_t rate = s_out_rate ? s_out_rate : 44100;
+        bool music = !paused;
+        if (music && used == 0) {
+            if (s_dec_done) {
+                break;
+            }
+            if (!filling && !s_expect_empty) {
+                s_player_underruns++;
+            }
+            filling = true;
+        }
+        if (music && filling) {
+            if (used < rate * PLAYER_PREFILL_MS / 1000 && !s_dec_done) {
+                if (!mixed) {
+                    vTaskDelay(pdMS_TO_TICKS(10));
+                    continue;
+                }
+                music = false;              /* the app's sound does not wait for ours */
+            } else {
+                filling = false;
+                s_expect_empty = false;
+            }
+        }
+
+        if (!open || open_rate != rate) {
+            if (open) {
+                esp_codec_dev_close(s_speaker);
+            }
+            /* a beep while we were paused may have left the tone task holding
+             * the codec (it keeps it five seconds): ask for it back */
+            if (s_tone_open && s_tone_queue) {
+                tone_note_t wake = { 0, 0 };
+                xQueueSend(s_tone_queue, &wake, 0);
+                for (int i = 0; i < 60 && s_tone_open; i++) {
+                    vTaskDelay(pdMS_TO_TICKS(10));
+                }
+            }
+            esp_codec_dev_sample_info_t fs = {
+                .bits_per_sample = 16,
+                .channel         = 1,
+                .sample_rate     = rate,
+            };
+            s_speaker_open = true;          /* before the open: see s_i2s_idle */
+            if (!s_speaker || esp_codec_dev_open(s_speaker, &fs) != ESP_OK) {
+                ESP_LOGE(TAG, "player: the codec did not accept %lu Hz", (unsigned long)rate);
+                s_speaker_open = false;
+                open = false;
+                break;
+            }
+            open = true;
+            open_rate = rate;
+            open_vol = -1;
+        }
+        if (open_vol != s_volume) {         /* the slider is heard at once */
+            open_vol = s_volume;
+            esp_codec_dev_set_out_vol(s_speaker, open_vol);
+        }
+
+        uint32_t n = rate * PLAYER_BLOCK_MS / 1000;
+        if (music) {
+            n = player_boundary(n);
+            if (n > used) {
+                n = used;
+            }
+            /* the low-water mark, from the moment the ring was full: the
+             * prefill after a start or a seek is not the decoder falling
+             * behind */
+            if (used > s_pring_n * 3 / 4) {
+                s_ring_primed = true;
+            } else if (s_expect_empty) {
+                s_ring_primed = false;
+            }
+            uint32_t ms_left = used * 1000 / rate;
+            if (s_ring_primed && ms_left < s_ring_min_ms) {
+                s_ring_min_ms = ms_left;
+            }
+        }
+        uint32_t at = s_pring_tail % s_pring_n;
+        if (music && n > s_pring_n - at) {
+            n = s_pring_n - at;             /* up to the wrap; the rest next round */
+        }
+        if (n > block_max) {
+            n = block_max;
+        }
+        /* Straight from PSRAM when alone: the I2S driver copies into its own
+         * DMA buffers. Mixed, through mixbuf. */
+        const int16_t *src = s_pring + at;
+        if (mixed) {
+            src = player_mix(mixbuf, music ? s_pring + at : NULL, n, rate);
+        }
+        if (esp_codec_dev_write(s_speaker, (void *)src, (int)(n * sizeof(int16_t))) != ESP_OK) {
+            break;
+        }
+        if (music) {
+            s_pring_tail += n;
+        }
+    }
+
+    if (open) {
+        esp_codec_dev_close(s_speaker);
+    }
+    free(mixbuf);
+    s_speaker_open = false;
+    s_out_parked = true;
+    s_player_out_task = NULL;
+    vTaskDelete(NULL);
+}
+
+/* Which track follows 'index' in the folder, or -1 at the end of a single
+ * file. With shuffle, any other one. */
+static int player_next_index(int index, int step)
+{
+    int count = s_player_list.count;
+    if (index < 0 || count == 0) {
+        return -1;
+    }
+    if (s_player_shuffle && count > 1) {
+        int r = (int)(esp_random() % (uint32_t)(count - 1));
+        return r >= index ? r + 1 : r;
+    }
+    return ((index + step) % count + count) % count;
+}
+
+
+/* The decoder's state lives here and not on its stack, so that the task can
+ * move to the other core and its successor pick up where it left off.
+ *
+ * Why it moves: minimp3 decodes in float, and on this chip the first FPU
+ * instruction pins a task to the core it ran it on (portasm.S, "CP
+ * operations are incompatible with unpinned tasks"). Created unpinned, the
+ * decoder landed on whichever core it started on and stayed there: in
+ * Visor 3D that was core 0, the one the viewer's worker spins on, while
+ * core 1 had room. So the decoder follows the app instead: when a worker
+ * starts on one core the decoder moves to the other, and with no worker it
+ * sits on core 0, away from LVGL. */
+static aos_audio_t     *s_dec;
+static aos_audio_info_t s_dec_info;
+static char             s_dec_path[256];
+static int16_t         *s_dec_chunk;           /* PLAYER_CHUNK stereo frames, PSRAM */
+static int              s_dec_failures;
+static int              s_dec_index = -1;      /* the decoder's file in the folder (may be ahead) */
+static bool             s_dec_finished;        /* the file ended; its tail is still playing */
+static volatile int     s_dec_core_want;
+static int              s_worker_core = -1;    /* where the app's worker runs, -1 none */
+static SemaphoreHandle_t s_dec_lock;           /* s_player_task changing hands */
+
+enum { STEP_AGAIN, STEP_WAIT, STEP_DONE };
+
+/* Over half the ring: the decoder out of everyone's way; under: level with
+ * the apps. Called by the writer, which always runs; under s_dec_lock so the
+ * handle is never one that just deleted itself. */
+static void player_decoder_prio(void)
+{
+    int want = ring_used() > s_pring_n / 2 ? PLAYER_PRIO_LOW : PLAYER_PRIO_HIGH;
+    if (want == s_dec_prio || !s_dec_lock) {
+        return;
+    }
+    if (xSemaphoreTake(s_dec_lock, 0) == pdTRUE) {
+        if (s_player_task) {
+            vTaskPrioritySet(s_player_task, (UBaseType_t)want);
+            s_dec_prio = want;
+        }
+        xSemaphoreGive(s_dec_lock);
+    }
+}
+
+static void player_flush(void)
+{
+    player_park(true);
+    s_expect_empty = true;
+    s_pring_tail = s_pring_head;        /* drop what was queued */
+    player_park(false);
+}
+
+/* Makes 'path' (with its info and folder index) the track that is heard,
+ * starting at ring position 'start'. */
+static void player_publish(const char *path, const aos_audio_info_t *info, int index,
+                           uint32_t start)
+{
+    portENTER_CRITICAL(&s_player_mux);
+    memcpy(s_player_path, path, sizeof(s_player_path));
+    s_player_info = *info;
+    portEXIT_CRITICAL(&s_player_mux);
+    player_title_from(path, info);
+    s_player_index    = index;
+    s_player_rate     = info->sample_rate;
+    s_player_channels = info->channels;
+    s_track_start     = start;
+}
+
+/* The next track, already decoding behind the one being heard; the writer
+ * publishes it when the tail reaches s_next_at (gapless). */
+static char             s_next_path[256];
+static aos_audio_info_t s_next_info;
+static int              s_next_index;
+static uint32_t         s_next_at;
+static volatile bool    s_next_pending;
+
+/* Called by the writer before every block: at the boundary, the next track
+ * becomes the one heard. Returns how many samples may be written before it. */
+static uint32_t player_boundary(uint32_t n)
+{
+    if (!s_next_pending) {
+        return n;
+    }
+    uint32_t left = s_next_at - s_pring_tail;
+    if ((int32_t)left <= 0) {
+        player_publish(s_next_path, &s_next_info, s_next_index, s_next_at);
+        s_next_pending = false;
+        return n;
+    }
+    return n < left ? n : left;         /* the title changes on the sample */
+}
+
+/* How the next file opened becomes the one heard. */
+enum { PUB_NOW, PUB_AT_HEAD, PUB_AFTER_DRAIN };
+static int s_dec_publish = PUB_NOW;
+
+/* Closes the decoder's file and points it at the track 'step' away from
+ * 'from'. */
+static int player_point_at(int from, int step, int publish)
+{
+    aos_audio_close(s_dec);
+    s_dec = NULL;
+    int next = player_next_index(from, step);
+    if (next < 0) {
+        return STEP_DONE;               /* a single file: over */
+    }
+    s_dec_index = next;
+    s_dec_publish = publish;
+    snprintf(s_dec_path, sizeof(s_dec_path), "%s/%s", s_player_list.dir,
+             aos_audio_list_name(&s_player_list, next));
+    return STEP_AGAIN;
+}
+
+/* A skip or a seek acts on what is HEARD. If the decoder is already into the
+ * next track (the last two seconds of this one are in the ring), it goes
+ * back to the one heard first. */
+static void player_back_to_heard(void)
+{
+    if (!s_next_pending) {
+        return;
+    }
+    s_next_pending = false;             /* the writer is parked: see callers */
+    aos_audio_close(s_dec);
+    s_dec = NULL;
+    portENTER_CRITICAL(&s_player_mux);
+    memcpy(s_dec_path, s_player_path, sizeof(s_dec_path));
+    portEXIT_CRITICAL(&s_player_mux);
+    s_dec_index = s_player_index;
+    s_dec_publish = PUB_NOW;
+}
+
+/* ---- internet radio ---------------------------------------------------------
+ *
+ * A station is one more source for the same decoder, ring and writer:
+ * s_dec_path holds its URL, aos_radio.c keeps the connection and
+ * aos_audio_open_src() decodes out of its ring. What is different from a
+ * file, all of it in radio_step():
+ *
+ *  - Opening waits for the ring to hold a second and a half WITHOUT blocking
+ *    the task: a stop or a skip during a ten-second TLS handshake is heard
+ *    at once, and the reader is left to give up on its own.
+ *  - A dry ring is a wait, not the end of the track; the end is the reader
+ *    giving up (aos_audio_ended()).
+ *  - Next and previous move along the list of stations the app gave.
+ *  - The title follows the stream's StreamTitle, and it is published when
+ *    its audio reaches the speaker: the metadata arrives with the bytes, and
+ *    those are heard two rings later (up to ~14 s at 128 kbps).
+ *  - A pause longer than the rings can hold resumes live: the listener
+ *    expects the radio, not a recording of what it said a while ago.
+ * -------------------------------------------------------------------------- */
+#define RADIO_LIVE_AFTER_MS 20000
+
+static bool                 s_radio_mode;
+static aos_radio_station_t *s_radio_list;           /* AOS_RADIO_MAX_STATIONS, PSRAM */
+static int                  s_radio_count;
+static volatile int         s_radio_index;
+static int64_t              s_radio_started_ms;
+static bool                 s_radio_open;           /* aos_radio_start() done for s_dec_path */
+static uint32_t             s_radio_seen_gen;       /* the last title the decoder met */
+static char                 s_radio_pend_title[128];
+static uint32_t             s_radio_pend_at;        /* ring sample where it is heard */
+static volatile bool        s_radio_pend;
+static char                 s_radio_heard[128];     /* under s_player_mux */
+static volatile uint32_t    s_radio_heard_gen;
+static int64_t              s_radio_paused_ms;
+
+/* The heard title, split into artist and title the way stations write it:
+ * "Artist - Title". */
+static void radio_set_heard(const char *full)
+{
+    char title[96], artist[96] = "";
+    const char *sep = strstr(full, " - ");
+    if (sep) {
+        snprintf(artist, sizeof(artist), "%.*s", (int)(sep - full), full);
+        snprintf(title, sizeof(title), "%s", sep + 3);
+    } else {
+        snprintf(title, sizeof(title), "%s", full);
+    }
+    portENTER_CRITICAL(&s_player_mux);
+    memcpy(s_player_title, title, sizeof(title));
+    memcpy(s_player_artist, artist, sizeof(artist));
+    memcpy(s_radio_heard, full, sizeof(s_radio_heard));
+    s_radio_heard_gen++;
+    portEXIT_CRITICAL(&s_player_mux);
+}
+
+/* The station that is now the one heard: its name as the album, no title
+ * yet, the format unknown until the first frame. */
+static void radio_publish_station(void)
+{
+    int i = s_radio_index;
+    if (!s_radio_list || i < 0 || i >= s_radio_count) {
+        return;
+    }
+    aos_audio_info_t none = {0};
+    s_radio_pend = false;
+    s_radio_seen_gen = 0;
+    portENTER_CRITICAL(&s_player_mux);
+    memcpy(s_player_path, s_radio_list[i].url, sizeof(s_radio_list[i].url));
+    s_player_info = none;
+    memcpy(s_player_album, s_radio_list[i].name, sizeof(s_radio_list[i].name));
+    s_player_album[sizeof(s_player_album) - 1] = '\0';
+    portEXIT_CRITICAL(&s_player_mux);
+    radio_set_heard("");
+    s_player_index = i;
+}
+
+/* The next station with an address, 'step' away. */
+static int radio_next_index(int from, int step)
+{
+    for (int k = 1; k <= s_radio_count; k++) {
+        int i = ((from + step * k) % s_radio_count + s_radio_count) % s_radio_count;
+        if (s_radio_list[i].url[0]) {
+            return i;
+        }
+    }
+    return from;
+}
+
+/* Drops what is queued and the connection; with 'step', moves along the
+ * list. The decoder opens the station again on its next step. */
+static void radio_restart(int step)
+{
+    player_park(true);
+    s_expect_empty = true;
+    s_pring_tail = s_pring_head;
+    player_park(false);
+    aos_audio_close(s_dec);
+    s_dec = NULL;
+    aos_radio_stop();
+    s_radio_open = false;
+    if (step) {
+        s_radio_index = radio_next_index(s_radio_index, step);
+    }
+    snprintf(s_dec_path, sizeof(s_dec_path), "%s", s_radio_list[s_radio_index].url);
+    radio_publish_station();
+    s_radio_started_ms = (int64_t)aos_hal_uptime_ms();
+}
+
+static void ring_put_chunk(int n);
+
+static void radio_ps(int want)
+{
+    if (want != s_radio_ps) {
+        s_radio_ps = want;
+        pm_policy_apply();
+    }
+}
+
+static int radio_step(void)
+{
+    /* the title whose audio has reached the speaker */
+    if (s_radio_pend && (int32_t)(s_pring_tail - s_radio_pend_at) >= 0) {
+        s_radio_pend = false;
+        radio_set_heard(s_radio_pend_title);
+    }
+
+    int64_t now = (int64_t)aos_hal_uptime_ms();
+    if (s_player_state == AOS_PLAYER_PAUSED) {
+        if (!s_radio_paused_ms) {
+            s_radio_paused_ms = now;
+        }
+    } else if (s_radio_paused_ms) {
+        bool stale = now - s_radio_paused_ms > RADIO_LIVE_AFTER_MS;
+        s_radio_paused_ms = 0;
+        if (stale) {
+            radio_restart(0);
+            return STEP_AGAIN;
+        }
+    }
+
+    int skip = s_player_skip;
+    if (skip) {
+        s_player_skip = 0;
+        radio_restart(skip);
+        return STEP_AGAIN;
+    }
+    s_player_seek_ms = -1;              /* nothing to seek in a live stream */
+
+    if (!s_dec) {
+        radio_ps(2);
+        if (!s_radio_open) {
+            if (!aos_radio_start(s_dec_path)) {
+                return STEP_DONE;
+            }
+            s_radio_open = true;
+        }
+        int ready = aos_radio_ready();
+        if (ready == 0) {
+            s_expect_empty = true;      /* connecting is not an underrun */
+            return STEP_WAIT;
+        }
+        if (ready < 0) {
+            return STEP_DONE;           /* the reason stays in the radio's status */
+        }
+        s_dec = aos_audio_open_src(aos_radio_read, NULL, &s_dec_info);
+        if (!s_dec) {
+            ESP_LOGW(TAG, "radio: no MP3 or AAC frames in %s", s_dec_path);
+            aos_radio_fail("no MP3 or AAC audio in the stream");
+            return STEP_DONE;
+        }
+        s_dec_frames = 0;
+        s_dec_us_total = 0;
+        s_cost_frames = 0;
+        s_cost_us = 0;
+        s_out_rate = s_dec_info.sample_rate;
+        portENTER_CRITICAL(&s_player_mux);
+        s_player_info = s_dec_info;
+        portEXIT_CRITICAL(&s_player_mux);
+        s_player_rate = s_dec_info.sample_rate;
+        s_player_channels = s_dec_info.channels;
+        s_track_start = s_pring_tail;
+        radio_ps(1);
+        ESP_LOGI(TAG, "radio: %s, %s %lu Hz %u ch, %u kbps", s_dec_path, s_dec_info.codec,
+                 (unsigned long)s_dec_info.sample_rate, (unsigned)s_dec_info.channels,
+                 (unsigned)s_dec_info.kbps);
+    }
+
+    radio_ps(aos_radio_busy() ? 2 : 1);
+    if (s_pring_n - ring_used() < PLAYER_CHUNK) {
+        return STEP_WAIT;
+    }
+    int64_t t0 = esp_timer_get_time();
+    int n = aos_audio_read(s_dec, s_dec_chunk, PLAYER_CHUNK);
+    uint32_t us = (uint32_t)(esp_timer_get_time() - t0);
+    if (n <= 0) {
+        return aos_audio_ended(s_dec) ? STEP_DONE : STEP_WAIT;
+    }
+    s_dec_frames += (uint32_t)n;
+    s_dec_us_total += us;
+    if (us > s_dec_us_max) {
+        s_dec_us_max = us;
+    }
+    uint32_t cf;
+    uint64_t cu;
+    aos_audio_cost(s_dec, &cf, &cu);
+    s_cost_frames = cf;
+    s_cost_us = cu;
+    ring_put_chunk(n);
+
+    char title[128];
+    uint32_t gen = aos_radio_title_at_read(title, sizeof(title));
+    if (gen != s_radio_seen_gen) {
+        s_radio_seen_gen = gen;
+        if (s_radio_pend) {
+            radio_set_heard(s_radio_pend_title);    /* two in a row: the older one is late */
+        }
+        memcpy(s_radio_pend_title, title, sizeof(title));
+        s_radio_pend_at = s_pring_head;
+        s_radio_pend = true;
+    }
+    return STEP_AGAIN;
+}
+
+/* The decoded chunk, mixed to mono, into the ring. */
+static void ring_put_chunk(int n)
+{
+    uint32_t head = s_pring_head;
+    const int16_t *c = s_dec_chunk;
+    if (s_dec_info.channels == 2) {
+        for (int i = 0; i < n; i++) {
+            s_pring[(head + (uint32_t)i) % s_pring_n] =
+                (int16_t)(((int32_t)c[2 * i] + c[2 * i + 1]) / 2);
+        }
+    } else {
+        for (int i = 0; i < n; i++) {
+            s_pring[(head + (uint32_t)i) % s_pring_n] = c[i];
+        }
+    }
+    s_pring_head = head + (uint32_t)n;
+}
+
+static int player_step(void)
+{
+    if (s_radio_mode) {
+        return radio_step();
+    }
+    if (!s_dec) {
+        s_dec = aos_audio_open(s_dec_path, &s_dec_info);
+        if (!s_dec) {
+            ESP_LOGW(TAG, "player: cannot play %s", s_dec_path);
+            /* a folder with one bad file goes on to the next; a folder of
+             * nothing but bad files, or a single file, stops */
+            if (++s_dec_failures >= (s_player_list.count ? s_player_list.count : 1)) {
+                return STEP_DONE;
+            }
+            return player_point_at(s_dec_index, 1, s_dec_publish);
+        }
+        s_dec_failures = 0;
+        s_dec_finished = false;
+        s_dec_frames = 0;
+        s_dec_us_total = 0;
+        s_cost_frames = 0;
+        s_cost_us = 0;
+        if (s_dec_publish == PUB_AT_HEAD && s_dec_info.sample_rate != s_out_rate) {
+            s_dec_publish = PUB_AFTER_DRAIN;    /* another rate: the codec reopens */
+        }
+        if (s_dec_publish == PUB_AT_HEAD) {
+            portENTER_CRITICAL(&s_player_mux);
+            memcpy(s_next_path, s_dec_path, sizeof(s_next_path));
+            s_next_info  = s_dec_info;
+            s_next_index = s_dec_index;
+            s_next_at    = s_pring_head;
+            s_next_pending = true;
+            portEXIT_CRITICAL(&s_player_mux);
+        } else if (s_dec_publish == PUB_NOW) {
+            /* the ring is empty: first track, or after a flush */
+            s_out_rate = s_dec_info.sample_rate;
+            player_publish(s_dec_path, &s_dec_info, s_dec_index, s_pring_tail);
+        }
+    }
+
+    if (s_dec_publish == PUB_AFTER_DRAIN) {
+        if (ring_used() > 0 && !s_player_skip && s_player_seek_ms < 0) {
+            s_expect_empty = true;
+            return STEP_WAIT;
+        }
+        s_dec_publish = PUB_NOW;
+        s_out_rate = s_dec_info.sample_rate;
+        player_publish(s_dec_path, &s_dec_info, s_dec_index, s_pring_tail);
+    }
+
+    int skip = s_player_skip;
+    if (skip) {
+        s_player_skip = 0;
+        player_park(true);
+        s_expect_empty = true;
+        s_pring_tail = s_pring_head;
+        s_next_pending = false;
+        player_park(false);
+        return player_point_at(s_player_index, skip, PUB_NOW);
+    }
+    int32_t seek = s_player_seek_ms;
+    if (seek >= 0) {
+        if (s_next_pending) {
+            player_park(true);
+            s_expect_empty = true;
+            s_pring_tail = s_pring_head;
+            player_back_to_heard();
+            player_park(false);
+            return STEP_AGAIN;          /* reopen what is heard; the seek waits */
+        }
+        s_player_seek_ms = -1;
+        player_flush();
+        uint32_t landed = aos_audio_seek(s_dec, (uint32_t)seek);
+        s_track_start = s_pring_tail - (uint32_t)((uint64_t)landed * s_dec_info.sample_rate / 1000);
+        s_dec_finished = false;
+    }
+
+    if (s_dec_finished) {
+        /* a single file: let the writer play the tail out, then stop */
+        if (ring_used() > 0) {
+            return STEP_WAIT;
+        }
+        return STEP_DONE;
+    }
+
+    if (s_pring_n - ring_used() < PLAYER_CHUNK) {
+        return STEP_WAIT;
+    }
+
+    int64_t t0 = esp_timer_get_time();
+    int n = aos_audio_read(s_dec, s_dec_chunk, PLAYER_CHUNK);
+    uint32_t us = (uint32_t)(esp_timer_get_time() - t0);
+    if (n <= 0) {
+        if (s_dec_index < 0) {
+            s_dec_finished = true;
+            s_expect_empty = true;      /* the silence that follows is the end */
+            return STEP_AGAIN;
+        }
+        if (s_next_pending) {
+            return STEP_WAIT;           /* a track shorter than the ring: one at a time */
+        }
+        /* Gapless: the next file starts right behind this one in the ring. */
+        return player_point_at(s_dec_index, 1, PUB_AT_HEAD);
+    }
+    s_dec_frames += (uint32_t)n;
+    s_dec_us_total += us;
+    if (us > s_dec_us_max) {
+        s_dec_us_max = us;
+    }
+    uint32_t cf;
+    uint64_t cu;
+    aos_audio_cost(s_dec, &cf, &cu);
+    s_cost_frames = cf;
+    s_cost_us = cu;
+    ring_put_chunk(n);
+    return STEP_AGAIN;
+}
+
+static void player_task(void *arg);
+
+/* A decoder pinned to 'core', made the current one. Under s_dec_lock. */
+static bool player_spawn_decoder(int core)
+{
+    TaskHandle_t t = NULL;
+    /* 6 KB: the FAT path of an open plus minimp3 used 3.3 KB, measured */
+    if (xTaskCreatePinnedToCore(player_task, "aos_player", 6144, (void *)(intptr_t)core,
+                                (UBaseType_t)s_dec_prio, &t, core) != pdPASS) {
+        return false;
+    }
+    s_player_task = t;
+    return true;
+}
+
+static void player_task(void *arg)
+{
+    int core = (int)(intptr_t)arg;
+    int64_t busy_since = esp_timer_get_time();
+
+    while (!s_player_abort) {
+        int want = s_dec_core_want;
+        if (want != core) {
+            xSemaphoreTake(s_dec_lock, portMAX_DELAY);
+            bool moved = player_spawn_decoder(want);
+            xSemaphoreGive(s_dec_lock);
+            if (moved) {
+                ESP_LOGI(TAG, "player: decoder moved to core %d", want);
+                vTaskDelete(NULL);      /* the successor carries on */
+                return;
+            }
+            s_dec_core_want = core;     /* no room for a second stack: stay */
+        }
+        int r = player_step();
+        if (r == STEP_DONE) {
+            break;
+        }
+        if (r == STEP_WAIT) {
+            ulTaskNotifyTake(pdTRUE, pdMS_TO_TICKS(10));
+            busy_since = esp_timer_get_time();
+        } else if (esp_timer_get_time() - busy_since > 100000) {
+            /* A decoder with work that never runs out must still let its
+             * core's idle task run: at priority 5 and slowed down by an OTA
+             * writing the flash (every write stalls the caches of both
+             * cores), it decoded for seconds on end and the task watchdog
+             * reset the watch in the middle of the upload (2026-09-26,
+             * three out of three with a station playing). A tick off every
+             * 100 ms costs 1 % and the ring never notices. */
+            vTaskDelay(1);
+            busy_since = esp_timer_get_time();
+        }
+    }
+
+    aos_audio_close(s_dec);
+    s_dec = NULL;
+    if (s_radio_open) {
+        aos_radio_stop();
+        s_radio_open = false;
+    }
+    radio_ps(0);
+    /* The writer plays out what is left (paused, it waits) and ends on its
+     * own; a stop gets there sooner through s_player_abort. */
+    s_dec_done = true;
+    while (s_player_out_task) {
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+    spk_unmix();                        /* an app's sound that rode with us goes on */
+    s_track_start = s_pring_tail;
+    s_player_state = AOS_PLAYER_STOPPED;
+    xSemaphoreTake(s_dec_lock, portMAX_DELAY);
+    s_player_task = NULL;
+    xSemaphoreGive(s_dec_lock);
+    vTaskDelete(NULL);
+}
+
+/* The app's worker started on 'core' (or ended, -1): the decoder goes to the
+ * other core, and with no worker to core 0, away from LVGL. */
+static void player_follow_worker(int core)
+{
+    s_worker_core = core;
+    s_dec_core_want = core == 0 ? 1 : 0;
+}
+
+static bool player_start(const char *path)
+{
+    /* Same reason as in tone_task: opening the speaker while recording tears
+     * down the microphone's input channel. */
+    if (s_mic_holds_codec) {
+        ESP_LOGW(TAG, "no playback while recording");
+        return false;
+    }
+    if (!path || !s_speaker) {
+        return false;
+    }
+
+    if (!s_pring) {
+        /* sized for 48 kHz; at 44.1 it holds a little more than two seconds */
+        s_pring_n = 48000 * PLAYER_RING_S;
+        s_pring = heap_caps_malloc(s_pring_n * sizeof(int16_t), MALLOC_CAP_SPIRAM);
+        if (!s_pring) {
+            ESP_LOGE(TAG, "player: no PSRAM for the ring");
+            return false;
+        }
+    }
+
+    if (!s_dec_chunk) {
+        s_dec_chunk = heap_caps_malloc(PLAYER_CHUNK * 2 * sizeof(int16_t), MALLOC_CAP_SPIRAM);
+    }
+    if (!s_dec_lock) {
+        s_dec_lock = xSemaphoreCreateMutex();
+    }
+    if (!s_dec_chunk || !s_dec_lock) {
+        return false;
+    }
+
+    portENTER_CRITICAL(&s_player_mux);
+    snprintf(s_player_path, sizeof(s_player_path), "%s", path);
+    memset(&s_player_info, 0, sizeof(s_player_info));  /* not the last track's length */
+    portEXIT_CRITICAL(&s_player_mux);
+    aos_audio_info_t none = {0};
+    player_title_from(path, &none);
+    snprintf(s_dec_path, sizeof(s_dec_path), "%s", path);
+    s_dec = NULL;
+    s_dec_failures = 0;
+    s_dec_index = s_player_index;       /* play()/play_folder() set it just before */
+    s_dec_publish = PUB_NOW;
+    s_next_pending = false;
+    s_dec_finished = false;
+
+    s_pring_head = s_pring_tail = s_track_start = 0;
+    s_player_abort = false;
+    s_player_skip = 0;
+    s_player_seek_ms = -1;
+    s_dec_done = false;
+    s_out_hold = false;
+    s_out_parked = false;
+    s_dec_us_max = 0;
+    s_ring_min_ms = UINT32_MAX;
+    s_ring_primed = false;
+    s_player_underruns = 0;
+    s_player_yielded_pause = false;
+    s_expect_empty = true;
+    s_dec_prio = PLAYER_PRIO_HIGH;          /* what it is created with */
+    s_player_state = AOS_PLAYER_PLAYING;
+
+    /* Internal stacks: the SD's FAT path is not happy with a PSRAM stack
+     * when the music folder falls back to SPIFFS (flash). 6 KB for the
+     * decoder, whose minimp3 state and buffers are all in PSRAM (3.3 KB
+     * used, measured); 4 KB for the writer, because opening the codec goes
+     * deep (2.4 KB used; with 3 KB it had 636 bytes to spare). */
+    if (xTaskCreate(player_out_task, "aos_play_out", 4096, NULL, PLAYER_OUT_PRIO,
+                    &s_player_out_task) != pdPASS) {
+        s_player_state = AOS_PLAYER_STOPPED;
+        return false;
+    }
+    bool started;
+    xSemaphoreTake(s_dec_lock, portMAX_DELAY);
+    s_dec_core_want = s_worker_core == 0 ? 1 : 0;
+    started = player_spawn_decoder(s_dec_core_want);
+    xSemaphoreGive(s_dec_lock);
+    if (!started) {
+        s_player_abort = true;
+        s_player_state = AOS_PLAYER_STOPPED;
+        return false;
+    }
+    return true;
+}
+
+bool aos_hal_player_play(const char *path)
+{
+    aos_hal_player_stop();
+    s_radio_mode = false;
+    s_player_index = -1;                /* one file: the video's sound, a ringtone */
+    aos_audio_list_free(&s_player_list);
+    return player_start(path);
+}
+
+bool aos_hal_player_play_folder(const char *path)
+{
+    static bool shuffle_loaded;
+    if (!shuffle_loaded) {
+        int32_t v = 0;
+        aos_hal_pref_get_i32("mus_shuf", &v);
+        s_player_shuffle = v != 0;
+        shuffle_loaded = true;
+    }
+    aos_hal_player_stop();
+    s_radio_mode = false;
+    if (!path) {
+        return false;
+    }
+    char dir[160];
+    const char *slash = strrchr(path, '/');
+    if (!slash || (size_t)(slash - path) >= sizeof(dir)) {
+        return false;
+    }
+    snprintf(dir, sizeof(dir), "%.*s", (int)(slash - path), path);
+    aos_audio_list_scan(&s_player_list, dir, PLAYER_MAX_TRACKS);
+    s_player_index = aos_audio_list_find(&s_player_list, slash + 1);
+    if (s_player_index < 0) {
+        aos_audio_list_free(&s_player_list);
+    }
+    return player_start(path);
+}
+
+/* ---- remembering the last track --------------------------------------------
+ *
+ * The folder track heard and where it was, in NVS: the path when a new track
+ * starts, the position every minute, on pause and on stop. After a restart
+ * the Music app offers to go on from there (nothing plays by itself). NVS
+ * skips a write whose value did not change, so a paused track costs nothing;
+ * one i32 a minute while playing is ~1,400 small entries a day spread over
+ * the partition's pages. Single files (a video's sound) are not remembered. */
+#define PLAYER_REMEMBER_MS  60000
+
+static char    s_saved_path[256];
+static int64_t s_saved_at_ms;
+
+static void player_remember(bool force)
+{
+    if (s_player_index < 0 || !s_player_task || s_radio_mode) {
+        return;
+    }
+    if (s_player_seek_ms >= 0) {
+        return;     /* resume_last's seek not applied yet: 0:00 is not where it is */
+    }
+    char path[256];
+    portENTER_CRITICAL(&s_player_mux);
+    memcpy(path, s_player_path, sizeof(path));
+    portEXIT_CRITICAL(&s_player_mux);
+    int64_t now = (int64_t)aos_hal_uptime_ms();
+    bool new_track = strcmp(path, s_saved_path) != 0;
+    if (new_track) {
+        aos_hal_pref_set_str("mus_path", path);
+        memcpy(s_saved_path, path, sizeof(s_saved_path));
+    }
+    if (new_track || force || now - s_saved_at_ms >= PLAYER_REMEMBER_MS) {
+        uint32_t rate = s_player_rate ? s_player_rate : 44100;
+        uint32_t pos = (uint32_t)((uint64_t)(s_pring_tail - s_track_start) * 1000 / rate);
+        aos_hal_pref_set_i32("mus_pos", (int32_t)pos);
+        s_saved_at_ms = now;
+    }
+}
+
+/* From the housekeeping task, every tick: cheap unless there is something
+ * to write. */
+static void player_remember_tick(void)
+{
+    static aos_player_state_t last;
+    aos_player_state_t st = s_player_state;
+    if (s_player_task && (st == AOS_PLAYER_PLAYING || st != last)) {
+        player_remember(st != last);
+    }
+    last = st;
+}
+
+bool aos_hal_player_last(char *path, size_t len, uint32_t *position_ms)
+{
+    int32_t pos = 0;
+    if (!path || len == 0 || !aos_hal_pref_get_str("mus_path", path, len) || !path[0]) {
+        return false;
+    }
+    struct stat st;
+    if (stat(path, &st) != 0) {
+        return false;                   /* deleted, or the card is out */
+    }
+    aos_hal_pref_get_i32("mus_pos", &pos);
+    if (position_ms) {
+        *position_ms = pos > 0 ? (uint32_t)pos : 0;
+    }
+    return true;
+}
+
+bool aos_hal_player_resume_last(void)
+{
+    char path[256];
+    uint32_t pos = 0;
+    if (!aos_hal_player_last(path, sizeof(path), &pos) || !aos_hal_player_play_folder(path)) {
+        return false;
+    }
+    if (pos > 0) {
+        aos_hal_player_seek(pos);       /* the decoder opens the file, then seeks */
+    }
+    return true;
+}
+
+void aos_hal_player_pause(void)
+{
+    if (s_player_state == AOS_PLAYER_PLAYING) {
+        s_player_state = AOS_PLAYER_PAUSED;
+        s_player_yielded_pause = false;
+    }
+}
+
+void aos_hal_player_resume(void)
+{
+    /* not while an app has the speaker or the microphone has the codec */
+    if (s_player_state == AOS_PLAYER_PAUSED && !s_yield_refs && !s_mic_holds_codec) {
+        s_player_state = AOS_PLAYER_PLAYING;
+    }
+}
+
+void aos_hal_player_stop(void)
+{
+    player_remember(true);              /* where it was, before it is gone */
+    if (!s_player_task) {
+        s_player_state = AOS_PLAYER_STOPPED;
+        return;
+    }
+    s_player_abort = true;
+    for (int i = 0; i < 100 && (s_player_task || s_player_out_task); i++) {
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+    s_player_state = AOS_PLAYER_STOPPED;
+}
+
+static bool radio_step_stopped(int step)
+{
+    if (!s_radio_mode || s_player_task || !s_radio_list || s_radio_count <= 0) {
+        return false;
+    }
+    /* A station that failed or was stopped: next and previous start the
+     * neighbour straight away. */
+    aos_hal_radio_play(s_radio_list, s_radio_count, radio_next_index(s_radio_index, step));
+    return true;
+}
+
+void aos_hal_player_next(void)
+{
+    if (radio_step_stopped(1)) {
+        return;
+    }
+    if (s_player_task) {
+        s_player_skip = 1;
+        if (s_player_state == AOS_PLAYER_PAUSED && !s_yield_refs) {
+            s_player_state = AOS_PLAYER_PLAYING;
+        }
+    }
+}
+
+void aos_hal_player_prev(void)
+{
+    if (radio_step_stopped(-1) || !s_player_task) {
+        return;
+    }
+    /* like every player: back to the start first, then the previous one */
+    uint32_t pos_ms = (uint32_t)((uint64_t)(s_pring_tail - s_track_start) * 1000 /
+                                 (s_player_rate ? s_player_rate : 44100));
+    if (!s_radio_mode && (pos_ms > 3000 || s_player_index < 0)) {
+        s_player_seek_ms = 0;
+    } else {
+        s_player_skip = -1;
+    }
+    if (s_player_state == AOS_PLAYER_PAUSED && !s_yield_refs) {
+        s_player_state = AOS_PLAYER_PLAYING;
+    }
+}
+
+void aos_hal_player_seek(uint32_t ms)
+{
+    if (s_player_task) {
+        s_player_seek_ms = (int32_t)ms;
+    }
+}
+
+void aos_hal_player_set_shuffle(bool on)
+{
+    s_player_shuffle = on;
+    aos_hal_pref_set_i32("mus_shuf", on ? 1 : 0);
+}
+
+bool aos_hal_player_status(aos_player_status_t *out)
+{
+    if (!out) {
+        return false;
+    }
+    uint32_t rate = s_player_rate ? s_player_rate : 44100;
+    out->state       = s_player_state;
+    out->duration_s  = s_player_info.duration_ms / 1000;
+    out->position_s  = s_player_task ? (uint32_t)((s_pring_tail - s_track_start) / rate) : 0;
+    out->sample_rate = s_player_rate;
+    out->channels    = s_player_channels;
+    portENTER_CRITICAL(&s_player_mux);
+    memcpy(out->path, s_player_path, sizeof(out->path) - 1);
+    out->path[sizeof(out->path) - 1] = '\0';
+    portEXIT_CRITICAL(&s_player_mux);
+    char title[96];
+    portENTER_CRITICAL(&s_player_mux);
+    memcpy(title, s_player_title, sizeof(title));
+    portEXIT_CRITICAL(&s_player_mux);
+    utf8_copy(out->title, sizeof(out->title), title);
+    return true;
+}
+
+/* A literal for the format: the info struct is a copy on the stack. */
+static const char *codec_name(const aos_audio_info_t *info)
+{
+    if (info->format == AOS_AUDIO_AAC) {
+        return !strcmp(info->codec, "HE-AACv2") ? "HE-AACv2"
+             : !strcmp(info->codec, "HE-AAC") ? "HE-AAC" : "AAC";
+    }
+    return info->format == AOS_AUDIO_MP3 ? "MP3" : (info->format == AOS_AUDIO_WAV ? "WAV" : "");
+}
+
+bool aos_hal_player_info(aos_player_info_t *out)
+{
+    if (!out) {
+        return false;
+    }
+    memset(out, 0, sizeof(*out));
+    uint32_t rate = s_player_rate ? s_player_rate : 44100;
+    portENTER_CRITICAL(&s_player_mux);
+    memcpy(out->path, s_player_path, sizeof(out->path));
+    memcpy(out->title, s_player_title, sizeof(out->title));
+    memcpy(out->artist, s_player_artist, sizeof(out->artist));
+    memcpy(out->album, s_player_album, sizeof(out->album));
+    aos_audio_info_t info = s_player_info;
+    portEXIT_CRITICAL(&s_player_mux);
+
+    out->state       = s_player_state;
+    out->format      = codec_name(&info);
+    out->kbps        = info.kbps;
+    out->vbr         = info.vbr;
+    out->sample_rate = info.sample_rate;
+    out->channels    = info.channels;
+    out->duration_ms = info.duration_ms;
+    out->position_ms = s_player_task
+                     ? (uint32_t)((uint64_t)(s_pring_tail - s_track_start) * 1000 / rate) : 0;
+    out->index       = s_player_index;
+    out->count       = s_player_index >= 0 ? s_player_list.count : 0;
+    out->shuffle     = s_player_shuffle;
+    out->yielded     = s_yield_refs > 0 && s_player_yielded_pause;
+    out->has_cover   = info.cover_offset != 0;
+    out->cover_offset = info.cover_offset;
+    out->cover_size  = info.cover_size;
+    if (s_radio_mode) {
+        out->live        = true;
+        out->duration_ms = 0;
+        out->index       = s_radio_index;
+        out->count       = s_radio_count;
+        out->shuffle     = false;
+        out->has_cover   = false;
+    }
+    return true;
+}
+
+bool aos_hal_radio_play(const aos_radio_station_t *list, int count, int index)
+{
+    if (!list || count <= 0 || index < 0 || index >= count || !list[index].url[0]) {
+        return false;
+    }
+    if (count > AOS_RADIO_MAX_STATIONS) {
+        count = AOS_RADIO_MAX_STATIONS;
+        if (index >= count) {
+            return false;
+        }
+    }
+    if (!s_radio_list) {
+        s_radio_list = heap_caps_calloc(AOS_RADIO_MAX_STATIONS, sizeof(aos_radio_station_t),
+                                        MALLOC_CAP_SPIRAM);
+        if (!s_radio_list) {
+            return false;
+        }
+    }
+    aos_http_stream_init();             /* aos_http.c's lock, from this side */
+    aos_hal_player_stop();
+    if (list != s_radio_list) {
+        memcpy(s_radio_list, list, (size_t)count * sizeof(aos_radio_station_t));
+    }
+    for (int i = 0; i < count; i++) {
+        s_radio_list[i].name[sizeof(s_radio_list[i].name) - 1] = '\0';
+        s_radio_list[i].url[sizeof(s_radio_list[i].url) - 1] = '\0';
+    }
+    s_radio_count = count;
+    s_radio_index = index;
+    aos_audio_list_free(&s_player_list);
+    s_player_index = index;
+    s_radio_mode = true;
+    s_radio_open = false;
+    s_radio_paused_ms = 0;
+    s_radio_started_ms = (int64_t)aos_hal_uptime_ms();
+    char url[256];
+    memcpy(url, s_radio_list[index].url, sizeof(url));
+    if (!player_start(url)) {
+        return false;
+    }
+    radio_publish_station();
+    return true;
+}
+
+bool aos_hal_radio_active(void)
+{
+    return s_radio_mode && s_player_task != NULL;
+}
+
+bool aos_hal_radio_status(aos_radio_status_t *out)
+{
+    if (!out) {
+        return false;
+    }
+    memset(out, 0, sizeof(*out));
+    out->index = -1;
+    if (!s_radio_mode || !s_radio_list) {
+        return true;
+    }
+    aos_radio_fill_status(out);
+    if (!s_player_task && out->state != AOS_RADIO_FAILED) {
+        out->state = AOS_RADIO_OFF;
+    }
+    int i = s_radio_index;
+    out->index = i;
+    out->count = s_radio_count;
+    if (i >= 0 && i < s_radio_count) {
+        memcpy(out->station, s_radio_list[i].name, sizeof(out->station));
+        memcpy(out->url, s_radio_list[i].url, sizeof(out->url));
+    }
+    portENTER_CRITICAL(&s_player_mux);
+    memcpy(out->title, s_radio_heard, sizeof(out->title));
+    aos_audio_info_t info = s_player_info;
+    portEXIT_CRITICAL(&s_player_mux);
+    out->title_gen   = s_radio_heard_gen;
+    snprintf(out->codec, sizeof(out->codec), "%s", codec_name(&info));
+    out->sample_rate = info.sample_rate;
+    out->channels    = info.channels;
+    if (!out->kbps) {
+        out->kbps = info.kbps;
+    }
+    uint32_t rate = s_player_rate ? s_player_rate : 44100;
+    if (s_player_task) {
+        out->buffer_ms += ring_used() * 1000 / rate;
+        out->listening_s = (uint32_t)(((int64_t)aos_hal_uptime_ms() - s_radio_started_ms) / 1000);
+    }
+    return true;
+}
+
+bool aos_hal_player_stats(aos_player_stats_t *out)
+{
+    if (!out) {
+        return false;
+    }
+    memset(out, 0, sizeof(*out));
+    uint32_t rate = s_player_rate ? s_player_rate : 44100;
+    uint32_t frames = s_dec_frames, us = s_dec_us_total;
+    out->ring_ms      = s_player_task ? ring_used() * 1000 / rate : 0;
+    out->ring_cap_ms  = s_pring_n * 1000 / rate;
+    out->ring_min_ms  = s_ring_min_ms == UINT32_MAX ? 0 : s_ring_min_ms;
+    out->underruns    = s_player_underruns;
+    /* decoder time per second of audio, in thousandths of a core */
+    out->load_permille = frames ? (uint32_t)((uint64_t)us * rate / frames / 1000) : 0;
+    uint32_t cf = s_cost_frames;
+    out->decode_permille = cf ? (uint32_t)(s_cost_us * rate / cf / 1000) : 0;
+    out->chunk_us_max = s_dec_us_max;
+    out->decoder_prio = s_player_task ? s_dec_prio : 0;
+    out->stack_free_dec = s_player_task ? (uint32_t)uxTaskGetStackHighWaterMark(s_player_task) : 0;
+    out->stack_free_out = s_player_out_task ? (uint32_t)uxTaskGetStackHighWaterMark(s_player_out_task) : 0;
+    return true;
+}
+
+bool aos_hal_play_file(const char *path)
+{
+    return aos_hal_player_play(path);
+}
+
+void aos_hal_audio_stop(void)
+{
+    aos_hal_player_stop();
+}
+
+bool aos_hal_audio_is_playing(void)
+{
+    return s_player_state == AOS_PLAYER_PLAYING;
+}
+
+/* The streaming speaker or the microphone asks for the codec: pause the music
+ * until they are done. Counted, because the walkie-talkie holds one and then
+ * the other; and the writer keeps off the codec for a moment after the last
+ * one lets go, or the music would blip in the gap between releasing the
+ * microphone and opening the speaker. yield=true returns once the writer has
+ * let go (or gave up waiting). */
+#define PLAYER_YIELD_TAIL_US    (800 * 1000)
+
+static void player_yield_to_app(bool yield)
+{
+    if (yield) {
+        portENTER_CRITICAL(&s_yield_mux);
+        bool first = s_yield_refs++ == 0;
+        portEXIT_CRITICAL(&s_yield_mux);
+        if (!first) {
+            return;
+        }
+        s_player_yielded_pause = s_player_task && s_player_state == AOS_PLAYER_PLAYING;
+        if (s_player_yielded_pause) {
+            s_player_state = AOS_PLAYER_PAUSED;
+        }
+        for (int i = 0; i < 50 && s_speaker_open && s_player_out_task; i++) {
+            vTaskDelay(pdMS_TO_TICKS(5));
+        }
+    } else {
+        portENTER_CRITICAL(&s_yield_mux);
+        bool last = s_yield_refs > 0 && --s_yield_refs == 0;
+        if (last) {
+            s_yield_until_us = esp_timer_get_time() + PLAYER_YIELD_TAIL_US;
+        }
+        portEXIT_CRITICAL(&s_yield_mux);
+        if (last && s_player_yielded_pause && s_player_state == AOS_PLAYER_PAUSED) {
+            s_player_state = AOS_PLAYER_PLAYING;
+        }
+        if (last) {
+            s_player_yielded_pause = false;
+        }
+    }
+}
+
+/* The WAV header the recorder writes (reading WAV lives in aos_audio.c). */
+typedef struct __attribute__((packed)) {
+    char     riff[4];
+    uint32_t size;
+    char     wave[4];
+} wav_riff_t;
+
+typedef struct __attribute__((packed)) {
+    char     id[4];
+    uint32_t size;
+} wav_chunk_t;
+
+typedef struct __attribute__((packed)) {
+    uint16_t format;
+    uint16_t channels;
+    uint32_t sample_rate;
+    uint32_t byte_rate;
+    uint16_t block_align;
+    uint16_t bits;
+} wav_fmt_t;
+
+/* --------------------------------------------------------------------------
+ * Recorder
+ *
+ * A task reads blocks from the microphone and writes them to the WAV as they
+ * are: 16-bit mono PCM, uncompressed. At 16 kHz that is 32 KB per second,
+ * ~2 MB per minute, which is nothing for a microSD and saves having to bring
+ * in an encoder.
+ *
+ * The header is written twice: on open with the sizes at zero, and on close
+ * with the real ones. If the power goes in between, what is left is a WAV
+ * claiming 0 bytes of audio; the file is intact, but nobody will open it. So
+ * every two seconds the header is rewritten with the figures so far: ending a
+ * recording badly costs at most the last two seconds.
+ * -------------------------------------------------------------------------- */
+
+#define REC_RING_LEN    256     /* ~12 s of envelope at 20 Hz */
+/* ES8311 PGA, in 6 dB steps (0..42).
+ *
+ * Measured on the board, and not the obvious way: the peak of a recording hit
+ * the top of the scale and looked like clipping, but it was the finger hitting
+ * the glass when pressing REC. Discarding those 150 ms (REC_SKIP_BLOCKS), the
+ * voice alone peaks at 3503 of 32768 with 24 dB, that is -19 dBFS: 20 dB of
+ * unused headroom and a file that sounds quiet. With 30 dB a normal voice
+ * lands near -13 dBFS and an emphatic one, some 10 dB above that, still does
+ * not reach the ceiling. More than that (36) would clip as soon as anybody
+ * raised their voice, and clipping cannot be fixed afterwards; something being
+ * a bit quiet can. */
+#define REC_MIC_GAIN_DB 30      /* the PGA moves in 6 dB steps */
+/* The first few milliseconds are the finger hitting the glass a centimetre
+ * from the microphone: an impulse that slams into the top of the scale and
+ * stays in the file as a click. Measured: with 18 dB, the peak of a normal
+ * voice recording read 99% with sustained saturation at 0%, so the only
+ * clipping was that knock. Three blocks are discarded; nobody starts talking
+ * 150 ms after pressing, and it gives the ADC a moment to settle as well. */
+#define REC_SKIP_BLOCKS 3
+
+/* --------------------------------------------------------------------------
+ * One capture, two consumers
+ *
+ * The recorder and the raw microphone are NOT two tasks: they are two clients
+ * of the same one. Two tasks reading the same codec is exactly the class of
+ * bug that already cost one round (see the codec arbitration, further up), and
+ * besides, with a single one the microphone level is valid whenever there is a
+ * capture and not only while recording, which was the ceiling of the noise
+ * app.
+ *
+ * The task lives for as long as some user remains and shuts itself down on
+ * seeing s_mic_users at zero. Users come and go from the LVGL thread, which is
+ * a single one, so it is enough for the counters to be volatile.
+ * -------------------------------------------------------------------------- */
+
+#define MIC_USER_REC    0x01    /* the recorder */
+#define MIC_USER_RAW    0x02    /* aos_hal_mic_open() */
+
+static volatile uint32_t s_mic_users;
+static uint32_t          s_mic_rate = AOS_MIC_RATE_HZ;  /* set by whoever is first */
+static volatile bool     s_mic_running;  /* the codec really is open */
+static volatile int      s_mic_level;    /* 0..100 of the last block */
+static volatile int      s_mic_peak;     /* raw peak of the last block */
+static int               s_mic_gain_db = REC_MIC_GAIN_DB;
+static volatile bool     s_mic_gain_dirty;
+
+/* Ring of raw PCM: one second, in PSRAM.
+ *
+ * It is allocated the first time somebody opens the raw microphone and is
+ * NEVER freed. It is 32 KB of the 8 MB of PSRAM, and in exchange the task can
+ * never find the ring freed from under a memcpy while the recorder keeps it
+ * alive. Freeing it would require an orderly shutdown between two clients in
+ * order to save 0.4% of the PSRAM. */
+static int16_t          *s_pcm_ring;
+static uint32_t          s_pcm_len;      /* in samples */
+static volatile uint32_t s_pcm_w;        /* monotonic counters, not indices */
+static volatile uint32_t s_pcm_r;
+static volatile uint32_t s_pcm_dropped;
+
+static aos_rec_state_t   s_rec_state;
+static char              s_rec_path[160];
+static uint32_t          s_rec_rate = AOS_REC_RATE_HZ;
+static volatile uint32_t s_rec_bytes;
+static volatile bool     s_rec_abort;
+
+static uint8_t           s_rec_ring[REC_RING_LEN];
+static volatile uint32_t s_rec_ring_w;   /* monotonic counters, not indices */
+static volatile uint32_t s_rec_ring_r;
+
+static void rec_header_write(FILE *file, uint32_t rate, uint32_t data_bytes)
+{
+    const uint16_t channels = 1;
+    const uint16_t bits     = 16;
+
+    wav_riff_t riff = { .riff = {'R','I','F','F'}, .wave = {'W','A','V','E'} };
+    riff.size = 36 + data_bytes;
+
+    wav_chunk_t fmt_chunk  = { .id = {'f','m','t',' '}, .size = 16 };
+    wav_fmt_t   fmt = {
+        .format      = 1,                       /* PCM */
+        .channels    = channels,
+        .sample_rate = rate,
+        .byte_rate   = rate * channels * bits / 8,
+        .block_align = channels * bits / 8,
+        .bits        = bits,
+    };
+    wav_chunk_t data_chunk = { .id = {'d','a','t','a'}, .size = data_bytes };
+
+    fseek(file, 0, SEEK_SET);
+    fwrite(&riff, sizeof(riff), 1, file);
+    fwrite(&fmt_chunk, sizeof(fmt_chunk), 1, file);
+    fwrite(&fmt, sizeof(fmt), 1, file);
+    fwrite(&data_chunk, sizeof(data_chunk), 1, file);
+}
+
+/* A VU level goes in dB, not in linear.
+ *
+ * A normal voice a hand's width from the microphone peaks at about 4000 of
+ * 32768: on a linear scale that is 12 out of 100 and the waveform never leaves
+ * the baseline. In dB it falls in the middle of the scale, which is where the
+ * eye expects to see it. -48 dBFS..0 dBFS is mapped to 0..100. */
+static uint8_t rec_level_from_peak(int32_t peak)
+{
+    if (peak < 16) {
+        return 0;                   /* noise floor of the ES8311 */
+    }
+    float db = 20.0f * log10f((float)peak / 32768.0f);
+    if (db < -48.0f) {
+        return 0;
+    }
+    int level = (int)((db + 48.0f) * (100.0f / 48.0f) + 0.5f);
+    return level > 100 ? 100 : (uint8_t)level;
+}
+
+static void rec_push_peak(uint8_t peak)
+{
+    s_rec_ring[s_rec_ring_w % REC_RING_LEN] = peak;
+    s_rec_ring_w++;
+}
+
+/* Pushes the block into the raw PCM ring. Only if somebody is listening: while
+ * merely recording, copying 1.6 KB every 50 ms is of use to nobody. */
+static void pcm_push(const int16_t *samples, int count)
+{
+    if (!s_pcm_ring || !s_pcm_len) {
+        return;
+    }
+    for (int i = 0; i < count; i++) {
+        s_pcm_ring[(s_pcm_w + (uint32_t)i) % s_pcm_len] = samples[i];
+    }
+    s_pcm_w += (uint32_t)count;
+}
+
+/* Statistics of one recording. Reset when each file is opened, not when the
+ * capture starts: with the shared task, one capture may see several recordings
+ * go by. */
+typedef struct {
+    int32_t  max_raw;
+    uint32_t blocks;
+    uint32_t clipped;
+    uint32_t level_sum;
+    uint32_t since_flush;
+    int      warmup;
+} rec_stats_t;
+
+/* Closes the WAV: final header, the log line that makes it possible to tune
+ * the gain with data, and deleting the file if nothing made it in. */
+static void rec_finish(FILE **file, rec_stats_t *st)
+{
+    if (!*file) {
+        return;
+    }
+    rec_header_write(*file, s_rec_rate, s_rec_bytes);
+    fclose(*file);
+    *file = NULL;
+
+    /* The peak alone is not enough: a sharp knock also takes it to the
+     * ceiling. The proportion of saturated blocks tells "a loud noise" apart
+     * from "the gain is wrong", and the mean level says how much headroom went
+     * unused. */
+    ESP_LOGI(TAG, "recording finished: %u ms, peak %ld of 32768 (%d%%), "
+                  "%u%% of %u blocks clipped, average level %u/100",
+             (unsigned)(s_rec_rate ? (uint32_t)((uint64_t)s_rec_bytes * 500 / s_rec_rate) : 0),
+             (long)st->max_raw, (int)(st->max_raw * 100 / 32768),
+             (unsigned)(st->blocks ? st->clipped * 100 / st->blocks : 0),
+             (unsigned)st->blocks,
+             (unsigned)(st->blocks ? st->level_sum / st->blocks : 0));
+
+    /* If not even a fifth of a second made it in, the capture failed: delete
+     * the file instead of leaving a zero-second WAV on the card. */
+    if (s_rec_bytes < s_rec_rate / 5 * 2) {
+        ESP_LOGW(TAG, "empty recording, deleting %s", s_rec_path);
+        remove(s_rec_path);
+        s_rec_bytes = 0;
+    }
+    s_rec_state = AOS_REC_IDLE;
+}
+
+static void mic_task(void *arg)
+{
+    (void)arg;
+
+    FILE       *file = NULL;
+    rec_stats_t st   = { 0 };
+
+    /* Wait for the tone task to close the speaker: opening or closing it
+     * enables both I2S channels and would knock our capture over. */
+    for (int i = 0; i < 40 && s_speaker_open; i++) {
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+
+    esp_codec_dev_sample_info_t fs = {
+        .bits_per_sample = 16,
+        .channel         = 1,
+        .sample_rate     = s_mic_rate,
+    };
+    int open_ret = s_mic ? esp_codec_dev_open(s_mic, &fs) : ESP_CODEC_DEV_NOT_FOUND;
+    if (open_ret != ESP_CODEC_DEV_OK) {
+        ESP_LOGE(TAG, "the microphone did not accept %lu Hz (%d)",
+                 (unsigned long)s_mic_rate, open_ret);
+        s_rec_state       = AOS_REC_IDLE;
+        s_mic_users       = 0;
+        s_mic_holds_codec = false;
+        s_mic_task        = NULL;
+        player_yield_to_app(false);
+        vTaskDelete(NULL);
+        return;
+    }
+    esp_codec_dev_set_in_gain(s_mic, (float)s_mic_gain_db);
+    s_mic_running = true;
+
+    /* One block = one envelope sample, so the peak comes for free. */
+    const int block = (int)(s_mic_rate / AOS_REC_PEAK_HZ);
+    int16_t *buffer = heap_caps_malloc((size_t)block * sizeof(int16_t),
+                                       MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
+    int errors = 0;
+
+    while (buffer && s_mic_users) {
+        if (s_mic_gain_dirty) {
+            s_mic_gain_dirty = false;
+            esp_codec_dev_set_in_gain(s_mic, (float)s_mic_gain_db);
+        }
+
+        /* Recording starts and stops: the file is opened and closed by the
+         * task, which is the only one that writes it. aos_hal_rec_start() only
+         * declares the intent. */
+        if (!file && (s_mic_users & MIC_USER_REC) &&
+            !s_rec_abort && s_rec_state != AOS_REC_IDLE) {
+            file = fopen(s_rec_path, "wb");
+            if (!file) {
+                ESP_LOGE(TAG, "could not create %s", s_rec_path);
+                s_rec_state  = AOS_REC_IDLE;
+                s_mic_users &= ~(uint32_t)MIC_USER_REC;
+                continue;
+            }
+            rec_header_write(file, s_rec_rate, 0);
+            st = (rec_stats_t){ .warmup = REC_SKIP_BLOCKS };
+        }
+        if (file && (s_rec_abort || !(s_mic_users & MIC_USER_REC))) {
+            rec_finish(&file, &st);
+            s_mic_users &= ~(uint32_t)MIC_USER_REC;
+            continue;
+        }
+
+        int read_ret = esp_codec_dev_read(s_mic, buffer,
+                                          block * (int)sizeof(int16_t));
+        if (read_ret != ESP_CODEC_DEV_OK) {
+            /* A single error must not cost the whole capture: it is retried a
+             * fair few times before giving up. */
+            ESP_LOGE(TAG, "microphone read: %d (failure %d)", read_ret, errors + 1);
+            if (++errors >= 8) {
+                break;
+            }
+            vTaskDelay(pdMS_TO_TICKS(10));
+            continue;
+        }
+        errors = 0;
+
+        int32_t peak = 0;
+        for (int i = 0; i < block; i++) {
+            int32_t value = buffer[i] < 0 ? -buffer[i] : buffer[i];
+            if (value > peak) {
+                peak = value;
+            }
+        }
+        s_mic_peak  = (int)peak;
+        s_mic_level = rec_level_from_peak(peak);
+        rec_push_peak((uint8_t)s_mic_level);
+
+        if (s_mic_users & MIC_USER_RAW) {
+            pcm_push(buffer, block);
+        }
+
+        if (!file || s_rec_state != AOS_REC_RECORDING) {
+            continue;       /* not recording or paused: the capture stays alive */
+        }
+        if (st.warmup > 0) {
+            st.warmup--;            /* the finger's knock does not make it into the file */
+            continue;
+        }
+
+        if (peak > st.max_raw) {
+            st.max_raw = peak;
+        }
+        st.blocks++;
+        if (peak >= 32000) {
+            st.clipped++;      /* pinned to the ceiling: that is clipping */
+        }
+        st.level_sum += (uint32_t)s_mic_level;
+
+        if (fwrite(buffer, 1, (size_t)block * sizeof(int16_t), file) == 0) {
+            ESP_LOGE(TAG, "no more audio fits on the card");
+            s_rec_abort = true;
+            continue;
+        }
+        s_rec_bytes += (uint32_t)block * sizeof(int16_t);
+
+        st.since_flush += (uint32_t)block * sizeof(int16_t);
+        if (st.since_flush >= s_rec_rate * 2 * 2) {     /* every ~2 s */
+            st.since_flush = 0;
+            rec_header_write(file, s_rec_rate, s_rec_bytes);
+            fseek(file, 0, SEEK_END);
+            fflush(file);
+        }
+    }
+
+    rec_finish(&file, &st);
+    free(buffer);
+    esp_codec_dev_close(s_mic);
+
+    s_mic_running     = false;
+    s_mic_level       = 0;
+    s_mic_peak        = 0;
+    s_rec_state       = AOS_REC_IDLE;
+    s_mic_users       = 0;
+    s_mic_holds_codec = false;      /* the speaker is available again */
+    s_mic_task        = NULL;
+    player_yield_to_app(false);     /* and the music comes back */
+    vTaskDelete(NULL);
+}
+
+/* Adds one user to the capture and starts it if it was needed. */
+static bool mic_acquire(uint32_t user)
+{
+    s_mic_users |= user;
+    if (s_mic_task) {
+        return true;
+    }
+
+    /* Reserve the codec BEFORE creating the task, and push an empty note so
+     * the tone task wakes up and releases the speaker right now rather than at
+     * its next queue timeout (half a second). */
+    player_yield_to_app(true);          /* the music pauses while we listen */
+    s_mic_holds_codec = true;
+    if (s_tone_queue) {
+        tone_note_t wake = { 0, 0 };
+        xQueueSend(s_tone_queue, &wake, 0);
+    }
+
+    if (xTaskCreate(mic_task, "aos_mic", 4096, NULL, 6, &s_mic_task) != pdPASS) {
+        s_mic_users &= ~user;
+        if (!s_mic_users) {
+            s_mic_holds_codec = false;
+        }
+        player_yield_to_app(false);
+        return false;
+    }
+    return true;
+}
+
+/* Removes a user. The task shuts down on its own once none are left. */
+static void mic_release(uint32_t user)
+{
+    s_mic_users &= ~user;
+}
+
+bool aos_hal_rec_start(const char *path, uint32_t sample_rate)
+{
+    if (!path || s_rec_state != AOS_REC_IDLE || (s_mic_users & MIC_USER_REC)) {
+        return false;
+    }
+
+    snprintf(s_rec_path, sizeof(s_rec_path), "%s", path);
+    /* If a capture is already running (the tuner, say), the rate is the one
+     * already in force: changing it would mean closing the codec from under
+     * the other one. */
+    if (!s_mic_task) {
+        s_mic_rate = sample_rate ? sample_rate : AOS_REC_RATE_HZ;
+    }
+    s_rec_rate     = s_mic_rate;
+    s_rec_bytes    = 0;
+    s_rec_abort    = false;
+    s_rec_ring_w   = 0;
+    s_rec_ring_r   = 0;
+    s_rec_state    = AOS_REC_RECORDING;
+
+    if (!mic_acquire(MIC_USER_REC)) {
+        s_rec_state = AOS_REC_IDLE;
+        return false;
+    }
+    return true;
+}
+
+void aos_hal_rec_pause(void)
+{
+    if (s_rec_state == AOS_REC_RECORDING) {
+        s_rec_state = AOS_REC_PAUSED;
+    }
+}
+
+void aos_hal_rec_resume(void)
+{
+    if (s_rec_state == AOS_REC_PAUSED) {
+        s_rec_state = AOS_REC_RECORDING;
+    }
+}
+
+bool aos_hal_rec_stop(void)
+{
+    if (!(s_mic_users & MIC_USER_REC)) {
+        s_rec_state = AOS_REC_IDLE;
+        return s_rec_bytes > 0;
+    }
+
+    /* We wait for the task to close the file, not to die: with the raw
+     * microphone open the capture stays alive after the recording. */
+    s_rec_abort = true;
+    for (int i = 0; i < 100 && (s_mic_users & MIC_USER_REC); i++) {
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+    mic_release(MIC_USER_REC);
+    s_rec_state = AOS_REC_IDLE;
+    return s_rec_bytes > 0;
+}
+
+bool aos_hal_rec_status(aos_rec_status_t *out)
+{
+    if (!out) {
+        return false;
+    }
+    out->state       = s_rec_state;
+    out->bytes       = s_rec_bytes;
+    out->sample_rate = s_rec_rate;
+    out->channels    = 1;
+    out->level       = s_mic_level;
+    /* The time comes from the bytes written, not from the clock: that way what
+     * the screen says is exactly how long the file will be. */
+    out->elapsed_ms  = s_rec_rate
+                     ? (uint32_t)((uint64_t)s_rec_bytes * 500 / s_rec_rate)
+                     : 0;
+    snprintf(out->path, sizeof(out->path), "%s", s_rec_path);
+    return true;
+}
+
+int aos_hal_rec_peaks(uint8_t *out, int max)
+{
+    if (!out || max <= 0) {
+        return 0;
+    }
+
+    uint32_t write = s_rec_ring_w;
+    uint32_t pending = write - s_rec_ring_r;
+    if (pending > REC_RING_LEN) {       /* the app fell asleep: we lost the old data */
+        s_rec_ring_r = write - REC_RING_LEN;
+        pending = REC_RING_LEN;
+    }
+    if (pending > (uint32_t)max) {
+        s_rec_ring_r = write - (uint32_t)max;
+        pending = (uint32_t)max;
+    }
+
+    for (uint32_t i = 0; i < pending; i++) {
+        out[i] = s_rec_ring[(s_rec_ring_r + i) % REC_RING_LEN];
+    }
+    s_rec_ring_r += pending;
+    return (int)pending;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Raw microphone                                                              */
+/* -------------------------------------------------------------------------- */
+
+bool aos_hal_mic_open(uint32_t sample_rate)
+{
+    if (s_mic_users & MIC_USER_RAW) {
+        return true;                /* it was already open */
+    }
+
+    /* The real rate: if there is already a capture, whichever one is running. */
+    uint32_t rate = s_mic_task ? s_mic_rate
+                               : (sample_rate ? sample_rate : AOS_MIC_RATE_HZ);
+
+    /* The ring only grows while the capture is stopped: nobody is writing it
+     * then. If it turned out small with the capture running it is left as it
+     * is — that is less than a second of history, which is not an error. */
+    if (!s_pcm_ring || (s_pcm_len < rate && !s_mic_task)) {
+        int16_t *ring = heap_caps_malloc((size_t)rate * sizeof(int16_t),
+                                         MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+        if (!ring) {
+            ESP_LOGE(TAG, "no PSRAM for the microphone ring");
+            return false;
+        }
+        free(s_pcm_ring);
+        s_pcm_ring = ring;
+        s_pcm_len  = rate;
+    }
+
+    s_pcm_w       = 0;
+    s_pcm_r       = 0;
+    s_pcm_dropped = 0;
+
+    if (!s_mic_task) {
+        s_mic_rate = rate;
+    }
+    return mic_acquire(MIC_USER_RAW);
+}
+
+void aos_hal_mic_close(void)
+{
+    mic_release(MIC_USER_RAW);
+}
+
+int aos_hal_mic_read(int16_t *out, int max)
+{
+    if (!out || max <= 0 || !s_pcm_ring || !s_pcm_len) {
+        return 0;
+    }
+
+    uint32_t write   = s_pcm_w;
+    uint32_t pending = write - s_pcm_r;
+    if (pending > s_pcm_len) {          /* the app fell asleep: we lost the old data */
+        s_pcm_dropped += pending - s_pcm_len;
+        s_pcm_r = write - s_pcm_len;
+        pending = s_pcm_len;
+    }
+    if (pending > (uint32_t)max) {
+        pending = (uint32_t)max;
+    }
+
+    for (uint32_t i = 0; i < pending; i++) {
+        out[i] = s_pcm_ring[(s_pcm_r + i) % s_pcm_len];
+    }
+    s_pcm_r += pending;
+    return (int)pending;
+}
+
+int aos_hal_mic_available(void)
+{
+    if (!s_pcm_ring || !s_pcm_len) {
+        return 0;
+    }
+    uint32_t pending = s_pcm_w - s_pcm_r;
+    return (int)(pending > s_pcm_len ? s_pcm_len : pending);
+}
+
+bool aos_hal_mic_status(aos_mic_status_t *out)
+{
+    if (!out) {
+        return false;
+    }
+    memset(out, 0, sizeof(*out));
+    out->open        = s_mic_running;
+    out->sample_rate = s_mic_rate;
+    out->gain_db     = s_mic_gain_db;
+    out->level       = s_mic_level;
+    out->peak        = s_mic_peak;
+    out->dropped     = s_pcm_dropped;
+    return true;
+}
+
+void aos_hal_mic_gain_set(int db)
+{
+    if (db < 0) {
+        db = 0;
+    } else if (db > 42) {
+        db = 42;
+    }
+    db = (db + 3) / 6 * 6;          /* the PGA only has 6 dB steps */
+    if (db == s_mic_gain_db) {
+        return;
+    }
+    s_mic_gain_db    = db;
+    s_mic_gain_dirty = true;        /* applied by the task, owner of the codec */
+}
+
+int aos_hal_mic_gain_get(void)
+{
+    return s_mic_gain_db;
+}
+
+/* --------------------------------------------------------------------------
+ * Control of the phone's music, over AMS
+ *
+ * This block sat empty from the start waiting for "the BLE stack". It turned
+ * out not to be BLE HID -which sends keys blind- but AMS, which also returns
+ * the title, the artist and the state. The comment in aos_hal.h said metadata
+ * only arrives from an iPhone: true, and this is what it arrives through.
+ *
+ * Born switched off. See the rule in aos_ams.h.
+ * -------------------------------------------------------------------------- */
+
+void aos_hal_media_enable(bool enable)
+{
+    aos_ble_media_enable(enable);
+}
+
+bool aos_hal_media_enabled(void)
+{
+    return aos_ble_media_enabled();
+}
+
+aos_media_link_t aos_hal_media_link(void)
+{
+    if (!aos_ble_media_enabled()) {
+        return AOS_MEDIA_OFF;
+    }
+    /* CONNECTED means "AMS subscribed and answering", not "there is
+     * bluetooth": with the phone connected but no AMS there is nothing to show
+     * and no command to send. */
+    return aos_ble_media_ready() ? AOS_MEDIA_CONNECTED : AOS_MEDIA_ADVERTISING;
+}
+
+const char *aos_hal_media_peer(void)
+{
+    return aos_ble_peer();
+}
+
+const char *aos_hal_media_player(void)
+{
+    return aos_ble_media_player();
+}
+
+bool aos_hal_media_info(aos_media_info_t *out)
+{
+    aos_ams_state_t st;
+    uint32_t pos = 0;
+    if (!out || !aos_ble_media_info(&st, &pos)) {
+        return false;
+    }
+    memset(out, 0, sizeof(*out));
+    snprintf(out->title,  sizeof(out->title),  "%s", st.title);
+    snprintf(out->artist, sizeof(out->artist), "%s", st.artist);
+    snprintf(out->album,  sizeof(out->album),  "%s", st.album);
+    out->playing      = st.playing;
+    out->has_metadata = st.hay_datos;
+    out->duration_s   = st.duration_s;
+    out->position_s   = pos;
+    return true;
+}
+
+bool aos_hal_media_command(aos_media_cmd_t cmd)
+{
+    return aos_ble_media_command((int)cmd);
+}
+
+/* --------------------------------------------------------------------------
+ * Bluetooth link
+ *
+ * The HAL only translates: the stack lives in components/aos_ble/ and does not
+ * show its face around here. What comes in over ANCS goes out through
+ * aos_notif_push(), which is the same store and the same policy that runs in
+ * the simulator.
+ *
+ * Turning bluetooth on costs ~30 KB of executable RAM, which is where the code
+ * of dynamic apps comes from: this switch is also an app switch, like the WiFi
+ * one, and turning it off gives all the memory back. The figures are measured
+ * in docs/HANDOFF-BLE-ANCS.md section 2.4.
+ * -------------------------------------------------------------------------- */
+
+void aos_hal_bt_enable(bool on)
+{
+    aos_hal_pref_set_i32("bt_on", on ? 1 : 0);
+    if (on) {
+        if (!aos_ble_start()) {
+            ESP_LOGE(TAG, "could not bring up the BLE stack");
+        }
+    } else {
+        aos_ble_stop();
+    }
+}
+
+bool aos_hal_bt_enabled(void)
+{
+    /* The preference, not the state of the stack: it is what decides whether
+     * the watch brings bluetooth up at startup, and it is what the Settings
+     * switch has to show even while the stack is still coming up. */
+    int32_t v = 0;
+    aos_hal_pref_get_i32("bt_on", &v);
+    return v != 0;
+}
+
+aos_bt_state_t aos_hal_bt_state(void)  { return aos_ble_state(); }
+const char    *aos_hal_bt_peer(void)   { return aos_ble_peer(); }
+bool           aos_hal_bt_bonded(void) { return aos_ble_bonded(); }
+bool           aos_hal_bt_phone_battery(int *p) { return aos_ble_phone_battery(p); }
+void           aos_hal_bt_forget(void) { aos_ble_forget(); }
+
+void     aos_hal_bt_pair_begin(void)          { aos_ble_pair_begin(); }
+uint32_t aos_hal_bt_pair_code(void)           { return aos_ble_pair_code(); }
+void     aos_hal_bt_pair_confirm(bool accept) { aos_ble_pair_confirm(accept); }
+void     aos_hal_bt_pair_cancel(void)         { aos_ble_pair_confirm(false); }
+
+bool aos_hal_notif_action(uint32_t uid, bool positive)
+{
+    return aos_ble_notif_action(uid, positive);
+}
+
+int aos_hal_volume_get(void)
+{
+    return s_volume;
+}
+
+void aos_hal_volume_set(int percent)
+{
+    s_volume = percent < 0 ? 0 : (percent > 100 ? 100 : percent);
+    aos_hal_pref_set_i32("volume", s_volume);
+}
+
+int aos_hal_mic_level(void)
+{
+    /* Valid whenever there is a capture, whether from the recorder or from
+     * aos_hal_mic_open(). What still is not done is keeping the microphone
+     * open just in case: on a 300 mAh battery, a permanent VU meter is
+     * expensive. */
+    return s_mic_level;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Network                                                                     */
+/* -------------------------------------------------------------------------- */
+
+
+/* The portal by name rather than by IP: the IP is handed out by the router and
+ * changes. With this, http://amoledos.local/ is enough from any device on the
+ * network (macOS and iOS resolve .local out of the box; on Android an app is
+ * usually needed). */
+static bool s_mdns_started;
+
+static void mdns_up(void)
+{
+    if (s_mdns_started) {
+        return;
+    }
+    if (mdns_init() != ESP_OK) {
+        ESP_LOGW(TAG, "mdns did not start");
+        return;
+    }
+    mdns_hostname_set(aos_hal_device_name());
+    mdns_instance_name_set(aos_hal_device_name());
+    mdns_service_add(NULL, "_http", "_tcp", 80, NULL, 0);
+    s_mdns_started = true;
+    ESP_LOGI(TAG, "portal also at http://%s.local/", aos_hal_device_name());
+}
+
+/* The name changed (aos_device_name.c): mDNS takes it live, no restart.
+ * The BLE name stays "AmoledOS" (the advertising packet is 31 of 31 bytes,
+ * see ROADMAP.md) and the USB strings are fixed when the port starts. */
+void aos_hal_device_name_applied(const char *name)
+{
+    if (s_mdns_started) {
+        mdns_hostname_set(name);
+        mdns_instance_name_set(name);
+        ESP_LOGI(TAG, "the watch is now %s.local", name);
+    }
+}
+
+bool aos_hal_mdns_add_netif(void *esp_netif)
+{
+    mdns_up();
+    esp_err_t e = mdns_register_netif((esp_netif_t *)esp_netif);
+    if (e != ESP_OK) {
+        ESP_LOGW(TAG, "mdns on the usb interface: register %s", esp_err_to_name(e));
+        return false;
+    }
+    e = mdns_netif_action((esp_netif_t *)esp_netif, MDNS_EVENT_ENABLE_IP4 | MDNS_EVENT_ANNOUNCE_IP4);
+    if (e != ESP_OK) {
+        ESP_LOGW(TAG, "mdns on the usb interface: enable %s", esp_err_to_name(e));
+        mdns_unregister_netif((esp_netif_t *)esp_netif);
+        return false;
+    }
+    ESP_LOGI(TAG, "%s.local also answers on the usb interface", aos_hal_device_name());
+    return true;
+}
+
+void aos_hal_mdns_remove_netif(void *esp_netif)
+{
+    mdns_netif_action((esp_netif_t *)esp_netif, MDNS_EVENT_DISABLE_IP4);
+    mdns_unregister_netif((esp_netif_t *)esp_netif);
+}
+
+/* --------------------------------------------------------------------------
+ * Reconnection pacing
+ *
+ * The handler below used to call esp_wifi_connect() on every disconnect, at
+ * once and for ever. At home that is a reconnect after a hiccup. Away from
+ * home it is a full scan of every channel with the radio at full power,
+ * failing because the network is not there, and another one straight after:
+ * the radio never rests and the chip never sleeps. Measured on 2026-09-25:
+ * a watch in a pocket, screen off, went from full to empty in 70 minutes the
+ * two times it was taken out of the house, against three hours at home.
+ *
+ * So each failure waits longer than the one before, and on battery with the
+ * screen off the station gives up after a few failures until the screen is
+ * lit or USB comes in, which is when somebody could want the network. It
+ * resumes from where it left off, so a watch that is away does not start
+ * the whole ladder again on every glance.
+ * -------------------------------------------------------------------------- */
+static const uint16_t s_retry_delay_s[] = { 0, 2, 5, 15, 30, 60, 120, 300, 600 };
+#define RETRY_STEPS         (sizeof(s_retry_delay_s) / sizeof(s_retry_delay_s[0]))
+#define RETRY_PARK_AFTER    3       /* failures, on battery with the screen off */
+#define RETRY_USB_CAP_S     60      /* on the cable nothing is saved by waiting */
+
+static esp_timer_handle_t s_retry_timer;
+static bool               s_retry_pending;   /* the timer is armed              */
+static uint8_t            s_retry_n;         /* failures since the last address */
+static bool               s_retry_parked;    /* waiting for the screen or USB   */
+static uint32_t           s_retry_total;     /* failures since boot             */
+static uint32_t           s_retry_next_s;    /* the delay scheduled last        */
+static uint8_t            s_retry_reason;    /* the driver's last reason        */
+static bool               s_retry_test_idle; /* bench: act as if on battery, off */
+static esp_timer_handle_t s_net_test_timer;
+
+static void net_retry_connect(void)
+{
+    if (s_link_parked || s_scan_hold || !s_wifi_started || !aos_hal_net_enabled()) {
+        return;
+    }
+    if (esp_wifi_connect() == ESP_OK) {
+        s_net_state = AOS_NET_CONNECTING;
+    }
+}
+
+static void net_retry_cb(void *arg)
+{
+    (void)arg;
+    s_retry_pending = false;
+    net_retry_connect();
+}
+
+static void net_retry_cancel(void)
+{
+    if (s_retry_timer) {
+        esp_timer_stop(s_retry_timer);
+    }
+    s_retry_pending = false;
+}
+
+/* One failure: wait, or park. Called from the disconnect event. */
+static void net_retry_schedule(void)
+{
+    s_retry_total++;
+    if (s_retry_n < 255) {
+        s_retry_n++;
+    }
+    bool idle_on_battery = (!s_usb_last && power_saving_active() &&
+                            s_display_state != AOS_DISPLAY_ACTIVE) || s_retry_test_idle;
+    if (idle_on_battery && s_retry_n > RETRY_PARK_AFTER) {
+        if (!s_retry_parked) {
+            ESP_LOGI(TAG, "wifi: %u failures (reason %u), on battery with the screen off: "
+                          "not retrying until the screen or USB", (unsigned)s_retry_n,
+                     (unsigned)s_retry_reason);
+        }
+        s_retry_parked = true;
+        s_retry_next_s = 0;
+        net_retry_cancel();
+        return;
+    }
+    unsigned step = s_retry_n - 1;
+    uint32_t delay_s = s_retry_delay_s[step < RETRY_STEPS ? step : RETRY_STEPS - 1];
+    if (s_usb_last && !s_retry_test_idle && delay_s > RETRY_USB_CAP_S) {
+        delay_s = RETRY_USB_CAP_S;
+    }
+    s_retry_next_s = delay_s;
+    if (delay_s == 0) {
+        net_retry_connect();
+        return;
+    }
+    if (!s_retry_timer) {
+        const esp_timer_create_args_t args = { .callback = net_retry_cb, .name = "aos_wifi_retry" };
+        if (esp_timer_create(&args, &s_retry_timer) != ESP_OK) {
+            net_retry_connect();
+            return;
+        }
+    }
+    esp_timer_stop(s_retry_timer);
+    s_retry_pending = esp_timer_start_once(s_retry_timer,
+                                           (uint64_t)delay_s * 1000000ULL) == ESP_OK;
+    ESP_LOGI(TAG, "wifi: failure %u (reason %u), next try in %lu s", (unsigned)s_retry_n,
+             (unsigned)s_retry_reason, (unsigned long)delay_s);
+}
+
+/* An address: the ladder starts over. */
+static void net_retry_reset(void)
+{
+    s_retry_n = 0;
+    s_retry_parked = false;
+    s_retry_next_s = 0;
+    net_retry_cancel();
+}
+
+/* The screen was lit or USB came in: somebody may want the network now. If
+ * the station is parked, or waiting a long while, it tries once straight
+ * away and resumes the ladder a few rungs down, not from the top. */
+static void net_retry_kick(const char *why)
+{
+    if (s_net_state == AOS_NET_CONNECTED || s_net_state == AOS_NET_OFF ||
+        s_net_state == AOS_NET_CONNECTING || s_link_parked || s_scan_hold ||
+        !s_wifi_started || !aos_hal_net_enabled()) {
+        return;
+    }
+    /* Down and nothing coming soon: parked, a long wait, or no attempt
+     * scheduled at all (which is a state no path should leave it in, and
+     * the one this kick is the way out of). */
+    if (!s_retry_parked && s_retry_pending && s_retry_next_s < 30) {
+        return;         /* already trying often enough */
+    }
+    ESP_LOGI(TAG, "wifi: %s, trying again now", why);
+    s_retry_parked = false;
+    if (s_retry_n > RETRY_PARK_AFTER + 1) {
+        s_retry_n = RETRY_PARK_AFTER + 1;
+    }
+    s_retry_next_s = 0;
+    net_retry_cancel();
+    net_retry_connect();
+}
+
+/* Bench: the home network "disappears" for N seconds. The station is pointed
+ * at an SSID that does not exist (in RAM only, NVS keeps the real one) and
+ * the ladder runs as it would away from home; then the stored network is put
+ * back. idle=true also acts as if on battery with the screen off, to see it
+ * park. The portal is unreachable meanwhile, by construction. */
+static void net_test_end(void *arg)
+{
+    (void)arg;
+    s_retry_test_idle = false;
+    ESP_LOGI(TAG, "wifi test: over, back to the stored network");
+    aos_hal_net_enable(true);
+}
+
+void aos_hal_net_test_absent(uint32_t seconds, bool idle)
+{
+    if (!s_wifi_started || seconds < 10) {
+        return;
+    }
+    if (!s_net_test_timer) {
+        const esp_timer_create_args_t args = { .callback = net_test_end, .name = "aos_wifi_test" };
+        if (esp_timer_create(&args, &s_net_test_timer) != ESP_OK) {
+            return;
+        }
+    }
+    ESP_LOGW(TAG, "wifi test: the network is gone for %lu s%s", (unsigned long)seconds,
+             idle ? ", acting as if on battery with the screen off" : "");
+    s_retry_test_idle = idle;
+    net_retry_reset();
+    wifi_config_t config = {0};
+    snprintf((char *)config.sta.ssid, sizeof(config.sta.ssid), "aos-test-no-such-network");
+    snprintf((char *)config.sta.password, sizeof(config.sta.password), "nothing-here");
+    esp_wifi_disconnect();
+    esp_wifi_set_config(WIFI_IF_STA, &config);
+    esp_timer_start_once(s_net_test_timer, (uint64_t)seconds * 1000000ULL);
+    esp_wifi_connect();
+}
+
+void aos_hal_net_retry_info(uint32_t *failures, bool *parked, uint32_t *next_s, uint8_t *reason)
+{
+    if (failures) *failures = s_retry_total;
+    if (parked)   *parked   = s_retry_parked;
+    if (next_s)   *next_s   = s_retry_next_s;
+    if (reason)   *reason   = s_retry_reason;
+}
+
+static void wifi_event_handler(void *arg, esp_event_base_t base,
+                               int32_t id, void *data)
+{
+    (void)arg;
+    if (base == WIFI_EVENT && id == WIFI_EVENT_STA_START) {
+        /* A stack brought up only to scan must not go off and connect: a
+         * station that is connecting cannot scan (aos_wifi_internal.h). */
+        if (!s_scan_hold) {
+            esp_wifi_connect();
+            s_net_state = AOS_NET_CONNECTING;
+        }
+    } else if (base == WIFI_EVENT && id == WIFI_EVENT_STA_DISCONNECTED) {
+        s_net_state = AOS_NET_FAILED;
+        strcpy(s_net_ip, "0.0.0.0");
+        if (data) {
+            s_retry_reason = ((const wifi_event_sta_disconnected_t *)data)->reason;
+        }
+        /* parked on a channel for the link, or lent to a scan: stay put */
+        if (!s_link_parked && !s_scan_hold) {
+            net_retry_schedule();
+        }
+    } else if (base == IP_EVENT && id == IP_EVENT_STA_GOT_IP) {
+        ip_event_got_ip_t *event = (ip_event_got_ip_t *)data;
+        snprintf(s_net_ip, sizeof(s_net_ip), IPSTR, IP2STR(&event->ip_info.ip));
+        s_net_state = AOS_NET_CONNECTED;
+        net_retry_reset();
+        ESP_LOGI(TAG, "wifi connected, ip %s", s_net_ip);
+        if (s_unpark_at_us) {
+            s_rejoin_ms = (uint32_t)((esp_timer_get_time() - s_unpark_at_us) / 1000);
+            s_unpark_at_us = 0;
+            ESP_LOGI(TAG, "back on the network %lu ms after leaving the parked channel",
+                     (unsigned long)s_rejoin_ms);
+        }
+        mdns_up();
+    }
+#if CONFIG_ESP_WIFI_FTM_ENABLE
+    else if (base == WIFI_EVENT && id == WIFI_EVENT_FTM_REPORT) {
+        const wifi_event_ftm_report_t *r = (const wifi_event_ftm_report_t *)data;
+        s_ftm.busy   = false;
+        s_ftm.status = (uint8_t)r->status;
+        s_ftm.ms     = (uint32_t)(esp_timer_get_time() / 1000);
+        if (r->status == FTM_STATUS_SUCCESS) {
+            s_ftm.valid   = true;
+            s_ftm.rtt_ns  = r->rtt_est;
+            s_ftm.dist_cm = r->dist_est;
+            s_ftm.sessions++;
+            ESP_LOGI(TAG, "ftm: %lu cm, rtt %lu ns (raw %lu), %u entries",
+                     (unsigned long)r->dist_est, (unsigned long)r->rtt_est,
+                     (unsigned long)r->rtt_raw, (unsigned)r->ftm_report_num_entries);
+        } else {
+            s_ftm.failures++;
+            ESP_LOGW(TAG, "ftm: status %d", (int)r->status);
+        }
+        esp_wifi_ftm_get_report(NULL, 0);       /* frees the driver's report */
+    }
+#endif
+}
+
+/* Parking (docs/LINK.md, the channel policy): the link needs both watches
+ * on one channel, and the station's channel is its access point's. Parked,
+ * the station drops the access point and sits on a fixed channel; the
+ * disconnect handler above leaves it there. Unparked, it reconnects and
+ * the time to get an address again is measured. */
+bool aos_hal_link_park(uint8_t channel)
+{
+    if (channel < 1 || channel > 13) {
+        return false;
+    }
+    s_link_parked = true;
+    esp_wifi_disconnect();
+    vTaskDelay(pdMS_TO_TICKS(100));
+    esp_err_t e = esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
+    ESP_LOGI(TAG, "parked on channel %u: %s", channel, esp_err_to_name(e));
+    return e == ESP_OK;
+}
+
+void aos_hal_link_unpark(void)
+{
+    if (!s_link_parked) {
+        return;
+    }
+    s_link_parked = false;
+    net_retry_reset();
+    s_unpark_at_us = esp_timer_get_time();
+    s_rejoin_ms = 0;
+    esp_wifi_connect();
+    s_net_state = AOS_NET_CONNECTING;
+}
+
+bool aos_hal_link_parked(void)
+{
+    return s_link_parked;
+}
+
+uint32_t aos_hal_link_rejoin_ms(void)
+{
+    return s_rejoin_ms;
+}
+
+/* The WiFi stack is only brought up once there is something to connect to.
+ *
+ * esp_wifi_init() eats several tens of KB of internal RAM, which is precisely
+ * what the I2S DMA descriptors and the internal copy the panel's SPI driver
+ * builds need. Starting it always, even with no stored credentials, meant
+ * audio could not initialise and the firmware aborted. */
+
+/* The network interfaces and the event handlers are created ONCE: creating
+ * them again after a deinit leaves rubbish behind. What does come and go is
+ * esp_wifi_init/deinit, which is the only thing that really frees the
+ * buffers. */
+static bool s_netif_ready;
+
+static bool wifi_stack_start(void)
+{
+    if (s_wifi_started) {
+        return true;
+    }
+
+    if (!s_netif_ready) {
+        ESP_ERROR_CHECK(esp_netif_init());
+        esp_netif_create_default_wifi_sta();
+        s_netif_ap = esp_netif_create_default_wifi_ap();
+        esp_event_handler_instance_register(WIFI_EVENT, ESP_EVENT_ANY_ID,
+                                            wifi_event_handler, NULL, NULL);
+        esp_event_handler_instance_register(IP_EVENT, IP_EVENT_STA_GOT_IP,
+                                            wifi_event_handler, NULL, NULL);
+        s_netif_ready = true;
+    }
+
+    wifi_init_config_t wifi_cfg = WIFI_INIT_CONFIG_DEFAULT();
+    if (esp_wifi_init(&wifi_cfg) != ESP_OK) {
+        ESP_LOGE(TAG, "could not initialise the wifi");
+        return false;
+    }
+
+    s_wifi_started = true;
+    return true;
+}
+
+/* esp_wifi_stop() on its own does NOT give the static buffers back: the deinit
+ * is needed. That is some 60 KB of executable memory, which is where the .text
+ * of dynamic apps comes from. */
+static void wifi_stack_stop(void)
+{
+    if (!s_wifi_started) {
+        return;
+    }
+    esp_wifi_stop();
+    esp_wifi_deinit();
+    s_wifi_started = false;
+    s_ap_active   = false;
+    strcpy(s_net_ip, "0.0.0.0");
+    ESP_LOGI(TAG, "wifi off, memory returned");
+}
+
+/* -------------------------------------------------------------------------- */
+/* Borrowing the radio for a scan (aos_wifi_internal.h explains why)           */
+/* -------------------------------------------------------------------------- */
+
+bool aos_wifi_scan_prepare(aos_wifi_scan_ctx_t *ctx)
+{
+    memset(ctx, 0, sizeof(*ctx));
+    ctx->state_before   = s_net_state;
+    ctx->enabled_before = aos_hal_net_enabled();
+
+    if (!s_wifi_started) {
+        /* Wifi off or no credentials: bring the stack up in plain STA just to
+         * look. The hold goes up BEFORE esp_wifi_start(), because the start
+         * event would otherwise try to join whatever network the driver
+         * remembers, and a station that is connecting cannot scan. */
+        s_scan_hold = true;
+        if (!wifi_stack_start()) {
+            s_scan_hold = false;
+            return false;
+        }
+        ctx->stack_was_off = true;
+        ctx->held = true;
+        esp_wifi_set_mode(WIFI_MODE_STA);
+        esp_wifi_start();
+        vTaskDelay(pdMS_TO_TICKS(50));
+        return true;
+    }
+
+    wifi_mode_t mode;
+    if (esp_wifi_get_mode(&mode) != ESP_OK || mode == WIFI_MODE_NULL) {
+        esp_wifi_set_mode(WIFI_MODE_STA);
+        esp_wifi_start();
+    }
+
+    /* Associated, or already off the access point for the link: the station
+     * is not connecting, so it can scan as it is. Parked on a channel, it
+     * must not be told to reconnect afterwards either. */
+    if (s_net_state == AOS_NET_CONNECTED || s_link_parked) {
+        return true;
+    }
+
+    /* On, with credentials, and retrying against an access point it cannot
+     * reach: stop the retry loop for the length of the scan. */
+    s_scan_hold = true;
+    ctx->held = true;
+    esp_wifi_disconnect();
+    vTaskDelay(pdMS_TO_TICKS(100));
+    return true;
+}
+
+void aos_wifi_scan_finish(const aos_wifi_scan_ctx_t *ctx)
+{
+    if (!ctx) {
+        return;
+    }
+    /* The scan lives in the HAL and outlives the app that started it, so the
+     * user can go to Settings and change the wifi while it runs. Two races,
+     * both handled here rather than left to chance. */
+    if (ctx->stack_was_off) {
+        if (!ctx->enabled_before && aos_hal_net_enabled() && s_wifi_started) {
+            /* Turned ON during the scan: aos_hal_net_enable() already
+             * configured and started the station, but its start event was
+             * swallowed by the hold. Leave the stack up and let it join. */
+            s_scan_hold = false;
+            esp_wifi_connect();
+            s_net_state = AOS_NET_CONNECTING;
+            return;
+        }
+        /* Taken down again: the stack costs some 60 KB of internal memory, and
+         * the user had it off for a reason. The hold comes down AFTER the
+         * stop, so no late event gets to connect. */
+        wifi_stack_stop();
+        s_scan_hold = false;
+        s_net_state = ctx->state_before;
+        return;
+    }
+    if (ctx->held) {
+        s_scan_hold = false;
+        /* Turned OFF during the scan: the driver is gone, and telling it to
+         * connect would only report a state that is not true. */
+        if (s_wifi_started && !s_link_parked) {
+            esp_wifi_connect();
+            s_net_state = AOS_NET_CONNECTING;
+        }
+    }
+}
+
+void aos_hal_net_enable(bool on)
+{
+    aos_hal_pref_set_i32("wifi_on", on ? 1 : 0);
+
+    net_retry_reset();
+    if (!on) {
+        wifi_stack_stop();
+        s_net_state = AOS_NET_OFF;
+        return;
+    }
+
+    char ssid[33] = {0};
+    char pass[65] = {0};
+    if (!aos_hal_pref_get_str("wifi_ssid", ssid, sizeof(ssid))) {
+        ESP_LOGW(TAG, "no wifi credentials stored");
+        s_net_state = AOS_NET_OFF;
+        return;
+    }
+    aos_hal_pref_get_str("wifi_pass", pass, sizeof(pass));
+    snprintf(s_net_ssid, sizeof(s_net_ssid), "%s", ssid);
+
+    /* only here is the stack brought up: there are credentials to use */
+    bool was_started = s_wifi_started;
+    if (!wifi_stack_start()) {
+        s_net_state = AOS_NET_FAILED;
+        return;
+    }
+
+    wifi_config_t config = {0};
+    snprintf((char *)config.sta.ssid, sizeof(config.sta.ssid), "%s", ssid);
+    snprintf((char *)config.sta.password, sizeof(config.sta.password), "%s", pass);
+    /* Used only in WIFI_PS_MAX_MODEM, which the power policy picks with the
+     * screen off: the station wakes every 10 beacons (about a second)
+     * instead of the default 3. The portal answers a little later with the
+     * screen off; broadcasts still arrive on every DTIM. */
+    config.sta.listen_interval = 10;
+
+    esp_wifi_set_mode(WIFI_MODE_STA);
+    esp_wifi_set_config(WIFI_IF_STA, &config);
+    esp_wifi_start();
+    s_net_state = AOS_NET_CONNECTING;
+    /* With the stack already up there is no STA_START event to connect from:
+     * new credentials over a station that was failing waited for the next
+     * retry, which now can be minutes away. */
+    if (was_started && !s_link_parked && !s_scan_hold) {
+        esp_wifi_connect();
+    }
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Onboarding through the board's own access point                             */
+/* -------------------------------------------------------------------------- */
+
+#define AOS_AP_PASS     "amoledos"      /* WPA2 asks for 8 characters minimum */
+
+bool aos_hal_net_has_credentials(void)
+{
+    char ssid[33] = {0};
+    return aos_hal_pref_get_str("wifi_ssid", ssid, sizeof(ssid)) && ssid[0];
+}
+
+bool aos_hal_net_set_credentials(const char *ssid, const char *pass)
+{
+    if (!ssid || !ssid[0]) {
+        return false;
+    }
+    aos_hal_pref_set_str("wifi_ssid", ssid);
+    aos_hal_pref_set_str("wifi_pass", pass ? pass : "");
+    ESP_LOGI(TAG, "network saved: %s", ssid);
+
+    /* Reconnect with the new network. The AP, if it was up, is switched off by
+     * the caller: the page had better manage to answer before it is cut. Saving
+     * a network implies wanting to use it, so this switches it on as well. */
+    aos_hal_net_enable(true);
+    return true;
+}
+
+void aos_hal_net_forget(void)
+{
+    aos_hal_pref_set_str("wifi_ssid", "");
+    aos_hal_pref_set_str("wifi_pass", "");
+    s_net_ssid[0] = 0;
+    aos_hal_net_enable(false);
+}
+
+/* --------------------------------------------------------------------------
+ * AP name and password
+ *
+ * The three getters answer even with the AP switched off, and that is
+ * deliberate: the screen shows the password and the QR BEFORE bringing it up.
+ * The default name comes from esp_read_mac(), which reads the factory MAC out
+ * of the eFuse without turning the radio on; esp_wifi_get_mac() -which is what
+ * was there- needs the stack initialised and returned rubbish until the first
+ * ap_start.
+ * -------------------------------------------------------------------------- */
+
+#define AOS_AP_KEY_SSID  "ap_ssid"
+#define AOS_AP_KEY_PASS  "ap_pass"
+#define AOS_AP_KEY_MODE  "ap_pmode"
+
+const char *aos_hal_net_ap_default_ssid(void)
+{
+    static char automatico[33];
+    if (!automatico[0]) {
+        /* The last two bytes of the softAP's MAC are enough to tell boards on
+         * the same table apart. */
+        uint8_t mac[6] = {0};
+        esp_read_mac(mac, ESP_MAC_WIFI_SOFTAP);
+        snprintf(automatico, sizeof(automatico), "AmoledOS-%02X%02X",
+                 mac[4], mac[5]);
+    }
+    return automatico;
+}
+
+aos_ap_pass_mode_t aos_hal_net_ap_pass_mode(void)
+{
+    int32_t modo = AOS_AP_PASS_FIXED;
+    aos_hal_pref_get_i32(AOS_AP_KEY_MODE, &modo);
+    return modo == AOS_AP_PASS_ROTATING ? AOS_AP_PASS_ROTATING
+                                        : AOS_AP_PASS_FIXED;
+}
+
+/* Alphabet without characters that get confused when read off the screen (0/O,
+ * 1/l/I) and without the ones that have to be escaped in the QR's text
+ * (\ ; , : "). Whoever scans the QR does not type it, but whoever is standing
+ * next to them reading the screen does. */
+static const char AP_PASS_ALFABETO[] =
+    "abcdefghijkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+#define AP_PASS_LARGO   10
+
+static void ap_pass_generar(char *out, size_t len)
+{
+    /* esp_random() uses the hardware generator; with the radio up it has real
+     * entropy, and here it runs right before esp_wifi_start(). */
+    for (size_t i = 0; i + 1 < len && i < AP_PASS_LARGO; i++) {
+        out[i] = AP_PASS_ALFABETO[esp_random() % (sizeof(AP_PASS_ALFABETO) - 1)];
+        out[i + 1] = 0;
+    }
+}
+
+/* Leaves in s_ap_ssid / s_ap_pass whatever should be used right now. With
+ * 'rotar' the password is renewed if the mode is rotating; the getters call
+ * with false so as not to change it merely by asking. */
+static void ap_config_resolver(bool rotar)
+{
+    char guardado[33] = {0};
+    if (aos_hal_pref_get_str(AOS_AP_KEY_SSID, guardado, sizeof(guardado)) &&
+        guardado[0]) {
+        snprintf(s_ap_ssid, sizeof(s_ap_ssid), "%s", guardado);
+    } else {
+        snprintf(s_ap_ssid, sizeof(s_ap_ssid), "%s", aos_hal_net_ap_default_ssid());
+    }
+
+    char clave[65] = {0};
+    bool hay = aos_hal_pref_get_str(AOS_AP_KEY_PASS, clave, sizeof(clave)) &&
+               clave[0];
+
+    if (aos_hal_net_ap_pass_mode() == AOS_AP_PASS_ROTATING) {
+        /* The rotating password IS stored. If it only lived in RAM, the screen
+         * would show one after a restart and the AP would come up with
+         * another; besides, the portal reads it from a different task. It is
+         * renewed when the AP comes up -not per client-, so the QR keeps
+         * working for as long as it lasts. */
+        if (rotar || !hay) {
+            char nueva[AP_PASS_LARGO + 1] = {0};
+            ap_pass_generar(nueva, sizeof(nueva));
+            snprintf(s_ap_pass, sizeof(s_ap_pass), "%s", nueva);
+            aos_hal_pref_set_str(AOS_AP_KEY_PASS, s_ap_pass);
+        } else {
+            snprintf(s_ap_pass, sizeof(s_ap_pass), "%s", clave);
+        }
+        return;
+    }
+
+    snprintf(s_ap_pass, sizeof(s_ap_pass), "%s", hay ? clave : AOS_AP_PASS);
+}
+
+const char *aos_hal_net_ap_ssid(void)
+{
+    if (!s_ap_active) {
+        ap_config_resolver(false);
+    }
+    return s_ap_ssid;
+}
+
+const char *aos_hal_net_ap_pass(void)
+{
+    if (!s_ap_active) {
+        ap_config_resolver(false);
+    }
+    return s_ap_pass;
+}
+
+const char *aos_hal_net_ap_ip(void)   { return s_ap_ip; }
+bool        aos_hal_net_ap_active(void) { return s_ap_active; }
+
+bool aos_hal_net_ap_set_config(const char *ssid, const char *pass,
+                               aos_ap_pass_mode_t mode)
+{
+    if (ssid && ssid[0] && strlen(ssid) > 32) {
+        return false;
+    }
+    /* WPA2 asks for between 8 and 63 characters. Empty is legitimate: it means
+     * "go back to the factory one", not "open network" - a setup AP with no
+     * password leaves the home WiFi form within anybody's reach. */
+    if (mode == AOS_AP_PASS_FIXED && pass && pass[0] &&
+        (strlen(pass) < 8 || strlen(pass) > 63)) {
+        return false;
+    }
+
+    aos_hal_pref_set_str(AOS_AP_KEY_SSID, ssid ? ssid : "");
+    aos_hal_pref_set_i32(AOS_AP_KEY_MODE, (int32_t)mode);
+    /* In rotating mode the stored one is wiped: if the old one stayed, the
+     * screen would show the previous fixed password until the next ap_start.
+     * Emptying it makes the first getter generate one on the spot. */
+    aos_hal_pref_set_str(AOS_AP_KEY_PASS,
+                         (mode == AOS_AP_PASS_FIXED && pass) ? pass : "");
+    s_ap_pass[0] = 0;       /* so ap_config_resolver() re-reads it from NVS */
+
+    ESP_LOGI(TAG, "AP configured: %s / key %s",
+             (ssid && ssid[0]) ? ssid : "(automatic)",
+             mode == AOS_AP_PASS_ROTATING ? "rotating" : "fixed");
+
+    /* With the AP up it is bounced so the change takes effect. That drops
+     * whoever is connected, which is unavoidable if the password has just been
+     * changed: the portal answers BEFORE calling here, just like /api/wifi. */
+    if (s_ap_active) {
+        aos_hal_net_ap_stop();
+        return aos_hal_net_ap_start();
+    }
+    return true;
+}
+
+bool aos_hal_net_ap_start(void)
+{
+    if (s_ap_active) {
+        return true;
+    }
+    if (!wifi_stack_start()) {
+        return false;
+    }
+
+    ap_config_resolver(true);
+
+    wifi_config_t ap = {0};
+    /* memcpy with an explicit length and not snprintf: ap.ap.ssid is 32 bytes
+     * WITHOUT a terminator -the length travels in ssid_len- so a 32-character
+     * name, which is the legal maximum, fits exactly. With snprintf the
+     * compiler warns about truncation and it is right: it would eat the last
+     * one. */
+    size_t n_ssid = strlen(s_ap_ssid);
+    if (n_ssid > sizeof(ap.ap.ssid)) {
+        n_ssid = sizeof(ap.ap.ssid);
+    }
+    memcpy(ap.ap.ssid, s_ap_ssid, n_ssid);
+    ap.ap.ssid_len = (uint8_t)n_ssid;
+
+    /* The password is terminated: 63 characters plus the zero, which is the
+     * WPA2 maximum and what aos_hal_net_ap_set_config() validates. */
+    size_t n_pass = strlen(s_ap_pass);
+    if (n_pass >= sizeof(ap.ap.password)) {
+        n_pass = sizeof(ap.ap.password) - 1;
+    }
+    memcpy(ap.ap.password, s_ap_pass, n_pass);
+    ap.ap.password[n_pass] = 0;
+    ap.ap.authmode       = WIFI_AUTH_WPA2_PSK;
+    ap.ap.max_connection = 4;
+#if CONFIG_ESP_WIFI_FTM_ENABLE
+    ap.ap.ftm_responder  = s_ftm_resp;
+#endif
+
+    /* The channel: the STA's if there is a connection, and 1 if there is
+     * none.
+     *
+     * There is ONE radio. In APSTA the AP and the STA have to share a channel,
+     * and the STA's is the one that rules. With channel 1 hard-coded -which is
+     * what was there- bringing the AP up while associated to a network on
+     * another channel knocked the board off the home network: it was seen on
+     * the board, with the STA on channel 6, and the symptom is that the portal
+     * stops answering on the LAN exactly when you tap "Configurar red".
+     *
+     * Asking for the STA's channel lets the two coexist: the watch stays on
+     * the home network AND serves its form. When there is no connection there
+     * is nothing to clash with and 1 is fine. */
+    ap.ap.channel = 1;
+    wifi_ap_record_t asociado;
+    if (esp_wifi_sta_get_ap_info(&asociado) == ESP_OK && asociado.primary) {
+        ap.ap.channel = asociado.primary;
+        ESP_LOGI(TAG, "the AP goes to channel %d, which is where the STA is",
+                 asociado.primary);
+    }
+
+    /* APSTA and not plain AP: STA mode is what makes it possible to scan the
+     * networks around while the AP goes on serving the form. */
+    esp_wifi_set_mode(WIFI_MODE_APSTA);
+    esp_wifi_set_config(WIFI_IF_AP, &ap);
+    if (esp_wifi_start() != ESP_OK) {
+        return false;
+    }
+
+    esp_netif_ip_info_t ip;
+    if (s_netif_ap && esp_netif_get_ip_info(s_netif_ap, &ip) == ESP_OK) {
+        snprintf(s_ap_ip, sizeof(s_ap_ip), IPSTR, IP2STR(&ip.ip));
+    }
+
+    s_ap_active = true;
+    ESP_LOGI(TAG, "access point up: %s / %s -> http://%s/",
+             s_ap_ssid, s_ap_pass, s_ap_ip);
+    return true;
+}
+
+/* ---- streaming speaker ------------------------------------------------------ */
+
+#define SPK_BLOCK_MS    20
+
+static void spk_task(void *arg)
+{
+    (void)arg;
+    esp_codec_dev_sample_info_t fs = {
+        .bits_per_sample = 16,
+        .channel         = 1,
+        .sample_rate     = s_spk_rate,
+    };
+    s_speaker_open = true;              /* the tone task and the mic see it taken */
+    if (!s_speaker || esp_codec_dev_open(s_speaker, &fs) != ESP_OK) {
+        ESP_LOGE(TAG, "streaming speaker: the codec did not accept %lu Hz", (unsigned long)s_spk_rate);
+        s_speaker_open = false;
+        s_spk_running = false;
+        s_spk_task = NULL;
+        player_yield_to_app(false);
+        vTaskDelete(NULL);
+        return;
+    }
+    esp_codec_dev_set_out_vol(s_speaker, s_volume);
+    const int block = (int)(s_spk_rate * SPK_BLOCK_MS / 1000);
+    int16_t *buf = heap_caps_malloc((size_t)block * sizeof(int16_t), MALLOC_CAP_8BIT | MALLOC_CAP_INTERNAL);
+    s_spk_running = buf != NULL;
+    while (buf && !s_spk_stop && !s_mic_holds_codec) {
+        uint32_t avail = s_spk_head - s_spk_tail;
+        int n = 0;
+        while (n < block && avail) {
+            buf[n++] = s_spk_ring[s_spk_tail % s_spk_ring_n];
+            s_spk_tail++;
+            avail--;
+        }
+        if (n < block) {
+            memset(buf + n, 0, (size_t)(block - n) * sizeof(int16_t));   /* silence keeps the amp awake */
+        }
+        if (esp_codec_dev_write(s_speaker, buf, block * (int)sizeof(int16_t)) != ESP_OK) {
+            break;
+        }
+    }
+    free(buf);
+    esp_codec_dev_close(s_speaker);
+    s_speaker_open = false;
+    s_spk_running = false;
+    s_spk_task = NULL;
+    player_yield_to_app(false);         /* the music comes back */
+    vTaskDelete(NULL);
+}
+
+static bool spk_open(uint32_t sample_rate)
+{
+    if (!s_speaker) {
+        return false;
+    }
+    /* Music playing: the app in front wins. The player pauses, lets go of
+     * the codec and comes back in aos_hal_spk_close(). */
+    player_yield_to_app(true);
+    /* The microphone that was just closed lets go of the codec when its task
+     * ends, a little after the close; and the tone task may still hold it for
+     * a note. Wait for both, bounded: the walkie's release-to-listen is this
+     * wait plus the codec's open. */
+    for (int i = 0; i < 80 && (s_mic_holds_codec || s_speaker_open); i++) {
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+    if (s_mic_holds_codec || s_speaker_open) {
+        return false;
+    }
+    return spk_ring_prepare(sample_rate) && spk_task_start();
+}
+
+/* The ring, one second at the app's rate, emptied. */
+static bool spk_ring_prepare(uint32_t sample_rate)
+{
+    if (!s_spk_ring) {
+        s_spk_ring_n = sample_rate ? sample_rate : 16000;
+        s_spk_ring = heap_caps_malloc(s_spk_ring_n * sizeof(int16_t), MALLOC_CAP_SPIRAM);
+        if (!s_spk_ring) {
+            return false;
+        }
+    } else if (s_spk_ring_n != (sample_rate ? sample_rate : 16000)) {
+        free(s_spk_ring);
+        s_spk_ring_n = sample_rate ? sample_rate : 16000;
+        s_spk_ring = heap_caps_malloc(s_spk_ring_n * sizeof(int16_t), MALLOC_CAP_SPIRAM);
+        if (!s_spk_ring) {
+            return false;
+        }
+    }
+    s_spk_rate = sample_rate ? sample_rate : 16000;
+    s_spk_head = s_spk_tail = 0;
+    s_spk_stop = false;
+    return true;
+}
+
+static bool spk_task_start(void)
+{
+    s_spk_running = true;               /* until the task says otherwise */
+    if (xTaskCreate(spk_task, "aos_spk", 4096, NULL, 6, &s_spk_task) != pdPASS) {
+        s_spk_running = false;
+        return false;
+    }
+    return true;
+}
+
+/* The player is ending with an app's sound riding in its writer: that sound
+ * gets a task of its own, as it would have had without the mix, and goes on
+ * from where it was in its ring. */
+static void spk_unmix(void)
+{
+    if (!s_spk_mixed) {
+        return;
+    }
+    s_spk_mixed = false;
+    spk_task_start();
+}
+
+bool aos_hal_spk_open(uint32_t sample_rate)
+{
+    if (s_spk_task || s_spk_mixed) {
+        return true;
+    }
+    /* Mixing on and music playing: the app's sound goes into the player's
+     * writer instead of pausing it (see player_mix()). */
+    if (aos_hal_player_mix() && !s_fg_voice && s_player_out_task &&
+        s_player_state == AOS_PLAYER_PLAYING && !s_mic_holds_codec) {
+        if (!spk_ring_prepare(sample_rate)) {
+            return false;
+        }
+        s_mix_phase = 0;
+        s_spk_running = true;
+        s_spk_mixed = true;
+        return true;
+    }
+    bool ok = spk_open(sample_rate);
+    if (!ok) {
+        player_yield_to_app(false);     /* no speaker after all: the music goes on */
+    }
+    return ok;
+}
+
+int aos_hal_spk_write(const int16_t *pcm, int n)
+{
+    if (!(s_spk_task || s_spk_mixed) || !pcm || n <= 0) {
+        return 0;
+    }
+    uint32_t used = s_spk_head - s_spk_tail;
+    uint32_t room = s_spk_ring_n - used;
+    if ((uint32_t)n > room) {
+        n = (int)room;
+    }
+    for (int i = 0; i < n; i++) {
+        s_spk_ring[s_spk_head % s_spk_ring_n] = pcm[i];
+        s_spk_head++;
+    }
+    return n;
+}
+
+int aos_hal_spk_queued(void)
+{
+    return (s_spk_task || s_spk_mixed) ? (int)(s_spk_head - s_spk_tail) : 0;
+}
+
+bool aos_hal_spk_is_open(void)
+{
+    return (s_spk_task && s_spk_running) || s_spk_mixed;
+}
+
+void aos_hal_spk_close(void)
+{
+    if (s_spk_mixed) {
+        s_spk_mixed = false;            /* the writer stops reading it */
+        s_spk_running = false;
+        return;
+    }
+    if (!s_spk_task) {
+        return;
+    }
+    s_spk_stop = true;
+    for (int i = 0; i < 60 && s_spk_task; i++) {
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+}
+
+/* ---- FTM ------------------------------------------------------------------ */
+
+bool aos_hal_ftm_supported(void)
+{
+#if CONFIG_ESP_WIFI_FTM_ENABLE
+    return true;
+#else
+    return false;
+#endif
+}
+
+bool aos_hal_ftm_responder(bool on)
+{
+#if CONFIG_ESP_WIFI_FTM_ENABLE
+    if (on) {
+        if (s_ftm_resp && s_ap_active) {
+            return true;
+        }
+        s_ftm_resp = true;
+        if (s_ap_active) {
+            aos_hal_net_ap_stop();          /* up again, this time with the flag */
+        }
+        s_ftm_ap_mine = aos_hal_net_ap_start();
+        if (s_ftm_ap_mine) {
+            esp_wifi_ftm_resp_set_offset(0);
+        }
+        return s_ftm_ap_mine;
+    }
+    s_ftm_resp = false;
+    if (s_ftm_ap_mine) {
+        s_ftm_ap_mine = false;
+        aos_hal_net_ap_stop();
+    }
+    return true;
+#else
+    (void)on;
+    return false;
+#endif
+}
+
+bool aos_hal_ftm_responder_info(uint8_t mac[6], uint8_t *channel)
+{
+#if CONFIG_ESP_WIFI_FTM_ENABLE
+    if (!s_ftm_resp || !s_ap_active || !mac) {
+        return false;
+    }
+    if (esp_wifi_get_mac(WIFI_IF_AP, mac) != ESP_OK) {
+        return false;
+    }
+    uint8_t primary = 0;
+    wifi_second_chan_t second;
+    if (channel && esp_wifi_get_channel(&primary, &second) == ESP_OK) {
+        *channel = primary;
+    }
+    return true;
+#else
+    (void)mac; (void)channel;
+    return false;
+#endif
+}
+
+bool aos_hal_ftm_measure(const uint8_t mac[6], uint8_t channel, uint8_t frames)
+{
+#if CONFIG_ESP_WIFI_FTM_ENABLE
+    if (!mac || s_ftm.busy) {
+        return false;
+    }
+    wifi_ftm_initiator_cfg_t cfg = {
+        .channel = channel,
+        .frm_count = frames ? frames : 16,
+        .burst_period = 2,
+        .use_get_report_api = true,
+    };
+    memcpy(cfg.resp_mac, mac, 6);
+    if (esp_wifi_ftm_initiate_session(&cfg) != ESP_OK) {
+        s_ftm.failures++;
+        return false;
+    }
+    s_ftm.busy = true;
+    return true;
+#else
+    (void)mac; (void)channel; (void)frames;
+    return false;
+#endif
+}
+
+bool aos_hal_ftm_result(aos_ftm_result_t *out)
+{
+    if (!out) {
+        return false;
+    }
+    *out = s_ftm;
+    return true;
+}
+
+void aos_hal_net_ap_stop(void)
+{
+    if (!s_ap_active) {
+        return;
+    }
+    s_ap_active = false;
+    /* If there are credentials it goes back to STA alone; if not, the radio is
+     * switched off. */
+    if (aos_hal_net_has_credentials()) {
+        esp_wifi_set_mode(WIFI_MODE_STA);
+    } else {
+        esp_wifi_stop();
+        s_net_state = AOS_NET_OFF;
+    }
+    ESP_LOGI(TAG, "access point down");
+}
+
+int aos_hal_net_scan(aos_wifi_ap_t *out, int max)
+{
+    if (!out || max <= 0) {
+        return -1;
+    }
+    /* The radio is borrowed the same way the scanner app borrows it: this is
+     * the /wifi page of the portal, and it used to fail in the one moment it
+     * matters most -credentials that do not work, a station retrying forever-
+     * because the IDF refuses to scan while connecting. */
+    aos_wifi_scan_ctx_t ctx;
+    if (!aos_wifi_scan_prepare(&ctx)) {
+        return -1;
+    }
+
+    wifi_scan_config_t cfg = { .show_hidden = false };
+    esp_err_t err = esp_wifi_scan_start(&cfg, true);
+    if (err != ESP_OK) {
+        ESP_LOGW(TAG, "network scan did not start: %s", esp_err_to_name(err));
+        aos_wifi_scan_finish(&ctx);
+        return -1;
+    }
+
+    uint16_t found = 0;
+    esp_wifi_scan_get_ap_num(&found);
+    if (found > (uint16_t)max) {
+        found = (uint16_t)max;
+    }
+
+    /* The records are read BEFORE giving the radio back: if the stack was
+     * brought up for this scan, finish takes it down and the results go with
+     * it. */
+    wifi_ap_record_t *recs = found ? calloc(found, sizeof(wifi_ap_record_t)) : NULL;
+    if (recs) {
+        esp_wifi_scan_get_ap_records(&found, recs);
+    } else {
+        esp_wifi_clear_ap_list();   /* the driver keeps them until read or cleared */
+    }
+    aos_wifi_scan_finish(&ctx);
+
+    if (found == 0) {
+        free(recs);
+        return 0;
+    }
+    if (!recs) {
+        return -1;
+    }
+
+    int n = 0;
+    for (uint16_t i = 0; i < found; i++) {
+        if (!recs[i].ssid[0]) {
+            continue;               /* hidden network: no name, no use */
+        }
+        snprintf(out[n].ssid, sizeof(out[n].ssid), "%s", (char *)recs[i].ssid);
+        out[n].rssi   = recs[i].rssi;
+        out[n].secure = (recs[i].authmode != WIFI_AUTH_OPEN);
+        n++;
+    }
+    free(recs);
+    return n;
+}
+
+
+bool aos_hal_net_enabled(void)
+{
+    int32_t on = 1;                 /* on by default */
+    aos_hal_pref_get_i32("wifi_on", &on);
+    return on != 0;
+}
+
+aos_net_state_t aos_hal_net_state(void) { return s_net_state; }
+const char     *aos_hal_net_ssid(void)  { return s_net_ssid; }
+const char     *aos_hal_net_ip(void)    { return s_net_ip; }
+
+int aos_hal_net_rssi(void)
+{
+    wifi_ap_record_t ap;
+    return esp_wifi_sta_get_ap_info(&ap) == ESP_OK ? ap.rssi : 0;
+}
+
+bool aos_hal_net_sync_time(void)
+{
+    if (s_net_state != AOS_NET_CONNECTED) {
+        return false;
+    }
+    esp_sntp_config_t config = ESP_NETIF_SNTP_DEFAULT_CONFIG("pool.ntp.org");
+    esp_netif_sntp_init(&config);
+    if (esp_netif_sntp_sync_wait(pdMS_TO_TICKS(8000)) != ESP_OK) {
+        return false;
+    }
+    struct tm now;
+    aos_hal_time_now(&now);
+    aos_board_rtc_set(&now);
+    aos_hal_pref_set_i32("time_ok", 1);
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Miscellaneous                                                               */
+/* -------------------------------------------------------------------------- */
+
+uint64_t aos_hal_uptime_ms(void)
+{
+    return (uint64_t)(esp_timer_get_time() / 1000);
+}
+
+void aos_hal_heap_info(uint32_t *free_internal, uint32_t *free_psram)
+{
+    if (free_internal) {
+        *free_internal = (uint32_t)heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
+    }
+    if (free_psram) {
+        *free_psram = (uint32_t)heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
+    }
+}
+
+const char *aos_hal_board_name(void)       { return s_board_name; }
+/* From the app descriptor, which CMakeLists fills with 'git describe --tags'.
+ * FIRMWARE_VERSION is only the floor for a build with no git repo behind it. */
+const char *aos_hal_firmware_version(void)
+{
+    const esp_app_desc_t *d = esp_app_get_description();
+    return (d && d->version[0]) ? d->version : FIRMWARE_VERSION;
+}
+
+/* -------------------------------------------------------------------------- */
+/* OTA                                                                         */
+/*                                                                             */
+/* Deliberately thin: opening, writing and closing. No downloading, no          */
+/* progress bar, no policy about when to update. The bytes come from whoever    */
+/* calls -today the portal's POST /api/ota- and this puts them down.            */
+/*                                                                             */
+/* esp_ota_write() validates the header of the first chunk, so an image for     */
+/* another chip, or a file that is not an image at all, fails on the first      */
+/* write and never touches the running slot. The idle slot is the only thing    */
+/* that gets erased, so a failure halfway leaves the watch exactly as it was.   */
+/* -------------------------------------------------------------------------- */
+
+static esp_ota_handle_t     s_ota;
+static const esp_partition_t *s_ota_part;
+static char                 s_ota_err[96];
+
+static void ota_fail(const char *what, esp_err_t err)
+{
+    snprintf(s_ota_err, sizeof(s_ota_err), "%s: %s", what, esp_err_to_name(err));
+    ESP_LOGE(TAG, "ota: %s", s_ota_err);
+}
+
+bool aos_hal_ota_begin(size_t total_bytes)
+{
+    if (s_ota) {
+        aos_hal_ota_abort();     /* an interrupted one left the slot open */
+    }
+    s_ota_err[0] = '\0';
+
+    /* The music or the radio stops for the upload: the watch restarts when it
+     * ends anyway, and the decoder is what starved a core while the flash
+     * was being written (see player_task). */
+    aos_hal_player_stop();
+
+    s_ota_part = esp_ota_get_next_update_partition(NULL);
+    if (!s_ota_part) {
+        snprintf(s_ota_err, sizeof(s_ota_err), "no hay particion OTA libre");
+        ESP_LOGE(TAG, "ota: %s", s_ota_err);
+        return false;
+    }
+    if (total_bytes > s_ota_part->size) {
+        snprintf(s_ota_err, sizeof(s_ota_err), "la imagen no entra: %u B en %u B",
+                 (unsigned)total_bytes, (unsigned)s_ota_part->size);
+        ESP_LOGE(TAG, "ota: %s", s_ota_err);
+        return false;
+    }
+
+    /* OTA_SIZE_UNKNOWN erases the whole partition, which is several seconds.
+     * With the size known it only erases what it needs. */
+    esp_err_t err = esp_ota_begin(s_ota_part,
+                                  total_bytes ? total_bytes : OTA_SIZE_UNKNOWN,
+                                  &s_ota);
+    if (err != ESP_OK) {
+        s_ota = 0;
+        ota_fail("esp_ota_begin", err);
+        return false;
+    }
+    s_ota_ps = true;
+    pm_policy_apply();
+    ESP_LOGI(TAG, "ota: writing into %s (%u B free), image of %u B",
+             s_ota_part->label, (unsigned)s_ota_part->size, (unsigned)total_bytes);
+    return true;
+}
+
+bool aos_hal_ota_write(const void *data, size_t len)
+{
+    if (!s_ota) {
+        return false;
+    }
+    esp_err_t err = esp_ota_write(s_ota, data, len);
+    if (err != ESP_OK) {
+        ota_fail("esp_ota_write", err);
+        esp_ota_abort(s_ota);
+        s_ota = 0;
+        s_ota_ps = false;
+        pm_policy_apply();
+        return false;
+    }
+    return true;
+}
+
+bool aos_hal_ota_end(void)
+{
+    if (!s_ota) {
+        return false;
+    }
+    esp_err_t err = esp_ota_end(s_ota);
+    s_ota = 0;
+    s_ota_ps = false;
+    pm_policy_apply();
+    if (err != ESP_OK) {
+        /* ESP_ERR_OTA_VALIDATE_FAILED is the interesting one: the image
+         * arrived whole but its checksum does not match. */
+        ota_fail("esp_ota_end", err);
+        return false;
+    }
+    err = esp_ota_set_boot_partition(s_ota_part);
+    if (err != ESP_OK) {
+        ota_fail("esp_ota_set_boot_partition", err);
+        return false;
+    }
+    ESP_LOGW(TAG, "ota: %s is now the boot partition; it starts on trial",
+             s_ota_part->label);
+    return true;
+}
+
+void aos_hal_ota_abort(void)
+{
+    if (s_ota) {
+        esp_ota_abort(s_ota);
+        s_ota = 0;
+        s_ota_ps = false;
+        pm_policy_apply();
+        ESP_LOGW(TAG, "ota: aborted, the running image is untouched");
+    }
+}
+
+const char *aos_hal_ota_error(void)
+{
+    return s_ota_err;
+}
+
+bool aos_hal_ota_pending_verify(void)
+{
+    const esp_partition_t *run = esp_ota_get_running_partition();
+    esp_ota_img_states_t state;
+    if (!run || esp_ota_get_state_partition(run, &state) != ESP_OK) {
+        return false;
+    }
+    return state == ESP_OTA_IMG_PENDING_VERIFY;
+}
+
+void aos_hal_ota_mark_valid(void)
+{
+    if (esp_ota_mark_app_valid_cancel_rollback() == ESP_OK) {
+        ESP_LOGI(TAG, "ota: this image is confirmed, the rollback is cancelled");
+    }
+}
+
+const char *aos_hal_ota_running_slot(void)
+{
+    const esp_partition_t *run = esp_ota_get_running_partition();
+    return run ? run->label : "?";
+}
+
+/* The format is built separately and only then passed through ESP_LOGI.
+ *
+ * This used to call esp_log_writev() directly, which adds NEITHER the
+ * "I (ms) tag:" prefix NOR the trailing newline: the macro puts those in. None
+ * of the ~50 sites calling aos_hal_log() writes the \n by hand -and the
+ * simulator's HAL adds it itself-, so every system line came out glued to the
+ * next:
+ *
+ *     idioma: de, 357 cadenas (tarjeta)I (2995) wifi:<ba-add>idx:0 ...
+ *
+ * It is always annoying and it misleads exactly when it matters: a line that
+ * starts where another ends is found by no grep of the log. */
+void aos_hal_log(const char *tag, const char *fmt, ...)
+{
+    /* 256 is enough with room to spare: the system's longest line runs to
+     * about 100. It truncates silently if one day it is not enough, which is
+     * preferable to spending stack in the caller's task. */
+    char linea[256];
+    va_list args;
+    va_start(args, fmt);
+    vsnprintf(linea, sizeof(linea), fmt, args);
+    va_end(args);
+    ESP_LOGI(tag, "%s", linea);
+}
+
+/*
+ * The v2 board carries a CST820 (ID 0xB7), not the CST816S the BSP claims. The
+ * difference that matters: **it falls asleep on its own**. Touching it wakes
+ * it, it latches the gesture and the coordinates, and it goes back to sleep
+ * before the driver manages to read the finger-count register (0x02), which is
+ * the one it looks at to decide whether there is a touch. Result: the chip
+ * answers over I2C, reports correct coordinates, and the screen still looks
+ * dead.
+ *
+ * Writing any non-zero value to 0xFE disables auto-sleep. Measured: without
+ * this LVGL sees not a single touch; with it, it sees them all.
+ */
+static i2c_master_dev_handle_t s_touch_dev;
+
+static void touch_disable_autosleep(void)
+{
+    i2c_master_bus_handle_t bus = bsp_i2c_get_handle();
+    if (!bus || i2c_master_probe(bus, 0x15, 100) != ESP_OK) {
+        return;         /* not the v2's touch panel */
+    }
+
+    const i2c_device_config_t cfg = {
+        .dev_addr_length = I2C_ADDR_BIT_LEN_7,
+        .device_address  = 0x15,
+        .scl_speed_hz    = CONFIG_BSP_I2C_CLK_SPEED_HZ,
+    };
+    if (i2c_master_bus_add_device(bus, &cfg, &s_touch_dev) != ESP_OK) {
+        return;
+    }
+
+    const uint8_t dis_auto_sleep[2] = { 0xFE, 0xFF };
+    esp_err_t ret = i2c_master_transmit(s_touch_dev, dis_auto_sleep,
+                                        sizeof(dis_auto_sleep), 100);
+    ESP_LOGI(TAG, "CST820 touch: auto-sleep disabled (%s)", esp_err_to_name(ret));
+}
+
+/* The CST820 puts itself back to sleep (after its own internal reset it
+ * returns to the factory values), and asleep it stops asserting the interrupt.
+ * A 2-byte write every 5 s is unnoticeable next to the reads the touch driver
+ * already does. Note: this is separate from the gesture polling we tried
+ * earlier which set off watchdogs; that one read every 40 ms. */
+static void touch_keep_awake(void)
+{
+    if (!s_touch_dev || s_touch_task) {
+        return;             /* the touch task does it itself, see below */
+    }
+    const uint8_t dis_auto_sleep[2] = { 0xFE, 0xFF };
+    i2c_master_transmit(s_touch_dev, dis_auto_sleep, sizeof(dis_auto_sleep), 50);
+}
+
+/* CST820 gesture codes, register 0x01 */
+#define CST_GESTURE_SLIDE_DOWN  0x01
+#define CST_GESTURE_SLIDE_UP    0x02
+#define CST_GESTURE_SLIDE_LEFT  0x03
+#define CST_GESTURE_SLIDE_RIGHT 0x04
+
+static volatile aos_touch_gesture_t s_pending_gesture;
+
+/* UNUSED. Polling the gesture register from the background task, in parallel
+ * with the touch driver's reads on the same bus, saturated CPU 0 and set off
+ * the watchdog ("task_wdt ... CPU 0: aos_hk"). And it is not needed: LVGL
+ * detects swipes properly once the screen is awake. Kept in case the chip's
+ * gesture ever becomes necessary, but not called. */
+__attribute__((unused))
+static void touch_poll_gesture(void)
+{
+    static uint8_t prev_fingers;
+
+    if (!s_touch_dev) {
+        return;
+    }
+
+    uint8_t reg = 0x01, buf[2] = {0};
+    if (i2c_master_transmit_receive(s_touch_dev, &reg, 1, buf, sizeof(buf), 50) != ESP_OK) {
+        return;
+    }
+
+    uint8_t gesture = buf[0];
+    uint8_t fingers = buf[1] & 0x0F;
+
+    if (prev_fingers && !fingers) {          /* released */
+        switch (gesture) {
+        case CST_GESTURE_SLIDE_DOWN:  s_pending_gesture = AOS_TOUCH_GESTURE_DOWN;  break;
+        case CST_GESTURE_SLIDE_UP:    s_pending_gesture = AOS_TOUCH_GESTURE_UP;    break;
+        case CST_GESTURE_SLIDE_LEFT:  s_pending_gesture = AOS_TOUCH_GESTURE_LEFT;  break;
+        case CST_GESTURE_SLIDE_RIGHT: s_pending_gesture = AOS_TOUCH_GESTURE_RIGHT; break;
+        default: break;
+        }
+        if (s_pending_gesture != AOS_TOUCH_GESTURE_NONE) {
+            ESP_LOGD(TAG, "touch gesture: 0x%02X", gesture);
+        }
+    }
+    prev_fingers = fingers;
+}
+
+aos_touch_gesture_t aos_hal_touch_gesture(void)
+{
+    aos_touch_gesture_t g = s_pending_gesture;
+    s_pending_gesture = AOS_TOUCH_GESTURE_NONE;
+    return g;
+}
+
+/* --------------------------------------------------------------------------
+ * Two fingers (docs/GESTURES.md)
+ *
+ * The v2's CST820 reports a SECOND finger, and no published driver knows it.
+ * Measured on 2026-09-24 by bursting registers 0x00..0x0E while pinching:
+ *
+ *   0x01        gesture id (0 while we read continuously)
+ *   0x02        finger count - and it NEVER goes above 1, even with two down
+ *   0x03..0x06  point 1: XH XL YH YL (12 bits each, low nibble of the H byte)
+ *   0x07..0x0A  point 2, same format; all zero while only one finger is down
+ *   0x0B..0x0E  FF with one finger; with two, 0x0B/0x0C echo point 2's Y
+ *
+ * Every driver looks at 0x02, reads "1" and stops at point 1. The one
+ * public attempt at a second point looked at 0x09..0x0C, the FocalTech
+ * 6-byte stride, which on this chip is half of point 2 and half an echo.
+ *
+ * So the driver's read_data is swapped, once, for our own: one burst of
+ * 0x00..0x0E (15 bytes, ~0.5 ms at 400 kHz, the same transaction the driver
+ * did with 5), from the same task at the same moment. Point 1 goes to LVGL
+ * exactly as the driver put it -a single pointer, count 0 or 1- so nothing
+ * that exists today sees a difference. The two points go to a frame that
+ * aos_hal_touch_frame() hands out, for the gesture recogniser (aos_gesture.c).
+ *
+ * The finger count of the frame is derived, not read:
+ *   0x02 >= 1 and point 2 set  -> 2 fingers
+ *   0x02 >= 1                  -> 1 finger, point 1
+ *   0x02 == 0 and point 2 set  -> 1 finger, point 2. Lifting the FIRST of two
+ *                                 fingers leaves the other one only in slot 2
+ *                                 for a while, with 0x02 already at 0: LVGL
+ *                                 sees a release with a finger still down.
+ *
+ * On any other touch controller (the v1's FT3168, which is documented as two
+ * point) the driver's own read runs and the frame copies what it left in
+ * tp->data, up to two points. Untested: nobody here has a v1.
+ * -------------------------------------------------------------------------- */
+
+static esp_lcd_touch_handle_t s_touch_tp;
+static esp_err_t (*s_touch_orig_read)(esp_lcd_touch_handle_t tp);
+static portMUX_TYPE      s_frame_lock = portMUX_INITIALIZER_UNLOCKED;
+static aos_touch_frame_t s_frame;
+static uint8_t           s_touch_regs[AOS_TOUCH_REGS];
+static uint8_t           s_touch_prev[AOS_TOUCH_REGS];
+
+/* The last AOS_TOUCH_RING samples, oldest first, so a consumer that runs
+ * slower than the chip (the recogniser, from LVGL's task) still sees every
+ * one of them: a fling's speed and a pinch's path are made of the in-between
+ * samples. */
+#define AOS_TOUCH_RING 16
+static aos_touch_frame_t s_ring[AOS_TOUCH_RING];
+static volatile uint32_t s_touch_reads, s_touch_samples;
+
+static void frame_publish(uint8_t count, const int16_t x[2], const int16_t y[2],
+                          bool changed)
+{
+    s_touch_reads++;
+    if (!changed) {
+        return;             /* same sample read again: the chip is slower than us */
+    }
+    uint32_t now = (uint32_t)(esp_timer_get_time() / 1000);
+    portENTER_CRITICAL(&s_frame_lock);
+    s_frame.count = count;
+    for (int i = 0; i < 2; i++) {
+        s_frame.x[i] = i < count ? x[i] : 0;
+        s_frame.y[i] = i < count ? y[i] : 0;
+    }
+    s_frame.seq++;
+    s_frame.t_ms = now;
+    s_ring[s_frame.seq % AOS_TOUCH_RING] = s_frame;
+    s_touch_samples++;
+    portEXIT_CRITICAL(&s_frame_lock);
+}
+
+/* --------------------------------------------------------------------------
+ * The touch task (v0.6.0, docs/GESTURES.md "B2")
+ *
+ * The CST820 used to be read from LVGL's task, on LVGL's clock, and that
+ * clock slows down with whatever the screen is drawing. Measured: 88 reads a
+ * second on a light screen, 27 on the raw view, 11 while Photos zooms - and
+ * every read skipped is a sample of the finger lost, exactly while the
+ * finger is moving something.
+ *
+ * Now a small task of its own reads the chip. It wakes on the chip's INT
+ * line (GPIO21: the chip pulses it on a touch and on every change, IrqCtl =
+ * 0x70) and also on a timeout -every 20 ms with a finger down, every 100 ms
+ * without- because a lost pulse must never leave the screen deaf (that is
+ * why LVGL reads in TIMER mode, see aos_ui.c). It is the ONLY thing that
+ * talks to the chip: the burst read, the keep-awake write every 5 s (it
+ * used to come from the housekeeping task) and the diagnostics' register
+ * reads all go through s_touch_i2c. Two tasks polling the chip at once is
+ * what set off watchdogs once (touch_poll_gesture).
+ *
+ * LVGL's read (touch_read_frame) no longer touches the bus: it hands over
+ * the latest point 1 the task left. It is pinned to LVGL's core with a
+ * higher priority, so it preempts a long draw for the half millisecond a
+ * read takes.
+ * -------------------------------------------------------------------------- */
+
+static SemaphoreHandle_t s_touch_wake;
+static SemaphoreHandle_t s_touch_i2c;
+/* The touch that lit the screen is only a wake-up: LVGL does not get it, or
+ * it would land as a click on whatever the watchface has under the finger. */
+static volatile bool     s_touch_swallow;
+/* With the screen not lit the CST820 may go back to its own auto-sleep,
+ * which scans far less often. Whether it still pulls INT on a touch in that
+ * state is what decides the default (docs/POWER.md, 2026-09-25). */
+static bool              s_touch_sleep_enabled = true;   /* checked on the board */
+static bool              s_touch_chip_sleeping;
+static volatile uint32_t s_touch_isr_count;
+static volatile uint32_t s_touch_wakes;
+static volatile bool     s_touch_lvgl_pressed;
+static volatile int16_t  s_touch_lvgl_x, s_touch_lvgl_y;
+
+static void touch_decode_publish(const uint8_t r[AOS_TOUCH_REGS])
+{
+    uint8_t n  = r[2] & 0x0F;
+    int16_t x1 = (int16_t)((r[3] & 0x0F) << 8 | r[4]);
+    int16_t y1 = (int16_t)((r[5] & 0x0F) << 8 | r[6]);
+    int16_t x2 = (int16_t)((r[7] & 0x0F) << 8 | r[8]);
+    int16_t y2 = (int16_t)((r[9] & 0x0F) << 8 | r[10]);
+    bool    p2 = r[7] || r[8] || r[9] || r[10];
+    if (s_touch_swallow) {
+        /* the finger that woke the screen: nobody sees it until it lifts */
+        if (n == 0) {
+            s_touch_swallow = false;
+        }
+        n = 0;
+        p2 = false;
+    }
+
+    /* For LVGL: exactly what esp_lcd_touch_cst816s_read_data() would leave */
+    s_touch_lvgl_x = x1;
+    s_touch_lvgl_y = y1;
+    s_touch_lvgl_pressed = n != 0;
+
+    int16_t fx[2], fy[2];
+    uint8_t count = 0;
+    if (n) {
+        fx[count] = x1; fy[count] = y1; count++;
+    }
+    if (p2) {
+        fx[count] = x2; fy[count] = y2; count++;
+    }
+    /* A new sample is a change in count or coordinates (0x02..0x0A): a
+     * finger at rest is read again and again with nothing new, and the
+     * recogniser must not count it twice. */
+    bool changed = memcmp(r + 2, s_touch_prev + 2, 9) != 0;
+    memcpy(s_touch_prev, r, AOS_TOUCH_REGS);
+    memcpy(s_touch_regs, r, AOS_TOUCH_REGS);
+    frame_publish(count, fx, fy, changed);
+}
+
+static void IRAM_ATTR touch_isr(esp_lcd_touch_handle_t tp)
+{
+    (void)tp;
+    BaseType_t woke = pdFALSE;
+    /* gpio_wakeup_enable() (the light-sleep wake source) turns this pin's
+     * interrupt into a LOW-LEVEL one, overriding the falling edge the touch
+     * driver set: for as long as INT is low it would fire again and again.
+     * One per read: the task enables it again after reading the chip. */
+    s_touch_isr_count++;
+    gpio_intr_disable(BSP_LCD_TOUCH_INT);
+    if (s_touch_wake) {
+        xSemaphoreGiveFromISR(s_touch_wake, &woke);
+    }
+    if (woke) {
+        portYIELD_FROM_ISR();
+    }
+}
+
+/* With the screen lit it reads the chip on every INT and every 20 ms while
+ * a finger is down (100 ms without one, to catch a release INT missed).
+ * With the screen not lit it does not read at all: it waits for INT, and
+ * INT alone lights the screen. That was ten I2C reads a second, each a
+ * wake-up out of light sleep, to learn that nobody was touching. */
+static void touch_task(void *arg)
+{
+    (void)arg;
+    uint32_t last_awake_ms = 0;
+    while (1) {
+        bool lit = s_display_state == AOS_DISPLAY_ACTIVE;
+        TickType_t wait = pdMS_TO_TICKS(!lit ? 5000 : s_frame.count ? 20 : 100);
+        bool by_int = xSemaphoreTake(s_touch_wake, wait) == pdTRUE;
+
+        lit = s_display_state == AOS_DISPLAY_ACTIVE;
+        if (!lit && by_int) {
+            s_touch_wakes++;
+            s_touch_swallow = true;
+            aos_hal_activity();         /* outside the bus lock: it takes LVGL's */
+            lit = true;
+        }
+        bool want_sleep = !lit && s_touch_sleep_enabled;
+
+        uint8_t r[AOS_TOUCH_REGS];
+        esp_err_t ret = ESP_FAIL;
+        xSemaphoreTake(s_touch_i2c, portMAX_DELAY);
+        uint32_t now = (uint32_t)(esp_timer_get_time() / 1000);
+        if (want_sleep != s_touch_chip_sleeping) {
+            /* 0xFE = 0 lets the chip fall into its auto-sleep; anything else
+             * keeps it awake (touch_disable_autosleep). */
+            const uint8_t w[2] = { 0xFE, want_sleep ? 0x00 : 0xFF };
+            if (i2c_master_transmit(s_touch_dev, w, sizeof(w), 50) == ESP_OK) {
+                s_touch_chip_sleeping = want_sleep;
+            }
+            last_awake_ms = now;
+        }
+        if (lit) {
+            ret = esp_lcd_panel_io_rx_param(s_touch_tp->io, 0x00, r, sizeof(r));
+        }
+        if (!want_sleep && now - last_awake_ms >= 5000) {
+            /* The CST820 puts itself back to sleep after its own resets;
+             * see touch_keep_awake(). */
+            last_awake_ms = now;
+            const uint8_t dis[2] = { 0xFE, 0xFF };
+            i2c_master_transmit(s_touch_dev, dis, sizeof(dis), 50);
+        }
+        xSemaphoreGive(s_touch_i2c);
+        gpio_intr_enable(BSP_LCD_TOUCH_INT);
+
+        if (ret == ESP_OK) {
+            touch_decode_publish(r);
+        }
+    }
+}
+
+void aos_hal_touch_sleep_enable(bool on)
+{
+    s_touch_sleep_enabled = on;
+    aos_hal_pref_set_i32("touch_slp", on ? 1 : 0);
+    if (s_touch_wake) {
+        xSemaphoreGive(s_touch_wake);    /* the task applies it now */
+    }
+}
+
+bool aos_hal_touch_sleep_enabled(void)
+{
+    return s_touch_sleep_enabled;
+}
+
+void aos_hal_touch_counters(uint32_t *isr, uint32_t *wakes, bool *chip_sleeping)
+{
+    if (isr)           *isr = s_touch_isr_count;
+    if (wakes)         *wakes = s_touch_wakes;
+    if (chip_sleeping) *chip_sleeping = s_touch_chip_sleeping;
+}
+
+/* Starts the task once the CST820 is known (touch_disable_autosleep found
+ * it at 0x15). Until then, and on any other chip, LVGL's read does the I2C
+ * itself as it always did. */
+static void touch_task_start(void)
+{
+    if (!s_touch_tp || !s_touch_dev || s_touch_task) {
+        return;
+    }
+    s_touch_wake = xSemaphoreCreateBinary();
+    s_touch_i2c  = xSemaphoreCreateMutex();
+    if (!s_touch_wake || !s_touch_i2c) {
+        return;
+    }
+    /* Above LVGL's task (the port's default, 4) and on its core. */
+    if (xTaskCreatePinnedToCore(touch_task, "touch", 3072, NULL, 6,
+                                &s_touch_task, AOS_LVGL_CORE) != pdPASS) {
+        s_touch_task = NULL;
+        ESP_LOGE(TAG, "touch task: could not start, LVGL keeps reading the chip");
+        return;
+    }
+    /* The INT line now wakes our task instead of LVGL's. */
+    esp_lcd_touch_register_interrupt_callback(s_touch_tp, touch_isr);
+    ESP_LOGI(TAG, "touch task: reading the CST820 on its INT line");
+}
+
+static esp_err_t touch_read_frame(esp_lcd_touch_handle_t tp)
+{
+    if (s_touch_task) {
+        /* The task reads the chip; LVGL takes the latest point 1. */
+        portENTER_CRITICAL(&tp->data.lock);
+        tp->data.points = s_touch_lvgl_pressed ? 1 : 0;
+        if (s_touch_lvgl_pressed) {
+            tp->data.coords[0].x = (uint16_t)s_touch_lvgl_x;
+            tp->data.coords[0].y = (uint16_t)s_touch_lvgl_y;
+        }
+        portEXIT_CRITICAL(&tp->data.lock);
+        return ESP_OK;
+    }
+    if (s_touch_dev) {
+        /* The CST820 before its task is up: the same burst, from here. */
+        uint8_t r[AOS_TOUCH_REGS];
+        esp_err_t ret = esp_lcd_panel_io_rx_param(tp->io, 0x00, r, sizeof(r));
+        if (ret != ESP_OK) {
+            /* Never an error to LVGL's port: it ESP_ERROR_CHECKs the read and
+             * a chip that did not answer once aborted the whole watch
+             * (2026-09-25, a boot out of deep sleep). No answer, no finger. */
+            portENTER_CRITICAL(&tp->data.lock);
+            tp->data.points = 0;
+            portEXIT_CRITICAL(&tp->data.lock);
+            return ESP_OK;
+        }
+        touch_decode_publish(r);
+        portENTER_CRITICAL(&tp->data.lock);
+        tp->data.points = s_touch_lvgl_pressed ? 1 : 0;
+        if (s_touch_lvgl_pressed) {
+            tp->data.coords[0].x = (uint16_t)s_touch_lvgl_x;
+            tp->data.coords[0].y = (uint16_t)s_touch_lvgl_y;
+        }
+        portEXIT_CRITICAL(&tp->data.lock);
+        return ESP_OK;
+    }
+    esp_err_t ret = s_touch_orig_read(tp);
+    if (ret != ESP_OK) {
+        portENTER_CRITICAL(&tp->data.lock);
+        tp->data.points = 0;            /* see above: never an error to LVGL */
+        portEXIT_CRITICAL(&tp->data.lock);
+        return ESP_OK;
+    }
+    int16_t fx[2] = { 0 }, fy[2] = { 0 };
+    uint8_t count;
+    portENTER_CRITICAL(&tp->data.lock);
+    count = tp->data.points > 2 ? 2 : tp->data.points;
+    for (int i = 0; i < count; i++) {
+        fx[i] = (int16_t)tp->data.coords[i].x;
+        fy[i] = (int16_t)tp->data.coords[i].y;
+    }
+    portEXIT_CRITICAL(&tp->data.lock);
+    bool changed = count != s_frame.count ||
+                   (count && (fx[0] != s_frame.x[0] || fy[0] != s_frame.y[0])) ||
+                   (count > 1 && (fx[1] != s_frame.x[1] || fy[1] != s_frame.y[1]));
+    frame_publish(count, fx, fy, changed);
+    return ESP_OK;
+}
+
+/* Called once the touch panel exists, before LVGL reads it. */
+static void touch_frame_install(esp_lcd_touch_handle_t tp)
+{
+    s_touch_tp            = tp;
+    s_touch_orig_read     = tp->read_data;
+    tp->read_data         = touch_read_frame;
+}
+
+uint32_t aos_hal_touch_frames(uint32_t after_seq, aos_touch_frame_t *out,
+                              uint32_t max)
+{
+    uint32_t n = 0;
+    portENTER_CRITICAL(&s_frame_lock);
+    uint32_t last = s_frame.seq;
+    uint32_t first = after_seq + 1;
+    if (last >= AOS_TOUCH_RING && first <= last - AOS_TOUCH_RING) {
+        first = last - AOS_TOUCH_RING + 1;      /* fell behind: the newest 16 */
+    }
+    if (last - first + 1 > max && last >= first) {
+        first = last - max + 1;
+    }
+    for (uint32_t s = first; s <= last && s != 0 && n < max; s++) {
+        out[n++] = s_ring[s % AOS_TOUCH_RING];
+    }
+    portEXIT_CRITICAL(&s_frame_lock);
+    return n;
+}
+
+void aos_hal_touch_stats(uint32_t *reads, uint32_t *samples)
+{
+    if (reads)   *reads   = s_touch_reads;
+    if (samples) *samples = s_touch_samples;
+}
+
+bool aos_hal_touch_frame(aos_touch_frame_t *out)
+{
+    if (!s_touch_tp) {
+        return false;
+    }
+    portENTER_CRITICAL(&s_frame_lock);
+    *out = s_frame;
+    portEXIT_CRITICAL(&s_frame_lock);
+    return true;
+}
+
+/* The CST820's configuration registers (0xEC..0xFE on the CST816S map:
+ * motion mask, IRQ, scan period, auto sleep, long-press reset...), for the
+ * gesture test screen. A separate transaction on the chip's own device
+ * handle, the one the keep-awake write already uses from another task; the
+ * I2C master driver serialises it with the touch reads. */
+bool aos_hal_touch_reg_read(uint8_t reg, uint8_t *val)
+{
+    if (!s_touch_dev || !val) {
+        return false;
+    }
+    if (s_touch_i2c) xSemaphoreTake(s_touch_i2c, portMAX_DELAY);
+    bool ok = i2c_master_transmit_receive(s_touch_dev, &reg, 1, val, 1, 50) == ESP_OK;
+    if (s_touch_i2c) xSemaphoreGive(s_touch_i2c);
+    return ok;
+}
+
+bool aos_hal_touch_reg_write(uint8_t reg, uint8_t val)
+{
+    if (!s_touch_dev) {
+        return false;
+    }
+    const uint8_t buf[2] = { reg, val };
+    if (s_touch_i2c) xSemaphoreTake(s_touch_i2c, portMAX_DELAY);
+    esp_err_t ret = i2c_master_transmit(s_touch_dev, buf, sizeof(buf), 50);
+    if (s_touch_i2c) xSemaphoreGive(s_touch_i2c);
+    aos_hal_log("touch", "CST820 reg 0x%02X <- 0x%02X (%s)", reg, val, esp_err_to_name(ret));
+    return ret == ESP_OK;
+}
+
+bool aos_hal_touch_multi(void)
+{
+    return s_touch_tp != NULL;
+}
+
+uint32_t aos_hal_touch_regs(uint8_t regs[AOS_TOUCH_REGS])
+{
+    if (!s_touch_tp || !s_touch_dev) {
+        return 0;
+    }
+    uint32_t seq;
+    portENTER_CRITICAL(&s_frame_lock);
+    memcpy(regs, s_touch_regs, AOS_TOUCH_REGS);
+    seq = s_frame.seq;
+    portEXIT_CRITICAL(&s_frame_lock);
+    return seq ? seq : 1;
+}
+
+/* --------------------------------------------------------------------------
+ * Panel sleep
+ *
+ * "Screen off" used to mean brightness 0: every pixel dark, but the driver IC
+ * still scanning, its charge pumps still running and the QSPI link still
+ * live. Sleep-in (0x10) stops all of that and keeps the frame memory, so the
+ * wake is sleep-out (0x11), a wait the panel's datasheet asks for, and
+ * display-on (0x29). Both revisions' controllers speak the same MIPI DCS
+ * commands and both go through the co5300 driver with the QSPI opcode wrap,
+ * which is what the (0x02 << 24) below is.
+ *
+ * Taken under the LVGL lock so a flush cannot be mid-flight on the same bus.
+ * The lock is recursive, so this works from the LVGL task and from the
+ * housekeeping task alike.
+ * -------------------------------------------------------------------------- */
+static esp_err_t panel_cmd(uint8_t cmd)
+{
+    return panel_tx_on_core(cmd, 0);
+}
+
+/* With the screen off LVGL has nothing to draw and nobody to listen to, but
+ * its refresh timer (33 ms) and the touch read timer (33 ms) go on waking
+ * the chip. The refresh timer is paused; the touch is read every 200 ms,
+ * because a finger also wakes the chip through GPIO21 and the read is what
+ * turns that into aos_hal_activity(). Both back to normal on wake. */
+/* With the screen off LVGL has nothing to draw: its refresh timer is paused
+ * (in always-on it pauses itself between redraws, LVGL does that). The touch
+ * read timer is the other one that kept waking the chip. On the v2 board the
+ * touch task watches the chip's INT line and lights the screen itself, so
+ * with the screen not lit LVGL does not read at all; on the v1, which has no
+ * task, it reads every 200 ms as before. */
+static void lvgl_timers_idle(aos_display_state_t state)
+{
+    if (!s_display || !aos_hal_lock(2000)) {
+        return;
+    }
+    bool lit = state == AOS_DISPLAY_ACTIVE;
+    lv_timer_t *refr = lv_display_get_refr_timer(s_display);
+    if (refr) {
+        if (state == AOS_DISPLAY_OFF) lv_timer_pause(refr); else lv_timer_resume(refr);
+    }
+    for (lv_indev_t *indev = lv_indev_get_next(NULL); indev; indev = lv_indev_get_next(indev)) {
+        lv_timer_t *read = lv_indev_get_read_timer(indev);
+        if (!read) {
+            continue;
+        }
+        if (lit) {
+            lv_timer_set_period(read, LV_DEF_REFR_PERIOD);
+            lv_timer_resume(read);
+        } else if (s_touch_task) {
+            lv_timer_pause(read);
+        } else {
+            lv_timer_set_period(read, 200);
+        }
+    }
+    aos_hal_unlock();
+}
+
+/* true when the panel was actually put to sleep or woken by this call */
+static bool panel_sleep(bool sleep)
+{
+    if (!s_panel || !s_panel_io || sleep == s_panel_asleep) {
+        return false;
+    }
+    if (sleep && !s_panel_sleep_enabled) {
+        return false;
+    }
+    if (!aos_hal_lock(2000)) {
+        ESP_LOGW(TAG, "panel %s: could not take the LVGL lock", sleep ? "sleep" : "wake");
+        return false;
+    }
+    int64_t t0 = esp_timer_get_time();
+    if (sleep) {
+        /* No display-off here: the panel's own sleep-in blanks it, and a
+         * display-on at wake was measured to cost a light-blue then white
+         * flash (see docs/POWER.md 6b). Brightness is already 0. */
+        panel_cmd(LCD_CMD_SLPIN);
+        vTaskDelay(pdMS_TO_TICKS(5));
+    } else {
+        s_panel_last_err = panel_cmd(LCD_CMD_SLPOUT);
+        /* Sleep-out brings the brightness register back to the factory 0xFF
+         * on this panel, and with it a flash of whatever the pixels do while
+         * their supply comes up (seen: light blue, then white). Brightness is
+         * pinned at 0 for the whole sequence; the caller raises it after the
+         * panel is on and showing a finished frame. */
+        bsp_display_brightness_set(0);
+        vTaskDelay(pdMS_TO_TICKS(AOS_PANEL_WAKE_MS));
+        /* The panel's memory still holds whatever was on screen when it went
+         * to sleep, and the UI has moved on since (back to the face, into
+         * always-on): with the refresh timer paused none of that was drawn.
+         * Displaying the old memory and letting LVGL catch up on top of it
+         * showed the menu bleeding through the watchface. So: the whole
+         * screen is rendered into the panel while it is still display-off,
+         * and only then is it switched on. Costs about 60 ms of the wake. */
+        if (s_display) {
+            lv_timer_t *refr = lv_display_get_refr_timer(s_display);
+            if (refr) lv_timer_resume(refr);
+            lv_obj_invalidate(lv_screen_active());
+            lv_refr_now(s_display);
+        }
+        vTaskDelay(pdMS_TO_TICKS(20));      /* one frame before the brightness comes up */
+    }
+    s_panel_asleep = sleep;
+    aos_hal_unlock();
+    ESP_LOGI(TAG, "panel %s in %lld ms", sleep ? "asleep" : "awake",
+             (esp_timer_get_time() - t0) / 1000);
+    return true;
+}
+
+/* --------------------------------------------------------------------------
+ * Power policy
+ *
+ * Two knobs, both decided here and nowhere else:
+ *
+ *   CPU  240 MHz while the screen is active or audio runs; 80 MHz otherwise.
+ *        It is a pm lock on ESP_PM_CPU_FREQ_MAX, so anything else that needs
+ *        the full clock can take its own. Without power saving the lock is
+ *        simply always held, which is the behaviour the firmware always had.
+ *   WiFi deepest modem sleep with the screen off, the light one otherwise.
+ *        The web portal answers a few hundred ms later with the screen off,
+ *        which nobody is looking at anyway.
+ *
+ * "Saving" is the preference OR the battery under 20% and unplugged.
+ * -------------------------------------------------------------------------- */
+static bool power_saving_active(void)
+{
+    return s_power_saving || s_low_battery_saving;
+}
+
+static void pm_policy_apply(void)
+{
+    bool saving   = power_saving_active();
+    bool audio    = s_player_task != NULL || s_mic_task != NULL ||
+                    s_speaker_open || s_mic_holds_codec;
+    bool want_max = !saving || s_display_state == AOS_DISPLAY_ACTIVE || audio;
+
+    if (audio) {
+        s_i2s_idle = false;
+    } else if (!s_i2s_idle) {
+        if (s_i2s_tx) i2s_channel_disable(s_i2s_tx);
+        if (s_i2s_rx) i2s_channel_disable(s_i2s_rx);
+        s_i2s_idle = true;
+    }
+
+    if (s_pm_max_lock) {
+        if (want_max && !s_pm_max_held) {
+            if (esp_pm_lock_acquire(s_pm_max_lock) == ESP_OK) {
+                s_pm_max_held = true;
+            }
+        } else if (!want_max && s_pm_max_held) {
+            if (esp_pm_lock_release(s_pm_max_lock) == ESP_OK) {
+                s_pm_max_held = false;
+            }
+        }
+    }
+
+    /* Light sleep only with the screen off and no audio: the QSPI panel and
+     * the I2S codec are not asked to survive it, and neither is anyone who is
+     * looking at the watch. It is an esp_pm reconfiguration, so it can be
+     * switched at run time. */
+    /* And only on battery: on USB there is nothing to save, and the
+     * USB-Serial-JTAG console does not survive light sleep - the port
+     * vanishes from the host until it is replugged, which is no way to
+     * develop. s_usb_last is what the PMU said, refreshed every 5 s and on
+     * every insert/remove interrupt. */
+    /* Dimmed counts too: the always-on face redraws once a minute, the
+     * panel keeps its image on its own, and its six QSPI pins keep their
+     * levels through sleep (gpio_sleep_sel_dis in display_start). */
+    bool want_ls = s_light_sleep_enabled && saving && s_pm_max_lock &&
+                   s_display_state != AOS_DISPLAY_ACTIVE && !audio && !s_usb_last;
+    if (want_ls != s_light_sleep_on) {
+        esp_pm_config_t pm = {
+            .max_freq_mhz = AOS_DFS_MAX_MHZ,
+            .min_freq_mhz = AOS_DFS_MIN_MHZ,
+            .light_sleep_enable = want_ls,
+        };
+        esp_err_t ret = esp_pm_configure(&pm);
+        if (ret == ESP_OK) {
+            s_light_sleep_on = want_ls;
+            ESP_LOGI(TAG, "light sleep %s", want_ls ? "on" : "off");
+        } else {
+            ESP_LOGW(TAG, "light sleep %s refused: %s", want_ls ? "on" : "off", esp_err_to_name(ret));
+        }
+    }
+
+    if (s_net_state != AOS_NET_OFF) {
+        bool fast = s_net_low_latency || s_ota_ps ||
+                    (s_radio_ps == 2 && aos_hal_bt_state() == AOS_BT_OFF);
+        int ps = fast ? WIFI_PS_NONE
+               : (saving && s_display_state != AOS_DISPLAY_ACTIVE && !s_radio_ps) ? WIFI_PS_MAX_MODEM
+                                                                                 : WIFI_PS_MIN_MODEM;
+        if (ps != s_wifi_ps && esp_wifi_set_ps((wifi_ps_type_t)ps) == ESP_OK) {
+            s_wifi_ps = ps;
+        }
+    }
+}
+
+void aos_hal_net_low_latency(bool on)
+{
+    if (on && aos_hal_bt_state() != AOS_BT_OFF) {
+        on = false;             /* coexistence wants modem sleep */
+    }
+    if (on == s_net_low_latency) {
+        return;
+    }
+    s_net_low_latency = on;
+    ESP_LOGI(TAG, "wifi power save %s (low latency %s)", on ? "off" : "back on", on ? "held" : "released");
+    pm_policy_apply();
+}
+
+static int cpu_mhz_now(void)
+{
+    rtc_cpu_freq_config_t cfg;
+    rtc_clk_cpu_freq_get_config(&cfg);
+    return (int)cfg.freq_mhz;
+}
+
+/* --------------------------------------------------------------------------
+ * Battery bookkeeping
+ *
+ * The AXP2101 has no coulomb counter, so anything about rates is arithmetic
+ * on its percentage over time. It is honest arithmetic: nothing is shown
+ * until there has been a quarter of an hour and two percent of drop to
+ * divide, and it resets every time USB is plugged in.
+ * -------------------------------------------------------------------------- */
+static void battery_stats_save(void)
+{
+    if (s_unsaved_minutes) {
+        aos_hal_pref_set_i32("bat_min", (int32_t)s_battery_minutes);
+        s_unsaved_minutes = 0;
+    }
+}
+
+static void power_event(aos_power_event_t event, int percent)
+{
+    if (s_power_cb) {
+        s_power_cb(event, percent);
+    }
+}
+
+static void usb_changed(bool present, int percent)
+{
+    if (present == s_usb_last) {
+        return;
+    }
+    s_usb_last = present;
+    pm_policy_apply();
+    if (present) {
+        ESP_LOGI(TAG, "usb in at %d%%", percent);
+        net_retry_kick("usb in");
+        s_unplug_us   = 0;
+        s_drain_pct_h = NAN;
+        s_hours_left  = NAN;
+        s_charge_counted = false;
+        s_critical_strikes = 0;
+        battery_stats_save();
+        power_event(AOS_POWER_USB_IN, percent);
+    } else {
+        ESP_LOGI(TAG, "usb out at %d%%", percent);
+        s_unplug_us  = esp_timer_get_time();
+        s_unplug_pct = percent;
+        s_low_warned = false;
+        power_event(AOS_POWER_USB_OUT, percent);
+    }
+}
+
+/* The clean way down: tell the UI, give it a moment to say so, save what has
+ * to be saved, and let the PMU cut the rails. Only ever on battery. */
+static void power_critical(int percent)
+{
+    if (s_shutting_down) {
+        return;
+    }
+    s_shutting_down = true;
+    ESP_LOGW(TAG, "battery critical at %d%%: powering off", percent);
+    power_event(AOS_POWER_CRITICAL, percent);
+    vTaskDelay(pdMS_TO_TICKS(3000));
+
+    aos_pmu_state_t pmu;
+    if (aos_board_pmu_read(&pmu) && pmu.valid && pmu.usb_present) {
+        ESP_LOGI(TAG, "usb arrived in time: staying up");
+        s_shutting_down = false;
+        s_critical_strikes = 0;
+        return;
+    }
+    aos_hal_shutdown();
+}
+
+/* Every 200 ms: the PMU's interrupt line, through the expander. */
+static void pmu_irq_service(void)
+{
+    uint32_t irq = aos_board_pmu_poll_irq();
+    if (!irq) {
+        return;
+    }
+    aos_pmu_state_t pmu;
+    bool ok  = aos_board_pmu_read(&pmu) && pmu.valid;
+    int  own = aos_soc_percent(&s_soc);
+    int  pct = ok ? (own >= 0 ? own : pmu.percent) : -1;
+    ESP_LOGI(TAG, "pmu irq 0x%06lx at %d%%", (unsigned long)irq, pct);
+
+    /* The power key. The chip decodes the gesture itself: a "negative edge"
+     * is the press, "short" is a release before the long threshold, "long"
+     * fires while still held. Holding on to the off threshold is the PMU's
+     * own power-off and never reaches here. */
+    if (irq & AXP2101_IRQ_PKEY_NEGATIVE) {
+        if (s_button_cb) s_button_cb(AOS_BUTTON_PWR, AOS_BUTTON_PRESS);
+    }
+    if (irq & AXP2101_IRQ_PKEY_SHORT) {
+        if (s_button_cb) s_button_cb(AOS_BUTTON_PWR, AOS_BUTTON_CLICK);
+    }
+    if (irq & AXP2101_IRQ_PKEY_LONG) {
+        if (s_button_cb) s_button_cb(AOS_BUTTON_PWR, AOS_BUTTON_LONG);
+    }
+
+    if (irq & AXP2101_IRQ_VBUS_INSERT) usb_changed(true, pct);
+    if (irq & AXP2101_IRQ_VBUS_REMOVE) usb_changed(false, pct);
+
+    if ((irq & AXP2101_IRQ_CHG_DONE) && !s_charge_counted) {
+        s_charge_counted = true;
+        s_charge_cycles++;
+        aos_hal_pref_set_i32("chg_cyc", (int32_t)s_charge_cycles);
+        power_event(AOS_POWER_CHARGE_DONE, pct);
+    }
+    if ((irq & AXP2101_IRQ_SOC_WARN_LEVEL) && ok && !pmu.usb_present && !s_low_warned) {
+        s_low_warned = true;
+        power_event(AOS_POWER_LOW_BATTERY, pct);
+    }
+    if ((irq & AXP2101_IRQ_SOC_SHUTDOWN_LEVEL) && ok && !pmu.usb_present) {
+        power_critical(pct);
+    }
+    if (irq & (AXP2101_IRQ_DIE_OVER_TEMP | AXP2101_IRQ_BAT_WORK_OVER_TEMP |
+               AXP2101_IRQ_BAT_CHG_OVER_TEMP)) {
+        ESP_LOGW(TAG, "PMU reports over-temperature (0x%06lx)", (unsigned long)irq);
+        power_event(AOS_POWER_OVERHEAT, pct);
+    }
+    if (irq & AXP2101_IRQ_CHG_TIMEOUT) {
+        ESP_LOGW(TAG, "charger safety timer expired: the cell is not taking charge");
+    }
+}
+
+/* Every 5 s: what the IRQ line could have missed, the low-battery backstop,
+ * the automatic power saving and the arithmetic above. */
+/* One step of the state of charge. The learned values are persisted when
+ * they change: the sag with the screen lit, and the capacity. */
+static void soc_step(const aos_pmu_state_t *pmu)
+{
+    aos_pmu_charger_t chg = {0};
+    aos_board_pmu_charger_get(&chg);
+    bool audio = s_player_task != NULL || s_mic_task != NULL ||
+                 s_speaker_open || s_mic_holds_codec;
+    aos_soc_input_t in = {
+        .now_us     = esp_timer_get_time(),
+        .vbat_mv    = (int)lrintf(pmu->vbat * 1000.0f),
+        .usb        = pmu->usb_present,
+        .chg_state  = pmu->charge_state,
+        .screen_lit = s_display_state == AOS_DISPLAY_ACTIVE,
+        .audio      = audio,
+        .busy       = s_net_state == AOS_NET_CONNECTING || aos_hal_link_running(),
+        .icc_ma     = chg.charge_ma > 0 ? chg.charge_ma : AOS_CHARGE_MA_CARE,
+        .ipre_ma    = chg.precharge_ma > 0 ? chg.precharge_ma : AOS_PRECHARGE_MA,
+        .iterm_ma   = chg.termination_ma > 0 ? chg.termination_ma : AOS_TERMINATION_MA,
+        .target_mv  = chg.target_mv > 0 ? chg.target_mv : AOS_CHARGE_MV_CARE,
+    };
+    s_gauge_pct = pmu->percent;
+    if (aos_soc_step(&s_soc, &in)) {
+        aos_hal_pref_set_i32("soc_sag", (int32_t)lrintf(s_soc.sag_mv * 10.0f));
+        aos_hal_pref_set_i32("bat_cap", (int32_t)lrintf(s_soc.cap_mah * 10.0f));
+        aos_hal_pref_set_i32("soc_n", (int32_t)(s_soc.sag_samples & 0xFFFF) |
+                                      ((int32_t)(s_soc.cap_samples & 0x7FFF) << 16));
+        ESP_LOGI(TAG, "battery: sag %.0f mV (%d), capacity %.0f mAh (%d)",
+                 s_soc.sag_mv, s_soc.sag_samples, s_soc.cap_mah, s_soc.cap_samples);
+    }
+}
+
+static void power_watch(void)
+{
+    static int minute_ticks;
+    aos_pmu_state_t pmu;
+    if (!aos_board_pmu_read(&pmu) || !pmu.valid) {
+        return;
+    }
+    pmu_cache_store(&pmu);
+    soc_step(&pmu);
+    int pct = aos_soc_percent(&s_soc);
+    if (pct < 0) {
+        pct = pmu.percent;
+    }
+    usb_changed(pmu.usb_present, pct);
+
+    bool on_battery = !pmu.usb_present;
+    bool was_saving = s_low_battery_saving;
+    s_low_battery_saving = on_battery && pct >= 0 && pct <= AOS_LOW_BATTERY_SAVING_PCT;
+    if (was_saving != s_low_battery_saving) {
+        ESP_LOGI(TAG, "low-battery power saving %s", s_low_battery_saving ? "on" : "off");
+    }
+
+    /* Low battery, on our own percent: the PMU's warning IRQ comes from its
+     * gauge, which on this cell never gets that low before the end. */
+    if (on_battery && pct >= 0 && pct <= AOS_LOW_BATTERY_WARN_PCT && !s_low_warned &&
+        esp_timer_get_time() > 60 * 1000000LL) {
+        s_low_warned = true;
+        power_event(AOS_POWER_LOW_BATTERY, pct);
+    }
+
+    /* The clean power-off: three strikes a few seconds apart, and not during
+     * the first half minute, when the estimate is still finding its feet.
+     * Our 2 % only counts with the voltage low as well, so a wrong estimate
+     * cannot switch off a watch that still has charge; the voltage alone
+     * (3.30 V, loaded) is what caught both flat batteries of 2026-09-25. */
+    bool soc_empty = pct >= 0 && pct <= AOS_SOC_EMPTY_PCT && pmu.vbat < AOS_CRITICAL_SOC_VBAT;
+    bool loaded = s_display_state == AOS_DISPLAY_ACTIVE || s_player_task || s_mic_task ||
+                  s_speaker_open || s_net_state == AOS_NET_CONNECTING || aos_hal_link_running();
+    float floor_v = loaded ? AOS_CRITICAL_VBAT_LOADED : AOS_CRITICAL_VBAT;
+    if (on_battery && esp_timer_get_time() > 30 * 1000000LL &&
+        (soc_empty || pmu.vbat < floor_v)) {
+        if (++s_critical_strikes >= 3) {
+            power_critical(pct);
+        }
+    } else {
+        s_critical_strikes = 0;
+    }
+
+    night_check();
+
+    if (on_battery && ++minute_ticks >= 12) {
+        minute_ticks = 0;
+        s_battery_minutes++;
+        if (++s_unsaved_minutes >= 10) {
+            battery_stats_save();
+        }
+        if (s_unplug_us && s_unplug_pct >= 0 && pct >= 0) {
+            float hours = (float)(esp_timer_get_time() - s_unplug_us) / 3600e6f;
+            int   drop  = s_unplug_pct - pct;
+            if (hours >= 0.25f && drop >= 2) {
+                s_drain_pct_h = (float)drop / hours;
+                s_hours_left  = (float)pct / s_drain_pct_h;
+            }
+        }
+    }
+}
+
+
+/* --------------------------------------------------------------------------
+ * Deep sleep at night
+ *
+ * Light sleep keeps everything able to answer: the phone, the portal, a
+ * touch in 120 ms. Deep sleep keeps nothing: every wake-up is a full boot
+ * (measured on 2026-09-25: WiFi at 4.8 s, the apps at 5.75 s), the phone's
+ * notifications stop, steps stop, and only the touch controller's INT line
+ * and the BOOT button can wake it - the power key and the IMU end on the
+ * TCA9554, whose INT does not reach the ESP32. So it is kept for the one
+ * stretch where none of that matters: the scheduled do-not-disturb hours,
+ * on battery, with the screen off for ten minutes and nothing running.
+ *
+ * It sleeps in chunks of half an hour. The chip's own timer runs on an RC
+ * oscillator that drifts; each chunk ends in a quick boot that reads the
+ * PCF85063 again and, if the night is not over, goes straight back to sleep
+ * before the panel, the WiFi or the apps are brought up (night_boot()). The
+ * last chunk ends two minutes before the end of the window or the next
+ * alarm, and that boot is a full one.
+ *
+ * Before sleeping: the counters are saved, the panel gets display-off and
+ * sleep-in and its five rails are cut (ALDO1-4 and BLDO2, measured), and
+ * the IMU is powered down. The next full boot brings all of them back, as
+ * it does from power-on.
+ * -------------------------------------------------------------------------- */
+#define NIGHT_MAGIC         0x4E474854u         /* "NGHT" */
+#define NIGHT_IDLE_US       (10LL * 60 * 1000000)
+#define NIGHT_CHUNK_S       (30 * 60)
+#define NIGHT_MARGIN_S      120
+#define NIGHT_MIN_SLEEP_S   (15 * 60)
+#define EPOCH_SANE          1700000000LL
+
+typedef struct {
+    uint32_t magic;
+    int64_t  wake_at;       /* the full boot, at or after this (epoch)       */
+    int64_t  chunk_start;   /* when the chunk now running began              */
+    uint32_t nights;        /* since power-on                                */
+    uint32_t chunks;        /* quick boots that went back to sleep           */
+    uint32_t slept_s;       /* seconds in deep sleep since power-on          */
+    int64_t  last_start, last_end;
+    uint8_t  last_wake;     /* 1 end of the night, 2 touch or BOOT, 3 USB    */
+    bool     test;          /* started by /api/pmu?deep=: no preference asked */
+    uint32_t chunk_s;       /* the length of a chunk: 30 min, less in a test  */
+} night_rtc_t;
+RTC_DATA_ATTR static night_rtc_t s_night;
+
+static bool s_night_enabled;                    /* preference "night_ds"    */
+static bool (*s_night_guard)(int64_t *wake_by);
+
+/* Things that must not be cut off by a boot: a countdown, a stopwatch. */
+#define SLEEP_HOLDERS 8
+static const char *s_hold_who[SLEEP_HOLDERS];
+static bool        s_hold_on[SLEEP_HOLDERS];
+
+void aos_hal_sleep_hold(const char *who, bool hold)
+{
+    if (!who) {
+        return;
+    }
+    int free_slot = -1;
+    for (int i = 0; i < SLEEP_HOLDERS; i++) {
+        if (s_hold_who[i] && strcmp(s_hold_who[i], who) == 0) {
+            s_hold_on[i] = hold;
+            return;
+        }
+        if (!s_hold_who[i] && free_slot < 0) {
+            free_slot = i;
+        }
+    }
+    if (hold && free_slot >= 0) {
+        s_hold_who[free_slot] = who;        /* callers pass string literals */
+        s_hold_on[free_slot] = true;
+    }
+}
+
+static const char *sleep_held_by(void)
+{
+    for (int i = 0; i < SLEEP_HOLDERS; i++) {
+        if (s_hold_who[i] && s_hold_on[i]) {
+            return s_hold_who[i];
+        }
+    }
+    return NULL;
+}
+
+void aos_hal_set_night_guard_cb(bool (*cb)(int64_t *wake_by))
+{
+    s_night_guard = cb;
+}
+
+void aos_hal_night_sleep_enable(bool on)
+{
+    s_night_enabled = on;
+    aos_hal_pref_set_i32("night_ds", on ? 1 : 0);
+}
+
+bool aos_hal_night_sleep_enabled(void)
+{
+    return s_night_enabled;
+}
+
+/* Inside the scheduled do-not-disturb hours, and when they end. */
+static bool night_window(int64_t now, int64_t *end)
+{
+    bool on = false;
+    int from = 0, to = 0;
+    aos_hal_notif_dnd_schedule_get(&on, &from, &to);
+    if (!on || from == to) {
+        return false;
+    }
+    time_t t = (time_t)now;
+    struct tm lt;
+    localtime_r(&t, &lt);
+    int m = lt.tm_hour * 60 + lt.tm_min;
+    bool inside = from < to ? (m >= from && m < to) : (m >= from || m < to);
+    if (!inside) {
+        return false;
+    }
+    int until = (to - m + 24 * 60) % (24 * 60);
+    *end = now - lt.tm_sec + (int64_t)until * 60;
+    return true;
+}
+
+static void night_cut_rails(void)
+{
+    static const char *const rails[] = { "ALDO1", "ALDO2", "ALDO3", "ALDO4", "BLDO2" };
+    for (unsigned k = 0; k < sizeof(rails) / sizeof(rails[0]); k++) {
+        int i = aos_board_pmu_rail_find(rails[k]);
+        if (i >= 0) {
+            aos_board_pmu_rail_set(i, false);
+        }
+    }
+}
+
+static void night_prepare_hw(void)
+{
+    if (s_panel && s_panel_io && aos_hal_lock(2000)) {
+        panel_brightness(0);
+        esp_lcd_panel_disp_on_off(s_panel, false);
+        panel_cmd(LCD_CMD_SLPIN);
+        aos_hal_unlock();
+        vTaskDelay(pdMS_TO_TICKS(10));
+    }
+    night_cut_rails();
+    aos_board_imu_power_down();
+    /* The CST820: in its auto-sleep only if that is known to keep INT
+     * working (s_touch_sleep_enabled); otherwise awake, as now. */
+    if (s_touch_dev && s_touch_i2c && s_touch_sleep_enabled) {
+        xSemaphoreTake(s_touch_i2c, pdMS_TO_TICKS(200));
+        const uint8_t w[2] = { 0xFE, 0x00 };
+        i2c_master_transmit(s_touch_dev, w, sizeof(w), 50);
+        xSemaphoreGive(s_touch_i2c);
+    }
+}
+
+static void __attribute__((noreturn)) night_sleep_chunk(int64_t now)
+{
+    int64_t left = s_night.wake_at - now;
+    int64_t max_chunk = s_night.chunk_s ? s_night.chunk_s : NIGHT_CHUNK_S;
+    int64_t chunk = left < max_chunk ? left : max_chunk;
+    if (chunk < 5) {
+        chunk = 5;
+    }
+    s_night.chunk_start = now;
+
+    esp_sleep_disable_wakeup_source(ESP_SLEEP_WAKEUP_ALL);
+    esp_sleep_enable_timer_wakeup((uint64_t)chunk * 1000000ULL);
+    /* Both lines are active low; the pull-ups hold them if nothing drives
+     * them, and they need the RTC peripherals powered through the sleep. */
+    esp_sleep_pd_config(ESP_PD_DOMAIN_RTC_PERIPH, ESP_PD_OPTION_ON);
+    rtc_gpio_pullup_en(BSP_LCD_TOUCH_INT);
+    rtc_gpio_pulldown_dis(BSP_LCD_TOUCH_INT);
+    rtc_gpio_pullup_en(BOOT_BUTTON_GPIO);
+    rtc_gpio_pulldown_dis(BOOT_BUTTON_GPIO);
+    esp_sleep_enable_ext1_wakeup_io((1ULL << BSP_LCD_TOUCH_INT) | (1ULL << BOOT_BUTTON_GPIO),
+                                    ESP_EXT1_WAKEUP_ANY_LOW);
+    ESP_LOGI(TAG, "night: deep sleep for %lld s (wake at %lld, %lld s left)",
+             (long long)chunk, (long long)s_night.wake_at, (long long)left);
+    esp_deep_sleep_start();
+}
+
+static void night_enter(int64_t now, int64_t wake_at, bool test)
+{
+    ESP_LOGW(TAG, "night: going to deep sleep until %lld (%s)", (long long)wake_at,
+             test ? "test" : "do not disturb");
+    battery_stats_save();
+    aos_steps_flush();
+    aos_stats_flush();
+    s_night.magic      = NIGHT_MAGIC;
+    s_night.wake_at    = wake_at;
+    s_night.nights++;
+    s_night.last_start = now;
+    s_night.last_end   = 0;
+    s_night.last_wake  = 0;
+    s_night.test       = test;
+    /* a test of a few minutes still wants to see the quick re-sleep: chunks
+     * of a third of it */
+    s_night.chunk_s    = test ? (uint32_t)((wake_at - now) / 3 > 20 ? (wake_at - now) / 3 : 20)
+                              : NIGHT_CHUNK_S;
+    night_prepare_hw();
+    /* the level of both wake lines right now: low would wake it at once */
+    if (gpio_get_level(BSP_LCD_TOUCH_INT) == 0) {
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
+    night_sleep_chunk(now);
+}
+
+/* From power_watch(): is this the moment? */
+static void night_check(void)
+{
+    if (!s_night_enabled || s_usb_last || !power_saving_active()) {
+        return;
+    }
+    if (s_display_state != AOS_DISPLAY_OFF || !s_display_off_since_us ||
+        esp_timer_get_time() - s_display_off_since_us < NIGHT_IDLE_US) {
+        return;
+    }
+    if (s_player_task || s_mic_task || s_speaker_open || s_mic_holds_codec ||
+        aos_hal_link_running() || aos_hal_ota_pending_verify() || sleep_held_by()) {
+        return;
+    }
+    /* "Calls always" asks for the phone to ring through do not disturb. */
+    if (aos_hal_notif_calls_always() && aos_hal_bt_state() == AOS_BT_CONNECTED) {
+        return;
+    }
+    int64_t now = (int64_t)time(NULL), end = 0;
+    if (now < EPOCH_SANE || !night_window(now, &end)) {
+        return;
+    }
+    int64_t wake_by = end;
+    if (s_night_guard && !s_night_guard(&wake_by)) {
+        return;
+    }
+    int64_t wake_at = wake_by - NIGHT_MARGIN_S;
+    if (wake_at - now < NIGHT_MIN_SLEEP_S) {
+        return;
+    }
+    night_enter(now, wake_at, false);
+}
+
+/* From aos_hal_init(), once the clock is read from the PCF85063. If a chunk
+ * ended and the night goes on, it goes back to sleep and does not return. */
+static void night_boot(void)
+{
+    if (s_night.magic != NIGHT_MAGIC) {
+        return;
+    }
+    esp_sleep_wakeup_cause_t cause = esp_sleep_get_wakeup_cause();
+    int64_t now = (int64_t)time(NULL);
+    if (s_night.chunk_start && now > s_night.chunk_start) {
+        s_night.slept_s += (uint32_t)(now - s_night.chunk_start);
+    }
+    s_night.chunk_start = 0;
+
+    bool usb = false;
+    aos_pmu_state_t pmu;
+    if (aos_board_pmu_read(&pmu) && pmu.valid) {
+        usb = pmu.usb_present;
+    }
+    int32_t pref = 0;
+    aos_hal_pref_get_i32("night_ds", &pref);
+
+    if (cause == ESP_SLEEP_WAKEUP_TIMER && now >= EPOCH_SANE &&
+        now < s_night.wake_at - 30 && (s_night.test || (pref && !usb))) {
+        s_night.chunks++;
+        night_cut_rails();          /* the PMU programme just turned them on */
+        aos_board_imu_power_down(); /* aos_board_init just turned it on */
+        night_sleep_chunk(now);
+    }
+
+    s_night.last_end  = now;
+    /* 2 a touch or BOOT; 1 the night ran its course; 3 a chunk cut short
+     * because USB came in */
+    s_night.last_wake = cause == ESP_SLEEP_WAKEUP_EXT1 ? 2
+                      : (cause == ESP_SLEEP_WAKEUP_TIMER && now < s_night.wake_at - 30 && usb) ? 3 : 1;
+    s_night.magic     = 0;
+    ESP_LOGI(TAG, "night: awake by %s after %lld s asleep (%lu chunks)",
+             s_night.last_wake == 2 ? "touch or BOOT" : s_night.last_wake == 3 ? "USB" : "timer",
+             (long long)(now - s_night.last_start), (unsigned long)s_night.chunks);
+}
+
+/* The energy fields of /api/status, as a JSON fragment starting with a comma:
+ * what the estimator uses, the WiFi pacing, the touch and the nights. */
+int aos_hal_power_json(char *out, size_t len)
+{
+    uint32_t isr = 0, wakes = 0;
+    bool chip_sleep = false;
+    aos_hal_touch_counters(&isr, &wakes, &chip_sleep);
+    int64_t off_s = s_display_state == AOS_DISPLAY_OFF && s_display_off_since_us
+                    ? (esp_timer_get_time() - s_display_off_since_us) / 1000000 : 0;
+    return snprintf(out, len,
+        ",\"soc\":%d,\"gauge_pct\":%d,\"sag_mv\":%.0f,\"sag_n\":%d,"
+        "\"cap_mah\":%.0f,\"cap_n\":%d,"
+        "\"wifi_fail\":%lu,\"wifi_parked\":%s,\"wifi_next_s\":%lu,\"wifi_reason\":%u,"
+        "\"touch_isr\":%lu,\"touch_wakes\":%lu,\"touch_chip_sleep\":%s,\"touch_slp\":%s,"
+        "\"night\":%s,\"nights\":%lu,\"night_chunks\":%lu,\"night_slept_s\":%lu,"
+        "\"night_last_wake\":%u,\"night_last_start\":%lld,\"night_last_end\":%lld,"
+        "\"display_off_s\":%lld,\"held_by\":\"%s\"",
+        aos_soc_percent(&s_soc), s_gauge_pct, s_soc.sag_mv, s_soc.sag_samples,
+        s_soc.cap_mah, s_soc.cap_samples,
+        (unsigned long)s_retry_total, s_retry_parked ? "true" : "false",
+        (unsigned long)s_retry_next_s, (unsigned)s_retry_reason,
+        (unsigned long)isr, (unsigned long)wakes, chip_sleep ? "true" : "false",
+        s_touch_sleep_enabled ? "true" : "false",
+        s_night_enabled ? "true" : "false", (unsigned long)s_night.nights,
+        (unsigned long)s_night.chunks, (unsigned long)s_night.slept_s,
+        (unsigned)s_night.last_wake, (long long)s_night.last_start,
+        (long long)s_night.last_end, (long long)off_s,
+        sleep_held_by() ? sleep_held_by() : "");
+}
+
+/* /api/pmu?deep=N: a night of N seconds now, whatever the hour, even on USB.
+ * For checking the wake-ups and the quick boots on the bench. */
+void aos_hal_night_test(uint32_t seconds)
+{
+    int64_t now = (int64_t)time(NULL);
+    if (now < EPOCH_SANE || seconds < 10) {
+        return;
+    }
+    night_enter(now, now + seconds, true);
+}
+
+void aos_hal_night_info(uint32_t *nights, uint32_t *chunks, uint32_t *slept_s,
+                        int64_t *last_start, int64_t *last_end, uint8_t *last_wake)
+{
+    if (nights)     *nights     = s_night.nights;
+    if (chunks)     *chunks     = s_night.chunks;
+    if (slept_s)    *slept_s    = s_night.slept_s;
+    if (last_start) *last_start = s_night.last_start;
+    if (last_end)   *last_end   = s_night.last_end;
+    if (last_wake)  *last_wake  = s_night.last_wake;
+}
+
+/* --------------------------------------------------------------------------
+ * Background task: IMU, screen auto-dimming and wake on wrist raise.
+ * -------------------------------------------------------------------------- */
+void aos_stats_tick(void);      /* aos_stats.c */
+
+static void housekeeping_task(void *arg)
+{
+    (void)arg;
+    uint32_t hk_ticks = 0;
+
+    while (1) {
+        aos_board_imu_poll();
+        button_poll();
+
+        if (++hk_ticks % 125 == 0) {        /* 125 * 40 ms = 5 s */
+            touch_keep_awake();
+            power_watch();
+            aos_steps_tick();
+        }
+        if (hk_ticks % 5 == 0) {            /* 200 ms */
+            pmu_irq_service();
+        }
+        pm_policy_apply();
+        aos_stats_tick();           /* Settings' graphs: aos_stats.c */
+        player_remember_tick();     /* the last track, for after a restart */
+
+        /* How much stack each of our tasks has to spare, in bytes (in ESP-IDF
+         * the high water mark comes in bytes, not words). Useful for deciding
+         * whether a stack can be shrunk, which is a better deal than sending
+         * it to PSRAM: shrinking frees internal RAM and pays no cache. */
+        if (hk_ticks % 1500 == 0) {         /* every minute */
+            char extra[64] = "";
+            if (s_player_task) {
+                snprintf(extra + strlen(extra), sizeof(extra) - strlen(extra),
+                         " player=%u", (unsigned)uxTaskGetStackHighWaterMark(s_player_task));
+            }
+            if (s_mic_task) {
+                snprintf(extra + strlen(extra), sizeof(extra) - strlen(extra),
+                         " mic=%u", (unsigned)uxTaskGetStackHighWaterMark(s_mic_task));
+            }
+            ESP_LOGI(TAG, "free stacks: hk=%u (of %d)%s",
+                     (unsigned)uxTaskGetStackHighWaterMark(NULL), HK_STACK, extra);
+        }
+
+        int64_t idle_ms = (esp_timer_get_time() - s_last_activity_us) / 1000;
+
+        if (s_raise_wake && aos_board_imu_wrist_raised()) {
+            aos_hal_activity();
+            vTaskDelay(pdMS_TO_TICKS(40));
+            continue;
+        }
+
+        /* With the battery on its last legs, always-on is the first thing to
+         * go. */
+        bool aod_ok = s_aod_enabled;
+        if (aod_ok) {
+            /* From what power_watch() already keeps, not from the PMU: this
+             * runs ten or twenty-five times a second, and a full PMU read is
+             * eleven I2C transactions. Measured on 2026-09-25 with the screen
+             * off: 145 I2C transactions a second, 110 of them from here. */
+            int pct = aos_soc_percent(&s_soc);
+            if (!s_usb_last && pct >= 0 && pct < AOD_LOW_BATTERY_PCT) {
+                aod_ok = false;
+            }
+        }
+
+        /* The user's timeouts (Settings > Display), or the old constants
+         * while they never chose. */
+        int64_t active_ms = s_active_s ? (int64_t)s_active_s * 1000
+                                       : (aod_ok ? AOD_TIMEOUT_MS : OFF_NO_AOD_MS);
+        switch (s_display_state) {
+        case AOS_DISPLAY_ACTIVE:
+            if (idle_ms > active_ms) {
+                aos_hal_display_set_state(aod_ok ? AOS_DISPLAY_AOD : AOS_DISPLAY_OFF);
+            }
+            break;
+
+        case AOS_DISPLAY_AOD:
+            /* aod_s counts from the dimming, which happened at active_ms. */
+            if (!aod_ok || (s_aod_s && idle_ms > active_ms + (int64_t)s_aod_s * 1000)) {
+                aos_hal_display_set_state(AOS_DISPLAY_OFF);
+            }
+            break;
+
+        case AOS_DISPLAY_OFF:
+            break;
+        }
+
+        /* Screen off: nobody is waiting on the 40 ms cadence, and every wake
+         * is a wake out of light sleep. */
+        vTaskDelay(pdMS_TO_TICKS(s_display_state != AOS_DISPLAY_ACTIVE ? 100 : 40));
+    }
+}
+
+/* -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+ * Frame budget
+ *
+ * Without this, wrong causes get proposed: it already happened once that the
+ * PSRAM buffers were blamed when the problem was the canvas stretch, and again
+ * that the flush buffer was moved to internal RAM "because it made sense" and
+ * the FPS dropped. The only way to know where the time goes is to measure it.
+ *
+ * LVGL reports the three stages of each refresh through display events:
+ *
+ *   REFR_START ..... RENDER_READY      drawing
+ *   FLUSH_WAIT_START ... FLUSH_WAIT_FINISH   waiting for the panel
+ *   ..... REFR_READY                   wrap-up; whatever is left until the
+ *                                      next REFR_START is the gap, which is
+ *                                      where the app's lv_timer runs
+ *
+ * Prints an average every 120 refreshes. To switch it off, do not call
+ * perf_hook_install().
+ * -------------------------------------------------------------------------- */
+
+/* Flush buffer. It is changed one variable at a time while watching
+ * bench_full_refresh(), which measures a full-screen refresh at startup
+ * without depending on any app. History measured on this board:
+ *
+ *   20 rows, single, psram     rectangle 25.5 ms   canvas 46.2 ms
+ *   20 rows, single, internal  rectangle 25.5 ms   canvas 46.2 ms
+ *   60 rows, double, internal  rectangle 25.0 ms   canvas 45.1 ms
+ *
+ * That is: neither the size, nor the location, nor double buffering changes
+ * anything. What stays is the variant that spends least of the scarce
+ * resource, which is internal RAM. */
+#define AOS_DRAW_ROWS       20
+#define AOS_DRAW_DOUBLE      0
+
+#define PERF_EVERY      120
+
+static struct {
+    int64_t refr_start, render_end, flush_start, flush_us, prev_end;
+    int64_t acc_render, acc_flush, acc_rest, acc_gap, acc_total;
+    int     n;
+} s_perf;
+
+static void perf_hook(lv_event_t *e)
+{
+    int64_t now = esp_timer_get_time();
+
+    switch (lv_event_get_code(e)) {
+    case LV_EVENT_REFR_START:
+        s_perf.refr_start = now;
+        /* It is cleared because LVGL always sends REFR_START, but RENDER_READY
+         * only when it really drew something. Without this, a clock that
+         * repaints once a minute goes on adding the cost of that drawing to
+         * every refresh and the budget does not add up to the total. */
+        s_perf.render_end = 0;
+        s_perf.flush_us = 0;
+        break;
+
+    case LV_EVENT_RENDER_READY:
+        s_perf.render_end = now;
+        break;
+
+    case LV_EVENT_FLUSH_WAIT_START:
+        s_perf.flush_start = now;
+        break;
+
+    case LV_EVENT_FLUSH_WAIT_FINISH:
+        s_perf.flush_us += now - s_perf.flush_start;
+        break;
+
+    case LV_EVENT_REFR_READY: {
+        /* if there was no drawing, the whole frame is "the rest" */
+        int64_t rend = s_perf.render_end ? s_perf.render_end : s_perf.refr_start;
+
+        if (s_perf.prev_end) {
+            s_perf.acc_total  += now - s_perf.prev_end;
+            s_perf.acc_gap    += s_perf.refr_start - s_perf.prev_end;
+            s_perf.acc_render += rend - s_perf.refr_start;
+            s_perf.acc_flush  += s_perf.flush_us;
+            s_perf.acc_rest   += (now - rend) - s_perf.flush_us;
+            s_perf.n++;
+        }
+        s_perf.prev_end = now;
+
+        if (s_perf.n >= PERF_EVERY) {
+            int n = s_perf.n;
+            /* the four terms make up the total: if it does not add up, the measurement is wrong */
+            ESP_LOGI(TAG,
+                     "frame %.1f ms = draw %.1f + flush %.2f + rest %.1f + gap %.1f  (%.1f fps)",
+                     (double)s_perf.acc_total  / n / 1000.0,
+                     (double)s_perf.acc_render / n / 1000.0,
+                     (double)s_perf.acc_flush  / n / 1000.0,
+                     (double)s_perf.acc_rest   / n / 1000.0,
+                     (double)s_perf.acc_gap    / n / 1000.0,
+                     1000000.0 * n / (double)s_perf.acc_total);
+            s_perf.acc_total = s_perf.acc_render = s_perf.acc_flush = 0;
+            s_perf.acc_rest  = s_perf.acc_gap = 0;
+            s_perf.n = 0;
+        }
+        break;
+    }
+
+    default:
+        break;
+    }
+}
+
+/* --------------------------------------------------------------------------
+ * What moving a screen costs
+ *
+ * The frame budget says drawing a full screen costs ~45 ms, and drawing a
+ * game's canvas is one memcpy per row from PSRAM into the flush buffer's RAM.
+ * 330 KB in 45 ms is 7 MB/s, and this chip has OCTAL PSRAM at 80 MHz: the bus
+ * gives far more. So what costs is the copier, not the memory... or the model
+ * is wrong.
+ *
+ * Measured once at startup, with the system idle, and separately:
+ *
+ *   - a single-shot copy, with the libc's memcpy: the bus ceiling.
+ *   - a row-by-row copy (736 B), which is how LVGL really copies.
+ *   - the same with lv_memcpy(), which is LVGL's own implementation in C and
+ *     the one in use today (CONFIG_LV_USE_BUILTIN_STRING=y).
+ *
+ * With these three figures it is possible to tell whether moving LVGL to the
+ * libc is worthwhile or whether something else has to be attacked.
+ * -------------------------------------------------------------------------- */
+static void bench_screen_copy(void)
+{
+    const int rows = 448, row_bytes = 368 * 2;
+    const size_t total = (size_t)rows * row_bytes;
+
+    uint8_t *src = heap_caps_malloc(total, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    uint8_t *dst = heap_caps_malloc((size_t)20 * row_bytes, MALLOC_CAP_INTERNAL);
+    if (!src || !dst) {
+        free(src);
+        free(dst);
+        return;
+    }
+    memset(src, 0x5A, total);
+
+    int64_t t0 = esp_timer_get_time();
+    for (int i = 0; i < 20; i++) {
+        memcpy(dst, src + (size_t)i * row_bytes * 20, (size_t)20 * row_bytes);
+    }
+    int64_t bulk = esp_timer_get_time() - t0;
+
+    t0 = esp_timer_get_time();
+    for (int y = 0; y < rows; y++) {
+        memcpy(dst + (size_t)(y % 20) * row_bytes, src + (size_t)y * row_bytes, row_bytes);
+    }
+    int64_t per_row = esp_timer_get_time() - t0;
+
+    t0 = esp_timer_get_time();
+    for (int y = 0; y < rows; y++) {
+        lv_memcpy(dst + (size_t)(y % 20) * row_bytes, src + (size_t)y * row_bytes, row_bytes);
+    }
+    int64_t per_row_lv = esp_timer_get_time() - t0;
+
+    ESP_LOGI(TAG, "screen copy (%u KB): in one go %lld us (%.1f MB/s) | "
+                  "row by row %lld us (%.1f MB/s) | lv_memcpy %lld us (%.1f MB/s)",
+             (unsigned)(total / 1024),
+             bulk, total / (double)bulk,
+             per_row, total / (double)per_row,
+             per_row_lv, total / (double)per_row_lv);
+
+    free(src);
+    free(dst);
+}
+
+/* What a full-screen refresh costs, without depending on any app.
+ *
+ * The same thing is drawn twice with two different objects and compared:
+ *
+ *   - a plain rectangle: measures the refresh machinery (splitting the screen
+ *     into flush-buffer-sized chunks, building the draw tasks, flushing).
+ *   - an RGB565 canvas the size of the screen, which is what a game uses.
+ *
+ * If the two come out similar, the machinery is what is expensive and the
+ * flush buffer size is what to look at. If the canvas comes out much higher,
+ * LVGL's image path is what is expensive. And we already know that copying the
+ * 322 KB is 4 ms, so any figure well above that is overhead, not memory. */
+static void bench_full_refresh(void)
+{
+    if (!s_display || !aos_hal_lock(2000)) {
+        return;
+    }
+
+    lv_obj_t *scr = lv_screen_active();
+    const int N = 8;
+
+    lv_obj_t *box = lv_obj_create(scr);
+    lv_obj_remove_style_all(box);
+    lv_obj_set_size(box, BSP_LCD_H_RES, BSP_LCD_V_RES);
+    lv_obj_set_pos(box, 0, 0);
+    lv_obj_set_style_bg_color(box, lv_color_hex(0x102030), 0);
+    lv_obj_set_style_bg_opa(box, LV_OPA_COVER, 0);
+
+    int64_t t0 = esp_timer_get_time();
+    for (int i = 0; i < N; i++) {
+        lv_obj_invalidate(box);
+        lv_refr_now(s_display);
+    }
+    int64_t rect_us = (esp_timer_get_time() - t0) / N;
+    lv_obj_delete(box);
+
+    int64_t canvas_us = -1, canvas_r0_us = -1;
+    int32_t radius = -1;
+    size_t bytes = (size_t)BSP_LCD_H_RES * BSP_LCD_V_RES * 2;
+    uint16_t *buf = heap_caps_malloc(bytes, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    if (buf) {
+        memset(buf, 0x33, bytes);
+        lv_obj_t *cv = lv_canvas_create(scr);
+        lv_canvas_set_buffer(cv, buf, BSP_LCD_H_RES, BSP_LCD_V_RES,
+                             LV_COLOR_FORMAT_RGB565);
+        lv_obj_set_size(cv, BSP_LCD_H_RES, BSP_LCD_V_RES);
+        lv_obj_set_pos(cv, 0, 0);
+        lv_image_set_antialias(cv, false);
+
+        t0 = esp_timer_get_time();
+        for (int i = 0; i < N; i++) {
+            lv_obj_invalidate(cv);
+            lv_refr_now(s_display);
+        }
+        canvas_us = (esp_timer_get_time() - t0) / N;
+
+        /* lv_image takes clip_radius from the object's radius style, and with
+         * a non-zero radius the blit goes through per-pixel masking instead of
+         * copying the whole row. A game's canvas never wants a radius. */
+        radius = lv_obj_get_style_radius(cv, LV_PART_MAIN);
+        lv_obj_set_style_radius(cv, 0, 0);
+        t0 = esp_timer_get_time();
+        for (int i = 0; i < N; i++) {
+            lv_obj_invalidate(cv);
+            lv_refr_now(s_display);
+        }
+        canvas_r0_us = (esp_timer_get_time() - t0) / N;
+
+        lv_obj_delete(cv);
+        free(buf);
+    }
+
+    /* Same canvas, same size, different memory: it separates "reading from
+     * PSRAM" from "LVGL's image path". A quarter of the screen is used because
+     * a whole one does not fit in internal RAM. */
+    int64_t quarter_psram = -1, quarter_int = -1;
+    const int qh = 112;
+    size_t qbytes = (size_t)BSP_LCD_H_RES * qh * 2;
+
+    for (int pass = 0; pass < 2; pass++) {
+        uint16_t *qb = heap_caps_malloc(qbytes, pass == 0
+                                        ? (MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT)
+                                        : MALLOC_CAP_INTERNAL);
+        if (!qb) {
+            continue;
+        }
+        memset(qb, 0x44, qbytes);
+        lv_obj_t *qc = lv_canvas_create(scr);
+        lv_canvas_set_buffer(qc, qb, BSP_LCD_H_RES, qh, LV_COLOR_FORMAT_RGB565);
+        lv_obj_set_size(qc, BSP_LCD_H_RES, qh);
+        lv_obj_set_pos(qc, 0, 0);
+        lv_image_set_antialias(qc, false);
+
+        int64_t tq = esp_timer_get_time();
+        for (int i = 0; i < N; i++) {
+            lv_obj_invalidate(qc);
+            lv_refr_now(s_display);
+        }
+        int64_t got = (esp_timer_get_time() - tq) / N;
+        if (pass == 0) quarter_psram = got; else quarter_int = got;
+
+        lv_obj_delete(qc);
+        free(qb);
+    }
+
+    lv_refr_now(s_display);
+    aos_hal_unlock();
+
+    ESP_LOGI(TAG, "canvas of %d rows: in psram %.1f ms | in internal ram %.1f ms",
+             qh, quarter_psram / 1000.0, quarter_int / 1000.0);
+
+    ESP_LOGI(TAG, "full refresh: rectangle %.1f ms | canvas %.1f ms | "
+                  "canvas radius 0: %.1f ms (the theme gives it radius %d) | "
+                  "buffer %d rows %s in psram | qspi %d MHz",
+             rect_us / 1000.0, canvas_us / 1000.0, canvas_r0_us / 1000.0,
+             (int)radius, AOS_DRAW_ROWS,
+             AOS_DRAW_DOUBLE ? "double" : "single",
+             (int)(AOS_LCD_PCLK_HZ / 1000000));
+}
+
+static void perf_hook_install(lv_display_t *display)
+{
+    static const lv_event_code_t codes[] = {
+        LV_EVENT_REFR_START, LV_EVENT_RENDER_READY,
+        LV_EVENT_FLUSH_WAIT_START, LV_EVENT_FLUSH_WAIT_FINISH,
+        LV_EVENT_REFR_READY,
+    };
+    for (unsigned i = 0; i < sizeof(codes) / sizeof(codes[0]); i++) {
+        lv_display_add_event_cb(display, perf_hook, codes[i], NULL);
+    }
+}
+
+
+/* --------------------------------------------------------------------------
+ * Display startup
+ *
+ * This used to be done by bsp_display_start_with_config(). It is redone here
+ * because of two things that are in the BSP's code and cannot be seen from
+ * outside:
+ *
+ * 1. THE BSP REGISTERS THIS PANEL AS IF IT WERE RGB, AND IT IS NOT.
+ *    bsp_display_lcd_init() registers it with lvgl_port_add_disp_rgb(), which
+ *    marks the display as LVGL_PORT_DISP_TYPE_RGB. And for that type,
+ *    lvgl_port_flush_callback() calls lv_disp_flush_ready() RIGHT AFTER
+ *    esp_lcd_panel_draw_bitmap(). On an RGB panel that is fine: the write goes
+ *    straight into the framebuffer and that is that. Ours is QSPI, and there
+ *    draw_bitmap QUEUES a DMA transfer and returns at once -which is why the
+ *    driver's error says "spi transmit (QUEUE) color failed"-. With a single
+ *    draw buffer, LVGL starts rendering the next chunk ON TOP of the one still
+ *    being sent, and the panel receives a mixture of the two.
+ *
+ *    On screen that shows up as isolated pixels carrying the colour of what
+ *    was there before, over the trail of whatever has just moved. And they do
+ *    not correct themselves, because LVGL considers that area drawn. On a
+ *    black background they are invisible; on Truco's green baize they appeared
+ *    at once, as lines of dots following the path of the cards.
+ *
+ *    lvgl_port_add_disp() -the generic path, for panels with an io_handle-
+ *    registers on_color_trans_done and considers the flush finished when the
+ *    DMA really has finished. It is the same port and the same panel: only who
+ *    announces that the buffer is free changes.
+ *
+ * 2. THE BSP IGNORES THE CONFIGURATION IT IS GIVEN.
+ *    bsp_display_start_with_config() takes a bsp_display_cfg_t and keeps it to
+ *    itself: bsp_display_lcd_init() does not receive it and builds its own
+ *    from the Kconfig values (CONFIG_BSP_DISPLAY_LVGL_BUF_HEIGHT, 24 rows).
+ *    Which means AOS_DRAW_ROWS, AOS_DRAW_DOUBLE and this file's DMA/PSRAM
+ *    flags NEVER had any effect, and the benchmark that concluded "neither the
+ *    size nor the location nor double buffering changes anything" was
+ *    measuring the same configuration every time. They do count now, so if
+ *    they are touched again they have to be measured again.
+ * -------------------------------------------------------------------------- */
+
+/* The controller wants windows of EVEN width and height. The BSP did this in
+ * its own callback; since we no longer go through it, it goes here.
+ *
+ * The BSP's copied the coordinates into a uint16_t before rounding, so an area
+ * with a negative x1 -an object poking out of the left edge- turned into a
+ * huge number. With signed integers, & ~1 and | 1 round outwards in both
+ * directions, which is what is needed. */
+static void display_round_area_cb(lv_event_t *e)
+{
+    lv_area_t *area = (lv_area_t *)lv_event_get_param(e);
+    if (!area) {
+        return;
+    }
+    area->x1 &= ~1;
+    area->y1 &= ~1;
+    area->x2 |= 1;
+    area->y2 |= 1;
+}
+
+static uint32_t lvgl_tick_ms(void)
+{
+    return (uint32_t)(esp_timer_get_time() / 1000);
+}
+
+/* The CO5300's memory is wider than the 368 columns LVGL draws: the v2's
+ * image sits 16 columns in (the BSP's x gap), and the glass shows a few of
+ * the columns past the right edge. Nothing ever writes those. They were
+ * black only because the panel never lost power: after the night's deep
+ * sleep cuts its rails they came back as garbage, a green bar down the
+ * right edge (2026-09-25, photographed). So at every start the whole
+ * addressable width is cleared once, gap at 0, before LVGL takes over.
+ * 466 columns is what the CO5300 drives on its round panels; about 20 ms. */
+#define PANEL_CLEAR_W   466
+#define PANEL_CLEAR_ROWS 8
+
+static void panel_clear_gram(esp_lcd_panel_handle_t panel)
+{
+    size_t bytes = (size_t)PANEL_CLEAR_W * PANEL_CLEAR_ROWS * 2;
+    uint16_t *black = heap_caps_calloc(1, bytes, MALLOC_CAP_DMA | MALLOC_CAP_INTERNAL);
+    if (!black) {
+        return;
+    }
+    esp_lcd_panel_set_gap(panel, 0, 0);
+    for (int y = 0; y < BSP_LCD_V_RES; y += PANEL_CLEAR_ROWS) {
+        int y1 = y + PANEL_CLEAR_ROWS > BSP_LCD_V_RES ? BSP_LCD_V_RES : y + PANEL_CLEAR_ROWS;
+        esp_lcd_panel_draw_bitmap(panel, 0, y, PANEL_CLEAR_W, y1, black);
+    }
+    /* back to what the BSP uses: 16 on the v2, set again when its touch is
+     * created; a command waits for the queued transfers, then the buffer
+     * can go */
+    esp_lcd_panel_set_gap(panel, aos_board_variant() == AOS_BOARD_V2_CO5300_CST816 ? 16 : 0, 0);
+    esp_lcd_panel_disp_on_off(panel, true);
+    heap_caps_free(black);
+}
+
+static lv_display_t *display_start(void)
+{
+    lvgl_port_cfg_t port_cfg = ESP_LVGL_PORT_INIT_CONFIG();
+#ifdef AOS_AUDIT_LVGL_STACK16
+    /* RAM audit (E1): 20 KB measured at a 7.6 KB peak after opening photos
+     * (the tjpgd path), settings, the calendar and the launcher; 16 KB keeps
+     * more than the whole observed peak as margin. */
+    port_cfg.task_stack = 16 * 1024;
+#else
+    port_cfg.task_stack = 20 * 1024;
+#endif
+    /* The port's tick is a periodic esp_timer, 5 ms from the factory, and a
+     * timer every 5 ms is a wake-up every 5 ms: with it, the chip never gets
+     * the 8 idle ms tickless idle asks for before it sleeps. LVGL 9 can take
+     * its tick from a callback instead, so the tick comes from esp_timer's
+     * clock (which light sleep keeps right) and the port's timer is left
+     * ticking once every 100 ms, where it only touches a counter nobody
+     * reads. */
+    port_cfg.timer_period_ms = 100;
+    /* Pinned, and to the core the panel's SPI interrupt lives on (this
+     * function runs there, see display_start_pinned): the bus lock's ISR
+     * side and its task side must never run at the same time on two cores,
+     * because IDF's spi_bus_lock reads `acquiring_dev` twice
+     * (espressif/esp-idf#18527) and the second read can be NULL. WiFi and
+     * its interrupts stay on core 0. */
+    port_cfg.task_affinity = AOS_LVGL_CORE;
+    if (lvgl_port_init(&port_cfg) != ESP_OK) {
+        ESP_LOGE(TAG, "lvgl_port_init failed");
+        return NULL;
+    }
+    lv_tick_set_cb(lvgl_tick_ms);
+
+    esp_lcd_panel_handle_t    panel = NULL;
+    esp_lcd_panel_io_handle_t io    = NULL;
+    bsp_display_config_t      hw    = {0};
+    if (bsp_display_new(&hw, &panel, &io) != ESP_OK) {
+        ESP_LOGE(TAG, "bsp_display_new failed");
+        return NULL;
+    }
+    s_panel    = panel;
+    s_panel_io = io;
+    panel_clear_gram(panel);
+
+    /* Light sleep isolates every GPIO (ESP_SLEEP_GPIO_RESET_WORKAROUND):
+     * chip select and the QSPI lines float while the chip sleeps, and the
+     * panel reads the noise as commands. Measured: after the first real light
+     * sleep the panel came back dead (TE stopped) until the next init. These
+     * six keep their normal configuration through sleep instead. */
+    const gpio_num_t lcd_pins[] = { BSP_LCD_CS, BSP_LCD_PCLK, BSP_LCD_DATA0,
+                                    BSP_LCD_DATA1, BSP_LCD_DATA2, BSP_LCD_DATA3 };
+    for (unsigned i = 0; i < sizeof(lcd_pins) / sizeof(lcd_pins[0]); i++) {
+        gpio_sleep_sel_dis(lcd_pins[i]);
+    }
+
+    const lvgl_port_display_cfg_t disp_cfg = {
+        .io_handle     = io,
+        .panel_handle  = panel,
+        .buffer_size   = BSP_LCD_H_RES * AOS_DRAW_ROWS,
+        .double_buffer = AOS_DRAW_DOUBLE,
+        .hres          = BSP_LCD_H_RES,
+        .vres          = BSP_LCD_V_RES,
+        .monochrome    = false,
+        .color_format  = LV_COLOR_FORMAT_RGB565,
+        .rotation = {
+            .swap_xy  = false,
+            .mirror_x = false,
+            .mirror_y = false,
+        },
+        .flags = {
+            /* The panel wants RGB565 the other way round; the BSP did this too. */
+            .swap_bytes  = true,
+            /* No software rotation: the screen is born portrait, and asking
+             * for it allocates one more buffer that is never used. */
+            .sw_rotate   = false,
+            /* THE DRAW BUFFER GOES IN DMA-CAPABLE INTERNAL RAM, and it is not
+             * for speed: it is so the flush cannot fail.
+             *
+             * With the buffer in PSRAM -which is where it landed with both
+             * flags false- spi_master cannot send from there and builds a
+             * bounce buffer in internal RAM ON EVERY TRANSACTION
+             * (setup_dma_priv_buffer). It is the same 14 KB, but asked for
+             * forty times a second and at the worst possible moment. When
+             * internal RAM gets tight that allocation fails, and that is where
+             * the disaster starts:
+             *
+             *   E spi_master: setup_dma_priv_buffer: Failed to allocate priv TX buffer
+             *   E lcd_panel.io.spi: spi transmit (queue) color failed
+             *   E co5300_spi: send color data failed
+             *   E task_wdt: CPU 0: taskLVGL -> Aborting -> Rebooting
+             *
+             * The reboot comes from LVGL's port IGNORING the error from
+             * esp_lcd_panel_draw_bitmap(), and for an SPI panel the
+             * lv_display_flush_ready() is given by the end-of-DMA callback. If
+             * the transaction was never queued, that callback never arrives
+             * and LVGL spins in wait_for_flushing() forever (decoded
+             * backtrace: lv_refr.c:1454). In other words, running out of
+             * internal RAM by 14 KB did not degrade the image: it killed the
+             * watch.
+             *
+             * Measured on 2026-09-08 with BLE advertising (~110 KB of internal
+             * RAM) and opening Clima, which also brings up TLS: it happened
+             * three times out of three. With the buffer here, there is no
+             * bounce buffer to allocate and the path that failed ceases to
+             * exist.
+             *
+             * It costs a fixed 14 KB of internal RAM, asked for at startup
+             * -when there is plenty- instead of 14 KB asked for on every frame
+             * when it is scarce. It is the same reasoning as aos_dynapp's code
+             * reservation: reserve early what cannot be asked for later.
+             *
+             * Beware the old note in HANDOFF-APPS.md saying this "was already
+             * tried and is not enough": that test dates from when the BSP
+             * ignored the entire configuration (see point 2 above), so the
+             * flag never actually got applied and the conclusion does not
+             * hold. */
+            .buff_dma    = true,
+            .buff_spiram = false,
+        },
+    };
+
+    /* Where the draw buffer lands cannot be deduced from the flags: it is
+     * measured and stated, this file having already had a whole benchmark
+     * measuring a configuration that was not being applied. */
+    size_t int_before = heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
+    size_t ext_before = heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
+
+    lv_display_t *disp = lvgl_port_add_disp(&disp_cfg);
+    if (!disp) {
+        ESP_LOGE(TAG, "lvgl_port_add_disp failed");
+        return NULL;
+    }
+
+    int int_used = (int)int_before - (int)heap_caps_get_free_size(MALLOC_CAP_INTERNAL);
+    int ext_used = (int)ext_before - (int)heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
+    ESP_LOGW(TAG, "drawing buffer: %d rows x %d px = %d KB asked for; "
+             "spent %d KB of internal RAM and %d KB of PSRAM",
+             AOS_DRAW_ROWS, BSP_LCD_H_RES,
+             (int)(BSP_LCD_H_RES * AOS_DRAW_ROWS * 2 * (AOS_DRAW_DOUBLE ? 2 : 1)) / 1024,
+             int_used / 1024, ext_used / 1024);
+    lv_display_add_event_cb(disp, display_round_area_cb, LV_EVENT_INVALIDATE_AREA, NULL);
+
+    esp_lcd_touch_handle_t tp = NULL;
+    if (bsp_touch_new(NULL, &tp) == ESP_OK && tp) {
+        touch_frame_install(tp);
+        const lvgl_port_touch_cfg_t touch_cfg = {
+            .disp   = disp,
+            .handle = tp,
+        };
+        if (!lvgl_port_add_touch(&touch_cfg)) {
+            ESP_LOGE(TAG, "lvgl_port_add_touch failed");
+        }
+    } else {
+        ESP_LOGE(TAG, "bsp_touch_new failed");
+    }
+
+    bsp_display_brightness_init();
+    ESP_LOGI(TAG, "display: %d buffer rows, %s, DMA flush with a real completion signal",
+             AOS_DRAW_ROWS, AOS_DRAW_DOUBLE ? "double" : "single");
+    return disp;
+}
+
+/* display_start() on core AOS_LVGL_CORE, whatever core app_main runs on: an
+ * interrupt is allocated on the core that calls esp_intr_alloc(), and
+ * spi_bus_initialize() does so from here. Everything that touches the
+ * panel's SPI afterwards -the LVGL task, the housekeeping task's brightness
+ * and sleep commands, the video app's worker- is pinned to the same core. */
+static lv_display_t     *s_display_started;
+static SemaphoreHandle_t s_display_started_sem;
+
+static void display_start_task(void *arg)
+{
+    (void)arg;
+    s_display_started = display_start();
+    xSemaphoreGive(s_display_started_sem);
+    vTaskDelete(NULL);
+}
+
+static lv_display_t *display_start_pinned(void)
+{
+    s_display_started_sem = xSemaphoreCreateBinary();
+    if (!s_display_started_sem) {
+        return display_start();
+    }
+    if (xTaskCreatePinnedToCore(display_start_task, "aos_disp_init", 8192, NULL, 5, NULL,
+                                AOS_LVGL_CORE) != pdPASS) {
+        vSemaphoreDelete(s_display_started_sem);
+        return display_start();
+    }
+    xSemaphoreTake(s_display_started_sem, portMAX_DELAY);
+    vSemaphoreDelete(s_display_started_sem);
+    s_display_started_sem = NULL;
+    return s_display_started;
+}
+
+int aos_hal_lvgl_core(void)
+{
+    return AOS_LVGL_CORE;
+}
+
+bool aos_hal_init(void)
+{
+    esp_err_t ret = nvs_flash_init();
+    if (ret == ESP_ERR_NVS_NO_FREE_PAGES || ret == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        nvs_flash_erase();
+        nvs_flash_init();
+    }
+
+    ESP_ERROR_CHECK(esp_event_loop_create_default());
+
+    ESP_ERROR_CHECK(bsp_i2c_init());
+    aos_board_init();
+    snprintf(s_board_name, sizeof(s_board_name), "%s", aos_board_variant_name());
+
+    {
+        int32_t saved;
+        if (aos_hal_pref_get_i32("pwr_save", &saved))  s_power_saving        = (saved != 0);
+        if (aos_hal_pref_get_i32("batt_care", &saved)) s_battery_care        = (saved != 0);
+        if (aos_hal_pref_get_i32("panel_slp", &saved)) s_panel_sleep_enabled = (saved != 0);
+        if (aos_hal_pref_get_i32("light_slp", &saved)) s_light_sleep_enabled = (saved != 0);
+        if (aos_hal_pref_get_i32("touch_slp", &saved)) s_touch_sleep_enabled = (saved != 0);
+        if (aos_hal_pref_get_i32("night_ds", &saved))  s_night_enabled = (saved != 0);
+        {
+            int32_t sag = 0, cap = 0, cnt = 0;
+            aos_hal_pref_get_i32("soc_sag", &sag);
+            aos_hal_pref_get_i32("bat_cap", &cap);
+            aos_hal_pref_get_i32("soc_n", &cnt);
+            /* the stored capacity only if a charge measured it: the sag's
+             * first sample also wrote the default of the day (130 mAh) */
+            if (((cnt >> 16) & 0x7FFF) == 0) {
+                cap = 0;
+            }
+            aos_soc_init(&s_soc, sag / 10.0f, cap / 10.0f);
+            s_soc.sag_samples = cnt & 0xFFFF;
+            s_soc.cap_samples = (cnt >> 16) & 0x7FFF;
+        }
+        if (aos_hal_pref_get_i32("bat_min", &saved))   s_battery_minutes     = (uint32_t)saved;
+        if (aos_hal_pref_get_i32("chg_cyc", &saved))   s_charge_cycles       = (uint32_t)saved;
+
+        const aos_pmu_config_t pmu_cfg = {
+            .charge_ma      = s_battery_care ? AOS_CHARGE_MA_CARE : AOS_CHARGE_MA_FULL,
+            .precharge_ma   = AOS_PRECHARGE_MA,
+            .termination_ma = AOS_TERMINATION_MA,
+            .target_mv      = s_battery_care ? AOS_CHARGE_MV_CARE : AOS_CHARGE_MV_FULL,
+            .warn_pct       = AOS_LOW_BATTERY_WARN_PCT,
+            .shutdown_pct   = AOS_LOW_BATTERY_OFF_PCT,
+            .poweroff_mv    = AOS_POWEROFF_MV,
+        };
+        aos_board_pmu_configure(&pmu_cfg);
+        aos_board_pmu_dump();
+
+        aos_pmu_state_t pmu;
+        if (aos_board_pmu_read(&pmu) && pmu.valid) {
+            s_usb_last = pmu.usb_present;
+            if (!pmu.usb_present) {
+                s_unplug_us  = esp_timer_get_time();
+                s_unplug_pct = pmu.percent;
+            }
+        }
+    }
+
+    bsp_spiffs_mount();
+    s_sd_mounted = (bsp_sdcard_mount() == ESP_OK);
+    ESP_LOGI(TAG, "microSD %s", s_sd_mounted ? "mounted" : "not available");
+
+    /* Time: the RTC's rules until somebody synchronises over NTP. */
+    aos_hal_timezone_set(aos_hal_timezone_get());
+    struct tm rtc_time;
+    if (aos_board_rtc_get(&rtc_time) && rtc_time.tm_year > 100) {
+        struct tm copy = rtc_time;
+        time_t epoch = mktime(&copy);
+        struct timeval tv = { .tv_sec = epoch, .tv_usec = 0 };
+        settimeofday(&tv, NULL);
+    }
+    /* A chunk of a night in deep sleep may end here and go back to sleep,
+     * before the panel, the WiFi or the apps are brought up. */
+    night_boot();
+
+    /* the tone queue and its task: aos_hal_beep() only enqueues */
+    s_tone_queue = xQueueCreate(TONE_QUEUE_LEN, sizeof(tone_note_t));
+    if (s_tone_queue) {
+        /* Priority 6, above the LVGL task (4): with drawing at 100% CPU and
+         * the same priority, this task got no turn and the notes came out
+         * mute. Audio cannot depend on how long a frame takes to draw. */
+        /* 4 K, not 3: 2,500 B peak measured while a tone played (RAM audit). In
+         * PSRAM, so the extra kilobyte costs no internal RAM. */
+        AOS_XTASKCREATE(tone_task, "aos_tone", 4096, NULL, 6, NULL);
+    }
+
+    int32_t saved = 0;
+    if (aos_hal_pref_get_i32("bright", &saved)) {
+        s_brightness = (int)saved;
+    }
+    if (aos_hal_pref_get_i32("volume", &saved)) {
+        s_volume = (int)saved;
+    }
+    if (aos_hal_pref_get_i32("aod", &saved)) {
+        s_aod_enabled = (saved != 0);
+    }
+    if (aos_hal_pref_get_i32("aod_bright", &saved)) {
+        s_aod_brightness = (int)saved;
+    }
+    if (aos_hal_pref_get_i32("scr_on_s", &saved) && saved >= 0) {
+        s_active_s = (uint32_t)saved;
+    }
+    if (aos_hal_pref_get_i32("aod_off_s", &saved) && saved >= 0) {
+        s_aod_s = (uint32_t)saved;
+    }
+    if (aos_hal_pref_get_i32("raise_wake", &saved)) {
+        s_raise_wake = (saved != 0);
+    }
+
+
+    /* The LVGL task's default stack (ESP_LVGL_PORT_INIT_CONFIG) is 7168 bytes,
+     * and that is not enough: decoder_info() in lv_tjpgd.c allocates its work
+     * buffer ON THE STACK (uint8_t workb[4096] + JDEC jd, nearly 4.7 KB in a
+     * single frame). LVGL calls it when opening any image or layer, trying
+     * every registered decoder, and on an already deep drawing path the stack
+     * pointer runs past the limit and lands inside the task's own TCB, which
+     * sits 16 bytes below. It stomps on list pointers and the reent: the board
+     * dies later, in the scheduler or in a printf, with no apparent relation
+     * to the drawing.
+     *
+     * Confirmed with a hardware watchpoint on the TCB's _stdout:
+     *   lv_draw_rect -> lv_draw_dispatch -> lv_draw_sw_layer -> lv_draw_sw_image
+     *     -> lv_image_decoder_open -> decoder_info (lv_tjpgd.c:122)
+     *
+     * That is why only claudito, 2043 and gemas failed (canvas and images) and
+     * not flappy or recorder, which use ordinary widgets. display_start()
+     * raises it. */
+    aos_board_panel_hw_reset();
+    s_display = display_start_pinned();
+
+    if (!s_display) {
+        ESP_LOGE(TAG, "could not start the display");
+        return false;
+    }
+    bsp_display_brightness_set(s_brightness);
+    perf_hook_install(s_display);
+    bench_screen_copy();
+    bench_full_refresh();
+    touch_disable_autosleep();
+    touch_task_start();
+
+    esp_err_t audio_ret = bsp_audio_init(NULL);
+    if (audio_ret == ESP_OK) {
+        s_speaker = bsp_audio_codec_speaker_init();
+        s_mic     = bsp_audio_codec_microphone_init();
+    }
+    ESP_LOGI(TAG, "audio: init=%s speaker=%p mic=%p volume=%d",
+             esp_err_to_name(audio_ret), s_speaker, s_mic, s_volume);
+
+    /* The recordings folder has to exist before anybody records: fopen() does
+     * not create directories. */
+    mkdir(aos_hal_path_recordings(), 0777);
+    /* Same for the videos folder: the portal's upload has to find it. */
+    if (aos_hal_path_sd_root()) {
+        char videos[64];
+        snprintf(videos, sizeof(videos), "%s/videos", aos_hal_path_sd_root());
+        mkdir(videos, 0777);
+    }
+
+    const gpio_config_t boot_button = {
+        .pin_bit_mask = 1ULL << BOOT_BUTTON_GPIO,
+        .mode         = GPIO_MODE_INPUT,
+        .pull_up_en   = GPIO_PULLUP_ENABLE,
+        .pull_down_en = GPIO_PULLDOWN_DISABLE,
+        .intr_type    = GPIO_INTR_DISABLE,
+    };
+    gpio_config(&boot_button);
+
+    /* What wakes the chip from light sleep: the touch controller's INT line
+     * (GPIO21, pulses low on a finger) and the BOOT button. The PMU's IRQ
+     * cannot: it ends on the expander (see aos_board.c), and it is polled
+     * whenever the chip is awake anyway. */
+    gpio_wakeup_enable(BSP_LCD_TOUCH_INT, GPIO_INTR_LOW_LEVEL);
+    gpio_wakeup_enable(BOOT_BUTTON_GPIO, GPIO_INTR_LOW_LEVEL);
+    esp_sleep_enable_gpio_wakeup();
+
+    /* The BSP enables both I2S channels at init and each enabled channel
+     * holds an APB_FREQ_MAX pm lock, which forbids light sleep for good. The
+     * codec's data interface disables the channel on close, so one open and
+     * close per device at boot puts them in the state they are in after any
+     * real use: off until needed. */
+    if (s_speaker) {
+        esp_codec_dev_sample_info_t fs = { .sample_rate = 16000, .channel = 1, .bits_per_sample = 16 };
+        if (esp_codec_dev_open(s_speaker, &fs) == ESP_OK) esp_codec_dev_close(s_speaker);
+    }
+    if (s_mic) {
+        esp_codec_dev_sample_info_t fs = { .sample_rate = 16000, .channel = 1, .bits_per_sample = 16 };
+        if (esp_codec_dev_open(s_mic, &fs) == ESP_OK) esp_codec_dev_close(s_mic);
+    }
+
+    /* Dynamic frequency scaling: the lock is taken here and released by the
+     * policy when there is nothing to draw. esp_pm_configure fails harmlessly
+     * when CONFIG_PM_ENABLE is off, and then the clock is what it always was. */
+    {
+        esp_pm_config_t pm = {
+            .max_freq_mhz = AOS_DFS_MAX_MHZ,
+            .min_freq_mhz = AOS_DFS_MIN_MHZ,
+            .light_sleep_enable = false,
+        };
+        esp_err_t pm_ret = esp_pm_configure(&pm);
+        if (pm_ret == ESP_OK &&
+            esp_pm_lock_create(ESP_PM_CPU_FREQ_MAX, 0, "aos_ui", &s_pm_max_lock) == ESP_OK) {
+            esp_pm_lock_acquire(s_pm_max_lock);
+            s_pm_max_held = true;
+            ESP_LOGI(TAG, "DFS %d..%d MHz, power saving %s, battery care %s, panel sleep %s",
+                     AOS_DFS_MIN_MHZ, AOS_DFS_MAX_MHZ,
+                     s_power_saving ? "on" : "off", s_battery_care ? "on" : "off",
+                     s_panel_sleep_enabled ? "on" : "off");
+        } else {
+            s_pm_max_lock = NULL;
+            ESP_LOGW(TAG, "DFS not available (%s): the CPU stays at %d MHz",
+                     esp_err_to_name(pm_ret), cpu_mhz_now());
+        }
+    }
+
+    s_last_activity_us = esp_timer_get_time();
+    /* on the panel's core: it sends the brightness and sleep commands over
+     * the same SPI device as the flush (see display_start) */
+    xTaskCreatePinnedToCore(housekeeping_task, "aos_hk", HK_STACK, NULL, 4, NULL, AOS_LVGL_CORE);
+
+    if (aos_hal_net_enabled()) {
+        aos_hal_net_enable(true);
+    } else {
+        ESP_LOGI(TAG, "wifi off by preference; the stack is not brought up");
+        s_net_state = AOS_NET_OFF;
+    }
+
+    /* Bluetooth, like WiFi, starts as it was left. And by default it is left
+     * OFF -aos_hal_bt_enabled() returns false if nothing was ever stored-,
+     * which is the right thing: it costs 30 KB of the memory dynamic apps come
+     * out of, and a watch with no paired phone gains nothing by having it on.
+     * It is switched on from Settings, which is also where pairing happens. */
+    if (aos_hal_bt_enabled()) {
+        if (!aos_ble_start()) {
+            ESP_LOGE(TAG, "could not bring up the BLE stack");
+        }
+    } else {
+        ESP_LOGI(TAG, "bluetooth off by preference");
+    }
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Worker: one background task for an app (see aos_hal.h)                     */
+/* -------------------------------------------------------------------------- */
+
+/* Measured with the Video app (2026-09-16, 12 KB frames): at priority 3,
+ * below LVGL's 4, a 12 KB read took 100 ms instead of 27, sound or no sound.
+ * Every SDMMC transaction ends in a wait, and when the data arrived the
+ * worker had to wait for LVGL to finish rendering on its core before it
+ * could take the next one. At 5, level with the player, the same read is
+ * 37 ms and the UI stays responsive, because the worker is pinned to core 1
+ * and LVGL, which floats, takes core 0 while it is busy. */
+#define AOS_WORKER_PRIO      5      /* level with the player (5); LVGL is 4, the mic 6 */
+#define AOS_WORKER_CORE      1      /* WiFi and BT live on core 0 */
+#define AOS_WORKER_STOP_MS   3000
+
+static TaskHandle_t     s_worker_task;
+static volatile bool    s_worker_stop;
+static volatile bool    s_worker_done;
+static aos_worker_fn_t  s_worker_fn;
+static void            *s_worker_arg;
+
+static void worker_task(void *arg)
+{
+    (void)arg;
+    s_worker_fn(s_worker_arg);
+    player_follow_worker(-1);           /* the decoder may go back to core 0 */
+    s_worker_done = true;
+    vTaskDelete(NULL);
+}
+
+bool aos_hal_worker_start(const char *name, aos_worker_fn_t fn, void *arg,
+                          uint32_t stack_bytes)
+{
+    return aos_hal_worker_start_on(name, fn, arg, stack_bytes, -1, -1);
+}
+
+bool aos_hal_worker_start_on(const char *name, aos_worker_fn_t fn, void *arg,
+                             uint32_t stack_bytes, int core, int prio)
+{
+    if (core < 0 || core > 1) {
+        core = AOS_WORKER_CORE;
+    }
+    if (prio < 1 || prio > 10) {
+        /* above 10 it would sit over the audio and the radio's own tasks */
+        prio = AOS_WORKER_PRIO;
+    }
+    if (!fn || s_worker_task) {
+        ESP_LOGW(TAG, "worker: %s", fn ? "one is already running" : "no function");
+        return false;
+    }
+    if (stack_bytes < 4096) {
+        stack_bytes = 4096;
+    }
+    s_worker_stop = false;
+    s_worker_done = false;
+    s_worker_fn   = fn;
+    s_worker_arg  = arg;
+    if (xTaskCreatePinnedToCore(worker_task, name ? name : "aos_worker", stack_bytes,
+                                NULL, (UBaseType_t)prio, &s_worker_task,
+                                core) != pdPASS) {
+        s_worker_task = NULL;
+        ESP_LOGE(TAG, "worker: no memory for a %lu B stack", (unsigned long)stack_bytes);
+        return false;
+    }
+    player_follow_worker(core);         /* the music gets out of its way */
+    ESP_LOGI(TAG, "worker %s started: %lu B stack, core %d, prio %d",
+             name ? name : "aos_worker", (unsigned long)stack_bytes, core, prio);
+    return true;
+}
+
+void aos_hal_worker_stop(void)
+{
+    if (!s_worker_task) {
+        return;
+    }
+    s_worker_stop = true;
+    int waited = 0;
+    while (!s_worker_done && waited < AOS_WORKER_STOP_MS) {
+        vTaskDelay(pdMS_TO_TICKS(10));
+        waited += 10;
+    }
+    if (!s_worker_done) {
+        /* It did not come back: it is not killed (its stack may be mid-call
+         * into the filesystem), it is disowned. The app's buffers must then
+         * stay allocated, which is the app's problem to have avoided. */
+        ESP_LOGE(TAG, "worker did not stop in %d ms; abandoned", AOS_WORKER_STOP_MS);
+    } else {
+        /* vTaskDelete(NULL) frees the TCB from the idle task; a moment for it. */
+        vTaskDelay(pdMS_TO_TICKS(20));
+        ESP_LOGI(TAG, "worker stopped after %d ms", waited);
+    }
+    s_worker_task = NULL;
+    /* An app that streamed and forgot: the radio goes back to power save. */
+    aos_hal_net_low_latency(false);
+}
+
+bool aos_hal_worker_running(void)
+{
+    return s_worker_task != NULL && !s_worker_done;
+}
+
+bool aos_hal_worker_should_stop(void)
+{
+    return s_worker_stop;
+}
+
+void aos_hal_worker_sleep(uint32_t ms)
+{
+    vTaskDelay(pdMS_TO_TICKS(ms ? ms : 1));
+}
+
+/* -------------------------------------------------------------------------- */
+/* Direct blit to the panel (see aos_hal.h)                                    */
+/* -------------------------------------------------------------------------- */
+
+bool aos_hal_display_blit(int x, int y, int w, int h, const void *rgb565_be)
+{
+    if (!s_panel || s_panel_asleep || !rgb565_be || w <= 0 || h <= 0) {
+        return false;
+    }
+    if (aos_hal_display_state() == AOS_DISPLAY_OFF) {
+        return false;
+    }
+    /* The decoder wrote the frame through the CPU's cache; the SPI DMA reads
+     * PSRAM behind it. Write the lines back first, or the panel shows a
+     * mixture of this frame and the previous one. */
+    size_t bytes = (size_t)w * (size_t)h * 2u;
+    if (esp_ptr_external_ram(rgb565_be)) {
+        esp_cache_msync((void *)rgb565_be, bytes,
+                        ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED);
+    }
+    /* In strips of AOS_DRAW_ROWS, the size the LVGL port flushes in: the
+     * SPI bus was created for that transfer size and a whole frame in one
+     * call fails ("spi transmit (queue) color failed") after the first
+     * chunk: the first 55 rows of the video reached the panel and the rest
+     * stayed black, 2026-09-16. Each strip is queued and the next call
+     * waits for it, the same as the port's own flush. */
+    const uint8_t *px = rgb565_be;
+    for (int row = 0; row < h; row += AOS_DRAW_ROWS) {
+        int rows = h - row < AOS_DRAW_ROWS ? h - row : AOS_DRAW_ROWS;
+        if (esp_lcd_panel_draw_bitmap(s_panel, x, y + row, x + w, y + row + rows, px) != ESP_OK) {
+            return false;
+        }
+        px += (size_t)w * (size_t)rows * 2u;
+    }
+    return true;
+}

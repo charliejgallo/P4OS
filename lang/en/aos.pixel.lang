@@ -1,0 +1,137 @@
+# amoledos-lang 1   es -> en
+# aos.pixel.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/pixel/main/pixel.c:527
+No se pudo guardar	Could not save
+
+#: apps/pixel/main/pixel.c:727
+no se lee	unreadable
+
+#: apps/pixel/main/pixel.c:732
+cuadros	frames
+
+#: apps/pixel/main/pixel.c:739
+vacío	empty
+
+#: apps/pixel/main/pixel.c:747
+sin tarjeta: memoria interna	no card: internal memory
+
+#: apps/pixel/main/pixel.c:789
+No se pudo leer la tarjeta	Could not read the card
+
+#: apps/pixel/main/pixel.c:853
+Tocá un lienzo para editarlo	Tap a canvas to edit it
+
+#: apps/pixel/main/pixel.c:871
+Nuevo lienzo	New canvas
+
+#: apps/pixel/main/pixel.c:883
+Cancelar	Cancel
+
+#: apps/pixel/main/pixel.c:1201
+#: apps/pixel/main/pixel.c:1613
+Zoom	Zoom
+
+#: apps/pixel/main/pixel.c:1242
+Hace falta más de un cuadro	It takes more than one frame
+
+#: apps/pixel/main/pixel.c:1294
+Velocidad	Speed
+
+#: apps/pixel/main/pixel.c:1296
+Cuadrícula	Grid
+
+#: apps/pixel/main/pixel.c:1296
+sí	yes
+
+#: apps/pixel/main/pixel.c:1296
+no	no
+
+#: apps/pixel/main/pixel.c:1298
+¿Seguro? Tocá de nuevo	Sure? Tap again
+
+#: apps/pixel/main/pixel.c:1298
+#: apps/pixel/main/pixel.c:1546
+Borrar lienzo	Delete canvas
+
+#: apps/pixel/main/pixel.c:1352
+#: apps/pixel/main/pixel.c:1369
+Máximo 16 cuadros	16 frames at most
+
+#: apps/pixel/main/pixel.c:1453
+Exportado:	Exported:
+
+#: apps/pixel/main/pixel.c:1457
+No se pudo exportar	Could not export
+
+#: apps/pixel/main/pixel.c:1529
+Reproducir	Play
+
+#: apps/pixel/main/pixel.c:1530
+Duplicar cuadro	Duplicate frame
+
+#: apps/pixel/main/pixel.c:1531
+Cuadro en blanco	Blank frame
+
+#: apps/pixel/main/pixel.c:1533
+Exportar GIF	Export GIF
+
+#: apps/pixel/main/pixel.c:1534
+Exportar PNG	Export PNG
+
+#: apps/pixel/main/pixel.c:1537
+Enviar a %s	Send to %s
+
+#: apps/pixel/main/pixel.c:1544
+Borrar cuadro	Delete frame
+
+#: apps/pixel/main/pixel.c:1545
+Limpiar cuadro	Clear frame
+
+#: apps/pixel/main/pixel.c:1603
+Lápiz	Pencil
+
+#: apps/pixel/main/pixel.c:1603
+Rellenar	Fill
+
+#: apps/pixel/main/pixel.c:1603
+Tomar color	Pick colour
+
+#: apps/pixel/main/pixel.c:1611
+Deshacer	Undo
+
+#: apps/pixel/main/pixel.c:1688
+No se pudo abrir	Could not open
+
+#: apps/pixel/main/pixel.c:1758
+Dibujo de %s en el lienzo %d	Drawing from %s in canvas %d
+
+#: apps/pixel/main/pixel.c:1802
+Llegó al lienzo %d de %s	Landed in canvas %d of %s
+
+#: apps/pixel/main/pixel.c:1805
+%s no tiene lugar	%s has no room
+
+#: apps/pixel/main/pixel.c:1807
+%s no pudo guardarlo	%s could not save it
+
+#: apps/pixel/main/pixel.c:1825
+#: apps/pixel/main/pixel.c:1859
+#: apps/pixel/main/pixel.c:1865
+No se pudo enviar	Could not send
+
+#: apps/pixel/main/pixel.c:1840
+Sólo viajan los de 8×8 y 16×16	Only 8×8 and 16×16 ones can be sent
+
+#: apps/pixel/main/pixel.c:1846
+%s no está en Pixel Art	%s is not in Pixel Art
+
+#: apps/pixel/main/pixel.c:1873
+Enviando a %s...	Sending to %s...
+
+#: apps/pixel/main/pixel.c:1962
+Actualizado desde el portal	Updated from the portal

@@ -1,0 +1,207 @@
+# amoledos-lang 1   es -> de
+# aos.cameras.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/camaras/main/cam_frigate.c:232
+No se encuentra Frigate	Frigate nicht gefunden
+
+#: apps/camaras/main/cam_frigate.c:233
+Frigate pide usuario y contraseña	Frigate verlangt Benutzer und Passwort
+
+#: apps/camaras/main/cam_frigate.c:234
+Frigate no responde	Frigate antwortet nicht
+
+#: apps/camaras/main/cam_frigate.c:235
+Frigate contestó %d	Frigate antwortete %d
+
+#: apps/camaras/main/cam_http.c:122
+#: apps/camaras/main/cam_http.c:219
+#: apps/camaras/main/cam_rtsp.c:434
+#: apps/camaras/main/cam_rtsp.c:448
+Sin memoria	Kein Speicher
+
+#: apps/camaras/main/cam_http.c:131
+No se encuentra el servidor	Server nicht gefunden
+
+#: apps/camaras/main/cam_http.c:132
+#: apps/camaras/main/cam_rtsp.c:462
+#: apps/camaras/main/cam_view.c:507
+Sin conexiones libres	Keine freien Verbindungen
+
+#: apps/camaras/main/cam_http.c:133
+El servidor no responde	Der Server antwortet nicht
+
+#: apps/camaras/main/cam_http.c:151
+#: apps/camaras/main/cam_http.c:169
+#: apps/camaras/main/cam_http.c:259
+El servidor cortó la conexión	Der Server hat die Verbindung getrennt
+
+#: apps/camaras/main/cam_http.c:164
+El servidor no contestó	Der Server hat nicht geantwortet
+
+#: apps/camaras/main/cam_http.c:183
+#: apps/camaras/main/cam_rtsp.c:486
+Usuario o contraseña incorrectos	Falscher Benutzer oder falsches Passwort
+
+#: apps/camaras/main/cam_http.c:184
+El servidor pide usuario y contraseña	Der Server verlangt Benutzer und Passwort
+
+#: apps/camaras/main/cam_http.c:188
+El servidor contestó %d	Der Server antwortete %d
+
+#: apps/camaras/main/cam_http.c:273
+El servidor dejó de mandar video	Der Server sendet kein Video mehr
+
+#: apps/camaras/main/cam_rtsp.c:461
+No se encuentra la cámara	Kamera nicht gefunden
+
+#: apps/camaras/main/cam_rtsp.c:463
+La cámara no responde	Die Kamera antwortet nicht
+
+#: apps/camaras/main/cam_rtsp.c:487
+La cámara pide usuario y contraseña	Die Kamera verlangt Benutzer und Passwort
+
+#: apps/camaras/main/cam_rtsp.c:492
+La cámara no contestó	Die Kamera hat nicht geantwortet
+
+#: apps/camaras/main/cam_rtsp.c:494
+La cámara contestó %d	Die Kamera antwortete %d
+
+#: apps/camaras/main/cam_rtsp.c:506
+La placa no decodifica H.265.\nSólo H.264 Baseline y MJPEG.	Die Platine dekodiert kein H.265.\nNur H.264 Baseline und MJPEG.
+
+#: apps/camaras/main/cam_rtsp.c:508
+El video no es H.264 ni MJPEG	Das Video ist weder H.264 noch MJPEG
+
+#: apps/camaras/main/cam_rtsp.c:520
+La cámara rechazó el pedido (SETUP %d)	Die Kamera lehnte ab (SETUP %d)
+
+#: apps/camaras/main/cam_rtsp.c:525
+La cámara no abrió la sesión	Die Kamera hat keine Sitzung geöffnet
+
+#: apps/camaras/main/cam_rtsp.c:571
+La cámara rechazó el pedido (PLAY %d)	Die Kamera lehnte ab (PLAY %d)
+
+#: apps/camaras/main/cam_rtsp.c:592
+La cámara cortó la conexión	Die Kamera hat die Verbindung getrennt
+
+#: apps/camaras/main/cam_rtsp.c:597
+La cámara dejó de mandar video	Die Kamera sendet kein Video mehr
+
+#: apps/camaras/main/cam_view.c:256
+H.264 %s: la placa sólo\ndecodifica el perfil Baseline.	H.264 %s: die Platine kann\nnur das Baseline-Profil.
+
+#: apps/camaras/main/cam_view.c:289
+Esta placa todavía no\ndecodifica H.264	Diese Platine dekodiert\nnoch kein H.264
+
+#: apps/camaras/main/cam_view.c:300
+%dx%d no entra en\nla memoria de la placa.	%dx%d passt nicht in\nden Speicher der Platine.
+
+#: apps/camaras/main/cam_view.c:408
+El decodificador JPEG no abrió	Der JPEG-Decoder ließ sich nicht öffnen
+
+#: apps/camaras/main/cam_view.c:545
+La dirección no es\nrtsp:// ni http://	Die Adresse ist weder\nrtsp:// noch http://
+
+#: apps/camaras/main/cam_view.c:556
+No hay lugar para otra tarea	Kein Platz für weitere Tasks
+
+#: apps/camaras/main/camaras.c:203
+Conectando…	Verbinde…
+
+#: apps/camaras/main/camaras.c:204
+Abriendo el video…	Öffne das Video…
+
+#: apps/camaras/main/camaras.c:205
+Esperando la imagen…	Warte auf das Bild…
+
+#: apps/camaras/main/camaras.c:215
+Este video no se puede ver en la placa.\nPasá la cámara a H.264 Baseline\no a MJPEG.	Dieses Video läuft nicht auf der Platine.\nStelle die Kamera auf H.264 Baseline\noder MJPEG um.
+
+#: apps/camaras/main/camaras.c:222
+Reintentando…	Neuer Versuch…
+
+#: apps/camaras/main/camaras.c:372
+sin imagen	kein Bild
+
+#: apps/camaras/main/camaras.c:372
+conectando	verbindet
+
+#: apps/camaras/main/camaras.c:374
+en vivo	live
+
+#: apps/camaras/main/camaras.c:396
+foto cada %s s	Bild alle %s s
+
+#: apps/camaras/main/camaras.c:465
+Todavía no hay cámaras	Noch keine Kameras
+
+#: apps/camaras/main/camaras.c:470
+Agregalas en %s, un bloque por cámara con su url rtsp:// o http://. Desde la compu: el portal, http://%s, Archivos > Editar cameras.txt.	Füge sie in %s hinzu, ein Block pro Kamera mit ihrer rtsp://- oder http://-URL. Vom Computer: das Portal, http://%s, Dateien > cameras.txt bearbeiten.
+
+#: apps/camaras/main/camaras.c:504
+Actualizando…	Aktualisiere…
+
+#: apps/camaras/main/camaras.c:510
+Persona	Person
+
+#: apps/camaras/main/camaras.c:510
+Auto	Auto
+
+#: apps/camaras/main/camaras.c:510
+Perro	Hund
+
+#: apps/camaras/main/camaras.c:511
+Gato	Katze
+
+#: apps/camaras/main/camaras.c:511
+Bicicleta	Fahrrad
+
+#: apps/camaras/main/camaras.c:511
+Moto	Motorrad
+
+#: apps/camaras/main/camaras.c:512
+Pájaro	Vogel
+
+#: apps/camaras/main/camaras.c:512
+Paquete	Paket
+
+#: apps/camaras/main/camaras.c:512
+Camión	Lkw
+
+#: apps/camaras/main/camaras.c:529
+ayer %02d:%02d	gestern %02d:%02d
+
+#: apps/camaras/main/camaras.c:561
+Sin eventos recientes.	Keine neuen Ereignisse.
+
+#: apps/camaras/main/camaras.c:642
+Frigate no tiene cámaras.	Frigate hat keine Kameras.
+
+#: apps/camaras/main/camaras.c:673
+Cargando…	Lade…
+
+#: apps/camaras/main/camaras.c:734
+Eventos	Ereignisse
+
+#: apps/camaras/main/camaras.c:811
+#: apps/camaras/main/camaras.c:818
+Cámaras	Kameras
+
+#: apps/camaras/main/camaras.c:888
+Sin tarjeta: no hay dónde guardar la foto	Keine Karte: Foto nicht speicherbar
+
+#: apps/camaras/main/camaras.c:1117
+Foto guardada en Fotos > camaras	Foto in Fotos > camaras gespeichert
+
+#: apps/camaras/main/camaras.c:1117
+No se pudo guardar la foto	Foto nicht gespeichert
+
+#: apps/camaras/main/camaras.c:1144
+Foto JPEG	JPEG-Foto
+
+#: apps/camaras/main/camaras.c:1148
+  ·  audio sin reproducir	  ·  Audio nicht abgespielt

@@ -1,0 +1,92 @@
+# amoledos-lang 1   es -> de
+# aos.tuner.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/afinador/main/afinador.c:497
+referencia	Referenz
+
+#: apps/afinador/main/afinador.c:501
+soltando el códec	gebe den Codec frei
+
+#: apps/afinador/main/afinador.c:501
+sonando	klingt
+
+#: apps/afinador/main/afinador.c:514
+#: apps/afinador/main/afinador.c:668
+no abrió el micrófono	Mikrofon ließ sich nicht öffnen
+
+#: apps/afinador/main/afinador.c:515
+#: apps/afinador/main/afinador.c:668
+abriendo el micrófono	öffne das Mikrofon
+
+#: apps/afinador/main/afinador.c:529
+satura: alejate del micrófono	übersteuert: weg vom Mikrofon
+
+#: apps/afinador/main/afinador.c:530
+tocá una cuerda	Saite anschlagen
+
+#: apps/afinador/main/afinador.c:546
+afinada	gestimmt
+
+#: apps/afinador/main/afinador.c:549
+casi: subila un poco	fast: etwas höher
+
+#: apps/afinador/main/afinador.c:549
+casi: bajala un poco	fast: etwas tiefer
+
+#: apps/afinador/main/afinador.c:551
+subila	höher stimmen
+
+#: apps/afinador/main/afinador.c:551
+bajala	tiefer stimmen
+
+#: apps/afinador/main/afinador.c:565
+satura	übersteuert
+
+#: apps/afinador/main/afinador.c:703
+Leq de %u:%02u	Leq über %u:%02u
+
+#: apps/afinador/main/afinador.c:708
+%u kHz  ·  PGA %d dB  ·  ponderación A, rápida	%u kHz  ·  PGA %d dB  ·  A-bewertet, schnell
+
+#: apps/afinador/main/afinador.c:716
+SATURA: el número no vale	ÜBERSTEUERT: Wert ungültig
+
+#: apps/afinador/main/afinador.c:719
+a %u Hz la curva A vale hasta 4 kHz	bei %u Hz gilt die A-Kurve bis 4 kHz
+
+#: apps/afinador/main/afinador.c:725
+dB relativos hasta que lo calibres	relative dB bis zur Kalibrierung
+
+#: apps/afinador/main/afinador.c:1129
+Tono	Ton
+
+#: apps/afinador/main/afinador.c:1144
+tocá una cuerda para oír su nota	Saite antippen, um den Ton zu hören
+
+#: apps/afinador/main/afinador.c:1145
+escuchar y sonar no van juntos	Hören und Spielen geht nicht zugleich
+
+#: apps/afinador/main/afinador.c:1251
+mínimo	Minimum
+
+#: apps/afinador/main/afinador.c:1253
+máximo	Maximum
+
+#: apps/afinador/main/afinador.c:1261
+últimos 60 s	letzte 60 s
+
+#: apps/afinador/main/afinador.c:1305
+Reiniciar	Reset
+
+#: apps/afinador/main/afinador.c:1353
+Afinador	Stimmgerät
+
+#: apps/afinador/main/afinador.c:1353
+Sonómetro	Schallpegel
+
+#: apps/afinador/main/afinador.c:1394
+sin memoria	kein Speicher

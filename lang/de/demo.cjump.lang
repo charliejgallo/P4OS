@@ -1,0 +1,130 @@
+# amoledos-lang 1   es -> de
+# demo.cjump.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/cjump/main/cj_skins.c:32
+Clásico	Klassisch
+
+#: apps/cjump/main/cj_skins.c:33
+Nerd	Nerd
+
+#: apps/cjump/main/cj_skins.c:34
+Café	Kaffee
+
+#: apps/cjump/main/cj_skins.c:35
+Idea	Idee
+
+#: apps/cjump/main/cj_skins.c:36
+Auriculares	Kopfhörer
+
+#: apps/cjump/main/cj_skins.c:37
+Obrero	Bauarbeiter
+
+#: apps/cjump/main/cj_skins.c:38
+Dormilón	Schlafmütze
+
+#: apps/cjump/main/cj_skins.c:39
+Graduado	Absolvent
+
+#: apps/cjump/main/cj_skins.c:40
+Hipnótico	Hypnotisch
+
+#: apps/cjump/main/cj_skins.c:41
+Navegador	Browser
+
+#: apps/cjump/main/cj_skins.c:42
+Forzudo	Muskelprotz
+
+#: apps/cjump/main/cj_skins.c:43
+Mago	Zauberer
+
+#: apps/cjump/main/cj_skins.c:44
+Ninja	Ninja
+
+#: apps/cjump/main/cj_skins.c:45
+Rey	König
+
+#: apps/cjump/main/cj_skins.c:46
+Astronauta	Astronaut
+
+#: apps/cjump/main/cj_skins.c:47
+Fiesta	Party
+
+#: apps/cjump/main/cjump.c:474
+SONIDO	TON
+
+#: apps/cjump/main/cjump.c:478
+Botones a los costados, o arrastrá el dedo	Tasten an den Seiten oder Finger ziehen
+
+#: apps/cjump/main/cjump.c:486
+Récord	Rekord
+
+#: apps/cjump/main/cjump.c:489
+#: apps/cjump/main/cjump.c:512
+Monedas	Münzen
+
+#: apps/cjump/main/cjump.c:519
+#: apps/cjump/main/cjump.c:709
+monedas	Münzen
+
+#: apps/cjump/main/cjump.c:525
+Comprar	Kaufen
+
+#: apps/cjump/main/cjump.c:525
+No alcanza	Zu wenig
+
+#: apps/cjump/main/cjump.c:531
+Puesto	Getragen
+
+#: apps/cjump/main/cjump.c:534
+Comprado	Gekauft
+
+#: apps/cjump/main/cjump.c:536
+Ponerme este	Anziehen
+
+#: apps/cjump/main/cjump.c:564
+Todavía no alcanza	Noch nicht genug Münzen
+
+#: apps/cjump/main/cjump.c:572
+Disfraz desbloqueado	Kostüm freigeschaltet
+
+#: apps/cjump/main/cjump.c:701
+Nuevo récord	Neuer Rekord
+
+#: apps/cjump/main/cjump.c:702
+Se acabó	Vorbei
+
+#: apps/cjump/main/cjump.c:713
+Juntadas	Gesammelt
+
+#: apps/cjump/main/cjump.c:714
+por altura	für Höhe
+
+#: apps/cjump/main/cjump.c:976
+Jugar	Spielen
+
+#: apps/cjump/main/cjump.c:978
+#: apps/cjump/main/cjump.c:996
+Tienda	Laden
+
+#: apps/cjump/main/cjump.c:1015
+Deslizá para ver los demás	Wischen für die anderen
+
+#: apps/cjump/main/cjump.c:1026
+Pausa	Pause
+
+#: apps/cjump/main/cjump.c:1028
+Seguir	Weiter
+
+#: apps/cjump/main/cjump.c:1030
+#: apps/cjump/main/cjump.c:1050
+Menú	Menü
+
+#: apps/cjump/main/cjump.c:1032
+Salir	Beenden
+
+#: apps/cjump/main/cjump.c:1048
+Otra vez	Nochmal

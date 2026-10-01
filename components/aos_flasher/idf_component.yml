@@ -1,0 +1,6 @@
+dependencies:
+  # The flashing engine: SLIP, the ROM protocol, chip detection and the
+  # bundled flasher stubs. P4OS drives it through its own port (aos_io), not
+  # the library's ESP32 UART port, which is compiled anyway (Kconfig default)
+  # and never called.
+  espressif/esp-serial-flasher: "^2.1.0"

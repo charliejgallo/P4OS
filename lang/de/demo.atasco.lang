@@ -1,0 +1,54 @@
+# amoledos-lang 1   es -> de
+# demo.atasco.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/atasco/main/atasco.c:315
+Nivel %d	Level %d
+
+#: apps/atasco/main/atasco.c:318
+%d movimiento	%d Zug
+
+#: apps/atasco/main/atasco.c:318
+%d movimientos	%d Züge
+
+#: apps/atasco/main/atasco.c:385
+%d de %d completados	%d von %d geschafft
+
+#: apps/atasco/main/atasco.c:388
+Jugar de nuevo	Nochmal spielen
+
+#: apps/atasco/main/atasco.c:390
+Jugar nivel %d	Level %d spielen
+
+#: apps/atasco/main/atasco.c:435
+Estacionamiento despejado	Parkplatz geräumt
+
+#: apps/atasco/main/atasco.c:436
+Auto afuera	Auto ist raus
+
+#: apps/atasco/main/atasco.c:442
+Nivel %d completado en %d movimiento	Level %d in %d Zug geschafft
+
+#: apps/atasco/main/atasco.c:443
+Nivel %d completado en %d movimientos	Level %d in %d Zügen geschafft
+
+#: apps/atasco/main/atasco.c:729
+Atasco	Stau
+
+#: apps/atasco/main/atasco.c:732
+Sacá el auto rojo	Hol das rote Auto raus
+
+#: apps/atasco/main/atasco.c:912
+Deslizá los autos para sacar al rojo	Autos schieben, um das rote zu befreien
+
+#: apps/atasco/main/atasco.c:918
+Deshacer	Rückgängig
+
+#: apps/atasco/main/atasco.c:959
+Menú	Menü
+
+#: apps/atasco/main/atasco.c:962
+Siguiente	Weiter

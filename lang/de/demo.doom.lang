@@ -1,0 +1,56 @@
+# amoledos-lang 1   es -> de
+# demo.doom.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/doom/main/doom.c:382
+FUEGO	FEUER
+
+#: apps/doom/main/doom.c:383
+USAR	NUTZEN
+
+#: apps/doom/main/doom.c:384
+MENÚ	MENÜ
+
+#: apps/doom/main/doom.c:385
+MAPA	KARTE
+
+#: apps/doom/main/doom.c:386
+ARMA	WAFFE
+
+#: apps/doom/main/doom.c:387
+LATERAL	SEITLICH
+
+#: apps/doom/main/doom.c:511
+No hay ningún WAD	Keine WAD gefunden
+
+#: apps/doom/main/doom.c:512
+Copiá doom1.wad (shareware) o doom.wad a la carpeta	Kopiere doom1.wad (Shareware) oder doom.wad in den Ordner
+
+#: apps/doom/main/doom.c:514
+#: apps/doom/main/doom.c:775
+#: apps/doom/main/doom.c:926
+Tocá para salir	Tippen zum Beenden
+
+#: apps/doom/main/doom.c:774
+Doom se detuvo	Doom wurde beendet
+
+#: apps/doom/main/doom.c:826
+Doom se juega con la pantalla horizontal	Doom spielt man im Querformat
+
+#: apps/doom/main/doom.c:827
+Girá la pantalla para seguir	Bildschirm drehen, um weiterzuspielen
+
+#: apps/doom/main/doom.c:904
+Doom ya corrió en este simulador: reinicialo para jugar otra vez	Doom lief schon in diesem Simulator: starte ihn neu, um wieder zu spielen
+
+#: apps/doom/main/doom.c:919
+Cargando...	Lädt...
+
+#: apps/doom/main/doom.c:925
+Doom no pudo arrancar	Doom konnte nicht starten
+
+#: apps/doom/main/doom.c:926
+Falta memoria	Nicht genug Speicher

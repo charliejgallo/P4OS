@@ -1,0 +1,296 @@
+# amoledos-lang 1   es -> de
+# demo.mapas.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/mapas/main/mapas.c:1127
+Sin memoria	Kein Speicher
+
+#: apps/mapas/main/mp_frame.c:287
+#: apps/mapas/main/mp_ui.c:553
+Buscar un lugar o una calle	Ort oder Straße suchen
+
+#: apps/mapas/main/mp_frame.c:365
+Descargando	Lade
+
+#: apps/mapas/main/mp_frame.c:367
+Sin datos aquí	Keine Daten hier
+
+#: apps/mapas/main/mp_frame.c:369
+#: apps/mapas/main/mp_ui.c:276
+Sin conexión	Keine Verbindung
+
+#: apps/mapas/main/mp_frame.c:371
+Esperando la hora	Warte auf die Uhrzeit
+
+#: apps/mapas/main/mp_frame.c:373
+Error de descarga	Downloadfehler
+
+#: apps/mapas/main/mp_ui.c:197
+Zona	Zone
+
+#: apps/mapas/main/mp_ui.c:200
+Guardada	Gespeichert
+
+#: apps/mapas/main/mp_ui.c:203
+No se pudo guardar	Speichern fehlgeschlagen
+
+#: apps/mapas/main/mp_ui.c:215
+#: apps/mapas/main/mp_ui.c:298
+Descargar: sí	Laden: ja
+
+#: apps/mapas/main/mp_ui.c:215
+#: apps/mapas/main/mp_ui.c:298
+Descargar: no	Laden: nein
+
+#: apps/mapas/main/mp_ui.c:224
+Caché borrada	Cache geleert
+
+#: apps/mapas/main/mp_ui.c:243
+Mapas	Karten
+
+#: apps/mapas/main/mp_ui.c:259
+Buscar	Suchen
+
+#: apps/mapas/main/mp_ui.c:260
+Guardar esta vista	Diese Ansicht speichern
+
+#: apps/mapas/main/mp_ui.c:262
+Zonas	Zonen
+
+#: apps/mapas/main/mp_ui.c:272
+Ciudad de Clima	Stadt von Wetter
+
+#: apps/mapas/main/mp_ui.c:292
+teselas	Kacheln
+
+#: apps/mapas/main/mp_ui.c:297
+Ajustes	Einstellungen
+
+#: apps/mapas/main/mp_ui.c:299
+Borrar caché	Cache leeren
+
+#: apps/mapas/main/mp_ui.c:303
+Datos: OpenFreeMap, OpenMapTiles, OpenStreetMap	Daten: OpenFreeMap, OpenMapTiles, OpenStreetMap
+
+#: apps/mapas/main/mp_ui.c:304
+Descargado:	Geladen:
+
+#: apps/mapas/main/mp_ui.c:324
+#: apps/mapas/main/mp_ui.c:334
+parque	Park
+
+#: apps/mapas/main/mp_ui.c:325
+aeropuerto	Flughafen
+
+#: apps/mapas/main/mp_ui.c:326
+cerro	Berg
+
+#: apps/mapas/main/mp_ui.c:327
+comercio	Geschäft
+
+#: apps/mapas/main/mp_ui.c:328
+escuela	Schule
+
+#: apps/mapas/main/mp_ui.c:329
+restaurante	Restaurant
+
+#: apps/mapas/main/mp_ui.c:330
+oficina	Büro
+
+#: apps/mapas/main/mp_ui.c:331
+autos	Autohaus
+
+#: apps/mapas/main/mp_ui.c:332
+ropa	Bekleidung
+
+#: apps/mapas/main/mp_ui.c:333
+almacén	Lebensmittel
+
+#: apps/mapas/main/mp_ui.c:335
+café	Café
+
+#: apps/mapas/main/mp_ui.c:336
+hospital	Krankenhaus
+
+#: apps/mapas/main/mp_ui.c:337
+comida rápida	Schnellimbiss
+
+#: apps/mapas/main/mp_ui.c:338
+farmacia	Apotheke
+
+#: apps/mapas/main/mp_ui.c:339
+carnicería	Metzgerei
+
+#: apps/mapas/main/mp_ui.c:340
+peluquería	Friseur
+
+#: apps/mapas/main/mp_ui.c:341
+panadería	Bäckerei
+
+#: apps/mapas/main/mp_ui.c:342
+templo	Gotteshaus
+
+#: apps/mapas/main/mp_ui.c:343
+club deportivo	Sportzentrum
+
+#: apps/mapas/main/mp_ui.c:344
+bar	Bar
+
+#: apps/mapas/main/mp_ui.c:345
+alojamiento	Unterkunft
+
+#: apps/mapas/main/mp_ui.c:346
+universidad	Hochschule
+
+#: apps/mapas/main/mp_ui.c:347
+edificio público	Rathaus
+
+#: apps/mapas/main/mp_ui.c:348
+heladería	Eisdiele
+
+#: apps/mapas/main/mp_ui.c:349
+galería de arte	Galerie
+
+#: apps/mapas/main/mp_ui.c:350
+biblioteca	Bibliothek
+
+#: apps/mapas/main/mp_ui.c:351
+policía	Polizei
+
+#: apps/mapas/main/mp_ui.c:352
+bicis de alquiler	Fahrradverleih
+
+#: apps/mapas/main/mp_ui.c:353
+veterinaria	Tierarzt
+
+#: apps/mapas/main/mp_ui.c:354
+estación	Bahnhof
+
+#: apps/mapas/main/mp_ui.c:355
+cancha	Sportplatz
+
+#: apps/mapas/main/mp_ui.c:356
+estacionamiento	Parkplatz
+
+#: apps/mapas/main/mp_ui.c:357
+consultorio	Arztpraxis
+
+#: apps/mapas/main/mp_ui.c:358
+bicicletería	Fahrradladen
+
+#: apps/mapas/main/mp_ui.c:359
+cervecería	Brauerei
+
+#: apps/mapas/main/mp_ui.c:360
+museo	Museum
+
+#: apps/mapas/main/mp_ui.c:361
+lavandería	Wäscherei
+
+#: apps/mapas/main/mp_ui.c:362
+vinoteca	Getränkehandel
+
+#: apps/mapas/main/mp_ui.c:363
+teatro	Theater
+
+#: apps/mapas/main/mp_ui.c:364
+dentista	Zahnarzt
+
+#: apps/mapas/main/mp_ui.c:365
+atracción	Sehenswürdigkeit
+
+#: apps/mapas/main/mp_ui.c:366
+banco	Bank
+
+#: apps/mapas/main/mp_ui.c:367
+estación de servicio	Tankstelle
+
+#: apps/mapas/main/mp_ui.c:368
+estadio	Stadion
+
+#: apps/mapas/main/mp_ui.c:369
+bomberos	Feuerwache
+
+#: apps/mapas/main/mp_ui.c:370
+música	Musik
+
+#: apps/mapas/main/mp_ui.c:371
+cajero	Geldautomat
+
+#: apps/mapas/main/mp_ui.c:372
+monumento	Denkmal
+
+#: apps/mapas/main/mp_ui.c:373
+cine	Kino
+
+#: apps/mapas/main/mp_ui.c:374
+cementerio	Friedhof
+
+#: apps/mapas/main/mp_ui.c:375
+juegos infantiles	Spielplatz
+
+#: apps/mapas/main/mp_ui.c:376
+información	Information
+
+#: apps/mapas/main/mp_ui.c:377
+correo	Post
+
+#: apps/mapas/main/mp_ui.c:378
+pileta	Schwimmbad
+
+#: apps/mapas/main/mp_ui.c:379
+jardín	Garten
+
+#: apps/mapas/main/mp_ui.c:380
+puerto	Hafen
+
+#: apps/mapas/main/mp_ui.c:381
+parque temático	Freizeitpark
+
+#: apps/mapas/main/mp_ui.c:382
+terminal de ferry	Fährterminal
+
+#: apps/mapas/main/mp_ui.c:383
+cárcel	Gefängnis
+
+#: apps/mapas/main/mp_ui.c:384
+camping	Campingplatz
+
+#: apps/mapas/main/mp_ui.c:385
+castillo	Burg
+
+#: apps/mapas/main/mp_ui.c:386
+baños	Toiletten
+
+#: apps/mapas/main/mp_ui.c:387
+zoológico	Zoo
+
+#: apps/mapas/main/mp_ui.c:388
+acuario	Aquarium
+
+#: apps/mapas/main/mp_ui.c:394
+lugar	Ort
+
+#: apps/mapas/main/mp_ui.c:395
+calle	Straße
+
+#: apps/mapas/main/mp_ui.c:396
+agua	Wasser
+
+#: apps/mapas/main/mp_ui.c:434
+Escribí un lugar, una calle o un comercio.	Gib einen Ort, eine Straße oder ein Geschäft ein.
+
+#: apps/mapas/main/mp_ui.c:436
+Buscando...	Suche...
+
+#: apps/mapas/main/mp_ui.c:438
+Nada con ese nombre.	Nichts mit diesem Namen.
+
+#: apps/mapas/main/mp_ui.c:438
+Nada con ese nombre en las zonas descargadas.	Nichts mit diesem Namen in den geladenen Zonen.
+
+#: apps/mapas/main/mp_ui.c:444
+Buscando en línea...	Suche online...

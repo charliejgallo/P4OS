@@ -1,0 +1,12 @@
+# p4bench cmd, 20260928-193847
+BENCH lvgl.cfg rot=0 copy=ppa fbs=2 rows=80 bmem=internal logical=720x1280 draw_units=2 os=1 ppa_draw=0
+BENCH mem int_free=276507 int_largest=188416 psram_free=26912784 psram_largest=26738688 dma_free=236935
+BENCH sd.speed khz=40000 mb=16 chunk_kb=32 write_MBps=8.91 read_MBps=0.08 small4k_write_ms=10.40 small4k_read_ms=4.25
+BENCH sd.speed khz=40000 mb=16 chunk_kb=256 write_MBps=1.73 read_MBps=0.08 small4k_write_ms=11.19 small4k_read_ms=4.24
+BENCH jpeg w=720 h=1280 quality=80 bytes=442325 enc_ms=19.29 enc_fps=51.8 dec_ms=10.51 dec_fps=95.2 dec_ok=1
+BENCH ppa up3_240x426_ms=10.36 up3_184x224_ms=4.25 rot90_full_ms=41.01 copy_full_ms=41.99 down4_full_ms=-1.00 blend_full_ms=28.14
+BENCH audio.tone hz=1000 ms=1000 took_ms=1049
+BENCH duplex secs=3 quiet_rms=-47.5 playing_rms=-19.2 delta_db=28.4 reads_ok=6/6 realtime=0.99 works=1
+BENCH bat adc_unit=1 ch=4 raw=1461 pin_mv=1402 battery_mv=4206 calibrated=1
+BENCH rtc.check epoch=592 set_at=0 rtc_us=591551181 uptime_s=592 valid=0
+BENCH lvgl.stats frames=1965 flushes=2100 flush_ms_per_frame=0.78 sync_ms_per_frame=8.32 touch_reads=39366 touch_hits=0

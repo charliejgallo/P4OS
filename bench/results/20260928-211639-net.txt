@@ -1,0 +1,7 @@
+# p4bench net, 20260928-211639
+BENCH wifi.status connected=0 ip=0.0.0.0 rssi=0 channel=0 disconnects=0 reconnects=0
+BENCH ntp ok=0 ms=14999 epoch=17
+BENCH lvgl.cfg rotmode=2 rot=90 copy=dma2d fbs=1 rows=128 bmem=internal logical=1280x720 draw_units=2 os=1 ppa_draw=0
+BENCH mem int_free=263983 int_largest=180224 psram_free=28327972 psram_largest=27787264 dma_free=224411
+BENCH wifi.init ok=1 err=ESP_OK ms=2210
+BENCH hosted.fw ok=0 major=0 minor=0 patch=0

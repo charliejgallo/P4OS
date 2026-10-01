@@ -1,0 +1,427 @@
+# amoledos-lang 1   es -> en
+# demo.golf.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/golf/main/gf_game.c:314
+¡Hoyo en uno!	Hole in one!
+
+#: apps/golf/main/gf_game.c:316
+¡Albatros!	Albatross!
+
+#: apps/golf/main/gf_game.c:317
+¡Águila!	Eagle!
+
+#: apps/golf/main/gf_game.c:318
+¡Birdie!	Birdie!
+
+#: apps/golf/main/gf_game.c:319
+#: apps/golf/main/gf_play.c:244
+#: apps/golf/main/gf_play.c:562
+#: apps/golf/main/golf.c:732
+Par	Par
+
+#: apps/golf/main/gf_game.c:320
+Bogey	Bogey
+
+#: apps/golf/main/gf_game.c:321
+Doble bogey	Double bogey
+
+#: apps/golf/main/gf_game.c:322
+Triple bogey	Triple bogey
+
+#: apps/golf/main/gf_game.c:323
+¡Increíble!	Incredible!
+
+#: apps/golf/main/gf_game.c:323
+#: apps/golf/main/gf_play.c:1125
+#: apps/golf/main/golf.c:730
+Recogida	Picked up
+
+#: apps/golf/main/gf_link.c:130
+Contra la otra placa	Against the other board
+
+#: apps/golf/main/gf_link.c:137
+El enlace no arrancó	The link did not start
+
+#: apps/golf/main/gf_link.c:157
+Esperando a	Waiting for
+
+#: apps/golf/main/gf_link.c:212
+#: apps/golf/main/gf_link.c:269
+#: apps/golf/main/gf_link.c:314
+%s salió del juego	%s left the game
+
+#: apps/golf/main/gf_link.c:281
+Sin señal de %s	No signal from %s
+
+#: apps/golf/main/gf_outfit.c:13
+Polo blanco	White polo
+
+#: apps/golf/main/gf_outfit.c:14
+Polo azul marino	Navy polo
+
+#: apps/golf/main/gf_outfit.c:15
+Polo verde	Green polo
+
+#: apps/golf/main/gf_outfit.c:16
+Polo amarillo	Yellow polo
+
+#: apps/golf/main/gf_outfit.c:17
+Polo rosa	Pink polo
+
+#: apps/golf/main/gf_outfit.c:18
+Rayas rojas	Red stripes
+
+#: apps/golf/main/gf_outfit.c:19
+Rayas lila	Lilac stripes
+
+#: apps/golf/main/gf_outfit.c:20
+Celeste y blanco	Sky blue and white
+
+#: apps/golf/main/gf_outfit.c:21
+Naranja fuego	Fire orange
+
+#: apps/golf/main/gf_outfit.c:22
+Negro y dorado	Black and gold
+
+#: apps/golf/main/gf_outfit.c:26
+Pantalón caqui	Khaki trousers
+
+#: apps/golf/main/gf_outfit.c:27
+Pantalón blanco	White trousers
+
+#: apps/golf/main/gf_outfit.c:28
+Pantalón azul	Blue trousers
+
+#: apps/golf/main/gf_outfit.c:29
+Pantalón gris	Grey trousers
+
+#: apps/golf/main/gf_outfit.c:30
+Pantalón negro	Black trousers
+
+#: apps/golf/main/gf_outfit.c:31
+Escocés rojo	Red tartan
+
+#: apps/golf/main/gf_outfit.c:32
+Escocés azul	Blue tartan
+
+#: apps/golf/main/gf_outfit.c:36
+Sin gorro	No hat
+
+#: apps/golf/main/gf_outfit.c:37
+Gorra blanca	White cap
+
+#: apps/golf/main/gf_outfit.c:38
+Gorra roja	Red cap
+
+#: apps/golf/main/gf_outfit.c:39
+Visera azul	Blue visor
+
+#: apps/golf/main/gf_outfit.c:40
+Piluso	Bucket hat
+
+#: apps/golf/main/gf_outfit.c:41
+Gorro de lana	Bobble hat
+
+#: apps/golf/main/gf_outfit.c:42
+Boina	Flat cap
+
+#: apps/golf/main/gf_outfit.c:43
+Sombrero de ala	Wide-brim hat
+
+#: apps/golf/main/gf_outfit.c:44
+Gorra dorada	Golden cap
+
+#: apps/golf/main/gf_outfit.c:48
+Zapatos blancos	White shoes
+
+#: apps/golf/main/gf_outfit.c:49
+Negros y blancos	Black and white
+
+#: apps/golf/main/gf_outfit.c:50
+Marrones clásicos	Classic brown
+
+#: apps/golf/main/gf_outfit.c:51
+Rojos	Red
+
+#: apps/golf/main/gf_outfit.c:52
+Dorados	Golden
+
+#: apps/golf/main/gf_outfit.c:56
+Palos de acero	Steel clubs
+
+#: apps/golf/main/gf_outfit.c:57
+Palos negros	Black clubs
+
+#: apps/golf/main/gf_outfit.c:58
+Palos azules	Blue clubs
+
+#: apps/golf/main/gf_outfit.c:59
+Palos dorados	Golden clubs
+
+#: apps/golf/main/gf_outfit.c:64
+Piel clara, pelo castaño	Fair skin, brown hair
+
+#: apps/golf/main/gf_outfit.c:65
+Piel clara, pelo rubio	Fair skin, blond hair
+
+#: apps/golf/main/gf_outfit.c:66
+Piel trigueña, pelo negro	Olive skin, black hair
+
+#: apps/golf/main/gf_outfit.c:67
+Piel morena, pelo negro	Dark skin, black hair
+
+#: apps/golf/main/gf_outfit.c:68
+Piel clara, pelo colorado	Fair skin, red hair
+
+#: apps/golf/main/gf_outfit.c:69
+Canoso	Grey hair
+
+#: apps/golf/main/gf_outfit.c:77
+Remeras	Shirts
+
+#: apps/golf/main/gf_outfit.c:77
+Pantalones	Trousers
+
+#: apps/golf/main/gf_outfit.c:77
+Gorros	Hats
+
+#: apps/golf/main/gf_outfit.c:77
+Zapatos	Shoes
+
+#: apps/golf/main/gf_outfit.c:77
+Palos	Clubs
+
+#: apps/golf/main/gf_outfit.c:77
+Aspecto	Looks
+
+#: apps/golf/main/gf_play.c:105
+Rough	Rough
+
+#: apps/golf/main/gf_play.c:105
+Fairway	Fairway
+
+#: apps/golf/main/gf_play.c:105
+Primer corte	First cut
+
+#: apps/golf/main/gf_play.c:106
+Salida	Tee
+
+#: apps/golf/main/gf_play.c:106
+Antegreen	Fringe
+
+#: apps/golf/main/gf_play.c:106
+Green	Green
+
+#: apps/golf/main/gf_play.c:107
+Búnker	Bunker
+
+#: apps/golf/main/gf_play.c:107
+Agua	Water
+
+#: apps/golf/main/gf_play.c:107
+Camino	Cart path
+
+#: apps/golf/main/gf_play.c:108
+Rough alto	Deep rough
+
+#: apps/golf/main/gf_play.c:108
+Bosque	Woods
+
+#: apps/golf/main/gf_play.c:108
+Arena y matas	Waste area
+
+#: apps/golf/main/gf_play.c:109
+Fuera de límites	Out of bounds
+
+#: apps/golf/main/gf_play.c:244
+#: apps/golf/main/gf_play.c:558
+#: apps/golf/main/golf.c:732
+Hoyo	Hole
+
+#: apps/golf/main/gf_play.c:248
+J	P
+
+#: apps/golf/main/gf_play.c:248
+#: apps/golf/main/gf_play.c:250
+Golpe	Shot
+
+#: apps/golf/main/gf_play.c:260
+Putter	Putter
+
+#: apps/golf/main/gf_play.c:527
+#: apps/golf/main/gf_play.c:848
+#: apps/golf/main/golf.c:889
+Tocá: carga, potencia, precisión	Tap: swing, power, accuracy
+
+#: apps/golf/main/gf_play.c:642
+Juega	Playing:
+
+#: apps/golf/main/gf_play.c:648
+Turno del jugador	Player's turn:
+
+#: apps/golf/main/gf_play.c:1107
+¡Al agua! +1	In the water! +1
+
+#: apps/golf/main/gf_play.c:1111
+Fuera de límites +1	Out of bounds +1
+
+#: apps/golf/main/gf_shop.c:197
+#: apps/golf/main/gf_shop.c:221
+Puesto	Wearing
+
+#: apps/golf/main/gf_shop.c:200
+Tuyo	Owned
+
+#: apps/golf/main/gf_shop.c:224
+Usar	Wear
+
+#: apps/golf/main/gf_shop.c:227
+Comprar	Buy
+
+#: apps/golf/main/gf_shop.c:252
+#: apps/golf/main/golf.c:963
+Tienda	Shop
+
+#: apps/golf/main/golf.c:372
+Golpear	Swing
+
+#: apps/golf/main/golf.c:377
+Pegar	Putt
+
+#: apps/golf/main/golf.c:435
+#: apps/golf/main/golf.c:958
+Juego rápido	Quick game
+
+#: apps/golf/main/golf.c:435
+#: apps/golf/main/golf.c:959
+Torneo	Tournament
+
+#: apps/golf/main/golf.c:435
+#: apps/golf/main/golf.c:960
+Práctica	Practice
+
+#: apps/golf/main/golf.c:435
+#: apps/golf/main/golf.c:435
+#: apps/golf/main/golf.c:961
+Multijugador	Multiplayer
+
+#: apps/golf/main/golf.c:437
+Fácil	Easy
+
+#: apps/golf/main/golf.c:437
+Normal	Normal
+
+#: apps/golf/main/golf.c:437
+Profesional	Pro
+
+#: apps/golf/main/golf.c:439
+Poco viento, medidor lento, ves dónde cae	Light wind, slow meter, see where it lands
+
+#: apps/golf/main/golf.c:440
+Viento real, medidor ágil	Real wind, quick meter
+
+#: apps/golf/main/golf.c:441
+Viento fuerte, medidor rápido, sin ayudas	Strong wind, fast meter, no help
+
+#: apps/golf/main/golf.c:538
+En esta placa, pasándola	On this board, passing it around
+
+#: apps/golf/main/golf.c:542
+jugadores	players
+
+#: apps/golf/main/golf.c:552
+Contra	Against
+
+#: apps/golf/main/golf.c:555
+Aparea otra placa en Enlace para jugar a distancia	Pair another board in Link to play remotely
+
+#: apps/golf/main/golf.c:601
+Metros	Metres
+
+#: apps/golf/main/golf.c:601
+Yardas	Yards
+
+#: apps/golf/main/golf.c:602
+Sonido: sí	Sound: on
+
+#: apps/golf/main/golf.c:602
+Sonido: no	Sound: off
+
+#: apps/golf/main/golf.c:700
+#: apps/golf/main/golf.c:701
+Vos	You
+
+#: apps/golf/main/golf.c:702
+Jugador	Player
+
+#: apps/golf/main/golf.c:732
+#: apps/golf/main/golf.c:794
+golpes	shots
+
+#: apps/golf/main/golf.c:737
+Monedas	Coins
+
+#: apps/golf/main/golf.c:783
+Terminaste	Place
+
+#: apps/golf/main/golf.c:784
+¡Campeón!	Champion!
+
+#: apps/golf/main/golf.c:787
+¡Ganaste!	You won!
+
+#: apps/golf/main/golf.c:787
+Empate	Tie
+
+#: apps/golf/main/golf.c:787
+Perdiste	You lost
+
+#: apps/golf/main/golf.c:789
+¡Nuevo récord!	New best!
+
+#: apps/golf/main/golf.c:789
+Fin de la vuelta	Round over
+
+#: apps/golf/main/golf.c:799
+monedas	coins
+
+#: apps/golf/main/golf.c:799
+Total	Total
+
+#: apps/golf/main/golf.c:1004
+Ajustes	Settings
+
+#: apps/golf/main/golf.c:1007
+Distancias en	Distances in
+
+#: apps/golf/main/golf.c:1010
+Ganás monedas al jugar: más en torneo, en difícil y con birdies. Gastalas en la tienda.	You earn coins by playing: more in tournaments, on harder levels and with birdies. Spend them in the shop.
+
+#: apps/golf/main/golf.c:1080
+Cargando	Loading
+
+#: apps/golf/main/golf.c:1080
+Preparando la cancha	Getting the course ready
+
+#: apps/golf/main/golf.c:1130
+Pausa	Paused
+
+#: apps/golf/main/golf.c:1131
+Seguir	Resume
+
+#: apps/golf/main/golf.c:1132
+#: apps/golf/main/golf.c:1182
+Menú	Menu
+
+#: apps/golf/main/golf.c:1133
+Salir	Exit
+
+#: apps/golf/main/golf.c:1164
+Continuar	Continue
+
+#: apps/golf/main/golf.c:1181
+Otra vez	Again

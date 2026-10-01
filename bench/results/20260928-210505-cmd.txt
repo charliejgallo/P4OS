@@ -1,0 +1,10 @@
+# p4bench cmd, 20260928-210505
+BENCH touch.rate reports_per_s=59.4 polls_per_s=1467 max_points=1
+BENCH touch.paint samples=4672 max_points=4 min_x=0 max_x=701 min_y=1 max_y=1274
+BENCH mic.level second=1 rms_dbfs=-57.3 peak_dbfs=-39.1
+BENCH mic.level second=2 rms_dbfs=-18.1 peak_dbfs=-3.9
+BENCH mic.level second=3 rms_dbfs=-17.1 peak_dbfs=-5.2
+BENCH mic.level second=4 rms_dbfs=-18.0 peak_dbfs=-5.9
+BENCH mic.level second=5 rms_dbfs=-10.6 peak_dbfs=0.0
+BENCH mic.level second=6 rms_dbfs=-9.5 peak_dbfs=0.0
+BENCH mic secs=6 gain_db=30 loudest_rms=-9.5 quietest_rms=-57.3 wav=/sdcard/bench/mic.wav

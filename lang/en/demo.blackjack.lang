@@ -1,0 +1,117 @@
+# amoledos-lang 1   es -> en
+# demo.blackjack.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/blackjack/main/blackjack.c:461
+BLACKJACK PAGA 3 A 2	BLACKJACK PAYS 3 TO 2
+
+#: apps/blackjack/main/blackjack.c:463
+LA BANCA SE PLANTA EN 17	DEALER STANDS ON ALL 17S
+
+#: apps/blackjack/main/blackjack.c:794
+Blackjack	Blackjack
+
+#: apps/blackjack/main/blackjack.c:795
+Ganás	Win
+
+#: apps/blackjack/main/blackjack.c:796
+#: apps/blackjack/main/blackjack.c:1068
+Empate	Push
+
+#: apps/blackjack/main/blackjack.c:797
+Perdés	Lose
+
+#: apps/blackjack/main/blackjack.c:798
+Te pasaste	Bust
+
+#: apps/blackjack/main/blackjack.c:853
+Banca	Bank
+
+#: apps/blackjack/main/blackjack.c:941
+#: apps/blackjack/main/blackjack.c:1475
+#: apps/blackjack/main/blackjack.c:1480
+Seguro	Insure
+
+#: apps/blackjack/main/blackjack.c:943
+La banca muestra un as. ¿Seguro?	The dealer shows an ace. Insurance?
+
+#: apps/blackjack/main/blackjack.c:949
+#: apps/blackjack/main/blackjack.c:1502
+#: apps/blackjack/main/blackjack.c:1505
+Apuesta	Bet
+
+#: apps/blackjack/main/blackjack.c:980
+Mezclando el sabot	Shuffling the shoe
+
+#: apps/blackjack/main/blackjack.c:1025
+El seguro paga	Insurance pays
+
+#: apps/blackjack/main/blackjack.c:1028
+Seguro perdido	Insurance lost
+
+#: apps/blackjack/main/blackjack.c:1208
+Banca nueva: 1000	New bank: 1000
+
+#: apps/blackjack/main/blackjack.c:1230
+Manos	Hands
+
+#: apps/blackjack/main/blackjack.c:1231
+Ganadas	Won
+
+#: apps/blackjack/main/blackjack.c:1232
+Blackjacks	Blackjacks
+
+#: apps/blackjack/main/blackjack.c:1233
+Mejor banca	Best bank
+
+#: apps/blackjack/main/blackjack.c:1237
+Sonido	Sound
+
+#: apps/blackjack/main/blackjack.c:1237
+Mudo	Muted
+
+#: apps/blackjack/main/blackjack.c:1238
+Consejo	Hint
+
+#: apps/blackjack/main/blackjack.c:1460
+#: apps/blackjack/main/blackjack.c:1465
+Borrar	Clear
+
+#: apps/blackjack/main/blackjack.c:1462
+#: apps/blackjack/main/blackjack.c:1467
+Repartir	Deal
+
+#: apps/blackjack/main/blackjack.c:1477
+#: apps/blackjack/main/blackjack.c:1482
+No	No
+
+#: apps/blackjack/main/blackjack.c:1488
+Doblar	Double
+
+#: apps/blackjack/main/blackjack.c:1490
+Dividir	Split
+
+#: apps/blackjack/main/blackjack.c:1492
+Pedir	Hit
+
+#: apps/blackjack/main/blackjack.c:1494
+Plantarse	Stand
+
+#: apps/blackjack/main/blackjack.c:1500
+#: apps/blackjack/main/blackjack.c:1507
+Otra mano	Deal again
+
+#: apps/blackjack/main/blackjack.c:1510
+Banca nueva	New bank
+
+#: apps/blackjack/main/blackjack.c:1566
+Seguir	Resume
+
+#: apps/blackjack/main/blackjack.c:1568
+Salir	Exit
+
+#: apps/blackjack/main/blackjack.c:1571
+La estrategia básica marca en dorado la jugada que sugiere.	Basic strategy rings its suggested play in gold.

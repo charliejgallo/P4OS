@@ -1,0 +1,88 @@
+# amoledos-lang 1   es -> en
+# app.recorder.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/recorder/main/rec_files.c:204
+Grabación	Recording
+
+#: apps/recorder/main/rec_files.c:275
+sin fecha	no date
+
+#: apps/recorder/main/rec_files.c:291
+hoy %02d:%02d	today %02d:%02d
+
+#: apps/recorder/main/rec_files.c:293
+ayer %02d:%02d	yesterday %02d:%02d
+
+#: apps/recorder/main/recorder.c:289
+Borrar	Delete
+
+#: apps/recorder/main/recorder.c:358
+en pausa: el archivo sigue abierto	paused: the file stays open
+
+#: apps/recorder/main/recorder.c:359
+grabando	recording
+
+#: apps/recorder/main/recorder.c:360
+PAUSA	PAUSED
+
+#: apps/recorder/main/recorder.c:368
+tocá el botón rojo para grabar	tap the red button to record
+
+#: apps/recorder/main/recorder.c:369
+LISTO	READY
+
+#: apps/recorder/main/recorder.c:389
+quedan %u h	%u h left
+
+#: apps/recorder/main/recorder.c:391
+quedan %u min	%u min left
+
+#: apps/recorder/main/recorder.c:394
+sin tarjeta	no card
+
+#: apps/recorder/main/recorder.c:401
+estéreo	stereo
+
+#: apps/recorder/main/recorder.c:401
+mono	mono
+
+#: apps/recorder/main/recorder.c:425
+No hay tarjeta	No card
+
+#: apps/recorder/main/recorder.c:436
+No se pudo grabar	Could not record
+
+#: apps/recorder/main/recorder.c:464
+Guardado	Saved
+
+#: apps/recorder/main/recorder.c:515
+No se pudo reproducir	Could not play
+
+#: apps/recorder/main/recorder.c:535
+Primero pará la grabación	Stop the recording first
+
+#: apps/recorder/main/recorder.c:603
+Tocá de nuevo para borrar	Tap again to delete
+
+#: apps/recorder/main/recorder.c:611
+No se pudo borrar	Could not delete
+
+#: apps/recorder/main/recorder.c:615
+Borrada	Deleted
+
+#: apps/recorder/main/recorder.c:656
+Se cortó la grabación	Recording interrupted
+
+#: apps/recorder/main/recorder.c:812
+#: apps/recorder/main/recorder.c:870
+Grabaciones	Recordings
+
+#: apps/recorder/main/recorder.c:827
+Todavía no grabaste nada.\nLo que grabes aparece acá.	Nothing recorded yet.\nYour recordings show up here.
+
+#: apps/recorder/main/recorder.c:903
+tocá la onda para saltar	tap the waveform to jump

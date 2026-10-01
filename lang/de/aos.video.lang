@@ -1,0 +1,44 @@
+# amoledos-lang 1   es -> de
+# aos.video.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/video/main/vd_list.c:165
+No es un AVI de MJPEG	Kein MJPEG-AVI
+
+#: apps/video/main/vd_list.c:179
+Sin sonido	Kein Ton
+
+#: apps/video/main/vd_list.c:290
+Videos	Videos
+
+#: apps/video/main/vd_list.c:297
+1 video en %s	1 Video in %s
+
+#: apps/video/main/vd_list.c:299
+%d videos en %s	%d Videos in %s
+
+#: apps/video/main/vd_list.c:309
+No hay videos en la tarjeta.\n\nCopiá archivos .avi de MJPEG a la carpeta videos, con el sonido en un .wav del mismo nombre.\n\nPara convertirlos: apps/video/convert.sh (ver el README).	Keine Videos auf der Karte.\n\nKopiere MJPEG-.avi-Dateien in den Ordner videos, den Ton als .wav mit gleichem Namen.\n\nZum Umwandeln: apps/video/convert.sh (siehe README).
+
+#: apps/video/main/video.c:392
+-10 s	-10 s
+
+#: apps/video/main/video.c:394
++10 s	+10 s
+
+#: apps/video/main/video.c:478
+Abriendo...	Öffne...
+
+#: apps/video/main/video.c:481
+#: apps/video/main/video.c:505
+No hay lugar para la tarea de video	Kein Platz für die Video-Aufgabe
+
+#: apps/video/main/video.c:504
+No hay memoria para este video	Zu wenig Speicher für dieses Video
+
+#: apps/video/main/video.c:506
+#: apps/video/main/video.c:601
+No es un AVI de MJPEG que se pueda leer	Kein lesbares MJPEG-AVI

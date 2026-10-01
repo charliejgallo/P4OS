@@ -1,0 +1,3 @@
+# LVGL variant B: FreeRTOS, two software draw units (one per core)
+CONFIG_LV_OS_FREERTOS=y
+CONFIG_LV_DRAW_SW_DRAW_UNIT_CNT=2

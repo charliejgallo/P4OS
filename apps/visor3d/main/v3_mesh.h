@@ -1,0 +1,53 @@
+/*
+ * VISOR 3D - meshes: loading STL (binary and ASCII) and M3D, welding and
+ * reducing to a triangle budget. Nothing here touches LVGL: it runs in the
+ * app's worker.
+ */
+#pragma once
+
+#include <stdbool.h>
+#include <stdint.h>
+
+/* The most triangles drawn. The watch (240 MHz) took 24 000; the P4 draws
+ * ~16 000 at ~28 fps moving, and the cap is set for the ~100 000 of the HD
+ * samples (mila_hd, tommy_hd) and some room: past it, and only for STL, the
+ * file is reduced on loading. An M3D is taken whole up to four times this. */
+#define V3_BUDGET       150000
+
+typedef struct {
+    int       nv, nt;
+    float    *v;            /* nv * 3, centred on the origin, radius 1       */
+    uint32_t *idx;          /* nt * 3                                        */
+    float    *fn;           /* nt * 3, unit face normals                     */
+    uint16_t *fc;           /* nt face colours (RGB565), NULL = one colour   */
+    int       nt_file;      /* triangles in the file, before any reduction   */
+    bool      closed;       /* a solid, wound consistently (outwards after
+                               loading): back faces can be skipped          */
+    char      err[64];      /* why it did not load                           */
+} v3_mesh_t;
+
+/* Loads .stl (binary or ASCII) or .m3d. 'progress', if given, is
+ * stage * 1000 + percent: stage 1 measures the model's box, 2 welds it (and
+ * reduces it, when it is over the budget), 3 and up are further passes
+ * with another grid - each one reads the whole file again. The UI polls it
+ * from the other task. */
+bool v3_mesh_load(v3_mesh_t *m, const char *path, volatile int *progress);
+void v3_mesh_free(v3_mesh_t *m);
+
+/* Called every 1024 triangles while loading: the worker gives its core away
+ * for a moment (or the task watchdog fires on IDLE0: a big STL is seconds
+ * of work), and says whether to go on. false cancels the load at once, with
+ * "cancelled" as the error: an app leaving mid-load must not wait for it,
+ * because its code is unloaded as soon as the worker is given up on. */
+void v3_mesh_set_yield(bool (*fn)(void));
+
+/* M3D, the format of AmoledOS's portal page /3d (which converts STL, OBJ
+ * and GLB into it; P4OS's portal does not have that page yet):
+ *
+ *   "M3D1"  uint32 nv  uint32 nt  uint32 flags
+ *   nv * 3 float32               vertices (any scale: centred on loading)
+ *   nt * 3 uint32                triangles
+ *   if flags & 1: nt * uint16    face colours, RGB565
+ *
+ * Little-endian, like both ends. Y is up, as in glTF. */
+#define V3_M3D_COLORS   1u

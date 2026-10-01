@@ -1,0 +1,3702 @@
+#include "aos_web.h"
+#include <math.h>
+#include <ctype.h>
+#include <stdlib.h>
+#include "aos_hal.h"
+#include "aos_i18n.h"   /* AOS_LANG_CODE_MAX */
+#include "aos_ui.h"     /* aos_ui_request_language and the rest of the notes */
+#include "aos_icon_ops.h" /* /api/icons: where each icon comes from, and its blob */
+#include "aos_menu.h"     /* /api/menu: the launcher's order and folders */
+#include "aos_watchface.h"
+#include "aos_log.h"
+#include "aos_apps.h"   /* aos_alarm_get / set */
+#include "aos_dynapp.h" /* aos_dynapp_is_dynamic, for /api/apps */
+#include "aos_usb.h"    /* /api/usb: the USB port's mode, branch usb */
+#include "esp_timer.h"
+#include "esp_core_dump.h"
+#include "esp_partition.h"
+#include <errno.h>
+#include <time.h>
+
+#include "esp_http_server.h"
+#include "esp_log.h"
+#include "esp_heap_caps.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+
+#include <dirent.h>
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
+static const char *TAG = "aos_web";
+
+/* The page is embedded with EMBED_TXTFILES; the linker defines these symbols. */
+extern const uint8_t portal_html_start[] asm("_binary_portal_html_start");
+extern const uint8_t portal_html_end[]   asm("_binary_portal_html_end");
+extern const uint8_t wifi_html_start[]   asm("_binary_wifi_html_start");
+extern const uint8_t wifi_html_end[]     asm("_binary_wifi_html_end");
+extern const uint8_t clima_html_start[]  asm("_binary_clima_html_start");
+extern const uint8_t clima_html_end[]    asm("_binary_clima_html_end");
+extern const uint8_t modelos_html_start[] asm("_binary_modelos_html_start");
+extern const uint8_t modelos_html_end[]   asm("_binary_modelos_html_end");
+extern const uint8_t mapas_html_start[] asm("_binary_mapas_html_start");
+extern const uint8_t mapas_html_end[]   asm("_binary_mapas_html_end");
+extern const uint8_t pixel_html_start[]  asm("_binary_pixel_html_start");
+extern const uint8_t pixel_html_end[]    asm("_binary_pixel_html_end");
+extern const uint8_t pato_html_start[]   asm("_binary_pato_html_start");
+extern const uint8_t pato_html_end[]     asm("_binary_pato_html_end");
+extern const uint8_t lua_html_start[]    asm("_binary_lua_html_start");
+extern const uint8_t lua_html_end[]      asm("_binary_lua_html_end");
+extern const uint8_t iconos_html_start[] asm("_binary_iconos_html_start");
+extern const uint8_t iconos_html_end[]   asm("_binary_iconos_html_end");
+extern const uint8_t cotiz_html_start[]  asm("_binary_cotiz_html_start");
+extern const uint8_t camaras_html_start[] asm("_binary_camaras_html_start");
+extern const uint8_t camaras_html_end[]   asm("_binary_camaras_html_end");
+extern const uint8_t cotiz_html_end[]    asm("_binary_cotiz_html_end");
+extern const uint8_t sensores_html_start[] asm("_binary_sensores_html_start");
+extern const uint8_t sensores_html_end[]   asm("_binary_sensores_html_end");
+extern const uint8_t remoto_html_start[] asm("_binary_remoto_html_start");
+extern const uint8_t red_html_start[]    asm("_binary_red_html_start");
+extern const uint8_t remoto_html_end[]   asm("_binary_remoto_html_end");
+extern const uint8_t red_html_end[]      asm("_binary_red_html_end");
+extern const uint8_t usb_html_start[]    asm("_binary_usb_html_start");
+extern const uint8_t usb_html_end[]      asm("_binary_usb_html_end");
+extern const uint8_t ap_html_start[]     asm("_binary_ap_html_start");
+extern const uint8_t ap_html_end[]       asm("_binary_ap_html_end");
+extern const uint8_t aos_css_start[]     asm("_binary_aos_css_start");
+extern const uint8_t aos_css_end[]       asm("_binary_aos_css_end");
+extern const uint8_t aos_js_start[]      asm("_binary_aos_js_start");
+extern const uint8_t menu_html_start[]   asm("_binary_menu_html_start");
+extern const uint8_t menu_html_end[]     asm("_binary_menu_html_end");
+extern const uint8_t aic_js_start[]      asm("_binary_aic_js_start");
+extern const uint8_t aic_js_end[]        asm("_binary_aic_js_end");
+extern const uint8_t glifos_js_start[]   asm("_binary_glifos_js_start");
+extern const uint8_t glifos_js_end[]     asm("_binary_glifos_js_end");
+extern const uint8_t aos_js_end[]        asm("_binary_aos_js_end");
+extern const uint8_t inicio_html_start[]   asm("_binary_inicio_html_start");
+extern const uint8_t inicio_html_end[]     asm("_binary_inicio_html_end");
+extern const uint8_t ajustes_html_start[]  asm("_binary_ajustes_html_start");
+extern const uint8_t ajustes_html_end[]    asm("_binary_ajustes_html_end");
+extern const uint8_t pantalla_html_start[] asm("_binary_pantalla_html_start");
+extern const uint8_t pantalla_html_end[]   asm("_binary_pantalla_html_end");
+extern const uint8_t registro_html_start[] asm("_binary_registro_html_start");
+extern const uint8_t registro_html_end[]   asm("_binary_registro_html_end");
+extern const uint8_t alarmas_html_start[]  asm("_binary_alarmas_html_start");
+extern const uint8_t alarmas_html_end[]    asm("_binary_alarmas_html_end");
+
+/* Defined further down, used by the status handler above them. */
+static void json_escape(char *dst, size_t dst_len, const char *src);
+static void url_decode(char *s);
+
+#define UPLOAD_CHUNK        4096
+#define MAX_UPLOAD_BYTES    (8 * 1024 * 1024)
+
+static httpd_handle_t s_server;
+
+/* --------------------------------------------------------------------------
+ * Parameter validation
+ *
+ * Everything arriving from the network is treated as hostile: the folder has
+ * to be one of the allowed ones, and of the name we keep only the last
+ * component, so that a "../../something" cannot write out of place.
+ * -------------------------------------------------------------------------- */
+
+static const char *resolve_dir(const char *dir)
+{
+    static char path[160];
+
+    if (!dir) {
+        return NULL;
+    }
+    if (strcmp(dir, "apps") == 0) {
+        snprintf(path, sizeof(path), "%s", aos_hal_path_apps());
+    } else if (strcmp(dir, "photos") == 0) {
+        snprintf(path, sizeof(path), "%s", aos_hal_path_photos());
+    } else if (strcmp(dir, "music") == 0) {
+        snprintf(path, sizeof(path), "%s", aos_hal_path_music());
+    } else if (strcmp(dir, "videos") == 0) {
+        /* The Video app's folder (branch video): MJPEG AVIs at 368x448 and
+         * the WAV beside each one, written by tools/video_convert.sh. It is
+         * composed here and in the app from the card's root, like the
+         * app's own data folders, so it needs no path helper of its own. */
+        const char *root = aos_hal_path_sd_root();
+        if (!root) {
+            return NULL;
+        }
+        snprintf(path, sizeof(path), "%s/videos", root);
+    } else if (strcmp(dir, "recordings") == 0) {
+        snprintf(path, sizeof(path), "%s", aos_hal_path_recordings());
+    } else if (strcmp(dir, "redes") == 0) {
+        /* With this branch, /api/list, /api/download and /api/delete serve the
+         * network surveys without a single new handler. */
+        snprintf(path, sizeof(path), "%s", aos_hal_path_scans());
+    } else if (strcmp(dir, "lang") == 0) {
+        snprintf(path, sizeof(path), "%s", aos_hal_path_lang());
+    } else if (strncmp(dir, "lang/", 5) == 0) {
+        /* Language packs each live in a subdirectory of their own, so this is
+         * the only path with two levels. The code is validated by hand
+         * -letters, digits, hyphens and nothing else- because it comes from
+         * the network: without this a "lang/../.." would escape the tree. */
+        const char *code = dir + 5;
+        size_t n = strlen(code);
+        if (n == 0 || n >= AOS_LANG_CODE_MAX) {
+            return NULL;
+        }
+        for (size_t i = 0; i < n; i++) {
+            if (!isalnum((unsigned char)code[i]) && code[i] != '-' && code[i] != '_') {
+                return NULL;
+            }
+        }
+        snprintf(path, sizeof(path), "%s/%s", aos_hal_path_lang(), code);
+    } else if (strcmp(dir, "radio") == 0) {
+        /* The Radio app's card folder (branch radio): the /radio page's
+         * list of stations (library.json) and the logo of each key
+         * (logoN.jpg). The generic handlers carry both; the firmware reads
+         * neither - the keys themselves are in NVS (aos_radio_api.c). */
+        const char *root = aos_hal_path_sd_root();
+        if (!root) {
+            return NULL;
+        }
+        snprintf(path, sizeof(path), "%s/radio", root);
+    } else if (strcmp(dir, "pixel") == 0) {
+        /* The Pixel Art app's documents (.pix) and its exports (.png, .gif),
+         * on the card only: without one the app falls back to SPIFFS and
+         * there is nothing here to serve. With this branch /pixel edits the
+         * files through /api/list, /api/download and /api/upload, no
+         * handler of its own. */
+        const char *root = aos_hal_path_sd_root();
+        if (!root) {
+            return NULL;
+        }
+        snprintf(path, sizeof(path), "%s/pixel", root);
+    } else if (strcmp(dir, "icons") == 0) {
+        /* Icon files, <app.id>.aic (docs/ICONS.md). Card or SPIFFS, like the
+         * apps: the /iconos page lists, uploads and deletes through the
+         * generic handlers, and each write asks the UI to rescan. */
+        snprintf(path, sizeof(path), "%s", aos_hal_path_icons());
+    } else if (strcmp(dir, "pato") == 0) {
+        /* The Pato goma app's scripts (.pato), on the card only. Like /pixel:
+         * /api/list, /api/download, /api/upload and /api/delete with dir=pato
+         * are the whole editor; the firmware never learns the format. */
+        const char *root = aos_hal_path_sd_root();
+        if (!root) {
+            return NULL;
+        }
+        snprintf(path, sizeof(path), "%s/pato", root);
+    } else if (strcmp(dir, "lua") == 0) {
+        /* The Lua scripts (.lua), on the card only. Same arrangement as
+         * /pato and /pixel: /api/list, /api/download, /api/upload and
+         * /api/delete with dir=lua are the whole editor, and the firmware
+         * never learns what is inside a script. It answered as "sd/lua"
+         * before this branch existed, through the explorer; the name of its
+         * own is what lets the page and the app agree on one spelling. */
+        const char *root = aos_hal_path_sd_root();
+        if (!root) {
+            return NULL;
+        }
+        snprintf(path, sizeof(path), "%s/lua", root);
+    } else if (strcmp(dir, "3d") == 0) {
+        /* The 3D viewer's models (.stl, .m3d), on the card only (v0.6.0).
+         * The /3d page converts OBJ and GLB in the browser and uploads the
+         * result here; the firmware never learns the format either. */
+        const char *root = aos_hal_path_sd_root();
+        if (!root) {
+            return NULL;
+        }
+        snprintf(path, sizeof(path), "%s/3d", root);
+    } else if (strcmp(dir, "maps") == 0) {
+        /* The Maps app's folder (branch mapas), on the card only: zones.txt,
+         * goto.txt, the offline packs (.amp) and their indexes (.idx), all
+         * written by the /mapas page through the generic handlers. The
+         * app's cache of tiles seen online is a subfolder, cache/, which the
+         * explorer reaches as sd/maps/cache. */
+        const char *root = aos_hal_path_sd_root();
+        if (!root) {
+            return NULL;
+        }
+        snprintf(path, sizeof(path), "%s/maps", root);
+    } else if (strcmp(dir, "sd") == 0 || strncmp(dir, "sd/", 3) == 0 ||
+               strcmp(dir, "usb") == 0 || strncmp(dir, "usb/", 4) == 0) {
+        /* The explorer: any folder of the card, or of the pendrive in host
+         * mode (branch usb: same rules, root /usb while one is mounted, so
+         * /api/list and /api/download serve it with no handler of their
+         * own). Validated component by component, because it comes from the
+         * network: no empty pieces, no dot-files (that rules out "." and
+         * ".."), plain printable ASCII and none of what FAT itself forbids.
+         * Without a card there is no "sd"; without a pendrive no "usb". */
+        bool usb = dir[0] == 'u';
+        const char *root = usb ? aos_usb_msc_root() : aos_hal_path_sd_root();
+        const char *rel = usb ? (dir[3] ? dir + 4 : "") : (dir[2] ? dir + 3 : "");
+        if (!root || strlen(rel) > 100) {
+            return NULL;
+        }
+        const char *c = rel;
+        while (*c) {
+            const char *end = strchr(c, '/');
+            size_t n = end ? (size_t)(end - c) : strlen(c);
+            if (n == 0 || c[0] == '.') {
+                return NULL;
+            }
+            for (size_t i = 0; i < n; i++) {
+                unsigned char ch = (unsigned char)c[i];
+                if (ch < 0x20 || ch > 0x7E || strchr("\\:*?\"<>|", ch)) {
+                    return NULL;
+                }
+            }
+            if (!end) break;
+            c = end + 1;
+        }
+        if (rel[0]) {
+            snprintf(path, sizeof(path), "%s/%s", root, rel);
+        } else {
+            snprintf(path, sizeof(path), "%s", root);
+        }
+        /* A trailing slash from the page is harmless; FatFs dislikes it. */
+        size_t len = strlen(path);
+        if (len > 1 && path[len - 1] == '/') path[len - 1] = '\0';
+    } else {
+        return NULL;
+    }
+    return path;
+}
+
+static bool safe_name(const char *name, char *out, size_t out_len)
+{
+    if (!name || !name[0]) {
+        return false;
+    }
+    const char *slash = strrchr(name, '/');
+    const char *base = slash ? slash + 1 : name;
+
+    if (base[0] == '.' || strchr(base, '\\') != NULL) {
+        return false;
+    }
+    if (strlen(base) >= out_len) {
+        return false;
+    }
+    snprintf(out, out_len, "%s", base);
+    return true;
+}
+
+/* Pulls dir and name out of the query, already validated. */
+static bool params(httpd_req_t *req, const char **dir_path, char *name, size_t name_len)
+{
+    char query[256];
+    if (httpd_req_get_url_query_str(req, query, sizeof(query)) != ESP_OK) {
+        return false;
+    }
+
+    char value[128];
+    if (httpd_query_key_value(query, "dir", value, sizeof(value)) != ESP_OK) {
+        return false;
+    }
+    url_decode(value);          /* the explorer's paths carry spaces */
+    *dir_path = resolve_dir(value);
+    if (!*dir_path) {
+        return false;
+    }
+
+    if (name) {
+        if (httpd_query_key_value(query, "name", value, sizeof(value)) != ESP_OK) {
+            return false;
+        }
+        /* the browser sends the name percent-encoded */
+        char decoded[128];
+        size_t out = 0;
+        for (size_t i = 0; value[i] && out < sizeof(decoded) - 1; i++) {
+            if (value[i] == '%' && value[i + 1] && value[i + 2]) {
+                char hex[3] = { value[i + 1], value[i + 2], 0 };
+                decoded[out++] = (char)strtol(hex, NULL, 16);
+                i += 2;
+            } else if (value[i] == '+') {
+                decoded[out++] = ' ';
+            } else {
+                decoded[out++] = value[i];
+            }
+        }
+        decoded[out] = '\0';
+        if (!safe_name(decoded, name, name_len)) {
+            return false;
+        }
+    }
+    return true;
+}
+
+
+/* --------------------------------------------------------------------------
+ * /api/pmu — the PMU's regulators and registers, for experiments.
+ *
+ *   GET /api/pmu                       the rail table, TS and a few registers
+ *   GET /api/pmu?rail=ALDO1&on=0       switch a rail (DCDC1 is refused)
+ *   GET /api/pmu?reg=0x50&val=0x10     write a register
+ *   GET /api/pmu?reg=0x50              read one
+ *
+ * Nothing here is remembered: a reboot restores the firmware's programme and
+ * the PMU's own defaults. It exists so a rail can be switched off while
+ * watching the screen, the touch, the codec and the card, without a reflash
+ * per attempt. See docs/POWER.md section 6.
+ * -------------------------------------------------------------------------- */
+static esp_err_t pmu_handler(httpd_req_t *req)
+{
+    char query[128] = "", value[24];
+    httpd_req_get_url_query_str(req, query, sizeof(query));
+
+    char note[96] = "";
+    if (httpd_query_key_value(query, "deep", value, sizeof(value)) == ESP_OK) {
+        /* the answer goes out first: the chip sleeps a moment later */
+        uint32_t secs = (uint32_t)atoi(value);
+        char msg[64];
+        snprintf(msg, sizeof(msg), "{\"deep\":%u}", (unsigned)secs);
+        httpd_resp_set_type(req, "application/json");
+        httpd_resp_sendstr(req, msg);
+        vTaskDelay(pdMS_TO_TICKS(300));
+        aos_hal_night_test(secs);
+        return ESP_OK;
+    } else if (httpd_query_key_value(query, "wifitest", value, sizeof(value)) == ESP_OK) {
+        char idle_s[8] = "0";
+        httpd_query_key_value(query, "idle", idle_s, sizeof(idle_s));
+        uint32_t secs = (uint32_t)atoi(value);
+        char msg[64];
+        snprintf(msg, sizeof(msg), "{\"wifitest\":%u,\"idle\":%d}", (unsigned)secs, atoi(idle_s) ? 1 : 0);
+        httpd_resp_set_type(req, "application/json");
+        httpd_resp_sendstr(req, msg);
+        vTaskDelay(pdMS_TO_TICKS(300));
+        aos_hal_net_test_absent(secs, atoi(idle_s) != 0);
+        return ESP_OK;
+    } else if (httpd_query_key_value(query, "tasks", value, sizeof(value)) == ESP_OK) {
+        /* each task's run time (microseconds since boot) and core; the
+         * difference between two readings says who keeps the chip awake */
+        UBaseType_t ntask = uxTaskGetNumberOfTasks();
+        TaskStatus_t *ts = heap_caps_calloc(ntask + 8, sizeof(TaskStatus_t), MALLOC_CAP_SPIRAM);
+        char *out = heap_caps_malloc(4096, MALLOC_CAP_SPIRAM);
+        if (!ts || !out) {
+            free(ts);
+            free(out);
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "sin memoria");
+            return ESP_FAIL;
+        }
+        uint32_t total = 0;
+        UBaseType_t got = uxTaskGetSystemState(ts, ntask + 8, &total);
+        int o = snprintf(out, 4096, "total %lu\n", (unsigned long)total);
+        for (UBaseType_t i = 0; i < got && o < 4000; i++) {
+            o += snprintf(out + o, 4096 - o, "%-16s %d %lu\n", ts[i].pcTaskName,
+                          (int)xTaskGetCoreID(ts[i].xHandle), (unsigned long)ts[i].ulRunTimeCounter);
+        }
+        free(ts);
+        httpd_resp_set_type(req, "text/plain");
+        esp_err_t r = httpd_resp_send(req, out, HTTPD_RESP_USE_STRLEN);
+        free(out);
+        return r;
+    } else if (httpd_query_key_value(query, "touchslp", value, sizeof(value)) == ESP_OK) {
+        aos_hal_touch_sleep_enable(atoi(value) != 0);
+        snprintf(note, sizeof(note), "\"touch_sleep\":%d,", atoi(value) ? 1 : 0);
+    } else if (httpd_query_key_value(query, "ls", value, sizeof(value)) == ESP_OK) {
+        aos_hal_light_sleep_enable(atoi(value) != 0);
+        snprintf(note, sizeof(note), "\"light_sleep_pref\":%d,", atoi(value) ? 1 : 0);
+    } else if (httpd_query_key_value(query, "panelslp", value, sizeof(value)) == ESP_OK) {
+        aos_hal_panel_sleep_enable(atoi(value) != 0);
+        snprintf(note, sizeof(note), "\"panel_sleep_pref\":%d,", atoi(value) ? 1 : 0);
+    } else if (httpd_query_key_value(query, "panelreset", value, sizeof(value)) == ESP_OK) {
+        aos_hal_panel_hw_reset();
+        snprintf(note, sizeof(note), "\"panelreset\":true,");
+    } else if (httpd_query_key_value(query, "display", value, sizeof(value)) == ESP_OK) {
+        if (atoi(value)) aos_hal_activity(); else aos_hal_display_on(false);
+        snprintf(note, sizeof(note), "\"display\":%d,", atoi(value) ? 1 : 0);
+    } else if (httpd_query_key_value(query, "locks", value, sizeof(value)) == ESP_OK) {
+        /* 2 KB, and in PSRAM: it used to be a static in internal RAM, sitting
+         * there for the one time a day somebody looks at the PM locks. */
+        char *dump = heap_caps_malloc(2048, MALLOC_CAP_SPIRAM);
+        if (!dump) {
+            httpd_resp_set_status(req, "503 Service Unavailable");
+            return httpd_resp_sendstr(req, "sin memoria");
+        }
+        aos_hal_pm_dump_text(dump, 2048);
+        httpd_resp_set_type(req, "text/plain");
+        esp_err_t r = httpd_resp_send(req, dump, HTTPD_RESP_USE_STRLEN);
+        free(dump);
+        return r;
+    } else if (httpd_query_key_value(query, "probe", value, sizeof(value)) == ESP_OK) {
+        char probe[320];
+        aos_hal_probe_devices(probe, sizeof(probe));
+        if (atoi(value) > 1) {
+            aos_hal_beep(880, 200);
+        }
+        httpd_resp_set_type(req, "application/json");
+        return httpd_resp_send(req, probe, HTTPD_RESP_USE_STRLEN);
+    } else if (httpd_query_key_value(query, "rail", value, sizeof(value)) == ESP_OK) {
+        int idx = aos_hal_pmu_rail_find(value);
+        char on_s[8] = "1";
+        httpd_query_key_value(query, "on", on_s, sizeof(on_s));
+        bool ok = idx >= 0 && aos_hal_pmu_rail_set(idx, atoi(on_s) != 0);
+        snprintf(note, sizeof(note), "\"set\":\"%s\",\"ok\":%s,", value, ok ? "true" : "false");
+    } else if (httpd_query_key_value(query, "reg", value, sizeof(value)) == ESP_OK) {
+        int reg = (int)strtol(value, NULL, 0);
+        char val_s[16];
+        if (httpd_query_key_value(query, "val", val_s, sizeof(val_s)) == ESP_OK) {
+            bool ok = aos_hal_pmu_register_write(reg, (int)strtol(val_s, NULL, 0));
+            snprintf(note, sizeof(note), "\"wrote\":\"0x%02X\",\"ok\":%s,", reg, ok ? "true" : "false");
+        } else {
+            snprintf(note, sizeof(note), "\"reg\":\"0x%02X\",\"value\":%d,", reg,
+                     aos_hal_pmu_register_read(reg));
+        }
+    }
+
+    char json[900];
+    int n = snprintf(json, sizeof(json), "{%s\"ts_v\":%.3f,\"adc_ctrl\":%d,\"ts_ctrl\":%d,"
+                     "\"status1\":%d,\"status2\":%d,\"rails\":[",
+                     note, aos_hal_pmu_ts_voltage(),
+                     aos_hal_pmu_register_read(0x30), aos_hal_pmu_register_read(0x50),
+                     aos_hal_pmu_register_read(0x00), aos_hal_pmu_register_read(0x01));
+    int count = aos_hal_pmu_rail_count();
+    for (int i = 0; i < count && n < (int)sizeof(json) - 64; i++) {
+        const char *name; bool on; int mv;
+        if (!aos_hal_pmu_rail_get(i, &name, &on, &mv)) continue;
+        n += snprintf(json + n, sizeof(json) - n, "%s{\"name\":\"%s\",\"on\":%s,\"mv\":%d}",
+                      i ? "," : "", name, on ? "true" : "false", mv);
+    }
+    n += snprintf(json + n, sizeof(json) - n, "]}");
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, json, HTTPD_RESP_USE_STRLEN);
+}
+
+/* -------------------------------------------------------------------------- */
+
+static esp_err_t page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html");
+    return httpd_resp_send(req, (const char *)portal_html_start,
+                           portal_html_end - portal_html_start - 1);
+}
+
+static esp_err_t status_handler(httpd_req_t *req)
+{
+    aos_battery_t batt;
+    int percent = aos_hal_battery_read(&batt) ? batt.percent : -1;
+
+    uint32_t internal = 0, psram = 0;
+    aos_hal_heap_info(&internal, &psram);
+
+    /* The slot and the trial flag are what make an update verifiable from
+     * outside: two builds of the same version look identical otherwise. */
+    /* The PMU's detail rides along: it is what a home-automation poller
+     * wants, and the only way to watch the drain without wearing the watch. */
+    aos_power_info_t pw;
+    bool have_pw = aos_hal_power_info(&pw);
+    /* JSON has no NaN: what is not known yet goes out as -1. */
+    if (have_pw) {
+        if (isnan(pw.board_temperature))  pw.board_temperature  = -1.0f;
+        if (isnan(pw.drain_pct_per_hour)) pw.drain_pct_per_hour = -1.0f;
+        if (isnan(pw.hours_left))         pw.hours_left         = -1.0f;
+    }
+    static const char *chg_names[] = {
+        "trickle", "precharge", "cc", "cv", "done", "idle"
+    };
+
+    char json[640];
+    int n = snprintf(json, sizeof(json),
+             "{\"version\":\"%s\",\"battery\":%d,\"heap\":%u,\"psram\":%u,"
+             "\"sd\":%s,\"board\":\"%s\",\"slot\":\"%s\",\"trial\":%s",
+             aos_hal_firmware_version(), percent,
+             (unsigned)internal, (unsigned)psram,
+             aos_hal_sd_present() ? "true" : "false",
+             aos_hal_board_name(),
+             aos_hal_ota_running_slot(),
+             aos_hal_ota_pending_verify() ? "true" : "false");
+    if (have_pw && n > 0 && n < (int)sizeof(json)) {
+        n += snprintf(json + n, sizeof(json) - n,
+             ",\"vbat\":%.3f,\"vbus\":%.2f,\"charging\":%s,\"usb\":%s,"
+             "\"charge_state\":\"%s\",\"charge_ma\":%d,\"charge_target_mv\":%d,"
+             "\"board_temp\":%.1f,\"drain_pct_h\":%.2f,\"hours_left\":%.1f,"
+             "\"on_battery_s\":%u,\"battery_minutes\":%u,\"cycles\":%u,"
+             "\"cpu_mhz\":%d,\"saving\":%s,\"panel_asleep\":%s,\"light_sleep\":%s,"
+             "\"power_on\":\"%s\",\"last_power_off\":\"%s\",\"boot_reason\":\"%s\""
+             ",\"uptime_s\":%u,\"display\":%d",
+             batt.voltage, pw.vbus,
+             batt.charging ? "true" : "false", batt.usb_present ? "true" : "false",
+             chg_names[pw.charge_state <= AOS_CHG_IDLE ? pw.charge_state : AOS_CHG_IDLE],
+             pw.charge_ma, pw.charge_target_mv,
+             pw.board_temperature, pw.drain_pct_per_hour, pw.hours_left,
+             (unsigned)pw.on_battery_s, (unsigned)pw.battery_minutes_total,
+             (unsigned)pw.charge_cycles, pw.cpu_mhz,
+             pw.power_saving_active ? "true" : "false",
+             pw.panel_asleep ? "true" : "false",
+             pw.light_sleep ? "true" : "false",
+             pw.power_on_reason, pw.power_off_reason, aos_hal_boot_reason(),
+             (unsigned)(aos_hal_uptime_ms() / 1000), (int)aos_hal_display_state());
+    }
+    if (n > 0 && n < (int)sizeof(json) - 1) {
+        json[n++] = '}';
+        json[n]   = '\0';
+    }
+
+    /* What the portal's status strip and the home page show on top of the
+     * above: the network, the phone, the card and what is on screen. Sent as
+     * a second piece so the first buffer keeps its size. The closing brace of
+     * the first piece is taken back and the fields are appended. */
+    if (n > 1 && json[n - 1] == '}') {
+        json[--n] = '\0';
+    }
+    char extra[640];
+    char ssid[68] = "", peer[68] = "";
+    if (aos_hal_net_state() == AOS_NET_CONNECTED) {
+        json_escape(ssid, sizeof(ssid), aos_hal_net_ssid());
+    }
+    aos_bt_state_t bt = aos_hal_bt_state();
+    if (bt == AOS_BT_CONNECTED) {
+        json_escape(peer, sizeof(peer), aos_hal_bt_peer());
+    }
+    int phone = -1;
+    if (bt == AOS_BT_CONNECTED && !aos_hal_bt_phone_battery(&phone)) {
+        phone = -1;
+    }
+    uint64_t sd_total = 0, sd_free = 0;
+    if (aos_hal_sd_present()) {
+        aos_hal_sd_usage(&sd_total, &sd_free);
+    }
+    const char *app = aos_ui_current_app();
+    char tz[48];
+    json_escape(tz, sizeof(tz), aos_hal_timezone_get());
+    /* The touch fit rides along: from outside, an uncalibrated panel (the
+     * identity) and a calibrated one look the same until a finger lands 55 px
+     * off, and this is the only way to tell without the watch on the wrist. */
+    float cal_ax = 1.0f, cal_bx = 0.0f, cal_ay = 1.0f, cal_by = 0.0f;
+    bool calibrated = aos_ui_touch_calibration_get(&cal_ax, &cal_bx, &cal_ay, &cal_by);
+    aos_steps_info_t steps = {0};
+    aos_hal_steps_get(&steps);
+    snprintf(extra, sizeof(extra),
+             ",\"ssid\":\"%s\",\"rssi\":%d,\"ip\":\"%s\",\"wifi_on\":%s,"
+             "\"ap\":%s,\"ap_ip\":\"%s\",\"bt\":\"%s\",\"bt_peer\":\"%s\","
+             "\"phone_batt\":%d,\"exec\":%u,\"sd_total\":%llu,\"sd_free\":%llu,"
+             "\"steps\":%u,\"steps_goal\":%u,\"name\":\"%s\","
+             "\"app\":\"%s\",\"time_ok\":%s,\"tz\":\"%s\",\"now\":%lld,"
+             "\"touch_cal\":%s,\"cal_ax\":%.4f,\"cal_bx\":%.2f,"
+             "\"cal_ay\":%.4f,\"cal_by\":%.2f}",
+             ssid, ssid[0] ? aos_hal_net_rssi() : 0,
+             ssid[0] ? aos_hal_net_ip() : "",
+             aos_hal_net_enabled() ? "true" : "false",
+             aos_hal_net_ap_active() ? "true" : "false",
+             aos_hal_net_ap_active() ? aos_hal_net_ap_ip() : "",
+             bt == AOS_BT_CONNECTED ? "connected" : bt == AOS_BT_PAIRING ? "pairing" :
+             bt == AOS_BT_ADVERTISING ? "advertising" : "off",
+             peer, phone,
+             (unsigned)heap_caps_get_free_size(MALLOC_CAP_EXEC),
+             (unsigned long long)sd_total, (unsigned long long)sd_free,
+             (unsigned)steps.today, (unsigned)steps.goal, aos_hal_device_name(),
+             app ? app : "",
+             aos_hal_time_is_valid() ? "true" : "false", tz,
+             (long long)time(NULL),
+             calibrated ? "true" : "false", cal_ax, cal_bx, cal_ay, cal_by);
+
+    char power[520];
+    aos_hal_power_json(power, sizeof(power));
+
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_send_chunk(req, json, n);
+    httpd_resp_send_chunk(req, power, HTTPD_RESP_USE_STRLEN);
+    httpd_resp_send_chunk(req, extra, HTTPD_RESP_USE_STRLEN);
+    return httpd_resp_send_chunk(req, NULL, 0);
+}
+
+static esp_err_t list_handler(httpd_req_t *req)
+{
+    const char *dir_path = NULL;
+    if (!params(req, &dir_path, NULL, 0)) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "dir invalido");
+        return ESP_FAIL;
+    }
+
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_sendstr_chunk(req, "{\"files\":[");
+
+    DIR *dir = opendir(dir_path);
+    if (dir) {
+        struct dirent *entry;
+        bool first = true;
+        char item[320];
+
+        while ((entry = readdir(dir)) != NULL) {
+            if (entry->d_name[0] == '.') {
+                continue;
+            }
+            char full[320];
+            snprintf(full, sizeof(full), "%s/%s", dir_path, entry->d_name);
+
+            struct stat info;
+            if (stat(full, &info) != 0) {
+                continue;
+            }
+            char nombre[200];
+            json_escape(nombre, sizeof(nombre), entry->d_name);
+            if (S_ISDIR(info.st_mode)) {
+                /* Folders ride in the same list, flagged: the explorer tab of
+                 * the Files page walks them; the fixed tabs never see one
+                 * because their folders hold files only. */
+                snprintf(item, sizeof(item), "%s{\"name\":\"%s\",\"dir\":true}",
+                         first ? "" : ",", nombre);
+            } else if (S_ISREG(info.st_mode)) {
+                snprintf(item, sizeof(item), "%s{\"name\":\"%s\",\"size\":%ld}",
+                         first ? "" : ",", nombre, (long)info.st_size);
+            } else {
+                continue;
+            }
+            httpd_resp_sendstr_chunk(req, item);
+            first = false;
+        }
+        closedir(dir);
+    }
+
+    httpd_resp_sendstr_chunk(req, "]}");
+    httpd_resp_sendstr_chunk(req, NULL);
+    return ESP_OK;
+}
+
+static esp_err_t upload_handler(httpd_req_t *req)
+{
+    const char *dir_path = NULL;
+    char name[96];
+    if (!params(req, &dir_path, name, sizeof(name))) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "parametros invalidos");
+        return ESP_FAIL;
+    }
+    if (req->content_len > MAX_UPLOAD_BYTES) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "archivo demasiado grande");
+        return ESP_FAIL;
+    }
+
+    char path[256];
+    snprintf(path, sizeof(path), "%s/%s", dir_path, name);
+
+    /* The first pack uploaded finds /lang and /lang/<code> not yet created.
+     * mkdir both, ignoring the result: if they are there, EEXIST and done; if
+     * they really fail, the fopen below says so with a useful error. */
+    if (strncmp(dir_path, aos_hal_path_lang(), strlen(aos_hal_path_lang())) == 0) {
+        mkdir(aos_hal_path_lang(), 0777);
+        mkdir(dir_path, 0777);
+    }
+    /* Same for /pixel: the first canvas drawn in the browser, before the app
+     * was ever opened on the watch, finds no folder. */
+    if (strstr(dir_path, "/pixel") != NULL) {
+        mkdir(dir_path, 0777);
+    }
+    /* Same for /radio: the first logo or list saved by the page. */
+    if (strstr(dir_path, "/radio") != NULL) {
+        mkdir(dir_path, 0777);
+    }
+    /* Same for /pato: the first script saved from the browser finds no folder
+     * if the app has not been opened on the watch yet. */
+    if (strstr(dir_path, "/pato") != NULL) {
+        mkdir(dir_path, 0777);
+    }
+    /* Same for /lua: a script written in the browser before the app has ever
+     * been opened on the watch. */
+    if (strstr(dir_path, "/lua") != NULL) {
+        mkdir(dir_path, 0777);
+    }
+    /* Same for /3d: a model converted in the browser before the viewer was
+     * ever opened on the watch. */
+    if (strstr(dir_path, "/3d") != NULL) {
+        mkdir(dir_path, 0777);
+    }
+    /* And /icons: the first icon dropped from /iconos creates the folder. */
+    bool is_icons = strcmp(dir_path, aos_hal_path_icons()) == 0;
+    if (is_icons) {
+        mkdir(dir_path, 0777);
+    }
+
+    FILE *file = fopen(path, "wb");
+    if (!file) {
+        ESP_LOGE(TAG, "could not create %s", path);
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "no se pudo escribir");
+        return ESP_FAIL;
+    }
+
+    char *buffer = malloc(UPLOAD_CHUNK);
+    if (!buffer) {
+        fclose(file);
+        remove(path);
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "sin memoria");
+        return ESP_FAIL;
+    }
+
+    int remaining = req->content_len;
+    while (remaining > 0) {
+        int chunk = httpd_req_recv(req, buffer,
+                                   remaining < UPLOAD_CHUNK ? remaining : UPLOAD_CHUNK);
+        if (chunk <= 0) {
+            if (chunk == HTTPD_SOCK_ERR_TIMEOUT) {
+                continue;
+            }
+            free(buffer);
+            fclose(file);
+            remove(path);       /* better no file than half a one */
+            ESP_LOGE(TAG, "upload of %s cut short", name);
+            return ESP_FAIL;
+        }
+        if (fwrite(buffer, 1, (size_t)chunk, file) != (size_t)chunk) {
+            free(buffer);
+            fclose(file);
+            remove(path);
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "error de escritura");
+            return ESP_FAIL;
+        }
+        remaining -= chunk;
+    }
+
+    free(buffer);
+    fclose(file);
+    ESP_LOGI(TAG, "uploaded %s (%d bytes)", path, req->content_len);
+    if (is_icons) {
+        aos_ui_request_icons();
+    }
+
+    char json[96];
+    snprintf(json, sizeof(json), "{\"ok\":true,\"size\":%d}", req->content_len);
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, json, HTTPD_RESP_USE_STRLEN);
+}
+
+/* --------------------------------------------------------------------------
+ * Firmware update
+ *
+ * The same shape as upload_handler: read the body in 4 KB pieces and hand each
+ * one straight on. The difference is where they go -esp_ota_write instead of
+ * fwrite- and that here there is no half-written file to delete if it fails,
+ * because what gets written is the idle slot and the running one is not
+ * touched until the very last step.
+ *
+ * It does NOT restart by itself. The answer has to reach the browser first,
+ * otherwise the socket dies mid-reply and whoever pushed the update is left
+ * not knowing whether it worked. The restart is a second call, POST
+ * /api/ota/restart, which tools/install_fw.sh makes on its own.
+ *
+ * And the image arrives on trial: see aos_hal_ota_pending_verify() and the
+ * confirmation in main.c.
+ * -------------------------------------------------------------------------- */
+
+static esp_err_t ota_handler(httpd_req_t *req)
+{
+    if (req->content_len <= 0) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "cuerpo vacio");
+        return ESP_FAIL;
+    }
+
+    if (!aos_hal_ota_begin((size_t)req->content_len)) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
+                            aos_hal_ota_error());
+        return ESP_FAIL;
+    }
+
+    char *buffer = malloc(UPLOAD_CHUNK);
+    if (!buffer) {
+        aos_hal_ota_abort();
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "sin memoria");
+        return ESP_FAIL;
+    }
+
+    int remaining = req->content_len;
+    while (remaining > 0) {
+        int chunk = httpd_req_recv(req, buffer,
+                                   remaining < UPLOAD_CHUNK ? remaining : UPLOAD_CHUNK);
+        if (chunk <= 0) {
+            if (chunk == HTTPD_SOCK_ERR_TIMEOUT) {
+                continue;
+            }
+            free(buffer);
+            aos_hal_ota_abort();
+            ESP_LOGE(TAG, "ota: upload cut short with %d B to go", remaining);
+            return ESP_FAIL;
+        }
+        if (!aos_hal_ota_write(buffer, (size_t)chunk)) {
+            free(buffer);
+            /* write() already aborted and left the reason behind */
+            httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
+                                aos_hal_ota_error());
+            return ESP_FAIL;
+        }
+        remaining -= chunk;
+    }
+    free(buffer);
+
+    if (!aos_hal_ota_end()) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
+                            aos_hal_ota_error());
+        return ESP_FAIL;
+    }
+
+    ESP_LOGI(TAG, "ota: image of %d B installed, waiting for the restart",
+             req->content_len);
+
+    char json[128];
+    snprintf(json, sizeof(json),
+             "{\"ok\":true,\"size\":%d,\"restart\":\"/api/ota/restart\"}",
+             req->content_len);
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, json, HTTPD_RESP_USE_STRLEN);
+}
+
+/* Separate so the answer to the upload gets out first. Half a second is enough
+ * for the socket to drain; a plain esp_restart() here cuts the reply. */
+static void restart_task(void *arg)
+{
+    (void)arg;
+    vTaskDelay(pdMS_TO_TICKS(500));
+    aos_hal_reboot();
+    vTaskDelete(NULL);
+}
+
+static esp_err_t ota_restart_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "application/json");
+    esp_err_t r = httpd_resp_send(req, "{\"ok\":true}", HTTPD_RESP_USE_STRLEN);
+    xTaskCreate(restart_task, "aos_restart", 2048, NULL, 5, NULL);
+    return r;
+}
+
+/* --------------------------------------------------------------------------
+ * Download
+ *
+ * Sent in chunks and not in one go: a one-minute WAV is 2 MB, and building the
+ * whole response in memory for that would be throwing PSRAM away.
+ *
+ * With "&dl=1" it goes as an attachment and the browser saves it; without
+ * that it goes as-is and the browser opens it with its own player, which is
+ * what is needed to listen to a recording without downloading it. Note there
+ * is no Range support: it is enough to play from start to finish, not to seek.
+ * -------------------------------------------------------------------------- */
+
+static const char *content_type_for(const char *name)
+{
+    const char *dot = strrchr(name, '.');
+    if (!dot) {
+        return "application/octet-stream";
+    }
+    if (strcasecmp(dot, ".wav") == 0)  return "audio/wav";
+    if (strcasecmp(dot, ".mp3") == 0)  return "audio/mpeg";
+    if (strcasecmp(dot, ".jpg") == 0 ||
+        strcasecmp(dot, ".jpeg") == 0) return "image/jpeg";
+    if (strcasecmp(dot, ".png") == 0)  return "image/png";
+    if (strcasecmp(dot, ".bmp") == 0)  return "image/bmp";
+    if (strcasecmp(dot, ".gif") == 0)  return "image/gif";
+    return "application/octet-stream";
+}
+
+static esp_err_t download_handler(httpd_req_t *req)
+{
+    const char *dir_path = NULL;
+    char name[96];
+    if (!params(req, &dir_path, name, sizeof(name))) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "parametros invalidos");
+        return ESP_FAIL;
+    }
+
+    char path[256];
+    snprintf(path, sizeof(path), "%s/%s", dir_path, name);
+
+    struct stat info;
+    if (stat(path, &info) != 0 || !S_ISREG(info.st_mode)) {
+        httpd_resp_send_err(req, HTTPD_404_NOT_FOUND, "no existe");
+        return ESP_FAIL;
+    }
+
+    FILE *file = fopen(path, "rb");
+    if (!file) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "no se pudo abrir");
+        return ESP_FAIL;
+    }
+
+    char *buffer = malloc(UPLOAD_CHUNK);
+    if (!buffer) {
+        fclose(file);
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "sin memoria");
+        return ESP_FAIL;
+    }
+
+    /* attachment only if asked for: otherwise the browser opens and plays it */
+    char query[256], value[16];
+    bool attach = httpd_req_get_url_query_str(req, query, sizeof(query)) == ESP_OK &&
+                  httpd_query_key_value(query, "dl", value, sizeof(value)) == ESP_OK;
+
+    char disposition[160];
+    snprintf(disposition, sizeof(disposition), "%s; filename=\"%s\"",
+             attach ? "attachment" : "inline", name);
+
+    httpd_resp_set_type(req, content_type_for(name));
+    httpd_resp_set_hdr(req, "Content-Disposition", disposition);
+
+    size_t got;
+    esp_err_t ret = ESP_OK;
+    while ((got = fread(buffer, 1, UPLOAD_CHUNK, file)) > 0) {
+        if (httpd_resp_send_chunk(req, buffer, got) != ESP_OK) {
+            /* the browser hung up: not an error of ours, but we have to leave */
+            ret = ESP_FAIL;
+            break;
+        }
+    }
+    free(buffer);
+    fclose(file);
+
+    if (ret != ESP_OK) {
+        return ret;
+    }
+    ESP_LOGI(TAG, "downloaded %s (%ld bytes)", path, (long)info.st_size);
+    return httpd_resp_send_chunk(req, NULL, 0);
+}
+
+static esp_err_t delete_handler(httpd_req_t *req)
+{
+    const char *dir_path = NULL;
+    char name[96];
+    if (!params(req, &dir_path, name, sizeof(name))) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "parametros invalidos");
+        return ESP_FAIL;
+    }
+
+    char path[256];
+    snprintf(path, sizeof(path), "%s/%s", dir_path, name);
+    struct stat info;
+    bool ok;
+    if (stat(path, &info) == 0 && S_ISDIR(info.st_mode)) {
+        /* Only an empty folder goes: rmdir refuses otherwise, and that is the
+         * behaviour wanted. Wiping a tree from a browser is not a feature. */
+        ok = rmdir(path) == 0;
+    } else {
+        ok = remove(path) == 0;
+    }
+    if (ok) {
+        ESP_LOGI(TAG, "deleted %s", path);
+        if (strcmp(dir_path, aos_hal_path_icons()) == 0) {
+            aos_ui_request_icons();     /* the app's own icon comes back */
+        }
+    }
+
+    httpd_resp_set_type(req, "application/json");
+    if (!ok) {
+        httpd_resp_set_status(req, "409 Conflict");
+        return httpd_resp_sendstr(req, "{\"ok\":false,\"error\":\"no se pudo borrar\"}");
+    }
+    return httpd_resp_send(req, "{\"ok\":true}", HTTPD_RESP_USE_STRLEN);
+}
+
+/* POST /api/mkdir?dir=sd/...&name=nueva: one folder, inside a validated one. */
+static esp_err_t mkdir_handler(httpd_req_t *req)
+{
+    const char *dir_path = NULL;
+    char name[96];
+    if (!params(req, &dir_path, name, sizeof(name))) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "parametros invalidos");
+        return ESP_FAIL;
+    }
+    char path[256];
+    snprintf(path, sizeof(path), "%s/%s", dir_path, name);
+    bool ok = mkdir(path, 0777) == 0;
+    ESP_LOGI(TAG, "mkdir %s -> %s", path, ok ? "ok" : "failed");
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_sendstr(req, ok ? "{\"ok\":true}" : "{\"ok\":false}");
+}
+
+
+/* -------------------------------------------------------------------------- */
+/* Network onboarding                                                          */
+/* -------------------------------------------------------------------------- */
+
+static esp_err_t wifi_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)wifi_html_start,
+                           wifi_html_end - wifi_html_start - 1);
+}
+
+static esp_err_t scan_handler(httpd_req_t *req)
+{
+    aos_wifi_ap_t aps[24];
+    int n = aos_hal_net_scan(aps, (int)(sizeof(aps) / sizeof(aps[0])));
+
+    httpd_resp_set_type(req, "application/json");
+    if (n < 0) {
+        return httpd_resp_send(req, "{\"error\":\"no se pudo escanear\"}",
+                               HTTPD_RESP_USE_STRLEN);
+    }
+
+    /* Sent in parts so as not to build a large buffer for nothing. */
+    httpd_resp_sendstr_chunk(req, "{\"redes\":[");
+    for (int i = 0; i < n; i++) {
+        /* A network name may carry quotes or backslashes and break the JSON. */
+        char esc[70];
+        size_t e = 0;
+        for (size_t c = 0; aps[i].ssid[c] && e < sizeof(esc) - 2; c++) {
+            char ch = aps[i].ssid[c];
+            if (ch == '"' || ch == '\\') {
+                esc[e++] = '\\';
+            } else if ((unsigned char)ch < 0x20) {
+                continue;
+            }
+            esc[e++] = ch;
+        }
+        esc[e] = 0;
+
+        char item[160];
+        snprintf(item, sizeof(item),
+                 "%s{\"ssid\":\"%.68s\",\"rssi\":%d,\"segura\":%s}",
+                 i ? "," : "", esc, aps[i].rssi,
+                 aps[i].secure ? "true" : "false");
+        httpd_resp_sendstr_chunk(req, item);
+    }
+    httpd_resp_sendstr_chunk(req, "]}");
+    return httpd_resp_sendstr_chunk(req, NULL);
+}
+
+/* Decodes %XX and '+' in place. */
+static void url_decode(char *s)
+{
+    char *w = s;
+    for (char *r = s; *r; r++) {
+        if (*r == '+') {
+            *w++ = ' ';
+        } else if (*r == '%' && isxdigit((unsigned char)r[1]) &&
+                                isxdigit((unsigned char)r[2])) {
+            char hex[3] = { r[1], r[2], 0 };
+            *w++ = (char)strtol(hex, NULL, 16);
+            r += 2;
+        } else {
+            *w++ = *r;
+        }
+    }
+    *w = 0;
+}
+
+static esp_err_t wifi_set_handler(httpd_req_t *req)
+{
+    char body[256];
+    int  want = req->content_len;
+    if (want <= 0 || want >= (int)sizeof(body)) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "cuerpo invalido");
+        return ESP_FAIL;
+    }
+    int got = httpd_req_recv(req, body, want);
+    if (got <= 0) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "no llego el cuerpo");
+        return ESP_FAIL;
+    }
+    body[got] = 0;
+
+    char ssid[33] = {0};
+    char pass[65] = {0};
+    httpd_query_key_value(body, "ssid", ssid, sizeof(ssid));
+    httpd_query_key_value(body, "pass", pass, sizeof(pass));
+    url_decode(ssid);
+    url_decode(pass);
+
+    if (!ssid[0]) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "falta el nombre de red");
+        return ESP_FAIL;
+    }
+
+    /* The answer goes out BEFORE reconnecting: changing mode drops the AP and
+     * with it the browser's connection, so the response would never arrive. */
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_sendstr(req, "{\"ok\":true}");
+
+    ESP_LOGI(TAG, "saving network '%s' from the portal", ssid);
+    aos_hal_net_set_credentials(ssid, pass);
+    return ESP_OK;
+}
+
+/* --------------------------------------------------------------------------
+ * Name and password of our own access point
+ *
+ * Configured from the browser and not from the screen on purpose: typing an
+ * SSID and a WPA2 password into 368 px with LVGL's keyboard is torture, and
+ * the portal is already open exactly when you are connected to this AP.
+ *
+ * The "rotating" mode sends no password at all: the device generates it when
+ * bringing the AP up and it is read off the screen, which also draws the QR.
+ * That the HAL -and not the browser- generates the password is what lets it
+ * rotate on its own with nobody watching the page.
+ * -------------------------------------------------------------------------- */
+
+/* Escapes what would break the JSON. The SSID is chosen by the user, so it may
+ * carry quotes. */
+static void json_escape(char *dst, size_t dst_len, const char *src)
+{
+    size_t w = 0;
+    for (size_t r = 0; src[r] && w + 2 < dst_len; r++) {
+        char c = src[r];
+        if (c == '"' || c == '\\') {
+            dst[w++] = '\\';
+        } else if ((unsigned char)c < 0x20) {
+            continue;
+        }
+        dst[w++] = c;
+    }
+    dst[w] = 0;
+}
+
+/* The two files every page shares. They are served with Cache-Control because
+ * otherwise the browser asks for them again on every page and the only
+ * advantage of having split them out is lost. An hour is enough: they change
+ * when the board is reflashed, and at that point reloading by hand is normal
+ * anyway. */
+static esp_err_t estatico(httpd_req_t *req, const char *tipo,
+                          const uint8_t *ini, const uint8_t *fin)
+{
+    httpd_resp_set_type(req, tipo);
+    httpd_resp_set_hdr(req, "Cache-Control", "max-age=3600");
+    return httpd_resp_send(req, (const char *)ini, fin - ini - 1);
+}
+
+static esp_err_t css_handler(httpd_req_t *req)
+{
+    return estatico(req, "text/css; charset=utf-8", aos_css_start, aos_css_end);
+}
+
+static esp_err_t js_handler(httpd_req_t *req)
+{
+    return estatico(req, "application/javascript; charset=utf-8",
+                    aos_js_start, aos_js_end);
+}
+
+/* /aic.js: the AIC interpreter both /iconos and /menu draw app icons with.
+ * /glifos.js: the folder glyph catalogue, generated with the firmware's font
+ * by tools/gen_folder_glyphs.py. Both cached like aos.js. */
+static esp_err_t aic_js_handler(httpd_req_t *req)
+{
+    return estatico(req, "application/javascript; charset=utf-8", aic_js_start, aic_js_end);
+}
+
+static esp_err_t glifos_js_handler(httpd_req_t *req)
+{
+    return estatico(req, "application/javascript; charset=utf-8", glifos_js_start, glifos_js_end);
+}
+
+static esp_err_t menu_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)menu_html_start, menu_html_end - menu_html_start - 1);
+}
+
+static esp_err_t usb_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)usb_html_start,
+                           usb_html_end - usb_html_start - 1);
+}
+
+static esp_err_t ap_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)ap_html_start,
+                           ap_html_end - ap_html_start - 1);
+}
+
+static esp_err_t ap_get_handler(httpd_req_t *req)
+{
+    char ssid[80], pass[144], porde[80];
+    json_escape(ssid,  sizeof(ssid),  aos_hal_net_ap_ssid());
+    json_escape(pass,  sizeof(pass),  aos_hal_net_ap_pass());
+    json_escape(porde, sizeof(porde), aos_hal_net_ap_default_ssid());
+
+    char json[400];
+    snprintf(json, sizeof(json),
+             "{\"ssid\":\"%s\",\"clave\":\"%s\",\"modo\":\"%s\","
+             "\"ssid_auto\":\"%s\",\"activo\":%s,\"ip\":\"%s\"}",
+             ssid, pass,
+             aos_hal_net_ap_pass_mode() == AOS_AP_PASS_ROTATING ? "rotativa"
+                                                                : "fija",
+             porde, aos_hal_net_ap_active() ? "true" : "false",
+             aos_hal_net_ap_ip());
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, json, HTTPD_RESP_USE_STRLEN);
+}
+
+static esp_err_t ap_set_handler(httpd_req_t *req)
+{
+    char body[256];
+    int  want = req->content_len;
+    if (want <= 0 || want >= (int)sizeof(body)) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "cuerpo invalido");
+        return ESP_FAIL;
+    }
+    int got = httpd_req_recv(req, body, want);
+    if (got <= 0) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "no llego el cuerpo");
+        return ESP_FAIL;
+    }
+    body[got] = 0;
+
+    char ssid[33] = {0};
+    char pass[65] = {0};
+    char modo[16] = {0};
+    httpd_query_key_value(body, "ssid", ssid, sizeof(ssid));
+    httpd_query_key_value(body, "pass", pass, sizeof(pass));
+    httpd_query_key_value(body, "modo", modo, sizeof(modo));
+    url_decode(ssid);
+    url_decode(pass);
+    url_decode(modo);
+
+    aos_ap_pass_mode_t mode = strcmp(modo, "rotativa") == 0
+                                  ? AOS_AP_PASS_ROTATING : AOS_AP_PASS_FIXED;
+
+    /* Validated HERE as well as in the HAL so we can answer why it failed: the
+     * HAL returns a bool and the page needs to tell somebody the password is
+     * too short. */
+    size_t largo = strlen(pass);
+    if (mode == AOS_AP_PASS_FIXED && largo && (largo < 8 || largo > 63)) {
+        httpd_resp_set_type(req, "application/json");
+        return httpd_resp_sendstr(req, "{\"ok\":false,\"error\":\"clave\"}");
+    }
+    if (strlen(ssid) > 32) {
+        httpd_resp_set_type(req, "application/json");
+        return httpd_resp_sendstr(req, "{\"ok\":false,\"error\":\"ssid\"}");
+    }
+
+    /* The answer goes out BEFORE applying, just like /api/wifi: with the AP up,
+     * aos_hal_net_ap_set_config() bounces it so the new name and password take
+     * effect, and that drops the connection of the very browser making the
+     * request. The response would never arrive afterwards. */
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_sendstr(req, "{\"ok\":true}");
+
+    ESP_LOGI(TAG, "AP from the portal: '%s', key %s",
+             ssid[0] ? ssid : "(automatic)", modo[0] ? modo : "fixed");
+    aos_hal_net_ap_set_config(ssid, pass, mode);
+    return ESP_OK;
+}
+
+/* Switching the AP on and off from the browser.
+ *
+ * Until now the only switch was the button on the screen, so bringing it down
+ * meant walking to the device -or restarting it, which is the detour that ended
+ * up being used-. With the channel fixed, switching it on from the LAN no
+ * longer drops the connection of whoever asked.
+ *
+ * Switching it off can drop it, for two different reasons: if the browser is on
+ * the AP's side it is left without a network, and with no stored credentials
+ * aos_hal_net_ap_stop() switches the whole radio off. So there the answer goes
+ * first, just as in /api/wifi. */
+static esp_err_t ap_estado_handler(httpd_req_t *req)
+{
+    char body[64];
+    int  want = req->content_len;
+    if (want <= 0 || want >= (int)sizeof(body)) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "cuerpo invalido");
+        return ESP_FAIL;
+    }
+    int got = httpd_req_recv(req, body, want);
+    if (got <= 0) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "no llego el cuerpo");
+        return ESP_FAIL;
+    }
+    body[got] = 0;
+
+    char on[8] = {0};
+    if (httpd_query_key_value(body, "on", on, sizeof(on)) != ESP_OK) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "falta on");
+        return ESP_FAIL;
+    }
+    bool prender = (on[0] == '1' || strcmp(on, "true") == 0);
+
+    httpd_resp_set_type(req, "application/json");
+
+    if (!prender) {
+        httpd_resp_sendstr(req, "{\"ok\":true,\"activo\":false}");
+        ESP_LOGI(TAG, "switching the AP off from the portal");
+        aos_hal_net_ap_stop();
+        return ESP_OK;
+    }
+
+    /* Switching on can answer afterwards, and it should: bringing the AP up can
+     * fail and whoever asked wants to know. */
+    bool ok = aos_hal_net_ap_start();
+    ESP_LOGI(TAG, "AP requested from the portal: %s", ok ? "up" : "failed");
+    return httpd_resp_sendstr(req, ok ? "{\"ok\":true,\"activo\":true}"
+                                      : "{\"ok\":false,\"error\":\"levantar\"}");
+}
+
+/* -------------------------------------------------------------------------- */
+
+/* --------------------------------------------------------------------------
+ * Weather location
+ *
+ * The weather app is a .so on the microSD, so the firmware does not know it:
+ * all they share is three preference keys. The portal writes them and the app
+ * reads them. That is enough to configure it from the computer, which is far
+ * more comfortable than a 368 px keyboard.
+ *
+ * The city search is done by the BROWSER against open-meteo (their API sends
+ * Access-Control-Allow-Origin: *), so the firmware learns nothing about that
+ * service: it only receives a name and two integers.
+ *
+ * If one day there is a second app with settings of its own, this asks to be
+ * generalised into a prefix-scoped preferences endpoint; for a single one it is
+ * not worth it.
+ * -------------------------------------------------------------------------- */
+
+#define CLIMA_KEY_CITY  "clima_city"
+#define CLIMA_KEY_LAT   "clima_lat"
+#define CLIMA_KEY_LON   "clima_lon"
+
+/* The network page is HTML+JS and nothing else: it lists the files, downloads
+ * whichever you pick and draws it in the browser. The firmware does NOT
+ * understand the report format -the HAL writes it and /api/download serves it
+ * verbatim-, the same as with 'remoto's profile. Even the manufacturer lookup
+ * by MAC is resolved in there, with an OUI table living in the JavaScript. */
+static esp_err_t red_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)red_html_start,
+                           red_html_end - red_html_start - 1);
+}
+
+static esp_err_t clima_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)clima_html_start,
+                           clima_html_end - clima_html_start - 1);
+}
+
+static esp_err_t clima_get_handler(httpd_req_t *req)
+{
+    char    city[40] = {0};
+    int32_t lat = 0, lon = 0;
+    aos_hal_pref_get_str(CLIMA_KEY_CITY, city, sizeof(city));
+    aos_hal_pref_get_i32(CLIMA_KEY_LAT, &lat);
+    aos_hal_pref_get_i32(CLIMA_KEY_LON, &lon);
+
+    /* The name is stored in ASCII already, but just in case, whatever could
+     * break the JSON is escaped. */
+    char esc[84];
+    size_t e = 0;
+    for (size_t c = 0; city[c] && e < sizeof(esc) - 2; c++) {
+        if (city[c] == '"' || city[c] == '\\') {
+            esc[e++] = '\\';
+        } else if ((unsigned char)city[c] < 0x20) {
+            continue;
+        }
+        esc[e++] = city[c];
+    }
+    esc[e] = 0;
+
+    char json[160];
+    snprintf(json, sizeof(json),
+             "{\"ciudad\":\"%s\",\"lat10k\":%ld,\"lon10k\":%ld}",
+             esc, (long)lat, (long)lon);
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, json, HTTPD_RESP_USE_STRLEN);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Languages                                                                   */
+/*                                                                             */
+/* Upload packs with /api/upload?dir=lang/<code> and pick one with this:       */
+/* uploading and choosing both stay in the browser, without touching the       */
+/* screen or taking the card out.                                             */
+/* -------------------------------------------------------------------------- */
+
+static esp_err_t lang_get_handler(httpd_req_t *req)
+{
+    aos_lang_t langs[AOS_LANG_MAX];
+    int n = aos_i18n_scan(langs, AOS_LANG_MAX);
+
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_sendstr_chunk(req, "{\"actual\":\"");
+    httpd_resp_sendstr_chunk(req, aos_i18n_current());
+    httpd_resp_sendstr_chunk(req, "\",\"idiomas\":[");
+    for (int i = 0; i < n; i++) {
+        char item[160];
+        /* Explicit precision: both come from the card, that is, from outside,
+         * and the compiler is right to ask for the limit to be written down. */
+        snprintf(item, sizeof(item),
+                 "%s{\"codigo\":\"%.*s\",\"nombre\":\"%.*s\",\"cadenas\":%d,"
+                 "\"apps\":%d,\"origen\":\"%s\"}",
+                 i ? "," : "",
+                 AOS_LANG_CODE_MAX - 1, langs[i].code,
+                 AOS_LANG_NAME_MAX - 1, langs[i].name,
+                 langs[i].strings, langs[i].apps,
+                 langs[i].origin == AOS_LANG_EMBEDDED ? "firmware"
+                     : langs[i].origin == AOS_LANG_CARD ? "tarjeta" : "codigo");
+        httpd_resp_sendstr_chunk(req, item);
+    }
+    httpd_resp_sendstr_chunk(req, "]}");
+    httpd_resp_sendstr_chunk(req, NULL);
+    return ESP_OK;
+}
+
+/* -------------------------------------------------------------------------- */
+/* Screenshot                                                                 */
+/*                                                                            */
+/* GET /api/captura returns whatever is drawn, as a BMP.                      */
+/*                                                                            */
+/* BMP and not PNG because there is no encoder on the board: lodepng is built  */
+/* as a DECODER, for the photo viewer. A BMP is 54 bytes of header and the raw */
+/* pixels, with no dependency at all, and it opens anywhere. It is 483 KB over */
+/* the local network, which for looking at a screen is fine.                   */
+/* -------------------------------------------------------------------------- */
+
+#define BMP_HEADER_LEN 54
+
+static void wr16(uint8_t *p, uint16_t v)
+{
+    p[0] = (uint8_t)(v & 0xFF);
+    p[1] = (uint8_t)(v >> 8);
+}
+
+static void wr32(uint8_t *p, uint32_t v)
+{
+    p[0] = (uint8_t)(v & 0xFF);
+    p[1] = (uint8_t)((v >> 8) & 0xFF);
+    p[2] = (uint8_t)((v >> 16) & 0xFF);
+    p[3] = (uint8_t)((v >> 24) & 0xFF);
+}
+
+static esp_err_t captura_handler(httpd_req_t *req)
+{
+    /* The screen is woken unless asked otherwise. Dimmed, what you see is the
+     * always-on face -the time alone on black- and not what you wanted to look
+     * at; ?sin_despertar=1 takes it exactly as it is. */
+    bool despertar = true;
+    char query[64];
+    if (httpd_req_get_url_query_str(req, query, sizeof(query)) == ESP_OK) {
+        char v[8];
+        if (httpd_query_key_value(query, "sin_despertar", v, sizeof(v)) == ESP_OK &&
+            v[0] == '1') {
+            despertar = false;
+        }
+    }
+
+    /* It keeps trying for a while before giving up. The slot is freed on the
+     * tick AFTER this task calls aos_ui_snapshot_release(), and the main loop
+     * comes round every 200 ms: two screenshots in a row, which is the most
+     * natural thing in the world when you are watching something, collided
+     * with a 503 out of pure race. */
+    bool turno = false;
+    for (int i = 0; i < 15 && !turno; i++) {
+        turno = aos_ui_request_snapshot(despertar);
+        if (!turno) {
+            vTaskDelay(pdMS_TO_TICKS(80));
+        }
+    }
+    if (!turno) {
+        httpd_resp_set_status(req, "503 Service Unavailable");
+        return httpd_resp_sendstr(req, "ya hay una captura en curso");
+    }
+
+    /* Taken by the interface task on its next tick. 3 s is a great deal: the
+     * main loop comes round every few milliseconds. The limit exists so as not
+     * to leave the browser hanging if the interface has jammed, which is
+     * precisely one of the cases where you want to take a screenshot. */
+    aos_ui_snapshot_t snap = { 0 };
+    aos_snapshot_state_t st = AOS_SNAPSHOT_PENDING;
+    for (int i = 0; i < 250; i++) {          /* 5 s: waking takes ~1 */
+        st = aos_ui_snapshot_peek(&snap);
+        if (st != AOS_SNAPSHOT_PENDING) {
+            break;
+        }
+        vTaskDelay(pdMS_TO_TICKS(20));
+    }
+
+    if (st != AOS_SNAPSHOT_READY || !snap.data || !snap.w || !snap.h) {
+        aos_ui_snapshot_release();
+        httpd_resp_set_status(req, "503 Service Unavailable");
+        return httpd_resp_sendstr(req, st == AOS_SNAPSHOT_PENDING
+                                       ? "la interfaz no respondio en 5 s"
+                                       : "no se pudo tomar la captura");
+    }
+
+    /* BMP rows are aligned to 4 bytes. With a width of 368 px the padding
+     * comes out 0, but it is computed anyway: the day the screen changes, a
+     * misaligned BMP looks skewed and it is not obvious why. */
+    const uint32_t fila_bytes = ((uint32_t)snap.w * 3u + 3u) & ~3u;
+    const uint32_t datos      = fila_bytes * snap.h;
+
+    uint8_t cab[BMP_HEADER_LEN] = { 0 };
+    cab[0] = 'B'; cab[1] = 'M';
+    wr32(cab + 2,  BMP_HEADER_LEN + datos);      /* file size                */
+    wr32(cab + 10, BMP_HEADER_LEN);              /* where the data starts    */
+    wr32(cab + 14, 40);                          /* BITMAPINFOHEADER         */
+    wr32(cab + 18, snap.w);
+    wr32(cab + 22, snap.h);                      /* positive = bottom-up     */
+    wr16(cab + 26, 1);                           /* planes                   */
+    wr16(cab + 28, 24);                          /* bits per pixel           */
+    wr32(cab + 34, datos);
+    wr32(cab + 38, 2835);                        /* 72 dpi, in px/metre      */
+    wr32(cab + 42, 2835);
+
+    uint8_t *fila = malloc(fila_bytes);
+    if (!fila) {
+        aos_ui_snapshot_release();
+        httpd_resp_set_status(req, "503 Service Unavailable");
+        return httpd_resp_sendstr(req, "sin memoria para la fila");
+    }
+
+    httpd_resp_set_type(req, "image/bmp");
+    httpd_resp_set_hdr(req, "Content-Disposition",
+                       "inline; filename=\"amoledos.bmp\"");
+
+    esp_err_t r = httpd_resp_send_chunk(req, (const char *)cab, BMP_HEADER_LEN);
+
+    /* Bottom-up, which is how a BMP is stored. And from RGB565 to 8-bit BGR
+     * replicating the high bits -(v << 3) | (v >> 2)- rather than merely
+     * shifting: without that, pure white comes out 0xF8, a dirty grey. */
+    for (int y = snap.h - 1; y >= 0 && r == ESP_OK; y--) {
+        const uint16_t *src = (const uint16_t *)(snap.data + (size_t)y * snap.stride);
+        uint8_t *dst = fila;
+        for (int x = 0; x < snap.w; x++) {
+            uint16_t px = src[x];
+            uint8_t r5 = (uint8_t)((px >> 11) & 0x1F);
+            uint8_t g6 = (uint8_t)((px >> 5)  & 0x3F);
+            uint8_t b5 = (uint8_t)( px        & 0x1F);
+            *dst++ = (uint8_t)((b5 << 3) | (b5 >> 2));
+            *dst++ = (uint8_t)((g6 << 2) | (g6 >> 4));
+            *dst++ = (uint8_t)((r5 << 3) | (r5 >> 2));
+        }
+        for (uint32_t p = (uint32_t)snap.w * 3u; p < fila_bytes; p++) {
+            fila[p] = 0;
+        }
+        r = httpd_resp_send_chunk(req, (const char *)fila, fila_bytes);
+    }
+
+    free(fila);
+    aos_ui_snapshot_release();      /* ALWAYS: otherwise 322 KB of PSRAM walk away */
+
+    if (r != ESP_OK) {
+        return r;                   /* the socket was cut; the chunked stream is not closed */
+    }
+    return httpd_resp_send_chunk(req, NULL, 0);
+}
+
+static esp_err_t lang_set_handler(httpd_req_t *req)
+{
+    char body[64];
+    int want = req->content_len;
+    if (want <= 0 || want >= (int)sizeof(body)) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "cuerpo invalido");
+        return ESP_FAIL;
+    }
+    int got = httpd_req_recv(req, body, want);
+    if (got <= 0) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "no llego el cuerpo");
+        return ESP_FAIL;
+    }
+    body[got] = 0;
+
+    char code[AOS_LANG_CODE_MAX] = {0};
+    if (httpd_query_key_value(body, "code", code, sizeof(code)) != ESP_OK || !code[0]) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "falta code");
+        return ESP_FAIL;
+    }
+
+    /* aos_i18n_set() is NOT called from here. This runs in the server task and
+     * changing language destroys LVGL objects: it has to be requested and left
+     * for aos_ui_tick() to apply, which is the same path the Settings dropdown
+     * uses. */
+    aos_ui_request_language(code);
+    ESP_LOGI(TAG, "language requested from the portal: %s", code);
+
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_sendstr(req, "{\"ok\":true}");
+}
+
+static esp_err_t clima_set_handler(httpd_req_t *req)
+{
+    char body[256];
+    int  want = req->content_len;
+    if (want <= 0 || want >= (int)sizeof(body)) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "cuerpo invalido");
+        return ESP_FAIL;
+    }
+    int got = httpd_req_recv(req, body, want);
+    if (got <= 0) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "no llego el cuerpo");
+        return ESP_FAIL;
+    }
+    body[got] = 0;
+
+    char name[64] = {0}, lat_s[16] = {0}, lon_s[16] = {0};
+    httpd_query_key_value(body, "name", name, sizeof(name));
+    httpd_query_key_value(body, "lat",  lat_s, sizeof(lat_s));
+    httpd_query_key_value(body, "lon",  lon_s, sizeof(lon_s));
+    url_decode(name);
+
+    /* The compiled font only draws ASCII, so accents have to be stripped
+     * BEFORE storing. The page already normalises them in the browser, but the
+     * endpoint can also be used by hand and "Cordoba" reads far better than
+     * "Crdoba": the 0xC3 UTF-8 block is transliterated, which is where the
+     * accented vowels and the n-tilde live. */
+    static const char latin1[] =
+        "AAAAAA CEEEEIIIIDNOOOOO OUUUUY  aaaaaa ceeeeiiiidnooooo ouuuuy y";
+    char clean[40];
+    size_t w = 0;
+    for (size_t r = 0; name[r] && w < sizeof(clean) - 1; r++) {
+        unsigned char c = (unsigned char)name[r];
+        if (c >= 0x20 && c < 0x7F) {
+            clean[w++] = (char)c;
+        } else if (c == 0xC3 && name[r + 1]) {
+            unsigned char next = (unsigned char)name[++r];
+            int idx = next - 0x80;
+            clean[w++] = (idx >= 0 && idx < 64) ? latin1[idx] : ' ';
+        } else if ((c & 0xE0) == 0xC0 && name[r + 1]) {
+            r += 1;                     /* another two-byte one: dropped */
+        } else if ((c & 0xF0) == 0xE0) {
+            r += 2;
+        } else if ((c & 0xF8) == 0xF0) {
+            r += 3;
+        }
+    }
+    while (w > 0 && clean[w - 1] == ' ') {
+        w--;
+    }
+    clean[w] = 0;
+
+    long lat = strtol(lat_s, NULL, 10);
+    long lon = strtol(lon_s, NULL, 10);
+
+    if (!clean[0] || lat < -900000 || lat > 900000 ||
+                     lon < -1800000 || lon > 1800000) {
+        httpd_resp_set_type(req, "application/json");
+        return httpd_resp_send(req, "{\"ok\":false,\"error\":\"lugar invalido\"}",
+                               HTTPD_RESP_USE_STRLEN);
+    }
+
+    aos_hal_pref_set_str(CLIMA_KEY_CITY, clean);
+    aos_hal_pref_set_i32(CLIMA_KEY_LAT, (int32_t)lat);
+    aos_hal_pref_set_i32(CLIMA_KEY_LON, (int32_t)lon);
+    ESP_LOGI(TAG, "weather: place '%s' (%ld, %ld) from the portal", clean, lat, lon);
+
+    char json[96];
+    snprintf(json, sizeof(json), "{\"ok\":true,\"ciudad\":\"%s\"}", clean);
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, json, HTTPD_RESP_USE_STRLEN);
+}
+
+/* --------------------------------------------------------------------------
+ * The Remoto app
+ *
+ * There are two different things here and it is worth not mixing them up:
+ *
+ *   - Home Assistant's ADDRESS and TOKEN go to NVS. They are short, they are
+ *     secret and there is no reason for them to be lying around in a file on
+ *     the microSD readable from any card reader.
+ *   - The PROFILE -pages, buttons, gestures- goes to a file on the microSD. In
+ *     NVS a string has a ceiling of a few kilobytes and a six-page profile
+ *     goes past it; besides, this way it can be copied, versioned and edited
+ *     by hand.
+ *
+ * The firmware does NOT understand the profile: it receives it, writes it and
+ * hands it back verbatim. Who interprets it is the .so, which is the one that
+ * knows what it means. All they share is the rc_gen key, which goes up on
+ * every save and which the app re-reads now and then to find out there is
+ * something new.
+ *
+ * The two queries that DO go out to Home Assistant from here -testing the
+ * connection and listing entities- exist so that configuring the remote is not
+ * a matter of typing "light.cocina" from memory and discovering the mistake
+ * three days later.
+ * -------------------------------------------------------------------------- */
+
+#define RC_KEY_URL      "rc_url"
+#define RC_KEY_TOKEN    "rc_token"
+#define RC_KEY_GEN      "rc_gen"
+
+#define RC_PROFILE_MAX  (48 * 1024)
+
+static void rc_profile_path(char *out, size_t len)
+{
+    snprintf(out, len, "%s/remoto.json", aos_hal_path_data());
+}
+
+/* -------------------------------------------------------------------------- */
+/* Exchange rates (#45)                                                        */
+/*                                                                             */
+/* Two keys and nothing more: the list of instruments and a generation counter
+ * that goes up on every save. It is 'clima's arrangement —the portal writes
+ * preferences and the .so reads them— and not 'remoto's, which needs a file on
+ * the microSD because its profile is kilobytes. Here the whole list is ~75
+ * characters.
+ *
+ * And as in /red, THE FIRMWARE DOES NOT UNDERSTAND THE FORMAT: it stores a
+ * comma-separated string of keys without knowing what they mean. Who
+ * interprets them is the app, which is the one that knows. All that is
+ * validated here is that they are reasonable characters and that they fit in
+ * the key; adding an instrument does not touch the firmware.
+ *
+ * Why an endpoint of its own and not a generic "preferences by prefix" one,
+ * which is what this file wondered about when 'remoto' turned up: because what
+ * differs between the three apps is precisely THE VALIDATION —clima validates
+ * coordinates, remoto validates the URL scheme, this one validates the shape
+ * of the list— and a generic endpoint can validate nothing. It would be a way
+ * for anybody to write any NVS key from the network.                          */
+/* -------------------------------------------------------------------------- */
+
+#define COTIZ_KEY_LIST  "cz_list"
+#define COTIZ_KEY_GEN   "cz_gen"
+
+/* /pixel: the page is the whole feature. It reads and writes the .pix files
+ * through the generic file API (dir=pixel), so the firmware never learns the
+ * format; that knowledge lives in the app and in the page, which share it. */
+static esp_err_t pixel_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)pixel_html_start,
+                           pixel_html_end - pixel_html_start - 1);
+}
+
+/* /3d: the 3D viewer's models (v0.6.0). Like /pixel, the page is the whole
+ * feature: it reads STL, OBJ and GLB in the browser, welds and reduces them
+ * to the viewer's budget and uploads an .m3d with dir=3d. */
+static esp_err_t modelos_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)modelos_html_start,
+                           modelos_html_end - modelos_html_start - 1);
+}
+
+/* GET /mapas: the Maps app's zones and offline maps (branch mapas). Like /3d,
+ * the page does the work in the browser -it fetches OpenFreeMap's tiles,
+ * strips them and packs them- and stores the result through the generic file
+ * API with dir=maps; the firmware never learns the format. */
+static esp_err_t mapas_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)mapas_html_start,
+                           mapas_html_end - mapas_html_start - 1);
+}
+
+/* /pato: same idea as /pixel. The page is the whole editor of the Pato goma
+ * scripts (.pato files, dir=pato); the firmware only stores the bytes. */
+/* /lua: the same idea again. The page is the editor of the Lua scripts
+ * (dir=lua) and the console where their errors land; what runs them is the
+ * app on the watch, and neither this handler nor any other knows a single
+ * thing about Lua. */
+static esp_err_t lua_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html");
+    return httpd_resp_send(req, (const char *)lua_html_start,
+                           lua_html_end - lua_html_start - 1);
+}
+
+static esp_err_t pato_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)pato_html_start,
+                           pato_html_end - pato_html_start - 1);
+}
+
+static esp_err_t cotiz_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)cotiz_html_start,
+                           cotiz_html_end - cotiz_html_start - 1);
+}
+
+static esp_err_t cotiz_get_handler(httpd_req_t *req)
+{
+    char lista[160] = {0};
+    aos_hal_pref_get_str(COTIZ_KEY_LIST, lista, sizeof(lista));
+
+    char json[200];
+    snprintf(json, sizeof(json), "{\"lista\":\"%s\"}", lista);
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, json, HTTPD_RESP_USE_STRLEN);
+}
+
+static esp_err_t cotiz_set_handler(httpd_req_t *req)
+{
+    char body[256];
+    int  want = req->content_len;
+    if (want <= 0 || want >= (int)sizeof(body)) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "cuerpo invalido");
+        return ESP_FAIL;
+    }
+    int got = httpd_req_recv(req, body, want);
+    if (got <= 0) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "no llego el cuerpo");
+        return ESP_FAIL;
+    }
+    body[got] = 0;
+
+    char lista[160] = {0};
+    httpd_query_key_value(body, "lista", lista, sizeof(lista));
+    url_decode(lista);
+
+    /* All that is validated is the SHAPE, because the firmware does not know
+     * which instruments exist: lower case and commas. Without this, this
+     * endpoint would write anything arriving over the network into NVS. A key
+     * the app does not know it ignores by itself, so no allow-list is needed
+     * here —and having one would mean reflashing to add an instrument—. */
+    for (const char *c = lista; *c; c++) {
+        if ((*c < 'a' || *c > 'z') && *c != ',') {
+            httpd_resp_set_type(req, "application/json");
+            return httpd_resp_send(req,
+                "{\"ok\":false,\"error\":\"la lista solo puede tener letras "
+                "minusculas y comas\"}", HTTPD_RESP_USE_STRLEN);
+        }
+    }
+
+    aos_hal_pref_set_str(COTIZ_KEY_LIST, lista);
+
+    /* The generation counter ALWAYS goes up, including when the list came out
+     * unchanged: it is what makes an open app notice and reload, and saving
+     * twice in a row has to work both times. */
+    int32_t gen = 0;
+    aos_hal_pref_get_i32(COTIZ_KEY_GEN, &gen);
+    aos_hal_pref_set_i32(COTIZ_KEY_GEN, gen + 1);
+
+    ESP_LOGI(TAG, "cotizaciones: [%s]", lista);
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, "{\"ok\":true}", HTTPD_RESP_USE_STRLEN);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Cameras (branch rtsp)                                                       */
+/*                                                                             */
+/* The Cameras app's list: up to eight cameras, each in one NVS string cam0 .. */
+/* cam7 holding four fields separated by 0x1F (the ASCII unit separator,      */
+/* which nothing typed into a form carries):                                   */
+/*                                                                             */
+/*     name \x1F url \x1F user \x1F password                                   */
+/*                                                                             */
+/* plus cam_gen, which goes up on every save so an open app rebuilds its list  */
+/* (the 'cotiz' arrangement). The slots are kept packed: deleting one moves    */
+/* the rest up, so the order on the page is the order on the watch.            */
+/*                                                                             */
+/* THE PASSWORD NEVER GOES BACK TO THE BROWSER, the same rule as remoto's      */
+/* token: the page learns only whether there is one. Saving with the password  */
+/* field untouched keeps the stored one. A URL typed with credentials in it    */
+/* (rtsp://user:pass@host/...) is taken apart here, so the URL that is stored  */
+/* and shown back is clean.                                                    */
+/*                                                                             */
+/* What is validated is what the app relies on: the scheme (rtsp:// or         */
+/* http://, the two it speaks), no control characters (0x1F would split the    */
+/* record), and the lengths of the app's buffers (apps/camaras/main/cam.h).    */
+/* -------------------------------------------------------------------------- */
+
+#define CAM_SLOTS_MAX  8
+#define CAM_KEY_GEN    "cam_gen"
+#define CAM_SEP        '\x1f'
+
+typedef struct {
+    char name[32];
+    char url[200];
+    char user[64];
+    char pass[64];
+} cam_rec_t;
+
+/* Copies and cuts to the field's size: the portal validated the lengths on
+ * the way in, so a cut here only happens to a record written by hand. */
+static void cam_copy(char *dst, size_t cap, const char *src)
+{
+    size_t n = src ? strnlen(src, cap - 1) : 0;
+    memcpy(dst, src ? src : "", n);
+    dst[n] = '\0';
+}
+
+static bool cam_load(int i, cam_rec_t *c)
+{
+    char key[8];
+    char raw[400];
+    snprintf(key, sizeof(key), "cam%d", i);
+    memset(c, 0, sizeof(*c));
+    if (!aos_hal_pref_get_str(key, raw, sizeof(raw)) || !raw[0]) {
+        return false;
+    }
+    char *f[4] = { raw, NULL, NULL, NULL };
+    int k = 1;
+    for (char *p = raw; *p && k < 4; p++) {
+        if (*p == CAM_SEP) {
+            *p = '\0';
+            f[k++] = p + 1;
+        }
+    }
+    cam_copy(c->name, sizeof(c->name), f[0]);
+    cam_copy(c->url,  sizeof(c->url),  f[1]);
+    cam_copy(c->user, sizeof(c->user), f[2]);
+    cam_copy(c->pass, sizeof(c->pass), f[3]);
+    return c->url[0] != '\0';
+}
+
+static bool cam_store(int i, const cam_rec_t *c)
+{
+    char key[8];
+    snprintf(key, sizeof(key), "cam%d", i);
+    if (!c) {
+        return aos_hal_pref_erase(key);
+    }
+    char raw[400];
+    snprintf(raw, sizeof(raw), "%s%c%s%c%s%c%s", c->name, CAM_SEP, c->url, CAM_SEP,
+             c->user, CAM_SEP, c->pass);
+    return aos_hal_pref_set_str(key, raw);
+}
+
+static int cam_count(cam_rec_t *all)
+{
+    int n = 0;
+    for (int i = 0; i < CAM_SLOTS_MAX; i++) {
+        if (cam_load(i, &all[n])) {
+            n++;
+        }
+    }
+    return n;
+}
+
+/* Writes the list back packed from slot 0 and clears the rest. */
+static void cam_save_all(const cam_rec_t *all, int n)
+{
+    for (int i = 0; i < CAM_SLOTS_MAX; i++) {
+        cam_store(i, i < n ? &all[i] : NULL);
+    }
+    int32_t gen = 0;
+    aos_hal_pref_get_i32(CAM_KEY_GEN, &gen);
+    aos_hal_pref_set_i32(CAM_KEY_GEN, gen + 1);
+}
+
+static bool cam_text_ok(const char *s)
+{
+    for (; *s; s++) {
+        if ((unsigned char)*s < 0x20 || *s == 0x7f) {
+            return false;
+        }
+    }
+    return true;
+}
+
+static esp_err_t camaras_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)camaras_html_start,
+                           camaras_html_end - camaras_html_start - 1);
+}
+
+static esp_err_t camaras_get_handler(httpd_req_t *req)
+{
+    cam_rec_t *all = calloc(CAM_SLOTS_MAX, sizeof(cam_rec_t));
+    char *json = malloc(4096);
+    if (!all || !json) {
+        free(all);
+        free(json);
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "sin memoria");
+        return ESP_FAIL;
+    }
+    int n = cam_count(all);
+    int len = snprintf(json, 4096, "{\"max\":%d,\"camaras\":[", CAM_SLOTS_MAX);
+    for (int i = 0; i < n && len < 3800; i++) {
+        char name[80], url[420], user[140];
+        json_escape(name, sizeof(name), all[i].name);
+        json_escape(url, sizeof(url), all[i].url);
+        json_escape(user, sizeof(user), all[i].user);
+        len += snprintf(json + len, 4096 - len,
+                        "%s{\"nombre\":\"%s\",\"url\":\"%s\",\"usuario\":\"%s\",\"clave\":%s}",
+                        i ? "," : "", name, url, user, all[i].pass[0] ? "true" : "false");
+    }
+    len += snprintf(json + len, 4096 - len, "]}");
+    httpd_resp_set_type(req, "application/json");
+    esp_err_t r = httpd_resp_send(req, json, len);
+    /* The passwords were in this buffer's source: wipe before freeing. */
+    memset(all, 0, CAM_SLOTS_MAX * sizeof(cam_rec_t));
+    free(all);
+    free(json);
+    return r;
+}
+
+static esp_err_t camaras_reply(httpd_req_t *req, const char *error)
+{
+    char out[200];
+    if (error) {
+        snprintf(out, sizeof(out), "{\"ok\":false,\"error\":\"%s\"}", error);
+    } else {
+        snprintf(out, sizeof(out), "{\"ok\":true}");
+    }
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, out, HTTPD_RESP_USE_STRLEN);
+}
+
+static esp_err_t camaras_set_handler(httpd_req_t *req)
+{
+    char body[1400];
+    int want = req->content_len;
+    if (want <= 0 || want >= (int)sizeof(body)) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "cuerpo invalido");
+        return ESP_FAIL;
+    }
+    int got = 0;
+    while (got < want) {
+        int r = httpd_req_recv(req, body + got, want - got);
+        if (r <= 0) {
+            httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "no llego el cuerpo");
+            return ESP_FAIL;
+        }
+        got += r;
+    }
+    body[got] = 0;
+
+    char accion[12] = "", idx[8] = "-1";
+    httpd_query_key_value(body, "accion", accion, sizeof(accion));
+    httpd_query_key_value(body, "i", idx, sizeof(idx));
+    int i = atoi(idx);
+
+    cam_rec_t *all = calloc(CAM_SLOTS_MAX + 1, sizeof(cam_rec_t));
+    if (!all) {
+        return camaras_reply(req, "sin memoria");
+    }
+    int n = cam_count(all);
+    const char *error = NULL;
+
+    if (strcmp(accion, "borrar") == 0) {
+        if (i < 0 || i >= n) {
+            error = "no existe esa camara";
+        } else {
+            memmove(&all[i], &all[i + 1], (size_t)(n - i - 1) * sizeof(cam_rec_t));
+            cam_save_all(all, n - 1);
+        }
+    } else if (strcmp(accion, "subir") == 0) {
+        if (i <= 0 || i >= n) {
+            error = "no se puede subir";
+        } else {
+            cam_rec_t tmp = all[i - 1];
+            all[i - 1] = all[i];
+            all[i] = tmp;
+            cam_save_all(all, n);
+        }
+    } else if (strcmp(accion, "guardar") == 0) {
+        cam_rec_t c;
+        memset(&c, 0, sizeof(c));
+        char url[600], pass[200], user[200], name[120], cambia[4] = "0";
+        name[0] = url[0] = user[0] = pass[0] = '\0';
+        httpd_query_key_value(body, "nombre", name, sizeof(name));
+        httpd_query_key_value(body, "url", url, sizeof(url));
+        httpd_query_key_value(body, "usuario", user, sizeof(user));
+        httpd_query_key_value(body, "clave", pass, sizeof(pass));
+        httpd_query_key_value(body, "clave_cambia", cambia, sizeof(cambia));
+        url_decode(name);
+        url_decode(url);
+        url_decode(user);
+        url_decode(pass);
+        bool new_pass = cambia[0] == '1';
+
+        /* rtsp://user:pass@host/... -> the credentials go to their fields. */
+        char *scheme_end = strstr(url, "://");
+        if (scheme_end) {
+            char *host = scheme_end + 3;
+            char *slash = strchr(host, '/');
+            char *at = strrchr(host, '@');
+            if (at && (!slash || at < slash)) {
+                *at = '\0';
+                char *colon = strchr(host, ':');
+                if (colon) {
+                    *colon = '\0';
+                    snprintf(pass, sizeof(pass), "%s", colon + 1);
+                    url_decode(pass);
+                    new_pass = true;
+                }
+                snprintf(user, sizeof(user), "%s", host);
+                url_decode(user);
+                memmove(host, at + 1, strlen(at + 1) + 1);
+            }
+        }
+
+        if (!name[0] || strlen(name) >= sizeof(c.name) || !cam_text_ok(name)) {
+            error = "el nombre tiene que tener entre 1 y 31 caracteres";
+        } else if (strncmp(url, "rtsp://", 7) != 0 && strncmp(url, "http://", 7) != 0) {
+            error = "la direccion tiene que empezar con rtsp:// o http://";
+        } else if (strlen(url) >= sizeof(c.url) || !cam_text_ok(url) || strchr(url, ' ') ||
+                   strlen(url) < 8) {
+            error = "la direccion no es valida";
+        } else if (strlen(user) >= sizeof(c.user) || !cam_text_ok(user) ||
+                   strlen(pass) >= sizeof(c.pass) || !cam_text_ok(pass)) {
+            error = "el usuario o la contrasena son demasiado largos";
+        } else if (i >= n || (i < 0 && n >= CAM_SLOTS_MAX)) {
+            error = i < 0 ? "ya hay 8 camaras" : "no existe esa camara";
+        } else {
+            cam_copy(c.name, sizeof(c.name), name);
+            cam_copy(c.url, sizeof(c.url), url);
+            cam_copy(c.user, sizeof(c.user), user);
+            if (new_pass) {
+                cam_copy(c.pass, sizeof(c.pass), pass);
+            } else if (i >= 0) {
+                cam_copy(c.pass, sizeof(c.pass), all[i].pass);
+            }
+            if (i < 0) {
+                all[n++] = c;
+            } else {
+                all[i] = c;
+            }
+            cam_save_all(all, n);
+            ESP_LOGI(TAG, "camaras: %s -> %s", c.name, c.url);
+        }
+        memset(pass, 0, sizeof(pass));
+        memset(&c, 0, sizeof(c));
+    } else {
+        error = "accion desconocida";
+    }
+    memset(body, 0, sizeof(body));
+    memset(all, 0, (CAM_SLOTS_MAX + 1) * sizeof(cam_rec_t));
+    free(all);
+    return camaras_reply(req, error);
+}
+
+static esp_err_t remoto_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)remoto_html_start,
+                           remoto_html_end - remoto_html_start - 1);
+}
+
+/* What the browser needs to know when opening the page. The token is NEVER
+ * returned: only whether one is stored and its last four characters, which are
+ * enough to recognise which it is without being able to reconstruct it. */
+static esp_err_t remoto_config_get(httpd_req_t *req)
+{
+    char url[80]    = {0};
+    char token[280] = {0};
+    aos_hal_pref_get_str(RC_KEY_URL, url, sizeof(url));
+    aos_hal_pref_get_str(RC_KEY_TOKEN, token, sizeof(token));
+
+    size_t n = strlen(token);
+    const char *cola = (n >= 4) ? token + n - 4 : "";
+
+    int32_t gen = 0;
+    aos_hal_pref_get_i32(RC_KEY_GEN, &gen);
+
+    char json[220];
+    snprintf(json, sizeof(json),
+             "{\"url\":\"%s\",\"token\":%s,\"cola\":\"%s\",\"gen\":%ld}",
+             url, n ? "true" : "false", cola, (long)gen);
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, json, HTTPD_RESP_USE_STRLEN);
+}
+
+static void rc_bump_gen(void)
+{
+    int32_t gen = 0;
+    aos_hal_pref_get_i32(RC_KEY_GEN, &gen);
+    aos_hal_pref_set_i32(RC_KEY_GEN, gen + 1);
+}
+
+static esp_err_t remoto_config_post(httpd_req_t *req)
+{
+    char body[512];
+    int  want = req->content_len;
+    if (want <= 0 || want >= (int)sizeof(body)) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "cuerpo invalido");
+        return ESP_FAIL;
+    }
+    int got = httpd_req_recv(req, body, want);
+    if (got <= 0) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "no llego el cuerpo");
+        return ESP_FAIL;
+    }
+    body[got] = 0;
+
+    char url[80] = {0}, token[280] = {0};
+    httpd_query_key_value(body, "url", url, sizeof(url));
+    httpd_query_key_value(body, "token", token, sizeof(token));
+    url_decode(url);
+    url_decode(token);
+
+    /* The trailing slash is also stripped by the app, but the sooner the
+     * better: it is what you copy out of the browser's address bar. */
+    for (size_t n = strlen(url); n > 0 && url[n - 1] == '/'; n = strlen(url)) {
+        url[n - 1] = 0;
+    }
+
+    /* Both schemes: https:// for an installation exposed to the internet,
+     * http:// for the one on the LAN, which usually has no certificate that
+     * can be verified. The user chooses; see rc_ha_load() in the app. */
+    if (strncmp(url, "http://", 7) != 0 && strncmp(url, "https://", 8) != 0) {
+        httpd_resp_set_type(req, "application/json");
+        return httpd_resp_send(req,
+            "{\"ok\":false,\"error\":\"tiene que empezar con http:// o https://\"}",
+            HTTPD_RESP_USE_STRLEN);
+    }
+    aos_hal_pref_set_str(RC_KEY_URL, url);
+
+    /* An empty token leaves the previous one: that way the address can be
+     * corrected without having to go to Home Assistant for a new token. */
+    if (token[0]) {
+        aos_hal_pref_set_str(RC_KEY_TOKEN, token);
+    }
+    rc_bump_gen();
+    ESP_LOGI(TAG, "remoto: %s, token %s", url, token[0] ? "new" : "unchanged");
+
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, "{\"ok\":true}", HTTPD_RESP_USE_STRLEN);
+}
+
+/* The profile, exactly as it is on the microSD. */
+static esp_err_t remoto_profile_get(httpd_req_t *req)
+{
+    char path[160];
+    rc_profile_path(path, sizeof(path));
+
+    FILE *f = fopen(path, "rb");
+    httpd_resp_set_type(req, "application/json");
+    if (!f) {
+        return httpd_resp_send(req, "null", HTTPD_RESP_USE_STRLEN);
+    }
+    char *buf = malloc(2048);
+    if (!buf) {
+        fclose(f);
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "sin memoria");
+        return ESP_FAIL;
+    }
+    size_t n;
+    while ((n = fread(buf, 1, 2048, f)) > 0) {
+        if (httpd_resp_send_chunk(req, buf, n) != ESP_OK) {
+            break;
+        }
+    }
+    free(buf);
+    fclose(f);
+    return httpd_resp_send_chunk(req, NULL, 0);
+}
+
+static esp_err_t remoto_profile_post(httpd_req_t *req)
+{
+    if (req->content_len <= 2 || req->content_len > RC_PROFILE_MAX) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "tamano invalido");
+        return ESP_FAIL;
+    }
+
+    char path[160], tmp[176];
+    rc_profile_path(path, sizeof(path));
+    snprintf(tmp, sizeof(tmp), "%s.tmp", path);
+
+    /* Written to a temporary file and renamed at the end. If the connection
+     * were cut halfway, the good profile stays where it was: the app reads
+     * this file when it opens and a half-written one would leave it with no
+     * buttons. */
+    FILE *f = fopen(tmp, "wb");
+    if (!f) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
+                            "no pude escribir en la microSD");
+        return ESP_FAIL;
+    }
+
+    char *buf = malloc(UPLOAD_CHUNK);
+    if (!buf) {
+        fclose(f);
+        remove(tmp);
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "sin memoria");
+        return ESP_FAIL;
+    }
+
+    int left = req->content_len;
+    bool ok  = true;
+    while (left > 0) {
+        int want = left < UPLOAD_CHUNK ? left : UPLOAD_CHUNK;
+        int got  = httpd_req_recv(req, buf, want);
+        if (got <= 0) {
+            ok = false;
+            break;
+        }
+        if (fwrite(buf, 1, (size_t)got, f) != (size_t)got) {
+            ok = false;
+            break;
+        }
+        left -= got;
+    }
+    free(buf);
+    fclose(f);
+
+    if (!ok) {
+        remove(tmp);
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
+                            "se corto la escritura");
+        return ESP_FAIL;
+    }
+    remove(path);
+    if (rename(tmp, path) != 0) {
+        remove(tmp);
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR,
+                            "no pude renombrar el archivo");
+        return ESP_FAIL;
+    }
+    rc_bump_gen();
+    ESP_LOGI(TAG, "remoto: profile saved, %d bytes", req->content_len);
+
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, "{\"ok\":true}", HTTPD_RESP_USE_STRLEN);
+}
+
+/* --------------------------------------------------------------------------
+ * Queries to Home Assistant from the portal
+ *
+ * The HAL's HTTP client is asynchronous because whoever uses it is normally a
+ * dynamic app, which cannot block the LVGL thread. Here it is the other way
+ * round: this runs in the web server's task, which can wait without bothering
+ * anybody, so it just polls and that is that.
+ * -------------------------------------------------------------------------- */
+
+static int ha_fetch(const char *path, const char *body, int max_bytes,
+                    char **out, int *out_len)
+{
+    *out     = NULL;
+    *out_len = 0;
+
+    char url[80] = {0}, token[280] = {0};
+    aos_hal_pref_get_str(RC_KEY_URL, url, sizeof(url));
+    aos_hal_pref_get_str(RC_KEY_TOKEN, token, sizeof(token));
+    /* Both schemes, the same as rc_ha_load() in the app and as the endpoint
+     * that stores the address. It was overlooked when Remoto learned https and
+     * the symptom was baffling: with the encrypted address stored correctly,
+     * the "Probar" button answered "the address or the token is missing". */
+    bool esquema_ok = (strncmp(url, "http://", 7) == 0) ||
+                      (strncmp(url, "https://", 8) == 0);
+    if (!esquema_ok || !token[0]) {
+        return -100;                    /* not configured yet */
+    }
+
+    char hdr[320];
+    snprintf(hdr, sizeof(hdr), "Authorization: Bearer %s\r\n", token);
+
+    char full[200];
+    snprintf(full, sizeof(full), "%s%s", url, path);
+
+    int id = aos_hal_http_request(body ? "POST" : "GET", full, hdr, body,
+                                  body ? "application/json" : NULL, max_bytes);
+    if (id <= 0) {
+        return -101;
+    }
+    /* Twelve seconds: the HAL's client gives up on its own at ten. */
+    for (int i = 0; i < 240 && aos_hal_http_state(id) == AOS_HTTP_BUSY; i++) {
+        vTaskDelay(pdMS_TO_TICKS(50));
+    }
+
+    int code = aos_hal_http_status(id);
+    if (aos_hal_http_state(id) == AOS_HTTP_DONE) {
+        const char *b = aos_hal_http_body(id);
+        int         n = aos_hal_http_len(id);
+        if (b && n > 0) {
+            *out = malloc((size_t)n + 1);
+            if (*out) {
+                memcpy(*out, b, (size_t)n);
+                (*out)[n] = 0;
+                *out_len  = n;
+            }
+        }
+    }
+    aos_hal_http_release(id);
+    return code;
+}
+
+static esp_err_t remoto_probe_handler(httpd_req_t *req)
+{
+    char *body = NULL;
+    int   len  = 0;
+    int   code = ha_fetch("/api/", NULL, 1024, &body, &len);
+
+    char json[256];
+    if (code == -100) {
+        snprintf(json, sizeof(json),
+                 "{\"ok\":false,\"msg\":\"falta la direccion o el token\"}");
+    } else if (code == 200) {
+        snprintf(json, sizeof(json),
+                 "{\"ok\":true,\"msg\":\"Home Assistant contesta y el token sirve\"}");
+    } else if (code == 401 || code == 403) {
+        snprintf(json, sizeof(json),
+                 "{\"ok\":false,\"msg\":\"llegue a Home Assistant pero rechazo el "
+                 "token (%d)\"}", code);
+    } else if (code < 0) {
+        /* The order is that of the AOS_HTTP_ERR_* in aos_hal.h and the index
+         * is -code, so adding an error over there forces adding it here: if
+         * not, the message falls through to the generic one and the user sees
+         * a bare number. */
+        static const char *const porque[] = {
+            "", "no resolvi el nombre", "no me pude conectar",
+            "fallo al mandar", "se corto la respuesta",
+            "eso no contesta HTTP", "me quede sin memoria",
+            "la placa todavia no tiene la hora: espera unos segundos y proba de nuevo",
+            "no pude verificar el certificado. Si Home Assistant esta en tu red "
+            "y usa un certificado propio, poné la direccion con http://"
+        };
+        int i = -code;
+        snprintf(json, sizeof(json), "{\"ok\":false,\"msg\":\"%s (%d)\"}",
+                 (i >= 1 && i <= (int)(sizeof(porque) / sizeof(porque[0])) - 1)
+                     ? porque[i] : "no pude preguntar", code);
+    } else {
+        snprintf(json, sizeof(json),
+                 "{\"ok\":false,\"msg\":\"contesto %d\"}", code);
+    }
+    free(body);
+
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, json, HTTPD_RESP_USE_STRLEN);
+}
+
+/* The list of entities, so the page can offer autocompletion instead of making
+ * you type "light.cocina" from memory. It is asked for with a template and not
+ * with /api/states because that would return the state and attributes of
+ * everything, which in a house with two hundred entities is hundreds of
+ * kilobytes. */
+/* Only the NUMERIC sensors, with name, unit and current value. It is what
+ * #46's picker needs, and it is far smaller than the whole entity list: of the
+ * 372 sensors of a real house, the ones with a number are the only ones that
+ * can be plotted.
+ *
+ * The filtering is done by HOME ASSISTANT and not by the browser or the
+ * firmware: it is the one with the data and a CPU. Same idea as Remoto's
+ * single template. */
+static esp_err_t sensores_handler(httpd_req_t *req)
+{
+    static const char *TPL =
+        "{\"template\":\"{% for s in states.sensor %}"
+        "{% if s.state is not none and is_number(s.state) %}"
+        "{{s.entity_id}}|{{s.name}}|{{s.attributes.unit_of_measurement|default('')}}"
+        "|{{s.state}}\\n{% endif %}{% endfor %}\"}";
+
+    char *body = NULL;
+    int   len  = 0;
+    int   code = ha_fetch("/api/template", TPL, 32 * 1024, &body, &len);
+
+    httpd_resp_set_type(req, "text/plain; charset=utf-8");
+    if (code == 200 && body) {
+        esp_err_t r = httpd_resp_send(req, body, len);
+        free(body);
+        return r;
+    }
+    free(body);
+    httpd_resp_set_status(req, "503 Service Unavailable");
+    return httpd_resp_send(req, "", 0);
+}
+
+#define SN_KEY_LIST  "sn_list"
+#define SN_KEY_GEN   "sn_gen"
+
+static esp_err_t sensores_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)sensores_html_start,
+                           sensores_html_end - sensores_html_start - 1);
+}
+
+static esp_err_t sensores_conf_get(httpd_req_t *req)
+{
+    char lista[400] = {0};
+    aos_hal_pref_get_str(SN_KEY_LIST, lista, sizeof(lista));
+
+    /* Whatever would break the JSON is escaped. The names are written by the
+     * browser in ASCII already, but this endpoint can also be called by hand. */
+    char esc[440];
+    size_t e = 0;
+    for (size_t c = 0; lista[c] && e < sizeof(esc) - 2; c++) {
+        if (lista[c] == '"' || lista[c] == '\\') {
+            esc[e++] = '\\';
+        } else if ((unsigned char)lista[c] < 0x20) {
+            continue;
+        }
+        esc[e++] = lista[c];
+    }
+    esc[e] = 0;
+
+    char json[480];
+    snprintf(json, sizeof(json), "{\"lista\":\"%s\"}", esc);
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, json, HTTPD_RESP_USE_STRLEN);
+}
+
+static esp_err_t sensores_conf_post(httpd_req_t *req)
+{
+    char body[600];
+    int  want = req->content_len;
+    if (want <= 0 || want >= (int)sizeof(body)) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "cuerpo invalido");
+        return ESP_FAIL;
+    }
+    int got = httpd_req_recv(req, body, want);
+    if (got <= 0) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "no llego el cuerpo");
+        return ESP_FAIL;
+    }
+    body[got] = 0;
+
+    char lista[400] = {0};
+    httpd_query_key_value(body, "lista", lista, sizeof(lista));
+    url_decode(lista);
+
+    /* Accents are stripped a second time, just as in /clima: the page already
+     * normalises in the browser, but a curl by hand would store "Presión" and
+     * the watch would show little boxes. Dropping the non-ASCII bytes is safe
+     * but looks broken ("Presin"); transliterating the 0xC3 block costs ten
+     * lines and is the same table clima and its endpoint use. */
+    static const char latin1[] =
+        "AAAAAA CEEEEIIIIDNOOOOO OUUUUY  aaaaaa ceeeeiiiidnooooo ouuuuy y";
+    char limpio[400];
+    size_t w = 0;
+    for (size_t r = 0; lista[r] && w < sizeof(limpio) - 1; r++) {
+        unsigned char c = (unsigned char)lista[r];
+        if (c >= 0x20 && c < 0x7F) {
+            limpio[w++] = (char)c;
+        } else if (c == 0xC3 && lista[r + 1]) {
+            unsigned char next = (unsigned char)lista[++r];
+            int idx = next - 0x80;
+            limpio[w++] = (idx >= 0 && idx < 64) ? latin1[idx] : ' ';
+        } else if (c == 0xC2 && (unsigned char)lista[r + 1] == 0xB0 &&
+                   w + 2 < sizeof(limpio)) {
+            /* The degree sign IS in the compiled font, and it is what
+             * distinguishes "22,9 C" from "22,9 °C" on half the sensors of a
+             * house. It is two-byte UTF-8 (\xC2\xB0) and passes through
+             * verbatim; the rule was written down by clima: never 0xB0 on its
+             * own. Without this branch it fell into the two-byte drop below. */
+            limpio[w++] = (char)0xC2;
+            limpio[w++] = (char)0xB0;
+            r += 1;
+        } else if ((c & 0xE0) == 0xC0 && lista[r + 1]) {
+            r += 1;
+        } else if ((c & 0xF0) == 0xE0) {
+            r += 2;
+        } else if ((c & 0xF8) == 0xF0) {
+            r += 3;
+        }
+    }
+    limpio[w] = 0;
+
+    /* Four records at most, which is what the app draws. Counted here as well
+     * as in the browser because the endpoint can be called by hand and a fifth
+     * would go into NVS never to be seen. */
+    int registros = limpio[0] ? 1 : 0;
+    for (const char *c = limpio; *c; c++) {
+        if (*c == ';' && c[1]) {
+            registros++;
+        }
+    }
+    if (registros > 4) {
+        httpd_resp_set_type(req, "application/json");
+        return httpd_resp_send(req,
+            "{\"ok\":false,\"error\":\"como mucho cuatro sensores\"}",
+            HTTPD_RESP_USE_STRLEN);
+    }
+
+    aos_hal_pref_set_str(SN_KEY_LIST, limpio);
+
+    int32_t gen = 0;
+    aos_hal_pref_get_i32(SN_KEY_GEN, &gen);
+    aos_hal_pref_set_i32(SN_KEY_GEN, gen + 1);
+
+    ESP_LOGI(TAG, "sensores: %d chosen [%s]", registros, limpio);
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_send(req, "{\"ok\":true}", HTTPD_RESP_USE_STRLEN);
+}
+
+static esp_err_t remoto_entities_handler(httpd_req_t *req)
+{
+    static const char *TPL =
+        "{\"template\":\"{{ states | map(attribute='entity_id') | join(',') }}\"}";
+
+    char *body = NULL;
+    int   len  = 0;
+    int   code = ha_fetch("/api/template", TPL, 24 * 1024, &body, &len);
+
+    httpd_resp_set_type(req, "text/plain; charset=utf-8");
+    if (code == 200 && body) {
+        esp_err_t r = httpd_resp_send(req, body, len);
+        free(body);
+        return r;
+    }
+    free(body);
+    httpd_resp_set_status(req, "503 Service Unavailable");
+    return httpd_resp_send(req, "", 0);
+}
+
+/* GET /api/usb[?mode=console|device|disk|host][&console=0|1]: which side of
+ * the USB PHY is on, what is plugged in when it is the host, and the heap
+ * figures the switch costs. Phase 1 of docs/USB.md: the tests are driven from
+ * here before anything reaches Settings. */
+static esp_err_t usb_handler(httpd_req_t *req)
+{
+    char query[400] = "", value[16];
+    httpd_req_get_url_query_str(req, query, sizeof(query));
+    if (httpd_query_key_value(query, "console", value, sizeof(value)) == ESP_OK) {
+        aos_usb_console_on_cdc(atoi(value) != 0);
+    }
+    bool ok = true;
+    if (httpd_query_key_value(query, "mode", value, sizeof(value)) == ESP_OK) {
+        if      (!strcmp(value, "console")) ok = aos_usb_mode_set(AOS_USB_CONSOLE);
+        else if (!strcmp(value, "device"))  ok = aos_usb_mode_set(AOS_USB_DEVICE);
+        else if (!strcmp(value, "host"))    ok = aos_usb_mode_set(AOS_USB_HOST);
+        else if (!strcmp(value, "disk"))    ok = aos_usb_mode_set(AOS_USB_DISK);
+        else {
+            httpd_resp_set_status(req, "400 Bad Request");
+            return httpd_resp_sendstr(req, "mode: console, device, disk or host");
+        }
+    }
+    if (httpd_query_key_value(query, "tusblog", value, sizeof(value)) == ESP_OK) {
+        char *txt = heap_caps_malloc(8192 + 1, MALLOC_CAP_SPIRAM);
+        if (!txt) {
+            httpd_resp_set_status(req, "503 Service Unavailable");
+            return httpd_resp_sendstr(req, "sin memoria");
+        }
+        aos_usb_tusb_log(txt, 8192 + 1);
+        httpd_resp_set_type(req, "text/plain");
+        esp_err_t r = httpd_resp_send(req, txt, HTTPD_RESP_USE_STRLEN);
+        free(txt);
+        return r;
+    }
+    /* ?key=<name>[,<name>...] and ?type=<text>: the keyboard (D3), for the
+     * tests; the apps call the HAL. */
+    char copy_note[160] = "", copy_note_keys[64] = "";
+    char keys[128] = "";
+    if (httpd_query_key_value(query, "key", keys, sizeof(keys)) == ESP_OK) {
+        url_decode(keys);
+        int sent = 0, asked = 0;
+        for (char *k = strtok(keys, ","); k; k = strtok(NULL, ",")) {
+            asked++;
+            if (aos_usb_hid_named(k)) sent++;
+        }
+        snprintf(copy_note_keys, sizeof(copy_note_keys), "\"keys\":{\"asked\":%d,\"sent\":%d},", asked, sent);
+    } else if (httpd_query_key_value(query, "type", keys, sizeof(keys)) == ESP_OK) {
+        url_decode(keys);
+        snprintf(copy_note_keys, sizeof(copy_note_keys), "\"typed\":%d,", aos_usb_hid_type(keys));
+    } else if (httpd_query_key_value(query, "mouse", keys, sizeof(keys)) == ESP_OK) {
+        /* ?mouse=dx,dy[,wheel]: one relative report (D4), for the tests. */
+        int dx = 0, dy = 0, wheel = 0;
+        sscanf(keys, "%d,%d,%d", &dx, &dy, &wheel);
+        snprintf(copy_note_keys, sizeof(copy_note_keys), "\"mouse\":%s,",
+                 aos_hal_usb_mouse(dx, dy, wheel) ? "true" : "false");
+    } else if (httpd_query_key_value(query, "pad", keys, sizeof(keys)) == ESP_OK) {
+        /* ?pad=x,y[,hat[,buttons]]: one gamepad report (D5), for the tests. */
+        int x = 0, y = 0, hat = 0; unsigned b = 0;
+        sscanf(keys, "%d,%d,%d,%u", &x, &y, &hat, &b);
+        snprintf(copy_note_keys, sizeof(copy_note_keys), "\"pad\":%s,",
+                 aos_hal_usb_gamepad(x, y, hat, b) ? "true" : "false");
+    } else if (httpd_query_key_value(query, "midi", keys, sizeof(keys)) == ESP_OK) {
+        /* ?midi=note[,velocity]: a note, held 150 ms (D7). */
+        int note = 60, vel = 100;
+        sscanf(keys, "%d,%d", &note, &vel);
+        bool ok = aos_hal_usb_midi_note(note, vel, true);
+        vTaskDelay(pdMS_TO_TICKS(150));
+        if (ok) aos_hal_usb_midi_note(note, vel, false);
+        snprintf(copy_note_keys, sizeof(copy_note_keys), "\"midi\":%s,", ok ? "true" : "false");
+    } else if (httpd_query_key_value(query, "click", keys, sizeof(keys)) == ESP_OK) {
+        snprintf(copy_note_keys, sizeof(copy_note_keys), "\"click\":%s,",
+                 aos_hal_usb_click(atoi(keys)) ? "true" : "false");
+    }
+    /* ?cp=<name>&from=<dir>&to=<dir>: whole-file copy between any two of
+     * the explorer's folders, the pendrive included (H1), timed for T5.
+     * The name is the last component only, like every other name here. */
+    char cp[128];
+    if (httpd_query_key_value(query, "cp", cp, sizeof(cp)) == ESP_OK) {
+        char from_s[64] = "", to_s[64] = "", name[96];
+        httpd_query_key_value(query, "from", from_s, sizeof(from_s));
+        httpd_query_key_value(query, "to", to_s, sizeof(to_s));
+        url_decode(cp); url_decode(from_s); url_decode(to_s);
+        char from_path[160], to_path[160];
+        const char *r = resolve_dir(from_s);
+        if (r) snprintf(from_path, sizeof(from_path), "%s", r);
+        const char *w = r ? resolve_dir(to_s) : NULL;
+        if (w) snprintf(to_path, sizeof(to_path), "%s", w);
+        if (!r || !w || !safe_name(cp, name, sizeof(name))) {
+            httpd_resp_set_status(req, "400 Bad Request");
+            return httpd_resp_sendstr(req, "cp: name, from and to (photos, music, apps, sd/..., usb/...)");
+        }
+        char src[300], dst[300];
+        snprintf(src, sizeof(src), "%s/%s", from_path, name);
+        snprintf(dst, sizeof(dst), "%s/%s", to_path, name);
+        int64_t t0 = esp_timer_get_time();
+        long bytes = aos_usb_copy(src, dst);
+        int ms = (int)((esp_timer_get_time() - t0) / 1000);
+        if (bytes < 0) {
+            snprintf(copy_note, sizeof(copy_note), "\"copy\":{\"ok\":false,\"errno\":%d,\"ms\":%d},", errno, ms);
+            ESP_LOGW(TAG, "copy %s -> %s failed: errno %d", src, dst, errno);
+        } else {
+            snprintf(copy_note, sizeof(copy_note), "\"copy\":{\"ok\":true,\"bytes\":%ld,\"ms\":%d,\"kb_s\":%ld},",
+                     bytes, ms, ms > 0 ? bytes / ms : 0);
+            ESP_LOGI(TAG, "copied %s -> %s: %ld B in %d ms", src, dst, bytes, ms);
+        }
+    }
+    char *json = heap_caps_malloc(1536, MALLOC_CAP_SPIRAM);
+    if (!json) {
+        httpd_resp_set_status(req, "503 Service Unavailable");
+        return httpd_resp_sendstr(req, "sin memoria");
+    }
+    int n = snprintf(json, 1536, "{\"ok\":%s,%s%s\"status\":", ok ? "true" : "false", copy_note, copy_note_keys);
+    n += aos_usb_status_json(json + n, 1536 - n);
+    if (n < 1534) { json[n++] = '}'; json[n] = 0; }
+    httpd_resp_set_type(req, "application/json");
+    esp_err_t r = httpd_resp_send(req, json, HTTPD_RESP_USE_STRLEN);
+    free(json);
+    return r;
+}
+
+/* GET /api/coredump: the last core dump, raw (ELF), straight from the
+ * coredump partition. For the panics that happen with the USB port on the
+ * OTG side, where no console can print them. Decode on the Mac with
+ * espcoredump.py info_corefile --core <file> --core-format elf build/amoledos.elf.
+ * ?erase=1 clears it. */
+static esp_err_t coredump_handler(httpd_req_t *req)
+{
+    char query[32] = "", value[8];
+    httpd_req_get_url_query_str(req, query, sizeof(query));
+    if (httpd_query_key_value(query, "erase", value, sizeof(value)) == ESP_OK) {
+        esp_err_t e = esp_core_dump_image_erase();
+        httpd_resp_set_type(req, "application/json");
+        char out[64];
+        snprintf(out, sizeof(out), "{\"erased\":%s}", e == ESP_OK ? "true" : "false");
+        return httpd_resp_sendstr(req, out);
+    }
+    size_t addr = 0, size = 0;
+    if (esp_core_dump_image_get(&addr, &size) != ESP_OK || size == 0) {
+        httpd_resp_set_status(req, "404 Not Found");
+        return httpd_resp_sendstr(req, "no core dump");
+    }
+    const esp_partition_t *part = esp_partition_find_first(ESP_PARTITION_TYPE_DATA,
+                                                           ESP_PARTITION_SUBTYPE_DATA_COREDUMP, NULL);
+    if (!part) {
+        httpd_resp_set_status(req, "500 Internal Server Error");
+        return httpd_resp_sendstr(req, "no coredump partition");
+    }
+    char *buf = heap_caps_malloc(4096, MALLOC_CAP_SPIRAM);
+    if (!buf) {
+        httpd_resp_set_status(req, "503 Service Unavailable");
+        return httpd_resp_sendstr(req, "sin memoria");
+    }
+    httpd_resp_set_type(req, "application/octet-stream");
+    for (size_t off = 0; off < size; off += 4096) {
+        size_t n = size - off < 4096 ? size - off : 4096;
+        if (esp_partition_read(part, off, buf, n) != ESP_OK) break;
+        if (httpd_resp_send_chunk(req, buf, n) != ESP_OK) break;
+    }
+    free(buf);
+    return httpd_resp_send_chunk(req, NULL, 0);
+}
+
+/* -------------------------------------------------------------------------- */
+/* The routes                                                                  */
+/*                                                                             */
+/* Outside aos_web_start() so they can be COUNTED before configuring the
+ * server. The ceiling used to be written by hand ("24, that is 21 routes +
+ * margin") and on adding the exchange-rate and sensor ones the table reached
+ * 26: the last two were not registered, httpd_register_uri_handler returned an
+ * error, nobody looked at it, and the endpoints gave 404 without a single line
+ * in the log. Now the ceiling comes from the table and adding a route cannot
+ * fail silently.                                                              */
+/* -------------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------
+ * The portal's own pages: home, files, settings, screen, log.
+ *
+ * Everything below is what the browser needs to do the work the watch's
+ * Settings app does, plus what makes the board testable from outside: a live
+ * view of the screen with the controls to drive it, and the log over wifi.
+ *
+ * On RAM: none of this adds a task or a static buffer in internal RAM. The
+ * pages are in flash, the JSON is built on the server's stack in pieces of a
+ * few hundred bytes, and the only allocation -the log ring- is in PSRAM.
+ * -------------------------------------------------------------------------- */
+
+static esp_err_t inicio_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)inicio_html_start,
+                           inicio_html_end - inicio_html_start - 1);
+}
+
+static esp_err_t ajustes_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)ajustes_html_start,
+                           ajustes_html_end - ajustes_html_start - 1);
+}
+
+static esp_err_t pantalla_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)pantalla_html_start,
+                           pantalla_html_end - pantalla_html_start - 1);
+}
+
+static esp_err_t registro_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)registro_html_start,
+                           registro_html_end - registro_html_start - 1);
+}
+
+/* Reads a small form body into 'body'. Returns false having already sent the
+ * error. Shared by the three POST handlers below. */
+static bool leer_cuerpo(httpd_req_t *req, char *body, size_t body_len)
+{
+    int want = req->content_len;
+    if (want <= 0 || want >= (int)body_len) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "cuerpo invalido");
+        return false;
+    }
+    int got = httpd_req_recv(req, body, want);
+    if (got <= 0) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "no llego el cuerpo");
+        return false;
+    }
+    body[got] = 0;
+    return true;
+}
+
+/* GET /api/ajustes: everything the Settings page shows, in one JSON. Sent in
+ * chunks so no single buffer has to hold the list of watchfaces. */
+static esp_err_t ajustes_get_handler(httpd_req_t *req)
+{
+    char item[200];
+    char tz[48];
+    json_escape(tz, sizeof(tz), aos_hal_timezone_get());
+
+    httpd_resp_set_type(req, "application/json");
+    snprintf(item, sizeof(item),
+             "{\"brillo\":%d,\"volumen\":%d,\"aod\":%d,\"aod_brillo\":%d,"
+             "\"menu\":%d,\"ahorro\":%d,\"cuidar\":%d,\"panel_slp\":%d,\"chip_slp\":%d,"
+             "\"noche\":%d,",
+             aos_hal_brightness_get(), aos_hal_volume_get(),
+             aos_hal_aod_enabled() ? 1 : 0, aos_hal_aod_brightness_get(),
+             (int)aos_ui_launcher_get_style(),
+             aos_hal_power_saving_enabled() ? 1 : 0,
+             aos_hal_battery_care_enabled() ? 1 : 0,
+             aos_hal_panel_sleep_enabled() ? 1 : 0,
+             aos_hal_light_sleep_enabled() ? 1 : 0,
+             aos_hal_night_sleep_enabled() ? 1 : 0);
+    httpd_resp_sendstr_chunk(req, item);
+
+    snprintf(item, sizeof(item),
+             "\"tz\":\"%s\",\"hora_ok\":%s,\"wifi\":%d,\"bt\":%d,"
+             "\"notif\":%d,\"notif_sonido\":%d,\"llamadas\":%d,\"nombre\":\"%s\",",
+             tz, aos_hal_time_is_valid() ? "true" : "false",
+             aos_hal_net_enabled() ? 1 : 0, aos_hal_bt_enabled() ? 1 : 0,
+             aos_hal_notif_enabled() ? 1 : 0, aos_hal_notif_sound() ? 1 : 0,
+             aos_hal_notif_calls_always() ? 1 : 0, aos_hal_device_name());
+    httpd_resp_sendstr_chunk(req, item);
+
+    uint32_t act_s, aod_s;
+    aos_hal_screen_timeouts_get(&act_s, &aod_s);
+    bool dnd_on;
+    int dnd_from, dnd_to;
+    aos_hal_notif_dnd_schedule_get(&dnd_on, &dnd_from, &dnd_to);
+    snprintf(item, sizeof(item), "\"pant_activa\":%u,\"aod_dura\":%u,\"levantar\":%d,"
+             "\"dnd_prog\":%d,\"dnd_desde\":%d,\"dnd_hasta\":%d,\"dnd_ahora\":%d,",
+             (unsigned)act_s, (unsigned)aod_s, aos_hal_raise_wake_enabled() ? 1 : 0,
+             dnd_on ? 1 : 0, dnd_from, dnd_to, aos_hal_notif_dnd_active() ? 1 : 0);
+    httpd_resp_sendstr_chunk(req, item);
+
+    const char *actual = aos_watchface_current();
+    snprintf(item, sizeof(item), "\"esfera\":\"%s\",\"esferas\":[", actual ? actual : "");
+    httpd_resp_sendstr_chunk(req, item);
+    int n = aos_watchface_count();
+    for (int i = 0; i < n; i++) {
+        const aos_watchface_t *f = aos_watchface_at(i);
+        if (!f) continue;
+        char nombre[64];
+        json_escape(nombre, sizeof(nombre), f->name ? f->name : f->id);
+        snprintf(item, sizeof(item), "%s{\"id\":\"%s\",\"nombre\":\"%s\"}",
+                 i ? "," : "", f->id, nombre);
+        httpd_resp_sendstr_chunk(req, item);
+    }
+    httpd_resp_sendstr_chunk(req, "]}");
+    httpd_resp_sendstr_chunk(req, NULL);
+    return ESP_OK;
+}
+
+/* POST /api/ajustes: any subset of the keys above. Whatever touches the panel
+ * or the UI is done with the display lock held -brightness is a command on
+ * the same QSPI bus the flush uses- or handed to aos_ui_tick() through the
+ * request functions, which is the same path the language change takes. */
+static esp_err_t ajustes_post_handler(httpd_req_t *req)
+{
+    char body[320];
+    if (!leer_cuerpo(req, body, sizeof(body))) {
+        return ESP_FAIL;
+    }
+
+    char v[64];
+    int aplicados = 0;
+    bool nombre_invalido = false;
+
+    if (!aos_hal_lock(500)) {
+        httpd_resp_set_status(req, "503 Service Unavailable");
+        return httpd_resp_sendstr(req, "la interfaz esta ocupada");
+    }
+
+    if (httpd_query_key_value(body, "brillo", v, sizeof(v)) == ESP_OK) {
+        aos_hal_brightness_set(atoi(v));
+        aos_hal_activity();
+        aplicados++;
+    }
+    if (httpd_query_key_value(body, "volumen", v, sizeof(v)) == ESP_OK) {
+        aos_hal_volume_set(atoi(v));
+        aplicados++;
+    }
+    if (httpd_query_key_value(body, "aod", v, sizeof(v)) == ESP_OK) {
+        aos_hal_aod_enable(atoi(v) != 0);
+        aplicados++;
+    }
+    if (httpd_query_key_value(body, "aod_brillo", v, sizeof(v)) == ESP_OK) {
+        aos_hal_aod_brightness_set(atoi(v));
+        aplicados++;
+    }
+    {
+        /* The two screen timeouts, in seconds (aos_hal_screen_timeouts_set):
+         * either may come alone. */
+        uint32_t act_s, aod_s;
+        aos_hal_screen_timeouts_get(&act_s, &aod_s);
+        bool cambia = false;
+        if (httpd_query_key_value(body, "pant_activa", v, sizeof(v)) == ESP_OK) {
+            act_s = (uint32_t)atoi(v);
+            cambia = true;
+        }
+        if (httpd_query_key_value(body, "aod_dura", v, sizeof(v)) == ESP_OK) {
+            aod_s = (uint32_t)atoi(v);
+            cambia = true;
+        }
+        if (cambia) {
+            aos_hal_screen_timeouts_set(act_s, aod_s);
+            aplicados++;
+        }
+    }
+    if (httpd_query_key_value(body, "levantar", v, sizeof(v)) == ESP_OK) {
+        aos_hal_raise_wake_enable(atoi(v) != 0);
+        aplicados++;
+    }
+    {
+        /* Do not disturb's schedule: on/off and the two times, in minutes
+         * after midnight; any of the three may come alone. */
+        bool on;
+        int from, to;
+        aos_hal_notif_dnd_schedule_get(&on, &from, &to);
+        bool cambia = false;
+        if (httpd_query_key_value(body, "dnd_prog", v, sizeof(v)) == ESP_OK) {
+            on = atoi(v) != 0;
+            cambia = true;
+        }
+        if (httpd_query_key_value(body, "dnd_desde", v, sizeof(v)) == ESP_OK) {
+            from = atoi(v);
+            cambia = true;
+        }
+        if (httpd_query_key_value(body, "dnd_hasta", v, sizeof(v)) == ESP_OK) {
+            to = atoi(v);
+            cambia = true;
+        }
+        if (cambia) {
+            aos_hal_notif_dnd_schedule_set(on, from, to);
+            aplicados++;
+        }
+    }
+    if (httpd_query_key_value(body, "ahorro", v, sizeof(v)) == ESP_OK) {
+        aos_hal_power_saving_enable(atoi(v) != 0);
+        aplicados++;
+    }
+    if (httpd_query_key_value(body, "cuidar", v, sizeof(v)) == ESP_OK) {
+        aos_hal_battery_care_enable(atoi(v) != 0);
+        aplicados++;
+    }
+    if (httpd_query_key_value(body, "panel_slp", v, sizeof(v)) == ESP_OK) {
+        aos_hal_panel_sleep_enable(atoi(v) != 0);
+        aplicados++;
+    }
+    if (httpd_query_key_value(body, "chip_slp", v, sizeof(v)) == ESP_OK) {
+        aos_hal_light_sleep_enable(atoi(v) != 0);
+        aplicados++;
+    }
+    if (httpd_query_key_value(body, "noche", v, sizeof(v)) == ESP_OK) {
+        aos_hal_night_sleep_enable(atoi(v) != 0);
+        aplicados++;
+    }
+    if (httpd_query_key_value(body, "bt", v, sizeof(v)) == ESP_OK) {
+        aos_hal_bt_enable(atoi(v) != 0);
+        aplicados++;
+    }
+    if (httpd_query_key_value(body, "notif", v, sizeof(v)) == ESP_OK) {
+        aos_hal_notif_enable(atoi(v) != 0);
+        aplicados++;
+    }
+    if (httpd_query_key_value(body, "notif_sonido", v, sizeof(v)) == ESP_OK) {
+        aos_hal_notif_sound_set(atoi(v) != 0);
+        aplicados++;
+    }
+    if (httpd_query_key_value(body, "llamadas", v, sizeof(v)) == ESP_OK) {
+        aos_hal_notif_calls_always_set(atoi(v) != 0);
+        aplicados++;
+    }
+    if (httpd_query_key_value(body, "tz", v, sizeof(v)) == ESP_OK) {
+        url_decode(v);
+        if (v[0]) {
+            aos_hal_timezone_set(v);
+            aplicados++;
+        }
+    }
+    if (httpd_query_key_value(body, "nombre", v, sizeof(v)) == ESP_OK) {
+        url_decode(v);
+        if (aos_hal_device_name_set(v)) {
+            aplicados++;
+        } else {
+            nombre_invalido = true;
+        }
+    }
+    aos_hal_unlock();
+
+    /* Deferred: these rebuild LVGL objects and must run on the UI tick. */
+    if (httpd_query_key_value(body, "esfera", v, sizeof(v)) == ESP_OK) {
+        url_decode(v);
+        aos_ui_request_watchface(v);
+        aplicados++;
+    }
+    if (httpd_query_key_value(body, "menu", v, sizeof(v)) == ESP_OK) {
+        aos_ui_request_launcher_style(atoi(v));
+        aplicados++;
+    }
+
+    /* Last, and after answering: it takes this very connection down. */
+    bool apagar_wifi = false;
+    if (httpd_query_key_value(body, "wifi", v, sizeof(v)) == ESP_OK) {
+        if (atoi(v) != 0) {
+            aos_hal_net_enable(true);
+        } else {
+            apagar_wifi = true;
+        }
+        aplicados++;
+    }
+
+    char json[96];
+    snprintf(json, sizeof(json), "{\"ok\":true,\"aplicados\":%d,\"nombre_invalido\":%s,\"nombre\":\"%s\"}",
+             aplicados, nombre_invalido ? "true" : "false", aos_hal_device_name());
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_sendstr(req, json);
+
+    if (apagar_wifi) {
+        ESP_LOGW(TAG, "wifi switched off from the portal");
+        aos_hal_net_enable(false);
+    }
+    return ESP_OK;
+}
+
+/* POST /api/accion: que=despertar|apagar|volver|inicio|menu|abrir|toast|
+ *                   sync_hora|hora|beep
+ * Navigation and the toast go through aos_ui's request notes; the rest is
+ * HAL and safe from here with the lock. */
+static esp_err_t accion_handler(httpd_req_t *req)
+{
+    char body[200];
+    if (!leer_cuerpo(req, body, sizeof(body))) {
+        return ESP_FAIL;
+    }
+    char que[24] = "", arg[96] = "";
+    httpd_query_key_value(body, "que", que, sizeof(que));
+
+    bool ok = true;
+    if (strcmp(que, "despertar") == 0) {
+        aos_hal_activity();
+    } else if (strcmp(que, "apagar") == 0) {
+        aos_hal_display_on(false);
+    } else if (strcmp(que, "volver") == 0) {
+        aos_ui_request_nav(AOS_UI_NAV_BACK);
+    } else if (strcmp(que, "inicio") == 0) {
+        aos_ui_request_nav(AOS_UI_NAV_HOME);
+    } else if (strcmp(que, "menu") == 0) {
+        aos_ui_request_nav(AOS_UI_NAV_LAUNCHER);
+    } else if (strcmp(que, "abrir") == 0) {
+        httpd_query_key_value(body, "id", arg, sizeof(arg));
+        url_decode(arg);
+        ok = arg[0] && aos_ui_app_find(arg) != NULL;
+        if (ok) aos_ui_request_open(arg);
+    } else if (strcmp(que, "toast") == 0) {
+        httpd_query_key_value(body, "texto", arg, sizeof(arg));
+        url_decode(arg);
+        ok = arg[0] != 0;
+        if (ok) aos_ui_request_toast(arg);
+    } else if (strcmp(que, "sync_hora") == 0) {
+        ok = aos_hal_net_sync_time();
+    } else if (strcmp(que, "hora") == 0) {
+        /* The browser's clock, as an epoch; the watch wants local time. */
+        httpd_query_key_value(body, "epoch", arg, sizeof(arg));
+        time_t epoch = (time_t)strtoll(arg, NULL, 10);
+        struct tm local;
+        ok = epoch > 1600000000 && localtime_r(&epoch, &local) != NULL;
+        if (ok && aos_hal_lock(500)) {
+            ok = aos_hal_time_set(&local);
+            aos_hal_unlock();
+        }
+    } else if (strcmp(que, "beep") == 0) {
+        aos_hal_beep(880, 120);
+    } else {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "accion desconocida");
+        return ESP_FAIL;
+    }
+
+    ESP_LOGI(TAG, "action from the portal: %s %s -> %s", que, arg, ok ? "ok" : "failed");
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_sendstr(req, ok ? "{\"ok\":true}" : "{\"ok\":false}");
+}
+
+/* GET /api/apps: what the launcher shows, so the Screen page can open any of
+ * them. Whether one came from the card is asked to aos_dynapp: the id does
+ * not say it, twelve of the card's apps are "aos.something" too. */
+static esp_err_t apps_handler(httpd_req_t *req)
+{
+    char item[160];
+    const char *abierta = aos_ui_current_app();
+
+    httpd_resp_set_type(req, "application/json");
+    snprintf(item, sizeof(item), "{\"abierta\":\"%s\",\"apps\":[", abierta ? abierta : "");
+    httpd_resp_sendstr_chunk(req, item);
+
+    int n = aos_ui_app_count();
+    for (int i = 0; i < n; i++) {
+        const aos_app_t *a = aos_ui_app_at(i);
+        if (!a || !a->desc.id) continue;
+        char nombre[64];
+        json_escape(nombre, sizeof(nombre), a->desc.name ? a->desc.name : a->desc.id);
+        snprintf(item, sizeof(item), "%s{\"id\":\"%s\",\"nombre\":\"%s\",\"dinamica\":%s}",
+                 i ? "," : "", a->desc.id, nombre,
+                 aos_dynapp_is_dynamic(a->desc.id) ? "true" : "false");
+        httpd_resp_sendstr_chunk(req, item);
+    }
+    httpd_resp_sendstr_chunk(req, "]}");
+    httpd_resp_sendstr_chunk(req, NULL);
+    return ESP_OK;
+}
+
+/* GET /api/icons: every app with where its icon comes from, for /iconos.
+ *   {"dir":"/sdcard/icons","apps":[{"id","nombre","origen":"archivo|app|firmware|glifo",
+ *                                    "bytes":N,"color_a":"RRGGBB","color_b":"RRGGBB","glifo":"..."}]}
+ * GET /api/icons?id=<app.id>: the AIC blob that WOULD be drawn for that app
+ * (file, then the app's own, then the firmware's table), as octet-stream;
+ * 404 if the icon is a switch case or a glyph and has no bytes to give.
+ * The page's canvas renderer draws it, so what the browser shows is the
+ * blob the watch has and not a copy of the page's own. */
+static esp_err_t icons_handler(httpd_req_t *req)
+{
+    char query[96] = "", id[48] = "";
+    if (httpd_req_get_url_query_str(req, query, sizeof(query)) == ESP_OK) {
+        httpd_query_key_value(query, "id", id, sizeof(id));
+    }
+
+    if (id[0]) {
+        size_t len = 0;
+        const uint8_t *ops = aos_icon_ops_for(id, &len);
+        if (!ops) {
+            int n = aos_ui_app_count();
+            for (int i = 0; i < n && !ops; i++) {
+                const aos_app_t *a = aos_ui_app_at(i);
+                if (a && a->desc.id && strcmp(a->desc.id, id) == 0) {
+                    ops = aos_icon_ops_builtin(a->desc.icon_vec, &len);
+                }
+            }
+        }
+        if (!ops) {
+            httpd_resp_set_status(req, "404 Not Found");
+            return httpd_resp_sendstr(req, "no blob for that icon");
+        }
+        httpd_resp_set_type(req, "application/octet-stream");
+        return httpd_resp_send(req, (const char *)ops, (ssize_t)len);
+    }
+
+    char item[224];
+    httpd_resp_set_type(req, "application/json");
+    snprintf(item, sizeof(item), "{\"dir\":\"%s\",\"apps\":[", aos_hal_path_icons());
+    httpd_resp_sendstr_chunk(req, item);
+
+    int n = aos_ui_app_count();
+    for (int i = 0; i < n; i++) {
+        const aos_app_t *a = aos_ui_app_at(i);
+        if (!a || !a->desc.id) continue;
+        char nombre[64], glifo[24];
+        json_escape(nombre, sizeof(nombre), a->desc.name ? _(a->desc.name) : a->desc.id);
+        json_escape(glifo, sizeof(glifo), a->desc.icon ? a->desc.icon : "");
+
+        size_t len = 0;
+        const char *origen;
+        switch (aos_icon_source(a->desc.id)) {
+        case AOS_ICON_SRC_FILE: origen = "archivo"; break;
+        case AOS_ICON_SRC_APP:  origen = "app";     break;
+        default:
+            origen = a->desc.icon_vec != AOS_ICON_NONE ? "firmware" : "glifo";
+            break;
+        }
+        if (!aos_icon_ops_for(a->desc.id, &len)) {
+            aos_icon_ops_builtin(a->desc.icon_vec, &len);
+        }
+        snprintf(item, sizeof(item),
+                 "%s{\"id\":\"%s\",\"nombre\":\"%s\",\"origen\":\"%s\",\"bytes\":%u,"
+                 "\"color_a\":\"%06X\",\"color_b\":\"%06X\",\"glifo\":\"%s\"}",
+                 i ? "," : "", a->desc.id, nombre, origen, (unsigned)len,
+                 (unsigned)(a->desc.color_a & 0xFFFFFF),
+                 (unsigned)((a->desc.color_b ? a->desc.color_b : a->desc.color_a) & 0xFFFFFF),
+                 glifo);
+        httpd_resp_sendstr_chunk(req, item);
+    }
+    httpd_resp_sendstr_chunk(req, "]}");
+    httpd_resp_sendstr_chunk(req, NULL);
+    return ESP_OK;
+}
+
+/* GET /api/menu: menu.txt as it is, text/plain; an empty body when there is
+ * none (the launcher then shows every app in its usual order). The page puts
+ * that together with /api/apps and /api/icons. X-Menu-Path says where it
+ * lives, card or SPIFFS. */
+static esp_err_t menu_get_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/plain; charset=utf-8");
+    httpd_resp_set_hdr(req, "X-Menu-Path", aos_hal_path_menu());
+    httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+    FILE *f = fopen(aos_hal_path_menu(), "rb");
+    if (!f) {
+        return httpd_resp_send(req, "", 0);
+    }
+    char buf[512];
+    size_t n;
+    while ((n = fread(buf, 1, sizeof(buf), f)) > 0) {
+        if (httpd_resp_send_chunk(req, buf, (ssize_t)n) != ESP_OK) {
+            fclose(f);
+            return ESP_FAIL;
+        }
+    }
+    fclose(f);
+    return httpd_resp_send_chunk(req, NULL, 0);
+}
+
+/* POST /api/menu: the whole new menu.txt as the body. Checked with the same
+ * parser the launcher uses BEFORE anything is written, then written to a
+ * temporary file and renamed over the old one, so the launcher can never
+ * read half a menu. An empty body deletes the file: back to the usual order.
+ * The launcher is rebuilt on the UI's next tick. */
+static esp_err_t menu_post_handler(httpd_req_t *req)
+{
+    const char *path = aos_hal_path_menu();
+    httpd_resp_set_type(req, "application/json");
+
+    if (req->content_len <= 0) {
+        remove(path);
+        aos_ui_request_menu();
+        return httpd_resp_sendstr(req, "{\"ok\":true,\"borrado\":true}");
+    }
+    if (req->content_len > AOS_MENU_FILE_MAX) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "menu demasiado grande");
+        return ESP_FAIL;
+    }
+
+    /* Over 1 KB: PSRAM. Read whole, since it has to be validated before a
+     * byte of it reaches the card. */
+    char *body = malloc((size_t)req->content_len);
+    if (!body) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "sin memoria");
+        return ESP_FAIL;
+    }
+    int got = 0;
+    while (got < req->content_len) {
+        int r = httpd_req_recv(req, body + got, (size_t)(req->content_len - got));
+        if (r == HTTPD_SOCK_ERR_TIMEOUT) {
+            continue;
+        }
+        if (r <= 0) {
+            free(body);
+            return ESP_FAIL;
+        }
+        got += r;
+    }
+
+    char err[64];
+    if (!aos_menu_validate(body, (size_t)got, err, sizeof(err))) {
+        free(body);
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, err);
+        return ESP_FAIL;
+    }
+
+    char tmp[96];
+    snprintf(tmp, sizeof(tmp), "%s.new", path);
+    FILE *f = fopen(tmp, "wb");
+    bool ok = f && fwrite(body, 1, (size_t)got, f) == (size_t)got;
+    if (f) {
+        ok = (fclose(f) == 0) && ok;
+    }
+    free(body);
+    /* FAT's rename does not replace: the old file goes first. */
+    if (ok) {
+        remove(path);
+        ok = rename(tmp, path) == 0;
+    }
+    if (!ok) {
+        remove(tmp);
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "no se pudo escribir");
+        return ESP_FAIL;
+    }
+    ESP_LOGI(TAG, "menu saved: %s (%d bytes)", path, got);
+    aos_ui_request_menu();
+    return httpd_resp_sendstr(req, "{\"ok\":true}");
+}
+
+/* --------------------------------------------------------------------------
+ * Backup and restore of the preferences
+ *
+ * GET /api/respaldo[?wifi=1] hands out every preference as JSON, for the file
+ * the portal saves; the WiFi credentials only when asked for. POST
+ * /api/respaldo takes them back as plain lines, "i<TAB>key<TAB>value" or
+ * "s<TAB>key<TAB>value": the page reads the JSON and sends that, so the
+ * firmware never needs a JSON parser. menu.txt travels in the same file and
+ * goes back through /api/menu. Most preferences are read at boot, so the page
+ * offers the restart afterwards.
+ * -------------------------------------------------------------------------- */
+
+/* Preferences that belong to THIS watch and must not arrive from another:
+ * the touch calibration of its own panel, its battery's history, its step
+ * count, the watch it is paired with over ESP-NOW. */
+static bool pref_de_este_reloj(const char *key)
+{
+    static const char *const PROPIAS[] = {
+        "cal_ax", "cal_ay", "cal_bx", "cal_by", "chg_cyc", "bat_min",
+        "st_today", "st_day", "lk_peer", "lk_lmk", "lk_pname", "bt_bond",
+        "time_ok", "pomo_day", "pomo_done",
+    };
+    for (size_t i = 0; i < sizeof(PROPIAS) / sizeof(PROPIAS[0]); i++) {
+        if (strcmp(key, PROPIAS[i]) == 0) {
+            return true;
+        }
+    }
+    return false;
+}
+
+typedef struct {
+    httpd_req_t *req;
+    bool wifi;
+    int  n;
+} respaldo_ctx_t;
+
+static void respaldo_visit(const char *key, bool is_str, int32_t v, const char *s, void *ctx)
+{
+    respaldo_ctx_t *c = (respaldo_ctx_t *)ctx;
+    if (!c->wifi && strncmp(key, "wifi_", 5) == 0 && strcmp(key, "wifi_on") != 0) {
+        return;
+    }
+    char item[640];
+    char k[40];
+    json_escape(k, sizeof(k), key);
+    if (is_str) {
+        char val[512];
+        json_escape(val, sizeof(val), s);
+        snprintf(item, sizeof(item), "%s{\"k\":\"%s\",\"s\":\"%s\"}", c->n ? "," : "", k, val);
+    } else {
+        snprintf(item, sizeof(item), "%s{\"k\":\"%s\",\"i\":%ld}", c->n ? "," : "", k, (long)v);
+    }
+    httpd_resp_sendstr_chunk(c->req, item);
+    c->n++;
+}
+
+static esp_err_t respaldo_get_handler(httpd_req_t *req)
+{
+    char query[32] = "", v[4] = "";
+    if (httpd_req_get_url_query_str(req, query, sizeof(query)) == ESP_OK) {
+        httpd_query_key_value(query, "wifi", v, sizeof(v));
+    }
+    char nombre[48], disp[96], item[200];
+    json_escape(nombre, sizeof(nombre), aos_hal_device_name());
+    snprintf(disp, sizeof(disp), "attachment; filename=\"%s-respaldo.json\"",
+             aos_hal_device_name());
+    httpd_resp_set_type(req, "application/json");
+    httpd_resp_set_hdr(req, "Content-Disposition", disp);
+    httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+    snprintf(item, sizeof(item), "{\"respaldo\":1,\"version\":\"%s\",\"nombre\":\"%s\",\"prefs\":[",
+             aos_hal_firmware_version(), nombre);
+    httpd_resp_sendstr_chunk(req, item);
+    respaldo_ctx_t ctx = { .req = req, .wifi = v[0] == '1', .n = 0 };
+    aos_hal_pref_foreach(respaldo_visit, &ctx);
+    httpd_resp_sendstr_chunk(req, "]}");
+    return httpd_resp_sendstr_chunk(req, NULL);
+}
+
+static esp_err_t respaldo_post_handler(httpd_req_t *req)
+{
+    if (req->content_len <= 0 || req->content_len > 32 * 1024) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "respaldo vacio o demasiado grande");
+        return ESP_FAIL;
+    }
+    char *body = malloc((size_t)req->content_len + 1);     /* PSRAM: over 1 KB */
+    if (!body) {
+        httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "sin memoria");
+        return ESP_FAIL;
+    }
+    int got = 0;
+    while (got < req->content_len) {
+        int r = httpd_req_recv(req, body + got, (size_t)(req->content_len - got));
+        if (r == HTTPD_SOCK_ERR_TIMEOUT) {
+            continue;
+        }
+        if (r <= 0) {
+            free(body);
+            return ESP_FAIL;
+        }
+        got += r;
+    }
+    body[got] = '\0';
+
+    int aplicados = 0, omitidos = 0;
+    char *save = NULL;
+    for (char *line = strtok_r(body, "\n", &save); line; line = strtok_r(NULL, "\n", &save)) {
+        char *t1 = strchr(line, '\t');
+        char *t2 = t1 ? strchr(t1 + 1, '\t') : NULL;
+        if (!t1 || !t2 || t1 - line != 1) {
+            omitidos++;
+            continue;
+        }
+        *t1 = '\0';
+        *t2 = '\0';
+        const char *key = t1 + 1, *val = t2 + 1;
+        size_t kl = strlen(key);
+        if (kl == 0 || kl > 15 || pref_de_este_reloj(key)) {     /* 15: NVS's key limit */
+            omitidos++;
+            continue;
+        }
+        bool ok = line[0] == 'i' ? aos_hal_pref_set_i32(key, (int32_t)strtol(val, NULL, 10))
+                : line[0] == 's' ? aos_hal_pref_set_str(key, val) : false;
+        ok ? aplicados++ : omitidos++;
+    }
+    free(body);
+    ESP_LOGI(TAG, "backup restored: %d preferences, %d skipped", aplicados, omitidos);
+
+    char json[80];
+    snprintf(json, sizeof(json), "{\"ok\":true,\"aplicados\":%d,\"omitidos\":%d}",
+             aplicados, omitidos);
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_sendstr(req, json);
+}
+
+static esp_err_t iconos_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)iconos_html_start,
+                           iconos_html_end - iconos_html_start - 1);
+}
+
+/* GET /api/log?desde=N: the ring from offset N to the end, as text. The
+ * offsets travel in two headers so the page can ask only for what is new. The
+ * end is fixed before sending: the log keeps growing meanwhile and a chunked
+ * stream with a moving end never finishes. */
+static esp_err_t log_handler(httpd_req_t *req)
+{
+    char query[48] = "", v[24];
+    size_t desde = 0;
+    if (httpd_req_get_url_query_str(req, query, sizeof(query)) == ESP_OK &&
+        httpd_query_key_value(query, "desde", v, sizeof(v)) == ESP_OK) {
+        desde = (size_t)strtoul(v, NULL, 10);
+    }
+
+    size_t hasta = aos_log_total();
+    char trozo[512];
+    size_t inicio = desde;
+    size_t n = aos_log_read(desde, hasta, trozo, sizeof(trozo), &inicio);
+
+    char h[24];
+    snprintf(h, sizeof(h), "%u", (unsigned)inicio);
+    httpd_resp_set_hdr(req, "X-Desde", h);
+    char h2[24];
+    snprintf(h2, sizeof(h2), "%u", (unsigned)hasta);
+    httpd_resp_set_hdr(req, "X-Hasta", h2);
+    httpd_resp_set_hdr(req, "Cache-Control", "no-store");
+    httpd_resp_set_type(req, "text/plain; charset=utf-8");
+
+    esp_err_t r = ESP_OK;
+    size_t pos = inicio;
+    while (n > 0 && r == ESP_OK) {
+        r = httpd_resp_send_chunk(req, trozo, n);
+        pos += n;
+        if (pos >= hasta) break;
+        n = aos_log_read(pos, hasta, trozo, sizeof(trozo), NULL);
+    }
+    if (r != ESP_OK) {
+        return r;
+    }
+    return httpd_resp_send_chunk(req, NULL, 0);
+}
+
+static esp_err_t alarmas_page_handler(httpd_req_t *req)
+{
+    httpd_resp_set_type(req, "text/html; charset=utf-8");
+    return httpd_resp_send(req, (const char *)alarmas_html_start,
+                           alarmas_html_end - alarmas_html_start - 1);
+}
+
+/* GET /api/alarmas: the six slots. Empty ones come with minuto -1. */
+static esp_err_t alarmas_get_handler(httpd_req_t *req)
+{
+    char json[AOS_ALARM_MAX * 52 + 24];
+    int n = snprintf(json, sizeof(json), "{\"alarmas\":[");
+    for (int i = 0; i < AOS_ALARM_MAX; i++) {
+        int minuto = -1, dias = 0x7F; bool on = false;
+        aos_alarm_get(i, &minuto, &on, &dias);
+        n += snprintf(json + n, sizeof(json) - n,
+                      "%s{\"i\":%d,\"minuto\":%d,\"on\":%s,\"dias\":%d}",
+                      i ? "," : "", i, minuto, on ? "true" : "false", dias);
+    }
+    snprintf(json + n, sizeof(json) - n, "]}");
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_sendstr(req, json);
+}
+
+/* POST /api/alarmas: i=N&minuto=M&on=0|1&dias=MASK (tm_wday bits), or
+ * i=N&minuto=-1 to clear. */
+static esp_err_t alarmas_post_handler(httpd_req_t *req)
+{
+    char body[96];
+    if (!leer_cuerpo(req, body, sizeof(body))) {
+        return ESP_FAIL;
+    }
+    char v[16];
+    int i = -1, minuto = -1, on = 0, dias = 0x7F;
+    if (httpd_query_key_value(body, "i", v, sizeof(v)) == ESP_OK)      i = atoi(v);
+    if (httpd_query_key_value(body, "minuto", v, sizeof(v)) == ESP_OK) minuto = atoi(v);
+    if (httpd_query_key_value(body, "on", v, sizeof(v)) == ESP_OK)     on = atoi(v);
+    if (httpd_query_key_value(body, "dias", v, sizeof(v)) == ESP_OK)   dias = atoi(v);
+    bool ok = aos_alarm_set(i, minuto, on != 0, dias);
+    ESP_LOGI(TAG, "alarm %d from the portal: %d %s days=0x%02x -> %s", i, minuto,
+             on ? "on" : "off", dias & 0x7F, ok ? "ok" : "rejected");
+    if (!ok) {
+        httpd_resp_send_err(req, HTTPD_400_BAD_REQUEST, "alarma invalida");
+        return ESP_FAIL;
+    }
+    httpd_resp_set_type(req, "application/json");
+    return httpd_resp_sendstr(req, "{\"ok\":true}");
+}
+
+/* aos_mem.c: the RAM audit endpoint (branch ram-audit). */
+esp_err_t aos_mem_handler(httpd_req_t *req);
+esp_err_t aos_jpegbench_handler(httpd_req_t *req);
+esp_err_t aos_h264bench_handler(httpd_req_t *req);
+esp_err_t aos_imu_dump_handler(httpd_req_t *req);
+esp_err_t aos_link_handler(httpd_req_t *req);
+esp_err_t aos_player_handler(httpd_req_t *req);     /* aos_player_api.c */
+esp_err_t aos_radio_page_handler(httpd_req_t *req); /* aos_radio_api.c */
+esp_err_t aos_radio_get_handler(httpd_req_t *req);
+esp_err_t aos_radio_set_handler(httpd_req_t *req);
+
+static const httpd_uri_t ROUTES[] = {
+        { .uri = "/",            .method = HTTP_GET,  .handler = inicio_page_handler },
+        { .uri = "/archivos",    .method = HTTP_GET,  .handler = page_handler },
+        { .uri = "/ajustes",     .method = HTTP_GET,  .handler = ajustes_page_handler },
+        { .uri = "/api/ajustes", .method = HTTP_GET,  .handler = ajustes_get_handler },
+        { .uri = "/api/ajustes", .method = HTTP_POST, .handler = ajustes_post_handler },
+        { .uri = "/api/accion",  .method = HTTP_POST, .handler = accion_handler },
+        { .uri = "/api/apps",    .method = HTTP_GET,  .handler = apps_handler },
+        { .uri = "/pantalla",    .method = HTTP_GET,  .handler = pantalla_page_handler },
+        { .uri = "/registro",    .method = HTTP_GET,  .handler = registro_page_handler },
+        { .uri = "/api/log",     .method = HTTP_GET,  .handler = log_handler },
+        { .uri = "/alarmas",     .method = HTTP_GET,  .handler = alarmas_page_handler },
+        { .uri = "/api/alarmas", .method = HTTP_GET,  .handler = alarmas_get_handler },
+        { .uri = "/api/alarmas", .method = HTTP_POST, .handler = alarmas_post_handler },
+        { .uri = "/api/status",  .method = HTTP_GET,  .handler = status_handler },
+        { .uri = "/api/pmu",     .method = HTTP_GET,  .handler = pmu_handler },
+        { .uri = "/api/mem",     .method = HTTP_GET,  .handler = aos_mem_handler },
+        { .uri = "/api/jpegbench", .method = HTTP_GET, .handler = aos_jpegbench_handler },
+        { .uri = "/api/h264bench", .method = HTTP_GET, .handler = aos_h264bench_handler },
+        { .uri = "/api/imu",     .method = HTTP_GET,  .handler = aos_imu_dump_handler },
+        { .uri = "/api/link",    .method = HTTP_GET,  .handler = aos_link_handler },
+        { .uri = "/api/player",  .method = HTTP_GET,  .handler = aos_player_handler },
+        { .uri = "/api/usb",     .method = HTTP_GET,  .handler = usb_handler },
+        { .uri = "/usb",         .method = HTTP_GET,  .handler = usb_page_handler },
+        { .uri = "/api/coredump",.method = HTTP_GET,  .handler = coredump_handler },
+        { .uri = "/api/list",    .method = HTTP_GET,  .handler = list_handler },
+        { .uri = "/api/upload",  .method = HTTP_POST, .handler = upload_handler },
+        { .uri = "/api/ota",     .method = HTTP_POST, .handler = ota_handler },
+        { .uri = "/api/ota/restart", .method = HTTP_POST, .handler = ota_restart_handler },
+        { .uri = "/api/download",.method = HTTP_GET,  .handler = download_handler },
+        { .uri = "/api/delete",  .method = HTTP_POST, .handler = delete_handler },
+        { .uri = "/api/mkdir",   .method = HTTP_POST, .handler = mkdir_handler },
+        { .uri = "/wifi",        .method = HTTP_GET,  .handler = wifi_page_handler },
+        { .uri = "/api/scan",    .method = HTTP_GET,  .handler = scan_handler },
+        { .uri = "/api/wifi",    .method = HTTP_POST, .handler = wifi_set_handler },
+        { .uri = "/ap",          .method = HTTP_GET,  .handler = ap_page_handler },
+        { .uri = "/api/ap",      .method = HTTP_GET,  .handler = ap_get_handler },
+        { .uri = "/api/ap",      .method = HTTP_POST, .handler = ap_set_handler },
+        { .uri = "/api/ap/estado", .method = HTTP_POST, .handler = ap_estado_handler },
+        { .uri = "/aos.css",     .method = HTTP_GET,  .handler = css_handler },
+        { .uri = "/aos.js",      .method = HTTP_GET,  .handler = js_handler },
+        { .uri = "/aic.js",      .method = HTTP_GET,  .handler = aic_js_handler },
+        { .uri = "/glifos.js",   .method = HTTP_GET,  .handler = glifos_js_handler },
+        { .uri = "/menu",        .method = HTTP_GET,  .handler = menu_page_handler },
+        { .uri = "/red",         .method = HTTP_GET,  .handler = red_page_handler },
+        { .uri = "/api/lang",    .method = HTTP_GET,  .handler = lang_get_handler },
+        { .uri = "/api/lang",    .method = HTTP_POST, .handler = lang_set_handler },
+        { .uri = "/api/captura", .method = HTTP_GET, .handler = captura_handler },
+        { .uri = "/clima",       .method = HTTP_GET,  .handler = clima_page_handler },
+        { .uri = "/api/clima",   .method = HTTP_GET,  .handler = clima_get_handler },
+        { .uri = "/api/clima",   .method = HTTP_POST, .handler = clima_set_handler },
+        { .uri = "/pixel",       .method = HTTP_GET,  .handler = pixel_page_handler },
+        { .uri = "/3d",          .method = HTTP_GET,  .handler = modelos_page_handler },
+        { .uri = "/mapas",       .method = HTTP_GET,  .handler = mapas_page_handler },
+        { .uri = "/pato",        .method = HTTP_GET,  .handler = pato_page_handler },
+        { .uri = "/lua",         .method = HTTP_GET,  .handler = lua_page_handler },
+        { .uri = "/iconos",      .method = HTTP_GET,  .handler = iconos_page_handler },
+        { .uri = "/api/icons",   .method = HTTP_GET,  .handler = icons_handler },
+        { .uri = "/api/menu",    .method = HTTP_GET,  .handler = menu_get_handler },
+        { .uri = "/api/menu",    .method = HTTP_POST, .handler = menu_post_handler },
+        { .uri = "/api/respaldo", .method = HTTP_GET,  .handler = respaldo_get_handler },
+        { .uri = "/api/respaldo", .method = HTTP_POST, .handler = respaldo_post_handler },
+        { .uri = "/cotiz",       .method = HTTP_GET,  .handler = cotiz_page_handler },
+        { .uri = "/api/cotiz",   .method = HTTP_GET,  .handler = cotiz_get_handler },
+        { .uri = "/api/cotiz",   .method = HTTP_POST, .handler = cotiz_set_handler },
+        { .uri = "/camaras",     .method = HTTP_GET,  .handler = camaras_page_handler },
+        { .uri = "/api/camaras", .method = HTTP_GET,  .handler = camaras_get_handler },
+        { .uri = "/api/camaras", .method = HTTP_POST, .handler = camaras_set_handler },
+        { .uri = "/radio",       .method = HTTP_GET,  .handler = aos_radio_page_handler },
+        { .uri = "/api/radio",   .method = HTTP_GET,  .handler = aos_radio_get_handler },
+        { .uri = "/api/radio",   .method = HTTP_POST, .handler = aos_radio_set_handler },
+        { .uri = "/remoto",              .method = HTTP_GET,  .handler = remoto_page_handler },
+        { .uri = "/api/remoto/config",   .method = HTTP_GET,  .handler = remoto_config_get },
+        { .uri = "/api/remoto/config",   .method = HTTP_POST, .handler = remoto_config_post },
+        { .uri = "/api/remoto/perfil",   .method = HTTP_GET,  .handler = remoto_profile_get },
+        { .uri = "/api/remoto/perfil",   .method = HTTP_POST, .handler = remoto_profile_post },
+        { .uri = "/api/remoto/probar",   .method = HTTP_GET,  .handler = remoto_probe_handler },
+        { .uri = "/api/remoto/entidades",.method = HTTP_GET,  .handler = remoto_entities_handler },
+        { .uri = "/api/sensores",        .method = HTTP_GET,  .handler = sensores_handler },
+        { .uri = "/sensores",            .method = HTTP_GET,  .handler = sensores_page_handler },
+        { .uri = "/api/sensoresconf",    .method = HTTP_GET,  .handler = sensores_conf_get },
+        { .uri = "/api/sensoresconf",    .method = HTTP_POST, .handler = sensores_conf_post },
+};
+#define N_ROUTES ((uint16_t)(sizeof(ROUTES) / sizeof(ROUTES[0])))
+
+esp_err_t aos_web_start(void)
+{
+    if (s_server) {
+        return ESP_OK;
+    }
+
+    httpd_config_t config = HTTPD_DEFAULT_CONFIG();
+    /* From the size of the array, NOT from a hand-written number. It was at 24
+     * with a comment saying "21 routes + margin", and on adding the
+     * exchange-rate and sensor ones the array reached 26: for the last two
+     * httpd_register_uri_handler() returned an error and NOBODY looked at it,
+     * so the endpoints simply gave 404 without a line in the log. Tied to the
+     * array, adding a route cannot fail silently again. */
+    config.max_uri_handlers = N_ROUTES;
+    /* 8 KB and not 6: the /remoto handlers that query Home Assistant build the
+     * Authorization header (320 B) and the URL on the stack, on top of what
+     * the server already uses. An overflow here does not give a clean error,
+     * and it is 2 KB of internal RAM in a single task. */
+    config.stack_size = 8192;
+    config.lru_purge_enable = true;
+    config.uri_match_fn = httpd_uri_match_wildcard;
+
+    esp_err_t ret = httpd_start(&s_server, &config);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "the server did not start: %s", esp_err_to_name(ret));
+        return ret;
+    }
+
+    for (unsigned i = 0; i < N_ROUTES; i++) {
+        esp_err_t r = httpd_register_uri_handler(s_server, &ROUTES[i]);
+        if (r != ESP_OK) {
+            /* Should never happen, because max_uri_handlers comes from the
+             * size of the table. If it does, let it be seen. */
+            ESP_LOGE(TAG, "could not register %s: %s",
+                     ROUTES[i].uri, esp_err_to_name(r));
+        }
+    }
+
+    ESP_LOGI(TAG, "portal at http://%s/  (ajustes, pantalla, registro, archivos, wifi, ap, red, clima, cotiz, sensores, remoto, pixel)",
+             aos_hal_net_ap_active() ? aos_hal_net_ap_ip() : aos_hal_net_ip());
+    return ESP_OK;
+}
+
+void aos_web_stop(void)
+{
+    if (s_server) {
+        httpd_stop(s_server);
+        s_server = NULL;
+    }
+}
+
+bool aos_web_running(void)
+{
+    return s_server != NULL;
+}

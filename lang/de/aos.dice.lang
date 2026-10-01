@@ -1,0 +1,24 @@
+# amoledos-lang 1   es -> de
+# aos.dice.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/dados/main/dados.c:426
+1 dado	1 Würfel
+
+#: apps/dados/main/dados.c:428
+%d dados	%d Würfel
+
+#: apps/dados/main/dados.c:664
+TIRAR	WÜRFELN
+
+#: apps/dados/main/dados.c:679
+Últimas	Letzte
+
+#: apps/dados/main/dados.c:694
+Agitá la placa o tocá los dados	Platine schütteln oder Würfel antippen
+
+#: apps/dados/main/dados.c:695
+Tocá los dados para tirar	Würfel antippen zum Würfeln

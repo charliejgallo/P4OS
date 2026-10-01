@@ -1,0 +1,4 @@
+# p4bench cmd, 20260928-214244
+BENCH wifi.init ok=1 err=ESP_OK ms=2211
+BENCH hosted.fw ok=0 major=0 minor=0 patch=0
+BENCH wifi.up ok=1 ms=4685 ip=<board-ip> rssi=-25 channel=6 ax=1 n=1

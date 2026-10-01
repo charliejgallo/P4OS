@@ -1,0 +1,12 @@
+# amoledos-lang 1   es -> de
+# demo.hello.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/hello_app/main/hello_app.c:71
+Hola desde un .so	Hallo aus einem .so
+
+#: apps/hello_app/main/hello_app.c:82
+tocar para sumar	tippen zum Zählen

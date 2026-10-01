@@ -1,0 +1,1825 @@
+# amoledos-lang 1   es -> en
+# demo.chatarra.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/chatarra/main/ch_battle.c:127
+ATACAR	FIGHT
+
+#: apps/chatarra/main/ch_battle.c:127
+OBJETO	ITEM
+
+#: apps/chatarra/main/ch_battle.c:128
+CAMBIAR	SWAP
+
+#: apps/chatarra/main/ch_battle.c:128
+ANALIZAR	SCAN
+
+#: apps/chatarra/main/ch_battle.c:129
+HUIR	RUN
+
+#: apps/chatarra/main/ch_battle.c:226
+TE ATACA %s!	%s ATTACKS YOU!
+
+#: apps/chatarra/main/ch_battle.c:310
+%s USA %s	%s USES %s
+
+#: apps/chatarra/main/ch_battle.c:311
+#: apps/chatarra/main/ch_battle.c:318
+#: apps/chatarra/main/ch_battle.c:770
+EL RIVAL	RIVAL
+
+#: apps/chatarra/main/ch_battle.c:311
+#: apps/chatarra/main/ch_battle.c:318
+#: apps/chatarra/main/ch_battle.c:770
+TU ROBOT	YOUR BOT
+
+#: apps/chatarra/main/ch_battle.c:317
+%s ESTA	%s IS
+
+#: apps/chatarra/main/ch_battle.c:319
+EN CORTOCIRCUITO Y	SHORT CIRCUITED AND
+
+#: apps/chatarra/main/ch_battle.c:319
+NO PUEDE MOVERSE.	CANNOT MOVE.
+
+#: apps/chatarra/main/ch_battle.c:325
+PERO NO TIENE ENERGIA.	BUT HAS NO ENERGY.
+
+#: apps/chatarra/main/ch_battle.c:331
+PERO FALLA.	BUT IT MISSES.
+
+#: apps/chatarra/main/ch_battle.c:359
+CRITICO! %d DE DANO	CRITICAL! %d DAMAGE
+
+#: apps/chatarra/main/ch_battle.c:363
+MUY EFICAZ! %d DE DANO	SUPER EFFECTIVE! %d DMG
+
+#: apps/chatarra/main/ch_battle.c:364
+POCO EFICAZ. %d DE DANO	NOT VERY GOOD. %d DMG
+
+#: apps/chatarra/main/ch_battle.c:365
+%d DE DANO.	%d DAMAGE.
+
+#: apps/chatarra/main/ch_battle.c:375
+SE CURA %d.	IT HEALS %d.
+
+#: apps/chatarra/main/ch_battle.c:380
+Y OTRA VEZ: %d MAS.	AND AGAIN: %d MORE.
+
+#: apps/chatarra/main/ch_battle.c:389
+BAJA SU DEFENSA.	ITS DEFENSE DROPS.
+
+#: apps/chatarra/main/ch_battle.c:393
+BAJA SU ATAQUE.	ITS ATTACK DROPS.
+
+#: apps/chatarra/main/ch_battle.c:397
+SUBE SU ATAQUE.	ITS ATTACK RISES.
+
+#: apps/chatarra/main/ch_battle.c:401
+#: apps/chatarra/main/ch_battle.c:856
+SUBE SU DEFENSA.	ITS DEFENSE RISES.
+
+#: apps/chatarra/main/ch_battle.c:405
+QUEDA RECALENTADO.	IT OVERHEATS.
+
+#: apps/chatarra/main/ch_battle.c:409
+QUEDA EN CORTOCIRCUITO.	IT SHORT CIRCUITS.
+
+#: apps/chatarra/main/ch_battle.c:415
+ABSORBE %d DE VIDA.	DRAINS %d HP.
+
+#: apps/chatarra/main/ch_battle.c:420
+RECARGA LA BATERIA.	RECHARGES ITS BATTERY.
+
+#: apps/chatarra/main/ch_battle.c:426
+SE REPARA %d.	REPAIRS %d.
+
+#: apps/chatarra/main/ch_battle.c:517
+#: apps/chatarra/main/ch_battle.c:667
+#: apps/chatarra/main/ch_battle.c:679
+%s SE APAGO!	%s SHUT DOWN!
+
+#: apps/chatarra/main/ch_battle.c:519
+SACAN A %s!	THEY SEND %s!
+
+#: apps/chatarra/main/ch_battle.c:530
+GANAS %d EXP.	YOU GET %d EXP.
+
+#: apps/chatarra/main/ch_battle.c:533
+#: apps/chatarra/main/ch_battle.c:604
+GANASTE EL COMBATE!	YOU WON THE FIGHT!
+
+#: apps/chatarra/main/ch_battle.c:534
+SUBISTE DE NIVEL!	YOU LEVELLED UP!
+
+#: apps/chatarra/main/ch_battle.c:579
+TE DEJA: %s	IT DROPS: %s
+
+#: apps/chatarra/main/ch_battle.c:583
+GANAS %d EXP Y %d CRED.	YOU GET %d EXP, %d CR.
+
+#: apps/chatarra/main/ch_battle.c:587
+#: apps/chatarra/main/ch_ui.c:1884
+MOCHILA LLENA!	YOUR BAG IS FULL!
+
+#: apps/chatarra/main/ch_battle.c:589
+ARRANCAS: %s	YOU RIP OFF: %s
+
+#: apps/chatarra/main/ch_battle.c:592
+SUBISTE AL NIVEL %d!	YOU REACHED LEVEL %d!
+
+#: apps/chatarra/main/ch_battle.c:638
+TU EQUIPO SE APAGO.	YOUR TEAM SHUT DOWN.
+
+#: apps/chatarra/main/ch_battle.c:638
+GANARON ELLOS.	THEY WON.
+
+#: apps/chatarra/main/ch_battle.c:649
+PIERDES %d CREDITOS.	YOU LOSE %d CREDITS.
+
+#: apps/chatarra/main/ch_battle.c:650
+TU ROBOT SE APAGO...	YOUR ROBOT SHUT DOWN...
+
+#: apps/chatarra/main/ch_battle.c:650
+TE LLEVAN AL TALLER.	THEY CARRY YOU HOME.
+
+#: apps/chatarra/main/ch_battle.c:681
+SACA OTRO ROBOT.	SEND ANOTHER ROBOT.
+
+#: apps/chatarra/main/ch_battle.c:769
+%s SE RECALIENTA	%s OVERHEATS
+
+#: apps/chatarra/main/ch_battle.c:771
+Y PIERDE %d DE VIDA.	AND LOSES %d HP.
+
+#: apps/chatarra/main/ch_battle.c:807
+SALE %s!	OUT COMES %s!
+
+#: apps/chatarra/main/ch_battle.c:848
+SE REPARA SOLO!	IT REPAIRS ITSELF!
+
+#: apps/chatarra/main/ch_battle.c:849
+VUELVE A EMPEZAR.	BACK TO THE START.
+
+#: apps/chatarra/main/ch_battle.c:856
+SE BLINDA.	IT ARMOURS UP.
+
+#: apps/chatarra/main/ch_battle.c:915
+REPARA %d DE VIDA.	REPAIRS %d HP.
+
+#: apps/chatarra/main/ch_battle.c:923
+RECUPERA %d DE ENERGIA.	RECOVERS %d ENERGY.
+
+#: apps/chatarra/main/ch_battle.c:928
+LO USARAS AL GANAR.	IT WORKS WHEN YOU WIN.
+
+#: apps/chatarra/main/ch_battle.c:931
+NO PASA NADA.	NOTHING HAPPENS.
+
+#: apps/chatarra/main/ch_battle.c:941
+USAS %s	YOU USE %s
+
+#: apps/chatarra/main/ch_battle.c:955
+NO SE PUEDE HUIR	THERE IS NO RUNNING
+
+#: apps/chatarra/main/ch_battle.c:955
+DE UN COMBATE ASI.	FROM A FIGHT LIKE THIS.
+
+#: apps/chatarra/main/ch_battle.c:961
+TE ESCAPASTE.	YOU GOT AWAY.
+
+#: apps/chatarra/main/ch_battle.c:966
+NO PUDISTE ESCAPAR!	YOU COULD NOT ESCAPE!
+
+#: apps/chatarra/main/ch_battle.c:1061
+%s  NV %d	%s  LV %d
+
+#: apps/chatarra/main/ch_battle.c:1062
+TIPO %s   A%d D%d V%d	TYPE %s   A%d D%d S%d
+
+#: apps/chatarra/main/ch_battle.c:1149
+CAMBIAN DE ROBOT.	BOTH SWAP ROBOTS.
+
+#: apps/chatarra/main/ch_battle.c:1150
+NADIE ATACA ESTE TURNO.	NOBODY ATTACKS THIS TURN.
+
+#: apps/chatarra/main/ch_battle.c:1193
+#: apps/chatarra/main/ch_ui.c:344
+#: apps/chatarra/main/ch_ui.c:1273
+#: apps/chatarra/main/ch_ui.c:1736
+N%d	LV%d
+
+#: apps/chatarra/main/ch_battle.c:1666
+#: apps/chatarra/main/ch_ui.c:1804
+VOLVER	BACK
+
+#: apps/chatarra/main/ch_battle.c:1674
+#: apps/chatarra/main/ch_link.c:781
+ESPERANDO...	WAITING...
+
+#: apps/chatarra/main/ch_feria.c:140
+CINTA DE CHATARRA	THE SCRAP BELT
+
+#: apps/chatarra/main/ch_feria.c:170
+%d PIEZAS	%d PARTS
+
+#: apps/chatarra/main/ch_feria.c:172
++%d CREDITOS	+%d CREDITS
+
+#: apps/chatarra/main/ch_feria.c:174
+RECORD %d	BEST %d
+
+#: apps/chatarra/main/ch_feria.c:177
+TE GANASTE UNA PIEZA!	YOU WON A PART!
+
+#: apps/chatarra/main/ch_feria.c:180
+TE GANASTE UNA PIEZA	YOU WON A PART
+
+#: apps/chatarra/main/ch_feria.c:182
+PERO NO TENES LUGAR	BUT YOU HAVE NO ROOM
+
+#: apps/chatarra/main/ch_feria.c:185
+TOCA PARA SALIR	TAP TO LEAVE
+
+#: apps/chatarra/main/ch_feria.c:195
+PIEZAS %d	PARTS %d
+
+#: apps/chatarra/main/ch_link.c:279
+LA CABINA ESTA CERRADA:	THE BOOTH IS CLOSED:
+
+#: apps/chatarra/main/ch_link.c:279
+ESTE EQUIPO TODAVIA NO	THIS DEVICE DOESN'T HAVE
+
+#: apps/chatarra/main/ch_link.c:280
+TIENE ENLACE.	THE LINK YET.
+
+#: apps/chatarra/main/ch_link.c:289
+BUSCANDO EL OTRO EQUIPO...	FINDING THE OTHER DEVICE...
+
+#: apps/chatarra/main/ch_link.c:405
+#: apps/chatarra/main/ch_link.c:556
+BUEN COMBATE.	GOOD FIGHT.
+
+#: apps/chatarra/main/ch_link.c:405
+#: apps/chatarra/main/ch_link.c:556
+#: apps/chatarra/main/ch_map.c:752
+TU EQUIPO QUEDO COMO NUEVO.	YOUR TEAM IS AS GOOD AS NEW.
+
+#: apps/chatarra/main/ch_link.c:427
+#: apps/chatarra/main/ch_link.c:433
+CAMBIO HECHO!	SWAP DONE!
+
+#: apps/chatarra/main/ch_link.c:474
+EL OTRO EQUIPO TIENE	THE OTHER DEVICE HAS
+
+#: apps/chatarra/main/ch_link.c:474
+OTRA VERSION DEL JUEGO.	ANOTHER GAME VERSION.
+
+#: apps/chatarra/main/ch_link.c:483
+#: apps/chatarra/main/ch_link.c:487
+#: apps/chatarra/main/ch_link.c:888
+CONECTADO CON	CONNECTED TO
+
+#: apps/chatarra/main/ch_link.c:544
+LOS DOS COMBATES	THE TWO BATTLES
+
+#: apps/chatarra/main/ch_link.c:544
+SE DESINCRONIZARON.	FELL OUT OF STEP.
+
+#: apps/chatarra/main/ch_link.c:545
+SE CORTO LA PELEA.	THE FIGHT IS OFF.
+
+#: apps/chatarra/main/ch_link.c:572
+TE OFRECEN UN ROBOT:	THEY OFFER A ROBOT:
+
+#: apps/chatarra/main/ch_link.c:573
+#: apps/chatarra/main/ch_link.c:577
+ELEGI QUE DAS A CAMBIO.	PICK WHAT YOU GIVE.
+
+#: apps/chatarra/main/ch_link.c:575
+TE OFRECEN UNA PIEZA:	THEY OFFER A PART:
+
+#: apps/chatarra/main/ch_link.c:589
+COLGARON DEL OTRO LADO.	THEY HUNG UP.
+
+#: apps/chatarra/main/ch_link.c:614
+SE CORTO LA LLAMADA.	THE CALL DROPPED.
+
+#: apps/chatarra/main/ch_link.c:614
+EL OTRO NO CONTESTA.	NO ANSWER FROM THE OTHER.
+
+#: apps/chatarra/main/ch_link.c:650
+SE FUE DE CHATARRA.	LEFT CHATARRA.
+
+#: apps/chatarra/main/ch_link.c:658
+#: apps/chatarra/main/ch_link.c:691
+NO CONTESTAN.	NO ANSWER.
+
+#: apps/chatarra/main/ch_link.c:658
+SE CORTO LA ESPERA.	GAVE UP WAITING.
+
+#: apps/chatarra/main/ch_link.c:672
+#: apps/chatarra/main/ch_link.c:686
+LLAMANDO...	CALLING...
+
+#: apps/chatarra/main/ch_link.c:676
+NO HAY OTRO EQUIPO	NO OTHER DEVICE
+
+#: apps/chatarra/main/ch_link.c:677
+EMPAREJADO. EMPAREJALOS	PAIRED. PAIR THEM
+
+#: apps/chatarra/main/ch_link.c:677
+EN LA APP ENLACE.	IN THE LINK APP.
+
+#: apps/chatarra/main/ch_link.c:687
+NO ESTA EN CHATARRA.	NOT IN CHATARRA.
+
+#: apps/chatarra/main/ch_link.c:692
+QUE ABRAN CHATARRA Y	HAVE THEM OPEN CHATARRA
+
+#: apps/chatarra/main/ch_link.c:692
+ENTREN A UNA CABINA.	AND STEP INTO A BOOTH.
+
+#: apps/chatarra/main/ch_link.c:733
+CABINA	PHONE BOOTH
+
+#: apps/chatarra/main/ch_link.c:734
+SIN PAREJA	NO PARTNER
+
+#: apps/chatarra/main/ch_link.c:742
+SALIR	LEAVE
+
+#: apps/chatarra/main/ch_link.c:751
+COMBATIR	FIGHT
+
+#: apps/chatarra/main/ch_link.c:752
+ROBOT	ROBOT
+
+#: apps/chatarra/main/ch_link.c:753
+PIEZA	PART
+
+#: apps/chatarra/main/ch_link.c:754
+COLGAR	HANG UP
+
+#: apps/chatarra/main/ch_link.c:771
+%d-%d DE %d	%d-%d OF %d
+
+#: apps/chatarra/main/ch_link.c:782
+RETIRAR	TAKE IT BACK
+
+#: apps/chatarra/main/ch_link.c:823
+DESAFIO MANDADO.	CHALLENGE SENT.
+
+#: apps/chatarra/main/ch_link.c:823
+#: apps/chatarra/main/ch_link.c:859
+ESPERANDO AL OTRO EQUIPO.	WAITING FOR OTHER DEVICE.
+
+#: apps/chatarra/main/ch_link.c:828
+QUE ROBOT OFRECES?	WHICH ROBOT DO YOU GIVE?
+
+#: apps/chatarra/main/ch_link.c:829
+QUE PIEZA OFRECES?	WHICH PART DO YOU GIVE?
+
+#: apps/chatarra/main/ch_link.c:859
+OFERTA MANDADA.	OFFER SENT.
+
+#: apps/chatarra/main/ch_link.c:872
+RETIRADO.	TAKEN BACK.
+
+#: apps/chatarra/main/ch_map.c:690
+%s\nENCONTRASTE %s!	%s\nYOU FOUND %s!
+
+#: apps/chatarra/main/ch_map.c:738
+ENCONTRASTE %s!	YOU FOUND %s!
+
+#: apps/chatarra/main/ch_map.c:753
+TU ROBOT QUEDO COMO NUEVO.	YOUR ROBOT IS GOOD AS NEW.
+
+#: apps/chatarra/main/ch_parts.c:74
+IMPACTO	IMPACT
+
+#: apps/chatarra/main/ch_parts.c:74
+PLASMA	PLASMA
+
+#: apps/chatarra/main/ch_parts.c:74
+FUEGO	FIRE
+
+#: apps/chatarra/main/ch_parts.c:75
+CRIO	CRYO
+
+#: apps/chatarra/main/ch_parts.c:75
+VOLT	VOLT
+
+#: apps/chatarra/main/ch_parts.c:75
+ACIDO	ACID
+
+#: apps/chatarra/main/ch_parts.c:111
+Golpe	Punch
+
+#: apps/chatarra/main/ch_parts.c:114
+Martillazo	Hammer Blow
+
+#: apps/chatarra/main/ch_parts.c:115
+Embestida	Charge
+
+#: apps/chatarra/main/ch_parts.c:116
+Doble Puno	Double Fist
+
+#: apps/chatarra/main/ch_parts.c:117
+Aplastar	Crush
+
+#: apps/chatarra/main/ch_parts.c:118
+Barrido	Sweep
+
+#: apps/chatarra/main/ch_parts.c:119
+Pisoton	Stomp
+
+#: apps/chatarra/main/ch_parts.c:120
+Cabezazo	Headbutt
+
+#: apps/chatarra/main/ch_parts.c:123
+Rayo Plasma	Plasma Ray
+
+#: apps/chatarra/main/ch_parts.c:124
+Lanza Ionica	Ion Lance
+
+#: apps/chatarra/main/ch_parts.c:125
+Pulso	Pulse
+
+#: apps/chatarra/main/ch_parts.c:126
+Sobrecarga	Overload
+
+#: apps/chatarra/main/ch_parts.c:127
+Haz Guia	Guided Beam
+
+#: apps/chatarra/main/ch_parts.c:128
+Absorber Carga	Drain Charge
+
+#: apps/chatarra/main/ch_parts.c:131
+Lanzallamas	Flamethrower
+
+#: apps/chatarra/main/ch_parts.c:132
+Chispa Termica	Heat Spark
+
+#: apps/chatarra/main/ch_parts.c:133
+Fundicion	Meltdown
+
+#: apps/chatarra/main/ch_parts.c:134
+Soplete	Blowtorch
+
+#: apps/chatarra/main/ch_parts.c:135
+Horno	Furnace
+
+#: apps/chatarra/main/ch_parts.c:138
+Escarcha	Frost
+
+#: apps/chatarra/main/ch_parts.c:139
+Nitrogeno	Nitrogen
+
+#: apps/chatarra/main/ch_parts.c:140
+Congelador	Deep Freeze
+
+#: apps/chatarra/main/ch_parts.c:141
+Viento Polar	Polar Wind
+
+#: apps/chatarra/main/ch_parts.c:142
+Rocio Helado	Icy Mist
+
+#: apps/chatarra/main/ch_parts.c:145
+Descarga	Discharge
+
+#: apps/chatarra/main/ch_parts.c:146
+Chispazo	Zap
+
+#: apps/chatarra/main/ch_parts.c:147
+Tormenta	Storm
+
+#: apps/chatarra/main/ch_parts.c:148
+Electroiman	Electromagnet
+
+#: apps/chatarra/main/ch_parts.c:149
+Cortocircuito	Short Circuit
+
+#: apps/chatarra/main/ch_parts.c:152
+Salpicon	Splash
+
+#: apps/chatarra/main/ch_parts.c:153
+Corrosion	Corrosion
+
+#: apps/chatarra/main/ch_parts.c:154
+Bidon Acido	Acid Drum
+
+#: apps/chatarra/main/ch_parts.c:155
+Oxido	Rust
+
+#: apps/chatarra/main/ch_parts.c:156
+Parasito	Parasite
+
+#: apps/chatarra/main/ch_parts.c:157
+Vapor Toxico	Toxic Vapor
+
+#: apps/chatarra/main/ch_parts.c:160
+Diagnostico	Diagnostic
+
+#: apps/chatarra/main/ch_parts.c:161
+Blindaje	Armor Up
+
+#: apps/chatarra/main/ch_parts.c:162
+Recarga	Recharge
+
+#: apps/chatarra/main/ch_parts.c:163
+Autoreparar	Self Repair
+
+#: apps/chatarra/main/ch_parts.c:164
+Mira Laser	Laser Sight
+
+#: apps/chatarra/main/ch_parts.c:165
+Placa Extra	Extra Plate
+
+#: apps/chatarra/main/ch_parts.c:166
+Refrigerar	Cool Down
+
+#: apps/chatarra/main/ch_parts.c:167
+Turbo	Turbo
+
+#: apps/chatarra/main/ch_parts.c:168
+Purga	Purge
+
+#: apps/chatarra/main/ch_parts.c:178
+Aceite	Oil
+
+#: apps/chatarra/main/ch_parts.c:178
+Repara 40 de vida.	Repairs 40 HP.
+
+#: apps/chatarra/main/ch_parts.c:179
+Aceite Puro	Pure Oil
+
+#: apps/chatarra/main/ch_parts.c:179
+Repara 120 de vida.	Repairs 120 HP.
+
+#: apps/chatarra/main/ch_parts.c:180
+Bateria	Battery
+
+#: apps/chatarra/main/ch_parts.c:180
+Devuelve 30 de energia.	Restores 30 energy.
+
+#: apps/chatarra/main/ch_parts.c:181
+Bateria Densa	Dense Battery
+
+#: apps/chatarra/main/ch_parts.c:181
+Devuelve toda la energia.	Restores all energy.
+
+#: apps/chatarra/main/ch_parts.c:182
+Soldador	Welder
+
+#: apps/chatarra/main/ch_parts.c:182
+Revive con media vida.	Revives at half HP.
+
+#: apps/chatarra/main/ch_parts.c:183
+Chip de Datos	Data Chip
+
+#: apps/chatarra/main/ch_parts.c:183
+Suma 300 de experiencia.	Adds 300 experience.
+
+#: apps/chatarra/main/ch_parts.c:184
+Iman de Rescate	Salvage Magnet
+
+#: apps/chatarra/main/ch_parts.c:184
+Mas chance de arrancar una pieza.	Better odds of ripping a part.
+
+#: apps/chatarra/main/ch_parts.c:185
+Llave Oxidada	Rusty Key
+
+#: apps/chatarra/main/ch_parts.c:185
+Abre una puerta trabada.	Opens a jammed door.
+
+#: apps/chatarra/main/ch_parts.c:186
+Pase de Sector	Sector Pass
+
+#: apps/chatarra/main/ch_parts.c:186
+Permite cruzar un control.	Gets you past a checkpoint.
+
+#: apps/chatarra/main/ch_parts.c:194
+Caja de Tornillos	Box of Bolts
+
+#: apps/chatarra/main/ch_parts.c:194
+Alguien la esta buscando.	Someone is looking for it.
+
+#: apps/chatarra/main/ch_parts.c:195
+Ancla Oxidada	Rusty Anchor
+
+#: apps/chatarra/main/ch_parts.c:195
+Pesa como para hundir un barco.	Heavy enough to sink a boat.
+
+#: apps/chatarra/main/ch_parts.c:196
+Fusible Grueso	Heavy Fuse
+
+#: apps/chatarra/main/ch_parts.c:196
+Aguanta lo que le tires.	Takes whatever you throw at it.
+
+#: apps/chatarra/main/ch_parts.c:197
+Molde de Acero	Steel Mold
+
+#: apps/chatarra/main/ch_parts.c:197
+Sigue caliente.	Still warm.
+
+#: apps/chatarra/main/ch_parts.c:198
+Termo	Thermos
+
+#: apps/chatarra/main/ch_parts.c:198
+Todavia tiene agua caliente.	Still has hot water in it.
+
+#: apps/chatarra/main/ch_parts.c:199
+Clave Maestra	Master Key
+
+#: apps/chatarra/main/ch_parts.c:199
+Abre lo que no deberia.	Opens what it should not.
+
+#: apps/chatarra/main/ch_parts.c:200
+Engranaje Grande	Big Gear
+
+#: apps/chatarra/main/ch_parts.c:200
+De una maquina que ya no existe.	From a machine long gone.
+
+#: apps/chatarra/main/ch_parts.c:205
+Repelente	Repellent
+
+#: apps/chatarra/main/ch_parts.c:205
+200 pasos sin encuentros.	200 steps with no encounters.
+
+#: apps/chatarra/main/ch_parts.c:206
+#: apps/chatarra/main/ch_parts.c:303
+Orugas	Treads
+
+#: apps/chatarra/main/ch_parts.c:206
+Caminas al doble. Para siempre.	Walk twice as fast. For good.
+
+#: apps/chatarra/main/ch_parts.c:207
+Bolsa Grande	Big Bag
+
+#: apps/chatarra/main/ch_parts.c:207
++2 lugares en la mochila.	+2 slots in your bag.
+
+#: apps/chatarra/main/ch_parts.c:247
+Ojo Simple	Simple Eye
+
+#: apps/chatarra/main/ch_parts.c:248
+Visor	Visor
+
+#: apps/chatarra/main/ch_parts.c:249
+Casco	Helmet
+
+#: apps/chatarra/main/ch_parts.c:250
+Cupula	Dome
+
+#: apps/chatarra/main/ch_parts.c:251
+Antena	Antenna
+
+#: apps/chatarra/main/ch_parts.c:252
+Radar	Radar
+
+#: apps/chatarra/main/ch_parts.c:253
+Ciclope	Cyclops
+
+#: apps/chatarra/main/ch_parts.c:254
+Faro	Beacon
+
+#: apps/chatarra/main/ch_parts.c:255
+Craneo	Skull
+
+#: apps/chatarra/main/ch_parts.c:256
+Tri-Ojo	Tri-Eye
+
+#: apps/chatarra/main/ch_parts.c:257
+Yelmo	Great Helm
+
+#: apps/chatarra/main/ch_parts.c:258
+Sensor	Sensor
+
+#: apps/chatarra/main/ch_parts.c:259
+Farola	Lamphead
+
+#: apps/chatarra/main/ch_parts.c:260
+Mascara	Mask
+
+#: apps/chatarra/main/ch_parts.c:261
+Torreta	Turret
+
+#: apps/chatarra/main/ch_parts.c:262
+Nucleo	Core
+
+#: apps/chatarra/main/ch_parts.c:265
+Caja	Crate
+
+#: apps/chatarra/main/ch_parts.c:266
+Barril	Barrel
+
+#: apps/chatarra/main/ch_parts.c:267
+Coraza	Cuirass
+
+#: apps/chatarra/main/ch_parts.c:268
+Reactor	Reactor
+
+#: apps/chatarra/main/ch_parts.c:269
+Panel	Panel
+
+#: apps/chatarra/main/ch_parts.c:270
+Blindado	Armored
+
+#: apps/chatarra/main/ch_parts.c:271
+Cofre	Strongbox
+
+#: apps/chatarra/main/ch_parts.c:272
+Nucleo V	Core V
+
+#: apps/chatarra/main/ch_parts.c:273
+Chasis	Chassis
+
+#: apps/chatarra/main/ch_parts.c:274
+Fragua	Forge
+
+#: apps/chatarra/main/ch_parts.c:275
+Celda	Cell
+
+#: apps/chatarra/main/ch_parts.c:276
+Boveda	Vault
+
+#: apps/chatarra/main/ch_parts.c:277
+Turbina	Turbine
+
+#: apps/chatarra/main/ch_parts.c:278
+Placa Madre	Mainboard
+
+#: apps/chatarra/main/ch_parts.c:279
+Motor	Engine
+
+#: apps/chatarra/main/ch_parts.c:280
+Prisma	Prism
+
+#: apps/chatarra/main/ch_parts.c:283
+Garras	Claws
+
+#: apps/chatarra/main/ch_parts.c:284
+Pinzas	Pincers
+
+#: apps/chatarra/main/ch_parts.c:285
+Martillos	Hammers
+
+#: apps/chatarra/main/ch_parts.c:286
+Canones	Cannons
+
+#: apps/chatarra/main/ch_parts.c:287
+Muelles	Coils
+
+#: apps/chatarra/main/ch_parts.c:288
+Tenazas	Tongs
+
+#: apps/chatarra/main/ch_parts.c:289
+Sierras	Saws
+
+#: apps/chatarra/main/ch_parts.c:290
+Puas	Spikes
+
+#: apps/chatarra/main/ch_parts.c:291
+Guantes	Gauntlets
+
+#: apps/chatarra/main/ch_parts.c:292
+Taladros	Drills
+
+#: apps/chatarra/main/ch_parts.c:293
+Latigos	Whips
+
+#: apps/chatarra/main/ch_parts.c:294
+Escudos	Shields
+
+#: apps/chatarra/main/ch_parts.c:295
+Lanzas	Lances
+
+#: apps/chatarra/main/ch_parts.c:296
+Imanes	Magnets
+
+#: apps/chatarra/main/ch_parts.c:297
+Sopletes	Torches
+
+#: apps/chatarra/main/ch_parts.c:298
+Rotores	Rotors
+
+#: apps/chatarra/main/ch_parts.c:301
+Patas	Legs
+
+#: apps/chatarra/main/ch_parts.c:302
+Zancos	Stilts
+
+#: apps/chatarra/main/ch_parts.c:304
+Rueda	Wheel
+
+#: apps/chatarra/main/ch_parts.c:305
+Triciclo	Trike
+
+#: apps/chatarra/main/ch_parts.c:306
+Flotador	Hover
+
+#: apps/chatarra/main/ch_parts.c:307
+Aracnidas	Spider Legs
+
+#: apps/chatarra/main/ch_parts.c:308
+Resortes	Springs
+
+#: apps/chatarra/main/ch_parts.c:309
+Botas	Boots
+
+#: apps/chatarra/main/ch_parts.c:310
+Cadenas	Chains
+
+#: apps/chatarra/main/ch_parts.c:311
+Monociclo	Unicycle
+
+#: apps/chatarra/main/ch_parts.c:312
+Cuadrupedas	Quad Legs
+
+#: apps/chatarra/main/ch_parts.c:313
+Cohetes	Rockets
+
+#: apps/chatarra/main/ch_parts.c:314
+Garras Sup.	Grip Claws
+
+#: apps/chatarra/main/ch_parts.c:315
+Pistones	Pistons
+
+#: apps/chatarra/main/ch_parts.c:316
+Deslizador	Glider
+
+#: apps/chatarra/main/ch_parts.c:1436
+JUEGO PURO	FULL SET
+
+#: apps/chatarra/main/ch_parts.c:1437
+TRIO	TRIO
+
+#: apps/chatarra/main/ch_parts.c:1438
+DUO	PAIR
+
+#: apps/chatarra/main/ch_ui.c:280
+#: apps/chatarra/main/ch_ui.c:1012
+MENU	MENU
+
+#: apps/chatarra/main/ch_ui.c:280
+#: apps/chatarra/main/ch_ui.c:978
+#: apps/chatarra/main/ch_ui.c:2603
+#: apps/chatarra/main/ch_ui.c:2604
+MAPA	MAP
+
+#: apps/chatarra/main/ch_ui.c:324
+#: apps/chatarra/main/ch_ui.c:372
+#: apps/chatarra/main/ch_ui.c:2378
+%dC	%dC
+
+#: apps/chatarra/main/ch_ui.c:327
+#: apps/chatarra/main/ch_ui.c:354
+VID	HP
+
+#: apps/chatarra/main/ch_ui.c:332
+#: apps/chatarra/main/ch_ui.c:359
+ENE	EN
+
+#: apps/chatarra/main/ch_ui.c:339
+#: apps/chatarra/main/ch_ui.c:366
+EXP	EXP
+
+#: apps/chatarra/main/ch_ui.c:370
+%s  N%d	%s  L%d
+
+#: apps/chatarra/main/ch_ui.c:970
+#: apps/chatarra/main/ch_ui.c:1008
+LO TUYO	YOUR STUFF
+
+#: apps/chatarra/main/ch_ui.c:971
+#: apps/chatarra/main/ch_ui.c:1010
+EL JUEGO	THE GAME
+
+#: apps/chatarra/main/ch_ui.c:974
+#: apps/chatarra/main/ch_ui.c:1250
+#: apps/chatarra/main/ch_ui.c:1325
+#: apps/chatarra/main/ch_zonas.c:2805
+TALLER	WORKSHOP
+
+#: apps/chatarra/main/ch_ui.c:975
+#: apps/chatarra/main/ch_ui.c:1509
+OBJETOS	ITEMS
+
+#: apps/chatarra/main/ch_ui.c:976
+EQUIPO	TEAM
+
+#: apps/chatarra/main/ch_ui.c:977
+#: apps/chatarra/main/ch_ui.c:2047
+#: apps/chatarra/main/ch_ui.c:2049
+REGISTRO	RECORDS
+
+#: apps/chatarra/main/ch_ui.c:979
+#: apps/chatarra/main/ch_ui.c:2440
+#: apps/chatarra/main/ch_ui.c:2442
+DIARIO	DIARY
+
+#: apps/chatarra/main/ch_ui.c:982
+#: apps/chatarra/main/ch_ui.c:2499
+AYUDA	HELP
+
+#: apps/chatarra/main/ch_ui.c:983
+SONIDO	SOUND
+
+#: apps/chatarra/main/ch_ui.c:984
+DIFICULTAD	DIFFICULTY
+
+#: apps/chatarra/main/ch_ui.c:985
+GUARDAR	SAVE
+
+#: apps/chatarra/main/ch_ui.c:986
+CERRAR	CLOSE
+
+#: apps/chatarra/main/ch_ui.c:990
+NORMAL	NORMAL
+
+#: apps/chatarra/main/ch_ui.c:990
+FACIL	EASY
+
+#: apps/chatarra/main/ch_ui.c:990
+DURO	HARD
+
+#: apps/chatarra/main/ch_ui.c:993
+MUDO	OFF
+
+#: apps/chatarra/main/ch_ui.c:993
+EFECTOS	FX ONLY
+
+#: apps/chatarra/main/ch_ui.c:993
+TODO	ALL
+
+#: apps/chatarra/main/ch_ui.c:1050
+DESLIZA PARA VOLVER	SWIPE TO GO BACK
+
+#: apps/chatarra/main/ch_ui.c:1112
+CAB	HED
+
+#: apps/chatarra/main/ch_ui.c:1112
+TOR	TOR
+
+#: apps/chatarra/main/ch_ui.c:1113
+BRA	ARM
+
+#: apps/chatarra/main/ch_ui.c:1113
+PIE	LEG
+
+#: apps/chatarra/main/ch_ui.c:1244
+#: apps/chatarra/main/ch_ui.c:1710
+%s  %s +%d%%	%s  %s +%d%%
+
+#: apps/chatarra/main/ch_ui.c:1247
+TIPO %s	TYPE %s
+
+#: apps/chatarra/main/ch_ui.c:1310
+GANA COMBATES	WIN FIGHTS
+
+#: apps/chatarra/main/ch_ui.c:1312
+PARA PIEZAS	FOR PARTS
+
+#: apps/chatarra/main/ch_ui.c:1326
+TOCA 2 VECES	TAP TWICE
+
+#: apps/chatarra/main/ch_ui.c:1330
+NO TENES OTRA DE ESTE TIPO	NO OTHERS OF THIS KIND
+
+#: apps/chatarra/main/ch_ui.c:1343
+#: apps/chatarra/main/ch_ui.c:1343
+#: apps/chatarra/main/ch_ui.c:2381
+#: apps/chatarra/main/ch_ui.c:2382
+TOCA 2X	TAP 2X
+
+#: apps/chatarra/main/ch_ui.c:1353
+JUEGO %d>%d	SET %d>%d
+
+#: apps/chatarra/main/ch_ui.c:1381
+#: apps/chatarra/main/ch_ui.c:2376
+PV%d E%d	HP%d E%d
+
+#: apps/chatarra/main/ch_ui.c:1392
+#: apps/chatarra/main/ch_ui.c:1393
+PUESTA	FITTED
+
+#: apps/chatarra/main/ch_ui.c:1509
+TOCA UNO PARA USARLO	TAP ONE TO USE IT
+
+#: apps/chatarra/main/ch_ui.c:1516
+NO TENES NADA.	YOU HAVE NOTHING.
+
+#: apps/chatarra/main/ch_ui.c:1548
+NADA SE TE ACERCA	NOTHING COMES NEAR YOU
+
+#: apps/chatarra/main/ch_ui.c:1556
+AHORA CAMINAS AL DOBLE	YOU WALK TWICE AS FAST
+
+#: apps/chatarra/main/ch_ui.c:1564
+MOCHILA: %d LUGARES	BAG: %d SLOTS
+
+#: apps/chatarra/main/ch_ui.c:1575
++%d DE VIDA	+%d HP
+
+#: apps/chatarra/main/ch_ui.c:1584
++%d DE ENERGIA	+%d ENERGY
+
+#: apps/chatarra/main/ch_ui.c:1595
+#: apps/chatarra/main/ch_ui.c:2187
+NIVEL %d	LEVEL %d
+
+#: apps/chatarra/main/ch_ui.c:1713
+NIVEL %d   TIPO %s	LEVEL %d   TYPE %s
+
+#: apps/chatarra/main/ch_ui.c:1729
+VACIO	EMPTY
+
+#: apps/chatarra/main/ch_ui.c:1739
+SALE	OUT
+
+#: apps/chatarra/main/ch_ui.c:1739
+ROTO	DEAD
+
+#: apps/chatarra/main/ch_ui.c:1754
+NUMEROS	STATS
+
+#: apps/chatarra/main/ch_ui.c:1755
+GOLPES	MOVES
+
+#: apps/chatarra/main/ch_ui.c:1759
+VIDA	HP
+
+#: apps/chatarra/main/ch_ui.c:1759
+ENER	ENE
+
+#: apps/chatarra/main/ch_ui.c:1759
+ATAQ	ATK
+
+#: apps/chatarra/main/ch_ui.c:1760
+DEFE	DEF
+
+#: apps/chatarra/main/ch_ui.c:1760
+VELO	SPD
+
+#: apps/chatarra/main/ch_ui.c:1794
+%d/%dE	%d/%dE
+
+#: apps/chatarra/main/ch_ui.c:1803
+ARMAR OTRO	BUILD ONE
+
+#: apps/chatarra/main/ch_ui.c:1807
+QUE SALGA ESTE	SEND THIS ONE
+
+#: apps/chatarra/main/ch_ui.c:1808
+DESARMAR	STRIP IT
+
+#: apps/chatarra/main/ch_ui.c:1825
+#: apps/chatarra/main/ch_ui.c:1856
+ROBOT ARMADO!	ROBOT BUILT!
+
+#: apps/chatarra/main/ch_ui.c:1830
+#: apps/chatarra/main/ch_ui.c:1861
+FALTAN PIEZAS SUELTAS	NOT ENOUGH LOOSE PARTS
+
+#: apps/chatarra/main/ch_ui.c:1867
+ESTA ROTO: AL TALLER	DEAD: GO TO A WORKSHOP
+
+#: apps/chatarra/main/ch_ui.c:1872
+CAMBIASTE DE ROBOT	YOU SWAPPED ROBOTS
+
+#: apps/chatarra/main/ch_ui.c:1880
+PIEZAS A LA MOCHILA	PARTS GO TO THE BAG
+
+#: apps/chatarra/main/ch_ui.c:1923
+#: apps/chatarra/main/ch_ui.c:2347
+TENES %d CREDITOS	YOU HAVE %d CREDITS
+
+#: apps/chatarra/main/ch_ui.c:1924
+TIENDA	SHOP
+
+#: apps/chatarra/main/ch_ui.c:1931
+%dC x%d	%dC x%d
+
+#: apps/chatarra/main/ch_ui.c:1973
+NO TE ALCANZA	NOT ENOUGH CREDITS
+
+#: apps/chatarra/main/ch_ui.c:1979
+COMPRADO	BOUGHT
+
+#: apps/chatarra/main/ch_ui.c:2062
+SIN DATOS	NO DATA
+
+#: apps/chatarra/main/ch_ui.c:2066
+PV%d A%d D%d V%d E%d	HP%d A%d D%d S%d E%d
+
+#: apps/chatarra/main/ch_ui.c:2175
+#: apps/chatarra/main/ch_ui.c:2175
+CAMPEON	CHAMPION
+
+#: apps/chatarra/main/ch_ui.c:2188
+COMBATES %d	FIGHTS %d
+
+#: apps/chatarra/main/ch_ui.c:2189
+PIEZAS %d/%d	PARTS %d/%d
+
+#: apps/chatarra/main/ch_ui.c:2190
+PASOS %d	STEPS %d
+
+#: apps/chatarra/main/ch_ui.c:2202
+NI UNA PIEZA TE LA REGALARON	NOT ONE PART WAS A GIFT
+
+#: apps/chatarra/main/ch_ui.c:2217
+TU ROBOT SON CUATRO PIEZAS:\nCABEZA, TORSO, BRAZOS Y\nPIERNAS.\n\nCADA UNA APORTA VIDA,\nATAQUE, DEFENSA, VELOCIDAD\nY ENERGIA, Y TRAE SUS\nPROPIOS ATAQUES.\n\nEL TORSO ADEMAS DECIDE EL\nTIPO DE TU ROBOT.	YOUR ROBOT IS FOUR PARTS:\nHEAD, TORSO, ARMS AND\nLEGS.\n\nEACH ONE ADDS HP, ATTACK,\nDEFENSE, SPEED AND ENERGY,\nAND BRINGS ITS OWN\nATTACKS.\n\nTHE TORSO ALSO SETS YOUR\nROBOT TYPE.
+
+#: apps/chatarra/main/ch_ui.c:2228
+AL GANAR UN COMBATE PODES\nARRANCARLE UNA PIEZA AL\nRIVAL.\n\nVA A LA MOCHILA Y SE MONTA\nEN EL MENU, EN TALLER.\n\nLA QUE TENIAS PUESTA VUELVE\nA LA MOCHILA: NUNCA SE\nPIERDE NADA.	WHEN YOU WIN A FIGHT YOU\nCAN RIP A PART OFF THE\nLOSER.\n\nIT GOES IN YOUR BAG AND\nYOU FIT IT FROM THE MENU,\nIN WORKSHOP.\n\nTHE OLD PART GOES BACK IN\nTHE BAG: NOTHING IS LOST.
+
+#: apps/chatarra/main/ch_ui.c:2238
+HAY SEIS TIPOS Y SE GANAN\nENTRE ELLOS:\n\nIMPACTO > CRIO Y ACIDO\nPLASMA  > IMPACTO Y VOLT\nFUEGO   > CRIO Y ACIDO\nCRIO    > PLASMA Y VOLT\nVOLT    > FUEGO E IMPACTO\nACIDO   > VOLT Y PLASMA\n\nPEGAR CON TU PROPIO TIPO\nHACE MAS DANO.	SIX TYPES BEAT EACH OTHER:\n\nIMPACT > CRYO AND ACID\nPLASMA > IMPACT AND VOLT\nFIRE   > CRYO AND ACID\nCRYO   > PLASMA AND VOLT\nVOLT   > FIRE AND IMPACT\nACID   > VOLT AND PLASMA\n\nHITTING WITH YOUR OWN TYPE\nDOES MORE DAMAGE.
+
+#: apps/chatarra/main/ch_ui.c:2250
+CADA ZONA TIENE UN DUNGEON\nY UN SUBJEFE AL FONDO.\n\nVENCERLO TE DA UN PASE DE\nSECTOR, Y ESE PASE ABRE EL\nCONTROL DE LA ZONA QUE\nSIGUE.\n\nTOCA DONDE QUERES CAMINAR.\nEL BOTON MENU, O TOCAR TU\nROBOT, ABRE ESTE MENU.\nCON DOS DEDOS ACERCAS O\nALEJAS EL MAPA.	EACH ZONE HAS A DUNGEON\nAND A SUB-BOSS AT THE END.\n\nBEATING IT EARNS YOU A\nSECTOR PASS, AND THAT PASS\nOPENS THE CHECKPOINT TO\nTHE NEXT ZONE.\n\nTAP WHERE YOU WANT TO GO.\nTHE MENU BUTTON OR YOUR\nROBOT OPENS THIS MENU.\nUSE TWO FINGERS TO ZOOM\nTHE MAP IN AND OUT.
+
+#: apps/chatarra/main/ch_ui.c:2348
+CHATARRERO	SCRAP DEALER
+
+#: apps/chatarra/main/ch_ui.c:2351
+NO TENES PIEZAS SUELTAS	YOU HAVE NO SPARE PARTS
+
+#: apps/chatarra/main/ch_ui.c:2419
++%dC	+%dC
+
+#: apps/chatarra/main/ch_ui.c:2440
+LO QUE TE PIDIERON	WHAT YOU WERE ASKED FOR
+
+#: apps/chatarra/main/ch_ui.c:2446
+NADIE TE PIDIO NADA	NOBODY ASKED YOU FOR ANYTHING
+
+#: apps/chatarra/main/ch_ui.c:2471
+ENTREGADO	DELIVERED
+
+#: apps/chatarra/main/ch_ui.c:2473
+LO TENES: VOLVE	YOU HAVE IT: GO BACK
+
+#: apps/chatarra/main/ch_ui.c:2475
+TRAE: %s	BRING: %s
+
+#: apps/chatarra/main/ch_ui.c:2478
+PENDIENTE	PENDING
+
+#: apps/chatarra/main/ch_ui.c:2510
+TOCA PARA SEGUIR	TAP TO CONTINUE
+
+#: apps/chatarra/main/ch_ui.c:2570
+TODAVIA NO ESTUVISTE AHI	YOU HAVE NOT BEEN THERE YET
+
+#: apps/chatarra/main/ch_ui.c:2575
+YA ESTAS AHI	YOU ARE ALREADY THERE
+
+#: apps/chatarra/main/ch_ui.c:2579
+VIAJANDO...	TRAVELLING...
+
+#: apps/chatarra/main/ch_ui.c:2603
+TOCA PARA VIAJAR	TAP TO TRAVEL
+
+#: apps/chatarra/main/ch_ui.c:2636
+SIN EXPLORAR	UNEXPLORED
+
+#: apps/chatarra/main/ch_ui.c:2637
+ESTAS AQUI	YOU ARE HERE
+
+#: apps/chatarra/main/ch_ui.c:2638
+VENCIDA - VIAJAR	CLEARED - TRAVEL
+
+#: apps/chatarra/main/ch_ui.c:2639
+VIAJAR	TRAVEL
+
+#: apps/chatarra/main/ch_ui.c:2735
+RPG DE ROBOTS	A ROBOT RPG
+
+#: apps/chatarra/main/ch_ui.c:2741
+#: apps/chatarra/main/ch_ui.c:2742
+EMPEZAR	START
+
+#: apps/chatarra/main/ch_ui.c:2748
+TOCA DONDE QUERES CAMINAR	TAP WHERE YOU WANT TO GO
+
+#: apps/chatarra/main/ch_ui.c:2750
+DOS DEDOS: ACERCAR Y ALEJAR	TWO FINGERS: ZOOM IN/OUT
+
+#: apps/chatarra/main/ch_ui.c:2752
+EL BOTON MENU, O TU ROBOT	MENU BUTTON, OR YOUR ROBOT
+
+#: apps/chatarra/main/ch_ui.c:2905
+PARTIDA GUARDADA	GAME SAVED
+
+#: apps/chatarra/main/ch_zonas.c:233
+ABUELA TUERCA: BUEN DIA,\nDORMILON.\nTE ARME UN ROBOT CON LO\nQUE HABIA EN EL GALPON.\nNO ES GRAN COSA, PERO\nCAMINA Y PEGA.\nANDA AL TALLER Y TE\nEXPLICO COMO SE CAMBIAN\nLAS PIEZAS.	GRANNY COG: MORNING,\nSLEEPYHEAD.\nI BUILT YOU A ROBOT OUT\nOF WHAT WAS IN THE SHED.\nIT IS NOT MUCH, BUT IT\nWALKS AND IT HITS.\nCOME TO THE WORKSHOP AND\nI WILL SHOW YOU HOW TO\nSWAP PARTS.
+
+#: apps/chatarra/main/ch_zonas.c:244
+UNA FOTO VIEJA: TU\nABUELA JOVEN, AL LADO\nDE UN ROBOT ENORME.\nABAJO DICE:\nCAMPEONA, ANO 12.	AN OLD PHOTO: YOUR\nGRANDMOTHER, YOUNG, NEXT\nTO A HUGE ROBOT.\nBELOW IT SAYS:\nCHAMPION, YEAR 12.
+
+#: apps/chatarra/main/ch_zonas.c:250
+#: apps/chatarra/main/ch_zonas.c:518
+#: apps/chatarra/main/ch_zonas.c:1000
+#: apps/chatarra/main/ch_zonas.c:1248
+UNA ESTANTERIA DE\nREPUESTOS.\nTODO ETIQUETADO A MANO.	A SHELF OF SPARE PARTS.\nALL LABELLED BY HAND.
+
+#: apps/chatarra/main/ch_zonas.c:254
+#: apps/chatarra/main/ch_zonas.c:522
+#: apps/chatarra/main/ch_zonas.c:1004
+#: apps/chatarra/main/ch_zonas.c:1251
+UNA PLANTA EN UN RINCON.\nSOBREVIVE AL ACEITE.	A PLANT IN THE CORNER.\nIT SURVIVES THE OIL.
+
+#: apps/chatarra/main/ch_zonas.c:257
+#: apps/chatarra/main/ch_zonas.c:525
+#: apps/chatarra/main/ch_zonas.c:1007
+#: apps/chatarra/main/ch_zonas.c:1253
+UN PLANO DE UN ROBOT,\nCLAVADO A LA PARED.\nTIENE CORRECCIONES DE\nTRES LETRAS DISTINTAS.	A ROBOT BLUEPRINT PINNED\nTO THE WALL.\nIT HAS CORRECTIONS IN\nTHREE DIFFERENT HANDS.
+
+#: apps/chatarra/main/ch_zonas.c:263
+#: apps/chatarra/main/ch_zonas.c:531
+#: apps/chatarra/main/ch_zonas.c:1013
+#: apps/chatarra/main/ch_zonas.c:1258
+UNA VASIJA CON RETAZOS\nDE CHAPA.	A POT FULL OF SCRAPS OF\nSHEET METAL.
+
+#: apps/chatarra/main/ch_zonas.c:358
+VECINO: SE ME CAYERON\nLOS TORNILLOS EN EL\nDEPOSITO DEL DESGUACE.\nESTA AL NORTE, PASANDO\nEL SENDERO.\nSI ME LOS TRAES TE DOY\nALGO QUE TE VA A SERVIR.	NEIGHBOUR: I DROPPED MY\nSCREWS IN THE SCRAPYARD\nSTOREROOM.\nIT IS NORTH, PAST THE\nPATH.\nBRING THEM BACK AND I\nWILL GIVE YOU SOMETHING.
+
+#: apps/chatarra/main/ch_zonas.c:365
+VECINO: MIS TORNILLOS!\nTOMA, ESTE SOLDADOR ERA\nDE MI PADRE.	NEIGHBOUR: MY SCREWS!\nHERE, THIS IRON WAS MY\nFATHER'S.
+
+#: apps/chatarra/main/ch_zonas.c:369
+UN BANCO DE PLAZA.\nMIRA AL ESTANQUE.	A PARK BENCH.\nIT FACES THE POND.
+
+#: apps/chatarra/main/ch_zonas.c:373
+UNA MACETA DE LA VEREDA.\nALGUIEN LE PUSO UN\nCARTELITO: NO PISAR.	A PLANTER ON THE KERB.\nSOMEONE TAPED A NOTE TO\nIT: KEEP OFF.
+
+#: apps/chatarra/main/ch_zonas.c:377
+UN GATO NEGRO.\nTE MIRA, BOSTEZA, Y\nSIGUE EN LO SUYO.	A BLACK CAT.\nIT LOOKS AT YOU, YAWNS,\nAND GOES BACK TO ITS\nBUSINESS.
+
+#: apps/chatarra/main/ch_zonas.c:408
+MECANICO: EL TALLER ES\nDE LA ABUELA TUERCA.\nSI TE ROMPEN EL ROBOT,\nTE LO DEJA COMO NUEVO\nY NO TE COBRA.	MECHANIC: THE WORKSHOP\nIS GRANNY COG'S.\nIF THEY BREAK YOUR BOT\nSHE LEAVES IT LIKE NEW\nAND CHARGES NOTHING.
+
+#: apps/chatarra/main/ch_zonas.c:414
+UN BANCO GASTADO.\nACA ESPERAN LOS QUE\nDEJAN EL ROBOT EN EL\nTALLER.	A WORN BENCH.\nTHIS IS WHERE PEOPLE\nWAIT WHILE THE WORKSHOP\nHAS THEIR ROBOT.
+
+#: apps/chatarra/main/ch_zonas.c:420
+UN PAJARO PICOTEA\nTORNILLOS DEL PISO.\nNO PARECE UNA BUENA\nDIETA.	A BIRD IS PECKING SCREWS\nOFF THE GROUND.\nTHAT CANNOT BE A GOOD\nDIET.
+
+#: apps/chatarra/main/ch_zonas.c:438
+VILLA TUERCA\nPOBLACION: 34 PERSONAS\nY UNOS CUANTOS ROBOTS.	COGVILLE\nPOPULATION: 34 PEOPLE\nAND A FEW ROBOTS.
+
+#: apps/chatarra/main/ch_zonas.c:442
+CHICO: MI HERMANA DICE\nQUE EN EL DESGUACE HAY\nPIEZAS BUENISIMAS.\nYO NO ENTRARIA. HAY\nROBOTS SUELTOS.	KID: MY SISTER SAYS THE\nSCRAPYARD IS FULL OF\nGREAT PARTS.\nI WOULD NOT GO IN.\nTHERE ARE LOOSE ROBOTS.
+
+#: apps/chatarra/main/ch_zonas.c:448
+UN BANCO FRENTE A LA\nFUENTE.\nABAJO HAY ALGO.	A BENCH FACING THE\nFOUNTAIN.\nTHERE IS SOMETHING\nUNDERNEATH.
+
+#: apps/chatarra/main/ch_zonas.c:454
+OTRO GATO. O EL MISMO,\nQUE SE MUEVE MAS RAPIDO\nDE LO QUE PARECE.	ANOTHER CAT. OR THE SAME\nONE, WHICH MOVES FASTER\nTHAN IT LOOKS.
+
+#: apps/chatarra/main/ch_zonas.c:472
+UN BANCO AL LADO DE LA\nCABINA.\nPARA ESPERAR TURNO.	A BENCH BESIDE THE\nBOOTH.\nFOR WAITING YOUR TURN.
+
+#: apps/chatarra/main/ch_zonas.c:477
+UN PAJARO EN EL CANTERO.\nSE VA APENAS TE ACERCAS.	A BIRD IN THE FLOWERBED.\nIT LEAVES AS SOON AS YOU\nGET CLOSE.
+
+#: apps/chatarra/main/ch_zonas.c:480
+#: apps/chatarra/main/ch_zonas.c:968
+#: apps/chatarra/main/ch_zonas.c:2596
+#: apps/chatarra/main/ch_zonas.c:2636
+CHATARRERO: TRAEME LO\nQUE NO USES.\nTE LO PAGO POR LO QUE\nPESA, NO POR LO QUE FUE.	DEALER: BRING ME WHAT YOU\nDO NOT USE.\nI PAY BY THE WEIGHT, NOT\nBY WHAT IT ONCE WAS.
+
+#: apps/chatarra/main/ch_zonas.c:494
+EL BANCO DE TRABAJO DE\nLA ABUELA.\nTU ROBOT QUEDA COMO\nNUEVO.	GRANNY'S WORKBENCH.\nYOUR ROBOT COMES OUT\nGOOD AS NEW.
+
+#: apps/chatarra/main/ch_zonas.c:499
+ABUELA TUERCA: TENGO\nACEITE, BATERIAS Y\nALGUNA COSA MAS.\nMIRA TRANQUILO.	GRANNY COG: I HAVE OIL,\nBATTERIES AND A FEW\nOTHER THINGS.\nTAKE YOUR TIME.
+
+#: apps/chatarra/main/ch_zonas.c:504
+ABUELA TUERCA: UN ROBOT\nSON CUATRO PIEZAS:\nCABEZA, TORSO, BRAZOS\nY PIERNAS.\nCADA UNA CAMBIA LAS\nESTADISTICAS Y TRAE SUS\nPROPIOS ATAQUES.\nCUANDO GANES UN COMBATE\nA VECES PODES ARRANCARLE\nUNA PIEZA AL RIVAL.\nESAS VAN A LA MOCHILA\nY SE MONTAN DESDE EL\nMENU, EN TALLER.	GRANNY COG: A ROBOT IS\nFOUR PARTS: HEAD, TORSO,\nARMS AND LEGS.\nEACH ONE CHANGES THE\nSTATS AND BRINGS ITS OWN\nATTACKS.\nWHEN YOU WIN A FIGHT YOU\nCAN SOMETIMES RIP A PART\nOFF THE LOSER.\nTHOSE GO IN YOUR BAG AND\nYOU FIT THEM FROM THE\nMENU, IN WORKSHOP.
+
+#: apps/chatarra/main/ch_zonas.c:559
+UN CUADRO DE UN LAGO.\nLA FIRMA DICE: TUERCA,\nANO 9.	A PAINTING OF A LAKE.\nSIGNED: COG, YEAR 9.
+
+#: apps/chatarra/main/ch_zonas.c:563
+LA FOTO DE UN ROBOT\nVIEJO, CON UNA MEDALLA.\nATRAS ALGUIEN ESCRIBIO:\nSIEMPRE VOLVIA.	A PHOTO OF AN OLD ROBOT\nWEARING A MEDAL.\nON THE BACK SOMEONE\nWROTE: HE ALWAYS CAME\nBACK.
+
+#: apps/chatarra/main/ch_zonas.c:568
+UNA BIBLIOTECA LLENA DE\nMANUALES.\nATRAS DE UN TOMO HAY\nALGO GUARDADO.	A BOOKCASE FULL OF\nMANUALS.\nSOMETHING IS TUCKED\nBEHIND ONE VOLUME.
+
+#: apps/chatarra/main/ch_zonas.c:573
+UNA TERMINAL VIEJA.\nEN LA PANTALLA PARPADEA\nUNA PARTIDA DE AJEDREZ\nSIN TERMINAR.	AN OLD TERMINAL.\nAN UNFINISHED GAME OF\nCHESS BLINKS ON THE\nSCREEN.
+
+#: apps/chatarra/main/ch_zonas.c:578
+UNA VASIJA DE BARRO.\nADENTRO HAY TORNILLOS\nDE TODAS LAS MEDIDAS.	A CLAY POT.\nINSIDE ARE SCREWS OF\nEVERY SIZE.
+
+#: apps/chatarra/main/ch_zonas.c:582
+LA MESA, PUESTA PARA\nDOS.\nHACE RATO QUE ESPERA.	THE TABLE, LAID FOR TWO.\nIT HAS BEEN WAITING A\nWHILE.
+
+#: apps/chatarra/main/ch_zonas.c:588
+LA CAMA, TENDIDA.\nMEJOR NO.	THE BED, MADE UP.\nBETTER NOT.
+
+#: apps/chatarra/main/ch_zonas.c:591
+UNA PLANTA DE INTERIOR.\nALGUIEN LA RIEGA TODOS\nLOS DIAS.	A HOUSE PLANT.\nSOMEONE WATERS IT EVERY\nDAY.
+
+#: apps/chatarra/main/ch_zonas.c:632
+UN CONTROL BAJADO.\nCARTEL: PROHIBIDO PASAR AL\nESTE SIN PASE DE SECTOR.\nEL PASE LO DA EL GUARDIAN\nDEL DESGUACE.	A LOWERED BARRIER.\nSIGN: NO PASSAGE EAST\nWITHOUT A SECTOR PASS.\nTHE PASS COMES FROM THE\nSCRAPYARD WARDEN.
+
+#: apps/chatarra/main/ch_zonas.c:637
+EL CONTROL ESTA LEVANTADO.\nAL ESTE: PUERTO BUJIA.	THE BARRIER IS UP.\nEAST: PORT SPARKPLUG.
+
+#: apps/chatarra/main/ch_zonas.c:640
+UN CONTROL BAJADO.\nAL ESTE NO SE PASA SIN\nPASE DE SECTOR.	A LOWERED CHECKPOINT.\nNO PASSAGE EAST WITHOUT\nA SECTOR PASS.
+
+#: apps/chatarra/main/ch_zonas.c:643
+EL CONTROL ESTA LEVANTADO.	THE CHECKPOINT IS UP.
+
+#: apps/chatarra/main/ch_zonas.c:645
+SENDERO NORTE\nAL DESGUACE.\nCUIDADO: HAY ROBOTS\nSUELTOS ENTRE LOS\nYUYOS.	NORTH PATH\nTO THE SCRAPYARD.\nCAREFUL: THERE ARE LOOSE\nROBOTS IN THE WEEDS.
+
+#: apps/chatarra/main/ch_zonas.c:686
+UN CARTEL TORCIDO:\nDESGUACE MUNICIPAL\nNO ALIMENTE A LOS\nROBOTS.	A CROOKED SIGN:\nMUNICIPAL SCRAPYARD\nDO NOT FEED THE ROBOTS.
+
+#: apps/chatarra/main/ch_zonas.c:790
+GUARDIAN DEL DESGUACE:\nALTO AHI.\nNADIE SE LLEVA CHATARRA\nDE ACA SIN PASAR POR\nENCIMA MIO.\nA VER QUE TRAJISTE.	SCRAPYARD WARDEN:\nHOLD IT RIGHT THERE.\nNOBODY TAKES SCRAP OUT\nOF HERE WITHOUT GOING\nTHROUGH ME.\nLET US SEE WHAT YOU HAVE.
+
+#: apps/chatarra/main/ch_zonas.c:834
+PLAYA DEL CANGREJO.\nNO SE PERMITE OXIDARSE\nEN LA ARENA.	CRAB BEACH.\nNO RUSTING ALLOWED\nON THE SAND.
+
+#: apps/chatarra/main/ch_zonas.c:874
+PUERTO BUJIA\nAQUI SE DESCARGA TODO LO\nQUE SE OXIDA DESPUES.\nAL NORTE: LA BODEGA.	PORT SPARKPLUG\nEVERYTHING THAT RUSTS\nLATER IS UNLOADED HERE.\nNORTH: THE HOLD.
+
+#: apps/chatarra/main/ch_zonas.c:879
+CHICO: EN LA BODEGA HAY\nAGUA HASTA LAS RODILLAS\nY ROBOTS QUE NO SALEN\nNUNCA DE AHI.	KID: THE HOLD IS FLOODED\nKNEE DEEP, AND THERE ARE\nROBOTS DOWN THERE THAT\nNEVER COME OUT.
+
+#: apps/chatarra/main/ch_zonas.c:929
+CONTROL DEL PUERTO.\nAL ESTE SUBE LA CUESTA\nHACIA ALTO VOLTIO.\nNO SE PASA SIN PASE.	PORT CHECKPOINT.\nEAST THE ROAD CLIMBS UP\nTO HIGH VOLT.\nNO PASS, NO PASSAGE.
+
+#: apps/chatarra/main/ch_zonas.c:933
+EL CONTROL ESTA ABIERTO.\nAL ESTE: LA CUESTA.	THE CHECKPOINT IS OPEN.\nEAST: THE CLIMB.
+
+#: apps/chatarra/main/ch_zonas.c:936
+#: apps/chatarra/main/ch_zonas.c:940
+CONTROL DEL PUERTO.\nAL ESTE SUBE LA CUESTA.	HARBOUR CHECKPOINT.\nEAST THE SLOPE GOES UP.
+
+#: apps/chatarra/main/ch_zonas.c:938
+#: apps/chatarra/main/ch_zonas.c:942
+EL CONTROL ESTA ABIERTO.	THE CHECKPOINT IS OPEN.
+
+#: apps/chatarra/main/ch_zonas.c:944
+PESCADORA: EL AGUA SALADA\nSE COME LOS CIRCUITOS.\nPOR ESO ACA TODO PEGA\nCON ACIDO.	FISHERWOMAN: SALT WATER\nEATS CIRCUITS ALIVE.\nTHAT IS WHY EVERYTHING\nHERE HITS WITH ACID.
+
+#: apps/chatarra/main/ch_zonas.c:949
+CAPITAN: PERDI EL ANCLA\nDE MI BARCO EN LA BODEGA.\nTRAEMELA Y TE DOY LA\nMEJOR BATERIA QUE TENGO.	CAPTAIN: I LOST MY\nANCHOR IN THE HOLD.\nBRING IT BACK AND I WILL\nGIVE YOU THE BEST\nBATTERY I HAVE.
+
+#: apps/chatarra/main/ch_zonas.c:953
+CAPITAN: EL ANCLA! AHORA\nSI PUEDO SALIR A PESCAR.\nTOMA, TE LA GANASTE.	CAPTAIN: THE ANCHOR!\nNOW I CAN GO OUT AND\nFISH AGAIN.\nHERE, YOU EARNED IT.
+
+#: apps/chatarra/main/ch_zonas.c:961
+FERIANTE: PASA, PASA.\nLA CINTA TRAE CHATARRA\nDE TODO EL PUERTO.\nAGARRA LAS VERDES Y\nDEJA PASAR LAS OXIDADAS.\nTE PAGO POR PIEZA.	BARKER: STEP UP, STEP UP.\nTHE BELT BRINGS SCRAP FROM\nALL OVER THE HARBOUR.\nGRAB THE GREEN ONES AND\nLET THE RUSTY ONES PASS.\nI PAY BY THE PART.
+
+#: apps/chatarra/main/ch_zonas.c:982
+EL BANCO DEL PUERTO.\nHUELE A SALITRE PERO\nDEJA EL ROBOT COMO NUEVO.	THE PORT WORKBENCH.\nSMELLS OF SALT BUT\nLEAVES A ROBOT LIKE NEW.
+
+#: apps/chatarra/main/ch_zonas.c:986
+MECANICO: TENGO DE TODO,\nY TODO UN POCO OXIDADO.\nMIRA TRANQUILO.	MECHANIC: I HAVE A BIT\nOF EVERYTHING, AND ALL\nOF IT SLIGHTLY RUSTED.\nTAKE YOUR TIME.
+
+#: apps/chatarra/main/ch_zonas.c:990
+ABUELA TUERCA: TE SEGUI\nHASTA ACA PARA DECIRTE\nUNA COSA.\nEL TIPO DEL TORSO MANDA:\nSI PEGAS CON TU PROPIO\nTIPO, HACES MAS DANO.\nACA TODOS PEGAN CON\nACIDO. LLEVA ALGO QUE\nRESISTA.	GRANNY COG: I FOLLOWED\nYOU ALL THE WAY HERE TO\nTELL YOU ONE THING.\nTHE TORSO SETS YOUR TYPE:\nHIT WITH YOUR OWN TYPE\nAND YOU HIT HARDER.\nEVERYTHING HERE HITS\nWITH ACID. BRING\nSOMETHING THAT HOLDS UP.
+
+#: apps/chatarra/main/ch_zonas.c:1047
+BODEGA MUNICIPAL\nNIVEL DEL AGUA: ALTO.\nNO RESPONDEMOS POR\nCIRCUITOS MOJADOS.	MUNICIPAL HOLD\nWATER LEVEL: HIGH.\nNOT RESPONSIBLE FOR WET\nCIRCUITS.
+
+#: apps/chatarra/main/ch_zonas.c:1110
+CAPATAZ DE LA BODEGA:\nASI QUE VOS SOS EL QUE\nANDA LEVANTANDO PIEZAS.\nACA ABAJO TODO SE OXIDA,\nPIBE. TAMBIEN VOS.	HOLD FOREMAN:\nSO YOU ARE THE ONE GOING\nAROUND PICKING UP PARTS.\nDOWN HERE EVERYTHING\nRUSTS, KID. YOU TOO.
+
+#: apps/chatarra/main/ch_zonas.c:1151
+LA CUESTA.\nARRIBA: ALTO VOLTIO.\nNO TOQUE LOS CABLES\nCON LAS MANOS.	THE CLIMB.\nUP TOP: HIGH VOLT.\nDO NOT TOUCH THE CABLES\nWITH YOUR HANDS.
+
+#: apps/chatarra/main/ch_zonas.c:1190
+ALTO VOLTIO\nALTURA: 900 METROS\nCONSUMO: TODO EL QUE\nHAGA FALTA.	HIGH VOLT\nALTITUDE: 900 METRES\nCONSUMPTION: WHATEVER IT\nTAKES.
+
+#: apps/chatarra/main/ch_zonas.c:1194
+CHICO: SI TOCAS UN CABLE\nPELADO se te frien los\nCIRCUITOS.\nA MI HERMANO LE PASO.	KID: TOUCH A BARE CABLE\nand your circuits fry.\nIT HAPPENED TO MY\nBROTHER.
+
+#: apps/chatarra/main/ch_zonas.c:1198
+SENORA: LA SUBESTACION\nSE LLENO DE ROBOTS Y\nNADIE PUEDE ENTRAR.\nSIN ELLA NO HAY LUZ.	LADY: THE SUBSTATION IS\nFULL OF ROBOTS AND\nNOBODY CAN GET IN.\nWITHOUT IT THERE IS NO\nPOWER.
+
+#: apps/chatarra/main/ch_zonas.c:1202
+TECNICO: NECESITO UN\nFUSIBLE GRUESO DE LOS\nQUE HAY EN LA SUBESTACION.\nSI ME LO TRAES TE DOY\nUN CHIP DE DATOS.	TECHNICIAN: I NEED A\nHEAVY FUSE, THE KIND\nTHEY KEEP IN THE\nSUBSTATION.\nBRING ME ONE AND THE\nDATA CHIP IS YOURS.
+
+#: apps/chatarra/main/ch_zonas.c:1206
+TECNICO: EL FUSIBLE!\nAHORA SI PUEDO ARREGLAR\nEL TABLERO. TOMA.	TECHNICIAN: THE FUSE!\nNOW I CAN FIX THE PANEL.\nHERE YOU GO.
+
+#: apps/chatarra/main/ch_zonas.c:1235
+EL BANCO DE ALTO VOLTIO.\nAca la corriente sobra.	THE HIGH VOLT BENCH.\nPower is the one thing\nthis town has to spare.
+
+#: apps/chatarra/main/ch_zonas.c:1237
+TENDERA: BATERIAS,\nACEITE Y LO DE SIEMPRE.\nTODO CON GARANTIA DE\nTRES DIAS.	SHOPKEEPER: BATTERIES,\nOIL AND THE USUAL.\nALL WITH A THREE DAY\nWARRANTY.
+
+#: apps/chatarra/main/ch_zonas.c:1241
+ABUELA TUERCA: PRESTA\nATENCION A LA VELOCIDAD.\nEL QUE PEGA PRIMERO PEGA\nDOS VECES, PORQUE EL OTRO\nPUEDE NO LLEGAR A PEGAR.\nUNAS PIERNAS BUENAS VALEN\nMAS QUE UN BRAZO CARO.	GRANNY COG: PAY\nATTENTION TO SPEED.\nWHOEVER HITS FIRST HITS\nTWICE, BECAUSE THE OTHER\nONE MAY NEVER GET TO HIT.\nGOOD LEGS ARE WORTH MORE\nTHAN AN EXPENSIVE ARM.
+
+#: apps/chatarra/main/ch_zonas.c:1291
+TABLERO GENERAL.\nNO OPERAR SIN GUANTES.\n(ALGUIEN TACHO LO DE\nLOS GUANTES.)	MAIN PANEL.\nDO NOT OPERATE WITHOUT\nGLOVES.\n(SOMEBODY CROSSED OUT\nTHE PART ABOUT GLOVES.)
+
+#: apps/chatarra/main/ch_zonas.c:1351
+INGENIERA JEFA:\nASI QUE VENIS A ARREGLAR\nLA SUBESTACION.\nPRIMERO ARREGLA ESTO:\nMI ROBOT CONTRA EL TUYO.	CHIEF ENGINEER:\nSO YOU CAME TO FIX THE\nSUBSTATION.\nFIX THIS FIRST:\nMY ROBOT AGAINST YOURS.
+
+#: apps/chatarra/main/ch_zonas.c:1390
+VALLE DEL HUMO.\nNO SE DETENGA.\nEL AIRE NO ES BUENO\nPARA NADIE.	SMOKE VALLEY.\nDO NOT STOP.\nTHE AIR IS NOT GOOD FOR\nANYONE.
+
+#: apps/chatarra/main/ch_zonas.c:1429
+FUNDICION\nAQUI SE FUNDE TODO LO\nQUE EL PUERTO OXIDA.\nAL NORTE: EL HORNO.	FOUNDRY\nEVERYTHING THE PORT\nRUSTS GETS MELTED HERE.\nNORTH: THE FURNACE.
+
+#: apps/chatarra/main/ch_zonas.c:1433
+FUNDIDOR: EL METAL\nCALIENTE NO PERDONA.\nSI TU ROBOT ES DE HIELO,\nACA LA VAS A PASAR MAL.	SMELTER: HOT METAL DOES\nNOT FORGIVE.\nIF YOUR ROBOT IS MADE OF\nICE, YOU WILL SUFFER.
+
+#: apps/chatarra/main/ch_zonas.c:1437
+CHICA: DICEN QUE EN EL\nHORNO VIVE UN ROBOT\nHECHO DE LAVA.\nYO NO LO VI, EH.	GIRL: THEY SAY A ROBOT\nMADE OF LAVA LIVES IN\nTHE FURNACE.\nI HAVE NOT SEEN IT.
+
+#: apps/chatarra/main/ch_zonas.c:1441
+MOLDEADORA: SE ME QUEDO\nUN MOLDE ADENTRO DEL\nHORNO Y NO PIENSO IR.\nTRAEMELO Y ARREGLAMOS.	MOLD MAKER: I LEFT A\nMOLD INSIDE THE FURNACE\nAND I AM NOT GOING BACK.\nBRING IT AND WE TALK.
+
+#: apps/chatarra/main/ch_zonas.c:1444
+MOLDEADORA: EL MOLDE!\nSOS DE FIERRO, PIBE.\nTOMA ESTO PARA EL CAMINO.	MOLD MAKER: THE MOLD!\nYOU ARE MADE OF IRON.\nTAKE THIS FOR THE ROAD.
+
+#: apps/chatarra/main/ch_zonas.c:1473
+EL BANCO DE LA FUNDICION.\nSe suelda todo de una.	THE FOUNDRY BENCH.\nWelds anything in one go.
+
+#: apps/chatarra/main/ch_zonas.c:1475
+HERRERO: LO QUE NECESITES\nPARA AGUANTAR EL CALOR.	BLACKSMITH: WHATEVER YOU\nNEED TO SURVIVE THE HEAT.
+
+#: apps/chatarra/main/ch_zonas.c:1477
+ABUELA TUERCA: ACORDATE\nDE MIRAR LOS TIPOS.\nEL FUEGO DERRITE EL HIELO\nY CORROE EL ACIDO, PERO\nCONTRA EL VOLT NO HACE\nNADA.\nMIRA LA FICHA ANTES DE\nPEGAR.	GRANNY COG: REMEMBER TO\nCHECK THE TYPES.\nFIRE MELTS ICE AND EATS\nACID, BUT AGAINST VOLT\nIT DOES NOTHING.\nREAD THE SHEET BEFORE YOU\nSWING.
+
+#: apps/chatarra/main/ch_zonas.c:1582
+MAESTRO FUNDIDOR:\nTREINTA ANOS METIENDO\nCHATARRA EN ESE HORNO.\nSE CUANDO UNA PIEZA\nSIRVE Y CUANDO NO.\nLA TUYA TODAVIA NO SE.	MASTER SMELTER:\nTHIRTY YEARS THROWING\nSCRAP IN THAT FURNACE.\nI KNOW WHEN A PART IS\nWORTH SOMETHING.\nYOURS I AM NOT SURE YET.
+
+#: apps/chatarra/main/ch_zonas.c:1624
+PASO HELADO.\nSI SE LE CONGELAN LOS\nSERVOS, NO INSISTA.\nESPERE AL DESHIELO.	FROZEN PASS.\nIF YOUR SERVOS FREEZE UP,\nDO NOT PUSH IT.\nWAIT FOR THE THAW.
+
+#: apps/chatarra/main/ch_zonas.c:1663
+CRIOVALLE\nTEMPERATURA MEDIA: -12.\nLOS CIRCUITOS DURAN MAS\nPERO LAS BATERIAS MENOS.	CRYOVALE\nAVERAGE TEMPERATURE: -12.\nCIRCUITS LAST LONGER\nBUT BATTERIES DO NOT.
+
+#: apps/chatarra/main/ch_zonas.c:1667
+CHICO: EN LA CUEVA EL\nPISO ES DE HIELO PURO.\nMI PAPA DICE QUE ADENTRO\nHAY ALGO QUE NO SE\nDERRITE NUNCA.	KID: THE CAVE FLOOR IS\nSOLID ICE.\nMY DAD SAYS THERE IS\nSOMETHING IN THERE THAT\nNEVER MELTS.
+
+#: apps/chatarra/main/ch_zonas.c:1672
+LENADOR: LOS BICHOS DE\nACA PEGAN CON CRIO.\nSI LLEVAS ALGO DE FUEGO\nLA VAS A PASAR MEJOR.	WOODCUTTER: EVERYTHING\nHERE HITS WITH CRYO.\nBRING SOMETHING WITH\nFIRE AND YOU WILL DO\nBETTER.
+
+#: apps/chatarra/main/ch_zonas.c:1676
+ABUELA DEL VALLE: SE ME\nQUEDO EL TERMO EN LA\nCUEVA Y SIN EL NO HAY\nMATE.\nTRAEMELO, SI?	VALLEY GRANNY: I LEFT MY\nTHERMOS IN THE CAVE AND\nWITHOUT IT THERE IS NO\nTEA.\nWOULD YOU FETCH IT?
+
+#: apps/chatarra/main/ch_zonas.c:1680
+ABUELA DEL VALLE: MI\nTERMO! GRACIAS, HIJO.\nTOMA ESTE SOLDADOR QUE\nERA DE MI MARIDO.	VALLEY GRANNY: MY\nTHERMOS! THANK YOU, DEAR.\nTAKE THIS WELDER, IT WAS\nMY HUSBAND'S.
+
+#: apps/chatarra/main/ch_zonas.c:1710
+EL BANCO DE CRIOVALLE.\nHay que soplarle el hielo\nantes de usarlo.	THE CRYOVALE BENCH.\nYou have to blow the ice\noff it before using it.
+
+#: apps/chatarra/main/ch_zonas.c:1713
+TENDERO: ACEITE QUE NO\nSE CONGELA. LO DEMAS SI.	SHOPKEEPER: OIL THAT\nDOES NOT FREEZE. THE\nREST DOES.
+
+#: apps/chatarra/main/ch_zonas.c:1715
+ABUELA TUERCA: TE VOY A\nDECIR LO ULTIMO Y DESPUES\nTE DEJO EN PAZ.\nNO TE ENAMORES DE UNA\nPIEZA. LA MEJOR CABEZA\nDEL MUNDO NO SIRVE SI EL\nTORSO NO LE DA ENERGIA.\nMIRA EL CONJUNTO.	GRANNY COG: LAST THING\nAND THEN I LEAVE YOU\nALONE.\nDO NOT FALL IN LOVE WITH\nA PART. THE BEST HEAD IN\nTHE WORLD IS USELESS IF\nTHE TORSO GIVES IT NO\nENERGY. LOOK AT THE WHOLE\nROBOT.
+
+#: apps/chatarra/main/ch_zonas.c:1821
+GUARDABOSQUE:\nTE VI SUBIR DESDE EL\nPASO. TARDASTE MENOS DE\nLO QUE PENSE.\nVEAMOS SI TU ROBOT\nAGUANTA EL FRIO.	RANGER:\nI WATCHED YOU COME UP\nFROM THE PASS. YOU TOOK\nLESS TIME THAN I THOUGHT.\nLET US SEE IF YOUR ROBOT\nHANDLES THE COLD.
+
+#: apps/chatarra/main/ch_zonas.c:1863
+AUTOPISTA A MALLA.\nVELOCIDAD MAXIMA: LA QUE\nTE DEN LAS PIERNAS.	HIGHWAY TO MESH.\nSPEED LIMIT: WHATEVER\nYOUR LEGS CAN DO.
+
+#: apps/chatarra/main/ch_zonas.c:1901
+CIUDAD MALLA\nAQUI NO SE FABRICA NADA.\nSOLO SE PIENSA.	MESH CITY\nNOTHING IS BUILT HERE.\nONLY THOUGHT.
+
+#: apps/chatarra/main/ch_zonas.c:1904
+CHICA: TODO EL PUEBLO\nCORRE SOBRE EL SERVIDOR\nDE ABAJO.\nSI SE APAGA, SE APAGA\nTODO.	GIRL: THE WHOLE TOWN\nRUNS ON THE SERVER DOWN\nBELOW.\nIF IT GOES OUT,\nEVERYTHING GOES OUT.
+
+#: apps/chatarra/main/ch_zonas.c:1909
+PROGRAMADOR: LOS BICHOS\nDE ACA PEGAN CON PLASMA.\nEL PLASMA NO PUEDE CON\nEL CRIO. PENSALO.	PROGRAMMER: EVERYTHING\nHERE HITS WITH PLASMA.\nPLASMA CANNOT HANDLE\nCRYO. THINK ABOUT IT.
+
+#: apps/chatarra/main/ch_zonas.c:1913
+ARCHIVISTA: PERDI LA\nCLAVE MAESTRA EN EL\nSERVIDOR.\nSIN ELLA NO PUEDO ENTRAR\nA MI PROPIA OFICINA.	ARCHIVIST: I LOST THE\nMASTER KEY SOMEWHERE IN\nTHE SERVER.\nWITHOUT IT I CANNOT GET\nINTO MY OWN OFFICE.
+
+#: apps/chatarra/main/ch_zonas.c:1917
+ARCHIVISTA: LA CLAVE!\nTOMA UN CHIP, TE LO\nGANASTE.	ARCHIVIST: THE KEY!\nTAKE A CHIP, YOU EARNED\nIT.
+
+#: apps/chatarra/main/ch_zonas.c:1946
+EL BANCO DE MALLA.\nTe lo diagnostica solo.	THE MESH BENCH.\nIt runs its own\ndiagnostics.
+
+#: apps/chatarra/main/ch_zonas.c:1948
+TENDERA: TODO CARO, TODO\nBUENO. Es una ciudad.	SHOPKEEPER: ALL PRICEY,\nALL GOOD. It is a city.
+
+#: apps/chatarra/main/ch_zonas.c:1950
+TECNICO: DEJAME VER TU\nROBOT... MIRA, LE SOBRA\nATAQUE Y LE FALTA VIDA.\nUN TORSO GRANDE TE\nSALVARIA MAS DE UN\nCOMBATE.	TECHNICIAN: LET ME SEE\nYOUR ROBOT... LOOK, TOO\nMUCH ATTACK AND NOT\nENOUGH LIFE.\nA BIG TORSO WOULD SAVE\nYOU MORE THAN ONE FIGHT.
+
+#: apps/chatarra/main/ch_zonas.c:2054
+ADMINISTRADORA:\nTE ESTUVE MIRANDO DESDE\nQUE ENTRASTE AL PUEBLO.\nSE QUE PIEZAS LLEVAS Y\nSE COMO PELEAS.\nIGUAL VENIS, CLARO.	ADMIN:\nI HAVE BEEN WATCHING YOU\nSINCE YOU ENTERED TOWN.\nI KNOW WHICH PARTS YOU\nCARRY AND HOW YOU FIGHT.\nYOU CAME ANYWAY, OF\nCOURSE.
+
+#: apps/chatarra/main/ch_zonas.c:2097
+EL PARAMO.\nACA TERMINA TODO LO QUE\nNO SIRVE.\nUSTED TAMBIEN, SI SE\nDESCUIDA.	THE WASTELAND.\nEVERYTHING USELESS ENDS\nUP HERE.\nYOU TOO, IF YOU ARE NOT\nCAREFUL.
+
+#: apps/chatarra/main/ch_zonas.c:2137
+VILLA OXIDO\nEL PUEBLO MAS VIEJO Y EL\nMAS CERCANO A LA TORRE.\nNADIE SABE CUAL DE LAS\nDOS COSAS ES PEOR.	RUSTVILLE\nTHE OLDEST TOWN AND THE\nCLOSEST ONE TO THE TOWER.\nNOBODY KNOWS WHICH OF\nTHE TWO IS WORSE.
+
+#: apps/chatarra/main/ch_zonas.c:2142
+VIEJO: YO SUBI A LA TORRE\nUNA VEZ. HACE MUCHO.\nNO TE VOY A CONTAR COMO\nME FUE.	OLD MAN: I CLIMBED THAT\nTOWER ONCE. LONG AGO.\nI AM NOT GOING TO TELL\nYOU HOW IT WENT.
+
+#: apps/chatarra/main/ch_zonas.c:2146
+CHICO: EN EL CEMENTERIO\nLOS ROBOTS SE ARMAN SOLOS\nCON LO QUE ENCUENTRAN.\nPOR ESO SON TAN RAROS.	KID: IN THE GRAVEYARD\nTHE ROBOTS BUILD\nTHEMSELVES OUT OF\nWHATEVER THEY FIND.\nTHAT IS WHY THEY ARE SO\nSTRANGE.
+
+#: apps/chatarra/main/ch_zonas.c:2150
+CHATARRERA: BUSCO UN\nENGRANAJE GRANDE, DE LOS\nVIEJOS. EN EL CEMENTERIO\nTIENE QUE HABER.\nTE PAGO BIEN.	SCRAP DEALER: I AM AFTER\nA BIG GEAR, ONE OF THE\nOLD ONES. THERE HAS TO BE\nONE IN THE GRAVEYARD.\nI PAY WELL.
+
+#: apps/chatarra/main/ch_zonas.c:2154
+CHATARRERA: MIRA ESO.\nHACIA VEINTE ANOS QUE NO\nVEIA UNO ENTERO.\nTOMA, TE LO GANASTE.	SCRAP DEALER: LOOK AT\nTHAT. TWENTY YEARS SINCE\nI SAW A WHOLE ONE.\nHERE, YOU EARNED IT.
+
+#: apps/chatarra/main/ch_zonas.c:2184
+EL BANCO DE VILLA OXIDO.\nViejo pero impecable.	THE RUSTVILLE BENCH.\nOld but flawless.
+
+#: apps/chatarra/main/ch_zonas.c:2186
+CHATARRERO: LO QUE VES\nes lo que hay. Alcanza.	SCRAPPER: WHAT YOU SEE\nis what there is. Enough.
+
+#: apps/chatarra/main/ch_zonas.c:2188
+ABUELA TUERCA: LLEGASTE\nLEJOS, EH.\nARRIBA DE LA TORRE ESTA\nEL CAMPEON. NO TE VOY A\nMENTIR: SU ROBOT ES MEJOR\nQUE EL TUYO.\nPERO EL NO ARMO EL SUYO.\nSE LO ARMARON.	GRANNY COG: YOU GOT FAR,\nDID YOU NOT.\nUP THAT TOWER IS THE\nCHAMPION. I WILL NOT LIE\nTO YOU: HIS ROBOT IS\nBETTER THAN YOURS.\nBUT HE DID NOT BUILD IT.\nIT WAS BUILT FOR HIM.
+
+#: apps/chatarra/main/ch_zonas.c:2296
+CHATARRERO MAYOR:\nTODO ESTO ERAN ROBOTS\nCOMO EL TUYO.\nCADA UNO CREYO QUE ERA\nDISTINTO.\nA VER VOS.	CHIEF SCRAPPER:\nALL OF THIS WAS ROBOTS\nLIKE YOURS.\nEVERY ONE OF THEM THOUGHT\nIT WAS DIFFERENT.\nLET US SEE ABOUT YOU.
+
+#: apps/chatarra/main/ch_zonas.c:2337
+ULTIMO TRAMO.\nDE ACA NO SE VUELVE\nIGUAL QUE COMO SE VINO.	THE LAST STRETCH.\nNOBODY COMES BACK FROM\nHERE THE SAME WAY THEY\nWENT UP.
+
+#: apps/chatarra/main/ch_zonas.c:2373
+PRISMA\nAL NORTE: LA TORRE.\nSUBEN MUCHOS. BAJAN\nBASTANTES MENOS.	PRISM\nNORTH: THE TOWER.\nMANY GO UP. RATHER FEWER\nCOME DOWN.
+
+#: apps/chatarra/main/ch_zonas.c:2377
+CHICO: MI HERMANA SUBIO\nAYER. TODAVIA NO BAJO.\nDICE MAMA QUE NO ME\nPREOCUPE.	KID: MY SISTER WENT UP\nYESTERDAY. SHE HAS NOT\nCOME DOWN.\nMUM SAYS NOT TO WORRY.
+
+#: apps/chatarra/main/ch_zonas.c:2381
+GUARDIA: DOS PISOS Y LA\nCUMBRE.\nREPARA ANTES DE SUBIR.\nARRIBA NO HAY BANCO.	GUARD: TWO FLOORS AND\nTHE SUMMIT.\nREPAIR BEFORE YOU GO UP.\nTHERE IS NO BENCH UP\nTHERE.
+
+#: apps/chatarra/main/ch_zonas.c:2411
+EL ULTIMO BANCO ANTES\nDE LA TORRE.\nUsalo bien.	THE LAST BENCH BEFORE\nTHE TOWER.\nUse it well.
+
+#: apps/chatarra/main/ch_zonas.c:2414
+TENDERO: LLEVA TODO LO\nQUE PUEDAS PAGAR.\nArriba no se compra nada.	SHOPKEEPER: TAKE\nEVERYTHING YOU CAN PAY\nFOR. Nothing is sold up\nthere.
+
+#: apps/chatarra/main/ch_zonas.c:2417
+ABUELA TUERCA: BUENO.\nHASTA ACA TE ACOMPANO.\nACORDATE DE UNA COSA\nSOLA: EL ROBOT QUE VAS A\nPELEAR ES EL QUE VOS\nARMASTE.\nNINGUNA PIEZA TE LA\nREGALARON.\nANDA.	GRANNY COG: RIGHT.\nTHIS IS AS FAR AS I GO.\nREMEMBER ONE THING ONLY:\nTHE ROBOT YOU ARE ABOUT\nTO FIGHT WITH IS THE ONE\nYOU BUILT.\nNOBODY GAVE YOU A SINGLE\nPART OF IT.\nGO ON.
+
+#: apps/chatarra/main/ch_zonas.c:2522
+CAMPEON:\nTE VI SUBIR PISO POR\nPISO. NO SALTEASTE\nNINGUNO.\nESO YA TE HACE DISTINTO\nA CASI TODOS.\nAHORA VEAMOS EL ROBOT.	CHAMPION:\nI WATCHED YOU COME UP\nFLOOR BY FLOOR. YOU DID\nNOT SKIP ONE.\nTHAT ALREADY MAKES YOU\nDIFFERENT FROM ALMOST\nEVERYONE.\nNOW LET US SEE THE ROBOT.
+
+#: apps/chatarra/main/ch_zonas.c:2529
+GUARDIANA DE LA CUMBRE:\nESE SILLON DE METAL ES\nDEL CAMPEON.\nTODAVIA NO ES TUYO.	SUMMIT KEEPER:\nTHAT METAL CHAIR BELONGS\nTO THE CHAMPION.\nIT IS NOT YOURS YET.
+
+#: apps/chatarra/main/ch_zonas.c:2532
+GUARDIANA: SENTATE, DALE.\nTE LO GANASTE.\nDESDE ACA SE VE TODO:\nEL PARAMO, LA CIUDAD,\nEL VALLE, EL PUERTO.\nY ALLA LEJOS, CHIQUITO,\nVILLA TUERCA.\nTU ROBOT NO SE PARECE EN\nNADA AL QUE TE ARMO LA\nABUELA.\nNI UNA PIEZA.\nFIN.	KEEPER: GO ON, SIT DOWN.\nYOU EARNED IT.\nFROM UP HERE YOU SEE IT\nALL: THE WASTELAND, THE\nCITY, THE VALLEY, THE\nPORT.\nAND FAR AWAY, TINY,\nCOGVILLE.\nYOUR ROBOT LOOKS NOTHING\nLIKE THE ONE GRANNY BUILT\nYOU.\nNOT ONE PART.\nTHE END.
+
+#: apps/chatarra/main/ch_zonas.c:2585
+CONTROL DE ALTO VOLTIO.\nAL ESTE BAJA AL VALLE\nDEL HUMO. CERRADO HASTA\nQUE ALGUIEN ARREGLE LA\nSUBESTACION.	HIGH VOLT CHECKPOINT.\nEAST IT DROPS INTO SMOKE\nVALLEY. CLOSED UNTIL\nSOMEBODY FIXES THE\nSUBSTATION.
+
+#: apps/chatarra/main/ch_zonas.c:2589
+CONTROL ABIERTO.\nAL ESTE: EL VALLE DEL\nHUMO.	CHECKPOINT OPEN.\nEAST: SMOKE VALLEY.
+
+#: apps/chatarra/main/ch_zonas.c:2592
+CONTROL DE ALTO VOLTIO.\nCERRADO.	HIGH VOLT CHECKPOINT.\nCLOSED.
+
+#: apps/chatarra/main/ch_zonas.c:2593
+#: apps/chatarra/main/ch_zonas.c:2633
+#: apps/chatarra/main/ch_zonas.c:2673
+#: apps/chatarra/main/ch_zonas.c:2713
+CONTROL ABIERTO.	CHECKPOINT OPEN.
+
+#: apps/chatarra/main/ch_zonas.c:2627
+CONTROL DE LA FUNDICION.\nAL ESTE EMPIEZA EL PASO\nHELADO. NO SE PASA SIN\nPASE DE SECTOR.	FOUNDRY CHECKPOINT.\nEAST THE FROZEN PASS\nBEGINS. NO PASSAGE\nWITHOUT A SECTOR PASS.
+
+#: apps/chatarra/main/ch_zonas.c:2630
+CONTROL ABIERTO.\nAL ESTE: EL PASO HELADO.	CHECKPOINT OPEN.\nEAST: THE FROZEN PASS.
+
+#: apps/chatarra/main/ch_zonas.c:2632
+CONTROL DE LA FUNDICION.\nCERRADO.	FOUNDRY CHECKPOINT.\nCLOSED.
+
+#: apps/chatarra/main/ch_zonas.c:2667
+CONTROL DE CRIOVALLE.\nAL ESTE BAJA LA AUTOPISTA\nA CIUDAD MALLA.\nCERRADO POR NIEVE.	CRYOVALE CHECKPOINT.\nEAST THE HIGHWAY DROPS\nDOWN TO MESH CITY.\nCLOSED FOR SNOW.
+
+#: apps/chatarra/main/ch_zonas.c:2670
+CONTROL ABIERTO.\nAL ESTE: LA AUTOPISTA.	CHECKPOINT OPEN.\nEAST: THE HIGHWAY.
+
+#: apps/chatarra/main/ch_zonas.c:2672
+CONTROL DE CRIOVALLE.\nCERRADO POR NIEVE.	CRYOVALE CHECKPOINT.\nCLOSED FOR SNOW.
+
+#: apps/chatarra/main/ch_zonas.c:2707
+CONTROL DE MALLA.\nAL ESTE EMPIEZA EL\nPARAMO. NO SE PASA SIN\nPASE DE SECTOR.	MESH CHECKPOINT.\nEAST THE WASTELAND\nBEGINS. NO PASSAGE\nWITHOUT A SECTOR PASS.
+
+#: apps/chatarra/main/ch_zonas.c:2710
+CONTROL ABIERTO.\nAL ESTE: EL PARAMO.	CHECKPOINT OPEN.\nEAST: THE WASTELAND.
+
+#: apps/chatarra/main/ch_zonas.c:2712
+CONTROL DE MALLA.\nCERRADO.	MESH CHECKPOINT.\nCLOSED.
+
+#: apps/chatarra/main/ch_zonas.c:2747
+CONTROL DE VILLA OXIDO.\nAL ESTE SOLO QUEDA LA\nTORRE PRISMA.\nNO SE PASA SIN PASE.	RUSTVILLE CHECKPOINT.\nEAST THERE IS ONLY THE\nPRISM TOWER LEFT.\nNO PASS, NO PASSAGE.
+
+#: apps/chatarra/main/ch_zonas.c:2750
+CONTROL ABIERTO.\nAL ESTE: LA TORRE.	CHECKPOINT OPEN.\nEAST: THE TOWER.
+
+#: apps/chatarra/main/ch_zonas.c:2752
+CONTROL DE VILLA OXIDO.\nCERRADO.	RUSTVILLE CHECKPOINT.\nCLOSED.
+
+#: apps/chatarra/main/ch_zonas.c:2795
+TU CASA	YOUR HOUSE
+
+#: apps/chatarra/main/ch_zonas.c:2797
+#: apps/chatarra/main/ch_zonas.c:2992
+VILLA TUERCA	COGVILLE
+
+#: apps/chatarra/main/ch_zonas.c:2799
+TUERCA NORTE	COG NORTH
+
+#: apps/chatarra/main/ch_zonas.c:2801
+PLAZA DE LA FUENTE	FOUNTAIN SQUARE
+
+#: apps/chatarra/main/ch_zonas.c:2803
+TUERCA ESTE	COG EAST
+
+#: apps/chatarra/main/ch_zonas.c:2807
+CASA VECINA	NEIGHBOR HOUSE
+
+#: apps/chatarra/main/ch_zonas.c:2809
+SENDERO NORTE	NORTH TRAIL
+
+#: apps/chatarra/main/ch_zonas.c:2811
+DESGUACE	THE SCRAPYARD
+
+#: apps/chatarra/main/ch_zonas.c:2813
+DESGUACE -2	SCRAPYARD -2
+
+#: apps/chatarra/main/ch_zonas.c:2815
+DEPOSITO	STOREROOM
+
+#: apps/chatarra/main/ch_zonas.c:2817
+SALA DEL GUARDIAN	WARDEN HALL
+
+#: apps/chatarra/main/ch_zonas.c:2821
+COSTA DEL CANGREJO	CRAB COAST
+
+#: apps/chatarra/main/ch_zonas.c:2823
+#: apps/chatarra/main/ch_zonas.c:2993
+PUERTO BUJIA	PORT SPARKPLUG
+
+#: apps/chatarra/main/ch_zonas.c:2825
+MUELLES DE BUJIA	BUJIA DOCKS
+
+#: apps/chatarra/main/ch_zonas.c:2827
+TALLER DEL PUERTO	PORT WORKSHOP
+
+#: apps/chatarra/main/ch_zonas.c:2829
+LA BODEGA	THE HOLD
+
+#: apps/chatarra/main/ch_zonas.c:2831
+BODEGA -2	THE HOLD -2
+
+#: apps/chatarra/main/ch_zonas.c:2833
+MUELLE HUNDIDO	SUNKEN PIER
+
+#: apps/chatarra/main/ch_zonas.c:2837
+LA CUESTA	THE CLIMB
+
+#: apps/chatarra/main/ch_zonas.c:2839
+#: apps/chatarra/main/ch_zonas.c:2994
+ALTO VOLTIO	HIGH VOLT
+
+#: apps/chatarra/main/ch_zonas.c:2841
+ALTO VOLTIO ESTE	HIGH VOLT EAST
+
+#: apps/chatarra/main/ch_zonas.c:2843
+TALLER DE ALTO VOLTIO	HIGH VOLT WORKSHOP
+
+#: apps/chatarra/main/ch_zonas.c:2845
+LA SUBESTACION	THE SUBSTATION
+
+#: apps/chatarra/main/ch_zonas.c:2847
+SUBESTACION -2	SUBSTATION -2
+
+#: apps/chatarra/main/ch_zonas.c:2849
+SALA DE BARRAS	BUSBAR ROOM
+
+#: apps/chatarra/main/ch_zonas.c:2853
+VALLE DEL HUMO	SMOKE VALLEY
+
+#: apps/chatarra/main/ch_zonas.c:2855
+#: apps/chatarra/main/ch_zonas.c:2995
+FUNDICION	FOUNDRY
+
+#: apps/chatarra/main/ch_zonas.c:2857
+PLAZA DEL HORNO	FURNACE SQUARE
+
+#: apps/chatarra/main/ch_zonas.c:2859
+TALLER DE FUNDICION	FOUNDRY WORKSHOP
+
+#: apps/chatarra/main/ch_zonas.c:2861
+EL HORNO	THE FURNACE
+
+#: apps/chatarra/main/ch_zonas.c:2863
+HORNO -2	FURNACE -2
+
+#: apps/chatarra/main/ch_zonas.c:2865
+BOCA DE COLADA	THE TAP HOLE
+
+#: apps/chatarra/main/ch_zonas.c:2869
+PASO HELADO	FROZEN PASS
+
+#: apps/chatarra/main/ch_zonas.c:2871
+#: apps/chatarra/main/ch_zonas.c:2996
+CRIOVALLE	CRYOVALE
+
+#: apps/chatarra/main/ch_zonas.c:2873
+CRIOVALLE ESTE	CRYOVALE EAST
+
+#: apps/chatarra/main/ch_zonas.c:2875
+TALLER DE CRIOVALLE	CRYOVALE WORKSHOP
+
+#: apps/chatarra/main/ch_zonas.c:2877
+CUEVA DE HIELO	ICE CAVE
+
+#: apps/chatarra/main/ch_zonas.c:2879
+CUEVA -2	ICE CAVE -2
+
+#: apps/chatarra/main/ch_zonas.c:2881
+EL NUCLEO HELADO	THE FROZEN CORE
+
+#: apps/chatarra/main/ch_zonas.c:2885
+AUTOPISTA	THE HIGHWAY
+
+#: apps/chatarra/main/ch_zonas.c:2887
+#: apps/chatarra/main/ch_zonas.c:2997
+CIUDAD MALLA	MESH CITY
+
+#: apps/chatarra/main/ch_zonas.c:2889
+MALLA ESTE	MESH EAST
+
+#: apps/chatarra/main/ch_zonas.c:2891
+TALLER DE MALLA	MESH WORKSHOP
+
+#: apps/chatarra/main/ch_zonas.c:2893
+EL SERVIDOR	THE SERVER
+
+#: apps/chatarra/main/ch_zonas.c:2895
+SERVIDOR -2	SERVER -2
+
+#: apps/chatarra/main/ch_zonas.c:2897
+SALA DE MAQUINAS	MACHINE ROOM
+
+#: apps/chatarra/main/ch_zonas.c:2901
+LLANURA MUERTA	DEAD PLAIN
+
+#: apps/chatarra/main/ch_zonas.c:2903
+#: apps/chatarra/main/ch_zonas.c:2998
+VILLA OXIDO	RUSTVILLE
+
+#: apps/chatarra/main/ch_zonas.c:2905
+PLAZA DEL OXIDO	RUST SQUARE
+
+#: apps/chatarra/main/ch_zonas.c:2907
+TALLER DE VILLA OXIDO	RUSTVILLE WORKSHOP
+
+#: apps/chatarra/main/ch_zonas.c:2909
+CEMENTERIO DE ROBOTS	ROBOT GRAVEYARD
+
+#: apps/chatarra/main/ch_zonas.c:2911
+CEMENTERIO -2	GRAVEYARD -2
+
+#: apps/chatarra/main/ch_zonas.c:2913
+LA FOSA	THE PIT
+
+#: apps/chatarra/main/ch_zonas.c:2917
+ULTIMO TRAMO	THE LAST STRETCH
+
+#: apps/chatarra/main/ch_zonas.c:2919
+#: apps/chatarra/main/ch_zonas.c:2999
+PRISMA	PRISM
+
+#: apps/chatarra/main/ch_zonas.c:2921
+PRISMA ESTE	PRISM EAST
+
+#: apps/chatarra/main/ch_zonas.c:2923
+TALLER DE PRISMA	PRISM WORKSHOP
+
+#: apps/chatarra/main/ch_zonas.c:2925
+LA TORRE	THE TOWER
+
+#: apps/chatarra/main/ch_zonas.c:2927
+TORRE -2	TOWER -2
+
+#: apps/chatarra/main/ch_zonas.c:2929
+LA CUMBRE	THE SUMMIT
+
+#: apps/chatarra/main/chatarra.c:305
+EL OTRO EQUIPO	THE OTHER DEVICE

@@ -1,0 +1,149 @@
+# amoledos-lang 1   es -> de
+# demo.2043.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/g2043/main/g2043.c:362
+DOBLE	DOPPEL
+
+#: apps/g2043/main/g2043.c:362
+TRIPLE	DREIFACH
+
+#: apps/g2043/main/g2043.c:362
+LASER	LASER
+
+#: apps/g2043/main/g2043.c:362
+ONDA	WELLE
+
+#: apps/g2043/main/g2043.c:362
+ENERGIA	ENERGIE
+
+#: apps/g2043/main/g2043.c:363
+ESCUDO	SCHILD
+
+#: apps/g2043/main/g2043.c:363
+NAVE EXTRA	EXTRASCHIFF
+
+#: apps/g2043/main/g2043.c:1412
+ALERTA	ALARM
+
+#: apps/g2043/main/g2043.c:1417
+PLANETA LIBERADO	PLANET BEFREIT
+
+#: apps/g2043/main/g2043.c:1420
+#: apps/g2043/main/g2043.c:1812
+SISTEMA LIBERADO	SYSTEM BEFREIT
+
+#: apps/g2043/main/g2043.c:1420
+GRACIAS POR JUGAR	DANKE FUERS SPIELEN
+
+#: apps/g2043/main/g2043.c:1612
+AUTO SI	AUTO AN
+
+#: apps/g2043/main/g2043.c:1612
+AUTO NO	AUTO AUS
+
+#: apps/g2043/main/g2043.c:1613
+SONIDO SI	TON AN
+
+#: apps/g2043/main/g2043.c:1613
+SONIDO NO	TON AUS
+
+#: apps/g2043/main/g2043.c:1619
+FPS SI	FPS AN
+
+#: apps/g2043/main/g2043.c:1619
+FPS NO	FPS AUS
+
+#: apps/g2043/main/g2043.c:1626
+RECORD  %lu	BEST  %lu
+
+#: apps/g2043/main/g2043.c:1725
+LA BATALLA DE CERES	DIE SCHLACHT UM CERES
+
+#: apps/g2043/main/g2043.c:1728
+JUGAR	SPIELEN
+
+#: apps/g2043/main/g2043.c:1728
+arrastrá el dedo para volar	Finger ziehen zum Fliegen
+
+#: apps/g2043/main/g2043.c:1734
+#: apps/g2043/main/g2043.c:1918
+ARRASTRÁ EL DEDO Y LA NAVE LO SIGUE	FINGER ZIEHEN, DAS SCHIFF FOLGT
+
+#: apps/g2043/main/g2043.c:1735
+DISPARAR: MANTENELO APRETADO	FEUERN: GEDRUECKT HALTEN
+
+#: apps/g2043/main/g2043.c:1736
+TONEL: UN GIRO INVULNERABLE	ROLLE: UNVERWUNDBARE DREHUNG
+
+#: apps/g2043/main/g2043.c:1737
+PAUSA: ARRIBA A LA DERECHA	PAUSE: OBEN RECHTS
+
+#: apps/g2043/main/g2043.c:1751
+RECORD 0	BEST 0
+
+#: apps/g2043/main/g2043.c:1753
+#: apps/g2043/main/g2043.c:1774
+#: apps/g2043/main/g2043.c:1795
+SALIR	BEENDEN
+
+#: apps/g2043/main/g2043.c:1764
+PAUSA	PAUSE
+
+#: apps/g2043/main/g2043.c:1766
+SEGUIR	WEITER
+
+#: apps/g2043/main/g2043.c:1785
+#: apps/g2043/main/g2043.c:1812
+FIN DEL JUEGO	SPIEL VORBEI
+
+#: apps/g2043/main/g2043.c:1791
+OTRA VEZ	NOCHMAL
+
+#: apps/g2043/main/g2043.c:1794
+MENU	MENUE
+
+#: apps/g2043/main/g2043.c:1814
+PUNTOS  %lu\nRECORD  %lu	PUNKTE  %lu\nBEST  %lu
+
+#: apps/g2043/main/g2043.c:1905
+#: apps/g2043/main/g2043.c:1913
+#: apps/g2043/main/g2043.c:1971
+DISPARAR	FEUER
+
+#: apps/g2043/main/g2043.c:1906
+#: apps/g2043/main/g2043.c:1914
+TONEL	ROLLE
+
+#: apps/g2043/main/g2043.c:1971
+DISPARO\nAUTO	AUTO\nFEUER
+
+#: apps/g2043/main/gx_foe.c:745
+GUARDIAN CARMESI	KARMESINROTER WAECHTER
+
+#: apps/g2043/main/gx_foe.c:746
+KRAKEN ORBITAL	ORBITALER KRAKE
+
+#: apps/g2043/main/gx_foe.c:747
+NUCLEO DEL CINTURON	KERN DES GUERTELS
+
+#: apps/g2043/main/gx_world.c:101
+TITAN ROJO	ROTER TITAN
+
+#: apps/g2043/main/gx_world.c:101
+LLANURAS DE OXIDO	ROSTEBENEN
+
+#: apps/g2043/main/gx_world.c:109
+MAR DE NEPTUNO	MEER DES NEPTUN
+
+#: apps/g2043/main/gx_world.c:109
+OCEANO DE METANO	METHANOZEAN
+
+#: apps/g2043/main/gx_world.c:117
+CINTURON DE CERES	GUERTEL DER CERES
+
+#: apps/g2043/main/gx_world.c:117
+CAMPO DE ESCOMBROS	TRUEMMERFELD

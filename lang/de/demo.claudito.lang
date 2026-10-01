@@ -1,0 +1,119 @@
+# amoledos-lang 1   es -> de
+# demo.claudito.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/claudito/main/cl_scene.c:861
+PATIO	PARK
+
+#: apps/claudito/main/cl_scene.c:861
+CASA	ZUHAUSE
+
+#: apps/claudito/main/claudito.c:264
+PELOTA	BALL
+
+#: apps/claudito/main/claudito.c:265
+GLOBO	BALLON
+
+#: apps/claudito/main/claudito.c:266
+BURBUJAS	BLASEN
+
+#: apps/claudito/main/claudito.c:267
+CUBOS	KLOETZE
+
+#: apps/claudito/main/claudito.c:917
+DIA %d	TAG %d
+
+#: apps/claudito/main/claudito.c:1064
+QUE COMEMOS?	WAS GIBTS ZU ESSEN?
+
+#: apps/claudito/main/claudito.c:1064
+A QUE JUGAMOS?	WAS SPIELEN WIR?
+
+#: apps/claudito/main/claudito.c:1151
+NO ENTRA	KEIN PLATZ
+
+#: apps/claudito/main/claudito.c:1151
+#: apps/claudito/main/claudito.c:2035
+MAS!	MEHR!
+
+#: apps/claudito/main/claudito.c:1185
+RICO!	LECKER!
+
+#: apps/claudito/main/claudito.c:1210
+FROTAME!	STREICHELN!
+
+#: apps/claudito/main/claudito.c:1223
+TOCAME LA	KRAUL MEINEN
+
+#: apps/claudito/main/claudito.c:1223
+PANZA!	BAUCH!
+
+#: apps/claudito/main/claudito.c:1230
+BUEN DIA!	GUTEN MORGEN!
+
+#: apps/claudito/main/claudito.c:1235
+A DORMIR...	AB INS BETT...
+
+#: apps/claudito/main/claudito.c:1244
+AL PATIO!	IN DEN PARK!
+
+#: apps/claudito/main/claudito.c:1244
+A CASA!	NACH HAUSE!
+
+#: apps/claudito/main/claudito.c:1288
+TENGO	ICH HAB
+
+#: apps/claudito/main/claudito.c:1288
+HAMBRE	HUNGER
+
+#: apps/claudito/main/claudito.c:1290
+ESTOY	ICH BIN
+
+#: apps/claudito/main/claudito.c:1290
+SUCIO	SCHMUTZIG
+
+#: apps/claudito/main/claudito.c:1292
+QUE SUENO	SO MUEDE
+
+#: apps/claudito/main/claudito.c:1294
+JUGAMOS?	SPIELEN?
+
+#: apps/claudito/main/claudito.c:1296
+#: apps/claudito/main/claudito.c:2386
+HOLA!	HALLO!
+
+#: apps/claudito/main/claudito.c:1296
+TODO BIEN	ALLES GUT
+
+#: apps/claudito/main/claudito.c:1297
+QUE LINDO	WIE SCHOEN
+
+#: apps/claudito/main/claudito.c:1297
+HOLA HOLA	HALLO HALLO
+
+#: apps/claudito/main/claudito.c:1504
+LIMPIO!	SAUBER!
+
+#: apps/claudito/main/claudito.c:1680
+DIA 1!	TAG 1!
+
+#: apps/claudito/main/claudito.c:1680
+DE NUEVO	VON VORN
+
+#: apps/claudito/main/claudito.c:2034
+JI JI JI!	HIHIHI!
+
+#: apps/claudito/main/claudito.c:2034
+JA JA!	HAHA!
+
+#: apps/claudito/main/claudito.c:2035
+BASTA!	AUFHOEREN!
+
+#: apps/claudito/main/claudito.c:2169
+MANTENE PARA	HALTEN ZUM
+
+#: apps/claudito/main/claudito.c:2169
+REINICIAR	NEUSTART

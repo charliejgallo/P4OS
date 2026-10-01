@@ -1,0 +1,19 @@
+# p4bench first, 20260928-193343
+BENCH lvgl.cfg rot=0 copy=ppa fbs=2 rows=80 bmem=internal logical=720x1280 draw_units=2 os=1 ppa_draw=0
+BENCH mem int_free=276507 int_largest=188416 psram_free=26912784 psram_largest=26738688 dma_free=236935
+BENCH psram memset_MBps=146 memcpy_MBps=67 read_MBps=165 psram2int_MBps=132 int2psram_MBps=104 gdma_MBps=50
+BENCH temp chip_c=31.4
+BENCH lcd.info w=720 h=1280 fbs=2 fb0=0x482b0a80 fb1=0x48472b00 fb2=0x0 dma2d=1
+BENCH lcd.rate frames=165 hz=55.01
+BENCH lcd.bars shown_ms=3000
+BENCH lcd.bars shown_ms=4000
+BENCH lcd.fill cpu_ms=14.62 memset_ms=13.47 ppa_ms=5.18 dma2d_ms=4.39 cpu_fps=68.4 ppa_fps=193.1 dma2d_fps=227.5 cpu_MBps=120
+BENCH lcd.tear mode=single fps=62.0
+BENCH lcd.tear mode=double fps=54.7
+BENCH touch.info found=1 addr=0x14 product=911 fw=0x1060 xmax=720 ymax=1280 vendor=0x00 cfg_ver=0x46 refresh_ms=10
+BENCH touch.rst gpio=23 held_low_gone=1 back_after_release=1 reset_wired=1
+BENCH i2c.dev sda=7 scl=8 addr=0x18 guess="ES8311 codec (board)"
+BENCH i2c.dev sda=7 scl=8 addr=0x40 guess="ES7210 mic ADC (board) / HTU21 / SHT21 / Si7021 / INA219"
+BENCH i2c.dev sda=7 scl=8 addr=0x5D guess="GT911 touch (board)"
+BENCH i2c.scan sda=7 scl=8 found=3
+BENCH sd.info name=SC16G size_mb=15185 free_mb=15181 khz=40000 real_khz=40000 width=4 ddr=0

@@ -1,0 +1,281 @@
+# amoledos-lang 1   es -> de
+# demo.mila.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/mila/main/mila.c:1169
+Tocá para empezar	Tippen zum Starten
+
+#: apps/mila/main/mila.c:1170
+Par	Par
+
+#: apps/mila/main/mila.c:1171
+¡Muy bien!	Sehr gut!
+
+#: apps/mila/main/mila.c:1181
+Jugar	Spielen
+
+#: apps/mila/main/mila.c:1182
+#: apps/mila/main/ml_ui.c:766
+Tienda	Laden
+
+#: apps/mila/main/mila.c:1183
+#: apps/mila/main/ml_ui.c:847
+Ajustes	Einstellungen
+
+#: apps/mila/main/mila.c:1184
+Amigo	Freund
+
+#: apps/mila/main/mila.c:1185
+Próximamente	Demnächst
+
+#: apps/mila/main/mila.c:1648
+Falta mila_p4.pak en la tarjeta	mila_p4.pak fehlt auf der Karte
+
+#: apps/mila/main/mila.c:1753
+No hay memoria para girar la pantalla	Zu wenig Speicher zum Drehen des Bildschirms
+
+#: apps/mila/main/mila.c:1762
+No se pudo cargar el nivel	Level konnte nicht geladen werden
+
+#: apps/mila/main/ml_link.c:110
+El otro reloj tiene otra versión de Mila.	Die andere Uhr hat eine andere Mila-Version.
+
+#: apps/mila/main/ml_link.c:111
+Actualizá los dos para jugar juntos.	Aktualisiere beide, um zusammen zu spielen.
+
+#: apps/mila/main/ml_link.c:112
+Buscando a	Suche nach
+
+#: apps/mila/main/ml_link.c:113
+está listo. ¿Qué hacemos?	ist bereit. Was machen wir?
+
+#: apps/mila/main/ml_link.c:114
+está eligiendo...	wählt gerade...
+
+#: apps/mila/main/ml_link.c:122
+El enlace no arrancó	Die Verbindung startete nicht
+
+#: apps/mila/main/ml_link.c:128
+Primero emparejá los relojes en Enlace	Kopple zuerst die Uhren unter Verbindung
+
+#: apps/mila/main/ml_link.c:217
+No hay un nivel abierto en los dos	Kein Level ist auf beiden offen
+
+#: apps/mila/main/ml_link.c:225
+Preparando...	Vorbereiten...
+
+#: apps/mila/main/ml_link.c:329
+#: apps/mila/main/ml_link.c:369
+%s se fue a su casa	%s ist nach Hause gegangen
+
+#: apps/mila/main/ml_link.c:329
+%s se desconectó	%s hat die Verbindung getrennt
+
+#: apps/mila/main/ml_link.c:351
+#: apps/mila/main/ml_link.c:387
+Sin señal de %s	Kein Signal von %s
+
+#: apps/mila/main/ml_shop.c:11
+Moño	Schleife
+
+#: apps/mila/main/ml_shop.c:12
+Gorrito de fiesta	Partyhut
+
+#: apps/mila/main/ml_shop.c:13
+Gorro de lana	Strickmütze
+
+#: apps/mila/main/ml_shop.c:14
+Flor	Blume
+
+#: apps/mila/main/ml_shop.c:15
+Boina	Baskenmütze
+
+#: apps/mila/main/ml_shop.c:16
+Orejas de conejo	Hasenohren
+
+#: apps/mila/main/ml_shop.c:17
+Sombrero de bruja	Hexenhut
+
+#: apps/mila/main/ml_shop.c:18
+Corona	Krone
+
+#: apps/mila/main/ml_shop.c:19
+Collar con cascabel	Halsband mit Glöckchen
+
+#: apps/mila/main/ml_shop.c:20
+Collar con pescadito	Halsband mit Fischchen
+
+#: apps/mila/main/ml_shop.c:21
+Moño al cuello	Fliege
+
+#: apps/mila/main/ml_shop.c:22
+Pañuelo	Halstuch
+
+#: apps/mila/main/ml_shop.c:23
+Pañuelo a lunares	Gepunktetes Halstuch
+
+#: apps/mila/main/ml_shop.c:24
+Collar de perlas	Perlenkette
+
+#: apps/mila/main/ml_shop.c:25
+Ratoncito	Spielmaus
+
+#: apps/mila/main/ml_shop.c:26
+Ovillo	Wollknäuel
+
+#: apps/mila/main/ml_shop.c:27
+Pelota con cascabel	Ball mit Glöckchen
+
+#: apps/mila/main/ml_shop.c:28
+Caña con pluma	Federangel
+
+#: apps/mila/main/ml_shop.c:29
+Caja de cartón	Karton
+
+#: apps/mila/main/ml_shop.c:30
+Plantita de catnip	Katzenminze
+
+#: apps/mila/main/ml_shop.c:31
+Túnel	Tunnel
+
+#: apps/mila/main/ml_shop.c:32
+Rascador	Kratzbaum
+
+#: apps/mila/main/ml_shop.c:33
+Hamaca de ventana	Fensterhängematte
+
+#: apps/mila/main/ml_shop.c:34
+Pecera	Goldfischglas
+
+#: apps/mila/main/ml_ui.c:320
+Mantené el dedo sobre Mila para ver todo el nivel.	Halte den Finger auf Mila, um das ganze Level zu sehen.
+
+#: apps/mila/main/ml_ui.c:321
+Tocá una casilla y Mila camina sola hasta ahí.	Tippe auf ein Feld und Mila läuft allein dorthin.
+
+#: apps/mila/main/ml_ui.c:322
+El botón de abajo a la izquierda deshace el último paso.	Die Taste unten links macht den letzten Zug rückgängig.
+
+#: apps/mila/main/ml_ui.c:323
+Arrastrá el ratoncito y Mila lo va a perseguir.	Zieh die Spielmaus und Mila jagt ihr nach.
+
+#: apps/mila/main/ml_ui.c:324
+Terminar un mundo le regala algo a Mila.	Eine Welt zu beenden bringt Mila ein Geschenk.
+
+#: apps/mila/main/ml_ui.c:325
+Pellizcá con dos dedos para ver todo el nivel.	Mit zwei Fingern zoomen, um das ganze Level zu sehen.
+
+#: apps/mila/main/ml_ui.c:326
+Cada día hay un regalito junto a la cucha.	Jeden Tag liegt ein kleines Geschenk am Körbchen.
+
+#: apps/mila/main/ml_ui.c:369
+Cargando...	Laden...
+
+#: apps/mila/main/ml_ui.c:441
+Seguir	Weiter
+
+#: apps/mila/main/ml_ui.c:443
+Empezar de nuevo	Neu starten
+
+#: apps/mila/main/ml_ui.c:445
+#: apps/mila/main/ml_ui.c:498
+#: apps/mila/main/ml_ui.c:540
+Mapa	Karte
+
+#: apps/mila/main/ml_ui.c:447
+#: apps/mila/main/ml_ui.c:559
+Casita	Zuhause
+
+#: apps/mila/main/ml_ui.c:482
+#: apps/mila/main/ml_ui.c:515
+¡Nivel completo!	Level geschafft!
+
+#: apps/mila/main/ml_ui.c:494
+#: apps/mila/main/ml_ui.c:540
+Siguiente	Nächstes
+
+#: apps/mila/main/ml_ui.c:497
+Otra vez	Nochmal
+
+#: apps/mila/main/ml_ui.c:517
+Movimientos: %d   (par %d)	Züge: %d   (Par %d)
+
+#: apps/mila/main/ml_ui.c:519
+#: apps/mila/main/ml_ui.c:555
++%d monedas	+%d Münzen
+
+#: apps/mila/main/ml_ui.c:520
+¡Perfecto!	Perfekt!
+
+#: apps/mila/main/ml_ui.c:520
+Probá llegar al par	Versuch das Par zu schaffen
+
+#: apps/mila/main/ml_ui.c:525
+¡Regalo: %s!	Geschenk: %s!
+
+#: apps/mila/main/ml_ui.c:551
+¡Ganaste la carrera!	Du hast das Rennen gewonnen!
+
+#: apps/mila/main/ml_ui.c:551
+Ganó tu amigo	Dein Freund hat gewonnen
+
+#: apps/mila/main/ml_ui.c:553
+Vos: %d movimientos   %s: %d	Du: %d Züge   %s: %d
+
+#: apps/mila/main/ml_ui.c:598
+En la casita	Zu Hause
+
+#: apps/mila/main/ml_ui.c:599
+Sacar	Ausziehen
+
+#: apps/mila/main/ml_ui.c:600
+Ponérselo	Anziehen
+
+#: apps/mila/main/ml_ui.c:603
+Premio por terminar %s	Preis für %s
+
+#: apps/mila/main/ml_ui.c:604
+Bloqueado	Gesperrt
+
+#: apps/mila/main/ml_ui.c:607
+Comprar  %d	Kaufen  %d
+
+#: apps/mila/main/ml_ui.c:708
+Te faltan monedas	Nicht genug Münzen
+
+#: apps/mila/main/ml_ui.c:770
+Gorros	Hüte
+
+#: apps/mila/main/ml_ui.c:770
+Cuello	Hals
+
+#: apps/mila/main/ml_ui.c:770
+Juguetes	Spielzeug
+
+#: apps/mila/main/ml_ui.c:812
+#: apps/mila/main/ml_ui.c:857
+Volver	Zurück
+
+#: apps/mila/main/ml_ui.c:822
+Niveles resueltos: %d\nMovimientos: %d\nCaricias: %d\nEstrellas: %d	Gelöste Level: %d\nZüge: %d\nStreicheleinheiten: %d\nSterne: %d
+
+#: apps/mila/main/ml_ui.c:850
+Efectos	Effekte
+
+#: apps/mila/main/ml_ui.c:852
+Música	Musik
+
+#: apps/mila/main/ml_ui.c:879
+Con un amigo	Mit einem Freund
+
+#: apps/mila/main/ml_ui.c:882
+Visitar su casita	Besuch bei ihr
+
+#: apps/mila/main/ml_ui.c:884
+Carrera en un nivel	Wettrennen in einem Level
+
+#: apps/mila/main/ml_ui.c:886
+Cancelar	Abbrechen

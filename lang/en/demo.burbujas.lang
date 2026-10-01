@@ -1,0 +1,102 @@
+# amoledos-lang 1   es -> en
+# demo.burbujas.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/burbujas/main/burbujas.c:54
+Clásico	Classic
+
+#: apps/burbujas/main/burbujas.c:54
+Niveles	Levels
+
+#: apps/burbujas/main/burbujas.c:54
+Contrarreloj	Time attack
+
+#: apps/burbujas/main/burbujas.c:57
+Sin fin	Endless
+
+#: apps/burbujas/main/burbujas.c:57
+Despejá el tablero	Clear the board
+
+#: apps/burbujas/main/burbujas.c:57
+Dos minutos	Two minutes
+
+#: apps/burbujas/main/burbujas.c:359
+#: apps/burbujas/main/burbujas.c:405
+#: apps/burbujas/main/burbujas.c:551
+Nivel	Level
+
+#: apps/burbujas/main/burbujas.c:372
+Sonido	Sound
+
+#: apps/burbujas/main/burbujas.c:409
+¡Un color más!	One more colour!
+
+#: apps/burbujas/main/burbujas.c:412
+¡Tablero limpio!	Board cleared!
+
+#: apps/burbujas/main/burbujas.c:415
+¡Bomba!	Bomb!
+
+#: apps/burbujas/main/burbujas.c:415
+¡Comodín!	Rainbow!
+
+#: apps/burbujas/main/burbujas.c:419
+¡Últimos 10 segundos!	Last 10 seconds!
+
+#: apps/burbujas/main/burbujas.c:422
+#: apps/burbujas/main/burbujas.c:543
+¡Tiempo!	Time's up!
+
+#: apps/burbujas/main/burbujas.c:426
+#: apps/burbujas/main/burbujas.c:541
+¡Nivel superado!	Level cleared!
+
+#: apps/burbujas/main/burbujas.c:430
+#: apps/burbujas/main/burbujas.c:541
+#: apps/burbujas/main/burbujas.c:544
+¡Se acabó!	Game over!
+
+#: apps/burbujas/main/burbujas.c:542
+¡Nuevo récord!	New best!
+
+#: apps/burbujas/main/burbujas.c:561
+Reventadas	Burst
+
+#: apps/burbujas/main/burbujas.c:562
+Mejor caída	Best drop
+
+#: apps/burbujas/main/burbujas.c:566
+Mejor nivel	Best level
+
+#: apps/burbujas/main/burbujas.c:569
+Récord	Best
+
+#: apps/burbujas/main/burbujas.c:574
+Siguiente	Next
+
+#: apps/burbujas/main/burbujas.c:574
+#: apps/burbujas/main/burbujas.c:911
+Otra vez	Again
+
+#: apps/burbujas/main/burbujas.c:851
+#: apps/burbujas/main/burbujas.c:855
+Burbujas	Bubbles
+
+#: apps/burbujas/main/burbujas.c:869
+Arrastrá para apuntar y soltá para tirar. Tocá abajo para cambiar la burbuja.	Drag to aim and let go to shoot. Tap the bottom to swap the bubble.
+
+#: apps/burbujas/main/burbujas.c:887
+Pausa	Paused
+
+#: apps/burbujas/main/burbujas.c:888
+Seguir	Resume
+
+#: apps/burbujas/main/burbujas.c:890
+#: apps/burbujas/main/burbujas.c:914
+Menú	Menu
+
+#: apps/burbujas/main/burbujas.c:892
+Salir	Exit

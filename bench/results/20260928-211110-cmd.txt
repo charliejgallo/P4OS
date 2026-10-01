@@ -1,0 +1,4 @@
+# p4bench cmd, 20260928-211110
+BENCH lcd.blsweep done=1
+BENCH audio.sweep from_hz=100 to_hz=8000 secs=6
+BENCH lcd.tear mode=single fps=62.0

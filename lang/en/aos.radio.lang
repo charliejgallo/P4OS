@@ -1,0 +1,140 @@
+# amoledos-lang 1   es -> en
+# aos.radio.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/radio/main/radio.c:135
+La tecla %d está libre: mantenela apretada para guardar la radio que suena	Key %d is free: hold it to save the station that's playing
+
+#: apps/radio/main/radio.c:138
+La tecla %d está libre: elegí una radio en %s.local/radio	Key %d is free: choose a radio at %s.local/radio
+
+#: apps/radio/main/radio.c:141
+Elegí tus radios en %s.local/radio	Choose your radios at %s.local/radio
+
+#: apps/radio/main/radio.c:162
+#: apps/radio/main/radio.c:250
+#: apps/radio/main/radio.c:562
+Sin WiFi	No WiFi
+
+#: apps/radio/main/radio.c:203
+Sintonizá una radio y mantené apretada la tecla para guardarla	Tune in a station and hold the key to save it
+
+#: apps/radio/main/radio.c:225
+%s quedó en la tecla %d	%s saved to key %d
+
+#: apps/radio/main/radio.c:347
+Formato no soportado: sólo MP3 y AAC	Format not supported: MP3 and AAC only
+
+#: apps/radio/main/radio.c:350
+La radio no está en esa dirección	The radio is not at that address
+
+#: apps/radio/main/radio.c:353
+Falta la hora para https	No clock yet for https
+
+#: apps/radio/main/radio.c:356
+No se encontró el servidor	Server not found
+
+#: apps/radio/main/radio.c:359
+No se pudo conectar	Could not connect
+
+#: apps/radio/main/radio.c:362
+Sin memoria	Out of memory
+
+#: apps/radio/main/radio.c:364
+No se pudo sintonizar	Could not tune in
+
+#: apps/radio/main/radio.c:390
+No suena ninguna radio.	No radio is playing.
+
+#: apps/radio/main/radio.c:393
+Tema	Song
+
+#: apps/radio/main/radio.c:395
+Álbum	Album
+
+#: apps/radio/main/radio.c:398
+La emisora dice	The station says
+
+#: apps/radio/main/radio.c:403
+Formato	Format
+
+#: apps/radio/main/radio.c:406
+estéreo	stereo
+
+#: apps/radio/main/radio.c:406
+mono	mono
+
+#: apps/radio/main/radio.c:408
+Servidor	Server
+
+#: apps/radio/main/radio.c:410
+Web	Web
+
+#: apps/radio/main/radio.c:412
+Buffer	Buffer
+
+#: apps/radio/main/radio.c:413
+Reconexiones	Reconnects
+
+#: apps/radio/main/radio.c:414
+Escuchando	Listening
+
+#: apps/radio/main/radio.c:415
+Recibido	Received
+
+#: apps/radio/main/radio.c:418
+Tapa	Cover
+
+#: apps/radio/main/radio.c:421
+Motivo	Reason
+
+#: apps/radio/main/radio.c:499
+Radio	Radio
+
+#: apps/radio/main/radio.c:505
+Tocá una radio de la lista	Tap a station in the list
+
+#: apps/radio/main/radio.c:506
+tus teclas se eligen en %s.local/radio	your keys are set at %s.local/radio
+
+#: apps/radio/main/radio.c:509
+Tocá una tecla o una radio	Tap a key or a station
+
+#: apps/radio/main/radio.c:515
+Sintonizando...	Tuning in...
+
+#: apps/radio/main/radio.c:517
+Cargando...	Loading...
+
+#: apps/radio/main/radio.c:566
+Conectando con %.60s	Connecting to %.60s
+
+#: apps/radio/main/radio.c:569
+Llenando el buffer	Filling the buffer
+
+#: apps/radio/main/radio.c:572
+Reconectando (%u)	Reconnecting (%u)
+
+#: apps/radio/main/radio.c:579
+En pausa	Paused
+
+#: apps/radio/main/radio.c:581
+En vivo  -  buffer %u s	Live  -  buffer %u s
+
+#: apps/radio/main/radio.c:587
+Suena la música de la tarjeta	The card's music is playing
+
+#: apps/radio/main/radio_ui.c:382
+Todas las radios	All stations
+
+#: apps/radio/main/radio_ui.c:547
+  ·  tecla %d	  ·  key %d
+
+#: apps/radio/main/radio_ui.c:564
+%d  ·  editalas en /radio	%d  ·  edit them at /radio
+
+#: apps/radio/main/radio_ui.c:704
+Tocá para volver	Tap to go back

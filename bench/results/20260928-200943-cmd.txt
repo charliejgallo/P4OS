@@ -1,0 +1,5 @@
+# p4bench cmd, 20260928-200943
+BENCH lvgl.cfg rot=0 copy=ppa fbs=2 rows=80 bmem=internal logical=720x1280 draw_units=2 os=1 ppa_draw=0
+BENCH mem int_free=276507 int_largest=188416 psram_free=26911248 psram_largest=26738688 dma_free=236935
+BENCH sd.rd mb=4 kb=32 fs_type=3 csize_sect=64 read_MBps=16.06 calls=128 worst_ms=2.3 fread_MBps=10.80 fread_nobuf_MBps=0.08
+BENCH sd.rd mb=4 kb=4 fs_type=3 csize_sect=64 read_MBps=8.11 calls=1024 worst_ms=1.0 fread_MBps=10.71 fread_nobuf_MBps=0.08

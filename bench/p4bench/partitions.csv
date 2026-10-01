@@ -1,0 +1,5 @@
+# p4bench: one big app, the rest is scratch for flash tests
+nvs,      data, nvs,     0x9000,  0x6000,
+phy_init, data, phy,     0xf000,  0x1000,
+factory,  app,  factory, 0x10000, 8M,
+scratch,  data, 0x40,    ,        4M,

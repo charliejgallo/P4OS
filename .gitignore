@@ -1,0 +1,33 @@
+build/
+build-*/
+managed_components/
+sdkconfig
+sdkconfig.old
+dependencies.lock.bak
+.DS_Store
+__pycache__/
+# Third-party reference material kept only locally (license / size)
+docs/hw/waveshare/
+docs/hw/*.pdf
+docs/hw/schematic-crops/
+# bench results with local IPs / serials stay local until curated
+bench/results/raw/
+# simulator: LVGL is a checkout (or a link to AmoledOS's), the fake card's
+# state is local; only its menu.txt is the demo home screen
+sim/lvgl
+sim/build/
+sim/sim_fs/*
+!sim/sim_fs/menu.txt
+# dynamic apps
+apps/*/build/
+apps/*/managed_components/
+apps/*/sdkconfig
+apps/*/sdkconfig.old
+compile_commands.json
+sim/build-dbg/
+# per-typeface screenshots; the sheets stay
+bench/results/fonts/*_home.png
+bench/results/fonts/*_app.png
+sim/build-*/
+# the pseudo-locale is generated from the sources (gen_lang.py pseudo xx)
+lang/xx/

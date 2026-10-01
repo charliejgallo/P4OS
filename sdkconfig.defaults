@@ -1,0 +1,176 @@
+# P4OS - Waveshare ESP32-P4-WIFI6-Touch-LCD-5
+#
+# Chip profile on top of this one: sdkconfig.defaults.rev3_x (default) or
+# .rev1_3, through tools/build_fw.sh. The LVGL block is provisional until the
+# bench's test 5 freezes it - it is ABI for the dynamic apps.
+CONFIG_IDF_TARGET="esp32p4"
+CONFIG_ESPTOOLPY_FLASHMODE_QIO=y
+CONFIG_ESPTOOLPY_FLASHSIZE_32MB=y
+CONFIG_ESPTOOLPY_FLASHSIZE="32MB"
+CONFIG_SPI_FLASH_SUPPORT_GD_CHIP=y
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+CONFIG_IDF_EXPERIMENTAL_FEATURES=y
+CONFIG_BOOTLOADER_LOG_LEVEL_WARN=y
+
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_XIP_FROM_PSRAM=y
+CONFIG_SPIRAM_USE_MALLOC=y
+# AOS_BSS_PSRAM (aos_hal.h) puts big statics in PSRAM; without this it did nothing
+CONFIG_SPIRAM_ALLOW_BSS_SEG_EXTERNAL_MEMORY=y
+CONFIG_CACHE_L2_CACHE_256KB=y
+CONFIG_CACHE_L2_CACHE_LINE_128B=y
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=16384
+CONFIG_FREERTOS_HZ=1000
+CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS=y
+CONFIG_FREERTOS_USE_TRACE_FACILITY=y
+CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH=y
+
+# LVGL (provisional: bench variant lvB)
+CONFIG_LV_OS_FREERTOS=y
+CONFIG_LV_DRAW_SW_DRAW_UNIT_CNT=2
+CONFIG_LV_USE_CLIB_MALLOC=y
+CONFIG_LV_USE_CLIB_STRING=y
+CONFIG_LV_USE_CLIB_SPRINTF=y
+# no '.' or ':': an address or a time stays on one line (sim/lv_conf.h)
+CONFIG_LV_TXT_BREAK_CHARS=" ,;-_)}"
+# the portal's address as a QR in Settings, About
+CONFIG_LV_USE_QRCODE=y
+CONFIG_LV_DEF_REFR_PERIOD=15
+CONFIG_LV_OBJ_STYLE_CACHE=y
+CONFIG_LV_USE_SNAPSHOT=y
+CONFIG_LV_FONT_MONTSERRAT_14=n
+CONFIG_LV_FONT_DEFAULT_UNSCII_8=y
+CONFIG_LV_USE_LOG=y
+CONFIG_LV_LOG_PRINTF=y
+
+CONFIG_FATFS_LFN_HEAP=y
+CONFIG_FATFS_API_ENCODING_UTF_8=y
+CONFIG_LV_BUILD_EXAMPLES=n
+CONFIG_LV_BUILD_DEMOS=n
+
+# Wi-Fi through the C6 (esp_wifi_remote + esp_hosted over SDIO)
+CONFIG_ESP_WIFI_REMOTE_LIBRARY_HOSTED=y
+# The Wi-Fi buffers the board has run with since it arrived. They were in
+# the build's sdkconfig only, so a fresh checkout got IDF's defaults (16, 16
+# and no out-of-order limit) and a firmware that had never been on the board
+# (found building from scratch, 2026-10-01).
+CONFIG_WIFI_RMT_STATIC_RX_BUFFER_NUM=10
+CONFIG_WIFI_RMT_RX_BA_WIN=6
+CONFIG_LWIP_TCP_OOSEQ_MAX_PBUFS=4
+CONFIG_ESP_HOSTED_SDIO_HOST_INTERFACE=y
+# TLS for aos_http: the handshake in PSRAM (3.5 KB internal instead of 34.6)
+CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC=y
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=y
+CONFIG_MBEDTLS_CERTIFICATE_BUNDLE_DEFAULT_CMN=y
+
+# USB device on the OTG port (aos_usb_p4.c): one HID interface with keyboard,
+# consumer control and mouse reports (the Macro pad), or the card as a disk
+# two HID interfaces: the keyboard (with the media keys and the mouse) and
+# the gamepad on its own (aos_usb_p4.c says why)
+CONFIG_TINYUSB_HID_COUNT=2
+# suspend and resume in the log, for the first plug-in tests
+CONFIG_TINYUSB_SUSPEND_CALLBACK=y
+CONFIG_TINYUSB_RESUME_CALLBACK=y
+# disk mode: the microSD as a USB drive. The transfer buffer is in PSRAM
+# (aos_tusb_config.h), so it can be the largest the P4 allows.
+CONFIG_TINYUSB_MSC_ENABLED=y
+CONFIG_TINYUSB_MSC_BUFSIZE=32768
+CONFIG_TINYUSB_CDC_ENABLED=n
+# keyboard mode also brings MIDI and a network over the cable (CDC-NCM): the
+# portal at 192.168.7.1 with no Wi-Fi. The NCM buffers are in PSRAM
+# (aos_tusb_config.h): four each way.
+CONFIG_TINYUSB_MIDI_COUNT=1
+CONFIG_TINYUSB_NET_MODE_NCM=y
+CONFIG_TINYUSB_NCM_OUT_NTB_BUFFS_COUNT=4
+CONFIG_TINYUSB_NCM_IN_NTB_BUFFS_COUNT=4
+CONFIG_TINYUSB_DESC_MANUFACTURER_STRING="P4OS"
+CONFIG_TINYUSB_DESC_PRODUCT_STRING="P4OS Macro pad"
+
+# newlib gives each FILE a 128-byte buffer unless FATFS reports a block size:
+# fread from the card went 1.6 MB/s with it, 10.8 MB/s with 8 KB (measured on
+# the board, 2026-09-28). The buffer is per open file.
+CONFIG_FATFS_VFS_FSTAT_BLKSIZE=8192
+
+# LVGL asked for it on the board: opa layers are slow below ~90 KB (1/20 of the screen)
+CONFIG_LV_DRAW_LAYER_SIMPLE_BUF_SIZE=92160
+
+# Internal RAM is what runs out on this board (3,8 KB left with the home
+# screen and Wi-Fi up, 2026-09-28): only allocations under 1 KB go there by
+# default, as on the watch, and lwIP's buffers may live in PSRAM.
+CONFIG_SPIRAM_MALLOC_ALWAYSINTERNAL=1024
+CONFIG_SPIRAM_TRY_ALLOCATE_WIFI_LWIP=y
+
+# Stacks and statics in PSRAM (2026-09-29). Task stacks may live there as
+# long as the task never touches the flash: every flash operation suspends
+# the cache PSRAM sits behind, XIP from PSRAM or not. The preferences reach
+# NVS through aos_flash_call (aos_flashop_p4.c), which hands the job to a task
+# with an internal stack. mDNS never writes the flash.
+CONFIG_MDNS_TASK_CREATE_FROM_SPIRAM=y
+CONFIG_MDNS_MEMORY_ALLOC_SPIRAM=y
+# The default event loop's task runs our Wi-Fi handlers (they start the
+# services): 328 bytes of 2,3 KB were left on the board. It stays internal.
+CONFIG_ESP_SYSTEM_EVENT_TASK_STACK_SIZE=3584
+# LVGL's two software draw threads stay internal (they are the hottest
+# stacks), but used 1,2 KB of 8 at the deepest on the board: no FreeType and
+# no ThorVG, which are what LVGL's 8 KB default is sized for.
+CONFIG_LV_DRAW_THREAD_STACK_SIZE=4096
+
+# TCP: lwIP's default window is 4 segments (5,7 KB), and with the C6's
+# round trip that capped the portal at 170 KB/s (2026-09-29). Sending gets
+# 64 KB. The receive window stays under esp_hosted's SDIO queue (20
+# packets): at 64 KB the bursts overflowed it and uploads fell to 76 KB/s,
+# one of them cut. lwIP's buffers live in PSRAM (SPIRAM_TRY_ALLOCATE_WIFI_LWIP).
+CONFIG_LWIP_TCP_SND_BUF_DEFAULT=65534
+CONFIG_LWIP_TCP_WND_DEFAULT=23040
+CONFIG_LWIP_TCP_RECVMBOX_SIZE=64
+CONFIG_LWIP_UDP_RECVMBOX_SIZE=64
+CONFIG_LWIP_TCPIP_RECVMBOX_SIZE=64
+
+
+# Sockets: the portal's 8 connections, aos_tcp's 10 (cameras, MQTT, Modbus,
+# the scope), HA's WebSocket, aos_http's requests, mDNS, SNTP and DNS. lwIP's
+# 10 were shared by all of them. 32 leaves 32 descriptors for files.
+CONFIG_LWIP_MAX_SOCKETS=32
+
+# Apps on the card (.so), through components/elf_loader and aos_dynapp.
+# On the P4 data and instructions see PSRAM at the same addresses, so the
+# loader runs the code where it puts it (LOAD_PSRAM); the chip has no
+# executable heap at all.
+CONFIG_ELF_LOADER=y
+CONFIG_ELF_DYNAMIC_LOAD_SHARED_OBJECT=y
+CONFIG_ELF_FILE_SYSTEM_BASE_PATH="/sdcard"
+CONFIG_ELF_LOADER_LOAD_PSRAM=y
+CONFIG_ELF_LOADER_LIBC_SYMBOLS=y
+CONFIG_ELF_LOADER_ESPIDF_SYMBOLS=y
+CONFIG_ELF_LOADER_CUSTOMER_SYMBOLS=y
+CONFIG_ELF_LOADER_NUMBER_SYMBOLS=4
+# ...and for that the PSRAM heap has to be executable. With this on, the
+# PMP marks it read/write only (cpu_region_protect.c, entry 10 on a v1.3
+# chip) and an app's first instruction faults. The price: the firmware's
+# own code in PSRAM loses its write protection too. The next step is an
+# executable alias of the apps' pages above the heap (docs/APPS-P4.md).
+CONFIG_SPIRAM_PRE_CONFIGURE_MEMORY_PROTECTION=n
+
+# Firmware updates over Wi-Fi (aos_ota_p4.c): a new image boots on trial and
+# the bootloader brings the previous one back if it is not confirmed (main.c
+# confirms it after 30 s up). Needs the bootloader flashed once.
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
+# The log ring in PSRAM that a restart does not clear (aos_logring.c): the
+# previous boot's tail, after a panic, for the portal.
+CONFIG_SPIRAM_ALLOW_NOINIT_SEG_EXTERNAL_MEMORY=y
+
+# mDNS answers on the USB network too (aos_usb_net_p4.c): STA, AP, ETH are
+# predefined and take the default three
+CONFIG_MDNS_MAX_INTERFACES=4
+
+# Internal RAM audit (2026-09-30, docs/MEMORY.md "Internal RAM audit"): code
+# that does not have to run from internal RAM goes to flash (XIP from PSRAM).
+# The H.264 decoder's hot loops (21 KB of IRAM, used by the camera app only);
+# the heap's functions (8 KB: no IRAM interrupt of ours or of IDF's
+# allocates); FreeRTOS's and the ring buffer's non-ISR functions.
+CONFIG_ESP_H264_DECODER_IRAM=n
+CONFIG_HEAP_PLACE_FUNCTION_INTO_FLASH=y
+CONFIG_FREERTOS_PLACE_FUNCTIONS_INTO_FLASH=y
+CONFIG_RINGBUF_PLACE_FUNCTIONS_INTO_FLASH=y

@@ -1,0 +1,7 @@
+# p4bench cmd, 20260928-214453
+BENCH lvgl.cfg rotmode=0 rot=0 copy=dma2d fbs=1 rows=128 bmem=internal logical=720x1280 draw_units=2 os=1 ppa_draw=0
+BENCH info chip=esp32p4 rev=v1.3 cores=2 cpu_mhz=360 flash_mb=32 flash_id=0xc84019 psram_mb=32 idf=c94f345e-dirty build=Sep 28 2026_20:58:06 reset=sw rev_min_cfg=100
+BENCH mem int_free=257479 int_largest=172032 psram_free=28614692 psram_largest=28311552 dma_free=217907
+BENCH wifi.init ok=1 err=ESP_OK ms=2212
+BENCH hosted.fw ok=0 major=0 minor=0 patch=0
+BENCH wifi.up ok=1 ms=4142 ip=<board-ip> rssi=-42 channel=6 ax=1 n=1

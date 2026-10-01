@@ -1,0 +1,80 @@
+# amoledos-lang 1   es -> en
+# demo.topos.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/topos/main/topos.c:57
+Clásico	Classic
+
+#: apps/topos/main/topos.c:57
+Supervivencia	Survival
+
+#: apps/topos/main/topos.c:57
+Frenesí	Frenzy
+
+#: apps/topos/main/topos.c:60
+60 segundos	60 seconds
+
+#: apps/topos/main/topos.c:60
+Tres vidas	Three lives
+
+#: apps/topos/main/topos.c:60
+30 segundos a fondo	30 seconds flat out
+
+#: apps/topos/main/topos.c:360
+Sonido	Sound
+
+#: apps/topos/main/topos.c:396
+¡Ya!	Go!
+
+#: apps/topos/main/topos.c:399
+Nivel	Level
+
+#: apps/topos/main/topos.c:406
+¡Últimos 10 segundos!	Last 10 seconds!
+
+#: apps/topos/main/topos.c:409
+¡Tiempo!	Time's up!
+
+#: apps/topos/main/topos.c:415
+¡Sin vidas!	No lives left!
+
+#: apps/topos/main/topos.c:506
+¡Nuevo récord!	New best!
+
+#: apps/topos/main/topos.c:506
+¡Se acabó!	Game over!
+
+#: apps/topos/main/topos.c:515
+Golpes	Hits
+
+#: apps/topos/main/topos.c:516
+Mejor racha	Best streak
+
+#: apps/topos/main/topos.c:519
+Récord	Best
+
+#: apps/topos/main/topos.c:804
+#: apps/topos/main/topos.c:808
+Topos	Whack-a-Mole
+
+#: apps/topos/main/topos.c:837
+Tocá los topos; los de casco, dos veces. ¡Las bombas no!	Tap the moles; the ones in hard hats, twice. Not the bombs!
+
+#: apps/topos/main/topos.c:853
+Pausa	Paused
+
+#: apps/topos/main/topos.c:855
+Seguir	Resume
+
+#: apps/topos/main/topos.c:857
+#: apps/topos/main/topos.c:889
+Menú	Menu
+
+#: apps/topos/main/topos.c:859
+Salir	Exit
+
+#: apps/topos/main/topos.c:886
+Otra vez	Again

@@ -1,0 +1,61 @@
+# amoledos-lang 1   es -> en
+# aos.mines.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/buscaminas/main/buscaminas.c:53
+Fácil	Easy
+
+#: apps/buscaminas/main/buscaminas.c:53
+Medio	Medium
+
+#: apps/buscaminas/main/buscaminas.c:53
+Difícil	Hard
+
+#: apps/buscaminas/main/buscaminas.c:53
+Experto	Expert
+
+#: apps/buscaminas/main/buscaminas.c:53
+Maestro	Master
+
+#: apps/buscaminas/main/buscaminas.c:461
+Récord %s	Record %s
+
+#: apps/buscaminas/main/buscaminas.c:464
+Sin récord	No record
+
+#: apps/buscaminas/main/buscaminas.c:477
+¡Ganaste!	You won!
+
+#: apps/buscaminas/main/buscaminas.c:481
+%s, nuevo récord	%s, new record
+
+#: apps/buscaminas/main/buscaminas.c:484
+¡Boom!	Boom!
+
+#: apps/buscaminas/main/buscaminas.c:486
+Pisaste una mina	You stepped on a mine
+
+#: apps/buscaminas/main/buscaminas.c:949
+Dificultad	Difficulty
+
+#: apps/buscaminas/main/buscaminas.c:969
+%d\xC3\x97%d, %d minas	%d\xC3\x97%d, %d mines
+
+#: apps/buscaminas/main/buscaminas.c:1055
+Cavar	Dig
+
+#: apps/buscaminas/main/buscaminas.c:1061
+Bandera	Flag
+
+#: apps/buscaminas/main/buscaminas.c:1078
+Jugar otra	Play again
+
+#: apps/buscaminas/main/buscaminas.c:1144
+#: apps/buscaminas/main/buscaminas.c:1167
+minas	mines
+
+#: apps/buscaminas/main/buscaminas.c:1195
+Sin memoria	Out of memory

@@ -1,0 +1,5 @@
+# p4bench cmd, 20260928-195414
+BENCH lvgl.cfg rot=0 copy=ppa fbs=2 rows=80 bmem=internal logical=720x1280 draw_units=2 os=1 ppa_draw=0
+BENCH mem int_free=276507 int_largest=188416 psram_free=26912272 psram_largest=26738688 dma_free=236935
+BENCH sd.speed khz=40000 mb=4 chunk_kb=32 write_MBps=8.14 read_MBps=0.08 small4k_write_ms=11.25 small4k_read_ms=4.29
+BENCH sd.speed khz=40000 mb=4 chunk_kb=256 write_MBps=4.91 read_MBps=0.08 small4k_write_ms=11.50 small4k_read_ms=4.23

@@ -1,0 +1,92 @@
+# amoledos-lang 1   es -> en
+# aos.tuner.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/afinador/main/afinador.c:497
+referencia	reference
+
+#: apps/afinador/main/afinador.c:501
+soltando el códec	releasing the codec
+
+#: apps/afinador/main/afinador.c:501
+sonando	playing
+
+#: apps/afinador/main/afinador.c:514
+#: apps/afinador/main/afinador.c:668
+no abrió el micrófono	the microphone didn't open
+
+#: apps/afinador/main/afinador.c:515
+#: apps/afinador/main/afinador.c:668
+abriendo el micrófono	opening the microphone
+
+#: apps/afinador/main/afinador.c:529
+satura: alejate del micrófono	clipping: move away from the mic
+
+#: apps/afinador/main/afinador.c:530
+tocá una cuerda	play a string
+
+#: apps/afinador/main/afinador.c:546
+afinada	in tune
+
+#: apps/afinador/main/afinador.c:549
+casi: subila un poco	close: up a little
+
+#: apps/afinador/main/afinador.c:549
+casi: bajala un poco	close: down a little
+
+#: apps/afinador/main/afinador.c:551
+subila	tune it up
+
+#: apps/afinador/main/afinador.c:551
+bajala	tune it down
+
+#: apps/afinador/main/afinador.c:565
+satura	clipping
+
+#: apps/afinador/main/afinador.c:703
+Leq de %u:%02u	Leq over %u:%02u
+
+#: apps/afinador/main/afinador.c:708
+%u kHz  ·  PGA %d dB  ·  ponderación A, rápida	%u kHz  ·  PGA %d dB  ·  A-weighted, fast
+
+#: apps/afinador/main/afinador.c:716
+SATURA: el número no vale	CLIPPING: the reading is invalid
+
+#: apps/afinador/main/afinador.c:719
+a %u Hz la curva A vale hasta 4 kHz	at %u Hz the A curve is good to 4 kHz
+
+#: apps/afinador/main/afinador.c:725
+dB relativos hasta que lo calibres	relative dB until you calibrate it
+
+#: apps/afinador/main/afinador.c:1129
+Tono	Tone
+
+#: apps/afinador/main/afinador.c:1144
+tocá una cuerda para oír su nota	tap a string to hear its note
+
+#: apps/afinador/main/afinador.c:1145
+escuchar y sonar no van juntos	listening and playing do not mix
+
+#: apps/afinador/main/afinador.c:1251
+mínimo	minimum
+
+#: apps/afinador/main/afinador.c:1253
+máximo	maximum
+
+#: apps/afinador/main/afinador.c:1261
+últimos 60 s	last 60 s
+
+#: apps/afinador/main/afinador.c:1305
+Reiniciar	Reset
+
+#: apps/afinador/main/afinador.c:1353
+Afinador	Tuner
+
+#: apps/afinador/main/afinador.c:1353
+Sonómetro	Sound meter
+
+#: apps/afinador/main/afinador.c:1394
+sin memoria	out of memory

@@ -1,0 +1,102 @@
+# amoledos-lang 1   es -> de
+# demo.burbujas.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/burbujas/main/burbujas.c:54
+Clásico	Klassisch
+
+#: apps/burbujas/main/burbujas.c:54
+Niveles	Level
+
+#: apps/burbujas/main/burbujas.c:54
+Contrarreloj	Zeitrennen
+
+#: apps/burbujas/main/burbujas.c:57
+Sin fin	Endlos
+
+#: apps/burbujas/main/burbujas.c:57
+Despejá el tablero	Feld leerräumen
+
+#: apps/burbujas/main/burbujas.c:57
+Dos minutos	Zwei Minuten
+
+#: apps/burbujas/main/burbujas.c:359
+#: apps/burbujas/main/burbujas.c:405
+#: apps/burbujas/main/burbujas.c:551
+Nivel	Level
+
+#: apps/burbujas/main/burbujas.c:372
+Sonido	Ton
+
+#: apps/burbujas/main/burbujas.c:409
+¡Un color más!	Eine Farbe mehr!
+
+#: apps/burbujas/main/burbujas.c:412
+¡Tablero limpio!	Feld leer!
+
+#: apps/burbujas/main/burbujas.c:415
+¡Bomba!	Bombe!
+
+#: apps/burbujas/main/burbujas.c:415
+¡Comodín!	Joker!
+
+#: apps/burbujas/main/burbujas.c:419
+¡Últimos 10 segundos!	Letzte 10 Sekunden!
+
+#: apps/burbujas/main/burbujas.c:422
+#: apps/burbujas/main/burbujas.c:543
+¡Tiempo!	Zeit um!
+
+#: apps/burbujas/main/burbujas.c:426
+#: apps/burbujas/main/burbujas.c:541
+¡Nivel superado!	Level geschafft!
+
+#: apps/burbujas/main/burbujas.c:430
+#: apps/burbujas/main/burbujas.c:541
+#: apps/burbujas/main/burbujas.c:544
+¡Se acabó!	Vorbei!
+
+#: apps/burbujas/main/burbujas.c:542
+¡Nuevo récord!	Neuer Rekord!
+
+#: apps/burbujas/main/burbujas.c:561
+Reventadas	Geplatzt
+
+#: apps/burbujas/main/burbujas.c:562
+Mejor caída	Bester Sturz
+
+#: apps/burbujas/main/burbujas.c:566
+Mejor nivel	Bestes Level
+
+#: apps/burbujas/main/burbujas.c:569
+Récord	Rekord
+
+#: apps/burbujas/main/burbujas.c:574
+Siguiente	Weiter
+
+#: apps/burbujas/main/burbujas.c:574
+#: apps/burbujas/main/burbujas.c:911
+Otra vez	Nochmal
+
+#: apps/burbujas/main/burbujas.c:851
+#: apps/burbujas/main/burbujas.c:855
+Burbujas	Blasen
+
+#: apps/burbujas/main/burbujas.c:869
+Arrastrá para apuntar y soltá para tirar. Tocá abajo para cambiar la burbuja.	Zum Zielen ziehen, zum Schießen loslassen. Unten tippen zum Tauschen.
+
+#: apps/burbujas/main/burbujas.c:887
+Pausa	Pause
+
+#: apps/burbujas/main/burbujas.c:888
+Seguir	Weiter
+
+#: apps/burbujas/main/burbujas.c:890
+#: apps/burbujas/main/burbujas.c:914
+Menú	Menü
+
+#: apps/burbujas/main/burbujas.c:892
+Salir	Beenden

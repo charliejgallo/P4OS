@@ -1,0 +1,225 @@
+# amoledos-lang 1   es -> en
+# demo.turbo.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/turbo/main/tb_link.c:134
+#: apps/turbo/main/tb_link.c:367
+Esperando a	Waiting for
+
+#: apps/turbo/main/tb_link.c:135
+El tramo lo elige el reloj anfitrión.	The host watch picks the stage.
+
+#: apps/turbo/main/tb_link.c:142
+El enlace no arrancó	The link did not start
+
+#: apps/turbo/main/tb_link.c:224
+El otro reloj tiene otra versión de Turbo.	The other watch has another version of Turbo.
+
+#: apps/turbo/main/tb_link.c:225
+Actualizá los dos para correr juntos.	Update both to race together.
+
+#: apps/turbo/main/tb_link.c:252
+#: apps/turbo/main/tb_link.c:332
+#: apps/turbo/main/tb_link.c:394
+%s salió de la carrera	%s left the race
+
+#: apps/turbo/main/tb_link.c:344
+#: apps/turbo/main/tb_link.c:376
+Sin señal de %s	No signal from %s
+
+#: apps/turbo/main/turbo.c:915
+TIEMPO	TIME
+
+#: apps/turbo/main/turbo.c:916
+km/h	km/h
+
+#: apps/turbo/main/turbo.c:917
+¡TIEMPO EXTRA!	EXTENDED TIME!
+
+#: apps/turbo/main/turbo.c:918
+¡YA!	GO!
+
+#: apps/turbo/main/turbo.c:919
+#: apps/turbo/main/turbo.c:1178
+¡LLEGADA!	FINISH!
+
+#: apps/turbo/main/turbo.c:920
+#: apps/turbo/main/turbo.c:1178
+SIN TIEMPO	TIME UP
+
+#: apps/turbo/main/turbo.c:921
+¡APURATE!	HURRY UP!
+
+#: apps/turbo/main/turbo.c:1024
+Cargando	Loading
+
+#: apps/turbo/main/turbo.c:1117
+Tiempo	Time
+
+#: apps/turbo/main/turbo.c:1118
+Recorrido	Covered
+
+#: apps/turbo/main/turbo.c:1119
+Récord	Record
+
+#: apps/turbo/main/turbo.c:1120
+  ¡nuevo!	  new!
+
+#: apps/turbo/main/turbo.c:1121
+Punta	Top
+
+#: apps/turbo/main/turbo.c:1122
+choques	crashes
+
+#: apps/turbo/main/turbo.c:1126
+Gira	Tour
+
+#: apps/turbo/main/turbo.c:1127
+¡Gira completa!	Tour complete!
+
+#: apps/turbo/main/turbo.c:1132
+todavía corre...	still racing...
+
+#: apps/turbo/main/turbo.c:1139
+¡Ganaste!	You win!
+
+#: apps/turbo/main/turbo.c:1139
+Ganó el otro reloj	The other watch won
+
+#: apps/turbo/main/turbo.c:1149
+monedas	coins
+
+#: apps/turbo/main/turbo.c:1181
+Siguiente	Next
+
+#: apps/turbo/main/turbo.c:1181
+Menú	Menu
+
+#: apps/turbo/main/turbo.c:1429
+Contra	Against
+
+#: apps/turbo/main/turbo.c:1449
+carreras contra el reloj	races against the clock
+
+#: apps/turbo/main/turbo.c:1455
+Gira completa	Full tour
+
+#: apps/turbo/main/turbo.c:1456
+#: apps/turbo/main/turbo.c:1499
+Contrarreloj	Time trial
+
+#: apps/turbo/main/turbo.c:1459
+#: apps/turbo/main/turbo.c:1641
+Garage	Garage
+
+#: apps/turbo/main/turbo.c:1460
+#: apps/turbo/main/turbo.c:1788
+Ajustes	Settings
+
+#: apps/turbo/main/turbo.c:1473
+Se abre con una gira	Opens with a tour
+
+#: apps/turbo/main/turbo.c:1474
+Terminá	Finish
+
+#: apps/turbo/main/turbo.c:1499
+Elegí el tramo	Pick the stage
+
+#: apps/turbo/main/turbo.c:1513
+récord	record
+
+#: apps/turbo/main/turbo.c:1571
+Comprar	Buy
+
+#: apps/turbo/main/turbo.c:1572
+Tu auto	Your car
+
+#: apps/turbo/main/turbo.c:1572
+Elegir	Choose
+
+#: apps/turbo/main/turbo.c:1606
+No alcanzan las monedas	Not enough coins
+
+#: apps/turbo/main/turbo.c:1657
+Velocidad	Speed
+
+#: apps/turbo/main/turbo.c:1657
+Aceleración	Acceleration
+
+#: apps/turbo/main/turbo.c:1657
+Agarre	Grip
+
+#: apps/turbo/main/turbo.c:1657
+Todo terreno	Off-road
+
+#: apps/turbo/main/turbo.c:1789
+Fácil	Easy
+
+#: apps/turbo/main/turbo.c:1789
+Normal	Normal
+
+#: apps/turbo/main/turbo.c:1789
+Difícil	Hard
+
+#: apps/turbo/main/turbo.c:1790
+Dificultad	Difficulty
+
+#: apps/turbo/main/turbo.c:1791
+Volante	Wheel
+
+#: apps/turbo/main/turbo.c:1791
+Flechas	Arrows
+
+#: apps/turbo/main/turbo.c:1792
+Dirección	Steering
+
+#: apps/turbo/main/turbo.c:1793
+Suave	Gentle
+
+#: apps/turbo/main/turbo.c:1793
+Medio	Medium
+
+#: apps/turbo/main/turbo.c:1793
+Rápido	Quick
+
+#: apps/turbo/main/turbo.c:1794
+Sensibilidad	Sensitivity
+
+#: apps/turbo/main/turbo.c:1796
+Acelerar solo	Auto throttle
+
+#: apps/turbo/main/turbo.c:1797
+Sonido	Sound
+
+#: apps/turbo/main/turbo.c:1802
+Volante: arrastrá el pulgar izquierdo de costado. Pedales a la derecha: freno y acelerador.	Wheel: drag your left thumb sideways. Pedals on the right: brake and throttle.
+
+#: apps/turbo/main/turbo.c:1875
+Otra vez	Again
+
+#: apps/turbo/main/turbo.c:1884
+Pausa	Pause
+
+#: apps/turbo/main/turbo.c:1885
+Seguir	Resume
+
+#: apps/turbo/main/turbo.c:1886
+Reiniciar	Restart
+
+#: apps/turbo/main/turbo.c:1887
+Salir al menú	Back to menu
+
+#: apps/turbo/main/turbo.c:1891
+Contra el otro reloj	Against the other watch
+
+#: apps/turbo/main/turbo.c:1893
+Cancelar	Cancel
+
+#: apps/turbo/main/turbo.c:1899
+Cargando...	Loading...
+
+#: apps/turbo/main/turbo.c:2110
+No hay memoria para el tramo	Not enough memory for the stage

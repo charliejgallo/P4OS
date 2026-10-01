@@ -1,0 +1,7 @@
+# LVGL variant C: B plus the PPA as a draw unit (fills and images)
+CONFIG_LV_OS_FREERTOS=y
+CONFIG_LV_DRAW_SW_DRAW_UNIT_CNT=2
+CONFIG_LV_USE_PPA=y
+CONFIG_LV_USE_PPA_IMG=y
+# the PPA draw unit refuses to build unless draw buffers are aligned to the L2 line
+CONFIG_LV_DRAW_BUF_ALIGN=128
