@@ -13,7 +13,7 @@ Clima: próximamente	Wetter: demnächst
 
 #: components/aos_ui/aos_home.c:758
 #: components/aos_ui/aos_home.c:990
-#: components/aos_apps/aos_app_bus.c:1083
+#: components/aos_apps/aos_app_bus.c:1102
 #: components/aos_apps/aos_app_files.c:3502
 Listo	Fertig
 
@@ -67,7 +67,7 @@ Home Assistant	Home Assistant
 Sin notificaciones	Keine Mitteilungen
 
 #: components/aos_ui/aos_panels.c:436
-#: components/aos_apps/aos_app_bus.c:1083
+#: components/aos_apps/aos_app_bus.c:1102
 Borrar todo	Alle löschen
 
 #: components/aos_ui/aos_panels.c:470
@@ -440,14 +440,14 @@ Enviando…	Wird gesendet…
 %s no está en modules.txt	%s steht nicht in modules.txt
 
 #: components/aos_apps/aos_app_bus.c:795
-#: components/aos_apps/aos_app_bus.c:1400
+#: components/aos_apps/aos_app_bus.c:1419
 GPIO%d lo tiene %s	GPIO%d belegt von %s
 
 #: components/aos_apps/aos_app_bus.c:796
 El módulo %s no tiene un cs= que sirva	Das Modul %s hat kein brauchbares cs=
 
 #: components/aos_apps/aos_app_bus.c:797
-#: components/aos_apps/aos_app_bus.c:1583
+#: components/aos_apps/aos_app_bus.c:1602
 #: components/aos_apps/aos_app_flasher.c:885
 #: components/aos_apps/aos_app_modules.c:322
 No se pudo abrir el puerto	Port konnte nicht geöffnet werden
@@ -491,89 +491,98 @@ Termocupla %.2f °C · chip %.2f °C	Thermoelement %.2f °C · Chip %.2f °C
 #: components/aos_apps/aos_app_bus.c:862
 Canal %d: %d de 1023\n%.3f V con VREF de 3.3 V	Kanal %d: %d von 1023\n%.3f V bei 3,3 V VREF
 
-#: components/aos_apps/aos_app_bus.c:897
+#: components/aos_apps/aos_app_bus.c:876
+Contestó %s (versión %02X): el lector está bien conectado	%s hat geantwortet (Version %02X): der Leser ist richtig angeschlossen
+
+#: components/aos_apps/aos_app_bus.c:880
+Contestó %02X: no es una versión de RC522 conocida. ¿RST a 3V3? ¿El CS es el SDA del módulo?	Antwort %02X: keine bekannte RC522-Version. Liegt RST auf 3V3? Ist CS der SDA-Pin des Moduls?
+
+#: components/aos_apps/aos_app_bus.c:915
 Tocá Enviar o un ejemplo.	Senden oder ein Beispiel antippen.
 
-#: components/aos_apps/aos_app_bus.c:925
+#: components/aos_apps/aos_app_bus.c:943
 1 byte · tocá para editar	1 Byte · zum Bearbeiten antippen
 
-#: components/aos_apps/aos_app_bus.c:926
+#: components/aos_apps/aos_app_bus.c:944
 %d bytes · tocá para editar	%d Bytes · zum Bearbeiten antippen
 
-#: components/aos_apps/aos_app_bus.c:946
+#: components/aos_apps/aos_app_bus.c:964
 sin CS	ohne CS
 
-#: components/aos_apps/aos_app_bus.c:947
+#: components/aos_apps/aos_app_bus.c:965
 GPIO%d · puerto	GPIO%d · vom Port
 
-#: components/aos_apps/aos_app_bus.c:1072
+#: components/aos_apps/aos_app_bus.c:1091
 Bytes a enviar, hasta %d	Zu sendende Bytes, bis zu %d
 
-#: components/aos_apps/aos_app_bus.c:1180
+#: components/aos_apps/aos_app_bus.c:1199
 #: components/aos_apps/aos_app_serial.c:958
 Enviar	Senden
 
-#: components/aos_apps/aos_app_bus.c:1199
+#: components/aos_apps/aos_app_bus.c:1218
 #: components/aos_apps/aos_app_clock.c:1039  (nombre de app)
 Reloj	Uhr
 
-#: components/aos_apps/aos_app_bus.c:1208
+#: components/aos_apps/aos_app_bus.c:1227
 Modo (CPOL, CPHA)	Modus (CPOL, CPHA)
 
-#: components/aos_apps/aos_app_bus.c:1211
+#: components/aos_apps/aos_app_bus.c:1230
 Chip select	Chip Select
 
-#: components/aos_apps/aos_app_bus.c:1223
+#: components/aos_apps/aos_app_bus.c:1242
 Primero va el bit	Bitreihenfolge
 
-#: components/aos_apps/aos_app_bus.c:1230
+#: components/aos_apps/aos_app_bus.c:1249
 BYTES A ENVIAR	ZU SENDENDE BYTES
 
-#: components/aos_apps/aos_app_bus.c:1264
+#: components/aos_apps/aos_app_bus.c:1283
 RESULTADO	ERGEBNIS
 
-#: components/aos_apps/aos_app_bus.c:1282
+#: components/aos_apps/aos_app_bus.c:1301
 EJEMPLOS	BEISPIELE
 
-#: components/aos_apps/aos_app_bus.c:1287
+#: components/aos_apps/aos_app_bus.c:1306
 Memoria flash: leer ID (9F)	Flash-Speicher: ID lesen (9F)
 
-#: components/aos_apps/aos_app_bus.c:1287
+#: components/aos_apps/aos_app_bus.c:1306
 MAX31855: temperatura	MAX31855: Temperatur
 
-#: components/aos_apps/aos_app_bus.c:1288
+#: components/aos_apps/aos_app_bus.c:1307
 MCP3008: canal	MCP3008: Kanal
 
-#: components/aos_apps/aos_app_bus.c:1288
+#: components/aos_apps/aos_app_bus.c:1307
+RC522 (RFID): leer la versión	RC522 (RFID): Version lesen
+
+#: components/aos_apps/aos_app_bus.c:1307
 Lazo: puentear los pines 34 y 36	Schleife: Pins 34 und 36 brücken
 
-#: components/aos_apps/aos_app_bus.c:1338
+#: components/aos_apps/aos_app_bus.c:1357
 No hay puertos SPI	Keine SPI-Ports
 
-#: components/aos_apps/aos_app_bus.c:1340
+#: components/aos_apps/aos_app_bus.c:1359
 Agregá uno a modules.txt (Módulos > Puertos), por ejemplo:	Einen in modules.txt eintragen (Module > Ports), zum Beispiel:
 
-#: components/aos_apps/aos_app_bus.c:1432
+#: components/aos_apps/aos_app_bus.c:1451
 #: components/aos_apps/aos_app_modules.c:55
 Header	Header
 
-#: components/aos_apps/aos_app_bus.c:1434
+#: components/aos_apps/aos_app_bus.c:1453
 Soltar	Freigeben
 
-#: components/aos_apps/aos_app_bus.c:1436
+#: components/aos_apps/aos_app_bus.c:1455
 Tocá el modo para cambiarlo. En OUT, tocá el nivel para invertirlo. Los pines quedan así al cerrar la app, hasta que los sueltes.	Modus antippen, um ihn zu ändern. Bei OUT den Pegel antippen, um ihn umzukehren. Die Pins bleiben nach dem Schließen der App so, bis du sie freigibst.
 
-#: components/aos_apps/aos_app_bus.c:1465
+#: components/aos_apps/aos_app_bus.c:1484
 #: components/aos_apps/aos_app_modules.c:360
 #: components/aos_apps/aos_app_modules.c:447
 reservado	reserviert
 
-#: components/aos_apps/aos_app_bus.c:1465
+#: components/aos_apps/aos_app_bus.c:1484
 #: components/aos_apps/aos_app_modules.c:360
 #: components/aos_apps/aos_app_settings.c:797
 de la placa	Platine
 
-#: components/aos_apps/aos_app_bus.c:1496
+#: components/aos_apps/aos_app_bus.c:1515
 IN ↑ / IN ↓: con pull-up o pull-down interno. Los pines 35 a 39 van por el LDO VO4: medí antes de colgarles algo.	IN ↑ / IN ↓: mit internem Pull-up bzw. Pull-down. Die Pins 35 bis 39 hängen am LDO VO4: vor dem Anschließen messen.
 
 #: components/aos_apps/aos_app_calc.c:63
@@ -4683,7 +4692,7 @@ Capacidad	Kapazität
 
 #: components/aos_apps/aos_app_settings.c:1134
 #: components/aos_apps/aos_app_sysmon.c:1229
-#: components/aos_apps/aos_app_bus.c:1659  (nombre de app)
+#: components/aos_apps/aos_app_bus.c:1678  (nombre de app)
 Bus	Bus
 
 #: components/aos_apps/aos_app_settings.c:1138

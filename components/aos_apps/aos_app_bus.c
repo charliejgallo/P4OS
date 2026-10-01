@@ -62,7 +62,7 @@ static const uint32_t CLOCKS[] = { 100000, 250000, 500000, 1000000, 2000000, 400
 #define SPI_MAX   64                        /* bytes in one transfer from here */
 
 /* What a transfer was for, so its reply can be read */
-enum { P_NONE = -1, P_FLASH, P_TC, P_ADC, P_LOOP, P_COUNT };
+enum { P_NONE = -1, P_FLASH, P_TC, P_ADC, P_RFID, P_LOOP, P_COUNT };
 
 /* Why a transfer did not happen */
 enum { E_NONE, E_PORT, E_PIN, E_CS_MOD, E_OPEN, E_XFER };
@@ -811,7 +811,7 @@ static void spi_decode(char *t, size_t n, lv_color_t *col)
     int preset = S.res_preset;
     if (preset == P_NONE && len >= 4 && tx[0] == 0x9F) preset = P_FLASH;
     bool ff = true, zero = true;
-    int from = preset == P_FLASH ? 1 : preset == P_ADC ? 1 : 0;   /* what counts as the chip's reply */
+    int from = preset == P_FLASH || preset == P_ADC || preset == P_RFID ? 1 : 0;   /* what counts as the chip's reply */
     for (int i = from; i < len; i++) { ff &= rx[i] == 0xFF; zero &= rx[i] == 0x00; }
     if (len > from && ff) { snprintf(t, n, "%s", _("Todo 0xFF: no contestó nadie (MISO quedó en 1). ¿Alimentación, CS, cables?")); *col = AOS_C_ORANGE; return; }
     if (len > from && zero) { snprintf(t, n, "%s", _("Todo 0x00: MISO quedó en 0. ¿Está a masa, o el chip sin alimentar?")); *col = AOS_C_ORANGE; return; }
@@ -861,6 +861,24 @@ static void spi_decode(char *t, size_t n, lv_color_t *col)
         int code = (rx[1] & 3) << 8 | rx[2];
         snprintf(t, n, _("Canal %d: %d de 1023\n%.3f V con VREF de 3.3 V"), S.res_ch, code, (double)(code * 3.3f / 1024.0f));
         *col = AOS_C_GREEN;
+        return;
+    }
+    case P_RFID: {
+        /* VersionReg (0x37): NXP's two silicon versions, and the clones
+         * the cheap boards carry, which work all the same */
+        if (len < 2) break;
+        static const struct { uint8_t v; const char *name; } VER[] = {
+            { 0x91, "MFRC522 v1.0" }, { 0x92, "MFRC522 v2.0" }, { 0x90, "MFRC522 v0.0" },
+            { 0x88, "FM17522 (clon)" }, { 0xB2, "FM17522E (clon)" }, { 0x12, "clon (sin marca)" },
+        };
+        for (size_t i = 0; i < sizeof VER / sizeof VER[0]; i++)
+            if (VER[i].v == rx[1]) {
+                snprintf(t, n, _("Contestó %s (versión %02X): el lector está bien conectado"), VER[i].name, rx[1]);
+                *col = AOS_C_GREEN;
+                return;
+            }
+        snprintf(t, n, _("Contestó %02X: no es una versión de RC522 conocida. ¿RST a 3V3? ¿El CS es el SDA del módulo?"), rx[1]);
+        *col = AOS_C_ORANGE;
         return;
     }
     default: break;
@@ -994,6 +1012,7 @@ static void preset(int which)
     case P_FLASH: S.tx[0] = 0x9F; S.tx[1] = S.tx[2] = S.tx[3] = 0; S.txn = 4; break;
     case P_TC:    memset(S.tx, 0, 4); S.txn = 4; break;
     case P_ADC:   S.tx[0] = 0x01; S.tx[1] = (uint8_t)(0x80 | S.adc_ch << 4); S.tx[2] = 0; S.txn = 3; break;
+    case P_RFID:  S.tx[0] = 0x80 | 0x37 << 1; S.tx[1] = 0; S.txn = 2; break;    /* read VersionReg */
     case P_LOOP:  memcpy(S.tx, LOOP, sizeof LOOP); S.txn = sizeof LOOP; break;
     default: return;
     }
@@ -1285,9 +1304,9 @@ static void build_spi_presets(lv_obj_t *parent, int32_t w)
     lv_obj_set_flex_flow(g, LV_FLEX_FLOW_COLUMN);
     static const char *const NAME[P_COUNT] = {
         N_("Memoria flash: leer ID (9F)"), N_("MAX31855: temperatura"),
-        N_("MCP3008: canal"), N_("Lazo: puentear los pines 34 y 36"),
+        N_("MCP3008: canal"), N_("RC522 (RFID): leer la versión"), N_("Lazo: puentear los pines 34 y 36"),
     };
-    static const char *const GLYPH[P_COUNT] = { AOS_SYM_MEMORY, AOS_SYM_THERMOMETER, AOS_SYM_GAUGE, AOS_SYM_SWAP_HORIZONTAL };
+    static const char *const GLYPH[P_COUNT] = { AOS_SYM_MEMORY, AOS_SYM_THERMOMETER, AOS_SYM_GAUGE, AOS_SYM_LOCK, AOS_SYM_SWAP_HORIZONTAL };
     const int32_t rh = U.land ? 80 : AOS_UI_ROW_H;
     for (int i = 0; i < P_COUNT; i++) {
         lv_obj_t *r = box(g, lv_pct(100), rh);
