@@ -96,7 +96,7 @@ Del sistema:
 - [x] Doom con cambio de búfer: 35 fps y sin corte posible entre cuadros.
 
 Que necesitan la mano del usuario o equipos:
-- [x] SPI en el conector (2026-10-01): el lazo del pin 34 al 36 a 40 MHz,
+- [x] SPI en el conector (2026-10-01): el lazo del pin 34 al 36 a 1, 10 y 40 MHz,
       los 16 bytes de vuelta (captura en el README). Con el puerto abierto,
       314 KB de interna libre. Falta un chip real: un RC522 (ejemplo nuevo
       en Bus, `44bbace`), y una memoria flash.
