@@ -39,7 +39,17 @@ of the apps came from there, redrawn for a screen five times larger.
 </p>
 
 <p align="center"><em>The captures come from the simulator, which draws the
-same pixels as the board. Photos of the board itself are on the way.</em></p>
+same pixels as the board.</em></p>
+
+<p align="center">
+  <img src="docs/img/photo-modules-bme280.jpg" width="300" alt="The board reading a BME280 on the rear header, in Modules">
+  <img src="docs/img/photo-bus-bme280.jpg" width="300" alt="Bus finding the BME280 at 0x76">
+  <img src="docs/img/board-spi-loop.png" width="225" alt="Bus's SPI loopback at 40 MHz, captured from the board">
+</p>
+
+<p align="center"><em>And on the board: a BME280 on the rear header, found by
+itself in Modules and by the scan in Bus, and the SPI loopback at 40 MHz
+(that one is a capture from the panel, over HTTP).</em></p>
 
 ---
 
@@ -210,12 +220,13 @@ test layouts.
 - The microSD, music and the speaker.
 - The games and most of the tools, in both orientations.
 - The BOOT button and safe mode.
-- An I2C and SPI scan of the header with nothing attached.
+- I2C with a real BME280 on the header: found by itself, read once a second
+  without errors. SPI with MOSI looped to MISO at 1, 10 and 40 MHz.
 - Settings' Storage page and the QR codes.
 
 **Waiting for hardware on the bench:**
 
-- Real I2C and SPI chips.
+- More I2C and SPI chips: an RC522 RFID reader is next.
 - The programmer against another ESP32.
 - The Riden over TTL, the Rigol over the LAN, and the terminal at 460800.
 - The IP cameras.
@@ -360,7 +371,7 @@ idioma de la tarjeta. Los documentos del plan y de las pruebas en la placa
 | | |
 |---|---|
 | Qué hace | inicio con carpetas, 20 apps propias y 30 de la tarjeta (juegos, mapas, radio, video, Lua), portal web, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, y taller con I2C, SPI y GPIO |
-| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el botón BOOT |
-| Qué falta | Bluetooth, probar chips reales en el conector, las cámaras, y un cuelgue raro tras reiniciar |
+| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el botón BOOT, un BME280 por I2C y SPI en lazo a 40 MHz |
+| Qué falta | Bluetooth, más chips en el conector (un lector RFID), las cámaras, y un cuelgue raro tras reiniciar |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
 | Cómo se instala | la primera vez por el CH340; después `tools/ota.sh p4os.local` o el portal |
