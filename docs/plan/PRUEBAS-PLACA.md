@@ -99,10 +99,23 @@ Que necesitan la mano del usuario o equipos:
 - [x] SPI en el conector (2026-10-01): el lazo del pin 34 al 36 a 40 MHz,
       los 16 bytes de vuelta (captura en el README). Con el puerto abierto,
       314 KB de interna libre. Falta un chip real: un RC522 (ejemplo nuevo
-      en Bus, `c523b01`), y una memoria flash.
+      en Bus, `44bbace`), y una memoria flash.
 - [x] I2C con un BME280 real (2026-10-01): en i2c.ext (pines 15/17, 3V3 en
       el 18), Bus lo ve en 0x76 y Módulos lo detecta solo; 181 lecturas sin
       errores, 23,1 °C, 43 % y 1020 hPa. Fotos en el README.
+- [x] Punto de acceso propio (2026-10-01): el C6 de fábrica hace SoftAP en
+      APSTA; el usuario se unió con el QR desde el teléfono y abrió el portal
+      con el otro. Con el AP prendido la RAM interna no cambió (291 KB) y la
+      red de casa siguió igual (1,59 MB/s por Wi-Fi contra 1,7 de antes).
+      Del teléfono a la placa por el AP: los 7,5 MB de mila_p4.pak en 2-3 s
+      (~3 MB/s, cronometrado a mano: el doble que por el router). El
+      contador de Ajustes y el registro vieron al teléfono entrar.
+- [x] Ajustes nuevos (2026-09-30), en vertical y acostada (Almacenamiento y el QR probados por el usuario):
+      Almacenamiento (la barra por tipo, el recuento de la tarjeta real,
+      Expulsar y Montar), Actualización (las dos ranuras; "Volver a esta
+      versión" pide dos toques y reinicia con la otra), Diagnóstico
+      (temperatura, CPU, motivo del reinicio, modo seguro, volcado) y el QR
+      del portal en Acerca de, leído con el teléfono.
 - [x] El botón BOOT (2026-09-30): toque = inicio (y despierta la pantalla
       apagada), largo = captura en `/sdcard/photos/Capturas` (un álbum de
       Fotos), apretado durante la pantalla de arranque = modo seguro. Los
