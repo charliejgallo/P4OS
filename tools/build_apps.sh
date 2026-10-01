@@ -33,6 +33,7 @@ PROFILE=${PROFILE:-rev1_3}
 FW=$ROOT/build/$PROFILE
 NM=$(command -v riscv32-esp-elf-nm || ls ~/.espressif/tools/riscv32-esp-elf/*/riscv32-esp-elf/bin/riscv32-esp-elf-nm | head -1)
 OD=$(command -v riscv32-esp-elf-objdump || ls ~/.espressif/tools/riscv32-esp-elf/*/riscv32-esp-elf/bin/riscv32-esp-elf-objdump | head -1)
+RE=$(command -v riscv32-esp-elf-readelf || ls ~/.espressif/tools/riscv32-esp-elf/*/riscv32-esp-elf/bin/riscv32-esp-elf-readelf | head -1)
 
 if [ ! -f $TABLE ] || ! grep -q ESP_ELFSYM_EXPORT $TABLE; then
     echo "The symbol table is empty. Run this first:"
@@ -102,8 +103,10 @@ for app in ${(z)apps}; do
     # The float ABI has to be the firmware's (ilp32f): a soft-float .so passes
     # every float in the wrong registers, and nothing fails until the numbers
     # come out wrong.
-    if ! file $so | grep -q "single-float ABI"; then
-        echo "  FAIL: $(basename $so) is not single-float ABI: $(file -b $so | cut -d, -f3)"
+    # (readelf and not file(1): the CI's container has no file)
+    flags=$($RE -h $so 2>/dev/null | grep Flags)
+    if ! echo "$flags" | grep -q "single-float ABI"; then
+        echo "  FAIL: $(basename $so) is not single-float ABI:$flags"
         problemas=$((problemas + 1))
         continue
     fi
