@@ -162,6 +162,8 @@ add_executable(p4os_sim
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_audio.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_hal_stubs.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_io.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_io_wire.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_leds.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_serial.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_sensors.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_modules.c

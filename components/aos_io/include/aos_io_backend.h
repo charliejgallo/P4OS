@@ -71,6 +71,34 @@ bool aos_io_be_spi_xfer(aos_io_spi_t *s, const uint8_t *tx, uint8_t *rx, size_t 
 bool aos_io_be_spi_set_clock(aos_io_spi_t *s, uint32_t hz);
 void aos_io_be_spi_close(aos_io_spi_t *s, bool last);
 
+/* 1-Wire: gpio claimed by aos_io.c; the backend owns the bus in be. */
+struct aos_io_ow {
+    int8_t gpio;
+    bool   pullup;
+    char   owner[24];
+    void  *be;
+};
+bool aos_io_be_ow_open(aos_io_ow_t *b);
+bool aos_io_be_ow_reset(aos_io_ow_t *b);
+int  aos_io_be_ow_search(aos_io_ow_t *b, uint64_t *roms, int max);
+bool aos_io_be_ow_write(aos_io_ow_t *b, const uint8_t *data, size_t n);
+bool aos_io_be_ow_read(aos_io_ow_t *b, uint8_t *data, size_t n);
+void aos_io_be_ow_close(aos_io_ow_t *b);
+
+/* LED strips: wire is the frame already in the strip's byte order and
+ * width (count * 3 or 4 bytes). */
+struct aos_io_strip {
+    int8_t          gpio;
+    aos_strip_cfg_t cfg;
+    uint8_t         bpp;        /* bytes a LED on the wire: 3 or 4 */
+    char            owner[24];
+    uint8_t        *wire;       /* count * bpp, PSRAM */
+    void           *be;
+};
+bool aos_io_be_strip_open(aos_io_strip_t *s);
+bool aos_io_be_strip_send(aos_io_strip_t *s);       /* s->wire, waits for the end */
+void aos_io_be_strip_close(aos_io_strip_t *s);
+
 bool aos_io_be_gpio_mode(int gpio, aos_gpio_mode_t mode);
 int  aos_io_be_gpio_get(int gpio);
 bool aos_io_be_gpio_set(int gpio, int level);

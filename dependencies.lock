@@ -369,6 +369,16 @@ dependencies:
       registry_url: https://components.espressif.com/
       type: service
     version: 1.13.1
+  espressif/onewire_bus:
+    component_hash: dcce4fb1c2fc43c3d02de1cc9abdf062127468a785578723696de3817c526f99
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=5.0'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.1.2
   espressif/tinyusb:
     component_hash: 16c8d774dab1f484d3e0c0f61105624d2424bbae864efd19818baf7b451b41e7
     dependencies:
@@ -524,10 +534,11 @@ direct_dependencies:
 - espressif/esp_wifi_remote
 - espressif/libpng
 - espressif/mdns
+- espressif/onewire_bus
 - idf
 - lvgl/lvgl
 - waveshare/esp32_p4_wifi6_touch_lcd_5
 - waveshare/esp_lcd_hx8394
-manifest_hash: cd86bfbf6317bbd3178f2866943526ed65d3b808e138f935838d2b5bb26decb7
+manifest_hash: 85eb32453c9f308305655fe9095228d2821a47fb3715031475c0c29e9ce4ca74
 target: esp32p4
 version: 2.0.0

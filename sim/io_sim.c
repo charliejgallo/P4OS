@@ -618,3 +618,161 @@ bool aos_io_be_spi_xfer(aos_io_spi_t *s, const uint8_t *tx, uint8_t *rx, size_t 
     free(wire_rx);
     return true;
 }
+
+/* ---- 1-Wire: P4_SIM_ONEWIRE says what hangs off any GPIO opened as a bus.
+ * Unset: two DS18B20s, one near 23 C and one that warms up and cools
+ * down over a minute (a hand on it); "none": nothing; "N": N of them.
+ * They answer SKIP ROM, MATCH ROM, CONVERT T, READ/WRITE SCRATCHPAD and
+ * COPY SCRATCHPAD, as the bytes come, like the real part; the search is
+ * answered whole. ---- */
+
+#define OW_SIM_MAX 4
+
+typedef struct {
+    uint64_t rom;
+    uint8_t  th, tl, cfg;
+    int16_t  raw;               /* the last conversion */
+} ow_sim_dev_t;
+
+typedef struct {
+    int n;
+    ow_sim_dev_t dev[OW_SIM_MAX];
+    int sel;                    /* -1 none, -2 all (SKIP ROM), else the index */
+    int rom_cmd;                /* waiting for: 0 a ROM command, 1 MATCH's bytes, 2 a function */
+    uint8_t match[8];
+    int match_n, wr_need, wr_n;
+    uint8_t wr[3];
+    uint8_t out[9];
+    int out_n, out_i;
+} ow_sim_t;
+
+static pthread_mutex_t s_ow_mx = PTHREAD_MUTEX_INITIALIZER;
+
+static uint64_t ow_sim_rom(uint8_t fam, uint32_t serial)
+{
+    uint8_t b[8] = { fam, (uint8_t)serial, (uint8_t)(serial >> 8), (uint8_t)(serial >> 16), 0x80, 0x00, 0x00, 0 };
+    b[7] = aos_io_ow_crc8(b, 7);
+    uint64_t r = 0;
+    for (int i = 7; i >= 0; i--) r = r << 8 | b[i];
+    return r;
+}
+
+bool aos_io_be_ow_open(aos_io_ow_t *b)
+{
+    ow_sim_t *s = calloc(1, sizeof *s);
+    if (!s) return false;
+    const char *e = getenv("P4_SIM_ONEWIRE");
+    int n = !e ? 2 : !strcmp(e, "none") ? 0 : atoi(e);
+    if (n < 0) n = 0;
+    if (n > OW_SIM_MAX) n = OW_SIM_MAX;
+    for (int i = 0; i < n; i++) {
+        s->dev[i].rom = ow_sim_rom(0x28, 0x5A1C00u + (uint32_t)i * 0x1F3u + (uint32_t)b->gpio);
+        s->dev[i].th = 0x4B;
+        s->dev[i].tl = 0x46;
+        s->dev[i].cfg = 0x7F;           /* 12 bits */
+        s->dev[i].raw = 0x0550;         /* 85.0: the power-up value */
+    }
+    s->n = n;
+    s->sel = -1;
+    b->be = s;
+    return true;
+}
+
+static void ow_sim_convert(ow_sim_t *s, int i)
+{
+    double t = (double)aos_hal_uptime_ms() / 1000.0;
+    double c = i == 0 ? 23.0 + 0.4 * sin(t / 37.0) : 24.0 + 6.0 * (0.5 + 0.5 * sin(t / 9.5));
+    int bits = ((s->dev[i].cfg >> 5) & 3) + 9;
+    int16_t raw = (int16_t)lround(c * 16.0);
+    raw &= (int16_t)~((1 << (12 - bits)) - 1);
+    s->dev[i].raw = raw;
+}
+
+bool aos_io_be_ow_reset(aos_io_ow_t *b)
+{
+    ow_sim_t *s = b->be;
+    pthread_mutex_lock(&s_ow_mx);
+    s->sel = -1;
+    s->rom_cmd = 0;
+    s->out_n = s->out_i = 0;
+    s->wr_need = 0;
+    bool present = s->n > 0;
+    pthread_mutex_unlock(&s_ow_mx);
+    return present;
+}
+
+int aos_io_be_ow_search(aos_io_ow_t *b, uint64_t *roms, int max)
+{
+    ow_sim_t *s = b->be;
+    int n = 0;
+    for (int i = 0; i < s->n && n < max; i++) roms[n++] = s->dev[i].rom;
+    return n;
+}
+
+bool aos_io_be_ow_write(aos_io_ow_t *b, const uint8_t *data, size_t n)
+{
+    ow_sim_t *s = b->be;
+    pthread_mutex_lock(&s_ow_mx);
+    for (size_t k = 0; k < n; k++) {
+        uint8_t c = data[k];
+        if (s->wr_need) {                       /* WRITE SCRATCHPAD's three bytes */
+            s->wr[s->wr_n++] = c;
+            if (s->wr_n == 3) {
+                for (int i = 0; i < s->n; i++)
+                    if (s->sel == -2 || s->sel == i) { s->dev[i].th = s->wr[0]; s->dev[i].tl = s->wr[1]; s->dev[i].cfg = (uint8_t)(s->wr[2] | 0x1F); }
+                s->wr_need = 0;
+            }
+            continue;
+        }
+        if (s->rom_cmd == 0) {
+            if (c == 0xCC) { s->sel = -2; s->rom_cmd = 2; }
+            else if (c == 0x55) { s->rom_cmd = 1; s->match_n = 0; }
+            continue;
+        }
+        if (s->rom_cmd == 1) {
+            s->match[s->match_n++] = c;
+            if (s->match_n == 8) {
+                uint64_t r = 0;
+                for (int i = 7; i >= 0; i--) r = r << 8 | s->match[i];
+                s->sel = -1;
+                for (int i = 0; i < s->n; i++) if (s->dev[i].rom == r) s->sel = i;
+                s->rom_cmd = 2;
+            }
+            continue;
+        }
+        /* a function command for whoever is selected */
+        if (c == 0x44) {
+            for (int i = 0; i < s->n; i++) if (s->sel == -2 || s->sel == i) ow_sim_convert(s, i);
+        } else if (c == 0xBE && s->sel >= 0) {
+            ow_sim_dev_t *d = &s->dev[s->sel];
+            uint8_t *o = s->out;
+            o[0] = (uint8_t)d->raw; o[1] = (uint8_t)(d->raw >> 8); o[2] = d->th; o[3] = d->tl; o[4] = d->cfg;
+            o[5] = 0xFF; o[6] = 0x0C; o[7] = 0x10; o[8] = aos_io_ow_crc8(o, 8);
+            s->out_n = 9;
+            s->out_i = 0;
+        } else if (c == 0x4E) {
+            s->wr_need = 3;
+            s->wr_n = 0;
+        }
+    }
+    pthread_mutex_unlock(&s_ow_mx);
+    return true;
+}
+
+bool aos_io_be_ow_read(aos_io_ow_t *b, uint8_t *data, size_t n)
+{
+    ow_sim_t *s = b->be;
+    pthread_mutex_lock(&s_ow_mx);
+    for (size_t k = 0; k < n; k++) data[k] = s->out_i < s->out_n ? s->out[s->out_i++] : 0xFF;
+    pthread_mutex_unlock(&s_ow_mx);
+    return true;
+}
+
+void aos_io_be_ow_close(aos_io_ow_t *b) { free(b->be); b->be = NULL; }
+
+/* ---- LED strips: nothing on the wire in the simulator; the app's preview
+ * draws what the effects engine made. The frame is kept for a peek. ---- */
+
+bool aos_io_be_strip_open(aos_io_strip_t *s) { (void)s; return true; }
+bool aos_io_be_strip_send(aos_io_strip_t *s) { (void)s; aos_hal_sleep_ms(1 + s->cfg.count * 30 / 1000); return true; }
+void aos_io_be_strip_close(aos_io_strip_t *s) { (void)s; }

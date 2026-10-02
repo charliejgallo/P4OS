@@ -1,6 +1,7 @@
 #include "aos_apps.h"
 #include "aos_ui.h"
 #include "aos_sensors.h"
+#include "aos_leds.h"
 
 /* The built-in apps that are ported so far (the rest wait in _pending/, see
  * docs/plan/APPS.md), then the placeholders of the planned ones. */
@@ -28,6 +29,7 @@ void aos_apps_register_builtin(void)
         aos_app_sysmon_get,
         aos_app_claude_get,
         aos_app_modules_get,
+        aos_app_leds_get,
         aos_app_macropad_get,
     };
     for (size_t i = 0; i < sizeof getters / sizeof getters[0]; i++) {
@@ -47,4 +49,5 @@ void aos_apps_service_tick(void)
     aos_clock_service_tick();
     aos_app_flasher_service_tick();
     aos_sensors_autostart();        /* the sensors of modules.txt, read from boot */
+    aos_leds_autostart();           /* a LED strip left on, back as it was */
 }

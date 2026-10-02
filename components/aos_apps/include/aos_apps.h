@@ -30,6 +30,7 @@ void aos_app_sysmon_get(aos_app_t *app);       /* also registers "widget sysmon"
 void aos_app_claude_get(aos_app_t *app);
 void aos_claude_widget_register(void);
 void aos_app_modules_get(aos_app_t *app);      /* the header, modules.txt, the sensors */
+void aos_app_leds_get(aos_app_t *app);         /* Tiras LED: addressable strips, WLED's way */
 void aos_app_macropad_get(aos_app_t *app);     /* layout and runner in aos_macropad.h */
 void aos_app_flasher_get(aos_app_t *app);
 void aos_ha_widget_register(void);

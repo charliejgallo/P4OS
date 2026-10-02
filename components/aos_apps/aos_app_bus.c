@@ -50,9 +50,9 @@
 #define C_BOARD     lv_color_hex(0x1D4ED8)
 #define C_CHANGED   lv_color_hex(0xB45309)
 
-enum { TAB_I2C, TAB_SPI, TAB_GPIO, TAB_COUNT };
-static const char *const TAB_NAME[TAB_COUNT] = { "I2C", "SPI", "GPIO" };
-static const char *const TAB_GLYPH[TAB_COUNT] = { AOS_SYM_CONNECTION, AOS_SYM_SWAP_HORIZONTAL, AOS_SYM_CHIP };
+enum { TAB_I2C, TAB_SPI, TAB_OW, TAB_GPIO, TAB_COUNT };
+static const char *const TAB_NAME[TAB_COUNT] = { "I2C", "SPI", "1-Wire", "GPIO" };
+static const char *const TAB_GLYPH[TAB_COUNT] = { AOS_SYM_CONNECTION, AOS_SYM_SWAP_HORIZONTAL, AOS_SYM_THERMOMETER, AOS_SYM_CHIP };
 
 /* SPI clocks the stepper offers */
 static const uint32_t CLOCKS[] = { 100000, 250000, 500000, 1000000, 2000000, 4000000, 5000000,
@@ -1517,6 +1517,262 @@ static void build_gpio(lv_obj_t *parent)
 }
 
 /* -------------------------------------------------------------------------- */
+/* 1-Wire                                                                      */
+/* -------------------------------------------------------------------------- */
+
+/* A thread of its own while the tab is open: a DS18B20 conversion takes
+ * 750 ms, which LVGL's thread must not wait for. It opens the bus on the
+ * chosen GPIO (as "Bus 1-Wire"), searches when asked, then converts and
+ * reads every sensor once a second, and closes the bus when the tab is left
+ * or the GPIO changes. */
+#define OWNER_OW    "Bus 1-Wire"
+#define OW_MAX      8
+
+static struct {
+    int8_t gpio;
+    bool pullup;
+    /* the thread's, read by the UI after seq moves */
+    volatile bool run, alive, want_search;
+    volatile int want_bits;          /* 9..12 for want_rom, 0 none */
+    volatile uint64_t want_rom;
+    volatile uint32_t seq;
+    int n;                           /* -1 not searched yet */
+    bool open_ok, presence;
+    uint64_t rom[OW_MAX];
+    float temp[OW_MAX];
+    int bits[OW_MAX];
+    bool read_ok[OW_MAX];
+    int8_t open_gpio;
+} OW;
+__attribute__((constructor)) static void OW_defaults(void) { OW.gpio = 28; OW.pullup = true; OW.n = -1; OW.open_gpio = -1; }
+
+static struct {
+    lv_obj_t *status, *dev_temp[OW_MAX], *dev_bits[OW_MAX][4];
+    uint32_t seen;
+    int shown_n;
+} UO;
+
+static void ow_thread(void *arg)
+{
+    (void)arg;
+    aos_io_ow_t *bus = NULL;
+    int8_t open_gpio = -1;
+    bool open_pull = false;
+    while (OW.run) {
+        if (!bus || open_gpio != OW.gpio || open_pull != OW.pullup) {
+            if (bus) aos_io_ow_close(bus);
+            open_gpio = OW.gpio;
+            open_pull = OW.pullup;
+            bus = aos_io_ow_open(open_gpio, open_pull, OWNER_OW);
+            OW.open_ok = bus != NULL;
+            OW.open_gpio = open_gpio;
+            OW.n = -1;
+            OW.want_search = true;
+            OW.seq++;
+            if (!bus) { aos_hal_sleep_ms(500); continue; }
+        }
+        if (OW.want_search) {
+            OW.want_search = false;
+            OW.presence = aos_io_ow_reset(bus);
+            uint64_t roms[OW_MAX];
+            int n = OW.presence ? aos_io_ow_search(bus, roms, OW_MAX) : 0;
+            if (n < 0) n = 0;
+            memcpy(OW.rom, roms, sizeof roms);
+            memset(OW.read_ok, 0, sizeof OW.read_ok);
+            OW.n = n;
+            OW.seq++;
+        }
+        if (OW.want_bits) {
+            aos_io_ds18b20_set_bits(bus, OW.want_rom, OW.want_bits);
+            OW.want_bits = 0;
+        }
+        bool any_t = false;
+        for (int i = 0; i < OW.n; i++) any_t |= aos_io_ow_family((uint8_t)OW.rom[i]) && ((uint8_t)OW.rom[i] == 0x28 ||
+                                                  (uint8_t)OW.rom[i] == 0x10 || (uint8_t)OW.rom[i] == 0x22 || (uint8_t)OW.rom[i] == 0x3B);
+        if (any_t) {
+            int wait = aos_io_ds18b20_convert_all(bus);
+            OW.presence = wait >= 0;
+            for (int w = 0; OW.run && w < (wait > 0 ? wait : 0); w += 50) aos_hal_sleep_ms(50);
+            for (int i = 0; OW.run && i < OW.n; i++) {
+                float t = 0;
+                int b = 0;
+                OW.read_ok[i] = aos_io_ds18b20_read(bus, OW.rom[i], &t, &b);
+                if (OW.read_ok[i]) { OW.temp[i] = t; OW.bits[i] = b; }
+            }
+            OW.seq++;
+        }
+        for (int w = 0; OW.run && !OW.want_search && !OW.want_bits && w < 250; w += 50) aos_hal_sleep_ms(50);
+    }
+    if (bus) aos_io_ow_close(bus);
+    OW.open_gpio = -1;
+    OW.alive = false;
+}
+
+static void ow_start(void)
+{
+    if (OW.alive) { OW.run = true; return; }
+    OW.run = true;
+    OW.alive = true;
+    if (!aos_hal_thread_start("bus_1wire", ow_thread, NULL, 4096, 3)) { OW.alive = false; OW.run = false; }
+}
+
+static void ow_stop(void) { OW.run = false; }
+
+static void ow_rom_text(uint64_t rom, char *t, size_t n)
+{
+    /* as Linux's w1 names them: family, then the 48-bit serial */
+    snprintf(t, n, "%02X-%012llX", (unsigned)(rom & 0xFF), (unsigned long long)((rom >> 8) & 0xFFFFFFFFFFFFull));
+}
+
+static void ow_status_refresh(void)
+{
+    if (!UO.status) return;
+    char t[160];
+    if (!OW.open_ok && OW.open_gpio < 0 && OW.n < 0) snprintf(t, sizeof t, "%s", _("Abriendo el bus…"));
+    else if (!OW.open_ok) {
+        const char *o = aos_io_owner(OW.gpio);
+        if (o && strcmp(o, OWNER_OW)) snprintf(t, sizeof t, _("GPIO%d lo tiene %s"), OW.gpio, o);
+        else snprintf(t, sizeof t, _("No se pudo abrir el bus en GPIO%d"), OW.gpio);
+    } else if (OW.n < 0) snprintf(t, sizeof t, "%s", _("Buscando…"));
+    else if (!OW.presence) snprintf(t, sizeof t, "%s", _("Nadie contestó. ¿La resistencia de 4,7 kΩ entre datos y 3V3? ¿VDD a 3V3 y GND?"));
+    else snprintf(t, sizeof t, _("GPIO%d · %d dispositivo(s) en el bus"), OW.gpio, OW.n);
+    lv_label_set_text(UO.status, t);
+}
+
+static void ow_values_refresh(void)
+{
+    char t[48];
+    for (int i = 0; i < OW.n && i < OW_MAX; i++) {
+        if (!UO.dev_temp[i]) continue;
+        if (OW.read_ok[i]) {
+            snprintf(t, sizeof t, "%.*f °C", OW.bits[i] >= 11 ? 2 : 1, (double)OW.temp[i]);
+            for (char *c = t; *c; c++) if (*c == '.') *c = ',';
+        } else {
+            snprintf(t, sizeof t, "%s", _("sin lectura"));
+        }
+        lv_label_set_text(UO.dev_temp[i], t);
+        for (int k = 0; k < 4; k++)
+            if (UO.dev_bits[i][k]) {
+                bool on = OW.read_ok[i] && OW.bits[i] == 9 + k;
+                lv_obj_set_style_bg_color(UO.dev_bits[i][k], on ? C_AMBER : AOS_C_CARD2, 0);
+            }
+    }
+}
+
+static void ow_pin_cb(lv_event_t *e) { OW.gpio = (int8_t)(intptr_t)lv_event_get_user_data(e); build_page(); }
+static void ow_pull_cb(lv_event_t *e) { OW.pullup = !OW.pullup; build_page(); }
+static void ow_search_cb(lv_event_t *e) { OW.n = -1; OW.want_search = true; ow_status_refresh(); }
+static void ow_bits_cb(lv_event_t *e)
+{
+    intptr_t v = (intptr_t)lv_event_get_user_data(e);
+    int dev = (int)(v >> 4), bits = (int)(v & 0xF) + 9;
+    if (dev < 0 || dev >= OW.n) return;
+    OW.want_rom = OW.rom[dev];
+    OW.want_bits = bits;
+    aos_ui_toast(_("Resolución guardada en el sensor"), 1500);
+}
+
+static lv_obj_t *ow_chip(lv_obj_t *parent, const char *text, bool on, bool enabled, lv_event_cb_t cb, void *ud)
+{
+    lv_obj_t *c = box(parent, LV_SIZE_CONTENT, 60);
+    lv_obj_set_style_radius(c, 30, 0);
+    lv_obj_set_style_pad_hor(c, 20, 0);
+    lv_obj_set_style_bg_color(c, on ? C_AMBER : AOS_C_CARD2, 0);
+    lv_obj_set_style_bg_opa(c, LV_OPA_COVER, 0);
+    lv_obj_set_style_bg_opa(c, LV_OPA_60, LV_STATE_PRESSED);
+    if (cb && enabled) {
+        lv_obj_add_flag(c, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_add_event_cb(c, cb, LV_EVENT_CLICKED, ud);
+    }
+    lv_obj_t *l = aos_label(c, text, aos_font_small, on ? lv_color_hex(0x1C1404) : enabled ? AOS_C_TEXT : AOS_C_DIM);
+    lv_obj_center(l);
+    aos_make_decorative(l);
+    return c;
+}
+
+static void build_ow(lv_obj_t *parent)
+{
+    memset(&UO, 0, sizeof UO);
+    UO.seen = OW.seq;
+    UO.shown_n = OW.n;
+    int32_t w = U.W - 2 * AOS_UI_PAD;
+    lv_obj_t *col = column(parent, w, lv_obj_get_height(parent));
+    lv_obj_t *top = box(col, w, 80);
+    lv_obj_t *t = aos_label(top, "1-Wire", aos_font_large, AOS_C_TEXT);
+    lv_obj_align(t, LV_ALIGN_LEFT_MID, 4, 0);
+    lv_obj_t *sb = pill(top, AOS_SYM_MAGNIFY, _("Buscar"), C_AMBER, ow_search_cb, NULL);
+    lv_obj_align(sb, LV_ALIGN_RIGHT_MID, 0, 0);
+    UO.status = caption(col, "", w);
+    ow_status_refresh();
+
+    /* the devices */
+    char txt[64];
+    for (int i = 0; i < OW.n && i < OW_MAX; i++) {
+        lv_obj_t *c = card(col, w, LV_SIZE_CONTENT);
+        lv_obj_set_style_pad_all(c, 20, 0);
+        lv_obj_set_flex_flow(c, LV_FLEX_FLOW_COLUMN);
+        lv_obj_set_style_pad_row(c, 10, 0);
+        uint8_t fam = (uint8_t)OW.rom[i];
+        const char *name = aos_io_ow_family(fam);
+        aos_label(c, name ? name : _("Dispositivo desconocido"), aos_font_body, AOS_C_TEXT);
+        ow_rom_text(OW.rom[i], txt, sizeof txt);
+        aos_label(c, txt, aos_font_small, AOS_C_DIM);
+        bool temp = fam == 0x28 || fam == 0x10 || fam == 0x22 || fam == 0x3B;
+        if (!temp) continue;
+        UO.dev_temp[i] = aos_label(c, "…", aos_font_large, C_AMBER);
+        if (fam == 0x28 || fam == 0x22) {
+            lv_obj_t *r = box(c, w - 40, LV_SIZE_CONTENT);
+            lv_obj_set_flex_flow(r, LV_FLEX_FLOW_ROW_WRAP);
+            lv_obj_set_style_pad_gap(r, 10, 0);
+            lv_obj_set_flex_align(r, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+            aos_label(r, _("Resolución"), aos_font_small, AOS_C_DIM);
+            static const char *const BITS[4] = { "9 bits", "10", "11", "12" };
+            for (int k = 0; k < 4; k++)
+                UO.dev_bits[i][k] = ow_chip(r, BITS[k], false, true, ow_bits_cb, (void *)(intptr_t)(i << 4 | k));
+        }
+    }
+    ow_values_refresh();
+
+    /* the pin */
+    lv_obj_t *pc = card(col, w, LV_SIZE_CONTENT);
+    lv_obj_set_style_pad_all(pc, 20, 0);
+    lv_obj_set_flex_flow(pc, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(pc, 12, 0);
+    aos_label(pc, _("Pin de datos"), aos_font_small, AOS_C_DIM);
+    lv_obj_t *pins = box(pc, w - 40, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(pins, LV_FLEX_FLOW_ROW_WRAP);
+    lv_obj_set_style_pad_gap(pins, 10, 0);
+    const aos_io_pin_t *hdr = aos_io_header();
+    for (int i = 0; i < 40; i++) {
+        const aos_io_pin_t *p = &hdr[i];
+        if (p->gpio < 0 || (p->flags & (AOS_PIN_RESERVED | AOS_PIN_BOARD))) continue;
+        const char *o = aos_io_owner(p->gpio);
+        bool mine = p->gpio == OW.gpio;
+        bool can = !o || mine || !strcmp(o, OWNER_OW);
+        snprintf(txt, sizeof txt, "GPIO%d · %d", p->gpio, p->pin);
+        ow_chip(pins, txt, mine, can, ow_pin_cb, (void *)(intptr_t)p->gpio);
+    }
+    ow_chip(pc, OW.pullup ? _("Pull-up interno: sí") : _("Pull-up interno: no"), OW.pullup, true, ow_pull_cb, NULL);
+    caption(col, _("Conexión del DS18B20: GND, datos al pin elegido, VDD a 3V3 (pin 18), y una resistencia de 4,7 kΩ entre datos y 3V3. El pull-up interno alcanza para un sensor con cable corto."), w);
+}
+
+static void ow_tick(void)
+{
+    if (S.tab != TAB_OW) return;
+    if (OW.seq == UO.seen) return;
+    UO.seen = OW.seq;
+    if (OW.n != UO.shown_n && !U.overlay) {
+        UO.shown_n = OW.n;
+        build_page();
+        UO.seen = OW.seq;
+        UO.shown_n = OW.n;
+        return;
+    }
+    ow_status_refresh();
+    ow_values_refresh();
+}
+
+/* -------------------------------------------------------------------------- */
 /* Pages                                                                       */
 /* -------------------------------------------------------------------------- */
 
@@ -1537,6 +1793,8 @@ static void build_page(void)
         lv_obj_set_style_text_color(lv_obj_get_child(U.tabs[i], 1), c, 0);
     }
     int32_t ch = lv_obj_get_height(U.content);
+    if (S.tab == TAB_OW) { ow_start(); build_ow(U.content); return; }
+    ow_stop();
     if (S.tab == TAB_GPIO) { build_gpio(U.content); return; }
     if (S.tab == TAB_SPI) { build_spi(U.content); return; }
 
@@ -1613,6 +1871,7 @@ static void timer_cb(lv_timer_t *t)
         U.live_ms = now;
         job_start(JOB_DUMP, (uint8_t)S.dev, 0, 0);
     }
+    ow_tick();
     if (S.tab == TAB_GPIO)
         for (int g = 0; g < 64; g++)
             if (U.pin_mode[g] && S.mode[g] != M_OUT && S.mode[g] != M_NONE) pin_refresh(g);
@@ -1661,6 +1920,7 @@ static void destroy(aos_app_t *self, void *inst)
 {
     if (U.timer) lv_timer_delete(U.timer);
     S.live = false;
+    ow_stop();
     memset(&U, 0, sizeof U);
 }
 

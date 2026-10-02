@@ -373,9 +373,9 @@ Un valor que el equipo no tiene en ese momento (fuente desenchufada, canal apaga
 libre	free
 
 #: components/aos_apps/aos_app_bus.c:327
+#: components/aos_apps/aos_app_bus.c:1636
 #: components/aos_apps/aos_app_files.c:2573
 #: components/aos_apps/aos_app_modules.c:1191
-#: components/aos_apps/aos_app_settings.c:569
 Buscando…	Searching…
 
 #: components/aos_apps/aos_app_bus.c:329
@@ -423,6 +423,7 @@ Escribir en 0x%02X, registro 0x%02X	Write to 0x%02X, register 0x%02X
 Escribir	Write
 
 #: components/aos_apps/aos_app_bus.c:668
+#: components/aos_apps/aos_app_bus.c:1717
 Dispositivo desconocido	Unknown device
 
 #: components/aos_apps/aos_app_bus.c:676
@@ -441,13 +442,14 @@ Enviando…	Sending…
 
 #: components/aos_apps/aos_app_bus.c:795
 #: components/aos_apps/aos_app_bus.c:1419
+#: components/aos_apps/aos_app_bus.c:1634
 GPIO%d lo tiene %s	GPIO%d is held by %s
 
 #: components/aos_apps/aos_app_bus.c:796
 El módulo %s no tiene un cs= que sirva	The module %s has no usable cs=
 
 #: components/aos_apps/aos_app_bus.c:797
-#: components/aos_apps/aos_app_bus.c:1602
+#: components/aos_apps/aos_app_bus.c:1860
 #: components/aos_apps/aos_app_flasher.c:885
 #: components/aos_apps/aos_app_modules.c:322
 No se pudo abrir el puerto	Could not open the port
@@ -584,6 +586,43 @@ de la placa	board
 
 #: components/aos_apps/aos_app_bus.c:1515
 IN ↑ / IN ↓: con pull-up o pull-down interno. Los pines 35 a 39 van por el LDO VO4: medí antes de colgarles algo.	IN ↑ / IN ↓: with internal pull-up or pull-down. Pins 35 to 39 go through the VO4 LDO: measure before hooking anything up.
+
+#: components/aos_apps/aos_app_bus.c:1631
+Abriendo el bus…	Opening the bus…
+
+#: components/aos_apps/aos_app_bus.c:1635
+No se pudo abrir el bus en GPIO%d	Could not open the bus on GPIO%d
+
+#: components/aos_apps/aos_app_bus.c:1637
+Nadie contestó. ¿La resistencia de 4,7 kΩ entre datos y 3V3? ¿VDD a 3V3 y GND?	Nobody answered. Is the 4.7 kΩ resistor between data and 3V3? VDD to 3V3 and GND?
+
+#: components/aos_apps/aos_app_bus.c:1638
+GPIO%d · %d dispositivo(s) en el bus	GPIO%d · %d device(s) on the bus
+
+#: components/aos_apps/aos_app_bus.c:1651
+sin lectura	no reading
+
+#: components/aos_apps/aos_app_bus.c:1672
+Resolución guardada en el sensor	Resolution saved in the sensor
+
+#: components/aos_apps/aos_app_bus.c:1703
+#: components/aos_apps/aos_app_files.c:3117
+Buscar	Search
+
+#: components/aos_apps/aos_app_bus.c:1728
+Resolución	Resolution
+
+#: components/aos_apps/aos_app_bus.c:1741
+Pin de datos	Data pin
+
+#: components/aos_apps/aos_app_bus.c:1755
+Pull-up interno: sí	Internal pull-up: yes
+
+#: components/aos_apps/aos_app_bus.c:1755
+Pull-up interno: no	Internal pull-up: no
+
+#: components/aos_apps/aos_app_bus.c:1756
+Conexión del DS18B20: GND, datos al pin elegido, VDD a 3V3 (pin 18), y una resistencia de 4,7 kΩ entre datos y 3V3. El pull-up interno alcanza para un sensor con cable corto.	Wiring a DS18B20: GND, data to the chosen pin, VDD to 3V3 (pin 18), and a 4.7 kΩ resistor between data and 3V3. The internal pull-up is enough for one sensor on a short cable.
 
 #: components/aos_apps/aos_app_calc.c:63
 #: components/aos_apps/aos_app_calc.c:101
@@ -1205,6 +1244,7 @@ cuarto (EE. UU.)	quart (US)
 galón (EE. UU.)	gallon (US)
 
 #: components/aos_apps/aos_app_convert.c:110
+#: components/aos_apps/aos_app_leds.c:341
 Velocidad	Speed
 
 #: components/aos_apps/aos_app_convert.c:111
@@ -1878,9 +1918,6 @@ OK	OK
 #: components/aos_apps/aos_app_files.c:2945
 Seleccionar	Select
 
-#: components/aos_apps/aos_app_files.c:3117
-Buscar	Search
-
 #: components/aos_apps/aos_app_files.c:3132
 Subcarpetas	Subfolders
 
@@ -2062,6 +2099,7 @@ Copiar	Copy
 Cortar	Cut
 
 #: components/aos_apps/aos_app_files.c:3663
+#: components/aos_apps/aos_app_leds.c:394
 #: components/aos_apps/aos_app_modules.c:468
 Ninguno	None
 
@@ -2455,6 +2493,8 @@ Encendida	On
 
 #: components/aos_apps/aos_app_ha.c:192
 #: components/aos_apps/aos_app_ha.c:222
+#: components/aos_apps/aos_app_leds.c:325
+#: components/aos_apps/aos_app_leds.c:469
 Apagada	Off
 
 #: components/aos_apps/aos_app_ha.c:195
@@ -2708,6 +2748,208 @@ Marcá favoritos en la app con la estrella	Mark favorites in the app with the st
 
 #: components/aos_apps/aos_app_ha.c:1408
 Sin escenas en Home Assistant	No scenes in Home Assistant
+
+#: components/aos_apps/aos_app_leds.c:33
+Efectos	Effects
+
+#: components/aos_apps/aos_app_leds.c:33
+Tira	Strip
+
+#: components/aos_apps/aos_app_leds.c:33
+#: components/aos_apps/_pending/aos_app_settings.c:3042
+Consumo	Drain
+
+#: components/aos_apps/aos_app_leds.c:37
+Sólido	Solid
+
+#: components/aos_apps/aos_app_leds.c:37
+Parpadeo	Blink
+
+#: components/aos_apps/aos_app_leds.c:37
+Respirar	Breathe
+
+#: components/aos_apps/aos_app_leds.c:37
+Barrido	Wipe
+
+#: components/aos_apps/aos_app_leds.c:37
+Arcoíris	Rainbow
+
+#: components/aos_apps/aos_app_leds.c:37
+Arcoíris en ciclo	Rainbow cycle
+
+#: components/aos_apps/aos_app_leds.c:38
+Teatro	Theater
+
+#: components/aos_apps/aos_app_leds.c:38
+Escáner	Scanner
+
+#: components/aos_apps/aos_app_leds.c:38
+Destellos	Twinkle
+
+#: components/aos_apps/aos_app_leds.c:38
+Fuego	Fire
+
+#: components/aos_apps/aos_app_leds.c:38
+Meteoro	Meteor
+
+#: components/aos_apps/aos_app_leds.c:38
+Degradé	Gradient
+
+#: components/aos_apps/aos_app_leds.c:38
+Ondas	Waves
+
+#: components/aos_apps/aos_app_leds.c:44
+Tiempo prendido	Time on
+
+#: components/aos_apps/aos_app_leds.c:44
+Arcoíris en la tira	Rainbows on the strip
+
+#: components/aos_apps/aos_app_leds.c:45
+Ancho	Width
+
+#: components/aos_apps/aos_app_leds.c:45
+#: components/aos_apps/aos_app_modbus.c:1216
+#: components/aos_apps/aos_app_modbus.c:1350
+Cantidad	Count
+
+#: components/aos_apps/aos_app_leds.c:45
+Llamas	Flames
+
+#: components/aos_apps/aos_app_leds.c:46
+Cola	Tail
+
+#: components/aos_apps/aos_app_leds.c:46
+Ondas en la tira	Waves on the strip
+
+#: components/aos_apps/aos_app_leds.c:206
+Sin tira: elegí el pin en Tira. Mientras, se ve acá.	No strip: choose the pin in Strip. Meanwhile, it shows here.
+
+#: components/aos_apps/aos_app_leds.c:207
+No se pudo abrir la tira en %s	Could not open the strip on %s
+
+#: components/aos_apps/aos_app_leds.c:208
+Apagada · GPIO%d · %d LEDs	Off · GPIO%d · %d LEDs
+
+#: components/aos_apps/aos_app_leds.c:209
+GPIO%d · %s · %d LEDs · %d fps · %u mA%s	GPIO%d · %s · %d LEDs · %d fps · %u mA%s
+
+#: components/aos_apps/aos_app_leds.c:210
+ (limitada)	 (limited)
+
+#: components/aos_apps/aos_app_leds.c:267
+Segundo color	Second colour
+
+#: components/aos_apps/aos_app_leds.c:267
+#: components/aos_apps/aos_app_leds.c:351
+Color	Colour
+
+#: components/aos_apps/aos_app_leds.c:325
+Prendida	On
+
+#: components/aos_apps/aos_app_leds.c:335
+Brillo	Brightness
+
+#: components/aos_apps/aos_app_leds.c:337
+EFECTO	EFFECT
+
+#: components/aos_apps/aos_app_leds.c:346
+COLORES	COLOURS
+
+#: components/aos_apps/aos_app_leds.c:352
+Segundo	Second
+
+#: components/aos_apps/aos_app_leds.c:354
+Blanco (canal W)	White (W channel)
+
+#: components/aos_apps/aos_app_leds.c:391
+PIN DE DATOS	DATA PIN
+
+#: components/aos_apps/aos_app_leds.c:405
+GPIO · pin del conector. Los que tiene otra app aparecen apagados. * con cuidado: arranque, dominio VO4 o USB (Ajustes, Expansión).	GPIO · header pin. The ones another app holds are greyed out. * with care: boot, the VO4 domain or USB (Settings, Expansion).
+
+#: components/aos_apps/aos_app_leds.c:407
+TIPO DE LED	LED TYPE
+
+#: components/aos_apps/aos_app_leds.c:412
+WS2812B también sirve para WS2813, WS2815 y WS2811 de 800 kHz. Las RGBW llevan un cuarto LED blanco.	WS2812B also does for WS2813, WS2815 and the 800 kHz WS2811. RGBW strips carry a fourth, white LED.
+
+#: components/aos_apps/aos_app_leds.c:414
+ORDEN DE LOS COLORES	COLOUR ORDER
+
+#: components/aos_apps/aos_app_leds.c:419
+Si el rojo sale verde, probá otro orden: las WS2812B son GRB.	If red comes out green, try another order: WS2812Bs are GRB.
+
+#: components/aos_apps/aos_app_leds.c:421
+CANTIDAD DE LEDS	NUMBER OF LEDS
+
+#: components/aos_apps/aos_app_leds.c:443
+Efectos al revés	Effects reversed
+
+#: components/aos_apps/aos_app_leds.c:468
+Limitada: pedía %u mA, brillo %d %%	Limited: it asked for %u mA, brightness %d %%
+
+#: components/aos_apps/aos_app_leds.c:469
+Dentro del límite	Within the limit
+
+#: components/aos_apps/aos_app_leds.c:482
+Consumo estimado ahora	Estimated draw now
+
+#: components/aos_apps/aos_app_leds.c:490
+Toda la tira en blanco al máximo: %u mA (%.1f A)	The whole strip at full white: %u mA (%.1f A)
+
+#: components/aos_apps/aos_app_leds.c:493
+LA FUENTE	THE SUPPLY
+
+#: components/aos_apps/aos_app_leds.c:497
+USB 2.0 (450 mA)	USB 2.0 (450 mA)
+
+#: components/aos_apps/aos_app_leds.c:497
+USB 3 (850 mA)	USB 3 (850 mA)
+
+#: components/aos_apps/aos_app_leds.c:498
+Sin límite	No limit
+
+#: components/aos_apps/aos_app_leds.c:502
+Lo que la fuente le puede dar a la tira. Si un efecto pediría más, se baja el brillo de todo el cuadro para que entre, como el limitador de WLED. Alimentada desde el USB de la placa, dejá USB 2.0.	What the supply can give the strip. If an effect would ask for more, the whole frame is dimmed to fit, like WLED's limiter. Powered from the board's USB, leave USB 2.0.
+
+#: components/aos_apps/aos_app_leds.c:504
+CONSUMO DE CADA LED	EACH LED'S DRAW
+
+#: components/aos_apps/aos_app_leds.c:508
+5 V típica (55 mA)	Typical 5 V (55 mA)
+
+#: components/aos_apps/aos_app_leds.c:508
+5 V eco (35 mA)	5 V eco (35 mA)
+
+#: components/aos_apps/aos_app_leds.c:508
+12 V (30 mA)	12 V (30 mA)
+
+#: components/aos_apps/aos_app_leds.c:509
+WS2815 (15 mA)	WS2815 (15 mA)
+
+#: components/aos_apps/aos_app_leds.c:509
+RGBW (80 mA)	RGBW (80 mA)
+
+#: components/aos_apps/aos_app_leds.c:513
+Un LED en blanco al máximo, sus tres colores prendidos: los valores de WLED. Cada canal suma su parte según cuánto brilla.	A LED at full white, its three colours on: WLED's figures. Each channel adds its share by how bright it is.
+
+#: components/aos_apps/aos_app_leds.c:515
+CÓMO CONECTARLA	HOW TO WIRE IT
+
+#: components/aos_apps/aos_app_leds.c:518
+Datos: GPIO%d, pin %d del conector, con una resistencia de 330 Ω en serie.	Data: GPIO%d, header pin %d, with a 330 Ω resistor in series.
+
+#: components/aos_apps/aos_app_leds.c:519
+Datos: el GPIO que elijas en Tira, con una resistencia de 330 Ω en serie.	Data: the GPIO you choose in Strip, with a 330 Ω resistor in series.
+
+#: components/aos_apps/aos_app_leds.c:521
+La placa da 3,3 V y muchas tiras de 5 V quieren 3,5 V o más para entender los datos: con un level shifter (74AHCT125 o similar) anda siempre.	The board gives 3.3 V and many 5 V strips want 3.5 V or more to read the data: with a level shifter (74AHCT125 or similar) it always works.
+
+#: components/aos_apps/aos_app_leds.c:522
+Masa común: la de la tira, la de la fuente y la de la placa (pin 13, por ejemplo).	Common ground: the strip's, the supply's and the board's (pin 13, for one).
+
+#: components/aos_apps/aos_app_leds.c:523
+Los 5 V de la tira, de una fuente aparte salvo con pocos LEDs. Los pines 1 y 3 de la placa tienen 5 V aun con la placa apagada por POWER. Una tira larga lleva alimentación por los dos extremos.	The strip's 5 V from a separate supply, unless it has few LEDs. Pins 1 and 3 of the board carry 5 V even with the board switched off by POWER. A long strip is fed from both ends.
 
 #: components/aos_apps/aos_app_life.c:59
 Sopa	Soup
@@ -3234,10 +3476,6 @@ Puerta %d	Door %d
 
 #: components/aos_apps/aos_app_modbus.c:1215
 Dirección inicial	Start address
-
-#: components/aos_apps/aos_app_modbus.c:1216
-#: components/aos_apps/aos_app_modbus.c:1350
-Cantidad	Count
 
 #: components/aos_apps/aos_app_modbus.c:1253
 Escribir el registro %u	Write register %u
@@ -4692,7 +4930,7 @@ Capacidad	Capacity
 
 #: components/aos_apps/aos_app_settings.c:1134
 #: components/aos_apps/aos_app_sysmon.c:1229
-#: components/aos_apps/aos_app_bus.c:1678  (nombre de app)
+#: components/aos_apps/aos_app_bus.c:1938  (nombre de app)
 Bus	Bus
 
 #: components/aos_apps/aos_app_settings.c:1138
@@ -6359,9 +6597,6 @@ una muestra cada 5 minutos: se va llenando	one sample every 5 minutes: it fills 
 #: components/aos_apps/_pending/aos_app_settings.c:3037
 -12 h	-12 h
 
-#: components/aos_apps/_pending/aos_app_settings.c:3042
-Consumo	Drain
-
 #: components/aos_apps/_pending/aos_app_settings.c:3043
 Cargador	Charger
 
@@ -6604,6 +6839,9 @@ Conversor	Converter
 
 #: components/aos_apps/aos_app_elec.c:808  (nombre de app)
 Electrónica	Electronics
+
+#: components/aos_apps/aos_app_leds.c:625  (nombre de app)
+Tiras LED	LED Strips
 
 #: components/aos_apps/aos_app_macropad.c:2679  (nombre de app)
 Macro pad	Macro pad

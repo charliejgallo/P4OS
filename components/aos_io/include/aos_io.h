@@ -222,6 +222,70 @@ bool aos_io_gpio_mode(int gpio, aos_gpio_mode_t mode, const char *owner);
 int  aos_io_gpio_get(int gpio);                  /* 0/1, -1 if not available */
 bool aos_io_gpio_set(int gpio, int level);
 
+/* ---- 1-Wire (any usable GPIO of the header) ----
+ *
+ * One bus per GPIO, for the DS18B20 and its family. On the board it is
+ * Espressif's onewire_bus over the RMT: the slots are timed by the
+ * peripheral, not by a loop with interrupts off. A 4.7 k pull-up to 3V3 on
+ * the wire is what the parts want; 'pullup' adds the internal one, enough
+ * for one sensor on a short cable. ROM ids are 64-bit, family code in the
+ * low byte and CRC in the high one, as they come off the wire. */
+typedef struct aos_io_ow aos_io_ow_t;
+aos_io_ow_t *aos_io_ow_open(int gpio, bool pullup, const char *owner);
+bool aos_io_ow_reset(aos_io_ow_t *b);                     /* true: a presence pulse */
+int  aos_io_ow_search(aos_io_ow_t *b, uint64_t *roms, int max);   /* how many, -1 error */
+bool aos_io_ow_write(aos_io_ow_t *b, const void *data, size_t n);
+bool aos_io_ow_read(aos_io_ow_t *b, void *data, size_t n);
+void aos_io_ow_close(aos_io_ow_t *b);
+int  aos_io_ow_gpio(aos_io_ow_t *b);
+uint8_t aos_io_ow_crc8(const void *data, size_t n);       /* Dallas/Maxim CRC-8 */
+const char *aos_io_ow_family(uint8_t code);               /* "DS18B20", NULL unknown */
+
+/* The DS18B20 (and DS18S20, DS1822, MAX31850): convert_all starts a
+ * conversion on every sensor at once (skip ROM) and returns the wait it
+ * needs (ms, by the slowest resolution; 750 at 12 bits); read gets one
+ * sensor's scratchpad, checks its CRC and gives degrees C and the
+ * resolution in bits. 85.0 straight after power-up is the part's reset
+ * value, not a reading. */
+int  aos_io_ds18b20_convert_all(aos_io_ow_t *b);          /* ms to wait, -1 nobody there */
+bool aos_io_ds18b20_read(aos_io_ow_t *b, uint64_t rom, float *celsius, int *bits);
+bool aos_io_ds18b20_set_bits(aos_io_ow_t *b, uint64_t rom, int bits);   /* 9..12, kept in its EEPROM */
+
+/* ---- addressable LED strips (any usable GPIO of the header) ----
+ *
+ * The single-wire kind: WS2812B and its relatives. The board sends them
+ * with the RMT, from a buffer in PSRAM (aos_io_p4.c). show() takes the
+ * colour of each LED as R, G, B, W bytes (W ignored on an RGB strip) and
+ * reorders them for the strip; it returns once the frame is on the wire.
+ * Four strips at most at once (the RMT's four TX channels, one of which a
+ * 1-Wire bus also takes). */
+typedef enum {
+    AOS_STRIP_WS2812B = 0,      /* 800 kHz, GRB: also WS2813, WS2815, WS2811 at 800 */
+    AOS_STRIP_WS2811_400,       /* the old 400 kHz WS2811 */
+    AOS_STRIP_SK6812,           /* 800 kHz, GRB, tighter T0H */
+    AOS_STRIP_SK6812_RGBW,      /* four bytes a LED, GRBW */
+    AOS_STRIP_TYPE_COUNT
+} aos_strip_type_t;
+
+typedef enum { AOS_ORDER_GRB = 0, AOS_ORDER_RGB, AOS_ORDER_BRG, AOS_ORDER_RBG, AOS_ORDER_GBR, AOS_ORDER_BGR,
+               AOS_ORDER_COUNT } aos_strip_order_t;
+
+typedef struct {
+    aos_strip_type_t  type;
+    aos_strip_order_t order;
+    uint16_t          count;    /* LEDs, 1..AOS_STRIP_MAX_LEDS */
+} aos_strip_cfg_t;
+
+#define AOS_STRIP_MAX_LEDS 1500
+
+typedef struct aos_io_strip aos_io_strip_t;
+aos_io_strip_t *aos_io_strip_open(int gpio, const aos_strip_cfg_t *cfg, const char *owner);
+bool aos_io_strip_show(aos_io_strip_t *s, const uint8_t *rgbw);   /* count * 4 bytes */
+void aos_io_strip_close(aos_io_strip_t *s);
+const char *aos_io_strip_type_name(aos_strip_type_t t);   /* "WS2812B" */
+const char *aos_io_strip_order_name(aos_strip_order_t o); /* "GRB" */
+bool aos_io_strip_type_rgbw(aos_strip_type_t t);
+
 /* ---- the serial capture service (aos_serial.c) ----
  *
  * Up to two channels read a UART port into a ring of lines in the

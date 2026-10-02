@@ -387,3 +387,207 @@ bool aos_io_be_gpio_mode(int gpio, aos_gpio_mode_t mode)
 
 int aos_io_be_gpio_get(int gpio) { return gpio_get_level(gpio); }
 bool aos_io_be_gpio_set(int gpio, int level) { return gpio_set_level(gpio, level) == ESP_OK; }
+
+/* ---- 1-Wire: Espressif's onewire_bus over the RMT (one TX and one RX
+ * channel a bus). Small: its receive buffer is a few symbols. ---- */
+
+#include "onewire_bus.h"
+#include "onewire_device.h"
+
+bool aos_io_be_ow_open(aos_io_ow_t *b)
+{
+    onewire_bus_config_t bc = { .bus_gpio_num = b->gpio, .flags = { .en_pull_up = b->pullup } };
+    onewire_bus_rmt_config_t rc = { .max_rx_bytes = 16 };      /* a scratchpad and its CRC */
+    onewire_bus_handle_t bus = NULL;
+    esp_err_t e = onewire_new_bus_rmt(&bc, &rc, &bus);
+    if (e != ESP_OK) {
+        aos_hal_log("io", "1-Wire on GPIO%d: %s", b->gpio, esp_err_to_name(e));
+        return false;
+    }
+    b->be = bus;
+    return true;
+}
+
+bool aos_io_be_ow_reset(aos_io_ow_t *b) { return onewire_bus_reset((onewire_bus_handle_t)b->be) == ESP_OK; }
+
+int aos_io_be_ow_search(aos_io_ow_t *b, uint64_t *roms, int max)
+{
+    onewire_device_iter_handle_t it = NULL;
+    if (onewire_new_device_iter((onewire_bus_handle_t)b->be, &it) != ESP_OK) return -1;
+    int n = 0;
+    onewire_device_t dev;
+    esp_err_t e;
+    while (n < max && (e = onewire_device_iter_get_next(it, &dev)) != ESP_ERR_NOT_FOUND) {
+        if (e == ESP_OK) roms[n++] = dev.address;
+        else break;                     /* a CRC error mid-search: what was found so far */
+    }
+    onewire_del_device_iter(it);
+    return n;
+}
+
+bool aos_io_be_ow_write(aos_io_ow_t *b, const uint8_t *data, size_t n)
+{
+    for (size_t off = 0; off < n; off += 255) {
+        size_t k = n - off > 255 ? 255 : n - off;
+        if (onewire_bus_write_bytes((onewire_bus_handle_t)b->be, data + off, (uint8_t)k) != ESP_OK) return false;
+    }
+    return true;
+}
+
+bool aos_io_be_ow_read(aos_io_ow_t *b, uint8_t *data, size_t n)
+{
+    for (size_t off = 0; off < n; off += 16) {
+        size_t k = n - off > 16 ? 16 : n - off;
+        if (onewire_bus_read_bytes((onewire_bus_handle_t)b->be, data + off, k) != ESP_OK) return false;
+    }
+    return true;
+}
+
+void aos_io_be_ow_close(aos_io_ow_t *b)
+{
+    if (b->be) onewire_bus_del((onewire_bus_handle_t)b->be);
+    b->be = NULL;
+    gpio_reset_pin(b->gpio);
+}
+
+/* ---- LED strips: one RMT TX channel each, a bytes encoder for the bits
+ * and a copy encoder for the reset (IDF's led_strip example's shape). No
+ * DMA: its symbol buffer would be internal RAM; the ISR refills the
+ * channel's memory from the PSRAM frame instead, 96 symbols at a time. ---- */
+
+#include "driver/rmt_tx.h"
+#include "driver/rmt_encoder.h"
+
+typedef struct {
+    rmt_encoder_t base;
+    rmt_encoder_t *bytes, *copy;
+    int state;
+    rmt_symbol_word_t reset;
+} strip_enc_t;
+
+typedef struct {
+    rmt_channel_handle_t ch;
+    rmt_encoder_t *enc;
+} strip_be_t;
+
+#define STRIP_RES_HZ 10000000           /* 0.1 us a tick */
+
+static size_t strip_encode(rmt_encoder_t *e, rmt_channel_handle_t ch, const void *data, size_t size,
+                           rmt_encode_state_t *ret)
+{
+    strip_enc_t *se = __containerof(e, strip_enc_t, base);
+    rmt_encode_state_t st = RMT_ENCODING_RESET, out = RMT_ENCODING_RESET;
+    size_t n = 0;
+    if (se->state == 0) {
+        n += se->bytes->encode(se->bytes, ch, data, size, &st);
+        if (st & RMT_ENCODING_COMPLETE) se->state = 1;
+        if (st & RMT_ENCODING_MEM_FULL) { *ret = RMT_ENCODING_MEM_FULL; return n; }
+    }
+    if (se->state == 1) {
+        n += se->copy->encode(se->copy, ch, &se->reset, sizeof se->reset, &st);
+        if (st & RMT_ENCODING_COMPLETE) { se->state = 0; out |= RMT_ENCODING_COMPLETE; }
+        if (st & RMT_ENCODING_MEM_FULL) out |= RMT_ENCODING_MEM_FULL;
+    }
+    *ret = out;
+    return n;
+}
+
+static esp_err_t strip_enc_reset(rmt_encoder_t *e)
+{
+    strip_enc_t *se = __containerof(e, strip_enc_t, base);
+    rmt_encoder_reset(se->bytes);
+    rmt_encoder_reset(se->copy);
+    se->state = 0;
+    return ESP_OK;
+}
+
+static esp_err_t strip_enc_del(rmt_encoder_t *e)
+{
+    strip_enc_t *se = __containerof(e, strip_enc_t, base);
+    rmt_del_encoder(se->bytes);
+    rmt_del_encoder(se->copy);
+    free(se);
+    return ESP_OK;
+}
+
+/* the datasheets' timings, in ticks: T0H, T0L, T1H, T1L, and the reset
+ * (300 us covers the newer WS2812B's 280) */
+static const struct { uint16_t t0h, t0l, t1h, t1l, reset_us; } TIMING[AOS_STRIP_TYPE_COUNT] = {
+    [AOS_STRIP_WS2812B]     = { 4, 8, 8, 4, 300 },
+    [AOS_STRIP_WS2811_400]  = { 5, 20, 12, 13, 300 },
+    [AOS_STRIP_SK6812]      = { 3, 9, 6, 6, 300 },
+    [AOS_STRIP_SK6812_RGBW] = { 3, 9, 6, 6, 300 },
+};
+
+bool aos_io_be_strip_open(aos_io_strip_t *s)
+{
+    strip_be_t *be = calloc(1, sizeof *be);
+    strip_enc_t *se = calloc(1, sizeof *se);
+    if (!be || !se) goto fail;
+    rmt_tx_channel_config_t cc = {
+        .gpio_num = s->gpio,
+        .clk_src = RMT_CLK_SRC_DEFAULT,
+        .resolution_hz = STRIP_RES_HZ,
+        .mem_block_symbols = 96,
+        .trans_queue_depth = 2,
+    };
+    esp_err_t e = rmt_new_tx_channel(&cc, &be->ch);
+    if (e != ESP_OK) {
+        cc.mem_block_symbols = 48;      /* the other channels took the second block */
+        e = rmt_new_tx_channel(&cc, &be->ch);
+    }
+    if (e != ESP_OK) { aos_hal_log("io", "LED strip on GPIO%d: %s", s->gpio, esp_err_to_name(e)); goto fail; }
+    const typeof(TIMING[0]) *t = &TIMING[s->cfg.type];
+    rmt_bytes_encoder_config_t bc = {
+        .bit0 = { .level0 = 1, .duration0 = t->t0h, .level1 = 0, .duration1 = t->t0l },
+        .bit1 = { .level0 = 1, .duration0 = t->t1h, .level1 = 0, .duration1 = t->t1l },
+        .flags.msb_first = 1,
+    };
+    rmt_copy_encoder_config_t cpc = {};
+    if (rmt_new_bytes_encoder(&bc, &se->bytes) != ESP_OK || rmt_new_copy_encoder(&cpc, &se->copy) != ESP_OK) goto fail;
+    uint32_t half = (uint32_t)t->reset_us * (STRIP_RES_HZ / 1000000) / 2;
+    se->reset = (rmt_symbol_word_t){ .level0 = 0, .duration0 = half, .level1 = 0, .duration1 = half };
+    se->base.encode = strip_encode;
+    se->base.reset = strip_enc_reset;
+    se->base.del = strip_enc_del;
+    be->enc = &se->base;
+    se = NULL;
+    if (rmt_enable(be->ch) != ESP_OK) goto fail;
+    s->be = be;
+    return true;
+fail:
+    if (se) {
+        if (se->bytes) rmt_del_encoder(se->bytes);
+        if (se->copy) rmt_del_encoder(se->copy);
+        free(se);
+    }
+    if (be) {
+        if (be->enc) rmt_del_encoder(be->enc);
+        if (be->ch) rmt_del_channel(be->ch);
+        free(be);
+    }
+    return false;
+}
+
+bool aos_io_be_strip_send(aos_io_strip_t *s)
+{
+    strip_be_t *be = s->be;
+    rmt_transmit_config_t tc = { .loop_count = 0 };
+    if (rmt_transmit(be->ch, be->enc, s->wire, (size_t)s->cfg.count * s->bpp, &tc) != ESP_OK) return false;
+    /* a WS2812B LED is 30 us on the wire: 1500 of them, 45 ms */
+    int ms = 20 + s->cfg.count * (s->cfg.type == AOS_STRIP_WS2811_400 ? 8 : 4) * s->bpp / 100;
+    return rmt_tx_wait_all_done(be->ch, ms) == ESP_OK;
+}
+
+void aos_io_be_strip_close(aos_io_strip_t *s)
+{
+    strip_be_t *be = s->be;
+    if (!be) return;
+    rmt_tx_wait_all_done(be->ch, 100);
+    rmt_disable(be->ch);
+    rmt_del_encoder(be->enc);
+    rmt_del_channel(be->ch);
+    free(be);
+    s->be = NULL;
+    gpio_reset_pin(s->gpio);
+}

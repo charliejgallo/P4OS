@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
  * Mas 149 funciones de libc/libm agregadas a mano.
- * Total: 3101 simbolos.
+ * Total: 3135 simbolos.
  */
 
 #include <stddef.h>
@@ -67,6 +67,7 @@ extern int aos_app_files_get;
 extern int aos_app_flasher_get;
 extern int aos_app_flasher_service_tick;
 extern int aos_app_ha_get;
+extern int aos_app_leds_get;
 extern int aos_app_life_get;
 extern int aos_app_macropad_get;
 extern int aos_app_modbus_get;
@@ -589,10 +590,19 @@ extern int aos_io_be_i2c_close;
 extern int aos_io_be_i2c_open;
 extern int aos_io_be_i2c_probe;
 extern int aos_io_be_i2c_xfer;
+extern int aos_io_be_ow_close;
+extern int aos_io_be_ow_open;
+extern int aos_io_be_ow_read;
+extern int aos_io_be_ow_reset;
+extern int aos_io_be_ow_search;
+extern int aos_io_be_ow_write;
 extern int aos_io_be_spi_close;
 extern int aos_io_be_spi_open;
 extern int aos_io_be_spi_set_clock;
 extern int aos_io_be_spi_xfer;
+extern int aos_io_be_strip_close;
+extern int aos_io_be_strip_open;
+extern int aos_io_be_strip_send;
 extern int aos_io_be_uart_close;
 extern int aos_io_be_uart_lines;
 extern int aos_io_be_uart_lines_release;
@@ -602,6 +612,9 @@ extern int aos_io_be_uart_set_baud;
 extern int aos_io_be_uart_set_format;
 extern int aos_io_be_uart_write;
 extern int aos_io_claim;
+extern int aos_io_ds18b20_convert_all;
+extern int aos_io_ds18b20_read;
+extern int aos_io_ds18b20_set_bits;
 extern int aos_io_gpio_get;
 extern int aos_io_gpio_mode;
 extern int aos_io_gpio_set;
@@ -616,6 +629,15 @@ extern int aos_io_module_at;
 extern int aos_io_module_count;
 extern int aos_io_module_find;
 extern int aos_io_module_gpio;
+extern int aos_io_ow_close;
+extern int aos_io_ow_crc8;
+extern int aos_io_ow_family;
+extern int aos_io_ow_gpio;
+extern int aos_io_ow_open;
+extern int aos_io_ow_read;
+extern int aos_io_ow_reset;
+extern int aos_io_ow_search;
+extern int aos_io_ow_write;
 extern int aos_io_owner;
 extern int aos_io_pin_of_gpio;
 extern int aos_io_port_at;
@@ -632,6 +654,12 @@ extern int aos_io_spi_open;
 extern int aos_io_spi_set_clock;
 extern int aos_io_spi_write_read;
 extern int aos_io_spi_xfer;
+extern int aos_io_strip_close;
+extern int aos_io_strip_open;
+extern int aos_io_strip_order_name;
+extern int aos_io_strip_show;
+extern int aos_io_strip_type_name;
+extern int aos_io_strip_type_rgbw;
 extern int aos_io_uart_close;
 extern int aos_io_uart_desc;
 extern int aos_io_uart_lines;
@@ -648,6 +676,12 @@ extern int aos_label_boxed;
 extern int aos_label_scaled;
 extern int aos_lang_pack_count;
 extern int aos_lang_packs;
+extern int aos_leds_autostart;
+extern int aos_leds_frame;
+extern int aos_leds_fx_count;
+extern int aos_leds_get;
+extern int aos_leds_set;
+extern int aos_leds_status;
 extern int aos_logring_add;
 extern int aos_lvmem_get_psram;
 extern int aos_lvmem_set_psram;
@@ -3171,6 +3205,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_app_flasher_get),
     ESP_ELFSYM_EXPORT(aos_app_flasher_service_tick),
     ESP_ELFSYM_EXPORT(aos_app_ha_get),
+    ESP_ELFSYM_EXPORT(aos_app_leds_get),
     ESP_ELFSYM_EXPORT(aos_app_life_get),
     ESP_ELFSYM_EXPORT(aos_app_macropad_get),
     ESP_ELFSYM_EXPORT(aos_app_modbus_get),
@@ -3693,10 +3728,19 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_be_i2c_open),
     ESP_ELFSYM_EXPORT(aos_io_be_i2c_probe),
     ESP_ELFSYM_EXPORT(aos_io_be_i2c_xfer),
+    ESP_ELFSYM_EXPORT(aos_io_be_ow_close),
+    ESP_ELFSYM_EXPORT(aos_io_be_ow_open),
+    ESP_ELFSYM_EXPORT(aos_io_be_ow_read),
+    ESP_ELFSYM_EXPORT(aos_io_be_ow_reset),
+    ESP_ELFSYM_EXPORT(aos_io_be_ow_search),
+    ESP_ELFSYM_EXPORT(aos_io_be_ow_write),
     ESP_ELFSYM_EXPORT(aos_io_be_spi_close),
     ESP_ELFSYM_EXPORT(aos_io_be_spi_open),
     ESP_ELFSYM_EXPORT(aos_io_be_spi_set_clock),
     ESP_ELFSYM_EXPORT(aos_io_be_spi_xfer),
+    ESP_ELFSYM_EXPORT(aos_io_be_strip_close),
+    ESP_ELFSYM_EXPORT(aos_io_be_strip_open),
+    ESP_ELFSYM_EXPORT(aos_io_be_strip_send),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_close),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_lines),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_lines_release),
@@ -3706,6 +3750,9 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_be_uart_set_format),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_write),
     ESP_ELFSYM_EXPORT(aos_io_claim),
+    ESP_ELFSYM_EXPORT(aos_io_ds18b20_convert_all),
+    ESP_ELFSYM_EXPORT(aos_io_ds18b20_read),
+    ESP_ELFSYM_EXPORT(aos_io_ds18b20_set_bits),
     ESP_ELFSYM_EXPORT(aos_io_gpio_get),
     ESP_ELFSYM_EXPORT(aos_io_gpio_mode),
     ESP_ELFSYM_EXPORT(aos_io_gpio_set),
@@ -3720,6 +3767,15 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_module_count),
     ESP_ELFSYM_EXPORT(aos_io_module_find),
     ESP_ELFSYM_EXPORT(aos_io_module_gpio),
+    ESP_ELFSYM_EXPORT(aos_io_ow_close),
+    ESP_ELFSYM_EXPORT(aos_io_ow_crc8),
+    ESP_ELFSYM_EXPORT(aos_io_ow_family),
+    ESP_ELFSYM_EXPORT(aos_io_ow_gpio),
+    ESP_ELFSYM_EXPORT(aos_io_ow_open),
+    ESP_ELFSYM_EXPORT(aos_io_ow_read),
+    ESP_ELFSYM_EXPORT(aos_io_ow_reset),
+    ESP_ELFSYM_EXPORT(aos_io_ow_search),
+    ESP_ELFSYM_EXPORT(aos_io_ow_write),
     ESP_ELFSYM_EXPORT(aos_io_owner),
     ESP_ELFSYM_EXPORT(aos_io_pin_of_gpio),
     ESP_ELFSYM_EXPORT(aos_io_port_at),
@@ -3736,6 +3792,12 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_spi_set_clock),
     ESP_ELFSYM_EXPORT(aos_io_spi_write_read),
     ESP_ELFSYM_EXPORT(aos_io_spi_xfer),
+    ESP_ELFSYM_EXPORT(aos_io_strip_close),
+    ESP_ELFSYM_EXPORT(aos_io_strip_open),
+    ESP_ELFSYM_EXPORT(aos_io_strip_order_name),
+    ESP_ELFSYM_EXPORT(aos_io_strip_show),
+    ESP_ELFSYM_EXPORT(aos_io_strip_type_name),
+    ESP_ELFSYM_EXPORT(aos_io_strip_type_rgbw),
     ESP_ELFSYM_EXPORT(aos_io_uart_close),
     ESP_ELFSYM_EXPORT(aos_io_uart_desc),
     ESP_ELFSYM_EXPORT(aos_io_uart_lines),
@@ -3752,6 +3814,12 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_label_scaled),
     ESP_ELFSYM_EXPORT(aos_lang_pack_count),
     ESP_ELFSYM_EXPORT(aos_lang_packs),
+    ESP_ELFSYM_EXPORT(aos_leds_autostart),
+    ESP_ELFSYM_EXPORT(aos_leds_frame),
+    ESP_ELFSYM_EXPORT(aos_leds_fx_count),
+    ESP_ELFSYM_EXPORT(aos_leds_get),
+    ESP_ELFSYM_EXPORT(aos_leds_set),
+    ESP_ELFSYM_EXPORT(aos_leds_status),
     ESP_ELFSYM_EXPORT(aos_logring_add),
     ESP_ELFSYM_EXPORT(aos_lvmem_get_psram),
     ESP_ELFSYM_EXPORT(aos_lvmem_set_psram),
