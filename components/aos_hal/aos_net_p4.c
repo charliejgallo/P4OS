@@ -38,6 +38,7 @@
 #include "esp_timer.h"
 #include "esp_wifi.h"
 #include "esp_hosted.h"
+#include "eh_host_mcu_transport_init_event.h"
 #include "esp_mac.h"
 #include "esp_random.h"
 #include "mdns.h"
@@ -248,14 +249,21 @@ static void net_task(void *arg)
     aos_hal_pref_get_i32("ap_on", &ap);
     if (ap) aos_hal_net_ap_start();     /* it was up before the restart */
     connect_now();
-    /* the co-processor's firmware, once, from this task: an RPC to the C6
-     * made from the UI under LVGL's lock is what froze the screen once
-     * (see the RSSI below). Settings' Diagnostics reads the copy. After
-     * the connection has been started: a C6 whose firmware predates this
-     * request (the replacement board's, 2026-10-03) lets it time out
-     * after 5 s, and the network must not wait for that. */
+    /* the co-processor's firmware, once. A C6 from esp_hosted 2.x on says
+     * it in its INIT event, kept by the transport: no RPC. Without it, the
+     * RPC, from this task: one made from the UI under LVGL's lock is what
+     * froze the screen once (see the RSSI below). Settings' Diagnostics
+     * reads the copy. After the connection has been started: the factory
+     * firmware of the replacement board's C6 (2026-10-03) says 0.0.0 in
+     * that event and lets the RPC time out after 5 s, and the network must
+     * not wait for that. */
+    uint32_t v = eh_host_mcu_transport_get_fw_version();
     esp_hosted_coprocessor_fwver_t fw = { 0 };
-    if (esp_hosted_get_coprocessor_fwversion(&fw) == ESP_OK) {
+    if (v) {
+        snprintf(s_c6_fw, sizeof s_c6_fw, "%u.%u.%u", (unsigned)(v >> 16 & 0xFF), (unsigned)(v >> 8 & 0xFF),
+                 (unsigned)(v & 0xFF));
+        ESP_LOGI(TAG, "the C6 runs esp_hosted %s", s_c6_fw);
+    } else if (esp_hosted_get_coprocessor_fwversion(&fw) == ESP_OK) {
         snprintf(s_c6_fw, sizeof s_c6_fw, "%u.%u.%u", (unsigned)fw.major1, (unsigned)fw.minor1, (unsigned)fw.patch1);
         ESP_LOGI(TAG, "the C6 runs esp_hosted %s", s_c6_fw);
     } else {
