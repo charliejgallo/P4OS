@@ -7125,3 +7125,13 @@ Video	Video
 
 #: apps/visor3d  (nombre de app)
 Visor 3D	3D Viewer
+mandando… %u %%	sending… %u %%
+listo: reiniciando	done: restarting
+Tocá otra vez: sin Wi-Fi un minuto y reinicia	Tap again: no Wi-Fi for a minute, then a restart
+LA RADIO (ESP32-C6)	THE RADIO (ESP32-C6)
+En el C6	On the C6
+de fábrica (sin versión)	factory (no version)
+En la tarjeta	On the card
+Una versión nueva del firmware del C6 se copia a /firmware/c6.bin de la tarjeta (portal o tools/install_c6.sh) y se instala desde acá.	A new C6 firmware goes to the card's /firmware/c6.bin (portal or tools/install_c6.sh) and is installed from here.
+Instalar en el C6	Install on the C6
+El C6 la escribe en su otra ranura y la revisa antes de cambiar. Mientras tanto no hay Wi-Fi, y al terminar la placa se reinicia.	The C6 writes it into its other slot and checks it before switching. There is no Wi-Fi meanwhile, and the board restarts at the end.

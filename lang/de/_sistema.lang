@@ -7125,3 +7125,13 @@ Video	Video
 
 #: apps/visor3d  (nombre de app)
 Visor 3D	3D-Viewer
+mandando… %u %%	wird gesendet… %u %%
+listo: reiniciando	fertig: Neustart
+Tocá otra vez: sin Wi-Fi un minuto y reinicia	Nochmal tippen: eine Minute kein WLAN, dann Neustart
+LA RADIO (ESP32-C6)	DAS FUNKMODUL (ESP32-C6)
+En el C6	Auf dem C6
+de fábrica (sin versión)	ab Werk (ohne Version)
+En la tarjeta	Auf der Karte
+Una versión nueva del firmware del C6 se copia a /firmware/c6.bin de la tarjeta (portal o tools/install_c6.sh) y se instala desde acá.	Eine neue C6-Firmware kommt nach /firmware/c6.bin auf der Karte (Portal oder tools/install_c6.sh) und wird von hier installiert.
+Instalar en el C6	Auf dem C6 installieren
+El C6 la escribe en su otra ranura y la revisa antes de cambiar. Mientras tanto no hay Wi-Fi, y al terminar la placa se reinicia.	Der C6 schreibt sie in seinen anderen Slot und prüft sie vor dem Wechsel. Solange gibt es kein WLAN, und am Ende startet die Platine neu.

@@ -2211,6 +2211,16 @@ static const char blob_en__sistema_lang[] =
     "Turbo\tTurbo\n"
     "Video\tVideo\n"
     "Visor 3D\t3D Viewer\n"
+    "mandando… %u %%\tsending… %u %%\n"
+    "listo: reiniciando\tdone: restarting\n"
+    "Tocá otra vez: sin Wi-Fi un minuto y reinicia\tTap again: no Wi-Fi for a minute, then a restart\n"
+    "LA RADIO (ESP32-C6)\tTHE RADIO (ESP32-C6)\n"
+    "En el C6\tOn the C6\n"
+    "de fábrica (sin versión)\tfactory (no version)\n"
+    "En la tarjeta\tOn the card\n"
+    "Una versión nueva del firmware del C6 se copia a /firmware/c6.bin de la tarjeta (portal o tools/install_c6.sh) y se instala desde acá.\tA new C6 firmware goes to the card's /firmware/c6.bin (portal or tools/install_c6.sh) and is installed from here.\n"
+    "Instalar en el C6\tInstall on the C6\n"
+    "El C6 la escribe en su otra ranura y la revisa antes de cambiar. Mientras tanto no hay Wi-Fi, y al terminar la placa se reinicia.\tThe C6 writes it into its other slot and checks it before switching. There is no Wi-Fi meanwhile, and the board restarts at the end.\n"
     ;
 
 static const char blob_en_aos_cameras_lang[] =
@@ -6455,6 +6465,16 @@ static const char blob_de__sistema_lang[] =
     "Turbo\tTurbo\n"
     "Video\tVideo\n"
     "Visor 3D\t3D-Viewer\n"
+    "mandando… %u %%\twird gesendet… %u %%\n"
+    "listo: reiniciando\tfertig: Neustart\n"
+    "Tocá otra vez: sin Wi-Fi un minuto y reinicia\tNochmal tippen: eine Minute kein WLAN, dann Neustart\n"
+    "LA RADIO (ESP32-C6)\tDAS FUNKMODUL (ESP32-C6)\n"
+    "En el C6\tAuf dem C6\n"
+    "de fábrica (sin versión)\tab Werk (ohne Version)\n"
+    "En la tarjeta\tAuf der Karte\n"
+    "Una versión nueva del firmware del C6 se copia a /firmware/c6.bin de la tarjeta (portal o tools/install_c6.sh) y se instala desde acá.\tEine neue C6-Firmware kommt nach /firmware/c6.bin auf der Karte (Portal oder tools/install_c6.sh) und wird von hier installiert.\n"
+    "Instalar en el C6\tAuf dem C6 installieren\n"
+    "El C6 la escribe en su otra ranura y la revisa antes de cambiar. Mientras tanto no hay Wi-Fi, y al terminar la placa se reinicia.\tDer C6 schreibt sie in seinen anderen Slot und prüft sie vor dem Wechsel. Solange gibt es kein WLAN, und am Ende startet die Platine neu.\n"
     ;
 
 static const char blob_de_aos_cameras_lang[] =
@@ -8502,7 +8522,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2197, 32, files_en, 33 },
-    { "de", "Deutsch", 2197, 32, files_de, 33 },
+    { "en", "English", 2207, 32, files_en, 33 },
+    { "de", "Deutsch", 2207, 32, files_de, 33 },
 };
 const int aos_lang_pack_count = 2;
