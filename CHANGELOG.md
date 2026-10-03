@@ -1,5 +1,39 @@
 # Changelog
 
+## 0.6.0 — 2026-10-03
+
+**The lock screen**
+- The time, the date, the messages and the music. A free swipe up unlocks.
+- When it locks: at boot, and after the screen has been off for the time
+  chosen (as soon as it goes off, or 1 to 60 minutes later).
+- An optional code of 4 or 6 digits, kept as a salted SHA-256. Wrong codes
+  make the pad wait longer each time.
+- A forgotten code is removed from the BOOT button's safe mode.
+- Settings, Lock screen: when it locks, the code, and what it shows.
+
+**The workshop**
+- **LED Strips**, a new app: an addressable strip on any free pin
+  (WS2812B, WS2811, SK6812, SK6812 RGBW), with 13 effects and WLED's power
+  limiter. It runs as a service, with the app closed and after a restart.
+- **1-Wire in Bus:** it searches the bus and reads every DS18B20 live, and
+  sets its resolution.
+- An RC522 example in Bus's SPI tab, and SPI tested on the board at 1, 10
+  and 40 MHz.
+- A real BME280 read on the board.
+
+**System**
+- **Languages:** English and German now also live in the firmware. The card's
+  pack and the firmware's are joined string by string, so the languages work
+  with no card and a card older than the firmware is still complete.
+- Diagnostics shows the C6's firmware version, when the C6 reports it.
+- Folder miniatures fit glyph and text icons, and the folder-rename
+  keyboard is dark like the others.
+- The install scripts use IPv4 straight away: the language packs go up in
+  seconds, not minutes.
+- The CI checks each app with readelf, and a new push cancels the run still
+  going.
+
+
 ## 0.5.0 — 2026-10-01
 
 The first public version. Before this, P4OS was built in private from the

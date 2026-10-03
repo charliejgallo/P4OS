@@ -2825,7 +2825,7 @@ Tira	Strip
 
 #: components/aos_apps/aos_app_leds.c:33
 #: components/aos_apps/_pending/aos_app_settings.c:3042
-Consumo	Drain
+Consumo	Power
 
 #: components/aos_apps/aos_app_leds.c:37
 Sólido	Solid

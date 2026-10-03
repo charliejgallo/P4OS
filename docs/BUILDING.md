@@ -106,6 +106,12 @@ And two things that restart the board on purpose:
   RESET? In the run before it, the BOOT button gave no edge at all, also
   after an OTA's software restart; after the RESET it worked at once. That
   was seen once.
+  On 2026-10-03 it happened on the replacement board as well, right after an
+  OTA: so it is not that board. The next OTA ran with the serial port
+  recording (open it first, then OTA, and keep reading): that time the
+  restart was clean, and the log is the baseline to compare with. It shows
+  the P4 resetting the C6 through GPIO54 on every boot, so a C6 left in a
+  bad state by the previous run is ruled out.
 
 When a HAL function is added or removed, the apps' symbol table must follow:
 

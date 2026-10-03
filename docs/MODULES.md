@@ -386,15 +386,56 @@ port's, those of its modules, or none. Then:
 The tab claims pins as `Bus SPI`, not `Bus`. A pin the GPIO tab holds is
 then refused, not taken over.
 
+## 1-Wire
+
+`aos_io_ow_*` opens a 1-Wire bus on any usable GPIO of the header, with an
+owner like every other port. On the board it is Espressif's `onewire_bus`
+over the RMT, one TX and one RX channel a bus: the slots are timed by the
+peripheral, not by a loop with interrupts off.
+
+- **The bus:** `aos_io_ow_reset()` (a presence pulse), `aos_io_ow_search()`
+  (the 64-bit ROM ids, family code in the low byte), and raw writes and
+  reads. `aos_io_ow_family()` names the codes (0x28 DS18B20, 0x10 DS18S20,
+  0x22 DS1822, 0x3B MAX31850, ...).
+- **The DS18B20 family:** `aos_io_ds18b20_convert_all()` starts every sensor
+  at once (skip ROM) and says how long to wait (750 ms at 12 bits).
+  `aos_io_ds18b20_read()` reads one, checks the scratchpad's CRC and gives
+  degrees and the resolution. `aos_io_ds18b20_set_bits()` changes the
+  resolution and keeps it in the sensor's EEPROM. 85.0 straight after power
+  up is the part's reset value, not a reading.
+- **Wiring:** GND, data to the pin, VDD to 3V3 (pin 18), and 4.7 kΩ between
+  data and 3V3. The internal pull-up is enough for one sensor on a short
+  cable.
+- **Bus, 1-Wire tab:** pick the pin, search, and every sensor is read once a
+  second in a thread of its own, with its resolution.
+- **The simulator:** `P4_SIM_ONEWIRE` says what hangs off any pin opened as
+  a bus. Unset, two DS18B20s: one near 23 °C, one that warms and cools over
+  a minute. `none` for nothing, or a number for that many.
+
+## LED strips
+
+`aos_io_strip_*` sends an addressable strip on any usable GPIO: the
+single-wire kind (WS2812B and the WS2813/WS2815/WS2811 at 800 kHz, the
+WS2811 at 400 kHz, SK6812, SK6812 RGBW), with the colour order. The RMT
+sends it from a frame in PSRAM, refilled by its ISR; there is no DMA,
+because its buffer would be internal RAM.
+
+The **LED Strips** app does not drive the strip itself. A service,
+`aos_leds.c`, does, and keeps going with any app in front:
+
+- **The effects:** 13 of them, at up to 50 fps.
+- **The limiter:** the current estimate is WLED's (a LED draws its mA at
+  full white, shared by its channels, linearly with each one), and the
+  frame is dimmed to stay within the supply's budget.
+- **Kept across restarts:** the configuration lives in the preferences, and
+  a strip left on comes back at boot.
+
+Fire is Mark Kriegsman's Fire2012 algorithm, as FastLED and WLED have it,
+written again here.
+
 ## Not done yet
 
-- **DS18B20 (1-Wire):** left out. A clean version needs the RMT 1-Wire
-  driver (`espressif/onewire_bus`, a new managed component) and a 1-Wire
-  API in `aos_io` with a simulator backend. Bit-banging it on the P4 means
-  microsecond timing with interrupts off, which is not what a service
-  thread should do. The DOMCOM gateway's driver is the reference when it
-  comes.
-- **WS2812 and relays** (Phase 6 extras): not in this round.
+- **Relays** (a Phase 6 extra): not in this round.
 ## What only the board can confirm
 
 Everything above has run against the emulation only. When the board comes,

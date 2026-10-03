@@ -96,6 +96,12 @@ Del sistema:
 - [x] Doom con cambio de búfer: 35 fps y sin corte posible entre cuadros.
 
 Que necesitan la mano del usuario o equipos:
+- [x] Pantalla de bloqueo (2026-10-03): probada por el usuario en la placa
+      de reemplazo, con código; las traducciones sin tarjeta, en el
+      simulador.
+- [ ] Tira WS2812B en GPIO5 (pin 11) con level shifter, desde Tiras LED.
+- [ ] DS18B20 real en Bus → 1-Wire (pin 16, 4,7 kΩ a 3V3).
+- [ ] RC522 en spi.a con el ejemplo de Bus (VersionReg 0x91/0x92).
 - [x] SPI en el conector (2026-10-01): el lazo del pin 34 al 36 a 1, 10 y 40 MHz,
       los 16 bytes de vuelta (captura en el README). Con el puerto abierto,
       314 KB de interna libre. Falta un chip real: un RC522 (ejemplo nuevo

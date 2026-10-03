@@ -22,6 +22,7 @@ what that asks for. The full texts are in [LICENSES/](LICENSES).
 | Waveshare BSP for this board, Espressif display, touch and codec helpers | fetched | Apache-2.0 | |
 | esp_lcd_hx8394 (Waveshare) | fetched | MIT | its licence file has the MIT template with the name left blank |
 | esp_hosted 1.4, esp_wifi_remote | fetched | Apache-2.0 | Wi-Fi through the ESP32-C6 |
+| onewire_bus 1.1 (Espressif) | fetched | Apache-2.0 | 1-Wire over the RMT, for the DS18B20 |
 | mdns, esp_tinyusb, esp-serial-flasher, esp_h264 | fetched | Apache-2.0 | esp_h264's decoder is tinyh264; the flasher's stubs are Apache-2.0 or MIT |
 | TinyUSB | fetched | MIT | [MIT-TinyUSB.txt](LICENSES/MIT-TinyUSB.txt) |
 | esp_new_jpeg | fetched | **Espressif MIT**: for use on Espressif products | [Espressif-MIT-esp_new_jpeg.txt](LICENSES/Espressif-MIT-esp_new_jpeg.txt) |
@@ -43,6 +44,9 @@ hardware has to replace them.
 
 The firmware that loads `doom.so` stays MIT. The GPL applies to the Doom app
 and to any simulator build that compiles Doom in.
+
+The LED Strips app's Fire effect follows Mark Kriegsman's Fire2012 algorithm
+(as published with FastLED, MIT), written again in `aos_io/aos_leds.c`.
 
 ## Fonts and icons
 

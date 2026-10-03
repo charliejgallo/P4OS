@@ -7,8 +7,9 @@ An iPhone-style operating system for the
 32 MB of PSRAM) and an ESP32-C6 that does the Wi-Fi.
 
 It has a home screen with pages, folders and a dock, a control centre and
-notifications, and runs in portrait or landscape. There are twenty built-in
-apps and thirty more on the microSD, loaded as shared objects:
+notifications, and a lock screen with an optional code, and it runs in
+portrait or landscape. There are twenty-three built-in apps and thirty more on
+the microSD, loaded as shared objects:
 
 - **Games:** twenty-one, among them Mila (a Sokoban with a black cat in
   Blender 3D), Monster Hop, a racing game, golf, a robot RPG, and Doom at
@@ -19,8 +20,9 @@ apps and thirty more on the microSD, loaded as shared objects:
 - **USB:** the port becomes a keyboard, mouse, gamepad, MIDI device, network
   or disk for a computer.
 - **A Wi-Fi network of its own,** joined with a QR code.
-- **The workshop:** I2C, SPI and GPIO on the 40-pin header, a serial
-  terminal, an ESP32 programmer, Modbus, and a bench supply and scope.
+- **The workshop:** I2C, SPI, 1-Wire and GPIO on the 40-pin header,
+  addressable LED strips on any free pin (WLED's way), a serial terminal, an
+  ESP32 programmer, Modbus, and a bench supply and scope.
 
 A desktop simulator runs the same UI code, so most of it can be built and
 tried without the board.
@@ -75,6 +77,34 @@ The home screen has icon pages, folders, a dock and widgets.
 |---|---|---|
 | <img src="docs/img/sim-settings-landscape.png" width="300"> | <img src="docs/img/land-macropad.png" width="300"> | <img src="docs/img/land-photos.png" width="300"> |
 
+### The lock screen
+
+It shows the time and date large, the messages that came in, and the music
+playing with its buttons, over the wallpaper. To unlock, swipe up from
+anywhere: the screen follows the finger.
+
+- **When it locks:** at boot, and when the screen has been off for the time
+  chosen in Settings (as soon as it goes off, or 1, 5, 15 or 60 minutes
+  later). It is checked while the screen is still dark, so waking never
+  shows a frame of what was under it.
+- **An optional code** of 4 or 6 digits. It is kept as a salted SHA-256,
+  never as itself. After 5 wrong tries the pad waits 30 s, and twice as long
+  every 3 more; the count survives a restart.
+- **A forgotten code:** in the BOOT button's safe mode the lock screen
+  does not ask for it, and Settings can remove it.
+- **Messages:** today the apps' notifications; the phone's over Bluetooth and
+  Home Assistant's will arrive in the same list. With a code, their text can
+  stay hidden until unlocked.
+
+| Locked | The code | Settings, Wi-Fi: its own network |
+|---|---|---|
+| <img src="docs/img/app-lock.png" width="230"> | <img src="docs/img/app-pad.png" width="230"> | <img src="docs/img/app-wifi-ap.png" width="230"> |
+
+The gesture is a free swipe up, as phones do it today, and not a control
+dragged along a track: Apple's 2005 patent on the latter
+([US 7,657,849](https://patents.google.com/patent/US7657849B2)) expired in
+2025, but that is not the reason this one was chosen.
+
 ### Built-in apps
 
 Every day:
@@ -110,8 +140,16 @@ header with who holds each pin.
 |---|---|---|---|---|---|
 | <img src="docs/img/app-bus.png" width="125"> | <img src="docs/img/app-modules.png" width="125"> | <img src="docs/img/app-serial.png" width="125"> | <img src="docs/img/app-flasher.png" width="125"> | <img src="docs/img/app-modbus.png" width="125"> | <img src="docs/img/app-elec.png" width="125"> |
 
-- **Bus:** scans I2C and names what answers, talks to SPI chips with presets,
-  and reads and drives GPIO.
+- **Bus:** scans I2C and names what answers, talks to SPI chips with presets
+  (flash memories, the MAX31855, the MCP3008, the RC522 RFID reader, a
+  loopback), finds the DS18B20s on a 1-Wire bus and reads them live with
+  their resolution, and reads and drives GPIO.
+- **LED Strips:** an addressable strip (WS2812B, WS2811, SK6812, SK6812 RGBW)
+  on any free pin of the header, with the colour order and the number of
+  LEDs. It has 13 effects with speed, intensity and two colours. The power
+  tab estimates what the strip draws, WLED's way, and dims the whole frame to
+  stay within the supply's budget. The strip keeps running with the app
+  closed and comes back after a restart.
 - **Modules:** live readings from the sensors in `modules.txt` (SHT3x,
   INA219, BME280...).
 - **Terminal:** two serial ports, hex, filters and alerts.
@@ -123,8 +161,12 @@ header with who holds each pin.
 - **Electronics:** resistor colours, Ohm's law, dividers, LEDs, the 555 and
   SMD codes.
 
-The simulator has fake chips and fake servers for all of it
-([docs/MODULES.md](docs/MODULES.md)).
+The simulator has fake chips and fake servers for all of it, two DS18B20s on
+its fake 1-Wire bus among them ([docs/MODULES.md](docs/MODULES.md)).
+
+| LED Strips: effects | The strip | Power | Bus: 1-Wire |
+|---|---|---|---|
+| <img src="docs/img/app-leds-fx.png" width="170"> | <img src="docs/img/app-leds-strip.png" width="170"> | <img src="docs/img/app-leds-power.png" width="170"> | <img src="docs/img/app-onewire.png" width="170"> |
 
 <p align="center"><img src="docs/img/land-bench.png" width="600" alt="Bench in landscape"></p>
 
@@ -192,17 +234,26 @@ an app.
 ### Settings
 
 The pages are Wi-Fi (with the access point), Bluetooth, USB (each mode
-explained), Display, Sound, Wallpaper, Expansion, Language, Date and time,
-Storage, Update, Diagnostics and About.
+explained), Display, Lock screen, Sound, Wallpaper, Expansion, Storage,
+Language, Date and time, Update, Diagnostics and About.
 
+- **Lock screen:** when it locks, the code (none, 4 or 6 digits, changed or
+  removed with the current one), and what it shows.
 - **Storage:** what fills the card by kind of file, and eject.
 - **Update:** both slots, and going back.
 - **Diagnostics:** chip temperature, CPU, memory, the reset reason, safe mode,
-  and the crash dump.
+  the hang watchdog's restarts, the C6's firmware, and the crash dump.
 - **About:** the portal's addresses, with a QR code for the phone.
 
-The interface is written in Spanish and translated by the language packs on
-the card: English and German are complete, and a pseudo-locale is used to
+| Update | Diagnostics |
+|---|---|
+| <img src="docs/img/app-update.png" width="230"> | <img src="docs/img/app-diag.png" width="230"> |
+
+**Languages.** The interface is written in Spanish. English and German are
+complete, and travel twice: inside the firmware, so they work with no card,
+and as packs on the card. The two are joined string by string with the
+card's first, so a fix copied to the card wins, and a card older than the
+firmware still gets the new screens translated. A pseudo-locale is used to
 test layouts.
 
 ## What was tested, and what not yet
@@ -223,10 +274,14 @@ test layouts.
 - I2C with a real BME280 on the header: found by itself, read once a second
   without errors. SPI with MOSI looped to MISO at 1, 10 and 40 MHz, the port's top speed.
 - Settings' Storage page and the QR codes.
+- The lock screen with its code, and the languages with no card.
 
 **Waiting for hardware on the bench:**
 
-- More I2C and SPI chips: an RC522 RFID reader is next.
+- More I2C and SPI chips: the RC522 RFID reader is next (its example is in
+  Bus).
+- An addressable strip on a real pin, and a real DS18B20: both run in the
+  simulator, and the board comes next.
 - The programmer against another ESP32.
 - The Riden over TTL, the Rigol over the LAN, and the terminal at 460800.
 - The IP cameras.
@@ -235,7 +290,8 @@ test layouts.
 
 **Not done yet:**
 
-- **Bluetooth:** the C6 can do it; it is next.
+- **Bluetooth:** next. The C6's factory firmware already offers BLE over
+  SDIO (it says "HCI over SDIO, BLE only" at boot).
 - **ESP-NOW:** esp_hosted 1.4 does not carry it, so the two-device games of
   AmoledOS run alone here.
 - **USB host:** the OTG port does not supply 5 V.
@@ -370,8 +426,8 @@ idioma de la tarjeta. Los documentos del plan y de las pruebas en la placa
 
 | | |
 |---|---|
-| Qué hace | inicio con carpetas, 20 apps propias y 30 de la tarjeta (juegos, mapas, radio, video, Lua), portal web, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, y taller con I2C, SPI y GPIO |
+| Qué hace | inicio con carpetas, pantalla de bloqueo con código, 23 apps propias y 30 de la tarjeta (juegos, mapas, radio, video, Lua), portal web, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, y taller con I2C, SPI, 1-Wire, GPIO y tiras LED direccionables |
 | Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el botón BOOT, un BME280 por I2C y SPI en lazo a 40 MHz |
-| Qué falta | Bluetooth, más chips en el conector (un lector RFID), las cámaras, y un cuelgue raro tras reiniciar |
+| Qué falta | Bluetooth, probar en la placa las tiras LED, el DS18B20 y el RC522, las cámaras, y un cuelgue raro tras reiniciar |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
 | Cómo se instala | la primera vez por el CH340; después `tools/ota.sh p4os.local` o el portal |

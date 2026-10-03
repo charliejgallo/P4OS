@@ -851,7 +851,7 @@ static const char blob_en__sistema_lang[] =
     "Sin escenas en Home Assistant\tNo scenes in Home Assistant\n"
     "Efectos\tEffects\n"
     "Tira\tStrip\n"
-    "Consumo\tDrain\n"
+    "Consumo\tPower\n"
     "Sólido\tSolid\n"
     "Parpadeo\tBlink\n"
     "Respirar\tBreathe\n"
