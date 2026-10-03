@@ -63,11 +63,14 @@ static uint32_t hash32(const char *s)
     return h;
 }
 
+/* By hash, and among equal hashes by where the key is in the blob: a
+ * merged catalogue has the card's lines first, so the card's translation
+ * of a key is the one catalog_find() meets first. */
 static int cmp_entry(const void *a, const void *b)
 {
-    uint32_t ha = ((const entry_t *)a)->hash;
-    uint32_t hb = ((const entry_t *)b)->hash;
-    return (ha > hb) - (ha < hb);
+    const entry_t *ea = a, *eb = b;
+    if (ea->hash != eb->hash) return (ea->hash > eb->hash) - (ea->hash < eb->hash);
+    return (ea->key > eb->key) - (ea->key < eb->key);
 }
 
 static const char *catalog_find(const catalog_t *cat, const char *key, uint32_t h)
@@ -345,7 +348,10 @@ static bool catalog_parse(catalog_t *cat, char *blob, const char *what)
                 char *val = tab + 1;
                 unescape(key);
                 unescape(val);
-                if (*key) {
+                /* a line left untranslated (both halves the same) says
+                 * nothing a lookup would not: skipped, so that in a merge
+                 * it does not hide the firmware's translation */
+                if (*key && strcmp(key, val) != 0) {
                     index[n].hash = hash32(key);
                     index[n].key  = (uint32_t)(key - blob);
                     index[n].val  = (uint32_t)(val - blob);
@@ -410,26 +416,53 @@ static char *embedded_dup(const char *code, const char *file)
     return NULL;
 }
 
-/* The CARD beats the firmware, on purpose and in this order:
+/* The CARD beats the firmware, string by string (P4OS, 2026-10-03; it used
+ * to be file by file):
  *
  *   1. /sdcard/lang/<code>/<file>
- *   2. the catalogue embedded in the binary
+ *   2. the catalogue embedded in the binary, for what the card lacks
  *
  * That way a bad translation is fixed by copying a file, without recompiling
- * or reflashing, and the third language comes in by exactly the same path as
- * the second instead of being a special case. */
+ * or reflashing; a card whose packs are older than the firmware does not
+ * leave the new screens in Spanish; and with no card at all the firmware's
+ * languages are still there. */
+/* The card's and the firmware's catalogue for one file, joined: the card's
+ * lines first (they win, see cmp_entry), the firmware's after, so a pack on
+ * the card that is older than the firmware still gets the new strings, and
+ * a fix copied to the card still beats the firmware. *where says which
+ * there were: "card", "firmware" or "card+firmware". NULL when neither. */
+static char *merged_blob(const char *code, const char *file, const char **where)
+{
+    char path[192];
+    pack_path(path, sizeof(path), code, file);
+    long len = 0;
+    char *card = slurp(path, &len);
+    char *fw = embedded_dup(code, file);
+    if (!card || !fw) {
+        *where = card ? "card" : "firmware";
+        return card ? card : fw;
+    }
+    size_t a = strlen(card), b = strlen(fw);
+    char *both = malloc(a + 1 + b + 1);
+    if (!both) {
+        free(fw);
+        *where = "card";
+        return card;
+    }
+    memcpy(both, card, a);
+    both[a] = '\n';
+    memcpy(both + a + 1, fw, b + 1);
+    free(card);
+    free(fw);
+    *where = "card+firmware";
+    return both;
+}
+
 static bool catalog_load(catalog_t *cat, const char *code, const char *file)
 {
     catalog_free(cat);
-
-    char path[192];
-    pack_path(path, sizeof(path), code, file);
-
-    long len = 0;
-    char *blob = slurp(path, &len);
-    if (!blob) {
-        blob = embedded_dup(code, file);
-    }
+    const char *where;
+    char *blob = merged_blob(code, file, &where);
     if (!blob) {
         return false;
     }
@@ -490,17 +523,10 @@ bool aos_i18n_set(const char *code)
     }
 
     catalog_t fresh = { 0 };
-    char path[192];
-    pack_path(path, sizeof(path), code, SYSTEM_CATALOG);
-    long len = 0;
-    char *blob = slurp(path, &len);
-    bool desde_tarjeta = (blob != NULL);
-    if (!blob) {
-        blob = embedded_dup(code, SYSTEM_CATALOG);
-    }
+    const char *where = "";
+    char *blob = merged_blob(code, SYSTEM_CATALOG, &where);
     if (!blob || !catalog_parse(&fresh, blob, SYSTEM_CATALOG)) {
-        aos_hal_log("i18n", "could not read %s nor the embedded one; staying on %s",
-                    path, s_code);
+        aos_hal_log("i18n", "no %s catalogue on the card nor in the firmware; staying on %s", code, s_code);
         return false;
     }
 
@@ -511,8 +537,7 @@ bool aos_i18n_set(const char *code)
     s_system = fresh;
     snprintf(s_code, sizeof(s_code), "%s", code);
     aos_hal_pref_set_str(PREF_KEY, s_code);
-    aos_hal_log("i18n", "language: %s, %d strings (%s)", s_code, s_system.count,
-                desde_tarjeta ? "card" : "firmware");
+    aos_hal_log("i18n", "language: %s, %d strings (%s)", s_code, s_system.count, where);
     return true;
 }
 
