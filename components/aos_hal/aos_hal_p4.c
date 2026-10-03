@@ -1529,6 +1529,21 @@ void aos_hal_alive(void)
     s_boot_up = true;
 }
 
+/* Every task and its state, to the log: what the watchdogs write before
+ * they restart the board (this one, and the C6 link's in aos_tasks_p4.c). */
+void aos_p4_log_tasks(void)
+{
+    UBaseType_t n = uxTaskGetNumberOfTasks() + 2;
+    TaskStatus_t *ts = heap_caps_calloc(n, sizeof *ts, MALLOC_CAP_SPIRAM);
+    if (!ts) return;
+    n = uxTaskGetSystemState(ts, n, NULL);
+    static const char *const ST[] = { "running", "ready", "blocked", "suspended", "deleted", "invalid" };
+    for (UBaseType_t i = 0; i < n; i++)
+        ESP_LOGE(TAG, "  task %-16s %-9s prio %u", ts[i].pcTaskName, ST[ts[i].eCurrentState < 6 ? ts[i].eCurrentState : 5],
+                 (unsigned)ts[i].uxCurrentPriority);
+    heap_caps_free(ts);
+}
+
 static void hang_check(void *arg)
 {
     (void)arg;
@@ -1541,16 +1556,7 @@ static void hang_check(void *arg)
         return;
     }
     ESP_LOGE(TAG, "hang watchdog: %s, %u s after boot, at stage '%s'", why, (unsigned)(now / 1000), s_boot_stage);
-    UBaseType_t n = uxTaskGetNumberOfTasks() + 2;
-    TaskStatus_t *ts = heap_caps_calloc(n, sizeof *ts, MALLOC_CAP_SPIRAM);
-    if (ts) {
-        n = uxTaskGetSystemState(ts, n, NULL);
-        static const char *const ST[] = { "running", "ready", "blocked", "suspended", "deleted", "invalid" };
-        for (UBaseType_t i = 0; i < n; i++)
-            ESP_LOGE(TAG, "  task %-16s %-9s prio %u", ts[i].pcTaskName, ST[ts[i].eCurrentState < 6 ? ts[i].eCurrentState : 5],
-                     (unsigned)ts[i].uxCurrentPriority);
-        heap_caps_free(ts);
-    }
+    aos_p4_log_tasks();
     esp_timer_stop(s_hang_timer);
     if (s_hang.count >= HANG_TRIES) {
         ESP_LOGE(TAG, "hang watchdog: restarted %d times in a row already; the board stays as it is", HANG_TRIES);

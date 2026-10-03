@@ -112,6 +112,27 @@ And two things that restart the board on purpose:
   restart was clean, and the log is the baseline to compare with. It shows
   the P4 resetting the C6 through GPIO54 on every boot, so a C6 left in a
   bad state by the previous run is ruled out.
+  The same day it happened in the middle of an OTA upload (the data slowed
+  to a trickle, then stopped), and this time the screen was looked at: the
+  menu and the touch worked. So the chip was not stopped; the network was
+  gone. That is what the next watchdog is for.
+- **The C6 link watchdog** (`aos_tasks_p4.c`): every Wi-Fi call is an RPC to
+  the C6 over SDIO, and the stats task makes one every 5 s anyway (the AP's
+  record, or the mode when there is no AP). Three in a row that time out
+  (esp_hosted gives up on each after 5 s), or one still out after 20 s, and
+  it logs every task and restarts; the boot resets the C6 through its reset
+  line. Three times in a row at most, cleared after 10 minutes of a healthy
+  link. A C6 that stops altogether is not this one's: esp_hosted's driver
+  sees its SDIO writes fail and restarts the board by itself, in
+  milliseconds (tested holding the C6's EN low). The case left is a link
+  whose bus still answers while nothing comes back, and that is the test:
+
+      curl -X POST http://p4os.local/api/wifi/linktest
+
+  freezes `sdio_process_rx`, the task that takes what the C6 sends. On the
+  board: three timeouts 18 s later, the restart, and the network back 28 s
+  after the freeze. `esp_wifi_stop` is dropped from the shutdown handlers
+  before restarting, or it waits 5 s more for an RPC of its own.
 
 When a HAL function is added or removed, the apps' symbol table must follow:
 

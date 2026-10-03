@@ -25,6 +25,11 @@
 - **Languages:** English and German now also live in the firmware. The card's
   pack and the firmware's are joined string by string, so the languages work
   with no card and a card older than the firmware is still complete.
+- **The link to the C6 is watched.** Twice, during an OTA, the Wi-Fi died with
+  the rest of the board alive, until RESET. Now three Wi-Fi calls to the C6
+  in a row with no answer (or one out for over 20 s) log every task and
+  restart the board, which comes back with network in under 30 s. Tested by
+  freezing the task that takes the C6's replies (`POST /api/wifi/linktest`).
 - Diagnostics shows the C6's firmware version, when the C6 reports it.
 - Folder miniatures fit glyph and text icons, and the folder-rename
   keyboard is dark like the others.

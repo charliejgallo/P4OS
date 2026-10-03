@@ -1018,6 +1018,10 @@ static void handler(aos_httpd_req_t *r)
     else if (!strcmp(p, "wifi")) api_wifi(r);
     else if (get && !strcmp(p, "wifi/scan")) api_wifi_scan(r);
     else if (post && !strcmp(p, "wifi/forget")) { aos_hal_net_forget(); send_ok(r); }
+    else if (post && !strcmp(p, "wifi/linktest")) {    /* tests the link watchdog (docs/BUILDING.md) */
+        if (aos_hal_net_test_freeze_link()) send_ok(r);
+        else send_err(r, 404, "no hay enlace que congelar");
+    }
     else if (!strcmp(p, "ha")) api_ha(r);
     else if (get && !strcmp(p, "ha/entities")) api_ha_entities(r);
     else if (post && !strcmp(p, "ha/fav")) api_ha_fav(r);

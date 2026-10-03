@@ -41,6 +41,7 @@
 #include "esp_flash.h"
 #include "esp_netif.h"
 #include "esp_wifi.h"
+#include "esp_attr.h"
 
 static const char *TAG = "tasks";
 
@@ -216,9 +217,95 @@ static int      s_net_channel;
 static uint8_t  s_net_bssid[6];
 static bool     s_net_bssid_ok;
 
+/* The link to the C6. Twice on 2026-10-03, during an OTA upload, the Wi-Fi
+ * died with the rest of the board alive: the screen and the touch went on,
+ * the network and the portal did not, nothing in the log said why, and it
+ * stayed so until RESET. Every Wi-Fi call goes to the C6 over SDIO, so the
+ * call this task makes every 5 s anyway (the AP's record, or the mode when
+ * there is no AP to ask about) is the link's heartbeat: an RPC that does
+ * not come back times out in esp_hosted after 5 s, and LINK_DEAD of those
+ * in a row mean the link is gone. One that never returns at all (esp_hosted
+ * queues it towards the C6 with no time limit, and that queue fills when
+ * the link stops) is caught by a timer of its own: a call out longer than
+ * LINK_STUCK_US.
+ *
+ * esp_hosted has no way back from that short of a restart (its own driver
+ * restarts the board on the SDIO errors it does see), so this writes the
+ * tasks to the log and restarts too; the next boot resets the C6 through
+ * its reset line, and the log survives (GET /api/log?prev=1). At most
+ * LINK_TRIES times in a row (a counter in noinit PSRAM, cleared once the
+ * link has answered for LINK_HEALTHY_S), so a C6 gone for good leaves the
+ * board up without network rather than in a loop. */
+#define LINK_DEAD       3
+#define LINK_SLOW_US    (4 * 1000000LL)     /* a failure this slow is a timeout, not an answer */
+#define LINK_STUCK_US   (20 * 1000000LL)
+#define LINK_TRIES      3
+#define LINK_HEALTHY_S  600
+#define LINK_MAGIC      0x43364C4Bu         /* "C6LK" */
+static EXT_RAM_NOINIT_ATTR struct { uint32_t magic, count; } s_link_boots;
+static volatile int64_t s_link_call_us;     /* when the call out started; 0: none out */
+static esp_timer_handle_t s_link_timer;
+
+static void link_dead(const char *why)
+{
+    static volatile bool done;
+    if (done) return;
+    done = true;
+    if (s_link_boots.magic != LINK_MAGIC) { s_link_boots.magic = LINK_MAGIC; s_link_boots.count = 0; }
+    if (s_link_boots.count >= LINK_TRIES) {
+        ESP_LOGE(TAG, "C6 link: dead (%s), and restarted %d times in a row already; staying up without network", why,
+                 LINK_TRIES);
+        return;
+    }
+    s_link_boots.count++;
+    ESP_LOGE(TAG, "C6 link: dead (%s); restarting, try %u of %d", why, (unsigned)s_link_boots.count, LINK_TRIES);
+    void aos_p4_log_tasks(void);
+    aos_p4_log_tasks();
+    vTaskDelay(pdMS_TO_TICKS(200));
+    /* esp_wifi_stop runs at shutdown, and it is one more RPC to wait 5 s for
+     * (esp_hosted's own restart drops it the same way) */
+    esp_unregister_shutdown_handler((shutdown_handler_t)esp_wifi_stop);
+    esp_restart();
+}
+
+static void link_timer_cb(void *arg)
+{
+    (void)arg;
+    int64_t at = s_link_call_us;
+    if (at && esp_timer_get_time() - at > LINK_STUCK_US) link_dead("an RPC out for over 20 s");
+}
+
+static void link_call_start(void)
+{
+    if (!s_link_timer) {
+        const esp_timer_create_args_t a = { .callback = link_timer_cb, .name = "c6-link" };
+        if (esp_timer_create(&a, &s_link_timer) == ESP_OK) esp_timer_start_periodic(s_link_timer, 5 * 1000000LL);
+    }
+    s_link_call_us = esp_timer_get_time();
+}
+
+static void link_call_end(bool ok)
+{
+    static int dead;
+    static int64_t alive_since;
+    int64_t now = esp_timer_get_time(), took = now - s_link_call_us;
+    s_link_call_us = 0;
+    if (s_link_boots.magic != LINK_MAGIC) { s_link_boots.magic = LINK_MAGIC; s_link_boots.count = 0; }
+    if (ok || took < LINK_SLOW_US) {        /* an error that came back quickly is still the C6 talking */
+        if (dead) ESP_LOGW(TAG, "C6 link: answering again after %d timeouts", dead);
+        dead = 0;
+        if (!alive_since) alive_since = now;
+        if (s_link_boots.count && now - alive_since > LINK_HEALTHY_S * 1000000LL) s_link_boots.count = 0;
+        return;
+    }
+    alive_since = 0;
+    ESP_LOGW(TAG, "C6 link: no answer in %d ms (%d in a row)", (int)(took / 1000), dead + 1);
+    if (++dead >= LINK_DEAD) link_dead("3 RPCs in a row timed out");
+}
+
 static void net_watch(int64_t now)
 {
-    static int64_t ap_at;
+    static int64_t ap_at, mode_at;
     bool up = aos_hal_net_state() == AOS_NET_CONNECTED;
     if (up && !s_net_since_us) {
         s_net_since_us = now;
@@ -235,12 +322,25 @@ static void net_watch(int64_t now)
     if (up && (!ap_at || now - ap_at > 5 * 1000000LL)) {
         ap_at = now;
         wifi_ap_record_t ap;
-        if (esp_wifi_sta_get_ap_info(&ap) == ESP_OK) {
+        link_call_start();
+        bool ok = esp_wifi_sta_get_ap_info(&ap) == ESP_OK;
+        link_call_end(ok);
+        if (ok) {
             s_net_channel = ap.primary;
             memcpy(s_net_bssid, ap.bssid, 6);
             s_net_bssid_ok = true;
             void aos_net_p4_note_rssi(int rssi);
             aos_net_p4_note_rssi(ap.rssi);
+        }
+    } else if (!up && (!mode_at || now - mode_at > 5 * 1000000LL)) {
+        /* No AP to ask about (connecting, or only the access point up): the
+         * mode is an RPC as well. Not before the radio came up. */
+        mode_at = now;
+        bool aos_net_p4_up(void);
+        if (aos_net_p4_up()) {
+            wifi_mode_t m;
+            link_call_start();
+            link_call_end(esp_wifi_get_mode(&m) == ESP_OK);
         }
     }
 }

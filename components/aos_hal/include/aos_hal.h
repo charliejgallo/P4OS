@@ -1360,6 +1360,12 @@ int         aos_hal_net_ap_clients(void);   /* P4OS: devices on it now, 0 when i
 /* P4OS: the Wi-Fi co-processor's firmware (the C6's esp_hosted), "1.4.3";
  * "" until the radio is up, "?" when it would not say. Asked once at boot. */
 const char *aos_hal_net_coprocessor_fw(void);
+/* P4OS, a test: freezes the task that takes what the C6 sends (esp_hosted's
+ * sdio_process_rx), so nothing comes back from it while the SDIO bus stays
+ * sound - the way the link died on its own during two OTAs. The link
+ * watchdog (aos_tasks_p4.c) should restart the board within ~30 s. false
+ * where there is no such task. */
+bool        aos_hal_net_test_freeze_link(void);
 
 /* --------------------------------------------------------------------------
  * AP name and password

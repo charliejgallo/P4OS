@@ -280,6 +280,17 @@ bool aos_net_p4_up(void) { return s_inited; }
 
 aos_net_state_t aos_hal_net_state(void) { return s_state; }
 const char *aos_hal_net_coprocessor_fw(void) { return s_c6_fw; }
+
+bool aos_hal_net_test_freeze_link(void)
+{
+    /* Not a reset of the C6: that one esp_hosted sees by itself (the SDIO
+     * writes fail and its driver restarts the board, tested). */
+    TaskHandle_t t = xTaskGetHandle("sdio_process_rx");
+    if (!t) return false;
+    ESP_LOGW(TAG, "test: sdio_process_rx frozen; the link watchdog should restart the board");
+    vTaskSuspend(t);
+    return true;
+}
 const char *aos_hal_net_ip(void) { return s_ip; }
 const char *aos_hal_net_ssid(void) { return s_ssid; }
 

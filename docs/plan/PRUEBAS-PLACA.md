@@ -32,6 +32,14 @@ se prueba.
 
 ### Pendientes, en resumen
 
+Hecho el 2026-10-03:
+- [x] Vigilante del enlace con el C6: tres consultas al C6 sin respuesta (o una
+      trabada más de 20 s) vuelcan las tareas al registro y reinician. Probado
+      en la placa con `POST /api/wifi/linktest` (congela `sdio_process_rx`):
+      detecta a los 18 s y la red vuelve a los 28 s. Un C6 en reset lo ve
+      solo esp_hosted (las escrituras SDIO fallan y reinicia en 30 ms).
+      Pendiente: ver si la próxima OTA que se corte la recupera sola.
+
 Hecho el 2026-09-30:
 - [x] Traducciones completas en/de (3821 textos, `lang/`), instaladas con
       `tools/install_lang.sh`; la app en primer plano ahora carga su catálogo.
