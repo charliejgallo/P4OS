@@ -637,6 +637,19 @@ lv_obj_t *aos_icon_create(lv_obj_t *parent, const aos_app_desc_t *desc, int32_t 
             lv_obj_set_style_text_font(glyph, size >= 64 ? aos_font_title : aos_font_body, 0);
         }
         lv_obj_center(glyph);
+        /* A folder's miniatures are ~26 px, less than the smallest font: the
+         * glyph (a Lua script's play sign) or the text ("Lua") spilled out
+         * of its square. Below 60 px it is scaled to fill 60 % of it, by
+         * whichever of its width and height is larger. */
+        if (size < 60) {
+            lv_obj_update_layout(glyph);
+            int32_t w = lv_obj_get_width(glyph), h = lv_obj_get_height(glyph), big = w > h ? w : h;
+            if (big > size * 6 / 10) {
+                lv_obj_set_style_transform_pivot_x(glyph, w / 2, 0);
+                lv_obj_set_style_transform_pivot_y(glyph, h / 2, 0);
+                lv_obj_set_style_transform_scale(glyph, 256 * size * 6 / 10 / big, 0);
+            }
+        }
     }
 
     aos_make_decorative(base);

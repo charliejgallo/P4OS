@@ -46,7 +46,7 @@ done
 # stale parts of the packs being replaced
 for p in $paks; do
     for i in {1..9}; do
-        curl -s -o /dev/null --max-time 10 -X POST "$B/api/fs/delete?path=/apps/$p.$i" || true
+        curl -4 -s -o /dev/null --max-time 10 -X POST "$B/api/fs/delete?path=/apps/$p.$i" || true
     done
 done
 
@@ -55,7 +55,7 @@ total=0
 for f in $files; do
     name=${f:t}
     size=$(wc -c < $f | tr -d ' ')
-    code=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 600 \
+    code=$(curl -4 -sS -o /dev/null -w '%{http_code}' --max-time 600 \
         -X PUT "$B/api/fs/put?path=/apps/$name" --data-binary "@$f") || code=000
     if [[ $code == 2* ]]; then
         printf "   %-24s %9s B  ok\n" $name $size
@@ -72,10 +72,10 @@ if [[ -n $NORESTART ]]; then
     exit 0
 fi
 echo "restarting the board (the .so files are read at startup)..."
-curl -s -o /dev/null --max-time 10 -X POST "$B/api/restart" || true
+curl -4 -s -o /dev/null --max-time 10 -X POST "$B/api/restart" || true
 for i in {1..60}; do
     sleep 1
-    curl -s -o /dev/null --max-time 2 "$B/api/apps" && { echo "   back after ${i} s"; exit 0; }
+    curl -4 -s -o /dev/null --max-time 2 "$B/api/apps" && { echo "   back after ${i} s"; exit 0; }
 done
 echo "   the board did not answer within a minute: look at it"
 exit 1

@@ -891,6 +891,7 @@ static void folder_name_clicked(lv_event_t *e)
     lv_obj_set_style_text_font(s_name_ta, aos_font_title, 0);
     lv_obj_align_to(s_name_ta, cap, LV_ALIGN_OUT_BOTTOM_MID, 0, 20);
     lv_obj_t *kb = lv_keyboard_create(s_name_sheet);
+    aos_keyboard_style(kb, aos_font_body);     /* dark, as every other keyboard of the system */
     lv_keyboard_set_textarea(kb, s_name_ta);
     lv_obj_set_size(kb, g->w, g->landscape ? g->h / 2 : g->h * 2 / 5);
     lv_obj_align(kb, LV_ALIGN_BOTTOM_MID, 0, 0);

@@ -47,7 +47,7 @@ for code in $CODES; do
 
     echo "== $code -> $HOST =="
     for d in /lang /lang/$code; do
-        c=$(curl -sS -o /dev/null -w '%{http_code}' --max-time 10 \
+        c=$(curl -4 -sS -o /dev/null -w '%{http_code}' --max-time 10 \
             -X POST "http://$HOST/api/fs/mkdir?path=$d") || c=000
         [[ $c == 2* || $c == 409 ]] || { echo "   mkdir $d FAILED (HTTP $c)"; exit 1; }
     done
@@ -55,7 +55,7 @@ for code in $CODES; do
     for f in $files; do
         name=${f:t}
         size=$(wc -c < $f | tr -d ' ')
-        code_http=$(curl -sS -o /dev/null -w '%{http_code}' \
+        code_http=$(curl -4 -sS -o /dev/null -w '%{http_code}' \
             --max-time 60 \
             -X PUT "http://$HOST/api/fs/put?path=/lang/$code/$name" \
             -H 'Content-Type: application/octet-stream' \
@@ -69,7 +69,7 @@ for code in $CODES; do
         fi
     done
     echo "   ${#files[@]} files, $total bytes"
-    listed=$(curl -sS --max-time 10 "http://$HOST/api/fs?path=/lang/$code" | grep -o '\.lang"' | wc -l | tr -d ' ')
+    listed=$(curl -4 -sS --max-time 10 "http://$HOST/api/fs?path=/lang/$code" | grep -o '\.lang"' | wc -l | tr -d ' ')
     echo "   checking: the card lists $listed .lang files in /lang/$code"
 done
 echo
