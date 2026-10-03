@@ -78,6 +78,7 @@ static struct {
     int st_shown;
     int ap_shown;                   /* Wi-Fi: the access point's state the page shows */
     lv_obj_t *dg_temp, *dg_cpu, *dg_int, *dg_psram, *dg_up;
+    lv_obj_t *c6_state;             /* Update: the C6's firmware going in */
     /* a row that asks for a second tap before it acts */
     lv_obj_t *armed;
     uint32_t armed_ms;
@@ -1178,6 +1179,67 @@ static const char *slot_state_text(const char *st)
     return st[0] ? st : "--";
 }
 
+/* The C6's firmware (aos_hal_net_coprocessor_update): the image waits on
+ * the card, put there by the portal or tools/install_c6.sh. */
+static void c6_path(char *out, size_t n)
+{
+    const char *root = aos_hal_path_sd_root();
+    if (root) snprintf(out, n, "%s/firmware/c6.bin", root);
+    else if (n) out[0] = 0;
+}
+
+static void c6_refresh(void)
+{
+    if (!U.c6_state) return;
+    aos_c6_update_t u;
+    aos_hal_net_coprocessor_status(&u);
+    char v[96];
+    switch (u.state) {
+    case AOS_C6_SENDING:
+        snprintf(v, sizeof v, _("mandando… %u %%"), (unsigned)(u.total ? (uint64_t)u.sent * 100 / u.total : 0));
+        break;
+    case AOS_C6_DONE: snprintf(v, sizeof v, "%s", _("listo: reiniciando")); break;
+    case AOS_C6_FAILED: snprintf(v, sizeof v, "%s", u.error); break;
+    default: v[0] = 0; break;
+    }
+    lv_label_set_text(U.c6_state, v);
+}
+
+static void c6_install_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez: sin Wi-Fi un minuto y reinicia"))) return;
+    char path[96];
+    c6_path(path, sizeof path);
+    if (!aos_hal_net_coprocessor_update(path)) {
+        aos_ui_toast(_("No se pudo empezar"), 1500);
+        return;
+    }
+    c6_refresh();
+}
+
+static void build_update_c6(lv_obj_t *p)
+{
+    lv_obj_t *g = group(p, _("LA RADIO (ESP32-C6)"));
+    const char *c6 = aos_hal_net_coprocessor_fw();
+    row(g, NULL, 0, _("En el C6"), !c6[0] ? _("todavía no arrancó") : !strcmp(c6, "?") ? _("de fábrica (sin versión)") : c6,
+        false, NULL, NULL);
+    char path[96], ver[32];
+    c6_path(path, sizeof path);
+    if (!path[0] || !aos_hal_net_coprocessor_image(path, ver, sizeof ver)) {
+        row(g, NULL, 0, _("En la tarjeta"), _("ninguna"), false, NULL, NULL);
+        note(p, _("Una versión nueva del firmware del C6 se copia a /firmware/c6.bin de la tarjeta (portal o tools/install_c6.sh) y se instala desde acá."));
+        return;
+    }
+    row(g, NULL, 0, _("En la tarjeta"), ver, false, NULL, NULL);
+    aos_c6_update_t u;
+    aos_hal_net_coprocessor_status(&u);
+    U.c6_state = lv_obj_get_user_data(row(g, NULL, 0, _("Estado"), "", false, NULL, NULL));
+    c6_refresh();
+    if (u.state != AOS_C6_SENDING && u.state != AOS_C6_DONE)
+        action_row(g, _("Instalar en el C6"), AOS_C_ACCENT, c6_install_cb);
+    note(p, _("El C6 la escribe en su otra ranura y la revisa antes de cambiar. Mientras tanto no hay Wi-Fi, y al terminar la placa se reinicia."));
+}
+
 static void build_update(lv_obj_t *p)
 {
     aos_ota_info_t o;
@@ -1203,6 +1265,8 @@ static void build_update(lv_obj_t *p)
             action_row(g, _("Volver a esta versión"), AOS_C_ACCENT, rollback_cb);
     }
     note(p, _("Las versiones nuevas llegan por el portal (Firmware) o con tools/ota.sh, y se escriben en la otra ranura. Arrancan a prueba: si la placa se reinicia antes de confirmarla, a los 30 s, vuelve sola a la anterior."));
+
+    build_update_c6(p);
 }
 
 /* ---- Diagnostics ---- */
@@ -1719,6 +1783,7 @@ static void build(int pg)
     U.wifi_list = U.wifi_state = U.side = NULL;
     U.usb_state = U.usb_dot = U.usb_root = NULL;
     U.dg_temp = U.dg_cpu = U.dg_int = U.dg_psram = U.dg_up = NULL;
+    U.c6_state = NULL;
     U.armed = NULL;
     memset(U.usb_tick, 0, sizeof U.usb_tick);
     if (!U.land) {
@@ -1775,6 +1840,7 @@ static void timer_cb(lv_timer_t *t)
     if (pg == PG_STORAGE && U.st_shown != S.gen && !U.overlay) build(pg);   /* the count moved on */
     static int ticks;
     if (U.dg_temp && ++ticks % 3 == 0) diag_refresh();
+    if (U.c6_state) c6_refresh();
     if (U.armed && (uint32_t)aos_hal_uptime_ms() - U.armed_ms > 5000) disarm();
 }
 

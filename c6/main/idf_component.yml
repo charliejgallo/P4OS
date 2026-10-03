@@ -1,0 +1,5 @@
+dependencies:
+  # the same version as the P4's (main/idf_component.yml): host and
+  # co-processor move together
+  espressif/esp_hosted: "==3.0.9"
+  idf: ">=5.5,<6.0"

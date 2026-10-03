@@ -39,6 +39,11 @@
 #include "esp_wifi.h"
 #include "esp_hosted.h"
 #include "eh_host_mcu_transport_init_event.h"
+#include "esp_hosted_ota.h"
+#include "esp_app_format.h"
+#include "esp_app_desc.h"
+#include "esp_heap_caps.h"
+#include "esp_system.h"
 #include "esp_mac.h"
 #include "esp_random.h"
 #include "mdns.h"
@@ -298,6 +303,138 @@ bool aos_hal_net_test_freeze_link(void)
     ESP_LOGW(TAG, "test: sdio_process_rx frozen; the link watchdog should restart the board");
     vTaskSuspend(t);
     return true;
+}
+
+/* ---- the C6's firmware, installed from the P4 ----
+ *
+ * The co-processor OTA of esp_hosted: begin, the image in chunks, end, and
+ * on a C6 from 2.6 on, activate. The C6 writes it into the slot it is not
+ * running and checks it (esp_ota_end) before it switches; a cut transfer or
+ * a corrupt image leaves the running firmware in place. A firmware that is
+ * sound but cannot talk to the P4 is the one case with no way back from
+ * here: the C6 has no rollback, and its serial port (J7) is the recovery
+ * (docs/C6.md). So the file must say it is an app for the ESP32-C6 before
+ * anything is sent. Then the board restarts: the boot resets the C6
+ * through its EN line, and both sides meet again from the start. */
+#define C6_CHUNK 1400               /* old C6 firmware takes up to 1500 per RPC */
+
+static aos_c6_update_t s_c6up;
+static char s_c6_path[128];
+static volatile bool s_c6_busy;
+
+bool aos_net_p4_c6_updating(void) { return s_c6_busy; }
+
+static bool c6_image_read(FILE *f, char *version, size_t n, uint32_t *size)
+{
+    esp_image_header_t h;
+    esp_image_segment_header_t seg;
+    esp_app_desc_t d;
+    if (fread(&h, sizeof h, 1, f) != 1 || h.magic != ESP_IMAGE_HEADER_MAGIC || h.chip_id != ESP_CHIP_ID_ESP32C6)
+        return false;
+    if (fread(&seg, sizeof seg, 1, f) != 1 || fread(&d, sizeof d, 1, f) != 1 || d.magic_word != ESP_APP_DESC_MAGIC_WORD)
+        return false;
+    if (version) snprintf(version, n, "%.*s", (int)sizeof d.version, d.version);
+    if (size) {
+        fseek(f, 0, SEEK_END);
+        *size = (uint32_t)ftell(f);
+    }
+    return true;
+}
+
+bool aos_hal_net_coprocessor_image(const char *path, char *version, size_t n)
+{
+    if (version && n) version[0] = 0;
+    FILE *f = path ? fopen(path, "rb") : NULL;
+    if (!f) return false;
+    bool ok = c6_image_read(f, version, n, NULL);
+    fclose(f);
+    if (!ok && version && n) version[0] = 0;
+    return ok;
+}
+
+static void c6_fail(const char *why, esp_err_t e)
+{
+    snprintf(s_c6up.error, sizeof s_c6up.error, "%s%s%s", why, e ? ": " : "", e ? esp_err_to_name(e) : "");
+    ESP_LOGE(TAG, "C6 update: %s", s_c6up.error);
+    s_c6up.state = AOS_C6_FAILED;
+}
+
+static void c6_update_task(void *arg)
+{
+    FILE *f = fopen(s_c6_path, "rb");
+    uint8_t *buf = heap_caps_malloc(C6_CHUNK, MALLOC_CAP_SPIRAM);
+    esp_err_t e = ESP_OK;
+    bool begun = false;
+    if (!f || !buf) {
+        c6_fail("no se pudo abrir la imagen", 0);
+        goto out;
+    }
+    ESP_LOGW(TAG, "C6 update: %s, %u bytes, version %s (the C6 runs %s)", s_c6_path, (unsigned)s_c6up.total,
+             s_c6up.version, s_c6_fw[0] ? s_c6_fw : "?");
+    if ((e = esp_hosted_slave_ota_begin()) != ESP_OK) {
+        c6_fail("el C6 no aceptó empezar", e);
+        goto out;
+    }
+    begun = true;
+    size_t got;
+    while ((got = fread(buf, 1, C6_CHUNK, f)) > 0) {
+        if ((e = esp_hosted_slave_ota_write(buf, got)) != ESP_OK) {
+            c6_fail("se cortó al mandar la imagen", e);
+            goto out;
+        }
+        s_c6up.sent += got;
+    }
+    if ((e = esp_hosted_slave_ota_end()) != ESP_OK) {
+        c6_fail("el C6 rechazó la imagen", e);
+        goto out;
+    }
+    /* From 2.6 on the C6 switches slots on activate; older ones did it at
+     * end and restart by themselves 5 s later. Which one it is comes from
+     * its INIT event (0 for the factory firmware, which predates it). */
+    uint32_t v = eh_host_mcu_transport_get_fw_version();
+    if (v >= ((2u << 16) | (6u << 8)) && (e = esp_hosted_slave_ota_activate()) != ESP_OK) {
+        c6_fail("el C6 no activó la imagen", e);
+        goto out;
+    }
+    ESP_LOGW(TAG, "C6 update: %u bytes sent and accepted; restarting", (unsigned)s_c6up.sent);
+    s_c6up.state = AOS_C6_DONE;
+    fclose(f);
+    heap_caps_free(buf);
+    vTaskDelay(pdMS_TO_TICKS(3000));    /* the screen says so; an old C6 restarts itself meanwhile */
+    esp_unregister_shutdown_handler((shutdown_handler_t)esp_wifi_stop);
+    esp_restart();
+out:
+    (void)begun;
+    if (f) fclose(f);
+    heap_caps_free(buf);
+    s_c6_busy = false;
+    vTaskDeleteWithCaps(NULL);
+}
+
+bool aos_hal_net_coprocessor_update(const char *path)
+{
+    if (s_c6_busy || !s_inited || !path) return false;
+    FILE *f = fopen(path, "rb");
+    if (!f) return false;
+    aos_c6_update_t u = { .state = AOS_C6_SENDING };
+    bool ok = c6_image_read(f, u.version, sizeof u.version, &u.total);
+    fclose(f);
+    if (!ok) return false;
+    snprintf(s_c6_path, sizeof s_c6_path, "%s", path);
+    s_c6up = u;
+    s_c6_busy = true;
+    /* reads the card, never the flash: its stack can be in PSRAM */
+    if (xTaskCreateWithCaps(c6_update_task, "c6-update", 4096, NULL, 5, NULL, MALLOC_CAP_SPIRAM) != pdPASS) {
+        s_c6_busy = false;
+        s_c6up.state = AOS_C6_IDLE;
+        return false;
+    }
+    return true;
+}
+
+void aos_hal_net_coprocessor_status(aos_c6_update_t *out)
+{
+    if (out) *out = s_c6up;
 }
 const char *aos_hal_net_ip(void) { return s_ip; }
 const char *aos_hal_net_ssid(void) { return s_ssid; }

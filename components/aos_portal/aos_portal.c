@@ -354,6 +354,46 @@ static void api_wifi(aos_httpd_req_t *r)
     send_cjson(r, 200, o);
 }
 
+/* The C6's firmware (docs/C6.md): GET says what runs, what waits on the
+ * card and how an update goes; POST /api/c6/update starts one from the
+ * card's /firmware/c6.bin (put there with fs/put first). */
+static void c6_card_path(char *out, size_t n)
+{
+    const char *root = aos_hal_path_sd_root();
+    if (root) snprintf(out, n, "%s/firmware/c6.bin", root);
+    else if (n) out[0] = 0;
+}
+
+static void api_c6(aos_httpd_req_t *r)
+{
+    static const char *const ST[] = { "idle", "sending", "done", "failed" };
+    char path[96], ver[32] = "";
+    c6_card_path(path, sizeof path);
+    bool img = path[0] && aos_hal_net_coprocessor_image(path, ver, sizeof ver);
+    aos_c6_update_t u;
+    aos_hal_net_coprocessor_status(&u);
+    cJSON *o = cJSON_CreateObject();
+    cJSON_AddStringToObject(o, "running", aos_hal_net_coprocessor_fw());
+    if (img) cJSON_AddStringToObject(o, "card", ver);
+    else cJSON_AddNullToObject(o, "card");
+    cJSON_AddStringToObject(o, "state", u.state <= AOS_C6_FAILED ? ST[u.state] : "?");
+    cJSON_AddNumberToObject(o, "sent", u.sent);
+    cJSON_AddNumberToObject(o, "total", u.total);
+    if (u.error[0]) cJSON_AddStringToObject(o, "error", u.error);
+    send_cjson(r, 200, o);
+}
+
+static void api_c6_update(aos_httpd_req_t *r)
+{
+    char path[96];
+    c6_card_path(path, sizeof path);
+    if (!path[0] || !aos_hal_net_coprocessor_image(path, NULL, 0))
+        send_err(r, 400, "no hay una imagen del C6 en /firmware/c6.bin");
+    else if (!aos_hal_net_coprocessor_update(path))
+        send_err(r, 409, "no se pudo empezar (¿ya hay una en curso?)");
+    else send_ok(r);
+}
+
 static void api_wifi_scan(aos_httpd_req_t *r)
 {
     aos_wifi_ap_t aps[24];
@@ -1018,6 +1058,8 @@ static void handler(aos_httpd_req_t *r)
     else if (!strcmp(p, "wifi")) api_wifi(r);
     else if (get && !strcmp(p, "wifi/scan")) api_wifi_scan(r);
     else if (post && !strcmp(p, "wifi/forget")) { aos_hal_net_forget(); send_ok(r); }
+    else if (get && !strcmp(p, "c6")) api_c6(r);
+    else if (post && !strcmp(p, "c6/update")) api_c6_update(r);
     else if (post && !strcmp(p, "wifi/linktest")) {    /* tests the link watchdog (docs/BUILDING.md) */
         if (aos_hal_net_test_freeze_link()) send_ok(r);
         else send_err(r, 404, "no hay enlace que congelar");

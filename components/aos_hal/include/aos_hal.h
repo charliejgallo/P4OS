@@ -1367,6 +1367,31 @@ const char *aos_hal_net_coprocessor_fw(void);
  * where there is no such task. */
 bool        aos_hal_net_test_freeze_link(void);
 
+/* P4OS: a new firmware for the co-processor (the C6), from a file: an
+ * esp_hosted co-processor image for the ESP32-C6 (tools/build_c6.sh,
+ * docs/C6.md). The file is checked first; then a task of its own sends it
+ * to the C6 over SDIO, in the slot the C6 is not running, and the board
+ * restarts to meet the new firmware. The Wi-Fi is gone while it runs
+ * (about a minute). */
+typedef enum {
+    AOS_C6_IDLE = 0,
+    AOS_C6_SENDING,
+    AOS_C6_DONE,            /* sent; the board is restarting */
+    AOS_C6_FAILED,
+} aos_c6_state_t;
+
+typedef struct {
+    aos_c6_state_t state;
+    uint32_t sent, total;   /* bytes */
+    char     version[32];   /* the image's */
+    char     error[64];
+} aos_c6_update_t;
+
+/* The image's version into 'version' ("" when the file is not one). */
+bool aos_hal_net_coprocessor_image(const char *path, char *version, size_t n);
+bool aos_hal_net_coprocessor_update(const char *path);
+void aos_hal_net_coprocessor_status(aos_c6_update_t *out);
+
 /* --------------------------------------------------------------------------
  * AP name and password
  *

@@ -272,7 +272,8 @@ static void link_timer_cb(void *arg)
 {
     (void)arg;
     int64_t at = s_link_call_us;
-    if (at && esp_timer_get_time() - at > LINK_STUCK_US) link_dead("an RPC out for over 20 s");
+    bool aos_net_p4_c6_updating(void);
+    if (at && esp_timer_get_time() - at > LINK_STUCK_US && !aos_net_p4_c6_updating()) link_dead("an RPC out for over 20 s");
 }
 
 static void link_call_start(void)
@@ -290,6 +291,8 @@ static void link_call_end(bool ok)
     static int64_t alive_since;
     int64_t now = esp_timer_get_time(), took = now - s_link_call_us;
     s_link_call_us = 0;
+    bool aos_net_p4_c6_updating(void);
+    if (aos_net_p4_c6_updating()) { dead = 0; return; }    /* the C6 is busy taking its new firmware */
     if (s_link_boots.magic != LINK_MAGIC) { s_link_boots.magic = LINK_MAGIC; s_link_boots.count = 0; }
     if (ok || took < LINK_SLOW_US) {        /* an error that came back quickly is still the C6 talking */
         if (dead) ESP_LOGW(TAG, "C6 link: answering again after %d timeouts", dead);

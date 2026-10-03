@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
  * Mas 149 funciones de libc/libm agregadas a mano.
- * Total: 3148 simbolos.
+ * Total: 3152 simbolos.
  */
 
 #include <stddef.h>
@@ -327,6 +327,9 @@ extern int aos_hal_net_ap_ssid;
 extern int aos_hal_net_ap_start;
 extern int aos_hal_net_ap_stop;
 extern int aos_hal_net_coprocessor_fw;
+extern int aos_hal_net_coprocessor_image;
+extern int aos_hal_net_coprocessor_status;
+extern int aos_hal_net_coprocessor_update;
 extern int aos_hal_net_enable;
 extern int aos_hal_net_enabled;
 extern int aos_hal_net_forget;
@@ -784,6 +787,7 @@ extern int aos_mqtt_topic_find;
 extern int aos_mqtt_unlock;
 extern int aos_mqtt_unsubscribe;
 extern int aos_mqtt_version;
+extern int aos_net_p4_c6_updating;
 extern int aos_net_p4_note_rssi;
 extern int aos_net_p4_start;
 extern int aos_net_p4_up;
@@ -3478,6 +3482,9 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_net_ap_start),
     ESP_ELFSYM_EXPORT(aos_hal_net_ap_stop),
     ESP_ELFSYM_EXPORT(aos_hal_net_coprocessor_fw),
+    ESP_ELFSYM_EXPORT(aos_hal_net_coprocessor_image),
+    ESP_ELFSYM_EXPORT(aos_hal_net_coprocessor_status),
+    ESP_ELFSYM_EXPORT(aos_hal_net_coprocessor_update),
     ESP_ELFSYM_EXPORT(aos_hal_net_enable),
     ESP_ELFSYM_EXPORT(aos_hal_net_enabled),
     ESP_ELFSYM_EXPORT(aos_hal_net_forget),
@@ -3935,6 +3942,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_mqtt_unlock),
     ESP_ELFSYM_EXPORT(aos_mqtt_unsubscribe),
     ESP_ELFSYM_EXPORT(aos_mqtt_version),
+    ESP_ELFSYM_EXPORT(aos_net_p4_c6_updating),
     ESP_ELFSYM_EXPORT(aos_net_p4_note_rssi),
     ESP_ELFSYM_EXPORT(aos_net_p4_start),
     ESP_ELFSYM_EXPORT(aos_net_p4_up),
