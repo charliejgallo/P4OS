@@ -21,6 +21,7 @@ project(p4os)
 # says why and how): every library that compiles TinyUSB's headers takes that
 # configuration file instead of esp_tinyusb's, which it includes. The managed
 # components stay untouched.
+idf_build_get_property(build_components BUILD_COMPONENTS)
 set(AOS_TUSB_DIR ${CMAKE_CURRENT_LIST_DIR}/components/aos_hal/tusb)
 foreach(c espressif__tinyusb espressif__esp_tinyusb aos_hal)
     if(c IN_LIST build_components)
