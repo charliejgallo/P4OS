@@ -17,21 +17,6 @@ include(${CMAKE_CURRENT_LIST_DIR}/components/aos_fonts/aos_fonts.cmake)
 # watch.
 project(p4os)
 
-# esp_hosted takes its SDIO buffers from internal DMA RAM, and ran it out on
-# the board. Inside its library only, heap_caps_aligned_alloc becomes
-# aos_hosted_aligned_alloc, which takes them from PSRAM
-# (components/aos_hal/aos_hosted_mem_p4.c). The component is managed and
-# stays untouched: the rename runs on the built library before every link
-# (a second run finds nothing left to rename).
-idf_build_get_property(build_components BUILD_COMPONENTS)
-if("espressif__esp_hosted" IN_LIST build_components)
-    idf_component_get_property(hosted_lib espressif__esp_hosted COMPONENT_LIB)
-    add_custom_command(TARGET ${CMAKE_PROJECT_NAME}.elf PRE_LINK
-        COMMAND ${CMAKE_OBJCOPY} --redefine-sym heap_caps_aligned_alloc=aos_hosted_aligned_alloc
-                $<TARGET_FILE:${hosted_lib}>
-        VERBATIM)
-endif()
-
 # TinyUSB's endpoint buffers in PSRAM (components/aos_hal/tusb/aos_tusb_config.h
 # says why and how): every library that compiles TinyUSB's headers takes that
 # configuration file instead of esp_tinyusb's, which it includes. The managed

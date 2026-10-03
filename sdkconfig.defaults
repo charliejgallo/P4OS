@@ -60,6 +60,11 @@ CONFIG_WIFI_RMT_STATIC_RX_BUFFER_NUM=10
 CONFIG_WIFI_RMT_RX_BA_WIN=6
 CONFIG_LWIP_TCP_OOSEQ_MAX_PBUFS=4
 CONFIG_ESP_HOSTED_SDIO_HOST_INTERFACE=y
+# esp_hosted's SDIO buffers and its task stacks in PSRAM. They ran internal
+# RAM out on the board with 1.4 (2026-09-29: a network scan, an upload over a
+# wide TCP window); the P4's SDMMC reaches PSRAM. 3.x has both as options.
+CONFIG_EH_HOST_PORT_DMA_PREFER_SPIRAM=y
+CONFIG_ESP_HOSTED_DFLT_TASK_FROM_SPIRAM=y
 # TLS for aos_http: the handshake in PSRAM (3.5 KB internal instead of 34.6)
 CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC=y
 CONFIG_MBEDTLS_CERTIFICATE_BUNDLE=y

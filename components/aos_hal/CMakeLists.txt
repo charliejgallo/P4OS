@@ -15,7 +15,7 @@ idf_component_register(
          "aos_stats.c" "aos_tasks_p4.c"
          "aos_jpeg_p4.c" "aos_h264.c"
          "aos_usb_p4.c" "aos_usb_net_p4.c" "aos_hid_keys.c"
-         "aos_retro_p4.c" "aos_lvmem.c" "aos_hosted_mem_p4.c" "aos_flashop_p4.c" "aos_worker_p4.c" "aos_ota_p4.c" "aos_coredump_p4.c"
+         "aos_retro_p4.c" "aos_lvmem.c" "aos_flashop_p4.c" "aos_worker_p4.c" "aos_ota_p4.c" "aos_coredump_p4.c"
     INCLUDE_DIRS "include"
     LDFRAGMENTS "psram.lf"
     REQUIRES lvgl esp_timer nvs_flash mbedtls
