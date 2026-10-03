@@ -31,3 +31,7 @@ bench/results/fonts/*_app.png
 sim/build-*/
 # the pseudo-locale is generated from the sources (gen_lang.py pseudo xx)
 lang/xx/
+
+# the C6 flash backup (docs/C6.md): Waveshare's firmware, and its NVS may hold
+# Wi-Fi credentials; it stays on this machine
+c6/backup/
