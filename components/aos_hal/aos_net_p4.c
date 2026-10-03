@@ -243,9 +243,17 @@ static void net_task(void *arg)
     s_inited = true;
     xEventGroupSetBits(s_ev, EV_INITED);
     ESP_LOGI(TAG, "radio up in %lld ms", (esp_timer_get_time() - t) / 1000);
+    s_want = aos_hal_net_enabled();
+    int32_t ap = 0;
+    aos_hal_pref_get_i32("ap_on", &ap);
+    if (ap) aos_hal_net_ap_start();     /* it was up before the restart */
+    connect_now();
     /* the co-processor's firmware, once, from this task: an RPC to the C6
      * made from the UI under LVGL's lock is what froze the screen once
-     * (see the RSSI below). Settings' Diagnostics reads the copy. */
+     * (see the RSSI below). Settings' Diagnostics reads the copy. After
+     * the connection has been started: a C6 whose firmware predates this
+     * request (the replacement board's, 2026-10-03) lets it time out
+     * after 5 s, and the network must not wait for that. */
     esp_hosted_coprocessor_fwver_t fw = { 0 };
     if (esp_hosted_get_coprocessor_fwversion(&fw) == ESP_OK) {
         snprintf(s_c6_fw, sizeof s_c6_fw, "%u.%u.%u", (unsigned)fw.major1, (unsigned)fw.minor1, (unsigned)fw.patch1);
@@ -254,11 +262,6 @@ static void net_task(void *arg)
         snprintf(s_c6_fw, sizeof s_c6_fw, "?");
         ESP_LOGW(TAG, "the C6 did not say its firmware version");
     }
-    s_want = aos_hal_net_enabled();
-    int32_t ap = 0;
-    aos_hal_pref_get_i32("ap_on", &ap);
-    if (ap) aos_hal_net_ap_start();     /* it was up before the restart */
-    connect_now();
     vTaskDeleteWithCaps(NULL);
 }
 

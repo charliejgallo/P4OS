@@ -5117,7 +5117,7 @@ Firmware del C6	C6 firmware
 todavía no arrancó	not up yet
 
 #: components/aos_apps/aos_app_settings.c:1292
-no la dijo	it did not say
+no la informa (firmware viejo)	it does not report it (old firmware)
 
 #: components/aos_apps/aos_app_settings.c:1295
 El Wi-Fi lo hace el ESP32-C6 de la placa; el P4 le habla por SDIO. Esta es la versión del firmware que corre en el C6.	The board's ESP32-C6 does the Wi-Fi; the P4 talks to it over SDIO. This is the firmware version the C6 runs.
