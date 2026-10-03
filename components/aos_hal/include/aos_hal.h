@@ -1357,6 +1357,9 @@ const char *aos_hal_net_ap_ssid(void);      /* AmoledOS-XXXX, or the chosen one 
 const char *aos_hal_net_ap_pass(void);
 const char *aos_hal_net_ap_ip(void);        /* nearly always 192.168.4.1 */
 int         aos_hal_net_ap_clients(void);   /* P4OS: devices on it now, 0 when it is down */
+/* P4OS: the Wi-Fi co-processor's firmware (the C6's esp_hosted), "1.4.3";
+ * "" until the radio is up, "?" when it would not say. Asked once at boot. */
+const char *aos_hal_net_coprocessor_fw(void);
 
 /* --------------------------------------------------------------------------
  * AP name and password

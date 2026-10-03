@@ -37,6 +37,7 @@
 #include "esp_netif_sntp.h"
 #include "esp_timer.h"
 #include "esp_wifi.h"
+#include "esp_hosted.h"
 #include "esp_mac.h"
 #include "esp_random.h"
 #include "mdns.h"
@@ -58,6 +59,7 @@ static char s_ip[16];
 static char s_ssid[33];
 static bool s_mdns, s_sntp;
 static volatile bool s_ap_on;           /* the access point is up (see below) */
+static char s_c6_fw[24];                /* the C6's esp_hosted firmware, asked once at boot */
 static volatile int s_ap_clients;       /* phones on it, counted from its events */
 
 /* ---- credentials ---- */
@@ -241,6 +243,17 @@ static void net_task(void *arg)
     s_inited = true;
     xEventGroupSetBits(s_ev, EV_INITED);
     ESP_LOGI(TAG, "radio up in %lld ms", (esp_timer_get_time() - t) / 1000);
+    /* the co-processor's firmware, once, from this task: an RPC to the C6
+     * made from the UI under LVGL's lock is what froze the screen once
+     * (see the RSSI below). Settings' Diagnostics reads the copy. */
+    esp_hosted_coprocessor_fwver_t fw = { 0 };
+    if (esp_hosted_get_coprocessor_fwversion(&fw) == ESP_OK) {
+        snprintf(s_c6_fw, sizeof s_c6_fw, "%u.%u.%u", (unsigned)fw.major1, (unsigned)fw.minor1, (unsigned)fw.patch1);
+        ESP_LOGI(TAG, "the C6 runs esp_hosted %s", s_c6_fw);
+    } else {
+        snprintf(s_c6_fw, sizeof s_c6_fw, "?");
+        ESP_LOGW(TAG, "the C6 did not say its firmware version");
+    }
     s_want = aos_hal_net_enabled();
     int32_t ap = 0;
     aos_hal_pref_get_i32("ap_on", &ap);
@@ -263,6 +276,7 @@ bool aos_net_p4_up(void) { return s_inited; }
 /* ---- the HAL's network API ---- */
 
 aos_net_state_t aos_hal_net_state(void) { return s_state; }
+const char *aos_hal_net_coprocessor_fw(void) { return s_c6_fw; }
 const char *aos_hal_net_ip(void) { return s_ip; }
 const char *aos_hal_net_ssid(void) { return s_ssid; }
 

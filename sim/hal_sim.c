@@ -2683,6 +2683,7 @@ bool aos_hal_net_ap_active(void)
 }
 const char *aos_hal_net_ap_ip(void)     { return "192.168.4.1"; }
 int aos_hal_net_ap_clients(void) { return s_net_ap ? 1 : 0; }
+const char *aos_hal_net_coprocessor_fw(void) { return "sim"; }
 
 const char *aos_hal_net_ap_ssid(void)
 {

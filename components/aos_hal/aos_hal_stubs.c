@@ -666,6 +666,9 @@ __attribute__((weak)) const char * aos_hal_net_ap_ip(void)
 __attribute__((weak)) int aos_hal_net_ap_clients(void)
 { int v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) const char * aos_hal_net_coprocessor_fw(void)
+{ return ""; }
+
 __attribute__((weak)) aos_ap_pass_mode_t aos_hal_net_ap_pass_mode(void)
 { aos_ap_pass_mode_t v; memset(&v, 0, sizeof v); return v; }
 

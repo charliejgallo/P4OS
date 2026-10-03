@@ -1287,6 +1287,13 @@ static void build_diag(lv_obj_t *p)
     row(g, NULL, 0, _("Reinicios por cuelgue"), v, false, NULL, NULL);
     if (aos_ui_safe_mode()) note(p, _("Se arrancó con BOOT apretado: sin las apps de la tarjeta y con los ajustes de pantalla de fábrica. Reiniciá para volver a la normalidad."));
 
+    g = group(p, _("RADIO (ESP32-C6)"));
+    const char *c6 = aos_hal_net_coprocessor_fw();
+    row(g, NULL, 0, _("Firmware del C6"), !c6[0] ? _("todavía no arrancó") : !strcmp(c6, "?") ? _("no la dijo") : c6,
+        false, NULL, NULL);
+    row(g, NULL, 0, _("Conexión"), "SDIO · esp_hosted", false, NULL, NULL);
+    note(p, _("El Wi-Fi lo hace el ESP32-C6 de la placa; el P4 le habla por SDIO. Esta es la versión del firmware que corre en el C6."));
+
     g = group(p, _("ÚLTIMO CUELGUE"));
     aos_coredump_info_t ci;
     if (!aos_hal_coredump_info(&ci) || !ci.present) {

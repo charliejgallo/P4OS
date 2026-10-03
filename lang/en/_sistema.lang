@@ -44,7 +44,7 @@ Español	Spanish
 #: components/aos_ui/aos_panels.c:349
 #: components/aos_apps/aos_app_settings.c:54
 #: components/aos_apps/_pending/aos_app_settings.c:2242
-#: components/aos_apps/aos_app_settings.c:1631  (nombre de app)
+#: components/aos_apps/aos_app_settings.c:1638  (nombre de app)
 Ajustes	Settings
 
 #: components/aos_ui/aos_panels.c:350
@@ -1712,7 +1712,7 @@ Datos o configuración	Data or settings
 
 #: components/aos_apps/aos_app_files.c:340
 #: components/aos_apps/aos_app_files.c:2685
-#: components/aos_apps/aos_app_settings.c:1441
+#: components/aos_apps/aos_app_settings.c:1448
 Firmware	Firmware
 
 #: components/aos_apps/aos_app_files.c:341
@@ -1763,7 +1763,7 @@ Fecha	Date
 #: components/aos_apps/aos_app_files.c:692
 #: components/aos_apps/aos_app_files.c:3950
 #: components/aos_apps/aos_app_files.c:3967
-#: components/aos_apps/aos_app_settings.c:1298
+#: components/aos_apps/aos_app_settings.c:1305
 Tamaño	Size
 
 #: components/aos_apps/aos_app_files.c:692
@@ -2604,7 +2604,7 @@ hace %u h  ·  ahora	%u h ago  ·  now
 7 días	7 days
 
 #: components/aos_apps/aos_app_ha.c:752
-#: components/aos_apps/aos_app_settings.c:1425
+#: components/aos_apps/aos_app_settings.c:1432
 Ahora	Now
 
 #: components/aos_apps/aos_app_ha.c:776
@@ -2684,7 +2684,7 @@ tocá para escribirla	tap to enter it
 Token	Token
 
 #: components/aos_apps/aos_app_ha.c:895
-#: components/aos_apps/aos_app_settings.c:1295
+#: components/aos_apps/aos_app_settings.c:1302
 guardado	saved
 
 #: components/aos_apps/aos_app_ha.c:895
@@ -2709,6 +2709,7 @@ El token se crea en Home Assistant: tu perfil > Seguridad > Tokens de acceso de 
 #: components/aos_apps/aos_app_ha.c:941
 #: components/aos_apps/aos_app_mqtt.c:46
 #: components/aos_apps/aos_app_mqtt.c:1912
+#: components/aos_apps/aos_app_settings.c:1294
 Conexión	Connection
 
 #: components/aos_apps/aos_app_ha.c:984
@@ -4088,7 +4089,7 @@ Servidor	Server
 
 #: components/aos_apps/aos_app_mqtt.c:1948
 #: components/aos_apps/aos_app_settings.c:1286
-#: components/aos_apps/aos_app_settings.c:1293
+#: components/aos_apps/aos_app_settings.c:1300
 ninguno	none
 
 #: components/aos_apps/aos_app_mqtt.c:1952
@@ -4720,7 +4721,7 @@ Fondo de pantalla	Wallpaper
 Editar inicio	Edit Home Screen
 
 #: components/aos_apps/aos_app_settings.c:431
-#: components/aos_apps/aos_app_settings.c:1453
+#: components/aos_apps/aos_app_settings.c:1460
 sin tarjeta	no card
 
 #: components/aos_apps/aos_app_settings.c:445
@@ -5071,15 +5072,15 @@ Temperatura del chip	Chip temperature
 CPU (núcleos 0 · 1)	CPU (cores 0 · 1)
 
 #: components/aos_apps/aos_app_settings.c:1274
-#: components/aos_apps/aos_app_settings.c:1448
+#: components/aos_apps/aos_app_settings.c:1455
 Interna libre	Internal free
 
 #: components/aos_apps/aos_app_settings.c:1275
-#: components/aos_apps/aos_app_settings.c:1450
+#: components/aos_apps/aos_app_settings.c:1457
 PSRAM libre	PSRAM free
 
 #: components/aos_apps/aos_app_settings.c:1276
-#: components/aos_apps/aos_app_settings.c:1457
+#: components/aos_apps/aos_app_settings.c:1464
 #: components/aos_apps/aos_app_sysmon.c:604
 #: components/aos_apps/aos_app_sysmon.c:1235
 Encendida hace	Up for
@@ -5097,7 +5098,7 @@ Modo seguro	Safe mode
 sí: sin las apps de la tarjeta	yes: without the card's apps
 
 #: components/aos_apps/aos_app_settings.c:1282
-#: components/aos_apps/aos_app_settings.c:1466
+#: components/aos_apps/aos_app_settings.c:1473
 no	no
 
 #: components/aos_apps/aos_app_settings.c:1287
@@ -5107,128 +5108,143 @@ Reinicios por cuelgue	Restarts after a hang
 Se arrancó con BOOT apretado: sin las apps de la tarjeta y con los ajustes de pantalla de fábrica. Reiniciá para volver a la normalidad.	It booted with BOOT held: without the card's apps and with the factory display tuning. Restart to go back to normal.
 
 #: components/aos_apps/aos_app_settings.c:1290
+RADIO (ESP32-C6)	RADIO (ESP32-C6)
+
+#: components/aos_apps/aos_app_settings.c:1292
+Firmware del C6	C6 firmware
+
+#: components/aos_apps/aos_app_settings.c:1292
+todavía no arrancó	not up yet
+
+#: components/aos_apps/aos_app_settings.c:1292
+no la dijo	it did not say
+
+#: components/aos_apps/aos_app_settings.c:1295
+El Wi-Fi lo hace el ESP32-C6 de la placa; el P4 le habla por SDIO. Esta es la versión del firmware que corre en el C6.	The board's ESP32-C6 does the Wi-Fi; the P4 talks to it over SDIO. This is the firmware version the C6 runs.
+
+#: components/aos_apps/aos_app_settings.c:1297
 ÚLTIMO CUELGUE	LAST CRASH
 
-#: components/aos_apps/aos_app_settings.c:1293
-#: components/aos_apps/aos_app_settings.c:1295
+#: components/aos_apps/aos_app_settings.c:1300
+#: components/aos_apps/aos_app_settings.c:1302
 Volcado	Dump
 
-#: components/aos_apps/aos_app_settings.c:1295
+#: components/aos_apps/aos_app_settings.c:1302
 dañado	damaged
 
-#: components/aos_apps/aos_app_settings.c:1296
+#: components/aos_apps/aos_app_settings.c:1303
 Tarea	Task
 
-#: components/aos_apps/aos_app_settings.c:1299
+#: components/aos_apps/aos_app_settings.c:1306
 Firmware (ELF)	Firmware (ELF)
 
-#: components/aos_apps/aos_app_settings.c:1300
+#: components/aos_apps/aos_app_settings.c:1307
 Borrar el volcado	Erase the dump
 
-#: components/aos_apps/aos_app_settings.c:1301
+#: components/aos_apps/aos_app_settings.c:1308
 El volcado se baja desde el portal (Firmware, Último cuelgue) o con tools/coredump.sh, y se lee con la ELF de esa compilación.	The dump downloads from the portal (Firmware, Last crash) or with tools/coredump.sh, and is read with that build's ELF.
 
-#: components/aos_apps/aos_app_settings.c:1305
+#: components/aos_apps/aos_app_settings.c:1312
 Abrir el Monitor	Open Monitor
 
-#: components/aos_apps/aos_app_settings.c:1355
+#: components/aos_apps/aos_app_settings.c:1362
 PORTAL WEB	WEB PORTAL
 
-#: components/aos_apps/aos_app_settings.c:1357
+#: components/aos_apps/aos_app_settings.c:1364
 En la red	On the network
 
-#: components/aos_apps/aos_app_settings.c:1363
+#: components/aos_apps/aos_app_settings.c:1370
 Por Wi-Fi	Over Wi-Fi
 
-#: components/aos_apps/aos_app_settings.c:1367
+#: components/aos_apps/aos_app_settings.c:1374
 Por su red propia	Over its own network
 
-#: components/aos_apps/aos_app_settings.c:1370
+#: components/aos_apps/aos_app_settings.c:1377
 Por el cable USB	Over the USB cable
 
-#: components/aos_apps/aos_app_settings.c:1372
+#: components/aos_apps/aos_app_settings.c:1379
 Sin Wi-Fi no hay código QR: el teléfono tiene que estar en la misma red que la placa, o en la red propia de la placa (Ajustes, Wi-Fi).	No QR code without Wi-Fi: the phone has to be on the same network as the board, or on the board's own network (Settings, Wi-Fi).
 
-#: components/aos_apps/aos_app_settings.c:1376
+#: components/aos_apps/aos_app_settings.c:1383
 Escaneálo con el teléfono para abrir el portal.	Scan it with the phone to open the portal.
 
-#: components/aos_apps/aos_app_settings.c:1394
+#: components/aos_apps/aos_app_settings.c:1401
 Cambiar el idioma cierra las apps abiertas.	Changing the language closes open apps.
 
-#: components/aos_apps/aos_app_settings.c:1398
+#: components/aos_apps/aos_app_settings.c:1405
 Buenos Aires (UTC−3)	Buenos Aires (UTC−3)
 
-#: components/aos_apps/aos_app_settings.c:1398
+#: components/aos_apps/aos_app_settings.c:1405
 Santiago (UTC−4/−3)	Santiago (UTC−4/−3)
 
-#: components/aos_apps/aos_app_settings.c:1399
+#: components/aos_apps/aos_app_settings.c:1406
 São Paulo (UTC−3)	São Paulo (UTC−3)
 
-#: components/aos_apps/aos_app_settings.c:1399
+#: components/aos_apps/aos_app_settings.c:1406
 Ciudad de México (UTC−6)	Mexico City (UTC−6)
 
-#: components/aos_apps/aos_app_settings.c:1400
+#: components/aos_apps/aos_app_settings.c:1407
 Nueva York (UTC−5/−4)	New York (UTC−5/−4)
 
-#: components/aos_apps/aos_app_settings.c:1400
+#: components/aos_apps/aos_app_settings.c:1407
 Madrid (UTC+1/+2)	Madrid (UTC+1/+2)
 
-#: components/aos_apps/aos_app_settings.c:1401
+#: components/aos_apps/aos_app_settings.c:1408
 Londres (UTC+0/+1)	London (UTC+0/+1)
 
-#: components/aos_apps/aos_app_settings.c:1413
+#: components/aos_apps/aos_app_settings.c:1420
 Sólo a-z, 0-9 y guiones	Only a-z, 0-9 and hyphens
 
-#: components/aos_apps/aos_app_settings.c:1416
-#: components/aos_apps/aos_app_settings.c:1442
+#: components/aos_apps/aos_app_settings.c:1423
+#: components/aos_apps/aos_app_settings.c:1449
 Nombre en la red	Network name
 
-#: components/aos_apps/aos_app_settings.c:1425
+#: components/aos_apps/aos_app_settings.c:1432
 sin hora (esperando la red)	no time (waiting for network)
 
-#: components/aos_apps/aos_app_settings.c:1426
+#: components/aos_apps/aos_app_settings.c:1433
 ZONA HORARIA	TIME ZONE
 
-#: components/aos_apps/aos_app_settings.c:1433
+#: components/aos_apps/aos_app_settings.c:1440
 La hora llega por la red (SNTP). La placa no tiene reloj con pila todavía.	The time comes from the network (SNTP). The board has no battery-backed clock yet.
 
-#: components/aos_apps/aos_app_settings.c:1440
+#: components/aos_apps/aos_app_settings.c:1447
 #: components/aos_apps/_pending/aos_app_settings.c:3301
 Placa	Board
 
-#: components/aos_apps/aos_app_settings.c:1444
+#: components/aos_apps/aos_app_settings.c:1451
 #: components/aos_apps/_pending/aos_app_settings.c:3262
 MEMORIA	MEMORY
 
-#: components/aos_apps/aos_app_settings.c:1454
+#: components/aos_apps/aos_app_settings.c:1461
 microSD libre	microSD free
 
-#: components/aos_apps/aos_app_settings.c:1458
+#: components/aos_apps/aos_app_settings.c:1465
 QUÉ HAY	WHAT'S INSIDE
 
-#: components/aos_apps/aos_app_settings.c:1460
+#: components/aos_apps/aos_app_settings.c:1467
 Micrófono	Microphone
 
-#: components/aos_apps/aos_app_settings.c:1461
+#: components/aos_apps/aos_app_settings.c:1468
 Parlante	Speaker
 
-#: components/aos_apps/aos_app_settings.c:1461
+#: components/aos_apps/aos_app_settings.c:1468
 Audio full dúplex	Full-duplex audio
 
-#: components/aos_apps/aos_app_settings.c:1462
+#: components/aos_apps/aos_app_settings.c:1469
 Conector de expansión	Expansion header
 
-#: components/aos_apps/aos_app_settings.c:1463
+#: components/aos_apps/aos_app_settings.c:1470
 #: components/aos_apps/_pending/aos_app_settings.c:1787
 Batería	Battery
 
-#: components/aos_apps/aos_app_settings.c:1463
+#: components/aos_apps/aos_app_settings.c:1470
 Cámara	Camera
 
-#: components/aos_apps/aos_app_settings.c:1463
+#: components/aos_apps/aos_app_settings.c:1470
 Acelerómetro	Accelerometer
 
-#: components/aos_apps/aos_app_settings.c:1466
+#: components/aos_apps/aos_app_settings.c:1473
 sí	yes
 
 #: components/aos_apps/aos_app_soon.c:31
