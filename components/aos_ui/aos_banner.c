@@ -8,6 +8,7 @@
  * `alert` and `sound` fields of each notification are just obeyed.
  */
 #include "aos_internal.h"
+#include "aos_lock.h"
 #include "aos_hal.h"
 #include "aos_theme.h"
 #include "aos_i18n.h"
@@ -106,7 +107,9 @@ void aos_banner_tick(void)
     while (aos_hal_notif_pop(&n)) {
         if (!n.alert) continue;
         aos_hal_activity();
-        banner_show(&n);
+        /* locked, the lock screen's list shows it: no banner over it, and
+         * none with its text when the content is to stay hidden */
+        if (!aos_lock_is_locked()) banner_show(&n);
         if (n.sound) aos_hal_beep(1760, 60);
     }
 }

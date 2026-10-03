@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
  * Mas 149 funciones de libc/libm agregadas a mano.
- * Total: 3136 simbolos.
+ * Total: 3148 simbolos.
  */
 
 #include <stddef.h>
@@ -683,6 +683,18 @@ extern int aos_leds_fx_count;
 extern int aos_leds_get;
 extern int aos_leds_set;
 extern int aos_leds_status;
+extern int aos_lock_get_cfg;
+extern int aos_lock_init;
+extern int aos_lock_is_locked;
+extern int aos_lock_layout;
+extern int aos_lock_now;
+extern int aos_lock_pad_close;
+extern int aos_lock_pad_open;
+extern int aos_lock_pin_check;
+extern int aos_lock_pin_len;
+extern int aos_lock_pin_set;
+extern int aos_lock_set_cfg;
+extern int aos_lock_tick;
 extern int aos_logring_add;
 extern int aos_lvmem_get_psram;
 extern int aos_lvmem_set_psram;
@@ -3822,6 +3834,18 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_leds_get),
     ESP_ELFSYM_EXPORT(aos_leds_set),
     ESP_ELFSYM_EXPORT(aos_leds_status),
+    ESP_ELFSYM_EXPORT(aos_lock_get_cfg),
+    ESP_ELFSYM_EXPORT(aos_lock_init),
+    ESP_ELFSYM_EXPORT(aos_lock_is_locked),
+    ESP_ELFSYM_EXPORT(aos_lock_layout),
+    ESP_ELFSYM_EXPORT(aos_lock_now),
+    ESP_ELFSYM_EXPORT(aos_lock_pad_close),
+    ESP_ELFSYM_EXPORT(aos_lock_pad_open),
+    ESP_ELFSYM_EXPORT(aos_lock_pin_check),
+    ESP_ELFSYM_EXPORT(aos_lock_pin_len),
+    ESP_ELFSYM_EXPORT(aos_lock_pin_set),
+    ESP_ELFSYM_EXPORT(aos_lock_set_cfg),
+    ESP_ELFSYM_EXPORT(aos_lock_tick),
     ESP_ELFSYM_EXPORT(aos_logring_add),
     ESP_ELFSYM_EXPORT(aos_lvmem_get_psram),
     ESP_ELFSYM_EXPORT(aos_lvmem_set_psram),

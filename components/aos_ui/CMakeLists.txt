@@ -12,4 +12,5 @@ idf_component_register(
     SRCS ${UI_SRCS}
     INCLUDE_DIRS "include"
     REQUIRES aos_hal aos_fonts lvgl
+    PRIV_REQUIRES mbedtls
 )

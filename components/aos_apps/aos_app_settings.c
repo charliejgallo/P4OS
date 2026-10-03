@@ -31,6 +31,7 @@
 #include "aos_ui.h"
 #include "aos_io.h"
 #include "aos_sys_glyphs.h"
+#include "aos_lock.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -49,11 +50,12 @@ static void *big_calloc(size_t n)
 #endif
 
 enum { PG_ROOT = 0, PG_WIFI, PG_DISPLAY, PG_SOUND, PG_WALL, PG_EXP, PG_LANG, PG_TIME, PG_ABOUT, PG_USB,
-       PG_STORAGE, PG_UPDATE, PG_DIAG, PG_COUNT };
+       PG_STORAGE, PG_UPDATE, PG_DIAG, PG_LOCK, PG_COUNT };
 
 static const char *const PG_TITLE[PG_COUNT] = { N_("Ajustes"), N_("Wi-Fi"), N_("Pantalla"), N_("Sonido"), N_("Fondo"),
                                                 N_("Expansión"), N_("Idioma"), N_("Fecha y hora"), N_("Acerca de"),
-                                                "USB", N_("Almacenamiento"), N_("Actualización"), N_("Diagnóstico") };
+                                                "USB", N_("Almacenamiento"), N_("Actualización"), N_("Diagnóstico"),
+                                                N_("Pantalla de bloqueo") };
 
 static struct {
     lv_obj_t *root, *page, *kb, *ta, *overlay;
@@ -422,6 +424,12 @@ static void build_root(lv_obj_t *p)
     g = group(p, NULL);
     row(g, AOS_SYM_BRIGHTNESS_6, 0x5E5CE6, _("Pantalla"), aos_ui_landscape() ? _("Horizontal") : _("Vertical"), true,
         open_cb, (void *)PG_DISPLAY);
+    {
+        aos_lock_cfg_t lc;
+        aos_lock_get_cfg(&lc);
+        row(g, AOS_SYM_LOCK, 0x30B0C7, _("Pantalla de bloqueo"),
+            !lc.enabled ? _("No") : aos_lock_pin_len() ? _("Con código") : _("Sí"), true, open_cb, (void *)PG_LOCK);
+    }
     row(g, AOS_SYM_VOLUME_HIGH, 0xFF375F, _("Sonido"), NULL, true, open_cb, (void *)PG_SOUND);
     row(g, AOS_SYM_PALETTE, 0x30B0C7, _("Fondo de pantalla"), NULL, true, open_cb, (void *)PG_WALL);
     row(g, AOS_SYM_VIEW_GRID_OUTLINE, 0xFF9F0A, _("Editar inicio"), NULL, true, edit_home_cb, NULL);
@@ -1354,6 +1362,171 @@ static void qr_box(lv_obj_t *strip, const char *text, const char *caption)
     lv_obj_set_style_text_align(t, LV_TEXT_ALIGN_CENTER, 0);
 }
 
+/* ---- Lock screen ---- */
+
+/* Setting, changing or removing the code goes through the lock screen's
+ * own pad (aos_lock.c), over everything: the current code first (not in
+ * the BOOT button's safe mode, which is how a forgotten one is removed),
+ * then the new one twice. */
+static struct { int len; bool remove; char first[8]; } LF;
+static void lf_cancel(void *ud);
+
+static void lock_after_new2(void);
+static bool lf_new2_cb(const char *pin, void *ud)
+{
+    (void)ud;
+    if (strcmp(pin, LF.first)) {
+        memset(LF.first, 0, sizeof LF.first);
+        aos_ui_toast(_("No coinciden: empezá de nuevo"), 2000);
+        lock_after_new2();
+        return true;            /* this sheet closes; a fresh one opens */
+    }
+    aos_lock_pin_set(pin);
+    memset(LF.first, 0, sizeof LF.first);
+    aos_lock_cfg_t c;
+    aos_lock_get_cfg(&c);
+    if (!c.enabled) { c.enabled = true; aos_lock_set_cfg(&c); }
+    aos_ui_toast(_("Código guardado"), 1500);
+    show(PG_LOCK);
+    return true;
+}
+
+static bool lf_new1_cb(const char *pin, void *ud)
+{
+    (void)ud;
+    snprintf(LF.first, sizeof LF.first, "%s", pin);
+    aos_lock_pad_open(lv_layer_top(), _("Repetí el código nuevo"), LF.len, lf_new2_cb, lf_cancel, NULL);
+    return false;               /* the new sheet replaced this one: nothing to close */
+}
+
+static void lf_cancel(void *ud) { (void)ud; memset(LF.first, 0, sizeof LF.first); }
+
+static void lock_after_new2(void)
+{
+    aos_lock_pad_open(lv_layer_top(), _("Elegí el código nuevo"), LF.len, lf_new1_cb, lf_cancel, NULL);
+}
+
+static void lf_after_current(void)
+{
+    if (LF.remove) {
+        aos_lock_pin_set(NULL);
+        aos_ui_toast(_("Sin código"), 1500);
+        show(PG_LOCK);
+        return;
+    }
+    lock_after_new2();
+}
+
+static bool lf_current_cb(const char *pin, void *ud)
+{
+    (void)ud;
+    if (!aos_lock_pin_check(pin)) return false;
+    aos_lock_pad_close();
+    lf_after_current();
+    return false;               /* closed above, and maybe a new sheet opened */
+}
+
+static void lock_code_start(int len, bool remove)
+{
+    LF.len = len;
+    LF.remove = remove;
+    memset(LF.first, 0, sizeof LF.first);
+    if (aos_lock_pin_len() && !aos_ui_safe_mode())
+        aos_lock_pad_open(lv_layer_top(), _("Ingresá el código actual"), aos_lock_pin_len(), lf_current_cb, lf_cancel, NULL);
+    else
+        lf_after_current();
+}
+
+static void lock_code_cb(lv_event_t *e)
+{
+    int len = (int)(intptr_t)lv_event_get_user_data(e);
+    if (len == 0) { if (aos_lock_pin_len()) lock_code_start(0, true); return; }
+    lock_code_start(len, false);
+}
+
+static void lock_change_cb(lv_event_t *e) { lock_code_start(aos_lock_pin_len(), false); }
+
+static void lock_sw_cb(lv_event_t *e)
+{
+    aos_lock_cfg_t c;
+    aos_lock_get_cfg(&c);
+    c.enabled = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
+    aos_lock_set_cfg(&c);
+    show(PG_LOCK);
+}
+
+static void lock_after_cb(lv_event_t *e)
+{
+    aos_lock_cfg_t c;
+    aos_lock_get_cfg(&c);
+    c.after_s = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+    aos_lock_set_cfg(&c);
+    show(PG_LOCK);
+}
+
+static void lock_notifs_cb(lv_event_t *e)
+{
+    aos_lock_cfg_t c;
+    aos_lock_get_cfg(&c);
+    c.show_notifs = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
+    aos_lock_set_cfg(&c);
+}
+
+static void lock_music_cb(lv_event_t *e)
+{
+    aos_lock_cfg_t c;
+    aos_lock_get_cfg(&c);
+    c.show_music = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
+    aos_lock_set_cfg(&c);
+}
+
+static void lock_hide_cb(lv_event_t *e)
+{
+    aos_lock_cfg_t c;
+    aos_lock_get_cfg(&c);
+    c.hide_content = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
+    aos_lock_set_cfg(&c);
+}
+
+static void lock_now_cb(lv_event_t *e) { aos_lock_now(); }
+
+static void build_lock(lv_obj_t *p)
+{
+    aos_lock_cfg_t c;
+    aos_lock_get_cfg(&c);
+    int len = aos_lock_pin_len();
+    lv_obj_t *g = group(p, NULL);
+    row_switch(g, AOS_SYM_LOCK, 0x30B0C7, _("Pantalla de bloqueo"), c.enabled, lock_sw_cb);
+    note(p, _("La hora, los mensajes y la música sobre el fondo de pantalla; deslizá hacia arriba para entrar. Aparece al arrancar y cuando la pantalla estuvo apagada el tiempo que elijas."));
+    if (!c.enabled) return;
+
+    g = group(p, _("BLOQUEAR"));
+    static const uint32_t AFTER[] = { 0, 60, 300, 900, 3600 };
+    static const char *const AFTER_N[] = { N_("Al apagarse la pantalla"), N_("1 minuto después"), N_("5 minutos después"),
+                                           N_("15 minutos después"), N_("1 hora después") };
+    for (size_t i = 0; i < sizeof AFTER / sizeof AFTER[0]; i++)
+        row(g, NULL, 0, _(AFTER_N[i]), c.after_s == AFTER[i] ? AOS_SYM_CHECK : NULL, false, lock_after_cb,
+            (void *)(uintptr_t)AFTER[i]);
+    note(p, _("Cuánto tiempo apagada antes de bloquearse. Cuándo se apaga la pantalla se elige en Pantalla."));
+
+    g = group(p, _("CÓDIGO"));
+    row(g, NULL, 0, _("Sin código"), len == 0 ? AOS_SYM_CHECK : NULL, false, lock_code_cb, (void *)(intptr_t)0);
+    row(g, NULL, 0, _("Código de 4 dígitos"), len == 4 ? AOS_SYM_CHECK : NULL, false, lock_code_cb, (void *)(intptr_t)4);
+    row(g, NULL, 0, _("Código de 6 dígitos"), len == 6 ? AOS_SYM_CHECK : NULL, false, lock_code_cb, (void *)(intptr_t)6);
+    if (len) action_row(g, _("Cambiar el código"), AOS_C_ACCENT, lock_change_cb);
+    note(p, aos_ui_safe_mode() ? _("Modo seguro: el código no se pide, así que podés quitarlo o cambiarlo sin saberlo.")
+                               : _("¿Te olvidaste el código? Reiniciá con BOOT apretado (modo seguro): ahí no se pide, y lo quitás desde acá. Después de 5 intentos mal, espera 30 s, y más cada vez."));
+
+    g = group(p, _("QUÉ SE MUESTRA"));
+    row_switch(g, AOS_SYM_BELL, 0xFF453A, _("Mensajes"), c.show_notifs, lock_notifs_cb);
+    row_switch(g, AOS_SYM_MUSIC, 0xFF375F, _("Música"), c.show_music, lock_music_cb);
+    row_switch(g, AOS_SYM_LOCK, 0x8E8E93, _("Ocultar el texto con código"), c.hide_content, lock_hide_cb);
+    note(p, _("Los mensajes son las notificaciones: hoy las de las apps, y las del teléfono por Bluetooth y las de Home Assistant cuando lleguen. Con código y el texto oculto, se ve de qué app son pero no qué dicen."));
+
+    g = group(p, NULL);
+    action_row(g, _("Bloquear ahora"), AOS_C_ACCENT, lock_now_cb);
+}
+
 /* ---- The portal's address, for About ---- */
 
 static void build_portal(lv_obj_t *p)
@@ -1528,6 +1701,7 @@ static void fill(lv_obj_t *col, int pg, bool back)
     case PG_STORAGE: build_storage(col); break;
     case PG_UPDATE: build_update(col); break;
     case PG_DIAG: build_diag(col); break;
+    case PG_LOCK: build_lock(col); break;
     default: build_root(col); break;
     }
 }

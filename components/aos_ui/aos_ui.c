@@ -26,6 +26,7 @@
  */
 #include "aos_ui.h"
 #include "aos_internal.h"
+#include "aos_lock.h"
 #include "aos_hal.h"
 #include "aos_theme.h"
 #include "aos_i18n.h"
@@ -293,6 +294,7 @@ static void relayout_all(void)
     aos_home_rebuild();
     lv_obj_set_pos(s_indicator, (s_geo.w - lv_obj_get_width(s_indicator)) / 2, s_geo.h - s_geo.bottom_h / 2 - 3);
     if (s_cur) refit_app(s_cur);
+    aos_lock_layout();
 }
 
 void aos_ui_set_landscape(bool landscape)
@@ -608,6 +610,7 @@ static void gesture_begin(int32_t x, int32_t y)
     g.y0 = g.y = g.py = y;
     g.t0 = g.still_since = lv_tick_get();
     if (s_block_gestures && s_cur) { g.kind = G_DEAD; return; }
+    if (aos_lock_is_locked()) { g.kind = G_DEAD; return; }     /* the lock screen's own swipe, nothing under it */
     if (aos_switcher_is_open()) { g.kind = G_DEAD; return; }
     if (aos_panel_current() != AOS_PANEL_NONE) { g.kind = G_DEAD; return; }
     if (y >= s_geo.h - EDGE_BOTTOM) g.kind = G_HOME;
@@ -1030,6 +1033,7 @@ void aos_ui_tick(void)
         if (a == s_cur || (a->desc.flags & AOS_APP_FLAG_BACKGROUND)) a->tick(a, a->inst);
     }
     aos_banner_tick();
+    aos_lock_tick();
     /* the screen's auto-off; an app in front with KEEP_AWAKE holds it on
      * for as long as it is in front (the flag used to count only when the
      * app opened) */
@@ -1105,7 +1109,8 @@ static void ui_button_cb(aos_button_t button, aos_button_action_t action)
         return;
     }
     bool used = false;
-    if (aos_hal_lock(300)) {
+    if (aos_lock_is_locked()) used = action != AOS_BUTTON_LONG;     /* locked: only the screenshot */
+    else if (aos_hal_lock(300)) {
         if (s_cur && s_cur->running && s_cur->button) used = s_cur->button(s_cur, s_cur->inst, (int)action);
         if (!used && action == AOS_BUTTON_CLICK) aos_ui_home();
         aos_hal_unlock();
@@ -1169,6 +1174,7 @@ void aos_ui_init(void)
 
     aos_panels_create(lv_layer_top());
     aos_banner_create(lv_layer_sys());
+    aos_lock_init();                /* over the panels; locked at boot when it is on */
 
     for (lv_indev_t *in = lv_indev_get_next(NULL); in; in = lv_indev_get_next(in)) {
         if (lv_indev_get_type(in) == LV_INDEV_TYPE_POINTER && !s_indev) {
