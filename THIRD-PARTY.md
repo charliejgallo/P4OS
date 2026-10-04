@@ -56,6 +56,8 @@ The LED Strips app's Fire effect follows Mark Kriegsman's Fire2012 algorithm
 | Font Awesome 5 Free glyphs (LVGL's symbols) | merged into the Inter files, from LVGL's `built_in_font` | fonts under SIL OFL 1.1 | [FontAwesome5-Free.txt](LICENSES/FontAwesome5-Free.txt) |
 | **Rubik Medium** (Google Fonts) | `apps/mila/tools/blender/fonts/`, the casita's name plate in Mila's art pack | SIL OFL 1.1 | its `OFL.txt` is next to it |
 | **JetBrains Mono 2.304** | `components/aos_fonts/aos_mono_*.c` (`tools/gen_mono_font.py`) | SIL OFL 1.1 | [OFL-1.1-JetBrainsMono.txt](LICENSES/OFL-1.1-JetBrainsMono.txt) |
+| **Noto Emoji** (Google, 2D colour set) | the card's `/fonts/emoji.pak`, built by `tools/gen_emoji.py` from the `2D/png/72` images; not in git, it goes out with the release | images under the Apache License 2.0 | [github.com/googlefonts/noto-emoji](https://github.com/googlefonts/noto-emoji); docs/EMOJI.md |
+| Region flags (in Noto Emoji's `third_party/region-flags`) | the flags in the same pack | public domain, or exempt from copyright | its `LICENSE` in that folder |
 | **Material Design Icons 7.4.47** (Pictogrammers) | `components/aos_ui/aos_sym_*.c` and the folder and settings fonts (bitmaps), `components/aos_web/glifos.js` (SVG paths) | Pictogrammers Free License: icons and fonts Apache-2.0 | brand and logo icons (such as Home Assistant's) are their owners' marks and are not covered by it |
 
 ## Data and services

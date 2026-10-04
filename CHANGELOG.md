@@ -2,6 +2,19 @@
 
 ## Unreleased (0.7)
 
+**Bluetooth and colour emoji**
+- Bluetooth with the phone: NimBLE on the P4, the C6's controller through
+  esp_hosted. From AmoledOS: pairing by numeric comparison, the iPhone's
+  notifications (ANCS), its music (AMS), battery and time. The board shows
+  up in the iPhone's Settings > Bluetooth (it advertises the HID service,
+  which is what iOS lists there) and the pairing code comes up over
+  everything. `GET`/`POST /api/bt`.
+- Colour emoji in any text, from Noto's 4012 (sequences, skin tones, flags
+  and keycaps included): the card's `/fonts/emoji.pak`, built by
+  `tools/gen_emoji.py` and put there by `tools/install_emoji.sh`. Banners
+  and the notification centre now go through the same text filter as the
+  lock screen. docs/EMOJI.md.
+
 **The ESP32-C6, updated from the P4**
 - esp_hosted 3.0.9 on the P4 (it was 1.4.7), with esp_wifi_remote 1.6.5.
   It still talks to the C6's factory firmware, and its own options put the

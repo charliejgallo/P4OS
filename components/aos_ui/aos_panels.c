@@ -17,6 +17,7 @@
  * whole screen per frame is what UI.md says to avoid on this panel.
  */
 #include "aos_internal.h"
+#include "aos_text_safe.h"
 #include "aos_hal.h"
 #include "aos_theme.h"
 #include "aos_i18n.h"
@@ -472,12 +473,15 @@ static void nc_fill(void)
         else lv_label_set_text_fmt(head, "%s  ·  %ld h", nt.app, mins / 60);
         lv_obj_t *t = lv_label_create(card);
         lv_obj_set_style_text_font(t, aos_font_small, 0);
-        lv_label_set_text(t, nt.title);
+        char safe[320];
+        aos_text_safe(safe, sizeof safe, nt.title);
+        lv_label_set_text(t, safe);
         lv_obj_t *m = lv_label_create(card);
         lv_obj_set_width(m, lv_pct(100));
         lv_obj_set_style_text_font(m, aos_font_caption, 0);
         lv_label_set_long_mode(m, LV_LABEL_LONG_MODE_WRAP);
-        lv_label_set_text(m, nt.message);
+        aos_text_safe(safe, sizeof safe, nt.message);
+        lv_label_set_text(m, safe);
     }
 }
 

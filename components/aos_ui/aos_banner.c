@@ -8,6 +8,7 @@
  * `alert` and `sound` fields of each notification are just obeyed.
  */
 #include "aos_internal.h"
+#include "aos_text_safe.h"
 #include "aos_lock.h"
 #include "aos_hal.h"
 #include "aos_theme.h"
@@ -73,16 +74,20 @@ static void banner_show(const aos_notif_t *n)
     lv_obj_t *head = lv_label_create(s_banner);
     lv_obj_set_style_text_font(head, aos_font_caption, 0);
     lv_obj_set_style_text_color(head, lv_color_hex(0xB8C0CC), 0);
-    lv_label_set_text(head, n->app);
+    char safe[320];
+    aos_text_safe(safe, sizeof safe, n->app);
+    lv_label_set_text(head, safe);
     lv_obj_t *t = lv_label_create(s_banner);
     lv_obj_set_style_text_font(t, aos_font_small, 0);
-    lv_label_set_text(t, n->title);
+    aos_text_safe(safe, sizeof safe, n->title);
+    lv_label_set_text(t, safe);
     lv_obj_t *m = lv_label_create(s_banner);
     lv_obj_set_width(m, lv_pct(100));
     lv_obj_set_style_text_font(m, aos_font_caption, 0);
     lv_label_set_long_mode(m, LV_LABEL_LONG_MODE_DOTS);
     lv_obj_set_style_max_height(m, 80, 0);
-    lv_label_set_text(m, n->message);
+    aos_text_safe(safe, sizeof safe, n->message);
+    lv_label_set_text(m, safe);
 
     lv_obj_update_layout(s_banner);
     int32_t h = lv_obj_get_height(s_banner);

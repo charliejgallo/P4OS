@@ -1633,6 +1633,13 @@ static const struct {
     const char *app, *title, *msg;
     bool silent, can_act;
 } FALSAS[] = {
+    /* emoji as a phone sends them: a heart with its selector, a thumb with a
+     * skin tone, a ZWJ sequence, a flag, a keycap; then three that stay text
+     * (a sun with no selector, the copyright sign, a hash) */
+    { AOS_NOTIF_SOCIAL, "WhatsApp", "Grupo \xF0\x9F\x98\x82",
+      "\xE2\x9D\xA4\xEF\xB8\x8F \xF0\x9F\x91\x8D\xF0\x9F\x8F\xBD \xF0\x9F\x91\xA9\xE2\x80\x8D\xF0\x9F\x92\xBB "
+      "\xF0\x9F\x87\xA6\xF0\x9F\x87\xB7 1\xEF\xB8\x8F\xE2\x83\xA3 \xE2\x98\x80 \xC2\xA9 # listo",
+      false, false },
     { AOS_NOTIF_SOCIAL, "WhatsApp", "Mariana",
       "Shall we go and eat something? \xF0\x9F\x8D\x95 See you at nine",
       false, false },

@@ -1,6 +1,7 @@
 #include "aos_theme.h"
 #include "aos_fonts.h"
 #include "aos_i18n.h"
+#include "aos_emoji.h"
 #include <string.h>
 
 const lv_font_t *aos_font_huge    = NULL;
@@ -89,6 +90,17 @@ void aos_theme_init(void)
     aos_font_caption = sim_font(20, aos_font_caption);
     aos_font_tiny    = sim_font(16, aos_font_tiny);
 #endif
+    /* colour emoji when the card has the pack (aos_emoji.c): each role gets
+     * a copy of its font that falls back to the emoji of its size */
+    if (aos_emoji_init()) {
+        aos_font_huge    = aos_emoji_font(aos_font_huge);
+        aos_font_large   = aos_emoji_font(aos_font_large);
+        aos_font_title   = aos_emoji_font(aos_font_title);
+        aos_font_body    = aos_emoji_font(aos_font_body);
+        aos_font_small   = aos_emoji_font(aos_font_small);
+        aos_font_caption = aos_emoji_font(aos_font_caption);
+        aos_font_tiny    = aos_emoji_font(aos_font_tiny);
+    }
 
     lv_obj_t *scr = lv_screen_active();
     lv_obj_set_style_bg_color(scr, AOS_C_BG, 0);

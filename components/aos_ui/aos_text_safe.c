@@ -1,5 +1,6 @@
-/* AmoledOS - sanitising of foreign text. See aos_text_safe.h. */
+/* P4OS (from AmoledOS) - sanitising of foreign text. See aos_text_safe.h. */
 #include "aos_text_safe.h"
+#include "aos_emoji.h"
 
 #include <string.h>
 
@@ -310,11 +311,19 @@ static size_t poner_cp(char *out, size_t espacio, uint32_t cp)
         out[1] = (char)(0x80 | (cp & 0x3F));
         return 2;
     }
-    if (espacio < 3) return 0;
-    out[0] = (char)(0xE0 | (cp >> 12));
-    out[1] = (char)(0x80 | ((cp >> 6) & 0x3F));
-    out[2] = (char)(0x80 | (cp & 0x3F));
-    return 3;
+    if (cp < 0x10000) {
+        if (espacio < 3) return 0;
+        out[0] = (char)(0xE0 | (cp >> 12));
+        out[1] = (char)(0x80 | ((cp >> 6) & 0x3F));
+        out[2] = (char)(0x80 | (cp & 0x3F));
+        return 3;
+    }
+    if (espacio < 4) return 0;
+    out[0] = (char)(0xF0 | (cp >> 18));
+    out[1] = (char)(0x80 | ((cp >> 12) & 0x3F));
+    out[2] = (char)(0x80 | ((cp >> 6) & 0x3F));
+    out[3] = (char)(0x80 | (cp & 0x3F));
+    return 4;
 }
 
 size_t aos_text_safe(char *out, size_t out_len, const char *in)
@@ -334,6 +343,19 @@ size_t aos_text_safe(char *out, size_t out_len, const char *in)
 
     while (i < largo && w + 1 < out_len) {
         uint32_t cp;
+        /* A colour emoji, when the card has them (aos_emoji.c): the whole
+         * sequence becomes the one private-use code point that draws it. */
+        size_t em = aos_emoji_match((const char *)s + i, largo - i, &cp);
+        if (em) {
+            size_t k = poner_cp(out + w, out_len - 1 - w, cp);
+            if (k == 0) {
+                break;
+            }
+            w += k;
+            i += em;
+            ultimo_fue_reemplazo = false;
+            continue;
+        }
         int n = decodificar(s + i, largo - i, &cp);
         i += (size_t)n;
 
