@@ -43,6 +43,11 @@ Hecho el 2026-10-04 (0.7.0):
       Los dos se reconectan solos después de reiniciar el Bluetooth.
 - [ ] La música del iPhone (AMS) y las acciones de las notificaciones desde
       la interfaz.
+- [x] Páginas del portal enchufables (docs/PORTAL-PAGES.md): la de
+      hello_app sale de /web de la tarjeta y aparece en el menú, probada por
+      el usuario; una rota no tumba el portal (probado en el simulador).
+- [ ] Mudar a sus apps las páginas que viven en el firmware: Notas primero
+      (la sesión de Notas), después Pixel Art, Lua, Mapas y el Visor 3D.
 
 Hecho el 2026-10-03:
 - [x] esp_hosted 3.0.9 en el P4 con el C6 de fábrica: Wi-Fi, AP (probado
