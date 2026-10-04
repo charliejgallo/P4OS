@@ -47,11 +47,16 @@ version 1 stays as it is, like the apps' `AOS_ABI_VERSION`.
 | `api(path, opts)` | `fetch('/api/' + path)`, JSON back, throws with the portal's error |
 | `post(path, body)` | `api` with POST and a JSON body |
 | `toast(text, bad)` | the portal's message at the bottom |
-| `fmtBytes(n)` | "1,2 MB" |
-| `fsText(path)` | a card file as text (throws "no existe" if it is not there) |
-| `fsPut(path, data)` | writes a card file (a string or a Blob), any size |
-| `fsList(path)` | a folder: `[{ name, dir, size, mtime }]` |
+| `row(label, value, cls)` | a settings-style row |
+| `fmtBytes(n)`, `fmtDate(s)` | "1,2 MB"; a Unix time as "04 oct 2026" |
+| `fsText(path)` | a card file as text; `null` if it is not there |
+| `fsBytes(path)` | a card file as an `ArrayBuffer` |
+| `fsList(path)` | a folder: `[{ name, dir, size, mtime }]`; empty if it is not there |
+| `fsPut(path, data, onProgress)` | writes a card file (a string, Blob or buffer), any size; `onProgress(0..1)` is optional |
 | `fsDelete(path)`, `fsMkdir(path)` | |
+| `fsUrl(path, download)` | the address of a card file, to link or to show in an `<img>` |
+| `fsSlug(text, max, default)` | a name the card takes: lower case, a-z 0-9 _ -, no accents |
+| `saveBlob(blob, name)` | hands a file to the browser to save |
 | `openApp(id)` | opens an app on the board (`demo.hello`) |
 | `registerPage(page)` | see above |
 
@@ -89,6 +94,7 @@ The boot scan opens and closes every `.so`; a page inside it would have to
 be copied out of each one at every boot. A file on the card is served as it
 is, and is replaced with one upload.
 
-The pages that live in the firmware's `app.js` today (Pixel Art, Lua, Maps,
-the 3D viewer, Notes) can move to their apps this way, and the firmware gets
-smaller.
+Pixel Art, Lua, Maps, the 3D viewer and Notes lived in the firmware's
+`app.js` until 2026-10-04 and moved to their apps this way: `app.js` went
+from 5300 lines to 2565, and its CSS from 364 to 255. Each brings its styles
+in a `<style>` it adds once.

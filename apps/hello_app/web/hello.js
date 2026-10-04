@@ -40,7 +40,7 @@ P.registerPage({
           h('button', { class: 'btn', onclick: save }, 'Guardar'),
           h('button', { class: 'btn', onclick: () => P.openApp('demo.hello').then(() => P.toast('Abierta en la placa')) },
             'Abrir la app en la placa'))));
-    P.fsText(FILE).then(t => { text.value = t; }).catch(() => { text.value = '¡Hola desde la tarjeta!'; });
+    P.fsText(FILE).then(t => { text.value = t ?? '¡Hola desde la tarjeta!'; }).catch(e => P.toast(e.message, true));
     const tick = () => P.api('info').then(i => { up.textContent = Math.floor(i.uptime_s / 60) + ' min'; }).catch(() => {});
     tick();
     const t = setInterval(tick, 5000);
