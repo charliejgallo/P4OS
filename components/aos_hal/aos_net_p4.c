@@ -223,6 +223,8 @@ static wifi_ps_type_t idle_ps(void)
     return v ? WIFI_PS_MIN_MODEM : WIFI_PS_NONE;
 }
 
+void aos_bt_p4_radio_up(void) __attribute__((weak));
+
 static void net_task(void *arg)
 {
     esp_netif_init();
@@ -278,6 +280,8 @@ static void net_task(void *arg)
         snprintf(s_c6_fw, sizeof s_c6_fw, "?");
         ESP_LOGW(TAG, "the C6 did not say its firmware version");
     }
+    /* Bluetooth goes through the same link (components/aos_ble) */
+    if (aos_bt_p4_radio_up) aos_bt_p4_radio_up();
     vTaskDeleteWithCaps(NULL);
 }
 

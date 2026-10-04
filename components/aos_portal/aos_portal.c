@@ -354,6 +354,31 @@ static void api_wifi(aos_httpd_req_t *r)
     send_cjson(r, 200, o);
 }
 
+/* Bluetooth (components/aos_ble): GET says how it is, POST {"on": bool}
+ * switches it as Settings does, {"forget": true} wipes the phone's keys. */
+static void api_bt(aos_httpd_req_t *r)
+{
+    if (!strcmp(aos_httpd_method(r), "POST")) {
+        cJSON *b = body_json(r);
+        cJSON *on = b ? cJSON_GetObjectItem(b, "on") : NULL;
+        bool forget = b && cJSON_IsTrue(cJSON_GetObjectItem(b, "forget"));
+        if (cJSON_IsBool(on)) aos_hal_bt_enable(cJSON_IsTrue(on));
+        if (forget) aos_hal_bt_forget();
+        cJSON_Delete(b);
+        if (!cJSON_IsBool(on) && !forget) { send_err(r, 400, "falta \"on\" o \"forget\""); return; }
+    }
+    static const char *const ST[] = { "off", "advertising", "pairing", "connected" };
+    aos_bt_state_t st = aos_hal_bt_state();
+    int pct = -1;
+    cJSON *o = cJSON_CreateObject();
+    cJSON_AddBoolToObject(o, "enabled", aos_hal_bt_enabled());
+    cJSON_AddStringToObject(o, "state", st <= AOS_BT_CONNECTED ? ST[st] : "?");
+    cJSON_AddStringToObject(o, "peer", aos_hal_bt_peer());
+    cJSON_AddBoolToObject(o, "bonded", aos_hal_bt_bonded());
+    if (aos_hal_bt_phone_battery(&pct)) cJSON_AddNumberToObject(o, "phone_battery", pct);
+    send_cjson(r, 200, o);
+}
+
 /* The C6's firmware (docs/C6.md): GET says what runs, what waits on the
  * card and how an update goes; POST /api/c6/update starts one from the
  * card's /firmware/c6.bin (put there with fs/put first). */
@@ -1089,6 +1114,7 @@ static void handler(aos_httpd_req_t *r)
         else if (want && !aos_hal_net_ap_start()) send_err(r, 409, "la radio está ocupada");
         else { if (!want) aos_hal_net_ap_stop(); send_ok(r); }
     }
+    else if (!strcmp(p, "bt")) api_bt(r);
     else if (get && !strcmp(p, "c6")) api_c6(r);
     else if (post && !strcmp(p, "c6/update")) api_c6_update(r);
     else if (post && !strcmp(p, "wifi/linktest")) {    /* tests the link watchdog (docs/BUILDING.md) */

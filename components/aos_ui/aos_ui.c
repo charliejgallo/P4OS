@@ -27,6 +27,7 @@
 #include "aos_ui.h"
 #include "aos_internal.h"
 #include "aos_lock.h"
+#include "aos_pair_ui.h"
 #include "aos_hal.h"
 #include "aos_theme.h"
 #include "aos_i18n.h"
@@ -295,6 +296,7 @@ static void relayout_all(void)
     lv_obj_set_pos(s_indicator, (s_geo.w - lv_obj_get_width(s_indicator)) / 2, s_geo.h - s_geo.bottom_h / 2 - 3);
     if (s_cur) refit_app(s_cur);
     aos_lock_layout();
+    aos_pair_ui_layout();
 }
 
 void aos_ui_set_landscape(bool landscape)
@@ -524,6 +526,7 @@ void aos_ui_home(void)
 
 void aos_ui_back(void)
 {
+    if (aos_pair_ui_visible()) { aos_pair_ui_cancel(); return; }     /* a Bluetooth code waiting: Back is a no */
     if (aos_panel_close() || aos_switcher_close()) return;
     if (s_cur) {
         if (s_cur->back && s_cur->back(s_cur, s_cur->inst)) return;
@@ -1034,6 +1037,7 @@ void aos_ui_tick(void)
     }
     aos_banner_tick();
     aos_lock_tick();
+    aos_pair_ui_tick();
     /* the screen's auto-off; an app in front with KEEP_AWAKE holds it on
      * for as long as it is in front (the flag used to count only when the
      * app opened) */
@@ -1109,6 +1113,10 @@ static void ui_button_cb(aos_button_t button, aos_button_action_t action)
         return;
     }
     bool used = false;
+    if (action == AOS_BUTTON_CLICK && aos_pair_ui_visible()) {
+        if (aos_hal_lock(300)) { aos_pair_ui_cancel(); aos_hal_unlock(); }
+        return;
+    }
     if (aos_lock_is_locked()) used = action != AOS_BUTTON_LONG;     /* locked: only the screenshot */
     else if (aos_hal_lock(300)) {
         if (s_cur && s_cur->running && s_cur->button) used = s_cur->button(s_cur, s_cur->inst, (int)action);

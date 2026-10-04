@@ -43,6 +43,8 @@ static const char *TAG = "p4os";
 static EXT_RAM_NOINIT_ATTR struct { uint32_t magic, count; } s_net_boots;
 #define NET_MAGIC 0x4E455442u
 
+void aos_bt_p4_tick(void) __attribute__((weak));
+
 static void tick_thread(void *arg)
 {
     (void)arg;
@@ -84,6 +86,8 @@ static void tick_thread(void *arg)
             aos_hal_unlock();
         }
         aos_dynapp_tick();      /* closes the .so files left unused */
+        static int bt_ticks;
+        if (aos_bt_p4_tick && ++bt_ticks % 15 == 0) aos_bt_p4_tick();    /* components/aos_ble */
     }
 }
 
