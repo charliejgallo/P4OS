@@ -1785,7 +1785,10 @@ bool aos_hal_usb_mouse_hold(int buttons);      /* buttons held down for the next
  * there can be AOS_USB_HOST_MAX of them: their FAT volumes are mounted at
  * /usb, /usb2 and /usb3. */
 #define AOS_USB_HOST_MAX 3
-enum { AOS_HAL_USB_HOST_OTG = 0, AOS_HAL_USB_HOST_HEADER = 1 };
+/* where the host is: 25/27 (and the OTG connector), 21/23, or both at once
+ * (P4OS's copy of ESP-IDF's host library, components/usb, drives both
+ * controllers as two root ports) */
+enum { AOS_HAL_USB_HOST_OTG = 0, AOS_HAL_USB_HOST_HEADER = 1, AOS_HAL_USB_HOST_BOTH = 2 };
 typedef struct {
     bool     device;            /* a mass storage device answered */
     bool     mounted;           /* its FAT is at path */
@@ -1797,12 +1800,32 @@ typedef struct {
 } aos_usb_host_info_t;
 bool aos_hal_usb_host_on(void);
 bool aos_hal_usb_host_set(bool on);             /* remembered across restarts; false = busy */
-int  aos_hal_usb_host_port(void);               /* AOS_HAL_USB_HOST_HEADER (21/23) or _OTG (25/27) */
+int  aos_hal_usb_host_port(void);               /* AOS_HAL_USB_HOST_HEADER (21/23), _OTG (25/27) or _BOTH */
 bool aos_hal_usb_host_port_set(int port);       /* remembered; the host, if on, moves there */
 /* the pendrives there are, in slot order: -1 with the host off */
 int  aos_hal_usb_host_devices(aos_usb_host_info_t *out, int max);
 bool aos_hal_usb_host_info(aos_usb_host_info_t *out);   /* the first one ("device" false: none); false: host off */
 const char *aos_hal_path_usb(void);                     /* "/usb" */
+
+/* P4OS: USB keyboards on the host (aos_usb_kbd_p4.c): boot-protocol HID
+ * keyboards, up to two, read as key events. A key is a Unicode code point
+ * (32 and up, but 127) or one of these, the values LVGL's LV_KEY_* have. A
+ * key with Ctrl or Cmd held comes with its mods (HID's modifier byte: 0x11
+ * Ctrl, 0x22 Shift, 0x44 Alt/AltGr, 0x88 Cmd) and is a shortcut, not text. */
+enum {
+    AOS_KEY_UP = 17, AOS_KEY_DOWN = 18, AOS_KEY_RIGHT = 19, AOS_KEY_LEFT = 20, AOS_KEY_ESC = 27,
+    AOS_KEY_DEL = 127, AOS_KEY_BACKSPACE = 8, AOS_KEY_ENTER = 10, AOS_KEY_NEXT = 9, AOS_KEY_PREV = 11,
+    AOS_KEY_HOME = 2, AOS_KEY_END = 3,
+};
+typedef struct {
+    uint32_t key;
+    uint8_t  mods;
+} aos_kbd_event_t;
+enum { AOS_KBD_US = 0, AOS_KBD_LATAM = 1 };
+bool aos_hal_usb_kbd_read(aos_kbd_event_t *ev);         /* the next key, false if none (does not wait) */
+int  aos_hal_usb_kbd_list(char names[][48], int max);   /* the keyboards connected, by name */
+int  aos_hal_usb_kbd_layout(void);                      /* AOS_KBD_LATAM (default) or _US */
+void aos_hal_usb_kbd_layout_set(int layout);
 
 /* mDNS on a network interface of somebody else's (the USB one): the watch
  * answers "amoledos.local" there too, with that interface's address. The

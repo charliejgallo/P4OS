@@ -861,6 +861,18 @@ __attribute__((weak)) bool aos_hal_usb_host_info(aos_usb_host_info_t *out)
 __attribute__((weak)) const char * aos_hal_path_usb(void)
 { return ""; }
 
+__attribute__((weak)) bool aos_hal_usb_kbd_read(aos_kbd_event_t *ev)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_usb_kbd_list(char names[][48], int max)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_usb_kbd_layout(void)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) void aos_hal_usb_kbd_layout_set(int layout)
+{ }
+
 __attribute__((weak)) const char * aos_hal_device_name(void)
 { return ""; }
 

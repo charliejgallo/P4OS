@@ -2325,18 +2325,23 @@ static const char blob_en__sistema_lang[] =
     "Tocá otra vez: habrá que volver a instalarla\tTap again: it will have to be installed again\n"
     "Autoridad nueva\tNew authority\n"
     "Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. La placa tiene su propia autoridad: se baja desde el portal (Ajustes, Seguridad) y se instala una vez como confiable en la Mac o el iPhone, y el navegador deja de avisar. Lo de arriba es su huella SHA-256, para compararla. Se aplica al reiniciar.\tWith HTTPS, what travels is encrypted, the password included, and away from home the portal sends HTTP over to HTTPS. The board has its own authority: download it from the portal (Settings, Security) and install it once as trusted on the Mac or the iPhone, and the browser stops warning. The line above is its SHA-256 fingerprint, to compare. It applies at the next restart.\n"
-    "Esperando un pendrive en el conector de 40 pines.\tWaiting for a pendrive on the 40-pin header.\n"
-    "DATOS DEL PENDRIVE\tPENDRIVE DATA LINES\n"
     "Pines 21 (D−) y 23 (D+)\tPins 21 (D−) and 23 (D+)\n"
     "Lo usa el host de pendrives, en los pines 25 y 27.\tThe pendrive host has it, on pins 25 and 27.\n"
     "Apagado.\tOff.\n"
     "%s%s %s, %.1f GB: en %s.\t%s%s %s, %.1f GB: at %s.\n"
     "Primero expulsá la tarjeta en la computadora\tEject the card on the computer first\n"
-    "PENDRIVES\tPENDRIVES\n"
-    "Leer pendrives\tRead pendrives\n"
-    "Se leen en /usb, desde Archivos y el portal; con un hub, hasta tres: /usb, /usb2 y /usb3. El conector OTG no da 5 V: los pendrives van al conector de 40 pines, con 5 V del pin 1 y GND del 5. En FAT32.\tRead at /usb, from Files and the portal; with a hub, up to three: /usb, /usb2 and /usb3. The OTG connector gives no 5 V: pendrives go on the 40-pin header, 5 V from pin 1 and GND from pin 5. FAT32.\n"
-    "21 y 23 son el segundo controlador USB del P4, de velocidad completa (12 Mbit/s): andan a la vez que cualquier modo del conector OTG. 25 y 27 son los mismos cables que el conector OTG, de alta velocidad: el host le saca el modo al OTG mientras está prendido.\t21 and 23 are the P4's second USB controller, Full Speed (12 Mbit/s): they work alongside any mode of the OTG connector. 25 and 27 are the same wires as the OTG connector, High Speed: the host takes the OTG's mode away while it is on.\n"
     "Pines 25 (D−) y 27 (D+), o el conector OTG\tPins 25 (D−) and 27 (D+), or the OTG connector\n"
+    "Esperando un pendrive o un teclado en el conector de 40 pines.\tWaiting for a pendrive or a keyboard on the 40-pin header.\n"
+    "%sTeclado %s.\t%sKeyboard %s.\n"
+    "PENDRIVES Y TECLADOS\tPENDRIVES AND KEYBOARDS\n"
+    "Host USB\tUSB host\n"
+    "Los pendrives se leen en /usb, desde Archivos y el portal; con un hub, hasta tres: /usb, /usb2 y /usb3, en FAT32. Un teclado escribe donde escribiría el de la pantalla cuando está abierto. El conector OTG no da 5 V: todo va al conector de 40 pines, con 5 V del pin 1 y GND del 5.\tPendrives are read at /usb, from Files and the portal; with a hub, up to three: /usb, /usb2 and /usb3, in FAT32. A keyboard types where the on-screen one would, while it is open. The OTG connector gives no 5 V: everything goes on the 40-pin header, 5 V from pin 1 and GND from pin 5.\n"
+    "PINES DE DATOS\tDATA PINS\n"
+    "Los dos a la vez\tBoth at once\n"
+    "21 y 23 son el segundo controlador USB del P4, de velocidad completa (12 Mbit/s): andan a la vez que cualquier modo del conector OTG. 25 y 27 son los mismos cables que el conector OTG, de alta velocidad, con cables cortos: el host le saca el modo al OTG mientras está prendido. Los dos a la vez son dos puertos, por ejemplo un teclado en uno y un pendrive en el otro.\t21 and 23 are the P4's second USB controller, Full Speed (12 Mbit/s): they work alongside any mode of the OTG connector. 25 and 27 are the same wires as the OTG connector, High Speed, with short wires: the host takes the OTG's mode away while it is on. Both at once are two ports, say a keyboard on one and a pendrive on the other.\n"
+    "TECLADO USB\tUSB KEYBOARD\n"
+    "Latinoamericano\tLatin American\n"
+    "Estadounidense\tUS\n"
     ;
 
 static const char blob_en_aos_cameras_lang[] =
@@ -6831,18 +6836,23 @@ static const char blob_de__sistema_lang[] =
     "Tocá otra vez: habrá que volver a instalarla\tNochmals tippen: sie muss neu installiert werden\n"
     "Autoridad nueva\tNeue Zertifizierungsstelle\n"
     "Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. La placa tiene su propia autoridad: se baja desde el portal (Ajustes, Seguridad) y se instala una vez como confiable en la Mac o el iPhone, y el navegador deja de avisar. Lo de arriba es su huella SHA-256, para compararla. Se aplica al reiniciar.\tMit HTTPS wird alles verschlüsselt übertragen, auch das Passwort, und außer Haus leitet das Portal von HTTP auf HTTPS um. Die Platine hat ihre eigene Zertifizierungsstelle: im Portal herunterladen (Einstellungen, Sicherheit) und einmal auf dem Mac oder iPhone als vertrauenswürdig installieren, dann warnt der Browser nicht mehr. Oben steht ihr SHA-256-Fingerabdruck zum Vergleichen. Gilt ab dem nächsten Neustart.\n"
-    "Esperando un pendrive en el conector de 40 pines.\tWarte auf einen USB-Stick an der 40-poligen Leiste.\n"
-    "DATOS DEL PENDRIVE\tDATENLEITUNGEN DES USB-STICKS\n"
     "Pines 21 (D−) y 23 (D+)\tPins 21 (D−) und 23 (D+)\n"
     "Lo usa el host de pendrives, en los pines 25 y 27.\tDer USB-Stick-Host belegt ihn, an den Pins 25 und 27.\n"
     "Apagado.\tAus.\n"
     "%s%s %s, %.1f GB: en %s.\t%s%s %s, %.1f GB: unter %s.\n"
     "Primero expulsá la tarjeta en la computadora\tZuerst die Karte am Computer auswerfen\n"
-    "PENDRIVES\tUSB-STICKS\n"
-    "Leer pendrives\tUSB-Sticks lesen\n"
-    "Se leen en /usb, desde Archivos y el portal; con un hub, hasta tres: /usb, /usb2 y /usb3. El conector OTG no da 5 V: los pendrives van al conector de 40 pines, con 5 V del pin 1 y GND del 5. En FAT32.\tLesbar unter /usb, in Dateien und im Portal; mit einem Hub bis zu drei: /usb, /usb2 und /usb3. Der OTG-Anschluss liefert keine 5 V: die Sticks kommen an die 40-polige Leiste, 5 V von Pin 1 und GND von Pin 5. In FAT32.\n"
-    "21 y 23 son el segundo controlador USB del P4, de velocidad completa (12 Mbit/s): andan a la vez que cualquier modo del conector OTG. 25 y 27 son los mismos cables que el conector OTG, de alta velocidad: el host le saca el modo al OTG mientras está prendido.\t21 und 23 sind der zweite USB-Controller des P4, Full Speed (12 Mbit/s): sie laufen neben jedem Modus des OTG-Anschlusses. 25 und 27 sind dieselben Leitungen wie der OTG-Anschluss, High Speed: solange der Host an ist, nimmt er dem OTG seinen Modus.\n"
     "Pines 25 (D−) y 27 (D+), o el conector OTG\tPins 25 (D−) und 27 (D+), oder der OTG-Anschluss\n"
+    "Esperando un pendrive o un teclado en el conector de 40 pines.\tWarte auf einen USB-Stick oder eine Tastatur an der 40-poligen Leiste.\n"
+    "%sTeclado %s.\t%sTastatur %s.\n"
+    "PENDRIVES Y TECLADOS\tUSB-STICKS UND TASTATUREN\n"
+    "Host USB\tUSB-Host\n"
+    "Los pendrives se leen en /usb, desde Archivos y el portal; con un hub, hasta tres: /usb, /usb2 y /usb3, en FAT32. Un teclado escribe donde escribiría el de la pantalla cuando está abierto. El conector OTG no da 5 V: todo va al conector de 40 pines, con 5 V del pin 1 y GND del 5.\tUSB-Sticks sind unter /usb lesbar, in Dateien und im Portal; mit einem Hub bis zu drei: /usb, /usb2 und /usb3, in FAT32. Eine Tastatur schreibt dorthin, wo die Bildschirmtastatur schreiben würde, solange sie offen ist. Der OTG-Anschluss liefert keine 5 V: alles kommt an die 40-polige Leiste, 5 V von Pin 1 und GND von Pin 5.\n"
+    "PINES DE DATOS\tDATENPINS\n"
+    "Los dos a la vez\tBeide gleichzeitig\n"
+    "21 y 23 son el segundo controlador USB del P4, de velocidad completa (12 Mbit/s): andan a la vez que cualquier modo del conector OTG. 25 y 27 son los mismos cables que el conector OTG, de alta velocidad, con cables cortos: el host le saca el modo al OTG mientras está prendido. Los dos a la vez son dos puertos, por ejemplo un teclado en uno y un pendrive en el otro.\t21 und 23 sind der zweite USB-Controller des P4, Full Speed (12 Mbit/s): sie laufen neben jedem Modus des OTG-Anschlusses. 25 und 27 sind dieselben Leitungen wie der OTG-Anschluss, High Speed, mit kurzen Kabeln: solange der Host an ist, nimmt er dem OTG seinen Modus. Beide gleichzeitig sind zwei Ports, etwa eine Tastatur am einen und ein USB-Stick am anderen.\n"
+    "TECLADO USB\tUSB-TASTATUR\n"
+    "Latinoamericano\tLateinamerikanisch\n"
+    "Estadounidense\tUS-amerikanisch\n"
     ;
 
 static const char blob_de_aos_cameras_lang[] =
@@ -9026,7 +9036,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2323, 33, files_en, 34 },
-    { "de", "Deutsch", 2323, 33, files_de, 34 },
+    { "en", "English", 2328, 33, files_en, 34 },
+    { "de", "Deutsch", 2328, 33, files_de, 34 },
 };
 const int aos_lang_pack_count = 2;

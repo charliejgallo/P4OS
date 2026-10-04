@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
  * Mas 152 funciones de libc/libm agregadas a mano.
- * Total: 3181 simbolos.
+ * Total: 3194 simbolos.
  */
 
 #include <stddef.h>
@@ -355,6 +355,7 @@ extern int aos_hal_net_has_credentials;
 extern int aos_hal_net_ip;
 extern int aos_hal_net_low_latency;
 extern int aos_hal_net_mac;
+extern int aos_hal_net_mdns_visible;
 extern int aos_hal_net_retry_info;
 extern int aos_hal_net_rssi;
 extern int aos_hal_net_scan;
@@ -411,6 +412,7 @@ extern int aos_hal_path_photos;
 extern int aos_hal_path_recordings;
 extern int aos_hal_path_scans;
 extern int aos_hal_path_sd_root;
+extern int aos_hal_path_usb;
 extern int aos_hal_play_file;
 extern int aos_hal_player_info;
 extern int aos_hal_player_last;
@@ -528,6 +530,16 @@ extern int aos_hal_usb_card_away;
 extern int aos_hal_usb_click;
 extern int aos_hal_usb_connected;
 extern int aos_hal_usb_gamepad;
+extern int aos_hal_usb_host_devices;
+extern int aos_hal_usb_host_info;
+extern int aos_hal_usb_host_on;
+extern int aos_hal_usb_host_port;
+extern int aos_hal_usb_host_port_set;
+extern int aos_hal_usb_host_set;
+extern int aos_hal_usb_kbd_layout;
+extern int aos_hal_usb_kbd_layout_set;
+extern int aos_hal_usb_kbd_list;
+extern int aos_hal_usb_kbd_read;
 extern int aos_hal_usb_key;
 extern int aos_hal_usb_key_valid;
 extern int aos_hal_usb_keys_ready;
@@ -957,6 +969,7 @@ extern int aos_ui_geo;
 extern int aos_ui_hold_home;
 extern int aos_ui_home;
 extern int aos_ui_home_layer;
+extern int aos_ui_hwkbd_handler;
 extern int aos_ui_init;
 extern int aos_ui_inject_drag;
 extern int aos_ui_inject_drag_rest;
@@ -3539,6 +3552,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_net_ip),
     ESP_ELFSYM_EXPORT(aos_hal_net_low_latency),
     ESP_ELFSYM_EXPORT(aos_hal_net_mac),
+    ESP_ELFSYM_EXPORT(aos_hal_net_mdns_visible),
     ESP_ELFSYM_EXPORT(aos_hal_net_retry_info),
     ESP_ELFSYM_EXPORT(aos_hal_net_rssi),
     ESP_ELFSYM_EXPORT(aos_hal_net_scan),
@@ -3595,6 +3609,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_path_recordings),
     ESP_ELFSYM_EXPORT(aos_hal_path_scans),
     ESP_ELFSYM_EXPORT(aos_hal_path_sd_root),
+    ESP_ELFSYM_EXPORT(aos_hal_path_usb),
     ESP_ELFSYM_EXPORT(aos_hal_play_file),
     ESP_ELFSYM_EXPORT(aos_hal_player_info),
     ESP_ELFSYM_EXPORT(aos_hal_player_last),
@@ -3712,6 +3727,16 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_usb_click),
     ESP_ELFSYM_EXPORT(aos_hal_usb_connected),
     ESP_ELFSYM_EXPORT(aos_hal_usb_gamepad),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_host_devices),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_host_info),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_host_on),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_host_port),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_host_port_set),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_host_set),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_kbd_layout),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_kbd_layout_set),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_kbd_list),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_kbd_read),
     ESP_ELFSYM_EXPORT(aos_hal_usb_key),
     ESP_ELFSYM_EXPORT(aos_hal_usb_key_valid),
     ESP_ELFSYM_EXPORT(aos_hal_usb_keys_ready),
@@ -4141,6 +4166,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_ui_hold_home),
     ESP_ELFSYM_EXPORT(aos_ui_home),
     ESP_ELFSYM_EXPORT(aos_ui_home_layer),
+    ESP_ELFSYM_EXPORT(aos_ui_hwkbd_handler),
     ESP_ELFSYM_EXPORT(aos_ui_init),
     ESP_ELFSYM_EXPORT(aos_ui_inject_drag),
     ESP_ELFSYM_EXPORT(aos_ui_inject_drag_rest),

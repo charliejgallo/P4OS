@@ -14,9 +14,16 @@
  *
  * Keys fire on press, like a phone's, and backspace and the arrows repeat
  * when held; letters do not.
+ *
+ * A USB keyboard on the board's host types into the same target while this
+ * keyboard is attached (aos_ui_hwkbd_handler): the system composes the
+ * accents and gives each key as a character, or as Enter, Backspace or an
+ * arrow.
  */
 #include "nt.h"
 #include "aos_i18n.h"
+#include "aos_ui.h"
+#include "aos_hal.h"
 
 #include <string.h>
 
@@ -292,6 +299,32 @@ lv_obj_t *nt_kb_create(lv_obj_t *parent, int32_t w, int32_t h)
     return K.kb;
 }
 
+/* A key of a USB keyboard (aos_ui_hwkbd_handler) */
+static bool hw_key(uint32_t k, uint8_t mods)
+{
+    if (!K.attached || (mods & 0x99)) return false;     /* Ctrl or Cmd: not text */
+    switch (k) {
+    case AOS_KEY_BACKSPACE: if (K.t.backspace) K.t.backspace(); break;
+    case AOS_KEY_ENTER:     if (K.t.enter) K.t.enter(); break;
+    case AOS_KEY_LEFT:      if (K.t.move) K.t.move(-1); return true;
+    case AOS_KEY_RIGHT:     if (K.t.move) K.t.move(1); return true;
+    default: {
+        if (k < 32 || k == AOS_KEY_DEL) return false;
+        char s[5];
+        if (k < 0x80) { s[0] = (char)k; s[1] = 0; }
+        else if (k < 0x800) { s[0] = 0xC0 | k >> 6; s[1] = 0x80 | (k & 0x3F); s[2] = 0; }
+        else { s[0] = 0xE0 | k >> 12; s[1] = 0x80 | (k >> 6 & 0x3F); s[2] = 0x80 | (k & 0x3F); s[3] = 0; }
+        K.dead = NULL;
+        type(s);
+        /* the on-screen keyboard's shift follows, as after its own keys */
+        if (K.mode == M_UPPER && !K.caps_lock) set_mode(M_LOWER);
+        break;
+    }
+    }
+    nt_kb_refresh_caps();
+    return true;
+}
+
 void nt_kb_attach(const nt_kb_target_t *t)
 {
     K.dead = NULL;
@@ -303,6 +336,7 @@ void nt_kb_attach(const nt_kb_target_t *t)
         memset(&K.t, 0, sizeof K.t);
         K.attached = false;
     }
+    aos_ui_hwkbd_handler(t ? hw_key : NULL);
     K.ta = NULL;
     if (K.kb) {
         set_mode(M_LOWER);
@@ -312,6 +346,7 @@ void nt_kb_attach(const nt_kb_target_t *t)
 
 void nt_kb_destroyed(void)
 {
+    aos_ui_hwkbd_handler(NULL);
     K.kb = NULL;
     K.attached = false;
     K.ta = NULL;

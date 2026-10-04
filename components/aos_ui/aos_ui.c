@@ -175,6 +175,7 @@ void aos_ui_hold_home(bool hold)
 static void destroy_app(aos_app_t *app)
 {
     if (!app->running && !app->root) return;
+    aos_hwkbd_app_gone(app->desc.id);
     if (app->running && app->destroy) app->destroy(app, app->inst);
     if (app->root) lv_obj_delete(app->root);
     app->inst = NULL;
@@ -276,6 +277,7 @@ static void refit_app(aos_app_t *app)
         app->created_rot = aos_hal_display_get_rotation();
         return;
     }
+    aos_hwkbd_app_gone(app->desc.id);
     if (app->destroy) app->destroy(app, app->inst);
     lv_obj_clean(app->root);
     app->inst = app->create ? app->create(app, app->root) : NULL;
@@ -1040,6 +1042,7 @@ void aos_ui_tick(void)
     aos_lock_tick();
     aos_pair_ui_tick();
     aos_access_tick();              /* mDNS by the portal's rules; once a second inside */
+    aos_hwkbd_tick();               /* a USB keyboard on the host types into the open keyboard */
     /* the screen's auto-off; an app in front with KEEP_AWAKE holds it on
      * for as long as it is in front (the flag used to count only when the
      * app opened) */

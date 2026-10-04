@@ -157,7 +157,10 @@ EXTRA_SYMBOLS = [
 # of the loader itself (exporting them breaks the resolution). aos_p4_ is
 # the HAL's own plumbing between its files (aos_p4_sd_card_open for disk
 # mode), not API for the apps.
-EXCLUDE_PREFIXES = ("_", ".", "$", "__", "aos_p4_")
+# aos_access_ is the portal's security (password, token, sessions, the
+# HTTPS keys): set on the board, in Settings, and nowhere else
+# (docs/SECURITY.md); aos_hwkbd_ is the shell's side of the USB keyboard.
+EXCLUDE_PREFIXES = ("_", ".", "$", "__", "aos_p4_", "aos_access_", "aos_hwkbd_")
 EXCLUDE_EXACT = {"elf_find_sym", "elf_find_sym_default", "elf_set_symbol_resolver"}
 
 

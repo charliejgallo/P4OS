@@ -89,6 +89,17 @@ int  aos_dev_log_level(void);
 bool        aos_ui_safe_mode(void);        /* for Settings' Diagnostics */
 const char *aos_ui_current_app(void);      /* NULL on the home screen */
 
+/* P4OS: keys from a USB keyboard (aos_hwkbd.c; aos_hal.h has the codes). By
+ * default they type into the text area of the LVGL keyboard that is open.
+ * An app with a keyboard of its own asks for them while its keyboard is up,
+ * and gives them back with NULL: the handler gets them only while that app
+ * is in front, and the shell forgets it when the app closes. key is a
+ * Unicode code point (accents already composed) or an AOS_KEY_*; mods is
+ * HID's modifier byte. Return true for a key used; false lets it go on to
+ * an open LVGL keyboard. */
+typedef bool (*aos_hwkbd_cb_t)(uint32_t key, uint8_t mods);
+void aos_ui_hwkbd_handler(aos_hwkbd_cb_t cb);
+
 /* ---- opening an app on something (aos_open_arg.c) ----
  * Archivos opens a photo in Fotos, a song in Música, a .bin in the
  * Programador. The caller says which app and hands it an argument, a path

@@ -7239,15 +7239,20 @@ Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el 
 Tocá otra vez: habrá que volver a instalarla	Nochmals tippen: sie muss neu installiert werden
 Autoridad nueva	Neue Zertifizierungsstelle
 Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. La placa tiene su propia autoridad: se baja desde el portal (Ajustes, Seguridad) y se instala una vez como confiable en la Mac o el iPhone, y el navegador deja de avisar. Lo de arriba es su huella SHA-256, para compararla. Se aplica al reiniciar.	Mit HTTPS wird alles verschlüsselt übertragen, auch das Passwort, und außer Haus leitet das Portal von HTTP auf HTTPS um. Die Platine hat ihre eigene Zertifizierungsstelle: im Portal herunterladen (Einstellungen, Sicherheit) und einmal auf dem Mac oder iPhone als vertrauenswürdig installieren, dann warnt der Browser nicht mehr. Oben steht ihr SHA-256-Fingerabdruck zum Vergleichen. Gilt ab dem nächsten Neustart.
-Esperando un pendrive en el conector de 40 pines.	Warte auf einen USB-Stick an der 40-poligen Leiste.
-DATOS DEL PENDRIVE	DATENLEITUNGEN DES USB-STICKS
 Pines 21 (D−) y 23 (D+)	Pins 21 (D−) und 23 (D+)
 Lo usa el host de pendrives, en los pines 25 y 27.	Der USB-Stick-Host belegt ihn, an den Pins 25 und 27.
 Apagado.	Aus.
 %s%s %s, %.1f GB: en %s.	%s%s %s, %.1f GB: unter %s.
 Primero expulsá la tarjeta en la computadora	Zuerst die Karte am Computer auswerfen
-PENDRIVES	USB-STICKS
-Leer pendrives	USB-Sticks lesen
-Se leen en /usb, desde Archivos y el portal; con un hub, hasta tres: /usb, /usb2 y /usb3. El conector OTG no da 5 V: los pendrives van al conector de 40 pines, con 5 V del pin 1 y GND del 5. En FAT32.	Lesbar unter /usb, in Dateien und im Portal; mit einem Hub bis zu drei: /usb, /usb2 und /usb3. Der OTG-Anschluss liefert keine 5 V: die Sticks kommen an die 40-polige Leiste, 5 V von Pin 1 und GND von Pin 5. In FAT32.
-21 y 23 son el segundo controlador USB del P4, de velocidad completa (12 Mbit/s): andan a la vez que cualquier modo del conector OTG. 25 y 27 son los mismos cables que el conector OTG, de alta velocidad: el host le saca el modo al OTG mientras está prendido.	21 und 23 sind der zweite USB-Controller des P4, Full Speed (12 Mbit/s): sie laufen neben jedem Modus des OTG-Anschlusses. 25 und 27 sind dieselben Leitungen wie der OTG-Anschluss, High Speed: solange der Host an ist, nimmt er dem OTG seinen Modus.
 Pines 25 (D−) y 27 (D+), o el conector OTG	Pins 25 (D−) und 27 (D+), oder der OTG-Anschluss
+Esperando un pendrive o un teclado en el conector de 40 pines.	Warte auf einen USB-Stick oder eine Tastatur an der 40-poligen Leiste.
+%sTeclado %s.	%sTastatur %s.
+PENDRIVES Y TECLADOS	USB-STICKS UND TASTATUREN
+Host USB	USB-Host
+Los pendrives se leen en /usb, desde Archivos y el portal; con un hub, hasta tres: /usb, /usb2 y /usb3, en FAT32. Un teclado escribe donde escribiría el de la pantalla cuando está abierto. El conector OTG no da 5 V: todo va al conector de 40 pines, con 5 V del pin 1 y GND del 5.	USB-Sticks sind unter /usb lesbar, in Dateien und im Portal; mit einem Hub bis zu drei: /usb, /usb2 und /usb3, in FAT32. Eine Tastatur schreibt dorthin, wo die Bildschirmtastatur schreiben würde, solange sie offen ist. Der OTG-Anschluss liefert keine 5 V: alles kommt an die 40-polige Leiste, 5 V von Pin 1 und GND von Pin 5.
+PINES DE DATOS	DATENPINS
+Los dos a la vez	Beide gleichzeitig
+21 y 23 son el segundo controlador USB del P4, de velocidad completa (12 Mbit/s): andan a la vez que cualquier modo del conector OTG. 25 y 27 son los mismos cables que el conector OTG, de alta velocidad, con cables cortos: el host le saca el modo al OTG mientras está prendido. Los dos a la vez son dos puertos, por ejemplo un teclado en uno y un pendrive en el otro.	21 und 23 sind der zweite USB-Controller des P4, Full Speed (12 Mbit/s): sie laufen neben jedem Modus des OTG-Anschlusses. 25 und 27 sind dieselben Leitungen wie der OTG-Anschluss, High Speed, mit kurzen Kabeln: solange der Host an ist, nimmt er dem OTG seinen Modus. Beide gleichzeitig sind zwei Ports, etwa eine Tastatur am einen und ein USB-Stick am anderen.
+TECLADO USB	USB-TASTATUR
+Latinoamericano	Lateinamerikanisch
+Estadounidense	US-amerikanisch

@@ -401,8 +401,9 @@ static void api_wifi(aos_httpd_req_t *r)
 /* The USB port (docs/USB.md): GET the OTG connector's role, and the
  * pendrive host with its pendrives; POST {"mode": "console"|"keys"} switches
  * the role as Settings, USB does, {"host": bool} the pendrive host, and
- * {"pins": "21/23"|"25/27"} picks the header port it uses (moving it there
- * if it is on). {"mode": "host"} is {"host": true}, as before. Disk mode
+ * {"pins": "21/23"|"25/27"|"both"} picks the header port it uses (moving it
+ * there if it is on) and {"layout": "latam"|"us"} the USB keyboards'
+ * layout. {"mode": "host"} is {"host": true}, as before. Disk mode
  * stays Settings' own: it has to close the apps holding the card. */
 static void usb_dev_json(cJSON *a, const aos_usb_host_info_t *in)
 {
@@ -425,18 +426,23 @@ static void api_usb(aos_httpd_req_t *r)
     static const char *const M[] = { "console", "keys", "disk", "host" };
     if (!strcmp(aos_httpd_method(r), "POST")) {
         cJSON *b = body_json(r);
-        const char *m = jstr(b, "mode"), *pins = jstr(b, "pins");
+        const char *m = jstr(b, "mode"), *pins = jstr(b, "pins"), *layout = jstr(b, "layout");
         cJSON *host = b ? cJSON_GetObjectItem(b, "host") : NULL;
         int want = -1, port = -1;
         for (int i = 0; m && i < 4; i++) if (!strcmp(m, M[i]) && i != AOS_HAL_USB_DISK) want = i;
-        if (pins) port = !strcmp(pins, "21/23") ? AOS_HAL_USB_HOST_HEADER : !strcmp(pins, "25/27") ? AOS_HAL_USB_HOST_OTG : -2;
-        bool bad = (m && want < 0) || port == -2 || (host && !cJSON_IsBool(host)) || (!m && !pins && !host);
+        if (pins) port = !strcmp(pins, "21/23") ? AOS_HAL_USB_HOST_HEADER : !strcmp(pins, "25/27") ? AOS_HAL_USB_HOST_OTG
+                       : !strcmp(pins, "both") ? AOS_HAL_USB_HOST_BOTH : -2;
+        int lay = !layout ? -1 : !strcmp(layout, "latam") ? AOS_KBD_LATAM : !strcmp(layout, "us") ? AOS_KBD_US : -2;
+        bool bad = (m && want < 0) || port == -2 || lay == -2 || (host && !cJSON_IsBool(host)) ||
+                   (!m && !pins && !host && !layout);
         bool host_on = host && cJSON_IsTrue(host);
         cJSON_Delete(b);
         if (bad) {
-            send_err(r, 400, "\"mode\": console o keys; \"host\": true o false; \"pins\": 21/23 o 25/27");
+            send_err(r, 400, "\"mode\": console o keys; \"host\": true o false; \"pins\": 21/23, 25/27 o both; "
+                             "\"layout\": latam o us");
             return;
         }
+        if (lay >= 0) aos_hal_usb_kbd_layout_set(lay);
         /* one switch at a time: the pins first, then the host, then the role */
         bool ok = port < 0 || aos_hal_usb_host_port_set(port);
         if (ok && host) ok = aos_hal_usb_host_set(host_on);
@@ -451,11 +457,17 @@ static void api_usb(aos_httpd_req_t *r)
     cJSON_AddStringToObject(o, "mode", m >= 0 && m < 4 ? M[m] : "?");
     cJSON_AddBoolToObject(o, "busy", aos_hal_usb_busy());
     cJSON_AddBoolToObject(o, "connected", aos_hal_usb_connected());
-    cJSON_AddStringToObject(o, "pins", aos_hal_usb_host_port() == AOS_HAL_USB_HOST_HEADER ? "21/23" : "25/27");
+    int hp = aos_hal_usb_host_port();
+    cJSON_AddStringToObject(o, "pins", hp == AOS_HAL_USB_HOST_HEADER ? "21/23" : hp == AOS_HAL_USB_HOST_BOTH ? "both" : "25/27");
+    cJSON_AddStringToObject(o, "layout", aos_hal_usb_kbd_layout() == AOS_KBD_US ? "us" : "latam");
     cJSON_AddBoolToObject(o, "host_on", aos_hal_usb_host_on());
     aos_usb_host_info_t in[AOS_USB_HOST_MAX];
     int n = aos_hal_usb_host_on() ? aos_hal_usb_host_devices(in, AOS_USB_HOST_MAX) : -1;
     if (n >= 0) {
+        char kn[2][48];
+        int nk = aos_hal_usb_kbd_list(kn, 2);
+        cJSON *k = cJSON_AddArrayToObject(o, "keyboards");
+        for (int i = 0; i < nk; i++) cJSON_AddItemToArray(k, cJSON_CreateString(kn[i]));
         cJSON *a = cJSON_AddArrayToObject(o, "pendrives");
         for (int i = 0; i < n; i++) usb_dev_json(a, &in[i]);
         /* "host": the first one, as before */

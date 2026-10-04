@@ -392,19 +392,23 @@ static const char *host_state_text(uint32_t *color)
     if (!aos_hal_usb_host_on()) return _("Apagado.");
     aos_usb_host_info_t in[AOS_USB_HOST_MAX];
     int n = aos_hal_usb_host_devices(in, AOS_USB_HOST_MAX);
-    if (n <= 0) {
+    char kn[2][48];
+    int nk = aos_hal_usb_kbd_list(kn, 2);
+    if (n <= 0 && nk <= 0) {
         *color = 0xFF9F0A;
-        return _("Esperando un pendrive en el conector de 40 pines.");
+        return _("Esperando un pendrive o un teclado en el conector de 40 pines.");
     }
     size_t o = 0;
     *color = 0x34C759;
+    for (int i = 0; i < nk && o < sizeof t; i++)
+        o += snprintf(t + o, sizeof t - o, _("%sTeclado %s."), o ? "\n" : "", kn[i]);
     for (int i = 0; i < n && o < sizeof t; i++) {
         if (in[i].mounted)
-            o += snprintf(t + o, sizeof t - o, _("%s%s %s, %.1f GB: en %s."), i ? "\n" : "", in[i].vendor,
+            o += snprintf(t + o, sizeof t - o, _("%s%s %s, %.1f GB: en %s."), o ? "\n" : "", in[i].vendor,
                           in[i].product, (double)in[i].bytes / 1e9, in[i].path);
         else {
             *color = 0xFF453A;
-            o += snprintf(t + o, sizeof t - o, "%s%s %s: %s", i ? "\n" : "", in[i].vendor, in[i].product, in[i].error);
+            o += snprintf(t + o, sizeof t - o, "%s%s %s: %s", o ? "\n" : "", in[i].vendor, in[i].product, in[i].error);
         }
     }
     return t;
@@ -415,7 +419,9 @@ static void usb_refresh(void)
     int mode = aos_hal_usb_mode();
     aos_usb_host_info_t hi[AOS_USB_HOST_MAX];
     int hn = aos_hal_usb_host_on() ? aos_hal_usb_host_devices(hi, AOS_USB_HOST_MAX) : -1;
-    int key = (mode << 4) | (aos_hal_usb_busy() << 3) | (aos_hal_usb_connected() << 2) | ((hn + 1) << 8);
+    char kn[2][48];
+    int key = (mode << 4) | (aos_hal_usb_busy() << 3) | (aos_hal_usb_connected() << 2) | ((hn + 1) << 8) |
+              (aos_hal_usb_kbd_list(kn, 2) << 20);
     for (int i = 0; i < hn; i++) key ^= (hi[i].device | hi[i].mounted << 1) << (12 + 2 * i);
     if (key == U.usb_shown) return;
     U.usb_shown = key;
@@ -444,10 +450,16 @@ static void usb_pins_cb(lv_event_t *e)
     show(PG_USB);
 }
 
+static void usb_layout_cb(lv_event_t *e)
+{
+    aos_hal_usb_kbd_layout_set((int)(intptr_t)lv_event_get_user_data(e));
+    show(PG_USB);
+}
+
 static void usb_host_cb(lv_event_t *e)
 {
     bool on = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
-    if (on && aos_hal_usb_host_port() == AOS_HAL_USB_HOST_OTG && aos_hal_usb_mode() == AOS_HAL_USB_DISK) {
+    if (on && aos_hal_usb_host_port() != AOS_HAL_USB_HOST_HEADER && aos_hal_usb_mode() == AOS_HAL_USB_DISK) {
         aos_ui_toast(_("Primero expulsá la tarjeta en la computadora"), 2500);
         lv_obj_set_state(lv_event_get_target(e), LV_STATE_CHECKED, false);
         return;
@@ -567,19 +579,26 @@ static void build_usb(lv_obj_t *p)
              true);
     note(p, _("El conector OTG es el USB 2.0 de alta velocidad del P4 (480 Mbit/s). La placa puede alimentarse por él o por el UART, y pasar de uno al otro sin reiniciarse."));
 
-    g = group(p, _("PENDRIVES"));
-    U.host_sw = lv_obj_get_child(row_switch(g, AOS_SYM_USB_PORT, 0x5E5CE6, _("Leer pendrives"), aos_hal_usb_host_on(),
+    g = group(p, _("PENDRIVES Y TECLADOS"));
+    U.host_sw = lv_obj_get_child(row_switch(g, AOS_SYM_USB_PORT, 0x5E5CE6, _("Host USB"), aos_hal_usb_host_on(),
                                             usb_host_cb), -1);
     state_row(g, &U.host_dot, &U.host_state);
-    note(p, _("Se leen en /usb, desde Archivos y el portal; con un hub, hasta tres: /usb, /usb2 y /usb3. El conector OTG no da 5 V: los pendrives van al conector de 40 pines, con 5 V del pin 1 y GND del 5. En FAT32."));
+    note(p, _("Los pendrives se leen en /usb, desde Archivos y el portal; con un hub, hasta tres: /usb, /usb2 y /usb3, en FAT32. Un teclado escribe donde escribiría el de la pantalla cuando está abierto. El conector OTG no da 5 V: todo va al conector de 40 pines, con 5 V del pin 1 y GND del 5."));
 
-    g = group(p, _("DATOS DEL PENDRIVE"));
+    g = group(p, _("PINES DE DATOS"));
     int port = aos_hal_usb_host_port();
     pick_row(g, _("Pines 21 (D−) y 23 (D+)"), port == AOS_HAL_USB_HOST_HEADER, usb_pins_cb,
              (void *)(intptr_t)AOS_HAL_USB_HOST_HEADER);
     pick_row(g, _("Pines 25 (D−) y 27 (D+), o el conector OTG"), port == AOS_HAL_USB_HOST_OTG, usb_pins_cb,
              (void *)(intptr_t)AOS_HAL_USB_HOST_OTG);
-    note(p, _("21 y 23 son el segundo controlador USB del P4, de velocidad completa (12 Mbit/s): andan a la vez que cualquier modo del conector OTG. 25 y 27 son los mismos cables que el conector OTG, de alta velocidad: el host le saca el modo al OTG mientras está prendido."));
+    pick_row(g, _("Los dos a la vez"), port == AOS_HAL_USB_HOST_BOTH, usb_pins_cb,
+             (void *)(intptr_t)AOS_HAL_USB_HOST_BOTH);
+    note(p, _("21 y 23 son el segundo controlador USB del P4, de velocidad completa (12 Mbit/s): andan a la vez que cualquier modo del conector OTG. 25 y 27 son los mismos cables que el conector OTG, de alta velocidad, con cables cortos: el host le saca el modo al OTG mientras está prendido. Los dos a la vez son dos puertos, por ejemplo un teclado en uno y un pendrive en el otro."));
+
+    g = group(p, _("TECLADO USB"));
+    int lay = aos_hal_usb_kbd_layout();
+    pick_row(g, _("Latinoamericano"), lay == AOS_KBD_LATAM, usb_layout_cb, (void *)(intptr_t)AOS_KBD_LATAM);
+    pick_row(g, _("Estadounidense"), lay == AOS_KBD_US, usb_layout_cb, (void *)(intptr_t)AOS_KBD_US);
     U.usb_shown = -1;
     usb_refresh();
 }

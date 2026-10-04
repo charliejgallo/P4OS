@@ -18,15 +18,25 @@
 #include "hcd.h"
 #include "hub.h"
 #include "usb/usb_helpers.h"
+#include "soc/soc_caps.h"
 
 #if ENABLE_USB_HUBS
 #include "ext_hub.h"
 #endif // ENABLE_USB_HUBS
 
 /*
-Implementation of the HUB driver that only supports the Root Hub with a single port. Therefore, we currently don't
-implement the bare minimum to control the root HCD port.
+Implementation of the HUB driver.
+
+P4OS: ESP-IDF's driver handles one root port. This one handles one per USB-OTG peripheral named in the port map
+(the ESP32-P4 has two: High-Speed and Full-Speed), each its own root port with its own state and requests. A device
+on a root port has parent_dev_hdl NULL and parent_port_num = the root port's index (the peripheral's number), so
+the checks for "a root port" are on parent_dev_hdl, no longer on parent_port_num == 0. Devices behind an external
+hub use the root port of their parent. Only one device can sit at address 0 (USBH and the enumeration driver look
+it up by address), so a connection on a root port while another device is being enumerated waits, and is taken up
+when that enumeration ends (hub_root_enum_done(), called by usb_host.c).
 */
+
+#define HUB_ROOT_PORTS                              SOC_USB_OTG_PERIPH_NUM
 
 #ifdef CONFIG_USB_HOST_HW_BUFFER_BIAS_IN
 #define HUB_ROOT_HCD_PORT_FIFO_BIAS                 HCD_PORT_FIFO_BIAS_RX
@@ -84,8 +94,11 @@ typedef struct {
             };
             uint32_t val;                           /**< Hub flag action value */
         } flags;                                    /**< Hub flags */
-        root_port_state_t root_port_state;          /**< Root port state */
-        unsigned int port_reqs;                     /**< Root port request flag */
+        root_port_state_t root_port_state[HUB_ROOT_PORTS];  /**< Each root port's state */
+        unsigned int port_reqs[HUB_ROOT_PORTS];     /**< Each root port's request flags */
+        uint32_t root_events;                       /**< Root ports with an HCD event to handle (bit per port) */
+        uint32_t root_reqs;                         /**< Root ports with requests to handle (bit per port) */
+        uint32_t root_pending;                      /**< Root ports with a connection waiting for address 0 */
     } dynamic;                                      /**< Dynamic members. Require a critical section */
 
     struct {
@@ -93,7 +106,7 @@ typedef struct {
     } single_thread;                                /**< Single thread members don't require a critical section so long as they are never accessed from multiple threads */
 
     struct {
-        hcd_port_handle_t root_port_hdl;            /**< Root port HCD handle */
+        hcd_port_handle_t root_port_hdl[HUB_ROOT_PORTS];   /**< Root ports' HCD handles, NULL for the unused */
         usb_proc_req_cb_t proc_req_cb;              /**< Process request callback */
         void *proc_req_cb_arg;                      /**< Process request callback argument */
         hub_event_cb_t event_cb;                    /**< Hub Driver event callback */
@@ -171,10 +184,21 @@ static esp_err_t dev_tree_node_new(usb_device_handle_t parent_dev_hdl, uint8_t p
     dev_tree_node->parent_port_num = parent_port_num;
 
     // Initialize and register a new USBH Device with the assigned UID
+    // A device on a root port uses that port; one behind a hub, the root port of its parent
+    hcd_port_handle_t root_port_hdl = NULL;
+    if (parent_dev_hdl == NULL) {
+        root_port_hdl = parent_port_num < HUB_ROOT_PORTS ? p_hub_driver_obj->constant.root_port_hdl[parent_port_num] : NULL;
+    } else {
+        usbh_dev_get_port_hdl(parent_dev_hdl, &root_port_hdl);
+    }
+    if (root_port_hdl == NULL) {
+        ret = ESP_ERR_INVALID_STATE;
+        goto fail;
+    }
     usbh_dev_params_t params = {
         .uid = dev_tree_node->uid,
         .speed = speed,
-        .root_port_hdl = p_hub_driver_obj->constant.root_port_hdl, // Always the same for all devices
+        .root_port_hdl = root_port_hdl,
         // TODO: IDF-10023 Move parent-child tree management responsibility to Hub Driver
         .parent_dev_hdl = parent_dev_hdl,
         .parent_port_num = parent_port_num,
@@ -299,7 +323,9 @@ static esp_err_t dev_tree_node_remove_by_parent(usb_device_handle_t parent_dev_h
 
 static bool root_port_callback(hcd_port_handle_t port_hdl, hcd_port_event_t port_event, void *user_arg, bool in_isr)
 {
+    const int root = (int)(intptr_t)user_arg;
     HUB_DRIVER_ENTER_CRITICAL_SAFE();
+    p_hub_driver_obj->dynamic.root_events |= BIT(root);
     p_hub_driver_obj->dynamic.flags.actions |= HUB_DRIVER_ACTION_ROOT_EVENT;
     HUB_DRIVER_EXIT_CRITICAL_SAFE();
     assert(in_isr); // Currently, this callback should only ever be called from an ISR context
@@ -375,50 +401,78 @@ new_ds_dev_err:
 #endif // ENABLE_USB_HUBS
 
 // ---------------------- Handlers -------------------------
-static void root_port_handle_events(hcd_port_handle_t root_port_hdl)
+
+/**
+ * @brief Whether a device sits at address 0 now (being enumerated)
+ */
+static bool addr0_busy(void)
 {
+    // (usbh_devs_open() would not do: a device being enumerated is locked, and it answers "not allowed")
+    return usbh_devs_addr_in_use(0);
+}
+
+/**
+ * @brief A device connected to a root port: reset it and hand it to the enumeration, or wait if address 0 is taken
+ */
+static void root_port_connect(int root)
+{
+    hcd_port_handle_t root_port_hdl = p_hub_driver_obj->constant.root_port_hdl[root];
+    if (addr0_busy()) {
+        ESP_LOGD(HUB_DRIVER_TAG, "Root port %d: waiting for another device's enumeration", root);
+        HUB_DRIVER_ENTER_CRITICAL();
+        p_hub_driver_obj->dynamic.root_pending |= BIT(root);
+        HUB_DRIVER_EXIT_CRITICAL();
+        return;
+    }
+    if (hcd_port_command(root_port_hdl, HCD_PORT_CMD_RESET) != ESP_OK) {
+        ESP_LOGE(HUB_DRIVER_TAG, "Root port %d reset failed", root);
+        return;
+    }
+    ESP_LOGD(HUB_DRIVER_TAG, "Root port %d reset", root);
+    usb_speed_t speed;
+    if (hcd_port_get_speed(root_port_hdl, &speed) != ESP_OK) {
+        goto new_dev_err;
+    }
+
+    if (dev_tree_node_new(NULL, root, speed) != ESP_OK) {
+        ESP_LOGE(HUB_DRIVER_TAG, "Failed to add new device");
+        goto new_dev_err;
+    }
+
+    // Change Port state
+    HUB_DRIVER_ENTER_CRITICAL();
+    p_hub_driver_obj->dynamic.root_port_state[root] = ROOT_PORT_STATE_ENABLED;
+    HUB_DRIVER_EXIT_CRITICAL();
+    return;
+new_dev_err:
+    // We allow this to fail in case a disconnect/port error happens while disabling.
+    hcd_port_command(root_port_hdl, HCD_PORT_CMD_DISABLE);
+}
+
+static void root_port_handle_events(int root)
+{
+    hcd_port_handle_t root_port_hdl = p_hub_driver_obj->constant.root_port_hdl[root];
     hcd_port_event_t port_event = hcd_port_handle_event(root_port_hdl);
     switch (port_event) {
     case HCD_PORT_EVENT_NONE:
         // Nothing to do
         break;
-    case HCD_PORT_EVENT_CONNECTION: {
-        if (hcd_port_command(root_port_hdl, HCD_PORT_CMD_RESET) != ESP_OK) {
-            ESP_LOGE(HUB_DRIVER_TAG, "Root port reset failed");
-            goto reset_err;
-        }
-        ESP_LOGD(HUB_DRIVER_TAG, "Root port reset");
-        usb_speed_t speed;
-        if (hcd_port_get_speed(p_hub_driver_obj->constant.root_port_hdl, &speed) != ESP_OK) {
-            goto new_dev_err;
-        }
-
-        if (dev_tree_node_new(NULL, 0, speed) != ESP_OK) {
-            ESP_LOGE(HUB_DRIVER_TAG, "Failed to add new device");
-            goto new_dev_err;
-        }
-
-        // Change Port state
-        HUB_DRIVER_ENTER_CRITICAL();
-        p_hub_driver_obj->dynamic.root_port_state = ROOT_PORT_STATE_ENABLED;
-        HUB_DRIVER_EXIT_CRITICAL();
+    case HCD_PORT_EVENT_CONNECTION:
+        root_port_connect(root);
         break;
-new_dev_err:
-        // We allow this to fail in case a disconnect/port error happens while disabling.
-        hcd_port_command(p_hub_driver_obj->constant.root_port_hdl, HCD_PORT_CMD_DISABLE);
-reset_err:
-        break;
-    }
     case HCD_PORT_EVENT_DISCONNECTION:
     case HCD_PORT_EVENT_ERROR:
     case HCD_PORT_EVENT_OVERCURRENT: {
         bool port_has_device = false;
         HUB_DRIVER_ENTER_CRITICAL();
-        switch (p_hub_driver_obj->dynamic.root_port_state) {
+        // A connection still waiting for address 0 is gone with it
+        p_hub_driver_obj->dynamic.root_pending &= ~BIT(root);
+        switch (p_hub_driver_obj->dynamic.root_port_state[root]) {
         case ROOT_PORT_STATE_POWERED: // This occurred before enumeration
         case ROOT_PORT_STATE_DISABLED: // This occurred after the device has already been disabled
             // Therefore, there's no device object to clean up, and we can go straight to port recovery
-            p_hub_driver_obj->dynamic.port_reqs |= PORT_REQ_RECOVER;
+            p_hub_driver_obj->dynamic.port_reqs[root] |= PORT_REQ_RECOVER;
+            p_hub_driver_obj->dynamic.root_reqs |= BIT(root);
             p_hub_driver_obj->dynamic.flags.actions |= HUB_DRIVER_ACTION_ROOT_REQ;
             break;
         case ROOT_PORT_STATE_NOT_POWERED: // The user turned off ports' power. Indicate to USBH that the device is gone
@@ -432,7 +486,8 @@ reset_err:
         HUB_DRIVER_EXIT_CRITICAL();
 
         if (port_has_device) {
-            ESP_ERROR_CHECK(dev_tree_node_dev_gone(NULL, 0));
+            // The device may not have a node, if its connection was still waiting
+            dev_tree_node_dev_gone(NULL, root);
         }
 
         break;
@@ -443,56 +498,59 @@ reset_err:
     }
 }
 
-static void root_port_req(hcd_port_handle_t root_port_hdl)
+static void root_port_req(int root)
 {
+    hcd_port_handle_t root_port_hdl = p_hub_driver_obj->constant.root_port_hdl[root];
     unsigned int port_reqs;
 
     HUB_DRIVER_ENTER_CRITICAL();
-    port_reqs = p_hub_driver_obj->dynamic.port_reqs;
-    p_hub_driver_obj->dynamic.port_reqs = 0;
+    port_reqs = p_hub_driver_obj->dynamic.port_reqs[root];
+    p_hub_driver_obj->dynamic.port_reqs[root] = 0;
     HUB_DRIVER_EXIT_CRITICAL();
 
     if (port_reqs & PORT_REQ_DISABLE) {
-        ESP_LOGD(HUB_DRIVER_TAG, "Disabling root port");
+        ESP_LOGD(HUB_DRIVER_TAG, "Disabling root port %d", root);
         // We allow this to fail in case a disconnect/port error happens while disabling.
-        hcd_port_command(p_hub_driver_obj->constant.root_port_hdl, HCD_PORT_CMD_DISABLE);
+        hcd_port_command(root_port_hdl, HCD_PORT_CMD_DISABLE);
     }
     if (port_reqs & PORT_REQ_RECOVER) {
-        ESP_LOGD(HUB_DRIVER_TAG, "Recovering root port");
-        ESP_ERROR_CHECK(hcd_port_recover(p_hub_driver_obj->constant.root_port_hdl));
+        ESP_LOGD(HUB_DRIVER_TAG, "Recovering root port %d", root);
+        ESP_ERROR_CHECK(hcd_port_recover(root_port_hdl));
 
         // In case the port's power was turned off with usb_host_lib_set_root_port_power(false)
         // we will not turn on the power during port recovery
         HUB_DRIVER_ENTER_CRITICAL();
-        const root_port_state_t root_state = p_hub_driver_obj->dynamic.root_port_state;
+        const root_port_state_t root_state = p_hub_driver_obj->dynamic.root_port_state[root];
         HUB_DRIVER_EXIT_CRITICAL();
 
         if (root_state != ROOT_PORT_STATE_NOT_POWERED) {
-            ESP_ERROR_CHECK(hcd_port_command(p_hub_driver_obj->constant.root_port_hdl, HCD_PORT_CMD_POWER_ON));
+            ESP_ERROR_CHECK(hcd_port_command(root_port_hdl, HCD_PORT_CMD_POWER_ON));
             HUB_DRIVER_ENTER_CRITICAL();
-            p_hub_driver_obj->dynamic.root_port_state = ROOT_PORT_STATE_POWERED;
+            p_hub_driver_obj->dynamic.root_port_state[root] = ROOT_PORT_STATE_POWERED;
             HUB_DRIVER_EXIT_CRITICAL();
         }
     }
 }
 
-static esp_err_t root_port_recycle(void)
+static esp_err_t root_port_recycle(int root)
 {
+    HUB_DRIVER_CHECK(root < HUB_ROOT_PORTS && p_hub_driver_obj->constant.root_port_hdl[root] != NULL, ESP_ERR_INVALID_ARG);
     // Device is free, we can now request its port be recycled
-    hcd_port_state_t port_state = hcd_port_get_state(p_hub_driver_obj->constant.root_port_hdl);
+    hcd_port_state_t port_state = hcd_port_get_state(p_hub_driver_obj->constant.root_port_hdl[root]);
     HUB_DRIVER_ENTER_CRITICAL();
     // How the port is recycled will depend on the port's state
     switch (port_state) {
     case HCD_PORT_STATE_ENABLED:
-        p_hub_driver_obj->dynamic.port_reqs |= PORT_REQ_DISABLE;
+        p_hub_driver_obj->dynamic.port_reqs[root] |= PORT_REQ_DISABLE;
         break;
     case HCD_PORT_STATE_RECOVERY:
-        p_hub_driver_obj->dynamic.port_reqs |= PORT_REQ_RECOVER;
+        p_hub_driver_obj->dynamic.port_reqs[root] |= PORT_REQ_RECOVER;
         break;
     default:
         abort();    // Should never occur
         break;
     }
+    p_hub_driver_obj->dynamic.root_reqs |= BIT(root);
     p_hub_driver_obj->dynamic.flags.actions |= HUB_DRIVER_ACTION_ROOT_REQ;
     HUB_DRIVER_EXIT_CRITICAL();
 
@@ -501,13 +559,15 @@ static esp_err_t root_port_recycle(void)
     return ESP_OK;
 }
 
-static esp_err_t root_port_disable(void)
+static esp_err_t root_port_disable(int root)
 {
-    hcd_port_state_t port_state = hcd_port_get_state(p_hub_driver_obj->constant.root_port_hdl);
+    HUB_DRIVER_CHECK(root < HUB_ROOT_PORTS && p_hub_driver_obj->constant.root_port_hdl[root] != NULL, ESP_ERR_INVALID_ARG);
+    hcd_port_state_t port_state = hcd_port_get_state(p_hub_driver_obj->constant.root_port_hdl[root]);
     HUB_DRIVER_CHECK(port_state == HCD_PORT_STATE_ENABLED, ESP_ERR_INVALID_STATE);
 
     HUB_DRIVER_ENTER_CRITICAL();
-    p_hub_driver_obj->dynamic.port_reqs |= PORT_REQ_DISABLE;
+    p_hub_driver_obj->dynamic.port_reqs[root] |= PORT_REQ_DISABLE;
+    p_hub_driver_obj->dynamic.root_reqs |= BIT(root);
     p_hub_driver_obj->dynamic.flags.actions |= HUB_DRIVER_ACTION_ROOT_REQ;
     HUB_DRIVER_EXIT_CRITICAL();
 
@@ -557,35 +617,33 @@ esp_err_t hub_install(hub_config_t *hub_config, void **client_ret)
     *client_ret = NULL;
 #endif // ENABLE_USB_HUBS
 
-    // Install HCD port
-    hcd_port_config_t port_config = {
-        .callback = root_port_callback,
-        .callback_arg = NULL,
-        .context = NULL,
-    };
-    hcd_port_handle_t root_port_hdl;
-
-    // Right now we support only one root port, can be extended in future
-    int root_port_index = 0;
-    if (hub_config->port_map & BIT1) {
-        root_port_index = 1;
-    }
-
-    ret = hcd_port_init(root_port_index, &port_config, &root_port_hdl);
-    if (ret != ESP_OK) {
-        ESP_LOGE(HUB_DRIVER_TAG, "HCD Port init error: %s", esp_err_to_name(ret));
-        goto err;
+    // Install an HCD port for each USB-OTG peripheral in the map: each is a root port
+    for (int i = 0; i < HUB_ROOT_PORTS; i++) {
+        if (!(hub_config->port_map & BIT(i))) {
+            continue;
+        }
+        hcd_port_config_t port_config = {
+            .callback = root_port_callback,
+            .callback_arg = (void *)(intptr_t)i,
+            .context = NULL,
+        };
+        ret = hcd_port_init(i, &port_config, &hub_driver_obj->constant.root_port_hdl[i]);
+        if (ret != ESP_OK) {
+            ESP_LOGE(HUB_DRIVER_TAG, "HCD Port %d init error: %s", i, esp_err_to_name(ret));
+            goto err;
+        }
     }
 
     // Initialize Hub driver object
-    hub_driver_obj->constant.root_port_hdl = root_port_hdl;
     hub_driver_obj->constant.proc_req_cb = hub_config->proc_req_cb;
     hub_driver_obj->constant.proc_req_cb_arg = hub_config->proc_req_cb_arg;
     hub_driver_obj->constant.event_cb = hub_config->event_cb;
     hub_driver_obj->constant.event_cb_arg = hub_config->event_cb_arg;
     TAILQ_INIT(&hub_driver_obj->single_thread.dev_nodes_tailq);
     // Driver is not installed, we can modify dynamic section outside of the critical section
-    hub_driver_obj->dynamic.root_port_state = ROOT_PORT_STATE_NOT_POWERED;
+    for (int i = 0; i < HUB_ROOT_PORTS; i++) {
+        hub_driver_obj->dynamic.root_port_state[i] = ROOT_PORT_STATE_NOT_POWERED;
+    }
 
     HUB_DRIVER_ENTER_CRITICAL();
     if (p_hub_driver_obj != NULL) {
@@ -599,8 +657,12 @@ esp_err_t hub_install(hub_config_t *hub_config, void **client_ret)
     return ret;
 
 assign_err:
-    ESP_ERROR_CHECK(hcd_port_deinit(root_port_hdl));
 err:
+    for (int i = 0; i < HUB_ROOT_PORTS; i++) {
+        if (hub_driver_obj->constant.root_port_hdl[i]) {
+            ESP_ERROR_CHECK(hcd_port_deinit(hub_driver_obj->constant.root_port_hdl[i]));
+        }
+    }
 #if ENABLE_USB_HUBS
     ext_hub_uninstall();
 err_ext_hub:
@@ -615,7 +677,9 @@ esp_err_t hub_uninstall(void)
 {
     HUB_DRIVER_ENTER_CRITICAL();
     HUB_DRIVER_CHECK_FROM_CRIT(p_hub_driver_obj != NULL, ESP_ERR_INVALID_STATE);
-    HUB_DRIVER_CHECK_FROM_CRIT(p_hub_driver_obj->dynamic.root_port_state == ROOT_PORT_STATE_NOT_POWERED, ESP_ERR_INVALID_STATE);
+    for (int i = 0; i < HUB_ROOT_PORTS; i++) {
+        HUB_DRIVER_CHECK_FROM_CRIT(p_hub_driver_obj->dynamic.root_port_state[i] == ROOT_PORT_STATE_NOT_POWERED, ESP_ERR_INVALID_STATE);
+    }
     hub_driver_t *hub_driver_obj = p_hub_driver_obj;
     p_hub_driver_obj = NULL;
     HUB_DRIVER_EXIT_CRITICAL();
@@ -625,7 +689,11 @@ esp_err_t hub_uninstall(void)
     ESP_ERROR_CHECK(ext_port_uninstall());
 #endif // ENABLE_USB_HUBS
 
-    ESP_ERROR_CHECK(hcd_port_deinit(hub_driver_obj->constant.root_port_hdl));
+    for (int i = 0; i < HUB_ROOT_PORTS; i++) {
+        if (hub_driver_obj->constant.root_port_hdl[i]) {
+            ESP_ERROR_CHECK(hcd_port_deinit(hub_driver_obj->constant.root_port_hdl[i]));
+        }
+    }
     // Free Hub driver resources
     heap_caps_free(hub_driver_obj);
     return ESP_OK;
@@ -635,14 +703,25 @@ esp_err_t hub_root_start(void)
 {
     HUB_DRIVER_ENTER_CRITICAL();
     HUB_DRIVER_CHECK_FROM_CRIT(p_hub_driver_obj != NULL, ESP_ERR_INVALID_STATE);
-    HUB_DRIVER_CHECK_FROM_CRIT(p_hub_driver_obj->dynamic.root_port_state == ROOT_PORT_STATE_NOT_POWERED, ESP_ERR_INVALID_STATE);
     HUB_DRIVER_EXIT_CRITICAL();
-    // Power ON the root port
-    esp_err_t ret;
-    ret = hcd_port_command(p_hub_driver_obj->constant.root_port_hdl, HCD_PORT_CMD_POWER_ON);
-    if (ret == ESP_OK) {
+    // Power ON every root port that is not powered yet
+    esp_err_t ret = ESP_ERR_INVALID_STATE;
+    for (int i = 0; i < HUB_ROOT_PORTS; i++) {
+        if (p_hub_driver_obj->constant.root_port_hdl[i] == NULL) {
+            continue;
+        }
         HUB_DRIVER_ENTER_CRITICAL();
-        p_hub_driver_obj->dynamic.root_port_state = ROOT_PORT_STATE_POWERED;
+        const bool off = p_hub_driver_obj->dynamic.root_port_state[i] == ROOT_PORT_STATE_NOT_POWERED;
+        HUB_DRIVER_EXIT_CRITICAL();
+        if (!off) {
+            continue;
+        }
+        ret = hcd_port_command(p_hub_driver_obj->constant.root_port_hdl[i], HCD_PORT_CMD_POWER_ON);
+        if (ret != ESP_OK) {
+            break;
+        }
+        HUB_DRIVER_ENTER_CRITICAL();
+        p_hub_driver_obj->dynamic.root_port_state[i] = ROOT_PORT_STATE_POWERED;
         HUB_DRIVER_EXIT_CRITICAL();
     }
     return ret;
@@ -652,19 +731,40 @@ esp_err_t hub_root_stop(void)
 {
     HUB_DRIVER_ENTER_CRITICAL();
     HUB_DRIVER_CHECK_FROM_CRIT(p_hub_driver_obj != NULL, ESP_ERR_INVALID_STATE);
-    if (p_hub_driver_obj->dynamic.root_port_state == ROOT_PORT_STATE_NOT_POWERED) {
-        // The HUB was already stopped by usb_host_lib_set_root_port_power(false)
-        HUB_DRIVER_EXIT_CRITICAL();
-        return ESP_OK;
-    }
-    p_hub_driver_obj->dynamic.root_port_state = ROOT_PORT_STATE_NOT_POWERED;
     HUB_DRIVER_EXIT_CRITICAL();
+    esp_err_t ret = ESP_OK;
+    for (int i = 0; i < HUB_ROOT_PORTS; i++) {
+        if (p_hub_driver_obj->constant.root_port_hdl[i] == NULL) {
+            continue;
+        }
+        HUB_DRIVER_ENTER_CRITICAL();
+        if (p_hub_driver_obj->dynamic.root_port_state[i] == ROOT_PORT_STATE_NOT_POWERED) {
+            // The port was already stopped by usb_host_lib_set_root_port_power(false)
+            HUB_DRIVER_EXIT_CRITICAL();
+            continue;
+        }
+        p_hub_driver_obj->dynamic.root_port_state[i] = ROOT_PORT_STATE_NOT_POWERED;
+        p_hub_driver_obj->dynamic.root_pending &= ~BIT(i);
+        HUB_DRIVER_EXIT_CRITICAL();
 
-    // HCD_PORT_CMD_POWER_OFF will only fail if the port is already powered_off
-    // This should never happen, so we assert ret == ESP_OK
-    const esp_err_t ret = hcd_port_command(p_hub_driver_obj->constant.root_port_hdl, HCD_PORT_CMD_POWER_OFF);
-    assert(ret == ESP_OK);
+        // HCD_PORT_CMD_POWER_OFF will only fail if the port is already powered_off
+        // This should never happen, so we assert ret == ESP_OK
+        ret = hcd_port_command(p_hub_driver_obj->constant.root_port_hdl[i], HCD_PORT_CMD_POWER_OFF);
+        assert(ret == ESP_OK);
+    }
     return ret;
+}
+
+void hub_root_enum_done(void)
+{
+    HUB_DRIVER_ENTER_CRITICAL();
+    if (p_hub_driver_obj == NULL || p_hub_driver_obj->dynamic.root_pending == 0) {
+        HUB_DRIVER_EXIT_CRITICAL();
+        return;
+    }
+    p_hub_driver_obj->dynamic.flags.actions |= HUB_DRIVER_ACTION_ROOT_EVENT;
+    HUB_DRIVER_EXIT_CRITICAL();
+    p_hub_driver_obj->constant.proc_req_cb(USB_PROC_REQ_SOURCE_HUB, false, p_hub_driver_obj->constant.proc_req_cb_arg);
 }
 
 esp_err_t hub_port_recycle(usb_device_handle_t parent_dev_hdl, uint8_t parent_port_num, unsigned int dev_uid)
@@ -674,8 +774,8 @@ esp_err_t hub_port_recycle(usb_device_handle_t parent_dev_hdl, uint8_t parent_po
     HUB_DRIVER_EXIT_CRITICAL();
     esp_err_t ret;
 
-    if (parent_port_num == 0) {
-        ret = root_port_recycle();
+    if (parent_dev_hdl == NULL) {
+        ret = root_port_recycle(parent_port_num);
     } else {
 #if ENABLE_USB_HUBS
         ext_hub_handle_t ext_hub_hdl = NULL;
@@ -704,12 +804,14 @@ esp_err_t hub_port_reset(usb_device_handle_t parent_dev_hdl, uint8_t parent_port
     HUB_DRIVER_EXIT_CRITICAL();
     esp_err_t ret;
 
-    if (parent_port_num == 0) {
-        ret = hcd_port_command(p_hub_driver_obj->constant.root_port_hdl, HCD_PORT_CMD_RESET);
+    if (parent_dev_hdl == NULL) {
+        HUB_DRIVER_CHECK(parent_port_num < HUB_ROOT_PORTS && p_hub_driver_obj->constant.root_port_hdl[parent_port_num] != NULL,
+                         ESP_ERR_INVALID_ARG);
+        ret = hcd_port_command(p_hub_driver_obj->constant.root_port_hdl[parent_port_num], HCD_PORT_CMD_RESET);
         if (ret != ESP_OK) {
-            ESP_LOGE(HUB_DRIVER_TAG, "Failed to issue root port reset");
+            ESP_LOGE(HUB_DRIVER_TAG, "Failed to issue root port %d reset", parent_port_num);
         } else {
-            ret = dev_tree_node_reset_completed(NULL, 0);
+            ret = dev_tree_node_reset_completed(NULL, parent_port_num);
         }
     } else {
 #if ENABLE_USB_HUBS
@@ -731,7 +833,7 @@ esp_err_t hub_port_active(usb_device_handle_t parent_dev_hdl, uint8_t parent_por
 {
     esp_err_t ret;
 
-    if (parent_port_num == 0) {
+    if (parent_dev_hdl == NULL) {
         // Root port no need to be activated
         ret = ESP_OK;
     } else {
@@ -755,8 +857,8 @@ esp_err_t hub_port_disable(usb_device_handle_t parent_dev_hdl, uint8_t parent_po
 {
     esp_err_t ret;
 
-    if (parent_port_num == 0) {
-        ret = root_port_disable();
+    if (parent_dev_hdl == NULL) {
+        ret = root_port_disable(parent_port_num);
     } else {
 #if ENABLE_USB_HUBS
         // External Hub port
@@ -848,10 +950,42 @@ esp_err_t hub_process(void)
         }
 #endif // ENABLE_USB_HUBS
         if (action_flags & HUB_DRIVER_ACTION_ROOT_EVENT) {
-            root_port_handle_events(p_hub_driver_obj->constant.root_port_hdl);
+            HUB_DRIVER_ENTER_CRITICAL();
+            uint32_t events = p_hub_driver_obj->dynamic.root_events;
+            p_hub_driver_obj->dynamic.root_events = 0;
+            HUB_DRIVER_EXIT_CRITICAL();
+            for (int i = 0; i < HUB_ROOT_PORTS; i++) {
+                if (events & BIT(i)) {
+                    root_port_handle_events(i);
+                }
+            }
         }
         if (action_flags & HUB_DRIVER_ACTION_ROOT_REQ) {
-            root_port_req(p_hub_driver_obj->constant.root_port_hdl);
+            HUB_DRIVER_ENTER_CRITICAL();
+            uint32_t reqs = p_hub_driver_obj->dynamic.root_reqs;
+            p_hub_driver_obj->dynamic.root_reqs = 0;
+            HUB_DRIVER_EXIT_CRITICAL();
+            for (int i = 0; i < HUB_ROOT_PORTS; i++) {
+                if (reqs & BIT(i)) {
+                    root_port_req(i);
+                }
+            }
+        }
+
+        // Connections that waited for address 0, one at a time: after any action, as address 0 frees up
+        // when an enumeration ends or a failed device is freed (its port recycled)
+        for (int i = 0; i < HUB_ROOT_PORTS; i++) {
+            HUB_DRIVER_ENTER_CRITICAL();
+            const bool pending = p_hub_driver_obj->dynamic.root_pending & BIT(i);
+            HUB_DRIVER_EXIT_CRITICAL();
+            if (pending && !addr0_busy()) {
+                HUB_DRIVER_ENTER_CRITICAL();
+                p_hub_driver_obj->dynamic.root_pending &= ~BIT(i);
+                HUB_DRIVER_EXIT_CRITICAL();
+                if (hcd_port_get_state(p_hub_driver_obj->constant.root_port_hdl[i]) == HCD_PORT_STATE_DISABLED) {
+                    root_port_connect(i);
+                }
+            }
         }
 
         HUB_DRIVER_ENTER_CRITICAL();

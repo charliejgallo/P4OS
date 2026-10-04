@@ -310,6 +310,16 @@ esp_err_t usbh_devs_mark_all_free(void);
  *    - ESP_ERR_NOT_ALLOWED: It is not allowed to open the device, it is locked for the enumeration
  *    - ESP_ERR_NOT_FOUND: Device with provided address not found
  */
+/**
+ * @brief Whether a device object holds an address, in any state
+ *
+ * P4OS: with two root ports, a connection waits while another device is at address 0.
+ *
+ * @param[in] dev_addr Device address
+ * @return true if a device object has that address
+ */
+bool usbh_devs_addr_in_use(uint8_t dev_addr);
+
 esp_err_t usbh_devs_open(uint8_t dev_addr, usb_device_handle_t *dev_hdl);
 
 /**
@@ -370,6 +380,17 @@ esp_err_t usbh_dev_get_addr(usb_device_handle_t dev_hdl, uint8_t *dev_addr);
  *    - ESP_ERR_INVALID_ARG: Invalid argument
  */
 esp_err_t usbh_dev_get_info(usb_device_handle_t dev_hdl, usb_device_info_t *dev_info);
+
+/**
+ * @brief Get the HCD port (the root port) a device is on
+ *
+ * P4OS: with more than one root port, a device behind a hub uses its parent's.
+ *
+ * @param[in] dev_hdl Device handle
+ * @param[out] port_hdl The device's HCD port handle
+ * @return esp_err_t
+ */
+esp_err_t usbh_dev_get_port_hdl(usb_device_handle_t dev_hdl, hcd_port_handle_t *port_hdl);
 
 /**
  * @brief Get a device's device descriptor

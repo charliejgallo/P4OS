@@ -14,7 +14,7 @@ idf_component_register(
          "aos_tls.c" "aos_nettools_p4.c"
          "aos_stats.c" "aos_tasks_p4.c"
          "aos_jpeg_p4.c" "aos_h264.c"
-         "aos_usb_p4.c" "aos_usb_net_p4.c" "aos_hid_keys.c"
+         "aos_usb_p4.c" "aos_usb_net_p4.c" "aos_usb_kbd_p4.c" "aos_hid_keys.c"
          "aos_retro_p4.c" "aos_lvmem.c" "aos_flashop_p4.c" "aos_worker_p4.c" "aos_ota_p4.c" "aos_coredump_p4.c"
     INCLUDE_DIRS "include"
     LDFRAGMENTS "psram.lf"
@@ -26,7 +26,7 @@ idf_component_register(
                   esp_driver_jpeg espressif__esp_new_jpeg espressif__libpng espressif__esp_h264
                   esp_driver_i2s espressif__esp_codec_dev espressif__esp_audio_codec
                   esp_driver_tsens bootloader_support spi_flash esp_partition espcoredump
-                  espressif__esp_tinyusb json
+                  espressif__esp_tinyusb json usb
 )
 
 # LVGL's objects, styles and layers to PSRAM (aos_lvmem.c): with the C

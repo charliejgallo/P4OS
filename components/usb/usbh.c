@@ -992,6 +992,16 @@ esp_err_t usbh_devs_mark_all_free(void)
     return (wait_for_free) ? ESP_ERR_NOT_FINISHED : ESP_OK;
 }
 
+bool usbh_devs_addr_in_use(uint8_t dev_addr)
+{
+    USBH_ENTER_CRITICAL();
+    // Any device object with that address, in whatever state (enumerating, gone, waiting to be freed):
+    // usbh_devs_add() refuses a second one at address 0 in all of them
+    const bool used = _find_dev_from_addr(dev_addr) != NULL;
+    USBH_EXIT_CRITICAL();
+    return used;
+}
+
 esp_err_t usbh_devs_open(uint8_t dev_addr, usb_device_handle_t *dev_hdl)
 {
     USBH_CHECK(dev_hdl != NULL, ESP_ERR_INVALID_ARG);
@@ -1084,6 +1094,15 @@ esp_err_t usbh_dev_get_addr(usb_device_handle_t dev_hdl, uint8_t *dev_addr)
     *dev_addr = dev_obj->constant.address;
     USBH_EXIT_CRITICAL();
 
+    return ESP_OK;
+}
+
+esp_err_t usbh_dev_get_port_hdl(usb_device_handle_t dev_hdl, hcd_port_handle_t *port_hdl)
+{
+    USBH_CHECK(dev_hdl != NULL && port_hdl != NULL, ESP_ERR_INVALID_ARG);
+    device_t *dev_obj = (device_t *)dev_hdl;
+    // Constant member: no critical section
+    *port_hdl = dev_obj->constant.port_hdl;
     return ESP_OK;
 }
 

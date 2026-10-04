@@ -75,6 +75,8 @@ void aos_np_command(aos_media_cmd_t cmd);   /* PLAY_PAUSE, NEXT, PREV to the one
 void aos_banner_create(lv_obj_t *layer);
 void aos_banner_layout(void);
 void aos_banner_tick(void);              /* polls aos_hal_notif_* for new ones */
+void aos_hwkbd_tick(void);               /* a USB keyboard types into the open keyboard (aos_hwkbd.c) */
+void aos_hwkbd_app_gone(const char *id); /* the app closes: its key handler goes */
 void aos_toast_show(const char *text, uint32_t ms);
 void aos_notif_act(uint32_t uid, bool positive);
 void aos_dev_init(void);                 /* aos_devtools.c: the developer overlays, from the prefs */   /* the phone's answer / reject / clear */

@@ -71,6 +71,7 @@
 #include "hal/usb_dwc_ll.h"
 #include "hal/usb_wrap_ll.h"
 #include "esp_private/periph_ctrl.h"
+#include "esp_private/usb_phy.h"
 #include "hal/usb_serial_jtag_ll.h"
 #include "driver/gpio.h"
 #include "esp_vfs_fat.h"
@@ -496,8 +497,8 @@ static void disk_stop(void)
 /* HOST: a pendrive                                                            */
 /* -------------------------------------------------------------------------- */
 
-/* The board as the host of a pendrive, on one of two ports of the 40-pin
- * header (J3), both with 5 V on pin 1 or 3 and GND on 5:
+/* The board as the host of pendrives and keyboards, on the 40-pin header
+ * (J3), with 5 V on pin 1 or 3 and GND on 5, on one port or both:
  *
  * - AOS_HAL_USB_HOST_HEADER, pins 21 (D-) and 23 (D+): the P4's second,
  *   Full-Speed controller (USB 1.1, USB_DWC_FS) on its own FSLS PHY 0,
@@ -507,15 +508,18 @@ static void disk_stop(void)
  *   swapped before the host is installed (usb_wrap_ll_phy_select), with the
  *   USB-Serial-JTAG's pads switched off so that it, sent to PHY 1, does not
  *   take GPIO26 either; host_stop and every boot put both back.
+ * - AOS_HAL_USB_HOST_BOTH: the two at once, two root ports of one host
+ *   library (components/usb is P4OS's copy of ESP-IDF's, which drives one).
  * - AOS_HAL_USB_HOST_OTG, pins 25 (D-) and 27 (D+): the High-Speed
  *   controller, the same as KEYS and DISK (TinyUSB is uninstalled first),
  *   whose lines also go to the OTG connector, which must stay unplugged
- *   then. Its port reset failed on every plug through the header's wires
- *   (2026-10-04, docs/USB.md), at High Speed and forced to Full Speed.
+ *   then. With 70 cm of wire its port reset failed on every plug; under
+ *   15 cm it runs at High Speed (2026-10-04, docs/USB.md).
  *
  * ESP-IDF's USB Host Library runs in a task of its own; Espressif's
  * usb_host_msc is its client, with its own background task, and tells this
- * file when a mass storage device comes and goes. A task here installs it
+ * file when a mass storage device comes and goes; aos_usb_kbd_p4.c is
+ * another client, for keyboards. A task here installs it
  * and mounts its FAT at /usb (msc_host_vfs, a FATFS volume: exFAT is not in
  * ESP-IDF, so the pendrive has to be FAT32), and takes it down when it goes
  * or the host stops. Behind a hub (the library's external hub support)
@@ -539,10 +543,17 @@ static struct {
     QueueHandle_t q;
     host_slot_t slot[AOS_USB_HOST_MAX];
     SemaphoreHandle_t mx;
-    int ctl;                    /* the controller in use: 0 High Speed, 1 Full Speed */
+    unsigned map;               /* the controllers in use: BIT0 High Speed (25/27), BIT1 Full Speed (21/23) */
+    usb_phy_handle_t phy[2];    /* their PHYs, set up here (the library's own setup does one) */
 } H;
 
-static volatile bool s_host_run;        /* the host library is up, on H.ctl */
+static volatile bool s_host_run;        /* the host library is up, on H.map */
+
+/* the controllers a host port setting takes */
+static unsigned host_map(int port)
+{
+    return port == AOS_HAL_USB_HOST_BOTH ? BIT0 | BIT1 : port == AOS_HAL_USB_HOST_HEADER ? BIT1 : BIT0;
+}
 static volatile bool s_want_host;
 
 /* The FSLS PHYs as the chip has them after power-on: the USB-Serial-JTAG on
@@ -561,7 +572,7 @@ int aos_hal_usb_host_port(void)
 {
     int32_t p = AOS_HAL_USB_HOST_HEADER;
     aos_hal_pref_get_i32(PREF_HOST_PORT, &p);
-    return p == AOS_HAL_USB_HOST_OTG ? AOS_HAL_USB_HOST_OTG : AOS_HAL_USB_HOST_HEADER;
+    return p == AOS_HAL_USB_HOST_OTG || p == AOS_HAL_USB_HOST_BOTH ? (int)p : AOS_HAL_USB_HOST_HEADER;
 }
 
 const char *aos_hal_path_usb(void) { return USB_ROOT; }
@@ -661,21 +672,23 @@ static void host_lib_task(void *arg)
 {
     (void)arg;
     bool freeing = false;
-    uint32_t shown = 0xFFFFFFFF;
+    uint32_t shown[2] = { 0xFFFFFFFF, 0xFFFFFFFF };
     for (;;) {
         uint32_t flags = 0;
         usb_host_lib_handle_events(pdMS_TO_TICKS(200), &flags);
-        /* the root port as the controller sees it, when it changes but for
+        /* each root port as its controller sees it, when it changes but for
          * the line states, which toggle with every transfer: for a pendrive
          * that does not come up (docs/USB.md) */
-        usb_dwc_dev_t *dwc = USB_DWC_LL_GET_HW(H.ctl);
-        uint32_t now = dwc->hprt_reg.prtconnsts | dwc->hprt_reg.prtena << 1 | dwc->hprt_reg.prtlnsts << 2 |
-                       dwc->hprt_reg.prtspd << 4 | dwc->hprt_reg.prtpwr << 6 | dwc->gotgctl_reg.asesvld << 7 |
-                       dwc->gotgctl_reg.bsesvld << 8 | dwc->gotgctl_reg.conidsts << 9;
-        if ((now & ~0xCu) != (shown & ~0xCu)) {
-            shown = now;
-            ESP_LOGI(TAG, "host port: connected %u, enabled %u, lines D+%u D-%u, speed %u (0 HS 1 FS 2 LS), power %u, "
-                          "A-session %u, B-session %u, id %u",
+        for (int c = 0; c < 2; c++) {
+            if (!(H.map & BIT(c))) continue;
+            usb_dwc_dev_t *dwc = USB_DWC_LL_GET_HW(c);
+            uint32_t now = dwc->hprt_reg.prtconnsts | dwc->hprt_reg.prtena << 1 | dwc->hprt_reg.prtlnsts << 2 |
+                           dwc->hprt_reg.prtspd << 4 | dwc->hprt_reg.prtpwr << 6 | dwc->gotgctl_reg.asesvld << 7 |
+                           dwc->gotgctl_reg.bsesvld << 8 | dwc->gotgctl_reg.conidsts << 9;
+            if ((now & ~0xCu) == (shown[c] & ~0xCu)) continue;
+            shown[c] = now;
+            ESP_LOGI(TAG, "host port %s: connected %u, enabled %u, lines D+%u D-%u, speed %u (0 HS 1 FS 2 LS), "
+                          "power %u, A-session %u, B-session %u, id %u", c ? "21/23" : "25/27",
                      (unsigned)(now & 1), (unsigned)(now >> 1 & 1), (unsigned)(now >> 2 & 1), (unsigned)(now >> 3 & 1),
                      (unsigned)(now >> 4 & 3), (unsigned)(now >> 6 & 1), (unsigned)(now >> 7 & 1), (unsigned)(now >> 8 & 1),
                      (unsigned)(now >> 9 & 1));
@@ -713,17 +726,23 @@ static void host_app_task(void *arg)
     vTaskDelete(NULL);
 }
 
-/* The library down, and on the Full-Speed controller the PHYs as they were.
- * The controller's pads go off only after the library: cut first, with a
- * pendrive on the port, the port saw a sudden disconnection and the
- * library's power-off failed its assert in hub_root_stop (a restart,
- * measured on 2026-10-04). usb_phy leaves them on, with the wrap's clock
- * off: the clock comes back for the one write, as they would be on GPIO26
- * once the swap is undone. Then the USB-Serial-JTAG goes back on GPIO24/25. */
+/* The library down, its PHYs, and on the Full-Speed controller the FSLS
+ * PHYs as they were. The controller's pads go off only after the library:
+ * cut first, with a pendrive on the port, the port saw a sudden
+ * disconnection and the library's power-off failed its assert in
+ * hub_root_stop (a restart, measured on 2026-10-04). usb_phy leaves them on,
+ * with the wrap's clock off: the clock comes back for the one write, as
+ * they would be on GPIO26 once the swap is undone. Then the
+ * USB-Serial-JTAG goes back on GPIO24/25. */
 static esp_err_t host_uninstall(void)
 {
     esp_err_t e = usb_host_uninstall();
-    if (H.ctl == 1) {
+    for (int c = 0; c < 2; c++)
+        if (H.phy[c]) {
+            usb_del_phy(H.phy[c]);
+            H.phy[c] = NULL;
+        }
+    if (H.map & BIT1) {
         PERIPH_RCC_ATOMIC() {
             _usb_wrap_ll_enable_bus_clock(true);
         }
@@ -736,15 +755,33 @@ static esp_err_t host_uninstall(void)
     return e;
 }
 
+/* A controller's PHY in host mode: the UTMI one of the High-Speed
+ * controller, the FSLS one of the Full-Speed controller. */
+static bool host_phy(int c)
+{
+    const usb_phy_config_t pc = { .controller = USB_PHY_CTRL_OTG,
+                                  .target = c ? USB_PHY_TARGET_INT : USB_PHY_TARGET_UTMI,
+                                  .otg_mode = USB_OTG_MODE_HOST, .otg_speed = USB_PHY_SPEED_UNDEFINED };
+    esp_err_t e = usb_new_phy(&pc, &H.phy[c]);
+    if (e != ESP_OK) {
+        ESP_LOGE(TAG, "host: the %s PHY: %s", c ? "Full-Speed" : "High-Speed", esp_err_to_name(e));
+        H.phy[c] = NULL;
+    }
+    return e == ESP_OK;
+}
+
+bool aos_p4_usb_kbd_start(void);
+void aos_p4_usb_kbd_stop(void);
+
 static bool host_start(void)
 {
     if (!H.mx) H.mx = xSemaphoreCreateMutex();
     if (!H.q) H.q = xQueueCreate(8, sizeof(msc_host_event_t));
     memset(H.slot, 0, sizeof H.slot);
     H.stop = H.lib_done = H.app_done = false;
-    H.ctl = aos_hal_usb_host_port() == AOS_HAL_USB_HOST_HEADER ? 1 : 0;
+    H.map = host_map(aos_hal_usb_host_port());
     gpio_drive_cap_t cap26 = GPIO_DRIVE_CAP_DEFAULT, cap27 = GPIO_DRIVE_CAP_DEFAULT;
-    if (H.ctl == 1) {
+    if (H.map & BIT1) {
         /* the USB-Serial-JTAG off its pads, and the Full-Speed controller
          * onto FSLS PHY 0 (GPIO24/25) before its PHY is set up: the wrap's
          * reset in usb_new_phy does not touch LP_SYS, so the swap holds */
@@ -753,17 +790,26 @@ static bool host_start(void)
         gpio_get_drive_capability(GPIO_NUM_26, &cap26);
         gpio_get_drive_capability(GPIO_NUM_27, &cap27);
     }
-    /* The port comes up unpowered, the controller is set up, and only then
-     * it is powered. */
-    const usb_host_config_t hc = { .skip_phy_setup = false, .root_port_unpowered = true,
-                                   .intr_flags = ESP_INTR_FLAG_LEVEL1, .peripheral_map = H.ctl ? BIT1 : BIT0 };
-    esp_err_t e = usb_host_install(&hc);
+    /* The PHYs set up here: the library's own setup does only one, and both
+     * controllers at once are two (components/usb, P4OS's copy of ESP-IDF's
+     * host library, drives both as two root ports). */
+    bool ok = (!(H.map & BIT0) || host_phy(0)) && (!(H.map & BIT1) || host_phy(1));
+    /* The ports come up unpowered, the controllers are set up, and only
+     * then they are powered. */
+    const usb_host_config_t hc = { .skip_phy_setup = true, .root_port_unpowered = true,
+                                   .intr_flags = ESP_INTR_FLAG_LEVEL1, .peripheral_map = H.map };
+    esp_err_t e = ok ? usb_host_install(&hc) : ESP_FAIL;
     if (e != ESP_OK) {
         ESP_LOGE(TAG, "host: usb_host_install: %s", esp_err_to_name(e));
-        if (H.ctl == 1) fsls_phys_default();
+        for (int c = 0; c < 2; c++)
+            if (H.phy[c]) {
+                usb_del_phy(H.phy[c]);
+                H.phy[c] = NULL;
+            }
+        if (H.map & BIT1) fsls_phys_default();
         return false;
     }
-    if (H.ctl == 1) {
+    if (H.map & BIT1) {
         /* usb_phy gives the 40 mA drive of USB pads to the pins it thinks
          * the PHY is on (26/27, the backlight): back to what they had, and
          * to the pins it really is on */
@@ -771,10 +817,11 @@ static bool host_start(void)
         gpio_set_drive_capability(GPIO_NUM_27, cap27);
         gpio_set_drive_capability(GPIO_NUM_24, GPIO_DRIVE_CAP_3);
         gpio_set_drive_capability(GPIO_NUM_25, GPIO_DRIVE_CAP_3);
-    } else {
+    }
+    if (H.map & BIT0) {
         /* (Forcing Full Speed here, FSLSSupp, was tried on 2026-10-04 on
-         * the header's wires: the port reset failed all the same. It stays
-         * at High Speed, for a pendrive on the OTG connector itself.) */
+         * long wires: the port reset failed all the same. Short wires were
+         * the answer: it stays at High Speed.) */
         usb_dwc_dev_t *dwc = USB_DWC_LL_GET_HW(0);
         /* VBUS valid, by override. This board's VBUS (the OTG connector's,
          * and the header's 5 V) reaches no pin of the P4 (schematic, USB
@@ -803,13 +850,18 @@ static bool host_start(void)
         host_uninstall();
         return false;
     }
-    ESP_LOGI(TAG, "host: waiting for a pendrive on %s",
-             H.ctl ? "J3 21 D- 23 D+ (Full-Speed controller)" : "J3 25 D- 27 D+ or the OTG connector (High-Speed controller)");
+    /* keyboards: a client of its own beside usb_host_msc */
+    if (!aos_p4_usb_kbd_start()) ESP_LOGW(TAG, "host: no keyboard client");
+    ESP_LOGI(TAG, "host: waiting for pendrives and keyboards on %s",
+             H.map == (BIT0 | BIT1) ? "J3 25/27 (High Speed) and 21/23 (Full Speed)"
+             : H.map & BIT1 ? "J3 21 D- 23 D+ (Full-Speed controller)"
+                            : "J3 25 D- 27 D+ or the OTG connector (High-Speed controller)");
     return true;
 }
 
 static void host_stop(void)
 {
+    aos_p4_usb_kbd_stop();
     H.stop = true;
     usb_host_lib_unblock();
     for (int i = 0; i < 150 && !(H.app_done && H.lib_done); i++) {
@@ -834,9 +886,9 @@ static void switch_task(void *arg)
     (void)arg;
     aos_hal_usb_mode_t want = s_want;
     bool host = s_want_host;
-    int ctl = aos_hal_usb_host_port() == AOS_HAL_USB_HOST_HEADER ? 1 : 0;
-    if (host && ctl == 0) want = AOS_HAL_USB_CONSOLE;
-    if (s_host_run && (!host || H.ctl != ctl)) {
+    unsigned map = host_map(aos_hal_usb_host_port());
+    if (host && (map & BIT0)) want = AOS_HAL_USB_CONSOLE;
+    if (s_host_run && (!host || H.map != map)) {
         host_stop();
         s_host_run = false;
         if (s_mode == AOS_HAL_USB_HOST) s_mode = AOS_HAL_USB_CONSOLE;
@@ -854,14 +906,14 @@ static void switch_task(void *arg)
     if (host && !s_host_run) {
         if (host_start()) {
             s_host_run = true;
-            if (H.ctl == 0) s_mode = AOS_HAL_USB_HOST;
+            if (H.map & BIT0) s_mode = AOS_HAL_USB_HOST;
         }
     }
     s_want_host = s_host_run;
     ESP_LOGI(TAG, "the port is %s now%s", s_mode == AOS_HAL_USB_KEYS ? "keyboard and mouse"
                                          : s_mode == AOS_HAL_USB_DISK ? "the card as a disk"
                                          : s_mode == AOS_HAL_USB_HOST ? "the host of a pendrive" : "idle",
-             s_host_run && H.ctl == 1 ? ", and the host of a pendrive on J3 21/23" : "");
+             s_host_run && H.map == BIT1 ? ", and the host of a pendrive on J3 21/23" : "");
     /* remembered for the next boot (aos_hal_usb_restore). Disk mode is
      * not: the boot reads the card, so a restart in disk mode comes back
      * in the mode it had before. */
@@ -903,7 +955,7 @@ bool aos_hal_usb_host_set(bool on)
     if (on == s_host_run) return true;
     ESP_LOGI(TAG, "%s the pendrive host", on ? "starting" : "stopping");
     /* on pins 25/27 the host takes the OTG controller from its role */
-    s_want = on && aos_hal_usb_host_port() == AOS_HAL_USB_HOST_OTG ? AOS_HAL_USB_CONSOLE
+    s_want = on && (host_map(aos_hal_usb_host_port()) & BIT0) ? AOS_HAL_USB_CONSOLE
            : s_mode == AOS_HAL_USB_HOST ? AOS_HAL_USB_CONSOLE : s_mode;
     s_want_host = on;
     return switch_start();
@@ -911,14 +963,15 @@ bool aos_hal_usb_host_set(bool on)
 
 bool aos_hal_usb_host_port_set(int port)
 {
-    if (port != AOS_HAL_USB_HOST_OTG && port != AOS_HAL_USB_HOST_HEADER) return false;
+    if (port != AOS_HAL_USB_HOST_OTG && port != AOS_HAL_USB_HOST_HEADER && port != AOS_HAL_USB_HOST_BOTH) return false;
     if (s_busy) return false;
     if (port == aos_hal_usb_host_port()) return true;
     aos_hal_pref_set_i32(PREF_HOST_PORT, port);
     if (!s_host_run) return true;
     /* host on: down and up again on the other controller */
-    ESP_LOGI(TAG, "the pendrive's port is J3 %s now", port == AOS_HAL_USB_HOST_HEADER ? "21/23" : "25/27");
-    s_want = port == AOS_HAL_USB_HOST_OTG || s_mode == AOS_HAL_USB_HOST ? AOS_HAL_USB_CONSOLE : s_mode;
+    ESP_LOGI(TAG, "the pendrive's port is J3 %s now", port == AOS_HAL_USB_HOST_BOTH ? "21/23 and 25/27"
+                                                     : port == AOS_HAL_USB_HOST_HEADER ? "21/23" : "25/27");
+    s_want = (host_map(port) & BIT0) || s_mode == AOS_HAL_USB_HOST ? AOS_HAL_USB_CONSOLE : s_mode;
     s_want_host = true;
     return switch_start();
 }
@@ -938,7 +991,7 @@ bool aos_hal_usb_mode_set(aos_hal_usb_mode_t mode)
     ESP_LOGI(TAG, "switching the port to %s", mode == AOS_HAL_USB_KEYS ? "keyboard and mouse"
                                              : mode == AOS_HAL_USB_DISK ? "the card as a disk" : "idle");
     s_want = mode;
-    s_want_host = s_host_run && H.ctl == 1;
+    s_want_host = s_host_run && H.map == BIT1;
     return switch_start();
 }
 
