@@ -41,6 +41,10 @@ Hecho el 2026-10-04 (0.7.0):
 - [x] Modo Teclado Bluetooth con una MacBook Air y el iPhone a la vez: texto
       de 72 caracteres, subir volumen, trackpad del Macro pad (dice BLE).
       Los dos se reconectan solos después de reiniciar el Bluetooth.
+- [ ] Páginas de Grabadora, Clima y Cotizaciones (2026-10-04, después de la
+      0.8.0) y rangos en `/api/fs/get`: probadas en el simulador; falta en
+      la placa escuchar una grabación desde Safari, cambiar el lugar de
+      Clima y la lista de Cotizaciones con las apps abiertas.
 - [x] Ajustes, Desarrollador (2026-10-04): toques y fps encima de todo, el
       nivel del registro, los ajustes de dibujo de `/api/tune` con su vuelta
       a fábrica, y reiniciar en modo seguro sin BOOT. Probados en la placa
