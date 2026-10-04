@@ -23,10 +23,13 @@
   HTTP redirects there; the session cookie is `Secure` over HTTPS.
 
 **USB host: a pendrive**
-- Settings, USB, Host: a pendrive wired to the 40-pin header (pins 25/27
-  are the same USB lines as the OTG connector, pin 1 gives the 5 V it does
-  not) is mounted at `/usb` (FAT32), through ESP-IDF's USB Host Library and
-  `usb_host_msc`. The portal shows it as a `usb` folder; `GET/POST /api/usb`.
+- Settings, USB, Host: a pendrive wired to the 40-pin header (5 V from
+  pin 1, data on pins 21/23) is mounted at `/usb` (FAT32), through ESP-IDF's
+  USB Host Library and `usb_host_msc`, on the P4's second, Full-Speed
+  controller, moved off GPIO26 (the backlight) onto GPIO24/25. Pins 25/27,
+  the OTG connector's High-Speed lines, can be chosen instead; on wires
+  they did not get past the port reset. The portal shows the pendrive as a
+  `usb` folder; `GET/POST /api/usb` (`mode`, `pins`).
 
 **Bluetooth**
 - The board asks for encryption only when the phone or the computer has not

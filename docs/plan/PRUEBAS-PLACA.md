@@ -406,6 +406,14 @@ por el Registro del portal sin cable serie)
 - [x] El modo del puerto se guarda (pref `usb_mode`): tras una OTA vuelve
       solo a Teclado y mouse a los 4,1 s y la Mac lo toma a los 4,5 s. El
       modo Disco no se guarda (el arranque lee la tarjeta).
+- [x] **Modo host, un pendrive** (2026-10-04, `docs/USB.md`): en los pines
+      21/23 del conector de 40 pines (segundo controlador del P4, Full
+      Speed, pasado de GPIO26/27 a GPIO24/25 porque el 26 es la
+      retroiluminación) montó un Kingston DataTraveler 2.0 de 8 GB en
+      `/usb`; una foto de 1,5 MB bajó por el portal a 490 KB/s. En los pines
+      25/27 (alta velocidad, las líneas del OTG) el reset del puerto falló
+      siempre, incluso forzado a Full Speed y con VBUS por override.
+- [ ] Host en 25/27 con cables cortos y trenzados, o un conector soldado.
 - [ ] Visto de paso: `E i2s_common: i2s_channel_disable … not enabled` al
       reabrir el códec para el sonido de las teclas; inofensivo, a limpiar.
 

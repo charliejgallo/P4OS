@@ -27,8 +27,8 @@ hace falta adaptador).
 | 16 | GPIO28 | 🟢 | 15 | GPIO21 | 🟢 ADC1 canal 5 |
 | 18 | 3V3 | ⚡ | 17 | GPIO22 | 🟢 ADC1 canal 6 |
 | 20 | GPIO29 | 🟢 | 19 | GND |  |
-| 22 | GPIO30 | 🟢 | 21 | GPIO24 | 🟡 USB-Serial-JTAG D− (libre si no se usa) |
-| 24 | GPIO31 | 🟢 | 23 | GPIO25 | 🟡 USB-Serial-JTAG D+ |
+| 22 | GPIO30 | 🟢 | 21 | GPIO24 | 🟡 USB D− del pendrive en modo host (`docs/USB.md`); si no, libre |
+| 24 | GPIO31 | 🟢 | 23 | GPIO25 | 🟡 USB D+ del pendrive en modo host |
 | 26 | GND |  | 25 | USBD_N | 🔴 USB HS (en paralelo con H2), no es GPIO |
 | 28 | GPIO34 | 🟡 strapping (JTAG), usable tras el arranque | 27 | USBD_P | 🔴 USB HS, no es GPIO |
 | 30 | GPIO35 | 🔴 BOOT (strapping, pull-up 4,7K) | 29 | GND |  |

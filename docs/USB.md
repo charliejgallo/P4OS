@@ -121,22 +121,49 @@ internal RAM audit, `docs/MEMORY.md`).
 ## Host mode: a pendrive
 
 The OTG connector gives no 5 V, so a device plugged into it gets no power.
-The same D+/D- lines come out on the 40-pin header, next to 5 V, and that is
-where a pendrive goes (a USB-A socket on wires, or a cut USB cable):
+A pendrive goes on the 40-pin header instead, next to 5 V (a USB-A socket
+on wires, or a cut USB cable), on one of two ports, chosen in Settings,
+USB, "Pendrive data lines" (or `POST /api/usb {"pins": "21/23"}`):
 
-| Pendrive | Header (J3) |
-|---|---|
-| VBUS (red) | pin 1 or 3, 5 V |
-| D- (white) | pin 25, USBD_N |
-| D+ (green) | pin 27, USBD_P |
-| GND (black) | pin 5 |
+| Pendrive | Pins 21/23 (default) | Pins 25/27 |
+|---|---|---|
+| VBUS (red) | pin 1 or 3, 5 V | the same |
+| D- (white) | pin 21, GPIO24 | pin 25, USBD_N |
+| D+ (green) | pin 23, GPIO25 | pin 27, USBD_P |
+| GND (black) | pin 5 | the same |
+| Controller | the P4's second one, Full Speed (USB 1.1, 12 Mbit/s) | the High-Speed one, also the OTG connector's |
 
-The OTG connector stays unplugged while the pendrive is there: its lines are
-the same wires. The lines are High Speed (480 Mbit/s): short wires, D+ and
-D- twisted together.
+**Pins 21/23 work; 25/27 did not** (2026-10-04, a Kingston DataTraveler
+2.0 of 8 GB on loose wires). On 25/27 the High-Speed controller saw the
+pendrive connect, and every port reset failed ("HUB: Root port reset
+failed"), at High Speed and forced to Full Speed (`FSLSSupp`), with VBUS
+and the A-session valid by override (this board's VBUS reaches no pin of
+the P4). On 21/23 it mounted at once, and a 1.5 MB photo came down to the
+Mac at 490 KB/s through the portal over Wi-Fi. 25/27 stays in Settings for
+a better-wired try; there, the OTG connector stays unplugged (its lines
+are the same wires).
+
+**Pins 21/23 and the backlight.** The P4 has two FSLS PHYs: PHY 0 on
+GPIO24/25, PHY 1 on GPIO26/27. At power-on the USB-Serial-JTAG is on PHY 0
+and the Full-Speed controller on PHY 1, and ESP-IDF's host library leaves
+it there - but **GPIO26 is this board's backlight PWM**. So host mode, on
+this port, switches the USB-Serial-JTAG's pads off and swaps the two
+(`usb_wrap_ll_phy_select(&USB_WRAP, 0)`, in `LP_SYS`, before
+`usb_host_install`, whose reset of the wrap does not touch it), and puts
+back the 40 mA drive the PHY driver gave GPIO26/27 thinking the pads were
+there. Leaving host mode turns the controller's pads off and swaps back;
+as `LP_SYS` survives a software restart, every boot swaps back too (a
+constructor in `aos_usb_p4.c`). The USB-Serial-JTAG is not used on this
+board (the console is the CH343 UART) and reaches no connector.
+
+The log says the root port's state on every change (`host port:
+connected, enabled, speed, power, A-session...`), for a pendrive that does
+not come up. A couple of failed enumerations
+(`ENUM: CHECK_SHORT_DEV_DESC FAILED`) while the plug goes in are normal:
+the contacts bounce, and the next try works.
 
 Settings, USB, Host (or `POST /api/usb {"mode": "host"}`) uninstalls TinyUSB
-and installs ESP-IDF's USB Host Library on the same controller, with
+and installs ESP-IDF's USB Host Library on the chosen controller, with
 Espressif's `usb_host_msc` as its client (`aos_usb_p4.c`). A pendrive that
 answers as mass storage is mounted at `/usb` through FATFS (its second
 volume): **FAT32 only**, as ESP-IDF has no exFAT, and many pendrives over
@@ -145,7 +172,7 @@ volume): **FAT32 only**, as ESP-IDF has no exFAT, and many pendrives over
 The portal sees it as a folder `usb` at the card's root: every file call
 (list, get with ranges, put, delete, bench) on `/usb/...` goes to the
 pendrive. `GET /api/usb` says the mode and, in host mode, the pendrive
-(`id`, `vendor`, `product`, `bytes`, `mounted`, `error`).
+(`id`, `vendor`, `product`, `bytes`, `mounted`, `error`) and `pins`.
 
 Host mode is not remembered across a restart: the board comes back as it
-was before (keyboard, or idle).
+was before (keyboard, or idle). The chosen pins are kept (pref `usb_hport`).

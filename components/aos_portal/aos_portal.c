@@ -384,25 +384,34 @@ static void api_wifi(aos_httpd_req_t *r)
 }
 
 /* The USB port (docs/USB.md): GET its mode and, in HOST, the pendrive;
- * POST {"mode": "console"|"keys"|"host"} switches it as Settings, USB does.
- * Disk mode stays Settings' own: it has to close the apps holding the card. */
+ * POST {"mode": "console"|"keys"|"host"} switches it as Settings, USB does,
+ * and {"pins": "21/23"|"25/27"} picks the header port HOST uses (moving it
+ * there if it is on). Disk mode stays Settings' own: it has to close the apps holding the card. */
 static void api_usb(aos_httpd_req_t *r)
 {
     static const char *const M[] = { "console", "keys", "disk", "host" };
     if (!strcmp(aos_httpd_method(r), "POST")) {
         cJSON *b = body_json(r);
-        const char *m = jstr(b, "mode");
-        int want = -1;
+        const char *m = jstr(b, "mode"), *pins = jstr(b, "pins");
+        int want = -1, port = -1;
         for (int i = 0; m && i < 4; i++) if (!strcmp(m, M[i]) && i != AOS_HAL_USB_DISK) want = i;
+        if (pins) port = !strcmp(pins, "21/23") ? AOS_HAL_USB_HOST_HEADER : !strcmp(pins, "25/27") ? AOS_HAL_USB_HOST_OTG : -2;
         cJSON_Delete(b);
-        if (want < 0) { send_err(r, 400, "\"mode\": console, keys o host"); return; }
-        if (!aos_hal_usb_mode_set((aos_hal_usb_mode_t)want)) { send_err(r, 409, "el USB está cambiando de modo"); return; }
+        if ((m && want < 0) || port == -2 || (!m && !pins)) {
+            send_err(r, 400, "\"mode\": console, keys o host; \"pins\": 21/23 o 25/27");
+            return;
+        }
+        if ((port >= 0 && !aos_hal_usb_host_port_set(port)) || (want >= 0 && !aos_hal_usb_mode_set((aos_hal_usb_mode_t)want))) {
+            send_err(r, 409, "el USB está cambiando de modo");
+            return;
+        }
     }
     cJSON *o = cJSON_CreateObject();
     int m = aos_hal_usb_mode();
     cJSON_AddStringToObject(o, "mode", m >= 0 && m < 4 ? M[m] : "?");
     cJSON_AddBoolToObject(o, "busy", aos_hal_usb_busy());
     cJSON_AddBoolToObject(o, "connected", aos_hal_usb_connected());
+    cJSON_AddStringToObject(o, "pins", aos_hal_usb_host_port() == AOS_HAL_USB_HOST_HEADER ? "21/23" : "25/27");
     aos_usb_host_info_t in;
     if (aos_hal_usb_host_info(&in)) {
         cJSON *h = cJSON_AddObjectToObject(o, "host");

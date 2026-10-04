@@ -2325,9 +2325,13 @@ static const char blob_en__sistema_lang[] =
     "Tocá otra vez: habrá que volver a instalarla\tTap again: it will have to be installed again\n"
     "Autoridad nueva\tNew authority\n"
     "Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. La placa tiene su propia autoridad: se baja desde el portal (Ajustes, Seguridad) y se instala una vez como confiable en la Mac o el iPhone, y el navegador deja de avisar. Lo de arriba es su huella SHA-256, para compararla. Se aplica al reiniciar.\tWith HTTPS, what travels is encrypted, the password included, and away from home the portal sends HTTP over to HTTPS. The board has its own authority: download it from the portal (Settings, Security) and install it once as trusted on the Mac or the iPhone, and the browser stops warning. The line above is its SHA-256 fingerprint, to compare. It applies at the next restart.\n"
-    "Un pendrive conectado a la placa, que se lee en /usb. El conector OTG no da 5 V: el pendrive va al conector de 40 pines, pin 25 a D−, 27 a D+, 1 a 5 V y 5 a GND, con el USB-C OTG desenchufado (son los mismos cables). En FAT32.\tA pendrive plugged into the board, read at /usb. The OTG connector gives no 5 V: the pendrive goes on the 40-pin header, pin 25 to D−, 27 to D+, 1 to 5 V and 5 to GND, with the OTG USB-C unplugged (they are the same wires). FAT32.\n"
     "Esperando un pendrive en el conector de 40 pines.\tWaiting for a pendrive on the 40-pin header.\n"
     "%s %s, %.1f GB: en /usb, para Archivos y el portal.\t%s %s, %.1f GB: at /usb, for Files and the portal.\n"
+    "Un pendrive conectado a la placa, que se lee en /usb. El conector OTG no da 5 V: el pendrive va al conector de 40 pines, con 5 V del pin 1 y GND del 5, y sus datos en los pines que se eligen abajo. En FAT32.\tA pendrive plugged into the board, read at /usb. The OTG connector gives no 5 V: the pendrive goes on the 40-pin header, 5 V from pin 1 and GND from pin 5, and its data on the pins chosen below. FAT32.\n"
+    "DATOS DEL PENDRIVE\tPENDRIVE DATA LINES\n"
+    "Pines 21 (D−) y 23 (D+)\tPins 21 (D−) and 23 (D+)\n"
+    "Pines 25 (D−) y 27 (D+)\tPins 25 (D−) and 27 (D+)\n"
+    "21 y 23 son el segundo controlador USB del P4, de velocidad completa (12 Mbit/s), y sólo salen al conector de 40 pines. 25 y 27 son los mismos cables que el conector OTG, que tiene que quedar desenchufado.\t21 and 23 are the P4's second USB controller, Full Speed (12 Mbit/s), and reach only the 40-pin header. 25 and 27 are the same wires as the OTG connector, which must stay unplugged.\n"
     ;
 
 static const char blob_en_aos_cameras_lang[] =
@@ -6822,9 +6826,13 @@ static const char blob_de__sistema_lang[] =
     "Tocá otra vez: habrá que volver a instalarla\tNochmals tippen: sie muss neu installiert werden\n"
     "Autoridad nueva\tNeue Zertifizierungsstelle\n"
     "Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. La placa tiene su propia autoridad: se baja desde el portal (Ajustes, Seguridad) y se instala una vez como confiable en la Mac o el iPhone, y el navegador deja de avisar. Lo de arriba es su huella SHA-256, para compararla. Se aplica al reiniciar.\tMit HTTPS wird alles verschlüsselt übertragen, auch das Passwort, und außer Haus leitet das Portal von HTTP auf HTTPS um. Die Platine hat ihre eigene Zertifizierungsstelle: im Portal herunterladen (Einstellungen, Sicherheit) und einmal auf dem Mac oder iPhone als vertrauenswürdig installieren, dann warnt der Browser nicht mehr. Oben steht ihr SHA-256-Fingerabdruck zum Vergleichen. Gilt ab dem nächsten Neustart.\n"
-    "Un pendrive conectado a la placa, que se lee en /usb. El conector OTG no da 5 V: el pendrive va al conector de 40 pines, pin 25 a D−, 27 a D+, 1 a 5 V y 5 a GND, con el USB-C OTG desenchufado (son los mismos cables). En FAT32.\tEin USB-Stick an der Platine, lesbar unter /usb. Der OTG-Anschluss liefert keine 5 V: der Stick kommt an die 40-polige Leiste, Pin 25 an D−, 27 an D+, 1 an 5 V und 5 an GND, mit abgezogenem OTG-USB-C (es sind dieselben Leitungen). FAT32.\n"
     "Esperando un pendrive en el conector de 40 pines.\tWarte auf einen USB-Stick an der 40-poligen Leiste.\n"
     "%s %s, %.1f GB: en /usb, para Archivos y el portal.\t%s %s, %.1f GB: unter /usb, für Dateien und das Portal.\n"
+    "Un pendrive conectado a la placa, que se lee en /usb. El conector OTG no da 5 V: el pendrive va al conector de 40 pines, con 5 V del pin 1 y GND del 5, y sus datos en los pines que se eligen abajo. En FAT32.\tEin USB-Stick an der Platine, lesbar unter /usb. Der OTG-Anschluss liefert keine 5 V: der Stick kommt an die 40-polige Leiste, 5 V von Pin 1 und GND von Pin 5, seine Datenleitungen an die unten gewählten Pins. In FAT32.\n"
+    "DATOS DEL PENDRIVE\tDATENLEITUNGEN DES USB-STICKS\n"
+    "Pines 21 (D−) y 23 (D+)\tPins 21 (D−) und 23 (D+)\n"
+    "Pines 25 (D−) y 27 (D+)\tPins 25 (D−) und 27 (D+)\n"
+    "21 y 23 son el segundo controlador USB del P4, de velocidad completa (12 Mbit/s), y sólo salen al conector de 40 pines. 25 y 27 son los mismos cables que el conector OTG, que tiene que quedar desenchufado.\t21 und 23 sind der zweite USB-Controller des P4, Full Speed (12 Mbit/s), und führen nur zur 40-poligen Leiste. 25 und 27 sind dieselben Leitungen wie der OTG-Anschluss, der dann abgesteckt bleiben muss.\n"
     ;
 
 static const char blob_de_aos_cameras_lang[] =
@@ -9008,7 +9016,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2314, 33, files_en, 34 },
-    { "de", "Deutsch", 2314, 33, files_de, 34 },
+    { "en", "English", 2318, 33, files_en, 34 },
+    { "de", "Deutsch", 2318, 33, files_de, 34 },
 };
 const int aos_lang_pack_count = 2;

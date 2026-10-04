@@ -1775,10 +1775,15 @@ void aos_hal_usb_restore(void);                /* at boot, once the card is read
 bool aos_hal_usb_mouse_hold(int buttons);      /* buttons held down for the next moves (bit 0 left,
                                                 * bit 1 right; 0 lets go): drag and drop */
 
-/* P4OS: HOST mode (aos_usb_p4.c, docs/USB.md): a pendrive on the header's
- * USB lines, J3 pin 25 (D-) and 27 (D+), with 5 V from pin 1 and the OTG
- * connector unplugged (the same lines, and it gives no 5 V). A FAT volume on
- * it is mounted at aos_hal_path_usb() while it is there. */
+/* P4OS: HOST mode (aos_usb_p4.c, docs/USB.md): a pendrive on the 40-pin
+ * header, with 5 V from pin 1 and GND from pin 5, on one of two ports:
+ * pins 21 (D-) and 23 (D+), the P4's Full-Speed controller (the default),
+ * or pins 25 (D-) and 27 (D+), the High-Speed one, which are also the OTG
+ * connector's lines (unplugged then; it gives no 5 V). A FAT volume on it is
+ * mounted at aos_hal_path_usb() while it is there. */
+enum { AOS_HAL_USB_HOST_OTG = 0, AOS_HAL_USB_HOST_HEADER = 1 };
+int  aos_hal_usb_host_port(void);               /* AOS_HAL_USB_HOST_HEADER (21/23) or _OTG (25/27) */
+bool aos_hal_usb_host_port_set(int port);       /* remembered; HOST mode, if on, moves there */
 typedef struct {
     bool     device;            /* a mass storage device answered */
     bool     mounted;           /* its FAT is at aos_hal_path_usb() */

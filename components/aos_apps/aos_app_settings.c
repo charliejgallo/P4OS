@@ -402,6 +402,17 @@ static void usb_refresh(void)
         if (U.usb_tick[i]) lv_obj_set_flag(U.usb_tick[i], LV_OBJ_FLAG_HIDDEN, i != mode);
 }
 
+static void pick_row(lv_obj_t *g, const char *label, bool on, lv_event_cb_t cb, void *ud);
+
+static void usb_pins_cb(lv_event_t *e)
+{
+    if (!aos_hal_usb_host_port_set((int)(intptr_t)lv_event_get_user_data(e))) {
+        aos_ui_toast(_("El USB está cambiando de modo"), 1500);
+        return;
+    }
+    show(PG_USB);
+}
+
 static void usb_mode_cb(lv_event_t *e)
 {
     int want = (int)(intptr_t)lv_event_get_user_data(e);
@@ -496,8 +507,15 @@ static void build_usb(lv_obj_t *p)
              _("La microSD aparece en la computadora como un pendrive, para copiar apps, música, fotos o mapas a la velocidad del USB. Mientras la tiene la computadora la placa no la toca: al elegirlo se cierran las otras apps, y las de la tarjeta no abren. Expulsala en la computadora y vuelve sola a la placa, con el modo de antes."),
              true);
     mode_row(g, AOS_HAL_USB_HOST, AOS_SYM_USB_PORT, 0x5E5CE6,
-             _("Un pendrive conectado a la placa, que se lee en /usb. El conector OTG no da 5 V: el pendrive va al conector de 40 pines, pin 25 a D−, 27 a D+, 1 a 5 V y 5 a GND, con el USB-C OTG desenchufado (son los mismos cables). En FAT32."),
+             _("Un pendrive conectado a la placa, que se lee en /usb. El conector OTG no da 5 V: el pendrive va al conector de 40 pines, con 5 V del pin 1 y GND del 5, y sus datos en los pines que se eligen abajo. En FAT32."),
              true);
+    g = group(p, _("DATOS DEL PENDRIVE"));
+    int port = aos_hal_usb_host_port();
+    pick_row(g, _("Pines 21 (D−) y 23 (D+)"), port == AOS_HAL_USB_HOST_HEADER, usb_pins_cb,
+             (void *)(intptr_t)AOS_HAL_USB_HOST_HEADER);
+    pick_row(g, _("Pines 25 (D−) y 27 (D+)"), port == AOS_HAL_USB_HOST_OTG, usb_pins_cb,
+             (void *)(intptr_t)AOS_HAL_USB_HOST_OTG);
+    note(p, _("21 y 23 son el segundo controlador USB del P4, de velocidad completa (12 Mbit/s), y sólo salen al conector de 40 pines. 25 y 27 son los mismos cables que el conector OTG, que tiene que quedar desenchufado."));
     note(p, _("El conector OTG es el USB 2.0 de alta velocidad del P4 (480 Mbit/s). La placa puede alimentarse por él o por el UART, y pasar de uno al otro sin reiniciarse."));
     U.usb_shown = -1;
     usb_refresh();
