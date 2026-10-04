@@ -314,3 +314,51 @@ img.shot { display: none; max-width: 800px; width: 100%; border-radius: 12px; }
   .ftable .row.sel .acts { display: flex; }
   .screen img { max-height: 70vh; }
 }
+
+/* ---- Notas ---- */
+.ntcards { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 14px; margin-top: 14px; }
+.ntcard { --tag: transparent; background: color-mix(in srgb, var(--tag) 30%, var(--card)); border-radius: var(--radius); padding: 14px 16px; cursor: pointer; min-height: 150px; display: flex; flex-direction: column; gap: 6px; border: 1px solid var(--line); }
+.ntcard:hover { filter: brightness(1.08); }
+.ntct { font-weight: 650; font-size: 17px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ntpin { float: right; font-size: 13px; }
+.ntprev { color: var(--dim); font-size: 13.5px; white-space: pre-line; overflow: hidden; flex: 1; max-height: 7.5em; }
+.ntprev .done { text-decoration: line-through; opacity: .7; }
+.ntmeta { display: flex; justify-content: space-between; color: var(--dim); font-size: 12px; }
+.ntsheet { max-width: 860px; overflow: visible; }
+.nttitle { width: 100%; border: 0; background: transparent; font-size: 30px; font-weight: 700; outline: none; padding: 4px 0; }
+.nttags { display: flex; gap: 6px; }
+.nttag { width: 26px; height: 26px; border-radius: 50%; border: 2px solid transparent; background: var(--card2); cursor: pointer; padding: 0; font-size: 12px; color: var(--dim); }
+.nttag.on { border-color: var(--text); }
+.ntbar { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 8px 0 12px; border-bottom: 1px solid var(--line); margin-bottom: 12px; position: sticky; top: 0; background: var(--card); z-index: 2; }
+.ntbar select { width: auto; padding: 7px 10px; border-radius: 999px; border: 0; background: var(--card2); }
+.ntbar .ntb { padding: 7px 12px; min-width: 38px; }
+.ntpop { position: relative; }
+.ntpop > summary { list-style: none; padding: 7px 12px; }
+.ntpop > summary::-webkit-details-marker { display: none; }
+.ntsw { position: absolute; top: 40px; left: 0; z-index: 5; display: flex; gap: 6px; padding: 10px; background: var(--card2); border-radius: 14px; box-shadow: 0 8px 24px rgba(0,0,0,.35); }
+.ntswb { width: 28px; height: 28px; border-radius: 50%; border: 1px solid var(--line); cursor: pointer; padding: 0; background: var(--card); color: var(--text); font-weight: 700; }
+.ntdoc { outline: none; min-height: 320px; font-size: 17px; line-height: 1.5; }
+.ntdoc .nb { --ind: 0; position: relative; padding-left: calc(var(--ind) * 28px); min-height: 1.5em; }
+.ntdoc .nb[data-t=h1] { font-size: 29px; font-weight: 700; margin-top: 14px; }
+.ntdoc .nb[data-t=h2] { font-size: 22px; font-weight: 700; margin-top: 10px; }
+.ntdoc .nb[data-t=h3] { font-weight: 700; margin-top: 6px; }
+.ntdoc .nb[data-t=quote] { font-style: italic; color: color-mix(in srgb, var(--text) 75%, var(--dim)); border-left: 4px solid var(--yellow); padding-left: calc(var(--ind) * 28px + 14px); margin: 4px 0; }
+.ntdoc .nb[data-t=bullet], .ntdoc .nb[data-t=num], .ntdoc .nb[data-t=check] { padding-left: calc(var(--ind) * 28px + 30px); }
+.ntdoc .nb[data-t=bullet]::before, .ntdoc .nb[data-t=num]::before { position: absolute; left: calc(var(--ind) * 28px); width: 24px; text-align: center; color: var(--dim); }
+.ntdoc .nb[data-t=bullet]::before { content: attr(data-g); }
+.ntdoc .nb[data-t=num]::before { content: attr(data-n); text-align: right; width: 26px; }
+.ntdoc .nb[data-t=check]::before { content: ''; position: absolute; left: calc(var(--ind) * 28px + 2px); top: .3em; width: 16px; height: 16px; border: 2px solid var(--dim); border-radius: 5px; cursor: pointer; }
+.ntdoc .nb[data-t=check][data-c="1"]::before { content: '✓'; background: var(--yellow); border-color: var(--yellow); color: #000; font-size: 13px; line-height: 16px; text-align: center; font-weight: 800; }
+.ntdoc .nb[data-t=check][data-c="1"] { text-decoration: line-through; color: var(--dim); }
+.ntdoc .nb[data-t=rule] { padding: 8px 0; }
+.ntdoc .nb[data-t=rule] hr { border: 0; border-top: 2px solid var(--line); margin: 0; }
+.ntraw { width: 100%; min-height: 420px; font: 14px/1.5 ui-monospace, Menlo, monospace; background: var(--card2); border: 0; border-radius: 12px; padding: 14px; }
+.nttasks .nttask { display: flex; align-items: center; gap: 8px; padding: 4px 0 4px calc(var(--ind, 0) * 28px); }
+.nttasks input[type=checkbox] { width: 20px; height: 20px; accent-color: var(--yellow); flex: none; }
+.nttxt { flex: 1; min-width: 0; border: 0; border-bottom: 1px solid var(--line); background: transparent; padding: 6px 2px; outline: none; }
+.nttxt.done { text-decoration: line-through; color: var(--dim); }
+.ntprio { width: auto; border: 0; background: var(--card2); border-radius: 8px; padding: 4px 6px; font-weight: 700; }
+.ntmini { padding: 4px 9px; font-size: 13px; }
+.ntprog { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; color: var(--dim); font-size: 13px; }
+.ntprog .ntbarfill { height: 8px; border-radius: 4px; background: var(--yellow); min-width: 8px; }
+.ntprog::before { content: ''; }
