@@ -1150,10 +1150,17 @@ static int gap_event(struct ble_gap_event *event, void *arg)
             advertise();
             return 0;
         }
+        if (s_conn != SIN_CONN && s_host != SIN_CONN) {
+            /* both places taken: a third has no business here */
+            ESP_LOGW(TAG, "a third connection (%u), closed", (unsigned)event->connect.conn_handle);
+            ble_gap_terminate(event->connect.conn_handle, BLE_ERR_REM_USER_CONN_TERM);
+            return 0;
+        }
         if (s_conn != SIN_CONN) {
             /* the phone's place is taken: this one is the computer, if the
              * keyboard mode allows a second, and on_svc swaps them if not */
             s_host = event->connect.conn_handle;
+            s_host_name[0] = '\0';
             ESP_LOGI(TAG, "second connection (%u)", (unsigned)s_host);
             if (ble_gap_security_initiate(s_host) != 0) ESP_LOGW(TAG, "could not start encryption");
             return 0;
@@ -1177,10 +1184,16 @@ static int gap_event(struct ble_gap_event *event, void *arg)
             s_host = SIN_CONN;
             s_host_name[0] = '\0';
             aos_ble_hid_host_gone();
-        } else {
+        } else if (event->disconnect.conn.conn_handle == s_conn) {
             ESP_LOGI(TAG, "phone disconnected (reason %d)",
                      event->disconnect.reason);
             limpiar_conexion();
+        } else {
+            /* neither: one that never got a place (a third, or one that
+             * failed half way). Clearing the phone's state for it would
+             * leave a phone connected that the board no longer knows. */
+            ESP_LOGI(TAG, "connection %u closed (reason %d)", (unsigned)event->disconnect.conn.conn_handle,
+                     event->disconnect.reason);
         }
         advertise();
         return 0;
@@ -1210,6 +1223,10 @@ static int gap_event(struct ble_gap_event *event, void *arg)
         /* Only now does looking for ANCS make sense. */
         ble_gattc_disc_svc_by_uuid(event->enc_change.conn_handle,
                                    &UUID_ANCS.u, on_svc, NULL);
+        if (event->enc_change.conn_handle == s_host && !s_host_name[0]) {
+            /* a computer that came second: its name, for Settings */
+            ble_gattc_read_by_uuid(s_host, 1, 0xFFFF, BLE_UUID16_DECLARE(0x2A00), on_host_name, NULL);
+        }
         advertise_if_room();
         return 0;
 

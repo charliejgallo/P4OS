@@ -23,6 +23,8 @@
 #include <string.h>
 
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "host/ble_hs.h"
 #include "services/gap/ble_svc_gap.h"
 
@@ -219,9 +221,24 @@ bool aos_ble_hid_send(int report_id, const void *data, size_t len)
     uint16_t h = report_id == RID_KEYBOARD ? s_h_kbd : report_id == RID_CONSUMER ? s_h_cons : s_h_mouse;
     bool sub = report_id == RID_KEYBOARD ? s_sub_kbd : report_id == RID_CONSUMER ? s_sub_cons : s_sub_mouse;
     if (!sub) return false;
-    struct os_mbuf *om = ble_hs_mbuf_from_flat(data, (uint16_t)len);
-    if (!om) return false;
-    return ble_gatts_notify_custom(conn, h, om) == 0;
+    /* A text is two notifications a character, faster than one connection
+     * interval carries them: when NimBLE runs out of buffers the
+     * notification fails (it frees the buffer itself) and this waits for the
+     * queue to drain and tries again. Without it a text stopped half way,
+     * and a lost release would leave a key held down. */
+    for (int tries = 0; tries < 50; tries++) {
+        struct os_mbuf *om = ble_hs_mbuf_from_flat(data, (uint16_t)len);
+        int rc = om ? ble_gatts_notify_custom(conn, h, om) : BLE_HS_ENOMEM;
+        if (rc == 0) return true;
+        if (rc != BLE_HS_ENOMEM && rc != BLE_HS_EBUSY) {
+            ESP_LOGW(TAG, "report %d: %d", report_id, rc);
+            return false;
+        }
+        if (aos_ble_host_conn() != conn) return false;
+        vTaskDelay(pdMS_TO_TICKS(5));
+    }
+    ESP_LOGW(TAG, "report %d: no room for 250 ms", report_id);
+    return false;
 }
 
 void aos_ble_hid_enable(bool on)
