@@ -1,5 +1,7 @@
-# Builds the firmware for both chip profiles and every app against it, on
-# each push and pull request. A tag v* also makes a release with them.
+# Builds the firmware for both chip profiles and every app against it, the
+# ESP32-C6's firmware (c6/, docs/C6.md) and the colour emoji pack
+# (docs/EMOJI.md), on each push and pull request. A tag v* also makes a
+# release with them.
 #
 # What it does not build: the apps' art packs (<app>_p4.pak). Their sources
 # are Blender renders and art that do not live in this repository; the packs
@@ -62,9 +64,52 @@ jobs:
           name: p4os-${{ matrix.profile }}
           path: out/*
 
+  # The C6's image, which the P4 installs from the card's /firmware/c6.bin
+  # (Settings, Update, or tools/install_c6.sh)
+  c6:
+    runs-on: ubuntu-latest
+    container: espressif/idf:release-v5.5
+    steps:
+      - uses: actions/checkout@v5
+      - name: firmware of the ESP32-C6
+        shell: bash
+        run: |
+          . $IDF_PATH/export.sh
+          tools/build_c6.sh
+          mkdir -p out
+          cp c6/build/p4os_c6.bin out/p4os-c6.bin
+      - uses: actions/upload-artifact@v5
+        with:
+          name: p4os-c6
+          path: out/*
+
+  # /fonts/emoji.pak, from Noto's images at a fixed tag: the same pack every
+  # time (15.5 MB, not kept in git)
+  emoji:
+    runs-on: ubuntu-latest
+    env:
+      NOTO_TAG: v2026-09-24-unicode18_0
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: emoji.pak
+        run: |
+          pip install --quiet pillow
+          git clone --quiet --depth 1 --branch "$NOTO_TAG" --filter=blob:none --sparse \
+              https://github.com/googlefonts/noto-emoji.git noto
+          (cd noto && git sparse-checkout set 2D/png/72 third_party/region-flags/png)
+          mkdir -p out
+          python3 tools/gen_emoji.py noto out/emoji.pak
+      - uses: actions/upload-artifact@v5
+        with:
+          name: p4os-emoji
+          path: out/*
+
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: firmware
+    needs: [firmware, c6, emoji]
     runs-on: ubuntu-latest
     permissions:
       contents: write

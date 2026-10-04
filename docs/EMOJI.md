@@ -9,9 +9,13 @@ the P4 has the card and the PSRAM to draw them all, in colour.
 `tools/gen_emoji.py` turns Google's Noto Emoji (the 2D set, Apache 2.0, and
 its public-domain region flags) into one file, `/fonts/emoji.pak` on the
 card: 4012 emoji, each a 48 x 48 RGBA image encoded as QOI, and an index of
-their sequences. 15.5 MB. It is not in git; it goes out with the release.
+their sequences. 15.5 MB. It is not in git: the CI builds it from Noto's
+tag `v2026-09-24-unicode18_0` (the `emoji` job of
+`.github/workflows/build.yml`) and it goes out with the release as
+`emoji.pak`. By hand, the same file byte for byte:
 
-    git clone --depth 1 --filter=blob:none --sparse https://github.com/googlefonts/noto-emoji.git
+    git clone --depth 1 --branch v2026-09-24-unicode18_0 --filter=blob:none --sparse \
+        https://github.com/googlefonts/noto-emoji.git
     (cd noto-emoji && git sparse-checkout set 2D/png/72 third_party/region-flags/png)
     tools/gen_emoji.py noto-emoji emoji.pak
     tools/install_emoji.sh p4os.local emoji.pak      # then restart

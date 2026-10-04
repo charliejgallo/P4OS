@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+**The release carries everything**
+- The CI builds the C6's firmware (`p4os-c6.bin`, for the card's
+  `/firmware/c6.bin`) and the colour emoji pack (`emoji.pak`, from Noto's
+  tag `v2026-09-24-unicode18_0`, the same file byte for byte as before), and
+  a tag's release takes them with the firmware, the apps and the languages.
+
 **Settings, Developer**
 - Show touches (a ring under every finger the GT911 reports) and fps
   (LVGL's renders plus the apps' flips), over everything; they stay on
