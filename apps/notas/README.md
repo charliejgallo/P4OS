@@ -58,13 +58,21 @@ note left empty is not kept.
 
 ## The portal
 
-Page **Notas** (`#notas`, in `components/aos_portal/web/app.js`): the notes
-as cards, a visual editor with the same formatting as the app, a task list
-editor, the raw Markdown, the bin, and uploading `.md`/`.txt` files. It
-only uses the portal's file API (`/api/fs*`), and its parser and writer
-follow `nt_doc.c` rule for rule: a note saved from the browser without
-changes comes back byte for byte (only `modified:` moves). Before writing it
-checks that the file did not change on the card since it was read.
+Page **Notas** (`#notas`), in `web/notas.js`: a page of the card
+(docs/PORTAL-PAGES.md) that `tools/install_apps.sh` puts in `/web`, using
+only `window.P4OS` version 1 and bringing its own styles. The notes as
+cards, a visual editor with the same formatting as the app, a task list
+editor, the raw Markdown, the bin, and uploading `.md`/`.txt` files. Its
+parser and writer follow `nt_doc.c` rule for rule: a note saved from the
+browser without changes comes back byte for byte (only `modified:` moves).
+Before writing it checks that the file did not change on the card since it
+was read.
+
+While the firmware still carries its own copy (`pageNotas` in
+`components/aos_portal/web/app.js`, with its menu entry in `index.html`),
+`notas.js` sees the portal's Notas entry in the menu and does not register:
+the firmware's goes on working. Once the firmware drops both, this one takes
+the place by itself.
 
 The app watches the card every two seconds: the open note, if it changed and
 there is nothing unsaved in the app, is read again (closed if it went to the
@@ -93,7 +101,7 @@ italic is upright.
 ```
 tools/build_apps.sh notas
 python3 apps/notas/tools/pack_fonts.py
-tools/install_apps.sh p4os.local notas         # the .so and the pack; restarts the board
+tools/install_apps.sh p4os.local notas         # the .so, the pack and the page; restarts the board
 tools/install_lang.sh p4os.local en            # and de
 ```
 
