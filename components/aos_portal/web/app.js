@@ -575,6 +575,10 @@ async function pageAjustes() {
       h('label', { class: 'f' }, 'Brillo'), slider('brightness', s.brightness),
       h('label', { class: 'f' }, 'Volumen'), slider('volume', s.volume))),
     h('h2', {}, 'Fondo de pantalla'), h('div', { class: 'card pad' }, sw),
+    h('h2', {}, 'Seguridad'), h('div', { class: 'card pad' },
+      h('p', { style: 'margin-top:0' }, 'La contraseña, las redes de confianza y HTTPS se cambian sólo en la placa: Ajustes, Portal web.'),
+      h('div', { class: 'btns' }, h('a', { class: 'btn', href: '/api/tls/ca' }, 'Bajar la autoridad HTTPS de la placa')),
+      h('p', { class: 'note' }, 'Instalada una vez como confiable en la Mac (Acceso a Llaveros, "Confiar siempre") o en el iPhone (Ajustes, General, Información, Confianza de certificados), el navegador deja de avisar por https://' + (info.name || 'p4os') + '.local. Sólo sirve para nombres .local y direcciones de la red de casa.')),
     h('h2', {}, 'Sistema'), h('div', { class: 'card pad' }, h('div', { class: 'btns' },
       h('button', { class: 'btn red', onclick: async () => { if (confirm('¿Reiniciar la placa?')) { await post('restart'); toast('Reiniciando…'); } } }, 'Reiniciar'))));
 }
@@ -2941,7 +2945,8 @@ function loginScreen(msg) {
       h('input', { type: 'text', autocomplete: 'username', value: name, style: 'display:none', readonly: true }),
       pw, err,
       h('div', { class: 'btns', style: 'margin-top:14px' }, h('button', { class: 'btn pri', type: 'submit' }, 'Entrar')),
-      h('p', { class: 'note' }, 'Se pone, se cambia o se quita en la placa: Ajustes, Portal web.'))));
+      h('p', { class: 'note' }, 'Se pone, se cambia o se quita en la placa: Ajustes, Portal web. ',
+        h('a', { href: '/api/tls/ca' }, 'La autoridad HTTPS de la placa'), ', para que el navegador confíe en ella.'))));
   pw.focus();
 }
 

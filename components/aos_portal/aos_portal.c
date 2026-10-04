@@ -1287,12 +1287,17 @@ static int s_https_port;
 static void https_up(void *arg)
 {
     (void)arg;
-    unsigned char *cert = NULL, *key = NULL;
-    size_t cl = 0, kl = 0;
-    if (aos_access_tls_der(&cert, &cl, &key, &kl) && aos_httpd_start_tls(s_https_port, cert, cl, key, kl))
+    /* the certificate carries the Wi-Fi address and its dates: up to 30 s
+     * for the connection and the clock, else it is made without them */
+    for (int i = 0; i < 30 && !(aos_hal_time_is_valid() && aos_hal_net_state() == AOS_NET_CONNECTED); i++)
+        aos_hal_sleep_ms(1000);
+    unsigned char *cert = NULL, *ca = NULL, *key = NULL;
+    size_t cl = 0, al = 0, kl = 0;
+    if (aos_access_tls_der(&cert, &cl, &ca, &al, &key, &kl) && aos_httpd_start_tls(s_https_port, cert, cl, ca, al, key, kl))
         aos_portal_set_https_port(s_https_port);
     if (key) memset(key, 0, kl);
     free(cert);
+    free(ca);
     free(key);
 }
 

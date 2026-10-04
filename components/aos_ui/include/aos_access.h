@@ -75,18 +75,22 @@ void aos_access_token_new(void);
 bool aos_access_token_ok(const char *token);
 
 /* ---- HTTPS (port 443) ----
- * The board's own certificate: an ECDSA P-256 key and a self-signed
- * certificate made on the board the first time, for <name>.local and the
- * board's own addresses, kept in preferences. A browser warns about it once;
- * its SHA-256 fingerprint, shown in Settings, is what to compare. Switching
- * HTTPS or making a new certificate takes effect at the next start. */
+ * The board's own authority (a CA limited to .local names and private
+ * addresses, ten years) signs the portal's certificate (800 days, renewed by
+ * the board). Trusting the authority once on a computer or a phone is what
+ * makes the browser's warning go; its SHA-256 fingerprint, shown in
+ * Settings, is what to compare. Switching HTTPS or making a new authority
+ * takes effect at the next start. */
 bool aos_access_https(void);
 void aos_access_set_https(bool on);
-/* the certificate and its key, DER, made if there are none yet (~1 s the
- * first time); free() both */
-bool aos_access_tls_der(unsigned char **cert, size_t *cert_len, unsigned char **key, size_t *key_len);
-void aos_access_tls_forget(void);           /* a new one at the next start */
-/* "AB:CD:..." of the certificate kept, "" if there is none yet */
+/* the portal's certificate, the authority's and the portal's key, DER, each
+ * made when needed (~1 s the first time); free() the three */
+bool aos_access_tls_der(unsigned char **cert, size_t *cert_len, unsigned char **ca, size_t *ca_len,
+                        unsigned char **key, size_t *key_len);
+/* the authority's certificate alone, DER, to download; free() it */
+bool aos_access_tls_ca(unsigned char **der, size_t *len);
+void aos_access_tls_forget(void);           /* a new authority at the next start */
+/* "AB:CD:..." of the authority, "" if there is none yet */
 void aos_access_tls_fingerprint(char *out, size_t n);
 
 /* Called from the shell's tick: keeps mDNS quiet on networks that are not

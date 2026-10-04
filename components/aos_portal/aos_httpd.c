@@ -14,6 +14,7 @@
 #include "mbedtls/pk.h"
 #include "mbedtls/error.h"
 #include "mbedtls/version.h"
+#include "mbedtls/oid.h"
 #if defined(MBEDTLS_PSA_CRYPTO_C)
 #include "psa/crypto.h"
 #endif
@@ -491,7 +492,18 @@ bool aos_httpd_start(int port, aos_httpd_handler_t handler)
     return aos_hal_thread_start("httpd", listen_thread, &l, 4096, 3);
 }
 
-bool aos_httpd_start_tls(int port, const unsigned char *cert, size_t cert_len, const unsigned char *key, size_t key_len)
+/* nameConstraints, which this mbedTLS does not parse: the board's own
+ * authority carries it (critical), and the board reads that certificate
+ * itself. Browsers do apply it. */
+static int accept_name_constraints(void *ctx, mbedtls_x509_crt const *crt, mbedtls_x509_buf const *oid,
+                                   int critical, const unsigned char *p, const unsigned char *end)
+{
+    (void)ctx; (void)crt; (void)critical; (void)p; (void)end;
+    return MBEDTLS_OID_CMP(MBEDTLS_OID_NAME_CONSTRAINTS, oid) == 0 ? 0 : -1;
+}
+
+bool aos_httpd_start_tls(int port, const unsigned char *cert, size_t cert_len, const unsigned char *ca,
+                         size_t ca_len, const unsigned char *key, size_t key_len)
 {
     if (!s_handler || T.ready) return T.ready;
     T.mx = aos_hal_mutex_create();
@@ -502,6 +514,8 @@ bool aos_httpd_start_tls(int port, const unsigned char *cert, size_t cert_len, c
     mbedtls_x509_crt_init(&T.crt);
     mbedtls_pk_init(&T.key);
     int e = mbedtls_x509_crt_parse_der(&T.crt, cert, cert_len);
+    if (!e && ca) e = mbedtls_x509_crt_parse_der_with_ext_cb(&T.crt, ca, ca_len, 1, accept_name_constraints, NULL);
+                                    /* the chain: ours, then its authority */
     if (!e) e = mbedtls_pk_parse_key(&T.key, key, key_len, NULL, 0, tls_rng, NULL);
     if (!e) e = mbedtls_ssl_config_defaults(&T.conf, MBEDTLS_SSL_IS_SERVER, MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT);
     if (!e) {

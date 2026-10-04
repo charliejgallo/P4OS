@@ -9,8 +9,10 @@
  *   pt_sess    the sessions: up to SESS_MAX hashes of their ids, in hex
  *   pt_token   the scripts' token, in clear: Settings shows it
  *   pt_https   1: the portal also answers HTTPS, on port 443
- *   pt_crt, pt_key   the board's certificate and its private key: DER in
- *              base64, one line (the simulator keeps preferences a line each)
+ *   pt_cac, pt_cak   the board's HTTPS authority and its key, and
+ *   pt_crt, pt_key   the portal's certificate and its key: DER in base64,
+ *              one line each (the simulator keeps preferences a line each)
+ *   pt_cfor    what the portal's certificate was made for
  *
  * A session id is 16 random bytes; what is kept is the start of its SHA-256,
  * so the preferences hold nothing a browser could present. Sessions do not
@@ -30,10 +32,13 @@
 #include "mbedtls/entropy.h"
 #include "mbedtls/version.h"
 #include "mbedtls/base64.h"
+#include "mbedtls/oid.h"
+#include "mbedtls/asn1.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #ifdef ESP_PLATFORM
 #include "esp_random.h"
@@ -351,7 +356,30 @@ bool aos_access_token_ok(const char *token)
 }
 
 
-/* ---- HTTPS: the board's certificate ---- */
+/* ---- HTTPS: the board's own authority and the portal's certificate ----
+ *
+ * Two certificates, as a real site has, so that trusting the board is done
+ * once: an authority (a small CA) that stays for ten years, and the portal's
+ * certificate, signed by it, that the board renews by itself. The authority
+ * is what goes into a Mac's keychain or an iPhone's profiles.
+ *
+ * The authority can only vouch for .local names, the board's own name and
+ * the private address ranges (a critical nameConstraints extension): its
+ * key is on the board, in flash that is not encrypted, and someone who took
+ * it from a board must not be able to impersonate any real site to the
+ * devices that trust it.
+ *
+ * The portal's certificate follows what Apple asks of a server certificate
+ * that a user trusts (and Chrome on a Mac uses Apple's verifier): the name
+ * in subjectAltName, serverAuth in extendedKeyUsage, at most 825 days. It
+ * is made again when it has 60 days left, or when the board's name or its
+ * Wi-Fi address changed (the address goes in it too).
+ */
+
+#define K_CAC   "pt_cac"            /* the authority's certificate */
+#define K_CAK   "pt_cak"            /* and its key */
+#define K_CFOR  "pt_cfor"           /* what the portal's was made for: "name|ip|until" */
+#define LEAF_DAYS 800
 
 bool aos_access_https(void) { return pref_i(K_HTTPS, 0) != 0; }
 void aos_access_set_https(bool on) { aos_hal_pref_set_i32(K_HTTPS, on); }
@@ -383,98 +411,285 @@ static bool pref_set_der(const char *k, const unsigned char *der, size_t len)
     return !mbedtls_base64_encode((unsigned char *)b64, sizeof b64, &olen, der, len) && aos_hal_pref_set_str(k, b64);
 }
 
-/* The key and a self-signed certificate for the board's names, valid from
- * 2026 to 2036 (the board may not know the date when it makes them). */
-static bool tls_make(void)
+static bool key_load(const char *k, mbedtls_pk_context *key)
+{
+    size_t len = 0;
+    unsigned char *der = pref_der(k, &len);
+    bool ok = der && !mbedtls_pk_parse_key(key, der, len, NULL, 0, drbg_rng, NULL);
+    if (der) memset(der, 0, len);
+    free(der);
+    return ok;
+}
+
+static bool key_new(const char *k, mbedtls_pk_context *key)
+{
+    unsigned char buf[256];
+    bool ok = !mbedtls_pk_setup(key, mbedtls_pk_info_from_type(MBEDTLS_PK_ECKEY)) &&
+              !mbedtls_ecp_gen_key(MBEDTLS_ECP_DP_SECP256R1, mbedtls_pk_ec(*key), drbg_rng, NULL);
+    int l = ok ? mbedtls_pk_write_key_der(key, buf, sizeof buf) : -1;    /* from the buffer's end */
+    ok = l > 0 && pref_set_der(k, buf + sizeof buf - l, (size_t)l);
+    memset(buf, 0, sizeof buf);
+    return ok;
+}
+
+static bool crt_save(const char *k, mbedtls_x509write_cert *crt)
+{
+    unsigned char *buf = malloc(1024);
+    int l = buf ? mbedtls_x509write_crt_der(crt, buf, 1024, drbg_rng, NULL) : -1;
+    bool ok = l > 0 && pref_set_der(k, buf + 1024 - l, (size_t)l);
+    free(buf);
+    return ok;
+}
+
+/* "YYYYMMDDhhmmss", days from now; with no clock yet, from 2026-01-01 */
+static void when(int days, char out[16])
+{
+    time_t t = aos_hal_time_is_valid() ? time(NULL) : 1767225600;
+    t += (time_t)days * 86400;
+    struct tm g;
+    gmtime_r(&t, &g);
+    strftime(out, 16, "%Y%m%d%H%M%S", &g);
+}
+
+static void serial(mbedtls_x509write_cert *crt)
+{
+    uint8_t s[16];
+    rnd(s, sizeof s);
+    s[0] &= 0x7F;                               /* a positive number */
+    mbedtls_x509write_crt_set_serial_raw(crt, s, sizeof s);
+}
+
+/* a DER element: tag, length (short or two bytes) and content */
+static size_t tlv(unsigned char *o, unsigned char tag, const void *c, size_t n)
+{
+    size_t h = 0;
+    o[h++] = tag;
+    if (n < 128) o[h++] = (unsigned char)n;
+    else { o[h++] = 0x82; o[h++] = (unsigned char)(n >> 8); o[h++] = (unsigned char)n; }
+    memmove(o + h, c, n);
+    return h + n;
+}
+
+/* NameConstraints { permittedSubtrees [0] { dNSName "local", dNSName <name>,
+ * iPAddress 10/8, 172.16/12, 192.168/16 } } */
+static size_t name_constraints(unsigned char *out, const char *name)
+{
+    static const uint8_t NETS[3][8] = {
+        { 10, 0, 0, 0, 255, 0, 0, 0 }, { 172, 16, 0, 0, 255, 240, 0, 0 }, { 192, 168, 0, 0, 255, 255, 0, 0 },
+    };
+    unsigned char subtrees[256], one[300], gn[300];     /* gcc cannot tell how long the name is */
+    size_t n = 0, g;
+    g = tlv(gn, 0x82, "local", 5);
+    n += tlv(subtrees + n, 0x30, gn, g);
+    g = tlv(gn, 0x82, name, strlen(name));
+    n += tlv(subtrees + n, 0x30, gn, g);
+    for (int i = 0; i < 3; i++) {
+        g = tlv(gn, 0x87, NETS[i], 8);
+        n += tlv(subtrees + n, 0x30, gn, g);
+    }
+    size_t p = tlv(one, 0xA0, subtrees, n);
+    return tlv(out, 0x30, one, p);
+}
+
+/* nameConstraints, which this mbedTLS does not parse: the board's own
+ * authority carries it (critical), and the board reads that certificate
+ * itself. Browsers do apply it. */
+static int accept_name_constraints(void *ctx, mbedtls_x509_crt const *crt, mbedtls_x509_buf const *oid,
+                                   int critical, const unsigned char *p, const unsigned char *end)
+{
+    (void)ctx; (void)crt; (void)critical; (void)p; (void)end;
+    return MBEDTLS_OID_CMP(MBEDTLS_OID_NAME_CONSTRAINTS, oid) == 0 ? 0 : -1;
+}
+
+/* each step of making a certificate, logged by name when it fails */
+static bool step(int e, const char *what)
+{
+    if (e) aos_hal_log("access", "certificate: %s failed (-0x%04x)", what, (unsigned)-e);
+    return !e;
+}
+#define STEP(call) step((call), #call)
+
+static bool make_ca(void)
 {
     mbedtls_pk_context key;
     mbedtls_x509write_cert crt;
     mbedtls_pk_init(&key);
     mbedtls_x509write_crt_init(&crt);
-    unsigned char *cbuf = malloc(1024), *kbuf = malloc(256);
-    bool ok = cbuf && kbuf &&
-              !mbedtls_pk_setup(&key, mbedtls_pk_info_from_type(MBEDTLS_PK_ECKEY)) &&
-              !mbedtls_ecp_gen_key(MBEDTLS_ECP_DP_SECP256R1, mbedtls_pk_ec(key), drbg_rng, NULL);
+    const char *name = aos_hal_device_name();
+    char subj[96], from[16], until[16];
+    unsigned char nc[300];
+    snprintf(subj, sizeof subj, "CN=P4OS %s,O=P4OS", name);
+    when(-1, from);
+    when(3650, until);
+    bool ok = key_new(K_CAK, &key);
     if (ok) {
-        const char *name = aos_hal_device_name();
-        char subj[96], local[80];
-        snprintf(local, sizeof local, "%s.local", name);
-        snprintf(subj, sizeof subj, "CN=%s,O=P4OS", local);
-        uint8_t serial[16];
-        rnd(serial, sizeof serial);
-        serial[0] &= 0x7F;                       /* a positive number */
         mbedtls_x509write_crt_set_version(&crt, MBEDTLS_X509_CRT_VERSION_3);
         mbedtls_x509write_crt_set_md_alg(&crt, MBEDTLS_MD_SHA256);
         mbedtls_x509write_crt_set_subject_key(&crt, &key);
         mbedtls_x509write_crt_set_issuer_key(&crt, &key);
+        serial(&crt);
+        size_t ncl = name_constraints(nc, name);
         ok = !mbedtls_x509write_crt_set_subject_name(&crt, subj) &&
              !mbedtls_x509write_crt_set_issuer_name(&crt, subj) &&
-             !mbedtls_x509write_crt_set_serial_raw(&crt, serial, sizeof serial) &&
-             !mbedtls_x509write_crt_set_validity(&crt, "20260101000000", "20360101000000") &&
-             !mbedtls_x509write_crt_set_basic_constraints(&crt, 0, -1) &&
-             !mbedtls_x509write_crt_set_key_usage(&crt, MBEDTLS_X509_KU_DIGITAL_SIGNATURE);
-#if MBEDTLS_VERSION_NUMBER >= 0x03050000
-        /* the names a browser checks: <name>.local, the bare name, and the
-         * addresses that never change (the AP, the cable) */
-        static const uint8_t AP_IP[4] = { 192, 168, 4, 1 }, USB_IP[4] = { 192, 168, 7, 1 };
-        mbedtls_x509_san_list san[4];
-        memset(san, 0, sizeof san);
-        san[0].node.type = MBEDTLS_X509_SAN_DNS_NAME;
-        san[0].node.san.unstructured_name.p = (unsigned char *)local;
-        san[0].node.san.unstructured_name.len = strlen(local);
-        san[1].node.type = MBEDTLS_X509_SAN_DNS_NAME;
-        san[1].node.san.unstructured_name.p = (unsigned char *)name;
-        san[1].node.san.unstructured_name.len = strlen(name);
-        san[2].node.type = MBEDTLS_X509_SAN_IP_ADDRESS;
-        san[2].node.san.unstructured_name.p = (unsigned char *)AP_IP;
-        san[2].node.san.unstructured_name.len = 4;
-        san[3].node.type = MBEDTLS_X509_SAN_IP_ADDRESS;
-        san[3].node.san.unstructured_name.p = (unsigned char *)USB_IP;
-        san[3].node.san.unstructured_name.len = 4;
-        for (int i = 0; i < 3; i++) san[i].next = &san[i + 1];
-        ok = ok && !mbedtls_x509write_crt_set_subject_alternative_name(&crt, san);
-#endif
+             !mbedtls_x509write_crt_set_validity(&crt, from, until) &&
+             !mbedtls_x509write_crt_set_basic_constraints(&crt, 1, 0) &&
+             !mbedtls_x509write_crt_set_key_usage(&crt, MBEDTLS_X509_KU_KEY_CERT_SIGN | MBEDTLS_X509_KU_CRL_SIGN) &&
+             !mbedtls_x509write_crt_set_subject_key_identifier(&crt) &&
+             !mbedtls_x509write_crt_set_extension(&crt, MBEDTLS_OID_NAME_CONSTRAINTS,
+                                                  MBEDTLS_OID_SIZE(MBEDTLS_OID_NAME_CONSTRAINTS), 1, nc, ncl) &&
+             crt_save(K_CAC, &crt);
     }
-    /* both DER writers fill their buffer from the end */
-    int cl = ok ? mbedtls_x509write_crt_der(&crt, cbuf, 1024, drbg_rng, NULL) : -1;
-    int kl = cl > 0 ? mbedtls_pk_write_key_der(&key, kbuf, 256) : -1;
-    ok = cl > 0 && kl > 0 && pref_set_der(K_CRT, cbuf + 1024 - cl, (size_t)cl) &&
-         pref_set_der(K_KEY, kbuf + 256 - kl, (size_t)kl);
-    aos_hal_log("access", ok ? "a new HTTPS certificate for %s.local" : "could not make an HTTPS certificate (%s)",
-                aos_hal_device_name());
-    if (kbuf) memset(kbuf, 0, 256);
-    free(cbuf);
-    free(kbuf);
+    aos_hal_log("access", ok ? "a new authority for %s's HTTPS" : "could not make %s's HTTPS authority", name);
     mbedtls_x509write_crt_free(&crt);
     mbedtls_pk_free(&key);
     return ok;
 }
 
-bool aos_access_tls_der(unsigned char **cert, size_t *cert_len, unsigned char **key, size_t *key_len)
+static void leaf_for(char *out, size_t n)
 {
-    for (int attempt = 0; attempt < 2; attempt++) {
-        *cert = pref_der(K_CRT, cert_len);
-        *key = pref_der(K_KEY, key_len);
-        if (*cert && *key) return true;
-        free(*cert);
-        free(*key);
-        *cert = *key = NULL;
-        if (attempt || !tls_make()) return false;
+    snprintf(out, n, "%s|%s", aos_hal_device_name(), aos_hal_net_state() == AOS_NET_CONNECTED ? aos_hal_net_ip() : "");
+}
+
+static bool make_leaf(void)
+{
+    mbedtls_pk_context cakey, key;
+    mbedtls_x509_crt ca;
+    mbedtls_x509write_cert crt;
+    mbedtls_pk_init(&cakey);
+    mbedtls_pk_init(&key);
+    mbedtls_x509_crt_init(&ca);
+    mbedtls_x509write_crt_init(&crt);
+    const char *name = aos_hal_device_name();
+    char subj[96], issuer[160], local[80], from[16], until[16], ip[16] = "";
+    snprintf(local, sizeof local, "%s.local", name);
+    snprintf(subj, sizeof subj, "CN=%s,O=P4OS", local);
+    when(-1, from);
+    when(LEAF_DAYS, until);
+    size_t cal = 0;
+    unsigned char *cader = pref_der(K_CAC, &cal);
+    bool ok = cader && STEP(mbedtls_x509_crt_parse_der_with_ext_cb(&ca, cader, cal, 1, accept_name_constraints, NULL)) &&
+              mbedtls_x509_dn_gets(issuer, sizeof issuer, &ca.subject) > 0 &&
+              step(!key_load(K_CAK, &cakey), "the authority's key") && (key_load(K_KEY, &key) || key_new(K_KEY, &key));
+    free(cader);
+    if (ok) {
+        mbedtls_x509write_crt_set_version(&crt, MBEDTLS_X509_CRT_VERSION_3);
+        mbedtls_x509write_crt_set_md_alg(&crt, MBEDTLS_MD_SHA256);
+        mbedtls_x509write_crt_set_subject_key(&crt, &key);
+        mbedtls_x509write_crt_set_issuer_key(&crt, &cakey);
+        serial(&crt);
+        static const char SERVER_AUTH[] = MBEDTLS_OID_SERVER_AUTH;
+        mbedtls_asn1_sequence eku = { .buf = { .tag = MBEDTLS_ASN1_OID, .len = MBEDTLS_OID_SIZE(MBEDTLS_OID_SERVER_AUTH),
+                                               .p = (unsigned char *)SERVER_AUTH }, .next = NULL };
+        ok = STEP(mbedtls_x509write_crt_set_subject_name(&crt, subj)) &&
+             STEP(mbedtls_x509write_crt_set_issuer_name(&crt, issuer)) &&
+             STEP(mbedtls_x509write_crt_set_validity(&crt, from, until)) &&
+             STEP(mbedtls_x509write_crt_set_basic_constraints(&crt, 0, -1)) &&
+             STEP(mbedtls_x509write_crt_set_key_usage(&crt, MBEDTLS_X509_KU_DIGITAL_SIGNATURE)) &&
+             STEP(mbedtls_x509write_crt_set_ext_key_usage(&crt, &eku)) &&
+             STEP(mbedtls_x509write_crt_set_subject_key_identifier(&crt)) &&
+             STEP(mbedtls_x509write_crt_set_authority_key_identifier(&crt));
+#if MBEDTLS_VERSION_NUMBER >= 0x03050000
+        /* <name>.local, the bare name, the AP, the cable and, if there is
+         * one, the Wi-Fi address */
+        static const uint8_t AP_IP[4] = { 192, 168, 4, 1 }, USB_IP[4] = { 192, 168, 7, 1 };
+        uint8_t sta[4];
+        int nsan = 4;
+        unsigned a0, a1, a2, a3;
+        if (aos_hal_net_state() == AOS_NET_CONNECTED && sscanf(aos_hal_net_ip(), "%u.%u.%u.%u", &a0, &a1, &a2, &a3) == 4) {
+            sta[0] = (uint8_t)a0; sta[1] = (uint8_t)a1; sta[2] = (uint8_t)a2; sta[3] = (uint8_t)a3;
+            snprintf(ip, sizeof ip, "%s", aos_hal_net_ip());
+            nsan = 5;
+        }
+        mbedtls_x509_san_list san[5];
+        memset(san, 0, sizeof san);
+        const struct { int type; const void *p; size_t len; } S[5] = {
+            { MBEDTLS_X509_SAN_DNS_NAME, local, strlen(local) }, { MBEDTLS_X509_SAN_DNS_NAME, name, strlen(name) },
+            { MBEDTLS_X509_SAN_IP_ADDRESS, AP_IP, 4 }, { MBEDTLS_X509_SAN_IP_ADDRESS, USB_IP, 4 },
+            { MBEDTLS_X509_SAN_IP_ADDRESS, sta, 4 },
+        };
+        for (int i = 0; i < nsan; i++) {
+            san[i].node.type = S[i].type;
+            san[i].node.san.unstructured_name.p = (unsigned char *)S[i].p;
+            san[i].node.san.unstructured_name.len = S[i].len;
+            san[i].next = i + 1 < nsan ? &san[i + 1] : NULL;
+        }
+        ok = ok && STEP(mbedtls_x509write_crt_set_subject_alternative_name(&crt, san));
+#endif
+        ok = ok && step(!crt_save(K_CRT, &crt), "writing it");
     }
+    if (ok) {
+        char f[96];
+        leaf_for(f, sizeof f);
+        size_t l = strlen(f);
+        snprintf(f + l, sizeof f - l, "|%.8s", until);
+        aos_hal_pref_set_str(K_CFOR, f);
+    }
+    aos_hal_log("access", ok ? "a new HTTPS certificate for %s.local, until %.8s" : "could not make %s.local's HTTPS certificate%.0s",
+                name, until);
+    mbedtls_x509write_crt_free(&crt);
+    mbedtls_x509_crt_free(&ca);
+    mbedtls_pk_free(&key);
+    mbedtls_pk_free(&cakey);
+    return ok;
+}
+
+/* whether the portal's certificate is still the right one: the same name and
+ * address, and 60 days or more left (only known with a clock) */
+static bool leaf_fresh(void)
+{
+    char was[96], now[96], soon[16];
+    if (!aos_hal_pref_get_str(K_CFOR, was, sizeof was)) return false;
+    char *last = strrchr(was, '|');
+    if (!last) return false;
+    *last++ = 0;
+    leaf_for(now, sizeof now);
+    if (strcmp(was, now)) return false;
+    when(60, soon);
+    return !aos_hal_time_is_valid() || strncmp(last, soon, 8) > 0;
+}
+
+bool aos_access_tls_der(unsigned char **cert, size_t *cert_len, unsigned char **ca, size_t *ca_len,
+                        unsigned char **key, size_t *key_len)
+{
+    *cert = *ca = *key = NULL;
+    size_t l;
+    unsigned char *probe = pref_der(K_CAC, &l);
+    if (!probe) {
+        aos_hal_pref_erase(K_CRT);              /* a new authority: the old certificate is not its */
+        aos_hal_pref_erase(K_CFOR);
+        if (!make_ca()) return false;
+    }
+    free(probe);
+    if (!leaf_fresh() && !make_leaf()) return false;
+    *cert = pref_der(K_CRT, cert_len);
+    *ca = pref_der(K_CAC, ca_len);
+    *key = pref_der(K_KEY, key_len);
+    if (*cert && *ca && *key) return true;
+    free(*cert);
+    free(*ca);
+    free(*key);
+    *cert = *ca = *key = NULL;
     return false;
+}
+
+bool aos_access_tls_ca(unsigned char **der, size_t *len)
+{
+    *der = pref_der(K_CAC, len);
+    return *der != NULL;
 }
 
 void aos_access_tls_forget(void)
 {
-    aos_hal_pref_erase(K_CRT);
-    aos_hal_pref_erase(K_KEY);
+    static const char *const K[] = { K_CAC, K_CAK, K_CRT, K_KEY, K_CFOR };
+    for (size_t i = 0; i < sizeof K / sizeof K[0]; i++) aos_hal_pref_erase(K[i]);
 }
 
+/* the authority's: what a computer or a phone is told to trust */
 void aos_access_tls_fingerprint(char *out, size_t n)
 {
     out[0] = 0;
     size_t len = 0;
-    unsigned char *der = pref_der(K_CRT, &len);
+    unsigned char *der = pref_der(K_CAC, &len);
     if (!der) return;
     uint8_t h[32];
     mbedtls_sha256(der, len, h, 0);

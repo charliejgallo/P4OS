@@ -75,20 +75,43 @@ HTTP only sends the browser there (302), so neither the password nor the
 session crosses that network in clear. At home, on the board's own network
 and over the cable, HTTP keeps working: the scripts in `tools/` use it.
 
-- **The certificate is the board's own.** The first time, the board makes
-  an ECDSA P-256 key and a self-signed certificate for `<name>.local`, the
-  bare name, `192.168.4.1` and `192.168.7.1`, valid from 2026 to 2036
-  (the board may not know the date yet). They are kept in preferences, as
-  DER. No authority signs it, so a browser warns once; Settings shows its
-  SHA-256 fingerprint to compare with the one the browser shows. "Certificado
-  nuevo" makes another at the next restart.
+- **The board has its own authority.** The first time, it makes a small
+  certificate authority (ECDSA P-256, ten years) and, signed by it, the
+  portal's certificate: `<name>.local`, the bare name, `192.168.4.1`,
+  `192.168.7.1` and the Wi-Fi address, `serverAuth`, 800 days. The board
+  makes the portal's certificate again by itself when it has 60 days left
+  or when its name or its Wi-Fi address changed; the authority stays.
+  Everything is kept in preferences, as DER.
+- **Trusting it once** makes the warning go. The portal hands out the
+  authority at `/api/tls/ca` (Settings, Security, in the portal; no login
+  needed, it is public):
+  - **Mac:** open the `.cer`, it goes into Keychain Access; open it there,
+    Trust, "When using this certificate: Always Trust". Safari and Chrome
+    take it.
+  - **iPhone:** open the link in Safari, allow the profile, install it in
+    Settings, General, VPN & Device Management; then Settings, General,
+    About, Certificate Trust Settings, and switch it on.
+  - Compare its SHA-256 fingerprint with the one Settings, Portal web shows
+    on the board.
+- **The authority can only vouch for the board's names.** Its key is on the
+  board, in flash that is not encrypted, so it carries a critical
+  `nameConstraints` extension: `.local` names, the board's own name and the
+  private ranges (10/8, 172.16/12, 192.168/16). Someone who took the key
+  from a board could not use it to pass for any site on the internet to a
+  device that trusts it. (mbedTLS does not parse that extension, so the
+  board reads its own authority with a callback that accepts it; browsers
+  do apply it.)
+- **What Apple asks of a server certificate a user trusts**, and Chrome on
+  a Mac uses Apple's verifier: the name in `subjectAltName`, `serverAuth`
+  in `extendedKeyUsage`, at most 825 days. The first certificate (before
+  2026-10-04's second version) was a single self-signed one with none of
+  this, which no Mac or iPhone would trust.
 - **TLS 1.2**, ECDHE with the board's ECDSA key, AES-GCM first (the P4 does
   AES in hardware), ChaCha20-Poly1305 last. Each connection's buffers (16 KB
   in, 4 KB out) are in PSRAM, as mbedTLS allocates there on this board.
 - The session cookie carries `Secure` when it was set over HTTPS.
-- To trust it for good instead of accepting the warning, the certificate
-  can be installed on a computer or a phone as a trusted one: it is the
-  same for the board's whole life, until a new one is made.
+- "Autoridad nueva" in Settings throws both away: the next start makes new
+  ones, and they have to be trusted again.
 
 ## What is not covered
 

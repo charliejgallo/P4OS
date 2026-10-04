@@ -15,9 +15,12 @@
   the scripts in `tools/` (`P4OS_TOKEN`).
 - `/api/auth`, `/api/login`, `/api/logout`.
 - HTTPS on port 443, switched on in Settings, Portal web: the board makes
-  its own certificate (ECDSA P-256, self-signed, its fingerprint shown in
-  Settings), TLS 1.2 with AES-GCM first. On untrusted networks plain HTTP
-  redirects there; the session cookie is `Secure` over HTTPS.
+  its own authority (limited by `nameConstraints` to `.local` names and
+  private addresses) and the portal's certificate signed by it, renewed by
+  itself. Trusting the authority once on a Mac or an iPhone
+  (`/api/tls/ca`, Settings, Security in the portal) takes the browser's
+  warning away. TLS 1.2 with AES-GCM first. On untrusted networks plain
+  HTTP redirects there; the session cookie is `Secure` over HTTPS.
 
 **Bluetooth**
 - The board asks for encryption only when the phone or the computer has not

@@ -1923,7 +1923,7 @@ static void pt_https_cb(lv_event_t *e)
 
 static void pt_cert_cb(lv_event_t *e)
 {
-    if (!second_tap(e, _("Tocá otra vez: los navegadores van a avisar de nuevo"))) return;
+    if (!second_tap(e, _("Tocá otra vez: habrá que volver a instalarla"))) return;
     aos_access_tls_forget();
     aos_ui_toast(_("Se hace uno nuevo al reiniciar"), 2000);
     show(PG_PORTAL);
@@ -1972,7 +1972,7 @@ static void build_access(lv_obj_t *p)
     row_switch(g, AOS_SYM_LOCK, 0x34C759, _("HTTPS (puerto 443)"), aos_access_https(), pt_https_cb);
     char fp[100];
     aos_access_tls_fingerprint(fp, sizeof fp);
-    if (fp[0]) action_row(g, _("Certificado nuevo"), AOS_C_RED, pt_cert_cb);
+    if (fp[0]) action_row(g, _("Autoridad nueva"), AOS_C_RED, pt_cert_cb);
     action_row(g, _("Reiniciar para aplicarlo"), AOS_C_ACCENT, dev_restart_cb);
     if (fp[0]) {
         lv_obj_t *f = aos_label(p, fp, aos_font_caption, AOS_C_TEXT);
@@ -1980,7 +1980,7 @@ static void build_access(lv_obj_t *p)
         lv_label_set_long_mode(f, LV_LABEL_LONG_MODE_WRAP);
         lv_obj_set_style_pad_hor(f, 24, 0);
     }
-    note(p, _("Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. El certificado lo hace la placa: el navegador avisa una vez que no lo conoce, y lo de arriba es su huella SHA-256 para compararla. Se aplica al reiniciar."));
+    note(p, _("Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. La placa tiene su propia autoridad: se baja desde el portal (Ajustes, Seguridad) y se instala una vez como confiable en la Mac o el iPhone, y el navegador deja de avisar. Lo de arriba es su huella SHA-256, para compararla. Se aplica al reiniciar."));
 
     char v[16];
     g = group(p, _("SESIONES Y SCRIPTS"));

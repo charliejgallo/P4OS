@@ -2322,6 +2322,9 @@ static const char blob_en__sistema_lang[] =
     "Certificado nuevo\tNew certificate\n"
     "Reiniciar para aplicarlo\tRestart to apply it\n"
     "Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. El certificado lo hace la placa: el navegador avisa una vez que no lo conoce, y lo de arriba es su huella SHA-256 para compararla. Se aplica al reiniciar.\tWith HTTPS, what travels is encrypted, the password included, and away from home the portal sends HTTP over to HTTPS. The board makes the certificate: the browser warns once that it does not know it, and the line above is its SHA-256 fingerprint, to compare. It applies at the next restart.\n"
+    "Tocá otra vez: habrá que volver a instalarla\tTap again: it will have to be installed again\n"
+    "Autoridad nueva\tNew authority\n"
+    "Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. La placa tiene su propia autoridad: se baja desde el portal (Ajustes, Seguridad) y se instala una vez como confiable en la Mac o el iPhone, y el navegador deja de avisar. Lo de arriba es su huella SHA-256, para compararla. Se aplica al reiniciar.\tWith HTTPS, what travels is encrypted, the password included, and away from home the portal sends HTTP over to HTTPS. The board has its own authority: download it from the portal (Settings, Security) and install it once as trusted on the Mac or the iPhone, and the browser stops warning. The line above is its SHA-256 fingerprint, to compare. It applies at the next restart.\n"
     ;
 
 static const char blob_en_aos_cameras_lang[] =
@@ -6813,6 +6816,9 @@ static const char blob_de__sistema_lang[] =
     "Certificado nuevo\tNeues Zertifikat\n"
     "Reiniciar para aplicarlo\tNeu starten zum Anwenden\n"
     "Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. El certificado lo hace la placa: el navegador avisa una vez que no lo conoce, y lo de arriba es su huella SHA-256 para compararla. Se aplica al reiniciar.\tMit HTTPS wird alles verschlüsselt übertragen, auch das Passwort, und außer Haus leitet das Portal von HTTP auf HTTPS um. Das Zertifikat erstellt die Platine: der Browser warnt einmal, dass er es nicht kennt, und oben steht sein SHA-256-Fingerabdruck zum Vergleichen. Gilt ab dem nächsten Neustart.\n"
+    "Tocá otra vez: habrá que volver a instalarla\tNochmals tippen: sie muss neu installiert werden\n"
+    "Autoridad nueva\tNeue Zertifizierungsstelle\n"
+    "Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. La placa tiene su propia autoridad: se baja desde el portal (Ajustes, Seguridad) y se instala una vez como confiable en la Mac o el iPhone, y el navegador deja de avisar. Lo de arriba es su huella SHA-256, para compararla. Se aplica al reiniciar.\tMit HTTPS wird alles verschlüsselt übertragen, auch das Passwort, und außer Haus leitet das Portal von HTTP auf HTTPS um. Die Platine hat ihre eigene Zertifizierungsstelle: im Portal herunterladen (Einstellungen, Sicherheit) und einmal auf dem Mac oder iPhone als vertrauenswürdig installieren, dann warnt der Browser nicht mehr. Oben steht ihr SHA-256-Fingerabdruck zum Vergleichen. Gilt ab dem nächsten Neustart.\n"
     ;
 
 static const char blob_de_aos_cameras_lang[] =
@@ -8996,7 +9002,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2308, 33, files_en, 34 },
-    { "de", "Deutsch", 2308, 33, files_de, 34 },
+    { "en", "English", 2311, 33, files_en, 34 },
+    { "de", "Deutsch", 2311, 33, files_de, 34 },
 };
 const int aos_lang_pack_count = 2;

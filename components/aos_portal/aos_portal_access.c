@@ -261,6 +261,21 @@ bool aos_portal_rules(aos_httpd_req_t *r)
         else aos_httpd_send(r, 403, "text/html; charset=utf-8", CLOSED_PAGE, sizeof CLOSED_PAGE - 1);
         return false;
     }
+    /* the board's HTTPS authority, to trust it: public, so no login asked
+     * (a phone fetches it before it can open the portal over HTTPS) */
+    if (api && !strcmp(p, "/api/tls/ca") && !strcmp(m, "GET")) {
+        unsigned char *der = NULL;
+        size_t len = 0;
+        if (!aos_access_tls_ca(&der, &len)) {
+            deny(r, 404, "todavía no hay certificado: prendé HTTPS en Ajustes, Portal web, y reiniciá");
+            return false;
+        }
+        char extra[160];
+        snprintf(extra, sizeof extra, "Content-Disposition: attachment; filename=\"%s-https.cer\"\r\n", aos_hal_device_name());
+        if (aos_httpd_begin(r, 200, "application/x-x509-ca-cert", (long)len, extra)) aos_httpd_write(r, der, len);
+        free(der);
+        return false;
+    }
     /* away from home with HTTPS on, plain HTTP is only a way to HTTPS: the
      * password and the session must not cross a stranger's network in clear */
     if (zone == AOS_ZONE_AWAY && s_https_port && !aos_httpd_is_tls(r)) {
