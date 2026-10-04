@@ -62,6 +62,7 @@
 #include "aos_portal_bench.h"
 #include "aos_portal_radio.h"
 #include "aos_portal_net.h"
+#include "aos_portal_access.h"
 #include "aos_portal_claude.h"
 #include "aos_portal_mqtt.h"
 #include "aos_portal_sysmon.h"
@@ -1214,6 +1215,7 @@ static void handler(aos_httpd_req_t *r)
 {
     const char *p = aos_httpd_path(r), *m = aos_httpd_method(r);
     bool post = !strcmp(m, "POST"), get = !strcmp(m, "GET");
+    if (!aos_portal_access(r)) return;
     if (strncmp(p, "/api/", 5)) { serve_asset(r, p); return; }
     p += 5;
     if (get && !strcmp(p, "info")) api_info(r);

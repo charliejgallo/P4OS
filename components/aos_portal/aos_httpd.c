@@ -227,9 +227,11 @@ static const char *reason(int s)
     case 400: return "Bad Request";
     case 404: return "Not Found";
     case 405: return "Method Not Allowed";
+    case 403: return "Forbidden";
     case 409: return "Conflict";
     case 413: return "Payload Too Large";
     case 416: return "Range Not Satisfiable";
+    case 421: return "Misdirected Request";
     case 500: return "Internal Server Error";
     case 503: return "Service Unavailable";
     default: return "";
@@ -241,8 +243,11 @@ bool aos_httpd_begin(aos_httpd_req_t *r, int status, const char *ctype, long len
     if (r->began) return false;
     r->began = true;
     char h[512];
+    /* nosniff: a file from the card is what its type says; DENY: no other
+     * site can frame the portal and make the user click on it */
     int n = snprintf(h, sizeof h, "HTTP/1.1 %d %s\r\nContent-Type: %s\r\nConnection: close\r\n"
-                                  "Cache-Control: no-store\r\n",
+                                  "Cache-Control: no-store\r\nX-Content-Type-Options: nosniff\r\n"
+                                  "X-Frame-Options: DENY\r\n",
                      status, reason(status), ctype ? ctype : "application/octet-stream");
     if (len >= 0) n += snprintf(h + n, sizeof h - n, "Content-Length: %ld\r\n", len);
     n += snprintf(h + n, sizeof h - n, "%s\r\n", extra ? extra : "");
