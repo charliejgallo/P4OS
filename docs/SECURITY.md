@@ -66,10 +66,34 @@ The API for it:
     POST /api/login     {"password": "..."}: the session cookie
     POST /api/logout    ends this browser's session
 
+## HTTPS
+
+Settings, Portal web, **HTTPS (port 443)**, and a restart. The portal then
+answers on 443 too (`aos_httpd_start_tls` in
+`components/aos_portal/aos_httpd.c`), and on an untrusted network plain
+HTTP only sends the browser there (302), so neither the password nor the
+session crosses that network in clear. At home, on the board's own network
+and over the cable, HTTP keeps working: the scripts in `tools/` use it.
+
+- **The certificate is the board's own.** The first time, the board makes
+  an ECDSA P-256 key and a self-signed certificate for `<name>.local`, the
+  bare name, `192.168.4.1` and `192.168.7.1`, valid from 2026 to 2036
+  (the board may not know the date yet). They are kept in preferences, as
+  DER. No authority signs it, so a browser warns once; Settings shows its
+  SHA-256 fingerprint to compare with the one the browser shows. "Certificado
+  nuevo" makes another at the next restart.
+- **TLS 1.2**, ECDHE with the board's ECDSA key, AES-GCM first (the P4 does
+  AES in hardware), ChaCha20-Poly1305 last. Each connection's buffers (16 KB
+  in, 4 KB out) are in PSRAM, as mbedTLS allocates there on this board.
+- The session cookie carries `Secure` when it was set over HTTPS.
+- To trust it for good instead of accepting the warning, the certificate
+  can be installed on a computer or a phone as a trusted one: it is the
+  same for the board's whole life, until a new one is made.
+
 ## What is not covered
 
-- **The traffic is plain HTTP.** On a network that is not yours, someone on
-  it can read what travels, the password included. HTTPS is next.
+- **HTTPS is off until it is turned on**, and plain HTTP stays open at home,
+  on the board's network and over the cable.
 - **The board's flash is not encrypted**, so the Wi-Fi passwords, the
   portal's password hash and the token can be read from a board in hand.
   ESP-IDF's flash encryption and secure boot burn eFuses for good: not for

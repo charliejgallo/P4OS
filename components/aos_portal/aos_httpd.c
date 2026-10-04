@@ -9,6 +9,15 @@
 #include "aos_httpd.h"
 #include "aos_hal.h"
 
+#include "mbedtls/ssl.h"
+#include "mbedtls/x509_crt.h"
+#include "mbedtls/pk.h"
+#include "mbedtls/error.h"
+#include "mbedtls/version.h"
+#if defined(MBEDTLS_PSA_CRYPTO_C)
+#include "psa/crypto.h"
+#endif
+
 #include <ctype.h>
 #include <errno.h>
 #include <stdio.h>
@@ -29,6 +38,8 @@
 
 struct aos_httpd_req {
     int fd;
+    bool tls;                       /* came in on the HTTPS port */
+    mbedtls_ssl_context *ssl;       /* NULL: plain HTTP, or not yet */
     char head[HEAD_MAX + 1];
     size_t head_len;
     char *method, *target, *path, *query;
@@ -56,6 +67,70 @@ static bool wait_fd(int fd, bool wr, int ms)
     return select(fd + 1, wr ? NULL : &set, wr ? &set : NULL, NULL, &tv) > 0;
 }
 
+/* ---- TLS (port 443): one configuration, a context per connection ----
+ * The context's buffers (16 KB in, 4 KB out) come from mbedTLS's allocator,
+ * which on the board is PSRAM (CONFIG_MBEDTLS_EXTERNAL_MEM_ALLOC). The
+ * random generator is the HAL's own, under a lock: the handshakes of two
+ * connections may run at once and this mbedTLS has no threading of its own. */
+static struct {
+    bool ready;
+    mbedtls_ssl_config conf;
+    mbedtls_x509_crt crt;
+    mbedtls_pk_context key;
+    void *mx;
+} T;
+
+#ifdef ESP_PLATFORM
+#include "esp_random.h"
+static void tls_rnd(void *b, size_t n) { esp_fill_random(b, n); }
+#else
+static void tls_rnd(void *b, size_t n) { arc4random_buf(b, n); }
+#endif
+
+static int tls_rng(void *ctx, unsigned char *out, size_t n)
+{
+    (void)ctx;
+    aos_hal_mutex_lock(T.mx);
+    tls_rnd(out, n);
+    aos_hal_mutex_unlock(T.mx);
+    return 0;
+}
+
+static bool wait_fd(int fd, bool wr, int ms);
+
+static int bio_send(void *ctx, const unsigned char *b, size_t n)
+{
+    int fd = *(int *)ctx;
+    if (!wait_fd(fd, true, IO_TIMEOUT)) return MBEDTLS_ERR_SSL_TIMEOUT;
+    ssize_t k = send(fd, b, n, 0);
+    if (k < 0) return errno == EAGAIN || errno == EINTR ? MBEDTLS_ERR_SSL_WANT_WRITE : MBEDTLS_ERR_SSL_INTERNAL_ERROR;
+    return (int)k;
+}
+
+static int bio_recv(void *ctx, unsigned char *b, size_t n)
+{
+    int fd = *(int *)ctx;
+    if (!wait_fd(fd, false, IO_TIMEOUT)) return MBEDTLS_ERR_SSL_TIMEOUT;
+    ssize_t k = recv(fd, b, n, 0);
+    if (k < 0) return errno == EAGAIN || errno == EINTR ? MBEDTLS_ERR_SSL_WANT_READ : MBEDTLS_ERR_SSL_INTERNAL_ERROR;
+    return (int)k;                  /* 0: the other side closed */
+}
+
+static bool send_all(int fd, const void *data, size_t len);
+
+static bool tls_send_all(mbedtls_ssl_context *ssl, const void *data, size_t len)
+{
+    const unsigned char *p = data;
+    while (len) {
+        int n = mbedtls_ssl_write(ssl, p, len);
+        if (n == MBEDTLS_ERR_SSL_WANT_WRITE || n == MBEDTLS_ERR_SSL_WANT_READ) continue;
+        if (n <= 0) return false;
+        p += n;
+        len -= (size_t)n;
+    }
+    return true;
+}
+
 static bool send_all(int fd, const void *data, size_t len)
 {
     const char *p = data;
@@ -70,11 +145,31 @@ static bool send_all(int fd, const void *data, size_t len)
     return true;
 }
 
-static int recv_some(int fd, void *buf, size_t len)
+static int recv_plain(int fd, void *buf, size_t len)
 {
     if (!wait_fd(fd, false, IO_TIMEOUT)) return -1;
     ssize_t n = recv(fd, buf, len, 0);
     return n < 0 ? -1 : (int)n;
+}
+
+/* what the request's reads and writes go through: the socket, or TLS on it */
+static int recv_some(aos_httpd_req_t *r, void *buf, size_t len)
+{
+    if (!r->ssl) return recv_plain(r->fd, buf, len);
+    for (;;) {
+        int n = mbedtls_ssl_read(r->ssl, buf, len);
+        if (n == MBEDTLS_ERR_SSL_WANT_READ || n == MBEDTLS_ERR_SSL_WANT_WRITE) continue;
+#ifdef MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET
+        if (n == MBEDTLS_ERR_SSL_RECEIVED_NEW_SESSION_TICKET) continue;
+#endif
+        if (n == MBEDTLS_ERR_SSL_PEER_CLOSE_NOTIFY || n == 0) return 0;
+        return n < 0 ? -1 : n;
+    }
+}
+
+static bool req_send(aos_httpd_req_t *r, const void *data, size_t len)
+{
+    return r->ssl ? tls_send_all(r->ssl, data, len) : send_all(r->fd, data, len);
 }
 
 static void url_decode(char *s)
@@ -98,7 +193,7 @@ static bool read_head(aos_httpd_req_t *r)
 {
     for (;;) {
         if (r->head_len >= HEAD_MAX) return false;
-        int n = recv_some(r->fd, r->head + r->head_len, HEAD_MAX - r->head_len);
+        int n = recv_some(r, r->head + r->head_len, HEAD_MAX - r->head_len);
         if (n <= 0) return false;
         r->head_len += (size_t)n;
         r->head[r->head_len] = 0;
@@ -206,7 +301,7 @@ int aos_httpd_body_read(aos_httpd_req_t *r, void *buf, int len)
         r->pre += n;
         r->pre_len -= (size_t)n;
     } else {
-        n = recv_some(r->fd, buf, (size_t)len);
+        n = recv_some(r, buf, (size_t)len);
         if (n <= 0) return -1;
     }
     r->body_read += n;
@@ -236,6 +331,7 @@ static const char *reason(int s)
     case 200: return "OK";
     case 204: return "No Content";
     case 206: return "Partial Content";
+    case 302: return "Found";
     case 400: return "Bad Request";
     case 401: return "Unauthorized";
     case 404: return "Not Found";
@@ -264,12 +360,12 @@ bool aos_httpd_begin(aos_httpd_req_t *r, int status, const char *ctype, long len
                      status, reason(status), ctype ? ctype : "application/octet-stream");
     if (len >= 0) n += snprintf(h + n, sizeof h - n, "Content-Length: %ld\r\n", len);
     n += snprintf(h + n, sizeof h - n, "%s\r\n", extra ? extra : "");
-    return send_all(r->fd, h, (size_t)n);
+    return req_send(r, h, (size_t)n);
 }
 
 bool aos_httpd_write(aos_httpd_req_t *r, const void *data, size_t len)
 {
-    return len == 0 || send_all(r->fd, data, len);
+    return len == 0 || req_send(r, data, len);
 }
 
 void aos_httpd_send(aos_httpd_req_t *r, int status, const char *ctype, const void *data, size_t len)
@@ -289,16 +385,47 @@ void aos_httpd_send_json(aos_httpd_req_t *r, int status, const char *json)
 
 /* ---- the server ---- */
 
+bool aos_httpd_is_tls(aos_httpd_req_t *r) { return r->tls; }
+
+/* The TLS handshake, before the request is read: false and the connection
+ * goes (a browser that refused the certificate, a client that spoke plain
+ * HTTP to 443). */
+static bool tls_open(aos_httpd_req_t *r)
+{
+    r->ssl = calloc(1, sizeof *r->ssl);
+    if (!r->ssl) return false;
+    mbedtls_ssl_init(r->ssl);
+    if (mbedtls_ssl_setup(r->ssl, &T.conf)) return false;
+    mbedtls_ssl_set_bio(r->ssl, &r->fd, bio_send, bio_recv, NULL);
+    for (;;) {
+        int e = mbedtls_ssl_handshake(r->ssl);
+        if (!e) return true;
+        if (e != MBEDTLS_ERR_SSL_WANT_READ && e != MBEDTLS_ERR_SSL_WANT_WRITE) return false;
+    }
+}
+
+static void tls_close(aos_httpd_req_t *r)
+{
+    if (!r->ssl) return;
+    mbedtls_ssl_close_notify(r->ssl);
+    mbedtls_ssl_free(r->ssl);
+    free(r->ssl);
+    r->ssl = NULL;
+}
+
+typedef struct { int port; bool tls; } listener_t;
+
 static void conn_thread(void *arg)
 {
     aos_httpd_req_t *r = arg;
-    if (read_head(r)) {
+    if ((!r->tls || tls_open(r)) && read_head(r)) {
         s_handler(r);
         if (!r->began) aos_httpd_send_text(r, 500, "no answer");
         /* drain what the client still sends so it sees our answer, not a reset */
         char junk[512];
         while (r->body_len > r->body_read && aos_httpd_body_read(r, junk, sizeof junk) > 0) {}
     }
+    tls_close(r);
     shutdown(r->fd, SHUT_WR);
     close(r->fd);
     free(r);
@@ -309,7 +436,8 @@ static void conn_thread(void *arg)
 
 static void listen_thread(void *arg)
 {
-    int port = (int)(intptr_t)arg;
+    listener_t *l = arg;
+    int port = l->port;
     int ls = socket(AF_INET, SOCK_STREAM, 0);
     int one = 1;
     setsockopt(ls, SOL_SOCKET, SO_REUSEADDR, &one, sizeof one);
@@ -319,7 +447,7 @@ static void listen_thread(void *arg)
         if (ls >= 0) close(ls);
         return;
     }
-    aos_hal_log("httpd", "portal on port %d", port);
+    aos_hal_log("httpd", "portal on port %d%s", port, l->tls ? " (HTTPS)" : "");
     for (;;) {
         int fd = accept(ls, NULL, NULL);
         if (fd < 0) { aos_hal_sleep_ms(100); continue; }
@@ -334,13 +462,16 @@ static void listen_thread(void *arg)
         aos_httpd_req_t *r = room ? calloc(1, sizeof *r) : NULL;
         if (!r) {
             static const char busy[] = "HTTP/1.1 503 Service Unavailable\r\nConnection: close\r\nContent-Length: 0\r\n\r\n";
-            send_all(fd, busy, sizeof busy - 1);
+            if (!l->tls) send_all(fd, busy, sizeof busy - 1);
             close(fd);
             if (room) { aos_hal_mutex_lock(s_mx); s_active--; aos_hal_mutex_unlock(s_mx); }
             continue;
         }
         r->fd = fd;
-        if (!aos_hal_thread_start("http", conn_thread, r, 12288, 3)) {
+        r->tls = l->tls;
+        /* TLS needs more stack than plain HTTP: the handshake's elliptic
+         * curves (PSRAM, like every thread's stack here) */
+        if (!aos_hal_thread_start(l->tls ? "https" : "http", conn_thread, r, l->tls ? 16384 : 12288, 3)) {
             close(fd);
             free(r);
             aos_hal_mutex_lock(s_mx);
@@ -355,5 +486,43 @@ bool aos_httpd_start(int port, aos_httpd_handler_t handler)
     if (s_handler) return true;
     s_handler = handler;
     s_mx = aos_hal_mutex_create();
-    return aos_hal_thread_start("httpd", listen_thread, (void *)(intptr_t)port, 4096, 3);
+    static listener_t l;
+    l = (listener_t){ port, false };
+    return aos_hal_thread_start("httpd", listen_thread, &l, 4096, 3);
+}
+
+bool aos_httpd_start_tls(int port, const unsigned char *cert, size_t cert_len, const unsigned char *key, size_t key_len)
+{
+    if (!s_handler || T.ready) return T.ready;
+    T.mx = aos_hal_mutex_create();
+#if defined(MBEDTLS_PSA_CRYPTO_C)
+    psa_crypto_init();
+#endif
+    mbedtls_ssl_config_init(&T.conf);
+    mbedtls_x509_crt_init(&T.crt);
+    mbedtls_pk_init(&T.key);
+    int e = mbedtls_x509_crt_parse_der(&T.crt, cert, cert_len);
+    if (!e) e = mbedtls_pk_parse_key(&T.key, key, key_len, NULL, 0, tls_rng, NULL);
+    if (!e) e = mbedtls_ssl_config_defaults(&T.conf, MBEDTLS_SSL_IS_SERVER, MBEDTLS_SSL_TRANSPORT_STREAM, MBEDTLS_SSL_PRESET_DEFAULT);
+    if (!e) {
+        mbedtls_ssl_conf_rng(&T.conf, tls_rng, NULL);
+        /* AES-GCM first: the P4 does AES in hardware, ChaCha20 in software.
+         * The key is ECDSA P-256, so only ECDSA suites. */
+        static const int SUITES[] = {
+            MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,
+            MBEDTLS_TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,
+            MBEDTLS_TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305_SHA256,
+            0,
+        };
+        mbedtls_ssl_conf_ciphersuites(&T.conf, SUITES);
+        e = mbedtls_ssl_conf_own_cert(&T.conf, &T.crt, &T.key);
+    }
+    if (e) {
+        aos_hal_log("httpd", "HTTPS not started: the certificate (-0x%04x)", (unsigned)-e);
+        return false;
+    }
+    T.ready = true;
+    static listener_t l;
+    l = (listener_t){ port, true };
+    return aos_hal_thread_start("httpsd", listen_thread, &l, 4096, 3);
 }

@@ -8,6 +8,9 @@
  *   pt_pass    "salt:iterations:hash", PBKDF2-HMAC-SHA256 in hex
  *   pt_sess    the sessions: up to SESS_MAX hashes of their ids, in hex
  *   pt_token   the scripts' token, in clear: Settings shows it
+ *   pt_https   1: the portal also answers HTTPS, on port 443
+ *   pt_crt, pt_key   the board's certificate and its private key: DER in
+ *              base64, one line (the simulator keeps preferences a line each)
  *
  * A session id is 16 random bytes; what is kept is the start of its SHA-256,
  * so the preferences hold nothing a browser could present. Sessions do not
@@ -20,6 +23,13 @@
 #include "mbedtls/md.h"
 #include "mbedtls/pkcs5.h"
 #include "mbedtls/sha256.h"
+#include "mbedtls/pk.h"
+#include "mbedtls/ecp.h"
+#include "mbedtls/x509_crt.h"
+#include "mbedtls/ctr_drbg.h"
+#include "mbedtls/entropy.h"
+#include "mbedtls/version.h"
+#include "mbedtls/base64.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -38,6 +48,9 @@ static void rnd(void *buf, size_t n) { arc4random_buf(buf, n); }
 #define K_PASS  "pt_pass"
 #define K_SESS  "pt_sess"
 #define K_TOKEN "pt_token"
+#define K_HTTPS "pt_https"
+#define K_CRT   "pt_crt"
+#define K_KEY   "pt_key"
 #define SEP     '\x1f'
 
 #define PBKDF2_ITER  10000          /* ~0.2 s on the board, with its SHA engine */
@@ -335,6 +348,139 @@ bool aos_access_token_ok(const char *token)
 {
     const char *t = aos_access_token();
     return token && strlen(token) == 32 && same(token, t, 32);
+}
+
+
+/* ---- HTTPS: the board's certificate ---- */
+
+bool aos_access_https(void) { return pref_i(K_HTTPS, 0) != 0; }
+void aos_access_set_https(bool on) { aos_hal_pref_set_i32(K_HTTPS, on); }
+
+static int drbg_rng(void *ctx, unsigned char *out, size_t n)
+{
+    (void)ctx;
+    rnd(out, n);
+    return 0;
+}
+
+/* a preference in base64 back to bytes; NULL if there is none */
+static unsigned char *pref_der(const char *k, size_t *len)
+{
+    char *b64 = malloc(1400);
+    unsigned char *der = malloc(1024);
+    bool ok = b64 && der && aos_hal_pref_get_str(k, b64, 1400) && b64[0] &&
+              !mbedtls_base64_decode(der, 1024, len, (const unsigned char *)b64, strlen(b64));
+    free(b64);
+    if (ok) return der;
+    free(der);
+    return NULL;
+}
+
+static bool pref_set_der(const char *k, const unsigned char *der, size_t len)
+{
+    char b64[1400];
+    size_t olen = 0;
+    return !mbedtls_base64_encode((unsigned char *)b64, sizeof b64, &olen, der, len) && aos_hal_pref_set_str(k, b64);
+}
+
+/* The key and a self-signed certificate for the board's names, valid from
+ * 2026 to 2036 (the board may not know the date when it makes them). */
+static bool tls_make(void)
+{
+    mbedtls_pk_context key;
+    mbedtls_x509write_cert crt;
+    mbedtls_pk_init(&key);
+    mbedtls_x509write_crt_init(&crt);
+    unsigned char *cbuf = malloc(1024), *kbuf = malloc(256);
+    bool ok = cbuf && kbuf &&
+              !mbedtls_pk_setup(&key, mbedtls_pk_info_from_type(MBEDTLS_PK_ECKEY)) &&
+              !mbedtls_ecp_gen_key(MBEDTLS_ECP_DP_SECP256R1, mbedtls_pk_ec(key), drbg_rng, NULL);
+    if (ok) {
+        const char *name = aos_hal_device_name();
+        char subj[96], local[80];
+        snprintf(local, sizeof local, "%s.local", name);
+        snprintf(subj, sizeof subj, "CN=%s,O=P4OS", local);
+        uint8_t serial[16];
+        rnd(serial, sizeof serial);
+        serial[0] &= 0x7F;                       /* a positive number */
+        mbedtls_x509write_crt_set_version(&crt, MBEDTLS_X509_CRT_VERSION_3);
+        mbedtls_x509write_crt_set_md_alg(&crt, MBEDTLS_MD_SHA256);
+        mbedtls_x509write_crt_set_subject_key(&crt, &key);
+        mbedtls_x509write_crt_set_issuer_key(&crt, &key);
+        ok = !mbedtls_x509write_crt_set_subject_name(&crt, subj) &&
+             !mbedtls_x509write_crt_set_issuer_name(&crt, subj) &&
+             !mbedtls_x509write_crt_set_serial_raw(&crt, serial, sizeof serial) &&
+             !mbedtls_x509write_crt_set_validity(&crt, "20260101000000", "20360101000000") &&
+             !mbedtls_x509write_crt_set_basic_constraints(&crt, 0, -1) &&
+             !mbedtls_x509write_crt_set_key_usage(&crt, MBEDTLS_X509_KU_DIGITAL_SIGNATURE);
+#if MBEDTLS_VERSION_NUMBER >= 0x03050000
+        /* the names a browser checks: <name>.local, the bare name, and the
+         * addresses that never change (the AP, the cable) */
+        static const uint8_t AP_IP[4] = { 192, 168, 4, 1 }, USB_IP[4] = { 192, 168, 7, 1 };
+        mbedtls_x509_san_list san[4];
+        memset(san, 0, sizeof san);
+        san[0].node.type = MBEDTLS_X509_SAN_DNS_NAME;
+        san[0].node.san.unstructured_name.p = (unsigned char *)local;
+        san[0].node.san.unstructured_name.len = strlen(local);
+        san[1].node.type = MBEDTLS_X509_SAN_DNS_NAME;
+        san[1].node.san.unstructured_name.p = (unsigned char *)name;
+        san[1].node.san.unstructured_name.len = strlen(name);
+        san[2].node.type = MBEDTLS_X509_SAN_IP_ADDRESS;
+        san[2].node.san.unstructured_name.p = (unsigned char *)AP_IP;
+        san[2].node.san.unstructured_name.len = 4;
+        san[3].node.type = MBEDTLS_X509_SAN_IP_ADDRESS;
+        san[3].node.san.unstructured_name.p = (unsigned char *)USB_IP;
+        san[3].node.san.unstructured_name.len = 4;
+        for (int i = 0; i < 3; i++) san[i].next = &san[i + 1];
+        ok = ok && !mbedtls_x509write_crt_set_subject_alternative_name(&crt, san);
+#endif
+    }
+    /* both DER writers fill their buffer from the end */
+    int cl = ok ? mbedtls_x509write_crt_der(&crt, cbuf, 1024, drbg_rng, NULL) : -1;
+    int kl = cl > 0 ? mbedtls_pk_write_key_der(&key, kbuf, 256) : -1;
+    ok = cl > 0 && kl > 0 && pref_set_der(K_CRT, cbuf + 1024 - cl, (size_t)cl) &&
+         pref_set_der(K_KEY, kbuf + 256 - kl, (size_t)kl);
+    aos_hal_log("access", ok ? "a new HTTPS certificate for %s.local" : "could not make an HTTPS certificate (%s)",
+                aos_hal_device_name());
+    if (kbuf) memset(kbuf, 0, 256);
+    free(cbuf);
+    free(kbuf);
+    mbedtls_x509write_crt_free(&crt);
+    mbedtls_pk_free(&key);
+    return ok;
+}
+
+bool aos_access_tls_der(unsigned char **cert, size_t *cert_len, unsigned char **key, size_t *key_len)
+{
+    for (int attempt = 0; attempt < 2; attempt++) {
+        *cert = pref_der(K_CRT, cert_len);
+        *key = pref_der(K_KEY, key_len);
+        if (*cert && *key) return true;
+        free(*cert);
+        free(*key);
+        *cert = *key = NULL;
+        if (attempt || !tls_make()) return false;
+    }
+    return false;
+}
+
+void aos_access_tls_forget(void)
+{
+    aos_hal_pref_erase(K_CRT);
+    aos_hal_pref_erase(K_KEY);
+}
+
+void aos_access_tls_fingerprint(char *out, size_t n)
+{
+    out[0] = 0;
+    size_t len = 0;
+    unsigned char *der = pref_der(K_CRT, &len);
+    if (!der) return;
+    uint8_t h[32];
+    mbedtls_sha256(der, len, h, 0);
+    size_t o = 0;
+    for (int i = 0; i < 32 && o + 4 < n; i++) o += (size_t)snprintf(out + o, n - o, "%s%02X", i ? ":" : "", h[i]);
+    free(der);
 }
 
 /* ---- the tick ---- */

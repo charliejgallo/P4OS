@@ -30,6 +30,11 @@ typedef void (*aos_httpd_handler_t)(aos_httpd_req_t *r);
 
 /* Starts the server on a port with a handler for everything. */
 bool aos_httpd_start(int port, aos_httpd_handler_t handler);
+/* And HTTPS on another port, with the same handler (aos_httpd_start first):
+ * the certificate and its key, DER. */
+bool aos_httpd_start_tls(int port, const unsigned char *cert, size_t cert_len, const unsigned char *key, size_t key_len);
+/* whether the request came over HTTPS */
+bool aos_httpd_is_tls(aos_httpd_req_t *r);
 
 const char *aos_httpd_method(aos_httpd_req_t *r);   /* "GET" */
 const char *aos_httpd_path(aos_httpd_req_t *r);     /* "/api/fs", decoded, no query */

@@ -2316,6 +2316,12 @@ static const char blob_en__sistema_lang[] =
     "Cerrar todas las sesiones\tClose every session\n"
     "Token nuevo para scripts\tNew token for scripts\n"
     "El token reemplaza a la contraseña en los scripts de tools/ (cabecera Authorization: Bearer). Se le pasa así: P4OS_TOKEN=<token> tools/ota.sh p4os.local\tThe token stands in for the password in the tools/ scripts (Authorization: Bearer header). Pass it like this: P4OS_TOKEN=<token> tools/ota.sh p4os.local\n"
+    "Tocá otra vez: los navegadores van a avisar de nuevo\tTap again: browsers will warn again\n"
+    "Se hace uno nuevo al reiniciar\tA new one is made at the next restart\n"
+    "HTTPS (puerto 443)\tHTTPS (port 443)\n"
+    "Certificado nuevo\tNew certificate\n"
+    "Reiniciar para aplicarlo\tRestart to apply it\n"
+    "Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. El certificado lo hace la placa: el navegador avisa una vez que no lo conoce, y lo de arriba es su huella SHA-256 para compararla. Se aplica al reiniciar.\tWith HTTPS, what travels is encrypted, the password included, and away from home the portal sends HTTP over to HTTPS. The board makes the certificate: the browser warns once that it does not know it, and the line above is its SHA-256 fingerprint, to compare. It applies at the next restart.\n"
     ;
 
 static const char blob_en_aos_cameras_lang[] =
@@ -6801,6 +6807,12 @@ static const char blob_de__sistema_lang[] =
     "Cerrar todas las sesiones\tAlle Sitzungen beenden\n"
     "Token nuevo para scripts\tNeues Token für Skripte\n"
     "El token reemplaza a la contraseña en los scripts de tools/ (cabecera Authorization: Bearer). Se le pasa así: P4OS_TOKEN=<token> tools/ota.sh p4os.local\tDas Token ersetzt das Passwort in den Skripten unter tools/ (Header Authorization: Bearer). So übergeben: P4OS_TOKEN=<token> tools/ota.sh p4os.local\n"
+    "Tocá otra vez: los navegadores van a avisar de nuevo\tNochmals tippen: Browser warnen erneut\n"
+    "Se hace uno nuevo al reiniciar\tBeim nächsten Neustart wird ein neues erstellt\n"
+    "HTTPS (puerto 443)\tHTTPS (Port 443)\n"
+    "Certificado nuevo\tNeues Zertifikat\n"
+    "Reiniciar para aplicarlo\tNeu starten zum Anwenden\n"
+    "Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. El certificado lo hace la placa: el navegador avisa una vez que no lo conoce, y lo de arriba es su huella SHA-256 para compararla. Se aplica al reiniciar.\tMit HTTPS wird alles verschlüsselt übertragen, auch das Passwort, und außer Haus leitet das Portal von HTTP auf HTTPS um. Das Zertifikat erstellt die Platine: der Browser warnt einmal, dass er es nicht kennt, und oben steht sein SHA-256-Fingerabdruck zum Vergleichen. Gilt ab dem nächsten Neustart.\n"
     ;
 
 static const char blob_de_aos_cameras_lang[] =
@@ -8984,7 +8996,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2302, 33, files_en, 34 },
-    { "de", "Deutsch", 2302, 33, files_de, 34 },
+    { "en", "English", 2308, 33, files_en, 34 },
+    { "de", "Deutsch", 2308, 33, files_de, 34 },
 };
 const int aos_lang_pack_count = 2;

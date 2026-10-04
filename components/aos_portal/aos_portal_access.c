@@ -85,6 +85,9 @@ static void deny(aos_httpd_req_t *r, int status, const char *why)
     aos_httpd_send_json(r, status, json);
 }
 
+static int s_https_port;
+void aos_portal_set_https_port(int port) { s_https_port = port; }
+
 /* ---- where a request came in ---- */
 
 static aos_zone_t zone_of(aos_httpd_req_t *r)
@@ -180,7 +183,8 @@ static void api_login(aos_httpd_req_t *r)
     }
     char id[AOS_ACCESS_SESSION_LEN + 1], extra[200];
     aos_access_session_new(id);
-    snprintf(extra, sizeof extra, "Set-Cookie: p4s=%s; Path=/; Max-Age=31536000; HttpOnly; SameSite=Strict\r\n", id);
+    snprintf(extra, sizeof extra, "Set-Cookie: p4s=%s; Path=/; Max-Age=31536000; HttpOnly; SameSite=Strict%s\r\n",
+             id, aos_httpd_is_tls(r) ? "; Secure" : "");
     cJSON_AddBoolToObject(o, "ok", true);
     aos_hal_log("access", "a session opened");
     send_cjson_access(r, 200, o, extra);
@@ -255,6 +259,20 @@ bool aos_portal_rules(aos_httpd_req_t *r)
     if (need == AOS_ACCESS_CLOSED) {
         if (api) deny(r, 403, "el portal está cerrado en esta red");
         else aos_httpd_send(r, 403, "text/html; charset=utf-8", CLOSED_PAGE, sizeof CLOSED_PAGE - 1);
+        return false;
+    }
+    /* away from home with HTTPS on, plain HTTP is only a way to HTTPS: the
+     * password and the session must not cross a stranger's network in clear */
+    if (zone == AOS_ZONE_AWAY && s_https_port && !aos_httpd_is_tls(r)) {
+        const char *host = aos_httpd_header(r, "Host");
+        const char *h;
+        size_t n;
+        host_part(host ? host : aos_hal_net_ip(), &h, &n);
+        char loc[200], port[8] = "";
+        if (s_https_port != 443) snprintf(port, sizeof port, ":%d", s_https_port);
+        snprintf(loc, sizeof loc, "Location: https://%.*s%s%s\r\n", (int)n, h, port, api ? "/" : p);
+        /* 302, not 301: a browser keeps a 301 for good, and HTTPS may go off */
+        if (aos_httpd_begin(r, 302, "text/plain", 0, loc)) {}
         return false;
     }
     if (api && !strcmp(p, "/api/login") && !strcmp(m, "POST")) { api_login(r); return false; }

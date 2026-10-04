@@ -255,8 +255,8 @@ Language, Date and time, Update, Diagnostics, About and Developer.
   the hang watchdog's restarts, the C6's firmware, and the crash dump.
 - **About:** the portal's addresses, with a QR code for the phone.
 - **Web portal:** which networks are trusted, and a password for the
-  others (or for all of them); the token for scripts
-  ([docs/SECURITY.md](docs/SECURITY.md)).
+  others (or for all of them); HTTPS with the board's own certificate; the
+  token for scripts ([docs/SECURITY.md](docs/SECURITY.md)).
 - **Developer:** touches and frames per second over everything, the log's
   level, the drawing preferences with their factory values, and restarting
   into safe mode without the BOOT button.

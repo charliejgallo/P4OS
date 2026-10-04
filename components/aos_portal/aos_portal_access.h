@@ -10,3 +10,7 @@ bool aos_portal_access(aos_httpd_req_t *r);
  * It also answers /api/auth, /api/login and /api/logout itself. false: it
  * answered. */
 bool aos_portal_rules(aos_httpd_req_t *r);
+
+/* The port HTTPS answers on, once it does (0: it does not): the rules send a
+ * browser there from plain HTTP on an untrusted network. */
+void aos_portal_set_https_port(int port);

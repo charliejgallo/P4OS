@@ -1915,7 +1915,22 @@ static void pt_sessions_cb(lv_event_t *e)
     show(PG_PORTAL);
 }
 
+static void pt_https_cb(lv_event_t *e)
+{
+    aos_access_set_https(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
+    show(PG_PORTAL);
+}
+
+static void pt_cert_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez: los navegadores van a avisar de nuevo"))) return;
+    aos_access_tls_forget();
+    aos_ui_toast(_("Se hace uno nuevo al reiniciar"), 2000);
+    show(PG_PORTAL);
+}
+
 static void pick_row(lv_obj_t *g, const char *label, bool on, lv_event_cb_t cb, void *ud);
+static void dev_restart_cb(lv_event_t *e);
 
 static void build_access(lv_obj_t *p)
 {
@@ -1952,6 +1967,20 @@ static void build_access(lv_obj_t *p)
         pick_row(g, _("Abierto con la contraseña"), away, pt_away_cb, (void *)1);
     }
     note(p, _("El cable USB entra siempre, sin contraseña: quien tiene el cable tiene la placa. La contraseña y estas reglas se cambian sólo acá, nunca desde el portal."));
+
+    g = group(p, "HTTPS");
+    row_switch(g, AOS_SYM_LOCK, 0x34C759, _("HTTPS (puerto 443)"), aos_access_https(), pt_https_cb);
+    char fp[100];
+    aos_access_tls_fingerprint(fp, sizeof fp);
+    if (fp[0]) action_row(g, _("Certificado nuevo"), AOS_C_RED, pt_cert_cb);
+    action_row(g, _("Reiniciar para aplicarlo"), AOS_C_ACCENT, dev_restart_cb);
+    if (fp[0]) {
+        lv_obj_t *f = aos_label(p, fp, aos_font_caption, AOS_C_TEXT);
+        lv_obj_set_width(f, lv_pct(100));
+        lv_label_set_long_mode(f, LV_LABEL_LONG_MODE_WRAP);
+        lv_obj_set_style_pad_hor(f, 24, 0);
+    }
+    note(p, _("Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. El certificado lo hace la placa: el navegador avisa una vez que no lo conoce, y lo de arriba es su huella SHA-256 para compararla. Se aplica al reiniciar."));
 
     char v[16];
     g = group(p, _("SESIONES Y SCRIPTS"));

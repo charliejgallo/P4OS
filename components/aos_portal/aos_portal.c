@@ -63,6 +63,7 @@
 #include "aos_portal_radio.h"
 #include "aos_portal_net.h"
 #include "aos_portal_access.h"
+#include "aos_access.h"
 #include "aos_portal_claude.h"
 #include "aos_portal_mqtt.h"
 #include "aos_portal_sysmon.h"
@@ -1278,8 +1279,32 @@ static void handler(aos_httpd_req_t *r)
     else send_err(r, 404, "no existe");
 }
 
+/* HTTPS, when Settings, Portal web turned it on: on 443 (in the simulator,
+ * on P4_SIM_HTTPS_PORT, or not at all). In a thread of its own, because the
+ * first time it makes the board's certificate (an ECDSA key, ~1 s). */
+static int s_https_port;
+
+static void https_up(void *arg)
+{
+    (void)arg;
+    unsigned char *cert = NULL, *key = NULL;
+    size_t cl = 0, kl = 0;
+    if (aos_access_tls_der(&cert, &cl, &key, &kl) && aos_httpd_start_tls(s_https_port, cert, cl, key, kl))
+        aos_portal_set_https_port(s_https_port);
+    if (key) memset(key, 0, kl);
+    free(cert);
+    free(key);
+}
+
 bool aos_portal_start(int port)
 {
     if (!s_shot_mx) s_shot_mx = aos_hal_mutex_create();
-    return aos_httpd_start(port, handler);
+    bool ok = aos_httpd_start(port, handler);
+#ifdef AOS_SIM
+    s_https_port = getenv("P4_SIM_HTTPS_PORT") ? atoi(getenv("P4_SIM_HTTPS_PORT")) : 0;
+#else
+    s_https_port = 443;
+#endif
+    if (ok && s_https_port && aos_access_https()) aos_hal_thread_start("https_up", https_up, NULL, 8192, 3);
+    return ok;
 }

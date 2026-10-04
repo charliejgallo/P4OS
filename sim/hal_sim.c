@@ -641,7 +641,12 @@ bool aos_hal_sd_usage(uint64_t *total_bytes, uint64_t *free_bytes)
 
 /* --------------------------------------------------------------------------
  * Preferences: a "key=value" text file, one per line.
+ *
+ * A line holds up to PREF_LINE characters: the board's NVS takes strings of
+ * up to 4000 bytes, and the portal's certificate (DER in base64, ~500) did
+ * not fit the 256 this file had, which split it in two lines on every save.
  * -------------------------------------------------------------------------- */
+#define PREF_LINE 2048
 
 static bool pref_lookup(const char *key, char *out, size_t out_len)
 {
@@ -649,7 +654,7 @@ static bool pref_lookup(const char *key, char *out, size_t out_len)
     if (!file) {
         return false;
     }
-    char line[256];
+    char line[PREF_LINE];
     bool found = false;
     size_t key_len = strlen(key);
     while (fgets(line, sizeof(line), file)) {
@@ -673,7 +678,7 @@ static bool pref_lookup(const char *key, char *out, size_t out_len)
 
 static bool pref_store(const char *key, const char *value)
 {
-    static char lines[PREFS_MAX_LINES][256];
+    static char lines[PREFS_MAX_LINES][PREF_LINE];
     int count = 0;
     size_t key_len = strlen(key);
 
@@ -710,7 +715,7 @@ int aos_hal_pref_foreach(aos_hal_pref_visit_t visit, void *ctx)
     if (!file) {
         return 0;
     }
-    char line[256];
+    char line[PREF_LINE];
     int n = 0;
     while (fgets(line, sizeof(line), file)) {
         line[strcspn(line, "\r\n")] = '\0';

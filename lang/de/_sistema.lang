@@ -7230,3 +7230,9 @@ Navegadores con sesión	Angemeldete Browser
 Cerrar todas las sesiones	Alle Sitzungen beenden
 Token nuevo para scripts	Neues Token für Skripte
 El token reemplaza a la contraseña en los scripts de tools/ (cabecera Authorization: Bearer). Se le pasa así: P4OS_TOKEN=<token> tools/ota.sh p4os.local	Das Token ersetzt das Passwort in den Skripten unter tools/ (Header Authorization: Bearer). So übergeben: P4OS_TOKEN=<token> tools/ota.sh p4os.local
+Tocá otra vez: los navegadores van a avisar de nuevo	Nochmals tippen: Browser warnen erneut
+Se hace uno nuevo al reiniciar	Beim nächsten Neustart wird ein neues erstellt
+HTTPS (puerto 443)	HTTPS (Port 443)
+Certificado nuevo	Neues Zertifikat
+Reiniciar para aplicarlo	Neu starten zum Anwenden
+Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. El certificado lo hace la placa: el navegador avisa una vez que no lo conoce, y lo de arriba es su huella SHA-256 para compararla. Se aplica al reiniciar.	Mit HTTPS wird alles verschlüsselt übertragen, auch das Passwort, und außer Haus leitet das Portal von HTTP auf HTTPS um. Das Zertifikat erstellt die Platine: der Browser warnt einmal, dass er es nicht kennt, und oben steht sein SHA-256-Fingerabdruck zum Vergleichen. Gilt ab dem nächsten Neustart.
