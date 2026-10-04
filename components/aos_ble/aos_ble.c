@@ -121,6 +121,7 @@ static char s_peer[40];
  * (on_svc sorts them). s_phone is the phone's identity once seen, so its HID
  * reads can be refused from the first one on the next connection. */
 static volatile uint16_t s_host = SIN_CONN;
+static volatile uint16_t s_pair_conn = SIN_CONN;    /* the connection the code belongs to */
 static char s_host_name[40];
 static ble_addr_t s_phone;
 static bool s_phone_known;
@@ -1219,6 +1220,7 @@ static int gap_event(struct ble_gap_event *event, void *arg)
              * the user, tapping on the Settings screen, and that arrives
              * through aos_ble_pair_confirm(). */
             s_pair_code   = event->passkey.params.numcmp;
+            s_pair_conn   = event->passkey.conn_handle;
             s_pair_wanted = true;
             ESP_LOGI(TAG, "pairing, code %06u", (unsigned)s_pair_code);
         } else {
@@ -1632,7 +1634,10 @@ uint32_t aos_ble_pair_code(void)
 
 void aos_ble_pair_confirm(bool accept)
 {
-    uint16_t conn = s_conn;
+    /* the connection that asked: the phone, or with the keyboard mode on a
+     * computer, which is not s_conn */
+    uint16_t conn = s_pair_conn != SIN_CONN ? s_pair_conn : s_conn;
+    s_pair_conn = SIN_CONN;
     uint32_t code = s_pair_code;
 
     s_pair_wanted = false;
