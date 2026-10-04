@@ -10,6 +10,7 @@
 #include "aos_hal.h"
 
 #include "mbedtls/ssl.h"
+#include "mbedtls/ssl_cache.h"
 #include "mbedtls/x509_crt.h"
 #include "mbedtls/pk.h"
 #include "mbedtls/error.h"
@@ -76,6 +77,7 @@ static bool wait_fd(int fd, bool wr, int ms)
 static struct {
     bool ready;
     mbedtls_ssl_config conf;
+    mbedtls_ssl_cache_context cache;
     mbedtls_x509_crt crt;
     mbedtls_pk_context key;
     void *mx;
@@ -95,6 +97,27 @@ static int tls_rng(void *ctx, unsigned char *out, size_t n)
     tls_rnd(out, n);
     aos_hal_mutex_unlock(T.mx);
     return 0;
+}
+
+/* The session cache: a browser that comes back (the portal opens a
+ * connection per request, a dozen at startup) resumes its session with a
+ * short handshake instead of the full one, which costs this board ~0.6 s
+ * of elliptic curves, ~1 s when several run at once. Its calls go under the
+ * lock too, as this mbedTLS has no threading of its own. */
+static int cache_get(void *data, unsigned char const *id, size_t len, mbedtls_ssl_session *s)
+{
+    aos_hal_mutex_lock(T.mx);
+    int e = mbedtls_ssl_cache_get(data, id, len, s);
+    aos_hal_mutex_unlock(T.mx);
+    return e;
+}
+
+static int cache_set(void *data, unsigned char const *id, size_t len, const mbedtls_ssl_session *s)
+{
+    aos_hal_mutex_lock(T.mx);
+    int e = mbedtls_ssl_cache_set(data, id, len, s);
+    aos_hal_mutex_unlock(T.mx);
+    return e;
 }
 
 static bool wait_fd(int fd, bool wr, int ms);
@@ -456,10 +479,18 @@ static void listen_thread(void *arg)
 #ifdef SO_NOSIGPIPE
         setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &one, sizeof one);
 #endif
-        aos_hal_mutex_lock(s_mx);
-        bool room = s_active < AOS_HTTPD_CONNS;
-        if (room) s_active++;
-        aos_hal_mutex_unlock(s_mx);
+        /* All the places taken: this one waits for one, up to 10 s, rather
+         * than being turned away. A page asks for a dozen things at once,
+         * and over HTTPS each one holds its place for a handshake: a
+         * dropped one was an app's page missing from the menu. */
+        bool room = false;
+        for (int waited = 0; !room && waited <= 10000; waited += 20) {
+            aos_hal_mutex_lock(s_mx);
+            room = s_active < AOS_HTTPD_CONNS;
+            if (room) s_active++;
+            aos_hal_mutex_unlock(s_mx);
+            if (!room) aos_hal_sleep_ms(20);
+        }
         aos_httpd_req_t *r = room ? calloc(1, sizeof *r) : NULL;
         if (!r) {
             static const char busy[] = "HTTP/1.1 503 Service Unavailable\r\nConnection: close\r\nContent-Length: 0\r\n\r\n";
@@ -529,6 +560,10 @@ bool aos_httpd_start_tls(int port, const unsigned char *cert, size_t cert_len, c
             0,
         };
         mbedtls_ssl_conf_ciphersuites(&T.conf, SUITES);
+        mbedtls_ssl_cache_init(&T.cache);
+        mbedtls_ssl_cache_set_max_entries(&T.cache, 16);
+        mbedtls_ssl_cache_set_timeout(&T.cache, 24 * 3600);
+        mbedtls_ssl_conf_session_cache(&T.conf, &T.cache, cache_get, cache_set);
         e = mbedtls_ssl_conf_own_cert(&T.conf, &T.crt, &T.key);
     }
     if (e) {
