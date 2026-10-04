@@ -106,3 +106,19 @@ int aos_hal_mdns_browse(const char *const *types, int ntypes, uint32_t timeout_m
             if (!strcmp(SVC[i].type, types[t])) out[k++] = SVC[i];
     return k;
 }
+
+/* The Mac's ARP cache is the user's real LAN: the simulator sweeps
+ * 127.0.0.1 and has no table to show. */
+int aos_hal_net_arp_table(aos_arp_entry_t *out, int max)
+{
+    (void)out;
+    (void)max;
+    return 0;
+}
+
+bool aos_hal_net_mac(uint8_t mac[6])
+{
+    static const uint8_t SIM[6] = { 0x02, 0x50, 0x34, 0x4f, 0x53, 0x01 };    /* locally administered */
+    memcpy(mac, SIM, 6);
+    return true;
+}

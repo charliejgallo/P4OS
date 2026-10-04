@@ -67,6 +67,9 @@ typedef struct {
     bool     icmp;              /* answered the ping */
     float    rtt_ms;
     bool     self;              /* this device */
+    bool     has_mac;
+    bool     arp_only;          /* answered ARP and nothing else: there, firewalled */
+    uint8_t  mac[6];            /* read from lwIP's ARP table as the sweep goes */
 } nt_host_t;
 
 typedef struct {

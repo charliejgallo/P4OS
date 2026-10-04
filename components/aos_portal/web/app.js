@@ -2496,6 +2496,42 @@ const RED_WEB = new Set([80, 443, 3000, 5000, 8000, 8080, 8081, 8123, 8443, 8888
 const RED_PHASE = ['Ping', 'Puertos', 'Nombres y redes Wi-Fi'];
 const ipNum = ip => (ip || '').split('.').reduce((a, b) => a * 256 + (parseInt(b, 10) || 0), 0);
 
+/* Who made a MAC, by its first three bytes. A short list lives here (from
+ * AmoledOS); the whole register can go on the card as /redes/oui.txt, either
+ * IEEE's oui.txt ("AA-BB-CC   (hex)   Name") or one "AA:BB:CC<tab>Name" per
+ * line, and is read once, the first time a survey with MACs is shown. */
+const RED_OUI = {
+  'a4:2b:8c': 'Netgear', 'b8:27:eb': 'Raspberry Pi', 'dc:a6:32': 'Raspberry Pi', 'e4:5f:01': 'Raspberry Pi',
+  'd8:3a:dd': 'Raspberry Pi', '00:11:32': 'Synology', '3c:2e:ff': 'HP', 'f0:18:98': 'Apple', '8c:85:90': 'Apple',
+  'a4:83:e7': 'Apple', 'ac:bc:32': 'Apple', '00:1b:63': 'Apple', '00:1a:11': 'Google', 'f4:f5:d8': 'Google',
+  '18:b4:30': 'Nest', '50:c7:bf': 'TP-Link', 'c4:e9:84': 'TP-Link', 'ec:08:6b': 'TP-Link', '34:60:f9': 'Tuya',
+  '68:57:2d': 'Espressif', '24:0a:c4': 'Espressif', '7c:df:a1': 'Espressif', '84:cc:a8': 'Espressif',
+  '2c:f4:32': 'Espressif', 'b4:e6:2d': 'Espressif', '5c:cf:7f': 'Espressif', 'cc:50:e3': 'Espressif',
+  '94:b9:7e': 'Espressif', 'a4:cf:12': 'Espressif', 'dc:4f:22': 'Espressif', '00:17:88': 'Philips Hue',
+  '00:50:56': 'VMware', '52:54:00': 'QEMU/KVM', '00:e0:4c': 'Realtek', '30:ed:a0': 'LG',
+};
+let redOuiFile = null;                 /* null: not looked for yet */
+async function redLoadOui() {
+  if (redOuiFile) return;
+  redOuiFile = {};
+  const t = await fsText(RED_DIR + '/oui.txt').catch(() => null);
+  if (!t) return;
+  for (const l of t.split('\n')) {
+    const m = /^\s*([0-9A-Fa-f]{2})[-:]?([0-9A-Fa-f]{2})[-:]?([0-9A-Fa-f]{2})\s+(?:\(hex\)\s+)?(.+?)\s*$/.exec(l);
+    if (m && !/^\(base 16\)/.test(m[4])) redOuiFile[(m[1] + ':' + m[2] + ':' + m[3]).toLowerCase()] = m[4];
+  }
+}
+/* A MAC with the locally administered bit set (second digit 2, 6, A or E) was
+ * made up by the device: a phone's private address, which no maker owns and
+ * which can change from one sweep to the next. */
+function redVendor(mac) {
+  if (!mac) return '';
+  const k = mac.slice(0, 8).toLowerCase();
+  const v = (redOuiFile && redOuiFile[k]) || RED_OUI[k];
+  if (v) return v;
+  return parseInt(mac[1], 16) & 2 ? 'MAC aleatoria' : '';
+}
+
 /* One survey, whatever the order of its lines; a line cut by a power loss is
  * skipped, not fatal. */
 function redParse(text) {
@@ -2511,7 +2547,7 @@ function redParse(text) {
     if (x.t === 'inicio') s.inicio = x;
     else if (x.t === 'fin') s.fin = x;
     else if (x.t === 'wifi') s.wifi.push(x);
-    else if (x.t === 'host') Object.assign(host(x.ip), { ping: x.ping, rtt: x.rtt, yo: x.yo, que: x.que, mac: x.mac });
+    else if (x.t === 'host') Object.assign(host(x.ip), { ping: x.ping, rtt: x.rtt, yo: x.yo, que: x.que, mac: x.mac, arp: x.arp });
     else if (x.t === 'puertos') host(x.ip).ports = (x.abiertos || []).slice().sort((a, b) => a - b);
     else if (x.t === 'nombre') {
       const hh = host(x.ip);
@@ -2527,8 +2563,15 @@ function redParse(text) {
 /* What changed from one sweep to the next. By address: a phone that got
  * another one from the router shows as one gone and one new. */
 function redDiff(cur, prev) {
-  const nuevos = cur.list.filter(x => !prev.hosts.has(x.ip));
-  const idos = prev.list.filter(x => !cur.hosts.has(x.ip));
+  /* the same MAC at another address is a move, not one new and one gone
+   * (a random phone MAC is not a person: it is not followed) */
+  const fixed = m => m && !(parseInt(m[1], 16) & 2);
+  const prevByMac = new Map(prev.list.filter(x => fixed(x.mac)).map(x => [x.mac, x]));
+  const curMacs = new Set(cur.list.filter(x => fixed(x.mac)).map(x => x.mac));
+  const movidos = cur.list.filter(x => fixed(x.mac) && prevByMac.has(x.mac) && prevByMac.get(x.mac).ip !== x.ip)
+    .map(x => ({ x, antes: prevByMac.get(x.mac).ip }));
+  const nuevos = cur.list.filter(x => !prev.hosts.has(x.ip) && !(fixed(x.mac) && prevByMac.has(x.mac)));
+  const idos = prev.list.filter(x => !cur.hosts.has(x.ip) && !(fixed(x.mac) && curMacs.has(x.mac)));
   const puertos = [];
   for (const x of cur.list) {
     const p = prev.hosts.get(x.ip);
@@ -2537,7 +2580,7 @@ function redDiff(cur, prev) {
     if (abiertos.length || cerrados.length) puertos.push({ x, abiertos, cerrados });
   }
   const pb = new Set(prev.wifi.map(w => w.bssid)), cb = new Set(cur.wifi.map(w => w.bssid));
-  return { nuevos, idos, puertos, redesNuevas: cur.wifi.filter(w => !pb.has(w.bssid)), redesIdas: prev.wifi.filter(w => !cb.has(w.bssid)) };
+  return { nuevos, idos, movidos, puertos, redesNuevas: cur.wifi.filter(w => !pb.has(w.bssid)), redesIdas: prev.wifi.filter(w => !cb.has(w.bssid)) };
 }
 
 /* Where a network's energy is, in channel numbers (5 MHz apart, so 20 MHz is
@@ -2649,6 +2692,7 @@ function pageRed() {
     const text = await fsText(RED_DIR + '/' + curName);
     if (gone || curName !== sel.value) return;
     cur = redParse(text || '');
+    if (cur.list.some(x => x.mac)) await redLoadOui();
     await render();
   }
 
@@ -2672,10 +2716,11 @@ function pageRed() {
       const prevText = await fsText(RED_DIR + '/' + cmp.value);
       if (gone) return;
       const d = redDiff(s, redParse(prevText || ''));
-      const who = x => x.ip + (x.name ? ' · ' + x.name : x.que ? ' · ' + x.que : '');
+      const who = x => x.ip + (x.name ? ' · ' + x.name : x.que ? ' · ' + x.que : redVendor(x.mac) ? ' · ' + redVendor(x.mac) : '');
       const lines = [
         ...d.nuevos.map(x => h('div', { class: 'row' }, h('div', { class: 'grow' }, h('span', { class: 'ok' }, '＋ '), who(x)), h('div', { class: 'val' }, 'equipo nuevo'))),
         ...d.idos.map(x => h('div', { class: 'row' }, h('div', { class: 'grow' }, h('span', { class: 'bad' }, '－ '), who(x)), h('div', { class: 'val' }, 'ya no está'))),
+        ...d.movidos.map(({ x, antes }) => h('div', { class: 'row' }, h('div', { class: 'grow' }, h('span', { class: 'warn' }, '⇄ '), who(x)), h('div', { class: 'val' }, 'antes en ' + antes))),
         ...d.puertos.map(({ x, abiertos, cerrados }) => h('div', { class: 'row' }, h('div', { class: 'grow' }, h('span', { class: 'warn' }, '◆ '), who(x)),
           h('div', { class: 'val' }, [abiertos.length ? 'abrió ' + abiertos.join(', ') : '', cerrados.length ? 'cerró ' + cerrados.join(', ') : ''].filter(Boolean).join(' · ')))),
         ...d.redesNuevas.map(w => h('div', { class: 'row' }, h('div', { class: 'grow' }, h('span', { class: 'ok' }, '＋ '), (w.ssid || '(oculta)') + ' · canal ' + w.canal), h('div', { class: 'val' }, 'red nueva'))),
@@ -2700,10 +2745,12 @@ function pageRed() {
           h('td', { class: 'mono', style: 'white-space:nowrap;word-break:normal' }, h('b', {}, x.ip), x.yo ? h('div', { class: 'muted small' }, 'esta placa') : null),
           h('td', {}, x.name ? h('b', {}, x.name) : h('span', { class: 'muted' }, '—'), x.servicios.length ? h('div', { class: 'muted small' }, x.servicios.join(' · ')) : null),
           h('td', { class: 'muted' }, x.que || ''),
-          h('td', { class: 'muted', style: 'white-space:nowrap' }, x.yo ? '—' : x.ping ? (x.rtt != null ? x.rtt + ' ms' : 'sí') : 'no'),
+          h('td', { class: 'muted', style: 'white-space:nowrap' }, x.yo ? '—' : x.ping ? (x.rtt != null ? x.rtt + ' ms' : 'sí') : x.arp ? 'sólo ARP' : 'no'),
           h('td', {}, x.ports.length ? x.ports.map(p => portChip(x.ip, p)) : h('span', { class: 'muted' }, 'ninguno')),
-          anyMac ? h('td', { class: 'mono muted' }, x.mac || '—') : null)))),
-        h('p', { class: 'note' }, 'Los que no contestan el ping aparecen igual si tienen algún puerto abierto, o en el barrido completo. Los puertos web abren el equipo en otra pestaña.')];
+          anyMac ? h('td', { style: 'white-space:nowrap' }, h('span', { class: 'mono muted', style: 'word-break:normal' }, x.mac || '—'),
+            redVendor(x.mac) ? h('div', { class: 'small' }, redVendor(x.mac)) : null) : null)))),
+        h('p', { class: 'note' }, '«Sólo ARP» es un equipo que no contestó el ping ni ningún puerto, pero sí quién tiene esa dirección: existe igual, con el firewall puesto (celulares, Windows). Una MAC aleatoria es la dirección privada de un teléfono: no tiene fabricante y puede cambiar. Los puertos web abren el equipo en otra pestaña.' +
+          (anyMac ? ' Para ver el fabricante de todas las MAC, poné la lista de la IEEE (oui.txt) en /redes de la tarjeta.' : ''))];
     }
 
     let wifiCard = null;
@@ -2734,8 +2781,8 @@ function pageRed() {
   function exportCsv(kind) {
     if (!cur) return;
     const base = curName.replace(/\.ndjson$/, '');
-    if (kind === 'equipos') saveBlob(redCsv([['ip', 'nombre', 'servicios', 'que_es', 'ping_ms', 'puertos', 'mac'],
-      ...cur.list.map(x => [x.ip, x.name, x.servicios.join(' / '), x.que, x.ping ? x.rtt : '', x.ports.join(' '), x.mac])]), base + '-equipos.csv');
+    if (kind === 'equipos') saveBlob(redCsv([['ip', 'nombre', 'servicios', 'que_es', 'ping_ms', 'solo_arp', 'puertos', 'mac', 'fabricante'],
+      ...cur.list.map(x => [x.ip, x.name, x.servicios.join(' / '), x.que, x.ping ? x.rtt : '', x.arp ? 'si' : '', x.ports.join(' '), x.mac, redVendor(x.mac)])]), base + '-equipos.csv');
     else saveBlob(redCsv([['ssid', 'bssid', 'rssi_dbm', 'canal', 'ancho_mhz', 'seguridad'],
       ...cur.wifi.map(w => [w.ssid, w.bssid, w.rssi, w.canal, w.ancho || 20, w.cifrado])]), base + '-redes.csv');
   }

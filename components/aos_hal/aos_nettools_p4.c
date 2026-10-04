@@ -19,6 +19,7 @@
 #include "esp_netif.h"
 #include "mdns.h"
 #include "lwip/def.h"
+#include "lwip/etharp.h"
 
 extern bool aos_net_p4_up(void);        /* aos_net_p4.c: the C6 answered */
 
@@ -103,6 +104,43 @@ bool aos_hal_net_ap_info(aos_wifi_ap_ex_t *out)
 
 #define MDNS_MAX_TYPES   16
 #define MDNS_PER_TYPE    16
+
+/* etharp_get_entry() walks lwIP's table, which only the TCP/IP thread may
+ * touch (no core locking in this build): it runs there, through
+ * esp_netif_tcpip_exec(), and this waits for it. */
+typedef struct {
+    aos_arp_entry_t *out;
+    int max, n;
+} arp_read_t;
+
+static esp_err_t arp_read(void *ctx)
+{
+    arp_read_t *c = ctx;
+    for (size_t i = 0; i < ARP_TABLE_SIZE && c->n < c->max; i++) {
+        ip4_addr_t *ip;
+        struct netif *nif;
+        struct eth_addr *eth;
+        if (!etharp_get_entry(i, &ip, &nif, &eth)) continue;      /* only the resolved ones */
+        c->out[c->n].ip = lwip_ntohl(ip4_addr_get_u32(ip));
+        memcpy(c->out[c->n].mac, eth->addr, 6);
+        c->n++;
+    }
+    return ESP_OK;
+}
+
+int aos_hal_net_arp_table(aos_arp_entry_t *out, int max)
+{
+    if (!out || max <= 0 || !aos_net_p4_up()) return 0;
+    arp_read_t c = { out, max, 0 };
+    if (esp_netif_tcpip_exec(arp_read, &c) != ESP_OK) return 0;
+    return c.n;
+}
+
+bool aos_hal_net_mac(uint8_t mac[6])
+{
+    esp_netif_t *nif = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+    return nif && esp_netif_get_mac(nif, mac) == ESP_OK;
+}
 
 static void txt_join(char *dst, size_t n, const mdns_result_t *r)
 {

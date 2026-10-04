@@ -4411,6 +4411,7 @@ Respondió el ping en %s ms	Answered ping in %s ms
 
 #: components/aos_apps/aos_app_net.c:1068
 No responde el ping; contestó por TCP	Doesn't answer ping; replied over TCP
+No responde el ping; contestó por ARP	Doesn't answer ping; replied over ARP
 
 #: components/aos_apps/aos_app_net.c:1078
 PUERTOS CONOCIDOS	WELL-KNOWN PORTS
@@ -7150,3 +7151,4 @@ Computadora	Computer
 La placa como teclado, mouse y teclas de medios de una computadora: se empareja desde los ajustes de Bluetooth de la Mac o la PC, y el Macro pad y las apps mandan las teclas por ahí cuando no hay un cable USB. El teléfono sigue conectado.	The board as a computer's keyboard, mouse and media keys: pair it from the Mac's or the PC's Bluetooth settings, and the Macro pad and the apps send their keys that way when there is no USB cable. The phone stays connected.
 %s usa la placa como teclado y mouse por Bluetooth	%s uses the board as a keyboard and mouse over Bluetooth
 La computadora	The computer
+Notas	Notes

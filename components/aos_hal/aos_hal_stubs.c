@@ -1152,5 +1152,11 @@ __attribute__((weak)) int aos_hal_net_scan_ex(aos_wifi_ap_ex_t *out, int max)
 __attribute__((weak)) bool aos_hal_net_ap_info(aos_wifi_ap_ex_t *out)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) int aos_hal_net_arp_table(aos_arp_entry_t *out, int max)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_net_mac(uint8_t mac[6])
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) int aos_hal_mdns_browse(const char *const *types, int ntypes, uint32_t timeout_ms, aos_mdns_svc_t *out, int max)
 { int v; memset(&v, 0, sizeof v); return v; }

@@ -707,7 +707,7 @@ typedef struct {
     probe_t *q;                 /* the port queue, grows as hosts turn up */
     int qn, qcap, qi, qdone;
     uint32_t self;
-    int64_t t0, last_pub;
+    int64_t t0, last_pub, last_arp;
 } sweep_t;
 
 static bool scan_cancel(void *ud)
@@ -751,22 +751,51 @@ static void sweep_queue(sweep_t *w, int host, int from, int to)
         w->q[w->qn++] = (probe_t){ .ip = w->h[host].ip, .port = NT_KNOWN_PORTS[k], .tag = (uint16_t)host };
 }
 
+/* The MACs. lwIP keeps 10 ARP entries and recycles them as the sweep asks
+ * for new addresses, so the table is read after every batch of pings and
+ * every 200 ms of the port probes, before the next ones push them out. An
+ * address that answered ARP is there even if it ignores the ping (phones,
+ * Windows with its firewall): it counts as alive, and gets its ports probed.
+ * 'probing': the port phase is on, and a newly found one needs its queue. */
+static void arp_harvest(sweep_t *w, bool probing)
+{
+    aos_arp_entry_t e[16];
+    int n = aos_hal_net_arp_table(e, 16);
+    for (int k = 0; k < n; k++) {
+        uint32_t i = e[k].ip - w->h[0].ip;
+        if (i >= (uint32_t)w->n || w->h[i].ip != e[k].ip) continue;
+        nt_host_t *x = &w->h[i];
+        memcpy(x->mac, e[k].mac, 6);
+        x->has_mac = true;
+        if (w->alive[i]) continue;
+        w->alive[i] = true;
+        x->arp_only = true;
+        if (probing && !w->expanded[i]) {
+            w->expanded[i] = true;
+            sweep_queue(w, (int)i, w->full ? 2 : 0, NT_KNOWN_N);    /* the full sweep queued 80 and 443 */
+        }
+    }
+    w->last_arp = now_us();
+}
+
 static void sweep_done(void *ud, const probe_t *p, int res, uint32_t us)
 {
     sweep_t *w = ud;
     int i = p->tag;
     w->qdone++;
     if (res == PR_OPEN) host_add_port(&w->h[i], p->port);
-    if (res != PR_SILENT && !w->alive[i]) {
+    if (res != PR_SILENT && (!w->alive[i] || w->h[i].arp_only)) {
         /* It refused or accepted: it is there, even if it ignores the ping.
          * Now it deserves the rest of the list. */
         w->alive[i] = true;
+        w->h[i].arp_only = false;
         if (!w->h[i].icmp && w->h[i].rtt_ms <= 0) w->h[i].rtt_ms = (float)us / 1000.0f;
     }
     if (w->alive[i] && !w->expanded[i]) {
         w->expanded[i] = true;
         sweep_queue(w, i, 2, NT_KNOWN_N);
     }
+    if (now_us() - w->last_arp > 200000) arp_harvest(w, true);
     if (now_us() - w->last_pub > 250000) scan_publish(w, 1, w->qdone, w->qn);
 }
 
@@ -818,10 +847,10 @@ static bool scan_targets(uint32_t *base, int *count, uint32_t *self, char *range
 
 /* A finished sweep goes to the card as one NDJSON file, the format AmoledOS's
  * aos_scan.c writes ("inicio", "wifi", "host", "puertos", "nombre", "fin"
- * lines), so the portal's Red page reads both. Here the hosts carry no MAC
- * (lwIP's ARP table holds 10 and forgets them as the sweep goes) but bring
- * what this sweep knows and that one did not: the ping time, the guess of
- * what each one is and which one is the board. */
+ * lines), so the portal's Red page reads both. The MACs come from lwIP's
+ * ARP table, read as the sweep goes (arp_harvest); the rest is what this
+ * sweep knows and that one did not: the ping time, the guess of what each one
+ * is and which one is the board. */
 
 static void jstr(FILE *f, const char *s)
 {
@@ -948,6 +977,10 @@ static void survey_save(const nt_host_t *h, const bool *alive, int count, bool f
         ports += x->nports;
         nt_ip_str(x->ip, ip, sizeof ip);
         fprintf(f, "{\"t\":\"host\",\"ip\":\"%s\",\"ping\":%s", ip, x->icmp ? "true" : "false");
+        if (x->has_mac)
+            fprintf(f, ",\"mac\":\"%02x:%02x:%02x:%02x:%02x:%02x\"",
+                    x->mac[0], x->mac[1], x->mac[2], x->mac[3], x->mac[4], x->mac[5]);
+        if (x->arp_only) fputs(",\"arp\":true", f);
         if (x->icmp) fprintf(f, ",\"rtt\":%d", (int)(x->rtt_ms + 0.5f));      /* ms: no float printf */
         if (x->self) fputs(",\"yo\":true", f);
         fputs(",\"que\":", f);
@@ -1006,6 +1039,7 @@ static void scan_thread(void *arg)
     for (int i = 0; i < count; i++) {
         w.h[i].ip = base + (uint32_t)i;
         w.h[i].self = w.h[i].ip == w.self;
+        if (w.h[i].self) w.h[i].has_mac = aos_hal_net_mac(w.h[i].mac);
     }
     nt_lock();
     if (w.gen == s_scan_gen) { snprintf(S.range, sizeof S.range, "%s", range); S.total = count; S.seq++; }
@@ -1046,6 +1080,7 @@ static void scan_thread(void *arg)
                         w.h[rseq].rtt_ms = (float)(now_us() - sent_at[rseq]) / 1000.0f;
                     }
                 }
+                arp_harvest(&w, false);         /* before the next batch pushes these out */
                 if (now_us() - w.last_pub > 250000) scan_publish(&w, 0, round * count + i, total);
             }
         }
@@ -1075,6 +1110,7 @@ static void scan_thread(void *arg)
         snprintf(err, sizeof err, "%s", N_("Sin sockets libres: probá de nuevo en un rato"));
         goto fail;
     }
+    arp_harvest(&w, false);             /* the last probes' answers */
     scan_publish(&w, 2, 0, 0);
 
     /* 3. Names: mDNS (the board has no reverse DNS), and on the desktop

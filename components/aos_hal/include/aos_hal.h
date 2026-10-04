@@ -2421,6 +2421,19 @@ int  aos_hal_net_scan_ex(aos_wifi_ap_ex_t *out, int max);
  * the board (an RPC to the C6): from a thread. */
 bool aos_hal_net_ap_info(aos_wifi_ap_ex_t *out);
 
+/* lwIP's ARP table as it is right now: the station's resolved entries, as
+ * host-order IPv4 and MAC. It holds 10 and recycles them as new addresses are
+ * asked for, so a sweep reads it after every batch it sends. Returns how many
+ * it filled; 0 where there is no such table (the simulator). */
+typedef struct {
+    uint32_t ip;
+    uint8_t  mac[6];
+} aos_arp_entry_t;
+int  aos_hal_net_arp_table(aos_arp_entry_t *out, int max);
+
+/* The station's own MAC; false without the radio. */
+bool aos_hal_net_mac(uint8_t mac[6]);
+
 /* mDNS browsing. 'types' are full service types, "_http._tcp"; all of them
  * are asked at once and answers are gathered for timeout_ms. One entry per
  * instance: its type, name, host, first IPv4 address (host order, 0 if the

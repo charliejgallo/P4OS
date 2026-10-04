@@ -20,6 +20,13 @@
   /api/net`), the saved ones as tables, what changed since the one before
   (hosts new and gone, ports opened and closed, networks), a graph of the
   channels with the least busy of 1, 6 and 11, CSV and the raw file.
+- The sweep keeps every host's MAC: lwIP's ARP table holds 10, so it is
+  read after every batch of pings and during the port probes. A host that
+  answers ARP and ignores everything else (phones, Windows) now counts, as
+  "ARP only". The page shows the maker (a short list, or IEEE's whole
+  `oui.txt` dropped in `/redes`), flags random phone MACs, and follows a
+  device that changed address instead of listing it as new and gone.
+  `aos_hal_net_arp_table()`, `aos_hal_net_mac()`.
 
 ## 0.7.0 — 2026-10-04
 

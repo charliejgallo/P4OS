@@ -59,6 +59,13 @@ static void api_get(aos_httpd_req_t *r)
         cJSON_AddStringToObject(h, "name", x->name);
         cJSON *ps = cJSON_AddArrayToObject(h, "ports");
         for (int k = 0; k < x->nports; k++) cJSON_AddItemToArray(ps, cJSON_CreateNumber(x->ports[k]));
+        if (x->has_mac) {
+            char mac[18];
+            snprintf(mac, sizeof mac, "%02x:%02x:%02x:%02x:%02x:%02x",
+                     x->mac[0], x->mac[1], x->mac[2], x->mac[3], x->mac[4], x->mac[5]);
+            cJSON_AddStringToObject(h, "mac", mac);
+        }
+        if (x->arp_only) cJSON_AddBoolToObject(h, "arp", true);
         if (x->self) cJSON_AddBoolToObject(h, "self", true);
         cJSON_AddItemToArray(hs, h);
     }

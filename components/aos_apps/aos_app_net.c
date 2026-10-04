@@ -1065,7 +1065,13 @@ static void build_detail(lv_obj_t *parent, int32_t w)
     if (known) {
         fmt_ms(ms, sizeof ms, h.rtt_ms > 0 ? h.rtt_ms : -1);
         if (h.icmp) snprintf(t, sizeof t, _("Respondió el ping en %s ms"), ms);
+        else if (h.arp_only) snprintf(t, sizeof t, "%s", _("No responde el ping; contestó por ARP"));
         else snprintf(t, sizeof t, "%s", _("No responde el ping; contestó por TCP"));
+        if (h.has_mac) {
+            size_t n = strlen(t);
+            snprintf(t + n, sizeof t - n, "\nMAC %02X:%02X:%02X:%02X:%02X:%02X",
+                     h.mac[0], h.mac[1], h.mac[2], h.mac[3], h.mac[4], h.mac[5]);
+        }
         caption(top, t, w - 48);
         lv_obj_set_style_text_align(lv_obj_get_child(top, -1), LV_TEXT_ALIGN_CENTER, 0);
     }
