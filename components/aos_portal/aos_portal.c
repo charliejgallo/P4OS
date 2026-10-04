@@ -1215,7 +1215,7 @@ static void handler(aos_httpd_req_t *r)
 {
     const char *p = aos_httpd_path(r), *m = aos_httpd_method(r);
     bool post = !strcmp(m, "POST"), get = !strcmp(m, "GET");
-    if (!aos_portal_access(r)) return;
+    if (!aos_portal_access(r) || !aos_portal_rules(r)) return;
     if (strncmp(p, "/api/", 5)) { serve_asset(r, p); return; }
     p += 5;
     if (get && !strcmp(p, "info")) api_info(r);

@@ -639,6 +639,9 @@ __attribute__((weak)) int aos_hal_net_rssi(void)
 __attribute__((weak)) const char * aos_hal_net_ip(void)
 { return ""; }
 
+__attribute__((weak)) void aos_hal_net_mdns_visible(bool on)
+{ }
+
 __attribute__((weak)) void aos_hal_net_enable(bool on)
 { }
 

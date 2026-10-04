@@ -26,6 +26,7 @@
  */
 #include "aos_ui.h"
 #include "aos_internal.h"
+#include "aos_access.h"
 #include "aos_lock.h"
 #include "aos_pair_ui.h"
 #include "aos_hal.h"
@@ -1038,6 +1039,7 @@ void aos_ui_tick(void)
     aos_banner_tick();
     aos_lock_tick();
     aos_pair_ui_tick();
+    aos_access_tick();              /* mDNS by the portal's rules; once a second inside */
     /* the screen's auto-off; an app in front with KEEP_AWAKE holds it on
      * for as long as it is in front (the flag used to count only when the
      * app opened) */

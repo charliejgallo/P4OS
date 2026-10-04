@@ -131,6 +131,14 @@ static void mdns_up(void)
     }
 }
 
+void aos_hal_net_mdns_visible(bool on)
+{
+    esp_netif_t *sta = esp_netif_get_handle_from_ifkey("WIFI_STA_DEF");
+    if (!s_mdns || !sta) return;
+    esp_err_t e = mdns_netif_action(sta, on ? (MDNS_EVENT_ENABLE_IP4 | MDNS_EVENT_ANNOUNCE_IP4) : MDNS_EVENT_DISABLE_IP4);
+    ESP_LOGI(TAG, "mDNS on the Wi-Fi: %s (%s)", on ? "answers" : "quiet", esp_err_to_name(e));
+}
+
 bool aos_hal_mdns_add_netif(void *esp_netif)
 {
     mdns_up();

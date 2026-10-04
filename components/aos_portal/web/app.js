@@ -26,6 +26,7 @@ async function api(path, opts = {}) {
   const t = await r.text();
   let j;
   try { j = JSON.parse(t); } catch { j = t; }
+  if (r.status === 401 && j && j.login) loginScreen();
   if (!r.ok) throw new Error((j && j.error) || r.statusText);
   return j;
 }
@@ -2910,9 +2911,55 @@ function route() {
   const r = (PAGES[p] || pagePantalla)();
   if (typeof r === 'function') leave = r;
 }
-window.addEventListener('hashchange', route);
-refreshInfo();
-setInterval(refreshInfo, 10000);
-route();
-/* a deep link to an app's page (#hola) lands before the page is known */
-loadCardPages().then(() => { const p = (location.hash || '').slice(1); if (PAGES[p] && PAGES[p].plugged) route(); });
+/* ---- access (aos_access.h on the board) ----
+ * The board says, per request, whether this network needs the password
+ * (GET /api/auth). Without a session the portal shows only this: the
+ * password, sent once to /api/login, which answers with a cookie the
+ * page's scripts cannot read. The rules themselves are set on the board,
+ * Settings, Portal web. */
+let auth = null;
+function loginScreen(msg) {
+  if (document.getElementById('login')) return;
+  const pw = h('input', { type: 'password', autocomplete: 'current-password', placeholder: 'contraseña', required: true });
+  const err = h('p', { class: 'bad small', style: 'min-height:1.4em;margin:10px 0 0' }, msg || '');
+  const go = async e => {
+    e.preventDefault();
+    try {
+      const r = await fetch('/api/login', { method: 'POST', body: JSON.stringify({ password: pw.value }) });
+      const j = await r.json().catch(() => ({}));
+      if (r.ok && j.ok) { location.reload(); return; }
+      err.textContent = j.error + (j.wait_s ? ` (${j.wait_s} s)` : '');
+      pw.select();
+    } catch (x) { err.textContent = x.message; }
+  };
+  const name = (auth && auth.name) || 'p4os';
+  document.body.append(h('div', { id: 'login', class: 'login' },
+    h('form', { class: 'card pad', onsubmit: go },
+      h('h1', {}, name),
+      h('p', { class: 'muted' }, 'Esta red pide la contraseña del portal.'),
+      /* for the browser's password manager: which device this is */
+      h('input', { type: 'text', autocomplete: 'username', value: name, style: 'display:none', readonly: true }),
+      pw, err,
+      h('div', { class: 'btns', style: 'margin-top:14px' }, h('button', { class: 'btn pri', type: 'submit' }, 'Entrar')),
+      h('p', { class: 'note' }, 'Se pone, se cambia o se quita en la placa: Ajustes, Portal web.'))));
+  pw.focus();
+}
+
+async function logout() {
+  await fetch('/api/logout', { method: 'POST' }).catch(() => {});
+  location.reload();
+}
+
+(async () => {
+  try { auth = await (await fetch('/api/auth')).json(); } catch { auth = null; }
+  if (auth && auth.need === 'login' && !auth.ok) { loginScreen(); return; }
+  if (auth && auth.session)
+    $('#nav').append(h('a', { href: '#', class: 'logout', onclick: e => { e.preventDefault(); logout(); } },
+      h('span', { class: 'ic' }, '⏻'), h('span', {}, 'Cerrar sesión')));
+  window.addEventListener('hashchange', route);
+  refreshInfo();
+  setInterval(refreshInfo, 10000);
+  route();
+  /* a deep link to an app's page (#hola) lands before the page is known */
+  loadCardPages().then(() => { const p = (location.hash || '').slice(1); if (PAGES[p] && PAGES[p].plugged) route(); });
+})();

@@ -244,7 +244,7 @@ an app.
 ### Settings
 
 The pages are Wi-Fi (with the access point), Bluetooth, USB (each mode
-explained), Display, Lock screen, Sound, Wallpaper, Expansion, Storage,
+explained), Web portal (trusted networks, the password), Display, Lock screen, Sound, Wallpaper, Expansion, Storage,
 Language, Date and time, Update, Diagnostics, About and Developer.
 
 - **Lock screen:** when it locks, the code (none, 4 or 6 digits, changed or
@@ -254,6 +254,9 @@ Language, Date and time, Update, Diagnostics, About and Developer.
 - **Diagnostics:** chip temperature, CPU, memory, the reset reason, safe mode,
   the hang watchdog's restarts, the C6's firmware, and the crash dump.
 - **About:** the portal's addresses, with a QR code for the phone.
+- **Web portal:** which networks are trusted, and a password for the
+  others (or for all of them); the token for scripts
+  ([docs/SECURITY.md](docs/SECURITY.md)).
 - **Developer:** touches and frames per second over everything, the log's
   level, the drawing preferences with their factory values, and restarting
   into safe mode without the BOOT button.
@@ -435,6 +438,7 @@ Where something is a guess, it says so.
 | [EMOJI.md](docs/EMOJI.md) | the colour emoji pack and how a text gets them |
 | [MODULES.md](docs/MODULES.md) | the 40-pin header, `modules.txt`, I2C, SPI and GPIO from apps |
 | [PORTAL-PAGES.md](docs/PORTAL-PAGES.md) | an app's own page in the web portal, from the card, with no firmware |
+| [SECURITY.md](docs/SECURITY.md) | who may use the portal: trusted networks, the password, the token, and what is not covered |
 | [MACROPAD.md](docs/MACROPAD.md) | the macro pad: pages, buttons, the gamepad and MIDI faces |
 | [CAMERAS.md](docs/CAMERAS.md) | RTSP and MJPEG cameras on this board |
 | [HOME-ASSISTANT.md](docs/HOME-ASSISTANT.md), [MQTT.md](docs/MQTT.md), [CLAUDE-APP.md](docs/CLAUDE-APP.md) | the home and service apps |

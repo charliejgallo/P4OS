@@ -7192,3 +7192,41 @@ Volver a lo de fábrica	Back to factory settings
 Estos se leen al arrancar: hay que reiniciar. Si un ajuste no deja arrancar, el tercer arranque fallido seguido vuelve solo a lo de fábrica.	These are read at boot: a restart is needed. If a setting keeps the board from starting, the third failed boot in a row goes back to the factory settings by itself.
 Reiniciar en modo seguro	Restart in safe mode
 El modo seguro arranca sin las apps de la tarjeta, con el dibujo de fábrica y el USB quieto, como con BOOT apretado al encender. El reinicio siguiente vuelve a la normalidad.	Safe mode starts without the card's apps, with the factory drawing settings and the USB idle, as with BOOT held at power on. The next restart goes back to normal.
+Portal web	Web portal
+abierto	open
+con contraseña	with password
+cerrado acá	closed here
+Tocá otra vez para quitarla	Tap again to remove it
+No coinciden: la contraseña no cambió	They don't match: the password did not change
+Contraseña guardada: los navegadores vuelven a entrar	Password saved: browsers must sign in again
+Repetí la contraseña	Repeat the password
+Tiene que tener 6 caracteres o más	It needs 6 characters or more
+La contraseña nueva del portal	The portal's new password
+Una contraseña para el portal	A password for the portal
+Siguiente	Next
+Tocá otra vez: el token de ahora deja de andar	Tap again: the current token stops working
+Tocá otra vez para cerrarlas	Tap again to close them
+Sesiones cerradas	Sessions closed
+ESTA RED	THIS NETWORK
+De confianza: en esta red el portal está abierto.	Trusted: on this network the portal is open.
+En esta red el portal pide la contraseña.	On this network the portal asks for the password.
+En esta red el portal está cerrado y la placa no anuncia su nombre. Se entra por la red propia de la placa o por el cable USB.	On this network the portal is closed and the board does not announce its name. It can be reached through the board's own network or the USB cable.
+REDES DE CONFIANZA	TRUSTED NETWORKS
+Ninguna	None
+quitar	remove
+En una red de confianza el portal se abre como siempre. En cualquier otra, la placa no anuncia su nombre y el portal queda cerrado, o pide la contraseña si así se elige abajo.	On a trusted network the portal opens as always. On any other, the board does not announce its name and the portal stays closed, or asks for the password if chosen below.
+CONTRASEÑA	PASSWORD
+Poner una contraseña	Set a password
+Quitar la contraseña	Remove the password
+PEDIRLA	ASK FOR IT
+Sólo fuera de casa	Only away from home
+También en casa y en la red de la placa	At home and on the board's network too
+EN REDES QUE NO SON DE CONFIANZA	ON UNTRUSTED NETWORKS
+Portal cerrado	Portal closed
+Abierto con la contraseña	Open with the password
+El cable USB entra siempre, sin contraseña: quien tiene el cable tiene la placa. La contraseña y estas reglas se cambian sólo acá, nunca desde el portal.	The USB cable always gets in, without a password: whoever holds the cable holds the board. The password and these rules are changed only here, never from the portal.
+SESIONES Y SCRIPTS	SESSIONS AND SCRIPTS
+Navegadores con sesión	Browsers signed in
+Cerrar todas las sesiones	Close every session
+Token nuevo para scripts	New token for scripts
+El token reemplaza a la contraseña en los scripts de tools/ (cabecera Authorization: Bearer). Se le pasa así: P4OS_TOKEN=<token> tools/ota.sh p4os.local	The token stands in for the password in the tools/ scripts (Authorization: Bearer header). Pass it like this: P4OS_TOKEN=<token> tools/ota.sh p4os.local

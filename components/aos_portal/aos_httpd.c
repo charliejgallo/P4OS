@@ -22,6 +22,7 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <arpa/inet.h>
 
 #define HEAD_MAX   4096
 #define IO_TIMEOUT 10000
@@ -147,6 +148,17 @@ const char *aos_httpd_method(aos_httpd_req_t *r) { return r->method; }
 const char *aos_httpd_path(aos_httpd_req_t *r) { return r->path; }
 long aos_httpd_body_len(aos_httpd_req_t *r) { return r->body_len; }
 
+bool aos_httpd_local_ip(aos_httpd_req_t *r, char *out, size_t out_len)
+{
+    struct sockaddr_in a;
+    socklen_t l = sizeof a;
+    if (getsockname(r->fd, (struct sockaddr *)&a, &l) || a.sin_family != AF_INET) return false;
+    uint32_t ip = ntohl(a.sin_addr.s_addr);
+    snprintf(out, out_len, "%u.%u.%u.%u", (unsigned)(ip >> 24), (unsigned)(ip >> 16 & 255),
+             (unsigned)(ip >> 8 & 255), (unsigned)(ip & 255));
+    return true;
+}
+
 const char *aos_httpd_header(aos_httpd_req_t *r, const char *name)
 {
     for (int i = 0; i < r->nhdr; i++)
@@ -225,6 +237,7 @@ static const char *reason(int s)
     case 204: return "No Content";
     case 206: return "Partial Content";
     case 400: return "Bad Request";
+    case 401: return "Unauthorized";
     case 404: return "Not Found";
     case 405: return "Method Not Allowed";
     case 403: return "Forbidden";

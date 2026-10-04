@@ -4,6 +4,10 @@
 # to the card's /firmware/c6.bin and starts the update; the board restarts
 # by itself when the C6 has it. Settings > Update does the same from the
 # card. docs/C6.md says what can go wrong and how to recover.
+# The portal's token, for a board that asks for its password here
+# (Settings, Portal web; docs/SECURITY.md): P4OS_TOKEN=<token> tools/...
+[ -n "$P4OS_TOKEN" ] && curl() { command curl -H "Authorization: Bearer $P4OS_TOKEN" "$@"; }
+
 set -e
 cd "$(dirname "$0")/.."
 host=${1:?usage: install_c6.sh <host> [image]}

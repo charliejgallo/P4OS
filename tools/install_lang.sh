@@ -23,6 +23,10 @@
 # the active one has no effect until it is chosen again (or the board
 # restarts). The portal can also choose it:
 #   curl -X POST http://<host>/api/settings -d '{"lang":"en"}'
+# The portal's token, for a board that asks for its password here
+# (Settings, Portal web; docs/SECURITY.md): P4OS_TOKEN=<token> tools/...
+[ -n "$P4OS_TOKEN" ] && curl() { command curl -H "Authorization: Bearer $P4OS_TOKEN" "$@"; }
+
 set -e
 ROOT=${0:a:h:h}
 HOST=${1:?usage: install_lang.sh <ip-or-name[:port]|sim> <code> [code...]}

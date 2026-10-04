@@ -38,6 +38,9 @@ bool        aos_httpd_query(aos_httpd_req_t *r, const char *key, char *out, size
 long        aos_httpd_query_int(aos_httpd_req_t *r, const char *key, long def);
 const char *aos_httpd_header(aos_httpd_req_t *r, const char *name);    /* case-insensitive, NULL if absent */
 long        aos_httpd_body_len(aos_httpd_req_t *r);                    /* Content-Length, -1 if none */
+/* The board's own address the request came in on ("192.168.4.1" on the AP,
+ * "192.168.7.1" over the cable): the portal's rules depend on it. */
+bool        aos_httpd_local_ip(aos_httpd_req_t *r, char *out, size_t out_len);
 /* Reads up to len bytes of the body: bytes read, 0 at its end, -1 on error. */
 int         aos_httpd_body_read(aos_httpd_req_t *r, void *buf, int len);
 /* The whole body into a malloc'd, NUL-terminated buffer (free it); NULL if

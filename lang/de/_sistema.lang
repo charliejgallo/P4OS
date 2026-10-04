@@ -7192,3 +7192,41 @@ Volver a lo de fábrica	Werkseinstellungen herstellen
 Estos se leen al arrancar: hay que reiniciar. Si un ajuste no deja arrancar, el tercer arranque fallido seguido vuelve solo a lo de fábrica.	Diese werden beim Start gelesen: ein Neustart ist nötig. Verhindert eine Einstellung den Start, stellt der dritte fehlgeschlagene Start in Folge die Werkseinstellungen von selbst her.
 Reiniciar en modo seguro	Im abgesicherten Modus neu starten
 El modo seguro arranca sin las apps de la tarjeta, con el dibujo de fábrica y el USB quieto, como con BOOT apretado al encender. El reinicio siguiente vuelve a la normalidad.	Der abgesicherte Modus startet ohne die Apps der Karte, mit den Werkseinstellungen fürs Zeichnen und ruhendem USB, wie mit gedrückter BOOT-Taste beim Einschalten. Der nächste Neustart kehrt zum Normalbetrieb zurück.
+Portal web	Webportal
+abierto	offen
+con contraseña	mit Passwort
+cerrado acá	hier geschlossen
+Tocá otra vez para quitarla	Nochmals tippen zum Entfernen
+No coinciden: la contraseña no cambió	Stimmen nicht überein: Passwort unverändert
+Contraseña guardada: los navegadores vuelven a entrar	Passwort gespeichert: Browser müssen sich neu anmelden
+Repetí la contraseña	Passwort wiederholen
+Tiene que tener 6 caracteres o más	Mindestens 6 Zeichen
+La contraseña nueva del portal	Neues Passwort für das Portal
+Una contraseña para el portal	Ein Passwort für das Portal
+Siguiente	Weiter
+Tocá otra vez: el token de ahora deja de andar	Nochmals tippen: das aktuelle Token wird ungültig
+Tocá otra vez para cerrarlas	Nochmals tippen zum Beenden
+Sesiones cerradas	Sitzungen beendet
+ESTA RED	DIESES NETZ
+De confianza: en esta red el portal está abierto.	Vertrauenswürdig: in diesem Netz ist das Portal offen.
+En esta red el portal pide la contraseña.	In diesem Netz verlangt das Portal das Passwort.
+En esta red el portal está cerrado y la placa no anuncia su nombre. Se entra por la red propia de la placa o por el cable USB.	In diesem Netz ist das Portal geschlossen und die Platine gibt ihren Namen nicht bekannt. Erreichbar über das eigene Netz der Platine oder das USB-Kabel.
+REDES DE CONFIANZA	VERTRAUENSWÜRDIGE NETZE
+Ninguna	Keine
+quitar	entfernen
+En una red de confianza el portal se abre como siempre. En cualquier otra, la placa no anuncia su nombre y el portal queda cerrado, o pide la contraseña si así se elige abajo.	In einem vertrauenswürdigen Netz öffnet sich das Portal wie immer. In jedem anderen gibt die Platine ihren Namen nicht bekannt und das Portal bleibt geschlossen oder verlangt das Passwort, wenn unten so gewählt.
+CONTRASEÑA	PASSWORT
+Poner una contraseña	Passwort festlegen
+Quitar la contraseña	Passwort entfernen
+PEDIRLA	ABFRAGEN
+Sólo fuera de casa	Nur außer Haus
+También en casa y en la red de la placa	Auch zu Hause und im Netz der Platine
+EN REDES QUE NO SON DE CONFIANZA	IN NICHT VERTRAUENSWÜRDIGEN NETZEN
+Portal cerrado	Portal geschlossen
+Abierto con la contraseña	Mit Passwort offen
+El cable USB entra siempre, sin contraseña: quien tiene el cable tiene la placa. La contraseña y estas reglas se cambian sólo acá, nunca desde el portal.	Über das USB-Kabel geht es immer ohne Passwort: wer das Kabel hat, hat die Platine. Passwort und Regeln werden nur hier geändert, nie im Portal.
+SESIONES Y SCRIPTS	SITZUNGEN UND SKRIPTE
+Navegadores con sesión	Angemeldete Browser
+Cerrar todas las sesiones	Alle Sitzungen beenden
+Token nuevo para scripts	Neues Token für Skripte
+El token reemplaza a la contraseña en los scripts de tools/ (cabecera Authorization: Bearer). Se le pasa así: P4OS_TOKEN=<token> tools/ota.sh p4os.local	Das Token ersetzt das Passwort in den Skripten unter tools/ (Header Authorization: Bearer). So übergeben: P4OS_TOKEN=<token> tools/ota.sh p4os.local

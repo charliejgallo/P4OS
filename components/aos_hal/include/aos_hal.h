@@ -1338,6 +1338,10 @@ void aos_hal_net_low_latency(bool on);
 const char *aos_hal_net_ssid(void);
 int         aos_hal_net_rssi(void);         /* dBm */
 const char *aos_hal_net_ip(void);
+/* P4OS: mDNS on the Wi-Fi station: answering and announcing the board's name
+ * there, or quiet (the portal's rules keep it quiet on networks that are not
+ * home, aos_access.c). The AP and the USB cable are not affected. */
+void aos_hal_net_mdns_visible(bool on);
 void        aos_hal_net_enable(bool on);
 bool        aos_hal_net_enabled(void);   /* preference, survives restarts */
 /* The station's reconnection pacing: failures since boot, whether it has

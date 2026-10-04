@@ -2278,6 +2278,44 @@ static const char blob_en__sistema_lang[] =
     "Estos se leen al arrancar: hay que reiniciar. Si un ajuste no deja arrancar, el tercer arranque fallido seguido vuelve solo a lo de fábrica.\tThese are read at boot: a restart is needed. If a setting keeps the board from starting, the third failed boot in a row goes back to the factory settings by itself.\n"
     "Reiniciar en modo seguro\tRestart in safe mode\n"
     "El modo seguro arranca sin las apps de la tarjeta, con el dibujo de fábrica y el USB quieto, como con BOOT apretado al encender. El reinicio siguiente vuelve a la normalidad.\tSafe mode starts without the card's apps, with the factory drawing settings and the USB idle, as with BOOT held at power on. The next restart goes back to normal.\n"
+    "Portal web\tWeb portal\n"
+    "abierto\topen\n"
+    "con contraseña\twith password\n"
+    "cerrado acá\tclosed here\n"
+    "Tocá otra vez para quitarla\tTap again to remove it\n"
+    "No coinciden: la contraseña no cambió\tThey don't match: the password did not change\n"
+    "Contraseña guardada: los navegadores vuelven a entrar\tPassword saved: browsers must sign in again\n"
+    "Repetí la contraseña\tRepeat the password\n"
+    "Tiene que tener 6 caracteres o más\tIt needs 6 characters or more\n"
+    "La contraseña nueva del portal\tThe portal's new password\n"
+    "Una contraseña para el portal\tA password for the portal\n"
+    "Siguiente\tNext\n"
+    "Tocá otra vez: el token de ahora deja de andar\tTap again: the current token stops working\n"
+    "Tocá otra vez para cerrarlas\tTap again to close them\n"
+    "Sesiones cerradas\tSessions closed\n"
+    "ESTA RED\tTHIS NETWORK\n"
+    "De confianza: en esta red el portal está abierto.\tTrusted: on this network the portal is open.\n"
+    "En esta red el portal pide la contraseña.\tOn this network the portal asks for the password.\n"
+    "En esta red el portal está cerrado y la placa no anuncia su nombre. Se entra por la red propia de la placa o por el cable USB.\tOn this network the portal is closed and the board does not announce its name. It can be reached through the board's own network or the USB cable.\n"
+    "REDES DE CONFIANZA\tTRUSTED NETWORKS\n"
+    "Ninguna\tNone\n"
+    "quitar\tremove\n"
+    "En una red de confianza el portal se abre como siempre. En cualquier otra, la placa no anuncia su nombre y el portal queda cerrado, o pide la contraseña si así se elige abajo.\tOn a trusted network the portal opens as always. On any other, the board does not announce its name and the portal stays closed, or asks for the password if chosen below.\n"
+    "CONTRASEÑA\tPASSWORD\n"
+    "Poner una contraseña\tSet a password\n"
+    "Quitar la contraseña\tRemove the password\n"
+    "PEDIRLA\tASK FOR IT\n"
+    "Sólo fuera de casa\tOnly away from home\n"
+    "También en casa y en la red de la placa\tAt home and on the board's network too\n"
+    "EN REDES QUE NO SON DE CONFIANZA\tON UNTRUSTED NETWORKS\n"
+    "Portal cerrado\tPortal closed\n"
+    "Abierto con la contraseña\tOpen with the password\n"
+    "El cable USB entra siempre, sin contraseña: quien tiene el cable tiene la placa. La contraseña y estas reglas se cambian sólo acá, nunca desde el portal.\tThe USB cable always gets in, without a password: whoever holds the cable holds the board. The password and these rules are changed only here, never from the portal.\n"
+    "SESIONES Y SCRIPTS\tSESSIONS AND SCRIPTS\n"
+    "Navegadores con sesión\tBrowsers signed in\n"
+    "Cerrar todas las sesiones\tClose every session\n"
+    "Token nuevo para scripts\tNew token for scripts\n"
+    "El token reemplaza a la contraseña en los scripts de tools/ (cabecera Authorization: Bearer). Se le pasa así: P4OS_TOKEN=<token> tools/ota.sh p4os.local\tThe token stands in for the password in the tools/ scripts (Authorization: Bearer header). Pass it like this: P4OS_TOKEN=<token> tools/ota.sh p4os.local\n"
     ;
 
 static const char blob_en_aos_cameras_lang[] =
@@ -2413,7 +2451,7 @@ static const char blob_en_aos_cotiz_lang[] =
     "esperando la hora de la red…\twaiting for network time…\n"
     "no pude verificar el servidor\tcould not verify the server\n"
     "no se pudo consultar (%d)\tcould not query (%d)\n"
-    "tocá para actualizar  ·  elegí cuáles en /cotiz\ttap to refresh  ·  choose which at /cotiz\n"
+    "tocá para actualizar  ·  elegí cuáles en el portal\ttap to refresh  ·  choose which in the portal\n"
     "Cotizaciones\tCurrencies\n"
     "Oficial\tOficial\n"
     "Blue\tBlue\n"
@@ -2780,6 +2818,7 @@ static const char blob_en_app_recorder_lang[] =
     "Grabaciones\tRecordings\n"
     "Todavía no grabaste nada.\\nLo que grabes aparece acá.\tNothing recorded yet.\\nYour recordings show up here.\n"
     "tocá la onda para saltar\ttap the waveform to jump\n"
+    "Esa grabación ya no está\tThat recording is gone\n"
     ;
 
 static const char blob_en_demo_2043_lang[] =
@@ -6724,6 +6763,44 @@ static const char blob_de__sistema_lang[] =
     "Estos se leen al arrancar: hay que reiniciar. Si un ajuste no deja arrancar, el tercer arranque fallido seguido vuelve solo a lo de fábrica.\tDiese werden beim Start gelesen: ein Neustart ist nötig. Verhindert eine Einstellung den Start, stellt der dritte fehlgeschlagene Start in Folge die Werkseinstellungen von selbst her.\n"
     "Reiniciar en modo seguro\tIm abgesicherten Modus neu starten\n"
     "El modo seguro arranca sin las apps de la tarjeta, con el dibujo de fábrica y el USB quieto, como con BOOT apretado al encender. El reinicio siguiente vuelve a la normalidad.\tDer abgesicherte Modus startet ohne die Apps der Karte, mit den Werkseinstellungen fürs Zeichnen und ruhendem USB, wie mit gedrückter BOOT-Taste beim Einschalten. Der nächste Neustart kehrt zum Normalbetrieb zurück.\n"
+    "Portal web\tWebportal\n"
+    "abierto\toffen\n"
+    "con contraseña\tmit Passwort\n"
+    "cerrado acá\thier geschlossen\n"
+    "Tocá otra vez para quitarla\tNochmals tippen zum Entfernen\n"
+    "No coinciden: la contraseña no cambió\tStimmen nicht überein: Passwort unverändert\n"
+    "Contraseña guardada: los navegadores vuelven a entrar\tPasswort gespeichert: Browser müssen sich neu anmelden\n"
+    "Repetí la contraseña\tPasswort wiederholen\n"
+    "Tiene que tener 6 caracteres o más\tMindestens 6 Zeichen\n"
+    "La contraseña nueva del portal\tNeues Passwort für das Portal\n"
+    "Una contraseña para el portal\tEin Passwort für das Portal\n"
+    "Siguiente\tWeiter\n"
+    "Tocá otra vez: el token de ahora deja de andar\tNochmals tippen: das aktuelle Token wird ungültig\n"
+    "Tocá otra vez para cerrarlas\tNochmals tippen zum Beenden\n"
+    "Sesiones cerradas\tSitzungen beendet\n"
+    "ESTA RED\tDIESES NETZ\n"
+    "De confianza: en esta red el portal está abierto.\tVertrauenswürdig: in diesem Netz ist das Portal offen.\n"
+    "En esta red el portal pide la contraseña.\tIn diesem Netz verlangt das Portal das Passwort.\n"
+    "En esta red el portal está cerrado y la placa no anuncia su nombre. Se entra por la red propia de la placa o por el cable USB.\tIn diesem Netz ist das Portal geschlossen und die Platine gibt ihren Namen nicht bekannt. Erreichbar über das eigene Netz der Platine oder das USB-Kabel.\n"
+    "REDES DE CONFIANZA\tVERTRAUENSWÜRDIGE NETZE\n"
+    "Ninguna\tKeine\n"
+    "quitar\tentfernen\n"
+    "En una red de confianza el portal se abre como siempre. En cualquier otra, la placa no anuncia su nombre y el portal queda cerrado, o pide la contraseña si así se elige abajo.\tIn einem vertrauenswürdigen Netz öffnet sich das Portal wie immer. In jedem anderen gibt die Platine ihren Namen nicht bekannt und das Portal bleibt geschlossen oder verlangt das Passwort, wenn unten so gewählt.\n"
+    "CONTRASEÑA\tPASSWORT\n"
+    "Poner una contraseña\tPasswort festlegen\n"
+    "Quitar la contraseña\tPasswort entfernen\n"
+    "PEDIRLA\tABFRAGEN\n"
+    "Sólo fuera de casa\tNur außer Haus\n"
+    "También en casa y en la red de la placa\tAuch zu Hause und im Netz der Platine\n"
+    "EN REDES QUE NO SON DE CONFIANZA\tIN NICHT VERTRAUENSWÜRDIGEN NETZEN\n"
+    "Portal cerrado\tPortal geschlossen\n"
+    "Abierto con la contraseña\tMit Passwort offen\n"
+    "El cable USB entra siempre, sin contraseña: quien tiene el cable tiene la placa. La contraseña y estas reglas se cambian sólo acá, nunca desde el portal.\tÜber das USB-Kabel geht es immer ohne Passwort: wer das Kabel hat, hat die Platine. Passwort und Regeln werden nur hier geändert, nie im Portal.\n"
+    "SESIONES Y SCRIPTS\tSITZUNGEN UND SKRIPTE\n"
+    "Navegadores con sesión\tAngemeldete Browser\n"
+    "Cerrar todas las sesiones\tAlle Sitzungen beenden\n"
+    "Token nuevo para scripts\tNeues Token für Skripte\n"
+    "El token reemplaza a la contraseña en los scripts de tools/ (cabecera Authorization: Bearer). Se le pasa así: P4OS_TOKEN=<token> tools/ota.sh p4os.local\tDas Token ersetzt das Passwort in den Skripten unter tools/ (Header Authorization: Bearer). So übergeben: P4OS_TOKEN=<token> tools/ota.sh p4os.local\n"
     ;
 
 static const char blob_de_aos_cameras_lang[] =
@@ -6859,7 +6936,7 @@ static const char blob_de_aos_cotiz_lang[] =
     "esperando la hora de la red…\twarte auf Netzwerkzeit…\n"
     "no pude verificar el servidor\tServer nicht verifizierbar\n"
     "no se pudo consultar (%d)\tAbfrage fehlgeschlagen (%d)\n"
-    "tocá para actualizar  ·  elegí cuáles en /cotiz\tzum Aktualisieren tippen  ·  Auswahl unter /cotiz\n"
+    "tocá para actualizar  ·  elegí cuáles en el portal\tzum Aktualisieren tippen  ·  Auswahl im Portal\n"
     "Cotizaciones\tKurse\n"
     "Oficial\tOficial\n"
     "Blue\tBlue\n"
@@ -7226,6 +7303,7 @@ static const char blob_de_app_recorder_lang[] =
     "Grabaciones\tAufnahmen\n"
     "Todavía no grabaste nada.\\nLo que grabes aparece acá.\tNoch nichts aufgenommen.\\nDeine Aufnahmen erscheinen hier.\n"
     "tocá la onda para saltar\tWelle antippen zum Springen\n"
+    "Esa grabación ya no está\tDiese Aufnahme gibt es nicht mehr\n"
     ;
 
 static const char blob_de_demo_2043_lang[] =
@@ -8906,7 +8984,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2264, 33, files_en, 34 },
-    { "de", "Deutsch", 2264, 33, files_de, 34 },
+    { "en", "English", 2302, 33, files_en, 34 },
+    { "de", "Deutsch", 2302, 33, files_de, 34 },
 };
 const int aos_lang_pack_count = 2;

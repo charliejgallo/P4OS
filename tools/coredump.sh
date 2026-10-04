@@ -6,6 +6,10 @@
 # build_fw.sh and ota.sh when they put an image on the board) and prints the
 # tasks, the registers and the backtraces (esp_coredump info_corefile).
 #   ERASE=1 tools/coredump.sh ...     and forgets it on the board afterwards
+# The portal's token, for a board that asks for its password here
+# (Settings, Portal web; docs/SECURITY.md): P4OS_TOKEN=<token> tools/...
+[ -n "$P4OS_TOKEN" ] && curl() { command curl -H "Authorization: Bearer $P4OS_TOKEN" "$@"; }
+
 set -e
 cd "$(dirname "$0")/.."
 HOST=${1:-p4os.local}

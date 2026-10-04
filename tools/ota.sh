@@ -11,6 +11,10 @@
 # itself. This script checks that the slot changed and waits for the
 # confirmation. The ELF is kept by its sha (tools/elf_keep.sh) so a later
 # core dump from this image can be decoded (tools/coredump.sh).
+# The portal's token, for a board that asks for its password here
+# (Settings, Portal web; docs/SECURITY.md): P4OS_TOKEN=<token> tools/...
+[ -n "$P4OS_TOKEN" ] && curl() { command curl -H "Authorization: Bearer $P4OS_TOKEN" "$@"; }
+
 set -e
 cd "$(dirname "$0")/.."
 HOST=${1:-p4os.local}

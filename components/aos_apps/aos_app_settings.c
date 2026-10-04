@@ -35,6 +35,7 @@
 #include "aos_io.h"
 #include "aos_sys_glyphs.h"
 #include "aos_lock.h"
+#include "aos_access.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -53,12 +54,13 @@ static void *big_calloc(size_t n)
 #endif
 
 enum { PG_ROOT = 0, PG_WIFI, PG_DISPLAY, PG_SOUND, PG_WALL, PG_EXP, PG_LANG, PG_TIME, PG_ABOUT, PG_USB,
-       PG_STORAGE, PG_UPDATE, PG_DIAG, PG_LOCK, PG_BT, PG_DEV, PG_COUNT };
+       PG_STORAGE, PG_UPDATE, PG_DIAG, PG_LOCK, PG_BT, PG_DEV, PG_PORTAL, PG_COUNT };
 
 static const char *const PG_TITLE[PG_COUNT] = { N_("Ajustes"), N_("Wi-Fi"), N_("Pantalla"), N_("Sonido"), N_("Fondo"),
                                                 N_("Expansión"), N_("Idioma"), N_("Fecha y hora"), N_("Acerca de"),
                                                 "USB", N_("Almacenamiento"), N_("Actualización"), N_("Diagnóstico"),
-                                                N_("Pantalla de bloqueo"), "Bluetooth", N_("Desarrollador") };
+                                                N_("Pantalla de bloqueo"), "Bluetooth", N_("Desarrollador"),
+                                                N_("Portal web") };
 
 static struct {
     lv_obj_t *root, *page, *kb, *ta, *overlay;
@@ -81,6 +83,7 @@ static struct {
     int st_shown;
     int ap_shown;                   /* Wi-Fi: the access point's state the page shows */
     int bt_shown;                   /* Bluetooth: the state the page shows */
+    int pt_shown;                   /* Portal web: the network the page shows */
     lv_obj_t *dg_temp, *dg_cpu, *dg_int, *dg_psram, *dg_up;
     lv_obj_t *c6_state;             /* Update: the C6's firmware going in */
     /* the page's own column, kept scrolled where it was when it is rebuilt */
@@ -97,6 +100,7 @@ static lv_obj_t *qr_strip(lv_obj_t *p);
 static void qr_box(lv_obj_t *strip, const char *text, const char *caption);
 static lv_obj_t *action_row(lv_obj_t *g, const char *label, lv_color_t color, lv_event_cb_t cb);
 static bool second_tap(lv_event_t *e, const char *question);
+static const char *portal_root_text(void);
 static aos_lang_t s_langs[AOS_LANG_MAX];
 
 /* -------------------------------------------------------------------------- */
@@ -494,6 +498,7 @@ static void build_root(lv_obj_t *p)
     row(g, AOS_SYM_BLUETOOTH, 0x0A84FF, "Bluetooth", bt_root_text(), true, open_cb, (void *)PG_BT);
     lv_obj_t *u = row(g, AOS_SYM_USB, 0x636366, "USB", usb_name((int)aos_hal_usb_mode()), true, open_cb, (void *)PG_USB);
     U.usb_root = lv_obj_get_user_data(u);
+    row(g, AOS_SYM_SERVER_NETWORK, 0x30B0C7, _("Portal web"), portal_root_text(), true, open_cb, (void *)PG_PORTAL);
 
     g = group(p, NULL);
     row(g, AOS_SYM_BRIGHTNESS_6, 0x5E5CE6, _("Pantalla"), aos_ui_landscape() ? _("Horizontal") : _("Vertical"), true,
@@ -556,12 +561,25 @@ static void kb_close(void)
  * text when the keyboard's OK is pressed; the sheet closes either way. */
 static void (*s_kb_done)(const char *text);
 
+static bool s_kb_secret;        /* the next sheet hides what is typed (a password) */
+
+/* The text is copied and the sheet closed before 'done' runs, so that 'done'
+ * may open another one (a password asked twice). */
+static void kb_finish(void)
+{
+    char text[128];
+    snprintf(text, sizeof text, "%s", U.ta ? lv_textarea_get_text(U.ta) : "");
+    void (*done)(const char *) = s_kb_done;
+    kb_close();
+    if (done) done(text);
+    memset(text, 0, sizeof text);
+}
+
 static void kb_event_cb(lv_event_t *e)
 {
     lv_event_code_t c = lv_event_get_code(e);
     if (c == LV_EVENT_READY) {
-        if (s_kb_done) s_kb_done(lv_textarea_get_text(U.ta));
-        kb_close();
+        kb_finish();
     } else if (c == LV_EVENT_CANCEL) {
         kb_close();
     }
@@ -569,11 +587,7 @@ static void kb_event_cb(lv_event_t *e)
 
 static void kb_cancel_cb(lv_event_t *e) { kb_close(); }
 
-static void kb_ok_cb(lv_event_t *e)
-{
-    if (s_kb_done) s_kb_done(lv_textarea_get_text(U.ta));
-    kb_close();
-}
+static void kb_ok_cb(lv_event_t *e) { kb_finish(); }
 
 static void kb_open(const char *title, const char *text, int max_len, const char *ok, void (*done)(const char *))
 {
@@ -605,6 +619,8 @@ static void kb_open(const char *title, const char *text, int max_len, const char
     lv_obj_align(t, LV_ALIGN_TOP_LEFT, AOS_UI_PAD, 90);
     U.ta = lv_textarea_create(U.overlay);
     lv_textarea_set_one_line(U.ta, true);
+    if (s_kb_secret) lv_textarea_set_password_mode(U.ta, true);
+    s_kb_secret = false;
     if (max_len) lv_textarea_set_max_length(U.ta, max_len);
     lv_textarea_set_text(U.ta, text ? text : "");
     lv_obj_set_size(U.ta, U.W - 2 * AOS_UI_PAD, 88);
@@ -1805,6 +1821,149 @@ static lv_obj_t *column(lv_obj_t *parent, int32_t x, int32_t w)
     return c;
 }
 
+/* ---- Portal web: who may use it (aos_access.h) ----
+ * The only place where the rules and the password are set: someone who got
+ * into the portal cannot open it further. */
+
+static char s_pw_first[64];
+
+static int portal_key(void)
+{
+    int k = aos_hal_net_state() == AOS_NET_CONNECTED;
+    for (const char *p = aos_hal_net_ssid(); *p; p++) k = k * 31 + *p;
+    return k;
+}
+
+static const char *portal_root_text(void)
+{
+    if (aos_hal_net_state() != AOS_NET_CONNECTED) return NULL;
+    aos_access_t a = aos_access_need(aos_access_here_trusted() ? AOS_ZONE_HOME : AOS_ZONE_AWAY);
+    return a == AOS_ACCESS_OPEN ? _("abierto") : a == AOS_ACCESS_LOGIN ? _("con contraseña") : _("cerrado acá");
+}
+
+static void pt_trust_cb(lv_event_t *e)
+{
+    aos_access_trust(aos_hal_net_ssid(), lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
+    show(PG_PORTAL);
+}
+
+static void pt_untrust_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez para quitarla"))) return;
+    char names[AOS_ACCESS_TRUST_MAX][33];
+    int i = (int)(intptr_t)lv_event_get_user_data(e);
+    if (i < aos_access_trusted(names, AOS_ACCESS_TRUST_MAX)) aos_access_trust(names[i], false);
+    show(PG_PORTAL);
+}
+
+static void pt_pw2_done(const char *t)
+{
+    if (strcmp(t, s_pw_first)) aos_ui_toast(_("No coinciden: la contraseña no cambió"), 2200);
+    else if (aos_access_set_password(t)) aos_ui_toast(_("Contraseña guardada: los navegadores vuelven a entrar"), 2400);
+    memset(s_pw_first, 0, sizeof s_pw_first);
+    show(PG_PORTAL);
+}
+
+static void pt_pw2_open(void *ud)
+{
+    (void)ud;
+    s_kb_secret = true;
+    kb_open(_("Repetí la contraseña"), "", 63, _("Guardar"), pt_pw2_done);
+}
+
+static void pt_pw1_done(const char *t)
+{
+    if (strlen(t) < 6) {
+        aos_ui_toast(_("Tiene que tener 6 caracteres o más"), 2000);
+        return;
+    }
+    size_t n = strnlen(t, sizeof s_pw_first - 1);         /* the sheet takes 63 at most */
+    memcpy(s_pw_first, t, n);
+    s_pw_first[n] = 0;
+    lv_async_call(pt_pw2_open, NULL);       /* after this sheet is gone */
+}
+
+static void pt_pw_cb(lv_event_t *e)
+{
+    s_kb_secret = true;
+    kb_open(aos_access_has_password() ? _("La contraseña nueva del portal") : _("Una contraseña para el portal"),
+            "", 63, _("Siguiente"), pt_pw1_done);
+}
+
+static void pt_pw_off_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez para quitarla"))) return;
+    aos_access_set_password(NULL);
+    show(PG_PORTAL);
+}
+
+static void pt_ask_cb(lv_event_t *e) { aos_access_set_ask_always(lv_event_get_user_data(e) != NULL); show(PG_PORTAL); }
+static void pt_away_cb(lv_event_t *e) { aos_access_set_away_login(lv_event_get_user_data(e) != NULL); show(PG_PORTAL); }
+
+static void pt_token_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez: el token de ahora deja de andar"))) return;
+    aos_access_token_new();
+    show(PG_PORTAL);
+}
+
+static void pt_sessions_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez para cerrarlas"))) return;
+    aos_access_sessions_clear();
+    aos_ui_toast(_("Sesiones cerradas"), 1500);
+    show(PG_PORTAL);
+}
+
+static void pick_row(lv_obj_t *g, const char *label, bool on, lv_event_cb_t cb, void *ud);
+
+static void build_access(lv_obj_t *p)
+{
+    U.pt_shown = portal_key();
+    bool up = aos_hal_net_state() == AOS_NET_CONNECTED, pw = aos_access_has_password();
+    const char *ssid = aos_hal_net_ssid();
+    lv_obj_t *g;
+    if (up && ssid[0]) {
+        g = group(p, _("ESTA RED"));
+        row_switch(g, AOS_SYM_WIFI, 0x0A84FF, ssid, aos_access_is_trusted(ssid), pt_trust_cb);
+        aos_access_t a = aos_access_need(aos_access_is_trusted(ssid) ? AOS_ZONE_HOME : AOS_ZONE_AWAY);
+        note(p, a == AOS_ACCESS_OPEN ? _("De confianza: en esta red el portal está abierto.")
+              : a == AOS_ACCESS_LOGIN ? _("En esta red el portal pide la contraseña.")
+              : _("En esta red el portal está cerrado y la placa no anuncia su nombre. Se entra por la red propia de la placa o por el cable USB."));
+    }
+
+    char names[AOS_ACCESS_TRUST_MAX][33];
+    int n = aos_access_trusted(names, AOS_ACCESS_TRUST_MAX);
+    g = group(p, _("REDES DE CONFIANZA"));
+    if (!n) row(g, NULL, 0, _("Ninguna"), NULL, false, NULL, NULL);
+    for (int i = 0; i < n; i++) row(g, NULL, 0, names[i], _("quitar"), false, pt_untrust_cb, (void *)(intptr_t)i);
+    note(p, _("En una red de confianza el portal se abre como siempre. En cualquier otra, la placa no anuncia su nombre y el portal queda cerrado, o pide la contraseña si así se elige abajo."));
+
+    g = group(p, _("CONTRASEÑA"));
+    action_row(g, pw ? _("Cambiar la contraseña") : _("Poner una contraseña"), AOS_C_ACCENT, pt_pw_cb);
+    if (pw) action_row(g, _("Quitar la contraseña"), AOS_C_RED, pt_pw_off_cb);
+    if (pw) {
+        bool always = aos_access_ask_always(), away = aos_access_away_login();
+        g = group(p, _("PEDIRLA"));
+        pick_row(g, _("Sólo fuera de casa"), !always, pt_ask_cb, NULL);
+        pick_row(g, _("También en casa y en la red de la placa"), always, pt_ask_cb, (void *)1);
+        g = group(p, _("EN REDES QUE NO SON DE CONFIANZA"));
+        pick_row(g, _("Portal cerrado"), !away, pt_away_cb, NULL);
+        pick_row(g, _("Abierto con la contraseña"), away, pt_away_cb, (void *)1);
+    }
+    note(p, _("El cable USB entra siempre, sin contraseña: quien tiene el cable tiene la placa. La contraseña y estas reglas se cambian sólo acá, nunca desde el portal."));
+
+    char v[16];
+    g = group(p, _("SESIONES Y SCRIPTS"));
+    snprintf(v, sizeof v, "%d", aos_access_session_count());
+    row(g, NULL, 0, _("Navegadores con sesión"), v, false, NULL, NULL);
+    if (aos_access_session_count()) action_row(g, _("Cerrar todas las sesiones"), AOS_C_RED, pt_sessions_cb);
+    action_row(g, _("Token nuevo para scripts"), AOS_C_ACCENT, pt_token_cb);
+    lv_obj_t *tk = aos_label(p, aos_access_token(), aos_font_body, AOS_C_TEXT);
+    lv_obj_set_style_pad_hor(tk, 24, 0);
+    note(p, _("El token reemplaza a la contraseña en los scripts de tools/ (cabecera Authorization: Bearer). Se le pasa así: P4OS_TOKEN=<token> tools/ota.sh p4os.local"));
+}
+
 /* ---- Desarrollador ---- */
 
 /* The drawing preferences (GET/POST /api/tune, docs/MEMORY.md), read at
@@ -1959,6 +2118,7 @@ static void fill(lv_obj_t *col, int pg, bool back)
     case PG_DIAG: build_diag(col); break;
     case PG_LOCK: build_lock(col); break;
     case PG_DEV: build_dev(col); break;
+    case PG_PORTAL: build_access(col); break;
     default: build_root(col); break;
     }
 }
@@ -2040,6 +2200,7 @@ static void timer_cb(lv_timer_t *t)
     int pg = U.land ? U.selected : U.depth ? U.stack[U.depth - 1] : PG_ROOT;
     if (pg == PG_WIFI && U.ap_shown != ap_key() && !U.overlay && !U.armed) build(pg);   /* the access point came up or down */
     if (pg == PG_BT && U.bt_shown != bt_key() && !U.overlay && !U.armed) build(pg);     /* a phone or a computer came or went */
+    if (pg == PG_PORTAL && U.pt_shown != portal_key() && !U.overlay && !U.armed) build(pg);   /* another network */
     if (pg == PG_STORAGE && U.st_shown != S.gen && !U.overlay) build(pg);   /* the count moved on */
     static int ticks;
     if (U.dg_temp && ++ticks % 3 == 0) diag_refresh();

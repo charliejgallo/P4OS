@@ -26,6 +26,10 @@
 # It speaks the P4 portal: PUT /api/fs/put?path= (the body is the file,
 # streamed, any size), POST /api/fs/delete?path=, POST /api/restart. The
 # firmware reads the .so files once at startup, hence the restart.
+# The portal's token, for a board that asks for its password here
+# (Settings, Portal web; docs/SECURITY.md): P4OS_TOKEN=<token> tools/...
+[ -n "$P4OS_TOKEN" ] && curl() { command curl -H "Authorization: Bearer $P4OS_TOKEN" "$@"; }
+
 set -e
 ROOT=${0:a:h:h}
 HOST=${1:?usage: install_apps.sh <ip-or-name> [app...]}

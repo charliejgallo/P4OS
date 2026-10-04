@@ -22,6 +22,10 @@
 # the previous one by itself at the next restart. That is why this script waits
 # and then checks the version - if the board comes back on the old firmware,
 # the new one did not survive.
+# The portal's token, for a board that asks for its password here
+# (Settings, Portal web; docs/SECURITY.md): P4OS_TOKEN=<token> tools/...
+[ -n "$P4OS_TOKEN" ] && curl() { command curl -H "Authorization: Bearer $P4OS_TOKEN" "$@"; }
+
 set -e
 ROOT=${0:a:h:h}
 HOST=${1:?usage: install_fw.sh <ip-or-name> [image.bin]}

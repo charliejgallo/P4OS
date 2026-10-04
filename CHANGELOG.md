@@ -2,6 +2,24 @@
 
 ## Unreleased
 
+**The portal's security** (docs/SECURITY.md)
+- Requests from other sites and DNS rebinding are refused: the API answers
+  only the portal's own pages, and only to the board's IP or name.
+- Trusted networks: on any other Wi-Fi the portal is closed (or asks for
+  the password) and the board does not announce itself on mDNS. The USB
+  cable always gets in; the board's own network counts as home. The network
+  the board is on when this firmware first boots becomes trusted.
+- A password for the portal, set only on the board (Settings, Portal web):
+  PBKDF2, a growing wait after wrong ones, sessions as `HttpOnly`
+  `SameSite=Strict` cookies, a login page and "Cerrar sesión". A token for
+  the scripts in `tools/` (`P4OS_TOKEN`).
+- `/api/auth`, `/api/login`, `/api/logout`.
+
+**Bluetooth**
+- The board asks for encryption only when the phone or the computer has not
+  started it: the "encryption failed (13)" at every boot is gone.
+- `strncasecmp`, `strcspn` and `fprintf` for the apps.
+
 **More apps with their own page**
 - **Recorder:** the recordings on the card, to listen to, download or
   delete; the app sees what the page deletes (it looks at its folder every
