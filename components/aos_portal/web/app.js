@@ -5257,12 +5257,91 @@ async function pageNotas() {
 }
 
 const PAGES = { pantalla: pagePantalla, inicio: pageInicio, wifi: pageWifi, ha: pageHa, terminal: pageTerminal, programador: pageProgramador, banco: pageBanco, claude: pageClaude, mqtt: pageMqtt, macropad: pageMacropad, expansion: pageExpansion, '3d': pageVisor3d, mapas: pageMapas, lua: pageLua, pixel: pagePixel, notas: pageNotas, archivos: pageArchivos, ajustes: pageAjustes, firmware: pageFirmware, registro: pageRegistro };
+
+/* ---- the apps' own pages (docs/PORTAL-PAGES.md) ----
+ * An app brings its page in apps/<x>/web/<x>.js; tools/install_apps.sh puts
+ * it in the card's /web, the firmware serves it from there, and this loads
+ * every .js it finds at startup, with its date in the address so the
+ * browser never keeps an old one. A page is an ES module that calls
+ * P4OS.registerPage(); P4OS is the whole API it gets, versioned like the
+ * apps' AOS_ABI_VERSION: what is in version 1 stays as it is. A page that
+ * fails to load or to draw is marked in the menu and the rest goes on. */
+let leave = null;                   /* what the page on screen asked to run when it is left */
+const cardFile = path => fetch('/api/fs/get?path=' + encodeURIComponent(path)).then(r => {
+  if (!r.ok) throw new Error(r.status === 404 ? 'no existe' : r.statusText);
+  return r.text();
+});
+const NAV_BEFORE = 'archivos';      /* the apps' pages go above the system's */
+
+function navEntry(id, name, icon, bad) {
+  const nav = $('#nav');
+  let a = nav.querySelector(`a[data-p="${CSS.escape(id)}"]`);
+  if (!a) {
+    a = h('a', { href: '#' + id, 'data-p': id });
+    nav.insertBefore(a, nav.querySelector(`a[data-p="${NAV_BEFORE}"]`));
+  }
+  put(a, h('span', { class: 'ic' }, icon || '◇'), h('span', {}, name + (bad ? ' ⚠' : '')));
+  a.title = bad || '';
+  return a;
+}
+
+window.P4OS = Object.freeze({
+  version: 1,
+  main, h, put, $, api, post, toast, fmtBytes,
+  fsText: cardFile,
+  fsPut: (path, data) => fetch('/api/fs/put?path=' + encodeURIComponent(path), { method: 'PUT', body: data })
+    .then(async r => { if (!r.ok) throw new Error((await r.text()) || r.statusText); }),
+  fsList: path => api('fs?path=' + encodeURIComponent(path)).then(j => j.entries || []),
+  fsDelete: path => api('fs/delete?path=' + encodeURIComponent(path), { method: 'POST' }),
+  fsMkdir: path => api('fs/mkdir?path=' + encodeURIComponent(path), { method: 'POST' }).catch(() => {}),
+  openApp: id => api('open?id=' + encodeURIComponent(id), { method: 'POST' }),
+  /* { id, name, icon, render(main) }: render may return a function, called
+   * when the page is left (to stop its timers) */
+  registerPage(pg) {
+    if (!pg || !/^[a-z0-9_-]+$/.test(pg.id || '') || typeof pg.render !== 'function') throw new Error('registerPage: id y render');
+    if (PAGES[pg.id] && !PAGES[pg.id].plugged) throw new Error(`registerPage: "${pg.id}" es del portal`);
+    const show = () => {
+      try { return pg.render(main); } catch (e) {
+        put(main, h('h1', {}, pg.name || pg.id), h('div', { class: 'card' }, h('p', { class: 'note' }, 'La página falló: ' + e.message)));
+        console.error(e);
+      }
+    };
+    show.plugged = true;
+    PAGES[pg.id] = show;
+    navEntry(pg.id, pg.name || pg.id, pg.icon);
+  },
+});
+
+async function loadCardPages() {
+  let files;
+  try { files = (await P4OS.fsList('/web')).filter(e => !e.dir && /^[A-Za-z0-9_-]+\.m?js$/.test(e.name)); }
+  catch { return; }                 /* no card, or no /web */
+  await Promise.all(files.map(async f => {
+    try { await import(`/web/${f.name}?v=${f.mtime || 0}`); }
+    catch (e) {
+      const id = f.name.replace(/\.m?js$/, '').toLowerCase();
+      navEntry(id, id, '◇', 'No cargó: ' + e.message);
+      PAGES[id] = Object.assign(() => put(main, h('h1', {}, id),
+        h('div', { class: 'card' }, h('p', { class: 'note' }, `/web/${f.name} no cargó: ${e.message}`))), { plugged: true });
+      console.error(f.name, e);
+    }
+  }));
+  /* the order the modules finished in is chance: by name, always the same */
+  const nav = $('#nav'), before = nav.querySelector(`a[data-p="${NAV_BEFORE}"]`);
+  [...nav.querySelectorAll('a')].filter(a => PAGES[a.dataset.p] && PAGES[a.dataset.p].plugged)
+    .sort((a, b) => a.lastChild.textContent.localeCompare(b.lastChild.textContent)).forEach(a => nav.insertBefore(a, before));
+}
+
 function route() {
   const p = (location.hash || '#pantalla').slice(1);
+  if (leave) { try { leave(); } catch {} leave = null; }
   document.querySelectorAll('.nav a').forEach(a => a.classList.toggle('on', a.dataset.p === p));
-  (PAGES[p] || pagePantalla)();
+  const r = (PAGES[p] || pagePantalla)();
+  if (typeof r === 'function') leave = r;
 }
 window.addEventListener('hashchange', route);
 refreshInfo();
 setInterval(refreshInfo, 10000);
 route();
+/* a deep link to an app's page (#hola) lands before the page is known */
+loadCardPages().then(() => { const p = (location.hash || '').slice(1); if (PAGES[p] && PAGES[p].plugged) route(); });

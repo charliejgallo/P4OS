@@ -72,6 +72,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <ctype.h>
 #include <sys/stat.h>
 #include <unistd.h>
 
@@ -567,6 +568,8 @@ static const char *ctype_of(const char *name)
         { ".csv", "text/plain; charset=utf-8" }, { ".md", "text/plain; charset=utf-8" }, { ".lua", "text/plain; charset=utf-8" },
         { ".jpg", "image/jpeg" }, { ".jpeg", "image/jpeg" }, { ".png", "image/png" }, { ".gif", "image/gif" },
         { ".bmp", "image/bmp" }, { ".mp3", "audio/mpeg" }, { ".wav", "audio/wav" }, { ".html", "text/html; charset=utf-8" },
+        { ".js", "text/javascript; charset=utf-8" }, { ".mjs", "text/javascript; charset=utf-8" },
+        { ".css", "text/css; charset=utf-8" }, { ".svg", "image/svg+xml" },
     };
     for (size_t i = 0; i < sizeof T / sizeof T[0]; i++)
         if (!strcasecmp(dot, T[i][0])) return T[i][1];
@@ -1093,6 +1096,41 @@ static void api_restart(aos_httpd_req_t *r)
 /* Routing                                                                     */
 /* -------------------------------------------------------------------------- */
 
+/* The apps' own portal pages: /web/<file> comes from the card's /web, where
+ * tools/install_apps.sh puts each app's apps/<x>/web/ (docs/PORTAL-PAGES.md).
+ * So an app brings its page the way it brings its icon, and updating it
+ * needs no firmware. A name of [A-Za-z0-9._-] only, one level deep: nothing
+ * outside /web can be reached through here. Not cached by the browser (the
+ * server sends no-store), and app.js asks for each page with its date in
+ * the address anyway. */
+static void serve_card_web(aos_httpd_req_t *r, const char *name)
+{
+    if (!*name || name[0] == '.' || strlen(name) > 64) { aos_httpd_send_text(r, 404, "no existe"); return; }
+    for (const char *c = name; *c; c++)
+        if (!isalnum((unsigned char)*c) && *c != '.' && *c != '_' && *c != '-') {
+            aos_httpd_send_text(r, 404, "no existe");
+            return;
+        }
+    const char *root = aos_hal_path_sd_root();
+    char path[128];
+    struct stat st;
+    snprintf(path, sizeof path, "%s/web/%s", root ? root : "", name);
+    FILE *f = root ? fopen(path, "rb") : NULL;
+    if (!f || stat(path, &st) || S_ISDIR(st.st_mode)) {
+        if (f) fclose(f);
+        aos_httpd_send_text(r, 404, "no existe");
+        return;
+    }
+    if (aos_httpd_begin(r, 200, ctype_of(name), (long)st.st_size, NULL)) {      /* the server says no-store already */
+        char *buf = aos_hal_io_alloc(16384);
+        ssize_t n;
+        while (buf && (n = read(fileno(f), buf, 16384)) > 0)
+            if (!aos_httpd_write(r, buf, (size_t)n)) break;
+        aos_hal_io_free(buf);
+    }
+    fclose(f);
+}
+
 static void serve_asset(aos_httpd_req_t *r, const char *path)
 {
     if (!strcmp(path, "/")) path = "/index.html";
@@ -1102,6 +1140,7 @@ static void serve_asset(aos_httpd_req_t *r, const char *path)
         if (aos_httpd_begin(r, 200, a->ctype, a->len, "Content-Encoding: gzip\r\n")) aos_httpd_write(r, a->data, a->len);
         return;
     }
+    if (!strncmp(path, "/web/", 5)) { serve_card_web(r, path + 5); return; }
     aos_httpd_send_text(r, 404, "no existe");
 }
 

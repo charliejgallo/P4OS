@@ -18,6 +18,10 @@
 #   has a pack (monsterhop, turbo, mila, golf). The game reads parts until
 #   one is missing, so the parts on the card that this build does not have
 #   are deleted first: a stale .pak.2 would be read as the end of the pack.
+# And to /web, the app's own portal page: apps/<x>/web/*.js
+# (docs/PORTAL-PAGES.md). The portal loads it from there: a page needs no
+# restart, only a reload of the portal in the browser, so when nothing but
+# pages goes up the board is not restarted.
 #
 # It speaks the P4 portal: PUT /api/fs/put?path= (the body is the file,
 # streamed, any size), POST /api/fs/delete?path=, POST /api/restart. The
@@ -31,6 +35,7 @@ B="http://$HOST"
 
 files=()
 paks=()
+webs=()
 for d in $ROOT/apps/*(/); do
     name=${d:t}
     (( ${#WANT[@]} )) && [[ ${WANT[(Ie)$name]} -eq 0 ]] && continue
@@ -40,8 +45,21 @@ for d in $ROOT/apps/*(/); do
         paks+=(${pak:t})
         files+=($pak $pak.<1-99>(.N))
     done
+    webs+=($d/web/*.(js|mjs)(.N))
 done
-(( ${#files[@]} )) || { echo "nothing built - run ./tools/build_apps.sh first"; exit 1; }
+(( ${#files[@]} + ${#webs[@]} )) || { echo "nothing built - run ./tools/build_apps.sh first"; exit 1; }
+
+if (( ${#webs[@]} )); then
+    echo "== ${#webs[@]} portal pages -> $HOST/web =="
+    curl -4 -s -o /dev/null --max-time 10 -X POST "$B/api/fs/mkdir?path=/web" || true
+    for f in $webs; do
+        code=$(curl -4 -sS -o /dev/null -w '%{http_code}' --max-time 60 \
+            -X PUT "$B/api/fs/put?path=/web/${f:t}" --data-binary "@$f") || code=000
+        [[ $code == 2* ]] || { printf "   %-24s FAILED (HTTP %s)\n" ${f:t} $code; exit 1; }
+        printf "   %-24s %9s B  ok\n" ${f:t} $(wc -c < $f | tr -d ' ')
+    done
+    (( ${#files[@]} )) || { echo "only pages: no restart, reload the portal in the browser"; exit 0; }
+fi
 
 # stale parts of the packs being replaced
 for p in $paks; do
