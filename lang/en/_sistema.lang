@@ -7162,3 +7162,33 @@ Aceptar	Accept
 Borrar en el teléfono	Clear on the phone
 Música del iPhone	iPhone music
 Con la música del iPhone, el centro de control y la pantalla de bloqueo muestran lo que suena en el teléfono y lo manejan, cuando la placa no está reproduciendo nada. Usa un poco más la radio.	With iPhone music on, the control centre and the lock screen show what the phone is playing and control it, whenever the board is not playing anything itself. It uses the radio a little more.
+Desarrollador	Developer
+Tocá otra vez para volver a lo de fábrica	Tap again to go back to the factory settings
+Tocá otra vez para reiniciar	Tap again to restart
+Tocá otra vez para reiniciar en modo seguro	Tap again to restart in safe mode
+EN PANTALLA	ON SCREEN
+Mostrar los toques	Show touches
+Mostrar los fps	Show fps
+Un círculo bajo cada dedo que informa el táctil (hasta dos), y los cuadros por segundo que llegan a la pantalla, arriba a la derecha. Quedan prendidos después de reiniciar.	A ring under every finger the touch panel reports (up to two), and the frames per second that reach the screen, top right. They stay on after a restart.
+Sólo errores	Errors only
+Errores y avisos	Errors and warnings
+Todo (de fábrica)	Everything (factory)
+Lo que llega al Registro del portal y a la consola serie. Este firmware no trae los mensajes de depuración.	What reaches the portal's Log and the serial console. This firmware has no debug messages built in.
+DÓNDE DIBUJA LVGL	WHERE LVGL DRAWS
+Dos búferes en PSRAM (de fábrica)	Two buffers in PSRAM (factory)
+Uno en PSRAM	One in PSRAM
+Dos en RAM interna	Two in internal RAM
+Uno en RAM interna	One in internal RAM
+FILAS POR BÚFER	ROWS PER BUFFER
+128 (de fábrica)	128 (factory)
+Medido en la placa: la pantalla entera se redibuja en 67 ms con dos internos de 56 filas, 67 ms con dos en PSRAM de 128 y 60 ms con 320; pero 320 filas le dejan poca PSRAM a Monster Hop. En RAM interna, si no alcanza, usa menos filas o vuelve a la PSRAM.	Measured on the board: the whole screen is redrawn in 67 ms with two internal buffers of 56 rows, 67 ms with two in PSRAM of 128 and 60 ms with 320; but 320 rows leave Monster Hop little PSRAM. In internal RAM, when there is not enough, it uses fewer rows or goes back to PSRAM.
+PANTALLA Y COPIAS	SCREEN AND COPIES
+Tres búferes del panel (de fábrica)	Three panel buffers (factory)
+Uno solo	Just one
+Copias con el PPA	Copies with the PPA
+Bandas de los juegos en PSRAM	Game bands in PSRAM
+Con un solo búfer del panel, las apps que dibujan la pantalla entera (los juegos) no tienen el suyo. Sin el PPA, las copias las hace la CPU. Las bandas en PSRAM hacen a Monster Hop acostado la mitad de rápido: están para medir.	With a single panel buffer, the apps that draw the whole screen (the games) have none of their own. Without the PPA, the CPU makes the copies. Bands in PSRAM make Monster Hop in landscape half as fast: they are there for measuring.
+Volver a lo de fábrica	Back to factory settings
+Estos se leen al arrancar: hay que reiniciar. Si un ajuste no deja arrancar, el tercer arranque fallido seguido vuelve solo a lo de fábrica.	These are read at boot: a restart is needed. If a setting keeps the board from starting, the third failed boot in a row goes back to the factory settings by itself.
+Reiniciar en modo seguro	Restart in safe mode
+El modo seguro arranca sin las apps de la tarjeta, con el dibujo de fábrica y el USB quieto, como con BOOT apretado al encender. El reinicio siguiente vuelve a la normalidad.	Safe mode starts without the card's apps, with the factory drawing settings and the USB idle, as with BOOT held at power on. The next restart goes back to normal.

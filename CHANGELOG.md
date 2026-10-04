@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+**Settings, Developer**
+- Show touches (a ring under every finger the GT911 reports) and fps
+  (LVGL's renders plus the apps' flips), over everything; they stay on
+  after a restart.
+- The log's level: errors, warnings, or everything this build has.
+- The drawing preferences of `/api/tune`, by name and with their measures:
+  where LVGL draws and how many rows, the panel's buffers, the PPA's copies,
+  the games' bands; and back to the factory values.
+- Restart, and restart into safe mode without holding BOOT (one boot only).
+
 **The iPhone's music and the notifications' actions**
 - The control centre and the lock screen show and drive the iPhone's music
   (AMS) when the board plays nothing itself; Settings, Bluetooth, "Música del

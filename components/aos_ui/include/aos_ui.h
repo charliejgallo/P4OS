@@ -78,6 +78,14 @@ void        aos_ui_home(void);             /* the home screen */
 void        aos_ui_close(const char *id);  /* ends an app (switcher's swipe up) */
 void        aos_ui_close_others(void);     /* ends every app but the one in front (USB disk mode) */
 void        aos_ui_set_safe_mode(bool on); /* main.c: this boot is the BOOT button's safe mode */
+/* Settings, Developer (aos_devtools.c): overlays and the log's level, kept as
+ * preferences and applied again at boot */
+void aos_dev_set_touches(bool on);          /* a ring under every finger */
+bool aos_dev_touches(void);
+void aos_dev_set_fps(bool on);              /* frames a second, top right */
+bool aos_dev_fps(void);
+void aos_dev_set_log_level(int level);      /* 1 errors, 2 warnings, 3 info */
+int  aos_dev_log_level(void);
 bool        aos_ui_safe_mode(void);        /* for Settings' Diagnostics */
 const char *aos_ui_current_app(void);      /* NULL on the home screen */
 

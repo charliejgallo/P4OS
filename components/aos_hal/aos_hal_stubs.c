@@ -21,6 +21,9 @@ __attribute__((weak)) int aos_hal_display_get_rotation(void)
 __attribute__((weak)) bool aos_hal_display_flush_count(uint64_t *px, uint32_t *frames)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) uint32_t aos_hal_display_flips(void)
+{ uint32_t v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) bool aos_hal_display_bench(int frames, aos_display_bench_t *out)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
@@ -862,6 +865,9 @@ __attribute__((weak)) const char * aos_hal_firmware_version(void)
 { return ""; }
 
 __attribute__((weak)) void aos_hal_log(const char *tag, const char *fmt, ...)
+{ }
+
+__attribute__((weak)) void aos_hal_log_level_set(int level)
 { }
 
 __attribute__((weak)) size_t aos_hal_log_total(void)

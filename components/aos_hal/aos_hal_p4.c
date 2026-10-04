@@ -1209,6 +1209,13 @@ bool aos_hal_display_flip(uint16_t *buf)
     return true;
 }
 
+uint32_t aos_hal_display_flips(void) { return s_flip_seq; }
+
+void aos_hal_log_level_set(int level)
+{
+    esp_log_level_set("*", level <= 1 ? ESP_LOG_ERROR : level == 2 ? ESP_LOG_WARN : ESP_LOG_INFO);
+}
+
 bool aos_hal_display_back_age(const uint16_t *fb, uint32_t *flips_since, bool *lvgl_touched)
 {
     int i = 0;

@@ -84,6 +84,9 @@ int  aos_hal_display_get_rotation(void);
  * turns it into a redraw rate, which is what tells a screen that keeps
  * repainting itself for nothing. false where it is not counted. */
 bool aos_hal_display_flush_count(uint64_t *px, uint32_t *frames);
+/* P4OS: frames the apps put on the panel whole with aos_hal_display_flip(),
+ * since boot (LVGL's own are counted by its render event). */
+uint32_t aos_hal_display_flips(void);
 
 /* P4OS: how fast LVGL redraws the whole screen, `frames` times in a row
  * (up to 200), with the draw buffers as the boot left them (pref "lvbuf":
@@ -1792,6 +1795,9 @@ const char *aos_hal_board_name(void);       /* "CO5300 + CST816 (v2)" etc */
 const char *aos_hal_firmware_version(void);
 
 void aos_hal_log(const char *tag, const char *fmt, ...);
+/* P4OS: the log's level from now on: 1 errors, 2 warnings, 3 info (the
+ * most this build compiles in). Settings, Developer keeps it. */
+void aos_hal_log_level_set(int level);
 
 /* P4OS: the log ring (aos_logring.c) - every aos_hal_log line and, on the
  * board, every ESP_LOG line. Positions are bytes since boot: read from the

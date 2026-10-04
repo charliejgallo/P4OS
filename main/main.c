@@ -123,7 +123,11 @@ void app_main(void)
      * setting that keeps the board from being usable. Read before the scan
      * and after it, so any moment of the boot screen will do. */
     aos_hal_boot_stage("card's apps");
-    bool safe = aos_hal_button_is_down(AOS_BUTTON_BOOT);
+    /* or asked for from Settings, Developer: one boot only */
+    int32_t safe_next = 0;
+    aos_hal_pref_get_i32("safe_next", &safe_next);
+    if (safe_next) aos_hal_pref_erase("safe_next");
+    bool safe = safe_next || aos_hal_button_is_down(AOS_BUTTON_BOOT);
     int dyn = safe ? 0 : aos_dynapp_scan();
     if (!safe && aos_hal_button_is_down(AOS_BUTTON_BOOT)) {
         safe = true;
@@ -142,7 +146,8 @@ void app_main(void)
     if (safe) {
         aos_ui_set_safe_mode(true);
         aos_hal_tune_reset();
-        ESP_LOGW(TAG, "safe mode (BOOT held at boot): no apps from the card, tuning preferences forgotten, USB idle");
+        ESP_LOGW(TAG, "safe mode (%s): no apps from the card, tuning preferences forgotten, USB idle",
+                 safe_next ? "asked for from Settings" : "BOOT held at boot");
     }
     ESP_LOGI(TAG, "%d app(s) on the card", dyn);
     if (aos_hal_lock(2000)) {

@@ -7162,3 +7162,33 @@ Aceptar	Akzeptieren
 Borrar en el teléfono	Auf dem Telefon löschen
 Música del iPhone	iPhone-Musik
 Con la música del iPhone, el centro de control y la pantalla de bloqueo muestran lo que suena en el teléfono y lo manejan, cuando la placa no está reproduciendo nada. Usa un poco más la radio.	Mit iPhone-Musik zeigen Kontrollzentrum und Sperrbildschirm, was auf dem Telefon läuft, und steuern es, solange die Platine selbst nichts abspielt. Das beansprucht das Funkmodul etwas mehr.
+Desarrollador	Entwickler
+Tocá otra vez para volver a lo de fábrica	Nochmals tippen, um die Werkseinstellungen herzustellen
+Tocá otra vez para reiniciar	Nochmals tippen zum Neustarten
+Tocá otra vez para reiniciar en modo seguro	Nochmals tippen für einen Neustart im abgesicherten Modus
+EN PANTALLA	AUF DEM BILDSCHIRM
+Mostrar los toques	Berührungen anzeigen
+Mostrar los fps	FPS anzeigen
+Un círculo bajo cada dedo que informa el táctil (hasta dos), y los cuadros por segundo que llegan a la pantalla, arriba a la derecha. Quedan prendidos después de reiniciar.	Ein Kreis unter jedem Finger, den der Touchscreen meldet (bis zu zwei), und die Bilder pro Sekunde, die den Bildschirm erreichen, oben rechts. Bleiben nach einem Neustart an.
+Sólo errores	Nur Fehler
+Errores y avisos	Fehler und Warnungen
+Todo (de fábrica)	Alles (Werkseinstellung)
+Lo que llega al Registro del portal y a la consola serie. Este firmware no trae los mensajes de depuración.	Was im Protokoll des Portals und auf der seriellen Konsole ankommt. Diese Firmware enthält keine Debug-Meldungen.
+DÓNDE DIBUJA LVGL	WO LVGL ZEICHNET
+Dos búferes en PSRAM (de fábrica)	Zwei Puffer im PSRAM (Werkseinstellung)
+Uno en PSRAM	Einer im PSRAM
+Dos en RAM interna	Zwei im internen RAM
+Uno en RAM interna	Einer im internen RAM
+FILAS POR BÚFER	ZEILEN PRO PUFFER
+128 (de fábrica)	128 (Werkseinstellung)
+Medido en la placa: la pantalla entera se redibuja en 67 ms con dos internos de 56 filas, 67 ms con dos en PSRAM de 128 y 60 ms con 320; pero 320 filas le dejan poca PSRAM a Monster Hop. En RAM interna, si no alcanza, usa menos filas o vuelve a la PSRAM.	Auf der Platine gemessen: Der ganze Bildschirm wird in 67 ms mit zwei internen Puffern zu 56 Zeilen neu gezeichnet, in 67 ms mit zwei im PSRAM zu 128 und in 60 ms mit 320; aber 320 Zeilen lassen Monster Hop wenig PSRAM. Reicht das interne RAM nicht, nimmt es weniger Zeilen oder wieder den PSRAM.
+PANTALLA Y COPIAS	BILDSCHIRM UND KOPIEN
+Tres búferes del panel (de fábrica)	Drei Panel-Puffer (Werkseinstellung)
+Uno solo	Nur einer
+Copias con el PPA	Kopien mit dem PPA
+Bandas de los juegos en PSRAM	Spielstreifen im PSRAM
+Con un solo búfer del panel, las apps que dibujan la pantalla entera (los juegos) no tienen el suyo. Sin el PPA, las copias las hace la CPU. Las bandas en PSRAM hacen a Monster Hop acostado la mitad de rápido: están para medir.	Mit nur einem Panel-Puffer haben die Apps, die den ganzen Bildschirm zeichnen (die Spiele), keinen eigenen. Ohne PPA kopiert die CPU. Streifen im PSRAM machen Monster Hop im Querformat halb so schnell: sie sind zum Messen da.
+Volver a lo de fábrica	Werkseinstellungen herstellen
+Estos se leen al arrancar: hay que reiniciar. Si un ajuste no deja arrancar, el tercer arranque fallido seguido vuelve solo a lo de fábrica.	Diese werden beim Start gelesen: ein Neustart ist nötig. Verhindert eine Einstellung den Start, stellt der dritte fehlgeschlagene Start in Folge die Werkseinstellungen von selbst her.
+Reiniciar en modo seguro	Im abgesicherten Modus neu starten
+El modo seguro arranca sin las apps de la tarjeta, con el dibujo de fábrica y el USB quieto, como con BOOT apretado al encender. El reinicio siguiente vuelve a la normalidad.	Der abgesicherte Modus startet ohne die Apps der Karte, mit den Werkseinstellungen fürs Zeichnen und ruhendem USB, wie mit gedrückter BOOT-Taste beim Einschalten. Der nächste Neustart kehrt zum Normalbetrieb zurück.

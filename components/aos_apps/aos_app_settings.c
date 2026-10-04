@@ -23,6 +23,9 @@
  *                safe mode, the hang watchdog, the last crash's dump
  *   Acerca de    board, firmware, memory, the portal's address (and a QR
  *                for the phone), what the HAL can do
+ *   Desarrollador  touches and fps over everything, the log's level, the
+ *                drawing preferences of /api/tune and their factory values,
+ *                restarting into safe mode without the BOOT button
  */
 #include "aos_apps.h"
 #include "aos_i18n.h"
@@ -50,12 +53,12 @@ static void *big_calloc(size_t n)
 #endif
 
 enum { PG_ROOT = 0, PG_WIFI, PG_DISPLAY, PG_SOUND, PG_WALL, PG_EXP, PG_LANG, PG_TIME, PG_ABOUT, PG_USB,
-       PG_STORAGE, PG_UPDATE, PG_DIAG, PG_LOCK, PG_BT, PG_COUNT };
+       PG_STORAGE, PG_UPDATE, PG_DIAG, PG_LOCK, PG_BT, PG_DEV, PG_COUNT };
 
 static const char *const PG_TITLE[PG_COUNT] = { N_("Ajustes"), N_("Wi-Fi"), N_("Pantalla"), N_("Sonido"), N_("Fondo"),
                                                 N_("Expansión"), N_("Idioma"), N_("Fecha y hora"), N_("Acerca de"),
                                                 "USB", N_("Almacenamiento"), N_("Actualización"), N_("Diagnóstico"),
-                                                N_("Pantalla de bloqueo"), "Bluetooth" };
+                                                N_("Pantalla de bloqueo"), "Bluetooth", N_("Desarrollador") };
 
 static struct {
     lv_obj_t *root, *page, *kb, *ta, *overlay;
@@ -80,6 +83,9 @@ static struct {
     int bt_shown;                   /* Bluetooth: the state the page shows */
     lv_obj_t *dg_temp, *dg_cpu, *dg_int, *dg_psram, *dg_up;
     lv_obj_t *c6_state;             /* Update: the C6's firmware going in */
+    /* the page's own column, kept scrolled where it was when it is rebuilt */
+    lv_obj_t *body;
+    int body_pg;
     /* a row that asks for a second tap before it acts */
     lv_obj_t *armed;
     uint32_t armed_ms;
@@ -521,6 +527,7 @@ static void build_root(lv_obj_t *p)
         aos_ui_safe_mode() ? _("modo seguro") : aos_hal_hang_restarts() ? _("hubo un cuelgue") : NULL, true, open_cb,
         (void *)PG_DIAG);
     row(g, AOS_SYM_INFORMATION_OUTLINE, 0x636366, _("Acerca de"), NULL, true, open_cb, (void *)PG_ABOUT);
+    row(g, AOS_SYM_FILE_CODE_OUTLINE, 0x5E5CE6, _("Desarrollador"), NULL, true, open_cb, (void *)PG_DEV);
 }
 
 /* ---- Wi-Fi ---- */
@@ -1798,6 +1805,123 @@ static lv_obj_t *column(lv_obj_t *parent, int32_t x, int32_t w)
     return c;
 }
 
+/* ---- Desarrollador ---- */
+
+/* The drawing preferences (GET/POST /api/tune, docs/MEMORY.md), read at
+ * boot. A choice equal to the factory value erases the preference, so
+ * "changed" is simply "there is one". */
+enum { T_LVBUF, T_LVROWS, T_FBS, T_BLIT, T_BANDS, T_N };
+static const char *const TUNE_KEY[T_N] = { "lvbuf", "lvrows", "fbs", "blit_hw", "bands_psram" };
+static const int TUNE_DEF[T_N] = { 2, 128, 3, 1, 0 };
+
+static int tune_get(int k)
+{
+    int32_t v = TUNE_DEF[k];
+    aos_hal_pref_get_i32(TUNE_KEY[k], &v);
+    return (int)v;
+}
+
+static bool tune_changed(void)
+{
+    for (int k = 0; k < T_N; k++) if (tune_get(k) != TUNE_DEF[k]) return true;
+    return false;
+}
+
+static void tune_set(int k, int v)
+{
+    if (v == TUNE_DEF[k]) aos_hal_pref_erase(TUNE_KEY[k]);
+    else aos_hal_pref_set_i32(TUNE_KEY[k], v);
+}
+
+/* user data: the key in the high half, the value in the low one */
+static void tune_pick_cb(lv_event_t *e)
+{
+    uintptr_t u = (uintptr_t)lv_event_get_user_data(e);
+    tune_set((int)(u >> 16), (int)(u & 0xFFFF));
+    show(PG_DEV);
+}
+static void *tune_ud(int k, int v) { return (void *)(((uintptr_t)k << 16) | (uintptr_t)v); }
+static void tune_blit_cb(lv_event_t *e) { tune_set(T_BLIT, lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED)); show(PG_DEV); }
+static void tune_bands_cb(lv_event_t *e) { tune_set(T_BANDS, lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED)); show(PG_DEV); }
+
+static void tune_reset_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez para volver a lo de fábrica"))) return;
+    aos_hal_tune_reset();
+    show(PG_DEV);
+}
+
+static void dev_touch_cb(lv_event_t *e) { aos_dev_set_touches(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED)); }
+static void dev_fps_cb(lv_event_t *e) { aos_dev_set_fps(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED)); }
+static void dev_log_cb(lv_event_t *e) { aos_dev_set_log_level((int)(intptr_t)lv_event_get_user_data(e)); show(PG_DEV); }
+
+static void dev_restart_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez para reiniciar"))) return;
+    lv_timer_t *t = lv_timer_create(reboot_cb, 300, NULL);
+    lv_timer_set_repeat_count(t, 1);
+}
+
+/* main.c reads "safe_next" at boot, erases it and comes up as with BOOT
+ * held: one boot only */
+static void dev_safe_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez para reiniciar en modo seguro"))) return;
+    aos_hal_pref_set_i32("safe_next", 1);
+    lv_timer_t *t = lv_timer_create(reboot_cb, 300, NULL);
+    lv_timer_set_repeat_count(t, 1);
+}
+
+static void pick_row(lv_obj_t *g, const char *label, bool on, lv_event_cb_t cb, void *ud)
+{
+    row(g, NULL, 0, label, on ? AOS_SYM_CHECK : NULL, false, cb, ud);
+}
+
+static void build_dev(lv_obj_t *p)
+{
+    lv_obj_t *g = group(p, _("EN PANTALLA"));
+    row_switch(g, AOS_SYM_GESTURE_TAP_BUTTON, 0x0A84FF, _("Mostrar los toques"), aos_dev_touches(), dev_touch_cb);
+    row_switch(g, AOS_SYM_SPEEDOMETER, 0x34C759, _("Mostrar los fps"), aos_dev_fps(), dev_fps_cb);
+    note(p, _("Un círculo bajo cada dedo que informa el táctil (hasta dos), y los cuadros por segundo que llegan a la pantalla, arriba a la derecha. Quedan prendidos después de reiniciar."));
+
+    g = group(p, _("REGISTRO"));
+    int lv = aos_dev_log_level();
+    pick_row(g, _("Sólo errores"), lv == 1, dev_log_cb, (void *)1);
+    pick_row(g, _("Errores y avisos"), lv == 2, dev_log_cb, (void *)2);
+    pick_row(g, _("Todo (de fábrica)"), lv == 3, dev_log_cb, (void *)3);
+    note(p, _("Lo que llega al Registro del portal y a la consola serie. Este firmware no trae los mensajes de depuración."));
+
+    g = group(p, _("DÓNDE DIBUJA LVGL"));
+    int lb = tune_get(T_LVBUF);
+    pick_row(g, _("Dos búferes en PSRAM (de fábrica)"), lb == 2, tune_pick_cb, tune_ud(T_LVBUF, 2));
+    pick_row(g, _("Uno en PSRAM"), lb == 3, tune_pick_cb, tune_ud(T_LVBUF, 3));
+    pick_row(g, _("Dos en RAM interna"), lb == 0, tune_pick_cb, tune_ud(T_LVBUF, 0));
+    pick_row(g, _("Uno en RAM interna"), lb == 1, tune_pick_cb, tune_ud(T_LVBUF, 1));
+    g = group(p, _("FILAS POR BÚFER"));
+    int lr = tune_get(T_LVROWS);
+    pick_row(g, "56", lr == 56, tune_pick_cb, tune_ud(T_LVROWS, 56));
+    pick_row(g, _("128 (de fábrica)"), lr == 128, tune_pick_cb, tune_ud(T_LVROWS, 128));
+    pick_row(g, "320", lr == 320, tune_pick_cb, tune_ud(T_LVROWS, 320));
+    note(p, _("Medido en la placa: la pantalla entera se redibuja en 67 ms con dos internos de 56 filas, 67 ms con dos en PSRAM de 128 y 60 ms con 320; pero 320 filas le dejan poca PSRAM a Monster Hop. En RAM interna, si no alcanza, usa menos filas o vuelve a la PSRAM."));
+    g = group(p, _("PANTALLA Y COPIAS"));
+    int fb = tune_get(T_FBS);
+    pick_row(g, _("Tres búferes del panel (de fábrica)"), fb != 1, tune_pick_cb, tune_ud(T_FBS, 3));
+    pick_row(g, _("Uno solo"), fb == 1, tune_pick_cb, tune_ud(T_FBS, 1));
+    row_switch(g, AOS_SYM_CHIP, 0x5E5CE6, _("Copias con el PPA"), tune_get(T_BLIT) != 0, tune_blit_cb);
+    row_switch(g, AOS_SYM_MEMORY, 0xFF9F0A, _("Bandas de los juegos en PSRAM"), tune_get(T_BANDS) != 0, tune_bands_cb);
+    note(p, _("Con un solo búfer del panel, las apps que dibujan la pantalla entera (los juegos) no tienen el suyo. Sin el PPA, las copias las hace la CPU. Las bandas en PSRAM hacen a Monster Hop acostado la mitad de rápido: están para medir."));
+    if (tune_changed()) {
+        g = group(p, NULL);
+        action_row(g, _("Volver a lo de fábrica"), AOS_C_RED, tune_reset_cb);
+    }
+    note(p, _("Estos se leen al arrancar: hay que reiniciar. Si un ajuste no deja arrancar, el tercer arranque fallido seguido vuelve solo a lo de fábrica."));
+
+    g = group(p, NULL);
+    action_row(g, _("Reiniciar"), AOS_C_ACCENT, dev_restart_cb);
+    action_row(g, _("Reiniciar en modo seguro"), AOS_C_ORANGE, dev_safe_cb);
+    note(p, _("El modo seguro arranca sin las apps de la tarjeta, con el dibujo de fábrica y el USB quieto, como con BOOT apretado al encender. El reinicio siguiente vuelve a la normalidad."));
+}
+
 static void fill(lv_obj_t *col, int pg, bool back)
 {
     U.PW = lv_obj_get_style_width(col, 0);
@@ -1834,6 +1958,7 @@ static void fill(lv_obj_t *col, int pg, bool back)
     case PG_UPDATE: build_update(col); break;
     case PG_DIAG: build_diag(col); break;
     case PG_LOCK: build_lock(col); break;
+    case PG_DEV: build_dev(col); break;
     default: build_root(col); break;
     }
 }
@@ -1847,6 +1972,9 @@ static void build(int pg)
 {
     kb_close();
     int32_t side_y = U.side ? lv_obj_get_scroll_y(U.side) : 0;
+    /* the same page again (a choice made, a state that moved): where it was */
+    int32_t body_y = U.body && U.body_pg == (U.land && pg == PG_ROOT ? PG_WIFI : pg) ? lv_obj_get_scroll_y(U.body) : 0;
+    U.body = NULL;
     if (U.page) lv_obj_delete(U.page);
     U.wifi_list = U.wifi_state = U.side = NULL;
     U.usb_state = U.usb_dot = U.usb_root = NULL;
@@ -1858,6 +1986,9 @@ static void build(int pg)
         U.page = column(U.root, 0, U.W);
         U.selected = -1;
         fill(U.page, pg, pg != PG_ROOT);
+        U.body = U.page;
+        U.body_pg = pg;
+        if (body_y) { lv_obj_update_layout(U.page); lv_obj_scroll_to_y(U.page, body_y, LV_ANIM_OFF); }
         return;
     }
     U.page = lv_obj_create(U.root);
@@ -1875,6 +2006,9 @@ static void build(int pg)
     lv_obj_t *main = column(U.page, SIDEBAR_W, U.W - SIDEBAR_W);
     lv_obj_set_style_pad_left(main, AOS_UI_PAD / 2, 0);
     fill(main, right, false);
+    U.body = main;
+    U.body_pg = right;
+    if (body_y) { lv_obj_update_layout(main); lv_obj_scroll_to_y(main, body_y, LV_ANIM_OFF); }
 }
 
 /* Opens a page on top (or rebuilds the current one if it is the same). */

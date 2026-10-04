@@ -1183,6 +1183,7 @@ void aos_ui_init(void)
     aos_panels_create(lv_layer_top());
     aos_banner_create(lv_layer_sys());
     aos_lock_init();                /* over the panels; locked at boot when it is on */
+    aos_dev_init();                 /* Settings, Developer: touches, fps, the log's level */
 
     for (lv_indev_t *in = lv_indev_get_next(NULL); in; in = lv_indev_get_next(in)) {
         if (lv_indev_get_type(in) == LV_INDEV_TYPE_POINTER && !s_indev) {

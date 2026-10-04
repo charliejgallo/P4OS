@@ -2248,6 +2248,36 @@ static const char blob_en__sistema_lang[] =
     "Borrar en el teléfono\tClear on the phone\n"
     "Música del iPhone\tiPhone music\n"
     "Con la música del iPhone, el centro de control y la pantalla de bloqueo muestran lo que suena en el teléfono y lo manejan, cuando la placa no está reproduciendo nada. Usa un poco más la radio.\tWith iPhone music on, the control centre and the lock screen show what the phone is playing and control it, whenever the board is not playing anything itself. It uses the radio a little more.\n"
+    "Desarrollador\tDeveloper\n"
+    "Tocá otra vez para volver a lo de fábrica\tTap again to go back to the factory settings\n"
+    "Tocá otra vez para reiniciar\tTap again to restart\n"
+    "Tocá otra vez para reiniciar en modo seguro\tTap again to restart in safe mode\n"
+    "EN PANTALLA\tON SCREEN\n"
+    "Mostrar los toques\tShow touches\n"
+    "Mostrar los fps\tShow fps\n"
+    "Un círculo bajo cada dedo que informa el táctil (hasta dos), y los cuadros por segundo que llegan a la pantalla, arriba a la derecha. Quedan prendidos después de reiniciar.\tA ring under every finger the touch panel reports (up to two), and the frames per second that reach the screen, top right. They stay on after a restart.\n"
+    "Sólo errores\tErrors only\n"
+    "Errores y avisos\tErrors and warnings\n"
+    "Todo (de fábrica)\tEverything (factory)\n"
+    "Lo que llega al Registro del portal y a la consola serie. Este firmware no trae los mensajes de depuración.\tWhat reaches the portal's Log and the serial console. This firmware has no debug messages built in.\n"
+    "DÓNDE DIBUJA LVGL\tWHERE LVGL DRAWS\n"
+    "Dos búferes en PSRAM (de fábrica)\tTwo buffers in PSRAM (factory)\n"
+    "Uno en PSRAM\tOne in PSRAM\n"
+    "Dos en RAM interna\tTwo in internal RAM\n"
+    "Uno en RAM interna\tOne in internal RAM\n"
+    "FILAS POR BÚFER\tROWS PER BUFFER\n"
+    "128 (de fábrica)\t128 (factory)\n"
+    "Medido en la placa: la pantalla entera se redibuja en 67 ms con dos internos de 56 filas, 67 ms con dos en PSRAM de 128 y 60 ms con 320; pero 320 filas le dejan poca PSRAM a Monster Hop. En RAM interna, si no alcanza, usa menos filas o vuelve a la PSRAM.\tMeasured on the board: the whole screen is redrawn in 67 ms with two internal buffers of 56 rows, 67 ms with two in PSRAM of 128 and 60 ms with 320; but 320 rows leave Monster Hop little PSRAM. In internal RAM, when there is not enough, it uses fewer rows or goes back to PSRAM.\n"
+    "PANTALLA Y COPIAS\tSCREEN AND COPIES\n"
+    "Tres búferes del panel (de fábrica)\tThree panel buffers (factory)\n"
+    "Uno solo\tJust one\n"
+    "Copias con el PPA\tCopies with the PPA\n"
+    "Bandas de los juegos en PSRAM\tGame bands in PSRAM\n"
+    "Con un solo búfer del panel, las apps que dibujan la pantalla entera (los juegos) no tienen el suyo. Sin el PPA, las copias las hace la CPU. Las bandas en PSRAM hacen a Monster Hop acostado la mitad de rápido: están para medir.\tWith a single panel buffer, the apps that draw the whole screen (the games) have none of their own. Without the PPA, the CPU makes the copies. Bands in PSRAM make Monster Hop in landscape half as fast: they are there for measuring.\n"
+    "Volver a lo de fábrica\tBack to factory settings\n"
+    "Estos se leen al arrancar: hay que reiniciar. Si un ajuste no deja arrancar, el tercer arranque fallido seguido vuelve solo a lo de fábrica.\tThese are read at boot: a restart is needed. If a setting keeps the board from starting, the third failed boot in a row goes back to the factory settings by itself.\n"
+    "Reiniciar en modo seguro\tRestart in safe mode\n"
+    "El modo seguro arranca sin las apps de la tarjeta, con el dibujo de fábrica y el USB quieto, como con BOOT apretado al encender. El reinicio siguiente vuelve a la normalidad.\tSafe mode starts without the card's apps, with the factory drawing settings and the USB idle, as with BOOT held at power on. The next restart goes back to normal.\n"
     ;
 
 static const char blob_en_aos_cameras_lang[] =
@@ -6664,6 +6694,36 @@ static const char blob_de__sistema_lang[] =
     "Borrar en el teléfono\tAuf dem Telefon löschen\n"
     "Música del iPhone\tiPhone-Musik\n"
     "Con la música del iPhone, el centro de control y la pantalla de bloqueo muestran lo que suena en el teléfono y lo manejan, cuando la placa no está reproduciendo nada. Usa un poco más la radio.\tMit iPhone-Musik zeigen Kontrollzentrum und Sperrbildschirm, was auf dem Telefon läuft, und steuern es, solange die Platine selbst nichts abspielt. Das beansprucht das Funkmodul etwas mehr.\n"
+    "Desarrollador\tEntwickler\n"
+    "Tocá otra vez para volver a lo de fábrica\tNochmals tippen, um die Werkseinstellungen herzustellen\n"
+    "Tocá otra vez para reiniciar\tNochmals tippen zum Neustarten\n"
+    "Tocá otra vez para reiniciar en modo seguro\tNochmals tippen für einen Neustart im abgesicherten Modus\n"
+    "EN PANTALLA\tAUF DEM BILDSCHIRM\n"
+    "Mostrar los toques\tBerührungen anzeigen\n"
+    "Mostrar los fps\tFPS anzeigen\n"
+    "Un círculo bajo cada dedo que informa el táctil (hasta dos), y los cuadros por segundo que llegan a la pantalla, arriba a la derecha. Quedan prendidos después de reiniciar.\tEin Kreis unter jedem Finger, den der Touchscreen meldet (bis zu zwei), und die Bilder pro Sekunde, die den Bildschirm erreichen, oben rechts. Bleiben nach einem Neustart an.\n"
+    "Sólo errores\tNur Fehler\n"
+    "Errores y avisos\tFehler und Warnungen\n"
+    "Todo (de fábrica)\tAlles (Werkseinstellung)\n"
+    "Lo que llega al Registro del portal y a la consola serie. Este firmware no trae los mensajes de depuración.\tWas im Protokoll des Portals und auf der seriellen Konsole ankommt. Diese Firmware enthält keine Debug-Meldungen.\n"
+    "DÓNDE DIBUJA LVGL\tWO LVGL ZEICHNET\n"
+    "Dos búferes en PSRAM (de fábrica)\tZwei Puffer im PSRAM (Werkseinstellung)\n"
+    "Uno en PSRAM\tEiner im PSRAM\n"
+    "Dos en RAM interna\tZwei im internen RAM\n"
+    "Uno en RAM interna\tEiner im internen RAM\n"
+    "FILAS POR BÚFER\tZEILEN PRO PUFFER\n"
+    "128 (de fábrica)\t128 (Werkseinstellung)\n"
+    "Medido en la placa: la pantalla entera se redibuja en 67 ms con dos internos de 56 filas, 67 ms con dos en PSRAM de 128 y 60 ms con 320; pero 320 filas le dejan poca PSRAM a Monster Hop. En RAM interna, si no alcanza, usa menos filas o vuelve a la PSRAM.\tAuf der Platine gemessen: Der ganze Bildschirm wird in 67 ms mit zwei internen Puffern zu 56 Zeilen neu gezeichnet, in 67 ms mit zwei im PSRAM zu 128 und in 60 ms mit 320; aber 320 Zeilen lassen Monster Hop wenig PSRAM. Reicht das interne RAM nicht, nimmt es weniger Zeilen oder wieder den PSRAM.\n"
+    "PANTALLA Y COPIAS\tBILDSCHIRM UND KOPIEN\n"
+    "Tres búferes del panel (de fábrica)\tDrei Panel-Puffer (Werkseinstellung)\n"
+    "Uno solo\tNur einer\n"
+    "Copias con el PPA\tKopien mit dem PPA\n"
+    "Bandas de los juegos en PSRAM\tSpielstreifen im PSRAM\n"
+    "Con un solo búfer del panel, las apps que dibujan la pantalla entera (los juegos) no tienen el suyo. Sin el PPA, las copias las hace la CPU. Las bandas en PSRAM hacen a Monster Hop acostado la mitad de rápido: están para medir.\tMit nur einem Panel-Puffer haben die Apps, die den ganzen Bildschirm zeichnen (die Spiele), keinen eigenen. Ohne PPA kopiert die CPU. Streifen im PSRAM machen Monster Hop im Querformat halb so schnell: sie sind zum Messen da.\n"
+    "Volver a lo de fábrica\tWerkseinstellungen herstellen\n"
+    "Estos se leen al arrancar: hay que reiniciar. Si un ajuste no deja arrancar, el tercer arranque fallido seguido vuelve solo a lo de fábrica.\tDiese werden beim Start gelesen: ein Neustart ist nötig. Verhindert eine Einstellung den Start, stellt der dritte fehlgeschlagene Start in Folge die Werkseinstellungen von selbst her.\n"
+    "Reiniciar en modo seguro\tIm abgesicherten Modus neu starten\n"
+    "El modo seguro arranca sin las apps de la tarjeta, con el dibujo de fábrica y el USB quieto, como con BOOT apretado al encender. El reinicio siguiente vuelve a la normalidad.\tDer abgesicherte Modus startet ohne die Apps der Karte, mit den Werkseinstellungen fürs Zeichnen und ruhendem USB, wie mit gedrückter BOOT-Taste beim Einschalten. Der nächste Neustart kehrt zum Normalbetrieb zurück.\n"
     ;
 
 static const char blob_de_aos_cameras_lang[] =
@@ -8846,7 +8906,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2234, 33, files_en, 34 },
-    { "de", "Deutsch", 2234, 33, files_de, 34 },
+    { "en", "English", 2264, 33, files_en, 34 },
+    { "de", "Deutsch", 2264, 33, files_de, 34 },
 };
 const int aos_lang_pack_count = 2;
