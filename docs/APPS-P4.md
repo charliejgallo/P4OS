@@ -147,6 +147,29 @@ gitignored; each app's README says how to build its pak.
     ~56 discs a frame, which saved 10 ms.
   - Clip in X as well as Y: narrow bands multiply every per-row cost.
 
+## Bluetooth, the keyboard and text from outside
+
+Since 0.7 ([BLUETOOTH.md](BLUETOOTH.md), [EMOJI.md](EMOJI.md)):
+
+- **Keys go over the cable or over Bluetooth by themselves.**
+  `aos_hal_usb_key`, `_type`, `_mouse`, `_click` and `_mouse_hold` reach a
+  computer that took the board's Bluetooth keyboard mode when none has the
+  USB port in KEYS mode. `aos_hal_usb_keys_ready()` is true either way, so
+  it no longer means "there is a cable". `aos_hal_bt_keyboard_ready()` and
+  `aos_hal_bt_keyboard_host()` say when it is Bluetooth, and to which
+  computer. The gamepad and MIDI are the cable's only.
+- **The phone:** `aos_hal_bt_state`, `_peer` and `_phone_battery`, its
+  notifications through `aos_hal_notif_count` and `_at`, its music through
+  `aos_hal_media_info` and `_command` (AMS, off by default). The simulator
+  has a fake iPhone.
+- **Text from outside** (a notification, a JSON from the network, a file)
+  goes through `aos_text_safe(out, len, in)`: it drops what the font lacks
+  and turns each emoji (skin tones, flags and joined sequences included)
+  into the code point that draws it in colour. Emoji show only with the
+  theme's fonts (`aos_font_*`), not with a font named by hand, and only with
+  `/fonts/emoji.pak` on the card (the simulator's is
+  `sim/sim_fs/fonts/emoji.pak`).
+
 ## Measuring on the board
 
 - **The log:** `GET /api/log?from=N` returns 16 KB at a time from the oldest
