@@ -7148,3 +7148,5 @@ TECLADO BLUETOOTH	BLUETOOTH KEYBOARD
 Teclado Bluetooth	Bluetooth keyboard
 Computadora	Computer
 La placa como teclado, mouse y teclas de medios de una computadora: se empareja desde los ajustes de Bluetooth de la Mac o la PC, y el Macro pad y las apps mandan las teclas por ahí cuando no hay un cable USB. El teléfono sigue conectado.	The board as a computer's keyboard, mouse and media keys: pair it from the Mac's or the PC's Bluetooth settings, and the Macro pad and the apps send their keys that way when there is no USB cable. The phone stays connected.
+%s usa la placa como teclado y mouse por Bluetooth	%s uses the board as a keyboard and mouse over Bluetooth
+La computadora	The computer

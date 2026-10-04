@@ -2234,6 +2234,8 @@ static const char blob_en__sistema_lang[] =
     "Teclado Bluetooth\tBluetooth keyboard\n"
     "Computadora\tComputer\n"
     "La placa como teclado, mouse y teclas de medios de una computadora: se empareja desde los ajustes de Bluetooth de la Mac o la PC, y el Macro pad y las apps mandan las teclas por ahí cuando no hay un cable USB. El teléfono sigue conectado.\tThe board as a computer's keyboard, mouse and media keys: pair it from the Mac's or the PC's Bluetooth settings, and the Macro pad and the apps send their keys that way when there is no USB cable. The phone stays connected.\n"
+    "%s usa la placa como teclado y mouse por Bluetooth\t%s uses the board as a keyboard and mouse over Bluetooth\n"
+    "La computadora\tThe computer\n"
     ;
 
 static const char blob_en_aos_cameras_lang[] =
@@ -6501,6 +6503,8 @@ static const char blob_de__sistema_lang[] =
     "Teclado Bluetooth\tBluetooth-Tastatur\n"
     "Computadora\tComputer\n"
     "La placa como teclado, mouse y teclas de medios de una computadora: se empareja desde los ajustes de Bluetooth de la Mac o la PC, y el Macro pad y las apps mandan las teclas por ahí cuando no hay un cable USB. El teléfono sigue conectado.\tDie Platine als Tastatur, Maus und Medientasten eines Computers: In den Bluetooth-Einstellungen des Mac oder PCs koppeln, dann schicken das Macro Pad und die Apps ihre Tasten darüber, wenn kein USB-Kabel steckt. Das Telefon bleibt verbunden.\n"
+    "%s usa la placa como teclado y mouse por Bluetooth\t%s nutzt die Platine als Tastatur und Maus über Bluetooth\n"
+    "La computadora\tDer Computer\n"
     ;
 
 static const char blob_de_aos_cameras_lang[] =
@@ -8548,7 +8552,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2220, 32, files_en, 33 },
-    { "de", "Deutsch", 2220, 32, files_de, 33 },
+    { "en", "English", 2222, 32, files_en, 33 },
+    { "de", "Deutsch", 2222, 32, files_de, 33 },
 };
 const int aos_lang_pack_count = 2;

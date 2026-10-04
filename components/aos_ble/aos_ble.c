@@ -1107,6 +1107,10 @@ bool aos_ble_is_phone(uint16_t conn)
     return s_phone_known && ble_gap_conn_find(conn, &d) == 0 && !ble_addr_cmp(&d.peer_id_addr, &s_phone);
 }
 
+/* The computer's name, for Settings. A read by type carries only what fits
+ * one packet, 19 bytes before the MTU grows ("Charlie's MacBook" for
+ * "Charlie's MacBook Air"), and a Mac ended the long read one byte short;
+ * so the MTU is exchanged first and the name read after it. */
 static int on_host_name(uint16_t conn, const struct ble_gatt_error *error, struct ble_gatt_attr *attr, void *arg)
 {
     (void)arg;
@@ -1120,13 +1124,29 @@ static int on_host_name(uint16_t conn, const struct ble_gatt_error *error, struc
     return 0;
 }
 
+static int on_host_mtu(uint16_t conn, const struct ble_gatt_error *error, uint16_t mtu, void *arg)
+{
+    (void)error;
+    (void)mtu;
+    (void)arg;
+    if (conn == s_host)
+        ble_gattc_read_by_uuid(conn, 1, 0xFFFF, BLE_UUID16_DECLARE(0x2A00), on_host_name, NULL);
+    return 0;
+}
+
+static void host_name_ask(uint16_t conn)
+{
+    if (ble_gattc_exchange_mtu(conn, on_host_mtu, NULL) != 0)
+        ble_gattc_read_by_uuid(conn, 1, 0xFFFF, BLE_UUID16_DECLARE(0x2A00), on_host_name, NULL);
+}
+
 /* This connection is a computer, not the phone. */
 static void to_host(uint16_t conn)
 {
     if (conn == s_conn) limpiar_conexion();
     s_host = conn;
     snprintf(s_host_name, sizeof s_host_name, "%s", "?");
-    ble_gattc_read_by_uuid(conn, 1, 0xFFFF, BLE_UUID16_DECLARE(0x2A00), on_host_name, NULL);
+    host_name_ask(conn);
     ESP_LOGI(TAG, "a computer on connection %u", (unsigned)conn);
 }
 
@@ -1225,7 +1245,7 @@ static int gap_event(struct ble_gap_event *event, void *arg)
                                    &UUID_ANCS.u, on_svc, NULL);
         if (event->enc_change.conn_handle == s_host && !s_host_name[0]) {
             /* a computer that came second: its name, for Settings */
-            ble_gattc_read_by_uuid(s_host, 1, 0xFFFF, BLE_UUID16_DECLARE(0x2A00), on_host_name, NULL);
+            host_name_ask(s_host);
         }
         advertise_if_room();
         return 0;

@@ -407,9 +407,20 @@ static lv_obj_t *tab(lv_obj_t *parent, const char *glyph, const char *text, bool
 /* What this face needs from the port: the MIDI face wants the computer to
  * have opened the MIDI port too, the rest the keyboard (the gamepad goes out
  * on the same HID interface as the keyboard and the mouse). */
+/* The keys go over Bluetooth when a computer took the board's keyboard mode
+ * there (Settings, Bluetooth) and none has the cable's: the HAL picks the
+ * way by itself, this only says which, on the chip. The gamepad and MIDI are
+ * the cable's only. */
+static bool via_bt(void)
+{
+    return aos_hal_bt_keyboard_ready() && !(aos_hal_usb_mode() == AOS_HAL_USB_KEYS && aos_hal_usb_connected());
+}
+
 static bool usb_ready(void)
 {
-    return S.face == FACE_MIDI ? aos_hal_usb_midi_ready() : aos_hal_usb_keys_ready();
+    if (S.face == FACE_MIDI) return aos_hal_usb_midi_ready();
+    if (S.face == FACE_PAD) return aos_hal_usb_keys_ready() && !via_bt();
+    return aos_hal_usb_keys_ready();
 }
 
 /* Before sending: an idle port (CONSOLE) becomes the keyboard by itself, as
@@ -436,7 +447,12 @@ static void usb_cb(lv_event_t *e)
 {
     const char *m;
     bool play = S.face == FACE_PAD || S.face == FACE_MIDI;
-    if (usb_ready()) m = S.face == FACE_PAD  ? _("La computadora tomó el mando del puerto OTG")
+    static char bt_msg[96];
+    if (usb_ready() && via_bt()) {
+        snprintf(bt_msg, sizeof bt_msg, _("%s usa la placa como teclado y mouse por Bluetooth"),
+                 aos_hal_bt_keyboard_host()[0] ? aos_hal_bt_keyboard_host() : _("La computadora"));
+        m = bt_msg;
+    } else if (usb_ready()) m = S.face == FACE_PAD  ? _("La computadora tomó el mando del puerto OTG")
                        : S.face == FACE_MIDI ? _("La computadora tomó el MIDI del puerto OTG")
                                              : _("La computadora tomó el teclado y el mouse del puerto OTG");
     else if (aos_hal_usb_busy()) m = _("El USB se está preparando…");
@@ -448,11 +464,12 @@ static void usb_cb(lv_event_t *e)
 
 static void usb_refresh(void)
 {
-    int st = usb_ready() ? 2 : aos_hal_usb_busy() ? 1 : 0;
+    int st = usb_ready() ? (via_bt() ? 3 : 2) : aos_hal_usb_busy() ? 1 : 0;
     if (st == U.usb_state) return;
     U.usb_state = st;
-    lv_obj_set_style_bg_color(U.usb_dot, st == 2 ? AOS_C_GREEN : st == 1 ? AOS_C_ORANGE : AOS_C_DIM, 0);
-    lv_label_set_text(U.usb_txt, st == 2 ? _("USB") : st == 1 ? _("USB…") : _("Sin USB"));
+    lv_obj_set_style_bg_color(U.usb_dot, st == 3 ? AOS_C_ACCENT : st == 2 ? AOS_C_GREEN : st == 1 ? AOS_C_ORANGE
+                                                                                              : AOS_C_DIM, 0);
+    lv_label_set_text(U.usb_txt, st == 3 ? "BLE" : st == 2 ? _("USB") : st == 1 ? _("USB…") : _("Sin USB"));
 }
 
 static void build_top(void)
