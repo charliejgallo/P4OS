@@ -30,8 +30,21 @@ P.registerPage({
 });
 ```
 
-The texts are in Spanish, like the rest of the portal. The portal's styles
-(`card`, `row`, `btn`, `note`, `val`, `muted`...) are there to use.
+The texts are in Spanish, like the rest of the portal: it has no
+translations.
+
+- **`render` is synchronous.** What it returns is the cleanup; an `async`
+  render returns a promise and the cleanup is lost. Load the data inside,
+  as a promise (`P.fsText(path).then(...)`), and draw when it comes.
+- **Styles.** The portal's classes are there to use (`card`, `pad`, `row`,
+  `grow`, `val`, `btn`, `pri`, `red`, `btns`, `note`, `muted`, `small`,
+  `pill`, `prog`, `mono`), and so are its colour variables (`--card`,
+  `--card2`, `--line`, `--dim`, `--accent`, `--green`, `--red`,
+  `--orange`), which follow the browser's light or dark mode. A page's own
+  rules go in one `<style id="css-<app>">` it adds once, with class names
+  of its own prefix (Radio's start with `rd`, Cameras' with `cm`).
+- **Errors.** `api` and `post` throw an `Error` with the portal's message;
+  show it with `toast(message, true)`.
 
 ## `window.P4OS`, version 1
 
@@ -63,6 +76,34 @@ version 1 stays as it is, like the apps' `AOS_ABI_VERSION`.
 Anything else of the board is in its JSON API (`api('info')`,
 `api('bt')`...), the same the portal's own pages use.
 
+## Talking to the app
+
+A page runs in the browser and its app on the board; they meet on the card.
+
+- **Files** are the usual way. The page writes with `fsPut` and the app
+  reads. An app that is open and has to notice looks at the file's date
+  now and then: Notes checks its folder every two seconds and reads the
+  open note again when it changed there and has nothing unsaved.
+- **`openApp(id)`** brings the app to the front.
+- **A JSON API of its own** is firmware, as Radio's `/api/radio` is
+  (`components/aos_portal/aos_portal_radio.c`). Most pages do not need
+  one.
+- **The internet** is the browser's, not the board's: Radio searches
+  radio-browser.info from the page. An image from another site drawn into
+  a `canvas` taints it (CORS) and it can no longer be exported; Radio asks
+  for such logos through `wsrv.nl` when it has to turn them into a JPEG for
+  the card.
+
+The pages there are, to copy from:
+
+| Page | What it shows | What to look at |
+|---|---|---|
+| `apps/hello_app/web/hello.js` | the template | everything basic |
+| `apps/camaras/web/camaras.js` | `/cameras.txt` by fields, with a preview | parsing and rewriting a configuration file, keeping its comments |
+| `apps/radio/web/radio.js` | the nine keys by drag and drop, the list, a search | a JSON API, a service on the internet, images made in a `canvas` |
+| `apps/notas/web/notas.js` | the notes, with an editor | a folder of files the app follows |
+| `apps/pixel`, `lua`, `mapas`, `visor3d` | drawings, scripts, offline zones, models | big uploads with progress, downloads made in the browser |
+
 ## How the portal loads them
 
 - At startup `app.js` lists `/web` and imports every `.js` there, with its
@@ -86,7 +127,15 @@ Anything else of the board is in its JSON API (`api('info')`,
 uploads the `.so`, the pack and the page. A page needs no restart, only a
 reload of the portal; when nothing but pages goes up, the script does not
 restart the board. In the simulator the card is `sim/sim_fs`: copy the page
-to `sim/sim_fs/web/`.
+to `sim/sim_fs/web/` and open `http://127.0.0.1:<port>/#<id>`.
+
+After changing a page, **reload the whole portal** (F5). Going to the same
+address with another `#` does not reload it, and the old page stays. A
+reload is enough: each page is asked for with its date (`?v=<mtime>`), so
+there is no cache to empty.
+
+A release carries every app's page in `web.zip`, for the card's `/web`: the
+CI collects `apps/*/web/*.js` by itself.
 
 ## Why the card and not the `.so`
 

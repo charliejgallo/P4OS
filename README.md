@@ -8,17 +8,19 @@ An iPhone-style operating system for the
 
 It has a home screen with pages, folders and a dock, a control centre and
 notifications, and a lock screen with an optional code, and it runs in
-portrait or landscape. There are twenty-three built-in apps and thirty more on
+portrait or landscape. There are twenty-three built-in apps and thirty-one more on
 the microSD, loaded as shared objects:
 
 - **Games:** twenty-one, among them Mila (a Sokoban with a black cat in
   Blender 3D), Monster Hop, a racing game, golf, a robot RPG, and Doom at
   35 fps.
-- **Tools:** a street map with offline zones, internet radio, IP cameras,
-  video, a 3D viewer, a tuner and Lua.
-- **A web portal** for files, updates and the log.
+- **Tools:** notes with task lists, a street map with offline zones,
+  internet radio, IP cameras, video, a 3D viewer, a tuner and Lua.
+- **A web portal** for files, updates, the log and the network sweeps, and a
+  page for every app that wants one, which the app brings from the card.
 - **Bluetooth with the phone:** the iPhone's notifications on the board, in
-  colour emoji, and the board as a computer's wireless keyboard and mouse.
+  colour emoji, its music, and its calls answered or rejected from the
+  board; and the board as a computer's wireless keyboard and mouse.
 - **USB:** the port becomes a keyboard, mouse, gamepad, MIDI device, network
   or disk for a computer.
 - **A Wi-Fi network of its own,** joined with a QR code.
@@ -64,8 +66,9 @@ itself in Modules and by the scan in Bus, and the SPI loopback at 40 MHz
 The home screen has icon pages, folders, a dock and widgets.
 
 - **Swiping down** from the top opens the control centre (Wi-Fi, Bluetooth,
-  do not disturb, orientation, brightness, volume, the music playing) and
-  the notifications.
+  do not disturb, orientation, brightness, volume, the music playing on the
+  board or on the iPhone) and the notifications, with the phone's own
+  actions.
 - **The status bar** shows the Wi-Fi or the board's own network, the card
   and the USB.
 - **The orientation** is chosen in Settings or the control centre, because
@@ -128,8 +131,9 @@ Every day:
 - **Claude:** the usage of your own Claude plan, the numbers Claude Code's
   `/usage` shows. It is unofficial; see [CLAUDE-APP.md](docs/CLAUDE-APP.md).
 - **Monitor:** CPU per core, the tasks, memory, temperature and the network.
-- **Also built in:** MQTT, network tools (ping, a host and port scan,
-  mDNS, Wi-Fi) and Conway's Life.
+- **Also built in:** MQTT, network tools (ping, a host and port scan with
+  every MAC and its maker, mDNS, Wi-Fi; each sweep is saved, and the portal
+  compares it with the one before) and Conway's Life.
 
 ### The workshop
 
@@ -202,6 +206,8 @@ needs a WAD of your own, and none is included.
 - **Radio:** MP3, AAC and HLS stations, with a dial.
 - **Video:** MJPEG + WAV from the card, up to 1280×720.
 - **3D Viewer:** STL and the games' models, with up to 100 000 triangles.
+- **Notes:** rich text (sizes, styles, colours, headings, bullets) and task
+  lists with priorities and subtasks, one Markdown file per note.
 - **Also from the card:** Cameras (RTSP H.264 and MJPEG), Recorder, Weather,
   Quotes, and Lua, where a script on the card is an app.
 
@@ -227,11 +233,11 @@ an app.
 
 | | |
 |---|---|
-| **Web portal** | at `p4os.local`: a file explorer, the firmware (updates, both slots, the last crash dump), the log (including the tail of the previous boot), and pages for the radio, maps, Lua, Pixel Art and the 3D viewer |
+| **Web portal** | at `p4os.local`: a file explorer, the firmware (updates, both slots, the last crash dump), the log (including the tail of the previous boot), and the network sweeps (each device with its MAC and maker, what changed since the last one, the Wi-Fi channels). The apps bring their own pages from the card, with no firmware: Notes, Radio, Cameras, Maps, Lua, Pixel Art and the 3D viewer have one ([docs/PORTAL-PAGES.md](docs/PORTAL-PAGES.md)) |
 | **Updates over the air** | two slots: an update is written into the idle one and boots on trial. If the board restarts in the first 30 s, the bootloader goes back by itself. Settings, Update can go back on purpose |
 | **USB** | the OTG port is high speed (480 Mbit/s). **Keyboard and mouse:** keyboard, media keys, mouse, a gamepad, a MIDI keyboard, and a network over the cable (the portal at `192.168.7.1`, 6.7 MB/s). **Disk:** the microSD as a USB drive. The mode is kept across restarts |
 | **Its own Wi-Fi** | an access point, `P4OS-XXXX`, next to the home network or alone. Two QR codes: one joins the phone, the other opens the portal at `192.168.4.1`. A phone downloaded from it at ~3 MB/s |
-| **Bluetooth** | through the C6. **The phone:** pairs from the iPhone's own Settings, Bluetooth; its notifications, battery and time come to the board. **Keyboard mode:** the board is a Mac's or PC's keyboard, mouse and media keys at the same time; the Macro pad's keys and trackpad go over Bluetooth when there is no cable. [docs/BLUETOOTH.md](docs/BLUETOOTH.md) |
+| **Bluetooth** | through the C6. **The phone:** pairs from the iPhone's own Settings, Bluetooth; its notifications, battery and time come to the board, its music shows and is driven from the control centre and the lock screen, and a call can be answered or rejected on the board. **Keyboard mode:** the board is a Mac's or PC's keyboard, mouse and media keys at the same time; the Macro pad's keys and trackpad go over Bluetooth when there is no cable. [docs/BLUETOOTH.md](docs/BLUETOOTH.md) |
 | **The C6's firmware** | updated from the P4, with no cable: Settings, Update, or `tools/install_c6.sh`. It runs esp_hosted 3.0.9, the same as the P4, and going back to the factory firmware works the same way. [docs/C6.md](docs/C6.md) |
 | **Home** | Home Assistant over WebSocket, MQTT, Wi-Fi at 2.4 GHz through the C6 |
 
@@ -239,7 +245,7 @@ an app.
 
 The pages are Wi-Fi (with the access point), Bluetooth, USB (each mode
 explained), Display, Lock screen, Sound, Wallpaper, Expansion, Storage,
-Language, Date and time, Update, Diagnostics and About.
+Language, Date and time, Update, Diagnostics, About and Developer.
 
 - **Lock screen:** when it locks, the code (none, 4 or 6 digits, changed or
   removed with the current one), and what it shows.
@@ -248,6 +254,9 @@ Language, Date and time, Update, Diagnostics and About.
 - **Diagnostics:** chip temperature, CPU, memory, the reset reason, safe mode,
   the hang watchdog's restarts, the C6's firmware, and the crash dump.
 - **About:** the portal's addresses, with a QR code for the phone.
+- **Developer:** touches and frames per second over everything, the log's
+  level, the drawing preferences with their factory values, and restarting
+  into safe mode without the BOOT button.
 
 | Update | Diagnostics |
 |---|---|
@@ -292,7 +301,13 @@ test layouts.
 - Bluetooth with an iPhone 15 Pro Max: listed in its Settings, paired, its
   notifications (with emoji) on the banner and the lock screen, its battery
   and time. At the same time, the keyboard mode with a MacBook Air: text,
-  media keys and the Macro pad's trackpad.
+  media keys and the Macro pad's trackpad. Its music driven from the
+  board, a call answered and one rejected, and a message cleared on the
+  phone from the notification centre.
+- The network sweep with every host's MAC and maker, saved and compared in
+  the portal.
+- Settings, Developer: touches and fps over the games, and the safe mode
+  asked for from there.
 
 **Waiting for hardware on the bench:**
 
@@ -308,12 +323,9 @@ test layouts.
 
 **Not done yet:**
 
-- **The phone's music over Bluetooth (AMS),** and the notifications'
-  actions (answer, dismiss), in the UI: the stack has them, from the watch.
 - **ESP-NOW:** esp_hosted does not carry it (3.0.9 neither), so the two-device games of
   AmoledOS run alone here.
 - **USB host:** the OTG port does not supply 5 V.
-- **A Developer section** in Settings.
 - **The network dying during an OTA:** seen twice on 0.6. The link to the
   C6 is now watched and the board restarts by itself in under 30 s, and the
   C6 runs a newer esp_hosted; the cause itself is not found
@@ -357,17 +369,20 @@ ffmpeg`) and LVGL 9.5.0 in `sim/lvgl`. The firmware build has to have
 run once first, because it fetches the components whose headers the
 simulator shares.
 
-Each push builds both firmware profiles and every app on GitHub Actions. The
-releases carry the firmware, a full-flash bundle, the apps and the language
-packs; the games' art packs are attached by hand.
+Each push builds both firmware profiles, every app, the C6's firmware and
+the emoji and Notes packs on GitHub Actions. The releases carry all of it
+with a full-flash bundle, the apps' portal pages and the language packs;
+only the games' art packs are attached by hand.
 
 ### The card
 
-    /apps/        <app>.so and <app>_p4.pak (the art packs)
+    /apps/        <app>.so and <app>_p4.pak (the art packs, Notes' fonts)
+    /web/         <app>.js — the apps' own pages in the portal
     /lang/        en/, de/ — the language packs
     /fonts/       emoji.pak — the colour emoji
     /firmware/    c6.bin — a firmware for the C6, to install from Settings
-    /music/ /photos/ /videos/ /maps/
+    /music/ /photos/ /videos/ /maps/ /notas/
+    /redes/       the network sweeps (and oui.txt, the makers' register, if put there)
     menu.txt      the home screen's order and folders
     modules.txt   what is wired to the header
 
@@ -452,8 +467,8 @@ idioma de la tarjeta. Los documentos del plan y de las pruebas en la placa
 
 | | |
 |---|---|
-| Qué hace | inicio con carpetas, pantalla de bloqueo con código, 23 apps propias y 30 de la tarjeta (juegos, mapas, radio, video, Lua), portal web, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, Bluetooth con el iPhone (notificaciones con emojis en color) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, y taller con I2C, SPI, 1-Wire, GPIO y tiras LED direccionables |
-| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, y Bluetooth con un iPhone y una MacBook a la vez |
-| Qué falta | la música del iPhone y las acciones de las notificaciones en la interfaz, probar en la placa las tiras LED, el DS18B20 y el RC522, las cámaras, y encontrar por qué se cortó la red durante dos OTA |
+| Qué hace | inicio con carpetas, pantalla de bloqueo con código, 23 apps propias y 31 de la tarjeta (juegos, notas, mapas, radio, video, Lua), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, y taller con I2C, SPI, 1-Wire, GPIO y tiras LED direccionables |
+| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), y los barridos de red con las MAC |
+| Qué falta | probar en la placa las tiras LED, el DS18B20 y el RC522, las cámaras, y encontrar por qué se cortó la red durante dos OTA |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
 | Cómo se instala | la primera vez por el CH340; después `tools/ota.sh p4os.local` o el portal |
