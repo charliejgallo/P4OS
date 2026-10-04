@@ -51,12 +51,25 @@ Algo con **negrita**, *cursiva*, <u>subrayado</u> y ~~tachado~~.
 One line per block, two spaces per level of indent, the bullet's own glyph
 for the styles Markdown has no marker for. Any text file works too: a line
 the reader cannot make out is a paragraph, and a hand-written note's first
-`# heading` becomes its title. They are edited from the portal's file
-manager as well; the app reads the folder again when it comes back to the
-front. Deleted notes go to `/sdcard/notas/papelera`.
+`# heading` becomes its title. They are edited from the portal too (below). Deleted notes go to `/sdcard/notas/papelera`.
 
 A note is saved two seconds after the last change and when it is closed; a
 note left empty is not kept.
+
+## The portal
+
+Page **Notas** (`#notas`, in `components/aos_portal/web/app.js`): the notes
+as cards, a visual editor with the same formatting as the app, a task list
+editor, the raw Markdown, the bin, and uploading `.md`/`.txt` files. It
+only uses the portal's file API (`/api/fs*`), and its parser and writer
+follow `nt_doc.c` rule for rule: a note saved from the browser without
+changes comes back byte for byte (only `modified:` moves). Before writing it
+checks that the file did not change on the card since it was read.
+
+The app watches the card every two seconds: the open note, if it changed and
+there is nothing unsaved in the app, is read again (closed if it went to the
+bin), and the notes screen follows the folder. Not while the keyboard, a
+panel or a menu is up.
 
 ## Fonts
 

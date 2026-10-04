@@ -76,11 +76,16 @@ static struct {
     lv_obj_t   *tb_b, *tb_i, *tb_u, *tb_fg, *tb_hl, *tb_list, *tb_check, *tb_kb, *tb_aa;
     int32_t     kb_h;
 
+    /* what the card had when we last read or wrote it (the portal edits it too) */
+    uint32_t    f_mtime, f_size, dir_sig;
+    int         ticks;
+
     /* typing into a computer */
     volatile bool typing, typing_stop;
 } S;
 
 static void build(void);
+static void watch_card(void);
 static void list_search_attach(void);
 static void tasks_keyboard(bool show);
 static void open_entry(int i);
@@ -182,6 +187,8 @@ static void save_now(bool rename_it)
     if (!S.file[0] && doc_empty()) return;     /* nothing yet: no file */
     if (!nt_save(S.file, sizeof S.file, &S.doc, &S.meta, rename_it))
         aos_ui_toast(_("No se pudo guardar la nota"), 2000);
+    else
+        nt_file_stat(S.file, &S.f_mtime, &S.f_size);
 }
 
 static void mark_dirty(void)
@@ -998,6 +1005,7 @@ static void open_entry(int i)
     nt_doc_init(&S.doc);
     snprintf(S.file, sizeof S.file, "%s", S.ix.e[i].file);
     nt_load(nt_dir(), S.file, &S.doc, &S.meta);
+    nt_file_stat(S.file, &S.f_mtime, &S.f_size);
     S.open = true;
     S.dirty = false;
     S.screen = S.meta.kind == NT_KIND_TASKS ? SCR_TASKS : SCR_NOTE;
@@ -1395,6 +1403,7 @@ static void build_list(void)
     lv_obj_t *page = S.page;
     nt_index_scan(&S.ix, false);
     nt_index_sort(&S.ix, S.order);
+    S.dir_sig = nt_dir_signature();
 
     lv_obj_t *head = nt_box(page, S.W, S.land ? 84 : 104);
     lv_obj_set_style_pad_hor(head, 24, 0);
@@ -1683,8 +1692,9 @@ static void notas_show(aos_app_t *self, void *inst)
     (void)self;
     (void)inst;
     statusbar();
-    /* the portal may have changed the folder meanwhile */
+    /* the portal may have changed the folder, or the note, meanwhile */
     if (S.screen == SCR_LIST) build();
+    else watch_card();
 }
 
 static void notas_hide(aos_app_t *self, void *inst)
@@ -1725,11 +1735,53 @@ static bool notas_back(aos_app_t *self, void *inst)
     }
 }
 
+/* The portal writes the same files. Every two seconds: the open note, if it
+ * changed on the card and there is nothing unsaved here, is read again (and
+ * closed if it was moved to the bin); the notes screen follows the folder.
+ * Not while the keyboard, a panel or a sheet is up: someone is using it. */
+static void watch_card(void)
+{
+    if (nt_sheet_open() || S.panel != P_NONE) return;
+    if (S.open && S.file[0] && !S.dirty) {
+        uint32_t m, z;
+        if (!nt_file_stat(S.file, &m, &z)) {
+            S.open = false;
+            nt_ed_forget();
+            nt_tasks_forget();
+            nt_doc_clear(&S.doc);
+            S.screen = SCR_LIST;
+            build();
+            aos_ui_toast(_("La nota se borró desde el portal"), 2000);
+        } else if (m != S.f_mtime || z != S.f_size) {
+            int32_t keep = S.screen == SCR_NOTE ? nt_ed_get_scroll() : nt_tasks_get_scroll();
+            nt_doc_clear(&S.doc);
+            nt_doc_init(&S.doc);
+            nt_load(nt_dir(), S.file, &S.doc, &S.meta);
+            S.f_mtime = m;
+            S.f_size = z;
+            nt_ed_forget();
+            nt_tasks_forget();
+            S.screen = S.meta.kind == NT_KIND_TASKS ? SCR_TASKS : SCR_NOTE;
+            build();
+            if (S.screen == SCR_NOTE) nt_ed_set_scroll(keep);
+            else nt_tasks_set_scroll(keep);
+            aos_ui_toast(_("Actualizada desde el portal"), 1500);
+        }
+    } else if (S.screen == SCR_LIST && !S.searching) {
+        uint32_t sig = nt_dir_signature();
+        if (sig != S.dir_sig) {
+            S.list_scroll = S.cards ? lv_obj_get_scroll_y(S.cards) : 0;
+            build();
+        }
+    }
+}
+
 static void notas_tick(aos_app_t *self, void *inst)
 {
     (void)self;
     (void)inst;
     if (S.dirty && lv_tick_elaps(S.dirty_ms) > SAVE_AFTER_MS) save_now(false);
+    if (++S.ticks % 10 == 0) watch_card();
 }
 
 static bool notas_resize(aos_app_t *self, void *inst, lv_obj_t *root)

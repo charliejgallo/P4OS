@@ -203,6 +203,34 @@ void nt_index_sort(nt_index_t *ix, int order)
     if (ix->n > 1) qsort(ix->e, ix->n, sizeof(nt_entry_t), cmp_entry);
 }
 
+bool nt_file_stat(const char *file, uint32_t *mtime, uint32_t *size)
+{
+    char path[256];
+    snprintf(path, sizeof path, "%s/%s", nt_dir(), file);
+    struct stat st;
+    if (stat(path, &st) != 0) return false;
+    *mtime = (uint32_t)st.st_mtime;
+    *size = (uint32_t)st.st_size;
+    return true;
+}
+
+static bool sig_cb(const aos_dir_entry_t *e, void *ctx)
+{
+    uint32_t *h = ctx;
+    if (e->dir || !is_note(e->name)) return true;
+    uint32_t x = e->mtime * 2654435761u ^ e->size;
+    for (const char *p = e->name; *p; p++) x = x * 31 + (unsigned char)*p;
+    *h += x;
+    return true;
+}
+
+uint32_t nt_dir_signature(void)
+{
+    uint32_t h = 0;
+    aos_hal_dir_scan(nt_dir(), sig_cb, &h);
+    return h;
+}
+
 bool nt_load(const char *dir, const char *file, nt_doc_t *d, nt_meta_t *m)
 {
     char path[256], name[96];

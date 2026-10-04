@@ -202,6 +202,10 @@ enum { NT_ORDER_MODIFIED = 0, NT_ORDER_CREATED, NT_ORDER_TITLE, NT_ORDER_COUNT }
 uint32_t nt_now(void);                  /* 0 while the clock is not set */
 
 bool nt_load(const char *dir, const char *file, nt_doc_t *d, nt_meta_t *m);
+/* For noticing what the portal changed: a note's date and size, and a hash
+ * of the whole folder's names, dates and sizes. */
+bool     nt_file_stat(const char *file, uint32_t *mtime, uint32_t *size);
+uint32_t nt_dir_signature(void);
 /* Writes the note, renaming its file after the title when it changed.
  * 'file' is in and out. */
 bool nt_save(char *file, size_t len, nt_doc_t *d, nt_meta_t *m, bool rename_it);
