@@ -34,7 +34,25 @@ so does `POST /api/bt {"on": true}`.
 - **The phone's battery and time** come from the Battery and Current Time
   services the iPhone publishes. The time is applied from the main loop,
   never from NimBLE's task.
-- **Music (AMS)** is off by default, as on the watch.
+- **Music (AMS)** is off by default, as on the watch: Settings, Bluetooth,
+  "Música del iPhone", or `POST /api/bt {"music": true}`. With it on, the
+  control centre and the lock screen show what the phone plays ("Artist ·
+  Spotify") and their buttons drive it. One row, two sources
+  (`aos_nowplaying.c`): the board's own player when it is playing, since it
+  is what the speaker says; else the phone with a track, playing or paused;
+  else the board, paused. The buttons go to the one shown, chosen again at
+  the tap.
+- **The notifications' actions** are the phone's own, and only the ones it
+  declared get a button (`can_positive` and `can_negative` are independent:
+  a call brings both, a WhatsApp message only the negative one). In the
+  notification centre a card says "Rechazar" / "Atender" for a call and
+  "Borrar en el teléfono" for the rest. The phone answers by withdrawing the
+  notification, which takes the card away; if it could not, it says so and
+  a toast tells (`aos_notif_act`).
+- **An incoming call** takes the whole screen, over the lock screen too:
+  the caller, Reject and Answer, a beep every two seconds if it sounds, and
+  the screen kept on. It closes when the phone withdraws the call (answered
+  on either side, rejected, or given up) and after 90 s at most.
 
 ## The keyboard mode
 
@@ -73,12 +91,15 @@ themselves after the board restarts.
 
 ## The portal
 
-    GET  /api/bt                          state, phone, battery, keyboard, computer
+    GET  /api/bt                          state, phone, battery, keyboard, computer,
+                                          music, and what the phone plays
     POST /api/bt {"on": true|false}
     POST /api/bt {"keyboard": true|false}
     POST /api/bt {"forget": true}         wipes the phone's keys
     POST /api/bt {"key": "volup"}         through the keyboard, cable or Bluetooth
     POST /api/bt {"type": "some text"}
+    POST /api/bt {"music": true|false}    the iPhone's music (AMS)
+    POST /api/bt {"media": "play"}        play/pause, "next", "prev" on the phone
 
 ## Memory
 

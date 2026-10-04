@@ -116,6 +116,8 @@ LV_FONT_DECLARE(aos_sym_72);
 #define AOS_SYM_STOP                         "\xF3\xB0\x93\x9B"
 #define AOS_SYM_MUSIC                        "\xF3\xB0\x9D\x9A"
 #define AOS_SYM_RADIO                        "\xF3\xB0\x90\xB9"
+#define AOS_SYM_PHONE                        "\xF3\xB0\x8F\xB2"
+#define AOS_SYM_PHONE_HANGUP                 "\xF3\xB0\x8F\xB5"
 #define AOS_SYM_MICROPHONE                   "\xF3\xB0\x8D\xAC"
 #define AOS_SYM_SPEAKER                      "\xF3\xB0\x93\x83"
 #define AOS_SYM_SHUFFLE_VARIANT              "\xF3\xB0\x92\x9F"

@@ -2238,6 +2238,16 @@ static const char blob_en__sistema_lang[] =
     "%s usa la placa como teclado y mouse por Bluetooth\t%s uses the board as a keyboard and mouse over Bluetooth\n"
     "La computadora\tThe computer\n"
     "Notas\tNotes\n"
+    "El teléfono no pudo hacerlo\tThe phone couldn't do it\n"
+    "El teléfono no está conectado\tThe phone isn't connected\n"
+    "Llamada entrante\tIncoming call\n"
+    "Número desconocido\tUnknown number\n"
+    "Rechazar\tDecline\n"
+    "Atender\tAnswer\n"
+    "Aceptar\tAccept\n"
+    "Borrar en el teléfono\tClear on the phone\n"
+    "Música del iPhone\tiPhone music\n"
+    "Con la música del iPhone, el centro de control y la pantalla de bloqueo muestran lo que suena en el teléfono y lo manejan, cuando la placa no está reproduciendo nada. Usa un poco más la radio.\tWith iPhone music on, the control centre and the lock screen show what the phone is playing and control it, whenever the board is not playing anything itself. It uses the radio a little more.\n"
     ;
 
 static const char blob_en_aos_cameras_lang[] =
@@ -6644,6 +6654,16 @@ static const char blob_de__sistema_lang[] =
     "%s usa la placa como teclado y mouse por Bluetooth\t%s nutzt die Platine als Tastatur und Maus über Bluetooth\n"
     "La computadora\tDer Computer\n"
     "Notas\tNotizen\n"
+    "El teléfono no pudo hacerlo\tDas Telefon konnte es nicht ausführen\n"
+    "El teléfono no está conectado\tDas Telefon ist nicht verbunden\n"
+    "Llamada entrante\tEingehender Anruf\n"
+    "Número desconocido\tUnbekannte Nummer\n"
+    "Rechazar\tAblehnen\n"
+    "Atender\tAnnehmen\n"
+    "Aceptar\tAkzeptieren\n"
+    "Borrar en el teléfono\tAuf dem Telefon löschen\n"
+    "Música del iPhone\tiPhone-Musik\n"
+    "Con la música del iPhone, el centro de control y la pantalla de bloqueo muestran lo que suena en el teléfono y lo manejan, cuando la placa no está reproduciendo nada. Usa un poco más la radio.\tMit iPhone-Musik zeigen Kontrollzentrum und Sperrbildschirm, was auf dem Telefon läuft, und steuern es, solange die Platine selbst nichts abspielt. Das beansprucht das Funkmodul etwas mehr.\n"
     ;
 
 static const char blob_de_aos_cameras_lang[] =
@@ -8826,7 +8846,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2224, 33, files_en, 34 },
-    { "de", "Deutsch", 2224, 33, files_de, 34 },
+    { "en", "English", 2234, 33, files_en, 34 },
+    { "de", "Deutsch", 2234, 33, files_de, 34 },
 };
 const int aos_lang_pack_count = 2;

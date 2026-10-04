@@ -214,16 +214,10 @@ static void vol_cb(lv_event_t *e) { aos_hal_volume_set(lv_slider_get_value(lv_ev
 static void settings_cb(lv_event_t *e) { aos_panel_close(); aos_ui_open("aos.settings"); }
 static void screen_off_cb(lv_event_t *e) { aos_panel_close(); aos_hal_display_on(false); }
 static void edit_cb(lv_event_t *e) { aos_panel_close(); aos_ui_edit_home(); }
-static void media_play_cb(lv_event_t *e)
-{
-    aos_player_info_t in;
-    if (aos_hal_player_info(&in) && in.state == AOS_PLAYER_PLAYING) aos_hal_player_pause();
-    else if (aos_hal_player_info(&in) && in.state == AOS_PLAYER_PAUSED) aos_hal_player_resume();
-    else aos_hal_player_resume_last();
-    aos_panels_tick();
-}
-static void media_next_cb(lv_event_t *e) { aos_hal_player_next(); }
-static void media_prev_cb(lv_event_t *e) { aos_hal_player_prev(); }
+/* the board's player or the iPhone's, whichever the tile shows (aos_nowplaying.c) */
+static void media_play_cb(lv_event_t *e) { aos_np_command(AOS_MEDIA_PLAY_PAUSE); aos_panels_tick(); }
+static void media_next_cb(lv_event_t *e) { aos_np_command(AOS_MEDIA_NEXT); }
+static void media_prev_cb(lv_event_t *e) { aos_np_command(AOS_MEDIA_PREV); }
 
 static lv_obj_t *vslider(lv_obj_t *parent, const char *glyph, int value, lv_event_cb_t cb)
 {
@@ -391,6 +385,34 @@ static void dismiss_cb(lv_event_t *e)
     aos_panels_tick();
 }
 
+/* The phone's own actions (ANCS): answer or hang up a call, clear a message
+ * from the phone. Only the ones the phone declared get a button, each on its
+ * own (aos_notif_t says why). The phone answers by withdrawing the
+ * notification, which takes the card away (aos_notif_act, aos_banner.c). */
+static void notif_action(lv_event_t *e, bool positive)
+{
+    aos_notif_act((uint32_t)(uintptr_t)lv_event_get_user_data(e), positive);
+}
+static void positive_cb(lv_event_t *e) { notif_action(e, true); }
+static void negative_cb(lv_event_t *e) { notif_action(e, false); }
+
+static lv_obj_t *action_btn(lv_obj_t *parent, const char *text, uint32_t color, lv_event_cb_t cb, uint32_t uid)
+{
+    lv_obj_t *b = lv_button_create(parent);
+    lv_obj_set_height(b, 64);
+    lv_obj_set_flex_grow(b, 1);
+    lv_obj_set_style_bg_color(b, lv_color_hex(color), 0);
+    lv_obj_set_style_radius(b, 32, 0);
+    lv_obj_set_style_shadow_width(b, 0, 0);
+    lv_obj_t *l = lv_label_create(b);
+    lv_obj_set_style_text_font(l, aos_font_caption, 0);
+    lv_obj_set_style_text_color(l, lv_color_white(), 0);
+    lv_label_set_text(l, text);
+    lv_obj_center(l);
+    lv_obj_add_event_cb(b, cb, LV_EVENT_CLICKED, (void *)(uintptr_t)uid);
+    return b;
+}
+
 static void nc_build(void)
 {
     const aos_geo_t *g = aos_ui_geo();
@@ -482,6 +504,19 @@ static void nc_fill(void)
         lv_label_set_long_mode(m, LV_LABEL_LONG_MODE_WRAP);
         aos_text_safe(safe, sizeof safe, nt.message);
         lv_label_set_text(m, safe);
+        if (nt.can_positive || nt.can_negative) {
+            bool call = nt.category == AOS_NOTIF_CALL_INCOMING;
+            lv_obj_t *row = lv_obj_create(card);
+            lv_obj_remove_style_all(row);
+            lv_obj_set_size(row, lv_pct(100), LV_SIZE_CONTENT);
+            lv_obj_set_style_pad_top(row, 10, 0);
+            lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+            lv_obj_set_style_pad_column(row, 14, 0);
+            if (nt.can_negative)
+                action_btn(row, call ? _("Rechazar") : _("Borrar en el teléfono"), call ? 0xD7372E : 0x3A404B, negative_cb, nt.uid);
+            if (nt.can_positive)
+                action_btn(row, call ? _("Atender") : _("Aceptar"), 0x2BA84A, positive_cb, nt.uid);
+        }
     }
 }
 
@@ -499,12 +534,16 @@ void aos_panels_tick(void)
         lv_obj_set_state(s_btn_rot, LV_STATE_CHECKED, land);
         lv_label_set_text(s_orient_glyph, land ? AOS_SYM_PHONE_ROTATE_LANDSCAPE : AOS_SYM_PHONE_ROTATE_PORTRAIT);
         lv_label_set_text(s_orient_lbl, land ? _("Horizontal") : _("Vertical"));
-        aos_player_info_t in;
-        bool have = aos_hal_player_info(&in) && in.state != AOS_PLAYER_STOPPED;
-        lv_label_set_text(s_media_title, have && in.title[0] ? in.title : _("Sin reproducción"));
-        lv_label_set_text(s_media_artist, have ? in.artist : "");
-        lv_label_set_text(lv_obj_get_child(s_media_play, 0),
-                          have && in.state == AOS_PLAYER_PLAYING ? AOS_SYM_PAUSE : AOS_SYM_PLAY);
+        aos_np_t np;
+        bool have = aos_np_get(&np);
+        char safe[192];
+        aos_text_safe(safe, sizeof safe, !have ? _("Sin reproducción") : np.title[0] ? np.title : np.from[0] ? np.from : _("Música"));
+        if (strcmp(lv_label_get_text(s_media_title), safe)) lv_label_set_text(s_media_title, safe);
+        /* the phone's says which app plays it: "Artist · Spotify" */
+        if (have && np.phone && np.title[0]) snprintf(safe, sizeof safe, "%s%s%s", np.artist, np.artist[0] ? "  ·  " : "", np.from);
+        else aos_text_safe(safe, sizeof safe, have ? np.artist : "");
+        if (strcmp(lv_label_get_text(s_media_artist), safe)) lv_label_set_text(s_media_artist, safe);
+        lv_label_set_text(lv_obj_get_child(s_media_play, 0), have && np.playing ? AOS_SYM_PAUSE : AOS_SYM_PLAY);
     }
     if (s_nc && !lv_obj_has_flag(s_nc, LV_OBJ_FLAG_HIDDEN) && s_nc_time) {
         struct tm t;

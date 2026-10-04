@@ -54,6 +54,7 @@ GLYPHS = [
     "grid", "bomb", "gamepad-variant", "dice-5", "cards-playing", "puzzle", "download", "update", "shield-check",
     # media
     "play", "pause", "skip-next", "skip-previous", "stop", "music", "radio",
+    "phone", "phone-hangup",
     "microphone", "speaker",
     "shuffle-variant", "music-note", "folder-music", "image-multiple", "image-broken-variant",
     # home

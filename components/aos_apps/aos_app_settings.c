@@ -264,6 +264,7 @@ static int bt_key(void)
 /* the page follows by itself: the timer rebuilds it when bt_key() changes */
 static void bt_page_cb(lv_event_t *e) { aos_hal_bt_enable(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED)); }
 static void bt_kbd_cb(lv_event_t *e) { aos_hal_bt_keyboard_enable(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED)); }
+static void bt_music_cb(lv_event_t *e) { aos_hal_media_enable(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED)); }
 
 static void bt_forget_cb(lv_event_t *e)
 {
@@ -300,9 +301,11 @@ static void build_bt(lv_obj_t *p)
         snprintf(v, sizeof v, "%d %%", pct);
         row(g, NULL, 0, _("Batería del teléfono"), v, false, NULL, NULL);
     }
+    row_switch(g, AOS_SYM_MUSIC, 0xFF2D55, _("Música del iPhone"), aos_hal_media_enabled(), bt_music_cb);
     if (aos_hal_bt_bonded()) action_row(g, _("Olvidar el teléfono"), AOS_C_RED, bt_forget_cb);
     if (!aos_hal_bt_bonded())
         note(p, _("En el iPhone: Ajustes, Bluetooth, tocá el nombre de la placa y confirmá el número en los dos."));
+    note(p, _("Con la música del iPhone, el centro de control y la pantalla de bloqueo muestran lo que suena en el teléfono y lo manejan, cuando la placa no está reproduciendo nada. Usa un poco más la radio."));
 
     g = group(p, _("TECLADO BLUETOOTH"));
     row_switch(g, AOS_SYM_KEYBOARD, 0x5E5CE6, _("Teclado Bluetooth"), aos_hal_bt_keyboard_enabled(), bt_kbd_cb);

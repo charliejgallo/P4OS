@@ -3,6 +3,7 @@
 
 #include "lvgl.h"
 #include "aos_ui.h"
+#include "aos_hal.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -59,11 +60,23 @@ bool        aos_panel_close(void);          /* true if one was open */
 aos_panel_t aos_panel_current(void);
 void        aos_panels_tick(void);
 
+/* ---- what is playing: the board's player or the iPhone's (aos_nowplaying.c) ---- */
+typedef struct {
+    bool on;                /* something to show */
+    bool phone;             /* the iPhone's, over AMS */
+    bool playing;
+    char title[96], artist[96];
+    char from[40];          /* the phone's player ("Spotify"); "" for the board */
+} aos_np_t;
+bool aos_np_get(aos_np_t *out);
+void aos_np_command(aos_media_cmd_t cmd);   /* PLAY_PAUSE, NEXT, PREV to the one shown */
+
 /* ---- banners and toasts (aos_banner.c) ---- */
 void aos_banner_create(lv_obj_t *layer);
 void aos_banner_layout(void);
 void aos_banner_tick(void);              /* polls aos_hal_notif_* for new ones */
 void aos_toast_show(const char *text, uint32_t ms);
+void aos_notif_act(uint32_t uid, bool positive);   /* the phone's answer / reject / clear */
 bool aos_banner_up(void);                /* a notification's banner is on the screen */
 bool aos_toast_up(void);
 

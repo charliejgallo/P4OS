@@ -42,7 +42,11 @@ Hecho el 2026-10-04 (0.7.0):
       de 72 caracteres, subir volumen, trackpad del Macro pad (dice BLE).
       Los dos se reconectan solos después de reiniciar el Bluetooth.
 - [ ] La música del iPhone (AMS) y las acciones de las notificaciones desde
-      la interfaz.
+      la interfaz: hechas el 2026-10-04 (centro de control, bloqueo,
+      botones en el centro de notificaciones, pantalla de llamada entrante),
+      probadas en el simulador; falta con el iPhone: prender «Música del
+      iPhone», pausar y pasar tema, una llamada atendida y una rechazada,
+      «Borrar en el teléfono» en un WhatsApp.
 - [x] Páginas del portal enchufables (docs/PORTAL-PAGES.md): la de
       hello_app sale de /web de la tarjeta y aparece en el menú, probada por
       el usuario; una rota no tumba el portal (probado en el simulador).

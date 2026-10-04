@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+**The iPhone's music and the notifications' actions**
+- The control centre and the lock screen show and drive the iPhone's music
+  (AMS) when the board plays nothing itself; Settings, Bluetooth, "Música del
+  iPhone" turns it on.
+- The notification centre has the phone's own actions: answer and reject a
+  call, clear a message on the phone. Only the ones the phone declared.
+- An incoming call takes the whole screen, over the lock screen too, with
+  Reject and Answer, until the phone withdraws it.
+- `/api/bt` gains `music`, `media` and what the phone plays.
+
 **The apps' own pages in the portal**
 - An app on the card can bring its page to the web portal: a JavaScript
   module in its `web/` folder, which `tools/install_apps.sh` puts in the

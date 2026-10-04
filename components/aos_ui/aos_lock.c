@@ -408,14 +408,10 @@ static void layer_ev(lv_event_t *e)
     }
 }
 
-static void music_prev_cb(lv_event_t *e) { aos_hal_player_prev(); }
-static void music_next_cb(lv_event_t *e) { aos_hal_player_next(); }
-static void music_play_cb(lv_event_t *e)
-{
-    aos_player_info_t in;
-    if (aos_hal_player_info(&in) && in.state == AOS_PLAYER_PLAYING) aos_hal_player_pause();
-    else aos_hal_player_resume();
-}
+/* the board's player or the iPhone's, whichever the row shows (aos_nowplaying.c) */
+static void music_prev_cb(lv_event_t *e) { aos_np_command(AOS_MEDIA_PREV); }
+static void music_next_cb(lv_event_t *e) { aos_np_command(AOS_MEDIA_NEXT); }
+static void music_play_cb(lv_event_t *e) { aos_np_command(AOS_MEDIA_PLAY_PAUSE); }
 
 static lv_obj_t *round_btn(lv_obj_t *parent, const char *glyph, lv_event_cb_t cb)
 {
@@ -520,15 +516,20 @@ static void msgs_refresh(bool force)
 static void music_refresh(void)
 {
     if (!L.music) return;
-    aos_player_info_t in;
-    bool on = s_cfg.show_music && aos_hal_player_info(&in) && in.state != AOS_PLAYER_STOPPED;
+    aos_np_t np;
+    bool on = s_cfg.show_music && aos_np_get(&np);
     lv_obj_set_flag(L.music, LV_OBJ_FLAG_HIDDEN, !on);
     if (!on) return;
-    if (strcmp(lv_label_get_text(L.m_title), in.title)) lv_label_set_text(L.m_title, in.title[0] ? in.title : _("Música"));
-    if (strcmp(lv_label_get_text(L.m_artist), in.artist)) lv_label_set_text(L.m_artist, in.artist);
-    if ((int)in.state != L.music_state) {
-        L.music_state = (int)in.state;
-        lv_label_set_text(lv_obj_get_child(L.m_play, 0), in.state == AOS_PLAYER_PLAYING ? AOS_SYM_PAUSE : AOS_SYM_PLAY);
+    char safe[192];
+    aos_text_safe(safe, sizeof safe, np.title[0] ? np.title : np.from[0] ? np.from : _("Música"));
+    if (strcmp(lv_label_get_text(L.m_title), safe)) lv_label_set_text(L.m_title, safe);
+    /* the phone's says which app plays it */
+    if (np.phone && np.title[0]) snprintf(safe, sizeof safe, "%s%s%s", np.artist, np.artist[0] ? "  ·  " : "", np.from);
+    else aos_text_safe(safe, sizeof safe, np.artist);
+    if (strcmp(lv_label_get_text(L.m_artist), safe)) lv_label_set_text(L.m_artist, safe);
+    if ((int)np.playing != L.music_state) {
+        L.music_state = (int)np.playing;
+        lv_label_set_text(lv_obj_get_child(L.m_play, 0), np.playing ? AOS_SYM_PAUSE : AOS_SYM_PLAY);
     }
 }
 

@@ -359,9 +359,10 @@ static void api_wifi(aos_httpd_req_t *r)
 
 /* Bluetooth (components/aos_ble): GET says how it is, POST {"on": bool}
  * switches it as Settings does, {"keyboard": bool} the keyboard mode, and
- * {"forget": true} wipes the phone's keys. {"key": "volup"} and {"type":
- * "text"} send through the keyboard (the cable's, or the Bluetooth one) and
- * answer whether it went. */
+ * {"forget": true} wipes the phone's keys, {"music": bool} the iPhone's music
+ * (AMS) and {"media": "play"|"next"|"prev"} commands it. {"key": "volup"}
+ * and {"type": "text"} send through the keyboard (the cable's, or the
+ * Bluetooth one) and answer whether it went. */
 static void api_bt(aos_httpd_req_t *r)
 {
     if (!strcmp(aos_httpd_method(r), "POST")) {
@@ -369,7 +370,16 @@ static void api_bt(aos_httpd_req_t *r)
         cJSON *on = b ? cJSON_GetObjectItem(b, "on") : NULL;
         cJSON *kbd = b ? cJSON_GetObjectItem(b, "keyboard") : NULL;
         bool forget = b && cJSON_IsTrue(cJSON_GetObjectItem(b, "forget"));
-        const char *key = jstr(b, "key"), *text = jstr(b, "type");
+        cJSON *music = b ? cJSON_GetObjectItem(b, "music") : NULL;
+        const char *key = jstr(b, "key"), *text = jstr(b, "type"), *media = jstr(b, "media");
+        if (media) {
+            int cmd = !strcmp(media, "play") ? AOS_MEDIA_PLAY_PAUSE : !strcmp(media, "next") ? AOS_MEDIA_NEXT
+                    : !strcmp(media, "prev") ? AOS_MEDIA_PREV : -1;
+            bool sent = cmd >= 0 && aos_hal_media_command((aos_media_cmd_t)cmd);
+            cJSON_Delete(b);
+            aos_httpd_send_json(r, 200, sent ? "{\"sent\":true}" : "{\"sent\":false}");
+            return;
+        }
         if (key || text) {
             bool sent = key ? aos_hal_usb_key(key) : aos_hal_usb_type(text) > 0;
             cJSON_Delete(b);
@@ -379,9 +389,10 @@ static void api_bt(aos_httpd_req_t *r)
         if (cJSON_IsBool(on)) aos_hal_bt_enable(cJSON_IsTrue(on));
         if (cJSON_IsBool(kbd)) aos_hal_bt_keyboard_enable(cJSON_IsTrue(kbd));
         if (forget) aos_hal_bt_forget();
-        bool any = cJSON_IsBool(on) || cJSON_IsBool(kbd) || forget;
+        if (cJSON_IsBool(music)) aos_hal_media_enable(cJSON_IsTrue(music));
+        bool any = cJSON_IsBool(on) || cJSON_IsBool(kbd) || forget || cJSON_IsBool(music);
         cJSON_Delete(b);
-        if (!any) { send_err(r, 400, "falta \"on\", \"keyboard\" o \"forget\""); return; }
+        if (!any) { send_err(r, 400, "falta \"on\", \"keyboard\", \"music\" o \"forget\""); return; }
     }
     static const char *const ST[] = { "off", "advertising", "pairing", "connected" };
     aos_bt_state_t st = aos_hal_bt_state();
@@ -395,6 +406,18 @@ static void api_bt(aos_httpd_req_t *r)
     cJSON_AddBoolToObject(o, "keyboard", aos_hal_bt_keyboard_enabled());
     cJSON_AddStringToObject(o, "computer", aos_hal_bt_keyboard_host());
     cJSON_AddBoolToObject(o, "keyboard_ready", aos_hal_bt_keyboard_ready());
+    cJSON_AddBoolToObject(o, "music", aos_hal_media_enabled());
+    aos_media_info_t mi;
+    if (aos_hal_media_link() == AOS_MEDIA_CONNECTED && aos_hal_media_info(&mi)) {
+        cJSON *m = cJSON_AddObjectToObject(o, "media");
+        cJSON_AddStringToObject(m, "player", aos_hal_media_player());
+        cJSON_AddStringToObject(m, "title", mi.title);
+        cJSON_AddStringToObject(m, "artist", mi.artist);
+        cJSON_AddStringToObject(m, "album", mi.album);
+        cJSON_AddBoolToObject(m, "playing", mi.playing);
+        cJSON_AddNumberToObject(m, "position_s", mi.position_s);
+        cJSON_AddNumberToObject(m, "duration_s", mi.duration_s);
+    }
     send_cjson(r, 200, o);
 }
 
