@@ -1,9 +1,9 @@
 # Builds the firmware for both chip profiles and every app against it, the
-# ESP32-C6's firmware (c6/, docs/C6.md) and the colour emoji pack
-# (docs/EMOJI.md), on each push and pull request. A tag v* also makes a
+# ESP32-C6's firmware (c6/, docs/C6.md), the colour emoji pack
+# (docs/EMOJI.md) and the Notes app's fonts, on each push and pull request. A tag v* also makes a
 # release with them.
 #
-# What it does not build: the apps' art packs (<app>_p4.pak). Their sources
+# What it does not build: the games' art packs (<app>_p4.pak). Their sources
 # are Blender renders and art that do not live in this repository; the packs
 # are made on the author's machine (apps/<app>/tools/pack_p4.py) and attached
 # to the release by hand.
@@ -57,6 +57,9 @@ jobs:
           if [ "$p" = rev1_3 ]; then
             mkdir -p out/apps && cp apps/*/build/*.so out/apps/
             (cd out && zip -qr apps.zip apps && rm -r apps)
+            # the apps' own pages in the portal, for the card's /web (docs/PORTAL-PAGES.md)
+            mkdir -p out/web && cp apps/*/web/*.js out/web/
+            (cd out && zip -qr web.zip web && rm -r web)
             zip -qr out/lang.zip lang/en lang/de
           fi
       - uses: actions/upload-artifact@v5
@@ -77,15 +80,16 @@ jobs:
           . $IDF_PATH/export.sh
           tools/build_c6.sh
           mkdir -p out
-          cp c6/build/p4os_c6.bin out/p4os-c6.bin
+          cp c6/build/p4os_c6.bin out/c6.bin
       - uses: actions/upload-artifact@v5
         with:
           name: p4os-c6
           path: out/*
 
-  # /fonts/emoji.pak, from Noto's images at a fixed tag: the same pack every
-  # time (15.5 MB, not kept in git)
-  emoji:
+  # The packs made from free sources, each the same file every time (none is
+  # kept in git): /fonts/emoji.pak from Noto's images at a fixed tag (15.5
+  # MB), and the Notes app's fonts from Inter 4.1 (802 KB)
+  packs:
     runs-on: ubuntu-latest
     env:
       NOTO_TAG: v2026-09-24-unicode18_0
@@ -94,6 +98,15 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: notas_p4.pak
+        run: |
+          npm install --global --silent lv_font_conv@1.5.3
+          python3 apps/notas/tools/pack_fonts.py
+          mkdir -p out
+          cp apps/notas/build/notas_p4.pak out/
       - name: emoji.pak
         run: |
           pip install --quiet pillow
@@ -104,12 +117,12 @@ jobs:
           python3 tools/gen_emoji.py noto out/emoji.pak
       - uses: actions/upload-artifact@v5
         with:
-          name: p4os-emoji
+          name: p4os-packs
           path: out/*
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [firmware, c6, emoji]
+    needs: [firmware, c6, packs]
     runs-on: ubuntu-latest
     permissions:
       contents: write

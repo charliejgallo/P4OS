@@ -10,7 +10,7 @@ the P4 has the card and the PSRAM to draw them all, in colour.
 its public-domain region flags) into one file, `/fonts/emoji.pak` on the
 card: 4012 emoji, each a 48 x 48 RGBA image encoded as QOI, and an index of
 their sequences. 15.5 MB. It is not in git: the CI builds it from Noto's
-tag `v2026-09-24-unicode18_0` (the `emoji` job of
+tag `v2026-09-24-unicode18_0` (the `packs` job of
 `.github/workflows/build.yml`) and it goes out with the release as
 `emoji.pak`. By hand, the same file byte for byte:
 

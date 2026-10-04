@@ -1,24 +1,16 @@
 # Changelog
 
-## Unreleased
+## 0.8.0 — 2026-10-04
 
-**The release carries everything**
-- The CI builds the C6's firmware (`p4os-c6.bin`, for the card's
-  `/firmware/c6.bin`) and the colour emoji pack (`emoji.pak`, from Noto's
-  tag `v2026-09-24-unicode18_0`, the same file byte for byte as before), and
-  a tag's release takes them with the firmware, the apps and the languages.
+**Notes, a new app**
+- Notes with styles (sizes, bold, italic, colours, highlighters, headings,
+  quotes, eight kinds of bullets, numbering, checkboxes) and task lists
+  (priorities, subtasks, drag to reorder), in an editor and a Spanish
+  keyboard of its own. One Markdown file per note in `/sdcard/notas`; a QR
+  or the computer's keyboard to share one. Its fonts travel in
+  `notas_p4.pak`. apps/notas/README.md.
 
-**Settings, Developer**
-- Show touches (a ring under every finger the GT911 reports) and fps
-  (LVGL's renders plus the apps' flips), over everything; they stay on
-  after a restart.
-- The log's level: errors, warnings, or everything this build has.
-- The drawing preferences of `/api/tune`, by name and with their measures:
-  where LVGL draws and how many rows, the panel's buffers, the PPA's copies,
-  the games' bands; and back to the factory values.
-- Restart, and restart into safe mode without holding BOOT (one boot only).
-
-**The iPhone's music and the notifications' actions**
+**The phone: music and actions**
 - The control centre and the lock screen show and drive the iPhone's music
   (AMS) when the board plays nothing itself; Settings, Bluetooth, "Música del
   iPhone" turns it on.
@@ -27,6 +19,20 @@
 - An incoming call takes the whole screen, over the lock screen too, with
   Reject and Answer, until the phone withdraws it.
 - `/api/bt` gains `music`, `media` and what the phone plays.
+
+**Red**
+- Every LAN sweep is saved to the card's `/redes` as one NDJSON file, with
+  the Wi-Fi networks around scanned at its end (the newest 40 are kept).
+- The sweep keeps every host's MAC: lwIP's ARP table holds 10, so it is
+  read after every batch of pings and during the port probes. A host that
+  answers ARP and ignores everything else (phones, Windows) now counts, as
+  "ARP only". `aos_hal_net_arp_table()`, `aos_hal_net_mac()`.
+- A Red page in the portal: start a sweep and follow it (`GET`/`POST
+  /api/net`), the saved ones as tables with each MAC's maker, what changed
+  since the one before (hosts new, gone or moved to another address, ports
+  opened and closed, networks), a graph of the channels with the least busy
+  of 1, 6 and 11, CSV and the raw file. IEEE's register dropped in
+  `/redes/oui.txt` names every maker.
 
 **The apps' own pages in the portal**
 - An app on the card can bring its page to the web portal: a JavaScript
@@ -39,20 +45,25 @@
   of radio-browser.info, what plays on the board; `GET`/`POST /api/radio`)
   and **Cameras** (`/cameras.txt` edited by fields, with a preview).
 
-**Red**
-- Every LAN sweep is saved to the card's `/redes` as one NDJSON file, with
-  the Wi-Fi networks around scanned at its end (the newest 40 are kept).
-- A Red page in the portal: start a sweep and follow it (`GET`/`POST
-  /api/net`), the saved ones as tables, what changed since the one before
-  (hosts new and gone, ports opened and closed, networks), a graph of the
-  channels with the least busy of 1, 6 and 11, CSV and the raw file.
-- The sweep keeps every host's MAC: lwIP's ARP table holds 10, so it is
-  read after every batch of pings and during the port probes. A host that
-  answers ARP and ignores everything else (phones, Windows) now counts, as
-  "ARP only". The page shows the maker (a short list, or IEEE's whole
-  `oui.txt` dropped in `/redes`), flags random phone MACs, and follows a
-  device that changed address instead of listing it as new and gone.
-  `aos_hal_net_arp_table()`, `aos_hal_net_mac()`.
+**Settings, Developer**
+- Show touches (a ring under every finger the GT911 reports) and fps
+  (LVGL's renders plus the apps' flips), over everything; they stay on
+  after a restart.
+- The log's level: errors, warnings, or everything this build has.
+- The drawing preferences of `/api/tune`, by name and with their measures:
+  where LVGL draws and how many rows, the panel's buffers, the PPA's copies,
+  the games' bands; and back to the factory values.
+- Restart, and restart into safe mode without holding BOOT (one boot only).
+- Settings keeps a page scrolled where it was when it rebuilds it.
+
+**The release carries more of itself**
+- The CI builds the C6's firmware (`c6.bin`, for the card's `/firmware`),
+  the colour emoji pack (`emoji.pak`, from Noto's tag
+  `v2026-09-24-unicode18_0`) and the Notes app's fonts (`notas_p4.pak`),
+  each the same file byte for byte as the ones built by hand, and a tag's
+  release takes them along with the firmware, the apps, their portal pages
+  (`web.zip`) and the languages. Only the games' art is still attached by
+  hand.
 
 ## 0.7.0 — 2026-10-04
 
