@@ -10,7 +10,7 @@ the OTG port is free for whatever it is asked to be. It is chosen in
 | Off | nothing | on the board |
 | Keyboard and mouse | a HID keyboard, mouse and media keys, a gamepad, a MIDI keyboard and a network (the Macro pad, `docs/MACROPAD.md`) | on the board |
 | Disk | the microSD as a USB drive | the computer's, until it ejects it |
-| Host | - | not on this board: the OTG port gives no 5 V |
+| Host | - (the board is the computer) | a pendrive on the 40-pin header, at `/usb` |
 
 The mode is remembered across restarts (pref `usb_mode`,
 `aos_hal_usb_restore()` once the boot has read the card): after an OTA the
@@ -117,3 +117,35 @@ internal RAM audit, `docs/MEMORY.md`).
 - **VBUS is not monitored,** so pulling the cable without ejecting looks to
   the board like a suspended bus, not an unplug: the card stays on the USB
   side until a mode is chosen in Settings.
+
+## Host mode: a pendrive
+
+The OTG connector gives no 5 V, so a device plugged into it gets no power.
+The same D+/D- lines come out on the 40-pin header, next to 5 V, and that is
+where a pendrive goes (a USB-A socket on wires, or a cut USB cable):
+
+| Pendrive | Header (J3) |
+|---|---|
+| VBUS (red) | pin 1 or 3, 5 V |
+| D- (white) | pin 25, USBD_N |
+| D+ (green) | pin 27, USBD_P |
+| GND (black) | pin 5 |
+
+The OTG connector stays unplugged while the pendrive is there: its lines are
+the same wires. The lines are High Speed (480 Mbit/s): short wires, D+ and
+D- twisted together.
+
+Settings, USB, Host (or `POST /api/usb {"mode": "host"}`) uninstalls TinyUSB
+and installs ESP-IDF's USB Host Library on the same controller, with
+Espressif's `usb_host_msc` as its client (`aos_usb_p4.c`). A pendrive that
+answers as mass storage is mounted at `/usb` through FATFS (its second
+volume): **FAT32 only**, as ESP-IDF has no exFAT, and many pendrives over
+32 GB come in exFAT. Settings says what it found, or why it did not mount.
+
+The portal sees it as a folder `usb` at the card's root: every file call
+(list, get with ranges, put, delete, bench) on `/usb/...` goes to the
+pendrive. `GET /api/usb` says the mode and, in host mode, the pendrive
+(`id`, `vendor`, `product`, `bytes`, `mounted`, `error`).
+
+Host mode is not remembered across a restart: the board comes back as it
+was before (keyboard, or idle).

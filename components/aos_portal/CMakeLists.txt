@@ -10,7 +10,7 @@ idf_component_register(
     SRCS "aos_httpd.c" "aos_portal.c" "aos_portal_bench.c" "aos_portal_claude.c" "aos_portal_mqtt.c" "aos_portal_sysmon.c" "aos_portal_macropad.c" "aos_portal_modules.c" "aos_portal_system.c" "aos_portal_radio.c" "aos_portal_net.c" "aos_portal_access.c" ${AOS_WEB_C}
     INCLUDE_DIRS "include"
     REQUIRES aos_hal
-    PRIV_REQUIRES aos_ui aos_apps aos_io aos_flasher json lvgl app_update esp_app_format
+    PRIV_REQUIRES aos_ui aos_apps aos_io aos_flasher json lvgl app_update esp_app_format fatfs
 )
 
 if(NOT CMAKE_BUILD_EARLY_EXPANSION)

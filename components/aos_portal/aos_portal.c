@@ -22,6 +22,7 @@
  *   GET  /api/ha     POST /api/ha {url?,token?}   GET /api/ha/entities
  *   POST /api/ha/fav?id=&on=
  *   GET  /api/fs?path=                 a folder's listing
+ *   GET  /api/usb, POST {"mode"}       the USB port's mode, and the pendrive in HOST
  *   GET  /api/fs/get?path=             a file (attachment=1 to download); a Range
  *                                      header gets that part (206)
  *   PUT  /api/fs/put?path=             the body becomes the file
@@ -63,6 +64,9 @@
 #include "aos_portal_radio.h"
 #include "aos_portal_net.h"
 #include "aos_portal_access.h"
+#ifdef ESP_PLATFORM
+#include "esp_vfs_fat.h"
+#endif
 #include "aos_access.h"
 #include "aos_portal_claude.h"
 #include "aos_portal_mqtt.h"
@@ -126,6 +130,13 @@ static const char *jstr(const cJSON *o, const char *k)
 
 /* A path on the card from ?path=: "/firmware/app.bin" -> "<root>/firmware/app.bin".
  * false for no card or anything that tries to leave it. */
+/* the pendrive is mounted (USB HOST mode, aos_usb_p4.c) */
+static bool usb_mounted(void)
+{
+    aos_usb_host_info_t in;
+    return aos_hal_usb_host_info(&in) && in.mounted;
+}
+
 static bool card_path(aos_httpd_req_t *r, const char *key, char *out, size_t n, char *rel, size_t rn)
 {
     const char *root = aos_hal_path_sd_root();
@@ -134,6 +145,18 @@ static bool card_path(aos_httpd_req_t *r, const char *key, char *out, size_t n, 
     if (strstr(p, "..")) return false;
     const char *q = p;
     while (*q == '/') q++;
+    /* "/usb/..." is the pendrive while there is one: every file call of the
+     * portal (list, get with ranges, put, delete, bench) works on it too */
+    if (!strncmp(q, "usb", 3) && (!q[3] || q[3] == '/') && usb_mounted()) {
+        root = aos_hal_path_usb();
+        q += 3;
+        while (*q == '/') q++;
+        snprintf(out, n, "%s%s%s", root, *q ? "/" : "", q);
+        size_t l = strlen(out);
+        while (l > strlen(root) && out[l - 1] == '/') out[--l] = 0;
+        if (rel) snprintf(rel, rn, "/usb%s%.*s", *q ? "/" : "", (int)(rn > 8 ? rn - 8 : 0), q);
+        return true;
+    }
     snprintf(out, n, "%s%s%s", root, *q ? "/" : "", q);
     size_t l = strlen(out);
     while (l > strlen(root) && out[l - 1] == '/') out[--l] = 0;
@@ -360,6 +383,43 @@ static void api_wifi(aos_httpd_req_t *r)
     send_cjson(r, 200, o);
 }
 
+/* The USB port (docs/USB.md): GET its mode and, in HOST, the pendrive;
+ * POST {"mode": "console"|"keys"|"host"} switches it as Settings, USB does.
+ * Disk mode stays Settings' own: it has to close the apps holding the card. */
+static void api_usb(aos_httpd_req_t *r)
+{
+    static const char *const M[] = { "console", "keys", "disk", "host" };
+    if (!strcmp(aos_httpd_method(r), "POST")) {
+        cJSON *b = body_json(r);
+        const char *m = jstr(b, "mode");
+        int want = -1;
+        for (int i = 0; m && i < 4; i++) if (!strcmp(m, M[i]) && i != AOS_HAL_USB_DISK) want = i;
+        cJSON_Delete(b);
+        if (want < 0) { send_err(r, 400, "\"mode\": console, keys o host"); return; }
+        if (!aos_hal_usb_mode_set((aos_hal_usb_mode_t)want)) { send_err(r, 409, "el USB está cambiando de modo"); return; }
+    }
+    cJSON *o = cJSON_CreateObject();
+    int m = aos_hal_usb_mode();
+    cJSON_AddStringToObject(o, "mode", m >= 0 && m < 4 ? M[m] : "?");
+    cJSON_AddBoolToObject(o, "busy", aos_hal_usb_busy());
+    cJSON_AddBoolToObject(o, "connected", aos_hal_usb_connected());
+    aos_usb_host_info_t in;
+    if (aos_hal_usb_host_info(&in)) {
+        cJSON *h = cJSON_AddObjectToObject(o, "host");
+        cJSON_AddBoolToObject(h, "device", in.device);
+        cJSON_AddBoolToObject(h, "mounted", in.mounted);
+        char id[12];
+        snprintf(id, sizeof id, "%04x:%04x", in.vid, in.pid);
+        cJSON_AddStringToObject(h, "id", id);
+        cJSON_AddStringToObject(h, "vendor", in.vendor);
+        cJSON_AddStringToObject(h, "product", in.product);
+        cJSON_AddNumberToObject(h, "bytes", (double)in.bytes);
+        cJSON_AddStringToObject(h, "error", in.error);
+        cJSON_AddStringToObject(h, "path", in.mounted ? "/usb" : "");
+    }
+    send_cjson(r, 200, o);
+}
+
 /* Bluetooth (components/aos_ble): GET says how it is, POST {"on": bool}
  * switches it as Settings does, {"keyboard": bool} the keyboard mode, and
  * {"forget": true} wipes the phone's keys, {"music": bool} the iPhone's music
@@ -579,11 +639,27 @@ static void api_fs_list(aos_httpd_req_t *r)
     fs_list_t l = { cJSON_AddArrayToObject(o, "entries"), 0 };
     if (aos_hal_dir_scan(path, fs_list_one, &l) < 0) { cJSON_Delete(o); send_err(r, 404, "no existe"); return; }
     if (l.n >= FS_LIST_MAX) cJSON_AddBoolToObject(o, "truncated", true);
+    bool on_usb = !strncmp(rel, "/usb", 4) && (!rel[4] || rel[4] == '/') && usb_mounted();
+    /* the card's root shows the pendrive as a folder while there is one */
+    if (!strcmp(rel, "/") && usb_mounted()) {
+        cJSON *e = cJSON_CreateObject();
+        cJSON_AddStringToObject(e, "name", "usb");
+        cJSON_AddBoolToObject(e, "dir", true);
+        cJSON_AddNumberToObject(e, "size", 0);
+        cJSON_AddNumberToObject(e, "mtime", 0);
+        cJSON_AddBoolToObject(e, "pendrive", true);
+        cJSON_AddItemToArray(cJSON_GetObjectItem(o, "entries"), e);
+    }
     uint64_t tot = 0, fr = 0;
-    if (aos_hal_sd_usage(&tot, &fr)) {
+#ifdef ESP_PLATFORM
+    if (on_usb ? esp_vfs_fat_info(aos_hal_path_usb(), &tot, &fr) == ESP_OK : aos_hal_sd_usage(&tot, &fr)) {
+#else
+    if (!on_usb && aos_hal_sd_usage(&tot, &fr)) {
+#endif
         cJSON_AddNumberToObject(o, "total", (double)tot);
         cJSON_AddNumberToObject(o, "free", (double)fr);
     }
+    if (on_usb) cJSON_AddBoolToObject(o, "pendrive", true);
     send_cjson(r, 200, o);
 }
 
@@ -1239,6 +1315,7 @@ static void handler(aos_httpd_req_t *r)
         else { if (!want) aos_hal_net_ap_stop(); send_ok(r); }
     }
     else if (!strcmp(p, "bt")) api_bt(r);
+    else if (!strcmp(p, "usb")) api_usb(r);
     else if (get && !strcmp(p, "c6")) api_c6(r);
     else if (post && !strcmp(p, "c6/update")) api_c6_update(r);
     else if (post && !strcmp(p, "wifi/linktest")) {    /* tests the link watchdog (docs/BUILDING.md) */

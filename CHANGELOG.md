@@ -22,6 +22,12 @@
   warning away. TLS 1.2 with AES-GCM first. On untrusted networks plain
   HTTP redirects there; the session cookie is `Secure` over HTTPS.
 
+**USB host: a pendrive**
+- Settings, USB, Host: a pendrive wired to the 40-pin header (pins 25/27
+  are the same USB lines as the OTG connector, pin 1 gives the 5 V it does
+  not) is mounted at `/usb` (FAT32), through ESP-IDF's USB Host Library and
+  `usb_host_msc`. The portal shows it as a `usb` folder; `GET/POST /api/usb`.
+
 **Bluetooth**
 - The board asks for encryption only when the phone or the computer has not
   started it: the "encryption failed (13)" at every boot is gone.

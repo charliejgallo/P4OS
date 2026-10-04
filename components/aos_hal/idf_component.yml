@@ -2,3 +2,7 @@ dependencies:
   # The Macro pad's keyboard and mouse on the OTG port (aos_usb_p4.c): TinyUSB
   # through Espressif's wrapper, the same one the S3 watch uses.
   espressif/esp_tinyusb: "^2.0.0"
+  # HOST mode (aos_usb_p4.c): a pendrive on the header's USB lines, J3 pins
+  # 25/27 with 5 V from pin 1 (the OTG connector gives no 5 V), mounted at
+  # /usb through FATFS
+  espressif/usb_host_msc: "^1.1.3"

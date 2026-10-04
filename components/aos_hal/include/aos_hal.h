@@ -1775,6 +1775,21 @@ void aos_hal_usb_restore(void);                /* at boot, once the card is read
 bool aos_hal_usb_mouse_hold(int buttons);      /* buttons held down for the next moves (bit 0 left,
                                                 * bit 1 right; 0 lets go): drag and drop */
 
+/* P4OS: HOST mode (aos_usb_p4.c, docs/USB.md): a pendrive on the header's
+ * USB lines, J3 pin 25 (D-) and 27 (D+), with 5 V from pin 1 and the OTG
+ * connector unplugged (the same lines, and it gives no 5 V). A FAT volume on
+ * it is mounted at aos_hal_path_usb() while it is there. */
+typedef struct {
+    bool     device;            /* a mass storage device answered */
+    bool     mounted;           /* its FAT is at aos_hal_path_usb() */
+    uint16_t vid, pid;
+    char     vendor[32], product[48];
+    uint64_t bytes;             /* its capacity */
+    char     error[64];         /* why it is not mounted, "" if it is */
+} aos_usb_host_info_t;
+bool aos_hal_usb_host_info(aos_usb_host_info_t *out);   /* false: not in HOST mode */
+const char *aos_hal_path_usb(void);                     /* "/usb" */
+
 /* mDNS on a network interface of somebody else's (the USB one): the watch
  * answers "amoledos.local" there too, with that interface's address. The
  * argument is an esp_netif_t*, kept opaque so this header stays free of

@@ -840,6 +840,12 @@ __attribute__((weak)) void aos_hal_usb_restore(void)
 __attribute__((weak)) bool aos_hal_usb_mouse_hold(int buttons)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) bool aos_hal_usb_host_info(aos_usb_host_info_t *out)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) const char * aos_hal_path_usb(void)
+{ return ""; }
+
 __attribute__((weak)) const char * aos_hal_device_name(void)
 { return ""; }
 

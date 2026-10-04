@@ -363,6 +363,23 @@ static const char *usb_state_text(uint32_t *color)
         }
         *color = 0xFF9F0A;
         return _("Esperando a la computadora. La tarjeta ya salió de la placa: las apps de la tarjeta no abren.");
+    case AOS_HAL_USB_HOST: {
+        static char t[160];
+        aos_usb_host_info_t in;
+        if (!aos_hal_usb_host_info(&in) || !in.device) {
+            *color = 0xFF9F0A;
+            return _("Esperando un pendrive en el conector de 40 pines.");
+        }
+        if (!in.mounted) {
+            *color = 0xFF453A;
+            snprintf(t, sizeof t, "%s %s: %s", in.vendor, in.product, in.error);
+            return t;
+        }
+        *color = 0x34C759;
+        snprintf(t, sizeof t, _("%s %s, %.1f GB: en /usb, para Archivos y el portal."), in.vendor, in.product,
+                 (double)in.bytes / 1e9);
+        return t;
+    }
     default:
         return _("El puerto está libre: la placa no aparece en la computadora.");
     }
@@ -371,7 +388,9 @@ static const char *usb_state_text(uint32_t *color)
 static void usb_refresh(void)
 {
     int mode = aos_hal_usb_mode();
-    int key = (mode << 4) | (aos_hal_usb_busy() << 3) | (aos_hal_usb_connected() << 2);
+    aos_usb_host_info_t hi = { 0 };
+    aos_hal_usb_host_info(&hi);
+    int key = (mode << 4) | (aos_hal_usb_busy() << 3) | (aos_hal_usb_connected() << 2) | (hi.device << 1) | hi.mounted;
     if (key == U.usb_shown) return;
     U.usb_shown = key;
     if (U.usb_root) lv_label_set_text(U.usb_root, usb_name(mode));
@@ -386,10 +405,6 @@ static void usb_refresh(void)
 static void usb_mode_cb(lv_event_t *e)
 {
     int want = (int)(intptr_t)lv_event_get_user_data(e);
-    if (want == AOS_HAL_USB_HOST) {
-        aos_ui_toast(_("Esta placa no da 5 V por el OTG: no puede alimentar un pendrive"), 2500);
-        return;
-    }
     if (want == (int)aos_hal_usb_mode()) return;
     if (aos_hal_usb_busy()) { aos_ui_toast(_("El USB está cambiando de modo"), 1500); return; }
     if (aos_hal_usb_mode() == AOS_HAL_USB_DISK && aos_hal_usb_connected())
@@ -481,8 +496,8 @@ static void build_usb(lv_obj_t *p)
              _("La microSD aparece en la computadora como un pendrive, para copiar apps, música, fotos o mapas a la velocidad del USB. Mientras la tiene la computadora la placa no la toca: al elegirlo se cierran las otras apps, y las de la tarjeta no abren. Expulsala en la computadora y vuelve sola a la placa, con el modo de antes."),
              true);
     mode_row(g, AOS_HAL_USB_HOST, AOS_SYM_USB_PORT, 0x5E5CE6,
-             _("Conectarle a la placa un pendrive, un teclado o un mouse. No en esta placa: el conector OTG no da los 5 V que necesitan. Haría falta un hub con fuente."),
-             false);
+             _("Un pendrive conectado a la placa, que se lee en /usb. El conector OTG no da 5 V: el pendrive va al conector de 40 pines, pin 25 a D−, 27 a D+, 1 a 5 V y 5 a GND, con el USB-C OTG desenchufado (son los mismos cables). En FAT32."),
+             true);
     note(p, _("El conector OTG es el USB 2.0 de alta velocidad del P4 (480 Mbit/s). La placa puede alimentarse por él o por el UART, y pasar de uno al otro sin reiniciarse."));
     U.usb_shown = -1;
     usb_refresh();
