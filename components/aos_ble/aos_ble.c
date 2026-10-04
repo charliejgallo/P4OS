@@ -92,9 +92,6 @@ static const ble_uuid128_t UUID_AMS_ENTITY_UPDATE = BLE_UUID128_INIT(
 /* State                                                                       */
 /* -------------------------------------------------------------------------- */
 
-/* The name in the advertising packet: the device's (Settings, About), cut to
- * what fits next to the ANCS solicitation (see advertise()). */
-#define NOMBRE_MAX  8
 #define SIN_CONN    0xFFFF
 
 static volatile bool     s_running;
@@ -164,31 +161,28 @@ static int gap_event(struct ble_gap_event *event, void *arg);
 static void ams_start(void);
 static void ams_stop(void);
 
-/* The advertising packet carries three things, and all three have to be there:
+/* The advertising packet, 31 bytes at most, carries four things:
  *
  *   flags                3 bytes   general discoverable + no BR/EDR
- *   name                10 bytes   up to 8 characters ("p4os"); a longer
- *                                  device name goes as a shortened one
+ *   HID service (16-bit) 4 bytes   0x1812: what makes iOS list it
+ *   name                 6 bytes   4 characters ("p4os"); a longer device
+ *                                  name goes shortened, and whole in the
+ *                                  scan response
  *   ANCS solicitation   18 bytes   the 128-bit UUID in field 0x15
  *   ------------------------------
- *                       31 bytes   which is exactly what fits
+ *                       31 bytes
  *
  * The service solicitation is how an accessory tells iOS "I want your
- * notifications". The name is what makes it show up in the phone's
- * Settings -> Bluetooth list.
- *
- * > The first version left the name OUT, in the scan response, on the grounds
- * > that it did not fit. **It did fit**: the arithmetic was added up wrong (21
- * > of the packet + 10 of the name is 31, that is, exactly, and it was read as
- * > overflowing). The result was that the watch advertised perfectly well and
- * > **did not appear in the iPhone's list**, because iOS builds that list from
- * > the advertising packet's name and not from the scan response's. Without a
- * > phone to test against, an arithmetic mistake looks identical to a stack
- * > that works.
- *
- * The scan response is left with the transmit power, which is informative and
- * needed by nobody, but it leaves the second packet built in case something
- * ever has to go in there. */
+ * notifications". But iOS lists in Settings -> Bluetooth only accessories of
+ * the kinds it handles there, a HID among them, and not a plain BLE
+ * peripheral: with flags, name and solicitation alone the watch, and then
+ * this board, could be found by LightBlue and never by Settings (AmoledOS,
+ * 2026-09; P4OS, 2026-10-03). Espressif's ANCS example (bluedroid ble_ancs)
+ * lists itself by advertising the HID service UUID, with no HID service
+ * behind it, and so does this. The appearance, which picks the icon, goes
+ * in the scan response with the whole name. */
+#define NOMBRE_ADV  4
+
 static void advertise(void)
 {
     if (!s_running) {
@@ -202,10 +196,15 @@ static void advertise(void)
     adv[i++] = BLE_HS_ADV_TYPE_FLAGS;
     adv[i++] = BLE_HS_ADV_F_DISC_GEN | BLE_HS_ADV_F_BREDR_UNSUP;
 
+    adv[i++] = 3;
+    adv[i++] = BLE_HS_ADV_TYPE_COMP_UUIDS16;
+    adv[i++] = 0x12;                    /* 0x1812, HID, little end first */
+    adv[i++] = 0x18;
+
     const char *nombre = aos_hal_device_name();
     size_t largo_nombre = strlen(nombre);
-    bool corto = largo_nombre > NOMBRE_MAX;
-    if (corto) largo_nombre = NOMBRE_MAX;
+    bool corto = largo_nombre > NOMBRE_ADV;
+    if (corto) largo_nombre = NOMBRE_ADV;
     adv[i++] = (uint8_t)(1 + largo_nombre);
     adv[i++] = corto ? BLE_HS_ADV_TYPE_INCOMP_NAME : BLE_HS_ADV_TYPE_COMP_NAME;
     memcpy(&adv[i], nombre, largo_nombre);
@@ -224,8 +223,11 @@ static void advertise(void)
 
     struct ble_hs_adv_fields rsp;
     memset(&rsp, 0, sizeof(rsp));
-    rsp.tx_pwr_lvl_is_present = 1;
-    rsp.tx_pwr_lvl = BLE_HS_ADV_TX_PWR_LVL_AUTO;
+    rsp.name = (const uint8_t *)nombre;
+    rsp.name_len = (uint8_t)strlen(nombre);
+    rsp.name_is_complete = 1;
+    rsp.appearance = 0x00C0;            /* Generic Watch */
+    rsp.appearance_is_present = 1;
     rc = ble_gap_adv_rsp_set_fields(&rsp);
     if (rc != 0) {
         ESP_LOGE(TAG, "ble_gap_adv_rsp_set_fields: %d", rc);
