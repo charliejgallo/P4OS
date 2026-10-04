@@ -86,3 +86,4 @@ Todavía no grabaste nada.\nLo que grabes aparece acá.	Nothing recorded yet.\nY
 
 #: apps/recorder/main/recorder.c:903
 tocá la onda para saltar	tap the waveform to jump
+Esa grabación ya no está	That recording is gone

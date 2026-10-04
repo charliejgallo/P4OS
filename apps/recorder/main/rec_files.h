@@ -27,6 +27,11 @@ typedef struct {
  * many it found. Files that are not WAVs are ignored. */
 int rec_files_scan(rec_file_t *out, int max);
 
+/* A number that changes when the folder does: names, sizes and dates. Cheap
+ * (no headers read), so the app can look every couple of seconds and notice
+ * what the portal's page deleted or a computer copied in. */
+uint32_t rec_files_signature(void);
+
 /* Full path of a recording. */
 void rec_files_path(char *out, size_t out_len, const char *name);
 

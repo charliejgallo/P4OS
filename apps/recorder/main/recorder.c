@@ -108,6 +108,8 @@ typedef struct {
     bool       button_toggle;   /* the physical button asks to change state */
     bool       ui_recording;    /* what the screen is showing */
     bool       ui_paused;
+    uint32_t   dir_sig;         /* the folder as the list last saw it */
+    uint32_t   dir_check_ms;
 } rec_ctx_t;
 
 static rec_ctx_t *s_ctx;
@@ -189,6 +191,7 @@ static void row_click_cb(lv_event_t *event)
 static void rescan(void)
 {
     s_ctx->file_count = rec_files_scan(s_ctx->files, REC_MAX_FILES);
+    s_ctx->dir_sig = rec_files_signature();
 }
 
 /* A row: the newest one with the green mark, the name, when and how big,
@@ -692,6 +695,37 @@ static void tick_cb(lv_timer_t *timer)
     if (now - s_ctx->last_info_ms >= 1000 || s_ctx->last_info_ms == 0) {
         s_ctx->last_info_ms = now ? now : 1;
         refresh_info(have ? &status : NULL);
+    }
+
+    /* Every two seconds, whether the folder changed behind our back: the
+     * portal's page deletes recordings, and a computer copies them in disk
+     * mode. Not while recording (the open WAV grows by itself). */
+    if (!active && now - s_ctx->dir_check_ms >= 2000) {
+        s_ctx->dir_check_ms = now;
+        if (rec_files_signature() != s_ctx->dir_sig) {
+            char open_name[REC_NAME_LEN] = "";
+            if (s_ctx->view == VIEW_DETAIL) {
+                snprintf(open_name, sizeof(open_name), "%s", s_ctx->files[s_ctx->detail_index].name);
+            }
+            rescan();
+            refresh_list();
+            if (open_name[0]) {
+                int found = -1;
+                for (int i = 0; i < s_ctx->file_count; i++) {
+                    if (!strcmp(s_ctx->files[i].name, open_name)) {
+                        found = i;
+                        break;
+                    }
+                }
+                if (found >= 0) {
+                    s_ctx->detail_index = found;
+                } else {
+                    stop_playback();
+                    show_view(VIEW_MAIN);
+                    aos_ui_toast(_("Esa grabación ya no está"), 1600);
+                }
+            }
+        }
     }
 
     if (s_ctx->view == VIEW_DETAIL) {

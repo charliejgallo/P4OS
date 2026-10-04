@@ -12,6 +12,11 @@
  * good JSON is kept on the microSD so there is something to show while the
  * network answers (or when there is no network).
  *
+ * The location is also a line in <data>/clima_lugar.txt, "name<TAB>lat10k
+ * <TAB>lon10k", which the app writes when a place is chosen here and reads
+ * when it changes: that is how the app's own portal page (web/clima.js)
+ * chooses the place, with no firmware in between.
+ *
  * Data from Open-Meteo (open-meteo.com), free and without a key.
  */
 #include "aos_app.h"
@@ -26,6 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #define BIG_ICON        200
 #define SMALL_ICON       60
@@ -105,6 +111,7 @@ typedef struct {
                                  * case, which fixes itself. */
     bool       forced;          /* the location came from CLIMA_PLACE, not from NVS */
     uint32_t   pref_ms;         /* last re-read of the preferences */
+    long       file_mtime;      /* clima_lugar.txt as last seen, -1 none */
     uint32_t   foot_ms;         /* last time the footer was repainted */
 
     /* sprites */
@@ -166,6 +173,80 @@ static void set_big_icon(wx_icon_t icon, bool night)
 /* Preferences                                                                 */
 /* -------------------------------------------------------------------------- */
 
+/* ---- the place as a file, for the portal's page ---- */
+
+static void place_file_path(char *out, size_t n)
+{
+    snprintf(out, n, "%s/clima_lugar.txt", aos_hal_path_data());
+}
+
+static long place_file_mtime(void)
+{
+    char path[160];
+    struct stat st;
+    place_file_path(path, sizeof(path));
+    return stat(path, &st) == 0 ? (long)st.st_mtime : -1;
+}
+
+/* "Buenos Aires\t-346131\t-583772" */
+static bool place_file_read(wx_place_t *out)
+{
+    char path[160], line[128];
+    place_file_path(path, sizeof(path));
+    FILE *f = fopen(path, "r");
+    if (!f) {
+        return false;
+    }
+    bool ok = fgets(line, sizeof(line), f) != NULL;
+    fclose(f);
+    if (!ok) {
+        return false;
+    }
+    char *lat = strchr(line, '\t');
+    char *lon = lat ? strchr(lat + 1, '\t') : NULL;
+    if (!lat || !lon || lat == line) {
+        return false;
+    }
+    *lat++ = 0;
+    *lon++ = 0;
+    memset(out, 0, sizeof(*out));
+    size_t n = strlen(line);
+    if (n >= sizeof(out->name)) {
+        n = sizeof(out->name) - 1;
+    }
+    memcpy(out->name, line, n);
+    out->lat10k = (int32_t)strtol(lat, NULL, 10);
+    out->lon10k = (int32_t)strtol(lon, NULL, 10);
+    return true;
+}
+
+static void place_file_write(void)
+{
+    char path[160], line[96];
+    mkdir(aos_hal_path_data(), 0777);
+    place_file_path(path, sizeof(path));
+    FILE *f = fopen(path, "w");
+    if (f) {
+        snprintf(line, sizeof(line), "%s\t%ld\t%ld\n", s_ctx->city, (long)s_ctx->lat10k, (long)s_ctx->lon10k);
+        fputs(line, f);
+        fclose(f);
+    }
+    s_ctx->file_mtime = place_file_mtime();
+}
+
+static void place_save(const wx_place_t *place)
+{
+    snprintf(s_ctx->city, sizeof(s_ctx->city), "%s", place->name);
+    s_ctx->lat10k     = place->lat10k;
+    s_ctx->lon10k     = place->lon10k;
+    s_ctx->have_place = true;
+
+    aos_hal_pref_set_i32("clima_lat", place->lat10k);
+    aos_hal_pref_set_i32("clima_lon", place->lon10k);
+    aos_hal_pref_set_str("clima_city", place->name);
+    place_file_write();
+}
+
 static void place_load(void)
 {
     /* Development switches: on the board they do no harm and in the simulator
@@ -206,19 +287,23 @@ static void place_load(void)
     s_ctx->city[0] = 0;
     aos_hal_pref_get_str("clima_city", s_ctx->city, sizeof(s_ctx->city));
     s_ctx->have_place = ok && s_ctx->city[0];
+
+    /* The file wins: the page may have changed it with the app closed. With
+     * no file yet, it is written, so the page knows where the app stands. */
+    wx_place_t fp;
+    if (place_file_read(&fp)) {
+        if (!s_ctx->have_place || fp.lat10k != s_ctx->lat10k || fp.lon10k != s_ctx->lon10k ||
+            strcmp(fp.name, s_ctx->city)) {
+            place_save(&fp);
+        }
+        s_ctx->file_mtime = place_file_mtime();
+    } else if (s_ctx->have_place) {
+        place_file_write();
+    } else {
+        s_ctx->file_mtime = -1;
+    }
 }
 
-static void place_save(const wx_place_t *place)
-{
-    snprintf(s_ctx->city, sizeof(s_ctx->city), "%s", place->name);
-    s_ctx->lat10k     = place->lat10k;
-    s_ctx->lon10k     = place->lon10k;
-    s_ctx->have_place = true;
-
-    aos_hal_pref_set_i32("clima_lat", place->lat10k);
-    aos_hal_pref_set_i32("clima_lon", place->lon10k);
-    aos_hal_pref_set_str("clima_city", place->name);
-}
 
 /* -------------------------------------------------------------------------- */
 /* Building the main view                                                      */
@@ -1040,6 +1125,28 @@ static void watch_prefs(void)
         return;
     }
     ctx->pref_ms = now;
+
+    /* the portal's page writes the file: it becomes the place, and the
+     * preferences follow it (place_save) */
+    long mt = place_file_mtime();
+    if (mt != ctx->file_mtime) {
+        ctx->file_mtime = mt;
+        wx_place_t fp;
+        if (place_file_read(&fp) && (fp.lat10k != ctx->lat10k || fp.lon10k != ctx->lon10k || strcmp(fp.name, ctx->city))) {
+            place_save(&fp);
+            memset(&ctx->data, 0, sizeof(ctx->data));
+            ctx->from_cache = false;
+            aos_hal_log("clima", "the portal's page changed the place to '%s' (%ld, %ld)",
+                        ctx->city, (long)ctx->lat10k, (long)ctx->lon10k);
+            if (ctx->view == VIEW_SEARCH) {
+                show_view(VIEW_MAIN);
+            }
+            start_fetch(true);
+            refresh_ui();
+            aos_ui_toast(ctx->city, 1200);
+            return;
+        }
+    }
 
     int32_t lat = 0, lon = 0;
     if (!aos_hal_pref_get_i32("clima_lat", &lat) ||

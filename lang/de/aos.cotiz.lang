@@ -37,7 +37,7 @@ no pude verificar el servidor	Server nicht verifizierbar
 no se pudo consultar (%d)	Abfrage fehlgeschlagen (%d)
 
 #: apps/cotiz/main/cotiz.c:284
-tocá para actualizar  ·  elegí cuáles en /cotiz	zum Aktualisieren tippen  ·  Auswahl unter /cotiz
+tocá para actualizar  ·  elegí cuáles en el portal	zum Aktualisieren tippen  ·  Auswahl im Portal
 
 #: apps/cotiz/main/cotiz.c:479
 Cotizaciones	Kurse

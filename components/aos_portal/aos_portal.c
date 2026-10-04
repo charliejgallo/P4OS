@@ -22,7 +22,8 @@
  *   GET  /api/ha     POST /api/ha {url?,token?}   GET /api/ha/entities
  *   POST /api/ha/fav?id=&on=
  *   GET  /api/fs?path=                 a folder's listing
- *   GET  /api/fs/get?path=             a file (attachment=1 to download)
+ *   GET  /api/fs/get?path=             a file (attachment=1 to download); a Range
+ *                                      header gets that part (206)
  *   PUT  /api/fs/put?path=             the body becomes the file
  *   POST /api/fs/mkdir?path=   POST /api/fs/delete?path=   POST /api/fs/rename?path=&to=
  *   GET  /api/settings   POST /api/settings {name,tz,lang,wallpaper,brightness,volume,landscape}
@@ -601,6 +602,31 @@ static const char *ctype_of(const char *name)
     return "application/octet-stream";
 }
 
+/* "bytes=a-b", "bytes=a-" or "bytes=-n", one range: what a browser's <audio>
+ * and <video> ask for (Safari plays nothing without it) and what a page uses
+ * to read only a file's header. false: no such header, or one we do not
+ * serve (several ranges), and the whole file goes. */
+static bool range_of(const char *h, long size, long *from, long *to, bool *bad)
+{
+    *bad = false;
+    if (!h || strncmp(h, "bytes=", 6) || strchr(h, ',')) return false;
+    const char *p = h + 6;
+    char *end;
+    if (*p == '-') {                                /* the last n bytes */
+        long n = strtol(p + 1, &end, 10);
+        if (end == p + 1 || n <= 0) { *bad = true; return true; }
+        *from = n >= size ? 0 : size - n;
+        *to = size - 1;
+    } else {
+        *from = strtol(p, &end, 10);
+        if (end == p || *end != '-') return false;
+        *to = end[1] ? strtol(end + 1, NULL, 10) : size - 1;
+        if (*to >= size) *to = size - 1;
+    }
+    if (*from < 0 || *from >= size || *to < *from) *bad = true;
+    return true;
+}
+
 static void api_fs_get(aos_httpd_req_t *r)
 {
     char path[320];
@@ -609,15 +635,30 @@ static void api_fs_get(aos_httpd_req_t *r)
     struct stat st;
     if (!f || stat(path, &st) || S_ISDIR(st.st_mode)) { if (f) fclose(f); send_err(r, 404, "no existe"); return; }
     const char *name = strrchr(path, '/') ? strrchr(path, '/') + 1 : path;
-    char extra[200] = "";
-    if (aos_httpd_query_int(r, "attachment", 0)) snprintf(extra, sizeof extra, "Content-Disposition: attachment; filename=\"%.150s\"\r\n", name);
-    if (aos_httpd_begin(r, 200, ctype_of(name), (long)st.st_size, extra)) {
+    long size = (long)st.st_size, from = 0, to = size - 1;
+    bool bad, ranged = range_of(aos_httpd_header(r, "Range"), size, &from, &to, &bad);
+    char extra[320];
+    int el = snprintf(extra, sizeof extra, "Accept-Ranges: bytes\r\n");
+    if (ranged && bad) {
+        snprintf(extra + el, sizeof extra - el, "Content-Range: bytes */%ld\r\n", size);
+        aos_httpd_begin(r, 416, "text/plain", 0, extra);
+        fclose(f);
+        return;
+    }
+    if (ranged) el += snprintf(extra + el, sizeof extra - el, "Content-Range: bytes %ld-%ld/%ld\r\n", from, to, size);
+    if (aos_httpd_query_int(r, "attachment", 0))
+        snprintf(extra + el, sizeof extra - el, "Content-Disposition: attachment; filename=\"%.150s\"\r\n", name);
+    if (aos_httpd_begin(r, ranged ? 206 : 200, ctype_of(name), to - from + 1, extra)) {
         /* read() on the descriptor: 16 KB at a time straight into buf, which
          * the card DMAs to (an unbuffered fread() would go byte by byte) */
         char *buf = aos_hal_io_alloc(16384);
+        long left = to - from + 1;
         ssize_t n;
-        while (buf && (n = read(fileno(f), buf, 16384)) > 0)
+        if (from && lseek(fileno(f), from, SEEK_SET) != from) left = 0;
+        while (buf && left > 0 && (n = read(fileno(f), buf, left < 16384 ? (size_t)left : 16384)) > 0) {
             if (!aos_httpd_write(r, buf, (size_t)n)) break;
+            left -= n;
+        }
         aos_hal_io_free(buf);
     }
     fclose(f);

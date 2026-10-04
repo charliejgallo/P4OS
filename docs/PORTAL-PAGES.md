@@ -67,7 +67,7 @@ version 1 stays as it is, like the apps' `AOS_ABI_VERSION`.
 | `fsList(path)` | a folder: `[{ name, dir, size, mtime }]`; empty if it is not there |
 | `fsPut(path, data, onProgress)` | writes a card file (a string, Blob or buffer), any size; `onProgress(0..1)` is optional |
 | `fsDelete(path)`, `fsMkdir(path)` | |
-| `fsUrl(path, download)` | the address of a card file, to link or to show in an `<img>` |
+| `fsUrl(path, download)` | the address of a card file, to link or to show in an `<img>`, `<audio>` or `<video>`; it answers `Range` requests, so a player seeks and `fetch(url, { headers: { Range: 'bytes=0-511' } })` reads a header |
 | `fsSlug(text, max, default)` | a name the card takes: lower case, a-z 0-9 _ -, no accents |
 | `saveBlob(blob, name)` | hands a file to the browser to save |
 | `openApp(id)` | opens an app on the board (`demo.hello`) |
@@ -102,6 +102,9 @@ The pages there are, to copy from:
 | `apps/camaras/web/camaras.js` | `/cameras.txt` by fields, with a preview | parsing and rewriting a configuration file, keeping its comments |
 | `apps/radio/web/radio.js` | the nine keys by drag and drop, the list, a search | a JSON API, a service on the internet, images made in a `canvas` |
 | `apps/notas/web/notas.js` | the notes, with an editor | a folder of files the app follows |
+| `apps/recorder/web/recorder.js` | the recordings, to listen to, download, delete | `<audio>` straight from the card, a file's header read with a `Range` request |
+| `apps/clima/web/clima.js` | the place, searched with a keyboard, and the forecast | a setting the app keeps in a preference, mirrored to a file both sides write |
+| `apps/cotiz/web/cotiz.js` | which rates the board shows | a one-line file the app reads |
 | `apps/pixel`, `lua`, `mapas`, `visor3d` | drawings, scripts, offline zones, models | big uploads with progress, downloads made in the browser |
 
 ## How the portal loads them

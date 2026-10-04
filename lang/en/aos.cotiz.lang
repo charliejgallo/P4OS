@@ -37,7 +37,7 @@ no pude verificar el servidor	could not verify the server
 no se pudo consultar (%d)	could not query (%d)
 
 #: apps/cotiz/main/cotiz.c:284
-tocá para actualizar  ·  elegí cuáles en /cotiz	tap to refresh  ·  choose which at /cotiz
+tocá para actualizar  ·  elegí cuáles en el portal	tap to refresh  ·  choose which in the portal
 
 #: apps/cotiz/main/cotiz.c:479
 Cotizaciones	Currencies

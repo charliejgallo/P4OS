@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+**More apps with their own page**
+- **Recorder:** the recordings on the card, to listen to, download or
+  delete; the app sees what the page deletes (it looks at its folder every
+  two seconds).
+- **Weather:** the place chosen with a real keyboard, from Open-Meteo's
+  search, and the week's forecast. The app keeps its place in
+  `/data/clima_lugar.txt` too, and takes it from there.
+- **Quotes:** which rates the board shows, with today's values beside them.
+  The app reads its list from `/data/cotiz.txt`; until now there was no way
+  to choose it on P4OS.
+- The portal serves byte ranges (`Range`, 206): Safari plays audio and video
+  from the card, a player seeks without downloading the whole file, and a
+  page can read only a file's header.
+
 ## 0.8.0 — 2026-10-04
 
 **Notes, a new app**
@@ -60,7 +76,7 @@
 - The CI builds the C6's firmware (`c6.bin`, for the card's `/firmware`),
   the colour emoji pack (`emoji.pak`, from Noto's tag
   `v2026-09-24-unicode18_0`) and the Notes app's fonts (`notas_p4.pak`),
-  each the same file byte for byte as the ones built by hand, and a tag's
+  the two packs the same files byte for byte as the ones built by hand, and a tag's
   release takes them along with the firmware, the apps, their portal pages
   (`web.zip`) and the languages. Only the games' art is still attached by
   hand.

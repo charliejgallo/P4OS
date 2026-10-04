@@ -157,6 +157,35 @@ int rec_files_scan(rec_file_t *out, int max)
     return count;
 }
 
+uint32_t rec_files_signature(void)
+{
+    uint32_t h = 2166136261u;
+    DIR *dir = opendir(aos_hal_path_recordings());
+    if (!dir) {
+        return 0;
+    }
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        if (entry->d_name[0] == '.' || !is_wav(entry->d_name)) {
+            continue;
+        }
+        uint32_t e = 2166136261u;      /* each file on its own: readdir's order does not matter */
+        for (const char *c = entry->d_name; *c; c++) {
+            e = (e ^ (uint8_t)*c) * 16777619u;
+        }
+        char path[REC_PATH_LEN];
+        rec_files_path(path, sizeof(path), entry->d_name);
+        struct stat info;
+        if (stat(path, &info) == 0) {
+            e = (e ^ (uint32_t)info.st_size) * 16777619u;
+            e = (e ^ (uint32_t)info.st_mtime) * 16777619u;
+        }
+        h += e;
+    }
+    closedir(dir);
+    return h;
+}
+
 void rec_files_next_name(char *out, size_t out_len)
 {
     int highest = 0;

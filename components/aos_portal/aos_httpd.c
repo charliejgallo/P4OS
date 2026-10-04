@@ -223,11 +223,13 @@ static const char *reason(int s)
     switch (s) {
     case 200: return "OK";
     case 204: return "No Content";
+    case 206: return "Partial Content";
     case 400: return "Bad Request";
     case 404: return "Not Found";
     case 405: return "Method Not Allowed";
     case 409: return "Conflict";
     case 413: return "Payload Too Large";
+    case 416: return "Range Not Satisfiable";
     case 500: return "Internal Server Error";
     case 503: return "Service Unavailable";
     default: return "";

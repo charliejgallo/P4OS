@@ -12,6 +12,11 @@
  *   cz_list  the comma-separated list of keys ("blue,oficial,eur")
  *   cz_gen   goes up on every save; the app re-reads it and reloads itself
  *
+ * P4OS: the page is the app's own (web/cotiz.js, from the card) and it
+ * cannot reach preferences, so the list is also a file, <data>/cotiz.txt,
+ * with the same comma-separated keys. When there is one it wins over
+ * cz_list, and the app looks at its date along with cz_gen.
+ *
  * The generation counter is what saves re-reading an NVS string every three
  * seconds just in case: an integer is compared, and only when it changed is
  * the list read. It is the same mechanism as 'remoto's rc_gen, and not
@@ -40,6 +45,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#include <sys/stat.h>
 
 #define TICK_MS         200
 #define REFRESH_MS      300000      /* 5 min: an exchange rate does not change faster */
@@ -74,6 +80,7 @@ typedef struct {
     cz_datos_t datos;
     int32_t    gen;
     uint32_t   pref_ms;
+    long       file_mtime;          /* cotiz.txt as last seen, -1 none */
 
     int      req;                   /* request in flight, 0 = none */
     bool     pidiendo_monedas;      /* which of the two queries it is on */
@@ -113,12 +120,48 @@ static void set_txt(lv_obj_t *obj, char *cache, size_t cap, const char *txt)
 /* Reads cz_list and turns it into indices. The drawing order is CZ_ESPECIES's
  * and not the preference's, so that adding an instrument from the portal does
  * not reorder the whole screen. */
+static void lista_path(char *out, size_t n)
+{
+    snprintf(out, n, "%s/cotiz.txt", aos_hal_path_data());
+}
+
+static long lista_mtime(void)
+{
+    char path[160];
+    struct stat st;
+    lista_path(path, sizeof(path));
+    return stat(path, &st) == 0 ? (long)st.st_mtime : -1;
+}
+
+/* The page's file: one line of keys. false if there is none. */
+static bool lista_de_archivo(char *out, size_t n)
+{
+    char path[160];
+    lista_path(path, sizeof(path));
+    FILE *f = fopen(path, "r");
+    if (!f) {
+        return false;
+    }
+    bool ok = fgets(out, (int)n, f) != NULL;
+    fclose(f);
+    for (char *c = out; ok && *c; c++) {
+        if (*c == '\r' || *c == '\n') {
+            *c = 0;
+            break;
+        }
+    }
+    return ok && out[0];
+}
+
 static void leer_lista(void)
 {
     char lista[160] = {0};
     const char *dev = getenv("CZ_LIST");     /* development switch */
+    s_cz.file_mtime = lista_mtime();
     if (dev && dev[0]) {
         snprintf(lista, sizeof(lista), "%s", dev);
+    } else if (lista_de_archivo(lista, sizeof(lista))) {
+        /* the portal's page chose it */
     } else if (!aos_hal_pref_get_str(KEY_LIST, lista, sizeof(lista)) || !lista[0]) {
         snprintf(lista, sizeof(lista), "%s", LISTA_DEF);
     }
@@ -281,7 +324,7 @@ static void pintar(void)
     } else if (s_cz.ultimo_error != 0 && !s_cz.hubo_datos) {
         snprintf(buf, sizeof(buf), _("no se pudo consultar (%d)"), s_cz.ultimo_error);
     } else {
-        snprintf(buf, sizeof(buf), "%s", _("tocá para actualizar  ·  elegí cuáles en /cotiz"));
+        snprintf(buf, sizeof(buf), "%s", _("tocá para actualizar  ·  elegí cuáles en el portal"));
     }
     set_txt(s_cz.pie, s_cz.txt_pie, sizeof(s_cz.txt_pie), buf);
 }
@@ -407,7 +450,7 @@ static void mirar_pref(void)
 
     int32_t gen = 0;
     aos_hal_pref_get_i32(KEY_GEN, &gen);
-    if (gen == s_cz.gen) {
+    if (gen == s_cz.gen && lista_mtime() == s_cz.file_mtime) {
         return;
     }
     /* Saved from the portal with the app open. Here the objects ARE rebuilt,
