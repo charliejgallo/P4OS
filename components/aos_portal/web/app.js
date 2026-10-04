@@ -2481,7 +2481,313 @@ const fsSlug = (s, max, def) => s.normalize('NFD').replace(/[\u0300-\u036f]/g, '
   .replace(/[^a-z0-9_-]+/g, '_').replace(/^_+|_+$/g, '').slice(0, max) || def;
 
 /* ---- router ---- */
-const PAGES = { pantalla: pagePantalla, inicio: pageInicio, wifi: pageWifi, ha: pageHa, terminal: pageTerminal, programador: pageProgramador, banco: pageBanco, claude: pageClaude, mqtt: pageMqtt, macropad: pageMacropad, expansion: pageExpansion, archivos: pageArchivos, ajustes: pageAjustes, firmware: pageFirmware, registro: pageRegistro };
+/* ---- Red ----
+ * The Red app's LAN sweeps, saved by the board to the card's /redes as one
+ * NDJSON file each (aos_nettools.c; AmoledOS's aos_scan.c writes the same
+ * lines), and a new sweep started from here over /api/net. The board only
+ * writes the lines: the tables, the changes since the sweep before and the
+ * channel graph are drawn here. */
+const RED_DIR = '/redes';
+const RED_PORTS = { 21: 'FTP', 22: 'SSH', 23: 'Telnet', 53: 'DNS', 80: 'HTTP', 139: 'NetBIOS', 443: 'HTTPS', 445: 'SMB',
+  502: 'Modbus', 554: 'RTSP', 631: 'IPP', 1880: 'Node-RED', 1883: 'MQTT', 3000: 'Grafana', 3389: 'RDP', 5000: 'UPnP',
+  5555: 'SCPI', 5900: 'VNC', 6053: 'ESPHome', 8000: 'HTTP', 8080: 'HTTP', 8081: 'HTTP', 8123: 'Home Assistant',
+  8443: 'HTTPS', 8554: 'RTSP', 8883: 'MQTT/TLS', 8888: 'HTTP', 9000: 'HTTP', 9100: 'Impresora', 32400: 'Plex' };
+const RED_WEB = new Set([80, 443, 3000, 5000, 8000, 8080, 8081, 8123, 8443, 8888, 9000]);
+const RED_PHASE = ['Ping', 'Puertos', 'Nombres y redes Wi-Fi'];
+const ipNum = ip => (ip || '').split('.').reduce((a, b) => a * 256 + (parseInt(b, 10) || 0), 0);
+
+/* One survey, whatever the order of its lines; a line cut by a power loss is
+ * skipped, not fatal. */
+function redParse(text) {
+  const s = { inicio: {}, fin: null, wifi: [], hosts: new Map() };
+  const host = ip => {
+    if (!s.hosts.has(ip)) s.hosts.set(ip, { ip, ports: [], servicios: [], name: '' });
+    return s.hosts.get(ip);
+  };
+  for (const l of text.split('\n')) {
+    if (!l.trim()) continue;
+    let x;
+    try { x = JSON.parse(l); } catch { continue; }
+    if (x.t === 'inicio') s.inicio = x;
+    else if (x.t === 'fin') s.fin = x;
+    else if (x.t === 'wifi') s.wifi.push(x);
+    else if (x.t === 'host') Object.assign(host(x.ip), { ping: x.ping, rtt: x.rtt, yo: x.yo, que: x.que, mac: x.mac });
+    else if (x.t === 'puertos') host(x.ip).ports = (x.abiertos || []).slice().sort((a, b) => a - b);
+    else if (x.t === 'nombre') {
+      const hh = host(x.ip);
+      if (!hh.name) hh.name = x.nombre || x.host || '';
+      if (x.servicio && !hh.servicios.includes(x.servicio)) hh.servicios.push(x.servicio);
+    }
+  }
+  s.list = [...s.hosts.values()].sort((a, b) => ipNum(a.ip) - ipNum(b.ip));
+  s.wifi.sort((a, b) => b.rssi - a.rssi);
+  return s;
+}
+
+/* What changed from one sweep to the next. By address: a phone that got
+ * another one from the router shows as one gone and one new. */
+function redDiff(cur, prev) {
+  const nuevos = cur.list.filter(x => !prev.hosts.has(x.ip));
+  const idos = prev.list.filter(x => !cur.hosts.has(x.ip));
+  const puertos = [];
+  for (const x of cur.list) {
+    const p = prev.hosts.get(x.ip);
+    if (!p) continue;
+    const abiertos = x.ports.filter(n => !p.ports.includes(n)), cerrados = p.ports.filter(n => !x.ports.includes(n));
+    if (abiertos.length || cerrados.length) puertos.push({ x, abiertos, cerrados });
+  }
+  const pb = new Set(prev.wifi.map(w => w.bssid)), cb = new Set(cur.wifi.map(w => w.bssid));
+  return { nuevos, idos, puertos, redesNuevas: cur.wifi.filter(w => !pb.has(w.bssid)), redesIdas: prev.wifi.filter(w => !cb.has(w.bssid)) };
+}
+
+/* Where a network's energy is, in channel numbers (5 MHz apart, so 20 MHz is
+ * 4 of them): its centre and half its width. */
+function redSpan(w) {
+  const width = w.ancho || 20;
+  let c = w.canal;
+  if (width === 40) c += 2 * (w.segundo || 0);
+  else if (width >= 80) {
+    const blocks = width === 160 ? [50, 114, 163] : [42, 58, 106, 122, 138, 155];
+    c = blocks.find(b => Math.abs(b - w.canal) <= width / 10) || c;
+  }
+  return { c, half: width / 10 };
+}
+
+/* The graph of the channels: every network as a bell, as tall as its signal. */
+function redChart(aps, band, mine) {
+  const W = 720, H = 220, top = 18, base = H - 26;
+  const lo = band === 2 ? -1 : Math.min(...aps.map(w => redSpan(w).c - redSpan(w).half)) - 2;
+  const hi = band === 2 ? 15 : Math.max(...aps.map(w => redSpan(w).c + redSpan(w).half)) + 2;
+  const X = c => 30 + (c - lo) / (hi - lo) * (W - 40);
+  const Y = rssi => base - Math.max(0, Math.min(1, (rssi + 100) / 70)) * (base - top);
+  let svg = `<svg viewBox="0 0 ${W} ${H}" class="redchart" role="img" aria-label="Canales ${band === 2 ? '2,4' : '5'} GHz">`;
+  for (const r of [-90, -70, -50]) svg += `<line x1="30" x2="${W - 10}" y1="${Y(r)}" y2="${Y(r)}" class="grid"/><text x="2" y="${Y(r) + 4}" class="ax">${r}</text>`;
+  const ticks = band === 2 ? [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13] : [...new Set(aps.map(w => w.canal))].sort((a, b) => a - b);
+  for (const t of ticks) svg += `<text x="${X(t)}" y="${H - 8}" class="ax" text-anchor="middle">${t}</text>`;
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const labels = [];
+  aps.forEach((w, i) => {
+    const { c, half } = redSpan(w);
+    const x0 = X(c - half), x1 = X(c + half), y = Y(w.rssi), k = (x1 - x0) * 0.32;
+    const own = mine && w.ssid && w.ssid.startsWith(mine);     /* "Casa" and "Casa 5G" */
+    const col = own ? 'var(--accent)' : `hsl(${(i * 67) % 360} 70% 60%)`;
+    svg += `<path d="M${x0} ${base} C${x0 + k} ${y} ${x1 - k} ${y} ${x1} ${base}" fill="${col}" fill-opacity="${own ? .28 : .1}" stroke="${col}" stroke-width="${own ? 2.5 : 1.3}"><title>${esc(w.ssid || 'oculta')} · canal ${w.canal} · ${w.rssi} dBm</title></path>`;
+    /* a name over the strong ones, unless it would land on another */
+    const ly = Math.max(top, y - 5), lx = X(c), lw = (w.ssid || '(oculta)').length * 6.5;
+    if ((w.rssi > -82 || own) && !labels.some(l => Math.abs(l.x - lx) < (l.w + lw) / 2 && Math.abs(l.y - ly) < 13)) {
+      labels.push({ x: lx, y: ly, w: lw });
+      svg += `<text x="${lx}" y="${ly}" text-anchor="middle" class="lab" fill="${col}">${esc(w.ssid || '(oculta)')}</text>`;
+    }
+  });
+  return h('div', { class: 'redchartbox', html: svg + '</svg>' });
+}
+
+/* Of 1, 6 and 11 (the three that do not overlap in 2,4 GHz), the one the
+ * neighbours use least, weighting each by its signal. Our own access points
+ * do not count against themselves. */
+function redBestChannel(aps, mine) {
+  const load = c => aps.filter(w => w.canal <= 14 && w.ssid !== mine)
+    .reduce((a, w) => { const s = redSpan(w); const d = Math.abs(s.c - c); return d < s.half + 2 ? a + Math.max(0, w.rssi + 100) * (1 - d / (s.half + 2)) : a; }, 0);
+  return [1, 6, 11].map(c => ({ c, load: load(c) })).sort((a, b) => a.load - b.load);
+}
+
+function redCsv(rows) {
+  const q = v => { const s = v == null ? '' : String(v); return /[",\n;]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; };
+  return new Blob(['﻿' + rows.map(r => r.map(q).join(',')).join('\r\n') + '\r\n'], { type: 'text/csv' });
+}
+
+function pageRed() {
+  let files = [], cur = null, curName = '', timer = null, lastFile = null, gone = false;
+  const sel = h('select'), cmp = h('select');
+  const scanCard = h('div', { class: 'card pad' });
+  const listCard = h('div');
+  const out = h('div');
+  const full = h('input', { type: 'checkbox' });
+  const bar = h('div', { class: 'prog', style: 'display:none' }, h('div'));
+  const msg = h('div', { class: 'muted small', style: 'margin-top:8px' });
+  const live = h('div', { class: 'small', style: 'margin-top:6px' });
+  const go = h('button', { class: 'btn pri', onclick: () => start() }, 'Barrer la red');
+  const stop = h('button', { class: 'btn red', style: 'display:none', onclick: () => post('net', { do: 'stop' }).catch(e => toast(e.message, true)) }, 'Parar');
+
+  put(scanCard,
+    h('div', { class: 'btns' }, go, stop,
+      h('label', { class: 'small', style: 'display:flex;gap:6px;align-items:center' }, full, 'Completo: también los que no contestan el ping'),
+      h('button', { class: 'btn', onclick: () => openApp('aos.net').then(() => toast('Red abierta en la placa')).catch(e => toast(e.message, true)) }, 'Abrir Red en la placa')),
+    bar, msg, live);
+
+  const label = f => {
+    const m = /^(\d{4})(\d\d)(\d\d)-(\d\d)(\d\d)(\d\d)?/.exec(f.name);
+    return (m ? `${m[3]}/${m[2]}/${m[1]} ${m[4]}:${m[5]}` : f.name) + ' · ' + fmtBytes(f.size);
+  };
+
+  async function loadList(pick) {
+    files = (await fsList(RED_DIR)).filter(f => !f.dir && /\.ndjson$/.test(f.name))
+      .sort((a, b) => (b.mtime || 0) - (a.mtime || 0) || b.name.localeCompare(a.name));
+    if (gone) return;
+    if (!files.length) {
+      put(listCard, h('div', { class: 'card pad muted' }, 'Todavía no hay relevamientos guardados. Cada barrido de la red queda en la tarjeta: hacé uno con el botón de arriba o desde la pestaña Hosts de la app Red.'));
+      put(out);
+      return;
+    }
+    put(sel, files.map(f => h('option', { value: f.name }, label(f))));
+    sel.value = pick && files.some(f => f.name === pick) ? pick : files[0].name;
+    put(listCard, h('div', { class: 'card pad' },
+      h('div', { class: 'btns' }, sel,
+        h('button', { class: 'btn', onclick: () => location.href = fsUrl(RED_DIR + '/' + sel.value, true) }, 'Descargar'),
+        h('button', { class: 'btn', onclick: () => exportCsv('equipos') }, 'CSV de equipos'),
+        h('button', { class: 'btn', onclick: () => exportCsv('redes') }, 'CSV de redes'),
+        h('button', { class: 'btn red', onclick: remove }, 'Borrar')),
+      h('div', { class: 'btns', style: 'margin-top:10px' }, h('span', { class: 'muted small' }, 'Comparar con'), cmp)));
+    await show();
+  }
+
+  async function show() {
+    curName = sel.value;
+    const i = files.findIndex(f => f.name === curName);
+    put(cmp, h('option', { value: '' }, 'nada'), files.filter(f => f.name !== curName).map(f => h('option', { value: f.name }, label(f))));
+    cmp.value = files[i + 1] ? files[i + 1].name : '';         /* the one before, by default */
+    const text = await fsText(RED_DIR + '/' + curName);
+    if (gone || curName !== sel.value) return;
+    cur = redParse(text || '');
+    await render();
+  }
+
+  async function render() {
+    const s = cur, ini = s.inicio, fin = s.fin;
+    const nports = s.list.reduce((a, x) => a + x.ports.length, 0);
+    const named = s.list.filter(x => x.name).length;
+    const summary = h('div', { class: 'card pad' },
+      h('div', { class: 'redstats' },
+        [[s.wifi.length, 'redes Wi-Fi'], [s.list.length, 'equipos'], [nports, 'puertos abiertos'], [named, 'con nombre']]
+          .map(([n, t]) => h('div', {}, h('b', {}, String(n)), h('span', { class: 'muted small' }, t)))),
+      h('div', { class: 'muted small', style: 'margin-top:10px' },
+        [ini.fecha || 'sin fecha', ini.ssid ? `desde ${ini.ssid} (${ini.ip || '?'}${ini.rango ? ', ' + ini.rango : ''})` : 'sin red',
+          ini.completo ? 'barrido completo' : null,
+          fin ? (fin.ms / 1000).toFixed(1).replace('.', ',') + ' s' : null].filter(Boolean).join(' · '),
+        fin && fin.cortado ? h('span', { class: 'warn' }, ' · cortado a mitad') : null,
+        !fin ? h('span', { class: 'warn' }, ' · incompleto') : null));
+
+    let diffCard = null;
+    if (cmp.value) {
+      const prevText = await fsText(RED_DIR + '/' + cmp.value);
+      if (gone) return;
+      const d = redDiff(s, redParse(prevText || ''));
+      const who = x => x.ip + (x.name ? ' · ' + x.name : x.que ? ' · ' + x.que : '');
+      const lines = [
+        ...d.nuevos.map(x => h('div', { class: 'row' }, h('div', { class: 'grow' }, h('span', { class: 'ok' }, '＋ '), who(x)), h('div', { class: 'val' }, 'equipo nuevo'))),
+        ...d.idos.map(x => h('div', { class: 'row' }, h('div', { class: 'grow' }, h('span', { class: 'bad' }, '－ '), who(x)), h('div', { class: 'val' }, 'ya no está'))),
+        ...d.puertos.map(({ x, abiertos, cerrados }) => h('div', { class: 'row' }, h('div', { class: 'grow' }, h('span', { class: 'warn' }, '◆ '), who(x)),
+          h('div', { class: 'val' }, [abiertos.length ? 'abrió ' + abiertos.join(', ') : '', cerrados.length ? 'cerró ' + cerrados.join(', ') : ''].filter(Boolean).join(' · ')))),
+        ...d.redesNuevas.map(w => h('div', { class: 'row' }, h('div', { class: 'grow' }, h('span', { class: 'ok' }, '＋ '), (w.ssid || '(oculta)') + ' · canal ' + w.canal), h('div', { class: 'val' }, 'red nueva'))),
+        ...d.redesIdas.map(w => h('div', { class: 'row' }, h('div', { class: 'grow' }, h('span', { class: 'bad' }, '－ '), (w.ssid || '(oculta)') + ' · canal ' + w.canal), h('div', { class: 'val' }, 'red que no se ve'))),
+      ];
+      diffCard = [h('h2', {}, 'Cambios desde el ' + label(files.find(f => f.name === cmp.value) || { name: cmp.value, size: 0 }).split(' · ')[0]),
+        h('div', { class: 'card' }, lines.length ? lines : h('div', { class: 'row muted' }, 'Nada cambió: los mismos equipos, puertos y redes.'))];
+    }
+
+    let hostsCard = null;
+    if (s.list.length) {
+      const anyMac = s.list.some(x => x.mac);
+      const portChip = (ip, p) => {
+        const name = RED_PORTS[p];
+        const txt = p + (name ? ' ' + name : '');
+        return RED_WEB.has(p) ? h('a', { class: 'pill redport', href: `${p === 443 || p === 8443 ? 'https' : 'http'}://${ip}:${p}/`, target: '_blank', rel: 'noopener' }, txt)
+          : h('span', { class: 'pill redport' }, txt);
+      };
+      hostsCard = [h('h2', {}, 'Equipos'), h('div', { class: 'card redwrap' }, h('table', { class: 'redt' },
+        h('tr', {}, ['Dirección', 'Nombre', 'Qué es', 'Ping', 'Puertos', anyMac ? 'MAC' : null].filter(Boolean).map(t => h('th', {}, t))),
+        s.list.map(x => h('tr', {},
+          h('td', { class: 'mono', style: 'white-space:nowrap;word-break:normal' }, h('b', {}, x.ip), x.yo ? h('div', { class: 'muted small' }, 'esta placa') : null),
+          h('td', {}, x.name ? h('b', {}, x.name) : h('span', { class: 'muted' }, '—'), x.servicios.length ? h('div', { class: 'muted small' }, x.servicios.join(' · ')) : null),
+          h('td', { class: 'muted' }, x.que || ''),
+          h('td', { class: 'muted', style: 'white-space:nowrap' }, x.yo ? '—' : x.ping ? (x.rtt != null ? x.rtt + ' ms' : 'sí') : 'no'),
+          h('td', {}, x.ports.length ? x.ports.map(p => portChip(x.ip, p)) : h('span', { class: 'muted' }, 'ninguno')),
+          anyMac ? h('td', { class: 'mono muted' }, x.mac || '—') : null)))),
+        h('p', { class: 'note' }, 'Los que no contestan el ping aparecen igual si tienen algún puerto abierto, o en el barrido completo. Los puertos web abren el equipo en otra pestaña.')];
+    }
+
+    let wifiCard = null;
+    if (s.wifi.length) {
+      const g24 = s.wifi.filter(w => w.canal <= 14), g5 = s.wifi.filter(w => w.canal > 14);
+      const best = g24.length ? redBestChannel(g24, ini.ssid) : null;
+      const ours = g24.find(w => w.ssid === ini.ssid);
+      const advice = best && h('p', { class: 'note' },
+        `De los canales que no se pisan (1, 6 y 11), el menos cargado por los vecinos es el ${best[0].c}` +
+        (ours ? (ours.canal === best[0].c ? `, y es el que usa ${ini.ssid}.` : `; ${ini.ssid} está en el ${ours.canal}.`) : '.'));
+      wifiCard = [h('h2', {}, 'Redes Wi-Fi'),
+        g24.length ? h('div', { class: 'card pad' }, h('div', { class: 'muted small' }, '2,4 GHz'), redChart(g24, 2, ini.ssid), advice) : null,
+        g5.length ? h('div', { class: 'card pad', style: 'margin-top:12px' }, h('div', { class: 'muted small' }, '5 GHz'), redChart(g5, 5, ini.ssid)) : null,
+        h('div', { class: 'card redwrap', style: 'margin-top:12px' }, h('table', { class: 'redt' },
+          h('tr', {}, ['Red', 'Señal', 'Canal', 'Ancho', 'Seguridad', 'BSSID'].map(t => h('th', {}, t))),
+          s.wifi.map(w => h('tr', {},
+            h('td', {}, w.oculta || !w.ssid ? h('span', { class: 'muted' }, '(oculta)') : h('b', { class: w.ssid === ini.ssid ? 'ok' : '' }, w.ssid)),
+            h('td', { style: 'white-space:nowrap' }, h('span', { class: 'redsig', style: `width:${Math.max(4, Math.min(60, (w.rssi + 100) * 0.9))}px` }), ' ', h('span', { class: 'muted small' }, w.rssi + ' dBm')),
+            h('td', {}, String(w.canal)), h('td', { class: 'muted' }, (w.ancho || 20) + ' MHz'),
+            h('td', { class: w.cifrado === 'abierta' ? 'warn' : 'muted' }, w.cifrado || ''),
+            h('td', { class: 'mono muted', style: 'white-space:nowrap;word-break:normal' }, w.bssid || '')))))];
+    }
+
+    put(out, summary, diffCard, hostsCard, wifiCard,
+      !s.list.length && !s.wifi.length ? h('div', { class: 'card pad muted' }, 'Este relevamiento no encontró nada.') : null);
+  }
+
+  function exportCsv(kind) {
+    if (!cur) return;
+    const base = curName.replace(/\.ndjson$/, '');
+    if (kind === 'equipos') saveBlob(redCsv([['ip', 'nombre', 'servicios', 'que_es', 'ping_ms', 'puertos', 'mac'],
+      ...cur.list.map(x => [x.ip, x.name, x.servicios.join(' / '), x.que, x.ping ? x.rtt : '', x.ports.join(' '), x.mac])]), base + '-equipos.csv');
+    else saveBlob(redCsv([['ssid', 'bssid', 'rssi_dbm', 'canal', 'ancho_mhz', 'seguridad'],
+      ...cur.wifi.map(w => [w.ssid, w.bssid, w.rssi, w.canal, w.ancho || 20, w.cifrado])]), base + '-redes.csv');
+  }
+
+  async function remove() {
+    if (!confirm('¿Borrar el relevamiento ' + label(files.find(f => f.name === sel.value)).split(' · ')[0] + '?')) return;
+    try { await fsDelete(RED_DIR + '/' + sel.value); toast('Borrado'); loadList(); }
+    catch (e) { toast(e.message, true); }
+  }
+
+  /* the sweep: polled once a second while it runs (every poll keeps it
+   * alive: closing the page stops it) */
+  function paint(st) {
+    const busy = st.state === 'busy';
+    go.style.display = busy ? 'none' : '';
+    stop.style.display = busy ? '' : 'none';
+    bar.style.display = busy ? '' : 'none';
+    full.disabled = busy;
+    const pct = st.phase === 0 && st.total ? st.done / st.total * 33 : st.phase === 1 ? 45 : 80;
+    bar.firstChild.style.width = pct + '%';
+    if (busy) msg.textContent = `${RED_PHASE[st.phase] || ''}… ${st.range || ''} · ${(st.elapsed_ms / 1000).toFixed(0)} s`;
+    else if (st.state === 'failed') msg.innerHTML = '', msg.append(h('span', { class: 'bad' }, st.error || 'El barrido falló'));
+    else if (st.state === 'done') msg.textContent = `Último barrido: ${st.hosts.length} equipo${st.hosts.length === 1 ? '' : 's'} en ${(st.elapsed_ms / 1000).toFixed(0)} s` + (st.file ? '. Guardado.' : '.');
+    else msg.textContent = 'Barre la red de la placa (su /24): quién contesta, qué puertos tiene abiertos y cómo se llama; al final mira las redes Wi-Fi de alrededor y lo guarda en la tarjeta.';
+    put(live, busy && st.hosts.length ? h('div', { class: 'muted' }, st.hosts.length + ' encontrados: ' +
+      st.hosts.slice(0, 40).map(x => x.name || x.ip).join(', ') + (st.hosts.length > 40 ? '…' : '')) : null);
+  }
+  async function poll() {
+    let st;
+    try { st = await api('net'); } catch (e) { msg.textContent = e.message; return; }
+    if (gone) return;
+    paint(st);
+    if (lastFile === null) lastFile = st.file;
+    if (st.state === 'busy') { if (!timer) timer = setInterval(poll, 1000); return; }
+    clearInterval(timer); timer = null;
+    if (st.state === 'done' && st.file && st.file !== lastFile) { lastFile = st.file; toast('Barrido guardado'); loadList(st.file); }
+  }
+  async function start() {
+    try { await post('net', { do: 'scan', full: full.checked }); } catch (e) { toast(e.message, true); return; }
+    lastFile = lastFile ?? '';
+    poll();
+  }
+
+  sel.onchange = show;
+  cmp.onchange = render;
+  put(main, h('h1', {}, 'Red'), scanCard, h('h2', {}, 'Relevamientos guardados'), listCard, out);
+  poll();
+  loadList().catch(e => toast(e.message, true));
+  return () => { gone = true; clearInterval(timer); };
+}
+
+const PAGES = { pantalla: pagePantalla, inicio: pageInicio, wifi: pageWifi, red: pageRed, ha: pageHa, terminal: pageTerminal, programador: pageProgramador, banco: pageBanco, claude: pageClaude, mqtt: pageMqtt, macropad: pageMacropad, expansion: pageExpansion, archivos: pageArchivos, ajustes: pageAjustes, firmware: pageFirmware, registro: pageRegistro };
 
 /* ---- the apps' own pages (docs/PORTAL-PAGES.md) ----
  * An app brings its page in apps/<x>/web/<x>.js; tools/install_apps.sh puts

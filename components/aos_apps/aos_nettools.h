@@ -80,11 +80,17 @@ typedef struct {
     nt_host_t hosts[NT_MAX_HOSTS];
     int      n;
     uint32_t elapsed_ms;
+    char     file[48];          /* where the finished sweep was saved, "" if not */
     uint32_t seq;
 } nt_scan_t;
 
 extern const uint16_t NT_KNOWN_PORTS[];
 extern const int NT_KNOWN_N;
+
+/* A finished sweep is saved to aos_hal_path_scans() as one NDJSON file,
+ * with the networks around scanned at its end: the portal's Red page reads
+ * them. The newest NT_SAVED_MAX are kept. */
+#define NT_SAVED_MAX   40
 
 bool nt_scan_start(bool full);
 void nt_scan_stop(void);

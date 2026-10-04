@@ -49,6 +49,13 @@ Hecho el 2026-10-04 (0.7.0):
 - [x] Mudadas a sus apps las páginas que vivían en el firmware: Notas,
       Pixel Art, Lua, Mapas y el Visor 3D (`app.js` de 5300 a 2565 líneas).
       Revisadas una por una en el simulador; en la placa cargan de /web.
+- [ ] Páginas nuevas de Radio (`/api/radio`, las nueve teclas, buscar y
+      arrastrar) y Cámaras (`/cameras.txt` con vista previa), desde sus apps;
+      probadas en el simulador con la cámara falsa (2026-10-04).
+- [ ] Red guarda cada barrido en `/redes` (NDJSON, los 40 últimos) y el
+      portal tiene la página Red: lanzar un barrido (`/api/net`), ver los
+      guardados, cambios contra el anterior, gráfico de canales, CSV.
+      Probado en el simulador (2026-10-04); falta un barrido real en la placa.
 
 Hecho el 2026-10-03:
 - [x] esp_hosted 3.0.9 en el P4 con el C6 de fábrica: Wi-Fi, AP (probado

@@ -98,3 +98,8 @@ Pixel Art, Lua, Maps, the 3D viewer and Notes lived in the firmware's
 `app.js` until 2026-10-04 and moved to their apps this way: `app.js` went
 from 5300 lines to 2565, and its CSS from 364 to 255. Each brings its styles
 in a `<style>` it adds once.
+
+Radio and Cameras were born this way, each with its page in its app; Radio
+has its own JSON API for the keys (`/api/radio`, aos_portal_radio.c). Red is
+an internal app, so its page (the saved sweeps, `/api/net`) lives in the
+firmware's `app.js` with the system's.

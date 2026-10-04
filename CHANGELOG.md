@@ -1,5 +1,26 @@
 # Changelog
 
+## Unreleased
+
+**The apps' own pages in the portal**
+- An app on the card can bring its page to the web portal: a JavaScript
+  module in its `web/` folder, which `tools/install_apps.sh` puts in the
+  card's `/web` and the portal loads at startup. No firmware, no restart; a
+  broken one does not break the portal. docs/PORTAL-PAGES.md.
+- Notes, Pixel Art, Lua, Maps and the 3D viewer moved their pages out of the
+  firmware this way (`app.js` from 5300 lines to 2565).
+- New pages: **Radio** (the nine keys by drag and drop, the list, a search
+  of radio-browser.info, what plays on the board; `GET`/`POST /api/radio`)
+  and **Cameras** (`/cameras.txt` edited by fields, with a preview).
+
+**Red**
+- Every LAN sweep is saved to the card's `/redes` as one NDJSON file, with
+  the Wi-Fi networks around scanned at its end (the newest 40 are kept).
+- A Red page in the portal: start a sweep and follow it (`GET`/`POST
+  /api/net`), the saved ones as tables, what changed since the one before
+  (hosts new and gone, ports opened and closed, networks), a graph of the
+  channels with the least busy of 1, 6 and 11, CSV and the raw file.
+
 ## 0.7.0 — 2026-10-04
 
 **Bluetooth and colour emoji**

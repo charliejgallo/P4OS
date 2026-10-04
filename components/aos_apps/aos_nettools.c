@@ -42,6 +42,9 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <time.h>
 
 #ifdef ESP_PLATFORM
 #include "esp_timer.h"
@@ -809,6 +812,175 @@ static bool scan_targets(uint32_t *base, int *count, uint32_t *self, char *range
 #endif
 }
 
+/* -------------------------------------------------------------------------- */
+/* The saved survey                                                            */
+/* -------------------------------------------------------------------------- */
+
+/* A finished sweep goes to the card as one NDJSON file, the format AmoledOS's
+ * aos_scan.c writes ("inicio", "wifi", "host", "puertos", "nombre", "fin"
+ * lines), so the portal's Red page reads both. Here the hosts carry no MAC
+ * (lwIP's ARP table holds 10 and forgets them as the sweep goes) but bring
+ * what this sweep knows and that one did not: the ping time, the guess of
+ * what each one is and which one is the board. */
+
+static void jstr(FILE *f, const char *s)
+{
+    fputc('"', f);
+    for (; s && *s; s++) {
+        unsigned char c = (unsigned char)*s;
+        if (c == '"' || c == '\\') fprintf(f, "\\%c", c);
+        else if (c < 0x20) fprintf(f, "\\u%04x", c);
+        else fputc(c, f);
+    }
+    fputc('"', f);
+}
+
+static const char *auth_txt(uint8_t a)
+{
+    switch (a) {
+    case AOS_WIFI_AUTH_OPEN:       return "abierta";
+    case AOS_WIFI_AUTH_WEP:        return "WEP";
+    case AOS_WIFI_AUTH_WPA:        return "WPA";
+    case AOS_WIFI_AUTH_WPA2:       return "WPA2";
+    case AOS_WIFI_AUTH_WPA_WPA2:   return "WPA/WPA2";
+    case AOS_WIFI_AUTH_WPA3:       return "WPA3";
+    case AOS_WIFI_AUTH_WPA2_WPA3:  return "WPA2/WPA3";
+    case AOS_WIFI_AUTH_ENTERPRISE: return "enterprise";
+    default:                       return "otra";
+    }
+}
+
+typedef struct { char name[40]; time_t mtime; } saved_t;
+
+static int saved_cmp(const void *a, const void *b)
+{
+    const saved_t *x = a, *y = b;
+    if (x->mtime != y->mtime) return x->mtime < y->mtime ? -1 : 1;
+    return strcmp(x->name, y->name);
+}
+
+/* The newest NT_SAVED_MAX stay; by date, so one saved before the clock was
+ * set (dated 1980 by FAT) is the first to go. */
+static void saved_prune(const char *dir)
+{
+    enum { CAP = 160 };
+    saved_t *v = nt_big_calloc(CAP, sizeof *v);
+    DIR *d = v ? opendir(dir) : NULL;
+    if (!d) { free(v); return; }
+    int n = 0;
+    struct dirent *e;
+    char path[96];
+    while ((e = readdir(d)) && n < CAP) {
+        size_t l = strlen(e->d_name);
+        if (l < 8 || l >= sizeof v[0].name || strcmp(e->d_name + l - 7, ".ndjson")) continue;
+        snprintf(path, sizeof path, "%s/%s", dir, e->d_name);
+        struct stat st;
+        if (stat(path, &st)) continue;
+        memcpy(v[n].name, e->d_name, l + 1);
+        v[n++].mtime = st.st_mtime;
+    }
+    closedir(d);
+    if (n > NT_SAVED_MAX) {
+        qsort(v, (size_t)n, sizeof *v, saved_cmp);
+        for (int i = 0; i < n - NT_SAVED_MAX; i++) {
+            snprintf(path, sizeof path, "%s/%s", dir, v[i].name);
+            unlink(path);
+        }
+    }
+    free(v);
+}
+
+static void survey_save(const nt_host_t *h, const bool *alive, int count, bool full,
+                        const char *range, const aos_wifi_ap_ex_t *aps, int naps,
+                        uint32_t ms, char *file, size_t fn)
+{
+    const char *dir = aos_hal_path_scans();
+    char path[96], when[24];
+    struct tm t;
+    aos_hal_time_now(&t);
+    mkdir(dir, 0777);
+    if (aos_hal_time_is_valid()) {
+        strftime(file, fn, "%Y%m%d-%H%M%S.ndjson", &t);
+        strftime(when, sizeof when, "%Y-%m-%d %H:%M", &t);
+    } else {
+        /* with no clock, a name that cannot collide is better than a date */
+        snprintf(file, fn, "barrido-%u.ndjson", (unsigned)(aos_hal_uptime_ms() / 1000));
+        when[0] = 0;
+    }
+    snprintf(path, sizeof path, "%s/%s", dir, file);
+    FILE *f = fopen(path, "w");
+    if (!f) { file[0] = 0; return; }
+
+    const char *slash = strchr(range, '/');
+    int prefix = slash ? atoi(slash + 1) : 24;
+    uint32_t mask = prefix >= 32 ? 0xFFFFFFFFu : prefix <= 0 ? 0 : ~((1u << (32 - prefix)) - 1);
+    char mk[16];
+    nt_ip_str(mask, mk, sizeof mk);
+    fputs("{\"t\":\"inicio\",\"fecha\":", f);
+    jstr(f, when);
+    fputs(",\"ssid\":", f);
+    jstr(f, aos_hal_net_ssid());
+    fputs(",\"ip\":", f);
+    jstr(f, aos_hal_net_ip());
+    fprintf(f, ",\"mascara\":\"%s\",\"rssi\":%d,\"rango\":", mk, aos_hal_net_rssi());
+    jstr(f, range);
+    fprintf(f, ",\"completo\":%s,\"equipo\":", full ? "true" : "false");
+    jstr(f, aos_hal_device_name());
+    fputs("}\n", f);
+
+    for (int i = 0; i < naps; i++) {
+        const aos_wifi_ap_ex_t *a = &aps[i];
+        fputs("{\"t\":\"wifi\",\"ssid\":", f);
+        jstr(f, a->ssid);
+        fprintf(f, ",\"bssid\":\"%02x:%02x:%02x:%02x:%02x:%02x\",\"rssi\":%d,\"canal\":%d,"
+                   "\"ancho\":%d,\"segundo\":%d,\"cifrado\":\"%s\",\"oculta\":%s}\n",
+                a->bssid[0], a->bssid[1], a->bssid[2], a->bssid[3], a->bssid[4], a->bssid[5],
+                a->rssi, a->channel, a->width ? a->width : 20, a->second, auth_txt(a->auth),
+                a->ssid[0] ? "false" : "true");
+    }
+
+    int hosts = 0, ports = 0;
+    char ip[16];
+    for (int i = 0; i < count; i++) {
+        if (!alive[i]) continue;
+        const nt_host_t *x = &h[i];
+        hosts++;
+        ports += x->nports;
+        nt_ip_str(x->ip, ip, sizeof ip);
+        fprintf(f, "{\"t\":\"host\",\"ip\":\"%s\",\"ping\":%s", ip, x->icmp ? "true" : "false");
+        if (x->icmp) fprintf(f, ",\"rtt\":%d", (int)(x->rtt_ms + 0.5f));      /* ms: no float printf */
+        if (x->self) fputs(",\"yo\":true", f);
+        fputs(",\"que\":", f);
+        jstr(f, nt_guess(x));
+        fputs("}\n", f);
+        if (x->nports) {
+            fprintf(f, "{\"t\":\"puertos\",\"ip\":\"%s\",\"abiertos\":[", ip);
+            for (int k = 0; k < x->nports; k++) fprintf(f, "%s%u", k ? "," : "", x->ports[k]);
+            fputs("]}\n", f);
+        }
+        if (x->name[0]) {
+            /* one line per service, the way aos_scan.c writes them; a name
+             * with no service announced (the board's own) still gets one */
+            bool any = false;
+            for (int k = 0; k <= NT_MDNS_NTYPES; k++) {
+                if (k < NT_MDNS_NTYPES ? !(x->mdns & NT_MDNS_TYPES[k].bit) : any) continue;
+                fprintf(f, "{\"t\":\"nombre\",\"ip\":\"%s\",\"nombre\":", ip);
+                jstr(f, x->name);
+                fputs(",\"host\":", f);
+                jstr(f, x->name);
+                fputs(",\"servicio\":", f);
+                jstr(f, k < NT_MDNS_NTYPES ? NT_MDNS_TYPES[k].label : "");
+                fputs("}\n", f);
+                any = true;
+            }
+        }
+    }
+    fprintf(f, "{\"t\":\"fin\",\"redes\":%d,\"equipos\":%d,\"puertos\":%d,\"ms\":%u,\"cortado\":false}\n",
+            naps, hosts, ports, (unsigned)ms);
+    fclose(f);
+    saved_prune(dir);
+}
+
 static void scan_thread(void *arg)
 {
     sweep_t w;
@@ -943,6 +1115,41 @@ static void scan_thread(void *arg)
         if (w.h[i].self && !w.h[i].name[0]) snprintf(w.h[i].name, sizeof w.h[i].name, "%s.local", aos_hal_device_name());
     }
     if (scan_cancel(&w)) goto stopped;
+
+    /* 4. The networks around, for the saved survey: the WiFi tab's scan if it
+     *    is fresh, else one now (two seconds of the radio off the channel,
+     *    which is why it waits until the sweep is over). */
+    {
+        aos_wifi_ap_ex_t *aps = nt_big_calloc(NT_MAX_APS, sizeof *aps);
+        int naps = 0;
+        if (aps) {
+            nt_lock();
+            bool fresh = W.n > 0 && W.state == NT_DONE && (uint32_t)aos_hal_uptime_ms() - W.scanned_ms < 120000;
+            if (fresh) { naps = W.n; memcpy(aps, W.aps, (size_t)naps * sizeof *aps); }
+            nt_unlock();
+            if (!fresh) {
+                naps = aos_hal_net_scan_ex(aps, NT_MAX_APS);
+                if (naps < 0) naps = 0;
+                nt_lock();
+                if (naps > 0 && W.state != NT_BUSY) {       /* the WiFi tab gets it free */
+                    memcpy(W.aps, aps, (size_t)naps * sizeof *aps);
+                    W.n = naps;
+                    W.state = NT_DONE;
+                    W.scanned_ms = (uint32_t)aos_hal_uptime_ms();
+                    W.seq++;
+                }
+                nt_unlock();
+            }
+        }
+        if (scan_cancel(&w)) { free(aps); goto stopped; }
+        char file[48];
+        survey_save(w.h, w.alive, count, w.full, range, aps, naps,
+                    (uint32_t)((now_us() - w.t0) / 1000), file, sizeof file);
+        free(aps);
+        nt_lock();
+        if (w.gen == s_scan_gen) snprintf(S.file, sizeof S.file, "%s", file);
+        nt_unlock();
+    }
     scan_publish(&w, 2, 1, 1);
     nt_lock();
     if (w.gen == s_scan_gen) { S.state = NT_DONE; S.seq++; }
