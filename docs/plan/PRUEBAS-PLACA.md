@@ -41,10 +41,9 @@ Hecho el 2026-10-04 (0.7.0):
 - [x] Modo Teclado Bluetooth con una MacBook Air y el iPhone a la vez: texto
       de 72 caracteres, subir volumen, trackpad del Macro pad (dice BLE).
       Los dos se reconectan solos después de reiniciar el Bluetooth.
-- [ ] Páginas de Grabadora, Clima y Cotizaciones (2026-10-04, después de la
-      0.8.0) y rangos en `/api/fs/get`: probadas en el simulador; falta en
-      la placa escuchar una grabación desde Safari, cambiar el lugar de
-      Clima y la lista de Cotizaciones con las apps abiertas.
+- [x] Páginas de Grabadora, Clima y Cotizaciones (2026-10-04, después de la
+      0.8.0) y rangos en `/api/fs/get`: probadas en la placa por el
+      usuario, con las apps abiertas.
 - [x] Ajustes, Desarrollador (2026-10-04): toques y fps encima de todo, el
       nivel del registro, los ajustes de dibujo de `/api/tune` con su vuelta
       a fábrica, y reiniciar en modo seguro sin BOOT. Probados en la placa
@@ -60,9 +59,11 @@ Hecho el 2026-10-04 (0.7.0):
 - [x] Mudadas a sus apps las páginas que vivían en el firmware: Notas,
       Pixel Art, Lua, Mapas y el Visor 3D (`app.js` de 5300 a 2565 líneas).
       Revisadas una por una en el simulador; en la placa cargan de /web.
-- [ ] Páginas nuevas de Radio (`/api/radio`, las nueve teclas, buscar y
-      arrastrar) y Cámaras (`/cameras.txt` con vista previa), desde sus apps;
-      probadas en el simulador con la cámara falsa (2026-10-04).
+- [x] Páginas nuevas de Radio (`/api/radio`, las nueve teclas, buscar y
+      arrastrar) y Cámaras (`/cameras.txt` con vista previa), desde sus apps
+      (2026-10-04). Radio probada en la placa por el usuario: emisoras
+      nuevas en las teclas. Cámaras, sólo en el simulador con la cámara
+      falsa.
 - [ ] Red guarda cada barrido en `/redes` (NDJSON, los 40 últimos) y el
       portal tiene la página Red: lanzar un barrido (`/api/net`), ver los
       guardados, cambios contra el anterior, gráfico de canales, CSV.
