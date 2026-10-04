@@ -56,8 +56,10 @@ Hecho el 2026-10-04 (0.7.0):
       portal tiene la página Red: lanzar un barrido (`/api/net`), ver los
       guardados, cambios contra el anterior, gráfico de canales, CSV.
       Barrido real en la placa hecho por el usuario (2026-10-04): anda.
-- [ ] Las MAC en el barrido (tabla ARP leída tanda por tanda) y los equipos
-      «sólo ARP»; probado en el simulador con relevamientos inventados.
+- [x] Las MAC en el barrido (tabla ARP leída tanda por tanda) y los equipos
+      «sólo ARP»: vistas en la placa por el usuario (2026-10-04), con el
+      fabricante de `/redes/oui.txt` (40.033 OUI, sacados del `manuf` de
+      Wireshark porque la IEEE rechaza la descarga automática).
 
 Hecho el 2026-10-03:
 - [x] esp_hosted 3.0.9 en el P4 con el C6 de fábrica: Wi-Fi, AP (probado
