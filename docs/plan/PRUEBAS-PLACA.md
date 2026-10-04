@@ -41,6 +41,13 @@ Hecho el 2026-10-04 (0.7.0):
 - [x] Modo Teclado Bluetooth con una MacBook Air y el iPhone a la vez: texto
       de 72 caracteres, subir volumen, trackpad del Macro pad (dice BLE).
       Los dos se reconectan solos después de reiniciar el Bluetooth.
+- [x] Seguridad del portal (2026-10-04, docs/SECURITY.md): rechazo de
+      pedidos de otros sitios y de otros nombres, redes de confianza,
+      contraseña con sesión y «Cerrar sesión» (probados por el usuario).
+- [ ] HTTPS con la autoridad propia: en la placa la cadena verifica para
+      p4os.local desde la Mac con openssl (AES-128-GCM, SAN con la IP del
+      Wi-Fi); falta instalar la autoridad como confiable en la Mac y el
+      iPhone y ver el candado en Safari y Chrome.
 - [x] Páginas de Grabadora, Clima y Cotizaciones (2026-10-04, después de la
       0.8.0) y rangos en `/api/fs/get`: probadas en la placa por el
       usuario, con las apps abiertas.
