@@ -19,6 +19,7 @@
 #pragma once
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
 
 #include "aos_hal.h"
@@ -71,6 +72,22 @@ void     aos_ble_pair_confirm(bool accept);
 
 /* Accept or reject a notification (answer/hang up a call). */
 bool aos_ble_notif_action(uint32_t uid, bool positive);
+
+/* ---- the board as a computer's keyboard, mouse and media keys
+ * (aos_ble_hid.c). With the mode on, a second connection is allowed: the
+ * phone (the one with ANCS) and a computer. ---- */
+void aos_ble_hid_enable(bool on);       /* preference; restarts the stack */
+bool aos_ble_hid_wanted(void);
+bool aos_ble_hid_ready(void);           /* a computer is connected and listens to the keyboard */
+bool aos_ble_hid_send(int report_id, const void *data, size_t len);     /* 1 keyboard, 2 media, 3 mouse */
+const char *aos_ble_host_name(void);    /* the computer's name, "" when none */
+
+/* between aos_ble.c and aos_ble_hid.c */
+void     aos_ble_hid_register(void);
+void     aos_ble_hid_subscribe(uint16_t attr, bool notify);
+void     aos_ble_hid_host_gone(void);
+uint16_t aos_ble_host_conn(void);       /* 0xFFFF when none */
+bool     aos_ble_is_phone(uint16_t conn);
 
 
 #ifdef __cplusplus

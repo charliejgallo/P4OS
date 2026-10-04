@@ -98,6 +98,13 @@ void aos_hal_bt_pair_cancel(void) { aos_ble_pair_confirm(false); }
 
 bool aos_hal_notif_action(uint32_t uid, bool positive) { return aos_ble_notif_action(uid, positive); }
 
+/* ---- the keyboard mode (aos_ble_hid.c) ---- */
+
+void aos_hal_bt_keyboard_enable(bool on) { aos_ble_hid_enable(on); }
+bool aos_hal_bt_keyboard_enabled(void) { return aos_ble_hid_wanted(); }
+const char *aos_hal_bt_keyboard_host(void) { return aos_ble_host_name(); }
+bool aos_hal_bt_keyboard_ready(void) { return aos_ble_hid_ready(); }
+
 /* main.c's loop, every 3 s: the phone's time is applied here and not in
  * NimBLE's task, and advertising that stopped by itself comes back */
 void aos_bt_p4_tick(void) { aos_ble_tick(); }

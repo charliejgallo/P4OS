@@ -552,6 +552,18 @@ __attribute__((weak)) void aos_hal_bt_pair_confirm(bool accept)
 __attribute__((weak)) void aos_hal_bt_pair_cancel(void)
 { }
 
+__attribute__((weak)) void aos_hal_bt_keyboard_enable(bool on)
+{ }
+
+__attribute__((weak)) bool aos_hal_bt_keyboard_enabled(void)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) const char * aos_hal_bt_keyboard_host(void)
+{ return ""; }
+
+__attribute__((weak)) bool aos_hal_bt_keyboard_ready(void)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) bool aos_hal_notif_pop(aos_notif_t *out)
 { bool v; memset(&v, 0, sizeof v); return v; }
 

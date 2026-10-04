@@ -2221,6 +2221,19 @@ static const char blob_en__sistema_lang[] =
     "Una versión nueva del firmware del C6 se copia a /firmware/c6.bin de la tarjeta (portal o tools/install_c6.sh) y se instala desde acá.\tA new C6 firmware goes to the card's /firmware/c6.bin (portal or tools/install_c6.sh) and is installed from here.\n"
     "Instalar en el C6\tInstall on the C6\n"
     "El C6 la escribe en su otra ranura y la revisa antes de cambiar. Mientras tanto no hay Wi-Fi, y al terminar la placa se reinicia.\tThe C6 writes it into its other slot and checks it before switching. There is no Wi-Fi meanwhile, and the board restarts at the end.\n"
+    "¿El teléfono muestra este número?\tDoes the phone show this number?\n"
+    "Tocá otra vez para olvidarlo\tTap again to forget it\n"
+    "Con el Bluetooth prendido, la placa recibe las notificaciones y la música del iPhone, y puede ser el teclado de una computadora.\tWith Bluetooth on, the board gets the iPhone's notifications and music, and can be a computer's keyboard.\n"
+    "TELÉFONO\tPHONE\n"
+    "esperando que vuelva\twaiting for it to come back\n"
+    "visible, sin emparejar\tvisible, not paired\n"
+    "Batería del teléfono\tPhone battery\n"
+    "Olvidar el teléfono\tForget the phone\n"
+    "En el iPhone: Ajustes, Bluetooth, tocá el nombre de la placa y confirmá el número en los dos.\tOn the iPhone: Settings, Bluetooth, tap the board's name and confirm the number on both.\n"
+    "TECLADO BLUETOOTH\tBLUETOOTH KEYBOARD\n"
+    "Teclado Bluetooth\tBluetooth keyboard\n"
+    "Computadora\tComputer\n"
+    "La placa como teclado, mouse y teclas de medios de una computadora: se empareja desde los ajustes de Bluetooth de la Mac o la PC, y el Macro pad y las apps mandan las teclas por ahí cuando no hay un cable USB. El teléfono sigue conectado.\tThe board as a computer's keyboard, mouse and media keys: pair it from the Mac's or the PC's Bluetooth settings, and the Macro pad and the apps send their keys that way when there is no USB cable. The phone stays connected.\n"
     ;
 
 static const char blob_en_aos_cameras_lang[] =
@@ -6475,6 +6488,19 @@ static const char blob_de__sistema_lang[] =
     "Una versión nueva del firmware del C6 se copia a /firmware/c6.bin de la tarjeta (portal o tools/install_c6.sh) y se instala desde acá.\tEine neue C6-Firmware kommt nach /firmware/c6.bin auf der Karte (Portal oder tools/install_c6.sh) und wird von hier installiert.\n"
     "Instalar en el C6\tAuf dem C6 installieren\n"
     "El C6 la escribe en su otra ranura y la revisa antes de cambiar. Mientras tanto no hay Wi-Fi, y al terminar la placa se reinicia.\tDer C6 schreibt sie in seinen anderen Slot und prüft sie vor dem Wechsel. Solange gibt es kein WLAN, und am Ende startet die Platine neu.\n"
+    "¿El teléfono muestra este número?\tZeigt das Telefon diese Zahl?\n"
+    "Tocá otra vez para olvidarlo\tNochmal tippen zum Vergessen\n"
+    "Con el Bluetooth prendido, la placa recibe las notificaciones y la música del iPhone, y puede ser el teclado de una computadora.\tMit Bluetooth bekommt die Platine die Mitteilungen und die Musik des iPhones und kann die Tastatur eines Computers sein.\n"
+    "TELÉFONO\tTELEFON\n"
+    "esperando que vuelva\twartet auf Rückkehr\n"
+    "visible, sin emparejar\tsichtbar, nicht gekoppelt\n"
+    "Batería del teléfono\tAkku des Telefons\n"
+    "Olvidar el teléfono\tTelefon vergessen\n"
+    "En el iPhone: Ajustes, Bluetooth, tocá el nombre de la placa y confirmá el número en los dos.\tAuf dem iPhone: Einstellungen, Bluetooth, den Namen der Platine antippen und die Zahl auf beiden bestätigen.\n"
+    "TECLADO BLUETOOTH\tBLUETOOTH-TASTATUR\n"
+    "Teclado Bluetooth\tBluetooth-Tastatur\n"
+    "Computadora\tComputer\n"
+    "La placa como teclado, mouse y teclas de medios de una computadora: se empareja desde los ajustes de Bluetooth de la Mac o la PC, y el Macro pad y las apps mandan las teclas por ahí cuando no hay un cable USB. El teléfono sigue conectado.\tDie Platine als Tastatur, Maus und Medientasten eines Computers: In den Bluetooth-Einstellungen des Mac oder PCs koppeln, dann schicken das Macro Pad und die Apps ihre Tasten darüber, wenn kein USB-Kabel steckt. Das Telefon bleibt verbunden.\n"
     ;
 
 static const char blob_de_aos_cameras_lang[] =
@@ -8522,7 +8548,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2207, 32, files_en, 33 },
-    { "de", "Deutsch", 2207, 32, files_de, 33 },
+    { "en", "English", 2220, 32, files_en, 33 },
+    { "de", "Deutsch", 2220, 32, files_de, 33 },
 };
 const int aos_lang_pack_count = 2;

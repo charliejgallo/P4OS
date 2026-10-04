@@ -1805,6 +1805,31 @@ void aos_hal_bt_forget(void)
     printf("[hal] phone forgotten\n");
 }
 
+/* The keyboard mode: the switch keeps its state, and a computer "connects"
+ * a second after it is switched on, so the page can be drawn. */
+static int64_t s_bt_kbd_ms;
+
+void aos_hal_bt_keyboard_enable(bool on)
+{
+    aos_hal_pref_set_i32("bt_hid", on ? 1 : 0);
+    s_bt_kbd_ms = on ? (int64_t)aos_hal_uptime_ms() : 0;
+}
+
+bool aos_hal_bt_keyboard_enabled(void)
+{
+    int32_t v = 0;
+    aos_hal_pref_get_i32("bt_hid", &v);
+    return v != 0;
+}
+
+const char *aos_hal_bt_keyboard_host(void)
+{
+    return aos_hal_bt_keyboard_enabled() && s_bt_enabled && aos_hal_uptime_ms() - s_bt_kbd_ms > 1000 ? "MacBook Air"
+                                                                                                    : "";
+}
+
+bool aos_hal_bt_keyboard_ready(void) { return aos_hal_bt_keyboard_host()[0] != 0; }
+
 void aos_hal_bt_pair_begin(void)
 {
     if (!s_bt_enabled) {

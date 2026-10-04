@@ -1171,6 +1171,16 @@ uint32_t aos_hal_bt_pair_code(void);        /* 0 = no code yet */
 void     aos_hal_bt_pair_confirm(bool accept);
 void     aos_hal_bt_pair_cancel(void);
 
+/* P4OS: the board as a computer's Bluetooth keyboard, mouse and media keys
+ * (HID over GATT, components/aos_ble/aos_ble_hid.c). With it on, a Mac or a
+ * PC pairs from its own Bluetooth settings while the phone stays connected,
+ * and aos_hal_usb_key/type/mouse/click go over Bluetooth when no computer is
+ * on the USB cable. Off by default; switching it restarts Bluetooth. */
+void        aos_hal_bt_keyboard_enable(bool on);   /* preference, survives restarts */
+bool        aos_hal_bt_keyboard_enabled(void);
+const char *aos_hal_bt_keyboard_host(void);        /* the connected computer's name, "" when none */
+bool        aos_hal_bt_keyboard_ready(void);       /* a computer listens to the keyboard */
+
 /* --------------------------------------------------------------------------
  * Phone notifications
  *

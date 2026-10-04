@@ -7135,3 +7135,16 @@ En la tarjeta	On the card
 Una versión nueva del firmware del C6 se copia a /firmware/c6.bin de la tarjeta (portal o tools/install_c6.sh) y se instala desde acá.	A new C6 firmware goes to the card's /firmware/c6.bin (portal or tools/install_c6.sh) and is installed from here.
 Instalar en el C6	Install on the C6
 El C6 la escribe en su otra ranura y la revisa antes de cambiar. Mientras tanto no hay Wi-Fi, y al terminar la placa se reinicia.	The C6 writes it into its other slot and checks it before switching. There is no Wi-Fi meanwhile, and the board restarts at the end.
+¿El teléfono muestra este número?	Does the phone show this number?
+Tocá otra vez para olvidarlo	Tap again to forget it
+Con el Bluetooth prendido, la placa recibe las notificaciones y la música del iPhone, y puede ser el teclado de una computadora.	With Bluetooth on, the board gets the iPhone's notifications and music, and can be a computer's keyboard.
+TELÉFONO	PHONE
+esperando que vuelva	waiting for it to come back
+visible, sin emparejar	visible, not paired
+Batería del teléfono	Phone battery
+Olvidar el teléfono	Forget the phone
+En el iPhone: Ajustes, Bluetooth, tocá el nombre de la placa y confirmá el número en los dos.	On the iPhone: Settings, Bluetooth, tap the board's name and confirm the number on both.
+TECLADO BLUETOOTH	BLUETOOTH KEYBOARD
+Teclado Bluetooth	Bluetooth keyboard
+Computadora	Computer
+La placa como teclado, mouse y teclas de medios de una computadora: se empareja desde los ajustes de Bluetooth de la Mac o la PC, y el Macro pad y las apps mandan las teclas por ahí cuando no hay un cable USB. El teléfono sigue conectado.	The board as a computer's keyboard, mouse and media keys: pair it from the Mac's or the PC's Bluetooth settings, and the Macro pad and the apps send their keys that way when there is no USB cable. The phone stays connected.

@@ -50,12 +50,12 @@ static void *big_calloc(size_t n)
 #endif
 
 enum { PG_ROOT = 0, PG_WIFI, PG_DISPLAY, PG_SOUND, PG_WALL, PG_EXP, PG_LANG, PG_TIME, PG_ABOUT, PG_USB,
-       PG_STORAGE, PG_UPDATE, PG_DIAG, PG_LOCK, PG_COUNT };
+       PG_STORAGE, PG_UPDATE, PG_DIAG, PG_LOCK, PG_BT, PG_COUNT };
 
 static const char *const PG_TITLE[PG_COUNT] = { N_("Ajustes"), N_("Wi-Fi"), N_("Pantalla"), N_("Sonido"), N_("Fondo"),
                                                 N_("Expansión"), N_("Idioma"), N_("Fecha y hora"), N_("Acerca de"),
                                                 "USB", N_("Almacenamiento"), N_("Actualización"), N_("Diagnóstico"),
-                                                N_("Pantalla de bloqueo") };
+                                                N_("Pantalla de bloqueo"), "Bluetooth" };
 
 static struct {
     lv_obj_t *root, *page, *kb, *ta, *overlay;
@@ -77,6 +77,7 @@ static struct {
     /* Storage: the count it shows; Diagnostics: the live values */
     int st_shown;
     int ap_shown;                   /* Wi-Fi: the access point's state the page shows */
+    int bt_shown;                   /* Bluetooth: the state the page shows */
     lv_obj_t *dg_temp, *dg_cpu, *dg_int, *dg_psram, *dg_up;
     lv_obj_t *c6_state;             /* Update: the C6's firmware going in */
     /* a row that asks for a second tap before it acts */
@@ -247,7 +248,70 @@ static void note(lv_obj_t *p, const char *text)
 /* -------------------------------------------------------------------------- */
 
 static void open_cb(lv_event_t *e) { show((int)(intptr_t)lv_event_get_user_data(e)); }
-static void bt_cb(lv_event_t *e) { aos_hal_bt_enable(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED)); }
+/* ---- Bluetooth: the phone, and the board as a computer's keyboard ---- */
+
+static int bt_key(void)
+{
+    int k = (int)aos_hal_bt_state() | aos_hal_bt_enabled() << 2 | aos_hal_bt_bonded() << 3 |
+            aos_hal_bt_keyboard_enabled() << 4 | (aos_hal_bt_keyboard_host()[0] != 0) << 5;
+    int pct = -1;
+    if (aos_hal_bt_phone_battery(&pct)) k |= (pct + 1) << 8;
+    for (const char *p = aos_hal_bt_peer(); *p; p++) k = k * 31 + *p;
+    for (const char *p = aos_hal_bt_keyboard_host(); *p; p++) k = k * 31 + *p;
+    return k;
+}
+
+/* the page follows by itself: the timer rebuilds it when bt_key() changes */
+static void bt_page_cb(lv_event_t *e) { aos_hal_bt_enable(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED)); }
+static void bt_kbd_cb(lv_event_t *e) { aos_hal_bt_keyboard_enable(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED)); }
+
+static void bt_forget_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez para olvidarlo"))) return;
+    aos_hal_bt_forget();
+}
+
+static const char *bt_root_text(void)
+{
+    if (!aos_hal_bt_enabled()) return _("No");
+    if (aos_hal_bt_state() == AOS_BT_CONNECTED && aos_hal_bt_peer()[0]) return aos_hal_bt_peer();
+    return _("Sí");
+}
+
+static void build_bt(lv_obj_t *p)
+{
+    char v[64];
+    U.bt_shown = bt_key();
+    lv_obj_t *g = group(p, NULL);
+    row_switch(g, AOS_SYM_BLUETOOTH, 0x0A84FF, "Bluetooth", aos_hal_bt_enabled(), bt_page_cb);
+    if (!aos_hal_bt_enabled()) {
+        note(p, _("Con el Bluetooth prendido, la placa recibe las notificaciones y la música del iPhone, y puede ser el teclado de una computadora."));
+        return;
+    }
+
+    g = group(p, _("TELÉFONO"));
+    aos_bt_state_t st = aos_hal_bt_state();
+    const char *peer = aos_hal_bt_peer();
+    row(g, NULL, 0, _("Estado"),
+        st == AOS_BT_CONNECTED ? (peer[0] ? peer : _("conectado")) : st == AOS_BT_PAIRING ? _("emparejando")
+        : aos_hal_bt_bonded() ? _("esperando que vuelva") : _("visible, sin emparejar"), false, NULL, NULL);
+    int pct;
+    if (st == AOS_BT_CONNECTED && aos_hal_bt_phone_battery(&pct)) {
+        snprintf(v, sizeof v, "%d %%", pct);
+        row(g, NULL, 0, _("Batería del teléfono"), v, false, NULL, NULL);
+    }
+    if (aos_hal_bt_bonded()) action_row(g, _("Olvidar el teléfono"), AOS_C_RED, bt_forget_cb);
+    if (!aos_hal_bt_bonded())
+        note(p, _("En el iPhone: Ajustes, Bluetooth, tocá el nombre de la placa y confirmá el número en los dos."));
+
+    g = group(p, _("TECLADO BLUETOOTH"));
+    row_switch(g, AOS_SYM_KEYBOARD, 0x5E5CE6, _("Teclado Bluetooth"), aos_hal_bt_keyboard_enabled(), bt_kbd_cb);
+    if (aos_hal_bt_keyboard_enabled()) {
+        const char *host = aos_hal_bt_keyboard_host();
+        row(g, NULL, 0, _("Computadora"), host[0] ? host : _("ninguna"), false, NULL, NULL);
+    }
+    note(p, _("La placa como teclado, mouse y teclas de medios de una computadora: se empareja desde los ajustes de Bluetooth de la Mac o la PC, y el Macro pad y las apps mandan las teclas por ahí cuando no hay un cable USB. El teléfono sigue conectado."));
+}
 static void wifi_sw_cb(lv_event_t *e) { aos_hal_net_enable(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED)); }
 static void edit_home_cb(lv_event_t *e) { aos_ui_edit_home(); }
 
@@ -418,7 +482,7 @@ static void build_root(lv_obj_t *p)
     snprintf(buf, sizeof buf, "%s", aos_hal_net_state() == AOS_NET_CONNECTED ? aos_hal_net_ssid()
                                     : aos_hal_net_enabled() ? _("Sin conectar") : _("No"));
     row(g, AOS_SYM_WIFI, 0x0A84FF, _("Wi-Fi"), buf, true, open_cb, (void *)PG_WIFI);
-    row_switch(g, AOS_SYM_BLUETOOTH, 0x0A84FF, _("Bluetooth"), aos_hal_bt_enabled(), bt_cb);
+    row(g, AOS_SYM_BLUETOOTH, 0x0A84FF, "Bluetooth", bt_root_text(), true, open_cb, (void *)PG_BT);
     lv_obj_t *u = row(g, AOS_SYM_USB, 0x636366, "USB", usb_name((int)aos_hal_usb_mode()), true, open_cb, (void *)PG_USB);
     U.usb_root = lv_obj_get_user_data(u);
 
@@ -1762,6 +1826,7 @@ static void fill(lv_obj_t *col, int pg, bool back)
     case PG_TIME: build_time(col); break;
     case PG_ABOUT: build_about(col); break;
     case PG_USB: build_usb(col); break;
+    case PG_BT: build_bt(col); break;
     case PG_STORAGE: build_storage(col); break;
     case PG_UPDATE: build_update(col); break;
     case PG_DIAG: build_diag(col); break;
@@ -1837,6 +1902,7 @@ static void timer_cb(lv_timer_t *t)
     if (U.usb_state || U.usb_root) usb_refresh();
     int pg = U.land ? U.selected : U.depth ? U.stack[U.depth - 1] : PG_ROOT;
     if (pg == PG_WIFI && U.ap_shown != ap_key() && !U.overlay && !U.armed) build(pg);   /* the access point came up or down */
+    if (pg == PG_BT && U.bt_shown != bt_key() && !U.overlay && !U.armed) build(pg);     /* a phone or a computer came or went */
     if (pg == PG_STORAGE && U.st_shown != S.gen && !U.overlay) build(pg);   /* the count moved on */
     static int ticks;
     if (U.dg_temp && ++ticks % 3 == 0) diag_refresh();

@@ -7135,3 +7135,16 @@ En la tarjeta	Auf der Karte
 Una versión nueva del firmware del C6 se copia a /firmware/c6.bin de la tarjeta (portal o tools/install_c6.sh) y se instala desde acá.	Eine neue C6-Firmware kommt nach /firmware/c6.bin auf der Karte (Portal oder tools/install_c6.sh) und wird von hier installiert.
 Instalar en el C6	Auf dem C6 installieren
 El C6 la escribe en su otra ranura y la revisa antes de cambiar. Mientras tanto no hay Wi-Fi, y al terminar la placa se reinicia.	Der C6 schreibt sie in seinen anderen Slot und prüft sie vor dem Wechsel. Solange gibt es kein WLAN, und am Ende startet die Platine neu.
+¿El teléfono muestra este número?	Zeigt das Telefon diese Zahl?
+Tocá otra vez para olvidarlo	Nochmal tippen zum Vergessen
+Con el Bluetooth prendido, la placa recibe las notificaciones y la música del iPhone, y puede ser el teclado de una computadora.	Mit Bluetooth bekommt die Platine die Mitteilungen und die Musik des iPhones und kann die Tastatur eines Computers sein.
+TELÉFONO	TELEFON
+esperando que vuelva	wartet auf Rückkehr
+visible, sin emparejar	sichtbar, nicht gekoppelt
+Batería del teléfono	Akku des Telefons
+Olvidar el teléfono	Telefon vergessen
+En el iPhone: Ajustes, Bluetooth, tocá el nombre de la placa y confirmá el número en los dos.	Auf dem iPhone: Einstellungen, Bluetooth, den Namen der Platine antippen und die Zahl auf beiden bestätigen.
+TECLADO BLUETOOTH	BLUETOOTH-TASTATUR
+Teclado Bluetooth	Bluetooth-Tastatur
+Computadora	Computer
+La placa como teclado, mouse y teclas de medios de una computadora: se empareja desde los ajustes de Bluetooth de la Mac o la PC, y el Macro pad y las apps mandan las teclas por ahí cuando no hay un cable USB. El teléfono sigue conectado.	Die Platine als Tastatur, Maus und Medientasten eines Computers: In den Bluetooth-Einstellungen des Mac oder PCs koppeln, dann schicken das Macro Pad und die Apps ihre Tasten darüber, wenn kein USB-Kabel steckt. Das Telefon bleibt verbunden.

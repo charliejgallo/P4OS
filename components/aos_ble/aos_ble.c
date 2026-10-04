@@ -115,6 +115,19 @@ static uint16_t s_h_svc_end;
  * to stall the drawing from a radio callback, which is worse. */
 static char s_peer[40];
 
+/* The computer, when the keyboard mode (aos_ble_hid.c) lets a second
+ * connection in. A connection is the phone if it has ANCS and the computer
+ * if it has not; until that is known it waits in s_conn, the phone's place
+ * (on_svc sorts them). s_phone is the phone's identity once seen, so its HID
+ * reads can be refused from the first one on the next connection. */
+static volatile uint16_t s_host = SIN_CONN;
+static char s_host_name[40];
+static ble_addr_t s_phone;
+static bool s_phone_known;
+
+static void limpiar_conexion(void);
+static void to_host(uint16_t conn);
+
 /* --------------------------------------------------------------------------
  * What the phone publishes besides notifications
  *
@@ -538,10 +551,23 @@ static int on_svc(uint16_t conn, const struct ble_gatt_error *error,
 {
     (void)arg;
     if (error->status == BLE_HS_EDONE) {
-        if (!s_h_svc_end) {
-            ESP_LOGW(TAG, "the ANCS service did not show up");
+        /* no ANCS: not a phone. With the keyboard mode on it is the computer */
+        if (conn == s_conn && !s_h_svc_end) {
+            if (aos_ble_hid_wanted() && s_host == SIN_CONN) to_host(conn);
+            else ESP_LOGW(TAG, "the ANCS service did not show up");
         }
         return 0;
+    }
+    if (error->status == 0 && svc && conn != s_conn) {
+        /* the phone came second: it takes the phone's place, and whatever
+         * was waiting there is the computer */
+        uint16_t other = s_conn;
+        limpiar_conexion();
+        s_conn = conn;
+        s_conectado = true;
+        s_cifrado = true;
+        s_host = SIN_CONN;
+        if (other != SIN_CONN) to_host(other);
     }
     if (error->status != 0 || !svc) {
         ESP_LOGW(TAG, "looking for ANCS: %d", error->status);
@@ -549,6 +575,11 @@ static int on_svc(uint16_t conn, const struct ble_gatt_error *error,
     }
     s_svc_start = svc->start_handle;
     s_h_svc_end = svc->end_handle;
+    struct ble_gap_conn_desc pd;
+    if (ble_gap_conn_find(conn, &pd) == 0) {
+        s_phone = pd.peer_id_addr;
+        s_phone_known = true;
+    }
     s_chr_count = 0;
     ESP_LOGI(TAG, "ANCS at %u..%u", svc->start_handle, svc->end_handle);
     ble_gattc_disc_all_chrs(conn, svc->start_handle, svc->end_handle,
@@ -1065,6 +1096,47 @@ static void limpiar_conexion(void)
     aos_notif_reset_pending();
 }
 
+uint16_t aos_ble_host_conn(void) { return s_host; }
+const char *aos_ble_host_name(void) { return s_host != SIN_CONN ? s_host_name : ""; }
+
+bool aos_ble_is_phone(uint16_t conn)
+{
+    if (conn == s_conn && s_h_svc_end) return true;         /* it has ANCS */
+    struct ble_gap_conn_desc d;
+    return s_phone_known && ble_gap_conn_find(conn, &d) == 0 && !ble_addr_cmp(&d.peer_id_addr, &s_phone);
+}
+
+static int on_host_name(uint16_t conn, const struct ble_gatt_error *error, struct ble_gatt_attr *attr, void *arg)
+{
+    (void)arg;
+    if (conn != s_host || error->status != 0 || !attr || !attr->om) return 0;
+    uint16_t n = OS_MBUF_PKTLEN(attr->om);
+    if (n >= sizeof s_host_name) n = sizeof s_host_name - 1;
+    if (ble_hs_mbuf_to_flat(attr->om, s_host_name, n, NULL) == 0) {
+        s_host_name[n] = '\0';
+        ESP_LOGI(TAG, "computer: %s", s_host_name);
+    }
+    return 0;
+}
+
+/* This connection is a computer, not the phone. */
+static void to_host(uint16_t conn)
+{
+    if (conn == s_conn) limpiar_conexion();
+    s_host = conn;
+    snprintf(s_host_name, sizeof s_host_name, "%s", "?");
+    ble_gattc_read_by_uuid(conn, 1, 0xFFFF, BLE_UUID16_DECLARE(0x2A00), on_host_name, NULL);
+    ESP_LOGI(TAG, "a computer on connection %u", (unsigned)conn);
+}
+
+static void advertise(void);
+
+/* With the keyboard mode on there is room for two: go on being seen. */
+static void advertise_if_room(void)
+{
+    if (aos_ble_hid_wanted() && (s_conn == SIN_CONN || s_host == SIN_CONN)) advertise();
+}
+
 static int gap_event(struct ble_gap_event *event, void *arg)
 {
     (void)arg;
@@ -1077,6 +1149,14 @@ static int gap_event(struct ble_gap_event *event, void *arg)
             advertise();
             return 0;
         }
+        if (s_conn != SIN_CONN) {
+            /* the phone's place is taken: this one is the computer, if the
+             * keyboard mode allows a second, and on_svc swaps them if not */
+            s_host = event->connect.conn_handle;
+            ESP_LOGI(TAG, "second connection (%u)", (unsigned)s_host);
+            if (ble_gap_security_initiate(s_host) != 0) ESP_LOGW(TAG, "could not start encryption");
+            return 0;
+        }
         s_conn      = event->connect.conn_handle;
         s_conectado = true;
         ESP_LOGI(TAG, "phone connected");
@@ -1087,13 +1167,25 @@ static int gap_event(struct ble_gap_event *event, void *arg)
         if (ble_gap_security_initiate(s_conn) != 0) {
             ESP_LOGW(TAG, "could not start encryption");
         }
+        advertise_if_room();
         return 0;
 
     case BLE_GAP_EVENT_DISCONNECT:
-        ESP_LOGI(TAG, "phone disconnected (reason %d)",
-                 event->disconnect.reason);
-        limpiar_conexion();
+        if (event->disconnect.conn.conn_handle == s_host) {
+            ESP_LOGI(TAG, "computer disconnected (reason %d)", event->disconnect.reason);
+            s_host = SIN_CONN;
+            s_host_name[0] = '\0';
+            aos_ble_hid_host_gone();
+        } else {
+            ESP_LOGI(TAG, "phone disconnected (reason %d)",
+                     event->disconnect.reason);
+            limpiar_conexion();
+        }
         advertise();
+        return 0;
+
+    case BLE_GAP_EVENT_SUBSCRIBE:
+        aos_ble_hid_subscribe(event->subscribe.attr_handle, event->subscribe.cur_notify);
         return 0;
 
     case BLE_GAP_EVENT_ADV_COMPLETE:
@@ -1107,7 +1199,7 @@ static int gap_event(struct ble_gap_event *event, void *arg)
             ESP_LOGW(TAG, "encryption failed (%d)", event->enc_change.status);
             return 0;
         }
-        s_cifrado     = true;
+        if (event->enc_change.conn_handle == s_conn) s_cifrado = true;
         s_pair_wanted = false;
         s_pair_code   = 0;
         if (ble_gap_conn_find(event->enc_change.conn_handle, &desc) == 0) {
@@ -1117,6 +1209,7 @@ static int gap_event(struct ble_gap_event *event, void *arg)
         /* Only now does looking for ANCS make sense. */
         ble_gattc_disc_svc_by_uuid(event->enc_change.conn_handle,
                                    &UUID_ANCS.u, on_svc, NULL);
+        advertise_if_room();
         return 0;
 
     case BLE_GAP_EVENT_PASSKEY_ACTION:
@@ -1263,6 +1356,8 @@ bool aos_ble_start(void)
         return false;
     }
 
+    aos_ble_hid_register();        /* the keyboard mode's services, if it is on */
+
     ble_hs_cfg.reset_cb = on_reset;
     ble_hs_cfg.sync_cb  = on_sync;
     ble_hs_cfg.store_status_cb = ble_store_util_status_rr;
@@ -1366,7 +1461,8 @@ void aos_ble_tick(void)
     }
     pedir_siguiente();
 
-    if (s_conectado || ble_gap_adv_active()) {
+    bool room = !s_conectado || (aos_ble_hid_wanted() && s_host == SIN_CONN);
+    if (!room || ble_gap_adv_active()) {
         return;
     }
     ESP_LOGW(TAG, "it was not advertising: resuming");

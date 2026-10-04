@@ -355,17 +355,21 @@ static void api_wifi(aos_httpd_req_t *r)
 }
 
 /* Bluetooth (components/aos_ble): GET says how it is, POST {"on": bool}
- * switches it as Settings does, {"forget": true} wipes the phone's keys. */
+ * switches it as Settings does, {"keyboard": bool} the keyboard mode, and
+ * {"forget": true} wipes the phone's keys. */
 static void api_bt(aos_httpd_req_t *r)
 {
     if (!strcmp(aos_httpd_method(r), "POST")) {
         cJSON *b = body_json(r);
         cJSON *on = b ? cJSON_GetObjectItem(b, "on") : NULL;
+        cJSON *kbd = b ? cJSON_GetObjectItem(b, "keyboard") : NULL;
         bool forget = b && cJSON_IsTrue(cJSON_GetObjectItem(b, "forget"));
         if (cJSON_IsBool(on)) aos_hal_bt_enable(cJSON_IsTrue(on));
+        if (cJSON_IsBool(kbd)) aos_hal_bt_keyboard_enable(cJSON_IsTrue(kbd));
         if (forget) aos_hal_bt_forget();
+        bool any = cJSON_IsBool(on) || cJSON_IsBool(kbd) || forget;
         cJSON_Delete(b);
-        if (!cJSON_IsBool(on) && !forget) { send_err(r, 400, "falta \"on\" o \"forget\""); return; }
+        if (!any) { send_err(r, 400, "falta \"on\", \"keyboard\" o \"forget\""); return; }
     }
     static const char *const ST[] = { "off", "advertising", "pairing", "connected" };
     aos_bt_state_t st = aos_hal_bt_state();
@@ -376,6 +380,9 @@ static void api_bt(aos_httpd_req_t *r)
     cJSON_AddStringToObject(o, "peer", aos_hal_bt_peer());
     cJSON_AddBoolToObject(o, "bonded", aos_hal_bt_bonded());
     if (aos_hal_bt_phone_battery(&pct)) cJSON_AddNumberToObject(o, "phone_battery", pct);
+    cJSON_AddBoolToObject(o, "keyboard", aos_hal_bt_keyboard_enabled());
+    cJSON_AddStringToObject(o, "computer", aos_hal_bt_keyboard_host());
+    cJSON_AddBoolToObject(o, "keyboard_ready", aos_hal_bt_keyboard_ready());
     send_cjson(r, 200, o);
 }
 

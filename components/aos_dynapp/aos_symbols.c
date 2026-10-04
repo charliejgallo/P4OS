@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
  * Mas 149 funciones de libc/libm agregadas a mano.
- * Total: 3152 simbolos.
+ * Total: 3164 simbolos.
  */
 
 #include <stddef.h>
@@ -113,6 +113,10 @@ extern int aos_claude_status;
 extern int aos_claude_widget_register;
 extern int aos_clock_service_tick;
 extern int aos_day_name;
+extern int aos_emoji_font;
+extern int aos_emoji_init;
+extern int aos_emoji_match;
+extern int aos_emoji_ready;
 extern int aos_flash_call;
 extern int aos_flashop_init;
 extern int aos_folder_font;
@@ -182,6 +186,10 @@ extern int aos_hal_bt_bonded;
 extern int aos_hal_bt_enable;
 extern int aos_hal_bt_enabled;
 extern int aos_hal_bt_forget;
+extern int aos_hal_bt_keyboard_enable;
+extern int aos_hal_bt_keyboard_enabled;
+extern int aos_hal_bt_keyboard_host;
+extern int aos_hal_bt_keyboard_ready;
 extern int aos_hal_bt_pair_begin;
 extern int aos_hal_bt_pair_cancel;
 extern int aos_hal_bt_pair_code;
@@ -797,6 +805,10 @@ extern int aos_notif_push_removed;
 extern int aos_notif_reset_pending;
 extern int aos_notif_set_dismiss_hook;
 extern int aos_page;
+extern int aos_pair_ui_cancel;
+extern int aos_pair_ui_layout;
+extern int aos_pair_ui_tick;
+extern int aos_pair_ui_visible;
 extern int aos_panel_close;
 extern int aos_panel_current;
 extern int aos_panel_drag;
@@ -3268,6 +3280,10 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_claude_widget_register),
     ESP_ELFSYM_EXPORT(aos_clock_service_tick),
     ESP_ELFSYM_EXPORT(aos_day_name),
+    ESP_ELFSYM_EXPORT(aos_emoji_font),
+    ESP_ELFSYM_EXPORT(aos_emoji_init),
+    ESP_ELFSYM_EXPORT(aos_emoji_match),
+    ESP_ELFSYM_EXPORT(aos_emoji_ready),
     ESP_ELFSYM_EXPORT(aos_flash_call),
     ESP_ELFSYM_EXPORT(aos_flashop_init),
     ESP_ELFSYM_EXPORT(aos_folder_font),
@@ -3337,6 +3353,10 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_bt_enable),
     ESP_ELFSYM_EXPORT(aos_hal_bt_enabled),
     ESP_ELFSYM_EXPORT(aos_hal_bt_forget),
+    ESP_ELFSYM_EXPORT(aos_hal_bt_keyboard_enable),
+    ESP_ELFSYM_EXPORT(aos_hal_bt_keyboard_enabled),
+    ESP_ELFSYM_EXPORT(aos_hal_bt_keyboard_host),
+    ESP_ELFSYM_EXPORT(aos_hal_bt_keyboard_ready),
     ESP_ELFSYM_EXPORT(aos_hal_bt_pair_begin),
     ESP_ELFSYM_EXPORT(aos_hal_bt_pair_cancel),
     ESP_ELFSYM_EXPORT(aos_hal_bt_pair_code),
@@ -3952,6 +3972,10 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_notif_reset_pending),
     ESP_ELFSYM_EXPORT(aos_notif_set_dismiss_hook),
     ESP_ELFSYM_EXPORT(aos_page),
+    ESP_ELFSYM_EXPORT(aos_pair_ui_cancel),
+    ESP_ELFSYM_EXPORT(aos_pair_ui_layout),
+    ESP_ELFSYM_EXPORT(aos_pair_ui_tick),
+    ESP_ELFSYM_EXPORT(aos_pair_ui_visible),
     ESP_ELFSYM_EXPORT(aos_panel_close),
     ESP_ELFSYM_EXPORT(aos_panel_current),
     ESP_ELFSYM_EXPORT(aos_panel_drag),

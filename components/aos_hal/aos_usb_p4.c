@@ -536,10 +536,52 @@ bool aos_hal_usb_mode_set(aos_hal_usb_mode_t mode)
 
 bool aos_hal_usb_connected(void) { return !s_busy && s_mode != AOS_HAL_USB_CONSOLE && tud_mounted(); }
 
-bool aos_hal_usb_keys_ready(void)
+static bool usb_ready(void)
 {
     return !s_busy && s_mode == AOS_HAL_USB_KEYS && tud_mounted();
 }
+
+/* -------------------------------------------------------------------------- */
+/* The same keys over Bluetooth                                                */
+/* -------------------------------------------------------------------------- */
+
+/* With no computer on the cable, a computer paired over Bluetooth in the
+ * keyboard mode (components/aos_ble/aos_ble_hid.c) takes the same reports:
+ * the Macro pad, the portal and the apps send keys without knowing which
+ * way they go. The cable wins when there are both. The gamepad and MIDI
+ * stay USB only. Weak: aos_ble is a component of its own. */
+bool aos_ble_hid_ready(void) __attribute__((weak));
+bool aos_ble_hid_send(int report_id, const void *data, size_t len) __attribute__((weak));
+
+static bool bt_ready(void) { return !usb_ready() && aos_ble_hid_ready && aos_ble_hid_ready(); }
+
+static bool bt_key(uint8_t mods, uint8_t key)
+{
+    uint8_t r[8] = { mods, 0, key, 0, 0, 0, 0, 0 };
+    if (!aos_ble_hid_send(RID_KEYBOARD, r, sizeof r)) return false;
+    vTaskDelay(pdMS_TO_TICKS(12));      /* a connection interval or so: some hosts miss a press released at once */
+    memset(r, 0, sizeof r);
+    aos_ble_hid_send(RID_KEYBOARD, r, sizeof r);
+    return true;
+}
+
+static bool bt_consumer(uint16_t usage)
+{
+    uint8_t r[2] = { (uint8_t)usage, (uint8_t)(usage >> 8) };
+    if (!aos_ble_hid_send(RID_CONSUMER, r, sizeof r)) return false;
+    vTaskDelay(pdMS_TO_TICKS(12));
+    memset(r, 0, sizeof r);
+    aos_ble_hid_send(RID_CONSUMER, r, sizeof r);
+    return true;
+}
+
+static bool bt_mouse(uint8_t buttons, int8_t dx, int8_t dy, int8_t wheel)
+{
+    int8_t r[5] = { (int8_t)buttons, dx, dy, wheel, 0 };
+    return aos_ble_hid_send(RID_MOUSE, r, sizeof r);
+}
+
+bool aos_hal_usb_keys_ready(void) { return usb_ready() || bt_ready(); }
 
 /* -------------------------------------------------------------------------- */
 /* Reports                                                                     */
@@ -555,7 +597,7 @@ static bool wait_ready(void)
 
 static bool begin(void)
 {
-    if (!aos_hal_usb_keys_ready()) {
+    if (!usb_ready()) {
         report_failed(s_busy ? "the port is switching modes" : s_mode != AOS_HAL_USB_KEYS ? "the port is not a keyboard"
                       : "no computer has configured the port");
         return false;
@@ -600,7 +642,9 @@ bool aos_hal_usb_key_valid(const char *name)
 bool aos_hal_usb_key(const char *name)
 {
     aos_hid_combo_t c;
-    if (!aos_hid_parse(name, &c) || !begin()) return false;
+    if (!aos_hid_parse(name, &c)) return false;
+    if (bt_ready()) return c.consumer ? bt_consumer(c.consumer) : bt_key(c.mods, c.key);
+    if (!begin()) return false;
     bool ok = c.consumer ? consumer_press(c.consumer) : key_press(c.mods, c.key);
     end();
     return ok;
@@ -608,7 +652,19 @@ bool aos_hal_usb_key(const char *name)
 
 int aos_hal_usb_type(const char *ascii)
 {
-    if (!ascii || !begin()) return 0;
+    if (!ascii) return 0;
+    if (bt_ready()) {
+        int sent = 0;
+        for (const char *p = ascii; *p; p++) {
+            uint8_t k;
+            bool sh;
+            if (!aos_hid_ascii(*p, &k, &sh)) continue;
+            if (!bt_key(sh ? AOS_HID_MOD_SHIFT : 0, k)) break;
+            sent++;
+        }
+        return sent;
+    }
+    if (!begin()) return 0;
     int sent = 0;
     for (const char *p = ascii; *p; p++) {
         uint8_t k;
@@ -626,13 +682,15 @@ static int8_t clamp8(int v) { return (int8_t)(v > 127 ? 127 : v < -127 ? -127 : 
 bool aos_hal_usb_mouse(int dx, int dy, int wheel)
 {
     /* no waiting: a report still in flight drops this one, a pixel nobody misses */
-    if (!aos_hal_usb_keys_ready() || !tud_hid_ready()) return false;
+    if (bt_ready()) return bt_mouse(s_buttons, clamp8(dx), clamp8(dy), clamp8(wheel));
+    if (!usb_ready() || !tud_hid_ready()) return false;
     return tud_hid_mouse_report(RID_MOUSE, s_buttons, clamp8(dx), clamp8(dy), clamp8(wheel), 0);
 }
 
 bool aos_hal_usb_mouse_hold(int buttons)
 {
     s_buttons = (uint8_t)(buttons & 0x03);
+    if (bt_ready()) return bt_mouse(s_buttons, 0, 0, 0);
     if (!begin()) return false;
     bool ok = wait_ready() && tud_hid_mouse_report(RID_MOUSE, s_buttons, 0, 0, 0, 0);
     end();
@@ -641,8 +699,14 @@ bool aos_hal_usb_mouse_hold(int buttons)
 
 bool aos_hal_usb_click(int button)
 {
-    if (!begin()) return false;
     uint8_t b = button == 2 ? MOUSE_BUTTON_RIGHT : MOUSE_BUTTON_LEFT;
+    if (bt_ready()) {
+        if (!bt_mouse((uint8_t)(s_buttons | b), 0, 0, 0)) return false;
+        vTaskDelay(pdMS_TO_TICKS(20));
+        bt_mouse(s_buttons, 0, 0, 0);
+        return true;
+    }
+    if (!begin()) return false;
     bool ok = wait_ready() && tud_hid_mouse_report(RID_MOUSE, (uint8_t)(s_buttons | b), 0, 0, 0, 0);
     if (ok) {
         vTaskDelay(pdMS_TO_TICKS(20));
@@ -659,7 +723,7 @@ bool aos_hal_usb_click(int button)
  * 8 up-left) and 32 buttons (GAMEPAD_BUTTON_*). */
 bool aos_hal_usb_gamepad(int x, int y, int hat, unsigned buttons)
 {
-    if (!aos_hal_usb_keys_ready() || !tud_hid_n_ready(HID_PAD)) return false;
+    if (!usb_ready() || !tud_hid_n_ready(HID_PAD)) return false;
     return tud_hid_n_gamepad_report(HID_PAD, 0, clamp8(x), clamp8(y), 0, 0, 0, 0,
                                     (uint8_t)(hat < 0 || hat > 8 ? 0 : hat), (uint32_t)buttons);
 }
@@ -669,8 +733,9 @@ bool aos_hal_usb_gamepad(int x, int y, int hat, unsigned buttons)
 bool aos_hal_usb_midi_ready(void)
 {
     /* not tud_midi_mounted(): it wants both directions, and this port has
-     * one (MIDI_OUT_DESCRIPTOR); the write checks its endpoint anyway */
-    return aos_hal_usb_keys_ready();
+     * one (MIDI_OUT_DESCRIPTOR); the write checks its endpoint anyway.
+     * The cable only: MIDI does not go over Bluetooth. */
+    return usb_ready();
 }
 
 static bool midi3(uint8_t status, uint8_t d1, uint8_t d2)
