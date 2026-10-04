@@ -149,6 +149,8 @@ EXTRA_SYMBOLS = [
     # aligned buffers for the card and the DMA (aos_hal_io_alloc is the
     # HAL's; this is the general one)
     "heap_caps_aligned_alloc",
+    # 2026-10-04: what Notes, Quotes and Weather had to do without
+    "strncasecmp", "strcspn", "fprintf",
 ]
 
 # Symbols that are never exported: internals of the compiler, of the linker or

@@ -1152,6 +1152,34 @@ static void to_host(uint16_t conn)
 
 static void advertise(void);
 
+/* Encryption is asked for a moment after connecting, and only on a link the
+ * other side has not encrypted by then. An iPhone or a Mac that holds our
+ * keys encrypts by itself as soon as it connects; ours, started at the same
+ * moment, was a second security procedure that the Security Manager gave up
+ * 30 s later: the "encryption failed (13)" (BLE_HS_ETIMEOUT) seen at every
+ * boot. A phone pairing for the first time does not start it, so this is
+ * still what starts its pairing. The callout runs on NimBLE's own task. */
+#define SEC_DELAY_MS 1500
+static struct ble_npl_callout s_sec_co;
+static bool s_sec_co_ok;
+
+static void sec_check(struct ble_npl_event *ev)
+{
+    (void)ev;
+    const uint16_t conns[2] = { s_conn, s_host };
+    for (int i = 0; i < 2; i++) {
+        struct ble_gap_conn_desc d;
+        if (conns[i] == SIN_CONN || ble_gap_conn_find(conns[i], &d) != 0 || d.sec_state.encrypted) continue;
+        if (ble_gap_security_initiate(conns[i]) != 0) ESP_LOGW(TAG, "could not start encryption on %u", (unsigned)conns[i]);
+        else ESP_LOGI(TAG, "connection %u not encrypted by the other side: asking for it", (unsigned)conns[i]);
+    }
+}
+
+static void sec_later(void)
+{
+    if (s_sec_co_ok) ble_npl_callout_reset(&s_sec_co, ble_npl_time_ms_to_ticks32(SEC_DELAY_MS));
+}
+
 /* With the keyboard mode on there is room for two: go on being seen. */
 static void advertise_if_room(void)
 {
@@ -1182,19 +1210,18 @@ static int gap_event(struct ble_gap_event *event, void *arg)
             s_host = event->connect.conn_handle;
             s_host_name[0] = '\0';
             ESP_LOGI(TAG, "second connection (%u)", (unsigned)s_host);
-            if (ble_gap_security_initiate(s_host) != 0) ESP_LOGW(TAG, "could not start encryption");
+            sec_later();
             return 0;
         }
         s_conn      = event->connect.conn_handle;
         s_conectado = true;
         ESP_LOGI(TAG, "phone connected");
-        /* We ask for encryption ourselves. Without an encrypted and
-         * authenticated connection the iPhone does not expose ANCS: its three
-         * characteristics require authorisation. If there are stored keys
-         * already this asks the user nothing. */
-        if (ble_gap_security_initiate(s_conn) != 0) {
-            ESP_LOGW(TAG, "could not start encryption");
-        }
+        /* The link has to be encrypted: without an encrypted and
+         * authenticated connection the iPhone does not expose ANCS (its three
+         * characteristics require authorisation). We ask for it ourselves if
+         * the phone has not, a moment later (sec_check). With stored keys
+         * this asks the user nothing. */
+        sec_later();
         advertise_if_room();
         return 0;
 
@@ -1230,7 +1257,12 @@ static int gap_event(struct ble_gap_event *event, void *arg)
 
     case BLE_GAP_EVENT_ENC_CHANGE:
         if (event->enc_change.status != 0) {
-            ESP_LOGW(TAG, "encryption failed (%d)", event->enc_change.status);
+            /* a procedure that lost the race to the other side's: the link
+             * is encrypted all the same */
+            if (ble_gap_conn_find(event->enc_change.conn_handle, &desc) == 0 && desc.sec_state.encrypted)
+                ESP_LOGI(TAG, "a second security procedure ended (%d); the link is encrypted", event->enc_change.status);
+            else
+                ESP_LOGW(TAG, "encryption failed (%d)", event->enc_change.status);
             return 0;
         }
         if (event->enc_change.conn_handle == s_conn) s_cifrado = true;
@@ -1396,6 +1428,7 @@ bool aos_ble_start(void)
     }
 
     aos_ble_hid_register();        /* the keyboard mode's services, if it is on */
+    s_sec_co_ok = ble_npl_callout_init(&s_sec_co, nimble_port_get_dflt_eventq(), sec_check, NULL) == 0;
 
     ble_hs_cfg.reset_cb = on_reset;
     ble_hs_cfg.sync_cb  = on_sync;
@@ -1434,6 +1467,11 @@ void aos_ble_stop(void)
     }
     s_running = false;
 
+    if (s_sec_co_ok) {
+        ble_npl_callout_stop(&s_sec_co);
+        ble_npl_callout_deinit(&s_sec_co);
+        s_sec_co_ok = false;
+    }
     int rc = nimble_port_stop();
     if (rc == 0) {
         esp_err_t e = nimble_port_deinit();

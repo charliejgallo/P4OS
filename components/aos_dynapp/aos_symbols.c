@@ -3,8 +3,8 @@
  *
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
- * Mas 149 funciones de libc/libm agregadas a mano.
- * Total: 3164 simbolos.
+ * Mas 152 funciones de libc/libm agregadas a mano.
+ * Total: 3181 simbolos.
  */
 
 #include <stddef.h>
@@ -113,6 +113,13 @@ extern int aos_claude_status;
 extern int aos_claude_widget_register;
 extern int aos_clock_service_tick;
 extern int aos_day_name;
+extern int aos_dev_fps;
+extern int aos_dev_init;
+extern int aos_dev_log_level;
+extern int aos_dev_set_fps;
+extern int aos_dev_set_log_level;
+extern int aos_dev_set_touches;
+extern int aos_dev_touches;
 extern int aos_emoji_font;
 extern int aos_emoji_init;
 extern int aos_emoji_match;
@@ -218,6 +225,7 @@ extern int aos_hal_display_blit_native;
 extern int aos_hal_display_blit_scaled;
 extern int aos_hal_display_fb;
 extern int aos_hal_display_flip;
+extern int aos_hal_display_flips;
 extern int aos_hal_display_flush_count;
 extern int aos_hal_display_get_rotation;
 extern int aos_hal_display_is_on;
@@ -295,6 +303,7 @@ extern int aos_hal_link_unpair;
 extern int aos_hal_link_unpark;
 extern int aos_hal_lock;
 extern int aos_hal_log;
+extern int aos_hal_log_level_set;
 extern int aos_hal_log_prev_read;
 extern int aos_hal_log_read;
 extern int aos_hal_log_total;
@@ -334,6 +343,7 @@ extern int aos_hal_net_ap_set_config;
 extern int aos_hal_net_ap_ssid;
 extern int aos_hal_net_ap_start;
 extern int aos_hal_net_ap_stop;
+extern int aos_hal_net_arp_table;
 extern int aos_hal_net_coprocessor_fw;
 extern int aos_hal_net_coprocessor_image;
 extern int aos_hal_net_coprocessor_status;
@@ -344,6 +354,7 @@ extern int aos_hal_net_forget;
 extern int aos_hal_net_has_credentials;
 extern int aos_hal_net_ip;
 extern int aos_hal_net_low_latency;
+extern int aos_hal_net_mac;
 extern int aos_hal_net_retry_info;
 extern int aos_hal_net_rssi;
 extern int aos_hal_net_scan;
@@ -799,11 +810,14 @@ extern int aos_net_p4_c6_updating;
 extern int aos_net_p4_note_rssi;
 extern int aos_net_p4_start;
 extern int aos_net_p4_up;
+extern int aos_notif_act;
 extern int aos_notif_action_failed;
 extern int aos_notif_push;
 extern int aos_notif_push_removed;
 extern int aos_notif_reset_pending;
 extern int aos_notif_set_dismiss_hook;
+extern int aos_np_command;
+extern int aos_np_get;
 extern int aos_page;
 extern int aos_pair_ui_cancel;
 extern int aos_pair_ui_layout;
@@ -1017,6 +1031,7 @@ extern int fgets;
 extern int floorf;
 extern int fmodf;
 extern int fopen;
+extern int fprintf;
 extern int fputc;
 extern int fputs;
 extern int fread;
@@ -3155,8 +3170,10 @@ extern int strchr;
 extern int strcmp;
 extern int strcoll;
 extern int strcpy;
+extern int strcspn;
 extern int strerror;
 extern int strlen;
+extern int strncasecmp;
 extern int strncmp;
 extern int strncpy;
 extern int strnlen;
@@ -3280,6 +3297,13 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_claude_widget_register),
     ESP_ELFSYM_EXPORT(aos_clock_service_tick),
     ESP_ELFSYM_EXPORT(aos_day_name),
+    ESP_ELFSYM_EXPORT(aos_dev_fps),
+    ESP_ELFSYM_EXPORT(aos_dev_init),
+    ESP_ELFSYM_EXPORT(aos_dev_log_level),
+    ESP_ELFSYM_EXPORT(aos_dev_set_fps),
+    ESP_ELFSYM_EXPORT(aos_dev_set_log_level),
+    ESP_ELFSYM_EXPORT(aos_dev_set_touches),
+    ESP_ELFSYM_EXPORT(aos_dev_touches),
     ESP_ELFSYM_EXPORT(aos_emoji_font),
     ESP_ELFSYM_EXPORT(aos_emoji_init),
     ESP_ELFSYM_EXPORT(aos_emoji_match),
@@ -3385,6 +3409,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_display_blit_scaled),
     ESP_ELFSYM_EXPORT(aos_hal_display_fb),
     ESP_ELFSYM_EXPORT(aos_hal_display_flip),
+    ESP_ELFSYM_EXPORT(aos_hal_display_flips),
     ESP_ELFSYM_EXPORT(aos_hal_display_flush_count),
     ESP_ELFSYM_EXPORT(aos_hal_display_get_rotation),
     ESP_ELFSYM_EXPORT(aos_hal_display_is_on),
@@ -3462,6 +3487,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_link_unpark),
     ESP_ELFSYM_EXPORT(aos_hal_lock),
     ESP_ELFSYM_EXPORT(aos_hal_log),
+    ESP_ELFSYM_EXPORT(aos_hal_log_level_set),
     ESP_ELFSYM_EXPORT(aos_hal_log_prev_read),
     ESP_ELFSYM_EXPORT(aos_hal_log_read),
     ESP_ELFSYM_EXPORT(aos_hal_log_total),
@@ -3501,6 +3527,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_net_ap_ssid),
     ESP_ELFSYM_EXPORT(aos_hal_net_ap_start),
     ESP_ELFSYM_EXPORT(aos_hal_net_ap_stop),
+    ESP_ELFSYM_EXPORT(aos_hal_net_arp_table),
     ESP_ELFSYM_EXPORT(aos_hal_net_coprocessor_fw),
     ESP_ELFSYM_EXPORT(aos_hal_net_coprocessor_image),
     ESP_ELFSYM_EXPORT(aos_hal_net_coprocessor_status),
@@ -3511,6 +3538,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_net_has_credentials),
     ESP_ELFSYM_EXPORT(aos_hal_net_ip),
     ESP_ELFSYM_EXPORT(aos_hal_net_low_latency),
+    ESP_ELFSYM_EXPORT(aos_hal_net_mac),
     ESP_ELFSYM_EXPORT(aos_hal_net_retry_info),
     ESP_ELFSYM_EXPORT(aos_hal_net_rssi),
     ESP_ELFSYM_EXPORT(aos_hal_net_scan),
@@ -3966,11 +3994,14 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_net_p4_note_rssi),
     ESP_ELFSYM_EXPORT(aos_net_p4_start),
     ESP_ELFSYM_EXPORT(aos_net_p4_up),
+    ESP_ELFSYM_EXPORT(aos_notif_act),
     ESP_ELFSYM_EXPORT(aos_notif_action_failed),
     ESP_ELFSYM_EXPORT(aos_notif_push),
     ESP_ELFSYM_EXPORT(aos_notif_push_removed),
     ESP_ELFSYM_EXPORT(aos_notif_reset_pending),
     ESP_ELFSYM_EXPORT(aos_notif_set_dismiss_hook),
+    ESP_ELFSYM_EXPORT(aos_np_command),
+    ESP_ELFSYM_EXPORT(aos_np_get),
     ESP_ELFSYM_EXPORT(aos_page),
     ESP_ELFSYM_EXPORT(aos_pair_ui_cancel),
     ESP_ELFSYM_EXPORT(aos_pair_ui_layout),
@@ -4184,6 +4215,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(floorf),
     ESP_ELFSYM_EXPORT(fmodf),
     ESP_ELFSYM_EXPORT(fopen),
+    ESP_ELFSYM_EXPORT(fprintf),
     ESP_ELFSYM_EXPORT(fputc),
     ESP_ELFSYM_EXPORT(fputs),
     ESP_ELFSYM_EXPORT(fread),
@@ -6322,8 +6354,10 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(strcmp),
     ESP_ELFSYM_EXPORT(strcoll),
     ESP_ELFSYM_EXPORT(strcpy),
+    ESP_ELFSYM_EXPORT(strcspn),
     ESP_ELFSYM_EXPORT(strerror),
     ESP_ELFSYM_EXPORT(strlen),
+    ESP_ELFSYM_EXPORT(strncasecmp),
     ESP_ELFSYM_EXPORT(strncmp),
     ESP_ELFSYM_EXPORT(strncpy),
     ESP_ELFSYM_EXPORT(strnlen),
