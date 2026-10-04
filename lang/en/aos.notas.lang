@@ -1,0 +1,422 @@
+# amoledos-lang 1   es -> en
+# aos.notas.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/notas/main/notas.c:109
+Ayer	Yesterday
+
+#: apps/notas/main/notas.c:184
+No se pudo guardar la nota	The note could not be saved
+
+#: apps/notas/main/notas.c:257
+Escritura cancelada	Typing cancelled
+
+#: apps/notas/main/notas.c:259
+Conectá una computadora en modo Teclado (USB o Bluetooth)	Connect a computer in Keyboard mode (USB or Bluetooth)
+
+#: apps/notas/main/notas.c:269
+Nota escrita en la computadora	Note typed into the computer
+
+#: apps/notas/main/notas.c:278
+En 3 segundos: poné el cursor donde va el texto	In 3 seconds: put the cursor where the text goes
+
+#: apps/notas/main/notas.c:290
+Escaneá con el teléfono	Scan it with your phone
+
+#: apps/notas/main/notas.c:309
+La nota es larga: el código lleva el principio.	The note is long: the code carries its beginning.
+
+#: apps/notas/main/notas.c:332
+#: apps/notas/main/notas.c:481
+Información	Information
+
+#: apps/notas/main/notas.c:337
+Palabras	Words
+
+#: apps/notas/main/notas.c:339
+Caracteres	Characters
+
+#: apps/notas/main/notas.c:346
+Párrafos	Paragraphs
+
+#: apps/notas/main/notas.c:348
+#: apps/notas/main/nt_tasks.c:565
+%d de %d	%d of %d
+
+#: apps/notas/main/notas.c:349
+Tareas hechas	Tasks done
+
+#: apps/notas/main/notas.c:353
+Creada	Created
+
+#: apps/notas/main/notas.c:355
+Modificada	Modified
+
+#: apps/notas/main/notas.c:356
+(sin guardar)	(not saved)
+
+#: apps/notas/main/notas.c:357
+Archivo	File
+
+#: apps/notas/main/notas.c:384
+#: apps/notas/main/notas.c:476
+#: apps/notas/main/notas.c:1113
+Color	Colour
+
+#: apps/notas/main/notas.c:402
+#: apps/notas/main/notas.c:1064
+Movida a la papelera	Moved to the bin
+
+#: apps/notas/main/notas.c:431
+#: apps/notas/main/notas.c:1094
+Duplicada	Duplicated
+
+#: apps/notas/main/notas.c:444
+Fijada arriba	Pinned to the top
+
+#: apps/notas/main/notas.c:444
+Ya no está fijada	No longer pinned
+
+#: apps/notas/main/notas.c:451
+#: apps/notas/main/notas.c:1099
+¿Mover a la papelera?	Move to the bin?
+
+#: apps/notas/main/notas.c:451
+Se puede recuperar desde la papelera.	It can be recovered from the bin.
+
+#: apps/notas/main/notas.c:452
+#: apps/notas/main/notas.c:1099
+Mover	Move
+
+#: apps/notas/main/notas.c:470
+Mostrar completadas	Show completed
+
+#: apps/notas/main/notas.c:470
+Ocultar completadas	Hide completed
+
+#: apps/notas/main/notas.c:471
+Desmarcar todas	Untick all
+
+#: apps/notas/main/notas.c:472
+Borrar completadas	Delete completed
+
+#: apps/notas/main/notas.c:473
+Ordenar por prioridad	Sort by priority
+
+#: apps/notas/main/notas.c:475
+#: apps/notas/main/notas.c:1112
+Desfijar	Unpin
+
+#: apps/notas/main/notas.c:475
+#: apps/notas/main/notas.c:1112
+Fijar arriba	Pin to the top
+
+#: apps/notas/main/notas.c:477
+Convertir en nota	Turn into a note
+
+#: apps/notas/main/notas.c:477
+Convertir en lista de tareas	Turn into a task list
+
+#: apps/notas/main/notas.c:479
+Compartir con un QR	Share as a QR code
+
+#: apps/notas/main/notas.c:480
+Parar de escribir	Stop typing
+
+#: apps/notas/main/notas.c:480
+Escribir en la computadora	Type into the computer
+
+#: apps/notas/main/notas.c:482
+#: apps/notas/main/notas.c:1114
+#: apps/notas/main/nt_tasks.c:279
+Duplicar	Duplicate
+
+#: apps/notas/main/notas.c:483
+#: apps/notas/main/notas.c:1115
+Mover a la papelera	Move to the bin
+
+#: apps/notas/main/notas.c:485
+#: apps/notas/main/notas.c:1117
+#: apps/notas/main/notas.c:1188
+#: apps/notas/main/notas.c:1526
+Sin título	Untitled
+
+#: apps/notas/main/notas.c:635
+#: apps/notas/main/notas.c:1364
+#: apps/notas/main/nt_editor.c:522
+#: apps/notas/main/nt_tasks.c:541
+Título	Title
+
+#: apps/notas/main/notas.c:635
+Encabezado	Heading
+
+#: apps/notas/main/notas.c:635
+Subtítulo	Subheading
+
+#: apps/notas/main/notas.c:636
+Cuerpo	Body
+
+#: apps/notas/main/notas.c:636
+Cita	Quote
+
+#: apps/notas/main/notas.c:636
+Línea	Line
+
+#: apps/notas/main/notas.c:648
+Tamaño	Size
+
+#: apps/notas/main/notas.c:651
+Chica	Small
+
+#: apps/notas/main/notas.c:651
+Normal	Normal
+
+#: apps/notas/main/notas.c:651
+Grande	Large
+
+#: apps/notas/main/notas.c:651
+Enorme	Huge
+
+#: apps/notas/main/notas.c:655
+Color del texto	Text colour
+
+#: apps/notas/main/notas.c:657
+Resaltado	Highlight
+
+#: apps/notas/main/notas.c:704
+Viñetas	Bullets
+
+#: apps/notas/main/notas.c:722
+#: apps/notas/main/nt_store.c:364
+Numeradas	Numbered
+
+#: apps/notas/main/notas.c:728
+Casillas	Checkboxes
+
+#: apps/notas/main/notas.c:729
+Sin lista	No list
+
+#: apps/notas/main/notas.c:940
+#: apps/notas/main/notas.c:1390
+#: apps/notas/main/notas.c:1401
+#: apps/notas/main/notas.c:1446
+Notas	Notes
+
+#: apps/notas/main/notas.c:1111
+Abrir	Open
+
+#: apps/notas/main/notas.c:1254
+Otras	Others
+
+#: apps/notas/main/notas.c:1254
+Fijadas	Pinned
+
+#: apps/notas/main/notas.c:1268
+Nada coincide con la búsqueda	Nothing matches the search
+
+#: apps/notas/main/notas.c:1269
+Todavía no hay listas	No lists yet
+
+#: apps/notas/main/notas.c:1269
+Todavía no hay notas	No notes yet
+
+#: apps/notas/main/notas.c:1273
+Tocá + para crear una	Tap + to make one
+
+#: apps/notas/main/notas.c:1301
+Nota	Note
+
+#: apps/notas/main/notas.c:1302
+Lista de tareas	Task list
+
+#: apps/notas/main/notas.c:1304
+Crear	Create
+
+#: apps/notas/main/notas.c:1345
+%d borradas	%d deleted
+
+#: apps/notas/main/notas.c:1362
+Última modificación	Last modified
+
+#: apps/notas/main/notas.c:1363
+Fecha de creación	Date created
+
+#: apps/notas/main/notas.c:1366
+Ordenar por	Sort by
+
+#: apps/notas/main/notas.c:1385
+Fondo claro	Light background
+
+#: apps/notas/main/notas.c:1385
+Fondo oscuro	Dark background
+
+#: apps/notas/main/notas.c:1386
+Ordenar por...	Sort by...
+
+#: apps/notas/main/notas.c:1387
+Ver en cuadrícula	Show as a grid
+
+#: apps/notas/main/notas.c:1387
+Ver en lista	Show as a list
+
+#: apps/notas/main/notas.c:1388
+#: apps/notas/main/notas.c:1548
+Papelera	Bin
+
+#: apps/notas/main/notas.c:1427
+Buscar	Search
+
+#: apps/notas/main/notas.c:1446
+Todas	All
+
+#: apps/notas/main/notas.c:1446
+#: apps/notas/main/nt_store.c:360
+Listas	Lists
+
+#: apps/notas/main/notas.c:1511
+Restaurada	Restored
+
+#: apps/notas/main/notas.c:1523
+Restaurar	Restore
+
+#: apps/notas/main/notas.c:1524
+Borrar para siempre	Delete forever
+
+#: apps/notas/main/notas.c:1533
+¿Vaciar la papelera?	Empty the bin?
+
+#: apps/notas/main/notas.c:1533
+Las notas se borran para siempre.	The notes are deleted forever.
+
+#: apps/notas/main/notas.c:1533
+#: apps/notas/main/notas.c:1543
+Vaciar	Empty
+
+#: apps/notas/main/notas.c:1582
+La papelera está vacía	The bin is empty
+
+#: apps/notas/main/nt_editor.c:549
+Escribí acá	Write here
+
+#: apps/notas/main/nt_editor.c:695
+Copiado	Copied
+
+#: apps/notas/main/nt_editor.c:746
+Cortar	Cut
+
+#: apps/notas/main/nt_editor.c:747
+Copiar	Copy
+
+#: apps/notas/main/nt_editor.c:748
+#: apps/notas/main/nt_editor.c:753
+Pegar	Paste
+
+#: apps/notas/main/nt_editor.c:749
+#: apps/notas/main/nt_editor.c:752
+Todo	All
+
+#: apps/notas/main/nt_editor.c:751
+Seleccionar	Select
+
+#: apps/notas/main/nt_store.c:333
+(copia)	(copy)
+
+#: apps/notas/main/nt_store.c:357
+Lo que se puede hacer	What it can do
+
+#: apps/notas/main/nt_store.c:358
+Texto en **negrita**, *cursiva*, <u>subrayado</u> y ~~tachado~~.	Text in **bold**, *italic*, <u>underline</u> and ~~strikethrough~~.
+
+#: apps/notas/main/nt_store.c:359
+<span style=\"color:red\">Colores</span>, <span style=\"background:yellow\">resaltado</span> y <span style=\"font-size:x-large\">tamaños</span>.	<span style=\"color:red\">Colours</span>, <span style=\"background:yellow\">highlights</span> and <span style=\"font-size:x-large\">sizes</span>.
+
+#: apps/notas/main/nt_store.c:361
+Con viñetas	With bullets
+
+#: apps/notas/main/nt_store.c:362
+y con sangría	and indented
+
+#: apps/notas/main/nt_store.c:363
+De varios tipos	Of several kinds
+
+#: apps/notas/main/nt_store.c:365
+Que se cuentan solas	That count themselves
+
+#: apps/notas/main/nt_store.c:366
+Y con casillas	And with checkboxes
+
+#: apps/notas/main/nt_store.c:367
+Que se tildan con un toque	That are ticked with a tap
+
+#: apps/notas/main/nt_store.c:368
+Las notas son archivos Markdown en la carpeta notas de la tarjeta: también se editan desde el portal.	Notes are Markdown files in the card's notas folder: they can be edited from the portal too.
+
+#: apps/notas/main/nt_store.c:370
+Tocá **Aa** para el formato. Escribir \"- \", \"1. \" o \"[] \" al principio de una línea también arma la lista.	Tap **Aa** for formatting. Typing \"- \", \"1. \" or \"[] \" at the start of a line makes the list too.
+
+#: apps/notas/main/nt_store.c:374
+Pan	Bread
+
+#: apps/notas/main/nt_store.c:375
+Leche	Milk
+
+#: apps/notas/main/nt_store.c:376
+Alimento para Mila	Food for Mila
+
+#: apps/notas/main/nt_store.c:377
+Café	Coffee
+
+#: apps/notas/main/nt_store.c:378
+Pilas AA	AA batteries
+
+#: apps/notas/main/nt_store.c:417
+Compras	Shopping
+
+#: apps/notas/main/nt_store.c:418
+Bienvenida a Notas	Welcome to Notes
+
+#: apps/notas/main/nt_tasks.c:240
+Sin prioridad	No priority
+
+#: apps/notas/main/nt_tasks.c:241
+Baja	Low
+
+#: apps/notas/main/nt_tasks.c:242
+Media	Medium
+
+#: apps/notas/main/nt_tasks.c:243
+Alta	High
+
+#: apps/notas/main/nt_tasks.c:245
+#: apps/notas/main/nt_tasks.c:276
+Prioridad	Priority
+
+#: apps/notas/main/nt_tasks.c:275
+Editar	Edit
+
+#: apps/notas/main/nt_tasks.c:277
+Más adentro	Indent
+
+#: apps/notas/main/nt_tasks.c:278
+Más afuera	Outdent
+
+#: apps/notas/main/nt_tasks.c:280
+Borrar	Delete
+
+#: apps/notas/main/nt_tasks.c:430
+Nueva tarea	New task
+
+#: apps/notas/main/nt_tasks.c:605
+Todavía no hay tareas	No tasks yet
+
+#: apps/notas/main/nt_tasks.c:619
+Agregar tarea	Add task
+
+#: apps/notas/main/nt_tasks.c:624
+Completadas (%d)	Completed (%d)
+
+#: apps/notas/main/nt_ui.c:628
+Cancelar	Cancel
