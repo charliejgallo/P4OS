@@ -356,7 +356,9 @@ static void api_wifi(aos_httpd_req_t *r)
 
 /* Bluetooth (components/aos_ble): GET says how it is, POST {"on": bool}
  * switches it as Settings does, {"keyboard": bool} the keyboard mode, and
- * {"forget": true} wipes the phone's keys. */
+ * {"forget": true} wipes the phone's keys. {"key": "volup"} and {"type":
+ * "text"} send through the keyboard (the cable's, or the Bluetooth one) and
+ * answer whether it went. */
 static void api_bt(aos_httpd_req_t *r)
 {
     if (!strcmp(aos_httpd_method(r), "POST")) {
@@ -364,6 +366,13 @@ static void api_bt(aos_httpd_req_t *r)
         cJSON *on = b ? cJSON_GetObjectItem(b, "on") : NULL;
         cJSON *kbd = b ? cJSON_GetObjectItem(b, "keyboard") : NULL;
         bool forget = b && cJSON_IsTrue(cJSON_GetObjectItem(b, "forget"));
+        const char *key = jstr(b, "key"), *text = jstr(b, "type");
+        if (key || text) {
+            bool sent = key ? aos_hal_usb_key(key) : aos_hal_usb_type(text) > 0;
+            cJSON_Delete(b);
+            aos_httpd_send_json(r, 200, sent ? "{\"sent\":true}" : "{\"sent\":false}");
+            return;
+        }
         if (cJSON_IsBool(on)) aos_hal_bt_enable(cJSON_IsTrue(on));
         if (cJSON_IsBool(kbd)) aos_hal_bt_keyboard_enable(cJSON_IsTrue(kbd));
         if (forget) aos_hal_bt_forget();
