@@ -125,6 +125,10 @@ CONFIG_TINYUSB_NCM_OUT_NTB_BUFFS_COUNT=4
 CONFIG_TINYUSB_NCM_IN_NTB_BUFFS_COUNT=4
 CONFIG_TINYUSB_DESC_MANUFACTURER_STRING="P4OS"
 CONFIG_TINYUSB_DESC_PRODUCT_STRING="P4OS Macro pad"
+# the pendrive host (aos_usb_p4.c): pendrives behind a hub too, up to three,
+# at /usb, /usb2 and /usb3; FATFS's volumes are the card and those three
+CONFIG_USB_HOST_HUBS_SUPPORTED=y
+CONFIG_FATFS_VOLUME_COUNT=4
 
 # newlib gives each FILE a 128-byte buffer unless FATFS reports a block size:
 # fread from the card went 1.6 MB/s with it, 10.8 MB/s with 8 KB (measured on

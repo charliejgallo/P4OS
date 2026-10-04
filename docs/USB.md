@@ -3,14 +3,14 @@
 The board's "OTG" connector is the P4's own USB 2.0 High-Speed port
 (480 Mbit/s). The console lives on the other connector (the CH343 UART), so
 the OTG port is free for whatever it is asked to be. It is chosen in
-**Settings → USB**, which says what each mode does:
+**Settings → USB**, which says what each mode does (the pendrive host is a
+switch of its own, at the end):
 
 | Mode | What the computer sees | The card |
 |---|---|---|
 | Off | nothing | on the board |
 | Keyboard and mouse | a HID keyboard, mouse and media keys, a gamepad, a MIDI keyboard and a network (the Macro pad, `docs/MACROPAD.md`) | on the board |
 | Disk | the microSD as a USB drive | the computer's, until it ejects it |
-| Host | - (the board is the computer) | a pendrive on the 40-pin header, at `/usb` |
 
 The mode is remembered across restarts (pref `usb_mode`,
 `aos_hal_usb_restore()` once the boot has read the card): after an OTA the
@@ -118,12 +118,15 @@ internal RAM audit, `docs/MEMORY.md`).
   the board like a suspended bus, not an unplug: the card stays on the USB
   side until a mode is chosen in Settings.
 
-## Host mode: a pendrive
+## The pendrive host
 
-The OTG connector gives no 5 V, so a device plugged into it gets no power.
-A pendrive goes on the 40-pin header instead, next to 5 V (a USB-A socket
-on wires, or a cut USB cable), on one of two ports, chosen in Settings,
-USB, "Pendrive data lines" (or `POST /api/usb {"pins": "21/23"}`):
+The board can also be the host of pendrives, with a switch of its own in
+Settings, USB, "Pendrives" (`POST /api/usb {"host": true}`), remembered
+across restarts (pref `usb_host`). The OTG connector gives no 5 V, so a
+device plugged into it gets no power: a pendrive goes on the 40-pin header
+instead, next to 5 V (a USB-A socket on wires, or a cut USB cable), on one
+of two ports, chosen in Settings, USB, "Pendrive data lines" (or
+`POST /api/usb {"pins": "21/23"}`, pref `usb_hport`):
 
 | Pendrive | Pins 21/23 (default) | Pins 25/27 |
 |---|---|---|
@@ -131,48 +134,74 @@ USB, "Pendrive data lines" (or `POST /api/usb {"pins": "21/23"}`):
 | D- (white) | pin 21, GPIO24 | pin 25, USBD_N |
 | D+ (green) | pin 23, GPIO25 | pin 27, USBD_P |
 | GND (black) | pin 5 | the same |
-| Controller | the P4's second one, Full Speed (USB 1.1, 12 Mbit/s) | the High-Speed one, also the OTG connector's |
+| Controller | the P4's second one, Full Speed (USB 1.1, 12 Mbit/s) | the High-Speed one (480 Mbit/s), the OTG connector's |
+| The OTG connector meanwhile | keeps its mode (off, keyboard and mouse, disk) | unplugged: its lines are the same wires; its mode is off while the host is on |
 
-**Pins 21/23 work; 25/27 did not** (2026-10-04, a Kingston DataTraveler
-2.0 of 8 GB on loose wires). On 25/27 the High-Speed controller saw the
-pendrive connect, and every port reset failed ("HUB: Root port reset
-failed"), at High Speed and forced to Full Speed (`FSLSSupp`), with VBUS
-and the A-session valid by override (this board's VBUS reaches no pin of
-the P4). On 21/23 it mounted at once, and a 1.5 MB photo came down to the
-Mac at 490 KB/s through the portal over Wi-Fi. 25/27 stays in Settings for
-a better-wired try; there, the OTG connector stays unplugged (its lines
-are the same wires).
+**Both work, and the wires decide** (2026-10-04, a Kingston DataTraveler
+2.0 of 8 GB, FAT32). With wires of about 70 cm, the High-Speed controller
+on 25/27 saw the pendrive connect and every port reset failed ("HUB: Root
+port reset failed"), at High Speed and forced to Full Speed (`FSLSSupp`)
+alike, while 21/23, at Full Speed, mounted it at once. With the same wires
+cut under 15 cm, 25/27 mounted it at High Speed: **7.4 MB/s** reading a
+1.5 MB photo on the board (`/api/fs/bench`). Through the portal over Wi-Fi
+both give about 450 KB/s: there the Wi-Fi is the limit. Full Speed tops at
+about 1 MB/s. So: 25/27 with short wires (D+ and D- twisted together is
+better still) when speed matters, 21/23 when the OTG connector is busy or
+the wires are long.
+
+ESP-IDF's host library drives one root port, so the two ports are not
+used at once; behind a hub, though, there can be several pendrives (below).
 
 **Pins 21/23 and the backlight.** The P4 has two FSLS PHYs: PHY 0 on
 GPIO24/25, PHY 1 on GPIO26/27. At power-on the USB-Serial-JTAG is on PHY 0
 and the Full-Speed controller on PHY 1, and ESP-IDF's host library leaves
-it there - but **GPIO26 is this board's backlight PWM**. So host mode, on
+it there - but **GPIO26 is this board's backlight PWM**. So the host, on
 this port, switches the USB-Serial-JTAG's pads off and swaps the two
 (`usb_wrap_ll_phy_select(&USB_WRAP, 0)`, in `LP_SYS`, before
 `usb_host_install`, whose reset of the wrap does not touch it), and puts
 back the 40 mA drive the PHY driver gave GPIO26/27 thinking the pads were
-there. Leaving host mode turns the controller's pads off and swaps back;
-as `LP_SYS` survives a software restart, every boot swaps back too (a
+there. Stopping turns the controller's pads off and swaps back; as
+`LP_SYS` survives a software restart, every boot swaps back too (a
 constructor in `aos_usb_p4.c`). The USB-Serial-JTAG is not used on this
 board (the console is the CH343 UART) and reaches no connector.
 
-The log says the root port's state on every change (`host port:
+The pads go off only after the host library is down. Cut first, with a
+pendrive on the port, the port saw a sudden disconnection and the
+library's port power-off failed its assert (`hub_root_stop`, hub.c), which
+restarted the board (seen on 2026-10-04 moving the host from 21/23 to
+25/27 with a pendrive mounted).
+
+On 25/27 the controller also gets VBUS and the A-session valid by
+override: this board's VBUS (the OTG connector's and the header's 5 V)
+reaches no pin of the P4. (On 21/23 ESP-IDF gives them through the GPIO
+matrix.)
+
+The log says the root port's state when it changes (`host port:
 connected, enabled, speed, power, A-session...`), for a pendrive that does
 not come up. A couple of failed enumerations
 (`ENUM: CHECK_SHORT_DEV_DESC FAILED`) while the plug goes in are normal:
-the contacts bounce, and the next try works.
+the contacts bounce, and the next try works. A pendrive already there when
+the host starts (at boot, say) is found too.
 
-Settings, USB, Host (or `POST /api/usb {"mode": "host"}`) uninstalls TinyUSB
-and installs ESP-IDF's USB Host Library on the chosen controller, with
-Espressif's `usb_host_msc` as its client (`aos_usb_p4.c`). A pendrive that
-answers as mass storage is mounted at `/usb` through FATFS (its second
-volume): **FAT32 only**, as ESP-IDF has no exFAT, and many pendrives over
-32 GB come in exFAT. Settings says what it found, or why it did not mount.
+The host is ESP-IDF's USB Host Library on the chosen controller, with
+Espressif's `usb_host_msc` as its client (`aos_usb_p4.c`); on 25/27,
+TinyUSB is uninstalled first. A pendrive that answers as mass storage is
+mounted at `/usb` through FATFS: **FAT32 only**, as ESP-IDF has no exFAT,
+and many pendrives over 32 GB come in exFAT. Settings says what it found,
+or why it did not mount.
 
-The portal sees it as a folder `usb` at the card's root: every file call
-(list, get with ranges, put, delete, bench) on `/usb/...` goes to the
-pendrive. `GET /api/usb` says the mode and, in host mode, the pendrive
-(`id`, `vendor`, `product`, `bytes`, `mounted`, `error`) and `pins`.
+**Hubs.** The library's external hub support is on
+(`CONFIG_USB_HOST_HUBS_SUPPORTED`): behind a hub there can be up to three
+pendrives, at `/usb`, `/usb2` and `/usb3` (FATFS has four volumes: the
+card and these). A hub with its own power supply also gives the pendrives
+their 5 V. On 25/27 a High-Speed hub runs at High Speed; a Full-Speed
+device behind a High-Speed hub needs split transactions, which ESP-IDF
+does not do.
 
-Host mode is not remembered across a restart: the board comes back as it
-was before (keyboard, or idle). The chosen pins are kept (pref `usb_hport`).
+The portal sees each pendrive as a folder at the card's root (`usb`,
+`usb2`, `usb3`): every file call (list, get with ranges, put, delete,
+bench) on `/usb/...` goes to the pendrive. `GET /api/usb` says the OTG's
+`mode` (`host` while the host holds the OTG controller, on 25/27),
+`host_on`, `pins` and `pendrives`, each with `id`, `vendor`, `product`,
+`bytes`, `mounted`, `path` and `error` (and `host`, the first one, as
+before). `{"mode": "host"}` still turns the host on.

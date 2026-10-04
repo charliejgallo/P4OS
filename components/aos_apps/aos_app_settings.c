@@ -75,7 +75,7 @@ static struct {
     lv_obj_t *wifi_list, *wifi_state, *side;
     /* USB page, refreshed by the timer: the port can change by itself (an
      * eject ends disk mode) */
-    lv_obj_t *usb_state, *usb_dot, *usb_tick[4], *usb_root;
+    lv_obj_t *usb_state, *usb_dot, *usb_tick[4], *usb_root, *host_state, *host_dot, *host_sw;
     int usb_shown;
     int32_t PW;                     /* width of the column being filled */
     int selected;                   /* landscape: the page on the right */
@@ -330,7 +330,8 @@ static void edit_home_cb(lv_event_t *e) { aos_ui_edit_home(); }
 
 /* ---- USB ---- */
 
-/* The rows' order IS aos_hal_usb_mode_t's: CONSOLE, KEYS, DISK, HOST. */
+/* The rows' order IS aos_hal_usb_mode_t's: CONSOLE, KEYS, DISK (HOST is the
+ * pendrive host holding the OTG controller, and has no row of its own). */
 static const char *usb_name(int mode)
 {
     switch (mode) {
@@ -341,7 +342,19 @@ static const char *usb_name(int mode)
     }
 }
 
-/* What the port is doing now, in a sentence, and the colour of its dot. */
+/* Settings' first page: the OTG's role, and the pendrive host beside it */
+static const char *usb_root_text(void)
+{
+    static char t[64];
+    int mode = aos_hal_usb_mode();
+    if (aos_hal_usb_host_on() && mode != AOS_HAL_USB_HOST)
+        snprintf(t, sizeof t, mode == AOS_HAL_USB_CONSOLE ? "%s" : "%s + %s",
+                 mode == AOS_HAL_USB_CONSOLE ? "Host" : usb_name(mode), "Host");
+    else snprintf(t, sizeof t, "%s", usb_name(mode));
+    return t;
+}
+
+/* What the OTG connector is doing now, in a sentence, and the colour of its dot. */
 static const char *usb_state_text(uint32_t *color)
 {
     *color = 0x8E8E93;
@@ -363,43 +376,61 @@ static const char *usb_state_text(uint32_t *color)
         }
         *color = 0xFF9F0A;
         return _("Esperando a la computadora. La tarjeta ya salió de la placa: las apps de la tarjeta no abren.");
-    case AOS_HAL_USB_HOST: {
-        static char t[160];
-        aos_usb_host_info_t in;
-        if (!aos_hal_usb_host_info(&in) || !in.device) {
-            *color = 0xFF9F0A;
-            return _("Esperando un pendrive en el conector de 40 pines.");
-        }
-        if (!in.mounted) {
-            *color = 0xFF453A;
-            snprintf(t, sizeof t, "%s %s: %s", in.vendor, in.product, in.error);
-            return t;
-        }
-        *color = 0x34C759;
-        snprintf(t, sizeof t, _("%s %s, %.1f GB: en /usb, para Archivos y el portal."), in.vendor, in.product,
-                 (double)in.bytes / 1e9);
-        return t;
-    }
+    case AOS_HAL_USB_HOST:
+        *color = 0x5E5CE6;
+        return _("Lo usa el host de pendrives, en los pines 25 y 27.");
     default:
         return _("El puerto está libre: la placa no aparece en la computadora.");
     }
 }
 
+/* The pendrives, a line each, and the colour of the dot. */
+static const char *host_state_text(uint32_t *color)
+{
+    static char t[400];
+    *color = 0x8E8E93;
+    if (!aos_hal_usb_host_on()) return _("Apagado.");
+    aos_usb_host_info_t in[AOS_USB_HOST_MAX];
+    int n = aos_hal_usb_host_devices(in, AOS_USB_HOST_MAX);
+    if (n <= 0) {
+        *color = 0xFF9F0A;
+        return _("Esperando un pendrive en el conector de 40 pines.");
+    }
+    size_t o = 0;
+    *color = 0x34C759;
+    for (int i = 0; i < n && o < sizeof t; i++) {
+        if (in[i].mounted)
+            o += snprintf(t + o, sizeof t - o, _("%s%s %s, %.1f GB: en %s."), i ? "\n" : "", in[i].vendor,
+                          in[i].product, (double)in[i].bytes / 1e9, in[i].path);
+        else {
+            *color = 0xFF453A;
+            o += snprintf(t + o, sizeof t - o, "%s%s %s: %s", i ? "\n" : "", in[i].vendor, in[i].product, in[i].error);
+        }
+    }
+    return t;
+}
+
 static void usb_refresh(void)
 {
     int mode = aos_hal_usb_mode();
-    aos_usb_host_info_t hi = { 0 };
-    aos_hal_usb_host_info(&hi);
-    int key = (mode << 4) | (aos_hal_usb_busy() << 3) | (aos_hal_usb_connected() << 2) | (hi.device << 1) | hi.mounted;
+    aos_usb_host_info_t hi[AOS_USB_HOST_MAX];
+    int hn = aos_hal_usb_host_on() ? aos_hal_usb_host_devices(hi, AOS_USB_HOST_MAX) : -1;
+    int key = (mode << 4) | (aos_hal_usb_busy() << 3) | (aos_hal_usb_connected() << 2) | ((hn + 1) << 8);
+    for (int i = 0; i < hn; i++) key ^= (hi[i].device | hi[i].mounted << 1) << (12 + 2 * i);
     if (key == U.usb_shown) return;
     U.usb_shown = key;
-    if (U.usb_root) lv_label_set_text(U.usb_root, usb_name(mode));
+    if (U.usb_root) lv_label_set_text(U.usb_root, usb_root_text());
     if (!U.usb_state) return;
     uint32_t c;
     lv_label_set_text(U.usb_state, usb_state_text(&c));
     lv_obj_set_style_bg_color(U.usb_dot, lv_color_hex(c), 0);
     for (int i = 0; i < 4; i++)
         if (U.usb_tick[i]) lv_obj_set_flag(U.usb_tick[i], LV_OBJ_FLAG_HIDDEN, i != mode);
+    if (U.host_state) {
+        lv_label_set_text(U.host_state, host_state_text(&c));
+        lv_obj_set_style_bg_color(U.host_dot, lv_color_hex(c), 0);
+    }
+    if (U.host_sw && !aos_hal_usb_busy()) lv_obj_set_state(U.host_sw, LV_STATE_CHECKED, aos_hal_usb_host_on());
 }
 
 static void pick_row(lv_obj_t *g, const char *label, bool on, lv_event_cb_t cb, void *ud);
@@ -411,6 +442,23 @@ static void usb_pins_cb(lv_event_t *e)
         return;
     }
     show(PG_USB);
+}
+
+static void usb_host_cb(lv_event_t *e)
+{
+    bool on = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
+    if (on && aos_hal_usb_host_port() == AOS_HAL_USB_HOST_OTG && aos_hal_usb_mode() == AOS_HAL_USB_DISK) {
+        aos_ui_toast(_("Primero expulsá la tarjeta en la computadora"), 2500);
+        lv_obj_set_state(lv_event_get_target(e), LV_STATE_CHECKED, false);
+        return;
+    }
+    if (!aos_hal_usb_host_set(on)) {
+        aos_ui_toast(_("El USB está cambiando de modo"), 1500);
+        lv_obj_set_state(lv_event_get_target(e), LV_STATE_CHECKED, !on);
+        return;
+    }
+    U.usb_shown = -1;
+    usb_refresh();
 }
 
 static void usb_mode_cb(lv_event_t *e)
@@ -476,25 +524,36 @@ static void mode_row(lv_obj_t *g, int mode, const char *glyph, uint32_t color, c
     lv_obj_set_pos(d, 0, 68);
 }
 
-static void build_usb(lv_obj_t *p)
+/* a dot and a sentence that usb_refresh keeps up to date */
+static void state_row(lv_obj_t *g, lv_obj_t **dot, lv_obj_t **label)
 {
-    lv_obj_t *g = group(p, _("AHORA"));
     lv_obj_t *r = lv_obj_create(g);
     lv_obj_remove_style_all(r);
     lv_obj_set_size(r, lv_pct(100), LV_SIZE_CONTENT);
     lv_obj_set_style_pad_hor(r, 22, 0);
     lv_obj_set_style_pad_ver(r, 22, 0);
     lv_obj_remove_flag(r, LV_OBJ_FLAG_SCROLLABLE);
-    U.usb_dot = lv_obj_create(r);
-    lv_obj_remove_style_all(U.usb_dot);
-    lv_obj_set_size(U.usb_dot, 18, 18);
-    lv_obj_set_style_radius(U.usb_dot, LV_RADIUS_CIRCLE, 0);
-    lv_obj_set_style_bg_opa(U.usb_dot, LV_OPA_COVER, 0);
-    lv_obj_set_pos(U.usb_dot, 0, 8);
-    U.usb_state = aos_label(r, "", aos_font_body, AOS_C_TEXT);
-    lv_obj_set_width(U.usb_state, lv_pct(100));
-    lv_label_set_long_mode(U.usb_state, LV_LABEL_LONG_MODE_WRAP);
-    lv_obj_set_style_pad_left(U.usb_state, 36, 0);
+    if (lv_obj_get_child_count(g) > 1) {
+        lv_obj_set_style_border_side(r, LV_BORDER_SIDE_TOP, 0);
+        lv_obj_set_style_border_width(r, 1, 0);
+        lv_obj_set_style_border_color(r, AOS_C_CARD2, 0);
+    }
+    *dot = lv_obj_create(r);
+    lv_obj_remove_style_all(*dot);
+    lv_obj_set_size(*dot, 18, 18);
+    lv_obj_set_style_radius(*dot, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_bg_opa(*dot, LV_OPA_COVER, 0);
+    lv_obj_set_pos(*dot, 0, 8);
+    *label = aos_label(r, "", aos_font_body, AOS_C_TEXT);
+    lv_obj_set_width(*label, lv_pct(100));
+    lv_label_set_long_mode(*label, LV_LABEL_LONG_MODE_WRAP);
+    lv_obj_set_style_pad_left(*label, 36, 0);
+}
+
+static void build_usb(lv_obj_t *p)
+{
+    lv_obj_t *g = group(p, _("AHORA"));
+    state_row(g, &U.usb_dot, &U.usb_state);
 
     g = group(p, _("QUÉ ES EL PUERTO OTG"));
     mode_row(g, AOS_HAL_USB_CONSOLE, AOS_SYM_POWER_PLUG_OFF, 0x8E8E93,
@@ -506,17 +565,21 @@ static void build_usb(lv_obj_t *p)
     mode_row(g, AOS_HAL_USB_DISK, AOS_SYM_SD, 0xFF9F0A,
              _("La microSD aparece en la computadora como un pendrive, para copiar apps, música, fotos o mapas a la velocidad del USB. Mientras la tiene la computadora la placa no la toca: al elegirlo se cierran las otras apps, y las de la tarjeta no abren. Expulsala en la computadora y vuelve sola a la placa, con el modo de antes."),
              true);
-    mode_row(g, AOS_HAL_USB_HOST, AOS_SYM_USB_PORT, 0x5E5CE6,
-             _("Un pendrive conectado a la placa, que se lee en /usb. El conector OTG no da 5 V: el pendrive va al conector de 40 pines, con 5 V del pin 1 y GND del 5, y sus datos en los pines que se eligen abajo. En FAT32."),
-             true);
+    note(p, _("El conector OTG es el USB 2.0 de alta velocidad del P4 (480 Mbit/s). La placa puede alimentarse por él o por el UART, y pasar de uno al otro sin reiniciarse."));
+
+    g = group(p, _("PENDRIVES"));
+    U.host_sw = lv_obj_get_child(row_switch(g, AOS_SYM_USB_PORT, 0x5E5CE6, _("Leer pendrives"), aos_hal_usb_host_on(),
+                                            usb_host_cb), -1);
+    state_row(g, &U.host_dot, &U.host_state);
+    note(p, _("Se leen en /usb, desde Archivos y el portal; con un hub, hasta tres: /usb, /usb2 y /usb3. El conector OTG no da 5 V: los pendrives van al conector de 40 pines, con 5 V del pin 1 y GND del 5. En FAT32."));
+
     g = group(p, _("DATOS DEL PENDRIVE"));
     int port = aos_hal_usb_host_port();
     pick_row(g, _("Pines 21 (D−) y 23 (D+)"), port == AOS_HAL_USB_HOST_HEADER, usb_pins_cb,
              (void *)(intptr_t)AOS_HAL_USB_HOST_HEADER);
-    pick_row(g, _("Pines 25 (D−) y 27 (D+)"), port == AOS_HAL_USB_HOST_OTG, usb_pins_cb,
+    pick_row(g, _("Pines 25 (D−) y 27 (D+), o el conector OTG"), port == AOS_HAL_USB_HOST_OTG, usb_pins_cb,
              (void *)(intptr_t)AOS_HAL_USB_HOST_OTG);
-    note(p, _("21 y 23 son el segundo controlador USB del P4, de velocidad completa (12 Mbit/s), y sólo salen al conector de 40 pines. 25 y 27 son los mismos cables que el conector OTG, que tiene que quedar desenchufado."));
-    note(p, _("El conector OTG es el USB 2.0 de alta velocidad del P4 (480 Mbit/s). La placa puede alimentarse por él o por el UART, y pasar de uno al otro sin reiniciarse."));
+    note(p, _("21 y 23 son el segundo controlador USB del P4, de velocidad completa (12 Mbit/s): andan a la vez que cualquier modo del conector OTG. 25 y 27 son los mismos cables que el conector OTG, de alta velocidad: el host le saca el modo al OTG mientras está prendido."));
     U.usb_shown = -1;
     usb_refresh();
 }
@@ -529,7 +592,7 @@ static void build_root(lv_obj_t *p)
                                     : aos_hal_net_enabled() ? _("Sin conectar") : _("No"));
     row(g, AOS_SYM_WIFI, 0x0A84FF, _("Wi-Fi"), buf, true, open_cb, (void *)PG_WIFI);
     row(g, AOS_SYM_BLUETOOTH, 0x0A84FF, "Bluetooth", bt_root_text(), true, open_cb, (void *)PG_BT);
-    lv_obj_t *u = row(g, AOS_SYM_USB, 0x636366, "USB", usb_name((int)aos_hal_usb_mode()), true, open_cb, (void *)PG_USB);
+    lv_obj_t *u = row(g, AOS_SYM_USB, 0x636366, "USB", usb_root_text(), true, open_cb, (void *)PG_USB);
     U.usb_root = lv_obj_get_user_data(u);
     row(g, AOS_SYM_SERVER_NETWORK, 0x30B0C7, _("Portal web"), portal_root_text(), true, open_cb, (void *)PG_PORTAL);
 
@@ -2199,7 +2262,7 @@ static void build(int pg)
     U.body = NULL;
     if (U.page) lv_obj_delete(U.page);
     U.wifi_list = U.wifi_state = U.side = NULL;
-    U.usb_state = U.usb_dot = U.usb_root = NULL;
+    U.usb_state = U.usb_dot = U.usb_root = U.host_state = U.host_dot = U.host_sw = NULL;
     U.dg_temp = U.dg_cpu = U.dg_int = U.dg_psram = U.dg_up = NULL;
     U.c6_state = NULL;
     U.armed = NULL;

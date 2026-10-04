@@ -22,7 +22,7 @@
  *   GET  /api/ha     POST /api/ha {url?,token?}   GET /api/ha/entities
  *   POST /api/ha/fav?id=&on=
  *   GET  /api/fs?path=                 a folder's listing
- *   GET  /api/usb, POST {"mode"}       the USB port's mode, and the pendrive in HOST
+ *   GET  /api/usb, POST {"mode","host","pins"} the OTG port's role, and the pendrive host
  *   GET  /api/fs/get?path=             a file (attachment=1 to download); a Range
  *                                      header gets that part (206)
  *   PUT  /api/fs/put?path=             the body becomes the file
@@ -130,11 +130,24 @@ static const char *jstr(const cJSON *o, const char *k)
 
 /* A path on the card from ?path=: "/firmware/app.bin" -> "<root>/firmware/app.bin".
  * false for no card or anything that tries to leave it. */
-/* the pendrive is mounted (USB HOST mode, aos_usb_p4.c) */
-static bool usb_mounted(void)
+/* "usb", "usb2", "usb3" at the start of a path (no leading slash): the
+ * mount of that pendrive while it is there (the USB host, aos_usb_p4.c),
+ * and the length of the name */
+static bool usb_root_of(const char *q, char *root, size_t rn, size_t *name_len)
 {
-    aos_usb_host_info_t in;
-    return aos_hal_usb_host_info(&in) && in.mounted;
+    if (strncmp(q, "usb", 3)) return false;
+    size_t l = q[3] >= '2' && q[3] <= '9' ? 4 : 3;
+    if (q[l] && q[l] != '/') return false;
+    if (!aos_hal_usb_host_on()) return false;
+    aos_usb_host_info_t in[AOS_USB_HOST_MAX];
+    int n = aos_hal_usb_host_devices(in, AOS_USB_HOST_MAX);
+    for (int i = 0; i < n; i++)
+        if (in[i].mounted && strlen(in[i].path) == l + 1 && !strncmp(in[i].path + 1, q, l)) {
+            snprintf(root, rn, "%s", in[i].path);
+            if (name_len) *name_len = l;
+            return true;
+        }
+    return false;
 }
 
 static bool card_path(aos_httpd_req_t *r, const char *key, char *out, size_t n, char *rel, size_t rn)
@@ -145,16 +158,18 @@ static bool card_path(aos_httpd_req_t *r, const char *key, char *out, size_t n, 
     if (strstr(p, "..")) return false;
     const char *q = p;
     while (*q == '/') q++;
-    /* "/usb/..." is the pendrive while there is one: every file call of the
-     * portal (list, get with ranges, put, delete, bench) works on it too */
-    if (!strncmp(q, "usb", 3) && (!q[3] || q[3] == '/') && usb_mounted()) {
-        root = aos_hal_path_usb();
-        q += 3;
+    /* "/usb/..." (and /usb2, /usb3) is a pendrive while there is one: every
+     * file call of the portal (list, get with ranges, put, delete, bench)
+     * works on it too */
+    char usb[8];
+    size_t ul;
+    if (usb_root_of(q, usb, sizeof usb, &ul)) {
+        q += ul;
         while (*q == '/') q++;
-        snprintf(out, n, "%s%s%s", root, *q ? "/" : "", q);
+        snprintf(out, n, "%s%s%s", usb, *q ? "/" : "", q);
         size_t l = strlen(out);
-        while (l > strlen(root) && out[l - 1] == '/') out[--l] = 0;
-        if (rel) snprintf(rel, rn, "/usb%s%.*s", *q ? "/" : "", (int)(rn > 8 ? rn - 8 : 0), q);
+        while (l > strlen(usb) && out[l - 1] == '/') out[--l] = 0;
+        if (rel) snprintf(rel, rn, "%s%s%.*s", usb, *q ? "/" : "", (int)(rn > 12 ? rn - 12 : 0), q);
         return true;
     }
     snprintf(out, n, "%s%s%s", root, *q ? "/" : "", q);
@@ -383,25 +398,50 @@ static void api_wifi(aos_httpd_req_t *r)
     send_cjson(r, 200, o);
 }
 
-/* The USB port (docs/USB.md): GET its mode and, in HOST, the pendrive;
- * POST {"mode": "console"|"keys"|"host"} switches it as Settings, USB does,
- * and {"pins": "21/23"|"25/27"} picks the header port HOST uses (moving it
- * there if it is on). Disk mode stays Settings' own: it has to close the apps holding the card. */
+/* The USB port (docs/USB.md): GET the OTG connector's role, and the
+ * pendrive host with its pendrives; POST {"mode": "console"|"keys"} switches
+ * the role as Settings, USB does, {"host": bool} the pendrive host, and
+ * {"pins": "21/23"|"25/27"} picks the header port it uses (moving it there
+ * if it is on). {"mode": "host"} is {"host": true}, as before. Disk mode
+ * stays Settings' own: it has to close the apps holding the card. */
+static void usb_dev_json(cJSON *a, const aos_usb_host_info_t *in)
+{
+    cJSON *h = cJSON_CreateObject();
+    cJSON_AddBoolToObject(h, "device", in->device);
+    cJSON_AddBoolToObject(h, "mounted", in->mounted);
+    char id[12];
+    snprintf(id, sizeof id, "%04x:%04x", in->vid, in->pid);
+    cJSON_AddStringToObject(h, "id", id);
+    cJSON_AddStringToObject(h, "vendor", in->vendor);
+    cJSON_AddStringToObject(h, "product", in->product);
+    cJSON_AddNumberToObject(h, "bytes", (double)in->bytes);
+    cJSON_AddStringToObject(h, "error", in->error);
+    cJSON_AddStringToObject(h, "path", in->path);
+    cJSON_AddItemToArray(a, h);
+}
+
 static void api_usb(aos_httpd_req_t *r)
 {
     static const char *const M[] = { "console", "keys", "disk", "host" };
     if (!strcmp(aos_httpd_method(r), "POST")) {
         cJSON *b = body_json(r);
         const char *m = jstr(b, "mode"), *pins = jstr(b, "pins");
+        cJSON *host = b ? cJSON_GetObjectItem(b, "host") : NULL;
         int want = -1, port = -1;
         for (int i = 0; m && i < 4; i++) if (!strcmp(m, M[i]) && i != AOS_HAL_USB_DISK) want = i;
         if (pins) port = !strcmp(pins, "21/23") ? AOS_HAL_USB_HOST_HEADER : !strcmp(pins, "25/27") ? AOS_HAL_USB_HOST_OTG : -2;
+        bool bad = (m && want < 0) || port == -2 || (host && !cJSON_IsBool(host)) || (!m && !pins && !host);
+        bool host_on = host && cJSON_IsTrue(host);
         cJSON_Delete(b);
-        if ((m && want < 0) || port == -2 || (!m && !pins)) {
-            send_err(r, 400, "\"mode\": console, keys o host; \"pins\": 21/23 o 25/27");
+        if (bad) {
+            send_err(r, 400, "\"mode\": console o keys; \"host\": true o false; \"pins\": 21/23 o 25/27");
             return;
         }
-        if ((port >= 0 && !aos_hal_usb_host_port_set(port)) || (want >= 0 && !aos_hal_usb_mode_set((aos_hal_usb_mode_t)want))) {
+        /* one switch at a time: the pins first, then the host, then the role */
+        bool ok = port < 0 || aos_hal_usb_host_port_set(port);
+        if (ok && host) ok = aos_hal_usb_host_set(host_on);
+        if (ok && want >= 0) ok = aos_hal_usb_mode_set((aos_hal_usb_mode_t)want);
+        if (!ok) {
             send_err(r, 409, "el USB está cambiando de modo");
             return;
         }
@@ -412,19 +452,21 @@ static void api_usb(aos_httpd_req_t *r)
     cJSON_AddBoolToObject(o, "busy", aos_hal_usb_busy());
     cJSON_AddBoolToObject(o, "connected", aos_hal_usb_connected());
     cJSON_AddStringToObject(o, "pins", aos_hal_usb_host_port() == AOS_HAL_USB_HOST_HEADER ? "21/23" : "25/27");
-    aos_usb_host_info_t in;
-    if (aos_hal_usb_host_info(&in)) {
-        cJSON *h = cJSON_AddObjectToObject(o, "host");
-        cJSON_AddBoolToObject(h, "device", in.device);
-        cJSON_AddBoolToObject(h, "mounted", in.mounted);
-        char id[12];
-        snprintf(id, sizeof id, "%04x:%04x", in.vid, in.pid);
-        cJSON_AddStringToObject(h, "id", id);
-        cJSON_AddStringToObject(h, "vendor", in.vendor);
-        cJSON_AddStringToObject(h, "product", in.product);
-        cJSON_AddNumberToObject(h, "bytes", (double)in.bytes);
-        cJSON_AddStringToObject(h, "error", in.error);
-        cJSON_AddStringToObject(h, "path", in.mounted ? "/usb" : "");
+    cJSON_AddBoolToObject(o, "host_on", aos_hal_usb_host_on());
+    aos_usb_host_info_t in[AOS_USB_HOST_MAX];
+    int n = aos_hal_usb_host_on() ? aos_hal_usb_host_devices(in, AOS_USB_HOST_MAX) : -1;
+    if (n >= 0) {
+        cJSON *a = cJSON_AddArrayToObject(o, "pendrives");
+        for (int i = 0; i < n; i++) usb_dev_json(a, &in[i]);
+        /* "host": the first one, as before */
+        if (n > 0) cJSON_AddItemToObject(o, "host", cJSON_Duplicate(cJSON_GetArrayItem(a, 0), true));
+        else {
+            aos_usb_host_info_t none = { 0 };
+            cJSON *t = cJSON_CreateArray();
+            usb_dev_json(t, &none);
+            cJSON_AddItemToObject(o, "host", cJSON_DetachItemFromArray(t, 0));
+            cJSON_Delete(t);
+        }
     }
     send_cjson(r, 200, o);
 }
@@ -648,20 +690,26 @@ static void api_fs_list(aos_httpd_req_t *r)
     fs_list_t l = { cJSON_AddArrayToObject(o, "entries"), 0 };
     if (aos_hal_dir_scan(path, fs_list_one, &l) < 0) { cJSON_Delete(o); send_err(r, 404, "no existe"); return; }
     if (l.n >= FS_LIST_MAX) cJSON_AddBoolToObject(o, "truncated", true);
-    bool on_usb = !strncmp(rel, "/usb", 4) && (!rel[4] || rel[4] == '/') && usb_mounted();
-    /* the card's root shows the pendrive as a folder while there is one */
-    if (!strcmp(rel, "/") && usb_mounted()) {
-        cJSON *e = cJSON_CreateObject();
-        cJSON_AddStringToObject(e, "name", "usb");
-        cJSON_AddBoolToObject(e, "dir", true);
-        cJSON_AddNumberToObject(e, "size", 0);
-        cJSON_AddNumberToObject(e, "mtime", 0);
-        cJSON_AddBoolToObject(e, "pendrive", true);
-        cJSON_AddItemToArray(cJSON_GetObjectItem(o, "entries"), e);
+    char usb[8];
+    bool on_usb = rel[0] == '/' && usb_root_of(rel + 1, usb, sizeof usb, NULL);
+    /* the card's root shows each pendrive as a folder while it is there */
+    if (!strcmp(rel, "/") && aos_hal_usb_host_on()) {
+        aos_usb_host_info_t in[AOS_USB_HOST_MAX];
+        int n = aos_hal_usb_host_devices(in, AOS_USB_HOST_MAX);
+        for (int i = 0; i < n; i++) {
+            if (!in[i].mounted) continue;
+            cJSON *e = cJSON_CreateObject();
+            cJSON_AddStringToObject(e, "name", in[i].path + 1);
+            cJSON_AddBoolToObject(e, "dir", true);
+            cJSON_AddNumberToObject(e, "size", 0);
+            cJSON_AddNumberToObject(e, "mtime", 0);
+            cJSON_AddBoolToObject(e, "pendrive", true);
+            cJSON_AddItemToArray(cJSON_GetObjectItem(o, "entries"), e);
+        }
     }
     uint64_t tot = 0, fr = 0;
 #ifdef ESP_PLATFORM
-    if (on_usb ? esp_vfs_fat_info(aos_hal_path_usb(), &tot, &fr) == ESP_OK : aos_hal_sd_usage(&tot, &fr)) {
+    if (on_usb ? esp_vfs_fat_info(usb, &tot, &fr) == ESP_OK : aos_hal_sd_usage(&tot, &fr)) {
 #else
     if (!on_usb && aos_hal_sd_usage(&tot, &fr)) {
 #endif

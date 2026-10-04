@@ -1775,24 +1775,33 @@ void aos_hal_usb_restore(void);                /* at boot, once the card is read
 bool aos_hal_usb_mouse_hold(int buttons);      /* buttons held down for the next moves (bit 0 left,
                                                 * bit 1 right; 0 lets go): drag and drop */
 
-/* P4OS: HOST mode (aos_usb_p4.c, docs/USB.md): a pendrive on the 40-pin
- * header, with 5 V from pin 1 and GND from pin 5, on one of two ports:
- * pins 21 (D-) and 23 (D+), the P4's Full-Speed controller (the default),
- * or pins 25 (D-) and 27 (D+), the High-Speed one, which are also the OTG
- * connector's lines (unplugged then; it gives no 5 V). A FAT volume on it is
- * mounted at aos_hal_path_usb() while it is there. */
+/* P4OS: the pendrive host (aos_usb_p4.c, docs/USB.md), a switch of its own
+ * beside the OTG connector's role: pendrives on the 40-pin header, with 5 V
+ * from pin 1 and GND from pin 5, on one of two ports: pins 21 (D-) and 23
+ * (D+), the P4's Full-Speed controller (the default), which works at the
+ * same time as any role of the OTG connector; or pins 25 (D-) and 27 (D+),
+ * the High-Speed one, the OTG connector's own lines, which takes the OTG
+ * controller (aos_hal_usb_mode() says AOS_HAL_USB_HOST then). Behind a hub
+ * there can be AOS_USB_HOST_MAX of them: their FAT volumes are mounted at
+ * /usb, /usb2 and /usb3. */
+#define AOS_USB_HOST_MAX 3
 enum { AOS_HAL_USB_HOST_OTG = 0, AOS_HAL_USB_HOST_HEADER = 1 };
-int  aos_hal_usb_host_port(void);               /* AOS_HAL_USB_HOST_HEADER (21/23) or _OTG (25/27) */
-bool aos_hal_usb_host_port_set(int port);       /* remembered; HOST mode, if on, moves there */
 typedef struct {
     bool     device;            /* a mass storage device answered */
-    bool     mounted;           /* its FAT is at aos_hal_path_usb() */
+    bool     mounted;           /* its FAT is at path */
     uint16_t vid, pid;
     char     vendor[32], product[48];
     uint64_t bytes;             /* its capacity */
     char     error[64];         /* why it is not mounted, "" if it is */
+    char     path[8];           /* "/usb", "/usb2", "/usb3"; "" if not mounted */
 } aos_usb_host_info_t;
-bool aos_hal_usb_host_info(aos_usb_host_info_t *out);   /* false: not in HOST mode */
+bool aos_hal_usb_host_on(void);
+bool aos_hal_usb_host_set(bool on);             /* remembered across restarts; false = busy */
+int  aos_hal_usb_host_port(void);               /* AOS_HAL_USB_HOST_HEADER (21/23) or _OTG (25/27) */
+bool aos_hal_usb_host_port_set(int port);       /* remembered; the host, if on, moves there */
+/* the pendrives there are, in slot order: -1 with the host off */
+int  aos_hal_usb_host_devices(aos_usb_host_info_t *out, int max);
+bool aos_hal_usb_host_info(aos_usb_host_info_t *out);   /* the first one ("device" false: none); false: host off */
 const char *aos_hal_path_usb(void);                     /* "/usb" */
 
 /* mDNS on a network interface of somebody else's (the USB one): the watch

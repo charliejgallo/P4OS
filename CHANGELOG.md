@@ -22,14 +22,18 @@
   warning away. TLS 1.2 with AES-GCM first. On untrusted networks plain
   HTTP redirects there; the session cookie is `Secure` over HTTPS.
 
-**USB host: a pendrive**
-- Settings, USB, Host: a pendrive wired to the 40-pin header (5 V from
-  pin 1, data on pins 21/23) is mounted at `/usb` (FAT32), through ESP-IDF's
-  USB Host Library and `usb_host_msc`, on the P4's second, Full-Speed
-  controller, moved off GPIO26 (the backlight) onto GPIO24/25. Pins 25/27,
-  the OTG connector's High-Speed lines, can be chosen instead; on wires
-  they did not get past the port reset. The portal shows the pendrive as a
-  `usb` folder; `GET/POST /api/usb` (`mode`, `pins`).
+**USB host: pendrives**
+- Settings, USB, Pendrives: a switch of its own, beside the OTG
+  connector's mode and remembered across restarts. Pendrives on the 40-pin
+  header (5 V from pin 1) are mounted at `/usb` (FAT32), through ESP-IDF's
+  USB Host Library and `usb_host_msc`, on one of two ports: pins 21/23, the
+  P4's second, Full-Speed controller, moved off GPIO26 (the backlight) onto
+  GPIO24/25, which works while the OTG connector is a keyboard or a disk;
+  or pins 25/27, the OTG connector's High-Speed lines: 7.4 MB/s with wires
+  under 15 cm (with 70 cm the port reset failed).
+- Hubs: up to three pendrives, at `/usb`, `/usb2` and `/usb3`.
+- The portal shows each one as a folder; `GET/POST /api/usb` (`mode`,
+  `host`, `pins`, `pendrives`).
 
 **Bluetooth**
 - The board asks for encryption only when the phone or the computer has not

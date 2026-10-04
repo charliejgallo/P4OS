@@ -840,11 +840,20 @@ __attribute__((weak)) void aos_hal_usb_restore(void)
 __attribute__((weak)) bool aos_hal_usb_mouse_hold(int buttons)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) bool aos_hal_usb_host_on(void)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_usb_host_set(bool on)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) int aos_hal_usb_host_port(void)
 { int v; memset(&v, 0, sizeof v); return v; }
 
 __attribute__((weak)) bool aos_hal_usb_host_port_set(int port)
 { bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_usb_host_devices(aos_usb_host_info_t *out, int max)
+{ int v; memset(&v, 0, sizeof v); return v; }
 
 __attribute__((weak)) bool aos_hal_usb_host_info(aos_usb_host_info_t *out)
 { bool v; memset(&v, 0, sizeof v); return v; }
