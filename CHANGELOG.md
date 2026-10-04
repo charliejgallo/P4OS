@@ -1,5 +1,23 @@
 # Changelog
 
+## Unreleased (0.7)
+
+**The ESP32-C6, updated from the P4**
+- esp_hosted 3.0.9 on the P4 (it was 1.4.7), with esp_wifi_remote 1.6.5.
+  It still talks to the C6's factory firmware, and its own options put the
+  SDIO buffers and its task stacks in PSRAM.
+- `c6/` is the C6's firmware, esp_hosted 3.0.9 with Wi-Fi and BLE, built by
+  `tools/build_c6.sh`. The P4 installs it from the card: Settings, Update,
+  or `tools/install_c6.sh`. No cable, no programmer.
+- The way back too: `tools/c6_app_from_flash.py` takes the factory app out
+  of a backup of the C6's flash, and the P4 sends it the same way.
+- docs/C6.md: versions, the update, the measured throughput, and the
+  serial recovery through J7.
+- The C6's Wi-Fi buffers are the P4's `CONFIG_WIFI_RMT_*`: 32 TX buffers,
+  or downloads fall to 0.4 MB/s with a new C6.
+- `POST /api/wifi/ap` switches the access point, `GET /api/fs/bench` times
+  a read from the card, `GET`/`POST /api/c6` show and start a C6 update.
+
 ## 0.6.0 — 2026-10-03
 
 **The lock screen**

@@ -582,6 +582,28 @@ static bool menu_ok(aos_httpd_req_t *r, const char *path)
     return ok;
 }
 
+/* How fast the card reads a file, with no network in the way: the card
+ * and the C6 share the P4's SDMMC controller (slots 0 and 1). */
+static void api_fs_bench(aos_httpd_req_t *r)
+{
+    char path[320], rel[256];
+    if (!card_path(r, "path", path, sizeof path, rel, sizeof rel)) { send_err(r, 400, "ruta inválida"); return; }
+    FILE *f = fopen(path, "rb");
+    char *buf = aos_hal_io_alloc(65536);
+    if (!f || !buf) { if (f) fclose(f); aos_hal_io_free(buf); send_err(r, 404, "no se pudo abrir"); return; }
+    uint64_t t0 = aos_hal_uptime_ms(), n = 0;
+    ssize_t got;            /* read(), as fs/get: an unbuffered fread() goes byte by byte */
+    while ((got = read(fileno(f), buf, 65536)) > 0 && n < 16u * 1048576) n += (uint64_t)got;
+    uint64_t ms = aos_hal_uptime_ms() - t0;
+    fclose(f);
+    aos_hal_io_free(buf);
+    cJSON *o = cJSON_CreateObject();
+    cJSON_AddNumberToObject(o, "bytes", (double)n);
+    cJSON_AddNumberToObject(o, "ms", (double)ms);
+    cJSON_AddNumberToObject(o, "kb_s", ms ? (double)n / ms * 1000 / 1024 : 0);
+    send_cjson(r, 200, o);
+}
+
 static void api_fs_put(aos_httpd_req_t *r)
 {
     char path[320], rel[256], tmp[340];
@@ -1058,6 +1080,15 @@ static void handler(aos_httpd_req_t *r)
     else if (!strcmp(p, "wifi")) api_wifi(r);
     else if (get && !strcmp(p, "wifi/scan")) api_wifi_scan(r);
     else if (post && !strcmp(p, "wifi/forget")) { aos_hal_net_forget(); send_ok(r); }
+    else if (post && !strcmp(p, "wifi/ap")) {          /* {"on": true|false}, as the switch in Settings */
+        cJSON *b = body_json(r);
+        cJSON *on = b ? cJSON_GetObjectItem(b, "on") : NULL;
+        bool want = cJSON_IsTrue(on), ok = cJSON_IsBool(on);
+        cJSON_Delete(b);
+        if (!ok) send_err(r, 400, "falta \"on\"");
+        else if (want && !aos_hal_net_ap_start()) send_err(r, 409, "la radio está ocupada");
+        else { if (!want) aos_hal_net_ap_stop(); send_ok(r); }
+    }
     else if (get && !strcmp(p, "c6")) api_c6(r);
     else if (post && !strcmp(p, "c6/update")) api_c6_update(r);
     else if (post && !strcmp(p, "wifi/linktest")) {    /* tests the link watchdog (docs/BUILDING.md) */
@@ -1069,6 +1100,7 @@ static void handler(aos_httpd_req_t *r)
     else if (post && !strcmp(p, "ha/fav")) api_ha_fav(r);
     else if (get && !strcmp(p, "fs")) api_fs_list(r);
     else if (get && !strcmp(p, "fs/get")) api_fs_get(r);
+    else if (get && !strcmp(p, "fs/bench")) api_fs_bench(r);
     else if (!strcmp(m, "PUT") && !strcmp(p, "fs/put")) api_fs_put(r);
     else if (post && !strcmp(p, "fs/mkdir")) api_fs_op(r, "mkdir");
     else if (post && !strcmp(p, "fs/delete")) api_fs_op(r, "delete");

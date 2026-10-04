@@ -33,6 +33,15 @@ se prueba.
 ### Pendientes, en resumen
 
 Hecho el 2026-10-03:
+- [x] esp_hosted 3.0.9 en el P4 con el C6 de fábrica: Wi-Fi, AP (probado
+      desde el celular), portal, OTA y el vigilante del enlace andan.
+- [x] Respaldo de los 4 MB del C6 por J7 (pinzas, 115200) y el C6 actualizado
+      a 3.0.9 desde el P4. También 3.0.9 → 2.12.13 → 3.0.9 y la vuelta al de
+      fábrica con la app sacada del respaldo, todo sin cables.
+- [x] Caudal: 32 buffers TX del C6 (desde el P4) o la bajada cae a 0,4 MB/s;
+      con 32, 0,8–1,3 MB/s, igual que el de fábrica (docs/C6.md).
+- [ ] La consola del C6 por J7 no mostró nada después de sacar el puente de
+      IO9 (¿se movió la pinza del TX?). Sirve para el próximo corte.
 - [x] Vigilante del enlace con el C6: tres consultas al C6 sin respuesta (o una
       trabada más de 20 s) vuelcan las tareas al registro y reinician. Probado
       en la placa con `POST /api/wifi/linktest` (congela `sdio_process_rx`):

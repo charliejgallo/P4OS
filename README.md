@@ -292,7 +292,7 @@ test layouts.
 
 - **Bluetooth:** next. The C6's factory firmware already offers BLE over
   SDIO (it says "HCI over SDIO, BLE only" at boot).
-- **ESP-NOW:** esp_hosted 1.4 does not carry it, so the two-device games of
+- **ESP-NOW:** esp_hosted does not carry it (3.0.9 neither), so the two-device games of
   AmoledOS run alone here.
 - **USB host:** the OTG port does not supply 5 V.
 - **A Developer section** in Settings.
@@ -311,14 +311,15 @@ The board-side checklist is in
 | SoC | ESP32-P4, chip rev 1.3 here. Rev 3.x builds as a separate profile, and a binary for one does not boot on the other |
 | Display | 720×1280 MIPI-DSI (HX8394) with three frame buffers, and GT911 touch with two fingers |
 | Memory | 768 KB internal RAM, 32 MB PSRAM, 32 MB flash |
-| Radio | ESP32-C6 over SDIO (esp_hosted 1.4): Wi-Fi 6 at 2.4 GHz |
+| Radio | ESP32-C6 over SDIO (esp_hosted 3.0.9): Wi-Fi 6 at 2.4 GHz |
 | Audio | ES8311 (speaker) + ES7210 (two microphones), full duplex |
 | Other | microSD (4-bit), CH340 serial, RS485, USB 2.0 OTG, the 40-pin header, BOOT, RESET and POWER |
 
 ## Building
 
-You need ESP-IDF **v5.5**, because the C6 link is validated on 5.5 with
-esp_hosted 1.4. [docs/BUILDING.md](docs/BUILDING.md) has the details.
+You need ESP-IDF **v5.5** (the C6 link runs esp_hosted 3.0.9 on it).
+[docs/BUILDING.md](docs/BUILDING.md) has the details, and
+[docs/C6.md](docs/C6.md) the C6's own firmware.
 
     tools/build_fw.sh rev1_3                 # the firmware (or rev3_x)
     tools/build_apps.sh                      # every app in apps/, checked against that firmware

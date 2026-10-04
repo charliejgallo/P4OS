@@ -323,6 +323,7 @@ static void net_watch(int64_t now)
      * every 5 s after, here and nowhere else - the status bar and the
      * Monitor read what this keeps (aos_hal_net_rssi). */
     if (up && (!ap_at || now - ap_at > 5 * 1000000LL)) {
+        bool first = !ap_at;
         ap_at = now;
         wifi_ap_record_t ap;
         link_call_start();
@@ -332,6 +333,9 @@ static void net_watch(int64_t now)
             s_net_channel = ap.primary;
             memcpy(s_net_bssid, ap.bssid, 6);
             s_net_bssid_ok = true;
+            if (first)
+                ESP_LOGI(TAG, "Wi-Fi: channel %d, %d dBm, phy%s%s%s%s", ap.primary, ap.rssi, ap.phy_11b ? " b" : "",
+                         ap.phy_11g ? " g" : "", ap.phy_11n ? " n" : "", ap.phy_11ax ? " ax" : "");
             void aos_net_p4_note_rssi(int rssi);
             aos_net_p4_note_rssi(ap.rssi);
         }

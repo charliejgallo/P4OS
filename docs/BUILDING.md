@@ -12,7 +12,7 @@ Three things build from this repository, independently:
 ## Requirements
 
 - ESP-IDF **v5.5.x** in `~/esp/esp-idf` (IDF 6 is not supported yet: the
-  ESP32-C6 link is only validated on 5.5 with esp_hosted 1.4).
+  ESP32-C6 link runs esp_hosted 3.x on 5.5; docs/C6.md).
 - Simulator: `brew install sdl2 cmake mbedtls ffmpeg`, and LVGL **9.5.0** in
   `sim/lvgl` - either a link to AmoledOS's checkout or
   `git clone --depth 1 -b v9.5.0 https://github.com/lvgl/lvgl sim/lvgl`.

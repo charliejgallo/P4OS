@@ -2,8 +2,8 @@
  * P4OS HAL - the network, through the ESP32-C6.
  *
  * The P4 has no radio: esp_wifi_remote turns the ordinary esp_wifi_* calls
- * into RPCs to the C6 over SDIO (esp_hosted 1.4, the pair Waveshare validates
- * on IDF 5.5, the same the bench uses). From here on it is a plain station:
+ * into RPCs to the C6 over SDIO (esp_hosted 3.x since P4OS 0.7, 1.4 before;
+ * docs/C6.md). From here on it is a plain station:
  *
  *   - the network is kept in NVS (wf_ssid / wf_pass) and the switch in
  *     "net_on", so Settings and the Control Centre survive a restart;
@@ -18,7 +18,7 @@
  * to join: away from home, the phone joins the board and opens the portal at
  * 192.168.4.1. See "The access point" below.
  *
- * Not here yet: Bluetooth, ESP-NOW (esp_hosted 1.4 does not carry it:
+ * Not here yet: Bluetooth, ESP-NOW (esp_hosted does not carry it, 3.0.9 neither:
  * HARDWARE.md test 10).
  */
 #include "aos_hal.h"
@@ -245,7 +245,10 @@ static void net_task(void *arg)
     esp_wifi_set_storage(WIFI_STORAGE_RAM);     /* the network lives in our prefs, not in the C6 */
     esp_wifi_set_mode(WIFI_MODE_STA);
     esp_wifi_start();
-    esp_wifi_set_ps(idle_ps());
+    esp_err_t pe = esp_wifi_set_ps(idle_ps());
+    wifi_ps_type_t ps = WIFI_PS_NONE;
+    esp_wifi_get_ps(&ps);
+    ESP_LOGI(TAG, "power save: asked %d (%s), the C6 has %d", (int)idle_ps(), esp_err_to_name(pe), (int)ps);
     s_inited = true;
     xEventGroupSetBits(s_ev, EV_INITED);
     ESP_LOGI(TAG, "radio up in %lld ms", (esp_timer_get_time() - t) / 1000);

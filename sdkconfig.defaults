@@ -56,8 +56,19 @@ CONFIG_ESP_WIFI_REMOTE_LIBRARY_HOSTED=y
 # the build's sdkconfig only, so a fresh checkout got IDF's defaults (16, 16
 # and no out-of-order limit) and a firmware that had never been on the board
 # (found building from scratch, 2026-10-01).
-CONFIG_WIFI_RMT_STATIC_RX_BUFFER_NUM=10
-CONFIG_WIFI_RMT_RX_BA_WIN=6
+# These are the C6's buffers, not the P4's: a C6 on esp_hosted 2.x or 3.x
+# takes them from the P4 at esp_wifi_init (the factory firmware ignored
+# them). The one that mattered is the TX count: 16 static buffers cannot fill
+# an aggregation window, and downloads from the board fell from 1.2 MB/s to
+# 0.4 (measured 2026-10-03 with the C6 on 2.12.13 and on 3.0.9; 64 gave
+# nothing more than 32). Dynamic TX buffers are not on offer while the P4
+# has PSRAM (esp_wifi_remote's Kconfig ties them to it). The rest is
+# Espressif's throughput profile, all in the C6's RAM.
+CONFIG_WIFI_RMT_STATIC_RX_BUFFER_NUM=20
+CONFIG_WIFI_RMT_DYNAMIC_RX_BUFFER_NUM=64
+CONFIG_WIFI_RMT_STATIC_TX_BUFFER_NUM=32
+CONFIG_WIFI_RMT_TX_BA_WIN=32
+CONFIG_WIFI_RMT_RX_BA_WIN=32
 CONFIG_LWIP_TCP_OOSEQ_MAX_PBUFS=4
 CONFIG_ESP_HOSTED_SDIO_HOST_INTERFACE=y
 # esp_hosted's SDIO buffers and its task stacks in PSRAM. They ran internal
