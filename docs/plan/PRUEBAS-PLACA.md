@@ -44,10 +44,14 @@ Hecho el 2026-10-04 (0.7.0):
 - [x] Seguridad del portal (2026-10-04, docs/SECURITY.md): rechazo de
       pedidos de otros sitios y de otros nombres, redes de confianza,
       contraseña con sesión y «Cerrar sesión» (probados por el usuario).
-- [ ] HTTPS con la autoridad propia: en la placa la cadena verifica para
-      p4os.local desde la Mac con openssl (AES-128-GCM, SAN con la IP del
-      Wi-Fi); falta instalar la autoridad como confiable en la Mac y el
-      iPhone y ver el candado en Safari y Chrome.
+- [x] HTTPS con la autoridad propia (2026-10-04): instalada como confiable
+      en la Mac (llavero Sistema, `security add-trusted-cert -d -r
+      trustRoot`), candado en Chrome visto por el usuario. Las páginas de
+      las apps cargan por HTTPS (conexiones que esperan lugar, sesiones TLS
+      reanudadas). Falta el iPhone.
+      Trampas: el doble clic al .cer puede dar -25294 (no encuentra el
+      llavero) o dejarlo importado sin confianza; `security dump-trust-settings
+      -d` y `security verify-cert -p ssl -s p4os.local` dicen la verdad.
 - [x] Páginas de Grabadora, Clima y Cotizaciones (2026-10-04, después de la
       0.8.0) y rangos en `/api/fs/get`: probadas en la placa por el
       usuario, con las apps abiertas.

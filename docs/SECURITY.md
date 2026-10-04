@@ -86,8 +86,14 @@ and over the cable, HTTP keeps working: the scripts in `tools/` use it.
   authority at `/api/tls/ca` (Settings, Security, in the portal; no login
   needed, it is public):
   - **Mac:** open the `.cer`, it goes into Keychain Access; open it there,
-    Trust, "When using this certificate: Always Trust". Safari and Chrome
-    take it.
+    Trust, "When using this certificate: Always Trust". Or in one step:
+    `sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain p4os-https.cer`.
+    Imported is not trusted: if the browser still warns,
+    `security dump-trust-settings -d` shows whether the trust is there, and
+    `security verify-cert -c leaf.pem -p ssl -s p4os.local` what macOS
+    makes of it. A double click may also fail with -25294 (no keychain to
+    put it in): import it into "login" or "System" by hand. Quit Chrome
+    (Cmd+Q) after trusting it; it remembers the warning until then.
   - **iPhone:** open the link in Safari, allow the profile, install it in
     Settings, General, VPN & Device Management; then Settings, General,
     About, Certificate Trust Settings, and switch it on.
