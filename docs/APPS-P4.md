@@ -147,6 +147,14 @@ gitignored; each app's README says how to build its pak.
     ~56 discs a frame, which saved 10 ms.
   - Clip in X as well as Y: narrow bands multiply every per-row cost.
 
+## A page of your own in the portal
+
+An app can bring a page to the board's web portal with no firmware: a
+JavaScript module in `apps/<app>/web/`, uploaded with the app by
+`tools/install_apps.sh` and loaded by the portal from the card. See
+[PORTAL-PAGES.md](PORTAL-PAGES.md); `apps/hello_app/web/hello.js` is the
+template.
+
 ## Bluetooth, the keyboard and text from outside
 
 Since 0.7 ([BLUETOOTH.md](BLUETOOTH.md), [EMOJI.md](EMOJI.md)):
