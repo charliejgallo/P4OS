@@ -17,6 +17,8 @@ the microSD, loaded as shared objects:
 - **Tools:** a street map with offline zones, internet radio, IP cameras,
   video, a 3D viewer, a tuner and Lua.
 - **A web portal** for files, updates and the log.
+- **Bluetooth with the phone:** the iPhone's notifications on the board, in
+  colour emoji, and the board as a computer's wireless keyboard and mouse.
 - **USB:** the port becomes a keyboard, mouse, gamepad, MIDI device, network
   or disk for a computer.
 - **A Wi-Fi network of its own,** joined with a QR code.
@@ -229,6 +231,8 @@ an app.
 | **Updates over the air** | two slots: an update is written into the idle one and boots on trial. If the board restarts in the first 30 s, the bootloader goes back by itself. Settings, Update can go back on purpose |
 | **USB** | the OTG port is high speed (480 Mbit/s). **Keyboard and mouse:** keyboard, media keys, mouse, a gamepad, a MIDI keyboard, and a network over the cable (the portal at `192.168.7.1`, 6.7 MB/s). **Disk:** the microSD as a USB drive. The mode is kept across restarts |
 | **Its own Wi-Fi** | an access point, `P4OS-XXXX`, next to the home network or alone. Two QR codes: one joins the phone, the other opens the portal at `192.168.4.1`. A phone downloaded from it at ~3 MB/s |
+| **Bluetooth** | through the C6. **The phone:** pairs from the iPhone's own Settings, Bluetooth; its notifications, battery and time come to the board. **Keyboard mode:** the board is a Mac's or PC's keyboard, mouse and media keys at the same time; the Macro pad's keys and trackpad go over Bluetooth when there is no cable. [docs/BLUETOOTH.md](docs/BLUETOOTH.md) |
+| **The C6's firmware** | updated from the P4, with no cable: Settings, Update, or `tools/install_c6.sh`. It runs esp_hosted 3.0.9, the same as the P4, and going back to the factory firmware works the same way. [docs/C6.md](docs/C6.md) |
 | **Home** | Home Assistant over WebSocket, MQTT, Wi-Fi at 2.4 GHz through the C6 |
 
 ### Settings
@@ -248,6 +252,14 @@ Language, Date and time, Update, Diagnostics and About.
 | Update | Diagnostics |
 |---|---|
 | <img src="docs/img/app-update.png" width="230"> | <img src="docs/img/app-diag.png" width="230"> |
+
+| Bluetooth | A notification with emoji |
+|---|---|
+| <img src="docs/img/sim-bluetooth.png" width="230"> | <img src="docs/img/sim-emoji-banner.png" width="360"> |
+
+**Emoji.** Every emoji of Unicode, in colour, in any text the phone sends:
+Google's Noto set, 4012 of them with skin tones, flags and ZWJ sequences,
+from a pack on the card ([docs/EMOJI.md](docs/EMOJI.md)).
 
 **Languages.** The interface is written in Spanish. English and German are
 complete, and travel twice: inside the firmware, so they work with no card,
@@ -275,6 +287,12 @@ test layouts.
   without errors. SPI with MOSI looped to MISO at 1, 10 and 40 MHz, the port's top speed.
 - Settings' Storage page and the QR codes.
 - The lock screen with its code, and the languages with no card.
+- The C6 updated from the P4 to esp_hosted 3.0.9, and back to its factory
+  firmware, with no cable; its flash backed up first through J7.
+- Bluetooth with an iPhone 15 Pro Max: listed in its Settings, paired, its
+  notifications (with emoji) on the banner and the lock screen, its battery
+  and time. At the same time, the keyboard mode with a MacBook Air: text,
+  media keys and the Macro pad's trackpad.
 
 **Waiting for hardware on the bench:**
 
@@ -290,14 +308,15 @@ test layouts.
 
 **Not done yet:**
 
-- **Bluetooth:** next. The C6's factory firmware already offers BLE over
-  SDIO (it says "HCI over SDIO, BLE only" at boot).
+- **The phone's music over Bluetooth (AMS),** and the notifications'
+  actions (answer, dismiss), in the UI: the stack has them, from the watch.
 - **ESP-NOW:** esp_hosted does not carry it (3.0.9 neither), so the two-device games of
   AmoledOS run alone here.
 - **USB host:** the OTG port does not supply 5 V.
 - **A Developer section** in Settings.
-- **A rare hang after a software restart:** it leaves no network and no USB,
-  and needs a RESET. It is instrumented but not understood
+- **The network dying during an OTA:** seen twice on 0.6. The link to the
+  C6 is now watched and the board restarts by itself in under 30 s, and the
+  C6 runs a newer esp_hosted; the cause itself is not found
   ([docs/BUILDING.md](docs/BUILDING.md)).
 
 The board-side checklist is in
@@ -346,6 +365,8 @@ packs; the games' art packs are attached by hand.
 
     /apps/        <app>.so and <app>_p4.pak (the art packs)
     /lang/        en/, de/ — the language packs
+    /fonts/       emoji.pak — the colour emoji
+    /firmware/    c6.bin — a firmware for the C6, to install from Settings
     /music/ /photos/ /videos/ /maps/
     menu.txt      the home screen's order and folders
     modules.txt   what is wired to the header
@@ -394,6 +415,9 @@ Where something is a guess, it says so.
 | [MEMORY.md](docs/MEMORY.md) | internal RAM vs PSRAM, the panel's three frame buffers, PSRAM bandwidth, the audit |
 | [APPS-P4.md](docs/APPS-P4.md) | writing and installing `.so` apps, drawing a frame, measured fps |
 | [USB.md](docs/USB.md) | the OTG port's modes, descriptors and measurements |
+| [BLUETOOTH.md](docs/BLUETOOTH.md) | the phone (ANCS), the keyboard mode (HID over GATT), the portal's API |
+| [C6.md](docs/C6.md) | the ESP32-C6's firmware: versions, updating it from the P4, throughput, recovery through J7 |
+| [EMOJI.md](docs/EMOJI.md) | the colour emoji pack and how a text gets them |
 | [MODULES.md](docs/MODULES.md) | the 40-pin header, `modules.txt`, I2C, SPI and GPIO from apps |
 | [MACROPAD.md](docs/MACROPAD.md) | the macro pad: pages, buttons, the gamepad and MIDI faces |
 | [CAMERAS.md](docs/CAMERAS.md) | RTSP and MJPEG cameras on this board |
@@ -427,8 +451,8 @@ idioma de la tarjeta. Los documentos del plan y de las pruebas en la placa
 
 | | |
 |---|---|
-| Qué hace | inicio con carpetas, pantalla de bloqueo con código, 23 apps propias y 30 de la tarjeta (juegos, mapas, radio, video, Lua), portal web, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, y taller con I2C, SPI, 1-Wire, GPIO y tiras LED direccionables |
-| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el botón BOOT, un BME280 por I2C y SPI en lazo a 40 MHz |
-| Qué falta | Bluetooth, probar en la placa las tiras LED, el DS18B20 y el RC522, las cámaras, y un cuelgue raro tras reiniciar |
+| Qué hace | inicio con carpetas, pantalla de bloqueo con código, 23 apps propias y 30 de la tarjeta (juegos, mapas, radio, video, Lua), portal web, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, Bluetooth con el iPhone (notificaciones con emojis en color) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, y taller con I2C, SPI, 1-Wire, GPIO y tiras LED direccionables |
+| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, y Bluetooth con un iPhone y una MacBook a la vez |
+| Qué falta | la música del iPhone y las acciones de las notificaciones en la interfaz, probar en la placa las tiras LED, el DS18B20 y el RC522, las cámaras, y encontrar por qué se cortó la red durante dos OTA |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
 | Cómo se instala | la primera vez por el CH340; después `tools/ota.sh p4os.local` o el portal |

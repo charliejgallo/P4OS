@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased (0.7)
+## 0.7.0 — 2026-10-04
 
 **Bluetooth and colour emoji**
 - Bluetooth with the phone: NimBLE on the P4, the C6's controller through
@@ -14,6 +14,12 @@
   `tools/gen_emoji.py` and put there by `tools/install_emoji.sh`. Banners
   and the notification centre now go through the same text filter as the
   lock screen. docs/EMOJI.md.
+- **Bluetooth keyboard mode:** the board as a computer's keyboard, mouse and
+  media keys (HID over GATT), with the phone connected at the same time. The
+  Macro pad, the portal and the apps send keys over Bluetooth when there is
+  no USB cable, and the Macro pad says BLE. Settings has a Bluetooth page:
+  the phone, its battery, forgetting it, the keyboard mode and the computer.
+  docs/BLUETOOTH.md.
 
 **The ESP32-C6, updated from the P4**
 - esp_hosted 3.0.9 on the P4 (it was 1.4.7), with esp_wifi_remote 1.6.5.

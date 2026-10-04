@@ -32,6 +32,18 @@ se prueba.
 
 ### Pendientes, en resumen
 
+Hecho el 2026-10-04 (0.7.0):
+- [x] Bluetooth con el iPhone 15 Pro Max: aparece en Ajustes del iPhone
+      (anuncia HID), empareja por comparación de números, notificaciones en
+      avisos y bloqueo, batería y hora del teléfono.
+- [x] Emojis en color (paquete Noto en /fonts/emoji.pak): avisos, centro de
+      notificaciones y bloqueo, vistos por el usuario.
+- [x] Modo Teclado Bluetooth con una MacBook Air y el iPhone a la vez: texto
+      de 72 caracteres, subir volumen, trackpad del Macro pad (dice BLE).
+      Los dos se reconectan solos después de reiniciar el Bluetooth.
+- [ ] La música del iPhone (AMS) y las acciones de las notificaciones desde
+      la interfaz.
+
 Hecho el 2026-10-03:
 - [x] esp_hosted 3.0.9 en el P4 con el C6 de fábrica: Wi-Fi, AP (probado
       desde el celular), portal, OTA y el vigilante del enlace andan.
