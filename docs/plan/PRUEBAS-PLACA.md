@@ -46,8 +46,9 @@ Hecho el 2026-10-04 (0.7.0):
 - [x] Páginas del portal enchufables (docs/PORTAL-PAGES.md): la de
       hello_app sale de /web de la tarjeta y aparece en el menú, probada por
       el usuario; una rota no tumba el portal (probado en el simulador).
-- [ ] Mudar a sus apps las páginas que viven en el firmware: Notas primero
-      (la sesión de Notas), después Pixel Art, Lua, Mapas y el Visor 3D.
+- [x] Mudadas a sus apps las páginas que vivían en el firmware: Notas,
+      Pixel Art, Lua, Mapas y el Visor 3D (`app.js` de 5300 a 2565 líneas).
+      Revisadas una por una en el simulador; en la placa cargan de /web.
 
 Hecho el 2026-10-03:
 - [x] esp_hosted 3.0.9 en el P4 con el C6 de fábrica: Wi-Fi, AP (probado
