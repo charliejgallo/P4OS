@@ -1,0 +1,766 @@
+# amoledos-lang 1   es -> de
+# aos.infrarrojo.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/infrarrojo/main/infrarrojo.c:400
+#: apps/infrarrojo/main/ir_learn.c:374
+#: apps/infrarrojo/main/ir_learn.c:528
+#: apps/infrarrojo/main/ir_remote.c:1094
+Cancelar	Abbrechen
+
+#: apps/infrarrojo/main/infrarrojo.c:449
+#: apps/infrarrojo/main/infrarrojo.c:498
+GPIO%d · pata %d	GPIO%d · Pin %d
+
+#: apps/infrarrojo/main/infrarrojo.c:478
+El receptor y el LED van en pines distintos	Empfänger und LED gehören an verschiedene Pins
+
+#: apps/infrarrojo/main/infrarrojo.c:489
+Pin del receptor	Pin des Empfängers
+
+#: apps/infrarrojo/main/infrarrojo.c:489
+Pin del LED	Pin der LED
+
+#: apps/infrarrojo/main/infrarrojo.c:502
+ocupado: %s	belegt: %s
+
+#: apps/infrarrojo/main/infrarrojo.c:503
+en el puerto %s	im Port %s
+
+#: apps/infrarrojo/main/infrarrojo.c:504
+dominio VO4: medir antes	VO4-Domäne: vorher messen
+
+#: apps/infrarrojo/main/infrarrojo.c:505
+USB-Serial-JTAG	USB-Serial-JTAG
+
+#: apps/infrarrojo/main/infrarrojo.c:506
+se lee al arrancar	wird beim Start gelesen
+
+#: apps/infrarrojo/main/infrarrojo.c:514
+Cerrar	Schließen
+
+#: apps/infrarrojo/main/infrarrojo.c:525
+Mandando un NEC y escuchando…	Sende einen NEC-Code und höre zu…
+
+#: apps/infrarrojo/main/infrarrojo.c:604
+#: apps/infrarrojo/main/infrarrojo.c:623
+GPIO%d (pata %d)	GPIO%d (Pin %d)
+
+#: apps/infrarrojo/main/infrarrojo.c:606
+GND (pata 19)	GND (Pin 19)
+
+#: apps/infrarrojo/main/infrarrojo.c:607
+3V3 (pata 18)	3V3 (Pin 18)
+
+#: apps/infrarrojo/main/infrarrojo.c:637
+LED IR (cátodo abajo)	IR-LED (Kathode unten)
+
+#: apps/infrarrojo/main/infrarrojo.c:641
+5V (pata 1)	5V (Pin 1)
+
+#: apps/infrarrojo/main/infrarrojo.c:646
+GND (pata 26)	GND (Pin 26)
+
+#: apps/infrarrojo/main/infrarrojo.c:694
+#: apps/infrarrojo/main/infrarrojo.c:784
+Cableado	Verkabelung
+
+#: apps/infrarrojo/main/infrarrojo.c:704
+Pines	Pins
+
+#: apps/infrarrojo/main/infrarrojo.c:705
+Receptor	Empfänger
+
+#: apps/infrarrojo/main/infrarrojo.c:706
+LED	LED
+
+#: apps/infrarrojo/main/infrarrojo.c:708
+Cualquier pin libre del conector de atrás. La app los toma mientras los usa y los suelta al cerrarse.	Jeder freie Pin der hinteren Stiftleiste. Die App belegt sie, solange sie sie nutzt, und gibt sie beim Schließen frei.
+
+#: apps/infrarrojo/main/infrarrojo.c:709
+Prueba de lazo	Schleifentest
+
+#: apps/infrarrojo/main/infrarrojo.c:711
+Con el LED apuntando al receptor: manda un código y mira si vuelve.	Mit der LED auf den Empfänger gerichtet: sendet einen Code und prüft, ob er zurückkommt.
+
+#: apps/infrarrojo/main/infrarrojo.c:715
+El receptor	Der Empfänger
+
+#: apps/infrarrojo/main/infrarrojo.c:720
+Un receptor con demodulador de 38 kHz (TSOP38238, VS1838B y parecidos). Alimentarlo con 3,3 V, nunca con 5 V: su salida iría con 5 V al pin, y el conector no los aguanta.	Ein Empfänger mit 38-kHz-Demodulator (TSOP38238, VS1838B und ähnliche). Mit 3,3 V versorgen, nie mit 5 V: sein Ausgang legte 5 V an den Pin, und die Stiftleiste verträgt das nicht.
+
+#: apps/infrarrojo/main/infrarrojo.c:721
+Las patas cambian de orden según el modelo: mirar su hoja de datos. Un capacitor de 100 nF entre VS y GND, cerca del receptor, evita lecturas falsas.	Die Reihenfolge der Beine hängt vom Modell ab: im Datenblatt nachsehen. Ein 100-nF-Kondensator zwischen VS und GND nahe am Empfänger verhindert Fehllesungen.
+
+#: apps/infrarrojo/main/infrarrojo.c:725
+El LED	Die LED
+
+#: apps/infrarrojo/main/infrarrojo.c:730
+Nunca el LED directo al pin: un GPIO da unos 20 mA y un LED IR quiere 50 a 100 mA en pulsos. El pin maneja la base de un transistor con 1 kΩ, y el LED va del colector a 5 V con su resistencia.	Die LED nie direkt an den Pin: ein GPIO liefert etwa 20 mA, eine IR-LED will 50 bis 100 mA in Pulsen. Der Pin steuert über 1 kΩ die Basis eines Transistors, die LED liegt mit ihrem Widerstand zwischen Kollektor und 5 V.
+
+#: apps/infrarrojo/main/infrarrojo.c:731
+Con 5 V y 33 Ω pasan unos 100 mA: alcanza para 5 a 8 m apuntando. Con 3,3 V y 22 Ω, unos 70 mA y algo menos de alcance. Dos LED en serie con 15 Ω cubren más ángulo.	Mit 5 V und 33 Ω fließen etwa 100 mA: reicht gezielt für 5 bis 8 m. Mit 3,3 V und 22 Ω etwa 70 mA und etwas weniger Reichweite. Zwei LEDs in Reihe mit 15 Ω decken einen größeren Winkel ab.
+
+#: apps/infrarrojo/main/infrarrojo.c:732
+Las patas de 5 V tienen tensión aun con la placa apagada.	Die 5-V-Pins führen Spannung, auch wenn die Platine aus ist.
+
+#: apps/infrarrojo/main/infrarrojo.c:736
+La base de códigos	Die Code-Bibliothek
+
+#: apps/infrarrojo/main/infrarrojo.c:737
+Los códigos de televisores, aires, ventiladores y luces son de SmartIR (licencia MIT, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle), empaquetados para la tarjeta en infrarrojo_p4.pak.	Die Codes für Fernseher, Klimaanlagen, Ventilatoren und Lampen stammen von SmartIR (MIT-Lizenz, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle), für die Karte gepackt in infrarrojo_p4.pak.
+
+#: apps/infrarrojo/main/infrarrojo.c:746
+Volvió: el LED y el receptor andan.	Er kam zurück: LED und Empfänger funktionieren.
+
+#: apps/infrarrojo/main/infrarrojo.c:747
+No volvió nada. Revisar el cableado, la alimentación del receptor y que el LED apunte a él.	Nichts kam zurück. Verkabelung, Versorgung des Empfängers und Ausrichtung der LED prüfen.
+
+#: apps/infrarrojo/main/infrarrojo.c:784
+#: apps/infrarrojo/main/ir_remote.c:180
+#: apps/infrarrojo/main/ir_remote.c:815
+Controles	Fernbedienungen
+
+#: apps/infrarrojo/main/infrarrojo.c:784
+#: apps/infrarrojo/main/ir_base.c:592
+#: apps/infrarrojo/main/ir_learn.c:507
+#: apps/infrarrojo/main/ir_remote.c:861
+Aprender	Lernen
+
+#: apps/infrarrojo/main/infrarrojo.c:784
+#: apps/infrarrojo/main/ir_base.c:563
+#: apps/infrarrojo/main/ir_base.c:598
+Códigos	Codes
+
+#: apps/infrarrojo/main/ir_base.c:52
+Teles y audio	TV und Audio
+
+#: apps/infrarrojo/main/ir_base.c:52
+Aires	Klimaanlagen
+
+#: apps/infrarrojo/main/ir_base.c:52
+Ventiladores	Ventilatoren
+
+#: apps/infrarrojo/main/ir_base.c:52
+Luces	Lampen
+
+#: apps/infrarrojo/main/ir_base.c:57
+Frío	Kühlen
+
+#: apps/infrarrojo/main/ir_base.c:57
+Calor	Heizen
+
+#: apps/infrarrojo/main/ir_base.c:57
+Seco	Entfeuchten
+
+#: apps/infrarrojo/main/ir_base.c:58
+#: apps/infrarrojo/main/ir_base.c:58
+Ventilación	Lüften
+
+#: apps/infrarrojo/main/ir_base.c:58
+Auto	Auto
+
+#: apps/infrarrojo/main/ir_base.c:59
+Frío/calor	Heizen/Kühlen
+
+#: apps/infrarrojo/main/ir_base.c:59
+Bajo	Niedrig
+
+#: apps/infrarrojo/main/ir_base.c:59
+Mínimo	Minimum
+
+#: apps/infrarrojo/main/ir_base.c:60
+#: apps/infrarrojo/main/ir_base.c:60
+#: apps/infrarrojo/main/ir_base.c:60
+Medio	Mittel
+
+#: apps/infrarrojo/main/ir_base.c:61
+Medio bajo	Mittel niedrig
+
+#: apps/infrarrojo/main/ir_base.c:61
+Medio alto	Mittel hoch
+
+#: apps/infrarrojo/main/ir_base.c:62
+Alto	Hoch
+
+#: apps/infrarrojo/main/ir_base.c:62
+#: apps/infrarrojo/main/ir_base.c:62
+#: apps/infrarrojo/main/ir_base.c:62
+Máximo	Maximum
+
+#: apps/infrarrojo/main/ir_base.c:62
+#: apps/infrarrojo/main/ir_base.c:63
+Silencioso	Leise
+
+#: apps/infrarrojo/main/ir_base.c:63
+#: apps/infrarrojo/main/ir_base.c:64
+Turbo	Turbo
+
+#: apps/infrarrojo/main/ir_base.c:63
+Potente	Stark
+
+#: apps/infrarrojo/main/ir_base.c:64
+Eco	Eco
+
+#: apps/infrarrojo/main/ir_base.c:64
+Noche	Nacht
+
+#: apps/infrarrojo/main/ir_base.c:65
+Ninguno	Keiner
+
+#: apps/infrarrojo/main/ir_base.c:65
+#: apps/infrarrojo/main/ir_base.c:69
+#: apps/infrarrojo/main/ir_base.c:92
+Normal	Normal
+
+#: apps/infrarrojo/main/ir_base.c:65
+Sí	Ja
+
+#: apps/infrarrojo/main/ir_base.c:65
+No	Nein
+
+#: apps/infrarrojo/main/ir_base.c:66
+Oscila	Schwenken
+
+#: apps/infrarrojo/main/ir_base.c:66
+Fijo	Fest
+
+#: apps/infrarrojo/main/ir_base.c:66
+Quieto	Stopp
+
+#: apps/infrarrojo/main/ir_base.c:67
+#: apps/infrarrojo/main/ir_base.c:67
+#: apps/infrarrojo/main/ir_base.c:87
+#: apps/infrarrojo/main/ir_store.c:182
+Arriba	Oben
+
+#: apps/infrarrojo/main/ir_base.c:67
+#: apps/infrarrojo/main/ir_base.c:67
+#: apps/infrarrojo/main/ir_base.c:87
+#: apps/infrarrojo/main/ir_store.c:183
+Abajo	Unten
+
+#: apps/infrarrojo/main/ir_base.c:68
+Horizontal	Horizontal
+
+#: apps/infrarrojo/main/ir_base.c:68
+Vertical	Vertikal
+
+#: apps/infrarrojo/main/ir_base.c:68
+Los dos	Beide
+
+#: apps/infrarrojo/main/ir_base.c:69
+Al revés	Rückwärts
+
+#: apps/infrarrojo/main/ir_base.c:81
+#: apps/infrarrojo/main/ir_store.c:175
+Apagar	Ausschalten
+
+#: apps/infrarrojo/main/ir_base.c:81
+#: apps/infrarrojo/main/ir_store.c:174
+Encender	Einschalten
+
+#: apps/infrarrojo/main/ir_base.c:82
+#: apps/infrarrojo/main/ir_base.c:305
+#: apps/infrarrojo/main/ir_store.c:173
+Encender/apagar	Ein/Aus
+
+#: apps/infrarrojo/main/ir_base.c:83
+#: apps/infrarrojo/main/ir_store.c:178
+Volumen +	Lautstärke +
+
+#: apps/infrarrojo/main/ir_base.c:83
+#: apps/infrarrojo/main/ir_store.c:179
+Volumen −	Lautstärke −
+
+#: apps/infrarrojo/main/ir_base.c:84
+#: apps/infrarrojo/main/ir_store.c:177
+Silencio	Stumm
+
+#: apps/infrarrojo/main/ir_base.c:84
+#: apps/infrarrojo/main/ir_store.c:180
+Canal +	Kanal +
+
+#: apps/infrarrojo/main/ir_base.c:85
+#: apps/infrarrojo/main/ir_store.c:181
+Canal −	Kanal −
+
+#: apps/infrarrojo/main/ir_base.c:85
+#: apps/infrarrojo/main/ir_store.c:176
+Fuente	Quelle
+
+#: apps/infrarrojo/main/ir_base.c:86
+#: apps/infrarrojo/main/ir_store.c:192
+Reproducir	Wiedergabe
+
+#: apps/infrarrojo/main/ir_base.c:86
+#: apps/infrarrojo/main/ir_store.c:193
+Pausa	Pause
+
+#: apps/infrarrojo/main/ir_base.c:86
+#: apps/infrarrojo/main/ir_store.c:195
+Detener	Stopp
+
+#: apps/infrarrojo/main/ir_base.c:87
+#: apps/infrarrojo/main/ir_store.c:184
+Izquierda	Links
+
+#: apps/infrarrojo/main/ir_base.c:88
+#: apps/infrarrojo/main/ir_store.c:185
+Derecha	Rechts
+
+#: apps/infrarrojo/main/ir_base.c:88
+#: apps/infrarrojo/main/ir_base.c:88
+#: apps/infrarrojo/main/ir_store.c:186
+OK	OK
+
+#: apps/infrarrojo/main/ir_base.c:89
+#: apps/infrarrojo/main/ir_store.c:187
+Volver	Zurück
+
+#: apps/infrarrojo/main/ir_base.c:89
+#: apps/infrarrojo/main/ir_store.c:188
+Inicio	Start
+
+#: apps/infrarrojo/main/ir_base.c:89
+#: apps/infrarrojo/main/ir_store.c:189
+Menú	Menü
+
+#: apps/infrarrojo/main/ir_base.c:90
+#: apps/infrarrojo/main/ir_store.c:190
+Info	Info
+
+#: apps/infrarrojo/main/ir_base.c:90
+Más luz	Heller
+
+#: apps/infrarrojo/main/ir_base.c:90
+Menos luz	Dunkler
+
+#: apps/infrarrojo/main/ir_base.c:91
+Más fría	Kälter
+
+#: apps/infrarrojo/main/ir_base.c:91
+Más cálida	Wärmer
+
+#: apps/infrarrojo/main/ir_base.c:91
+Luz de noche	Nachtlicht
+
+#: apps/infrarrojo/main/ir_base.c:92
+Oscilar	Schwenken
+
+#: apps/infrarrojo/main/ir_base.c:195
+#: apps/infrarrojo/main/ir_portal.c:138
+#: apps/infrarrojo/main/ir_portal.c:166
+No se pudo mandar	Senden fehlgeschlagen
+
+#: apps/infrarrojo/main/ir_base.c:313
+#: apps/infrarrojo/main/ir_learn.c:287
+#: apps/infrarrojo/main/ir_remote.c:1117
+No se pudo escribir en la tarjeta	Konnte nicht auf die Karte schreiben
+
+#: apps/infrarrojo/main/ir_base.c:314
+Agregado a Controles	Zu Fernbedienungen hinzugefügt
+
+#: apps/infrarrojo/main/ir_base.c:398
+Códigos de SmartIR, licencia MIT: © 2019 Vassilis Panos, 2024 Li Tin O've Weedle.	Codes von SmartIR, MIT-Lizenz: © 2019 Vassilis Panos, 2024 Li Tin O've Weedle.
+
+#: apps/infrarrojo/main/ir_base.c:425
+%d modelo	%d Modell
+
+#: apps/infrarrojo/main/ir_base.c:425
+%d modelos	%d Modelle
+
+#: apps/infrarrojo/main/ir_base.c:442
+código %d de SmartIR	SmartIR-Code %d
+
+#: apps/infrarrojo/main/ir_base.c:443
+#: apps/infrarrojo/main/ir_base.c:474
+modelo sin nombre	Modell ohne Namen
+
+#: apps/infrarrojo/main/ir_base.c:469
+No se pudo leer este modelo de la base.	Dieses Modell ließ sich nicht aus der Bibliothek lesen.
+
+#: apps/infrarrojo/main/ir_base.c:476
+%s · %s · código %d de SmartIR · %d códigos	%s · %s · SmartIR-Code %d · %d Codes
+
+#: apps/infrarrojo/main/ir_base.c:488
+Modos: %s · de %d a %d °C	Modi: %s · %d bis %d °C
+
+#: apps/infrarrojo/main/ir_base.c:493
+Probar: prender	Testen: an
+
+#: apps/infrarrojo/main/ir_base.c:494
+Probar: apagar	Testen: aus
+
+#: apps/infrarrojo/main/ir_base.c:495
+#: apps/infrarrojo/main/ir_base.c:501
+Agregar a Controles	Zu Fernbedienungen
+
+#: apps/infrarrojo/main/ir_base.c:496
+Prender manda frío a 24 °C (o el primer modo que tenga). Si el aire contesta, es este modelo.	An sendet Kühlen bei 24 °C (oder den ersten Modus). Reagiert das Gerät, ist es dieses Modell.
+
+#: apps/infrarrojo/main/ir_base.c:502
+Tocá un comando para probarlo antes de agregarlo.	Tippe auf einen Befehl, um ihn vor dem Hinzufügen zu testen.
+
+#: apps/infrarrojo/main/ir_base.c:511
+Buscando en la base…	Durchsuche die Bibliothek…
+
+#: apps/infrarrojo/main/ir_base.c:511
+Listo.	Fertig.
+
+#: apps/infrarrojo/main/ir_base.c:522
+Ningún control de la base manda algo parecido. Puede ser un modelo que SmartIR no tiene.	Keine Fernbedienung der Bibliothek sendet etwas Ähnliches. Vielleicht ein Modell, das SmartIR nicht hat.
+
+#: apps/infrarrojo/main/ir_base.c:526
+Mandan este mismo código:	Diese senden genau diesen Code:
+
+#: apps/infrarrojo/main/ir_base.c:527
+Los más parecidos, de más a menos:	Die ähnlichsten, die besten zuerst:
+
+#: apps/infrarrojo/main/ir_base.c:566
+#: apps/infrarrojo/main/ir_learn.c:393
+Falta la base de códigos	Die Code-Bibliothek fehlt
+
+#: apps/infrarrojo/main/ir_base.c:567
+Es infrarrojo_p4.pak, en la carpeta apps de la tarjeta. Se arma con apps/infrarrojo/tools/pack_smartir.py a partir de SmartIR, y tools/install_apps.sh la sube.	Das ist infrarrojo_p4.pak im Ordner apps der Karte. apps/infrarrojo/tools/pack_smartir.py baut sie aus SmartIR, tools/install_apps.sh lädt sie hoch.
+
+#: apps/infrarrojo/main/ir_base.c:569
+Sin ella se aprenden y se mandan códigos igual.	Ohne sie werden Codes trotzdem gelernt und gesendet.
+
+#: apps/infrarrojo/main/ir_base.c:578
+#: apps/infrarrojo/main/ir_base.c:585
+Marcas	Marken
+
+#: apps/infrarrojo/main/ir_base.c:585
+Resultados	Ergebnisse
+
+#: apps/infrarrojo/main/ir_base.c:592
+#: apps/infrarrojo/main/ir_learn.c:558
+¿De qué control es?	Von welcher Fernbedienung?
+
+#: apps/infrarrojo/main/ir_base.c:608
+Ya hay una búsqueda en curso	Es läuft schon eine Suche
+
+#: apps/infrarrojo/main/ir_learn.c:220
+Aprendido: %s	Gelernt: %s
+
+#: apps/infrarrojo/main/ir_learn.c:269
+#: apps/infrarrojo/main/ir_remote.c:899
+#: apps/infrarrojo/main/ir_remote.c:1038
+Botón	Taste
+
+#: apps/infrarrojo/main/ir_learn.c:276
+#: apps/infrarrojo/main/ir_remote.c:1138
+Aparato nuevo	Neues Gerät
+
+#: apps/infrarrojo/main/ir_learn.c:301
+Guardado: %s	Gespeichert: %s
+
+#: apps/infrarrojo/main/ir_learn.c:348
+Guardar el botón	Taste speichern
+
+#: apps/infrarrojo/main/ir_learn.c:349
+#: apps/infrarrojo/main/ir_remote.c:1039
+#: apps/infrarrojo/main/ir_remote.c:1139
+Nombre	Name
+
+#: apps/infrarrojo/main/ir_learn.c:350
+#: apps/infrarrojo/main/ir_remote.c:1041
+Función en el control	Funktion auf der Fernbedienung
+
+#: apps/infrarrojo/main/ir_learn.c:358
+Aparato	Gerät
+
+#: apps/infrarrojo/main/ir_learn.c:366
+Aparato nuevo…	Neues Gerät…
+
+#: apps/infrarrojo/main/ir_learn.c:371
+Nombre del aparato nuevo	Name des neuen Geräts
+
+#: apps/infrarrojo/main/ir_learn.c:375
+#: apps/infrarrojo/main/ir_remote.c:1095
+#: apps/infrarrojo/main/ir_remote.c:1156
+Guardar	Speichern
+
+#: apps/infrarrojo/main/ir_learn.c:438
+Crudo (protocolo desconocido)	Roh (unbekanntes Protokoll)
+
+#: apps/infrarrojo/main/ir_learn.c:445
+En pausa.	Pausiert.
+
+#: apps/infrarrojo/main/ir_learn.c:446
+Escuchando. Apuntá el control al receptor y apretá un botón.	Höre zu. Richte die Fernbedienung auf den Empfänger und drücke eine Taste.
+
+#: apps/infrarrojo/main/ir_learn.c:447
+Escuchar	Zuhören
+
+#: apps/infrarrojo/main/ir_learn.c:447
+#: apps/infrarrojo/main/ir_learn.c:544
+Pausar	Pausieren
+
+#: apps/infrarrojo/main/ir_learn.c:454
+Aprendiendo «%s» de %s: apretalo %d veces.	Lerne „%s“ von %s: %d-mal drücken.
+
+#: apps/infrarrojo/main/ir_learn.c:472
+Portadora: %u,%u kHz, la del protocolo (el receptor no la mide).	Träger: %u,%u kHz, der des Protokolls (der Empfänger misst ihn nicht).
+
+#: apps/infrarrojo/main/ir_learn.c:475
+Portadora: probablemente 38 kHz (el receptor no la mide).	Träger: wahrscheinlich 38 kHz (der Empfänger misst ihn nicht).
+
+#: apps/infrarrojo/main/ir_learn.c:477
+Confirmado: %d veces igual.	Bestätigt: %d-mal gleich.
+
+#: apps/infrarrojo/main/ir_learn.c:478
+%d de %d: apretá el mismo botón otra vez para confirmar.	%d von %d: dieselbe Taste noch einmal drücken zum Bestätigen.
+
+#: apps/infrarrojo/main/ir_learn.c:482
+Usar esta	Diese nehmen
+
+#: apps/infrarrojo/main/ir_learn.c:482
+#: apps/infrarrojo/main/ir_learn.c:556
+Guardar en un aparato	In einem Gerät speichern
+
+#: apps/infrarrojo/main/ir_learn.c:487
+Últimas capturas	Letzte Aufnahmen
+
+#: apps/infrarrojo/main/ir_learn.c:493
+%d duraciones	%d Dauern
+
+#: apps/infrarrojo/main/ir_learn.c:557
+Mandar	Senden
+
+#: apps/infrarrojo/main/ir_portal.c:77
+#: apps/infrarrojo/main/ir_proto.c:441
+crudo	roh
+
+#: apps/infrarrojo/main/ir_portal.c:121
+Escuchando	Höre zu
+
+#: apps/infrarrojo/main/ir_portal.c:125
+#: apps/infrarrojo/main/ir_portal.c:169
+#: apps/infrarrojo/main/ir_remote.c:816
+Listo	Fertig
+
+#: apps/infrarrojo/main/ir_portal.c:129
+No encuentro ese aparato	Gerät nicht gefunden
+
+#: apps/infrarrojo/main/ir_portal.c:138
+#: apps/infrarrojo/main/ir_portal.c:166
+Mandado	Gesendet
+
+#: apps/infrarrojo/main/ir_portal.c:144
+Protocolo desconocido	Unbekanntes Protokoll
+
+#: apps/infrarrojo/main/ir_portal.c:152
+Sin duraciones	Keine Dauern
+
+#: apps/infrarrojo/main/ir_portal.c:171
+Pedido desconocido	Unbekannte Anfrage
+
+#: apps/infrarrojo/main/ir_portal.c:218
+Pedido ilegible	Unlesbare Anfrage
+
+#: apps/infrarrojo/main/ir_proto.c:392
+%d duraciones, %s ms	%d Dauern, %s ms
+
+#: apps/infrarrojo/main/ir_proto.c:415
+cabecera %s + %s ms, 	Header %s + %s ms, 
+
+#: apps/infrarrojo/main/ir_proto.c:425
+%s%d bits por distancia de pulsos: %s	%s%d Bit per Pulsabstand: %s
+
+#: apps/infrarrojo/main/ir_proto.c:427
+%s%d duraciones, sin un patrón conocido	%s%d Dauern, kein bekanntes Muster
+
+#: apps/infrarrojo/main/ir_proto.c:431
+ · %d tramas, %s ms	 · %d Rahmen, %s ms
+
+#: apps/infrarrojo/main/ir_proto.c:442
+%s, repetición	%s, Wiederholung
+
+#: apps/infrarrojo/main/ir_proto.c:446
+%s  fab. 0x%04X  dir 0x%0*X  cmd 0x%0*X	%s  Herst. 0x%04X  Adr 0x%0*X  Bef 0x%0*X
+
+#: apps/infrarrojo/main/ir_proto.c:449
+%s  dir 0x%0*X  cmd 0x%0*X	%s  Adr 0x%0*X  Bef 0x%0*X
+
+#: apps/infrarrojo/main/ir_remote.c:188
+Todavía no hay aparatos.	Noch keine Geräte.
+
+#: apps/infrarrojo/main/ir_remote.c:192
+Creá uno con + y aprendé los botones de su control, o buscá tu tele o tu aire en Códigos.	Lege mit + eines an und lerne die Tasten seiner Fernbedienung, oder suche deinen Fernseher oder deine Klimaanlage unter Codes.
+
+#: apps/infrarrojo/main/ir_remote.c:199
+Nuevo aparato	Neues Gerät
+
+#: apps/infrarrojo/main/ir_remote.c:200
+Buscar en Códigos	In Codes suchen
+
+#: apps/infrarrojo/main/ir_remote.c:210
+SmartIR %d (falta la base)	SmartIR %d (Bibliothek fehlt)
+
+#: apps/infrarrojo/main/ir_remote.c:212
+1 botón	1 Taste
+
+#: apps/infrarrojo/main/ir_remote.c:214
+%s · %d botones	%s · %d Tasten
+
+#: apps/infrarrojo/main/ir_remote.c:234
+Este botón todavía no tiene código: Editar	Diese Taste hat noch keinen Code: Bearbeiten
+
+#: apps/infrarrojo/main/ir_remote.c:374
+Se borra %s y todos sus botones.	%s und alle Tasten werden gelöscht.
+
+#: apps/infrarrojo/main/ir_remote.c:375
+¿Borrar el aparato?	Gerät löschen?
+
+#: apps/infrarrojo/main/ir_remote.c:375
+#: apps/infrarrojo/main/ir_remote.c:997
+#: apps/infrarrojo/main/ir_remote.c:1092
+Borrar	Löschen
+
+#: apps/infrarrojo/main/ir_remote.c:482
+#: apps/infrarrojo/main/ir_remote.c:753
+Otros	Weitere
+
+#: apps/infrarrojo/main/ir_remote.c:486
+#: apps/infrarrojo/main/ir_remote.c:757
++ Botón	+ Taste
+
+#: apps/infrarrojo/main/ir_remote.c:663
+Falta la base de códigos (infrarrojo_p4.pak) o no trae este aire.	Die Code-Bibliothek (infrarrojo_p4.pak) fehlt oder hat dieses Gerät nicht.
+
+#: apps/infrarrojo/main/ir_remote.c:704
+Modo	Modus
+
+#: apps/infrarrojo/main/ir_remote.c:718
+#: apps/infrarrojo/main/ir_store.c:155
+Ventilador	Ventilator
+
+#: apps/infrarrojo/main/ir_remote.c:718
+Oscilación	Schwenken
+
+#: apps/infrarrojo/main/ir_remote.c:719
+Modo especial	Sondermodus
+
+#: apps/infrarrojo/main/ir_remote.c:719
+Opción	Option
+
+#: apps/infrarrojo/main/ir_remote.c:743
+Cada cambio se manda solo, con el estado entero, como el control del aire. Código %d de SmartIR.	Jede Änderung wird von selbst mit dem ganzen Zustand gesendet, wie es die Fernbedienung des Geräts tut. SmartIR-Code %d.
+
+#: apps/infrarrojo/main/ir_remote.c:749
+Mandar otra vez	Erneut senden
+
+#: apps/infrarrojo/main/ir_remote.c:803
+Ese estado no está en la base de este aire	Dieser Zustand fehlt in den Codes des Geräts
+
+#: apps/infrarrojo/main/ir_remote.c:816
+#: apps/infrarrojo/main/ir_remote.c:860
+Editar	Bearbeiten
+
+#: apps/infrarrojo/main/ir_remote.c:853
+Sin botones. Tocá Editar y agregá uno, o aprendelo en Aprender.	Keine Tasten. Tippe auf Bearbeiten und füge eine hinzu, oder lerne sie unter Lernen.
+
+#: apps/infrarrojo/main/ir_remote.c:870
+#: apps/infrarrojo/main/ir_remote.c:1138
+Nombre y tipo	Name und Art
+
+#: apps/infrarrojo/main/ir_remote.c:871
+Borrar aparato	Gerät löschen
+
+#: apps/infrarrojo/main/ir_remote.c:873
+Archivo: ir/%s (se edita también desde el portal)	Datei: ir/%s (auch im Portal bearbeitbar)
+
+#: apps/infrarrojo/main/ir_remote.c:974
+No hay código para mandar	Kein Code zum Senden
+
+#: apps/infrarrojo/main/ir_remote.c:997
+¿Borrar el botón?	Taste löschen?
+
+#: apps/infrarrojo/main/ir_remote.c:997
+Se borra con su código.	Sie wird mit ihrem Code gelöscht.
+
+#: apps/infrarrojo/main/ir_remote.c:1038
+Botón nuevo	Neue Taste
+
+#: apps/infrarrojo/main/ir_remote.c:1059
+crudo · %d duraciones · %u kHz	roh · %d Dauern · %u kHz
+
+#: apps/infrarrojo/main/ir_remote.c:1060
+sin código todavía	noch kein Code
+
+#: apps/infrarrojo/main/ir_remote.c:1082
+Dirección (hexa)	Adresse (hex)
+
+#: apps/infrarrojo/main/ir_remote.c:1084
+Comando (hexa)	Befehl (hex)
+
+#: apps/infrarrojo/main/ir_remote.c:1090
+Probar	Testen
+
+#: apps/infrarrojo/main/ir_remote.c:1091
+Código a mano	Code von Hand
+
+#: apps/infrarrojo/main/ir_remote.c:1111
+Falta el nombre	Der Name fehlt
+
+#: apps/infrarrojo/main/ir_remote.c:1148
+Un aire acondicionado se agrega desde Códigos: manda el estado entero y necesita su modelo.	Eine Klimaanlage wird unter Codes hinzugefügt: Sie sendet ihren ganzen Zustand und braucht ihr Modell.
+
+#: apps/infrarrojo/main/ir_remote.c:1156
+Crear	Anlegen
+
+#: apps/infrarrojo/main/ir_store.c:152
+Tele	TV
+
+#: apps/infrarrojo/main/ir_store.c:153
+Audio	Audio
+
+#: apps/infrarrojo/main/ir_store.c:154
+Aire	Klimaanlage
+
+#: apps/infrarrojo/main/ir_store.c:156
+Luz	Lampe
+
+#: apps/infrarrojo/main/ir_store.c:157
+Otro	Andere
+
+#: apps/infrarrojo/main/ir_store.c:172
+Otro botón	Andere Taste
+
+#: apps/infrarrojo/main/ir_store.c:191
+Guía	Guide
+
+#: apps/infrarrojo/main/ir_store.c:194
+Reproducir/pausa	Wiedergabe/Pause
+
+#: apps/infrarrojo/main/ir_store.c:196
+Retroceder	Zurückspulen
+
+#: apps/infrarrojo/main/ir_store.c:197
+Adelantar	Vorspulen
+
+#: apps/infrarrojo/main/ir_store.c:198
+Anterior	Zurück
+
+#: apps/infrarrojo/main/ir_store.c:199
+Siguiente	Weiter
+
+#: apps/infrarrojo/main/ir_store.c:200
+Grabar	Aufnehmen
+
+#: apps/infrarrojo/main/ir_store.c:201
+Rojo	Rot
+
+#: apps/infrarrojo/main/ir_store.c:202
+Verde	Grün
+
+#: apps/infrarrojo/main/ir_store.c:203
+Amarillo	Gelb
+
+#: apps/infrarrojo/main/ir_store.c:204
+Azul	Blau
