@@ -54,6 +54,7 @@
 #define DIE_MAX         300
 #define TOTAL_H         156         /* the total's number plus its caption */
 #define CHIP_H          88
+#define CHIP_AIR        12          /* around the chips, for the pad's outline */
 #define COUNT_H         104
 #define ROLL_H          128
 #define HIST_H          48
@@ -756,12 +757,14 @@ static void layout(int32_t w, int32_t h)
     int chip_rows = (N_SIDES + chip_cols - 1) / chip_cols;
     int32_t chip_w = (cw - (chip_cols - 1) * 12) / chip_cols;
     int32_t rows_h = chip_rows * CHIP_H + (chip_rows - 1) * 12;
-    lv_obj_set_size(s_dice.chip_row, cw, rows_h);
-    lv_obj_set_pos(s_dice.chip_row, cx, y);
+    /* the row reaches CHIP_AIR beyond the chips: room for the gamepad's
+     * outline around the end ones, which the row would otherwise clip */
+    lv_obj_set_size(s_dice.chip_row, cw + 2 * CHIP_AIR, rows_h + 2 * CHIP_AIR);
+    lv_obj_set_pos(s_dice.chip_row, cx - CHIP_AIR, y - CHIP_AIR);
     for (int i = 0; i < N_SIDES; i++) {
         lv_obj_set_size(s_dice.chip[i], chip_w, CHIP_H);
-        lv_obj_set_pos(s_dice.chip[i], (i % chip_cols) * (chip_w + 12),
-                                       (i / chip_cols) * (CHIP_H + 12));
+        lv_obj_set_pos(s_dice.chip[i], CHIP_AIR + (i % chip_cols) * (chip_w + 12),
+                                       CHIP_AIR + (i / chip_cols) * (CHIP_H + 12));
     }
     y += rows_h + GAP;
 
