@@ -176,6 +176,7 @@ static void destroy_app(aos_app_t *app)
 {
     if (!app->running && !app->root) return;
     aos_hwkbd_app_gone(app->desc.id);
+    aos_hwmouse_app_gone(app->desc.id);
     if (app->running && app->destroy) app->destroy(app, app->inst);
     if (app->root) lv_obj_delete(app->root);
     app->inst = NULL;
@@ -278,6 +279,7 @@ static void refit_app(aos_app_t *app)
         return;
     }
     aos_hwkbd_app_gone(app->desc.id);
+    aos_hwmouse_app_gone(app->desc.id);
     if (app->destroy) app->destroy(app, app->inst);
     lv_obj_clean(app->root);
     app->inst = app->create ? app->create(app, app->root) : NULL;

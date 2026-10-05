@@ -100,6 +100,32 @@ const char *aos_ui_current_app(void);      /* NULL on the home screen */
 typedef bool (*aos_hwkbd_cb_t)(uint32_t key, uint8_t mods);
 void aos_ui_hwkbd_handler(aos_hwkbd_cb_t cb);
 
+/* P4OS: a USB mouse, raw (aos_hwmouse.c), for an app that wants more of it
+ * than a finger: a VNC viewer, a drawing app. By default the left button
+ * is a finger on the glass, the right one "back", the middle one "home"
+ * and the wheel scrolls what is under the arrow. An app asks for the
+ * reports while it is in front, like the keyboard's handler, and the
+ * handler says with a mask what it took for itself; what it did not take
+ * goes on as before. x/y is where the arrow is, in the screen's
+ * coordinates; dx/dy what the mouse moved (0 on an absolute pointer);
+ * buttons bit 0 left, 1 right, 2 middle, with pressed/released the edges
+ * of this report. Called from LVGL's task, once a report. */
+typedef struct {
+    int32_t x, y;
+    int16_t dx, dy;
+    int8_t  wheel;              /* notches, positive away from the user */
+    uint8_t buttons, pressed, released;
+} aos_hwmouse_event_t;
+enum {
+    AOS_HWMOUSE_LEFT   = 1,     /* the left button does not press LVGL */
+    AOS_HWMOUSE_RIGHT  = 2,     /* no "back" */
+    AOS_HWMOUSE_MIDDLE = 4,     /* no "home" */
+    AOS_HWMOUSE_WHEEL  = 8,     /* no scrolling */
+    AOS_HWMOUSE_ALL    = 15,
+};
+typedef uint8_t (*aos_hwmouse_cb_t)(const aos_hwmouse_event_t *ev);
+void aos_ui_hwmouse_handler(aos_hwmouse_cb_t cb);
+
 /* ---- opening an app on something (aos_open_arg.c) ----
  * Archivos opens a photo in Fotos, a song in Música, a .bin in the
  * Programador. The caller says which app and hands it an argument, a path

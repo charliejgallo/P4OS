@@ -48,12 +48,15 @@ list(PREPEND CMAKE_MODULE_PATH "${AOS_ROOT}/components/elf_loader")
 idf_build_set_property(INCLUDE_DIRECTORIES "${AOS_ROOT}/components/aos_ui/include" APPEND)
 idf_build_set_property(INCLUDE_DIRECTORIES "${AOS_ROOT}/components/aos_fonts/include" APPEND)
 idf_build_set_property(INCLUDE_DIRECTORIES "${AOS_ROOT}/components/aos_hal/include" APPEND)
+# the header's ports and the workshop's drivers (aos_io.h), since 0.9.2
+idf_build_set_property(INCLUDE_DIRECTORIES "${AOS_ROOT}/components/aos_io/include" APPEND)
 
 # Y estos son los que ve el paso de project_so(), que compila aparte.
 idf_build_set_property(COMPILE_INCLUDE_DIRECTORIES "${CMAKE_BINARY_DIR}/config" APPEND)
 idf_build_set_property(COMPILE_INCLUDE_DIRECTORIES "${AOS_ROOT}/components/aos_ui/include" APPEND)
 idf_build_set_property(COMPILE_INCLUDE_DIRECTORIES "${AOS_ROOT}/components/aos_fonts/include" APPEND)
 idf_build_set_property(COMPILE_INCLUDE_DIRECTORIES "${AOS_ROOT}/components/aos_hal/include" APPEND)
+idf_build_set_property(COMPILE_INCLUDE_DIRECTORIES "${AOS_ROOT}/components/aos_io/include" APPEND)
 
 idf_build_get_property(_aos_components BUILD_COMPONENTS)
 list(LENGTH _aos_components _aos_count)

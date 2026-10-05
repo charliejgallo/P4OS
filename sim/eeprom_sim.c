@@ -303,6 +303,9 @@ static void ee93_init(void)
         M.mem[w] = M.org == 8 ? tmp[w] : (uint16_t)(tmp[2 * w] << 8 | tmp[2 * w + 1]);
     free(tmp);
     for (M.abits = 0; (1u << M.abits) < words; M.abits++) {}
+    /* the 93C56 and 93C76 take the address bits of the next size up, the
+     * top one unused (as the 66 and the 86) */
+    if (M.t->bits == 2048 || M.t->bits == 8192) M.abits++;
     M.dlevel = -1;
     M.on = true;
     aos_hal_log("sim", "emulated %s (x%d) on CS%d SK%d DI%d DO%d", M.t->name, M.org, M.cs, M.sk, M.di, M.dout);

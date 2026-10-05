@@ -4738,7 +4738,6 @@ Esperando a la computadora. La tarjeta ya salió de la placa: las apps de la tar
 El puerto está libre: la placa no aparece en la computadora.	The port is free: the board does not show up on the computer.
 
 #: components/aos_apps/aos_app_settings.c:312
-Esta placa no da 5 V por el OTG: no puede alimentar un pendrive	This board gives no 5 V on the OTG port: it cannot power a USB stick
 
 #: components/aos_apps/aos_app_settings.c:316
 #: components/aos_apps/aos_app_settings.c:324
@@ -4764,7 +4763,6 @@ La placa es un teclado, un mouse, las teclas multimedia, un joystick y un teclad
 La microSD aparece en la computadora como un pendrive, para copiar apps, música, fotos o mapas a la velocidad del USB. Mientras la tiene la computadora la placa no la toca: al elegirlo se cierran las otras apps, y las de la tarjeta no abren. Expulsala en la computadora y vuelve sola a la placa, con el modo de antes.	The microSD shows up on the computer as a USB stick, to copy apps, music, photos or maps at USB speed. While the computer has it the board does not touch it: choosing this closes the other apps, and the card's apps do not open. Eject it on the computer and it comes back to the board by itself, in the mode it had before.
 
 #: components/aos_apps/aos_app_settings.c:406
-Conectarle a la placa un pendrive, un teclado o un mouse. No en esta placa: el conector OTG no da los 5 V que necesitan. Haría falta un hub con fuente.	Plugging a USB stick, a keyboard or a mouse into the board. Not on this board: the OTG connector does not give the 5 V they need. It would take a powered hub.
 
 #: components/aos_apps/aos_app_settings.c:408
 El conector OTG es el USB 2.0 de alta velocidad del P4 (480 Mbit/s). La placa puede alimentarse por él o por el UART, y pasar de uno al otro sin reiniciarse.	The OTG connector is the P4's High-Speed USB 2.0 (480 Mbit/s). The board can be powered from it or from the UART, and move from one to the other without restarting.
@@ -7230,12 +7228,9 @@ Navegadores con sesión	Browsers signed in
 Cerrar todas las sesiones	Close every session
 Token nuevo para scripts	New token for scripts
 El token reemplaza a la contraseña en los scripts de tools/ (cabecera Authorization: Bearer). Se le pasa así: P4OS_TOKEN=<token> tools/ota.sh p4os.local	The token stands in for the password in the tools/ scripts (Authorization: Bearer header). Pass it like this: P4OS_TOKEN=<token> tools/ota.sh p4os.local
-Tocá otra vez: los navegadores van a avisar de nuevo	Tap again: browsers will warn again
 Se hace uno nuevo al reiniciar	A new one is made at the next restart
 HTTPS (puerto 443)	HTTPS (port 443)
-Certificado nuevo	New certificate
 Reiniciar para aplicarlo	Restart to apply it
-Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. El certificado lo hace la placa: el navegador avisa una vez que no lo conoce, y lo de arriba es su huella SHA-256 para compararla. Se aplica al reiniciar.	With HTTPS, what travels is encrypted, the password included, and away from home the portal sends HTTP over to HTTPS. The board makes the certificate: the browser warns once that it does not know it, and the line above is its SHA-256 fingerprint, to compare. It applies at the next restart.
 Tocá otra vez: habrá que volver a instalarla	Tap again: it will have to be installed again
 Autoridad nueva	New authority
 Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. La placa tiene su propia autoridad: se baja desde el portal (Ajustes, Seguridad) y se instala una vez como confiable en la Mac o el iPhone, y el navegador deja de avisar. Lo de arriba es su huella SHA-256, para compararla. Se aplica al reiniciar.	With HTTPS, what travels is encrypted, the password included, and away from home the portal sends HTTP over to HTTPS. The board has its own authority: download it from the portal (Settings, Security) and install it once as trusted on the Mac or the iPhone, and the browser stops warning. The line above is its SHA-256 fingerprint, to compare. It applies at the next restart.
@@ -7270,3 +7265,9 @@ Con una placa de sonido o unos auriculares USB conectados, todo lo que suena (la
 parlante	speaker
 micrófono	microphone
 Grabar con su micrófono	Record with its microphone
+CAN	CAN
+Dibujo	Drawing
+EEPROM	EEPROM
+Infrarrojo	Infrared
+PWM	PWM
+VNC	VNC

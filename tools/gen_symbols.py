@@ -151,6 +151,11 @@ EXTRA_SYMBOLS = [
     "heap_caps_aligned_alloc",
     # 2026-10-04: what Notes, Quotes and Weather had to do without
     "strncasecmp", "strcspn", "fprintf",
+    # 2026-10-05: what CAN did without (64-bit shifts and conversions of
+    # libgcc, a 64-bit parse, a rounding, a zeroed allocation with a choice
+    # of RAM)
+    "strtoull", "lroundf", "heap_caps_calloc",
+    "__ashldi3", "__lshrdi3", "__floatdisf", "__floatundisf",
 ]
 
 # Symbols that are never exported: internals of the compiler, of the linker or
@@ -159,8 +164,9 @@ EXTRA_SYMBOLS = [
 # mode), not API for the apps.
 # aos_access_ is the portal's security (password, token, sessions, the
 # HTTPS keys): set on the board, in Settings, and nowhere else
-# (docs/SECURITY.md); aos_hwkbd_ is the shell's side of the USB keyboard.
-EXCLUDE_PREFIXES = ("_", ".", "$", "__", "aos_p4_", "aos_access_", "aos_hwkbd_")
+# (docs/SECURITY.md); aos_hwkbd_ and aos_hwmouse_ are the shell's side of the
+# USB keyboard and mouse.
+EXCLUDE_PREFIXES = ("_", ".", "$", "__", "aos_p4_", "aos_access_", "aos_hwkbd_", "aos_hwmouse_")
 EXCLUDE_EXACT = {"elf_find_sym", "elf_find_sym_default", "elf_set_symbol_resolver"}
 
 

@@ -3,8 +3,8 @@
  *
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
- * Mas 152 funciones de libc/libm agregadas a mano.
- * Total: 3274 simbolos.
+ * Mas 159 funciones de libc/libm agregadas a mano.
+ * Total: 3281 simbolos.
  */
 
 #include <stddef.h>
@@ -17,6 +17,7 @@ extern int NT_KNOWN_PORTS;
 extern int NT_MDNS_NTYPES;
 extern int NT_MDNS_TYPES;
 extern int __adddf3;
+extern int __ashldi3;
 extern int __divdf3;
 extern int __divdi3;
 extern int __divsf3;
@@ -29,13 +30,16 @@ extern int __fixunsdfdi;
 extern int __fixunsdfsi;
 extern int __fixunssfsi;
 extern int __floatdidf;
+extern int __floatdisf;
 extern int __floatsidf;
 extern int __floatundidf;
+extern int __floatundisf;
 extern int __floatunsidf;
 extern int __gedf2;
 extern int __getreent;
 extern int __gtdf2;
 extern int __ledf2;
+extern int __lshrdi3;
 extern int __ltdf2;
 extern int __moddi3;
 extern int __muldf3;
@@ -618,7 +622,6 @@ extern int aos_http_stream_init;
 extern int aos_http_stream_open;
 extern int aos_http_stream_recv;
 extern int aos_http_stream_send;
-extern int aos_hwmouse_tick;
 extern int aos_i18n_app_count;
 extern int aos_i18n_app_load;
 extern int aos_i18n_app_unload;
@@ -1050,6 +1053,7 @@ extern int aos_ui_hold_home;
 extern int aos_ui_home;
 extern int aos_ui_home_layer;
 extern int aos_ui_hwkbd_handler;
+extern int aos_ui_hwmouse_handler;
 extern int aos_ui_init;
 extern int aos_ui_inject_drag;
 extern int aos_ui_inject_drag_rest;
@@ -1140,6 +1144,7 @@ extern int getc;
 extern int getenv;
 extern int gmtime_r;
 extern int heap_caps_aligned_alloc;
+extern int heap_caps_calloc;
 extern int heap_caps_free;
 extern int heap_caps_malloc;
 extern int heap_caps_realloc;
@@ -1170,6 +1175,7 @@ extern int log10f;
 extern int log2f;
 extern int logf;
 extern int longjmp;
+extern int lroundf;
 extern int lseek;
 extern int lv_anim_core_deinit;
 extern int lv_anim_core_init;
@@ -3278,6 +3284,7 @@ extern int strtod;
 extern int strtof;
 extern int strtol;
 extern int strtoul;
+extern int strtoull;
 extern int tanf;
 extern int time;
 extern int tud_hid_descriptor_report_cb;
@@ -3294,6 +3301,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(NT_MDNS_NTYPES),
     ESP_ELFSYM_EXPORT(NT_MDNS_TYPES),
     ESP_ELFSYM_EXPORT(__adddf3),
+    ESP_ELFSYM_EXPORT(__ashldi3),
     ESP_ELFSYM_EXPORT(__divdf3),
     ESP_ELFSYM_EXPORT(__divdi3),
     ESP_ELFSYM_EXPORT(__divsf3),
@@ -3306,13 +3314,16 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(__fixunsdfsi),
     ESP_ELFSYM_EXPORT(__fixunssfsi),
     ESP_ELFSYM_EXPORT(__floatdidf),
+    ESP_ELFSYM_EXPORT(__floatdisf),
     ESP_ELFSYM_EXPORT(__floatsidf),
     ESP_ELFSYM_EXPORT(__floatundidf),
+    ESP_ELFSYM_EXPORT(__floatundisf),
     ESP_ELFSYM_EXPORT(__floatunsidf),
     ESP_ELFSYM_EXPORT(__gedf2),
     ESP_ELFSYM_EXPORT(__getreent),
     ESP_ELFSYM_EXPORT(__gtdf2),
     ESP_ELFSYM_EXPORT(__ledf2),
+    ESP_ELFSYM_EXPORT(__lshrdi3),
     ESP_ELFSYM_EXPORT(__ltdf2),
     ESP_ELFSYM_EXPORT(__moddi3),
     ESP_ELFSYM_EXPORT(__muldf3),
@@ -3895,7 +3906,6 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_http_stream_open),
     ESP_ELFSYM_EXPORT(aos_http_stream_recv),
     ESP_ELFSYM_EXPORT(aos_http_stream_send),
-    ESP_ELFSYM_EXPORT(aos_hwmouse_tick),
     ESP_ELFSYM_EXPORT(aos_i18n_app_count),
     ESP_ELFSYM_EXPORT(aos_i18n_app_load),
     ESP_ELFSYM_EXPORT(aos_i18n_app_unload),
@@ -4327,6 +4337,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_ui_home),
     ESP_ELFSYM_EXPORT(aos_ui_home_layer),
     ESP_ELFSYM_EXPORT(aos_ui_hwkbd_handler),
+    ESP_ELFSYM_EXPORT(aos_ui_hwmouse_handler),
     ESP_ELFSYM_EXPORT(aos_ui_init),
     ESP_ELFSYM_EXPORT(aos_ui_inject_drag),
     ESP_ELFSYM_EXPORT(aos_ui_inject_drag_rest),
@@ -4417,6 +4428,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(getenv),
     ESP_ELFSYM_EXPORT(gmtime_r),
     ESP_ELFSYM_EXPORT(heap_caps_aligned_alloc),
+    ESP_ELFSYM_EXPORT(heap_caps_calloc),
     ESP_ELFSYM_EXPORT(heap_caps_free),
     ESP_ELFSYM_EXPORT(heap_caps_malloc),
     ESP_ELFSYM_EXPORT(heap_caps_realloc),
@@ -4447,6 +4459,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(log2f),
     ESP_ELFSYM_EXPORT(logf),
     ESP_ELFSYM_EXPORT(longjmp),
+    ESP_ELFSYM_EXPORT(lroundf),
     ESP_ELFSYM_EXPORT(lseek),
     ESP_ELFSYM_EXPORT(lv_anim_core_deinit),
     ESP_ELFSYM_EXPORT(lv_anim_core_init),
@@ -6555,6 +6568,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(strtof),
     ESP_ELFSYM_EXPORT(strtol),
     ESP_ELFSYM_EXPORT(strtoul),
+    ESP_ELFSYM_EXPORT(strtoull),
     ESP_ELFSYM_EXPORT(tanf),
     ESP_ELFSYM_EXPORT(time),
     ESP_ELFSYM_EXPORT(tud_hid_descriptor_report_cb),

@@ -79,10 +79,21 @@ app has one, to `/apps`, deletes the stale parts, and restarts the board
 through the portal. The card in the computer works too. The paks are
 gitignored; each app's README says how to build its pak.
 
+## The descriptor's flags, while the app runs
+
+`self->desc.flags` may change while the app runs: the shell reads them at
+every touch. The VNC viewer sets `AOS_APP_FLAG_NO_SWIPE |
+AOS_APP_FLAG_LONG_DRAG` only while it shows the remote screen, so a drag
+from the left edge is the remote's there and "back" everywhere else.
+
 ## Drawing a frame of your own
 
 - **Worker** (`aos_hal_worker_start`): runs on core 0, priority 3, with a
-  PSRAM stack. Never touches LVGL.
+  PSRAM stack. Never touches LVGL. **There is one in the whole system**, and
+  `aos_hal_worker_stop()` stops whoever's it is: an app that keeps running
+  in the background (`AOS_APP_FLAG_BACKGROUND`) and holds it would stop
+  Video, Doom or Mapas from starting theirs. Such an app uses a thread of
+  its own (`aos_hal_thread_start`), as Infrarrojo does.
 - **Two cores for one frame** (`aos_hal_worker_split`): half runs on the
   caller's core and half on a helper pinned to the other core, at the
   caller's priority.
@@ -211,6 +222,14 @@ takes is there for the apps, all in `aos_hal.h`:
   `aos_ui_hwkbd_handler(cb)` (`aos_ui.h`) and gives them back with NULL:
   `cb(key, mods)` gets a Unicode code point (accents already composed) or
   an `AOS_KEY_*`, and returns true for a key it used. Notes does this.
+- **A mouse** points with an arrow: the left button is a finger, the right
+  one "back", the middle one "home", the wheel scrolls. An app that wants
+  more (VNC, Dibujo, PWM's knob) takes the raw reports while it is in
+  front with `aos_ui_hwmouse_handler(cb)` (`aos_ui.h`, since 0.10): `cb`
+  gets the arrow's position, the motion, the wheel and the buttons with
+  their edges, and returns a mask of what it keeps for itself
+  (`AOS_HWMOUSE_LEFT`, `_RIGHT`, `_MIDDLE`, `_WHEEL`); the rest goes on
+  as before.
 - **MIDI:** `aos_hal_midi_read(&msg)` (status, data1, data2) and
   `aos_hal_midi_send(&msg)`; `aos_hal_midi_devices()` lists them.
 - **Webcams:** the Cameras app shows them (`usb://N`). For your own,

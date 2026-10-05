@@ -78,6 +78,7 @@ void aos_banner_tick(void);              /* polls aos_hal_notif_* for new ones *
 void aos_hwkbd_tick(void);               /* a USB keyboard types into the open keyboard (aos_hwkbd.c) */
 void aos_hwkbd_app_gone(const char *id); /* the app closes: its key handler goes */
 void aos_hwmouse_tick(void);             /* a USB mouse points on the screen (aos_hwmouse.c) */
+void aos_hwmouse_app_gone(const char *id); /* the app closes: its mouse handler goes */
 void aos_toast_show(const char *text, uint32_t ms);
 void aos_notif_act(uint32_t uid, bool positive);
 void aos_dev_init(void);                 /* aos_devtools.c: the developer overlays, from the prefs */   /* the phone's answer / reject / clear */

@@ -13,6 +13,10 @@
  *
  * LVGL's coordinates are the turned screen's (the HAL rotates in the flush),
  * so the arrow needs no turning of its own.
+ *
+ * An app in front can take the raw reports (aos_ui_hwmouse_handler) and
+ * keep any of the buttons and the wheel for itself; the shell drops the
+ * handler when the app closes (aos_hwmouse_app_gone, from destroy_app).
  */
 #include "aos_internal.h"
 #include "aos_hal.h"
@@ -22,10 +26,26 @@
 #include "esp_heap_caps.h"
 #endif
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #define HIDE_MS 4000
+
+static aos_hwmouse_cb_t s_cb;
+static char s_owner[48];
+
+void aos_ui_hwmouse_handler(aos_hwmouse_cb_t cb)
+{
+    const char *id = aos_ui_current_app();
+    s_cb = cb && id ? cb : NULL;
+    snprintf(s_owner, sizeof s_owner, "%s", s_cb ? id : "");
+}
+
+void aos_hwmouse_app_gone(const char *id)
+{
+    if (s_cb && id && strcmp(id, s_owner) == 0) s_cb = NULL;
+}
 
 static struct {
     lv_indev_t *indev;
@@ -36,6 +56,7 @@ static struct {
     int wheel;
     uint32_t moved_ms;
     bool shown;
+    bool took_left;                 /* the app's handler keeps the left button */
 } M;
 
 /* the arrow, 12 x 19, drawn at twice that: X black, . white */
@@ -91,15 +112,28 @@ static void read_cb(lv_indev_t *indev, lv_indev_data_t *data)
         M.y = M.y < 0 ? 0 : M.y >= H ? H - 1 : M.y;
         uint8_t was = M.buttons;
         M.buttons = ev.buttons;
-        if ((ev.buttons & 2) && !(was & 2)) aos_ui_request_nav(AOS_UI_NAV_BACK);
-        if ((ev.buttons & 4) && !(was & 4)) aos_ui_request_nav(AOS_UI_NAV_HOME);
-        M.wheel += ev.wheel;
+        uint8_t took = 0;
+        if (s_cb) {
+            const char *cur = aos_ui_current_app();
+            if (cur && strcmp(cur, s_owner) == 0) {
+                aos_hwmouse_event_t e = {
+                    .x = M.x, .y = M.y, .dx = ev.absolute ? 0 : ev.dx, .dy = ev.absolute ? 0 : ev.dy,
+                    .wheel = ev.wheel, .buttons = ev.buttons,
+                    .pressed = (uint8_t)(ev.buttons & ~was), .released = (uint8_t)(was & ~ev.buttons),
+                };
+                took = s_cb(&e);
+            }
+        }
+        M.took_left = took & AOS_HWMOUSE_LEFT;
+        if (!(took & AOS_HWMOUSE_RIGHT) && (ev.buttons & 2) && !(was & 2)) aos_ui_request_nav(AOS_UI_NAV_BACK);
+        if (!(took & AOS_HWMOUSE_MIDDLE) && (ev.buttons & 4) && !(was & 4)) aos_ui_request_nav(AOS_UI_NAV_HOME);
+        if (!(took & AOS_HWMOUSE_WHEEL)) M.wheel += ev.wheel;
         M.moved_ms = lv_tick_get();
         aos_hal_activity();
     }
     data->point.x = M.x;
     data->point.y = M.y;
-    data->state = M.buttons & 1 ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
+    data->state = (M.buttons & 1) && !M.took_left ? LV_INDEV_STATE_PRESSED : LV_INDEV_STATE_RELEASED;
 }
 
 /* the object under the arrow that can still scroll that way */
