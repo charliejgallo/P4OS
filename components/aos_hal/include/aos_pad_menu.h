@@ -100,15 +100,19 @@ static inline bool aos_pad_menu_step(aos_pad_menu_t *m, const aos_pad_t *p)
             lv_area_t b;
             lv_obj_get_coords(m->item[i], &b);
             int32_t dx = (b.x1 + b.x2) / 2 - cx, dy = (b.y1 + b.y2) / 2 - cy;
+            /* across: the gap between the two buttons sideways, 0 when they
+             * overlap (a narrow button under a wide one is straight below) */
             int32_t along, across;
-            if (dirs & AOS_PAD_UP)         { along = -dy; across = dx; }
-            else if (dirs & AOS_PAD_DOWN)  { along = dy;  across = dx; }
-            else if (dirs & AOS_PAD_LEFT)  { along = -dx; across = dy; }
-            else                           { along = dx;  across = dy; }
+            bool vert = dirs & (AOS_PAD_UP | AOS_PAD_DOWN);
+            if (dirs & AOS_PAD_UP)         along = -dy;
+            else if (dirs & AOS_PAD_DOWN)  along = dy;
+            else if (dirs & AOS_PAD_LEFT)  along = -dx;
+            else                           along = dx;
             if (along <= 0) continue;
-            if (across < 0) across = -across;
-            /* straight ahead wins over a closer one off to the side */
-            int32_t d = along + 3 * across;
+            if (vert) across = b.x1 > a.x2 ? b.x1 - a.x2 : a.x1 > b.x2 ? a.x1 - b.x2 : 0;
+            else      across = b.y1 > a.y2 ? b.y1 - a.y2 : a.y1 > b.y2 ? a.y1 - b.y2 : 0;
+            /* the next row or column first, then the nearest in it */
+            int32_t d = along + 2 * across;
             if (d < best) { best = d; bi = i; }
         }
         if (bi >= 0) {

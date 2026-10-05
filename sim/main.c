@@ -30,10 +30,11 @@
  * Commands, separated by ';':  wait <ms> | tap <x> <y> [ms] |
  * drag <x1> <y1> <x2> <y2> [ms] [rest_ms] | pinch <cx> <cy> <from> <to> [ms] |
  * key <k> | type <text> | enter | open <app id> | rotate | shot <file.png> |
- * pad <buttons> <x> <y> [ms] | quit
+ * pad <buttons> <x> <y> [ms] [hat] | quit
  * (pad: a gamepad plugged in, holding <buttons> - hex, bit 0 = button 1 -
- * and the left stick at <x> <y> in -32767..32767 for ms, 150 by default;
- * then it lets go and stays plugged in. "pad off" unplugs it)
+ * and the left stick at <x> <y> in -32767..32767 for ms, 150 by default,
+ * and the hat (the d-pad: 0 up, 2 right, 4 down, 6 left; -1 none); then
+ * it lets go and stays plugged in. "pad off" unplugs it)
  * (type and enter go to the text field of the on-screen keyboard showing)
  * Coordinates are logical (the ones the UI sees in the current orientation).
  */
@@ -320,8 +321,10 @@ static void script_step(void)
     else if (sscanf(c, "shot %199s", a) == 1) shot_request(a);
     else if (!strcmp(c, "pad off")) { s_pad_scripted = false; aos_hal_sim_pad(false, 0, 0, 0, -1); }
     else if (sscanf(c, "pad %x %d %d %d", (unsigned *)&x, &y, &x2, &ms) >= 3) {
-        if (sscanf(c, "pad %x %d %d %d", (unsigned *)&x, &y, &x2, &ms) < 4) ms = 150;
-        aos_hal_sim_pad(true, (uint32_t)x, (int16_t)y, (int16_t)x2, -1);
+        int hat = -1;
+        int got = sscanf(c, "pad %x %d %d %d %d", (unsigned *)&x, &y, &x2, &ms, &hat);
+        if (got < 4) ms = 150;
+        aos_hal_sim_pad(true, (uint32_t)x, (int16_t)y, (int16_t)x2, (int8_t)hat);
         s_pad_scripted = true;
         s_pad_hold_until = lv_tick_get() + ms;
         s_script_wait_until = lv_tick_get() + ms + 50;
