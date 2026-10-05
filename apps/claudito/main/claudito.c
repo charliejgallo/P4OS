@@ -25,7 +25,7 @@
  * no buttons. The touch layers are LVGL hit areas on a transparent object
  * exactly over the canvas, at the same art positions x the canvas's scale:
  * the events and their meaning (PRESSED, PRESSING, CLICKED, PRESS_LOST) are
- * the watch's.
+ * the watch's. A USB gamepad plays it too ("The gamepad", near the end).
  *
  * Each scene's background is drawn once into a separate buffer, and again
  * when night falls or ends, and copied on every frame: redrawing the parquet
@@ -40,6 +40,7 @@
 #include "aos_hal.h"
 #include "aos_i18n.h"
 #include "aos_retro.h"
+#include "aos_pad.h"
 #include "aos_ui.h"
 
 #include "cl_pixel.h"
@@ -222,6 +223,13 @@ typedef struct {
 #ifdef AOS_SIM
     uint16_t *verify;           /* CLAUDITO_VERIFY: the stage as presented */
 #endif
+
+    /* A USB gamepad (see "The gamepad"): its state, and the cursors it
+     * moves, which only show once it has been used */
+    aos_pad_t gp;
+    bool   gp_shown;
+    int8_t gp_act;          /* the action bar's button under the cursor */
+    int8_t gp_item;         /* the tray's item under the cursor */
 
     bool   hud_dirty;
     bool   bar_dirty;
@@ -1031,6 +1039,13 @@ static void bar_draw(app_t *a)
         }
     }
 
+    /* the pad's cursor: a frame in the gaps round the button */
+    if (a->gp_shown) {
+        box_t k;
+        act_box(a, a->gp_act, &k, NULL);
+        cl_frame(b, k.x - 1, k.y - 1, k.w + 2, k.h + 2, cl_rgb(0xFFFFFF));
+    }
+
     present_changed(a, &a->bar_box);
 }
 
@@ -1078,6 +1093,10 @@ static void tray_draw(app_t *a)
             int oy = (i == TOY_BALLOON) ? 2 : (i == TOY_BLOCKS ? 5 : 4);
             cl_blit(b, x + ox, y + oy, TOYS[i].rows, TOYS[i].nrows, false);
         }
+    }
+    if (a->gp_shown) {
+        cl_frame(b, tray_item_x(a, a->gp_item) - 1, tray_item_y(a) - 1,
+                 TRAY_SIZE + 2, TRAY_SIZE + 2, cl_rgb(0xFFFFFF));
     }
 }
 
@@ -1852,6 +1871,8 @@ static void frame_draw(app_t *a)
     stage_present(a);
 }
 
+static void pad_step(app_t *a);
+
 static void step(void *user)
 {
     app_t *a = (app_t *)user;
@@ -1865,6 +1886,7 @@ static void step(void *user)
     }
 
     a->frame++;
+    pad_step(a);
 
     /* the stats clock: each step's exact share of a second (71 or 72 ms), so
        the wear is by the wall clock whatever the frame rate */
@@ -2037,16 +2059,9 @@ static void tickle_hit(app_t *a)
     aos_hal_beep(1800 + (int)(rnd() % 400), 25);
 }
 
-static void stage_event(lv_event_t *event)
+/* The finger (or the pad, see "The gamepad") at x, y on the stage. */
+static void stage_at(app_t *a, lv_event_code_t code, int x, int y)
 {
-    app_t *a = (app_t *)lv_event_get_user_data(event);
-    lv_event_code_t code = lv_event_get_code(event);
-
-    int x, y;
-    if (!touch_point(a, &x, &y)) {
-        return;
-    }
-
     int px, py, pw, ph;
     cl_pet_bbox(&a->pet, &px, &py, &pw, &ph);
     bool on_pet = (x >= px - 2 && x <= px + pw + 2 && y >= py - 2 && y <= py + ph + 2);
@@ -2120,6 +2135,15 @@ static void stage_event(lv_event_t *event)
     }
 }
 
+static void stage_event(lv_event_t *event)
+{
+    app_t *a = (app_t *)lv_event_get_user_data(event);
+    int x, y;
+    if (touch_point(a, &x, &y)) {
+        stage_at(a, lv_event_get_code(event), x, y);
+    }
+}
+
 /* A swipe to the right over the stage leaves, as on the watch, except while
  * the finger is at work (rubbing and tickling are drags). LVGL sends the
  * gesture to the first ancestor of the pressed object without
@@ -2188,6 +2212,128 @@ static void tray_event(lv_event_t *event)
         feed_start(a, idx);
     } else if (a->mode == MODE_TOY_TRAY) {
         toy_start(a, (toy_t)idx);
+    }
+}
+
+/* --------------------------------------------------------------------------
+ * The gamepad
+ *
+ * A USB pad on the board's host (aos_pad.h) does what the finger does, with
+ * a cursor that only shows once the pad is used:
+ *
+ *  - Left and right go along the action bar, A presses the button there.
+ *    With a tray open they go along the tray instead, A picks and B closes.
+ *  - Washing and tickling, the d-pad or the stick moves the sponge or the
+ *    hand over the stage; A held is the finger on the glass (rub by moving
+ *    with it held, a press on the belly tickles), and B puts the sponge or
+ *    the hand away.
+ *  - B otherwise strokes the critter, and wakes it when it sleeps.
+ *  - START held is the finger held on the name: two seconds reset the days.
+ * -------------------------------------------------------------------------- */
+
+#define PAD_DEAD        6000        /* the stick's dead zone, of 32767 */
+
+/* The sponge or the hand, moved by the pad: up to 3 art pixels a step with
+ * the stick all the way, 2 on the d-pad. */
+static void pad_pointer(app_t *a, const aos_pad_t *p)
+{
+    int sx = p->x, sy = p->y, dx, dy;
+    bool stick = sx <= -PAD_DEAD || sx >= PAD_DEAD || sy <= -PAD_DEAD || sy >= PAD_DEAD;
+    if (!stick && !(p->held & (AOS_PAD_A | AOS_PAD_DIRS)) && !((p->pressed | p->released) & AOS_PAD_A)) {
+        return;     /* the pad is idle: the finger may be at work */
+    }
+    if (sx <= -PAD_DEAD || sx >= PAD_DEAD) dx = sx * 3 / 32767;
+    else dx = (aos_pad_held(p, AOS_PAD_RIGHT) - aos_pad_held(p, AOS_PAD_LEFT)) * 2;
+    if (sy <= -PAD_DEAD || sy >= PAD_DEAD) dy = sy * 3 / 32767;
+    else dy = (aos_pad_held(p, AOS_PAD_DOWN) - aos_pad_held(p, AOS_PAD_UP)) * 2;
+
+    int x = clampi(a->sponge_x + dx, cl_left(&a->stage) + 5, cl_right(&a->stage) - 6);
+    int y = clampi(a->sponge_y + dy, cl_top(&a->stage) + 8, cl_bottom(&a->stage) - 8);
+
+    if (aos_pad_held(p, AOS_PAD_A)) {
+        stage_at(a, aos_pad_pressed(p, AOS_PAD_A) ? LV_EVENT_PRESSED : LV_EVENT_PRESSING, x, y);
+    } else {
+        if (aos_pad_pressed(p, AOS_PAD_A) || (p->released & AOS_PAD_A)) {
+            stage_at(a, LV_EVENT_RELEASED, x, y);     /* a press shorter than a step too */
+        }
+        a->sponge_x = x;
+        a->sponge_y = y;
+        a->sponge_down = false;
+    }
+}
+
+static void pad_step(app_t *a)
+{
+    aos_pad_t *p = &a->gp;
+
+    aos_pad_update(p, lv_tick_get());
+    /* in the background, or under the app switcher, the pad is not ours */
+    if (!p->connected || !lv_obj_is_visible(a->r->view)) {
+        return;
+    }
+    if (!a->gp_shown) {
+        /* the first press only shows where the cursor is */
+        if (p->pressed) {
+            a->gp_shown = true;
+            a->bar_dirty = true;
+        }
+        return;
+    }
+
+    /* START held: the name held down (step() counts the frames) */
+    if (aos_pad_pressed(p, AOS_PAD_START)) {
+        a->hold_t = 1;
+        a->hud_dirty = true;
+    } else if ((p->released & AOS_PAD_START) && a->hold_t > 0) {
+        say(a, _("MANTENE PARA"), _("REINICIAR"), 30);
+        a->hold_t = 0;
+        a->hud_dirty = true;
+    }
+
+    switch (a->mode) {
+    case MODE_WASH:
+    case MODE_TICKLE:
+        if (aos_pad_pressed(p, AOS_PAD_B)) {
+            mode_set(a, MODE_IDLE);
+            return;
+        }
+        pad_pointer(a, p);
+        return;
+
+    case MODE_FOOD_TRAY:
+    case MODE_TOY_TRAY:
+        if (aos_pad_repeat(p, AOS_PAD_LEFT) && a->gp_item > 0) a->gp_item--;
+        if (aos_pad_repeat(p, AOS_PAD_RIGHT) && a->gp_item < TRAY_ITEMS - 1) a->gp_item++;
+        if (aos_pad_pressed(p, AOS_PAD_A)) {
+            if (a->mode == MODE_FOOD_TRAY) feed_start(a, a->gp_item);
+            else toy_start(a, (toy_t)a->gp_item);
+        } else if (aos_pad_pressed(p, AOS_PAD_B)) {
+            mode_set(a, MODE_IDLE);
+        }
+        return;
+
+    default:
+        break;
+    }
+
+    int act = a->gp_act;
+    if (aos_pad_repeat(p, AOS_PAD_LEFT) && act > 0) act--;
+    if (aos_pad_repeat(p, AOS_PAD_RIGHT) && act < ACT_COUNT - 1) act++;
+    if (act != a->gp_act) {
+        a->gp_act = (int8_t)act;
+        a->bar_dirty = true;
+    }
+    if (aos_pad_pressed(p, AOS_PAD_A)) {
+        action_do(a, a->gp_act);
+        /* the hand and the sponge start where the action put them */
+    } else if (aos_pad_pressed(p, AOS_PAD_B)) {
+        if (a->mode == MODE_SLEEP) {
+            action_do(a, ACT_SLEEP);
+        } else {
+            int px, py, pw, ph;
+            cl_pet_bbox(&a->pet, &px, &py, &pw, &ph);
+            stage_at(a, LV_EVENT_PRESSED, px + pw / 2, py + ph / 2);
+        }
     }
 }
 
