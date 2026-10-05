@@ -428,13 +428,15 @@ static void api_usb(aos_httpd_req_t *r)
         cJSON *b = body_json(r);
         const char *m = jstr(b, "mode"), *pins = jstr(b, "pins"), *layout = jstr(b, "layout");
         cJSON *host = b ? cJSON_GetObjectItem(b, "host") : NULL;
+        cJSON *uaudio = b ? cJSON_GetObjectItem(b, "usb_audio") : NULL;
+        if (cJSON_IsBool(uaudio)) aos_hal_usb_audio_enable(cJSON_IsTrue(uaudio));
         int want = -1, port = -1;
         for (int i = 0; m && i < 4; i++) if (!strcmp(m, M[i]) && i != AOS_HAL_USB_DISK) want = i;
         if (pins) port = !strcmp(pins, "21/23") ? AOS_HAL_USB_HOST_HEADER : !strcmp(pins, "25/27") ? AOS_HAL_USB_HOST_OTG
                        : !strcmp(pins, "both") ? AOS_HAL_USB_HOST_BOTH : -2;
         int lay = !layout ? -1 : !strcmp(layout, "latam") ? AOS_KBD_LATAM : !strcmp(layout, "us") ? AOS_KBD_US : -2;
         bool bad = (m && want < 0) || port == -2 || lay == -2 || (host && !cJSON_IsBool(host)) ||
-                   (!m && !pins && !host && !layout);
+                   (!m && !pins && !host && !layout && !cJSON_IsBool(uaudio));
         bool host_on = host && cJSON_IsTrue(host);
         cJSON_Delete(b);
         if (bad) {
@@ -460,6 +462,7 @@ static void api_usb(aos_httpd_req_t *r)
     int hp = aos_hal_usb_host_port();
     cJSON_AddStringToObject(o, "pins", hp == AOS_HAL_USB_HOST_HEADER ? "21/23" : hp == AOS_HAL_USB_HOST_BOTH ? "both" : "25/27");
     cJSON_AddStringToObject(o, "layout", aos_hal_usb_kbd_layout() == AOS_KBD_US ? "us" : "latam");
+    cJSON_AddBoolToObject(o, "usb_audio", aos_hal_usb_audio_enabled());
     cJSON_AddBoolToObject(o, "host_on", aos_hal_usb_host_on());
     aos_usb_host_info_t in[AOS_USB_HOST_MAX];
     int n = aos_hal_usb_host_on() ? aos_hal_usb_host_devices(in, AOS_USB_HOST_MAX) : -1;
@@ -504,6 +507,16 @@ static void api_usb(aos_httpd_req_t *r)
             cJSON_AddItemToArray(ga, g);
         }
         cJSON_AddBoolToObject(o, "mouse", aos_hal_hid_mouse_present());
+        /* a sound card: its name, what it has, whether it is playing */
+        char an[48];
+        bool aout, ain, aplay;
+        if (aos_hal_usb_audio_info(an, sizeof an, &aout, &ain, &aplay)) {
+            cJSON *a = cJSON_AddObjectToObject(o, "audio");
+            cJSON_AddStringToObject(a, "name", an);
+            cJSON_AddBoolToObject(a, "output", aout);
+            cJSON_AddBoolToObject(a, "input", ain);
+            cJSON_AddBoolToObject(a, "playing", aplay);
+        }
         /* webcams: their MJPEG sizes, and the stream if one is on */
         cJSON *ca = cJSON_AddArrayToObject(o, "cameras");
         for (int i = 0; i < aos_hal_uvc_count(); i++) {

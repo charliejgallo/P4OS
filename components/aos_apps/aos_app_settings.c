@@ -393,6 +393,7 @@ static void uses_text(const char *uses, char *out, size_t n)
         { "keyboard", N_("teclado") }, { "mouse", N_("mouse") }, { "gamepad", N_("joystick") }, { "media keys", N_("teclas multimedia") },
         { "system keys", N_("teclas de sistema") }, { "hub", N_("hub") }, { "disk, not mounted", N_("disco sin montar") },
         { "MIDI", N_("MIDI") }, { "serial", N_("puerto serie") }, { "camera", N_("cámara") },
+        { "speaker", N_("parlante") }, { "microphone", N_("micrófono") },
     };
     size_t o = 0;
     out[0] = 0;
@@ -480,6 +481,11 @@ static void usb_pins_cb(lv_event_t *e)
         return;
     }
     show(PG_USB);
+}
+
+static void usb_audio_cb(lv_event_t *e)
+{
+    aos_hal_usb_audio_enable(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
 }
 
 static void usb_layout_cb(lv_event_t *e)
@@ -626,6 +632,11 @@ static void build_usb(lv_obj_t *p)
     pick_row(g, _("Los dos a la vez"), port == AOS_HAL_USB_HOST_BOTH, usb_pins_cb,
              (void *)(intptr_t)AOS_HAL_USB_HOST_BOTH);
     note(p, _("21 y 23 son el segundo controlador USB del P4, de velocidad completa (12 Mbit/s): andan a la vez que cualquier modo del conector OTG. 25 y 27 son los mismos cables que el conector OTG, de alta velocidad, con cables cortos: el host le saca el modo al OTG mientras está prendido. Los dos a la vez son dos puertos, por ejemplo un teclado en uno y un pendrive en el otro."));
+
+    g = group(p, _("AUDIO USB"));
+    row_switch(g, AOS_SYM_VOLUME_HIGH, 0xFF375F, _("Sonido por la placa de audio USB"), aos_hal_usb_audio_enabled(),
+               usb_audio_cb);
+    note(p, _("Con una placa de sonido o unos auriculares USB conectados, todo lo que suena (la música, la radio, las apps, los avisos) sale por ahí, con el volumen de la placa, y el parlante se calla. Tiene que aceptar 48 kHz."));
 
     g = group(p, _("TECLADO USB"));
     int lay = aos_hal_usb_kbd_layout();

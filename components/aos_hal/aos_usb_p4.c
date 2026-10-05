@@ -85,7 +85,8 @@ void aos_p4_usb_net_mac(uint8_t mac[6]);
 
 /* the host's clients: the devices list (aos_usb_devs_p4.c), HID
  * (aos_usb_hid_p4.c), MIDI (aos_usb_midi_p4.c), serial
- * (aos_usb_serial_p4.c) and webcams (aos_usb_uvc_p4.c) */
+ * (aos_usb_serial_p4.c), webcams (aos_usb_uvc_p4.c) and sound cards
+ * (aos_usb_uac_p4.c) */
 bool aos_p4_usb_devs_start(void);
 void aos_p4_usb_devs_stop(void);
 void aos_p4_usb_dev_use(uint8_t addr, const char *what);
@@ -97,6 +98,8 @@ bool aos_p4_usb_serial_start(void);
 void aos_p4_usb_serial_stop(void);
 bool aos_p4_usb_uvc_start(void);
 void aos_p4_usb_uvc_stop(void);
+bool aos_p4_usb_uac_start(void);
+void aos_p4_usb_uac_stop(void);
 
 /* aos_hal_p4.c: the card on its slot with no filesystem, for disk mode */
 sdmmc_card_t *aos_p4_sd_card_open(void);
@@ -873,6 +876,7 @@ static bool host_start(void)
     if (!aos_p4_usb_midi_start()) ESP_LOGW(TAG, "host: no MIDI client");
     aos_p4_usb_serial_start();
     aos_p4_usb_uvc_start();
+    aos_p4_usb_uac_start();
     ESP_LOGI(TAG, "host: waiting for devices on %s",
              H.map == (BIT0 | BIT1) ? "J3 25/27 (High Speed) and 21/23 (Full Speed)"
              : H.map & BIT1 ? "J3 21 D- 23 D+ (Full-Speed controller)"
@@ -882,6 +886,7 @@ static bool host_start(void)
 
 static void host_stop(void)
 {
+    aos_p4_usb_uac_stop();
     aos_p4_usb_uvc_stop();
     aos_p4_usb_serial_stop();
     aos_p4_usb_hid_stop();

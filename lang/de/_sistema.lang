@@ -7264,3 +7264,8 @@ puerto serie	serielle Schnittstelle
 cámara	Kamera
 Esperando dispositivos en el conector de 40 pines.	Warte auf Geräte an der 40-poligen Leiste.
 sin uso todavía	noch nicht verwendet
+AUDIO USB	USB-AUDIO
+Sonido por la placa de audio USB	Ton über die USB-Soundkarte
+Con una placa de sonido o unos auriculares USB conectados, todo lo que suena (la música, la radio, las apps, los avisos) sale por ahí, con el volumen de la placa, y el parlante se calla. Tiene que aceptar 48 kHz.	Mit einer angeschlossenen USB-Soundkarte oder einem USB-Headset kommt alles, was die Platine abspielt (Musik, Radio, Apps, Hinweise), dort heraus, mit der Lautstärke der Platine, und der Lautsprecher schweigt. Sie muss 48 kHz unterstützen.
+parlante	Lautsprecher
+micrófono	Mikrofon

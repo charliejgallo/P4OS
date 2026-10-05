@@ -47,6 +47,8 @@
 - USB serial: Arduinos and CH34x, CP210x, FTDI adapters as ports `usb0`,
   `usb1` of the Terminal.
 - Webcams (MJPEG) as cameras of the Cameras app while plugged in.
+- USB sound cards and headsets: the board's sound goes there instead of
+  its speaker, at the board's volume (Settings, USB, USB audio).
 
 **Bluetooth**
 - The board asks for encryption only when the phone or the computer has not

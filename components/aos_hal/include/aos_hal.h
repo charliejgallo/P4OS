@@ -1925,6 +1925,14 @@ void aos_hal_uvc_stop(void);
 int  aos_hal_uvc_frame(uint8_t *buf, int max, uint32_t *seq);
 bool aos_hal_uvc_streaming(uint16_t *w, uint16_t *h, uint32_t *frames);    /* false when no camera streams */
 
+/* P4OS: USB sound cards on the host (aos_usb_uac_p4.c). With a card's
+ * output there (48 kHz 16-bit) and this on (the default), everything the
+ * board sounds goes to the card, at the board's volume, and its speaker is
+ * muted. info() says what card there is (false: none). */
+bool aos_hal_usb_audio_enabled(void);
+void aos_hal_usb_audio_enable(bool on);
+bool aos_hal_usb_audio_info(char *name, size_t n, bool *out, bool *in, bool *playing);
+
 /* mDNS on a network interface of somebody else's (the USB one): the watch
  * answers "amoledos.local" there too, with that interface's address. The
  * argument is an esp_netif_t*, kept opaque so this header stays free of

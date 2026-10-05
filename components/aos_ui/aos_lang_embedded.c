@@ -2350,6 +2350,11 @@ static const char blob_en__sistema_lang[] =
     "cámara\tcamera\n"
     "Esperando dispositivos en el conector de 40 pines.\tWaiting for devices on the 40-pin header.\n"
     "sin uso todavía\tnot used yet\n"
+    "AUDIO USB\tUSB AUDIO\n"
+    "Sonido por la placa de audio USB\tSound through the USB sound card\n"
+    "Con una placa de sonido o unos auriculares USB conectados, todo lo que suena (la música, la radio, las apps, los avisos) sale por ahí, con el volumen de la placa, y el parlante se calla. Tiene que aceptar 48 kHz.\tWith a USB sound card or headset plugged in, everything the board plays (music, the radio, apps, alerts) comes out there, at the board's volume, and the speaker goes quiet. It has to take 48 kHz.\n"
+    "parlante\tspeaker\n"
+    "micrófono\tmicrophone\n"
     ;
 
 static const char blob_en_aos_cameras_lang[] =
@@ -2417,6 +2422,11 @@ static const char blob_en_aos_cameras_lang[] =
     "No se pudo guardar la foto\tCouldn't save the photo\n"
     "Foto JPEG\tJPEG photo\n"
     "  ·  audio sin reproducir\t  ·  audio not played\n"
+    "La cámara USB no está conectada\tThe USB camera is not connected\n"
+    "La cámara USB no arrancó\tThe USB camera did not start\n"
+    "Sin memoria para la cámara\tNo memory for the camera\n"
+    "Se desenchufó la cámara USB\tThe USB camera was unplugged\n"
+    "La cámara USB no manda imagen\tThe USB camera sends no picture\n"
     ;
 
 static const char blob_en_aos_clima_lang[] =
@@ -6869,6 +6879,11 @@ static const char blob_de__sistema_lang[] =
     "cámara\tKamera\n"
     "Esperando dispositivos en el conector de 40 pines.\tWarte auf Geräte an der 40-poligen Leiste.\n"
     "sin uso todavía\tnoch nicht verwendet\n"
+    "AUDIO USB\tUSB-AUDIO\n"
+    "Sonido por la placa de audio USB\tTon über die USB-Soundkarte\n"
+    "Con una placa de sonido o unos auriculares USB conectados, todo lo que suena (la música, la radio, las apps, los avisos) sale por ahí, con el volumen de la placa, y el parlante se calla. Tiene que aceptar 48 kHz.\tMit einer angeschlossenen USB-Soundkarte oder einem USB-Headset kommt alles, was die Platine abspielt (Musik, Radio, Apps, Hinweise), dort heraus, mit der Lautstärke der Platine, und der Lautsprecher schweigt. Sie muss 48 kHz unterstützen.\n"
+    "parlante\tLautsprecher\n"
+    "micrófono\tMikrofon\n"
     ;
 
 static const char blob_de_aos_cameras_lang[] =
@@ -6936,6 +6951,11 @@ static const char blob_de_aos_cameras_lang[] =
     "No se pudo guardar la foto\tFoto nicht gespeichert\n"
     "Foto JPEG\tJPEG-Foto\n"
     "  ·  audio sin reproducir\t  ·  Audio nicht abgespielt\n"
+    "La cámara USB no está conectada\tDie USB-Kamera ist nicht angeschlossen\n"
+    "La cámara USB no arrancó\tDie USB-Kamera ist nicht gestartet\n"
+    "Sin memoria para la cámara\tKein Speicher für die Kamera\n"
+    "Se desenchufó la cámara USB\tDie USB-Kamera wurde abgesteckt\n"
+    "La cámara USB no manda imagen\tDie USB-Kamera sendet kein Bild\n"
     ;
 
 static const char blob_de_aos_clima_lang[] =
@@ -9052,7 +9072,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2336, 33, files_en, 34 },
-    { "de", "Deutsch", 2336, 33, files_de, 34 },
+    { "en", "English", 2341, 33, files_en, 34 },
+    { "de", "Deutsch", 2341, 33, files_de, 34 },
 };
 const int aos_lang_pack_count = 2;

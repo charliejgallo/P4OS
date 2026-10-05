@@ -16,3 +16,6 @@ dependencies:
   # webcams on the host (aos_usb_uvc_p4.c): MJPEG frames, decoded by the P4's
   # JPEG engine
   espressif/usb_host_uvc: "^2.6.0"
+  # USB sound cards on the host (aos_usb_uac_p4.c): the speaker's output,
+  # sent to the card instead of the board's speaker
+  espressif/usb_host_uac: "^1.5.0"

@@ -225,6 +225,7 @@ keys is two HID interfaces):
 | `aos_usb_midi_p4.c` | MIDI keyboards, pads, controllers | `aos_hal_midi_read` / `_send`; MIDI thru to the computer |
 | `aos_usb_serial_p4.c` + `usb_host_cdc_acm` (+ CH34x, CP210x, FTDI) | Arduinos, boards with native USB, USB-serial adapters | ports `usb0`, `usb1` of aos_io: the Terminal opens them like its UARTs |
 | `aos_usb_uvc_p4.c` + `usb_host_uvc` | webcams (MJPEG) | a camera of the Cameras app while plugged in (`usb://0`) |
+| `aos_usb_uac_p4.c` + `usb_host_uac` | USB sound cards and headsets | the board's sound, instead of its speaker |
 
 **HID** reads each interface's report descriptor: which usage is where in
 each report, signed or not, relative or absolute, under which application
@@ -311,8 +312,22 @@ its boot log, clean. A camera that declares
 no name shows as "Webcam vid:pid". `/api/usb` `cameras` lists each with
 its MJPEG sizes, and `camera_stream` the one streaming.
 
+**Sound cards**: with a card's output there (48 kHz 16-bit PCM, stereo or
+mono) and Settings, USB, "Sound through the USB sound card" on (the
+default; `POST /api/usb {"usb_audio": bool}`), the board's audio output
+task (`aos_audio_p4.c`), which mixes the player, the apps' stream and the
+tones into one 48 kHz stereo block every 10 ms, writes each block to the
+card too and mutes the speaker. The codec keeps running: its I2S clock
+paces the mix and is the board microphones' clock. The volume is the
+board's, on the speaker's curve, in the samples (the card's own at its
+top). The stream starts with the first sound and stops when the board's
+audio goes idle. Tried on 2026-10-04 with a GeneralPlus card (1b3f:2008:
+output 48 kHz stereo, a 48 kHz mono microphone and HID volume keys, which
+work as media keys): the radio through headphones. Its microphone is not
+used yet.
+
 `GET /api/usb` says the OTG's `mode` (`host` while the host holds the OTG
 controller), `host_on`, `pins`, `layout`, `devices`, `keyboards`,
-`gamepads`, `mouse`, `midi`/`midi_last` and `pendrives` (each with `id`,
+`gamepads`, `mouse`, `midi`/`midi_last`, `audio`, `cameras` and `pendrives` (each with `id`,
 `vendor`, `product`, `bytes`, `mounted`, `path`, `error`; `host` is the
 first one, as before). `{"mode": "host"}` still turns the host on.

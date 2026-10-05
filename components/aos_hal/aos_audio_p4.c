@@ -2226,8 +2226,15 @@ static bool out_open(int16_t *stereo)
     return true;
 }
 
+/* a USB sound card on the host (aos_usb_uac_p4.c): the mix goes to it and
+ * the board's speaker is muted while one is there and wanted */
+bool aos_p4_usb_audio_out(void);
+void aos_p4_usb_audio_write(const int16_t *stereo, int frames, int volume);
+void aos_p4_usb_audio_idle(void);
+
 static void out_close(void)
 {
+    aos_p4_usb_audio_idle();
     esp_codec_dev_close(s_speaker);
     s_out_open = false;
     ESP_LOGD(TAG, "speaker closed (amp cycle %lu)", (unsigned long)s_out_opens);
@@ -2303,6 +2310,7 @@ static void aout_task(void *arg)
 
     int open_vol = -1;
     uint32_t idle_ms = 0;
+    int usb_muted = -1;             /* the speaker muted for a USB card; -1 not known (just opened) */
 
     for (;;) {
         bool for_mic = s_out_for_mic;
@@ -2329,6 +2337,7 @@ static void aout_task(void *arg)
             }
             open_vol = s_volume;
             idle_ms = 0;
+            usb_muted = -1;
         }
         if (open_vol != s_volume) {         /* the slider is heard at once */
             open_vol = s_volume;
@@ -2344,6 +2353,15 @@ static void aout_task(void *arg)
             stereo[2 * i] = v;
             stereo[2 * i + 1] = v;
         }
+        /* A USB sound card: the same block to it, and the speaker silent.
+         * The codec keeps running: its clock paces this loop and the
+         * board's microphones. */
+        bool usb = aos_p4_usb_audio_out();
+        if ((int)usb != usb_muted) {
+            esp_codec_dev_set_out_mute(s_speaker, usb);
+            usb_muted = usb;
+        }
+        if (usb) aos_p4_usb_audio_write(stereo, BUS_BLOCK, s_volume);
         if (esp_codec_dev_write(s_speaker, stereo, BUS_BLOCK * 2 * (int)sizeof(int16_t)) !=
             ESP_CODEC_DEV_OK) {
             ESP_LOGW(TAG, "speaker: write failed, reopening");

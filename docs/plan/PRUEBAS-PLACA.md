@@ -482,6 +482,11 @@ por el Registro del portal sin cable serie)
       hub, se recomienda cablear directo (el usuario no lo va a usar con
       hub; decisión del 2026-10-04).
 - [ ] Varios pendrives detrás del hub (`/usb2`, `/usb3`).
+- [x] **Placa de audio USB** GeneralPlus (1b3f:2008, 2026-10-04): salida 48
+      kHz estéreo, micrófono 48 kHz mono y teclas de volumen (HID). La radio
+      (MP3 44,1 kHz remuestreado a 48) sonó por auriculares y el parlante de
+      la placa se calló. Falta: su micrófono para grabar; medir cortes en
+      una escucha larga.
 - [ ] Visto de paso: `E i2s_common: i2s_channel_disable … not enabled` al
       reabrir el códec para el sonido de las teclas; inofensivo, a limpiar.
 
