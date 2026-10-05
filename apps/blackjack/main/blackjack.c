@@ -34,6 +34,12 @@
  *     a hand in progress survives it.
  *   - Every touch target is at least 88 px and clear of the system's edge
  *     strips (top 48, bottom 36, left 28).
+ *   - A USB gamepad plays it through aos_pad_menu: the d-pad walks the
+ *     buttons showing (chips, Borrar, Repartir; Seguro / No; the four plays;
+ *     the end of the round; the menu's) and A presses the outlined one,
+ *     which starts on the usual choice - Repartir, Pedir, Otra mano. B is
+ *     the second choice (Plantarse, Borrar, No, Apuesta), L doubles, R
+ *     splits, and START opens and closes the menu.
  */
 #include "aos_app.h"
 #include "aos_fonts.h"
@@ -41,6 +47,8 @@
 #include "aos_i18n.h"
 #include "aos_icon_ops.h"
 #include "aos_ui.h"
+#include "aos_pad.h"
+#include "aos_pad_menu.h"
 
 #include "bj_art.h"
 #include "bj_game.h"
@@ -148,6 +156,12 @@ typedef struct {
 
     lv_obj_t   *menu, *lbl_stats, *chip_sfx, *chip_hint;
     bool        menu_open;
+
+    /* the gamepad */
+    aos_pad_t      pad;
+    aos_pad_menu_t pmenu;
+    int            pad_key;     /* what pmenu holds: a state, or 100 for the menu */
+    lv_obj_t      *btn_noins, *btn_resume, *btn_exit;
 
     bool        sfx, hint;
     bool        want_exit, leaving, closing;
@@ -1277,6 +1291,157 @@ static void hint_cb(lv_event_t *e)
 }
 
 /* --------------------------------------------------------------------------
+ * The gamepad
+ * -------------------------------------------------------------------------- */
+
+/* A button there to press: shown, in a row shown, and enabled. */
+static bool pad_usable(lv_obj_t *b)
+{
+    return b && lv_obj_is_valid(b) && !lv_obj_has_flag(b, LV_OBJ_FLAG_HIDDEN) &&
+           !lv_obj_has_flag(lv_obj_get_parent(b), LV_OBJ_FLAG_HIDDEN) &&
+           !lv_obj_has_state(b, LV_STATE_DISABLED);
+}
+
+/* The buttons the d-pad walks: those of the row showing, again whenever the
+ * state or the menu changes. */
+static void pad_items(app_t *a)
+{
+    int key = a->menu_open ? 100 : a->last_state;
+    if (key == a->pad_key) {
+        return;
+    }
+    a->pad_key = key;
+
+    lv_obj_t *it[BJ_NCHIPS + 2];
+    int n = 0, sel = 0;
+    if (key == 100) {
+        it[n++] = a->chip_sfx;
+        it[n++] = a->chip_hint;
+        it[n++] = a->btn_resume;
+        it[n++] = a->btn_exit;
+        sel = 2;
+    } else if (key == BJ_ST_BET) {
+        for (int i = 0; i < BJ_NCHIPS; i++) {
+            it[n++] = lv_obj_get_child(a->row_chips, i);
+        }
+        it[n++] = a->btn_clear;
+        it[n++] = a->btn_deal;
+        sel = n - 1;
+    } else if (key == BJ_ST_INSURANCE) {
+        it[n++] = a->btn_ins;
+        it[n++] = a->btn_noins;
+        sel = 1;
+    } else if (key == BJ_ST_PLAYER) {
+        it[n++] = a->btn_double;
+        it[n++] = a->btn_split;
+        it[n++] = a->btn_hit;
+        it[n++] = a->btn_stand;
+        sel = 2;
+    } else if (key == BJ_ST_OVER) {
+        it[n++] = a->btn_again;
+        it[n++] = a->btn_rebet;
+        it[n++] = a->btn_refill;
+    }
+    /* Repartir or Otra mano may be off (no bet, not enough bank): then the
+     * outline starts on the first one that is not */
+    for (int i = 0; n && !pad_usable(it[sel]) && i < n; i++) {
+        if (pad_usable(it[i])) {
+            sel = i;
+        }
+    }
+    if (n) {
+        aos_pad_menu_set(&a->pmenu, it, n, sel);
+    } else {
+        aos_pad_menu_clear(&a->pmenu);
+    }
+}
+
+/* A shortcut presses a button only if it is there to press. */
+static void pad_click(lv_obj_t *b)
+{
+    if (pad_usable(b)) {
+        lv_obj_send_event(b, LV_EVENT_CLICKED, NULL);
+    }
+}
+
+/* aos_pad_menu leaves its outline on a button that got disabled while
+ * selected (Borrar once the bet is cleared, Doblar after a hit): it skips
+ * disabled buttons when taking the outline off. Here only the selected one
+ * keeps it. */
+static void pad_unmark_others(app_t *a)
+{
+    for (int i = 0; i < a->pmenu.n; i++) {
+        lv_obj_t *o = a->pmenu.item[i];
+        if (i != a->pmenu.sel && lv_obj_is_valid(o) &&
+            lv_obj_get_style_outline_width(o, 0) != 0) {
+            lv_obj_set_style_outline_width(o, 0, 0);
+            lv_obj_set_style_outline_pad(o, 0, 0);
+        }
+    }
+}
+
+static void pad_step(app_t *a)
+{
+    aos_pad_update(&a->pad, lv_tick_get());
+    pad_items(a);
+    if (!a->pad.pressed && !a->pad.repeat) {
+        return;
+    }
+    bool start = aos_pad_pressed(&a->pad, AOS_PAD_START);
+    bool b     = aos_pad_pressed(&a->pad, AOS_PAD_B);
+    if (a->menu_open) {
+        if (start || b) {
+            menu_show(a, false);
+        } else {
+            aos_pad_menu_step(&a->pmenu, &a->pad);
+        }
+        return;
+    }
+    if (start) {
+        menu_show(a, true);
+        return;
+    }
+    switch (a->last_state) {
+    case BJ_ST_BET:
+        if (b) {
+            pad_click(a->btn_clear);
+            return;
+        }
+        break;
+    case BJ_ST_INSURANCE:
+        if (b) {
+            pad_click(a->btn_noins);
+            return;
+        }
+        break;
+    case BJ_ST_PLAYER:
+        if (b) {
+            pad_click(a->btn_stand);
+            return;
+        }
+        if (aos_pad_pressed(&a->pad, AOS_PAD_L)) {
+            pad_click(a->btn_double);
+            return;
+        }
+        if (aos_pad_pressed(&a->pad, AOS_PAD_R)) {
+            pad_click(a->btn_split);
+            return;
+        }
+        break;
+    case BJ_ST_OVER:
+        if (b) {
+            pad_click(a->btn_rebet);
+            return;
+        }
+        break;
+    default:
+        break;
+    }
+    aos_pad_menu_step(&a->pmenu, &a->pad);
+    pad_unmark_others(a);
+}
+
+/* --------------------------------------------------------------------------
  * The timer
  * -------------------------------------------------------------------------- */
 
@@ -1322,6 +1487,10 @@ static void frame(lv_timer_t *timer)
     }
 
     tweens(a, dt);
+    pad_step(a);
+    if (a->want_exit) {
+        return;                         /* "Salir" from the pad: the next frame */
+    }
 
     if (a->banner_ms) {
         if (a->banner_ms <= dt) {
@@ -1474,12 +1643,13 @@ static void build_controls(app_t *a, lv_obj_t *root)
         int sw = cw * 58 / 100;
         a->btn_ins = make_button(a->row_ins, _("Seguro"), cx0, y_lo, sw, bh, 0x2D5DA8,
                                  mid, insure_cb, a);
-        make_button(a->row_ins, _("No"), cx0 + sw + GAP, y_lo, cw - sw - GAP, bh, 0x4A5060,
-                    mid, noins_cb, a);
+        a->btn_noins = make_button(a->row_ins, _("No"), cx0 + sw + GAP, y_lo, cw - sw - GAP,
+                                   bh, 0x4A5060, mid, noins_cb, a);
     } else {
         a->btn_ins = make_button(a->row_ins, _("Seguro"), cx0, y_hi, cw, bh, 0x2D5DA8,
                                  mid, insure_cb, a);
-        make_button(a->row_ins, _("No"), cx0, y_lo, cw, bh, 0x4A5060, mid, noins_cb, a);
+        a->btn_noins = make_button(a->row_ins, _("No"), cx0, y_lo, cw, bh, 0x4A5060, mid,
+                                   noins_cb, a);
     }
 
     /* Playing: two by two, the two that are pressed most in the lower row,
@@ -1563,9 +1733,11 @@ static void build_menu(app_t *a, lv_obj_t *root)
     a->chip_sfx  = make_toggle(c, rx, y, tw, sfx_cb, a);
     a->chip_hint = make_toggle(c, rx + tw + GAP, y, tw, hint_cb, a);
     y += 88 + 32;
-    make_button(c, _("Seguir"), rx, y, rw, BTN_H, 0x1F7A3A, &aos_inter_36, resume_cb, a);
+    a->btn_resume = make_button(c, _("Seguir"), rx, y, rw, BTN_H, 0x1F7A3A, &aos_inter_36,
+                                resume_cb, a);
     y += BTN_H + GAP;
-    make_button(c, _("Salir"), rx, y, rw, BTN_H, 0x7A1420, &aos_inter_36, exit_cb, a);
+    a->btn_exit = make_button(c, _("Salir"), rx, y, rw, BTN_H, 0x7A1420, &aos_inter_36,
+                              exit_cb, a);
     y += BTN_H + 36;
 
     lv_obj_t *note = make_label(c, _("La estrategia básica marca en dorado la jugada que sugiere."),
@@ -1743,6 +1915,9 @@ static bool view_build(app_t *a, lv_obj_t *root)
     if (a->menu_open) {
         menu_show(a, true);
     }
+    /* new buttons: the pad takes them on the next frame */
+    aos_pad_menu_clear(&a->pmenu);
+    a->pad_key = -99;
     return true;
 }
 
@@ -1780,6 +1955,7 @@ static void *blackjack_create(aos_app_t *self, lv_obj_t *root)
         return NULL;
     }
 
+    aos_pad_reset(&a->pad, lv_tick_get());
     a->timer = lv_timer_create(frame, FRAME_MS, a);
 
 #ifdef AOS_SIM_BUILTIN

@@ -33,7 +33,7 @@ round never finished.
 
 ## On the P4
 
-The whole 720 x 1280 screen, by touch alone. Upright: the rail with the
+The whole 720 x 1280 screen, by touch or with a USB gamepad. Upright: the rail with the
 menu and the bank on top, the dealer, the printed band, the player with the
 betting circle at his left, and the chips and the buttons at the bottom,
 two by two while playing (Pedir and Plantarse in the lower row, nearest the
@@ -41,6 +41,12 @@ thumb). Lying down (1280 x 720): the table on the left and every control in
 a leather panel on the right. Turning the screen rebuilds the view around
 the same game, so a hand in progress survives it. Every target is at least
 88 px and clear of the system's edge strips.
+
+With a gamepad the d-pad walks the buttons showing and A presses the
+outlined one, which starts on the usual choice (Repartir, Pedir, Otra
+mano). B is the second choice (Plantarse, Borrar, No, Apuesta), L doubles,
+R splits and START opens and closes the menu. The outline only appears
+once the pad is used.
 
 ## How it is drawn
 
