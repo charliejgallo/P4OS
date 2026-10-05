@@ -21,6 +21,7 @@
  *    on the glass fires. Touching the score (portrait) or the II button
  *    (landscape) pauses.
  *  - The pace is the service's fixed tick (30 steps a second).
+ *  - A USB gamepad plays it too ("The gamepad", below).
  *
  * The record and the switches are the same preferences as on the watch.
  */
@@ -29,6 +30,7 @@
 #include "aos_hal.h"
 #include "aos_ui.h"
 #include "aos_retro.h"
+#include "aos_pad_menu.h"
 
 #include "arkanos.h"
 #include "aos_i18n.h"
@@ -72,6 +74,14 @@ typedef struct {
     uint8_t     over_shown;
     uint8_t     won;
     uint8_t     paused_from;    /* the state the pause interrupted */
+    bool        finger;         /* a finger was on the canvas in the last step */
+
+    /* A USB gamepad (see "The gamepad"): its state, the panel's buttons it
+     * goes through, and those buttons per panel */
+    aos_pad_t   gp;
+    aos_pad_menu_t menu;
+    uint8_t     gp_run;         /* steps the d-pad has been held one way */
+    lv_obj_t   *pm_title[4], *pm_pause[4], *pm_over[3];
 
     bool        want_exit;
 } app_t;
@@ -154,6 +164,9 @@ static void overlay_hide_all(app_t *a)
             lv_obj_add_flag(panels[i], LV_OBJ_FLAG_HIDDEN);
         }
     }
+    /* the pad has no buttons to go through (an empty set also takes the
+     * outline off the one it was on) */
+    aos_pad_menu_set(&a->menu, NULL, 0, 0);
     controls_for(a, NULL);
 }
 
@@ -163,6 +176,14 @@ static void overlay_show(app_t *a, lv_obj_t *panel)
     if (panel) {
         lv_obj_remove_flag(panel, LV_OBJ_FLAG_HIDDEN);
         lv_obj_move_foreground(panel);
+        /* and the pad goes through its buttons, from the first one */
+        if (panel == a->title) {
+            aos_pad_menu_set(&a->menu, a->pm_title, 4, 0);
+        } else if (panel == a->pause) {
+            aos_pad_menu_set(&a->menu, a->pm_pause, 4, 0);
+        } else if (panel == a->over) {
+            aos_pad_menu_set(&a->menu, a->pm_over, 3, 0);
+        }
     }
     controls_for(a, panel);
 }
@@ -204,6 +225,11 @@ static lv_obj_t *make_row(lv_obj_t *parent, int gap)
     lv_obj_set_style_pad_column(r, gap, 0);
     lv_obj_remove_flag(r, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_remove_flag(r, LV_OBJ_FLAG_CLICKABLE);
+    /* room inside for the pad's outline round a button (aos_pad_menu.h),
+     * which LVGL would clip at the row's edge; the margins give it back, so
+     * the panel's layout stays the same */
+    lv_obj_set_style_pad_all(r, 12, 0);
+    lv_obj_set_style_margin_all(r, -12, 0);
     return r;
 }
 
@@ -428,6 +454,7 @@ static void build_title(app_t *a, lv_obj_t *root)
     lv_obj_t *go = make_button(p, _("JUGAR"), _("arrastra el dedo"),
                                w - 96, land ? 104 : 128, 0x0A84FF, start_cb, a);
     lv_obj_set_style_margin_top(go, land ? 4 : 12, 0);
+    a->pm_title[0] = go;
     lv_obj_set_style_margin_bottom(go, land ? 4 : 12, 0);
 
     /* How it is played, as it really is on this screen: by touch alone. */
@@ -453,7 +480,9 @@ static void build_title(app_t *a, lv_obj_t *root)
     a->chip_fps = make_chip(row, (w - 96 - 16) / 2, chip_cb, a);
 
     a->title_hi = make_label(p, _("RECORD 0"), &aos_montserrat_28, 0xFFFFFF);
-    make_button(p, _("SALIR"), NULL, 220, 68, 0xFF453A, exit_cb, a);
+    a->pm_title[1] = a->chip_sfx;
+    a->pm_title[2] = a->chip_fps;
+    a->pm_title[3] = make_button(p, _("SALIR"), NULL, 220, 68, 0xFF453A, exit_cb, a);
 }
 
 static void build_pause(app_t *a, lv_obj_t *root)
@@ -463,11 +492,14 @@ static void build_pause(app_t *a, lv_obj_t *root)
     a->pause = p;
 
     make_label(p, _("PAUSA"), &aos_montserrat_48, 0xFFFFFF);
-    make_button(p, _("SEGUIR"), NULL, w - 64, 96, 0x30D158, resume_cb, a);
+    a->pm_pause[0] = make_button(p, _("SEGUIR"), NULL, w - 64, 96, 0x30D158, resume_cb, a);
     a->chip_sfx2 = make_chip(p, w - 64, chip_cb, a);
     a->chip_fps2 = make_chip(p, w - 64, chip_cb, a);
     lv_obj_t *out = make_button(p, _("SALIR"), NULL, w - 64, 80, 0xFF453A, exit_cb, a);
     lv_obj_set_style_margin_top(out, 12, 0);
+    a->pm_pause[1] = a->chip_sfx2;
+    a->pm_pause[2] = a->chip_fps2;
+    a->pm_pause[3] = out;
 }
 
 static void build_over(app_t *a, lv_obj_t *root)
@@ -483,8 +515,9 @@ static void build_over(app_t *a, lv_obj_t *root)
     a->over_go = make_button(p, _("OTRA VEZ"), NULL, w - 64, 96, 0x30D158, green_cb, a);
     lv_obj_set_style_margin_top(a->over_go, 12, 0);
     lv_obj_t *row = make_row(p, 16);
-    make_button(row, _("MENU"), NULL, (w - 64 - 16) / 2, 80, 0x0A84FF, menu_cb, a);
-    make_button(row, _("SALIR"), NULL, (w - 64 - 16) / 2, 80, 0xFF453A, exit_cb, a);
+    a->pm_over[0] = a->over_go;
+    a->pm_over[1] = make_button(row, _("MENU"), NULL, (w - 64 - 16) / 2, 80, 0x0A84FF, menu_cb, a);
+    a->pm_over[2] = make_button(row, _("SALIR"), NULL, (w - 64 - 16) / 2, 80, 0xFF453A, exit_cb, a);
 }
 
 /* Both endings use the same panel: the title changes and so does what the
@@ -536,6 +569,7 @@ static void read_input(app_t *a)
     if (!playing(g)) {
         g->touching = 0;
         g->fire_down = 0;
+        a->finger = false;
         return;
     }
     /* a finger landing on the score (portrait) or on II (landscape) */
@@ -550,14 +584,100 @@ static void read_input(app_t *a)
     if (touching) {
         g->touch_x = (int16_t)(tx * FX_ONE + FX_ONE / 2);
         g->touch_y = (int16_t)(ty * FX_ONE + FX_ONE / 2);
-    } else if (g->touching || tapped) {
+    } else if (a->finger || tapped) {
         /* lifted, or a tap already over within one step: the ball goes.
          * Launching on the lift and not on the landing lets the thumb come
          * down, aim, and only then serve. */
         g->fire_edge = 1;
     }
+    a->finger = touching;
     g->touching = touching ? 1 : 0;
     g->fire_down = (touching || tapped) ? 1 : 0;
+}
+
+/* --------------------------------------------------------------------------
+ * The gamepad
+ *
+ * A USB pad on the board's host (aos_pad.h) plays alongside the finger. The
+ * d-pad moves the paddle, slow for the first steps so it can be placed to
+ * the pixel and then faster; the left stick moves it at a speed that
+ * follows how far it leans. A serves the ball, and with the laser fitted
+ * fires while held; START pauses. Over a panel the d-pad goes through its
+ * buttons and A presses them (aos_pad_menu.h); START on the title plays, on
+ * the pause it resumes and on the end panel it plays again, and B is back:
+ * out of the pause, or from the end panel to the menu.
+ * -------------------------------------------------------------------------- */
+
+#define PAD_DEAD        6000        /* the stick's dead zone, of 32767 */
+#define PAD_STICK_MAX   14          /* px a step with the stick all the way */
+#define PAD_DPAD_MIN    4           /* px a step on the d-pad: at first... */
+#define PAD_DPAD_MAX    11          /* ...and after a few steps held */
+
+static void pad_click(lv_obj_t *b)
+{
+    if (b && lv_obj_is_valid(b)) {
+        lv_obj_send_event(b, LV_EVENT_CLICKED, NULL);
+    }
+}
+
+static void pad_step(app_t *a)
+{
+    ak_t *g = &a->g;
+    aos_pad_t *p = &a->gp;
+
+    aos_pad_update(p, lv_tick_get());
+    /* in the background, or under the app switcher, the pad is not ours */
+    if (!p->connected || !lv_obj_is_visible(a->r->view)) {
+        return;
+    }
+    if (a->menu.n) {
+        /* a panel is up */
+        if (aos_pad_menu_step(&a->menu, p)) {
+            return;
+        }
+        bool start = aos_pad_pressed(p, AOS_PAD_START);
+        bool back = aos_pad_pressed(p, AOS_PAD_B);
+        if (a->menu.item[0] == a->pm_title[0] && start) {
+            pad_click(a->pm_title[0]);
+        } else if (a->menu.item[0] == a->pm_pause[0] && (start || back)) {
+            pad_click(a->pm_pause[0]);
+        } else if (a->menu.item[0] == a->pm_over[0]) {
+            if (start) pad_click(a->pm_over[0]);
+            else if (back) pad_click(a->pm_over[1]);
+        }
+        return;
+    }
+    if (!playing(g)) {
+        return;
+    }
+    if (aos_pad_pressed(p, AOS_PAD_START)) {
+        aos_hal_beep(700, 30);
+        pause_show(a);
+        return;
+    }
+
+    int v = 0;      /* px a step, signed */
+    if (p->x <= -PAD_DEAD || p->x >= PAD_DEAD) {
+        v = p->x * PAD_STICK_MAX / 32767;
+        a->gp_run = 0;
+    } else {
+        int dir = aos_pad_held(p, AOS_PAD_RIGHT) - aos_pad_held(p, AOS_PAD_LEFT);
+        if (dir && a->gp_run < 255) a->gp_run++;
+        if (!dir) a->gp_run = 0;
+        int sp = PAD_DPAD_MIN + a->gp_run;
+        v = dir * (sp < PAD_DPAD_MAX ? sp : PAD_DPAD_MAX);
+    }
+    /* a finger on the canvas has the last word */
+    if (v && !a->finger) {
+        g->touching = 1;
+        g->touch_x = (int16_t)(g->pad_x + v * FX_ONE);
+    }
+    if (aos_pad_pressed(p, AOS_PAD_A)) {
+        g->fire_edge = 1;       /* serves; with the laser, also a shot */
+    }
+    if (aos_pad_held(p, AOS_PAD_A)) {
+        g->fire_down = 1;
+    }
 }
 
 static void step(void *user)
@@ -574,6 +694,7 @@ static void step(void *user)
     }
 
     read_input(a);
+    pad_step(a);
 
     if (g->state == ST_PAUSE || g->state == ST_TITLE ||
         g->state == ST_OVER || g->state == ST_WIN) {
@@ -760,6 +881,7 @@ static bool arkanos_resize(aos_app_t *self, void *inst, lv_obj_t *root)
     }
 
     ak_geo_t old = ak_geo;
+    aos_pad_menu_set(&a->menu, NULL, 0, 0);     /* its buttons are about to go */
     if (a->stage) {
         lv_obj_delete(a->stage);        /* the panels go with it */
     }
