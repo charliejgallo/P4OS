@@ -362,6 +362,16 @@ void     bb_game_release(bb_game_t *g, int x, int y);
 void     bb_game_cancel(bb_game_t *g);
 void     bb_game_swap(bb_game_t *g);
 
+/* The gamepad. An angle in 1/16 of a brad (256 to the turn; 64 * 16 is
+ * straight up), clamped to the same fifteen degrees off the walls as the
+ * finger; and the shot that a release would fire. Both ignore the pad while
+ * a finger is aiming. */
+#define BB_AIM_MIN16    (11 * 16)
+#define BB_AIM_MAX16    (117 * 16)
+#define BB_AIM_UP16     (64 * 16)
+void     bb_game_aim_angle(bb_game_t *g, int ang16);
+void     bb_game_shoot(bb_game_t *g);
+
 /* the bot: aims where a decent player would, and misses now and then */
 void     bb_game_bot(bb_game_t *g, int dt_ms);
 

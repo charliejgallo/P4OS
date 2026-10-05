@@ -8,6 +8,8 @@
  *   - pushing the dirty rectangles to the screen (flush())
  *   - the LVGL screens: the title with the three modes, pause, and the result
  *   - touch: press, drag and release, which is how one aims
+ *   - a USB gamepad: the stick or the d-pad aims, A shoots, B swaps, START
+ *     pauses, and the panels' buttons are walked with the d-pad
  *   - a record per mode, the level reached, and the sound switch
  *
  * Born multilingual like Claude Jump: every visible word is an LVGL label
@@ -18,6 +20,7 @@
 #include "aos_hal.h"
 #include "aos_i18n.h"
 #include "aos_icon_ops.h"
+#include "aos_pad_menu.h"
 #include "aos_ui.h"
 
 #include "bb_art.h"
@@ -74,6 +77,14 @@ typedef struct {
     lv_obj_t   *chip_sfx, *chip_fps;
     lv_obj_t   *lbl_over_t, *lbl_over_m, *lbl_over_s, *lbl_over_b, *lbl_over_r;
     lv_obj_t   *btn_again, *lbl_again;
+
+    /* the gamepad: each panel's buttons, in the order the d-pad finds them */
+    aos_pad_t       pad;
+    aos_pad_menu_t  menu;
+    lv_obj_t       *menu_panel;     /* whose buttons the menu holds now      */
+    lv_obj_t       *pad_title[4], *pad_pause[5], *pad_over[2];
+    int16_t         pad_aim;        /* 1/16 brad, see bb_game_aim_angle()    */
+    uint16_t        pad_hold_ms;    /* how long a d-pad side has been held   */
 
     uint32_t    hi[BB_MODES];
     uint16_t    level;          /* levels: the one to play next               */
@@ -439,6 +450,7 @@ static void game_start(app_t *a, int mode)
     bb_game_t *g = &a->g;
 
     g->best = mode == MODE_LEVELS ? 0 : a->hi[mode];
+    a->pad_aim = BB_AIM_UP16;
     bb_game_start(g, mode, a->level);
     bb_bg_build(g, false);
     a->paused     = false;
@@ -666,6 +678,131 @@ static void gesture_cb(lv_event_t *e)
 }
 
 /* --------------------------------------------------------------------------
+ * The gamepad
+ *
+ * The panels go through aos_pad_menu (the d-pad walks their buttons, A
+ * clicks), with START as a second A and B as "back": resume from the pause,
+ * the title from the result. In play the stick aims by speed -a little
+ * deflection is a slow, fine turn, all of it a fast one- and the d-pad by a
+ * fine step per press that turns steadily, then faster, while it is held.
+ * A finger that is aiming wins: the pad waits until it lets go.
+ * -------------------------------------------------------------------------- */
+
+#define PAD_DEAD        8000        /* the stick's slack around the centre    */
+#define PAD_STEP16      8           /* one d-pad press: 0.7 degrees           */
+
+static void pad_tick(app_t *a, int dt)
+{
+    aos_pad_t *p = &a->pad;
+    bb_game_t *g = &a->g;
+    uint32_t now = lv_tick_get();
+
+    aos_pad_update(p, now);
+    if (!p->connected) {
+        return;
+    }
+
+    lv_obj_t *panel = g->state == GS_TITLE                ? a->title
+                    : a->paused                           ? a->pause
+                    : g->state == GS_OVER && a->over_shown ? a->over
+                                                          : NULL;
+    if (panel != a->menu_panel) {
+        /* a new panel (or none): the button that opened it is still down */
+        a->menu_panel = panel;
+        if (panel == a->title) {
+            aos_pad_menu_set(&a->menu, a->pad_title, 4, 0);
+        } else if (panel == a->pause) {
+            aos_pad_menu_set(&a->menu, a->pad_pause, 5, 0);
+        } else if (panel == a->over) {
+            aos_pad_menu_set(&a->menu, a->pad_over, 2, 0);
+        } else {
+            aos_pad_menu_clear(&a->menu);
+        }
+        a->pad_hold_ms = 0;
+        aos_pad_reset(p, now);
+        return;
+    }
+
+    if (panel) {
+        if (aos_pad_pressed(p, AOS_PAD_B)) {
+            if (panel == a->pause) {
+                overlay_hide_all(a);
+                a->paused  = false;
+                a->prev_ms = 0;
+            } else if (panel == a->over) {
+                go_title(a);
+            }
+            return;
+        }
+        if (aos_pad_pressed(p, AOS_PAD_START)) {
+            lv_obj_t *sel = aos_pad_menu_selected(&a->menu);
+            if (sel) {
+                lv_obj_send_event(sel, LV_EVENT_CLICKED, NULL);
+            }
+            return;
+        }
+        aos_pad_menu_step(&a->menu, p);
+        return;
+    }
+
+    if (g->state != GS_PLAY && g->state != GS_ENDING) {
+        return;
+    }
+    if (aos_pad_pressed(p, AOS_PAD_START)) {
+        pause_show(a);
+        return;
+    }
+    if (g->state != GS_PLAY || g->touching) {
+        return;
+    }
+    if (aos_pad_pressed(p, AOS_PAD_B)) {
+        bb_game_swap(g);
+    }
+
+    /* the stick first: past its slack the d-pad bits are the stick's too */
+    int ang = a->pad_aim;
+    bool moved = false;
+    int sx = p->x < 0 ? -p->x : p->x;
+    if (sx > PAD_DEAD) {
+        int q = (sx - PAD_DEAD) * 1024 / (32767 - PAD_DEAD);        /* 0..1024 */
+        int rate = 120 + ((q * q) >> 10) * 1600 / 1024;     /* 1/16 brad per s */
+        int d = rate * dt / 1000;
+        ang += p->x > 0 ? -(d ? d : 1) : (d ? d : 1);
+        moved = true;
+        a->pad_hold_ms = 0;
+    } else if (aos_pad_held(p, AOS_PAD_LEFT | AOS_PAD_RIGHT)) {
+        int dir = aos_pad_held(p, AOS_PAD_LEFT) ? 1 : -1;
+        if (aos_pad_pressed(p, AOS_PAD_LEFT | AOS_PAD_RIGHT)) {
+            a->pad_hold_ms = 0;
+            ang += dir * PAD_STEP16;
+        } else {
+            a->pad_hold_ms = (uint16_t)(a->pad_hold_ms + dt > 60000 ? 60000 : a->pad_hold_ms + dt);
+            if (a->pad_hold_ms > AOS_PAD_REPEAT_DELAY_MS) {
+                int rate = a->pad_hold_ms < 1200 ? 450 : 1100;
+                ang += dir * (rate * dt / 1000);
+            }
+        }
+        moved = true;
+    } else {
+        a->pad_hold_ms = 0;
+    }
+    if (aos_pad_pressed(p, AOS_PAD_UP) && p->y > -16000) {
+        /* the hat's up (not the stick's): straight up, back to the middle */
+        ang = BB_AIM_UP16;
+        moved = true;
+    }
+    ang = clampi(ang, BB_AIM_MIN16, BB_AIM_MAX16);
+    a->pad_aim = (int16_t)ang;
+
+    if (moved || (aos_pad_pressed(p, AOS_PAD_A) && !g->aiming)) {
+        bb_game_aim_angle(g, ang);
+    }
+    if (aos_pad_pressed(p, AOS_PAD_A)) {
+        bb_game_shoot(g);
+    }
+}
+
+/* --------------------------------------------------------------------------
  * The frame
  * -------------------------------------------------------------------------- */
 
@@ -714,6 +851,8 @@ static void frame(lv_timer_t *timer)
     if ((a->frames & 7) == 0) {
         g->fps10 = a->fps10;
     }
+
+    pad_tick(a, dt);
 
     if (a->banner_ms) {
         if (a->banner_ms <= dt) {
@@ -794,8 +933,8 @@ static void burbujas_hide(aos_app_t *self, void *inst)
  * Building the screens
  * -------------------------------------------------------------------------- */
 
-static void make_mode_button(app_t *a, lv_obj_t *parent, int m, int y,
-                             lv_event_cb_t cb)
+static lv_obj_t *make_mode_button(app_t *a, lv_obj_t *parent, int m, int y,
+                                  lv_event_cb_t cb)
 {
     lv_obj_t *b = lv_obj_create(parent);
     lv_obj_remove_style_all(b);
@@ -841,6 +980,7 @@ static void make_mode_button(app_t *a, lv_obj_t *parent, int m, int y,
     lv_label_set_long_mode(r, LV_LABEL_LONG_MODE_DOTS);
     lv_obj_remove_flag(r, LV_OBJ_FLAG_CLICKABLE);
     a->lbl_rec[m] = r;
+    return b;
 }
 
 static void build_title(app_t *a, lv_obj_t *root)
@@ -861,9 +1001,10 @@ static void build_title(app_t *a, lv_obj_t *root)
                                 0x8E8E93, &aos_montserrat_36, snd_cb, a);
     a->lbl_snd = lv_obj_get_child(snd, 0);
 
-    make_mode_button(a, p, MODE_CLASSIC, 232, mode0_cb);
-    make_mode_button(a, p, MODE_LEVELS,  282, mode1_cb);
-    make_mode_button(a, p, MODE_TIMED,   332, mode2_cb);
+    a->pad_title[0] = make_mode_button(a, p, MODE_CLASSIC, 232, mode0_cb);
+    a->pad_title[1] = make_mode_button(a, p, MODE_LEVELS,  282, mode1_cb);
+    a->pad_title[2] = make_mode_button(a, p, MODE_TIMED,   332, mode2_cb);
+    a->pad_title[3] = snd;
 
     /* The strip under the last button is read, not touched: how to play. */
     lv_obj_t *h = make_label(p, _("Arrastrá para apuntar y soltá para tirar. Tocá abajo para cambiar la burbuja."),
@@ -885,14 +1026,16 @@ static void build_pause(app_t *a, lv_obj_t *root)
     lv_obj_set_style_bg_opa(p, LV_OPA_80, 0);
 
     make_label(p, _("Pausa"), &aos_montserrat_64, 0xFFFFFF, 100);
-    make_button(p, _("Seguir"), 64, 162, 240, 50, 0x30D158,
-                &aos_montserrat_48, resume_cb, a);
-    make_button(p, _("Menú"), 64, 220, 240, 40, 0x0A84FF,
-                &aos_montserrat_36, menu_cb, a);
-    make_button(p, _("Salir"), 64, 268, 240, 40, 0xFF453A,
-                &aos_montserrat_36, exit_cb, a);
+    a->pad_pause[0] = make_button(p, _("Seguir"), 64, 162, 240, 50, 0x30D158,
+                                  &aos_montserrat_48, resume_cb, a);
+    a->pad_pause[1] = make_button(p, _("Menú"), 64, 220, 240, 40, 0x0A84FF,
+                                  &aos_montserrat_36, menu_cb, a);
+    a->pad_pause[2] = make_button(p, _("Salir"), 64, 268, 240, 40, 0xFF453A,
+                                  &aos_montserrat_36, exit_cb, a);
     a->chip_sfx = make_chip(p, 64, 322, 116, snd_cb, a);
     a->chip_fps = make_chip(p, 188, 322, 116, fps_cb, a);
+    a->pad_pause[3] = a->chip_sfx;
+    a->pad_pause[4] = a->chip_fps;
 }
 
 static void build_over(app_t *a, lv_obj_t *root)
@@ -911,8 +1054,9 @@ static void build_over(app_t *a, lv_obj_t *root)
     a->btn_again = make_button(p, _("Otra vez"), 64, 244, 240, 50, 0x30D158,
                                &aos_montserrat_48, again_cb, a);
     a->lbl_again = lv_obj_get_child(a->btn_again, 0);
-    make_button(p, _("Menú"), 64, 302, 240, 40, 0x0A84FF,
-                &aos_montserrat_36, menu_cb, a);
+    a->pad_over[0] = a->btn_again;
+    a->pad_over[1] = make_button(p, _("Menú"), 64, 302, 240, 40, 0x0A84FF,
+                                 &aos_montserrat_36, menu_cb, a);
 }
 
 /* --------------------------------------------------------------------------

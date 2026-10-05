@@ -9,6 +9,14 @@ with its bounces and a dashed circle shows the cell it would stick to.
 Letting go shoots; letting go below the line does not. A tap on the bottom
 strip swaps the bubble in the launcher for the one waiting in the pipe.
 
+**With a USB gamepad** the stick aims by speed (a little deflection turns
+slowly, all of it fast), the d-pad nudges the aim less than a degree a press
+and turns steadily while held, up on the d-pad points straight up again, A
+shoots, B swaps and START pauses. The guide stays up, since there is no
+finger to lift. On the title, the pause and the result the d-pad walks the
+buttons, A or START clicks and B goes back (resume, or the title). A finger
+that is aiming wins over the pad.
+
 ---
 
 ## The three modes

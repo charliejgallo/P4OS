@@ -1139,6 +1139,43 @@ void bb_game_release(bb_game_t *g, int x, int y)
     }
 }
 
+/* The gamepad aims by angle rather than by a point: 1/16 of a brad, so the
+ * d-pad can nudge it by less than a degree. Halfway between two entries of
+ * the sine table is a chord a hair shorter than 1024, which no shot notices.
+ * The guide stays up from then on: a pad player has no finger to lift. */
+void bb_game_aim_angle(bb_game_t *g, int ang16)
+{
+    if (g->state != GS_PLAY || g->touching) {
+        return;
+    }
+    ang16 = ang16 < BB_AIM_MIN16 ? BB_AIM_MIN16 : ang16 > BB_AIM_MAX16 ? BB_AIM_MAX16 : ang16;
+    int a = ang16 >> 4, f = ang16 & 15;
+    int16_t vx = (int16_t)((bb_cos(a) * (16 - f) + bb_cos(a + 1) * f) / 4);
+    int16_t vy = (int16_t)(-(bb_sin(a) * (16 - f) + bb_sin(a + 1) * f) / 4);
+    if (!g->aiming || !g->aim_ok || vx != g->aim_vx || vy != g->aim_vy) {
+        g->aim_vx = vx;
+        g->aim_vy = vy;
+        g->aiming = 1;
+        g->aim_ok = 1;
+        g->preview_dirty = 1;
+    }
+}
+
+/* What a release does, without the release: fire now, or as soon as the
+ * last one has arrived. */
+void bb_game_shoot(bb_game_t *g)
+{
+    if (g->state != GS_PLAY || g->touching || !g->aim_ok) {
+        return;
+    }
+    if (ready_to_fire(g)) {
+        fire(g);
+    } else {
+        g->queued    = 1;
+        g->queued_ms = QUEUE_MS;
+    }
+}
+
 void bb_game_cancel(bb_game_t *g)
 {
     g->touching = 0;
