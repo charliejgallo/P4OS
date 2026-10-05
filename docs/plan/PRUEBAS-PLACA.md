@@ -437,7 +437,14 @@ por el Registro del portal sin cable serie)
 - [ ] Teclado MIDI (`midi_last`, y MIDI thru con el OTG en modo teclado).
 - [ ] Arduino o adaptador CH340/CP210x/FTDI en el Terminal (`usb0`).
 - [ ] Webcam en Cámaras (en 25/27).
-- [ ] Un hub con varios dispositivos (`/usb2`, `/usb3`).
+- [x] **Hub** de 7 puertos (dos chips de 4 encadenados) en 21/23 con el
+      joystick (2026-10-04): entra en cualquier puerto y se lee. Visto: (a)
+      una vez el hub contestó STALL a GET_PORT_STATUS justo tras encender
+      sus puertos y quedó descartado hasta desenchufarlo (no se repitió en
+      ~6 conexiones más); (b) 2 de 4 veces, al resetear el puerto del
+      joystick (baja velocidad) se cayó el hub entero y volvió solo.
+      ¿Caída de tensión en los 5 V por cables? Probar con hub con fuente.
+- [ ] Varios pendrives detrás del hub (`/usb2`, `/usb3`).
 - [ ] Visto de paso: `E i2s_common: i2s_channel_disable … not enabled` al
       reabrir el códec para el sonido de las teclas; inofensivo, a limpiar.
 

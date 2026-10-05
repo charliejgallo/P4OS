@@ -28,6 +28,8 @@ host").
 - `usbh.c`: `usbh_dev_get_port_hdl()` (a child's root port) and
   `usbh_devs_addr_in_use()` (address 0 taken, in any state: a device being
   enumerated is locked, and `usbh_devs_open()` answers "not allowed").
+- `ext_hub.c`: the hub's change bitmap took byte i shifted by i bits, not
+  8 x i, which mixed up the ports of a hub with more than 7.
 - The PHYs: `usb_host_install()` still sets up only one; with both
   controllers P4OS passes `skip_phy_setup` and sets up the two itself
   (`components/aos_hal/aos_usb_p4.c`).

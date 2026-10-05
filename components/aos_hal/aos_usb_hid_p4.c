@@ -82,6 +82,7 @@ typedef struct {
     volatile bool gone, in_busy, ctrl_busy, led_busy;
     bool halted;
     int step;                   /* 0 report descriptor, 1 idle, 2 running */
+    TickType_t retry_at;        /* an IN transfer that failed is asked again then (0: none) */
     bool boot;                  /* the boot protocol's fixed layout */
     bool ids;                   /* the reports start with a report ID */
     field_t *f;
@@ -615,6 +616,13 @@ static void in_done(usb_transfer_t *t)
     }
     bool again = t->status != USB_TRANSFER_STATUS_NO_DEVICE && t->status != USB_TRANSFER_STATUS_CANCELED &&
                  !h->gone && !K.stop;
+    if (again && t->status != USB_TRANSFER_STATUS_COMPLETED) {
+        /* an error, often the device going away (its DEV_GONE comes a moment
+         * later): asked again in 50 ms by the task, not at once */
+        h->in_busy = false;
+        h->retry_at = xTaskGetTickCount() + pdMS_TO_TICKS(50);
+        return;
+    }
     h->in_busy = again && usb_host_transfer_submit(t) == ESP_OK;
 }
 
@@ -899,6 +907,13 @@ static void hid_task(void *arg)
     while (!K.stop) {
         usb_host_client_handle_events(K.client, pdMS_TO_TICKS(20));
         reap();
+        /* IN transfers that failed, asked again */
+        for (int i = 0; i < IF_MAX; i++) {
+            hid_t *h = &K.h[i];
+            if (!h->retry_at || (int32_t)(xTaskGetTickCount() - h->retry_at) < 0) continue;
+            h->retry_at = 0;
+            if (h->dev && !h->gone && h->step == 2) h->in_busy = usb_host_transfer_submit(h->in) == ESP_OK;
+        }
         /* the key held repeats */
         if (K.held_code && (int32_t)(xTaskGetTickCount() - K.held_next) >= 0) {
             key_down(K.held_code, K.held_mods);

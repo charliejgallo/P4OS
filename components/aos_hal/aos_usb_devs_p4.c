@@ -101,9 +101,13 @@ static void dev_new(uint8_t addr)
          * port when there is no parent (components/usb/P4OS.md) */
         if (!di.parent.dev_hdl) d.port = di.parent.port_num ? AOS_HAL_USB_HOST_HEADER : AOS_HAL_USB_HOST_OTG;
         else {
-            entry_t *p = by_hdl(di.parent.dev_hdl);
-            d.port = p ? p->d.port : 0;
+            /* behind hubs: up the parents to the root port (the hubs
+             * themselves are not announced to clients, so not listed) */
             d.hub_port = di.parent.port_num;
+            usb_device_info_t pi = di;
+            for (int up = 0; up < 6 && pi.parent.dev_hdl; up++)
+                if (usb_host_device_info(pi.parent.dev_hdl, &pi) != ESP_OK) break;
+            d.port = !pi.parent.dev_hdl && pi.parent.port_num ? AOS_HAL_USB_HOST_HEADER : AOS_HAL_USB_HOST_OTG;
         }
     }
     if (d.cls == 0x09) snprintf(d.uses, sizeof d.uses, "hub");

@@ -368,7 +368,8 @@ static void device_status_change_handle(ext_hub_dev_t *ext_hub_dev, const uint8_
     assert(length <= EXT_HUB_MAX_STATUS_BYTES_SIZE);
 
     for (uint32_t i = 0; i < length; i++) {
-        device_status |= (uint32_t)(data[i] << i);
+        // P4OS: each byte is 8 bits of the bitmap (ESP-IDF shifted by i, which mixed up ports past the 7th)
+        device_status |= (uint32_t)data[i] << (8 * i);
     }
 
     if (device_status) {
