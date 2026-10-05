@@ -5,6 +5,7 @@
  *   cam_rtsp.c    RTSP over TCP: Digest, SDP, interleaved RTP
  *   cam_http.c    MJPEG over HTTP (go2rtc, Frigate, ffmpeg), single JPEGs
  *                 polled (a snapshot URL), and a plain GET for Frigate's API
+ *   cam_usb.c     a webcam on the board's USB host (usb://0), MJPEG
  *   cam_depay.c   RTP payloads back into NAL units (RFC 6184) and JPEG
  *                 files (RFC 2435)
  *   cam_view.c    one camera's thread: session, decode, drop when late,
@@ -43,6 +44,8 @@ typedef struct {
 /* A URL taken apart. */
 typedef struct {
     bool rtsp;                      /* rtsp:// ; otherwise http:// */
+    bool usb;                       /* usb://N: the board's webcam N (aos_hal_uvc_*) */
+    int  usb_index;
     char host[96];
     int  port;
     char path[CAM_URL_LEN];         /* from the first '/', query included */
@@ -124,6 +127,10 @@ bool cam_rtsp_run(cam_view_t *v, const cam_t *cam, const cam_url_t *url,
  * picture and closed: the caller asks again after cam->refresh_ms. */
 bool cam_http_run(cam_view_t *v, const cam_t *cam, const cam_url_t *url,
                   char *why, size_t why_len, bool *polled);
+
+/* A webcam on the board's USB host: its MJPEG frames, until stop or until it
+ * is unplugged. */
+bool cam_usb_run(cam_view_t *v, const cam_t *cam, const cam_url_t *url, char *why, size_t why_len);
 
 /* A whole GET into buf (NUL-terminated), for Frigate's API and pictures.
  * Returns the HTTP status (200...) with *len set, or < 0 (AOS_TCP_ERR_*).

@@ -205,3 +205,8 @@ Foto JPEG	JPEG photo
 
 #: apps/camaras/main/camaras.c:1148
   ·  audio sin reproducir	  ·  audio not played
+La cámara USB no está conectada	The USB camera is not connected
+La cámara USB no arrancó	The USB camera did not start
+Sin memoria para la cámara	No memory for the camera
+Se desenchufó la cámara USB	The USB camera was unplugged
+La cámara USB no manda imagen	The USB camera sends no picture

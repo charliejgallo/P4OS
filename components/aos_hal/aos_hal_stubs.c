@@ -924,6 +924,21 @@ __attribute__((weak)) int aos_hal_usb_serial_write(int h, const void *buf, int l
 __attribute__((weak)) void aos_hal_usb_serial_close(int h)
 { }
 
+__attribute__((weak)) int aos_hal_uvc_count(void)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_uvc_info(int index, char *name, size_t n, uint16_t (*sizes)[2], int max, int *nsizes)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_uvc_start(int index, int w, int h)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) void aos_hal_uvc_stop(void)
+{ }
+
+__attribute__((weak)) int aos_hal_uvc_frame(uint8_t *buf, int max, uint32_t *seq)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) const char * aos_hal_device_name(void)
 { return ""; }
 

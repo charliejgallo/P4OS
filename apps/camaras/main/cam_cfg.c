@@ -75,12 +75,15 @@ const char *cam_cfg_path(void)
 
 uint32_t cam_cfg_stamp(void)
 {
+    /* the webcams on the board's USB host count too: one plugged in or out
+     * reloads the list like a changed file */
+    uint32_t usb = (uint32_t)aos_hal_uvc_count() * 0x9E3779B9u;
     const char *p = cam_cfg_path();
     struct stat st;
     if (!p || stat(p, &st) != 0) {
-        return 0;
+        return usb;
     }
-    return (uint32_t)st.st_size * 2654435761u ^ (uint32_t)st.st_mtime;
+    return ((uint32_t)st.st_size * 2654435761u ^ (uint32_t)st.st_mtime) ^ usb;
 }
 
 static char *trim(char *s)
@@ -197,6 +200,14 @@ bool cam_cfg_load(cam_cfg_t *cfg)
             n++;
         }
     }
+    /* and the webcams on the board's USB host, while they are plugged in */
+    for (int i = 0; i < aos_hal_uvc_count() && n < CAM_MAX; i++) {
+        cam_t *c = &cfg->cams[n];
+        memset(c, 0, sizeof *c);
+        if (!aos_hal_uvc_info(i, c->name, sizeof c->name, NULL, 0, NULL)) break;
+        snprintf(c->url, sizeof c->url, "usb://%d", i);
+        n++;
+    }
     cfg->count = n;
     return true;
 }
@@ -205,6 +216,11 @@ bool cam_url_parse(const char *url, cam_url_t *out)
 {
     memset(out, 0, sizeof(*out));
     const char *p;
+    if (strncmp(url, "usb://", 6) == 0) {
+        out->usb = true;
+        out->usb_index = atoi(url + 6);
+        return true;
+    }
     if (strncmp(url, "rtsp://", 7) == 0) {
         out->rtsp = true;
         out->port = 554;

@@ -417,9 +417,22 @@ por el Registro del portal sin cable serie)
       en los dos.
 - [x] Pasar el host de 21/23 a 25/27 con el pendrive montado reiniciaba la
       placa (assert en `hub_root_stop`): arreglado, probado.
-- [ ] Un hub con varios pendrives (`/usb2`, `/usb3`).
-- [ ] Escribir en el pendrive desde el portal (no se probó: es un pendrive
-      con datos del usuario).
+- [x] Escribir en el pendrive: 4 MB por el portal, leídos de vuelta
+      idénticos (SHA-256) y borrados (2026-10-04, con permiso del usuario).
+- [x] **Los dos puertos a la vez** (2026-10-04, copia propia de la
+      librería host en `components/usb`): teclado Chicony en 21/23 y el
+      Kingston en 25/27, el pendrive a 7,5 MB/s con el teclado puesto, y los
+      dos enchufados desde el arranque (el segundo espera la dirección 0).
+- [x] Teclado por su descriptor HID: sus dos interfaces (teclado; teclas
+      multimedia y de sistema) en la lista de dispositivos.
+- [ ] Escribir con el teclado físico en un campo del sistema y en Notas;
+      distribución latinoamericana (ñ, tildes, @), multimedia (volumen).
+- [ ] Mouse (puntero, rueda, clic derecho = atrás).
+- [ ] Gamepad/joystick (`/api/usb` `gamepads` en vivo).
+- [ ] Teclado MIDI (`midi_last`, y MIDI thru con el OTG en modo teclado).
+- [ ] Arduino o adaptador CH340/CP210x/FTDI en el Terminal (`usb0`).
+- [ ] Webcam en Cámaras (en 25/27).
+- [ ] Un hub con varios dispositivos (`/usb2`, `/usb3`).
 - [ ] Visto de paso: `E i2s_common: i2s_channel_disable … not enabled` al
       reabrir el códec para el sonido de las teclas; inofensivo, a limpiar.
 

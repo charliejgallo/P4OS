@@ -205,3 +205,8 @@ Foto JPEG	JPEG-Foto
 
 #: apps/camaras/main/camaras.c:1148
   ·  audio sin reproducir	  ·  Audio nicht abgespielt
+La cámara USB no está conectada	Die USB-Kamera ist nicht angeschlossen
+La cámara USB no arrancó	Die USB-Kamera ist nicht gestartet
+Sin memoria para la cámara	Kein Speicher für die Kamera
+Se desenchufó la cámara USB	Die USB-Kamera wurde abgesteckt
+La cámara USB no manda imagen	Die USB-Kamera sendet kein Bild

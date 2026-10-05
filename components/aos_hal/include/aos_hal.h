@@ -1910,6 +1910,20 @@ int  aos_hal_usb_serial_read(int h, void *buf, int len, int timeout_ms);
 int  aos_hal_usb_serial_write(int h, const void *buf, int len);
 void aos_hal_usb_serial_close(int h);
 
+/* P4OS: webcams on the host (aos_usb_uvc_p4.c, USB Video Class). Listed
+ * while plugged in, with the MJPEG sizes each declares; one streams at a
+ * time, MJPEG at the size asked for (or the largest below it). The newest
+ * frame is a whole JPEG for aos_hal_jpeg_decode: frame() copies it when it
+ * is newer than *seq (and updates *seq), 0 when there is none newer, -1
+ * when the camera is not streaming (stopped, or unplugged). On pins 21/23
+ * (Full Speed) only small sizes get through; 25/27 is High Speed. A start
+ * of the camera already streaming joins it; each start wants its stop. */
+int  aos_hal_uvc_count(void);
+bool aos_hal_uvc_info(int index, char *name, size_t n, uint16_t (*sizes)[2], int max, int *nsizes);
+bool aos_hal_uvc_start(int index, int w, int h);
+void aos_hal_uvc_stop(void);
+int  aos_hal_uvc_frame(uint8_t *buf, int max, uint32_t *seq);
+
 /* mDNS on a network interface of somebody else's (the USB one): the watch
  * answers "amoledos.local" there too, with that interface's address. The
  * argument is an esp_netif_t*, kept opaque so this header stays free of

@@ -22,18 +22,29 @@
   warning away. TLS 1.2 with AES-GCM first. On untrusted networks plain
   HTTP redirects there; the session cookie is `Secure` over HTTPS.
 
-**USB host: pendrives**
-- Settings, USB, Pendrives: a switch of its own, beside the OTG
-  connector's mode and remembered across restarts. Pendrives on the 40-pin
-  header (5 V from pin 1) are mounted at `/usb` (FAT32), through ESP-IDF's
-  USB Host Library and `usb_host_msc`, on one of two ports: pins 21/23, the
-  P4's second, Full-Speed controller, moved off GPIO26 (the backlight) onto
-  GPIO24/25, which works while the OTG connector is a keyboard or a disk;
-  or pins 25/27, the OTG connector's High-Speed lines: 7.4 MB/s with wires
-  under 15 cm (with 70 cm the port reset failed).
-- Hubs: up to three pendrives, at `/usb`, `/usb2` and `/usb3`.
-- The portal shows each one as a folder; `GET/POST /api/usb` (`mode`,
-  `host`, `pins`, `pendrives`).
+**USB host**
+- Settings, USB, USB host: a switch of its own, beside the OTG connector's
+  mode and remembered across restarts. Devices go on the 40-pin header
+  (5 V from pin 1), on pins 21/23 (the P4's second, Full-Speed controller,
+  moved off GPIO26, the backlight, onto GPIO24/25: it works while the OTG
+  connector is a keyboard or a disk), on 25/27 (the OTG connector's
+  High-Speed lines: 7.4 MB/s from a pendrive with wires under 15 cm; with
+  70 cm the port reset failed), or on both at once: P4OS carries its own
+  copy of ESP-IDF's host library (`components/usb`) that drives the two
+  controllers as two root ports. Hubs too.
+- Every device is listed in Settings and `/api/usb`, with what the board
+  does with it, also the ones nothing takes.
+- Pendrives (FAT32) at `/usb`, `/usb2`, `/usb3`: Files and the portal.
+- Keyboards (any, by their HID report descriptor; Latin American or US
+  layout, dead-key accents, Caps Lock's LED) type into the open text
+  field, and Notas; media keys work anywhere; mice move a pointer (the
+  wheel scrolls, right is back); gamepads and joysticks for games
+  (`aos_hal_hid_gamepad_get`).
+- MIDI keyboards and controllers (`aos_hal_midi_read`/`_send`, and MIDI
+  thru to the computer).
+- USB serial: Arduinos and CH34x, CP210x, FTDI adapters as ports `usb0`,
+  `usb1` of the Terminal.
+- Webcams (MJPEG) as cameras of the Cameras app while plugged in.
 
 **Bluetooth**
 - The board asks for encryption only when the phone or the computer has not

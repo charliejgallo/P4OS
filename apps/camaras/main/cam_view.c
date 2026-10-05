@@ -476,7 +476,8 @@ static void cam_thread(void *arg)
         v->jpeg_in_len = 0;
         v->have_sps = false;
         bool polled = false;
-        bool ok = v->url.rtsp ? cam_rtsp_run(v, &v->cam, &v->url, why, sizeof(why))
+        bool ok = v->url.usb  ? cam_usb_run(v, &v->cam, &v->url, why, sizeof(why))
+                : v->url.rtsp ? cam_rtsp_run(v, &v->cam, &v->url, why, sizeof(why))
                               : cam_http_run(v, &v->cam, &v->url, why, sizeof(why), &polled);
         if (v->url.rtsp) {
             close_decoders(v);      /* the next session starts at a keyframe anyway */
