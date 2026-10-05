@@ -132,6 +132,7 @@ struct app {
     uint32_t    touch_seq;
     bool        touch_lift;         /* ignore fingers until all have lifted   */
     aos_pad_t   pad;                /* a USB gamepad, read once per tick      */
+    bool        pad_analog;         /* its stick has been seen half way: analog */
     aos_pad_menu_t pmenu;           /* the panel showing's buttons, for it    */
     bool        autoplay;           /* the bot drives (simulator switch)     */
     int8_t      dev_go;             /* turbo_dev.txt "go N": that stage first */

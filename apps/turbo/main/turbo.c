@@ -1448,13 +1448,18 @@ static void touch_poll(app_t *a, int dt_ms)
     /* the pad: A the gas and B the brake; the stick past its dead zone is
      * the wheel turned as far as the stick is pushed, a little gentler near
      * the middle and by the sensitivity; the d-pad (or a stick inside the
-     * dead zone) turns it like the arrows, whatever the setting */
+     * dead zone) turns it gradually, whatever the setting.
+     * Many cheap pads report their d-pad as the X/Y axes, all or nothing,
+     * and no hat: taken as a stick that would be full lock at a touch. So
+     * the axes are a stick only once they have been seen part way. */
     bool pad_left = false, pad_right = false;
+    if (!a->pad.connected) a->pad_analog = false;
     if (live && a->pad.connected) {
         if (aos_pad_held(&a->pad, AOS_PAD_A)) gas = true;
         if (aos_pad_held(&a->pad, AOS_PAD_B)) brake = true;
-        int sx = a->pad.x;
-        if (sx > PAD_DEAD || sx < -PAD_DEAD) {
+        int sx = a->pad.x, ax = sx < 0 ? -sx : sx;
+        if (ax > 8000 && ax < 28000) a->pad_analog = true;
+        if (a->pad_analog && ax > PAD_DEAD) {
             static const float gain[3] = { 0.8f, 1.0f, 1.25f };
             float v = (float)(sx > 0 ? sx - PAD_DEAD : sx + PAD_DEAD) / (float)(32767 - PAD_DEAD);
             steering = true;
@@ -1466,11 +1471,15 @@ static void touch_poll(app_t *a, int dt_ms)
     }
     float dt = (float)dt_ms / 1000.0f;
     if ((a->ctl == CTL_ARROWS || pad_left || pad_right) && !steering) {
-        /* the arrows turn the wheel at a steady rate, faster back to centre */
+        /* the arrows turn the wheel at a steady rate, faster back to centre;
+         * the pad's d-pad at about half that (a thumb holds it longer than
+         * a finger holds an arrow, and it was too sudden) */
         static const float rate[3] = { 3.0f, 4.5f, 6.5f };
+        static const float pad_rate[3] = { 1.4f, 2.0f, 2.8f };
         bool tl = left || pad_left, tr = right || pad_right;
         float target = tl == tr ? 0.0f : (tl ? -1.0f : 1.0f);
-        float r = rate[a->sens] * (target == 0.0f ? 1.6f : 1.0f);
+        bool by_pad = (pad_left || pad_right) && !left && !right;
+        float r = (by_pad ? pad_rate : rate)[a->sens] * (target == 0.0f ? 1.6f : 1.0f);
         float d = target - steer, stp = r * dt;
         steer += d > stp ? stp : (d < -stp ? -stp : d);
     } else if (!steering) {
