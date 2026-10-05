@@ -1,0 +1,864 @@
+# amoledos-lang 1   es -> en
+# aos.eeprom.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/eeprom/main/ee_drv.c:204
+El chip no habilita la escritura (WEL no sube): mirá /WP y /HOLD.	The chip does not enable writing (WEL stays low): check /WP and /HOLD.
+
+#: apps/eeprom/main/ee_drv.c:348
+No hay un puerto %s en modules.txt.	There is no port %s in modules.txt.
+
+#: apps/eeprom/main/ee_drv.c:352
+El GPIO%d lo tiene %s: soltalo ahí primero.	GPIO%d is held by %s: release it there first.
+
+#: apps/eeprom/main/ee_drv.c:354
+No se pudo abrir %s (el registro dice por qué).	Could not open %s (the log says why).
+
+#: apps/eeprom/main/ee_drv.c:380
+Nadie contesta en 0x%02X de %s: mirá el cableado, A0-A2 y los pull-ups.	Nobody answers at 0x%02X on %s: check the wiring, A0-A2 and the pull-ups.
+
+#: apps/eeprom/main/ee_drv.c:398
+La flash no da su JEDEC id (%02X %02X %02X): mirá el cableado y /HOLD.	The flash gives no JEDEC id (%02X %02X %02X): check the wiring and /HOLD.
+
+#: apps/eeprom/main/ee_drv.c:402
+#: apps/eeprom/main/ee_drv.c:663
+Nadie contesta en el SPI: MISO queda en 1. Mirá el cableado, /CS y /HOLD.	Nobody answers on SPI: MISO stays at 1. Check the wiring, /CS and /HOLD.
+
+#: apps/eeprom/main/ee_drv.c:413
+%s y %s están en el mismo GPIO%d.	%s and %s are on the same GPIO%d.
+
+#: apps/eeprom/main/ee_drv.c:421
+El GPIO%d (%s) lo tiene %s.	GPIO%d (%s) is held by %s.
+
+#: apps/eeprom/main/ee_drv.c:422
+El GPIO%d (%s) no se puede usar.	GPIO%d (%s) cannot be used.
+
+#: apps/eeprom/main/ee_drv.c:439
+Nadie contesta: DO no baja después de la dirección. Mirá el cableado y CS.	Nobody answers: DO does not go low after the address. Check the wiring and CS.
+
+#: apps/eeprom/main/ee_drv.c:522
+Abriendo…	Opening…
+
+#: apps/eeprom/main/ee_drv.c:523
+Leyendo	Reading
+
+#: apps/eeprom/main/ee_drv.c:524
+Copia de lo que había	Copy of what was there
+
+#: apps/eeprom/main/ee_drv.c:525
+Escribiendo y verificando	Writing and verifying
+
+#: apps/eeprom/main/ee_drv.c:526
+Verificando	Verifying
+
+#: apps/eeprom/main/ee_drv.c:527
+Guardando la versión	Saving the version
+
+#: apps/eeprom/main/ee_drv.c:528
+Buscando	Searching
+
+#: apps/eeprom/main/ee_drv.c:551
+Nadie contesta entre 0x50 y 0x57 de %s. Mirá el cableado, los pull-ups de SDA y SCL y los 3V3.	Nobody answers between 0x50 and 0x57 on %s. Check the wiring, the SDA and SCL pull-ups and the 3V3.
+
+#: apps/eeprom/main/ee_drv.c:555
+Responden: %s	Answering: %s
+
+#: apps/eeprom/main/ee_drv.c:567
+No se pudo leer.	Could not read.
+
+#: apps/eeprom/main/ee_drv.c:569
+El principio está todo en 0x%02X: no se sabe leyendo si toma 1 o 2 bytes de dirección. Elegí el chip; la prueba de tamaño lo confirma.	The start is all 0x%02X: reading cannot tell whether it takes 1 or 2 address bytes. Pick the chip; the size test confirms it.
+
+#: apps/eeprom/main/ee_drv.c:592
+Toma 1 byte de dirección (24xx01 a 24xx16).	Takes 1 address byte (24xx01 to 24xx16).
+
+#: apps/eeprom/main/ee_drv.c:594
+Toma 2 bytes de dirección (24xx32 o más grande).	Takes 2 address bytes (24xx32 or bigger).
+
+#: apps/eeprom/main/ee_drv.c:608
+El tamaño no se sabe leyendo (el principio es todo igual): probá la prueba de tamaño.	Reading cannot tell the size (the start is all the same): try the size test.
+
+#: apps/eeprom/main/ee_drv.c:614
+#: apps/eeprom/main/ee_drv.c:708
+#: apps/eeprom/main/ee_drv.c:796
+Da la vuelta a los %s: un %s.	Wraps around at %s: a %s.
+
+#: apps/eeprom/main/ee_drv.c:643
+Una flash: JEDEC %02X %02X %02X (%s).	A flash: JEDEC %02X %02X %02X (%s).
+
+#: apps/eeprom/main/ee_drv.c:643
+fabricante desconocido	unknown maker
+
+#: apps/eeprom/main/ee_drv.c:650
+Tamaño por el id: %s.	Size from the id: %s.
+
+#: apps/eeprom/main/ee_drv.c:652
+Es de más de 16 MB: con 3 bytes de dirección se ven los primeros 16.	It is over 16 MB: with 3 address bytes only the first 16 are seen.
+
+#: apps/eeprom/main/ee_drv.c:658
+Protegida: estado 0x%02X (BP2-BP0 = %d).	Protected: status 0x%02X (BP2-BP0 = %d).
+
+#: apps/eeprom/main/ee_drv.c:669
+Una EEPROM 25xx: estado 0x%02X.	A 25xx EEPROM: status 0x%02X.
+
+#: apps/eeprom/main/ee_drv.c:670
+Protegida: BP1 BP0 = %d%d.	Protected: BP1 BP0 = %d%d.
+
+#: apps/eeprom/main/ee_drv.c:675
+Firma 0x29: un 25xx1024.	Signature 0x29: a 25xx1024.
+
+#: apps/eeprom/main/ee_drv.c:687
+Está todo en 0x%02X: el tamaño no se sabe leyendo. Elegí el chip; la prueba de tamaño lo confirma.	It is all 0x%02X: reading cannot tell the size. Pick the chip; the size test confirms it.
+
+#: apps/eeprom/main/ee_drv.c:692
+No se entiende cuántos bytes de dirección toma.	Cannot tell how many address bytes it takes.
+
+#: apps/eeprom/main/ee_drv.c:693
+Toma %d byte(s) de dirección.	Takes %d address byte(s).
+
+#: apps/eeprom/main/ee_drv.c:715
+Nadie contesta: DO no baja después de la dirección. Mirá el cableado, CS y que DO tenga pull-up.	Nobody answers: DO does not go low after the address. Check the wiring, CS, and that DO has a pull-up.
+
+#: apps/eeprom/main/ee_drv.c:724
+DO baja después de %d bits de dirección.	DO goes low after %d address bits.
+
+#: apps/eeprom/main/ee_drv.c:738
+Es un %s o un %s: el principio es todo igual y no se distinguen leyendo.	It is a %s or a %s: the start is all the same and reading cannot tell them apart.
+
+#: apps/eeprom/main/ee_drv.c:742
+Un %s en x%d (ORG a %s).	A %s at x%d (ORG to %s).
+
+#: apps/eeprom/main/ee_drv.c:745
+No es ninguno de la tabla.	It is none of the table.
+
+#: apps/eeprom/main/ee_drv.c:767
+No hace falta: la flash dice su tamaño en el JEDEC id y la 93xx en la dirección. Usá Detectar.	Not needed: a flash tells its size in the JEDEC id and a 93xx in its address. Use Detect.
+
+#: apps/eeprom/main/ee_drv.c:773
+No se pudo leer el byte 0.	Could not read byte 0.
+
+#: apps/eeprom/main/ee_drv.c:788
+No se pudo escribir el byte 0: ¿WP está a 3V3?	Could not write byte 0: is WP at 3V3?
+
+#: apps/eeprom/main/ee_drv.c:797
+El byte 0 volvió a 0x%02X.	Byte 0 is back to 0x%02X.
+
+#: apps/eeprom/main/ee_drv.c:798
+¡Ojo! El byte 0 no volvió a 0x%02X: escribilo a mano.	Careful! Byte 0 did not go back to 0x%02X: write it by hand.
+
+#: apps/eeprom/main/ee_drv.c:816
+desde el portal	from the portal
+
+#: apps/eeprom/main/ee_drv.c:828
+No contestó en la dirección 0x%X.	No answer at address 0x%X.
+
+#: apps/eeprom/main/ee_drv.c:830
+Lectura cancelada.	Read cancelled.
+
+#: apps/eeprom/main/ee_drv.c:838
+Leídos %s.	Read %s.
+
+#: apps/eeprom/main/ee_drv.c:839
+Sin tarjeta: no se guardó la versión.	No card: the version was not saved.
+
+#: apps/eeprom/main/ee_drv.c:840
+No se pudo guardar la versión en la tarjeta.	Could not save the version on the card.
+
+#: apps/eeprom/main/ee_drv.c:841
+Igual a la última versión: no se guardó otra.	Same as the last version: no new one saved.
+
+#: apps/eeprom/main/ee_drv.c:848
+Sin tarjeta no se escribe: no habría dónde guardar la copia de lo que había.	No writing without a card: there would be nowhere to keep a copy of what was there.
+
+#: apps/eeprom/main/ee_drv.c:854
+Está protegida (estado 0x%02X): sacale la protección en la pestaña Chip. No se escribió nada.	It is protected (status 0x%02X): remove the protection in the Chip tab. Nothing was written.
+
+#: apps/eeprom/main/ee_drv.c:860
+No hay memoria.	Out of memory.
+
+#: apps/eeprom/main/ee_drv.c:867
+#: apps/eeprom/main/ee_drv.c:880
+No se pudo guardar la copia en la tarjeta: no se escribió nada.	Could not save the copy on the card: nothing was written.
+
+#: apps/eeprom/main/ee_drv.c:873
+La copia falló en 0x%X: no se escribió nada.	The copy failed at 0x%X: nothing was written.
+
+#: apps/eeprom/main/ee_drv.c:877
+Cancelado antes de escribir.	Cancelled before writing.
+
+#: apps/eeprom/main/ee_drv.c:879
+copia antes de escribir	copy before writing
+
+#: apps/eeprom/main/ee_drv.c:886
+No se pudo releer la copia: no se escribió nada.	Could not read the copy back: nothing was written.
+
+#: apps/eeprom/main/ee_drv.c:903
+No se pudo releer la copia.	Could not read the copy back.
+
+#: apps/eeprom/main/ee_drv.c:915
+No se pudo escribir en 0x%X.	Could not write at 0x%X.
+
+#: apps/eeprom/main/ee_drv.c:916
+La copia de antes está en Versiones (%s).	The copy from before is in Versions (%s).
+
+#: apps/eeprom/main/ee_drv.c:923
+Cancelado a mitad: quedó escrito hasta 0x%X. La copia de antes está en Versiones.	Cancelled halfway: written up to 0x%X. The copy from before is in Versions.
+
+#: apps/eeprom/main/ee_drv.c:928
+No se pudo releer 0x%X para verificar.	Could not read 0x%X back to verify.
+
+#: apps/eeprom/main/ee_drv.c:932
+No verificó en 0x%X: el chip tiene 0x%02X y debería 0x%02X.	Verify failed at 0x%X: the chip holds 0x%02X and should hold 0x%02X.
+
+#: apps/eeprom/main/ee_drv.c:933
+¿WP está a 3V3? Para escribir va a GND.	Is WP at 3V3? For writing it goes to GND.
+
+#: apps/eeprom/main/ee_drv.c:947
+El chip ya tenía eso: no hizo falta escribir nada.	The chip already held that: nothing needed writing.
+
+#: apps/eeprom/main/ee_drv.c:948
+Escrito 1 sector y verificado.	1 sector written and verified.
+
+#: apps/eeprom/main/ee_drv.c:949
+Escrita 1 palabra y verificada.	1 word written and verified.
+
+#: apps/eeprom/main/ee_drv.c:950
+Escrita 1 página y verificada.	1 page written and verified.
+
+#: apps/eeprom/main/ee_drv.c:951
+Escritos %u sectores y verificados.	%u sectors written and verified.
+
+#: apps/eeprom/main/ee_drv.c:952
+Escritas %u palabras y verificadas.	%u words written and verified.
+
+#: apps/eeprom/main/ee_drv.c:953
+Escritas %u páginas y verificadas.	%u pages written and verified.
+
+#: apps/eeprom/main/ee_drv.c:964
+#: apps/eeprom/main/ee_drv.c:974
+Esta memoria no tiene registro de estado.	This memory has no status register.
+
+#: apps/eeprom/main/ee_drv.c:968
+Estado 0x%02X.	Status 0x%02X.
+
+#: apps/eeprom/main/ee_drv.c:983
+No cambió: el estado quedó en 0x%02X. Con WPEN puesto, /WP tiene que estar a 3V3.	It did not change: the status stayed 0x%02X. With WPEN set, /WP must be at 3V3.
+
+#: apps/eeprom/main/ee_drv.c:987
+Listo: estado 0x%02X.	Done: status 0x%02X.
+
+#: apps/eeprom/main/ee_pg_chip.c:79
+#: apps/eeprom/main/ee_pg_chip.c:368
+#: apps/eeprom/main/eeprom.c:56
+Chip	Chip
+
+#: apps/eeprom/main/ee_pg_chip.c:113
+modules.txt no tiene puertos de esa clase	modules.txt has no ports of that kind
+
+#: apps/eeprom/main/ee_pg_chip.c:114
+#: apps/eeprom/main/ee_pg_chip.c:387
+#: apps/eeprom/main/ee_pg_chip.c:399
+Puerto	Port
+
+#: apps/eeprom/main/ee_pg_chip.c:128
+sin pines de dirección	no address pins
+
+#: apps/eeprom/main/ee_pg_chip.c:151
+#: apps/eeprom/main/ee_pg_chip.c:391
+Dirección	Address
+
+#: apps/eeprom/main/ee_pg_chip.c:177
+El del puerto	The port's own
+
+#: apps/eeprom/main/ee_pg_chip.c:178
+en modules.txt	in modules.txt
+
+#: apps/eeprom/main/ee_pg_chip.c:187
+#: apps/eeprom/main/ee_pg_wire.c:103
+#: apps/eeprom/main/ee_pg_wire.c:108
+#: apps/eeprom/main/ee_pg_wire.c:110
+pata	pin
+
+#: apps/eeprom/main/ee_pg_chip.c:198
+#: apps/eeprom/main/ee_pg_chip.c:403
+Chip select	Chip select
+
+#: apps/eeprom/main/ee_pg_chip.c:225
+#: apps/eeprom/main/ee_pg_chip.c:405
+Reloj	Clock
+
+#: apps/eeprom/main/ee_pg_chip.c:242
+#: apps/eeprom/main/ee_pg_chip.c:255
+#: apps/eeprom/main/ee_pg_chip.c:290
+#: apps/eeprom/main/ee_pg_mem.c:495
+Hay un trabajo en curso	A job is running
+
+#: apps/eeprom/main/ee_pg_chip.c:243
+Buscando…	Searching…
+
+#: apps/eeprom/main/ee_pg_chip.c:249
+Probando…	Testing…
+
+#: apps/eeprom/main/ee_pg_chip.c:256
+Prueba de tamaño	Size test
+
+#: apps/eeprom/main/ee_pg_chip.c:257
+Escribe dos marcas en el byte 0 y mira dónde da la vuelta la memoria; al final vuelve a poner el byte que estaba. Con WP a 3V3 no puede escribir.	Writes two marks into byte 0 and looks where the memory wraps around; at the end it puts the old byte back. With WP at 3V3 it cannot write.
+
+#: apps/eeprom/main/ee_pg_chip.c:258
+Probar	Test
+
+#: apps/eeprom/main/ee_pg_chip.c:302
+Nada	Nothing
+
+#: apps/eeprom/main/ee_pg_chip.c:302
+¼ de arriba	Upper ¼
+
+#: apps/eeprom/main/ee_pg_chip.c:302
+½ de arriba	Upper ½
+
+#: apps/eeprom/main/ee_pg_chip.c:302
+Toda	All
+
+#: apps/eeprom/main/ee_pg_chip.c:310
+Proteger: %s. Lo protegido no se puede escribir hasta sacarlo.	Protect: %s. What is protected cannot be written until it is removed.
+
+#: apps/eeprom/main/ee_pg_chip.c:311
+#: apps/eeprom/main/eeprom.c:410
+Protección	Protection
+
+#: apps/eeprom/main/ee_pg_chip.c:311
+#: apps/eeprom/main/ee_pg_chip.c:333
+Cambiar	Change
+
+#: apps/eeprom/main/ee_pg_chip.c:321
+Bloques protegidos (BP1 BP0)	Protected blocks (BP1 BP0)
+
+#: apps/eeprom/main/ee_pg_chip.c:328
+Leé el estado primero	Read the status first
+
+#: apps/eeprom/main/ee_pg_chip.c:330
+WPEN	WPEN
+
+#: apps/eeprom/main/ee_pg_chip.c:331
+Con WPEN puesto, la pata /WP en bajo traba el registro de estado.	With WPEN set, the /WP pin held low locks the status register.
+
+#: apps/eeprom/main/ee_pg_chip.c:332
+Sin WPEN, la pata /WP no traba el registro de estado.	Without WPEN, the /WP pin does not lock the status register.
+
+#: apps/eeprom/main/ee_pg_chip.c:341
+#: apps/eeprom/main/ee_pg_chip.c:474
+Quitar protección	Remove protection
+
+#: apps/eeprom/main/ee_pg_chip.c:341
+Pone en 0 el registro de estado de la flash: se puede escribir toda.	Sets the flash's status register to 0: all of it becomes writable.
+
+#: apps/eeprom/main/ee_pg_chip.c:342
+Quitar	Remove
+
+#: apps/eeprom/main/ee_pg_chip.c:347
+#: apps/eeprom/main/ee_pg_mem.c:434
+sin leer	not read
+
+#: apps/eeprom/main/ee_pg_chip.c:349
+ (protegida)	 (protected)
+
+#: apps/eeprom/main/ee_pg_chip.c:361
+MEMORIA	MEMORY
+
+#: apps/eeprom/main/ee_pg_chip.c:371
+%s. Páginas de 256 B, se borra por sectores de 4 KB.	%s. 256 B pages, erased in 4 KB sectors.
+
+#: apps/eeprom/main/ee_pg_chip.c:373
+%s. Palabras de 8 o 16 bits según ORG.	%s. 8 or 16 bit words, as ORG says.
+
+#: apps/eeprom/main/ee_pg_chip.c:375
+%s. Página de %u B, escritura de %u ms.	%s. %u B page, %u ms write.
+
+#: apps/eeprom/main/ee_pg_chip.c:382
+CONEXIÓN	CONNECTION
+
+#: apps/eeprom/main/ee_pg_chip.c:401
+del puerto	the port's
+
+#: apps/eeprom/main/ee_pg_chip.c:408
+modo	mode
+
+#: apps/eeprom/main/ee_pg_chip.c:417
+x8 (ORG a GND)	x8 (ORG to GND)
+
+#: apps/eeprom/main/ee_pg_chip.c:417
+x16 (ORG a 3V3)	x16 (ORG to 3V3)
+
+#: apps/eeprom/main/ee_pg_chip.c:425
+DETECTAR	DETECT
+
+#: apps/eeprom/main/ee_pg_chip.c:430
+Detectar	Detect
+
+#: apps/eeprom/main/ee_pg_chip.c:432
+Probar tamaño	Size test
+
+#: apps/eeprom/main/ee_pg_chip.c:434
+Busca quién responde entre 0x50 y 0x57 y, leyendo, cuántos bytes de dirección toma y dónde da la vuelta.	Looks for who answers between 0x50 and 0x57 and, by reading, how many address bytes it takes and where it wraps around.
+
+#: apps/eeprom/main/ee_pg_chip.c:435
+Pide el JEDEC id: fabricante y tamaño.	Asks for the JEDEC id: maker and size.
+
+#: apps/eeprom/main/ee_pg_chip.c:436
+Lee el estado, la firma del 25xx1024 y, leyendo, los bytes de dirección y dónde da la vuelta.	Reads the status, the 25xx1024's signature and, by reading, the address bytes and where it wraps around.
+
+#: apps/eeprom/main/ee_pg_chip.c:437
+Cuenta los bits de dirección hasta el 0 de DO: eso da el chip y el ORG.	Counts the address bits until DO's 0: that gives the chip and the ORG.
+
+#: apps/eeprom/main/ee_pg_chip.c:444
+Usar %s en 0x%02X	Use %s at 0x%02X
+
+#: apps/eeprom/main/ee_pg_chip.c:445
+Usar %s x%d	Use %s x%d
+
+#: apps/eeprom/main/ee_pg_chip.c:446
+Usar %s	Use %s
+
+#: apps/eeprom/main/ee_pg_chip.c:454
+PROTECCIÓN	PROTECTION
+
+#: apps/eeprom/main/ee_pg_chip.c:458
+Las 24xx se protegen con la pata WP (7): a GND se escribe, a 3V3 queda protegida toda. No hay nada que cambiar desde acá.	24xx parts are protected with the WP pin (7): at GND they write, at 3V3 all of it is protected. Nothing to change from here.
+
+#: apps/eeprom/main/ee_pg_chip.c:462
+Las 93xx no guardan protección: la app manda EWEN antes de escribir y EWDS al terminar.	93xx parts keep no protection: the app sends EWEN before writing and EWDS when done.
+
+#: apps/eeprom/main/ee_pg_chip.c:467
+Estado	Status
+
+#: apps/eeprom/main/ee_pg_chip.c:470
+Bloques protegidos	Protected blocks
+
+#: apps/eeprom/main/ee_pg_chip.c:471
+puesto	set
+
+#: apps/eeprom/main/ee_pg_chip.c:471
+no	no
+
+#: apps/eeprom/main/ee_pg_chip.c:472
+BP1 y BP0 protegen un cuarto, la mitad o toda la memoria desde arriba; con WPEN, /WP en bajo traba el estado.	BP1 and BP0 protect a quarter, half or all of the memory from the top; with WPEN, /WP low locks the status.
+
+#: apps/eeprom/main/ee_pg_chip.c:476
+La flash protege con BP2-BP0 del estado; la app no escribe mientras estén puestos.	A flash protects with BP2-BP0 of its status; the app does not write while they are set.
+
+#: apps/eeprom/main/ee_pg_mem.c:336
+Texto desde 0x%X	Text from 0x%X
+
+#: apps/eeprom/main/ee_pg_mem.c:365
+Texto	Text
+
+#: apps/eeprom/main/ee_pg_mem.c:366
+#: apps/eeprom/main/ee_ui.c:400
+#: apps/eeprom/main/ee_ui.c:468
+Listo	Done
+
+#: apps/eeprom/main/ee_pg_mem.c:432
+Leyendo el chip…	Reading the chip…
+
+#: apps/eeprom/main/ee_pg_mem.c:432
+Escribiendo el chip…	Writing the chip…
+
+#: apps/eeprom/main/ee_pg_mem.c:442
+Ojo: la imagen es de un %s y el chip elegido es un %s.	Careful: the image is from a %s and the chosen chip is a %s.
+
+#: apps/eeprom/main/ee_pg_mem.c:444
+1 byte cambiado sin escribir	1 changed byte not written
+
+#: apps/eeprom/main/ee_pg_mem.c:446
+%u bytes cambiados sin escribir	%u changed bytes not written
+
+#: apps/eeprom/main/ee_pg_mem.c:448
+Comparando con %s: %u diferencias	Comparing with %s: %u differences
+
+#: apps/eeprom/main/ee_pg_mem.c:476
+Dejar	Stop
+
+#: apps/eeprom/main/ee_pg_mem.c:498
+Hay %u bytes cambiados sin escribir: leer el chip los pisa.	There are %u changed bytes not written: reading the chip overwrites them.
+
+#: apps/eeprom/main/ee_pg_mem.c:499
+#: apps/eeprom/main/ee_pg_mem.c:798
+Leer	Read
+
+#: apps/eeprom/main/ee_pg_mem.c:499
+Leer igual	Read anyway
+
+#: apps/eeprom/main/ee_pg_mem.c:525
+Leé el chip o abrí una versión primero	Read the chip or open a version first
+
+#: apps/eeprom/main/ee_pg_mem.c:526
+#: apps/eeprom/main/eeprom.c:213
+La imagen no es del tamaño de este chip	The image is not this chip's size
+
+#: apps/eeprom/main/ee_pg_mem.c:530
+\nOjo: la imagen es de un %s.	\nCareful: the image is from a %s.
+
+#: apps/eeprom/main/ee_pg_mem.c:532
+Escribir %u bytes cambiados en el %s (%s). Antes se guarda una copia de lo que tiene, y después se verifica.%s	Write %u changed bytes into the %s (%s). A copy of what it holds is kept first, and it is verified afterwards.%s
+
+#: apps/eeprom/main/ee_pg_mem.c:534
+Escribir los cambios	Write the changes
+
+#: apps/eeprom/main/ee_pg_mem.c:534
+#: apps/eeprom/main/ee_pg_mem.c:538
+#: apps/eeprom/main/ee_pg_mem.c:799
+Escribir	Write
+
+#: apps/eeprom/main/ee_pg_mem.c:536
+Escribir la imagen entera (%s) en el %s (%s). Sólo se escriben las páginas que cambian; antes se guarda una copia y después se verifica.%s	Write the whole image (%s) into the %s (%s). Only the pages that change are written; a copy is kept first and it is verified afterwards.%s
+
+#: apps/eeprom/main/ee_pg_mem.c:538
+Escribir la imagen	Write the image
+
+#: apps/eeprom/main/ee_pg_mem.c:545
+Fuera de la memoria	Outside the memory
+
+#: apps/eeprom/main/ee_pg_mem.c:554
+Ir a la dirección	Go to address
+
+#: apps/eeprom/main/ee_pg_mem.c:574
+No está	Not found
+
+#: apps/eeprom/main/ee_pg_mem.c:609
+Escribí bytes en hexa, de a dos cifras	Type bytes in hex, two digits each
+
+#: apps/eeprom/main/ee_pg_mem.c:622
+#: apps/eeprom/main/ee_pg_mem.c:637
+Buscar texto	Find text
+
+#: apps/eeprom/main/ee_pg_mem.c:623
+#: apps/eeprom/main/ee_pg_mem.c:638
+Buscar bytes (hexa)	Find bytes (hex)
+
+#: apps/eeprom/main/ee_pg_mem.c:634
+Siguiente: %s	Next: %s
+
+#: apps/eeprom/main/ee_pg_mem.c:638
+DE AD BE EF	DE AD BE EF
+
+#: apps/eeprom/main/ee_pg_mem.c:639
+#: apps/eeprom/main/ee_pg_mem.c:801
+Buscar	Find
+
+#: apps/eeprom/main/ee_pg_mem.c:645
+Nada para deshacer	Nothing to undo
+
+#: apps/eeprom/main/ee_pg_mem.c:658
+Sumas de la imagen	Checksums of the image
+
+#: apps/eeprom/main/ee_pg_mem.c:670
+Con los cambios sin escribir.	Including the changes not yet written.
+
+#: apps/eeprom/main/ee_pg_mem.c:684
+No se pudo guardar en la tarjeta	Could not save on the card
+
+#: apps/eeprom/main/ee_pg_mem.c:688
+Igual a la última versión: no se guardó otra	Same as the last version: no new one saved
+
+#: apps/eeprom/main/ee_pg_mem.c:688
+Guardada en Versiones	Saved in Versions
+
+#: apps/eeprom/main/ee_pg_mem.c:698
+#: apps/eeprom/main/ee_pg_ver.c:49
+#: apps/eeprom/main/ee_pg_ver.c:137
+No se pudo leer la versión	Could not read the version
+
+#: apps/eeprom/main/ee_pg_mem.c:707
+No hay versiones de este chip	No versions of this chip
+
+#: apps/eeprom/main/ee_pg_mem.c:716
+Comparar con	Compare with
+
+#: apps/eeprom/main/ee_pg_mem.c:722
+Quedan cambios viejos: leé el chip de nuevo	Old changes remain: read the chip again
+
+#: apps/eeprom/main/ee_pg_mem.c:742
+Nota de la versión	Note for the version
+
+#: apps/eeprom/main/ee_pg_mem.c:748
+Dejar el %s (%s) todo en 0xFF. Antes se guarda una copia de lo que tiene.	Set all of the %s (%s) to 0xFF. A copy of what it holds is kept first.
+
+#: apps/eeprom/main/ee_pg_mem.c:749
+#: apps/eeprom/main/ee_pg_mem.c:766
+Borrar el chip	Erase the chip
+
+#: apps/eeprom/main/ee_pg_mem.c:749
+#: apps/eeprom/main/ee_pg_ver.c:159
+#: apps/eeprom/main/ee_pg_ver.c:176
+#: apps/eeprom/main/ee_ui.c:467
+Borrar	Delete
+
+#: apps/eeprom/main/ee_pg_mem.c:760
+Sumas: CRC32, MD5, SHA-256	Checksums: CRC32, MD5, SHA-256
+
+#: apps/eeprom/main/ee_pg_mem.c:761
+Guardar como versión	Save as a version
+
+#: apps/eeprom/main/ee_pg_mem.c:761
+con una nota, sin escribir el chip	with a note, without writing the chip
+
+#: apps/eeprom/main/ee_pg_mem.c:762
+Comparar con una versión	Compare with a version
+
+#: apps/eeprom/main/ee_pg_mem.c:764
+Dejar de comparar	Stop comparing
+
+#: apps/eeprom/main/ee_pg_mem.c:765
+Deshacer todos los cambios	Undo all changes
+
+#: apps/eeprom/main/ee_pg_mem.c:766
+todo en 0xFF	all to 0xFF
+
+#: apps/eeprom/main/ee_pg_mem.c:768
+#: apps/eeprom/main/eeprom.c:56
+Memoria	Memory
+
+#: apps/eeprom/main/ee_pg_mem.c:800
+Ir a	Go to
+
+#: apps/eeprom/main/ee_pg_mem.c:802
+Deshacer	Undo
+
+#: apps/eeprom/main/ee_pg_mem.c:803
+Más	More
+
+#: apps/eeprom/main/ee_pg_mem.c:818
+Leyendo…	Reading…
+
+#: apps/eeprom/main/ee_pg_mem.c:819
+Todavía no hay nada leído.\nTocá Leer, o abrí una versión en Versiones.	Nothing read yet.\nTap Read, or open a version in Versions.
+
+#: apps/eeprom/main/ee_pg_ver.c:16
+lectura	read
+
+#: apps/eeprom/main/ee_pg_ver.c:17
+antes de escribir	before writing
+
+#: apps/eeprom/main/ee_pg_ver.c:18
+#: apps/eeprom/main/eeprom.c:393
+escrita	written
+
+#: apps/eeprom/main/ee_pg_ver.c:19
+#: apps/eeprom/main/ee_portal.c:121
+del portal	from the portal
+
+#: apps/eeprom/main/ee_pg_ver.c:20
+guardada	saved
+
+#: apps/eeprom/main/ee_pg_ver.c:21
+archivo	file
+
+#: apps/eeprom/main/ee_pg_ver.c:51
+#: apps/eeprom/main/eeprom.c:189
+#: apps/eeprom/main/eeprom.c:209
+No hay memoria para la imagen	Not enough memory for the image
+
+#: apps/eeprom/main/ee_pg_ver.c:61
+versión	version
+
+#: apps/eeprom/main/ee_pg_ver.c:89
+No se pudo borrar	Could not delete
+
+#: apps/eeprom/main/ee_pg_ver.c:98
+No se pudo guardar la nota	Could not save the note
+
+#: apps/eeprom/main/ee_pg_ver.c:130
+Hay %u bytes cambiados sin escribir en la memoria: abrir la versión los pisa.	There are %u changed bytes not written in Memory: opening the version overwrites them.
+
+#: apps/eeprom/main/ee_pg_ver.c:131
+Abrir	Open
+
+#: apps/eeprom/main/ee_pg_ver.c:131
+Abrir igual	Open anyway
+
+#: apps/eeprom/main/ee_pg_ver.c:141
+Leé el chip para ver las diferencias	Read the chip to see the differences
+
+#: apps/eeprom/main/ee_pg_ver.c:145
+La versión no es del tamaño de este chip	The version is not this chip's size
+
+#: apps/eeprom/main/ee_pg_ver.c:147
+Escribir %s en el %s y verificarlo. Antes se guarda una copia de lo que tiene ahora; sólo se escriben las páginas que cambian.%s	Write %s into the %s and verify it. A copy of what it holds now is kept first; only the pages that change are written.%s
+
+#: apps/eeprom/main/ee_pg_ver.c:148
+\nLos cambios sin escribir de la memoria se pierden.	\nThe unwritten changes in Memory are lost.
+
+#: apps/eeprom/main/ee_pg_ver.c:149
+#: apps/eeprom/main/ee_pg_ver.c:149
+Restaurar	Restore
+
+#: apps/eeprom/main/ee_pg_ver.c:152
+#: apps/eeprom/main/ee_pg_ver.c:174
+Nota	Note
+
+#: apps/eeprom/main/ee_pg_ver.c:158
+Borrar %s de la tarjeta. No se puede deshacer.	Delete %s from the card. This cannot be undone.
+
+#: apps/eeprom/main/ee_pg_ver.c:159
+Borrar la versión	Delete the version
+
+#: apps/eeprom/main/ee_pg_ver.c:171
+Abrir en Memoria	Open in Memory
+
+#: apps/eeprom/main/ee_pg_ver.c:171
+para verla, editarla o escribirla	to look at, edit or write it
+
+#: apps/eeprom/main/ee_pg_ver.c:172
+Comparar con la memoria	Compare with Memory
+
+#: apps/eeprom/main/ee_pg_ver.c:172
+las diferencias en rojo	the differences in red
+
+#: apps/eeprom/main/ee_pg_ver.c:173
+Restaurar en el chip	Restore into the chip
+
+#: apps/eeprom/main/ee_pg_ver.c:173
+escribir y verificar	write and verify
+
+#: apps/eeprom/main/ee_pg_ver.c:175
+Sumas	Checksums
+
+#: apps/eeprom/main/ee_pg_ver.c:199
+Versiones del %s	Versions of the %s
+
+#: apps/eeprom/main/ee_pg_ver.c:204
+Sin tarjeta: no hay versiones.	No card: no versions.
+
+#: apps/eeprom/main/ee_pg_ver.c:212
+Todavía no hay versiones de este chip. Cada lectura guarda una, y cada escritura guarda lo que había antes y lo que quedó. Desde el portal se pueden subir .bin.	No versions of this chip yet. Every read saves one, and every write saves what was there before and what it left. The portal can upload .bin files.
+
+#: apps/eeprom/main/ee_pg_ver.c:240
+ · comparando	 · comparing
+
+#: apps/eeprom/main/ee_pg_wire.c:111
+sin conectar	not connected
+
+#: apps/eeprom/main/ee_pg_wire.c:217
+A TENER EN CUENTA	MIND THIS
+
+#: apps/eeprom/main/ee_pg_wire.c:220
+Todo a 3V3: el header no aguanta 5 V. Si el chip está en una placa a 5 V, no lo conectes así.	Everything at 3V3: the header does not take 5 V. If the chip sits on a 5 V board, do not wire it like this.
+
+#: apps/eeprom/main/ee_pg_wire.c:221
+Un capacitor de 100 nF entre VCC y GND, pegado al chip.	A 100 nF capacitor between VCC and GND, right at the chip.
+
+#: apps/eeprom/main/ee_pg_wire.c:225
+SDA y SCL necesitan pull-ups de 4,7 kΩ a 3V3, si el módulo no los trae.	SDA and SCL need 4.7 kΩ pull-ups to 3V3 if the module has none.
+
+#: apps/eeprom/main/ee_pg_wire.c:227
+A0-A2 eligen la dirección: para 0x%02X van como dice el dibujo (1 = 3V3, 0 = GND).	A0-A2 choose the address: for 0x%02X wire them as drawn (1 = 3V3, 0 = GND).
+
+#: apps/eeprom/main/ee_pg_wire.c:230
+Este chip no usa A0-A2 (los bits altos de la dirección van ahí): a GND.	This chip does not use A0-A2 (the high address bits go there): to GND.
+
+#: apps/eeprom/main/ee_pg_wire.c:232
+En el 24xx1025, A2 (pata 3) va a 3V3: no es dirección, y sin eso no anda.	On the 24xx1025, A2 (pin 3) goes to 3V3: it is not an address, and it does not work without it.
+
+#: apps/eeprom/main/ee_pg_wire.c:233
+WP (pata 7) a GND para escribir; a 3V3 queda protegida toda.	WP (pin 7) to GND for writing; at 3V3 all of it is protected.
+
+#: apps/eeprom/main/ee_pg_wire.c:237
+/WP (3) y /HOLD (7) a 3V3: en bajo, /HOLD congela el bus y /WP traba la protección.	/WP (3) and /HOLD (7) to 3V3: low, /HOLD freezes the bus and /WP locks the protection.
+
+#: apps/eeprom/main/ee_pg_wire.c:239
+El chip select es el GPIO%d, no el cs= del puerto.	The chip select is GPIO%d, not the port's cs=.
+
+#: apps/eeprom/main/ee_pg_wire.c:242
+Una flash soldada en una placa puede estar alimentando al resto: mejor sacarla, o con la placa sin su micro.	A flash soldered on a board may end up powering the rest of it: better take it off, or work with the board's micro removed.
+
+#: apps/eeprom/main/ee_pg_wire.c:245
+ORG (6) elige palabras de 16 bits (a 3V3) o de 8 (a GND): tiene que coincidir con lo elegido en Chip.	ORG (6) chooses 16-bit words (at 3V3) or 8-bit ones (at GND): it must match what is chosen in Chip.
+
+#: apps/eeprom/main/ee_pg_wire.c:246
+DO usa el pull-up interno; con cables largos, uno de 10 kΩ a 3V3.	DO uses the internal pull-up; with long wires, add a 10 kΩ one to 3V3.
+
+#: apps/eeprom/main/ee_pg_wire.c:247
+Hay 93xx en SOIC con las patas rotadas (las \"X\" de Microchip): mirá la hoja de datos.	Some SOIC 93xx have rotated pins (Microchip's \"X\" ones): check the datasheet.
+
+#: apps/eeprom/main/ee_pg_wire.c:248
+CS es activo en alto, al revés que en SPI.	CS is active high, unlike SPI.
+
+#: apps/eeprom/main/ee_pg_wire.c:259
+#: apps/eeprom/main/ee_pg_wire.c:271
+Cómo se conecta el %s	How to wire the %s
+
+#: apps/eeprom/main/ee_portal.c:145
+La placa está ocupada con otro trabajo.	The board is busy with another job.
+
+#: apps/eeprom/main/ee_portal.c:148
+No conozco ese chip.	I do not know that chip.
+
+#: apps/eeprom/main/ee_portal.c:160
+En la placa está elegido el %s, no el %s.	The board has the %s chosen, not the %s.
+
+#: apps/eeprom/main/ee_portal.c:164
+En la placa hay cambios sin escribir: escribilos o descartalos allá primero.	The board holds changes not yet written: write or discard them there first.
+
+#: apps/eeprom/main/ee_portal.c:166
+No se pudo empezar a leer.	Could not start reading.
+
+#: apps/eeprom/main/ee_portal.c:167
+El portal pidió leer el chip	The portal asked to read the chip
+
+#: apps/eeprom/main/ee_portal.c:172
+Falta la versión.	The version is missing.
+
+#: apps/eeprom/main/ee_portal.c:173
+No se pudo leer esa versión, o no es del tamaño del chip.	Could not read that version, or it is not the chip's size.
+
+#: apps/eeprom/main/ee_portal.c:174
+No se pudo empezar a escribir.	Could not start writing.
+
+#: apps/eeprom/main/ee_portal.c:175
+El portal pidió escribir el chip	The portal asked to write the chip
+
+#: apps/eeprom/main/ee_portal.c:180
+Pedido desconocido.	Unknown request.
+
+#: apps/eeprom/main/ee_ui.c:343
+#: apps/eeprom/main/ee_ui.c:399
+#: apps/eeprom/main/eeprom.c:307
+Cancelar	Cancel
+
+#: apps/eeprom/main/ee_ui.c:347
+Aceptar	OK
+
+#: apps/eeprom/main/eeprom.c:56
+Versiones	Versions
+
+#: apps/eeprom/main/eeprom.c:56
+Cableado	Wiring
+
+#: apps/eeprom/main/eeprom.c:195
+#: apps/eeprom/main/eeprom.c:221
+No se pudo empezar	Could not start
+
+#: apps/eeprom/main/eeprom.c:217
+No hay cambios para escribir	No changes to write
+
+#: apps/eeprom/main/eeprom.c:275
+ (pedido del portal)	 (asked from the portal)
+
+#: apps/eeprom/main/eeprom.c:366
+Falló.	Failed.
+
+#: apps/eeprom/main/eeprom.c:380
+leída	read
+
+#: apps/eeprom/main/eeprom.c:384
+No se pudo leer	Could not read
+
+#: apps/eeprom/main/eeprom.c:393
+borrada	erased
+
+#: apps/eeprom/main/eeprom.c:397
+No se pudo escribir	Could not write
