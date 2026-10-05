@@ -46,6 +46,7 @@
 #include "aos_i18n.h"
 #include "aos_ui.h"
 #include "aos_retro.h"
+#include "aos_pad_menu.h"
 
 #include "g2043.h"
 
@@ -143,6 +144,13 @@ typedef struct {
     uint64_t    prof_draw_us, prof_diff_us, prof_px, prof_rects, prof_tiles;
 
     uint8_t     paused_from;    /* the state the pause interrupted */
+
+    /* A USB gamepad (see "The gamepad"): its state, the panel's buttons it
+     * goes through, and those buttons per panel */
+    aos_pad_t   pad;
+    aos_pad_menu_t menu;
+    uint8_t     pad_btn;        /* 1 << CB_* held on the pad (the buttons light up) */
+    lv_obj_t   *pm_title[4], *pm_pause[5], *pm_over[3];
     int16_t     detail_t;       /* draws until the next quality check */
 
     bool        want_exit;
@@ -1455,6 +1463,9 @@ static void overlay_hide_all(app_t *a)
             lv_obj_add_flag(panels[i], LV_OBJ_FLAG_HIDDEN);
         }
     }
+    /* the pad has no buttons to go through (an empty set also takes the
+     * outline off the one it was on) */
+    aos_pad_menu_set(&a->menu, NULL, 0, 0);
     controls_show(a, true);
 }
 
@@ -1464,6 +1475,14 @@ static void overlay_show(app_t *a, lv_obj_t *panel)
     if (panel) {
         lv_obj_remove_flag(panel, LV_OBJ_FLAG_HIDDEN);
         lv_obj_move_foreground(panel);
+        /* and the pad goes through its buttons, from the first one */
+        if (panel == a->title) {
+            aos_pad_menu_set(&a->menu, a->pm_title, 4, 0);
+        } else if (panel == a->pause) {
+            aos_pad_menu_set(&a->menu, a->pm_pause, 5, 0);
+        } else if (panel == a->over) {
+            aos_pad_menu_set(&a->menu, a->pm_over, 3, 0);
+        }
     }
     /* over a menu the fire buttons have nothing to do: they go with it */
     controls_show(a, panel == NULL);
@@ -1727,6 +1746,7 @@ static void build_title(app_t *a, lv_obj_t *root)
 
     lv_obj_t *b = make_button(p, _("JUGAR"), _("arrastrá el dedo para volar"),
                               0, y, cw, 112, 0x0A84FF, start_cb, a);
+    a->pm_title[0] = b;
     y = below(b, 22);
 
     /* What is really on the screen: the drag, the two buttons, the pause. */
@@ -1751,6 +1771,9 @@ static void build_title(app_t *a, lv_obj_t *root)
     a->title_hi = make_label(p, _("RECORD 0"), &aos_montserrat_28, 0xFFFFFF, y);
     y = below(a->title_hi, 16);
     b = make_button(p, _("SALIR"), NULL, (cw - 200) / 2, y, 200, 64, 0xFF453A, exit_cb, a);
+    a->pm_title[1] = a->chip_auto;
+    a->pm_title[2] = a->chip_sfx;
+    a->pm_title[3] = b;
     panel_fit(p, below(b, 24));
 }
 
@@ -1764,6 +1787,7 @@ static void build_pause(app_t *a, lv_obj_t *root)
     lv_obj_t *l = make_label(p, _("PAUSA"), &aos_montserrat_36, 0xFFFFFF, 24);
     int y = below(l, 24);
     lv_obj_t *b = make_button(p, _("SEGUIR"), NULL, 0, y, cw, 76, 0x30D158, resume_cb, a);
+    a->pm_pause[0] = b;
     y = below(b, 20);
     a->chip_auto2 = make_chip(p, 0, y, cw, chip_cb, a);
     y += CHIP_H + 12;
@@ -1772,6 +1796,10 @@ static void build_pause(app_t *a, lv_obj_t *root)
     a->chip_fps2  = make_chip(p, 0, y, cw, chip_cb, a);
     y += CHIP_H + 20;
     b = make_button(p, _("SALIR"), NULL, 0, y, cw, 76, 0xFF453A, exit_cb, a);
+    a->pm_pause[1] = a->chip_auto2;
+    a->pm_pause[2] = a->chip_sfx2;
+    a->pm_pause[3] = a->chip_fps2;
+    a->pm_pause[4] = b;
     panel_fit(p, below(b, 24));
 }
 
@@ -1789,10 +1817,12 @@ static void build_over(app_t *a, lv_obj_t *root)
     y = below(a->over_score, 28);
 
     lv_obj_t *b = make_button(p, _("OTRA VEZ"), NULL, 0, y, cw, 76, 0x30D158, retry_cb, a);
+    a->pm_over[0] = b;
     y = below(b, 14);
     int hw = (cw - 14) / 2;
-    make_button(p, _("MENU"), NULL, 0, y, hw, 76, 0x0A84FF, menu_cb, a);
+    a->pm_over[1] = make_button(p, _("MENU"), NULL, 0, y, hw, 76, 0x0A84FF, menu_cb, a);
     b = make_button(p, _("SALIR"), NULL, hw + 14, y, hw, 76, 0xFF453A, exit_cb, a);
+    a->pm_over[2] = b;
     panel_fit(p, below(b, 26));
 }
 
@@ -1945,7 +1975,7 @@ static uint8_t ctl_hit(const app_t *a, int x, int y)
  * recharges, so its cooldown can be seen. */
 static void ctl_refresh(app_t *a)
 {
-    uint8_t held = a->btn_held;
+    uint8_t held = a->btn_held | a->pad_btn;
     for (int i = 0; i < CB_COUNT; i++) {
         uint8_t bit = (uint8_t)(1u << i);
         if (!a->btn[i].obj || ((held ^ a->btn_shown) & bit) == 0) {
@@ -2151,6 +2181,91 @@ static void read_input(app_t *a)
     ctl_refresh(a);
 }
 
+/* --------------------------------------------------------------------------
+ * The gamepad
+ *
+ * A USB pad on the board's host (aos_pad.h) plays alongside the fingers:
+ * the left stick flies the ship at a speed that follows how far it leans,
+ * the d-pad at full speed; A fires while held, B (or R) does the barrel
+ * roll, START pauses. The on-screen buttons light up with the pad's, so the
+ * cooldown and AUTO read the same. Over a panel the d-pad goes through its
+ * buttons and A presses them (aos_pad_menu.h); START on the title plays, on
+ * the pause it resumes and on the end panel it retries, and B is back: out
+ * of the pause, or from the end panel to the menu.
+ * -------------------------------------------------------------------------- */
+
+#define PAD_DEAD        6000        /* the stick's dead zone, of 32767 */
+
+static void pad_click(lv_obj_t *b)
+{
+    if (b && lv_obj_is_valid(b)) {
+        lv_obj_send_event(b, LV_EVENT_CLICKED, NULL);
+    }
+}
+
+static void pad_step(app_t *a)
+{
+    g_t *g = &a->g;
+    aos_pad_t *p = &a->pad;
+    uint8_t btn = 0;
+
+    aos_pad_update(p, lv_tick_get());
+    /* in the background, or under the app switcher, the pad is not ours */
+    if (!p->connected || !lv_obj_is_visible(a->r->view)) {
+        p->pressed = p->repeat = 0;
+    } else if (a->menu.n) {
+        /* a panel is up */
+        if (!aos_pad_menu_step(&a->menu, p)) {
+            bool start = aos_pad_pressed(p, AOS_PAD_START);
+            bool back = aos_pad_pressed(p, AOS_PAD_B);
+            if (a->menu.item[0] == a->pm_title[0] && start) {
+                pad_click(a->pm_title[0]);
+            } else if (a->menu.item[0] == a->pm_pause[0] && (start || back)) {
+                pad_click(a->pm_pause[0]);
+            } else if (a->menu.item[0] == a->pm_over[0]) {
+                if (start) pad_click(a->pm_over[0]);
+                else if (back) pad_click(a->pm_over[1]);
+            }
+        }
+    } else if (state_is_flying(g) && g->state != ST_PAUSE) {
+        if (aos_pad_pressed(p, AOS_PAD_START)) {
+            aos_hal_beep(700, 30);
+            pause_show(a);
+            return;
+        }
+        /* the stick past its dead zone, or else the d-pad at full tilt */
+        int sx = p->x, sy = p->y;
+        if (sx > -PAD_DEAD && sx < PAD_DEAD) {
+            sx = (aos_pad_held(p, AOS_PAD_RIGHT) - aos_pad_held(p, AOS_PAD_LEFT)) * 32767;
+        }
+        if (sy > -PAD_DEAD && sy < PAD_DEAD) {
+            sy = (aos_pad_held(p, AOS_PAD_DOWN) - aos_pad_held(p, AOS_PAD_UP)) * 32767;
+        }
+        /* a finger flying the ship has the last word */
+        if ((sx || sy) && !a->fly_on) {
+            /* player_move() heads at half the distance to the target, capped
+             * at PLAYER_SPEED: a target twice that far is top speed */
+            g->touching = 1;
+            g->touch_x = (int16_t)(g->px + sx * (2 * PLAYER_SPEED) / 32767);
+            g->touch_y = (int16_t)(g->py + sy * (2 * PLAYER_SPEED) / 32767);
+        }
+        if (aos_pad_held(p, AOS_PAD_A)) {
+            g->fire_down = 1;
+            btn |= 1u << CB_FIRE;
+        }
+        if (aos_pad_held(p, AOS_PAD_B | AOS_PAD_R)) {
+            btn |= 1u << CB_ROLL;
+        }
+        if (aos_pad_pressed(p, AOS_PAD_B | AOS_PAD_R)) {
+            roll_start(g);
+        }
+    }
+    if (btn != a->pad_btn) {
+        a->pad_btn = btn;
+        ctl_refresh(a);
+    }
+}
+
 static void step(void *user)
 {
     app_t *a = (app_t *)user;
@@ -2164,6 +2279,7 @@ static void step(void *user)
     }
 
     read_input(a);
+    pad_step(a);
     if (a->g.state != ST_PAUSE) {
         step_state(a);
     }
