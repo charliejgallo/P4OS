@@ -43,7 +43,10 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       **USB**. Sin probar: MIDI con un aparato real.
 - [ ] **Joystick en todos los juegos** (2026-10-05, para la 0.9.1,
       `docs/GAMEPAD.md`): los 22 juegos y Lua se juegan con joystick en el
-      simulador; falta probarlos en la placa con el joystick genérico. Sin
+      simulador. En la placa con el joystick genérico (cruceta como ejes,
+      sin hat): 2043 y Turbo andan (2026-10-05; Turbo giraba de golpe
+      porque tomaba la cruceta por palanca a fondo, arreglado en aos_pad.h);
+      falta probar el resto. Sin
       probar en ningún lado: las partidas entre dos placas (carrera de
       Monster Hop, visitas de Mila, Truco de a dos).
 - [ ] El cuelgue del primer arranque tras algunas OTA: dos volcados el
