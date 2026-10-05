@@ -951,6 +951,12 @@ __attribute__((weak)) void aos_hal_usb_audio_enable(bool on)
 __attribute__((weak)) bool aos_hal_usb_audio_info(char *name, size_t n, bool *out, bool *in, bool *playing)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) bool aos_hal_usb_mic_enabled(void)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) void aos_hal_usb_mic_enable(bool on)
+{ }
+
 __attribute__((weak)) const char * aos_hal_device_name(void)
 { return ""; }
 

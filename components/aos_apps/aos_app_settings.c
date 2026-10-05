@@ -488,6 +488,11 @@ static void usb_audio_cb(lv_event_t *e)
     aos_hal_usb_audio_enable(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
 }
 
+static void usb_mic_cb(lv_event_t *e)
+{
+    aos_hal_usb_mic_enable(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
+}
+
 static void usb_layout_cb(lv_event_t *e)
 {
     aos_hal_usb_kbd_layout_set((int)(intptr_t)lv_event_get_user_data(e));
@@ -636,6 +641,7 @@ static void build_usb(lv_obj_t *p)
     g = group(p, _("AUDIO USB"));
     row_switch(g, AOS_SYM_VOLUME_HIGH, 0xFF375F, _("Sonido por la placa de audio USB"), aos_hal_usb_audio_enabled(),
                usb_audio_cb);
+    row_switch(g, AOS_SYM_MICROPHONE, 0xFF9F0A, _("Grabar con su micrófono"), aos_hal_usb_mic_enabled(), usb_mic_cb);
     note(p, _("Con una placa de sonido o unos auriculares USB conectados, todo lo que suena (la música, la radio, las apps, los avisos) sale por ahí, con el volumen de la placa, y el parlante se calla. Tiene que aceptar 48 kHz."));
 
     g = group(p, _("TECLADO USB"));

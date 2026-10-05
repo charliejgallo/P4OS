@@ -1932,6 +1932,10 @@ bool aos_hal_uvc_streaming(uint16_t *w, uint16_t *h, uint32_t *frames);    /* fa
 bool aos_hal_usb_audio_enabled(void);
 void aos_hal_usb_audio_enable(bool on);
 bool aos_hal_usb_audio_info(char *name, size_t n, bool *out, bool *in, bool *playing);
+/* And the card's microphone in place of the board's while something
+ * records (the recorder, the walkie-talkie): on by default. */
+bool aos_hal_usb_mic_enabled(void);
+void aos_hal_usb_mic_enable(bool on);
 
 /* mDNS on a network interface of somebody else's (the USB one): the watch
  * answers "amoledos.local" there too, with that interface's address. The

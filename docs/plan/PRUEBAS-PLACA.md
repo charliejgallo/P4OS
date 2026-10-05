@@ -485,8 +485,10 @@ por el Registro del portal sin cable serie)
 - [x] **Placa de audio USB** GeneralPlus (1b3f:2008, 2026-10-04): salida 48
       kHz estéreo, micrófono 48 kHz mono y teclas de volumen (HID). La radio
       (MP3 44,1 kHz remuestreado a 48) sonó por auriculares y el parlante de
-      la placa se calló. Falta: su micrófono para grabar; medir cortes en
-      una escucha larga.
+      la placa se calló; "suena limpio" (el usuario), 4 bloques de 10 ms
+      perdidos en 12 s. Su micrófono en la Grabadora: 335 376 muestras en
+      6,99 s (48 kHz, sin pérdidas), ruido de fondo media 74 pico 2944 (sin
+      micrófono enchufado). Falta: un micrófono de verdad.
 - [ ] Visto de paso: `E i2s_common: i2s_channel_disable … not enabled` al
       reabrir el códec para el sonido de las teclas; inofensivo, a limpiar.
 

@@ -323,8 +323,19 @@ board's, on the speaker's curve, in the samples (the card's own at its
 top). The stream starts with the first sound and stops when the board's
 audio goes idle. Tried on 2026-10-04 with a GeneralPlus card (1b3f:2008:
 output 48 kHz stereo, a 48 kHz mono microphone and HID volume keys, which
-work as media keys): the radio through headphones. Its microphone is not
-used yet.
+work as media keys): the radio through headphones, 4 blocks of 10 ms
+dropped in 12 s.
+
+A card's microphone takes the place of the board's while something
+records (the recorder, the walkie-talkie, the meter) and Settings, USB,
+"Record with its microphone" is on (the default; `{"usb_mic": bool}`):
+the capture task still reads the codec, which paces it, and puts the
+card's samples (48 kHz mono, read without waiting from its ring) in both
+slots; unplugged mid-recording, the board's microphones are back at the
+next block. With the GeneralPlus card and nothing in its microphone jack,
+the recorder got 335,376 samples in 6.99 s (48 kHz, none lost) of its
+noise floor (mean 74, peak 2944); with nothing in the jack some cards send
+digital silence. The log says how many samples came and their peak.
 
 `GET /api/usb` says the OTG's `mode` (`host` while the host holds the OTG
 controller), `host_on`, `pins`, `layout`, `devices`, `keyboards`,

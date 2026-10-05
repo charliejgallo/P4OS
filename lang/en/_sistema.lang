@@ -7269,3 +7269,4 @@ Sonido por la placa de audio USB	Sound through the USB sound card
 Con una placa de sonido o unos auriculares USB conectados, todo lo que suena (la música, la radio, las apps, los avisos) sale por ahí, con el volumen de la placa, y el parlante se calla. Tiene que aceptar 48 kHz.	With a USB sound card or headset plugged in, everything the board plays (music, the radio, apps, alerts) comes out there, at the board's volume, and the speaker goes quiet. It has to take 48 kHz.
 parlante	speaker
 micrófono	microphone
+Grabar con su micrófono	Record with its microphone

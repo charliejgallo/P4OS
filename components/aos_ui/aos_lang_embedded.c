@@ -2355,6 +2355,7 @@ static const char blob_en__sistema_lang[] =
     "Con una placa de sonido o unos auriculares USB conectados, todo lo que suena (la música, la radio, las apps, los avisos) sale por ahí, con el volumen de la placa, y el parlante se calla. Tiene que aceptar 48 kHz.\tWith a USB sound card or headset plugged in, everything the board plays (music, the radio, apps, alerts) comes out there, at the board's volume, and the speaker goes quiet. It has to take 48 kHz.\n"
     "parlante\tspeaker\n"
     "micrófono\tmicrophone\n"
+    "Grabar con su micrófono\tRecord with its microphone\n"
     ;
 
 static const char blob_en_aos_cameras_lang[] =
@@ -6884,6 +6885,7 @@ static const char blob_de__sistema_lang[] =
     "Con una placa de sonido o unos auriculares USB conectados, todo lo que suena (la música, la radio, las apps, los avisos) sale por ahí, con el volumen de la placa, y el parlante se calla. Tiene que aceptar 48 kHz.\tMit einer angeschlossenen USB-Soundkarte oder einem USB-Headset kommt alles, was die Platine abspielt (Musik, Radio, Apps, Hinweise), dort heraus, mit der Lautstärke der Platine, und der Lautsprecher schweigt. Sie muss 48 kHz unterstützen.\n"
     "parlante\tLautsprecher\n"
     "micrófono\tMikrofon\n"
+    "Grabar con su micrófono\tMit ihrem Mikrofon aufnehmen\n"
     ;
 
 static const char blob_de_aos_cameras_lang[] =
@@ -9072,7 +9074,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2341, 33, files_en, 34 },
-    { "de", "Deutsch", 2341, 33, files_de, 34 },
+    { "en", "English", 2342, 33, files_en, 34 },
+    { "de", "Deutsch", 2342, 33, files_de, 34 },
 };
 const int aos_lang_pack_count = 2;

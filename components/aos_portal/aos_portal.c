@@ -430,13 +430,15 @@ static void api_usb(aos_httpd_req_t *r)
         cJSON *host = b ? cJSON_GetObjectItem(b, "host") : NULL;
         cJSON *uaudio = b ? cJSON_GetObjectItem(b, "usb_audio") : NULL;
         if (cJSON_IsBool(uaudio)) aos_hal_usb_audio_enable(cJSON_IsTrue(uaudio));
+        cJSON *umic = b ? cJSON_GetObjectItem(b, "usb_mic") : NULL;
+        if (cJSON_IsBool(umic)) aos_hal_usb_mic_enable(cJSON_IsTrue(umic));
         int want = -1, port = -1;
         for (int i = 0; m && i < 4; i++) if (!strcmp(m, M[i]) && i != AOS_HAL_USB_DISK) want = i;
         if (pins) port = !strcmp(pins, "21/23") ? AOS_HAL_USB_HOST_HEADER : !strcmp(pins, "25/27") ? AOS_HAL_USB_HOST_OTG
                        : !strcmp(pins, "both") ? AOS_HAL_USB_HOST_BOTH : -2;
         int lay = !layout ? -1 : !strcmp(layout, "latam") ? AOS_KBD_LATAM : !strcmp(layout, "us") ? AOS_KBD_US : -2;
         bool bad = (m && want < 0) || port == -2 || lay == -2 || (host && !cJSON_IsBool(host)) ||
-                   (!m && !pins && !host && !layout && !cJSON_IsBool(uaudio));
+                   (!m && !pins && !host && !layout && !cJSON_IsBool(uaudio) && !cJSON_IsBool(umic));
         bool host_on = host && cJSON_IsTrue(host);
         cJSON_Delete(b);
         if (bad) {
@@ -463,6 +465,7 @@ static void api_usb(aos_httpd_req_t *r)
     cJSON_AddStringToObject(o, "pins", hp == AOS_HAL_USB_HOST_HEADER ? "21/23" : hp == AOS_HAL_USB_HOST_BOTH ? "both" : "25/27");
     cJSON_AddStringToObject(o, "layout", aos_hal_usb_kbd_layout() == AOS_KBD_US ? "us" : "latam");
     cJSON_AddBoolToObject(o, "usb_audio", aos_hal_usb_audio_enabled());
+    cJSON_AddBoolToObject(o, "usb_mic", aos_hal_usb_mic_enabled());
     cJSON_AddBoolToObject(o, "host_on", aos_hal_usb_host_on());
     aos_usb_host_info_t in[AOS_USB_HOST_MAX];
     int n = aos_hal_usb_host_on() ? aos_hal_usb_host_devices(in, AOS_USB_HOST_MAX) : -1;

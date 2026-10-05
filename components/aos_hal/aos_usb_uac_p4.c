@@ -23,6 +23,13 @@
  * both. The stream starts with the first block and stops when the board's
  * audio goes idle (the output task closes the codec after 5 s of nothing).
  *
+ * A card's microphone (its input, RX) takes the place of the board's
+ * microphones while a capture runs (the recorder, the walkie-talkie, the
+ * meter: aos_audio_p4.c, its capture task) and the setting is on (pref
+ * usb_mic, on by default): 48 kHz 16-bit mono (a stereo one is mixed down),
+ * read without waiting from the card's ring each time the board's own
+ * codec has delivered a 10 ms block, which keeps pacing the capture.
+ *
  * A card that does not take 48 kHz 16-bit PCM is listed but not used.
  */
 #include "aos_hal.h"
@@ -41,6 +48,7 @@
 
 static const char *TAG = "usb";
 #define PREF_AUDIO  "usb_audio"
+#define PREF_MIC    "usb_mic"
 #define RATE        48000
 #define RING_BYTES  (RATE / 1000 * 4 * 60)      /* 60 ms of stereo 16-bit */
 
@@ -73,6 +81,8 @@ static struct {
     int vol;                        /* the volume applied, and its gain in Q15 */
     int32_t gain;
     uint32_t written, dropped;
+    uint32_t mic_frames;            /* microphone samples read, and their peak, since its stream started */
+    int32_t mic_peak;
 } A;
 
 static void wide_to_str(const wchar_t *w, char *out, size_t n)
@@ -296,6 +306,75 @@ void aos_p4_usb_audio_idle(void)
         A.written = A.dropped = 0;
     }
     xSemaphoreGive(A.mx);
+}
+
+/* ---- for the board's capture (aos_audio_p4.c) ----------------------------- */
+
+bool aos_hal_usb_mic_enabled(void)
+{
+    int32_t v = 1;
+    aos_hal_pref_get_i32(PREF_MIC, &v);
+    return v != 0;
+}
+
+void aos_hal_usb_mic_enable(bool on) { aos_hal_pref_set_i32(PREF_MIC, on); }
+
+bool aos_p4_usb_mic_active(void) { return A.installed && A.in.h && A.in.ok && aos_hal_usb_mic_enabled(); }
+
+/* Up to 'frames' 48 kHz mono samples that have come in, without waiting:
+ * the frames read (0 while the stream fills, at the start). */
+int aos_p4_usb_mic_read(int16_t *mono, int frames)
+{
+    card_t *c = &A.in;
+    if (!c->h || !c->ok) return 0;
+    if (!c->streaming) {
+        static uint32_t failed_at;
+        if (failed_at && xTaskGetTickCount() - failed_at < pdMS_TO_TICKS(2000)) return 0;
+        const uac_host_stream_config_t sc = { .channels = c->channels, .bit_resolution = 16, .sample_freq = RATE };
+        if (uac_host_device_start(c->h, &sc) != ESP_OK) {
+            failed_at = xTaskGetTickCount();
+            ESP_LOGW(TAG, "sound card \"%s\": the microphone did not start", c->name);
+            return 0;
+        }
+        failed_at = 0;
+        c->streaming = true;
+        A.mic_frames = 0;
+        A.mic_peak = 0;
+        ESP_LOGI(TAG, "sound card \"%s\": recording from its microphone", c->name);
+    }
+    static int16_t st[480 * 2];
+    if (frames > 480) frames = 480;
+    uint32_t got = 0;
+    int ch = c->channels == 2 ? 2 : 1;
+    if (uac_host_device_read(c->h, (uint8_t *)(ch == 2 ? st : mono), frames * ch * sizeof(int16_t), &got, 0) != ESP_OK)
+        return 0;
+    int n = (int)(got / (ch * sizeof(int16_t)));
+    if (ch == 2)
+        for (int i = 0; i < n; i++) mono[i] = (int16_t)((st[2 * i] + st[2 * i + 1]) / 2);
+    A.mic_frames += n;
+    for (int i = 0; i < n; i++) {
+        int32_t v = mono[i] < 0 ? -mono[i] : mono[i];
+        if (v > A.mic_peak) A.mic_peak = v;
+    }
+    return n;
+}
+
+/* the capture ended: the card's microphone stream stops */
+void aos_p4_usb_mic_idle(void)
+{
+    if (!A.installed) return;
+    xSemaphoreTake(A.mx, portMAX_DELAY);
+    uac_host_device_handle_t h = A.in.h && A.in.streaming ? A.in.h : NULL;
+    xSemaphoreGive(A.mx);
+    if (!h) return;
+    uac_host_device_stop(h);
+    xSemaphoreTake(A.mx, portMAX_DELAY);
+    if (A.in.h == h) A.in.streaming = false;
+    xSemaphoreGive(A.mx);
+    /* how much came, and how loud: a card with nothing in its jack may send
+     * digital silence, which is not the same as nothing */
+    ESP_LOGI(TAG, "sound card microphone stopped: %u samples in (%u ms), peak %d", (unsigned)A.mic_frames,
+             (unsigned)(A.mic_frames / (RATE / 1000)), (int)A.mic_peak);
 }
 
 bool aos_hal_usb_audio_info(char *name, size_t n, bool *out, bool *in, bool *playing)

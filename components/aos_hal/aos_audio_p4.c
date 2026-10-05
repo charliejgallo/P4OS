@@ -2231,6 +2231,9 @@ static bool out_open(int16_t *stereo)
 bool aos_p4_usb_audio_out(void);
 void aos_p4_usb_audio_write(const int16_t *stereo, int frames, int volume);
 void aos_p4_usb_audio_idle(void);
+bool aos_p4_usb_mic_active(void);
+int  aos_p4_usb_mic_read(int16_t *mono, int frames);
+void aos_p4_usb_mic_idle(void);
 
 static void out_close(void)
 {
@@ -2635,6 +2638,7 @@ static void ain_task(void *arg)
     int      slot = 0;              /* MIC1 */
     bool     decided = false;
     int      errors = 0;
+    bool     usb_used = false;      /* a USB card's microphone took part */
 
     while (!s_ain_stop) {
         if (s_mic_gain_dirty) {
@@ -2653,6 +2657,19 @@ static void ain_task(void *arg)
             continue;
         }
         errors = 0;
+
+        /* A USB sound card's microphone, when there is one and it is wanted
+         * (aos_usb_uac_p4.c): its samples take the place of both slots. The
+         * codec's read above still paces the loop; unplugged, the board's
+         * microphones are back at the next block. */
+        if (aos_p4_usb_mic_active()) {
+            int got = aos_p4_usb_mic_read(mono, BUS_BLOCK);
+            for (int i = 0; i < BUS_BLOCK; i++) {
+                int16_t v = i < got ? mono[i] : got > 0 ? mono[got - 1] : 0;
+                raw[2 * i] = raw[2 * i + 1] = v;
+            }
+            usb_used = true;
+        }
 
         for (int i = 0; i < BUS_BLOCK; i++) {
             int32_t l = raw[2 * i], r = raw[2 * i + 1];
@@ -2691,11 +2708,13 @@ static void ain_task(void *arg)
     }
 
     esp_codec_dev_close(s_mic);
+    if (usb_used) aos_p4_usb_mic_idle();
     if (frames) {
-        ESP_LOGI(TAG, "capture: %lu ms, MIC1 mean %u peak %ld, MIC2 mean %u peak %ld, used MIC%d, "
+        ESP_LOGI(TAG, "capture: %lu ms, MIC1 mean %u peak %ld, MIC2 mean %u peak %ld, used %s%d, "
                       "%lu samples lost", (unsigned long)((uint64_t)frames * 1000 / BUS_RATE),
                  (unsigned)(sum[0] / frames), (long)pk[0], (unsigned)(sum[1] / frames),
-                 (long)pk[1], slot + 1, (unsigned long)s_cap_lost);
+                 (long)pk[1], usb_used ? "the USB card's microphone (both slots) and MIC" : "MIC", slot + 1,
+                 (unsigned long)s_cap_lost);
     }
     free(raw);
     free(mono);
