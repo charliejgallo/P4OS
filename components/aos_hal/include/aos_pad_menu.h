@@ -44,9 +44,10 @@ static inline bool aos_pad_menu_usable_(lv_obj_t *o)
            !lv_obj_has_state(o, LV_STATE_DISABLED);
 }
 
+/* (also on a hidden button: it must not come back with an old outline) */
 static inline void aos_pad_menu_mark_(aos_pad_menu_t *m, bool on)
 {
-    if (m->sel >= m->n || !aos_pad_menu_usable_(m->item[m->sel])) return;
+    if (m->sel >= m->n || !m->item[m->sel] || !lv_obj_is_valid(m->item[m->sel])) return;
     lv_obj_t *o = m->item[m->sel];
     lv_obj_set_style_outline_width(o, on ? 5 : 0, 0);
     lv_obj_set_style_outline_pad(o, on ? 4 : 0, 0);
@@ -81,14 +82,31 @@ static inline lv_obj_t *aos_pad_menu_selected(const aos_pad_menu_t *m)
 static inline bool aos_pad_menu_step(aos_pad_menu_t *m, const aos_pad_t *p)
 {
     if (!m->n) return false;
+    if (!aos_pad_menu_usable_(m->item[m->sel])) {
+        /* the selected one went away (a buy button hidden once bought): the
+         * outline moves at once to the nearest one usable, or the first */
+        lv_obj_t *gone = m->item[m->sel];
+        bool where = gone && lv_obj_is_valid(gone);
+        lv_area_t g = { 0 };
+        if (where) lv_obj_get_coords(gone, &g);
+        int32_t best = INT32_MAX, bi = -1;
+        for (int i = 0; i < m->n; i++) {
+            if (!aos_pad_menu_usable_(m->item[i])) continue;
+            if (!where) { bi = i; break; }
+            lv_area_t b;
+            lv_obj_get_coords(m->item[i], &b);
+            int32_t dx = (b.x1 + b.x2 - g.x1 - g.x2) / 2, dy = (b.y1 + b.y2 - g.y1 - g.y2) / 2;
+            int32_t d = (dx < 0 ? -dx : dx) + (dy < 0 ? -dy : dy);
+            if (d < best) { best = d; bi = i; }
+        }
+        if (bi < 0) return false;
+        if (m->shown) aos_pad_menu_mark_(m, false);
+        m->sel = (uint8_t)bi;
+        if (m->shown) aos_pad_menu_mark_(m, true);
+    }
     uint32_t dirs = p->repeat & AOS_PAD_DIRS;
     bool click = aos_pad_pressed(p, AOS_PAD_A);
     if (!dirs && !click) return false;
-    if (!aos_pad_menu_usable_(m->item[m->sel])) {
-        /* the selected one went away: the first one usable */
-        for (m->sel = 0; m->sel < m->n && !aos_pad_menu_usable_(m->item[m->sel]); m->sel++) {}
-        if (m->sel >= m->n) { m->sel = 0; return false; }
-    }
     if (!m->shown) {
         /* the first press only shows where it is */
         m->shown = true;
