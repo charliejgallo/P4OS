@@ -24,10 +24,10 @@ en todos los juegos, lienzo retro por CPU). Lo que sigue:
 | Versión | Qué trae | Quién | Estado |
 |---|---|---|---|
 | **0.9.2** | El Programador graba por el host USB (EN/BOOT por RTS/DTR, y la secuencia de la USB-Serial-JTAG para C3/C6/S3/H2); entrar al portal desde afuera con el *subnet router* de Tailscale de Home Assistant (sólo documentación) | firmware | grabación probada con un ESP32 y un ESP32-C3 |
-| **0.10, "el taller"** | `aos_io_pwm_*` (LEDC y sigma-delta: el P4 no tiene DAC), `aos_io_ir_*` (RMT, leer y emitir crudo), `aos_io_twai_*` (CAN, con un transceptor de 3,3 V) | firmware | en curso |
-| | Apps **PWM** (perilla, servo, patrones), **IR** (aprender, guardar, mandar; códigos de SmartIR en un pack), **CAN** (espía del bus, enviar, grabar) | una sesión de app cada una, cuando su API esté | esperan su API |
+| **0.10, "el taller"** | `aos_io_pwm_*` (LEDC), `aos_io_dac_*` (sigma-delta: el P4 no tiene DAC), `aos_io_ir_*` (RMT, leer y emitir crudo), `aos_io_can_*` (CAN, con un transceptor de 3,3 V) | firmware | hecho y probado en la placa el 2026-10-05 (`docs/MODULES.md`) |
+| | Apps **PWM** (perilla, servo, patrones), **IR** (aprender, guardar, mandar; códigos de SmartIR en un pack), **CAN** (espía del bus, enviar, grabar) | una sesión de app cada una | listas para arrancar |
 | | Apps **EEPROM** (24xx, 25xx, 93xx, con versiones y checksums) y **Dibujo** | sesiones de app, sin firmware | listas para arrancar |
-| **0.11** | **VNC**: el visor como app que se instala (mouse y teclado USB), después el servidor (necesita firmware) | app, luego firmware | |
+| **0.11** | **VNC**: el visor como app que se instala (mouse y teclado USB), después el servidor (necesita firmware) | app, luego firmware | el visor, listo para arrancar (no necesita firmware) |
 | sin fecha | Tailscale dentro de la placa: no hay cliente oficial para ESP32; WireGuard (componente para ESP-IDF) contra un servidor propio es la alternativa | investigar | |
 
 Hardware para probar el taller: receptores y emisores IR, LEDs y servos
