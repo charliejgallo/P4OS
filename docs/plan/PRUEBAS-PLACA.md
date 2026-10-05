@@ -438,7 +438,9 @@ por el Registro del portal sin cable serie)
 - [x] Adaptador CH340 (1a86:7523, "USB2.0-Serial") en 25/27 (2026-10-04):
       listado como `usb0`, abierto por el servicio serie a 115200 y 13
       bytes mandados (`/api/serial/send`).
-- [ ] Recepción por `usb0` (TX y RX puenteados, o un equipo conectado).
+- [x] Recepción por `usb0` con TX y RX puenteados (2026-10-04): eco
+      idéntico (UTF-8 incluido) y los mismos bytes recibidos que enviados
+      a 115200, 9600 y 921600 baudios.
 - [ ] Arduino (CDC-ACM), CP210x, FTDI.
 - [ ] Webcam en Cámaras (en 25/27).
 - [x] **Hub** de 7 puertos (dos chips de 4 encadenados) en 21/23 con el
