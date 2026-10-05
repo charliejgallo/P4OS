@@ -34,7 +34,11 @@ enum {
     DP_BTN_MAP,
     DP_BTN_WEAPON,
     DP_BTN_STRAFE,  /* held down in Doom while the app has it latched */
-    DP_BTN_N
+    DP_BTN_N,       /* the ones on the screen */
+    /* a USB gamepad's own, with nothing on the screen: L and R sidestep */
+    DP_BTN_STRAFE_L = DP_BTN_N,
+    DP_BTN_STRAFE_R,
+    DP_BTN_ALL
 };
 
 typedef enum {

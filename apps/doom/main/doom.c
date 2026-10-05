@@ -39,6 +39,12 @@
  * plays on, blitted into the buffer on screen as before, so the toast stays
  * where LVGL drew it.
  *
+ * A USB gamepad plays as well (aos_pad.h), through the same buttons as the
+ * fingers: the stick or the d-pad walks and turns (the arrows in a menu),
+ * A fires (Enter, 'y'), B uses (back, 'n'), START is MENU - held, out of
+ * Doom, as MENU is - L and R sidestep, and L and R together change weapon.
+ * A finger on the stick wins over the pad's.
+ *
  * The WAD is not in the app: the card's doom/ folder is searched for the
  * full game first and the shareware DOOM1.WAD last (port/dg_system.c). The
  * config and the saves go in the same folder.
@@ -50,6 +56,7 @@
 #include "aos_i18n.h"
 #include "aos_icon_ops.h"
 #include "aos_gesture.h"
+#include "aos_pad.h"
 #include "lvgl.h"
 
 #include "doom_port.h"
@@ -157,8 +164,14 @@ typedef struct {
     uint32_t    fdown[2];           /* when it landed */
     bool        strafe_on;          /* STRAFE is a latch: a tap on, a tap off */
     bool        menu_tap;           /* a MENU press from outside (back) */
-    bool        btn_on[DP_BTN_N];   /* what Doom was last told */
-    uint32_t    btn_ms[DP_BTN_N];   /* when it went down */
+    bool        btn_on[DP_BTN_ALL]; /* what Doom was last told */
+    uint32_t    btn_ms[DP_BTN_ALL]; /* when it went down */
+
+    /* a USB gamepad */
+    aos_pad_t   pad;
+    uint32_t    pad_want;           /* 1 << DP_BTN_* the pad holds down */
+    uint32_t    pad_start_ms;       /* when START went down */
+    bool        pad_stick;          /* the pad's stick is off the middle */
 
     int         dbx, dby;           /* where the base was last drawn, 0,0 none */
 
@@ -420,7 +433,8 @@ static int claim(app_t *a, int x, int y, int other_owner)
 
 static void pad_apply(app_t *a)
 {
-    bool want[DP_BTN_N] = { false };
+    bool want[DP_BTN_ALL] = { false };
+    for (int b = 0; b < DP_BTN_ALL; b++) want[b] = (a->pad_want >> b) & 1u;
     for (int i = 0; i < 2; i++) {
         if (a->fown[i] == OWN_PICTURE) {
             want[DP_BTN_FIRE] = true;
@@ -434,7 +448,7 @@ static void pad_apply(app_t *a)
         want[DP_BTN_MENU] = true;       /* MIN_PRESS_MS lets it go below */
     }
     uint32_t now = (uint32_t)aos_hal_uptime_ms();
-    for (int b = 0; b < DP_BTN_N; b++) {
+    for (int b = 0; b < DP_BTN_ALL; b++) {
         if (!want[b] && a->btn_on[b] && now - a->btn_ms[b] < MIN_PRESS_MS) {
             want[b] = true;         /* held a moment longer; pad_poll comes back in 8 ms */
         }
@@ -458,7 +472,47 @@ static void pad_release_all(app_t *a)
         a->fid[i] = 0;
     }
     a->strafe_on = false;
+    a->pad_want = 0;
+    if (a->pad_stick) {
+        dp_stick(0, 0);
+        a->pad_stick = false;
+    }
     pad_apply(a);
+}
+
+/* The gamepad, read once a tick into what pad_apply() sends with the
+ * fingers' buttons, and into the stick unless a thumb has the one on the
+ * screen. The d-pad pushes the stick all the way; an analogue stick as far
+ * as it goes, the engine's own dead zone and curve taking it from there. */
+static void gamepad_poll(app_t *a, uint32_t now)
+{
+    aos_pad_update(&a->pad, lv_tick_get());
+    const aos_pad_t *p = &a->pad;
+    uint32_t w = 0;
+    if (p->held & AOS_PAD_A) w |= 1u << DP_BTN_FIRE;
+    if (p->held & AOS_PAD_B) w |= 1u << DP_BTN_USE;
+    if (p->held & AOS_PAD_START) w |= 1u << DP_BTN_MENU;
+    bool l = p->held & AOS_PAD_L, r = p->held & AOS_PAD_R;
+    if (l && r) w |= 1u << DP_BTN_WEAPON;
+    else if (l) w |= 1u << DP_BTN_STRAFE_L;
+    else if (r) w |= 1u << DP_BTN_STRAFE_R;
+    a->pad_want = w;
+
+    if (p->pressed & AOS_PAD_START) a->pad_start_ms = now;
+    if ((p->held & AOS_PAD_START) && now - a->pad_start_ms >= MENU_HOLD_MS) a->want_exit = true;
+
+    if (a->fown[0] == OWN_STICK || a->fown[1] == OWN_STICK) return;
+    int x = p->x * 100 / 32767, y = p->y * 100 / 32767;
+    if (x > -8 && x < 8) x = 0;
+    if (y > -8 && y < 8) y = 0;
+    if (p->held & AOS_PAD_LEFT) x = -100;
+    if (p->held & AOS_PAD_RIGHT) x = 100;
+    if (p->held & AOS_PAD_UP) y = -100;
+    if (p->held & AOS_PAD_DOWN) y = 100;
+    if (x || y || a->pad_stick) {
+        dp_stick(x, y);
+        a->pad_stick = x || y;
+    }
 }
 
 static void pad_poll(app_t *a)
@@ -490,6 +544,7 @@ static void pad_poll(app_t *a)
             a->want_exit = true;
         }
     }
+    gamepad_poll(a, now);
     pad_apply(a);
 }
 
@@ -760,7 +815,12 @@ static void frame(lv_timer_t *t)
         aos_ui_home();                  /* destroy() stops the engine */
         return;
     }
-    if (!a->running) return;
+    if (!a->running) {
+        /* "tap to leave": A or START on the pad too */
+        aos_pad_update(&a->pad, lv_tick_get());
+        if (a->exit_on_tap && aos_pad_pressed(&a->pad, AOS_PAD_A | AOS_PAD_START)) a->want_exit = true;
+        return;
+    }
 
     dp_state_t st = dp_state();
     if (st == DP_QUIT) {

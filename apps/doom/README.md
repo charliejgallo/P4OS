@@ -114,6 +114,14 @@ fingers, and each finger owns what it landed on until it lifts.
   the bottom edge would go home, and a panel pulled down from the top would
   be hidden under the picture. They come back when Doom stops.
 
+**A USB gamepad** plays too, through the same buttons as the fingers
+(`gamepad_poll` in doom.c): the left stick or the d-pad walks and turns
+(the arrows in a menu), A is FIRE (Enter, *yes*), B is USE (back, *no*),
+START is MENU and held two seconds leaves, L and R sidestep (Doom's own
+strafe keys, `DP_BTN_STRAFE_L/_R`, which have no button on the screen) and
+L and R together are WEAPON. A thumb on the screen's stick wins over the
+pad's stick. There is no MAP on the pad: its button is on the screen.
+
 Sound effects and **the music** play through the speaker: Doom's own OPL2
 soundtrack, synthesised on the board. Doom's Sound menu sets both volumes,
 and the options (volumes, screen size, mouse sensitivity, which is the

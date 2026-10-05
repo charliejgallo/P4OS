@@ -20,6 +20,9 @@
  * it latched: with it down, G_BuildTiccmd turns the mouse's sideways motion
  * into a sidestep (side += mousex * 2) instead of a turn, so the stick walks
  * in all four directions and the view stays put.
+ *
+ * A gamepad's L and R (DP_BTN_STRAFE_L/_R) are Doom's sidestep keys in a
+ * level and nothing in a menu.
  */
 #include "doomtype.h"
 #include "doomkeys.h"
@@ -64,7 +67,7 @@ void dp_stick(int x, int y)
 static uint8_t  s_pend_key[PENDING];
 static uint8_t  s_pend_down[PENDING];
 static int      s_pend_n;
-static uint8_t  s_sent[DP_BTN_N];           /* the key each held button sent */
+static uint8_t  s_sent[DP_BTN_ALL];           /* the key each held button sent */
 static int      s_arrow;                    /* the arrow the stick holds, 0 none */
 static uint32_t s_arrow_next;               /* when it repeats */
 
@@ -74,7 +77,7 @@ void dg_input_reset(void)
     s_stick_x = s_stick_y = 0;
     s_pend_n = 0;
     s_arrow = 0;
-    for (int i = 0; i < DP_BTN_N; i++) s_sent[i] = 0;
+    for (int i = 0; i < DP_BTN_ALL; i++) s_sent[i] = 0;
 }
 
 static void pend(int key, bool down)
@@ -96,6 +99,8 @@ static int translate(int btn)
     case DP_BTN_MAP:    return KEY_TAB;
     case DP_BTN_WEAPON: return key_nextweapon ? key_nextweapon : ']';
     case DP_BTN_STRAFE: return key_strafe;
+    case DP_BTN_STRAFE_L: return ms ? 0 : key_strafeleft;
+    case DP_BTN_STRAFE_R: return ms ? 0 : key_straferight;
     }
     return 0;
 }
@@ -107,11 +112,11 @@ static void drain_ring(void)
         int btn = s_ring_btn[t % RING];
         bool down = s_ring_down[t % RING];
         __atomic_store_n(&s_tail, t + 1, __ATOMIC_RELEASE);
-        if (btn >= DP_BTN_N) continue;
+        if (btn >= DP_BTN_ALL) continue;
         if (down) {
             if (s_sent[btn]) pend(s_sent[btn], false);
             s_sent[btn] = (uint8_t)translate(btn);
-            pend(s_sent[btn], true);
+            if (s_sent[btn]) pend(s_sent[btn], true);
         } else if (s_sent[btn]) {
             pend(s_sent[btn], false);
             s_sent[btn] = 0;
