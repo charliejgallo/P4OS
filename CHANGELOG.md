@@ -5,7 +5,9 @@
 - **The Programmer flashes through the USB host:** the host's USB serial
   ports (`usb0`...) are in its list, in the app and the portal, and an
   ESP32 dev board goes into its bootloader by itself through RTS and DTR,
-  as esptool does (docs/USB.md).
+  as esptool does (docs/USB.md). A C3, C6, S3 or H2 on its own USB
+  (USB-Serial-JTAG) gets the sequence its USB logic decodes.
+- Espressif's USB-Serial-JTAG no longer shows a "?" after its name.
 
 ## 0.9.1 — 2026-10-05
 

@@ -37,17 +37,22 @@ takes keys while its keyboard is up).
 
 ## hola_esp32
 
-An ESP-IDF project for a classic ESP32, to try the Programmer and the
-Terminal through the USB host: it says hello on UART0 when it starts and
+An ESP-IDF project for an ESP32, to try the Programmer and the Terminal
+through the USB host: it says hello on the console when it starts and
 `Hola mundo <n>` every two seconds, and answers each line it gets with
 `Recibido: <line>`.
 
     cd tools/usb_test/hola_esp32
     idf.py set-target esp32 && idf.py build
 
+The console is UART0, a dev board's USB-serial converter; on a chip with
+its own USB (C3, C6, S3) `sdkconfig.defaults.<target>` moves it to the
+USB-Serial-JTAG (`idf.py set-target esp32c3`).
+
 Then `build/flasher_args.json` and the three bins it names
 (`bootloader/bootloader.bin`, `partition_table/partition-table.bin`,
 `hola_esp32.bin`) go to a folder under `/firmware` on the card, keeping
 those paths, and the Programmer lists it. Tried on 2026-10-05 with an
 ESP32 dev board on a CP2102 at `usb0`: written and verified in 6.6 s at
-460800 baud, with no button pressed, and read back in the Terminal.
+460800 baud, with no button pressed, and read back in the Terminal; and
+with an ESP32-C3 on its own USB: 1.5 s.

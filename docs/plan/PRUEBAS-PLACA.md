@@ -52,7 +52,10 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       descarga por RTS/DTR; detectado en 0,8 s y grabado con
       `tools/usb_test/hola_esp32` (200 KB a 460800, MD5 bien, 6,6 s). La
       Terminal en `usb0` leyó los "Hola mundo" y le mandó texto (volvió
-      "Recibido"). Falta: chips con USB propio (S3/C3/C6), otra secuencia.
+      "Recibido"). Y un ESP32-C3 por su USB-Serial-JTAG (otra secuencia de
+      DTR/RTS): detectado en 0,5 s, grabado en 1,5 s, leído en la Terminal.
+      Su firmware viejo se reiniciaba cada 2,7 s: el Programador espera
+      hasta 3 s a que el puerto vuelva.
 - [ ] El cuelgue del primer arranque tras algunas OTA: dos volcados el
       2026-10-04 con `strcmp` en `dlsym` cargando apps (handoff de sistema).
 

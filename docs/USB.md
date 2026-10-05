@@ -296,9 +296,17 @@ into its bootloader with no button. Tried on 2026-10-05 with an ESP32
 (v3.1, 4 MB) on a CP2102: detected in 0.8 s, and a test firmware
 (`tools/usb_test/hola_esp32`, 200 KB) written at 460800 baud, MD5-checked
 and restarted in 6.6 s; the Terminal then read it and wrote to it on
-`usb0`. A chip with its own USB
-(ESP32-S3, C3, C6 through USB-Serial-JTAG) needs esptool's other reset
-sequence, which is not here yet: put it in download mode by hand.
+`usb0`.
+
+A chip on its own USB (ESP32-C3, C6, S3, H2: Espressif's USB-Serial-JTAG,
+`303a:1001`) gets esptool's other sequence, the one the chip's USB logic
+decodes: DTR up, then RTS up through (1,1), then both down; it restarts
+into the ROM and stays on the bus. After the final reset it comes back as
+a new device, and the flasher waits up to 3 s for a port that is away.
+Tried with an ESP32-C3 (v0.4, 4 MB) whose old firmware restarted every
+2.7 s: detected in 0.5 s, the same test firmware written and verified in
+1.5 s (250 KB/s: USB, not the baud rate), then read and written in the
+Terminal.
 
 **Webcams**: MJPEG, at 1280 x 720 or the largest size below it that the
 camera has; the newest frame is copied for the Cameras app, which decodes
