@@ -173,6 +173,7 @@ typedef struct {
     aos_io_uart_t *u;
     uint64_t deadline;
     bool lines;
+    bool jtag;                      /* the target's own USB-Serial-JTAG */
 } fl_port_t;
 
 static esp_loader_error_t p_read(esp_loader_port_t *port, uint8_t *data, uint16_t size, uint32_t timeout)
@@ -213,6 +214,20 @@ static esp_loader_error_t p_write(esp_loader_port_t *port, const uint8_t *data, 
 static void p_enter_bootloader(esp_loader_port_t *port)
 {
     fl_port_t *p = container_of(port, fl_port_t, port);
+    if (p->jtag) {
+        /* esptool's USBJTAGSerialReset, step for step: the chip's USB logic
+         * resets it when RTS rises with DTR low, into the ROM if DTR was
+         * high just before. It goes through (1,1), never (0,0). */
+        aos_io_uart_dtr_rts(p->u, false, false);
+        aos_hal_sleep_ms(100);
+        aos_io_uart_dtr_rts(p->u, true, false);
+        aos_hal_sleep_ms(100);
+        aos_io_uart_dtr_rts(p->u, true, true);
+        aos_io_uart_dtr_rts(p->u, false, true);
+        aos_hal_sleep_ms(100);
+        aos_io_uart_dtr_rts(p->u, false, false);
+        return;
+    }
     if (!p->lines) return;
     aos_io_uart_lines(p->u, 0, 1);      /* held in reset, GPIO0 high */
     aos_hal_sleep_ms(RESET_HOLD_MS);
@@ -224,6 +239,13 @@ static void p_enter_bootloader(esp_loader_port_t *port)
 static void p_reset_target(esp_loader_port_t *port)
 {
     fl_port_t *p = container_of(port, fl_port_t, port);
+    if (p->jtag) {
+        /* RTS alone: a reset with DTR low, into the application */
+        aos_io_uart_dtr_rts(p->u, false, true);
+        aos_hal_sleep_ms(200);
+        aos_io_uart_dtr_rts(p->u, false, false);
+        return;
+    }
     if (!p->lines) return;
     aos_io_uart_lines(p->u, 0, 1);
     aos_hal_sleep_ms(RESET_HOLD_MS);
@@ -504,12 +526,14 @@ static bool run(ctx_t *c)
     c->P.port.ops = &PORT_OPS;
     c->P.u = c->u;
     c->P.lines = aos_io_uart_lines(c->u, -1, -1);
+    c->P.jtag = aos_io_uart_is_usb_jtag(c->u);
     lock();
     s_st.lines = c->P.lines;
     unlock();
     int en = -1, boot = -1;
     aos_io_port_lines(J.port, &en, &boot);
-    if (usb) logf_(L_INFO, "%s, EN por RTS y BOOT por DTR", aos_io_uart_desc(c->u));
+    if (c->P.jtag) logf_(L_INFO, "%s: la USB-Serial-JTAG del chip, se reinicia sola", aos_io_uart_desc(c->u));
+    else if (usb) logf_(L_INFO, "%s, EN por RTS y BOOT por DTR", aos_io_uart_desc(c->u));
     else if (c->P.lines) logf_(L_INFO, "%s, EN GPIO%d, BOOT GPIO%d", aos_io_uart_desc(c->u), en, boot);
     else if (en >= 0 || boot >= 0) logf_(L_WARN, "%s: EN/BOOT ocupados por %s", aos_io_uart_desc(c->u), aos_io_owner(en >= 0 ? en : boot) ? aos_io_owner(en >= 0 ? en : boot) : "otro");
     else logf_(L_WARN, "%s sin EN/BOOT: poné la placa en modo descarga (BOOT apretado y reset)", aos_io_uart_desc(c->u));

@@ -130,6 +130,11 @@ bool aos_io_uart_set_format(aos_io_uart_t *u, char parity, int stop_bits);
  * false: the port has no such lines (no module on it with en= or boot=),
  * or a pin is somebody else's. aos_io_uart_lines(u, -1, -1) just asks. */
 bool aos_io_uart_lines(aos_io_uart_t *u, int en, int boot);
+/* A USB port that is an ESP32-C3/C6/S3/H2's own USB-Serial-JTAG: its reset
+ * into the ROM is a sequence of DTR and RTS that the chip's USB logic
+ * decodes (no transistors), driven raw with aos_io_uart_dtr_rts. */
+bool aos_io_uart_is_usb_jtag(aos_io_uart_t *u);
+bool aos_io_uart_dtr_rts(aos_io_uart_t *u, bool dtr, bool rts);
 /* The EN and BOOT GPIOs modules.txt gives a port, -1 for a missing one;
  * false when it gives neither. For showing them, before opening anything. */
 bool aos_io_port_lines(const char *port, int *en_gpio, int *boot_gpio);

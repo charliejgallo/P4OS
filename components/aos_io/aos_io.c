@@ -339,6 +339,8 @@ aos_io_uart_t *aos_io_uart_open(const char *port, uint32_t baud, bool rs485, con
         snprintf(u->desc, sizeof u->desc, "%s %.40s", port, name);
         u->en_gpio = u->boot_gpio = -1;
         u->en = u->boot = 1;        /* EN and BOOT up: the board runs */
+        uint16_t vid = 0, pid = 0;
+        u->usb_jtag = aos_hal_usb_serial_ids(ui, &vid, &pid) && vid == 0x303A && pid == 0x1001;
         return u;
     }
     const aos_io_port_t *p = aos_io_port_find(port);
@@ -447,6 +449,16 @@ bool aos_io_uart_lines(aos_io_uart_t *u, int en, int boot)
     if (en >= 0) u->en = (int8_t)en;
     if (boot >= 0) u->boot = (int8_t)boot;
     return true;
+}
+
+bool aos_io_uart_is_usb_jtag(aos_io_uart_t *u)
+{
+    return u && u->usb >= 0 && u->usb_jtag;
+}
+
+bool aos_io_uart_dtr_rts(aos_io_uart_t *u, bool dtr, bool rts)
+{
+    return u && u->usb >= 0 && aos_hal_usb_serial_lines(u->usb, dtr, rts);
 }
 
 void aos_io_uart_close(aos_io_uart_t *u)

@@ -25,6 +25,7 @@ struct aos_io_uart {
     /* a USB serial port of the host ("usb0"): the HAL's handle, and no
      * backend nor pins; -1 for a UART */
     int16_t  usb;
+    bool     usb_jtag;              /* an Espressif chip's own USB-Serial-JTAG (303a:1001) */
 };
 
 struct aos_io_i2c {

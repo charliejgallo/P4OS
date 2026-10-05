@@ -313,6 +313,19 @@ int aos_hal_usb_serial_write(int h, const void *buf, int len)
     return cdc_acm_host_data_tx_blocking(S.s[h].cdc, buf, len, 500) == ESP_OK ? len : -1;
 }
 
+bool aos_hal_usb_serial_ids(int index, uint16_t *vid, uint16_t *pid)
+{
+    if (!S.installed) return false;
+    xSemaphoreTake(S.mx, portMAX_DELAY);
+    int i = slot_of(index);
+    if (i >= 0) {
+        if (vid) *vid = S.s[i].vid;
+        if (pid) *pid = S.s[i].pid;
+    }
+    xSemaphoreGive(S.mx);
+    return i >= 0;
+}
+
 bool aos_hal_usb_serial_lines(int h, bool dtr, bool rts)
 {
     if (h < 0 || h >= SER_MAX || !S.s[h].cdc || S.s[h].closed) return false;
