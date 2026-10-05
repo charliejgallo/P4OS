@@ -453,6 +453,18 @@ level through its RC filter, with a meter on it.
 
 ![PWM on the header: two LEDs, a servo and an analog level](img/taller-pwm.svg)
 
+Tried on the board on 2026-10-05, wired as drawn on a breadboard, all
+four channels at once from the PWM app:
+
+| Channel | Asked | What the hardware gives |
+|---|---|---|
+| LED 1, GPIO28 | 1 kHz, a sine pattern | 998 Hz, 15 bits |
+| LED 2, GPIO29 | 5 kHz, breathing | 5000 Hz, 12 bits |
+| Servo, GPIO32 | 50 Hz, 500-2500 us | 50 Hz, 19 bits; both ends and the sweep |
+| Analog, GPIO30 | 104/255 = 1.34 V | 1.313 V on a meter (-27 mV, 2 %), steady but for a few mV of breadboard noise |
+
+<img src="img/taller-pwm-banco.jpg" width="360" alt="The bench: the board, the breadboard with the LED, the RC filter and the meter reading 1.313 V">
+
 **A pin let go** (an output closed) rests at its off level through the
 weak pull: down, or up for an inverted PWM output. `gpio_reset_pin()`
 alone leaves the pull-up on, and a servo whose channel was switched off
