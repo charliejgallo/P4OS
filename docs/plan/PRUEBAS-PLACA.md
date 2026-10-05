@@ -450,7 +450,12 @@ por el Registro del portal sin cable serie)
 - [x] CP2102 de una placa ESP32 (10c4:ea60, 2026-10-04): con los búferes
       en RAM interna, nada hasta apretar EN y después el registro de
       arranque limpio (ROM, bootloader IDF 5.5.5, ESPHome), 5172 bytes.
-- [ ] FTDI.
+- [ ] FTDI (el Nano del usuario es un clon con CH340: no sirve para esto).
+- [x] **Raspberry Pi Pico** (2026-10-04): en BOOTSEL se montó en `/usb`
+      como disco; copiar MicroPython v1.29.0 (.uf2) ahí la programó (el
+      portal contesta error porque el disco se va antes de cerrar el
+      archivo: es la señal de que tomó). Volvió como CDC-ACM y su REPL
+      contestó comandos mandados desde la placa.
 - [x] **Webcam** Logitech C270 (046d:0825, sin nombre declarado) en 25/27
       (2026-10-04): MJPEG 640x480 (su máximo en MJPEG), 14-19 cuadros/s en
       la app Cámaras, decodificar 4-5 ms por cuadro, escalar a 720x540

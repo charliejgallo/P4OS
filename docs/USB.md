@@ -263,7 +263,17 @@ on the computer (MIDI thru).
 
 **Serial**: tried with a CH340 converter (loopback at 9600, 115200 and
 921600 baud), an Arduino Leonardo (CDC-ACM, with a keyboard on the same
-device: `tools/usb_test/`) and an ESP32 board's CP2102 (its boot log). Listed while plugged in, opened when the Terminal (or anyone
+device: `tools/usb_test/`), an ESP32 board's CP2102 (its boot log) and a
+Raspberry Pi Pico with MicroPython (its REPL: commands typed from the
+board, answers back).
+
+**A Pico (RP2040) is programmed from the board.** In BOOTSEL mode it is a
+mass storage device ("RP2 Boot", `INFO_UF2.TXT`), mounted at `/usb` like
+a pendrive: copying a `.uf2` there (`PUT /api/fs/put?path=/usb/x.uf2`, or
+Files in the portal) writes it, and the Pico restarts into it as the last
+block arrives. The copy then answers an error (the drive went away before
+the file was closed): that is the sign it took. Tried on 2026-10-04 with
+MicroPython v1.29.0 (680 KB, about 4 s); it came back as a CDC-ACM port. Listed while plugged in, opened when the Terminal (or anyone
 through aos_io) opens `usb0`; DTR and RTS go up on open, as a computer's
 terminal does (an Arduino resets, a CDC device that waits for a terminal
 starts sending). Received bytes wait in 16 KB of PSRAM.
