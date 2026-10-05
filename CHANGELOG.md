@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.9.1 — unreleased
+## 0.9.1 — 2026-10-05
 
 **A gamepad in every game** (docs/GAMEPAD.md)
 - A USB gamepad or joystick on the host plays every game from its title to
@@ -11,6 +11,8 @@
   (9/10), the D-pad or the stick. On the panels the D-pad moves an outline
   and A presses; it appears only once the pad is used, so touch looks the
   same as before.
+- The retro canvas presses its own buttons from the pad and lights them
+  (docs/RETRO.md); 0.9.0's notes promised it, but it went in after the tag.
 - `aos_pad.h` and `aos_pad_menu.h` (header only, no new firmware) for the
   apps; `aos.pad()` for the Lua scripts.
 - The simulator fakes a pad: `P4_SIM_PAD=1` (the keyboard) and the scripts'
