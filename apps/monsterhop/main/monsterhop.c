@@ -10,10 +10,12 @@
  *   - the screen turns: the worker makes the frames and the background
  *     cache again for the new shape (JOB_FIT) and the panels are laid out
  *     again (mh_ui_layout); a level being played pauses and carries on;
- *   - touch only: swipes hop, a tap hops up the screen, and the action (a
+ *   - touch: swipes hop, a tap hops up the screen, and the action (a
  *     lever, a crate, a chest, the super hop) is a button drawn in the
  *     frame, as are the pause and, if Ajustes says so, four arrows
- *     (touch_poll reads the panel's own samples, both fingers);
+ *     (touch_poll reads the panel's own samples, both fingers); a USB
+ *     gamepad does the same from its d-pad, A and START (gamepad_poll),
+ *     and goes through the panels' buttons (mh_ui_gamepad);
  *   - the key race needs the radio link, which the P4 does not have yet:
  *     the house only offers it when aos_hal_link_start() works.
  *
@@ -1321,6 +1323,50 @@ static void touch_poll(app_t *a)
     a->hs.act_lit = act;
 }
 
+/* A USB gamepad: up the screen is +Y, as the arrows drawn in the frame
+ * have it, so the d-pad's four ways are the grid's. A direction hops when
+ * pressed and, held, again as often as a held arrow (PAD_REPEAT_MS; a hop
+ * given mid-hop waits its turn in the game). A is the action, START the
+ * pause; any of A, B or START skips the fly-over. The panels take the rest
+ * (mh_ui_gamepad). Nothing while the system has something over the game. */
+static void gamepad_poll(app_t *a)
+{
+    aos_pad_t *p = &a->gp;
+    aos_pad_update(p, lv_tick_get());
+    if (!p->connected || a->closing || a->fitting || a->over) return;
+    if (a->state == ST_INTRO) {
+        if (aos_pad_pressed(p, AOS_PAD_A | AOS_PAD_B | AOS_PAD_START)) a->intro_skip = true;
+        return;
+    }
+    if (a->state != ST_PLAY) {
+        mh_ui_gamepad(a, p);
+        return;
+    }
+    if (aos_pad_pressed(p, AOS_PAD_START) && !a->lk_race) {
+        a->want_pause = true;
+        return;
+    }
+    if (aos_pad_pressed(p, AOS_PAD_A)) a->in_action = true;
+    static const uint32_t way[4] = { AOS_PAD_UP, AOS_PAD_RIGHT, AOS_PAD_DOWN, AOS_PAD_LEFT };   /* DIR_N.. */
+    int d = -1;
+    bool fresh = false;
+    for (int k = 0; k < 4 && d < 0; k++)
+        if (aos_pad_pressed(p, way[k])) {
+            d = k;
+            fresh = true;
+        }
+    for (int k = 0; k < 4 && d < 0; k++)
+        if (aos_pad_held(p, way[k])) d = k;
+    uint32_t now = lv_tick_get();
+    if (d >= 0 && (fresh || now - a->gp_hop_ms >= PAD_REPEAT_MS)) {
+        hop(a, d);
+        a->gp_hop_ms = now;
+    }
+    /* the drawn controls light up as if touched */
+    if (aos_pad_held(p, AOS_PAD_A)) a->hs.act_lit = true;
+    if (d >= 0) a->hs.pad_lit = (int8_t)d;
+}
+
 /* back, from a swipe right or the runtime */
 static bool go_back(app_t *a)
 {
@@ -1515,6 +1561,7 @@ static void frame(lv_timer_t *t)
         return;
     }
     touch_poll(a);
+    gamepad_poll(a);
     /* the screen turned: the worker makes the frames again between two of
      * them (or after the job it is on) */
     if (a->want_fit && a->job == JOB_NONE) {

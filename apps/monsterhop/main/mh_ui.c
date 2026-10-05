@@ -16,6 +16,7 @@
 #include "aos_fonts.h"
 #include "aos_hal.h"
 #include "aos_i18n.h"
+#include "aos_pad_menu.h"
 #include "aos_theme.h"
 #include "aos_ui.h"
 #include "src/misc/cache/instance/lv_image_cache.h"
@@ -374,6 +375,8 @@ typedef struct {
     lv_obj_t *m_scroll, *m_img, *m_pad[MH_SPOTS], *m_star[MH_LEVELS][3], *m_marker, *m_head;
     lv_obj_t *m_pop, *m_pop_title, *m_pop_body, *m_pop_play;
     int       m_pop_level;
+    lv_obj_t *m_back;
+    int       m_last;               /* the pad last clicked (the gamepad goes back to it) */
     /* map lying down: the level's card on the left, the zones on the right */
     lv_obj_t *m_emb, *m_zone, *m_title, *m_bstar[3], *m_info, *m_play;
     lv_obj_t *m_zemb[6], *m_zstars[6];
@@ -404,6 +407,13 @@ typedef struct {
     uint8_t   star_big[STAR_B * STAR_B * 3], star_big_off[STAR_B * STAR_B * 3];
     lv_image_dsc_t d_star_on, d_star_off, d_star_big, d_star_big_off;
     bool      link_checked, link_ok;
+    /* a USB gamepad: the buttons of the panel showing, handed over again
+     * when the state or its rows change (gp_dirty) */
+    aos_pad_menu_t gp_menu;
+    int       gp_state;
+    bool      gp_dirty;
+    lv_obj_t *backs[ST_N];          /* the back buttons: not where a page starts */
+    int       nbacks;
 } ui_t;
 
 static ui_t s_ui;
@@ -569,6 +579,7 @@ static lv_obj_t *back_button(lv_obj_t *p, int x, int y)
 {
     lv_obj_t *b = button(p, LV_SYMBOL_LEFT, x, y, 80, 80, 0x5A4A7A, back_cb, s_ui.a, NULL);
     lv_obj_set_style_radius(b, 40, 0);
+    if (s_ui.nbacks < ST_N) s_ui.backs[s_ui.nbacks++] = b;
     return b;
 }
 
@@ -722,11 +733,13 @@ static const struct { uint8_t zone, emblem; } s_wz[6] = {
 static void pop_close(void)
 {
     if (s_ui.m_pop) lv_obj_add_flag(s_ui.m_pop, LV_OBJ_FLAG_HIDDEN);
+    s_ui.gp_dirty = true;
 }
 
 static void play_level(app_t *a, int i)
 {
     pop_close();
+    s_ui.m_last = -1;               /* back on the map, the marker's level */
     mh_snd(SND_GO);
     mha_level_start(a, i);
 }
@@ -794,12 +807,11 @@ static void map_scroll_to(app_t *a, int i, bool anim)
     lv_obj_scroll_to_y(s_ui.m_scroll, want, anim ? LV_ANIM_ON : LV_ANIM_OFF);
 }
 
-static void zone_cb(lv_event_t *e)
+/* a zone of the side list: its next level chosen and in view (-1 none) */
+static int zone_go(app_t *a, int k)
 {
-    app_t *a = app_of(e);
-    int k = (int)(intptr_t)lv_obj_get_user_data(lv_event_get_current_target(e));
     int first = mh_zone_first(s_wz[k].zone);
-    if (first < 0) return;
+    if (first < 0) return -1;
     mh_snd(SND_SELECT);
     /* the zone's next level to play, else its first */
     int pick = first;
@@ -811,6 +823,12 @@ static void zone_cb(lv_event_t *e)
     }
     side_select(a, pick);
     map_scroll_to(a, pick, true);
+    return pick;
+}
+
+static void zone_cb(lv_event_t *e)
+{
+    zone_go(app_of(e), (int)(intptr_t)lv_obj_get_user_data(lv_event_get_current_target(e)));
 }
 
 static void pad_cb(lv_event_t *e)
@@ -818,6 +836,7 @@ static void pad_cb(lv_event_t *e)
     app_t *a = app_of(e);
     int i = (int)(intptr_t)lv_obj_get_user_data(lv_event_get_target(e));
     mh_snd(SND_SELECT);
+    s_ui.m_last = i;
     if (i == MH_LEVELS) {
         mha_set_state(a, ST_HOUSE);
         return;
@@ -849,6 +868,7 @@ static void pad_cb(lv_event_t *e)
     lv_label_set_text(s_ui.m_pop_body, b);
     lv_obj_remove_flag(s_ui.m_pop, LV_OBJ_FLAG_HIDDEN);
     lv_obj_move_foreground(s_ui.m_pop);
+    s_ui.gp_dirty = true;
 }
 
 static void build_map(app_t *a)
@@ -903,7 +923,7 @@ static void build_map(app_t *a)
         lv_obj_set_style_bg_color(hd, lv_color_hex(0x000000), 0);
         lv_obj_set_style_bg_opa(hd, 150, 0);
         lv_obj_remove_flag(hd, LV_OBJ_FLAG_SCROLLABLE);
-        back_button(hd, 16, 12);
+        s_ui.m_back = back_button(hd, 16, 12);
         lv_obj_t *hl = label(hd, "", aos_font_body, 0xFFD060, 110, 34, W - 130);
         lv_obj_set_user_data(hd, hl);
         /* the level's card */
@@ -928,7 +948,7 @@ static void build_map(app_t *a)
         /* the level's card on the left, the zones on the right */
         int sw = mx - 24;
         lv_obj_t *c = box(p, 12, 12, sw, H - 24, 240);
-        back_button(c, 12, 12);
+        s_ui.m_back = back_button(c, 12, 12);
         s_ui.m_emb = image(c, NULL, 0, 0);
         lv_obj_set_size(s_ui.m_emb, 188, 188);
         lv_obj_set_pos(s_ui.m_emb, (sw - 188) / 2, 16);
@@ -979,6 +999,7 @@ static int next_level(const app_t *a)
 
 static void map_refresh(app_t *a)
 {
+    s_ui.gp_dirty = true;
     if (s_ui.m_head) {
         char b[64];
         coins_text(b, sizeof b, a);
@@ -1220,6 +1241,7 @@ static void item_cb(lv_event_t *e)
 static void shop_list(app_t *a)
 {
     lv_obj_clean(s_ui.s_list);
+    s_ui.gp_dirty = true;
     int cat = s_ui.s_cat;
     int rw = lv_obj_get_width(s_ui.s_list);
     for (int i = 0; i < mh_shop_count(cat); i++) {
@@ -1284,10 +1306,9 @@ static void tabs_paint(void)
     }
 }
 
-static void tab_cb(lv_event_t *e)
+static void tab_pick(app_t *a, int cat)
 {
-    app_t *a = app_of(e);
-    s_ui.s_cat = (int)(intptr_t)lv_obj_get_user_data(lv_event_get_current_target(e));
+    s_ui.s_cat = cat;
     s_ui.s_sel = a->prog.eq[s_ui.s_cat];
     memcpy(a->try_eq, a->prog.eq, sizeof a->try_eq);
     tabs_paint();
@@ -1295,6 +1316,11 @@ static void tab_cb(lv_event_t *e)
     shop_btn_refresh(a);
     shop_list(a);
     shop_preview_job(a);
+}
+
+static void tab_cb(lv_event_t *e)
+{
+    tab_pick(app_of(e), (int)(intptr_t)lv_obj_get_user_data(lv_event_get_current_target(e)));
 }
 
 static void build_shop(app_t *a)
@@ -1382,6 +1408,7 @@ static void build_album(app_t *a)
 static void album_refresh(app_t *a)
 {
     lv_obj_clean(s_ui.al_grid);
+    s_ui.gp_dirty = true;
     int cw = card_w(), ch = card_h();
     for (int i = 0; i < MH_LEVELS; i++) {
         bool got = (a->prog.stickers & (1u << i)) != 0;
@@ -1951,6 +1978,9 @@ static void build_all(app_t *a)
     for (int k = 0; k < 3; k++) s_ui.turn_cv[k] = NULL;
     s_ui.m_head = s_ui.m_pop = NULL;
     s_ui.m_sel = -1;
+    s_ui.m_last = -1;
+    s_ui.nbacks = 0;
+    s_ui.gp_dirty = true;
     build_title(a);
     build_map(a);
     build_house(a);
@@ -1997,6 +2027,7 @@ void mh_ui_layout(app_t *a)
 
 void mh_ui_show(app_t *a, int st)
 {
+    s_ui.gp_state = -1;             /* the gamepad starts the panel afresh */
     for (int i = 0; i < ST_N; i++) {
         if (s_ui.p[i] && i != st) lv_obj_add_flag(s_ui.p[i], LV_OBJ_FLAG_HIDDEN);
     }
@@ -2049,6 +2080,7 @@ void mh_ui_before_job(app_t *a, int what)
         /* the album and the trophies are rebuilt each time they are shown */
         lv_obj_clean(s_ui.al_grid);
         lv_obj_clean(s_ui.tr_list);
+        s_ui.gp_dirty = true;
         mh_uimg_t *all[] = { &a->ui_map, &a->ui_logo, &a->ui_house };
         for (size_t i = 0; i < sizeof all / sizeof all[0]; i++)
             if (all[i]->buf) lv_image_cache_drop(&all[i]->dsc);
@@ -2092,6 +2124,158 @@ void mh_ui_tick(app_t *a, int dt_ms)
             s_ui.turn_frame = (s_ui.turn_frame + 1) % 12;
             turn_draw(a);
         }
+    }
+}
+
+/* ---- a USB gamepad (aos_pad_menu.h) ---- */
+
+/* the buttons under o, in the order they were built: what reacts to a
+ * click (an event of its own); a hidden box and what is inside are not */
+static void gp_collect(lv_obj_t *o, lv_obj_t **it, int *n)
+{
+    uint32_t cnt = lv_obj_get_child_count(o);
+    for (uint32_t k = 0; k < cnt && *n < AOS_PAD_MENU_MAX; k++) {
+        lv_obj_t *c = lv_obj_get_child(o, (int32_t)k);
+        if (lv_obj_has_flag(c, LV_OBJ_FLAG_CLICKABLE) && lv_obj_get_event_count(c)) it[(*n)++] = c;
+        else if (!lv_obj_has_flag(c, LV_OBJ_FLAG_HIDDEN)) gp_collect(c, it, n);
+    }
+}
+
+static bool gp_is_back(const lv_obj_t *o)
+{
+    for (int i = 0; i < s_ui.nbacks; i++)
+        if (s_ui.backs[i] == o) return true;
+    return false;
+}
+
+/* The panel's buttons to the pad's menu. On the same panel the one chosen
+ * stays chosen if it is still there; else the one the panel suggests (the
+ * map: the marker's level, or the one last opened; the shop: the row tried
+ * on), else the same place, else the first that is not a back button. */
+static void gp_items(app_t *a)
+{
+    int n = 0, st = a->state;
+    bool same = s_ui.gp_state == st;
+    lv_obj_t *it[AOS_PAD_MENU_MAX], *keep = same ? aos_pad_menu_selected(&s_ui.gp_menu) : NULL, *want = NULL;
+    int was = same ? s_ui.gp_menu.sel : -1;
+    s_ui.gp_dirty = false;
+    s_ui.gp_state = st;
+    if (st == ST_MAP && s_ui.m_pop && !lv_obj_has_flag(s_ui.m_pop, LV_OBJ_FLAG_HIDDEN)) {
+        gp_collect(s_ui.m_pop, it, &n);
+        want = s_ui.m_pop_play;
+        was = -1;
+    } else if (st == ST_MAP) {
+        /* the levels and the house; not the zones to come (a toast), and
+         * lying down the zones' list is L/R */
+        it[n++] = s_ui.m_back;
+        for (int i = 0; i <= MH_LEVELS; i++) it[n++] = s_ui.m_pad[i];
+        if (s_ui.land) it[n++] = s_ui.m_play;
+        int i = s_ui.land && s_ui.m_sel >= 0 ? s_ui.m_sel : s_ui.m_last >= 0 ? s_ui.m_last : next_level(a);
+        want = s_ui.m_pad[i];
+    } else if (st >= 0 && st < ST_N && s_ui.p[st]) {
+        gp_collect(s_ui.p[st], it, &n);
+        if (st == ST_SHOP) {
+            uint32_t rows = lv_obj_get_child_count(s_ui.s_list);
+            for (uint32_t k = 0; k < rows; k++) {
+                lv_obj_t *r = lv_obj_get_child(s_ui.s_list, (int32_t)k);
+                if ((int)(intptr_t)lv_obj_get_user_data(r) == s_ui.s_sel) want = r;
+            }
+        }
+    }
+    int sel = -1;
+    for (int i = 0; i < n && sel < 0; i++)
+        if (keep && it[i] == keep) sel = i;
+    for (int i = 0; i < n && sel < 0; i++)
+        if (want && it[i] == want) sel = i;
+    if (sel < 0 && was >= 0 && was < n) sel = was;
+    for (int i = 0; i < n && sel < 0; i++)
+        if (!gp_is_back(it[i])) sel = i;
+    aos_pad_menu_set(&s_ui.gp_menu, it, n, sel);
+}
+
+/* the outline onto o (a button of the menu), shown, in view */
+static void gp_select(lv_obj_t *o)
+{
+    for (int i = 0; i < s_ui.gp_menu.n; i++) {
+        if (s_ui.gp_menu.item[i] != o) continue;
+        s_ui.gp_menu.shown = true;
+        aos_pad_menu_set(&s_ui.gp_menu, s_ui.gp_menu.item, s_ui.gp_menu.n, i);
+        lv_obj_scroll_to_view_recursive(o, LV_ANIM_ON);
+        return;
+    }
+}
+
+/* the zone of the side list holding level i */
+static int gp_zone_of(int i)
+{
+    int z = i >= 0 && i < MH_LEVELS ? mha_level_info(i)->zone : ZONE_CITY;
+    for (int k = 0; k < 6; k++)
+        if (s_wz[k].zone == z) return k;
+    return 0;
+}
+
+void mh_ui_gamepad(app_t *a, const aos_pad_t *p)
+{
+    int st = a->state;
+    if (st == ST_BOOT || st == ST_LOADING) return;
+    if (s_ui.gp_dirty || s_ui.gp_state != st) gp_items(a);
+    bool pop = st == ST_MAP && s_ui.m_pop && !lv_obj_has_flag(s_ui.m_pop, LV_OBJ_FLAG_HIDDEN);
+    if (aos_pad_pressed(p, AOS_PAD_START)) {
+        if (st == ST_MENU) {
+            mh_snd(SND_SELECT);
+            mha_set_state(a, ST_MAP);
+            return;
+        }
+        if (st == ST_PAUSE) {
+            mha_resume(a);
+            return;
+        }
+    }
+    if (aos_pad_pressed(p, AOS_PAD_B)) {
+        /* the panel's back; the title has none (the app is the system's) */
+        if (pop) pop_close();
+        else if (st != ST_MENU) {
+            mh_snd(SND_SELECT);
+            mha_back(a);
+        }
+        return;
+    }
+    int lr = aos_pad_pressed(p, AOS_PAD_L) ? -1 : aos_pad_pressed(p, AOS_PAD_R) ? 1 : 0;
+    if (lr && st == ST_SHOP) {
+        tab_pick(a, (s_ui.s_cat + lr + CAT_N) % CAT_N);
+        lv_obj_t *t = lv_obj_get_child(s_ui.s_tabs, s_ui.s_cat);
+        if (t) gp_select(t);
+        return;
+    }
+    if (lr && st == ST_MAP && !pop) {
+        /* the next zone or the one before, at its next level */
+        lv_obj_t *cur = aos_pad_menu_selected(&s_ui.gp_menu);
+        int at = -1;
+        for (int i = 0; i < MH_LEVELS; i++)
+            if (s_ui.m_pad[i] == cur) at = i;
+        if (at < 0) at = s_ui.m_sel >= 0 ? s_ui.m_sel : next_level(a);
+        int k = (gp_zone_of(at) + lr + 6) % 6, pick = zone_go(a, k);
+        if (pick < 0) return;
+        s_ui.m_last = pick;
+        gp_select(s_ui.m_pad[pick]);
+        return;
+    }
+    if (lr && st == ST_LOBBY && a->is_host) {
+        mh_snd(SND_SELECT);
+        mhl_pick(a, lr);
+        return;
+    }
+    /* the trophies are a list to read: the d-pad scrolls it */
+    if (st == ST_TROPHIES && aos_pad_repeat(p, AOS_PAD_UP | AOS_PAD_DOWN)) {
+        lv_obj_scroll_by_bounded(s_ui.tr_list, 0, aos_pad_repeat(p, AOS_PAD_UP) ? 240 : -240, LV_ANIM_ON);
+        return;
+    }
+    aos_pad_menu_step(&s_ui.gp_menu, p);
+    /* lying down, the level under the outline is the card's */
+    if (st == ST_MAP && s_ui.land && !pop) {
+        lv_obj_t *cur = aos_pad_menu_selected(&s_ui.gp_menu);
+        for (int i = 0; i < MH_LEVELS; i++)
+            if (s_ui.m_pad[i] == cur && i != s_ui.m_sel) side_select(a, i);
     }
 }
 

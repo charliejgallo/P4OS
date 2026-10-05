@@ -13,6 +13,8 @@
  */
 #pragma once
 
+#include "aos_pad.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -27,6 +29,9 @@ void mh_ui_layout(app_t *a);
 void mh_ui_show(app_t *a, int state);           /* the panel of a state      */
 void mh_ui_tick(app_t *a, int dt_ms);
 void mh_ui_free(app_t *a);
+/* a USB gamepad on the panel showing, every tick (the play's own input is
+ * monsterhop.c's): the d-pad through its buttons, A clicks, B goes back */
+void mh_ui_gamepad(app_t *a, const aos_pad_t *p);
 
 /* the worker's half of a picture job, and the LVGL half once it is done */
 void mh_ui_job(app_t *a, int what);

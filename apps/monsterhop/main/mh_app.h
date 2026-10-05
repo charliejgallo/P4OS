@@ -22,6 +22,7 @@
 #pragma once
 
 #include "aos_app.h"
+#include "aos_pad.h"
 
 #include "mh_art.h"
 #include "mh_cast.h"
@@ -164,6 +165,8 @@ struct app {
     mh_track_t  tk[2];              /* a finger each                          */
     uint32_t    last_hop_ms;
     volatile bool want_pause, want_map;
+    aos_pad_t   gp;                 /* a USB gamepad, read once a tick        */
+    uint32_t    gp_hop_ms;          /* when a held direction last hopped      */
     mh_post_t   post;               /* the zone's airborne bits               */
 
     /* the player */

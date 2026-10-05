@@ -106,7 +106,7 @@ what it gets every 2 s while playing (portal `/api/log`):
 mhop: 24.8 fps 720x1280, render 31 ms, push 4400 us
 ```
 
-## Playing: touch only
+## Playing: touch, or a USB gamepad
 
 - **Swipe** to hop one cell that way (the most aligned of the grid's four
   ways); a **tap** hops up the screen. The fingers are read from the panel's
@@ -123,6 +123,22 @@ mhop: 24.8 fps 720x1280, render 31 ms, push 4400 us
 
 The panels have a back button in their corner; a swipe to the right does
 the same.
+
+**A USB gamepad** (`aos_pad.h`) plays it all without touching the screen:
+
+| | |
+| --- | --- |
+| D-pad / left stick | hop along the grid (up the screen is +Y, as the drawn arrows); held, it keeps hopping every 260 ms |
+| A | the action (the gold button); on the panels, the outlined button |
+| START | pause and resume; on the title, Jugar |
+| B | back on every panel (closes the map's level card); the title has none |
+| L / R | the shop's tabs, the map's zones, the race's level |
+
+On the panels the d-pad moves a white outline to the nearest button that
+way (`aos_pad_menu.h`; it only shows once the pad is used), A clicks it;
+the trophies' list scrolls instead. Lying down, the level under the
+outline on the map is the card's, and A plays it. Any of A, B or START
+skips the fly-over.
 
 ## Both orientations
 
