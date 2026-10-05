@@ -8,7 +8,9 @@
  *
  * I2C: the board bus answers where the board's chips are; "i2c.ext" answers
  * at the addresses in P4_SIM_I2C_EXT (default 0x76,0x44: a BME280 and an
- * SHT3x). GPIO: levels kept in memory, inputs with pull-up read 1. On top
+ * SHT3x). EEPROMs (eeprom_sim.c, P4_SIM_EEPROM: a 24LC256 at 0x50 unless
+ * told otherwise) answer on every port but the board's, and so do 25xx on
+ * SPI and a 93xx on GPIOs when configured. GPIO: levels kept in memory, inputs with pull-up read 1. On top
  * of that, sensors_sim.c's emulated sensors (P4_SIM_SENSORS) answer on every
  * port but the board's with their chips' real protocols, and win over the
  * plain register blobs at their addresses.
@@ -236,10 +238,18 @@ bool aos_io_be_i2c_open(aos_io_i2c_t *b) { (void)b; return true; }
 bool sim_sensors_has(uint8_t addr);
 bool sim_sensors_xfer(uint8_t addr, const uint8_t *w, size_t wn, uint8_t *r, size_t rn);
 
+/* eeprom_sim.c */
+bool sim_ee24_has(uint8_t addr);
+bool sim_ee24_xfer(uint8_t addr, const uint8_t *w, size_t wn, uint8_t *r, size_t rn);
+int  sim_ee25_type(const char *name, size_t len);
+void sim_ee25_xfer(int type, const uint8_t *tx, uint8_t *rx, size_t n);
+void sim_ee93_gpio_set(int gpio, int level);
+bool sim_ee93_gpio_get(int gpio, int *level);
+
 bool aos_io_be_i2c_probe(aos_io_i2c_t *b, uint8_t addr)
 {
     if (!strcmp(b->port->name, "i2c.board")) return addr == 0x5D || addr == 0x18 || addr == 0x40;
-    return sim_sensors_has(addr) || ext_has(addr);
+    return sim_ee24_has(addr) || sim_sensors_has(addr) || ext_has(addr);
 }
 
 /* Every simulated device is 256 bytes of registers with auto-increment, the
@@ -273,6 +283,7 @@ bool aos_io_be_i2c_xfer(aos_io_i2c_t *b, uint8_t addr, const void *w, size_t wn,
 {
     (void)timeout_ms;
     if (!aos_io_be_i2c_probe(b, addr)) return false;
+    if (strcmp(b->port->name, "i2c.board") && sim_ee24_has(addr)) return sim_ee24_xfer(addr, w, wn, r, rn);
     if (strcmp(b->port->name, "i2c.board") && sim_sensors_has(addr)) return sim_sensors_xfer(addr, w, wn, r, rn);
     uint8_t *m = regs_of(b, addr);
     const uint8_t *wb = w;
@@ -298,12 +309,20 @@ bool aos_io_be_gpio_mode(int gpio, aos_gpio_mode_t mode)
     return true;
 }
 
-int aos_io_be_gpio_get(int gpio) { return (gpio >= 0 && gpio < 64) ? s_level[gpio] : -1; }
+int aos_io_be_gpio_get(int gpio)
+{
+    int v;
+    if (sim_ee93_gpio_get(gpio, &v)) return v;      /* a 93xx driving its DO */
+    return (gpio >= 0 && gpio < 64) ? s_level[gpio] : -1;
+}
+
+int sim_io_gpio_level(int gpio) { return (gpio >= 0 && gpio < 64) ? s_level[gpio] : 0; }
 
 bool aos_io_be_gpio_set(int gpio, int level)
 {
     if (gpio < 0 || gpio >= 64) return false;
     s_level[gpio] = level ? 1 : 0;
+    sim_ee93_gpio_set(gpio, level ? 1 : 0);
     return true;
 }
 
@@ -343,7 +362,7 @@ void aos_io_be_uart_lines_release(aos_io_uart_t *u)
  * The port's wires lead to emulated chips, chosen by the CS line of each
  * transfer. P4_SIM_SPI_A (P4_SIM_<PORT>, as the UARTs) says which:
  *
- *   unset                         49=w25q128,48=max31855,47=mcp3008
+ *   unset                         49=w25q128,48=max31855,47=mcp3008,46=25lc640
  *   "49=max31855,48=w25q128"      a chip per CS GPIO
  *   "mcp3008"                     that chip on any CS (and with none)
  *   "loop"                        MOSI wired to MISO: what a jumper between
@@ -375,7 +394,7 @@ void aos_io_be_uart_lines_release(aos_io_uart_t *u)
 #include <math.h>
 #include <pthread.h>
 
-enum { SD_NONE = 0, SD_LOOP, SD_FLASH, SD_TC, SD_TC_OPEN, SD_ADC };
+enum { SD_NONE = 0, SD_LOOP, SD_FLASH, SD_TC, SD_TC_OPEN, SD_ADC, SD_EE25 = 32 /* + its type (eeprom_sim.c) */ };
 
 typedef struct {
     int8_t any;                 /* the chip on every CS, 0 = per CS */
@@ -398,7 +417,8 @@ static int dev_named(const char *n, size_t len)
     };
     for (size_t i = 0; i < sizeof N / sizeof N[0]; i++)
         if (strlen(N[i].name) == len && !strncasecmp(n, N[i].name, len)) return N[i].dev;
-    return -1;
+    int t = sim_ee25_type(n, len);
+    return t >= 0 ? SD_EE25 + t : -1;
 }
 
 static void map_parse(const char *spec, sim_spi_map_t *m)
@@ -430,7 +450,7 @@ bool aos_io_be_spi_open(aos_io_spi_t *s, bool first)
     char env[40];
     env_name(s->port->name, env, sizeof env);
     const char *spec = getenv(env);
-    map_parse(spec ? spec : "49=w25q128,48=max31855,47=mcp3008", &st->map);
+    map_parse(spec ? spec : "49=w25q128,48=max31855,47=mcp3008,46=25lc640", &st->map);
     s->actual_hz = s->clock_hz;
     s->be = st;
     return true;
@@ -597,7 +617,10 @@ bool aos_io_be_spi_xfer(aos_io_spi_t *s, const uint8_t *tx, uint8_t *rx, size_t 
     case SD_TC:
     case SD_TC_OPEN: tc_xfer(chip == SD_TC_OPEN, wire_rx, n); max_hz = 5000000; mode_ok = s->mode == 0; break;
     case SD_ADC:    adc_xfer(wire_tx, wire_rx, n); max_hz = 2000000; mode_ok = s->mode == 0 || s->mode == 3; break;
-    default:        memset(wire_rx, 0xFF, n); break;
+    default:
+        if (chip >= SD_EE25) { sim_ee25_xfer(chip - SD_EE25, wire_tx, wire_rx, n); max_hz = 10000000; mode_ok = s->mode == 0 || s->mode == 3; }
+        else memset(wire_rx, 0xFF, n);
+        break;
     }
     pthread_mutex_unlock(&s_spi_mx);
     /* a mode the chip does not speak: the master samples on the edge where
