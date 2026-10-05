@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.10.0 — unreleased
+
+**The workshop's drivers** (docs/MODULES.md)
+- `aos_io_pwm_*`: PWM on any header pin by the LEDC, seven channels, servo
+  pulses, hardware fades.
+- `aos_io_dac_*`: an analog level through an RC filter, by the
+  sigma-delta modulator (the P4 has no DAC).
+- `aos_io_ir_*`: raw infrared in (a demodulating receiver) and out (an IR
+  LED and a transistor, the carrier settable), by the RMT.
+- `aos_io_can_*`: CAN by the TWAI controllers, normal, listen only and a
+  self test that needs no transceiver.
+- `POST /api/expansion/selftest` tries them all on a free pin.
+- The simulator emulates serial EEPROMs (24xx, 25xx, 93xx), loops IR back
+  with a remote in the room, and has a car on its CAN bus.
+
 ## 0.9.2 — unreleased
 
 - **The Programmer flashes through the USB host:** the host's USB serial

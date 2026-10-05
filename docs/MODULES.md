@@ -433,6 +433,48 @@ The **LED Strips** app does not drive the strip itself. A service,
 Fire is Mark Kriegsman's Fire2012 algorithm, as FastLED and WLED have it,
 written again here.
 
+## PWM, an analog level, infrared and CAN
+
+Since 0.10, for the workshop apps. The API is in `aos_io.h`, the shared
+part in `components/aos_io/aos_io_signal.c`, the board's in
+`aos_io_signal_p4.c` and the simulator's in `sim/io_signal_sim.c`. Each
+one takes any usable GPIO of the header and claims it, like the rest.
+
+| What | Hardware | Limits |
+|---|---|---|
+| `aos_io_pwm_*` | the LEDC, from the 40 MHz crystal | seven channels (the eighth is the backlight), three frequencies at once; 1 Hz to 20 MHz, 20 bits of duty up to 38 Hz, 15 at 1 kHz, 1 at 20 MHz; servo pulse in microseconds; hardware fades |
+| `aos_io_dac_*` | the sigma-delta modulator, 1 MHz | the P4 has no DAC: 1 kOhm and 1 uF to ground give 0-3.3 V with a few mV of ripple, 256 steps, eight channels; not for audio |
+| `aos_io_ir_*` | the RMT, 1 us a tick | in: a demodulating receiver (TSOP38238, VS1838B), up to 1024 marks and spaces a frame, two buffers so the next frame lands while one is read; out: an IR LED through a transistor, the carrier settable (38 kHz, 33 % by default, or none) |
+| `aos_io_can_*` | the TWAI controllers, classic CAN 2.0 | 25 kbit/s to 1 Mbit/s; normal, listen only, and a self test that needs no transceiver (one pin for TX and RX); a queue of 64 received frames with time stamps |
+
+**On a real CAN bus** a 3.3 V transceiver goes between the pins and
+CANH/CANL (SN65HVD230 and kin): the header's pins are not 5 V tolerant.
+
+**The clock of the LEDC.** All its timers share one clock, and the
+backlight's (set up by the BSP) is the crystal. Asking for the 80 MHz PLL
+failed on the board with "timer clock conflict", so PWM runs from 40 MHz.
+
+**Trying them without an app:** `POST /api/expansion/selftest?gpio=28`
+opens each on a free pin with nothing wired and says what happened: PWM
+(frequency and bits at 1 kHz and 50 Hz, a fade, a servo pulse), the
+analog level, an IR frame out (NEC, 68 ms), and CAN in its self test
+(frames sent and heard back). With `&gpio2=` and a jumper between the two
+pins, the IR frame also comes back in. On the board, on 2026-10-05: all
+of it worked on GPIO28 and GPIO32.
+
+**In the simulator** PWM and the analog level keep the board's limits and
+numbers. What an IR output sends reaches every IR input, and a NEC remote
+in the room presses a key every 6 s (`P4_SIM_IR_REMOTE=0` stops it). All
+the CAN nodes share a bus with a car on it (engine speed 0x0C0, vehicle
+speed 0x1A0, temperatures 0x3E8, a J1939-style 0x18FEF100;
+`P4_SIM_CAN_TRAFFIC=0` takes it off), and a node in the self test hears
+only itself.
+
+**EEPROMs** have no API of their own: they are I2C, SPI or GPIO. The
+simulator emulates the three families (`sim/eeprom_sim.c`): 24xx on I2C
+(`P4_SIM_EEPROM`, a 24LC256 at 0x50 by default), 25xx on SPI (a 25LC640 on
+CS GPIO46) and a 93xx clocked on GPIOs (`P4_SIM_93C`).
+
 ## Not done yet
 
 - **Relays** (a Phase 6 extra): not in this round.

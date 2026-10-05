@@ -103,7 +103,7 @@ versión); usan una API chica y estable, que también existe en el simulador:
 - `aos_io_i2c_*` (abrir un bus lógico, transferir, escanear)
 - `aos_io_spi_*` (dispositivo sobre un bus lógico, transferencia con DMA) — **hecho el 2026-09-30**: API en `aos_io.h`, GPSPI2/3 en la placa, chips emulados en el simulador y la pestaña SPI de Bus; detalles en [MODULES.md](../MODULES.md#spi)
 - `aos_io_uart_*` (abrir por puerto lógico, baudios, modo RS485, leer/escribir sin bloquear)
-- `aos_io_pwm_*`, `aos_io_adc_*`, más adelante `aos_io_twai_*` (CAN) y `aos_io_rmt_*` (WS2812, IR)
+- `aos_io_pwm_*`, `aos_io_dac_*` (sigma-delta), `aos_io_ir_*` (RMT) y `aos_io_can_*` (TWAI) — **hechos el 2026-10-05** ([MODULES.md](../MODULES.md#pwm-an-analog-level-infrared-and-can)); las tiras WS2812 ya estaban (`aos_io_strip_*`). Falta `aos_io_adc_*`
 
 Se abre **por nombre de puerto lógico** (`aos_io_uart_open("uart.a")`), no por
 número de pin. Así la app no sabe ni le importa dónde está conectado el módulo.
