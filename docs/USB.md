@@ -293,7 +293,10 @@ portal. EN and BOOT go through RTS and DTR (`aos_hal_usb_serial_lines`),
 as esptool drives them: on a dev board with the usual two transistors, RTS
 asserted pulls EN low and DTR asserted pulls GPIO0 low, so the board goes
 into its bootloader with no button. Tried on 2026-10-05 with an ESP32
-(v3.1, 4 MB) on a CP2102: detected in 0.8 s. A chip with its own USB
+(v3.1, 4 MB) on a CP2102: detected in 0.8 s, and a test firmware
+(`tools/usb_test/hola_esp32`, 200 KB) written at 460800 baud, MD5-checked
+and restarted in 6.6 s; the Terminal then read it and wrote to it on
+`usb0`. A chip with its own USB
 (ESP32-S3, C3, C6 through USB-Serial-JTAG) needs esptool's other reset
 sequence, which is not here yet: put it in download mode by hand.
 

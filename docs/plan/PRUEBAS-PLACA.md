@@ -47,6 +47,12 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       Turbo giraba de golpe porque tomaba la cruceta por palanca a fondo
       (arreglado en aos_pad.h). Sin probar: las partidas entre dos placas
       (carrera de Monster Hop, visitas de Mila, Truco de a dos).
+- [x] **Programador por el host USB** (2026-10-05, para la 0.9.2): un
+      ESP32 de desarrollo con CP2102 en `usb0` entra solo en modo de
+      descarga por RTS/DTR; detectado en 0,8 s y grabado con
+      `tools/usb_test/hola_esp32` (200 KB a 460800, MD5 bien, 6,6 s). La
+      Terminal en `usb0` leyó los "Hola mundo" y le mandó texto (volvió
+      "Recibido"). Falta: chips con USB propio (S3/C3/C6), otra secuencia.
 - [ ] El cuelgue del primer arranque tras algunas OTA: dos volcados el
       2026-10-04 con `strcmp` en `dlsym` cargando apps (handoff de sistema).
 
