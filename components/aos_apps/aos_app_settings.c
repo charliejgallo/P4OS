@@ -99,6 +99,7 @@ static void open_cb(lv_event_t *e);
 static lv_obj_t *qr_strip(lv_obj_t *p);
 static void qr_box(lv_obj_t *strip, const char *text, const char *caption);
 static lv_obj_t *action_row(lv_obj_t *g, const char *label, lv_color_t color, lv_event_cb_t cb);
+static void dev_restart_cb(lv_event_t *e);
 static bool second_tap(lv_event_t *e, const char *question);
 static const char *portal_root_text(void);
 static aos_lang_t s_langs[AOS_LANG_MAX];
@@ -697,6 +698,11 @@ static void build_root(lv_obj_t *p)
         (void *)PG_DIAG);
     row(g, AOS_SYM_INFORMATION_OUTLINE, 0x636366, _("Acerca de"), NULL, true, open_cb, (void *)PG_ABOUT);
     row(g, AOS_SYM_FILE_CODE_OUTLINE, 0x5E5CE6, _("Desarrollador"), NULL, true, open_cb, (void *)PG_DEV);
+
+    /* at the bottom, where a phone has "Shut Down": two taps, like
+     * Desarrollador's */
+    g = group(p, NULL);
+    action_row(g, _("Reiniciar"), AOS_C_ACCENT, dev_restart_cb);
 }
 
 /* ---- Wi-Fi ---- */
