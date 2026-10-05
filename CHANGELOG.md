@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.9.0 — 2026-10-05
 
 **The portal's security** (docs/SECURITY.md)
 - Requests from other sites and DNS rebinding are refused: the API answers
@@ -48,7 +48,15 @@
   `usb1` of the Terminal.
 - Webcams (MJPEG) as cameras of the Cameras app while plugged in.
 - USB sound cards and headsets: the board's sound goes there instead of
-  its speaker, at the board's volume (Settings, USB, USB audio).
+  its speaker, at the board's volume, and their microphone records in place
+  of the board's (Settings, USB, USB audio).
+- A Raspberry Pi Pico in BOOTSEL mode is a drive at `/usb`: copying its
+  `.uf2` there programs it.
+- A device whose enumeration fails is tried again while it stays plugged
+  in; serial devices stay open between uses of the port (an FTDI lost the
+  first packet after every reopen).
+- The host's DMA buffers stay in internal RAM: in PSRAM a serial port read
+  garbage.
 
 **Bluetooth**
 - The board asks for encryption only when the phone or the computer has not

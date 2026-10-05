@@ -22,7 +22,9 @@ the microSD, loaded as shared objects:
   colour emoji, its music, and its calls answered or rejected from the
   board; and the board as a computer's wireless keyboard and mouse.
 - **USB:** the port becomes a keyboard, mouse, gamepad, MIDI device, network
-  or disk for a computer.
+  or disk for a computer; and the board is a USB host on its 40-pin header,
+  two ports at once: pendrives, keyboards, mice, gamepads, webcams, sound
+  cards, MIDI and serial devices.
 - **A Wi-Fi network of its own,** joined with a QR code.
 - **The workshop:** I2C, SPI, 1-Wire and GPIO on the 40-pin header,
   addressable LED strips on any free pin (WLED's way), a serial terminal, an
@@ -235,7 +237,7 @@ an app.
 |---|---|
 | **Web portal** | at `p4os.local`: a file explorer, the firmware (updates, both slots, the last crash dump), the log (including the tail of the previous boot), and the network sweeps (each device with its MAC and maker, what changed since the last one, the Wi-Fi channels). The apps bring their own pages from the card, with no firmware: Notes, Radio, Cameras, Recorder, Weather, Quotes, Maps, Lua, Pixel Art and the 3D viewer have one ([docs/PORTAL-PAGES.md](docs/PORTAL-PAGES.md)) |
 | **Updates over the air** | two slots: an update is written into the idle one and boots on trial. If the board restarts in the first 30 s, the bootloader goes back by itself. Settings, Update can go back on purpose |
-| **USB** | the OTG port is high speed (480 Mbit/s). **Keyboard and mouse:** keyboard, media keys, mouse, a gamepad, a MIDI keyboard, and a network over the cable (the portal at `192.168.7.1`, 6.7 MB/s). **Disk:** the microSD as a USB drive. The mode is kept across restarts |
+| **USB** | the OTG port is high speed (480 Mbit/s). **Keyboard and mouse:** keyboard, media keys, mouse, a gamepad, a MIDI keyboard, and a network over the cable (the portal at `192.168.7.1`, 6.7 MB/s). **Disk:** the microSD as a USB drive. The mode is kept across restarts. **Host:** devices on the 40-pin header (5 V from pin 1, data on pins 21/23, 25/27 or both at once, through P4OS's own copy of ESP-IDF's host library): pendrives at `/usb` (7.4 MB/s), keyboards that type into any text field, a mouse pointer, gamepads for the games, webcams in Cameras, sound cards for all the board's sound and recording, USB serial ports in the Terminal (CH340, CP210x, FTDI, CDC-ACM), MIDI; a Raspberry Pi Pico is programmed by copying its `.uf2` ([docs/USB.md](docs/USB.md)) |
 | **Its own Wi-Fi** | an access point, `P4OS-XXXX`, next to the home network or alone. Two QR codes: one joins the phone, the other opens the portal at `192.168.4.1`. A phone downloaded from it at ~3 MB/s |
 | **Bluetooth** | through the C6. **The phone:** pairs from the iPhone's own Settings, Bluetooth; its notifications, battery and time come to the board, its music shows and is driven from the control centre and the lock screen, and a call can be answered or rejected on the board. **Keyboard mode:** the board is a Mac's or PC's keyboard, mouse and media keys at the same time; the Macro pad's keys and trackpad go over Bluetooth when there is no cable. [docs/BLUETOOTH.md](docs/BLUETOOTH.md) |
 | **The C6's firmware** | updated from the P4, with no cable: Settings, Update, or `tools/install_c6.sh`. It runs esp_hosted 3.0.9, the same as the P4, and going back to the factory firmware works the same way. [docs/C6.md](docs/C6.md) |
@@ -292,6 +294,10 @@ test layouts.
 - USB against a Mac: keyboard, mouse, media keys, the gamepad, MIDI, the
   network over the cable, and disk mode. Reads at 8.2 MB/s and writes at
   4.8 MB/s.
+- USB host, on both ports at once: a pendrive, a keyboard, a mouse, a
+  gamepad, a hub, a webcam (Logitech C270), a sound card (output and
+  microphone), CH340, CP2102, FTDI and an Arduino Leonardo and a Pico as
+  serial ports.
 - The microSD, music and the speaker.
 - The games and most of the tools, in both orientations.
 - The BOOT button and safe mode.
@@ -328,7 +334,8 @@ test layouts.
 
 - **ESP-NOW:** esp_hosted does not carry it (3.0.9 neither), so the two-device games of
   AmoledOS run alone here.
-- **USB host:** the OTG port does not supply 5 V.
+- **USB host:** MIDI is written but not tried with a device; Xbox pads
+  (not HID) are not taken.
 - **The network dying during an OTA:** seen twice on 0.6. The link to the
   C6 is now watched and the board restarts by itself in under 30 s, and the
   C6 runs a newer esp_hosted; the cause itself is not found
