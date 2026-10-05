@@ -19,6 +19,10 @@
  *     if (aos_pad_pressed(&pad, AOS_PAD_A)) jump();
  *     if (aos_pad_repeat(&pad, AOS_PAD_DOWN)) cursor++;   (menus, grids)
  *
+ * pad.x/pad.y are the left stick for analog use (aiming, steering), but
+ * only once it has moved part way: a d-pad that reports itself as axes
+ * keeps them at 0 and is read as directions.
+ *
  * aos_pad_update() costs a mutex and a copy per pad: call it once a frame,
  * not once per test. Nothing to free.
  */
@@ -50,8 +54,10 @@ typedef struct {
     uint32_t pressed;       /* went down in the last update */
     uint32_t released;      /* came up in the last update */
     uint32_t repeat;        /* pressed, plus held directions repeating */
-    int16_t  x, y;          /* the left stick of the first pad, -32767..32767 (0 without one) */
+    int16_t  x, y;          /* the left stick of the first pad, -32767..32767 (0 without one,
+                             * and 0 until it is known to be analog: see aos_pad_update) */
     bool     connected;     /* some pad is plugged in */
+    bool     analog;        /* its stick has been seen part way */
     uint32_t rep_next;      /* when the held directions repeat next */
 } aos_pad_t;
 
@@ -91,6 +97,17 @@ static inline void aos_pad_update(aos_pad_t *p, uint32_t now_ms)
 {
     uint32_t prev = p->held;
     p->held = aos_pad_bits(&p->x, &p->y, &p->connected);
+    /* Many cheap pads report their d-pad as the X/Y axes, all or nothing,
+     * with no hat. Read as a stick, that is full deflection at a touch (a
+     * steering wheel at full lock). So x/y stay 0 until an axis has been
+     * seen part way, which only a real stick does; the directions come
+     * from those axes either way. */
+    if (!p->connected) p->analog = false;
+    if (!p->analog) {
+        int ax = p->x < 0 ? -p->x : p->x, ay = p->y < 0 ? -p->y : p->y;
+        if ((ax > 8000 && ax < 28000) || (ay > 8000 && ay < 28000)) p->analog = true;
+        else p->x = p->y = 0;
+    }
     p->pressed = p->held & ~prev;
     p->released = prev & ~p->held;
     p->repeat = p->pressed;
@@ -112,6 +129,7 @@ static inline bool aos_pad_repeat(const aos_pad_t *p, uint32_t bits)  { return (
 static inline void aos_pad_reset(aos_pad_t *p, uint32_t now_ms)
 {
     p->held = aos_pad_bits(&p->x, &p->y, &p->connected);
+    if (!p->analog) p->x = p->y = 0;
     p->pressed = p->released = p->repeat = 0;
     p->rep_next = now_ms + AOS_PAD_REPEAT_DELAY_MS;
 }

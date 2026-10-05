@@ -63,7 +63,10 @@ them needs no newer firmware than 0.9.0.
 - `aos_pad.h`: `aos_pad_update(&pad, lv_tick_get())` once a frame reads
   every pad into the roles above, with `held`, `pressed`, `released`,
   `repeat` (directions repeat while held, for menus and grids) and the left
-  stick in `pad.x`/`pad.y` for analog use.
+  stick in `pad.x`/`pad.y` for analog use. Many cheap pads report their
+  D-pad as the X/Y axes, all or nothing, with no hat: `pad.x`/`pad.y` stay
+  0 until an axis has been seen part way (only a real stick does that),
+  so such a D-pad is read as directions, not as a stick pushed to the end.
 - `aos_pad_menu.h`: `aos_pad_menu_set(&menu, buttons, n, first)` hands it a
   panel's LVGL buttons and `aos_pad_menu_step(&menu, &pad)` does the rest:
   the D-pad moves the outline, A sends `LV_EVENT_CLICKED`. Set it again (or
@@ -86,4 +89,6 @@ The Lua scripts have `aos.pad()` ([apps/lua/README.md](../apps/lua/README.md)).
 
 In the simulator `P4_SIM_PAD=1` makes the keyboard a pad (the arrows, z/c
 = A, x/v = B, a/d = L/R, Return = START, Shift = button 9), and a script's
-`pad <buttons> <x> <y> [ms] [hat]` holds one (sim/main.c).
+`pad <buttons> <x> <y> [ms] [hat]` holds one (sim/main.c); a stick at
+the end (32767) acts as such a D-pad until one `pad` has held it part way
+(say 16000).
