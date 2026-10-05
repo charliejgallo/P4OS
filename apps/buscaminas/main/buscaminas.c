@@ -28,6 +28,11 @@
  * The game lives in statics (G) that survive the app being destroyed and
  * created again - which is what the runtime does when the screen turns - and
  * the clock stops while the app is not in front.
+ *
+ * A USB gamepad plays it too: the d-pad walks a yellow cursor over the cells
+ * (it shows on the first press and goes away with the next touch), A digs -
+ * or chords on a number -, B flags, START deals a new board and L or R open
+ * the difficulty picker, which the d-pad and A then go through.
  */
 #include "aos_app.h"
 #include "aos_theme.h"
@@ -35,6 +40,8 @@
 #include "aos_i18n.h"
 #include "aos_ui.h"
 #include "aos_sys_glyphs.h"
+#include "aos_pad.h"
+#include "aos_pad_menu.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -122,6 +129,7 @@ static struct {
     lv_obj_t   *lbl_res_title, *lbl_res_sub;
     lv_obj_t   *picker;
     lv_timer_t *timer;
+    lv_timer_t *pad_timer;
 
     uint16_t *buf;              /* RGB565, PSRAM, big enough for the area */
     size_t    buf_cap;          /* in pixels */
@@ -134,6 +142,17 @@ static struct {
     bool dirty;
     int  dx0, dy0, dx1, dy1;    /* display cells to redraw, inclusive */
 } U;
+
+/* ---- The gamepad: the cursor in game (portrait) cells ---------------------- */
+
+#define C_CURSOR    0xFFD60A
+
+static struct {
+    aos_pad_t      pad;
+    aos_pad_menu_t menu;        /* the difficulty picker's rows */
+    bool           on;          /* the cursor shows (the pad was used) */
+    int            x, y;
+} P;
 
 /* -------------------------------------------------------------------------- */
 
@@ -431,6 +450,24 @@ static void present(void)
             draw_cell(&layer, x, y);
         }
     }
+
+    /* the pad's cursor, a frame over its cell, when that cell was redrawn */
+    if (P.on) {
+        int dc, dr;
+        to_disp(P.x, P.y, &dc, &dr);
+        if (dc >= U.dx0 && dc <= U.dx1 && dr >= U.dy0 && dr <= U.dy1) {
+            lv_draw_rect_dsc_t dsc;
+            lv_draw_rect_dsc_init(&dsc);
+            dsc.bg_opa = LV_OPA_TRANSP;
+            dsc.border_color = lv_color_hex(C_CURSOR);
+            dsc.border_opa = LV_OPA_COVER;
+            dsc.border_width = LV_MAX(3, U.cell / 12);
+            dsc.radius = LV_MAX(3, U.cell / 6);
+            lv_area_t a = { dc * U.cell, dr * U.cell,
+                            (dc + 1) * U.cell - 1, (dr + 1) * U.cell - 1 };
+            lv_draw_rect(&layer, &dsc, &a);
+        }
+    }
     lv_canvas_finish_layer(U.canvas, &layer);
 }
 
@@ -686,6 +723,10 @@ static void board_layout(void)
     int cw = U.bw / U.dcols, ch = U.bh / U.drows;
     U.cell = cw < ch ? cw : ch;
 
+    /* a smaller board may have left the cursor outside */
+    if (P.x >= G.cols) P.x = G.cols - 1;
+    if (P.y >= G.rows) P.y = G.rows - 1;
+
     int w = U.dcols * U.cell, h = U.drows * U.cell;
     lv_canvas_set_buffer(U.canvas, U.buf, w, h, LV_COLOR_FORMAT_RGB565);
     memset(U.buf, 0, (size_t)w * h * 2);
@@ -756,7 +797,8 @@ static bool touch_cell(float px, float py, int *out_x, int *out_y)
     return inside(*out_x, *out_y);
 }
 
-static void tap(float px, float py)
+/* Digs (or flags) the cell x, y: a finger's tap and the pad's A or B. */
+static void act_cell(int x, int y, bool flag)
 {
     /* A finished board stays still to be looked at: where the other mines
      * were, which flag was wrong. The watch restarted on the next touch after
@@ -764,11 +806,7 @@ static void tap(float px, float py)
     if (G.phase == GAME_LOST || G.phase == GAME_WON) {
         return;
     }
-    int x, y;
-    if (!touch_cell(px, py, &x, &y)) {
-        return;
-    }
-    if (G.flag_mode) {
+    if (flag) {
         /* Flagging does not start the game: the first dig must stay safe. */
         toggle_flag(x, y);
         present();
@@ -797,6 +835,14 @@ static void tap(float px, float py)
     present();
 }
 
+static void tap(float px, float py)
+{
+    int x, y;
+    if (touch_cell(px, py, &x, &y)) {
+        act_cell(x, y, G.flag_mode);
+    }
+}
+
 /* Tap digs (or flags, in flag mode), a long press always flags.
  *
  * With LVGL's own events and not aos_gesture: there is no drag or pinch any
@@ -817,6 +863,12 @@ static void touch_cb(lv_event_t *e)
 
     if (code == LV_EVENT_PRESSED) {
         s_press = p;
+        /* a finger again: the pad's cursor steps aside */
+        if (P.on) {
+            P.on = false;
+            dirty_cell(P.x, P.y);
+            present();
+        }
     } else if (code == LV_EVENT_SHORT_CLICKED) {
         int lim = LV_MAX(16, U.cell / 3);
         if (LV_ABS(p.x - s_press.x) > lim || LV_ABS(p.y - s_press.y) > lim) {
@@ -876,6 +928,7 @@ static void tick_cb(lv_timer_t *timer)
 
 static void picker_close(void)
 {
+    aos_pad_menu_clear(&P.menu);
     if (U.picker) {
         lv_obj_delete(U.picker);
         U.picker = NULL;
@@ -949,8 +1002,10 @@ static void level_cb(lv_event_t *event)
     lv_obj_t *t = label(card, _("Dificultad"), aos_font_title, AOS_C_TEXT);
     lv_obj_set_pos(t, pad + 8, pad + 8);
 
+    lv_obj_t *rows[LEVELS];
     for (int i = 0; i < LEVELS; i++) {
         lv_obj_t *r = box(card, AOS_C_CARD2, 20);
+        rows[i] = r;
         lv_obj_set_size(r, cw - 2 * pad, row_h);
         lv_obj_set_pos(r, pad, pad + title_h + i * (row_h + row_gap));
         lv_obj_add_flag(r, LV_OBJ_FLAG_CLICKABLE);
@@ -980,6 +1035,79 @@ static void level_cb(lv_event_t *event)
                             G.best[i] > 0 ? AOS_C_YELLOW : AOS_C_DIM);
         lv_obj_align(b, LV_ALIGN_RIGHT_MID, -24, 0);
     }
+    aos_pad_menu_set(&P.menu, rows, LEVELS, G.level);
+}
+
+/* -------------------------------------------------------------------------- */
+/* The gamepad                                                                 */
+
+/* Moves the cursor one cell on SCREEN: the d-pad goes where it points even
+ * with the board turned. */
+static void cursor_move(int ddc, int ddr)
+{
+    int dc, dr;
+    to_disp(P.x, P.y, &dc, &dr);
+    dc += ddc;
+    dr += ddr;
+    if (dc < 0 || dr < 0 || dc >= U.dcols || dr >= U.drows) {
+        return;
+    }
+    dirty_cell(P.x, P.y);
+    to_logic(dc, dr, &P.x, &P.y);
+    dirty_cell(P.x, P.y);
+}
+
+/* Every 30 ms: the runtime's tick comes at 5 Hz, too slow for a d-pad. */
+static void pad_cb(lv_timer_t *timer)
+{
+    (void)timer;
+    aos_pad_update(&P.pad, lv_tick_get());
+    if (!P.pad.pressed && !P.pad.repeat) {
+        return;
+    }
+
+    if (U.picker) {
+        if (aos_pad_pressed(&P.pad, AOS_PAD_B | AOS_PAD_L | AOS_PAD_R)) {
+            picker_close();
+        } else {
+            aos_pad_menu_step(&P.menu, &P.pad);
+        }
+        return;
+    }
+    if (aos_pad_pressed(&P.pad, AOS_PAD_START)) {
+        new_cb(NULL);
+        return;
+    }
+    if (aos_pad_pressed(&P.pad, AOS_PAD_L | AOS_PAD_R)) {
+        level_cb(NULL);
+        return;
+    }
+
+    uint32_t dirs = P.pad.repeat & AOS_PAD_DIRS;
+    bool a = aos_pad_pressed(&P.pad, AOS_PAD_A);
+    bool b = aos_pad_pressed(&P.pad, AOS_PAD_B);
+    if (!dirs && !a && !b) {
+        return;
+    }
+    if (!P.on) {
+        /* the first press only shows where the cursor is */
+        P.on = true;
+        dirty_cell(P.x, P.y);
+        present();
+        return;
+    }
+    if (a && (G.phase == GAME_LOST || G.phase == GAME_WON)) {
+        new_cb(NULL);           /* "Jugar otra" */
+        return;
+    }
+    if (dirs & AOS_PAD_UP)    cursor_move(0, -1);
+    if (dirs & AOS_PAD_DOWN)  cursor_move(0, 1);
+    if (dirs & AOS_PAD_LEFT)  cursor_move(-1, 0);
+    if (dirs & AOS_PAD_RIGHT) cursor_move(1, 0);
+    if (a || b) {
+        act_cell(P.x, P.y, b);
+    }
+    present();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1106,6 +1234,9 @@ static void *create(aos_app_t *self, lv_obj_t *root)
     U.self = self;
     U.root = root;
 
+    aos_pad_menu_clear(&P.menu);
+    aos_pad_reset(&P.pad, lv_tick_get());
+
     if (!G.inited) {
         G.rng  = (uint32_t)aos_hal_uptime_ms() * 2654435761u | 1u;
         G.boom = -1;
@@ -1213,6 +1344,9 @@ static void *create(aos_app_t *self, lv_obj_t *root)
 
     if (!G.inited) {
         new_game();
+        /* the cursor starts in the middle of the board */
+        P.x = G.cols / 2;
+        P.y = G.rows / 2;
     } else {
         board_layout();
         clock_resume();
@@ -1222,6 +1356,7 @@ static void *create(aos_app_t *self, lv_obj_t *root)
     present();
 
     U.timer = lv_timer_create(tick_cb, 200, NULL);
+    U.pad_timer = lv_timer_create(pad_cb, 30, NULL);
     return &U;
 }
 
@@ -1232,6 +1367,10 @@ static void destroy(aos_app_t *self, void *inst)
     if (U.timer) {
         lv_timer_delete(U.timer);
         U.timer = NULL;
+    }
+    if (U.pad_timer) {
+        lv_timer_delete(U.pad_timer);
+        U.pad_timer = NULL;
     }
     /* The objects first: the canvas points at the buffer about to be freed. */
     if (self && self->root) {
