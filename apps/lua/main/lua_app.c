@@ -50,15 +50,17 @@
  *     -- @orientation portrait    or landscape: the screen turns for it
  *                                 (launcher entries only)
  *
- * Input is the finger alone: touch(), gesture(), aos.touch() and
- * aos.fingers(). The board has no buttons and no motion sensor. The way back
- * is the system's: the left edge (back to the list, or out) and the bottom
- * edge (home).
+ * Input is the finger -touch(), gesture(), aos.touch() and aos.fingers()-
+ * and, since 0.9, a USB gamepad: aos.pad(). The board has no buttons and no
+ * motion sensor. The way back is the system's: the left edge (back to the
+ * list, or out) and the bottom edge (home). The pad also goes down the list
+ * of scripts (aos_pad_menu) and A on an error message reloads the script.
  */
 #include "aos_app.h"
 #include "aos_hal.h"
 #include "aos_i18n.h"
 #include "aos_icon_ops.h"
+#include "aos_pad_menu.h"
 #include "aos_retro.h"
 #include "aos_theme.h"
 #include "aos_ui.h"
@@ -220,6 +222,13 @@ typedef struct {
     int        n_pend;
     int16_t    t_x, t_y;
     bool       t_down;
+    /* The USB gamepad: read by pad_cb() every 20 ms whatever is on screen.
+     * Over a script, the presses gather in pad_pend until pump() hands them
+     * over with the next frame; over the list, they drive pad_menu. */
+    aos_pad_t      pad;
+    uint16_t       pad_pend;
+    aos_pad_menu_t pad_menu;
+    lv_timer_t    *pad_timer;
     bool       want_touch, want_gesture;
     uint32_t   last_post;
     bool       want_reload;
@@ -1104,6 +1113,12 @@ static void pump(void *user)
     ctx->api.touch_x = ctx->t_x;
     ctx->api.touch_y = ctx->t_y;
     ctx->api.touch_down = ctx->t_down;
+    ctx->api.pad_held = (uint16_t)ctx->pad.held;
+    ctx->api.pad_pressed = ctx->pad_pend;
+    ctx->api.pad_x = ctx->pad.x;
+    ctx->api.pad_y = ctx->pad.y;
+    ctx->api.pad_on = ctx->pad.connected;
+    ctx->pad_pend = 0;
 
     /* aos.fingers(): read here, in the LVGL task where aos_touch_points()
      * has to be called, in canvas pixels. */
@@ -1245,6 +1260,11 @@ static void run_script(lua_ctx_t *ctx, const char *name)
         ctx->message = NULL;
         ctx->surface = NULL;
     }
+    /* the list's buttons are gone, and the A that picked the script is
+     * not the script's first press */
+    aos_pad_menu_clear(&ctx->pad_menu);
+    aos_pad_reset(&ctx->pad, lv_tick_get());
+    ctx->pad_pend = 0;
     if (ctx->message) {
         lv_obj_add_flag(ctx->message, LV_OBJ_FLAG_HIDDEN);
     }
@@ -1373,6 +1393,7 @@ static void build_list(lua_ctx_t *ctx)
     lv_obj_set_style_text_font(title, aos_font_title, 0);
     lv_obj_set_style_pad_bottom(title, 10, 0);
 
+    aos_pad_menu_clear(&ctx->pad_menu);
     if (ctx->count == 0) {
         lv_obj_t *empty = lv_label_create(ctx->list);
         lv_label_set_long_mode(empty, LV_LABEL_LONG_WRAP);
@@ -1383,6 +1404,7 @@ static void build_list(lua_ctx_t *ctx)
         return;
     }
 
+    lv_obj_t *btns[AOS_PAD_MENU_MAX];
     for (int i = 0; i < ctx->count; i++) {
         lv_obj_t *btn = lv_button_create(ctx->list);
         lv_obj_set_size(btn, LV_PCT(100), AOS_UI_ROW_H);
@@ -1400,7 +1422,46 @@ static void build_list(lua_ctx_t *ctx)
         lv_obj_set_style_text_color(l, lv_color_hex(0xE8E8F0), 0);
         lv_obj_set_style_text_font(l, aos_font_body, 0);
         lv_obj_align(l, LV_ALIGN_LEFT_MID, 0, 0);
+
+        /* the pad's menu holds the first AOS_PAD_MENU_MAX; it scrolls the
+         * list to each one it moves to */
+        if (i < AOS_PAD_MENU_MAX) btns[i] = btn;
     }
+    aos_pad_menu_set(&ctx->pad_menu, btns,
+                     ctx->count < AOS_PAD_MENU_MAX ? ctx->count : AOS_PAD_MENU_MAX, 0);
+    aos_pad_reset(&ctx->pad, lv_tick_get());
+}
+
+/* ==========================================================================
+ * The gamepad
+ * ========================================================================== */
+
+/* Every 20 ms, in the LVGL task, whatever is on screen: one read of the pad.
+ * Over the list it drives the buttons; over a script it gathers the presses
+ * for the next frame - pump() only runs when the thread is free, and a press
+ * that came and went during a slow frame would be lost there. On an error
+ * message, A is the tap that reloads. */
+static void pad_cb(lv_timer_t *t)
+{
+    lua_ctx_t *ctx = (lua_ctx_t *)lv_timer_get_user_data(t);
+
+    aos_pad_update(&ctx->pad, lv_tick_get());
+    if (ctx->list && !ctx->r) {
+        (void)aos_pad_menu_step(&ctx->pad_menu, &ctx->pad);
+        return;
+    }
+    ctx->pad_pend = (uint16_t)(ctx->pad_pend | ctx->pad.pressed);
+    if (ctx->message && !lv_obj_has_flag(ctx->message, LV_OBJ_FLAG_HIDDEN) &&
+        aos_pad_pressed(&ctx->pad, AOS_PAD_A)) {
+        ctx->want_reload = true;
+        try_reload(ctx);
+    }
+}
+
+static void pad_start(lua_ctx_t *ctx)
+{
+    aos_pad_reset(&ctx->pad, lv_tick_get());
+    ctx->pad_timer = lv_timer_create(pad_cb, 20, ctx);
 }
 
 /* ==========================================================================
@@ -1417,6 +1478,7 @@ static void *lua_create(aos_app_t *self, lv_obj_t *root)
     ctx->self = self;
     ctx->ref_tick = ctx->ref_draw = ctx->ref_touch = LUA_NOREF;
     ctx->ref_gesture = ctx->ref_resize = LUA_NOREF;
+    pad_start(ctx);
 
     /* LUA_RUN=cubo.lua opens straight into that script. On the board getenv
      * always returns NULL -there is no environment- so this costs nothing and
@@ -1442,6 +1504,10 @@ static void lua_destroy(aos_app_t *self, void *inst)
      * about to go. The LVGL objects under root are the runtime's business;
      * the canvas is ended here so its timers stop calling pump(). */
     lv_async_call_cancel(pick_async, ctx);  /* a tap on the list in flight */
+    if (ctx->pad_timer) {
+        lv_timer_delete(ctx->pad_timer);
+        ctx->pad_timer = NULL;
+    }
     bool back = thread_stop(ctx);
     aos_retro_end();
     if (!back) {
@@ -1731,6 +1797,7 @@ static void *script_create(aos_app_t *self, lv_obj_t *root)
     ctx->standalone = true;
     ctx->ref_tick = ctx->ref_draw = ctx->ref_touch = LUA_NOREF;
     ctx->ref_gesture = ctx->ref_resize = LUA_NOREF;
+    pad_start(ctx);
 
     char file[sizeof(ctx->running)];
     app_file_of(self->desc.id, file, sizeof(file));

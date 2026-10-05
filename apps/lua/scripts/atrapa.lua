@@ -1,4 +1,4 @@
--- ATRAPA - catch the stars, by touch alone
+-- ATRAPA - catch the stars, by touch or with a gamepad
 -- @name Atrapa
 -- @orientation portrait
 --
@@ -6,6 +6,9 @@
 -- where the finger is (aos.touch()), anywhere on the screen, so the thumb
 -- never covers what falls. Three stars missed and it is over; a tap starts
 -- again.
+--
+-- With a USB gamepad (aos.pad()) the d-pad slides the basket and the stick
+-- steers it by how far it is pushed; A or START starts, START pauses.
 --
 -- The sky is drawn once and frozen (aos.background()), so the stars, the
 -- basket and the score are drawn every frame and never erased: the app puts
@@ -19,6 +22,7 @@ local bx = W // 2
 local stars, score, lives, best = {}, 0, 3, 0
 local state = "title"          -- "title", "play", "over"
 local spawn, speed = 0, 1
+local PAD_SPEED = 0.32         -- canvas pixels per ms, d-pad or stick at full
 
 local function sky()
     -- a gradient in bands, darker at the top, and a few fixed dots
@@ -45,9 +49,33 @@ function init()
     sky()
 end
 
+local function start()
+    reset()
+    state = "play"
+    aos.beep(900, 30)
+end
+
 function tick(dt)
     local x, y, down = aos.touch()
-    if down then bx = math.max(BASKET_W // 2, math.min(W - BASKET_W // 2, x)) end
+    if down then bx = x end
+
+    -- the pad: two numbers and a boolean of aos.pad(), nothing to collect
+    local held, pressed, sx = aos.pad()
+    if pressed & (aos.PAD_A | aos.PAD_START) ~= 0 and state ~= "play" and state ~= "pause" then
+        start()
+    elseif pressed & aos.PAD_START ~= 0 then
+        state = state == "pause" and "play" or "pause"
+        aos.beep(state == "pause" and 500 or 900, 25)
+    end
+    if state == "pause" then return end
+    if held & aos.PAD_LEFT ~= 0 then
+        bx = bx - PAD_SPEED * dt
+    elseif held & aos.PAD_RIGHT ~= 0 then
+        bx = bx + PAD_SPEED * dt
+    elseif sx > 4000 or sx < -4000 then
+        bx = bx + PAD_SPEED * dt * sx / 32767
+    end
+    bx = math.max(BASKET_W // 2, math.min(W - BASKET_W // 2, bx))
     if state ~= "play" then return end
 
     spawn = spawn - dt
@@ -86,26 +114,31 @@ function draw()
         aos.disc(s.x, s.y // 1, 5, 0xFFD740)
         aos.disc(s.x, s.y // 1, 2, 0xFFFFFF)
     end
-    aos.rect(bx - BASKET_W // 2, BASKET_Y, BASKET_W, 10, 0x30D158)
-    aos.rect(bx - BASKET_W // 2 + 4, BASKET_Y + 10, BASKET_W - 8, 4, 0x1A7F36)
+    local b = math.floor(bx) - BASKET_W // 2     -- the pad moves it by fractions
+    aos.rect(b, BASKET_Y, BASKET_W, 10, 0x30D158)
+    aos.rect(b + 4, BASKET_Y + 10, BASKET_W - 8, 4, 0x1A7F36)
 
     aos.text(8, 24, string.format("%d", score), 0xFFFFFF, 3)
     for i = 1, lives do aos.disc(W - 12 * i, 34, 4, 0xFF453A) end
 
+    -- with a pad plugged in the hint names its button
+    local _, _, _, _, pad = aos.pad()
     if state == "title" then
         centre("ATRAPA", H // 3, 0xFFD740, 4)
-        centre("TOCA PARA JUGAR", H // 3 + 50, 0xB0B8D0, 2)
+        centre(pad and "A PARA JUGAR" or "TOCA PARA JUGAR", H // 3 + 50, 0xB0B8D0, 2)
     elseif state == "over" then
         centre("FIN", H // 3, 0xFF453A, 5)
         centre(string.format("RECORD %d", best), H // 3 + 56, 0xB0B8D0, 2)
-        centre("TOCA PARA SEGUIR", H // 3 + 84, 0xB0B8D0, 2)
+        centre(pad and "A PARA SEGUIR" or "TOCA PARA SEGUIR", H // 3 + 84, 0xB0B8D0, 2)
+    elseif state == "pause" then
+        centre("PAUSA", H // 3, 0xFFFFFF, 4)
     end
 end
 
 function touch(x, y, ev)
-    if ev == "down" and state ~= "play" then
-        reset()
+    if ev == "down" and state == "pause" then
         state = "play"
-        aos.beep(900, 30)
+    elseif ev == "down" and state ~= "play" then
+        start()
     end
 end

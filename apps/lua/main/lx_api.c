@@ -3,6 +3,7 @@
  */
 #include "lx_api.h"
 
+#include "aos_pad.h"
 #include "lauxlib.h"
 #include "lvgl.h"
 
@@ -190,6 +191,38 @@ static int l_fingers(lua_State *L)
     return 1 + 3 * n;
 }
 
+/* The USB gamepad.
+ *
+ *     held, pressed, x, y, on = aos.pad()
+ *     isdown, waspressed      = aos.pad(aos.PAD_A)
+ *
+ * With no argument: two bit masks of roles (aos.PAD_UP, _DOWN, _LEFT,
+ * _RIGHT, _A, _B, _L, _R, _START, the same roles and buttons in every game,
+ * aos_pad.h), what is held now and what went down since the frame before;
+ * then the left stick, -32767..32767 each way (0 without one), and whether a
+ * pad is plugged in. With a mask: whether any of those is held, and whether
+ * any of them was just pressed - the shape a script wants for one button:
+ *
+ *     if select(2, aos.pad(aos.PAD_A)) then jump() end
+ *
+ * Numbers and booleans only, so asking every frame makes no garbage. */
+static int l_pad(lua_State *L)
+{
+    lx_ctx_t *c = ctx_of(L);
+    if (!lua_isnoneornil(L, 1)) {
+        lua_Integer m = luaL_checkinteger(L, 1);
+        lua_pushboolean(L, (c->pad_held & m) != 0);
+        lua_pushboolean(L, (c->pad_pressed & m) != 0);
+        return 2;
+    }
+    lua_pushinteger(L, c->pad_held);
+    lua_pushinteger(L, c->pad_pressed);
+    lua_pushinteger(L, c->pad_x);
+    lua_pushinteger(L, c->pad_y);
+    lua_pushboolean(L, c->pad_on);
+    return 5;
+}
+
 /* Milliseconds since the script started, not since the board booted: a script
  * that subtracts two of these gets small numbers, which in 32-bit floats is
  * the difference between having decimals and not having them. */
@@ -281,6 +314,7 @@ static const luaL_Reg lx_funcs[] = {
     {"shade", l_shade},
     {"touch", l_touch},
     {"fingers", l_fingers},
+    {"pad",   l_pad},
     {"ms",    l_ms},
     {"stats", l_stats},
     {"background", l_background},
@@ -288,9 +322,21 @@ static const luaL_Reg lx_funcs[] = {
     {NULL, NULL},
 };
 
+/* The pad's roles, as aos.PAD_*: the bits of aos_pad.h, which lua_app.c
+ * hands over as they are. */
+static const struct { const char *name; uint16_t bit; } lx_pad_bits[] = {
+    {"PAD_UP", AOS_PAD_UP},       {"PAD_DOWN", AOS_PAD_DOWN},
+    {"PAD_LEFT", AOS_PAD_LEFT},   {"PAD_RIGHT", AOS_PAD_RIGHT},
+    {"PAD_A", AOS_PAD_A},         {"PAD_B", AOS_PAD_B},
+    {"PAD_L", AOS_PAD_L},         {"PAD_R", AOS_PAD_R},
+    {"PAD_START", AOS_PAD_START},
+};
+#define LX_PAD_BITS ((int)(sizeof(lx_pad_bits) / sizeof(lx_pad_bits[0])))
+
 void lx_api_open(lua_State *L, lx_ctx_t *ctx)
 {
-    lua_createtable(L, 0, (int)(sizeof(lx_funcs) / sizeof(lx_funcs[0])) + 2);
+    lua_createtable(L, 0, (int)(sizeof(lx_funcs) / sizeof(lx_funcs[0])) + 2 +
+                          LX_PAD_BITS);
 
     for (const luaL_Reg *f = lx_funcs; f->name; f++) {
         lua_pushlightuserdata(L, ctx);
@@ -303,6 +349,10 @@ void lx_api_open(lua_State *L, lx_ctx_t *ctx)
     lua_setfield(L, -2, "W");
     lua_pushinteger(L, ctx->h);
     lua_setfield(L, -2, "H");
+    for (int i = 0; i < LX_PAD_BITS; i++) {
+        lua_pushinteger(L, lx_pad_bits[i].bit);
+        lua_setfield(L, -2, lx_pad_bits[i].name);
+    }
 
     lua_setglobal(L, "aos");
 }

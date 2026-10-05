@@ -32,7 +32,7 @@ changes, so saving is the whole step.
 | `pelota.lua` | Drawing without erasing: a drawn grid frozen with `aos.background()`, eight balls, and the rows and pixels each frame cost. |
 | `gestos.lua` | `gesture()` (pinch to zoom, drag, double tap) and `aos.fingers()` (a ring under each finger). |
 | `pintar.lua` | New. Finger painting with every finger at once, a palette strip, and its own canvas: `@canvas 360x640`, x2. The paper starts with a black kitten on it. |
-| `atrapa.lua` | New. A small game by touch alone: the basket follows the finger, anywhere on the screen. `@orientation portrait`. |
+| `atrapa.lua` | New. A small game: the basket follows the finger, anywhere on the screen, or a USB gamepad (d-pad or stick to steer, A or START to start, START to pause). `@orientation portrait`. |
 
 `cubo.aic` and `hola.aic` are their launcher icons, assembled from the
 `.aic.txt` beside them with `python3 tools/aic.py asm scripts/cubo.aic.txt`.
@@ -77,6 +77,8 @@ every primitive marks the box it touched.
 | `aos.shade(x, y, w, h, f)` | darkens (f<0) or lightens (f>0), in sixteenths |
 | `aos.touch()` | `x, y, down`: where the finger is |
 | `aos.fingers()` | `n, id1, x1, y1, id2, x2, y2`: every finger down, each with an id that stays while it does |
+| `aos.pad()` | `held, pressed, x, y, on`: a USB gamepad. `held` and `pressed` are bit masks of `aos.PAD_UP`, `PAD_DOWN`, `PAD_LEFT`, `PAD_RIGHT`, `PAD_A`, `PAD_B`, `PAD_L`, `PAD_R`, `PAD_START` (held now / went down since the last frame); `x, y` the left stick, -32767..32767; `on` whether one is plugged in |
+| `aos.pad(mask)` | `isdown, waspressed` for those roles: `if select(2, aos.pad(aos.PAD_A)) then jump() end` |
 | `aos.ms()` | milliseconds since the script started |
 | `aos.beep(hz, ms)` | |
 | `aos.background()` | freezes what is drawn as the world; from then on the app undoes each frame |
@@ -87,11 +89,18 @@ Colours are `0xRRGGBB`. And the callbacks, all optional: `init()`,
 `gesture(ev, x, y, a, b, c)` (`"tap"`, `"double"`, `"long"`, `"drag"`,
 `"release"`, `"pinchstart"`, `"pinch"`, `"pinchend"`) and, new, `resize(w, h)`.
 
-**Input is the finger alone.** The board has no buttons and no motion
-sensor, and the API never had anything to read either. The way out is the
-system's: the left edge goes back (to the list, or out of a launcher entry)
-and the bottom edge goes home. A drag that starts anywhere else is the
-script's, pinches included.
+**Input is the finger, and a USB gamepad.** The board has no buttons and no
+motion sensor. A pad on the USB host port (0.9) is `aos.pad()`, polled: the
+roles are the same buttons in every game (A is button 1 or 2, B 3 or 4, L 5
+or 7, R 6 or 8, START 9 or 10, the directions the hat or the stick past half
+way, every pad plugged in OR'ed; `docs/` and `aos_pad.h` have the table).
+The presses are gathered between frames, so a short one during a slow frame
+still shows in `pressed` once. The pad also goes down the list of scripts
+(A opens one) and A on an error message reloads the script. Lua 5.4 has the
+bit operators: `held & aos.PAD_LEFT ~= 0` reads as it should. The way out
+is the system's: the left edge goes back (to the list, or out of a launcher
+entry) and the bottom edge goes home. A drag that starts anywhere else is
+the script's, pinches included.
 
 No `io`, `os`, `package` or `debug`: their sources are not in the binary.
 

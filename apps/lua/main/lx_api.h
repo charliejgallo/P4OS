@@ -15,7 +15,7 @@
  *     million is not a clipped rectangle, it is an overflow.
  *   - P4OS: nothing behind the door touches LVGL or the hardware. The script
  *     runs on a thread of its own (lua_app.c says why), so what it reads from
- *     outside -the finger, the time- is a snapshot the app wrote before
+ *     outside -the finger, the gamepad, the time- is a snapshot the app wrote before
  *     handing it the frame, and what it asks of the outside -a beep- is
  *     queued for the app to do from the LVGL task afterwards.
  */
@@ -62,6 +62,15 @@ typedef struct {
     uint8_t   finger_id[2];
     int16_t   finger_x[2], finger_y[2];
     uint32_t  t0;               /* ms when the script started    */
+
+    /* The USB gamepad, the same way: aos_pad.h's roles held now, the ones
+     * that went down since the frame before (gathered by the app between
+     * frames, so a short press during a slow one is not lost), the left
+     * stick, and whether one is plugged in. For aos.pad(). */
+    uint16_t  pad_held;
+    uint16_t  pad_pressed;
+    int16_t   pad_x, pad_y;
+    bool      pad_on;
 
     lx_beep_t beeps[LX_MAX_BEEPS];
     uint8_t   n_beeps;
