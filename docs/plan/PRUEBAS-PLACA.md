@@ -425,10 +425,15 @@ por el Registro del portal sin cable serie)
       dos enchufados desde el arranque (el segundo espera la dirección 0).
 - [x] Teclado por su descriptor HID: sus dos interfaces (teclado; teclas
       multimedia y de sistema) en la lista de dispositivos.
-- [ ] Escribir con el teclado físico en un campo del sistema y en Notas;
-      distribución latinoamericana (ñ, tildes, @), multimedia (volumen).
-- [ ] Mouse (puntero, rueda, clic derecho = atrás).
-- [ ] Gamepad/joystick (`/api/usb` `gamepads` en vivo).
+- [x] Escribir con el teclado físico en Notas (2026-10-04, el usuario).
+- [ ] Distribución latinoamericana a fondo (ñ, tildes, @) y teclas
+      multimedia (volumen).
+- [x] Mouse Logitech (046d:c077, baja velocidad, 4 campos): puntero, clic y
+      rueda andan (2026-10-04, el usuario).
+- [x] Joystick genérico estilo SNES (081f:e401): cruceta como ejes X/Y
+      (+-32767, diagonales incluidas) y d-pad; X=1, A=2, B=3, Y=4, L=5, R=6,
+      Select=9, Start=10, leído en vivo por `/api/usb` (2026-10-04). Manda
+      reportes todo el tiempo aunque se le pida SET_IDLE: sin problema.
 - [ ] Teclado MIDI (`midi_last`, y MIDI thru con el OTG en modo teclado).
 - [ ] Arduino o adaptador CH340/CP210x/FTDI en el Terminal (`usb0`).
 - [ ] Webcam en Cámaras (en 25/27).

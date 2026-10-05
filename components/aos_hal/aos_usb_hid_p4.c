@@ -755,6 +755,11 @@ static void wide_to_str(const usb_str_desc_t *d, char *out, size_t n)
             out[i++] = w >= 32 && w < 127 ? (char)w : '?';
         }
     out[i] = 0;
+    /* some pad their names with spaces (" USB gamepad           ") */
+    while (i && out[i - 1] == ' ') out[--i] = 0;
+    size_t lead = 0;
+    while (out[lead] == ' ') lead++;
+    if (lead) memmove(out, out + lead, i - lead + 1);
 }
 
 static void hid_free(hid_t *h)
