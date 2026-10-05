@@ -517,6 +517,13 @@ static bool run(ctx_t *c)
     bool usb = !strncmp(J.port, "usb", 3);      /* a USB serial port of the host */
     if (!usb && (!pt || pt->kind != AOS_PORT_UART)) return failf("No hay un puerto serie %s", J.port);
     c->u = aos_io_uart_open(J.port, 115200, false, AOS_FLASHER_OWNER);
+    /* A USB device can be away for a moment: a chip on its own USB that
+     * restarts (an ESP32-C3 in a boot loop was gone 0.4 s out of every
+     * 2.7, 2026-10-05) comes back as a new device. Up to 3 s for it. */
+    for (int i = 0; !c->u && usb && i < 30 && !s_cancel; i++) {
+        aos_hal_sleep_ms(100);
+        c->u = aos_io_uart_open(J.port, 115200, false, AOS_FLASHER_OWNER);
+    }
     if (!c->u && usb) return failf("No se pudo abrir %s: ¿está enchufado, o abierto en la Terminal?", J.port);
     if (!c->u) {
         const char *o = aos_io_owner(pt->pins[0]);

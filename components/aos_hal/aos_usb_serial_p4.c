@@ -70,6 +70,7 @@ static void wide_to_str(const usb_str_desc_t *d, char *out, size_t n)
     if (d)
         for (int k = 0; k < (d->bLength - 2) / 2 && i + 1 < n; k++) {
             uint16_t w = d->wData[k];
+            if (!w) break;              /* Espressif's own strings end in a NUL */
             out[i++] = w >= 32 && w < 127 ? (char)w : '?';
         }
     out[i] = 0;
