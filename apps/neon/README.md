@@ -35,6 +35,13 @@ to the right on a menu goes back. Touches are read from the touch panel's
 own samples (`aos_hal_touch_frames()`), not as LVGL events, so a flick
 shorter than a frame still turns and a second finger is a swipe of its own.
 
+**A USB gamepad** (`aos_pad.h`) plays too: the d-pad or the stick turns
+(of two directions pressed at once, the one across the snake's way wins),
+START pauses and resumes. On the menus, the pause and OTRA VEZ / MENÚ the
+d-pad goes through the buttons with an outline and A presses
+(`aos_pad_menu.h`); START presses the one picked, B goes back (from the
+pause it resumes) and never leaves the app.
+
 An earlier build had four arrows floating over the bottom corners and a
 CONTROL entry on the menu to choose; on the board swiping won, and both are
 gone (a `neon_ctrl` value saved by that build is ignored).
