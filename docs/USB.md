@@ -278,7 +278,10 @@ configuration descriptor is several KB (every format and size), so the
 library's control transfers go up to 4 KB
 (`CONFIG_USB_HOST_CONTROL_TRANSFER_MAX_SIZE`; 256 failed its enumeration),
 and the host's DMA buffers are in PSRAM
-(`CONFIG_USB_HOST_DWC_DMA_CAP_MEMORY_IN_PSRAM`). A camera that declares
+(`CONFIG_USB_HOST_DWC_DMA_CAP_MEMORY_IN_PSRAM`, PSRAM first): that costs
+the pendrive about 15 % (7.4 MB/s with them in internal RAM, 6.1-6.4
+with them in PSRAM, the same file), nothing a transfer over Wi-Fi
+notices. A camera that declares
 no name shows as "Webcam vid:pid". `/api/usb` `cameras` lists each with
 its MJPEG sizes, and `camera_stream` the one streaming.
 

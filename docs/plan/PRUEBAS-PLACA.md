@@ -449,6 +449,8 @@ por el Registro del portal sin cable serie)
       Antes hizo falta: descriptores de configuración de hasta 4 KB (la
       librería traía 256) y sacar dos tablas de la pila de la tarea del
       driver UVC (se desbordaba al llegar la cámara: reinicio).
+- [x] Pendrive con los búferes DMA del host en PSRAM: 6,1-6,4 MB/s (antes,
+      en RAM interna, 7,4). Queda en PSRAM (PSRAM primero).
 - [x] **Hub** de 7 puertos (dos chips de 4 encadenados) en 21/23 con el
       joystick (2026-10-04): entra en cualquier puerto y se lee. Visto: (a)
       una vez el hub contestó STALL a GET_PORT_STATUS justo tras encender
