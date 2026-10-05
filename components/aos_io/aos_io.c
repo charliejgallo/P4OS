@@ -316,13 +316,36 @@ static void release_pins(const aos_io_port_t *p, const char *owner)
     for (int k = 0; k < 4; k++) if (p->pins[k] >= 0) aos_io_release(p->pins[k], owner);
 }
 
+/* "usb0", "usb1": a USB serial port of the host (aos_hal_usb_serial_*),
+ * index into what is plugged in now */
+static int usb_port_index(const char *port)
+{
+    if (!port || strncmp(port, "usb", 3) || port[3] < '0' || port[3] > '9' || port[4]) return -1;
+    return port[3] - '0';
+}
+
 aos_io_uart_t *aos_io_uart_open(const char *port, uint32_t baud, bool rs485, const char *owner)
 {
+    int ui = usb_port_index(port);
+    if (ui >= 0) {
+        int h = aos_hal_usb_serial_open(ui, baud ? baud : 115200);
+        if (h < 0) { aos_hal_log("io", "no USB serial port %s", port); return NULL; }
+        aos_io_uart_t *u = calloc(1, sizeof *u);
+        u->usb = (int16_t)h;
+        u->baud = baud ? baud : 115200;
+        snprintf(u->owner, sizeof u->owner, "%s", owner);
+        char name[40] = "";
+        aos_hal_usb_serial_name(ui, name, sizeof name);
+        snprintf(u->desc, sizeof u->desc, "%s %.40s", port, name);
+        u->en_gpio = u->boot_gpio = u->en = u->boot = -1;
+        return u;
+    }
     const aos_io_port_t *p = aos_io_port_find(port);
     if (!p || p->kind != AOS_PORT_UART) { aos_hal_log("io", "no UART port %s", port ? port : "?"); return NULL; }
     if (!claim_pins(p, owner)) return NULL;
     aos_io_uart_t *u = calloc(1, sizeof *u);
     u->port = p;
+    u->usb = -1;
     snprintf(u->owner, sizeof u->owner, "%s", owner);
     u->baud = baud ? baud : p->freq;
     snprintf(u->desc, sizeof u->desc, "%s TX%d RX%d", p->name, p->pins[0], p->pins[1]);
@@ -339,12 +362,27 @@ aos_io_uart_t *aos_io_uart_open(const char *port, uint32_t baud, bool rs485, con
     return u;
 }
 
-int aos_io_uart_read(aos_io_uart_t *u, void *buf, int len, int timeout_ms) { return u ? aos_io_be_uart_read(u, buf, len, timeout_ms) : -1; }
-int aos_io_uart_write(aos_io_uart_t *u, const void *buf, int len) { return u ? aos_io_be_uart_write(u, buf, len) : -1; }
+int aos_io_uart_read(aos_io_uart_t *u, void *buf, int len, int timeout_ms)
+{
+    if (!u) return -1;
+    return u->usb >= 0 ? aos_hal_usb_serial_read(u->usb, buf, len, timeout_ms) : aos_io_be_uart_read(u, buf, len, timeout_ms);
+}
+
+int aos_io_uart_write(aos_io_uart_t *u, const void *buf, int len)
+{
+    if (!u) return -1;
+    return u->usb >= 0 ? aos_hal_usb_serial_write(u->usb, buf, len) : aos_io_be_uart_write(u, buf, len);
+}
 
 bool aos_io_uart_set_baud(aos_io_uart_t *u, uint32_t baud)
 {
-    if (!u || !aos_io_be_uart_set_baud(u, baud)) return false;
+    if (!u) return false;
+    if (u->usb >= 0) {
+        if (!aos_hal_usb_serial_set_format(u->usb, baud, 'N', 1)) return false;
+        u->baud = baud;
+        return true;
+    }
+    if (!aos_io_be_uart_set_baud(u, baud)) return false;
     u->baud = baud;
     return true;
 }
@@ -352,6 +390,7 @@ bool aos_io_uart_set_baud(aos_io_uart_t *u, uint32_t baud)
 bool aos_io_uart_set_format(aos_io_uart_t *u, char parity, int stop_bits)
 {
     if (!u || (parity != 'N' && parity != 'E' && parity != 'O') || (stop_bits != 1 && stop_bits != 2)) return false;
+    if (u->usb >= 0) return aos_hal_usb_serial_set_format(u->usb, u->baud, parity, stop_bits);
     return aos_io_be_uart_set_format(u, parity, stop_bits);
 }
 
@@ -403,6 +442,11 @@ bool aos_io_uart_lines(aos_io_uart_t *u, int en, int boot)
 void aos_io_uart_close(aos_io_uart_t *u)
 {
     if (!u) return;
+    if (u->usb >= 0) {
+        aos_hal_usb_serial_close(u->usb);
+        free(u);
+        return;
+    }
     if (u->lines_claimed) {
         aos_io_be_uart_lines_release(u);
         if (u->en_gpio >= 0) aos_io_release(u->en_gpio, u->owner);

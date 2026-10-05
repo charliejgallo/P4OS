@@ -1884,6 +1884,32 @@ bool aos_hal_hid_gamepad_get(int index, aos_gamepad_t *out);    /* index 0..AOS_
 enum { AOS_DPAD_UP = 1, AOS_DPAD_DOWN = 2, AOS_DPAD_LEFT = 4, AOS_DPAD_RIGHT = 8 };
 uint8_t aos_hal_hid_gamepad_dpad(const aos_gamepad_t *pad);
 
+/* P4OS: USB MIDI devices on the host (aos_usb_midi_p4.c): keyboards, pads,
+ * controllers. Messages in a queue (the oldest dropped when nobody reads
+ * it), without system exclusive. A MIDI keyboard also plays on the computer
+ * when the OTG connector is its MIDI port at the same time (MIDI thru). */
+typedef struct {
+    uint8_t status, data1, data2;   /* 0x90 note on, 0x80 off, 0xB0 control, 0xE0 bend... (| channel) */
+    uint8_t cable;
+} aos_midi_msg_t;
+bool aos_hal_midi_read(aos_midi_msg_t *m);
+bool aos_hal_midi_send(const aos_midi_msg_t *m);        /* to the first device that takes messages */
+int  aos_hal_midi_devices(char names[][48], int max);
+int  aos_hal_midi_last(aos_midi_msg_t *out, int max);   /* the last ones in, newest first */
+
+/* P4OS: USB serial ports on the host (aos_usb_serial_p4.c): CDC-ACM devices
+ * and CH34x, CP210x, FTDI converters. Listed while plugged in (index 0..
+ * count-1, the "usb0", "usb1" ports of aos_io); open gives a handle, -1 if
+ * it cannot. Reads wait up to timeout_ms: bytes, 0 on timeout, -1 once the
+ * device is gone. */
+int  aos_hal_usb_serial_count(void);
+bool aos_hal_usb_serial_name(int index, char *out, size_t n);
+int  aos_hal_usb_serial_open(int index, uint32_t baud);
+bool aos_hal_usb_serial_set_format(int h, uint32_t baud, char parity, int stop_bits);   /* 'N' 'E' 'O'; 1 or 2 */
+int  aos_hal_usb_serial_read(int h, void *buf, int len, int timeout_ms);
+int  aos_hal_usb_serial_write(int h, const void *buf, int len);
+void aos_hal_usb_serial_close(int h);
+
 /* mDNS on a network interface of somebody else's (the USB one): the watch
  * answers "amoledos.local" there too, with that interface's address. The
  * argument is an esp_netif_t*, kept opaque so this header stays free of

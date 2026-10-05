@@ -891,6 +891,39 @@ __attribute__((weak)) bool aos_hal_hid_gamepad_get(int index, aos_gamepad_t *out
 __attribute__((weak)) uint8_t aos_hal_hid_gamepad_dpad(const aos_gamepad_t *pad)
 { uint8_t v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) bool aos_hal_midi_read(aos_midi_msg_t *m)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_midi_send(const aos_midi_msg_t *m)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_midi_devices(char names[][48], int max)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_midi_last(aos_midi_msg_t *out, int max)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_usb_serial_count(void)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_usb_serial_name(int index, char *out, size_t n)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_usb_serial_open(int index, uint32_t baud)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_usb_serial_set_format(int h, uint32_t baud, char parity, int stop_bits)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_usb_serial_read(int h, void *buf, int len, int timeout_ms)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_usb_serial_write(int h, const void *buf, int len)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) void aos_hal_usb_serial_close(int h)
+{ }
+
 __attribute__((weak)) const char * aos_hal_device_name(void)
 { return ""; }
 

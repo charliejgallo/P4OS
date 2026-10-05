@@ -422,7 +422,7 @@ dependencies:
       - if: target not in ["linux"]
       version: ^1.0.0
     source:
-      registry_url: https://components.espressif.com
+      registry_url: https://components.espressif.com/
       type: service
     targets:
     - esp32s2
@@ -440,7 +440,7 @@ dependencies:
       require: public
       version: ^2.1.0
     source:
-      registry_url: https://components.espressif.com
+      registry_url: https://components.espressif.com/
       type: service
     version: 2.2.1
   espressif/usb_host_cp210x_vcp:
@@ -454,9 +454,20 @@ dependencies:
       require: private
       version: '>=4.4'
     source:
-      registry_url: https://components.espressif.com
+      registry_url: https://components.espressif.com/
       type: service
     version: 2.2.0
+  espressif/usb_host_ftdi_vcp:
+    component_hash: efa8896db30feeb44aa71b13ef4488bf85af650589c66f79c35aaee75b105ae1
+    dependencies:
+    - name: espressif/usb_host_cdc_acm
+      registry_url: https://components.espressif.com
+      require: public
+      version: ^2.3.0
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 2.1.1
   espressif/usb_host_msc:
     component_hash: d8765c212bb4915d42560886fac3cc5059d61a0bfa14152b32ea9a5258e7a0c9
     dependencies:
@@ -586,11 +597,15 @@ direct_dependencies:
 - espressif/libpng
 - espressif/mdns
 - espressif/onewire_bus
+- espressif/usb_host_cdc_acm
+- espressif/usb_host_ch34x_vcp
+- espressif/usb_host_cp210x_vcp
+- espressif/usb_host_ftdi_vcp
 - espressif/usb_host_msc
 - idf
 - lvgl/lvgl
 - waveshare/esp32_p4_wifi6_touch_lcd_5
 - waveshare/esp_lcd_hx8394
-manifest_hash: afbd5dc204ba03477ac8f87baf13e3d2de92bd30d5dc76f49fdd88b6a146d450
+manifest_hash: e7e5619e1249092b8c850e58115427ecfbd9c666f48fbb9e4206c6ad81ceb8c7
 target: esp32p4
 version: 2.0.0

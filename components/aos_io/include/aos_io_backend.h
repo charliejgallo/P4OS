@@ -22,6 +22,9 @@ struct aos_io_uart {
     int8_t   en_gpio, boot_gpio;
     bool     lines_claimed;
     int8_t   en, boot;
+    /* a USB serial port of the host ("usb0"): the HAL's handle, and no
+     * backend nor pins; -1 for a UART */
+    int16_t  usb;
 };
 
 struct aos_io_i2c {

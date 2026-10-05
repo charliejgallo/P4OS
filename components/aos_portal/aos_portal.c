@@ -504,6 +504,21 @@ static void api_usb(aos_httpd_req_t *r)
             cJSON_AddItemToArray(ga, g);
         }
         cJSON_AddBoolToObject(o, "mouse", aos_hal_hid_mouse_present());
+        /* MIDI: the devices, and the last messages in (newest first) */
+        char mn[2][48];
+        int nm = aos_hal_midi_devices(mn, 2);
+        if (nm > 0) {
+            cJSON *ma = cJSON_AddArrayToObject(o, "midi");
+            for (int i = 0; i < nm; i++) cJSON_AddItemToArray(ma, cJSON_CreateString(mn[i]));
+            aos_midi_msg_t ml[8];
+            int nl = aos_hal_midi_last(ml, 8);
+            cJSON *la = cJSON_AddArrayToObject(o, "midi_last");
+            for (int i = 0; i < nl; i++) {
+                char m[12];
+                snprintf(m, sizeof m, "%02x %02x %02x", ml[i].status, ml[i].data1, ml[i].data2);
+                cJSON_AddItemToArray(la, cJSON_CreateString(m));
+            }
+        }
         cJSON *a = cJSON_AddArrayToObject(o, "pendrives");
         for (int i = 0; i < n; i++) usb_dev_json(a, &in[i]);
         /* "host": the first one, as before */

@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
  * Mas 152 funciones de libc/libm agregadas a mano.
- * Total: 3201 simbolos.
+ * Total: 3212 simbolos.
  */
 
 #include <stddef.h>
@@ -333,6 +333,10 @@ extern int aos_hal_mic_level;
 extern int aos_hal_mic_open;
 extern int aos_hal_mic_read;
 extern int aos_hal_mic_status;
+extern int aos_hal_midi_devices;
+extern int aos_hal_midi_last;
+extern int aos_hal_midi_read;
+extern int aos_hal_midi_send;
 extern int aos_hal_minute_history;
 extern int aos_hal_mutex_create;
 extern int aos_hal_mutex_lock;
@@ -559,6 +563,13 @@ extern int aos_hal_usb_mouse;
 extern int aos_hal_usb_mouse_hold;
 extern int aos_hal_usb_net_up;
 extern int aos_hal_usb_restore;
+extern int aos_hal_usb_serial_close;
+extern int aos_hal_usb_serial_count;
+extern int aos_hal_usb_serial_name;
+extern int aos_hal_usb_serial_open;
+extern int aos_hal_usb_serial_read;
+extern int aos_hal_usb_serial_set_format;
+extern int aos_hal_usb_serial_write;
 extern int aos_hal_usb_type;
 extern int aos_hal_volume_get;
 extern int aos_hal_volume_set;
@@ -3537,6 +3548,10 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_mic_open),
     ESP_ELFSYM_EXPORT(aos_hal_mic_read),
     ESP_ELFSYM_EXPORT(aos_hal_mic_status),
+    ESP_ELFSYM_EXPORT(aos_hal_midi_devices),
+    ESP_ELFSYM_EXPORT(aos_hal_midi_last),
+    ESP_ELFSYM_EXPORT(aos_hal_midi_read),
+    ESP_ELFSYM_EXPORT(aos_hal_midi_send),
     ESP_ELFSYM_EXPORT(aos_hal_minute_history),
     ESP_ELFSYM_EXPORT(aos_hal_mutex_create),
     ESP_ELFSYM_EXPORT(aos_hal_mutex_lock),
@@ -3763,6 +3778,13 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_usb_mouse_hold),
     ESP_ELFSYM_EXPORT(aos_hal_usb_net_up),
     ESP_ELFSYM_EXPORT(aos_hal_usb_restore),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_serial_close),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_serial_count),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_serial_name),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_serial_open),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_serial_read),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_serial_set_format),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_serial_write),
     ESP_ELFSYM_EXPORT(aos_hal_usb_type),
     ESP_ELFSYM_EXPORT(aos_hal_volume_get),
     ESP_ELFSYM_EXPORT(aos_hal_volume_set),

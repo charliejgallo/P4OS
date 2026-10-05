@@ -874,6 +874,12 @@ static void *create(aos_app_t *self, lv_obj_t *root)
         if (ports[0]) strlcat(ports, "\n", sizeof ports);
         strlcat(ports, p->name, sizeof ports);
     }
+    /* USB serial devices on the host, while plugged in: "usb0", "usb1" */
+    for (int i = 0; i < aos_hal_usb_serial_count() && i < 4; i++) {
+        char u[8];
+        snprintf(u, sizeof u, "%susb%d", ports[0] ? "\n" : "", i);
+        strlcat(ports, u, sizeof ports);
+    }
     T.port_dd = dropdown(T.bar, ports[0] ? ports : "uart.b", 150);
     char bauds[160] = "";
     for (size_t i = 0; i < N_BAUDS; i++) {
