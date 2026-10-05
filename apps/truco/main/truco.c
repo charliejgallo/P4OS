@@ -50,6 +50,12 @@
  *     game is against the machine, fully.
  *   - Turning the screen goes through resize(): the view is rebuilt in the
  *     new size around the same game, cards where they were.
+ *   - A USB gamepad plays it through aos_pad_menu: the d-pad walks your
+ *     cards still in hand and the calls showing; A does
+ *     what a tap does (the first lifts a card, the second plays it). B puts
+ *     a lifted card back, START opens and closes the menu, and at the end
+ *     of a game A or START carries on. The outline only shows once the pad
+ *     is used.
  *
  * Development switches (simulator; on the board getenv() returns NULL):
  *   TRUCO_AUTO=1        the machine plays both sides (for leaving it running)
@@ -65,6 +71,8 @@
 #include "aos_fonts.h"
 #include "aos_hal.h"
 #include "aos_ui.h"
+#include "aos_pad.h"
+#include "aos_pad_menu.h"
 
 #include "tr_game.h"
 #include "tr_cards.h"
@@ -148,7 +156,12 @@ typedef struct {
     /* The menu */
     lv_obj_t *menu;
     lv_obj_t *menu_stats, *menu_duo, *menu_duo_lbl, *menu_note, *menu_new;
+    lv_obj_t *menu_resume, *menu_exit;
     bool      menu_open;
+
+    /* The gamepad: pmenu holds whatever can be pressed right now */
+    aos_pad_t      pad;
+    aos_pad_menu_t pmenu;
 
     /* Two watches (tl_link.h). 'me' is my seat in the engine: 0 alone or as
      * the host, 1 as the guest. Everything the UI draws goes through ME/THEM
@@ -990,6 +1003,107 @@ static void root_cb(lv_event_t *e)
 }
 
 /* -------------------------------------------------------------------------- */
+/* The gamepad                                                                 */
+
+/* Takes the outline off everything but the selected one: aos_pad_menu skips
+ * a button that was hidden while selected (a call once answered) and its
+ * outline would come back with it the next time the bar shows. */
+static void pad_unmark(lv_obj_t *o, const lv_obj_t *sel)
+{
+    if (o && o != sel && lv_obj_get_style_outline_width(o, 0) != 0) {
+        lv_obj_set_style_outline_width(o, 0, 0);
+        lv_obj_set_style_outline_pad(o, 0, 0);
+    }
+}
+
+/* What the d-pad walks right now: the menu's buttons, the chooser, or your
+ * cards still in hand and the calls showing. Handed to
+ * pmenu only when it changed, keeping the selection where it was. */
+static void pad_items(void)
+{
+    lv_obj_t *it[TR_HAND_N + BTN_MAX];
+    int n = 0, def = 0;
+    if (s_t.menu_open) {
+        it[n++] = s_t.menu_resume;
+        it[n++] = s_t.menu_new;
+        it[n++] = s_t.menu_duo;
+        it[n++] = s_t.menu_exit;
+    } else if (s_t.lk == LK_CHOOSE) {
+        for (int k = 0; k < 2; k++) {
+            if (s_t.choose[k]) it[n++] = s_t.choose[k];
+        }
+    } else {
+        for (int i = 0; i < TR_HAND_N; i++) {
+            if (s_t.vis[ME][i] && !s_t.g.spent[ME][i] && s_t.card[ME][i]) {
+                it[n++] = s_t.card[ME][i];
+            }
+        }
+        /* answering a call, the outline starts on QUIERO: no card can be
+         * played until it is answered */
+        if (s_t.g.phase == TR_P_ANSWER && s_t.bar_n > 0) def = -n;
+        for (int i = 0; i < s_t.bar_n; i++) {
+            it[n++] = s_t.btn[i];
+        }
+        /* not the menu button: START is the menu, and between two hands it
+         * would be all there is, for an A meant for the next card */
+    }
+
+    bool same = n == s_t.pmenu.n;
+    for (int i = 0; same && i < n; i++) {
+        same = it[i] == s_t.pmenu.item[i];
+    }
+    if (!same) {
+        /* until the pad is used, the outline (unseen) stays on the default */
+        lv_obj_t *was = s_t.pmenu.shown ? aos_pad_menu_selected(&s_t.pmenu) : NULL;
+        bool answer = def < 0;
+        int sel = answer ? -def : def;
+        for (int i = answer ? sel : 0; i < n; i++) {
+            if (it[i] == was) sel = i;
+        }
+        aos_pad_menu_set(&s_t.pmenu, it, n, sel);
+    }
+
+    if (!s_t.pmenu.shown) return;
+    const lv_obj_t *sel = s_t.pmenu.sel < s_t.pmenu.n ? s_t.pmenu.item[s_t.pmenu.sel] : NULL;
+    for (int p = 0; p < TR_HAND_N; p++) pad_unmark(s_t.card[ME][p], sel);
+    for (int i = 0; i < BTN_MAX; i++) pad_unmark(s_t.btn[i], sel);
+}
+
+static void pad_step(void)
+{
+    aos_pad_update(&s_t.pad, lv_tick_get());
+    pad_items();
+    if (!s_t.pad.pressed && !s_t.pad.repeat) return;
+
+    bool start = aos_pad_pressed(&s_t.pad, AOS_PAD_START);
+    bool b     = aos_pad_pressed(&s_t.pad, AOS_PAD_B);
+    if (s_t.menu_open) {
+        if (start || b) menu_show(false);
+        else aos_pad_menu_step(&s_t.pmenu, &s_t.pad);
+        return;
+    }
+    /* the end of a game, or of the link: a touch anywhere, which is A here */
+    if ((s_t.over || s_t.lk == LK_LOST) &&
+        aos_pad_pressed(&s_t.pad, AOS_PAD_A | AOS_PAD_START)) {
+        root_cb(NULL);
+        return;
+    }
+    if (start) {
+        if (s_t.lk != LK_CHOOSE) menu_show(true);
+        return;
+    }
+    if (b) {
+        /* B puts the lifted card back, as touching the baize does */
+        if (s_t.sel >= 0) {
+            s_t.sel = -1;
+            retarget_all();
+        }
+        return;
+    }
+    aos_pad_menu_step(&s_t.pmenu, &s_t.pad);
+}
+
+/* -------------------------------------------------------------------------- */
 
 static void tick_cb(lv_timer_t *t)
 {
@@ -1002,6 +1116,8 @@ static void tick_cb(lv_timer_t *t)
         aos_ui_back();
         return;
     }
+    pad_step();
+    if (s_t.want_exit) return;          /* SALIR from the pad: the next tick */
     if (s_t.lk == LK_CHOOSE) return;
     if (s_t.link) link_tick();
     if (s_t.lk == LK_HELLO || s_t.lk == LK_LOST) return;
@@ -1237,14 +1353,14 @@ static void build_menu(lv_obj_t *root)
 
     const int bh = 96, gap = 18;
     int y = o->land ? (chh - (4 * bh + 3 * gap)) / 2 : 272;
-    menu_button(c, "SEGUIR", rx, y, rw, bh, 0x0E4A2A, menu_resume_cb, NULL);
+    s_t.menu_resume = menu_button(c, "SEGUIR", rx, y, rw, bh, 0x0E4A2A, menu_resume_cb, NULL);
     y += bh + gap;
     s_t.menu_new = menu_button(c, "PARTIDA NUEVA", rx, y, rw, bh, 0x0E4A2A, menu_new_cb, NULL);
     y += bh + gap;
     s_t.menu_duo = menu_button(c, "A DOS JUGADORES", rx, y, rw, bh, 0x16365E, menu_duo_cb,
                                &s_t.menu_duo_lbl);
     y += bh + gap;
-    menu_button(c, "SALIR", rx, y, rw, bh, 0x53311E, menu_exit_cb, NULL);
+    s_t.menu_exit = menu_button(c, "SALIR", rx, y, rw, bh, 0x53311E, menu_exit_cb, NULL);
     y += bh + 28;
 
     s_t.menu_note = lv_label_create(c);
@@ -1563,6 +1679,7 @@ static void *truco_create(aos_app_t *self, lv_obj_t *root)
     const char *sd = getenv("TRUCO_SEED");
     if (sd && sd[0]) s_t.my_seed = (uint32_t)atoi(sd);
     s_t.nonce = s_t.my_seed ^ 0xA5A5F00Du;
+    aos_pad_reset(&s_t.pad, lv_tick_get());
     s_t.timer = lv_timer_create(tick_cb, 33, NULL);
 
     /* Can this device play two-handed at all? Asking the radio is the only
@@ -1709,6 +1826,7 @@ static bool truco_resize(aos_app_t *self, void *inst, lv_obj_t *root)
     (void)self; (void)inst;
     s_t.closing = true;
     lv_obj_clean(root);
+    aos_pad_menu_clear(&s_t.pmenu);     /* its buttons went with the view */
     view_free();
     s_t.root = root;
     s_t.closing = false;
