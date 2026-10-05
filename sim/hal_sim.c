@@ -615,6 +615,53 @@ bool aos_hal_usb_gamepad(int x, int y, int hat, unsigned buttons)
     lx = x; ly = y; lh = hat; lb = buttons; same = 0; any = true;
     return true;
 }
+/* A gamepad on the USB host, faked: main.c drives it from the keyboard
+ * (P4_SIM_PAD=1) or from a script ('pad'). Index 0 only, like a pad
+ * plugged in alone; the d-pad reading is the board's (aos_usb_hid_p4.c). */
+static aos_gamepad_t s_pad = { .hat = -1 };
+
+void aos_hal_sim_pad(bool connected, uint32_t buttons, int16_t ax, int16_t ay, int8_t hat)
+{
+    if (connected && !s_pad.connected) {
+        snprintf(s_pad.name, sizeof s_pad.name, "Simulator pad");
+        s_pad.axes = 3;
+        s_pad.has_hat = true;
+        s_pad.nbuttons = 12;
+    }
+    s_pad.connected = connected;
+    s_pad.buttons = buttons;
+    s_pad.axis[0] = ax;
+    s_pad.axis[1] = ay;
+    s_pad.hat = hat;
+    s_pad.reports++;
+}
+
+int aos_hal_hid_gamepad_count(void) { return s_pad.connected ? 1 : 0; }
+
+bool aos_hal_hid_gamepad_get(int index, aos_gamepad_t *out)
+{
+    if (index != 0) { memset(out, 0, sizeof *out); return false; }
+    *out = s_pad;
+    return out->connected;
+}
+
+uint8_t aos_hal_hid_gamepad_dpad(const aos_gamepad_t *p)
+{
+    static const uint8_t HAT[8] = { AOS_DPAD_UP, AOS_DPAD_UP | AOS_DPAD_RIGHT, AOS_DPAD_RIGHT,
+                                    AOS_DPAD_DOWN | AOS_DPAD_RIGHT, AOS_DPAD_DOWN, AOS_DPAD_DOWN | AOS_DPAD_LEFT,
+                                    AOS_DPAD_LEFT, AOS_DPAD_UP | AOS_DPAD_LEFT };
+    uint8_t d = p->hat >= 0 && p->hat < 8 ? HAT[p->hat] : 0;
+    if (p->axes & 1) {
+        if (p->axis[0] < -16384) d |= AOS_DPAD_LEFT;
+        if (p->axis[0] > 16384) d |= AOS_DPAD_RIGHT;
+    }
+    if (p->axes & 2) {
+        if (p->axis[1] < -16384) d |= AOS_DPAD_UP;
+        if (p->axis[1] > 16384) d |= AOS_DPAD_DOWN;
+    }
+    return d;
+}
+
 bool aos_hal_usb_midi_ready(void) { return aos_hal_usb_keys_ready(); }
 bool aos_hal_usb_midi_note(int note, int velocity, bool on) { if (!aos_hal_usb_keys_ready()) return false; printf("[hal] midi note %d %s vel %d\n", note, on ? "on" : "off", velocity); return true; }
 bool aos_hal_usb_midi_cc(int control, int value) { if (!aos_hal_usb_keys_ready()) return false; printf("[hal] midi cc %d %d\n", control, value); return true; }

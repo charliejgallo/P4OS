@@ -193,6 +193,17 @@ takes is there for the apps, all in `aos_hal.h`:
   SNES-style pad is X=1, A=2, B=3, Y=4, L=5, R=6, Select=9, Start=10, but
   another pad differs, so offer to map them. `/api/usb` shows the pads
   live, to see which is which.
+- **The same pad in every game:** `aos_pad.h` (header only, no new
+  firmware) reads all the pads into roles, A (buttons 1 or 2), B (3 or 4),
+  L (5 or 7), R (6 or 8), START (9 or 10) and the four directions, with
+  `pressed`/`released` edges and directions that repeat while held, for
+  menus and grids. The retro canvas maps its buttons the same way.
+  `aos_pad_menu.h` takes a screen's LVGL buttons: the d-pad moves an
+  outline to the nearest one in that direction and A clicks it; the
+  outline appears only once the pad is used. In the simulator,
+  `P4_SIM_PAD=1` makes the keyboard a pad (the arrows, z/c = A, x/v = B,
+  a/d = L/R, Return = START) and a script's `pad <buttons> <x> <y> [ms]`
+  holds one (sim/main.c).
 - **A keyboard** types into the open LVGL keyboard's text area by itself.
   An app with a keyboard of its own takes the keys while it is up with
   `aos_ui_hwkbd_handler(cb)` (`aos_ui.h`) and gives them back with NULL:

@@ -17,13 +17,23 @@
  *     s        screenshot to sim_shot.png
  *     q        quit
  *
+ * A USB gamepad, faked (P4_SIM_PAD=1, what aos_hal_hid_gamepad_get reads):
+ *     arrows   the d-pad          z / c    buttons 1 / 2 (A)
+ *     x / v    buttons 3 / 4 (B)  a / d    buttons 5 / 6 (L / R)
+ *     Return   button 10 (Start)  Shift    button 9 (Select)
+ * With the pad on, those letters are the pad's and not the commands above.
+ *
  * Scripts, for looking at the UI without anybody at the mouse:
  *
  *     P4_SIM_SCRIPT="wait 800; shot home.png; tap 360 700; wait 600; shot app.png; quit"
  *
  * Commands, separated by ';':  wait <ms> | tap <x> <y> [ms] |
  * drag <x1> <y1> <x2> <y2> [ms] [rest_ms] | pinch <cx> <cy> <from> <to> [ms] |
- * key <k> | type <text> | enter | open <app id> | rotate | shot <file.png> | quit
+ * key <k> | type <text> | enter | open <app id> | rotate | shot <file.png> |
+ * pad <buttons> <x> <y> [ms] | quit
+ * (pad: a gamepad plugged in, holding <buttons> - hex, bit 0 = button 1 -
+ * and the left stick at <x> <y> in -32767..32767 for ms, 150 by default;
+ * then it lets go and stays plugged in. "pad off" unplugs it)
  * (type and enter go to the text field of the on-screen keyboard showing)
  * Coordinates are logical (the ones the UI sees in the current orientation).
  */
@@ -45,6 +55,7 @@ void aos_hal_sim_set_display(lv_display_t *disp);
 void aos_hal_sim_idle_tick(void);
 void aos_hal_sim_notificacion(void);
 void aos_hal_sim_link_tick(void);
+void aos_hal_sim_pad(bool connected, uint32_t buttons, int16_t ax, int16_t ay, int8_t hat);
 
 /* --------------------------------------------------------------------------
  * Apps from apps/ compiled in (AOS_SIM_BUILTIN), as on the watch's simulator
@@ -140,13 +151,19 @@ static void shot_tick(void)
  * -------------------------------------------------------------------------- */
 static volatile char s_key;
 static bool s_quit;
+static bool s_pad_keys;             /* P4_SIM_PAD: the keyboard is a gamepad */
+
+static bool pad_key(SDL_Keycode k)
+{
+    return s_pad_keys && (k == 'z' || k == 'c' || k == 'x' || k == 'v' || k == 'a' || k == 'd');
+}
 
 static int event_watch(void *ud, SDL_Event *e)
 {
     if (e->type == SDL_QUIT) s_quit = true;
     if (e->type == SDL_KEYDOWN && !e->key.repeat) {
         SDL_Keycode k = e->key.keysym.sym;
-        if (k < 128) s_key = (char)k;
+        if (k < 128 && !pad_key(k)) s_key = (char)k;
         if (k == SDLK_ESCAPE) s_key = 'b';
     }
     return 1;
@@ -165,6 +182,36 @@ static void do_key(char k)
     case 'q': s_quit = true; break;
     default: break;
     }
+}
+
+/* The fake gamepad: the keyboard's state every pass of the loop, unless a
+ * script's 'pad' is holding it. */
+static uint32_t s_pad_hold_until;
+static bool s_pad_scripted;
+
+static void pad_tick(void)
+{
+    if (s_pad_scripted) {
+        if ((int32_t)(lv_tick_get() - s_pad_hold_until) < 0) return;
+        s_pad_scripted = false;
+        aos_hal_sim_pad(true, 0, 0, 0, -1);
+    }
+    if (!s_pad_keys) return;
+    const Uint8 *k = SDL_GetKeyboardState(NULL);
+    uint32_t b = 0;
+    if (k[SDL_SCANCODE_Z]) b |= 1u << 0;
+    if (k[SDL_SCANCODE_C]) b |= 1u << 1;
+    if (k[SDL_SCANCODE_X]) b |= 1u << 2;
+    if (k[SDL_SCANCODE_V]) b |= 1u << 3;
+    if (k[SDL_SCANCODE_A]) b |= 1u << 4;
+    if (k[SDL_SCANCODE_D]) b |= 1u << 5;
+    if (k[SDL_SCANCODE_LSHIFT] || k[SDL_SCANCODE_RSHIFT]) b |= 1u << 8;
+    if (k[SDL_SCANCODE_RETURN]) b |= 1u << 9;
+    int dx = k[SDL_SCANCODE_RIGHT] - k[SDL_SCANCODE_LEFT];
+    int dy = k[SDL_SCANCODE_DOWN] - k[SDL_SCANCODE_UP];
+    /* the hat, 0 up then clockwise, as a real pad reports its d-pad */
+    static const int8_t HAT[3][3] = { { 7, 0, 1 }, { 6, -1, 2 }, { 5, 4, 3 } };
+    aos_hal_sim_pad(true, b, 0, 0, HAT[dy + 1][dx + 1]);
 }
 
 /* --------------------------------------------------------------------------
@@ -271,6 +318,14 @@ static void script_step(void)
     else if (sscanf(c, "open %199s", a) == 1) aos_ui_open(a);
     else if (!strncmp(c, "rotate", 6)) { aos_ui_request_landscape(-1); s_script_wait_until = lv_tick_get() + 300; }
     else if (sscanf(c, "shot %199s", a) == 1) shot_request(a);
+    else if (!strcmp(c, "pad off")) { s_pad_scripted = false; aos_hal_sim_pad(false, 0, 0, 0, -1); }
+    else if (sscanf(c, "pad %x %d %d %d", (unsigned *)&x, &y, &x2, &ms) >= 3) {
+        if (sscanf(c, "pad %x %d %d %d", (unsigned *)&x, &y, &x2, &ms) < 4) ms = 150;
+        aos_hal_sim_pad(true, (uint32_t)x, (int16_t)y, (int16_t)x2, -1);
+        s_pad_scripted = true;
+        s_pad_hold_until = lv_tick_get() + ms;
+        s_script_wait_until = lv_tick_get() + ms + 50;
+    }
     else if (!strncmp(c, "quit", 4)) s_quit = true;
     else printf("[script] ?? %s\n", c);
 }
@@ -297,6 +352,9 @@ int main(int argc, char **argv)
     aos_ui_init();
     aos_portal_start(getenv("P4_SIM_PORTAL_PORT") ? atoi(getenv("P4_SIM_PORTAL_PORT")) : 8080);
 
+    s_pad_keys = getenv("P4_SIM_PAD") && atoi(getenv("P4_SIM_PAD"));
+    if (s_pad_keys) aos_hal_sim_pad(true, 0, 0, 0, -1);
+
     if (getenv("P4_SIM_SCRIPT")) {
         s_script = strdup(getenv("P4_SIM_SCRIPT"));
         s_script_pos = s_script;
@@ -306,6 +364,7 @@ int main(int argc, char **argv)
     while (!s_quit) {
         uint32_t wait = lv_timer_handler();
         touch_frames_tick();
+        pad_tick();
         if (s_key) { char k = s_key; s_key = 0; do_key(k); }
         uint32_t now = lv_tick_get();
         if (now - last_tick >= 200) {
