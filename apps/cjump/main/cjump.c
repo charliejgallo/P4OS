@@ -9,6 +9,7 @@
  *   - the four LVGL screens: menu, shop, pause and game over
  *   - the costume shop and its magnified preview
  *   - the controls: the OS's two side buttons and pause, and the finger
+ *     (a USB gamepad presses those buttons, and goes through the screens)
  *   - the preferences: record, coins, costume worn and which are bought
  *   - turning the screen (cjump_resize)
  *
@@ -32,6 +33,7 @@
 #include "aos_i18n.h"
 #include "aos_ui.h"
 #include "aos_retro.h"
+#include "aos_pad_menu.h"
 #include "aos_sys_glyphs.h"
 #include "aos_theme.h"
 
@@ -116,6 +118,13 @@ typedef struct {
     bool       over_shown;
     bool       closing;             /* see cjump_destroy()                     */
     uint32_t   last_gesture_ms;
+
+    /* A USB gamepad: in play it presses the OS's buttons by itself; here
+     * it goes through the screens (see "The gamepad") */
+    aos_pad_t  gp;
+    aos_pad_menu_t menu;
+    lv_obj_t  *menu_panel;          /* the screen the menu went through last step */
+    lv_obj_t  *pm_title[3], *pm_shop[4], *pm_pause[3], *pm_over[2];
 
     uint8_t    auto_wait;           /* CJ_AUTO: frames before retrying         */
     uint8_t    arrows;              /* the buttons held on the previous step   */
@@ -436,6 +445,9 @@ static void overlay_hide_all(app_t *a)
     if (a->preview) {
         lv_obj_add_flag(a->preview, LV_OBJ_FLAG_HIDDEN);
     }
+    /* the pad has no buttons to go through (an empty set also takes the
+     * outline off the one it was on) */
+    aos_pad_menu_set(&a->menu, NULL, 0, 0);
     aos_retro_show_controls(true);
 }
 
@@ -461,6 +473,16 @@ static void overlay_show(app_t *a, lv_obj_t *panel)
     if (panel) {
         lv_obj_remove_flag(panel, LV_OBJ_FLAG_HIDDEN);
         lv_obj_move_foreground(panel);
+        /* and the pad goes through its buttons, from the first one */
+        if (panel == a->title) {
+            aos_pad_menu_set(&a->menu, a->pm_title, 3, 0);
+        } else if (panel == a->shop) {
+            aos_pad_menu_set(&a->menu, a->pm_shop, 4, 3);
+        } else if (panel == a->pause) {
+            aos_pad_menu_set(&a->menu, a->pm_pause, 3, 0);
+        } else if (panel == a->over) {
+            aos_pad_menu_set(&a->menu, a->pm_over, 2, 0);
+        }
     }
     aos_retro_show_controls(panel == NULL);
 }
@@ -760,7 +782,13 @@ static void read_controls(app_t *a)
         g->touching = 0;
         return;
     }
-    /* the OS's pause button, or a tap on the score strip */
+    /* The OS's pause button, or a tap on the score strip. A pad's START
+     * presses the OS's pause too, but the pad answers it itself (pad_step()):
+     * taken twice, the press that resumes would pause again. */
+    if ((down & AOS_RETRO_BTN_PAUSE) &&
+        ((a->gp.held | a->gp.released) & AOS_PAD_START)) {
+        down &= ~(uint32_t)AOS_RETRO_BTN_PAUSE;
+    }
     if ((down & AOS_RETRO_BTN_PAUSE) || hud) {
         pause_show(a);
         return;
@@ -856,6 +884,63 @@ static void gesture_cb(lv_event_t *event)
 }
 
 /* --------------------------------------------------------------------------
+ * The gamepad
+ *
+ * In play a USB pad needs nothing from here: the OS presses the canvas's
+ * buttons with it (the d-pad walks, as the side buttons do). On the screens
+ * the d-pad goes through the buttons and A presses them (aos_pad_menu.h);
+ * START plays from the menu, pauses and resumes, and plays again at the
+ * end; B is back (the shop and the end to the menu, out of the pause); L
+ * and R go through the costumes in the shop.
+ * -------------------------------------------------------------------------- */
+
+static void pad_click(lv_obj_t *b)
+{
+    if (b && lv_obj_is_valid(b)) {
+        lv_obj_send_event(b, LV_EVENT_CLICKED, NULL);
+    }
+}
+
+static void pad_step(app_t *a)
+{
+    aos_pad_t *p = &a->gp;
+    lv_obj_t *panel = a->menu.n ? lv_obj_get_parent(a->menu.item[0]) : NULL;
+
+    aos_pad_update(p, lv_tick_get());
+    /* a screen that has just come up does not take the press that brought
+     * it (that START is pausing, not resuming) */
+    bool fresh = panel != a->menu_panel;
+    a->menu_panel = panel;
+    /* in the background, or under the app switcher, the pad is not ours */
+    if (fresh || !p->connected || !lv_obj_is_visible(a->r->view)) {
+        return;
+    }
+    if (!panel) {
+        if (a->g.state == ST_PLAY && aos_pad_pressed(p, AOS_PAD_START)) {
+            pause_show(a);
+        }
+        return;
+    }
+    if (aos_pad_menu_step(&a->menu, p)) {
+        return;
+    }
+    bool start = aos_pad_pressed(p, AOS_PAD_START);
+    bool back = aos_pad_pressed(p, AOS_PAD_B);
+    if (panel == a->title) {
+        if (start) pad_click(a->pm_title[0]);
+    } else if (panel == a->shop) {
+        if (back) pad_click(a->pm_shop[0]);
+        else if (aos_pad_pressed(p, AOS_PAD_L)) shop_move(a, -1);
+        else if (aos_pad_pressed(p, AOS_PAD_R)) shop_move(a, +1);
+    } else if (panel == a->pause) {
+        if (start || back) pad_click(a->pm_pause[0]);
+    } else if (panel == a->over) {
+        if (start) pad_click(a->pm_over[0]);
+        else if (back) pad_click(a->pm_over[1]);
+    }
+}
+
+/* --------------------------------------------------------------------------
  * The frame
  * -------------------------------------------------------------------------- */
 
@@ -892,6 +977,7 @@ static void step(void *user)
         return;
     }
 
+    pad_step(a);
     read_controls(a);
 
     if (g->state != ST_PLAY && g->state != ST_DYING) {
@@ -973,12 +1059,13 @@ static void build_title(app_t *a, lv_obj_t *root)
     lv_label_set_long_mode(a->lbl_coins, LV_LABEL_LONG_MODE_DOTS);
     lv_obj_set_style_text_align(a->lbl_coins, LV_TEXT_ALIGN_LEFT, 0);
 
-    make_button(p, _("Jugar"), 64, 224, 240, 48, 0x30D158,
-                &aos_montserrat_36, start_cb, a);
-    make_button(p, _("Tienda"), 64, 278, 240, 38, 0xBF5AF2,
-                &aos_montserrat_28, shop_open_cb, a);
+    a->pm_title[0] = make_button(p, _("Jugar"), 64, 224, 240, 48, 0x30D158,
+                                 &aos_montserrat_36, start_cb, a);
+    a->pm_title[1] = make_button(p, _("Tienda"), 64, 278, 240, 38, 0xBF5AF2,
+                                 &aos_montserrat_28, shop_open_cb, a);
 
     a->chip_sfx  = make_chip(p, 128, 322, 112, sfx_cb,  a);
+    a->pm_title[2] = a->chip_sfx;
 
     /* How to play, at the bottom, under everything that is touched. */
     a->lbl_ayuda = make_label(p, "", &aos_montserrat_24, 0x6E7A8C, 372);
@@ -990,18 +1077,18 @@ static void build_shop(app_t *a, lv_obj_t *root)
     a->shop = p;
 
     /* "Back" at the top left, where every screen of the system has it. */
-    make_button(p, LV_SYMBOL_LEFT, 8, 8, 66, 36, 0x8E8E93,
-                &aos_montserrat_28, shop_back_cb, a);
+    a->pm_shop[0] = make_button(p, LV_SYMBOL_LEFT, 8, 8, 66, 36, 0x8E8E93,
+                                &aos_montserrat_28, shop_back_cb, a);
 
     make_label(p, _("Tienda"), &aos_montserrat_36, 0xFFFFFF, 8);
     a->lbl_wallet = make_label(p, "", &aos_montserrat_28, 0xFFD60A, 50);
 
     /* The arrows go on either side of the preview, which takes the centre,
      * at its middle height in both orientations (its scale differs). */
-    make_button(p, "<", 4, 116, 44, 76, 0x0A84FF, &aos_montserrat_36,
-                shop_prev_cb, a);
-    make_button(p, ">", 320, 116, 44, 76, 0x0A84FF, &aos_montserrat_36,
-                shop_next_cb, a);
+    a->pm_shop[1] = make_button(p, "<", 4, 116, 44, 76, 0x0A84FF, &aos_montserrat_36,
+                                shop_prev_cb, a);
+    a->pm_shop[2] = make_button(p, ">", 320, 116, 44, 76, 0x0A84FF, &aos_montserrat_36,
+                                shop_next_cb, a);
 
     a->lbl_skin  = make_label(p, "", &aos_montserrat_36, 0xFFFFFF, 232);
     a->lbl_price = make_label(p, "", &aos_montserrat_28, 0x9AA3B8, 270);
@@ -1009,6 +1096,7 @@ static void build_shop(app_t *a, lv_obj_t *root)
     a->btn_action = make_button(p, "", 64, 304, 240, 46, 0x30D158,
                                 &aos_montserrat_28, shop_action_cb, a);
     a->lbl_action = lv_obj_get_child(a->btn_action, 0);
+    a->pm_shop[3] = a->btn_action;
 
     /* Same idea as in the menu: a notice under everything that is touched.
      * Here it teaches the gesture, which otherwise is not discovered. */
@@ -1025,12 +1113,12 @@ static void build_pause(app_t *a, lv_obj_t *root)
 
     make_label(p, _("Pausa"), &aos_montserrat_48, 0xFFFFFF, 116);
 
-    make_button(p, _("Seguir"), 64, 178, 240, 50, 0x30D158,
-                &aos_montserrat_36, resume_cb, a);
-    make_button(p, _("Menú"), 64, 236, 240, 40, 0x0A84FF,
-                &aos_montserrat_28, menu_cb, a);
-    make_button(p, _("Salir"), 64, 284, 240, 40, 0xFF453A,
-                &aos_montserrat_28, exit_cb, a);
+    a->pm_pause[0] = make_button(p, _("Seguir"), 64, 178, 240, 50, 0x30D158,
+                                 &aos_montserrat_36, resume_cb, a);
+    a->pm_pause[1] = make_button(p, _("Menú"), 64, 236, 240, 40, 0x0A84FF,
+                                 &aos_montserrat_28, menu_cb, a);
+    a->pm_pause[2] = make_button(p, _("Salir"), 64, 284, 240, 40, 0xFF453A,
+                                 &aos_montserrat_28, exit_cb, a);
 }
 
 static void build_over(app_t *a, lv_obj_t *root)
@@ -1045,10 +1133,10 @@ static void build_over(app_t *a, lv_obj_t *root)
     a->lbl_over_c = make_label(p, "", &aos_montserrat_36, 0xFFD60A, 174);
     a->lbl_over_b = make_label(p, "", &aos_montserrat_24, 0x9AA3B8, 214);
 
-    make_button(p, _("Otra vez"), 64, 250, 240, 50, 0x30D158,
-                &aos_montserrat_36, start_cb, a);
-    make_button(p, _("Menú"), 64, 308, 240, 40, 0x0A84FF,
-                &aos_montserrat_28, menu_cb, a);
+    a->pm_over[0] = make_button(p, _("Otra vez"), 64, 250, 240, 50, 0x30D158,
+                                &aos_montserrat_36, start_cb, a);
+    a->pm_over[1] = make_button(p, _("Menú"), 64, 308, 240, 40, 0x0A84FF,
+                                &aos_montserrat_28, menu_cb, a);
 }
 
 /* --------------------------------------------------------------------------
@@ -1141,6 +1229,8 @@ static bool view_build(app_t *a)
 static void view_drop(app_t *a)
 {
     aos_retro_stop();
+    aos_pad_menu_set(&a->menu, NULL, 0, 0);     /* its buttons are about to go */
+    a->menu_panel = NULL;
     a->closing = true;
     aos_retro_end();
     if (a->root) {
