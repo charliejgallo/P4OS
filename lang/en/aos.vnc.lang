@@ -1,0 +1,205 @@
+# amoledos-lang 1   es -> en
+# aos.vnc.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/vnc/main/vnc.c:233
+No entran más computadoras	No room for more computers
+
+#: apps/vnc/main/vnc.c:288
+sólo mirar	view only
+
+#: apps/vnc/main/vnc.c:299
+Ninguna computadora todavía.\nAgregala con + o desde la página VNC del portal.\n\nEn la Mac: Compartir pantalla, con «Los visores VNC pueden controlar la pantalla con contraseña».	No computers yet.\nAdd one with + or from the portal's VNC page.\n\nOn a Mac: Screen Sharing, with “VNC viewers may control screen with password”.
+
+#: apps/vnc/main/vnc.c:309
+Automática	Automatic
+
+#: apps/vnc/main/vnc.c:332
+16 bits (rápido)	16 bits (fast)
+
+#: apps/vnc/main/vnc.c:333
+24 bits	24 bits
+
+#: apps/vnc/main/vnc.c:419
+Falta la dirección	The address is missing
+
+#: apps/vnc/main/vnc.c:431
+No se pudo guardar en la tarjeta	Could not save to the card
+
+#: apps/vnc/main/vnc.c:435
+Guardada	Saved
+
+#: apps/vnc/main/vnc.c:446
+Tocá otra vez para borrar	Tap again to delete
+
+#: apps/vnc/main/vnc.c:476
+Nueva computadora	New computer
+
+#: apps/vnc/main/vnc.c:476
+Computadora	Computer
+
+#: apps/vnc/main/vnc.c:482
+Nombre	Name
+
+#: apps/vnc/main/vnc.c:483
+Dirección (IP o nombre)	Address (IP or name)
+
+#: apps/vnc/main/vnc.c:485
+Puerto	Port
+
+#: apps/vnc/main/vnc.c:487
+Contraseña VNC	VNC password
+
+#: apps/vnc/main/vnc.c:489
+Queda guardada en la tarjeta (vnc.txt) y se puede leer. VNC usa sólo los primeros 8 caracteres.	It is kept on the card (vnc.txt), readable. VNC uses only the first 8 characters.
+
+#: apps/vnc/main/vnc.c:495
+Codificación	Encoding
+
+#: apps/vnc/main/vnc.c:499
+Colores	Colours
+
+#: apps/vnc/main/vnc.c:507
+Sólo mirar (no manda mouse ni teclado)	View only (no mouse or keyboard sent)
+
+#: apps/vnc/main/vnc.c:519
+Guardar	Save
+
+#: apps/vnc/main/vnc.c:522
+Borrar	Delete
+
+#: apps/vnc/main/vnc.c:745
+Trackpad: el dedo mueve el puntero	Trackpad: your finger moves the pointer
+
+#: apps/vnc/main/vnc.c:745
+Toque: el dedo es el mouse	Touch: your finger is the mouse
+
+#: apps/vnc/main/vnc.c:756
+Ajustar	Fit
+
+#: apps/vnc/main/vnc.c:756
+Llenar	Fill
+
+#: apps/vnc/main/vnc.c:1046
+Reintentar	Retry
+
+#: apps/vnc/main/vnc.c:1047
+Volver	Back
+
+#: apps/vnc/main/vnc.c:1127
+No se pudo empezar: la conexión anterior todavía se está cerrando	Could not start: the previous connection is still closing
+
+#: apps/vnc/main/vnc.c:1165
+Conectando…	Connecting…
+
+#: apps/vnc/main/vnc.c:1166
+Entrando…	Signing in…
+
+#: apps/vnc/main/vnc_rfb.c:193
+Se cortó la conexión	The connection dropped
+
+#: apps/vnc/main/vnc_rfb.c:287
+El servidor dejó de mandar datos	The server stopped sending data
+
+#: apps/vnc/main/vnc_rfb.c:289
+#: apps/vnc/main/vnc_rfb.c:1181
+El servidor cerró la conexión	The server closed the connection
+
+#: apps/vnc/main/vnc_rfb.c:412
+Datos comprimidos incompletos	Compressed data cut short
+
+#: apps/vnc/main/vnc_rfb.c:422
+#: apps/vnc/main/vnc_rfb.c:431
+Datos comprimidos dañados	Compressed data damaged
+
+#: apps/vnc/main/vnc_rfb.c:605
+Rectángulo demasiado ancho	Rectangle too wide
+
+#: apps/vnc/main/vnc_rfb.c:675
+Sin memoria para ZRLE	No memory for ZRLE
+
+#: apps/vnc/main/vnc_rfb.c:712
+ZRLE: una tira se pasa del bloque	ZRLE: a run goes past the tile
+
+#: apps/vnc/main/vnc_rfb.c:726
+#: apps/vnc/main/vnc_rfb.c:730
+ZRLE: datos inválidos	ZRLE: invalid data
+
+#: apps/vnc/main/vnc_rfb.c:754
+JPEG demasiado grande	JPEG too large
+
+#: apps/vnc/main/vnc_rfb.c:761
+Sin memoria para el JPEG	No memory for the JPEG
+
+#: apps/vnc/main/vnc_rfb.c:765
+El decodificador JPEG no abrió	The JPEG decoder did not open
+
+#: apps/vnc/main/vnc_rfb.c:792
+Tight: compresión desconocida	Tight: unknown compression
+
+#: apps/vnc/main/vnc_rfb.c:793
+Tight: rectángulo demasiado ancho	Tight: rectangle too wide
+
+#: apps/vnc/main/vnc_rfb.c:806
+Tight: filtro desconocido	Tight: unknown filter
+
+#: apps/vnc/main/vnc_rfb.c:817
+Sin memoria para Tight	No memory for Tight
+
+#: apps/vnc/main/vnc_rfb.c:884
+Tamaño de pantalla inválido	Invalid screen size
+
+#: apps/vnc/main/vnc_rfb.c:885
+La pantalla remota no entra en la memoria	The remote screen does not fit in memory
+
+#: apps/vnc/main/vnc_rfb.c:914
+Un rectángulo cae fuera de la pantalla	A rectangle falls outside the screen
+
+#: apps/vnc/main/vnc_rfb.c:928
+Codificación %d no soportada	Encoding %d not supported
+
+#: apps/vnc/main/vnc_rfb.c:971
+Mensaje desconocido del servidor (%d)	Unknown message from the server (%d)
+
+#: apps/vnc/main/vnc_rfb.c:984
+El servidor rechazó la conexión: %s	The server refused the connection: %s
+
+#: apps/vnc/main/vnc_rfb.c:985
+#: apps/vnc/main/vnc_rfb.c:1058
+El servidor rechazó la conexión	The server refused the connection
+
+#: apps/vnc/main/vnc_rfb.c:991
+El servidor pide contraseña: cargala en la computadora	The server wants a password: enter it for this computer
+
+#: apps/vnc/main/vnc_rfb.c:1001
+No es un servidor VNC	Not a VNC server
+
+#: apps/vnc/main/vnc_rfb.c:1034
+La Mac no ofrece contraseña VNC: activá «Los visores VNC pueden controlar la pantalla con contraseña» en Compartir pantalla	The Mac offers no VNC password: turn on “VNC viewers may control screen with password” in Screen Sharing
+
+#: apps/vnc/main/vnc_rfb.c:1036
+Ningún tipo de seguridad que la placa conozca (%s)	No security type the board knows (%s)
+
+#: apps/vnc/main/vnc_rfb.c:1047
+Tipo de seguridad %d no soportado	Security type %d not supported
+
+#: apps/vnc/main/vnc_rfb.c:1058
+Contraseña incorrecta	Wrong password
+
+#: apps/vnc/main/vnc_rfb.c:1158
+Sin memoria	Out of memory
+
+#: apps/vnc/main/vnc_rfb.c:1162
+No se encontró la computadora (DNS)	Computer not found (DNS)
+
+#: apps/vnc/main/vnc_rfb.c:1163
+Sin conexiones libres en la placa	No free connections on the board
+
+#: apps/vnc/main/vnc_rfb.c:1164
+La computadora no contesta	The computer does not answer
+
+#: apps/vnc/main/vnc_rfb.c:1165
+No se pudo conectar (¿VNC activado? ¿puerto?)	Could not connect (VNC on? right port?)
