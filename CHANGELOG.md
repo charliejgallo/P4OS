@@ -1,5 +1,21 @@
 # Changelog
 
+## 0.9.1 — unreleased
+
+**A gamepad in every game** (docs/GAMEPAD.md)
+- A USB gamepad or joystick on the host plays every game from its title to
+  its last panel: 2043, ARKANOS, Atasco, Blackjack, Buscaminas, Burbujas,
+  Chatarra, Claude Jump, Claudito, Dados, Doom, Flappy, Gemas, Golf, Mila,
+  Monster Hop, Neon Snakes, Simon, Topos, Truco, Turbo, and Atrapa in Lua.
+  The same roles everywhere: A (buttons 1/2), B (3/4), L/R (5-8), START
+  (9/10), the D-pad or the stick. On the panels the D-pad moves an outline
+  and A presses; it appears only once the pad is used, so touch looks the
+  same as before.
+- `aos_pad.h` and `aos_pad_menu.h` (header only, no new firmware) for the
+  apps; `aos.pad()` for the Lua scripts.
+- The simulator fakes a pad: `P4_SIM_PAD=1` (the keyboard) and the scripts'
+  `pad` command.
+
 ## 0.9.0 — 2026-10-05
 
 **The portal's security** (docs/SECURITY.md)

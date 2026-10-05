@@ -130,11 +130,10 @@ SNES- and PlayStation-style layouts. The on-screen button lights while the
 pad holds it, and the pad keeps the screen on.
 
 It reaches only what a game reads through `aos_retro_buttons()`,
-`_pressed()` and `_released()`. Of the games on the canvas, Claude Jump
-reads its left, right and pause there and Topos its pause; 2043, Arkanos,
-Chatarra and Claudito read the finger themselves, and need a pad of their
-own (`aos_hal_hid_gamepad_get`, docs/APPS-P4.md). A new game that declares
-its controls takes the pad for free.
+`_pressed()` and `_released()`. A new game that declares its controls takes
+the pad for free; the games that read the finger themselves (2043, Arkanos,
+Chatarra, Claudito, Topos) read the pad too since 0.9.1, through
+`aos_pad.h`, and so do their panels ([GAMEPAD.md](GAMEPAD.md)).
 
 ### Where things go
 

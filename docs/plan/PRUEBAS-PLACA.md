@@ -41,6 +41,11 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       Arduino Leonardo (serie + teclado) y una Pico (programada con su .uf2
       desde la placa, REPL de MicroPython). El detalle de cada uno, abajo en
       **USB**. Sin probar: MIDI con un aparato real.
+- [ ] **Joystick en todos los juegos** (2026-10-05, para la 0.9.1,
+      `docs/GAMEPAD.md`): los 22 juegos y Lua se juegan con joystick en el
+      simulador; falta probarlos en la placa con el joystick genérico. Sin
+      probar en ningún lado: las partidas entre dos placas (carrera de
+      Monster Hop, visitas de Mila, Truco de a dos).
 - [ ] El cuelgue del primer arranque tras algunas OTA: dos volcados el
       2026-10-04 con `strcmp` en `dlsym` cargando apps (handoff de sistema).
 

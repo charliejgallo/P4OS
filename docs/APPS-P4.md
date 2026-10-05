@@ -203,7 +203,9 @@ takes is there for the apps, all in `aos_hal.h`:
   outline appears only once the pad is used. In the simulator,
   `P4_SIM_PAD=1` makes the keyboard a pad (the arrows, z/c = A, x/v = B,
   a/d = L/R, Return = START) and a script's `pad <buttons> <x> <y> [ms]`
-  holds one (sim/main.c).
+  holds one (sim/main.c). [GAMEPAD.md](GAMEPAD.md) has the controls of
+  every game and what they ran into (the app's `tick` is too slow for a
+  D-pad: read the pad from the game's own timer).
 - **A keyboard** types into the open LVGL keyboard's text area by itself.
   An app with a keyboard of its own takes the keys while it is up with
   `aos_ui_hwkbd_handler(cb)` (`aos_ui.h`) and gives them back with NULL:
