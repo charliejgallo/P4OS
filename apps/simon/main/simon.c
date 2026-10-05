@@ -19,6 +19,10 @@
  * the screen goes through resize(), which only moves the objects, so a game
  * in progress survives it - even mid-sequence, because the timer never
  * stops.
+ *
+ * A USB gamepad plays it with the d-pad, the board turned a quarter: up is
+ * the green pad (top left) and the others follow clockwise - right red, down
+ * blue, left yellow. A or START is the eye in the middle.
  */
 #include "aos_app.h"
 #include "aos_theme.h"
@@ -26,6 +30,7 @@
 #include "aos_hal.h"
 #include "aos_i18n.h"
 #include "aos_ui.h"
+#include "aos_pad.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -79,6 +84,7 @@ typedef struct {
     bool pending_start;         /* left by the physical button */
 
     uint32_t rng;
+    aos_pad_t gpad;
 } simon_t;
 
 static simon_t s_simon;
@@ -328,6 +334,22 @@ static void frame_cb(lv_timer_t *timer)
         try_start();
     }
 
+    /* the gamepad: each direction is the pad in that corner, clockwise from
+     * the top left */
+    aos_pad_update(&s_simon.gpad, now);
+    if (s_simon.gpad.pressed) {
+        static const uint32_t DIR[4] = { AOS_PAD_UP, AOS_PAD_RIGHT, AOS_PAD_LEFT, AOS_PAD_DOWN };
+        for (int i = 0; i < 4; i++) {
+            if (aos_pad_pressed(&s_simon.gpad, DIR[i])) {
+                press_pad(i);
+                break;
+            }
+        }
+        if (aos_pad_pressed(&s_simon.gpad, AOS_PAD_A | AOS_PAD_START)) {
+            try_start();
+        }
+    }
+
     /* switch off the panel the player lit */
     if (s_simon.flash >= 0 && (int32_t)(now - s_simon.flash_end_ms) >= 0) {
         set_pad(s_simon.flash, false);
@@ -552,6 +574,7 @@ static void *create(aos_app_t *self, lv_obj_t *root)
     layout(w, h);
 
     go_idle();
+    aos_pad_reset(&s_simon.gpad, lv_tick_get());
     s_simon.timer = lv_timer_create(frame_cb, 40, NULL);
     return &s_simon;
 }
