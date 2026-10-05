@@ -14,6 +14,8 @@
 #include "esp_bit_defs.h"
 #include "esp_private/critical_section.h"
 #include "esp_log.h"
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
 #include "usb_private.h"
 #include "hcd.h"
 #include "hub.h"
@@ -37,6 +39,7 @@ when that enumeration ends (hub_root_enum_done(), called by usb_host.c).
 */
 
 #define HUB_ROOT_PORTS                              SOC_USB_OTG_PERIPH_NUM
+#define ROOT_ENUM_TRIES                             3
 
 #ifdef CONFIG_USB_HOST_HW_BUFFER_BIAS_IN
 #define HUB_ROOT_HCD_PORT_FIFO_BIAS                 HCD_PORT_FIFO_BIAS_RX
@@ -99,6 +102,8 @@ typedef struct {
         uint32_t root_events;                       /**< Root ports with an HCD event to handle (bit per port) */
         uint32_t root_reqs;                         /**< Root ports with requests to handle (bit per port) */
         uint32_t root_pending;                      /**< Root ports with a connection waiting for address 0 */
+        uint32_t root_retry;                        /**< Root ports whose device failed enumeration, to try again */
+        uint8_t enum_tries[HUB_ROOT_PORTS];         /**< Failed enumerations in a row on each root port */
     } dynamic;                                      /**< Dynamic members. Require a critical section */
 
     struct {
@@ -405,6 +410,20 @@ new_ds_dev_err:
 /**
  * @brief Whether a device sits at address 0 now (being enumerated)
  */
+/**
+ * @brief Whether a root port still has its device's tree node (a failed device not freed yet)
+ */
+static bool root_has_node(int root)
+{
+    dev_tree_node_t *it;
+    TAILQ_FOREACH(it, &p_hub_driver_obj->single_thread.dev_nodes_tailq, tailq_entry) {
+        if (it->parent_dev_hdl == NULL && it->parent_port_num == root) {
+            return true;
+        }
+    }
+    return false;
+}
+
 static bool addr0_busy(void)
 {
     // (usbh_devs_open() would not do: a device being enumerated is locked, and it answers "not allowed")
@@ -465,8 +484,10 @@ static void root_port_handle_events(int root)
     case HCD_PORT_EVENT_OVERCURRENT: {
         bool port_has_device = false;
         HUB_DRIVER_ENTER_CRITICAL();
-        // A connection still waiting for address 0 is gone with it
+        // A connection still waiting for address 0 is gone with it, and so are the tries of a failed one
         p_hub_driver_obj->dynamic.root_pending &= ~BIT(root);
+        p_hub_driver_obj->dynamic.root_retry &= ~BIT(root);
+        p_hub_driver_obj->dynamic.enum_tries[root] = 0;
         switch (p_hub_driver_obj->dynamic.root_port_state[root]) {
         case ROOT_PORT_STATE_POWERED: // This occurred before enumeration
         case ROOT_PORT_STATE_DISABLED: // This occurred after the device has already been disabled
@@ -545,6 +566,10 @@ static esp_err_t root_port_recycle(int root)
         break;
     case HCD_PORT_STATE_RECOVERY:
         p_hub_driver_obj->dynamic.port_reqs[root] |= PORT_REQ_RECOVER;
+        break;
+    case HCD_PORT_STATE_DISABLED:
+        // P4OS: a device that failed its enumeration and was dropped on purpose (hub_process): the port is
+        // disabled already, and the device still connected to be tried again
         break;
     default:
         abort();    // Should never occur
@@ -755,10 +780,28 @@ esp_err_t hub_root_stop(void)
     return ret;
 }
 
-void hub_root_enum_done(void)
+void hub_root_enum_done(usb_device_handle_t parent_dev_hdl, uint8_t parent_port_num, bool ok)
 {
     HUB_DRIVER_ENTER_CRITICAL();
-    if (p_hub_driver_obj == NULL || p_hub_driver_obj->dynamic.root_pending == 0) {
+    if (p_hub_driver_obj == NULL) {
+        HUB_DRIVER_EXIT_CRITICAL();
+        return;
+    }
+    // A device on a root port that failed its enumeration (a bouncing plug, a slow device) is tried again while it
+    // stays connected, up to ROOT_ENUM_TRIES times; ESP-IDF left it there until it was unplugged
+    if (parent_dev_hdl == NULL && parent_port_num < HUB_ROOT_PORTS) {
+        if (ok) {
+            p_hub_driver_obj->dynamic.enum_tries[parent_port_num] = 0;
+        } else {
+            // Always taken up, if only to free address 0 the failed device holds (ESP-IDF kept it until unplugged,
+            // which with two root ports would hold a connection waiting on the other one)
+            if (p_hub_driver_obj->dynamic.enum_tries[parent_port_num] < 255) {
+                p_hub_driver_obj->dynamic.enum_tries[parent_port_num]++;
+            }
+            p_hub_driver_obj->dynamic.root_retry |= BIT(parent_port_num);
+        }
+    }
+    if (p_hub_driver_obj->dynamic.root_pending == 0 && p_hub_driver_obj->dynamic.root_retry == 0) {
         HUB_DRIVER_EXIT_CRITICAL();
         return;
     }
@@ -985,6 +1028,51 @@ esp_err_t hub_process(void)
                 if (hcd_port_get_state(p_hub_driver_obj->constant.root_port_hdl[i]) == HCD_PORT_STATE_DISABLED) {
                     root_port_connect(i);
                 }
+            }
+        }
+
+        // Devices that failed their enumeration and are still connected, once their failed object is freed (the
+        // port recycled, disabled) and address 0 is free
+        for (int i = 0; i < HUB_ROOT_PORTS; i++) {
+            HUB_DRIVER_ENTER_CRITICAL();
+            const bool retry = p_hub_driver_obj->dynamic.root_retry & BIT(i);
+            const int tries = p_hub_driver_obj->dynamic.enum_tries[i];
+            HUB_DRIVER_EXIT_CRITICAL();
+            if (!retry) {
+                continue;
+            }
+            const hcd_port_state_t st = hcd_port_get_state(p_hub_driver_obj->constant.root_port_hdl[i]);
+            if (st == HCD_PORT_STATE_ENABLED) {
+                continue;       // the canceled enumeration's disable has not been processed yet
+            }
+            if (st != HCD_PORT_STATE_DISABLED) {
+                // unplugged meanwhile: its disconnection takes care of it
+                HUB_DRIVER_ENTER_CRITICAL();
+                p_hub_driver_obj->dynamic.root_retry &= ~BIT(i);
+                HUB_DRIVER_EXIT_CRITICAL();
+                continue;
+            }
+            if (root_has_node(i)) {
+                // The failed device still holds address 0: dropped as its disconnection would (USBH frees it, and
+                // its port comes back through hub_port_recycle while it stays disabled)
+                HUB_DRIVER_ENTER_CRITICAL();
+                p_hub_driver_obj->dynamic.root_port_state[i] = ROOT_PORT_STATE_DISABLED;
+                HUB_DRIVER_EXIT_CRITICAL();
+                dev_tree_node_dev_gone(NULL, i);
+                continue;
+            }
+            if (addr0_busy()) {
+                continue;
+            }
+            HUB_DRIVER_ENTER_CRITICAL();
+            p_hub_driver_obj->dynamic.root_retry &= ~BIT(i);
+            HUB_DRIVER_EXIT_CRITICAL();
+            if (tries <= ROOT_ENUM_TRIES) {
+                ESP_LOGW(HUB_DRIVER_TAG, "Root port %d: enumeration failed, trying again (%d of %d)", i, tries, ROOT_ENUM_TRIES);
+                vTaskDelay(pdMS_TO_TICKS(100));
+                root_port_connect(i);
+            } else {
+                ESP_LOGW(HUB_DRIVER_TAG, "Root port %d: enumeration failed %d times, left until it is unplugged", i, tries - 1);
             }
         }
 

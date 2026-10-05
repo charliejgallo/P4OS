@@ -129,12 +129,13 @@ esp_err_t hub_root_start(void);
 esp_err_t hub_root_stop(void);
 
 /**
- * @brief An enumeration ended (completed or canceled)
+ * @brief An enumeration ended (completed, or canceled: ok false)
  *
  * P4OS: a connection on another root port may be waiting for address 0 to be free; this lets the Hub driver take
- * it up. Called by the USB Host Library.
+ * it up. And a device on a root port whose enumeration failed is dropped (freeing address 0) and, while it stays
+ * connected, tried again up to three times. Called by the USB Host Library.
  */
-void hub_root_enum_done(void);
+void hub_root_enum_done(usb_device_handle_t parent_dev_hdl, uint8_t parent_port_num, bool ok);
 
 /**
  * @brief Indicate to the Hub driver that a device's port can be recycled

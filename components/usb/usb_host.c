@@ -398,11 +398,12 @@ static void enum_event_callback(enum_event_data_t *event_data, void *arg)
         // Propagate a new device event
         ESP_ERROR_CHECK(usbh_devs_new_dev_event(event_data->complete.dev_hdl));
         // P4OS: a connection on another root port may be waiting for address 0
-        hub_root_enum_done();
+        hub_root_enum_done(event_data->complete.parent_dev_hdl, event_data->complete.parent_port_num, true);
         break;
     case ENUM_EVENT_CANCELED:
         hub_port_disable(event_data->canceled.parent_dev_hdl, event_data->canceled.parent_port_num);
-        hub_root_enum_done();
+        // P4OS: and a device on a root port that failed is tried again (hub.c)
+        hub_root_enum_done(event_data->canceled.parent_dev_hdl, event_data->canceled.parent_port_num, false);
         break;
     default:
         abort();    // Should never occur

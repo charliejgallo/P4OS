@@ -25,6 +25,11 @@ host").
   address 0 waits: `hub_root_enum_done()` (called by `usb_host.c` when an
   enumeration completes or is canceled) and every pass of `hub_process()`
   take it up once address 0 is free.
+- A device on a root port whose enumeration fails (a bouncing plug, a slow
+  device) is dropped as if it had gone, which frees address 0 (ESP-IDF
+  kept it there until it was unplugged), and while it stays connected it
+  is tried again, up to three times (`hub_root_enum_done(..., false)`,
+  `root_port_recycle` taking a port that is already disabled).
 - `usbh.c`: `usbh_dev_get_port_hdl()` (a child's root port) and
   `usbh_devs_addr_in_use()` (address 0 taken, in any state: a device being
   enumerated is locked, and `usbh_devs_open()` answers "not allowed").
