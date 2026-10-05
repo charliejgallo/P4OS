@@ -28,6 +28,14 @@
  * playing" button. The game itself lives in statics (s_keep) so turning the
  * screen, which rebuilds the app, does not lose the half-solved car park.
  * New here: undo, one move at a time.
+ *
+ * A USB gamepad plays it as well. On the board the d-pad walks a yellow
+ * frame over the cells (it shows on the first press and steps aside at the
+ * next touch); A on a car takes it - the frame turns green and wraps the
+ * car - and then the d-pad slides it along its axis, one cell a press, until
+ * A or B lets it go: the whole slide is one move, as with a finger. B with
+ * nothing taken undoes, R starts the level over and START goes to the
+ * levels. The menu and the victory panel go through aos_pad_menu.
  */
 #include "aos_app.h"
 #include "aos_hal.h"
@@ -35,6 +43,8 @@
 #include "aos_ui.h"
 #include "aos_theme.h"
 #include "aos_sys_glyphs.h"
+#include "aos_pad.h"
+#include "aos_pad_menu.h"
 
 #include "at_cars.h"
 #include "at_game.h"
@@ -67,6 +77,8 @@
 #define C_WALL_LO   0x6A6A72      /* ... and its shadow                       */
 #define C_MARK      0xD2D2D8      /* the crosses marking the bays             */
 #define C_HAZARD    0xFFC81F      /* the hazard tape of the gap               */
+#define C_CURSOR    0xFFD60A      /* the gamepad's frame ...                  */
+#define C_GRAB      0x30D158      /* ... and while it holds a car             */
 
 #define KEY_UNLOCKED "atasco_unlk"
 
@@ -150,6 +162,17 @@ typedef struct {
     lv_obj_t *lbl_win_info;
     lv_obj_t *btn_menu_w;
     lv_obj_t *btn_next;
+    lv_obj_t *btn_go;       /* the menu's "keep playing" */
+
+    /* --- gamepad --- */
+    aos_pad_t      pad;
+    aos_pad_menu_t pmenu;   /* the buttons of the menu or the victory panel */
+    lv_timer_t    *pad_timer;
+    lv_obj_t      *cursor;  /* the frame over the board */
+    bool           cur_on;
+    int            cur_row, cur_col;
+    int            grab;    /* the car the pad holds, -1 if none */
+    int            grab_from;
 } at_app_t;
 
 /* --------------------------------------------------------------------------
@@ -305,6 +328,7 @@ static void build_cars(at_app_t *a)
         place_car_view(a, i);
     }
     lv_obj_move_foreground(a->touch);
+    lv_obj_move_foreground(a->cursor);
     layout_exit(a);
     a->dragging = false;
 }
@@ -335,8 +359,36 @@ static void load_level(at_app_t *a, int idx)
 
     const at_level_t *lvl = at_level_get(idx);
     at_parse_level(lvl->rows, &a->board);
+    a->grab    = -1;
+    a->cur_row = a->board.cars[a->board.target_idx].row;
+    a->cur_col = a->board.cars[a->board.target_idx].col;
     build_cars(a);
     lv_obj_remove_flag(a->hint, LV_OBJ_FLAG_HIDDEN);
+}
+
+/* --------------------------------------------------------------------------
+ * The gamepad's frame on the board: one cell, or the whole car it holds
+ * -------------------------------------------------------------------------- */
+
+static void cursor_show(at_app_t *a)
+{
+    if (!a->cur_on || a->state != ST_PLAY) {
+        lv_obj_add_flag(a->cursor, LV_OBJ_FLAG_HIDDEN);
+        return;
+    }
+    int r = a->cur_row, c = a->cur_col, w = 1, h = 1;
+    if (a->grab >= 0) {
+        const at_car_t *car = &a->board.cars[a->grab];
+        r = car->row;
+        c = car->col;
+        w = car->horizontal ? car->len : 1;
+        h = car->horizontal ? 1 : car->len;
+    }
+    lv_obj_set_pos(a->cursor, c * CELL, r * CELL);
+    lv_obj_set_size(a->cursor, w * CELL, h * CELL);
+    lv_obj_set_style_border_color(a->cursor,
+                                  lv_color_hex(a->grab >= 0 ? C_GRAB : C_CURSOR), 0);
+    lv_obj_remove_flag(a->cursor, LV_OBJ_FLAG_HIDDEN);
 }
 
 /* --------------------------------------------------------------------------
@@ -402,6 +454,16 @@ static void show_menu(at_app_t *a)
     lv_obj_remove_flag(a->menu_page, LV_OBJ_FLAG_HIDDEN);
     lv_obj_move_foreground(a->menu_page);
     refresh_menu(a);
+
+    /* the pad: the 25 bays and the button, starting on the button */
+    lv_obj_t *items[AOS_PAD_MENU_MAX];
+    int n = 0;
+    for (int i = 0; i < a->level_btn_n && n < AOS_PAD_MENU_MAX - 1; i++) {
+        items[n++] = a->level_btn[i];
+    }
+    items[n++] = a->btn_go;
+    aos_pad_menu_set(&a->pmenu, items, n, n - 1);
+    cursor_show(a);
 }
 
 static void show_play(at_app_t *a)
@@ -413,6 +475,8 @@ static void show_play(at_app_t *a)
     lv_obj_remove_flag(a->play_page, LV_OBJ_FLAG_HIDDEN);
     lv_obj_move_foreground(a->play_page);
     update_hud(a);
+    aos_pad_menu_clear(&a->pmenu);
+    cursor_show(a);
 }
 
 static void start_level(at_app_t *a, int idx)
@@ -461,6 +525,10 @@ static void show_win(at_app_t *a)
     lv_obj_remove_flag(a->win_panel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_move_foreground(a->win_dim);
     lv_obj_move_foreground(a->win_panel);
+
+    lv_obj_t *items[] = { a->btn_menu_w, a->btn_next };
+    aos_pad_menu_set(&a->pmenu, items, 2, last ? 0 : 1);
+    cursor_show(a);
 }
 
 /* --------------------------------------------------------------------------
@@ -537,6 +605,7 @@ static void drive_out(at_app_t *a)
     /* No more playing: while it is leaving, touches must not move anything. */
     a->state = ST_WIN;
     lv_obj_add_flag(a->hint, LV_OBJ_FLAG_HIDDEN);
+    cursor_show(a);
 
     lv_anim_t an;
     lv_anim_init(&an);
@@ -585,6 +654,46 @@ static bool drag_release(at_app_t *a)
     return moved;
 }
 
+/* The car the pad held is let go: the whole slide is one move, as a finger's
+ * drag is. Only the bookkeeping, no UI (destroy uses it too). */
+static bool grab_commit(at_app_t *a)
+{
+    int idx = a->grab;
+    if (idx < 0) {
+        return false;
+    }
+    a->grab = -1;
+    const at_car_t *c = &a->board.cars[idx];
+    int pos = c->horizontal ? c->col : c->row;
+    a->cur_row = c->row;
+    a->cur_col = c->col;
+    if (pos == a->grab_from) {
+        return false;
+    }
+    a->moves++;
+    if (a->undo_n == UNDO_MAX) {
+        memmove(a->undo, a->undo + 1, sizeof(a->undo[0]) * (UNDO_MAX - 1));
+        a->undo_n--;
+    }
+    a->undo[a->undo_n++] = (at_undo_t){ (int8_t)idx, (int8_t)a->grab_from };
+    return true;
+}
+
+/* ... and with the UI: getting to the exit sends the car out the same way a
+ * finger does. */
+static void pad_release(at_app_t *a)
+{
+    int idx = a->grab;
+    if (grab_commit(a)) {
+        update_hud(a);
+        lv_obj_add_flag(a->hint, LV_OBJ_FLAG_HIDDEN);
+    }
+    if (idx == a->board.target_idx && at_target_at_exit(&a->board)) {
+        drive_out(a);
+    }
+    cursor_show(a);
+}
+
 static void touch_event(lv_event_t *event)
 {
     at_app_t      *a    = lv_event_get_user_data(event);
@@ -607,6 +716,11 @@ static void touch_event(lv_event_t *event)
 
     if (code == LV_EVENT_PRESSED) {
         a->dragging = false;
+        /* a finger again: the pad lets go of its car and its frame hides */
+        if (a->grab >= 0 || a->cur_on) {
+            a->cur_on = false;
+            pad_release(a);
+        }
         if (px < 0 || py < 0 || px >= BOARD_PX || py >= BOARD_PX) {
             return;
         }
@@ -636,21 +750,30 @@ static void touch_event(lv_event_t *event)
  * Button callbacks
  * -------------------------------------------------------------------------- */
 
-static void cb_restart(lv_event_t *e)
+static void cb_restart_level(at_app_t *a)
 {
-    at_app_t *a = lv_event_get_user_data(e);
     if (a->state != ST_PLAY) {
         return;
     }
     load_level(a, a->level);
     update_hud(a);
+    cursor_show(a);
+}
+
+static void cb_restart(lv_event_t *e)
+{
+    cb_restart_level((at_app_t *)lv_event_get_user_data(e));
 }
 
 /* A move backwards is always legal: the car came from there along a clear
  * path, and nothing else has moved since that move. */
 static void undo_move(at_app_t *a)
 {
-    if (a->state != ST_PLAY || a->undo_n == 0 || a->dragging) {
+    if (a->state != ST_PLAY || a->dragging) {
+        return;
+    }
+    pad_release(a);
+    if (a->state != ST_PLAY || a->undo_n == 0) {
         return;
     }
     at_undo_t u = a->undo[--a->undo_n];
@@ -661,6 +784,9 @@ static void undo_move(at_app_t *a)
         c->row = u.from;
     }
     place_car_view(a, u.idx);
+    a->cur_row = c->row;
+    a->cur_col = c->col;
+    cursor_show(a);
     if (a->moves > 0) {
         a->moves--;
     }
@@ -785,6 +911,7 @@ static void build_menu_page(at_app_t *a, lv_obj_t *root)
     lv_obj_t *go = text_btn(a->menu_page, "", AOS_C_ACCENT, AOS_C_TEXT,
                             a->land ? col_w : 440, cb_continue, a);
     lv_obj_set_height(go, 96);
+    a->btn_go = go;
     lv_obj_set_style_radius(go, 30, 0);
     if (a->land) {
         lv_obj_set_pos(go, MARGIN, H - MARGIN - 96);
@@ -904,6 +1031,14 @@ static void build_play_page(at_app_t *a, lv_obj_t *root)
     lv_obj_add_event_cb(a->touch, touch_event, LV_EVENT_RELEASED, a);
     lv_obj_add_event_cb(a->touch, touch_event, LV_EVENT_PRESS_LOST, a);
 
+    /* the gamepad's frame, over everything on the board and deaf to touch */
+    a->cursor = panel_base(a->board_area);
+    lv_obj_remove_flag(a->cursor, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_style_border_width(a->cursor, 6, 0);
+    lv_obj_set_style_border_opa(a->cursor, LV_OPA_COVER, 0);
+    lv_obj_set_style_radius(a->cursor, 14, 0);
+    lv_obj_add_flag(a->cursor, LV_OBJ_FLAG_HIDDEN);
+
     /* The hint and undo: under the board in portrait, in the card in
      * landscape. The side card is drawn after the board, so it also covers
      * the car as it drives off. */
@@ -962,6 +1097,134 @@ static void build_win_overlay(at_app_t *a, lv_obj_t *root)
     a->btn_next = text_btn(a->win_panel, _("Siguiente"), AOS_C_GREEN,
                            lv_color_hex(0x000000), bw, cb_win_next, a);
     lv_obj_set_pos(a->btn_next, 32 + bw + 16, ph - 32 - BTN);
+}
+
+/* --------------------------------------------------------------------------
+ * The gamepad, every 30 ms (the app tick comes at 5 Hz, too slow for it)
+ * -------------------------------------------------------------------------- */
+
+static void pad_play(at_app_t *a)
+{
+    const aos_pad_t *p = &a->pad;
+    if (aos_pad_pressed(p, AOS_PAD_START)) {
+        pad_release(a);
+        if (a->state == ST_PLAY) {
+            show_menu(a);
+        }
+        return;
+    }
+    if (aos_pad_pressed(p, AOS_PAD_R)) {
+        a->grab = -1;           /* the board is about to be loaded again */
+        cb_restart_level(a);
+        return;
+    }
+    if (aos_pad_pressed(p, AOS_PAD_L)) {
+        undo_move(a);
+        return;
+    }
+
+    uint32_t dirs = p->repeat & AOS_PAD_DIRS;
+    bool btn_a = aos_pad_pressed(p, AOS_PAD_A);
+    bool btn_b = aos_pad_pressed(p, AOS_PAD_B);
+    if (!dirs && !btn_a && !btn_b) {
+        return;
+    }
+    if (!a->cur_on) {
+        /* the first press only shows where the frame is */
+        a->cur_on = true;
+        cursor_show(a);
+        return;
+    }
+    if (a->dragging) {
+        return;                 /* a finger is on a car */
+    }
+
+    int dr = (dirs & AOS_PAD_DOWN) ? 1 : (dirs & AOS_PAD_UP) ? -1 : 0;
+    int dc = (dirs & AOS_PAD_RIGHT) ? 1 : (dirs & AOS_PAD_LEFT) ? -1 : 0;
+
+    if (a->grab >= 0) {
+        if (btn_a || btn_b) {
+            pad_release(a);
+            aos_hal_beep(1200, 18);
+            return;
+        }
+        /* the car only moves along its own axis */
+        at_car_t *c = &a->board.cars[a->grab];
+        int step = c->horizontal ? dc : dr;
+        if (!step) {
+            return;
+        }
+        int pos = (c->horizontal ? c->col : c->row) + step;
+        if (at_apply_move(&a->board, a->grab, pos)) {
+            place_car_view(a, a->grab);
+            cursor_show(a);
+            /* flush against the exit: it is out, as with a finger */
+            if (a->grab == a->board.target_idx && at_target_at_exit(&a->board)) {
+                pad_release(a);
+            }
+        } else {
+            aos_hal_beep(300, 25);
+        }
+        return;
+    }
+
+    if (btn_b) {
+        undo_move(a);
+        return;
+    }
+    if (btn_a) {
+        int idx = at_car_at(&a->board, a->cur_row, a->cur_col);
+        if (idx >= 0) {
+            const at_car_t *c = &a->board.cars[idx];
+            a->grab      = idx;
+            a->grab_from = c->horizontal ? c->col : c->row;
+            cursor_show(a);
+            aos_hal_beep(900, 18);
+        }
+        return;
+    }
+    int r = a->cur_row + dr, c = a->cur_col + dc;
+    if (r >= 0 && r < AT_GRID && c >= 0 && c < AT_GRID) {
+        a->cur_row = r;
+        a->cur_col = c;
+        cursor_show(a);
+    }
+}
+
+static void pad_cb(lv_timer_t *timer)
+{
+    at_app_t *a = lv_timer_get_user_data(timer);
+    aos_pad_update(&a->pad, lv_tick_get());
+    if (!a->pad.pressed && !a->pad.repeat) {
+        return;
+    }
+    switch (a->state) {
+    case ST_MENU:
+        if (aos_pad_pressed(&a->pad, AOS_PAD_START)) {
+            lv_obj_send_event(a->btn_go, LV_EVENT_CLICKED, NULL);
+        } else {
+            aos_pad_menu_step(&a->pmenu, &a->pad);
+        }
+        break;
+    case ST_WIN:
+        /* B is the panel's "Menú"; START its "Siguiente", or the menu */
+        if (aos_pad_pressed(&a->pad, AOS_PAD_B)) {
+            if (!lv_obj_has_flag(a->win_panel, LV_OBJ_FLAG_HIDDEN)) {
+                show_menu(a);
+            }
+        } else if (aos_pad_pressed(&a->pad, AOS_PAD_START)) {
+            if (!lv_obj_has_flag(a->win_panel, LV_OBJ_FLAG_HIDDEN)) {
+                lv_obj_send_event(lv_obj_has_flag(a->btn_next, LV_OBJ_FLAG_HIDDEN)
+                                  ? a->btn_menu_w : a->btn_next, LV_EVENT_CLICKED, NULL);
+            }
+        } else {
+            aos_pad_menu_step(&a->pmenu, &a->pad);
+        }
+        break;
+    default:
+        pad_play(a);
+        break;
+    }
 }
 
 /* --------------------------------------------------------------------------
@@ -1053,6 +1316,7 @@ static void *at_create(aos_app_t *self, lv_obj_t *root)
         return NULL;
     }
     a->self = self;
+    a->grab = -1;
     a->W    = lv_obj_get_width(root);
     a->H    = lv_obj_get_height(root);
     a->land = a->W > a->H;
@@ -1084,6 +1348,8 @@ static void *at_create(aos_app_t *self, lv_obj_t *root)
         a->board  = s_keep.board;
         a->undo_n = s_keep.undo_n;
         memcpy(a->undo, s_keep.undo, sizeof(a->undo));
+        a->cur_row = a->board.cars[a->board.target_idx].row;
+        a->cur_col = a->board.cars[a->board.target_idx].col;
         if (s_keep.state == ST_MENU) {
             show_menu(a);
         } else {
@@ -1124,6 +1390,8 @@ static void *at_create(aos_app_t *self, lv_obj_t *root)
     } else {
         show_menu(a);
     }
+    aos_pad_reset(&a->pad, lv_tick_get());
+    a->pad_timer = lv_timer_create(pad_cb, 30, a);
     return a;
 }
 
@@ -1131,6 +1399,13 @@ static void at_destroy(aos_app_t *self, void *inst)
 {
     (void)self;
     at_app_t *a = inst;
+
+    if (a->pad_timer) {
+        lv_timer_delete(a->pad_timer);
+        a->pad_timer = NULL;
+    }
+    /* a car the pad was holding: its slide counts, as a finger's would */
+    grab_commit(a);
 
     /* What the next create picks up. */
     s_keep.valid  = true;
