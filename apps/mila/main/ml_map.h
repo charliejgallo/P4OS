@@ -9,6 +9,7 @@
  */
 #pragma once
 
+#include "aos_pad.h"
 #include "ml_gfx.h"
 
 #include <stdbool.h>
@@ -25,3 +26,6 @@ void mlm_damage(app_t *a, struct ml_dmg *d);
 /* the screen turned (worker) */
 void mlm_refit(app_t *a);
 void mlm_touch(app_t *a, int code, int x, int y);   /* LVGL thread          */
+/* a USB gamepad (LVGL thread): Mila's stone goes from level to level, L/R
+ * from world to world, A or START opens it */
+void mlm_gamepad(app_t *a, const aos_pad_t *p);

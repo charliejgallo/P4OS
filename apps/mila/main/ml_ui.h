@@ -8,6 +8,8 @@
  */
 #pragma once
 
+#include "aos_pad.h"
+
 #include <stdbool.h>
 #include <stdint.h>
 
@@ -21,6 +23,9 @@ void ml_ui_layout(app_t *a);
 void ml_ui_show(app_t *a, int state);
 void ml_ui_tick(app_t *a, int dt_ms);
 void ml_ui_free(app_t *a);
+/* a USB gamepad on the panel showing (LVGL thread): the d-pad through its
+ * buttons, A clicks; B and START are mila.c's */
+void ml_ui_gamepad(app_t *a, const aos_pad_t *p);
 
 void ml_ui_job(app_t *a, int what);         /* worker                        */
 void ml_ui_job_done(app_t *a, int what);    /* LVGL                          */

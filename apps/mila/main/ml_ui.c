@@ -16,6 +16,7 @@
 #include "aos_fonts.h"
 #include "aos_hal.h"
 #include "aos_i18n.h"
+#include "aos_pad_menu.h"
 #include "aos_theme.h"
 #include "aos_ui.h"
 #include "src/misc/cache/instance/lv_image_cache.h"
@@ -213,6 +214,10 @@ static struct {
     int       res_a, res_b, res_c, res_d;
     bool      res_won;
     char      res_gift[24];
+    /* a USB gamepad: the buttons of the panel showing (gp_state: the state
+     * they were handed over for, -1 to hand them over again) */
+    aos_pad_menu_t gp_menu;
+    int       gp_state;
 } s_ui;
 
 static app_t *app_of(lv_event_t *e)
@@ -655,15 +660,18 @@ static void tab_cb(lv_event_t *e)
     shop_refresh(a);
 }
 
-static void arrow_cb(lv_event_t *e)
+static void item_step(app_t *a, int d)
 {
-    app_t *a = app_of(e);
-    int d = (int)(intptr_t)lv_obj_get_user_data(lv_event_get_target_obj(e));
     int n = ml_shop_count(a->shop_tab);
     a->shop_item = (a->shop_item + d + n) % n;
     ml_snd(SND_SELECT);
     shop_preview(a);
     shop_refresh(a);
+}
+
+static void arrow_cb(lv_event_t *e)
+{
+    item_step(app_of(e), (int)(intptr_t)lv_obj_get_user_data(lv_event_get_target_obj(e)));
 }
 
 static void turn_cb(lv_event_t *e)
@@ -963,6 +971,7 @@ void ml_ui_layout(app_t *a)
 
 void ml_ui_show(app_t *a, int st)
 {
+    s_ui.gp_state = -1;             /* the gamepad starts the panel afresh */
     lv_obj_t *all[] = { s_ui.pause, s_ui.result, s_ui.shop, s_ui.settings, s_ui.lobby };
     lv_obj_t *want = NULL;
     switch (st) {
@@ -1025,6 +1034,46 @@ void ml_ui_tick(app_t *a, int dt_ms)
 {
     (void)a;
     (void)dt_ms;
+}
+
+/* ---- a USB gamepad (aos_pad_menu.h) ---- */
+
+/* the buttons under o, in the order they were built: what reacts to a
+ * click (an event of its own) */
+static void gp_collect(lv_obj_t *o, lv_obj_t **it, int *n)
+{
+    uint32_t cnt = lv_obj_get_child_count(o);
+    for (uint32_t k = 0; k < cnt && *n < AOS_PAD_MENU_MAX; k++) {
+        lv_obj_t *c = lv_obj_get_child(o, (int32_t)k);
+        if (lv_obj_has_flag(c, LV_OBJ_FLAG_CLICKABLE) && lv_obj_get_event_count(c)) it[(*n)++] = c;
+        else if (!lv_obj_has_flag(c, LV_OBJ_FLAG_HIDDEN)) gp_collect(c, it, n);
+    }
+}
+
+/* The panels' buttons are built once (and again when the screen turns, which
+ * shows the panel again): handed over when the state changes, starting on
+ * the first one (the shop: on its big button). In the shop L/R are its
+ * arrows, Mila's previous and next. */
+void ml_ui_gamepad(app_t *a, const aos_pad_t *p)
+{
+    int st = a->state;
+    lv_obj_t *pn = st == ST_PAUSE ? s_ui.pause : st == ST_RESULT ? s_ui.result : st == ST_SHOP ? s_ui.shop
+                 : st == ST_SETTINGS ? s_ui.settings : st == ST_LOBBY ? s_ui.lobby : NULL;
+    if (!pn) return;
+    if (s_ui.gp_state != st) {
+        lv_obj_t *it[AOS_PAD_MENU_MAX];
+        int n = 0, sel = 0;
+        gp_collect(pn, it, &n);
+        for (int i = 0; i < n; i++)
+            if (st == ST_SHOP && it[i] == s_ui.s_btn) sel = i;
+        aos_pad_menu_set(&s_ui.gp_menu, it, n, sel);
+        s_ui.gp_state = st;
+    }
+    if (st == ST_SHOP && aos_pad_pressed(p, AOS_PAD_L | AOS_PAD_R)) {
+        item_step(a, aos_pad_pressed(p, AOS_PAD_L) ? -1 : 1);
+        return;
+    }
+    aos_pad_menu_step(&s_ui.gp_menu, p);
 }
 
 void ml_ui_free(app_t *a)

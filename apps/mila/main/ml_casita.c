@@ -121,6 +121,9 @@ typedef struct {
     int           drag_toy;
     int           press_x, press_y;
     bool          pressed, dragged;
+    /* ... and from a USB gamepad (mlc_gamepad) */
+    volatile bool gp_pet, gp_toy, gp_gift;
+    int           gp_drawn;         /* the cursor the bar was drawn with      */
     /* Mila's and the guest's frames unpacked (ML_ZIP): body, shadow, hat,
      * neck, each */
     ml_zstream_t  zs[8];
@@ -672,6 +675,19 @@ static void react(app_t *a, casita_t *c)
     a->prog.stat[SX_PETS]++;
 }
 
+/* the day's present, opened: a few coins */
+static void open_gift(app_t *a, casita_t *c)
+{
+    c->gift_ready = false;
+    c->gift_opening = true;
+    c->gift_t = 0;
+    int coins = 15 + (int)(rnd(c) % 16);
+    a->prog.coins += coins;
+    a->prog.gift_day = today();
+    ml_snd(SND_GIFT);
+    mla_save(a);
+}
+
 static void step_toys(casita_t *c, float dt)
 {
     for (int i = 0; i < TY_N; i++) {
@@ -707,14 +723,7 @@ void mlc_step(app_t *a, float dt)
         if (fabsf(c->tap_x - mx) < 70 * CK && fabsf(c->tap_y - my) < 70 * CK && !m->hidden) {
             react(a, c);
         } else if (c->gift_ready && fabsf(wx - 1.3f) < 0.35f && fabsf(wy - 2.05f) < 0.35f) {
-            c->gift_ready = false;
-            c->gift_opening = true;
-            c->gift_t = 0;
-            int coins = 15 + (int)(rnd(c) % 16);
-            a->prog.coins += coins;
-            a->prog.gift_day = today();
-            ml_snd(SND_GIFT);
-            mla_save(a);
+            open_gift(a, c);
         } else {
             for (int i = 0; i < TY_N; i++) {
                 toy_t *t = &c->toys[i];
@@ -726,6 +735,23 @@ void mlc_step(app_t *a, float dt)
                 }
             }
         }
+    }
+    /* the gamepad's: a pet, a toy of hers, the present */
+    if (c->gp_pet) {
+        c->gp_pet = false;
+        if (!m->hidden) react(a, c);
+    }
+    if (c->gp_toy) {
+        c->gp_toy = false;
+        int t = pick_toy(c);
+        if (t >= 0) {
+            use_toy(a, c, t);
+            a->prog.stat[SX_TOYS]++;
+        }
+    }
+    if (c->gp_gift) {
+        c->gp_gift = false;
+        if (c->gift_ready) open_gift(a, c);
     }
     if (c->drag) {
         float wx = WX(c->drag_x);
@@ -1003,14 +1029,19 @@ void mlc_band(app_t *a, ml_img_t *im, int y0, int y1)
     }
     if (y1 > s_bar.y - 10) {
         ml_rrect(im, s_bar.x, s_bar.y, s_bar.w, s_bar.h, 36, ml_rgb(44, 30, 62), 235);
-        int n = nbuttons(a);
+        int n = nbuttons(a), sel = a->gp_bar;
         static const int ico[4] = { ICO_PLAY, ICO_SHOP, ICO_GEAR, ICO_LINK };
         static const int sym[4] = { SYM_PLAY, SYM_SHOP, SYM_GEAR, SYM_FRIEND };
         static const int msg[4] = { MSG_PLAY, MSG_SHOP, MSG_SETTINGS, MSG_FRIEND };
         for (int i = 0; i < n; i++) {
             int cx, cy;
             bar_centre(i, n, &cx, &cy);
-            bar_button(a, im, cx, cy, ico[i], &h->sym[sym[i]], &h->msg[msg[i]], i == 0);
+            if (i == sel) {
+                /* the gamepad's cursor: a lighter tile under the button */
+                int bw = s_bar.column ? s_bar.w - 24 : s_bar.w / n - 12, bh = s_bar.column ? s_bar.h / n - 12 : s_bar.h - 24;
+                ml_rrect(im, cx - bw / 2, cy - bh / 2, bw, bh, 28, ml_rgb(120, 84, 170), 255);
+            }
+            bar_button(a, im, cx, cy, ico[i], &h->sym[sym[i]], &h->msg[msg[i]], sel >= 0 ? i == sel : i == 0);
         }
     }
 }
@@ -1035,8 +1066,9 @@ void mlc_damage(app_t *a, ml_dmg_t *d)
         c->hud_coins = a->prog.coins;
         ml_dmg_rect(d, s_pill_l - 4, s_pill_y - 4, s_pill_r - s_pill_l + 8, pill_h(&a->hud) + 8);
     }
-    if (n != c->hud_n) {
+    if (n != c->hud_n || a->gp_bar != c->gp_drawn) {
         c->hud_n = n;
+        c->gp_drawn = a->gp_bar;
         ml_dmg_rect(d, s_bar.x - 4, s_bar.y - 14, s_bar.w + 8, s_bar.h + 18);
     }
 }
@@ -1054,6 +1086,46 @@ bool mlc_refit(app_t *a)
     ml_anim_free(&c->room);
     for (int i = 0; i < 10; i++) c->heart_was[i].on = false;
     return ok;
+}
+
+/* ---- a USB gamepad (LVGL thread) ----
+ * The cursor shows with the first press, on Jugar; the d-pad moves it along
+ * the bar (either way it lies), A or START presses the button under it. The
+ * room is B (a pet, as a tap on her), R (she goes to a toy of hers) and L
+ * (the day's present, while it waits). */
+void mlc_gamepad(app_t *a, const aos_pad_t *p)
+{
+    casita_t *c = C(a);
+    if (!c) return;
+    int n = nbuttons(a);
+    if (a->gp_bar >= n) a->gp_bar = n - 1;
+    if (aos_pad_pressed(p, AOS_PAD_B)) c->gp_pet = true;
+    if (aos_pad_pressed(p, AOS_PAD_R)) c->gp_toy = true;
+    if (aos_pad_pressed(p, AOS_PAD_L)) c->gp_gift = true;
+    bool go = aos_pad_pressed(p, AOS_PAD_A | AOS_PAD_START);
+    int d = aos_pad_repeat(p, AOS_PAD_LEFT | AOS_PAD_UP) ? -1 : aos_pad_repeat(p, AOS_PAD_RIGHT | AOS_PAD_DOWN) ? 1 : 0;
+    if (a->gp_bar < 0) {
+        /* the first press only shows where it is (START goes on: it is the
+         * title's "go") */
+        if (d || aos_pad_pressed(p, AOS_PAD_A)) {
+            a->gp_bar = 0;
+            return;
+        }
+        if (!go) return;
+        a->gp_bar = 0;
+    }
+    if (d) {
+        a->gp_bar = (a->gp_bar + d + n) % n;
+        ml_snd(SND_SELECT);
+        return;
+    }
+    if (!go) return;
+    ml_snd(SND_SELECT);
+    int i = a->gp_bar;
+    if (i <= 0) mla_set_state(a, ST_MAP);
+    else if (i == 1) mla_set_state(a, ST_SHOP);
+    else if (i == 2) mla_set_state(a, ST_SETTINGS);
+    else ml_link_begin(a);
 }
 
 /* ---- touch (LVGL thread) ---- */

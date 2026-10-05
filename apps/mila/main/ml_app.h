@@ -31,6 +31,7 @@
 #pragma once
 
 #include "aos_app.h"
+#include "aos_pad.h"
 
 #include "ml_art.h"
 #include "ml_gfx.h"
@@ -215,6 +216,12 @@ struct app {
     uint32_t    press_ms, last_step_ms;
     int         held_dir;
     volatile bool want_pause;
+    /* a USB gamepad, read once a tick by the LVGL timer */
+    aos_pad_t   gp;
+    uint32_t    gp_step_ms;         /* when a held direction last stepped     */
+    bool        gp_rep;             /* ... and it is repeating                */
+    bool        gp_peek;            /* the whole level while L is held        */
+    volatile int gp_bar;            /* the casita's button under its cursor, -1 none yet */
     volatile int  tap_x, tap_y;     /* a tap for the scene, -1 none           */
 
     /* LVGL pictures and the shop (ml_ui.c) */

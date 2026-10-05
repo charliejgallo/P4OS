@@ -9,8 +9,11 @@
  *
  * P4OS: the watch's game on the 5" screen, upright or lying down, with the
  * art rendered again from Blender at 1.5 x (tools/pack_p4.py makes
- * mila_p4.pak). Touch only: the watch's BOOT button (undo, pause) is the
- * HUD's buttons here. The link to another board (visits, races) only shows
+ * mila_p4.pak). Touch: the watch's BOOT button (undo, pause) is the HUD's
+ * buttons here. A USB gamepad plays it too (gamepad_poll): the d-pad steps,
+ * B undoes, R starts over, L held shows the whole level, START pauses, and
+ * the casita, the map and the panels have their own (mlc_gamepad,
+ * mlm_gamepad, ml_ui_gamepad). The link to another board (visits, races) only shows
  * when aos_hal_link_start() works.
  */
 #include "ml_app.h"
@@ -1576,6 +1579,115 @@ static bool go_back(app_t *a)
     }
 }
 
+/* ---- a USB gamepad ---- */
+
+/* A level: the d-pad steps one cell a press and, held, repeats as a held
+ * swipe does (but sooner: a button held is meant); B undoes and R starts
+ * over, as the HUD's buttons (and they flash), L held is the whole level as
+ * a finger held on Mila, START pauses. The overview ends with A or START. */
+static void gamepad_level(app_t *a, const aos_pad_t *p)
+{
+    if (!a->level_ok) return;
+    if (a->lmode == LM_OVERVIEW) {
+        if (aos_pad_pressed(p, AOS_PAD_A | AOS_PAD_START) && a->mode_t > 0.25f) {
+            a->mode_t = 0;
+            a->lmode = LM_ZOOM;
+            a->w_fps_t0 = aos_hal_uptime_ms();
+            a->w_frames = 0;
+            ml_snd(SND_ZOOM);
+        }
+        return;
+    }
+    if (aos_pad_pressed(p, AOS_PAD_START)) {
+        a->want_pause = true;
+        return;
+    }
+    if (a->gp_peek && !aos_pad_held(p, AOS_PAD_L)) {
+        a->gp_peek = false;
+        if (a->lmode == LM_PEEK) {
+            a->lmode = LM_PLAY;
+            a->peek_ready = false;
+        }
+    }
+    if (a->lmode != LM_PLAY) return;
+    if (aos_pad_pressed(p, AOS_PAD_L)) {
+        a->gp_peek = true;
+        a->lmode = LM_PEEK;
+        a->peek_ready = false;
+        if (!job(a, JOB_PEEK)) a->pending_job = JOB_PEEK;
+        return;
+    }
+    if (aos_pad_pressed(p, AOS_PAD_B)) {
+        ml_play_undo(&a->play);
+        a->hud_flash_undo = 0.15f;
+        a->prog.stat[SX_UNDOS]++;
+    }
+    if (aos_pad_pressed(p, AOS_PAD_R)) {
+        ml_play_restart(&a->play);
+        a->hud_flash_restart = 0.15f;
+    }
+    static const uint32_t way[4] = { AOS_PAD_UP, AOS_PAD_RIGHT, AOS_PAD_DOWN, AOS_PAD_LEFT };   /* D_UP.. */
+    uint32_t now = lv_tick_get();
+    for (int d = 0; d < 4; d++) {
+        if (aos_pad_pressed(p, way[d])) {
+            ml_play_push_dir(&a->play, d);
+            a->gp_step_ms = now;
+            a->gp_rep = false;
+            return;
+        }
+    }
+    for (int d = 0; d < 4; d++) {
+        if (!aos_pad_held(p, way[d])) continue;
+        uint32_t wait = a->gp_rep ? REPEAT_MS : AOS_PAD_REPEAT_DELAY_MS;
+        if (now - a->gp_step_ms >= wait && !ml_play_busy(&a->play)) {
+            ml_play_push_dir(&a->play, d);
+            a->gp_step_ms = now;
+            a->gp_rep = true;
+        }
+        return;
+    }
+}
+
+/* Once a tick: the level, the casita and the map read the pad themselves;
+ * on the panels B is back (never out of the game: the casita has none, B
+ * pets Mila there) and START resumes the pause. Nothing while the loader
+ * or something of the system's is over the game. */
+static void gamepad_poll(app_t *a)
+{
+    aos_pad_t *p = &a->gp;
+    aos_pad_update(p, lv_tick_get());
+    if (!p->connected || a->closing || a->fitting || a->over_wait || ml_ui_loader_on()) return;
+    switch (a->state) {
+    case ST_LEVEL:
+        gamepad_level(a, p);
+        break;
+    case ST_CASITA:
+        mlc_gamepad(a, p);
+        break;
+    case ST_MAP:
+        if (aos_pad_pressed(p, AOS_PAD_B)) {
+            ml_snd(SND_SELECT);
+            go_back(a);
+        } else {
+            mlm_gamepad(a, p);
+        }
+        break;
+    case ST_PAUSE: case ST_RESULT: case ST_SHOP: case ST_SETTINGS: case ST_LOBBY:
+        if (aos_pad_pressed(p, AOS_PAD_START) && a->state == ST_PAUSE) {
+            ml_snd(SND_SELECT);
+            mla_resume(a);
+        } else if (aos_pad_pressed(p, AOS_PAD_B)) {
+            ml_snd(SND_SELECT);
+            go_back(a);
+        } else {
+            ml_ui_gamepad(a, p);
+        }
+        break;
+    default:
+        break;
+    }
+}
+
 static void gesture_cb(lv_event_t *e)
 {
     app_t *a = app_of(e);
@@ -1742,6 +1854,7 @@ static void frame(lv_timer_t *t)
     ml_audio_tick();
     ml_ui_tick(a, dt);
     hold_tick(a);
+    gamepad_poll(a);
 
     if (a->job_done && a->job == JOB_NONE) {
         a->job_done = false;
@@ -1981,6 +2094,7 @@ static void *ml_create(aos_app_t *self, lv_obj_t *root)
     }
     ml_audio_open();
     a->state = ST_BOOT;
+    a->gp_bar = -1;
     ml_ui_show(a, ST_BOOT);
     s_last_job = JOB_BOOT;
     a->job = JOB_BOOT;

@@ -19,6 +19,7 @@
  */
 #pragma once
 
+#include "aos_pad.h"
 #include "ml_gfx.h"
 
 #include <stdbool.h>
@@ -38,5 +39,8 @@ void mlc_damage(app_t *a, struct ml_dmg *d);
 /* the screen turned (worker): the room again, where it goes now */
 bool mlc_refit(app_t *a);
 void mlc_touch(app_t *a, int code, int x, int y);   /* LVGL thread          */
+/* a USB gamepad (LVGL thread): a cursor on the buttons, A presses, B pets
+ * her, R sends her to a toy, L opens the day's present */
+void mlc_gamepad(app_t *a, const aos_pad_t *p);
 /* the friend's Mila is visiting (ml_link.c): her outfit, or NULL to leave */
 void mlc_guest(app_t *a, const char *hat, uint32_t hat_col, const char *neck, uint32_t neck_col, bool on);

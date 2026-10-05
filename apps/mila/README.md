@@ -227,7 +227,7 @@ the frame buffer itself); the whole-level picture is freed while the level is
 played and painted again for a peek; the casita's room picture is freed once
 it is in the cache; Mila's frames are freed on the map.
 
-## Playing: touch only
+## Playing: touch, or a USB gamepad
 
 The watch's BOOT button (undo, pause) is gone; everything is on the glass:
 
@@ -239,6 +239,23 @@ The watch's BOOT button (undo, pause) is gone; everything is on the glass:
 - A level opens on the whole room with its goal; a tap flies the camera down
   onto Mila. **Pinch** (fingers together) for the whole room again, spread
   them to go back; or **touch and hold Mila**.
+
+**A USB gamepad** (`aos_pad.h`) plays it all without touching the screen:
+
+| | |
+| --- | --- |
+| D-pad / left stick | a level: one step a press (a thing in the way is pushed); held, she keeps walking. The casita: the cursor along its buttons. The map: Mila to the next open level (up/right) or the one before (down/left) |
+| A | the casita's button, the map's level, the panels' outlined button; ends a level's overview |
+| B | undo in a level; back on the map and the panels; a pet in the casita |
+| R | start over in a level; the next world on the map; a toy for her in the casita; the next item in the shop |
+| L | held, the whole level (as a finger held on Mila); the world before on the map; the day's present in the casita; the item before in the shop |
+| START | pause and resume; ends the overview; Jugar in the casita, the level on the map |
+
+The casita's cursor is a lighter tile under a button, drawn in the frame
+(`mlc_gamepad`); the map's is Mila's own marker (`mlm_gamepad`), and the
+strip glides to keep her in view; the panels (pause, results, shop,
+settings, lobby) move `aos_pad_menu.h`'s outline to the nearest button. The
+casita's cursor and the outline only show once the pad is used.
 
 Upright the level sits between the HUD's rows; lying down the HUD goes to the
 corners beside it. The screen can turn at any moment: a level being played

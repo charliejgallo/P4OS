@@ -61,7 +61,8 @@ typedef struct {
     float     t;
     int       drawn_sc;         /* the scroll of the last frame, -1 none   */
     int       drawn_coins, drawn_stars;
-    int       cur_w, cur_l;     /* where Mila stands                        */
+    int       cur_w, cur_l;     /* where Mila stands (the gamepad moves her) */
+    int       drawn_w, drawn_l; /* where she stood in the last frame        */
     /* the finger (LVGL thread writes) */
     volatile bool   held;
     volatile float  drag_to;
@@ -434,8 +435,10 @@ void mlm_damage(app_t *a, ml_dmg_t *d)
     map_t *m = M(a);
     if (!m) return;
     int sc = ml_iround(m->scroll);
-    if (sc != m->drawn_sc) {
+    if (sc != m->drawn_sc || m->cur_w != m->drawn_w || m->cur_l != m->drawn_l) {
         m->drawn_sc = sc;
+        m->drawn_w = m->cur_w;
+        m->drawn_l = m->cur_l;
         ml_dmg_full(d);
         return;
     }
@@ -543,5 +546,72 @@ void mlm_touch(app_t *a, int code, int x, int y)
                 return;
             }
         }
+    }
+}
+
+/* ---- a USB gamepad (LVGL thread) ----
+ * Mila's stone is the cursor, as it is the map's marker: the d-pad takes
+ * her to the next open level (up or right, the way the strip climbs) or the
+ * one before (down or left), L/R to the world before or after, and the strip
+ * glides to keep her in view. A or START opens the level she stands on. */
+
+/* the strip's y of a level's stone, or -1 */
+static int stone_y(const map_t *m, int w, int l)
+{
+    for (int i = 0; i < m->np; i++)
+        if (m->p[i].world == w && l < m->p[i].nn) return m->p[i].y + m->p[i].node[l][1];
+    return -1;
+}
+
+void mlm_gamepad(app_t *a, const aos_pad_t *p)
+{
+    map_t *m = M(a);
+    if (!m) return;
+    int nw = a->worlds.nworlds;
+    int step = aos_pad_repeat(p, AOS_PAD_UP | AOS_PAD_RIGHT) ? 1 : aos_pad_repeat(p, AOS_PAD_DOWN | AOS_PAD_LEFT) ? -1 : 0;
+    int jump = aos_pad_pressed(p, AOS_PAD_R) ? 1 : aos_pad_pressed(p, AOS_PAD_L) ? -1 : 0;
+    int w = m->cur_w, l = m->cur_l;
+    if (step) {
+        /* the next open level that way, across the worlds */
+        for (;;) {
+            l += step;
+            if (l < 0) {
+                if (--w < 0) break;
+                l = a->worlds.w[w].nlevels - 1;
+            } else if (l >= a->worlds.w[w].nlevels) {
+                if (++w >= nw) break;
+                l = 0;
+            }
+            if (mla_level_open(a, w, l)) break;
+        }
+    } else if (jump) {
+        /* the next open world that way, at its first level not solved */
+        for (w += jump; w >= 0 && w < nw && !mla_world_open(a, w); w += jump) {}
+        if (w >= 0 && w < nw) {
+            l = 0;
+            for (int k = 0; k < a->worlds.w[w].nlevels; k++)
+                if (mla_level_open(a, w, k) && !a->prog.stars[w][k]) {
+                    l = k;
+                    break;
+                }
+        }
+    }
+    if (step || jump) {
+        int y = w >= 0 && w < nw && mla_level_open(a, w, l) ? stone_y(m, w, l) : -1;
+        if (y < 0) {
+            ml_snd(SND_BUMP);
+            return;
+        }
+        m->cur_w = w;
+        m->cur_l = l;
+        float to = (float)y - ML_H * 0.58f, hi = (float)(m->strip_h - ML_H);
+        m->go_to = to < 0 ? 0 : to > hi ? (hi > 0 ? hi : 0) : to;
+        m->vel = 0;
+        ml_snd(SND_SELECT);
+        return;
+    }
+    if (aos_pad_pressed(p, AOS_PAD_A | AOS_PAD_START) && mla_level_open(a, m->cur_w, m->cur_l)) {
+        ml_snd(SND_SELECT);
+        mla_level_start(a, m->cur_w, m->cur_l);
     }
 }
