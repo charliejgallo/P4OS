@@ -337,7 +337,8 @@ aos_io_uart_t *aos_io_uart_open(const char *port, uint32_t baud, bool rs485, con
         char name[40] = "";
         aos_hal_usb_serial_name(ui, name, sizeof name);
         snprintf(u->desc, sizeof u->desc, "%s %.40s", port, name);
-        u->en_gpio = u->boot_gpio = u->en = u->boot = -1;
+        u->en_gpio = u->boot_gpio = -1;
+        u->en = u->boot = 1;        /* EN and BOOT up: the board runs */
         return u;
     }
     const aos_io_port_t *p = aos_io_port_find(port);
@@ -417,6 +418,15 @@ bool aos_io_port_lines(const char *port, int *en_gpio, int *boot_gpio)
 
 bool aos_io_uart_lines(aos_io_uart_t *u, int en, int boot)
 {
+    if (u && u->usb >= 0) {
+        /* On USB, EN and BOOT are RTS and DTR, as esptool drives them: an
+         * ESP32 dev board's two transistors pull EN low with RTS asserted
+         * and GPIO0 low with DTR asserted (both asserted, neither). */
+        if (en >= 0) u->en = (int8_t)(en ? 1 : 0);
+        if (boot >= 0) u->boot = (int8_t)(boot ? 1 : 0);
+        if (en < 0 && boot < 0) return true;
+        return aos_hal_usb_serial_lines(u->usb, u->boot == 0, u->en == 0);
+    }
     if (!u || (u->en_gpio < 0 && u->boot_gpio < 0)) return false;
     if (!u->lines_claimed) {
         /* the pins become the port owner's the first time they are wanted,

@@ -492,8 +492,10 @@ static bool run(ctx_t *c)
 {
     set_phase(AOS_FLASHER_OPENING);
     const aos_io_port_t *pt = aos_io_port_find(J.port);
-    if (!pt || pt->kind != AOS_PORT_UART) return failf("No hay un puerto serie %s", J.port);
+    bool usb = !strncmp(J.port, "usb", 3);      /* a USB serial port of the host */
+    if (!usb && (!pt || pt->kind != AOS_PORT_UART)) return failf("No hay un puerto serie %s", J.port);
     c->u = aos_io_uart_open(J.port, 115200, false, AOS_FLASHER_OWNER);
+    if (!c->u && usb) return failf("No se pudo abrir %s: ¿está enchufado, o abierto en la Terminal?", J.port);
     if (!c->u) {
         const char *o = aos_io_owner(pt->pins[0]);
         if (!o) o = aos_io_owner(pt->pins[1]);
@@ -507,7 +509,8 @@ static bool run(ctx_t *c)
     unlock();
     int en = -1, boot = -1;
     aos_io_port_lines(J.port, &en, &boot);
-    if (c->P.lines) logf_(L_INFO, "%s, EN GPIO%d, BOOT GPIO%d", aos_io_uart_desc(c->u), en, boot);
+    if (usb) logf_(L_INFO, "%s, EN por RTS y BOOT por DTR", aos_io_uart_desc(c->u));
+    else if (c->P.lines) logf_(L_INFO, "%s, EN GPIO%d, BOOT GPIO%d", aos_io_uart_desc(c->u), en, boot);
     else if (en >= 0 || boot >= 0) logf_(L_WARN, "%s: EN/BOOT ocupados por %s", aos_io_uart_desc(c->u), aos_io_owner(en >= 0 ? en : boot) ? aos_io_owner(en >= 0 ? en : boot) : "otro");
     else logf_(L_WARN, "%s sin EN/BOOT: poné la placa en modo descarga (BOOT apretado y reset)", aos_io_uart_desc(c->u));
 

@@ -480,7 +480,7 @@ async function pageProgramador() {
     last = st;
     if (!portSel.options.length || force) {
       put(portSel, st.ports.map(p => h('option', { value: p.name, selected: p.name === flashPort },
-        p.name + (p.lines ? ' · con EN/BOOT' : ' · sin EN/BOOT') + (p.holder ? ' · lo tiene ' + p.holder : ''))));
+        p.name + (p.desc ? ' · ' + p.desc + ' · EN/BOOT por RTS/DTR' : p.lines ? ' · con EN/BOOT' : ' · sin EN/BOOT') + (p.holder ? ' · lo tiene ' + p.holder : ''))));
     }
     const c = st.chip;
     put(target,

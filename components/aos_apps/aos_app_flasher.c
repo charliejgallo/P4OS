@@ -279,8 +279,17 @@ static void refresh_target(void)
     const aos_io_port_t *p = aos_io_port_find(S.port);
     int en = -1, boot = -1;
     aos_io_port_lines(S.port, &en, &boot);
-    lv_label_set_text(U.port_lbl, S.port);
-    lv_obj_set_style_text_color(U.port_lbl, p ? AOS_C_TEXT : AOS_C_ORANGE, 0);
+    /* a USB port shows what is plugged into it; orange when it is gone */
+    int ui = !strncmp(S.port, "usb", 3) && S.port[3] >= '0' && S.port[3] <= '9' ? S.port[3] - '0' : -1;
+    char dev[48] = "";
+    bool usb_ok = ui >= 0 && ui < aos_hal_usb_serial_count() && aos_hal_usb_serial_name(ui, dev, sizeof dev);
+    if (usb_ok) {
+        snprintf(buf, sizeof buf, "%s %.20s", S.port, dev);
+        lv_label_set_text(U.port_lbl, buf);
+    } else {
+        lv_label_set_text(U.port_lbl, S.port);
+    }
+    lv_obj_set_style_text_color(U.port_lbl, p || usb_ok ? AOS_C_TEXT : AOS_C_ORANGE, 0);
     snprintf(buf, sizeof buf, "%u", (unsigned)BAUDS[S.baud_i]);
     lv_label_set_text(U.baud_lbl, buf);
 
@@ -309,13 +318,17 @@ static void detect_cb(lv_event_t *e)
 static void port_cb(lv_event_t *e)
 {
     if (aos_flasher_busy()) return;
-    /* the next UART port of modules.txt */
-    int n = aos_io_port_count(), cur = -1;
-    for (int i = 0; i < n; i++) if (!strcmp(aos_io_port_at(i)->name, S.port)) cur = i;
-    for (int k = 1; k <= n; k++) {
-        const aos_io_port_t *p = aos_io_port_at((cur + k + n) % n);
-        if (p && p->kind == AOS_PORT_UART) { snprintf(S.port, sizeof S.port, "%s", p->name); break; }
+    /* the next UART port of modules.txt, then the USB serial ports of the
+     * host plugged in now ("usb0"...), and round again */
+    char names[24][16];
+    int n = 0, cur = -1;
+    for (int i = 0; i < aos_io_port_count() && n < 20; i++) {
+        const aos_io_port_t *p = aos_io_port_at(i);
+        if (p && p->kind == AOS_PORT_UART) snprintf(names[n++], sizeof names[0], "%s", p->name);
     }
+    for (int i = 0; i < aos_hal_usb_serial_count() && i < 4; i++) snprintf(names[n++], sizeof names[0], "usb%d", i);
+    for (int i = 0; i < n; i++) if (!strcmp(names[i], S.port)) cur = i;
+    if (n) snprintf(S.port, sizeof S.port, "%s", names[(cur + 1) % n]);
     aos_hal_pref_set_str("fl_port", S.port);
     build();
 }

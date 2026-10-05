@@ -1077,6 +1077,17 @@ static void api_flash(aos_httpd_req_t *r)
         if (holder) cJSON_AddStringToObject(p, "holder", holder);
         cJSON_AddItemToArray(ports, p);
     }
+    /* USB serial ports of the host: EN and BOOT through RTS and DTR */
+    for (int i = 0; i < aos_hal_usb_serial_count() && i < 4; i++) {
+        cJSON *p = cJSON_CreateObject();
+        char n[8], d[48] = "";
+        snprintf(n, sizeof n, "usb%d", i);
+        aos_hal_usb_serial_name(i, d, sizeof d);
+        cJSON_AddStringToObject(p, "name", n);
+        cJSON_AddStringToObject(p, "desc", d);
+        cJSON_AddBoolToObject(p, "lines", true);
+        cJSON_AddItemToArray(ports, p);
+    }
     static aos_flasher_source_t src[AOS_FLASHER_SOURCES_MAX] AOS_BSS_PSRAM;     /* 24 x ~1 KB: not on a 12 KB stack, nor in internal RAM */
     static void *src_mx;
     if (!src_mx) src_mx = aos_hal_mutex_create();

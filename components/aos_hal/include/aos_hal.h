@@ -1908,6 +1908,9 @@ int  aos_hal_usb_serial_open(int index, uint32_t baud);
 bool aos_hal_usb_serial_set_format(int h, uint32_t baud, char parity, int stop_bits);   /* 'N' 'E' 'O'; 1 or 2 */
 int  aos_hal_usb_serial_read(int h, void *buf, int len, int timeout_ms);
 int  aos_hal_usb_serial_write(int h, const void *buf, int len);
+/* DTR and RTS (true = asserted, as a terminal leaves them on open): what
+ * esptool moves to reset an ESP32 dev board into its bootloader */
+bool aos_hal_usb_serial_lines(int h, bool dtr, bool rts);
 void aos_hal_usb_serial_close(int h);
 
 /* P4OS: webcams on the host (aos_usb_uvc_p4.c, USB Video Class). Listed

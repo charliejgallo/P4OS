@@ -921,6 +921,9 @@ __attribute__((weak)) int aos_hal_usb_serial_read(int h, void *buf, int len, int
 __attribute__((weak)) int aos_hal_usb_serial_write(int h, const void *buf, int len)
 { int v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) bool aos_hal_usb_serial_lines(int h, bool dtr, bool rts)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) void aos_hal_usb_serial_close(int h)
 { }
 

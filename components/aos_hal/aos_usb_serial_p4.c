@@ -313,6 +313,12 @@ int aos_hal_usb_serial_write(int h, const void *buf, int len)
     return cdc_acm_host_data_tx_blocking(S.s[h].cdc, buf, len, 500) == ESP_OK ? len : -1;
 }
 
+bool aos_hal_usb_serial_lines(int h, bool dtr, bool rts)
+{
+    if (h < 0 || h >= SER_MAX || !S.s[h].cdc || S.s[h].closed) return false;
+    return cdc_acm_host_set_control_line_state(S.s[h].cdc, dtr, rts) == ESP_OK;
+}
+
 void aos_hal_usb_serial_close(int h)
 {
     if (h < 0 || h >= SER_MAX || !S.installed) return;
