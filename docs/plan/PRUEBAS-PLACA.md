@@ -41,16 +41,12 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       Arduino Leonardo (serie + teclado) y una Pico (programada con su .uf2
       desde la placa, REPL de MicroPython). El detalle de cada uno, abajo en
       **USB**. Sin probar: MIDI con un aparato real.
-- [ ] **Joystick en todos los juegos** (2026-10-05, para la 0.9.1,
-      `docs/GAMEPAD.md`): los 22 juegos y Lua se juegan con joystick en el
-      simulador. En la placa con el joystick genérico (cruceta como ejes,
-      sin hat): 2043, Turbo, Golf, Burbujas, Arkanos, Atrapa, Mila, Doom,
-      Claude Jump, Gemas, Buscaminas, Atasco y Claudito andan (2026-10-05; Turbo giraba de golpe
-      porque tomaba la cruceta por palanca a fondo, arreglado en aos_pad.h);
-      falta probar Topos, Flappy, Neon Snakes, Monster Hop, Chatarra,
-      Simon, Dados, Blackjack y Truco. Sin
-      probar en ningún lado: las partidas entre dos placas (carrera de
-      Monster Hop, visitas de Mila, Truco de a dos).
+- [x] **Joystick en todos los juegos** (2026-10-05, 0.9.1,
+      `docs/GAMEPAD.md`): los 22 juegos y Atrapa (Lua) probados en la placa
+      con el joystick genérico (cruceta como ejes, sin hat), todos bien.
+      Turbo giraba de golpe porque tomaba la cruceta por palanca a fondo
+      (arreglado en aos_pad.h). Sin probar: las partidas entre dos placas
+      (carrera de Monster Hop, visitas de Mila, Truco de a dos).
 - [ ] El cuelgue del primer arranque tras algunas OTA: dos volcados el
       2026-10-04 con `strcmp` en `dlsym` cargando apps (handoff de sistema).
 

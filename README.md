@@ -298,9 +298,8 @@ test layouts.
   gamepad, a hub, a webcam (Logitech C270), a sound card (output and
   microphone), CH340, CP2102, FTDI and an Arduino Leonardo and a Pico as
   serial ports.
-- A generic USB gamepad in the games: 2043, Turbo, Golf, Burbujas, ARKANOS,
-  Atrapa, Mila, Doom, Claude Jump, Gemas, Buscaminas, Atasco and Claudito
-  played with it on the board; the rest in the simulator.
+- A generic USB gamepad in every game: the 22 games and Atrapa (Lua)
+  played with it on the board.
 - The microSD, music and the speaker.
 - The games and most of the tools, in both orientations.
 - The BOOT button and safe mode.
