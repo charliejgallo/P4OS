@@ -211,7 +211,11 @@ Que necesitan la mano del usuario o equipos:
 - [x] Pantalla de bloqueo (2026-10-03): probada por el usuario en la placa
       de reemplazo, con código; las traducciones sin tarjeta, en el
       simulador.
-- [ ] Tira WS2812B en GPIO5 (pin 11) con level shifter, desde Tiras LED.
+- [x] Tira WS2812B desde Tiras LED (2026-10-05): 12 LEDs en GPIO4 (pin 14),
+      dato a 3,3 V directo con 330 Ω en serie (sin level shifter, anda),
+      5 V del header, límite de fuente 500 mA. Orden GRB correcto (rojo,
+      verde y azul sólidos salen bien). Falta: los efectos, el limitador
+      en blanco pleno y que vuelva sola después de reiniciar.
 - [ ] DS18B20 real en Bus → 1-Wire (pin 16, 4,7 kΩ a 3V3).
 - [ ] RC522 en spi.a con el ejemplo de Bus (VersionReg 0x91/0x92).
 - [x] SPI en el conector (2026-10-01): el lazo del pin 34 al 36 a 1, 10 y 40 MHz,
