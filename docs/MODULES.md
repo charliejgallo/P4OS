@@ -447,6 +447,11 @@ one takes any usable GPIO of the header and claims it, like the rest.
 | `aos_io_ir_*` | the RMT, 1 us a tick | in: a demodulating receiver (TSOP38238, VS1838B), up to 1024 marks and spaces a frame, two buffers so the next frame lands while one is read; out: an IR LED through a transistor, the carrier settable (38 kHz, 33 % by default, or none) |
 | `aos_io_can_*` | the TWAI controllers, classic CAN 2.0 | 25 kbit/s to 1 Mbit/s; normal, listen only, and a self test that needs no transceiver (one pin for TX and RX); a queue of 64 received frames with time stamps |
 
+**A pin let go** (an output closed) rests at its off level through the
+weak pull: down, or up for an inverted PWM output. `gpio_reset_pin()`
+alone leaves the pull-up on, and a servo whose channel was switched off
+moved by itself on a line held weakly high.
+
 **On a real CAN bus** a 3.3 V transceiver goes between the pins and
 CANH/CANL (SN65HVD230 and kin): the header's pins are not 5 V tolerant.
 

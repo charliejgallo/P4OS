@@ -59,7 +59,10 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
 - [ ] **Apps del taller** (instaladas el 2026-10-05, probadas sólo en el
       simulador): EEPROM con una 24LC del usuario; PWM con LEDs (**anduvo
       el 2026-10-05**: un LED en GPIO28, a mano, rampa, respirar y estrobo)
-      y un servo (alimentación del servo aparte; falta); Infrarrojo con receptor y emisor
+      y un servo (**anduvo el 2026-10-05** en GPIO32: los dos extremos de
+      500 a 2500 us y el barrido; al apagar el canal se movía solo porque el
+      pin quedaba con el pull-up, arreglado: el pin suelto queda tirado al
+      nivel de apagado); Infrarrojo con receptor y emisor
       (aprender un control, mandarlo, la base de SmartIR); CAN con los
       transceptores SN65HVD230 cuando lleguen (la autoprueba ya anduvo);
       Visor VNC contra una computadora (Compartir pantalla de la Mac con
