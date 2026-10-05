@@ -66,6 +66,22 @@ The API for it:
     POST /api/login     {"password": "..."}: the session cookie
     POST /api/logout    ends this browser's session
 
+## From outside home: Tailscale
+
+There is no Tailscale client for the ESP32, and the board does not need
+one. A machine at home that is on your tailnet can route to the home
+network for it: Home Assistant's Tailscale add-on does it with its
+"advertise routes" option (any Linux box with `tailscale up
+--advertise-routes=<your LAN>/24` does too), once the route is approved in
+the Tailscale admin console. Then a phone or a laptop on the tailnet opens
+the board's portal at its home address, from anywhere.
+
+Mind what the board sees: a subnet router rewrites the source of what it
+forwards to its own LAN address by default, so those requests arrive from
+inside the home network and the portal treats them like any other at
+home. If the tailnet has people or devices you would not let into the
+portal, set the password with "at home too" (Settings, Portal web).
+
 ## HTTPS
 
 Settings, Portal web, **HTTPS (port 443)**, and a restart. The portal then

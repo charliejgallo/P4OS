@@ -8,6 +8,9 @@
   as esptool does (docs/USB.md). A C3, C6, S3 or H2 on its own USB
   (USB-Serial-JTAG) gets the sequence its USB logic decodes.
 - Espressif's USB-Serial-JTAG no longer shows a "?" after its name.
+- docs/SECURITY.md: reaching the portal from outside home through a
+  Tailscale subnet router (Home Assistant's add-on), with nothing on the
+  board.
 
 ## 0.9.1 — 2026-10-05
 
