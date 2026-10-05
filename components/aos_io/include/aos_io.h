@@ -294,9 +294,10 @@ bool aos_io_strip_type_rgbw(aos_strip_type_t t);
 /* ---- PWM (any usable GPIO of the header) ----
  *
  * The LEDC: seven channels (the eighth drives the backlight), 1 Hz to
- * 40 MHz. The duty resolution falls as the frequency rises - 20 bits up to
- * 76 Hz, 14 at 4.8 kHz, 10 at 78 kHz, 2 at 20 MHz - and _bits() says what
- * a channel has. Channels on the same frequency share a timer; there are
+ * 20 MHz, from the 40 MHz crystal (the backlight's clock, which all the
+ * LEDC's timers must share). The duty resolution falls as the frequency
+ * rises - 20 bits up to 38 Hz, 13 at 4.8 kHz, 9 at 78 kHz, 1 at 20 MHz -
+ * and _bits() says what a channel has. Channels on the same frequency share a timer; there are
  * three, so three different frequencies at once at most (open fails past
  * that). A servo is 50 Hz and a pulse width: set_pulse_us(1500) centres
  * most. fade() ramps in hardware and returns at once. Invert flips the

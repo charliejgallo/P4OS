@@ -39,7 +39,7 @@ static float clamp01(float v)
 
 aos_io_pwm_t *aos_io_pwm_open(int gpio, uint32_t freq_hz, const char *owner)
 {
-    if (!freq_hz || freq_hz > 40000000) return NULL;
+    if (!freq_hz || freq_hz > 20000000) return NULL;
     if (!take(gpio, owner, "PWM")) return NULL;
     aos_io_pwm_t *p = calloc(1, sizeof *p);
     if (!p) { aos_io_release(gpio, owner); return NULL; }
@@ -55,7 +55,7 @@ aos_io_pwm_t *aos_io_pwm_open(int gpio, uint32_t freq_hz, const char *owner)
 
 bool aos_io_pwm_set_freq(aos_io_pwm_t *p, uint32_t freq_hz)
 {
-    if (!p || !freq_hz || freq_hz > 40000000) return false;
+    if (!p || !freq_hz || freq_hz > 20000000) return false;
     if (!aos_io_be_pwm_set_freq(p, freq_hz)) return false;
     return aos_io_be_pwm_set_duty(p, p->invert ? 1.0f - p->duty : p->duty, 0);
 }

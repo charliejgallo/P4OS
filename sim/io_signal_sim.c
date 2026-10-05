@@ -48,7 +48,7 @@ static int s_channels;
 
 static uint8_t bits_for(uint32_t hz)
 {
-    int b = (int)floor(log2(80000000.0 / (double)hz));
+    int b = (int)floor(log2(40000000.0 / (double)hz));
     if (b < 1) b = 1;
     if (b > 20) b = 20;
     return (uint8_t)b;
@@ -67,10 +67,10 @@ static void tm_put(int t) { if (t >= 0 && s_tm[t].refs) s_tm[t].refs--; }
 /* the LEDC's own rounding: the divider is a whole number of 1/256 */
 static uint32_t actual_hz(uint32_t hz, uint8_t bits)
 {
-    double div = 80000000.0 / ((double)hz * (double)(1u << bits));
+    double div = 40000000.0 / ((double)hz * (double)(1u << bits));
     div = floor(div * 256.0 + 0.5) / 256.0;
     if (div < 1.0) div = 1.0;
-    return (uint32_t)lround(80000000.0 / (div * (double)(1u << bits)));
+    return (uint32_t)lround(40000000.0 / (div * (double)(1u << bits)));
 }
 
 bool aos_io_be_pwm_open(aos_io_pwm_t *p, uint32_t freq_hz)

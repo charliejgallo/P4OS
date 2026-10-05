@@ -4,7 +4,9 @@
  *
  * The LEDC's timer 1 and channel 1 belong to the backlight (the BSP sets
  * them up at boot), so PWM has timers 0, 2, 3 and the other seven
- * channels. Everything that is not touched from an ISR lives in PSRAM.
+ * channels. The LEDC has one clock for all its timers, and the backlight's
+ * came out as the 40 MHz crystal: asking another one fails with "timer
+ * clock conflict" (seen on the board, 2026-10-05), so PWM uses it too. Everything that is not touched from an ISR lives in PSRAM.
  */
 #include "aos_io_backend.h"
 #include "aos_hal.h"
@@ -50,7 +52,7 @@ typedef struct { int ch, tm; } pwm_be_t;
 
 static uint8_t bits_for(uint32_t hz)
 {
-    uint32_t b = ledc_find_suitable_duty_resolution(80000000, hz);
+    uint32_t b = ledc_find_suitable_duty_resolution(40000000, hz);
     if (b < 1) b = 1;
     if (b > 20) b = 20;
     return (uint8_t)b;
@@ -66,9 +68,14 @@ static int timer_get(uint32_t hz)
         uint8_t bits = bits_for(hz);
         ledc_timer_config_t tc = {
             .speed_mode = LEDC_LOW_SPEED_MODE, .duty_resolution = bits, .timer_num = t,
-            .freq_hz = hz, .clk_cfg = LEDC_AUTO_CLK,
+            .freq_hz = hz, .clk_cfg = LEDC_USE_XTAL_CLK,
         };
         esp_err_t e = ledc_timer_config(&tc);
+        if (e != ESP_OK) {
+            /* the backlight on another clock after all: whatever it is */
+            tc.clk_cfg = LEDC_AUTO_CLK;
+            e = ledc_timer_config(&tc);
+        }
         if (e != ESP_OK) { aos_hal_log("io", "PWM: %u Hz: %s", (unsigned)hz, esp_err_to_name(e)); return -1; }
         s_tm[t].asked = hz;
         s_tm[t].bits = bits;
