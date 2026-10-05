@@ -34,7 +34,7 @@ On the card both go in `/apps`: `turbo.so` and `turbo_p4.pak`. Without the
 pack the game still runs, with boxes for cars and props. Neither file is in
 git, nor are the renders (`assets/`).
 
-## Playing: touch only
+## Playing: touch, or a USB gamepad
 
 The watch steered by tilting it; the P4 has no IMU.
 
@@ -52,6 +52,18 @@ The watch steered by tilting it; the P4 has no IMU.
 
 Both fingers are read from the panel's own samples
 (`aos_hal_touch_frames`), so steering and the gas work at once.
+
+**A USB gamepad** (`aos_pad.h`) drives too, with the fingers or instead of
+them: the left stick is the wheel, turned as far as the stick is pushed
+(past a dead zone of 4000, a little gentler near the middle, scaled by the
+sensitivity), the d-pad turns it like the arrows whatever Dirección says,
+A is the gas and B the brake, START pauses and resumes. On every panel the
+d-pad goes through the buttons with an outline (`aos_pad_menu.h`), A
+presses, B is the system's back (never out of the app from the menu),
+START on the title presses the one picked, and L / R change the car in the
+garage. The panels' flex columns let the outline draw past them
+(`pad_room`): without that LVGL clipped it, and did not even redraw the
+part outside a column.
 
 ## The screen
 

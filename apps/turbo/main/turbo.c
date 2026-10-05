@@ -17,7 +17,12 @@
  *     right one, all drawn in the frame (touch_poll reads the panel's own
  *     samples, both fingers);
  *   - racing another board needs the radio link, which the P4 does not have
- *     yet: the menu only offers it when aos_hal_link_start() works.
+ *     yet: the menu only offers it when aos_hal_link_start() works;
+ *   - a USB gamepad drives as well (aos_pad.h): the stick is the wheel, as
+ *     far over as it is pushed, the d-pad the arrows, A the gas, B the brake
+ *     and START the pause. On the panels the d-pad goes through the buttons
+ *     and A presses them (aos_pad_menu.h); B is back, L and R change the car
+ *     in the garage.
  *
  * Every word on screen is wrapped in _(): the LVGL panels directly, and the
  * words inside the frame (the clock's "TIEMPO", "¡YA!"...) are rendered
@@ -841,6 +846,72 @@ static lv_obj_t *panel_of(app_t *a, int i)
     return i < (int)(sizeof(p) / sizeof(p[0])) ? p[i] : NULL;
 }
 
+/* Every button inside o, in the order they were made. */
+static int pad_collect(lv_obj_t *o, lv_obj_t **out, int n, int max)
+{
+    uint32_t k = lv_obj_get_child_count(o);
+    for (uint32_t i = 0; i < k && n < max; i++) {
+        lv_obj_t *c = lv_obj_get_child(o, (int32_t)i);
+        if (lv_obj_has_flag(c, LV_OBJ_FLAG_CLICKABLE)) out[n++] = c;
+        else n = pad_collect(c, out, n, max);
+    }
+    return n;
+}
+
+/* The pad goes through the buttons of the panel showing. The one it had
+ * picked before loses its outline first: that panel is hidden by now, and
+ * aos_pad_menu leaves hidden ones alone, so it would still wear it the
+ * next time the panel comes up. */
+static void pad_menu_take(app_t *a, lv_obj_t *show)
+{
+    aos_pad_menu_t *m = &a->pmenu;
+    if (m->sel < m->n && lv_obj_is_valid(m->item[m->sel])) {
+        lv_obj_set_style_outline_width(m->item[m->sel], 0, 0);
+    }
+    if (!show) {
+        aos_pad_menu_clear(m);
+        return;
+    }
+    lv_obj_t *items[AOS_PAD_MENU_MAX];
+    int n = pad_collect(show, items, 0, AOS_PAD_MENU_MAX);
+    int sel = 0;
+    for (int i = 0; i < n; i++) {
+        if (items[i] == a->g_btn) sel = i;      /* the garage: buy / choose */
+    }
+    aos_pad_menu_set(m, items, n, sel);
+}
+
+/* Room for the pad's outline, which is drawn around a button and so out
+ * of the flex column or row holding it, which would clip it: those that
+ * stay put let their buttons draw outside them - and say they draw that
+ * much further themselves, or LVGL would not redraw them, nor the outline,
+ * where they end - and the lists that scroll (they have to clip) keep a
+ * margin inside as wide as the outline. */
+#define PAD_ROOM 12
+
+static void pad_room_cb(lv_event_t *e)
+{
+    lv_event_set_ext_draw_size(e, PAD_ROOM);
+}
+
+static void pad_room(lv_obj_t *o)
+{
+    uint32_t k = lv_obj_get_child_count(o);
+    for (uint32_t i = 0; i < k; i++) {
+        lv_obj_t *c = lv_obj_get_child(o, (int32_t)i);
+        if (lv_obj_has_flag(c, LV_OBJ_FLAG_CLICKABLE) || !lv_obj_get_child_count(c)) continue;
+        if (lv_obj_has_flag(c, LV_OBJ_FLAG_SCROLLABLE)) {
+            lv_obj_set_style_pad_hor(c, PAD_ROOM, 0);
+            lv_obj_set_style_pad_top(c, PAD_ROOM, 0);
+        } else {
+            lv_obj_add_flag(c, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
+            lv_obj_add_event_cb(c, pad_room_cb, LV_EVENT_REFR_EXT_DRAW_SIZE, NULL);
+            lv_obj_refresh_ext_draw_size(c);
+        }
+        pad_room(c);
+    }
+}
+
 static void show_panel(app_t *a, lv_obj_t *show)
 {
     for (int i = 0; i < 9; i++) {
@@ -851,6 +922,7 @@ static void show_panel(app_t *a, lv_obj_t *show)
         lv_obj_remove_flag(show, LV_OBJ_FLAG_HIDDEN);
         lv_obj_move_foreground(show);
     }
+    pad_menu_take(a, show);
 }
 
 /* --------------------------------------------------------------------------
@@ -1282,6 +1354,10 @@ static void finger_release(app_t *a, tb_finger_t *k)
     if (k->what == TK_PAUSE && dx * dx + dy * dy < 40 * 40) pause_show(a);
 }
 
+/* The stick this far from the middle (of 32767) is still the middle: cheap
+ * sticks rest a few thousand off. */
+#define PAD_DEAD 4000
+
 static void touch_poll(app_t *a, int dt_ms)
 {
     aos_touch_frame_t fr[16];
@@ -1369,11 +1445,31 @@ static void touch_poll(app_t *a, int dt_ms)
             break;
         }
     }
+    /* the pad: A the gas and B the brake; the stick past its dead zone is
+     * the wheel turned as far as the stick is pushed, a little gentler near
+     * the middle and by the sensitivity; the d-pad (or a stick inside the
+     * dead zone) turns it like the arrows, whatever the setting */
+    bool pad_left = false, pad_right = false;
+    if (live && a->pad.connected) {
+        if (aos_pad_held(&a->pad, AOS_PAD_A)) gas = true;
+        if (aos_pad_held(&a->pad, AOS_PAD_B)) brake = true;
+        int sx = a->pad.x;
+        if (sx > PAD_DEAD || sx < -PAD_DEAD) {
+            static const float gain[3] = { 0.8f, 1.0f, 1.25f };
+            float v = (float)(sx > 0 ? sx - PAD_DEAD : sx + PAD_DEAD) / (float)(32767 - PAD_DEAD);
+            steering = true;
+            steer = clampf(v * (0.4f + 0.6f * fabsf(v)) * gain[a->sens], -1.0f, 1.0f);
+        } else {
+            pad_left = aos_pad_held(&a->pad, AOS_PAD_LEFT);
+            pad_right = aos_pad_held(&a->pad, AOS_PAD_RIGHT);
+        }
+    }
     float dt = (float)dt_ms / 1000.0f;
-    if (a->ctl == CTL_ARROWS) {
+    if ((a->ctl == CTL_ARROWS || pad_left || pad_right) && !steering) {
         /* the arrows turn the wheel at a steady rate, faster back to centre */
         static const float rate[3] = { 3.0f, 4.5f, 6.5f };
-        float target = left == right ? 0.0f : (left ? -1.0f : 1.0f);
+        bool tl = left || pad_left, tr = right || pad_right;
+        float target = tl == tr ? 0.0f : (tl ? -1.0f : 1.0f);
         float r = rate[a->sens] * (target == 0.0f ? 1.6f : 1.0f);
         float d = target - steer, stp = r * dt;
         steer += d > stp ? stp : (d < -stp ? -stp : d);
@@ -2039,6 +2135,33 @@ static void boot_tick(app_t *a)
     }
 }
 
+static bool app_back(aos_app_t *self, void *inst);
+
+/* The pad outside the driving (touch_poll has that): START pauses a race
+ * and resumes it, and on the title it presses the button picked; the d-pad
+ * and A go through the panel's buttons; B is what the system's back is,
+ * which never leaves the app from here (app_back). */
+static void pad_ui(app_t *a)
+{
+    const aos_pad_t *p = &a->pad;
+    if (!p->pressed && !p->repeat) return;
+    if (a->closing || a->fitting || a->state == ST_BOOT) return;
+    if (a->state == ST_RACE && !a->paused) {
+        if (aos_pad_pressed(p, AOS_PAD_START)) pause_show(a);
+        return;
+    }
+    if (aos_pad_menu_step(&a->pmenu, p)) return;
+    if (aos_pad_pressed(p, AOS_PAD_START)) {
+        lv_obj_t *o = aos_pad_menu_selected(&a->pmenu);
+        if (a->state == ST_RACE) resume(a);
+        else if (a->state == ST_MENU && o) lv_obj_send_event(o, LV_EVENT_CLICKED, NULL);
+    } else if (aos_pad_pressed(p, AOS_PAD_B)) {
+        app_back(a->self, a);
+    } else if (a->state == ST_GARAGE && aos_pad_pressed(p, AOS_PAD_L | AOS_PAD_R)) {
+        garage_step(a, aos_pad_pressed(p, AOS_PAD_L) ? -1 : 1);
+    }
+}
+
 static void frame(lv_timer_t *t)
 {
     app_t *a = (app_t *)lv_timer_get_user_data(t);
@@ -2060,7 +2183,9 @@ static void frame(lv_timer_t *t)
     a->prev_ms = now;
     a->st_ms += (uint32_t)dt;
 
+    aos_pad_update(&a->pad, lv_tick_get());
     touch_poll(a, dt);
+    pad_ui(a);
     tb_audio_tick();
     if (a->link_on) tbl_tick(a);
 
@@ -2245,6 +2370,7 @@ static void *turbo_create(aos_app_t *self, lv_obj_t *root)
     build_garage(a, root);
     build_settings(a, root);
     build_misc(a, root);
+    for (int i = 0; i < 9; i++) pad_room(panel_of(a, i));
     tba_layout(a);
 
     lv_obj_remove_flag(root, LV_OBJ_FLAG_GESTURE_BUBBLE);
