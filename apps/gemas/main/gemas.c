@@ -41,6 +41,13 @@
  *     the app, and the board, the score and the level come back paused.
  *   - Everything the watch measured in its 44 px cell (gravity, the drag
  *     threshold, sparks, waves) is scaled by the cell.
+ *   - A USB gamepad plays it too: the d-pad walks a yellow frame over the
+ *     jewels (it shows on the first press and hides at the next touch), A
+ *     takes the jewel under it - the same white ring as a tap - and then a
+ *     direction swaps it with that neighbour (or A on it again, or B, lets
+ *     it go). START pauses and resumes; the menu, the pause and the game
+ *     over go through aos_pad_menu, with START on their main button and B
+ *     as "Seguir" in the pause.
  */
 #include "aos_app.h"
 #include "aos_hal.h"
@@ -48,6 +55,8 @@
 #include "aos_ui.h"
 #include "aos_theme.h"
 #include "aos_fonts.h"
+#include "aos_pad.h"
+#include "aos_pad_menu.h"
 
 #include "gm_art.h"
 #include "gm_board.h"
@@ -255,6 +264,14 @@ typedef struct {
     bool        drag_done;
     bool        want_exit;
     bool        exiting;        /* SALIR: back() must let the runtime close */
+
+    /* gamepad */
+    aos_pad_t      pad;
+    aos_pad_menu_t pmenu;       /* the buttons of the panel showing */
+    lv_obj_t      *pm_menu[4], *pm_pause[4], *pm_over[3];
+    lv_obj_t      *pad_ring;    /* the pad's frame over the board */
+    bool           cur_on;
+    int8_t         cur_r, cur_c;
 #ifdef AOS_SIM_BUILTIN
     int8_t      test_mv[4];     /* move served up by GEMAS_TEST, -1 = none */
 #endif
@@ -872,6 +889,9 @@ static void cascade_end(app_t *a)
  * -------------------------------------------------------------------------- */
 
 static void try_swap(app_t *a, int r1, int c1, int r2, int c2);
+static void game_start(app_t *a);
+static void pause_open(app_t *a);
+static void pad_step(app_t *a);
 
 /* easing: 0..256 -> 0..256 with a start and a stop */
 static int ease(int t)
@@ -1286,6 +1306,10 @@ static void frame(lv_timer_t *timer)
     }
 
     gm_snd_tick();
+    pad_step(a);
+    if (a->want_exit) {
+        return;                 /* "Salir" from the pad: the next frame leaves */
+    }
 
 #ifdef AOS_SIM_BUILTIN
     if (getenv("GEMAS_TRACE")) {
@@ -1405,6 +1429,9 @@ static void touch_event(lv_event_t *event)
         int r, c;
         a->pressing  = false;
         a->drag_done = false;
+        /* a finger again: the pad's frame steps aside */
+        a->cur_on = false;
+        lv_obj_add_flag(a->pad_ring, LV_OBJ_FLAG_HIDDEN);
         if (!point_to_cell(a, px, py, &r, &c) || a->state != ST_IDLE) {
             return;
         }
@@ -1453,6 +1480,108 @@ static void touch_event(lv_event_t *event)
         r2 += (dy > 0) ? 1 : -1;
     }
     try_swap(a, a->press_r, a->press_c, r2, c2);
+}
+
+/* The gamepad: the frame sits on the pad's cell, unless that jewel is taken,
+ * when the white ring alone says where it is. */
+static void pad_ring_show(app_t *a)
+{
+    bool show = a->cur_on && a->sel_r < 0 && a->state != ST_MENU &&
+                a->state != ST_PAUSE && a->state != ST_OVER;
+    if (!show) {
+        lv_obj_add_flag(a->pad_ring, LV_OBJ_FLAG_HIDDEN);
+        return;
+    }
+    lv_obj_set_pos(a->pad_ring, a->cur_c * a->cell, a->cur_r * a->cell);
+    lv_obj_remove_flag(a->pad_ring, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_move_foreground(a->pad_ring);
+}
+
+static void pad_board(app_t *a)
+{
+    const aos_pad_t *p = &a->pad;
+    uint32_t dirs = p->repeat & AOS_PAD_DIRS;
+    bool btn_a = aos_pad_pressed(p, AOS_PAD_A);
+    bool btn_b = aos_pad_pressed(p, AOS_PAD_B);
+    if (!dirs && !btn_a && !btn_b) {
+        return;
+    }
+    if (!a->cur_on) {
+        /* the first press only shows where the frame is */
+        a->cur_on = true;
+        pad_ring_show(a);
+        return;
+    }
+    int dr = (dirs & AOS_PAD_DOWN) ? 1 : (dirs & AOS_PAD_UP) ? -1 : 0;
+    int dc = dr ? 0 : (dirs & AOS_PAD_RIGHT) ? 1 : (dirs & AOS_PAD_LEFT) ? -1 : 0;
+
+    if (a->sel_r >= 0) {
+        /* a jewel taken: B or A lets it go, a direction swaps it there */
+        if (btn_a || btn_b) {
+            sel_clear(a);
+        } else if (dr || dc) {
+            int r2 = a->sel_r + dr, c2 = a->sel_c + dc;
+            if (r2 >= 0 && r2 < GM_N && c2 >= 0 && c2 < GM_N && a->state == ST_IDLE) {
+                a->cur_r = (int8_t)r2;
+                a->cur_c = (int8_t)c2;
+                try_swap(a, a->sel_r, a->sel_c, r2, c2);
+            }
+        }
+        pad_ring_show(a);
+        return;
+    }
+    if (btn_a) {
+        if (a->state == ST_IDLE) {
+            hint_clear(a);
+            sel_show(a, a->cur_r, a->cur_c);
+            gm_snd_play(GM_SFX_SELECT, 0);
+        }
+    } else if (dr || dc) {
+        int r = a->cur_r + dr, c = a->cur_c + dc;
+        if (r >= 0 && r < GM_N && c >= 0 && c < GM_N) {
+            a->cur_r = (int8_t)r;
+            a->cur_c = (int8_t)c;
+        }
+    }
+    pad_ring_show(a);
+}
+
+/* Once a frame. */
+static void pad_step(app_t *a)
+{
+    aos_pad_update(&a->pad, lv_tick_get());
+    if (!a->pad.pressed && !a->pad.repeat) {
+        return;
+    }
+    bool start = aos_pad_pressed(&a->pad, AOS_PAD_START);
+    switch (a->state) {
+    case ST_MENU:
+    case ST_OVER:
+        if (start) {
+            /* "Jugar" / "Otra vez" */
+            game_start(a);
+        } else {
+            aos_pad_menu_step(&a->pmenu, &a->pad);
+        }
+        break;
+    case ST_PAUSE:
+        if (start || aos_pad_pressed(&a->pad, AOS_PAD_B)) {
+            a->state = a->resume;
+            panel_hide_all(a);
+            pad_ring_show(a);
+        } else {
+            aos_pad_menu_step(&a->pmenu, &a->pad);
+        }
+        break;
+    default:
+        if (start) {
+            pause_open(a);
+            pad_ring_show(a);
+        } else {
+            pad_board(a);
+        }
+        break;
+    }
 }
 
 /* With AOS_APP_FLAG_NO_SWIPE the back gesture is handled by the app. While
@@ -1589,6 +1718,7 @@ static lv_obj_t *make_text(lv_obj_t *parent, const char *text,
 
 static void panel_hide_all(app_t *a)
 {
+    aos_pad_menu_clear(&a->pmenu);
     lv_obj_t *const panels[] = { a->menu, a->pause, a->over };
     for (unsigned i = 0; i < sizeof(panels) / sizeof(panels[0]); i++) {
         if (panels[i]) {
@@ -1602,6 +1732,18 @@ static void panel_show(app_t *a, lv_obj_t *panel)
     panel_hide_all(a);
     lv_obj_remove_flag(panel, LV_OBJ_FLAG_HIDDEN);
     lv_obj_move_foreground(panel);
+    if (a->pad_ring) {
+        lv_obj_add_flag(a->pad_ring, LV_OBJ_FLAG_HIDDEN);
+    }
+
+    /* the pad goes through its buttons, from the main one */
+    if (panel == a->menu) {
+        aos_pad_menu_set(&a->pmenu, a->pm_menu, 4, 3);
+    } else if (panel == a->pause) {
+        aos_pad_menu_set(&a->pmenu, a->pm_pause, 4, 0);
+    } else if (panel == a->over) {
+        aos_pad_menu_set(&a->pmenu, a->pm_over, 3, 0);
+    }
 }
 
 /* --------------------------------------------------------------------------
@@ -1757,6 +1899,7 @@ static void game_start(app_t *a)
     game_show(a);
     gm_snd_play(GM_SFX_START, 0);
     a->state = ST_FALL;
+    pad_ring_show(a);
 }
 
 static void go_menu(app_t *a)
@@ -1826,6 +1969,7 @@ static void cb_resume(lv_event_t *e)
     app_t *a = (app_t *)lv_event_get_user_data(e);
     a->state = a->resume;
     panel_hide_all(a);
+    pad_ring_show(a);
 }
 
 static void cb_retry(lv_event_t *e)  { game_start((app_t *)lv_event_get_user_data(e)); }
@@ -2175,7 +2319,11 @@ static void build_menu(app_t *a, lv_obj_t *root)
     lv_obj_t *play = make_box(p);
     lv_obj_set_size(play, ws[B_PLAY], hs[B_PLAY]);
     lv_obj_set_pos(play, xs[B_PLAY], ys[B_PLAY]);
-    make_button(play, _("Jugar"), 0, 0, ws[B_PLAY], BTN_H, 0x30D158, aos_font_large, cb_play, a);
+    a->pm_menu[0] = a->chip_mode;
+    a->pm_menu[1] = a->chip_diff;
+    a->pm_menu[2] = a->chip_sfx;
+    a->pm_menu[3] = make_button(play, _("Jugar"), 0, 0, ws[B_PLAY], BTN_H, 0x30D158,
+                                aos_font_large, cb_play, a);
     a->lbl_best = make_text(play, "", aos_font_body, 0x8E8E93, BTN_H + 24);
 }
 
@@ -2189,12 +2337,16 @@ static void build_pause(app_t *a)
     a->pause = lv_obj_get_parent(p);
 
     make_text(p, _("Pausa"), aos_font_huge, 0xFFFFFF, 36);
-    make_button(p, _("Seguir"), DLG_IN, y, iw, BTN_H, 0x30D158, aos_font_large, cb_resume, a);
+    a->pm_pause[0] = make_button(p, _("Seguir"), DLG_IN, y, iw, BTN_H, 0x30D158,
+                                 aos_font_large, cb_resume, a);
     y += BTN_H + 16;
     a->chip_sfx2 = make_chip(p, _("Sonido"), DLG_IN, y, iw, 0x2C2C2E, cb_sfx, a);
+    a->pm_pause[1] = a->chip_sfx2;
     y += ROW_H + 16;
-    make_button(p, _("Menú"),  DLG_IN, y, hb, ROW_H, 0x0A84FF, aos_font_title, cb_menu, a);
-    make_button(p, _("Salir"), DLG_IN + hb + 16, y, hb, ROW_H, 0xFF453A, aos_font_title, cb_exit, a);
+    a->pm_pause[2] = make_button(p, _("Menú"),  DLG_IN, y, hb, ROW_H, 0x0A84FF,
+                                 aos_font_title, cb_menu, a);
+    a->pm_pause[3] = make_button(p, _("Salir"), DLG_IN + hb + 16, y, hb, ROW_H, 0xFF453A,
+                                 aos_font_title, cb_exit, a);
 }
 
 static int over_score_y(void)
@@ -2215,10 +2367,13 @@ static void build_over(app_t *a)
     a->lbl_over_score = make_text(p, "", &aos_inter_num_144, 0xFFFFFF, over_score_y());
     a->lbl_over_info  = make_text(p, "", aos_font_body, 0x8E8E93, y_info);
 
-    make_button(p, _("Otra vez"), DLG_IN, y_btn, iw, BTN_H, 0x30D158, aos_font_large, cb_retry, a);
+    a->pm_over[0] = make_button(p, _("Otra vez"), DLG_IN, y_btn, iw, BTN_H, 0x30D158,
+                                aos_font_large, cb_retry, a);
     int y = y_btn + BTN_H + 16;
-    make_button(p, _("Menú"),  DLG_IN, y, hb, ROW_H, 0x0A84FF, aos_font_title, cb_menu, a);
-    make_button(p, _("Salir"), DLG_IN + hb + 16, y, hb, ROW_H, 0xFF453A, aos_font_title, cb_exit, a);
+    a->pm_over[1] = make_button(p, _("Menú"),  DLG_IN, y, hb, ROW_H, 0x0A84FF,
+                                aos_font_title, cb_menu, a);
+    a->pm_over[2] = make_button(p, _("Salir"), DLG_IN + hb + 16, y, hb, ROW_H, 0xFF453A,
+                                aos_font_title, cb_exit, a);
 }
 
 /* --------------------------------------------------------------------------
@@ -2375,6 +2530,14 @@ static void *gemas_create(aos_app_t *self, lv_obj_t *root)
     lv_obj_set_style_border_color(a->sel_ring, lv_color_hex(0xFFFFFF), 0);
     lv_obj_add_flag(a->sel_ring, LV_OBJ_FLAG_HIDDEN);
 
+    a->pad_ring = make_box(a->board);
+    lv_obj_set_size(a->pad_ring, a->cell, a->cell);
+    lv_obj_set_style_radius(a->pad_ring, a->cell / 4, 0);
+    lv_obj_set_style_border_width(a->pad_ring, 5, 0);
+    lv_obj_set_style_border_color(a->pad_ring, lv_color_hex(0xFFD60A), 0);
+    lv_obj_add_flag(a->pad_ring, LV_OBJ_FLAG_HIDDEN);
+    a->cur_r = a->cur_c = GM_N / 2;
+
     gm_fx_init(&a->fx, root, a->cell * 256 / GM_CELL_REF);
     gm_fx_set_area(&a->fx, a->bx, a->by, a->board_px, a->board_px, 0);
 
@@ -2495,6 +2658,7 @@ static void *gemas_create(aos_app_t *self, lv_obj_t *root)
         }
     }
 #endif
+    aos_pad_reset(&a->pad, lv_tick_get());
     a->timer = lv_timer_create(frame, frame_ms, a);
     return a;
 }

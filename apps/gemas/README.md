@@ -49,9 +49,15 @@ precisely for that: the back gesture only counts in the menu.
 If the move forms nothing, the jewels return by themselves. If the board runs
 out of possible moves, it shuffles itself.
 
-It is played by touch alone (the board has no buttons and no motion sensor):
-you pause with the round button in the HUD. After six seconds
-without a touch, the game pulses two jewels that would form a line.
+It is played by touch (the board has no buttons and no motion sensor): you
+pause with the round button in the HUD. After six seconds without a touch,
+the game pulses two jewels that would form a line.
+
+A USB gamepad plays it too: the d-pad walks a yellow frame over the jewels,
+A takes one and a direction swaps it with that neighbour (A again or B lets
+it go), START pauses and resumes. The menu, the pause and the game over are
+walked with the d-pad and A; START is their main button, B resumes from the
+pause. The frame only shows once the pad is used, and a touch hides it.
 
 ## The special jewels
 
