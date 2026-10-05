@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
  * Mas 152 funciones de libc/libm agregadas a mano.
- * Total: 3223 simbolos.
+ * Total: 3274 simbolos.
  */
 
 #include <stddef.h>
@@ -473,6 +473,7 @@ extern int aos_hal_rec_status;
 extern int aos_hal_rec_stop;
 extern int aos_hal_retro_alloc;
 extern int aos_hal_retro_free;
+extern int aos_hal_retro_hw_reload;
 extern int aos_hal_retro_scale;
 extern int aos_hal_rtc_alarm_clear;
 extern int aos_hal_rtc_alarm_set;
@@ -570,6 +571,8 @@ extern int aos_hal_usb_net_up;
 extern int aos_hal_usb_restore;
 extern int aos_hal_usb_serial_close;
 extern int aos_hal_usb_serial_count;
+extern int aos_hal_usb_serial_ids;
+extern int aos_hal_usb_serial_lines;
 extern int aos_hal_usb_serial_name;
 extern int aos_hal_usb_serial_open;
 extern int aos_hal_usb_serial_read;
@@ -647,6 +650,16 @@ extern int aos_inter_num_144;
 extern int aos_inter_num_96;
 extern int aos_inter_sb_20;
 extern int aos_io_arg_int;
+extern int aos_io_be_can_close;
+extern int aos_io_be_can_filter;
+extern int aos_io_be_can_open;
+extern int aos_io_be_can_recover;
+extern int aos_io_be_can_recv;
+extern int aos_io_be_can_send;
+extern int aos_io_be_can_status;
+extern int aos_io_be_dac_close;
+extern int aos_io_be_dac_open;
+extern int aos_io_be_dac_set;
 extern int aos_io_be_gpio_get;
 extern int aos_io_be_gpio_mode;
 extern int aos_io_be_gpio_set;
@@ -654,12 +667,21 @@ extern int aos_io_be_i2c_close;
 extern int aos_io_be_i2c_open;
 extern int aos_io_be_i2c_probe;
 extern int aos_io_be_i2c_xfer;
+extern int aos_io_be_ir_carrier;
+extern int aos_io_be_ir_close;
+extern int aos_io_be_ir_open;
+extern int aos_io_be_ir_read;
+extern int aos_io_be_ir_send;
 extern int aos_io_be_ow_close;
 extern int aos_io_be_ow_open;
 extern int aos_io_be_ow_read;
 extern int aos_io_be_ow_reset;
 extern int aos_io_be_ow_search;
 extern int aos_io_be_ow_write;
+extern int aos_io_be_pwm_close;
+extern int aos_io_be_pwm_open;
+extern int aos_io_be_pwm_set_duty;
+extern int aos_io_be_pwm_set_freq;
 extern int aos_io_be_spi_close;
 extern int aos_io_be_spi_open;
 extern int aos_io_be_spi_set_clock;
@@ -675,7 +697,18 @@ extern int aos_io_be_uart_read;
 extern int aos_io_be_uart_set_baud;
 extern int aos_io_be_uart_set_format;
 extern int aos_io_be_uart_write;
+extern int aos_io_can_close;
+extern int aos_io_can_filter;
+extern int aos_io_can_open;
+extern int aos_io_can_recover;
+extern int aos_io_can_recv;
+extern int aos_io_can_send;
+extern int aos_io_can_status;
 extern int aos_io_claim;
+extern int aos_io_dac_close;
+extern int aos_io_dac_level;
+extern int aos_io_dac_open;
+extern int aos_io_dac_set;
 extern int aos_io_ds18b20_convert_all;
 extern int aos_io_ds18b20_read;
 extern int aos_io_ds18b20_set_bits;
@@ -688,6 +721,12 @@ extern int aos_io_i2c_guess;
 extern int aos_io_i2c_open;
 extern int aos_io_i2c_probe;
 extern int aos_io_i2c_xfer;
+extern int aos_io_ir_close;
+extern int aos_io_ir_read;
+extern int aos_io_ir_rx_open;
+extern int aos_io_ir_send;
+extern int aos_io_ir_set_carrier;
+extern int aos_io_ir_tx_open;
 extern int aos_io_load;
 extern int aos_io_module_at;
 extern int aos_io_module_count;
@@ -708,6 +747,16 @@ extern int aos_io_port_at;
 extern int aos_io_port_count;
 extern int aos_io_port_find;
 extern int aos_io_port_lines;
+extern int aos_io_pwm_bits;
+extern int aos_io_pwm_close;
+extern int aos_io_pwm_duty;
+extern int aos_io_pwm_fade;
+extern int aos_io_pwm_freq;
+extern int aos_io_pwm_open;
+extern int aos_io_pwm_set_duty;
+extern int aos_io_pwm_set_freq;
+extern int aos_io_pwm_set_invert;
+extern int aos_io_pwm_set_pulse_us;
 extern int aos_io_release;
 extern int aos_io_release_owner;
 extern int aos_io_spi_clock;
@@ -726,6 +775,8 @@ extern int aos_io_strip_type_name;
 extern int aos_io_strip_type_rgbw;
 extern int aos_io_uart_close;
 extern int aos_io_uart_desc;
+extern int aos_io_uart_dtr_rts;
+extern int aos_io_uart_is_usb_jtag;
 extern int aos_io_uart_lines;
 extern int aos_io_uart_open;
 extern int aos_io_uart_read;
@@ -3699,6 +3750,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_rec_stop),
     ESP_ELFSYM_EXPORT(aos_hal_retro_alloc),
     ESP_ELFSYM_EXPORT(aos_hal_retro_free),
+    ESP_ELFSYM_EXPORT(aos_hal_retro_hw_reload),
     ESP_ELFSYM_EXPORT(aos_hal_retro_scale),
     ESP_ELFSYM_EXPORT(aos_hal_rtc_alarm_clear),
     ESP_ELFSYM_EXPORT(aos_hal_rtc_alarm_set),
@@ -3796,6 +3848,8 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_usb_restore),
     ESP_ELFSYM_EXPORT(aos_hal_usb_serial_close),
     ESP_ELFSYM_EXPORT(aos_hal_usb_serial_count),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_serial_ids),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_serial_lines),
     ESP_ELFSYM_EXPORT(aos_hal_usb_serial_name),
     ESP_ELFSYM_EXPORT(aos_hal_usb_serial_open),
     ESP_ELFSYM_EXPORT(aos_hal_usb_serial_read),
@@ -3873,6 +3927,16 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_inter_num_96),
     ESP_ELFSYM_EXPORT(aos_inter_sb_20),
     ESP_ELFSYM_EXPORT(aos_io_arg_int),
+    ESP_ELFSYM_EXPORT(aos_io_be_can_close),
+    ESP_ELFSYM_EXPORT(aos_io_be_can_filter),
+    ESP_ELFSYM_EXPORT(aos_io_be_can_open),
+    ESP_ELFSYM_EXPORT(aos_io_be_can_recover),
+    ESP_ELFSYM_EXPORT(aos_io_be_can_recv),
+    ESP_ELFSYM_EXPORT(aos_io_be_can_send),
+    ESP_ELFSYM_EXPORT(aos_io_be_can_status),
+    ESP_ELFSYM_EXPORT(aos_io_be_dac_close),
+    ESP_ELFSYM_EXPORT(aos_io_be_dac_open),
+    ESP_ELFSYM_EXPORT(aos_io_be_dac_set),
     ESP_ELFSYM_EXPORT(aos_io_be_gpio_get),
     ESP_ELFSYM_EXPORT(aos_io_be_gpio_mode),
     ESP_ELFSYM_EXPORT(aos_io_be_gpio_set),
@@ -3880,12 +3944,21 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_be_i2c_open),
     ESP_ELFSYM_EXPORT(aos_io_be_i2c_probe),
     ESP_ELFSYM_EXPORT(aos_io_be_i2c_xfer),
+    ESP_ELFSYM_EXPORT(aos_io_be_ir_carrier),
+    ESP_ELFSYM_EXPORT(aos_io_be_ir_close),
+    ESP_ELFSYM_EXPORT(aos_io_be_ir_open),
+    ESP_ELFSYM_EXPORT(aos_io_be_ir_read),
+    ESP_ELFSYM_EXPORT(aos_io_be_ir_send),
     ESP_ELFSYM_EXPORT(aos_io_be_ow_close),
     ESP_ELFSYM_EXPORT(aos_io_be_ow_open),
     ESP_ELFSYM_EXPORT(aos_io_be_ow_read),
     ESP_ELFSYM_EXPORT(aos_io_be_ow_reset),
     ESP_ELFSYM_EXPORT(aos_io_be_ow_search),
     ESP_ELFSYM_EXPORT(aos_io_be_ow_write),
+    ESP_ELFSYM_EXPORT(aos_io_be_pwm_close),
+    ESP_ELFSYM_EXPORT(aos_io_be_pwm_open),
+    ESP_ELFSYM_EXPORT(aos_io_be_pwm_set_duty),
+    ESP_ELFSYM_EXPORT(aos_io_be_pwm_set_freq),
     ESP_ELFSYM_EXPORT(aos_io_be_spi_close),
     ESP_ELFSYM_EXPORT(aos_io_be_spi_open),
     ESP_ELFSYM_EXPORT(aos_io_be_spi_set_clock),
@@ -3901,7 +3974,18 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_be_uart_set_baud),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_set_format),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_write),
+    ESP_ELFSYM_EXPORT(aos_io_can_close),
+    ESP_ELFSYM_EXPORT(aos_io_can_filter),
+    ESP_ELFSYM_EXPORT(aos_io_can_open),
+    ESP_ELFSYM_EXPORT(aos_io_can_recover),
+    ESP_ELFSYM_EXPORT(aos_io_can_recv),
+    ESP_ELFSYM_EXPORT(aos_io_can_send),
+    ESP_ELFSYM_EXPORT(aos_io_can_status),
     ESP_ELFSYM_EXPORT(aos_io_claim),
+    ESP_ELFSYM_EXPORT(aos_io_dac_close),
+    ESP_ELFSYM_EXPORT(aos_io_dac_level),
+    ESP_ELFSYM_EXPORT(aos_io_dac_open),
+    ESP_ELFSYM_EXPORT(aos_io_dac_set),
     ESP_ELFSYM_EXPORT(aos_io_ds18b20_convert_all),
     ESP_ELFSYM_EXPORT(aos_io_ds18b20_read),
     ESP_ELFSYM_EXPORT(aos_io_ds18b20_set_bits),
@@ -3914,6 +3998,12 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_i2c_open),
     ESP_ELFSYM_EXPORT(aos_io_i2c_probe),
     ESP_ELFSYM_EXPORT(aos_io_i2c_xfer),
+    ESP_ELFSYM_EXPORT(aos_io_ir_close),
+    ESP_ELFSYM_EXPORT(aos_io_ir_read),
+    ESP_ELFSYM_EXPORT(aos_io_ir_rx_open),
+    ESP_ELFSYM_EXPORT(aos_io_ir_send),
+    ESP_ELFSYM_EXPORT(aos_io_ir_set_carrier),
+    ESP_ELFSYM_EXPORT(aos_io_ir_tx_open),
     ESP_ELFSYM_EXPORT(aos_io_load),
     ESP_ELFSYM_EXPORT(aos_io_module_at),
     ESP_ELFSYM_EXPORT(aos_io_module_count),
@@ -3934,6 +4024,16 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_port_count),
     ESP_ELFSYM_EXPORT(aos_io_port_find),
     ESP_ELFSYM_EXPORT(aos_io_port_lines),
+    ESP_ELFSYM_EXPORT(aos_io_pwm_bits),
+    ESP_ELFSYM_EXPORT(aos_io_pwm_close),
+    ESP_ELFSYM_EXPORT(aos_io_pwm_duty),
+    ESP_ELFSYM_EXPORT(aos_io_pwm_fade),
+    ESP_ELFSYM_EXPORT(aos_io_pwm_freq),
+    ESP_ELFSYM_EXPORT(aos_io_pwm_open),
+    ESP_ELFSYM_EXPORT(aos_io_pwm_set_duty),
+    ESP_ELFSYM_EXPORT(aos_io_pwm_set_freq),
+    ESP_ELFSYM_EXPORT(aos_io_pwm_set_invert),
+    ESP_ELFSYM_EXPORT(aos_io_pwm_set_pulse_us),
     ESP_ELFSYM_EXPORT(aos_io_release),
     ESP_ELFSYM_EXPORT(aos_io_release_owner),
     ESP_ELFSYM_EXPORT(aos_io_spi_clock),
@@ -3952,6 +4052,8 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_strip_type_rgbw),
     ESP_ELFSYM_EXPORT(aos_io_uart_close),
     ESP_ELFSYM_EXPORT(aos_io_uart_desc),
+    ESP_ELFSYM_EXPORT(aos_io_uart_dtr_rts),
+    ESP_ELFSYM_EXPORT(aos_io_uart_is_usb_jtag),
     ESP_ELFSYM_EXPORT(aos_io_uart_lines),
     ESP_ELFSYM_EXPORT(aos_io_uart_open),
     ESP_ELFSYM_EXPORT(aos_io_uart_read),

@@ -103,6 +103,63 @@ bool aos_io_be_strip_open(aos_io_strip_t *s);
 bool aos_io_be_strip_send(aos_io_strip_t *s);       /* s->wire, waits for the end */
 void aos_io_be_strip_close(aos_io_strip_t *s);
 
+/* PWM, analog out, IR and CAN (aos_io_signal.c): the shared part checks,
+ * claims the pins and keeps the numbers; the backends move the hardware. */
+struct aos_io_pwm {
+    int8_t   gpio;
+    char     owner[24];
+    uint32_t freq;              /* actual */
+    uint8_t  bits;
+    float    duty;              /* as asked, before invert */
+    bool     invert;
+    void    *be;
+};
+bool aos_io_be_pwm_open(aos_io_pwm_t *p, uint32_t freq_hz);    /* sets freq and bits */
+bool aos_io_be_pwm_set_freq(aos_io_pwm_t *p, uint32_t freq_hz);
+bool aos_io_be_pwm_set_duty(aos_io_pwm_t *p, float duty, uint32_t fade_ms);  /* already inverted */
+void aos_io_be_pwm_close(aos_io_pwm_t *p);
+
+struct aos_io_dac {
+    int8_t gpio;
+    char   owner[24];
+    float  level;
+    void  *be;
+};
+bool aos_io_be_dac_open(aos_io_dac_t *d);
+bool aos_io_be_dac_set(aos_io_dac_t *d, float level);
+void aos_io_be_dac_close(aos_io_dac_t *d);
+
+struct aos_io_ir {
+    int8_t   gpio;
+    bool     tx;
+    char     owner[24];
+    uint32_t gap_us;
+    uint32_t carrier_hz;
+    uint8_t  duty;
+    void    *be;
+};
+bool aos_io_be_ir_open(aos_io_ir_t *ir);
+int  aos_io_be_ir_read(aos_io_ir_t *ir, uint16_t *us, int max, int timeout_ms);
+bool aos_io_be_ir_carrier(aos_io_ir_t *ir);
+bool aos_io_be_ir_send(aos_io_ir_t *ir, const uint16_t *us, int n);
+void aos_io_be_ir_close(aos_io_ir_t *ir);
+
+struct aos_io_can {
+    int8_t   tx_gpio, rx_gpio;
+    char     owner[24];
+    uint32_t bitrate;
+    aos_can_mode_t mode;
+    uint32_t received, sent, dropped;
+    void    *be;
+};
+bool aos_io_be_can_open(aos_io_can_t *c);
+bool aos_io_be_can_filter(aos_io_can_t *c, uint32_t id, uint32_t mask, bool ext);
+bool aos_io_be_can_send(aos_io_can_t *c, const aos_can_frame_t *f, int timeout_ms);
+int  aos_io_be_can_recv(aos_io_can_t *c, aos_can_frame_t *f, int timeout_ms);
+bool aos_io_be_can_status(aos_io_can_t *c, aos_can_status_t *st);
+bool aos_io_be_can_recover(aos_io_can_t *c);
+void aos_io_be_can_close(aos_io_can_t *c);
+
 bool aos_io_be_gpio_mode(int gpio, aos_gpio_mode_t mode);
 int  aos_io_be_gpio_get(int gpio);
 bool aos_io_be_gpio_set(int gpio, int level);

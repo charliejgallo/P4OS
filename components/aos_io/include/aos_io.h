@@ -291,6 +291,100 @@ const char *aos_io_strip_type_name(aos_strip_type_t t);   /* "WS2812B" */
 const char *aos_io_strip_order_name(aos_strip_order_t o); /* "GRB" */
 bool aos_io_strip_type_rgbw(aos_strip_type_t t);
 
+/* ---- PWM (any usable GPIO of the header) ----
+ *
+ * The LEDC: seven channels (the eighth drives the backlight), 1 Hz to
+ * 40 MHz. The duty resolution falls as the frequency rises - 20 bits up to
+ * 76 Hz, 14 at 4.8 kHz, 10 at 78 kHz, 2 at 20 MHz - and _bits() says what
+ * a channel has. Channels on the same frequency share a timer; there are
+ * three, so three different frequencies at once at most (open fails past
+ * that). A servo is 50 Hz and a pulse width: set_pulse_us(1500) centres
+ * most. fade() ramps in hardware and returns at once. Invert flips the
+ * output, as for a LED to 3V3 through the pin. */
+typedef struct aos_io_pwm aos_io_pwm_t;
+aos_io_pwm_t *aos_io_pwm_open(int gpio, uint32_t freq_hz, const char *owner);
+bool     aos_io_pwm_set_freq(aos_io_pwm_t *p, uint32_t freq_hz);    /* keeps the duty */
+uint32_t aos_io_pwm_freq(const aos_io_pwm_t *p);                    /* what the hardware gives */
+int      aos_io_pwm_bits(const aos_io_pwm_t *p);
+bool     aos_io_pwm_set_duty(aos_io_pwm_t *p, float duty);          /* 0..1 */
+float    aos_io_pwm_duty(const aos_io_pwm_t *p);
+bool     aos_io_pwm_set_pulse_us(aos_io_pwm_t *p, float us);        /* the high time of each period */
+bool     aos_io_pwm_fade(aos_io_pwm_t *p, float duty, uint32_t ms);
+bool     aos_io_pwm_set_invert(aos_io_pwm_t *p, bool invert);
+void     aos_io_pwm_close(aos_io_pwm_t *p);
+
+/* ---- an analog level out (any usable GPIO of the header) ----
+ *
+ * The P4 has no DAC. The sigma-delta modulator puts out a pulse density
+ * (1 MHz) that an RC low-pass turns into a voltage: 1 kOhm and 1 uF give
+ * 0..3.3 V with a few mV of ripple and settle in ~5 ms. 256 steps, eight
+ * channels. Not for audio. */
+typedef struct aos_io_dac aos_io_dac_t;
+aos_io_dac_t *aos_io_dac_open(int gpio, const char *owner);
+bool  aos_io_dac_set(aos_io_dac_t *d, float level);     /* 0..1 of 3.3 V */
+float aos_io_dac_level(const aos_io_dac_t *d);
+void  aos_io_dac_close(aos_io_dac_t *d);
+
+/* ---- infrared, raw (the RMT; any usable GPIO of the header) ----
+ *
+ * Receive with a demodulating receiver (TSOP38238, VS1838B and kin: OUT
+ * low while it sees the carrier). read() waits for one frame and gives its
+ * marks and spaces in microseconds, mark first; a frame ends with a space
+ * longer than gap_us (open's argument, 0 = 20 ms). A glitch under 1 us is
+ * dropped. Up to AOS_IR_MAX_DURATIONS a frame.
+ *
+ * Send through an IR LED and a transistor (the pin drives the base or the
+ * gate, never the LED directly): send() puts out marks as the carrier
+ * (38 kHz and 33 % unless set_carrier says otherwise) and spaces as
+ * nothing, mark first, and returns when the frame is out. 0 Hz sends the
+ * marks as plain high levels, for a wired IR input. A receiver and a
+ * sender can be open at once, on two pins. */
+#define AOS_IR_MAX_DURATIONS 1024
+typedef struct aos_io_ir aos_io_ir_t;
+aos_io_ir_t *aos_io_ir_rx_open(int gpio, uint32_t gap_us, const char *owner);
+int  aos_io_ir_read(aos_io_ir_t *ir, uint16_t *us, int max, int timeout_ms);   /* durations, 0 none, -1 error */
+aos_io_ir_t *aos_io_ir_tx_open(int gpio, const char *owner);
+bool aos_io_ir_set_carrier(aos_io_ir_t *ir, uint32_t hz, int duty_percent);
+bool aos_io_ir_send(aos_io_ir_t *ir, const uint16_t *us, int n);
+void aos_io_ir_close(aos_io_ir_t *ir);
+
+/* ---- CAN (TWAI; any two usable GPIOs of the header) ----
+ *
+ * The P4's TWAI controllers, classic CAN 2.0 (11- and 29-bit ids, up to 8
+ * bytes), 25 kbit/s to 1 Mbit/s. On a real bus a 3.3 V transceiver goes
+ * between the pins and CANH/CANL (SN65HVD230 and kin; the header has no
+ * 5 V-tolerant pins). Modes:
+ *   NORMAL     takes part: acknowledges, sends
+ *   LISTEN     only listens: never acknowledges or sends (a car's bus)
+ *   SELFTEST   sends without needing an acknowledgement and receives its
+ *              own frames: tx_gpio == rx_gpio works with nothing wired
+ * recv() returns frames in the order they came, with a microsecond time
+ * stamp; a queue of 64 in between drops the oldest. A filter keeps the
+ * frames whose id matches id under mask (mask 0: all). */
+typedef enum { AOS_CAN_NORMAL = 0, AOS_CAN_LISTEN, AOS_CAN_SELFTEST } aos_can_mode_t;
+typedef struct {
+    uint32_t id;
+    bool     ext;               /* 29-bit id */
+    bool     rtr;               /* remote frame: no data, len is what it asks for */
+    uint8_t  len;               /* 0..8 */
+    uint8_t  data[8];
+    uint64_t t_us;              /* when it came (recv) */
+} aos_can_frame_t;
+typedef struct {
+    const char *state;          /* "active", "warning", "passive", "bus_off" (for the app to translate) */
+    uint16_t tx_errors, rx_errors;
+    uint32_t bus_errors;        /* since open */
+    uint32_t received, sent, dropped;
+} aos_can_status_t;
+typedef struct aos_io_can aos_io_can_t;
+aos_io_can_t *aos_io_can_open(int tx_gpio, int rx_gpio, uint32_t bitrate, aos_can_mode_t mode, const char *owner);
+bool aos_io_can_filter(aos_io_can_t *c, uint32_t id, uint32_t mask, bool ext);
+bool aos_io_can_send(aos_io_can_t *c, const aos_can_frame_t *f, int timeout_ms);
+int  aos_io_can_recv(aos_io_can_t *c, aos_can_frame_t *f, int timeout_ms);     /* 1, 0 none, -1 closed */
+bool aos_io_can_status(aos_io_can_t *c, aos_can_status_t *st);
+bool aos_io_can_recover(aos_io_can_t *c);        /* out of bus_off */
+void aos_io_can_close(aos_io_can_t *c);
+
 /* ---- the serial capture service (aos_serial.c) ----
  *
  * Up to two channels read a UART port into a ring of lines in the

@@ -12,6 +12,12 @@
  *                                      candidates, how each port went
  *   GET  /api/sensors/hist?i=&k=       value k of sensor i, the last five minutes
  *   POST /api/sensors/rescan
+ *   POST /api/expansion/selftest?gpio=&gpio2=
+ *                                      PWM, the analog level, IR and CAN tried
+ *                                      on a free pin with nothing wired: CAN in
+ *                                      its self test, IR out (and in on gpio2
+ *                                      when the two are jumpered), what each
+ *                                      answered. For the developer.
  *
  * The words are Spanish, like the rest of the portal (the Módulos app says
  * the same through the catalogs).
@@ -395,6 +401,97 @@ static void api_hist(aos_httpd_req_t *r)
     free(h);
 }
 
+/* The workshop's drivers on the board, one after the other, each opened
+ * and closed again: what an app will meet, without the app. */
+static void api_selftest(aos_httpd_req_t *r)
+{
+    static const char OWNER[] = "prueba";
+    int g = (int)aos_httpd_query_int(r, "gpio", 28), g2 = (int)aos_httpd_query_int(r, "gpio2", -1);
+    cJSON *o = cJSON_CreateObject();
+    cJSON_AddNumberToObject(o, "gpio", g);
+
+    cJSON *pw = cJSON_AddObjectToObject(o, "pwm");
+    aos_io_pwm_t *p = aos_io_pwm_open(g, 1000, OWNER);
+    cJSON_AddBoolToObject(pw, "open", p != NULL);
+    if (p) {
+        cJSON_AddNumberToObject(pw, "hz_1000", aos_io_pwm_freq(p));
+        cJSON_AddNumberToObject(pw, "bits_1000", aos_io_pwm_bits(p));
+        cJSON_AddBoolToObject(pw, "duty", aos_io_pwm_set_duty(p, 0.5f));
+        cJSON_AddBoolToObject(pw, "fade", aos_io_pwm_fade(p, 0.1f, 50));
+        aos_hal_sleep_ms(60);
+        cJSON_AddBoolToObject(pw, "set_freq", aos_io_pwm_set_freq(p, 50));
+        cJSON_AddNumberToObject(pw, "hz_50", aos_io_pwm_freq(p));
+        cJSON_AddNumberToObject(pw, "bits_50", aos_io_pwm_bits(p));
+        cJSON_AddBoolToObject(pw, "servo", aos_io_pwm_set_pulse_us(p, 1500));
+        cJSON_AddNumberToObject(pw, "servo_duty", aos_io_pwm_duty(p));
+        aos_io_pwm_close(p);
+    }
+
+    cJSON *da = cJSON_AddObjectToObject(o, "dac");
+    aos_io_dac_t *d = aos_io_dac_open(g, OWNER);
+    cJSON_AddBoolToObject(da, "open", d != NULL);
+    if (d) {
+        cJSON_AddBoolToObject(da, "set", aos_io_dac_set(d, 0.5f));
+        aos_io_dac_close(d);
+    }
+
+    cJSON *ir = cJSON_AddObjectToObject(o, "ir");
+    aos_io_ir_t *rx = g2 >= 0 ? aos_io_ir_rx_open(g2, 0, OWNER) : NULL;
+    aos_io_ir_t *tx = aos_io_ir_tx_open(g, OWNER);
+    cJSON_AddBoolToObject(ir, "tx_open", tx != NULL);
+    if (g2 >= 0) cJSON_AddBoolToObject(ir, "rx_open", rx != NULL);
+    if (tx) {
+        /* NEC, address 0x04 command 0x08, sent as plain levels so a jumper
+         * carries it to the input */
+        uint16_t f[67];
+        int n = 0;
+        f[n++] = 9000; f[n++] = 4500;
+        uint32_t word = 0x04u | 0xFBu << 8 | 0x08u << 16 | 0xF7u << 24;
+        for (int b = 0; b < 32; b++) { f[n++] = 560; f[n++] = (word >> b & 1) ? 1690 : 560; }
+        f[n++] = 560;
+        if (rx) aos_io_ir_set_carrier(tx, 0, 50);
+        uint64_t t0 = aos_hal_uptime_ms();
+        cJSON_AddBoolToObject(ir, "send", aos_io_ir_send(tx, f, n));
+        cJSON_AddNumberToObject(ir, "send_ms", (double)(aos_hal_uptime_ms() - t0));
+        if (rx) {
+            uint16_t *got = malloc(sizeof(uint16_t) * 128);
+            int k = got ? aos_io_ir_read(rx, got, 128, 200) : -1;
+            cJSON_AddNumberToObject(ir, "read", k);
+            if (k > 1) { cJSON_AddNumberToObject(ir, "first_mark", got[0]); cJSON_AddNumberToObject(ir, "first_space", got[1]); }
+            free(got);
+        }
+        aos_io_ir_close(tx);
+    }
+    aos_io_ir_close(rx);
+
+    cJSON *ca = cJSON_AddObjectToObject(o, "can");
+    aos_io_can_t *c = aos_io_can_open(g, g, 500000, AOS_CAN_SELFTEST, OWNER);
+    cJSON_AddBoolToObject(ca, "open", c != NULL);
+    if (c) {
+        int sent = 0, back = 0;
+        for (int i = 0; i < 3; i++) {
+            aos_can_frame_t f = { .id = 0x100 + (uint32_t)i, .len = 4, .data = { 0xCA, 0xFE, 0, (uint8_t)i } };
+            sent += aos_io_can_send(c, &f, 100);
+        }
+        aos_can_frame_t e = { .id = 0x18FEF100, .ext = true, .len = 8, .data = { 1, 2, 3, 4, 5, 6, 7, 8 } };
+        sent += aos_io_can_send(c, &e, 100);
+        aos_can_frame_t f;
+        uint32_t last_id = 0;
+        while (aos_io_can_recv(c, &f, 50) == 1) { back++; last_id = f.id; }
+        cJSON_AddNumberToObject(ca, "sent", sent);
+        cJSON_AddNumberToObject(ca, "received", back);
+        cJSON_AddNumberToObject(ca, "last_id", last_id);
+        aos_can_status_t st;
+        if (aos_io_can_status(c, &st)) {
+            cJSON_AddStringToObject(ca, "state", st.state);
+            cJSON_AddNumberToObject(ca, "tx_errors", st.tx_errors);
+            cJSON_AddNumberToObject(ca, "bus_errors", st.bus_errors);
+        }
+        aos_io_can_close(c);
+    }
+    send_cjson(r, 200, o);
+}
+
 bool aos_portal_modules(aos_httpd_req_t *r, const char *method, const char *p)
 {
     bool get = !strcmp(method, "GET"), post = !strcmp(method, "POST");
@@ -403,6 +500,7 @@ bool aos_portal_modules(aos_httpd_req_t *r, const char *method, const char *p)
     else if (post && !strcmp(p, "expansion/save")) api_check_or_save(r, true);
     else if (get && !strcmp(p, "sensors")) api_sensors(r);
     else if (get && !strcmp(p, "sensors/hist")) api_hist(r);
+    else if (post && !strcmp(p, "expansion/selftest")) api_selftest(r);
     else if (post && !strcmp(p, "sensors/rescan")) { aos_sensors_rescan(); aos_httpd_send_json(r, 200, "{\"ok\":true}"); }
     else return false;
     return true;

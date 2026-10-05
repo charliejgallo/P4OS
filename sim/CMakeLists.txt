@@ -170,9 +170,11 @@ add_executable(p4os_sim
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_serial.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_sensors.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_modules.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_io_signal.c
     io_sim.c
     sensors_sim.c
     eeprom_sim.c
+    io_signal_sim.c
     ${AOS_UI_SRC}
     ${AOS_APPS_SRC}
     ${AOS_FONT_SRC}
