@@ -367,7 +367,7 @@ async function pageTerminal() {
     try { st = await api('serial?ch=' + termCh); } catch { return; }
     if (full || !portSel.options.length) {
       put(portSel, st.ports.map(p => h('option', { value: p.name, selected: st.running ? p.name === st.port : p.name === (termPort || (termCh ? 'uart.a' : 'uart.b')) },
-        p.name + (p.holder && !st.running ? ' · lo tiene ' + p.holder : ''))));
+        p.name + (p.desc ? ' · ' + p.desc : '') + (p.holder && !st.running ? ' · lo tiene ' + p.holder : ''))));
       if (st.running) baudSel.value = st.baud;
     }
     connBtn.textContent = st.running ? 'Detener' : 'Conectar';

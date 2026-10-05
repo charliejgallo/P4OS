@@ -435,7 +435,11 @@ por el Registro del portal sin cable serie)
       Select=9, Start=10, leído en vivo por `/api/usb` (2026-10-04). Manda
       reportes todo el tiempo aunque se le pida SET_IDLE: sin problema.
 - [ ] Teclado MIDI (`midi_last`, y MIDI thru con el OTG en modo teclado).
-- [ ] Arduino o adaptador CH340/CP210x/FTDI en el Terminal (`usb0`).
+- [x] Adaptador CH340 (1a86:7523, "USB2.0-Serial") en 25/27 (2026-10-04):
+      listado como `usb0`, abierto por el servicio serie a 115200 y 13
+      bytes mandados (`/api/serial/send`).
+- [ ] Recepción por `usb0` (TX y RX puenteados, o un equipo conectado).
+- [ ] Arduino (CDC-ACM), CP210x, FTDI.
 - [ ] Webcam en Cámaras (en 25/27).
 - [x] **Hub** de 7 puertos (dos chips de 4 encadenados) en 21/23 con el
       joystick (2026-10-04): entra en cualquier puerto y se lee. Visto: (a)

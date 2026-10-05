@@ -1155,6 +1155,16 @@ static void api_serial(aos_httpd_req_t *r)
         if (holder) cJSON_AddStringToObject(p, "holder", holder);
         cJSON_AddItemToArray(ports, p);
     }
+    /* USB serial devices on the host, while plugged in (docs/USB.md) */
+    for (int i = 0; i < aos_hal_usb_serial_count() && i < 4; i++) {
+        cJSON *p = cJSON_CreateObject();
+        char n[8], d[48] = "";
+        snprintf(n, sizeof n, "usb%d", i);
+        aos_hal_usb_serial_name(i, d, sizeof d);
+        cJSON_AddStringToObject(p, "name", n);
+        cJSON_AddStringToObject(p, "desc", d);
+        cJSON_AddItemToArray(ports, p);
+    }
     cJSON *tr = cJSON_AddArrayToObject(o, "triggers");
     for (int i = 0; i < aos_serial_trigger_count(); i++) {
         aos_serial_trigger_t t;
