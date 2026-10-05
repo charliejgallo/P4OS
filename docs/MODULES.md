@@ -465,6 +465,12 @@ four channels at once from the PWM app:
 
 <img src="img/taller-pwm-banco.jpg" width="360" alt="The bench: the board, the breadboard with the LED, the RC filter and the meter reading 1.313 V">
 
+**Wiring for a bench test of infrared:** a demodulating receiver on
+GPIO5 (not GPIO21/22, which the I2C service scans by itself) and an IR LED
+driven through an NPN transistor from 5 V.
+
+![Infrared on the header: a receiver and an IR LED through a transistor](img/taller-ir.svg)
+
 **A pin let go** (an output closed) rests at its off level through the
 weak pull: down, or up for an inverted PWM output. `gpio_reset_pin()`
 alone leaves the pull-up on, and a servo whose channel was switched off

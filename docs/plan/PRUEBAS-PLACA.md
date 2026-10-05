@@ -56,7 +56,8 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       DTR/RTS): detectado en 0,5 s, grabado en 1,5 s, leído en la Terminal.
       Su firmware viejo se reiniciaba cada 2,7 s: el Programador espera
       hasta 3 s a que el puerto vuelva.
-- [ ] **Apps del taller** (cableado de PWM en `docs/img/taller-pwm.svg`;
+- [ ] **Apps del taller** (cableado de PWM en `docs/img/taller-pwm.svg`, de IR en
+      `docs/img/taller-ir.svg`;
       instaladas el 2026-10-05, probadas sólo en el
       simulador): EEPROM con una 24LC del usuario; PWM con LEDs (**anduvo
       el 2026-10-05**: un LED en GPIO28, a mano, rampa, respirar y estrobo)
