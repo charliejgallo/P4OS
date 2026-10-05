@@ -447,7 +447,10 @@ por el Registro del portal sin cable serie)
       (`hola placa` -> `HOLA PLACA`); con `!` escribió "hola desde el
       Leonardo" en una nota (con el teclado de Notas abierto: sin él, Notas
       no toma teclas físicas).
-- [ ] CP210x, FTDI.
+- [x] CP2102 de una placa ESP32 (10c4:ea60, 2026-10-04): con los búferes
+      en RAM interna, nada hasta apretar EN y después el registro de
+      arranque limpio (ROM, bootloader IDF 5.5.5, ESPHome), 5172 bytes.
+- [ ] FTDI.
 - [x] **Webcam** Logitech C270 (046d:0825, sin nombre declarado) en 25/27
       (2026-10-04): MJPEG 640x480 (su máximo en MJPEG), 14-19 cuadros/s en
       la app Cámaras, decodificar 4-5 ms por cuadro, escalar a 720x540
@@ -455,8 +458,10 @@ por el Registro del portal sin cable serie)
       Antes hizo falta: descriptores de configuración de hasta 4 KB (la
       librería traía 256) y sacar dos tablas de la pila de la tarea del
       driver UVC (se desbordaba al llegar la cámara: reinicio).
-- [x] Pendrive con los búferes DMA del host en PSRAM: 6,1-6,4 MB/s (antes,
-      en RAM interna, 7,4). Queda en PSRAM (PSRAM primero).
+- [x] Pendrive con los búferes DMA del host en PSRAM: 6,1-6,4 MB/s (en
+      RAM interna, 7,4). **Pero se volvió a RAM interna**: con PSRAM un
+      CP2102 leía 400 KB/s de basura repetida (imposible por el cable) y
+      cerrar el puerto en medio abortaba en el driver CDC-ACM (reinicio).
 - [x] **Hub** de 7 puertos (dos chips de 4 encadenados) en 21/23 con el
       joystick (2026-10-04): entra en cualquier puerto y se lee. Visto: (a)
       una vez el hub contestó STALL a GET_PORT_STATUS justo tras encender

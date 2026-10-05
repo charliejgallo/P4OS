@@ -262,8 +262,8 @@ keyboard mode with the computer, a MIDI keyboard on the board also plays
 on the computer (MIDI thru).
 
 **Serial**: tried with a CH340 converter (loopback at 9600, 115200 and
-921600 baud) and an Arduino Leonardo (CDC-ACM, with a keyboard on the same
-device: `tools/usb_test/`). Listed while plugged in, opened when the Terminal (or anyone
+921600 baud), an Arduino Leonardo (CDC-ACM, with a keyboard on the same
+device: `tools/usb_test/`) and an ESP32 board's CP2102 (its boot log). Listed while plugged in, opened when the Terminal (or anyone
 through aos_io) opens `usb0`; DTR and RTS go up on open, as a computer's
 terminal does (an Arduino resets, a CDC device that waits for a terminal
 starts sending). Received bytes wait in 16 KB of PSRAM.
@@ -280,11 +280,16 @@ decode each and 16-29 ms for the app to scale it to 720 x 540. A webcam's
 configuration descriptor is several KB (every format and size), so the
 library's control transfers go up to 4 KB
 (`CONFIG_USB_HOST_CONTROL_TRANSFER_MAX_SIZE`; 256 failed its enumeration),
-and the host's DMA buffers are in PSRAM
-(`CONFIG_USB_HOST_DWC_DMA_CAP_MEMORY_IN_PSRAM`, PSRAM first): that costs
-the pendrive about 15 % (7.4 MB/s with them in internal RAM, 6.1-6.4
-with them in PSRAM, the same file), nothing a transfer over Wi-Fi
-notices. A camera that declares
+and **the host's DMA buffers stay in internal RAM**, an exception to
+PSRAM first that is about correctness. With them in PSRAM
+(`CONFIG_USB_HOST_DWC_DMA_CAP_MEMORY_IN_PSRAM`, which ESP-IDF marks with
+an open issue on the buffers' alignment, IDF-11368) the pendrive read
+15 % slower (6.1-6.4 MB/s instead of 7.4), which would have been fine;
+but a CP2102 serial port then read 400 KB/s of repeated garbage, which no
+cable at 115200 baud carries, and closing the port in the middle of it
+aborted in Espressif's CDC-ACM driver (a restart). Back in internal RAM,
+the same port read nothing until the ESP32 behind it was reset, and then
+its boot log, clean. A camera that declares
 no name shows as "Webcam vid:pid". `/api/usb` `cameras` lists each with
 its MJPEG sizes, and `camera_stream` the one streaming.
 

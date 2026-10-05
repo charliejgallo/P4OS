@@ -131,9 +131,11 @@ CONFIG_USB_HOST_HUBS_SUPPORTED=y
 # a webcam's configuration descriptor is several KB (every format and size
 # it has): with the default 256 its enumeration failed
 CONFIG_USB_HOST_CONTROL_TRANSFER_MAX_SIZE=4096
-# PSRAM first: the host's DMA buffers (that 4 KB per device, the pendrives'
-# and the cameras' transfers) in PSRAM, which the P4's USB DMA reaches
-CONFIG_USB_HOST_DWC_DMA_CAP_MEMORY_IN_PSRAM=y
+# The host's DMA buffers stay in internal RAM (PSRAM first does not hold
+# here): in PSRAM a CP2102 serial port read 400 KB/s of repeated garbage,
+# which the cable cannot carry (docs/USB.md), and ESP-IDF marks the option
+# with an open issue on the buffers' alignment (IDF-11368)
+# CONFIG_USB_HOST_DWC_DMA_CAP_MEMORY_IN_PSRAM is not set
 CONFIG_FATFS_VOLUME_COUNT=4
 
 # newlib gives each FILE a 128-byte buffer unless FATFS reports a block size:
