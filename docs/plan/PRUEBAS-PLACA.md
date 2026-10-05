@@ -56,6 +56,13 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       DTR/RTS): detectado en 0,5 s, grabado en 1,5 s, leído en la Terminal.
       Su firmware viejo se reiniciaba cada 2,7 s: el Programador espera
       hasta 3 s a que el puerto vuelva.
+- [ ] **Apps del taller** (instaladas el 2026-10-05, probadas sólo en el
+      simulador): EEPROM con una 24LC del usuario; PWM con LEDs y un servo
+      (alimentación del servo aparte); Infrarrojo con receptor y emisor
+      (aprender un control, mandarlo, la base de SmartIR); CAN con los
+      transceptores SN65HVD230 cuando lleguen (la autoprueba ya anduvo);
+      Visor VNC contra una computadora (Compartir pantalla de la Mac con
+      contraseña VNC); Dibujo con el dedo y el mouse USB.
 - [ ] El cuelgue del primer arranque tras algunas OTA: dos volcados el
       2026-10-04 con `strcmp` en `dlsym` cargando apps (handoff de sistema).
 
