@@ -178,6 +178,7 @@ static void shop_list_build(app_t *a)
         lv_obj_remove_flag(b, LV_OBJ_FLAG_SCROLLABLE);
         lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_add_flag(b, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
+        lv_obj_add_flag(b, GF_PAD_BTN);
         lv_obj_set_user_data(b, (void *)(intptr_t)i);
         lv_obj_add_event_cb(b, item_cb, LV_EVENT_CLICKED, a);
         if (c == CAT_LOOK) {
@@ -358,4 +359,19 @@ void gfs_touch(app_t *a, int x, int y, int ev)
     } else {
         a->dragging = false;
     }
+}
+
+/* The gamepad: L and R change the category, as the arrows beside its name
+ * do; the d-pad and A walk and press the list like any panel (golf.c). */
+void gfs_pad(app_t *a, const aos_pad_t *p)
+{
+    if (aos_pad_pressed(p, AOS_PAD_L)) cat_step(a, -1);
+    else if (aos_pad_pressed(p, AOS_PAD_R)) cat_step(a, 1);
+}
+
+lv_obj_t *gfs_pad_default(app_t *a)
+{
+    if (!a->shop_list || a->shop_item < 0 || a->shop_item >= (int)lv_obj_get_child_count(a->shop_list))
+        return NULL;
+    return lv_obj_get_child(a->shop_list, a->shop_item);
 }

@@ -7,6 +7,9 @@
  *           backswing, set the power, and hit the sweet spot on the way down
  *   FLIGHT  back to the map, the ball flies with its shadow and leaves a line
  *   PUTT    the green close up, with the slope drawn as chevrons; two taps
+ *
+ * A USB gamepad plays it too (gfp_pad): the stick or the d-pad turns the
+ * line, L and R change the club, A is every tap of the swing and the putt.
  */
 #include "gf_app.h"
 #include "gf_audio.h"
@@ -948,6 +951,109 @@ bool gfp_back(app_t *a)
         return true;
     }
     return false;
+}
+
+/* --------------------------------------------------------------------------
+ * The gamepad
+ *
+ * The line turns on the screen the way the stick or the d-pad points,
+ * whatever way the map is turned: the stick by speed (a little deflection
+ * is a slow, fine turn, all of it a fast one), the d-pad a quarter of a
+ * degree a press, repeating while it is held and in whole degrees after a
+ * second. With the putter, up and down move the marker nearer or further.
+ * A is each of the taps the finger gives: the swing's three, the putt's
+ * two, and skipping the flight or the banner. B leaves the 3D view for the
+ * map while the swing has not started, as the arrow in its corner does.
+ * -------------------------------------------------------------------------- */
+
+#define PAD_DEAD    8000            /* the stick's slack around the centre      */
+
+/* the stick past its slack, as 0..1 squared: fine near the centre */
+static float pad_axis(int v)
+{
+    int m = v < 0 ? -v : v;
+    if (m <= PAD_DEAD) return 0;
+    float q = (float)(m - PAD_DEAD) / (float)(32767 - PAD_DEAD);
+    return v < 0 ? -q * q : q * q;
+}
+
+/* the d-pad's step on this frame along 'neg'/'pos': one on a press, the
+ * repeats while held, 'fine' for the first second and 'coarse' after */
+static float pad_step(app_t *a, const aos_pad_t *p, uint32_t neg, uint32_t pos, float fine, float coarse)
+{
+    if (!aos_pad_repeat(p, neg | pos)) return 0;
+    float k = a->pad_hold_ms < 1000 ? fine : coarse;
+    return aos_pad_repeat(p, pos) ? k : -k;
+}
+
+static void pad_aim(app_t *a, const aos_pad_t *p, int dt)
+{
+    if (aos_pad_pressed(p, AOS_PAD_DIRS)) {
+        a->pad_hold_ms = 0;
+    } else if (aos_pad_held(p, AOS_PAD_DIRS)) {
+        a->pad_hold_ms = (uint16_t)(a->pad_hold_ms + dt > 60000 ? 60000 : a->pad_hold_ms + dt);
+    } else {
+        a->pad_hold_ms = 0;
+    }
+
+    /* the turn, clockwise on the screen; past its slack the stick is also
+     * the d-pad, so it is one or the other */
+    float turn, sx = pad_axis(p->x);
+    if (sx != 0) turn = (4.0f + 56.0f * fabsf(sx)) * DEG * (float)dt / 1000.0f * (sx > 0 ? 1.0f : -1.0f);
+    else turn = pad_step(a, p, AOS_PAD_LEFT, AOS_PAD_RIGHT, 0.25f * DEG, 1.0f * DEG);
+    if (turn != 0) {
+        /* which way the aim turns the line on this map: the view may be
+         * turned any way, so it is measured rather than assumed */
+        gf_player_t *pl = cur_player(a);
+        float bx, by, x0, y0, x1, y1;
+        gf_view_w2s(&a->view, pl->x, pl->y, &bx, &by);
+        gf_view_w2s(&a->view, pl->x + sinf(a->aim) * 10, pl->y + cosf(a->aim) * 10, &x0, &y0);
+        gf_view_w2s(&a->view, pl->x + sinf(a->aim + 0.1f) * 10, pl->y + cosf(a->aim + 0.1f) * 10, &x1, &y1);
+        float cross = (x0 - bx) * (y1 - by) - (y0 - by) * (x1 - bx);
+        a->aim += cross > 0 ? turn : -turn;
+        if (a->aim > PI) a->aim -= 2 * PI;
+        if (a->aim < -PI) a->aim += 2 * PI;
+        a->v3d_valid = false;
+        a->aim_changed_ms = (uint32_t)aos_hal_uptime_ms();
+    }
+
+    if (a->club == CLUB_PT) {
+        float sy = pad_axis(p->y), d;
+        if (sy != 0) d = -(0.5f + 11.5f * fabsf(sy)) * (float)dt / 1000.0f * (sy > 0 ? 1.0f : -1.0f);
+        else d = pad_step(a, p, AOS_PAD_DOWN, AOS_PAD_UP, 0.25f, 1.0f);
+        if (d != 0) a->aim_dist = clampf(a->aim_dist + d, 0.5f, 80.0f);
+    }
+}
+
+void gfp_pad(app_t *a, const aos_pad_t *p, int dt)
+{
+    if (a->fit_pending || a->pinching || a->rezoom) return;
+    bool go = aos_pad_pressed(p, AOS_PAD_A);
+    switch (a->state) {
+    case ST_AIM:
+    case ST_PUTT:
+        if (a->meter != MT_IDLE) {
+            if (go) gfp_touch(a, 0, 0, 0);          /* the putt's power */
+            return;
+        }
+        if (aos_pad_pressed(p, AOS_PAD_L)) gfp_club_step(a, -1);
+        if (aos_pad_pressed(p, AOS_PAD_R)) gfp_club_step(a, 1);
+        pad_aim(a, p, dt);
+        if (go) gfp_hit_pressed(a);
+        break;
+    case ST_SWING:
+        if (cur_player(a)->remote) break;
+        if (go) gfp_touch(a, 0, 0, 0);
+        else if (aos_pad_pressed(p, AOS_PAD_B)) gfp_back(a);
+        break;
+    case ST_FLIGHT:
+    case ST_ROLL:
+    case ST_RESULT:
+        if (go) gfp_touch(a, 0, 0, 0);
+        break;
+    default:
+        break;
+    }
 }
 
 /* --------------------------------------------------------------------------

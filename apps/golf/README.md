@@ -59,6 +59,28 @@ The watch's game was already touch: nothing needed the IMU or the button.
 Pause: the list button in the corner or the system's back. A swipe to the
 right leaves the setup screens, the settings and the shop.
 
+## Playing with a USB gamepad
+
+The same game, with no finger. On the map the stick turns the line by speed
+(a little deflection is a slow, fine turn, all of it a fast one) and the
+d-pad a quarter of a degree a press, repeating while held and in whole
+degrees after a second; the line turns the way the stick points on the
+screen, however the map is turned. With the putter, up and down move the
+marker nearer or further. L and R change the club. A is every tap: Hit opens
+the 3D view, then the swing's three taps (backswing, power, accuracy), the
+putt's two, and skipping the flight or the banner. B in the 3D view, before
+the swing starts, goes back to the map. START pauses.
+
+The panels (menu, setup, settings, shop, pause, the hole and round cards)
+are walked with the d-pad, with A or START to press and B as the system's
+back (on the menu it does nothing: the app is left from the system). L and
+R change the course in the setup and the category in the shop. Nobody lists
+the buttons for the pad: `gfa_button` marks the ones it makes
+(`GF_PAD_BTN`) and `pad_tick` (golf.c) gathers those under the panel showing
+every frame, so a setup built again for another course, the shop's list
+after a purchase and every panel after the screen turns are followed by
+themselves.
+
 ## Both orientations
 
 The screen can turn at any moment (`app_resize`). The panels are built again

@@ -20,6 +20,7 @@
 
 #include "aos_app.h"
 #include "aos_gesture.h"
+#include "aos_pad_menu.h"
 
 #include "gf_art.h"
 #include "gf_game.h"
@@ -51,6 +52,11 @@ enum {
 };
 
 enum { MT_IDLE = 0, MT_UP, MT_DOWN, MT_SWING, MT_FOLLOW };
+
+/* A button of a panel that the gamepad may press (gfa_button sets it when the
+ * button has a callback; the shop's items set it themselves). The pad walks
+ * the ones under the panel showing, whatever built them (golf.c, pad_tick). */
+#define GF_PAD_BTN      LV_OBJ_FLAG_USER_2
 
 #define MAX_TRACE       16
 #define TRACE_PTS       48
@@ -217,6 +223,12 @@ struct app {
     bool        booting;
     bool        menu_ready, map_ready, turn_over, job_green, link_on_lobby;
     uint32_t    last_gesture_ms;
+    /* the gamepad: the panel whose buttons the menu holds, and how long a
+     * d-pad direction has been held (the aim's steps grow with it) */
+    aos_pad_t   pad;
+    aos_pad_menu_t pad_menu;
+    lv_obj_t   *pad_panel;
+    uint16_t    pad_hold_ms;
     bool        prepared;       /* turn_prepare ran for the hole being loaded */
     uint64_t    prev_ms;
     lv_timer_t *timer;
@@ -257,6 +269,8 @@ void gfp_touch(app_t *a, int x, int y, int ev);     /* ev: 0 press, 1 drag, 2 re
 void gfp_pinch(app_t *a, const aos_gesture_event_t *ev, int ox, int oy);
 void gfp_hit_pressed(app_t *a);
 void gfp_club_step(app_t *a, int d);
+/* the gamepad while a hole is played (no panel showing) */
+void gfp_pad(app_t *a, const aos_pad_t *p, int dt);
 bool gfp_back(app_t *a);
 void gfp_menu_scene(app_t *a);
 void gfp_menu_frame(app_t *a, int dt);
@@ -277,6 +291,8 @@ void gfs_open(app_t *a);
 void gfs_frame(app_t *a, int dt);
 void gfs_touch(app_t *a, int x, int y, int ev);
 void gfs_refit(app_t *a);            /* the screen turned while in the shop */
+void gfs_pad(app_t *a, const aos_pad_t *p);     /* L / R: the category */
+lv_obj_t *gfs_pad_default(app_t *a);            /* the item being looked at */
 
 /* gf_link.c */
 bool gfl_available(app_t *a, char *name, int n);

@@ -150,7 +150,10 @@ lv_obj_t *gfa_button(lv_obj_t *parent, const char *text, int x, int y, int w, in
     lv_obj_set_style_border_width(b, 2, 0);
     lv_obj_remove_flag(b, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE);
-    if (cb) lv_obj_add_event_cb(b, cb, LV_EVENT_CLICKED, data);
+    if (cb) {
+        lv_obj_add_event_cb(b, cb, LV_EVENT_CLICKED, data);
+        lv_obj_add_flag(b, GF_PAD_BTN);
+    }
     lv_obj_t *l = lv_label_create(b);
     lv_label_set_text(l, text);
     lv_obj_set_style_text_font(l, font, 0);
@@ -1233,6 +1236,126 @@ static void gesture_cb(lv_event_t *e)
     if (dir == LV_DIR_LEFT || dir == LV_DIR_RIGHT) handle_gesture(a, (int)dir);
 }
 
+/* --------------------------------------------------------------------------
+ * The gamepad
+ *
+ * The panels are not listed by hand: every button the pad may press carries
+ * GF_PAD_BTN, and the ones under the panel showing are gathered every frame
+ * (a few dozen objects), so a setup screen built again for another course,
+ * the shop's list after a purchase or every panel after the screen turned
+ * are followed without anybody telling the pad. The d-pad walks them, A or
+ * START presses, B is the system's back (never leaving the app: on the menu
+ * it does nothing). L and R change the course in the setup and the category
+ * in the shop. With no panel, a hole is being played: gfp_pad.
+ * -------------------------------------------------------------------------- */
+
+static bool app_back(aos_app_t *self, void *inst);
+
+static lv_obj_t *pad_panel(app_t *a)
+{
+    lv_obj_t *p = NULL;
+    if (a->paused) p = a->p_pause;
+    else switch (a->state) {
+    case ST_MENU:       p = a->p_menu; break;
+    case ST_SETUP:      p = a->p_setup; break;
+    case ST_SETTINGS:   p = a->p_settings; break;
+    case ST_LOADING:    p = a->p_loading; break;   /* no buttons: B leaves the lobby */
+    case ST_HOLE_END:   p = a->p_hole; break;
+    case ST_ROUND_END:  p = a->p_round; break;
+    case ST_SHOP:       p = a->p_shop; break;
+    default: break;
+    }
+    return p && !lv_obj_has_flag(p, LV_OBJ_FLAG_HIDDEN) ? p : NULL;
+}
+
+static void pad_gather(lv_obj_t *o, lv_obj_t **out, int *n)
+{
+    uint32_t k = lv_obj_get_child_count(o);
+    for (uint32_t i = 0; i < k && *n < AOS_PAD_MENU_MAX; i++) {
+        lv_obj_t *c = lv_obj_get_child(o, (int32_t)i);
+        if (lv_obj_has_flag(c, LV_OBJ_FLAG_HIDDEN)) continue;
+        if (lv_obj_has_flag(c, GF_PAD_BTN)) out[(*n)++] = c;
+        else pad_gather(c, out, n);
+    }
+}
+
+/* Where the outline starts on a panel: the biggest button, which is what the
+ * panel is for (the first mode, Continue, Again, Resume...); in the shop,
+ * the item being looked at. */
+static int pad_default(app_t *a, lv_obj_t *const *it, int n)
+{
+    lv_obj_t *want = a->state == ST_SHOP && !a->paused ? gfs_pad_default(a) : NULL;
+    int best = 0;
+    int32_t area = -1;
+    for (int i = 0; i < n; i++) {
+        if (it[i] == want) return i;
+        int32_t s = lv_obj_get_width(it[i]) * lv_obj_get_height(it[i]);
+        if (s > area) { area = s; best = i; }
+    }
+    return best;
+}
+
+static void pad_tick(app_t *a, int dt)
+{
+    aos_pad_t *p = &a->pad;
+    aos_pad_menu_t *m = &a->pad_menu;
+    uint32_t now = lv_tick_get();
+    aos_pad_update(p, now);
+    if (!p->connected || (aos_ui_overlay() & ~(uint32_t)AOS_UI_OVER_TOAST)) return;
+
+    lv_obj_t *panel = pad_panel(a);
+    lv_obj_t *it[AOS_PAD_MENU_MAX];
+    int n = 0;
+    if (panel) pad_gather(panel, it, &n);
+    if (panel != a->pad_panel) {
+        /* another panel, or none: the button that opened it is still down */
+        a->pad_panel = panel;
+        aos_pad_menu_set(m, it, n, pad_default(a, it, n));
+        a->pad_hold_ms = 0;
+        aos_pad_reset(p, now);
+        return;
+    }
+    if (panel && (n != m->n || memcmp(it, m->item, (size_t)n * sizeof it[0]))) {
+        /* the same panel built again: stay on the same place in it */
+        lv_obj_t *was = aos_pad_menu_selected(m);
+        int sel = m->sel < n ? m->sel : 0;
+        for (int i = 0; i < n; i++) {
+            if (it[i] == was) sel = i;
+        }
+        aos_pad_menu_set(m, it, n, sel);
+    } else if (panel && m->shown && m->sel < m->n &&
+               lv_obj_get_style_outline_width(m->item[m->sel], 0) == 0) {
+        /* rebuilt into the very same addresses: the outline went with them */
+        aos_pad_menu_set(m, it, n, m->sel);
+    }
+
+    if (panel) {
+        if (aos_pad_pressed(p, AOS_PAD_B)) {
+            if (a->paused || a->state != ST_MENU) app_back(a->self, a);
+            return;
+        }
+        if (aos_pad_pressed(p, AOS_PAD_START)) {
+            lv_obj_t *sel = aos_pad_menu_selected(m);
+            if (sel) lv_obj_send_event(sel, LV_EVENT_CLICKED, NULL);
+            return;
+        }
+        if (!a->paused && a->state == ST_SETUP && aos_pad_pressed(p, AOS_PAD_L | AOS_PAD_R)) {
+            course_step(a, aos_pad_pressed(p, AOS_PAD_L) ? -1 : 1);
+            return;
+        }
+        if (!a->paused && a->state == ST_SHOP) gfs_pad(a, p);
+        aos_pad_menu_step(m, p);
+        return;
+    }
+    if (a->state >= ST_AIM && a->state <= ST_REMOTE) {
+        if (aos_pad_pressed(p, AOS_PAD_START)) {
+            pause_show(a);
+            return;
+        }
+        gfp_pad(a, p, dt);
+    }
+}
+
 static void frame(lv_timer_t *t)
 {
     app_t *a = (app_t *)lv_timer_get_user_data(t);
@@ -1273,6 +1396,7 @@ static void frame(lv_timer_t *t)
             return;
         }
     }
+    pad_tick(a, dt);
     if (a->paused) return;
     /* A panel, the switcher, a banner, the gesture home, the zoom to the
      * icon: the game waits under it (the flight stops in the air, the swing
