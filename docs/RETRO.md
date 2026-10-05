@@ -120,6 +120,22 @@ The flags of `aos_retro_begin()`:
   LVGL's pointer and gestures, so a slider run is not a swipe. The bottom
   36 px, where the home swipe starts, stay free.
 
+### A USB gamepad presses the same buttons
+
+Since 0.9, a gamepad on the board's USB host (docs/USB.md) presses the
+canvas's buttons alongside the on-screen controls, with no change in the
+game: the D-pad or the left stick is LEFT/RIGHT/UP/DOWN, buttons 1 and 2
+are A, 3 and 4 are B, 9 and 10 (Select, Start) are PAUSE, which covers the
+SNES- and PlayStation-style layouts. The on-screen button lights while the
+pad holds it, and the pad keeps the screen on.
+
+It reaches only what a game reads through `aos_retro_buttons()`,
+`_pressed()` and `_released()`. Of the games on the canvas, Claude Jump
+reads its left, right and pause there and Topos its pause; 2043, Arkanos,
+Chatarra and Claudito read the finger themselves, and need a pad of their
+own (`aos_hal_hid_gamepad_get`, docs/APPS-P4.md). A new game that declares
+its controls takes the pad for free.
+
 ### Where things go
 
 The scale factor is automatic unless the game passes one. It is the biggest

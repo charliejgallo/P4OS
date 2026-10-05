@@ -107,6 +107,7 @@ typedef struct {
     /* input */
     uint32_t      seq;
     uint32_t      held, edges, rel_edges, shown_bits;
+    uint32_t      touch_bits, pad_bits; /* held = the on-screen controls' | a USB gamepad's */
     bool          touch_on;
     uint8_t       prev_count;       /* fingers in the previous sample */
     int16_t       prev_x[2], prev_y[2]; /* ... and where they were (root coords) */
@@ -769,6 +770,15 @@ static void view_rect(rect_t *r)
  * finger is on the canvas. The panel has no finger ids, so a new finger is
  * told by the count going up: with two, it is the one further from where
  * the single finger was. */
+/* the buttons held now, and the presses and releases since the game last
+ * asked */
+static void held_set(uint32_t now)
+{
+    s.edges |= now & ~s.held;
+    s.rel_edges |= s.held & ~now;
+    s.held = now;
+}
+
 static void sample(const aos_touch_frame_t *f)
 {
     uint32_t bits = 0;
@@ -824,9 +834,8 @@ static void sample(const aos_touch_frame_t *f)
         if (s.tap_y >= s.pub.h) s.tap_y = (int16_t)(s.pub.h - 1);
     }
 
-    s.edges |= bits & ~s.held;
-    s.rel_edges |= s.held & ~bits;
-    s.held = bits;
+    s.touch_bits = bits;
+    held_set(bits | s.pad_bits);
     s.prev_count = (uint8_t)n;
     for (int i = 0; i < n; i++) {
         s.prev_x[i] = f->x[i];
@@ -838,6 +847,31 @@ static void sample(const aos_touch_frame_t *f)
         s.ty = (int16_t)cy;
     }
     slider_thumb(slider_on, slx);
+}
+
+/* A USB gamepad on the board's host (aos_hal_hid_gamepad_*, docs/USB.md)
+ * presses the same buttons as the on-screen controls, so every game on the
+ * canvas takes one with no change: the D-pad (or the left stick) is the
+ * arrows; buttons 1 and 2 are A, 3 and 4 are B, 9 and 10 (Select, Start)
+ * pause. That covers the usual layouts: a SNES-style pad's A and X are 2
+ * and 1, B and Y 3 and 4; a PlayStation-style one's cross and square 2
+ * and 1, circle and triangle 3 and 4. Any pad plugged in counts. */
+static uint32_t pad_bits(void)
+{
+    uint32_t b = 0;
+    for (int i = 0; i < AOS_GAMEPAD_MAX; i++) {
+        aos_gamepad_t p;
+        if (!aos_hal_hid_gamepad_get(i, &p)) continue;
+        uint8_t d = aos_hal_hid_gamepad_dpad(&p);
+        if (d & AOS_DPAD_LEFT) b |= AOS_RETRO_BTN_LEFT;
+        if (d & AOS_DPAD_RIGHT) b |= AOS_RETRO_BTN_RIGHT;
+        if (d & AOS_DPAD_UP) b |= AOS_RETRO_BTN_UP;
+        if (d & AOS_DPAD_DOWN) b |= AOS_RETRO_BTN_DOWN;
+        if (p.buttons & 0x003) b |= AOS_RETRO_BTN_A;
+        if (p.buttons & 0x00C) b |= AOS_RETRO_BTN_B;
+        if (p.buttons & 0x300) b |= AOS_RETRO_BTN_PAUSE;
+    }
+    return b;
 }
 
 static void poll(void)
@@ -869,8 +903,16 @@ static void poll(void)
             }
         }
     }
-    if (!front) {
+    if (front) {
+        uint32_t pb = pad_bits();
+        if (pb != s.pad_bits) {
+            s.pad_bits = pb;
+            held_set(s.touch_bits | pb);
+            aos_hal_activity();         /* a game played with the pad keeps the screen on */
+        }
+    } else {
         s.held = s.edges = s.rel_edges = 0;
+        s.touch_bits = s.pad_bits = 0;
         s.touch_on = s.tap_pending = false;
     }
     show_bits(s.held);
