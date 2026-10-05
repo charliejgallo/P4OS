@@ -442,7 +442,13 @@ por el Registro del portal sin cable serie)
       idéntico (UTF-8 incluido) y los mismos bytes recibidos que enviados
       a 115200, 9600 y 921600 baudios.
 - [ ] Arduino (CDC-ACM), CP210x, FTDI.
-- [ ] Webcam en Cámaras (en 25/27).
+- [x] **Webcam** Logitech C270 (046d:0825, sin nombre declarado) en 25/27
+      (2026-10-04): MJPEG 640x480 (su máximo en MJPEG), 14-19 cuadros/s en
+      la app Cámaras, decodificar 4-5 ms por cuadro, escalar a 720x540
+      16-29 ms, sin cuadros descartados; "funciona muy bien" (el usuario).
+      Antes hizo falta: descriptores de configuración de hasta 4 KB (la
+      librería traía 256) y sacar dos tablas de la pila de la tarea del
+      driver UVC (se desbordaba al llegar la cámara: reinicio).
 - [x] **Hub** de 7 puertos (dos chips de 4 encadenados) en 21/23 con el
       joystick (2026-10-04): entra en cualquier puerto y se lee. Visto: (a)
       una vez el hub contestó STALL a GET_PORT_STATUS justo tras encender

@@ -1923,6 +1923,7 @@ bool aos_hal_uvc_info(int index, char *name, size_t n, uint16_t (*sizes)[2], int
 bool aos_hal_uvc_start(int index, int w, int h);
 void aos_hal_uvc_stop(void);
 int  aos_hal_uvc_frame(uint8_t *buf, int max, uint32_t *seq);
+bool aos_hal_uvc_streaming(uint16_t *w, uint16_t *h, uint32_t *frames);    /* false when no camera streams */
 
 /* mDNS on a network interface of somebody else's (the USB one): the watch
  * answers "amoledos.local" there too, with that interface's address. The

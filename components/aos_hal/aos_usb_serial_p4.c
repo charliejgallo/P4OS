@@ -128,7 +128,7 @@ static void new_dev(usb_device_handle_t dev)
 /* the devices list knows what is still plugged in */
 static bool present(const ser_t *s)
 {
-    aos_usb_dev_t d[12];
+    static aos_usb_dev_t d[12];         /* 1.5 KB: not on a caller's stack; under S.mx like every caller */
     int n = aos_hal_usb_devices(d, 12);
     for (int i = 0; i < n; i++)
         if (d[i].addr == s->addr && d[i].vid == s->vid && d[i].pid == s->pid) return true;

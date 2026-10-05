@@ -271,6 +271,16 @@ it with the P4's JPEG engine like an MJPEG over HTTP. One camera streams
 at a time, shared by the mosaic and the full screen. Webcams use
 isochronous transfers: on 21/23 (Full Speed) only small sizes fit, 25/27
 is the port for them. A webcam draws 150-500 mA of the 5 V on pin 1.
+Tried on 2026-10-04 with a Logitech C270 on 25/27: MJPEG 640 x 480 (the
+largest it has in MJPEG), 14-19 frames a second on screen, 4-5 ms to
+decode each and 16-29 ms for the app to scale it to 720 x 540. A webcam's
+configuration descriptor is several KB (every format and size), so the
+library's control transfers go up to 4 KB
+(`CONFIG_USB_HOST_CONTROL_TRANSFER_MAX_SIZE`; 256 failed its enumeration),
+and the host's DMA buffers are in PSRAM
+(`CONFIG_USB_HOST_DWC_DMA_CAP_MEMORY_IN_PSRAM`). A camera that declares
+no name shows as "Webcam vid:pid". `/api/usb` `cameras` lists each with
+its MJPEG sizes, and `camera_stream` the one streaming.
 
 `GET /api/usb` says the OTG's `mode` (`host` while the host holds the OTG
 controller), `host_on`, `pins`, `layout`, `devices`, `keyboards`,

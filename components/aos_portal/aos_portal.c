@@ -504,6 +504,32 @@ static void api_usb(aos_httpd_req_t *r)
             cJSON_AddItemToArray(ga, g);
         }
         cJSON_AddBoolToObject(o, "mouse", aos_hal_hid_mouse_present());
+        /* webcams: their MJPEG sizes, and the stream if one is on */
+        cJSON *ca = cJSON_AddArrayToObject(o, "cameras");
+        for (int i = 0; i < aos_hal_uvc_count(); i++) {
+            char cn[48];
+            uint16_t sz[12][2];
+            int ns = 0;
+            if (!aos_hal_uvc_info(i, cn, sizeof cn, sz, 12, &ns)) break;
+            cJSON *c = cJSON_CreateObject();
+            cJSON_AddStringToObject(c, "name", cn);
+            cJSON *sa = cJSON_AddArrayToObject(c, "sizes");
+            for (int k = 0; k < ns; k++) {
+                char t[16];
+                snprintf(t, sizeof t, "%ux%u", sz[k][0], sz[k][1]);
+                cJSON_AddItemToArray(sa, cJSON_CreateString(t));
+            }
+            cJSON_AddItemToArray(ca, c);
+        }
+        uint16_t sw, sh;
+        uint32_t sf;
+        if (aos_hal_uvc_streaming(&sw, &sh, &sf)) {
+            char t[16];
+            snprintf(t, sizeof t, "%ux%u", sw, sh);
+            cJSON *st = cJSON_AddObjectToObject(o, "camera_stream");
+            cJSON_AddStringToObject(st, "size", t);
+            cJSON_AddNumberToObject(st, "frames", sf);
+        }
         /* MIDI: the devices, and the last messages in (newest first) */
         char mn[2][48];
         int nm = aos_hal_midi_devices(mn, 2);

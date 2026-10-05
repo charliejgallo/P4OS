@@ -939,6 +939,9 @@ __attribute__((weak)) void aos_hal_uvc_stop(void)
 __attribute__((weak)) int aos_hal_uvc_frame(uint8_t *buf, int max, uint32_t *seq)
 { int v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) bool aos_hal_uvc_streaming(uint16_t *w, uint16_t *h, uint32_t *frames)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) const char * aos_hal_device_name(void)
 { return ""; }
 

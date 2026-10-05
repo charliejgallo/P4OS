@@ -59,6 +59,26 @@ static struct {
     uint16_t w, h;
 } U = { .streaming = -1 };
 
+/* The name, from the devices list. That list may hear of the camera a
+ * moment after this driver does: without its IDs yet, it is asked again
+ * whenever the name is wanted (aos_hal_uvc_info). Under U.mx. */
+static void name_of(cam_t *c)
+{
+    static aos_usb_dev_t d[12];
+    if (c->vid) return;
+    int nd = aos_hal_usb_devices(d, 12);
+    for (int i = 0; i < nd; i++)
+        if (d[i].addr == c->addr) {
+            c->vid = d[i].vid;
+            c->pid = d[i].pid;
+            snprintf(c->name, sizeof c->name, "%.23s%s%.23s", d[i].vendor, d[i].vendor[0] && d[i].product[0] ? " " : "",
+                     d[i].product);
+        }
+    /* many webcams declare no name (a Logitech C270 does not): its IDs */
+    if (!c->name[0] && c->vid) snprintf(c->name, sizeof c->name, "Webcam %04x:%04x", c->vid, c->pid);
+    if (!c->name[0]) snprintf(c->name, sizeof c->name, "Webcam");
+}
+
 static void driver_event(const uvc_host_driver_event_data_t *ev, void *ctx)
 {
     (void)ctx;
@@ -77,9 +97,11 @@ static void driver_event(const uvc_host_driver_event_data_t *ev, void *ctx)
     c->used = true;
     c->addr = addr;
     c->stream_index = ev->device_connected.uvc_stream_index;
-    /* its MJPEG sizes */
-    uvc_host_frame_info_t info[16];
-    size_t n = 16;
+    /* its MJPEG sizes. Static, as the device list below: this runs on the
+     * driver's task, whose stack two arrays of these and a log line
+     * overflowed (a restart, on 2026-10-04, as the first webcam came) */
+    static uvc_host_frame_info_t info[24];
+    size_t n = sizeof info / sizeof info[0];
     if (uvc_host_get_frame_list(addr, c->stream_index, (uvc_host_frame_info_t (*)[])info, &n) == ESP_OK)
         for (size_t i = 0; i < n && c->nsizes < SIZES_MAX; i++)
             if (info[i].format == UVC_VS_FORMAT_MJPEG) {
@@ -87,17 +109,7 @@ static void driver_event(const uvc_host_driver_event_data_t *ev, void *ctx)
                 c->size[c->nsizes][1] = info[i].v_res;
                 c->nsizes++;
             }
-    /* the name, from the devices list */
-    aos_usb_dev_t d[12];
-    int nd = aos_hal_usb_devices(d, 12);
-    for (int i = 0; i < nd; i++)
-        if (d[i].addr == addr) {
-            c->vid = d[i].vid;
-            c->pid = d[i].pid;
-            snprintf(c->name, sizeof c->name, "%.23s%s%.23s", d[i].vendor, d[i].vendor[0] && d[i].product[0] ? " " : "",
-                     d[i].product);
-        }
-    if (!c->name[0]) snprintf(c->name, sizeof c->name, "USB camera");
+    name_of(c);
     xSemaphoreGive(U.mx);
     ESP_LOGI(TAG, "camera \"%s\" at address %u: %d MJPEG sizes%s", c->name, addr, c->nsizes,
              c->nsizes ? "" : " (none: it cannot be shown)");
@@ -107,7 +119,7 @@ static void driver_event(const uvc_host_driver_event_data_t *ev, void *ctx)
 /* the devices list knows what is still plugged in */
 static void prune(void)
 {
-    aos_usb_dev_t d[12];
+    static aos_usb_dev_t d[12];         /* under U.mx, as every caller holds it */
     int nd = aos_hal_usb_devices(d, 12);
     for (int i = 0; i < CAM_MAX; i++) {
         if (!U.c[i].used || i == U.streaming) continue;
@@ -149,11 +161,14 @@ bool aos_p4_usb_uvc_start(void)
     if (!U.mx) U.mx = xSemaphoreCreateMutex();
     memset(U.c, 0, sizeof U.c);
     U.streaming = -1;
-    const uvc_host_driver_config_t cfg = { .driver_task_stack_size = 4096, .driver_task_priority = 5, .xCoreID = 0,
+    const uvc_host_driver_config_t cfg = { .driver_task_stack_size = 6144, .driver_task_priority = 5, .xCoreID = 0,
                                            .create_background_task = true, .event_cb = driver_event };
     /* the driver warns about every device that is not a camera: a pendrive,
      * a keyboard. Only its errors are news. */
     esp_log_level_set("uvc", ESP_LOG_ERROR);
+    /* and every lost isochronous packet ("usb err 1"), a few a minute on
+     * a webcam that streams fine */
+    esp_log_level_set("uvc-isoc", ESP_LOG_ERROR);
     esp_err_t e = uvc_host_install(&cfg);
     U.installed = e == ESP_OK;
     if (!U.installed) ESP_LOGW(TAG, "camera: uvc_host_install: %s", esp_err_to_name(e));
@@ -193,6 +208,7 @@ bool aos_hal_uvc_info(int index, char *name, size_t n, uint16_t (*sizes)[2], int
     xSemaphoreTake(U.mx, portMAX_DELAY);
     int i = slot_of(index);
     if (i >= 0) {
+        name_of(&U.c[i]);
         if (name) snprintf(name, n, "%s", U.c[i].name);
         int k = 0;
         for (; sizes && k < U.c[i].nsizes && k < max; k++) {
@@ -276,6 +292,15 @@ void aos_hal_uvc_stop(void)
     bool last = --U.users <= 0;
     xSemaphoreGive(U.mx);
     if (last) stream_close();
+}
+
+bool aos_hal_uvc_streaming(uint16_t *w, uint16_t *h, uint32_t *frames)
+{
+    if (!U.stream || U.gone) return false;
+    if (w) *w = U.w;
+    if (h) *h = U.h;
+    if (frames) *frames = U.frames;
+    return true;
 }
 
 int aos_hal_uvc_frame(uint8_t *buf, int max, uint32_t *seq)
