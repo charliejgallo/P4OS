@@ -57,8 +57,9 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       Su firmware viejo se reiniciaba cada 2,7 s: el Programador espera
       hasta 3 s a que el puerto vuelva.
 - [ ] **Apps del taller** (instaladas el 2026-10-05, probadas sólo en el
-      simulador): EEPROM con una 24LC del usuario; PWM con LEDs y un servo
-      (alimentación del servo aparte); Infrarrojo con receptor y emisor
+      simulador): EEPROM con una 24LC del usuario; PWM con LEDs (**anduvo
+      el 2026-10-05**: un LED en GPIO28, a mano, rampa, respirar y estrobo)
+      y un servo (alimentación del servo aparte; falta); Infrarrojo con receptor y emisor
       (aprender un control, mandarlo, la base de SmartIR); CAN con los
       transceptores SN65HVD230 cuando lleguen (la autoprueba ya anduvo);
       Visor VNC contra una computadora (Compartir pantalla de la Mac con
