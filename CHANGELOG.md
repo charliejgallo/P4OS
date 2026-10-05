@@ -1,8 +1,21 @@
 # Changelog
 
-## 0.10.0 — unreleased
+## 0.9.2 — 2026-10-05
 
-**The workshop's drivers** (docs/MODULES.md)
+**The Programmer over the USB host** (docs/USB.md)
+- The host's USB serial ports (`usb0`...) are in the Programmer's list,
+  in the app and the portal, and an ESP32 dev board goes into its
+  bootloader by itself through RTS and DTR, as esptool does. A C3, C6, S3
+  or H2 on its own USB (USB-Serial-JTAG) gets the sequence its USB logic
+  decodes. Tried with an ESP32 on a CP2102 (6.6 s) and an ESP32-C3 (1.5 s).
+- The Programmer waits up to 3 s for a USB port that is away (a chip that
+  restarts comes back as a new device).
+- Espressif's USB-Serial-JTAG no longer shows a "?" after its name.
+- docs/SECURITY.md: reaching the portal from outside home through a
+  Tailscale subnet router (Home Assistant's add-on), with nothing on the
+  board.
+
+**The workshop's drivers** (docs/MODULES.md), for the apps of 0.10
 - `aos_io_pwm_*`: PWM on any header pin by the LEDC, seven channels, servo
   pulses, hardware fades.
 - `aos_io_dac_*`: an analog level through an RC filter, by the
@@ -14,18 +27,6 @@
 - `POST /api/expansion/selftest` tries them all on a free pin.
 - The simulator emulates serial EEPROMs (24xx, 25xx, 93xx), loops IR back
   with a remote in the room, and has a car on its CAN bus.
-
-## 0.9.2 — unreleased
-
-- **The Programmer flashes through the USB host:** the host's USB serial
-  ports (`usb0`...) are in its list, in the app and the portal, and an
-  ESP32 dev board goes into its bootloader by itself through RTS and DTR,
-  as esptool does (docs/USB.md). A C3, C6, S3 or H2 on its own USB
-  (USB-Serial-JTAG) gets the sequence its USB logic decodes.
-- Espressif's USB-Serial-JTAG no longer shows a "?" after its name.
-- docs/SECURITY.md: reaching the portal from outside home through a
-  Tailscale subnet router (Home Assistant's add-on), with nothing on the
-  board.
 
 ## 0.9.1 — 2026-10-05
 

@@ -435,7 +435,7 @@ written again here.
 
 ## PWM, an analog level, infrared and CAN
 
-Since 0.10, for the workshop apps. The API is in `aos_io.h`, the shared
+Since 0.9.2, for the workshop apps (0.10). The API is in `aos_io.h`, the shared
 part in `components/aos_io/aos_io_signal.c`, the board's in
 `aos_io_signal_p4.c` and the simulator's in `sim/io_signal_sim.c`. Each
 one takes any usable GPIO of the header and claims it, like the rest.
