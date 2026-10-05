@@ -12,7 +12,7 @@
   and A presses; it appears only once the pad is used, so touch looks the
   same as before.
 - The retro canvas presses its own buttons from the pad and lights them
-  (docs/RETRO.md); 0.9.0's notes promised it, but it went in after the tag.
+  (docs/RETRO.md); it was written for 0.9.0 and went in after its tag.
 - `aos_pad.h` and `aos_pad_menu.h` (header only, no new firmware) for the
   apps; `aos.pad()` for the Lua scripts.
 - The simulator fakes a pad: `P4_SIM_PAD=1` (the keyboard) and the scripts'
