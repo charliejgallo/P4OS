@@ -10,6 +10,7 @@ idf_component_register(
          "ch_ui.c"
          "ch_link.c"
          "ch_feria.c"
+         "ch_pad.c"
     INCLUDE_DIRS "."
     REQUIRES lvgl
 )

@@ -878,6 +878,56 @@ void ch_lk_toque(ch_t *g, int bx, int by)
     }
 }
 
+/* The booth's buttons, for the gamepad's cursor: the same tiles and buttons
+ * ch_lk_toque() answers to, the ones that are drawn lit. */
+static int lk_blanco(ch_blanco_t *z, int n, int max, int x, int y, int w, int h,
+                   int tipo)
+{
+    if (n >= max) return n;
+    z[n].x = (int16_t)x; z[n].y = (int16_t)y;
+    z[n].w = (int16_t)w; z[n].h = (int16_t)h;
+    z[n].tipo = (uint8_t)tipo;
+    return n + 1;
+}
+
+int ch_lk_blancos(ch_t *g, ch_blanco_t *z, int max)
+{
+    int n = 0;
+
+    switch (g->lk.estado) {
+    case LK_SIN_ENLACE:
+    case LK_CAIDO:
+    case LK_HECHO:
+        n = lk_blanco(z, n, max, BOT_X, BOT_Y0, BOT_W, BOT_H, BL_BOTON);
+        break;
+    case LK_MENU:
+        for (int i = 0; i < 4; i++) {
+            n = lk_blanco(z, n, max, TL_X + (i & 1) * (TL_W + 4),
+                        TL_Y + (i >> 1) * (TL_H + 2), TL_W, TL_H, BL_BOTON);
+        }
+        break;
+    case LK_ELIGIENDO: {
+        uint8_t ids[CH_MAX_MOCHILA];
+        int k = opciones(g, ids, CH_MAX_MOCHILA);
+        for (int i = 0; i < BOT_MAX && g->lk.sel + i < k; i++) {
+            n = lk_blanco(z, n, max, BOT_X, BOT_Y0 + i * BOT_SEP, BOT_W, BOT_H,
+                        BL_BOTON);
+        }
+        /* the title turns the page; R does it from the pad */
+        if (k > BOT_MAX) {
+            n = lk_blanco(z, n, max, SW / 2, 2, SW / 2 - 8, LK_HDR - 6, BL_ABAJO);
+        }
+        break;
+    }
+    case LK_OFRECIDO:
+        n = lk_blanco(z, n, max, BOT_X, BOT_Y0 + BOT_SEP, BOT_W, BOT_H, BL_BOTON);
+        break;
+    default:
+        break;
+    }
+    return n;
+}
+
 bool ch_lk_atras(ch_t *g)
 {
     switch (g->lk.estado) {

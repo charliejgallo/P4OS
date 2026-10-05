@@ -543,6 +543,98 @@ void ch_map_toque(ch_t *g, int bx, int by)
 }
 
 /* --------------------------------------------------------------------------
+ * The gamepad
+ *
+ * The finger walks a route; the pad walks a cell at a time, through the same
+ * route: one step in g->ruta, and the next one appended on the step's LAST
+ * frame, so a held direction walks without a stop between cells and letting
+ * go stops on the next cell, never two further. A direction into something
+ * solid only turns the robot to face it - which is what A then acts on.
+ * -------------------------------------------------------------------------- */
+
+static int pad_dir(const ch_t *g, uint32_t held)
+{
+    static const uint32_t BIT[4] = { CHP_ABAJO, CHP_ARRIBA, CHP_IZQ, CHP_DER };
+
+    /* With two held (a diagonal of the stick) the way it already walks wins,
+     * so it does not zigzag. */
+    if (held & BIT[g->s.dir & 3]) return g->s.dir & 3;
+    for (int d = 0; d < 4; d++) {
+        if (held & BIT[d]) return d;
+    }
+    return -1;
+}
+
+/* A, on what is in front: a creature, an entity, or one across a counter -
+ * the same two cells a tap allows. Last, something you are standing on. */
+static void pad_accion(ch_t *g)
+{
+    const ch_room_t *r = &ch_salas[g->s.sala % ch_nsalas];
+    int d = g->s.dir & 3;
+
+    for (int k = 1; k <= 2; k++) {
+        int x = g->s.x + DX[d] * k, y = g->s.y + DY[d] * k;
+        int i;
+
+        if (x < 0 || x >= COLS || y < 0 || y >= ROWS) return;
+        for (int m = 0; m < g->nmov; m++) {
+            if (g->mov[m].vivo && g->mov[m].x == x && g->mov[m].y == y) {
+                lanzar_bicho(g, m);
+                return;
+            }
+        }
+        i = ent_en(r, x, y);
+        if (i >= 0 && ent_viva(g, &r->ents[i]) && r->ents[i].tipo != E_PUERTA) {
+            ch_map_interactuar(g, i);
+            return;
+        }
+        /* only past something you cannot walk through */
+        if (!bloqueado(g, r, x, y)) break;
+    }
+    {
+        int i = ent_en(r, g->s.x, g->s.y);
+        if (i >= 0 && ent_viva(g, &r->ents[i]) && r->ents[i].tipo != E_PUERTA) {
+            ch_map_interactuar(g, i);
+        }
+    }
+}
+
+void ch_map_pad(ch_t *g, uint32_t held, uint32_t pressed)
+{
+    const ch_room_t *r = &ch_salas[g->s.sala % ch_nsalas];
+    int d = pad_dir(g, held);
+
+    if (d >= 0) {
+        g->quieto = 0;
+        g->destino_ent = 0xFF;
+        if (g->andando) {
+            /* A route the finger asked for gives way: the step under way
+             * ends, the rest is dropped. */
+            if (g->nruta > g->iruta + 1) g->nruta = (uint8_t)(g->iruta + 1);
+            if (g->andando == 1 && g->nruta == g->iruta + 1) {
+                if (g->nruta >= RUTA_MAX) {
+                    g->ruta[0] = g->ruta[g->iruta];
+                    g->iruta = 0;
+                    g->nruta = 1;
+                }
+                g->ruta[g->nruta++] = (uint8_t)d;
+            }
+        } else if (!g->trans) {
+            g->nruta = g->iruta = 0;
+            g->s.dir = (uint8_t)d;
+            if (!bloqueado(g, r, g->s.x + DX[d], g->s.y + DY[d])) {
+                g->ruta[0] = (uint8_t)d;
+                g->nruta = 1;
+            }
+        }
+        return;
+    }
+    if ((pressed & CHP_A) && !g->andando && g->iruta >= g->nruta && !g->trans) {
+        pad_accion(g);
+    }
+}
+
+/* --------------------------------------------------------------------------
  * What happens on stepping into a cell
  * -------------------------------------------------------------------------- */
 

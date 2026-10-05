@@ -7,6 +7,7 @@
  * Living here:
  *   - the OS's retro canvas, the two layers on it and the camera
  *   - the touch: taps, and two fingers for the zoom
+ *   - the USB gamepad, read here and handed to ch_pad.c as plain bits
  *   - the save file
  *
  * ---------------------------------------------------------------------------
@@ -50,6 +51,7 @@
 #include "aos_hal.h"
 #include "aos_i18n.h"
 #include "aos_icon_ops.h"
+#include "aos_pad.h"
 #include "aos_retro.h"
 #include "aos_ui.h"
 
@@ -166,6 +168,8 @@ typedef struct {
     uint8_t     t_z0;               /* and the zoom it started from          */
     uint8_t     t_n2;               /* samples in a row with two fingers     */
     uint32_t    t_pinza_fin;        /* when the last pinch let go            */
+
+    aos_pad_t   pad;                /* the USB gamepad (ch_pad.c)            */
 
     uint16_t    frames;
     uint8_t     mostrar_fps;
@@ -796,6 +800,7 @@ static void dibujar_ui(ch_t *g)
     } else {
         ch_ui_dibujar(g);
     }
+    ch_pad_dibujar(g);              /* the pad's cursor, over all of it  */
 }
 
 /* Rebuilds every background for the current mode. It is the only expensive
@@ -985,6 +990,7 @@ static void tocar(app_t *a, int sx, int sy)
     int cx = (sx - r->x) / r->scale, cy = (sy - r->y) / r->scale;
 
     if (cx < 0 || cy < 0 || cx >= r->w || cy >= r->h) return;
+    g->pad_visto = 0;               /* a finger: the pad's cursor goes   */
 
     /* On the map, the window is the world and the rest is the HUD. */
     if (g->modo == MODO_MAPA && cx >= a->vx && cx < a->vx + a->vw &&
@@ -1093,6 +1099,28 @@ static void leer_dedos(app_t *a)
 }
 
 /* --------------------------------------------------------------------------
+ * The gamepad
+ *
+ * Read once a frame and handed over as bits: the game's own enum is the same
+ * as aos_pad.h's, so it is a cast, and the asserts are what keep it one.
+ * -------------------------------------------------------------------------- */
+
+_Static_assert((int)CHP_ARRIBA == (int)AOS_PAD_UP &&
+               (int)CHP_ABAJO == (int)AOS_PAD_DOWN &&
+               (int)CHP_IZQ == (int)AOS_PAD_LEFT &&
+               (int)CHP_DER == (int)AOS_PAD_RIGHT &&
+               (int)CHP_A == (int)AOS_PAD_A && (int)CHP_B == (int)AOS_PAD_B &&
+               (int)CHP_L == (int)AOS_PAD_L && (int)CHP_R == (int)AOS_PAD_R &&
+               (int)CHP_START == (int)AOS_PAD_START,
+               "the game's pad bits are aos_pad.h's");
+
+static void leer_pad(app_t *a)
+{
+    aos_pad_update(&a->pad, lv_tick_get());
+    ch_pad(&a->g, a->pad.held, a->pad.pressed, a->pad.repeat);
+}
+
+/* --------------------------------------------------------------------------
  * The game's clock
  * -------------------------------------------------------------------------- */
 
@@ -1118,6 +1146,7 @@ static void step(void *user)
     }
 
     leer_dedos(a);
+    leer_pad(a);
     if (g->zoom_pide) {
         cambiar_zoom(a, g->zoom + g->zoom_pide * ZOOM_PASO);
         g->zoom_pide = 0;
@@ -1251,6 +1280,7 @@ static bool chatarra_resize(aos_app_t *self, void *inst, lv_obj_t *root)
     a->deslizando = false;
     a->g.rehacer_fondo = 1;
     dedos_desde_ahora(a);
+    aos_pad_reset(&a->pad, lv_tick_get());
     aos_retro_run(FPS, step, NULL, a);
     return true;
 }
@@ -1474,6 +1504,7 @@ static void *chatarra_create(aos_app_t *self, lv_obj_t *root)
 
     a->prev_ms = aos_hal_uptime_ms();
     dedos_desde_ahora(a);
+    aos_pad_reset(&a->pad, lv_tick_get());
     aos_retro_run(FPS, step, NULL, a);
     aos_hal_log("chatarra", "ready | canvas %dx%d x%d, UI %dx%d, zoom %d",
                 a->r->w, a->r->h, a->r->scale, UW, UH, a->g.zoom);

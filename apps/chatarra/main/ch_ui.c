@@ -386,21 +386,27 @@ void ch_ui_hud(ch_t *g)
     g->hud_sucio = 0;
 }
 
+void ch_ui_boton_menu(ch_t *g)
+{
+    if (g->modo == MODO_MAPA) {
+        ch_ui_menu(g);
+    } else if (g->modo != MODO_FERIA && g->modo != MODO_CABINA &&
+               g->modo != MODO_DIALOGO && g->modo != MODO_TITULO &&
+               g->modo != MODO_COMBATE) {
+        /* From any menu the same button goes back to the map. */
+        ch_sfx(700, 30);
+        g->sel = g->sel2 = g->scroll = 0;
+        g->modo = MODO_MAPA;
+        g->rehacer_fondo = 1;
+    }
+}
+
 /* A tap on the HUD, in any mode that shows it. */
 static void hud_toque(ch_t *g, int bx, int by)
 {
     switch (hud_boton_en(bx, by)) {
     case HB_MENU:
-        if (g->modo == MODO_MAPA) {
-            ch_ui_menu(g);
-        } else if (g->modo != MODO_FERIA && g->modo != MODO_CABINA &&
-                   g->modo != MODO_DIALOGO) {
-            /* From any menu the same button goes back to the map. */
-            ch_sfx(700, 30);
-            g->sel = g->sel2 = g->scroll = 0;
-            g->modo = MODO_MAPA;
-            g->rehacer_fondo = 1;
-        }
+        ch_ui_boton_menu(g);
         break;
     case HB_MENOS:
         if (g->modo == MODO_MAPA) g->zoom_pide = -1;
@@ -2950,6 +2956,152 @@ void ch_ui_toque(ch_t *g, int bx, int by)
          * into world units and hands it to ch_map_toque(). */
         break;
     }
+}
+
+/* --------------------------------------------------------------------------
+ * The targets, for the gamepad
+ *
+ * Every rectangle a tap on this screen answers to, from the same geometry
+ * functions the drawing and the touch use - so the pad's cursor lands
+ * exactly on what is drawn, and A is a tap in its middle. The geometry that
+ * lives in statics (the list's rows, s_nlista) is the one the screen's
+ * background left there: ch_pad.c never asks while a rebuild is pending.
+ * The back button and the HUD are not targets: B and START are those.
+ * -------------------------------------------------------------------------- */
+
+static int blanco(ch_blanco_t *z, int n, int max, int x, int y, int w, int h, int tipo)
+{
+    if (n >= max) return n;
+    z[n].x = (int16_t)x; z[n].y = (int16_t)y;
+    z[n].w = (int16_t)w; z[n].h = (int16_t)h;
+    z[n].tipo = (uint8_t)tipo;
+    return n + 1;
+}
+
+/* The list's two arrows, which flecha_en() answers whether drawn or not. */
+static int blancos_flechas(ch_blanco_t *z, int n, int max)
+{
+    n = blanco(z, n, max, AR_X, AR_Y, AR_W, AR_H, BL_ARRIBA);
+    return blanco(z, n, max, AR_X + AR_W + 4, AR_Y, AR_W, AR_H, BL_ABAJO);
+}
+
+/* The rows of the list on show, `total` entries from g->scroll. */
+static int blancos_filas(const ch_t *g, ch_blanco_t *z, int n, int max, int total)
+{
+    for (int i = 0; i < s_lfilas && g->scroll + i < total; i++) {
+        n = blanco(z, n, max, LX, s_ly0 + i * s_lfh, LW, s_lfh - 4, BL_BOTON);
+    }
+    return blancos_flechas(z, n, max);
+}
+
+int ch_ui_blancos(ch_t *g, ch_blanco_t *z, int max)
+{
+    int n = 0;
+
+    switch (g->modo) {
+    case MODO_TITULO:
+        titulo_geom();
+        n = blanco(z, n, max, TIT_BX, TIT_BY, TIT_BW, TIT_BH, BL_BOTON);
+        break;
+
+    case MODO_MENU: {
+        int nb, cols;
+        const char *tit;
+        (void)pagina(g, &nb, &cols, &tit);
+        for (int i = 0; i < nb; i++) {
+            int x, y, w, h;
+            baldosa_caja(i, nb, cols, &x, &y, &w, &h);
+            n = blanco(z, n, max, x, y, w, h, BL_BOTON);
+        }
+        break;
+    }
+
+    case MODO_TALLER:
+        taller_geom();
+        if (g->sel2 == 0) {
+            /* the four categories first: they are what the screen is for */
+            int ew = (TA_EW - 4) / EQUIPO;
+            for (int c = 0; c < P_CATS; c++) {
+                n = blanco(z, n, max, TA_BX, TA_BY + c * TA_BH, TA_BW, TA_BH - 3,
+                         BL_BOTON);
+            }
+            for (int i = 0; i < EQUIPO; i++) {
+                n = blanco(z, n, max, TA_EX + i * (ew + 2), TA_EY, ew, TA_EH,
+                         BL_BOTON);
+            }
+        } else {
+            n = blancos_filas(g, z, n, max, s_nlista);
+        }
+        break;
+
+    case MODO_OBJETOS:
+    case MODO_VENDER:
+        n = blancos_filas(g, z, n, max, s_nlista);
+        break;
+
+    case MODO_TIENDA:
+        n = blancos_filas(g, z, n, max, NSURTIDO);
+        break;
+
+    case MODO_DIARIO:
+        n = blancos_flechas(z, n, max);
+        break;
+
+    case MODO_FICHA: {
+        int w;
+        eq_geom();
+        w = (EQ_PW - 3) / 2;
+        for (int i = 0; i < EQUIPO; i++) {
+            n = blanco(z, n, max, 4 + i * (EQ_W + 3), EQ_Y, EQ_W, EQ_H, BL_BOTON);
+        }
+        for (int i = 0; i < 2; i++) {
+            n = blanco(z, n, max, EQ_PX + i * (w + 3), EQ_VY, w, EQ_VH, BL_BOTON);
+        }
+        for (int i = 0; i < 2; i++) {
+            n = blanco(z, n, max, i ? SW / 2 + 2 : 4, EQ_BY, SW / 2 - 6, EQ_BH,
+                     BL_BOTON);
+        }
+        break;
+    }
+
+    case MODO_REGISTRO: {
+        int pag;
+        rg_geom();
+        pag = g->scroll % rg_paginas();
+        for (int c = 0; c < P_CATS; c++) {
+            n = blanco(z, n, max, RG_TX + c * (RG_TW + 2), RG_TY, RG_TW, RG_TH,
+                     BL_BOTON);
+        }
+        for (int k = 0; k < RG_PAG && pag * RG_PAG + k < PVAR; k++) {
+            n = blanco(z, n, max, RG_GX + (k % RG_COLS) * RG_CW + 1,
+                     RG_GY + (k / RG_COLS) * RG_CH + 1, RG_CW - 3, RG_CH - 3,
+                     BL_BOTON);
+        }
+        if (rg_paginas() > 1) n = blancos_flechas(z, n, max);
+        break;
+    }
+
+    case MODO_MAPAMUNDI: {
+        int pag;
+        mm_geom();
+        pag = g->scroll % mm_paginas();
+        for (int i = 0; i < MM_FILAS && pag * MM_FILAS + i < ZONAS; i++) {
+            n = blanco(z, n, max, 6, MM_Y0 + i * MM_FH, SW - 12, MM_H, BL_BOTON);
+        }
+        if (mm_paginas() > 1) n = blancos_flechas(z, n, max);
+        break;
+    }
+
+    case MODO_AYUDA:
+    case MODO_FINAL:
+        /* any tap turns the page, or leaves */
+        n = blanco(z, n, max, 0, HDR, SW, SH - HDR, BL_TODO);
+        break;
+
+    default:
+        break;
+    }
+    return n;
 }
 
 /* The back gesture, and the header's back button. Returns true if the app

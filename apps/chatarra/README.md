@@ -137,13 +137,29 @@ Measured (2026-09-29): the `.so` went from 212 KB to 336 KB with the 2x art
 (`.rodata` 117 KB, `.data.rel.ro` 35 KB, all in PSRAM with the code); the room
 buffers at zoom 6 are 1080x1008, 2.1 MB each, 4.4 MB for the two, in PSRAM.
 
-### Touch only
+### Touch, and a USB gamepad
 
-There is no physical input on the board, so everything is on the glass: the
-HUD's **MENU** (or touching your own robot), the zoom buttons, a back button
-in each header (the system's back swipe does the same), and on the map a tap
-on a character's head counts as a tap on the character. No motion sensor was
-ever used by this game.
+Everything is on the glass: the HUD's **MENU** (or touching your own robot),
+the zoom buttons, a back button in each header (the system's back swipe does
+the same), and on the map a tap on a character's head counts as a tap on the
+character. No motion sensor was ever used by this game.
+
+A USB gamepad on the board's host port plays all of it (`ch_pad.c`), and it
+does so by turning into taps, so it can do nothing a finger cannot:
+
+| | |
+| --- | --- |
+| map | d-pad or stick walks a cell at a time (held, it keeps walking, doors included); **A** talks, opens, fights or uses what you face, one cell away or across a counter; **START** opens the menu; **L/R** zoom out / in |
+| dialogue | **A** or **B** writes the page out, then turns it |
+| menus, workshop, items, team, shop, scrap dealer, register, world map, booth, combat | a white frame over the screen's buttons: the d-pad moves it to the nearest one in that direction, **A** taps it (the two-tap rules of the shop, the workshop and the dealer hold), **B** is the back button, **START** the HUD's MENU/MAPA; in a list, UP/DOWN past the first or last row and **L/R** turn it |
+| combat messages, help, the closing screen | **A** goes on |
+| title | **A** or **START** |
+| the scrap belt | a claw: UP/DOWN pick the lane, LEFT/RIGHT slide it, **A** grabs; **B** ends the round |
+
+Each screen publishes its targets (`ch_ui_blancos`, `ch_bt_blancos`,
+`ch_lk_blancos`) from the same geometry its drawing and its touch use. The
+frame shows from the first press of the pad and goes away with the next tap
+of a finger; while it is hidden, the first press only shows it.
 
 ### The phone booths
 
@@ -315,6 +331,7 @@ carries a MENU button as well (see "On P4OS").
 | `ch_ui.c` | HUD, dialogue, menu, workshop, items, team screen, register, shop, title |
 | `ch_link.c` | the phone booth: the protocol and the screen for the other watch |
 | `ch_feria.c` | the scrap belt: the minigame at Bujia docks |
+| `ch_pad.c` | the USB gamepad, turned into taps (P4OS) |
 | `ch_sound.c` | the four-voice synthesiser and the sixteen tunes |
 | `chatarra.c` | the only thing LVGL and the HAL see: the retro canvas, the two layers, the camera, taps and pinch, saving |
 

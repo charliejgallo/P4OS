@@ -131,6 +131,37 @@ void ch_fe_toque(ch_t *g, int bx, int by)
     }
 }
 
+/* THE PAD'S CLAW. A finger grabs a part where it is; a pad cannot point, so
+ * it gets a claw: UP and DOWN pick the lane, LEFT and RIGHT slide it along,
+ * and A grabs whatever is under it - through ch_fe_toque(), with the same
+ * margin a finger has. It starts two thirds of the way along, where a part
+ * has crossed most of the belt and there is still time to look at its box. */
+static int garra_x(ch_t *g)
+{
+    if (!g->fe.garra_x) g->fe.garra_x = (int16_t)(SW * 2 / 3);
+    return g->fe.garra_x;
+}
+
+void ch_fe_pad(ch_t *g, uint32_t held, uint32_t pressed, uint32_t repeat)
+{
+    int x = garra_x(g);
+
+    if (g->fe.resta == 0) {             /* the prize screen: out           */
+        if (pressed & (CHP_A | CHP_START)) ch_fe_toque(g, 0, 0);
+        return;
+    }
+    if ((repeat & CHP_ARRIBA) && g->fe.garra_c > 0) g->fe.garra_c--;
+    if ((repeat & CHP_ABAJO) && g->fe.garra_c < FE_CARRIL - 1) g->fe.garra_c++;
+    if (held & CHP_IZQ) x -= 4;
+    if (held & CHP_DER) x += 4;
+    if (x < FE_PIEZA / 2) x = FE_PIEZA / 2;
+    if (x > SW - FE_PIEZA / 2) x = SW - FE_PIEZA / 2;
+    g->fe.garra_x = (int16_t)x;
+    if (pressed & CHP_A) {
+        ch_fe_toque(g, x, FE_Y0 + g->fe.garra_c * FE_ALTO + FE_PIEZA / 2);
+    }
+}
+
 void ch_fe_fondo(ch_t *g)
 {
     ch_buf_t *b = &g->bg;
@@ -221,6 +252,16 @@ void ch_fe_dibujar(ch_t *g)
         ch_part_draw(b, cat, var, x + FE_PIEZA / 2, y + FE_PIEZA / 2, FE_ESC,
                      g->fe.p[i].malo ? -1 : (int)g->s.yo.skin);
         ch_dirty_add(&g->d_cur, x - 2, y - 2, FE_PIEZA + 6, FE_PIEZA + 6);
+    }
+
+    /* The claw, over the parts, once the pad has been used: a white frame
+     * the size of the margin ch_fe_toque() grabs with. */
+    if (g->pad_visto) {
+        int x = garra_x(g) - FE_PIEZA / 2 - 3;
+        int y = FE_Y0 + g->fe.garra_c * FE_ALTO - 3;
+        ch_frame(b, x, y, FE_PIEZA + 6, FE_PIEZA + 6, ch_rgb(0xFFFFFF));
+        ch_frame(b, x - 1, y - 1, FE_PIEZA + 8, FE_PIEZA + 8, ch_rgb(0xFFFFFF));
+        ch_dirty_add(&g->d_cur, x - 1, y - 1, FE_PIEZA + 8, FE_PIEZA + 8);
     }
     ch_clip_none(b);
     (void)t;

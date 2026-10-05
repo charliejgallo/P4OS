@@ -938,6 +938,10 @@ typedef struct {
         uint8_t  puntos, record;
         uint8_t  aviso;         /* cuadros del destello rojo al agarrar mal  */
         uint8_t  premio;        /* FE_PREMIO_*: lo que paso con la pieza     */
+        /* The gamepad's claw: the lane and the column it grabs at. Zeroed
+         * with the rest on every round, and placed on the first frame. */
+        uint8_t  garra_c;
+        int16_t  garra_x;
     } fe;
 
     /* mobile entities of the room (the enemies that patrol) */
@@ -1022,12 +1026,53 @@ typedef struct {
     /* the phone booth */
     ch_link_t  lk;
 
+    /* The gamepad's cursor over the buttons of a menu screen (ch_pad.c).
+     * `pad_visto` is on from the first press of the pad until the next tap
+     * of a finger: a player who only touches never sees an outline. */
+    uint8_t    pad_visto;
+    uint8_t    pad_sel;         /* which target of the screen                */
+    uint32_t   pad_clave;       /* the screen that index belongs to          */
+
     /* things the LVGL layer has to deal with */
     uint8_t    quiere_salir;
     uint8_t    quiere_guardar;
     uint8_t    pitido;          /* pending note                              */
     uint16_t   pitido_hz;
 } ch_t;
+
+/* --------------------------------------------------------------------------
+ * The gamepad (P4OS)
+ *
+ * chatarra.c reads the USB pad and hands the game its roles as these bits -
+ * the same ones as aos_pad.h's AOS_PAD_*, checked there - so the game goes on
+ * not knowing a HAL exists. ch_pad.c turns them into what a finger would
+ * have done: on the map the d-pad walks a cell at a time and A acts on what
+ * you face; on every other screen a cursor goes over the screen's TARGETS -the
+ * rectangles a tap answers to, published by the screen that draws them- and
+ * A taps the one it is on. So the pad can never do something a finger could
+ * not, and the two-tap rules (buy, fit, sell) hold for it too.
+ * -------------------------------------------------------------------------- */
+enum {
+    CHP_ARRIBA = 1u << 0, CHP_ABAJO = 1u << 1, CHP_IZQ = 1u << 2,
+    CHP_DER    = 1u << 3, CHP_A     = 1u << 4, CHP_B   = 1u << 5,
+    CHP_L      = 1u << 6, CHP_R     = 1u << 7, CHP_START = 1u << 8,
+    CHP_DIRS   = CHP_ARRIBA | CHP_ABAJO | CHP_IZQ | CHP_DER,
+};
+
+/* A target: a rectangle a tap answers to, in UI units. ("Zona" is taken:
+ * it is the world's eight.) */
+enum {
+    BL_BOTON = 0,       /* the cursor goes to it and A taps it               */
+    BL_ARRIBA,          /* a list's up arrow: L, or UP past the first row    */
+    BL_ABAJO,           /* its down arrow: R, or DOWN past the last row      */
+    BL_TODO,            /* the whole screen is one tap: A, no cursor         */
+};
+typedef struct { int16_t x, y, w, h; uint8_t tipo; } ch_blanco_t;
+#define CH_BLANCOS_MAX 24
+
+/* ch_pad.c */
+void ch_pad(ch_t *g, uint32_t held, uint32_t pressed, uint32_t repeat);
+void ch_pad_dibujar(ch_t *g);           /* the cursor, onto fb               */
 
 /* --------------------------------------------------------------------------
  * API between files
@@ -1056,6 +1101,10 @@ void ch_map_dialogo_cerrado(ch_t *g);
 #ifdef AOS_SIM_BUILTIN
 int  ch_map_check(void);        /* world test bench, CH_CHECK=1 */
 #endif
+/* The pad on the map: a held direction walks, A acts on what you face. */
+void ch_map_pad(ch_t *g, uint32_t held, uint32_t pressed);
+/* The pad at the fair: a claw over the lanes. */
+void ch_fe_pad(ch_t *g, uint32_t held, uint32_t pressed, uint32_t repeat);
 
 /* ch_ui.c */
 void ch_ui_hud(ch_t *g);
@@ -1065,6 +1114,11 @@ bool ch_ui_atras(ch_t *g);                      /* back gesture              */
 void ch_ui_toque(ch_t *g, int bx, int by);
 void ch_ui_dialogo(ch_t *g, const char *texto, int ent, int luego);
 void ch_ui_aviso(ch_t *g, const char *texto);
+/* The HUD's MENU button, wherever it is: the menu from the map, the map from
+ * a menu. The pad's START. */
+void ch_ui_boton_menu(ch_t *g);
+/* The zones of the screen on show (not the combat's nor the booth's). */
+int  ch_ui_blancos(ch_t *g, ch_blanco_t *z, int max);
 /* LOS ICONOS DE 12x12 son de toda la interfaz y no del menu: la cabina los
  * usa igual. Cualquier letra que no sea '#' (cuerpo) ni '+' (detalle) se busca
  * en la paleta de los sprites, asi que un icono puede tener tanto detalle como
@@ -1106,6 +1160,7 @@ bool ch_lk_atras(ch_t *g);
 void ch_lk_elegir(ch_t *g, uint8_t eleccion);   /* send my choice this turn  */
 void ch_lk_combate_fin(ch_t *g);
 bool ch_lk_hay_piezas(const ch_t *g);
+int  ch_lk_blancos(ch_t *g, ch_blanco_t *z, int max);
 
 /* ch_battle.c */
 void ch_bt_empezar(ch_t *g, const ch_robot_t *rival, int jefe, int zona);
@@ -1115,6 +1170,7 @@ void ch_bt_animar(ch_t *g, int quien, int tipo, int de_estado);
 bool ch_bt_atras(ch_t *g);
 void ch_bt_tick(ch_t *g);
 void ch_bt_toque(ch_t *g, int bx, int by);
+int  ch_bt_blancos(ch_t *g, ch_blanco_t *z, int max);
 /* A link battle: the two choices of the turn, mine and theirs, decided
  * elsewhere and applied here. Never called in a battle against the machine. */
 void ch_bt_aplicar_enlace(ch_t *g, uint8_t mio, uint8_t suyo);

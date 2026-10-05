@@ -1111,6 +1111,57 @@ void ch_bt_toque(ch_t *g, int bx, int by)
     }
 }
 
+/* The rectangles the touch above answers to, for the gamepad's cursor. The
+ * team's lamps (MP_EQUIPO) are not a button and are left out; a cell that
+ * only beeps -an empty slot, the robot already out- stays in, because it is
+ * on screen and a finger can tap it too. */
+static int bt_blanco(ch_blanco_t *z, int n, int max, int x, int y, int w, int tipo)
+{
+    if (n >= max) return n;
+    z[n].x = (int16_t)x; z[n].y = (int16_t)y;
+    z[n].w = (int16_t)w; z[n].h = (int16_t)BOT_H;
+    z[n].tipo = (uint8_t)tipo;
+    return n + 1;
+}
+
+int ch_bt_blancos(ch_t *g, ch_blanco_t *z, int max)
+{
+    int n = 0;
+
+    bt_geom();
+    switch (g->bt.fase) {
+    case CB_MENSAJE:
+        n = bt_blanco(z, n, max, CAJA_X, CAJA_Y, CAJA_W, BL_TODO);
+        break;
+    case CB_MENU:
+        for (int i = 0; i < MP_EQUIPO; i++) {
+            n = bt_blanco(z, n, max, B6_X[i], B6_Y[i], B6_W, BL_BOTON);
+        }
+        break;
+    case CB_ATAQUES:
+        for (int i = 0; i < 4 && i < g->s.yo.nmov; i++) {
+            n = bt_blanco(z, n, max, BOT_X[i], BOT_Y[i], BOT_W, BL_BOTON);
+        }
+        break;
+    case CB_OBJETOS:
+        for (int i = 0; i < 4; i++) {
+            n = bt_blanco(z, n, max, BOT_X[i], BOT_Y[i], BOT_W, BL_BOTON);
+        }
+        break;
+    case CB_CAMBIO:
+        /* the first one offered is the second robot: the first is the one
+         * already out */
+        for (int k = 1; k <= 4; k++) {
+            int i = k & 3;
+            n = bt_blanco(z, n, max, BOT_X[i], BOT_Y[i], BOT_W, BL_BOTON);
+        }
+        break;
+    default:
+        break;
+    }
+    return n;
+}
+
 /* --------------------------------------------------------------------------
  * A TURN OF A BATTLE BETWEEN TWO WATCHES
  *
