@@ -1,0 +1,354 @@
+# amoledos-lang 1   es -> en
+# aos.pwm.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/pwm/main/pw_draw.c:121
+%s V a la salida del filtro	%s V out of the filter
+
+#: apps/pwm/main/pw_draw.c:123
+pulsos a 1 MHz	pulses at 1 MHz
+
+#: apps/pwm/main/pw_draw.c:158
+siempre abajo	always low
+
+#: apps/pwm/main/pw_draw.c:159
+siempre arriba	always high
+
+#: apps/pwm/main/pw_draw.c:160
+alto %s (%s %%)	high %s (%s %%)
+
+#: apps/pwm/main/pw_draw.c:180
+invertida	inverted
+
+#: apps/pwm/main/pw_draw.c:220
+señal	signal
+
+#: apps/pwm/main/pw_draw.c:221
+fuente	supply
+
+#: apps/pwm/main/pw_draw.c:222
+5 V aparte	separate 5 V
+
+#: apps/pwm/main/pw_draw.c:228
+servo	servo
+
+#: apps/pwm/main/pw_draw.c:239
+#: apps/pwm/main/pw_sheets.c:717
+LED IR	IR LED
+
+#: apps/pwm/main/pw_draw.c:250
+salida	output
+
+#: apps/pwm/main/pw_draw.c:341
+GPIO%d (pata %d)	GPIO%d (pin %d)
+
+#: apps/pwm/main/pw_engine.c:177
+#: apps/pwm/main/pw_sheets.c:165
+El pin lo tiene %s	%s has that pin
+
+#: apps/pwm/main/pw_engine.c:181
+No se pudo abrir el nivel analógico	Could not open the analog level
+
+#: apps/pwm/main/pw_engine.c:191
+Los siete canales del LEDC están ocupados	All seven LEDC channels are in use
+
+#: apps/pwm/main/pw_engine.c:193
+Ya hay tres frecuencias distintas: el LEDC no da más	There are already three different frequencies: the LEDC has no more
+
+#: apps/pwm/main/pw_engine.c:195
+No se pudo abrir el PWM (mirá el registro)	Could not open the PWM (see the log)
+
+#: apps/pwm/main/pw_engine.c:203
+Elegí un pin para este canal	Choose a pin for this channel
+
+#: apps/pwm/main/pw_engine.c:426
+%s no entra: el LEDC da tres frecuencias a la vez como máximo	%s does not fit: the LEDC gives three frequencies at once at most
+
+#: apps/pwm/main/pw_engine.c:540
+%s · %d bits	%s · %d bits
+
+#: apps/pwm/main/pw_engine.c:556
+ciclo %s %%	duty %s %%
+
+#: apps/pwm/main/pw_engine.c:561
+%d de 255	%d of 255
+
+#: apps/pwm/main/pw_engine.c:566
+PWM	PWM
+
+#: apps/pwm/main/pw_engine.c:566
+#: apps/pwm/main/pw_sheets.c:716
+Servo	Servo
+
+#: apps/pwm/main/pw_engine.c:566
+#: apps/pwm/main/pw_sheets.c:714
+LED	LED
+
+#: apps/pwm/main/pw_engine.c:566
+Nivel	Level
+
+#: apps/pwm/main/pw_engine.c:568
+Fijo	Steady
+
+#: apps/pwm/main/pw_engine.c:568
+Respirar	Breathe
+
+#: apps/pwm/main/pw_engine.c:568
+Barrido	Sweep
+
+#: apps/pwm/main/pw_engine.c:568
+Estrobo	Strobe
+
+#: apps/pwm/main/pw_engine.c:568
+Rampa	Ramp
+
+#: apps/pwm/main/pw_engine.c:568
+Seno	Sine
+
+#: apps/pwm/main/pw_engine.c:568
+#: apps/pwm/main/pw_sheets.c:444
+Pasos	Steps
+
+#: apps/pwm/main/pw_knob.c:131
+Con un patrón andando, la perilla gira la velocidad	With a pattern running, the knob turns the speed
+
+#: apps/pwm/main/pw_knob.c:249
+fino ×0,1	fine ×0.1
+
+#: apps/pwm/main/pw_knob.c:295
+real %s · %d bits	actual %s · %d bits
+
+#: apps/pwm/main/pw_knob.c:297
+al encender	when on
+
+#: apps/pwm/main/pw_knob.c:299
+FRECUENCIA	FREQUENCY
+
+#: apps/pwm/main/pw_knob.c:309
+PERÍODO	PERIOD
+
+#: apps/pwm/main/pw_knob.c:316
+CICLO	DUTY
+
+#: apps/pwm/main/pw_knob.c:316
+ÁNGULO	ANGLE
+
+#: apps/pwm/main/pw_knob.c:316
+BRILLO	BRIGHTNESS
+
+#: apps/pwm/main/pw_knob.c:316
+NIVEL	LEVEL
+
+#: apps/pwm/main/pw_knob.c:317
+EN VIVO	LIVE
+
+#: apps/pwm/main/pw_sheets.c:122
+Listo	Done
+
+#: apps/pwm/main/pw_sheets.c:159
+Ese pin lo usa el canal %d	Channel %d uses that pin
+
+#: apps/pwm/main/pw_sheets.c:177
+Pin del canal	Channel pin
+
+#: apps/pwm/main/pw_sheets.c:178
+Los pines libres del header. Andan a 3,3 V: nunca 5 V en una pata. La pata es el número en el conector de 40.	The header's free pins. They work at 3.3 V: never 5 V on a pin. The pin number is the one on the 40-pin connector.
+
+#: apps/pwm/main/pw_sheets.c:212
+pata %d	pin %d
+
+#: apps/pwm/main/pw_sheets.c:216
+este canal	this channel
+
+#: apps/pwm/main/pw_sheets.c:217
+canal %d	channel %d
+
+#: apps/pwm/main/pw_sheets.c:219
+VO4: medí antes	VO4: measure first
+
+#: apps/pwm/main/pw_sheets.c:220
+strapping	strapping
+
+#: apps/pwm/main/pw_sheets.c:223
+libre	free
+
+#: apps/pwm/main/pw_sheets.c:323
+Tocá otra vez para borrarlo	Tap again to delete it
+
+#: apps/pwm/main/pw_sheets.c:336
+Canal %d	Channel %d
+
+#: apps/pwm/main/pw_sheets.c:343
+Invertir la salida	Invert the output
+
+#: apps/pwm/main/pw_sheets.c:351
+Para un LED entre 3V3 y la pata: prende cuando la pata va a 0.	For a LED between 3V3 and the pin: it lights when the pin goes to 0.
+
+#: apps/pwm/main/pw_sheets.c:354
+Pulso mínimo	Minimum pulse
+
+#: apps/pwm/main/pw_sheets.c:355
+Pulso máximo	Maximum pulse
+
+#: apps/pwm/main/pw_sheets.c:356
+Recorrido	Travel
+
+#: apps/pwm/main/pw_sheets.c:357
+La mayoría de los servos van de 500 a 2500 µs en 180°. Si el servo zumba o golpea en un extremo, acercá los topes.	Most servos go from 500 to 2500 µs over 180°. If the servo buzzes or hits an end, bring the stops closer.
+
+#: apps/pwm/main/pw_sheets.c:360
+Gamma	Gamma
+
+#: apps/pwm/main/pw_sheets.c:361
+El ojo ve la luz en escala logarítmica: con gamma 2,2, el brillo al 50 % es un ciclo del 22 %.	The eye sees light on a logarithmic scale: with gamma 2.2, 50 % brightness is a 22 % duty.
+
+#: apps/pwm/main/pw_sheets.c:363
+El nivel analógico no tiene ajustes: 256 pasos de 0 a 3,3 V, con el filtro RC del cableado.	The analog level has no settings: 256 steps from 0 to 3.3 V, with the RC filter from the wiring.
+
+#: apps/pwm/main/pw_sheets.c:365
+Borrar el canal	Delete the channel
+
+#: apps/pwm/main/pw_sheets.c:398
+%d pasos	%d steps
+
+#: apps/pwm/main/pw_sheets.c:445
+Cada paso dura lo mismo: el período dividido por la cantidad de pasos.	Every step lasts the same: the period divided by the number of steps.
+
+#: apps/pwm/main/pw_sheets.c:492
+No se pudo leer el preset	Could not read the preset
+
+#: apps/pwm/main/pw_sheets.c:500
+Cargado: %s	Loaded: %s
+
+#: apps/pwm/main/pw_sheets.c:510
+¿Borrar?	Delete?
+
+#: apps/pwm/main/pw_sheets.c:543
+Todavía no hay presets guardados.	No presets saved yet.
+
+#: apps/pwm/main/pw_sheets.c:543
+No hay tarjeta.	No card.
+
+#: apps/pwm/main/pw_sheets.c:564
+Borrar	Delete
+
+#: apps/pwm/main/pw_sheets.c:606
+No hay tarjeta	No card
+
+#: apps/pwm/main/pw_sheets.c:613
+Guardado: %s	Saved: %s
+
+#: apps/pwm/main/pw_sheets.c:619
+No se pudo guardar	Could not save
+
+#: apps/pwm/main/pw_sheets.c:636
+#: apps/pwm/main/pw_ui.c:465
+Presets	Presets
+
+#: apps/pwm/main/pw_sheets.c:637
+Todos los canales con sus pines, modos y patrones, en /sdcard/pwm. Al cargar uno, los canales encendidos se encienden.	All the channels with their pins, modes and patterns, in /sdcard/pwm. Loading one turns on the channels that were on.
+
+#: apps/pwm/main/pw_sheets.c:642
+nombre del preset	preset name
+
+#: apps/pwm/main/pw_sheets.c:652
+Guardar	Save
+
+#: apps/pwm/main/pw_sheets.c:678
+La pata da 3,3 V y pocos mA: el LED con su resistencia (220 a 470 Ω) a GND. En modo LED, el brillo va con la curva de gamma.	The pin gives 3.3 V and a few mA: the LED with its resistor (220 to 470 Ω) to GND. In LED mode the brightness follows the gamma curve.
+
+#: apps/pwm/main/pw_sheets.c:679
+El LED prende cuando la pata va a 0: activá Invertir en los ajustes del canal.	The LED lights when the pin goes to 0: turn on Invert in the channel's settings.
+
+#: apps/pwm/main/pw_sheets.c:680
+El servo se alimenta aparte, con 5 V externos y no de la placa: GND en común con el header y sólo la señal a la pata. Modo Servo: 50 Hz y un pulso de 500 a 2500 µs.	The servo is powered separately, from an external 5 V and not from the board: GND shared with the header and only the signal to the pin. Servo mode: 50 Hz and a pulse from 500 to 2500 µs.
+
+#: apps/pwm/main/pw_sheets.c:681
+Un LED infrarrojo pide más corriente que la pata: un transistor NPN con 1 kΩ en la base. Para la portadora de un control remoto, PWM a 38 kHz con ciclo del 33 %.	An infrared LED wants more current than the pin gives: an NPN transistor with 1 kΩ on the base. For a remote control's carrier, PWM at 38 kHz with a 33 % duty.
+
+#: apps/pwm/main/pw_sheets.c:682
+El nivel analógico es un tren de pulsos a 1 MHz: 1 kΩ en serie y 1 µF a GND lo vuelven una tensión de 0 a 3,3 V, con pocos mV de ripple y ~5 ms para asentarse. Sin carga pesada a la salida.	The analog level is a pulse train at 1 MHz: 1 kΩ in series and 1 µF to GND turn it into 0 to 3.3 V, with a few mV of ripple and ~5 ms to settle. No heavy load on the output.
+
+#: apps/pwm/main/pw_sheets.c:713
+#: apps/pwm/main/pw_ui.c:466
+Cableado	Wiring
+
+#: apps/pwm/main/pw_sheets.c:715
+LED a 3V3	LED to 3V3
+
+#: apps/pwm/main/pw_sheets.c:718
+Filtro RC	RC filter
+
+#: apps/pwm/main/pw_sheets.c:757
+Señal: pata %d (GPIO%d).	Signal: pin %d (GPIO%d).
+
+#: apps/pwm/main/pw_sheets.c:761
+GND: patas %s. 3V3: patas %s. 5V: patas %s (sólo para alimentar algo chico; un servo, mejor aparte).	GND: pins %s. 3V3: pins %s. 5V: pins %s (only to power something small; a servo, better separately).
+
+#: apps/pwm/main/pw_ui.c:145
+Ya están los siete canales	All seven channels are there
+
+#: apps/pwm/main/pw_ui.c:154
+Salidas apagadas y pines sueltos	Outputs off and pins released
+
+#: apps/pwm/main/pw_ui.c:182
+Con un patrón andando, el valor lo mueve el patrón	With a pattern running, the pattern moves the value
+
+#: apps/pwm/main/pw_ui.c:241
+Valor	Value
+
+#: apps/pwm/main/pw_ui.c:242
+Frecuencia	Frequency
+
+#: apps/pwm/main/pw_ui.c:243
+Velocidad	Speed
+
+#: apps/pwm/main/pw_ui.c:311
+sin pin	no pin
+
+#: apps/pwm/main/pw_ui.c:320
+#: apps/pwm/main/pw_ui.c:327
+Canales	Channels
+
+#: apps/pwm/main/pw_ui.c:324
+#: apps/pwm/main/pw_ui.c:330
+Apagar todo	All off
+
+#: apps/pwm/main/pw_ui.c:358
++ Canal	+ Channel
+
+#: apps/pwm/main/pw_ui.c:428
+Patrón	Pattern
+
+#: apps/pwm/main/pw_ui.c:455
+Editar los pasos	Edit the steps
+
+#: apps/pwm/main/pw_ui.c:547
+Ningún PWM encendido	No PWM on
+
+#: apps/pwm/main/pw_ui.c:558
+(%d de 3 frecuencias)	(%d of 3 frequencies)
+
+#: apps/pwm/main/pw_ui.c:576
+Elegí\nun pin	Choose\na pin
+
+#: apps/pwm/main/pw_ui.c:579
+GPIO%d\npata %d	GPIO%d\npin %d
+
+#: apps/pwm/main/pw_ui.c:608
+período %s	period %s
+
+#: apps/pwm/main/pw_ui.c:623
+Entre %s y %s	Between %s and %s
+
+#: apps/pwm/main/pw_ui.c:631
+Un patrón mueve el valor solo, y sigue con la app en segundo plano. Al cerrar la app, todo se apaga.	A pattern moves the value by itself, and keeps going with the app in the background. Closing the app turns everything off.
+
+#: apps/pwm/main/pw_ui.c:632
+Con fades del LEDC: el hardware va de un punto al siguiente.	With LEDC fades: the hardware goes from one point to the next.
+
+#: apps/pwm/main/pw_ui.c:633
+La app escribe el valor cada 20 ms.	The app writes the value every 20 ms.
