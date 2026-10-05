@@ -21,6 +21,8 @@
  * No OS controls are asked for: a pause pill would sit on the bottom row of
  * holes. The screens are laid out on a stage over the canvas, from its size.
  *
+ * A USB gamepad plays it too, with a cursor on the holes ("The gamepad").
+ *
  * Born multilingual like Claude Jump: every visible word is an LVGL label
  * wrapped in _(), and the canvas only ever gets numbers and signs.
  */
@@ -31,6 +33,7 @@
 #include "aos_icon_ops.h"
 #include "aos_ui.h"
 #include "aos_retro.h"
+#include "aos_pad_menu.h"
 
 #include "topos.h"
 #include "tp_art.h"
@@ -89,6 +92,16 @@ typedef struct {
     uint16_t    auto_wait;
 
     uint16_t    ms_x;           /* the step's exact milliseconds: 33, 33, 34 */
+
+    /* A USB gamepad (see "The gamepad"): its state, the hole under its
+     * cursor, and the screens' buttons it goes through */
+    aos_pad_t   gp;
+    aos_pad_menu_t menu;
+    lv_obj_t   *menu_panel;     /* the screen the menu went through last step */
+    lv_obj_t   *cursor;         /* the frame round the hole, over the canvas */
+    bool        cursor_on;      /* the pad has been used in play            */
+    int8_t      cur_c, cur_r;
+    lv_obj_t   *pm_title[4], *pm_pause[5], *pm_over[2];
 } app_t;
 
 static bool s_sfx = true;
@@ -302,6 +315,9 @@ static void overlay_hide_all(app_t *a)
             lv_obj_add_flag(panels[i], LV_OBJ_FLAG_HIDDEN);
         }
     }
+    /* the pad has no buttons to go through (an empty set also takes the
+     * outline off the one it was on) */
+    aos_pad_menu_set(&a->menu, NULL, 0, 0);
     aos_retro_show_controls(true);
 }
 
@@ -312,6 +328,14 @@ static void overlay_show(app_t *a, lv_obj_t *panel)
     if (panel) {
         lv_obj_remove_flag(panel, LV_OBJ_FLAG_HIDDEN);
         lv_obj_move_foreground(panel);
+        /* and the pad goes through its buttons */
+        if (panel == a->title) {
+            aos_pad_menu_set(&a->menu, a->pm_title, 4, 0);
+        } else if (panel == a->pause) {
+            aos_pad_menu_set(&a->menu, a->pm_pause, 5, 0);
+        } else if (panel == a->over) {
+            aos_pad_menu_set(&a->menu, a->pm_over, 2, 0);
+        }
     }
     aos_retro_show_controls(panel == NULL && a->g.state != GS_TITLE && a->g.state != GS_OVER);
 }
@@ -560,7 +584,11 @@ static void taps(app_t *a)
     if (a->closing || a->paused || a->g.state == GS_TITLE || a->g.state == GS_OVER) {
         return;                 /* a panel is taking this finger */
     }
-    if (down & AOS_RETRO_BTN_PAUSE) {
+    /* A pad's START presses the OS's pause too, but the pad answers it
+     * itself (pad_step()): taken twice, the press that resumes would pause
+     * again. */
+    if ((down & AOS_RETRO_BTN_PAUSE) &&
+        !((a->gp.held | a->gp.released) & AOS_PAD_START)) {
         pause_show(a);
         return;
     }
@@ -614,6 +642,124 @@ static void gesture_cb(lv_event_t *e)
 }
 
 /* --------------------------------------------------------------------------
+ * The gamepad
+ *
+ * A USB pad on the board's host (aos_pad.h) plays with a cursor on the
+ * holes: a white frame that only shows once the pad is used in play. The
+ * d-pad (or the stick) moves it one hole at a time, and A or B whack the
+ * hole under it, with the same tp_game_tap() as a finger landing there;
+ * START pauses. On the screens the d-pad goes through the buttons and A
+ * presses them (aos_pad_menu.h); START plays the mode under the outline
+ * (Clásico if it is on the sound), resumes, and plays again at the end; B
+ * is back (out of the pause, from the end to the title).
+ * -------------------------------------------------------------------------- */
+
+static void pad_click(lv_obj_t *b)
+{
+    if (b && lv_obj_is_valid(b)) {
+        lv_obj_send_event(b, LV_EVENT_CLICKED, NULL);
+    }
+}
+
+/* The frame round the cursor's hole: the cell a tap counts for, a little
+ * inside it so two neighbours never touch. */
+static void cursor_place(app_t *a)
+{
+    if (!a->cursor) {
+        return;
+    }
+    const int k = a->r->scale;
+    if (a->cur_c >= tp_geo.cols) a->cur_c = (int8_t)(tp_geo.cols - 1);
+    if (a->cur_r >= tp_geo.rows) a->cur_r = (int8_t)(tp_geo.rows - 1);
+    int cx = TP_COL_X(a->cur_c), cy = TP_ROW_Y(a->cur_r);
+    lv_obj_set_pos(a->cursor, (cx - TP_CELL_HW + 2) * k, (cy - TP_CELL_UP + 2) * k);
+    lv_obj_set_size(a->cursor, (2 * TP_CELL_HW - 4) * k, (TP_CELL_UP + TP_CELL_DN - 2) * k);
+}
+
+static void cursor_show(app_t *a, bool on)
+{
+    if (!a->cursor) {
+        return;
+    }
+    if (on) {
+        lv_obj_remove_flag(a->cursor, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_add_flag(a->cursor, LV_OBJ_FLAG_HIDDEN);
+    }
+}
+
+static void pad_step(app_t *a)
+{
+    aos_pad_t *p = &a->gp;
+    tp_game_t *g = &a->g;
+    lv_obj_t *panel = a->menu.n ? lv_obj_get_parent(a->menu.item[0]) : NULL;
+
+    aos_pad_update(p, lv_tick_get());
+    /* a screen that has just come up does not take the press that brought
+     * it (that START is pausing, not resuming) */
+    bool fresh = panel != a->menu_panel;
+    a->menu_panel = panel;
+
+    /* the cursor is on the field only in play, and only for the pad */
+    bool field = !panel && !a->paused && (g->state == GS_COUNT || g->state == GS_PLAY ||
+                                         g->state == GS_ENDING);
+    cursor_show(a, field && a->cursor_on);
+
+    /* in the background, or under the app switcher, the pad is not ours */
+    if (fresh || !p->connected || !lv_obj_is_visible(a->r->view)) {
+        return;
+    }
+    if (panel) {
+        if (aos_pad_menu_step(&a->menu, p)) {
+            return;
+        }
+        bool start = aos_pad_pressed(p, AOS_PAD_START);
+        bool back = aos_pad_pressed(p, AOS_PAD_B);
+        if (panel == a->title) {
+            if (start) {
+                lv_obj_t *sel = aos_pad_menu_selected(&a->menu);
+                pad_click(sel && sel != a->pm_title[3] ? sel : a->pm_title[0]);
+            }
+        } else if (panel == a->pause) {
+            if (start || back) pad_click(a->pm_pause[0]);
+        } else if (panel == a->over) {
+            if (start) pad_click(a->pm_over[0]);
+            else if (back) pad_click(a->pm_over[1]);
+        }
+        return;
+    }
+    if (!field) {
+        return;
+    }
+    if (aos_pad_pressed(p, AOS_PAD_START)) {
+        pause_show(a);
+        return;
+    }
+    if (!a->cursor_on) {
+        /* the first press only shows where the cursor is */
+        if (p->pressed) {
+            a->cursor_on = true;
+            cursor_place(a);
+            cursor_show(a, true);
+        }
+        return;
+    }
+    int c = a->cur_c, r = a->cur_r;
+    if (aos_pad_repeat(p, AOS_PAD_LEFT) && c > 0) c--;
+    if (aos_pad_repeat(p, AOS_PAD_RIGHT) && c < tp_geo.cols - 1) c++;
+    if (aos_pad_repeat(p, AOS_PAD_UP) && r > 0) r--;
+    if (aos_pad_repeat(p, AOS_PAD_DOWN) && r < tp_geo.rows - 1) r++;
+    if (c != a->cur_c || r != a->cur_r) {
+        a->cur_c = (int8_t)c;
+        a->cur_r = (int8_t)r;
+        cursor_place(a);
+    }
+    if (aos_pad_pressed(p, AOS_PAD_A | AOS_PAD_B)) {
+        tp_game_tap(g, TP_COL_X(a->cur_c), TP_ROW_Y(a->cur_r));
+    }
+}
+
+/* --------------------------------------------------------------------------
  * The frame
  * -------------------------------------------------------------------------- */
 
@@ -642,6 +788,7 @@ static void step(void *user)
     a->ms_x = (uint16_t)(a->ms_x % FPS);
 
     taps(a);
+    pad_step(a);
 
     if (a->banner_ms) {
         if (a->banner_ms <= dt) {
@@ -730,8 +877,8 @@ static void topos_hide(aos_app_t *self, void *inst)
  * Building the screens
  * -------------------------------------------------------------------------- */
 
-static void make_mode_button(app_t *a, lv_obj_t *parent, int m,
-                             int x, int y, int w, int h, lv_event_cb_t cb)
+static lv_obj_t *make_mode_button(app_t *a, lv_obj_t *parent, int m,
+                                  int x, int y, int w, int h, lv_event_cb_t cb)
 {
     lv_obj_t *b = lv_obj_create(parent);
     lv_obj_remove_style_all(b);
@@ -777,6 +924,7 @@ static void make_mode_button(app_t *a, lv_obj_t *parent, int m,
     lv_obj_align(r, LV_ALIGN_RIGHT_MID, -28, 0);
     lv_obj_remove_flag(r, LV_OBJ_FLAG_CLICKABLE);
     a->lbl_rec[m] = r;
+    return b;
 }
 
 /* The title. The big mole, the bomb and the mallet are the canvas
@@ -826,9 +974,10 @@ static void build_title(app_t *a, lv_obj_t *root)
         bx = 56;
         by = bot + 48;
     }
-    make_mode_button(a, p, MODE_CLASSIC,  bx, by,                  bw, bh, mode0_cb);
-    make_mode_button(a, p, MODE_SURVIVAL, bx, by + bh + gap,       bw, bh, mode1_cb);
-    make_mode_button(a, p, MODE_FRENZY,   bx, by + 2 * (bh + gap), bw, bh, mode2_cb);
+    a->pm_title[0] = make_mode_button(a, p, MODE_CLASSIC,  bx, by,                  bw, bh, mode0_cb);
+    a->pm_title[1] = make_mode_button(a, p, MODE_SURVIVAL, bx, by + bh + gap,       bw, bh, mode1_cb);
+    a->pm_title[2] = make_mode_button(a, p, MODE_FRENZY,   bx, by + 2 * (bh + gap), bw, bh, mode2_cb);
+    a->pm_title[3] = snd;
 
     /* How to play: read, not touched. Under the modes upright, under the
      * scene lying down. */
@@ -845,6 +994,11 @@ static void build_title(app_t *a, lv_obj_t *root)
     lv_obj_set_style_pad_ver(h, 12, 0);
 }
 
+static void row_ext_cb(lv_event_t *e)
+{
+    lv_event_set_ext_draw_size(e, 12);     /* aos_pad_menu.h's outline: 4 + 5 */
+}
+
 static void build_pause(app_t *a, lv_obj_t *root)
 {
     lv_obj_t *p = make_column_panel(a, root);
@@ -852,12 +1006,12 @@ static void build_pause(app_t *a, lv_obj_t *root)
 
     make_label(p, _("Pausa"), &aos_montserrat_64, 0xFFFFFF, 0);
     make_gap(p, 12);
-    make_button(p, _("Seguir"), 0, 0, 480, 108, 0x30D158,
-                &aos_montserrat_48, resume_cb, a);
-    make_button(p, _("Menú"), 0, 0, 480, 88, 0x0A84FF,
-                &aos_montserrat_36, menu_cb, a);
-    make_button(p, _("Salir"), 0, 0, 480, 88, 0xFF453A,
-                &aos_montserrat_36, exit_cb, a);
+    a->pm_pause[0] = make_button(p, _("Seguir"), 0, 0, 480, 108, 0x30D158,
+                                 &aos_montserrat_48, resume_cb, a);
+    a->pm_pause[1] = make_button(p, _("Menú"), 0, 0, 480, 88, 0x0A84FF,
+                                 &aos_montserrat_36, menu_cb, a);
+    a->pm_pause[2] = make_button(p, _("Salir"), 0, 0, 480, 88, 0xFF453A,
+                                 &aos_montserrat_36, exit_cb, a);
 
     /* the two switches side by side */
     lv_obj_t *row = lv_obj_create(p);
@@ -869,6 +1023,13 @@ static void build_pause(app_t *a, lv_obj_t *root)
     a->chip_fps = make_chip(row, 230, fps_cb, a);
     lv_obj_align(a->chip_sfx, LV_ALIGN_LEFT_MID, 0, 0);
     lv_obj_align(a->chip_fps, LV_ALIGN_RIGHT_MID, 0, 0);
+    /* the pad's outline goes round a chip, past the row's edge: the row
+     * lets it show and redraws that far */
+    lv_obj_add_flag(row, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
+    lv_obj_add_event_cb(row, row_ext_cb, LV_EVENT_REFR_EXT_DRAW_SIZE, NULL);
+    lv_obj_refresh_ext_draw_size(row);
+    a->pm_pause[3] = a->chip_sfx;
+    a->pm_pause[4] = a->chip_fps;
 }
 
 static void build_over(app_t *a, lv_obj_t *root)
@@ -883,11 +1044,11 @@ static void build_over(app_t *a, lv_obj_t *root)
     a->lbl_over_b = make_label(p, "", &aos_montserrat_28, 0xDDE3EE, 0);
     a->lbl_over_r = make_label(p, "", &aos_montserrat_28, 0xFFD60A, 0);
     make_gap(p, 24);
-    make_button(p, _("Otra vez"), 0, 0, 480, 108, 0x30D158,
-                &aos_montserrat_48, again_cb, a);
+    a->pm_over[0] = make_button(p, _("Otra vez"), 0, 0, 480, 108, 0x30D158,
+                                &aos_montserrat_48, again_cb, a);
     make_gap(p, 4);
-    make_button(p, _("Menú"), 0, 0, 480, 88, 0x0A84FF,
-                &aos_montserrat_36, menu_cb, a);
+    a->pm_over[1] = make_button(p, _("Menú"), 0, 0, 480, 88, 0x0A84FF,
+                                &aos_montserrat_36, menu_cb, a);
 }
 
 /* --------------------------------------------------------------------------
@@ -941,6 +1102,20 @@ static bool ui_build(app_t *a, lv_obj_t *root)
     lv_obj_align(a->banner, LV_ALIGN_CENTER, 0, -a->sh / 16);
     lv_obj_remove_flag(a->banner, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_flag(a->banner, LV_OBJ_FLAG_HIDDEN);
+
+    /* the pad's cursor, under the screens: hidden until the pad plays */
+    a->cursor = lv_obj_create(a->stage);
+    lv_obj_remove_style_all(a->cursor);
+    lv_obj_set_style_radius(a->cursor, 10 * a->r->scale, 0);
+    lv_obj_set_style_border_color(a->cursor, lv_color_hex(0xFFFFFF), 0);
+    lv_obj_set_style_border_width(a->cursor, a->r->scale + 2, 0);
+    lv_obj_set_style_outline_color(a->cursor, lv_color_hex(0x000000), 0);
+    lv_obj_set_style_outline_opa(a->cursor, LV_OPA_50, 0);
+    lv_obj_set_style_outline_width(a->cursor, 3, 0);
+    lv_obj_remove_flag(a->cursor, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_remove_flag(a->cursor, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_flag(a->cursor, LV_OBJ_FLAG_HIDDEN);
+    cursor_place(a);
 
     build_title(a, a->stage);
     build_pause(a, a->stage);
@@ -1090,10 +1265,12 @@ static bool topos_resize(aos_app_t *self, void *inst, lv_obj_t *root)
 
     aos_retro_stop();
     aos_retro_end();
+    aos_pad_menu_set(&a->menu, NULL, 0, 0);     /* its buttons are about to go */
+    a->menu_panel = NULL;
     a->closing = true;          /* no callback of ours while they go */
     lv_obj_clean(root);
     a->closing = false;
-    a->title = a->pause = a->over = a->banner = a->stage = NULL;
+    a->title = a->pause = a->over = a->banner = a->stage = a->cursor = NULL;
     a->chip_sfx = a->chip_fps = NULL;
     if (!ui_build(a, root)) {
         return false;           /* the runtime creates the app again */
