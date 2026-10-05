@@ -237,7 +237,8 @@ descriptor cannot be read. Then:
   while one is open (`components/aos_ui/aos_hwkbd.c`): into the text area
   of the open LVGL keyboard, with Enter as its OK and Esc as its close;
   with none open, Esc is "back". An app with a keyboard of its own takes
-  the keys with `aos_ui_hwkbd_handler()` while it is up (Notas does). The
+  the keys with `aos_ui_hwkbd_handler()` while it is up (Notas does, so
+  it takes physical keys only while its own keyboard is showing). The
   layout is Latin American (ñ, ¿¡, AltGr for @, the acute and the
   diaeresis as dead keys) or US, in Settings, USB, "USB keyboard"; a key
   held repeats; Caps Lock lights the keyboard's LED.
@@ -260,7 +261,9 @@ in `/api/usb` `midi_last`. With the host on 21/23 and the OTG connector in
 keyboard mode with the computer, a MIDI keyboard on the board also plays
 on the computer (MIDI thru).
 
-**Serial**: listed while plugged in, opened when the Terminal (or anyone
+**Serial**: tried with a CH340 converter (loopback at 9600, 115200 and
+921600 baud) and an Arduino Leonardo (CDC-ACM, with a keyboard on the same
+device: `tools/usb_test/`). Listed while plugged in, opened when the Terminal (or anyone
 through aos_io) opens `usb0`; DTR and RTS go up on open, as a computer's
 terminal does (an Arduino resets, a CDC device that waits for a terminal
 starts sending). Received bytes wait in 16 KB of PSRAM.

@@ -441,7 +441,13 @@ por el Registro del portal sin cable serie)
 - [x] Recepción por `usb0` con TX y RX puenteados (2026-10-04): eco
       idéntico (UTF-8 incluido) y los mismos bytes recibidos que enviados
       a 115200, 9600 y 921600 baudios.
-- [ ] Arduino (CDC-ACM), CP210x, FTDI.
+- [x] **Arduino Leonardo** (2341:8036) con `tools/usb_test/p4os_leonardo`
+      (2026-10-04): dispositivo compuesto, serie CDC-ACM y teclado HID a la
+      vez, cada parte con su driver. Por `usb0` llegan sus líneas y el eco
+      (`hola placa` -> `HOLA PLACA`); con `!` escribió "hola desde el
+      Leonardo" en una nota (con el teclado de Notas abierto: sin él, Notas
+      no toma teclas físicas).
+- [ ] CP210x, FTDI.
 - [x] **Webcam** Logitech C270 (046d:0825, sin nombre declarado) en 25/27
       (2026-10-04): MJPEG 640x480 (su máximo en MJPEG), 14-19 cuadros/s en
       la app Cámaras, decodificar 4-5 ms por cuadro, escalar a 720x540
