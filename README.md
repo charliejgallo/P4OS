@@ -298,6 +298,9 @@ test layouts.
   gamepad, a hub, a webcam (Logitech C270), a sound card (output and
   microphone), CH340, CP2102, FTDI and an Arduino Leonardo and a Pico as
   serial ports.
+- A generic USB gamepad in the games: 2043, Turbo, Golf, Burbujas, ARKANOS,
+  Atrapa, Mila, Doom, Claude Jump, Gemas, Buscaminas, Atasco and Claudito
+  played with it on the board; the rest in the simulator.
 - The microSD, music and the speaker.
 - The games and most of the tools, in both orientations.
 - The BOOT button and safe mode.
@@ -480,7 +483,7 @@ idioma de la tarjeta. Los documentos del plan y de las pruebas en la placa
 | | |
 |---|---|
 | Qué hace | inicio con carpetas, pantalla de bloqueo con código, 23 apps propias y 31 de la tarjeta (juegos, notas, mapas, radio, video, Lua), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, y taller con I2C, SPI, 1-Wire, GPIO y tiras LED direccionables |
-| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), y los barridos de red con las MAC |
+| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie |
 | Qué falta | probar en la placa las tiras LED, el DS18B20 y el RC522, las cámaras, y encontrar por qué se cortó la red durante dos OTA |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
 | Cómo se instala | la primera vez por el CH340; después `tools/ota.sh p4os.local` o el portal |
