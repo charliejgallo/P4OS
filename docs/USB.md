@@ -223,7 +223,7 @@ keys is two HID interfaces):
 | `aos_usb_p4.c` + `usb_host_msc` | pendrives, card readers, disks (FAT32) | `/usb`, `/usb2`, `/usb3` (FATFS has four volumes: the card and these); Files and the portal |
 | `aos_usb_hid_p4.c` | keyboards, mice, gamepads and joysticks, media keys | keys in the open text field, a pointer, `aos_hal_hid_gamepad_get`, volume and play/pause |
 | `aos_usb_midi_p4.c` | MIDI keyboards, pads, controllers | `aos_hal_midi_read` / `_send`; MIDI thru to the computer |
-| `aos_usb_serial_p4.c` + `usb_host_cdc_acm` (+ CH34x, CP210x, FTDI) | Arduinos, boards with native USB, USB-serial adapters | ports `usb0`, `usb1` of aos_io: the Terminal opens them like its UARTs |
+| `aos_usb_serial_p4.c` + `usb_host_cdc_acm` (+ CH34x, CP210x, FTDI) | Arduinos, boards with native USB, USB-serial adapters | ports `usb0`, `usb1` of aos_io: the Terminal opens them like its UARTs, and the Programmer flashes an ESP32 through them |
 | `aos_usb_uvc_p4.c` + `usb_host_uvc` | webcams (MJPEG) | a camera of the Cameras app while plugged in (`usb://0`) |
 | `aos_usb_uac_p4.c` + `usb_host_uac` | USB sound cards and headsets | the board's sound, instead of its speaker |
 
@@ -286,6 +286,16 @@ MicroPython v1.29.0 (680 KB, about 4 s); it came back as a CDC-ACM port. Listed 
 through aos_io) opens `usb0`; DTR and RTS go up on open, as a computer's
 terminal does (an Arduino resets, a CDC device that waits for a terminal
 starts sending). Received bytes wait in 16 KB of PSRAM.
+
+**The Programmer flashes an ESP32 through them** (since 0.9.2): the USB
+ports come after the header's UARTs in its list, in the app and in the
+portal. EN and BOOT go through RTS and DTR (`aos_hal_usb_serial_lines`),
+as esptool drives them: on a dev board with the usual two transistors, RTS
+asserted pulls EN low and DTR asserted pulls GPIO0 low, so the board goes
+into its bootloader with no button. Tried on 2026-10-05 with an ESP32
+(v3.1, 4 MB) on a CP2102: detected in 0.8 s. A chip with its own USB
+(ESP32-S3, C3, C6 through USB-Serial-JTAG) needs esptool's other reset
+sequence, which is not here yet: put it in download mode by hand.
 
 **Webcams**: MJPEG, at 1280 x 720 or the largest size below it that the
 camera has; the newest frame is copied for the Cameras app, which decodes

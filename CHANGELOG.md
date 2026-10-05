@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.2 — unreleased
+
+- **The Programmer flashes through the USB host:** the host's USB serial
+  ports (`usb0`...) are in its list, in the app and the portal, and an
+  ESP32 dev board goes into its bootloader by itself through RTS and DTR,
+  as esptool does (docs/USB.md).
+
 ## 0.9.1 — 2026-10-05
 
 **A gamepad in every game** (docs/GAMEPAD.md)

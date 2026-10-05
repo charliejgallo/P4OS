@@ -162,7 +162,8 @@ header with who holds each pin.
   INA219, BME280...).
 - **Terminal:** two serial ports, hex, filters and alerts.
 - **Programmer:** flashes another ESP32 from firmware on the card
-  (esp-serial-flasher).
+  (esp-serial-flasher), wired to the header or plugged into the USB host
+  (a dev board goes into its bootloader by itself, through RTS and DTR).
 - **Modbus:** a Riden RD60xx supply over RTU, and a gateway.
 - **Bench:** a Rigol scope over the LAN, the Riden, a UNI-T generator over
   USB, and a logger to CSV.
