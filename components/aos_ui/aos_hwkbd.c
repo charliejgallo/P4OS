@@ -8,7 +8,9 @@
  * keyboard, with no app knowing about it. Enter and Esc do what the
  * keyboard's OK and close keys do (LV_EVENT_READY / LV_EVENT_CANCEL to the
  * keyboard, then to its text area); in a text area of several lines Enter
- * is a new line. With no keyboard open, the keys go nowhere.
+ * is a new line. With no keyboard open, Esc is "back" and the rest go
+ * nowhere. Media keys (volume, play/pause, next, previous, mute) work
+ * anywhere, on what the control centre would control.
  *
  * An app with a keyboard of its own (Notas) takes them first, while it is in
  * front, through aos_ui_hwkbd_handler(). The handler is code of a dynamic
@@ -66,12 +68,36 @@ static int utf8(uint32_t c, char *out)
     return 3;
 }
 
+/* a media key, on what the control centre would control */
+static void media_key(uint32_t usage)
+{
+    static int muted_at = -1;           /* the volume before mute, -1 not muted */
+    int v = aos_hal_volume_get();
+    switch (usage) {
+    case 0xCD: aos_np_command(AOS_MEDIA_PLAY_PAUSE); break;
+    case 0xB5: aos_np_command(AOS_MEDIA_NEXT); break;
+    case 0xB6: aos_np_command(AOS_MEDIA_PREV); break;
+    case 0xE9: aos_hal_volume_set(v + 5 > 100 ? 100 : v + 5); muted_at = -1; break;
+    case 0xEA: aos_hal_volume_set(v - 5 < 0 ? 0 : v - 5); muted_at = -1; break;
+    case 0xE2:
+        if (muted_at >= 0) { aos_hal_volume_set(muted_at); muted_at = -1; }
+        else { muted_at = v; aos_hal_volume_set(0); }
+        break;
+    default: break;
+    }
+}
+
 void aos_hwkbd_tick(void)
 {
     aos_kbd_event_t ev;
     lv_obj_t *kb = NULL;
     bool looked = false;
     for (int n = 0; n < 32 && aos_hal_usb_kbd_read(&ev); n++) {
+        aos_hal_activity();
+        if (ev.key >= AOS_KEY_CONSUMER) {
+            media_key(ev.key - AOS_KEY_CONSUMER);
+            continue;
+        }
         if (s_cb) {
             const char *cur = aos_ui_current_app();
             if (cur && strcmp(cur, s_owner) == 0 && s_cb(ev.key, ev.mods)) continue;
@@ -80,7 +106,10 @@ void aos_hwkbd_tick(void)
             kb = open_kb();
             looked = true;
         }
-        if (!kb) continue;
+        if (!kb) {
+            if (ev.key == AOS_KEY_ESC) aos_ui_request_nav(AOS_UI_NAV_BACK);
+            continue;
+        }
         lv_obj_t *ta = lv_keyboard_get_textarea(kb);
         if (!ta || (ev.mods & 0x99)) continue;      /* Ctrl or Cmd: a shortcut, not text */
         switch (ev.key) {
@@ -99,7 +128,8 @@ void aos_hwkbd_tick(void)
                 lv_textarea_add_char(ta, '\n');
                 break;
             }
-            /* fall through: as the OK key */
+            /* as the OK key */
+            __attribute__((fallthrough));
         case AOS_KEY_ESC: {
             lv_event_code_t code = ev.key == AOS_KEY_ESC ? LV_EVENT_CANCEL : LV_EVENT_READY;
             if (lv_obj_send_event(kb, code, NULL) == LV_RESULT_OK && lv_obj_is_valid(ta)) lv_obj_send_event(ta, code, NULL);

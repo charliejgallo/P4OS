@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
  * Mas 152 funciones de libc/libm agregadas a mano.
- * Total: 3194 simbolos.
+ * Total: 3201 simbolos.
  */
 
 #include <stddef.h>
@@ -245,6 +245,11 @@ extern int aos_hal_h264_decode;
 extern int aos_hal_h264_open;
 extern int aos_hal_hang_restarts;
 extern int aos_hal_heap_info;
+extern int aos_hal_hid_gamepad_count;
+extern int aos_hal_hid_gamepad_dpad;
+extern int aos_hal_hid_gamepad_get;
+extern int aos_hal_hid_mouse_present;
+extern int aos_hal_hid_mouse_read;
 extern int aos_hal_http_body;
 extern int aos_hal_http_get;
 extern int aos_hal_http_len;
@@ -529,6 +534,7 @@ extern int aos_hal_usb_busy;
 extern int aos_hal_usb_card_away;
 extern int aos_hal_usb_click;
 extern int aos_hal_usb_connected;
+extern int aos_hal_usb_devices;
 extern int aos_hal_usb_gamepad;
 extern int aos_hal_usb_host_devices;
 extern int aos_hal_usb_host_info;
@@ -587,6 +593,7 @@ extern int aos_http_stream_init;
 extern int aos_http_stream_open;
 extern int aos_http_stream_recv;
 extern int aos_http_stream_send;
+extern int aos_hwmouse_tick;
 extern int aos_i18n_app_count;
 extern int aos_i18n_app_load;
 extern int aos_i18n_app_unload;
@@ -3442,6 +3449,11 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_h264_open),
     ESP_ELFSYM_EXPORT(aos_hal_hang_restarts),
     ESP_ELFSYM_EXPORT(aos_hal_heap_info),
+    ESP_ELFSYM_EXPORT(aos_hal_hid_gamepad_count),
+    ESP_ELFSYM_EXPORT(aos_hal_hid_gamepad_dpad),
+    ESP_ELFSYM_EXPORT(aos_hal_hid_gamepad_get),
+    ESP_ELFSYM_EXPORT(aos_hal_hid_mouse_present),
+    ESP_ELFSYM_EXPORT(aos_hal_hid_mouse_read),
     ESP_ELFSYM_EXPORT(aos_hal_http_body),
     ESP_ELFSYM_EXPORT(aos_hal_http_get),
     ESP_ELFSYM_EXPORT(aos_hal_http_len),
@@ -3726,6 +3738,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_usb_card_away),
     ESP_ELFSYM_EXPORT(aos_hal_usb_click),
     ESP_ELFSYM_EXPORT(aos_hal_usb_connected),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_devices),
     ESP_ELFSYM_EXPORT(aos_hal_usb_gamepad),
     ESP_ELFSYM_EXPORT(aos_hal_usb_host_devices),
     ESP_ELFSYM_EXPORT(aos_hal_usb_host_info),
@@ -3784,6 +3797,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_http_stream_open),
     ESP_ELFSYM_EXPORT(aos_http_stream_recv),
     ESP_ELFSYM_EXPORT(aos_http_stream_send),
+    ESP_ELFSYM_EXPORT(aos_hwmouse_tick),
     ESP_ELFSYM_EXPORT(aos_i18n_app_count),
     ESP_ELFSYM_EXPORT(aos_i18n_app_load),
     ESP_ELFSYM_EXPORT(aos_i18n_app_unload),

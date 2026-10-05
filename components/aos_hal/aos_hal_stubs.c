@@ -861,6 +861,9 @@ __attribute__((weak)) bool aos_hal_usb_host_info(aos_usb_host_info_t *out)
 __attribute__((weak)) const char * aos_hal_path_usb(void)
 { return ""; }
 
+__attribute__((weak)) int aos_hal_usb_devices(aos_usb_dev_t *out, int max)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) bool aos_hal_usb_kbd_read(aos_kbd_event_t *ev)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
@@ -872,6 +875,21 @@ __attribute__((weak)) int aos_hal_usb_kbd_layout(void)
 
 __attribute__((weak)) void aos_hal_usb_kbd_layout_set(int layout)
 { }
+
+__attribute__((weak)) bool aos_hal_hid_mouse_read(aos_mouse_event_t *ev)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_hid_mouse_present(void)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_hid_gamepad_count(void)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_hid_gamepad_get(int index, aos_gamepad_t *out)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) uint8_t aos_hal_hid_gamepad_dpad(const aos_gamepad_t *pad)
+{ uint8_t v; memset(&v, 0, sizeof v); return v; }
 
 __attribute__((weak)) const char * aos_hal_device_name(void)
 { return ""; }

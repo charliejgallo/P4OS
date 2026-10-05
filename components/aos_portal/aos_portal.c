@@ -468,6 +468,42 @@ static void api_usb(aos_httpd_req_t *r)
         int nk = aos_hal_usb_kbd_list(kn, 2);
         cJSON *k = cJSON_AddArrayToObject(o, "keyboards");
         for (int i = 0; i < nk; i++) cJSON_AddItemToArray(k, cJSON_CreateString(kn[i]));
+        /* every device on the host, and what the board does with it */
+        aos_usb_dev_t dv[10];
+        int nd = aos_hal_usb_devices(dv, 10);
+        cJSON *da = cJSON_AddArrayToObject(o, "devices");
+        for (int i = 0; i < nd; i++) {
+            cJSON *d = cJSON_CreateObject();
+            char id[12];
+            snprintf(id, sizeof id, "%04x:%04x", dv[i].vid, dv[i].pid);
+            cJSON_AddStringToObject(d, "id", id);
+            cJSON_AddStringToObject(d, "vendor", dv[i].vendor);
+            cJSON_AddStringToObject(d, "product", dv[i].product);
+            cJSON_AddNumberToObject(d, "class", dv[i].cls);
+            cJSON_AddStringToObject(d, "speed", dv[i].speed == 2 ? "high" : dv[i].speed == 1 ? "full" : "low");
+            cJSON_AddStringToObject(d, "pins", dv[i].port == AOS_HAL_USB_HOST_HEADER ? "21/23" : "25/27");
+            if (dv[i].hub_port) cJSON_AddNumberToObject(d, "hub_port", dv[i].hub_port);
+            cJSON_AddStringToObject(d, "uses", dv[i].uses);
+            cJSON_AddItemToArray(da, d);
+        }
+        /* gamepads, live: to see a pad's buttons and axes from the computer */
+        cJSON *ga = cJSON_AddArrayToObject(o, "gamepads");
+        for (int i = 0; i < AOS_GAMEPAD_MAX; i++) {
+            aos_gamepad_t p;
+            if (!aos_hal_hid_gamepad_get(i, &p)) continue;
+            cJSON *g = cJSON_CreateObject();
+            cJSON_AddStringToObject(g, "name", p.name);
+            cJSON_AddNumberToObject(g, "buttons", p.buttons);
+            cJSON_AddNumberToObject(g, "nbuttons", p.nbuttons);
+            cJSON *ax = cJSON_AddArrayToObject(g, "axes");
+            for (int k = 0; k < 8; k++)
+                if (p.axes & (1 << k)) cJSON_AddItemToArray(ax, cJSON_CreateNumber(p.axis[k]));
+            cJSON_AddNumberToObject(g, "hat", p.hat);
+            cJSON_AddNumberToObject(g, "dpad", aos_hal_hid_gamepad_dpad(&p));
+            cJSON_AddNumberToObject(g, "reports", p.reports);
+            cJSON_AddItemToArray(ga, g);
+        }
+        cJSON_AddBoolToObject(o, "mouse", aos_hal_hid_mouse_present());
         cJSON *a = cJSON_AddArrayToObject(o, "pendrives");
         for (int i = 0; i < n; i++) usb_dev_json(a, &in[i]);
         /* "host": the first one, as before */

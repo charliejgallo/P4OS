@@ -2328,11 +2328,8 @@ static const char blob_en__sistema_lang[] =
     "Pines 21 (D−) y 23 (D+)\tPins 21 (D−) and 23 (D+)\n"
     "Lo usa el host de pendrives, en los pines 25 y 27.\tThe pendrive host has it, on pins 25 and 27.\n"
     "Apagado.\tOff.\n"
-    "%s%s %s, %.1f GB: en %s.\t%s%s %s, %.1f GB: at %s.\n"
     "Primero expulsá la tarjeta en la computadora\tEject the card on the computer first\n"
     "Pines 25 (D−) y 27 (D+), o el conector OTG\tPins 25 (D−) and 27 (D+), or the OTG connector\n"
-    "Esperando un pendrive o un teclado en el conector de 40 pines.\tWaiting for a pendrive or a keyboard on the 40-pin header.\n"
-    "%sTeclado %s.\t%sKeyboard %s.\n"
     "PENDRIVES Y TECLADOS\tPENDRIVES AND KEYBOARDS\n"
     "Host USB\tUSB host\n"
     "Los pendrives se leen en /usb, desde Archivos y el portal; con un hub, hasta tres: /usb, /usb2 y /usb3, en FAT32. Un teclado escribe donde escribiría el de la pantalla cuando está abierto. El conector OTG no da 5 V: todo va al conector de 40 pines, con 5 V del pin 1 y GND del 5.\tPendrives are read at /usb, from Files and the portal; with a hub, up to three: /usb, /usb2 and /usb3, in FAT32. A keyboard types where the on-screen one would, while it is open. The OTG connector gives no 5 V: everything goes on the 40-pin header, 5 V from pin 1 and GND from pin 5.\n"
@@ -2342,6 +2339,17 @@ static const char blob_en__sistema_lang[] =
     "TECLADO USB\tUSB KEYBOARD\n"
     "Latinoamericano\tLatin American\n"
     "Estadounidense\tUS\n"
+    "teclado\tkeyboard\n"
+    "mouse\tmouse\n"
+    "joystick\tgamepad\n"
+    "teclas multimedia\tmedia keys\n"
+    "teclas de sistema\tsystem keys\n"
+    "hub\thub\n"
+    "disco sin montar\tdisk, not mounted\n"
+    "puerto serie\tserial port\n"
+    "cámara\tcamera\n"
+    "Esperando dispositivos en el conector de 40 pines.\tWaiting for devices on the 40-pin header.\n"
+    "sin uso todavía\tnot used yet\n"
     ;
 
 static const char blob_en_aos_cameras_lang[] =
@@ -6839,11 +6847,8 @@ static const char blob_de__sistema_lang[] =
     "Pines 21 (D−) y 23 (D+)\tPins 21 (D−) und 23 (D+)\n"
     "Lo usa el host de pendrives, en los pines 25 y 27.\tDer USB-Stick-Host belegt ihn, an den Pins 25 und 27.\n"
     "Apagado.\tAus.\n"
-    "%s%s %s, %.1f GB: en %s.\t%s%s %s, %.1f GB: unter %s.\n"
     "Primero expulsá la tarjeta en la computadora\tZuerst die Karte am Computer auswerfen\n"
     "Pines 25 (D−) y 27 (D+), o el conector OTG\tPins 25 (D−) und 27 (D+), oder der OTG-Anschluss\n"
-    "Esperando un pendrive o un teclado en el conector de 40 pines.\tWarte auf einen USB-Stick oder eine Tastatur an der 40-poligen Leiste.\n"
-    "%sTeclado %s.\t%sTastatur %s.\n"
     "PENDRIVES Y TECLADOS\tUSB-STICKS UND TASTATUREN\n"
     "Host USB\tUSB-Host\n"
     "Los pendrives se leen en /usb, desde Archivos y el portal; con un hub, hasta tres: /usb, /usb2 y /usb3, en FAT32. Un teclado escribe donde escribiría el de la pantalla cuando está abierto. El conector OTG no da 5 V: todo va al conector de 40 pines, con 5 V del pin 1 y GND del 5.\tUSB-Sticks sind unter /usb lesbar, in Dateien und im Portal; mit einem Hub bis zu drei: /usb, /usb2 und /usb3, in FAT32. Eine Tastatur schreibt dorthin, wo die Bildschirmtastatur schreiben würde, solange sie offen ist. Der OTG-Anschluss liefert keine 5 V: alles kommt an die 40-polige Leiste, 5 V von Pin 1 und GND von Pin 5.\n"
@@ -6853,6 +6858,17 @@ static const char blob_de__sistema_lang[] =
     "TECLADO USB\tUSB-TASTATUR\n"
     "Latinoamericano\tLateinamerikanisch\n"
     "Estadounidense\tUS-amerikanisch\n"
+    "teclado\tTastatur\n"
+    "mouse\tMaus\n"
+    "joystick\tGamepad\n"
+    "teclas multimedia\tMedientasten\n"
+    "teclas de sistema\tSystemtasten\n"
+    "hub\tHub\n"
+    "disco sin montar\tLaufwerk, nicht eingehängt\n"
+    "puerto serie\tserielle Schnittstelle\n"
+    "cámara\tKamera\n"
+    "Esperando dispositivos en el conector de 40 pines.\tWarte auf Geräte an der 40-poligen Leiste.\n"
+    "sin uso todavía\tnoch nicht verwendet\n"
     ;
 
 static const char blob_de_aos_cameras_lang[] =
@@ -9036,7 +9052,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2328, 33, files_en, 34 },
-    { "de", "Deutsch", 2328, 33, files_de, 34 },
+    { "en", "English", 2336, 33, files_en, 34 },
+    { "de", "Deutsch", 2336, 33, files_de, 34 },
 };
 const int aos_lang_pack_count = 2;

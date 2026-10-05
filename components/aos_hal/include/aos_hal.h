@@ -1807,16 +1807,36 @@ int  aos_hal_usb_host_devices(aos_usb_host_info_t *out, int max);
 bool aos_hal_usb_host_info(aos_usb_host_info_t *out);   /* the first one ("device" false: none); false: host off */
 const char *aos_hal_path_usb(void);                     /* "/usb" */
 
-/* P4OS: USB keyboards on the host (aos_usb_kbd_p4.c): boot-protocol HID
- * keyboards, up to two, read as key events. A key is a Unicode code point
- * (32 and up, but 127) or one of these, the values LVGL's LV_KEY_* have. A
- * key with Ctrl or Cmd held comes with its mods (HID's modifier byte: 0x11
+/* P4OS: every device on the host (aos_usb_devs_p4.c), whether a driver
+ * takes it or not. */
+typedef struct {
+    uint8_t  addr;
+    uint8_t  port;              /* AOS_HAL_USB_HOST_OTG (25/27) or _HEADER (21/23) */
+    uint8_t  hub_port;          /* 0 on the root port itself; else the hub's port */
+    uint8_t  speed;             /* 0 low, 1 full, 2 high */
+    uint16_t vid, pid;
+    uint8_t  cls, sub;          /* the device's class, or its first interface's */
+    char     vendor[32], product[48];
+    char     uses[40];          /* what the board does with it ("" nothing): "/usb", "keyboard, mouse"... */
+} aos_usb_dev_t;
+int aos_hal_usb_devices(aos_usb_dev_t *out, int max);
+
+/* P4OS: HID on the host (aos_usb_hid_p4.c): keyboards, mice, gamepads and
+ * media keys, any number of each on one or several interfaces (a wireless
+ * receiver), read from their report descriptors.
+ *
+ * Keys are events. A key is a Unicode code point (32 and up, but 127) or
+ * one of these, the values LVGL's LV_KEY_* have, or a media key:
+ * AOS_KEY_CONSUMER + its usage of HID's consumer page (0xE9 volume up,
+ * 0xEA down, 0xE2 mute, 0xCD play/pause, 0xB5 next, 0xB6 previous). A key
+ * with Ctrl or Cmd held comes with its mods (HID's modifier byte: 0x11
  * Ctrl, 0x22 Shift, 0x44 Alt/AltGr, 0x88 Cmd) and is a shortcut, not text. */
 enum {
     AOS_KEY_UP = 17, AOS_KEY_DOWN = 18, AOS_KEY_RIGHT = 19, AOS_KEY_LEFT = 20, AOS_KEY_ESC = 27,
     AOS_KEY_DEL = 127, AOS_KEY_BACKSPACE = 8, AOS_KEY_ENTER = 10, AOS_KEY_NEXT = 9, AOS_KEY_PREV = 11,
     AOS_KEY_HOME = 2, AOS_KEY_END = 3,
 };
+#define AOS_KEY_CONSUMER 0x110000u      /* past Unicode's last code point */
 typedef struct {
     uint32_t key;
     uint8_t  mods;
@@ -1826,6 +1846,43 @@ bool aos_hal_usb_kbd_read(aos_kbd_event_t *ev);         /* the next key, false i
 int  aos_hal_usb_kbd_list(char names[][48], int max);   /* the keyboards connected, by name */
 int  aos_hal_usb_kbd_layout(void);                      /* AOS_KBD_LATAM (default) or _US */
 void aos_hal_usb_kbd_layout_set(int layout);
+
+/* Mice: the motion and the wheel summed since the last read, the buttons
+ * held now (bit 0 left, 1 right, 2 middle, then back and forward). An
+ * absolute pointer (a touch screen, a tablet) gives x, y in 0..65535 of its
+ * surface instead. false when nothing moved or changed. */
+typedef struct {
+    int16_t  dx, dy, wheel, pan;
+    uint8_t  buttons;
+    bool     absolute;
+    uint16_t x, y;
+} aos_mouse_event_t;
+bool aos_hal_hid_mouse_read(aos_mouse_event_t *ev);
+bool aos_hal_hid_mouse_present(void);
+
+/* Gamepads and joysticks: a state to read whenever wanted (a game, every
+ * frame). Axes scaled to -32767..32767: 0 X, 1 Y (the left stick; down is
+ * positive), 2 Z, 3 Rx, 4 Ry, 5 Rz (the right stick and triggers, as each
+ * pad lays them out), 6 slider or accelerator, 7 dial or brake. Buttons as
+ * the pad numbers them, bit 0 = button 1: there is no standard layout in
+ * HID, so a game offers to map them. */
+#define AOS_GAMEPAD_MAX 4
+typedef struct {
+    bool     connected;
+    char     name[48];
+    uint32_t buttons;
+    int16_t  axis[8];
+    int8_t   hat;               /* -1 centred, 0 up, 1 up-right ... 7 up-left */
+    uint8_t  axes;              /* the axes it has, bit per axis */
+    bool     has_hat;
+    uint8_t  nbuttons;
+    uint32_t reports;           /* reports read: it is alive if this moves */
+} aos_gamepad_t;
+int  aos_hal_hid_gamepad_count(void);
+bool aos_hal_hid_gamepad_get(int index, aos_gamepad_t *out);    /* index 0..AOS_GAMEPAD_MAX-1 */
+/* up/down/left/right from the hat and the left stick (past half way) */
+enum { AOS_DPAD_UP = 1, AOS_DPAD_DOWN = 2, AOS_DPAD_LEFT = 4, AOS_DPAD_RIGHT = 8 };
+uint8_t aos_hal_hid_gamepad_dpad(const aos_gamepad_t *pad);
 
 /* mDNS on a network interface of somebody else's (the USB one): the watch
  * answers "amoledos.local" there too, with that interface's address. The

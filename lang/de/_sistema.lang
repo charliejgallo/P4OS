@@ -7242,11 +7242,8 @@ Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el 
 Pines 21 (D−) y 23 (D+)	Pins 21 (D−) und 23 (D+)
 Lo usa el host de pendrives, en los pines 25 y 27.	Der USB-Stick-Host belegt ihn, an den Pins 25 und 27.
 Apagado.	Aus.
-%s%s %s, %.1f GB: en %s.	%s%s %s, %.1f GB: unter %s.
 Primero expulsá la tarjeta en la computadora	Zuerst die Karte am Computer auswerfen
 Pines 25 (D−) y 27 (D+), o el conector OTG	Pins 25 (D−) und 27 (D+), oder der OTG-Anschluss
-Esperando un pendrive o un teclado en el conector de 40 pines.	Warte auf einen USB-Stick oder eine Tastatur an der 40-poligen Leiste.
-%sTeclado %s.	%sTastatur %s.
 PENDRIVES Y TECLADOS	USB-STICKS UND TASTATUREN
 Host USB	USB-Host
 Los pendrives se leen en /usb, desde Archivos y el portal; con un hub, hasta tres: /usb, /usb2 y /usb3, en FAT32. Un teclado escribe donde escribiría el de la pantalla cuando está abierto. El conector OTG no da 5 V: todo va al conector de 40 pines, con 5 V del pin 1 y GND del 5.	USB-Sticks sind unter /usb lesbar, in Dateien und im Portal; mit einem Hub bis zu drei: /usb, /usb2 und /usb3, in FAT32. Eine Tastatur schreibt dorthin, wo die Bildschirmtastatur schreiben würde, solange sie offen ist. Der OTG-Anschluss liefert keine 5 V: alles kommt an die 40-polige Leiste, 5 V von Pin 1 und GND von Pin 5.
@@ -7256,3 +7253,14 @@ Los dos a la vez	Beide gleichzeitig
 TECLADO USB	USB-TASTATUR
 Latinoamericano	Lateinamerikanisch
 Estadounidense	US-amerikanisch
+teclado	Tastatur
+mouse	Maus
+joystick	Gamepad
+teclas multimedia	Medientasten
+teclas de sistema	Systemtasten
+hub	Hub
+disco sin montar	Laufwerk, nicht eingehängt
+puerto serie	serielle Schnittstelle
+cámara	Kamera
+Esperando dispositivos en el conector de 40 pines.	Warte auf Geräte an der 40-poligen Leiste.
+sin uso todavía	noch nicht verwendet

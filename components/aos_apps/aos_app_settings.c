@@ -385,32 +385,61 @@ static const char *usb_state_text(uint32_t *color)
 }
 
 /* The pendrives, a line each, and the colour of the dot. */
+/* what a driver does with a device (aos_usb_dev_t.uses, comma separated),
+ * in the language of the screen */
+static void uses_text(const char *uses, char *out, size_t n)
+{
+    static const struct { const char *tok; const char *es; } T[] = {
+        { "keyboard", N_("teclado") }, { "mouse", N_("mouse") }, { "gamepad", N_("joystick") }, { "media keys", N_("teclas multimedia") },
+        { "system keys", N_("teclas de sistema") }, { "hub", N_("hub") }, { "disk, not mounted", N_("disco sin montar") },
+        { "MIDI", N_("MIDI") }, { "serial", N_("puerto serie") }, { "camera", N_("cámara") },
+    };
+    size_t o = 0;
+    out[0] = 0;
+    while (*uses && o < n) {
+        const char *e = strchr(uses, ',');
+        size_t l = e ? (size_t)(e - uses) : strlen(uses);
+        const char *show = NULL;
+        for (size_t i = 0; i < sizeof T / sizeof T[0] && !show; i++)
+            if (strlen(T[i].tok) == l && !strncmp(uses, T[i].tok, l)) show = _(T[i].es);
+        o += show ? snprintf(out + o, n - o, "%s%s", o ? ", " : "", show)
+                  : snprintf(out + o, n - o, "%s%.*s", o ? ", " : "", (int)l, uses);
+        uses += l;
+        while (*uses == ',' || *uses == ' ') uses++;
+    }
+}
+
+/* Every device on the host, a line each, and the colour of the dot. */
 static const char *host_state_text(uint32_t *color)
 {
-    static char t[400];
+    static char t[640];
     *color = 0x8E8E93;
     if (!aos_hal_usb_host_on()) return _("Apagado.");
-    aos_usb_host_info_t in[AOS_USB_HOST_MAX];
-    int n = aos_hal_usb_host_devices(in, AOS_USB_HOST_MAX);
-    char kn[2][48];
-    int nk = aos_hal_usb_kbd_list(kn, 2);
-    if (n <= 0 && nk <= 0) {
+    aos_usb_dev_t dv[10];
+    int n = aos_hal_usb_devices(dv, 10);
+    if (n <= 0) {
         *color = 0xFF9F0A;
-        return _("Esperando un pendrive o un teclado en el conector de 40 pines.");
+        return _("Esperando dispositivos en el conector de 40 pines.");
     }
+    aos_usb_host_info_t in[AOS_USB_HOST_MAX];
+    int np = aos_hal_usb_host_devices(in, AOS_USB_HOST_MAX);
     size_t o = 0;
     *color = 0x34C759;
-    for (int i = 0; i < nk && o < sizeof t; i++)
-        o += snprintf(t + o, sizeof t - o, _("%sTeclado %s."), o ? "\n" : "", kn[i]);
     for (int i = 0; i < n && o < sizeof t; i++) {
-        if (in[i].mounted)
-            o += snprintf(t + o, sizeof t - o, _("%s%s %s, %.1f GB: en %s."), o ? "\n" : "", in[i].vendor,
-                          in[i].product, (double)in[i].bytes / 1e9, in[i].path);
-        else {
-            *color = 0xFF453A;
-            o += snprintf(t + o, sizeof t - o, "%s%s %s: %s", o ? "\n" : "", in[i].vendor, in[i].product, in[i].error);
-        }
+        char name[84], use[96];
+        snprintf(name, sizeof name, "%s%s%s", dv[i].vendor, dv[i].vendor[0] && dv[i].product[0] ? " " : "", dv[i].product);
+        if (!name[0]) snprintf(name, sizeof name, "%04x:%04x", dv[i].vid, dv[i].pid);
+        uses_text(dv[i].uses, use, sizeof use);
+        o += snprintf(t + o, sizeof t - o, "%s%s (%s%s): %s", o ? "\n" : "", name,
+                      dv[i].port == AOS_HAL_USB_HOST_HEADER ? "21/23" : "25/27", dv[i].hub_port ? ", hub" : "",
+                      use[0] ? use : _("sin uso todavía"));
     }
+    /* why a pendrive is not mounted */
+    for (int i = 0; i < np && o < sizeof t; i++)
+        if (!in[i].mounted && in[i].error[0]) {
+            *color = 0xFF453A;
+            o += snprintf(t + o, sizeof t - o, "\n%s %s: %s", in[i].vendor, in[i].product, in[i].error);
+        }
     return t;
 }
 
@@ -419,10 +448,13 @@ static void usb_refresh(void)
     int mode = aos_hal_usb_mode();
     aos_usb_host_info_t hi[AOS_USB_HOST_MAX];
     int hn = aos_hal_usb_host_on() ? aos_hal_usb_host_devices(hi, AOS_USB_HOST_MAX) : -1;
-    char kn[2][48];
-    int key = (mode << 4) | (aos_hal_usb_busy() << 3) | (aos_hal_usb_connected() << 2) | ((hn + 1) << 8) |
-              (aos_hal_usb_kbd_list(kn, 2) << 20);
+    aos_usb_dev_t dv[10];
+    int nd = aos_hal_usb_devices(dv, 10);
+    int key = (mode << 4) | (aos_hal_usb_busy() << 3) | (aos_hal_usb_connected() << 2) | ((hn + 1) << 8) | (nd << 20);
     for (int i = 0; i < hn; i++) key ^= (hi[i].device | hi[i].mounted << 1) << (12 + 2 * i);
+    /* and what each device is used for, which drivers say a moment later */
+    for (int i = 0; i < nd; i++)
+        for (const char *c = dv[i].uses; *c; c++) key = key * 31 + *c;
     if (key == U.usb_shown) return;
     U.usb_shown = key;
     if (U.usb_root) lv_label_set_text(U.usb_root, usb_root_text());

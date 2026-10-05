@@ -83,6 +83,14 @@ void aos_p4_usb_net_stop(void);
 void aos_p4_usb_net_relink(bool up);
 void aos_p4_usb_net_mac(uint8_t mac[6]);
 
+/* the host's clients: the devices list (aos_usb_devs_p4.c) and HID
+ * (aos_usb_hid_p4.c) */
+bool aos_p4_usb_devs_start(void);
+void aos_p4_usb_devs_stop(void);
+void aos_p4_usb_dev_use(uint8_t addr, const char *what);
+bool aos_p4_usb_hid_start(void);
+void aos_p4_usb_hid_stop(void);
+
 /* aos_hal_p4.c: the card on its slot with no filesystem, for disk mode */
 sdmmc_card_t *aos_p4_sd_card_open(void);
 void aos_p4_sd_card_close(sdmmc_card_t *card);
@@ -662,6 +670,7 @@ static void host_mount(uint8_t addr)
     }
     ESP_LOGI(TAG, "pendrive %04x:%04x \"%s %s\", %" PRIu64 " MB: %s%s", in.vid, in.pid, in.vendor, in.product,
              in.bytes / 1000000, in.mounted ? "mounted at " : "", in.mounted ? root : in.error);
+    aos_p4_usb_dev_use(addr, in.mounted ? root : "disk, not mounted");
     xSemaphoreTake(H.mx, portMAX_DELAY);
     sl->info = in;
     xSemaphoreGive(H.mx);
@@ -770,8 +779,7 @@ static bool host_phy(int c)
     return e == ESP_OK;
 }
 
-bool aos_p4_usb_kbd_start(void);
-void aos_p4_usb_kbd_stop(void);
+
 
 static bool host_start(void)
 {
@@ -833,6 +841,9 @@ static bool host_start(void)
         dwc->gotgctl_reg.avalidoven = 1;
         dwc->gotgctl_reg.avalidovval = 1;
     }
+    /* the devices list first, so it hears of every device before the
+     * drivers that tell it what they do with it */
+    if (!aos_p4_usb_devs_start()) ESP_LOGW(TAG, "host: no devices list");
     usb_host_lib_set_root_port_power(true);
     if (xTaskCreatePinnedToCore(host_lib_task, "usb_host", 4096, NULL, 5, NULL, 0) != pdPASS) {
         host_uninstall();
@@ -850,9 +861,9 @@ static bool host_start(void)
         host_uninstall();
         return false;
     }
-    /* keyboards: a client of its own beside usb_host_msc */
-    if (!aos_p4_usb_kbd_start()) ESP_LOGW(TAG, "host: no keyboard client");
-    ESP_LOGI(TAG, "host: waiting for pendrives and keyboards on %s",
+    /* keyboards, mice, gamepads: a client of its own beside usb_host_msc */
+    if (!aos_p4_usb_hid_start()) ESP_LOGW(TAG, "host: no HID client");
+    ESP_LOGI(TAG, "host: waiting for devices on %s",
              H.map == (BIT0 | BIT1) ? "J3 25/27 (High Speed) and 21/23 (Full Speed)"
              : H.map & BIT1 ? "J3 21 D- 23 D+ (Full-Speed controller)"
                             : "J3 25 D- 27 D+ or the OTG connector (High-Speed controller)");
@@ -861,7 +872,8 @@ static bool host_start(void)
 
 static void host_stop(void)
 {
-    aos_p4_usb_kbd_stop();
+    aos_p4_usb_hid_stop();
+    aos_p4_usb_devs_stop();
     H.stop = true;
     usb_host_lib_unblock();
     for (int i = 0; i < 150 && !(H.app_done && H.lib_done); i++) {

@@ -1043,6 +1043,7 @@ void aos_ui_tick(void)
     aos_pair_ui_tick();
     aos_access_tick();              /* mDNS by the portal's rules; once a second inside */
     aos_hwkbd_tick();               /* a USB keyboard on the host types into the open keyboard */
+    aos_hwmouse_tick();             /* and a USB mouse points */
     /* the screen's auto-off; an app in front with KEEP_AWAKE holds it on
      * for as long as it is in front (the flag used to count only when the
      * app opened) */
