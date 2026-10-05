@@ -28,6 +28,10 @@
  * shorter than a frame still turns, and a second finger landing while the
  * first drags is a swipe of its own.
  *
+ * A USB gamepad plays too (aos_pad.h): the d-pad or the stick turns, START
+ * pauses and resumes, and on the menus and the pause the d-pad goes through
+ * the buttons with A to press (aos_pad_menu.h), B going back.
+ *
  * The files:
  *   ns_game.c  the rules: deterministic, integers only, no LVGL
  *   ns_art.c   every sprite, drawn by code at the cell size of the mode
@@ -53,6 +57,8 @@
 #include "aos_hal.h"
 #include "aos_i18n.h"
 #include "aos_icon_ops.h"
+#include "aos_pad.h"
+#include "aos_pad_menu.h"
 #include "aos_sys_glyphs.h"
 #include "aos_theme.h"
 #include "aos_ui.h"
@@ -204,6 +210,8 @@ typedef struct {
     track_t     tk[2];
     uint32_t    touch_seq;
     bool        pause_held;
+    aos_pad_t   pad;
+    aos_pad_menu_t pmenu;           /* the buttons showing, for the pad      */
 
     uint32_t    last_step_ms, over_at_ms;
 
@@ -522,6 +530,18 @@ static void input_reset(app_t *a)
     if (a->pause) lv_obj_remove_state(a->pause, LV_STATE_PRESSED);
 }
 
+/* The buttons showing are the pad's, from the first one shown. The three
+ * are the same objects on every screen, so the outline a hidden one kept
+ * from the last screen goes first (aos_pad_menu skips a hidden one). */
+static void pad_menu_take(app_t *a)
+{
+    for (int i = 0; i < 3; i++) lv_obj_set_style_outline_width(a->btn[i], 0, 0);
+    int first = 0;
+    while (first < 3 && lv_obj_has_flag(a->btn[first], LV_OBJ_FLAG_HIDDEN)) first++;
+    if (first < 3) aos_pad_menu_set(&a->pmenu, a->btn, 3, first);
+    else aos_pad_menu_clear(&a->pmenu);
+}
+
 /* -------------------------------------------------------------------------- */
 /* Screens                                                                     */
 
@@ -582,6 +602,7 @@ static void show_screen(app_t *a, screen_t s)
         btn_set(a, 2, NULL, 0, 0, 0);
         break;
     }
+    pad_menu_take(a);
 }
 
 static void show_overlay(app_t *a, overlay_t ov)
@@ -616,6 +637,7 @@ static void show_overlay(app_t *a, overlay_t ov)
         btn_set(a, 2, NULL, 0, 0, 0);
         break;
     }
+    pad_menu_take(a);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1252,6 +1274,40 @@ static void take_gesture(app_t *a)
     if (dir == LV_DIR_RIGHT && a->scr != SCR_PLAY) go_back(a);
 }
 
+/* The pad, once a frame. In play a direction pressed turns - of the ones
+ * pressed together (a stick going round), the one across the way the snake
+ * will be going - and START pauses; everywhere else the d-pad and A are the
+ * buttons', START presses the one picked (or resumes from the pause) and B
+ * is the menus' back, never out of the app. */
+static void pad_step(app_t *a)
+{
+    aos_pad_update(&a->pad, lv_tick_get());
+    const aos_pad_t *p = &a->pad;
+    if (!p->pressed && !p->repeat) return;
+    if (steering(a)) {
+        static const uint32_t bit[4] = { AOS_PAD_UP, AOS_PAD_RIGHT, AOS_PAD_DOWN, AOS_PAD_LEFT };
+        uint8_t cur = last_dir(a);
+        for (uint8_t d = 0; d < 4; d++) {      /* NS_UP, NS_RIGHT, NS_DOWN, NS_LEFT */
+            if ((p->pressed & bit[d]) && ((d ^ cur) & 1)) {
+                queue_turn(a, d);
+                break;
+            }
+        }
+        if (aos_pad_pressed(p, AOS_PAD_START)) go_back(a);
+        return;
+    }
+    if (aos_pad_menu_step(&a->pmenu, p)) return;
+    bool paused = a->scr == SCR_PLAY && a->ov == OV_PAUSE;
+    if (aos_pad_pressed(p, AOS_PAD_START)) {
+        lv_obj_t *o = aos_pad_menu_selected(&a->pmenu);
+        if (paused) resume(a);
+        else if (o) lv_obj_send_event(o, LV_EVENT_CLICKED, NULL);
+    } else if (aos_pad_pressed(p, AOS_PAD_B)) {
+        if (paused) resume(a);
+        else if (a->scr != SCR_MENU) go_back(a);
+    }
+}
+
 static void frame(lv_timer_t *timer)
 {
     app_t *a = lv_timer_get_user_data(timer);
@@ -1271,6 +1327,7 @@ static void frame(lv_timer_t *timer)
         a->want_pause = a->want_back = false;
         go_back(a);
     }
+    pad_step(a);
     take_gesture(a);
     link_tick(a);
 
@@ -1509,6 +1566,7 @@ static void *app_create(aos_app_t *self, lv_obj_t *root)
     a->stat_t0 = (uint32_t)aos_hal_uptime_ms();
     show_screen(a, SCR_MENU);
     touch_sync(a);
+    aos_pad_reset(&a->pad, lv_tick_get());
 
 #ifdef AOS_SIM_BUILTIN
     if ((env = getenv("NS_MODE")) && env[0]) {
