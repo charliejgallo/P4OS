@@ -27,6 +27,9 @@
  *     six are 200. Everything is placed from the root's size in layout(),
  *     which resize() calls again on a turn of the screen, so a roll and its
  *     history survive it.
+ *   - A USB gamepad walks the controls with aos_pad_menu (the die chips,
+ *     minus, plus and TIRAR, where the outline starts, so A rolls). START
+ *     rolls from wherever the outline is and L / R step through the dice.
  */
 #include "aos_app.h"
 #include "aos_theme.h"
@@ -35,6 +38,8 @@
 #include "aos_i18n.h"
 #include "aos_sys_glyphs.h"
 #include "aos_ui.h"
+#include "aos_pad.h"
+#include "aos_pad_menu.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -125,6 +130,9 @@ typedef struct {
     bool     imu_primed;
 
     bool pending_roll;                  /* left by the physical button */
+
+    aos_pad_t      pad;
+    aos_pad_menu_t pmenu;               /* chips, minus, plus and TIRAR */
 } dice_ui_t;
 
 /* The game itself outlives the UI: leaving the app and coming back, or a
@@ -524,6 +532,19 @@ static void frame_cb(lv_timer_t *timer)
         start_roll();
     }
 
+    /* the gamepad */
+    aos_pad_update(&s_dice.pad, now);
+    if (aos_pad_pressed(&s_dice.pad, AOS_PAD_START)) {
+        start_roll();
+    } else if (aos_pad_pressed(&s_dice.pad, AOS_PAD_L | AOS_PAD_R)) {
+        int next = s_game.sides_idx + (aos_pad_pressed(&s_dice.pad, AOS_PAD_R) ? 1 : -1);
+        if (next >= 0 && next < N_SIDES) {
+            lv_obj_send_event(s_dice.chip[next], LV_EVENT_CLICKED, NULL);
+        }
+    } else {
+        aos_pad_menu_step(&s_dice.pmenu, &s_dice.pad);
+    }
+
     if (s_dice.rolling) {
         if ((int32_t)(now - s_dice.roll_end_ms) >= 0) {
             s_dice.rolling = false;
@@ -802,6 +823,16 @@ static void *create(aos_app_t *self, lv_obj_t *root)
     refresh_history();
     refresh_total(true);
     paint_all(true);
+
+    lv_obj_t *items[N_SIDES + 3];
+    for (int i = 0; i < N_SIDES; i++) {
+        items[i] = s_dice.chip[i];
+    }
+    items[N_SIDES]     = s_dice.btn_minus;
+    items[N_SIDES + 1] = s_dice.btn_plus;
+    items[N_SIDES + 2] = s_dice.btn_roll;
+    aos_pad_menu_set(&s_dice.pmenu, items, N_SIDES + 3, N_SIDES + 2);
+    aos_pad_reset(&s_dice.pad, lv_tick_get());
 
     s_dice.last_imu_ms   = lv_tick_get();
     s_dice.last_shake_ms = lv_tick_get();
