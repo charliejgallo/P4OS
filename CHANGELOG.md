@@ -31,7 +31,9 @@
   High-Speed lines: 7.4 MB/s from a pendrive with wires under 15 cm; with
   70 cm the port reset failed), or on both at once: P4OS carries its own
   copy of ESP-IDF's host library (`components/usb`) that drives the two
-  controllers as two root ports. Hubs too.
+  controllers as two root ports. Hubs work too, though wiring the devices
+  directly is recommended (a hub without its own supply can drop off for a
+  moment when something is plugged into it).
 - Every device is listed in Settings and `/api/usb`, with what the board
   does with it, also the ones nothing takes.
 - Pendrives (FAT32) at `/usb`, `/usb2`, `/usb3`: Files and the portal.

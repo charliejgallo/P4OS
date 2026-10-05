@@ -443,7 +443,9 @@ por el Registro del portal sin cable serie)
       sus puertos y quedó descartado hasta desenchufarlo (no se repitió en
       ~6 conexiones más); (b) 2 de 4 veces, al resetear el puerto del
       joystick (baja velocidad) se cayó el hub entero y volvió solo.
-      ¿Caída de tensión en los 5 V por cables? Probar con hub con fuente.
+      Probablemente los 5 V que caen por los cables. Queda así: anda con
+      hub, se recomienda cablear directo (el usuario no lo va a usar con
+      hub; decisión del 2026-10-04).
 - [ ] Varios pendrives detrás del hub (`/usb2`, `/usb3`).
 - [ ] Visto de paso: `E i2s_common: i2s_channel_disable … not enabled` al
       reabrir el códec para el sonido de las teclas; inofensivo, a limpiar.

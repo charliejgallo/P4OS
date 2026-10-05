@@ -194,8 +194,19 @@ USB Keyboard", class 03, low speed, on 21/23`). A couple of failed
 enumerations (`ENUM: CHECK_SHORT_DEV_DESC FAILED`) while a plug goes in
 are normal: the contacts bounce, and the next try works.
 
-**Hubs** are on (`CONFIG_USB_HOST_HUBS_SUPPORTED`). A hub with its own
-power supply also gives the devices their 5 V. On 25/27 a High-Speed hub
+**Hubs** are on (`CONFIG_USB_HOST_HUBS_SUPPORTED`), and they work, but
+**wiring the devices to the two ports directly is the recommended way**.
+Tried on 2026-10-04 with a 7-port hub without its own supply (two 4-port
+chips in a chain) on 21/23 and a pad plugged into each of its ports: the
+pad came up and read on every port, but 2 times in 4 the whole hub fell
+off the root port as the pad's port was reset, and came back by itself
+half a second later (most likely the 5 V dipping, through the wires from
+pin 1, at the moment of plugging in); and once the hub refused a port
+status request right after powering its ports and stayed out until it was
+unplugged. A hub with its own supply also gives the devices their 5 V. The
+hubs themselves do not show in the devices list (the library does not
+announce them to its clients); what hangs from them does, with the hub's
+port. On 25/27 a High-Speed hub
 runs at High Speed; a Full- or Low-Speed device behind a High-Speed hub
 needs split transactions, which ESP-IDF does not do (a keyboard behind a
 High-Speed hub on 25/27 does not work; on 21/23 it does).
