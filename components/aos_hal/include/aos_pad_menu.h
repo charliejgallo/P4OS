@@ -19,6 +19,11 @@
  * Call aos_pad_menu_set() again (or aos_pad_menu_clear()) whenever those
  * buttons are deleted: the menu keeps their pointers. A button that is
  * hidden or disabled is skipped.
+ *
+ * The outline is drawn 9 px outside the button, and a parent clips it to
+ * its own area: a row or column that holds the buttons tight needs
+ * LV_OBJ_FLAG_OVERFLOW_VISIBLE and a bigger draw area of its own
+ * (LV_EVENT_REFR_EXT_DRAW_SIZE), or some inner padding if it scrolls.
  */
 #pragma once
 
