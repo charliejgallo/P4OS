@@ -15,6 +15,15 @@
   apps; `aos.pad()` for the Lua scripts.
 - The simulator fakes a pad: `P4_SIM_PAD=1` (the keyboard) and the scripts'
   `pad` command.
+- A d-pad that the pad reports as the X/Y axes (many cheap ones) is read
+  as directions, not as a stick pushed to the end: Turbo turned at full
+  lock at a touch.
+
+**Retro canvas**
+- The CPU scales it by default: the PPA left the first row of each small
+  block wrong, and Atrapa left a trail behind every falling star.
+  `retro_hw` in `/api/settings` turns the PPA back on; `/api/sysmon` shows
+  the canvas's rate and its scaling cost.
 
 ## 0.9.0 — 2026-10-05
 

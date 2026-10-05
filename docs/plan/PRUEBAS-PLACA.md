@@ -520,8 +520,12 @@ por el Registro del portal sin cable serie)
 - [ ] Precisión contra un instrumento de referencia.
 
 **Lienzo retro**
-- [ ] Si el escalado ×3 del PPA (bilineal) se ve aceptable. Si no,
-      `retro_hw=0` escala por CPU.
+- [x] El escalado del PPA dejaba mal la primera fila de cada bloque: Atrapa
+      (Lua) dejaba una raya por cada estrella que caía (2026-10-05). Desde
+      ed96d74 escala la CPU por omisión (`retro_hw=1` en `/api/settings`
+      vuelve al PPA). Medido por CPU: Atrapa 49,8 fps (escalar 0,25 ms),
+      2043 a pantalla completa 29 fps (escalar 4,2-4,9 ms, refresco 15 ms);
+      los dos se ven bien. `/api/sysmon` muestra el lienzo en `lvgl.retro`.
 - [ ] Que el PPA acepte los buffers de LVGL.
 - [ ] Que no haya costuras entre franjas.
 - [ ] Jugar con dos dedos.

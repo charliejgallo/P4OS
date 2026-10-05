@@ -313,7 +313,18 @@ Its assumptions:
     canvas row per three screen rows pixel by pixel, and `memcpy`s the other
     two.
 
-### What the board still has to confirm
+### What the board showed (2026-10-05)
+
+The SRM leaves the **first screen row of each scaled block** wrong. A
+game that presents many small rects (Lua's Atrapa, one per falling star)
+left a trail of single rows behind every star; whole-canvas presents hid
+it. So since 0.9.1 the **CPU scales by default** and the PPA is behind
+`retro_hw` = 1 (`POST /api/settings {"retro_hw":1}`, read again at once).
+On the CPU, Atrapa runs at 49.8 fps with 0.25 ms of scaling a frame, and
+2043, which presents the whole canvas, at 29 fps with 4-5 ms of scaling
+and a 15 ms refresh. `/api/sysmon` shows these live in `lvgl.retro`.
+
+### What the board still had to confirm (written before it came)
 
 1. **What the SRM's scaling looks like at x3 on pixel art.** If it is soft,
    choose between the PPA and `retro_hw=0` by eye.
