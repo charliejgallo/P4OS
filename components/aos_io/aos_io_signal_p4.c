@@ -39,6 +39,16 @@ static void lock(void)
 
 static void unlock(void) { xSemaphoreGive(s_mx); }
 
+/* A pin let go rests at its "off" level through the weak pull, not
+ * floating: gpio_reset_pin() leaves the pull-up on, and a servo's input
+ * held weakly high moved by itself when its channel was switched off
+ * (seen on the board, 2026-10-05). */
+static void rest(int gpio, int level)
+{
+    gpio_reset_pin(gpio);
+    gpio_set_pull_mode(gpio, level ? GPIO_PULLUP_ONLY : GPIO_PULLDOWN_ONLY);
+}
+
 /* ======================= PWM: the LEDC ======================= */
 
 #define BL_TIMER 1                      /* the backlight's (BSP) */
@@ -160,11 +170,12 @@ void aos_io_be_pwm_close(aos_io_pwm_t *p)
     pwm_be_t *be = p->be;
     if (!be) return;
     lock();
-    ledc_stop(LEDC_LOW_SPEED_MODE, be->ch, 0);
+    int off = p->invert ? 1 : 0;            /* an inverted output is off high */
+    ledc_stop(LEDC_LOW_SPEED_MODE, be->ch, off);
     s_ch_used[be->ch] = false;
     timer_put(be->tm);
     unlock();
-    gpio_reset_pin(p->gpio);
+    rest(p->gpio, off);
     heap_caps_free(be);
     p->be = NULL;
 }
@@ -196,7 +207,7 @@ void aos_io_be_dac_close(aos_io_dac_t *d)
     if (!d->be) return;
     sdm_channel_disable((sdm_channel_handle_t)d->be);
     sdm_del_channel((sdm_channel_handle_t)d->be);
-    gpio_reset_pin(d->gpio);
+    rest(d->gpio, 0);
     d->be = NULL;
 }
 
@@ -354,7 +365,8 @@ void aos_io_be_ir_close(aos_io_ir_t *ir)
     heap_caps_free(be->buf[1]);
     heap_caps_free(be->out);
     heap_caps_free(be);
-    gpio_reset_pin(ir->gpio);
+    if (ir->tx) rest(ir->gpio, 0);              /* the LED's transistor off */
+    else gpio_reset_pin(ir->gpio);
     ir->be = NULL;
 }
 
