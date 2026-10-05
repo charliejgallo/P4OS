@@ -263,9 +263,17 @@ on the computer (MIDI thru).
 
 **Serial**: tried with a CH340 converter (loopback at 9600, 115200 and
 921600 baud), an Arduino Leonardo (CDC-ACM, with a keyboard on the same
-device: `tools/usb_test/`), an ESP32 board's CP2102 (its boot log) and a
-Raspberry Pi Pico with MicroPython (its REPL: commands typed from the
-board, answers back).
+device: `tools/usb_test/`), an ESP32 board's CP2102 (its boot log), an
+FTDI FT232R (loopback at 9600, 115200 and 921600, reopened between each)
+and a Raspberry Pi Pico with MicroPython (its REPL: commands typed from
+the board, answers back).
+
+Once a serial device is opened, its USB side stays open until it is
+unplugged: closing the port puts it at rest (what comes in is dropped) and
+opening it again takes it back at the new speed. Closing and reopening it
+for real lost the first packet after every reopen with the FTDI: the
+CDC-ACM driver resets its side of the endpoints on close but not the
+device's, and their data toggles part ways.
 
 **A Pico (RP2040) is programmed from the board.** In BOOTSEL mode it is a
 mass storage device ("RP2 Boot", `INFO_UF2.TXT`), mounted at `/usb` like

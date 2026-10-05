@@ -13,6 +13,14 @@
  * What comes in lands in a stream buffer in PSRAM (16 KB) that the reader
  * empties; writing blocks up to half a second. A device unplugged while
  * open closes its port: reads answer -1 from then on.
+ *
+ * Once opened, the USB side stays open until the device goes (or the host
+ * stops): closing the port only puts it to rest, dropping what comes in,
+ * and opening it again takes it back at the new speed. Closing it for
+ * real and opening it again lost the first packet after every reopen with
+ * an FTDI (measured on 2026-10-04): the CDC-ACM driver resets its side of
+ * the endpoints on close and not the device's, so their data toggles part
+ * ways. And that close is where the driver aborted under heavy traffic.
  */
 #include "aos_hal.h"
 
@@ -47,6 +55,7 @@ typedef struct {
     cdc_acm_dev_hdl_t cdc;
     StreamBufferHandle_t rx;
     volatile bool closed;           /* unplugged while open */
+    volatile bool in_use;           /* opened by someone; false: at rest, input dropped */
 } ser_t;
 
 static struct {
@@ -137,16 +146,35 @@ static bool present(const ser_t *s)
 
 /* the list without the ones that went away (closed ones only: an open port
  * stays until it is closed, reading -1) */
+/* the USB side closed for real: the device went, or the host stops */
+static void dispose(ser_t *s)
+{
+    if (s->cdc) cdc_acm_host_close(s->cdc);
+    s->cdc = NULL;
+    if (s->rx) vStreamBufferDeleteWithCaps(s->rx);
+    s->rx = NULL;
+    s->in_use = false;
+}
+
+/* the list without the ones that went away (one in use stays, reading -1,
+ * until whoever has it closes it) */
 static void prune(void)
 {
-    for (int i = 0; i < SER_MAX; i++)
-        if (S.s[i].used && !S.s[i].cdc && !present(&S.s[i])) S.s[i].used = false;
+    for (int i = 0; i < SER_MAX; i++) {
+        ser_t *s = &S.s[i];
+        if (!s->used || s->in_use) continue;
+        if (s->cdc && s->closed) {
+            dispose(s);
+            s->used = false;
+        } else if (!s->cdc && !present(s)) s->used = false;
+    }
 }
 
 static bool rx_cb(const uint8_t *data, size_t len, void *arg)
 {
     ser_t *s = arg;
-    if (s->rx) xStreamBufferSend(s->rx, data, len, 0);     /* full: what does not fit is lost */
+    /* at rest, nobody reads: dropped. Full: what does not fit is lost. */
+    if (s->rx && s->in_use) xStreamBufferSend(s->rx, data, len, 0);
     return true;
 }
 
@@ -174,7 +202,7 @@ bool aos_p4_usb_serial_start(void)
 void aos_p4_usb_serial_stop(void)
 {
     if (!S.installed) return;
-    for (int i = 0; i < SER_MAX; i++) aos_hal_usb_serial_close(i);
+    for (int i = 0; i < SER_MAX; i++) dispose(&S.s[i]);
     cdc_acm_host_uninstall();
     S.installed = false;
     memset(S.s, 0, sizeof S.s);
@@ -217,7 +245,16 @@ int aos_hal_usb_serial_open(int index, uint32_t baud)
     int i = slot_of(index);
     ser_t *s = i >= 0 ? &S.s[i] : NULL;
     xSemaphoreGive(S.mx);
-    if (!s || s->cdc) return -1;
+    if (!s || s->in_use || s->closed) return -1;
+    if (s->cdc) {
+        /* at rest since its last close: taken back as it is */
+        xStreamBufferReset(s->rx);
+        s->in_use = true;
+        aos_hal_usb_serial_set_format(i, baud, 'N', 1);
+        cdc_acm_host_set_control_line_state(s->cdc, true, true);
+        ESP_LOGI(TAG, "serial \"%s\" open again at %u baud", s->name, (unsigned)baud);
+        return i;
+    }
     s->rx = xStreamBufferCreateWithCaps(RX_BYTES, 1, MALLOC_CAP_SPIRAM);
     if (!s->rx) return -1;
     s->closed = false;
@@ -245,6 +282,7 @@ int aos_hal_usb_serial_open(int index, uint32_t baud)
         s->rx = NULL;
         return -1;
     }
+    s->in_use = true;
     aos_hal_usb_serial_set_format(i, baud, 'N', 1);
     /* DTR and RTS up: what a computer's terminal does, and what an Arduino
      * (or a CDC device that waits for a terminal) expects */
@@ -277,11 +315,13 @@ int aos_hal_usb_serial_write(int h, const void *buf, int len)
 
 void aos_hal_usb_serial_close(int h)
 {
-    if (h < 0 || h >= SER_MAX) return;
+    if (h < 0 || h >= SER_MAX || !S.installed) return;
+    xSemaphoreTake(S.mx, portMAX_DELAY);
     ser_t *s = &S.s[h];
-    if (s->cdc) cdc_acm_host_close(s->cdc);
-    s->cdc = NULL;
-    if (s->rx) vStreamBufferDeleteWithCaps(s->rx);
-    s->rx = NULL;
-    if (s->closed) s->used = false;     /* it is gone: off the list too */
+    s->in_use = false;                  /* at rest: the USB side stays open (see the top) */
+    if (s->closed) {                    /* it is gone: closed for real, and off the list */
+        dispose(s);
+        s->used = false;
+    }
+    xSemaphoreGive(S.mx);
 }

@@ -450,7 +450,12 @@ por el Registro del portal sin cable serie)
 - [x] CP2102 de una placa ESP32 (10c4:ea60, 2026-10-04): con los búferes
       en RAM interna, nada hasta apretar EN y después el registro de
       arranque limpio (ROM, bootloader IDF 5.5.5, ESPHome), 5172 bytes.
-- [ ] FTDI (el Nano del usuario es un clon con CH340: no sirve para esto).
+- [x] **FTDI FT232R** (0403:6001, 2026-10-04): eco con TX y RX puenteados
+      a 9600, 115200 y 921600, cerrando y reabriendo entre cada una: todo
+      vuelve. Antes se perdía el primer paquete tras cada reapertura (data
+      toggle desfasado por el cierre del driver CDC-ACM): ahora el lado USB
+      queda abierto hasta que se desenchufa. Al enchufarlo en caliente dos
+      veces no enumeró: desde entonces la placa reintenta sola.
 - [x] **Raspberry Pi Pico** (2026-10-04): en BOOTSEL se montó en `/usb`
       como disco; copiar MicroPython v1.29.0 (.uf2) ahí la programó (el
       portal contesta error porque el disco se va antes de cerrar el
