@@ -127,8 +127,11 @@ and over the cable, HTTP keeps working: the scripts in `tools/` use it.
   portal's password hash and the token can be read from a board in hand.
   ESP-IDF's flash encryption and secure boot burn eFuses for good: not for
   a board under development.
-- **The firmware is not signed.** Whoever gets into the portal can install
-  their own. ESP-IDF can refuse images not signed with your key, without
-  secure boot; it is planned.
+- **The firmware is not signed, on purpose.** Whoever gets into the
+  portal can install their own. ESP-IDF can refuse images not signed with a
+  key, but then only whoever holds that key could change the board's
+  firmware, and P4OS is meant to be open: anyone can build and load their
+  own. What guards the firmware page is what guards the rest of the
+  portal: the trusted networks, the password and HTTPS.
 - **The card is readable by whoever holds it.** The cameras' passwords in
   `/cameras.txt`, for one, are in clear.

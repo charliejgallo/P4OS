@@ -178,6 +178,38 @@ Since 0.7 ([BLUETOOTH.md](BLUETOOTH.md), [EMOJI.md](EMOJI.md)):
   `/fonts/emoji.pak` on the card (the simulator's is
   `sim/sim_fs/fonts/emoji.pak`).
 
+## Devices on the USB host
+
+Since 0.9 ([USB.md](USB.md), "The USB host"), what the board's USB host
+takes is there for the apps, all in `aos_hal.h`:
+
+- **Gamepads and joysticks:** `aos_hal_hid_gamepad_get(i, &pad)` for
+  `i` in `0..AOS_GAMEPAD_MAX-1` (false when there is none there): buttons
+  as the pad numbers them (bit 0 = button 1), eight axes scaled to
+  +-32767 (0 X and 1 Y are the left stick or the D-pad; down is positive),
+  the hat, and `reports`, which moves while the pad is alive. Read it every
+  frame. `aos_hal_hid_gamepad_dpad(&pad)` gives up/down/left/right from the
+  hat or the left stick. HID has no standard button layout: a generic
+  SNES-style pad is X=1, A=2, B=3, Y=4, L=5, R=6, Select=9, Start=10, but
+  another pad differs, so offer to map them. `/api/usb` shows the pads
+  live, to see which is which.
+- **A keyboard** types into the open LVGL keyboard's text area by itself.
+  An app with a keyboard of its own takes the keys while it is up with
+  `aos_ui_hwkbd_handler(cb)` (`aos_ui.h`) and gives them back with NULL:
+  `cb(key, mods)` gets a Unicode code point (accents already composed) or
+  an `AOS_KEY_*`, and returns true for a key it used. Notes does this.
+- **MIDI:** `aos_hal_midi_read(&msg)` (status, data1, data2) and
+  `aos_hal_midi_send(&msg)`; `aos_hal_midi_devices()` lists them.
+- **Webcams:** the Cameras app shows them (`usb://N`). For your own,
+  `aos_hal_uvc_count`, `_info` (name and MJPEG sizes), `_start`, `_frame`
+  (the newest JPEG, for `aos_hal_jpeg_decode`) and `_stop`.
+- **Serial ports:** `aos_io_uart_open("usb0", baud, false, owner)` opens a
+  USB serial device like a UART; `aos_hal_usb_serial_count()` says how many
+  are plugged in.
+- **Sound cards:** nothing to do. The player, `aos_hal_spk_*`, the tones
+  and the microphone go to and come from the card by themselves when the
+  user has one plugged in.
+
 ## Measuring on the board
 
 - **The log:** `GET /api/log?from=N` returns 16 KB at a time from the oldest

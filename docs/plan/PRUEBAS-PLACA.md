@@ -5,7 +5,7 @@ simulador, contra servidores falsos en la Mac. Este archivo junta, en un solo
 lugar, lo que **sólo la placa puede confirmar**, para ir tachando a medida que
 se prueba.
 
-## Estado al 2026-09-30
+## Estado al 2026-09-30 (lo de después, en los resúmenes de abajo)
 
 - **La placa corre P4OS entero:** rev 1.3 del chip, perfil `rev1_3`, firmware
   por `tools/build_fw.sh rev1_3 … app-flash`, portal en `p4os.local`.
@@ -31,6 +31,18 @@ se prueba.
   (`docs/BUILDING.md`).
 
 ### Pendientes, en resumen
+
+Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
+- [x] **Host USB** (docs/USB.md): los dos puertos a la vez (21/23 y 25/27)
+      con la copia propia de la librería host (`components/usb`); probados
+      en la placa un pendrive (lectura 7,4 MB/s, escritura), teclado (también
+      en Notas), mouse, joystick, hub, webcam C270 en Cámaras, placa de
+      audio (salida y micrófono), y por serie CH340, CP2102, FTDI, un
+      Arduino Leonardo (serie + teclado) y una Pico (programada con su .uf2
+      desde la placa, REPL de MicroPython). El detalle de cada uno, abajo en
+      **USB**. Sin probar: MIDI con un aparato real.
+- [ ] El cuelgue del primer arranque tras algunas OTA: dos volcados el
+      2026-10-04 con `strcmp` en `dlsym` cargando apps (handoff de sistema).
 
 Hecho el 2026-10-04 (0.7.0):
 - [x] Bluetooth con el iPhone 15 Pro Max: aparece en Ajustes del iPhone

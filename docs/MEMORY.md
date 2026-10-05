@@ -29,6 +29,17 @@ file lists what cannot, and why, so that new code follows it.
   audio.
 - **Whatever an interrupt touches**, and whatever runs while the cache is
   off.
+- **The USB host's DMA buffers** (since 2026-10-04, the 0.9 host). ESP-IDF
+  can put them in PSRAM (`CONFIG_USB_HOST_DWC_DMA_CAP_MEMORY_IN_PSRAM`,
+  marked with an open issue on the buffers' alignment, IDF-11368), and with
+  it a pendrive read 15 % slower, which would have been fine; but a CP2102
+  serial port read 400 KB/s of repeated garbage, more than its cable
+  carries, and closing it then aborted in the CDC-ACM driver. So they stay
+  in internal RAM: each device's control buffer (4 KB, for a webcam's
+  configuration descriptor), the pendrives' transfers, the webcams' and
+  sound cards' isochronous ones. The class drivers' own rings and frame
+  buffers (the webcam's MJPEG frames, the serial ports' 16 KB, the sound
+  card's) are in PSRAM where they ask for it. `docs/USB.md`.
 
 ## The panel's three frame buffers (2026-09-29)
 

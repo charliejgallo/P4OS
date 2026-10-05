@@ -25,11 +25,13 @@ what that asks for. The full texts are in [LICENSES/](LICENSES).
 | onewire_bus 1.1 (Espressif) | fetched | Apache-2.0 | 1-Wire over the RMT, for the DS18B20 |
 | mdns, esp_tinyusb, esp-serial-flasher, esp_h264 | fetched | Apache-2.0 | esp_h264's decoder is tinyh264; the flasher's stubs are Apache-2.0 or MIT |
 | TinyUSB | fetched | MIT | [MIT-TinyUSB.txt](LICENSES/MIT-TinyUSB.txt) |
+| USB host class drivers (Espressif esp-usb): usb_host_msc, usb_host_cdc_acm with its CH34x, CP210x and FTDI drivers, usb_host_uvc, usb_host_uac | fetched | Apache-2.0 | pendrives, serial ports, webcams and sound cards on the USB host |
 | esp_new_jpeg | fetched | **Espressif MIT**: for use on Espressif products | [Espressif-MIT-esp_new_jpeg.txt](LICENSES/Espressif-MIT-esp_new_jpeg.txt) |
 | esp_audio_codec (prebuilt, AAC for the radio) | fetched | **Espressif Modified MIT**: use and redistribution only with Espressif products | [Espressif-Modified-MIT-esp_audio_codec.txt](LICENSES/Espressif-Modified-MIT-esp_audio_codec.txt) |
 | libpng, zlib | fetched | libpng licence, zlib licence | [libpng.txt](LICENSES/libpng.txt), [zlib.txt](LICENSES/zlib.txt) |
 | **elf_loader 1.3.3** (Espressif, esp-iot-solution `5d75f3f`) | **vendored**, `components/elf_loader/` | Apache-2.0 | **modified**: the changes are marked `AmoledOS:` / `P4OS:` in the source; [Apache-2.0.txt](LICENSES/Apache-2.0.txt) |
 | **minimp3** (lieff) | **vendored**, `components/aos_hal/minimp3/` | CC0-1.0 | one change, marked `AmoledOS:` (the caller's scratch buffer) |
+| **ESP-IDF's USB host library** (`components/usb` of release/v5.5, `c94f345e`) | **vendored**, `components/usb/` | Apache-2.0 | **modified**: two root ports at once, retries of failed enumerations, a hub fix; the changes are in [components/usb/P4OS.md](components/usb/P4OS.md) and marked `P4OS:` in the source; [Apache-2.0.txt](LICENSES/Apache-2.0.txt) |
 
 The Espressif MIT and Modified MIT licences cover Espressif hardware only.
 P4OS's MIT licence does not extend to those two components. A port to other
