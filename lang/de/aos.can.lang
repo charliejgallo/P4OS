@@ -1,0 +1,409 @@
+# amoledos-lang 1   es -> de
+# aos.can.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/can/main/can.c:52
+Tramas	Frames
+
+#: apps/can/main/can.c:52
+Por id	Nach ID
+
+#: apps/can/main/can.c:52
+#: apps/can/main/can_send.c:409
+Enviar	Senden
+
+#: apps/can/main/can.c:52
+Señales	Signale
+
+#: apps/can/main/can.c:239
+#: apps/can/main/can_send.c:148
+#: apps/can/main/can_sheets.c:441
+Conectá el bus primero	Zuerst den Bus verbinden
+
+#: apps/can/main/can.c:240
+No hay tarjeta	Keine Karte
+
+#: apps/can/main/can.c:241
+Grabando en la tarjeta, carpeta can	Aufnahme auf die Karte, Ordner can
+
+#: apps/can/main/can.c:277
+Recuperando: 128 silencios de 11 bits y vuelve	Erholung: 128 Pausen von 11 Bit, dann zurück
+
+#: apps/can/main/can.c:312
+Desconectar	Trennen
+
+#: apps/can/main/can.c:312
+#: apps/can/main/can.c:442
+#: apps/can/main/can_sheets.c:287
+Conectar	Verbinden
+
+#: apps/can/main/can.c:321
+Desconectado. Tocá la conexión para elegir pines, velocidad y modo.	Getrennt. Auf die Verbindung tippen, um Pins, Geschwindigkeit und Modus zu wählen.
+
+#: apps/can/main/can.c:326
+%s · errores TX %u RX %u · de bus %u · %.0f tramas/s · carga %.0f %%	%s · Fehler TX %u RX %u · Bus %u · %.0f Frames/s · Last %.0f %%
+
+#: apps/can/main/can.c:331
+%u recibidas · %u enviadas · %u perdidas	%u empfangen · %u gesendet · %u verloren
+
+#: apps/can/main/can.c:333
+ · %u sin confirmar	 · %u unbestätigt
+
+#: apps/can/main/can.c:336
+ · grabando %s, %u:%02u, %u tramas	 · Aufnahme %s, %u:%02u, %u Frames
+
+#: apps/can/main/can.c:338
+ (%u perdidas)	 (%u verloren)
+
+#: apps/can/main/can.c:340
+ · repitiendo %s, %u	 · Wiedergabe %s, %u
+
+#: apps/can/main/can.c:445
+Recuperar	Erholen
+
+#: apps/can/main/can.c:511
+No hay memoria para el espía	Kein Speicher für den Mitschnitt
+
+#: apps/can/main/can_bus.c:269
+Un solo pin para TX y RX sirve sólo en la autoprueba	Ein Pin für TX und RX geht nur im Selbsttest
+
+#: apps/can/main/can_bus.c:274
+El GPIO%d lo tiene %s	GPIO%d belegt von %s
+
+#: apps/can/main/can_bus.c:280
+El controlador no arrancó: mirá el registro	Der Controller startete nicht: siehe Protokoll
+
+#: apps/can/main/can_bus.c:305
+No hay lugar para otra tarea	Kein Platz für eine weitere Task
+
+#: apps/can/main/can_frame.c:126
+desconectado	getrennt
+
+#: apps/can/main/can_frame.c:127
+activo	aktiv
+
+#: apps/can/main/can_frame.c:128
+con avisos	Warnung
+
+#: apps/can/main/can_frame.c:129
+pasivo	passiv
+
+#: apps/can/main/can_frame.c:130
+fuera del bus	Bus aus
+
+#: apps/can/main/can_frame.c:146
+Normal	Normal
+
+#: apps/can/main/can_frame.c:147
+Autoprueba	Selbsttest
+
+#: apps/can/main/can_frame.c:148
+Solo escucha	Nur hören
+
+#: apps/can/main/can_frame.c:202
+No está %s	%s fehlt
+
+#: apps/can/main/can_frame.c:234
+El archivo no tiene señales (BO_ y SG_)	Die Datei hat keine Signale (BO_ und SG_)
+
+#: apps/can/main/can_frame.c:336
+No se pudo guardar en la tarjeta	Speichern auf der Karte fehlgeschlagen
+
+#: apps/can/main/can_send.c:144
+#: apps/can/main/can_send.c:170
+Un id de 11 bits llega hasta 7FF: marcá 29 bits	Eine 11-Bit-ID reicht bis 7FF: 29 Bit wählen
+
+#: apps/can/main/can_send.c:152
+En solo escucha no sale nada: cambiá el modo	Im Nur-hören-Modus geht nichts hinaus: Modus ändern
+
+#: apps/can/main/can_send.c:161
+La cola de envío está llena	Die Sendewarteschlange ist voll
+
+#: apps/can/main/can_send.c:174
+La lista está llena	Die Liste ist voll
+
+#: apps/can/main/can_send.c:224
+Ya hay 8 periódicas andando	Es laufen schon 8 periodische
+
+#: apps/can/main/can_send.c:254
+Sin tramas guardadas. Armá una arriba y tocá Guardar; también se editan desde el portal.	Keine gespeicherten Frames. Oben einen bauen und Speichern tippen; sie lassen sich auch im Portal bearbeiten.
+
+#: apps/can/main/can_send.c:287
+#: apps/can/main/can_send.c:416
+cada %u ms	alle %u ms
+
+#: apps/can/main/can_send.c:288
+#: apps/can/main/can_send.c:417
+a mano	von Hand
+
+#: apps/can/main/can_send.c:316
+Sin bus: conectalo arriba para mandar.	Kein Bus: oben verbinden, um zu senden.
+
+#: apps/can/main/can_send.c:317
+En solo escucha no sale nada: cambiá el modo en la conexión.	Im Nur-hören-Modus geht nichts hinaus: Modus in der Verbindung ändern.
+
+#: apps/can/main/can_send.c:318
+Autoprueba: lo que mandes vuelve sólo a esta placa.	Selbsttest: Gesendetes kommt nur zu dieser Platine zurück.
+
+#: apps/can/main/can_send.c:319
+Normal: lo que mandes sale al bus.	Normal: Gesendetes geht auf den Bus.
+
+#: apps/can/main/can_send.c:369
+#: apps/can/main/can_sheets.c:273
+29 bits	29 Bit
+
+#: apps/can/main/can_send.c:370
+Remota	Remote
+
+#: apps/can/main/can_send.c:434
+Guardar	Speichern
+
+#: apps/can/main/can_sheets.c:91
+Entre 25 y 1000 kbit/s	Zwischen 25 und 1000 kbit/s
+
+#: apps/can/main/can_sheets.c:104
+Velocidad en kbit/s	Geschwindigkeit in kbit/s
+
+#: apps/can/main/can_sheets.c:111
+Normal: la placa confirma tramas y puede mandar. En un auto, no.	Normal: Die Platine bestätigt Frames und kann senden. Nicht im Auto.
+
+#: apps/can/main/can_sheets.c:127
+En hexa, como 0C0	In Hex, etwa 0C0
+
+#: apps/can/main/can_sheets.c:135
+En hexa, como 7FF	In Hex, etwa 7FF
+
+#: apps/can/main/can_sheets.c:144
+Id del filtro, en hexa	Filter-ID, in Hex
+
+#: apps/can/main/can_sheets.c:152
+Máscara del filtro, en hexa	Filtermaske, in Hex
+
+#: apps/can/main/can_sheets.c:181
+pata	Pin
+
+#: apps/can/main/can_sheets.c:236
+Conexión	Verbindung
+
+#: apps/can/main/can_sheets.c:239
+Pines del header	Pins der Stiftleiste
+
+#: apps/can/main/can_sheets.c:246
+TX va a la D (CTX) del transceptor y RX a su R (CRX). En la autoprueba alcanza un pin: elegí el mismo en los dos y no hace falta cablear nada.	TX geht an D (CTX) des Transceivers, RX an dessen R (CRX). Im Selbsttest reicht ein Pin: in beiden denselben wählen, dann muss nichts verdrahtet werden.
+
+#: apps/can/main/can_sheets.c:249
+Velocidad	Geschwindigkeit
+
+#: apps/can/main/can_sheets.c:258
+Otra…	Andere…
+
+#: apps/can/main/can_sheets.c:259
+Otra: %u.%u k	Andere: %u.%u k
+
+#: apps/can/main/can_sheets.c:262
+Modo	Modus
+
+#: apps/can/main/can_sheets.c:264
+No confirma ni manda nada: para espiar un bus ajeno, como el de un auto. Arranca siempre así.	Bestätigt und sendet nichts: zum Mithören an fremden Bussen, etwa im Auto. Startet immer so.
+
+#: apps/can/main/can_sheets.c:266
+Participa: confirma las tramas de los otros y puede mandar.	Nimmt teil: bestätigt die Frames der anderen und kann senden.
+
+#: apps/can/main/can_sheets.c:267
+Sin transceptor: manda y se escucha a sí misma. No sale al bus.	Ohne Transceiver: sendet und hört sich selbst. Nichts geht auf den Bus.
+
+#: apps/can/main/can_sheets.c:269
+Filtro del controlador	Controller-Filter
+
+#: apps/can/main/can_sheets.c:271
+Sin filtro	Kein Filter
+
+#: apps/can/main/can_sheets.c:272
+11 bits	11 Bit
+
+#: apps/can/main/can_sheets.c:277
+Id %X	ID %X
+
+#: apps/can/main/can_sheets.c:279
+Máscara %X	Maske %X
+
+#: apps/can/main/can_sheets.c:281
+Pasa la trama cuyo id coincide con el del filtro en los bits de la máscara: 7FF deja un id solo, 700 los de 0x100 en 0x100. Lo que no pasa no llega ni a la grabación.	Ein Frame passiert, wenn seine ID in den Bits der Maske mit der des Filters übereinstimmt: 7FF lässt eine ID durch, 700 die von 0x100 in Schritten von 0x100. Was nicht passiert, kommt nicht einmal in die Aufnahme.
+
+#: apps/can/main/can_sheets.c:287
+Reconectar con esto	Damit neu verbinden
+
+#: apps/can/main/can_sheets.c:289
+#: apps/can/main/can_sheets.c:335
+Cableado	Verdrahtung
+
+#: apps/can/main/can_sheets.c:347
+P4 · header	P4 · Stiftleiste
+
+#: apps/can/main/can_sheets.c:351
+TX GPIO%d · p%u	TX GPIO%d · P%u
+
+#: apps/can/main/can_sheets.c:353
+RX GPIO%d · p%u	RX GPIO%d · P%u
+
+#: apps/can/main/can_sheets.c:355
+3V3 · p18	3V3 · P18
+
+#: apps/can/main/can_sheets.c:356
+GND · p19	GND · P19
+
+#: apps/can/main/can_sheets.c:374
+bus	Bus
+
+#: apps/can/main/can_sheets.c:383
+En un auto, sólo escucha. Una trama mandada al bus de un auto puede apagar el motor, el tablero o los frenos asistidos, y un nodo que no confirma bien lo puede trabar entero. La app arranca siempre en Solo escucha.	Im Auto nur hören. Ein auf den Bus eines Autos gesendeter Frame kann Motor, Armaturenbrett oder Bremskraftverstärker abschalten, und ein falsch bestätigender Knoten kann alles blockieren. Die App startet immer in Nur hören.
+
+#: apps/can/main/can_sheets.c:390
+· El transceptor tiene que ser de 3,3 V: SN65HVD230, 231 o 232. Uno de 5 V (MCP2551, TJA1050) le devuelve 5 V al pin RX, y el header no los aguanta.	· Der Transceiver muss für 3,3 V sein: SN65HVD230, 231 oder 232. Ein 5-V-Typ (MCP2551, TJA1050) legt 5 V an den RX-Pin, das verträgt die Stiftleiste nicht.
+
+#: apps/can/main/can_sheets.c:392
+· Una resistencia de 120 Ω en cada punta del bus: con todo apagado se miden 60 Ω entre CANH y CANL. Muchos módulos traen la suya; si la placa no va en una punta, sacala.	· Ein 120-Ω-Widerstand an jedem Ende des Busses: ausgeschaltet misst man 60 Ω zwischen CANH und CANL. Viele Module haben einen eigenen; sitzt die Platine nicht am Ende, entfernen.
+
+#: apps/can/main/can_sheets.c:394
+· GND común con el resto del bus, y la misma velocidad en todos los nodos.	· Gemeinsames GND mit dem restlichen Bus und dieselbe Geschwindigkeit an allen Knoten.
+
+#: apps/can/main/can_sheets.c:395
+· En el conector OBD-II de un auto: CANH en la pata 6, CANL en la 14, masa en la 4 o 5; casi siempre a 500 kbit/s.	· Am OBD-II-Stecker eines Autos: CANH an Pin 6, CANL an 14, Masse an 4 oder 5; fast immer 500 kbit/s.
+
+#: apps/can/main/can_sheets.c:397
+· Sin transceptor: modo Autoprueba con TX y RX en el mismo pin. La placa se manda y se escucha.	· Ohne Transceiver: Selbsttest mit TX und RX am selben Pin. Die Platine sendet an sich und hört sich.
+
+#: apps/can/main/can_sheets.c:442
+Para repetir hace falta modo Normal o Autoprueba	Wiedergabe braucht den Modus Normal oder Selbsttest
+
+#: apps/can/main/can_sheets.c:443
+Ya hay una repitiéndose	Es läuft schon eine Wiedergabe
+
+#: apps/can/main/can_sheets.c:462
+Se está grabando: pará la grabación primero	Wird gerade aufgenommen: zuerst die Aufnahme stoppen
+
+#: apps/can/main/can_sheets.c:469
+¿Borrar?	Löschen?
+
+#: apps/can/main/can_sheets.c:482
+Grabaciones	Aufnahmen
+
+#: apps/can/main/can_sheets.c:486
+Repitiendo %s	Wiedergabe %s
+
+#: apps/can/main/can_sheets.c:488
+Parar	Stopp
+
+#: apps/can/main/can_sheets.c:490
+En la tarjeta, carpeta can, en el CSV de SavvyCAN (GVRET). Se bajan desde la página CAN del portal. Repetir manda cada trama a su tiempo: hace falta modo Normal o Autoprueba.	Auf der Karte, Ordner can, im CSV von SavvyCAN (GVRET). Herunterladen über die CAN-Seite des Portals. Wiedergabe sendet jeden Frame zu seiner Zeit: braucht den Modus Normal oder Selbsttest.
+
+#: apps/can/main/can_sheets.c:493
+Todavía no hay grabaciones: el botón rojo de arriba graba.	Noch keine Aufnahmen: der rote Knopf oben nimmt auf.
+
+#: apps/can/main/can_sheets.c:514
+Repetir	Abspielen
+
+#: apps/can/main/can_sheets.c:515
+En bucle	Schleife
+
+#: apps/can/main/can_sheets.c:516
+Borrar	Löschen
+
+#: apps/can/main/can_sig.c:169
+30 s · de %s a %s	30 s · von %s bis %s
+
+#: apps/can/main/can_sig.c:172
+Esperando su id…	Warte auf seine ID…
+
+#: apps/can/main/can_sig.c:172
+Sin bus	Kein Bus
+
+#: apps/can/main/can_sig.c:180
+Sin señales	Keine Signale
+
+#: apps/can/main/can_sig.c:216
+Señales leídas de nuevo	Signale neu gelesen
+
+#: apps/can/main/can_sig.c:292
+%d señales de can/senales.dbc (se edita desde el portal)	%d Signale aus can/senales.dbc (im Portal bearbeitbar)
+
+#: apps/can/main/can_sig.c:296
+Leer de nuevo	Neu lesen
+
+#: apps/can/main/can_spy.c:213
+   tiempo   id        n  datos                    ascii	     Zeit   ID        n  Daten                    ASCII
+
+#: apps/can/main/can_spy.c:214
+   tiempo   id        n  datos	     Zeit   ID        n  Daten
+
+#: apps/can/main/can_spy.c:229
+#: apps/can/main/can_spy.c:449
+Esperando tramas…	Warte auf Frames…
+
+#: apps/can/main/can_spy.c:229
+#: apps/can/main/can_spy.c:449
+Sin bus. Conectalo arriba.	Kein Bus. Oben verbinden.
+
+#: apps/can/main/can_spy.c:231
+Seguir	Folgen
+
+#: apps/can/main/can_spy.c:335
+Filtro: sólo un id	Filter: nur eine ID
+
+#: apps/can/main/can_spy.c:335
+Filtro: %d ocultos	Filter: %d ausgeblendet
+
+#: apps/can/main/can_spy.c:338
+1 id	1 ID
+
+#: apps/can/main/can_spy.c:339
+%d ids	%d IDs
+
+#: apps/can/main/can_spy.c:413
+id	ID
+
+#: apps/can/main/can_spy.c:414
+datos	Daten
+
+#: apps/can/main/can_spy.c:415
+por s	pro s
+
+#: apps/can/main/can_spy.c:416
+vistas	gesehen
+
+#: apps/can/main/can_spy.c:469
+%u bytes · %u.%u por segundo · cada %u.%u ms · %u vistas	%u Bytes · %u.%u pro Sekunde · alle %u.%u ms · %u gesehen
+
+#: apps/can/main/can_spy.c:543
+16 bits: Intel	16 Bit: Intel
+
+#: apps/can/main/can_spy.c:543
+#: apps/can/main/can_spy.c:646
+16 bits: Motorola	16 Bit: Motorola
+
+#: apps/can/main/can_spy.c:574
+Id %s (29 bits)	ID %s (29 Bit)
+
+#: apps/can/main/can_spy.c:574
+Id %s	ID %s
+
+#: apps/can/main/can_spy.c:625
+Naranja: bits que cambiaron alguna vez; amarillo: recién.	Orange: Bits, die sich je geändert haben; gelb: gerade eben.
+
+#: apps/can/main/can_spy.c:631
+Sólo este id	Nur diese ID
+
+#: apps/can/main/can_spy.c:632
+Ocultarlo	Ausblenden
+
+#: apps/can/main/can_spy.c:633
+Mostrar todos	Alle zeigen
+
+#: apps/can/main/can_spy.c:634
+Llevar a Enviar	Zu Senden
+
+#: apps/can/main/can_spy.c:636
+Graficar un byte, o dos juntos:	Ein Byte oder zwei zusammen zeichnen:
