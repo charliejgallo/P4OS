@@ -22,11 +22,15 @@
  * Each pipe is ONE transparent column with its four pieces (two bodies, two
  * caps) inside: a frame moves three objects, not twelve, and the pieces only
  * change size when the column is recycled at the right edge.
+ *
+ * A USB gamepad plays it too (aos_pad.h): A flaps, starts and retries, like
+ * a tap; START starts, and in flight it pauses and resumes.
  */
 #include "aos_app.h"
 #include "aos_fonts.h"
 #include "aos_hal.h"
 #include "aos_i18n.h"
+#include "aos_pad.h"
 #include "aos_theme.h"
 
 #include <stdio.h>
@@ -84,6 +88,7 @@ typedef enum {
     STATE_READY = 0,
     STATE_PLAYING,
     STATE_DEAD,
+    STATE_PAUSED,           /* START on the pad, in flight */
 } game_state_t;
 
 typedef struct {
@@ -119,6 +124,7 @@ typedef struct {
     int          score;
     int          best;
     uint32_t     rng;
+    aos_pad_t    pad;
 } flappy_t;
 
 /* --------------------------------------------------------------------------
@@ -244,6 +250,11 @@ static void overlay_show(flappy_t *game, const char *title, const char *score,
         lv_obj_add_flag(game->overlay_score, LV_OBJ_FLAG_HIDDEN);
     }
     lv_label_set_text(game->overlay_detail, detail);
+    if (detail[0]) {
+        lv_obj_remove_flag(game->overlay_detail, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_add_flag(game->overlay_detail, LV_OBJ_FLAG_HIDDEN);
+    }
     lv_obj_remove_flag(game->overlay, LV_OBJ_FLAG_HIDDEN);
     lv_obj_move_foreground(game->overlay);
 }
@@ -303,10 +314,26 @@ static bool bird_hits_pipe(const flappy_t *game, const pipe_t *pipe)
            bird_bottom > pipe->gap_y + PIPE_GAP / 2;
 }
 
+static void press(flappy_t *game);
+static void pause_toggle(flappy_t *game);
+
+/* The pad, once a frame: A is a tap, START starts or pauses. */
+static void pad_step(flappy_t *game)
+{
+    aos_pad_update(&game->pad, lv_tick_get());
+    if (aos_pad_pressed(&game->pad, AOS_PAD_START) &&
+        (game->state == STATE_PLAYING || game->state == STATE_PAUSED)) {
+        pause_toggle(game);
+    } else if (aos_pad_pressed(&game->pad, AOS_PAD_A | AOS_PAD_START)) {
+        press(game);
+    }
+}
+
 static void step(lv_timer_t *timer)
 {
     flappy_t *game = (flappy_t *)lv_timer_get_user_data(timer);
 
+    pad_step(game);
     if (game->state != STATE_PLAYING) {
         return;
     }
@@ -398,10 +425,21 @@ static void flap(flappy_t *game, int beep_ms)
     aos_hal_beep(1200, beep_ms);
 }
 
-static void tap_cb(lv_event_t *event)
+/* Paused from the pad: the bird hangs where it was until START, A or a tap. */
+static void pause_toggle(flappy_t *game)
 {
-    flappy_t *game = (flappy_t *)lv_event_get_user_data(event);
+    if (game->state == STATE_PLAYING) {
+        game->state = STATE_PAUSED;
+        overlay_show(game, _("Pausa"), NULL, "");
+    } else if (game->state == STATE_PAUSED) {
+        game->state = STATE_PLAYING;
+        lv_obj_add_flag(game->overlay, LV_OBJ_FLAG_HIDDEN);
+    }
+}
 
+/* A tap, or A on the pad. */
+static void press(flappy_t *game)
+{
     switch (game->state) {
     case STATE_READY:
         lv_obj_add_flag(game->overlay, LV_OBJ_FLAG_HIDDEN);
@@ -419,7 +457,16 @@ static void tap_cb(lv_event_t *event)
             game_reset(game);
         }
         break;
+
+    case STATE_PAUSED:
+        pause_toggle(game);
+        break;
     }
+}
+
+static void tap_cb(lv_event_t *event)
+{
+    press((flappy_t *)lv_event_get_user_data(event));
 }
 
 /* -------------------------------------------------------------------------- */
@@ -611,6 +658,7 @@ static void *flappy_create(aos_app_t *self, lv_obj_t *root)
     lv_obj_move_foreground(touch);
 
     game_reset(game);
+    aos_pad_reset(&game->pad, lv_tick_get());
     game->timer = lv_timer_create(step, FRAME_MS, game);
     return game;
 }
@@ -632,7 +680,7 @@ static void flappy_hide(aos_app_t *self, void *inst)
 {
     (void)self;
     flappy_t *game = (flappy_t *)inst;
-    if (game && game->state == STATE_PLAYING) {
+    if (game && (game->state == STATE_PLAYING || game->state == STATE_PAUSED)) {
         game->state   = STATE_DEAD;   /* leaving mid-game should not count */
         game->dead_ms = lv_tick_get();
         overlay_show(game, _("Pausa"), NULL, _("Tocá para reiniciar"));
