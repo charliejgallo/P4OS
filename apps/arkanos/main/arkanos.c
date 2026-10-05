@@ -214,6 +214,11 @@ static lv_obj_t *make_panel(lv_obj_t *parent, int w, int gap)
     return p;
 }
 
+static void row_ext_cb(lv_event_t *e)
+{
+    lv_event_set_ext_draw_size(e, 12);     /* aos_pad_menu.h's outline: 4 + 5 */
+}
+
 /* A row inside a panel: chips or buttons side by side. */
 static lv_obj_t *make_row(lv_obj_t *parent, int gap)
 {
@@ -225,11 +230,11 @@ static lv_obj_t *make_row(lv_obj_t *parent, int gap)
     lv_obj_set_style_pad_column(r, gap, 0);
     lv_obj_remove_flag(r, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_remove_flag(r, LV_OBJ_FLAG_CLICKABLE);
-    /* room inside for the pad's outline round a button (aos_pad_menu.h),
-     * which LVGL would clip at the row's edge; the margins give it back, so
-     * the panel's layout stays the same */
-    lv_obj_set_style_pad_all(r, 12, 0);
-    lv_obj_set_style_margin_all(r, -12, 0);
+    /* the pad's outline goes round a button, past the row's edge: the row
+     * lets it show and redraws that far */
+    lv_obj_add_flag(r, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
+    lv_obj_add_event_cb(r, row_ext_cb, LV_EVENT_REFR_EXT_DRAW_SIZE, NULL);
+    lv_obj_refresh_ext_draw_size(r);
     return r;
 }
 
