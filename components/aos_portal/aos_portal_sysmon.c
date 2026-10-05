@@ -14,6 +14,7 @@
 #include "aos_portal_sysmon.h"
 #include "aos_hal.h"
 #include "lvgl.h"
+#include "aos_retro.h"
 #include "cJSON.h"
 
 #include <math.h>
@@ -66,7 +67,21 @@ static void add_lvgl(cJSON *o)
     memset(&mon, 0, sizeof mon);
     lv_mem_monitor(&mon);
     int anims = (int)lv_anim_count_running();
+    aos_retro_stats_t rs;
+    aos_retro_stats(&rs);
     aos_hal_unlock();
+    /* the retro canvas, while a game on it runs: its rate and what scaling
+     * and LVGL's refresh cost (docs/RETRO.md) */
+    if (rs.frames) {
+        cJSON *rt = cJSON_AddObjectToObject(l, "retro");
+        cJSON_AddNumberToObject(rt, "frames", rs.frames);
+        cJSON_AddNumberToObject(rt, "fps", rs.fps10 / 10.0);
+        cJSON_AddNumberToObject(rt, "scale_us", rs.scale_us_avg);
+        cJSON_AddNumberToObject(rt, "scale_us_max", rs.scale_us_max);
+        cJSON_AddNumberToObject(rt, "refresh_us", rs.refresh_us_avg);
+        cJSON_AddNumberToObject(rt, "px", rs.px_last);
+        cJSON_AddBoolToObject(rt, "ppa", rs.hw);
+    }
     cJSON_AddNumberToObject(l, "objects", objs);
     cJSON_AddNumberToObject(l, "timers", timers);
     cJSON_AddNumberToObject(l, "anims", anims);

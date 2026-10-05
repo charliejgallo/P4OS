@@ -1086,6 +1086,9 @@ __attribute__((weak)) void aos_hal_retro_free(void *p)
 __attribute__((weak)) bool aos_hal_retro_scale(const uint16_t *src, int src_w, int src_h, int in_x, int in_y, int in_w, int in_h, int k, uint16_t *dst, size_t dst_bytes, int dst_stride_px, int dst_h, int out_x, int out_y)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) void aos_hal_retro_hw_reload(void)
+{ }
+
 __attribute__((weak)) uint64_t aos_hal_uptime_us(void)
 { uint64_t v; memset(&v, 0, sizeof v); return v; }
 

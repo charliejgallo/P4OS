@@ -3,9 +3,13 @@
  * canvas scaler"; the service is components/aos_ui/aos_retro.c, the contract
  * docs/RETRO.md). The simulator's stand-in is sim/retro_sim.c.
  *
- * NOT RUN ON THE BOARD YET: written against esp_driver_ppa of the IDF in
- * ~/esp/esp-idf and compiled; what only the board can settle is listed in
- * docs/RETRO.md, "What the board still has to confirm". The assumptions:
+ * OFF BY DEFAULT since 0.9.1 (preference "retro_hw" = 1 turns it on): on
+ * the board the SRM leaves the first screen row of a scaled block wrong
+ * (seen 2026-10-05 with Lua's Atrapa at x3: every star that fell left one
+ * row behind, at rows 3j, the top row of the canvas row the restore began
+ * at). Games that redraw many small rects showed trails; whole-canvas
+ * presents hid it. The CPU path is nearest neighbour, crisp, and has no
+ * such edge. The notes below are how the PPA path was written:
  *
  *  - One SRM operation per refreshed chunk: the aligned block of the canvas
  *    goes, scaled x k, straight into LVGL's draw buffer at its place. No
@@ -85,17 +89,23 @@ void aos_hal_retro_free(void *p)
     heap_caps_free(p);
 }
 
+void aos_hal_retro_hw_reload(void)
+{
+    s_state = 0;
+}
+
 static bool ready(void)
 {
     if (s_state == 0) {
-        int32_t on = 1;
+        int32_t on = 0;
         aos_hal_pref_get_i32("retro_hw", &on);
-        if (!on) {
+        if (on != 1) {
             s_state = -1;
-            ESP_LOGI(TAG, "PPA off by preference: the CPU scales");
+            ESP_LOGI(TAG, "the CPU scales (retro_hw=1 for the PPA)");
         } else {
             ppa_client_config_t pc = { .oper_type = PPA_OPERATION_SRM, .max_pending_trans_num = 1 };
-            s_state = ppa_register_client(&pc, &s_srm) == ESP_OK ? 1 : -1;
+            /* registered once: a reload that turns it on again keeps it */
+            s_state = s_srm || ppa_register_client(&pc, &s_srm) == ESP_OK ? 1 : -1;
             if (s_state < 0) ESP_LOGW(TAG, "no PPA client: the CPU scales");
         }
     }

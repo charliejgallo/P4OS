@@ -28,6 +28,8 @@ void *aos_hal_retro_alloc(size_t bytes)
     return p;
 }
 
+void aos_hal_retro_hw_reload(void) {}
+
 void aos_hal_retro_free(void *p)
 {
     free(p);

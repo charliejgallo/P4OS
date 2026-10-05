@@ -27,7 +27,7 @@
  *                                      header gets that part (206)
  *   PUT  /api/fs/put?path=             the body becomes the file
  *   POST /api/fs/mkdir?path=   POST /api/fs/delete?path=   POST /api/fs/rename?path=&to=
- *   GET  /api/settings   POST /api/settings {name,tz,lang,wallpaper,brightness,volume,landscape}
+ *   GET  /api/settings   POST /api/settings {name,tz,lang,wallpaper,brightness,volume,landscape,retro_hw}
  *   GET  /api/flash                    the Programador: status, ports, firmware on the card
  *   POST /api/flash/start {path,port,baud}   POST /api/flash/detect {port}   POST /api/flash/cancel
  *   GET  /api/flash/log?from=          its log lines
@@ -1347,6 +1347,11 @@ static void api_settings(aos_httpd_req_t *r)
         if (cJSON_IsNumber(n = cJSON_GetObjectItemCaseSensitive(b, "wallpaper")))
             aos_ui_request_call(set_wallpaper, (void *)(intptr_t)n->valueint);
         if (cJSON_IsNumber(n = cJSON_GetObjectItemCaseSensitive(b, "brightness"))) aos_hal_brightness_set(n->valueint);
+        /* the retro canvas's scaler: 1 the PPA, 0 the CPU (the default) */
+        if (cJSON_IsNumber(n = cJSON_GetObjectItemCaseSensitive(b, "retro_hw"))) {
+            aos_hal_pref_set_i32("retro_hw", n->valueint ? 1 : 0);
+            aos_hal_retro_hw_reload();
+        }
         if (cJSON_IsNumber(n = cJSON_GetObjectItemCaseSensitive(b, "volume"))) aos_hal_volume_set(n->valueint);
         if (cJSON_IsBool(n = cJSON_GetObjectItemCaseSensitive(b, "landscape"))) aos_ui_request_landscape(cJSON_IsTrue(n));
         cJSON_Delete(b);
@@ -1368,6 +1373,9 @@ static void api_settings(aos_httpd_req_t *r)
         cJSON_AddItemToArray(wp, cJSON_CreateString(c));
     }
     cJSON_AddNumberToObject(o, "brightness", aos_hal_brightness_get());
+    int32_t retro_hw = 0;
+    aos_hal_pref_get_i32("retro_hw", &retro_hw);
+    cJSON_AddNumberToObject(o, "retro_hw", retro_hw == 1);
     cJSON_AddNumberToObject(o, "volume", aos_hal_volume_get());
     cJSON_AddBoolToObject(o, "landscape", aos_ui_landscape());
     int32_t cla, clo;           /* Clima's city: where #mapas starts with no zones, as the app does */

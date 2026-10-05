@@ -2201,9 +2201,11 @@ bool aos_hal_display_fb(const uint16_t **px, int *w, int *h);
  *                draw buffer of dst_bytes, dst_stride_px pixels per row,
  *                dst_h rows) at (out_x, out_y). The whole block, k*in_w by
  *                k*in_h, must fit in dst. false = not done (no PPA, buffer not
- *                aligned for it, turned off with the "retro_hw" preference):
- *                the caller scales it on the CPU. Called with LVGL's lock,
- *                from its render.
+ *                aligned for it, or the "retro_hw" preference not 1 - off
+ *                by default since 0.9.1): the caller scales it on the CPU.
+ *                Called with LVGL's lock, from its render.
+ *   retro_hw_reload  the "retro_hw" preference is read again at the next
+ *                scale (the portal's Settings changes it).
  *   uptime_us    a microsecond clock, for measuring.
  * ========================================================================== */
 void    *aos_hal_retro_alloc(size_t bytes);
@@ -2212,6 +2214,7 @@ bool     aos_hal_retro_scale(const uint16_t *src, int src_w, int src_h,
                              int in_x, int in_y, int in_w, int in_h, int k,
                              uint16_t *dst, size_t dst_bytes, int dst_stride_px, int dst_h,
                              int out_x, int out_y);
+void     aos_hal_retro_hw_reload(void);
 uint64_t aos_hal_uptime_us(void);
 /* ======================== end of the retro canvas ======================== */
 
