@@ -59,7 +59,10 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
 - [ ] **Apps del taller** (los cableados en `docs/img/bench-*.svg`, que arma
       `tools/bench_diagrams.py`: PWM, IR, tira WS2812B y 24LC;
       instaladas el 2026-10-05, probadas sólo en el
-      simulador): EEPROM con una 24LC del usuario; PWM con LEDs (**anduvo
+      simulador): EEPROM con una 24LC256 en i2c.ext (pines 15/17,
+      pull-ups de 4,7 kΩ): detectada en 0x50 y el tamaño medido
+      escribiendo da 24LC256 (2026-10-05); falta leerla entera, guardar
+      versión, escribir, verificar y restaurar; PWM con LEDs (**anduvo
       el 2026-10-05**: un LED en GPIO28, a mano, rampa, respirar y estrobo)
       y un servo (**anduvo el 2026-10-05**, cableado como
       `docs/img/bench-pwm.svg`: tres frecuencias a la vez, 998 Hz, 5 kHz y
