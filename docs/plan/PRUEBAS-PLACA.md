@@ -82,8 +82,18 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       y se volvió a mandar, y el monitor subió el volumen; con la base de
       SmartIR, "subir volumen" desde el listado también anduvo); CAN con los
       transceptores SN65HVD230 cuando lleguen (la autoprueba ya anduvo);
-      Visor VNC contra una computadora (Compartir pantalla de la Mac con
-      contraseña VNC); Dibujo con el dedo y el mouse USB.
+      Visor VNC contra una computadora (**anduvo el 2026-10-05** con una
+      MacBook Air y dos monitores, Compartir pantalla con contraseña VNC,
+      RFB 3.889, ZRLE: login escrito con la burbuja del teclado, mouse y
+      teclado andando, 60 eventos de mouse y 40 de teclado en el registro.
+      La Mac manda los dos monitores como una sola pantalla de 4860x2316 y
+      no dice dónde está cada uno; el botón de monitor ofrece la lista del
+      servidor si la manda y "Marcar con el dedo". Adivinar los monitores
+      por el negro entre ellos cortó el escritorio real en 8 y se sacó.
+      Una trampa que parece un fallo: con la pantalla de bloqueo, la Mac
+      apaga la pantalla al minuto y sigue mandando la última imagen, así
+      que los toques parecen no hacer nada; una tecla la despierta);
+      Dibujo con el dedo y el mouse USB.
 - [ ] El cuelgue del primer arranque tras algunas OTA: dos volcados el
       2026-10-04 con `strcmp` en `dlsym` cargando apps (handoff de sistema).
 
