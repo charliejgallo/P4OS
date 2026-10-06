@@ -1570,10 +1570,13 @@ static void hang_check(void *arg)
         return;
     }
     s_hang.count++;
-    ESP_LOGE(TAG, "hang watchdog: restarting (try %u of %d); the log above survives it (GET /api/log?prev=1)",
-             (unsigned)s_hang.count, HANG_TRIES);
+    /* abort(), not esp_restart(): the panic writes a core dump with every
+     * task's stack, so a hang shows where each one was waiting
+     * (tools/coredump.sh), where the list above only says that they were */
+    ESP_LOGE(TAG, "hang watchdog: restarting through a panic, for a core dump (try %u of %d); the log above "
+             "survives it (GET /api/log?prev=1)", (unsigned)s_hang.count, HANG_TRIES);
     vTaskDelay(pdMS_TO_TICKS(100));
-    esp_restart();
+    abort();
 }
 
 static void hang_start(void)
