@@ -67,8 +67,12 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       medidos con tester; el servo en GPIO32: los dos extremos de
       500 a 2500 us y el barrido; al apagar el canal se movía solo porque el
       pin quedaba con el pull-up, arreglado: el pin suelto queda tirado al
-      nivel de apagado); Infrarrojo con receptor y emisor
-      (aprender un control, mandarlo, la base de SmartIR); CAN con los
+      nivel de apagado); Infrarrojo con receptor y emisor (**mandar anduvo
+      el 2026-10-05**: receptor en GPIO5, LED IR con transistor en GPIO31,
+      un código del monitor mandado, NEC a 38 kHz; cambiar los pines
+      colgaba la placa, arreglado: el esquema de Cableado le pasaba a LVGL
+      un texto de la pila sin `text_local`; falta aprender un control y la
+      base de SmartIR); CAN con los
       transceptores SN65HVD230 cuando lleguen (la autoprueba ya anduvo);
       Visor VNC contra una computadora (Compartir pantalla de la Mac con
       contraseña VNC); Dibujo con el dedo y el mouse USB.
