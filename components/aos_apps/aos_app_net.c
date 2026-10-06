@@ -102,6 +102,26 @@ static void recent_push(const char *h)
 /* The screen                                                                  */
 /* -------------------------------------------------------------------------- */
 
+/* A graph drawn once, into a picture of its own in PSRAM, whenever its
+ * data change. Drawn live in LV_EVENT_DRAW_MAIN, the channel graphs (a
+ * curve of 30-60 antialiased segments, a fill and a name per network) were
+ * drawn again in every frame of a scroll and in every band of the draw
+ * buffer: thousands of lines a frame with a few dozen networks around, and
+ * the page crawled until they were scrolled out of view. Now a scroll only
+ * copies pixels. */
+typedef void (*paint_fn)(lv_layer_t *layer, const lv_area_t *c, bool five);
+
+typedef struct {
+    lv_obj_t     *holder;   /* the card or box it covers, edge to edge */
+    lv_obj_t     *canvas;   /* made on the first paint */
+    void         *px;
+    int32_t       w, h;
+    lv_color_format_t cf;   /* RGB565 over a known background, ARGB8888 over rounded corners */
+    lv_color_t    bg;
+    paint_fn      paint;
+    bool          five;
+} graph_t;
+
 typedef struct {
     /* Ping */
     lv_obj_t *p_host, *p_res, *p_btn, *p_big, *p_badge, *p_sub, *p_fact[6], *p_chart, *p_err;
@@ -116,7 +136,8 @@ typedef struct {
     uint32_t d_seen;
     int d_nopen;
     /* WiFi */
-    lv_obj_t *w_l5, *w_cap, *w_ssid, *w_rssi, *w_q, *w_info, *w_trace, *w_g24, *w_g5, *w_list, *w_btn, *w_when, *w_bars;
+    lv_obj_t *w_l5, *w_cap, *w_ssid, *w_rssi, *w_q, *w_info, *w_list, *w_btn, *w_when, *w_bars;
+    graph_t w_trace, w_g24, w_g5;
     uint32_t w_seen, w_scanned;
     /* mDNS */
     lv_obj_t *m_btn, *m_state, *m_list, *m_filters;
@@ -1239,13 +1260,9 @@ static void ap_span(const aos_wifi_ap_ex_t *a, bool five, float *centre, float *
 
 static bool same_bssid(const uint8_t *a, const uint8_t *b) { return !memcmp(a, b, 6); }
 
-static void channels_draw(lv_event_t *e)
+static void channels_paint(lv_layer_t *layer, const lv_area_t *area, bool five)
 {
-    lv_layer_t *layer = lv_event_get_layer(e);
-    lv_obj_t *o = lv_event_get_current_target_obj(e);
-    bool five = lv_event_get_user_data(e) != NULL;
-    lv_area_t c;
-    lv_obj_get_coords(o, &c);
+    lv_area_t c = *area;
     const lv_font_t *f = aos_font_tiny;
     int32_t lh = lv_font_get_line_height(f);
     int32_t x0 = c.x1 + 70, x1 = c.x2 - 24, y0 = c.y1 + 20 + lh, y1 = c.y2 - 16 - lh;
@@ -1330,12 +1347,10 @@ static void channels_draw(lv_event_t *e)
     if (!drawn) draw_text(layer, U.w_n ? _("Nada en esta banda") : _("Escaneando…"), aos_font_small, AOS_C_DIM, x0, (y0 + y1) / 2 - 14, x1, LV_TEXT_ALIGN_CENTER);
 }
 
-static void trace_draw(lv_event_t *e)
+static void trace_paint(lv_layer_t *layer, const lv_area_t *area, bool five)
 {
-    lv_layer_t *layer = lv_event_get_layer(e);
-    lv_obj_t *o = lv_event_get_current_target_obj(e);
-    lv_area_t c;
-    lv_obj_get_coords(o, &c);
+    (void)five;
+    lv_area_t c = *area;
     const lv_font_t *f = aos_font_tiny;
     int32_t lh = lv_font_get_line_height(f);
     int32_t x0 = c.x1 + 70, x1 = c.x2 - 20, y0 = c.y1 + 16, y1 = c.y2 - 16 - lh;
@@ -1385,6 +1400,47 @@ static void trace_draw(lv_event_t *e)
         px = x;
         py = y;
     }
+}
+
+static void graph_gone(lv_event_t *e)
+{
+    aos_hal_io_free(lv_event_get_user_data(e));
+}
+
+static void graph_init(graph_t *gr, lv_obj_t *holder, int32_t w, int32_t h, paint_fn paint, bool five, bool rounded)
+{
+    memset(gr, 0, sizeof *gr);
+    gr->holder = holder;
+    gr->w = w;
+    gr->h = h;
+    gr->paint = paint;
+    gr->five = five;
+    gr->cf = rounded ? LV_COLOR_FORMAT_ARGB8888 : LV_COLOR_FORMAT_RGB565;
+    gr->bg = AOS_C_CARD;
+}
+
+/* Draws the graph into its picture; the picture is made the first time,
+ * so one that stays hidden (5 GHz, which this board's C6 cannot hear)
+ * costs nothing. */
+static void graph_paint(graph_t *gr)
+{
+    if (!gr->holder || lv_obj_has_flag(gr->holder, LV_OBJ_FLAG_HIDDEN)) return;
+    if (!gr->canvas) {
+        size_t bytes = (size_t)gr->w * gr->h * (gr->cf == LV_COLOR_FORMAT_RGB565 ? 2 : 4);
+        gr->px = aos_hal_io_alloc(bytes);
+        if (!gr->px) return;
+        gr->canvas = lv_canvas_create(gr->holder);
+        lv_canvas_set_buffer(gr->canvas, gr->px, gr->w, gr->h, gr->cf);
+        lv_obj_set_pos(gr->canvas, 0, 0);
+        lv_obj_add_event_cb(gr->canvas, graph_gone, LV_EVENT_DELETE, gr->px);
+    }
+    if (gr->cf == LV_COLOR_FORMAT_RGB565) lv_canvas_fill_bg(gr->canvas, gr->bg, LV_OPA_COVER);
+    else lv_canvas_fill_bg(gr->canvas, lv_color_black(), LV_OPA_TRANSP);
+    lv_layer_t layer;
+    lv_canvas_init_layer(gr->canvas, &layer);
+    lv_area_t c = { 0, 0, gr->w - 1, gr->h - 1 };
+    gr->paint(&layer, &c, gr->five);
+    lv_canvas_finish_layer(gr->canvas, &layer);       /* drawn when it returns: stack texts are safe */
 }
 
 static void wifi_scan_cb(lv_event_t *e) { nt_wifi_scan(); U.pg.w_seen = 0xFFFFFFFFu; }
@@ -1481,18 +1537,16 @@ static void wifi_refresh(void)
         lv_label_set_text(g->w_info, _("La placa no está asociada a ninguna red"));
         lv_label_set_text(g->w_cap, _("Las redes de alrededor y sus canales"));
     }
-    lv_obj_invalidate(g->w_trace);
+    graph_paint(&g->w_trace);
     if (rescan) {
         g->w_scanned = scanned;
-        lv_obj_invalidate(g->w_g24);
+        graph_paint(&g->w_g24);
         bool has5 = false;
         for (int k = 0; k < U.w_n; k++) if (U.w_aps[k].channel > 14) has5 = true;
-        if (g->w_g5) {
-            if (has5) lv_obj_remove_flag(g->w_g5, LV_OBJ_FLAG_HIDDEN);
-            else lv_obj_add_flag(g->w_g5, LV_OBJ_FLAG_HIDDEN);
-            if (has5) lv_obj_remove_flag(g->w_l5, LV_OBJ_FLAG_HIDDEN);
-            else lv_obj_add_flag(g->w_l5, LV_OBJ_FLAG_HIDDEN);
-            lv_obj_invalidate(g->w_g5);
+        if (g->w_g5.holder) {
+            lv_obj_set_flag(g->w_g5.holder, LV_OBJ_FLAG_HIDDEN, !has5);
+            lv_obj_set_flag(g->w_l5, LV_OBJ_FLAG_HIDDEN, !has5);
+            graph_paint(&g->w_g5);
         }
         wifi_list_build();
     }
@@ -1527,21 +1581,20 @@ static void build_wifi(void)
     g->w_info = aos_label(cc, "", aos_font_caption, AOS_C_DIM);
     lv_obj_set_width(g->w_info, lw - 44);
     lv_label_set_long_mode(g->w_info, LV_LABEL_LONG_MODE_WRAP);
-    g->w_trace = box(cc, lw - 44, U.land ? 180 : 200);
-    lv_obj_add_event_cb(g->w_trace, trace_draw, LV_EVENT_DRAW_MAIN, NULL);
+    int32_t th = U.land ? 180 : 200;
+    graph_init(&g->w_trace, box(cc, lw - 44, th), lw - 44, th, trace_paint, false, false);
 
     lv_obj_t *br = row(U.land ? left : right, U.land ? lw : rw, 80, 16);
     g->w_btn = pill(br, AOS_SYM_RESTART, _("Escanear"), C_NET_D, wifi_scan_cb, NULL);
     g->w_when = caption(U.land ? left : right, "", U.land ? lw : rw);
 
     section(right, _("CANALES 2,4 GHz"));
-    g->w_g24 = card(right, rw, U.land ? 300 : 330);
-    lv_obj_add_event_cb(g->w_g24, channels_draw, LV_EVENT_DRAW_MAIN, NULL);
+    int32_t h24 = U.land ? 300 : 330, h5 = U.land ? 260 : 280;
+    graph_init(&g->w_g24, card(right, rw, h24), rw, h24, channels_paint, false, true);
     g->w_l5 = section(right, _("CANALES 5 GHz"));
     lv_obj_add_flag(g->w_l5, LV_OBJ_FLAG_HIDDEN);
-    g->w_g5 = card(right, rw, U.land ? 260 : 280);
-    lv_obj_add_flag(g->w_g5, LV_OBJ_FLAG_HIDDEN);
-    lv_obj_add_event_cb(g->w_g5, channels_draw, LV_EVENT_DRAW_MAIN, (void *)1);
+    graph_init(&g->w_g5, card(right, rw, h5), rw, h5, channels_paint, true, true);
+    lv_obj_add_flag(g->w_g5.holder, LV_OBJ_FLAG_HIDDEN);
 
     section(U.land ? left : right, _("REDES"));
     g->w_list = card(U.land ? left : right, U.land ? lw : rw, LV_SIZE_CONTENT);
