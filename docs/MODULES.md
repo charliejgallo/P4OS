@@ -420,6 +420,8 @@ WS2811 at 400 kHz, SK6812, SK6812 RGBW), with the colour order. The RMT
 sends it from a frame in PSRAM, refilled by its ISR; there is no DMA,
 because its buffer would be internal RAM.
 
+![A WS2812B strip on the header](img/bench-ws2812.svg)
+
 The **LED Strips** app does not drive the strip itself. A service,
 `aos_leds.c`, does, and keeps going with any app in front:
 
@@ -451,7 +453,7 @@ one takes any usable GPIO of the header and claims it, like the rest.
 LEDs at two frequencies, a servo at 50 Hz on its own 5 V, and the analog
 level through its RC filter, with a meter on it.
 
-![PWM on the header: two LEDs, a servo and an analog level](img/taller-pwm.svg)
+![PWM on the header: two LEDs, a servo and an analog level](img/bench-pwm.svg)
 
 Tried on the board on 2026-10-05, wired as drawn on a breadboard, all
 four channels at once from the PWM app:
@@ -469,7 +471,7 @@ four channels at once from the PWM app:
 GPIO5 (not GPIO21/22, which the I2C service scans by itself) and an IR LED
 driven through an NPN transistor from 5 V.
 
-![Infrared on the header: a receiver and an IR LED through a transistor](img/taller-ir.svg)
+![Infrared on the header: a receiver and an IR LED through a transistor](img/bench-ir.svg)
 
 **A pin let go** (an output closed) rests at its off level through the
 weak pull: down, or up for an inverted PWM output. `gpio_reset_pin()`
@@ -499,8 +501,12 @@ speed 0x1A0, temperatures 0x3E8, a J1939-style 0x18FEF100;
 `P4_SIM_CAN_TRAFFIC=0` takes it off), and a node in the self test hears
 only itself.
 
-**EEPROMs** have no API of their own: they are I2C, SPI or GPIO. The
-simulator emulates the three families (`sim/eeprom_sim.c`): 24xx on I2C
+**EEPROMs** have no API of their own: they are I2C, SPI or GPIO. A 24LC
+on the header's I2C bus:
+
+![A 24LC EEPROM on the header](img/bench-24lc.svg)
+
+The simulator emulates the three families (`sim/eeprom_sim.c`): 24xx on I2C
 (`P4_SIM_EEPROM`, a 24LC256 at 0x50 by default), 25xx on SPI (a 25LC640 on
 CS GPIO46) and a 93xx clocked on GPIOs (`P4_SIM_93C`).
 

@@ -1,0 +1,146 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 880" font-family="Helvetica, Arial, sans-serif" font-size="14">
+<rect width="1200" height="880" fill="#ffffff"/>
+<text x="600.0" y="40" text-anchor="middle" font-size="22" font-weight="bold" fill="#111">PWM on the 40-pin header</text>
+<text x="600.0" y="64" text-anchor="middle" font-size="13" fill="#555">two LEDs at two frequencies, a servo at 50 Hz and an analog level: three LEDC timers and the sigma-delta</text>
+<path d="M514 357 L375.0 357" stroke="#b45309" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
+<path d="M439.0 357 L300 357" stroke="#b45309" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
+<rect x="375.0" y="347" width="64" height="20" rx="3" fill="#fde68a" stroke="#92400e" stroke-width="2"/>
+<text x="407.0" y="341" font-size="12" fill="#374151" text-anchor="middle" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">330 Ω</text>
+<path d="M300 357 L230 357" stroke="#b45309" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
+<path d="M230 343 L230 371 L196 357 Z" fill="#ef4444" stroke="#333" stroke-width="2"/>
+<path d="M194 343 V371" stroke="#333" stroke-width="3"/>
+<path d="M194 357 L60 357" stroke="#111111" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
+<circle cx="60" cy="357" r="4" fill="#111111"/>
+<text x="160" y="339" font-size="12" fill="#374151" text-anchor="middle" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">LED 1, 1 kHz</text>
+<path d="M514 409 L375.0 409" stroke="#b45309" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
+<path d="M439.0 409 L300 409" stroke="#b45309" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
+<rect x="375.0" y="399" width="64" height="20" rx="3" fill="#fde68a" stroke="#92400e" stroke-width="2"/>
+<text x="407.0" y="393" font-size="12" fill="#374151" text-anchor="middle" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">330 Ω</text>
+<path d="M300 409 L230 409" stroke="#b45309" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
+<path d="M230 395 L230 423 L196 409 Z" fill="#22c55e" stroke="#333" stroke-width="2"/>
+<path d="M194 395 V423" stroke="#333" stroke-width="3"/>
+<path d="M194 409 L60 409" stroke="#111111" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
+<circle cx="60" cy="409" r="4" fill="#111111"/>
+<text x="160" y="391" font-size="12" fill="#374151" text-anchor="middle" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">LED 2, 5 kHz</text>
+<path d="M514 435 L390.0 435" stroke="#b45309" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
+<path d="M454.0 435 L330 435" stroke="#b45309" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
+<rect x="390.0" y="425" width="64" height="20" rx="3" fill="#ddd6fe" stroke="#5b21b6" stroke-width="2"/>
+<text x="422.0" y="461" font-size="12" fill="#374151" text-anchor="middle" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">1 kΩ</text>
+<path d="M330 435 L220 435" stroke="#7c3aed" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
+<circle cx="220" cy="435" r="4" fill="#7c3aed"/>
+<path d="M220 435 L220 443" stroke="#7c3aed" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
+<path d="M206 444 H234 M206 452 H234" stroke="#5b21b6" stroke-width="3"/>
+<path d="M220 453 L220 487" stroke="#111111" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
+<circle cx="220" cy="487" r="4" fill="#111111"/>
+<text x="240" y="453" font-size="12" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">1 µF</text>
+<path d="M514 487 L60 487 L60 357" stroke="#111111" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
+<circle cx="60" cy="487" r="4" fill="#111111"/>
+<text x="60" y="509" font-size="12" fill="#111" text-anchor="start" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GND (pin 26)</text>
+<path d="M220 435 L150 547" stroke="#7c3aed" stroke-width="1.5" fill="none" stroke-linejoin="round" stroke-dasharray="4 3"/>
+<rect x="40" y="547" width="230" height="30" rx="8" fill="#f5f3ff" stroke="#7c3aed" stroke-width="2"/>
+<text x="155" y="567" font-size="12" fill="#5b21b6" text-anchor="middle" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">meter here to GND: 0-3.3 V</text>
+<text x="155" y="597" font-size="12" fill="#7c3aed" text-anchor="middle" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">analog level (sigma-delta, no timer)</text>
+<rect x="870" y="405" width="130" height="64" rx="8" fill="#2563eb" stroke="#1e3a8a" stroke-width="2"/>
+<text x="935.0" y="431.0" text-anchor="middle" font-size="14" font-weight="bold" fill="#fff">Servo</text>
+<text x="935.0" y="451.0" text-anchor="middle" font-size="11" fill="#fff">SG90, MG90...</text>
+<rect x="1040" y="405" width="140" height="64" rx="8" fill="#fee2e2" stroke="#dc2626" stroke-width="2"/>
+<text x="1110.0" y="431.0" text-anchor="middle" font-size="14" font-weight="bold" fill="#991b1b">its own 5 V</text>
+<text x="1110.0" y="451.0" text-anchor="middle" font-size="11" fill="#991b1b">supply</text>
+<path d="M1000 427 L1040 427" stroke="#dc2626" stroke-width="3" fill="none" stroke-linejoin="round"/>
+<text x="1020" y="417" font-size="12" fill="#dc2626" text-anchor="middle" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">+</text>
+<path d="M566 565 L900 565 L900 469" stroke="#f97316" stroke-width="3" fill="none" stroke-linejoin="round"/>
+<path d="M566 591 L1110 591 L1110 469" stroke="#78350f" stroke-width="3" fill="none" stroke-linejoin="round"/>
+<path d="M960 591 L960 469" stroke="#78350f" stroke-width="3" fill="none" stroke-linejoin="round"/>
+<circle cx="960" cy="591" r="4" fill="#78350f"/>
+<text x="760" y="557" font-size="12" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">signal (orange): PWM 50 Hz</text>
+<text x="760" y="611" font-size="12" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GND (brown), shared by the servo and its supply</text>
+<rect x="40" y="715" width="1120" height="116" rx="8" fill="#f9fafb" stroke="#d1d5db"/>
+<text x="58" y="739" font-size="14" font-weight="bold" fill="#111">What it tries (all of it worked on the board, 2026-10-05)</text>
+<text x="58" y="761" font-size="12" fill="#374151">• LED 1 (GPIO28, pin 16) at 1 kHz and LED 2 (GPIO29, pin 20) at 5 kHz: two LEDC timers. LEDs: the long leg (anode) toward the resistor</text>
+<text x="58" y="781" font-size="12" fill="#374151">• The servo (GPIO32, pin 31) at 50 Hz, 500-2500 µs: the third timer, the last one free (LEDC timer 1 is the screen's backlight)</text>
+<text x="58" y="801" font-size="12" fill="#374151">• The analog level (GPIO30, pin 22): sigma-delta through 1 kΩ and 1 µF, no timer; 1.34 V asked, 1.313 V measured</text>
+<text x="58" y="821" font-size="12" fill="#374151">• Without its own supply, a small servo can take 5 V from pin 1 or 3, with 470 µF across it near the servo</text>
+<rect x="500" y="158" width="80" height="528" rx="6" fill="#1f2937"/>
+<text x="540" y="149" text-anchor="middle" font-size="11" fill="#6b7280">the header, as it faces you</text>
+<circle cx="558" cy="175" r="7" fill="#7f1d1d"/>
+<text x="578" y="179" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">1  5V</text>
+<circle cx="522" cy="175" r="7" fill="#7f1d1d"/>
+<text x="502" y="179" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">3V3  2</text>
+<circle cx="558" cy="201" r="7" fill="#7f1d1d"/>
+<text x="578" y="205" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">3  5V</text>
+<circle cx="522" cy="201" r="7" fill="#4b5563"/>
+<text x="502" y="205" font-size="11.5" fill="#6b7280" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO7 board SDA  4</text>
+<circle cx="558" cy="227" r="7" fill="#030712"/>
+<text x="578" y="231" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">5  GND</text>
+<circle cx="522" cy="227" r="7" fill="#4b5563"/>
+<text x="502" y="231" font-size="11.5" fill="#6b7280" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO8 board SCL  6</text>
+<circle cx="558" cy="253" r="7" fill="#4b5563"/>
+<text x="578" y="257" font-size="11.5" fill="#6b7280" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">7  GPIO37 console</text>
+<circle cx="522" cy="253" r="7" fill="#9ca3af"/>
+<text x="502" y="257" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO2  8</text>
+<circle cx="558" cy="279" r="7" fill="#4b5563"/>
+<text x="578" y="283" font-size="11.5" fill="#6b7280" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">9  GPIO38 console</text>
+<circle cx="522" cy="279" r="7" fill="#030712"/>
+<text x="502" y="283" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GND  10</text>
+<circle cx="558" cy="305" r="7" fill="#9ca3af"/>
+<text x="578" y="309" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">11  GPIO5</text>
+<circle cx="522" cy="305" r="7" fill="#9ca3af"/>
+<text x="502" y="309" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO3  12</text>
+<circle cx="558" cy="331" r="7" fill="#030712"/>
+<text x="578" y="335" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">13  GND</text>
+<circle cx="522" cy="331" r="7" fill="#9ca3af"/>
+<text x="502" y="335" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO4  14</text>
+<circle cx="558" cy="357" r="7" fill="#9ca3af"/>
+<text x="578" y="361" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">15  GPIO21 SDA</text>
+<circle cx="522" cy="357" r="8" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
+<text x="502" y="361" font-size="11.5" fill="#f59e0b" text-anchor="end" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO28  16</text>
+<circle cx="558" cy="383" r="7" fill="#9ca3af"/>
+<text x="578" y="387" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">17  GPIO22 SCL</text>
+<circle cx="522" cy="383" r="7" fill="#7f1d1d"/>
+<text x="502" y="387" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">3V3  18</text>
+<circle cx="558" cy="409" r="7" fill="#030712"/>
+<text x="578" y="413" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">19  GND</text>
+<circle cx="522" cy="409" r="8" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
+<text x="502" y="413" font-size="11.5" fill="#f59e0b" text-anchor="end" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO29  20</text>
+<circle cx="558" cy="435" r="7" fill="#9ca3af"/>
+<text x="578" y="439" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">21  GPIO24</text>
+<circle cx="522" cy="435" r="8" fill="#8b5cf6" stroke="#fff" stroke-width="2"/>
+<text x="502" y="439" font-size="11.5" fill="#8b5cf6" text-anchor="end" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO30  22</text>
+<circle cx="558" cy="461" r="7" fill="#9ca3af"/>
+<text x="578" y="465" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">23  GPIO25</text>
+<circle cx="522" cy="461" r="7" fill="#9ca3af"/>
+<text x="502" y="465" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO31  24</text>
+<circle cx="558" cy="487" r="7" fill="#4b5563"/>
+<text x="578" y="491" font-size="11.5" fill="#6b7280" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">25  USB D-</text>
+<circle cx="522" cy="487" r="8" fill="#111111" stroke="#fff" stroke-width="2"/>
+<text x="502" y="491" font-size="11.5" fill="#111" text-anchor="end" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GND  26</text>
+<circle cx="558" cy="513" r="7" fill="#4b5563"/>
+<text x="578" y="517" font-size="11.5" fill="#6b7280" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">27  USB D+</text>
+<circle cx="522" cy="513" r="7" fill="#9ca3af"/>
+<text x="502" y="517" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO34  28</text>
+<circle cx="558" cy="539" r="7" fill="#030712"/>
+<text x="578" y="543" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">29  GND</text>
+<circle cx="522" cy="539" r="7" fill="#4b5563"/>
+<text x="502" y="543" font-size="11.5" fill="#6b7280" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO35 BOOT  30</text>
+<circle cx="558" cy="565" r="8" fill="#f59e0b" stroke="#fff" stroke-width="2"/>
+<text x="578" y="569" font-size="11.5" fill="#f59e0b" text-anchor="start" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">31  GPIO32</text>
+<circle cx="522" cy="565" r="7" fill="#9ca3af"/>
+<text x="502" y="569" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO49  32</text>
+<circle cx="558" cy="591" r="8" fill="#111111" stroke="#fff" stroke-width="2"/>
+<text x="578" y="595" font-size="11.5" fill="#111" text-anchor="start" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">33  GND</text>
+<circle cx="522" cy="591" r="7" fill="#9ca3af"/>
+<text x="502" y="595" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO50  34</text>
+<circle cx="558" cy="617" r="7" fill="#9ca3af"/>
+<text x="578" y="621" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">35  GPIO46</text>
+<circle cx="522" cy="617" r="7" fill="#9ca3af"/>
+<text x="502" y="621" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO51  36</text>
+<circle cx="558" cy="643" r="7" fill="#9ca3af"/>
+<text x="578" y="647" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">37  GPIO47</text>
+<circle cx="522" cy="643" r="7" fill="#9ca3af"/>
+<text x="502" y="647" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO52  38</text>
+<circle cx="558" cy="669" r="7" fill="#9ca3af"/>
+<text x="578" y="673" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">39  GPIO48</text>
+<circle cx="522" cy="669" r="7" fill="#030712"/>
+<text x="502" y="673" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GND  40</text>
+<text x="560" y="167" font-size="10" fill="#f59e0b" text-anchor="middle">1</text>
+</svg>

@@ -56,13 +56,13 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       DTR/RTS): detectado en 0,5 s, grabado en 1,5 s, leído en la Terminal.
       Su firmware viejo se reiniciaba cada 2,7 s: el Programador espera
       hasta 3 s a que el puerto vuelva.
-- [ ] **Apps del taller** (cableado de PWM en `docs/img/taller-pwm.svg`, de IR en
-      `docs/img/taller-ir.svg`;
+- [ ] **Apps del taller** (los cableados en `docs/img/bench-*.svg`, que arma
+      `tools/bench_diagrams.py`: PWM, IR, tira WS2812B y 24LC;
       instaladas el 2026-10-05, probadas sólo en el
       simulador): EEPROM con una 24LC del usuario; PWM con LEDs (**anduvo
       el 2026-10-05**: un LED en GPIO28, a mano, rampa, respirar y estrobo)
       y un servo (**anduvo el 2026-10-05**, cableado como
-      `docs/img/taller-pwm.svg`: tres frecuencias a la vez, 998 Hz, 5 kHz y
+      `docs/img/bench-pwm.svg`: tres frecuencias a la vez, 998 Hz, 5 kHz y
       50 Hz, más el nivel analógico en GPIO30, 1,34 V pedido y 1,313 V
       medidos con tester; el servo en GPIO32: los dos extremos de
       500 a 2500 us y el barrido; al apagar el canal se movía solo porque el
