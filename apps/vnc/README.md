@@ -114,6 +114,12 @@ edge is the remote mouse's); the bar's X leaves. Sent to the background the
 session stops asking for updates and keeps the connection; back in front it
 asks for the whole screen.
 
+A Mac at its lock screen turns its display off after a minute and goes on
+sending the last picture, so taps seem to do nothing: a key (the bubble's
+keyboard) wakes it. The log line every few seconds counts the pointer and
+key events sent and the empty updates, which tells a viewer that does not
+send from a computer that does not answer.
+
 ## On the board (to measure)
 
 The picture goes through an `lv_canvas` that points at the session's view
