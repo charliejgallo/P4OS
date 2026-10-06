@@ -94,6 +94,11 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       apaga la pantalla al minuto y sigue mandando la última imagen, así
       que los toques parecen no hacer nada; una tecla la despierta);
       Dibujo con el dedo y el mouse USB.
+- [x] Red, pestaña Wi-Fi fluida (2026-10-06, `5362893`): los gráficos de
+      canales y el nivel en vivo se dibujaban en cada cuadro del scroll;
+      ahora se pintan una vez en una imagen en PSRAM cuando cambian los
+      datos. Probado por el usuario en la placa: el scroll va fluido
+      también sobre los gráficos. 5 y 6 GHz no: el ESP32-C6 es sólo 2,4 GHz.
 - [ ] El cuelgue del primer arranque tras algunas OTA: dos volcados el
       2026-10-04 con `strcmp` en `dlsym` cargando apps (handoff de sistema).
 
