@@ -1108,8 +1108,8 @@ bool aos_ble_is_phone(uint16_t conn)
 }
 
 /* The computer's name, for Settings. A read by type carries only what fits
- * one packet, 19 bytes before the MTU grows ("Charlie's MacBook" for
- * "Charlie's MacBook Air"), and a Mac ended the long read one byte short;
+ * one packet, 19 bytes before the MTU grows ("Someone's MacBook" for
+ * "Someone's MacBook Air"), and a Mac ended the long read one byte short;
  * so the MTU is exchanged first and the name read after it. */
 static int on_host_name(uint16_t conn, const struct ble_gatt_error *error, struct ble_gatt_attr *attr, void *arg)
 {

@@ -1,5 +1,54 @@
 # Changelog
 
+## 0.10.0 — 2026-10-06
+
+**The workshop on the card** (docs/MODULES.md): four apps that use the
+drivers of 0.9.2, each with its wiring drawing on the board and its page in
+the portal.
+- **EEPROM:** reads, writes and edits serial memories: 24xx (I2C), 25xx
+  and 25Qxx flash (SPI), 93xx (Microwire). Finds the chip and measures its
+  size by writing, a hex editor with find and undo, versions with CRC32 and
+  MD5, a compare, and the protection pins explained per family.
+- **PWM:** seven channels on any free pins, 1 Hz to 20 MHz, a knob,
+  patterns (ramp, breathing, strobe, sine), servo pulses in microseconds and
+  an analog level through an RC filter.
+- **Infrarrojo (Infrared):** a learning remote: NEC, Samsung, Sony, JVC,
+  Panasonic, RC5, RC6 or raw, remotes drawn from their buttons, and
+  SmartIR's library of TVs, air conditioners, fans and lights in a pack
+  (`infrarrojo_p4.pak`, MIT).
+- **CAN:** a bus analyser on the TWAI controller: frames, by id, sending,
+  signals decoded from a DBC, recording to the card. Opens in listen only.
+- Tried on the bench on 2026-10-05, with drawings and photos in
+  docs/MODULES.md: PWM at 998 Hz, 5 kHz and 50 Hz at once, a servo end to
+  end, the analog level at 1.34 V asked and 1.313 V measured; a 12-LED
+  WS2812B strip on 3.3 V data; a monitor's remote learned (Samsung 0x0707)
+  and sent back, and SmartIR's "volume up"; a 24LC256 found, sized, read,
+  edited, written and restored, its CRC32s matching on a computer; CAN in
+  its self test (the real bus waits for the transceivers).
+
+**Two more apps from the card**
+- **Dibujo (Drawing):** up to eight layers, brushes, shapes, text, fill,
+  selections, a grid with a magnet, rulers, symmetry, deep undo; by finger,
+  USB mouse or joystick; PNG out, pictures in to trace over.
+- **VNC:** a computer's screen on the board. RFB 3.3 to 3.8 (and Apple's
+  3.889), VNC passwords, Tight with JPEG on the P4's engine, ZRLE, Hextile,
+  CopyRect. Touch, trackpad, or a USB mouse and keyboard; a keyboard bubble
+  that floats over the remote screen and is dragged anywhere; one monitor of
+  several, from the server's list (ExtendedDesktopSize) or marked with a
+  finger, which then costs only its own pixels. Tried against a MacBook Air
+  with two monitors.
+
+**The system**
+- Settings: **Restart** at the bottom of the list.
+- A hang now ends in a panic instead of a plain restart, so it leaves a
+  core dump to read.
+- `aos_ui_hwmouse_handler()`: an app takes the USB mouse's own reports
+  (its buttons and wheel), as VNC, Dibujo and PWM's knob do.
+- A header pin let go rests at its off level through its pull; a servo
+  switched off no longer moves on a line left weakly high.
+- The new apps' names in the system's packs (Drawing, Infrared), and their
+  strings in the catalogs built into the firmware.
+
 ## 0.9.2 — 2026-10-05
 
 **The Programmer over the USB host** (docs/USB.md)

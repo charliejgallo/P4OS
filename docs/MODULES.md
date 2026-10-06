@@ -422,6 +422,14 @@ because its buffer would be internal RAM.
 
 ![A WS2812B strip on the header](img/bench-ws2812.svg)
 
+Tried on the board on 2026-10-05: a strip of 12 WS2812B on GPIO4, its data
+straight from the 3.3 V pin with no level shifter, powered from the
+header's 5 V. Red, green and blue came out as asked with the GRB order,
+the effects ran at 50 fps, and the strip came back by itself after a
+restart.
+
+<img src="img/bench-ws2812-photo.jpg" width="360" alt="The LED Strips app on the board running Rainbow cycle on a 12-LED WS2812B strip">
+
 The **LED Strips** app does not drive the strip itself. A service,
 `aos_leds.c`, does, and keeps going with any app in front:
 
@@ -472,6 +480,11 @@ GPIO5 (not GPIO21/22, which the I2C service scans by itself) and an IR LED
 driven through an NPN transistor from 5 V.
 
 ![Infrared on the header: a receiver and an IR LED through a transistor](img/bench-ir.svg)
+
+Tried on the board on 2026-10-05 with the Infrarrojo app, wired as drawn
+(receiver on GPIO5, the LED's transistor on GPIO31): a monitor's remote
+learned as Samsung, address 0x0707, command 7, sent back, and the monitor
+turned its volume up; "volume up" from SmartIR's code library worked too.
 
 **A pin let go** (an output closed) rests at its off level through the
 weak pull: down, or up for an inverted PWM output. `gpio_reset_pin()`

@@ -8,14 +8,15 @@ An iPhone-style operating system for the
 
 It has a home screen with pages, folders and a dock, a control centre and
 notifications, and a lock screen with an optional code, and it runs in
-portrait or landscape. There are twenty-three built-in apps and thirty-one more on
+portrait or landscape. There are twenty-three built-in apps and thirty-seven more on
 the microSD, loaded as shared objects:
 
 - **Games:** twenty-one, among them Mila (a Sokoban with a black cat in
   Blender 3D), Monster Hop, a racing game, golf, a robot RPG, and Doom at
   35 fps.
 - **Tools:** notes with task lists, a street map with offline zones,
-  internet radio, IP cameras, video, a 3D viewer, a tuner and Lua.
+  internet radio, IP cameras, video, a 3D viewer, a tuner, a drawing app,
+  a VNC viewer for a computer's screen, and Lua.
 - **A web portal** for files, updates, the log and the network sweeps, and a
   page for every app that wants one, which the app brings from the card.
 - **Bluetooth with the phone:** the iPhone's notifications on the board, in
@@ -28,7 +29,11 @@ the microSD, loaded as shared objects:
 - **A Wi-Fi network of its own,** joined with a QR code.
 - **The workshop:** I2C, SPI, 1-Wire and GPIO on the 40-pin header,
   addressable LED strips on any free pin (WLED's way), a serial terminal, an
-  ESP32 programmer, Modbus, and a bench supply and scope.
+  ESP32 programmer, Modbus, a bench supply and scope, an EEPROM reader and
+  writer, a PWM and servo generator with an analog level, a learning
+  infrared remote with SmartIR's codes, and a CAN bus analyser. Each one
+  was tried on the bench with real parts, wiring diagrams and photos
+  included.
 
 A desktop simulator runs the same UI code, so most of it can be built and
 tried without the board.
@@ -179,6 +184,44 @@ its fake 1-Wire bus among them ([docs/MODULES.md](docs/MODULES.md)).
 
 <p align="center"><img src="docs/img/land-bench.png" width="600" alt="Bench in landscape"></p>
 
+**From the card, for the bench** (since 0.10). Each one owns the header
+pins it uses, has a wiring drawing on the board and a page in the portal.
+
+| EEPROM | PWM | Infrared | CAN |
+|---|---|---|---|
+| <img src="docs/img/app-eeprom.png" width="170"> | <img src="docs/img/app-pwm.png" width="170"> | <img src="docs/img/app-infrared.png" width="170"> | <img src="docs/img/app-can.png" width="170"> |
+
+- **EEPROM:** reads, writes and edits serial memories: 24xx on I2C, 25xx
+  and 25Qxx flash on SPI, 93xx Microwire. It finds the chip and measures
+  its size, has a hex editor with find and undo, keeps versions with CRC32
+  and MD5, compares them, and draws the wiring for the chosen chip.
+- **PWM:** seven channels on any free pins, from 1 Hz to 20 MHz, with a
+  knob, patterns (ramp, breathing, strobe, sine), servo pulses in
+  microseconds, and an analog level through an RC filter (the P4 has no
+  DAC).
+- **Infrared:** learns a remote's buttons (NEC, Samsung, Sony, JVC,
+  Panasonic, RC5, RC6, or raw) and sends them back; air conditioners, TVs, fans and lights
+  from [SmartIR](https://github.com/smartHomeHub/SmartIR)'s code library.
+- **CAN:** a bus analyser on the P4's TWAI controller: frames live, by id,
+  sending, decoding signals, and recording to the card. It needs a 3.3 V
+  transceiver (SN65HVD230); its self test needs none.
+
+Tried on the bench on 2026-10-05: PWM at three frequencies at once with a
+servo and the analog level checked with a meter (1.34 V asked, 1.313 V
+measured), a WS2812B strip straight from 3.3 V, a monitor's remote learned
+and sent back, and a 24LC256 read, edited, written and restored with its
+checksums matching on a computer. The wiring drawings and the numbers are
+in [docs/MODULES.md](docs/MODULES.md).
+
+<p align="center">
+  <img src="docs/img/bench-pwm-photo.jpg" width="230" alt="PWM on the bench: two LEDs, a servo, the RC filter and a meter reading 1.313 V">
+  <img src="docs/img/bench-ws2812-photo.jpg" width="230" alt="A 12-LED WS2812B strip running Rainbow cycle from LED Strips">
+  <img src="docs/img/bench-24lc-photo.jpg" width="230" alt="The EEPROM app's hex view, a 24LC256 on the breadboard">
+</p>
+<p align="center">
+  <img src="docs/img/bench-pwm.svg" width="460" alt="Wiring: two LEDs, a servo and an analog level on the header">
+</p>
+
 ### Apps from the card
 
 These are `.so` files that the firmware loads at boot. Their code runs
@@ -211,8 +254,18 @@ needs a WAD of your own, and none is included.
 - **3D Viewer:** STL and the games' models, with up to 100 000 triangles.
 - **Notes:** rich text (sizes, styles, colours, headings, bullets) and task
   lists with priorities and subtasks, one Markdown file per note.
+- **Drawing:** layers, brushes, shapes, text, fill and selections, by
+  finger or USB mouse, saved as PNG.
+- **VNC:** a computer's screen on the board (a Mac's Screen Sharing with
+  the VNC password, or any VNC server), driven by touch, as a trackpad, or
+  with a USB mouse and keyboard; a keyboard bubble that floats over the
+  remote screen, and one monitor of several marked with a finger.
 - **Also from the card:** Cameras (RTSP H.264 and MJPEG), Recorder, Weather,
   Quotes, and Lua, where a script on the card is an app.
+
+| Drawing | VNC, in landscape |
+|---|---|
+| <img src="docs/img/app-drawing.png" width="170"> | <img src="docs/img/land-vnc.png" width="540"> |
 
 | Golf | Monster Hop | Maps | Turbo |
 |---|---|---|---|
@@ -320,14 +373,22 @@ test layouts.
   the portal.
 - Settings, Developer: touches and fps over the games, and the safe mode
   asked for from there.
+- The Programmer flashing an ESP32 on a CP2102 (6.6 s) and an ESP32-C3 on
+  its own USB (1.5 s), plugged into the USB host.
+- The workshop on the bench: PWM at three frequencies at once, a servo and
+  the analog level; a WS2812B strip; infrared learned and sent; a 24LC256
+  read, written and restored; CAN's self test with no transceiver.
+- VNC against a MacBook Air with two monitors: the login typed with the
+  on-screen keyboard, then the mouse and keyboard.
 
 **Waiting for hardware on the bench:**
 
 - More I2C and SPI chips: the RC522 RFID reader is next (its example is in
   Bus).
-- An addressable strip on a real pin, and a real DS18B20: both run in the
-  simulator, and the board comes next.
-- The programmer against another ESP32.
+- A real DS18B20: it runs in the simulator, and the board comes next.
+- CAN on a real bus, with two SN65HVD230 transceivers and an ESP32-C3 as
+  the other node.
+- A 25xx SPI EEPROM in the EEPROM app.
 - The Riden over TTL, the Rigol over the LAN, and the terminal at 460800.
 - The IP cameras.
 - The microphone's gain, and the speaker's latency and heating.
