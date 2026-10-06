@@ -73,7 +73,8 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       colgaba la placa, arreglado: el esquema de Cableado le pasaba a LVGL
       un texto de la pila sin `text_local`; aprender anduvo: un botón del
       control del monitor quedó como Samsung, dirección 0x0707, comando 7,
-      y se volvió a mandar; falta la base de SmartIR); CAN con los
+      y se volvió a mandar, y el monitor subió el volumen; con la base de
+      SmartIR, "subir volumen" desde el listado también anduvo); CAN con los
       transceptores SN65HVD230 cuando lleguen (la autoprueba ya anduvo);
       Visor VNC contra una computadora (Compartir pantalla de la Mac con
       contraseña VNC); Dibujo con el dedo y el mouse USB.
