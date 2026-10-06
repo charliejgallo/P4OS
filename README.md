@@ -201,7 +201,7 @@ pins it uses, has a wiring drawing on the board and a page in the portal.
   DAC).
 - **Infrared:** learns a remote's buttons (NEC, Samsung, Sony, JVC,
   Panasonic, RC5, RC6, or raw) and sends them back; air conditioners, TVs, fans and lights
-  from [SmartIR](https://github.com/smartHomeHub/SmartIR)'s code library.
+  from [SmartIR](https://github.com/litinoveweedle/SmartIR)'s code library.
 - **CAN:** a bus analyser on the P4's TWAI controller: frames live, by id,
   sending, decoding signals, and recording to the card. It needs a 3.3 V
   transceiver (SN65HVD230); its self test needs none.
