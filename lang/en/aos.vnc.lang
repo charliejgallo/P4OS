@@ -5,201 +5,228 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/vnc/main/vnc.c:233
+#: apps/vnc/main/vnc.c:235
 No entran más computadoras	No room for more computers
 
-#: apps/vnc/main/vnc.c:288
+#: apps/vnc/main/vnc.c:290
 sólo mirar	view only
 
-#: apps/vnc/main/vnc.c:299
+#: apps/vnc/main/vnc.c:301
 Ninguna computadora todavía.\nAgregala con + o desde la página VNC del portal.\n\nEn la Mac: Compartir pantalla, con «Los visores VNC pueden controlar la pantalla con contraseña».	No computers yet.\nAdd one with + or from the portal's VNC page.\n\nOn a Mac: Screen Sharing, with “VNC viewers may control screen with password”.
 
-#: apps/vnc/main/vnc.c:309
+#: apps/vnc/main/vnc.c:311
 Automática	Automatic
 
-#: apps/vnc/main/vnc.c:332
+#: apps/vnc/main/vnc.c:334
 16 bits (rápido)	16 bits (fast)
 
-#: apps/vnc/main/vnc.c:333
+#: apps/vnc/main/vnc.c:335
 24 bits	24 bits
 
-#: apps/vnc/main/vnc.c:419
+#: apps/vnc/main/vnc.c:421
 Falta la dirección	The address is missing
 
-#: apps/vnc/main/vnc.c:431
+#: apps/vnc/main/vnc.c:433
 No se pudo guardar en la tarjeta	Could not save to the card
 
-#: apps/vnc/main/vnc.c:435
+#: apps/vnc/main/vnc.c:437
 Guardada	Saved
 
-#: apps/vnc/main/vnc.c:446
+#: apps/vnc/main/vnc.c:448
 Tocá otra vez para borrar	Tap again to delete
 
-#: apps/vnc/main/vnc.c:476
+#: apps/vnc/main/vnc.c:478
 Nueva computadora	New computer
 
-#: apps/vnc/main/vnc.c:476
+#: apps/vnc/main/vnc.c:478
 Computadora	Computer
 
-#: apps/vnc/main/vnc.c:482
+#: apps/vnc/main/vnc.c:484
 Nombre	Name
 
-#: apps/vnc/main/vnc.c:483
+#: apps/vnc/main/vnc.c:485
 Dirección (IP o nombre)	Address (IP or name)
 
-#: apps/vnc/main/vnc.c:485
+#: apps/vnc/main/vnc.c:487
 Puerto	Port
 
-#: apps/vnc/main/vnc.c:487
+#: apps/vnc/main/vnc.c:489
 Contraseña VNC	VNC password
 
-#: apps/vnc/main/vnc.c:489
+#: apps/vnc/main/vnc.c:491
 Queda guardada en la tarjeta (vnc.txt) y se puede leer. VNC usa sólo los primeros 8 caracteres.	It is kept on the card (vnc.txt), readable. VNC uses only the first 8 characters.
 
-#: apps/vnc/main/vnc.c:495
+#: apps/vnc/main/vnc.c:497
 Codificación	Encoding
 
-#: apps/vnc/main/vnc.c:499
+#: apps/vnc/main/vnc.c:501
 Colores	Colours
 
-#: apps/vnc/main/vnc.c:507
+#: apps/vnc/main/vnc.c:509
 Sólo mirar (no manda mouse ni teclado)	View only (no mouse or keyboard sent)
 
-#: apps/vnc/main/vnc.c:519
+#: apps/vnc/main/vnc.c:521
 Guardar	Save
 
-#: apps/vnc/main/vnc.c:522
+#: apps/vnc/main/vnc.c:524
 Borrar	Delete
 
-#: apps/vnc/main/vnc.c:745
+#: apps/vnc/main/vnc.c:834
 Trackpad: el dedo mueve el puntero	Trackpad: your finger moves the pointer
 
-#: apps/vnc/main/vnc.c:745
+#: apps/vnc/main/vnc.c:834
 Toque: el dedo es el mouse	Touch: your finger is the mouse
 
-#: apps/vnc/main/vnc.c:756
+#: apps/vnc/main/vnc.c:845
 Ajustar	Fit
 
-#: apps/vnc/main/vnc.c:756
+#: apps/vnc/main/vnc.c:845
 Llenar	Fill
 
-#: apps/vnc/main/vnc.c:1046
+#: apps/vnc/main/vnc.c:961
+Qué pantalla ver	Which screen to show
+
+#: apps/vnc/main/vnc.c:968
+Todas · %d×%d	All · %d×%d
+
+#: apps/vnc/main/vnc.c:975
+Monitor %d · %d×%d	Monitor %d · %d×%d
+
+#: apps/vnc/main/vnc.c:980
+Zona elegida · %d×%d	Chosen area · %d×%d
+
+#: apps/vnc/main/vnc.c:986
+Lo que se ve ahora · %d×%d	What's in view now · %d×%d
+
+#: apps/vnc/main/vnc.c:989
+Para buscar los monitores, elegí «Todas».	To look for the monitors, choose “All”.
+
+#: apps/vnc/main/vnc.c:990
+No se ven monitores separados: acercá con dos dedos hasta ver sólo uno y elegí «Lo que se ve ahora».	No separate monitors can be seen: zoom in with two fingers until only one shows and choose “What's in view now”.
+
+#: apps/vnc/main/vnc.c:992
+Los monitores salen de los bordes negros entre ellos. Si uno queda mal, acercá con dos dedos y elegí «Lo que se ve ahora».	The monitors come from the black edges between them. If one comes out wrong, zoom in with two fingers and choose “What's in view now”.
+
+#: apps/vnc/main/vnc.c:994
+La lista la manda la computadora.	The computer sends this list.
+
+#: apps/vnc/main/vnc.c:1275
 Reintentar	Retry
 
-#: apps/vnc/main/vnc.c:1047
+#: apps/vnc/main/vnc.c:1276
 Volver	Back
 
-#: apps/vnc/main/vnc.c:1127
+#: apps/vnc/main/vnc.c:1358
 No se pudo empezar: la conexión anterior todavía se está cerrando	Could not start: the previous connection is still closing
 
-#: apps/vnc/main/vnc.c:1165
+#: apps/vnc/main/vnc.c:1396
 Conectando…	Connecting…
 
-#: apps/vnc/main/vnc.c:1166
+#: apps/vnc/main/vnc.c:1397
 Entrando…	Signing in…
 
-#: apps/vnc/main/vnc_rfb.c:193
+#: apps/vnc/main/vnc_rfb.c:210
 Se cortó la conexión	The connection dropped
 
-#: apps/vnc/main/vnc_rfb.c:287
+#: apps/vnc/main/vnc_rfb.c:320
 El servidor dejó de mandar datos	The server stopped sending data
 
-#: apps/vnc/main/vnc_rfb.c:289
-#: apps/vnc/main/vnc_rfb.c:1181
+#: apps/vnc/main/vnc_rfb.c:322
+#: apps/vnc/main/vnc_rfb.c:1290
 El servidor cerró la conexión	The server closed the connection
 
-#: apps/vnc/main/vnc_rfb.c:412
+#: apps/vnc/main/vnc_rfb.c:445
 Datos comprimidos incompletos	Compressed data cut short
 
-#: apps/vnc/main/vnc_rfb.c:422
-#: apps/vnc/main/vnc_rfb.c:431
+#: apps/vnc/main/vnc_rfb.c:455
+#: apps/vnc/main/vnc_rfb.c:464
 Datos comprimidos dañados	Compressed data damaged
 
-#: apps/vnc/main/vnc_rfb.c:605
+#: apps/vnc/main/vnc_rfb.c:638
 Rectángulo demasiado ancho	Rectangle too wide
 
-#: apps/vnc/main/vnc_rfb.c:675
+#: apps/vnc/main/vnc_rfb.c:708
 Sin memoria para ZRLE	No memory for ZRLE
 
-#: apps/vnc/main/vnc_rfb.c:712
+#: apps/vnc/main/vnc_rfb.c:745
 ZRLE: una tira se pasa del bloque	ZRLE: a run goes past the tile
 
-#: apps/vnc/main/vnc_rfb.c:726
-#: apps/vnc/main/vnc_rfb.c:730
+#: apps/vnc/main/vnc_rfb.c:759
+#: apps/vnc/main/vnc_rfb.c:763
 ZRLE: datos inválidos	ZRLE: invalid data
 
-#: apps/vnc/main/vnc_rfb.c:754
+#: apps/vnc/main/vnc_rfb.c:787
 JPEG demasiado grande	JPEG too large
 
-#: apps/vnc/main/vnc_rfb.c:761
+#: apps/vnc/main/vnc_rfb.c:794
 Sin memoria para el JPEG	No memory for the JPEG
 
-#: apps/vnc/main/vnc_rfb.c:765
+#: apps/vnc/main/vnc_rfb.c:798
 El decodificador JPEG no abrió	The JPEG decoder did not open
 
-#: apps/vnc/main/vnc_rfb.c:792
+#: apps/vnc/main/vnc_rfb.c:825
 Tight: compresión desconocida	Tight: unknown compression
 
-#: apps/vnc/main/vnc_rfb.c:793
+#: apps/vnc/main/vnc_rfb.c:826
 Tight: rectángulo demasiado ancho	Tight: rectangle too wide
 
-#: apps/vnc/main/vnc_rfb.c:806
+#: apps/vnc/main/vnc_rfb.c:839
 Tight: filtro desconocido	Tight: unknown filter
 
-#: apps/vnc/main/vnc_rfb.c:817
+#: apps/vnc/main/vnc_rfb.c:850
 Sin memoria para Tight	No memory for Tight
 
-#: apps/vnc/main/vnc_rfb.c:884
-Tamaño de pantalla inválido	Invalid screen size
-
-#: apps/vnc/main/vnc_rfb.c:885
+#: apps/vnc/main/vnc_rfb.c:935
 La pantalla remota no entra en la memoria	The remote screen does not fit in memory
 
-#: apps/vnc/main/vnc_rfb.c:914
+#: apps/vnc/main/vnc_rfb.c:953
+Tamaño de pantalla inválido	Invalid screen size
+
+#: apps/vnc/main/vnc_rfb.c:1004
 Un rectángulo cae fuera de la pantalla	A rectangle falls outside the screen
 
-#: apps/vnc/main/vnc_rfb.c:928
+#: apps/vnc/main/vnc_rfb.c:1019
 Codificación %d no soportada	Encoding %d not supported
 
-#: apps/vnc/main/vnc_rfb.c:971
+#: apps/vnc/main/vnc_rfb.c:1079
 Mensaje desconocido del servidor (%d)	Unknown message from the server (%d)
 
-#: apps/vnc/main/vnc_rfb.c:984
+#: apps/vnc/main/vnc_rfb.c:1092
 El servidor rechazó la conexión: %s	The server refused the connection: %s
 
-#: apps/vnc/main/vnc_rfb.c:985
-#: apps/vnc/main/vnc_rfb.c:1058
+#: apps/vnc/main/vnc_rfb.c:1093
+#: apps/vnc/main/vnc_rfb.c:1166
 El servidor rechazó la conexión	The server refused the connection
 
-#: apps/vnc/main/vnc_rfb.c:991
+#: apps/vnc/main/vnc_rfb.c:1099
 El servidor pide contraseña: cargala en la computadora	The server wants a password: enter it for this computer
 
-#: apps/vnc/main/vnc_rfb.c:1001
+#: apps/vnc/main/vnc_rfb.c:1109
 No es un servidor VNC	Not a VNC server
 
-#: apps/vnc/main/vnc_rfb.c:1034
+#: apps/vnc/main/vnc_rfb.c:1142
 La Mac no ofrece contraseña VNC: activá «Los visores VNC pueden controlar la pantalla con contraseña» en Compartir pantalla	The Mac offers no VNC password: turn on “VNC viewers may control screen with password” in Screen Sharing
 
-#: apps/vnc/main/vnc_rfb.c:1036
+#: apps/vnc/main/vnc_rfb.c:1144
 Ningún tipo de seguridad que la placa conozca (%s)	No security type the board knows (%s)
 
-#: apps/vnc/main/vnc_rfb.c:1047
+#: apps/vnc/main/vnc_rfb.c:1155
 Tipo de seguridad %d no soportado	Security type %d not supported
 
-#: apps/vnc/main/vnc_rfb.c:1058
+#: apps/vnc/main/vnc_rfb.c:1166
 Contraseña incorrecta	Wrong password
 
-#: apps/vnc/main/vnc_rfb.c:1158
+#: apps/vnc/main/vnc_rfb.c:1267
 Sin memoria	Out of memory
 
-#: apps/vnc/main/vnc_rfb.c:1162
+#: apps/vnc/main/vnc_rfb.c:1271
 No se encontró la computadora (DNS)	Computer not found (DNS)
 
-#: apps/vnc/main/vnc_rfb.c:1163
+#: apps/vnc/main/vnc_rfb.c:1272
 Sin conexiones libres en la placa	No free connections on the board
 
-#: apps/vnc/main/vnc_rfb.c:1164
+#: apps/vnc/main/vnc_rfb.c:1273
 La computadora no contesta	The computer does not answer
 
-#: apps/vnc/main/vnc_rfb.c:1165
+#: apps/vnc/main/vnc_rfb.c:1274
 No se pudo conectar (¿VNC activado? ¿puerto?)	Could not connect (VNC on? right port?)

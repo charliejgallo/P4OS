@@ -124,6 +124,8 @@ static struct {
         vnc_sess_t   *sess;
         lv_obj_t     *obj, *canvas, *msg, *msg_btns, *bar, *name, *info, *handle, *ring;
         lv_obj_t     *in_g, *mode_g;
+        lv_obj_t     *zpick;
+        uint32_t      zone_gen;
         vnc_kbd_t    *kbd;
         bool          kbd_on;
         bool          bar_on;
@@ -859,6 +861,145 @@ static void refresh_cb(lv_event_t *e)
     bar_touch();
 }
 
+/* ---- the viewer: which monitor ------------------------------------------------------
+ *
+ * A Mac with two monitors sends them as one wide screen, black where they
+ * do not overlap. The monitor button picks one: from the list the server
+ * sends (ExtendedDesktopSize), or the part being looked at, zoomed in to
+ * one monitor with two fingers. The session then keeps, asks for and
+ * points at only that rectangle; it is saved with the computer ("zone"). */
+#define ZONE_MAX (VNC_MAX_SCREENS + 3)
+static vnc_rect_t s_zones[ZONE_MAX];
+
+static void zpick_close(void)
+{
+    if (A.vw.zpick) lv_obj_delete(A.vw.zpick);
+    A.vw.zpick = NULL;
+}
+
+static void zpick_bg_cb(lv_event_t *e)
+{
+    if (lv_event_get_target(e) == lv_event_get_current_target(e)) zpick_close();
+}
+
+static void zone_save(const vnc_rect_t *z)
+{
+    A.vw.srv.zone = *z;
+    int i = A.vw.index;
+    if (i < 0 || i >= A.cfg.count || strcmp(A.cfg.s[i].host, A.vw.srv.host) || A.cfg.s[i].port != A.vw.srv.port) {
+        return;
+    }
+    A.cfg.s[i].zone = *z;
+    if (vnc_cfg_save(&A.cfg)) A.cfg_stamp = vnc_cfg_stamp();
+}
+
+static void zone_pick(int k)
+{
+    vnc_rect_t z = s_zones[k];
+    int fw = 0, fh = 0;
+    vnc_sess_screens(A.vw.sess, &fw, &fh, NULL, NULL, 0, NULL);
+    if (z.x == 0 && z.y == 0 && z.w == fw && z.h == fh) z.w = z.h = 0;     /* all of it */
+    zone_save(&z);
+    vnc_sess_set_zone(A.vw.sess, &z);
+}
+
+static void zpick_cb(lv_event_t *e)
+{
+    int k = (int)(intptr_t)lv_event_get_user_data(e);
+    zpick_close();
+    if (k >= 0 && k < ZONE_MAX) zone_pick(k);
+    bar_touch();
+}
+
+/* The part of the server's screen in view now; false if it is all of it. */
+static bool zone_in_view(vnc_rect_t *out)
+{
+    vnc_rect_t cur;
+    vnc_sess_screens(A.vw.sess, NULL, NULL, &cur, NULL, 0, NULL);
+    const vnc_view_t *v = &A.vw.view;
+    float x0 = v->ox, y0 = v->oy, x1 = v->ox + (float)v->vw / v->scale, y1 = v->oy + (float)v->vh / v->scale;
+    int ix0 = x0 < 0 ? 0 : (int)(x0 + 0.5f), iy0 = y0 < 0 ? 0 : (int)(y0 + 0.5f);
+    int ix1 = x1 > (float)A.vw.rw ? A.vw.rw : (int)(x1 + 0.5f), iy1 = y1 > (float)A.vw.rh ? A.vw.rh : (int)(y1 + 0.5f);
+    if (ix1 - ix0 < 64 || iy1 - iy0 < 64) return false;
+    if (ix0 <= 2 && iy0 <= 2 && ix1 >= A.vw.rw - 2 && iy1 >= A.vw.rh - 2) return false;
+    *out = (vnc_rect_t){ cur.x + ix0, cur.y + iy0, ix1 - ix0, iy1 - iy0 };
+    return true;
+}
+
+static lv_obj_t *zpick_row(lv_obj_t *card, const char *text, bool on, int k)
+{
+    lv_obj_t *b = aos_button(card, text, on ? AOS_C_ACCENT : AOS_C_CARD2, zpick_cb, (void *)(intptr_t)k);
+    lv_obj_set_width(b, LV_PCT(100));
+    return b;
+}
+
+static void zone_cb(lv_event_t *e)
+{
+    (void)e;
+    if (A.vw.zpick || !A.vw.sess) return;
+    int fw = 0, fh = 0;
+    vnc_rect_t cur, scr[VNC_MAX_SCREENS];
+    bool guessed = false;
+    int ns = vnc_sess_screens(A.vw.sess, &fw, &fh, &cur, scr, VNC_MAX_SCREENS, &guessed);
+    if (fw <= 0) return;
+
+    lv_obj_t *bg = box(A.vw.obj, A.W, A.H);
+    A.vw.zpick = bg;
+    lv_obj_set_style_bg_color(bg, lv_color_black(), 0);
+    lv_obj_set_style_bg_opa(bg, LV_OPA_60, 0);
+    lv_obj_add_flag(bg, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(bg, zpick_bg_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_t *card = box(bg, A.land ? 620 : A.W - 2 * AOS_UI_PAD, LV_SIZE_CONTENT);
+    lv_obj_set_style_bg_color(card, AOS_C_CARD, 0);
+    lv_obj_set_style_bg_opa(card, LV_OPA_COVER, 0);
+    lv_obj_set_style_radius(card, 28, 0);
+    lv_obj_set_style_pad_all(card, 28, 0);
+    lv_obj_set_style_pad_row(card, 16, 0);
+    lv_obj_set_flex_flow(card, LV_FLEX_FLOW_COLUMN);
+    lv_obj_add_flag(card, LV_OBJ_FLAG_CLICKABLE);       /* a tap between rows does not close */
+    lv_obj_center(card);
+    lv_obj_t *title = aos_label(card, _("Qué pantalla ver"), aos_font_body, AOS_C_TEXT);
+    aos_make_decorative(title);
+
+    char line[96];
+    int k = 0;
+    bool all = cur.x == 0 && cur.y == 0 && cur.w == fw && cur.h == fh;
+    s_zones[k] = (vnc_rect_t){ 0, 0, fw, fh };
+    snprintf(line, sizeof line, _("Todas · %d×%d"), fw, fh);
+    zpick_row(card, line, all, k++);
+    bool listed = all;
+    for (int i = 0; i < ns && k < ZONE_MAX - 2; i++) {
+        bool on = !memcmp(&scr[i], &cur, sizeof cur);
+        listed |= on;
+        s_zones[k] = scr[i];
+        snprintf(line, sizeof line, _("Monitor %d · %d×%d"), i + 1, scr[i].w, scr[i].h);
+        zpick_row(card, line, on, k++);
+    }
+    if (!listed) {
+        s_zones[k] = cur;
+        snprintf(line, sizeof line, _("Zona elegida · %d×%d"), cur.w, cur.h);
+        zpick_row(card, line, true, k++);
+    }
+    vnc_rect_t v;
+    if (zone_in_view(&v)) {
+        s_zones[k] = v;
+        snprintf(line, sizeof line, _("Lo que se ve ahora · %d×%d"), v.w, v.h);
+        zpick_row(card, line, false, k++);
+    }
+    const char *why = !ns && !all ? _("Para buscar los monitores, elegí «Todas».")
+                    : !ns ? _("No se ven monitores separados: acercá con dos dedos hasta ver sólo uno y "
+                              "elegí «Lo que se ve ahora».")
+                    : guessed ? _("Los monitores salen de los bordes negros entre ellos. Si uno queda mal, "
+                                  "acercá con dos dedos y elegí «Lo que se ve ahora».")
+                              : _("La lista la manda la computadora.");
+    lv_obj_t *hint = aos_label(card, why,
+                               aos_font_caption, AOS_C_DIM);
+    lv_obj_set_width(hint, LV_PCT(100));
+    lv_label_set_long_mode(hint, LV_LABEL_LONG_MODE_WRAP);
+    aos_make_decorative(hint);
+    bar_touch();
+}
+
 static void retry_cb(lv_event_t *e)
 {
     (void)e;
@@ -1099,6 +1240,7 @@ static void build_viewer(void)
         lv_obj_delete(A.vw.obj);
         A.vw.obj = NULL;
     }
+    A.vw.zpick = NULL;
     lv_obj_t *o = box(A.root, A.W, A.H);
     A.vw.obj = o;
     lv_obj_set_style_bg_color(o, lv_color_black(), 0);
@@ -1169,6 +1311,7 @@ static void build_viewer(void)
     if (!A.vw.srv.view_only) bar_btn(row, input_glyph(), input_cb, &A.vw.in_g);
     else A.vw.in_g = NULL;
     bar_btn(row, mode_glyph(), mode_cb, &A.vw.mode_g);
+    bar_btn(row, AOS_SYM_MONITOR, zone_cb, NULL);
     bar_btn(row, A.land ? AOS_SYM_PHONE_ROTATE_PORTRAIT : AOS_SYM_PHONE_ROTATE_LANDSCAPE, rotate_cb, NULL);
     bar_btn(row, AOS_SYM_RESTART, refresh_cb, NULL);
 
@@ -1267,8 +1410,10 @@ static void viewer_frame(void)
     if (st == VNC_ST_ERROR) return;
 
     int rw, rh;
-    if (vnc_sess_desktop(s, &rw, &rh, NULL, 0) && (rw != A.vw.rw || rh != A.vw.rh)) {
-        bool first = A.vw.rw == 0;
+    uint32_t zg = vnc_sess_zone_gen(s);
+    if (vnc_sess_desktop(s, &rw, &rh, NULL, 0) && (rw != A.vw.rw || rh != A.vw.rh || zg != A.vw.zone_gen)) {
+        bool first = A.vw.rw == 0 || zg != A.vw.zone_gen;
+        A.vw.zone_gen = zg;
         A.vw.rw = rw;
         A.vw.rh = rh;
         if (first) {
@@ -1375,6 +1520,10 @@ static bool back(aos_app_t *self, void *inst)
     (void)self;
     (void)inst;
     if (A.screen == SCR_VIEW) {
+        if (A.vw.zpick) {
+            zpick_close();
+            return true;
+        }
         /* with a mouse in use, "back" is its right button */
         if (A.vw.mouse && aos_hal_hid_mouse_present() && aos_hal_uptime_ms() - A.vw.mouse_ms < MOUSE_FRESH_MS &&
             A.vw.sess && A.vw.shown && over_canvas(A.vw.mx, A.vw.my)) {

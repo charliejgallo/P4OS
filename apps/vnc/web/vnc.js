@@ -3,8 +3,9 @@
  *
  * The file is the app's (apps/vnc/main/vnc_cfg.c), /data/vnc.txt: one
  * [Name] block per computer with host, port, pass, enc (auto, tight, zrle,
- * hextile, raw), depth (16 or 24), quality (Tight's JPEG, 0-9) and view
- * (1: look only), up to sixteen. The page reads it, shows each computer and
+ * hextile, raw), depth (16 or 24), quality (Tight's JPEG, 0-9), view
+ * (1: look only) and zone (x,y,w,h: one monitor of several, which the app
+ * picks with its monitor button), up to sixteen. The page reads it, shows each computer and
  * writes it back whole; the app, open on the list, reloads it within two
  * seconds. Lines it does not know are not kept.
  *
@@ -41,13 +42,14 @@ const ENCS = [['auto', 'Automática (Tight, ZRLE, Hextile)'], ['tight', 'Tight (
   ['zrle', 'ZRLE (la de la Mac)'], ['hextile', 'Hextile'], ['raw', 'Raw (sin comprimir)']];
 const HEADER = `# Computers for the VNC viewer of P4OS (apps/vnc). One block each:
 # [Name]  host, port (5900), pass, enc (auto tight zrle hextile raw),
-# depth (16 or 24), quality (0-9), view (1: look only).
+# depth (16 or 24), quality (0-9), view (1: look only),
+# zone (x,y,w,h: one monitor of several).
 # The passwords are kept here in the clear.
 `;
 
-const blank = () => ({ name: '', host: '', port: '5900', pass: '', enc: 'auto', depth: '16', quality: '6', view: '0' });
+const blank = () => ({ name: '', host: '', port: '5900', pass: '', enc: 'auto', depth: '16', quality: '6', view: '0', zone: '' });
 
-/* vnc.txt -> [{ name, host, port, pass, enc, depth, quality, view }] */
+/* vnc.txt -> [{ name, host, port, pass, enc, depth, quality, view, zone }] */
 function parse(text) {
   const list = [];
   let cur = null;
@@ -75,6 +77,7 @@ function serialize(list) {
     if (c.depth === '24') out += 'depth = 24\n';
     if (c.quality !== '' && c.quality !== '6') out += `quality = ${c.quality}\n`;
     if (c.view === '1') out += 'view = 1\n';
+    if (c.zone) out += `zone = ${c.zone.replace(/\s/g, '')}\n`;
   }
   return out;
 }
@@ -91,6 +94,8 @@ function check(list) {
     if (!/^\d+$/.test(c.port) || p < 1 || p > 65535) return `${c.name}: el puerto va de 1 a 65535 (VNC suele ser 5900)`;
     if (!/^\d$/.test(c.quality)) return `${c.name}: la calidad va de 0 a 9`;
     if (/\n/.test(c.pass) || c.pass.length > 63) return `${c.name}: la contraseña es muy larga`;
+    if (c.zone && !/^\d+,\d+,[1-9]\d*,[1-9]\d*$/.test(c.zone.replace(/\s/g, '')))
+      return `${c.name}: la zona va como x,y,ancho,alto (o vacía: toda la pantalla)`;
   }
   return null;
 }
@@ -150,7 +155,9 @@ function render() {
             select(c, 'enc', 'Codificación', ENCS),
             select(c, 'depth', 'Colores', [['16', '16 bits (rápido)'], ['24', '24 bits (exactos)']]),
             select(c, 'quality', 'Calidad JPEG (Tight)', [...Array(10).keys()].map(q => [String(q), String(q)])),
-            h('label', { class: 'vncheck' }, view, 'Sólo mirar: no manda el mouse ni el teclado')),
+            h('label', { class: 'vncheck' }, view, 'Sólo mirar: no manda el mouse ni el teclado'),
+            input(c, 'zone', 'Monitor (zona x,y,ancho,alto; vacía: todos)',
+                  { placeholder: 'se elige en la app, con el botón de monitor', autocomplete: 'off', wide: true })),
           h('div', { class: 'vnwarn' }, 'La contraseña queda en /data/vnc.txt de la tarjeta, legible. VNC usa sólo los primeros 8 caracteres.'));
       }));
     }

@@ -27,7 +27,12 @@
  *              32-bit for exact colours (the "24 bits" setting)
  *   encodings  Raw, CopyRect, Hextile, ZRLE, Tight (zlib streams, palette,
  *              gradient and JPEG, decoded by the P4's engine), and the
- *              pseudo-encodings DesktopSize and LastRect
+ *              pseudo-encodings DesktopSize, ExtendedDesktopSize (only
+ *              read: the monitors it lists) and LastRect
+ *   zones      one monitor of several (a Mac with two sends them as one
+ *              screen): the kept screen, the update requests and the
+ *              pointer all move to that rectangle, so the rest costs
+ *              neither memory nor network
  *
  * Errors inside a message (a closed socket, bad data, the app leaving)
  * longjmp back to the session's loop, so the decoders read like the
@@ -68,6 +73,8 @@
 #define ENC_ZRLE        16
 #define ENC_DESKTOPSIZE (-223)
 #define ENC_LASTRECT    (-224)
+#define ENC_EXTDESKTOP  (-308)
+#define GUESS_MS        5000
 #define ENC_QUALITY0    (-32)
 #define ENC_COMPRESS0   (-256)
 
@@ -101,7 +108,17 @@ struct vnc_sess {
     volatile int state;
     char         detail[160];
     bool         have_desktop;
-    int          rw, rh, shift;
+    int          rw, rh, shift;     /* the zone shown */
+    int          full_w, full_h;    /* the server's whole screen */
+    vnc_rect_t   cur;               /* the zone, in the server's pixels */
+    vnc_rect_t   scr[VNC_MAX_SCREENS];
+    int          nscr;
+    vnc_rect_t   guess[VNC_MAX_SCREENS];    /* found by the black between them */
+    int          nguess;
+    uint64_t     guess_t;
+    bool         want_zone;
+    vnc_rect_t   zone;              /* asked for; w 0: all of it */
+    uint32_t     zone_gen;
     char         name[96];
     char         stats[96];
     ev_t         q[EVQ];
@@ -208,15 +225,23 @@ static void put32(uint8_t *p, uint32_t v)
     p[3] = (uint8_t)v;
 }
 
-static void send_update_request(vnc_sess_t *s, bool incremental)
+static void request_area(vnc_sess_t *s, bool incremental, int x, int y, int w, int h)
 {
     uint8_t m[10] = { 3, incremental ? 1 : 0 };
-    put16(m + 2, 0);
-    put16(m + 4, 0);
-    put16(m + 6, (uint32_t)s->rw);
-    put16(m + 8, (uint32_t)s->rh);
+    put16(m + 2, (uint32_t)x);
+    put16(m + 4, (uint32_t)y);
+    put16(m + 6, (uint32_t)w);
+    put16(m + 8, (uint32_t)h);
     send_all(s, m, sizeof m);
 }
+
+/* only the zone: the server sends nothing of the rest */
+static void send_update_request(vnc_sess_t *s, bool incremental)
+{
+    request_area(s, incremental, s->cur.x, s->cur.y, s->cur.w, s->cur.h);
+}
+
+static void apply_zone(vnc_sess_t *s, bool force);
 
 /* What the UI queued: sent in one go. Called between messages and while
  * the reader waits, so a click goes out even in the middle of a big update. */
@@ -229,7 +254,15 @@ static void pump(vnc_sess_t *s)
     s->qn = 0;
     bool refresh = s->want_refresh;
     s->want_refresh = false;
+    bool zone = s->want_zone;
+    s->want_zone = false;
     aos_hal_mutex_unlock(s->mx);
+    /* safe in the middle of an update too: the decoders reach the kept
+     * screen only through vnc_fb_*, which cut to whatever zone is there */
+    if (zone && s->have_desktop) {
+        apply_zone(s, false);
+        refresh = true;
+    }
     if (s->req_owed && !s->paused) {
         s->req_owed = false;
         refresh = true;             /* back from the background: all of it */
@@ -247,8 +280,8 @@ static void pump(vnc_sess_t *s)
         if (q[i].type == EV_POINTER) {
             m[0] = 5;
             m[1] = q[i].buttons;
-            put16(m + 2, q[i].x);
-            put16(m + 4, q[i].y);
+            put16(m + 2, (uint32_t)(q[i].x + s->cur.x));
+            put16(m + 4, (uint32_t)(q[i].y + s->cur.y));
             len += 6;
         } else {
             m[0] = 4;
@@ -879,20 +912,73 @@ static void dec_tight(vnc_sess_t *s, int x, int y, int w, int h)
 
 /* ---- messages ---------------------------------------------------------------------- */
 
+/* The zone asked for, cut to the screen; all of it when it does not fit
+ * (a monitor unplugged since it was saved). */
+static vnc_rect_t zone_for(const vnc_sess_t *s, vnc_rect_t z)
+{
+    vnc_rect_t all = { 0, 0, s->full_w, s->full_h };
+    if (z.w <= 0 || z.h <= 0 || z.x < 0 || z.y < 0 || z.x >= s->full_w || z.y >= s->full_h) return all;
+    if (z.x + z.w > s->full_w) z.w = s->full_w - z.x;
+    if (z.y + z.h > s->full_h) z.h = s->full_h - z.y;
+    if (z.w < 64 || z.h < 64) return all;
+    return z;
+}
+
+/* The kept screen for the zone asked for. force: even if it is the same
+ * (the server's screen changed under it). */
+static void apply_zone(vnc_sess_t *s, bool force)
+{
+    aos_hal_mutex_lock(s->mx);
+    vnc_rect_t z = zone_for(s, s->zone);
+    aos_hal_mutex_unlock(s->mx);
+    if (!force && s->fb.px && !memcmp(&z, &s->cur, sizeof z)) return;
+    if (!vnc_fb_alloc(&s->fb, z.w, z.h)) fail(s, _("La pantalla remota no entra en la memoria"));
+    s->fb.zx = z.x;
+    s->fb.zy = z.y;
+    s->cur = z;
+    s->have_valid = false;
+    aos_hal_mutex_lock(s->mx);
+    s->rw = z.w;
+    s->rh = z.h;
+    s->shift = s->fb.shift;
+    s->have_desktop = true;
+    s->zone_gen++;
+    aos_hal_mutex_unlock(s->mx);
+    aos_hal_log(VNC_TAG, "showing %dx%d at %d,%d of %dx%d, kept at 1/%d: %dx%d", z.w, z.h, z.x, z.y, s->full_w,
+                s->full_h, 1 << s->fb.shift, s->fb.w, s->fb.h);
+}
+
 static void desktop_size(vnc_sess_t *s, int w, int h)
 {
     if (w <= 0 || h <= 0 || w > 8192 || h > 8192) fail(s, _("Tamaño de pantalla inválido"));
-    if (!vnc_fb_alloc(&s->fb, w, h)) fail(s, _("La pantalla remota no entra en la memoria"));
-    s->have_valid = false;
     aos_hal_mutex_lock(s->mx);
-    s->rw = w;
-    s->rh = h;
-    s->shift = s->fb.shift;
-    s->have_desktop = true;
+    s->full_w = w;
+    s->full_h = h;
     aos_hal_mutex_unlock(s->mx);
-    if (s->fb.shift) {
-        aos_hal_log(VNC_TAG, "%dx%d kept at 1/%d: %dx%d", w, h, 1 << s->fb.shift, s->fb.w, s->fb.h);
+    apply_zone(s, true);
+}
+
+/* ExtendedDesktopSize: the screen's size and the monitors in it. Read
+ * whole before the lock: reading may wait, and the wait pumps. */
+static bool ext_desktop(vnc_sess_t *s, int w, int h)
+{
+    int n = rd_u8(s);
+    rd_ptr(s, 3);
+    vnc_rect_t scr[VNC_MAX_SCREENS];
+    int k = 0;
+    for (int i = 0; i < n; i++) {
+        const uint8_t *p = rd_ptr(s, 16);
+        vnc_rect_t r = { p[4] << 8 | p[5], p[6] << 8 | p[7], p[8] << 8 | p[9], p[10] << 8 | p[11] };
+        if (k < VNC_MAX_SCREENS && r.w > 0 && r.h > 0) scr[k++] = r;
     }
+    aos_hal_mutex_lock(s->mx);
+    memcpy(s->scr, scr, sizeof scr);
+    s->nscr = k;
+    aos_hal_mutex_unlock(s->mx);
+    aos_hal_log(VNC_TAG, "the server lists %d monitor(s) in %dx%d", k, w, h);
+    if (w == s->full_w && h == s->full_h && s->fb.px) return false;
+    desktop_size(s, w, h);
+    return true;
 }
 
 static void fb_update(vnc_sess_t *s)
@@ -910,14 +996,19 @@ static void fb_update(vnc_sess_t *s)
             resized = true;
             continue;
         }
-        if (enc >= 0 && (x + w > s->rw || y + h > s->rh)) {
+        if (enc == ENC_EXTDESKTOP) {
+            if (ext_desktop(s, w, h)) resized = true;
+            continue;
+        }
+        if (enc >= 0 && (x + w > s->full_w || y + h > s->full_h)) {
             fail(s, _("Un rectángulo cae fuera de la pantalla"));
         }
         switch (enc) {
         case ENC_RAW:      dec_raw(s, x, y, w, h); break;
         case ENC_COPYRECT: {
             int sx = rd_u16(s), sy = rd_u16(s);
-            vnc_fb_copy(&s->fb, sx, sy, x, y, w, h);
+            /* from outside the zone: that part is asked for again */
+            if (!vnc_fb_copy(&s->fb, sx, sy, x, y, w, h)) request_area(s, false, x, y, w, h);
             break;
         }
         case ENC_HEXTILE:  dec_hextile(s, x, y, w, h); break;
@@ -942,6 +1033,23 @@ static void fb_update(vnc_sess_t *s)
     if (s->paused) s->req_owed = true;
     else send_update_request(s, !resized);
     present(s);
+    /* where the monitors are, while the whole screen is shown and the server
+     * did not say: one pass over it, every few seconds */
+    uint64_t now = aos_hal_uptime_ms();
+    if (!s->nscr && !resized && !s->cur.x && !s->cur.y && s->cur.w == s->full_w && s->cur.h == s->full_h &&
+        (!s->guess_t || now - s->guess_t >= GUESS_MS)) {
+        vnc_rect_t g[VNC_MAX_SCREENS];
+        int k = vnc_fb_monitors(&s->fb, g, VNC_MAX_SCREENS);
+        s->guess_t = aos_hal_uptime_ms();
+        if (k != s->nguess || memcmp(g, s->guess, (size_t)k * sizeof *g)) {
+            aos_hal_log(VNC_TAG, "%d monitor(s) by the black between them, in %u ms", k,
+                        (unsigned)(s->guess_t - now));
+        }
+        aos_hal_mutex_lock(s->mx);
+        memcpy(s->guess, g, (size_t)k * sizeof *g);
+        s->nguess = k;
+        aos_hal_mutex_unlock(s->mx);
+    }
 }
 
 static void handle_message(vnc_sess_t *s)
@@ -1104,6 +1212,7 @@ static void handshake(vnc_sess_t *s)
     encs[n++] = ENC_COPYRECT;
     encs[n++] = ENC_RAW;
     encs[n++] = ENC_DESKTOPSIZE;
+    encs[n++] = ENC_EXTDESKTOP;
     encs[n++] = ENC_LASTRECT;
     encs[n++] = ENC_QUALITY0 + s->srv.quality;
     encs[n++] = ENC_COMPRESS0 + 6;
@@ -1209,6 +1318,7 @@ vnc_sess_t *vnc_sess_start(const vnc_server_t *srv)
         return NULL;
     }
     s->srv = *srv;
+    s->zone = srv->zone;
     s->front = -1;
     s->ui_front = -1;
     s->state = VNC_ST_CONNECTING;
@@ -1246,6 +1356,39 @@ bool vnc_sess_desktop(vnc_sess_t *s, int *w, int *h, char *name, size_t n)
     if (name) snprintf(name, n, "%s", s->name);
     aos_hal_mutex_unlock(s->mx);
     return ok;
+}
+
+int vnc_sess_screens(vnc_sess_t *s, int *full_w, int *full_h, vnc_rect_t *zone, vnc_rect_t *scr, int max,
+                     bool *guessed)
+{
+    aos_hal_mutex_lock(s->mx);
+    if (full_w) *full_w = s->full_w;
+    if (full_h) *full_h = s->full_h;
+    if (zone) *zone = s->cur;
+    const vnc_rect_t *src = s->nscr ? s->scr : s->guess;
+    int n = s->nscr ? s->nscr : s->nguess;
+    if (guessed) *guessed = !s->nscr && n > 0;
+    if (n > max) n = max;
+    if (scr && n > 0) memcpy(scr, src, (size_t)n * sizeof *scr);
+    aos_hal_mutex_unlock(s->mx);
+    return n;
+}
+
+void vnc_sess_set_zone(vnc_sess_t *s, const vnc_rect_t *z)
+{
+    if (!s) return;
+    aos_hal_mutex_lock(s->mx);
+    s->zone = *z;
+    s->want_zone = true;
+    aos_hal_mutex_unlock(s->mx);
+}
+
+uint32_t vnc_sess_zone_gen(vnc_sess_t *s)
+{
+    aos_hal_mutex_lock(s->mx);
+    uint32_t g = s->zone_gen;
+    aos_hal_mutex_unlock(s->mx);
+    return g;
 }
 
 void vnc_sess_stats(vnc_sess_t *s, char *out, size_t n)

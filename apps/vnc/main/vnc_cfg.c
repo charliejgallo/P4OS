@@ -13,6 +13,7 @@
  *     depth   = 16            16 (fast) or 24 (exact colours)
  *     quality = 6             Tight's JPEG, 0-9
  *     view    = 0             1: look only, nothing is sent
+ *     zone    = 1920,404,2940,1912   only that part: one monitor of several
  *
  * Only host is needed. "host:1" is display 1 (port 5901), "host::5901" a
  * port, as other viewers write them. The password is kept in the clear: the
@@ -145,6 +146,12 @@ void vnc_cfg_load(vnc_cfg_t *cfg)
             cur->quality = q < 0 ? 0 : q > 9 ? 9 : q;
         } else if (!strcmp(key, "view")) {
             cur->view_only = atoi(val) != 0;
+        } else if (!strcmp(key, "zone")) {
+            vnc_rect_t z;
+            if (sscanf(val, "%d , %d , %d , %d", &z.x, &z.y, &z.w, &z.h) == 4 && z.x >= 0 && z.y >= 0 &&
+                z.w > 0 && z.h > 0) {
+                cur->zone = z;
+            }
         }
     }
     fclose(f);
@@ -172,7 +179,8 @@ bool vnc_cfg_save(const vnc_cfg_t *cfg)
     }
     fputs("# Computers for the VNC viewer of P4OS (apps/vnc). One block each:\n"
           "# [Name]  host, port (5900), pass, enc (auto tight zrle hextile raw),\n"
-          "# depth (16 or 24), quality (0-9), view (1: look only).\n"
+          "# depth (16 or 24), quality (0-9), view (1: look only),\n"
+          "# zone (x,y,w,h: one monitor of several).\n"
           "# The passwords are kept here in the clear.\n", f);
     /* snprintf + fputs: fprintf reached the apps' table after 0.8.0 */
     char b[256];
@@ -194,6 +202,10 @@ bool vnc_cfg_save(const vnc_cfg_t *cfg)
             fputs(b, f);
         }
         if (s->view_only) fputs("view = 1\n", f);
+        if (s->zone.w > 0) {
+            snprintf(b, sizeof b, "zone = %d,%d,%d,%d\n", s->zone.x, s->zone.y, s->zone.w, s->zone.h);
+            fputs(b, f);
+        }
     }
     bool ok = fclose(f) == 0;
     if (ok) {

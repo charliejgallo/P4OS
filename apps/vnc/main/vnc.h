@@ -38,6 +38,11 @@ static inline void vnc_copy(char *dst, size_t cap, const char *src)
 
 /* ---- the saved computers (vnc_cfg.c) ------------------------------------- */
 
+/* A rectangle of the server's screen, in its pixels */
+typedef struct {
+    int x, y, w, h;
+} vnc_rect_t;
+
 enum { VNC_ENC_AUTO = 0, VNC_ENC_TIGHT, VNC_ENC_ZRLE, VNC_ENC_HEXTILE, VNC_ENC_RAW, VNC_ENC_COUNT };
 
 typedef struct {
@@ -49,6 +54,7 @@ typedef struct {
     int  depth;                 /* 16 or 24 */
     int  quality;               /* Tight's JPEG, 0-9 */
     bool view_only;
+    vnc_rect_t zone;            /* the part shown (one monitor of several); w 0: all of it */
 } vnc_server_t;
 
 #define VNC_MAX_SERVERS 16
@@ -70,10 +76,12 @@ const char *vnc_enc_name(int enc);
 /* The remote screen as it is kept: RGB565 in LVGL's byte order, in PSRAM.
  * A screen too big for the budget (a Retina Mac's 2880 x 1800, a 5K) is kept
  * at a half or a quarter: every write skips the pixels in between, so the
- * decoders never know. Coordinates outside are always the server's. */
+ * decoders never know. Coordinates outside are always the server's: the
+ * writes move them by (zx, zy) and cut what falls outside the zone. */
 typedef struct {
     uint16_t *px;
-    int       rw, rh;           /* the server's size */
+    int       zx, zy;           /* the server pixel kept at (0, 0): a zone's corner */
+    int       rw, rh;           /* the size kept, before the shift: the zone's */
     int       w, h;             /* what is kept: rw >> shift */
     int       shift;
     /* what changed since the last present, in kept pixels: x0 < x1 if any */
@@ -87,11 +95,16 @@ void vnc_fb_fill(vnc_fb_t *fb, int x, int y, int w, int h, uint16_t c);
 void vnc_fb_row(vnc_fb_t *fb, int x, int y, int w, const uint16_t *src);
 /* w x h pixels, rows stride_px apart */
 void vnc_fb_rect(vnc_fb_t *fb, int x, int y, int w, int h, const uint16_t *src, int stride_px);
-void vnc_fb_copy(vnc_fb_t *fb, int sx, int sy, int dx, int dy, int w, int h);
+/* false: the source is not all in the zone; the caller asks for dx..dy again */
+bool vnc_fb_copy(vnc_fb_t *fb, int sx, int sy, int dx, int dy, int w, int h);
 static inline bool vnc_fb_skip_row(const vnc_fb_t *fb, int y)
 {
-    return (y & ((1 << fb->shift) - 1)) != 0;
+    return ((y - fb->zy) & ((1 << fb->shift) - 1)) != 0;
 }
+
+/* The monitors in a screen that holds several, found by the black between
+ * them (a Mac sends them that way); 0 if it does not show two or more. */
+int  vnc_fb_monitors(const vnc_fb_t *fb, vnc_rect_t *out, int max);
 
 /* Where the view looks: scale is view pixels per server pixel, (ox, oy)
  * the server pixel at the view's top left corner. */
@@ -131,8 +144,21 @@ vnc_sess_t *vnc_sess_start(const vnc_server_t *srv);
 void        vnc_sess_stop(vnc_sess_t *s);
 
 vnc_state_t vnc_sess_state(vnc_sess_t *s, char *detail, size_t n);
-/* The server's screen and name; false before ServerInit. */
+/* The screen shown (the zone, or all of it) and the server's name; false
+ * before ServerInit. Every coordinate the UI uses is the zone's. */
 bool        vnc_sess_desktop(vnc_sess_t *s, int *w, int *h, char *name, size_t n);
+
+#define VNC_MAX_SCREENS 8
+/* The server's whole screen, the zone shown in it and the monitors: the
+ * ones the server listed (ExtendedDesktopSize), or else the ones found by
+ * the black between them (*guessed). Returns how many went into scr. */
+int         vnc_sess_screens(vnc_sess_t *s, int *full_w, int *full_h, vnc_rect_t *zone,
+                             vnc_rect_t *scr, int max, bool *guessed);
+/* Shows only z of the server's screen (w 0: all of it). Takes effect when
+ * the worker next looks, with a whole update of the new zone. */
+void        vnc_sess_set_zone(vnc_sess_t *s, const vnc_rect_t *z);
+/* A number that changes with every new zone. */
+uint32_t    vnc_sess_zone_gen(vnc_sess_t *s);
 /* A line of numbers for the overlay: encoding, fps, kbit/s. */
 void        vnc_sess_stats(vnc_sess_t *s, char *out, size_t n);
 /* Bells rung by the server so far. */

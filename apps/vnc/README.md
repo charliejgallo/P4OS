@@ -16,13 +16,36 @@ It builds two ways from the same source: the simulator compiles it in
 | versions | RFB 3.3, 3.7, 3.8; Apple's 3.889 as 3.8 |
 | security | None, VNC (DES of the challenge). Not Apple's own types 30/35: on a Mac turn on "VNC viewers may control screen with password" |
 | pixels | RGB565 (the "16 bits" setting, LVGL's own format: Raw lands as it comes) or 32-bit ("24 bits", exact colours) |
-| encodings | Tight (fill, palette, gradient, zlib, JPEG by the P4's engine), ZRLE, Hextile, CopyRect, Raw; DesktopSize and LastRect |
+| encodings | Tight (fill, palette, gradient, zlib, JPEG by the P4's engine), ZRLE, Hextile, CopyRect, Raw; DesktopSize, ExtendedDesktopSize (its list of monitors) and LastRect |
 
 A remote screen bigger than 9 MB at 16 bits (a Retina Mac's 2880x1800, a
 5K) is kept at a half or a quarter: the decoders write every pixel through
 `vnc_fb.c`, which drops the ones in between. The view scales that to the
 board's screen, averaging up to 3x3 samples a pixel when it shrinks, so text
 stays readable.
+
+## One monitor of several
+
+A Mac with two monitors sends them as one screen (two side by side, one
+1920x1080 and one 2940x1912 set lower, make 4860x2316), black wherever no
+monitor is. The viewer's monitor button picks one, and from then on the
+session keeps only that rectangle, asks the server for updates of that
+rectangle only and moves the pointer into it: less memory (a monitor that
+fits whole is no longer halved), less network, more frames. The choice is
+saved with the computer (`zone = x,y,w,h` in `vnc.txt`, also in the portal's
+card) and the next connection starts on it; one that no longer fits (a
+monitor unplugged) shows all of it.
+
+The monitors come from the server when it lists them (ExtendedDesktopSize);
+a Mac does not, so the viewer finds them itself in the black between them
+(`vnc_fb_monitors`): column by column, how far the black reaches in from the
+top and the bottom, on a running median so that a dark wallpaper does not
+move the steps, and each monitor's top and bottom an eighth in from the
+least black over its columns, since Tight's JPEG smears grey into the black
+edge. It runs every 5 s while all of the screen is shown, in one pass over
+it in memory order (1-2 ms in the simulator for 2430x1158). Two monitors of
+the same height side by side, aligned, leave no step to find: then zoom in
+with two fingers until only one shows and choose "What's in view now".
 
 ## Files
 
@@ -58,7 +81,11 @@ marks where the viewer's pointer is and where it clicked, shows what was
 typed, and prints every pointer and key event. `--version 3.3|3.7|3.889`,
 `--apple` (a Mac without the VNC password), `--size 2880x1800`,
 `--resize-every 10 --size2 5120x2880` (DesktopSize), `--no-jpeg` (Tight's
-gradient filter), `--fps`. The password is a test one: never a real one.
+gradient filter), `--fps`, `--monitors 1920x1080+0+0,2940x1912+1920+404`
+(several monitors in one screen, black between them, as a Mac sends them)
+and `--list-monitors` (and say where they are, ExtendedDesktopSize). Updates
+cover only the area asked for, as a real server's. The password is a test
+one: never a real one.
 
 In the simulator, `sim/sim_fs/data/vnc.txt` (ignored by git) with
 `host = 127.0.0.1`, and `VNC_OPEN=<n>` connects to the n-th computer at

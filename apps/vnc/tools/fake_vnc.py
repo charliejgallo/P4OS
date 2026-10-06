@@ -19,8 +19,10 @@ security None, or VNC with --password (a TEST password: never a real one);
 any true-colour pixel format the client asks for; the encodings Raw,
 CopyRect, Hextile, ZRLE and Tight (fill, palette, gradient every few
 frames, zlib and JPEG), in the client's order of preference; the
-pseudo-encodings DesktopSize (--resize-every switches between two sizes)
-and LastRect. Ctrl+G rings the bell.
+pseudo-encodings DesktopSize (--resize-every switches between two sizes),
+ExtendedDesktopSize (with --list-monitors) and LastRect. --monitors makes
+one screen of several monitors, black between them, as a Mac sends them;
+updates cover only the area the viewer asked for. Ctrl+G rings the bell.
 
 Needs Pillow and numpy. Listens on 127.0.0.1 unless --host says otherwise.
 """
@@ -160,6 +162,7 @@ class Desktop:
         self.typed = ''
         self.scroll_n = 0
         self.log = ['P4OS fake VNC server', 'listening', '']
+        self.monitors = []              # (x, y, w, h): black outside them, like a Mac
         self.resize(w, h)
 
     def resize(self, w, h):
@@ -228,7 +231,13 @@ class Desktop:
             d.ellipse([px - 16, py - 16, px + 16, py + 16], outline=(255, 0, 0), width=3)
             d.line([px - 24, py, px + 24, py], fill=(255, 0, 0), width=1)
             d.line([px, py - 24, px, py + 24], fill=(255, 0, 0), width=1)
-        return np.asarray(img, dtype=np.uint8).copy()
+        a = np.asarray(img, dtype=np.uint8).copy()
+        if self.monitors:
+            keep = np.zeros(a.shape[:2], dtype=bool)
+            for (mx, my, mw, mh) in self.monitors:
+                keep[my:my + mh, mx:mx + mw] = True
+            a[~keep] = 0
+        return a
 
 
 # ---- pixels in the client's format -------------------------------------------
@@ -285,6 +294,7 @@ class PixelFormat:
 
 ENC_RAW, ENC_COPYRECT, ENC_HEXTILE, ENC_TIGHT, ENC_ZRLE = 0, 1, 5, 7, 16
 ENC_DESKTOPSIZE, ENC_LASTRECT = -223, -224
+ENC_EXTDESKTOP = -308
 
 
 def rect_header(x, y, w, h, enc):
@@ -426,6 +436,7 @@ class Client:
         self.mods = set()
         self.frame_no = 0
         self.size = (desk.w, desk.h)
+        self.ext_sent = False
         self.log_t = 0
         self.bytes_out = 0
 
@@ -677,6 +688,18 @@ class Client:
         inc, wx, wy, ww, wh = self.want
         H, W = picture.shape[:2]
         rects = []
+        if (((W, H) != self.size or not self.ext_sent) and self.args.list_monitors and
+                ENC_EXTDESKTOP in self.encs):
+            self.ext_sent = True
+            mons = self.desk.monitors or [(0, 0, W, H)]
+            body = struct.pack('>B3x', len(mons))
+            for i, (mx, my, mw, mh) in enumerate(mons):
+                body += struct.pack('>IHHHHI', i + 1, mx, my, mw, mh, 0)
+            rects.append(rect_header(0, 0, W, H, ENC_EXTDESKTOP) + body)
+            self.say('extended desktop size %dx%d, %d monitor(s)' % (W, H, len(mons)))
+            self.size = (W, H)
+            self.have = None
+            inc, wx, wy, ww, wh = 0, wx, wy, ww, wh
         if (W, H) != self.size:
             if ENC_DESKTOPSIZE in self.encs:
                 rects.append(rect_header(0, 0, W, H, ENC_DESKTOPSIZE))
@@ -686,11 +709,12 @@ class Client:
             inc, wx, wy, ww, wh = 0, 0, 0, W, H
         enc = self.pick_encoding()
         if self.have is None or not inc or self.have.shape != picture.shape:
-            self.have = np.zeros_like(picture)
+            if self.have is None or self.have.shape != picture.shape:
+                self.have = np.zeros_like(picture)
             dirty = [(wx, wy, min(ww, W - wx), min(wh, H - wy))]
             # a full update in tiles: Tight's fill and JPEG get their chance
             if enc != ENC_RAW:
-                dirty = [(tx, ty, min(256, W - tx), min(256, H - ty))
+                dirty = [(tx, ty, min(256, wx + ww - tx), min(256, wy + wh - ty))
                          for ty in range(wy, wy + wh, 256) for tx in range(wx, wx + ww, 256)]
         else:
             if scroll and ENC_COPYRECT in self.encs:
@@ -717,6 +741,15 @@ class Client:
                     x0, x1 = cols[i], min(W, cols[j] + T)
                     dirty.append((x0, ty, x1 - x0, min(T, H - ty)))
                     i = j + 1
+            # only what was asked for, as a real server does (a viewer showing
+            # one monitor asks for that one)
+            cut = []
+            for (x, y, w, h) in dirty:
+                x0, y0 = max(x, wx), max(y, wy)
+                x1, y1 = min(x + w, wx + ww), min(y + h, wy + wh)
+                if x1 > x0 and y1 > y0:
+                    cut.append((x0, y0, x1 - x0, y1 - y0))
+            dirty = cut
         if not dirty and not rects:
             return              # nothing changed: the request stays pending
         for (x, y, w, h) in dirty:
@@ -765,11 +798,25 @@ def main():
     ap.add_argument('--fps', type=float, default=15)
     ap.add_argument('--no-jpeg', action='store_true')
     ap.add_argument('--title', default='Escritorio de prueba')
+    ap.add_argument('--monitors', default='',
+                    help='WxH+X+Y,... : monitors in one screen, black between them, e.g. '
+                         '1920x1080+0+0,2940x1912+1920+404 (the screen is what holds them all)')
+    ap.add_argument('--list-monitors', action='store_true',
+                    help='say where they are (ExtendedDesktopSize); without it, like a Mac: one screen, no list')
     args = ap.parse_args()
     if args.apple:
         args.version = '3.889'
     w, h = (int(v) for v in args.size.split('x'))
+    mons = []
+    for m in filter(None, args.monitors.split(',')):
+        size, mx, my = m.split('+')
+        mw, mh = (int(v) for v in size.split('x'))
+        mons.append((int(mx), int(my), mw, mh))
+    if mons:
+        w = max(mx + mw for (mx, my, mw, mh) in mons)
+        h = max(my + mh for (mx, my, mw, mh) in mons)
     desk = Desktop(w, h, args.title)
+    desk.monitors = mons
     if args.resize_every > 0:
         sizes = [(w, h), tuple(int(v) for v in args.size2.split('x'))]
 
