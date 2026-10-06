@@ -724,6 +724,93 @@ static void kbd_cb(lv_event_t *e)
     view_mode(false);
 }
 
+/* ---- the viewer: the keyboard bubble ------------------------------------------------
+ *
+ * A round button that floats over the remote screen, always there (the bar
+ * hides): a tap opens or closes the keyboard, a drag puts it somewhere
+ * else, and it stays there (preferences "vnc_bx", "vnc_by"). With no USB
+ * keyboard it is the way to type a login. Above the keyboard while that
+ * is open. */
+#define BUBBLE 92
+static int32_t s_bx = -1, s_by = -1;
+static int32_t s_b_x0, s_b_y0;
+static bool s_b_moved;
+
+static void bubble_place(lv_obj_t *b)
+{
+    int32_t maxy = (A.vw.kbd_on && A.vw.kbd ? A.H - vnc_kbd_height(A.vw.kbd) : A.H) - BUBBLE - 12;
+    if (s_bx < 0) {
+        int32_t v;
+        s_bx = aos_hal_pref_get_i32("vnc_bx", &v) ? v : A.W - BUBBLE - 24;
+        s_by = aos_hal_pref_get_i32("vnc_by", &v) ? v : A.H - BUBBLE - 160;
+    }
+    int32_t x = s_bx < 8 ? 8 : s_bx > A.W - BUBBLE - 8 ? A.W - BUBBLE - 8 : s_bx;
+    int32_t y = s_by < 8 ? 8 : s_by > maxy ? maxy : s_by;
+    lv_obj_set_pos(b, x, y);
+}
+
+static void bubble_toggle(void *ud)
+{
+    (void)ud;
+    kbd_cb(NULL);
+}
+
+static void bubble_cb(lv_event_t *e)
+{
+    lv_obj_t *b = lv_event_get_target(e);
+    lv_event_code_t c = lv_event_get_code(e);
+    if (c == LV_EVENT_PRESSED) {
+        s_b_x0 = lv_obj_get_x(b);
+        s_b_y0 = lv_obj_get_y(b);
+        s_b_moved = false;
+    } else if (c == LV_EVENT_PRESSING) {
+        lv_point_t v;
+        lv_indev_get_vect(lv_indev_active(), &v);
+        if (!v.x && !v.y) return;
+        int32_t x = lv_obj_get_x(b) + v.x, y = lv_obj_get_y(b) + v.y;
+        int32_t dx = x - s_b_x0, dy = y - s_b_y0;
+        if (dx * dx + dy * dy > 14 * 14) s_b_moved = true;
+        if (s_b_moved) {
+            s_bx = x;
+            s_by = y;
+            bubble_place(b);
+        }
+    } else if (c == LV_EVENT_RELEASED) {
+        if (s_b_moved) {
+            s_bx = lv_obj_get_x(b);
+            s_by = lv_obj_get_y(b);
+            aos_hal_pref_set_i32("vnc_bx", s_bx);
+            aos_hal_pref_set_i32("vnc_by", s_by);
+        } else {
+            /* the viewer is rebuilt: not from inside this button's own event */
+            lv_async_call(bubble_toggle, NULL);
+        }
+    }
+}
+
+static void bubble_create(lv_obj_t *parent)
+{
+    lv_obj_t *b = box(parent, BUBBLE, BUBBLE);
+    lv_obj_set_style_radius(b, LV_RADIUS_CIRCLE, 0);
+    lv_obj_set_style_bg_color(b, A.vw.kbd_on ? AOS_C_ACCENT : lv_color_hex(0x2C2C2E), 0);
+    lv_obj_set_style_bg_opa(b, LV_OPA_80, 0);
+    lv_obj_set_style_border_width(b, 2, 0);
+    lv_obj_set_style_border_color(b, lv_color_hex(0x8E8E93), 0);
+    lv_obj_set_style_border_opa(b, LV_OPA_60, 0);
+    lv_obj_set_style_shadow_width(b, 18, 0);
+    lv_obj_set_style_shadow_opa(b, LV_OPA_50, 0);
+    lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_remove_flag(b, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_SCROLL_CHAIN | LV_OBJ_FLAG_GESTURE_BUBBLE |
+                          LV_OBJ_FLAG_EVENT_BUBBLE);
+    lv_obj_add_event_cb(b, bubble_cb, LV_EVENT_PRESSED, NULL);
+    lv_obj_add_event_cb(b, bubble_cb, LV_EVENT_PRESSING, NULL);
+    lv_obj_add_event_cb(b, bubble_cb, LV_EVENT_RELEASED, NULL);
+    lv_obj_t *l = aos_label(b, AOS_SYM_KEYBOARD, &aos_sym_44, AOS_C_TEXT);
+    lv_obj_center(l);
+    aos_make_decorative(l);
+    bubble_place(b);
+}
+
 static const char *input_glyph(void)
 {
     return A.vw.input == IN_TRACKPAD ? AOS_SYM_MOUSE : AOS_SYM_GESTURE_TAP_BUTTON;
@@ -1102,6 +1189,7 @@ static void build_viewer(void)
         A.vw.kbd = vnc_kbd_create(o, A.W, A.land, &A.vw.sess, kbd_hide, NULL);
         if (!A.vw.kbd) A.vw.kbd_on = false;
     }
+    if (!A.vw.srv.view_only) bubble_create(o);
     A.vw.last_state = -1;
     bar_show(A.vw.bar_on);
 }
