@@ -1,0 +1,173 @@
+# amoledos-lang 1   es -> de
+# aos.pato.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/pato/main/pato.c:421
+Escribiendo	Tippe
+
+#: apps/pato/main/pato.c:422
+#: apps/pato/main/pato.c:675
+#: apps/pato/main/pato.c:899
+Tecla	Taste
+
+#: apps/pato/main/pato.c:423
+Espera	Warte
+
+#: apps/pato/main/pato.c:424
+#: apps/pato/main/pato.c:677
+#: apps/pato/main/pato.c:901
+Mouse	Maus
+
+#: apps/pato/main/pato.c:425
+#: apps/pato/main/pato.c:678
+#: apps/pato/main/pato.c:902
+Rueda	Rad
+
+#: apps/pato/main/pato.c:426
+#: apps/pato/main/pato.c:679
+#: apps/pato/main/pato.c:903
+Clic	Klick
+
+#: apps/pato/main/pato.c:441
+#: apps/pato/main/pato.c:1547
+Listo	Fertig
+
+#: apps/pato/main/pato.c:442
+#: apps/pato/main/pato.c:1445
+Volver	Zurück
+
+#: apps/pato/main/pato.c:455
+Se perdió el teclado	Tastatur verloren
+
+#: apps/pato/main/pato.c:525
+#: apps/pato/main/pato.c:1481
+Parar	Stopp
+
+#: apps/pato/main/pato.c:674
+#: apps/pato/main/pato.c:898
+Escribir	Tippen
+
+#: apps/pato/main/pato.c:676
+#: apps/pato/main/pato.c:900
+Esperar	Warten
+
+#: apps/pato/main/pato.c:680
+#: apps/pato/main/pato.c:904
+Repetir	Wiederholen
+
+#: apps/pato/main/pato.c:681
+Comentario	Kommentar
+
+#: apps/pato/main/pato.c:800
+texto a escribir	zu tippender Text
+
+#: apps/pato/main/pato.c:803
+Se escribe tal cual en la computadora.	Wird so auf dem Computer getippt.
+
+#: apps/pato/main/pato.c:812
+Una tecla o combo: enter, esc, up, cmd+space,\nctrl+alt+supr, f5. Prefijos: cmd+ ctrl+ alt+ shift+	Eine Taste oder Kombi: enter, esc, up, cmd+space,\nctrl+alt+entf, f5. Präfixe: cmd+ ctrl+ alt+ shift+
+
+#: apps/pato/main/pato.c:821
+Espera, en milisegundos (0 a 60000).	Wartet, in Millisekunden (0 bis 60000).
+
+#: apps/pato/main/pato.c:833
+Mueve el puntero: dx a la derecha, dy hacia abajo.	Bewegt den Zeiger: dx nach rechts, dy nach unten.
+
+#: apps/pato/main/pato.c:841
+Rueda: positivo arriba, negativo abajo.	Rad: positiv hoch, negativ runter.
+
+#: apps/pato/main/pato.c:848
+#: apps/pato/main/pato.c:903
+izquierdo	links
+
+#: apps/pato/main/pato.c:848
+#: apps/pato/main/pato.c:903
+derecho	rechts
+
+#: apps/pato/main/pato.c:860
+Repite el paso anterior esta cantidad de veces.	Wiederholt den vorigen Schritt so oft.
+
+#: apps/pato/main/pato.c:865
+nota	Notiz
+
+#: apps/pato/main/pato.c:868
+No se ejecuta: sólo una nota para vos.	Wird nicht ausgeführt: nur eine Notiz.
+
+#: apps/pato/main/pato.c:959
+Flujo vacío. Agregá el primer paso.	Leerer Ablauf. Füge den ersten Schritt hinzu.
+
+#: apps/pato/main/pato.c:1047
+Ponele un nombre	Gib ihm einen Namen
+
+#: apps/pato/main/pato.c:1059
+No se pudo guardar	Konnte nicht speichern
+
+#: apps/pato/main/pato.c:1075
+Guardado	Gespeichert
+
+#: apps/pato/main/pato.c:1075
+#: apps/pato/main/pato.c:1180
+pasos	Schritte
+
+#: apps/pato/main/pato.c:1084
+Demasiados pasos	Zu viele Schritte
+
+#: apps/pato/main/pato.c:1106
+Borrado	Gelöscht
+
+#: apps/pato/main/pato.c:1131
+Pasá el USB a Teclado, o emparejá por Bluetooth	USB auf Tastatur stellen oder per Bluetooth koppeln
+
+#: apps/pato/main/pato.c:1135
+El script está vacío	Das Skript ist leer
+
+#: apps/pato/main/pato.c:1162
+No se pudo leer el script	Konnte das Skript nicht lesen
+
+#: apps/pato/main/pato.c:1199
+Detenido	Gestoppt
+
+#: apps/pato/main/pato.c:1224
+El USB está cambiando de modo	USB wechselt den Modus
+
+#: apps/pato/main/pato.c:1258
+No hay scripts todavía.\nCreá uno con «Nuevo script»,\no desde el portal (página Pato goma).	Noch keine Skripte.\nErstelle eines mit „Neues Skript“,\noder im Portal (Seite Pato goma).
+
+#: apps/pato/main/pato.c:1337
+Teclado listo (USB o Bluetooth)	Tastatur bereit (USB oder Bluetooth)
+
+#: apps/pato/main/pato.c:1338
+Pasalo a «Teclado» o emparejá Bluetooth	Auf „Tastatur“ stellen oder Bluetooth koppeln
+
+#: apps/pato/main/pato.c:1390
+Nuevo script	Neues Skript
+
+#: apps/pato/main/pato.c:1395
+Pasar el USB a Teclado	USB auf Tastatur stellen
+
+#: apps/pato/main/pato.c:1439
+Se enviará al teclado y mouse de la computadora.	Wird an Tastatur und Maus des Computers gesendet.
+
+#: apps/pato/main/pato.c:1450
+Editar	Bearbeiten
+
+#: apps/pato/main/pato.c:1455
+Ejecutar	Ausführen
+
+#: apps/pato/main/pato.c:1498
+Nombre del script	Skriptname
+
+#: apps/pato/main/pato.c:1523
+Agregar paso	Schritt hinzufügen
+
+#: apps/pato/main/pato.c:1528
+Guardar	Speichern
+
+#: apps/pato/main/pato.c:1533
+Borrar	Löschen
+
+#: apps/pato/main/pato.c:1545
+Paso	Schritt

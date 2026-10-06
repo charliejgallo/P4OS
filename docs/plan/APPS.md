@@ -29,7 +29,7 @@ P4 tiene FPU de simple precisión y desaparecen los `__addsf3` de Xtensa).
 | Calculadora | ✅ Migrar | R. La Braun en vertical; en horizontal, científica. |
 | Conversor | ✅ Migrar | R. Se suma una pestaña de **electrónica** (ver Calculadoras de electrónica). |
 | Life | ✅ Migrar | R. Grilla mucho más grande (180×320 celdas a 4 px). |
-| Pato goma | ❌ No se pasa | Decidido por el usuario el 2026-09-30. Queda la copia sin portar en `components/aos_apps/_pending/`. |
+| Pato goma | ✅ Hecha (2026-10-06) | `.so` de tarjeta `apps/pato/` (`aos.pato`), con ícono, página del portal y **editor de flujos en la placa** (nuevo: el reloj sólo elegía y corría). El usuario revirtió la decisión del 2026-09-30. Queda la copia vieja sin portar en `components/aos_apps/_pending/` (puede borrarse). |
 | Control PC | ✅ Hecho dentro del Macro pad | No es una app aparte: el Macro pad tiene todo lo que hacía (pad multimedia, trackpad con zoom por pellizco, mando, MIDI). Lo que dependía del IMU (air mouse, mando por inclinación) no existe en esta placa. |
 | Enlace | ⏸️ Depende de la Fase 2 | Si ESP-NOW anda por el C6, se migra (apareo por botón o QR, no por choque). Si no, pasa a enlace por UDP en la LAN. |
 | Actividad (pasos) | ❌ No migra | Sin IMU. |
