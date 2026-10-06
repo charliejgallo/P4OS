@@ -465,7 +465,7 @@ four channels at once from the PWM app:
 | Servo, GPIO32 | 50 Hz, 500-2500 us | 50 Hz, 19 bits; both ends and the sweep |
 | Analog, GPIO30 | 104/255 = 1.34 V | 1.313 V on a meter (-27 mV, 2 %), steady but for a few mV of breadboard noise |
 
-<img src="img/taller-pwm-banco.jpg" width="360" alt="The bench: the board, the breadboard with the LED, the RC filter and the meter reading 1.313 V">
+<img src="img/bench-pwm-photo.jpg" width="360" alt="The bench: the board, the breadboard with the LED, the RC filter and the meter reading 1.313 V">
 
 **Wiring for a bench test of infrared:** a demodulating receiver on
 GPIO5 (not GPIO21/22, which the I2C service scans by itself) and an IR LED
@@ -505,6 +505,16 @@ only itself.
 on the header's I2C bus:
 
 ![A 24LC EEPROM on the header](img/bench-24lc.svg)
+
+Tried on the board on 2026-10-05 with a 24LC256 wired as drawn, from the
+EEPROM app: found at 0x50, its size measured by writing (it wraps at
+32 KB), read whole and kept as a version, edited in the hex view, written
+and verified, compared, put back to the version read first and read again.
+Every version's CRC32 and MD5 match the file when checked on a computer:
+the first read and the restored one are both 1B43EABD (all FF), the edited
+one 39CE0FF3 both times it was written.
+
+<img src="img/bench-24lc-photo.jpg" width="360" alt="The EEPROM app's hex view on the board, with a 24LC256 on the breadboard">
 
 The simulator emulates the three families (`sim/eeprom_sim.c`): 24xx on I2C
 (`P4_SIM_EEPROM`, a 24LC256 at 0x50 by default), 25xx on SPI (a 25LC640 on
