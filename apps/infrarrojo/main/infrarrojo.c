@@ -561,6 +561,11 @@ static void dtext(lv_layer_t *layer, int32_t x, int32_t y, int32_t w, const char
     lv_draw_label_dsc_t d;
     lv_draw_label_dsc_init(&d);
     d.text = t;
+    /* a copy: LVGL keeps the pointer and draws later, on its draw threads,
+     * and t is often a buffer on the caller's stack ("GPIO%d (pata %d)").
+     * Without it the board hung when the pins changed: a draw thread kept
+     * reading the dead buffer, never reaching the end (2026-10-05). */
+    d.text_local = 1;
     d.font = f;
     d.color = c;
     d.align = al;

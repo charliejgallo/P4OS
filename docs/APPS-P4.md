@@ -79,6 +79,17 @@ app has one, to `/apps`, deletes the stale parts, and restarts the board
 through the portal. The card in the computer works too. The paks are
 gitignored; each app's README says how to build its pak.
 
+## Drawing text yourself
+
+`lv_draw_label()` keeps the **pointer** to the text and draws later, on
+LVGL's draw threads (two of them on the board, in parallel). A text built
+on the stack (a `char buf[]`, a `snprintf` in a draw event) is gone by
+then: set `dsc.text_local = 1` so LVGL copies it. Literals and `_()`
+strings live on, and a canvas layer finished before returning is drawn
+at once. Infrarrojo hung the board this way (2026-10-05): a draw thread
+went round and round past the end of a dead buffer, and the UI waits for
+it to finish the frame.
+
 ## The descriptor's flags, while the app runs
 
 `self->desc.flags` may change while the app runs: the shell reads them at
