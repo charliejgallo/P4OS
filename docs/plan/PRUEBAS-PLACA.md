@@ -71,8 +71,9 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       el 2026-10-05**: receptor en GPIO5, LED IR con transistor en GPIO31,
       un código del monitor mandado, NEC a 38 kHz; cambiar los pines
       colgaba la placa, arreglado: el esquema de Cableado le pasaba a LVGL
-      un texto de la pila sin `text_local`; falta aprender un control y la
-      base de SmartIR); CAN con los
+      un texto de la pila sin `text_local`; aprender anduvo: un botón del
+      control del monitor quedó como Samsung, dirección 0x0707, comando 7,
+      y se volvió a mandar; falta la base de SmartIR); CAN con los
       transceptores SN65HVD230 cuando lleguen (la autoprueba ya anduvo);
       Visor VNC contra una computadora (Compartir pantalla de la Mac con
       contraseña VNC); Dibujo con el dedo y el mouse USB.
