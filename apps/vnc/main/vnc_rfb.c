@@ -152,6 +152,9 @@ struct vnc_sess {
 
     /* counters */
     uint32_t     n_updates, n_bytes, n_render_ms, n_renders, n_dec_ms;
+    /* for the log line, between two of them: input sent and held back
+     * (look only), and updates that came with nothing in them */
+    uint32_t     n_ptr, n_key, n_held, n_empty;
     uint64_t     stats_t0;
     int          stats_n;
     int          last_enc;
@@ -266,6 +269,7 @@ static void pump(vnc_sess_t *s)
     if (refresh && s->have_desktop) {
         send_update_request(s, false);
     }
+    if (s->srv.view_only) s->n_held += (uint32_t)n;
     if (!n || s->srv.view_only) {
         return;
     }
@@ -279,12 +283,14 @@ static void pump(vnc_sess_t *s)
             put16(m + 2, (uint32_t)(q[i].x + s->cur.x));
             put16(m + 4, (uint32_t)(q[i].y + s->cur.y));
             len += 6;
+            s->n_ptr++;
         } else {
             m[0] = 4;
             m[1] = q[i].down ? 1 : 0;
             m[2] = m[3] = 0;
             put32(m + 4, q[i].key);
             len += 8;
+            s->n_key++;
         }
     }
     send_all(s, out, len);
@@ -619,8 +625,10 @@ static void stats(vnc_sess_t *s)
     snprintf(s->stats, sizeof s->stats, "%s", line);
     aos_hal_mutex_unlock(s->mx);
     if (++s->stats_n % LOG_EVERY == 0 && s->n_updates) {
-        aos_hal_log(VNC_TAG, "%s; render %u ms, decode %u ms an update", line, (unsigned)rms,
-                    (unsigned)(s->n_dec_ms / s->n_updates));
+        aos_hal_log(VNC_TAG, "%s; render %u ms, decode %u ms an update; sent %u pointer, %u key (%u held back); "
+                    "%u empty updates", line, (unsigned)rms, (unsigned)(s->n_dec_ms / s->n_updates),
+                    (unsigned)s->n_ptr, (unsigned)s->n_key, (unsigned)s->n_held, (unsigned)s->n_empty);
+        s->n_ptr = s->n_key = s->n_held = s->n_empty = 0;
     }
     s->n_updates = s->n_bytes = s->n_render_ms = s->n_renders = s->n_dec_ms = 0;
     s->stats_t0 = now;
@@ -983,6 +991,7 @@ static void fb_update(vnc_sess_t *s)
     rd_u8(s);
     int n = rd_u16(s);
     bool resized = false;
+    if (!n) s->n_empty++;
     for (int i = 0; n == 0xFFFF || i < n; i++) {
         int x = rd_u16(s), y = rd_u16(s), w = rd_u16(s), h = rd_u16(s);
         int32_t enc = (int32_t)rd_u32(s);
