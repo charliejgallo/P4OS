@@ -95,18 +95,6 @@ Monitor %d · %d×%d	Monitor %d · %d×%d
 #: apps/vnc/main/vnc.c:980
 Zona elegida · %d×%d	Gewählter Bereich · %d×%d
 
-#: apps/vnc/main/vnc.c:986
-Lo que se ve ahora · %d×%d	Was jetzt zu sehen ist · %d×%d
-
-#: apps/vnc/main/vnc.c:989
-Para buscar los monitores, elegí «Todas».	Um die Monitore zu suchen, wähle „Alle“.
-
-#: apps/vnc/main/vnc.c:990
-No se ven monitores separados: acercá con dos dedos hasta ver sólo uno y elegí «Lo que se ve ahora».	Keine getrennten Monitore erkennbar: mit zwei Fingern heranzoomen, bis nur einer zu sehen ist, und „Was jetzt zu sehen ist“ wählen.
-
-#: apps/vnc/main/vnc.c:992
-Los monitores salen de los bordes negros entre ellos. Si uno queda mal, acercá con dos dedos y elegí «Lo que se ve ahora».	Die Monitore ergeben sich aus den schwarzen Rändern zwischen ihnen. Passt einer nicht, mit zwei Fingern heranzoomen und „Was jetzt zu sehen ist“ wählen.
-
 #: apps/vnc/main/vnc.c:994
 La lista la manda la computadora.	Diese Liste schickt der Computer.
 
@@ -230,3 +218,15 @@ La computadora no contesta	Der Computer antwortet nicht
 
 #: apps/vnc/main/vnc_rfb.c:1274
 No se pudo conectar (¿VNC activado? ¿puerto?)	Keine Verbindung (VNC an? richtiger Port?)
+
+#: apps/vnc/main/vnc.c
+Marcar con el dedo	Mit dem Finger markieren
+
+#: apps/vnc/main/vnc.c
+Arrastrá un rectángulo sobre la parte que querés ver	Zieh ein Rechteck über den Teil, den du sehen willst
+
+#: apps/vnc/main/vnc.c
+Muy chico: arrastrá un rectángulo más grande	Zu klein: zieh ein größeres Rechteck
+
+#: apps/vnc/main/vnc.c
+Para ver una sola parte (un monitor de varios), marcala con el dedo; acercá antes con dos dedos si querés más precisión.	Um nur einen Teil zu zeigen (einen von mehreren Monitoren), markiere ihn mit dem Finger; vorher mit zwei Fingern heranzoomen, wenn es genauer sein soll.

@@ -24,28 +24,27 @@ A remote screen bigger than 9 MB at 16 bits (a Retina Mac's 2880x1800, a
 board's screen, averaging up to 3x3 samples a pixel when it shrinks, so text
 stays readable.
 
-## One monitor of several
+## One part of the screen
 
-A Mac with two monitors sends them as one screen (two side by side, one
-1920x1080 and one 2940x1912 set lower, make 4860x2316), black wherever no
-monitor is. The viewer's monitor button picks one, and from then on the
-session keeps only that rectangle, asks the server for updates of that
-rectangle only and moves the pointer into it: less memory (a monitor that
-fits whole is no longer halved), less network, more frames. The choice is
-saved with the computer (`zone = x,y,w,h` in `vnc.txt`, also in the portal's
-card) and the next connection starts on it; one that no longer fits (a
-monitor unplugged) shows all of it.
+A computer with several monitors may send them as one screen (a Mac does:
+two side by side make one wide picture, black wherever no monitor is). The
+viewer's monitor button picks a part, and from then on the session keeps
+only that rectangle, asks the server for updates of that rectangle only and
+moves the pointer into it: less memory (a part that fits whole is no longer
+halved), less network, more frames. The choice is saved with the computer
+(`zone = x,y,w,h` in `vnc.txt`, also in the portal's card) and the next
+connection starts on it; one that no longer fits (a monitor unplugged) shows
+all of it.
 
-The monitors come from the server when it lists them (ExtendedDesktopSize);
-a Mac does not, so the viewer finds them itself in the black between them
-(`vnc_fb_monitors`): column by column, how far the black reaches in from the
-top and the bottom, on a running median so that a dark wallpaper does not
-move the steps, and each monitor's top and bottom an eighth in from the
-least black over its columns, since Tight's JPEG smears grey into the black
-edge. It runs every 5 s while all of the screen is shown, in one pass over
-it in memory order (1-2 ms in the simulator for 2430x1158). Two monitors of
-the same height side by side, aligned, leave no step to find: then zoom in
-with two fingers until only one shows and choose "What's in view now".
+The parts on offer are the monitors the server lists (ExtendedDesktopSize),
+when it lists them, and "Mark with a finger": a drag over the remote screen
+draws the rectangle, and lifting the finger shows only that. Zoomed in
+first, it is as precise as wanted; it works with any computer, any
+arrangement and either way the board is turned (a part "as seen now" did
+not: upright, a wide monitor zoomed to the width still took in all the
+height). Finding the monitors by the black between them was tried
+and dropped: right on a test pattern, a real desktop (a dark wallpaper, a
+lock screen) came out in eight pieces.
 
 ## Files
 

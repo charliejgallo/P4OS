@@ -124,7 +124,7 @@ static struct {
         vnc_sess_t   *sess;
         lv_obj_t     *obj, *canvas, *msg, *msg_btns, *bar, *name, *info, *handle, *ring;
         lv_obj_t     *in_g, *mode_g;
-        lv_obj_t     *zpick;
+        lv_obj_t     *zpick, *mark;
         uint32_t      zone_gen;
         vnc_kbd_t    *kbd;
         bool          kbd_on;
@@ -861,15 +861,20 @@ static void refresh_cb(lv_event_t *e)
     bar_touch();
 }
 
-/* ---- the viewer: which monitor ------------------------------------------------------
+/* ---- the viewer: which part ---------------------------------------------------------
  *
- * A Mac with two monitors sends them as one wide screen, black where they
- * do not overlap. The monitor button picks one: from the list the server
- * sends (ExtendedDesktopSize), or the part being looked at, zoomed in to
- * one monitor with two fingers. The session then keeps, asks for and
- * points at only that rectangle; it is saved with the computer ("zone"). */
+ * A computer with several monitors may send them as one wide screen (a Mac
+ * does). The monitor button picks a part: a monitor from the list the
+ * server sends (ExtendedDesktopSize), when it sends one, or a rectangle
+ * marked with a finger (zoomed in first, for precision). The session then
+ * keeps, asks for and points at only that; it is saved with the computer
+ * ("zone"). Guessing the monitors from the black between them was tried
+ * and dropped: a real desktop, with a dark wallpaper or a lock screen, cut
+ * into eight. */
 #define ZONE_MAX (VNC_MAX_SCREENS + 3)
 static vnc_rect_t s_zones[ZONE_MAX];
+#define ZONE_MARK (-2)                  /* the picker's row that starts marking */
+static void mark_open(void);
 
 static void zpick_close(void)
 {
@@ -897,7 +902,7 @@ static void zone_pick(int k)
 {
     vnc_rect_t z = s_zones[k];
     int fw = 0, fh = 0;
-    vnc_sess_screens(A.vw.sess, &fw, &fh, NULL, NULL, 0, NULL);
+    vnc_sess_screens(A.vw.sess, &fw, &fh, NULL, NULL, 0);
     if (z.x == 0 && z.y == 0 && z.w == fw && z.h == fh) z.w = z.h = 0;     /* all of it */
     zone_save(&z);
     vnc_sess_set_zone(A.vw.sess, &z);
@@ -907,23 +912,92 @@ static void zpick_cb(lv_event_t *e)
 {
     int k = (int)(intptr_t)lv_event_get_user_data(e);
     zpick_close();
+    if (k == ZONE_MARK) {
+        mark_open();
+        return;
+    }
     if (k >= 0 && k < ZONE_MAX) zone_pick(k);
     bar_touch();
 }
 
-/* The part of the server's screen in view now; false if it is all of it. */
-static bool zone_in_view(vnc_rect_t *out)
+/* Marking a part with a finger: a drag over the remote screen draws the
+ * rectangle, and lifting it shows only that. Zoomed in first, it is as
+ * precise as one wants; it works the same upright or turned. */
+static lv_obj_t *s_mark_r;
+static lv_point_t s_mark_p0;
+
+static void mark_close(void)
 {
+    if (A.vw.mark) lv_obj_delete(A.vw.mark);
+    A.vw.mark = NULL;
+    s_mark_r = NULL;
+}
+
+static void mark_cb(lv_event_t *e)
+{
+    lv_event_code_t code = lv_event_get_code(e);
+    lv_point_t p;
+    lv_indev_get_point(lv_indev_active(), &p);
+    if (code == LV_EVENT_PRESSED) {
+        s_mark_p0 = p;
+        lv_obj_set_pos(s_mark_r, p.x, p.y);
+        lv_obj_set_size(s_mark_r, 1, 1);
+        lv_obj_remove_flag(s_mark_r, LV_OBJ_FLAG_HIDDEN);
+        return;
+    }
+    int32_t x0 = LV_MIN(s_mark_p0.x, p.x), y0 = LV_MIN(s_mark_p0.y, p.y);
+    int32_t x1 = LV_MAX(s_mark_p0.x, p.x), y1 = LV_MAX(s_mark_p0.y, p.y);
+    if (code == LV_EVENT_PRESSING) {
+        lv_obj_set_pos(s_mark_r, x0, y0);
+        lv_obj_set_size(s_mark_r, x1 - x0 + 1, y1 - y0 + 1);
+        return;
+    }
+    if (code != LV_EVENT_RELEASED) return;
+    float rx0, ry0, rx1, ry1;
+    to_remote((float)x0, (float)y0, &rx0, &ry0);
+    to_remote((float)x1, (float)y1, &rx1, &ry1);
+    int ix0 = rx0 < 0 ? 0 : (int)(rx0 + 0.5f), iy0 = ry0 < 0 ? 0 : (int)(ry0 + 0.5f);
+    int ix1 = rx1 > (float)A.vw.rw ? A.vw.rw : (int)(rx1 + 0.5f);
+    int iy1 = ry1 > (float)A.vw.rh ? A.vw.rh : (int)(ry1 + 0.5f);
+    mark_close();
+    if (ix1 - ix0 < 64 || iy1 - iy0 < 64) {
+        aos_ui_toast(_("Muy chico: arrastrá un rectángulo más grande"), 2000);
+        return;
+    }
     vnc_rect_t cur;
-    vnc_sess_screens(A.vw.sess, NULL, NULL, &cur, NULL, 0, NULL);
-    const vnc_view_t *v = &A.vw.view;
-    float x0 = v->ox, y0 = v->oy, x1 = v->ox + (float)v->vw / v->scale, y1 = v->oy + (float)v->vh / v->scale;
-    int ix0 = x0 < 0 ? 0 : (int)(x0 + 0.5f), iy0 = y0 < 0 ? 0 : (int)(y0 + 0.5f);
-    int ix1 = x1 > (float)A.vw.rw ? A.vw.rw : (int)(x1 + 0.5f), iy1 = y1 > (float)A.vw.rh ? A.vw.rh : (int)(y1 + 0.5f);
-    if (ix1 - ix0 < 64 || iy1 - iy0 < 64) return false;
-    if (ix0 <= 2 && iy0 <= 2 && ix1 >= A.vw.rw - 2 && iy1 >= A.vw.rh - 2) return false;
-    *out = (vnc_rect_t){ cur.x + ix0, cur.y + iy0, ix1 - ix0, iy1 - iy0 };
-    return true;
+    vnc_sess_screens(A.vw.sess, NULL, NULL, &cur, NULL, 0);
+    vnc_rect_t z = { cur.x + ix0, cur.y + iy0, ix1 - ix0, iy1 - iy0 };
+    zone_save(&z);
+    vnc_sess_set_zone(A.vw.sess, &z);
+}
+
+static void mark_open(void)
+{
+    bar_show(false);
+    lv_obj_t *o = box(A.vw.obj, A.W, view_h());
+    A.vw.mark = o;
+    lv_obj_add_flag(o, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(o, mark_cb, LV_EVENT_PRESSED, NULL);
+    lv_obj_add_event_cb(o, mark_cb, LV_EVENT_PRESSING, NULL);
+    lv_obj_add_event_cb(o, mark_cb, LV_EVENT_RELEASED, NULL);
+    s_mark_r = box(o, 1, 1);
+    lv_obj_set_style_border_width(s_mark_r, 4, 0);
+    lv_obj_set_style_border_color(s_mark_r, AOS_C_ACCENT, 0);
+    lv_obj_set_style_bg_color(s_mark_r, AOS_C_ACCENT, 0);
+    lv_obj_set_style_bg_opa(s_mark_r, LV_OPA_20, 0);
+    lv_obj_remove_flag(s_mark_r, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_flag(s_mark_r, LV_OBJ_FLAG_HIDDEN);
+    lv_obj_t *tip = aos_label(o, _("Arrastrá un rectángulo sobre la parte que querés ver"), aos_font_body,
+                              AOS_C_TEXT);
+    lv_obj_set_width(tip, A.W - 2 * AOS_UI_PAD);
+    lv_label_set_long_mode(tip, LV_LABEL_LONG_MODE_WRAP);
+    lv_obj_set_style_text_align(tip, LV_TEXT_ALIGN_CENTER, 0);
+    lv_obj_set_style_bg_color(tip, lv_color_black(), 0);
+    lv_obj_set_style_bg_opa(tip, LV_OPA_70, 0);
+    lv_obj_set_style_pad_all(tip, 14, 0);
+    lv_obj_set_style_radius(tip, 16, 0);
+    lv_obj_align(tip, LV_ALIGN_TOP_MID, 0, 64);         /* below the handle */
+    lv_obj_remove_flag(tip, LV_OBJ_FLAG_CLICKABLE);
 }
 
 static lv_obj_t *zpick_row(lv_obj_t *card, const char *text, bool on, int k)
@@ -939,8 +1013,7 @@ static void zone_cb(lv_event_t *e)
     if (A.vw.zpick || !A.vw.sess) return;
     int fw = 0, fh = 0;
     vnc_rect_t cur, scr[VNC_MAX_SCREENS];
-    bool guessed = false;
-    int ns = vnc_sess_screens(A.vw.sess, &fw, &fh, &cur, scr, VNC_MAX_SCREENS, &guessed);
+    int ns = vnc_sess_screens(A.vw.sess, &fw, &fh, &cur, scr, VNC_MAX_SCREENS);
     if (fw <= 0) return;
 
     lv_obj_t *bg = box(A.vw.obj, A.W, A.H);
@@ -980,18 +1053,10 @@ static void zone_cb(lv_event_t *e)
         snprintf(line, sizeof line, _("Zona elegida · %d×%d"), cur.w, cur.h);
         zpick_row(card, line, true, k++);
     }
-    vnc_rect_t v;
-    if (zone_in_view(&v)) {
-        s_zones[k] = v;
-        snprintf(line, sizeof line, _("Lo que se ve ahora · %d×%d"), v.w, v.h);
-        zpick_row(card, line, false, k++);
-    }
-    const char *why = !ns && !all ? _("Para buscar los monitores, elegí «Todas».")
-                    : !ns ? _("No se ven monitores separados: acercá con dos dedos hasta ver sólo uno y "
-                              "elegí «Lo que se ve ahora».")
-                    : guessed ? _("Los monitores salen de los bordes negros entre ellos. Si uno queda mal, "
-                                  "acercá con dos dedos y elegí «Lo que se ve ahora».")
-                              : _("La lista la manda la computadora.");
+    zpick_row(card, _("Marcar con el dedo"), false, ZONE_MARK);
+    const char *why = ns ? _("La lista la manda la computadora.")
+                         : _("Para ver una sola parte (un monitor de varios), marcala con el dedo; "
+                             "acercá antes con dos dedos si querés más precisión.");
     lv_obj_t *hint = aos_label(card, why,
                                aos_font_caption, AOS_C_DIM);
     lv_obj_set_width(hint, LV_PCT(100));
@@ -1241,6 +1306,8 @@ static void build_viewer(void)
         A.vw.obj = NULL;
     }
     A.vw.zpick = NULL;
+    A.vw.mark = NULL;
+    s_mark_r = NULL;
     lv_obj_t *o = box(A.root, A.W, A.H);
     A.vw.obj = o;
     lv_obj_set_style_bg_color(o, lv_color_black(), 0);
@@ -1522,6 +1589,10 @@ static bool back(aos_app_t *self, void *inst)
     if (A.screen == SCR_VIEW) {
         if (A.vw.zpick) {
             zpick_close();
+            return true;
+        }
+        if (A.vw.mark) {
+            mark_close();
             return true;
         }
         /* with a mouse in use, "back" is its right button */

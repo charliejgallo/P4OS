@@ -74,7 +74,6 @@
 #define ENC_DESKTOPSIZE (-223)
 #define ENC_LASTRECT    (-224)
 #define ENC_EXTDESKTOP  (-308)
-#define GUESS_MS        5000
 #define ENC_QUALITY0    (-32)
 #define ENC_COMPRESS0   (-256)
 
@@ -113,9 +112,6 @@ struct vnc_sess {
     vnc_rect_t   cur;               /* the zone, in the server's pixels */
     vnc_rect_t   scr[VNC_MAX_SCREENS];
     int          nscr;
-    vnc_rect_t   guess[VNC_MAX_SCREENS];    /* found by the black between them */
-    int          nguess;
-    uint64_t     guess_t;
     bool         want_zone;
     vnc_rect_t   zone;              /* asked for; w 0: all of it */
     uint32_t     zone_gen;
@@ -1033,23 +1029,6 @@ static void fb_update(vnc_sess_t *s)
     if (s->paused) s->req_owed = true;
     else send_update_request(s, !resized);
     present(s);
-    /* where the monitors are, while the whole screen is shown and the server
-     * did not say: one pass over it, every few seconds */
-    uint64_t now = aos_hal_uptime_ms();
-    if (!s->nscr && !resized && !s->cur.x && !s->cur.y && s->cur.w == s->full_w && s->cur.h == s->full_h &&
-        (!s->guess_t || now - s->guess_t >= GUESS_MS)) {
-        vnc_rect_t g[VNC_MAX_SCREENS];
-        int k = vnc_fb_monitors(&s->fb, g, VNC_MAX_SCREENS);
-        s->guess_t = aos_hal_uptime_ms();
-        if (k != s->nguess || memcmp(g, s->guess, (size_t)k * sizeof *g)) {
-            aos_hal_log(VNC_TAG, "%d monitor(s) by the black between them, in %u ms", k,
-                        (unsigned)(s->guess_t - now));
-        }
-        aos_hal_mutex_lock(s->mx);
-        memcpy(s->guess, g, (size_t)k * sizeof *g);
-        s->nguess = k;
-        aos_hal_mutex_unlock(s->mx);
-    }
 }
 
 static void handle_message(vnc_sess_t *s)
@@ -1358,18 +1337,14 @@ bool vnc_sess_desktop(vnc_sess_t *s, int *w, int *h, char *name, size_t n)
     return ok;
 }
 
-int vnc_sess_screens(vnc_sess_t *s, int *full_w, int *full_h, vnc_rect_t *zone, vnc_rect_t *scr, int max,
-                     bool *guessed)
+int vnc_sess_screens(vnc_sess_t *s, int *full_w, int *full_h, vnc_rect_t *zone, vnc_rect_t *scr, int max)
 {
     aos_hal_mutex_lock(s->mx);
     if (full_w) *full_w = s->full_w;
     if (full_h) *full_h = s->full_h;
     if (zone) *zone = s->cur;
-    const vnc_rect_t *src = s->nscr ? s->scr : s->guess;
-    int n = s->nscr ? s->nscr : s->nguess;
-    if (guessed) *guessed = !s->nscr && n > 0;
-    if (n > max) n = max;
-    if (scr && n > 0) memcpy(scr, src, (size_t)n * sizeof *scr);
+    int n = s->nscr < max ? s->nscr : max;
+    if (scr && n > 0) memcpy(scr, s->scr, (size_t)n * sizeof *scr);
     aos_hal_mutex_unlock(s->mx);
     return n;
 }

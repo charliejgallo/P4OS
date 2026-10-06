@@ -102,10 +102,6 @@ static inline bool vnc_fb_skip_row(const vnc_fb_t *fb, int y)
     return ((y - fb->zy) & ((1 << fb->shift) - 1)) != 0;
 }
 
-/* The monitors in a screen that holds several, found by the black between
- * them (a Mac sends them that way); 0 if it does not show two or more. */
-int  vnc_fb_monitors(const vnc_fb_t *fb, vnc_rect_t *out, int max);
-
 /* Where the view looks: scale is view pixels per server pixel, (ox, oy)
  * the server pixel at the view's top left corner. */
 typedef struct {
@@ -149,11 +145,11 @@ vnc_state_t vnc_sess_state(vnc_sess_t *s, char *detail, size_t n);
 bool        vnc_sess_desktop(vnc_sess_t *s, int *w, int *h, char *name, size_t n);
 
 #define VNC_MAX_SCREENS 8
-/* The server's whole screen, the zone shown in it and the monitors: the
- * ones the server listed (ExtendedDesktopSize), or else the ones found by
- * the black between them (*guessed). Returns how many went into scr. */
+/* The server's whole screen, the zone shown in it and the monitors the
+ * server listed (ExtendedDesktopSize; one that does not list them gives
+ * 0). Returns how many went into scr. */
 int         vnc_sess_screens(vnc_sess_t *s, int *full_w, int *full_h, vnc_rect_t *zone,
-                             vnc_rect_t *scr, int max, bool *guessed);
+                             vnc_rect_t *scr, int max);
 /* Shows only z of the server's screen (w 0: all of it). Takes effect when
  * the worker next looks, with a whole update of the new zone. */
 void        vnc_sess_set_zone(vnc_sess_t *s, const vnc_rect_t *z);
