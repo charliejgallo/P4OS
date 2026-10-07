@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.11.1 — 2026-10-07
+
+RF, after trying it with real remotes on the board. Only the app changed:
+`rf.so`, its page and its language packs.
+
+- **Real remotes decode whole.** With a copier remote the codes came out
+  cut anywhere (21, 23 or 28 bits of a 24-bit code). The detector's noise
+  floor sat at the noise's low quantiles, so a real stick's noise opened
+  trains by itself and kept them open, and a remote that came in the middle
+  was cut. The floor is now the noise's mean, and a train that does not
+  stand 4 dB over it is let go. Two remotes, three codes and eight buttons
+  came out right on the board; weak signals are found better too (18 dB
+  down: 6/6, 4/4 and 3/3 repeats, from 2/6, 3/4 and 3/3).
+- A code valid as both **EV1527 and PT2262** is named by its data pins, and
+  its details show the other reading.
+- Two buttons of one remote pressed within 2 s are two lines, and the tail
+  of the last repeat is no longer listed as something unknown.
+- **Tapping the spectrum** tunes to the signal near the finger, and the
+  scale's frequencies can be tapped.
+- **Volume and mute** in the app (a speaker button) and on its page; the
+  frequency keypad is dark, as the system's others.
+
 ## 0.11.0 — 2026-10-07
 
 **RF, a software radio on the card** (apps/rf/README.md). Needs this
