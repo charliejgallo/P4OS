@@ -62,4 +62,19 @@ struct rf_src {
 };
 
 extern const rf_src_ops_t rf_src_rtl;
-extern const rf_src_ops_t rf_src_file;   /* a recording; for now the simulator's RF_IQ_FILE */
+extern const rf_src_ops_t rf_src_file;   /* the simulator's RF_IQ_FILE (development) */
+/* a recording on the card as a source (rf_src_file.c): cu8 at its rate,
+ * in real time, over and over; NULL if it cannot be read */
+rf_src_t *rf_src_file_open(const char *path, uint32_t rate, uint32_t freq_hz);
+
+/* ---- what the app keeps (rf_rec.c), all from the engine's thread ---- */
+struct rf_decoded_s;
+bool rf_wav_start(uint32_t rate, uint32_t freq_hz);         /* to the recorder's folder */
+void rf_wav_write(const int16_t *pcm, int n);
+bool rf_wav_on(uint32_t *samples, uint32_t *rate);
+void rf_wav_stop(void);
+bool rf_iq_start(uint32_t rate, uint32_t freq_hz, int gain);   /* rf/iq/<when>_<hz>_<sps>.cu8 */
+void rf_iq_write(const uint8_t *iq, int bytes);
+bool rf_iq_on(uint64_t *written, uint32_t *dropped);
+void rf_iq_stop(void);
+const char *rf_rec_last_path(bool iq);

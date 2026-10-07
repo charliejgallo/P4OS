@@ -37,6 +37,46 @@ neighbours at both rates: the demodulator is right on air, not only on the
 test signals. FM was listened to on the board the next morning: it sounds
 right. AM and narrow FM wait for real traffic.
 
+## Data: 433 and 868 MHz
+
+**Data** (and the 433 and 868 bands, which choose it) listens to the band
+around the centre at 240 ksps for on-off keyed transmissions - the remotes
+of gates, alarms and doorbells, cheap weather sensors - and lists what it
+gets where the waterfall was: the time, what it is, how many repeats, and
+its values; a tap shows the rest (frequency to the kHz, signal over the
+noise, modulation, pulse widths, the bits). It goes on with the screen
+locked, like listening.
+
+`rf_ook.c` finds the pulses (the power over the noise floor, sliced in the
+middle in dB between noise and marks, with hysteresis and a 40 us debounce)
+and reads them as rtl_433's analyser does: PWM, PPM or Manchester, from the
+widths. Decoded by name: **EV1527** and **PT2262** remotes, **Nexus**-type
+(the many brands of 36-bit PPM thermo-hygrometers) and **Prologue**
+sensors. Anything else still shows its modulation, widths and bits, so a
+new protocol can be recognised (and written) from what the app shows.
+Repeats of the same sender within 2 s are one line with a count.
+
+Each new one goes to the card, `rf/datos-<day>.csv` (on by default), and,
+when asked and the board's MQTT is connected, to
+`<board name>/rf/<protocol>-<id>` as JSON (temperature, humidity, battery,
+button, the bits).
+
+## Keeping and playing back
+
+The save button (the disk, second row) opens:
+
+- **Screenshot**: the screen as the panel shows it, spectrum included, to
+  `photos/Capturas` (`aos_hal_display_save`).
+- **Record the audio** (while listening): a WAV in the Recorder's folder.
+- **Record the signal (I/Q)**: the raw samples at the present rate to
+  `rf/iq/<when>_<Hz>_<sps>.cu8`, with a `.txt` beside it, through a 4 MB ring
+  and a writer thread of its own (the card writes ~3 MB/s: 2.4 Msps is
+  4.8 MB/s, 240 k is 0.5). Changing the rate ends it.
+- **Play a recording**: the app runs on the file as if it were the radio
+  (data mode decodes it, listening modes demodulate it); tuning is off
+  until it stops.
+- The CSV and MQTT switches above.
+
 ## Wiring
 
 The RTL-SDR goes on the USB host, as a pendrive does (`docs/USB.md`, "The

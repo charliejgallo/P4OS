@@ -60,6 +60,11 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       2,048 y 2,4 Msps (4,1 y 4,8 MB/s) sin muestras perdidas, 25 cuadros/s
       con 25-35 % de CPU; desenchufada y vuelta a enchufar con la app
       abierta, vuelve sola. Sin probar: 21/23 (Full Speed).
+- [ ] **RF: datos de 433 MHz y guardar** (2026-10-07): el modo Datos corre en la
+      placa (16 % del hilo de la radio). Falta: apretar un control remoto o un
+      timbre de 433 MHz cerca y ver que aparezca; si hay un sensor de
+      temperatura, que salga con sus valores. Probar la captura de pantalla
+      (en el simulador no existe), grabar audio y señal, y reproducir.
 - [ ] **RF: escuchar** (2026-10-07, `apps/rf/README.md`): FM, AM y FM
       angosta medidas en la placa (CPU 36-40 % del núcleo 0 a 240 k, el
       piloto estéreo de una FM real a 36-43 dB). **FM oída por el usuario

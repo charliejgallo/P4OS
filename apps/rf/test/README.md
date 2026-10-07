@@ -26,6 +26,21 @@ Measured on 2026-10-07 (the 16-bit chain), the 1 kHz tone over the rest:
 | AM | 52.5 | 51.9 | 49.7 | 45.0 |
 | Narrow FM | 38.9 | 38.7 | 38.9 | 38.4 |
 
+The on-off keying decoders, the same way:
+
+```bash
+cc -O1 -g -fsanitize=address,undefined -DRF_HOST_TEST -Iapps/rf/main \
+   apps/rf/main/rf_ook.c apps/rf/test/ook_test.c -o /tmp/ook_test -lm
+python3 apps/rf/test/gen_ook.py 240000 /tmp/ook.cu8
+/tmp/ook_test 240000 /tmp/ook.cu8
+```
+
+`gen_ook.py` sends an EV1527 remote (6 repeats), a PT2262 one (4), a Nexus
+sensor 10 dB weaker (3) and a Prologue one (3), each off the centre by up to
+80 kHz. On 2026-10-07 every repeat came out right at 240 k and 960 k, the
+offsets to a few Hz; with everything 18 dB weaker, 2 of 6 EV1527 repeats, 3
+of 4 PT2262 and 3 of 3 Prologue (the Nexus, 28 dB down, was lost).
+
 In the simulator, `RF_IQ_FILE=/tmp/am.cu8@960000` makes such a file the
 app's source, in real time and in a loop, and `RF_WAV_OUT=/tmp/out.raw` keeps
 what the speaker would have played (raw 16-bit mono at the mode's rate).

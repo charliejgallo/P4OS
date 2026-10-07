@@ -2,11 +2,10 @@
  * RF - a recording as a source: cu8 I/Q from a file, at its own rate, in
  * real time, over and over (rf.h).
  *
- * For now it is a development hook: the environment's RF_IQ_FILE,
- * "path@rate" (the simulator; on the board getenv() is always NULL), wins
- * over the RTL-SDR, so the app's listening is tried against the signals of
- * apps/rf/test/gen_iq.py. Recording and playing on the card is the plan's
- * phase 6.
+ * The app plays back what it recorded (the .cu8 in rf/iq, rf_src_file_open), and
+ * in the simulator the environment's RF_IQ_FILE, "path@rate" (on the board
+ * getenv() is always NULL), wins over the RTL-SDR, so the app is tried
+ * against the signals of apps/rf/test/.
  */
 #include "rf.h"
 
@@ -26,6 +25,29 @@ typedef struct {
     bool running;
 } file_src_t;
 
+static rf_src_t *open_path(const char *path, uint32_t rate)
+{
+    FILE *f = fopen(path, "rb");
+    if (!f) return NULL;
+    file_src_t *s = calloc(1, sizeof *s);
+    if (!s) {
+        fclose(f);
+        return NULL;
+    }
+    s->f = f;
+    s->rate = rate;
+    const char *base = strrchr(path, '/');
+    snprintf(s->name, sizeof s->name, "%s", base ? base + 1 : path);
+    s->base.ops = &rf_src_file;
+    return &s->base;
+}
+
+rf_src_t *rf_src_file_open(const char *path, uint32_t rate, uint32_t freq_hz)
+{
+    (void)freq_hz;
+    return open_path(path, rate);
+}
+
 static rf_src_t *file_open(const char **why)
 {
     const char *e = getenv("RF_IQ_FILE");
@@ -38,18 +60,9 @@ static rf_src_t *file_open(const char **why)
     char *at = strrchr(path, '@');
     uint32_t rate = at ? (uint32_t)strtoul(at + 1, NULL, 10) : 2400000;
     if (at) *at = 0;
-    FILE *f = fopen(path, "rb");
-    if (!f) {
-        *why = N_("No hay ninguna RTL-SDR en el host USB");
-        return NULL;
-    }
-    file_src_t *s = calloc(1, sizeof *s);
-    s->f = f;
-    s->rate = rate;
-    const char *base = strrchr(path, '/');
-    snprintf(s->name, sizeof s->name, "%s", base ? base + 1 : path);
-    s->base.ops = &rf_src_file;
-    return &s->base;
+    rf_src_t *src = open_path(path, rate);
+    if (!src) *why = N_("No hay ninguna RTL-SDR en el host USB");
+    return src;
 }
 
 static void file_info(rf_src_t *b, rf_src_info_t *o)

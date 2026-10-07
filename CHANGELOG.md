@@ -15,6 +15,12 @@
   PMR, marine), with a squelch, through the speaker or a USB sound card,
   and on with the screen locked or another app in front. 36-40 % of core 0
   at 240 ksps with the spectrum running.
+- **RF reads 433 and 868 MHz:** the Data mode lists the remotes and
+  sensors around (EV1527, PT2262, Nexus, Prologue by name; anything else by
+  its modulation, widths and bits), keeps them in a CSV of the day and can
+  publish them over MQTT.
+- **RF keeps things:** a screenshot, the audio as WAV, the raw signal (I/Q)
+  on the card, and plays a recording back as if it were the radio.
 - **esp-dsp for the apps:** the firmware carries it and lends its 16-bit
   SIMD routines (dot products, decimating FIRs, FFTs) and biquads; on the
   P4 a float multiply-add costs ~5 cycles whatever the code
