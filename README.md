@@ -418,7 +418,7 @@ test layouts.
   read, written and restored; CAN's self test with no transceiver.
 - VNC against a MacBook Air with two monitors: the login typed with the
   on-screen keyboard, then the mouse and keyboard.
-- RF with an RTL-SDR (R828D tuner) on the USB host: 2.4 Msps with no
+- RF with an RTL-SDR (R820T tuner) on the USB host: 2.4 Msps with no
   samples lost, unplugged and plugged back while running, and broadcast FM
   heard on the speaker (the stereo pilot 36 to 43 dB over its neighbours).
 
