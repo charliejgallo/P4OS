@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.10.1 — 2026-10-06
 
 - **A crash while booting, about one boot in 18, is gone.** It showed only
   after an OTA (the trial image was rolled back), but any restart could fall

@@ -21,6 +21,11 @@ concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
 
+# Apps that are built (so the CI still checks them) but not published: left
+# out of apps.zip, web.zip and lang.zip. A directory of apps/, by name.
+env:
+  NOT_IN_RELEASE: pato
+
 jobs:
   firmware:
     runs-on: ubuntu-latest
@@ -56,11 +61,19 @@ jobs:
               partition_table/partition-table.bin ota_data_initial.bin flash_args)
           if [ "$p" = rev1_3 ]; then
             mkdir -p out/apps && cp apps/*/build/*.so out/apps/
-            (cd out && zip -qr apps.zip apps && rm -r apps)
             # the apps' own pages in the portal, for the card's /web (docs/PORTAL-PAGES.md)
             mkdir -p out/web && cp apps/*/web/*.js out/web/
+            mkdir -p out/lang && cp -r lang/en lang/de out/lang/
+            for a in $NOT_IN_RELEASE; do
+              for so in apps/$a/build/*.so; do [ -e "$so" ] && rm -f "out/apps/$(basename "$so")"; done
+              for js in apps/$a/web/*.js; do [ -e "$js" ] && rm -f "out/web/$(basename "$js")"; done
+              id=$(grep -ho '\.id *= *"[^"]*"' apps/$a/main/*.c | head -1 | sed 's/.*"\(.*\)"/\1/')
+              [ -n "$id" ] && rm -f out/lang/en/$id.lang out/lang/de/$id.lang
+              echo "left out of the release: $a ($id)"
+            done
+            (cd out && zip -qr apps.zip apps && rm -r apps)
             (cd out && zip -qr web.zip web && rm -r web)
-            zip -qr out/lang.zip lang/en lang/de
+            (cd out && zip -qr lang.zip lang && rm -r lang)
           fi
       - uses: actions/upload-artifact@v5
         with:
