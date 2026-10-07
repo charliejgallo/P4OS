@@ -34,7 +34,8 @@ Measured on the board on 2026-10-07 (the spectrum running, core 0):
 
 A real FM station (98.3 MHz) gave the stereo pilot 36 to 43 dB over its
 neighbours at both rates: the demodulator is right on air, not only on the
-test signals. The board's audio was not listened to by anyone yet.
+test signals. FM was listened to on the board the next morning: it sounds
+right. AM and narrow FM wait for real traffic.
 
 ## Wiring
 
