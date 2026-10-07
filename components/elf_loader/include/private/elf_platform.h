@@ -68,6 +68,10 @@ uintptr_t elf_remap_text(esp_elf_t *elf, uintptr_t sym);
  */
 #ifdef CONFIG_ELF_LOADER_LOAD_PSRAM
 void esp_elf_arch_flush(void);
+#if CONFIG_IDF_TARGET_ESP32P4
+/* P4OS: the same for one block of code only, by address range */
+void esp_elf_arch_flush_code(const void *code);
+#endif
 #endif
 
 /**

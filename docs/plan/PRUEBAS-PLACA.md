@@ -99,8 +99,22 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       ahora se pintan una vez en una imagen en PSRAM cuando cambian los
       datos. Probado por el usuario en la placa: el scroll va fluido
       también sobre los gráficos. 5 y 6 GHz no: el ESP32-C6 es sólo 2,4 GHz.
-- [ ] El cuelgue del primer arranque tras algunas OTA: dos volcados el
-      2026-10-04 con `strcmp` en `dlsym` cargando apps (handoff de sistema).
+- [x] El cuelgue del primer arranque tras algunas OTA (resuelto el
+      2026-10-06): no era de las OTA, era de cualquier arranque (~1 de cada
+      18), y sólo se veía en una OTA porque la vuelta atrás lo delataba. El
+      cargador de apps sincronizaba TODA la caché con la ROM después de
+      cada `.so` mientras el otro núcleo dibujaba la pantalla de arranque, y
+      a veces rompía datos de la PSRAM durante el escaneo de apps. Medido
+      con `tools/boot_loop.sh`: 4 caídas en 70 reinicios antes, 0 en 80
+      después (sincronizando por rango sólo el bloque del módulo), y 0 en
+      27 con la imagen de producción. Detalle en `docs/MEMORY.md`.
+- [ ] Sin Wi-Fi después de un reinicio por software (visto otra vez el
+      2026-10-06, 1 vez en ~140 reinicios seguidos): la interfaz anda, el
+      C6 no levanta la red, y no lo arreglan ni apagar y prender el Wi-Fi
+      ni los dos reinicios del vigilante de red; el botón de reset (que
+      corta la alimentación) sí, al instante. Desde ahora el registro se
+      guarda en `/sdcard/logs/sin-red-N.txt` antes de reintentar: la
+      próxima vez, leerlo de la tarjeta.
 
 Hecho el 2026-10-04 (0.7.0):
 - [x] Bluetooth con el iPhone 15 Pro Max: aparece en Ajustes del iPhone

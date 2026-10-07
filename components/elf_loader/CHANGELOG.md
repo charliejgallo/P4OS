@@ -1,5 +1,13 @@
 # ChangeLog
 
+## P4OS - 2026-10-06
+
+* ESP32-P4: after loading a module, the cache is synced for the module's own
+  block only (`esp_elf_arch_flush_code()`, `esp_cache_msync()` by range on a
+  block aligned and sized to the 128-byte L2 line) instead of the ROM's
+  whole-cache calls, which run while the other core works and broke PSRAM
+  data now and then during P4OS's boot (docs/MEMORY.md in P4OS).
+
 ## v1.3.3 - 2026-07-28
 
 * Fixed intermittent crash during long-term ELF execution from PSRAM on ESP32-S31 (use full cache flush instead of ranged API)

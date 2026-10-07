@@ -7,6 +7,8 @@
  * stack in PSRAM, and app_main returns: that gives back the main task's 16 KB
  * of internal RAM.
  */
+#include <stdio.h>
+#include <sys/stat.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_log.h"
@@ -22,6 +24,7 @@
 #include "aos_portal.h"
 #include "aos_dynapp.h"
 #include "aos_i18n.h"
+#include "xip_check.h"
 
 static const char *TAG = "p4os";
 
@@ -44,6 +47,32 @@ static EXT_RAM_NOINIT_ATTR struct { uint32_t magic, count; } s_net_boots;
 #define NET_MAGIC 0x4E455442u
 
 void aos_bt_p4_tick(void) __attribute__((weak));
+
+/* The log so far, on the card: when the network does not come back the
+ * portal cannot be reached to read it, and the cure that has worked (a
+ * power cycle, or the board's reset button, which is one) wipes the PSRAM
+ * where the previous boot's log lives. 2026-10-06: once in ~140 software
+ * restarts the C6 came up with no Wi-Fi, and neither turning the Wi-Fi off
+ * and on nor two more restarts brought it back. */
+static void log_to_card(const char *why, unsigned n)
+{
+    const char *root = aos_hal_path_sd_root();
+    if (!root) return;
+    char path[96];
+    snprintf(path, sizeof path, "%s/logs", root);
+    mkdir(path, 0777);
+    snprintf(path, sizeof path, "%s/logs/%s-%u.txt", root, why, n);
+    FILE *f = fopen(path, "w");
+    if (!f) return;
+    static char buf[4096];
+    size_t from = 0, next = 0;
+    while (aos_hal_log_read(from, buf, sizeof buf, &next) > 0 && next > from) {
+        fputs(buf, f);
+        from = next;
+    }
+    fclose(f);
+    ESP_LOGW(TAG, "the log is on the card: %s", path);
+}
 
 static void tick_thread(void *arg)
 {
@@ -72,12 +101,14 @@ static void tick_thread(void *arg)
                 s_net_boots.count = 0;
             } else if (s_net_boots.count < NET_RETRIES) {
                 s_net_boots.count++;
+                log_to_card("sin-red", (unsigned)s_net_boots.count);
                 ESP_LOGE(TAG, "no network %d s after boot (state %d): restarting, try %u of %d", NET_DEADLINE_MS / 1000,
                          (int)aos_hal_net_state(), (unsigned)s_net_boots.count, NET_RETRIES);
                 vTaskDelay(pdMS_TO_TICKS(200));
                 aos_hal_reboot();
             } else {
                 ESP_LOGE(TAG, "still no network after %d restarts: staying up without it", NET_RETRIES);
+                log_to_card("sin-red", NET_RETRIES + 1);
             }
         }
         if (aos_hal_lock(0)) {
@@ -104,7 +135,9 @@ void app_main(void)
         if (rec && heap_trace_init_standalone(rec, TRACE_N) == ESP_OK) heap_trace_start(HEAP_TRACE_LEAKS);
     }
 #endif
+    xip_check_run();                /* diagnostic builds only (xip_check.c) */
     aos_hal_init();
+    xip_check_log();
     aos_hal_boot_stage("apps");
     aos_apps_register_builtin();
     if (aos_hal_lock(0)) {

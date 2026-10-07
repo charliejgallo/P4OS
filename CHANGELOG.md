@@ -1,5 +1,21 @@
 # Changelog
 
+## Unreleased
+
+- **A crash while booting, about one boot in 18, is gone.** It showed only
+  after an OTA (the trial image was rolled back), but any restart could fall
+  over during the card's app scan and start again by itself. The app loader
+  synced the whole cache after each `.so` with the other core drawing the
+  boot screen; it now syncs the module's own block by address range. 4 bad
+  boots in 70 before, none in 107 after (docs/MEMORY.md).
+- Network, Wi-Fi: the channel graphs and the live signal are drawn once into
+  a picture when their data change, so the page scrolls smoothly over them.
+- `tools/boot_loop.sh`: restarts the board over and over and keeps the log
+  and the core dump of every boot that falls over.
+- When the network does not come back after a restart, the log is saved to
+  the card (`/logs/sin-red-N.txt`) before the board tries again: the cure
+  that works, a power cycle, wipes the log kept in PSRAM.
+
 ## 0.10.0 — 2026-10-06
 
 **The workshop on the card** (docs/MODULES.md): four apps that use the

@@ -121,6 +121,19 @@ set up from a constructor instead (see `aos_scope.c`, `T_defaults`).
   there: every job that drew into it ran 8-15 times slower, a `memcpy` out
   of it 119 ms against 8 (2026-09-29). With the flag the block of 24 KB
   was not there at all, and two of 12 KB were.
+- Cache maintenance on PSRAM: always by address range, with
+  `esp_cache_msync()`, on blocks that start and end on the 128-byte L2
+  line, and never the ROM's whole-cache calls (`Cache_WriteBack_All`,
+  `Cache_Invalidate_All`) while the other core runs. The app loader did
+  that after every `.so` it opened, with LVGL drawing the boot screen on
+  the other core, and about one boot in 18 fell over during the card's
+  app scan: a module's symbol table read back broken right after
+  `dlopen`, or the PSRAM heap's free lists broken under LVGL. Measured
+  with `tools/boot_loop.sh`: 4 bad boots in 70 with the whole-cache
+  calls, none in 80 (and none in 27 more on the release build) with the
+  ranged ones (`esp_elf_arch_flush_code()` in `components/elf_loader`,
+  2026-10-06). Espressif went the other way on the ESP32-S31 (loader
+  v1.3.3), but there the ranges were not aligned to the line.
 - Two cores for one frame: `aos_hal_worker_split()` (`aos_hal.h`). Each
   half needs its own scratch, and what they share must only be read. A
   pass bound by PSRAM gains little: measured, the 3D viewer's vertex pass

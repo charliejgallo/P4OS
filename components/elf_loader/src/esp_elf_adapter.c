@@ -18,6 +18,9 @@
 #include "esp32p4/rom/cache.h"
 #endif
 #include "private/elf_platform.h"
+#if CONFIG_IDF_TARGET_ESP32P4
+#include "esp_cache.h"
+#endif
 
 #ifdef CONFIG_ELF_LOADER_LOAD_PSRAM
 #ifdef CONFIG_IDF_TARGET_ESP32S3
@@ -151,4 +154,26 @@ void IRAM_ATTR esp_elf_arch_flush(void)
     spi_flash_enable_interrupts_caches_and_other_cpu();
 #endif
 }
+
+#if CONFIG_IDF_TARGET_ESP32P4
+/* P4OS: the loaded code's own lines only, through IDF's ranged cache API.
+ * esp_elf_arch_flush() writes back the whole L1 data cache and drops both
+ * cores' whole instruction caches with the ROM's *_All calls while the other
+ * core runs (LVGL, the boot screen), which IDF itself never does; the boot
+ * crashes of 2026-10-04/06 (a module's symbol table read back broken right
+ * after dlopen, the PSRAM heap's free lists broken under LVGL, all during the
+ * card's app scan) pointed there. The code blocks are 128-byte aligned and
+ * sized (__wrap_esp_elf_malloc in aos_dynapp.c), the L2 line, so syncing the
+ * whole block never touches anyone else's data. */
+void esp_elf_arch_flush_code(const void *code)
+{
+    size_t n = code ? heap_caps_get_allocated_size((void *)code) & ~(size_t)127 : 0;
+    if (!n || ((uintptr_t)code & 127)) {
+        esp_elf_arch_flush();
+        return;
+    }
+    esp_cache_msync((void *)code, n, ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_TYPE_DATA);
+    esp_cache_msync((void *)code, n, ESP_CACHE_MSYNC_FLAG_DIR_M2C | ESP_CACHE_MSYNC_FLAG_TYPE_INST);
+}
+#endif
 #endif

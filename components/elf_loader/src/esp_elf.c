@@ -742,7 +742,11 @@ int esp_elf_relocate(esp_elf_t *elf, const uint8_t *pbuf)
     }
 
 #ifdef CONFIG_ELF_LOADER_LOAD_PSRAM
+#if CONFIG_IDF_TARGET_ESP32P4
+    esp_elf_arch_flush_code(elf->psegment);     /* code and data, one block on the P4 */
+#else
     esp_elf_arch_flush();
+#endif
 #endif
 #ifdef CONFIG_ELF_LOADER_TEXT_PSRAM_MMU
     esp_elf_arch_flush_text(elf);
