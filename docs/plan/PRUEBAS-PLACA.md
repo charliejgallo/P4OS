@@ -60,21 +60,31 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       2,048 y 2,4 Msps (4,1 y 4,8 MB/s) sin muestras perdidas, 25 cuadros/s
       con 25-35 % de CPU; desenchufada y vuelta a enchufar con la app
       abierta, vuelve sola. Sin probar: 21/23 (Full Speed).
-- [ ] **RF: la página del portal** (2026-10-07, `http://p4os.local/#rf`): el
+- [x] **RF: la página del portal** (2026-10-07, `http://p4os.local/#rf`): el
       canal en vivo anda en la placa (espectro cada ~80 ms, estado, órdenes);
-      falta verla en un navegador: sintonizar tocando, modos, la tabla de
-      Datos, grabar y bajar.
+      el usuario la abrió: "se ve bien". Volumen y silenciar agregados el
+      2026-10-07 (sin mirar todavía en el navegador).
 - [ ] **RF: datos de 433 MHz y guardar** (2026-10-07): el modo Datos corre en la
-      placa (16 % del hilo de la radio). Falta: apretar un control remoto o un
-      timbre de 433 MHz cerca y ver que aparezca; si hay un sensor de
-      temperatura, que salga con sus valores. Probar la captura de pantalla
-      (en el simulador no existe), grabar audio y señal, y reproducir.
+      placa (16 % del hilo de la radio). **Un control copiador (EV1527, dos
+      códigos, 4CC45 y 4CC55, botones 4 y 1) probado el 2026-10-07:** al
+      principio salían códigos cortados (el piso de ruido del detector);
+      arreglado con una grabación I/Q de la placa y vuelto a probar: los
+      cuatro botones en su línea, 18-20 dB, sin basura. Grabar la señal (I/Q)
+      y bajarla por el portal, probado. Falta: un control de fábrica (CROE,
+      que puede ser de código variable), un sensor de temperatura, la
+      captura de pantalla, grabar audio y reproducir.
 - [ ] **RF: escuchar** (2026-10-07, `apps/rf/README.md`): FM, AM y FM
       angosta medidas en la placa (CPU 36-40 % del núcleo 0 a 240 k, el
       piloto estéreo de una FM real a 36-43 dB). **FM oída por el usuario
-      el 2026-10-07: se escucha bien.** Falta: AM en la banda aérea con
-      tráfico, FM angosta en PMR o 2 m, el silenciador, y que siga sonando
-      con la placa bloqueada y con otra app adelante.
+      el 2026-10-07: se escucha bien.** AM y FM angosta probadas el
+      2026-10-07 sin tráfico que valga (antena adentro, con lluvia): en
+      121,9 se abrió el silenciador una vez, 1 s a 8 dB; en 156,8 nada en
+      2,5 min; en 121,6 hay una portadora fija de ~50 kHz de ancho, de la
+      casa o de la placa (no sigue a la sintonía). Falta: AM y FM angosta
+      con tráfico fuerte (antena afuera, o un handy a varios metros y en
+      baja potencia: de cerca puede quemar la entrada del R820T y la placa
+      se reinició con uno cerca, sin volcado: sospecha de RF en los cables
+      del host USB), y que siga sonando bloqueada y con otra app adelante.
 - [ ] **Apps del taller** (los cableados en `docs/img/bench-*.svg`, que arma
       `tools/bench_diagrams.py`: PWM, IR, tira WS2812B y 24LC;
       instaladas el 2026-10-05, probadas sólo en el

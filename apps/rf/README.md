@@ -55,7 +55,15 @@ widths. Decoded by name: **EV1527** and **PT2262** remotes, **Nexus**-type
 (the many brands of 36-bit PPM thermo-hygrometers) and **Prologue**
 sensors. Anything else still shows its modulation, widths and bits, so a
 new protocol can be recognised (and written) from what the app shows.
-Repeats of the same sender within 2 s are one line with a count.
+Repeats of the same sender and button within 2 s are one line with a count,
+and a piece of the last repeat (cut short when the button was let go) is
+not listed. A code that is valid as both EV1527 and PT2262 (one EV1527 in
+30 is) is named by its last four symbols - a PT2262 remote's data pins are
+driven, never floating - and its details show the other reading.
+
+Tried on the board on 2026-10-07 with a copier remote (EV1527, two buttons,
+21 dB over the noise): every press listed with its button, 24 and 25
+repeats, as an I/Q recording of it confirms on the Mac (`test/README.md`).
 
 Each new one goes to the card, `rf/datos-<day>.csv` (on by default), and,
 when asked and the board's MQTT is connected, to

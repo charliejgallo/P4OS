@@ -49,7 +49,8 @@ struct rf_ook {
     int32_t wsum;
     int wpos, wlen;
     uint32_t deb, cand;             /* samples a change must last; how long the present one has */
-    float noise, level;             /* power while idle, power of the marks */
+    float noise, level;             /* power while idle (its mean), power of the marks */
+    uint32_t settle;                /* samples since the start: the floor's first fast learning */
     bool in_pkt, high;
     uint32_t run;                   /* samples in the present state */
     uint32_t max_mark;
@@ -91,6 +92,8 @@ static void finish(rf_ook_t *o, void (*done)(const rf_pulses_t *, void *), void 
     o->zr = o->zi = 0;
 }
 
+#define NOISE_CHECK 8            /* marks after which a train must stand 4 dB over the floor */
+
 static inline uint16_t to_us(const rf_ook_t *o, uint32_t samples)
 {
     float v = samples * o->us;
@@ -113,9 +116,19 @@ void rf_ook_feed(rf_ook_t *o, const uint8_t *iq, int n, void (*done)(const rf_pu
         float p = (float)o->wsum / o->wlen;
         o->run++;
         if (!o->in_pkt) {
-            /* idle: follow the floor, wait for something 6 dB over it for 40 us */
-            if (p < o->noise) o->noise += (p - o->noise) * 0.01f;
-            else if (p < o->noise * 4) o->noise += (p - o->noise) * 0.0005f;
+            /* idle: follow the floor, wait for something 6 dB over it for 40 us.
+             * The floor is the noise's MEAN power, followed alike up and
+             * down (what stands 6 dB over it stays out, so a transmission's
+             * edge does not lift it). It used to come down 20 times faster
+             * than it went up: it sat at the noise's low quantiles, and the
+             * board's real noise - far larger than the tests' - crossed
+             * "6 dB over" by itself, opened a train that noise kept alive
+             * up to its 600 marks, and a remote that came in the middle had
+             * its repeats cut anywhere (a copier remote, 2026-10-07: 21, 23,
+             * 28 bits of a 24-bit code). */
+            float k = o->settle < o->rate / 20 ? 0.01f : 0.0005f;
+            if (o->settle < o->rate / 20) o->settle++;
+            if (p < o->noise * 4 || o->noise > 1e8f) o->noise += (p - o->noise) * k;
             if (p > o->noise * 4 && p > 4) {
                 if (++o->cand >= o->deb) {
                     o->in_pkt = o->high = true;
@@ -160,6 +173,16 @@ void rf_ook_feed(rf_ook_t *o, const uint8_t *iq, int n, void (*done)(const rf_pu
                     if (o->pk.n < RF_PULSES_MAX) o->pk.space[o->pk.n++] = to_us(o, len);
                     if (o->pk.n >= RF_PULSES_MAX) {
                         finish(o, done, ctx);
+                        o->cand = 0;
+                        continue;
+                    }
+                    /* Noise that opened a train keeps it alive: its "marks"
+                     * are barely over the line, which sits only 3 dB over
+                     * the floor. After a few marks, under 4 dB is let go (noise
+                     * that did came out at 0.2 to 2.7 dB on the board). */
+                    if (o->pk.n == NOISE_CHECK && o->level < o->noise * 2.5f) {
+                        o->pk.n = 0;
+                        finish(o, NULL, NULL);
                         o->cand = 0;
                         continue;
                     }
@@ -264,14 +287,22 @@ static bool dec_ev1527(rf_decoded_t *d)
         has10 |= pair == 2;
         has01 |= pair == 1;
     }
-    if (!has10 && has01) {
-        char tri[13];
-        for (int i = 0; i < 12; i++) {
-            int pair = (v >> (22 - 2 * i)) & 3;
-            tri[i] = pair == 0 ? '0' : pair == 3 ? '1' : 'F';
-        }
-        tri[12] = 0;
-        snprintf(d->code, sizeof d->code, "%s", tri);
+    char tri[13];
+    for (int i = 0; i < 12; i++) {
+        int pair = (v >> (22 - 2 * i)) & 3;
+        tri[i] = pair == 0 ? '0' : pair == 3 ? '1' : 'F';
+    }
+    tri[12] = 0;
+    /* One in 30 EV1527 codes has no "10" pair and reads as PT2262 too, and
+     * the bits cannot tell which. A remote's PT2262 has its buttons on the
+     * last four symbols, the data pins, driven to 0 or 1: an F there is
+     * more likely an EV1527 (a copier remote, 2026-10-07: 4CC454 read as
+     * F01010F0 FFF0), though a sensor's PT2262 with twelve address symbols
+     * can float them too. So the other reading stays in d->code. */
+    bool pt_ok = !has10 && has01;
+    bool data_driven = tri[8] != 'F' && tri[9] != 'F' && tri[10] != 'F' && tri[11] != 'F';
+    if (pt_ok) snprintf(d->code, sizeof d->code, "%s", tri);
+    if (pt_ok && data_driven) {
         snprintf(d->proto, sizeof d->proto, "PT2262");
         snprintf(d->key, sizeof d->key, "pt2262-%.8s", tri);
         snprintf(d->text, sizeof d->text, "code %.8s data %s", tri, tri + 8);

@@ -27,207 +27,210 @@ FM angosta	Schmal-FM
 #: apps/rf/main/rf.c:91
 Datos	Daten
 
-#: apps/rf/main/rf.c:321
-#: apps/rf/main/rf.c:2009
+#: apps/rf/main/rf.c:331
+#: apps/rf/main/rf.c:2021
 Sin memoria	Kein Speicher
 
-#: apps/rf/main/rf.c:466
+#: apps/rf/main/rf.c:476
 La RTL-SDR no empezó a mandar muestras	Der RTL-SDR hat nicht begonnen, Samples zu senden
 
-#: apps/rf/main/rf.c:483
+#: apps/rf/main/rf.c:493
 Se desconectó la RTL-SDR	Der RTL-SDR wurde abgezogen
 
-#: apps/rf/main/rf.c:814
+#: apps/rf/main/rf.c:824
 Gan. auto	Verst. auto
 
-#: apps/rf/main/rf.c:815
+#: apps/rf/main/rf.c:825
 Gan. %d,%d dB	Verst. %d,%d dB
 
-#: apps/rf/main/rf.c:817
+#: apps/rf/main/rf.c:827
 Paso %u MHz	Schritt %u MHz
 
-#: apps/rf/main/rf.c:821
+#: apps/rf/main/rf.c:831
 Paso %u,%02u kHz	Schritt %u,%02u kHz
 
-#: apps/rf/main/rf.c:822
+#: apps/rf/main/rf.c:832
 Paso %u,%u kHz	Schritt %u,%u kHz
 
-#: apps/rf/main/rf.c:823
+#: apps/rf/main/rf.c:833
 Paso %u kHz	Schritt %u kHz
 
-#: apps/rf/main/rf.c:827
+#: apps/rf/main/rf.c:837
 Silenc. %d dB	Sperre %d dB
 
-#: apps/rf/main/rf.c:828
+#: apps/rf/main/rf.c:838
 Silenc. no	Sperre aus
 
-#: apps/rf/main/rf.c:846
+#: apps/rf/main/rf.c:856
 Reproduciendo una grabación: no se puede sintonizar	Eine Aufnahme läuft: kein Abstimmen möglich
 
-#: apps/rf/main/rf.c:1059
+#: apps/rf/main/rf.c:1069
 Buscando una RTL-SDR…	Suche einen RTL-SDR…
 
-#: apps/rf/main/rf.c:1063
+#: apps/rf/main/rf.c:1073
 Enchufala en el host USB: pines 25/27 del conector de atrás (High Speed, cables de menos de 15 cm) y 5 V del pin 1. Los pines 21/23 son Full Speed: alcanzan para 240 mil muestras por segundo.	Am USB-Host anschließen: Pins 25/27 der hinteren Stiftleiste (High Speed, Kabel kürzer als 15 cm) und 5 V von Pin 1. Die Pins 21/23 sind Full Speed: genug für 240 000 Samples pro Sekunde.
 
-#: apps/rf/main/rf.c:1064
+#: apps/rf/main/rf.c:1074
 El host USB está apagado: prendelo en Ajustes → USB → Host USB, y enchufá la RTL-SDR en los pines 25/27 del conector de atrás.	Der USB-Host ist aus: unter Einstellungen → USB → USB-Host einschalten und den RTL-SDR an die Pins 25/27 der hinteren Stiftleiste anschließen.
 
-#: apps/rf/main/rf.c:1110
+#: apps/rf/main/rf.c:1120
 señal	Signal
 
-#: apps/rf/main/rf.c:1111
+#: apps/rf/main/rf.c:1121
 silenciado	stumm
 
-#: apps/rf/main/rf.c:1114
+#: apps/rf/main/rf.c:1124
 estéreo	Stereo
 
-#: apps/rf/main/rf.c:1118
+#: apps/rf/main/rf.c:1128
 perdidos	verloren
 
-#: apps/rf/main/rf.c:1120
+#: apps/rf/main/rf.c:1130
 Sin radio	Kein Funkgerät
 
-#: apps/rf/main/rf.c:1125
+#: apps/rf/main/rf.c:1135
 reproduciendo	Wiedergabe
 
-#: apps/rf/main/rf.c:1133
+#: apps/rf/main/rf.c:1143
 recibidos	empfangen
 
-#: apps/rf/main/rf.c:1141
+#: apps/rf/main/rf.c:1151
 Señal ahora: %d dB sobre el ruido	Signal jetzt: %d dB über dem Rauschen
 
-#: apps/rf/main/rf.c:1239
+#: apps/rf/main/rf.c:1249
 En los pines 21/23 (Full Speed) sólo entran 240 mil muestras por segundo	An den Pins 21/23 (Full Speed) passen nur 240 000 Samples pro Sekunde
 
-#: apps/rf/main/rf.c:1336
+#: apps/rf/main/rf.c:1346
 Frecuencia en MHz	Frequenz in MHz
 
-#: apps/rf/main/rf.c:1360
+#: apps/rf/main/rf.c:1370
 Automática	Automatisch
 
-#: apps/rf/main/rf.c:1369
+#: apps/rf/main/rf.c:1379
 Ganancia	Verstärkung
 
-#: apps/rf/main/rf.c:1380
+#: apps/rf/main/rf.c:1390
 Todo a la izquierda es automática. Subila hasta que aparezcan las señales sin que suba el piso de ruido.	Ganz links ist automatisch. So weit erhöhen, bis die Signale erscheinen, ohne dass das Grundrauschen steigt.
 
-#: apps/rf/main/rf.c:1393
+#: apps/rf/main/rf.c:1403
 Siempre abierto	Immer offen
 
-#: apps/rf/main/rf.c:1410
+#: apps/rf/main/rf.c:1420
 Activar el sonido	Ton an
 
-#: apps/rf/main/rf.c:1410
+#: apps/rf/main/rf.c:1420
 Silenciar	Stumm
 
-#: apps/rf/main/rf.c:1438
+#: apps/rf/main/rf.c:1448
 Volumen	Lautstärke
 
-#: apps/rf/main/rf.c:1447
+#: apps/rf/main/rf.c:1457
 El volumen es el de la placa, el mismo de todo el sistema. Silenciar calla sólo la radio, que sigue sintonizada.	Die Lautstärke ist die der Platine, dieselbe für das ganze System. Stumm schaltet nur das Radio stumm, es bleibt abgestimmt.
 
-#: apps/rf/main/rf.c:1457
+#: apps/rf/main/rf.c:1467
 Silenciador	Rauschsperre
 
-#: apps/rf/main/rf.c:1466
+#: apps/rf/main/rf.c:1476
 Corta el audio de AM y FM angosta mientras el canal no supera al ruido por esos dB; entre 6 y 15 suele andar. Todo a la izquierda, siempre abierto. La FM comercial no lo usa.	Schaltet AM und Schmal-FM stumm, solange der Kanal nicht so viele dB über dem Rauschen liegt; 6 bis 15 passt meist. Ganz links: immer offen. UKW-Rundfunk nutzt sie nicht.
 
-#: apps/rf/main/rf.c:1487
+#: apps/rf/main/rf.c:1497
 ID %u · canal %d · %.1f °C	ID %u · Kanal %d · %.1f °C
 
-#: apps/rf/main/rf.c:1489
+#: apps/rf/main/rf.c:1499
 batería baja	Batterie schwach
 
-#: apps/rf/main/rf.c:1491
+#: apps/rf/main/rf.c:1501
 código %.8s · datos %s	Code %.8s · Daten %s
 
-#: apps/rf/main/rf.c:1493
+#: apps/rf/main/rf.c:1503
 ID %05X · botón %X	ID %05X · Taste %X
 
-#: apps/rf/main/rf.c:1506
-#: apps/rf/main/rf.c:1590
+#: apps/rf/main/rf.c:1516
+#: apps/rf/main/rf.c:1600
 Desconocido	Unbekannt
 
-#: apps/rf/main/rf.c:1559
+#: apps/rf/main/rf.c:1569
 Esperando transmisiones en la banda: controles remotos, sensores de temperatura, timbres…	Warte auf Sendungen im Band: Fernbedienungen, Temperatursensoren, Klingeln…
 
-#: apps/rf/main/rf.c:1595
+#: apps/rf/main/rf.c:1605
 Hora: %02d:%02d:%02d · %d veces\n	Zeit: %02d:%02d:%02d · %d Mal\n
 
-#: apps/rf/main/rf.c:1597
+#: apps/rf/main/rf.c:1607
 Frecuencia: %u,%03u MHz (%+d kHz del centro) · %.0f dB sobre el ruido\n	Frequenz: %u,%03u MHz (%+d kHz von der Mitte) · %.0f dB über dem Rauschen\n
 
-#: apps/rf/main/rf.c:1600
+#: apps/rf/main/rf.c:1610
 Modulación: %s · corto %d µs · largo %d µs · pausa %d µs\n	Modulation: %s · kurz %d µs · lang %d µs · Pause %d µs\n
 
-#: apps/rf/main/rf.c:1602
+#: apps/rf/main/rf.c:1612
 %d bits: %s	%d Bits: %s
 
-#: apps/rf/main/rf.c:1617
+#: apps/rf/main/rf.c:1614
+\nTambién se lee como PT2262: %.8s %s	\nAuch als PT2262 lesbar: %.8s %s
+
+#: apps/rf/main/rf.c:1629
 Captura guardada: %s	Bildschirmfoto gespeichert: %s
 
-#: apps/rf/main/rf.c:1619
+#: apps/rf/main/rf.c:1631
 No se pudo guardar la captura	Bildschirmfoto konnte nicht gespeichert werden
 
-#: apps/rf/main/rf.c:1633
+#: apps/rf/main/rf.c:1645
 Grabando el audio en la carpeta de la Grabadora	Nehme den Ton im Ordner des Rekorders auf
 
-#: apps/rf/main/rf.c:1633
+#: apps/rf/main/rf.c:1645
 Grabación de audio terminada	Tonaufnahme beendet
 
-#: apps/rf/main/rf.c:1637
+#: apps/rf/main/rf.c:1649
 Grabando la señal en rf/iq de la tarjeta	Nehme das Signal in rf/iq der Karte auf
 
-#: apps/rf/main/rf.c:1637
+#: apps/rf/main/rf.c:1649
 Grabación de la señal terminada	Signalaufnahme beendet
 
-#: apps/rf/main/rf.c:1686
+#: apps/rf/main/rf.c:1698
 Guardar	Sichern
 
-#: apps/rf/main/rf.c:1687
+#: apps/rf/main/rf.c:1699
 Captura de pantalla	Bildschirmfoto
 
-#: apps/rf/main/rf.c:1690
+#: apps/rf/main/rf.c:1702
 Terminar la grabación de audio	Tonaufnahme beenden
 
-#: apps/rf/main/rf.c:1690
+#: apps/rf/main/rf.c:1702
 Grabar el audio	Ton aufnehmen
 
-#: apps/rf/main/rf.c:1691
+#: apps/rf/main/rf.c:1703
 Terminar la grabación de la señal	Signalaufnahme beenden
 
-#: apps/rf/main/rf.c:1691
+#: apps/rf/main/rf.c:1703
 Grabar la señal (I/Q)	Signal aufnehmen (I/Q)
 
-#: apps/rf/main/rf.c:1693
+#: apps/rf/main/rf.c:1705
 Dejar de reproducir	Wiedergabe beenden
 
-#: apps/rf/main/rf.c:1694
+#: apps/rf/main/rf.c:1706
 Reproducir una grabación	Eine Aufnahme abspielen
 
-#: apps/rf/main/rf.c:1695
+#: apps/rf/main/rf.c:1707
 Guardar lo recibido en modo Datos (rf/datos-<día>.csv)	Im Datenmodus Empfangenes sichern (rf/datos-<Tag>.csv)
 
-#: apps/rf/main/rf.c:1696
+#: apps/rf/main/rf.c:1708
 Publicarlo por MQTT	Per MQTT veröffentlichen
 
-#: apps/rf/main/rf.c:1696
+#: apps/rf/main/rf.c:1708
 Publicarlo por MQTT (no conectado)	Per MQTT veröffentlichen (nicht verbunden)
 
-#: apps/rf/main/rf.c:1699
+#: apps/rf/main/rf.c:1711
 La señal ocupa %u MB por minuto a la tasa de ahora; la tarjeta escribe unos 3 MB/s.	Das Signal belegt bei der jetzigen Rate %u MB pro Minute; die Karte schreibt etwa 3 MB/s.
 
-#: apps/rf/main/rf.c:1711
+#: apps/rf/main/rf.c:1723
 Grabaciones	Aufnahmen
 
-#: apps/rf/main/rf.c:1736
+#: apps/rf/main/rf.c:1748
 No hay grabaciones todavía.	Noch keine Aufnahmen.
 
-#: apps/rf/main/rf.c:1760
+#: apps/rf/main/rf.c:1772
 No sé a qué frecuencia está grabada	Die Frequenz steht nicht im Namen
 
-#: apps/rf/main/rf.c:2019
+#: apps/rf/main/rf.c:2031
 No pude arrancar la radio	Funkgerät ließ sich nicht starten
 
 #: apps/rf/main/rf_src_file.c:55

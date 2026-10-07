@@ -7,7 +7,7 @@ DC), for the decoders' tests (apps/rf/test/README.md). In 2 seconds:
 
   0.10 s  an EV1527 remote, ID A3F21, button 4, T = 320 us, 6 repeats,
           60 kHz above the centre
-  0.60 s  a PT2262 remote, code 0F1F0110FF01 (tri-state), T = 400 us, 4 repeats,
+  0.60 s  a PT2262 remote, code 0F1F0110 1000 (tri-state: address, then the data pins, driven), T = 400 us, 4 repeats,
           -40 kHz
   1.00 s  a Nexus sensor, ID 0x5B, channel 2, 21.7 C, 64 %, 3 repeats, +10 kHz,
           10 dB weaker
@@ -76,7 +76,7 @@ for _ in range(6):
     t = put(t, ev1527(0xA3F21, 0x4, 320), 60e3, 0.5)
 t = 0.60
 for _ in range(4):
-    t = put(t, pt2262('0F1F0110FF01', 400), -40e3, 0.5)
+    t = put(t, pt2262('0F1F01101000', 400), -40e3, 0.5)
 t = 1.00
 for _ in range(3):
     t = put(t, nexus(0x5B, 2, 21.7, 64), 10e3, 0.16)

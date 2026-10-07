@@ -38,7 +38,7 @@ enum { RF_MOD_UNKNOWN, RF_MOD_PWM, RF_MOD_PPM, RF_MOD_MANCHESTER };
 typedef struct rf_decoded_s {
     char proto[24];                 /* "EV1527", "Nexus-TH", ... or "" when only analysed */
     char text[96];                  /* a plain line in English, for the CSV and the tests (the app writes its own) */
-    char code[16];                  /* PT2262: the 12 three-state symbols */
+    char code[16];                  /* the 12 three-state symbols: a PT2262, or an EV1527 that reads as one too */
     char key[32];                   /* what identifies the sender, to group repeats and name it in MQTT */
     /* decoded values; has_* say which */
     bool has_temp, has_hum, has_batt, has_button;

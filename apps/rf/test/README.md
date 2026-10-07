@@ -37,9 +37,19 @@ python3 apps/rf/test/gen_ook.py 240000 /tmp/ook.cu8
 
 `gen_ook.py` sends an EV1527 remote (6 repeats), a PT2262 one (4), a Nexus
 sensor 10 dB weaker (3) and a Prologue one (3), each off the centre by up to
-80 kHz. On 2026-10-07 every repeat came out right at 240 k and 960 k, the
-offsets to a few Hz; with everything 18 dB weaker, 2 of 6 EV1527 repeats, 3
-of 4 PT2262 and 3 of 3 Prologue (the Nexus, 28 dB down, was lost).
+80 kHz. Every repeat comes out right at 240 k and 960 k, the offsets to a few
+Hz; with everything 18 dB weaker, 6 of 6 EV1527 repeats, 4 of 4 PT2262 and 3
+of 3 Prologue (the Nexus, 28 dB down, is lost).
+
+Its noise is far smaller than a real stick's, and that hid a bug until a real
+remote came (2026-10-07): the floor sat at the noise's low quantiles, the
+board's noise opened trains by itself and kept them open, and the remote's
+repeats were cut anywhere (one 24-bit code whole in 14 trains). An I/Q
+recording made on the board is the test for that: `ook_test` on two minutes
+of a copier remote's two buttons, three presses each, gives 24 + 25 EV1527
+repeats and no noise train. Recordings stay out of git (56 MB); make one with
+the app (Save, Record the signal) or `rec_iq=1` / `rec_iq=0` over
+`/api/live`.
 
 In the simulator, `RF_IQ_FILE=/tmp/am.cu8@960000` makes such a file the
 app's source, in real time and in a loop, and `RF_WAV_OUT=/tmp/out.raw` keeps

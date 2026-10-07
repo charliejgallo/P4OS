@@ -272,7 +272,17 @@ static void on_pulses(const rf_pulses_t *p, void *ctx)
     aos_hal_mutex_lock(a->mx);
     for (uint32_t k = 0; k < 4 && k < a->ev_n; k++) {
         rf_event_t *e = &a->ev[(a->ev_n - 1 - k) % EV_MAX];
-        if (!strcmp(e->d.key, d.key) && now - e->t_last <= 2000) {
+        /* a piece of what was just decoded, of its widths (the last
+         * repeat, cut short when the button was let go): not a new sender */
+        if (!d.proto[0] && e->d.proto[0] && now - e->t_last <= 1000 && d.mod == e->d.mod &&
+            LV_ABS(d.short_us - e->d.short_us) * 4 < e->d.short_us && LV_ABS(d.long_us - e->d.long_us) * 4 < e->d.long_us) {
+            aos_hal_mutex_unlock(a->mx);
+            return;
+        }
+        /* the same sender and the same button: a remote's two buttons
+         * pressed within 2 s are two lines (the key names the remote only,
+         * for MQTT's topic) */
+        if (!strcmp(e->d.key, d.key) && e->d.button == d.button && now - e->t_last <= 2000) {
             e->count++;
             e->t_last = now;
             if (p->snr_db > e->snr) e->snr = p->snr_db;
@@ -1600,6 +1610,8 @@ static void ev_detail(lv_event_t *e)
     k += snprintf(t + k, sizeof t - k, _("Modulación: %s · corto %d µs · largo %d µs · pausa %d µs\n"),
                   mod_name(ev.d.mod), ev.d.short_us, ev.d.long_us, ev.d.gap_us);
     k += snprintf(t + k, sizeof t - k, _("%d bits: %s"), ev.d.nbits, ev.d.hex);
+    if (!strcmp(ev.d.proto, "EV1527") && ev.d.code[0])
+        k += snprintf(t + k, sizeof t - k, _("\nTambién se lee como PT2262: %.8s %s"), ev.d.code, ev.d.code + 8);
     lv_obj_t *l = aos_label(card, t, aos_font_caption, AOS_C_TEXT);
     lv_obj_set_width(l, LV_PCT(100));
     lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
