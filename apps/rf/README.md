@@ -49,6 +49,21 @@ to the back header.
   transfer buffers, 64 KB of internal RAM, are freed then) and remembers
   the frequency, rate, gain and step.
 
+## Measured on the board
+
+2026-10-06, the same stick on pins 25/27: 2.048 Msps at 4.1 MB/s and
+2.4 Msps at 4.8 MB/s, no sample lost; 25 frames a second with 25-35 % of
+core 0 and 8-15 % of core 1; an FFT of 2048 points in 1.35 ms. Unplugged
+with the app open, the stream stopped clean and the app took the stick back
+by itself within a second of plugging it in again.
+
+Getting there: through LVGL the spectrum and the waterfall (620 000 pixels
+out of PSRAM every frame) and an FFT working in PSRAM cost 93/97 % of the
+two cores for 12 frames a second, 4.3 ms an FFT. Now the trace is redrawn
+only where it moved, both pictures are blitted straight to the panel
+(`aos_hal_display_blit_scaled`; through LVGL only while something is over
+the app, and in the simulator), and the FFT works in 28 KB of internal RAM.
+
 ## Trying it in the simulator
 
 The simulator drives the real stick plugged into the Mac, through libusb

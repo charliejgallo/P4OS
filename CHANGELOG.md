@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+- **RF, a new app: the spectrum and waterfall of an RTL-SDR** (an RTL2832U
+  stick) on the USB host. Drag or tap to tune, type a frequency, bands,
+  gain, sample rate and step. At 2.4 Msps on pins 25/27 it moves 4.8 MB/s
+  without losing a sample, 25 frames a second. Its driver is librtlsdr,
+  inside the app (GPL, as Doom's engine): `apps/rf/README.md`.
+- **Raw USB devices for apps** (`aos_hal_usb_raw_*`): an app can drive a
+  device none of the board's drivers takes - control and bulk transfers,
+  and a stream into a PSRAM ring. In the simulator, the Mac's own device
+  with `P4_SIM_USB=1` (`docs/USB.md`, "Raw devices").
+- Apps that draw straight to the panel (Video, Doom, Mapas...) no longer
+  draw over the lock screen when they are open under it
+  (`AOS_UI_OVER_LOCK`).
+
 ## 0.10.1 — 2026-10-06
 
 - **A crash while booting, about one boot in 18, is gone.** It showed only

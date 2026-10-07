@@ -26,8 +26,8 @@ estándares, nada de una lista de estaciones ni ajustes al equipo del usuario.
 
 | Fase | Qué | Estado |
 |---|---|---|
-| **1. USB crudo** | `aos_hal_usb_raw_*` en el firmware (control, bulk, stream a un anillo en PSRAM), su gemelo en el simulador sobre libusb (`P4_SIM_USB=1`), librtlsdr en la app con su capa libusb (`apps/rf/main/port/`) | hecho el 2026-10-06; probado en el simulador con la RTL-SDR real (2,048 Msps, 4,0 MB/s, nada perdido); **falta la placa** |
-| **2. Espectro y cascada** | FFT de 2048 puntos, 25 por segundo; arrastrar para sintonizar, tocar para centrar, escribir la frecuencia, bandas, ganancia, muestreo, paso | hecho el 2026-10-06 (la misma prueba); falta la placa |
+| **1. USB crudo** | `aos_hal_usb_raw_*` en el firmware (control, bulk, stream a un anillo en PSRAM), su gemelo en el simulador sobre libusb (`P4_SIM_USB=1`), librtlsdr en la app con su capa libusb (`apps/rf/main/port/`) | **hecho y probado en la placa el 2026-10-06** (abajo) |
+| **2. Espectro y cascada** | FFT de 2048 puntos, 25 por segundo; arrastrar para sintonizar, tocar para centrar, escribir la frecuencia, bandas, ganancia, muestreo, paso | **hecho y probado en la placa el 2026-10-06** |
 | 3. Escuchar | FM comercial (mono, después estéreo y RDS), AM (banda aérea), NFM (radioaficionados, PMR, marina), por el parlante o la placa de audio USB; silenciador | sin hacer |
 | 4. 433/868 MHz | demodulador OOK/FSK a pulsos + decodificadores (sensores, controles), publicarlos en Home Assistant por MQTT | sin hacer |
 | 5. CC1101 | módulo de `aos_io`: frecuencia, modulación, RSSI, recibir pulsos por GDO0 con el RMT (como Infrarrojo), aprender y reenviar códigos de los controles propios; barrido de RSSI como espectro grueso. Nada de interferir señales | sin hacer; el usuario tiene una CC1101 de 433 MHz con 10 pines |
@@ -43,14 +43,30 @@ estándares, nada de una lista de estaciones ni ajustes al equipo del usuario.
   muestras.
 - **En el simulador** (2026-10-06): 2,048 Msps a 4,0 MB/s sin pérdidas, las
   FM de la banda a la vista.
-- **En la placa, por medir:**
-  1. que enumere en 25/27 (High Speed, cables de menos de 15 cm) y en 21/23;
-  2. MB/s y muestras perdidas a 1,024, 2,048 y 2,4 Msps (el pendrive leyó a
-     7,4 MB/s; 2,4 Msps son 4,8 MB/s);
-  3. CPU del trabajador (`/api/sysmon`) y fps de la pantalla;
-  4. RAM interna con la app abierta (4 × 16 KB de búferes del host mientras
-     corre el stream) y que vuelvan al ir al segundo plano;
-  5. desenchufarla con la app abierta y volver a enchufarla.
+- **En la placa** (2026-10-06, pines 25/27, High Speed):
+
+  | | 2,048 Msps | 2,4 Msps |
+  |---|---|---|
+  | USB | 4,1 MB/s, 0 perdidas | 4,8 MB/s, 0 perdidas |
+  | CPU (núcleo 0 / 1) | 35 % / 15 % | 25 % / 8 % |
+  | Pantalla | 25 cuadros/s | 25 cuadros/s |
+  | Una FFT de 2048 | 1,35 ms | 1,4 ms |
+
+  Desenchufada con la app abierta: el stream se cortó limpio (194 MB, 0
+  perdidas, 2 errores en el instante del corte), la app la soltó y la volvió
+  a abrir sola en menos de un segundo al enchufarla otra vez; la RAM interna
+  libre quedó igual (121 KB con la app abierta).
+- **Lo que costó llegar ahí:** la primera versión dibujaba el espectro y la
+  cascada con LVGL (620 000 píxeles desde PSRAM por cuadro) y tenía la FFT en
+  PSRAM: 93/97 % de CPU, 12 cuadros/s y 4,3 ms por FFT. Ahora el trazo se
+  redibuja sólo donde cambió, las dos imágenes van directo al panel
+  (`aos_hal_display_blit_scaled`) y la FFT trabaja en 28 KB de RAM interna.
+  La pantalla compite con todo lo que lee PSRAM: un lazo caliente en PSRAM
+  rinde un tercio.
+- Probada en esa sesión una falla del sistema: la app de abajo de la pantalla
+  de bloqueo dibujaba encima de ella (Video, Doom y las otras que van directo
+  al panel también). `AOS_UI_OVER_LOCK` lo arregla para todas.
+- Sin probar: los pines 21/23 (Full Speed, 0,25 Msps) y 1,024/1,8 Msps.
 - Consumo: una RTL-SDR toma ~300 mA de los 5 V del pin 1 y se calienta.
 
 ## Decisiones

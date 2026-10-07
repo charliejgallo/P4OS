@@ -56,12 +56,10 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       DTR/RTS): detectado en 0,5 s, grabado en 1,5 s, leído en la Terminal.
       Su firmware viejo se reiniciaba cada 2,7 s: el Programador espera
       hasta 3 s a que el puerto vuelva.
-- [ ] **RF con la RTL-SDR** (2026-10-06, `docs/plan/RF.md`): USB crudo
-      (`aos_hal_usb_raw_*`) y la app RF probados en el simulador con la
-      RTL-SDR real (R820T, 2,048 Msps a 4,0 MB/s, nada perdido). En la
-      placa: que enumere en 25/27 y en 21/23, MB/s y perdidos a 1,024,
-      2,048 y 2,4 Msps, CPU del trabajador, RAM interna con la app abierta y
-      en segundo plano, desenchufar y volver a enchufar con la app abierta.
+- [x] **RF con la RTL-SDR** (2026-10-06, `docs/plan/RF.md`): en 25/27, a
+      2,048 y 2,4 Msps (4,1 y 4,8 MB/s) sin muestras perdidas, 25 cuadros/s
+      con 25-35 % de CPU; desenchufada y vuelta a enchufar con la app
+      abierta, vuelve sola. Sin probar: 21/23 (Full Speed).
 - [ ] **Apps del taller** (los cableados en `docs/img/bench-*.svg`, que arma
       `tools/bench_diagrams.py`: PWM, IR, tira WS2812B y 24LC;
       instaladas el 2026-10-05, probadas sólo en el
