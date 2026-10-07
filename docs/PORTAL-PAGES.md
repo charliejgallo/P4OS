@@ -85,6 +85,8 @@ A page runs in the browser and its app on the board; they meet on the card.
   now and then: Notes checks its folder every two seconds and reads the
   open note again when it changed there and has nothing unsaved.
 - **`openApp(id)`** brings the app to the front.
+- **Live data**, for what changes too often for a file (a spectrum, a
+  meter): see "Live data" below. No firmware of the app's own.
 - **A JSON API of its own** is firmware, as Radio's `/api/radio` is
   (`components/aos_portal/aos_portal_radio.c`). Most pages do not need
   one.
@@ -106,6 +108,28 @@ The pages there are, to copy from:
 | `apps/clima/web/clima.js` | the place, searched with a keyboard, and the forecast | a setting the app keeps in a preference, mirrored to a file both sides write |
 | `apps/cotiz/web/cotiz.js` | which rates the board shows | a one-line file the app reads |
 | `apps/pixel`, `lua`, `mapas`, `visor3d` | drawings, scripts, offline zones, models | big uploads with progress, downloads made in the browser |
+
+## Live data
+
+Since 2026-10-07 (`aos_hal_live_*` in `aos_hal.h`, `aos_live.c`,
+`aos_portal_live.c`): a channel in memory between an app and its page, for
+what changes too often for the card (writing a file several times a second
+is slow and wears it).
+
+| | the app (C) | the page (JS) |
+|---|---|---|
+| values | `aos_hal_live_put(id, key, type, data, len)`: the latest of each key kept, 64 KB at most | `GET /api/live?app=<id>&key=<key>`, as its type; the `X-Live-Seq` header says which version; 404 when there is none (the app is not open) |
+| | | `GET /api/live?app=<id>`: the keys there are, with their size, version and age |
+| messages | `aos_hal_live_take(id, buf, max)` from its timer: the next one, 0 when none | `POST /api/live?app=<id>` with a text body, 1 KB at most (16 queued in all) |
+| who looks | `aos_hal_live_idle_ms(id)`: how long ago a page asked anything of it; make the data only while it is small | |
+| leaving | `aos_hal_live_clear(id)` in `destroy()` | |
+
+The ids are the apps' own (`desc.id`). The RF app is the example
+(`apps/rf/main/rf.c`, "the portal's page", and `apps/rf/web/rf.js`): a
+binary spectrum it puts 25 times a second while someone looks (the page
+asks for it in a loop, one request at a time, ~80 ms each on the board), a
+JSON state every second, a JSON list when something new arrives; the page
+sends lines of `key=value`, the same as the card's `rf/control.txt`.
 
 ## How the portal loads them
 

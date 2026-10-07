@@ -62,6 +62,7 @@
 #include "aos_icon_ops.h"
 #include "aos_portal_bench.h"
 #include "aos_portal_radio.h"
+#include "aos_portal_live.h"
 #include "aos_portal_net.h"
 #include "aos_portal_access.h"
 #ifdef ESP_PLATFORM
@@ -1534,6 +1535,7 @@ static void handler(aos_httpd_req_t *r)
     else if (post && !strncmp(p, "serial/", 7)) api_serial_post(r, p + 7);
     else if (aos_portal_bench(r, m, p)) {}
     else if (aos_portal_radio(r, m, p)) {}
+    else if (aos_portal_live(r, m, p)) {}
     else if (aos_portal_net(r, m, p)) {}
     else if (aos_portal_claude(r, m, p)) {}
     else if (aos_portal_mqtt(r, m, p)) {}

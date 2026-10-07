@@ -1992,6 +1992,34 @@ const char *aos_hal_device_name(void);
 bool aos_hal_device_name_valid(const char *name);
 bool aos_hal_device_name_set(const char *name);
 
+/* P4OS: live data between an app and its page in the portal (aos_live.c,
+ * docs/PORTAL-PAGES.md "Live data"), in memory: what changes too often for
+ * a file on the card (a spectrum, a meter).
+ *
+ * The app puts named blobs - the latest of each kept, up to
+ * AOS_LIVE_BLOB_MAX, with a content type - and the page reads them, GET
+ * /api/live?app=<id>&key=<key> (the X-Live-Seq header says which version).
+ * The page posts short texts, POST /api/live?app=<id>, queued (16 in all)
+ * for the app to take from its timer. idle_ms says how long ago a page
+ * last asked anything of the app (UINT32_MAX: never), so it can make the
+ * data only while someone looks. clear() when the app goes. The ids are
+ * the app's own (desc.id). */
+#define AOS_LIVE_BLOB_MAX (64 * 1024)
+#define AOS_LIVE_MSG_MAX  1024
+bool     aos_hal_live_put(const char *app, const char *key, const char *type, const void *data, size_t len);
+int      aos_hal_live_take(const char *app, char *out, int max);       /* the next message's length, 0 none */
+uint32_t aos_hal_live_idle_ms(const char *app);
+void     aos_hal_live_clear(const char *app);
+/* the portal's side */
+typedef struct {
+    char key[16], type[32];
+    uint32_t len, seq, age_ms;
+} aos_live_info_t;
+int  aos_hal_live_get(const char *app, const char *key, void *out, size_t max, char *type, size_t type_len,
+                      uint32_t *seq);                                   /* bytes, -1 none */
+int  aos_hal_live_list(const char *app, aos_live_info_t *out, int max);
+bool aos_hal_live_push(const char *app, const char *text, size_t len);
+
 bool aos_hal_mdns_add_netif(void *esp_netif);
 void aos_hal_mdns_remove_netif(void *esp_netif);
 

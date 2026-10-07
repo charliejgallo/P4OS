@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
  * Mas 186 funciones de libc/libm agregadas a mano.
- * Total: 3319 simbolos.
+ * Total: 3326 simbolos.
  */
 
 #include <stddef.h>
@@ -310,6 +310,13 @@ extern int aos_hal_link_test;
 extern int aos_hal_link_test_running;
 extern int aos_hal_link_unpair;
 extern int aos_hal_link_unpark;
+extern int aos_hal_live_clear;
+extern int aos_hal_live_get;
+extern int aos_hal_live_idle_ms;
+extern int aos_hal_live_list;
+extern int aos_hal_live_push;
+extern int aos_hal_live_put;
+extern int aos_hal_live_take;
 extern int aos_hal_lock;
 extern int aos_hal_log;
 extern int aos_hal_log_level_set;
@@ -3632,6 +3639,13 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_link_test_running),
     ESP_ELFSYM_EXPORT(aos_hal_link_unpair),
     ESP_ELFSYM_EXPORT(aos_hal_link_unpark),
+    ESP_ELFSYM_EXPORT(aos_hal_live_clear),
+    ESP_ELFSYM_EXPORT(aos_hal_live_get),
+    ESP_ELFSYM_EXPORT(aos_hal_live_idle_ms),
+    ESP_ELFSYM_EXPORT(aos_hal_live_list),
+    ESP_ELFSYM_EXPORT(aos_hal_live_push),
+    ESP_ELFSYM_EXPORT(aos_hal_live_put),
+    ESP_ELFSYM_EXPORT(aos_hal_live_take),
     ESP_ELFSYM_EXPORT(aos_hal_lock),
     ESP_ELFSYM_EXPORT(aos_hal_log),
     ESP_ELFSYM_EXPORT(aos_hal_log_level_set),

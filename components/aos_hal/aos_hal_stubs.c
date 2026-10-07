@@ -1002,6 +1002,27 @@ __attribute__((weak)) bool aos_hal_device_name_valid(const char *name)
 __attribute__((weak)) bool aos_hal_device_name_set(const char *name)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) bool aos_hal_live_put(const char *app, const char *key, const char *type, const void *data, size_t len)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_live_take(const char *app, char *out, int max)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) uint32_t aos_hal_live_idle_ms(const char *app)
+{ uint32_t v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) void aos_hal_live_clear(const char *app)
+{ }
+
+__attribute__((weak)) int aos_hal_live_get(const char *app, const char *key, void *out, size_t max, char *type, size_t type_len, uint32_t *seq)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_live_list(const char *app, aos_live_info_t *out, int max)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_live_push(const char *app, const char *text, size_t len)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) bool aos_hal_mdns_add_netif(void *esp_netif)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
