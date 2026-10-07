@@ -90,13 +90,15 @@ typedef struct {
     volatile uint32_t want_freq, want_rate;
     volatile int want_gain;                 /* tenths of dB, -1 automatic */
     volatile uint32_t freq, rate;           /* what the source has */
-    volatile bool paused;
+    volatile bool paused;                   /* hidden || locked */
+    bool hidden;
     volatile uint32_t info_seq, spec_seq;
     rf_src_info_t info;
     void *mx;
     float *spec;                            /* RF_FFT, under mx */
     volatile uint64_t bytes;
     volatile uint32_t dropped;
+    volatile unsigned ui_frames, ui_draw_us;    /* the UI's drawing, for the worker's log */
 
     /* the UI's */
     uint32_t step;
@@ -111,6 +113,14 @@ typedef struct {
     int16_t tick_x[TICKS_MAX];
     int nticks;
     lv_image_dsc_t spec_dsc, wf_dsc;
+    bool blit_ok;                           /* straight to the panel (not in the simulator) */
+    int16_t *yt, *yd;                       /* W: the trace's top now, and as drawn */
+    uint8_t *vgrid, *hgrid;                 /* W, SH */
+    uint16_t *c_fill;                       /* SH: the fill's colour per row */
+    uint16_t c_bg, c_grid, c_line, c_mark, c_markfill;
+    float drawn_ref;
+    unsigned ticks_gen, drawn_ticks;
+    bool drawn_once;
     uint16_t *spec_px, *wf_px;
     int SH, WH, wf_row;
     uint16_t lut[256];
@@ -155,6 +165,9 @@ static void worker(void *arg)
     uint32_t cur_freq = 0, cur_rate = 0;
     int cur_gain = -2, fill = 0;
     uint64_t since = 0, next_try = 0;
+    /* where the worker's time goes, logged every 10 s (docs/plan/RF.md) */
+    uint64_t t_read = 0, t_fft = 0, t_take = 0, t_log = aos_hal_uptime_us();
+    unsigned n_fft = 0;
     while (!aos_hal_worker_should_stop()) {
         if (a->paused) {
             if (src && started) {
@@ -217,7 +230,9 @@ static void worker(void *arg)
             }
             since = 0;
         }
+        uint64_t t0 = aos_hal_uptime_us();
         int n = src->ops->read(src, buf, READ_BYTES, 200);
+        t_read += aos_hal_uptime_us() - t0;
         if (n < 0) {
             aos_hal_log("rf", "the radio went away");
             src->ops->close(src);
@@ -238,7 +253,10 @@ static void worker(void *arg)
                 i += take;
                 since += take / 2;
                 if (fill == RF_FFT * 2) {
+                    uint64_t t1 = aos_hal_uptime_us();
                     rf_fft_add_cu8(fft, frame);
+                    t_fft += aos_hal_uptime_us() - t1;
+                    n_fft++;
                     fill = 0;
                 }
             } else {
@@ -249,7 +267,9 @@ static void worker(void *arg)
             }
             if (since >= period) {
                 if (rf_fft_count(fft)) {
+                    uint64_t t2 = aos_hal_uptime_us();
                     rf_fft_take_db(fft, db);
+                    t_take += aos_hal_uptime_us() - t2;
                     aos_hal_mutex_lock(a->mx);
                     memcpy(a->spec, db, RF_FFT * sizeof(float));
                     a->spec_seq++;
@@ -264,6 +284,17 @@ static void worker(void *arg)
         src->ops->stats(src, &b, &d);
         a->bytes = b;
         a->dropped = d;
+        uint64_t now = aos_hal_uptime_us();
+        if (now - t_log >= 10000000) {
+            unsigned span = (unsigned)((now - t_log) / 1000);
+            aos_hal_log("rf", "worker in %u ms: read %u ms, %u FFTs %u ms, dB %u ms; UI drew %u frames in %u ms",
+                        span, (unsigned)(t_read / 1000), n_fft, (unsigned)(t_fft / 1000), (unsigned)(t_take / 1000),
+                        a->ui_frames, a->ui_draw_us / 1000);
+            t_read = t_fft = t_take = 0;
+            n_fft = 0;
+            a->ui_frames = a->ui_draw_us = 0;
+            t_log = now;
+        }
     }
     if (src) src->ops->close(src);
 out:
@@ -337,6 +368,7 @@ static void place_ticks(rf_t *a)
         a->tick_x[a->nticks++] = (int16_t)x;
     }
     for (int i = a->nticks; i < TICKS_MAX; i++) lv_obj_add_flag(a->tick_lbl[i], LV_OBJ_FLAG_HIDDEN);
+    a->ticks_gen++;
 }
 
 /* the noise floor: the 20th percentile of the columns, slowly followed */
@@ -357,6 +389,54 @@ static void follow_floor(rf_t *a)
     } else a->floor_db += (f - a->floor_db) * 0.05f;
 }
 
+/* the spectrum's pixel at (x, y) with the trace's top at t */
+static inline uint16_t spec_pixel(const rf_t *a, int x, int y, int t)
+{
+    if (y < t) return x == a->W / 2 ? a->c_mark : a->hgrid[y] || a->vgrid[x] ? a->c_grid : a->c_bg;
+    if (y <= t + 1) return a->c_line;
+    return x == a->W / 2 ? a->c_markfill : a->c_fill[y];
+}
+
+/* Where the panel takes the two pictures straight (the board): LVGL's own
+ * drawing of them cost a core and a half for 12 frames a second
+ * (2026-10-06), since every frame re-rendered 620 000 pixels out of PSRAM.
+ * Not under anything LVGL draws over the app (a panel, the switcher, a
+ * toast, our own sheets): then the images are shown through LVGL. */
+static bool may_blit(rf_t *a)
+{
+    return a->blit_ok && !aos_ui_overlay() && !a->sheet && lv_obj_has_flag(a->empty, LV_OBJ_FLAG_HIDDEN);
+}
+
+static void present(rf_t *a, bool spec_changed)
+{
+    if (may_blit(a)) {
+        if (!lv_obj_has_flag(a->spec_img, LV_OBJ_FLAG_HIDDEN)) {
+            /* LVGL stops drawing them; it paints their place black once */
+            lv_obj_add_flag(a->spec_img, LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(a->wf_img, LV_OBJ_FLAG_HIDDEN);
+        }
+        lv_area_t c;
+        lv_obj_get_coords(a->spec_img, &c);
+        bool ok = aos_hal_display_blit_scaled(c.x1, c.y1, a->W, a->SH, a->spec_px, 1, false);
+        lv_obj_get_coords(a->wf_img, &c);
+        ok = ok && aos_hal_display_blit_scaled(c.x1, c.y1, a->W, a->WH, a->wf_px + a->wf_row * a->W, 1, false);
+        if (ok) return;
+        a->blit_ok = false;         /* the simulator: LVGL from now on */
+    }
+    if (lv_obj_has_flag(a->spec_img, LV_OBJ_FLAG_HIDDEN)) {
+        lv_obj_remove_flag(a->spec_img, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_remove_flag(a->wf_img, LV_OBJ_FLAG_HIDDEN);
+    }
+    if (spec_changed) {
+        lv_image_cache_drop(&a->spec_dsc);
+        lv_obj_invalidate(a->spec_img);
+    }
+    lv_image_cache_drop(&a->wf_dsc);
+    a->wf_dsc.data = (const uint8_t *)(a->wf_px + a->wf_row * a->W);
+    lv_image_set_src(a->wf_img, &a->wf_dsc);
+    lv_obj_invalidate(a->wf_img);
+}
+
 static void draw_spectrum(rf_t *a)
 {
     const int W = a->W, SH = a->SH;
@@ -368,33 +448,46 @@ static void draw_spectrum(rf_t *a)
         a->col[x] = m;
     }
     follow_floor(a);
-    float lo = a->floor_db - 8, hi = a->floor_db + 62;
+    /* the scale moves in whole steps of 2 dB, so the grid stays put and the
+     * trace can be redrawn only where it moved */
+    float ref = 2.0f * floorf(a->floor_db / 2.0f);
+    float lo = ref - 8, hi = ref + 62;
     float wlo = a->floor_db - 2, whi = a->floor_db + 42;
-    static int16_t yt[1280];
+    bool full = ref != a->drawn_ref || a->ticks_gen != a->drawn_ticks || !a->drawn_once;
+    if (full) {
+        a->drawn_ref = ref;
+        a->drawn_ticks = a->ticks_gen;
+        a->drawn_once = true;
+        float db_per_row = (hi - lo) / SH;
+        for (int y = 0; y < SH; y++) {
+            float level = hi - y * db_per_row;
+            a->hgrid[y] = fmodf(level + 1000.0f, 10.0f) < db_per_row;
+        }
+        memset(a->vgrid, 0, W);
+        for (int i = 0; i < a->nticks; i++)
+            if (a->tick_x[i] >= 0 && a->tick_x[i] < W) a->vgrid[a->tick_x[i]] = 1;
+    }
     for (int x = 0; x < W; x++) {
         a->smooth[x] += (a->col[x] - a->smooth[x]) * 0.5f;
         int y = (int)((hi - a->smooth[x]) * SH / (hi - lo));
-        yt[x] = (int16_t)(y < 0 ? 0 : y >= SH ? SH - 1 : y);
+        a->yt[x] = (int16_t)(y < 0 ? 0 : y >= SH - 2 ? SH - 2 : y);
     }
-    /* the trace, row by row (PSRAM likes rows) */
-    const uint16_t bg = rgb565(8, 10, 16), grid = rgb565(36, 40, 52), line = rgb565(120, 230, 255);
-    static uint8_t vgrid[1280];
-    memset(vgrid, 0, W);
-    for (int i = 0; i < a->nticks; i++)
-        if (a->tick_x[i] >= 0 && a->tick_x[i] < W) vgrid[a->tick_x[i]] = 1;
-    float db_per_row = (hi - lo) / SH;
-    for (int y = 0; y < SH; y++) {
-        uint16_t *row = a->spec_px + y * W;
-        float level = hi - y * db_per_row;
-        bool hgrid = fmodf(level + 1000.0f, 10.0f) < db_per_row;
-        uint16_t fill = rgb565(10, 40 + 60 * (SH - y) / SH, 70 + 60 * (SH - y) / SH);
+    if (full) {
+        /* row by row (PSRAM likes rows) */
+        for (int y = 0; y < SH; y++) {
+            uint16_t *row = a->spec_px + y * W;
+            for (int x = 0; x < W; x++) row[x] = spec_pixel(a, x, y, a->yt[x]);
+        }
+    } else {
+        /* only the rows between where the trace was and where it is */
         for (int x = 0; x < W; x++) {
-            int t = yt[x];
-            row[x] = y < t ? (hgrid || vgrid[x] ? grid : bg) : y <= t + 1 ? line : fill;
+            int t0 = a->yd[x], t1 = a->yt[x];
+            if (t0 == t1) continue;
+            int y0 = t0 < t1 ? t0 : t1, y1 = (t0 < t1 ? t1 : t0) + 1;
+            for (int y = y0; y <= y1 && y < SH; y++) a->spec_px[y * W + x] = spec_pixel(a, x, y, t1);
         }
     }
-    lv_image_cache_drop(&a->spec_dsc);
-    lv_obj_invalidate(a->spec_img);
+    memcpy(a->yd, a->yt, W * sizeof(int16_t));
 
     /* a row of the waterfall, twice */
     a->wf_row = (a->wf_row + a->WH - 1) % a->WH;
@@ -404,10 +497,8 @@ static void draw_spectrum(rf_t *a)
         int i = (int)((a->col[x] - wlo) * k);
         r1[x] = r2[x] = a->lut[i < 0 ? 0 : i > 255 ? 255 : i];
     }
-    lv_image_cache_drop(&a->wf_dsc);
-    a->wf_dsc.data = (const uint8_t *)(a->wf_px + a->wf_row * W);
-    lv_image_set_src(a->wf_img, &a->wf_dsc);
-    lv_obj_invalidate(a->wf_img);
+    r1[W / 2] = r2[W / 2] = a->c_mark;
+    present(a, true);
 }
 
 /* ---- the UI's state ------------------------------------------------------- */
@@ -450,6 +541,9 @@ static void tune(rf_t *a, int64_t hz, bool snap)
 static void ui_timer(lv_timer_t *t)
 {
     rf_t *a = lv_timer_get_user_data(t);
+    /* the spectrum is only worth its 4 MB/s on screen: the stream rests
+     * while the board is locked (listening, later, will keep it going) */
+    a->paused = a->hidden || (aos_ui_overlay() & AOS_UI_OVER_LOCK);
     if (a->state == ST_RUN) {
         if (!lv_obj_has_flag(a->empty, LV_OBJ_FLAG_HIDDEN)) lv_obj_add_flag(a->empty, LV_OBJ_FLAG_HIDDEN);
     } else {
@@ -475,7 +569,10 @@ static void ui_timer(lv_timer_t *t)
         memcpy(a->ui_spec, a->spec, RF_FFT * sizeof(float));
         a->seen_spec = a->spec_seq;
         aos_hal_mutex_unlock(a->mx);
+        uint64_t t0 = aos_hal_uptime_us();
         draw_spectrum(a);
+        a->ui_draw_us += (unsigned)(aos_hal_uptime_us() - t0);
+        a->ui_frames++;
     }
     uint64_t now = aos_hal_uptime_ms();
     if (now - a->stat_at >= 1000) {
@@ -753,7 +850,24 @@ static void build(rf_t *a, lv_obj_t *root)
     a->wf_px = psram((size_t)a->W * a->WH * 2 * 2);
     a->col = psram(a->W * sizeof(float));
     a->smooth = psram(a->W * sizeof(float));
-    if (!a->spec_px || !a->wf_px || !a->col || !a->smooth) return;
+    a->yt = psram(a->W * sizeof(int16_t));
+    a->yd = psram(a->W * sizeof(int16_t));
+    a->vgrid = psram(a->W);
+    a->hgrid = psram(a->SH);
+    a->c_fill = psram(a->SH * sizeof(uint16_t));
+    if (!a->spec_px || !a->wf_px || !a->col || !a->smooth || !a->yt || !a->yd || !a->vgrid || !a->hgrid || !a->c_fill) {
+        free(a->spec_px);
+        a->spec_px = NULL;
+        return;
+    }
+    /* the tuned frequency is the column in the middle, drawn into the pixels */
+    a->c_bg = rgb565(8, 10, 16);
+    a->c_grid = rgb565(36, 40, 52);
+    a->c_line = rgb565(120, 230, 255);
+    a->c_mark = rgb565(200, 50, 50);
+    a->c_markfill = rgb565(120, 40, 60);
+    for (int r = 0; r < a->SH; r++) a->c_fill[r] = rgb565(10, 40 + 60 * (a->SH - r) / a->SH, 70 + 60 * (a->SH - r) / a->SH);
+    a->blit_ok = true;
     for (int x = 0; x < a->W; x++) a->smooth[x] = -120;
     memset(a->spec_px, 0, (size_t)a->W * a->SH * 2);
     uint16_t dark = a->lut[0];
@@ -777,14 +891,6 @@ static void build(rf_t *a, lv_obj_t *root)
         lv_obj_add_flag(*o, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_add_event_cb(*o, spec_event, LV_EVENT_ALL, a);
     }
-    /* the tuned frequency, a thin line down the middle */
-    lv_obj_t *mark = lv_obj_create(root);
-    lv_obj_remove_style_all(mark);
-    lv_obj_set_size(mark, 2, y - head);
-    lv_obj_set_pos(mark, a->W / 2 - 1, head);
-    lv_obj_set_style_bg_color(mark, AOS_C_RED, 0);
-    lv_obj_set_style_bg_opa(mark, LV_OPA_50, 0);
-    lv_obj_remove_flag(mark, LV_OBJ_FLAG_CLICKABLE);
 
     lv_obj_t *row = lv_obj_create(root);
     lv_obj_remove_style_all(row);
@@ -890,6 +996,11 @@ static void rf_destroy(aos_app_t *self, void *inst)
     free(a->wf_px);
     free(a->col);
     free(a->smooth);
+    free(a->yt);
+    free(a->yd);
+    free(a->vgrid);
+    free(a->hgrid);
+    free(a->c_fill);
     if (A == a) A = NULL;
     free(a);
 }
@@ -897,13 +1008,14 @@ static void rf_destroy(aos_app_t *self, void *inst)
 static void rf_hide(aos_app_t *self, void *inst)
 {
     (void)self;
+    ((rf_t *)inst)->hidden = true;
     ((rf_t *)inst)->paused = true;
 }
 
 static void rf_show(aos_app_t *self, void *inst)
 {
     (void)self;
-    ((rf_t *)inst)->paused = false;
+    ((rf_t *)inst)->hidden = false;
 }
 
 static bool rf_init(aos_app_t *app)
