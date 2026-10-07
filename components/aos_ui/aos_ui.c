@@ -826,6 +826,7 @@ uint32_t aos_ui_overlay(void)
     if (s_curtain && !lv_obj_has_flag(s_curtain, LV_OBJ_FLAG_HIDDEN)) o |= AOS_UI_OVER_CURTAIN;
     if (aos_banner_up()) o |= AOS_UI_OVER_BANNER;
     if (aos_toast_up()) o |= AOS_UI_OVER_TOAST;
+    if (aos_lock_covers()) o |= AOS_UI_OVER_LOCK;
     return o;
 }
 

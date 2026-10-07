@@ -634,6 +634,7 @@ void aos_lock_now(void)
 }
 
 bool aos_lock_is_locked(void) { return s_locked; }
+bool aos_lock_covers(void) { return s_locked || L.layer; }
 
 void aos_lock_layout(void)
 {

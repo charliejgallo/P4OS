@@ -57,6 +57,8 @@ enum {
     AOS_UI_OVER_BANNER   = 1u << 4,     /* a notification's banner */
     AOS_UI_OVER_TOAST    = 1u << 5,
     AOS_UI_OVER_NOT_FRONT = 1u << 6,
+    AOS_UI_OVER_LOCK     = 1u << 7,     /* the lock screen, up or sliding away (since 0.10.2: the
+                                         * app under it is still "in front" and kept blitting over it) */
 };
 uint32_t aos_ui_overlay(void);
 

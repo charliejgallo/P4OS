@@ -32,6 +32,7 @@ void aos_lock_init(void);       /* aos_ui_init, after the layers */
 void aos_lock_tick(void);       /* aos_ui_tick: decides when to lock */
 void aos_lock_layout(void);     /* the orientation changed */
 bool aos_lock_is_locked(void);
+bool aos_lock_covers(void);     /* locked, or its layer still sliding away */
 void aos_lock_now(void);
 
 void aos_lock_get_cfg(aos_lock_cfg_t *out);
