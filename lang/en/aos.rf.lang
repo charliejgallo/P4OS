@@ -5,75 +5,120 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/rf/main/rf.c:68
+#: apps/rf/main/rf.c:73
+#: apps/rf/main/rf.c:83
 FM	FM
 
-#: apps/rf/main/rf.c:69
+#: apps/rf/main/rf.c:74
 Aire	Air
 
-#: apps/rf/main/rf.c:70
+#: apps/rf/main/rf.c:75
 Marina	Marine
 
-#: apps/rf/main/rf.c:149
-#: apps/rf/main/rf.c:869
+#: apps/rf/main/rf.c:83
+Sin audio	No audio
+
+#: apps/rf/main/rf.c:83
+AM	AM
+
+#: apps/rf/main/rf.c:83
+FM angosta	Narrow FM
+
+#: apps/rf/main/rf.c:234
+#: apps/rf/main/rf.c:1279
 Sin memoria	Out of memory
 
-#: apps/rf/main/rf.c:211
+#: apps/rf/main/rf.c:340
 La RTL-SDR no empezó a mandar muestras	The RTL-SDR did not start sending samples
 
-#: apps/rf/main/rf.c:226
+#: apps/rf/main/rf.c:357
 Se desconectó la RTL-SDR	The RTL-SDR was unplugged
 
-#: apps/rf/main/rf.c:428
-Ganancia auto	Gain auto
+#: apps/rf/main/rf.c:672
+Gan. auto	Gain auto
 
-#: apps/rf/main/rf.c:429
-Ganancia %d,%d dB	Gain %d.%d dB
+#: apps/rf/main/rf.c:673
+Gan. %d,%d dB	Gain %d.%d dB
 
-#: apps/rf/main/rf.c:431
+#: apps/rf/main/rf.c:675
 Paso %u MHz	Step %u MHz
 
-#: apps/rf/main/rf.c:432
+#: apps/rf/main/rf.c:679
+Paso %u,%02u kHz	Step %u.%02u kHz
+
+#: apps/rf/main/rf.c:680
 Paso %u,%u kHz	Step %u.%u kHz
 
-#: apps/rf/main/rf.c:433
+#: apps/rf/main/rf.c:681
 Paso %u kHz	Step %u kHz
 
-#: apps/rf/main/rf.c:458
+#: apps/rf/main/rf.c:685
+Silenc. %d dB	Squelch %d dB
+
+#: apps/rf/main/rf.c:686
+Silenc. no	Squelch off
+
+#: apps/rf/main/rf.c:762
 Buscando una RTL-SDR…	Looking for an RTL-SDR…
 
-#: apps/rf/main/rf.c:462
-Enchufala en el host USB: pines 25/27 del conector de atrás (High Speed, cables de menos de 15 cm) y 5 V del pin 1. Los pines 21/23 son Full Speed: alcanzan para 250 mil muestras por segundo.	Plug it into the USB host: pins 25/27 of the back header (High Speed, wires shorter than 15 cm) and 5 V from pin 1. Pins 21/23 are Full Speed: enough for 250 thousand samples a second.
+#: apps/rf/main/rf.c:766
+Enchufala en el host USB: pines 25/27 del conector de atrás (High Speed, cables de menos de 15 cm) y 5 V del pin 1. Los pines 21/23 son Full Speed: alcanzan para 240 mil muestras por segundo.	Plug it into the USB host: pins 25/27 of the back header (High Speed, wires shorter than 15 cm) and 5 V from pin 1. Pins 21/23 are Full Speed: enough for 240 thousand samples a second.
 
-#: apps/rf/main/rf.c:463
+#: apps/rf/main/rf.c:767
 El host USB está apagado: prendelo en Ajustes → USB → Host USB, y enchufá la RTL-SDR en los pines 25/27 del conector de atrás.	The USB host is off: turn it on in Settings → USB → USB host, and plug the RTL-SDR into pins 25/27 of the back header.
 
-#: apps/rf/main/rf.c:488
+#: apps/rf/main/rf.c:802
+señal	signal
+
+#: apps/rf/main/rf.c:803
+silenciado	muted
+
+#: apps/rf/main/rf.c:806
+estéreo	stereo
+
+#: apps/rf/main/rf.c:810
 perdidos	lost
 
-#: apps/rf/main/rf.c:490
+#: apps/rf/main/rf.c:812
 Sin radio	No radio
 
-#: apps/rf/main/rf.c:565
-En los pines 21/23 (Full Speed) sólo entran 250 mil muestras por segundo	On pins 21/23 (Full Speed) only 250 thousand samples a second fit
+#: apps/rf/main/rf.c:818
+Señal ahora: %d dB sobre el ruido	Signal now: %d dB over the noise
 
-#: apps/rf/main/rf.c:640
+#: apps/rf/main/rf.c:893
+En los pines 21/23 (Full Speed) sólo entran 240 mil muestras por segundo	On pins 21/23 (Full Speed) only 240 thousand samples a second fit
+
+#: apps/rf/main/rf.c:987
 Frecuencia en MHz	Frequency in MHz
 
-#: apps/rf/main/rf.c:663
+#: apps/rf/main/rf.c:1010
 Automática	Automatic
 
-#: apps/rf/main/rf.c:672
+#: apps/rf/main/rf.c:1019
 Ganancia	Gain
 
-#: apps/rf/main/rf.c:683
+#: apps/rf/main/rf.c:1030
 Todo a la izquierda es automática. Subila hasta que aparezcan las señales sin que suba el piso de ruido.	All the way left is automatic. Raise it until the signals show without the noise floor rising.
 
-#: apps/rf/main/rf.c:873
+#: apps/rf/main/rf.c:1043
+Siempre abierto	Always open
+
+#: apps/rf/main/rf.c:1051
+Silenciador	Squelch
+
+#: apps/rf/main/rf.c:1060
+Corta el audio de AM y FM angosta mientras el canal no supera al ruido por esos dB; entre 6 y 15 suele andar. Todo a la izquierda, siempre abierto. La FM comercial no lo usa.	Mutes AM and narrow FM while the channel is not that many dB over the noise; 6 to 15 usually works. All the way left, always open. Broadcast FM does not use it.
+
+#: apps/rf/main/rf.c:1289
 No pude arrancar la radio	Could not start the radio
 
+#: apps/rf/main/rf_src_file.c:33
+#: apps/rf/main/rf_src_file.c:43
 #: apps/rf/main/rf_src_rtl.c:33
 No hay ninguna RTL-SDR en el host USB	There is no RTL-SDR on the USB host
+
+#: apps/rf/main/rf_src_file.c:61
+archivo	file
 
 #: apps/rf/main/rf_src_rtl.c:40
 La RTL-SDR no respondió al abrirla	The RTL-SDR did not answer when opened

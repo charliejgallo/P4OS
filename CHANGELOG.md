@@ -11,6 +11,14 @@
   device none of the board's drivers takes - control and bulk transfers,
   and a stream into a PSRAM ring. In the simulator, the Mac's own device
   with `P4_SIM_USB=1` (`docs/USB.md`, "Raw devices").
+- **RF listens:** broadcast FM, AM (the airband) and narrow FM (amateurs,
+  PMR, marine), with a squelch, through the speaker or a USB sound card,
+  and on with the screen locked or another app in front. 36-40 % of core 0
+  at 240 ksps with the spectrum running.
+- **esp-dsp for the apps:** the firmware carries it and lends its 16-bit
+  SIMD routines (dot products, decimating FIRs, FFTs) and biquads; on the
+  P4 a float multiply-add costs ~5 cycles whatever the code
+  (`docs/APPS-P4.md`, "DSP").
 - Apps that draw straight to the panel (Video, Doom, Mapas...) no longer
   draw over the lock screen when they are open under it
   (`AOS_UI_OVER_LOCK`).

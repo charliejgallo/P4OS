@@ -28,7 +28,7 @@ estándares, nada de una lista de estaciones ni ajustes al equipo del usuario.
 |---|---|---|
 | **1. USB crudo** | `aos_hal_usb_raw_*` en el firmware (control, bulk, stream a un anillo en PSRAM), su gemelo en el simulador sobre libusb (`P4_SIM_USB=1`), librtlsdr en la app con su capa libusb (`apps/rf/main/port/`) | **hecho y probado en la placa el 2026-10-06** (abajo) |
 | **2. Espectro y cascada** | FFT de 2048 puntos, 25 por segundo; arrastrar para sintonizar, tocar para centrar, escribir la frecuencia, bandas, ganancia, muestreo, paso | **hecho y probado en la placa el 2026-10-06** |
-| 3. Escuchar | FM comercial (mono, después estéreo y RDS), AM (banda aérea), NFM (radioaficionados, PMR, marina), por el parlante o la placa de audio USB; silenciador | sin hacer |
+| **3. Escuchar** | FM comercial (mono; estéreo y RDS después), AM (banda aérea), FM angosta (radioaficionados, PMR, marina), por el parlante o la placa de audio USB; silenciador | **hecho el 2026-10-07**: probado en la Mac con señales sintéticas y en la placa con una FM real (el piloto estéreo medido a 36-43 dB) y la CPU medida; **falta que alguien lo escuche** (la noche de la prueba, la placa en volumen 0) |
 | 4. 433/868 MHz | demodulador OOK/FSK a pulsos + decodificadores (sensores, controles), publicarlos en Home Assistant por MQTT | sin hacer |
 | 5. CC1101 | módulo de `aos_io`: frecuencia, modulación, RSSI, recibir pulsos por GDO0 con el RMT (como Infrarrojo), aprender y reenviar códigos de los controles propios; barrido de RSSI como espectro grueso. Nada de interferir señales | sin hacer; el usuario tiene una CC1101 de 433 MHz con 10 pines |
 | 6. Más fuentes | rtl_tcp (sirve para probar sin la placa y para usar una SDR de otra máquina), grabar y reproducir I/Q en la tarjeta | sin hacer |
@@ -68,6 +68,32 @@ estándares, nada de una lista de estaciones ni ajustes al equipo del usuario.
   al panel también). `AOS_UI_OVER_LOCK` lo arregla para todas.
 - Sin probar: los pines 21/23 (Full Speed, 0,25 Msps) y 1,024/1,8 Msps.
 - Consumo: una RTL-SDR toma ~300 mA de los 5 V del pin 1 y se calienta.
+
+## Escuchar: lo medido y lo aprendido (2026-10-07)
+
+- **El punto flotante del P4 es lento para esto:** ~5 ciclos por
+  multiplicación-suma, haga lo que haga el código. En flotante la cadena de
+  FM a 960 k tomaba el 72 % de un núcleo. Los filtros pasaron a 16 bits sobre
+  el SIMD del P4 con esp-dsp, que el firmware ahora presta a las apps
+  (`docs/APPS-P4.md`, "DSP": lo medido y las trampas).
+- **Muestreo para escuchar:** 240 k por defecto para AM y FM angosta (la
+  RTL2832 hace la primera decimación adentro), 960 k para FM comercial (más
+  espectro), 1,92 M opcional. 1,44 y 2,4 M quedan para mirar: su primera
+  etapa divide por 3 o 5, y esp-dsp con decimación impar no da lo mismo que
+  C.
+- **AM y FM angosta a 24 kHz de audio:** la voz no necesita más, y el filtro
+  de canal a 48 k en C costaba un 25 % de núcleo.
+- **El bloqueador de continua promedia 0,1 s:** con el promedio de cada
+  bloque (0,5 ms a 2,4 M) seguía a una portadora corrida 1 kHz y la AM salía
+  con el segundo armónico a −27 dB.
+- **La cola del parlante:** entre 50 y 200 ms; si el motor se atrasa y se
+  pone al día, se tira el bloque (una vez se llenó el segundo entero y no
+  bajaba).
+- **El motor corre a prioridad 1:** a 3 dejó sin CPU al hilo `tick` del
+  sistema y el vigilante reinició la placa.
+- Primero se rompió el heap por un búfer de audio chico (el colchón de
+  100 ms no entraba): desde entonces todo pasa por el simulador con ASan
+  (`sim/build-rf-asan`) antes de la placa.
 
 ## Decisiones
 

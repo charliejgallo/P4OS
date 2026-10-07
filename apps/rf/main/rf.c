@@ -18,6 +18,7 @@
  * scrolls by moving a pointer instead of 800 KB.
  */
 #include "rf.h"
+#include "rf_demod.h"
 
 #include "aos_app.h"
 #include "aos_hal.h"
@@ -27,6 +28,7 @@
 #include "aos_ui.h"
 
 #include <math.h>
+#include <sys/stat.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -61,23 +63,39 @@ enum { ST_SEARCH, ST_NONE, ST_RUN, ST_LOST };
 typedef struct {
     const char *name;
     uint32_t hz, step;
+    int mode;
 } band_t;
 
-/* centre and step of common bands; anyone's, not a list of stations */
+/* centre, step and how to listen of common bands; anyone's, not a list of
+ * stations. 433 MHz also carries LPD handhelds (narrow FM); 868 and ADS-B
+ * are data, only seen. */
 static const band_t BANDS[] = {
-    { N_("FM"),     98000000,  100000 },
-    { N_("Aire"),   125000000, 25000 },
-    { N_("Marina"), 156800000, 25000 },
-    { "2 m",        145000000, 12500 },
-    { "433",        433920000, 25000 },
-    { "70 cm",      435000000, 12500 },
-    { "PMR",        446100000, 12500 },
-    { "868",        868300000, 25000 },
-    { "ADS-B",      1090000000, 1000000 },
+    { N_("FM"),     98000000,  100000,  RF_MODE_WFM },
+    { N_("Aire"),   125000000, 25000,   RF_MODE_AM },
+    { N_("Marina"), 156800000, 25000,   RF_MODE_NFM },
+    { "2 m",        145000000, 12500,   RF_MODE_NFM },
+    { "433",        433920000, 25000,   RF_MODE_NFM },
+    { "70 cm",      435000000, 12500,   RF_MODE_NFM },
+    { "PMR",        446006250, 12500,   RF_MODE_NFM },
+    { "868",        868300000, 25000,   RF_MODE_OFF },
+    { "ADS-B",      1090000000, 1000000, RF_MODE_OFF },
 };
-static const uint32_t STEPS[] = { 1000, 5000, 10000, 12500, 25000, 100000, 1000000 };
-static const uint32_t RATES_HS[] = { 1024000, 1800000, 2048000, 2400000 };
-static const uint32_t RATES_FS[] = { 250000 };
+static const char *const MODES[RF_MODE_COUNT] = { N_("Sin audio"), N_("FM"), N_("AM"), N_("FM angosta") };
+static const uint32_t MODE_STEP[RF_MODE_COUNT] = { 0, 100000, 25000, 12500 };
+static const uint32_t STEPS[] = { 1000, 5000, 6250, 8330, 10000, 12500, 25000, 100000, 1000000 };
+/* 48 kHz times a number the demodulator divides (rf_demod.h) */
+static const uint32_t RATES_HS[] = { 960000, 1440000, 1920000, 2400000 };
+static const uint32_t RATES_FS[] = { 240000 };
+/* While listening: 240 k (no stage before the channel: a fifth of the
+ * work), or the rates whose first stage divides by an even number, which
+ * the board's SIMD filters (rf_demod.c). Measured on the board for
+ * broadcast FM at 960 k: ~60 % of core 0 with the spectrum. */
+static const uint32_t RATES_LISTEN[] = { 240000, 960000, 1920000 };
+
+static uint32_t listen_rate(uint32_t r)
+{
+    return r >= 1440000 ? 1920000 : r >= 900000 ? 960000 : 240000;
+}
 
 typedef struct {
     aos_app_t *self;
@@ -90,8 +108,14 @@ typedef struct {
     volatile uint32_t want_freq, want_rate;
     volatile int want_gain;                 /* tenths of dB, -1 automatic */
     volatile uint32_t freq, rate;           /* what the source has */
-    volatile bool paused;                   /* hidden || locked */
+    volatile bool paused;                   /* hidden or locked, with no audio */
     bool hidden;
+    uint32_t shown_rate;
+    volatile bool stop, done;               /* the engine's thread */
+    volatile int want_mode, want_sq;        /* RF_MODE_*, squelch dB (0 off) */
+    volatile float level_db, pilot_db;      /* the demodulator's, for the status line */
+    volatile float floor_bin_db;            /* the spectrum's noise floor, per bin */
+    volatile bool sq_open, listening;
     volatile uint32_t info_seq, spec_seq;
     rf_src_info_t info;
     void *mx;
@@ -107,7 +131,10 @@ typedef struct {
     float *col, *smooth;                    /* W */
     float floor_db;
     bool floor_set;
-    lv_obj_t *freq_lbl, *status_lbl, *rate_btn, *gain_btn, *step_btn;
+    lv_obj_t *freq_lbl, *status_lbl, *rate_btn, *gain_btn, *step_btn, *sq_btn;
+    lv_obj_t *mode_btn[RF_MODE_COUNT];
+    int band_px;                            /* the channel's half width on screen */
+    uint16_t c_band, c_bandgrid;
     lv_obj_t *spec_img, *wf_img, *empty, *empty_lbl;
     lv_obj_t *tick_lbl[TICKS_MAX];
     int16_t tick_x[TICKS_MAX];
@@ -132,7 +159,9 @@ typedef struct {
     uint32_t drag_f0;
     /* the frequency sheet */
     lv_obj_t *sheet, *ta;
-    lv_obj_t *gain_slider, *gain_val;
+    lv_obj_t *gain_slider, *gain_val, *sq_slider, *sq_val, *sq_live;
+    /* rf/control.txt on the card: what the portal (or anyone) asks for */
+    long ctl_mtime, ctl_size;
 } rf_t;
 
 static rf_t *A;
@@ -147,15 +176,61 @@ static void *psram(size_t n)
 #endif
 }
 
-/* ---- the worker ----------------------------------------------------------- */
+/* ---- the engine ----------------------------------------------------------- */
 
-static void worker(void *arg)
+/* Audio to the board's speaker, keeping between 50 and 200 ms in its ring.
+ * The stick's clock and the audio's are two crystals, so the ring drifts:
+ * a sample is dropped or doubled now and then. And when the engine falls
+ * behind and catches up it makes audio faster than real time: past 300 ms
+ * the block goes (a click, once) - a ring left full is a second of delay
+ * and every sample after it lost (seen on the board, 2026-10-07). */
+static void audio_out(int16_t *pcm, int n, uint32_t rate)
+{
+    if (n <= 0) return;
+    int q = aos_hal_spk_queued();
+    if (q > (int)rate * 3 / 10) return;
+    if (q > (int)rate / 5 && n > 2) n--;
+    else if (q < (int)rate / 20 && n > 2) {
+        pcm[n] = pcm[n - 1];
+        n++;
+    }
+    aos_hal_spk_write(pcm, n);
+    /* development: the simulator's speaker plays nothing, so RF_WAV_OUT
+     * keeps what it would have played, as raw 48 kHz 16-bit mono (on the
+     * board getenv() is always NULL) */
+    static FILE *dump;
+    static bool tried;
+    if (!tried) {
+        tried = true;
+        const char *p = getenv("RF_WAV_OUT");
+        if (p && *p) dump = fopen(p, "wb");
+    }
+    if (dump) {
+        fwrite(pcm, sizeof(int16_t), n, dump);
+        fflush(dump);
+    }
+}
+
+/* The engine: a thread of its own (not the system's one worker), so the
+ * radio keeps sounding with the screen locked or another app in front. */
+static void engine(void *arg)
 {
     rf_t *a = arg;
     uint8_t *buf = psram(READ_BYTES), *frame = psram(RF_FFT * 2);
     float *db = psram(RF_FFT * sizeof(float));
     rf_fft_t *fft = rf_fft_new(RF_FFT);
-    if (!buf || !frame || !db || !fft) {
+    /* a read's audio (16 K pairs at 240 kHz: 3277 samples) or the 100 ms
+     * cushion written when the speaker opens, whichever is more */
+    enum { PCM_MAX = (READ_BYTES / 2 / 5 + 64) > RF_AUDIO_RATE / 10 ? (READ_BYTES / 2 / 5 + 64) : RF_AUDIO_RATE / 10 };
+    int16_t *pcm = psram((PCM_MAX + 2) * sizeof(int16_t));
+    rf_demod_t *dm = NULL;
+    int cur_mode = RF_MODE_OFF;
+    uint32_t src_rate = 0, dm_tried = 0;   /* the rate the source runs at; the last one a demodulator was tried at */
+    rf_demod_set_clock(aos_hal_uptime_us);
+    bool spk = false;
+    uint32_t spk_rate = 0;
+    uint64_t t_dem = 0;
+    if (!buf || !frame || !db || !fft || !pcm) {
         a->why = N_("Sin memoria");
         a->state = ST_NONE;
         goto out;
@@ -168,22 +243,27 @@ static void worker(void *arg)
     /* where the worker's time goes, logged every 10 s (docs/plan/RF.md) */
     uint64_t t_read = 0, t_fft = 0, t_take = 0, t_log = aos_hal_uptime_us();
     unsigned n_fft = 0;
-    while (!aos_hal_worker_should_stop()) {
+    while (!a->stop) {
         if (a->paused) {
             if (src && started) {
                 src->ops->stop(src);
                 started = false;
             }
-            aos_hal_worker_sleep(100);
+            if (spk) aos_hal_spk_close();
+            spk = false;
+            aos_hal_sleep_ms(100);
             continue;
         }
         if (!src) {
+            if (spk) aos_hal_spk_close();
+            spk = false;
             if (aos_hal_uptime_ms() < next_try) {
-                aos_hal_worker_sleep(100);
+                aos_hal_sleep_ms(100);
                 continue;
             }
             const char *why = NULL;
-            src = rf_src_rtl.open(&why);
+            src = rf_src_file.open(&why);
+            if (!src) src = rf_src_rtl.open(&why);
             if (!src) {
                 a->why = why;
                 if (a->state != ST_LOST) a->state = ST_NONE;
@@ -201,11 +281,13 @@ static void worker(void *arg)
         }
         uint32_t want_rate = a->want_rate;
         if (!a->info.high_speed && want_rate > RATES_FS[0]) want_rate = RATES_FS[0];
+        else if (a->info.high_speed && a->want_mode != RF_MODE_OFF) want_rate = listen_rate(want_rate);
         if (want_rate != cur_rate) {
             if (started) src->ops->stop(src);
             started = false;
             uint32_t got = src->ops->set_rate(src, want_rate);
-            a->rate = got ? got : a->rate;
+            src_rate = got ? got : src_rate;
+            a->rate = src_rate;
             cur_rate = want_rate;
             fill = 0;
         }
@@ -218,6 +300,40 @@ static void worker(void *arg)
             cur_gain = a->want_gain;
             src->ops->set_gain(src, cur_gain);
         }
+        /* the demodulator follows the mode and the rate */
+        int want_mode = a->want_mode;
+        /* the rate is the source's own (src_rate), never the UI's copy */
+        if (want_mode != cur_mode || (dm && rf_demod_rate(dm) != src_rate) ||
+            (!dm && want_mode != RF_MODE_OFF && dm_tried != src_rate)) {
+            rf_demod_free(dm);
+            dm = want_mode != RF_MODE_OFF ? rf_demod_new(want_mode, src_rate) : NULL;
+            dm_tried = src_rate;
+            if (want_mode != RF_MODE_OFF && !dm) aos_hal_log("rf", "no demodulator for mode %d at %u sps", want_mode, (unsigned)src_rate);
+            if (dm) aos_hal_log("rf", "demodulator: mode %d at %u sps, filters on %s (%s)", want_mode, (unsigned)src_rate,
+                                rf_demod_simd() ? "the SIMD (esp-dsp)" : "C", rf_demod_simd_note());
+            cur_mode = want_mode;
+            a->pilot_db = 0;
+        }
+        /* broadcast FM needs no squelch: only AM and narrow FM get it */
+        if (dm) rf_demod_set_squelch(dm, want_mode == RF_MODE_WFM ? 0 : a->want_sq);
+        /* the speaker at the demodulator's rate (48 k broadcast, 24 k voice) */
+        if (dm && spk && spk_rate != rf_demod_audio_rate(dm)) {
+            aos_hal_spk_close();
+            spk = false;
+        }
+        if (dm && !spk) {
+            spk_rate = rf_demod_audio_rate(dm);
+            spk = aos_hal_spk_open(spk_rate);
+            /* 100 ms of silence first: the ring's cushion */
+            if (spk) {
+                memset(pcm, 0, spk_rate / 10 * sizeof(int16_t));
+                aos_hal_spk_write(pcm, spk_rate / 10);
+            }
+        } else if (!dm && spk) {
+            aos_hal_spk_close();
+            spk = false;
+        }
+        a->listening = dm && spk;
         if (!started) {
             started = src->ops->start(src);
             if (!started) {
@@ -241,6 +357,17 @@ static void worker(void *arg)
             a->why = N_("Se desconectó la RTL-SDR");
             a->state = ST_LOST;
             continue;
+        }
+        if (dm && n > 0) {
+            uint64_t t3 = aos_hal_uptime_us();
+            int na = rf_demod_run(dm, buf, n / 2, pcm, PCM_MAX);
+            if (spk) audio_out(pcm, na, spk_rate);
+            rf_demod_stats_t st;
+            rf_demod_stats(dm, &st);
+            a->level_db = st.level_db;
+            a->sq_open = st.open;
+            a->pilot_db = st.pilot_db;
+            t_dem += aos_hal_uptime_us() - t3;
         }
         /* RF_AVG FFTs from the start of each display period, the rest only read */
         uint32_t period = (a->rate ? a->rate : 2048000) / RF_FPS;
@@ -268,7 +395,10 @@ static void worker(void *arg)
             if (since >= period) {
                 if (rf_fft_count(fft)) {
                     uint64_t t2 = aos_hal_uptime_us();
+                    int navg = rf_fft_count(fft);
                     rf_fft_take_db(fft, db);
+                    a->floor_bin_db = rf_fft_floor_db(db, RF_FFT, navg);
+                    if (dm) rf_demod_set_noise_floor(dm, a->floor_bin_db, RF_FFT);
                     t_take += aos_hal_uptime_us() - t2;
                     aos_hal_mutex_lock(a->mx);
                     memcpy(a->spec, db, RF_FFT * sizeof(float));
@@ -287,10 +417,20 @@ static void worker(void *arg)
         uint64_t now = aos_hal_uptime_us();
         if (now - t_log >= 10000000) {
             unsigned span = (unsigned)((now - t_log) / 1000);
-            aos_hal_log("rf", "worker in %u ms: read %u ms, %u FFTs %u ms, dB %u ms; UI drew %u frames in %u ms",
+            if (dm) {
+                uint32_t pu[5];
+                int ni;
+                rf_demod_profile(dm, pu, &ni);
+                aos_hal_log("rf", "demod in ms: input %u, decimation %u, channel %u, demodulation %u, audio %u; "
+                                  "%d buffers not internal", (unsigned)(pu[0] / 1000), (unsigned)(pu[1] / 1000),
+                            (unsigned)(pu[2] / 1000), (unsigned)(pu[3] / 1000), (unsigned)(pu[4] / 1000), ni);
+            }
+            aos_hal_log("rf", "engine in %u ms: read %u ms, %u FFTs %u ms, dB %u ms, demod %u ms (mode %d, floor %d dB, level %d dB, "
+                              "pilot %d dB, audio queued %d); UI drew %u frames in %u ms",
                         span, (unsigned)(t_read / 1000), n_fft, (unsigned)(t_fft / 1000), (unsigned)(t_take / 1000),
-                        a->ui_frames, a->ui_draw_us / 1000);
-            t_read = t_fft = t_take = 0;
+                        (unsigned)(t_dem / 1000), cur_mode, (int)a->floor_bin_db, (int)a->level_db, (int)a->pilot_db,
+                        spk ? aos_hal_spk_queued() : -1, a->ui_frames, a->ui_draw_us / 1000);
+            t_read = t_fft = t_take = t_dem = 0;
             n_fft = 0;
             a->ui_frames = a->ui_draw_us = 0;
             t_log = now;
@@ -298,10 +438,14 @@ static void worker(void *arg)
     }
     if (src) src->ops->close(src);
 out:
+    if (spk) aos_hal_spk_close();
+    rf_demod_free(dm);
     free(buf);
     free(frame);
     free(db);
+    free(pcm);
     rf_fft_free(fft);
+    a->done = true;
 }
 
 /* ---- drawing -------------------------------------------------------------- */
@@ -368,6 +512,10 @@ static void place_ticks(rf_t *a)
         a->tick_x[a->nticks++] = (int16_t)x;
     }
     for (int i = a->nticks; i < TICKS_MAX; i++) lv_obj_add_flag(a->tick_lbl[i], LV_OBJ_FLAG_HIDDEN);
+    /* the channel being listened to, shaded around the middle */
+    uint32_t hw = rf_demod_half_width(a->want_mode);
+    a->band_px = hw ? (int)((uint64_t)hw * a->W / span) : -1;
+    if (hw && a->band_px < 1) a->band_px = 1;
     a->ticks_gen++;
 }
 
@@ -392,7 +540,12 @@ static void follow_floor(rf_t *a)
 /* the spectrum's pixel at (x, y) with the trace's top at t */
 static inline uint16_t spec_pixel(const rf_t *a, int x, int y, int t)
 {
-    if (y < t) return x == a->W / 2 ? a->c_mark : a->hgrid[y] || a->vgrid[x] ? a->c_grid : a->c_bg;
+    int dx = x - a->W / 2;
+    if (y < t) {
+        if (!dx) return a->c_mark;
+        bool band = dx <= a->band_px && dx >= -a->band_px;
+        return a->hgrid[y] || a->vgrid[x] ? (band ? a->c_bandgrid : a->c_grid) : band ? a->c_band : a->c_bg;
+    }
     if (y <= t + 1) return a->c_line;
     return x == a->W / 2 ? a->c_markfill : a->c_fill[y];
 }
@@ -516,13 +669,25 @@ static void show_buttons(rf_t *a)
     uint32_t r = a->rate ? a->rate : a->want_rate;
     snprintf(s, sizeof s, "%u,%03u Msps", (unsigned)(r / 1000000), (unsigned)(r % 1000000 / 1000));
     lv_label_set_text(lv_obj_get_child(a->rate_btn, 0), s);
-    if (a->want_gain < 0) snprintf(s, sizeof s, "%s", _("Ganancia auto"));
-    else snprintf(s, sizeof s, _("Ganancia %d,%d dB"), a->want_gain / 10, a->want_gain % 10);
+    if (a->want_gain < 0) snprintf(s, sizeof s, "%s", _("Gan. auto"));
+    else snprintf(s, sizeof s, _("Gan. %d,%d dB"), a->want_gain / 10, a->want_gain % 10);
     lv_label_set_text(lv_obj_get_child(a->gain_btn, 0), s);
     if (a->step >= 1000000) snprintf(s, sizeof s, _("Paso %u MHz"), (unsigned)(a->step / 1000000));
-    else if (a->step % 1000) snprintf(s, sizeof s, _("Paso %u,%u kHz"), (unsigned)(a->step / 1000), (unsigned)(a->step % 1000 / 100));
-    else snprintf(s, sizeof s, _("Paso %u kHz"), (unsigned)(a->step / 1000));
+    else if (a->step % 1000) {
+        /* 6,25 / 8,33 / 12,5 kHz */
+        unsigned frac = a->step % 1000;
+        if (frac % 100) snprintf(s, sizeof s, _("Paso %u,%02u kHz"), (unsigned)(a->step / 1000), frac / 10);
+        else snprintf(s, sizeof s, _("Paso %u,%u kHz"), (unsigned)(a->step / 1000), frac / 100);
+    } else snprintf(s, sizeof s, _("Paso %u kHz"), (unsigned)(a->step / 1000));
     lv_label_set_text(lv_obj_get_child(a->step_btn, 0), s);
+    /* only AM and narrow FM use it: dimmed for the others */
+    bool sq_used = a->want_mode == RF_MODE_AM || a->want_mode == RF_MODE_NFM;
+    if (sq_used && a->want_sq) snprintf(s, sizeof s, _("Silenc. %d dB"), a->want_sq);
+    else snprintf(s, sizeof s, "%s", _("Silenc. no"));
+    lv_label_set_text(lv_obj_get_child(a->sq_btn, 0), s);
+    lv_obj_set_style_text_color(lv_obj_get_child(a->sq_btn, 0), sq_used ? AOS_C_TEXT : AOS_C_DIM, 0);
+    for (int m = 0; m < RF_MODE_COUNT; m++)
+        lv_obj_set_style_bg_color(a->mode_btn[m], m == a->want_mode ? AOS_C_ACCENT : AOS_C_CARD2, 0);
 }
 
 static uint32_t clamp_freq(rf_t *a, int64_t f)
@@ -538,12 +703,57 @@ static void tune(rf_t *a, int64_t hz, bool snap)
     show_freq(a);
 }
 
+/* rf/control.txt on the card, read when it changes: lines of key=value
+ * that set what the screen sets - freq (Hz, or MHz with a point), mode
+ * (off, wfm, am, nfm), rate, gain (tenths of a dB, or auto), sq (dB),
+ * step (Hz). It is how a page of the portal tunes the app; the board's
+ * own UI follows. */
+static void control_poll(rf_t *a)
+{
+    const char *root = aos_hal_path_sd_root();
+    char path[128];
+    snprintf(path, sizeof path, "%s/rf/control.txt", root ? root : aos_hal_path_data());
+    struct stat st;
+    if (stat(path, &st) != 0) return;
+    if ((long)st.st_mtime == a->ctl_mtime && (long)st.st_size == a->ctl_size) return;
+    a->ctl_mtime = (long)st.st_mtime;
+    a->ctl_size = (long)st.st_size;
+    FILE *f = fopen(path, "r");
+    if (!f) return;
+    char line[96];
+    while (fgets(line, sizeof line, f)) {
+        char k[16], v[32];
+        if (sscanf(line, " %15[a-z_] = %31s", k, v) != 2) continue;
+        if (!strcmp(k, "freq")) {
+            double x = strtod(v, NULL);
+            tune(a, strchr(v, '.') ? (int64_t)(x * 1e6 + 0.5) : (int64_t)x, false);
+        } else if (!strcmp(k, "mode")) {
+            static const char *const M[RF_MODE_COUNT] = { "off", "wfm", "am", "nfm" };
+            for (int m = 0; m < RF_MODE_COUNT; m++)
+                if (!strcmp(v, M[m])) a->want_mode = m;
+        } else if (!strcmp(k, "rate")) a->want_rate = (uint32_t)strtoul(v, NULL, 10);
+        else if (!strcmp(k, "gain")) a->want_gain = !strcmp(v, "auto") ? -1 : (int)strtol(v, NULL, 10);
+        else if (!strcmp(k, "sq")) a->want_sq = (int)strtol(v, NULL, 10);
+        else if (!strcmp(k, "step")) a->step = (uint32_t)strtoul(v, NULL, 10);
+        else if (!strcmp(k, "simd")) rf_demod_use_simd(strtol(v, NULL, 10) != 0);   /* to measure */
+        else if (!strcmp(k, "fft")) rf_fft_use_simd(strtol(v, NULL, 10) != 0);
+    }
+    fclose(f);
+    aos_hal_log("rf", "control.txt: %u Hz, mode %d, %u sps, gain %d, squelch %d", (unsigned)a->want_freq, a->want_mode,
+                (unsigned)a->want_rate, a->want_gain, a->want_sq);
+    show_freq(a);
+    show_buttons(a);
+    place_ticks(a);
+}
+
 static void ui_timer(lv_timer_t *t)
 {
     rf_t *a = lv_timer_get_user_data(t);
-    /* the spectrum is only worth its 4 MB/s on screen: the stream rests
-     * while the board is locked (listening, later, will keep it going) */
-    a->paused = a->hidden || (aos_ui_overlay() & AOS_UI_OVER_LOCK);
+    /* with nothing to listen to, the spectrum is only worth its 4 MB/s on
+     * screen: the stream rests while the board is locked or the app is
+     * behind another; listening goes on (and nothing is drawn) */
+    bool unseen = a->hidden || (aos_ui_overlay() & AOS_UI_OVER_LOCK);
+    a->paused = unseen && a->want_mode == RF_MODE_OFF;
     if (a->state == ST_RUN) {
         if (!lv_obj_has_flag(a->empty, LV_OBJ_FLAG_HIDDEN)) lv_obj_add_flag(a->empty, LV_OBJ_FLAG_HIDDEN);
     } else {
@@ -553,9 +763,15 @@ static void ui_timer(lv_timer_t *t)
         else
             snprintf(s, sizeof s, "%s\n\n%s", a->why ? _(a->why) : "",
                      aos_hal_usb_host_on()
-                         ? _("Enchufala en el host USB: pines 25/27 del conector de atrás (High Speed, cables de menos de 15 cm) y 5 V del pin 1. Los pines 21/23 son Full Speed: alcanzan para 250 mil muestras por segundo.")
+                         ? _("Enchufala en el host USB: pines 25/27 del conector de atrás (High Speed, cables de menos de 15 cm) y 5 V del pin 1. Los pines 21/23 son Full Speed: alcanzan para 240 mil muestras por segundo.")
                          : _("El host USB está apagado: prendelo en Ajustes → USB → Host USB, y enchufá la RTL-SDR en los pines 25/27 del conector de atrás."));
         lv_label_set_text(a->empty_lbl, s);
+    }
+    /* the engine changed the rate (listening keeps to 960 k or 1.92 M) */
+    if (a->rate && a->rate != a->shown_rate) {
+        a->shown_rate = a->rate;
+        show_buttons(a);
+        place_ticks(a);
     }
     if (a->info_seq != a->seen_info) {
         a->seen_info = a->info_seq;
@@ -564,7 +780,7 @@ static void ui_timer(lv_timer_t *t)
         show_buttons(a);
         place_ticks(a);
     }
-    if (a->spec_seq != a->seen_spec && a->state == ST_RUN) {
+    if (a->spec_seq != a->seen_spec && a->state == ST_RUN && !unseen) {
         aos_hal_mutex_lock(a->mx);
         memcpy(a->ui_spec, a->spec, RF_FFT * sizeof(float));
         a->seen_spec = a->spec_seq;
@@ -580,7 +796,16 @@ static void ui_timer(lv_timer_t *t)
         /* tenths of MB/s, with a decimal comma */
         unsigned mbs10 = a->stat_at && b >= a->stat_bytes ? (unsigned)((b - a->stat_bytes) * 10 / 1000 / (now - a->stat_at)) : 0;
         char s[160];
-        if (a->state == ST_RUN)
+        if (a->state == ST_RUN && a->listening) {
+            /* what is being heard: the channel over the noise, the pilot */
+            int lv = (int)(a->level_db + 0.5f);
+            snprintf(s, sizeof s, "%s · %s %d dB%s%s · %u,%u MB/s", _(MODES[a->want_mode]), _("señal"), lv,
+                     a->sq_open ? "" : " · ", a->sq_open ? "" : _("silenciado"), mbs10 / 10, mbs10 % 10);
+            if (a->want_mode == RF_MODE_WFM && a->pilot_db >= 10) {
+                size_t k = strlen(s);
+                snprintf(s + k, sizeof s - k, " · %s", _("estéreo"));
+            }
+        } else if (a->state == ST_RUN)
             snprintf(s, sizeof s, "%s %s · %s · %u,%u MB/s · %s %u", a->info.kind, a->info.tuner,
                      a->info.high_speed ? "High Speed" : "Full Speed", mbs10 / 10, mbs10 % 10, _("perdidos"),
                      (unsigned)a->dropped);
@@ -588,6 +813,11 @@ static void ui_timer(lv_timer_t *t)
         lv_label_set_text(a->status_lbl, s);
         a->stat_at = now;
         a->stat_bytes = b;
+        control_poll(a);
+        if (a->sq_live) {
+            snprintf(s, sizeof s, _("Señal ahora: %d dB sobre el ruido"), (int)(a->level_db + 0.5f));
+            lv_label_set_text(a->sq_live, s);
+        }
         if (a->rate && a->nticks == 0) place_ticks(a);
     }
 }
@@ -652,14 +882,15 @@ static void step_cycle(lv_event_t *e)
 static void rate_cycle(lv_event_t *e)
 {
     rf_t *a = lv_event_get_user_data(e);
-    const uint32_t *R = a->info.high_speed ? RATES_HS : RATES_FS;
-    int n = a->info.high_speed ? 4 : 1, i = 0;
-    while (i < n && R[i] != a->want_rate) i++;
+    bool listen = a->want_mode != RF_MODE_OFF;
+    const uint32_t *R = !a->info.high_speed ? RATES_FS : listen ? RATES_LISTEN : RATES_HS;
+    int n = !a->info.high_speed ? 1 : listen ? 3 : 4, i = 0;
+    uint32_t cur = listen && a->info.high_speed ? listen_rate(a->want_rate) : a->want_rate;
+    while (i < n && R[i] != cur) i++;
     a->want_rate = R[(i + 1) % n];
-    a->rate = 0;
     show_buttons(a);
     place_ticks(a);
-    if (!a->info.high_speed) aos_ui_toast(_("En los pines 21/23 (Full Speed) sólo entran 250 mil muestras por segundo"), 2500);
+    if (!a->info.high_speed) aos_ui_toast(_("En los pines 21/23 (Full Speed) sólo entran 240 mil muestras por segundo"), 2500);
 }
 
 static void band_tap(lv_event_t *e)
@@ -667,7 +898,26 @@ static void band_tap(lv_event_t *e)
     rf_t *a = A;
     const band_t *b = &BANDS[(intptr_t)lv_event_get_user_data(e)];
     a->step = b->step;
+    if (b->mode != RF_MODE_OFF && a->info.high_speed && b->mode != a->want_mode)
+        a->want_rate = b->mode == RF_MODE_WFM ? 960000 : 240000;
+    a->want_mode = b->mode;
     tune(a, b->hz, false);
+    show_buttons(a);
+    place_ticks(a);
+}
+
+static void mode_tap(lv_event_t *e)
+{
+    rf_t *a = A;
+    int m = (int)(intptr_t)lv_event_get_user_data(e);
+    if (m == a->want_mode) return;
+    /* how wide to look while listening: broadcast FM at 960 k, with its
+     * neighbours on screen; the narrow modes at 240 k, a fifth of the work */
+    if (a->want_mode == RF_MODE_OFF && m != RF_MODE_OFF && a->info.high_speed)
+        a->want_rate = m == RF_MODE_WFM ? 960000 : 240000;
+    a->want_mode = m;
+    if (MODE_STEP[m]) a->step = MODE_STEP[m];
+    tune(a, a->want_freq, true);
     show_buttons(a);
     place_ticks(a);
 }
@@ -675,7 +925,7 @@ static void band_tap(lv_event_t *e)
 static void sheet_close(rf_t *a)
 {
     if (a->sheet) lv_obj_delete(a->sheet);
-    a->sheet = a->ta = a->gain_slider = a->gain_val = NULL;
+    a->sheet = a->ta = a->gain_slider = a->gain_val = a->sq_slider = a->sq_val = a->sq_live = NULL;
 }
 
 static void sheet_bg_tap(lv_event_t *e)
@@ -784,20 +1034,77 @@ static void gain_tap(lv_event_t *e)
     lv_obj_send_event(a->gain_slider, LV_EVENT_VALUE_CHANGED, NULL);
 }
 
+static void sq_changed(lv_event_t *e)
+{
+    rf_t *a = lv_event_get_user_data(e);
+    a->want_sq = lv_slider_get_value(a->sq_slider);
+    char s[48];
+    if (a->want_sq) snprintf(s, sizeof s, "%d dB", a->want_sq);
+    else snprintf(s, sizeof s, "%s", _("Siempre abierto"));
+    lv_label_set_text(a->sq_val, s);
+    show_buttons(a);
+}
+
+static void sq_tap(lv_event_t *e)
+{
+    rf_t *a = lv_event_get_user_data(e);
+    lv_obj_t *card = sheet_open(a, _("Silenciador"));
+    a->sq_val = aos_label(card, "", aos_font_large, AOS_C_TEXT);
+    a->sq_slider = lv_slider_create(card);
+    lv_obj_set_width(a->sq_slider, LV_PCT(100));
+    lv_obj_set_height(a->sq_slider, 24);
+    lv_slider_set_range(a->sq_slider, 0, 40);
+    lv_slider_set_value(a->sq_slider, a->want_sq, LV_ANIM_OFF);
+    lv_obj_add_event_cb(a->sq_slider, sq_changed, LV_EVENT_VALUE_CHANGED, a);
+    a->sq_live = aos_label(card, "", aos_font_body, AOS_C_ACCENT);
+    lv_obj_t *l = aos_label(card, _("Corta el audio de AM y FM angosta mientras el canal no supera al ruido por esos dB; entre 6 y 15 suele andar. Todo a la izquierda, siempre abierto. La FM comercial no lo usa."),
+                            aos_font_caption, AOS_C_DIM);
+    lv_obj_set_width(l, LV_PCT(100));
+    lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
+    lv_obj_send_event(a->sq_slider, LV_EVENT_VALUE_CHANGED, NULL);
+}
+
 /* ---- building ------------------------------------------------------------- */
 
-static lv_obj_t *button(lv_obj_t *parent, const char *text, lv_event_cb_t cb, void *ud)
+static lv_obj_t *button_f(lv_obj_t *parent, const char *text, lv_event_cb_t cb, void *ud, const lv_font_t *font,
+                          int pad)
 {
     lv_obj_t *b = lv_button_create(parent);
     lv_obj_set_height(b, AOS_UI_TAP_MIN - 16);
     lv_obj_set_style_bg_color(b, AOS_C_CARD2, 0);
     lv_obj_set_style_radius(b, 18, 0);
     lv_obj_set_style_shadow_width(b, 0, 0);
-    lv_obj_set_style_pad_hor(b, 20, 0);
-    lv_obj_t *l = aos_label(b, text, aos_font_small, AOS_C_TEXT);
+    lv_obj_set_style_pad_hor(b, pad, 0);
+    lv_obj_t *l = aos_label(b, text, font, AOS_C_TEXT);
     lv_obj_center(l);
     lv_obj_add_event_cb(b, cb, LV_EVENT_CLICKED, ud);
     return b;
+}
+
+static lv_obj_t *button(lv_obj_t *parent, const char *text, lv_event_cb_t cb, void *ud)
+{
+    return button_f(parent, text, cb, ud, aos_font_small, 20);
+}
+
+/* a row of controls across the screen */
+static lv_obj_t *ctl_row(rf_t *a, int y, bool scroll)
+{
+    lv_obj_t *row = lv_obj_create(a->root);
+    lv_obj_remove_style_all(row);
+    lv_obj_set_size(row, a->W, AOS_UI_TAP_MIN - 8);
+    lv_obj_set_pos(row, 0, y);
+    lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+    if (scroll) {
+        lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+        lv_obj_set_style_pad_hor(row, AOS_UI_PAD, 0);
+        lv_obj_set_style_pad_column(row, 12, 0);
+        lv_obj_set_scroll_dir(row, LV_DIR_HOR);
+        lv_obj_set_scrollbar_mode(row, LV_SCROLLBAR_MODE_OFF);
+    } else {
+        lv_obj_set_flex_align(row, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+        lv_obj_remove_flag(row, LV_OBJ_FLAG_SCROLLABLE);
+    }
+    return row;
 }
 
 static lv_obj_t *image_for(lv_obj_t *parent, lv_image_dsc_t *d, uint16_t *px, int w, int h)
@@ -839,8 +1146,9 @@ static void build(rf_t *a, lv_obj_t *root)
     a->status_lbl = aos_label(root, "", aos_font_caption, AOS_C_DIM);
     lv_obj_align(a->status_lbl, LV_ALIGN_TOP_MID, 0, land ? 70 : 96);
 
-    /* controls at the bottom: rate, gain, step, then the bands */
-    int ctl = 2 * (AOS_UI_TAP_MIN - 4);
+    /* controls at the bottom: how to listen; rate, gain, step, squelch;
+     * the bands */
+    int ctl = 3 * (AOS_UI_TAP_MIN - 8) + 8;
     int avail = a->H - head - ctl - 36;
     a->SH = avail * (land ? 45 : 36) / 100;
     a->WH = avail - a->SH;
@@ -866,6 +1174,8 @@ static void build(rf_t *a, lv_obj_t *root)
     a->c_line = rgb565(120, 230, 255);
     a->c_mark = rgb565(200, 50, 50);
     a->c_markfill = rgb565(120, 40, 60);
+    a->c_band = rgb565(26, 34, 58);
+    a->c_bandgrid = rgb565(50, 60, 90);
     for (int r = 0; r < a->SH; r++) a->c_fill[r] = rgb565(10, 40 + 60 * (a->SH - r) / a->SH, 70 + 60 * (a->SH - r) / a->SH);
     a->blit_ok = true;
     for (int x = 0; x < a->W; x++) a->smooth[x] = -120;
@@ -892,26 +1202,15 @@ static void build(rf_t *a, lv_obj_t *root)
         lv_obj_add_event_cb(*o, spec_event, LV_EVENT_ALL, a);
     }
 
-    lv_obj_t *row = lv_obj_create(root);
-    lv_obj_remove_style_all(row);
-    lv_obj_set_size(row, a->W, AOS_UI_TAP_MIN - 4);
-    lv_obj_set_pos(row, 0, y + 6);
-    lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(row, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    a->rate_btn = button(row, "", rate_cycle, a);
-    a->gain_btn = button(row, "", gain_tap, a);
-    a->step_btn = button(row, "", step_cycle, a);
-
-    lv_obj_t *bands = lv_obj_create(root);
-    lv_obj_remove_style_all(bands);
-    lv_obj_set_size(bands, a->W, AOS_UI_TAP_MIN - 4);
-    lv_obj_set_pos(bands, 0, y + 6 + AOS_UI_TAP_MIN - 4);
-    lv_obj_set_flex_flow(bands, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(bands, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_hor(bands, AOS_UI_PAD, 0);
-    lv_obj_set_style_pad_column(bands, 12, 0);
-    lv_obj_set_scroll_dir(bands, LV_DIR_HOR);
-    lv_obj_set_scrollbar_mode(bands, LV_SCROLLBAR_MODE_OFF);
+    int rh = AOS_UI_TAP_MIN - 8;
+    lv_obj_t *modes = ctl_row(a, y + 6, false);
+    for (int m = 0; m < RF_MODE_COUNT; m++) a->mode_btn[m] = button(modes, _(MODES[m]), mode_tap, (void *)(intptr_t)m);
+    lv_obj_t *row = ctl_row(a, y + 6 + rh, false);
+    a->rate_btn = button_f(row, "", rate_cycle, a, aos_font_caption, 14);
+    a->gain_btn = button_f(row, "", gain_tap, a, aos_font_caption, 14);
+    a->step_btn = button_f(row, "", step_cycle, a, aos_font_caption, 14);
+    a->sq_btn = button_f(row, "", sq_tap, a, aos_font_caption, 14);
+    lv_obj_t *bands = ctl_row(a, y + 6 + 2 * rh, true);
     for (size_t i = 0; i < sizeof BANDS / sizeof BANDS[0]; i++) {
         lv_obj_t *b = button(bands, _(BANDS[i].name), band_tap, (void *)(intptr_t)i);
         lv_obj_set_style_bg_color(b, AOS_C_CARD, 0);
@@ -965,7 +1264,12 @@ static void *rf_create(aos_app_t *self, lv_obj_t *root)
     a->spec = psram(RF_FFT * sizeof(float));
     a->ui_spec = psram(RF_FFT * sizeof(float));
     a->want_freq = pref_u32("rf_freq", 98000000);
-    a->want_rate = pref_u32("rf_rate", 2048000);
+    a->want_rate = pref_u32("rf_rate", 2400000);
+    /* a rate from before the demodulators (2.048 M, 250 k...): the nearest of now */
+    if (a->want_rate % 48000 || (a->want_rate != 240000 && a->want_rate < 960000)) a->want_rate = a->want_rate < 900000 ? 240000 : 2400000;
+    a->want_mode = pref_int("rf_mode", RF_MODE_OFF);
+    if (a->want_mode < 0 || a->want_mode >= RF_MODE_COUNT) a->want_mode = RF_MODE_OFF;
+    a->want_sq = pref_int("rf_sq", 10);
     a->want_gain = pref_int("rf_gain", -1);
     a->step = pref_u32("rf_step", 100000);
     a->state = ST_SEARCH;
@@ -976,7 +1280,14 @@ static void *rf_create(aos_app_t *self, lv_obj_t *root)
         return a;
     }
     a->timer = lv_timer_create(ui_timer, 1000 / RF_FPS / 2, a);
-    if (!aos_hal_worker_start_on("rf", worker, a, 16 * 1024, 0, 3)) aos_ui_toast(_("No pude arrancar la radio"), 2000);
+    /* priority 1, the system's "tick" thread's own on core 0: if demodulating
+     * ever takes the whole core, they take turns and the board goes on (at
+     * 3 a busy engine starved tick and the hang watchdog restarted the board,
+     * 2026-10-07); what the engine cannot keep up with is dropped and counted */
+    if (!aos_hal_thread_start("rf", engine, a, 16 * 1024, 1)) {
+        a->done = true;
+        aos_ui_toast(_("No pude arrancar la radio"), 2000);
+    }
     return a;
 }
 
@@ -984,12 +1295,21 @@ static void rf_destroy(aos_app_t *self, void *inst)
 {
     (void)self;
     rf_t *a = inst;
-    aos_hal_worker_stop();
+    a->stop = true;
+    /* the engine closes the radio and the speaker on its way out */
+    for (int i = 0; i < 300 && !a->done; i++) aos_hal_sleep_ms(10);
     if (a->timer) lv_timer_delete(a->timer);
+    if (!a->done) {
+        /* stuck in a USB call: leaking beats freeing under it */
+        aos_hal_log("rf", "the engine did not stop; its memory is left");
+        return;
+    }
     pref_put("rf_freq", (long)a->want_freq);
     pref_put("rf_rate", (long)a->want_rate);
     pref_put("rf_gain", (long)a->want_gain);
     pref_put("rf_step", (long)a->step);
+    pref_put("rf_mode", a->want_mode);
+    pref_put("rf_sq", a->want_sq);
     free(a->spec);
     free(a->ui_spec);
     free(a->spec_px);
@@ -1008,8 +1328,9 @@ static void rf_destroy(aos_app_t *self, void *inst)
 static void rf_hide(aos_app_t *self, void *inst)
 {
     (void)self;
-    ((rf_t *)inst)->hidden = true;
-    ((rf_t *)inst)->paused = true;
+    rf_t *a = inst;
+    a->hidden = true;
+    a->paused = a->want_mode == RF_MODE_OFF;
 }
 
 static void rf_show(aos_app_t *self, void *inst)

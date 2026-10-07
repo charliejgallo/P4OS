@@ -19,8 +19,13 @@ rf_fft_t *rf_fft_new(int n);            /* n rounded up to a power of two */
 void rf_fft_free(rf_fft_t *f);
 int  rf_fft_size(const rf_fft_t *f);
 void rf_fft_add_cu8(rf_fft_t *f, const uint8_t *iq);   /* n I/Q pairs (2n bytes) into the sum */
+void rf_fft_use_simd(bool on);          /* the board's 16-bit SIMD FFT (default) or float, to compare */
 int  rf_fft_count(const rf_fft_t *f);
 void rf_fft_take_db(rf_fft_t *f, float *out);         /* n bins, lowest frequency first; resets */
+/* The noise floor under the bins of an average of navg FFTs: their 20th
+ * percentile, which sits below the noise's mean by an amount that depends
+ * on navg (chi-squared), corrected for */
+float rf_fft_floor_db(const float *db, int n, int navg);
 
 /* ---- sources ---- */
 typedef struct rf_src rf_src_t;
@@ -57,3 +62,4 @@ struct rf_src {
 };
 
 extern const rf_src_ops_t rf_src_rtl;
+extern const rf_src_ops_t rf_src_file;   /* a recording; for now the simulator's RF_IQ_FILE */

@@ -60,6 +60,12 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       2,048 y 2,4 Msps (4,1 y 4,8 MB/s) sin muestras perdidas, 25 cuadros/s
       con 25-35 % de CPU; desenchufada y vuelta a enchufar con la app
       abierta, vuelve sola. Sin probar: 21/23 (Full Speed).
+- [ ] **RF: escuchar** (2026-10-07, `apps/rf/README.md`): FM, AM y FM
+      angosta medidas en la placa (CPU 36-40 % del núcleo 0 a 240 k, el
+      piloto estéreo de una FM real a 36-43 dB), pero con el volumen en 0:
+      **falta oírlas**. Probar FM en una emisora, AM en la banda aérea con
+      tráfico, FM angosta en PMR o 2 m, el silenciador, y que siga sonando
+      con la placa bloqueada y con otra app adelante.
 - [ ] **Apps del taller** (los cableados en `docs/img/bench-*.svg`, que arma
       `tools/bench_diagrams.py`: PWM, IR, tira WS2812B y 24LC;
       instaladas el 2026-10-05, probadas sólo en el

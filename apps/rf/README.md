@@ -1,11 +1,40 @@
 # RF
 
-Software radios and transceivers for P4OS. The first part is a spectrum and
-waterfall from an **RTL-SDR** (an RTL2832U USB stick) on the board's USB
-host: drag to tune, tap a frequency to centre it, tap the number on top to
-type one, and a row of bands to jump to. The plan for the rest (listening
-to FM and AM, decoders at 433 MHz, a CC1101 on the header) is in
-`docs/plan/RF.md`.
+Software radios and transceivers for P4OS. An **RTL-SDR** (an RTL2832U USB
+stick) on the board's USB host gives a spectrum and waterfall - drag to tune,
+tap a frequency to centre it, tap the number on top to type one, a row of
+bands to jump to - and **listens**: broadcast FM, AM (the airband) and narrow
+FM (amateurs, PMR, marine), through the board's speaker or a USB sound card,
+with a squelch. The plan for the rest (decoders at 433 MHz, a CC1101 on the
+header, recordings, the portal's page) is in `docs/plan/RF.md`.
+
+## Listening
+
+The row above the rates chooses: **No audio** (the spectrum only: the stream
+rests while the board is locked or the app is behind another), **FM**
+(broadcast, mono, 75 us de-emphasis, the stereo pilot shown as "stereo"),
+**AM** and **Narrow FM**. With a mode on, the radio goes on with the screen
+locked and with another app in front. The bands choose their mode too.
+
+The frequency listened to is the centre, the red line; the channel's width is
+shaded around it. The squelch (AM and narrow FM; default 10 dB) mutes the
+audio while the channel is less than that over the noise floor of the
+spectrum; its sheet shows the signal live. While listening the rate is one of
+240 k (the default for AM and narrow FM), 960 k (broadcast FM's default, more
+spectrum on screen) or 1.92 Msps.
+
+Measured on the board on 2026-10-07 (the spectrum running, core 0):
+
+| | Radio thread | Core 0 |
+|---|---|---|
+| FM at 240 k | 25 % | 40 % |
+| FM at 960 k | 59 % | 76 % |
+| AM at 240 k | 19 % | 37 % |
+| Narrow FM at 240 k | 18.5 % | 36 % |
+
+A real FM station (98.3 MHz) gave the stereo pilot 36 to 43 dB over its
+neighbours at both rates: the demodulator is right on air, not only on the
+test signals. The board's audio was not listened to by anyone yet.
 
 ## Wiring
 
@@ -15,8 +44,8 @@ to the back header.
 
 | | Pins 25/27 (High Speed) | Pins 21/23 (Full Speed) |
 |---|---|---|
-| Sample rates | 1.024, 1.8, 2.048, 2.4 Msps | 0.25 Msps |
-| What fits on screen | 1 to 2.4 MHz at once | 250 kHz at once |
+| Sample rates | 0.96, 1.44, 1.92, 2.4 Msps (listening: 0.24, 0.96, 1.92) | 0.24 Msps |
+| What fits on screen | 1 to 2.4 MHz at once | 240 kHz at once |
 | Wires | **shorter than 15 cm** | any |
 
 5 V from pin 1, ground on pin 5, on either port. An RTL-SDR draws about
@@ -39,15 +68,27 @@ to the back header.
 - **Sources** (`rf.h`): the app works on cu8 I/Q from an `rf_src_ops_t`.
   The RTL-SDR is the first one (`rf_src_rtl.c`); an rtl_tcp server, another
   SDR on USB or a recording on the card are more of them, not another app.
-- **Two halves:** the worker (core 0) owns the source - every retune is a
-  few dozen USB transfers - and reads every sample off the ring, turning
-  some into spectra (25 a second, each the average of 4 FFTs of 2048
-  points, `rf_dsp.c`); LVGL's timer draws the trace and a row of the
-  waterfall. The waterfall is a ring of twice its height, each row written
-  twice, so it scrolls by moving a pointer.
-- The app stops the stream while it is in the background (the stream's
-  transfer buffers, 64 KB of internal RAM, are freed then) and remembers
-  the frequency, rate, gain and step.
+- **Two halves:** the engine, a thread of its own on core 0 at priority 1
+  (the system's tick thread's: at 3 a busy engine starved it and the hang
+  watchdog restarted the board), owns the source - every retune is a few
+  dozen USB transfers - and reads every sample off the ring: all of them go
+  through the demodulator, some into spectra (25 a second, each the average
+  of 4 FFTs of 2048 points, `rf_dsp.c`). LVGL's timer draws the trace and a
+  row of the waterfall, straight to the panel. The waterfall is a ring of
+  twice its height, each row written twice, so it scrolls by moving a
+  pointer.
+- **The demodulator** (`rf_demod.c`, its chain in the comment at the top):
+  16-bit filters on the P4's SIMD through esp-dsp (`docs/APPS-P4.md`, "DSP"),
+  float only for the discriminators. The audio goes to `aos_hal_spk_*` at
+  48 kHz (FM) or 24 kHz (AM, narrow FM), kept between 50 and 200 ms queued:
+  the stick's and the audio's crystals drift apart, so a sample is dropped
+  or doubled now and then, and a block is dropped if the engine catches up
+  after falling behind.
+- The app remembers the frequency, rate, gain, step, mode and squelch.
+- **`rf/control.txt`** on the card (lines of `key=value`: `freq` in Hz or in
+  MHz with a point, `mode` off/wfm/am/nfm, `rate`, `gain` in tenths of a dB
+  or `auto`, `sq`, `step`) tunes the app when it changes: what the portal's
+  page will use. `simd=0` and `fft=0` switch the SIMD off, to measure.
 
 ## Measured on the board
 
@@ -63,6 +104,12 @@ two cores for 12 frames a second, 4.3 ms an FFT. Now the trace is redrawn
 only where it moved, both pictures are blitted straight to the panel
 (`aos_hal_display_blit_scaled`; through LVGL only while something is over
 the app, and in the simulator), and the FFT works in 28 KB of internal RAM.
+
+## Tests
+
+`test/README.md`: the demodulator on the Mac against synthetic signals with
+neighbours, noise and a mistuned carrier, and in the simulator with a file
+as the source.
 
 ## Trying it in the simulator
 

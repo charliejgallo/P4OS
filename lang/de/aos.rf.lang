@@ -5,75 +5,120 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/rf/main/rf.c:68
+#: apps/rf/main/rf.c:73
+#: apps/rf/main/rf.c:83
 FM	UKW
 
-#: apps/rf/main/rf.c:69
+#: apps/rf/main/rf.c:74
 Aire	Flugfunk
 
-#: apps/rf/main/rf.c:70
+#: apps/rf/main/rf.c:75
 Marina	Seefunk
 
-#: apps/rf/main/rf.c:149
-#: apps/rf/main/rf.c:869
+#: apps/rf/main/rf.c:83
+Sin audio	Kein Ton
+
+#: apps/rf/main/rf.c:83
+AM	AM
+
+#: apps/rf/main/rf.c:83
+FM angosta	Schmal-FM
+
+#: apps/rf/main/rf.c:234
+#: apps/rf/main/rf.c:1279
 Sin memoria	Kein Speicher
 
-#: apps/rf/main/rf.c:211
+#: apps/rf/main/rf.c:340
 La RTL-SDR no empezó a mandar muestras	Der RTL-SDR hat nicht begonnen, Samples zu senden
 
-#: apps/rf/main/rf.c:226
+#: apps/rf/main/rf.c:357
 Se desconectó la RTL-SDR	Der RTL-SDR wurde abgezogen
 
-#: apps/rf/main/rf.c:428
-Ganancia auto	Verstärkung auto
+#: apps/rf/main/rf.c:672
+Gan. auto	Verst. auto
 
-#: apps/rf/main/rf.c:429
-Ganancia %d,%d dB	Verstärkung %d,%d dB
+#: apps/rf/main/rf.c:673
+Gan. %d,%d dB	Verst. %d,%d dB
 
-#: apps/rf/main/rf.c:431
+#: apps/rf/main/rf.c:675
 Paso %u MHz	Schritt %u MHz
 
-#: apps/rf/main/rf.c:432
+#: apps/rf/main/rf.c:679
+Paso %u,%02u kHz	Schritt %u,%02u kHz
+
+#: apps/rf/main/rf.c:680
 Paso %u,%u kHz	Schritt %u,%u kHz
 
-#: apps/rf/main/rf.c:433
+#: apps/rf/main/rf.c:681
 Paso %u kHz	Schritt %u kHz
 
-#: apps/rf/main/rf.c:458
+#: apps/rf/main/rf.c:685
+Silenc. %d dB	Sperre %d dB
+
+#: apps/rf/main/rf.c:686
+Silenc. no	Sperre aus
+
+#: apps/rf/main/rf.c:762
 Buscando una RTL-SDR…	Suche einen RTL-SDR…
 
-#: apps/rf/main/rf.c:462
-Enchufala en el host USB: pines 25/27 del conector de atrás (High Speed, cables de menos de 15 cm) y 5 V del pin 1. Los pines 21/23 son Full Speed: alcanzan para 250 mil muestras por segundo.	Am USB-Host anschließen: Pins 25/27 der hinteren Stiftleiste (High Speed, Kabel kürzer als 15 cm) und 5 V von Pin 1. Die Pins 21/23 sind Full Speed: genug für 250 000 Samples pro Sekunde.
+#: apps/rf/main/rf.c:766
+Enchufala en el host USB: pines 25/27 del conector de atrás (High Speed, cables de menos de 15 cm) y 5 V del pin 1. Los pines 21/23 son Full Speed: alcanzan para 240 mil muestras por segundo.	Am USB-Host anschließen: Pins 25/27 der hinteren Stiftleiste (High Speed, Kabel kürzer als 15 cm) und 5 V von Pin 1. Die Pins 21/23 sind Full Speed: genug für 240 000 Samples pro Sekunde.
 
-#: apps/rf/main/rf.c:463
+#: apps/rf/main/rf.c:767
 El host USB está apagado: prendelo en Ajustes → USB → Host USB, y enchufá la RTL-SDR en los pines 25/27 del conector de atrás.	Der USB-Host ist aus: unter Einstellungen → USB → USB-Host einschalten und den RTL-SDR an die Pins 25/27 der hinteren Stiftleiste anschließen.
 
-#: apps/rf/main/rf.c:488
+#: apps/rf/main/rf.c:802
+señal	Signal
+
+#: apps/rf/main/rf.c:803
+silenciado	stumm
+
+#: apps/rf/main/rf.c:806
+estéreo	Stereo
+
+#: apps/rf/main/rf.c:810
 perdidos	verloren
 
-#: apps/rf/main/rf.c:490
+#: apps/rf/main/rf.c:812
 Sin radio	Kein Funkgerät
 
-#: apps/rf/main/rf.c:565
-En los pines 21/23 (Full Speed) sólo entran 250 mil muestras por segundo	An den Pins 21/23 (Full Speed) passen nur 250 000 Samples pro Sekunde
+#: apps/rf/main/rf.c:818
+Señal ahora: %d dB sobre el ruido	Signal jetzt: %d dB über dem Rauschen
 
-#: apps/rf/main/rf.c:640
+#: apps/rf/main/rf.c:893
+En los pines 21/23 (Full Speed) sólo entran 240 mil muestras por segundo	An den Pins 21/23 (Full Speed) passen nur 240 000 Samples pro Sekunde
+
+#: apps/rf/main/rf.c:987
 Frecuencia en MHz	Frequenz in MHz
 
-#: apps/rf/main/rf.c:663
+#: apps/rf/main/rf.c:1010
 Automática	Automatisch
 
-#: apps/rf/main/rf.c:672
+#: apps/rf/main/rf.c:1019
 Ganancia	Verstärkung
 
-#: apps/rf/main/rf.c:683
+#: apps/rf/main/rf.c:1030
 Todo a la izquierda es automática. Subila hasta que aparezcan las señales sin que suba el piso de ruido.	Ganz links ist automatisch. So weit erhöhen, bis die Signale erscheinen, ohne dass das Grundrauschen steigt.
 
-#: apps/rf/main/rf.c:873
+#: apps/rf/main/rf.c:1043
+Siempre abierto	Immer offen
+
+#: apps/rf/main/rf.c:1051
+Silenciador	Rauschsperre
+
+#: apps/rf/main/rf.c:1060
+Corta el audio de AM y FM angosta mientras el canal no supera al ruido por esos dB; entre 6 y 15 suele andar. Todo a la izquierda, siempre abierto. La FM comercial no lo usa.	Schaltet AM und Schmal-FM stumm, solange der Kanal nicht so viele dB über dem Rauschen liegt; 6 bis 15 passt meist. Ganz links: immer offen. UKW-Rundfunk nutzt sie nicht.
+
+#: apps/rf/main/rf.c:1289
 No pude arrancar la radio	Funkgerät ließ sich nicht starten
 
+#: apps/rf/main/rf_src_file.c:33
+#: apps/rf/main/rf_src_file.c:43
 #: apps/rf/main/rf_src_rtl.c:33
 No hay ninguna RTL-SDR en el host USB	Am USB-Host ist kein RTL-SDR
+
+#: apps/rf/main/rf_src_file.c:61
+archivo	Datei
 
 #: apps/rf/main/rf_src_rtl.c:40
 La RTL-SDR no respondió al abrirla	Der RTL-SDR antwortete beim Öffnen nicht
