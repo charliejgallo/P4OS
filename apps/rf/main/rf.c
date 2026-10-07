@@ -47,6 +47,7 @@ extern void lv_image_cache_drop(const void *src);
 #define RF_AVG      4
 #define READ_BYTES  (32 * 1024)
 #define TICKS_MAX   12
+#define SNAP_PX     36          /* how far from a tap a signal is looked for */
 
 /* A radio mast with waves on both sides, on a blue to violet tile. */
 static const uint8_t RF_ICON[] = {
@@ -145,6 +146,7 @@ typedef struct {
     lv_obj_t *spec_img, *wf_img, *empty, *empty_lbl;
     lv_obj_t *tick_lbl[TICKS_MAX];
     int16_t tick_x[TICKS_MAX];
+    uint32_t tick_f[TICKS_MAX];             /* each label's frequency: a tap tunes there */
     int nticks;
     lv_image_dsc_t spec_dsc, wf_dsc;
     bool blit_ok;                           /* straight to the panel (not in the simulator) */
@@ -181,6 +183,10 @@ typedef struct {
     /* keeping things (rf_rec.c): asked by the UI, done by the engine */
     volatile bool rec_iq, rec_wav;
     lv_obj_t *rec_btn;
+    /* the speaker: the board's volume, and a mute of the radio's own */
+    lv_obj_t *vol_btn, *vol_val, *vol_slider, *mute_btn;
+    volatile bool muted;
+    int vol_shown;
     char play_path[160];
     volatile bool play_req, play_stop, playing;
     volatile uint32_t play_rate, play_freq;
@@ -226,6 +232,7 @@ static void *psram(size_t n)
 static void audio_out(int16_t *pcm, int n, uint32_t rate)
 {
     if (n <= 0) return;
+    if (A && A->muted) memset(pcm, 0, (size_t)n * sizeof *pcm);   /* the ring keeps its pace */
     int q = aos_hal_spk_queued();
     if (q > (int)rate * 3 / 10) return;
     if (q > (int)rate / 5 && n > 2) n--;
@@ -634,6 +641,7 @@ static void place_ticks(rf_t *a)
         lv_label_set_text(l, s);
         lv_obj_remove_flag(l, LV_OBJ_FLAG_HIDDEN);
         lv_obj_set_x(l, x - 60);
+        a->tick_f[a->nticks] = (uint32_t)t;
         a->tick_x[a->nticks++] = (int16_t)x;
     }
     for (int i = a->nticks; i < TICKS_MAX; i++) lv_obj_add_flag(a->tick_lbl[i], LV_OBJ_FLAG_HIDDEN);
@@ -844,13 +852,15 @@ static void tune(rf_t *a, int64_t hz, bool snap)
 }
 
 static void capture_now(lv_timer_t *t);
+static void show_vol(rf_t *a);
 static bool play_file(rf_t *a, const char *name);
 
 /* One line of key=value: from rf/control.txt or from the portal's page (the
  * live channel). freq (Hz, or MHz with a point), mode (off, wfm, am, nfm,
  * data), rate, gain (tenths of a dB, or auto), sq (dB), step (Hz); and from
  * the page also step_by (+1/-1), capture, rec_iq, rec_wav, play (a
- * recording's name), play_stop, log, mqtt. */
+ * recording's name), play_stop, log, mqtt, vol (0-100, the board's) and
+ * mute (the radio's own). */
 static void apply_line(rf_t *a, const char *line)
 {
     char k[16], v[80];
@@ -880,6 +890,14 @@ static void apply_line(rf_t *a, const char *line)
     else if (!strcmp(k, "play_stop")) a->play_stop = true;
     else if (!strcmp(k, "log")) a->log_on = n != 0;
     else if (!strcmp(k, "mqtt")) a->mqtt_on = n != 0;
+    else if (!strcmp(k, "vol")) {
+        aos_hal_volume_set(n < 0 ? 0 : n > 100 ? 100 : (int)n);
+        a->muted = false;
+        if (a->vol_btn) show_vol(a);
+    } else if (!strcmp(k, "mute")) {
+        a->muted = n != 0;
+        if (a->vol_btn) show_vol(a);
+    }
     else if (!strcmp(k, "simd")) rf_demod_use_simd(n != 0);      /* to measure */
     else if (!strcmp(k, "fft")) rf_fft_use_simd(n != 0);
 }
@@ -957,7 +975,7 @@ static void live_state(rf_t *a, unsigned mbs10)
                      "\"step\":%u,\"sq\":%d,\"level\":%.1f,\"pilot\":%.1f,\"open\":%s,\"listening\":%s,"
                      "\"mbs\":%u.%u,\"dropped\":%u,\"rec_iq\":%s,\"iq_mb\":%u,\"iq_dropped\":%u,\"rec_wav\":%s,"
                      "\"wav_s\":%u,\"playing\":%s,\"play\":\"%s\",\"received\":%u,\"log\":%s,\"mqtt\":%s,"
-                     "\"mqtt_ready\":%s,\"gains\":[",
+                     "\"mqtt_ready\":%s,\"vol\":%d,\"muted\":%s,\"gains\":[",
                      a->state == ST_RUN ? "run" : a->state == ST_SEARCH ? "search" : "none", a->why ? a->why : "",
                      a->info.kind ? a->info.kind : "", a->info.name, a->info.tuner, a->info.high_speed ? "true" : "false",
                      (unsigned)a->info.fmin, (unsigned)a->info.fmax, (unsigned)a->want_freq,
@@ -968,7 +986,7 @@ static void live_state(rf_t *a, unsigned mbs10)
                      (unsigned)(ws / (wr ? wr : 1)), a->playing ? "true" : "false",
                      a->playing ? (strrchr(a->play_path, '/') ? strrchr(a->play_path, '/') + 1 : a->play_path) : "",
                      (unsigned)a->ev_n, a->log_on ? "true" : "false", a->mqtt_on ? "true" : "false",
-                     rf_mqtt_ready() ? "true" : "false");
+                     rf_mqtt_ready() ? "true" : "false", aos_hal_volume_get(), a->muted ? "true" : "false");
     for (int i = 0; i < a->info.ngains && k < (int)sizeof j - 16; i++)
         k += snprintf(j + k, sizeof j - k, "%s%d", i ? "," : "", a->info.gains[i]);
     snprintf(j + k, sizeof j - k, "]}");
@@ -1124,6 +1142,8 @@ static void ui_timer(lv_timer_t *t)
             lv_label_set_text(a->sq_live, s);
         }
         if (a->rate && a->nticks == 0) place_ticks(a);
+        /* the volume may change elsewhere too (control centre, the keys) */
+        if (a->vol_btn && aos_hal_volume_get() != a->vol_shown) show_vol(a);
     }
 }
 
@@ -1155,16 +1175,37 @@ static void spec_event(lv_event_t *e)
         a->dragging = false;
         if (a->moved) tune(a, a->want_freq, true);
         else {
-            /* a tap: that frequency to the centre */
+            /* a tap: that frequency to the centre. A finger covers ~60 px,
+             * 80 kHz at 0.96 Msps, and a narrow FM channel is 12.5: so a
+             * signal near the finger, clearly over the floor, is taken at
+             * its peak. The middle column is left out of the search, where
+             * the stick's own DC spike stands. */
             lv_area_t c;
             lv_obj_get_coords(lv_event_get_target_obj(e), &c);
-            tune(a, (int64_t)a->want_freq + (int64_t)(p.x - c.x1 - a->W / 2) * span / a->W, true);
+            int x = p.x - c.x1, best = -1;
+            float bv = a->floor_db + 8;
+            for (int k = x - SNAP_PX; k <= x + SNAP_PX; k++)
+                if (k >= 0 && k < a->W && LV_ABS(k - a->W / 2) > 2 && a->smooth[k] > bv) {
+                    bv = a->smooth[k];
+                    best = k;
+                }
+            if (best >= 0) x = best;
+            tune(a, (int64_t)a->want_freq + (int64_t)(x - a->W / 2) * span / a->W, true);
         }
         place_ticks(a);
         break;
     default:
         break;
     }
+}
+
+static void tick_tap(lv_event_t *e)
+{
+    rf_t *a = A;
+    int i = (int)(intptr_t)lv_event_get_user_data(e);
+    if (i < 0 || i >= a->nticks) return;
+    tune(a, a->tick_f[i], false);
+    place_ticks(a);
 }
 
 static void step_by(lv_event_t *e)
@@ -1233,6 +1274,7 @@ static void sheet_close(rf_t *a)
 {
     if (a->sheet) lv_obj_delete(a->sheet);
     a->sheet = a->ta = a->gain_slider = a->gain_val = a->sq_slider = a->sq_val = a->sq_live = NULL;
+    a->vol_val = a->vol_slider = a->mute_btn = NULL;
 }
 
 static void sheet_bg_tap(lv_event_t *e)
@@ -1303,6 +1345,7 @@ static void freq_tap(lv_event_t *e)
     lv_textarea_set_text(a->ta, s);
     lv_obj_t *kb = lv_keyboard_create(a->sheet);
     lv_keyboard_set_mode(kb, LV_KEYBOARD_MODE_NUMBER);
+    aos_keyboard_style(kb, aos_font_body);     /* dark, as the system's other keyboards */
     lv_keyboard_set_textarea(kb, a->ta);
     lv_obj_add_event_cb(kb, kb_event, LV_EVENT_READY, a);
     lv_obj_add_event_cb(kb, kb_event, LV_EVENT_CANCEL, a);
@@ -1350,6 +1393,62 @@ static void sq_changed(lv_event_t *e)
     else snprintf(s, sizeof s, "%s", _("Siempre abierto"));
     lv_label_set_text(a->sq_val, s);
     show_buttons(a);
+}
+
+/* The speaker button: its symbol says the volume, or that the radio is muted */
+static void show_vol(rf_t *a)
+{
+    int v = aos_hal_volume_get();
+    a->vol_shown = v;
+    const char *sym = a->muted || v == 0 ? LV_SYMBOL_MUTE : v < 50 ? LV_SYMBOL_VOLUME_MID : LV_SYMBOL_VOLUME_MAX;
+    lv_label_set_text(lv_obj_get_child(a->vol_btn, 0), sym);
+    lv_obj_set_style_bg_color(a->vol_btn, a->muted ? AOS_C_RED : AOS_C_CARD2, 0);
+    if (a->vol_val) {
+        char s[24];
+        snprintf(s, sizeof s, "%d %%", v);
+        lv_label_set_text(a->vol_val, s);
+        lv_label_set_text(lv_obj_get_child(a->mute_btn, 0), a->muted ? _("Activar el sonido") : _("Silenciar"));
+        lv_obj_set_style_bg_color(a->mute_btn, a->muted ? AOS_C_RED : AOS_C_CARD2, 0);
+    }
+}
+
+static void set_muted(rf_t *a, bool m)
+{
+    a->muted = m;
+    show_vol(a);
+}
+
+static void vol_changed(lv_event_t *e)
+{
+    rf_t *a = lv_event_get_user_data(e);
+    aos_hal_volume_set(lv_slider_get_value(a->vol_slider));
+    if (a->muted) a->muted = false;     /* moving the volume means wanting to hear */
+    show_vol(a);
+}
+
+static void mute_tap(lv_event_t *e)
+{
+    rf_t *a = lv_event_get_user_data(e);
+    set_muted(a, !a->muted);
+}
+
+static void vol_tap(lv_event_t *e)
+{
+    rf_t *a = lv_event_get_user_data(e);
+    lv_obj_t *card = sheet_open(a, _("Volumen"));
+    a->vol_val = aos_label(card, "", aos_font_large, AOS_C_TEXT);
+    a->vol_slider = lv_slider_create(card);
+    lv_obj_set_width(a->vol_slider, LV_PCT(100));
+    lv_obj_set_height(a->vol_slider, 24);
+    lv_slider_set_range(a->vol_slider, 0, 100);
+    lv_slider_set_value(a->vol_slider, aos_hal_volume_get(), LV_ANIM_OFF);
+    lv_obj_add_event_cb(a->vol_slider, vol_changed, LV_EVENT_VALUE_CHANGED, a);
+    a->mute_btn = button_f(card, "", mute_tap, a, aos_font_body, 20);
+    lv_obj_t *l = aos_label(card, _("El volumen es el de la placa, el mismo de todo el sistema. Silenciar calla sólo la radio, que sigue sintonizada."),
+                            aos_font_caption, AOS_C_DIM);
+    lv_obj_set_width(l, LV_PCT(100));
+    lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
+    show_vol(a);
 }
 
 static void sq_tap(lv_event_t *e)
@@ -1801,6 +1900,9 @@ static void build(rf_t *a, lv_obj_t *root)
         lv_obj_set_style_text_align(a->tick_lbl[i], LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_set_y(a->tick_lbl[i], y + 6);
         lv_obj_add_flag(a->tick_lbl[i], LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(a->tick_lbl[i], LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_set_ext_click_area(a->tick_lbl[i], 12);
+        lv_obj_add_event_cb(a->tick_lbl[i], tick_tap, LV_EVENT_CLICKED, (void *)(intptr_t)i);
     }
     y += 36;
     a->wf_img = image_for(root, &a->wf_dsc, a->wf_px, a->W, a->WH);
@@ -1830,6 +1932,7 @@ static void build(rf_t *a, lv_obj_t *root)
     a->gain_btn = button_f(row, "", gain_tap, a, aos_font_caption, 14);
     a->step_btn = button_f(row, "", step_cycle, a, aos_font_caption, 14);
     a->sq_btn = button_f(row, "", sq_tap, a, aos_font_caption, 14);
+    a->vol_btn = button_f(row, LV_SYMBOL_VOLUME_MAX, vol_tap, a, aos_font_small, 16);
     a->rec_btn = button_f(row, LV_SYMBOL_SAVE, rec_tap, a, aos_font_small, 16);
     lv_obj_t *bands = ctl_row(a, y + 6 + 2 * rh, true);
     for (size_t i = 0; i < sizeof BANDS / sizeof BANDS[0]; i++) {

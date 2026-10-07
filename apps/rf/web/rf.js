@@ -100,12 +100,18 @@ P.registerPage({
     const sq = h('input', { type: 'range', min: 0, max: 40, step: 1, style: 'width:140px', onchange: () => send('sq=' + sq.value) });
     const sqLbl = h('span', { class: 'small' }, '');
     const sqBox = h('span', {}, 'Silenciador ', sq, ' ', sqLbl);
+    /* the board's volume (the system's) and the radio's own mute */
+    const vol = h('input', { type: 'range', min: 0, max: 100, step: 1, style: 'width:120px', onchange: () => send('vol=' + vol.value) });
+    const volLbl = h('span', { class: 'small' }, '');
+    let muted = false;
+    const muteBtn = h('button', { class: 'btn', onclick: () => send('mute=' + (muted ? 0 : 1)) }, 'Silenciar');
+    const volBox = h('span', {}, 'Volumen ', vol, ' ', volLbl, ' ', muteBtn);
     const bands = h('div', { class: 'rf-seg' }, ...BANDS.map(([n, hz, m, step]) =>
       h('button', { class: 'btn', onclick: () => send(`mode=${m}\nfreq=${hz}\nstep=${step}`) }, n)));
     const controls = h('div', { class: 'card' },
       modeRow,
       h('div', { class: 'row', style: 'flex-wrap:wrap;gap:14px;margin-top:10px' },
-        h('span', {}, 'Muestreo ', rateSel), h('span', {}, 'Ganancia ', gainSel), h('span', {}, 'Paso ', stepSel), sqBox),
+        h('span', {}, 'Muestreo ', rateSel), h('span', {}, 'Ganancia ', gainSel), h('span', {}, 'Paso ', stepSel), sqBox, volBox),
       h('div', { style: 'margin-top:10px' }, bands));
 
     /* ---- the spectrum and the waterfall (or Data's list) ---- */
@@ -236,6 +242,13 @@ P.registerPage({
       if (document.activeElement !== stepSel) stepSel.value = s.step;
       if (document.activeElement !== sq) sq.value = s.sq;
       sqLbl.textContent = s.sq ? s.sq + ' dB' : 'no';
+      if (s.vol !== undefined) {
+        if (document.activeElement !== vol) vol.value = s.vol;
+        volLbl.textContent = s.vol + ' %';
+        muted = !!s.muted;
+        muteBtn.textContent = muted ? 'Activar el sonido' : 'Silenciar';
+        muteBtn.classList.toggle('red', muted);
+      }
       sqBox.style.display = s.mode === 'am' || s.mode === 'nfm' ? '' : 'none';
       wf.style.display = s.mode === 'data' ? 'none' : '';
       evBox.style.display = s.mode === 'data' ? '' : 'none';

@@ -5,217 +5,229 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/rf/main/rf.c:80
-#: apps/rf/main/rf.c:90
+#: apps/rf/main/rf.c:81
+#: apps/rf/main/rf.c:91
 FM	FM
 
-#: apps/rf/main/rf.c:81
+#: apps/rf/main/rf.c:82
 Aire	Air
 
-#: apps/rf/main/rf.c:82
+#: apps/rf/main/rf.c:83
 Marina	Marine
 
-#: apps/rf/main/rf.c:90
+#: apps/rf/main/rf.c:91
 Sin audio	No audio
 
-#: apps/rf/main/rf.c:90
+#: apps/rf/main/rf.c:91
 AM	AM
 
-#: apps/rf/main/rf.c:90
+#: apps/rf/main/rf.c:91
 FM angosta	Narrow FM
 
-#: apps/rf/main/rf.c:90
+#: apps/rf/main/rf.c:91
 Datos	Data
 
-#: apps/rf/main/rf.c:314
-#: apps/rf/main/rf.c:1755
+#: apps/rf/main/rf.c:321
+#: apps/rf/main/rf.c:2009
 Sin memoria	Out of memory
 
-#: apps/rf/main/rf.c:459
+#: apps/rf/main/rf.c:466
 La RTL-SDR no empezó a mandar muestras	The RTL-SDR did not start sending samples
 
-#: apps/rf/main/rf.c:476
+#: apps/rf/main/rf.c:483
 Se desconectó la RTL-SDR	The RTL-SDR was unplugged
 
-#: apps/rf/main/rf.c:806
+#: apps/rf/main/rf.c:814
 Gan. auto	Gain auto
 
-#: apps/rf/main/rf.c:807
+#: apps/rf/main/rf.c:815
 Gan. %d,%d dB	Gain %d.%d dB
 
-#: apps/rf/main/rf.c:809
+#: apps/rf/main/rf.c:817
 Paso %u MHz	Step %u MHz
 
-#: apps/rf/main/rf.c:813
+#: apps/rf/main/rf.c:821
 Paso %u,%02u kHz	Step %u.%02u kHz
 
-#: apps/rf/main/rf.c:814
+#: apps/rf/main/rf.c:822
 Paso %u,%u kHz	Step %u.%u kHz
 
-#: apps/rf/main/rf.c:815
+#: apps/rf/main/rf.c:823
 Paso %u kHz	Step %u kHz
 
-#: apps/rf/main/rf.c:819
+#: apps/rf/main/rf.c:827
 Silenc. %d dB	Squelch %d dB
 
-#: apps/rf/main/rf.c:820
+#: apps/rf/main/rf.c:828
 Silenc. no	Squelch off
 
-#: apps/rf/main/rf.c:838
+#: apps/rf/main/rf.c:846
 Reproduciendo una grabación: no se puede sintonizar	Playing a recording: it cannot be tuned
 
-#: apps/rf/main/rf.c:903
+#: apps/rf/main/rf.c:1059
 Buscando una RTL-SDR…	Looking for an RTL-SDR…
 
-#: apps/rf/main/rf.c:907
+#: apps/rf/main/rf.c:1063
 Enchufala en el host USB: pines 25/27 del conector de atrás (High Speed, cables de menos de 15 cm) y 5 V del pin 1. Los pines 21/23 son Full Speed: alcanzan para 240 mil muestras por segundo.	Plug it into the USB host: pins 25/27 of the back header (High Speed, wires shorter than 15 cm) and 5 V from pin 1. Pins 21/23 are Full Speed: enough for 240 thousand samples a second.
 
-#: apps/rf/main/rf.c:908
+#: apps/rf/main/rf.c:1064
 El host USB está apagado: prendelo en Ajustes → USB → Host USB, y enchufá la RTL-SDR en los pines 25/27 del conector de atrás.	The USB host is off: turn it on in Settings → USB → USB host, and plug the RTL-SDR into pins 25/27 of the back header.
 
-#: apps/rf/main/rf.c:947
+#: apps/rf/main/rf.c:1110
 señal	signal
 
-#: apps/rf/main/rf.c:948
+#: apps/rf/main/rf.c:1111
 silenciado	muted
 
-#: apps/rf/main/rf.c:951
+#: apps/rf/main/rf.c:1114
 estéreo	stereo
 
-#: apps/rf/main/rf.c:955
+#: apps/rf/main/rf.c:1118
 perdidos	lost
 
-#: apps/rf/main/rf.c:957
+#: apps/rf/main/rf.c:1120
 Sin radio	No radio
 
-#: apps/rf/main/rf.c:962
+#: apps/rf/main/rf.c:1125
 reproduciendo	playing
 
-#: apps/rf/main/rf.c:970
+#: apps/rf/main/rf.c:1133
 recibidos	received
 
-#: apps/rf/main/rf.c:977
+#: apps/rf/main/rf.c:1141
 Señal ahora: %d dB sobre el ruido	Signal now: %d dB over the noise
 
-#: apps/rf/main/rf.c:1052
+#: apps/rf/main/rf.c:1239
 En los pines 21/23 (Full Speed) sólo entran 240 mil muestras por segundo	On pins 21/23 (Full Speed) only 240 thousand samples a second fit
 
-#: apps/rf/main/rf.c:1148
+#: apps/rf/main/rf.c:1336
 Frecuencia en MHz	Frequency in MHz
 
-#: apps/rf/main/rf.c:1171
+#: apps/rf/main/rf.c:1360
 Automática	Automatic
 
-#: apps/rf/main/rf.c:1180
+#: apps/rf/main/rf.c:1369
 Ganancia	Gain
 
-#: apps/rf/main/rf.c:1191
+#: apps/rf/main/rf.c:1380
 Todo a la izquierda es automática. Subila hasta que aparezcan las señales sin que suba el piso de ruido.	All the way left is automatic. Raise it until the signals show without the noise floor rising.
 
-#: apps/rf/main/rf.c:1204
+#: apps/rf/main/rf.c:1393
 Siempre abierto	Always open
 
-#: apps/rf/main/rf.c:1212
+#: apps/rf/main/rf.c:1410
+Activar el sonido	Unmute
+
+#: apps/rf/main/rf.c:1410
+Silenciar	Mute
+
+#: apps/rf/main/rf.c:1438
+Volumen	Volume
+
+#: apps/rf/main/rf.c:1447
+El volumen es el de la placa, el mismo de todo el sistema. Silenciar calla sólo la radio, que sigue sintonizada.	The volume is the board's, the same for the whole system. Mute silences only the radio, which stays tuned.
+
+#: apps/rf/main/rf.c:1457
 Silenciador	Squelch
 
-#: apps/rf/main/rf.c:1221
+#: apps/rf/main/rf.c:1466
 Corta el audio de AM y FM angosta mientras el canal no supera al ruido por esos dB; entre 6 y 15 suele andar. Todo a la izquierda, siempre abierto. La FM comercial no lo usa.	Mutes AM and narrow FM while the channel is not that many dB over the noise; 6 to 15 usually works. All the way left, always open. Broadcast FM does not use it.
 
-#: apps/rf/main/rf.c:1242
+#: apps/rf/main/rf.c:1487
 ID %u · canal %d · %.1f °C	ID %u · channel %d · %.1f °C
 
-#: apps/rf/main/rf.c:1244
+#: apps/rf/main/rf.c:1489
 batería baja	battery low
 
-#: apps/rf/main/rf.c:1246
+#: apps/rf/main/rf.c:1491
 código %.8s · datos %s	code %.8s · data %s
 
-#: apps/rf/main/rf.c:1248
+#: apps/rf/main/rf.c:1493
 ID %05X · botón %X	ID %05X · button %X
 
-#: apps/rf/main/rf.c:1261
-#: apps/rf/main/rf.c:1345
+#: apps/rf/main/rf.c:1506
+#: apps/rf/main/rf.c:1590
 Desconocido	Unknown
 
-#: apps/rf/main/rf.c:1314
+#: apps/rf/main/rf.c:1559
 Esperando transmisiones en la banda: controles remotos, sensores de temperatura, timbres…	Waiting for transmissions in the band: remote controls, temperature sensors, doorbells…
 
-#: apps/rf/main/rf.c:1350
+#: apps/rf/main/rf.c:1595
 Hora: %02d:%02d:%02d · %d veces\n	Time: %02d:%02d:%02d · %d times\n
 
-#: apps/rf/main/rf.c:1352
+#: apps/rf/main/rf.c:1597
 Frecuencia: %u,%03u MHz (%+d kHz del centro) · %.0f dB sobre el ruido\n	Frequency: %u.%03u MHz (%+d kHz from the centre) · %.0f dB over the noise\n
 
-#: apps/rf/main/rf.c:1355
+#: apps/rf/main/rf.c:1600
 Modulación: %s · corto %d µs · largo %d µs · pausa %d µs\n	Modulation: %s · short %d µs · long %d µs · gap %d µs\n
 
-#: apps/rf/main/rf.c:1357
+#: apps/rf/main/rf.c:1602
 %d bits: %s	%d bits: %s
 
-#: apps/rf/main/rf.c:1372
+#: apps/rf/main/rf.c:1617
 Captura guardada: %s	Screenshot saved: %s
 
-#: apps/rf/main/rf.c:1374
+#: apps/rf/main/rf.c:1619
 No se pudo guardar la captura	The screenshot could not be saved
 
-#: apps/rf/main/rf.c:1388
+#: apps/rf/main/rf.c:1633
 Grabando el audio en la carpeta de la Grabadora	Recording the audio into the Recorder's folder
 
-#: apps/rf/main/rf.c:1388
+#: apps/rf/main/rf.c:1633
 Grabación de audio terminada	Audio recording finished
 
-#: apps/rf/main/rf.c:1392
+#: apps/rf/main/rf.c:1637
 Grabando la señal en rf/iq de la tarjeta	Recording the signal into the card's rf/iq
 
-#: apps/rf/main/rf.c:1392
+#: apps/rf/main/rf.c:1637
 Grabación de la señal terminada	Signal recording finished
 
-#: apps/rf/main/rf.c:1441
+#: apps/rf/main/rf.c:1686
 Guardar	Keep
 
-#: apps/rf/main/rf.c:1442
+#: apps/rf/main/rf.c:1687
 Captura de pantalla	Screenshot
 
-#: apps/rf/main/rf.c:1445
+#: apps/rf/main/rf.c:1690
 Terminar la grabación de audio	Stop recording the audio
 
-#: apps/rf/main/rf.c:1445
+#: apps/rf/main/rf.c:1690
 Grabar el audio	Record the audio
 
-#: apps/rf/main/rf.c:1446
+#: apps/rf/main/rf.c:1691
 Terminar la grabación de la señal	Stop recording the signal
 
-#: apps/rf/main/rf.c:1446
+#: apps/rf/main/rf.c:1691
 Grabar la señal (I/Q)	Record the signal (I/Q)
 
-#: apps/rf/main/rf.c:1448
+#: apps/rf/main/rf.c:1693
 Dejar de reproducir	Stop playing
 
-#: apps/rf/main/rf.c:1449
+#: apps/rf/main/rf.c:1694
 Reproducir una grabación	Play a recording
 
-#: apps/rf/main/rf.c:1450
+#: apps/rf/main/rf.c:1695
 Guardar lo recibido en modo Datos (rf/datos-<día>.csv)	Keep what Data mode receives (rf/datos-<day>.csv)
 
-#: apps/rf/main/rf.c:1451
+#: apps/rf/main/rf.c:1696
 Publicarlo por MQTT	Publish it over MQTT
 
-#: apps/rf/main/rf.c:1451
+#: apps/rf/main/rf.c:1696
 Publicarlo por MQTT (no conectado)	Publish it over MQTT (not connected)
 
-#: apps/rf/main/rf.c:1454
+#: apps/rf/main/rf.c:1699
 La señal ocupa %u MB por minuto a la tasa de ahora; la tarjeta escribe unos 3 MB/s.	The signal takes %u MB a minute at the present rate; the card writes about 3 MB/s.
 
-#: apps/rf/main/rf.c:1466
+#: apps/rf/main/rf.c:1711
 Grabaciones	Recordings
 
-#: apps/rf/main/rf.c:1491
+#: apps/rf/main/rf.c:1736
 No hay grabaciones todavía.	No recordings yet.
 
-#: apps/rf/main/rf.c:1510
+#: apps/rf/main/rf.c:1760
 No sé a qué frecuencia está grabada	Its frequency is not in its name
 
-#: apps/rf/main/rf.c:1765
+#: apps/rf/main/rf.c:2019
 No pude arrancar la radio	Could not start the radio
 
 #: apps/rf/main/rf_src_file.c:55
