@@ -42,10 +42,11 @@ hardware has to replace them.
 | What | Where | Licence | Notes |
 |---|---|---|---|
 | **doomgeneric** (`dcb7a8d`), Chocolate Doom 2.2.1's music player, DOSBox's DBOPL | **vendored**, `apps/doom/main/doomgeneric/` | **GPL-2.0-or-later** | modified, every change listed in [apps/doom/README.md](apps/doom/README.md). `doom.so` as a whole is GPL-2.0; the repository at the release's tag is its source. **No WAD is included.** |
+| **librtlsdr 2.0.3** | **vendored**, `apps/rf/main/rtlsdr/` | **GPL-2.0-or-later** | two small changes, listed in [apps/rf/README.md](apps/rf/README.md). `rf.so` as a whole is GPL-2.0-or-later; the repository at the release's tag is its source. |
 | **Lua 5.4.8** | **vendored**, `apps/lua/main/lua/` | MIT, Lua.org, PUC-Rio | one patch to `luaconf.h`, recorded in `VENDOR.md`; the notice stays in `lua.h` |
 
-The firmware that loads `doom.so` stays MIT. The GPL applies to the Doom app
-and to any simulator build that compiles Doom in.
+The firmware that loads `doom.so` and `rf.so` stays MIT. The GPL applies to
+the Doom and RF apps and to any simulator build that compiles them in.
 
 The LED Strips app's Fire effect follows Mark Kriegsman's Fire2012 algorithm
 (as published with FastLED, MIT), written again in `aos_io/aos_leds.c`.

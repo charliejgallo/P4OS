@@ -1,0 +1,79 @@
+# amoledos-lang 1   es -> de
+# aos.rf.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/rf/main/rf.c:68
+FM	UKW
+
+#: apps/rf/main/rf.c:69
+Aire	Flugfunk
+
+#: apps/rf/main/rf.c:70
+Marina	Seefunk
+
+#: apps/rf/main/rf.c:149
+#: apps/rf/main/rf.c:869
+Sin memoria	Kein Speicher
+
+#: apps/rf/main/rf.c:211
+La RTL-SDR no empezó a mandar muestras	Der RTL-SDR hat nicht begonnen, Samples zu senden
+
+#: apps/rf/main/rf.c:226
+Se desconectó la RTL-SDR	Der RTL-SDR wurde abgezogen
+
+#: apps/rf/main/rf.c:428
+Ganancia auto	Verstärkung auto
+
+#: apps/rf/main/rf.c:429
+Ganancia %d,%d dB	Verstärkung %d,%d dB
+
+#: apps/rf/main/rf.c:431
+Paso %u MHz	Schritt %u MHz
+
+#: apps/rf/main/rf.c:432
+Paso %u,%u kHz	Schritt %u,%u kHz
+
+#: apps/rf/main/rf.c:433
+Paso %u kHz	Schritt %u kHz
+
+#: apps/rf/main/rf.c:458
+Buscando una RTL-SDR…	Suche einen RTL-SDR…
+
+#: apps/rf/main/rf.c:462
+Enchufala en el host USB: pines 25/27 del conector de atrás (High Speed, cables de menos de 15 cm) y 5 V del pin 1. Los pines 21/23 son Full Speed: alcanzan para 250 mil muestras por segundo.	Am USB-Host anschließen: Pins 25/27 der hinteren Stiftleiste (High Speed, Kabel kürzer als 15 cm) und 5 V von Pin 1. Die Pins 21/23 sind Full Speed: genug für 250 000 Samples pro Sekunde.
+
+#: apps/rf/main/rf.c:463
+El host USB está apagado: prendelo en Ajustes → USB → Host USB, y enchufá la RTL-SDR en los pines 25/27 del conector de atrás.	Der USB-Host ist aus: unter Einstellungen → USB → USB-Host einschalten und den RTL-SDR an die Pins 25/27 der hinteren Stiftleiste anschließen.
+
+#: apps/rf/main/rf.c:488
+perdidos	verloren
+
+#: apps/rf/main/rf.c:490
+Sin radio	Kein Funkgerät
+
+#: apps/rf/main/rf.c:565
+En los pines 21/23 (Full Speed) sólo entran 250 mil muestras por segundo	An den Pins 21/23 (Full Speed) passen nur 250 000 Samples pro Sekunde
+
+#: apps/rf/main/rf.c:640
+Frecuencia en MHz	Frequenz in MHz
+
+#: apps/rf/main/rf.c:663
+Automática	Automatisch
+
+#: apps/rf/main/rf.c:672
+Ganancia	Verstärkung
+
+#: apps/rf/main/rf.c:683
+Todo a la izquierda es automática. Subila hasta que aparezcan las señales sin que suba el piso de ruido.	Ganz links ist automatisch. So weit erhöhen, bis die Signale erscheinen, ohne dass das Grundrauschen steigt.
+
+#: apps/rf/main/rf.c:873
+No pude arrancar la radio	Funkgerät ließ sich nicht starten
+
+#: apps/rf/main/rf_src_rtl.c:33
+No hay ninguna RTL-SDR en el host USB	Am USB-Host ist kein RTL-SDR
+
+#: apps/rf/main/rf_src_rtl.c:40
+La RTL-SDR no respondió al abrirla	Der RTL-SDR antwortete beim Öffnen nicht

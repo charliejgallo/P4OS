@@ -64,7 +64,7 @@ if(NOT DEFINED P4OS_SIM_APPS)
     # -DP4OS_SIM_APPS="a;b" builds a smaller simulator
     set(P4OS_SIM_APPS hello_app cotiz clima burbujas simon dados flappy gemas buscaminas atasco radio recorder afinador
         arkanos topos cjump g2043 claudito camaras pixel neon blackjack truco lua video doom chatarra
-        visor3d mapas monsterhop turbo mila golf notas eeprom dibujo pwm infrarrojo can vnc)
+        visor3d mapas monsterhop turbo mila golf notas eeprom dibujo pwm infrarrojo can vnc rf)
 endif()
 set(AOS_DYNAPP_SRC "")
 foreach(a ${P4OS_SIM_APPS})
@@ -104,6 +104,26 @@ if(AOS_DOOM_SRC)
         ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/include)
     target_compile_definitions(aos_doom PRIVATE AOS_SIM)
     target_compile_options(aos_doom PRIVATE -w)
+endif()
+
+# The RF app's radio driver: librtlsdr (apps/rf/main/rtlsdr, GPL,
+# third-party) and its port onto the HAL's raw USB (apps/rf/main/port, which
+# maps libusb's names to rfusb_ ones, so they never meet the Mac's libusb
+# that usb_raw_sim.c links). Below the glob like Doom, and quiet for the same
+# reasons.
+file(GLOB AOS_RTLSDR_SRC CONFIGURE_DEPENDS
+    ${CMAKE_CURRENT_SOURCE_DIR}/../apps/rf/main/rtlsdr/*.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../apps/rf/main/port/*.c)
+if(AOS_RTLSDR_SRC AND "rf" IN_LIST P4OS_SIM_APPS)
+    add_library(aos_rtlsdr STATIC ${AOS_RTLSDR_SRC})
+    target_include_directories(aos_rtlsdr BEFORE PRIVATE
+        ${CMAKE_CURRENT_SOURCE_DIR}/../apps/rf/main/port
+        ${CMAKE_CURRENT_SOURCE_DIR}/../apps/rf/main/rtlsdr
+        ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/include)
+    target_compile_definitions(aos_rtlsdr PRIVATE AOS_SIM)
+    target_compile_options(aos_rtlsdr PRIVATE -w)
+else()
+    set(AOS_RTLSDR_SRC "")
 endif()
 
 # cJSON for the Home Assistant service: the board takes it from ESP-IDF's
@@ -208,6 +228,7 @@ target_compile_definitions(p4os_sim PRIVATE AOS_SIM_BUILTIN AOS_SIM)
 target_link_libraries(p4os_sim PRIVATE lvgl ${SDL2_LIBRARIES} m aos_cjson
     $<$<BOOL:${AOS_LUA_SRC}>:aos_lua>
     $<$<BOOL:${AOS_DOOM_SRC}>:aos_doom>
+    $<$<BOOL:${AOS_RTLSDR_SRC}>:aos_rtlsdr>
     ${MBEDTLS_LIB} ${MBEDX509_LIB} ${MBEDCRYPTO_LIB} ${AVCODEC_LIBRARIES})
 target_link_directories(p4os_sim PRIVATE ${SDL2_LIBRARY_DIRS} ${AVCODEC_LIBRARY_DIRS})
 
@@ -227,4 +248,16 @@ if(EXISTS ${AOS_ESF_DIR}/CMakeLists.txt)
     add_subdirectory(${AOS_ESF_DIR} esp-serial-flasher EXCLUDE_FROM_ALL)
     target_compile_options(flasher PRIVATE -w)
     target_link_libraries(p4os_sim PRIVATE flasher)
+endif()
+
+# Raw USB devices through the Mac's libusb (usb_raw_sim.c), for the apps that
+# bring a driver of their own: the RF app's RTL-SDR plugged into the Mac.
+# Used only with P4_SIM_USB=1 at run time; without libusb (brew install
+# libusb) the weak stubs answer "no device".
+pkg_check_modules(LIBUSB libusb-1.0)
+if(LIBUSB_FOUND)
+    target_sources(p4os_sim PRIVATE usb_raw_sim.c)
+    target_include_directories(p4os_sim PRIVATE ${LIBUSB_INCLUDE_DIRS})
+    target_link_directories(p4os_sim PRIVATE ${LIBUSB_LIBRARY_DIRS})
+    target_link_libraries(p4os_sim PRIVATE ${LIBUSB_LIBRARIES})
 endif()
