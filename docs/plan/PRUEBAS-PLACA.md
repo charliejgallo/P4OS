@@ -60,6 +60,10 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       2,048 y 2,4 Msps (4,1 y 4,8 MB/s) sin muestras perdidas, 25 cuadros/s
       con 25-35 % de CPU; desenchufada y vuelta a enchufar con la app
       abierta, vuelve sola. Sin probar: 21/23 (Full Speed).
+- [ ] **RF: la página del portal** (2026-10-07, `http://p4os.local/#rf`): el
+      canal en vivo anda en la placa (espectro cada ~80 ms, estado, órdenes);
+      falta verla en un navegador: sintonizar tocando, modos, la tabla de
+      Datos, grabar y bajar.
 - [ ] **RF: datos de 433 MHz y guardar** (2026-10-07): el modo Datos corre en la
       placa (16 % del hilo de la radio). Falta: apretar un control remoto o un
       timbre de 433 MHz cerca y ver que aparezca; si hay un sensor de

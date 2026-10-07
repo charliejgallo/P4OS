@@ -21,6 +21,12 @@
   publish them over MQTT.
 - **RF keeps things:** a screenshot, the audio as WAV, the raw signal (I/Q)
   on the card, and plays a recording back as if it were the radio.
+- **RF in the portal** (`#rf`): the spectrum and its waterfall in the
+  browser, tuning by clicking, the modes and settings, Data mode's list, the
+  recordings to play, download or delete.
+- **Live data for the apps' pages** (`/api/live`, `aos_hal_live_*`): an app
+  puts values and takes messages in memory, for what changes too often for
+  a file on the card.
 - **esp-dsp for the apps:** the firmware carries it and lends its 16-bit
   SIMD routines (dot products, decimating FIRs, FFTs) and biquads; on the
   P4 a float multiply-add costs ~5 cycles whatever the code

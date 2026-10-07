@@ -77,6 +77,19 @@ The save button (the disk, second row) opens:
   until it stops.
 - The CSV and MQTT switches above.
 
+## The page in the portal
+
+`web/rf.js`, at `http://p4os.local/#rf` while the app is open on the board
+(the page offers to open it): the frequency and its steps, the modes, rate,
+gain, step and squelch, the bands; the spectrum with its own waterfall drawn
+by the browser (a click tunes there, the wheel over the spectrum moves a
+step); Data mode's list, a row opening its pulses and bits; the save
+buttons (the board's screenshot, a PNG of the spectrum from the browser, the
+recordings), and the recordings and CSVs to play, download or delete. It
+talks to the app through the portal's live channel (`docs/PORTAL-PAGES.md`,
+"Live data"); while a page looks the radio goes on even with nothing to
+listen to and the board locked.
+
 ## Wiring
 
 The RTL-SDR goes on the USB host, as a pendrive does (`docs/USB.md`, "The

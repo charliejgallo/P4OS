@@ -173,7 +173,7 @@ typedef struct {
      * fills it under mx, the UI lists it */
     struct rf_event *ev;
     volatile uint32_t ev_n, ev_seq;
-    uint32_t seen_ev;
+    uint32_t seen_ev, live_ev;
     bool log_on, mqtt_on;
     lv_obj_t *ev_list, *ev_empty;
     lv_obj_t *ev_title[40];                 /* the rows' first lines, newest first */
@@ -843,11 +843,57 @@ static void tune(rf_t *a, int64_t hz, bool snap)
     show_freq(a);
 }
 
-/* rf/control.txt on the card, read when it changes: lines of key=value
- * that set what the screen sets - freq (Hz, or MHz with a point), mode
- * (off, wfm, am, nfm), rate, gain (tenths of a dB, or auto), sq (dB),
- * step (Hz). It is how a page of the portal tunes the app; the board's
- * own UI follows. */
+static void capture_now(lv_timer_t *t);
+static bool play_file(rf_t *a, const char *name);
+
+/* One line of key=value: from rf/control.txt or from the portal's page (the
+ * live channel). freq (Hz, or MHz with a point), mode (off, wfm, am, nfm,
+ * data), rate, gain (tenths of a dB, or auto), sq (dB), step (Hz); and from
+ * the page also step_by (+1/-1), capture, rec_iq, rec_wav, play (a
+ * recording's name), play_stop, log, mqtt. */
+static void apply_line(rf_t *a, const char *line)
+{
+    char k[16], v[80];
+    if (sscanf(line, " %15[a-z_] = %79s", k, v) != 2) return;
+    long n = strtol(v, NULL, 10);
+    if (!strcmp(k, "freq")) {
+        double x = strtod(v, NULL);
+        tune(a, strchr(v, '.') ? (int64_t)(x * 1e6 + 0.5) : (int64_t)x, false);
+    } else if (!strcmp(k, "mode")) {
+        static const char *const M[MODES_N] = { "off", "wfm", "am", "nfm", "data" };
+        for (int m = 0; m < MODES_N; m++)
+            if (!strcmp(v, M[m])) {
+                if (a->want_mode == RF_MODE_OFF && m != RF_MODE_OFF && m != MODE_DATA && a->info.high_speed)
+                    a->want_rate = m == RF_MODE_WFM ? 960000 : 240000;
+                a->want_mode = m;
+                if (MODE_STEP[m]) a->step = MODE_STEP[m];
+            }
+    } else if (!strcmp(k, "rate")) a->want_rate = (uint32_t)strtoul(v, NULL, 10);
+    else if (!strcmp(k, "gain")) a->want_gain = !strcmp(v, "auto") ? -1 : (int)n;
+    else if (!strcmp(k, "sq")) a->want_sq = (int)n;
+    else if (!strcmp(k, "step")) a->step = (uint32_t)strtoul(v, NULL, 10);
+    else if (!strcmp(k, "step_by")) tune(a, (int64_t)a->want_freq + (n < 0 ? -1 : 1) * (int64_t)a->step, true);
+    else if (!strcmp(k, "capture")) lv_timer_create(capture_now, 250, NULL);
+    else if (!strcmp(k, "rec_iq")) a->rec_iq = n != 0;
+    else if (!strcmp(k, "rec_wav")) a->rec_wav = n != 0;
+    else if (!strcmp(k, "play")) play_file(a, v);
+    else if (!strcmp(k, "play_stop")) a->play_stop = true;
+    else if (!strcmp(k, "log")) a->log_on = n != 0;
+    else if (!strcmp(k, "mqtt")) a->mqtt_on = n != 0;
+    else if (!strcmp(k, "simd")) rf_demod_use_simd(n != 0);      /* to measure */
+    else if (!strcmp(k, "fft")) rf_fft_use_simd(n != 0);
+}
+
+static void applied(rf_t *a)
+{
+    show_freq(a);
+    show_buttons(a);
+    place_ticks(a);
+    mode_view(a);
+}
+
+/* rf/control.txt on the card, read when it changes (apply_line). The
+ * portal's page sends the same lines through the live channel. */
 static void control_poll(rf_t *a)
 {
     const char *root = aos_hal_path_sd_root();
@@ -860,31 +906,120 @@ static void control_poll(rf_t *a)
     a->ctl_size = (long)st.st_size;
     FILE *f = fopen(path, "r");
     if (!f) return;
-    char line[96];
-    while (fgets(line, sizeof line, f)) {
-        char k[16], v[32];
-        if (sscanf(line, " %15[a-z_] = %31s", k, v) != 2) continue;
-        if (!strcmp(k, "freq")) {
-            double x = strtod(v, NULL);
-            tune(a, strchr(v, '.') ? (int64_t)(x * 1e6 + 0.5) : (int64_t)x, false);
-        } else if (!strcmp(k, "mode")) {
-            static const char *const M[MODES_N] = { "off", "wfm", "am", "nfm", "data" };
-            for (int m = 0; m < MODES_N; m++)
-                if (!strcmp(v, M[m])) a->want_mode = m;
-        } else if (!strcmp(k, "rate")) a->want_rate = (uint32_t)strtoul(v, NULL, 10);
-        else if (!strcmp(k, "gain")) a->want_gain = !strcmp(v, "auto") ? -1 : (int)strtol(v, NULL, 10);
-        else if (!strcmp(k, "sq")) a->want_sq = (int)strtol(v, NULL, 10);
-        else if (!strcmp(k, "step")) a->step = (uint32_t)strtoul(v, NULL, 10);
-        else if (!strcmp(k, "simd")) rf_demod_use_simd(strtol(v, NULL, 10) != 0);   /* to measure */
-        else if (!strcmp(k, "fft")) rf_fft_use_simd(strtol(v, NULL, 10) != 0);
-    }
+    char line[128];
+    while (fgets(line, sizeof line, f)) apply_line(a, line);
     fclose(f);
     aos_hal_log("rf", "control.txt: %u Hz, mode %d, %u sps, gain %d, squelch %d", (unsigned)a->want_freq, a->want_mode,
                 (unsigned)a->want_rate, a->want_gain, a->want_sq);
-    show_freq(a);
-    show_buttons(a);
-    place_ticks(a);
-    mode_view(a);
+    applied(a);
+}
+
+/* ---- the portal's page (apps/rf/web/rf.js), through the live channel ---- */
+
+#define LIVE_APP "aos.rf"
+#define LIVE_BINS 1024
+
+/* the spectrum: "RFS1", seq, centre Hz, rate, floor (dB x 10), bins, mode,
+ * flags (1 listening, 2 squelch open, 4 playing), then the bins as
+ * (dB + 140) x 2, the strongest of each pair of the FFT's */
+static void live_spec(rf_t *a)
+{
+    static uint8_t blob[24 + LIVE_BINS];
+    static uint32_t seq;
+    uint32_t v[4] = { ++seq, a->want_freq, a->rate ? a->rate : a->want_rate, 0 };
+    memcpy(blob, "RFS1", 4);
+    memcpy(blob + 4, v, 12);
+    int16_t fl = (int16_t)(a->floor_bin_db * 10);
+    uint16_t nb = LIVE_BINS;
+    memcpy(blob + 16, &fl, 2);
+    memcpy(blob + 18, &nb, 2);
+    blob[20] = (uint8_t)a->want_mode;
+    blob[21] = (uint8_t)((a->listening ? 1 : 0) | (a->sq_open ? 2 : 0) | (a->playing ? 4 : 0));
+    blob[22] = blob[23] = 0;
+    for (int i = 0; i < LIVE_BINS; i++) {
+        float d = a->ui_spec[2 * i] > a->ui_spec[2 * i + 1] ? a->ui_spec[2 * i] : a->ui_spec[2 * i + 1];
+        float q = (d + 140.0f) * 2.0f;
+        blob[24 + i] = (uint8_t)(q < 0 ? 0 : q > 255 ? 255 : q);
+    }
+    aos_hal_live_put(LIVE_APP, "spec", "application/octet-stream", blob, sizeof blob);
+}
+
+static void live_state(rf_t *a, unsigned mbs10)
+{
+    static char j[1400];
+    static const char *const M[MODES_N] = { "off", "wfm", "am", "nfm", "data" };
+    uint64_t iqb = 0;
+    uint32_t drop = 0, ws = 0, wr = 0;
+    bool iq = rf_iq_on(&iqb, &drop), wav = rf_wav_on(&ws, &wr);
+    int k = snprintf(j, sizeof j,
+                     "{\"state\":\"%s\",\"why\":\"%s\",\"kind\":\"%s\",\"name\":\"%s\",\"tuner\":\"%s\","
+                     "\"high_speed\":%s,\"fmin\":%u,\"fmax\":%u,\"freq\":%u,\"rate\":%u,\"mode\":\"%s\",\"gain\":%d,"
+                     "\"step\":%u,\"sq\":%d,\"level\":%.1f,\"pilot\":%.1f,\"open\":%s,\"listening\":%s,"
+                     "\"mbs\":%u.%u,\"dropped\":%u,\"rec_iq\":%s,\"iq_mb\":%u,\"iq_dropped\":%u,\"rec_wav\":%s,"
+                     "\"wav_s\":%u,\"playing\":%s,\"play\":\"%s\",\"received\":%u,\"log\":%s,\"mqtt\":%s,"
+                     "\"mqtt_ready\":%s,\"gains\":[",
+                     a->state == ST_RUN ? "run" : a->state == ST_SEARCH ? "search" : "none", a->why ? a->why : "",
+                     a->info.kind ? a->info.kind : "", a->info.name, a->info.tuner, a->info.high_speed ? "true" : "false",
+                     (unsigned)a->info.fmin, (unsigned)a->info.fmax, (unsigned)a->want_freq,
+                     (unsigned)(a->rate ? a->rate : a->want_rate), M[a->want_mode], a->want_gain, (unsigned)a->step,
+                     a->want_sq, (double)a->level_db, (double)a->pilot_db, a->sq_open ? "true" : "false",
+                     a->listening ? "true" : "false", mbs10 / 10, mbs10 % 10, (unsigned)a->dropped,
+                     iq ? "true" : "false", (unsigned)(iqb / 1000000), (unsigned)drop, wav ? "true" : "false",
+                     (unsigned)(ws / (wr ? wr : 1)), a->playing ? "true" : "false",
+                     a->playing ? (strrchr(a->play_path, '/') ? strrchr(a->play_path, '/') + 1 : a->play_path) : "",
+                     (unsigned)a->ev_n, a->log_on ? "true" : "false", a->mqtt_on ? "true" : "false",
+                     rf_mqtt_ready() ? "true" : "false");
+    for (int i = 0; i < a->info.ngains && k < (int)sizeof j - 16; i++)
+        k += snprintf(j + k, sizeof j - k, "%s%d", i ? "," : "", a->info.gains[i]);
+    snprintf(j + k, sizeof j - k, "]}");
+    aos_hal_live_put(LIVE_APP, "state", "application/json", j, strlen(j));
+}
+
+/* the last 30 transmissions, newest first, as data: the page writes them */
+static void live_events(rf_t *a)
+{
+    static char j[12 * 1024];
+    static const char *const MOD[] = { "", "PWM", "PPM", "Manchester" };
+    int k = snprintf(j, sizeof j, "[");
+    aos_hal_mutex_lock(a->mx);
+    uint32_t n = a->ev_n;
+    for (uint32_t i = 0; i < n && i < 30 && k < (int)sizeof j - 400; i++) {
+        const rf_event_t *e = &a->ev[(n - 1 - i) % EV_MAX];
+        const rf_decoded_t *d = &e->d;
+        k += snprintf(j + k, sizeof j - k,
+                      "%s{\"n\":%u,\"t\":\"%02d:%02d:%02d\",\"proto\":\"%s\",\"count\":%d,\"freq\":%u,\"off\":%d,"
+                      "\"snr\":%.1f,\"mod\":\"%s\",\"short\":%d,\"long\":%d,\"gap\":%d,\"bits\":%d,\"hex\":\"%.64s\","
+                      "\"id\":%u,\"code\":\"%s\"",
+                      i ? "," : "", (unsigned)(n - 1 - i), e->when.tm_hour, e->when.tm_min, e->when.tm_sec, d->proto,
+                      e->count, (unsigned)e->freq, (int)e->off, (double)e->snr, MOD[d->mod], d->short_us, d->long_us,
+                      d->gap_us, d->nbits, d->hex, (unsigned)d->id, d->code);
+        if (d->has_temp) k += snprintf(j + k, sizeof j - k, ",\"temp\":%.1f", (double)d->temp_c);
+        if (d->has_hum) k += snprintf(j + k, sizeof j - k, ",\"hum\":%d", d->hum);
+        if (d->has_batt) k += snprintf(j + k, sizeof j - k, ",\"batt_low\":%s", d->batt_low ? "true" : "false");
+        if (d->has_button) k += snprintf(j + k, sizeof j - k, ",\"button\":%d", d->button);
+        if (d->channel) k += snprintf(j + k, sizeof j - k, ",\"channel\":%d", d->channel);
+        k += snprintf(j + k, sizeof j - k, "}");
+    }
+    aos_hal_mutex_unlock(a->mx);
+    snprintf(j + k, sizeof j - k, "]");
+    aos_hal_live_put(LIVE_APP, "events", "application/json", j, strlen(j));
+}
+
+/* the page's lines, as they come */
+static void live_take(rf_t *a)
+{
+    char msg[AOS_LIVE_MSG_MAX + 1];
+    bool any = false;
+    while (aos_hal_live_take(LIVE_APP, msg, sizeof msg) > 0) {
+        for (char *line = msg; line && *line;) {      /* strtok is not in the firmware's table */
+            char *nl = strchr(line, '\n');
+            if (nl) *nl = 0;
+            apply_line(a, line);
+            line = nl ? nl + 1 : NULL;
+        }
+        any = true;
+    }
+    if (any) applied(a);
 }
 
 static void ui_timer(lv_timer_t *t)
@@ -894,7 +1029,10 @@ static void ui_timer(lv_timer_t *t)
      * screen: the stream rests while the board is locked or the app is
      * behind another; listening goes on (and nothing is drawn) */
     bool unseen = a->hidden || (aos_ui_overlay() & AOS_UI_OVER_LOCK);
-    a->paused = unseen && a->want_mode == RF_MODE_OFF;
+    /* a page of the portal looking counts as someone looking */
+    bool watched = aos_hal_live_idle_ms(LIVE_APP) < 3000;
+    a->paused = unseen && a->want_mode == RF_MODE_OFF && !watched;
+    live_take(a);
     if (a->state == ST_RUN) {
         if (!lv_obj_has_flag(a->empty, LV_OBJ_FLAG_HIDDEN)) lv_obj_add_flag(a->empty, LV_OBJ_FLAG_HIDDEN);
     } else {
@@ -925,15 +1063,22 @@ static void ui_timer(lv_timer_t *t)
         a->seen_ev = a->ev_seq;
         ev_rebuild(a);
     }
-    if (a->spec_seq != a->seen_spec && a->state == ST_RUN && !unseen) {
+    if (a->spec_seq != a->seen_spec && a->state == ST_RUN && (!unseen || watched)) {
         aos_hal_mutex_lock(a->mx);
         memcpy(a->ui_spec, a->spec, RF_FFT * sizeof(float));
         a->seen_spec = a->spec_seq;
         aos_hal_mutex_unlock(a->mx);
-        uint64_t t0 = aos_hal_uptime_us();
-        draw_spectrum(a);
-        a->ui_draw_us += (unsigned)(aos_hal_uptime_us() - t0);
-        a->ui_frames++;
+        if (!unseen) {
+            uint64_t t0 = aos_hal_uptime_us();
+            draw_spectrum(a);
+            a->ui_draw_us += (unsigned)(aos_hal_uptime_us() - t0);
+            a->ui_frames++;
+        }
+        if (watched) live_spec(a);
+    }
+    if (watched && a->ev_seq != a->live_ev) {
+        a->live_ev = a->ev_seq;
+        live_events(a);
     }
     uint64_t now = aos_hal_uptime_ms();
     if (now - a->stat_at >= 1000) {
@@ -972,6 +1117,7 @@ static void ui_timer(lv_timer_t *t)
         lv_label_set_text(a->status_lbl, s);
         a->stat_at = now;
         a->stat_bytes = b;
+        if (watched) live_state(a, mbs10);
         control_poll(a);
         if (a->sq_live) {
             snprintf(s, sizeof s, _("Señal ahora: %d dB sobre el ruido"), (int)(a->level_db + 0.5f));
@@ -1503,12 +1649,17 @@ static void play_list(lv_event_t *e)
 static void play_pick(lv_event_t *e)
 {
     rf_t *a = A;
-    const char *name = lv_event_get_user_data(e);
+    if (play_file(a, lv_event_get_user_data(e))) sheet_close(a);
+}
+
+/* plays rf/iq/<name> (its name says its centre and rate) */
+static bool play_file(rf_t *a, const char *name)
+{
     unsigned hz = 0, sps = 0;
     char when[20];
-    if (sscanf(name, "%19[^_]_%u_%u", when, &hz, &sps) != 3 || !sps) {
+    if (strchr(name, '/') || sscanf(name, "%19[^_]_%u_%u", when, &hz, &sps) != 3 || !sps) {
         aos_ui_toast(_("No sé a qué frecuencia está grabada"), 2000);
-        return;
+        return false;
     }
     const char *root = aos_hal_path_sd_root();
     snprintf(a->play_path, sizeof a->play_path, "%s/rf/iq/%s", root ? root : aos_hal_path_data(), name);
@@ -1517,9 +1668,9 @@ static void play_pick(lv_event_t *e)
     a->want_freq = hz;
     a->rec_iq = false;
     a->play_req = true;
-    sheet_close(a);
     show_freq(a);
     place_ticks(a);
+    return true;
 }
 
 /* ---- building ------------------------------------------------------------- */
@@ -1771,6 +1922,7 @@ static void rf_destroy(aos_app_t *self, void *inst)
 {
     (void)self;
     rf_t *a = inst;
+    aos_hal_live_clear(LIVE_APP);
     a->stop = true;
     /* the engine closes the radio and the speaker on its way out */
     for (int i = 0; i < 300 && !a->done; i++) aos_hal_sleep_ms(10);

@@ -33,7 +33,7 @@ estándares, nada de una lista de estaciones ni ajustes al equipo del usuario.
 | 5. CC1101 | módulo de `aos_io`: frecuencia, modulación, RSSI, recibir pulsos por GDO0 con el RMT (como Infrarrojo), aprender y reenviar códigos de los controles propios; barrido de RSSI como espectro grueso. Nada de interferir señales | sin hacer; el usuario tiene una CC1101 de 433 MHz con 10 pines |
 | 6. Más fuentes | rtl_tcp (sirve para probar sin la placa y para usar una SDR de otra máquina), grabar y reproducir I/Q en la tarjeta | **grabar y reproducir I/Q, audio WAV y capturas hechos el 2026-10-07** (probados en el simulador); falta rtl_tcp |
 | 7. ADS-B | aviones en 1090 MHz (2 Msps), dibujados en Mapas | sin hacer; hay que medir si la placa decodifica a esa tasa |
-| 8. Página del portal | la cascada y los controles en el navegador (`apps/rf/web/`) | sin hacer |
+| **8. Página del portal** | la cascada y los controles en el navegador (`apps/rf/web/`) | **hecha el 2026-10-07**, con un canal en vivo nuevo del sistema (`/api/live`, sirve para cualquier app); probada entera contra el simulador y el canal en la placa (~80 ms por espectro) |
 
 ## Lo medido y lo que hay que medir en la placa
 
