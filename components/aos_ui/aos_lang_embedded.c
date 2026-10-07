@@ -3445,6 +3445,59 @@ static const char blob_en_aos_notas_lang[] =
     "Cancelar\tCancel\n"
     ;
 
+static const char blob_en_aos_pato_lang[] =
+    "Escribiendo\tTyping\n"
+    "Tecla\tKey\n"
+    "Espera\tWait\n"
+    "Mouse\tMouse\n"
+    "Rueda\tWheel\n"
+    "Clic\tClick\n"
+    "Listo\tDone\n"
+    "Volver\tBack\n"
+    "Se perdió el teclado\tLost the keyboard\n"
+    "Parar\tStop\n"
+    "Escribir\tType\n"
+    "Esperar\tWait\n"
+    "Repetir\tRepeat\n"
+    "Comentario\tComment\n"
+    "texto a escribir\ttext to type\n"
+    "Se escribe tal cual en la computadora.\tTyped as-is on the computer.\n"
+    "Una tecla o combo: enter, esc, up, cmd+space,\\nctrl+alt+supr, f5. Prefijos: cmd+ ctrl+ alt+ shift+\tA key or combo: enter, esc, up, cmd+space,\\nctrl+alt+del, f5. Prefixes: cmd+ ctrl+ alt+ shift+\n"
+    "Espera, en milisegundos (0 a 60000).\tWaits, in milliseconds (0 to 60000).\n"
+    "Mueve el puntero: dx a la derecha, dy hacia abajo.\tMoves the pointer: dx right, dy down.\n"
+    "Rueda: positivo arriba, negativo abajo.\tWheel: positive up, negative down.\n"
+    "izquierdo\tleft\n"
+    "derecho\tright\n"
+    "Repite el paso anterior esta cantidad de veces.\tRepeats the previous step this many times.\n"
+    "nota\tnote\n"
+    "No se ejecuta: sólo una nota para vos.\tNot run: just a note for you.\n"
+    "Flujo vacío. Agregá el primer paso.\tEmpty flow. Add the first step.\n"
+    "Ponele un nombre\tGive it a name\n"
+    "No se pudo guardar\tCould not save\n"
+    "Guardado\tSaved\n"
+    "pasos\tsteps\n"
+    "Demasiados pasos\tToo many steps\n"
+    "Borrado\tDeleted\n"
+    "Pasá el USB a Teclado, o emparejá por Bluetooth\tSwitch USB to Keyboard, or pair over Bluetooth\n"
+    "El script está vacío\tThe script is empty\n"
+    "No se pudo leer el script\tCould not read the script\n"
+    "Detenido\tStopped\n"
+    "El USB está cambiando de modo\tUSB is switching mode\n"
+    "No hay scripts todavía.\\nCreá uno con «Nuevo script»,\\no desde el portal (página Pato goma).\tNo scripts yet.\\nMake one with “New script”,\\nor from the portal (Pato goma page).\n"
+    "Teclado listo (USB o Bluetooth)\tKeyboard ready (USB or Bluetooth)\n"
+    "Pasalo a «Teclado» o emparejá Bluetooth\tSwitch to “Keyboard” or pair Bluetooth\n"
+    "Nuevo script\tNew script\n"
+    "Pasar el USB a Teclado\tSwitch USB to Keyboard\n"
+    "Se enviará al teclado y mouse de la computadora.\tIt will be sent to the computer's keyboard and mouse.\n"
+    "Editar\tEdit\n"
+    "Ejecutar\tRun\n"
+    "Nombre del script\tScript name\n"
+    "Agregar paso\tAdd step\n"
+    "Guardar\tSave\n"
+    "Borrar\tDelete\n"
+    "Paso\tStep\n"
+    ;
+
 static const char blob_en_aos_pixel_lang[] =
     "No se pudo guardar\tCould not save\n"
     "no se lee\tunreadable\n"
@@ -3651,6 +3704,33 @@ static const char blob_en_aos_radio_lang[] =
     "  ·  tecla %d\t  ·  key %d\n"
     "%d  ·  editalas en /radio\t%d  ·  edit them at /radio\n"
     "Tocá para volver\tTap to go back\n"
+    ;
+
+static const char blob_en_aos_rf_lang[] =
+    "FM\tFM\n"
+    "Aire\tAir\n"
+    "Marina\tMarine\n"
+    "Sin memoria\tOut of memory\n"
+    "La RTL-SDR no empezó a mandar muestras\tThe RTL-SDR did not start sending samples\n"
+    "Se desconectó la RTL-SDR\tThe RTL-SDR was unplugged\n"
+    "Ganancia auto\tGain auto\n"
+    "Ganancia %d,%d dB\tGain %d.%d dB\n"
+    "Paso %u MHz\tStep %u MHz\n"
+    "Paso %u,%u kHz\tStep %u.%u kHz\n"
+    "Paso %u kHz\tStep %u kHz\n"
+    "Buscando una RTL-SDR…\tLooking for an RTL-SDR…\n"
+    "Enchufala en el host USB: pines 25/27 del conector de atrás (High Speed, cables de menos de 15 cm) y 5 V del pin 1. Los pines 21/23 son Full Speed: alcanzan para 250 mil muestras por segundo.\tPlug it into the USB host: pins 25/27 of the back header (High Speed, wires shorter than 15 cm) and 5 V from pin 1. Pins 21/23 are Full Speed: enough for 250 thousand samples a second.\n"
+    "El host USB está apagado: prendelo en Ajustes → USB → Host USB, y enchufá la RTL-SDR en los pines 25/27 del conector de atrás.\tThe USB host is off: turn it on in Settings → USB → USB host, and plug the RTL-SDR into pins 25/27 of the back header.\n"
+    "perdidos\tlost\n"
+    "Sin radio\tNo radio\n"
+    "En los pines 21/23 (Full Speed) sólo entran 250 mil muestras por segundo\tOn pins 21/23 (Full Speed) only 250 thousand samples a second fit\n"
+    "Frecuencia en MHz\tFrequency in MHz\n"
+    "Automática\tAutomatic\n"
+    "Ganancia\tGain\n"
+    "Todo a la izquierda es automática. Subila hasta que aparezcan las señales sin que suba el piso de ruido.\tAll the way left is automatic. Raise it until the signals show without the noise floor rising.\n"
+    "No pude arrancar la radio\tCould not start the radio\n"
+    "No hay ninguna RTL-SDR en el host USB\tThere is no RTL-SDR on the USB host\n"
+    "La RTL-SDR no respondió al abrirla\tThe RTL-SDR did not answer when opened\n"
     ;
 
 static const char blob_en_aos_simon_lang[] =
@@ -5473,9 +5553,11 @@ static const aos_lang_file_t files_en[] = {
     { "aos.lua.lang", blob_en_aos_lua_lang },
     { "aos.mines.lang", blob_en_aos_mines_lang },
     { "aos.notas.lang", blob_en_aos_notas_lang },
+    { "aos.pato.lang", blob_en_aos_pato_lang },
     { "aos.pixel.lang", blob_en_aos_pixel_lang },
     { "aos.pwm.lang", blob_en_aos_pwm_lang },
     { "aos.radio.lang", blob_en_aos_radio_lang },
+    { "aos.rf.lang", blob_en_aos_rf_lang },
     { "aos.simon.lang", blob_en_aos_simon_lang },
     { "aos.tuner.lang", blob_en_aos_tuner_lang },
     { "aos.video.lang", blob_en_aos_video_lang },
@@ -8935,6 +9017,59 @@ static const char blob_de_aos_notas_lang[] =
     "Cancelar\tAbbrechen\n"
     ;
 
+static const char blob_de_aos_pato_lang[] =
+    "Escribiendo\tTippe\n"
+    "Tecla\tTaste\n"
+    "Espera\tWarte\n"
+    "Mouse\tMaus\n"
+    "Rueda\tRad\n"
+    "Clic\tKlick\n"
+    "Listo\tFertig\n"
+    "Volver\tZurück\n"
+    "Se perdió el teclado\tTastatur verloren\n"
+    "Parar\tStopp\n"
+    "Escribir\tTippen\n"
+    "Esperar\tWarten\n"
+    "Repetir\tWiederholen\n"
+    "Comentario\tKommentar\n"
+    "texto a escribir\tzu tippender Text\n"
+    "Se escribe tal cual en la computadora.\tWird so auf dem Computer getippt.\n"
+    "Una tecla o combo: enter, esc, up, cmd+space,\\nctrl+alt+supr, f5. Prefijos: cmd+ ctrl+ alt+ shift+\tEine Taste oder Kombi: enter, esc, up, cmd+space,\\nctrl+alt+entf, f5. Präfixe: cmd+ ctrl+ alt+ shift+\n"
+    "Espera, en milisegundos (0 a 60000).\tWartet, in Millisekunden (0 bis 60000).\n"
+    "Mueve el puntero: dx a la derecha, dy hacia abajo.\tBewegt den Zeiger: dx nach rechts, dy nach unten.\n"
+    "Rueda: positivo arriba, negativo abajo.\tRad: positiv hoch, negativ runter.\n"
+    "izquierdo\tlinks\n"
+    "derecho\trechts\n"
+    "Repite el paso anterior esta cantidad de veces.\tWiederholt den vorigen Schritt so oft.\n"
+    "nota\tNotiz\n"
+    "No se ejecuta: sólo una nota para vos.\tWird nicht ausgeführt: nur eine Notiz.\n"
+    "Flujo vacío. Agregá el primer paso.\tLeerer Ablauf. Füge den ersten Schritt hinzu.\n"
+    "Ponele un nombre\tGib ihm einen Namen\n"
+    "No se pudo guardar\tKonnte nicht speichern\n"
+    "Guardado\tGespeichert\n"
+    "pasos\tSchritte\n"
+    "Demasiados pasos\tZu viele Schritte\n"
+    "Borrado\tGelöscht\n"
+    "Pasá el USB a Teclado, o emparejá por Bluetooth\tUSB auf Tastatur stellen oder per Bluetooth koppeln\n"
+    "El script está vacío\tDas Skript ist leer\n"
+    "No se pudo leer el script\tKonnte das Skript nicht lesen\n"
+    "Detenido\tGestoppt\n"
+    "El USB está cambiando de modo\tUSB wechselt den Modus\n"
+    "No hay scripts todavía.\\nCreá uno con «Nuevo script»,\\no desde el portal (página Pato goma).\tNoch keine Skripte.\\nErstelle eines mit „Neues Skript“,\\noder im Portal (Seite Pato goma).\n"
+    "Teclado listo (USB o Bluetooth)\tTastatur bereit (USB oder Bluetooth)\n"
+    "Pasalo a «Teclado» o emparejá Bluetooth\tAuf „Tastatur“ stellen oder Bluetooth koppeln\n"
+    "Nuevo script\tNeues Skript\n"
+    "Pasar el USB a Teclado\tUSB auf Tastatur stellen\n"
+    "Se enviará al teclado y mouse de la computadora.\tWird an Tastatur und Maus des Computers gesendet.\n"
+    "Editar\tBearbeiten\n"
+    "Ejecutar\tAusführen\n"
+    "Nombre del script\tSkriptname\n"
+    "Agregar paso\tSchritt hinzufügen\n"
+    "Guardar\tSpeichern\n"
+    "Borrar\tLöschen\n"
+    "Paso\tSchritt\n"
+    ;
+
 static const char blob_de_aos_pixel_lang[] =
     "No se pudo guardar\tSpeichern fehlgeschlagen\n"
     "no se lee\tnicht lesbar\n"
@@ -9141,6 +9276,33 @@ static const char blob_de_aos_radio_lang[] =
     "  ·  tecla %d\t  ·  Taste %d\n"
     "%d  ·  editalas en /radio\t%d  ·  bearbeiten unter /radio\n"
     "Tocá para volver\tTippen zum Zurückgehen\n"
+    ;
+
+static const char blob_de_aos_rf_lang[] =
+    "FM\tUKW\n"
+    "Aire\tFlugfunk\n"
+    "Marina\tSeefunk\n"
+    "Sin memoria\tKein Speicher\n"
+    "La RTL-SDR no empezó a mandar muestras\tDer RTL-SDR hat nicht begonnen, Samples zu senden\n"
+    "Se desconectó la RTL-SDR\tDer RTL-SDR wurde abgezogen\n"
+    "Ganancia auto\tVerstärkung auto\n"
+    "Ganancia %d,%d dB\tVerstärkung %d,%d dB\n"
+    "Paso %u MHz\tSchritt %u MHz\n"
+    "Paso %u,%u kHz\tSchritt %u,%u kHz\n"
+    "Paso %u kHz\tSchritt %u kHz\n"
+    "Buscando una RTL-SDR…\tSuche einen RTL-SDR…\n"
+    "Enchufala en el host USB: pines 25/27 del conector de atrás (High Speed, cables de menos de 15 cm) y 5 V del pin 1. Los pines 21/23 son Full Speed: alcanzan para 250 mil muestras por segundo.\tAm USB-Host anschließen: Pins 25/27 der hinteren Stiftleiste (High Speed, Kabel kürzer als 15 cm) und 5 V von Pin 1. Die Pins 21/23 sind Full Speed: genug für 250 000 Samples pro Sekunde.\n"
+    "El host USB está apagado: prendelo en Ajustes → USB → Host USB, y enchufá la RTL-SDR en los pines 25/27 del conector de atrás.\tDer USB-Host ist aus: unter Einstellungen → USB → USB-Host einschalten und den RTL-SDR an die Pins 25/27 der hinteren Stiftleiste anschließen.\n"
+    "perdidos\tverloren\n"
+    "Sin radio\tKein Funkgerät\n"
+    "En los pines 21/23 (Full Speed) sólo entran 250 mil muestras por segundo\tAn den Pins 21/23 (Full Speed) passen nur 250 000 Samples pro Sekunde\n"
+    "Frecuencia en MHz\tFrequenz in MHz\n"
+    "Automática\tAutomatisch\n"
+    "Ganancia\tVerstärkung\n"
+    "Todo a la izquierda es automática. Subila hasta que aparezcan las señales sin que suba el piso de ruido.\tGanz links ist automatisch. So weit erhöhen, bis die Signale erscheinen, ohne dass das Grundrauschen steigt.\n"
+    "No pude arrancar la radio\tFunkgerät ließ sich nicht starten\n"
+    "No hay ninguna RTL-SDR en el host USB\tAm USB-Host ist kein RTL-SDR\n"
+    "La RTL-SDR no respondió al abrirla\tDer RTL-SDR antwortete beim Öffnen nicht\n"
     ;
 
 static const char blob_de_aos_simon_lang[] =
@@ -10963,9 +11125,11 @@ static const aos_lang_file_t files_de[] = {
     { "aos.lua.lang", blob_de_aos_lua_lang },
     { "aos.mines.lang", blob_de_aos_mines_lang },
     { "aos.notas.lang", blob_de_aos_notas_lang },
+    { "aos.pato.lang", blob_de_aos_pato_lang },
     { "aos.pixel.lang", blob_de_aos_pixel_lang },
     { "aos.pwm.lang", blob_de_aos_pwm_lang },
     { "aos.radio.lang", blob_de_aos_radio_lang },
+    { "aos.rf.lang", blob_de_aos_rf_lang },
     { "aos.simon.lang", blob_de_aos_simon_lang },
     { "aos.tuner.lang", blob_de_aos_tuner_lang },
     { "aos.video.lang", blob_de_aos_video_lang },
@@ -10994,7 +11158,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2343, 39, files_en, 40 },
-    { "de", "Deutsch", 2343, 39, files_de, 40 },
+    { "en", "English", 2343, 41, files_en, 42 },
+    { "de", "Deutsch", 2343, 41, files_de, 42 },
 };
 const int aos_lang_pack_count = 2;
