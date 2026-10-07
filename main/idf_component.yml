@@ -26,3 +26,8 @@ dependencies:
   # H.264 for the Cameras app (aos_h264.c): tinyh264, the software decoder
   # AmoledOS measured on the watch; constrained baseline only
   espressif/esp_h264: "^1.4.1"
+  # DSP for the apps (aos_symbols.c lends a chosen part of it): on the P4 a
+  # float multiply-add costs ~5 cycles whatever the code, and esp-dsp's
+  # 16-bit routines run on the core's SIMD (PIE) at under one a tap. The RF
+  # app's filters are its first user (apps/rf/main/rf_demod.c).
+  espressif/esp-dsp: "^1.6"

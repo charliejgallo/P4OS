@@ -3,8 +3,8 @@
  *
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
- * Mas 159 funciones de libc/libm agregadas a mano.
- * Total: 3291 simbolos.
+ * Mas 186 funciones de libc/libm agregadas a mano.
+ * Total: 3319 simbolos.
  */
 
 #include <stddef.h>
@@ -810,6 +810,7 @@ extern int aos_leds_fx_count;
 extern int aos_leds_get;
 extern int aos_leds_set;
 extern int aos_leds_status;
+extern int aos_lock_covers;
 extern int aos_lock_get_cfg;
 extern int aos_lock_init;
 extern int aos_lock_is_locked;
@@ -1127,6 +1128,33 @@ extern int clock;
 extern int close;
 extern int closedir;
 extern int cosf;
+extern int dsps_biquad_f32_ansi;
+extern int dsps_biquad_f32_arp4;
+extern int dsps_biquad_gen_bpf_f32;
+extern int dsps_biquad_gen_hpf_f32;
+extern int dsps_biquad_gen_lpf_f32;
+extern int dsps_bit_rev_fc32_ansi;
+extern int dsps_bit_rev_sc16_ansi;
+extern int dsps_cplx2reC_fc32_ansi;
+extern int dsps_dotprod_f32_ansi;
+extern int dsps_dotprod_f32_arp4;
+extern int dsps_dotprod_s16_ansi;
+extern int dsps_dotprod_s16_arp4;
+extern int dsps_fft2r_deinit_fc32;
+extern int dsps_fft2r_deinit_sc16;
+extern int dsps_fft2r_fc32_ansi_;
+extern int dsps_fft2r_fc32_arp4_;
+extern int dsps_fft2r_init_fc32;
+extern int dsps_fft2r_init_sc16;
+extern int dsps_fft2r_sc16_ansi_;
+extern int dsps_fft2r_sc16_arp4_;
+extern int dsps_fird_f32_ansi;
+extern int dsps_fird_f32_arp4;
+extern int dsps_fird_init_f32;
+extern int dsps_fird_init_s16;
+extern int dsps_fird_s16_aexx_free;
+extern int dsps_fird_s16_ansi;
+extern int dsps_fird_s16_arp4;
 extern int exp2f;
 extern int expf;
 extern int fabsf;
@@ -4104,6 +4132,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_leds_get),
     ESP_ELFSYM_EXPORT(aos_leds_set),
     ESP_ELFSYM_EXPORT(aos_leds_status),
+    ESP_ELFSYM_EXPORT(aos_lock_covers),
     ESP_ELFSYM_EXPORT(aos_lock_get_cfg),
     ESP_ELFSYM_EXPORT(aos_lock_init),
     ESP_ELFSYM_EXPORT(aos_lock_is_locked),
@@ -4421,6 +4450,33 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(close),
     ESP_ELFSYM_EXPORT(closedir),
     ESP_ELFSYM_EXPORT(cosf),
+    ESP_ELFSYM_EXPORT(dsps_biquad_f32_ansi),
+    ESP_ELFSYM_EXPORT(dsps_biquad_f32_arp4),
+    ESP_ELFSYM_EXPORT(dsps_biquad_gen_bpf_f32),
+    ESP_ELFSYM_EXPORT(dsps_biquad_gen_hpf_f32),
+    ESP_ELFSYM_EXPORT(dsps_biquad_gen_lpf_f32),
+    ESP_ELFSYM_EXPORT(dsps_bit_rev_fc32_ansi),
+    ESP_ELFSYM_EXPORT(dsps_bit_rev_sc16_ansi),
+    ESP_ELFSYM_EXPORT(dsps_cplx2reC_fc32_ansi),
+    ESP_ELFSYM_EXPORT(dsps_dotprod_f32_ansi),
+    ESP_ELFSYM_EXPORT(dsps_dotprod_f32_arp4),
+    ESP_ELFSYM_EXPORT(dsps_dotprod_s16_ansi),
+    ESP_ELFSYM_EXPORT(dsps_dotprod_s16_arp4),
+    ESP_ELFSYM_EXPORT(dsps_fft2r_deinit_fc32),
+    ESP_ELFSYM_EXPORT(dsps_fft2r_deinit_sc16),
+    ESP_ELFSYM_EXPORT(dsps_fft2r_fc32_ansi_),
+    ESP_ELFSYM_EXPORT(dsps_fft2r_fc32_arp4_),
+    ESP_ELFSYM_EXPORT(dsps_fft2r_init_fc32),
+    ESP_ELFSYM_EXPORT(dsps_fft2r_init_sc16),
+    ESP_ELFSYM_EXPORT(dsps_fft2r_sc16_ansi_),
+    ESP_ELFSYM_EXPORT(dsps_fft2r_sc16_arp4_),
+    ESP_ELFSYM_EXPORT(dsps_fird_f32_ansi),
+    ESP_ELFSYM_EXPORT(dsps_fird_f32_arp4),
+    ESP_ELFSYM_EXPORT(dsps_fird_init_f32),
+    ESP_ELFSYM_EXPORT(dsps_fird_init_s16),
+    ESP_ELFSYM_EXPORT(dsps_fird_s16_aexx_free),
+    ESP_ELFSYM_EXPORT(dsps_fird_s16_ansi),
+    ESP_ELFSYM_EXPORT(dsps_fird_s16_arp4),
     ESP_ELFSYM_EXPORT(exp2f),
     ESP_ELFSYM_EXPORT(expf),
     ESP_ELFSYM_EXPORT(fabsf),

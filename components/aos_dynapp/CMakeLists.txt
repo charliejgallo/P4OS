@@ -1,7 +1,7 @@
 idf_component_register(
     SRCS "aos_dynapp.c" "aos_symbols.c"
     INCLUDE_DIRS "include"
-    REQUIRES aos_ui aos_hal elf_loader espressif__esp_new_jpeg
+    REQUIRES aos_ui aos_hal elf_loader espressif__esp_new_jpeg espressif__esp-dsp
     # the symbol table names aos_io's functions: aos_io links after it, or
     # an object nothing else pulls in (aos_io_signal*.c) stays out
     PRIV_REQUIRES aos_io

@@ -44,6 +44,46 @@ restart: the card is scanned at boot.
 - **Float:** the P4 has a single-precision FPU. `double` arithmetic is
   libgcc's soft-float (`__adddf3` and friends, exported by the table); the S3's
   `__addsf3` family does not exist here.
+- **Float is slow for signal processing:** a multiply-add costs about 5
+  cycles whatever the code - esp-dsp's own benchmarks show its hand-written
+  float dot product no faster than C. For filters and FFTs over many samples
+  use 16-bit fixed point on the core's SIMD (below).
+
+## DSP: esp-dsp on the SIMD
+
+Since 2026-10-07 the firmware carries esp-dsp (1.8.2) and lends a chosen part
+of it to the apps (`EXTRA_SYMBOLS` in `tools/gen_symbols.py`): dot products,
+decimating FIRs, FFTs, biquads, in their `_arp4` (SIMD) and `_ansi` (C)
+forms. The apps' build has no esp-dsp headers: declare what you call (the RF
+app copies `fir_s16_t` as esp-dsp 1.8.2 has it, `apps/rf/main/rf_demod.c`).
+
+Measured with the RF app (`apps/rf/README.md`):
+
+| | In C | 16-bit on the SIMD |
+|---|---|---|
+| FFT of 2048 points (complex) | float: 1.4 ms | 0.46 ms (`dsps_fft2r_sc16_arp4_` + `dsps_bit_rev_sc16_ansi`) |
+| A 56-tap half-band, 240 k outputs/s, I and Q, per 10 s | float, 4 sums at a time: 2.2 s; 16-bit with 32-bit sums: 3.6 s | 1.5 s (`dsps_fird_s16_arp4`) |
+
+What it wants, and what bit:
+
+- **Arrays 16-byte aligned, lengths a multiple of 8.** The 128-bit loads
+  ignore the low address bits: a misaligned array gives wrong sums, silently.
+- **`dsps_fird_s16_arp4` with an odd decimation (or 1) parts from C** as soon
+  as its delay line wraps (seen with 5: the first 11 outputs equal, then not).
+  Use it for even decimations and C for the rest.
+- **It runs its taps forwards over the delay line; `_ansi` backwards.** Use
+  symmetric taps over the whole padded length, or the two give the same
+  filter some samples apart.
+- **Its return value is not the output count** (1.8.2 returns a register it
+  never loads): the count is `len`.
+- **One call per output is too dear for short filters:** `dsps_dotprod_s16`
+  costs ~85 cycles for 32 taps, mostly the call. Call the block functions.
+- **The sc16 FFT halves at each stage** (the result is the DFT over N), and
+  its twiddle table is global and set once per boot by
+  `dsps_fft2r_init_sc16`: the RF app makes its own table with the same recipe
+  (`rf_dsp.c`) so it does not depend on who initialised it first.
+- Compare the SIMD routine with the C one once at start and fall back if
+  they differ (`rf_demod_simd()`); the simulator only has the C ones.
 
 ## Measured
 

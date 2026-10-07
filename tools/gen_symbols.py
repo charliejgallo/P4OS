@@ -108,6 +108,21 @@ EXTRA_SYMBOLS = [
     "__eqdf2", "__nedf2", "__ltdf2", "__ledf2", "__gtdf2", "__gedf2", "__unorddf2",
     # stdio: a line at a time (the cameras' config)
     "fgets",
+    # esp-dsp (2026-10-07, for the RF app's filters): on the P4 a float
+    # multiply-add costs ~5 cycles whatever the code; the 16-bit routines run
+    # on the core's SIMD (PIE), the dot product at 0.8 cycles a tap. A chosen
+    # part, not the whole library: each name here is linked into the
+    # firmware. The _arp4 ones want 16-byte aligned arrays and lengths that
+    # are multiples of 8 (else the dot product falls back to C); the _ansi
+    # ones take anything.
+    "dsps_dotprod_s16_arp4", "dsps_dotprod_s16_ansi", "dsps_dotprod_f32_arp4", "dsps_dotprod_f32_ansi",
+    "dsps_fird_s16_arp4", "dsps_fird_s16_ansi", "dsps_fird_init_s16", "dsps_fird_s16_aexx_free",
+    "dsps_fird_f32_arp4", "dsps_fird_f32_ansi", "dsps_fird_init_f32",
+    "dsps_fft2r_init_sc16", "dsps_fft2r_sc16_arp4_", "dsps_fft2r_sc16_ansi_", "dsps_bit_rev_sc16_ansi",
+    "dsps_fft2r_init_fc32", "dsps_fft2r_fc32_arp4_", "dsps_fft2r_fc32_ansi_", "dsps_bit_rev_fc32_ansi",
+    "dsps_cplx2reC_fc32_ansi", "dsps_fft2r_deinit_fc32", "dsps_fft2r_deinit_sc16",
+    "dsps_biquad_f32_arp4", "dsps_biquad_f32_ansi", "dsps_biquad_gen_lpf_f32", "dsps_biquad_gen_hpf_f32",
+    "dsps_biquad_gen_bpf_f32",
     # --------------------------------------------------------------------
     # What an interpreter needs (branch lua). Every one of these came out of
     # build_apps.sh's own check on lua.so: the list is not a guess.

@@ -37,6 +37,16 @@ dependencies:
       registry_url: https://components.espressif.com
       type: service
     version: 1.1.6
+  espressif/esp-dsp:
+    component_hash: ed9ac175b14e0414399a2b33c525579414b5bad19a2a67b12ea212def96f9a98
+    dependencies:
+    - name: idf
+      require: private
+      version: '>=4.2'
+    source:
+      registry_url: https://components.espressif.com/
+      type: service
+    version: 1.8.2
   espressif/esp-serial-flasher:
     component_hash: 086e340d6f1e923d6934898186b5f718cfc614e480980f66ef0f3bc3522e1ace
     dependencies:
@@ -639,6 +649,7 @@ dependencies:
     version: 2.1.0
 direct_dependencies:
 - espressif/cmake_utilities
+- espressif/esp-dsp
 - espressif/esp-serial-flasher
 - espressif/esp_audio_codec
 - espressif/esp_h264
@@ -660,6 +671,6 @@ direct_dependencies:
 - lvgl/lvgl
 - waveshare/esp32_p4_wifi6_touch_lcd_5
 - waveshare/esp_lcd_hx8394
-manifest_hash: 3442a0ec785115078e74cca0a67994d2ef7f48d4fd9a385d52df855a895df299
+manifest_hash: 4dc56ccba231eac1c0d07b81f12f2437d9553d9535af35b093a9c342fcf92fb7
 target: esp32p4
 version: 2.0.0
