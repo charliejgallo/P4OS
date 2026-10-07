@@ -32,7 +32,7 @@ firmware del taller). Lo que sigue:
 | | `aos_ui_hwmouse_handler` (el mouse USB crudo para la app de adelante) | firmware | hecho el 2026-10-05 |
 | | Servicios para que sigan con la app cerrada: patrones de PWM, grabar el bus CAN | firmware | pedidos, sin hacer |
 | **0.11** | **VNC**: el visor como app que se instala (mouse y teclado USB), después el servidor (necesita firmware) | app, luego firmware | el visor sale en la **0.10.0**, probado contra una MacBook Air con dos monitores (login con la burbuja del teclado, elegir un monitor marcándolo con el dedo); falta el servidor |
-| **0.11** | **RF**: espectro y cascada de una RTL-SDR por el host USB (el firmware presta USB crudo, `aos_hal_usb_raw_*`; el driver, librtlsdr, va en la app); después escuchar FM/AM, 433 MHz y una CC1101. Plan en [RF.md](RF.md) | firmware (USB crudo) + app | USB crudo y espectro hechos el 2026-10-06, probados en el simulador con la RTL-SDR real; falta la placa |
+| **0.11** | **RF**: espectro y cascada de una RTL-SDR por el host USB (el firmware presta USB crudo, `aos_hal_usb_raw_*`; el driver, librtlsdr, va en la app); después escuchar FM/AM, 433 MHz y una CC1101. Plan en [RF.md](RF.md) | firmware (USB crudo) + app | **publicada como 0.11.0 el 2026-10-07**: USB crudo, espectro a 2,4 Msps sin pérdidas en la placa, FM/AM/FM angosta (FM escuchada en la placa), modo Datos de 433/868 MHz, grabaciones y página del portal. Pendiente: un control de 433 real, AM/FM angosta con tráfico real, la CC1101 |
 | sin fecha | Tailscale dentro de la placa: no hay cliente oficial para ESP32; WireGuard (componente para ESP-IDF) contra un servidor propio es la alternativa | investigar | |
 
 Hardware para probar el taller: receptores y emisores IR, LEDs y servos

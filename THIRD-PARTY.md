@@ -24,6 +24,7 @@ what that asks for. The full texts are in [LICENSES/](LICENSES).
 | esp_hosted 1.4, esp_wifi_remote | fetched | Apache-2.0 | Wi-Fi through the ESP32-C6 |
 | onewire_bus 1.1 (Espressif) | fetched | Apache-2.0 | 1-Wire over the RMT, for the DS18B20 |
 | mdns, esp_tinyusb, esp-serial-flasher, esp_h264 | fetched | Apache-2.0 | esp_h264's decoder is tinyh264; the flasher's stubs are Apache-2.0 or MIT |
+| esp-dsp 1.8 (Espressif) | fetched | Apache-2.0 | its 16-bit SIMD filters and FFTs, lent to the apps (RF's demodulators) |
 | TinyUSB | fetched | MIT | [MIT-TinyUSB.txt](LICENSES/MIT-TinyUSB.txt) |
 | USB host class drivers (Espressif esp-usb): usb_host_msc, usb_host_cdc_acm with its CH34x, CP210x and FTDI drivers, usb_host_uvc, usb_host_uac | fetched | Apache-2.0 | pendrives, serial ports, webcams and sound cards on the USB host |
 | esp_new_jpeg | fetched | **Espressif MIT**: for use on Espressif products | [Espressif-MIT-esp_new_jpeg.txt](LICENSES/Espressif-MIT-esp_new_jpeg.txt) |
@@ -47,6 +48,10 @@ hardware has to replace them.
 
 The firmware that loads `doom.so` and `rf.so` stays MIT. The GPL applies to
 the Doom and RF apps and to any simulator build that compiles them in.
+
+The simulator links the Mac's libusb (LGPL-2.1, from Homebrew, dynamically)
+when it is installed, for `P4_SIM_USB=1`; it is not part of anything the
+board runs.
 
 The LED Strips app's Fire effect follows Mark Kriegsman's Fire2012 algorithm
 (as published with FastLED, MIT), written again in `aos_io/aos_leds.c`.

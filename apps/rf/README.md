@@ -5,8 +5,9 @@ stick) on the board's USB host gives a spectrum and waterfall - drag to tune,
 tap a frequency to centre it, tap the number on top to type one, a row of
 bands to jump to - and **listens**: broadcast FM, AM (the airband) and narrow
 FM (amateurs, PMR, marine), through the board's speaker or a USB sound card,
-with a squelch. The plan for the rest (decoders at 433 MHz, a CC1101 on the
-header, recordings, the portal's page) is in `docs/plan/RF.md`.
+with a squelch. It also decodes the 433 and 868 MHz remotes and sensors
+around, records all of it, and has a page in the portal. What comes next (a
+CC1101 on the header, FSK) is in `docs/plan/RF.md`.
 
 ## Listening
 

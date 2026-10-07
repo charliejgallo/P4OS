@@ -1,6 +1,9 @@
 # Changelog
 
-## Unreleased
+## 0.11.0 — 2026-10-07
+
+**RF, a software radio on the card** (apps/rf/README.md). Needs this
+firmware: it uses the raw USB, live data and esp-dsp it brings.
 
 - **RF, a new app: the spectrum and waterfall of an RTL-SDR** (an RTL2832U
   stick) on the USB host. Drag or tap to tune, type a frequency, bands,

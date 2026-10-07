@@ -8,7 +8,7 @@ An iPhone-style operating system for the
 
 It has a home screen with pages, folders and a dock, a control centre and
 notifications, and a lock screen with an optional code, and it runs in
-portrait or landscape. There are twenty-three built-in apps and thirty-seven more on
+portrait or landscape. There are twenty-three built-in apps and thirty-eight more on
 the microSD, loaded as shared objects:
 
 - **Games:** twenty-one, among them Mila (a Sokoban with a black cat in
@@ -34,6 +34,10 @@ the microSD, loaded as shared objects:
   infrared remote with SmartIR's codes, and a CAN bus analyser. Each one
   was tried on the bench with real parts, wiring diagrams and photos
   included.
+- **A software radio:** an RTL-SDR stick on the USB host gives a live
+  spectrum and waterfall, broadcast FM in stereo, AM for the airband and
+  narrow FM for hams and PMR, and the 433/868 MHz remotes and weather
+  sensors decoded, with recordings of all of it and a page in the portal.
 
 A desktop simulator runs the same UI code, so most of it can be built and
 tried without the board.
@@ -222,6 +226,40 @@ in [docs/MODULES.md](docs/MODULES.md).
   <img src="docs/img/bench-pwm.svg" width="460" alt="Wiring: two LEDs, a servo and an analog level on the header">
 </p>
 
+### RF, a software radio
+
+An [RTL-SDR](https://www.rtl-sdr.com/about-rtl-sdr/) stick (an RTL2832U with
+any of the tuners osmocom's library knows, the RTL-SDR Blog V4 included)
+plugged into the USB host, with the driver inside the app: the firmware only lends
+it raw USB access, so another receiver is another source file in the app
+and no firmware ([apps/rf/README.md](apps/rf/README.md)). From the card,
+since 0.11.
+
+| FM, listening | 433 MHz, Data mode | A sensor's details |
+|---|---|---|
+| <img src="docs/img/app-rf-fm.png" width="200"> | <img src="docs/img/app-rf-data.png" width="200"> | <img src="docs/img/app-rf-detail.png" width="200"> |
+
+- **Spectrum and waterfall,** up to 2.4 Msps with none lost, drawn
+  straight to the panel. Drag to tune, tap a frequency to centre it, or
+  type one; a row of bands (FM, airband, marine, 2 m, 433, 70 cm, PMR).
+- **Listening:** broadcast FM (mono, with the stereo pilot shown), AM for the
+  airband, narrow FM for hams and PMR, with squelch over the measured
+  noise floor. The filters are 16-bit fixed point on the P4's SIMD
+  (esp-dsp), at about a third of one core.
+- **Data:** the on-off keyed signals of 433/868 MHz remotes and sensors
+  found in the band, their pulses analysed (PWM, PPM, Manchester) and
+  decoded: EV1527 and PT2262 remotes, Nexus and Prologue thermometers;
+  anything else shows its timings and bits.
+- **Keeping it:** a screenshot, the audio as WAV,
+  the raw signal as I/Q (and played back later as if live), what was
+  received as CSV, and over MQTT.
+- **Its page in the portal:** the spectrum and waterfall live, tuning and
+  every control, the received list, the spectrum as PNG, and the
+  recordings to download.
+
+`librtlsdr` is GPL v2, so `rf.so` is too; the firmware stays MIT
+([THIRD-PARTY.md](THIRD-PARTY.md)).
+
 ### Apps from the card
 
 These are `.so` files that the firmware loads at boot. Their code runs
@@ -289,9 +327,9 @@ an app.
 
 | | |
 |---|---|
-| **Web portal** | at `p4os.local`: a file explorer, the firmware (updates, both slots, the last crash dump), the log (including the tail of the previous boot), and the network sweeps (each device with its MAC and maker, what changed since the last one, the Wi-Fi channels). The apps bring their own pages from the card, with no firmware: Notes, Radio, Cameras, Recorder, Weather, Quotes, Maps, Lua, Pixel Art and the 3D viewer have one ([docs/PORTAL-PAGES.md](docs/PORTAL-PAGES.md)) |
+| **Web portal** | at `p4os.local`: a file explorer, the firmware (updates, both slots, the last crash dump), the log (including the tail of the previous boot), and the network sweeps (each device with its MAC and maker, what changed since the last one, the Wi-Fi channels). The apps bring their own pages from the card, with no firmware: Notes, Radio, RF, Cameras, Recorder, Weather, Quotes, Maps, Lua, Pixel Art and the 3D viewer have one, and an app can stream live data to its page ([docs/PORTAL-PAGES.md](docs/PORTAL-PAGES.md)) |
 | **Updates over the air** | two slots: an update is written into the idle one and boots on trial. If the board restarts in the first 30 s, the bootloader goes back by itself. Settings, Update can go back on purpose |
-| **USB** | the OTG port is high speed (480 Mbit/s). **Keyboard and mouse:** keyboard, media keys, mouse, a gamepad, a MIDI keyboard, and a network over the cable (the portal at `192.168.7.1`, 6.7 MB/s). **Disk:** the microSD as a USB drive. The mode is kept across restarts. **Host:** devices on the 40-pin header (5 V from pin 1, data on pins 21/23, 25/27 or both at once, through P4OS's own copy of ESP-IDF's host library): pendrives at `/usb` (7.4 MB/s), keyboards that type into any text field, a mouse pointer, gamepads that play every game ([docs/GAMEPAD.md](docs/GAMEPAD.md)), webcams in Cameras, sound cards for all the board's sound and recording, USB serial ports in the Terminal (CH340, CP210x, FTDI, CDC-ACM), MIDI; a Raspberry Pi Pico is programmed by copying its `.uf2` ([docs/USB.md](docs/USB.md)) |
+| **USB** | the OTG port is high speed (480 Mbit/s). **Keyboard and mouse:** keyboard, media keys, mouse, a gamepad, a MIDI keyboard, and a network over the cable (the portal at `192.168.7.1`, 6.7 MB/s). **Disk:** the microSD as a USB drive. The mode is kept across restarts. **Host:** devices on the 40-pin header (5 V from pin 1, data on pins 21/23, 25/27 or both at once, through P4OS's own copy of ESP-IDF's host library): pendrives at `/usb` (7.4 MB/s), keyboards that type into any text field, a mouse pointer, gamepads that play every game ([docs/GAMEPAD.md](docs/GAMEPAD.md)), webcams in Cameras, sound cards for all the board's sound and recording, USB serial ports in the Terminal (CH340, CP210x, FTDI, CDC-ACM), MIDI, and raw devices for apps that bring their own driver (an RTL-SDR in RF); a Raspberry Pi Pico is programmed by copying its `.uf2` ([docs/USB.md](docs/USB.md)) |
 | **Its own Wi-Fi** | an access point, `P4OS-XXXX`, next to the home network or alone. Two QR codes: one joins the phone, the other opens the portal at `192.168.4.1`. A phone downloaded from it at ~3 MB/s |
 | **Bluetooth** | through the C6. **The phone:** pairs from the iPhone's own Settings, Bluetooth; its notifications, battery and time come to the board, its music shows and is driven from the control centre and the lock screen, and a call can be answered or rejected on the board. **Keyboard mode:** the board is a Mac's or PC's keyboard, mouse and media keys at the same time; the Macro pad's keys and trackpad go over Bluetooth when there is no cable. [docs/BLUETOOTH.md](docs/BLUETOOTH.md) |
 | **The C6's firmware** | updated from the P4, with no cable: Settings, Update, or `tools/install_c6.sh`. It runs esp_hosted 3.0.9, the same as the P4, and going back to the factory firmware works the same way. [docs/C6.md](docs/C6.md) |
@@ -380,6 +418,9 @@ test layouts.
   read, written and restored; CAN's self test with no transceiver.
 - VNC against a MacBook Air with two monitors: the login typed with the
   on-screen keyboard, then the mouse and keyboard.
+- RF with an RTL-SDR (R828D tuner) on the USB host: 2.4 Msps with no
+  samples lost, unplugged and plugged back while running, and broadcast FM
+  heard on the speaker (the stereo pilot 36 to 43 dB over its neighbours).
 
 **Waiting for hardware on the bench:**
 
@@ -393,9 +434,13 @@ test layouts.
 - The IP cameras.
 - The microphone's gain, and the speaker's latency and heating.
 - The real-time clock with a cell.
+- RF with a real 433 MHz remote and sensor (the decoders are tested with
+  synthetic signals), and AM and narrow FM with real traffic.
 
 **Not done yet:**
 
+- **RF:** FSK signals, a CC1101 module on the header as a second receiver
+  and transmitter, and ADS-B.
 - **ESP-NOW:** esp_hosted does not carry it (3.0.9 neither), so the two-device games of
   AmoledOS run alone here.
 - **USB host:** MIDI is written but not tried with a device; Xbox pads
@@ -508,6 +553,7 @@ Where something is a guess, it says so.
 | [C6.md](docs/C6.md) | the ESP32-C6's firmware: versions, updating it from the P4, throughput, recovery through J7 |
 | [EMOJI.md](docs/EMOJI.md) | the colour emoji pack and how a text gets them |
 | [MODULES.md](docs/MODULES.md) | the 40-pin header, `modules.txt`, I2C, SPI and GPIO from apps |
+| [apps/rf/README.md](apps/rf/README.md) | the software radio: receivers, the signal chain, what was measured, the decoders and their tests |
 | [PORTAL-PAGES.md](docs/PORTAL-PAGES.md) | an app's own page in the web portal, from the card, with no firmware |
 | [SECURITY.md](docs/SECURITY.md) | who may use the portal: trusted networks, the password, the token, and what is not covered |
 | [GAMEPAD.md](docs/GAMEPAD.md) | a USB gamepad in the games: the buttons, game by game, and `aos_pad.h` |
@@ -543,8 +589,8 @@ idioma de la tarjeta. Los documentos del plan y de las pruebas en la placa
 
 | | |
 |---|---|
-| Qué hace | inicio con carpetas, pantalla de bloqueo con código, 23 apps propias y 31 de la tarjeta (juegos, notas, mapas, radio, video, Lua), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, y taller con I2C, SPI, 1-Wire, GPIO y tiras LED direccionables |
-| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie |
-| Qué falta | probar en la placa las tiras LED, el DS18B20 y el RC522, las cámaras, y encontrar por qué se cortó la red durante dos OTA |
+| Qué hace | inicio con carpetas, pantalla de bloqueo con código, 23 apps propias y 38 de la tarjeta (juegos, notas, mapas, radio, video, Lua, una radio definida por software con RTL-SDR), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, y taller con I2C, SPI, 1-Wire, GPIO y tiras LED direccionables |
+| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, y RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante) |
+| Qué falta | probar en la placa el DS18B20 y el RC522, las cámaras, RF con un control de 433 MHz real, y encontrar por qué se cortó la red durante dos OTA |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
 | Cómo se instala | la primera vez por el CH340; después `tools/ota.sh p4os.local` o el portal |
