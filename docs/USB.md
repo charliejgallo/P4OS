@@ -226,6 +226,7 @@ keys is two HID interfaces):
 | `aos_usb_serial_p4.c` + `usb_host_cdc_acm` (+ CH34x, CP210x, FTDI) | Arduinos, boards with native USB, USB-serial adapters | ports `usb0`, `usb1` of aos_io: the Terminal opens them like its UARTs, and the Programmer flashes an ESP32 through them |
 | `aos_usb_uvc_p4.c` + `usb_host_uvc` | webcams (MJPEG) | a camera of the Cameras app while plugged in (`usb://0`) |
 | `aos_usb_uac_p4.c` + `usb_host_uac` | USB sound cards and headsets | the board's sound, instead of its speaker |
+| `aos_usb_raw_p4.c` | anything an app brings its own driver for (vendor class: a software radio) | `aos_hal_usb_raw_*`, see "Raw devices" below |
 
 **HID** reads each interface's report descriptor: which usage is where in
 each report, signed or not, relative or absolute, under which application
@@ -357,6 +358,47 @@ next block. With the GeneralPlus card and nothing in its microphone jack,
 the recorder got 335,376 samples in 6.99 s (48 kHz, none lost) of its
 noise floor (mean 74, peak 2944); with nothing in the jack some cards send
 digital silence. The log says how many samples came and their peak.
+
+### Raw devices
+
+A device none of these drivers takes - a vendor-class one, like an RTL-SDR
+software radio, a logic analyser or a programmer - can still be driven by an
+app that brings its own driver. The firmware lends it raw access
+(`aos_hal_usb_raw_*` in `aos_hal.h`, `aos_usb_raw_p4.c`), a client of the
+host library of its own with its own task, where every transfer's callback
+runs:
+
+- **open** by the device's address in `aos_hal_usb_devices()`, with an
+  owner name that Settings and `/api/usb` show as what the device is used
+  for; one app at a time per device;
+- **claim** an interface;
+- **control** transfers, and **bulk or interrupt** transfers, synchronous,
+  with a timeout (the library has none for bulk: a late one is halted,
+  flushed and cleared);
+- a **stream** from an IN endpoint: several transfers kept in flight, each
+  one put back as it completes, their data copied into a ring in PSRAM that
+  the app reads at its own pace. What does not fit in the ring is dropped
+  one whole transfer at a time (so I/Q pairs never split) and counted.
+
+The stream's transfer buffers are the host library's, in internal RAM like
+all its DMA buffers (see "Webcams" above), and live only while the stream
+runs: 4 x 16 KB by default. Unplugged while open, every call answers
+`AOS_USB_RAW_GONE` and the task lets go of the device once nothing is in
+flight; the handle stays valid until the app closes it, also across the host
+being switched off.
+
+Why the driver lives in the app: it is a lot of code that one app wants, it
+carries its own licence (librtlsdr is GPL; the RF app carries it as the Doom
+app carries its engine, and the firmware stays MIT), and a new device then
+needs a new app, not a new firmware. The RF app (`apps/rf/README.md`) puts
+libusb's API on top of this (`apps/rf/main/port/`), so a libusb driver
+moves over with its own sources nearly untouched.
+
+In the simulator the same functions run on the Mac's libusb
+(`sim/usb_raw_sim.c`) with `P4_SIM_USB=1`: an app then drives the real
+device plugged into the Mac. The Mac numbers its devices per bus, so the
+simulator gives each one an address of its own (two of them shared address
+1 on the first try: the stick and the board's USB-serial adapter).
 
 `GET /api/usb` says the OTG's `mode` (`host` while the host holds the OTG
 controller), `host_on`, `pins`, `layout`, `devices`, `keyboards`,

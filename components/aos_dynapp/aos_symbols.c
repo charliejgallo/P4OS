@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
  * Mas 159 funciones de libc/libm agregadas a mano.
- * Total: 3281 simbolos.
+ * Total: 3291 simbolos.
  */
 
 #include <stddef.h>
@@ -572,6 +572,16 @@ extern int aos_hal_usb_mode_set;
 extern int aos_hal_usb_mouse;
 extern int aos_hal_usb_mouse_hold;
 extern int aos_hal_usb_net_up;
+extern int aos_hal_usb_raw_claim;
+extern int aos_hal_usb_raw_close;
+extern int aos_hal_usb_raw_control;
+extern int aos_hal_usb_raw_gone;
+extern int aos_hal_usb_raw_open;
+extern int aos_hal_usb_raw_stream_read;
+extern int aos_hal_usb_raw_stream_start;
+extern int aos_hal_usb_raw_stream_stats;
+extern int aos_hal_usb_raw_stream_stop;
+extern int aos_hal_usb_raw_transfer;
 extern int aos_hal_usb_restore;
 extern int aos_hal_usb_serial_close;
 extern int aos_hal_usb_serial_count;
@@ -3856,6 +3866,16 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_usb_mouse),
     ESP_ELFSYM_EXPORT(aos_hal_usb_mouse_hold),
     ESP_ELFSYM_EXPORT(aos_hal_usb_net_up),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_raw_claim),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_raw_close),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_raw_control),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_raw_gone),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_raw_open),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_raw_stream_read),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_raw_stream_start),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_raw_stream_stats),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_raw_stream_stop),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_raw_transfer),
     ESP_ELFSYM_EXPORT(aos_hal_usb_restore),
     ESP_ELFSYM_EXPORT(aos_hal_usb_serial_close),
     ESP_ELFSYM_EXPORT(aos_hal_usb_serial_count),

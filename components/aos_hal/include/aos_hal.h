@@ -1914,6 +1914,42 @@ bool aos_hal_usb_serial_lines(int h, bool dtr, bool rts);
 bool aos_hal_usb_serial_ids(int index, uint16_t *vid, uint16_t *pid);  /* by list index, like _name */
 void aos_hal_usb_serial_close(int h);
 
+/* P4OS: raw access to a USB device on the host (aos_usb_raw_p4.c), for an
+ * app that brings its own driver: a device none of the board's drivers
+ * takes (vendor class: a software radio, a logic analyser), found in
+ * aos_hal_usb_devices() and opened by its address. The app claims an
+ * interface and then makes control transfers and bulk or interrupt
+ * transfers, synchronous, or keeps an IN endpoint streaming into a ring in
+ * PSRAM that it reads at its own pace (several transfers in flight, each
+ * put back as it completes; what does not fit in the ring is dropped a
+ * whole transfer at a time, and counted). docs/USB.md, "Raw devices".
+ *
+ * Transfers answer the bytes moved, or one of the AOS_USB_RAW_ codes. Once
+ * the device is unplugged every call answers AOS_USB_RAW_GONE; the handle
+ * stays valid until closed. One app at a time per device. */
+typedef struct aos_usb_raw aos_usb_raw_t;
+enum { AOS_USB_RAW_ERROR = -1, AOS_USB_RAW_TIMEOUT = -2, AOS_USB_RAW_STALL = -3, AOS_USB_RAW_GONE = -4 };
+/* owner names it in Settings, USB ("RF"); NULL if there is no such device
+ * or it is open already */
+aos_usb_raw_t *aos_hal_usb_raw_open(uint8_t addr, const char *owner);
+bool aos_hal_usb_raw_claim(aos_usb_raw_t *u, int intf, int alt);
+/* type is bmRequestType (bit 7 set: data comes in) */
+int  aos_hal_usb_raw_control(aos_usb_raw_t *u, uint8_t type, uint8_t req, uint16_t value, uint16_t index,
+                             void *data, uint16_t len, int timeout_ms);
+/* bulk or interrupt, as the endpoint is; ep bit 7 set is IN */
+int  aos_hal_usb_raw_transfer(aos_usb_raw_t *u, uint8_t ep, void *data, int len, int timeout_ms);
+/* 0 for the defaults: 4 transfers of 16 KB (internal RAM, the host's DMA
+ * buffers; only while streaming) and a ring of 1 MB (PSRAM) */
+bool aos_hal_usb_raw_stream_start(aos_usb_raw_t *u, uint8_t ep, int xfer_bytes, int xfers, int ring_bytes);
+/* waits up to timeout_ms for something: bytes read (whole transfers keep
+ * an even count), 0 on timeout, AOS_USB_RAW_GONE once unplugged */
+int  aos_hal_usb_raw_stream_read(aos_usb_raw_t *u, void *buf, int len, int timeout_ms);
+/* since the stream started: bytes received, of which dropped, and failed transfers */
+void aos_hal_usb_raw_stream_stats(aos_usb_raw_t *u, uint64_t *bytes, uint32_t *dropped, uint32_t *errors);
+void aos_hal_usb_raw_stream_stop(aos_usb_raw_t *u);
+bool aos_hal_usb_raw_gone(aos_usb_raw_t *u);
+void aos_hal_usb_raw_close(aos_usb_raw_t *u);
+
 /* P4OS: webcams on the host (aos_usb_uvc_p4.c, USB Video Class). Listed
  * while plugged in, with the MJPEG sizes each declares; one streams at a
  * time, MJPEG at the size asked for (or the largest below it). The newest

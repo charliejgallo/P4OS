@@ -930,6 +930,36 @@ __attribute__((weak)) bool aos_hal_usb_serial_ids(int index, uint16_t *vid, uint
 __attribute__((weak)) void aos_hal_usb_serial_close(int h)
 { }
 
+__attribute__((weak)) aos_usb_raw_t * aos_hal_usb_raw_open(uint8_t addr, const char *owner)
+{ return NULL; }
+
+__attribute__((weak)) bool aos_hal_usb_raw_claim(aos_usb_raw_t *u, int intf, int alt)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_usb_raw_control(aos_usb_raw_t *u, uint8_t type, uint8_t req, uint16_t value, uint16_t index, void *data, uint16_t len, int timeout_ms)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_usb_raw_transfer(aos_usb_raw_t *u, uint8_t ep, void *data, int len, int timeout_ms)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_usb_raw_stream_start(aos_usb_raw_t *u, uint8_t ep, int xfer_bytes, int xfers, int ring_bytes)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_usb_raw_stream_read(aos_usb_raw_t *u, void *buf, int len, int timeout_ms)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) void aos_hal_usb_raw_stream_stats(aos_usb_raw_t *u, uint64_t *bytes, uint32_t *dropped, uint32_t *errors)
+{ }
+
+__attribute__((weak)) void aos_hal_usb_raw_stream_stop(aos_usb_raw_t *u)
+{ }
+
+__attribute__((weak)) bool aos_hal_usb_raw_gone(aos_usb_raw_t *u)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) void aos_hal_usb_raw_close(aos_usb_raw_t *u)
+{ }
+
 __attribute__((weak)) int aos_hal_uvc_count(void)
 { int v; memset(&v, 0, sizeof v); return v; }
 

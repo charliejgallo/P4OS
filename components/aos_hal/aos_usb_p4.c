@@ -100,6 +100,8 @@ bool aos_p4_usb_uvc_start(void);
 void aos_p4_usb_uvc_stop(void);
 bool aos_p4_usb_uac_start(void);
 void aos_p4_usb_uac_stop(void);
+bool aos_p4_usb_raw_start(void);
+void aos_p4_usb_raw_stop(void);
 
 /* aos_hal_p4.c: the card on its slot with no filesystem, for disk mode */
 sdmmc_card_t *aos_p4_sd_card_open(void);
@@ -877,6 +879,8 @@ static bool host_start(void)
     aos_p4_usb_serial_start();
     aos_p4_usb_uvc_start();
     aos_p4_usb_uac_start();
+    /* the apps' own drivers (the RF app's radios) */
+    if (!aos_p4_usb_raw_start()) ESP_LOGW(TAG, "host: no raw client");
     ESP_LOGI(TAG, "host: waiting for devices on %s",
              H.map == (BIT0 | BIT1) ? "J3 25/27 (High Speed) and 21/23 (Full Speed)"
              : H.map & BIT1 ? "J3 21 D- 23 D+ (Full-Speed controller)"
@@ -886,6 +890,7 @@ static bool host_start(void)
 
 static void host_stop(void)
 {
+    aos_p4_usb_raw_stop();
     aos_p4_usb_uac_stop();
     aos_p4_usb_uvc_stop();
     aos_p4_usb_serial_stop();
