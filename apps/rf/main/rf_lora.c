@@ -57,7 +57,7 @@
 #define MIN_FRAMES  4
 #define MAX_MS      12000       /* longer: a carrier, not a packet */
 #define WIN_MS      80          /* of the start, for the dechirp */
-#define RING_MS     200
+#define RING_MS     700         /* holds a whole packet + lead, to cache it at its end */
 #define FFT_MAX     16384
 
 typedef struct {
@@ -559,6 +559,22 @@ static void frame_done(rf_lora_t *o, uint64_t at, void (*done)(const rf_lora_pkt
     }
     for (int i = 0; i < BURSTS; i++)
         if (o->b[i].ended && o->b[i].analysed) report(o, &o->b[i], done, ctx);
+}
+
+int rf_lora_extract(rf_lora_t *o, uint64_t from, int n, uint8_t *out)
+{
+    /* copy n cu8 pairs starting at the absolute sample 'from' out of the
+     * ring, if still held (for tap-to-decode). returns the pairs copied */
+    if (!o || n <= 0 || from >= o->ring_pos) return 0;
+    if (o->ring_pos - from > o->ring_n) return 0;           /* rolled out */
+    uint64_t avail = o->ring_pos - from;
+    if ((uint64_t)n > avail) n = (int)avail;
+    uint32_t back = (uint32_t)(o->ring_pos - from);
+    uint32_t at = o->ring_at >= back ? o->ring_at - back : o->ring_at + o->ring_n - back;
+    int first = (int)(o->ring_n - at) < n ? (int)(o->ring_n - at) : n;
+    memcpy(out, o->ring + 2 * at, (size_t)first * 2);
+    if (first < n) memcpy(out + 2 * first, o->ring, (size_t)(n - first) * 2);
+    return n;
 }
 
 void rf_lora_feed(rf_lora_t *o, const uint8_t *iq, int n, void (*done)(const rf_lora_pkt_t *, void *), void *ctx)

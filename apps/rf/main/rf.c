@@ -21,6 +21,7 @@
 #include "rf_demod.h"
 #include "rf_ook.h"
 #include "rf_lora.h"
+#include "rf_mesh.h"
 
 #include "aos_app.h"
 #include "aos_hal.h"
@@ -252,7 +253,24 @@ typedef struct {
     int mesh_region, mesh_preset;
     bool lora_only, lora_chan;              /* the list's filters: LoRa only, the channel only */
     lv_obj_t *mesh_region_dd, *mesh_preset_dd, *mesh_lbl;
+    /* Meshtastic: a channel key the user loads (card file / portal), and
+     * tap-to-decode of one packet at a time, on the analysis thread */
+    uint8_t mesh_key[32];
+    int mesh_keylen;
+    char mesh_keystr[48];
+    /* the I/Q of the last few LoRa packets, cached at their end (when still
+     * in the ring), so a tap any time after can decode them */
+    uint8_t *dec_cache;                     /* CACHE_N slots of CACHE_MAX pairs */
+    uint32_t cache_idx[8];                  /* which lp each slot holds (UINT32_MAX empty) */
+    int cache_len[8], cache_head;
+    volatile int dec_req;                   /* the lp index asked for, -1 none */
+    volatile int dec_state;                 /* 0 idle, 1 working, 2 done */
+    lv_obj_t *dec_lbl, *dec_btn;            /* the detail sheet's result line and button */
 } rf_t;
+
+#define CACHE_N   6
+#define CACHE_MS  300
+#define CACHE_MAX (960000 / 1000 * CACHE_MS)
 
 #define LP_MAX 64
 typedef struct rf_lpkt {
@@ -260,6 +278,8 @@ typedef struct rf_lpkt {
     uint32_t freq;
     uint64_t t_end;                         /* uptime ms when it was reported */
     struct tm when;
+    rf_mesh_t mesh;                         /* tap-to-decode result */
+    uint8_t decoded;                        /* 0 none, 1 ok, 2 failed */
 } rf_lpkt_t;
 
 #define EV_MAX 64
@@ -283,6 +303,7 @@ static bool in_channel(const rf_t *a, uint32_t freq);
 static bool lp_shown(const rf_t *a, const struct rf_lpkt *e);
 static void lp_rebuild(rf_t *a);
 static float lp_busy(rf_t *a, uint32_t *count);
+static void mesh_result_text(const struct rf_lpkt *e, char *t, size_t n);
 static void set_mode(rf_t *a, int m);
 static lv_obj_t *button(lv_obj_t *parent, const char *text, lv_event_cb_t cb, void *ud);
 static lv_obj_t *button_f(lv_obj_t *parent, const char *text, lv_event_cb_t cb, void *ud, const lv_font_t *font,
@@ -390,7 +411,9 @@ static void on_lora(const rf_lora_pkt_t *p, void *ctx)
     rf_t *a = ctx;
     if (!a->lp) return;
     aos_hal_mutex_lock(a->mx);
+    uint32_t idx = a->lp_n;
     rf_lpkt_t *e = &a->lp[a->lp_n % LP_MAX];
+    memset(e, 0, sizeof *e);
     e->p = *p;
     e->freq = (uint32_t)((int64_t)a->freq + p->offset_hz);
     e->t_end = aos_hal_uptime_ms();
@@ -398,6 +421,19 @@ static void on_lora(const rf_lora_pkt_t *p, void *ctx)
     a->lp_n++;
     a->lp_seq++;
     aos_hal_mutex_unlock(a->mx);
+    /* cache a LoRa packet's I/Q now, at its end, while it is still in the
+     * ring: a tap any time later decodes it (the engine thread owns a->lora) */
+    if (p->sf && a->dec_cache && a->lora) {
+        int lead = 960000 / 1000 * 3;
+        uint64_t from = p->start > (uint64_t)lead ? p->start - lead : 0;
+        int npairs = (int)((uint64_t)p->dur_us * 960000 / 1000000) + 960000 / 1000 * 25;
+        if (npairs > CACHE_MAX) npairs = CACHE_MAX;
+        int slot = a->cache_head % CACHE_N;
+        int got = rf_lora_extract(a->lora, from, npairs, a->dec_cache + (size_t)slot * CACHE_MAX * 2);
+        a->cache_idx[slot] = got > (1 << 9) ? idx : (uint32_t)-1;
+        a->cache_len[slot] = got;
+        a->cache_head++;
+    }
     /* the CSV is the analysis thread's: a line on the card costs tens of ms,
      * and a busy band sends several a second */
 }
@@ -411,6 +447,39 @@ static void lora_yield(void)
     aos_hal_sleep_ms(1);
 }
 
+
+/* one tap-to-decode: pull the packet's I/Q from the meter's ring and run
+ * rf_mesh.c. On the analysis thread (hundreds of ms of float). */
+static void mesh_do_decode(rf_t *a)
+{
+    int idx = a->dec_req;
+    a->dec_state = 1;
+    rf_mesh_t out;
+    memset(&out, 0, sizeof out);
+    bool ok = false;
+    if (idx >= 0 && a->dec_cache) {
+        aos_hal_mutex_lock(a->mx);
+        bool live = (uint32_t)idx < a->lp_n && idx + LP_MAX >= (int)a->lp_n;
+        rf_lpkt_t e = live ? a->lp[idx % LP_MAX] : (rf_lpkt_t){ 0 };
+        int slot = -1;
+        for (int s = 0; s < CACHE_N; s++) if (a->cache_idx[s] == (uint32_t)idx) { slot = s; break; }
+        aos_hal_mutex_unlock(a->mx);
+        if (live && e.p.sf && slot >= 0) {
+            uint32_t center = (uint32_t)((int64_t)e.freq - e.p.offset_hz);
+            ok = rf_mesh_decode(a->dec_cache + (size_t)slot * CACHE_MAX * 2, a->cache_len[slot], 960000,
+                                e.p.offset_hz, center, e.p.bw_hz, e.p.sf,
+                                a->mesh_keylen ? a->mesh_key : NULL, a->mesh_keylen, &out);
+        }
+        aos_hal_mutex_lock(a->mx);
+        if ((uint32_t)idx < a->lp_n && idx + LP_MAX >= (int)a->lp_n) {
+            a->lp[idx % LP_MAX].mesh = out;
+            a->lp[idx % LP_MAX].decoded = ok ? 1 : 2;
+        }
+        aos_hal_mutex_unlock(a->mx);
+    }
+    a->dec_state = 2;
+}
+
 static void lora_worker(void *arg)
 {
     rf_t *a = arg;
@@ -419,6 +488,8 @@ static void lora_worker(void *arg)
         aos_hal_mutex_lock(a->lora_mx);
         bool did = a->lora && rf_lora_analyse_pending(a->lora);
         aos_hal_mutex_unlock(a->lora_mx);
+        /* a tap-to-decode asked for */
+        if (a->dec_req >= 0 && a->dec_state == 0) { mesh_do_decode(a); did = true; }
         /* the packets reported since, to rf/lora-<day>.csv */
         while (a->lp && logged < a->lp_n) {
             if (a->lp_n - logged > LP_MAX) logged = a->lp_n - LP_MAX;
@@ -1021,6 +1092,45 @@ static void capture_now(lv_timer_t *t);
 static void show_vol(rf_t *a);
 static bool play_file(rf_t *a, const char *name);
 
+/* The Meshtastic channel key. It lives in rf/mesh_key.txt on the card, set
+ * by the user (a preset, or pasted in the portal) - never in the repo. */
+static void mesh_key_apply(rf_t *a, const char *s)
+{
+    snprintf(a->mesh_keystr, sizeof a->mesh_keystr, "%s", s ? s : "");
+    a->mesh_keylen = a->mesh_keystr[0] ? rf_mesh_key(a->mesh_keystr, a->mesh_key) : 0;
+}
+
+static void mesh_key_load(rf_t *a)
+{
+    a->mesh_keystr[0] = 0;
+    a->mesh_keylen = 0;
+    const char *r = aos_hal_path_sd_root();
+    if (!r) return;
+    char path[128], s[48];
+    snprintf(path, sizeof path, "%s/rf/mesh_key.txt", r);
+    FILE *f = fopen(path, "r");
+    if (!f) return;
+    if (fgets(s, sizeof s, f)) {
+        s[strcspn(s, "\r\n")] = 0;
+        mesh_key_apply(a, s);
+    }
+    fclose(f);
+}
+
+static void mesh_key_save(rf_t *a, const char *s)
+{
+    mesh_key_apply(a, s);
+    const char *r = aos_hal_path_sd_root();
+    if (!r) return;
+    char path[128];
+    snprintf(path, sizeof path, "%s/rf", r);
+    mkdir(path, 0777);
+    snprintf(path, sizeof path, "%s/rf/mesh_key.txt", r);
+    if (!s || !s[0]) { remove(path); return; }
+    FILE *f = fopen(path, "w");
+    if (f) { fprintf(f, "%s\n", s); fclose(f); }
+}
+
 /* One line of key=value: from rf/control.txt or from the portal's page (the
  * live channel). freq (Hz, or MHz with a point), mode (off, wfm, am, nfm,
  * data), rate, gain (tenths of a dB, or auto), sq (dB), step (Hz); and from
@@ -1058,6 +1168,8 @@ static void apply_line(rf_t *a, const char *line)
         a->muted = n != 0;
         if (a->vol_btn) show_vol(a);
     }
+    else if (!strcmp(k, "key")) mesh_key_save(a, strcmp(v, "none") ? v : "");   /* Meshtastic channel key */
+    else if (!strcmp(k, "decode")) { a->dec_req = (int)n; a->dec_state = 0; }   /* decode that packet */
     else if (!strcmp(k, "simd")) rf_demod_use_simd(n != 0);      /* to measure */
     else if (!strcmp(k, "fft")) rf_fft_use_simd(n != 0);
 }
@@ -1198,10 +1310,24 @@ static void live_lora(rf_t *a)
         const char *preset = rf_lora_preset(e->p.sf, e->p.bw_hz);
         k += snprintf(j + k, sizeof j - k,
                       "%s{\"n\":%u,\"t\":\"%02d:%02d:%02d\",\"freq\":%u,\"off\":%d,\"width\":%u,\"ms\":%u,"
-                      "\"snr\":%.1f,\"sf\":%d,\"bw\":%u,\"q\":%.2f,\"preset\":\"%s\"}",
+                      "\"snr\":%.1f,\"sf\":%d,\"bw\":%u,\"q\":%.2f,\"preset\":\"%s\"",
                       rows++ ? "," : "", (unsigned)(n - 1 - i), e->when.tm_hour, e->when.tm_min, e->when.tm_sec, (unsigned)e->freq,
                       (int)e->p.offset_hz, (unsigned)e->p.width_hz, (unsigned)(e->p.dur_us / 1000), (double)e->p.snr_db,
                       e->p.sf, (unsigned)e->p.bw_hz, (double)e->p.quality, preset ? preset : "");
+        if (e->decoded == 1) {
+            const rf_mesh_t *m = &e->mesh;
+            k += snprintf(j + k, sizeof j - k, ",\"from\":%u,\"to\":%u,\"hops\":%d,\"port\":%d", (unsigned)m->from,
+                          (unsigned)m->to, m->hop_limit, m->portnum);
+            if (m->portnum == 1) {
+                k += snprintf(j + k, sizeof j - k, ",\"text\":\"");
+                for (const char *p = m->text; *p && k < (int)sizeof j - 8; p++) {
+                    if (*p == '"' || *p == '\\') j[k++] = '\\';
+                    if ((unsigned char)*p >= 0x20) j[k++] = *p;
+                }
+                k += snprintf(j + k, sizeof j - k, "\"");
+            }
+        } else if (e->decoded == 2) k += snprintf(j + k, sizeof j - k, ",\"decfail\":true");
+        k += snprintf(j + k, sizeof j - k, "}");
     }
     aos_hal_mutex_unlock(a->mx);
     snprintf(j + k, sizeof j - k, "]");
@@ -1345,6 +1471,19 @@ static void ui_timer(lv_timer_t *t)
         /* the volume may change elsewhere too (control centre, the keys) */
         if (a->vol_btn && aos_hal_volume_get() != a->vol_shown) show_vol(a);
     }
+    /* a tap-to-decode finished: show it in the open detail sheet */
+    if (a->dec_state == 2 && a->dec_lbl) {
+        int idx = a->dec_req;
+        aos_hal_mutex_lock(a->mx);
+        bool live = idx >= 0 && (uint32_t)idx < a->lp_n && idx + LP_MAX >= (int)a->lp_n;
+        rf_lpkt_t ev = live ? a->lp[idx % LP_MAX] : (rf_lpkt_t){ 0 };
+        aos_hal_mutex_unlock(a->mx);
+        char m[320];
+        if (live && ev.decoded == 1) { mesh_result_text(&ev, m, sizeof m); lv_label_set_text(a->dec_lbl, m); }
+        else lv_label_set_text(a->dec_lbl, _("No se pudo decodificar (muy débil, o ya salió del buffer)."));
+        a->dec_state = 3;
+        a->dec_req = -1;
+    }
 }
 
 /* ---- events --------------------------------------------------------------- */
@@ -1450,6 +1589,7 @@ static void sheet_close(rf_t *a)
     a->sheet = a->ta = a->gain_slider = a->gain_val = a->sq_slider = a->sq_val = a->sq_live = NULL;
     a->vol_val = a->vol_slider = a->mute_btn = NULL;
     a->seg_rate = a->seg_step = a->mesh_region_dd = a->mesh_preset_dd = a->mesh_lbl = NULL;
+    a->dec_lbl = a->dec_btn = NULL;
 }
 
 static void sheet_bg_tap(lv_event_t *e)
@@ -1698,6 +1838,15 @@ static void step_pick(lv_event_t *e)
     seg_light(a->seg_step, a->step);
 }
 
+static void key_pick(lv_event_t *e)
+{
+    rf_t *a = A;
+    int v = (int)(intptr_t)lv_event_get_user_data(e);
+    mesh_key_save(a, v ? "AQ==" : "");
+    sheet_close(a);
+    aos_ui_toast(v ? _("Canal público puesto (AQ==)") : _("Clave quitada"), 2000);
+}
+
 static void settings_tap(lv_event_t *e)
 {
     rf_t *a = A;
@@ -1735,6 +1884,17 @@ static void settings_tap(lv_event_t *e)
         section(card, _("Qué lista LoRa (el CSV guarda todo)"));
         sheet_switch(card, _("Sólo paquetes LoRa: lo que no tiene chirps no se muestra"), a->lora_only, 2);
         sheet_switch(card, _("Sólo el canal sintonizado (el paso de ancho)"), a->lora_chan, 3);
+        char ks[72];
+        if (a->mesh_keylen) snprintf(ks, sizeof ks, _("Clave del canal (Meshtastic): %s"), a->mesh_keystr);
+        else snprintf(ks, sizeof ks, "%s", _("Clave del canal (Meshtastic): ninguna"));
+        section(card, ks);
+        lv_obj_t *kr = seg_row(card);
+        seg_add(kr, _("Canal público"), key_pick, 1);
+        seg_add(kr, _("Ninguna"), key_pick, 0);
+        lv_obj_t *kl = aos_label(card, _("Para un canal privado, pegá su PSK (base64) en la página del portal; la clave se guarda en la tarjeta, no en el teléfono ni en la nube."),
+                                 aos_font_caption, AOS_C_DIM);
+        lv_obj_set_width(kl, LV_PCT(100));
+        lv_label_set_long_mode(kl, LV_LABEL_LONG_WRAP);
     }
     section(card, _("Ganancia"));
     gain_controls(a, card);
@@ -2103,6 +2263,30 @@ static void lp_rebuild(rf_t *a)
     }
 }
 
+/* the decoded Meshtastic frame of a packet, in words */
+static void mesh_result_text(const rf_lpkt_t *e, char *t, size_t n)
+{
+    const rf_mesh_t *m = &e->mesh;
+    int c;
+    if (m->to == 0xffffffffu)
+        c = snprintf(t, n, _("De !%08x a todos (broadcast)\n%d saltos%s\n"), (unsigned)m->from, m->hop_limit,
+                     m->want_ack ? _(" · pide acuse") : "");
+    else
+        c = snprintf(t, n, _("De !%08x a !%08x\n%d saltos%s\n"), (unsigned)m->from, (unsigned)m->to, m->hop_limit,
+                     m->want_ack ? _(" · pide acuse") : "");
+    if (m->portnum == 1) snprintf(t + c, n - c, _("Texto: %s"), m->text);
+    else if (m->decrypted) snprintf(t + c, n - c, _("No es un mensaje de texto (tipo %d, %d bytes)"), m->portnum, m->payload_len);
+    else snprintf(t + c, n - c, "%s", _("Sin clave de canal: solo la cabecera. Cargá una en Ajustes o en la página del portal."));
+}
+
+static void dec_tap(lv_event_t *e)
+{
+    rf_t *a = A;
+    a->dec_req = (int)(intptr_t)lv_event_get_user_data(e);
+    a->dec_state = 0;
+    if (a->dec_lbl) lv_label_set_text(a->dec_lbl, _("Descifrando…"));
+}
+
 static void lp_detail(lv_event_t *e)
 {
     rf_t *a = A;
@@ -2139,6 +2323,17 @@ static void lp_detail(lv_event_t *e)
     lv_obj_t *l = aos_label(card, t, aos_font_caption, AOS_C_TEXT);
     lv_obj_set_width(l, LV_PCT(100));
     lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
+    /* Meshtastic: read the packet (the header, and the text with a key) */
+    if (ev.p.sf) {
+        a->dec_lbl = aos_label(card, "", aos_font_caption, AOS_C_ACCENT);
+        lv_obj_set_width(a->dec_lbl, LV_PCT(100));
+        lv_label_set_long_mode(a->dec_lbl, LV_LABEL_LONG_WRAP);
+        if (ev.decoded == 1) { char m[320]; mesh_result_text(&ev, m, sizeof m); lv_label_set_text(a->dec_lbl, m); }
+        else if (ev.decoded == 2) lv_label_set_text(a->dec_lbl, _("No se pudo decodificar (muy débil, o ya salió del buffer)."));
+        a->dec_btn = button_f(card, a->mesh_keylen ? _("Leer y descifrar (Meshtastic)") : _("Leer la cabecera (Meshtastic)"),
+                              dec_tap, (void *)(uintptr_t)idx, aos_font_small, 16);
+        lv_obj_set_style_bg_color(a->dec_btn, AOS_C_ACCENT, 0);
+    }
 }
 
 static void ev_detail(lv_event_t *e)
@@ -2580,6 +2775,10 @@ static void *rf_create(aos_app_t *self, lv_obj_t *root)
     a->lora_chan = pref_int("rf_lora_chan", 0) != 0;
     if (a->mesh_region < 0 || a->mesh_region >= MESH_REGIONS_N) a->mesh_region = 0;
     if (a->mesh_preset < 0 || a->mesh_preset >= MESH_PRESETS_N) a->mesh_preset = 1;
+    a->dec_cache = psram((size_t)CACHE_N * CACHE_MAX * 2);
+    for (int s = 0; s < CACHE_N; s++) a->cache_idx[s] = (uint32_t)-1;
+    a->dec_req = -1;
+    mesh_key_load(a);
     a->want_gain = pref_int("rf_gain", -1);
     a->step = pref_u32("rf_step", 100000);
     a->state = ST_SEARCH;
@@ -2632,6 +2831,7 @@ static void rf_destroy(aos_app_t *self, void *inst)
     pref_put("rf_lora_chan", a->lora_chan);
     free(a->ev);
     free(a->lp);
+    free(a->dec_cache);
     free(a->spec);
     free(a->ui_spec);
     free(a->spec_px);

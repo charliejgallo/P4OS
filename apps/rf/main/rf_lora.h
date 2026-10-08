@@ -32,6 +32,11 @@ void rf_lora_free(rf_lora_t *o);
  * was looked at. Cheap: one 256-point FFT every 2 ms. */
 void rf_lora_feed(rf_lora_t *o, const uint8_t *iq, int n, void (*done)(const rf_lora_pkt_t *, void *), void *ctx);
 
+/* copy n cu8 pairs from the absolute sample 'from' out of the ring, for
+ * decoding a packet the user tapped; 0 if it has rolled out. rf_lora_pkt_t's
+ * .start is such a sample position. */
+int rf_lora_extract(rf_lora_t *o, uint64_t from, int n, uint8_t *out);
+
 /* The slow part: the dechirp of a preamble the feed set aside (tens of ms
  * of work for a packet). From another thread (the app's), or right after
  * the feed (the tests). Returns true if there was one to do. */

@@ -238,7 +238,7 @@ static int getbit(int v, int n, int i) { return (v >> (n - 1 - i)) & 1; }
 
 static void deinterleave(const int *vals, int sf_app, int cw_len, int diag, int *out)
 {
-    int deint[8][8];
+    int deint[12][8];                    /* sf_app up to 12 rows */
     memset(deint, 0, sizeof deint);
     for (int i = 0; i < cw_len; i++)
         for (int jx = 0; jx < sf_app; jx++) {
@@ -277,7 +277,7 @@ static bool hdr_ok(const int *n)
 
 static bool decode_header(const int *syms, int sf, int off, int *nib /*>=8*/)
 {
-    int vals[8], cws[8];
+    int vals[8], cws[12];
     for (int i = 0; i < 8; i++) vals[i] = demap(syms[i], sf, true, off, 1);
     deinterleave(vals, sf - 2, 8, 0, cws);
     for (int i = 0; i < sf - 2; i++) nib[i] = nibble(cws[i], 8, 0);
@@ -319,7 +319,7 @@ static bool decode_packet(const int *syms, int nsym, int sf, int off, uint8_t *d
     int cws[256], ncw = 0;
     int k = 8;
     while (ncw < need - 2 && k + 5 <= nsym) {
-        int vals[5], out[8];
+        int vals[5], out[12];
         for (int i = 0; i < 5; i++) vals[i] = demap(syms[k + i], sf, false, off, 1);
         deinterleave(vals, sf, 5, 0, out);
         for (int i = 0; i < sf; i++) cws[ncw++] = out[i];
