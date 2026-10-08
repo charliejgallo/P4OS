@@ -1,5 +1,16 @@
 # Changelog
 
+## Unreleased
+
+- **RF measures LoRa** (apps/rf/README.md): each packet in the band - when,
+  where, how long, how strong - with the spreading factor and bandwidth its
+  preamble shows, named after a Meshtastic preset when it is one, and the
+  channel's busy share over the last minute. Found on synthetic packets of
+  five presets at three sample rates, a weak one too. Bands has Meshtastic's
+  default channel of a region and preset (ANZ and MediumFast: 926.125 MHz).
+- **RF's controls are one bar:** mode, bands, settings, speaker and keeping
+  things, each a sheet; the spectrum and waterfall got the room.
+
 ## 0.11.1 — 2026-10-07
 
 RF, after trying it with real remotes on the board. Only the app changed:

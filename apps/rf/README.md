@@ -6,12 +6,24 @@ tap a frequency to centre it, tap the number on top to type one, a row of
 bands to jump to - and **listens**: broadcast FM, AM (the airband) and narrow
 FM (amateurs, PMR, marine), through the board's speaker or a USB sound card,
 with a squelch. It also decodes the 433 and 868 MHz remotes and sensors
-around, records all of it, and has a page in the portal. What comes next (a
-CC1101 on the header, FSK) is in `docs/plan/RF.md`.
+around, **measures LoRa** (Meshtastic, LoRaWAN: each packet, its spreading
+factor and bandwidth, and how busy the channel is), records all of it, and
+has a page in the portal. What comes next (a CC1101 on the header, FSK) is
+in `docs/plan/RF.md`.
+
+## The bar
+
+One bar at the bottom: the **mode** (a sheet lists them, each with what it
+is for), the **bands** (with Meshtastic's default channel of a region and a
+preset), the **settings** (sample rate, the arrows' step, gain, squelch), the
+**speaker** (the board's volume, and a mute of the radio's own) and
+**keeping things**. It replaced three rows of buttons on 2026-10-07: the
+spectrum and the waterfall got their room, and a mode more needs no more of
+it.
 
 ## Listening
 
-The row above the rates chooses: **No audio** (the spectrum only: the stream
+The mode chooses: **No audio** (the spectrum only: the stream
 rests while the board is locked or the app is behind another), **FM**
 (broadcast, mono, 75 us de-emphasis, the stereo pilot shown as "stereo"),
 **AM** and **Narrow FM**. With a mode on, the radio goes on with the screen
@@ -69,6 +81,56 @@ Each new one goes to the card, `rf/datos-<day>.csv` (on by default), and,
 when asked and the board's MQTT is connected, to
 `<board name>/rf/<protocol>-<id>` as JSON (temperature, humidity, battery,
 button, the bits).
+
+## LoRa: packets, their settings, the channel's use
+
+**LoRa** watches the band on screen for LoRa packets - Meshtastic's,
+LoRaWAN's, a sensor's - and lists each: when, where, how long on the air,
+how strong, and the **spreading factor and bandwidth** its preamble shows,
+named after a Meshtastic preset when it is one (MediumFast is SF9 at
+250 kHz). The status line counts the last minute: packets, and the share of
+it the channel was busy, what Meshtastic calls channel utilization. The top
+of the waterfall stays: packets show there as blocks. It reads no payload:
+that is the next step (`docs/plan/RF.md`).
+
+**Bands** has a **Meshtastic** row: a region and a preset give the default
+channel's frequency, as Meshtastic's firmware computes it (the djb2 hash of
+the preset's name, modulo the slots of that width in the region: ANZ and
+MediumFast is 926.125 MHz, ANZ and LongFast 919.875, US and LongFast
+906.875). A channel with a name of its own sits elsewhere: the Meshtastic app
+shows its frequency. At 960 ksps the screen holds a 250 kHz channel and its
+neighbours; at 2.4 Msps, nine of them.
+
+How `rf_lora.c` does it:
+
+- **Finding packets.** Every 2 ms a 256-point FFT of the band; each bin has
+  its own floor, the mean of its noise, followed slowly (a carrier that
+  stays on becomes floor). A bin 12 dB over it is on; a chirp is narrow in
+  0.27 ms, so a packet is the frames in a row whose pieces fall within
+  520 kHz of each other. It ends after 12 ms of nothing.
+- **What it is.** Over the packet, each bin's power is summed: a chirp
+  visits its whole band alike, so the band is where the sum stands up. Then
+  80 ms of its start (the preamble: 8 to 16 identical up-chirps) is
+  dechirped against every LoRa bandwidth near that width and every
+  spreading factor 5 to 12, four symbols' spectra summed: the right slope
+  makes each symbol one tone, in the same bin every time. Of the bandwidths
+  that pass, the one that gathered most of the power wins.
+- **Traps, measured on synthetic packets.** SF9 at 250 kHz and SF7 at
+  125 kHz have the same slope (BW^2 / 2^SF): judged on its own the narrower
+  twin gathers its share just as well (and at a rate equal to its
+  bandwidth, both halves of the jump land in one bin), so the bandwidths are
+  compared on the power each gathered of what came in. A remote's keyed
+  carrier is a tone already: the dechirp must beat the window as it is.
+- The dechirp is float work, tens of ms a packet: on a thread of its own
+  (`rf_lora`, the lowest priority), with 80 ms of the packet copied out of a
+  200 ms ring; the feed itself is a 256-point SIMD FFT every 2 ms.
+
+On synthetic packets (`test/gen_lora.py`, the board's noise): ShortTurbo,
+MediumFast, LongFast, LongSlow and an SF7/125 kHz LoRaWAN-like one, each at
+its offset, come out with their SF and bandwidth at 0.96, 1.92 and
+2.4 Msps, timed to the ms; a MediumFast at 0 dB in its band too; a 433 MHz
+remote's burst is "another signal", and a carrier that stays on is nothing.
+Each packet goes to `rf/lora-<day>.csv` when Data's CSV switch is on.
 
 ## Keeping and playing back
 
@@ -172,7 +234,8 @@ the app, and in the simulator), and the FFT works in 28 KB of internal RAM.
 
 `test/README.md`: the demodulator on the Mac against synthetic signals with
 neighbours, noise and a mistuned carrier, and in the simulator with a file
-as the source.
+as the source; the remotes' decoders; the LoRa meter against synthetic
+packets.
 
 ## Trying it in the simulator
 

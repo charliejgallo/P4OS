@@ -54,3 +54,25 @@ the app (Save, Record the signal) or `rec_iq=1` / `rec_iq=0` over
 In the simulator, `RF_IQ_FILE=/tmp/am.cu8@960000` makes such a file the
 app's source, in real time and in a loop, and `RF_WAV_OUT=/tmp/out.raw` keeps
 what the speaker would have played (raw 16-bit mono at the mode's rate).
+
+# The LoRa meter's tests
+
+```bash
+cc -O1 -g -fsanitize=address,undefined -DRF_HOST_TEST -Iapps/rf/main \
+   apps/rf/main/rf_lora.c apps/rf/main/rf_dsp.c apps/rf/test/lora_test.c -o /tmp/lora_test -lm
+python3 apps/rf/test/gen_lora.py 960000 /tmp/lora.cu8
+/tmp/lora_test 960000 /tmp/lora.cu8
+```
+
+`gen_lora.py` sends what a LoRa radio does - a preamble of up-chirps, the
+sync word, 2.25 down-chirps, the payload's symbols - for five presets at
+their offsets (MediumFast, LongFast, ShortTurbo, LongSlow, an SF7/125 kHz
+one), a MediumFast at 0 dB in its band, a 433 MHz remote's burst and a
+carrier that stays on, in the board's noise. On 2026-10-07 every packet came
+out with its spreading factor and bandwidth at 0.96, 1.92 and 2.4 Msps, the
+weak one too, the burst as "not LoRa" and the carrier as nothing. Each try
+on the way is in `rf_lora.c`: the twins of one slope at two bandwidths won
+until the bandwidths were compared on the power they gathered.
+
+In the simulator: `RF_IQ_FILE=/tmp/lora.cu8@960000` and the LoRa mode.
+

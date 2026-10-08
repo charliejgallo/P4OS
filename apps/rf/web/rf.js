@@ -13,12 +13,26 @@ const P = window.P4OS;
 const APP = 'aos.rf';
 const LIVE = 'live?app=' + APP;
 
-const MODES = [['off', 'Sin audio'], ['wfm', 'FM'], ['am', 'AM'], ['nfm', 'FM angosta'], ['data', 'Datos']];
+const MODES = [['off', 'Sin audio'], ['wfm', 'FM'], ['am', 'AM'], ['nfm', 'FM angosta'], ['data', 'Datos'], ['lora', 'LoRa']];
 const HALF = { wfm: 100000, am: 4000, nfm: 6500 };
 const BANDS = [['FM', 98000000, 'wfm', 100000], ['Aire', 125000000, 'am', 25000], ['Marina', 156800000, 'nfm', 25000],
   ['2 m', 145000000, 'nfm', 12500], ['433', 433920000, 'data', 25000], ['70 cm', 435000000, 'nfm', 12500],
-  ['PMR', 446006250, 'nfm', 12500], ['868', 868300000, 'data', 25000], ['ADS-B', 1090000000, 'off', 1000000]];
-const STEPS = [1000, 5000, 6250, 8330, 10000, 12500, 25000, 100000, 1000000];
+  ['PMR', 446006250, 'nfm', 12500], ['868', 868300000, 'data', 25000], ['LoRa 868', 868100000, 'lora', 25000],
+  ['LoRa 915', 915200000, 'lora', 25000], ['ADS-B', 1090000000, 'off', 1000000]];
+const STEPS = [1000, 5000, 6250, 8330, 10000, 12500, 25000, 100000, 125000, 250000, 1000000];
+/* Meshtastic's regions and presets, as the app has them (rf.c): a default
+ * channel's slot is the djb2 hash of the preset's name modulo the slots */
+const MESH_REGIONS = [['ANZ', 915, 928], ['US', 902, 928], ['EU_868', 869.4, 869.65], ['EU_433', 433, 434], ['CN', 470, 510],
+  ['IN', 865, 867], ['KR', 920, 923], ['TW', 920, 925], ['RU', 868.7, 869.2], ['NZ_865', 864, 868]];
+const MESH_PRESETS = [['LongFast', 11, 250], ['MediumFast', 9, 250], ['MediumSlow', 10, 250], ['ShortFast', 7, 250],
+  ['ShortSlow', 8, 250], ['ShortTurbo', 7, 500], ['LongModerate', 11, 125], ['LongSlow', 12, 125]];
+function meshFreq(r, p) {
+  let h = 5381;
+  for (const c of MESH_PRESETS[p][0]) h = (Math.imul(h, 33) + c.charCodeAt(0)) >>> 0;
+  const bw = MESH_PRESETS[p][2] / 1000, [, lo, hi] = MESH_REGIONS[r];
+  const slots = Math.max(1, Math.floor((hi - lo) / bw + 1e-6));
+  return Math.round((lo + bw / 2 + (h % slots) * bw) * 1e6);
+}
 const RATES = { hs: [960000, 1440000, 1920000, 2400000], listen: [240000, 960000, 1920000], fs: [240000] };
 
 const css = `
@@ -108,11 +122,23 @@ P.registerPage({
     const volBox = h('span', {}, 'Volumen ', vol, ' ', volLbl, ' ', muteBtn);
     const bands = h('div', { class: 'rf-seg' }, ...BANDS.map(([n, hz, m, step]) =>
       h('button', { class: 'btn', onclick: () => send(`mode=${m}\nfreq=${hz}\nstep=${step}`) }, n)));
+    const meshReg = h('select', {}, ...MESH_REGIONS.map(([n], i) => h('option', { value: i }, n)));
+    const meshPre = h('select', {}, ...MESH_PRESETS.map(([n], i) => h('option', { value: i, selected: i === 1 }, n)));
+    const meshLbl = h('span', { class: 'small' }, '');
+    const meshShow = () => {
+      const p = MESH_PRESETS[meshPre.value];
+      meshLbl.textContent = `${mhz(meshFreq(meshReg.value, meshPre.value), 4)} MHz · SF${p[1]} · ${p[2]} kHz`;
+    };
+    meshReg.onchange = meshPre.onchange = meshShow;
+    meshShow();
+    const mesh = h('div', { class: 'row', style: 'flex-wrap:wrap;gap:10px;margin-top:10px' }, 'Meshtastic, canal por defecto: ',
+      meshReg, meshPre, meshLbl,
+      h('button', { class: 'btn', onclick: () => send(`mode=lora\nfreq=${meshFreq(meshReg.value, meshPre.value)}\nstep=${MESH_PRESETS[meshPre.value][2] * 1000}`) }, 'Escuchar ahí'));
     const controls = h('div', { class: 'card' },
       modeRow,
       h('div', { class: 'row', style: 'flex-wrap:wrap;gap:14px;margin-top:10px' },
         h('span', {}, 'Muestreo ', rateSel), h('span', {}, 'Ganancia ', gainSel), h('span', {}, 'Paso ', stepSel), sqBox, volBox),
-      h('div', { style: 'margin-top:10px' }, bands));
+      h('div', { style: 'margin-top:10px' }, bands), mesh);
 
     /* ---- the spectrum and the waterfall (or Data's list) ---- */
     const sc = h('canvas', { class: 'rf-canvas', height: 220 });
@@ -120,7 +146,8 @@ P.registerPage({
     const axis = h('div', { class: 'rf-axis' });
     const hover = h('div', { class: 'rf-hover' }, ' ');
     const evBox = h('div', {});
-    const view = h('div', { class: 'card' }, sc, axis, wf, evBox, hover);
+    const loraBox = h('div', { style: 'margin-top:10px' });
+    const view = h('div', { class: 'card' }, sc, axis, wf, evBox, loraBox, hover);
 
     const xToHz = (cv, ev) => {
       const r = cv.getBoundingClientRect();
@@ -225,13 +252,14 @@ P.registerPage({
         s.state === 'search' ? 'Buscando la radio…' : (s.why || 'Sin radio');
       if (s.listening) t += ` · señal ${Math.round(s.level)} dB${s.open ? '' : ' · silenciado'}${s.mode === 'wfm' && s.pilot >= 10 ? ' · estéreo' : ''}`;
       if (s.mode === 'data') t += ` · ${s.received} recibidos`;
+      if (s.mode === 'lora') t += ` · LoRa: ${s.lora_n} paquetes en el último minuto, canal ocupado ${String(s.lora_busy).replace('.', ',')} %`;
       if (s.playing) t += ' · reproduciendo ' + s.play;
       if (s.rec_iq) t += ` · grabando la señal (${s.iq_mb} MB${s.iq_dropped ? ', perdiendo' : ''})`;
       if (s.rec_wav) t += ` · grabando el audio (${Math.floor(s.wav_s / 60)}:${String(s.wav_s % 60).padStart(2, '0')})`;
       status.textContent = t;
       if (changed('modes', s.mode))
         put(modeRow, ...MODES.map(([m, n]) => h('button', { class: 'btn' + (s.mode === m ? ' on' : ''), onclick: () => send('mode=' + m) }, n)));
-      const rates = !s.high_speed ? RATES.fs : s.mode !== 'off' ? RATES.listen : RATES.hs;
+      const rates = !s.high_speed ? RATES.fs : s.mode !== 'off' && s.mode !== 'lora' ? RATES.listen : RATES.hs;
       if (!rates.includes(s.rate)) rates.unshift(s.rate);   /* a recording's own */
       if (changed('rates', rates.join() + '/' + s.rate))
         put(rateSel, ...rates.map(r => h('option', { value: r, selected: r === s.rate }, (r / 1e6).toFixed(3).replace('.', ',') + ' Msps')));
@@ -252,6 +280,8 @@ P.registerPage({
       sqBox.style.display = s.mode === 'am' || s.mode === 'nfm' ? '' : 'none';
       wf.style.display = s.mode === 'data' ? 'none' : '';
       evBox.style.display = s.mode === 'data' ? '' : 'none';
+      loraBox.style.display = s.mode === 'lora' ? '' : 'none';
+      if (s.mode === 'lora') loadLora();
       drawKeep(s);
       if (s.mode === 'data' && s.received !== evSeen) {
         evSeen = s.received;
@@ -279,6 +309,26 @@ P.registerPage({
       }).catch(() => {});
     }
 
+    /* LoRa's packets: the newest first, what they are, where and how long */
+    let loraSeen = '';
+    function loadLora() {
+      P.api(LIVE + '&key=lora').then(list => {
+        const key = list.length ? list[0].n + '/' + list.length : '';
+        if (key === loraSeen) return;
+        loraSeen = key;
+        if (!list.length) {
+          put(loraBox, h('p', { class: 'note' }, 'Esperando paquetes LoRa en la banda.'));
+          return;
+        }
+        put(loraBox, h('table', { class: 'rf-ev' }, h('tbody', {}, ...list.map(e => h('tr', {},
+          h('td', {}, e.t),
+          h('td', {}, h('b', {}, e.preset || (e.sf ? `SF${e.sf} · ${e.bw / 1000} kHz` : 'Otra señal'))),
+          h('td', {}, `${mhz(e.freq, 4)} MHz` + (e.sf ? ` · SF${e.sf} · ${e.bw / 1000} kHz` : ` · ${Math.round(e.width / 1000)} kHz de ancho`)),
+          h('td', { class: 'small' }, `${e.ms} ms · ${Math.round(e.snr)} dB`))))),
+          h('p', { class: 'note small' }, 'El SF y el ancho salen del preámbulo de cada paquete. Todo queda también en rf/lora-<día>.csv de la tarjeta.'));
+      }).catch(() => {});
+    }
+
     function drawKeep(s) {
       if (!changed('keep', [s.listening, s.rec_wav, s.rec_iq, s.playing, s.log, s.mqtt, s.mqtt_ready, s.rate].join())) return;
       const tog = (on, a, b, cmd) => h('button', { class: 'btn' + (on ? ' red' : ''), onclick: () => send(cmd + '=' + (on ? 0 : 1)) }, on ? b : a);
@@ -291,7 +341,7 @@ P.registerPage({
           s.listening || s.rec_wav ? tog(s.rec_wav, 'Grabar el audio', 'Terminar el audio', 'rec_wav') : null,
           tog(s.rec_iq, 'Grabar la señal (I/Q)', 'Terminar la señal', 'rec_iq'),
           s.playing ? h('button', { class: 'btn red', onclick: () => send('play_stop=1') }, 'Dejar de reproducir') : null),
-        sw('Guardar lo recibido en modo Datos (rf/datos-<día>.csv)', s.log, 'log'),
+        sw('Guardar lo recibido en Datos y LoRa (rf/datos- y rf/lora-<día>.csv)', s.log, 'log'),
         sw(s.mqtt_ready ? 'Publicarlo por MQTT' : 'Publicarlo por MQTT (no conectado)', s.mqtt, 'mqtt'),
         h('p', { class: 'note small' }, `La señal ocupa ${Math.round(s.rate * 2 * 60 / 1e6)} MB por minuto a esta tasa; la tarjeta escribe unos 3 MB/s.`));
     }

@@ -20,6 +20,7 @@
 #include "rf.h"
 #include "rf_demod.h"
 #include "rf_ook.h"
+#include "rf_lora.h"
 
 #include "aos_app.h"
 #include "aos_hal.h"
@@ -73,9 +74,11 @@ typedef struct {
 /* centre, step and how to listen of common bands; anyone's, not a list of
  * stations. 433 MHz also carries LPD handhelds (narrow FM); 868 and ADS-B
  * are data, only seen. */
-/* the app's modes: the demodulator's, then data (on-off keying, rf_ook.c) */
+/* the app's modes: the demodulator's, then data (on-off keying, rf_ook.c)
+ * and the LoRa meter (rf_lora.c) */
 #define MODE_DATA RF_MODE_COUNT
-#define MODES_N   (RF_MODE_COUNT + 1)
+#define MODE_LORA (RF_MODE_COUNT + 1)
+#define MODES_N   (RF_MODE_COUNT + 2)
 
 static const band_t BANDS[] = {
     { N_("FM"),     98000000,  100000,  RF_MODE_WFM },
@@ -86,11 +89,56 @@ static const band_t BANDS[] = {
     { "70 cm",      435000000, 12500,   RF_MODE_NFM },
     { "PMR",        446006250, 12500,   RF_MODE_NFM },
     { "868",        868300000, 25000,   MODE_DATA },
+    { "LoRa 868",   868100000, 25000,   MODE_LORA },
+    { "LoRa 915",   915200000, 25000,   MODE_LORA },
     { "ADS-B",      1090000000, 1000000, RF_MODE_OFF },
 };
-static const char *const MODES[MODES_N] = { N_("Sin audio"), N_("FM"), N_("AM"), N_("FM angosta"), N_("Datos") };
-static const uint32_t MODE_STEP[MODES_N] = { 0, 100000, 25000, 12500, 25000 };
-static const uint32_t STEPS[] = { 1000, 5000, 6250, 8330, 10000, 12500, 25000, 100000, 1000000 };
+static const char *const MODES[MODES_N] = { N_("Sin audio"), N_("FM"), N_("AM"), N_("FM angosta"), N_("Datos"), "LoRa" };
+static const char *const MODE_INFO[MODES_N] = {
+    N_("Sólo el espectro y la cascada"),
+    N_("Radio comercial, de 88 a 108 MHz"),
+    N_("La banda de aviación (118 a 137 MHz) y otras en AM"),
+    N_("Radioaficionados, PMR, la banda marina, servicios"),
+    N_("Controles remotos, sensores y timbres de 433 y 868 MHz"),
+    N_("Paquetes LoRa: Meshtastic, LoRaWAN, sensores. Cuánto ocupan el canal y con qué ajustes"),
+};
+/* the key each mode has in rf/control.txt and the portal's page */
+static const char *const MODE_KEY[MODES_N] = { "off", "wfm", "am", "nfm", "data", "lora" };
+static const uint32_t MODE_STEP[MODES_N] = { 0, 100000, 25000, 12500, 25000, 25000 };
+
+/* Meshtastic's regions (its firmware's RegionInfo: start and end in MHz)
+ * and modem presets; a default channel's slot is the djb2 hash of the
+ * preset's name modulo the slots that fit, so the frequency follows. */
+static const struct {
+    const char *name;
+    float lo, hi;
+} MESH_REGIONS[] = {
+    { "ANZ", 915.0f, 928.0f },   { "US", 902.0f, 928.0f },    { "EU_868", 869.4f, 869.65f }, { "EU_433", 433.0f, 434.0f },
+    { "CN", 470.0f, 510.0f },    { "IN", 865.0f, 867.0f },    { "KR", 920.0f, 923.0f },      { "TW", 920.0f, 925.0f },
+    { "RU", 868.7f, 869.2f },    { "NZ_865", 864.0f, 868.0f },
+};
+static const struct {
+    const char *name;
+    int sf;
+    uint32_t bw;
+} MESH_PRESETS[] = {
+    { "LongFast", 11, 250000 },   { "MediumFast", 9, 250000 }, { "MediumSlow", 10, 250000 }, { "ShortFast", 7, 250000 },
+    { "ShortSlow", 8, 250000 },   { "ShortTurbo", 7, 500000 }, { "LongModerate", 11, 125000 }, { "LongSlow", 12, 125000 },
+};
+#define MESH_REGIONS_N (int)(sizeof MESH_REGIONS / sizeof MESH_REGIONS[0])
+#define MESH_PRESETS_N (int)(sizeof MESH_PRESETS / sizeof MESH_PRESETS[0])
+
+static uint32_t mesh_freq(int region, int preset)
+{
+    uint32_t h = 5381;
+    for (const char *c = MESH_PRESETS[preset].name; *c; c++) h = h * 33 + (uint8_t)*c;
+    double bw = MESH_PRESETS[preset].bw / 1e6, lo = MESH_REGIONS[region].lo, hi = MESH_REGIONS[region].hi;
+    int slots = (int)((hi - lo) / bw + 1e-6);
+    if (slots < 1) slots = 1;
+    return (uint32_t)((lo + bw / 2 + (h % slots) * bw) * 1e6 + 0.5);
+}
+/* 125 and 250 kHz: LoRa's channels, a Meshtastic preset's step */
+static const uint32_t STEPS[] = { 1000, 5000, 6250, 8330, 10000, 12500, 25000, 100000, 125000, 250000, 1000000 };
 /* 48 kHz times a number the demodulator divides (rf_demod.h) */
 static const uint32_t RATES_HS[] = { 960000, 1440000, 1920000, 2400000 };
 static const uint32_t RATES_FS[] = { 240000 };
@@ -139,8 +187,9 @@ typedef struct {
     float *col, *smooth;                    /* W */
     float floor_db;
     bool floor_set;
-    lv_obj_t *freq_lbl, *status_lbl, *rate_btn, *gain_btn, *step_btn, *sq_btn;
-    lv_obj_t *mode_btn[MODES_N];
+    lv_obj_t *freq_lbl, *status_lbl;
+    lv_obj_t *mode_btn, *band_btn, *set_btn;        /* the bar at the bottom */
+    lv_obj_t *seg_rate, *seg_step;                  /* the settings sheet's choices */
     int band_px;                            /* the channel's half width on screen */
     uint16_t c_band, c_bandgrid;
     lv_obj_t *spec_img, *wf_img, *empty, *empty_lbl;
@@ -159,6 +208,8 @@ typedef struct {
     bool drawn_once;
     uint16_t *spec_px, *wf_px;
     int SH, WH, wf_row;
+    int wf_vis;                             /* the rows shown: WH, or the top of it in LoRa mode */
+    int wf_y;                               /* where the waterfall starts on screen */
     uint16_t lut[256];
     lv_timer_t *timer;
     uint64_t stat_at, stat_bytes;
@@ -190,7 +241,25 @@ typedef struct {
     char play_path[160];
     volatile bool play_req, play_stop, playing;
     volatile uint32_t play_rate, play_freq;
+    /* LoRa: the meter's packets, newest last (a ring, under mx); the meter
+     * itself, which the analysis thread borrows under lora_mx */
+    struct rf_lpkt *lp;
+    volatile uint32_t lp_n, lp_seq;
+    uint32_t seen_lp, live_lp, lp_shown_n;
+    rf_lora_t *volatile lora;
+    void *lora_mx;
+    volatile bool lora_done;
+    int mesh_region, mesh_preset;
+    lv_obj_t *mesh_region_dd, *mesh_preset_dd, *mesh_lbl;
 } rf_t;
+
+#define LP_MAX 64
+typedef struct rf_lpkt {
+    rf_lora_pkt_t p;
+    uint32_t freq;
+    uint64_t t_end;                         /* uptime ms when it was reported */
+    struct tm when;
+} rf_lpkt_t;
 
 #define EV_MAX 64
 typedef struct rf_event {
@@ -207,6 +276,9 @@ static rf_t *A;
 
 static void mode_view(rf_t *a);
 static void ev_rebuild(rf_t *a);
+static void lp_rebuild(rf_t *a);
+static float lp_busy(rf_t *a, uint32_t *count);
+static void set_mode(rf_t *a, int m);
 static lv_obj_t *button(lv_obj_t *parent, const char *text, lv_event_cb_t cb, void *ud);
 static lv_obj_t *button_f(lv_obj_t *parent, const char *text, lv_event_cb_t cb, void *ud, const lv_font_t *font,
                           int pad);
@@ -306,6 +378,40 @@ static void on_pulses(const rf_pulses_t *p, void *ctx)
     if (a->mqtt_on) rf_mqtt_decoded(&d, freq, p->snr_db);
 }
 
+/* A packet the LoRa meter finished (the engine's thread): into the ring,
+ * and to the day's CSV when that is on. */
+static void on_lora(const rf_lora_pkt_t *p, void *ctx)
+{
+    rf_t *a = ctx;
+    if (!a->lp) return;
+    aos_hal_mutex_lock(a->mx);
+    rf_lpkt_t *e = &a->lp[a->lp_n % LP_MAX];
+    e->p = *p;
+    e->freq = (uint32_t)((int64_t)a->freq + p->offset_hz);
+    e->t_end = aos_hal_uptime_ms();
+    aos_hal_time_now(&e->when);
+    a->lp_n++;
+    a->lp_seq++;
+    aos_hal_mutex_unlock(a->mx);
+    if (a->log_on) rf_log_lora(p, e->freq, rf_lora_preset(p->sf, p->bw_hz));
+}
+
+/* The LoRa meter's slow half: each packet's dechirp (tens of ms of float on
+ * the board), off the engine, which must keep reading the stick. It borrows
+ * the meter under lora_mx; the engine takes it back under the same lock
+ * before freeing it. */
+static void lora_worker(void *arg)
+{
+    rf_t *a = arg;
+    while (!a->stop) {
+        aos_hal_mutex_lock(a->lora_mx);
+        bool did = a->lora && rf_lora_analyse_pending(a->lora);
+        aos_hal_mutex_unlock(a->lora_mx);
+        if (!did) aos_hal_sleep_ms(10);
+    }
+    a->lora_done = true;
+}
+
 /* The engine: a thread of its own (not the system's one worker), so the
  * radio keeps sounding with the screen locked or another app in front. */
 static void engine(void *arg)
@@ -321,6 +427,8 @@ static void engine(void *arg)
     rf_demod_t *dm = NULL;
     rf_ook_t *ook = NULL;
     uint32_t ook_rate = 0;
+    rf_lora_t *lr = NULL;
+    uint32_t lr_rate = 0;
     int cur_mode = RF_MODE_OFF;
     uint32_t src_rate = 0, dm_tried = 0;   /* the rate the source runs at; the last one a demodulator was tried at */
     rf_demod_set_clock(aos_hal_uptime_us);
@@ -399,7 +507,8 @@ static void engine(void *arg)
         if (!a->info.high_speed && want_rate > RATES_FS[0]) want_rate = RATES_FS[0];
         else if (a->playing) want_rate = a->play_rate;
         else if (a->want_mode == MODE_DATA) want_rate = 240000;    /* the band around the centre, as rtl_433 */
-        else if (a->info.high_speed && a->want_mode != RF_MODE_OFF) want_rate = listen_rate(want_rate);
+        else if (a->info.high_speed && a->want_mode != RF_MODE_OFF && a->want_mode != MODE_LORA)
+            want_rate = listen_rate(want_rate);
         if (want_rate != cur_rate) {
             if (started) src->ops->stop(src);
             started = false;
@@ -426,14 +535,24 @@ static void engine(void *arg)
         /* the demodulator follows the mode and the rate */
         int want_mode = a->want_mode;
         /* the rate is the source's own (src_rate), never the UI's copy */
-        bool audio_mode = want_mode != RF_MODE_OFF && want_mode != MODE_DATA;
+        bool audio_mode = want_mode != RF_MODE_OFF && want_mode != MODE_DATA && want_mode != MODE_LORA;
         if (want_mode != cur_mode || (dm && rf_demod_rate(dm) != src_rate) || (ook && ook_rate != src_rate) ||
-            (!dm && audio_mode && dm_tried != src_rate)) {
+            (lr && lr_rate != src_rate) || (!dm && audio_mode && dm_tried != src_rate)) {
             rf_demod_free(dm);
             dm = audio_mode ? rf_demod_new(want_mode, src_rate) : NULL;
             rf_ook_free(ook);
             ook = want_mode == MODE_DATA ? rf_ook_new(src_rate) : NULL;
             ook_rate = src_rate;
+            aos_hal_mutex_lock(a->lora_mx);
+            a->lora = NULL;
+            aos_hal_mutex_unlock(a->lora_mx);
+            rf_lora_free(lr);
+            lr = want_mode == MODE_LORA ? rf_lora_new(src_rate) : NULL;
+            lr_rate = src_rate;
+            if (want_mode == MODE_LORA && !lr) aos_hal_log("rf", "no LoRa meter at %u sps (memory)", (unsigned)src_rate);
+            aos_hal_mutex_lock(a->lora_mx);
+            a->lora = lr;
+            aos_hal_mutex_unlock(a->lora_mx);
             dm_tried = src_rate;
             if (audio_mode && !dm) aos_hal_log("rf", "no demodulator for mode %d at %u sps", want_mode, (unsigned)src_rate);
             if (dm) aos_hal_log("rf", "demodulator: mode %d at %u sps, filters on %s (%s)", want_mode, (unsigned)src_rate,
@@ -496,6 +615,7 @@ static void engine(void *arg)
         }
         if (n > 0 && rf_iq_on(NULL, NULL)) rf_iq_write(buf, n);
         if (ook && n > 0) rf_ook_feed(ook, buf, n / 2, on_pulses, a);
+        if (lr && n > 0) rf_lora_feed(lr, buf, n / 2, on_lora, a);
         if (dm && n > 0) {
             uint64_t t3 = aos_hal_uptime_us();
             int na = rf_demod_run(dm, buf, n / 2, pcm, PCM_MAX);
@@ -582,6 +702,10 @@ out:
     rf_iq_stop();
     rf_demod_free(dm);
     rf_ook_free(ook);
+    aos_hal_mutex_lock(a->lora_mx);
+    a->lora = NULL;
+    aos_hal_mutex_unlock(a->lora_mx);
+    rf_lora_free(lr);
     free(buf);
     free(frame);
     free(db);
@@ -716,7 +840,7 @@ static void present(rf_t *a, bool spec_changed)
         bool ok = aos_hal_display_blit_scaled(c.x1, c.y1, a->W, a->SH, a->spec_px, 1, false);
         if (a->want_mode != MODE_DATA) {     /* data mode lists what it got where the waterfall was */
             lv_obj_get_coords(a->wf_img, &c);
-            ok = ok && aos_hal_display_blit_scaled(c.x1, c.y1, a->W, a->WH, a->wf_px + a->wf_row * a->W, 1, false);
+            ok = ok && aos_hal_display_blit_scaled(c.x1, c.y1, a->W, a->wf_vis, a->wf_px + a->wf_row * a->W, 1, false);
         }
         if (ok) return;
         a->blit_ok = false;         /* the simulator: LVGL from now on */
@@ -815,31 +939,28 @@ static void show_freq(rf_t *a)
     lv_label_set_text(a->freq_lbl, s);
 }
 
+static void fmt_step(char *s, size_t n, uint32_t step)
+{
+    if (step >= 1000000) snprintf(s, n, "%u MHz", (unsigned)(step / 1000000));
+    else if (step % 1000) {
+        /* 6,25 / 8,33 / 12,5 kHz */
+        unsigned frac = step % 1000;
+        if (frac % 100) snprintf(s, n, "%u,%02u kHz", (unsigned)(step / 1000), frac / 10);
+        else snprintf(s, n, "%u,%u kHz", (unsigned)(step / 1000), frac / 100);
+    } else snprintf(s, n, "%u kHz", (unsigned)(step / 1000));
+}
+
+static void fmt_rate(char *s, size_t n, uint32_t r)
+{
+    snprintf(s, n, "%u,%03u Msps", (unsigned)(r / 1000000), (unsigned)(r % 1000000 / 1000));
+}
+
+/* The bar: the mode on its button; what is being kept, red */
 static void show_buttons(rf_t *a)
 {
     char s[48];
-    uint32_t r = a->rate ? a->rate : a->want_rate;
-    snprintf(s, sizeof s, "%u,%03u Msps", (unsigned)(r / 1000000), (unsigned)(r % 1000000 / 1000));
-    lv_label_set_text(lv_obj_get_child(a->rate_btn, 0), s);
-    if (a->want_gain < 0) snprintf(s, sizeof s, "%s", _("Gan. auto"));
-    else snprintf(s, sizeof s, _("Gan. %d,%d dB"), a->want_gain / 10, a->want_gain % 10);
-    lv_label_set_text(lv_obj_get_child(a->gain_btn, 0), s);
-    if (a->step >= 1000000) snprintf(s, sizeof s, _("Paso %u MHz"), (unsigned)(a->step / 1000000));
-    else if (a->step % 1000) {
-        /* 6,25 / 8,33 / 12,5 kHz */
-        unsigned frac = a->step % 1000;
-        if (frac % 100) snprintf(s, sizeof s, _("Paso %u,%02u kHz"), (unsigned)(a->step / 1000), frac / 10);
-        else snprintf(s, sizeof s, _("Paso %u,%u kHz"), (unsigned)(a->step / 1000), frac / 100);
-    } else snprintf(s, sizeof s, _("Paso %u kHz"), (unsigned)(a->step / 1000));
-    lv_label_set_text(lv_obj_get_child(a->step_btn, 0), s);
-    /* only AM and narrow FM use it: dimmed for the others */
-    bool sq_used = a->want_mode == RF_MODE_AM || a->want_mode == RF_MODE_NFM;
-    if (sq_used && a->want_sq) snprintf(s, sizeof s, _("Silenc. %d dB"), a->want_sq);
-    else snprintf(s, sizeof s, "%s", _("Silenc. no"));
-    lv_label_set_text(lv_obj_get_child(a->sq_btn, 0), s);
-    lv_obj_set_style_text_color(lv_obj_get_child(a->sq_btn, 0), sq_used ? AOS_C_TEXT : AOS_C_DIM, 0);
-    for (int m = 0; m < MODES_N; m++)
-        lv_obj_set_style_bg_color(a->mode_btn[m], m == a->want_mode ? AOS_C_ACCENT : AOS_C_CARD2, 0);
+    snprintf(s, sizeof s, "%s  " LV_SYMBOL_DOWN, _(MODES[a->want_mode]));
+    lv_label_set_text(lv_obj_get_child(a->mode_btn, 0), s);
     lv_obj_set_style_bg_color(a->rec_btn, a->rec_iq || a->rec_wav ? AOS_C_RED : AOS_C_CARD2, 0);
 }
 
@@ -880,14 +1001,8 @@ static void apply_line(rf_t *a, const char *line)
         double x = strtod(v, NULL);
         tune(a, strchr(v, '.') ? (int64_t)(x * 1e6 + 0.5) : (int64_t)x, false);
     } else if (!strcmp(k, "mode")) {
-        static const char *const M[MODES_N] = { "off", "wfm", "am", "nfm", "data" };
         for (int m = 0; m < MODES_N; m++)
-            if (!strcmp(v, M[m])) {
-                if (a->want_mode == RF_MODE_OFF && m != RF_MODE_OFF && m != MODE_DATA && a->info.high_speed)
-                    a->want_rate = m == RF_MODE_WFM ? 960000 : 240000;
-                a->want_mode = m;
-                if (MODE_STEP[m]) a->step = MODE_STEP[m];
-            }
+            if (!strcmp(v, MODE_KEY[m])) set_mode(a, m);
     } else if (!strcmp(k, "rate")) a->want_rate = (uint32_t)strtoul(v, NULL, 10);
     else if (!strcmp(k, "gain")) a->want_gain = !strcmp(v, "auto") ? -1 : (int)n;
     else if (!strcmp(k, "sq")) a->want_sq = (int)n;
@@ -975,28 +1090,30 @@ static void live_spec(rf_t *a)
 static void live_state(rf_t *a, unsigned mbs10)
 {
     static char j[1400];
-    static const char *const M[MODES_N] = { "off", "wfm", "am", "nfm", "data" };
     uint64_t iqb = 0;
     uint32_t drop = 0, ws = 0, wr = 0;
     bool iq = rf_iq_on(&iqb, &drop), wav = rf_wav_on(&ws, &wr);
+    uint32_t lora_n;
+    float lora_busy = lp_busy(a, &lora_n);
     int k = snprintf(j, sizeof j,
                      "{\"state\":\"%s\",\"why\":\"%s\",\"kind\":\"%s\",\"name\":\"%s\",\"tuner\":\"%s\","
                      "\"high_speed\":%s,\"fmin\":%u,\"fmax\":%u,\"freq\":%u,\"rate\":%u,\"mode\":\"%s\",\"gain\":%d,"
                      "\"step\":%u,\"sq\":%d,\"level\":%.1f,\"pilot\":%.1f,\"open\":%s,\"listening\":%s,"
                      "\"mbs\":%u.%u,\"dropped\":%u,\"rec_iq\":%s,\"iq_mb\":%u,\"iq_dropped\":%u,\"rec_wav\":%s,"
                      "\"wav_s\":%u,\"playing\":%s,\"play\":\"%s\",\"received\":%u,\"log\":%s,\"mqtt\":%s,"
-                     "\"mqtt_ready\":%s,\"vol\":%d,\"muted\":%s,\"gains\":[",
+                     "\"mqtt_ready\":%s,\"vol\":%d,\"muted\":%s,\"lora_n\":%u,\"lora_busy\":%.1f,\"gains\":[",
                      a->state == ST_RUN ? "run" : a->state == ST_SEARCH ? "search" : "none", a->why ? a->why : "",
                      a->info.kind ? a->info.kind : "", a->info.name, a->info.tuner, a->info.high_speed ? "true" : "false",
                      (unsigned)a->info.fmin, (unsigned)a->info.fmax, (unsigned)a->want_freq,
-                     (unsigned)(a->rate ? a->rate : a->want_rate), M[a->want_mode], a->want_gain, (unsigned)a->step,
+                     (unsigned)(a->rate ? a->rate : a->want_rate), MODE_KEY[a->want_mode], a->want_gain, (unsigned)a->step,
                      a->want_sq, (double)a->level_db, (double)a->pilot_db, a->sq_open ? "true" : "false",
                      a->listening ? "true" : "false", mbs10 / 10, mbs10 % 10, (unsigned)a->dropped,
                      iq ? "true" : "false", (unsigned)(iqb / 1000000), (unsigned)drop, wav ? "true" : "false",
                      (unsigned)(ws / (wr ? wr : 1)), a->playing ? "true" : "false",
                      a->playing ? (strrchr(a->play_path, '/') ? strrchr(a->play_path, '/') + 1 : a->play_path) : "",
                      (unsigned)a->ev_n, a->log_on ? "true" : "false", a->mqtt_on ? "true" : "false",
-                     rf_mqtt_ready() ? "true" : "false", aos_hal_volume_get(), a->muted ? "true" : "false");
+                     rf_mqtt_ready() ? "true" : "false", aos_hal_volume_get(), a->muted ? "true" : "false", (unsigned)lora_n,
+                     (double)lora_busy);
     for (int i = 0; i < a->info.ngains && k < (int)sizeof j - 16; i++)
         k += snprintf(j + k, sizeof j - k, "%s%d", i ? "," : "", a->info.gains[i]);
     snprintf(j + k, sizeof j - k, "]}");
@@ -1031,6 +1148,28 @@ static void live_events(rf_t *a)
     aos_hal_mutex_unlock(a->mx);
     snprintf(j + k, sizeof j - k, "]");
     aos_hal_live_put(LIVE_APP, "events", "application/json", j, strlen(j));
+}
+
+/* the LoRa meter's last 30 packets, newest first */
+static void live_lora(rf_t *a)
+{
+    static char j[8 * 1024];
+    int k = snprintf(j, sizeof j, "[");
+    aos_hal_mutex_lock(a->mx);
+    uint32_t n = a->lp_n;
+    for (uint32_t i = 0; i < n && i < 30 && k < (int)sizeof j - 300; i++) {
+        const rf_lpkt_t *e = &a->lp[(n - 1 - i) % LP_MAX];
+        const char *preset = rf_lora_preset(e->p.sf, e->p.bw_hz);
+        k += snprintf(j + k, sizeof j - k,
+                      "%s{\"n\":%u,\"t\":\"%02d:%02d:%02d\",\"freq\":%u,\"off\":%d,\"width\":%u,\"ms\":%u,"
+                      "\"snr\":%.1f,\"sf\":%d,\"bw\":%u,\"q\":%.2f,\"preset\":\"%s\"}",
+                      i ? "," : "", (unsigned)(n - 1 - i), e->when.tm_hour, e->when.tm_min, e->when.tm_sec, (unsigned)e->freq,
+                      (int)e->p.offset_hz, (unsigned)e->p.width_hz, (unsigned)(e->p.dur_us / 1000), (double)e->p.snr_db,
+                      e->p.sf, (unsigned)e->p.bw_hz, (double)e->p.quality, preset ? preset : "");
+    }
+    aos_hal_mutex_unlock(a->mx);
+    snprintf(j + k, sizeof j - k, "]");
+    aos_hal_live_put(LIVE_APP, "lora", "application/json", j, strlen(j));
 }
 
 /* the page's lines, as they come */
@@ -1091,6 +1230,10 @@ static void ui_timer(lv_timer_t *t)
         a->seen_ev = a->ev_seq;
         ev_rebuild(a);
     }
+    if (a->lp_seq != a->seen_lp && a->want_mode == MODE_LORA && !unseen && !a->sheet) {
+        a->seen_lp = a->lp_seq;
+        lp_rebuild(a);
+    }
     if (a->spec_seq != a->seen_spec && a->state == ST_RUN && (!unseen || watched)) {
         aos_hal_mutex_lock(a->mx);
         memcpy(a->ui_spec, a->spec, RF_FFT * sizeof(float));
@@ -1107,6 +1250,10 @@ static void ui_timer(lv_timer_t *t)
     if (watched && a->ev_seq != a->live_ev) {
         a->live_ev = a->ev_seq;
         live_events(a);
+    }
+    if (watched && a->lp_seq != a->live_lp) {
+        a->live_lp = a->lp_seq;
+        live_lora(a);
     }
     uint64_t now = aos_hal_uptime_ms();
     if (now - a->stat_at >= 1000) {
@@ -1141,6 +1288,13 @@ static void ui_timer(lv_timer_t *t)
         if (a->state == ST_RUN && a->want_mode == MODE_DATA && !a->listening) {
             k = strlen(s);
             snprintf(s + k, sizeof s - k, " · %u %s", (unsigned)a->ev_n, _("recibidos"));
+        }
+        if (a->state == ST_RUN && a->want_mode == MODE_LORA && !a->playing) {
+            /* the channel's use: what Meshtastic itself counts as "channel utilization" */
+            uint32_t c;
+            int busy10 = (int)(lp_busy(a, &c) * 10 + 0.5f);
+            snprintf(s, sizeof s, _("LoRa · %u paquetes en el último minuto · ocupado %d,%d %%"), (unsigned)c, busy10 / 10,
+                     busy10 % 10);
         }
         lv_label_set_text(a->status_lbl, s);
         a->stat_at = now;
@@ -1226,55 +1380,28 @@ static void step_by(lv_event_t *e)
     place_ticks(a);
 }
 
-static void step_cycle(lv_event_t *e)
+/* The rates this radio and mode take: one at Full Speed; while listening,
+ * the ones the demodulator divides; else all. */
+static int rates_for(rf_t *a, const uint32_t **R)
 {
-    rf_t *a = lv_event_get_user_data(e);
-    int n = sizeof STEPS / sizeof STEPS[0], i = 0;
-    while (i < n && STEPS[i] != a->step) i++;
-    a->step = STEPS[(i + 1) % n];
-    show_buttons(a);
+    bool listen = a->want_mode != RF_MODE_OFF && a->want_mode != MODE_LORA;
+    *R = !a->info.high_speed ? RATES_FS : listen ? RATES_LISTEN : RATES_HS;
+    return !a->info.high_speed ? 1 : listen ? 3 : 4;
 }
 
-static void rate_cycle(lv_event_t *e)
+static void set_mode(rf_t *a, int m)
 {
-    rf_t *a = lv_event_get_user_data(e);
-    bool listen = a->want_mode != RF_MODE_OFF;
-    const uint32_t *R = !a->info.high_speed ? RATES_FS : listen ? RATES_LISTEN : RATES_HS;
-    int n = !a->info.high_speed ? 1 : listen ? 3 : 4, i = 0;
-    uint32_t cur = listen && a->info.high_speed ? listen_rate(a->want_rate) : a->want_rate;
-    while (i < n && R[i] != cur) i++;
-    a->want_rate = R[(i + 1) % n];
-    show_buttons(a);
-    place_ticks(a);
-    if (!a->info.high_speed) aos_ui_toast(_("En los pines 21/23 (Full Speed) sólo entran 240 mil muestras por segundo"), 2500);
-}
-
-static void band_tap(lv_event_t *e)
-{
-    rf_t *a = A;
-    const band_t *b = &BANDS[(intptr_t)lv_event_get_user_data(e)];
-    a->step = b->step;
-    if (b->mode != RF_MODE_OFF && a->info.high_speed && b->mode != a->want_mode)
-        a->want_rate = b->mode == RF_MODE_WFM ? 960000 : 240000;
-    a->want_mode = b->mode;
-    tune(a, b->hz, false);
-    show_buttons(a);
-    place_ticks(a);
-    mode_view(a);
-}
-
-static void mode_tap(lv_event_t *e)
-{
-    rf_t *a = A;
-    int m = (int)(intptr_t)lv_event_get_user_data(e);
-    if (m == a->want_mode) return;
-    /* how wide to look while listening: broadcast FM at 960 k, with its
-     * neighbours on screen; the narrow modes at 240 k, a fifth of the work */
-    if (a->want_mode == RF_MODE_OFF && m != RF_MODE_OFF && a->info.high_speed)
-        a->want_rate = m == RF_MODE_WFM ? 960000 : 240000;
+    if (m != a->want_mode && a->info.high_speed) {
+        /* how wide to look: broadcast FM at 960 k, with its neighbours on
+         * screen; the narrow modes at 240 k, a fifth of the work; LoRa at
+         * 960 k at least, its channels being 125 to 500 kHz */
+        if (m == RF_MODE_WFM) a->want_rate = 960000;
+        else if ((m == RF_MODE_AM || m == RF_MODE_NFM) && a->want_mode == RF_MODE_OFF) a->want_rate = 240000;
+        else if (m == MODE_LORA && a->want_rate < 960000) a->want_rate = 960000;
+    }
+    if (m != a->want_mode && MODE_STEP[m]) a->step = MODE_STEP[m];
     a->want_mode = m;
-    if (MODE_STEP[m]) a->step = MODE_STEP[m];
-    tune(a, a->want_freq, true);
+    tune(a, a->want_freq, m != MODE_LORA);
     show_buttons(a);
     place_ticks(a);
     mode_view(a);
@@ -1285,6 +1412,7 @@ static void sheet_close(rf_t *a)
     if (a->sheet) lv_obj_delete(a->sheet);
     a->sheet = a->ta = a->gain_slider = a->gain_val = a->sq_slider = a->sq_val = a->sq_live = NULL;
     a->vol_val = a->vol_slider = a->mute_btn = NULL;
+    a->seg_rate = a->seg_step = a->mesh_region_dd = a->mesh_preset_dd = a->mesh_lbl = NULL;
 }
 
 static void sheet_bg_tap(lv_event_t *e)
@@ -1306,6 +1434,7 @@ static lv_obj_t *sheet_open(rf_t *a, const char *title)
     lv_obj_t *card = lv_obj_create(a->sheet);
     lv_obj_set_width(card, a->W - 2 * AOS_UI_PAD);
     lv_obj_set_height(card, LV_SIZE_CONTENT);
+    lv_obj_set_style_max_height(card, a->H - 80, 0);
     lv_obj_align(card, LV_ALIGN_TOP_MID, 0, 40);
     lv_obj_set_style_bg_color(card, AOS_C_CARD, 0);
     lv_obj_set_style_border_width(card, 0, 0);
@@ -1373,11 +1502,9 @@ static void gain_changed(lv_event_t *e)
     show_buttons(a);
 }
 
-static void gain_tap(lv_event_t *e)
+static void gain_controls(rf_t *a, lv_obj_t *card)
 {
-    rf_t *a = lv_event_get_user_data(e);
-    lv_obj_t *card = sheet_open(a, _("Ganancia"));
-    a->gain_val = aos_label(card, "", aos_font_large, AOS_C_TEXT);
+    a->gain_val = aos_label(card, "", aos_font_body, AOS_C_TEXT);
     a->gain_slider = lv_slider_create(card);
     lv_obj_set_width(a->gain_slider, LV_PCT(100));
     lv_obj_set_height(a->gain_slider, 24);
@@ -1461,11 +1588,9 @@ static void vol_tap(lv_event_t *e)
     show_vol(a);
 }
 
-static void sq_tap(lv_event_t *e)
+static void sq_controls(rf_t *a, lv_obj_t *card)
 {
-    rf_t *a = lv_event_get_user_data(e);
-    lv_obj_t *card = sheet_open(a, _("Silenciador"));
-    a->sq_val = aos_label(card, "", aos_font_large, AOS_C_TEXT);
+    a->sq_val = aos_label(card, "", aos_font_body, AOS_C_TEXT);
     a->sq_slider = lv_slider_create(card);
     lv_obj_set_width(a->sq_slider, LV_PCT(100));
     lv_obj_set_height(a->sq_slider, 24);
@@ -1478,6 +1603,237 @@ static void sq_tap(lv_event_t *e)
     lv_obj_set_width(l, LV_PCT(100));
     lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
     lv_obj_send_event(a->sq_slider, LV_EVENT_VALUE_CHANGED, NULL);
+}
+
+/* ---- the sheets of the bar: mode, band, settings ---------------------------- */
+
+static lv_obj_t *section(lv_obj_t *card, const char *title)
+{
+    lv_obj_t *l = aos_label(card, title, aos_font_small, AOS_C_DIM);
+    lv_obj_set_width(l, LV_PCT(100));
+    lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
+    return l;
+}
+
+/* a row of choices, the chosen one lit; each button's user data is its value */
+static lv_obj_t *seg_row(lv_obj_t *card)
+{
+    lv_obj_t *row = lv_obj_create(card);
+    lv_obj_remove_style_all(row);
+    lv_obj_set_width(row, LV_PCT(100));
+    lv_obj_set_height(row, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW_WRAP);
+    lv_obj_set_style_pad_column(row, 10, 0);
+    lv_obj_set_style_pad_row(row, 10, 0);
+    return row;
+}
+
+static void seg_light(lv_obj_t *row, uint32_t value)
+{
+    for (uint32_t i = 0; i < lv_obj_get_child_count(row); i++) {
+        lv_obj_t *b = lv_obj_get_child(row, i);
+        lv_obj_set_style_bg_color(b, (uint32_t)(uintptr_t)lv_obj_get_user_data(b) == value ? AOS_C_ACCENT : AOS_C_CARD2, 0);
+    }
+}
+
+static void seg_add(lv_obj_t *row, const char *text, lv_event_cb_t cb, uint32_t value)
+{
+    lv_obj_t *b = button_f(row, text, cb, (void *)(uintptr_t)value, aos_font_caption, 14);
+    lv_obj_set_user_data(b, (void *)(uintptr_t)value);
+}
+
+static void rate_pick(lv_event_t *e)
+{
+    rf_t *a = A;
+    if (!a->info.high_speed) {
+        aos_ui_toast(_("En los pines 21/23 (Full Speed) sólo entran 240 mil muestras por segundo"), 2500);
+        return;
+    }
+    a->want_rate = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+    seg_light(a->seg_rate, a->want_rate);
+    place_ticks(a);
+}
+
+static void step_pick(lv_event_t *e)
+{
+    rf_t *a = A;
+    a->step = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+    seg_light(a->seg_step, a->step);
+}
+
+static void settings_tap(lv_event_t *e)
+{
+    rf_t *a = A;
+    (void)e;
+    lv_obj_t *card = sheet_open(a, _("Ajustes de la radio"));
+    lv_obj_set_style_pad_row(card, 12, 0);
+    char s[32];
+    section(card, _("Muestras por segundo (cuánto se ve a la vez)"));
+    a->seg_rate = seg_row(card);
+    const uint32_t *R;
+    int nr = rates_for(a, &R);
+    uint32_t cur = a->rate ? a->rate : a->want_rate;
+    for (int i = 0; i < nr; i++) {
+        fmt_rate(s, sizeof s, R[i]);
+        seg_add(a->seg_rate, s, rate_pick, R[i]);
+    }
+    seg_light(a->seg_rate, a->want_mode == MODE_DATA ? 240000 : cur);
+    if (a->want_mode == MODE_DATA) {
+        lv_obj_t *l = aos_label(card, _("El modo Datos escucha siempre a 240 mil."), aos_font_caption, AOS_C_DIM);
+        lv_obj_set_width(l, LV_PCT(100));
+    }
+    section(card, _("Paso de las flechas"));
+    a->seg_step = seg_row(card);
+    for (size_t i = 0; i < sizeof STEPS / sizeof STEPS[0]; i++) {
+        fmt_step(s, sizeof s, STEPS[i]);
+        seg_add(a->seg_step, s, step_pick, STEPS[i]);
+    }
+    seg_light(a->seg_step, a->step);
+    section(card, _("Ganancia"));
+    gain_controls(a, card);
+    if (a->want_mode == RF_MODE_AM || a->want_mode == RF_MODE_NFM) {
+        section(card, _("Silenciador"));
+        sq_controls(a, card);
+    }
+}
+
+/* the mode's sheet: each one with what it is for */
+static void mode_pick(lv_event_t *e)
+{
+    rf_t *a = A;
+    int m = (int)(intptr_t)lv_event_get_user_data(e);
+    sheet_close(a);
+    set_mode(a, m);
+}
+
+static lv_obj_t *pick_row(lv_obj_t *card, const char *title, const char *line, bool on, lv_event_cb_t cb, intptr_t ud)
+{
+    lv_obj_t *row = lv_obj_create(card);
+    lv_obj_set_width(row, LV_PCT(100));
+    lv_obj_set_height(row, LV_SIZE_CONTENT);
+    lv_obj_set_style_bg_color(row, on ? AOS_C_ACCENT : AOS_C_CARD2, 0);
+    lv_obj_set_style_border_width(row, 0, 0);
+    lv_obj_set_style_radius(row, 14, 0);
+    lv_obj_set_style_pad_all(row, 12, 0);
+    lv_obj_set_flex_flow(row, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(row, 2, 0);
+    lv_obj_remove_flag(row, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_flag(row, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(row, cb, LV_EVENT_CLICKED, (void *)ud);
+    aos_label(row, title, aos_font_small, AOS_C_TEXT);
+    if (line) {
+        lv_obj_t *l = aos_label(row, line, aos_font_caption, on ? AOS_C_TEXT : AOS_C_DIM);
+        lv_obj_set_width(l, LV_PCT(100));
+        lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
+    }
+    aos_make_decorative(lv_obj_get_child(row, 0));
+    if (line) aos_make_decorative(lv_obj_get_child(row, 1));
+    return row;
+}
+
+static void mode_sheet_tap(lv_event_t *e)
+{
+    rf_t *a = A;
+    (void)e;
+    lv_obj_t *card = sheet_open(a, _("Modo"));
+    lv_obj_set_style_pad_row(card, 10, 0);
+    for (int m = 0; m < MODES_N; m++) pick_row(card, _(MODES[m]), _(MODE_INFO[m]), m == a->want_mode, mode_pick, m);
+}
+
+/* the bands' sheet, and the default channel of a Meshtastic region and preset */
+static void band_pick(lv_event_t *e)
+{
+    rf_t *a = A;
+    const band_t *b = &BANDS[(intptr_t)lv_event_get_user_data(e)];
+    sheet_close(a);
+    set_mode(a, b->mode);
+    a->step = b->step;
+    tune(a, b->hz, false);
+    place_ticks(a);
+}
+
+static void mesh_show(rf_t *a)
+{
+    char f[24], s[96];
+    fmt_hz(f, sizeof f, mesh_freq(a->mesh_region, a->mesh_preset));
+    snprintf(s, sizeof s, "%s · SF%d · %u kHz", f, MESH_PRESETS[a->mesh_preset].sf,
+             (unsigned)(MESH_PRESETS[a->mesh_preset].bw / 1000));
+    lv_label_set_text(a->mesh_lbl, s);
+}
+
+static void mesh_changed(lv_event_t *e)
+{
+    rf_t *a = A;
+    (void)e;
+    a->mesh_region = (int)lv_dropdown_get_selected(a->mesh_region_dd);
+    a->mesh_preset = (int)lv_dropdown_get_selected(a->mesh_preset_dd);
+    mesh_show(a);
+}
+
+static void mesh_go(lv_event_t *e)
+{
+    rf_t *a = A;
+    (void)e;
+    uint32_t f = mesh_freq(a->mesh_region, a->mesh_preset), bw = MESH_PRESETS[a->mesh_preset].bw;
+    sheet_close(a);
+    set_mode(a, MODE_LORA);
+    a->step = bw;                   /* the arrows go channel by channel */
+    tune(a, f, false);
+    place_ticks(a);
+}
+
+static lv_obj_t *dropdown(lv_obj_t *parent, const char *options, int sel)
+{
+    lv_obj_t *d = lv_dropdown_create(parent);
+    lv_dropdown_set_options(d, options);
+    lv_dropdown_set_selected(d, (uint32_t)sel);
+    lv_obj_set_style_text_font(d, aos_font_small, 0);
+    lv_obj_set_style_bg_color(d, AOS_C_CARD2, 0);
+    lv_obj_set_style_text_color(d, AOS_C_TEXT, 0);
+    lv_obj_set_style_border_width(d, 0, 0);
+    lv_obj_t *list = lv_dropdown_get_list(d);
+    lv_obj_set_style_text_font(list, aos_font_small, 0);
+    lv_obj_set_style_bg_color(list, AOS_C_CARD2, 0);
+    lv_obj_set_style_text_color(list, AOS_C_TEXT, 0);
+    lv_obj_set_style_border_width(list, 0, 0);
+    lv_obj_add_event_cb(d, mesh_changed, LV_EVENT_VALUE_CHANGED, NULL);
+    return d;
+}
+
+static void band_sheet_tap(lv_event_t *e)
+{
+    rf_t *a = A;
+    (void)e;
+    lv_obj_t *card = sheet_open(a, _("Bandas"));
+    lv_obj_set_style_pad_row(card, 10, 0);
+    lv_obj_t *grid = seg_row(card);
+    char s[64], f[24];
+    for (size_t i = 0; i < sizeof BANDS / sizeof BANDS[0]; i++) {
+        fmt_hz(f, sizeof f, BANDS[i].hz);
+        snprintf(s, sizeof s, "%s\n%s", _(BANDS[i].name), f);
+        lv_obj_t *b = button_f(grid, s, band_pick, (void *)(intptr_t)i, aos_font_caption, 12);
+        lv_obj_set_style_text_align(lv_obj_get_child(b, 0), LV_TEXT_ALIGN_CENTER, 0);
+        lv_obj_set_style_bg_color(b, BANDS[i].hz == a->want_freq && BANDS[i].mode == a->want_mode ? AOS_C_ACCENT : AOS_C_CARD2, 0);
+    }
+    section(card, _("Meshtastic: el canal por defecto de una región y un preset"));
+    lv_obj_t *row = seg_row(card);
+    char opts[256];
+    int k = 0;
+    for (int i = 0; i < MESH_REGIONS_N; i++) k += snprintf(opts + k, sizeof opts - k, "%s%s", i ? "\n" : "", MESH_REGIONS[i].name);
+    a->mesh_region_dd = dropdown(row, opts, a->mesh_region);
+    lv_obj_set_width(a->mesh_region_dd, 200);
+    k = 0;
+    for (int i = 0; i < MESH_PRESETS_N; i++) k += snprintf(opts + k, sizeof opts - k, "%s%s", i ? "\n" : "", MESH_PRESETS[i].name);
+    a->mesh_preset_dd = dropdown(row, opts, a->mesh_preset);
+    lv_obj_set_width(a->mesh_preset_dd, 280);
+    a->mesh_lbl = aos_label(card, "", aos_font_body, AOS_C_TEXT);
+    mesh_show(a);
+    lv_obj_t *go = button_f(card, _("Escuchar ahí"), mesh_go, NULL, aos_font_small, 16);
+    lv_obj_set_style_bg_color(go, AOS_C_ACCENT, 0);
+    lv_obj_t *l = aos_label(card, _("Con un nombre de canal propio el número de canal cambia: la frecuencia está en la app de Meshtastic, en LoRa."),
+                            aos_font_caption, AOS_C_DIM);
+    lv_obj_set_width(l, LV_PCT(100));
+    lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
 }
 
 /* ---- data: what was received ------------------------------------------------ */
@@ -1576,16 +1932,146 @@ static void ev_rebuild(rf_t *a)
 /* the list where the waterfall was, in data mode */
 static void mode_view(rf_t *a)
 {
-    bool data = a->want_mode == MODE_DATA;
-    if (data) {
-        lv_obj_add_flag(a->wf_img, LV_OBJ_FLAG_HIDDEN);
+    bool data = a->want_mode == MODE_DATA, lora = a->want_mode == MODE_LORA;
+    /* LoRa keeps the waterfall's top, where its packets show as blocks,
+     * and lists them under it */
+    a->wf_vis = lora ? a->WH * 2 / 5 : a->WH;
+    lv_obj_set_height(a->wf_img, a->wf_vis);
+    int top = lora ? a->wf_vis + 8 : 0;
+    lv_obj_set_y(a->ev_list, a->wf_y + top);
+    lv_obj_set_height(a->ev_list, a->WH - top);
+    if (data || lora) {
         lv_obj_remove_flag(a->ev_list, LV_OBJ_FLAG_HIDDEN);
         a->seen_ev = a->ev_seq - 1;
-        a->ev_shown_n = (uint32_t)-1;       /* made again on the next tick */
-    } else {
-        lv_obj_add_flag(a->ev_list, LV_OBJ_FLAG_HIDDEN);
-        if (!a->blit_ok) lv_obj_remove_flag(a->wf_img, LV_OBJ_FLAG_HIDDEN);
+        a->seen_lp = a->lp_seq - 1;
+        a->ev_shown_n = a->lp_shown_n = (uint32_t)-1;  /* made again on the next tick */
+        lv_obj_invalidate(a->ev_list);
+    } else lv_obj_add_flag(a->ev_list, LV_OBJ_FLAG_HIDDEN);
+    if (data) lv_obj_add_flag(a->wf_img, LV_OBJ_FLAG_HIDDEN);
+    else if (!a->blit_ok) lv_obj_remove_flag(a->wf_img, LV_OBJ_FLAG_HIDDEN);
+    /* what the waterfall left under the list goes */
+    lv_obj_invalidate(a->root);
+}
+
+/* ---- LoRa: the packets ------------------------------------------------------ */
+
+static void lp_title(const rf_lpkt_t *e, char *t, size_t n)
+{
+    const char *preset = rf_lora_preset(e->p.sf, e->p.bw_hz);
+    int c = snprintf(t, n, "%02d:%02d:%02d  ", e->when.tm_hour, e->when.tm_min, e->when.tm_sec);
+    if (preset) snprintf(t + c, n - c, "%s", preset);
+    else if (e->p.sf) snprintf(t + c, n - c, "LoRa SF%d · %u kHz", e->p.sf, (unsigned)(e->p.bw_hz / 1000));
+    else snprintf(t + c, n - c, "%s", _("Otra señal"));
+}
+
+static void lp_line(const rf_lpkt_t *e, char *t, size_t n)
+{
+    char f[24];
+    fmt_hz(f, sizeof f, e->freq);
+    int c = snprintf(t, n, "%s · ", f);
+    if (e->p.sf && rf_lora_preset(e->p.sf, e->p.bw_hz))
+        c += snprintf(t + c, n - c, "SF%d · %u kHz · ", e->p.sf, (unsigned)(e->p.bw_hz / 1000));
+    else if (!e->p.sf) c += snprintf(t + c, n - c, _("%u kHz de ancho · "), (unsigned)(e->p.width_hz / 1000));
+    snprintf(t + c, n - c, "%u ms · %.0f dB", (unsigned)(e->p.dur_us / 1000), (double)e->p.snr_db);
+}
+
+/* The share of the last minute something was on the air, as the meter saw
+ * it (packets at once count twice) */
+static float lp_busy(rf_t *a, uint32_t *count)
+{
+    uint64_t now = aos_hal_uptime_ms(), on_us = 0;
+    uint32_t c = 0;
+    aos_hal_mutex_lock(a->mx);
+    for (uint32_t k = 0; k < LP_MAX && k < a->lp_n; k++) {
+        const rf_lpkt_t *e = &a->lp[(a->lp_n - 1 - k) % LP_MAX];
+        if (now - e->t_end > 60000) break;
+        on_us += e->p.dur_us;
+        c++;
     }
+    aos_hal_mutex_unlock(a->mx);
+    *count = c;
+    return on_us / 600000.0f;
+}
+
+static void lp_detail(lv_event_t *e);
+
+static void lp_rebuild(rf_t *a)
+{
+    char t[160];
+    if (a->lp_n == a->lp_shown_n) return;
+    lv_obj_clean(a->ev_list);
+    memset(a->ev_title, 0, sizeof a->ev_title);
+    a->ev_empty = NULL;
+    aos_hal_mutex_lock(a->mx);
+    uint32_t n = a->lp_n, shown = n < 40 ? n : 40;
+    a->lp_shown_n = n;
+    for (uint32_t k = 0; k < shown; k++) {
+        uint32_t idx = n - 1 - k;
+        const rf_lpkt_t *ev = &a->lp[idx % LP_MAX];
+        lv_obj_t *row = lv_obj_create(a->ev_list);
+        lv_obj_set_width(row, LV_PCT(100));
+        lv_obj_set_height(row, LV_SIZE_CONTENT);
+        lv_obj_set_style_bg_color(row, AOS_C_CARD, 0);
+        lv_obj_set_style_border_width(row, 0, 0);
+        lv_obj_set_style_radius(row, 16, 0);
+        lv_obj_set_style_pad_all(row, 12, 0);
+        lv_obj_set_flex_flow(row, LV_FLEX_FLOW_COLUMN);
+        lv_obj_set_style_pad_row(row, 2, 0);
+        lv_obj_remove_flag(row, LV_OBJ_FLAG_SCROLLABLE);
+        lv_obj_add_flag(row, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_add_event_cb(row, lp_detail, LV_EVENT_CLICKED, (void *)(uintptr_t)idx);
+        lp_title(ev, t, sizeof t);
+        aos_label(row, t, aos_font_small, ev->p.sf ? AOS_C_TEXT : AOS_C_DIM);
+        lp_line(ev, t, sizeof t);
+        lv_obj_t *l = aos_label(row, t, aos_font_caption, AOS_C_DIM);
+        lv_obj_set_width(l, LV_PCT(100));
+        lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
+    }
+    aos_hal_mutex_unlock(a->mx);
+    if (!n) {
+        a->ev_empty = aos_label(a->ev_list, _("Esperando paquetes LoRa en la banda. Bandas tiene el canal por defecto de cada región y preset de Meshtastic."),
+                                aos_font_body, AOS_C_DIM);
+        lv_obj_set_width(a->ev_empty, LV_PCT(100));
+        lv_label_set_long_mode(a->ev_empty, LV_LABEL_LONG_WRAP);
+    }
+}
+
+static void lp_detail(lv_event_t *e)
+{
+    rf_t *a = A;
+    uint32_t idx = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+    if (!a || idx + LP_MAX < a->lp_n) return;          /* gone from the ring */
+    rf_lpkt_t ev;
+    aos_hal_mutex_lock(a->mx);
+    ev = a->lp[idx % LP_MAX];
+    aos_hal_mutex_unlock(a->mx);
+    char t[700], title[64], f[24];
+    lp_title(&ev, title, sizeof title);
+    lv_obj_t *card = sheet_open(a, title + 10);         /* past the time */
+    fmt_hz(f, sizeof f, ev.freq);
+    int k = snprintf(t, sizeof t, _("Hora: %02d:%02d:%02d\n"), ev.when.tm_hour, ev.when.tm_min, ev.when.tm_sec);
+    k += snprintf(t + k, sizeof t - k, _("Frecuencia: %s (%+d kHz del centro) · %u kHz de ancho\n"), f,
+                  (int)(ev.p.offset_hz / 1000), (unsigned)(ev.p.width_hz / 1000));
+    k += snprintf(t + k, sizeof t - k, _("En el aire: %u ms · %.0f dB sobre el ruido en su ancho\n"), (unsigned)(ev.p.dur_us / 1000),
+                  (double)ev.p.snr_db);
+    if (ev.p.sf) {
+        k += snprintf(t + k, sizeof t - k, _("LoRa: SF%d, %u kHz (el preámbulo concentró el %.0f %% de su energía)"), ev.p.sf,
+                      (unsigned)(ev.p.bw_hz / 1000), (double)(ev.p.quality * 100));
+        /* is it where a Meshtastic default channel is? */
+        for (int p = 0; p < MESH_PRESETS_N; p++) {
+            if (MESH_PRESETS[p].sf != ev.p.sf || MESH_PRESETS[p].bw != ev.p.bw_hz) continue;
+            for (int r = 0; r < MESH_REGIONS_N; r++) {
+                int32_t d = (int32_t)(mesh_freq(r, p) - ev.freq);
+                if (d < 0) d = -d;
+                if ((uint32_t)d <= ev.p.bw_hz / 4)
+                    k += snprintf(t + k, sizeof t - k, _("\nEn el canal por defecto de Meshtastic %s en %s"), MESH_PRESETS[p].name,
+                                  MESH_REGIONS[r].name);
+            }
+        }
+    } else k += snprintf(t + k, sizeof t - k, "%s", _("No se encontraron chirps de LoRa en su comienzo: es otra cosa, o llegó demasiado débil para saberlo."));
+    lv_obj_t *l = aos_label(card, t, aos_font_caption, AOS_C_TEXT);
+    lv_obj_set_width(l, LV_PCT(100));
+    lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
 }
 
 static void ev_detail(lv_event_t *e)
@@ -1704,7 +2190,7 @@ static void rec_tap(lv_event_t *e)
                  a->rec_iq);
     if (a->playing) sheet_button(card, _("Dejar de reproducir"), rec_action, 3, true);
     else sheet_button(card, _("Reproducir una grabación"), play_list, 0, false);
-    sheet_switch(card, _("Guardar lo recibido en modo Datos (rf/datos-<día>.csv)"), a->log_on, 0);
+    sheet_switch(card, _("Guardar lo recibido en Datos y LoRa (rf/datos- y rf/lora-<día>.csv)"), a->log_on, 0);
     sheet_switch(card, rf_mqtt_ready() ? _("Publicarlo por MQTT") : _("Publicarlo por MQTT (no conectado)"), a->mqtt_on, 1);
     uint32_t r = a->rate ? a->rate : a->want_rate;
     char t[200];
@@ -1866,9 +2352,10 @@ static void build(rf_t *a, lv_obj_t *root)
     a->status_lbl = aos_label(root, "", aos_font_caption, AOS_C_DIM);
     lv_obj_align(a->status_lbl, LV_ALIGN_TOP_MID, 0, land ? 70 : 96);
 
-    /* controls at the bottom: how to listen; rate, gain, step, squelch;
-     * the bands */
-    int ctl = 3 * (AOS_UI_TAP_MIN - 8) + 8;
+    /* one bar at the bottom: the mode, the bands, the settings, the
+     * speaker, keeping things; each opens a sheet (2026-10-07: the three
+     * rows it replaced had no room for another mode) */
+    int ctl = (AOS_UI_TAP_MIN - 8) + 8;
     int avail = a->H - head - ctl - 36;
     a->SH = avail * (land ? 45 : 36) / 100;
     a->WH = avail - a->SH;
@@ -1918,6 +2405,9 @@ static void build(rf_t *a, lv_obj_t *root)
     }
     y += 36;
     a->wf_img = image_for(root, &a->wf_dsc, a->wf_px, a->W, a->WH);
+    lv_image_set_inner_align(a->wf_img, LV_IMAGE_ALIGN_TOP_LEFT);     /* LoRa shows only its top */
+    a->wf_vis = a->WH;
+    a->wf_y = y;
     lv_obj_set_pos(a->wf_img, 0, y);
     /* data mode's list, where the waterfall is */
     a->ev_list = lv_obj_create(root);
@@ -1935,22 +2425,15 @@ static void build(rf_t *a, lv_obj_t *root)
         lv_obj_add_event_cb(*o, spec_event, LV_EVENT_ALL, a);
     }
 
-    int rh = AOS_UI_TAP_MIN - 8;
-    lv_obj_t *modes = ctl_row(a, y + 6, false);
-    for (int m = 0; m < MODES_N; m++)
-        a->mode_btn[m] = button_f(modes, _(MODES[m]), mode_tap, (void *)(intptr_t)m, aos_font_caption, 14);
-    lv_obj_t *row = ctl_row(a, y + 6 + rh, false);
-    a->rate_btn = button_f(row, "", rate_cycle, a, aos_font_caption, 14);
-    a->gain_btn = button_f(row, "", gain_tap, a, aos_font_caption, 14);
-    a->step_btn = button_f(row, "", step_cycle, a, aos_font_caption, 14);
-    a->sq_btn = button_f(row, "", sq_tap, a, aos_font_caption, 14);
-    a->vol_btn = button_f(row, LV_SYMBOL_VOLUME_MAX, vol_tap, a, aos_font_small, 16);
-    a->rec_btn = button_f(row, LV_SYMBOL_SAVE, rec_tap, a, aos_font_small, 16);
-    lv_obj_t *bands = ctl_row(a, y + 6 + 2 * rh, true);
-    for (size_t i = 0; i < sizeof BANDS / sizeof BANDS[0]; i++) {
-        lv_obj_t *b = button(bands, _(BANDS[i].name), band_tap, (void *)(intptr_t)i);
-        lv_obj_set_style_bg_color(b, AOS_C_CARD, 0);
-    }
+    lv_obj_t *bar = ctl_row(a, y + 6, false);
+    a->mode_btn = button_f(bar, "", mode_sheet_tap, a, aos_font_small, 18);
+    lv_obj_set_style_bg_color(a->mode_btn, AOS_C_ACCENT, 0);
+    char bands[48];
+    snprintf(bands, sizeof bands, LV_SYMBOL_LIST "  %s", _("Bandas"));
+    a->band_btn = button_f(bar, bands, band_sheet_tap, a, aos_font_small, 18);
+    a->set_btn = button_f(bar, LV_SYMBOL_SETTINGS, settings_tap, a, aos_font_small, 18);
+    a->vol_btn = button_f(bar, LV_SYMBOL_VOLUME_MAX, vol_tap, a, aos_font_small, 18);
+    a->rec_btn = button_f(bar, LV_SYMBOL_SAVE, rec_tap, a, aos_font_small, 18);
 
     /* no radio yet: a card over the spectrum */
     a->empty = lv_obj_create(root);
@@ -1999,6 +2482,7 @@ static void *rf_create(aos_app_t *self, lv_obj_t *root)
     A = a;
     a->self = self;
     a->mx = aos_hal_mutex_create();
+    a->lora_mx = aos_hal_mutex_create();
     a->spec = psram(RF_FFT * sizeof(float));
     a->ui_spec = psram(RF_FFT * sizeof(float));
     a->want_freq = pref_u32("rf_freq", 98000000);
@@ -2012,6 +2496,12 @@ static void *rf_create(aos_app_t *self, lv_obj_t *root)
     a->mqtt_on = pref_int("rf_mqtt", 0) != 0;
     a->ev = psram(EV_MAX * sizeof(rf_event_t));
     if (a->ev) memset(a->ev, 0, EV_MAX * sizeof(rf_event_t));
+    a->lp = psram(LP_MAX * sizeof(rf_lpkt_t));
+    if (a->lp) memset(a->lp, 0, LP_MAX * sizeof(rf_lpkt_t));
+    a->mesh_region = pref_int("rf_mesh_reg", 0);
+    a->mesh_preset = pref_int("rf_mesh_pre", 1);
+    if (a->mesh_region < 0 || a->mesh_region >= MESH_REGIONS_N) a->mesh_region = 0;
+    if (a->mesh_preset < 0 || a->mesh_preset >= MESH_PRESETS_N) a->mesh_preset = 1;
     a->want_gain = pref_int("rf_gain", -1);
     a->step = pref_u32("rf_step", 100000);
     a->state = ST_SEARCH;
@@ -2030,6 +2520,9 @@ static void *rf_create(aos_app_t *self, lv_obj_t *root)
         a->done = true;
         aos_ui_toast(_("No pude arrancar la radio"), 2000);
     }
+    /* LoRa's dechirps, at the same lowest priority: behind the engine, the
+     * UI and tick alike */
+    if (!aos_hal_thread_start("rf_lora", lora_worker, a, 8 * 1024, 1)) a->lora_done = true;
     return a;
 }
 
@@ -2040,9 +2533,9 @@ static void rf_destroy(aos_app_t *self, void *inst)
     aos_hal_live_clear(LIVE_APP);
     a->stop = true;
     /* the engine closes the radio and the speaker on its way out */
-    for (int i = 0; i < 300 && !a->done; i++) aos_hal_sleep_ms(10);
+    for (int i = 0; i < 300 && !(a->done && a->lora_done); i++) aos_hal_sleep_ms(10);
     if (a->timer) lv_timer_delete(a->timer);
-    if (!a->done) {
+    if (!a->done || !a->lora_done) {
         /* stuck in a USB call: leaking beats freeing under it */
         aos_hal_log("rf", "the engine did not stop; its memory is left");
         return;
@@ -2055,7 +2548,10 @@ static void rf_destroy(aos_app_t *self, void *inst)
     pref_put("rf_sq", a->want_sq);
     pref_put("rf_log", a->log_on);
     pref_put("rf_mqtt", a->mqtt_on);
+    pref_put("rf_mesh_reg", a->mesh_region);
+    pref_put("rf_mesh_pre", a->mesh_preset);
     free(a->ev);
+    free(a->lp);
     free(a->spec);
     free(a->ui_spec);
     free(a->spec_px);

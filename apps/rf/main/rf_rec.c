@@ -13,6 +13,7 @@
  */
 #include "rf.h"
 #include "rf_ook.h"
+#include "rf_lora.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -275,6 +276,26 @@ void rf_log_decoded(const rf_decoded_t *d, uint32_t freq_hz, float snr_db, int32
             t.tm_year + 1900, t.tm_mon + 1, t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, (unsigned)freq_hz,
             (int)offset_hz, (double)snr_db, d->proto, d->key, d->text, temp, hum, (unsigned)d->id, btn, d->channel, batt,
             MOD[d->mod], d->short_us, d->long_us, d->nbits, d->hex);
+    fclose(f);
+}
+
+/* rf/lora-<day>.csv: a line a packet (the LoRa meter's, rf_lora.c) */
+void rf_log_lora(const rf_lora_pkt_t *p, uint32_t freq_hz, const char *preset)
+{
+    struct tm t;
+    aos_hal_time_now(&t);
+    char path[96];
+    snprintf(path, sizeof path, "%s/rf", root());
+    mkdir(path, 0777);
+    snprintf(path, sizeof path, "%s/rf/lora-%04d-%02d-%02d.csv", root(), t.tm_year + 1900, t.tm_mon + 1, t.tm_mday);
+    struct stat st;
+    bool fresh = stat(path, &st) != 0;
+    FILE *f = fopen(path, "a");
+    if (!f) return;
+    if (fresh) fprintf(f, "time,frequency_hz,offset_hz,width_hz,duration_ms,snr_db,sf,bandwidth_hz,preset,quality\n");
+    fprintf(f, "%04d-%02d-%02d %02d:%02d:%02d,%u,%d,%u,%.1f,%.1f,%d,%u,%s,%.2f\n", t.tm_year + 1900, t.tm_mon + 1,
+            t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec, (unsigned)freq_hz, (int)p->offset_hz, (unsigned)p->width_hz,
+            p->dur_us / 1000.0, (double)p->snr_db, p->sf, (unsigned)p->bw_hz, preset ? preset : "", (double)p->quality);
     fclose(f);
 }
 
