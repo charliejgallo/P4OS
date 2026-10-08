@@ -2,6 +2,23 @@
 
 ## Unreleased
 
+- **BLE, a Bluetooth LE scanner and analyser on the card**
+  (apps/ble/README.md): who is near and what each one is, a radar by
+  estimated distance with a finder that beeps, the readings thermometers
+  broadcast (BTHome, pvvx/ATC, MiBeacon, Govee, Ruuvi, SwitchBot, Qingping,
+  Inkbird, Eddystone TLM) with two hours of history, CSV and MQTT, the
+  statistics of the air, a device's advertisement explained structure by
+  structure, a GATT explorer, favourites and names, and its page in the
+  portal. Encrypted sensors (stock Xiaomi MiBeacon v4/v5, BTHome v2) are
+  read with their key, kept in `ble/claves.txt`. If a link drops while it
+  scans, it says so. Needs this firmware.
+- **Bluetooth LE for apps** (docs/BLUETOOTH.md): `aos_hal_ble_*`, a raw
+  scanner into a PSRAM ring and one GATT connection of the app's own,
+  next to the phone and the computer (NimBLE now allows 3 connections).
+- **Fonts:** typographic punctuation, symbols (currencies, arrows, maths,
+  check marks...), Latin Extended-A and Greek in the text sizes; a name
+  with a typographic apostrophe, as a Mac's own, no longer shows a box. `aos_text_safe` asks the font
+  what it can draw, and the phone's and the computer's names go through it.
 - **RF measures LoRa** (apps/rf/README.md): each packet in the band - when,
   where, how long, how strong - with the spreading factor and bandwidth its
   preamble shows, named after a Meshtastic preset when it is one, and the

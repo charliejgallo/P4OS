@@ -270,6 +270,49 @@ is pins 25/27 (High Speed, the RTL-SDR's), "1.1" pins 21/23 (Full Speed).
 `librtlsdr` is GPL v2, so `rf.so` is too; the firmware stays MIT
 ([THIRD-PARTY.md](THIRD-PARTY.md)).
 
+### BLE, a Bluetooth LE scanner
+
+Everything the devices around advertise over Bluetooth LE, heard by the
+C6's radio and explained ([apps/ble/README.md](apps/ble/README.md)). The
+firmware lends the apps a raw scanner and a GATT client
+(`aos_hal_ble_*`, [docs/BLUETOOTH.md](docs/BLUETOOTH.md)); what the bytes
+mean is the app's. From the card, since 0.12.
+
+| Nearby | Radar | Sensors | Airwaves |
+|---|---|---|---|
+| <img src="docs/img/app-ble-list.png" width="180"> | <img src="docs/img/app-ble-radar.png" width="180"> | <img src="docs/img/app-ble-sens.png" width="180"> | <img src="docs/img/app-ble-air.png" width="180"> |
+
+- **Nearby:** each device with what it seems to be (phone, earbuds, watch,
+  tracker, thermometer, mouse...), its company, the kind of address, the
+  last 30 seconds of signal, and a sensor's readings; sorted and filtered.
+- **Radar** by estimated distance, and a **finder** for one device: its
+  signal in big numbers, whether it is getting closer, and a beep that
+  comes faster as you walk towards it.
+- **Sensors:** the readings thermometers and the like broadcast (BTHome,
+  pvvx/ATC, Xiaomi's MiBeacon, Govee, Ruuvi, SwitchBot, Qingping, Inkbird,
+  Eddystone TLM), with their last two hours, to CSV and MQTT. The ones
+  that **encrypt** (a stock Xiaomi, BTHome with a key) are read with the
+  device's key.
+- **Airwaves:** packets a second, devices, companies, kinds of address and
+  of advertisement, the spread of the signal.
+- **A device's detail:** every AD structure of its advertisement and scan
+  response explained (Apple's Continuity, Microsoft's Swift Pair, Google's
+  Fast Pair, beacons, companies, UUIDs), with the raw bytes; and for the
+  ones that connect, a **GATT explorer** to read, write and listen to
+  their characteristics.
+- **Its page in the portal:** the table live (search, sort, CSV and JSON),
+  the sensors, a device's packets, and the keys.
+- If the phone, the computer or the Wi-Fi goes down while scanning (the C6
+  has one radio for all three), it says so under the scan's buttons.
+
+On the board, 2026-10-07: a stock Xiaomi e-ink clock thermometer, its
+readings encrypted (MiBeacon v5), read with the key made for it, next to
+its own screen.
+
+<p align="center">
+  <img src="docs/img/photo-ble-xiaomi.jpg" width="300" alt="BLE on the board showing a Xiaomi thermometer's decrypted readings next to the thermometer showing the same 24.6 °C and 65 %">
+</p>
+
 ### Apps from the card
 
 These are `.so` files that the firmware loads at boot. Their code runs
@@ -432,6 +475,10 @@ test layouts.
   samples lost, unplugged and plugged back while running, and broadcast FM
   heard on the speaker (the stereo pilot 36 to 43 dB over its neighbours).
   Two real 433 MHz gate remotes (EV1527), every button decoded.
+- BLE scanning at 100 % for five minutes with the iPhone and the MacBook
+  connected and a download going: no link dropped, none of 3300 packets
+  lost. A stock Xiaomi thermometer's encrypted readings decrypted with its
+  key, the same as its screen.
 
 **Waiting for hardware on the bench:**
 
@@ -453,6 +500,8 @@ test layouts.
 
 - **RF:** FSK signals, a CC1101 module on the header as a second receiver
   and transmitter, and ADS-B.
+- **BLE:** the GATT explorer with a real device (it is tried against the
+  simulator's), and activating Xiaomi sensors from the board itself.
 - **ESP-NOW:** esp_hosted does not carry it (3.0.9 neither), so the two-device games of
   AmoledOS run alone here.
 - **USB host:** MIDI is written but not tried with a device; Xbox pads
@@ -601,8 +650,8 @@ idioma de la tarjeta. Los documentos del plan y de las pruebas en la placa
 
 | | |
 |---|---|
-| Qué hace | inicio con carpetas, pantalla de bloqueo con código, 23 apps propias y 38 de la tarjeta (juegos, notas, mapas, radio, video, Lua, una radio definida por software con RTL-SDR), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, y taller con I2C, SPI, 1-Wire, GPIO y tiras LED direccionables |
-| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, y RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante) |
+| Qué hace | inicio con carpetas, pantalla de bloqueo con código, 23 apps propias y 38 de la tarjeta (juegos, notas, mapas, radio, video, Lua, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, y taller con I2C, SPI, 1-Wire, GPIO y tiras LED direccionables |
+| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante), y BLE escuchando con el iPhone y la Mac conectados y leyendo un termómetro Xiaomi cifrado con su clave |
 | Qué falta | probar en la placa el DS18B20 y el RC522, las cámaras, RF con un sensor de 433 MHz y con tráfico real de AM y FM angosta, y encontrar por qué se cortó la red durante dos OTA |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
 | Cómo se instala | la primera vez por el CH340; después `tools/ota.sh p4os.local` o el portal |
