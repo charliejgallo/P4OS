@@ -2859,7 +2859,7 @@ bool aos_hal_ota_info(aos_ota_info_t *out)
     return true;
 }
 bool aos_hal_ota_boot_other(void) { printf("[hal] the other slot boots at the next restart\n"); return true; }
-static bool s_sim_dump_erased;
+static bool s_sim_dump_erased, s_sim_dump_read;
 bool aos_hal_coredump_info(aos_coredump_info_t *out)
 {
     memset(out, 0, sizeof *out);
@@ -2868,9 +2868,16 @@ bool aos_hal_coredump_info(aos_coredump_info_t *out)
     out->size = 65536;
     snprintf(out->task, sizeof out->task, "lvgl");
     snprintf(out->elf_sha, sizeof out->elf_sha, "1d62bada1a5db550");
+    snprintf(out->slot, sizeof out->slot, "other");
+    snprintf(out->version, sizeof out->version, "sim-anterior");
+    out->seen = (uint32_t)time(NULL) - 3600;
+    out->unread = !s_sim_dump_read;
     return true;
 }
 bool aos_hal_coredump_erase(void) { s_sim_dump_erased = true; return true; }
+void aos_hal_coredump_mark_read(void) { s_sim_dump_read = true; }
+bool aos_hal_coredump_boot_check(void) { return getenv("P4_SIM_COREDUMP") && !s_sim_dump_erased && !s_sim_dump_read; }
+void aos_hal_coredump_test_panic(uint32_t delay_ms) { printf("[hal] a panic on purpose in %u ms (not in the simulator)\n", (unsigned)delay_ms); }
 int aos_hal_hang_restarts(void) { return getenv("P4_SIM_HANG") ? atoi(getenv("P4_SIM_HANG")) : 0; }
 /* On the board this comes from the app descriptor, which CMakeLists fills with
  * 'git describe --tags'. Here there is no descriptor and no point inventing a

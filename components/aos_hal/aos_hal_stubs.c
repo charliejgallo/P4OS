@@ -828,6 +828,15 @@ __attribute__((weak)) size_t aos_hal_coredump_read(size_t off, void *buf, size_t
 __attribute__((weak)) bool aos_hal_coredump_erase(void)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) bool aos_hal_coredump_boot_check(void)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) void aos_hal_coredump_mark_read(void)
+{ }
+
+__attribute__((weak)) void aos_hal_coredump_test_panic(uint32_t delay_ms)
+{ }
+
 __attribute__((weak)) aos_hal_usb_mode_t aos_hal_usb_mode(void)
 { aos_hal_usb_mode_t v; memset(&v, 0, sizeof v); return v; }
 

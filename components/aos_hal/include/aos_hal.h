@@ -1805,10 +1805,25 @@ typedef struct {
     char     task[16];
     uint32_t pc, ra, sp, mcause, mtval;
     char     elf_sha[17];       /* the crashing firmware's ELF sha, first 16 hex */
+    /* which firmware that is, by its sha: "running" (this one), "other" (the
+     * other OTA slot) or "" (neither: an older image), and its version */
+    char     slot[8];
+    char     version[32];
+    /* first seen at a boot (Unix time, 0 while the clock is not set), and not
+     * yet downloaded nor erased (aos_hal_coredump_mark_read) */
+    uint32_t seen;
+    bool     unread;
 } aos_coredump_info_t;
 bool   aos_hal_coredump_info(aos_coredump_info_t *out);
 size_t aos_hal_coredump_read(size_t off, void *buf, size_t len);
 bool   aos_hal_coredump_erase(void);
+/* At boot: a dump not seen before is noted as unread (and logged); true if
+ * there is one unread. Later calls only fill in its time once the clock is
+ * set. */
+bool   aos_hal_coredump_boot_check(void);
+void   aos_hal_coredump_mark_read(void);
+/* Development: a panic on purpose after delay_ms, to try the dump. */
+void   aos_hal_coredump_test_panic(uint32_t delay_ms);
 
 /* -------------------------------------------------------------------------- */
 /* Miscellaneous                                                               */

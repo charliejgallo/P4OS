@@ -26,6 +26,10 @@ CONFIG_FREERTOS_HZ=1000
 CONFIG_FREERTOS_GENERATE_RUN_TIME_STATS=y
 CONFIG_FREERTOS_USE_TRACE_FACILITY=y
 CONFIG_ESP_COREDUMP_ENABLE_TO_FLASH=y
+# the firmware's ELF sha in a core dump, 16 hex characters (9 by default):
+# enough for tools/coredump.sh to pick build/elf/<sha>.elf without doubt.
+# 7 more bytes of internal RAM: the panic handler reads it with the caches off.
+CONFIG_APP_RETRIEVE_LEN_ELF_SHA=16
 
 # LVGL (provisional: bench variant lvB)
 CONFIG_LV_OS_FREERTOS=y

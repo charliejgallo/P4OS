@@ -624,7 +624,16 @@ function pageRegistro() {
   } }, 'Descargar');
   const title = h('h1', {}, 'Registro');
   const sub = h('div', { class: 'note', style: 'margin:-6px 0 10px' });
-  put(main, title, sub, h('div', { class: 'btns', style: 'margin-bottom:10px;flex-wrap:wrap;gap:8px' }, pb,
+  /* a crash's dump nobody has read yet */
+  const dump = h('div');
+  api('coredump').then(cd => {
+    if (!cd.present || !cd.unread) return;
+    const fw = cd.version ? cd.version : cd.elf_sha ? 'ELF ' + cd.elf_sha : 'un firmware que no se sabe';
+    put(dump, h('div', { class: 'card pad warn', style: 'margin-bottom:10px' },
+      'La placa se cayó: hay un volcado sin leer (' + fw + (cd.seen ? ', visto ' + new Date(cd.seen * 1000).toLocaleString() : '') + '). ',
+      h('a', { href: '#firmware' }, 'Verlo en Firmware'), '.'));
+  }).catch(() => {});
+  put(main, title, sub, dump, h('div', { class: 'btns', style: 'margin-bottom:10px;flex-wrap:wrap;gap:8px' }, pb,
     h('button', { class: 'btn', onclick: () => { lines = []; render(); } }, 'Limpiar'), which, dl, fin), count, pre);
   const tick = async () => {
     if (location.hash !== '#registro' || prev) return;
@@ -727,9 +736,13 @@ async function pageFirmware() {
       cd.present ? [
         row('Volcado', fmtBytes(cd.size) + (cd.valid ? '' : ' (dañado)')),
         cd.task ? row('Tarea', cd.task) : null, cd.pc && cd.pc !== '0x00000000' ? row('PC / RA', cd.pc + ' / ' + cd.ra) : null,
-        h('div', { class: 'note' }, 'Para ver funciones y líneas: tools/coredump.sh en la Mac. Necesita la ELF del firmware que se colgó: build/elf/<sha>.elf, que tools/ota.sh guarda en cada instalación.'),
+        row('Firmware', cd.elf_sha ? 'ELF ' + cd.elf_sha + ' — ' + (cd.slot === 'running' ? 'el de ahora' : cd.slot === 'other' ? 'el de la otra ranura' : 'ninguna de las dos ranuras: uno viejo') + (cd.version ? ' (' + cd.version + ')' : '') : 'no se sabe', cd.slot ? '' : 'warn'),
+        cd.seen ? row('Visto', new Date(cd.seen * 1000).toLocaleString()) : null,
+        cd.unread ? row('Estado', 'sin leer', 'warn') : null,
+        h('div', { class: 'note' }, 'Para ver funciones y líneas: tools/coredump.sh en la Mac. Decodifica sólo con la ELF de ese firmware (build/elf/<sha>.elf, que tools/ota.sh guarda en cada instalación); descargarlo entero cuenta como leído.'),
         h('div', { class: 'btns', style: 'margin-top:10px' },
-          h('a', { class: 'btn', href: '/api/coredump/elf', download: 'p4os-coredump.bin' }, 'Descargar el volcado'),
+          h('a', { class: 'btn', href: '/api/coredump/elf', download: 'p4os-coredump-' + (cd.elf_sha || 'unknown') + '.elf' }, 'Descargar el volcado'),
+          cd.unread ? h('button', { class: 'btn', onclick: async () => { await post('coredump/read').catch(e => toast(e.message, true)); pageFirmware(); } }, 'Marcar como leído') : null,
           h('button', { class: 'btn red', onclick: async () => { if (!confirm('¿Borrar el volcado?')) return; await post('coredump/erase').catch(e => toast(e.message, true)); pageFirmware(); } }, 'Borrar'),
           h('button', { class: 'btn', onclick: () => { location.hash = '#registro'; } }, 'Ver el registro'))]
       : h('div', { class: 'note' }, 'No hay: la placa no se colgó desde que se borró el último.')));

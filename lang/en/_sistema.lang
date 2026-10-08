@@ -7277,3 +7277,6 @@ BLE	BLE
 
 #: apps/rf/main/rf.c  (nombre de app)
 RF	RF
+
+#: main/main.c
+La placa se cayó la vez anterior: el volcado está en el portal, en Registro.	The board crashed last time: the dump is in the portal, on the Registro page.

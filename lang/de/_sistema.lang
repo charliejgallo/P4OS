@@ -7277,3 +7277,6 @@ BLE	BLE
 
 #: apps/rf/main/rf.c  (nombre de app)
 RF	RF
+
+#: main/main.c
+La placa se cayó la vez anterior: el volcado está en el portal, en Registro.	Die Platine ist beim letzten Mal abgestürzt: Der Dump ist im Portal, auf der Seite Registro.

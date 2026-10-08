@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+- **A crash's core dump says which firmware made it.** The board reads the
+  dump's own notes (IDF's summary fails here: it maps the whole partition)
+  and gives the firmware's ELF sha, whether that is the firmware running now
+  or the other OTA slot's, and its version, plus the crashed task, pc, ra and
+  cause. The sha is 16 characters now (it was cut at 9).
+  `tools/coredump.sh` decodes only against `build/elf/<sha>.elf` and refuses
+  when that ELF is not there, instead of trying others: an old dump read
+  against today's code pointed at the wrong lines.
+- A new dump is noted at boot as unread, with the time it was first seen:
+  the log and the screen say so once, and the portal's Registro and Firmware
+  pages until it is downloaded, marked read or erased.
+- `POST /api/coredump/test`: a panic on purpose, to try all of it.
+
 ## 0.13.0 — 2026-10-08
 
 **RF reads the Meshtastic message, not just measures the packet.** Only the

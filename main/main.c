@@ -81,10 +81,19 @@ static void tick_thread(void *arg)
     bool net_checked = false;
     if (trial) ESP_LOGW(TAG, "this firmware is on trial: confirmed after %d s up", OTA_TRIAL_MS / 1000);
     bool up = false;
+    /* a core dump nobody has read yet: its time is filled in once the clock
+     * is set, and the check stops when it is read or erased */
+    aos_coredump_info_t cd;
+    bool cd_wait = aos_hal_coredump_info(&cd) && cd.present && cd.unread && !cd.seen;
+    uint32_t ticks = 0;
     aos_hal_boot_stage("up");
     for (;;) {
         vTaskDelay(pdMS_TO_TICKS(200));
         aos_hal_alive();                /* the hang watchdog's beat (aos_hal_p4.c) */
+        if (cd_wait && ++ticks % 150 == 0) {        /* every 30 s */
+            aos_hal_coredump_boot_check();
+            cd_wait = aos_hal_coredump_info(&cd) && cd.present && cd.unread && !cd.seen;
+        }
         if (trial && aos_hal_uptime_ms() > OTA_TRIAL_MS) {
             trial = false;
             aos_hal_ota_mark_valid();
@@ -189,6 +198,13 @@ void app_main(void)
     }
     aos_hal_boot_stage("usb");
     if (safe) aos_ui_request_toast(_("Modo seguro: sin las apps de la tarjeta. Reiniciá para volver a la normalidad."));
+    /* the last crash's dump, if nobody has read it: said in the log, and once
+     * on screen when it is new */
+    aos_coredump_info_t cd0;
+    bool cd_new = aos_hal_coredump_info(&cd0) && cd0.present && !cd0.unread;
+    if (aos_hal_coredump_boot_check() && cd_new) {
+        aos_ui_request_toast(_("La placa se cayó la vez anterior: el volcado está en el portal, en Registro."));
+    }
     else aos_hal_usb_restore();     /* the USB port as it was before the restart; after the scan: never the disk */
     /* 16 KB, in PSRAM: the apps' service ticks run here, and 8 KB had 404
      * bytes left on the board with the music app open (2026-09-29). */

@@ -11,9 +11,15 @@
  *                                 confirms it after 30 s up, else the previous
  *                                 image comes back by itself)
  *   POST /api/ota/other           boots the other slot at the next restart
- *   GET  /api/coredump            the last panic's summary (task, pc, ra, cause)
- *   GET  /api/coredump/elf        the dump itself, for tools/coredump.sh
+ *   GET  /api/coredump            the last panic's summary (task, pc, ra, cause),
+ *                                 which firmware made it (elf_sha, slot, version),
+ *                                 when it was first seen and whether it is unread
+ *   GET  /api/coredump/elf        the dump itself, for tools/coredump.sh (read
+ *                                 whole, it counts as read)
+ *   POST /api/coredump/read       counts it as read
  *   POST /api/coredump/erase      forgets it
+ *   POST /api/coredump/test?ms=   development: a panic on purpose, to try all
+ *                                 of the above (the board restarts)
  *   GET  /api/display/bench?frames=   LVGL redrawing the whole screen, ms a frame
  *   GET  /api/tune   POST /api/tune?key=&value=   the tuning preferences read
  *                                 at boot (lvbuf, lvrows, fbs, blit_hw,
@@ -158,6 +164,10 @@ static void api_coredump(aos_httpd_req_t *r)
         HEX("mtval", ci.mtval);
 #undef HEX
         cJSON_AddStringToObject(o, "elf_sha", ci.elf_sha);
+        cJSON_AddStringToObject(o, "slot", ci.slot);
+        cJSON_AddStringToObject(o, "version", ci.version);
+        cJSON_AddNumberToObject(o, "seen", (double)ci.seen);
+        cJSON_AddBoolToObject(o, "unread", ci.unread);
     }
     send_cjson(r, 200, o);
 }
@@ -168,15 +178,19 @@ static void api_coredump_elf(aos_httpd_req_t *r)
     if (!aos_hal_coredump_info(&ci) || !ci.present) { send_err(r, 404, "no hay volcado"); return; }
     char *buf = malloc(CHUNK);
     if (!buf) { send_err(r, 500, "sin memoria"); return; }
-    if (aos_httpd_begin(r, 200, "application/octet-stream", (long)ci.size,
-                        "Content-Disposition: attachment; filename=\"p4os-coredump.elf\"\r\n")) {
-        for (size_t off = 0; off < ci.size;) {
+    char disp[96];
+    snprintf(disp, sizeof disp, "Content-Disposition: attachment; filename=\"p4os-coredump-%s.elf\"\r\n",
+             ci.elf_sha[0] ? ci.elf_sha : "unknown");
+    size_t off = 0;
+    if (aos_httpd_begin(r, 200, "application/octet-stream", (long)ci.size, disp)) {
+        while (off < ci.size) {
             size_t n = aos_hal_coredump_read(off, buf, CHUNK);
             if (!n || !aos_httpd_write(r, buf, n)) break;
             off += n;
         }
     }
     free(buf);
+    if (off >= ci.size) aos_hal_coredump_mark_read();      /* taken whole: read */
 }
 
 #ifdef ESP_PLATFORM
@@ -375,7 +389,16 @@ bool aos_portal_system(aos_httpd_req_t *r, const char *m, const char *p)
 #ifdef ESP_PLATFORM
     else if (get && !strcmp(p, "heap")) api_heap(r);
 #endif
-    else if (post && !strcmp(p, "coredump/erase")) {
+    else if (post && !strcmp(p, "coredump/read")) {
+        aos_hal_coredump_mark_read();
+        aos_httpd_send_json(r, 200, "{\"ok\":true}");
+    } else if (post && !strcmp(p, "coredump/test")) {
+        char v[16] = "";
+        uint32_t ms = aos_httpd_query(r, "ms", v, sizeof v) ? (uint32_t)atoi(v) : 500;
+        aos_hal_log("coredump", "a panic on purpose asked for from the portal, in %u ms", (unsigned)ms);
+        aos_httpd_send_json(r, 200, "{\"ok\":true}");
+        aos_hal_coredump_test_panic(ms < 200 ? 200 : ms);
+    } else if (post && !strcmp(p, "coredump/erase")) {
         if (aos_hal_coredump_erase()) aos_httpd_send_json(r, 200, "{\"ok\":true}");
         else send_err(r, 500, "no se pudo borrar");
     } else return false;
