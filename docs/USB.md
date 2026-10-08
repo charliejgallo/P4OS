@@ -143,6 +143,12 @@ wires, or a cut USB cable). There are two ports, chosen in Settings, USB,
 | Controller | the P4's second one, Full Speed (USB 1.1, 12 Mbit/s) | the High-Speed one (480 Mbit/s), the OTG connector's |
 | The OTG connector meanwhile | keeps its mode (off, keyboard and mouse, disk) | unplugged: its lines are the same wires; its mode is off while the host is on |
 
+<p align="center"><img src="img/photo-usb-host-sockets.jpg" width="300" alt="The two USB-A sockets on the back of the board, in a 3D-printed cover, wired to the 40-pin header"></p>
+
+The prototype on the user's board: both sockets in a 3D-printed back
+cover, wired to the header, "2.0" on pins 25/27 (High Speed) and "1.1" on
+21/23 (Full Speed); an RTL-SDR in the High-Speed one.
+
 "Both" is the two at once, as two root ports of one host library: a
 keyboard on 21/23 and a pendrive on 25/27, say. ESP-IDF's library drives
 one root port; `components/usb` is P4OS's copy of it, changed to drive one

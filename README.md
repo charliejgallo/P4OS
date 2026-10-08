@@ -257,6 +257,16 @@ since 0.11.
   every control, the received list, the spectrum as PNG, and the
   recordings to download.
 
+On the board, 2026-10-07: two gate remotes, a copier and a factory one,
+in Data mode with every button on its line; and the back of the board,
+with the two USB host sockets on the header in a 3D-printed cover: "2.0"
+is pins 25/27 (High Speed, the RTL-SDR's), "1.1" pins 21/23 (Full Speed).
+
+<p align="center">
+  <img src="docs/img/photo-rf-433.jpg" width="300" alt="RF on the board in Data mode, listing 433 MHz remotes">
+  <img src="docs/img/photo-usb-host-sockets.jpg" width="300" alt="Two USB-A sockets wired to the 40-pin header in a 3D-printed back cover">
+</p>
+
 `librtlsdr` is GPL v2, so `rf.so` is too; the firmware stays MIT
 ([THIRD-PARTY.md](THIRD-PARTY.md)).
 
@@ -421,6 +431,7 @@ test layouts.
 - RF with an RTL-SDR (R820T tuner) on the USB host: 2.4 Msps with no
   samples lost, unplugged and plugged back while running, and broadcast FM
   heard on the speaker (the stereo pilot 36 to 43 dB over its neighbours).
+  Two real 433 MHz gate remotes (EV1527), every button decoded.
 
 **Waiting for hardware on the bench:**
 
@@ -434,8 +445,9 @@ test layouts.
 - The IP cameras.
 - The microphone's gain, and the speaker's latency and heating.
 - The real-time clock with a cell.
-- RF with a real 433 MHz remote and sensor (the decoders are tested with
-  synthetic signals), and AM and narrow FM with real traffic.
+- RF with a 433 MHz weather sensor (its decoders are tested with synthetic
+  signals), and AM and narrow FM with real traffic: indoors, the airband
+  and marine channel 16 gave next to nothing.
 
 **Not done yet:**
 
@@ -591,6 +603,6 @@ idioma de la tarjeta. Los documentos del plan y de las pruebas en la placa
 |---|---|
 | Qué hace | inicio con carpetas, pantalla de bloqueo con código, 23 apps propias y 38 de la tarjeta (juegos, notas, mapas, radio, video, Lua, una radio definida por software con RTL-SDR), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, y taller con I2C, SPI, 1-Wire, GPIO y tiras LED direccionables |
 | Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, y RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante) |
-| Qué falta | probar en la placa el DS18B20 y el RC522, las cámaras, RF con un control de 433 MHz real, y encontrar por qué se cortó la red durante dos OTA |
+| Qué falta | probar en la placa el DS18B20 y el RC522, las cámaras, RF con un sensor de 433 MHz y con tráfico real de AM y FM angosta, y encontrar por qué se cortó la red durante dos OTA |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
 | Cómo se instala | la primera vez por el CH340; después `tools/ota.sh p4os.local` o el portal |
