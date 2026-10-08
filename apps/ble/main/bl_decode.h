@@ -127,6 +127,11 @@ typedef struct {
  * false if no known format is found. */
 bool bl_sensor_decode(const bl_ad_t *ad, const uint8_t addr[6], bl_sensor_t *out);
 
+/* The same, for an encrypted MiBeacon (v4/v5) or BTHome v2 with the
+ * device's 16-byte key: decrypts and decodes. Returns one of BL_KEY_*. */
+enum { BL_KEY_OK = 0, BL_KEY_NOT_ENCRYPTED, BL_KEY_WRONG, BL_KEY_UNSUPPORTED };
+int bl_sensor_decode_key(const bl_ad_t *ad, const uint8_t addr[6], const uint8_t key[16], bl_sensor_t *out);
+
 /* ---- beacons ---- */
 
 enum { BL_BEACON_NONE, BL_BEACON_IBEACON, BL_BEACON_ALT, BL_BEACON_EDDY_UID, BL_BEACON_EDDY_URL,

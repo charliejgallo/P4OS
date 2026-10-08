@@ -15,6 +15,7 @@
  */
 #include "bl.h"
 #include "aos_text_safe.h"
+#include "bl_crypt.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -220,6 +221,7 @@ static bl_dev_t *dev_new(const aos_ble_adv_t *a)
     for (int k = 0; k < BL_HIST; k++) d->hist[k] = BL_NO_RSSI;
     for (int k = 0; k < BL_SEN_HIST; k++) d->sen_t[k] = d->sen_h[k] = NAN;
     d->hist_sec = a->t_ms / 1000;
+    d->key_state = -1;
     bl_ad_clear(&d->ad);
     BL.gen++;
     return d;
@@ -270,8 +272,21 @@ static void dev_decode(bl_dev_t *d, const uint8_t *data, int len, uint32_t t)
     bl_ad_merge(&d->ad, data, len);
     d->cls = bl_classify(&d->ad, &d->label);
     bl_sensor_t s;
+    bool got = bl_sensor_decode(&d->ad, d->addr, &s);
+    if (got && s.encrypted && d->has_key) {
+        /* encrypted, and its key is known: what it says, decrypted; a wrong
+         * key leaves the "encrypted" in place, and says so */
+        bl_sensor_t plain;
+        int r = bl_sensor_decode_key(&d->ad, d->addr, d->key, &plain);
+        if (r != BL_KEY_NOT_ENCRYPTED) d->key_state = (int8_t)r;
+        if (r == BL_KEY_OK) s = plain;
+        else if (r == BL_KEY_NOT_ENCRYPTED) got = false;     /* this frame carried no reading */
+    }
     /* a beacon's calibrated power alone is not a reading */
-    if (bl_sensor_decode(&d->ad, d->addr, &s) && ((s.mask & ~(uint32_t)BL_V_RSSI1M) || s.encrypted)) {
+    if (got && ((s.mask & ~(uint32_t)BL_V_RSSI1M) || s.encrypted)) {
+        /* encrypted with no readings after decrypted ones: keep the
+         * readings (the key went wrong is told in the detail) */
+        if (s.encrypted && d->has_sen && !d->sen.encrypted) goto beacon;
         /* some formats send their values a few at a time (BTHome objects,
          * Eddystone's frames): what did not come this time is kept */
         uint32_t had = d->has_sen ? d->sen.mask : 0;
@@ -286,6 +301,7 @@ static void dev_decode(bl_dev_t *d, const uint8_t *data, int len, uint32_t t)
         d->sen_ms = t;
         sensor_keep(d, t);
     }
+beacon:;
     bl_beacon_t b;
     if (bl_beacon_decode(&d->ad, &b)) {
         d->bc = b;
@@ -398,6 +414,9 @@ void bl_forget_all(void)
         d->addr_type = keep.addr_type;
         d->fav = true;
         memcpy(d->alias, keep.alias, sizeof d->alias);
+        d->has_key = keep.has_key;
+        memcpy(d->key, keep.key, sizeof d->key);
+        d->key_state = -1;
         d->ad = keep.ad;
         d->cls = keep.cls;
         d->label = keep.label;
@@ -616,6 +635,104 @@ void bl_names_save(void)
     s_names_mtime = file_mtime(path);
 }
 
+/* -------------------------------------------------------------------------- */
+/* claves.txt: the keys of the devices that encrypt                            */
+/* -------------------------------------------------------------------------- */
+
+static uint32_t s_keys_mtime;
+
+static void keys_path(char *out, size_t n)
+{
+    snprintf(out, n, "%s/ble/claves.txt", card_root());
+}
+
+void bl_redecode(bl_dev_t *d)
+{
+    /* the readings start again from what the bytes say with the key */
+    d->has_sen = false;
+    d->key_state = -1;
+    memset(&d->sen, 0, sizeof d->sen);
+    uint32_t t = d->last_ms;
+    if (d->adv_len) dev_decode(d, d->adv, d->adv_len, t);
+    if (d->rsp_len) dev_decode(d, d->rsp, d->rsp_len, t);
+}
+
+static void keys_load(void)
+{
+    char path[160];
+    keys_path(path, sizeof path);
+    s_keys_mtime = file_mtime(path);
+    FILE *f = fopen(path, "r");
+    bool had[BL_DEV_MAX];
+    for (int i = 0; i < BL.ndev; i++) {
+        had[i] = BL.dev[i].has_key;
+        BL.dev[i].has_key = false;
+    }
+    char line[160];
+    while (f && fgets(line, sizeof line, f)) {
+        line[strcspn(line, "\r\n")] = 0;
+        if (!line[0] || line[0] == '#') continue;
+        char *bar = strchr(line, '|');
+        if (!bar) continue;
+        *bar++ = 0;
+        uint8_t a[6], k[16];
+        if (!bl_parse_addr(line, a) || !bl_parse_key(bar, k)) continue;
+        int i = bl_find(a);
+        if (i < 0) {
+            if (BL.ndev >= BL_DEV_MAX) continue;
+            aos_ble_adv_t fake = { .t_ms = 0 };
+            memcpy(fake.addr, a, 6);
+            bl_dev_t *d = dev_new(&fake);
+            if (!d) continue;
+            d->last_ms = d->first_ms = now_ms() - BL_GONE_MS - 1;
+            i = (int)(d - BL.dev);
+            had[i] = false;
+        }
+        bool same = BL.dev[i].has_key && !memcmp(BL.dev[i].key, k, 16);
+        memcpy(BL.dev[i].key, k, 16);
+        BL.dev[i].has_key = true;
+        if (!same) bl_redecode(&BL.dev[i]);
+    }
+    if (f) fclose(f);
+    for (int i = 0; i < BL.ndev; i++)
+        if (had[i] && !BL.dev[i].has_key) bl_redecode(&BL.dev[i]);   /* a key taken away */
+}
+
+static void keys_save(void)
+{
+    char path[160], dir[160];
+    snprintf(dir, sizeof dir, "%s/ble", card_root());
+    mkdir(dir, 0777);
+    keys_path(path, sizeof path);
+    FILE *f = fopen(path, "w");
+    if (!f) return;
+    fputs("# BLE de P4OS: claves de los equipos que cifran lo que anuncian (MiBeacon v4/v5, BTHome v2).\n"
+          "# direccion|32 cifras hexadecimales\n", f);
+    for (int i = 0; i < BL.ndev; i++) {
+        const bl_dev_t *d = &BL.dev[i];
+        if (!d->has_key) continue;
+        char a[20], l[80];
+        bl_fmt_addr(d->addr, a, sizeof a);
+        int k = snprintf(l, sizeof l, "%s|", a);
+        for (int b = 0; b < 16; b++) k += snprintf(l + k, sizeof l - k, "%02x", d->key[b]);
+        snprintf(l + k, sizeof l - k, "\n");
+        fputs(l, f);
+    }
+    fclose(f);
+    s_keys_mtime = file_mtime(path);
+}
+
+void bl_key_set(int idx, const uint8_t *key)
+{
+    if (idx < 0 || idx >= BL.ndev) return;
+    bl_dev_t *d = &BL.dev[idx];
+    d->has_key = key != NULL;
+    if (key) memcpy(d->key, key, 16);
+    else memset(d->key, 0, 16);
+    keys_save();
+    bl_redecode(d);
+}
+
 void bl_names_poll(void)
 {
     uint32_t t = now_ms();
@@ -625,6 +742,8 @@ void bl_names_poll(void)
     names_path(path, sizeof path);
     uint32_t m = file_mtime(path);
     if (m != s_names_mtime) names_load();
+    keys_path(path, sizeof path);
+    if (file_mtime(path) != s_keys_mtime) keys_load();
 }
 
 /* -------------------------------------------------------------------------- */
@@ -732,4 +851,5 @@ void bl_names_first(void);
 void bl_names_first(void)
 {
     names_load();
+    keys_load();
 }

@@ -185,6 +185,32 @@ static void adv_mibeacon(sdev_t *d, uint32_t now, uint8_t *o, uint8_t *n, bool r
     ad(o, n, 0x16, s, 20);
 }
 
+/* A stock Xiaomi LYWSD03MMC: MiBeacon v5 encrypted, one reading a packet
+ * (temperature 22.4, humidity 58, battery 83). Made beforehand with
+ * pycryptodome and the test key 00 01 02 .. 0F, which is what the app
+ * needs to read it (Cargar la clave); without it, "cifrado". */
+static void adv_mi_enc(sdev_t *d, uint32_t now, uint8_t *o, uint8_t *n, bool rsp)
+{
+    (void)now;
+    static const uint8_t P[3][23] = {
+        { 0x58, 0x58, 0x5B, 0x05, 0x40, 0xA1, 0xF0, 0xE1, 0x38, 0xC1, 0xA4, 0x05, 0xE2, 0x35, 0xCC, 0x02, 0x01, 0x00, 0x00, 0x8A, 0xED, 0xA9, 0x58 },
+        { 0x58, 0x58, 0x5B, 0x05, 0x41, 0xA1, 0xF0, 0xE1, 0x38, 0xC1, 0xA4, 0xC7, 0x2A, 0xC6, 0x1B, 0x02, 0x00, 0x00, 0x72, 0x8D, 0xB8, 0x63 },
+        { 0x58, 0x58, 0x5B, 0x05, 0x42, 0xA1, 0xF0, 0xE1, 0x38, 0xC1, 0xA4, 0x10, 0x4A, 0x0A, 0xA3, 0x03, 0x00, 0x00, 0xBD, 0x09, 0x0C, 0xF3 },
+    };
+    if (rsp) {
+        uint8_t m[13] = { 0x8F, 0x03, 0x10 };
+        for (int i = 0; i < 6; i++) m[3 + i] = d->addr[5 - i];
+        ad(o, n, 0xFF, m, 9);
+        return;
+    }
+    ad_flags(o, n);
+    int k = (int)(d->seq++ % 3);
+    uint8_t s[25] = { 0x95, 0xFE };
+    int len = k == 0 ? 23 : 22;
+    memcpy(s + 2, P[k], len);
+    ad(o, n, 0x16, s, 2 + len);
+}
+
 /* SwitchBot Meter: service data 0xFD3D, type 'T' */
 static void adv_switchbot(sdev_t *d, uint32_t now, uint8_t *o, uint8_t *n, bool rsp)
 {
@@ -447,6 +473,7 @@ static sdev_t DEV[] = {
     { A(A4, C1, 38, 52, 4F, 21), 0, AOS_BLE_ADV_IND, 2000, -80, MOVE_STILL, 0, adv_govee },
     { A(F1, 0C, 55, 9D, 3F, 8C), 1, AOS_BLE_ADV_IND, 1285, -86, MOVE_STILL, 0, adv_ruuvi },
     { A(58, 2D, 34, 10, 77, 6A), 0, AOS_BLE_ADV_IND, 3000, -74, MOVE_STILL, 0, adv_mibeacon },
+    { A(A4, C1, 38, E1, F0, A1), 0, AOS_BLE_ADV_IND, 2400, -59, MOVE_STILL, 0, adv_mi_enc },
     { A(C9, 21, 7E, 0A, 3D, 91), 1, AOS_BLE_ADV_IND, 1800, -68, MOVE_STILL, 0, adv_switchbot },
     { A(58, 2D, 34, 54, 2C, 08), 0, AOS_BLE_ADV_NONCONN_IND, 2000, -83, MOVE_STILL, 0, adv_qingping },
     { A(49, 22, 06, 12, 3A, 7B), 0, AOS_BLE_ADV_IND, 2500, -88, MOVE_STILL, 0, adv_inkbird },

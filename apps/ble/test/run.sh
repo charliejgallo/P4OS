@@ -27,5 +27,5 @@ SAN="-g -O1 -fno-omit-frame-pointer -fsanitize=address,undefined -fno-sanitize-r
 mkdir -p "$OUT.d"
 cc -std=c11 -Wall -Wextra -Wno-missing-field-initializers $SAN -Ishim -c ../../../sim/ble_sim.c -o "$OUT.d/ble_sim.o"
 cc -std=c11 -Wall -Wextra -Werror $SAN -I../main -Ishim \
-   ../main/bl_decode.c ../main/bl_names.c test_decode.c "$OUT.d/ble_sim.o" -lm -o "$OUT"
+   ../main/bl_decode.c ../main/bl_names.c ../main/bl_crypt.c test_decode.c "$OUT.d/ble_sim.o" -lm -o "$OUT"
 "$OUT" "$@"

@@ -14,6 +14,7 @@
  * those same documents.
  */
 #include "bl_decode.h"
+#include "bl_crypt.h"
 
 #include <math.h>
 #include <stdarg.h>
@@ -715,6 +716,12 @@ static bool sen_mibeacon(const uint8_t *d, int n, bl_sensor_t *o)
         case 0x1019:                        /* door: 0 open, 1 closed, 2 left open */
             if (l >= 1) { o->open = v[0] != 1; o->mask |= BL_V_OPEN; }
             break;
+        /* the newer ids, v5 firmwares: a float temperature, one-byte
+         * humidity and battery, a float humidity */
+        case 0x4C01: if (l >= 4) { float f; memcpy(&f, v, 4); o->temp = f; o->mask |= BL_V_TEMP; } break;
+        case 0x4C02: if (l >= 1) { o->hum = v[0]; o->mask |= BL_V_HUM; } break;
+        case 0x4C03: if (l >= 1) { o->batt = v[0]; o->mask |= BL_V_BATT; } break;
+        case 0x4C08: if (l >= 4) { float f; memcpy(&f, v, 4); o->hum = f; o->mask |= BL_V_HUM; } break;
         default: break;
         }
         i += 3 + l;
@@ -951,6 +958,94 @@ static bool sensors(const bl_ad_t *ad, bl_sensor_t *o, const char **label)
     for (int i = 0; i < ad->nsd && i < BL_MAX_SD; i++) ok |= sen_sd(&ad->sd[i], ad, o, label);
     for (int i = 0; i < ad->nmfg && i < BL_MAX_MFG; i++) ok |= sen_mfg(&ad->mfg[i], ad, o, label);
     return ok;
+}
+
+/* ---- with the device's key ---- */
+
+/* MiBeacon v4/v5, encrypted: after the header (and the MAC and capability
+ * the frame control announces), the objects encrypted, then three bytes of
+ * the extended counter and a 4-byte tag. AES-CCM, nonce = the MAC as on the
+ * air (little endian) + product id + frame counter + extended counter,
+ * associated data 0x11. The plain frame keeps the header, with the
+ * encrypted bit cleared, and the objects in place. */
+static int mi_decrypt(const bl_sd_t *s, const uint8_t addr[6], const uint8_t key[16], bl_sd_t *plain)
+{
+    const uint8_t *d = s->data;
+    int n = s->len > (int)sizeof s->data ? (int)sizeof s->data : s->len;
+    if (n < 5) return BL_KEY_NOT_ENCRYPTED;
+    uint16_t fc = u16le(d);
+    if (!(fc & 0x0008)) return BL_KEY_NOT_ENCRYPTED;
+    if ((fc >> 12) < 4) return BL_KEY_UNSUPPORTED;      /* v2/v3: another scheme, 12-byte keys */
+    int i = 5;
+    if (fc & 0x0010) i += 6;
+    if (fc & 0x0020) {
+        if (i >= n) return BL_KEY_UNSUPPORTED;
+        if (d[i] & 0x20) i += 2;
+        i += 1;
+    }
+    int clen = n - i - 7;
+    if (clen <= 0) return BL_KEY_NOT_ENCRYPTED;         /* nothing measured in this one */
+    uint8_t nonce[12];
+    for (int k = 0; k < 6; k++) nonce[k] = addr[5 - k];
+    memcpy(nonce + 6, d + 2, 3);
+    memcpy(nonce + 9, d + n - 7, 3);
+    static const uint8_t AAD = 0x11;
+    uint8_t out[29];
+    if (!bl_ccm_decrypt(key, nonce, 12, &AAD, 1, d + i, clen, d + n - 4, 4, out)) return BL_KEY_WRONG;
+    *plain = *s;
+    memcpy(plain->data, d, i);
+    plain->data[0] = (uint8_t)(fc & ~0x0008);
+    memcpy(plain->data + i, out, clen);
+    plain->len = (uint8_t)(i + clen);
+    return BL_KEY_OK;
+}
+
+/* BTHome v2, encrypted: the device info byte, the objects encrypted, a
+ * 4-byte counter and a 4-byte tag. Nonce = the MAC as written (big endian)
+ * + the UUID as on the air (D2 FC) + the device info + the counter. */
+static int bth_decrypt(const bl_sd_t *s, const uint8_t addr[6], const uint8_t key[16], bl_sd_t *plain)
+{
+    const uint8_t *d = s->data;
+    int n = s->len > (int)sizeof s->data ? (int)sizeof s->data : s->len;
+    if (n < 1 || (d[0] >> 5) != 2 || !(d[0] & 0x01)) return BL_KEY_NOT_ENCRYPTED;
+    int clen = n - 1 - 8;
+    if (clen <= 0) return BL_KEY_NOT_ENCRYPTED;
+    uint8_t nonce[13];
+    memcpy(nonce, addr, 6);
+    nonce[6] = 0xD2;
+    nonce[7] = 0xFC;
+    nonce[8] = d[0];
+    memcpy(nonce + 9, d + n - 8, 4);
+    uint8_t out[29];
+    if (!bl_ccm_decrypt(key, nonce, 13, NULL, 0, d + 1, clen, d + n - 4, 4, out)) return BL_KEY_WRONG;
+    *plain = *s;
+    plain->data[0] = (uint8_t)(d[0] & ~0x01);
+    memcpy(plain->data + 1, out, clen);
+    plain->len = (uint8_t)(1 + clen);
+    return BL_KEY_OK;
+}
+
+int bl_sensor_decode_key(const bl_ad_t *ad, const uint8_t addr[6], const uint8_t key[16], bl_sensor_t *out)
+{
+    if (!ad || !addr || !key || !out) return BL_KEY_NOT_ENCRYPTED;
+    static bl_ad_t tmp;                 /* too big for a small task's stack */
+    tmp = *ad;
+    int best = BL_KEY_NOT_ENCRYPTED;
+    for (int i = 0; i < tmp.nsd && i < BL_MAX_SD; i++) {
+        bl_sd_t *s = &tmp.sd[i];
+        if (s->uuid_len != 2) continue;
+        bl_sd_t plain;
+        int r = s->uuid == 0xFE95 ? mi_decrypt(s, addr, key, &plain)
+              : s->uuid == 0xFCD2 ? bth_decrypt(s, addr, key, &plain) : BL_KEY_NOT_ENCRYPTED;
+        if (r == BL_KEY_OK) *s = plain;
+        /* the most telling outcome: ok, else a wrong key, else unsupported */
+        if (r == BL_KEY_OK || (r == BL_KEY_WRONG && best != BL_KEY_OK) ||
+            (r == BL_KEY_UNSUPPORTED && best == BL_KEY_NOT_ENCRYPTED))
+            best = r;
+    }
+    if (best != BL_KEY_OK) return best;
+    if (!bl_sensor_decode(&tmp, addr, out)) return BL_KEY_WRONG;
+    return BL_KEY_OK;
 }
 
 bool bl_sensor_decode(const bl_ad_t *ad, const uint8_t addr[6], bl_sensor_t *out)

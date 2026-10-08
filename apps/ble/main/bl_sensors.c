@@ -93,10 +93,10 @@ static void card_new(lv_obj_t *wrap, int i, int32_t cwid)
     S.card[i] = c;
     int32_t iw = cwid - 40;
     S.name[i] = aos_label(c, "", aos_font_body, AOS_C_TEXT);
-    lv_obj_set_width(S.name[i], iw);
+    lv_obj_set_size(S.name[i], iw, lv_font_get_line_height(aos_font_body));
     lv_label_set_long_mode(S.name[i], LV_LABEL_LONG_MODE_DOTS);
     S.fmt[i] = aos_label(c, "", aos_font_tiny, AOS_C_DIM);
-    lv_obj_set_width(S.fmt[i], iw);
+    lv_obj_set_size(S.fmt[i], iw, lv_font_get_line_height(aos_font_tiny));
     lv_label_set_long_mode(S.fmt[i], LV_LABEL_LONG_MODE_DOTS);
     lv_obj_set_y(S.fmt[i], 38);
     S.temp[i] = aos_label(c, "", aos_font_large, AOS_C_TEXT);
@@ -146,7 +146,7 @@ static void card_fill(int i)
     rest.mask &= ~(BL_V_TEMP | BL_V_HUM);
     if (!(s->mask & BL_V_TEMP)) rest.mask &= ~(BL_V_OPEN | BL_V_HR);   /* already big */
     bl_sensor_line(&rest, t, sizeof t);
-    lv_label_set_text(S.line[i], t[0] ? t : " ");
+    lv_label_set_text(S.line[i], s->encrypted ? _("tocá para cargar su clave") : t[0] ? t : " ");
     char age[24];
     bl_fmt_age(age, sizeof age, (uint32_t)aos_hal_uptime_ms() - d->sen_ms);
     snprintf(t, sizeof t, _("%s · %d dBm · 2 h"), age, d->rssi);

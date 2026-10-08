@@ -13,6 +13,7 @@
 #include "bl.h"
 #include "aos_mono.h"
 #include "aos_text_safe.h"
+#include "bl_crypt.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -96,6 +97,22 @@ static void packet_card(lv_obj_t *col, int32_t w, const char *title, const uint8
         aos_text_safe(v, sizeof v, lines[i].val);
         bl_kv(c, w - 44, lines[i].key, v);
     }
+    /* its key opens what the lines above call encrypted */
+    bl_dev_t *d = cur();
+    if (d && d->has_key) {
+        static bl_ad_t one;
+        bl_ad_clear(&one);
+        bl_ad_merge(&one, data, len);
+        bl_sensor_t s;
+        int r = bl_sensor_decode_key(&one, d->addr, d->key, &s);
+        if (r == BL_KEY_OK) {
+            char l[120];
+            bl_sensor_line(&s, l, sizeof l);
+            bl_kv(c, w - 44, _("Con la clave"), l[0] ? l : _("sin lecturas en este paquete"));
+        } else if (r == BL_KEY_WRONG) {
+            bl_kv(c, w - 44, _("Con la clave"), _("no coincide"));
+        }
+    }
     char hex[31 * 3 + 4];
     bl_hex(data, len, hex, sizeof hex);
     lv_obj_t *h = aos_label(c, hex, &aos_mono_18, AOS_C_DIM);
@@ -116,6 +133,52 @@ static void adv_fill(void)
     D.adv_ms = (uint32_t)aos_hal_uptime_ms();
 }
 
+/* ---- the key of a device that encrypts ---- */
+
+static void sens_fill(void);
+
+static void key_done(const char *v)
+{
+    uint8_t k[16];
+    if (!bl_parse_key(v, k)) {
+        aos_ui_toast(_("Tienen que ser 32 cifras hexadecimales"), 2000);
+        return;
+    }
+    bl_key_set(BL.sel, k);
+    sens_fill();
+}
+
+static void key_cb(lv_event_t *e)
+{
+    (void)e;
+    bl_text_entry(_("La clave del equipo (32 cifras)"), "", false, key_done);
+}
+
+static void key_del_cb(lv_event_t *e)
+{
+    (void)e;
+    bl_key_set(BL.sel, NULL);
+    sens_fill();
+}
+
+static void key_card(lv_obj_t *parent, int32_t w, const bl_dev_t *d)
+{
+    const char *st;
+    lv_color_t c = AOS_C_DIM;
+    if (!d->has_key) st = _("Cifra sus lecturas. Con su clave (en Xiaomi, la «bindkey»: 32 cifras hexadecimales) la app las descifra.");
+    else if (d->key_state == BL_KEY_OK) { st = _("Clave correcta: las lecturas se descifran."); c = AOS_C_GREEN; }
+    else if (d->key_state == BL_KEY_WRONG) { st = _("La clave no coincide con lo que anuncia."); c = AOS_C_ORANGE; }
+    else if (d->key_state == BL_KEY_UNSUPPORTED) { st = _("Usa un cifrado viejo (MiBeacon v2/v3) que la app no descifra."); c = AOS_C_ORANGE; }
+    else st = _("Clave cargada: esperando un paquete cifrado para probarla.");
+    lv_obj_t *l = bl_caption(parent, st, w);
+    lv_obj_set_style_text_color(l, c, 0);
+    lv_obj_t *b = bl_wrap(parent, w, 12);
+    bl_pill(b, AOS_SYM_LOCK_OPEN_VARIANT, d->has_key ? _("Cambiar la clave") : _("Cargar la clave"), BL_C, key_cb, NULL);
+    if (d->has_key) bl_pill(b, AOS_SYM_DELETE, _("Borrar la clave"), AOS_C_CARD2, key_del_cb, NULL);
+    if (!d->has_key)
+        bl_caption(parent, _("La bindkey de un sensor Xiaomi sale de su cuenta de Mi Home (por ejemplo con «Xiaomi Cloud Tokens Extractor»), o de Home Assistant si ya lo lee. También se puede pegar desde la página BLE del portal."), w);
+}
+
 static void sens_fill(void)
 {
     bl_dev_t *d = cur();
@@ -125,9 +188,12 @@ static void sens_fill(void)
     char v[64], t[64];
     if (d->has_sen) {
         const bl_sensor_t *s = &d->sen;
-        snprintf(t, sizeof t, "%s · %s", _("Sensor"), s->format ? s->format : "");
+        if (d->has_key && d->key_state == BL_KEY_OK)
+            snprintf(t, sizeof t, "%s · %s · %s", _("Sensor"), s->format ? s->format : "", _("descifrado"));
+        else snprintf(t, sizeof t, "%s · %s", _("Sensor"), s->format ? s->format : "");
         aos_label(D.sens, t, aos_font_body, AOS_C_TEXT);
         if (s->encrypted) bl_kv(D.sens, w, _("Datos"), _("cifrados: hace falta la clave del equipo"));
+        if (s->encrypted || d->has_key) key_card(D.sens, w, d);
 #define KV(bit, key, fmtv) if (s->mask & (bit)) { fmtv; bl_kv(D.sens, w, key, v); }
         char n[24];
         KV(BL_V_TEMP, _("Temperatura"), (bl_fmt_num(n, sizeof n, s->temp, 2), snprintf(v, sizeof v, "%s °C", n)));

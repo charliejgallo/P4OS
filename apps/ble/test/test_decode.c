@@ -7,6 +7,7 @@
  * run.sh builds and runs it. Exit status 0 when everything held.
  */
 #include "bl_decode.h"
+#include "bl_crypt.h"
 #include "aos_hal.h"
 
 #include <math.h>
@@ -1179,6 +1180,17 @@ static void sim_check(simdev_t *d, const aos_ble_adv_t *pk)
         CHECK(c == BL_CLS_HEALTH);
     } else if (is(a, "24:0A:C4:6E:1F:52")) {
         CHECK(c == BL_CLS_DEVBOARD);
+    } else if (is(a, "A4:C1:38:E1:F0:A1")) {                /* a stock Xiaomi, encrypted */
+        if (rsp) return;
+        CHECK(sok && !strcmp(s.format, "MiBeacon") && s.encrypted);
+        uint8_t k[16];
+        for (int q = 0; q < 16; q++) k[q] = (uint8_t)q;
+        bl_sensor_t p;
+        CHECK(bl_sensor_decode_key(&d->ad, a, k, &p) == BL_KEY_OK && !p.encrypted);
+        CHECK((p.mask & BL_V_TEMP) ? fabsf(p.temp - 22.4f) < 0.001f
+              : (p.mask & BL_V_HUM) ? fabsf(p.hum - 58) < 0.001f : (p.mask & BL_V_BATT) && p.batt == 83);
+        k[0] = 0xFF;
+        CHECK(bl_sensor_decode_key(&d->ad, a, k, &p) == BL_KEY_WRONG);
     } else {
         printf("  unknown simulated device %02X:%02X:%02X:%02X:%02X:%02X\n", a[0], a[1], a[2], a[3], a[4], a[5]);
         CHECK(0);
@@ -1289,7 +1301,7 @@ static void test_sim(void)
         }
     }
     aos_hal_ble_scan_stop();
-    CHECK(nd == 24);
+    CHECK(nd == 25);
     for (int k = 0; k < nd; k++) {
         if (dev[k].checked < 2) printf("  device %d checked only %d times\n", k, dev[k].checked);
         CHECK(dev[k].checked >= 2);
@@ -1309,6 +1321,84 @@ static uint32_t rnd32(void)
     rs ^= rs >> 17;
     rs ^= rs << 5;
     return rs;
+}
+
+/* ---- the encrypted ones ---- */
+
+static int unhex(const char *h, uint8_t *o)
+{
+    int n = 0;
+    while (h[0] && h[1]) { unsigned v; sscanf(h, "%2x", &v); o[n++] = (uint8_t)v; h += 2; }
+    return n;
+}
+
+static void test_crypto(void)
+{
+    uint8_t k[16], in[64], c[64], out[64], want[64], nonce[16], aad[32];
+    /* AES-128, FIPS-197 appendix C.1 */
+    unhex("000102030405060708090a0b0c0d0e0f", k);
+    unhex("00112233445566778899aabbccddeeff", in);
+    unhex("69c4e0d86a7b0430d8cdb78070b4c55a", want);
+    bl_aes128_encrypt(k, in, out);
+    CHECK(!memcmp(out, want, 16));
+    /* CCM, NIST SP 800-38C examples 1 to 3 (nonces of 7, 8 and 12 bytes) */
+    unhex("404142434445464748494a4b4c4d4e4f", k);
+    int nn = unhex("10111213141516", nonce), na = unhex("0001020304050607", aad);
+    unhex("7162015b4dac255d", c);
+    unhex("20212223", want);
+    CHECK(bl_ccm_decrypt(k, nonce, nn, aad, na, c, 4, c + 4, 4, out) && !memcmp(out, want, 4));
+    nn = unhex("1011121314151617", nonce);
+    na = unhex("000102030405060708090a0b0c0d0e0f", aad);
+    unhex("d2a1f0e051ea5f62081a7792073d593d1fc64fbfaccd", c);
+    unhex("202122232425262728292a2b2c2d2e2f", want);
+    CHECK(bl_ccm_decrypt(k, nonce, nn, aad, na, c, 16, c + 16, 6, out) && !memcmp(out, want, 16));
+    c[3] ^= 1;
+    CHECK(!bl_ccm_decrypt(k, nonce, nn, aad, na, c, 16, c + 16, 6, out));
+    nn = unhex("101112131415161718191a1b", nonce);
+    na = unhex("000102030405060708090a0b0c0d0e0f10111213", aad);
+    unhex("e3b201a9f5b71a7a9b1ceaeccd97e70b6176aad9a4428aa5484392fbc1b09951", c);
+    unhex("202122232425262728292a2b2c2d2e2f3031323334353637", want);
+    CHECK(bl_ccm_decrypt(k, nonce, nn, aad, na, c, 24, c + 24, 8, out) && !memcmp(out, want, 24));
+    CHECK(bl_parse_key("23:1d:39:c1 d7cc1ab1-aee224cd096db932", k) && k[0] == 0x23 && k[15] == 0x32);
+    CHECK(!bl_parse_key("231d39c1d7cc1ab1aee224cd096db9", k));     /* 15 bytes */
+    CHECK(!bl_parse_key("b853075158487ca39a5b5ea9", k));            /* a 12-byte v2/v3 key */
+
+    /* BTHome v2 encrypted: the example of bthome.io, temperature 25.06 and
+     * humidity 50.55 */
+    bl_ad_t ad;
+    bl_sensor_t s;
+    unhex("231d39c1d7cc1ab1aee224cd096db932", k);
+    const uint8_t a1[6] = { 0x54, 0x48, 0xE6, 0x8F, 0x80, 0xA5 };
+    int n = unhex("020106121" "6d2fc41a47266c95f730011223378237214", in);
+    bl_ad_clear(&ad);
+    bl_ad_merge(&ad, in, n);
+    CHECK(bl_sensor_decode(&ad, a1, &s) && s.encrypted);
+    CHECK(bl_sensor_decode_key(&ad, a1, k, &s) == BL_KEY_OK && !s.encrypted);
+    NEAR(s.temp, 25.06f, 0.001f);
+    NEAR(s.hum, 50.55f, 0.001f);
+    k[5] ^= 0x40;
+    CHECK(bl_sensor_decode_key(&ad, a1, k, &s) == BL_KEY_WRONG);
+
+    /* MiBeacon v5 encrypted, shaped like a stock LYWSD03MMC's (frame
+     * control 0x5858, MAC included), made with pycryptodome and the nonce
+     * of Home Assistant's xiaomi-ble: MAC little endian + product id +
+     * counter + extended counter, associated data 0x11. Objects 0x4C01
+     * (temperature, float) 21.5 and 0x4C02 (humidity) 47. */
+    for (int i = 0; i < 16; i++) k[i] = (uint8_t)i;
+    const uint8_t a2[6] = { 0x11, 0x22, 0x33, 0x44, 0x55, 0x66 };
+    n = unhex("020106201695fe5858e4162a6655443322112ac52bf45b60e5f77c7ebb01000020195355", in);
+    bl_ad_clear(&ad);
+    bl_ad_merge(&ad, in, n);
+    CHECK(bl_sensor_decode_key(&ad, a2, k, &s) == BL_KEY_OK && !strcmp(s.format, "MiBeacon"));
+    NEAR(s.temp, 21.5f, 0.001f);
+    NEAR(s.hum, 47.0f, 0.001f);
+    CHECK(bl_sensor_decode_key(&ad, a1, k, &s) == BL_KEY_WRONG);    /* another MAC, another nonce */
+    /* a plain one is not decrypted */
+    n = unhex("020106121695fe5020aa01" "2a6a771034" "2d580d1004" "d500b001", in);
+    bl_ad_clear(&ad);
+    bl_ad_merge(&ad, in, n);
+    CHECK(bl_sensor_decode_key(&ad, a2, k, &s) == BL_KEY_NOT_ENCRYPTED);
+    printf("crypto: AES, CCM, BTHome and MiBeacon with keys\n");
 }
 
 static void fuzz(int iters)
@@ -1361,6 +1451,14 @@ static void fuzz(int iters)
             if (!utf8_ok(l[i].key, sizeof l[i].key) || !utf8_ok(l[i].val, sizeof l[i].val)) { CHECK(0); printf("  bad utf-8 at %d\n", it); }
         bl_sensor_t s;
         bl_sensor_decode(&acc, NULL, &s);
+        {
+            /* and with a key: random, so nearly always the wrong one, which
+             * still walks every parse and the whole CCM */
+            uint8_t fk[16], fa[6];
+            for (int q = 0; q < 16; q++) fk[q] = (uint8_t)rand();
+            for (int q = 0; q < 6; q++) fa[q] = (uint8_t)rand();
+            bl_sensor_decode_key(&acc, fa, fk, &s);
+        }
         bl_beacon_t b;
         if (bl_beacon_decode(&acc, &b) && !utf8_ok(b.url, sizeof b.url)) CHECK(0);
         const char *lab;
@@ -1400,6 +1498,7 @@ int main(int argc, char **argv)
     test_values();
     test_text();
     test_distance();
+    test_crypto();
     test_sim();
     fuzz(iters);
     printf("%d checks passed, %d failed\n", g_pass, g_fail);

@@ -68,6 +68,27 @@ simulator's, and a fuzzer under ASan/UBSan):
 - GATT values of the known characteristics (battery, temperature,
   humidity, pressure, heart rate, Device Information, PnP ID...).
 
+### Sensors that encrypt
+
+A stock Xiaomi thermometer (LYWSD03MMC and its kin, MiBeacon v4/v5) and
+BTHome v2 devices set up with a key advertise their readings encrypted with
+AES-CCM. With the device's 16-byte key the app decrypts them
+(`main/bl_crypt.c`, plain C: the firmware's mbedTLS is not in the apps'
+symbol table) and they read like any other sensor: the readings, the
+history, the CSV and MQTT.
+
+- **The key** goes in from the device's detail ("Cargar la clave", 32 hex
+  digits) or from the portal, and is kept in `ble/claves.txt` on the card
+  (`AA:BB:CC:DD:EE:FF|<32 hex>`). The detail says whether it matches.
+- **Xiaomi's bindkey** comes from the Mi Home account the sensor is paired
+  with (tools such as "Xiaomi Cloud Tokens Extractor"), or from Home
+  Assistant if it already reads the sensor. MiBeacon v2/v3 (12-byte keys)
+  is not supported, and the detail says so.
+- **Checked** against FIPS-197 and NIST SP 800-38C (AES, CCM with 7, 8 and
+  12-byte nonces), bthome.io's encryption example, and a MiBeacon v5
+  packet made with pycryptodome and Home Assistant's nonce; the simulator
+  has a stock Xiaomi that encrypts with the test key 00 01 02 .. 0F.
+
 The distance is the log-distance path loss model: the power at a metre is
 the beacon's calibrated one when it says it, the advertised TX power minus
 41 dB when it says that, and -59 dBm otherwise; the exponent depends on the

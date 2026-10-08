@@ -62,6 +62,9 @@ typedef struct {
     uint32_t sen_slot;              /* the minute of the last reading */
     bool fav;
     char alias[28];
+    bool has_key;                   /* its key for encrypted advertisements, from ble/claves.txt */
+    uint8_t key[16];
+    int8_t key_state;               /* BL_KEY_* of the last encrypted packet, -1 none yet */
 } bl_dev_t;
 
 typedef struct {
@@ -144,6 +147,10 @@ int  bl_rssi_recent(const bl_dev_t *d, int secs);   /* strongest in the last sec
 void bl_forget_all(void);
 void bl_names_save(void);           /* favourites and aliases to /sdcard/ble/nombres.txt */
 void bl_names_poll(void);           /* re-read it if the portal changed it */
+/* A device's key for its encrypted advertisements (MiBeacon v4/v5, BTHome
+ * v2): kept in ble/claves.txt, NULL clears it. */
+void bl_key_set(int idx, const uint8_t *key);
+void bl_redecode(bl_dev_t *d);      /* what it said, again: after a new key */
 int  bl_sorted(int *out, int max, int filter, int sort);
 const char *bl_class_glyph(bl_class_t c);
 lv_color_t bl_class_color(bl_class_t c);

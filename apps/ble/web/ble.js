@@ -304,6 +304,27 @@ P.registerPage({
       g.fillText(num(lo, bars ? 0 : 1), 4, H - 4);
     }
 
+    /* the key of a device that encrypts: typed here, kept by the app in
+     * ble/claves.txt; the input is made once per device so typing is not
+     * undone by the redraws */
+    const keyBox = h('div', {});
+    function drawKey(d) {
+      if (!changed('key', [d.a, d.key].join('|'))) return;
+      const inp = h('input', { placeholder: '32 cifras hexadecimales (la bindkey)', style: 'width:340px;font-family:ui-monospace,Menlo,monospace', maxlength: 47 });
+      const st = d.key === -2 ? 'Sin clave: sus lecturas van cifradas.' : d.key === 0 ? 'Clave correcta: las lecturas se descifran.'
+        : d.key === 2 ? 'La clave no coincide con lo que anuncia.' : d.key === 3 ? 'Usa un cifrado viejo (MiBeacon v2/v3) que la app no descifra.'
+        : 'Clave cargada: esperando un paquete cifrado para probarla.';
+      put(keyBox, h('h3', {}, 'Clave'), h('p', { class: 'note', style: d.key === 0 ? 'color:var(--green)' : d.key >= 2 ? 'color:var(--orange)' : '' }, st),
+        h('div', { class: 'btns' }, inp,
+          h('button', { class: 'btn pri', onclick: () => {
+            const k = inp.value.replace(/[\s:-]/g, '');
+            if (!/^[0-9a-fA-F]{32}$/.test(k)) { P.toast('Tienen que ser 32 cifras hexadecimales', true); return; }
+            send(`key=${d.a},${k}`).then(() => P.toast('Clave guardada en ble/claves.txt'));
+          } }, 'Guardar la clave'),
+          d.key > -2 ? h('button', { class: 'btn', onclick: () => send(`key=${d.a},`) }, 'Borrar la clave') : null),
+        h('p', { class: 'note small' }, 'La bindkey de un sensor Xiaomi sale de su cuenta de Mi Home (por ejemplo con "Xiaomi Cloud Tokens Extractor"), o de Home Assistant si ya lo lee. BTHome cifrado usa la clave que le pusiste al configurarlo.'));
+    }
+
     function lines(ls) {
       return h('div', { class: 'bl-kv' }, ...ls.flatMap(([k, v]) => [h('div', { class: 'k' }, k), h('div', {}, v)]));
     }
@@ -321,7 +342,8 @@ P.registerPage({
             h('button', { class: 'btn', onclick: () => select(d.a) }, 'Cerrar')));
         put(detail, detailHead, detailBody);
       }
-      const sig = JSON.stringify([d.r, d.age, d.adv, dev && dev.adv, dev && dev.rsp, dev && dev.hist && dev.hist.slice(-3)]);
+      drawKey(d);
+      const sig = JSON.stringify([d.r, d.age, d.adv, d.key, d.sen && d.sen.encrypted, dev && dev.adv, dev && dev.rsp, dev && dev.hist && dev.hist.slice(-3)]);
       if (!changed('detail', sig)) return;
       const info = [['Qué es', d.cls + (d.lbl ? ' · ' + d.lbl : '')], ['Dirección', `${d.a} (${d.k})`]];
       if (d.co) info.push(['Fabricante', `${d.co}` + (d.cid !== undefined ? ` (0x${d.cid.toString(16).toUpperCase().padStart(4, '0')})` : '')]);
@@ -330,6 +352,7 @@ P.registerPage({
         ['Paquetes', `${d.adv} anuncios, ${d.rsp} respuestas, cambió ${d.chg} veces`], ['Oído', `hace ${age(d.age)} · desde hace ${age(d.seen)}`],
         ['Conectable', d.conn ? 'sí (el explorador GATT está en la placa)' : 'no']);
       const parts = [lines(info), h('h3', {}, 'Señal, dos minutos'), sigCanvas];
+      if ((d.sen && d.sen.encrypted) || d.key > -2) parts.push(keyBox);
       if (d.sen) parts.push(h('h3', {}, 'Sensor · ' + d.sen.format), lines(Object.entries(d.sen).filter(([k]) => k !== 'format').map(([k, v]) => [k, String(v)])));
       if (dev && dev.temps && dev.temps.some(v => v !== null)) parts.push(h('h3', {}, 'Temperatura, dos horas'), tempCanvas);
       if (dev && dev.beacon) {

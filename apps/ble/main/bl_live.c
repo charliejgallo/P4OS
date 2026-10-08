@@ -11,6 +11,7 @@
  * forget, csv, mqtt, env, minrssi.
  */
 #include "bl.h"
+#include "bl_crypt.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -143,6 +144,8 @@ static void put_devices(void)
             (d->kinds & ((1u << AOS_BLE_ADV_IND) | (1u << AOS_BLE_ADV_DIRECT_IND))) ? "true" : "false", d->kinds);
         if (d->has_sen) sensor_obj(j, n, &k, &d->sen);
         if (d->has_bc) PUT(",\"bc\":%d", d->bc.kind);
+        /* the key: -2 none, else BL_KEY_* of the last try (-1 not tried yet) */
+        PUT(",\"key\":%d", d->has_key ? d->key_state : -2);
         PUT("}");
         put++;
     }
@@ -248,6 +251,19 @@ static void take(void)
             else if (!strcmp(key, "mqtt")) { BL.mqtt = num != 0; changed = true; }
             else if (!strcmp(key, "forget")) { bl_forget_all(); changed = true; }
             else if (!strcmp(key, "lost_ok")) { BL.lost = 0; changed = true; }
+            else if (!strcmp(key, "key")) {
+                /* key=AA:..:FF,<32 hex>   key=AA:..:FF,   (clears it) */
+                uint8_t a[6], k[16];
+                char *comma = strchr(v, ',');
+                if (!comma) continue;
+                *comma = 0;
+                if (!bl_parse_addr(v, a)) continue;
+                int i = bl_find(a);
+                if (i < 0) continue;
+                if (!comma[1]) bl_key_set(i, NULL);
+                else if (bl_parse_key(comma + 1, k)) bl_key_set(i, k);
+                changed = true;
+            }
             else if (!strcmp(key, "fav") || !strcmp(key, "alias")) {
                 /* fav=AA:..:FF,1   alias=AA:..:FF,some name */
                 uint8_t a[6];

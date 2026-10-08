@@ -68,824 +68,871 @@ Tipos de anuncio	Advertising types
 #: apps/ble/main/bl_air.c:248
 Señal (dBm)	Signal (dBm)
 
-#: apps/ble/main/bl_decode.c:389
+#: apps/ble/main/bl_decode.c:390
 Pública	Public
 
-#: apps/ble/main/bl_decode.c:390
+#: apps/ble/main/bl_decode.c:391
 Aleatoria estática	Random static
 
-#: apps/ble/main/bl_decode.c:391
+#: apps/ble/main/bl_decode.c:392
 Privada resoluble	Resolvable private
 
-#: apps/ble/main/bl_decode.c:392
+#: apps/ble/main/bl_decode.c:393
 Privada no resoluble	Non-resolvable private
 
-#: apps/ble/main/bl_decode.c:394
-#: apps/ble/main/bl_decode.c:1268
+#: apps/ble/main/bl_decode.c:395
+#: apps/ble/main/bl_decode.c:1363
 #: apps/ble/main/bl_names.c:600
 Desconocido	Unknown
 
-#: apps/ble/main/bl_decode.c:913
-#: apps/ble/main/bl_decode.c:914
-#: apps/ble/main/bl_decode.c:915
+#: apps/ble/main/bl_decode.c:920
+#: apps/ble/main/bl_decode.c:921
+#: apps/ble/main/bl_decode.c:922
 Sensor BTHome	BTHome sensor
 
-#: apps/ble/main/bl_decode.c:917
+#: apps/ble/main/bl_decode.c:924
 Termómetro (pvvx)	Thermometer (pvvx)
 
-#: apps/ble/main/bl_decode.c:918
+#: apps/ble/main/bl_decode.c:925
 Termómetro (ATC)	Thermometer (ATC)
 
-#: apps/ble/main/bl_decode.c:920
+#: apps/ble/main/bl_decode.c:927
 Sensor Xiaomi	Xiaomi sensor
 
-#: apps/ble/main/bl_decode.c:921
-#: apps/ble/main/bl_decode.c:1434
+#: apps/ble/main/bl_decode.c:928
+#: apps/ble/main/bl_decode.c:1529
 Termómetro SwitchBot	SwitchBot thermometer
 
-#: apps/ble/main/bl_decode.c:922
-#: apps/ble/main/bl_decode.c:1430
-#: apps/ble/main/bl_decode.c:1431
-#: apps/ble/main/bl_decode.c:1432
+#: apps/ble/main/bl_decode.c:929
+#: apps/ble/main/bl_decode.c:1525
+#: apps/ble/main/bl_decode.c:1526
+#: apps/ble/main/bl_decode.c:1527
 Sensor Qingping	Qingping sensor
 
-#: apps/ble/main/bl_decode.c:934
-#: apps/ble/main/bl_decode.c:1433
+#: apps/ble/main/bl_decode.c:941
+#: apps/ble/main/bl_decode.c:1528
 Termómetro Inkbird	Inkbird thermometer
 
-#: apps/ble/main/bl_decode.c:935
-#: apps/ble/main/bl_decode.c:1426
-#: apps/ble/main/bl_decode.c:1427
+#: apps/ble/main/bl_decode.c:942
+#: apps/ble/main/bl_decode.c:1521
+#: apps/ble/main/bl_decode.c:1522
 Termómetro Govee	Govee thermometer
 
-#: apps/ble/main/bl_decode.c:1120
-#: apps/ble/main/bl_decode.c:2231
+#: apps/ble/main/bl_decode.c:1215
+#: apps/ble/main/bl_decode.c:2326
 Otro	Other
 
-#: apps/ble/main/bl_decode.c:1164
+#: apps/ble/main/bl_decode.c:1259
 cargando	charging
 
-#: apps/ble/main/bl_decode.c:1180
-#: apps/ble/main/bl_decode.c:1807
+#: apps/ble/main/bl_decode.c:1275
+#: apps/ble/main/bl_decode.c:1902
 modelo	model
 
-#: apps/ble/main/bl_decode.c:1188
+#: apps/ble/main/bl_decode.c:1283
 izq.	left
 
-#: apps/ble/main/bl_decode.c:1189
+#: apps/ble/main/bl_decode.c:1284
 der.	right
 
-#: apps/ble/main/bl_decode.c:1190
+#: apps/ble/main/bl_decode.c:1285
 estuche	case
 
-#: apps/ble/main/bl_decode.c:1199
-#: apps/ble/main/bl_decode.c:1308
+#: apps/ble/main/bl_decode.c:1294
+#: apps/ble/main/bl_decode.c:1403
 Equipo Apple	Apple device
 
-#: apps/ble/main/bl_decode.c:1199
+#: apps/ble/main/bl_decode.c:1294
 Accesorio Find My	Find My accessory
 
-#: apps/ble/main/bl_decode.c:1200
+#: apps/ble/main/bl_decode.c:1295
 batería llena	battery full
 
-#: apps/ble/main/bl_decode.c:1200
+#: apps/ble/main/bl_decode.c:1295
 batería media	battery medium
 
-#: apps/ble/main/bl_decode.c:1200
+#: apps/ble/main/bl_decode.c:1295
 batería baja	battery low
 
-#: apps/ble/main/bl_decode.c:1201
+#: apps/ble/main/bl_decode.c:1296
 batería muy baja	battery critical
 
-#: apps/ble/main/bl_decode.c:1206
+#: apps/ble/main/bl_decode.c:1301
 lejos del dueño	away from owner
 
-#: apps/ble/main/bl_decode.c:1206
+#: apps/ble/main/bl_decode.c:1301
 cerca del dueño	near owner
 
-#: apps/ble/main/bl_decode.c:1251
-#: apps/ble/main/bl_decode.c:1867
+#: apps/ble/main/bl_decode.c:1346
+#: apps/ble/main/bl_decode.c:1962
 #: apps/ble/main/bl_names.c:601
 Teléfono	Phone
 
-#: apps/ble/main/bl_decode.c:1252
-#: apps/ble/main/bl_decode.c:1867
+#: apps/ble/main/bl_decode.c:1347
+#: apps/ble/main/bl_decode.c:1962
 #: apps/ble/main/bl_names.c:602
 Computadora	Computer
 
-#: apps/ble/main/bl_decode.c:1253
+#: apps/ble/main/bl_decode.c:1348
 #: apps/ble/main/bl_names.c:609
 Tableta	Tablet
 
-#: apps/ble/main/bl_decode.c:1254
+#: apps/ble/main/bl_decode.c:1349
 #: apps/ble/main/bl_names.c:618
 Reloj	Watch
 
-#: apps/ble/main/bl_decode.c:1255
+#: apps/ble/main/bl_decode.c:1350
 Audio	Audio
 
-#: apps/ble/main/bl_decode.c:1256
+#: apps/ble/main/bl_decode.c:1351
 Rastreador	Tracker
 
-#: apps/ble/main/bl_decode.c:1257
-#: apps/ble/main/bl_detail.c:121
+#: apps/ble/main/bl_decode.c:1352
+#: apps/ble/main/bl_detail.c:192
+#: apps/ble/main/bl_detail.c:193
 #: apps/ble/main/bl_names.c:676
 Sensor	Sensor
 
-#: apps/ble/main/bl_decode.c:1258
-#: apps/ble/main/bl_detail.c:161
-#: apps/ble/main/bl_scan.c:427
+#: apps/ble/main/bl_decode.c:1353
+#: apps/ble/main/bl_detail.c:234
+#: apps/ble/main/bl_scan.c:460
 Baliza	Beacon
 
-#: apps/ble/main/bl_decode.c:1259
+#: apps/ble/main/bl_decode.c:1354
 Teclado o mouse	Keyboard or mouse
 
-#: apps/ble/main/bl_decode.c:1260
+#: apps/ble/main/bl_decode.c:1355
 #: apps/ble/main/bl_names.c:639
 Joystick	Joystick
 
-#: apps/ble/main/bl_decode.c:1261
-#: apps/ble/main/bl_decode.c:1382
-#: apps/ble/main/bl_decode.c:1450
+#: apps/ble/main/bl_decode.c:1356
+#: apps/ble/main/bl_decode.c:1477
+#: apps/ble/main/bl_decode.c:1545
 #: apps/ble/main/bl_names.c:782
 Tele	TV
 
-#: apps/ble/main/bl_decode.c:1262
-#: apps/ble/main/bl_decode.c:1869
+#: apps/ble/main/bl_decode.c:1357
+#: apps/ble/main/bl_decode.c:1964
 Salud	Health
 
-#: apps/ble/main/bl_decode.c:1263
-#: apps/ble/main/bl_detail.c:133
+#: apps/ble/main/bl_decode.c:1358
+#: apps/ble/main/bl_detail.c:206
 Luz	Light
 
-#: apps/ble/main/bl_decode.c:1264
+#: apps/ble/main/bl_decode.c:1359
 Deporte	Sports
 
-#: apps/ble/main/bl_decode.c:1265
+#: apps/ble/main/bl_decode.c:1360
 Placa de desarrollo	Dev board
 
-#: apps/ble/main/bl_decode.c:1289
+#: apps/ble/main/bl_decode.c:1384
 AirTag (lejos del dueño)	AirTag (away from owner)
 
-#: apps/ble/main/bl_decode.c:1290
+#: apps/ble/main/bl_decode.c:1385
 Find My (lejos del dueño)	Find My (away from owner)
 
-#: apps/ble/main/bl_decode.c:1295
+#: apps/ble/main/bl_decode.c:1390
 iPhone (punto de acceso)	iPhone (hotspot)
 
-#: apps/ble/main/bl_decode.c:1309
+#: apps/ble/main/bl_decode.c:1404
 Accesorio HomeKit	HomeKit accessory
 
-#: apps/ble/main/bl_decode.c:1310
+#: apps/ble/main/bl_decode.c:1405
 Impresora AirPrint	AirPrint printer
 
-#: apps/ble/main/bl_decode.c:1321
+#: apps/ble/main/bl_decode.c:1416
 Teclado (Swift Pair)	Keyboard (Swift Pair)
 
-#: apps/ble/main/bl_decode.c:1322
+#: apps/ble/main/bl_decode.c:1417
 Mouse (Swift Pair)	Mouse (Swift Pair)
 
-#: apps/ble/main/bl_decode.c:1324
+#: apps/ble/main/bl_decode.c:1419
 Joystick (Swift Pair)	Joystick (Swift Pair)
 
-#: apps/ble/main/bl_decode.c:1327
+#: apps/ble/main/bl_decode.c:1422
 Audio (Swift Pair)	Audio (Swift Pair)
 
-#: apps/ble/main/bl_decode.c:1337
+#: apps/ble/main/bl_decode.c:1432
 PC con Windows	Windows PC
 
-#: apps/ble/main/bl_decode.c:1338
+#: apps/ble/main/bl_decode.c:1433
 Teléfono con Windows	Windows phone
 
-#: apps/ble/main/bl_decode.c:1341
+#: apps/ble/main/bl_decode.c:1436
 Notebook con Windows	Windows laptop
 
-#: apps/ble/main/bl_decode.c:1342
+#: apps/ble/main/bl_decode.c:1437
 Tableta con Windows	Windows tablet
 
-#: apps/ble/main/bl_decode.c:1416
-#: apps/ble/main/bl_decode.c:1417
-#: apps/ble/main/bl_decode.c:1418
+#: apps/ble/main/bl_decode.c:1511
+#: apps/ble/main/bl_decode.c:1512
+#: apps/ble/main/bl_decode.c:1513
 #: apps/ble/main/bl_names.c:637
 Teclado	Keyboard
 
-#: apps/ble/main/bl_decode.c:1419
-#: apps/ble/main/bl_decode.c:1420
-#: apps/ble/main/bl_decode.c:1421
+#: apps/ble/main/bl_decode.c:1514
+#: apps/ble/main/bl_decode.c:1515
+#: apps/ble/main/bl_decode.c:1516
 #: apps/ble/main/bl_names.c:638
 Mouse	Mouse
 
-#: apps/ble/main/bl_decode.c:1423
+#: apps/ble/main/bl_decode.c:1518
 #: apps/ble/main/bl_names.c:623
 Control remoto	Remote control
 
-#: apps/ble/main/bl_decode.c:1424
-#: apps/ble/main/bl_decode.c:1425
-#: apps/ble/main/bl_decode.c:1429
-#: apps/ble/main/bl_decode.c:1435
+#: apps/ble/main/bl_decode.c:1519
+#: apps/ble/main/bl_decode.c:1520
+#: apps/ble/main/bl_decode.c:1524
+#: apps/ble/main/bl_decode.c:1530
 Termómetro	Thermometer
 
-#: apps/ble/main/bl_decode.c:1517
+#: apps/ble/main/bl_decode.c:1612
 UART de Nordic	Nordic UART
 
-#: apps/ble/main/bl_decode.c:1520
+#: apps/ble/main/bl_decode.c:1615
 Auriculares (Fast Pair)	Headphones (Fast Pair)
 
-#: apps/ble/main/bl_decode.c:1523
+#: apps/ble/main/bl_decode.c:1618
 Teléfono (exposición)	Phone (exposure)
 
-#: apps/ble/main/bl_decode.c:1524
+#: apps/ble/main/bl_decode.c:1619
 #: apps/ble/main/bl_names.c:631
 Sensor de pulso	Heart rate sensor
 
-#: apps/ble/main/bl_decode.c:1525
+#: apps/ble/main/bl_decode.c:1620
 #: apps/ble/main/bl_names.c:633
 Tensiómetro	Blood pressure monitor
 
-#: apps/ble/main/bl_decode.c:1526
+#: apps/ble/main/bl_decode.c:1621
 #: apps/ble/main/bl_names.c:647
 Glucómetro	Glucose meter
 
-#: apps/ble/main/bl_decode.c:1528
+#: apps/ble/main/bl_decode.c:1623
 #: apps/ble/main/bl_names.c:796
 Balanza	Scale
 
-#: apps/ble/main/bl_decode.c:1529
+#: apps/ble/main/bl_decode.c:1624
 #: apps/ble/main/bl_names.c:793
 Oxímetro	Oximeter
 
-#: apps/ble/main/bl_decode.c:1594
+#: apps/ble/main/bl_decode.c:1689
 nada	none
 
-#: apps/ble/main/bl_decode.c:1594
+#: apps/ble/main/bl_decode.c:1689
 pulsado	press
 
-#: apps/ble/main/bl_decode.c:1594
+#: apps/ble/main/bl_decode.c:1689
 doble	double
 
-#: apps/ble/main/bl_decode.c:1594
+#: apps/ble/main/bl_decode.c:1689
 triple	triple
 
-#: apps/ble/main/bl_decode.c:1594
+#: apps/ble/main/bl_decode.c:1689
 largo	long
 
-#: apps/ble/main/bl_decode.c:1595
+#: apps/ble/main/bl_decode.c:1690
 largo doble	long double
 
-#: apps/ble/main/bl_decode.c:1595
+#: apps/ble/main/bl_decode.c:1690
 largo triple	long triple
 
-#: apps/ble/main/bl_decode.c:1598
+#: apps/ble/main/bl_decode.c:1693
 cifrado, sin lecturas	encrypted, no readings
 
-#: apps/ble/main/bl_decode.c:1602
+#: apps/ble/main/bl_decode.c:1697
 rocío	dew
 
-#: apps/ble/main/bl_decode.c:1607
-#: apps/ble/main/bl_scan.c:444
+#: apps/ble/main/bl_decode.c:1702
+#: apps/ble/main/bl_scan.c:477
 suelo	soil
 
-#: apps/ble/main/bl_decode.c:1614
-#: apps/ble/main/bl_scan.c:447
+#: apps/ble/main/bl_decode.c:1709
+#: apps/ble/main/bl_scan.c:480
 #: apps/ble/main/bl_sensors.c:134
 abierto	open
 
-#: apps/ble/main/bl_decode.c:1614
-#: apps/ble/main/bl_scan.c:447
+#: apps/ble/main/bl_decode.c:1709
+#: apps/ble/main/bl_scan.c:480
 #: apps/ble/main/bl_sensors.c:134
 cerrado	closed
 
-#: apps/ble/main/bl_decode.c:1615
-#: apps/ble/main/bl_scan.c:448
+#: apps/ble/main/bl_decode.c:1710
+#: apps/ble/main/bl_scan.c:481
 movimiento	motion
 
-#: apps/ble/main/bl_decode.c:1615
-#: apps/ble/main/bl_scan.c:448
+#: apps/ble/main/bl_decode.c:1710
+#: apps/ble/main/bl_scan.c:481
 quieto	still
 
-#: apps/ble/main/bl_decode.c:1618
+#: apps/ble/main/bl_decode.c:1713
 botón	button
 
-#: apps/ble/main/bl_decode.c:1621
+#: apps/ble/main/bl_decode.c:1716
 mantenido	held
 
-#: apps/ble/main/bl_decode.c:1634
+#: apps/ble/main/bl_decode.c:1729
 batería	battery
 
-#: apps/ble/main/bl_decode.c:1636
+#: apps/ble/main/bl_decode.c:1731
 contador	count
 
-#: apps/ble/main/bl_decode.c:1637
-#: apps/ble/main/bl_decode.c:2190
-#: apps/ble/main/bl_decode.c:2207
+#: apps/ble/main/bl_decode.c:1732
+#: apps/ble/main/bl_decode.c:2285
+#: apps/ble/main/bl_decode.c:2302
 lpm	bpm
 
-#: apps/ble/main/bl_decode.c:1651
+#: apps/ble/main/bl_decode.c:1746
 (sobran bytes)	(extra bytes)
 
-#: apps/ble/main/bl_decode.c:1666
-#: apps/ble/main/bl_detail.c:123
+#: apps/ble/main/bl_decode.c:1761
+#: apps/ble/main/bl_detail.c:195
 Datos	Data
 
-#: apps/ble/main/bl_decode.c:1693
+#: apps/ble/main/bl_decode.c:1788
 mayor	major
 
-#: apps/ble/main/bl_decode.c:1695
+#: apps/ble/main/bl_decode.c:1790
 menor	minor
 
-#: apps/ble/main/bl_decode.c:1697
+#: apps/ble/main/bl_decode.c:1792
 a 1 m	at 1 m
 
-#: apps/ble/main/bl_decode.c:1705
-#: apps/ble/main/bl_decode.c:1711
+#: apps/ble/main/bl_decode.c:1800
+#: apps/ble/main/bl_decode.c:1806
 a 0 m	at 0 m
 
-#: apps/ble/main/bl_decode.c:1724
-#: apps/ble/main/bl_decode.c:1732
-#: apps/ble/main/bl_detail.c:254
+#: apps/ble/main/bl_decode.c:1819
+#: apps/ble/main/bl_decode.c:1827
+#: apps/ble/main/bl_detail.c:327
 Fabricante	Manufacturer
 
-#: apps/ble/main/bl_decode.c:1724
-#: apps/ble/main/bl_decode.c:1767
+#: apps/ble/main/bl_decode.c:1819
+#: apps/ble/main/bl_decode.c:1862
 demasiado corto	too short
 
-#: apps/ble/main/bl_decode.c:1735
+#: apps/ble/main/bl_decode.c:1830
 desconocido	unknown
 
-#: apps/ble/main/bl_decode.c:1746
+#: apps/ble/main/bl_decode.c:1841
 tipo	type
 
-#: apps/ble/main/bl_decode.c:1767
-#: apps/ble/main/bl_decode.c:1773
+#: apps/ble/main/bl_decode.c:1862
+#: apps/ble/main/bl_decode.c:1868
 Datos de servicio	Service data
 
-#: apps/ble/main/bl_decode.c:1808
+#: apps/ble/main/bl_decode.c:1903
 emparejado, no visible	paired, not discoverable
 
-#: apps/ble/main/bl_decode.c:1824
+#: apps/ble/main/bl_decode.c:1919
 aleatoria	random
 
-#: apps/ble/main/bl_decode.c:1824
+#: apps/ble/main/bl_decode.c:1919
 pública	public
 
-#: apps/ble/main/bl_decode.c:1842
+#: apps/ble/main/bl_decode.c:1937
 LE Limited Discoverable	LE Limited Discoverable
 
-#: apps/ble/main/bl_decode.c:1842
+#: apps/ble/main/bl_decode.c:1937
 LE General Discoverable	LE General Discoverable
 
-#: apps/ble/main/bl_decode.c:1843
+#: apps/ble/main/bl_decode.c:1938
 sin BR/EDR	no BR/EDR
 
-#: apps/ble/main/bl_decode.c:1843
+#: apps/ble/main/bl_decode.c:1938
 LE y BR/EDR a la vez (controlador)	LE and BR/EDR at once (controller)
 
-#: apps/ble/main/bl_decode.c:1844
+#: apps/ble/main/bl_decode.c:1939
 LE y BR/EDR a la vez (host)	LE and BR/EDR at once (host)
 
-#: apps/ble/main/bl_decode.c:1845
+#: apps/ble/main/bl_decode.c:1940
 Flags	Flags
 
-#: apps/ble/main/bl_decode.c:1846
-#: apps/ble/main/bl_decode.c:2094
+#: apps/ble/main/bl_decode.c:1941
+#: apps/ble/main/bl_decode.c:2189
 vacío	empty
 
-#: apps/ble/main/bl_decode.c:1849
+#: apps/ble/main/bl_decode.c:1944
 ninguno	none
 
-#: apps/ble/main/bl_decode.c:1853
+#: apps/ble/main/bl_decode.c:1948
 Servicios (16 bits)	Services (16-bit)
 
-#: apps/ble/main/bl_decode.c:1854
+#: apps/ble/main/bl_decode.c:1949
 Servicios (32 bits)	Services (32-bit)
 
-#: apps/ble/main/bl_decode.c:1856
-#: apps/ble/main/bl_decode.c:1857
+#: apps/ble/main/bl_decode.c:1951
+#: apps/ble/main/bl_decode.c:1952
 Servicio 128 bits	128-bit service
 
-#: apps/ble/main/bl_decode.c:1857
+#: apps/ble/main/bl_decode.c:1952
 incompleto	incomplete
 
-#: apps/ble/main/bl_decode.c:1859
+#: apps/ble/main/bl_decode.c:1954
 Nombre corto	Short name
 
-#: apps/ble/main/bl_decode.c:1860
-#: apps/ble/main/bl_detail.c:265
+#: apps/ble/main/bl_decode.c:1955
+#: apps/ble/main/bl_detail.c:342
 Nombre	Name
 
-#: apps/ble/main/bl_decode.c:1862
+#: apps/ble/main/bl_decode.c:1957
 Potencia TX	TX power
 
-#: apps/ble/main/bl_decode.c:1865
+#: apps/ble/main/bl_decode.c:1960
 Clase de dispositivo	Device class
 
-#: apps/ble/main/bl_decode.c:1867
+#: apps/ble/main/bl_decode.c:1962
 Varios	Miscellaneous
 
-#: apps/ble/main/bl_decode.c:1867
+#: apps/ble/main/bl_decode.c:1962
 Red	Networking
 
-#: apps/ble/main/bl_decode.c:1868
+#: apps/ble/main/bl_decode.c:1963
 Audio y video	Audio/video
 
-#: apps/ble/main/bl_decode.c:1868
+#: apps/ble/main/bl_decode.c:1963
 Periférico	Peripheral
 
-#: apps/ble/main/bl_decode.c:1868
+#: apps/ble/main/bl_decode.c:1963
 Imagen	Imaging
 
-#: apps/ble/main/bl_decode.c:1868
+#: apps/ble/main/bl_decode.c:1963
 Vestible	Wearable
 
-#: apps/ble/main/bl_decode.c:1869
+#: apps/ble/main/bl_decode.c:1964
 Juguete	Toy
 
-#: apps/ble/main/bl_decode.c:1873
+#: apps/ble/main/bl_decode.c:1968
 Sin categoría	Uncategorized
 
-#: apps/ble/main/bl_decode.c:1876
+#: apps/ble/main/bl_decode.c:1971
 Hash C (SSP)	Hash C (SSP)
 
-#: apps/ble/main/bl_decode.c:1877
+#: apps/ble/main/bl_decode.c:1972
 Aleatorio R (SSP)	Randomizer R (SSP)
 
-#: apps/ble/main/bl_decode.c:1880
+#: apps/ble/main/bl_decode.c:1975
 ID de dispositivo	Device ID
 
-#: apps/ble/main/bl_decode.c:1887
-#: apps/ble/main/bl_decode.c:2253
+#: apps/ble/main/bl_decode.c:1982
+#: apps/ble/main/bl_decode.c:2348
 producto	product
 
-#: apps/ble/main/bl_decode.c:1889
-#: apps/ble/main/bl_decode.c:2255
+#: apps/ble/main/bl_decode.c:1984
+#: apps/ble/main/bl_decode.c:2350
 versión	version
 
-#: apps/ble/main/bl_decode.c:1891
+#: apps/ble/main/bl_decode.c:1986
 Clave TK	TK value
 
-#: apps/ble/main/bl_decode.c:1893
+#: apps/ble/main/bl_decode.c:1988
 Flags OOB	OOB flags
 
-#: apps/ble/main/bl_decode.c:1895
+#: apps/ble/main/bl_decode.c:1990
 Intervalo de conexión	Connection interval
 
-#: apps/ble/main/bl_decode.c:1906
+#: apps/ble/main/bl_decode.c:2001
 Pide servicios (16 bits)	Solicits services (16-bit)
 
-#: apps/ble/main/bl_decode.c:1907
+#: apps/ble/main/bl_decode.c:2002
 Pide servicios (32 bits)	Solicits services (32-bit)
 
-#: apps/ble/main/bl_decode.c:1909
+#: apps/ble/main/bl_decode.c:2004
 Pide servicio 128 bits	Solicits 128-bit service
 
-#: apps/ble/main/bl_decode.c:1914
-#: apps/ble/main/bl_decode.c:1915
+#: apps/ble/main/bl_decode.c:2009
+#: apps/ble/main/bl_decode.c:2010
 Destino	Target
 
-#: apps/ble/main/bl_decode.c:1917
+#: apps/ble/main/bl_decode.c:2012
 Apariencia	Appearance
 
-#: apps/ble/main/bl_decode.c:1926
-#: apps/ble/main/bl_decode.c:1971
+#: apps/ble/main/bl_decode.c:2021
+#: apps/ble/main/bl_decode.c:2066
 Intervalo de anuncios	Advertising interval
 
-#: apps/ble/main/bl_decode.c:1931
-#: apps/ble/main/bl_decode.c:1932
+#: apps/ble/main/bl_decode.c:2026
+#: apps/ble/main/bl_decode.c:2027
 Dirección LE	LE address
 
-#: apps/ble/main/bl_decode.c:1935
+#: apps/ble/main/bl_decode.c:2030
 sólo periférico	peripheral only
 
-#: apps/ble/main/bl_decode.c:1935
+#: apps/ble/main/bl_decode.c:2030
 sólo central	central only
 
-#: apps/ble/main/bl_decode.c:1936
+#: apps/ble/main/bl_decode.c:2031
 periférico y central, prefiere periférico	peripheral and central, prefers peripheral
 
-#: apps/ble/main/bl_decode.c:1937
+#: apps/ble/main/bl_decode.c:2032
 periférico y central, prefiere central	peripheral and central, prefers central
 
-#: apps/ble/main/bl_decode.c:1938
+#: apps/ble/main/bl_decode.c:2033
 Rol LE	LE role
 
-#: apps/ble/main/bl_decode.c:1943
+#: apps/ble/main/bl_decode.c:2038
 Hash C-256	Hash C-256
 
-#: apps/ble/main/bl_decode.c:1944
+#: apps/ble/main/bl_decode.c:2039
 Aleatorio R-256	Randomizer R-256
 
-#: apps/ble/main/bl_decode.c:1945
+#: apps/ble/main/bl_decode.c:2040
 Confirmación LE SC	LE SC confirmation
 
-#: apps/ble/main/bl_decode.c:1946
+#: apps/ble/main/bl_decode.c:2041
 Aleatorio LE SC	LE SC random
 
-#: apps/ble/main/bl_decode.c:1960
+#: apps/ble/main/bl_decode.c:2055
 Posicionamiento en interiores	Indoor positioning
 
-#: apps/ble/main/bl_decode.c:1961
+#: apps/ble/main/bl_decode.c:2056
 Descubrimiento de transporte	Transport discovery
 
-#: apps/ble/main/bl_decode.c:1962
+#: apps/ble/main/bl_decode.c:2057
 Funciones LE	LE features
 
-#: apps/ble/main/bl_decode.c:1963
+#: apps/ble/main/bl_decode.c:2058
 Mapa de canales	Channel map
 
-#: apps/ble/main/bl_decode.c:1965
+#: apps/ble/main/bl_decode.c:2060
 Mensaje mesh	Mesh message
 
-#: apps/ble/main/bl_decode.c:1966
+#: apps/ble/main/bl_decode.c:2061
 Baliza mesh	Mesh beacon
 
-#: apps/ble/main/bl_decode.c:1969
+#: apps/ble/main/bl_decode.c:2064
 Identificador de conjunto	Set identifier
 
-#: apps/ble/main/bl_decode.c:1979
+#: apps/ble/main/bl_decode.c:2074
 Nombre de difusión	Broadcast name
 
-#: apps/ble/main/bl_decode.c:1980
+#: apps/ble/main/bl_decode.c:2075
 Datos cifrados	Encrypted data
 
-#: apps/ble/main/bl_decode.c:1985
+#: apps/ble/main/bl_decode.c:2080
 Tipo	Type
 
-#: apps/ble/main/bl_decode.c:2003
+#: apps/ble/main/bl_decode.c:2098
 Error	Error
 
-#: apps/ble/main/bl_decode.c:2004
+#: apps/ble/main/bl_decode.c:2099
 la longitud se pasa del paquete	length runs past the packet
 
-#: apps/ble/main/bl_decode.c:2106
-#: apps/ble/main/bl_decode.c:2112
-#: apps/ble/main/bl_decode.c:2153
+#: apps/ble/main/bl_decode.c:2201
+#: apps/ble/main/bl_decode.c:2207
+#: apps/ble/main/bl_decode.c:2248
 sin dato	no data
 
-#: apps/ble/main/bl_decode.c:2148
-#: apps/ble/main/bl_decode.c:2169
+#: apps/ble/main/bl_decode.c:2243
+#: apps/ble/main/bl_decode.c:2264
 axila	armpit
 
-#: apps/ble/main/bl_decode.c:2148
-#: apps/ble/main/bl_decode.c:2169
+#: apps/ble/main/bl_decode.c:2243
+#: apps/ble/main/bl_decode.c:2264
 cuerpo	body
 
-#: apps/ble/main/bl_decode.c:2148
-#: apps/ble/main/bl_decode.c:2169
+#: apps/ble/main/bl_decode.c:2243
+#: apps/ble/main/bl_decode.c:2264
 oído	ear
 
-#: apps/ble/main/bl_decode.c:2148
-#: apps/ble/main/bl_decode.c:2169
+#: apps/ble/main/bl_decode.c:2243
+#: apps/ble/main/bl_decode.c:2264
 dedo	finger
 
-#: apps/ble/main/bl_decode.c:2149
-#: apps/ble/main/bl_decode.c:2170
+#: apps/ble/main/bl_decode.c:2244
+#: apps/ble/main/bl_decode.c:2265
 tracto digestivo	GI tract
 
-#: apps/ble/main/bl_decode.c:2149
-#: apps/ble/main/bl_decode.c:2170
+#: apps/ble/main/bl_decode.c:2244
+#: apps/ble/main/bl_decode.c:2265
 boca	mouth
 
-#: apps/ble/main/bl_decode.c:2149
-#: apps/ble/main/bl_decode.c:2170
+#: apps/ble/main/bl_decode.c:2244
+#: apps/ble/main/bl_decode.c:2265
 recto	rectum
 
-#: apps/ble/main/bl_decode.c:2149
-#: apps/ble/main/bl_decode.c:2170
+#: apps/ble/main/bl_decode.c:2244
+#: apps/ble/main/bl_decode.c:2265
 dedo del pie	toe
 
-#: apps/ble/main/bl_decode.c:2150
-#: apps/ble/main/bl_decode.c:2171
+#: apps/ble/main/bl_decode.c:2245
+#: apps/ble/main/bl_decode.c:2266
 tímpano	eardrum
 
-#: apps/ble/main/bl_decode.c:2211
+#: apps/ble/main/bl_decode.c:2306
 contacto	contact
 
-#: apps/ble/main/bl_decode.c:2211
+#: apps/ble/main/bl_decode.c:2306
 sin contacto	non-contact
 
-#: apps/ble/main/bl_decode.c:2231
+#: apps/ble/main/bl_decode.c:2326
 Pecho	Chest
 
-#: apps/ble/main/bl_decode.c:2231
+#: apps/ble/main/bl_decode.c:2326
 Muñeca	Wrist
 
-#: apps/ble/main/bl_decode.c:2231
+#: apps/ble/main/bl_decode.c:2326
 Dedo	Finger
 
-#: apps/ble/main/bl_decode.c:2231
+#: apps/ble/main/bl_decode.c:2326
 Mano	Hand
 
-#: apps/ble/main/bl_decode.c:2232
+#: apps/ble/main/bl_decode.c:2327
 Lóbulo de la oreja	Earlobe
 
-#: apps/ble/main/bl_decode.c:2232
+#: apps/ble/main/bl_decode.c:2327
 Pie	Foot
 
-#: apps/ble/main/bl_decode.c:2272
+#: apps/ble/main/bl_decode.c:2367
 latencia	latency
 
-#: apps/ble/main/bl_decode.c:2274
+#: apps/ble/main/bl_decode.c:2369
 supervisión	timeout
 
-#: apps/ble/main/bl_decode.c:2291
+#: apps/ble/main/bl_decode.c:2386
 medición fallida	measurement failed
 
-#: apps/ble/main/bl_decode.c:2303
+#: apps/ble/main/bl_decode.c:2398
 rueda	wheel
 
-#: apps/ble/main/bl_decode.c:2305
-#: apps/ble/main/bl_decode.c:2314
+#: apps/ble/main/bl_decode.c:2400
+#: apps/ble/main/bl_decode.c:2409
 vueltas	revs
 
-#: apps/ble/main/bl_decode.c:2312
+#: apps/ble/main/bl_decode.c:2407
 pedal	crank
 
-#: apps/ble/main/bl_decode.c:2325
+#: apps/ble/main/bl_decode.c:2420
 balance	balance
 
-#: apps/ble/main/bl_decode.c:2340
+#: apps/ble/main/bl_decode.c:2435
 pasos/min	steps/min
 
-#: apps/ble/main/bl_decode.c:2342
+#: apps/ble/main/bl_decode.c:2437
 corriendo	running
 
-#: apps/ble/main/bl_decode.c:2342
+#: apps/ble/main/bl_decode.c:2437
 caminando	walking
 
-#: apps/ble/main/bl_decode.c:2349
+#: apps/ble/main/bl_decode.c:2444
 notificaciones e indicaciones	notifications and indications
 
-#: apps/ble/main/bl_decode.c:2350
+#: apps/ble/main/bl_decode.c:2445
 notificaciones	notifications
 
-#: apps/ble/main/bl_decode.c:2351
+#: apps/ble/main/bl_decode.c:2446
 indicaciones	indications
 
-#: apps/ble/main/bl_decode.c:2352
-#: apps/ble/main/bl_decode.c:2357
+#: apps/ble/main/bl_decode.c:2447
+#: apps/ble/main/bl_decode.c:2452
 apagado	off
 
-#: apps/ble/main/bl_decode.c:2357
+#: apps/ble/main/bl_decode.c:2452
 difusión	broadcast
 
-#: apps/ble/main/bl_decode.c:2362
+#: apps/ble/main/bl_decode.c:2457
 escritura confiable	reliable write
 
-#: apps/ble/main/bl_decode.c:2363
+#: apps/ble/main/bl_decode.c:2458
 descripción escribible	writable description
 
-#: apps/ble/main/bl_decode.c:2364
+#: apps/ble/main/bl_decode.c:2459
 ninguna	none
 
-#: apps/ble/main/bl_decode.c:2374
+#: apps/ble/main/bl_decode.c:2469
 unidad	unit
 
-#: apps/ble/main/bl_decode.c:2383
+#: apps/ble/main/bl_decode.c:2478
 entrada	input
 
-#: apps/ble/main/bl_decode.c:2383
+#: apps/ble/main/bl_decode.c:2478
 salida	output
 
-#: apps/ble/main/bl_decode.c:2383
+#: apps/ble/main/bl_decode.c:2478
 característica	feature
 
-#: apps/ble/main/bl_decode.c:2385
+#: apps/ble/main/bl_decode.c:2480
 reporte	report
 
-#: apps/ble/main/bl_detail.c:42
-#: apps/ble/main/bl_detail.c:263
+#: apps/ble/main/bl_detail.c:44
+#: apps/ble/main/bl_detail.c:340
 Favorito	Favorite
 
-#: apps/ble/main/bl_detail.c:42
-#: apps/ble/main/bl_detail.c:263
+#: apps/ble/main/bl_detail.c:44
+#: apps/ble/main/bl_detail.c:340
 Marcar	Star
 
-#: apps/ble/main/bl_detail.c:60
+#: apps/ble/main/bl_detail.c:63
 Un nombre para este equipo	A name for this device
 
-#: apps/ble/main/bl_detail.c:87
+#: apps/ble/main/bl_detail.c:90
 bytes	bytes
 
-#: apps/ble/main/bl_detail.c:105
-Anuncio	Advertisement
+#: apps/ble/main/bl_detail.c:111
+#: apps/ble/main/bl_detail.c:113
+Con la clave	With the key
 
-#: apps/ble/main/bl_detail.c:106
-Respuesta al escaneo	Scan response
+#: apps/ble/main/bl_detail.c:111
+sin lecturas en este paquete	no readings in this packet
 
-#: apps/ble/main/bl_detail.c:107
-Todavía no se lo oyó esta vez.	Not heard yet this time.
-
-#: apps/ble/main/bl_detail.c:123
-cifrados: hace falta la clave del equipo	encrypted: needs the device's key
-
-#: apps/ble/main/bl_detail.c:126
-Temperatura	Temperature
-
-#: apps/ble/main/bl_detail.c:127
-Humedad	Humidity
-
-#: apps/ble/main/bl_detail.c:128
-Presión	Pressure
+#: apps/ble/main/bl_detail.c:113
+no coincide	doesn't match
 
 #: apps/ble/main/bl_detail.c:129
+Anuncio	Advertisement
+
+#: apps/ble/main/bl_detail.c:130
+Respuesta al escaneo	Scan response
+
+#: apps/ble/main/bl_detail.c:131
+Todavía no se lo oyó esta vez.	Not heard yet this time.
+
+#: apps/ble/main/bl_detail.c:144
+Tienen que ser 32 cifras hexadecimales	It has to be 32 hex digits
+
+#: apps/ble/main/bl_detail.c:154
+La clave del equipo (32 cifras)	The device's key (32 digits)
+
+#: apps/ble/main/bl_detail.c:168
+Cifra sus lecturas. Con su clave (en Xiaomi, la «bindkey»: 32 cifras hexadecimales) la app las descifra.	It encrypts its readings. With its key (for Xiaomi, the "bindkey": 32 hex digits) the app decrypts them.
+
+#: apps/ble/main/bl_detail.c:169
+Clave correcta: las lecturas se descifran.	Key is correct: the readings are decrypted.
+
+#: apps/ble/main/bl_detail.c:170
+La clave no coincide con lo que anuncia.	The key doesn't match what it advertises.
+
+#: apps/ble/main/bl_detail.c:171
+Usa un cifrado viejo (MiBeacon v2/v3) que la app no descifra.	It uses an old encryption (MiBeacon v2/v3) the app can't decrypt.
+
+#: apps/ble/main/bl_detail.c:172
+Clave cargada: esperando un paquete cifrado para probarla.	Key loaded: waiting for an encrypted packet to try it.
+
+#: apps/ble/main/bl_detail.c:176
+Cambiar la clave	Change the key
+
+#: apps/ble/main/bl_detail.c:176
+Cargar la clave	Enter the key
+
+#: apps/ble/main/bl_detail.c:177
+Borrar la clave	Delete the key
+
+#: apps/ble/main/bl_detail.c:179
+La bindkey de un sensor Xiaomi sale de su cuenta de Mi Home (por ejemplo con «Xiaomi Cloud Tokens Extractor»), o de Home Assistant si ya lo lee. También se puede pegar desde la página BLE del portal.	A Xiaomi sensor's bindkey comes from its Mi Home account (for example with "Xiaomi Cloud Tokens Extractor"), or from Home Assistant if it already reads it. It can also be pasted from the BLE page of the portal.
+
+#: apps/ble/main/bl_detail.c:192
+descifrado	decrypted
+
+#: apps/ble/main/bl_detail.c:195
+cifrados: hace falta la clave del equipo	encrypted: needs the device's key
+
+#: apps/ble/main/bl_detail.c:199
+Temperatura	Temperature
+
+#: apps/ble/main/bl_detail.c:200
+Humedad	Humidity
+
+#: apps/ble/main/bl_detail.c:201
+Presión	Pressure
+
+#: apps/ble/main/bl_detail.c:202
 Punto de rocío	Dew point
 
-#: apps/ble/main/bl_detail.c:134
+#: apps/ble/main/bl_detail.c:207
 Humedad del suelo	Soil moisture
 
-#: apps/ble/main/bl_detail.c:135
+#: apps/ble/main/bl_detail.c:208
 Conductividad	Conductivity
 
-#: apps/ble/main/bl_detail.c:136
+#: apps/ble/main/bl_detail.c:209
 Peso	Weight
 
-#: apps/ble/main/bl_detail.c:137
+#: apps/ble/main/bl_detail.c:210
 Potencia	Power
 
-#: apps/ble/main/bl_detail.c:138
+#: apps/ble/main/bl_detail.c:211
 Energía	Energy
 
-#: apps/ble/main/bl_detail.c:139
+#: apps/ble/main/bl_detail.c:212
 Distancia	Distance
 
-#: apps/ble/main/bl_detail.c:140
+#: apps/ble/main/bl_detail.c:213
 Giro	Rotation
 
-#: apps/ble/main/bl_detail.c:141
+#: apps/ble/main/bl_detail.c:214
 Abertura	Opening
 
-#: apps/ble/main/bl_detail.c:141
+#: apps/ble/main/bl_detail.c:214
 abierta	open
 
-#: apps/ble/main/bl_detail.c:141
+#: apps/ble/main/bl_detail.c:214
 cerrada	closed
 
-#: apps/ble/main/bl_detail.c:142
+#: apps/ble/main/bl_detail.c:215
 Movimiento	Motion
 
-#: apps/ble/main/bl_detail.c:142
+#: apps/ble/main/bl_detail.c:215
 sí	yes
 
-#: apps/ble/main/bl_detail.c:142
+#: apps/ble/main/bl_detail.c:215
 no	no
 
-#: apps/ble/main/bl_detail.c:143
+#: apps/ble/main/bl_detail.c:216
 #: apps/ble/main/bl_names.c:661
 Botón	Button
 
-#: apps/ble/main/bl_detail.c:143
+#: apps/ble/main/bl_detail.c:216
 evento %d	event %d
 
-#: apps/ble/main/bl_detail.c:144
+#: apps/ble/main/bl_detail.c:217
 Pulso	Heart rate
 
-#: apps/ble/main/bl_detail.c:151
+#: apps/ble/main/bl_detail.c:224
 Aceleración	Acceleration
 
-#: apps/ble/main/bl_detail.c:153
+#: apps/ble/main/bl_detail.c:226
 Batería	Battery
 
-#: apps/ble/main/bl_detail.c:154
+#: apps/ble/main/bl_detail.c:227
 Tensión	Voltage
 
-#: apps/ble/main/bl_detail.c:155
+#: apps/ble/main/bl_detail.c:228
 Contador	Counter
 
-#: apps/ble/main/bl_detail.c:168
+#: apps/ble/main/bl_detail.c:241
 Mayor / menor	Major / minor
 
-#: apps/ble/main/bl_detail.c:171
+#: apps/ble/main/bl_detail.c:244
 Espacio	Namespace
 
-#: apps/ble/main/bl_detail.c:173
+#: apps/ble/main/bl_detail.c:246
 Instancia	Instance
 
-#: apps/ble/main/bl_detail.c:177
+#: apps/ble/main/bl_detail.c:250
 Potencia a 1 m	Power at 1 m
 
-#: apps/ble/main/bl_detail.c:177
+#: apps/ble/main/bl_detail.c:250
 Potencia a 0 m	Power at 0 m
 
-#: apps/ble/main/bl_detail.c:208
+#: apps/ble/main/bl_detail.c:281
 Mín. %d · prom. %s · máx. %d dBm · ≈ %s m\nCada %s · %u anuncios, %u respuestas · cambió %u veces\nOído %s · desde hace %s	Min %d · avg %s · max %d dBm · ≈ %s m\nEvery %s · %u adverts, %u responses · changed %u times\nLast heard %s · seen for %s
 
-#: apps/ble/main/bl_detail.c:253
+#: apps/ble/main/bl_detail.c:326
 Compañía	Company
 
-#: apps/ble/main/bl_detail.c:256
+#: apps/ble/main/bl_detail.c:332
 Nombre propio	Advertised name
 
-#: apps/ble/main/bl_detail.c:258
+#: apps/ble/main/bl_detail.c:335
 Su dirección es privada y cambia cada pocos minutos: cuando cambie, va a aparecer como otro equipo.	Its address is private and changes every few minutes: when it does, it will show up as a different device.
 
-#: apps/ble/main/bl_detail.c:260
+#: apps/ble/main/bl_detail.c:337
 #: apps/ble/main/bl_radar.c:268
 Buscar	Find
 
-#: apps/ble/main/bl_detail.c:262
+#: apps/ble/main/bl_detail.c:339
 Conectar	Connect
 
-#: apps/ble/main/bl_detail.c:270
+#: apps/ble/main/bl_detail.c:347
 Señal	Signal
 
 #: apps/ble/main/bl_gatt.c:59
@@ -1744,18 +1791,21 @@ Igual	Same
 #: apps/ble/main/bl_radar.c:405
 Sin señal hace %s	No signal for %s
 
-#: apps/ble/main/bl_scan.c:70
+#: apps/ble/main/bl_scan.c:72
 ahora	now
 
-#: apps/ble/main/bl_scan.c:428
+#: apps/ble/main/bl_scan.c:461
 Sin nombre	Unnamed
 
-#: apps/ble/main/bl_scan.c:437
+#: apps/ble/main/bl_scan.c:470
 #: apps/ble/main/bl_sensors.c:129
 cifrado	encrypted
 
-#: apps/ble/main/bl_scan.c:450
+#: apps/ble/main/bl_scan.c:483
 bat.	bat.
+
+#: apps/ble/main/bl_sensors.c:149
+tocá para cargar su clave	tap to enter its key
 
 #: apps/ble/main/bl_sensors.c:152
 %s · %d dBm · 2 h	%s · %d dBm · 2 h
