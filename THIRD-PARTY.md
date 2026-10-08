@@ -45,6 +45,7 @@ hardware has to replace them.
 | **doomgeneric** (`dcb7a8d`), Chocolate Doom 2.2.1's music player, DOSBox's DBOPL | **vendored**, `apps/doom/main/doomgeneric/` | **GPL-2.0-or-later** | modified, every change listed in [apps/doom/README.md](apps/doom/README.md). `doom.so` as a whole is GPL-2.0; the repository at the release's tag is its source. **No WAD is included.** |
 | **librtlsdr 2.0.3** | **vendored**, `apps/rf/main/rtlsdr/` | **GPL-2.0-or-later** | two small changes, listed in [apps/rf/README.md](apps/rf/README.md). `rf.so` as a whole is GPL-2.0-or-later; the repository at the release's tag is its source. |
 | **Lua 5.4.8** | **vendored**, `apps/lua/main/lua/` | MIT, Lua.org, PUC-Rio | one patch to `luaconf.h`, recorded in `VENDOR.md`; the notice stays in `lua.h` |
+| compact AES (forward cipher), after **tiny-AES-c** (kokke) | **vendored**, `apps/rf/main/aes.c` | public domain (the Unlicense) | the standard AES S-box and schedule, generalised to a runtime key size, for `rf_mesh.c`'s AES-CTR (reading a Meshtastic channel the user has the key to) |
 
 The firmware that loads `doom.so` and `rf.so` stays MIT. The GPL applies to
 the Doom and RF apps and to any simulator build that compiles them in.

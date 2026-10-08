@@ -85,3 +85,22 @@ view. Recordings stay out of git (168 MB; and they are someone's radio).
 
 In the simulator: `RF_IQ_FILE=/tmp/lora.cu8@960000` and the LoRa mode.
 
+
+# The Meshtastic decoder's test
+
+`rf_mesh.c` is a C port of the Python decoder above, with a compact AES
+(`aes.c`) for the channel decryption. `mesh_test` runs it over a recording:
+
+```bash
+cc -O2 -Wall -Iapps/rf/main \
+   apps/rf/main/rf_mesh.c apps/rf/main/aes.c apps/rf/test/mesh_test.c -o /tmp/mesh_test -lm
+/tmp/mesh_test <recording.cu8> AQ==        # AQ== = the public channel key
+```
+
+On 2026-10-08, against an I/Q recording made on the board (960 ksps, a
+Meshtastic node on the public channel), the C decoder gives the same text
+messages as the Python prototype and the same node ids and hop counts. A
+recording (someone's radio) and any channel key stay out of git; pass them
+on the command line. For a private channel, give its PSK (base64) in place
+of `AQ==`. Direct messages encrypted to another node's public key are not
+read — that needs that node's private key.
