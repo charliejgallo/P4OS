@@ -1901,5 +1901,29 @@ Olvida lo escuchado hasta ahora. Los favoritos y sus nombres quedan.	Vergisst al
 #: apps/ble/main/ble.c:506
 Vaciar la lista	Liste leeren
 
-#: apps/ble/main/ble.c:716
+#: apps/ble/main/ble.c:572
+el teléfono	das Telefon
+
+#: apps/ble/main/ble.c:573
+la computadora	der Computer
+
+#: apps/ble/main/ble.c:574
+el Wi-Fi	das WLAN
+
+#: apps/ble/main/ble.c:578
+ y 	 und 
+
+#: apps/ble/main/ble.c:600
+recién	gerade eben
+
+#: apps/ble/main/ble.c:601
+hace %s	vor %s
+
+#: apps/ble/main/ble.c:603
+Mientras escaneaba se desconectó %s (%s). El Bluetooth y el Wi-Fi comparten una sola radio: escuchar menos tiempo (en los ajustes del escaneo) o pausar el escaneo les deja más aire.	Während des Scans hat sich %s getrennt (%s). Bluetooth und WLAN teilen sich ein einziges Funkmodul: weniger lange zuhören (in den Scan-Einstellungen) oder den Scan pausieren lässt ihnen mehr Sendezeit.
+
+#: apps/ble/main/ble.c:609
+Entendido	Verstanden
+
+#: apps/ble/main/ble.c:797
 No hay memoria para abrir BLE	Nicht genug Speicher, um BLE zu öffnen

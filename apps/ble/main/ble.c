@@ -537,6 +537,80 @@ static void top_strip(lv_obj_t *page)
 
 static lv_obj_t *s_status;
 
+/* ---- the links the scan may disturb ---- */
+
+static uint8_t links_up(void)
+{
+    uint8_t m = 0;
+    if (aos_hal_bt_state() == AOS_BT_CONNECTED) m |= BL_LOST_PHONE;
+    if (aos_hal_bt_keyboard_ready()) m |= BL_LOST_COMPUTER;
+    if (aos_hal_net_state() == AOS_NET_CONNECTED) m |= BL_LOST_WIFI;
+    return m;
+}
+
+/* Once a second. Only a link that was up and went down while the scan was
+ * running counts; what happens with the scan stopped is none of its doing. */
+static bool links_watch(void)
+{
+    uint8_t up = links_up();
+    bool scanning = aos_hal_ble_scanning() && !BL.paused;
+    uint8_t gone = scanning ? (uint8_t)(BL.was_up & ~up) : 0;
+    BL.was_up = up;
+    if (!gone) return false;
+    bool fresh = (gone & ~BL.lost) != 0;
+    BL.lost |= gone;
+    BL.lost_ms = (uint32_t)aos_hal_uptime_ms();
+    aos_hal_log("ble", "while scanning, lost %s%s%s", gone & BL_LOST_PHONE ? "phone " : "",
+                gone & BL_LOST_COMPUTER ? "computer " : "", gone & BL_LOST_WIFI ? "wifi" : "");
+    return fresh;
+}
+
+void bl_lost_text(char *out, size_t n)
+{
+    const char *w[3];
+    int k = 0;
+    if (BL.lost & BL_LOST_PHONE) w[k++] = _("el teléfono");
+    if (BL.lost & BL_LOST_COMPUTER) w[k++] = _("la computadora");
+    if (BL.lost & BL_LOST_WIFI) w[k++] = _("el Wi-Fi");
+    out[0] = 0;
+    size_t l = 0;
+    for (int i = 0; i < k && l < n; i++)
+        l += snprintf(out + l, n - l, "%s%s", i == 0 ? "" : i == k - 1 ? _(" y ") : ", ", w[i]);
+}
+
+static void lost_ok_cb(lv_event_t *e)
+{
+    (void)e;
+    BL.lost = 0;
+    bl_rebuild();
+}
+
+/* The notice under the scan's buttons. */
+static lv_obj_t *lost_card(lv_obj_t *page)
+{
+    lv_obj_t *c = bl_vcard(page, BL.cw, 20, 10);
+    lv_obj_set_style_bg_color(c, lv_color_hex(0x3A2A10), 0);
+    lv_obj_t *r = bl_row(c, BL.cw - 40, LV_SIZE_CONTENT, 12);
+    lv_obj_set_flex_align(r, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
+    aos_label(r, AOS_SYM_ALERT_OUTLINE, &aos_sym_28, AOS_C_ORANGE);
+    char what[96], t[400], age[24], when[40];
+    bl_lost_text(what, sizeof what);
+    uint32_t ago = (uint32_t)aos_hal_uptime_ms() - BL.lost_ms;
+    bl_fmt_age(age, sizeof age, ago);
+    if (ago < 60000) snprintf(when, sizeof when, "%s", _("recién"));
+    else snprintf(when, sizeof when, _("hace %s"), age);
+    snprintf(t, sizeof t,
+             _("Mientras escaneaba se desconectó %s (%s). El Bluetooth y el Wi-Fi comparten una sola radio: escuchar menos tiempo (en los ajustes del escaneo) o pausar el escaneo les deja más aire."),
+             what, when);
+    lv_obj_t *l = aos_label(r, t, aos_font_caption, AOS_C_TEXT);
+    lv_obj_set_flex_grow(l, 1);
+    lv_label_set_long_mode(l, LV_LABEL_LONG_MODE_WRAP);
+    lv_obj_t *b = bl_wrap(c, BL.cw - 40, 12);
+    lv_obj_t *ok = bl_chip(b, _("Entendido"), false, lost_ok_cb, NULL);
+    (void)ok;
+    return c;
+}
+
 void bl_list_gone(void);
 void bl_radar_gone(void);
 void bl_sens_gone(void);
@@ -575,7 +649,13 @@ void bl_rebuild(void)
     lv_obj_set_style_pad_row(page, 8, 0);
     top_strip(page);
     s_status = lv_obj_get_user_data(page);
-    lv_obj_t *body = bl_box(page, BL.cw, BL.ch - 88);
+    int32_t used = 88;
+    if (BL.lost) {
+        lv_obj_t *lc = lost_card(page);
+        lv_obj_update_layout(page);
+        used += lv_obj_get_height(lc) + 8;
+    }
+    lv_obj_t *body = bl_box(page, BL.cw, BL.ch - used);
     lv_obj_update_layout(page);
     if (BL.bt_off && BL.tab != BL_TAB_AIR) {
         bl_bt_off_card(body, BL.cw);
@@ -634,6 +714,7 @@ static void timer_cb(lv_timer_t *t)
     if (BL.ticks % 10 == 0) {
         bl_log_tick();
         bl_names_poll();
+        if (links_watch() && !BL.hidden && !BL.overlay && BL.page == BL_PAGE_TAB) bl_rebuild();
         /* Bluetooth came on (here or in Settings) or the scan stopped by
          * itself: start it again */
         bool want = !BL.paused && (!BL.hidden || BL.log_csv || BL.mqtt);
@@ -718,6 +799,7 @@ static void *ble_create(aos_app_t *self, lv_obj_t *root)
     }
     settings_load();
     bl_names_first();
+    BL.was_up = links_up();
     BL.started_ms = (uint32_t)aos_hal_uptime_ms();
     layout(root);
     bl_scan_apply();

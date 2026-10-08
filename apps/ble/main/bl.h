@@ -76,6 +76,7 @@ enum { BL_TAB_LIST, BL_TAB_RADAR, BL_TAB_SENS, BL_TAB_AIR, BL_TAB_COUNT };
 enum { BL_SORT_RSSI, BL_SORT_NAME, BL_SORT_RECENT, BL_SORT_COUNT };
 enum { BL_FILT_ALL, BL_FILT_NAMED, BL_FILT_FAV, BL_FILT_CONN, BL_FILT_SENSOR, BL_FILT_BEACON, BL_FILT_APPLE, BL_FILT_COUNT };
 enum { BL_PAGE_TAB, BL_PAGE_DETAIL, BL_PAGE_FINDER, BL_PAGE_GATT };
+enum { BL_LOST_PHONE = 1, BL_LOST_COMPUTER = 2, BL_LOST_WIFI = 4 };
 
 typedef struct {
     /* settings, kept in preferences */
@@ -90,6 +91,11 @@ typedef struct {
     bl_air_t air;
     aos_ble_adv_t *rx;              /* the drain's buffer, PSRAM */
     bool bt_off;                    /* the scan cannot start: Bluetooth is off */
+    /* links that went down while scanning (BL_LOST_*), told on screen until
+     * dismissed: the C6 has one radio for the phone, the computer and the
+     * Wi-Fi, and listening takes air time from them */
+    uint8_t lost, was_up;
+    uint32_t lost_ms;
     uint32_t started_ms;
 
     /* the UI */
@@ -133,6 +139,7 @@ bool bl_parse_addr(const char *s, uint8_t a[6]);
 void bl_fmt_num(char *out, size_t n, float v, int dec);
 void bl_fmt_age(char *out, size_t n, uint32_t ms);
 bool bl_mqtt_ready(void);
+void bl_lost_text(char *out, size_t n);   /* "el teléfono y el Wi-Fi", "" none */
 
 /* ---- ble.c: UI helpers and navigation ---- */
 lv_obj_t *bl_box(lv_obj_t *parent, int32_t w, int32_t h);

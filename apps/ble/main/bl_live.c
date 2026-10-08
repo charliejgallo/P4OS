@@ -72,7 +72,8 @@ static void put_state(void)
         int v = (sec <= BL.air.sec && BL.air.sec - sec < BL_AIR_HIST) ? BL.air.devs[sec % BL_AIR_HIST] : 0;
         PUT("%s%d", kk == BL_AIR_HIST - 1 ? "" : ",", v);
     }
-    PUT("]}");
+    /* the mask (1 phone, 2 computer, 4 Wi-Fi): the page words it in Spanish */
+    PUT("],\"lost\":%d,\"lost_age\":%u}", BL.lost, BL.lost ? (unsigned)((uint32_t)aos_hal_uptime_ms() - BL.lost_ms) : 0);
     if (k < n) aos_hal_live_put(LIVE_ID, "state", "application/json", j, k);
 }
 
@@ -246,6 +247,7 @@ static void take(void)
             else if (!strcmp(key, "csv")) { BL.log_csv = num != 0; changed = true; }
             else if (!strcmp(key, "mqtt")) { BL.mqtt = num != 0; changed = true; }
             else if (!strcmp(key, "forget")) { bl_forget_all(); changed = true; }
+            else if (!strcmp(key, "lost_ok")) { BL.lost = 0; changed = true; }
             else if (!strcmp(key, "fav") || !strcmp(key, "alias")) {
                 /* fav=AA:..:FF,1   alias=AA:..:FF,some name */
                 uint8_t a[6];

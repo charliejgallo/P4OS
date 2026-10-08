@@ -1901,5 +1901,29 @@ Olvida lo escuchado hasta ahora. Los favoritos y sus nombres quedan.	Forgets eve
 #: apps/ble/main/ble.c:506
 Vaciar la lista	Clear list
 
-#: apps/ble/main/ble.c:716
+#: apps/ble/main/ble.c:572
+el teléfono	the phone
+
+#: apps/ble/main/ble.c:573
+la computadora	the computer
+
+#: apps/ble/main/ble.c:574
+el Wi-Fi	the Wi-Fi
+
+#: apps/ble/main/ble.c:578
+ y 	 and 
+
+#: apps/ble/main/ble.c:600
+recién	just now
+
+#: apps/ble/main/ble.c:601
+hace %s	%s ago
+
+#: apps/ble/main/ble.c:603
+Mientras escaneaba se desconectó %s (%s). El Bluetooth y el Wi-Fi comparten una sola radio: escuchar menos tiempo (en los ajustes del escaneo) o pausar el escaneo les deja más aire.	While scanning, %s disconnected (%s). Bluetooth and Wi-Fi share a single radio: listening less of the time (in the scan settings) or pausing the scan leaves them more airtime.
+
+#: apps/ble/main/ble.c:609
+Entendido	Got it
+
+#: apps/ble/main/ble.c:797
 No hay memoria para abrir BLE	Not enough memory to open BLE

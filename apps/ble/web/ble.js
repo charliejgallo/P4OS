@@ -80,8 +80,10 @@ P.registerPage({
     /* ---- the top: the state and the controls ---- */
     const status = h('div', { class: 'note' }, '');
     const controls = h('div', { class: 'bl-top', style: 'margin-top:10px' });
+    /* told when a link went down while the board was scanning */
+    const lostBox = h('div', { style: 'display:none;margin-top:10px;padding:10px 12px;border-radius:10px;background:color-mix(in srgb,var(--orange) 18%,transparent)' });
     const chart = h('canvas', { class: 'bl-canvas', height: 140, style: 'margin-top:12px' });
-    const top = h('div', { class: 'card' }, h('h2', {}, 'Bluetooth LE'), status, controls, chart);
+    const top = h('div', { class: 'card' }, h('h2', {}, 'Bluetooth LE'), status, controls, lostBox, chart);
     const missing = h('div', { class: 'card' });
 
     /* ---- the devices ---- */
@@ -140,6 +142,19 @@ P.registerPage({
         h('button', { class: 'btn', onclick: () => { if (confirm('¿Vaciar la lista? Los favoritos quedan.')) send('forget=1'); } }, 'Vaciar la lista'));
     }
 
+    function drawLost(s) {
+      if (!changed('lost', s.lost + '|' + Math.floor((s.lost_age || 0) / 60000))) return;
+      if (!s.lost) { lostBox.style.display = 'none'; return; }
+      const w = [];
+      if (s.lost & 1) w.push('el teléfono');
+      if (s.lost & 2) w.push('la computadora');
+      if (s.lost & 4) w.push('el Wi-Fi');
+      const what = w.length > 1 ? w.slice(0, -1).join(', ') + ' y ' + w[w.length - 1] : w[0];
+      lostBox.style.display = '';
+      put(lostBox, h('div', {}, `⚠ Mientras escaneaba se desconectó ${what} (${s.lost_age < 60000 ? 'recién' : 'hace ' + age(s.lost_age)}). El Bluetooth y el Wi-Fi de la placa comparten una sola radio: escuchar menos tiempo o pausar el escaneo les deja más aire.`),
+        h('div', { class: 'btns', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: () => send('lost_ok=1') }, 'Entendido')));
+    }
+
     function drawChart(s) {
       const W = chart.clientWidth || 600, H = 140, dpr = window.devicePixelRatio || 1;
       if (chart.width !== W * dpr) { chart.width = W * dpr; chart.height = H * dpr; }
@@ -174,6 +189,7 @@ P.registerPage({
         : `${s.alive} cerca · ${s.known} vistos · ${num(s.pps)} paquetes/s · ${s.total} en total · ${s.lost} perdidos · `
           + (s.paused ? 'en pausa' : `${s.active ? 'activo' : 'pasivo'} ${s.duty} %`);
       drawControls(s);
+      drawLost(s);
       drawChart(s);
     }
 
