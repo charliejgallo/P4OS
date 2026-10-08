@@ -68,10 +68,17 @@ static void fft(cpx *a, int n)
     }
 }
 
-/* the reference chirp of a symbol: up = exp(j(pi k^2/N - pi k)), down = conj */
+/* the reference chirp of a symbol: up = exp(j(pi k^2/N - pi k)), down = conj.
+ * The phase k^2/N - k (in units of pi) reaches hundreds of radians once
+ * multiplied by pi; newlib's single-precision cosf/sinf reduce such large
+ * arguments poorly (the Mac's libm does not), which smeared the chirp enough
+ * to kill sync on the board. Reduce mod 2 (the period of cos(pi*u)) first, so
+ * cosf/sinf only ever see a small argument. */
 static cpx chirp_at(int k, int N, bool down)
 {
-    float ph = (float)(M_PI * (double)k * k / N - M_PI * k);
+    double u = (double)k * k / N - (double)k;  /* |u| <= N/4, fits a long */
+    u -= 2.0 * (long)(u * 0.5);                /* u in (-2, 2); no libm floor */
+    float ph = (float)(M_PI * u);              /* |ph| < 2*pi */
     return (cpx){ cosf(ph), down ? -sinf(ph) : sinf(ph) };
 }
 
@@ -224,10 +231,16 @@ static bool sync_sig(cpx *x, int len, int sf, cpx *fb, cpx **yout, int *sout, in
     if (cfo >= N / 4.0f) cfo -= N / 2.0f;
     cpx *y = big((size_t)len * sizeof(cpx));
     if (!y) return false;
+    /* derotate by the coarse CFO. By an incremental rotation, not cosf(ph)
+     * per sample: ph = -2*pi*cfo/N*i grows to tens of thousands of radians,
+     * where newlib's cosf/sinf lose accuracy (same trap as chirp_at). */
+    float wph = (float)(-2 * M_PI * cfo / N);
+    cpx rot = { cosf(wph), sinf(wph) }, r = { 1, 0 };
     for (int i = 0; i < len; i++) {
-        float ph = (float)(-2 * M_PI * cfo / N * i);
-        float c = cosf(ph), si = sinf(ph);
-        y[i] = (cpx){ x[i].re * c - x[i].im * si, x[i].re * si + x[i].im * c };
+        y[i] = (cpx){ x[i].re * r.re - x[i].im * r.im, x[i].re * r.im + x[i].im * r.re };
+        cpx t = { r.re * rot.re - r.im * rot.im, r.re * rot.im + r.im * rot.re };
+        r = t;
+        if ((i & 1023) == 1023) { float g = 1.0f / sqrtf(r.re * r.re + r.im * r.im); r.re *= g; r.im *= g; }
     }
     s = (int)rnd(s + cfo);
     *yout = y; *sout = s; *npreout = npre; *cfo_out = cfo;
@@ -436,7 +449,9 @@ static bool decode_one(const uint8_t *iq, int n, float dci, float dcq, uint32_t 
      * The filtered copy is never stored whole: fir_interp filters on demand
      * at the resample points (half the memory of the old path). */
     cpx *tmp = big((size_t)n * sizeof(cpx));
-    int xlen = (int)((long)(n - 1) * bw / rate);
+    /* int64, not long: on the 32-bit board (n-1)*bw overflows a 32-bit long
+     * (e.g. 147134*250000 = 3.7e10), which truncated x and broke sync. */
+    int xlen = (int)((int64_t)(n - 1) * bw / rate);
     cpx *x = big((size_t)xlen * sizeof(cpx));
     if (!tmp || !x) { free(tmp); free(x); return false; }
     mix_cu8(iq, n, dci, dcq, (float)fc, rate, tmp);
