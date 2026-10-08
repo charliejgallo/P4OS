@@ -296,8 +296,8 @@ static bool dec_ev1527(rf_decoded_t *d)
     /* One in 30 EV1527 codes has no "10" pair and reads as PT2262 too, and
      * the bits cannot tell which. A remote's PT2262 has its buttons on the
      * last four symbols, the data pins, driven to 0 or 1: an F there is
-     * more likely an EV1527 (a copier remote, 2026-10-07: 4CC454 read as
-     * F01010F0 FFF0), though a sensor's PT2262 with twelve address symbols
+     * more likely an EV1527 (a copier remote, 2026-10-07, whose buttons
+     * read as PT2262 data FFF0 and FF0F), though a sensor's PT2262 with twelve address symbols
      * can float them too. So the other reading stays in d->code. */
     bool pt_ok = !has10 && has01;
     bool data_driven = tri[8] != 'F' && tri[9] != 'F' && tri[10] != 'F' && tri[11] != 'F';

@@ -66,13 +66,16 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       2026-10-07 (sin mirar todavía en el navegador).
 - [ ] **RF: datos de 433 MHz y guardar** (2026-10-07): el modo Datos corre en la
       placa (16 % del hilo de la radio). **Un control copiador (EV1527, dos
-      códigos, 4CC45 y 4CC55, botones 4 y 1) probado el 2026-10-07:** al
+      códigos, dos botones cada uno) y uno de fábrica (EV1527, cuatro botones)
+      probados el 2026-10-07:** al
       principio salían códigos cortados (el piso de ruido del detector);
       arreglado con una grabación I/Q de la placa y vuelto a probar: los
-      cuatro botones en su línea, 18-20 dB, sin basura. Grabar la señal (I/Q)
-      y bajarla por el portal, probado. Falta: un control de fábrica (CROE,
-      que puede ser de código variable), un sensor de temperatura, la
-      captura de pantalla, grabar audio y reproducir.
+      ocho botones en su línea, 18-20 dB, sin basura (el de fábrica es de
+      código fijo, no variable). Grabar la señal (I/Q) y bajarla por el
+      portal, probado; las grabaciones quedan en la tarjeta para pruebas.
+      Nunca anotar los códigos de los controles del usuario en el repo:
+      abren su portón. Falta: un sensor de temperatura, la captura de
+      pantalla, grabar audio y reproducir.
 - [ ] **RF: escuchar** (2026-10-07, `apps/rf/README.md`): FM, AM y FM
       angosta medidas en la placa (CPU 36-40 % del núcleo 0 a 240 k, el
       piloto estéreo de una FM real a 36-43 dB). **FM oída por el usuario
