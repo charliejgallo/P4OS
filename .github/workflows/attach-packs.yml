@@ -1,0 +1,38 @@
+# Copies the art packs and SmartIR's library (build.yml, CARRIED_PACKS) from
+# the latest published release into another one, on GitHub's side: for a
+# release made before build.yml carried them over by itself, or one whose
+# hand upload stalled.
+#   gh workflow run attach-packs.yml -f tag=v0.13.0
+name: attach-packs
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: the release to complete (v0.13.0)
+        required: true
+      from:
+        description: where to take them from (empty - the latest published release)
+        required: false
+
+jobs:
+  attach:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      R: ${{ github.repository }}
+      CARRIED_PACKS: monsterhop_p4.pak turbo_p4.pak golf_p4.pak mila_p4.pak mila_p4.pak.1 mila_p4.pak.2 infrarrojo_p4.pak
+    steps:
+      - name: copy
+        run: |
+          from="${{ inputs.from }}"
+          [ -n "$from" ] || from=$(gh release view --repo "$R" --json tagName -q .tagName)
+          echo "from $from into ${{ inputs.tag }}"
+          mkdir -p packs
+          for p in $CARRIED_PACKS; do
+            gh release download "$from" --repo "$R" -p "$p" -D packs || echo "not in $from: $p"
+          done
+          ls -la packs
+          gh release upload "${{ inputs.tag }}" --repo "$R" --clobber packs/*

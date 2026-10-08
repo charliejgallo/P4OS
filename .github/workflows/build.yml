@@ -3,10 +3,14 @@
 # (docs/EMOJI.md) and the Notes app's fonts, on each push and pull request. A tag v* also makes a
 # release with them.
 #
-# What it does not build: the games' art packs (<app>_p4.pak). Their sources
-# are Blender renders and art that do not live in this repository; the packs
-# are made on the author's machine (apps/<app>/tools/pack_p4.py) and attached
-# to the release by hand.
+# What it does not build: the games' art packs (<app>_p4.pak) and SmartIR's
+# library for Infrarrojo. Their sources (Blender renders, art, SmartIR's
+# codes) do not live in this repository; they are made on the author's
+# machine (apps/<app>/tools/pack_p4.py, apps/infrarrojo/tools/pack_smartir.py)
+# and attached by hand once. Every release after that carries them over from
+# the latest published one, on GitHub's side (CARRIED_PACKS below, and
+# attach-packs.yml for a release already made): a 37 MB upload from home
+# stalls more often than it goes through.
 name: build
 
 on:
@@ -25,6 +29,8 @@ concurrency:
 # out of apps.zip, web.zip and lang.zip. A directory of apps/, by name.
 env:
   NOT_IN_RELEASE: pato
+  # carried over from the latest published release into each new one
+  CARRIED_PACKS: monsterhop_p4.pak turbo_p4.pak golf_p4.pak mila_p4.pak mila_p4.pak.1 mila_p4.pak.2 infrarrojo_p4.pak
 
 jobs:
   firmware:
@@ -144,6 +150,16 @@ jobs:
         with:
           path: dist
           merge-multiple: true
+      - name: the packs of the latest published release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          from=$(gh release view --repo "${{ github.repository }}" --json tagName -q .tagName)
+          echo "packs from $from"
+          for p in $CARRIED_PACKS; do
+            gh release download "$from" --repo "${{ github.repository }}" -p "$p" -D dist --skip-existing || echo "not in $from: $p"
+          done
+          ls -la dist
       - name: release
         env:
           GH_TOKEN: ${{ github.token }}
