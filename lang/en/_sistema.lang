@@ -7274,3 +7274,6 @@ VNC	VNC
 
 #: apps/ble/main/ble.c  (nombre de app)
 BLE	BLE
+
+#: apps/rf/main/rf.c  (nombre de app)
+RF	RF

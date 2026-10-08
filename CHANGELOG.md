@@ -1,6 +1,10 @@
 # Changelog
 
-## Unreleased
+## 0.12.0 — 2026-10-08
+
+**BLE, a Bluetooth LE scanner on the card,** with the firmware it needs
+(`aos_hal_ble_*`) and fonts that draw more than Latin-1; and RF measures
+LoRa. Update the firmware first: BLE uses functions 0.11 does not have.
 
 - **BLE, a Bluetooth LE scanner and analyser on the card**
   (apps/ble/README.md): who is near and what each one is, a radar by
@@ -17,8 +21,9 @@
   next to the phone and the computer (NimBLE now allows 3 connections).
 - **Fonts:** typographic punctuation, symbols (currencies, arrows, maths,
   check marks...), Latin Extended-A and Greek in the text sizes; a name
-  with a typographic apostrophe, as a Mac's own, no longer shows a box. `aos_text_safe` asks the font
-  what it can draw, and the phone's and the computer's names go through it.
+  with a typographic apostrophe, as a Mac's own, no longer shows a box.
+  `aos_text_safe` asks the font what it can draw, and the phone's and the
+  computer's names go through it.
 - **RF measures LoRa** (apps/rf/README.md): each packet in the band - when,
   where, how long, how strong - with the spreading factor and bandwidth its
   preamble shows, named after a Meshtastic preset when it is one, and the
