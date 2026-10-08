@@ -7271,3 +7271,6 @@ EEPROM	EEPROM
 Infrarrojo	Infrarot
 PWM	PWM
 VNC	VNC
+
+#: apps/ble/main/ble.c  (nombre de app)
+BLE	BLE
