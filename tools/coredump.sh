@@ -15,7 +15,18 @@ cd "$(dirname "$0")/.."
 HOST=${1:-p4os.local}
 B="http://$HOST"
 tmp=$(mktemp -d)
-curl -4 -s --max-time 5 "$B/api/coredump"; echo
+info=$(curl -4 -s --max-time 5 "$B/api/coredump"); echo "$info"
+# The board's summary of the dump often fails and leaves elf_sha empty: then
+# nothing says which firmware crashed, the first ELF below that loads is
+# taken, and a dump left over from an older firmware (it stays in flash
+# until erased, across any number of restarts) decodes against today's
+# code with wrong lines. It happened on 2026-10-08: the BLE panic of the
+# first OTA of 0.12 was read again, a day later, as a new bug.
+if echo "$info" | grep -q '"elf_sha":""'; then
+    echo "WARNING: the dump does not say which firmware made it. It may be an OLD one:"
+    echo "  compare with GET /api/sysmon (reset_reason \"panic\" and the uptime) before trusting"
+    echo "  the lines below, and erase it once read (ERASE=1 $0 $HOST)."
+fi
 curl -sf --max-time 60 -o "$tmp/core.bin" "$B/api/coredump/elf" || { echo "no core dump on the board"; exit 0; }
 source ~/esp/esp-idf/export.sh >/dev/null 2>&1
 A2L=$(ls ~/.espressif/tools/riscv32-esp-elf/*/riscv32-esp-elf/bin/riscv32-esp-elf-addr2line | tail -1)
