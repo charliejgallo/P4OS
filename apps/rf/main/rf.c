@@ -473,6 +473,21 @@ static void mesh_do_decode(rf_t *a)
         aos_hal_log("rf", "decode idx %d: slot %d, %d pairs, sf %d, off %d -> %s", idx, slot,
                     slot >= 0 ? a->cache_len[slot] : -1, e.p.sf, (int)e.p.offset_hz,
                     ok ? (out.portnum == 1 ? "text" : "decoded") : "FAILED");
+        /* debug: the exact I/Q and params we tried, to the card, for the Mac */
+        if (!ok && slot >= 0) {
+            const char *r = aos_hal_path_sd_root();
+            if (r) {
+                char p[128];
+                snprintf(p, sizeof p, "%s/rf/dbg.cu8", r);
+                FILE *f = fopen(p, "wb");
+                if (f) { fwrite(a->dec_cache + (size_t)slot * CACHE_MAX * 2, 2, a->cache_len[slot], f); fclose(f); }
+                snprintf(p, sizeof p, "%s/rf/dbg.txt", r);
+                f = fopen(p, "w");
+                if (f) { fprintf(f, "pairs=%d\nfc=%d\nbw=%u\nsf=%d\ncenter=%u\n", a->cache_len[slot],
+                                 (int)e.p.offset_hz, (unsigned)e.p.bw_hz, e.p.sf,
+                                 (unsigned)((int64_t)e.freq - e.p.offset_hz)); fclose(f); }
+            }
+        }
         aos_hal_mutex_lock(a->mx);
         if ((uint32_t)idx < a->lp_n && idx + LP_MAX >= (int)a->lp_n) {
             a->lp[idx % LP_MAX].mesh = out;
@@ -2808,7 +2823,8 @@ static void *rf_create(aos_app_t *self, lv_obj_t *root)
     }
     /* LoRa's dechirps, at the same lowest priority: behind the engine, the
      * UI and tick alike */
-    if (!aos_hal_thread_start("rf_lora", lora_worker, a, 8 * 1024, 1)) a->lora_done = true;
+    /* 16 KB: the Meshtastic decode's call chain (rf_mesh) is deep */
+    if (!aos_hal_thread_start("rf_lora", lora_worker, a, 16 * 1024, 1)) a->lora_done = true;
     return a;
 }
 

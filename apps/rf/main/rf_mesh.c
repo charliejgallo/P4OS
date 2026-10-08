@@ -326,10 +326,14 @@ static bool decode_packet(const int *syms, int nsym, int sf, int off, uint8_t *d
     int length = nib[0] * 16 + nib[1];
     int has_crc = nib[2] & 1, cr = nib[2] >> 1;
     if (length < 4 || length > 240 || cr != 1) return false;    /* CR 4/5 only */
-    int need = 2 * (length + 2 * has_crc);
-    int cws[256], ncw = 0;
-    int k = 8;
-    while (ncw < need - 2 && k + 5 <= nsym) {
+    int need = 2 * (length + 2 * has_crc);          /* up to 2*(240+2) = 484 */
+    /* These buffers are large; off the stack, because only one decode runs
+     * at a time (the app's analysis thread) and its stack is small - on the
+     * board the old stack arrays overflowed it and the decode failed. */
+    static int cws[512], tmp[512], src[512];
+    static uint8_t by[260], w[256];
+    int ncw = 0, k = 8;
+    while (ncw < need - 2 && k + 5 <= nsym && ncw + 12 <= 512) {
         int vals[5], out[12];
         for (int i = 0; i < 5; i++) vals[i] = demap(syms[k + i], sf, false, off, 1);
         deinterleave(vals, sf, 5, 0, out);
@@ -337,31 +341,29 @@ static bool decode_packet(const int *syms, int nsym, int sf, int off, uint8_t *d
         k += 5;
     }
     if (ncw < need - 2) return false;
-    uint8_t w[256];
     whitening(length, w);
     /* the codewords that fail parity; a single bit of each is flipped */
-    int bad[8], nbad = 0;
-    for (int i = 0; i < need - 2 && nbad < 8; i++) if (parity_bad(cws[i])) bad[nbad++] = i;
-    if (!has_crc) { nbad = 0; }         /* nothing to check against; take as is */
-    int combos = 1;
-    for (int i = 0; i < nbad && i < 4; i++) combos *= 5;
+    int bad[16], nbad = 0;
+    for (int i = 0; i < need - 2 && nbad < 16; i++) if (parity_bad(cws[i])) bad[nbad++] = i;
+    if (!has_crc) nbad = 0;              /* nothing to check against; take as is */
     if (nbad > 4) return false;
+    int combos = 1;
+    for (int i = 0; i < nbad; i++) combos *= 5;
     for (int c = 0; c < combos; c++) {
-        int tmp[256];
-        memcpy(tmp, cws, (need - 2) * sizeof(int));
+        memcpy(tmp, cws, (size_t)(need - 2) * sizeof(int));
         int cc = c;
         for (int i = 0; i < nbad; i++) { tmp[bad[i]] ^= 1 << (4 - cc % 5); cc /= 5; }
-        uint8_t by[256];
-        int nib5[2] = { nib[5], nib[6] };   /* spare nibbles of the header block */
-        int nn = 0, src[256];
-        src[nn++] = nib5[0]; src[nn++] = nib5[1];
+        int nn = 0;
+        src[nn++] = nib[5]; src[nn++] = nib[6];   /* spare nibbles of the header block */
         for (int i = 0; i < need - 2; i++) src[nn++] = nibble(tmp[i], 5, 0);
         for (int i = 0; i < need / 2; i++) by[i] = (uint8_t)(src[2 * i] | src[2 * i + 1] << 4);
         for (int i = 0; i < length; i++) data[i] = by[i] ^ w[i];
         if (!has_crc) { *length_out = length; return true; }
         uint16_t rx = by[length] | by[length + 1] << 8;
-        uint16_t cc16 = crc16(data, length - 2) ^ data[length - 1] ^ (data[length - 2] << 8);
-        if (cc16 == rx) { *length_out = length; return true; }
+        if ((uint16_t)(crc16(data, length - 2) ^ data[length - 1] ^ (data[length - 2] << 8)) == rx) {
+            *length_out = length;
+            return true;
+        }
     }
     return false;
 }
