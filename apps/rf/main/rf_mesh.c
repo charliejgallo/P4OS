@@ -125,40 +125,51 @@ static int isz(int k, int N) { int m = ((k + N / 2) % N) - N / 2; return (m < 0 
 
 /* ---- baseband and resampling -------------------------------------------- */
 
-/* mix x (len, at fs) down by fc and low-pass (97-tap windowed sinc), in place */
-static void baseband(cpx *x, int len, float fc, float cutoff, float fs, cpx *tmp)
+/* a 97-tap low-pass (windowed sinc), normalised */
+static void lpf(float *h, float cutoff, float fs)
 {
-    for (int i = 0; i < len; i++) {
-        float ph = (float)(-2 * M_PI * fc / fs * i);
-        float c = cosf(ph), s = sinf(ph);
-        tmp[i] = (cpx){ x[i].re * c - x[i].im * s, x[i].re * s + x[i].im * c };
-    }
-    float h[97], sum = 0;
+    float sum = 0;
     for (int t = 0; t < 97; t++) {
-        float a = (t - 48.0f);
-        float si = a == 0 ? 1.0f : sinf(2 * (float)M_PI * cutoff / fs * a) / (2 * (float)M_PI * cutoff / fs * a);
+        float a = t - 48.0f, w = 2 * (float)M_PI * cutoff / fs * a;
+        float si = a == 0 ? 1.0f : sinf(w) / w;
         h[t] = si * (0.54f - 0.46f * cosf(2 * (float)M_PI * t / 96));
         sum += h[t];
     }
     for (int t = 0; t < 97; t++) h[t] /= sum;
-    for (int i = 0; i < len; i++) {
-        float re = 0, im = 0;
-        for (int t = 0; t < 97; t++) {
-            int j = i - 48 + t;
-            if (j >= 0 && j < len) { re += tmp[j].re * h[t]; im += tmp[j].im * h[t]; }
-        }
-        x[i] = (cpx){ re, im };
+}
+
+/* mix cu8 I/Q (n pairs, DC removed) down by fc into out (n cpx) at fs, by an
+ * incremental rotation (no cosf per sample, no large-angle loss) */
+static void mix_cu8(const uint8_t *iq, int n, float dci, float dcq, float fc, float fs, cpx *out)
+{
+    float w = (float)(-2 * M_PI * fc / fs);
+    cpx rot = { cosf(w), sinf(w) }, r = { 1, 0 };
+    for (int i = 0; i < n; i++) {
+        float xr = iq[2 * i] - dci, xq = iq[2 * i + 1] - dcq;
+        out[i] = (cpx){ xr * r.re - xq * r.im, xr * r.im + xq * r.re };
+        cpx t = { r.re * rot.re - r.im * rot.im, r.re * rot.im + r.im * rot.re };
+        r = t;
+        if ((i & 1023) == 1023) { float g = 1.0f / sqrtf(r.re * r.re + r.im * r.im); r.re *= g; r.im *= g; }
     }
 }
 
-/* linear interpolation of x (at fs, len samples) at sample position p */
-static cpx interp(const cpx *x, int len, float p)
+/* the low-passed value of x at the fractional sample position pos: the FIR
+ * at the two neighbouring integer positions, linearly interpolated. Avoids
+ * a whole filtered copy of the signal (the board's PSRAM is scarce). */
+static cpx fir_interp(const cpx *x, int n, float pos, const float *h)
 {
-    int i = (int)p;
-    if (i < 0) return x[0];
-    if (i >= len - 1) return x[len - 1];
-    float f = p - i;
-    return (cpx){ x[i].re + (x[i + 1].re - x[i].re) * f, x[i].im + (x[i + 1].im - x[i].im) * f };
+    int i0 = (int)floorf(pos);
+    float f = pos - i0;
+    cpx r[2] = { { 0, 0 }, { 0, 0 } };
+    for (int d = 0; d < 2; d++) {
+        float re = 0, im = 0;
+        for (int t = 0; t < 97; t++) {
+            int jj = i0 + d - 48 + t;
+            if (jj >= 0 && jj < n) { re += x[jj].re * h[t]; im += x[jj].im * h[t]; }
+        }
+        r[d] = (cpx){ re, im };
+    }
+    return (cpx){ r[0].re + (r[1].re - r[0].re) * f, r[0].im + (r[1].im - r[0].im) * f };
 }
 
 /* ---- sync -------------------------------------------------------------- */
@@ -413,20 +424,21 @@ static int parse_mesh(const uint8_t *data, int length, const uint8_t *key, int k
 
 /* ---- the whole thing ---------------------------------------------------- */
 
-static bool decode_one(const cpx *raw, int n, uint32_t rate, int32_t fc, uint32_t freq_hz,
+static bool decode_one(const uint8_t *iq, int n, float dci, float dcq, uint32_t rate, int32_t fc, uint32_t freq_hz,
                        uint32_t bw, int sf, int sfo_sign, cpx *fb, uint8_t *data, int *length)
 {
     int N = 1 << sf;
-    /* to_baseband: mix + low-pass at rate, resample to bw */
-    cpx *y = big((size_t)n * sizeof(cpx)), *tmp = big((size_t)n * sizeof(cpx));
-    if (!y || !tmp) { free(y); free(tmp); return false; }
-    memcpy(y, raw, (size_t)n * sizeof(cpx));
-    baseband(y, n, fc, bw * 0.55f, rate, tmp);
+    float h[97];
+    lpf(h, bw * 0.55f, rate);
+    /* one mix buffer at the sample rate (reused), and the band-rate signal.
+     * The filtered copy is never stored whole: fir_interp filters on demand
+     * at the resample points (half the memory of the old path). */
+    cpx *tmp = big((size_t)n * sizeof(cpx));
     int xlen = (int)((long)(n - 1) * bw / rate);
     cpx *x = big((size_t)xlen * sizeof(cpx));
-    if (!x) { free(y); free(tmp); return false; }
-    for (int k = 0; k < xlen; k++) x[k] = interp(y, n, (float)((double)k * rate / bw));
-    free(y);
+    if (!tmp || !x) { free(tmp); free(x); return false; }
+    mix_cu8(iq, n, dci, dcq, (float)fc, rate, tmp);
+    for (int k = 0; k < xlen; k++) x[k] = fir_interp(tmp, n, (float)((double)k * rate / bw), h);
     /* sync */
     cpx *yc = NULL;
     int s, npre;
@@ -440,29 +452,24 @@ static bool decode_one(const cpx *raw, int n, uint32_t rate, int32_t fc, uint32_
     for (int i = 0; i < 2; i++) fd += fpeak(yc + s + (npre + 2 + i) * N, N, false, fb);
     fd /= 2;
     free(yc);
+    free(x);
     float cf = (fu + fd) / 2, tf = (fu - fd) / 2;
     float cfo_bins = cfo + cf;
     float fc2 = fc + cfo_bins * bw / N;
-    /* z = raw mixed by fc2, low-pass */
-    cpx *z = big((size_t)n * sizeof(cpx));
-    if (!z) { free(x); free(tmp); return false; }
-    memcpy(z, raw, (size_t)n * sizeof(cpx));
-    baseband(z, n, fc2, bw * 0.55f, rate, tmp);
-    free(tmp);
-    free(x);
-    /* resample z at the symbol grid, with the sender's drift */
+    /* fine: mix by fc2, resample at the symbol grid with the sender's drift */
+    mix_cu8(iq, n, dci, dcq, fc2, rate, tmp);
     float t0 = (s - tf) / (float)bw;
     float ppm = sfo_sign * fc2 / (float)freq_hz;
     int M = (int)((n / (float)rate - t0) * bw * 0.999f);
     int want = (int)((npre + 4.25f) * N) + NSYM_MAX * N;
     if (M > want) M = want;
     cpx *zr = big((size_t)M * sizeof(cpx));
-    if (!zr) { free(z); return false; }
+    if (!zr) { free(tmp); return false; }
     for (int k = 0; k < M; k++) {
         float t = t0 + (float)k / bw * (1 + ppm);
-        zr[k] = interp(z, n, t * rate);
+        zr[k] = fir_interp(tmp, n, t * rate, h);
     }
-    free(z);
+    free(tmp);
     /* symbols after the 2.25 down-chirps */
     int syms[NSYM_MAX], nsym = 0;
     int start = (int)((npre + 4.25f) * N);
@@ -480,20 +487,17 @@ bool rf_mesh_decode(const uint8_t *iq, int n, uint32_t rate, int32_t fc, uint32_
                     uint32_t bw, int sf, const uint8_t *key, int keylen, rf_mesh_t *out)
 {
     if (sf < 7 || sf > 12 || (1 << sf) > FFT_MAX) return false;
-    cpx *raw = big((size_t)n * sizeof(cpx));
     cpx *fb = big((size_t)FFT_MAX * sizeof(cpx));
-    if (!raw || !fb) { free(raw); free(fb); return false; }
+    if (!fb) return false;
     double mi = 0, mq = 0;
-    for (int k = 0; k < n; k++) { mi += iq[2*k]; mq += iq[2*k+1]; }
+    for (int k = 0; k < n; k++) { mi += iq[2 * k]; mq += iq[2 * k + 1]; }
     mi /= n; mq /= n;
-    for (int k = 0; k < n; k++) raw[k] = (cpx){ (float)(iq[2*k] - mi), (float)(iq[2*k+1] - mq) };
     memset(out, 0, sizeof *out);
     uint8_t data[256];
     int length = 0;
     bool ok = false;
     for (int sgn = -1; sgn <= 1 && !ok; sgn += 2)
-        ok = decode_one(raw, n, rate, fc, freq_hz, bw, sf, sgn, fb, data, &length);
-    free(raw);
+        ok = decode_one(iq, n, (float)mi, (float)mq, rate, fc, freq_hz, bw, sf, sgn, fb, data, &length);
     free(fb);
     if (!ok) return false;
     out->crc_ok = true;

@@ -470,6 +470,9 @@ static void mesh_do_decode(rf_t *a)
                                 e.p.offset_hz, center, e.p.bw_hz, e.p.sf,
                                 a->mesh_keylen ? a->mesh_key : NULL, a->mesh_keylen, &out);
         }
+        aos_hal_log("rf", "decode idx %d: slot %d, %d pairs, sf %d, off %d -> %s", idx, slot,
+                    slot >= 0 ? a->cache_len[slot] : -1, e.p.sf, (int)e.p.offset_hz,
+                    ok ? (out.portnum == 1 ? "text" : "decoded") : "FAILED");
         aos_hal_mutex_lock(a->mx);
         if ((uint32_t)idx < a->lp_n && idx + LP_MAX >= (int)a->lp_n) {
             a->lp[idx % LP_MAX].mesh = out;
