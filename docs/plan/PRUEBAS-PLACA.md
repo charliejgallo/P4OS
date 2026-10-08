@@ -33,12 +33,17 @@ se prueba.
 ### Pendientes, en resumen
 
 Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
-- [ ] **BLE** (`apps/ble`, docs/BLUETOOTH.md "The apps' scanner"): el escaneo
-      con el iPhone y la Mac conectados a la vez (que no se caigan, cuántos
-      paquetes por segundo a 30 y a 100 %, cuánto baja el Wi-Fi a 100 %), la
-      conexión GATT como tercera (el C6 admite 3), "Leer todo" y una
-      notificación con un sensor real, y la RAM interna libre antes y
-      después (`/api/sysmon`). Necesita firmware nuevo (OTA) y la app.
+- [ ] **BLE** (`apps/ble`, docs/BLUETOOTH.md "The apps' scanner"). **Instalada
+      el 2026-10-07** (firmware `0973f16`, por OTA). Medido: escanea (10-12
+      equipos reales, ~9 paquetes/s al 30 %, ~16 al 100 %, ninguno perdido);
+      el Wi-Fi sigue arriba sin pérdidas y baja de ~0,9 a ~0,7-0,8 MB/s al
+      100 %; la RAM interna libre no se movió (217 → 216 KB). La primera OTA
+      entró en pánico al sincronizar el Bluetooth (mutex sin crear) y volvió
+      sola a la imagen anterior; arreglado. **Falta:** escanear con el iPhone
+      y la Mac conectados (si se cae algo, la app lo avisa debajo de los
+      botones del escaneo y lo anota en el registro como "ble: while
+      scanning, lost ..."), la conexión GATT como tercera y "Leer todo" con un
+      equipo real.
 
 Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
 - [x] **Host USB** (docs/USB.md): los dos puertos a la vez (21/23 y 25/27)
