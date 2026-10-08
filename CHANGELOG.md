@@ -14,6 +14,18 @@
   the log and the screen say so once, and the portal's Registro and Firmware
   pages until it is downloaded, marked read or erased.
 - `POST /api/coredump/test`: a panic on purpose, to try all of it.
+- **Apps in the background** (Settings, Developer): an app kept on leaving
+  is closed instead if it holds 1 MB of PSRAM or more and has nothing
+  running (header pins, sound, the microphone, a recording, the worker, or
+  the app saying so with `aos_ui_set_busy()`); below 8 MB of free PSRAM the
+  hidden ones go too. "Close on leaving" and "Keep open" are the other
+  modes. The page lists what is open and what each one holds; the log says
+  each decision and whether a closed app gave its PSRAM back. Measured on
+  the board: Photos, Pixel Art and Drawing (2.1, 2.0 and 1.7 MB) now close;
+  the games already did, and give all their memory back.
+- VNC stays open while it has a session, so going home does not drop it.
+- Settings' restart button says "Restart the board" in English (it said
+  "Reset", the stopwatch's word).
 
 ## 0.13.0 — 2026-10-08
 

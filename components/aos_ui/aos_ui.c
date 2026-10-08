@@ -23,6 +23,20 @@
  * it (up to AOS_UI_ALIVE_MAX of them; the least recently used goes first).
  * Watch apps have neither flag and are destroyed on leaving, exactly as on
  * the watch, because some of them only stop their timers in destroy().
+ *
+ * Apps in the background (2026-10-08). Nearly every app has KEEP, the heavy
+ * games too, and a hidden game holds megabytes of PSRAM that the next one
+ * may need. So on leaving, a keepable app is measured (the PSRAM free when
+ * it was created, less the PSRAM free now) and looked at for anything it
+ * left running: BACKGROUND, aos_ui_set_busy(), header pins claimed while it
+ * was in front (aos_io_held_for_app), the worker going, the speaker or the
+ * microphone open, a recording going. Then, by the "bg_mode" preference (Settings,
+ * Developer): AUTO (the default) closes it if it holds 1 MB or more and is
+ * not busy; CLOSE closes it unless it is busy; KEEP keeps it, as before.
+ * In AUTO and CLOSE, below 8 MB of free PSRAM the hidden apps that are not
+ * busy are closed too, the least recently used first. Nothing in the apps
+ * changes: a game holds megabytes and nothing else, and goes; the PWM app
+ * holds its pins and stays; RF stays while it plays.
  */
 #include "aos_ui.h"
 #include "aos_internal.h"
@@ -34,6 +48,7 @@
 #include "aos_i18n.h"
 #include "aos_menu.h"
 #include "aos_icon_ops.h"
+#include "aos_io.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -172,6 +187,21 @@ void aos_ui_hold_home(bool hold)
     }
 }
 
+/* apps in the background: per app, what leave_current() measured (see the
+ * top of this file) */
+#define BG_CLOSE_KB     1024        /* AUTO closes an app holding this much */
+#define BG_LOW_KB       (8 * 1024)  /* below this much free PSRAM, hidden apps go */
+
+static uint32_t s_psram_at_create_kb[AOS_MAX_APPS];
+static uint32_t s_held_kb[AOS_MAX_APPS];
+static bool s_busy[AOS_MAX_APPS];
+static const char *s_left_busy[AOS_MAX_APPS];     /* what it had running when it left */
+/* an app just closed: is the PSRAM it had back? Checked a moment later
+ * (its .so is unloaded on the next aos_dynapp_tick), from home, and only if
+ * nothing was created meanwhile; what is missing is logged */
+static uint32_t s_closed_ms[AOS_MAX_APPS], s_creates;
+static uint32_t s_closed_creates[AOS_MAX_APPS];
+
 static void destroy_app(aos_app_t *app)
 {
     if (!app->running && !app->root) return;
@@ -182,6 +212,38 @@ static void destroy_app(aos_app_t *app)
     app->inst = NULL;
     app->root = NULL;
     app->running = false;
+    int s = (int)(app - s_apps);
+    s_busy[s] = false;
+    s_left_busy[s] = NULL;
+    s_held_kb[s] = 0;
+    if (s_psram_at_create_kb[s]) {
+        s_closed_ms[s] = (uint32_t)aos_hal_uptime_ms() | 1;
+        s_closed_creates[s] = s_creates;
+    }
+}
+
+static uint32_t psram_free_kb(void);
+
+static void closed_check_tick(void)
+{
+    uint32_t now = (uint32_t)aos_hal_uptime_ms();
+    for (int i = 0; i < AOS_MAX_APPS; i++) {
+        if (!s_closed_ms[i] || now - s_closed_ms[i] < 1500) continue;
+        if (s_cur || s_closed_creates[i] != s_creates) {      /* something else took memory since */
+            s_closed_ms[i] = 0;
+            continue;
+        }
+        uint32_t free_kb = psram_free_kb(), at = s_psram_at_create_kb[i];
+        int32_t short_kb = (int32_t)at - (int32_t)free_kb;
+        if (short_kb > 256) {
+            aos_hal_log("ui", "%s closed, and %d KB of PSRAM did not come back (free %u KB, %u when it opened)",
+                        s_apps[i].desc.id, (int)short_kb, (unsigned)free_kb, (unsigned)at);
+        } else {
+            aos_hal_log("ui", "%s closed: its PSRAM is back (free %u KB, %u when it opened)", s_apps[i].desc.id,
+                        (unsigned)free_kb, (unsigned)at);
+        }
+        s_closed_ms[i] = 0;
+    }
 }
 
 bool aos_ui_unregister_app(const char *id)
@@ -409,16 +471,114 @@ static void enforce_alive_max(aos_app_t *keep)
 
 /* Takes the app in front off the screen (hide(), and destroy() unless it is
  * one that is kept). */
+/* ---- apps in the background (see the top of this file) ---- */
+
+static int slot_of_app(const aos_app_t *app) { return (int)(app - s_apps); }
+
+static uint32_t psram_free_kb(void)
+{
+    uint32_t p = 0;
+    aos_hal_heap_info(NULL, &p);
+    return p / 1024;
+}
+
+int aos_ui_bg_mode(void)
+{
+    int32_t v = AOS_UI_BG_AUTO;
+    aos_hal_pref_get_i32("bg_mode", &v);
+    return v >= AOS_UI_BG_AUTO && v <= AOS_UI_BG_KEEP ? (int)v : AOS_UI_BG_AUTO;
+}
+
+void aos_ui_set_bg_mode(int mode)
+{
+    if (mode == AOS_UI_BG_AUTO) aos_hal_pref_erase("bg_mode");
+    else aos_hal_pref_set_i32("bg_mode", mode);
+}
+
+void aos_ui_set_busy(const char *id, bool busy)
+{
+    int s = id ? slot_of(id) : -1;
+    if (s >= 0) s_busy[s] = busy;
+}
+
+uint32_t aos_ui_app_held_kb(const aos_app_t *app) { return app ? s_held_kb[slot_of_app(app)] : 0; }
+
+/* What the app has running that must not stop, or NULL. 'leaving': it was in
+ * front just now, so the speaker, the microphone and a recording are its. */
+static const char *busy_why(const aos_app_t *app, bool leaving)
+{
+    int s = slot_of_app(app);
+    if (app->desc.flags & AOS_APP_FLAG_BACKGROUND) return "background";
+    if (s_busy[s]) return "busy";
+    if (aos_io_held_for_app(app->desc.id)) return "pins";
+    if (leaving) {
+        /* the system's one worker is the front app's: an export, a decode */
+        if (aos_hal_worker_running()) return "busy";
+        if (aos_hal_spk_is_open()) return "audio";
+        aos_mic_status_t m;
+        if (aos_hal_mic_status(&m) && m.open) return "microphone";
+        aos_rec_status_t r;
+        if (aos_hal_rec_status(&r) && r.state != AOS_REC_IDLE) return "recording";
+        return NULL;
+    }
+    /* hidden: what it had when it left, while that is still going */
+    const char *w = s_left_busy[s];
+    if (w && !strcmp(w, "audio") && aos_hal_spk_is_open()) return w;
+    if (w && !strcmp(w, "microphone")) {
+        aos_mic_status_t m;
+        if (aos_hal_mic_status(&m) && m.open) return w;
+    }
+    if (w && !strcmp(w, "recording")) {
+        aos_rec_status_t r;
+        if (aos_hal_rec_status(&r) && r.state != AOS_REC_IDLE) return w;
+    }
+    return NULL;
+}
+
+const char *aos_ui_app_busy(const aos_app_t *app) { return app && app->running ? busy_why(app, false) : NULL; }
+
+/* Keep this app, which is leaving and could be kept, or close it? */
+static bool keep_on_leaving(aos_app_t *app)
+{
+    int s = slot_of_app(app);
+    uint32_t now = psram_free_kb(), at = s_psram_at_create_kb[s];
+    s_held_kb[s] = at > now ? at - now : 0;
+    const char *why = busy_why(app, true);
+    s_left_busy[s] = why;
+    int mode = aos_ui_bg_mode();
+    bool keep = mode == AOS_UI_BG_KEEP || why || (mode == AOS_UI_BG_AUTO && s_held_kb[s] < BG_CLOSE_KB);
+    aos_hal_log("ui", "%s %s on leaving: it holds %u KB of PSRAM%s%s", keep ? "keeping" : "closing", app->desc.id,
+                (unsigned)s_held_kb[s], why ? ", running: " : "", why ? why : "");
+    return keep;
+}
+
+/* Below BG_LOW_KB of free PSRAM, the hidden apps that are not busy go, the
+ * least recently used first. */
+static void trim_for_memory(void)
+{
+    if (aos_ui_bg_mode() == AOS_UI_BG_KEEP) return;
+    aos_app_t *alive[AOS_MAX_APPS];
+    int n = aos_ui_alive(alive, AOS_MAX_APPS);
+    for (int i = n - 1; i >= 0 && psram_free_kb() < BG_LOW_KB; i--) {
+        if (alive[i] == s_cur || busy_why(alive[i], false)) continue;
+        aos_hal_log("ui", "closing %s: %u KB of PSRAM free, under %u", alive[i]->desc.id, (unsigned)psram_free_kb(),
+                    (unsigned)BG_LOW_KB);
+        destroy_app(alive[i]);
+    }
+}
+
 static void leave_current(bool destroy_now)
 {
     aos_app_t *app = s_cur;
     if (!app) return;
     s_cur = NULL;
     if (app->hide && app->running) app->hide(app, app->inst);
-    if (destroy_now || !keepable(app)) destroy_app(app);
+    if (destroy_now || !keepable(app) || !keep_on_leaving(app)) destroy_app(app);
     else if (app->root) lv_obj_add_flag(app->root, LV_OBJ_FLAG_HIDDEN);
+    aos_hal_app_context_set(NULL);
     aos_hal_audio_foreground(NULL);
     aos_i18n_app_unload();
+    trim_for_memory();
 }
 
 bool aos_ui_open(const char *id)
@@ -437,6 +597,7 @@ bool aos_ui_open(const char *id)
     if (prev) leave_current(false);
 
     apply_rotation(app);
+    aos_hal_app_context_set(app->desc.id);      /* what it claims now is its (aos_io) */
 
     /* The app's own catalogue, before create(): that is where it builds its
      * UI and calls _(). In every path -created now or back from the
@@ -461,6 +622,9 @@ bool aos_ui_open(const char *id)
         lv_obj_remove_flag(app->root, LV_OBJ_FLAG_SCROLLABLE);
         place_root(app);
         lv_obj_update_layout(app->root);
+        trim_for_memory();
+        s_psram_at_create_kb[slot_of_app(app)] = psram_free_kb();
+        s_creates++;
         app->running = true;
         app->created_rot = aos_hal_display_get_rotation();
         app->inst = app->create ? app->create(app, app->root) : NULL;
@@ -1036,6 +1200,7 @@ void aos_ui_tick(void)
     requests_tick();
     calls_tick();
     snapshot_tick();
+    closed_check_tick();
     for (int i = 0; i < AOS_MAX_APPS; i++) {
         aos_app_t *a = &s_apps[i];
         if (!s_used[i] || !a->running || !a->tick) continue;

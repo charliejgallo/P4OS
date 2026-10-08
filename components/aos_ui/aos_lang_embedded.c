@@ -2360,6 +2360,21 @@ static const char blob_en__sistema_lang[] =
     "BLE\tBLE\n"
     "RF\tRF\n"
     "La placa se cayó la vez anterior: el volcado está en el portal, en Registro.\tThe board crashed last time: the dump is in the portal, on the Registro page.\n"
+    "Tocá otra vez para cerrarla\tTap again to close it\n"
+    "en segundo plano\tin the background\n"
+    "trabajando\tworking\n"
+    "usa pines del header\tuses header pins\n"
+    "sonando\tplaying\n"
+    "con el micrófono\tusing the microphone\n"
+    "APPS EN SEGUNDO PLANO\tAPPS IN THE BACKGROUND\n"
+    "Automático (de fábrica)\tAutomatic (default)\n"
+    "Cerrar al salir\tClose on leaving\n"
+    "Mantener abiertas\tKeep open\n"
+    "Al salir de una app, Automático la cierra si ocupa 1 MB de PSRAM o más y no tiene nada andando; Cerrar al salir la cierra si no tiene nada andando; Mantener abiertas la deja, como antes. Andando es usar pines del header, sonar, el micrófono, grabar o trabajar en segundo plano. Con menos de 8 MB de PSRAM libre se cierran también las escondidas que no tienen nada andando.\tOn leaving an app, Automatic closes it if it holds 1 MB of PSRAM or more and has nothing running; Close on leaving closes it if it has nothing running; Keep open keeps it, as before. Running means using header pins, playing sound, the microphone, recording or working in the background. Below 8 MB of free PSRAM, hidden apps with nothing running are closed too.\n"
+    "ABIERTAS AHORA\tOPEN NOW\n"
+    "Ninguna, fuera de Ajustes\tNone besides Settings\n"
+    "Lo que ocupa cada una se mide al salir de ella. Tocar una la cierra.\tWhat each one holds is measured when it is left. Tapping one closes it.\n"
+    "Reiniciar la placa\tRestart the board\n"
     ;
 
 static const char blob_en_aos_ble_lang[] =
@@ -8655,6 +8670,21 @@ static const char blob_de__sistema_lang[] =
     "BLE\tBLE\n"
     "RF\tRF\n"
     "La placa se cayó la vez anterior: el volcado está en el portal, en Registro.\tDie Platine ist beim letzten Mal abgestürzt: Der Dump ist im Portal, auf der Seite Registro.\n"
+    "Tocá otra vez para cerrarla\tZum Schließen noch einmal tippen\n"
+    "en segundo plano\tim Hintergrund\n"
+    "trabajando\tarbeitet\n"
+    "usa pines del header\tnutzt Header-Pins\n"
+    "sonando\tspielt ab\n"
+    "con el micrófono\tnutzt das Mikrofon\n"
+    "APPS EN SEGUNDO PLANO\tAPPS IM HINTERGRUND\n"
+    "Automático (de fábrica)\tAutomatisch (Standard)\n"
+    "Cerrar al salir\tBeim Verlassen schließen\n"
+    "Mantener abiertas\tGeöffnet lassen\n"
+    "Al salir de una app, Automático la cierra si ocupa 1 MB de PSRAM o más y no tiene nada andando; Cerrar al salir la cierra si no tiene nada andando; Mantener abiertas la deja, como antes. Andando es usar pines del header, sonar, el micrófono, grabar o trabajar en segundo plano. Con menos de 8 MB de PSRAM libre se cierran también las escondidas que no tienen nada andando.\tBeim Verlassen einer App schließt Automatisch sie, wenn sie 1 MB PSRAM oder mehr belegt und nichts läuft; Beim Verlassen schließen schließt sie, wenn nichts läuft; Geöffnet lassen behält sie wie bisher. Laufen heißt: Header-Pins nutzen, Ton abspielen, das Mikrofon, aufnehmen oder im Hintergrund arbeiten. Unter 8 MB freiem PSRAM werden auch versteckte Apps ohne laufende Aufgabe geschlossen.\n"
+    "ABIERTAS AHORA\tJETZT GEÖFFNET\n"
+    "Ninguna, fuera de Ajustes\tKeine außer Einstellungen\n"
+    "Lo que ocupa cada una se mide al salir de ella. Tocar una la cierra.\tWas jede belegt, wird beim Verlassen gemessen. Antippen schließt sie.\n"
+    "Reiniciar la placa\tPlatine neu starten\n"
     ;
 
 static const char blob_de_aos_ble_lang[] =
@@ -12604,7 +12634,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2346, 42, files_en, 43 },
-    { "de", "Deutsch", 2346, 42, files_de, 43 },
+    { "en", "English", 2361, 42, files_en, 43 },
+    { "de", "Deutsch", 2361, 42, files_de, 43 },
 };
 const int aos_lang_pack_count = 2;

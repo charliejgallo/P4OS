@@ -85,6 +85,9 @@ const aos_io_pin_t *aos_io_pin_of_gpio(int gpio)
 
 #define MAX_GPIO 55
 static char s_owner[MAX_GPIO][24];
+/* the app in front when the pin was claimed (aos_hal_app_context): an app
+ * that leaves with pins still claimed under its name left something running */
+static char s_app[MAX_GPIO][40];
 static void *s_mutex;
 
 static void lock(void)
@@ -100,6 +103,10 @@ bool aos_io_claim(int gpio, const char *owner)
     if (!p || (p->flags & AOS_PIN_RESERVED) || !owner) return false;
     lock();
     bool ok = !s_owner[gpio][0] || !strcmp(s_owner[gpio], owner);
+    if (ok && !s_owner[gpio][0]) {
+        const char *app = aos_hal_app_context();
+        snprintf(s_app[gpio], sizeof s_app[gpio], "%s", app ? app : "");
+    }
     if (ok) snprintf(s_owner[gpio], sizeof s_owner[gpio], "%s", owner);
     unlock();
     if (!ok) aos_hal_log("io", "GPIO%d is %s's, %s cannot have it", gpio, s_owner[gpio], owner);
@@ -110,7 +117,7 @@ void aos_io_release(int gpio, const char *owner)
 {
     if (gpio < 0 || gpio >= MAX_GPIO) return;
     lock();
-    if (owner && !strcmp(s_owner[gpio], owner)) s_owner[gpio][0] = 0;
+    if (owner && !strcmp(s_owner[gpio], owner)) s_owner[gpio][0] = s_app[gpio][0] = 0;
     unlock();
 }
 
@@ -118,13 +125,23 @@ void aos_io_release_owner(const char *owner)
 {
     if (!owner) return;
     lock();
-    for (int i = 0; i < MAX_GPIO; i++) if (!strcmp(s_owner[i], owner)) s_owner[i][0] = 0;
+    for (int i = 0; i < MAX_GPIO; i++) if (!strcmp(s_owner[i], owner)) s_owner[i][0] = s_app[i][0] = 0;
     unlock();
 }
 
 const char *aos_io_owner(int gpio)
 {
     return (gpio >= 0 && gpio < MAX_GPIO && s_owner[gpio][0]) ? s_owner[gpio] : NULL;
+}
+
+int aos_io_held_for_app(const char *app_id)
+{
+    if (!app_id || !app_id[0]) return 0;
+    int n = 0;
+    lock();
+    for (int i = 0; i < MAX_GPIO; i++) if (s_owner[i][0] && !strcmp(s_app[i], app_id)) n++;
+    unlock();
+    return n;
 }
 
 /* -------------------------------------------------------------------------- */

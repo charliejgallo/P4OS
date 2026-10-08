@@ -715,7 +715,7 @@ static void build_root(lv_obj_t *p)
     /* at the bottom, where a phone has "Shut Down": two taps, like
      * Desarrollador's */
     g = group(p, NULL);
-    action_row(g, _("Reiniciar"), AOS_C_ACCENT, dev_restart_cb);
+    action_row(g, _("Reiniciar la placa"), AOS_C_ACCENT, dev_restart_cb);
 }
 
 /* ---- Wi-Fi ---- */
@@ -2248,8 +2248,66 @@ static void pick_row(lv_obj_t *g, const char *label, bool on, lv_event_cb_t cb, 
     row(g, NULL, 0, label, on ? AOS_SYM_CHECK : NULL, false, cb, ud);
 }
 
+/* Apps in the background (aos_ui.c): the mode, and what is open now with the
+ * PSRAM each one held when it was last left. */
+static void bg_mode_cb(lv_event_t *e) { aos_ui_set_bg_mode((int)(intptr_t)lv_event_get_user_data(e)); show(PG_DEV); }
+
+static void bg_close_cb(lv_event_t *e)
+{
+    const char *id = lv_event_get_user_data(e);
+    if (!second_tap(e, _("Tocá otra vez para cerrarla"))) return;
+    aos_ui_close(id);
+    show(PG_DEV);
+}
+
+static const char *busy_text(const char *why)
+{
+    if (!why) return NULL;
+    if (!strcmp(why, "background")) return _("en segundo plano");
+    if (!strcmp(why, "busy")) return _("trabajando");
+    if (!strcmp(why, "pins")) return _("usa pines del header");
+    if (!strcmp(why, "audio")) return _("sonando");
+    if (!strcmp(why, "microphone")) return _("con el micrófono");
+    if (!strcmp(why, "recording")) return _("grabando");
+    return why;
+}
+
+static void build_bg(lv_obj_t *p)
+{
+    lv_obj_t *g = group(p, _("APPS EN SEGUNDO PLANO"));
+    int bm = aos_ui_bg_mode();
+    pick_row(g, _("Automático (de fábrica)"), bm == AOS_UI_BG_AUTO, bg_mode_cb, (void *)AOS_UI_BG_AUTO);
+    pick_row(g, _("Cerrar al salir"), bm == AOS_UI_BG_CLOSE, bg_mode_cb, (void *)AOS_UI_BG_CLOSE);
+    pick_row(g, _("Mantener abiertas"), bm == AOS_UI_BG_KEEP, bg_mode_cb, (void *)AOS_UI_BG_KEEP);
+    note(p, _("Al salir de una app, Automático la cierra si ocupa 1 MB de PSRAM o más y no tiene nada andando; Cerrar al salir la cierra si no tiene nada andando; Mantener abiertas la deja, como antes. Andando es usar pines del header, sonar, el micrófono, grabar o trabajar en segundo plano. Con menos de 8 MB de PSRAM libre se cierran también las escondidas que no tienen nada andando."));
+
+    g = group(p, _("ABIERTAS AHORA"));
+    aos_app_t *alive[8];
+    int n = aos_ui_alive(alive, 8), shown = 0;
+    for (int i = 0; i < n; i++) {
+        const aos_app_t *a = alive[i];
+        if (!strcmp(a->desc.id, "aos.settings")) continue;
+        char v[96];
+        uint32_t kb = aos_ui_app_held_kb(a);
+        const char *why = busy_text(aos_ui_app_busy(a));
+        if (kb >= 1024) snprintf(v, sizeof v, "%u,%u MB%s%s", (unsigned)(kb / 1024), (unsigned)(kb % 1024 * 10 / 1024),
+                                 why ? " · " : "", why ? why : "");
+        else snprintf(v, sizeof v, "%u KB%s%s", (unsigned)kb, why ? " · " : "", why ? why : "");
+        row(g, NULL, 0, aos_tr(a->desc.name), v, false, bg_close_cb, (void *)a->desc.id);
+        shown++;
+    }
+    if (!shown) row(g, NULL, 0, _("Ninguna, fuera de Ajustes"), NULL, false, NULL, NULL);
+    uint32_t fi = 0, fp = 0;
+    aos_hal_heap_info(&fi, &fp);
+    char v[32];
+    snprintf(v, sizeof v, "%u,%u MB", (unsigned)(fp >> 20), (unsigned)((fp & 0xFFFFF) * 10 >> 20));
+    row(g, NULL, 0, _("PSRAM libre"), v, false, NULL, NULL);
+    note(p, _("Lo que ocupa cada una se mide al salir de ella. Tocar una la cierra."));
+}
+
 static void build_dev(lv_obj_t *p)
 {
+    build_bg(p);
     lv_obj_t *g = group(p, _("EN PANTALLA"));
     row_switch(g, AOS_SYM_GESTURE_TAP_BUTTON, 0x0A84FF, _("Mostrar los toques"), aos_dev_touches(), dev_touch_cb);
     row_switch(g, AOS_SYM_SPEEDOMETER, 0x34C759, _("Mostrar los fps"), aos_dev_fps(), dev_fps_cb);
@@ -2288,7 +2346,7 @@ static void build_dev(lv_obj_t *p)
     note(p, _("Estos se leen al arrancar: hay que reiniciar. Si un ajuste no deja arrancar, el tercer arranque fallido seguido vuelve solo a lo de fábrica."));
 
     g = group(p, NULL);
-    action_row(g, _("Reiniciar"), AOS_C_ACCENT, dev_restart_cb);
+    action_row(g, _("Reiniciar la placa"), AOS_C_ACCENT, dev_restart_cb);
     action_row(g, _("Reiniciar en modo seguro"), AOS_C_ORANGE, dev_safe_cb);
     note(p, _("El modo seguro arranca sin las apps de la tarjeta, con el dibujo de fábrica y el USB quieto, como con BOOT apretado al encender. El reinicio siguiente vuelve a la normalidad."));
 }

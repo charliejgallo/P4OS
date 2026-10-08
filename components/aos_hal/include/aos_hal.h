@@ -2142,6 +2142,14 @@ void aos_hal_mdns_remove_netif(void *esp_netif);
 
 uint64_t aos_hal_uptime_ms(void);
 void     aos_hal_heap_info(uint32_t *free_internal, uint32_t *free_psram);
+
+/* The app in front, for which whatever is opened now is opened: aos_ui sets
+ * it before an app's create() and clears it when the app leaves. aos_io
+ * notes it with every pin claimed, so the shell can tell that an app it is
+ * about to close left something running (aos_ui.c, "Apps in the
+ * background"). NULL: none (a service, the shell). */
+void        aos_hal_app_context_set(const char *app_id);
+const char *aos_hal_app_context(void);
 const char *aos_hal_board_name(void);       /* "CO5300 + CST816 (v2)" etc */
 const char *aos_hal_firmware_version(void);
 

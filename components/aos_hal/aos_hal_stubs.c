@@ -1089,6 +1089,12 @@ __attribute__((weak)) uint64_t aos_hal_uptime_ms(void)
 __attribute__((weak)) void aos_hal_heap_info(uint32_t *free_internal, uint32_t *free_psram)
 { }
 
+__attribute__((weak)) void aos_hal_app_context_set(const char *app_id)
+{ }
+
+__attribute__((weak)) const char * aos_hal_app_context(void)
+{ return ""; }
+
 __attribute__((weak)) const char * aos_hal_board_name(void)
 { return ""; }
 

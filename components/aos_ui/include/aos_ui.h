@@ -78,6 +78,25 @@ bool        aos_ui_open(const char *id);   /* brings an app to the front */
 void        aos_ui_back(void);             /* the app's back(), else home */
 void        aos_ui_home(void);             /* the home screen */
 void        aos_ui_close(const char *id);  /* ends an app (switcher's swipe up) */
+
+/* Apps in the background (aos_ui.c explains it): what happens to an app with
+ * KEEP when it is left. AUTO, the default: closed if it holds 1 MB of PSRAM
+ * or more and has nothing running; CLOSE: closed unless it has something
+ * running; KEEP: kept, as before. "Something running": BACKGROUND,
+ * aos_ui_set_busy(), header pins, the speaker, the microphone, a recording. */
+enum { AOS_UI_BG_AUTO = 0, AOS_UI_BG_CLOSE = 1, AOS_UI_BG_KEEP = 2 };
+int         aos_ui_bg_mode(void);
+void        aos_ui_set_bg_mode(int mode);
+/* An app says it has something that must go on while it is hidden (a remote
+ * session, a download) that the shell cannot see by itself. */
+void        aos_ui_set_busy(const char *id, bool busy);
+/* What the shell measured when the app last left: the PSRAM it holds, KB. */
+uint32_t    aos_ui_app_held_kb(const aos_app_t *app);
+/* What a live app has running ("background", "busy", "pins", "audio",
+ * "microphone", "recording"), or NULL. */
+const char *aos_ui_app_busy(const aos_app_t *app);
+/* The live apps (in front or hidden), most recent first. */
+int         aos_ui_alive(aos_app_t **out, int max);
 void        aos_ui_close_others(void);     /* ends every app but the one in front (USB disk mode) */
 void        aos_ui_set_safe_mode(bool on); /* main.c: this boot is the BOOT button's safe mode */
 /* Settings, Developer (aos_devtools.c): overlays and the log's level, kept as

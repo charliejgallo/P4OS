@@ -2806,10 +2806,26 @@ bool aos_hal_net_ap_set_config(const char *ssid, const char *pass,
 
 /* -------------------------------------------------------------------------- */
 
+/* PSRAM free as the board would count it: 24 MB at the first call, less what
+ * the process has allocated since (macOS's malloc statistics), so that what
+ * an app holds shows as on the board (aos_ui.c, apps in the background). */
+#ifdef __APPLE__
+#include <malloc/malloc.h>
+#endif
 void aos_hal_heap_info(uint32_t *free_internal, uint32_t *free_psram)
 {
     if (free_internal) *free_internal = 240 * 1024;
-    if (free_psram)    *free_psram    = 6 * 1024 * 1024;
+    if (!free_psram) return;
+#ifdef __APPLE__
+    static size_t base;
+    malloc_statistics_t st;
+    malloc_zone_statistics(NULL, &st);
+    if (!base) base = st.size_in_use;
+    long long f = 24LL * 1024 * 1024 - ((long long)st.size_in_use - (long long)base);
+    *free_psram = (uint32_t)(f < 0 ? 0 : f);
+#else
+    *free_psram = 24u * 1024 * 1024;
+#endif
 }
 
 const char *aos_hal_board_name(void)       { return "SDL simulator"; }
@@ -2882,6 +2898,9 @@ int aos_hal_hang_restarts(void) { return getenv("P4_SIM_HANG") ? atoi(getenv("P4
 /* On the board this comes from the app descriptor, which CMakeLists fills with
  * 'git describe --tags'. Here there is no descriptor and no point inventing a
  * number: what matters on the desktop is knowing you are NOT on the board. */
+static char s_app_ctx[48];
+void aos_hal_app_context_set(const char *app_id) { snprintf(s_app_ctx, sizeof s_app_ctx, "%s", app_id ? app_id : ""); }
+const char *aos_hal_app_context(void) { return s_app_ctx[0] ? s_app_ctx : NULL; }
 const char *aos_hal_firmware_version(void) { return "sim"; }
 
 void aos_hal_log(const char *tag, const char *fmt, ...)

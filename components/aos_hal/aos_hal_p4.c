@@ -122,6 +122,10 @@ void aos_hal_heap_info(uint32_t *free_internal, uint32_t *free_psram)
     if (free_psram) *free_psram = heap_caps_get_free_size(MALLOC_CAP_SPIRAM);
 }
 
+static char s_app_ctx[48];
+void aos_hal_app_context_set(const char *app_id) { snprintf(s_app_ctx, sizeof s_app_ctx, "%s", app_id ? app_id : ""); }
+const char *aos_hal_app_context(void) { return s_app_ctx[0] ? s_app_ctx : NULL; }
+
 const char *aos_hal_board_name(void) { return "Waveshare ESP32-P4-WIFI6-Touch-LCD-5"; }
 const char *aos_hal_firmware_version(void) { return esp_app_get_description()->version; }
 

@@ -7280,3 +7280,48 @@ RF	RF
 
 #: main/main.c
 La placa se cayó la vez anterior: el volcado está en el portal, en Registro.	Die Platine ist beim letzten Mal abgestürzt: Der Dump ist im Portal, auf der Seite Registro.
+
+#: components/aos_apps/aos_app_settings.c
+Tocá otra vez para cerrarla	Zum Schließen noch einmal tippen
+
+#: components/aos_apps/aos_app_settings.c
+en segundo plano	im Hintergrund
+
+#: components/aos_apps/aos_app_settings.c
+trabajando	arbeitet
+
+#: components/aos_apps/aos_app_settings.c
+usa pines del header	nutzt Header-Pins
+
+#: components/aos_apps/aos_app_settings.c
+sonando	spielt ab
+
+#: components/aos_apps/aos_app_settings.c
+con el micrófono	nutzt das Mikrofon
+
+#: components/aos_apps/aos_app_settings.c
+APPS EN SEGUNDO PLANO	APPS IM HINTERGRUND
+
+#: components/aos_apps/aos_app_settings.c
+Automático (de fábrica)	Automatisch (Standard)
+
+#: components/aos_apps/aos_app_settings.c
+Cerrar al salir	Beim Verlassen schließen
+
+#: components/aos_apps/aos_app_settings.c
+Mantener abiertas	Geöffnet lassen
+
+#: components/aos_apps/aos_app_settings.c
+Al salir de una app, Automático la cierra si ocupa 1 MB de PSRAM o más y no tiene nada andando; Cerrar al salir la cierra si no tiene nada andando; Mantener abiertas la deja, como antes. Andando es usar pines del header, sonar, el micrófono, grabar o trabajar en segundo plano. Con menos de 8 MB de PSRAM libre se cierran también las escondidas que no tienen nada andando.	Beim Verlassen einer App schließt Automatisch sie, wenn sie 1 MB PSRAM oder mehr belegt und nichts läuft; Beim Verlassen schließen schließt sie, wenn nichts läuft; Geöffnet lassen behält sie wie bisher. Laufen heißt: Header-Pins nutzen, Ton abspielen, das Mikrofon, aufnehmen oder im Hintergrund arbeiten. Unter 8 MB freiem PSRAM werden auch versteckte Apps ohne laufende Aufgabe geschlossen.
+
+#: components/aos_apps/aos_app_settings.c
+ABIERTAS AHORA	JETZT GEÖFFNET
+
+#: components/aos_apps/aos_app_settings.c
+Ninguna, fuera de Ajustes	Keine außer Einstellungen
+
+#: components/aos_apps/aos_app_settings.c
+Lo que ocupa cada una se mide al salir de ella. Tocar una la cierra.	Was jede belegt, wird beim Verlassen gemessen. Antippen schließt sie.
+
+#: components/aos_apps/aos_app_settings.c
+Reiniciar la placa	Platine neu starten

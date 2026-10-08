@@ -1421,6 +1421,9 @@ static void open_viewer(int index)
     lv_obj_clean(A.root);
     build_viewer();
     A.vw.sess = vnc_sess_start(&A.vw.srv);
+    /* a remote session goes on while the app is hidden: the shell must not
+     * close it on leaving (aos_ui.c, apps in the background) */
+    aos_ui_set_busy(A.self->desc.id, A.vw.sess != NULL);
     if (!A.vw.sess) {
         set_text(A.vw.msg, _("No se pudo empezar: la conexión anterior todavía se está cerrando"));
         lv_obj_remove_flag(A.vw.msg_btns, LV_OBJ_FLAG_HIDDEN);
@@ -1444,6 +1447,7 @@ static void close_viewer(void)
     A.vw.obj = NULL;
     vnc_sess_stop(A.vw.sess);
     A.vw.sess = NULL;
+    aos_ui_set_busy(A.self->desc.id, false);
     aos_hal_net_low_latency(false);
     A.self->desc.flags &= ~(uint32_t)(AOS_APP_FLAG_NO_SWIPE | AOS_APP_FLAG_LONG_DRAG);
     memset(&A.vw, 0, sizeof A.vw);

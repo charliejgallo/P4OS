@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
  * Mas 186 funciones de libc/libm agregadas a mano.
- * Total: 3341 simbolos.
+ * Total: 3352 simbolos.
  */
 
 #include <stddef.h>
@@ -179,6 +179,8 @@ extern int aos_hal_aod_brightness_get;
 extern int aos_hal_aod_brightness_set;
 extern int aos_hal_aod_enable;
 extern int aos_hal_aod_enabled;
+extern int aos_hal_app_context;
+extern int aos_hal_app_context_set;
 extern int aos_hal_audio_foreground;
 extern int aos_hal_audio_is_playing;
 extern int aos_hal_audio_stop;
@@ -225,9 +227,12 @@ extern int aos_hal_bt_phone_battery;
 extern int aos_hal_bt_state;
 extern int aos_hal_button_is_down;
 extern int aos_hal_caps;
+extern int aos_hal_coredump_boot_check;
 extern int aos_hal_coredump_erase;
 extern int aos_hal_coredump_info;
+extern int aos_hal_coredump_mark_read;
 extern int aos_hal_coredump_read;
+extern int aos_hal_coredump_test_panic;
 extern int aos_hal_device_name;
 extern int aos_hal_device_name_applied;
 extern int aos_hal_device_name_set;
@@ -751,6 +756,7 @@ extern int aos_io_gpio_get;
 extern int aos_io_gpio_mode;
 extern int aos_io_gpio_set;
 extern int aos_io_header;
+extern int aos_io_held_for_app;
 extern int aos_io_i2c_close;
 extern int aos_io_i2c_guess;
 extern int aos_io_i2c_open;
@@ -1067,11 +1073,14 @@ extern int aos_trc;
 extern int aos_ui_alive;
 extern int aos_ui_app_area;
 extern int aos_ui_app_at;
+extern int aos_ui_app_busy;
 extern int aos_ui_app_count;
 extern int aos_ui_app_find;
+extern int aos_ui_app_held_kb;
 extern int aos_ui_app_layer;
 extern int aos_ui_app_root;
 extern int aos_ui_back;
+extern int aos_ui_bg_mode;
 extern int aos_ui_block_gestures;
 extern int aos_ui_boot_done;
 extern int aos_ui_boot_progress;
@@ -1108,6 +1117,8 @@ extern int aos_ui_request_snapshot;
 extern int aos_ui_request_toast;
 extern int aos_ui_safe_mode;
 extern int aos_ui_set_badge;
+extern int aos_ui_set_bg_mode;
+extern int aos_ui_set_busy;
 extern int aos_ui_set_landscape;
 extern int aos_ui_set_launch_rect;
 extern int aos_ui_set_safe_mode;
@@ -3523,6 +3534,8 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_aod_brightness_set),
     ESP_ELFSYM_EXPORT(aos_hal_aod_enable),
     ESP_ELFSYM_EXPORT(aos_hal_aod_enabled),
+    ESP_ELFSYM_EXPORT(aos_hal_app_context),
+    ESP_ELFSYM_EXPORT(aos_hal_app_context_set),
     ESP_ELFSYM_EXPORT(aos_hal_audio_foreground),
     ESP_ELFSYM_EXPORT(aos_hal_audio_is_playing),
     ESP_ELFSYM_EXPORT(aos_hal_audio_stop),
@@ -3569,9 +3582,12 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_bt_state),
     ESP_ELFSYM_EXPORT(aos_hal_button_is_down),
     ESP_ELFSYM_EXPORT(aos_hal_caps),
+    ESP_ELFSYM_EXPORT(aos_hal_coredump_boot_check),
     ESP_ELFSYM_EXPORT(aos_hal_coredump_erase),
     ESP_ELFSYM_EXPORT(aos_hal_coredump_info),
+    ESP_ELFSYM_EXPORT(aos_hal_coredump_mark_read),
     ESP_ELFSYM_EXPORT(aos_hal_coredump_read),
+    ESP_ELFSYM_EXPORT(aos_hal_coredump_test_panic),
     ESP_ELFSYM_EXPORT(aos_hal_device_name),
     ESP_ELFSYM_EXPORT(aos_hal_device_name_applied),
     ESP_ELFSYM_EXPORT(aos_hal_device_name_set),
@@ -4095,6 +4111,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_gpio_mode),
     ESP_ELFSYM_EXPORT(aos_io_gpio_set),
     ESP_ELFSYM_EXPORT(aos_io_header),
+    ESP_ELFSYM_EXPORT(aos_io_held_for_app),
     ESP_ELFSYM_EXPORT(aos_io_i2c_close),
     ESP_ELFSYM_EXPORT(aos_io_i2c_guess),
     ESP_ELFSYM_EXPORT(aos_io_i2c_open),
@@ -4411,11 +4428,14 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_ui_alive),
     ESP_ELFSYM_EXPORT(aos_ui_app_area),
     ESP_ELFSYM_EXPORT(aos_ui_app_at),
+    ESP_ELFSYM_EXPORT(aos_ui_app_busy),
     ESP_ELFSYM_EXPORT(aos_ui_app_count),
     ESP_ELFSYM_EXPORT(aos_ui_app_find),
+    ESP_ELFSYM_EXPORT(aos_ui_app_held_kb),
     ESP_ELFSYM_EXPORT(aos_ui_app_layer),
     ESP_ELFSYM_EXPORT(aos_ui_app_root),
     ESP_ELFSYM_EXPORT(aos_ui_back),
+    ESP_ELFSYM_EXPORT(aos_ui_bg_mode),
     ESP_ELFSYM_EXPORT(aos_ui_block_gestures),
     ESP_ELFSYM_EXPORT(aos_ui_boot_done),
     ESP_ELFSYM_EXPORT(aos_ui_boot_progress),
@@ -4452,6 +4472,8 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_ui_request_toast),
     ESP_ELFSYM_EXPORT(aos_ui_safe_mode),
     ESP_ELFSYM_EXPORT(aos_ui_set_badge),
+    ESP_ELFSYM_EXPORT(aos_ui_set_bg_mode),
+    ESP_ELFSYM_EXPORT(aos_ui_set_busy),
     ESP_ELFSYM_EXPORT(aos_ui_set_landscape),
     ESP_ELFSYM_EXPORT(aos_ui_set_launch_rect),
     ESP_ELFSYM_EXPORT(aos_ui_set_safe_mode),

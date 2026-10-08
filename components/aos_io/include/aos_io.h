@@ -60,6 +60,9 @@ bool        aos_io_claim(int gpio, const char *owner);   /* false: taken or not 
 void        aos_io_release(int gpio, const char *owner);
 void        aos_io_release_owner(const char *owner);     /* all of an owner's pins */
 const char *aos_io_owner(int gpio);                      /* NULL: nobody */
+/* Pins still claimed that were claimed while app_id was in front
+ * (aos_hal_app_context): what it left running, if it is leaving. */
+int         aos_io_held_for_app(const char *app_id);
 
 /* ---- ports and modules (modules.txt) ---- */
 

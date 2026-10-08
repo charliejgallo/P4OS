@@ -137,6 +137,32 @@ every touch. The VNC viewer sets `AOS_APP_FLAG_NO_SWIPE |
 AOS_APP_FLAG_LONG_DRAG` only while it shows the remote screen, so a drag
 from the left edge is the remote's there and "back" everywhere else.
 
+## When the app is left: kept or closed
+
+`AOS_APP_FLAG_KEEP` asks to be kept hidden when the user leaves; whether it
+is depends on Settings, Developer, "Apps in the background" (`aos_ui.c`
+explains it). In the default, Automatic, an app is closed on leaving if it
+holds 1 MB of PSRAM or more and has nothing running, and below 8 MB of free
+PSRAM the hidden ones go too. "Running" is seen by the system: header pins
+claimed while the app was in front, the speaker or the microphone open, a
+recording, the worker going, or `AOS_APP_FLAG_BACKGROUND`. What it cannot
+see, the app says: `aos_ui_set_busy(self->desc.id, true)` while a remote
+session or a download must go on (VNC does it while connected), `false`
+when it ends. So:
+
+- Save the user's work in `hide()`: `destroy()` may follow at once (Dibujo
+  saves the open drawing there).
+- Do not count on being kept to stay fast: an app that holds megabytes is
+  reopened from scratch.
+- The log says what was decided and what each app held (`ui: keeping ... /
+  closing ... on leaving: it holds N KB of PSRAM`), and whether an app that
+  was closed gave its PSRAM back.
+
+Measured on the board (2026-10-08): Photos 2.1 MB, Pixel Art 2.0 MB and
+Drawing 1.7 MB are closed; Radio 490 KB, Notes 343 KB, Music 156 KB, CAN
+154 KB and the small tools stay. The games have no KEEP, and Gems, Mila,
+Monster Hop and Turbo give all their PSRAM back when closed.
+
 ## Drawing a frame of your own
 
 - **Worker** (`aos_hal_worker_start`): runs on core 0, priority 3, with a

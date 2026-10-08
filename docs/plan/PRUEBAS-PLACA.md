@@ -159,6 +159,19 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       con `tools/boot_loop.sh`: 4 caídas en 70 reinicios antes, 0 en 80
       después (sincronizando por rango sólo el bloque del módulo), y 0 en
       27 con la imagen de producción. Detalle en `docs/MEMORY.md`.
+- [x] Apps en segundo plano (2026-10-08): al salir, una app con KEEP se
+      cierra si ocupa 1 MB de PSRAM o más y no tiene nada andando (Ajustes,
+      Desarrollador). Medido en la placa: Fotos 2,1 MB, Pixel 2,0 MB y
+      Dibujo 1,7 MB se cierran; Radio 490 KB, Notas 343 KB, Música 156 KB,
+      CAN 154 KB y las chicas se quedan. Los juegos no tienen KEEP (ya se
+      cerraban) y Gemas, Mila, Monster Hop y Turbo devuelven toda su PSRAM.
+      PSRAM libre en el inicio: ~17 MB. Falta ver en la placa una app
+      "ocupada" (PWM con un canal prendido, RF sonando, VNC conectado: este
+      último probado en el simulador).
+- [x] Volcado de cuelgue (2026-10-08): pánico de prueba
+      (`POST /api/coredump/test`), el volcado dice tarea, pc, sha de 16 y
+      versión, `coredump.sh` lo decodifica hasta `panic_later` con su ELF y
+      se niega sin él.
 - [ ] Sin Wi-Fi después de un reinicio por software (visto otra vez el
       2026-10-06, 1 vez en ~140 reinicios seguidos): la interfaz anda, el
       C6 no levanta la red, y no lo arreglan ni apagar y prender el Wi-Fi

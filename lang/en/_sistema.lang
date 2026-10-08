@@ -7280,3 +7280,48 @@ RF	RF
 
 #: main/main.c
 La placa se cayó la vez anterior: el volcado está en el portal, en Registro.	The board crashed last time: the dump is in the portal, on the Registro page.
+
+#: components/aos_apps/aos_app_settings.c
+Tocá otra vez para cerrarla	Tap again to close it
+
+#: components/aos_apps/aos_app_settings.c
+en segundo plano	in the background
+
+#: components/aos_apps/aos_app_settings.c
+trabajando	working
+
+#: components/aos_apps/aos_app_settings.c
+usa pines del header	uses header pins
+
+#: components/aos_apps/aos_app_settings.c
+sonando	playing
+
+#: components/aos_apps/aos_app_settings.c
+con el micrófono	using the microphone
+
+#: components/aos_apps/aos_app_settings.c
+APPS EN SEGUNDO PLANO	APPS IN THE BACKGROUND
+
+#: components/aos_apps/aos_app_settings.c
+Automático (de fábrica)	Automatic (default)
+
+#: components/aos_apps/aos_app_settings.c
+Cerrar al salir	Close on leaving
+
+#: components/aos_apps/aos_app_settings.c
+Mantener abiertas	Keep open
+
+#: components/aos_apps/aos_app_settings.c
+Al salir de una app, Automático la cierra si ocupa 1 MB de PSRAM o más y no tiene nada andando; Cerrar al salir la cierra si no tiene nada andando; Mantener abiertas la deja, como antes. Andando es usar pines del header, sonar, el micrófono, grabar o trabajar en segundo plano. Con menos de 8 MB de PSRAM libre se cierran también las escondidas que no tienen nada andando.	On leaving an app, Automatic closes it if it holds 1 MB of PSRAM or more and has nothing running; Close on leaving closes it if it has nothing running; Keep open keeps it, as before. Running means using header pins, playing sound, the microphone, recording or working in the background. Below 8 MB of free PSRAM, hidden apps with nothing running are closed too.
+
+#: components/aos_apps/aos_app_settings.c
+ABIERTAS AHORA	OPEN NOW
+
+#: components/aos_apps/aos_app_settings.c
+Ninguna, fuera de Ajustes	None besides Settings
+
+#: components/aos_apps/aos_app_settings.c
+Lo que ocupa cada una se mide al salir de ella. Tocar una la cierra.	What each one holds is measured when it is left. Tapping one closes it.
+
+#: components/aos_apps/aos_app_settings.c
+Reiniciar la placa	Restart the board
