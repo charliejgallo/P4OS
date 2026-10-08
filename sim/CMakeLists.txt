@@ -173,6 +173,7 @@ add_executable(p4os_sim
     retro_sim.c
     jpeg_sim.c
     usb_sim.c
+    ble_sim.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_hid_keys.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_http.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_tcp.c

@@ -1386,7 +1386,10 @@ static void on_reset(int reason)
 {
     ESP_LOGE(TAG, "the host restarted (%d)", reason);
     limpiar_conexion();
+    aos_ble_scan_reset();
 }
+
+uint8_t aos_ble_own_addr_type(void) { return s_addr_type; }
 
 static void on_sync(void)
 {
@@ -1397,6 +1400,7 @@ static void on_sync(void)
     }
     advertise();
     diag_scan();
+    aos_ble_scan_synced();
 }
 
 static void host_task(void *param)
@@ -1428,6 +1432,7 @@ bool aos_ble_start(void)
     }
 
     aos_ble_hid_register();        /* the keyboard mode's services, if it is on */
+    aos_ble_scan_init();           /* the apps' scanner and GATT client (aos_ble_scan.c) */
     s_sec_co_ok = ble_npl_callout_init(&s_sec_co, nimble_port_get_dflt_eventq(), sec_check, NULL) == 0;
 
     ble_hs_cfg.reset_cb = on_reset;
@@ -1472,6 +1477,7 @@ void aos_ble_stop(void)
         ble_npl_callout_deinit(&s_sec_co);
         s_sec_co_ok = false;
     }
+    aos_ble_scan_deinit();
     int rc = nimble_port_stop();
     if (rc == 0) {
         esp_err_t e = nimble_port_deinit();

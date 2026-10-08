@@ -92,8 +92,9 @@ CONFIG_BT_NIMBLE_50_FEATURE_SUPPORT=n
 CONFIG_BT_NIMBLE_SECURITY_ENABLE=y
 CONFIG_BT_NIMBLE_SM_SC=y
 CONFIG_BT_NIMBLE_NVS_PERSIST=y
-# two connections: the phone and, in keyboard mode, a computer
-CONFIG_BT_NIMBLE_MAX_CONNECTIONS=2
+# three connections: the phone, in keyboard mode a computer, and the one an
+# app opens as a GATT client (aos_ble_scan.c). The C6's controller allows 3.
+CONFIG_BT_NIMBLE_MAX_CONNECTIONS=3
 CONFIG_BT_NIMBLE_GATT_MAX_PROCS=8
 CONFIG_BT_NIMBLE_MEM_ALLOC_MODE_INTERNAL=n
 CONFIG_BT_NIMBLE_MEM_ALLOC_MODE_EXTERNAL=y

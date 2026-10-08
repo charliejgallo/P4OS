@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
  * Mas 186 funciones de libc/libm agregadas a mano.
- * Total: 3326 simbolos.
+ * Total: 3341 simbolos.
  */
 
 #include <stddef.h>
@@ -188,6 +188,21 @@ extern int aos_hal_battery_care_enable;
 extern int aos_hal_battery_care_enabled;
 extern int aos_hal_battery_read;
 extern int aos_hal_beep;
+extern int aos_hal_ble_gatt_attrs;
+extern int aos_hal_ble_gatt_connect;
+extern int aos_hal_ble_gatt_disconnect;
+extern int aos_hal_ble_gatt_events;
+extern int aos_hal_ble_gatt_mtu;
+extern int aos_hal_ble_gatt_read;
+extern int aos_hal_ble_gatt_rssi;
+extern int aos_hal_ble_gatt_state;
+extern int aos_hal_ble_gatt_subscribe;
+extern int aos_hal_ble_gatt_write;
+extern int aos_hal_ble_scan_lost;
+extern int aos_hal_ble_scan_read;
+extern int aos_hal_ble_scan_start;
+extern int aos_hal_ble_scan_stop;
+extern int aos_hal_ble_scanning;
 extern int aos_hal_board_name;
 extern int aos_hal_boot_reason;
 extern int aos_hal_boot_stage;
@@ -3517,6 +3532,21 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_battery_care_enabled),
     ESP_ELFSYM_EXPORT(aos_hal_battery_read),
     ESP_ELFSYM_EXPORT(aos_hal_beep),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_attrs),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_connect),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_disconnect),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_events),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_mtu),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_read),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_rssi),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_state),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_subscribe),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_gatt_write),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_scan_lost),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_scan_read),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_scan_start),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_scan_stop),
+    ESP_ELFSYM_EXPORT(aos_hal_ble_scanning),
     ESP_ELFSYM_EXPORT(aos_hal_board_name),
     ESP_ELFSYM_EXPORT(aos_hal_boot_reason),
     ESP_ELFSYM_EXPORT(aos_hal_boot_stage),

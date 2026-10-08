@@ -567,6 +567,51 @@ __attribute__((weak)) const char * aos_hal_bt_keyboard_host(void)
 __attribute__((weak)) bool aos_hal_bt_keyboard_ready(void)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) bool aos_hal_ble_scan_start(bool active, int duty_pct)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) void aos_hal_ble_scan_stop(void)
+{ }
+
+__attribute__((weak)) bool aos_hal_ble_scanning(void)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_ble_scan_read(aos_ble_adv_t *out, int max)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) uint32_t aos_hal_ble_scan_lost(void)
+{ uint32_t v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_ble_gatt_connect(const uint8_t addr[6], uint8_t addr_type)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) void aos_hal_ble_gatt_disconnect(void)
+{ }
+
+__attribute__((weak)) aos_ble_gatt_state_t aos_hal_ble_gatt_state(int *reason)
+{ aos_ble_gatt_state_t v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) uint16_t aos_hal_ble_gatt_mtu(void)
+{ uint16_t v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_ble_gatt_rssi(int8_t *rssi)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_ble_gatt_attrs(aos_ble_attr_t *out, int max)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_ble_gatt_read(uint16_t handle)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_ble_gatt_write(uint16_t handle, const void *data, size_t len, bool response)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_ble_gatt_subscribe(uint16_t value_handle, int mode)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_ble_gatt_events(aos_ble_gatt_ev_t *out, int max)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) bool aos_hal_notif_pop(aos_notif_t *out)
 { bool v; memset(&v, 0, sizeof v); return v; }
 

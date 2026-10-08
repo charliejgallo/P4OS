@@ -89,6 +89,41 @@ Tested with an iPhone 15 Pro Max and a MacBook Air at once: a 72-character
 text, volume up, the Macro pad's trackpad, and both coming back by
 themselves after the board restarts.
 
+## The apps' scanner and GATT client
+
+Since the BLE app (`apps/ble`, 2026-10-07): `aos_hal_ble_*` in `aos_hal.h`,
+`components/aos_ble/aos_ble_scan.c`. Raw on purpose: the HAL hands over the
+bytes as they came, and the meaning is the app's.
+
+- **Scanning:** `aos_hal_ble_scan_start(active, duty_pct)`, every packet
+  kept (no duplicate filter: the RSSI over time is the point) in a ring of
+  1024 reports in PSRAM that the app drains with `aos_hal_ble_scan_read`;
+  what overflows is counted (`_scan_lost`). The interval is 100 ms and the
+  window the duty asked for: the C6 has one radio for Wi-Fi and Bluetooth,
+  and 100 % slows the Wi-Fi.
+- **A GATT client** for one device at a time: `_gatt_connect` stops the scan
+  (NimBLE starts no connection while discovering; it comes back by itself),
+  exchanges the MTU, discovers every service, characteristic and
+  descriptor, and leaves them as a table (`_gatt_attrs`). Reads (long
+  reads, up to 512 bytes), writes with and without response, and
+  subscriptions (the CCCD written for the app) are queued and run one at a
+  time; their answers, the notifications and the indications come back
+  through `_gatt_events`. The RSSI of the link is measured once a second.
+  **No pairing:** the store of bonds holds the phone's and the computer's
+  keys, and a sensor's would push them out.
+- **Its own connection:** NimBLE delivers a connection's events to the
+  callback that made it, so the app's never reach `aos_ble.c`'s gap_event
+  (whose "a third connection is closed" is about the phone and the
+  computer). `CONFIG_BT_NIMBLE_MAX_CONNECTIONS` went from 2 to 3 for it; the
+  C6's controller already allowed 3.
+- **No waiting on LVGL's thread:** starting a scan or a connection is an
+  HCI command that waits for the C6 over SDIO, so the calls only queue a
+  command and post an event to NimBLE's queue; the host task does the rest.
+  Everything shared is in PSRAM (~170 KB, the first time an app asks), under
+  one mutex.
+- **The simulator** (`sim/ble_sim.c`) makes up a neighbourhood with a
+  device of every format the app decodes and two that take a connection.
+
 ## The portal
 
     GET  /api/bt                          state, phone, battery, keyboard, computer,

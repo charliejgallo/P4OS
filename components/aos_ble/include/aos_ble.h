@@ -88,6 +88,14 @@ void     aos_ble_hid_subscribe(uint16_t attr, bool notify);
 void     aos_ble_hid_host_gone(void);
 uint16_t aos_ble_host_conn(void);       /* 0xFFFF when none */
 bool     aos_ble_is_phone(uint16_t conn);
+uint8_t  aos_ble_own_addr_type(void);
+
+/* between aos_ble.c and aos_ble_scan.c, the apps' scanner and GATT client
+ * (aos_hal_ble_*): its event and callout live on NimBLE's queue */
+void aos_ble_scan_init(void);       /* after nimble_port_init */
+void aos_ble_scan_deinit(void);     /* before nimble_port_deinit */
+void aos_ble_scan_synced(void);
+void aos_ble_scan_reset(void);
 
 
 #ifdef __cplusplus
