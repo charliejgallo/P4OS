@@ -729,10 +729,16 @@ static void engine(void *arg)
             a->pilot_db = st.pilot_db;
             t_dem += aos_hal_uptime_us() - t3;
         }
-        /* RF_AVG FFTs from the start of each display period, the rest only read */
-        uint32_t period = (a->rate ? a->rate : 2048000) / RF_FPS;
+        /* FFTs from the start of each display period, the rest only read. In
+         * Data/LoRa the eye is on the list, not a live 25 fps spectrum, so the
+         * display rate (and the per-bin log10f of the floor, the engine's
+         * costliest step) drops - CPU the busy band needs to read without
+         * losing samples, and the analysis thread needs to keep up. */
+        bool quiet_spec = want_mode == MODE_DATA || want_mode == MODE_LORA;
+        int fps = quiet_spec ? 8 : RF_FPS, avg = quiet_spec ? 2 : RF_AVG;
+        uint32_t period = (a->rate ? a->rate : 2048000) / fps;
         for (int i = 0; i < n;) {
-            if (rf_fft_count(fft) < RF_AVG) {
+            if (rf_fft_count(fft) < avg) {
                 int take = RF_FFT * 2 - fill;
                 if (take > n - i) take = n - i;
                 memcpy(frame + fill, buf + i, take);
