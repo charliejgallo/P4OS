@@ -23,7 +23,9 @@
   where, how long, how strong - with the spreading factor and bandwidth its
   preamble shows, named after a Meshtastic preset when it is one, and the
   channel's busy share over the last minute. Found on synthetic packets of
-  five presets at three sample rates, a weak one too. Bands has Meshtastic's
+  five presets at three sample rates, a weak one too, and on the board with
+  two Meshtastic nodes: every message and its acknowledgement as MediumFast,
+  the band's hopping neighbours kept off the list. Bands has Meshtastic's
   default channel of a region and preset (ANZ and MediumFast: 926.125 MHz).
 - **RF's controls are one bar:** mode, bands, settings, speaker and keeping
   things, each a sheet; the spectrum and waterfall got the room.

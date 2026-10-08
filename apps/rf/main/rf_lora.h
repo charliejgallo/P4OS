@@ -37,6 +37,19 @@ void rf_lora_feed(rf_lora_t *o, const uint8_t *iq, int n, void (*done)(const rf_
  * the feed (the tests). Returns true if there was one to do. */
 bool rf_lora_analyse_pending(rf_lora_t *o);
 
+/* What the analysis cost since the last call (which resets it): the
+ * dechirps done and their time, given a clock; bursts too narrow to look
+ * at; bursts that rolled out of the ring before a job was free. */
+typedef struct {
+    uint32_t analysed, narrow, missed;
+    uint32_t analyse_max_us;
+    uint64_t analyse_us;
+} rf_lora_stats_t;
+/* a clock for the stats, and something to call now and then in the long
+ * analysis, for whoever shares its core (both may be NULL) */
+void rf_lora_set_clock(rf_lora_t *o, uint64_t (*us)(void), void (*yield)(void));
+void rf_lora_stats(rf_lora_t *o, rf_lora_stats_t *out);
+
 /* The Meshtastic preset with this bandwidth and spreading factor, or NULL */
 const char *rf_lora_preset(int sf, uint32_t bw_hz);
 

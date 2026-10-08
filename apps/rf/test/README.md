@@ -74,5 +74,14 @@ weak one too, the burst as "not LoRa" and the carrier as nothing. Each try
 on the way is in `rf_lora.c`: the twins of one slope at two bandwidths won
 until the bandwidths were compared on the power they gathered.
 
+The real test is a recording made on the board (2026-10-08, 960 ksps at
+926.125 MHz, 88 s): two Meshtastic nodes on MediumFast, three messages, and
+the busy band of Buenos Aires around them. `lora_test` gives the 8 packets
+as MediumFast, 274 to 304 kHz wide, and 62 bursts of hopping neighbours as
+not LoRa; the same stretch made 1.92 Msps by interpolation, the same. It
+took three tries: the band was the whole view (the strong node's skirts),
+then dragged by a narrow carrier, then the plateau assumed a quarter of the
+view. Recordings stay out of git (168 MB; and they are someone's radio).
+
 In the simulator: `RF_IQ_FILE=/tmp/lora.cu8@960000` and the LoRa mode.
 

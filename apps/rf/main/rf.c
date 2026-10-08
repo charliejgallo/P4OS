@@ -250,6 +250,7 @@ typedef struct {
     void *lora_mx;
     volatile bool lora_done;
     int mesh_region, mesh_preset;
+    bool lora_only, lora_chan;              /* the list's filters: LoRa only, the channel only */
     lv_obj_t *mesh_region_dd, *mesh_preset_dd, *mesh_lbl;
 } rf_t;
 
@@ -276,6 +277,10 @@ static rf_t *A;
 
 static void mode_view(rf_t *a);
 static void ev_rebuild(rf_t *a);
+static lv_obj_t *sheet_switch(lv_obj_t *card, const char *text, bool on, intptr_t ud);
+struct rf_lpkt;
+static bool in_channel(const rf_t *a, uint32_t freq);
+static bool lp_shown(const rf_t *a, const struct rf_lpkt *e);
 static void lp_rebuild(rf_t *a);
 static float lp_busy(rf_t *a, uint32_t *count);
 static void set_mode(rf_t *a, int m);
@@ -393,20 +398,37 @@ static void on_lora(const rf_lora_pkt_t *p, void *ctx)
     a->lp_n++;
     a->lp_seq++;
     aos_hal_mutex_unlock(a->mx);
-    if (a->log_on) rf_log_lora(p, e->freq, rf_lora_preset(p->sf, p->bw_hz));
+    /* the CSV is the analysis thread's: a line on the card costs tens of ms,
+     * and a busy band sends several a second */
 }
 
 /* The LoRa meter's slow half: each packet's dechirp (tens of ms of float on
  * the board), off the engine, which must keep reading the stick. It borrows
  * the meter under lora_mx; the engine takes it back under the same lock
  * before freeing it. */
+static void lora_yield(void)
+{
+    aos_hal_sleep_ms(1);
+}
+
 static void lora_worker(void *arg)
 {
     rf_t *a = arg;
+    uint32_t logged = 0;
     while (!a->stop) {
         aos_hal_mutex_lock(a->lora_mx);
         bool did = a->lora && rf_lora_analyse_pending(a->lora);
         aos_hal_mutex_unlock(a->lora_mx);
+        /* the packets reported since, to rf/lora-<day>.csv */
+        while (a->lp && logged < a->lp_n) {
+            if (a->lp_n - logged > LP_MAX) logged = a->lp_n - LP_MAX;
+            aos_hal_mutex_lock(a->mx);
+            rf_lpkt_t e = a->lp[logged % LP_MAX];
+            aos_hal_mutex_unlock(a->mx);
+            logged++;
+            if (a->log_on) rf_log_lora(&e.p, e.freq, rf_lora_preset(e.p.sf, e.p.bw_hz));
+            did = true;
+        }
         if (!did) aos_hal_sleep_ms(10);
     }
     a->lora_done = true;
@@ -434,7 +456,7 @@ static void engine(void *arg)
     rf_demod_set_clock(aos_hal_uptime_us);
     bool spk = false;
     uint32_t spk_rate = 0;
-    uint64_t t_dem = 0;
+    uint64_t t_dem = 0, t_lora = 0;
     if (!buf || !frame || !db || !fft || !pcm) {
         a->why = N_("Sin memoria");
         a->state = ST_NONE;
@@ -548,6 +570,7 @@ static void engine(void *arg)
             aos_hal_mutex_unlock(a->lora_mx);
             rf_lora_free(lr);
             lr = want_mode == MODE_LORA ? rf_lora_new(src_rate) : NULL;
+            if (lr) rf_lora_set_clock(lr, aos_hal_uptime_us, lora_yield);
             lr_rate = src_rate;
             if (want_mode == MODE_LORA && !lr) aos_hal_log("rf", "no LoRa meter at %u sps (memory)", (unsigned)src_rate);
             aos_hal_mutex_lock(a->lora_mx);
@@ -615,7 +638,11 @@ static void engine(void *arg)
         }
         if (n > 0 && rf_iq_on(NULL, NULL)) rf_iq_write(buf, n);
         if (ook && n > 0) rf_ook_feed(ook, buf, n / 2, on_pulses, a);
-        if (lr && n > 0) rf_lora_feed(lr, buf, n / 2, on_lora, a);
+        if (lr && n > 0) {
+            uint64_t t4 = aos_hal_uptime_us();
+            rf_lora_feed(lr, buf, n / 2, on_lora, a);
+            t_lora += aos_hal_uptime_us() - t4;
+        }
         if (dm && n > 0) {
             uint64_t t3 = aos_hal_uptime_us();
             int na = rf_demod_run(dm, buf, n / 2, pcm, PCM_MAX);
@@ -689,7 +716,15 @@ static void engine(void *arg)
                         span, (unsigned)(t_read / 1000), n_fft, (unsigned)(t_fft / 1000), (unsigned)(t_take / 1000),
                         (unsigned)(t_dem / 1000), cur_mode, (int)a->floor_bin_db, (int)a->level_db, (int)a->pilot_db,
                         spk ? aos_hal_spk_queued() : -1, a->ui_frames, a->ui_draw_us / 1000);
-            t_read = t_fft = t_take = t_dem = 0;
+            if (lr) {
+                rf_lora_stats_t ls;
+                rf_lora_stats(lr, &ls);
+                aos_hal_log("rf", "lora: finding %u ms; %u dechirps, %u ms each, %u at most; %u too narrow, %u missed",
+                            (unsigned)(t_lora / 1000), (unsigned)ls.analysed,
+                            (unsigned)(ls.analysed ? ls.analyse_us / ls.analysed / 1000 : 0),
+                            (unsigned)(ls.analyse_max_us / 1000), (unsigned)ls.narrow, (unsigned)ls.missed);
+            }
+            t_read = t_fft = t_take = t_dem = t_lora = 0;
             n_fft = 0;
             a->ui_frames = a->ui_draw_us = 0;
             t_log = now;
@@ -1157,13 +1192,14 @@ static void live_lora(rf_t *a)
     int k = snprintf(j, sizeof j, "[");
     aos_hal_mutex_lock(a->mx);
     uint32_t n = a->lp_n;
-    for (uint32_t i = 0; i < n && i < 30 && k < (int)sizeof j - 300; i++) {
+    for (uint32_t i = 0, rows = 0; i < n && i < LP_MAX && rows < 30 && k < (int)sizeof j - 300; i++) {
         const rf_lpkt_t *e = &a->lp[(n - 1 - i) % LP_MAX];
+        if (!lp_shown(a, e)) continue;
         const char *preset = rf_lora_preset(e->p.sf, e->p.bw_hz);
         k += snprintf(j + k, sizeof j - k,
                       "%s{\"n\":%u,\"t\":\"%02d:%02d:%02d\",\"freq\":%u,\"off\":%d,\"width\":%u,\"ms\":%u,"
                       "\"snr\":%.1f,\"sf\":%d,\"bw\":%u,\"q\":%.2f,\"preset\":\"%s\"}",
-                      i ? "," : "", (unsigned)(n - 1 - i), e->when.tm_hour, e->when.tm_min, e->when.tm_sec, (unsigned)e->freq,
+                      rows++ ? "," : "", (unsigned)(n - 1 - i), e->when.tm_hour, e->when.tm_min, e->when.tm_sec, (unsigned)e->freq,
                       (int)e->p.offset_hz, (unsigned)e->p.width_hz, (unsigned)(e->p.dur_us / 1000), (double)e->p.snr_db,
                       e->p.sf, (unsigned)e->p.bw_hz, (double)e->p.quality, preset ? preset : "");
     }
@@ -1293,8 +1329,8 @@ static void ui_timer(lv_timer_t *t)
             /* the channel's use: what Meshtastic itself counts as "channel utilization" */
             uint32_t c;
             int busy10 = (int)(lp_busy(a, &c) * 10 + 0.5f);
-            snprintf(s, sizeof s, _("LoRa · %u paquetes en el último minuto · ocupado %d,%d %%"), (unsigned)c, busy10 / 10,
-                     busy10 % 10);
+            snprintf(s, sizeof s, _("LoRa · en el canal, el último minuto: %u paquetes, ocupado %d,%d %%"), (unsigned)c,
+                     busy10 / 10, busy10 % 10);
         }
         lv_label_set_text(a->status_lbl, s);
         a->stat_at = now;
@@ -1394,10 +1430,11 @@ static void set_mode(rf_t *a, int m)
     if (m != a->want_mode && a->info.high_speed) {
         /* how wide to look: broadcast FM at 960 k, with its neighbours on
          * screen; the narrow modes at 240 k, a fifth of the work; LoRa at
-         * 960 k at least, its channels being 125 to 500 kHz */
-        if (m == RF_MODE_WFM) a->want_rate = 960000;
+         * 960 k: a 250 kHz channel and its neighbours, and on the board at
+         * 1.92 M samples were lost and a Meshtastic message went unread
+         * that the same signal at 960 k gave (2026-10-08) */
+        if (m == RF_MODE_WFM || m == MODE_LORA) a->want_rate = 960000;
         else if ((m == RF_MODE_AM || m == RF_MODE_NFM) && a->want_mode == RF_MODE_OFF) a->want_rate = 240000;
-        else if (m == MODE_LORA && a->want_rate < 960000) a->want_rate = 960000;
     }
     if (m != a->want_mode && MODE_STEP[m]) a->step = MODE_STEP[m];
     a->want_mode = m;
@@ -1681,6 +1718,11 @@ static void settings_tap(lv_event_t *e)
     if (a->want_mode == MODE_DATA) {
         lv_obj_t *l = aos_label(card, _("El modo Datos escucha siempre a 240 mil."), aos_font_caption, AOS_C_DIM);
         lv_obj_set_width(l, LV_PCT(100));
+    } else if (a->want_mode == MODE_LORA) {
+        lv_obj_t *l = aos_label(card, _("LoRa abre a 0,96: un canal y sus vecinos. Más muestras muestran más banda, pero la placa puede perder muestras y con ellas paquetes."),
+                                aos_font_caption, AOS_C_DIM);
+        lv_obj_set_width(l, LV_PCT(100));
+        lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
     }
     section(card, _("Paso de las flechas"));
     a->seg_step = seg_row(card);
@@ -1689,6 +1731,11 @@ static void settings_tap(lv_event_t *e)
         seg_add(a->seg_step, s, step_pick, STEPS[i]);
     }
     seg_light(a->seg_step, a->step);
+    if (a->want_mode == MODE_LORA) {
+        section(card, _("Qué lista LoRa (el CSV guarda todo)"));
+        sheet_switch(card, _("Sólo paquetes LoRa: lo que no tiene chirps no se muestra"), a->lora_only, 2);
+        sheet_switch(card, _("Sólo el canal sintonizado (el paso de ancho)"), a->lora_chan, 3);
+    }
     section(card, _("Ganancia"));
     gain_controls(a, card);
     if (a->want_mode == RF_MODE_AM || a->want_mode == RF_MODE_NFM) {
@@ -1975,8 +2022,10 @@ static void lp_line(const rf_lpkt_t *e, char *t, size_t n)
     snprintf(t + c, n - c, "%u ms · %.0f dB", (unsigned)(e->p.dur_us / 1000), (double)e->p.snr_db);
 }
 
-/* The share of the last minute something was on the air, as the meter saw
- * it (packets at once count twice) */
+/* The share of the last minute the channel was busy, as Meshtastic counts
+ * its "channel utilization": the packets whose centre falls in the channel
+ * tuned (in_channel), packets at
+ * once counted twice. Other neighbours of the band stay out. */
 static float lp_busy(rf_t *a, uint32_t *count)
 {
     uint64_t now = aos_hal_uptime_ms(), on_us = 0;
@@ -1985,6 +2034,7 @@ static float lp_busy(rf_t *a, uint32_t *count)
     for (uint32_t k = 0; k < LP_MAX && k < a->lp_n; k++) {
         const rf_lpkt_t *e = &a->lp[(a->lp_n - 1 - k) % LP_MAX];
         if (now - e->t_end > 60000) break;
+        if (!in_channel(a, e->freq)) continue;
         on_us += e->p.dur_us;
         c++;
     }
@@ -1995,6 +2045,21 @@ static float lp_busy(rf_t *a, uint32_t *count)
 
 static void lp_detail(lv_event_t *e);
 
+/* the channel tuned: the step wide when it is a LoRa bandwidth (125, 250,
+ * 500 kHz: Bands' Meshtastic row sets it so), 250 kHz otherwise */
+static bool in_channel(const rf_t *a, uint32_t freq)
+{
+    bool lora_step = a->step == 125000 || a->step == 250000 || a->step == 500000;
+    uint32_t half = (lora_step ? a->step : 250000) / 2;
+    return freq + half >= a->want_freq && freq <= a->want_freq + half;
+}
+
+/* what the list shows: the filters of the settings (the CSV keeps all) */
+static bool lp_shown(const rf_t *a, const struct rf_lpkt *e)
+{
+    return (!a->lora_only || e->p.sf) && (!a->lora_chan || in_channel(a, e->freq));
+}
+
 static void lp_rebuild(rf_t *a)
 {
     char t[160];
@@ -2003,11 +2068,13 @@ static void lp_rebuild(rf_t *a)
     memset(a->ev_title, 0, sizeof a->ev_title);
     a->ev_empty = NULL;
     aos_hal_mutex_lock(a->mx);
-    uint32_t n = a->lp_n, shown = n < 40 ? n : 40;
+    uint32_t n = a->lp_n, rows = 0;
     a->lp_shown_n = n;
-    for (uint32_t k = 0; k < shown; k++) {
+    for (uint32_t k = 0; k < n && k < LP_MAX && rows < 40; k++) {
         uint32_t idx = n - 1 - k;
         const rf_lpkt_t *ev = &a->lp[idx % LP_MAX];
+        if (!lp_shown(a, ev)) continue;
+        rows++;
         lv_obj_t *row = lv_obj_create(a->ev_list);
         lv_obj_set_width(row, LV_PCT(100));
         lv_obj_set_height(row, LV_SIZE_CONTENT);
@@ -2028,7 +2095,7 @@ static void lp_rebuild(rf_t *a)
         lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
     }
     aos_hal_mutex_unlock(a->mx);
-    if (!n) {
+    if (!rows) {
         a->ev_empty = aos_label(a->ev_list, _("Esperando paquetes LoRa en la banda. Bandas tiene el canal por defecto de cada región y preset de Meshtastic."),
                                 aos_font_body, AOS_C_DIM);
         lv_obj_set_width(a->ev_empty, LV_PCT(100));
@@ -2146,8 +2213,16 @@ static void rec_switch(lv_event_t *e)
     rf_t *a = A;
     lv_obj_t *sw = lv_event_get_target_obj(e);
     bool on = lv_obj_has_state(sw, LV_STATE_CHECKED);
-    if ((intptr_t)lv_event_get_user_data(e) == 0) a->log_on = on;
-    else a->mqtt_on = on;
+    intptr_t what = (intptr_t)lv_event_get_user_data(e);
+    if (what == 0) a->log_on = on;
+    else if (what == 1) a->mqtt_on = on;
+    else {
+        if (what == 2) a->lora_only = on;
+        else a->lora_chan = on;
+        a->lp_shown_n = (uint32_t)-1;       /* the list again, filtered so */
+        a->seen_lp = a->lp_seq - 1;
+        a->live_lp = a->lp_seq - 1;
+    }
 }
 
 static void play_pick(lv_event_t *e);
@@ -2491,6 +2566,7 @@ static void *rf_create(aos_app_t *self, lv_obj_t *root)
     if (a->want_rate % 48000 || (a->want_rate != 240000 && a->want_rate < 960000)) a->want_rate = a->want_rate < 900000 ? 240000 : 2400000;
     a->want_mode = pref_int("rf_mode", RF_MODE_OFF);
     if (a->want_mode < 0 || a->want_mode >= MODES_N) a->want_mode = RF_MODE_OFF;
+    if (a->want_mode == MODE_LORA) a->want_rate = 960000;     /* LoRa always opens at 960 k (set_mode) */
     a->want_sq = pref_int("rf_sq", 10);
     a->log_on = pref_int("rf_log", 1) != 0;
     a->mqtt_on = pref_int("rf_mqtt", 0) != 0;
@@ -2500,6 +2576,8 @@ static void *rf_create(aos_app_t *self, lv_obj_t *root)
     if (a->lp) memset(a->lp, 0, LP_MAX * sizeof(rf_lpkt_t));
     a->mesh_region = pref_int("rf_mesh_reg", 0);
     a->mesh_preset = pref_int("rf_mesh_pre", 1);
+    a->lora_only = pref_int("rf_lora_only", 1) != 0;
+    a->lora_chan = pref_int("rf_lora_chan", 0) != 0;
     if (a->mesh_region < 0 || a->mesh_region >= MESH_REGIONS_N) a->mesh_region = 0;
     if (a->mesh_preset < 0 || a->mesh_preset >= MESH_PRESETS_N) a->mesh_preset = 1;
     a->want_gain = pref_int("rf_gain", -1);
@@ -2550,6 +2628,8 @@ static void rf_destroy(aos_app_t *self, void *inst)
     pref_put("rf_mqtt", a->mqtt_on);
     pref_put("rf_mesh_reg", a->mesh_region);
     pref_put("rf_mesh_pre", a->mesh_preset);
+    pref_put("rf_lora_only", a->lora_only);
+    pref_put("rf_lora_chan", a->lora_chan);
     free(a->ev);
     free(a->lp);
     free(a->spec);

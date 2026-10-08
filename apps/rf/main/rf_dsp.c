@@ -243,6 +243,18 @@ void rf_fft_take_db(rf_fft_t *f, float *out)
     f->nacc = 0;
 }
 
+/* the same, as power (linear): for whoever only compares and sums them -
+ * the LoRa meter, where a log10f and a powf a bin every 2 ms cost a third
+ * of the engine at 1.92 Msps on the board (2026-10-07) */
+void rf_fft_take_pow(rf_fft_t *f, float *out)
+{
+    const int n = f->n;
+    float k = f->nacc ? 1.0f / f->nacc : 1.0f;
+    for (int i = 0; i < n; i++) out[i] = f->acc[(i + n / 2) & (n - 1)] * k + 1e-12f;
+    memset(f->acc, 0, n * sizeof(float));
+    f->nacc = 0;
+}
+
 float rf_fft_floor_db(const float *db, int n, int navg)
 {
     /* the 20th percentile of a chi-squared of 2 navg degrees over its mean,

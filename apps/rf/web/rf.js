@@ -252,7 +252,7 @@ P.registerPage({
         s.state === 'search' ? 'Buscando la radio…' : (s.why || 'Sin radio');
       if (s.listening) t += ` · señal ${Math.round(s.level)} dB${s.open ? '' : ' · silenciado'}${s.mode === 'wfm' && s.pilot >= 10 ? ' · estéreo' : ''}`;
       if (s.mode === 'data') t += ` · ${s.received} recibidos`;
-      if (s.mode === 'lora') t += ` · LoRa: ${s.lora_n} paquetes en el último minuto, canal ocupado ${String(s.lora_busy).replace('.', ',')} %`;
+      if (s.mode === 'lora') t += ` · LoRa en el canal, el último minuto: ${s.lora_n} paquetes, ocupado ${String(s.lora_busy).replace('.', ',')} %`;
       if (s.playing) t += ' · reproduciendo ' + s.play;
       if (s.rec_iq) t += ` · grabando la señal (${s.iq_mb} MB${s.iq_dropped ? ', perdiendo' : ''})`;
       if (s.rec_wav) t += ` · grabando el audio (${Math.floor(s.wav_s / 60)}:${String(s.wav_s % 60).padStart(2, '0')})`;

@@ -49,7 +49,9 @@
 
 #define DET_N       256
 #define BURSTS      4
-#define THRESH_DB   12.0f
+#define THRESH     8.9f        /* 9.5 dB over a bin's mean noise: on */
+#define JOBS        4
+#define MIN_WIDTH   50000       /* narrower is not looked at: LoRa is 125 to 500 kHz but for rare uses */
 #define JOIN_HZ     520000
 #define HANG_MS     12
 #define MIN_FRAMES  4
@@ -60,6 +62,7 @@
 
 typedef struct {
     bool on, ended, job_given, analysed;
+    uint32_t uid;               /* its number, for the job that comes back */
     uint64_t s0, s_last;
     int lo, hi;                 /* the segments' envelope, in bins */
     int frames;
@@ -73,13 +76,25 @@ typedef struct {
     float re, im;
 } cpx;
 
+/* a dechirp to do: the start of a burst, copied out of the ring */
+typedef struct {
+    volatile int state;         /* 0 free, 1 filled (for the analyser), 2 done (for the feed) */
+    uint32_t uid;               /* whose */
+    uint8_t *iq;
+    int n;
+    float fc, width, max_t;     /* its centre and width; the longest symbol its duration allows */
+    int sf;
+    uint32_t bw;
+    float q;
+} job_t;
+
 struct rf_lora {
     uint32_t rate, hop;
     float bin_hz;
     rf_fft_t *fft;
     uint8_t frame[DET_N * 2];
     int fill;
-    float fdb[DET_N], floor[DET_N];
+    float pw[DET_N], floor[DET_N];  /* this frame's power, each bin's mean noise (linear) */
     bool act[DET_N];
     uint32_t nframes;
     uint64_t pos;               /* samples the frames have reached */
@@ -88,15 +103,14 @@ struct rf_lora {
     uint32_t ring_n, ring_at;   /* its size, and where the next sample goes */
     uint32_t ph;                /* where pos is in its 2 ms hop */
     burst_t b[BURSTS];
-    /* the one dechirp job */
-    volatile int job_state;     /* 0 free, 1 filled (for the analyser), 2 done (for the feed) */
-    int job_burst;
-    uint8_t *job_iq;
-    int job_n, job_cap;
-    float job_fc, job_width;
-    int job_sf;
-    uint32_t job_bw;
-    float job_q;
+    uint32_t next_uid;
+    /* the dechirps to do: a queue, so a packet that comes while another is
+     * looked at waits its turn instead of rolling out of the ring */
+    job_t job[JOBS];
+    int job_cap;
+    uint64_t (*clock)(void);
+    void (*yield)(void);
+    rf_lora_stats_t st;
     cpx *xb, *fb;               /* the analyser's: decimated, and the FFT's */
     float *acc;                 /* the windows' power spectra, summed */
     int xb_cap;
@@ -130,12 +144,13 @@ rf_lora_t *rf_lora_new(uint32_t rate)
     o->ring_n = rate / 1000 * RING_MS;
     o->ring = big((size_t)o->ring_n * 2);
     o->job_cap = (int)(rate / 1000 * WIN_MS);
-    o->job_iq = big((size_t)o->job_cap * 2);
+    bool jobs_ok = true;
+    for (int i = 0; i < JOBS; i++) jobs_ok &= (o->job[i].iq = big((size_t)o->job_cap * 2)) != NULL;
     o->xb_cap = o->job_cap;
     o->xb = big((size_t)o->xb_cap * sizeof(cpx));
     o->fb = big(FFT_MAX * sizeof(cpx));
     o->acc = big(FFT_MAX * sizeof(float));
-    if (!o->fft || !o->ring || !o->job_iq || !o->xb || !o->fb || !o->acc) {
+    if (!o->fft || !o->ring || !jobs_ok || !o->xb || !o->fb || !o->acc) {
         rf_lora_free(o);
         return NULL;
     }
@@ -147,7 +162,7 @@ void rf_lora_free(rf_lora_t *o)
     if (!o) return;
     rf_fft_free(o->fft);
     free(o->ring);
-    free(o->job_iq);
+    for (int i = 0; i < JOBS; i++) free(o->job[i].iq);
     free(o->xb);
     free(o->fb);
     free(o->acc);
@@ -237,6 +252,7 @@ static float dechirp(rf_lora_t *o, const cpx *x, int m, float fsd, uint32_t bw, 
         for (int n = L; n < N; n++) y[n] = (cpx){ 0, 0 };
         fft(y, N);
         for (int i = 0; i < N; i++) acc[i] += y[i].re * y[i].re + y[i].im * y[i].im;
+        if (o->yield) o->yield();       /* the engine, at the same priority, must keep reading */
     }
     float total = 0;
     for (int i = 0; i < N; i++) total += acc[i];
@@ -257,13 +273,23 @@ static float dechirp(rf_lora_t *o, const cpx *x, int m, float fsd, uint32_t bw, 
     return e1 / total;
 }
 
-static const uint32_t LORA_BW[] = { 7812, 10417, 15625, 20833, 31250, 41667, 62500, 125000, 250000, 500000 };
+/* The bandwidths and spreading factors tried: LoRa's from 62.5 kHz and SF7
+ * up, what Meshtastic, LoRaWAN and most sensors use. The narrower ones and
+ * SF5/6 exist but are rare, and on the board's busy 915 MHz band they made
+ * a hopping neighbour's narrow bursts pass for LoRa (2026-10-08). */
+static const uint32_t LORA_BW[] = { 62500, 125000, 250000, 500000 };
+#define SF_MIN 7
 
 bool rf_lora_analyse_pending(rf_lora_t *o)
 {
-    if (!o || o->job_state != 1) return false;
+    if (!o) return false;
+    job_t *j = NULL;
+    for (int i = 0; i < JOBS; i++)       /* the oldest first */
+        if (o->job[i].state == 1 && (!j || o->job[i].uid < j->uid)) j = &o->job[i];
+    if (!j) return false;
+    uint64_t t0 = o->clock ? o->clock() : 0;
     /* Each bandwidth near the width that showed - a weak packet shows
-     * narrower than it is, so up to 2.9 times it - gives its best spreading
+     * narrower than it is, so up to 3.5 times it - gives its best spreading
      * factor, which must stand clearly over that bandwidth's other ones.
      * Among those, the one that gathered most of the window's power wins: a
      * slope's twin at half the bandwidth (SF9 at 250 k, SF7 at 125 k)
@@ -275,7 +301,7 @@ bool rf_lora_analyse_pending(rf_lora_t *o)
     float best_q = 0, best_g = 0;
     for (size_t bi = 0; bi < sizeof LORA_BW / sizeof LORA_BW[0]; bi++) {
         uint32_t bw = LORA_BW[bi];
-        if (o->job_width < 0.35f * bw || o->job_width > 2.6f * bw || bw > o->rate * 0.95f) continue;
+        if (j->width < 0.28f * bw || j->width > 2.6f * bw || bw > o->rate * 0.95f) continue;
         int bw_sf = 0;
         float bw_q = 0, bw_second = 0, bw_g = 0;
         /* to its centre, and down to a rate a little over its bandwidth:
@@ -283,11 +309,11 @@ bool rf_lora_analyse_pending(rf_lora_t *o)
         int D = (int)(o->rate / bw);
         if (D < 1) D = 1;
         float fsd = (float)o->rate / D;
-        int m = o->job_n / D;
+        int m = j->n / D;
         if (m > o->xb_cap) m = o->xb_cap;
-        float a = (float)(-2 * M_PI * o->job_fc / o->rate);
+        float a = (float)(-2 * M_PI * j->fc / o->rate);
         cpx w = { cosf(a), sinf(a) }, r = { 1, 0 };
-        const uint8_t *q = o->job_iq;
+        const uint8_t *q = j->iq;
         for (int i = 0; i < m; i++) {
             float sr = 0, si = 0;
             for (int j = 0; j < D; j++, q += 2) {
@@ -303,7 +329,8 @@ bool rf_lora_analyse_pending(rf_lora_t *o)
                 r.re *= g, r.im *= g;
             }
         }
-        for (int sf = 5; sf <= 12; sf++) {
+        for (int sf = SF_MIN; sf <= 12; sf++) {
+            if ((float)(1u << sf) / bw > j->max_t) break;     /* longer symbols than the packet allows */
             float gv, gh;
             float qv = dechirp(o, o->xb, m, fsd, bw, sf, 0, &gv, false), qh = dechirp(o, o->xb, m, fsd, bw, sf, 0.5f, &gh, false);
             if (qh > qv) qv = qh, gv = gh;
@@ -321,48 +348,72 @@ bool rf_lora_analyse_pending(rf_lora_t *o)
             best_g = bw_g, best_q = bw_q, best_sf = bw_sf, best_bw = bw;
     }
     bool ok = best_sf != 0;
-    o->job_sf = ok ? best_sf : 0;
-    o->job_bw = ok ? best_bw : 0;
-    o->job_q = best_q;      /* 0 when nothing passed */
+    j->sf = ok ? best_sf : 0;
+    j->bw = ok ? best_bw : 0;
+    j->q = best_q;          /* 0 when nothing passed */
+    if (o->clock) {
+        uint32_t us = (uint32_t)(o->clock() - t0);
+        o->st.analysed++;
+        o->st.analyse_us += us;
+        if (us > o->st.analyse_max_us) o->st.analyse_max_us = us;
+    }
     __sync_synchronize();
-    o->job_state = 2;
+    j->state = 2;
     return true;
 }
 
 /* ---- finding them ----------------------------------------------------------- */
 
-/* the burst's band from its summed profile: the bins standing 3 dB over
- * the floor on average, around the strongest, gaps of 2 allowed */
+/* The burst's band from its summed profile: the widest run of bins over a
+ * line, gaps of 2 allowed. The line is 3 dB over the floor, or 10 dB under
+ * the packet's own plateau if that is higher: a node a
+ * metre away stood 30 dB up, and its skirts - a chirp's jumps are not band-
+ * limited, the stick's range neither - stood 3 dB over the noise across
+ * the whole view (the board, 2026-10-08). The widest run, not the one
+ * around the strongest bin: a narrow carrier near a packet stands higher
+ * per bin than a chirp spread over 250 kHz, and dragged the band along. */
 static void band_of(const rf_lora_t *o, const burst_t *b, int *lo, int *hi, float *snr_db)
 {
-    int f = b->frames ? b->frames : 1, pk = b->lo;
-    float best = -1;
-    for (int k = b->lo; k <= b->hi; k++)
-        if (b->prof[k] > best) best = b->prof[k], pk = k;
-    int l = pk, h = pk;
-    for (int k = pk - 1, gap = 0; k >= 0 && gap <= 2; k--) {
-        if (b->prof[k] / f >= 2.0f) l = k, gap = 0;
-        else gap++;
+    float f = b->frames ? (float)b->frames : 1;
+    /* the plateau: the highest mean over 7 neighbouring bins - a packet's
+     * band is 13 bins and more at any rate here, a carrier's 1 to 3 */
+    float plateau = 0, run = 0;
+    for (int k = 0; k < DET_N; k++) {
+        run += b->prof[k] / f - (k >= 7 ? b->prof[k - 7] / f : 0);
+        if (k >= 6 && run / 7 > plateau) plateau = run / 7;
     }
-    for (int k = pk + 1, gap = 0; k < DET_N && gap <= 2; k++) {
-        if (b->prof[k] / f >= 2.0f) h = k, gap = 0;
-        else gap++;
+    float line = plateau / 10;
+    if (line < 2.0f) line = 2.0f;
+    int best_l = b->lo, best_h = b->lo;
+    for (int k = 0; k < DET_N;) {
+        if (b->prof[k] / f < line) {
+            k++;
+            continue;
+        }
+        int l = k, h = k, gap = 0;
+        for (k++; k < DET_N && gap <= 2; k++) {
+            if (b->prof[k] / f >= line) h = k, gap = 0;
+            else gap++;
+        }
+        if (h - l > best_h - best_l) best_l = l, best_h = h;
     }
-    *lo = l;
-    *hi = h;
+    *lo = best_l;
+    *hi = best_h;
     float s = 0;
-    for (int k = l; k <= h; k++) s += b->prof[k] / f;
-    s = s / (h - l + 1) - 1;
+    for (int k = best_l; k <= best_h; k++) s += b->prof[k] / f;
+    s = s / (best_h - best_l + 1) - 1;
     *snr_db = s > 0 ? 10 * log10f(s) : 0;
     (void)o;
 }
 
 static void report(rf_lora_t *o, burst_t *b, void (*done)(const rf_lora_pkt_t *, void *), void *ctx)
 {
-    if (b->frames >= MIN_FRAMES && done) {
-        int lo, hi;
-        float snr;
-        band_of(o, b, &lo, &hi, &snr);
+    int lo, hi;
+    float snr;
+    band_of(o, b, &lo, &hi, &snr);
+    /* narrower than any LoRa worth the name: some other neighbour of the
+     * band, which would bury the packets in the list */
+    if (b->frames >= MIN_FRAMES && done && (hi - lo) * o->bin_hz >= MIN_WIDTH) {
         rf_lora_pkt_t p = {
             .start = b->s0,
             .dur_us = (uint32_t)((b->s_last + DET_N - b->s0) * 1000000ull / o->rate),
@@ -378,47 +429,49 @@ static void report(rf_lora_t *o, burst_t *b, void (*done)(const rf_lora_pkt_t *,
     memset(b, 0, sizeof *b);
 }
 
-/* the job: the window of the burst's start, still in the ring */
-static bool give_job(rf_lora_t *o, int i)
+/* a job: the window of the burst's start, still in the ring */
+static bool give_job(rf_lora_t *o, job_t *j, burst_t *b)
 {
-    burst_t *b = &o->b[i];
     uint64_t from = b->s0 + o->rate / 1000;                /* 1 ms in */
     uint64_t to = b->s0 + o->rate / 1000 * (1 + WIN_MS);
     if (to > o->pos) to = o->pos;
     if (to <= from || o->ring_pos - from > o->ring_n) return false;
     int n = (int)(to - from);
     if (n > o->job_cap) n = o->job_cap;
+    uint8_t *job_iq = j->iq;
     /* where 'from' sits: as far back from the ring's head as it is in samples */
     uint32_t back = (uint32_t)(o->ring_pos - from);
     uint32_t at = o->ring_at >= back ? o->ring_at - back : o->ring_at + o->ring_n - back;
     int first = (int)(o->ring_n - at) < n ? (int)(o->ring_n - at) : n;
-    memcpy(o->job_iq, o->ring + 2 * at, (size_t)first * 2);
-    if (first < n) memcpy(o->job_iq + 2 * first, o->ring, (size_t)(n - first) * 2);
+    memcpy(job_iq, o->ring + 2 * at, (size_t)first * 2);
+    if (first < n) memcpy(job_iq + 2 * first, o->ring, (size_t)(n - first) * 2);
     int lo, hi;
     float snr;
     band_of(o, b, &lo, &hi, &snr);
-    o->job_n = n;
-    o->job_fc = ((lo + hi) / 2.0f - DET_N / 2) * o->bin_hz;
-    o->job_width = (hi - lo) * o->bin_hz;
-    o->job_burst = i;
+    j->n = n;
+    j->fc = ((lo + hi) / 2.0f - DET_N / 2) * o->bin_hz;
+    j->width = (hi - lo) * o->bin_hz;
+    /* a preamble of 6 symbols at least, then something: a symbol is a
+     * sixth of the packet at most (unknown while it goes on) */
+    j->max_t = b->ended ? (float)(b->s_last + DET_N - b->s0) / o->rate / 6 : 1e9f;
+    j->uid = b->uid;
     __sync_synchronize();
-    o->job_state = 1;
+    j->state = 1;
     return true;
 }
 
 static void frame_done(rf_lora_t *o, uint64_t at, void (*done)(const rf_lora_pkt_t *, void *), void *ctx)
 {
     rf_fft_add_cu8(o->fft, o->frame);
-    rf_fft_take_db(o->fft, o->fdb);
+    rf_fft_take_pow(o->fft, o->pw);
     o->nframes++;
-    /* the floors, and what stands over them */
+    /* the floors (each bin's mean noise power), and what stands over them */
     float a = o->nframes < 50 ? 0.1f : 0.004f;
     bool *act = o->act;
     for (int k = 0; k < DET_N; k++) {
-        float d = o->fdb[k] - o->floor[k];
-        if (o->nframes == 1) o->floor[k] = o->fdb[k], d = 0;
-        act[k] = o->nframes > 50 && d > THRESH_DB;
-        o->floor[k] += d * (act[k] ? a / 50 : a);
+        if (o->nframes == 1) o->floor[k] = o->pw[k];
+        act[k] = o->nframes > 50 && o->pw[k] > o->floor[k] * THRESH;
+        o->floor[k] += (o->pw[k] - o->floor[k]) * (act[k] ? a / 50 : a);
     }
     /* segments: bins on, gaps of one allowed, two bins at least */
     int join = (int)(JOIN_HZ / o->bin_hz);
@@ -443,6 +496,7 @@ static void frame_done(rf_lora_t *o, uint64_t at, void (*done)(const rf_lora_pkt
                     bi = i;
                     memset(&o->b[i], 0, sizeof o->b[i]);
                     o->b[i].on = true;
+                    o->b[i].uid = ++o->next_uid;
                     o->b[i].s0 = at;
                     o->b[i].lo = lo;
                     o->b[i].hi = hi;
@@ -458,22 +512,25 @@ static void frame_done(rf_lora_t *o, uint64_t at, void (*done)(const rf_lora_pkt
         burst_t *b = &o->b[i];
         if (b->on && joined[i]) {
             b->frames++;
-            /* over the floor's mean: a floor of dB means sits 2.5 dB under it */
-            for (int k = 0; k < DET_N; k++) b->prof[k] += powf(10.0f, (o->fdb[k] - o->floor[k] - 2.5f) / 10.0f);
+            for (int k = 0; k < DET_N; k++) b->prof[k] += o->pw[k] / o->floor[k];
         } else if (b->on && at - b->s_last > o->rate / 1000 * HANG_MS) {
             b->on = false;
             b->ended = true;
         }
         if (b->on && at - b->s0 > o->rate / 1000 * MAX_MS) memset(b, 0, sizeof *b);   /* a carrier */
     }
-    /* the dechirp: the job back, a new one out */
-    if (o->job_state == 2) {
-        burst_t *b = &o->b[o->job_burst];
-        b->sf = o->job_sf;
-        b->bw = o->job_bw;
-        b->q = o->job_q;
-        b->analysed = true;
-        o->job_state = 0;
+    /* the dechirps: the jobs back to their bursts (if still there), new ones out */
+    for (int ji = 0; ji < JOBS; ji++) {
+        job_t *j = &o->job[ji];
+        if (j->state != 2) continue;
+        for (int i = 0; i < BURSTS; i++)
+            if (o->b[i].uid == j->uid && (o->b[i].on || o->b[i].ended)) {
+                o->b[i].sf = j->sf;
+                o->b[i].bw = j->bw;
+                o->b[i].q = j->q;
+                o->b[i].analysed = true;
+            }
+        j->state = 0;
     }
     for (int i = 0; i < BURSTS; i++) {
         burst_t *b = &o->b[i];
@@ -484,10 +541,21 @@ static void frame_done(rf_lora_t *o, uint64_t at, void (*done)(const rf_lora_pkt
             b->analysed = true;                 /* noise: nothing to look at */
             continue;
         }
-        if (o->job_state == 0) {
-            if (give_job(o, i)) b->job_given = true;
-            else b->analysed = true;            /* gone from the ring: not looked at */
-        } else if (o->ring_pos - b->s0 > o->ring_n) b->analysed = true;
+        int lo, hi;
+        float snr;
+        band_of(o, b, &lo, &hi, &snr);
+        if ((hi - lo) * o->bin_hz < MIN_WIDTH) {
+            b->analysed = true;                 /* too narrow to be worth the work */
+            o->st.narrow++;
+            continue;
+        }
+        job_t *j = NULL;
+        for (int ji = 0; ji < JOBS && !j; ji++)
+            if (o->job[ji].state == 0) j = &o->job[ji];
+        if (j) {
+            if (give_job(o, j, b)) b->job_given = true;
+            else b->analysed = true, o->st.missed++;      /* gone from the ring: not looked at */
+        } else if (o->ring_pos - b->s0 > o->ring_n) b->analysed = true, o->st.missed++;
     }
     for (int i = 0; i < BURSTS; i++)
         if (o->b[i].ended && o->b[i].analysed) report(o, &o->b[i], done, ctx);
@@ -523,6 +591,18 @@ void rf_lora_feed(rf_lora_t *o, const uint8_t *iq, int n, void (*done)(const rf_
         if (o->ph == DET_N) frame_done(o, o->pos - DET_N, done, ctx);
         if (o->ph == o->hop) o->ph = 0;
     }
+}
+
+void rf_lora_set_clock(rf_lora_t *o, uint64_t (*us)(void), void (*yield)(void))
+{
+    o->clock = us;
+    o->yield = yield;
+}
+
+void rf_lora_stats(rf_lora_t *o, rf_lora_stats_t *out)
+{
+    *out = o->st;
+    memset(&o->st, 0, sizeof o->st);
 }
 
 const char *rf_lora_preset(int sf, uint32_t bw_hz)

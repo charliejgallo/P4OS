@@ -22,6 +22,7 @@ void rf_fft_add_cu8(rf_fft_t *f, const uint8_t *iq);   /* n I/Q pairs (2n bytes)
 void rf_fft_use_simd(bool on);          /* the board's 16-bit SIMD FFT (default) or float, to compare */
 int  rf_fft_count(const rf_fft_t *f);
 void rf_fft_take_db(rf_fft_t *f, float *out);         /* n bins, lowest frequency first; resets */
+void rf_fft_take_pow(rf_fft_t *f, float *out);        /* the same as power, linear */
 /* The noise floor under the bins of an average of navg FFTs: their 20th
  * percentile, which sits below the noise's mean by an amount that depends
  * on navg (chi-squared), corrected for */

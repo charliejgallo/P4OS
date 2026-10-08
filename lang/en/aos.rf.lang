@@ -45,244 +45,256 @@ Controles remotos, sensores y timbres de 433 y 868 MHz	Remote controls, sensors 
 #: apps/rf/main/rf.c:103
 Paquetes LoRa: Meshtastic, LoRaWAN, sensores. Cuánto ocupan el canal y con qué ajustes	LoRa packets: Meshtastic, LoRaWAN, sensors. How busy the channel is, and with which settings
 
-#: apps/rf/main/rf.c:439
-#: apps/rf/main/rf.c:2511
+#: apps/rf/main/rf.c:461
+#: apps/rf/main/rf.c:2589
 Sin memoria	Out of memory
 
-#: apps/rf/main/rf.c:595
+#: apps/rf/main/rf.c:618
 La RTL-SDR no empezó a mandar muestras	The RTL-SDR did not start sending samples
 
-#: apps/rf/main/rf.c:612
+#: apps/rf/main/rf.c:635
 Se desconectó la RTL-SDR	The RTL-SDR was unplugged
 
-#: apps/rf/main/rf.c:977
+#: apps/rf/main/rf.c:1012
 Reproduciendo una grabación: no se puede sintonizar	Playing a recording: it cannot be tuned
 
-#: apps/rf/main/rf.c:1208
+#: apps/rf/main/rf.c:1244
 Buscando una RTL-SDR…	Looking for an RTL-SDR…
 
-#: apps/rf/main/rf.c:1212
+#: apps/rf/main/rf.c:1248
 Enchufala en el host USB: pines 25/27 del conector de atrás (High Speed, cables de menos de 15 cm) y 5 V del pin 1. Los pines 21/23 son Full Speed: alcanzan para 240 mil muestras por segundo.	Plug it into the USB host: pins 25/27 of the back header (High Speed, wires shorter than 15 cm) and 5 V from pin 1. Pins 21/23 are Full Speed: enough for 240 thousand samples a second.
 
-#: apps/rf/main/rf.c:1213
+#: apps/rf/main/rf.c:1249
 El host USB está apagado: prendelo en Ajustes → USB → Host USB, y enchufá la RTL-SDR en los pines 25/27 del conector de atrás.	The USB host is off: turn it on in Settings → USB → USB host, and plug the RTL-SDR into pins 25/27 of the back header.
 
-#: apps/rf/main/rf.c:1267
+#: apps/rf/main/rf.c:1303
 señal	signal
 
-#: apps/rf/main/rf.c:1268
+#: apps/rf/main/rf.c:1304
 silenciado	muted
 
-#: apps/rf/main/rf.c:1271
+#: apps/rf/main/rf.c:1307
 estéreo	stereo
 
-#: apps/rf/main/rf.c:1275
+#: apps/rf/main/rf.c:1311
 perdidos	lost
 
-#: apps/rf/main/rf.c:1277
+#: apps/rf/main/rf.c:1313
 Sin radio	No radio
 
-#: apps/rf/main/rf.c:1282
+#: apps/rf/main/rf.c:1318
 reproduciendo	playing
 
-#: apps/rf/main/rf.c:1290
+#: apps/rf/main/rf.c:1326
 recibidos	received
 
-#: apps/rf/main/rf.c:1296
-LoRa · %u paquetes en el último minuto · ocupado %d,%d %%	LoRa · %u packets in the last minute · busy %d.%d %%
+#: apps/rf/main/rf.c:1332
+LoRa · en el canal, el último minuto: %u paquetes, ocupado %d,%d %%	LoRa · in the channel, the last minute: %u packets, busy %d.%d %%
 
-#: apps/rf/main/rf.c:1305
+#: apps/rf/main/rf.c:1341
 Señal ahora: %d dB sobre el ruido	Signal now: %d dB over the noise
 
-#: apps/rf/main/rf.c:1475
+#: apps/rf/main/rf.c:1512
 Frecuencia en MHz	Frequency in MHz
 
-#: apps/rf/main/rf.c:1499
+#: apps/rf/main/rf.c:1536
 Automática	Automatic
 
-#: apps/rf/main/rf.c:1517
+#: apps/rf/main/rf.c:1554
 Todo a la izquierda es automática. Subila hasta que aparezcan las señales sin que suba el piso de ruido.	All the way left is automatic. Raise it until the signals show without the noise floor rising.
 
-#: apps/rf/main/rf.c:1530
+#: apps/rf/main/rf.c:1567
 Siempre abierto	Always open
 
-#: apps/rf/main/rf.c:1547
+#: apps/rf/main/rf.c:1584
 Activar el sonido	Unmute
 
-#: apps/rf/main/rf.c:1547
+#: apps/rf/main/rf.c:1584
 Silenciar	Mute
 
-#: apps/rf/main/rf.c:1575
+#: apps/rf/main/rf.c:1612
 Volumen	Volume
 
-#: apps/rf/main/rf.c:1584
+#: apps/rf/main/rf.c:1621
 El volumen es el de la placa, el mismo de todo el sistema. Silenciar calla sólo la radio, que sigue sintonizada.	The volume is the board's, the same for the whole system. Mute silences only the radio, which stays tuned.
 
-#: apps/rf/main/rf.c:1601
+#: apps/rf/main/rf.c:1638
 Corta el audio de AM y FM angosta mientras el canal no supera al ruido por esos dB; entre 6 y 15 suele andar. Todo a la izquierda, siempre abierto. La FM comercial no lo usa.	Mutes AM and narrow FM while the channel is not that many dB over the noise; 6 to 15 usually works. All the way left, always open. Broadcast FM does not use it.
 
-#: apps/rf/main/rf.c:1649
+#: apps/rf/main/rf.c:1686
 En los pines 21/23 (Full Speed) sólo entran 240 mil muestras por segundo	On pins 21/23 (Full Speed) only 240 thousand samples a second fit
 
-#: apps/rf/main/rf.c:1668
+#: apps/rf/main/rf.c:1705
 Ajustes de la radio	Radio settings
 
-#: apps/rf/main/rf.c:1671
+#: apps/rf/main/rf.c:1708
 Muestras por segundo (cuánto se ve a la vez)	Samples per second (how much is seen at once)
 
-#: apps/rf/main/rf.c:1682
+#: apps/rf/main/rf.c:1719
 El modo Datos escucha siempre a 240 mil.	Data mode always listens at 240 k.
 
-#: apps/rf/main/rf.c:1685
+#: apps/rf/main/rf.c:1722
+LoRa abre a 0,96: un canal y sus vecinos. Más muestras muestran más banda, pero la placa puede perder muestras y con ellas paquetes.	LoRa opens at 0.96: a channel and its neighbours. More samples show more of the band, but the board may lose samples, and packets with them.
+
+#: apps/rf/main/rf.c:1727
 Paso de las flechas	The arrows' step
 
-#: apps/rf/main/rf.c:1692
+#: apps/rf/main/rf.c:1735
+Qué lista LoRa (el CSV guarda todo)	What LoRa lists (the CSV keeps everything)
+
+#: apps/rf/main/rf.c:1736
+Sólo paquetes LoRa: lo que no tiene chirps no se muestra	LoRa packets only: what has no chirps is not shown
+
+#: apps/rf/main/rf.c:1737
+Sólo el canal sintonizado (el paso de ancho)	The tuned channel only (the step wide)
+
+#: apps/rf/main/rf.c:1739
 Ganancia	Gain
 
-#: apps/rf/main/rf.c:1695
+#: apps/rf/main/rf.c:1742
 Silenciador	Squelch
 
-#: apps/rf/main/rf.c:1738
+#: apps/rf/main/rf.c:1785
 Modo	Mode
 
-#: apps/rf/main/rf.c:1807
-#: apps/rf/main/rf.c:2432
+#: apps/rf/main/rf.c:1854
+#: apps/rf/main/rf.c:2507
 Bandas	Bands
 
-#: apps/rf/main/rf.c:1818
+#: apps/rf/main/rf.c:1865
 Meshtastic: el canal por defecto de una región y un preset	Meshtastic: the default channel of a region and a preset
 
-#: apps/rf/main/rf.c:1831
+#: apps/rf/main/rf.c:1878
 Escuchar ahí	Listen there
 
-#: apps/rf/main/rf.c:1833
+#: apps/rf/main/rf.c:1880
 Con un nombre de canal propio el número de canal cambia: la frecuencia está en la app de Meshtastic, en LoRa.	A channel with a name of its own moves to another slot: the Meshtastic app shows its frequency, under LoRa.
 
-#: apps/rf/main/rf.c:1853
+#: apps/rf/main/rf.c:1900
 ID %u · canal %d · %.1f °C	ID %u · channel %d · %.1f °C
 
-#: apps/rf/main/rf.c:1855
+#: apps/rf/main/rf.c:1902
 batería baja	battery low
 
-#: apps/rf/main/rf.c:1857
+#: apps/rf/main/rf.c:1904
 código %.8s · datos %s	code %.8s · data %s
 
-#: apps/rf/main/rf.c:1859
+#: apps/rf/main/rf.c:1906
 ID %05X · botón %X	ID %05X · button %X
 
-#: apps/rf/main/rf.c:1872
-#: apps/rf/main/rf.c:2086
+#: apps/rf/main/rf.c:1919
+#: apps/rf/main/rf.c:2153
 Desconocido	Unknown
 
-#: apps/rf/main/rf.c:1925
+#: apps/rf/main/rf.c:1972
 Esperando transmisiones en la banda: controles remotos, sensores de temperatura, timbres…	Waiting for transmissions in the band: remote controls, temperature sensors, doorbells…
 
-#: apps/rf/main/rf.c:1964
+#: apps/rf/main/rf.c:2011
 Otra señal	Other signal
 
-#: apps/rf/main/rf.c:1974
+#: apps/rf/main/rf.c:2021
 %u kHz de ancho · 	%u kHz wide · 
 
-#: apps/rf/main/rf.c:2032
+#: apps/rf/main/rf.c:2099
 Esperando paquetes LoRa en la banda. Bandas tiene el canal por defecto de cada región y preset de Meshtastic.	Waiting for LoRa packets in the band. Bands has the default channel of each Meshtastic region and preset.
 
-#: apps/rf/main/rf.c:2052
+#: apps/rf/main/rf.c:2119
 Hora: %02d:%02d:%02d\n	Time: %02d:%02d:%02d\n
 
-#: apps/rf/main/rf.c:2053
+#: apps/rf/main/rf.c:2120
 Frecuencia: %s (%+d kHz del centro) · %u kHz de ancho\n	Frequency: %s (%+d kHz from the centre) · %u kHz wide\n
 
-#: apps/rf/main/rf.c:2055
+#: apps/rf/main/rf.c:2122
 En el aire: %u ms · %.0f dB sobre el ruido en su ancho\n	On the air: %u ms · %.0f dB over the noise in its width\n
 
-#: apps/rf/main/rf.c:2058
+#: apps/rf/main/rf.c:2125
 LoRa: SF%d, %u kHz (el preámbulo concentró el %.0f %% de su energía)	LoRa: SF%d, %u kHz (the preamble gathered %.0f %% of its energy)
 
-#: apps/rf/main/rf.c:2067
+#: apps/rf/main/rf.c:2134
 \nEn el canal por defecto de Meshtastic %s en %s	\nOn the Meshtastic default channel of %s in %s
 
-#: apps/rf/main/rf.c:2071
+#: apps/rf/main/rf.c:2138
 No se encontraron chirps de LoRa en su comienzo: es otra cosa, o llegó demasiado débil para saberlo.	No LoRa chirps at its start: it is something else, or it came too weak to tell.
 
-#: apps/rf/main/rf.c:2091
+#: apps/rf/main/rf.c:2158
 Hora: %02d:%02d:%02d · %d veces\n	Time: %02d:%02d:%02d · %d times\n
 
-#: apps/rf/main/rf.c:2093
+#: apps/rf/main/rf.c:2160
 Frecuencia: %u,%03u MHz (%+d kHz del centro) · %.0f dB sobre el ruido\n	Frequency: %u.%03u MHz (%+d kHz from the centre) · %.0f dB over the noise\n
 
-#: apps/rf/main/rf.c:2096
+#: apps/rf/main/rf.c:2163
 Modulación: %s · corto %d µs · largo %d µs · pausa %d µs\n	Modulation: %s · short %d µs · long %d µs · gap %d µs\n
 
-#: apps/rf/main/rf.c:2098
+#: apps/rf/main/rf.c:2165
 %d bits: %s	%d bits: %s
 
-#: apps/rf/main/rf.c:2100
+#: apps/rf/main/rf.c:2167
 \nTambién se lee como PT2262: %.8s %s	\nAlso reads as PT2262: %.8s %s
 
-#: apps/rf/main/rf.c:2115
+#: apps/rf/main/rf.c:2182
 Captura guardada: %s	Screenshot saved: %s
 
-#: apps/rf/main/rf.c:2117
+#: apps/rf/main/rf.c:2184
 No se pudo guardar la captura	The screenshot could not be saved
 
-#: apps/rf/main/rf.c:2131
+#: apps/rf/main/rf.c:2198
 Grabando el audio en la carpeta de la Grabadora	Recording the audio into the Recorder's folder
 
-#: apps/rf/main/rf.c:2131
+#: apps/rf/main/rf.c:2198
 Grabación de audio terminada	Audio recording finished
 
-#: apps/rf/main/rf.c:2135
+#: apps/rf/main/rf.c:2202
 Grabando la señal en rf/iq de la tarjeta	Recording the signal into the card's rf/iq
 
-#: apps/rf/main/rf.c:2135
+#: apps/rf/main/rf.c:2202
 Grabación de la señal terminada	Signal recording finished
 
-#: apps/rf/main/rf.c:2184
+#: apps/rf/main/rf.c:2259
 Guardar	Keep
 
-#: apps/rf/main/rf.c:2185
+#: apps/rf/main/rf.c:2260
 Captura de pantalla	Screenshot
 
-#: apps/rf/main/rf.c:2188
+#: apps/rf/main/rf.c:2263
 Terminar la grabación de audio	Stop recording the audio
 
-#: apps/rf/main/rf.c:2188
+#: apps/rf/main/rf.c:2263
 Grabar el audio	Record the audio
 
-#: apps/rf/main/rf.c:2189
+#: apps/rf/main/rf.c:2264
 Terminar la grabación de la señal	Stop recording the signal
 
-#: apps/rf/main/rf.c:2189
+#: apps/rf/main/rf.c:2264
 Grabar la señal (I/Q)	Record the signal (I/Q)
 
-#: apps/rf/main/rf.c:2191
+#: apps/rf/main/rf.c:2266
 Dejar de reproducir	Stop playing
 
-#: apps/rf/main/rf.c:2192
+#: apps/rf/main/rf.c:2267
 Reproducir una grabación	Play a recording
 
-#: apps/rf/main/rf.c:2193
+#: apps/rf/main/rf.c:2268
 Guardar lo recibido en Datos y LoRa (rf/datos- y rf/lora-<día>.csv)	Keep what Data and LoRa receive (rf/datos- and rf/lora-<day>.csv)
 
-#: apps/rf/main/rf.c:2194
+#: apps/rf/main/rf.c:2269
 Publicarlo por MQTT	Publish it over MQTT
 
-#: apps/rf/main/rf.c:2194
+#: apps/rf/main/rf.c:2269
 Publicarlo por MQTT (no conectado)	Publish it over MQTT (not connected)
 
-#: apps/rf/main/rf.c:2197
+#: apps/rf/main/rf.c:2272
 La señal ocupa %u MB por minuto a la tasa de ahora; la tarjeta escribe unos 3 MB/s.	The signal takes %u MB a minute at the present rate; the card writes about 3 MB/s.
 
-#: apps/rf/main/rf.c:2209
+#: apps/rf/main/rf.c:2284
 Grabaciones	Recordings
 
-#: apps/rf/main/rf.c:2234
+#: apps/rf/main/rf.c:2309
 No hay grabaciones todavía.	No recordings yet.
 
-#: apps/rf/main/rf.c:2258
+#: apps/rf/main/rf.c:2333
 No sé a qué frecuencia está grabada	Its frequency is not in its name
 
-#: apps/rf/main/rf.c:2521
+#: apps/rf/main/rf.c:2599
 No pude arrancar la radio	Could not start the radio
 
 #: apps/rf/main/rf_src_file.c:55

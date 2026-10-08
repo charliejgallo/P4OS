@@ -98,39 +98,68 @@ channel's frequency, as Meshtastic's firmware computes it (the djb2 hash of
 the preset's name, modulo the slots of that width in the region: ANZ and
 MediumFast is 926.125 MHz, ANZ and LongFast 919.875, US and LongFast
 906.875). A channel with a name of its own sits elsewhere: the Meshtastic app
-shows its frequency. At 960 ksps the screen holds a 250 kHz channel and its
-neighbours; at 2.4 Msps, nine of them.
+shows its frequency. LoRa opens at 960 ksps: a 250 kHz channel and its
+neighbours. More samples show more of the band, but on the board, at
+1.92 Msps, samples were lost and a message went unread that 960 k gave.
+
+The list shows **LoRa packets only** (settings: what has no chirps is not
+listed; **the tuned channel only** is the other switch); the CSV keeps all.
+The busy share counts the tuned channel only: the step wide when it is a
+LoRa bandwidth (Bands' Meshtastic row sets it so), 250 kHz otherwise.
 
 How `rf_lora.c` does it:
 
-- **Finding packets.** Every 2 ms a 256-point FFT of the band; each bin has
-  its own floor, the mean of its noise, followed slowly (a carrier that
-  stays on becomes floor). A bin 12 dB over it is on; a chirp is narrow in
-  0.27 ms, so a packet is the frames in a row whose pieces fall within
-  520 kHz of each other. It ends after 12 ms of nothing.
-- **What it is.** Over the packet, each bin's power is summed: a chirp
-  visits its whole band alike, so the band is where the sum stands up. Then
-  80 ms of its start (the preamble: 8 to 16 identical up-chirps) is
-  dechirped against every LoRa bandwidth near that width and every
-  spreading factor 5 to 12, four symbols' spectra summed: the right slope
-  makes each symbol one tone, in the same bin every time. Of the bandwidths
-  that pass, the one that gathered most of the power wins.
+- **Finding packets.** Every 2 ms a 256-point FFT of the band, as power
+  (no logarithms: a log10f and a powf a bin cost a third of the engine at
+  1.92 Msps); each bin has its own floor, the mean of its noise, followed
+  slowly (a carrier that stays on becomes floor). A bin 9.5 dB over it is
+  on; a chirp is narrow in 0.27 ms, so a packet is the frames in a row
+  whose pieces fall within 520 kHz of each other. It ends after 12 ms of
+  nothing.
+- **Its band.** Over the packet each bin's power is summed: a chirp visits
+  its whole band alike. The band is the widest run over a line 10 dB under
+  the packet's plateau (3 dB over the floor at least). Both halves were
+  learnt on the board: a node a metre away stood 30 dB up and its skirts
+  stood 3 dB over the noise across the whole view; and a narrow carrier
+  beside a packet, taken as the start, dragged the band to a megahertz.
+  Narrower than 50 kHz is not listed.
+- **What it is.** 80 ms of its start (the preamble: 8 to 16 identical
+  up-chirps) is dechirped against every LoRa bandwidth near that width
+  (62.5 to 500 kHz) and every spreading factor 7 to 12, four symbols'
+  spectra summed: the right slope makes each symbol one tone, in the same
+  bin every time. Of the bandwidths that pass, the one that gathered most
+  of the power wins. SF5/6 and the narrower bandwidths are rare, and on a
+  busy 915 MHz band they made a neighbour's narrow bursts pass for LoRa.
 - **Traps, measured on synthetic packets.** SF9 at 250 kHz and SF7 at
   125 kHz have the same slope (BW^2 / 2^SF): judged on its own the narrower
   twin gathers its share just as well (and at a rate equal to its
   bandwidth, both halves of the jump land in one bin), so the bandwidths are
   compared on the power each gathered of what came in. A remote's keyed
   carrier is a tone already: the dechirp must beat the window as it is.
-- The dechirp is float work, tens of ms a packet: on a thread of its own
-  (`rf_lora`, the lowest priority), with 80 ms of the packet copied out of a
-  200 ms ring; the feed itself is a 256-point SIMD FFT every 2 ms.
+- The dechirp is float work, 130 to 400 ms a packet on the board: on a
+  thread of its own (`rf_lora`, the lowest priority, sleeping 1 ms between
+  FFTs so the engine keeps reading), from a queue of four jobs of 80 ms each
+  copied out of a 200 ms ring; the CSV is written from that thread too (a
+  line on the card costs tens of ms, and a busy band sends several a
+  second). The engine's log has a line every 10 s: the time finding, the
+  dechirps and their time, the bursts too narrow and those missed.
 
 On synthetic packets (`test/gen_lora.py`, the board's noise): ShortTurbo,
 MediumFast, LongFast, LongSlow and an SF7/125 kHz LoRaWAN-like one, each at
 its offset, come out with their SF and bandwidth at 0.96, 1.92 and
 2.4 Msps, timed to the ms; a MediumFast at 0 dB in its band too; a 433 MHz
 remote's burst is "another signal", and a carrier that stays on is nothing.
-Each packet goes to `rf/lora-<day>.csv` when Data's CSV switch is on.
+Each packet goes to `rf/lora-<day>.csv` when the CSV switch is on.
+
+On the board, 2026-10-08, with two Meshtastic nodes in ANZ on MediumFast
+(926.125 MHz) a few metres from the antenna: every message and its
+acknowledgement listed as MediumFast, 128 to 190 ms, the sending node at
+25 dB and the answering one at 20, both some 20 kHz under the channel's
+centre (their crystals). Around them, 915 MHz in Buenos Aires is busy:
+neighbours hopping across the band with 250 to 300 kHz bursts every
+~100 ms, and a narrow transmitter at 927.0 MHz several times a second; all
+"other signal", off the list. An I/Q recording of three messages, made on
+the board, is the meter's real test (`test/README.md`).
 
 ## Keeping and playing back
 
