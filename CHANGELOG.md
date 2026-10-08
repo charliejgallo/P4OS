@@ -1,5 +1,28 @@
 # Changelog
 
+## 0.13.0 — 2026-10-08
+
+**RF reads the Meshtastic message, not just measures the packet.** Only the
+RF app changed; no firmware update needed over 0.12.
+
+- **Tap a LoRa packet to read its Meshtastic frame** (apps/rf/README.md):
+  the decoder demodulates the packet (sync, dechirp, Hamming, CRC) and reads
+  the Meshtastic header that travels in the clear - who to whom, hops. With
+  the channel key it decrypts the payload (AES-CTR, Meshtastic's open
+  scheme) and shows a text message. The key is the user's to give - the
+  public default, or one typed on the board or pasted in the portal
+  (`rf/mesh_key.txt` on the card); none are built in or kept in the sources.
+  Direct messages encrypted to another node's public key are not read (that
+  needs the node's private key). Closed the loop on the board between two of
+  the user's own nodes.
+- **Decode on the board fixed:** the same decoder worked on the Mac but
+  always failed on the board. Two 32-bit/embedded traps: a sample count
+  times the bandwidth overflowed a 32-bit `long` (it is 64-bit on the Mac),
+  truncating the signal so sync never caught the preamble; and `cosf`/`sinf`
+  were called with large arguments, where the board's single-precision libm
+  loses accuracy and smeared the reference chirp. Fixed with 64-bit maths and
+  by keeping those angles small.
+
 ## 0.12.0 — 2026-10-08
 
 **BLE, a Bluetooth LE scanner on the card,** with the firmware it needs

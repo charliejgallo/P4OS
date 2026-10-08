@@ -90,8 +90,17 @@ how strong, and the **spreading factor and bandwidth** its preamble shows,
 named after a Meshtastic preset when it is one (MediumFast is SF9 at
 250 kHz). The status line counts the last minute: packets, and the share of
 it the channel was busy, what Meshtastic calls channel utilization. The top
-of the waterfall stays: packets show there as blocks. It reads no payload:
-that is the next step (`docs/plan/RF.md`).
+of the waterfall stays: packets show there as blocks.
+
+**Tap a packet to read its Meshtastic frame.** The decoder demodulates it
+(sync, dechirp, Hamming, CRC) and reads the Meshtastic header, which travels
+in the clear: who to whom, and the hops left. Give it the **channel key** -
+the public default, or one typed on the board or pasted in the portal, kept
+in `rf/mesh_key.txt` on the card - and it decrypts the payload (AES-CTR, the
+open scheme of Meshtastic's firmware) and shows a text message. The keys are
+yours to supply; none are built in or kept in the sources. A direct message
+encrypted to another node's public key is not read: that needs the node's
+private key, which is not here.
 
 **Bands** has a **Meshtastic** row: a region and a preset give the default
 channel's frequency, as Meshtastic's firmware computes it (the djb2 hash of
