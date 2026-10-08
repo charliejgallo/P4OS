@@ -39,11 +39,15 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       el Wi-Fi sigue arriba sin pérdidas y baja de ~0,9 a ~0,7-0,8 MB/s al
       100 %; la RAM interna libre no se movió (217 → 216 KB). La primera OTA
       entró en pánico al sincronizar el Bluetooth (mutex sin crear) y volvió
-      sola a la imagen anterior; arreglado. **Falta:** escanear con el iPhone
-      y la Mac conectados (si se cae algo, la app lo avisa debajo de los
-      botones del escaneo y lo anota en el registro como "ble: while
-      scanning, lost ..."), la conexión GATT como tercera y "Leer todo" con un
-      equipo real.
+      sola a la imagen anterior; arreglado. El iPhone se conectó con el
+      escaneo andando (notificaciones y música bien). La Mac no reconectaba
+      (nunca pidió la conexión, ya pasaba antes de BLE): olvidada y emparejada
+      de nuevo, anduvo, y después de reiniciar la placa volvieron solos los
+      dos. Su nombre trae un apóstrofo tipográfico que salía como rectángulo:
+      fuentes ampliadas (`b57fe6d`). **Falta:** escanear un rato con los dos
+      conectados (si se cae algo, la app lo avisa debajo de los botones del
+      escaneo y lo anota como "ble: while scanning, lost ..."), la conexión
+      GATT como tercera y "Leer todo" con un equipo real.
 
 Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
 - [x] **Host USB** (docs/USB.md): los dos puertos a la vez (21/23 y 25/27)
