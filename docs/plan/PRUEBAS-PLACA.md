@@ -32,6 +32,14 @@ se prueba.
 
 ### Pendientes, en resumen
 
+Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
+- [ ] **BLE** (`apps/ble`, docs/BLUETOOTH.md "The apps' scanner"): el escaneo
+      con el iPhone y la Mac conectados a la vez (que no se caigan, cuántos
+      paquetes por segundo a 30 y a 100 %, cuánto baja el Wi-Fi a 100 %), la
+      conexión GATT como tercera (el C6 admite 3), "Leer todo" y una
+      notificación con un sensor real, y la RAM interna libre antes y
+      después (`/api/sysmon`). Necesita firmware nuevo (OTA) y la app.
+
 Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
 - [x] **Host USB** (docs/USB.md): los dos puertos a la vez (21/23 y 25/27)
       con la copia propia de la librería host (`components/usb`); probados
