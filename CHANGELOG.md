@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.1 — 2026-10-08
 
 - **A crash's core dump says which firmware made it.** The board reads the
   dump's own notes (IDF's summary fails here: it maps the whole partition)
