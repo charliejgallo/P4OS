@@ -33,6 +33,7 @@
 #include "aos_theme.h"
 #include "aos_hal.h"
 #include "aos_ui.h"
+#include "aos_text_safe.h"
 #include "aos_gesture.h"
 #include "aos_sys_glyphs.h"
 #include "aos_fonts.h"
@@ -449,8 +450,10 @@ static void usb_cb(lv_event_t *e)
     bool play = S.face == FACE_PAD || S.face == FACE_MIDI;
     static char bt_msg[96];
     if (usb_ready() && via_bt()) {
+        char host[48];
+        aos_text_safe(host, sizeof host, aos_hal_bt_keyboard_host());
         snprintf(bt_msg, sizeof bt_msg, _("%s usa la placa como teclado y mouse por Bluetooth"),
-                 aos_hal_bt_keyboard_host()[0] ? aos_hal_bt_keyboard_host() : _("La computadora"));
+                 host[0] ? host : _("La computadora"));
         m = bt_msg;
     } else if (usb_ready()) m = S.face == FACE_PAD  ? _("La computadora tomó el mando del puerto OTG")
                        : S.face == FACE_MIDI ? _("La computadora tomó el MIDI del puerto OTG")

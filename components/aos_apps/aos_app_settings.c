@@ -32,6 +32,7 @@
 #include "aos_theme.h"
 #include "aos_hal.h"
 #include "aos_ui.h"
+#include "aos_text_safe.h"
 #include "aos_io.h"
 #include "aos_sys_glyphs.h"
 #include "aos_lock.h"
@@ -283,10 +284,20 @@ static void bt_forget_cb(lv_event_t *e)
     aos_hal_bt_forget();
 }
 
+/* The phone's and the computer's names are theirs, in any characters
+ * ("Charlie's MacBook" with a typographic apostrophe, an emoji): drawn
+ * through aos_text_safe like any text from outside. */
+static const char *bt_safe(char *buf, size_t n, const char *name)
+{
+    aos_text_safe(buf, n, name);
+    return buf;
+}
+
 static const char *bt_root_text(void)
 {
+    static char name[64];
     if (!aos_hal_bt_enabled()) return _("No");
-    if (aos_hal_bt_state() == AOS_BT_CONNECTED && aos_hal_bt_peer()[0]) return aos_hal_bt_peer();
+    if (aos_hal_bt_state() == AOS_BT_CONNECTED && aos_hal_bt_peer()[0]) return bt_safe(name, sizeof name, aos_hal_bt_peer());
     return _("Sí");
 }
 
@@ -303,7 +314,8 @@ static void build_bt(lv_obj_t *p)
 
     g = group(p, _("TELÉFONO"));
     aos_bt_state_t st = aos_hal_bt_state();
-    const char *peer = aos_hal_bt_peer();
+    char peer_s[64];
+    const char *peer = bt_safe(peer_s, sizeof peer_s, aos_hal_bt_peer());
     row(g, NULL, 0, _("Estado"),
         st == AOS_BT_CONNECTED ? (peer[0] ? peer : _("conectado")) : st == AOS_BT_PAIRING ? _("emparejando")
         : aos_hal_bt_bonded() ? _("esperando que vuelva") : _("visible, sin emparejar"), false, NULL, NULL);
@@ -321,7 +333,8 @@ static void build_bt(lv_obj_t *p)
     g = group(p, _("TECLADO BLUETOOTH"));
     row_switch(g, AOS_SYM_KEYBOARD, 0x5E5CE6, _("Teclado Bluetooth"), aos_hal_bt_keyboard_enabled(), bt_kbd_cb);
     if (aos_hal_bt_keyboard_enabled()) {
-        const char *host = aos_hal_bt_keyboard_host();
+        char host_s[64];
+        const char *host = bt_safe(host_s, sizeof host_s, aos_hal_bt_keyboard_host());
         row(g, NULL, 0, _("Computadora"), host[0] ? host : _("ninguna"), false, NULL, NULL);
     }
     note(p, _("La placa como teclado, mouse y teclas de medios de una computadora: se empareja desde los ajustes de Bluetooth de la Mac o la PC, y el Macro pad y las apps mandan las teclas por ahí cuando no hay un cable USB. El teléfono sigue conectado."));

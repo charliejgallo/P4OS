@@ -1,6 +1,8 @@
 /* P4OS (from AmoledOS) - sanitising of foreign text. See aos_text_safe.h. */
 #include "aos_text_safe.h"
 #include "aos_emoji.h"
+#include "aos_fonts.h"
+#include "lvgl.h"
 
 #include <string.h>
 
@@ -14,20 +16,24 @@ bool aos_text_font_has(uint32_t cp)
     if (cp == '\n') {
         return true;
     }
-    if (cp >= 0x20 && cp <= 0x7E) {
-        return true;                    /* printable ASCII */
+    if (cp < 0x20 || (cp >= 0x7F && cp < 0xA0)) {
+        return false;                   /* control characters */
     }
-    if (cp >= 0xA0 && cp <= 0xFF) {
-        return true;                    /* Latin-1: accents, n-tildes, inverted ? and ! , degree */
-    }
-    if (cp == 0x2022 || cp == 0x20AC) {
-        return true;                    /* middle dot and euro */
-    }
-    /* The 61 FontAwesome glyphs behind LV_SYMBOL_* are at 0xF000+, but we do
-     * not put them here: they are OUR icons, not something that can arrive in
-     * a phone's text. If a real one ever turns up, let it fall through to the
+    /* The FontAwesome glyphs behind LV_SYMBOL_* and the emoji live in the
+     * private use area: they are OUR icons, not something that can arrive in
+     * a phone's text. If a real one ever turns up, it falls through to the
      * replacement. */
-    return false;
+    if (cp >= 0xE000 && cp <= 0xF8FF) {
+        return false;
+    }
+    /* Asked of the font itself rather than of a list kept by hand: the list
+     * said ASCII and Latin-1 long after tools/gen_fonts.py had added the
+     * typographic quotes, Greek and the rest. Every text size is generated
+     * with the same ranges; the 48 and 64 carry fewer (they are clocks and
+     * titles), and the 14 is the cheapest to ask. The generated font, not a
+     * theme copy: those fall back to the emoji. */
+    lv_font_glyph_dsc_t g;
+    return lv_font_get_glyph_dsc(&aos_inter_14, &g, cp, 0);
 }
 
 /* --------------------------------------------------------------------------

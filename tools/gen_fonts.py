@@ -81,6 +81,37 @@ TEXT_RANGE = ("0x20-0x7F,0xA0-0xFF,0x2022,0x2026,0x20AC,"
               # infinity, approx, not-equal, less/greater-or-equal
               "0x394,0x3A9,0x3BC,0x3C0,0x2190-0x2193,0x2212,0x221A,0x221E,0x2248,0x2260,0x2264,0x2265")
 
+# P4OS, 2026-10-07: what arrives from outside carries more than Latin-1. A
+# Mac calls itself "Charlie's MacBook" with a typographic apostrophe (U+2019),
+# BLE devices and notifications bring dashes, quotes, units, arrows, other
+# alphabets. Inter has them, and lv_font_conv takes only the code points the
+# font really has, so a block can be named whole. Measured per block, summed
+# over the text sizes (14-36 and the labels' 20): the symbols below ~410 KB,
+# Latin Extended-A ~150 KB, Greek ~110 KB; Cyrillic would be ~300 KB more and
+# is left out. The 48 and 64, where a glyph costs ~0.6 and ~1 KB, get only
+# the typographic punctuation (EXTRA_BIG): they are clocks and titles.
+EXTRA_PUNCT = "0x2010-0x205E"               # dashes, quotes, daggers, per mille, primes, angle quotes
+EXTRA_TEXT = ",".join([
+    EXTRA_PUNCT,
+    "0x100-0x17F",                          # Latin Extended-A: Polish, Czech, Turkish, Romanian...
+    "0x218-0x21B",                          # Romanian's comma-below S and T
+    "0x370-0x3FF",                          # Greek (and the engineer's alpha to omega)
+    "0x2070-0x209F",                        # superscripts and subscripts
+    "0x20A0-0x20C0",                        # currencies
+    "0x2100-0x218F",                        # letterlike (TM, No, degree C) and fractions
+    "0x2194-0x21FF",                        # the rest of the arrows
+    "0x2200-0x22FF",                        # mathematical operators
+    "0x2300-0x23FF",                        # technical (command, option, return...)
+    "0x25A0-0x25FF",                        # geometric shapes
+    "0x2600-0x27BF",                        # miscellaneous symbols and dingbats (check marks, stars)
+])
+EXTRA_BIG = EXTRA_PUNCT
+BIG_SIZES = (48, 64)
+
+
+def text_range(size):
+    return TEXT_RANGE + "," + (EXTRA_BIG if size in BIG_SIZES else EXTRA_TEXT)
+
 # The FontAwesome codepoints behind every LV_SYMBOL_* macro, copied verbatim
 # from LVGL's own scripts/built_in_font/built_in_font_gen.py - if that part of
 # this list drifts from LVGL's, the symbols in the status bar and the launcher
@@ -190,7 +221,7 @@ def generate(size, out_path, font=None):
         "--no-compress", "--no-prefilter",
         "--bpp", str(BPP),
         "--size", str(size),
-        "--font", font or TEXT_FONT, "-r", TEXT_RANGE,
+        "--font", font or TEXT_FONT, "-r", text_range(size),
         "--font", SYMBOL_FONT, "-r", SYMBOL_RANGE,
         "--format", "lvgl",
         "-o", out_path,
