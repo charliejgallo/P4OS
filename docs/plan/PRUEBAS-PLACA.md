@@ -44,10 +44,12 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       (nunca pidió la conexión, ya pasaba antes de BLE): olvidada y emparejada
       de nuevo, anduvo, y después de reiniciar la placa volvieron solos los
       dos. Su nombre trae un apóstrofo tipográfico que salía como rectángulo:
-      fuentes ampliadas (`b57fe6d`). **Falta:** escanear un rato con los dos
-      conectados (si se cae algo, la app lo avisa debajo de los botones del
-      escaneo y lo anota como "ble: while scanning, lost ..."), la conexión
-      GATT como tercera y "Leer todo" con un equipo real.
+      fuentes ampliadas (`b57fe6d`). Cinco minutos al 100 % con los dos
+      conectados y una descarga de 9 MB en el medio (0,74 MB/s): ningún
+      enlace caído, 11-17 paquetes/s, 3300 paquetes sin perder ninguno; el
+      ping es igual con y sin escaneo (lo que varía es la red). **Falta:** la
+      conexión GATT como tercera y "Leer todo" con un equipo real (la tiene
+      que hacer el usuario: no conectarse a sus equipos desde las sesiones).
 
 Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
 - [x] **Host USB** (docs/USB.md): los dos puertos a la vez (21/23 y 25/27)
