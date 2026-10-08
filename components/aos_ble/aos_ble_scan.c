@@ -595,6 +595,9 @@ static void run(struct ble_npl_event *ev)
     /* static and in PSRAM: 524 bytes would weigh on NimBLE's 5 KB stack
      * (internal), and only its task runs this */
     AOS_BSS_PSRAM static cmd_t c;
+    /* kicked at every sync, also before any app asked for anything: then
+     * there is nothing allocated, no mutex, and nothing to do */
+    if (!s_mx || !s_cmd) return;
     for (;;) {
         /* a connection under way or a GATT procedure holds the GATT
          * commands back; a scan or a disconnection never waits */
