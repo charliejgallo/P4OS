@@ -655,6 +655,10 @@ void bl_redecode(bl_dev_t *d)
     uint32_t t = d->last_ms;
     if (d->adv_len) dev_decode(d, d->adv, d->adv_len, t);
     if (d->rsp_len) dev_decode(d, d->rsp, d->rsp_len, t);
+    /* a key tried only on an old packet proves little: a device that was
+     * just activated again (a new bindkey) still has the old key's packet
+     * here. The next one decides. */
+    if (d->key_state == BL_KEY_WRONG && now_ms() - t > 30000) d->key_state = -1;
 }
 
 static void keys_load(void)
@@ -726,6 +730,9 @@ void bl_key_set(int idx, const uint8_t *key)
 {
     if (idx < 0 || idx >= BL.ndev) return;
     bl_dev_t *d = &BL.dev[idx];
+    char a[20];
+    bl_fmt_addr(d->addr, a, sizeof a);
+    aos_hal_log("ble", "key for %s %s", a, key ? "set" : "cleared");
     d->has_key = key != NULL;
     if (key) memcpy(d->key, key, 16);
     else memset(d->key, 0, 16);

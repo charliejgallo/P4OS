@@ -319,7 +319,9 @@ P.registerPage({
           h('button', { class: 'btn pri', onclick: () => {
             const k = inp.value.replace(/[\s:-]/g, '');
             if (!/^[0-9a-fA-F]{32}$/.test(k)) { P.toast('Tienen que ser 32 cifras hexadecimales', true); return; }
-            send(`key=${d.a},${k}`).then(() => P.toast('Clave guardada en ble/claves.txt'));
+            /* the app confirms by the device's state in the next table:
+             * until then, only that it was sent */
+            send(`key=${d.a},${k}`).then(() => P.toast('Clave enviada: la app la guarda y la prueba con el próximo paquete'));
           } }, 'Guardar la clave'),
           d.key > -2 ? h('button', { class: 'btn', onclick: () => send(`key=${d.a},`) }, 'Borrar la clave') : null),
         h('p', { class: 'note small' }, 'La bindkey de un sensor Xiaomi sale de su cuenta de Mi Home (por ejemplo con "Xiaomi Cloud Tokens Extractor"), o de Home Assistant si ya lo lee. BTHome cifrado usa la clave que le pusiste al configurarlo.'));
