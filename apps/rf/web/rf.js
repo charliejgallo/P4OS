@@ -134,11 +134,20 @@ P.registerPage({
     const mesh = h('div', { class: 'row', style: 'flex-wrap:wrap;gap:10px;margin-top:10px' }, 'Meshtastic, canal por defecto: ',
       meshReg, meshPre, meshLbl,
       h('button', { class: 'btn', onclick: () => send(`mode=lora\nfreq=${meshFreq(meshReg.value, meshPre.value)}\nstep=${MESH_PRESETS[meshPre.value][2] * 1000}`) }, 'Escuchar ahí'));
+    /* the channel key: paste a PSK (base64) to read the text of its packets */
+    const keyIn = h('input', { type: 'text', placeholder: 'PSK en base64 (p. ej. AQ==)', style: 'width:220px' });
+    const keyStatus = h('span', { class: 'small' }, '');
+    const meshKey = h('div', { class: 'row', style: 'flex-wrap:wrap;gap:10px;margin-top:8px' }, 'Clave del canal: ', keyStatus,
+      keyIn,
+      h('button', { class: 'btn', onclick: () => { const v = keyIn.value.trim(); if (v) send('key=' + v); } }, 'Poner'),
+      h('button', { class: 'btn', onclick: () => send('key=AQ==') }, 'Canal público'),
+      h('button', { class: 'btn', onclick: () => send('key=none') }, 'Quitar'),
+      h('span', { class: 'small', style: 'flex-basis:100%;opacity:.7' }, 'La clave se guarda en la tarjeta de la placa, no en el navegador ni en la nube. Los mensajes directos cifrados a otro nodo no se leen.'));
     const controls = h('div', { class: 'card' },
       modeRow,
       h('div', { class: 'row', style: 'flex-wrap:wrap;gap:14px;margin-top:10px' },
         h('span', {}, 'Muestreo ', rateSel), h('span', {}, 'Ganancia ', gainSel), h('span', {}, 'Paso ', stepSel), sqBox, volBox),
-      h('div', { style: 'margin-top:10px' }, bands), mesh);
+      h('div', { style: 'margin-top:10px' }, bands), mesh, meshKey);
 
     /* ---- the spectrum and the waterfall (or Data's list) ---- */
     const sc = h('canvas', { class: 'rf-canvas', height: 220 });
@@ -281,6 +290,8 @@ P.registerPage({
       wf.style.display = s.mode === 'data' ? 'none' : '';
       evBox.style.display = s.mode === 'data' ? '' : 'none';
       loraBox.style.display = s.mode === 'lora' ? '' : 'none';
+      meshKey.style.display = s.mode === 'lora' ? '' : 'none';
+      if (s.has_key !== undefined) keyStatus.textContent = s.has_key ? 'puesta ✓' : 'ninguna';
       if (s.mode === 'lora') loadLora();
       drawKeep(s);
       if (s.mode === 'data' && s.received !== evSeen) {
@@ -311,21 +322,35 @@ P.registerPage({
 
     /* LoRa's packets: the newest first, what they are, where and how long */
     let loraSeen = '';
+    const hid = v => '!' + (v >>> 0).toString(16).padStart(8, '0');
     function loadLora() {
       P.api(LIVE + '&key=lora').then(list => {
-        const key = list.length ? list[0].n + '/' + list.length : '';
+        /* re-render when a packet arrives or when one finishes decoding */
+        const key = list.map(e => e.n + (e.text !== undefined ? 't' : e.port !== undefined ? 'p' : e.decfail ? 'f' : '')).join();
         if (key === loraSeen) return;
         loraSeen = key;
         if (!list.length) {
           put(loraBox, h('p', { class: 'note' }, 'Esperando paquetes LoRa en la banda.'));
           return;
         }
-        put(loraBox, h('table', { class: 'rf-ev' }, h('tbody', {}, ...list.map(e => h('tr', {},
-          h('td', {}, e.t),
-          h('td', {}, h('b', {}, e.preset || (e.sf ? `SF${e.sf} · ${e.bw / 1000} kHz` : 'Otra señal'))),
-          h('td', {}, `${mhz(e.freq, 4)} MHz` + (e.sf ? ` · SF${e.sf} · ${e.bw / 1000} kHz` : ` · ${Math.round(e.width / 1000)} kHz de ancho`)),
-          h('td', { class: 'small' }, `${e.ms} ms · ${Math.round(e.snr)} dB`))))),
-          h('p', { class: 'note small' }, 'El SF y el ancho salen del preámbulo de cada paquete. Todo queda también en rf/lora-<día>.csv de la tarjeta.'));
+        const rows = [];
+        for (const e of list) {
+          rows.push(h('tr', e.sf ? { class: 'k', onclick: () => send('decode=' + e.n) } : {},
+            h('td', {}, e.t),
+            h('td', {}, h('b', {}, e.preset || (e.sf ? `SF${e.sf} · ${e.bw / 1000} kHz` : 'Otra señal'))),
+            h('td', {}, `${mhz(e.freq, 4)} MHz` + (e.sf ? ` · SF${e.sf} · ${e.bw / 1000} kHz` : ` · ${Math.round(e.width / 1000)} kHz de ancho`)),
+            h('td', { class: 'small' }, `${e.ms} ms · ${Math.round(e.snr)} dB`)));
+          if (e.from !== undefined) {
+            const to = e.to === 4294967295 ? 'todos (broadcast)' : hid(e.to);
+            const body = `De ${hid(e.from)} a ${to} · ${e.hops} saltos`
+              + (e.port === 1 ? ` · Texto: ${e.text}` : e.port !== undefined ? ` · tipo ${e.port} (no es texto)` : '');
+            rows.push(h('tr', {}, h('td', {}), h('td', { colspan: 3, class: 'det' }, body)));
+          } else if (e.decfail) {
+            rows.push(h('tr', {}, h('td', {}), h('td', { colspan: 3, class: 'det' }, 'No se pudo decodificar.')));
+          }
+        }
+        put(loraBox, h('table', { class: 'rf-ev' }, h('tbody', {}, ...rows)),
+          h('p', { class: 'note small' }, 'Tocá un paquete LoRa para leer su cabecera (y el texto, con la clave puesta). El SF y el ancho salen del preámbulo; todo queda en rf/lora-<día>.csv de la tarjeta.'));
       }).catch(() => {});
     }
 

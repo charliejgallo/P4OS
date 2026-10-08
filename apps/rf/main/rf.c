@@ -1248,7 +1248,7 @@ static void live_state(rf_t *a, unsigned mbs10)
                      "\"step\":%u,\"sq\":%d,\"level\":%.1f,\"pilot\":%.1f,\"open\":%s,\"listening\":%s,"
                      "\"mbs\":%u.%u,\"dropped\":%u,\"rec_iq\":%s,\"iq_mb\":%u,\"iq_dropped\":%u,\"rec_wav\":%s,"
                      "\"wav_s\":%u,\"playing\":%s,\"play\":\"%s\",\"received\":%u,\"log\":%s,\"mqtt\":%s,"
-                     "\"mqtt_ready\":%s,\"vol\":%d,\"muted\":%s,\"lora_n\":%u,\"lora_busy\":%.1f,\"gains\":[",
+                     "\"mqtt_ready\":%s,\"vol\":%d,\"muted\":%s,\"lora_n\":%u,\"lora_busy\":%.1f,\"has_key\":%s,\"gains\":[",
                      a->state == ST_RUN ? "run" : a->state == ST_SEARCH ? "search" : "none", a->why ? a->why : "",
                      a->info.kind ? a->info.kind : "", a->info.name, a->info.tuner, a->info.high_speed ? "true" : "false",
                      (unsigned)a->info.fmin, (unsigned)a->info.fmax, (unsigned)a->want_freq,
@@ -1260,7 +1260,7 @@ static void live_state(rf_t *a, unsigned mbs10)
                      a->playing ? (strrchr(a->play_path, '/') ? strrchr(a->play_path, '/') + 1 : a->play_path) : "",
                      (unsigned)a->ev_n, a->log_on ? "true" : "false", a->mqtt_on ? "true" : "false",
                      rf_mqtt_ready() ? "true" : "false", aos_hal_volume_get(), a->muted ? "true" : "false", (unsigned)lora_n,
-                     (double)lora_busy);
+                     (double)lora_busy, a->mesh_keylen ? "true" : "false");
     for (int i = 0; i < a->info.ngains && k < (int)sizeof j - 16; i++)
         k += snprintf(j + k, sizeof j - k, "%s%d", i ? "," : "", a->info.gains[i]);
     snprintf(j + k, sizeof j - k, "]}");
