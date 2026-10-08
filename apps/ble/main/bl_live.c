@@ -260,6 +260,7 @@ static void take(void)
                 if (key[0] == 'f') BL.dev[i].fav = atoi(comma + 1) != 0;
                 else {
                     snprintf(BL.dev[i].alias, sizeof BL.dev[i].alias, "%.27s", comma + 1);
+                    bl_utf8_trim(BL.dev[i].alias);
                     for (char *p = BL.dev[i].alias; *p; p++) if (*p == '|') *p = ' ';
                 }
                 bl_names_save();

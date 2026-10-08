@@ -116,6 +116,20 @@ extern bl_t BL;
 /* lroundf is not in the firmware's table */
 static inline int lroundf_safe(float v) { return (int)(v < 0 ? v - 0.5f : v + 0.5f); }
 
+/* A text cut to fit by bytes may end in half a UTF-8 character: drop it. */
+static inline void bl_utf8_trim(char *s)
+{
+    int n = 0;
+    while (s[n]) n++;
+    int i = n;
+    while (i > 0 && ((unsigned char)s[i - 1] & 0xC0) == 0x80) i--;   /* continuation bytes */
+    if (i > 0 && ((unsigned char)s[i - 1] & 0x80)) {
+        unsigned char c = (unsigned char)s[i - 1];
+        int want = (c & 0xE0) == 0xC0 ? 2 : (c & 0xF0) == 0xE0 ? 3 : (c & 0xF8) == 0xF0 ? 4 : 1;
+        if (n - (i - 1) < want) s[i - 1] = 0;
+    }
+}
+
 /* ---- bl_scan.c: the table ---- */
 bool bl_scan_init(void);
 void bl_scan_free(void);

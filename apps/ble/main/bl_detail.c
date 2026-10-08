@@ -12,6 +12,7 @@
  */
 #include "bl.h"
 #include "aos_mono.h"
+#include "aos_text_safe.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -48,6 +49,7 @@ static void alias_done(const char *v)
     bl_dev_t *d = cur();
     if (!d) return;
     snprintf(d->alias, sizeof d->alias, "%.27s", v);
+    bl_utf8_trim(d->alias);
     for (char *p = d->alias; *p; p++) if (*p == '|' || *p == '\n') *p = ' ';
     bl_names_save();
     bl_rebuild();
@@ -88,7 +90,12 @@ static void packet_card(lv_obj_t *col, int32_t w, const char *title, const uint8
     aos_label(c, t, aos_font_body, AOS_C_TEXT);
     static bl_line_t lines[24];
     int n = bl_explain(data, len, lines, 24, aos_tr);
-    for (int i = 0; i < n; i++) bl_kv(c, w - 44, lines[i].key, lines[i].val);
+    for (int i = 0; i < n; i++) {
+        /* a name or a URL from the air: whatever it carries, drawable */
+        char v[sizeof lines[0].val + 16];
+        aos_text_safe(v, sizeof v, lines[i].val);
+        bl_kv(c, w - 44, lines[i].key, v);
+    }
     char hex[31 * 3 + 4];
     bl_hex(data, len, hex, sizeof hex);
     lv_obj_t *h = aos_label(c, hex, &aos_mono_18, AOS_C_DIM);
@@ -253,7 +260,11 @@ void bl_detail_build(lv_obj_t *page)
         else snprintf(cs, sizeof cs, "%s 0x%04X", _("Compañía"), d->ad.mfg[0].company);
         bl_kv(c, w - 44, _("Fabricante"), cs);
     }
-    if (d->ad.name[0] && d->alias[0]) bl_kv(c, w - 44, _("Nombre propio"), d->ad.name);
+    if (d->ad.name[0] && d->alias[0]) {
+        char nm[64];
+        aos_text_safe(nm, sizeof nm, d->ad.name);
+        bl_kv(c, w - 44, _("Nombre propio"), nm);
+    }
     if (bl_addr_kind(d->addr, d->addr_type) == BL_ADDR_RPA)
         bl_caption(c, _("Su dirección es privada y cambia cada pocos minutos: cuando cambie, va a aparecer como otro equipo."), w - 44);
     lv_obj_t *b = bl_wrap(c, w - 44, 12);

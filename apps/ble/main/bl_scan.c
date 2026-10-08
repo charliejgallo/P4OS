@@ -14,6 +14,7 @@
  * And published, when asked, to MQTT: <board>/ble/<address> with the readings.
  */
 #include "bl.h"
+#include "aos_text_safe.h"
 
 #include <math.h>
 #include <stdio.h>
@@ -415,10 +416,23 @@ void bl_forget_all(void)
 /* Names and lines                                                             */
 /* -------------------------------------------------------------------------- */
 
+/* A name from the air (or typed in the portal) can carry anything: emoji,
+ * typographic quotes, bytes cut in half. Drawn through aos_text_safe, into
+ * one of a few buffers so two names can be in use at once (a row's name
+ * and its subtitle's comparison). */
+static const char *safe_name(const char *raw)
+{
+    static char buf[4][64];
+    static int k;
+    char *b = buf[k++ & 3];
+    aos_text_safe(b, sizeof buf[0], raw);
+    return b;
+}
+
 const char *bl_dev_name(const bl_dev_t *d)
 {
-    if (d->alias[0]) return d->alias;
-    if (d->ad.name[0]) return d->ad.name;
+    if (d->alias[0]) return safe_name(d->alias);
+    if (d->ad.name[0]) return safe_name(d->ad.name);
     if (d->label) return _(d->label);
     if (d->ad.nmfg) {
         const char *c = bl_company_name(d->ad.mfg[0].company);
@@ -572,7 +586,10 @@ static void names_load(void)
             i = (int)(d - BL.dev);
         }
         BL.dev[i].fav = strchr(p1, '*') != NULL;
-        if (p2) snprintf(BL.dev[i].alias, sizeof BL.dev[i].alias, "%.27s", p2);
+        if (p2) {
+            snprintf(BL.dev[i].alias, sizeof BL.dev[i].alias, "%.27s", p2);
+            bl_utf8_trim(BL.dev[i].alias);
+        }
     }
     fclose(f);
     BL.gen++;
