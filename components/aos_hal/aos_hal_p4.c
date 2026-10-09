@@ -1574,6 +1574,10 @@ static void hang_check(void *arg)
         return;
     }
     s_hang.count++;
+    /* out of the cache now: a restart loses what is only there, and the next
+     * boot would find the count it started with (2026-10-09: the network's
+     * counter never got past "try 1") */
+    esp_cache_msync(&s_hang, sizeof s_hang, ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED);
     /* abort(), not esp_restart(): the panic writes a core dump with every
      * task's stack, so a hang shows where each one was waiting
      * (tools/coredump.sh), where the list above only says that they were */

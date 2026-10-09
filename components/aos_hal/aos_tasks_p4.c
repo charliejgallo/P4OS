@@ -34,6 +34,7 @@
 #include "esp_idf_version.h"
 #include "esp_system.h"
 #include "esp_timer.h"
+#include "esp_cache.h"
 #include "esp_log.h"
 #include "esp_ota_ops.h"
 #include "esp_partition.h"
@@ -258,6 +259,8 @@ static void link_dead(const char *why)
         return;
     }
     s_link_boots.count++;
+    /* out of the cache before the restart, or the next boot reads the old count */
+    esp_cache_msync(&s_link_boots, sizeof s_link_boots, ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED);
     ESP_LOGE(TAG, "C6 link: dead (%s); restarting, try %u of %d", why, (unsigned)s_link_boots.count, LINK_TRIES);
     void aos_p4_log_tasks(void);
     aos_p4_log_tasks();

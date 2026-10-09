@@ -8,6 +8,15 @@
   (seen at a convention). The scan now borrows the radio, as AmoledOS did:
   the retries stop, the attempt is let go, the scan runs, and the station
   looks for its network again. Connected, it scans as before.
+- **Away from home the board no longer restarts every minute.** The
+  network check restarts a board with no network after a minute (for a C6
+  that came up without it), at most twice, but its count was left in the
+  cache and lost at each restart: it said "try 1 of 2" for ever. The count
+  is written to PSRAM now (and the hang and C6-link checks' too, which had
+  the same flaw), and no restart happens when the station says why it has
+  no network: the network is not around, or the password is wrong. Tried on
+  the board with a saved network that does not exist: scanned, and stayed
+  up.
 
 ## 0.13.1 — 2026-10-08
 

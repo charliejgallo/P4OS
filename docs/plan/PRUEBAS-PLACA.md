@@ -172,12 +172,18 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       (`POST /api/coredump/test`), el volcado dice tarea, pc, sha de 16 y
       versión, `coredump.sh` lo decodifica hasta `panic_later` con su ELF y
       se niega sin él.
-- [ ] Escanear Wi-Fi lejos de casa (2026-10-09): en una convención la app
+- [x] Escanear Wi-Fi lejos de casa (2026-10-09): en una convención la app
       Red no encontraba ninguna red (la estación reintentando conectarse a
       la red guardada y el IDF negándose a escanear). Arreglado tomando
-      prestada la radio como en AmoledOS; instalado y probado conectado (4
-      redes en 5 s, sigue conectada). Falta: el usuario lejos de su red o
-      con el router apagado, Red → Wi-Fi → Escanear.
+      prestada la radio como en AmoledOS. Probado con una red guardada que
+      no existe (`POST /api/wifi` desde la Mac): escanea, y conectada sigue
+      escaneando bien.
+- [x] Lejos de casa la placa se reiniciaba cada minuto (2026-10-09, visto
+      por el cable): el vigilante de red decía siempre "try 1 of 2" porque
+      su contador quedaba en la caché y se perdía al reiniciar (igual el de
+      cuelgues y el del enlace del C6). Ahora se escribe a PSRAM, y sin red
+      por un motivo claro (201 no está, 15/202/204 contraseña) no reinicia:
+      "no restart" en el registro, un solo arranque.
 - [ ] Sin Wi-Fi después de un reinicio por software (visto otra vez el
       2026-10-06, 1 vez en ~140 reinicios seguidos): la interfaz anda, el
       C6 no levanta la red, y no lo arreglan ni apagar y prender el Wi-Fi

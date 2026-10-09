@@ -218,9 +218,11 @@ static void on_event(void *arg, esp_event_base_t base, int32_t id, void *data)
         wifi_event_sta_disconnected_t *d = data;
         xEventGroupClearBits(s_ev, EV_GOT_IP);
         s_ip[0] = 0;
+        /* let go of on purpose, to scan: no retry until it is done, and the
+         * reason stays the last real one (main.c's network check reads it) */
+        if (s_scan_hold && s_want) return;
         s_reason = d->reason;
         if (!s_want) { s_state = AOS_NET_OFF; return; }
-        if (s_scan_hold) return;            /* let go of on purpose, to scan: no retry until it is done */
         s_failures++;
         s_state = s_failures > 3 ? AOS_NET_FAILED : AOS_NET_CONNECTING;
         if (s_ap_on) {

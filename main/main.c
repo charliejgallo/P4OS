@@ -13,6 +13,7 @@
 #include "freertos/task.h"
 #include "esp_log.h"
 #include "esp_attr.h"
+#include "esp_cache.h"
 #if CONFIG_HEAP_TRACING_STANDALONE
 #include "esp_heap_caps.h"
 #include "esp_heap_trace.h"
@@ -106,10 +107,26 @@ static void tick_thread(void *arg)
             net_checked = true;
             if (s_net_boots.magic != NET_MAGIC) { s_net_boots.magic = NET_MAGIC; s_net_boots.count = 0; }
             bool want = aos_hal_net_enabled() && aos_hal_net_ssid()[0];
+            uint8_t reason = 0;
+            aos_hal_net_retry_info(NULL, NULL, NULL, &reason);
+            /* the network is not around, or the password is wrong: a restart
+             * cannot fix that, and away from home it restarted the board every
+             * minute (2026-10-09). The restart is for the C6 that came up with
+             * no network at all (2026-09-29/30). */
+            bool not_ours = reason == 201 || reason == 210 || reason == 211 ||   /* no such access point */
+                            reason == 15 || reason == 202 || reason == 204;      /* the password */
             if (!want || aos_hal_net_state() == AOS_NET_CONNECTED) {
                 s_net_boots.count = 0;
+            } else if (not_ours) {
+                ESP_LOGW(TAG, "no network %d s after boot, but the station says why (reason %u): no restart",
+                         NET_DEADLINE_MS / 1000, (unsigned)reason);
             } else if (s_net_boots.count < NET_RETRIES) {
                 s_net_boots.count++;
+                /* out of the cache before the restart: the next boot must read
+                 * this count, and it read 1 every time until it was written
+                 * back (2026-10-09) */
+                esp_cache_msync(&s_net_boots, sizeof s_net_boots,
+                                ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED);
                 log_to_card("sin-red", (unsigned)s_net_boots.count);
                 ESP_LOGE(TAG, "no network %d s after boot (state %d): restarting, try %u of %d", NET_DEADLINE_MS / 1000,
                          (int)aos_hal_net_state(), (unsigned)s_net_boots.count, NET_RETRIES);
