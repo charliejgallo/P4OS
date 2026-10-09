@@ -464,6 +464,8 @@ test layouts.
   the portal.
 - Settings, Developer: touches and fps over the games, and the safe mode
   asked for from there.
+- Scanning for Wi-Fi with the saved network out of reach (as away from
+  home), and staying up without a network instead of restarting.
 - The Programmer flashing an ESP32 on a CP2102 (6.6 s) and an ESP32-C3 on
   its own USB (1.5 s), plugged into the USB host.
 - The workshop on the bench: PWM at three frequencies at once, a servo and

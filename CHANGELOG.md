@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.13.2 — 2026-10-09
 
 - **Scanning for Wi-Fi works away from home.** With a saved network out of
   reach the station retries for ever, and the IDF refuses to scan while it
@@ -17,6 +17,9 @@
   no network: the network is not around, or the password is wrong. Tried on
   the board with a saved network that does not exist: scanned, and stayed
   up.
+- `tools/console_log.py` records the serial console to a file, for what
+  the portal cannot show (no network at all, a boot loop). Opening the port
+  restarts the board.
 
 ## 0.13.1 — 2026-10-08
 

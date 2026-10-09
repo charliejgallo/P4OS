@@ -176,8 +176,8 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       Red no encontraba ninguna red (la estación reintentando conectarse a
       la red guardada y el IDF negándose a escanear). Arreglado tomando
       prestada la radio como en AmoledOS. Probado con una red guardada que
-      no existe (`POST /api/wifi` desde la Mac): escanea, y conectada sigue
-      escaneando bien.
+      no existe (`POST /api/wifi` desde la Mac): escanea ("funciona muy
+      bien", el usuario en la pantalla), y conectada sigue escaneando bien.
 - [x] Lejos de casa la placa se reiniciaba cada minuto (2026-10-09, visto
       por el cable): el vigilante de red decía siempre "try 1 of 2" porque
       su contador quedaba en la caché y se perdía al reiniciar (igual el de
