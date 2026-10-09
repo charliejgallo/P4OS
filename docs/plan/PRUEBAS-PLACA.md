@@ -172,6 +172,12 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       (`POST /api/coredump/test`), el volcado dice tarea, pc, sha de 16 y
       versión, `coredump.sh` lo decodifica hasta `panic_later` con su ELF y
       se niega sin él.
+- [ ] Escanear Wi-Fi lejos de casa (2026-10-09): en una convención la app
+      Red no encontraba ninguna red (la estación reintentando conectarse a
+      la red guardada y el IDF negándose a escanear). Arreglado tomando
+      prestada la radio como en AmoledOS; instalado y probado conectado (4
+      redes en 5 s, sigue conectada). Falta: el usuario lejos de su red o
+      con el router apagado, Red → Wi-Fi → Escanear.
 - [ ] Sin Wi-Fi después de un reinicio por software (visto otra vez el
       2026-10-06, 1 vez en ~140 reinicios seguidos): la interfaz anda, el
       C6 no levanta la red, y no lo arreglan ni apagar y prender el Wi-Fi

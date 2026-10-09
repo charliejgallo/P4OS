@@ -22,6 +22,10 @@
 #include "lwip/etharp.h"
 
 extern bool aos_net_p4_up(void);        /* aos_net_p4.c: the C6 answered */
+/* aos_net_p4.c: a scan that borrows the radio from a station still trying to
+ * connect; scan_done gives it back once the records are read */
+extern esp_err_t aos_net_p4_scan_start(const wifi_scan_config_t *sc, bool *held);
+extern void aos_net_p4_scan_done(bool held);
 
 static uint8_t auth_of(wifi_auth_mode_t m)
 {
@@ -77,13 +81,16 @@ int aos_hal_net_scan_ex(aos_wifi_ap_ex_t *out, int max)
 {
     if (!aos_net_p4_up() || !out || max <= 0) return -1;
     wifi_scan_config_t sc = { .show_hidden = true };
-    if (esp_wifi_scan_start(&sc, true) != ESP_OK) return -1;
+    bool held;
+    if (aos_net_p4_scan_start(&sc, &held) != ESP_OK) { aos_net_p4_scan_done(held); return -1; }
     uint16_t n = 0;
     esp_wifi_scan_get_ap_num(&n);
+    wifi_ap_record_t *rec = n ? calloc(n, sizeof *rec) : NULL;
+    if (n && rec) esp_wifi_scan_get_ap_records(&n, rec);
+    else esp_wifi_clear_ap_list();
+    aos_net_p4_scan_done(held);             /* the records are read: the radio can go back */
     if (!n) return 0;
-    wifi_ap_record_t *rec = calloc(n, sizeof *rec);
-    if (!rec) { esp_wifi_clear_ap_list(); return -1; }
-    esp_wifi_scan_get_ap_records(&n, rec);
+    if (!rec) return -1;
     int k = 0;
     for (int i = 0; i < n && k < max; i++) fill(&out[k++], &rec[i]);
     free(rec);

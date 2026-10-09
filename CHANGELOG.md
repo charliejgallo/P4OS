@@ -1,5 +1,14 @@
 # Changelog
 
+## Unreleased
+
+- **Scanning for Wi-Fi works away from home.** With a saved network out of
+  reach the station retries for ever, and the IDF refuses to scan while it
+  is connecting: the Network app and the portal's Wi-Fi page found nothing
+  (seen at a convention). The scan now borrows the radio, as AmoledOS did:
+  the retries stop, the attempt is let go, the scan runs, and the station
+  looks for its network again. Connected, it scans as before.
+
 ## 0.13.1 — 2026-10-08
 
 - **A crash's core dump says which firmware made it.** The board reads the

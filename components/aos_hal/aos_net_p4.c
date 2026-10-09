@@ -110,6 +110,44 @@ static void connect_now(void)
 
 static void retry_cb(void *arg) { connect_now(); }
 
+/* ---- borrowing the radio to scan ----
+ * The IDF refuses to scan while the station is connecting
+ * (ESP_ERR_WIFI_STATE), and away from home the station is always
+ * connecting: the saved network is out of reach and it retries for ever.
+ * At a convention (2026-10-09) the Network app found nothing at all, while
+ * at home, connected, it scanned fine. AmoledOS had the same and borrowed
+ * the radio (aos_wifi_scan_prepare there): the retries stop, the attempt
+ * under way is let go, the scan runs (a few tries while the radio lets go),
+ * and then the station looks for its network again. A connected station,
+ * or one not trying, scans as it is. */
+static volatile bool s_scan_hold;
+
+esp_err_t aos_net_p4_scan_start(const wifi_scan_config_t *sc, bool *held)
+{
+    *held = s_inited && s_want && s_state != AOS_NET_CONNECTED;
+    if (*held) {
+        s_scan_hold = true;
+        esp_timer_stop(s_retry);
+        esp_wifi_disconnect();
+    }
+    esp_err_t e = ESP_FAIL;
+    for (int i = 0; i < 25; i++) {          /* up to 5 s: a connect under way takes a moment to let go */
+        e = esp_wifi_scan_start(sc, true);
+        if (e != ESP_ERR_WIFI_STATE) break;
+        if (*held) esp_wifi_disconnect();
+        vTaskDelay(pdMS_TO_TICKS(200));
+    }
+    if (e != ESP_OK) ESP_LOGW(TAG, "scan did not start: %s", esp_err_to_name(e));
+    return e;
+}
+
+void aos_net_p4_scan_done(bool held)
+{
+    if (!held) return;
+    s_scan_hold = false;
+    if (s_want && !s_ap_on) connect_now();      /* and back to looking for the network */
+}
+
 static void schedule_retry(void)
 {
     static const uint32_t STEPS[] = { 1, 2, 5, 10, 20, 30, 60 };
@@ -182,6 +220,7 @@ static void on_event(void *arg, esp_event_base_t base, int32_t id, void *data)
         s_ip[0] = 0;
         s_reason = d->reason;
         if (!s_want) { s_state = AOS_NET_OFF; return; }
+        if (s_scan_hold) return;            /* let go of on purpose, to scan: no retry until it is done */
         s_failures++;
         s_state = s_failures > 3 ? AOS_NET_FAILED : AOS_NET_CONNECTING;
         if (s_ap_on) {
@@ -541,13 +580,16 @@ int aos_hal_net_scan(aos_wifi_ap_t *out, int max)
 {
     if (!s_ev || !(xEventGroupWaitBits(s_ev, EV_INITED, false, true, pdMS_TO_TICKS(8000)) & EV_INITED)) return -1;
     wifi_scan_config_t sc = { .show_hidden = false };
-    if (esp_wifi_scan_start(&sc, true) != ESP_OK) return -1;
+    bool held;
+    if (aos_net_p4_scan_start(&sc, &held) != ESP_OK) { aos_net_p4_scan_done(held); return -1; }
     uint16_t n = 0;
     esp_wifi_scan_get_ap_num(&n);
+    wifi_ap_record_t *rec = n ? calloc(n, sizeof *rec) : NULL;
+    if (n && rec) esp_wifi_scan_get_ap_records(&n, rec);
+    else esp_wifi_clear_ap_list();
+    aos_net_p4_scan_done(held);             /* the records are read: the radio can go back */
     if (!n) return 0;
-    wifi_ap_record_t *rec = calloc(n, sizeof *rec);
-    if (!rec) { esp_wifi_clear_ap_list(); return -1; }
-    esp_wifi_scan_get_ap_records(&n, rec);
+    if (!rec) return -1;
     int k = 0;
     for (int i = 0; i < n && k < max; i++) {
         if (!rec[i].ssid[0]) continue;
