@@ -134,6 +134,13 @@ set up from a constructor instead (see `aos_scope.c`, `T_defaults`).
   ranged ones (`esp_elf_arch_flush_code()` in `components/elf_loader`,
   2026-10-06). Espressif went the other way on the ESP32-S31 (loader
   v1.3.3), but there the ranges were not aligned to the line.
+- Something kept across a restart in PSRAM (`EXT_RAM_NOINIT_ATTR`: a
+  count of tries, a log): write it back with `esp_cache_msync(...,
+  ESP_CACHE_MSYNC_FLAG_DIR_C2M | ESP_CACHE_MSYNC_FLAG_UNALIGNED)` right
+  after changing it. A restart drops what is only in the cache: the network
+  check's count read "try 1 of 2" at every boot and the board restarted
+  every minute away from home (2026-10-09). The log ring
+  (`aos_logring.c`) always did it.
 - Two cores for one frame: `aos_hal_worker_split()` (`aos_hal.h`). Each
   half needs its own scratch, and what they share must only be read. A
   pass bound by PSRAM gains little: measured, the 3D viewer's vertex pass
