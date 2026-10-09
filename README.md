@@ -471,6 +471,7 @@ test layouts.
 - The workshop on the bench: PWM at three frequencies at once, a servo and
   the analog level; a WS2812B strip; infrared learned and sent; a 24LC256
   read, written and restored; CAN's self test with no transceiver.
+- Drawing on the board, by finger and with a USB mouse.
 - VNC against a MacBook Air with two monitors: the login typed with the
   on-screen keyboard, then the mouse and keyboard.
 - RF with an RTL-SDR (R820T tuner) on the USB host: 2.4 Msps with no

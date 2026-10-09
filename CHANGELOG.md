@@ -17,6 +17,7 @@
   no network: the network is not around, or the password is wrong. Tried on
   the board with a saved network that does not exist: scanned, and stayed
   up.
+- Drawing tried on the board by finger and with a USB mouse: it works.
 - `tools/console_log.py` records the serial console to a file, for what
   the portal cannot show (no network at all, a boot loop). Opening the port
   restarts the board.

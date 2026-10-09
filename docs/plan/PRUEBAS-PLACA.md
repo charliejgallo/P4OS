@@ -144,7 +144,8 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       Una trampa que parece un fallo: con la pantalla de bloqueo, la Mac
       apaga la pantalla al minuto y sigue mandando la última imagen, así
       que los toques parecen no hacer nada; una tecla la despierta);
-      Dibujo con el dedo y el mouse USB.
+      Dibujo con el dedo y el mouse USB (**probado por el usuario en la
+      placa, funciona bien**, confirmado el 2026-10-09).
 - [x] Red, pestaña Wi-Fi fluida (2026-10-06, `5362893`): los gráficos de
       canales y el nivel en vivo se dibujaban en cada cuadro del scroll;
       ahora se pintan una vez en una imagen en PSRAM cuando cambian los
