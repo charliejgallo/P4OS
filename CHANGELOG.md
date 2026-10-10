@@ -1,5 +1,23 @@
 # Changelog
 
+## 0.13.3 — 2026-10-10
+
+- **BLE keeps up to 2048 devices, not 256.** At a fair the screen said
+  256: the table had a fixed top, and phones change their private address
+  every few minutes, each a new device. It now starts at 256 and doubles up
+  to 2048 (~0.8 KB each in PSRAM; the sensors' two hours kept apart, for 64
+  of them), a device is found by a hash of its address, and "seen since
+  launch" counts them all, forgotten ones too. Airwaves and the portal say
+  when the top is reached and how many were forgotten, and the page says
+  how many fit in its live answer. In the simulator, `P4_SIM_BLE_CROWD=N`
+  adds that many phones changing address every minute.
+- **A Wi-Fi scan no longer cuts a first connection.** 0.13.2's scan
+  borrowed the radio from any station not connected yet, also one that was
+  connecting to a network in reach (right after boot, say): the attempt was
+  let go. It now borrows it from a station that has failed at least once
+  (away from home), or after 2.4 s of a first attempt; and two scans at
+  once (the portal's and the board's) give it back only when both are done.
+
 ## 0.13.2 — 2026-10-09
 
 - **Scanning for Wi-Fi works away from home.** With a saved network out of

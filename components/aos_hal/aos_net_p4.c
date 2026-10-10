@@ -120,18 +120,32 @@ static void retry_cb(void *arg) { connect_now(); }
  * under way is let go, the scan runs (a few tries while the radio lets go),
  * and then the station looks for its network again. A connected station,
  * or one not trying, scans as it is. */
-static volatile bool s_scan_hold;
+/* Not a flag but a count: the portal's Wi-Fi page and the board can scan at
+ * once, and the station must not go back to its network while one of them
+ * still has the radio. */
+static volatile int s_scan_holds;
+
+/* A station that is looking for its network and has failed at least once
+ * (away from home it never stops); during a first attempt that is only
+ * taking its time -the network is there- it is let alone. */
+static bool scan_should_hold(void)
+{
+    return s_inited && s_want && s_state != AOS_NET_CONNECTED && s_failures > 0;
+}
 
 esp_err_t aos_net_p4_scan_start(const wifi_scan_config_t *sc, bool *held)
 {
-    *held = s_inited && s_want && s_state != AOS_NET_CONNECTED;
-    if (*held) {
-        s_scan_hold = true;
-        esp_timer_stop(s_retry);
-        esp_wifi_disconnect();
-    }
+    *held = false;
     esp_err_t e = ESP_FAIL;
     for (int i = 0; i < 25; i++) {          /* up to 5 s: a connect under way takes a moment to let go */
+        /* hold from the start for a station that keeps failing; for a
+         * first attempt, only if it is still at it after 2.4 s */
+        if (!*held && (scan_should_hold() || (i == 12 && s_inited && s_want && s_state != AOS_NET_CONNECTED))) {
+            *held = true;
+            __atomic_add_fetch(&s_scan_holds, 1, __ATOMIC_SEQ_CST);
+            esp_timer_stop(s_retry);
+            esp_wifi_disconnect();
+        }
         e = esp_wifi_scan_start(sc, true);
         if (e != ESP_ERR_WIFI_STATE) break;
         if (*held) esp_wifi_disconnect();
@@ -144,8 +158,9 @@ esp_err_t aos_net_p4_scan_start(const wifi_scan_config_t *sc, bool *held)
 void aos_net_p4_scan_done(bool held)
 {
     if (!held) return;
-    s_scan_hold = false;
-    if (s_want && !s_ap_on) connect_now();      /* and back to looking for the network */
+    /* the last one to give the radio back sends the station looking again */
+    if (__atomic_sub_fetch(&s_scan_holds, 1, __ATOMIC_SEQ_CST) > 0) return;
+    if (s_want && !s_ap_on) connect_now();
 }
 
 static void schedule_retry(void)
@@ -220,7 +235,7 @@ static void on_event(void *arg, esp_event_base_t base, int32_t id, void *data)
         s_ip[0] = 0;
         /* let go of on purpose, to scan: no retry until it is done, and the
          * reason stays the last real one (main.c's network check reads it) */
-        if (s_scan_hold && s_want) return;
+        if (s_scan_holds > 0 && s_want) return;
         s_reason = d->reason;
         if (!s_want) { s_state = AOS_NET_OFF; return; }
         s_failures++;
