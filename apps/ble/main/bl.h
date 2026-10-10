@@ -25,7 +25,13 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define BL_DEV_MAX     256
+/* The table starts with room for BL_DEV_START and doubles when it fills, up
+ * to BL_DEV_MAX (~0.8 KB each, in PSRAM): a fair or a station has hundreds
+ * of phones, each changing its private address every few minutes. Past
+ * the top, the one not heard for longest makes room. */
+#define BL_DEV_START   256
+#define BL_DEV_MAX     2048
+#define BL_SH_MAX      64           /* sensors whose two hours are kept */
 #define BL_HIST        120          /* seconds of RSSI kept per device */
 #define BL_SEN_HIST    120          /* sensor readings kept per device, one a minute: two hours */
 #define BL_AIR_HIST    120          /* seconds of the air's counters */
@@ -57,15 +63,21 @@ typedef struct {
     bl_sensor_t sen;
     bl_beacon_t bc;
     uint32_t sen_ms;
-    float sen_t[BL_SEN_HIST];       /* temperature, NAN none */
-    float sen_h[BL_SEN_HIST];
-    uint32_t sen_slot;              /* the minute of the last reading */
+    int16_t sh;                     /* its sensor history in BL.sh, -1 none */
     bool fav;
     char alias[28];
     bool has_key;                   /* its key for encrypted advertisements, from ble/claves.txt */
     uint8_t key[16];
     int8_t key_state;               /* BL_KEY_* of the last encrypted packet, -1 none yet */
 } bl_dev_t;
+
+/* A sensor's last two hours, one reading a minute, in tenths (INT16_MIN
+ * none): kept apart from the devices, since few of them are sensors. */
+typedef struct bl_senhist {
+    int16_t t[BL_SEN_HIST], h[BL_SEN_HIST];
+    uint32_t slot;                  /* the minute of the last reading */
+    int16_t dev;                    /* its device, -1 free */
+} bl_senhist_t;
 
 typedef struct {
     uint32_t sec;                   /* the second of the last bin */
@@ -88,8 +100,12 @@ typedef struct {
     int duty;
 
     /* the table */
-    bl_dev_t *dev;                  /* BL_DEV_MAX, PSRAM */
-    int ndev;
+    bl_dev_t *dev;                  /* cap records, PSRAM */
+    int ndev, cap;
+    uint32_t seen_total;            /* devices heard since the app opened, forgotten ones too */
+    uint32_t forgotten;             /* made room for another when the table was full */
+    int16_t *hash;                  /* address -> index, open addressing, BL_HASH slots */
+    struct bl_senhist *sh;          /* BL_SH_MAX, PSRAM */
     uint32_t gen;                   /* bumped when a device is added or forgotten */
     bl_air_t air;
     aos_ble_adv_t *rx;              /* the drain's buffer, PSRAM */
@@ -139,6 +155,10 @@ void bl_scan_free(void);
 void bl_scan_apply(void);           /* start/stop/parameters as the settings say */
 void bl_scan_drain(void);           /* from the timer */
 int  bl_find(const uint8_t addr[6]);
+/* A sensor's reading of a minute (slot = uptime / 60 s), NAN when none;
+ * and the minute of its last one, 0 when it has no history. */
+float    bl_sen_at(const bl_dev_t *d, bool hum, uint32_t slot);
+uint32_t bl_sen_last(const bl_dev_t *d);
 bool bl_alive(const bl_dev_t *d);   /* heard in the last BL_GONE_MS */
 const char *bl_dev_name(const bl_dev_t *d);   /* alias, name, label or company: ready to show */
 void bl_dev_sub(const bl_dev_t *d, char *out, size_t n);   /* the second line of a row */

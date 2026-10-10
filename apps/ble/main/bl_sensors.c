@@ -37,29 +37,29 @@ static void graph_draw(lv_event_t *e)
     int i = (int)(intptr_t)lv_obj_get_user_data(o);
     if (i < 0 || i >= S.n || S.dev[i] < 0 || S.dev[i] >= BL.ndev) return;
     const bl_dev_t *d = &BL.dev[S.dev[i]];
-    const float *v = d->sen_t;
+    uint32_t newest = (uint32_t)(aos_hal_uptime_ms() / 60000);
+    /* the two hours, oldest first: the temperature, or the humidity when
+     * there is none */
+    float v[BL_SEN_HIST];
     bool hum = false;
     float lo = 1e9f, hi = -1e9f;
-    for (int k = 0; k < BL_SEN_HIST; k++) if (!isnan(v[k])) { if (v[k] < lo) lo = v[k]; if (v[k] > hi) hi = v[k]; }
-    if (lo > hi) {
-        /* no temperature: the humidity, if there is */
-        v = d->sen_h;
-        hum = true;
-        for (int k = 0; k < BL_SEN_HIST; k++) if (!isnan(v[k])) { if (v[k] < lo) lo = v[k]; if (v[k] > hi) hi = v[k]; }
-        if (lo > hi) return;
+    for (int pass = 0; pass < 2 && lo > hi; pass++) {
+        hum = pass == 1;
+        for (int k = 0; k < BL_SEN_HIST; k++) {
+            v[k] = bl_sen_at(d, hum, newest - (BL_SEN_HIST - 1 - k));
+            if (!isnan(v[k])) { if (v[k] < lo) lo = v[k]; if (v[k] > hi) hi = v[k]; }
+        }
     }
+    if (lo > hi) return;
     if (hi - lo < 1) { float m = (hi + lo) / 2; lo = m - 0.5f; hi = m + 0.5f; }
     lv_area_t a;
     lv_obj_get_coords(o, &a);
     lv_layer_t *layer = lv_event_get_layer(e);
     int32_t w = lv_area_get_width(&a) - 70, h = lv_area_get_height(&a);
-    uint32_t newest = (uint32_t)(aos_hal_uptime_ms() / 60000);
     int32_t px = -1, py = 0;
     lv_color_t c = hum ? AOS_C_TEAL : AOS_C_ORANGE;
     for (int k = 0; k < BL_SEN_HIST; k++) {
-        uint32_t slot = newest - (BL_SEN_HIST - 1 - k);
-        if (slot > d->sen_slot || d->sen_slot - slot >= BL_SEN_HIST) { px = -1; continue; }
-        float val = v[slot % BL_SEN_HIST];
+        float val = v[k];
         if (isnan(val)) { px = -1; continue; }
         int32_t x = a.x1 + k * w / (BL_SEN_HIST - 1);
         int32_t y = a.y2 - 4 - (int32_t)((val - lo) / (hi - lo) * (h - 8));

@@ -24,7 +24,7 @@ typedef struct {
 } bars_t;
 
 static struct {
-    lv_obj_t *col, *kpi[4], *chart, *cls, *co, *addr, *kinds, *hist;
+    lv_obj_t *col, *kpi[4], *full, *chart, *cls, *co, *addr, *kinds, *hist;
     bars_t b_cls, b_co, b_addr, b_kinds;
     int rhist[15];                  /* -100..-30 in 5 dB bins */
 } A;
@@ -207,7 +207,14 @@ void bl_air_refresh(void)
     lv_label_set_text(A.kpi[0], t);
     bl_fmt_num(t, sizeof t, BL.air.pps, BL.air.pps < 10 ? 1 : 0);
     lv_label_set_text(A.kpi[1], t);
-    snprintf(t, sizeof t, "%d", BL.ndev);
+    snprintf(t, sizeof t, "%u", (unsigned)BL.seen_total);
+    if (BL.forgotten && A.full) {
+        char f[200];
+        snprintf(f, sizeof f, _("La memoria guarda %d equipos: %u se olvidaron para hacer lugar (los que hacía más que no se oían). Los favoritos no se olvidan."),
+                 BL.cap, (unsigned)BL.forgotten);
+        lv_label_set_text(A.full, f);
+        lv_obj_remove_flag(A.full, LV_OBJ_FLAG_HIDDEN);
+    }
     lv_label_set_text(A.kpi[2], t);
     snprintf(t, sizeof t, "%u", (unsigned)BL.air.lost);
     lv_label_set_text(A.kpi[3], t);
@@ -236,6 +243,9 @@ void bl_air_build(lv_obj_t *page)
     kpi_tile(k, 1, tw, _("paquetes por segundo"));
     kpi_tile(k, 2, tw, _("vistos desde que abrió"));
     kpi_tile(k, 3, tw, _("paquetes perdidos"));
+    /* the table's top, said when it is reached */
+    A.full = bl_caption(A.col, "", w);
+    lv_obj_add_flag(A.full, LV_OBJ_FLAG_HIDDEN);
     lv_obj_t *cc = bl_vcard(A.col, w, 22, 10);
     aos_label(cc, _("Los últimos dos minutos"), aos_font_body, AOS_C_TEXT);
     A.chart = bl_box(cc, w - 44, 220);

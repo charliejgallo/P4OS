@@ -152,20 +152,37 @@ float bl_env_n(void)
 /* The table                                                                   */
 /* -------------------------------------------------------------------------- */
 
+#define BL_HASH 4096                /* twice BL_DEV_MAX, a power of two */
+
 bool bl_scan_init(void)
 {
-    if (!BL.dev) BL.dev = ps_alloc(sizeof(bl_dev_t) * BL_DEV_MAX);
+    if (!BL.dev) {
+        BL.dev = ps_alloc(sizeof(bl_dev_t) * BL_DEV_START);
+        BL.cap = BL.dev ? BL_DEV_START : 0;
+    }
     if (!BL.rx) BL.rx = ps_alloc(sizeof(aos_ble_adv_t) * RX_MAX);
-    return BL.dev && BL.rx;
+    if (!BL.hash) {
+        BL.hash = ps_alloc(sizeof(int16_t) * BL_HASH);
+        if (BL.hash) for (int i = 0; i < BL_HASH; i++) BL.hash[i] = -1;
+    }
+    if (!BL.sh) {
+        BL.sh = ps_alloc(sizeof(bl_senhist_t) * BL_SH_MAX);
+        if (BL.sh) for (int i = 0; i < BL_SH_MAX; i++) BL.sh[i].dev = -1;
+    }
+    return BL.dev && BL.rx && BL.hash && BL.sh;
 }
 
 void bl_scan_free(void)
 {
     free(BL.dev);
     free(BL.rx);
+    free(BL.hash);
+    free(BL.sh);
     BL.dev = NULL;
     BL.rx = NULL;
-    BL.ndev = 0;
+    BL.hash = NULL;
+    BL.sh = NULL;
+    BL.ndev = BL.cap = 0;
 }
 
 void bl_scan_apply(void)
@@ -182,10 +199,39 @@ void bl_scan_apply(void)
     BL.bt_off = !aos_hal_ble_scan_start(BL.active, BL.duty);
 }
 
+/* ---- the address index: every packet looks its device up, and at a fair
+ * a list walk over two thousand records was the costly part ---- */
+
+static uint32_t addr_hash(const uint8_t a[6])
+{
+    uint32_t h = 2166136261u;
+    for (int i = 0; i < 6; i++) h = (h ^ a[i]) * 16777619u;
+    return h;
+}
+
+static void hash_put(int idx)
+{
+    uint32_t h = addr_hash(BL.dev[idx].addr) & (BL_HASH - 1);
+    while (BL.hash[h] >= 0) h = (h + 1) & (BL_HASH - 1);
+    BL.hash[h] = (int16_t)idx;
+}
+
+/* After a record changed its address or the table was compacted: linear
+ * probing has no cheap removal, and this is rare. */
+static void hash_rebuild(void)
+{
+    for (int i = 0; i < BL_HASH; i++) BL.hash[i] = -1;
+    for (int i = 0; i < BL.ndev; i++) hash_put(i);
+}
+
 int bl_find(const uint8_t addr[6])
 {
-    for (int i = 0; i < BL.ndev; i++)
-        if (!memcmp(BL.dev[i].addr, addr, 6)) return i;
+    if (!BL.hash) return -1;
+    uint32_t h = addr_hash(addr) & (BL_HASH - 1);
+    for (int n = 0; n < BL_HASH && BL.hash[h] >= 0; n++, h = (h + 1) & (BL_HASH - 1)) {
+        int i = BL.hash[h];
+        if (i < BL.ndev && !memcmp(BL.dev[i].addr, addr, 6)) return i;
+    }
     return -1;
 }
 
@@ -194,22 +240,48 @@ bool bl_alive(const bl_dev_t *d)
     return now_ms() - d->last_ms < BL_GONE_MS;
 }
 
-/* A new record; when the table is full, the one not heard for longest that
- * is neither a favourite nor open on the screen makes room. */
+static void sh_release(bl_dev_t *d)
+{
+    if (d->sh >= 0 && d->sh < BL_SH_MAX && BL.sh[d->sh].dev == (int16_t)(d - BL.dev)) BL.sh[d->sh].dev = -1;
+    d->sh = -1;
+}
+
+/* Room for one more: double the table while it may grow, else the record
+ * not heard for longest that is neither a favourite nor open on the screen
+ * makes room. Indexes stay what they were either way. */
+static int dev_slot(bool *evicted)
+{
+    *evicted = false;
+    if (BL.ndev < BL.cap) return BL.ndev++;
+    if (BL.cap < BL_DEV_MAX) {
+        int cap = BL.cap * 2 > BL_DEV_MAX ? BL_DEV_MAX : BL.cap * 2;
+        bl_dev_t *n = ps_alloc(sizeof(bl_dev_t) * cap);
+        if (n) {
+            memcpy(n, BL.dev, sizeof(bl_dev_t) * BL.ndev);
+            free(BL.dev);
+            BL.dev = n;
+            BL.cap = cap;
+            return BL.ndev++;
+        }
+    }
+    int old = -1;
+    for (int k = 0; k < BL.ndev; k++) {
+        if (BL.dev[k].fav || k == BL.sel) continue;
+        if (old < 0 || (int32_t)(BL.dev[k].last_ms - BL.dev[old].last_ms) < 0) old = k;
+    }
+    if (old >= 0) {
+        sh_release(&BL.dev[old]);
+        BL.forgotten++;
+        *evicted = true;
+    }
+    return old;
+}
+
 static bl_dev_t *dev_new(const aos_ble_adv_t *a)
 {
-    int i = BL.ndev;
-    if (i >= BL_DEV_MAX) {
-        int old = -1;
-        for (int k = 0; k < BL.ndev; k++) {
-            if (BL.dev[k].fav || k == BL.sel) continue;
-            if (old < 0 || (int32_t)(BL.dev[k].last_ms - BL.dev[old].last_ms) < 0) old = k;
-        }
-        if (old < 0) return NULL;
-        i = old;
-    } else {
-        BL.ndev++;
-    }
+    bool reused;
+    int i = dev_slot(&reused);
+    if (i < 0) return NULL;
     bl_dev_t *d = &BL.dev[i];
     memset(d, 0, sizeof *d);
     memcpy(d->addr, a->addr, 6);
@@ -219,12 +291,71 @@ static bl_dev_t *dev_new(const aos_ble_adv_t *a)
     d->rssi_max = -127;
     d->rssi_avg = a->rssi;
     for (int k = 0; k < BL_HIST; k++) d->hist[k] = BL_NO_RSSI;
-    for (int k = 0; k < BL_SEN_HIST; k++) d->sen_t[k] = d->sen_h[k] = NAN;
+    d->sh = -1;
     d->hist_sec = a->t_ms / 1000;
     d->key_state = -1;
     bl_ad_clear(&d->ad);
+    if (reused) hash_rebuild();
+    else hash_put(i);
     BL.gen++;
     return d;
+}
+
+/* ---- sensors' history ---- */
+
+#define SH_NONE INT16_MIN
+
+float bl_sen_at(const bl_dev_t *d, bool hum, uint32_t slot)
+{
+    if (!BL.sh || d->sh < 0) return NAN;
+    const bl_senhist_t *h = &BL.sh[d->sh];
+    if (slot > h->slot || h->slot - slot >= BL_SEN_HIST) return NAN;
+    int16_t v = (hum ? h->h : h->t)[slot % BL_SEN_HIST];
+    return v == SH_NONE ? NAN : v / 10.0f;
+}
+
+uint32_t bl_sen_last(const bl_dev_t *d)
+{
+    return BL.sh && d->sh >= 0 ? BL.sh[d->sh].slot : 0;
+}
+
+static int16_t tenths(float v)
+{
+    float r = v * 10.0f;
+    if (r > 32000) r = 32000;
+    if (r < -32000) r = -32000;
+    return (int16_t)(r < 0 ? r - 0.5f : r + 0.5f);
+}
+
+static void sensor_keep(bl_dev_t *d, uint32_t t)
+{
+    if (!BL.sh || !(d->sen.mask & (BL_V_TEMP | BL_V_HUM))) return;
+    uint32_t slot = t / 60000;
+    int idx = (int)(d - BL.dev);
+    if (d->sh < 0 || BL.sh[d->sh].dev != idx) {
+        /* a free history, else the one read longest ago */
+        int pick = -1;
+        for (int k = 0; k < BL_SH_MAX; k++) {
+            if (BL.sh[k].dev < 0) { pick = k; break; }
+            if (pick < 0 || BL.sh[k].slot < BL.sh[pick].slot) pick = k;
+        }
+        bl_senhist_t *h = &BL.sh[pick];
+        if (h->dev >= 0 && h->dev < BL.ndev) BL.dev[h->dev].sh = -1;
+        for (int k = 0; k < BL_SEN_HIST; k++) h->t[k] = h->h[k] = SH_NONE;
+        h->slot = slot;
+        h->dev = (int16_t)idx;
+        d->sh = (int16_t)pick;
+    }
+    bl_senhist_t *h = &BL.sh[d->sh];
+    if (slot > h->slot) {
+        uint32_t gap = slot - h->slot;
+        if (gap > BL_SEN_HIST) gap = BL_SEN_HIST;
+        for (uint32_t k = 1; k <= gap; k++) h->t[(h->slot + k) % BL_SEN_HIST] = h->h[(h->slot + k) % BL_SEN_HIST] = SH_NONE;
+        h->slot = slot;
+    }
+    int i = slot % BL_SEN_HIST;
+    if (d->sen.mask & BL_V_TEMP) h->t[i] = tenths(d->sen.temp);
+    if (d->sen.mask & BL_V_HUM) h->h[i] = tenths(d->sen.hum);
 }
 
 static void hist_roll(int8_t *hist, uint32_t *last, uint32_t sec)
@@ -248,21 +379,6 @@ static void air_roll(uint32_t sec)
         A->devs[(A->sec + k) % BL_AIR_HIST] = 0;
     }
     A->sec = sec;
-}
-
-static void sensor_keep(bl_dev_t *d, uint32_t t)
-{
-    uint32_t slot = t / 60000;
-    if (!d->sen_slot) d->sen_slot = slot;
-    if (slot > d->sen_slot) {
-        uint32_t gap = slot - d->sen_slot;
-        if (gap > BL_SEN_HIST) gap = BL_SEN_HIST;
-        for (uint32_t k = 1; k <= gap; k++) d->sen_t[(d->sen_slot + k) % BL_SEN_HIST] = d->sen_h[(d->sen_slot + k) % BL_SEN_HIST] = NAN;
-        d->sen_slot = slot;
-    }
-    int i = slot % BL_SEN_HIST;
-    if (d->sen.mask & BL_V_TEMP) d->sen_t[i] = d->sen.temp;
-    if (d->sen.mask & BL_V_HUM) d->sen_h[i] = d->sen.hum;
 }
 
 /* What the bytes say, again: after a change in the advertisement or the
@@ -314,6 +430,8 @@ static void ingest(const aos_ble_adv_t *a)
     int i = bl_find(a->addr);
     bl_dev_t *d = i >= 0 ? &BL.dev[i] : dev_new(a);
     if (!d) return;
+    /* its first packet (a favourite waiting in the table has none yet) */
+    if (!d->n_adv && !d->n_rsp) BL.seen_total++;
     uint32_t sec = a->t_ms / 1000;
 
     air_roll(sec);
@@ -423,10 +541,13 @@ void bl_forget_all(void)
         d->rssi_min = 127;
         d->rssi_max = -127;
         for (int k = 0; k < BL_HIST; k++) d->hist[k] = BL_NO_RSSI;
-        for (int k = 0; k < BL_SEN_HIST; k++) d->sen_t[k] = d->sen_h[k] = NAN;
+        d->sh = -1;
     }
     BL.ndev = n;
     BL.sel = -1;
+    BL.seen_total = BL.forgotten = 0;
+    for (int k = 0; k < BL_SH_MAX && BL.sh; k++) BL.sh[k].dev = -1;
+    hash_rebuild();
     memset(&BL.air, 0, sizeof BL.air);
     BL.gen++;
 }
@@ -594,7 +715,6 @@ static void names_load(void)
         if (!bl_parse_addr(line, a)) continue;
         int i = bl_find(a);
         if (i < 0) {
-            if (BL.ndev >= BL_DEV_MAX) continue;
             /* a favourite not heard yet this time: a record waiting for it */
             aos_ble_adv_t fake = { .t_ms = 0 };
             memcpy(fake.addr, a, 6);
@@ -667,7 +787,7 @@ static void keys_load(void)
     keys_path(path, sizeof path);
     s_keys_mtime = file_mtime(path);
     FILE *f = fopen(path, "r");
-    bool had[BL_DEV_MAX];
+    static bool had[BL_DEV_MAX];
     for (int i = 0; i < BL.ndev; i++) {
         had[i] = BL.dev[i].has_key;
         BL.dev[i].has_key = false;
@@ -683,7 +803,6 @@ static void keys_load(void)
         if (!bl_parse_addr(line, a) || !bl_parse_key(bar, k)) continue;
         int i = bl_find(a);
         if (i < 0) {
-            if (BL.ndev >= BL_DEV_MAX) continue;
             aos_ble_adv_t fake = { .t_ms = 0 };
             memcpy(fake.addr, a, 6);
             bl_dev_t *d = dev_new(&fake);

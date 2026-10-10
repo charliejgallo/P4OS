@@ -29,43 +29,46 @@ No conectable	Nicht verbindbar
 #: apps/ble/main/bl_air.c:195
 Responde al escaneo	Scan-Antwort
 
-#: apps/ble/main/bl_air.c:235
+#: apps/ble/main/bl_air.c:213
+La memoria guarda %d equipos: %u se olvidaron para hacer lugar (los que hacía más que no se oían). Los favoritos no se olvidan.	Der Speicher behält %d Geräte: %u wurden vergessen, um Platz zu machen (die am längsten nicht gehörten). Favoriten werden nie vergessen.
+
+#: apps/ble/main/bl_air.c:242
 cerca ahora	jetzt in der Nähe
 
-#: apps/ble/main/bl_air.c:236
+#: apps/ble/main/bl_air.c:243
 paquetes por segundo	Pakete pro Sekunde
 
-#: apps/ble/main/bl_air.c:237
+#: apps/ble/main/bl_air.c:244
 vistos desde que abrió	gesehen seit dem Start
 
-#: apps/ble/main/bl_air.c:238
+#: apps/ble/main/bl_air.c:245
 paquetes perdidos	verlorene Pakete
 
-#: apps/ble/main/bl_air.c:240
+#: apps/ble/main/bl_air.c:250
 Los últimos dos minutos	Die letzten zwei Minuten
 
-#: apps/ble/main/bl_air.c:243
+#: apps/ble/main/bl_air.c:253
 Qué son	Was sie sind
 
-#: apps/ble/main/bl_air.c:243
+#: apps/ble/main/bl_air.c:253
 Por lo que anuncian: servicios, apariencia, mensajes de Apple, Microsoft y Google, formatos de sensores.	Nach dem, was sie senden: Dienste, Erscheinungsbild, Nachrichten von Apple, Microsoft und Google, Sensorformate.
 
-#: apps/ble/main/bl_air.c:244
+#: apps/ble/main/bl_air.c:254
 Fabricantes	Hersteller
 
-#: apps/ble/main/bl_air.c:244
+#: apps/ble/main/bl_air.c:254
 Por el identificador de compañía de sus datos de fabricante.	Nach der Firmenkennung in ihren Herstellerdaten.
 
-#: apps/ble/main/bl_air.c:245
+#: apps/ble/main/bl_air.c:255
 Direcciones	Adressen
 
-#: apps/ble/main/bl_air.c:245
+#: apps/ble/main/bl_air.c:255
 Las privadas resolubles cambian cada pocos minutos: así los teléfonos evitan que los sigan. Las públicas y las estáticas son siempre las mismas.	Auflösbare private Adressen wechseln alle paar Minuten: So entgehen Handys der Verfolgung. Öffentliche und statische bleiben immer gleich.
 
-#: apps/ble/main/bl_air.c:246
+#: apps/ble/main/bl_air.c:256
 Tipos de anuncio	Advertising-Typen
 
-#: apps/ble/main/bl_air.c:248
+#: apps/ble/main/bl_air.c:258
 Señal (dBm)	Signal (dBm)
 
 #: apps/ble/main/bl_decode.c:390
@@ -195,7 +198,7 @@ Sensor	Sensor
 
 #: apps/ble/main/bl_decode.c:1353
 #: apps/ble/main/bl_detail.c:234
-#: apps/ble/main/bl_scan.c:460
+#: apps/ble/main/bl_scan.c:581
 Baliza	Beacon
 
 #: apps/ble/main/bl_decode.c:1354
@@ -343,25 +346,25 @@ cifrado, sin lecturas	verschlüsselt, keine Werte
 rocío	Tau
 
 #: apps/ble/main/bl_decode.c:1702
-#: apps/ble/main/bl_scan.c:477
+#: apps/ble/main/bl_scan.c:598
 suelo	Boden
 
 #: apps/ble/main/bl_decode.c:1709
-#: apps/ble/main/bl_scan.c:480
+#: apps/ble/main/bl_scan.c:601
 #: apps/ble/main/bl_sensors.c:134
 abierto	offen
 
 #: apps/ble/main/bl_decode.c:1709
-#: apps/ble/main/bl_scan.c:480
+#: apps/ble/main/bl_scan.c:601
 #: apps/ble/main/bl_sensors.c:134
 cerrado	geschlossen
 
 #: apps/ble/main/bl_decode.c:1710
-#: apps/ble/main/bl_scan.c:481
+#: apps/ble/main/bl_scan.c:602
 movimiento	Bewegung
 
 #: apps/ble/main/bl_decode.c:1710
-#: apps/ble/main/bl_scan.c:481
+#: apps/ble/main/bl_scan.c:602
 quieto	ruhig
 
 #: apps/ble/main/bl_decode.c:1713
@@ -1794,14 +1797,14 @@ Sin señal hace %s	Kein Signal seit %s
 #: apps/ble/main/bl_scan.c:72
 ahora	jetzt
 
-#: apps/ble/main/bl_scan.c:461
+#: apps/ble/main/bl_scan.c:582
 Sin nombre	Ohne Namen
 
-#: apps/ble/main/bl_scan.c:470
+#: apps/ble/main/bl_scan.c:591
 #: apps/ble/main/bl_sensors.c:129
 cifrado	verschlüsselt
 
-#: apps/ble/main/bl_scan.c:483
+#: apps/ble/main/bl_scan.c:604
 bat.	Akku
 
 #: apps/ble/main/bl_sensors.c:149

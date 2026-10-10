@@ -186,8 +186,11 @@ P.registerPage({
       st = s;
       showMissing(false);
       status.textContent = s.bt_off ? 'Bluetooth apagado en la placa (se prende en Ajustes o desde la app).'
-        : `${s.alive} cerca · ${s.known} vistos · ${num(s.pps)} paquetes/s · ${s.total} en total · ${s.lost} perdidos · `
-          + (s.paused ? 'en pausa' : `${s.active ? 'activo' : 'pasivo'} ${s.duty} %`);
+        : `${s.alive} cerca · ${s.seen ?? s.known} vistos · ${num(s.pps)} paquetes/s · ${s.total} en total · ${s.lost} perdidos · `
+          + (s.paused ? 'en pausa' : `${s.active ? 'activo' : 'pasivo'} ${s.duty} %`)
+          /* the table's top, and what fits in one answer of the live channel */
+          + (s.forgotten ? ` · la placa guarda ${s.cap} equipos y olvidó ${s.forgotten} para hacer lugar` : '')
+          + (s.listed !== undefined && s.listed < s.known ? ` · la tabla de abajo muestra los ${s.listed} más fuertes de ${s.known}` : '');
       drawControls(s);
       drawLost(s);
       drawChart(s);

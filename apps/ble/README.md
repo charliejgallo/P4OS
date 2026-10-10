@@ -96,6 +96,22 @@ surroundings chosen in the settings (2.0 outdoors, 2.7 a house, 3.3 an
 office). Walls and bodies move it a lot: it is an estimate, and the screens
 say so.
 
+## How many
+
+The table keeps up to **2048 devices**: it starts with room for 256 and
+doubles as it fills (~0.8 KB each, in PSRAM), and past the top the one not
+heard for longest makes room (never a favourite). At a fair or a station
+that happens fast: phones change their private address every few minutes,
+and each new address is a new device. "Seen since launch" counts them all,
+forgotten ones too, and Airwaves says how many were forgotten. Looking a
+device up is a hash of its address, not a walk of the table. Two hours of
+history are kept for 64 sensors at most. In the simulator,
+`P4_SIM_BLE_CROWD=900` adds that many phones that change their address
+every minute: ~550 packets a second, none lost.
+
+The portal's live table carries what fits in one answer of the live
+channel (64 KB, about 175 devices), the strongest first, and says so.
+
 ## Settings
 
 The cog on every tab: active or passive scanning (active asks scannable

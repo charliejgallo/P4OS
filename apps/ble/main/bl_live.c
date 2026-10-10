@@ -24,6 +24,7 @@
 static char *s_j;                   /* JMAX, PSRAM-ish: malloc'd once */
 static uint8_t s_sel[6];
 static bool s_has_sel;
+static int s_listed;              /* devices that fit in the last "devices" */
 
 /* JSON text: quotes, backslashes and control characters out of the way */
 static size_t jstr(char *out, size_t n, const char *s)
@@ -58,10 +59,11 @@ static void put_state(void)
     int alive = 0;
     for (int i = 0; i < BL.ndev; i++) alive += bl_alive(&BL.dev[i]);
     PUT("{\"scanning\":%s,\"paused\":%s,\"bt_off\":%s,\"active\":%s,\"duty\":%d,\"env\":%d,\"min_rssi\":%d,"
-        "\"csv\":%s,\"mqtt\":%s,\"mqtt_ready\":%s,\"pps\":%.1f,\"total\":%u,\"lost\":%u,\"alive\":%d,\"known\":%d,\"pkts\":[",
+        "\"csv\":%s,\"mqtt\":%s,\"mqtt_ready\":%s,\"pps\":%.1f,\"total\":%u,\"lost\":%u,\"alive\":%d,\"known\":%d,\"seen\":%u,\"forgotten\":%u,\"cap\":%d,\"listed\":%d,\"pkts\":[",
         aos_hal_ble_scanning() ? "true" : "false", BL.paused ? "true" : "false", BL.bt_off ? "true" : "false",
         BL.active ? "true" : "false", BL.duty, BL.env, BL.min_rssi, BL.log_csv ? "true" : "false", BL.mqtt ? "true" : "false",
-        bl_mqtt_ready() ? "true" : "false", (double)BL.air.pps, (unsigned)BL.air.total, (unsigned)BL.air.lost, alive, BL.ndev);
+        bl_mqtt_ready() ? "true" : "false", (double)BL.air.pps, (unsigned)BL.air.total, (unsigned)BL.air.lost, alive, BL.ndev,
+        (unsigned)BL.seen_total, (unsigned)BL.forgotten, BL.cap, s_listed);
     for (int kk = BL_AIR_HIST - 1; kk >= 1; kk--) {
         uint32_t sec = s - kk;
         int v = (sec <= BL.air.sec && BL.air.sec - sec < BL_AIR_HIST) ? BL.air.pkts[sec % BL_AIR_HIST] : 0;
@@ -150,6 +152,7 @@ static void put_devices(void)
         put++;
     }
     PUT("]");
+    s_listed = put;
     if (k < JMAX) aos_hal_live_put(LIVE_ID, "devices", "application/json", j, k);
 }
 
@@ -208,7 +211,7 @@ static void put_dev(void)
     uint32_t m = (uint32_t)(aos_hal_uptime_ms() / 60000);
     for (int q = BL_SEN_HIST - 1; q >= 0; q--) {
         uint32_t slot = m - q;
-        float v = (slot <= d->sen_slot && d->sen_slot - slot < BL_SEN_HIST) ? d->sen_t[slot % BL_SEN_HIST] : NAN;
+        float v = bl_sen_at(d, false, slot);
         if (v != v) PUT("%snull", q == BL_SEN_HIST - 1 ? "" : ",");
         else PUT("%s%.2f", q == BL_SEN_HIST - 1 ? "" : ",", (double)v);
     }
@@ -301,8 +304,8 @@ void bl_live_tick(void)
     last = now;
     if (!s_j) s_j = malloc(JMAX);
     if (!s_j) return;
+    put_devices();                  /* first: the state says how many it listed */
     put_state();
-    put_devices();
     put_dev();
 }
 

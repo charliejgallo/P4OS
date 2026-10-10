@@ -538,6 +538,8 @@ static void push(sdev_t *d, uint32_t now, int8_t rssi, bool rsp)
     s_ring[s_w++ % ADV_RING] = a;
 }
 
+static void crowd_init(uint32_t now);
+
 static void world_init(uint32_t now)
 {
     if (s_init) return;
@@ -546,15 +548,64 @@ static void world_init(uint32_t now)
         DEV[i].next = now + rnd() % DEV[i].itvl;
         DEV[i].phase = rnd() % 60000;
     }
+    crowd_init(now);
 }
+
+/* A crowd, for a fair: P4_SIM_BLE_CROWD=N phones that come and go, each
+ * with a private address it changes every minute, as phones do (every 15
+ * minutes or so, in truth). Off unless asked: the tests count on the 25
+ * above. */
+static sdev_t *s_crowd;
+static int s_ncrowd;
+static uint32_t s_crowd_rot;
+
+static void crowd_addr(sdev_t *d)
+{
+    for (int k = 0; k < 6; k++) d->addr[k] = (uint8_t)rnd();
+    d->addr[0] = (uint8_t)((d->addr[0] & 0x3F) | 0x40);   /* resolvable private */
+}
+
+static void crowd_init(uint32_t now)
+{
+    const char *e = getenv("P4_SIM_BLE_CROWD");
+    int n = e ? atoi(e) : 0;
+    if (n <= 0) return;
+    if (n > 4000) n = 4000;
+    s_crowd = calloc((size_t)n, sizeof *s_crowd);
+    if (!s_crowd) return;
+    s_ncrowd = n;
+    for (int i = 0; i < n; i++) {
+        sdev_t *d = &s_crowd[i];
+        crowd_addr(d);
+        d->type = 1;
+        d->kind = AOS_BLE_ADV_IND;
+        d->itvl = (uint16_t)(150 + rnd() % 900);
+        d->rssi = -60 - (float)(rnd() % 34);
+        d->move = rnd() % 3 == 0 ? MOVE_WALK : MOVE_STILL;
+        d->adv = adv_iphone;
+        d->next = now + rnd() % d->itvl;
+        d->phase = rnd() % 60000;
+    }
+    s_crowd_rot = now + 60000;
+    printf("[ble] a crowd of %d phones\n", n);
+}
+
+static int world_count(void) { return NDEV + s_ncrowd; }
+static sdev_t *world_dev(int i) { return i < NDEV ? &DEV[i] : &s_crowd[i - NDEV]; }
 
 static void world_run(uint32_t now)
 {
     world_init(now);
     if (!s_scan) { s_last = now; return; }
     if (now - s_last > 3000) s_last = now - 3000;
-    for (int i = 0; i < NDEV; i++) {
-        sdev_t *d = &DEV[i];
+    if (s_ncrowd && (int32_t)(now - s_crowd_rot) >= 0) {
+        /* a twentieth of them, a new address each, every three seconds:
+         * all of them in a minute */
+        for (int i = 0; i < s_ncrowd; i++) if (rnd() % 20 == 0) crowd_addr(&s_crowd[i]);
+        s_crowd_rot = now + 3000;
+    }
+    for (int i = 0; i < world_count(); i++) {
+        sdev_t *d = world_dev(i);
         if ((int32_t)(d->next - s_last) < 0) d->next = s_last;
         while ((int32_t)(d->next - now) <= 0) {
             uint32_t t = d->next;
