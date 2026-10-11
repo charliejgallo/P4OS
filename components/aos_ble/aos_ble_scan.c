@@ -555,6 +555,23 @@ static int gap_cb(struct ble_gap_event *event, void *arg)
     case BLE_GAP_EVENT_MTU:
         s_mtu = event->mtu.value;
         return 0;
+    case BLE_GAP_EVENT_L2CAP_UPDATE_REQ: {
+        /* the peripheral asking for slower parameters: accepted as asked
+           (self_params already holds a copy), only logged */
+        const struct ble_gap_upd_params *p = event->conn_update_req.peer_params;
+        ESP_LOGI(TAG, "update asked: %u-%u x1.25 ms, latency %u, timeout %u0 ms",
+                 p->itvl_min, p->itvl_max, p->latency, p->supervision_timeout);
+        return 0;
+    }
+    case BLE_GAP_EVENT_CONN_UPDATE: {
+        struct ble_gap_conn_desc d;
+        if (event->conn_update.status == 0 && ble_gap_conn_find(event->conn_update.conn_handle, &d) == 0)
+            ESP_LOGI(TAG, "updated: %u x1.25 ms, latency %u, timeout %u0 ms",
+                     d.conn_itvl, d.conn_latency, d.supervision_timeout);
+        else
+            ESP_LOGI(TAG, "update: %d", event->conn_update.status);
+        return 0;
+    }
     default:
         return 0;
     }
@@ -575,8 +592,17 @@ static void connect_to(const uint8_t addr[6], uint8_t type)
     s_scanning = false;
     ble_addr_t peer = { .type = type ? BLE_ADDR_RANDOM : BLE_ADDR_PUBLIC };
     for (int i = 0; i < 6; i++) peer.val[i] = addr[5 - i];
+    /* 15-30 ms, not NimBLE's default 30-50 ms: some sensors (a stock
+       Xiaomi thermometer) drop the ATT discovery at the slower interval and
+       the link sits until the 30 s ATT timeout. A peripheral that wants
+       slower asks for it afterwards and is accepted (gap_cb). */
+    static const struct ble_gap_conn_params cp = {
+        .scan_itvl = 16, .scan_window = 16,
+        .itvl_min = 12, .itvl_max = 24,
+        .latency = 0, .supervision_timeout = 200,
+    };
     s_state = AOS_BLE_GATT_CONNECTING;
-    int rc = ble_gap_connect(aos_ble_own_addr_type(), &peer, 8000, NULL, gap_cb, NULL);
+    int rc = ble_gap_connect(aos_ble_own_addr_type(), &peer, 8000, &cp, gap_cb, NULL);
     if (rc) {
         ESP_LOGW(TAG, "ble_gap_connect: %d", rc);
         s_reason = rc;

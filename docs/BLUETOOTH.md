@@ -111,6 +111,15 @@ bytes as they came, and the meaning is the app's.
   through `_gatt_events`. The RSSI of the link is measured once a second.
   **No pairing:** the store of bonds holds the phone's and the computer's
   keys, and a sensor's would push them out.
+- **At 15-30 ms** (2026-10-10): the connection asks for an interval of
+  12-24 × 1.25 ms, latency 0 and a 2 s supervision timeout, not NimBLE's
+  default 30-50 ms. At the default a stock Xiaomi thermometer let the
+  discovery hang until the ATT timeout: 4 tries out of 6 failed with
+  reason 13 after 35-43 s, and the 2 that went through took 16-17 s. At
+  15-30 ms, 10 out of 10 went through in 7-15 s (the discovery itself
+  ~6-7 s). A peripheral that wants a slower interval asks for it after
+  connecting and is given it as asked; the request and the update are
+  logged (`update asked`, `updated`). The Xiaomi asked for none.
 - **Its own connection:** NimBLE delivers a connection's events to the
   callback that made it, so the app's never reach `aos_ble.c`'s gap_event
   (whose "a third connection is closed" is about the phone and the
