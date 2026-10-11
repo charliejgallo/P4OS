@@ -160,6 +160,8 @@ the factory password; a module whose owner changed it takes the command
 written by hand. The simulator has one (`HLK-LD2410_A1B2`) that reports
 only after it, as the real one.
 
+<img src="../../docs/img/app-ble-hilink.png" width="270" alt="The GATT explorer on the simulator's radar: a report read in words, under its frame">
+
 ## Building and trying it
 
     tools/build_apps.sh ble
