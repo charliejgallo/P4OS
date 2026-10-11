@@ -1,5 +1,30 @@
 # Changelog
 
+## 0.13.4 — 2026-10-10
+
+- **BLE's GATT client connects at 15-30 ms.** At NimBLE's default
+  30-50 ms a stock Xiaomi thermometer let the service discovery hang until
+  the ATT timeout: on the board 4 tries out of 6 failed after 35-43 s and
+  the other 2 took 16-17 s. The connection now asks for 12-24 × 1.25 ms,
+  latency 0 and a 2 s supervision timeout: 10 out of 10 went through in
+  7-15 s. A peripheral that wants slower asks afterwards and is given it as
+  asked; the request and the update are logged.
+- **The GATT explorer in the portal's page too.** Connect, read all, and
+  per characteristic read, write and listen, from the computer, on the
+  board's connection; it goes on with the board's screen elsewhere or
+  locked.
+- **Hi-Link presence radars read in words** (LD2410 and kin). Their frames
+  are told by their content wherever they show: a report reads as who is
+  there and at what distance (engineering mode with its gates, light and
+  OUT pin), a command and its answer by name and outcome. On a module
+  named `HLK-`, the UART bridge's 0xFFF2 gets a button that sends the
+  documented permission command with the factory password, without which
+  it reports nothing over Bluetooth. Tried with an LD2410: "someone still
+  at 4.67 m", ~11 frames a second.
+- Asking again for the device already connected no longer cuts the
+  connection (NimBLE answered `BLE_HS_EDONE` while the old link was torn
+  down), and that code reads as what it is.
+
 ## 0.13.3 — 2026-10-10
 
 - **BLE keeps up to 2048 devices, not 256.** At a fair the screen said
