@@ -1178,6 +1178,9 @@ static void sim_check(simdev_t *d, const aos_ble_adv_t *pk)
         CHECK(c == BL_CLS_WATCH && lab && !strcmp(lab, "Garmin"));
     } else if (is(a, "D0:5F:64:8A:17:3E")) {
         CHECK(c == BL_CLS_HEALTH);
+    } else if (is(a, "D7:3E:52:10:A1:B2")) {                /* a Hi-Link radar: no reading in the air */
+        CHECK(!sok);
+        if (rsp) CHECK(!strcmp(d->ad.name, "HLK-LD2410_A1B2"));
     } else if (is(a, "24:0A:C4:6E:1F:52")) {
         CHECK(c == BL_CLS_DEVBOARD);
     } else if (is(a, "A4:C1:38:E1:F0:A1")) {                /* a stock Xiaomi, encrypted */
@@ -1301,7 +1304,7 @@ static void test_sim(void)
         }
     }
     aos_hal_ble_scan_stop();
-    CHECK(nd == 25);
+    CHECK(nd == 26);
     for (int k = 0; k < nd; k++) {
         if (dev[k].checked < 2) printf("  device %d checked only %d times\n", k, dev[k].checked);
         CHECK(dev[k].checked >= 2);
@@ -1401,8 +1404,57 @@ static void test_crypto(void)
     printf("crypto: AES, CCM, BTHome and MiBeacon with keys\n");
 }
 
+static void test_hilink(void)
+{
+    uint8_t v[96];
+    char out[220];
+    /* a report taken from an LD2410 on the board, 2026-10-10 */
+    int n = unhex("F4F3F2F10D0002AA00C40100DD0124D3015500F8F7F6F5", v);
+    CHECK(bl_hilink_format(v, n, out, sizeof out, NULL));
+    CHECK(strstr(out, "nadie") && strstr(out, "4,52 m (0)") && strstr(out, "4,77 m (36)") && strstr(out, "detección 4,67 m"));
+    /* the same after the tail of another, and cut short */
+    n = unhex("0102F4F3F2F10D0002AA02C40100DD0124D3015500F8F7F6F5", v);
+    CHECK(bl_hilink_format(v, n, out, sizeof out, NULL) && strstr(out, "alguien quieto"));
+    CHECK(!bl_hilink_format(v, n - 1, out, sizeof out, NULL) && !out[0]);
+    /* engineering mode: 8/8 gates, their energies, light and OUT */
+    n = unhex("F4F3F2F1230001AA03500032A0001E960008083C28140A0503020100" "0A0A0A0A0A0A0A0A0A" "78015500F8F7F6F5", v);
+    CHECK(bl_hilink_format(v, n, out, sizeof out, NULL) && strstr(out, "modo ingeniería, 8/8") && strstr(out, "luz 120") && strstr(out, "OUT 1"));
+    /* the permission command, as made, and its answer */
+    n = bl_hilink_permission(NULL, v, sizeof v);
+    uint8_t want[18];
+    unhex("FDFCFBFA0800A800486 94C696E6B04030201", want);
+    unhex("FDFCFBFA0800A80048694C696E6B04030201", want);
+    CHECK(n == 18 && !memcmp(v, want, 18));
+    CHECK(bl_hilink_format(v, n, out, sizeof out, NULL) && strstr(out, "comando permiso de Bluetooth (0x00A8)"));
+    n = unhex("FDFCFBFA0400A801000004030201", v);
+    CHECK(bl_hilink_format(v, n, out, sizeof out, NULL) && strstr(out, "respuesta a permiso de Bluetooth (0x00A8): bien"));
+    /* a version answer, read as ESPHome reads it: V1.07.22091516 */
+    n = unhex("FDFCFBFA0C00A00100000000070116150922" "04030201", v);
+    CHECK(bl_hilink_format(v, n, out, sizeof out, NULL) && strstr(out, "V1.07.22091516"));
+    /* text is not a frame */
+    n = unhex("48656C6C6F20776F726C64", v);
+    CHECK(!bl_hilink_format(v, n, out, sizeof out, NULL));
+    printf("hilink: reports, engineering mode, commands and answers\n");
+}
+
 static void fuzz(int iters)
 {
+    for (int it = 0; it < 20000; it++) {
+        uint8_t f[80];
+        int dl = (int)(rnd32() % 60);
+        bool rep = rnd32() & 1;
+        static const uint8_t RH[4] = { 0xF4, 0xF3, 0xF2, 0xF1 }, RT[4] = { 0xF8, 0xF7, 0xF6, 0xF5 };
+        static const uint8_t CH[4] = { 0xFD, 0xFC, 0xFB, 0xFA }, CT[4] = { 0x04, 0x03, 0x02, 0x01 };
+        memcpy(f, rep ? RH : CH, 4);
+        f[4] = (uint8_t)dl;
+        f[5] = 0;
+        for (int k = 0; k < dl; k++) f[6 + k] = (uint8_t)rnd32();
+        if (rep && dl >= 2) { f[6] = (uint8_t)(1 + (rnd32() & 1)); f[7] = 0xAA; }
+        memcpy(f + 6 + dl, rep ? RT : CT, 4);
+        char out[120];
+        size_t sz = 1 + rnd32() % sizeof out;
+        if (bl_hilink_format(f, 10 + dl, out, sz, NULL) && !utf8_ok(out, sz)) CHECK(0);
+    }
     static const uint8_t TYPES[] = { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A, 0x0D, 0x10, 0x12, 0x14,
                                      0x15, 0x16, 0x17, 0x18, 0x19, 0x1A, 0x1B, 0x1C, 0x1F, 0x20, 0x21, 0x24, 0x2F, 0x30, 0xFF, 0x77 };
     static const uint16_t SD[] = { 0xFCD2, 0x181C, 0x181E, 0x181A, 0xFE95, 0xFD3D, 0x0D00, 0xFDCD, 0xFEAA, 0xFE2C, 0x1234 };
@@ -1474,6 +1526,7 @@ static void fuzz(int iters)
         size_t sz = 1 + rnd32() % sizeof out;
         uint16_t u = GV[rnd32() % (sizeof GV / sizeof GV[0])];
         if (bl_value_format(u, d, len, out, sz, trs[it % 3]) && !utf8_ok(out, sz)) { CHECK(0); printf("  bad value 0x%04X\n", u); }
+        if (bl_hilink_format(d, len, out, sz, trs[it % 3]) && !utf8_ok(out, sz)) CHECK(0);
         if (bl_value_text(d, len, out, sz) && !utf8_ok(out, sz)) CHECK(0);
         bl_hex(d, len, out, sz);
         if (strlen(out) >= sz) CHECK(0);
@@ -1499,6 +1552,7 @@ int main(int argc, char **argv)
     test_text();
     test_distance();
     test_crypto();
+    test_hilink();
     test_sim();
     fuzz(iters);
     printf("%d checks passed, %d failed\n", g_pass, g_fail);

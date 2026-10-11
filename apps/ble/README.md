@@ -148,6 +148,18 @@ connected in ~4 s, its UART bridge listed (0xFFF2 to write, 0xFFF1 to
 listen), and after the documented permission command (default password
 `HiLink`) its report frames came in as notifications, ~11 a second.
 
+**Hi-Link radars** (LD2410 and kin) are read in words: their frames are told
+by their content (`F4 F3 F2 F1` … `F8 F7 F6 F5` for a report, `FD FC FB FA`
+… `04 03 02 01` for a command and its answer), wherever they show, so a
+notification reads "someone still · still at 4,67 m (58) · detection
+4,49 m", engineering mode adds its gates, light and OUT pin, and an answer
+says which command and whether it went fine (with the firmware version or
+the MAC when that is what was asked). On a module whose name says `HLK-`,
+the bridge's 0xFFF2 gets a button that sends the permission command with
+the factory password; a module whose owner changed it takes the command
+written by hand. The simulator has one (`HLK-LD2410_A1B2`) that reports
+only after it, as the real one.
+
 ## Building and trying it
 
     tools/build_apps.sh ble

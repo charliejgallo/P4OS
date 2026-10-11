@@ -28,7 +28,7 @@ typedef struct sdev sdev_t;
 typedef void (*adv_fn)(sdev_t *d, uint32_t now, uint8_t *out, uint8_t *len, bool rsp);
 
 enum { MOVE_STILL, MOVE_WALK, MOVE_PASS, MOVE_FAR };
-enum { PROF_NONE, PROF_HR, PROF_ESP };
+enum { PROF_NONE, PROF_HR, PROF_ESP, PROF_HLK };
 
 struct sdev {
     uint8_t addr[6];
@@ -449,6 +449,20 @@ static void adv_hr(sdev_t *d, uint32_t now, uint8_t *o, uint8_t *n, bool rsp)
     ad(o, n, 0x0A, &tx, 1);
 }
 
+/* A Hi-Link presence radar (an LD2410 with Bluetooth): its UART bridge, and
+ * its maker's odd company id (0x0100, which the SIG gave someone else) */
+static void adv_hlk(sdev_t *d, uint32_t now, uint8_t *o, uint8_t *n, bool rsp)
+{
+    (void)now;
+    if (rsp) { ad_name(o, n, "HLK-LD2410_A1B2"); return; }
+    ad_flags(o, n);
+    uint8_t u[2] = { 0x30, 0xAF };
+    ad(o, n, 0x03, u, 2);
+    uint8_t m[15] = { 0x00, 0x01, 0x44, 0x02, 0x10, 0x31, 0x07, 0x24, 0x00 };
+    for (int i = 0; i < 6; i++) m[9 + i] = d->addr[i];
+    ad(o, n, 0xFF, m, 15);
+}
+
 static void adv_esp(sdev_t *d, uint32_t now, uint8_t *o, uint8_t *n, bool rsp)
 {
     (void)d; (void)now;
@@ -492,6 +506,7 @@ static sdev_t DEV[] = {
     { A(7A, 33, 0E, 51, 2C, 9B), 1, AOS_BLE_ADV_NONCONN_IND, 640, -87, MOVE_PASS, 0, adv_vendor },
     { A(D0, 5F, 64, 8A, 17, 3E), 1, AOS_BLE_ADV_IND, 100, -66, MOVE_WALK, PROF_HR, adv_hr },
     { A(24, 0A, C4, 6E, 1F, 52), 0, AOS_BLE_ADV_IND, 200, -52, MOVE_STILL, PROF_ESP, adv_esp },
+    { A(D7, 3E, 52, 10, A1, B2), 0, AOS_BLE_ADV_IND, 300, -70, MOVE_STILL, PROF_HLK, adv_hlk },
 };
 #define NDEV ((int)(sizeof DEV / sizeof DEV[0]))
 
@@ -706,6 +721,18 @@ static const gattr_t HR_TABLE[] = {
     C_(34, 0x02, 0x2A28, "2.4.1 (build 812)"),
 };
 
+static const gattr_t HLK_TABLE[] = {
+    S_(1, 3, 0x1800),
+    C_(3, 0x02, 0x2A00, "HLK-LD2410_A1B2"),
+    S_(4, 9, 0xFFF0),
+    C_(6, 0x04, 0xFFF2, NULL),
+    C_(8, 0x10, 0xFFF1, NULL),
+    D_(9, 0x2902),
+};
+/* it reports only after the permission command, as the real one */
+static bool s_hlk_ok, s_hlk_ack;
+static uint32_t s_hlk_next;
+
 static const gattr_t ESP_TABLE[] = {
     S_(1, 5, 0x1800),
     C_(3, 0x02, 0x2A00, "ESP32-Taller"),
@@ -821,9 +848,11 @@ static void gatt_run(void)
         }
         s_gstate = AOS_BLE_GATT_DISCOVERING;
         s_gt = now;
-        s_tab = s_gdev->prof == PROF_HR ? HR_TABLE : ESP_TABLE;
-        s_ntab = s_gdev->prof == PROF_HR ? (int)(sizeof HR_TABLE / sizeof HR_TABLE[0])
-                                          : (int)(sizeof ESP_TABLE / sizeof ESP_TABLE[0]);
+        s_tab = s_gdev->prof == PROF_HR ? HR_TABLE : s_gdev->prof == PROF_HLK ? HLK_TABLE : ESP_TABLE;
+        s_ntab = s_gdev->prof == PROF_HR    ? (int)(sizeof HR_TABLE / sizeof HR_TABLE[0])
+                 : s_gdev->prof == PROF_HLK ? (int)(sizeof HLK_TABLE / sizeof HLK_TABLE[0])
+                                            : (int)(sizeof ESP_TABLE / sizeof ESP_TABLE[0]);
+        s_hlk_ok = s_hlk_ack = false;
     }
     if (s_gstate == AOS_BLE_GATT_DISCOVERING && now - s_gt > 900) {
         s_gstate = AOS_BLE_GATT_READY;
@@ -842,9 +871,28 @@ static void gatt_run(void)
         for (int i = 0; i < s_ntab; i++) {
             const gattr_t *a = &s_tab[i];
             if (a->kind != AOS_BLE_ATTR_CHAR || a->handle >= 64 || !s_sub[a->handle] || a->uuid128) continue;
+            if (s_tab == HLK_TABLE) continue;           /* its own cadence, below */
             uint8_t v[32];
             int n = value_of(a, v);
             ev_put(a->props & 0x10 ? AOS_BLE_EV_NOTIFY : AOS_BLE_EV_INDICATE, a->handle, 0, v, n);
+        }
+    }
+    if (s_tab == HLK_TABLE && s_sub[8]) {
+        if (s_hlk_ack) {
+            static const uint8_t ACK[] = { 0xFD, 0xFC, 0xFB, 0xFA, 0x04, 0x00, 0xA8, 0x01, 0x00, 0x00, 0x04, 0x03, 0x02, 0x01 };
+            ev_put(AOS_BLE_EV_NOTIFY, 8, 0, ACK, sizeof ACK);
+            s_hlk_ack = false;
+        }
+        if (s_hlk_ok && (int32_t)(now - s_hlk_next) >= 0) {
+            /* ten reports a second: someone sitting at ~1.6 m, breathing */
+            s_hlk_next = now + 100;
+            int still = (int)drift(now, 160, 6, 8, 0), mov = (int)drift(now, 150, 40, 5, 1);
+            uint8_t f[23] = { 0xF4, 0xF3, 0xF2, 0xF1, 0x0D, 0x00, 0x02, 0xAA, 0x02 };
+            f[9] = (uint8_t)mov; f[10] = (uint8_t)(mov >> 8); f[11] = (uint8_t)(rnd() % 12);
+            f[12] = (uint8_t)still; f[13] = (uint8_t)(still >> 8); f[14] = (uint8_t)(55 + rnd() % 10);
+            f[15] = (uint8_t)still; f[16] = (uint8_t)(still >> 8);
+            f[17] = 0x55; f[18] = 0x00; f[19] = 0xF8; f[20] = 0xF7; f[21] = 0xF6; f[22] = 0xF5;
+            ev_put(AOS_BLE_EV_NOTIFY, 8, 0, f, sizeof f);
         }
     }
     if (s_nus_pending && s_sub[21]) {
@@ -916,6 +964,14 @@ bool aos_hal_ble_gatt_write(uint16_t handle, const void *data, size_t len, bool 
     if (!a) st = 0x101;
     else if (a->uuid128 == U_SECRET) st = 0x105;
     else if (a->kind == AOS_BLE_ATTR_CHAR && !(a->props & 0x0C)) st = 0x103;
+    if (!st && s_tab == HLK_TABLE && a->uuid16 == 0xFFF2) {
+        /* the permission command, FD FC FB FA .. A8 00 + password .. 04 03 02 01 */
+        const uint8_t *p = data;
+        if (len >= 18 && p[0] == 0xFD && p[3] == 0xFA && p[6] == 0xA8 && !memcmp(p + 8, "HiLink", 6)) {
+            s_hlk_ok = true;
+            s_hlk_ack = true;
+        }
+    }
     if (!st && a->uuid128 == U_NUS_RX) {
         /* the UART answers what it is sent, shouting */
         const char *p = data;

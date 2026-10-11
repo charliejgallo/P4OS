@@ -329,6 +329,7 @@ P.registerPage({
       else if (act === 'all') send('gatt_readall=1');
       else if (act === 'read') send('gatt_read=' + hd);
       else if (act === 'sub') send(`gatt_sub=${hd},${b.dataset.m}`);
+      else if (act === 'hilink') send('gatt_hilink=' + hd);
       else if (act === 'write') {
         const v = prompt('Escribir: texto, o bytes con 0x (por ejemplo 0x01 A0)');
         if (v !== null && v !== '') send(`gatt_write=${hd},${v}`);
@@ -357,6 +358,7 @@ P.registerPage({
         const acts = [];
         if (!desc && (a.p & 2)) acts.push(btn('Leer', 'read', { 'data-h': a.h }));
         if (!desc && (a.p & 12)) acts.push(btn('Escribir', 'write', { 'data-h': a.h }));
+        if (a.hl) acts.push(btn('Pedir los datos (Hi-Link)', 'hilink', { 'data-h': a.h }, 'btn pri'));
         if (!desc && (a.p & 48)) acts.push(btn(a.sub ? 'Dejar de escuchar' : (a.p & 16) ? 'Notificaciones' : 'Indicaciones', 'sub',
           { 'data-h': a.h, 'data-m': a.sub ? 0 : (a.p & 16) ? 1 : 2 }, a.sub ? 'btn pri' : 'btn'));
         rows.push(h('tr', {},

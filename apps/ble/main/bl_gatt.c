@@ -81,8 +81,10 @@ static const char *reason_text(int r)
     case 0x213: return N_("el equipo cortó");
     case 0x216: return N_("cortado desde acá");
     case 0x23E: return N_("la conexión no llegó a armarse");
-    case 0x207: return N_("no hay lugar para otra conexión");
-    case 14: return N_("no hay lugar para otra conexión");
+    /* NimBLE's codes and the controller's (0x200 + HCI): 0x207 out of
+     * memory, 0x209 no room for one more connection */
+    case 0x207: case 0x209: return N_("no hay lugar para otra conexión");
+    case 14: return N_("ya había una conexión con ese equipo: probá de nuevo");
     default: return N_("falló");
     }
 }
@@ -137,8 +139,10 @@ static void value_text(int i, char *out, size_t n)
         out[0] = 0;
         return;
     }
-    char words[120] = "", hex[64 * 3 + 8];
-    if (!(a->uuid_len == 2 && bl_value_format(uuid16_of(a), v->val, v->len, words, sizeof words, aos_tr)))
+    char words[220] = "", hex[64 * 3 + 8];
+    /* a Hi-Link radar's frame is told by its content, whatever the UUID */
+    if (!bl_hilink_format(v->val, v->len, words, sizeof words, aos_tr) &&
+        !(a->uuid_len == 2 && bl_value_format(uuid16_of(a), v->val, v->len, words, sizeof words, aos_tr)))
         bl_value_text(v->val, v->len, words, sizeof words);
     bl_hex(v->val, v->len > 24 ? 24 : v->len, hex, sizeof hex);
     const char *more = v->full > 24 ? " ..." : "";
@@ -222,6 +226,31 @@ static void write_done(const char *s)
         if (i >= 0) attr_name(&G.at[i], nm, sizeof nm);
         log_add(_("escrito en %s: %s bytes"), nm, b);
     }
+}
+
+/* A Hi-Link module (its name says HLK-) reports over Bluetooth only after
+ * the permission command, written to its UART bridge's 0xFFF2. */
+static bool hilink_bridge(const aos_ble_attr_t *a)
+{
+    if (uuid16_of(a) != 0xFFF2) return false;
+    int d = bl_find(G.addr);
+    return d >= 0 && !strncmp(BL.dev[d].ad.name, "HLK-", 4);
+}
+
+static void hilink_send(int i)
+{
+    uint8_t f[24];
+    int n = bl_hilink_permission(NULL, f, sizeof f);
+    char nm[64];
+    attr_name(&G.at[i], nm, sizeof nm);
+    if (aos_hal_ble_gatt_write(G.at[i].handle, f, n, (G.at[i].props & 0x08) != 0))
+        log_add(_("permiso de Hi-Link pedido en %s%s"), nm, "");
+}
+
+static void hilink_cb(lv_event_t *e)
+{
+    int i = (int)(intptr_t)lv_event_get_user_data(e);
+    if (i >= 0 && i < G.n) hilink_send(i);
 }
 
 static void write_cb(lv_event_t *e)
@@ -362,6 +391,7 @@ static void list_build(void)
             lv_obj_t *br = bl_wrap(box, iw, 10);
             if (a->props & 0x02) small_btn(br, _("Leer"), AOS_C_CARD2, read_cb, i);
             if (a->props & 0x0C) small_btn(br, _("Escribir"), AOS_C_CARD2, write_cb, i);
+            if ((a->props & 0x0C) && hilink_bridge(a)) small_btn(br, _("Pedir los datos (Hi-Link)"), BL_C, hilink_cb, i);
             if (a->props & 0x30)
                 G.sub_b[i] = small_btn(br, G.v[i].sub ? _("Dejar de escuchar") : (a->props & 0x10) ? _("Notificaciones") : _("Indicaciones"),
                                        G.v[i].sub ? BL_C : AOS_C_CARD2, sub_cb, i);
@@ -592,6 +622,12 @@ void bl_gatt_remote(const char *key, const char *v)
             G.state = AOS_BLE_GATT_IDLE;
             log_add("%s", _("desconectado"), NULL);
         } else if (bl_parse_addr(v, a)) {
+            /* asked again for the device already open (a double click, a
+             * page reloaded): nothing to do. Cutting it and connecting at
+             * once failed: NimBLE answers BLE_HS_EDONE while the old link
+             * is still being torn down (seen on the board, 2026-10-10). */
+            if (G.open && !memcmp(G.addr, a, 6) && G.state >= AOS_BLE_GATT_CONNECTING && G.state <= AOS_BLE_GATT_READY)
+                return;
             int i = bl_find(a);
             if (G.open) aos_hal_ble_gatt_disconnect();
             connect_to(a, i >= 0 ? BL.dev[i].addr_type : 0);
@@ -605,6 +641,9 @@ void bl_gatt_remote(const char *key, const char *v)
     } else if (!strcmp(key, "gatt_sub")) {
         const char *c = strchr(v, ',');
         if (c) aos_hal_ble_gatt_subscribe((uint16_t)atoi(v), atoi(c + 1));
+    } else if (!strcmp(key, "gatt_hilink")) {
+        int i = attr_index((uint16_t)atoi(v));
+        if (i >= 0) hilink_send(i);
     } else if (!strcmp(key, "gatt_write")) {
         const char *c = strchr(v, ',');
         int i = c ? attr_index((uint16_t)atoi(v)) : -1;
@@ -662,7 +701,8 @@ size_t bl_gatt_json(char *j, size_t n)
         S(nm);
         P(",\"v\":");
         S(t);
-        P(",\"s\":%d,\"c\":%u,\"sub\":%s}", G.v[i].status, (unsigned)G.v[i].count, G.v[i].sub ? "true" : "false");
+        P(",\"s\":%d,\"c\":%u,\"sub\":%s,\"hl\":%s}", G.v[i].status, (unsigned)G.v[i].count, G.v[i].sub ? "true" : "false",
+          at->kind == AOS_BLE_ATTR_CHAR && (at->props & 0x0C) && hilink_bridge(at) ? "true" : "false");
     }
     P("],\"log\":[");
     for (int i = G.nlog - 1, first = 1; i >= 0; i--, first = 0) {

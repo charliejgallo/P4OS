@@ -756,6 +756,98 @@ característica	Feature
 #: apps/ble/main/bl_decode.c:2480
 reporte	Report
 
+#: apps/ble/main/bl_decode.c:2546
+puertas y espera	Tore und Wartezeit
+
+#: apps/ble/main/bl_decode.c:2547
+leer los parámetros	Parameter lesen
+
+#: apps/ble/main/bl_decode.c:2548
+#: apps/ble/main/bl_decode.c:2598
+modo ingeniería	Engineering-Modus
+
+#: apps/ble/main/bl_decode.c:2549
+fin del modo ingeniería	Ende des Engineering-Modus
+
+#: apps/ble/main/bl_decode.c:2550
+sensibilidad	Empfindlichkeit
+
+#: apps/ble/main/bl_decode.c:2551
+versión del firmware	Firmware-Version
+
+#: apps/ble/main/bl_decode.c:2552
+velocidad del puerto	Baudrate
+
+#: apps/ble/main/bl_decode.c:2553
+valores de fábrica	Werkseinstellungen
+
+#: apps/ble/main/bl_decode.c:2554
+reinicio	Neustart
+
+#: apps/ble/main/bl_decode.c:2555
+Bluetooth	Bluetooth
+
+#: apps/ble/main/bl_decode.c:2556
+dirección MAC	MAC-Adresse
+
+#: apps/ble/main/bl_decode.c:2557
+permiso de Bluetooth	Bluetooth-Berechtigung
+
+#: apps/ble/main/bl_decode.c:2558
+contraseña de Bluetooth	Bluetooth-Passwort
+
+#: apps/ble/main/bl_decode.c:2559
+resolución de distancia	Entfernungsauflösung
+
+#: apps/ble/main/bl_decode.c:2560
+leer la resolución de distancia	Entfernungsauflösung lesen
+
+#: apps/ble/main/bl_decode.c:2561
+fin de la configuración	Ende der Konfiguration
+
+#: apps/ble/main/bl_decode.c:2562
+configuración	Konfiguration
+
+#: apps/ble/main/bl_decode.c:2574
+nadie	niemand
+
+#: apps/ble/main/bl_decode.c:2574
+alguien moviéndose	jemand in Bewegung
+
+#: apps/ble/main/bl_decode.c:2574
+alguien quieto	jemand ruhig
+
+#: apps/ble/main/bl_decode.c:2575
+alguien moviéndose y quieto	jemand in Bewegung und ruhig
+
+#: apps/ble/main/bl_decode.c:2580
+en movimiento a	in Bewegung bei
+
+#: apps/ble/main/bl_decode.c:2585
+quieto a	ruhig bei
+
+#: apps/ble/main/bl_decode.c:2590
+detección	Erkennung
+
+#: apps/ble/main/bl_decode.c:2600
+puertas	Tore
+
+#: apps/ble/main/bl_decode.c:2603
+luz	Licht
+
+#: apps/ble/main/bl_decode.c:2620
+respuesta a	Antwort auf
+
+#: apps/ble/main/bl_decode.c:2620
+comando	Befehl
+
+#: apps/ble/main/bl_decode.c:2632
+#: apps/ble/main/bl_gatt.c:72
+error	Fehler
+
+#: apps/ble/main/bl_decode.c:2635
+bien	ok
+
 #: apps/ble/main/bl_detail.c:44
 #: apps/ble/main/bl_detail.c:340
 Favorito	Favorit
@@ -938,194 +1030,200 @@ Conectar	Verbinden
 #: apps/ble/main/bl_detail.c:347
 Señal	Signal
 
-#: apps/ble/main/bl_gatt.c:59
+#: apps/ble/main/bl_gatt.c:61
 pide un enlace autenticado (emparejar)	braucht eine authentifizierte Verbindung (koppeln)
 
-#: apps/ble/main/bl_gatt.c:60
+#: apps/ble/main/bl_gatt.c:62
 pide un enlace cifrado (emparejar)	braucht eine verschlüsselte Verbindung (koppeln)
 
-#: apps/ble/main/bl_gatt.c:61
+#: apps/ble/main/bl_gatt.c:63
 pide autorización	braucht eine Autorisierung
 
-#: apps/ble/main/bl_gatt.c:62
+#: apps/ble/main/bl_gatt.c:64
 no se puede leer	nicht lesbar
 
-#: apps/ble/main/bl_gatt.c:63
+#: apps/ble/main/bl_gatt.c:65
 no se puede escribir	nicht beschreibbar
 
-#: apps/ble/main/bl_gatt.c:64
+#: apps/ble/main/bl_gatt.c:66
 atributo inexistente	Attribut existiert nicht
 
-#: apps/ble/main/bl_gatt.c:65
+#: apps/ble/main/bl_gatt.c:67
 largo no válido	ungültige Länge
 
-#: apps/ble/main/bl_gatt.c:66
+#: apps/ble/main/bl_gatt.c:68
 pedido no soportado	Anfrage nicht unterstützt
 
-#: apps/ble/main/bl_gatt.c:67
+#: apps/ble/main/bl_gatt.c:69
 no contestó a tiempo	Zeitüberschreitung
 
-#: apps/ble/main/bl_gatt.c:68
-#: apps/ble/main/bl_gatt.c:256
+#: apps/ble/main/bl_gatt.c:70
+#: apps/ble/main/bl_gatt.c:307
+#: apps/ble/main/bl_gatt.c:623
 desconectado	getrennt
 
-#: apps/ble/main/bl_gatt.c:69
+#: apps/ble/main/bl_gatt.c:71
 error de ATT	ATT-Fehler
 
-#: apps/ble/main/bl_gatt.c:70
-error	Fehler
-
-#: apps/ble/main/bl_gatt.c:77
+#: apps/ble/main/bl_gatt.c:79
 no contestó: puede que no acepte conexiones o esté lejos	keine Antwort: nimmt vielleicht keine Verbindungen an oder ist zu weit weg
 
-#: apps/ble/main/bl_gatt.c:78
+#: apps/ble/main/bl_gatt.c:80
 se perdió la señal	Signal verloren
 
-#: apps/ble/main/bl_gatt.c:79
+#: apps/ble/main/bl_gatt.c:81
 el equipo cortó	das Gerät hat getrennt
 
-#: apps/ble/main/bl_gatt.c:80
+#: apps/ble/main/bl_gatt.c:82
 cortado desde acá	von hier getrennt
 
-#: apps/ble/main/bl_gatt.c:81
+#: apps/ble/main/bl_gatt.c:83
 la conexión no llegó a armarse	die Verbindung kam nicht zustande
 
-#: apps/ble/main/bl_gatt.c:82
-#: apps/ble/main/bl_gatt.c:83
+#: apps/ble/main/bl_gatt.c:86
 no hay lugar para otra conexión	kein Platz für eine weitere Verbindung
 
-#: apps/ble/main/bl_gatt.c:84
+#: apps/ble/main/bl_gatt.c:87
+ya había una conexión con ese equipo: probá de nuevo	es bestand schon eine Verbindung zu dem Gerät: nochmal versuchen
+
+#: apps/ble/main/bl_gatt.c:88
 falló	fehlgeschlagen
 
-#: apps/ble/main/bl_gatt.c:147
+#: apps/ble/main/bl_gatt.c:153
 (vacío)	(leer)
 
-#: apps/ble/main/bl_gatt.c:211
+#: apps/ble/main/bl_gatt.c:217
 Hex incompleto: van de a dos cifras	Hex unvollständig: immer zwei Ziffern
 
-#: apps/ble/main/bl_gatt.c:214
+#: apps/ble/main/bl_gatt.c:220
 No se pudo escribir	Schreiben fehlgeschlagen
 
-#: apps/ble/main/bl_gatt.c:221
+#: apps/ble/main/bl_gatt.c:227
+#: apps/ble/main/bl_gatt.c:658
 escrito en %s: %s bytes	in %s geschrieben: %s Bytes
 
-#: apps/ble/main/bl_gatt.c:231
+#: apps/ble/main/bl_gatt.c:247
+permiso de Hi-Link pedido en %s%s	Hi-Link-Berechtigung angefragt an %s%s
+
+#: apps/ble/main/bl_gatt.c:262
 Escribir: texto, o bytes con 0x (0x01 A0)	Schreiben: Text oder Bytes mit 0x (0x01 A0)
 
-#: apps/ble/main/bl_gatt.c:246
+#: apps/ble/main/bl_gatt.c:276
 leyendo %s atributos	%s Attribute werden gelesen
 
-#: apps/ble/main/bl_gatt.c:261
+#: apps/ble/main/bl_gatt.c:297
+conectando...	verbinden...
+
+#: apps/ble/main/bl_gatt.c:310
 #: apps/ble/main/ble.c:389
 Bluetooth apagado	Bluetooth aus
 
-#: apps/ble/main/bl_gatt.c:262
-#: apps/ble/main/bl_gatt.c:504
-conectando...	verbinden...
-
-#: apps/ble/main/bl_gatt.c:299
+#: apps/ble/main/bl_gatt.c:347
 lee	liest
 
-#: apps/ble/main/bl_gatt.c:299
+#: apps/ble/main/bl_gatt.c:347
 escribe	schreibt
 
-#: apps/ble/main/bl_gatt.c:299
+#: apps/ble/main/bl_gatt.c:347
 escribe sin respuesta	schreibt ohne Antwort
 
-#: apps/ble/main/bl_gatt.c:299
+#: apps/ble/main/bl_gatt.c:347
 notifica	benachrichtigt
 
-#: apps/ble/main/bl_gatt.c:300
+#: apps/ble/main/bl_gatt.c:348
 indica	indiziert
 
-#: apps/ble/main/bl_gatt.c:300
+#: apps/ble/main/bl_gatt.c:348
 difunde	sendet Broadcast
 
-#: apps/ble/main/bl_gatt.c:300
+#: apps/ble/main/bl_gatt.c:348
 firma	signiert
 
-#: apps/ble/main/bl_gatt.c:319
+#: apps/ble/main/bl_gatt.c:367
 Servicio %s · handles %u a %u	Dienst %s · Handles %u bis %u
 
-#: apps/ble/main/bl_gatt.c:344
+#: apps/ble/main/bl_gatt.c:392
 Leer	Lesen
 
-#: apps/ble/main/bl_gatt.c:345
+#: apps/ble/main/bl_gatt.c:393
 Escribir	Schreiben
 
-#: apps/ble/main/bl_gatt.c:347
-#: apps/ble/main/bl_gatt.c:467
-Dejar de escuchar	Nicht mehr mithören
-
-#: apps/ble/main/bl_gatt.c:347
-#: apps/ble/main/bl_gatt.c:467
-Notificaciones	Benachrichtigungen
-
-#: apps/ble/main/bl_gatt.c:347
-#: apps/ble/main/bl_gatt.c:467
-Indicaciones	Indikationen
-
-#: apps/ble/main/bl_gatt.c:377
-Nada todavía.	Noch nichts.
-
-#: apps/ble/main/bl_gatt.c:385
-Conectando...	Verbinden...
-
-#: apps/ble/main/bl_gatt.c:386
-Conectado, listando servicios...	Verbunden, Dienste werden aufgelistet...
-
-#: apps/ble/main/bl_gatt.c:391
-Conectado · %d servicios, %d características	Verbunden · %d Dienste, %d Charakteristiken
-
-#: apps/ble/main/bl_gatt.c:392
-Señal %d dBm · MTU %u	Signal %d dBm · MTU %u
+#: apps/ble/main/bl_gatt.c:394
+Pedir los datos (Hi-Link)	Daten anfordern (Hi-Link)
 
 #: apps/ble/main/bl_gatt.c:396
+#: apps/ble/main/bl_gatt.c:516
+Dejar de escuchar	Nicht mehr mithören
+
+#: apps/ble/main/bl_gatt.c:396
+#: apps/ble/main/bl_gatt.c:516
+Notificaciones	Benachrichtigungen
+
+#: apps/ble/main/bl_gatt.c:396
+#: apps/ble/main/bl_gatt.c:516
+Indicaciones	Indikationen
+
+#: apps/ble/main/bl_gatt.c:426
+Nada todavía.	Noch nichts.
+
+#: apps/ble/main/bl_gatt.c:434
+Conectando...	Verbinden...
+
+#: apps/ble/main/bl_gatt.c:435
+Conectado, listando servicios...	Verbunden, Dienste werden aufgelistet...
+
+#: apps/ble/main/bl_gatt.c:440
+Conectado · %d servicios, %d características	Verbunden · %d Dienste, %d Charakteristiken
+
+#: apps/ble/main/bl_gatt.c:441
+Señal %d dBm · MTU %u	Signal %d dBm · MTU %u
+
+#: apps/ble/main/bl_gatt.c:445
  · leyendo %d de %d	 · lese %d von %d
 
-#: apps/ble/main/bl_gatt.c:401
+#: apps/ble/main/bl_gatt.c:450
 Sin conexión	Keine Verbindung
 
-#: apps/ble/main/bl_gatt.c:404
+#: apps/ble/main/bl_gatt.c:453
 Desconectado	Getrennt
 
-#: apps/ble/main/bl_gatt.c:421
+#: apps/ble/main/bl_gatt.c:470
 servicios listados	Dienste aufgelistet
 
-#: apps/ble/main/bl_gatt.c:424
+#: apps/ble/main/bl_gatt.c:473
 sin conexión:	keine Verbindung:
 
-#: apps/ble/main/bl_gatt.c:454
+#: apps/ble/main/bl_gatt.c:503
 leer %s: %s	lesen %s: %s
 
-#: apps/ble/main/bl_gatt.c:470
+#: apps/ble/main/bl_gatt.c:519
 suscribir %s: %s	abonnieren %s: %s
 
-#: apps/ble/main/bl_gatt.c:471
+#: apps/ble/main/bl_gatt.c:520
 escuchando %s%s	hört mit: %s%s
 
-#: apps/ble/main/bl_gatt.c:471
+#: apps/ble/main/bl_gatt.c:520
 ya no escucha %s%s	hört nicht mehr: %s%s
 
-#: apps/ble/main/bl_gatt.c:473
+#: apps/ble/main/bl_gatt.c:522
 escribir %s: %s	schreiben %s: %s
 
-#: apps/ble/main/bl_gatt.c:474
+#: apps/ble/main/bl_gatt.c:523
 escritura aceptada en %s%s	Schreiben akzeptiert: %s%s
 
-#: apps/ble/main/bl_gatt.c:516
+#: apps/ble/main/bl_gatt.c:568
 Leer todo	Alles lesen
 
-#: apps/ble/main/bl_gatt.c:517
+#: apps/ble/main/bl_gatt.c:569
 Desconectar	Trennen
 
-#: apps/ble/main/bl_gatt.c:517
+#: apps/ble/main/bl_gatt.c:569
 Conectar de nuevo	Neu verbinden
 
-#: apps/ble/main/bl_gatt.c:526
+#: apps/ble/main/bl_gatt.c:578
 Si tarda, puede que el equipo no acepte conexiones o que ya esté conectado a otro (muchos aceptan uno solo).	Dauert es lange, nimmt das Gerät vielleicht keine Verbindungen an oder ist schon mit einem anderen verbunden (viele erlauben nur eine).
 
-#: apps/ble/main/bl_gatt.c:528
+#: apps/ble/main/bl_gatt.c:580
 Lo último	Zuletzt
 
 #: apps/ble/main/bl_list.c:27
@@ -1978,5 +2076,5 @@ Mientras escaneaba se desconectó %s (%s). El Bluetooth y el Wi-Fi comparten una
 #: apps/ble/main/ble.c:609
 Entendido	Verstanden
 
-#: apps/ble/main/ble.c:797
+#: apps/ble/main/ble.c:799
 No hay memoria para abrir BLE	Nicht genug Speicher, um BLE zu öffnen

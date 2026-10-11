@@ -2528,3 +2528,171 @@ int bl_p1m_guess(const bl_ad_t *ad, const bl_beacon_t *bc)
     if (ad && ad->has_tx) return ad->tx_power - 41;
     return -59;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Hi-Link radars' frames (LD2410 and kin), over their UART bridge             */
+/* -------------------------------------------------------------------------- */
+
+/* Told by their content, not by the characteristic: 0xFFF1/0xFFF2 is the
+ * UART bridge of many modules. A report: F4 F3 F2 F1, length (LE), the
+ * data, F8 F7 F6 F5; the data, 0x01 (engineering) or 0x02 (basic), 0xAA,
+ * the target state, the moving target's distance (cm) and energy, the still
+ * one's, the detection distance, (engineering: the gates' energies, light,
+ * the OUT pin), 0x55, 0x00. A command or its acknowledgement: FD FC FB FA,
+ * length, the command word (| 0x0100 in the answer), the status (0 fine),
+ * the data, 04 03 02 01. */
+
+static const struct { uint16_t cmd; const char *name; } HL_CMDS[] = {
+    { 0x0060, N_("puertas y espera") },
+    { 0x0061, N_("leer los parámetros") },
+    { 0x0062, N_("modo ingeniería") },
+    { 0x0063, N_("fin del modo ingeniería") },
+    { 0x0064, N_("sensibilidad") },
+    { 0x00A0, N_("versión del firmware") },
+    { 0x00A1, N_("velocidad del puerto") },
+    { 0x00A2, N_("valores de fábrica") },
+    { 0x00A3, N_("reinicio") },
+    { 0x00A4, N_("Bluetooth") },
+    { 0x00A5, N_("dirección MAC") },
+    { 0x00A8, N_("permiso de Bluetooth") },
+    { 0x00A9, N_("contraseña de Bluetooth") },
+    { 0x00AA, N_("resolución de distancia") },
+    { 0x00AB, N_("leer la resolución de distancia") },
+    { 0x00FE, N_("fin de la configuración") },
+    { 0x00FF, N_("configuración") },
+};
+
+static void hl_dist(sb_t *b, unsigned cm)
+{
+    sb_fix(b, (int32_t)cm, 2);
+    sb_cat(b, " m");
+}
+
+static bool hl_report(const uint8_t *d, int len, sb_t *b, bl_tr_fn tr)
+{
+    if (len < 13 || (d[0] != 0x01 && d[0] != 0x02) || d[1] != 0xAA) return false;
+    static const char *const ST[4] = { N_("nadie"), N_("alguien moviéndose"), N_("alguien quieto"),
+                                       N_("alguien moviéndose y quieto") };
+    int st = d[2] & 3;
+    sb_cat(b, "Hi-Link: ");
+    sb_cat(b, T(tr, ST[st]));
+    sb_cat(b, " \xC2\xB7 ");
+    sb_cat(b, T(tr, N_("en movimiento a")));
+    sb_cat(b, " ");
+    hl_dist(b, (unsigned)(d[3] | d[4] << 8));
+    sb_catf(b, " (%u)", d[5]);
+    sb_cat(b, " \xC2\xB7 ");
+    sb_cat(b, T(tr, N_("quieto a")));
+    sb_cat(b, " ");
+    hl_dist(b, (unsigned)(d[6] | d[7] << 8));
+    sb_catf(b, " (%u)", d[8]);
+    sb_cat(b, " \xC2\xB7 ");
+    sb_cat(b, T(tr, N_("detección")));
+    sb_cat(b, " ");
+    hl_dist(b, (unsigned)(d[9] | d[10] << 8));
+    if (d[0] == 0x01 && len >= 13 + 2) {
+        /* engineering mode: the top gates, then the energies of each */
+        int g1 = d[11], g2 = d[12];
+        int at = 13 + (g1 + 1) + (g2 + 1);
+        sb_cat(b, " \xC2\xB7 ");
+        sb_cat(b, T(tr, N_("modo ingeniería")));
+        sb_catf(b, ", %d/%d ", g1, g2);
+        sb_cat(b, T(tr, N_("puertas")));
+        if (at + 2 <= len - 2) {
+            sb_catf(b, " \xC2\xB7 ");
+            sb_cat(b, T(tr, N_("luz")));
+            sb_catf(b, " %u \xC2\xB7 OUT %u", d[at], d[at + 1]);
+        }
+    }
+    return true;
+}
+
+static bool hl_command(const uint8_t *d, int len, sb_t *b, bl_tr_fn tr)
+{
+    if (len < 2) return false;
+    uint16_t w = (uint16_t)(d[0] | d[1] << 8);
+    bool ack = w & 0x0100;
+    uint16_t cmd = (uint16_t)(w & ~0x0100);
+    const char *name = NULL;
+    for (size_t i = 0; i < sizeof HL_CMDS / sizeof HL_CMDS[0]; i++)
+        if (HL_CMDS[i].cmd == cmd) name = HL_CMDS[i].name;
+    sb_cat(b, "Hi-Link: ");
+    sb_cat(b, T(tr, ack ? N_("respuesta a") : N_("comando")));
+    sb_cat(b, " ");
+    if (name) {
+        sb_cat(b, T(tr, name));
+        sb_catf(b, " (0x%04X)", cmd);
+    } else {
+        sb_catf(b, "0x%04X", cmd);
+    }
+    if (ack && len >= 4) {
+        uint16_t status = (uint16_t)(d[2] | d[3] << 8);
+        sb_cat(b, ": ");
+        if (status) {
+            sb_cat(b, T(tr, N_("error")));
+            sb_catf(b, " %u", status);
+        } else {
+            sb_cat(b, T(tr, N_("bien")));
+        }
+        if (!status && cmd == 0x00A0 && len >= 4 + 8) {
+            /* the version: a type, then major (high.low) and minor */
+            uint16_t major = (uint16_t)(d[6] | d[7] << 8);
+            uint32_t minor = (uint32_t)d[8] | (uint32_t)d[9] << 8 | (uint32_t)d[10] << 16 | (uint32_t)d[11] << 24;
+            sb_catf(b, " \xC2\xB7 V%u.%02X.%08X", major >> 8, major & 0xFF, (unsigned)minor);
+        } else if (!status && cmd == 0x00A5 && len >= 4 + 6) {
+            sb_catf(b, " \xC2\xB7 %02X:%02X:%02X:%02X:%02X:%02X", d[4], d[5], d[6], d[7], d[8], d[9]);
+        }
+    }
+    return true;
+}
+
+bool bl_hilink_format(const uint8_t *v, int n, char *out, size_t sz, bl_tr_fn tr)
+{
+    if (!out || !sz) return false;
+    out[0] = 0;
+    if (!v || n < 10) return false;
+    sb_t b;
+    sb_init(&b, out, sz);
+    /* the first whole frame in the value: a notification may start with
+     * the tail of another */
+    for (int i = 0; i + 10 <= n; i++) {
+        bool rep = v[i] == 0xF4 && v[i + 1] == 0xF3 && v[i + 2] == 0xF2 && v[i + 3] == 0xF1;
+        bool cmd = v[i] == 0xFD && v[i + 1] == 0xFC && v[i + 2] == 0xFB && v[i + 3] == 0xFA;
+        if (!rep && !cmd) continue;
+        int len = v[i + 4] | v[i + 5] << 8;
+        if (i + 6 + len + 4 > n) continue;
+        const uint8_t *t = v + i + 6 + len;
+        bool tail = rep ? (t[0] == 0xF8 && t[1] == 0xF7 && t[2] == 0xF6 && t[3] == 0xF5)
+                        : (t[0] == 0x04 && t[1] == 0x03 && t[2] == 0x02 && t[3] == 0x01);
+        if (!tail) continue;
+        bool ok = rep ? hl_report(v + i + 6, len, &b, tr) : hl_command(v + i + 6, len, &b, tr);
+        if (ok) return true;
+        out[0] = 0;
+        sb_init(&b, out, sz);
+    }
+    return false;
+}
+
+/* The command that lets a Hi-Link module report over Bluetooth: 0x00A8
+ * with its password (HiLink, unless its owner changed it). */
+int bl_hilink_permission(const char *password, uint8_t *out, int max)
+{
+    const char *pw = password && password[0] ? password : "HiLink";
+    int pl = (int)strlen(pw);
+    if (pl > 6) pl = 6;
+    int len = 2 + 6;
+    if (max < 4 + 2 + len + 4) return 0;
+    int k = 0;
+    static const uint8_t H[4] = { 0xFD, 0xFC, 0xFB, 0xFA }, TL[4] = { 0x04, 0x03, 0x02, 0x01 };
+    memcpy(out, H, 4);
+    k = 4;
+    out[k++] = (uint8_t)len;
+    out[k++] = 0;
+    out[k++] = 0xA8;
+    out[k++] = 0x00;
+    memset(out + k, 0, 6);
+    memcpy(out + k, pw, pl);
+    k += 6;
+    memcpy(out + k, TL, 4);
+    return k + 4;
+}

@@ -756,6 +756,98 @@ característica	feature
 #: apps/ble/main/bl_decode.c:2480
 reporte	report
 
+#: apps/ble/main/bl_decode.c:2546
+puertas y espera	gates and timeout
+
+#: apps/ble/main/bl_decode.c:2547
+leer los parámetros	read parameters
+
+#: apps/ble/main/bl_decode.c:2548
+#: apps/ble/main/bl_decode.c:2598
+modo ingeniería	engineering mode
+
+#: apps/ble/main/bl_decode.c:2549
+fin del modo ingeniería	end of engineering mode
+
+#: apps/ble/main/bl_decode.c:2550
+sensibilidad	sensitivity
+
+#: apps/ble/main/bl_decode.c:2551
+versión del firmware	firmware version
+
+#: apps/ble/main/bl_decode.c:2552
+velocidad del puerto	baud rate
+
+#: apps/ble/main/bl_decode.c:2553
+valores de fábrica	factory reset
+
+#: apps/ble/main/bl_decode.c:2554
+reinicio	restart
+
+#: apps/ble/main/bl_decode.c:2555
+Bluetooth	Bluetooth
+
+#: apps/ble/main/bl_decode.c:2556
+dirección MAC	MAC address
+
+#: apps/ble/main/bl_decode.c:2557
+permiso de Bluetooth	Bluetooth permission
+
+#: apps/ble/main/bl_decode.c:2558
+contraseña de Bluetooth	Bluetooth password
+
+#: apps/ble/main/bl_decode.c:2559
+resolución de distancia	distance resolution
+
+#: apps/ble/main/bl_decode.c:2560
+leer la resolución de distancia	read distance resolution
+
+#: apps/ble/main/bl_decode.c:2561
+fin de la configuración	end of configuration
+
+#: apps/ble/main/bl_decode.c:2562
+configuración	configuration
+
+#: apps/ble/main/bl_decode.c:2574
+nadie	nobody
+
+#: apps/ble/main/bl_decode.c:2574
+alguien moviéndose	someone moving
+
+#: apps/ble/main/bl_decode.c:2574
+alguien quieto	someone still
+
+#: apps/ble/main/bl_decode.c:2575
+alguien moviéndose y quieto	someone moving and still
+
+#: apps/ble/main/bl_decode.c:2580
+en movimiento a	moving at
+
+#: apps/ble/main/bl_decode.c:2585
+quieto a	still at
+
+#: apps/ble/main/bl_decode.c:2590
+detección	detection
+
+#: apps/ble/main/bl_decode.c:2600
+puertas	gates
+
+#: apps/ble/main/bl_decode.c:2603
+luz	light
+
+#: apps/ble/main/bl_decode.c:2620
+respuesta a	answer to
+
+#: apps/ble/main/bl_decode.c:2620
+comando	command
+
+#: apps/ble/main/bl_decode.c:2632
+#: apps/ble/main/bl_gatt.c:72
+error	error
+
+#: apps/ble/main/bl_decode.c:2635
+bien	ok
+
 #: apps/ble/main/bl_detail.c:44
 #: apps/ble/main/bl_detail.c:340
 Favorito	Favorite
@@ -938,194 +1030,200 @@ Conectar	Connect
 #: apps/ble/main/bl_detail.c:347
 Señal	Signal
 
-#: apps/ble/main/bl_gatt.c:59
+#: apps/ble/main/bl_gatt.c:61
 pide un enlace autenticado (emparejar)	needs an authenticated link (pair)
 
-#: apps/ble/main/bl_gatt.c:60
+#: apps/ble/main/bl_gatt.c:62
 pide un enlace cifrado (emparejar)	needs an encrypted link (pair)
 
-#: apps/ble/main/bl_gatt.c:61
+#: apps/ble/main/bl_gatt.c:63
 pide autorización	needs authorization
 
-#: apps/ble/main/bl_gatt.c:62
+#: apps/ble/main/bl_gatt.c:64
 no se puede leer	not readable
 
-#: apps/ble/main/bl_gatt.c:63
+#: apps/ble/main/bl_gatt.c:65
 no se puede escribir	not writable
 
-#: apps/ble/main/bl_gatt.c:64
+#: apps/ble/main/bl_gatt.c:66
 atributo inexistente	attribute not found
 
-#: apps/ble/main/bl_gatt.c:65
+#: apps/ble/main/bl_gatt.c:67
 largo no válido	invalid length
 
-#: apps/ble/main/bl_gatt.c:66
+#: apps/ble/main/bl_gatt.c:68
 pedido no soportado	request not supported
 
-#: apps/ble/main/bl_gatt.c:67
+#: apps/ble/main/bl_gatt.c:69
 no contestó a tiempo	timed out
 
-#: apps/ble/main/bl_gatt.c:68
-#: apps/ble/main/bl_gatt.c:256
+#: apps/ble/main/bl_gatt.c:70
+#: apps/ble/main/bl_gatt.c:307
+#: apps/ble/main/bl_gatt.c:623
 desconectado	disconnected
 
-#: apps/ble/main/bl_gatt.c:69
+#: apps/ble/main/bl_gatt.c:71
 error de ATT	ATT error
 
-#: apps/ble/main/bl_gatt.c:70
-error	error
-
-#: apps/ble/main/bl_gatt.c:77
+#: apps/ble/main/bl_gatt.c:79
 no contestó: puede que no acepte conexiones o esté lejos	no answer: it may not accept connections or be too far
 
-#: apps/ble/main/bl_gatt.c:78
+#: apps/ble/main/bl_gatt.c:80
 se perdió la señal	signal lost
 
-#: apps/ble/main/bl_gatt.c:79
+#: apps/ble/main/bl_gatt.c:81
 el equipo cortó	the device hung up
 
-#: apps/ble/main/bl_gatt.c:80
+#: apps/ble/main/bl_gatt.c:82
 cortado desde acá	disconnected from here
 
-#: apps/ble/main/bl_gatt.c:81
+#: apps/ble/main/bl_gatt.c:83
 la conexión no llegó a armarse	the connection never came up
 
-#: apps/ble/main/bl_gatt.c:82
-#: apps/ble/main/bl_gatt.c:83
+#: apps/ble/main/bl_gatt.c:86
 no hay lugar para otra conexión	no room for another connection
 
-#: apps/ble/main/bl_gatt.c:84
+#: apps/ble/main/bl_gatt.c:87
+ya había una conexión con ese equipo: probá de nuevo	there was already a connection to it: try again
+
+#: apps/ble/main/bl_gatt.c:88
 falló	failed
 
-#: apps/ble/main/bl_gatt.c:147
+#: apps/ble/main/bl_gatt.c:153
 (vacío)	(empty)
 
-#: apps/ble/main/bl_gatt.c:211
+#: apps/ble/main/bl_gatt.c:217
 Hex incompleto: van de a dos cifras	Incomplete hex: digits go in pairs
 
-#: apps/ble/main/bl_gatt.c:214
+#: apps/ble/main/bl_gatt.c:220
 No se pudo escribir	Could not write
 
-#: apps/ble/main/bl_gatt.c:221
+#: apps/ble/main/bl_gatt.c:227
+#: apps/ble/main/bl_gatt.c:658
 escrito en %s: %s bytes	wrote to %s: %s bytes
 
-#: apps/ble/main/bl_gatt.c:231
+#: apps/ble/main/bl_gatt.c:247
+permiso de Hi-Link pedido en %s%s	Hi-Link permission asked on %s%s
+
+#: apps/ble/main/bl_gatt.c:262
 Escribir: texto, o bytes con 0x (0x01 A0)	Write: text, or bytes with 0x (0x01 A0)
 
-#: apps/ble/main/bl_gatt.c:246
+#: apps/ble/main/bl_gatt.c:276
 leyendo %s atributos	reading %s attributes
 
-#: apps/ble/main/bl_gatt.c:261
+#: apps/ble/main/bl_gatt.c:297
+conectando...	connecting...
+
+#: apps/ble/main/bl_gatt.c:310
 #: apps/ble/main/ble.c:389
 Bluetooth apagado	Bluetooth off
 
-#: apps/ble/main/bl_gatt.c:262
-#: apps/ble/main/bl_gatt.c:504
-conectando...	connecting...
-
-#: apps/ble/main/bl_gatt.c:299
+#: apps/ble/main/bl_gatt.c:347
 lee	read
 
-#: apps/ble/main/bl_gatt.c:299
+#: apps/ble/main/bl_gatt.c:347
 escribe	write
 
-#: apps/ble/main/bl_gatt.c:299
+#: apps/ble/main/bl_gatt.c:347
 escribe sin respuesta	write w/o response
 
-#: apps/ble/main/bl_gatt.c:299
+#: apps/ble/main/bl_gatt.c:347
 notifica	notify
 
-#: apps/ble/main/bl_gatt.c:300
+#: apps/ble/main/bl_gatt.c:348
 indica	indicate
 
-#: apps/ble/main/bl_gatt.c:300
+#: apps/ble/main/bl_gatt.c:348
 difunde	broadcast
 
-#: apps/ble/main/bl_gatt.c:300
+#: apps/ble/main/bl_gatt.c:348
 firma	signed
 
-#: apps/ble/main/bl_gatt.c:319
+#: apps/ble/main/bl_gatt.c:367
 Servicio %s · handles %u a %u	Service %s · handles %u to %u
 
-#: apps/ble/main/bl_gatt.c:344
+#: apps/ble/main/bl_gatt.c:392
 Leer	Read
 
-#: apps/ble/main/bl_gatt.c:345
+#: apps/ble/main/bl_gatt.c:393
 Escribir	Write
 
-#: apps/ble/main/bl_gatt.c:347
-#: apps/ble/main/bl_gatt.c:467
-Dejar de escuchar	Stop listening
-
-#: apps/ble/main/bl_gatt.c:347
-#: apps/ble/main/bl_gatt.c:467
-Notificaciones	Notifications
-
-#: apps/ble/main/bl_gatt.c:347
-#: apps/ble/main/bl_gatt.c:467
-Indicaciones	Indications
-
-#: apps/ble/main/bl_gatt.c:377
-Nada todavía.	Nothing yet.
-
-#: apps/ble/main/bl_gatt.c:385
-Conectando...	Connecting...
-
-#: apps/ble/main/bl_gatt.c:386
-Conectado, listando servicios...	Connected, listing services...
-
-#: apps/ble/main/bl_gatt.c:391
-Conectado · %d servicios, %d características	Connected · %d services, %d characteristics
-
-#: apps/ble/main/bl_gatt.c:392
-Señal %d dBm · MTU %u	Signal %d dBm · MTU %u
+#: apps/ble/main/bl_gatt.c:394
+Pedir los datos (Hi-Link)	Ask for its data (Hi-Link)
 
 #: apps/ble/main/bl_gatt.c:396
+#: apps/ble/main/bl_gatt.c:516
+Dejar de escuchar	Stop listening
+
+#: apps/ble/main/bl_gatt.c:396
+#: apps/ble/main/bl_gatt.c:516
+Notificaciones	Notifications
+
+#: apps/ble/main/bl_gatt.c:396
+#: apps/ble/main/bl_gatt.c:516
+Indicaciones	Indications
+
+#: apps/ble/main/bl_gatt.c:426
+Nada todavía.	Nothing yet.
+
+#: apps/ble/main/bl_gatt.c:434
+Conectando...	Connecting...
+
+#: apps/ble/main/bl_gatt.c:435
+Conectado, listando servicios...	Connected, listing services...
+
+#: apps/ble/main/bl_gatt.c:440
+Conectado · %d servicios, %d características	Connected · %d services, %d characteristics
+
+#: apps/ble/main/bl_gatt.c:441
+Señal %d dBm · MTU %u	Signal %d dBm · MTU %u
+
+#: apps/ble/main/bl_gatt.c:445
  · leyendo %d de %d	 · reading %d of %d
 
-#: apps/ble/main/bl_gatt.c:401
+#: apps/ble/main/bl_gatt.c:450
 Sin conexión	No connection
 
-#: apps/ble/main/bl_gatt.c:404
+#: apps/ble/main/bl_gatt.c:453
 Desconectado	Disconnected
 
-#: apps/ble/main/bl_gatt.c:421
+#: apps/ble/main/bl_gatt.c:470
 servicios listados	services listed
 
-#: apps/ble/main/bl_gatt.c:424
+#: apps/ble/main/bl_gatt.c:473
 sin conexión:	no connection:
 
-#: apps/ble/main/bl_gatt.c:454
+#: apps/ble/main/bl_gatt.c:503
 leer %s: %s	read %s: %s
 
-#: apps/ble/main/bl_gatt.c:470
+#: apps/ble/main/bl_gatt.c:519
 suscribir %s: %s	subscribe %s: %s
 
-#: apps/ble/main/bl_gatt.c:471
+#: apps/ble/main/bl_gatt.c:520
 escuchando %s%s	listening to %s%s
 
-#: apps/ble/main/bl_gatt.c:471
+#: apps/ble/main/bl_gatt.c:520
 ya no escucha %s%s	stopped listening to %s%s
 
-#: apps/ble/main/bl_gatt.c:473
+#: apps/ble/main/bl_gatt.c:522
 escribir %s: %s	write %s: %s
 
-#: apps/ble/main/bl_gatt.c:474
+#: apps/ble/main/bl_gatt.c:523
 escritura aceptada en %s%s	write accepted on %s%s
 
-#: apps/ble/main/bl_gatt.c:516
+#: apps/ble/main/bl_gatt.c:568
 Leer todo	Read all
 
-#: apps/ble/main/bl_gatt.c:517
+#: apps/ble/main/bl_gatt.c:569
 Desconectar	Disconnect
 
-#: apps/ble/main/bl_gatt.c:517
+#: apps/ble/main/bl_gatt.c:569
 Conectar de nuevo	Reconnect
 
-#: apps/ble/main/bl_gatt.c:526
+#: apps/ble/main/bl_gatt.c:578
 Si tarda, puede que el equipo no acepte conexiones o que ya esté conectado a otro (muchos aceptan uno solo).	If it takes long, the device may not accept connections or may already be connected to another one (many accept only one).
 
-#: apps/ble/main/bl_gatt.c:528
+#: apps/ble/main/bl_gatt.c:580
 Lo último	Latest
 
 #: apps/ble/main/bl_list.c:27
@@ -1978,5 +2076,5 @@ Mientras escaneaba se desconectó %s (%s). El Bluetooth y el Wi-Fi comparten una
 #: apps/ble/main/ble.c:609
 Entendido	Got it
 
-#: apps/ble/main/ble.c:797
+#: apps/ble/main/ble.c:799
 No hay memoria para abrir BLE	Not enough memory to open BLE

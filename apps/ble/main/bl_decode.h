@@ -211,6 +211,14 @@ const char *bl_addr_kind_name(bl_addr_kind_t k);  /* N_("Pública"), N_("Aleator
 bool bl_value_format(uint16_t uuid16, const uint8_t *v, int n, char *out, size_t sz, bl_tr_fn tr);
 /* Any value: the text if it is all printable UTF-8, else nothing. */
 bool bl_value_text(const uint8_t *v, int n, char *out, size_t sz);
+/* A Hi-Link radar's frame (LD2410 and kin, over their UART bridge
+ * 0xFFF1/0xFFF2), told by its content: a report ("Hi-Link: alguien quieto
+ * · ... 4,77 m"), or a command and its answer. false if the value holds no
+ * whole frame. */
+bool bl_hilink_format(const uint8_t *v, int n, char *out, size_t sz, bl_tr_fn tr);
+/* The command that lets a Hi-Link module report over Bluetooth (0x00A8 with
+ * the password, "HiLink" when NULL or empty). Returns its length. */
+int bl_hilink_permission(const char *password, uint8_t *out, int max);
 /* "01 A2 FF ..." */
 void bl_hex(const uint8_t *v, int n, char *out, size_t sz);
 
