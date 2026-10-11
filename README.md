@@ -481,7 +481,10 @@ test layouts.
 - BLE scanning at 100 % for five minutes with the iPhone and the MacBook
   connected and a download going: no link dropped, none of 3300 packets
   lost. A stock Xiaomi thermometer's encrypted readings decrypted with its
-  key, the same as its screen.
+  key, the same as its screen. The GATT explorer with that thermometer
+  (10 connections out of 10, its 86 attributes listed) and with an
+  HLK-LD2410 presence radar, whose UART bridge reported once given the
+  permission command, also from the portal.
 
 **Waiting for hardware on the bench:**
 
@@ -503,8 +506,8 @@ test layouts.
 
 - **RF:** FSK signals, a CC1101 module on the header as a second receiver
   and transmitter, and ADS-B.
-- **BLE:** the GATT explorer with a real device (it is tried against the
-  simulator's), and activating Xiaomi sensors from the board itself.
+- **BLE:** activating Xiaomi sensors from the board itself (their key is
+  made elsewhere for now).
 - **ESP-NOW:** esp_hosted does not carry it (3.0.9 neither), so the two-device games of
   AmoledOS run alone here.
 - **USB host:** MIDI is written but not tried with a device; Xbox pads

@@ -47,9 +47,12 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       fuentes ampliadas (`b57fe6d`). Cinco minutos al 100 % con los dos
       conectados y una descarga de 9 MB en el medio (0,74 MB/s): ningún
       enlace caído, 11-17 paquetes/s, 3300 paquetes sin perder ninguno; el
-      ping es igual con y sin escaneo (lo que varía es la red). **Falta:** la
-      conexión GATT como tercera y "Leer todo" con un equipo real (la tiene
-      que hacer el usuario: no conectarse a sus equipos desde las sesiones).
+      ping es igual con y sin escaneo (lo que varía es la red). GATT como
+      tercera conexión, con el iPhone y la Mac conectados (2026-10-10, a
+      pedido del usuario): un radar HLK-LD2410 (puente serie listado y
+      tramas tras el comando de permiso, también desde el portal) y el
+      Xiaomi de fábrica, 10 de 10 a 15-30 ms (con el intervalo por defecto
+      fallaban 4 de 6). **Falta:** activar sensores Xiaomi desde la placa.
 
 Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
 - [x] **Host USB** (docs/USB.md): los dos puertos a la vez (21/23 y 25/27)
