@@ -18,6 +18,7 @@
 #include "aos_mono.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #define ATTRS_MAX 160
@@ -33,6 +34,7 @@ typedef struct {
 
 static struct {
     bool open;                      /* a connection was asked for */
+    uint8_t addr[6];                /* whose */
     aos_ble_attr_t at[ATTRS_MAX];
     attr_val_t v[ATTRS_MAX];
     int n;
@@ -231,9 +233,8 @@ static void write_cb(lv_event_t *e)
     bl_text_entry(_("Escribir: texto, o bytes con 0x (0x01 A0)"), "", false, write_done);
 }
 
-static void read_all_cb(lv_event_t *e)
+static void read_all(void)
 {
-    (void)e;
     G.rq_n = G.rq_i = 0;
     G.rq_wait = false;
     for (int i = 0; i < G.n && G.rq_n < ATTRS_MAX; i++) {
@@ -246,6 +247,27 @@ static void read_all_cb(lv_event_t *e)
     log_add(_("leyendo %s atributos"), n, NULL);
 }
 
+static void read_all_cb(lv_event_t *e)
+{
+    (void)e;
+    read_all();
+}
+
+/* A connection to addr, from the screen or from the portal. */
+static void connect_to(const uint8_t addr[6], uint8_t type)
+{
+    memset(G.v, 0, sizeof G.v);
+    G.n = 0;
+    G.rq_n = G.rq_i = 0;
+    G.rq_wait = false;
+    memcpy(G.addr, addr, 6);
+    G.open = aos_hal_ble_gatt_connect(addr, type);
+    G.state = G.open ? AOS_BLE_GATT_CONNECTING : AOS_BLE_GATT_IDLE;
+    G.reason = 0;
+    G.built_ready = false;
+    if (G.open) log_add("%s", _("conectando..."), NULL);
+}
+
 static void disc_cb(lv_event_t *e)
 {
     (void)e;
@@ -255,11 +277,8 @@ static void disc_cb(lv_event_t *e)
         G.state = AOS_BLE_GATT_IDLE;
         log_add("%s", _("desconectado"), NULL);
     } else if (BL.sel >= 0) {
-        memset(G.v, 0, sizeof G.v);
-        G.n = 0;
-        G.open = aos_hal_ble_gatt_connect(BL.dev[BL.sel].addr, BL.dev[BL.sel].addr_type);
+        connect_to(BL.dev[BL.sel].addr, BL.dev[BL.sel].addr_type);
         if (!G.open) aos_ui_toast(_("Bluetooth apagado"), 1500);
-        else log_add("%s", _("conectando..."), NULL);
     }
     G.built_ready = false;
     bl_rebuild();
@@ -496,12 +515,15 @@ void bl_gatt_build(lv_obj_t *page)
     G.col = NULL;
     memset(G.val_l, 0, sizeof G.val_l);
     memset(G.sub_b, 0, sizeof G.sub_b);
+    if (G.open && memcmp(G.addr, d->addr, 6)) {
+        /* the portal had another device connected: this one instead */
+        aos_hal_ble_gatt_disconnect();
+        G.open = false;
+    }
     if (!G.open) {
         /* first time on this page: connect */
         memset(&G, 0, sizeof G);
-        G.open = aos_hal_ble_gatt_connect(d->addr, d->addr_type);
-        G.state = G.open ? AOS_BLE_GATT_CONNECTING : AOS_BLE_GATT_IDLE;
-        if (G.open) log_add("%s", _("conectando..."), NULL);
+        connect_to(d->addr, d->addr_type);
     }
     int32_t w = BL.cw, h = lv_obj_get_height(page);
     G.col = bl_column(page, w, h);
@@ -550,4 +572,105 @@ void bl_gatt_gone(void)
     G.col = G.st = G.st_sub = G.btns = G.list = G.log = NULL;
     memset(G.val_l, 0, sizeof G.val_l);
     memset(G.sub_b, 0, sizeof G.sub_b);
+}
+
+/* -------------------------------------------------------------------------- */
+/* From the portal's page (bl_live.c)                                          */
+/* -------------------------------------------------------------------------- */
+
+bool bl_gatt_active(void) { return G.open; }
+
+/* gatt=AA:..:FF (connect) or off; gatt_readall; gatt_read=<handle>;
+ * gatt_sub=<handle>,<0 off|1 notify|2 indicate>; gatt_write=<handle>,<text or 0x..> */
+void bl_gatt_remote(const char *key, const char *v)
+{
+    if (!strcmp(key, "gatt")) {
+        uint8_t a[6];
+        if (!strcmp(v, "off")) {
+            if (G.open) aos_hal_ble_gatt_disconnect();
+            G.open = false;
+            G.state = AOS_BLE_GATT_IDLE;
+            log_add("%s", _("desconectado"), NULL);
+        } else if (bl_parse_addr(v, a)) {
+            int i = bl_find(a);
+            if (G.open) aos_hal_ble_gatt_disconnect();
+            connect_to(a, i >= 0 ? BL.dev[i].addr_type : 0);
+        }
+    } else if (!G.open || G.state != AOS_BLE_GATT_READY) {
+        return;
+    } else if (!strcmp(key, "gatt_readall")) {
+        read_all();
+    } else if (!strcmp(key, "gatt_read")) {
+        aos_hal_ble_gatt_read((uint16_t)atoi(v));
+    } else if (!strcmp(key, "gatt_sub")) {
+        const char *c = strchr(v, ',');
+        if (c) aos_hal_ble_gatt_subscribe((uint16_t)atoi(v), atoi(c + 1));
+    } else if (!strcmp(key, "gatt_write")) {
+        const char *c = strchr(v, ',');
+        int i = c ? attr_index((uint16_t)atoi(v)) : -1;
+        if (i < 0) return;
+        static uint8_t buf[512];
+        int n = parse_value(c + 1, buf, sizeof buf);
+        if (n < 0) return;
+        char nm[64], b[16];
+        attr_name(&G.at[i], nm, sizeof nm);
+        snprintf(b, sizeof b, "%d", n);
+        if (aos_hal_ble_gatt_write(G.at[i].handle, buf, n, (G.at[i].props & 0x08) != 0))
+            log_add(_("escrito en %s: %s bytes"), nm, b);
+    }
+}
+
+/* JSON text, for names and values from the device */
+static size_t jesc(char *out, size_t n, const char *s)
+{
+    size_t k = 0;
+    if (n < 3) return 0;
+    out[k++] = '"';
+    for (const unsigned char *p = (const unsigned char *)s; *p && k < n - 3; p++) {
+        if (*p == '"' || *p == '\\') { if (k >= n - 4) break; out[k++] = '\\'; out[k++] = (char)*p; }
+        else if (*p == '\n') { if (k >= n - 4) break; out[k++] = '\\'; out[k++] = 'n'; }
+        else if (*p < 0x20) out[k++] = ' ';
+        else out[k++] = (char)*p;
+    }
+    out[k++] = '"';
+    out[k] = 0;
+    return k;
+}
+
+size_t bl_gatt_json(char *j, size_t n)
+{
+    size_t k = 0;
+    char a[20];
+    bl_fmt_addr(G.addr, a, sizeof a);
+    int8_t r;
+    bool rok = G.state == AOS_BLE_GATT_READY && aos_hal_ble_gatt_rssi(&r);
+#define P(...) do { if (k < n) k += snprintf(j + k, n - k, __VA_ARGS__); } while (0)
+#define S(x) do { if (k < n) k += jesc(j + k, n - k, (x)); } while (0)
+    P("{\"a\":\"%s\",\"open\":%s,\"state\":%d,\"reason\":%d,\"why\":", a, G.open ? "true" : "false", G.state, G.reason);
+    S(reason_text(G.reason));
+    P(",\"mtu\":%u,\"rssi\":", aos_hal_ble_gatt_mtu());
+    if (rok) P("%d", r);
+    else P("null");
+    P(",\"reading\":[%d,%d],\"attrs\":[", G.rq_i, G.rq_n);
+    for (int i = 0; i < G.n && i < ATTRS_MAX && k < n - 600; i++) {
+        const aos_ble_attr_t *at = &G.at[i];
+        char nm[80], u[48], t[300];
+        attr_name(at, nm, sizeof nm);
+        bl_uuid_str(at->uuid, at->uuid_len, u, sizeof u);
+        value_text(i, t, sizeof t);
+        P("%s{\"k\":%d,\"h\":%u,\"end\":%u,\"p\":%u,\"u\":\"%s\",\"n\":", i ? "," : "", at->kind, at->handle, at->end, at->props, u);
+        S(nm);
+        P(",\"v\":");
+        S(t);
+        P(",\"s\":%d,\"c\":%u,\"sub\":%s}", G.v[i].status, (unsigned)G.v[i].count, G.v[i].sub ? "true" : "false");
+    }
+    P("],\"log\":[");
+    for (int i = G.nlog - 1, first = 1; i >= 0; i--, first = 0) {
+        if (!first) P(",");
+        S(G.logs[i]);
+    }
+    P("]}");
+#undef P
+#undef S
+    return k < n ? k : 0;
 }

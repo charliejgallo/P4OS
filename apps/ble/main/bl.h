@@ -231,6 +231,10 @@ void bl_finder_beep(void);          /* from the timer, every tick */
 void bl_gatt_build(lv_obj_t *page);
 void bl_gatt_refresh(void);
 void bl_gatt_close(void);           /* leaving the app or the page */
+/* the same explorer, driven from the portal's page (bl_live.c) */
+bool   bl_gatt_active(void);
+void   bl_gatt_remote(const char *key, const char *value);
+size_t bl_gatt_json(char *out, size_t n);
 void bl_page_gone(void);            /* forget every page's object pointers */
 
 /* ---- bl_live.c: the portal's page ---- */

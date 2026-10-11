@@ -722,6 +722,9 @@ static void timer_cb(lv_timer_t *t)
         if (want && !aos_hal_ble_scanning()) bl_scan_apply();
         if (want && was_off != BL.bt_off && !BL.overlay && BL.page == BL_PAGE_TAB && !BL.hidden) bl_rebuild();
     }
+    /* a GATT session goes on wherever it was asked from: the page, or the
+     * portal with the screen elsewhere (or locked) */
+    if (bl_gatt_active()) bl_gatt_refresh();
     if (BL.hidden || BL.overlay) return;
     if (BL.page == BL_PAGE_FINDER) bl_finder_beep();
     /* the radar sweeps at 10 fps, the finder at 5, the rest twice a second */
@@ -729,7 +732,6 @@ static void timer_cb(lv_timer_t *t)
     if (BL.page == BL_PAGE_FINDER && BL.ticks % 2 == 0) {
         if (sel_resolve()) bl_finder_refresh();
     }
-    if (BL.page == BL_PAGE_GATT) bl_gatt_refresh();
     if (BL.ticks % 5) return;
     if (s_status) {
         char s[96];

@@ -254,6 +254,7 @@ static void take(void)
             else if (!strcmp(key, "mqtt")) { BL.mqtt = num != 0; changed = true; }
             else if (!strcmp(key, "forget")) { bl_forget_all(); changed = true; }
             else if (!strcmp(key, "lost_ok")) { BL.lost = 0; changed = true; }
+            else if (!strncmp(key, "gatt", 4)) bl_gatt_remote(key, v);
             else if (!strcmp(key, "key")) {
                 /* key=AA:..:FF,<32 hex>   key=AA:..:FF,   (clears it) */
                 uint8_t a[6], k[16];
@@ -296,14 +297,24 @@ static void take(void)
 
 void bl_live_tick(void)
 {
-    static uint32_t last;
+    static uint32_t last, last_g;
+    static bool was_gatt;
     take();
     if (aos_hal_live_idle_ms(LIVE_ID) > 3000) return;
     uint32_t now = (uint32_t)aos_hal_uptime_ms();
-    if (now - last < 1000) return;
-    last = now;
     if (!s_j) s_j = malloc(JMAX);
     if (!s_j) return;
+    /* the GATT explorer three times a second while it is open (a read or a
+     * notification shows at once), and once more after it closes */
+    bool g = bl_gatt_active();
+    if ((g || was_gatt) && now - last_g >= 300) {
+        last_g = now;
+        size_t k = bl_gatt_json(s_j, JMAX);
+        if (k) aos_hal_live_put(LIVE_ID, "gatt", "application/json", s_j, k);
+        was_gatt = g;
+    }
+    if (now - last < 1000) return;
+    last = now;
     put_devices();                  /* first: the state says how many it listed */
     put_state();
     put_dev();

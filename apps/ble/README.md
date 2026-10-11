@@ -137,6 +137,17 @@ as CSV or JSON), the sensors, a device's detail with its packets explained
 and raw, its signal and its temperature, a star and a name, and the CSVs on
 the card. Live through `/api/live` while the app is open on the board.
 
+The **GATT explorer** is on the page too, for a device that takes a
+connection: connect, "read all", and per characteristic read, write (text,
+or bytes as `0x01 A0`) and listen to notifications, on the board's own
+connection (`gatt=<address>`, `gatt_readall`, `gatt_read`, `gatt_sub`,
+`gatt_write` over the live channel; the app puts the table as `gatt`, three
+times a second while it is open). It goes on with the board's screen
+elsewhere or locked. Tried on 2026-10-10 with an HLK-LD2410 presence radar:
+connected in ~4 s, its UART bridge listed (0xFFF2 to write, 0xFFF1 to
+listen), and after the documented permission command (default password
+`HiLink`) its report frames came in as notifications, ~11 a second.
+
 ## Building and trying it
 
     tools/build_apps.sh ble

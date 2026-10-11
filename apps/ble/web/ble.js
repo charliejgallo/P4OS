@@ -311,6 +311,73 @@ P.registerPage({
      * ble/claves.txt; the input is made once per device so typing is not
      * undone by the redraws */
     const keyBox = h('div', {});
+
+    /* ---- the GATT explorer, on the board's connection: the page asks
+     * (gatt=<address>, gatt_readall, gatt_read, gatt_sub, gatt_write) and
+     * draws what the app puts as "gatt" ---- */
+    let gatt = null;
+    const gattBox = h('div', {});
+    const GATT_STATE = ['Desconectado', 'Conectando...', 'Conectado, listando servicios...', 'Conectado', 'Sin conexión'];
+    const propsText = p => [[2, 'lee'], [8, 'escribe'], [4, 'escribe sin respuesta'], [16, 'notifica'], [32, 'indica']]
+      .filter(([b]) => p & b).map(([, t]) => t).join(' · ');
+    gattBox.addEventListener('pointerdown', ev => {
+      const b = ev.target.closest('[data-g]');
+      if (!b) return;
+      const act = b.dataset.g, hd = b.dataset.h;
+      if (act === 'connect') send('gatt=' + sel);
+      else if (act === 'off') send('gatt=off');
+      else if (act === 'all') send('gatt_readall=1');
+      else if (act === 'read') send('gatt_read=' + hd);
+      else if (act === 'sub') send(`gatt_sub=${hd},${b.dataset.m}`);
+      else if (act === 'write') {
+        const v = prompt('Escribir: texto, o bytes con 0x (por ejemplo 0x01 A0)');
+        if (v !== null && v !== '') send(`gatt_write=${hd},${v}`);
+      }
+    });
+    function drawGatt() {
+      const g = gatt && gatt.a === sel ? gatt : null;
+      if (!changed('gatt', JSON.stringify(g) + sel)) return;
+      const btn = (t, act, extra = {}, cls = 'btn') => h('button', { class: cls, 'data-g': act, ...extra }, t);
+      if (!g || (!g.open && g.state === 0)) {
+        put(gattBox, h('h3', {}, 'GATT'), h('p', { class: 'note' }, 'Conectarse para ver sus servicios y características, leerlas, escribirlas y escuchar sus notificaciones. Mientras tanto la placa deja de escanear un momento; muchos equipos aceptan una sola conexión a la vez.'),
+          h('div', { class: 'btns' }, btn('Conectar por GATT', 'connect', {}, 'btn pri')));
+        return;
+      }
+      let st = GATT_STATE[g.state] || '';
+      if (g.state === 3) st += ` · MTU ${g.mtu}` + (g.rssi !== null ? ` · señal ${g.rssi} dBm` : '') + (g.reading[0] < g.reading[1] ? ` · leyendo ${g.reading[0] + 1} de ${g.reading[1]}` : '');
+      if (g.state === 4) st += `: ${g.why} (${g.reason})`;
+      const live = g.state >= 1 && g.state <= 3;
+      const rows = [];
+      for (const a of g.attrs) {
+        if (a.k === 0) {
+          rows.push(h('tr', {}, h('td', { colspan: 3, style: 'padding-top:14px' }, h('b', { style: 'color:var(--accent)' }, a.n), h('div', { class: 'sub' }, `Servicio ${a.u} · handles ${a.h} a ${a.end}`))));
+          continue;
+        }
+        const desc = a.k === 2;
+        const acts = [];
+        if (!desc && (a.p & 2)) acts.push(btn('Leer', 'read', { 'data-h': a.h }));
+        if (!desc && (a.p & 12)) acts.push(btn('Escribir', 'write', { 'data-h': a.h }));
+        if (!desc && (a.p & 48)) acts.push(btn(a.sub ? 'Dejar de escuchar' : (a.p & 16) ? 'Notificaciones' : 'Indicaciones', 'sub',
+          { 'data-h': a.h, 'data-m': a.sub ? 0 : (a.p & 16) ? 1 : 2 }, a.sub ? 'btn pri' : 'btn'));
+        rows.push(h('tr', {},
+          h('td', { style: desc ? 'padding-left:22px' : '' }, desc ? h('span', { class: 'sub' }, a.n) : a.n,
+            h('div', { class: 'sub' }, `${a.u} · ${a.h}` + (desc ? '' : ' · ' + propsText(a.p)))),
+          h('td', { class: 'bl-hex', style: `white-space:pre-wrap;color:${a.s ? 'var(--orange)' : 'var(--fg, inherit)'}` }, a.v + (a.c > 1 ? '' : '')),
+          h('td', { style: 'white-space:nowrap' }, ...acts)));
+      }
+      put(gattBox, h('h3', {}, 'GATT'), h('p', { class: 'note', style: g.state === 4 ? 'color:var(--orange)' : '' }, st),
+        h('div', { class: 'btns' }, g.state === 3 ? btn('Leer todo', 'all', {}, 'btn pri') : null,
+          live ? btn('Desconectar', 'off') : btn('Conectar de nuevo', 'connect')),
+        rows.length ? h('div', { class: 'bl-wrap' }, h('table', { class: 'bl-tbl' }, h('tbody', {}, ...rows))) : null,
+        g.log.length ? h('details', {}, h('summary', { class: 'small muted' }, 'Lo último'), h('div', { class: 'small muted', style: 'white-space:pre-line' }, g.log.join('\n'))) : null);
+    }
+    async function gattTick() {
+      if (!alive || !sel) return;
+      const d = devs.find(x => x.a === sel);
+      if (!d || !(d.conn || (gatt && gatt.a === sel))) return;
+      try { gatt = await P.api(LIVE + '&key=gatt'); } catch { /* none yet */ }
+      drawGatt();
+    }
     function drawKey(d) {
       if (!changed('key', [d.a, d.key].join('|'))) return;
       const inp = h('input', { placeholder: '32 cifras hexadecimales (la bindkey)', style: 'width:340px;font-family:ui-monospace,Menlo,monospace', maxlength: 47 });
@@ -355,9 +422,10 @@ P.registerPage({
       info.push(['Señal', d.age < 10000 ? `${d.r} dBm · prom. ${num(d.ra, 0)} · mín. ${d.rmin} · máx. ${d.rmax}` : '—'],
         ['Distancia', `≈ ${num(d.dist)} m (estimada por la señal)`], ['Intervalo', ivText(d.iv) || '?'],
         ['Paquetes', `${d.adv} anuncios, ${d.rsp} respuestas, cambió ${d.chg} veces`], ['Oído', `hace ${age(d.age)} · desde hace ${age(d.seen)}`],
-        ['Conectable', d.conn ? 'sí (el explorador GATT está en la placa)' : 'no']);
+        ['Conectable', d.conn ? 'sí (abajo, GATT)' : 'no']);
       const parts = [lines(info), h('h3', {}, 'Señal, dos minutos'), sigCanvas];
       if ((d.sen && d.sen.encrypted) || d.key > -2) parts.push(keyBox);
+      if (d.conn || (gatt && gatt.a === sel)) parts.push(gattBox);
       if (d.sen) parts.push(h('h3', {}, 'Sensor · ' + d.sen.format), lines(Object.entries(d.sen).filter(([k]) => k !== 'format').map(([k, v]) => [k, String(v)])));
       if (dev && dev.temps && dev.temps.some(v => v !== null)) parts.push(h('h3', {}, 'Temperatura, dos horas'), tempCanvas);
       if (dev && dev.beacon) {
@@ -370,6 +438,8 @@ P.registerPage({
         if (dev.rsp) parts.push(h('h3', {}, `Respuesta al escaneo · ${dev.rsp.length / 2} bytes`), lines(dev.rsp_lines), h('div', { class: 'bl-hex' }, dev.rsp.replace(/(..)/g, '$1 ')));
       } else parts.push(h('p', { class: 'note' }, 'Pidiendo los paquetes a la placa...'));
       put(detailBody, ...parts);
+      drawn.gatt = null;
+      drawGatt();
       if (dev && dev.hist) drawLine(sigCanvas, dev.hist.map(v => v || null), -100, -30, 'var(--accent)', true);
       if (dev && dev.temps) {
         const t = dev.temps.filter(v => v !== null);
@@ -404,7 +474,7 @@ P.registerPage({
     const loop = async () => { if (busy || !alive) return; busy = true; await tick(); busy = false; };
     loop();
     loadFiles();
-    const t1 = setInterval(loop, 1000), t2 = setInterval(loadFiles, 20000);
-    return () => { alive = false; clearInterval(t1); clearInterval(t2); };
+    const t1 = setInterval(loop, 1000), t2 = setInterval(loadFiles, 20000), t3 = setInterval(gattTick, 400);
+    return () => { alive = false; clearInterval(t1); clearInterval(t2); clearInterval(t3); };
   },
 });
