@@ -8,8 +8,9 @@
  * The core knows nothing of any chip. It keeps the status, the log and the
  * cancel flag, and the dump file; the job itself is run by the family the
  * caller chose (aos_flasher_opts_t.family, aos_flasher_priv.h):
- * aos_flasher_esp.c for the ESP32s, aos_flasher_avr.c for the Arduinos, and
- * those of docs/plan/PROGRAMADOR.md after them.
+ * aos_flasher_esp.c for the ESP32s, aos_flasher_avr.c for the Arduinos,
+ * aos_flasher_swd.c for Cortex-M chips by SWD, aos_flasher_stm32.c for an
+ * STM32's serial bootloader.
  *
  * A dump is written to "<name>.part" while it is read, with a SHA-256 kept
  * on the way, and renamed to its final name only once the last byte is in:
@@ -288,6 +289,7 @@ const char *aos_flasher_family_name(int family)
     case AOS_FLASHER_ESP: return "ESP32";
     case AOS_FLASHER_AVR: return "Arduino";
     case AOS_FLASHER_SWD: return "SWD";
+    case AOS_FLASHER_STM32: return "STM32";
     default: return "?";
     }
 }
@@ -295,7 +297,8 @@ const char *aos_flasher_family_name(int family)
 static void worker(void *arg)
 {
     (void)arg;
-    bool ok = J.opts.family == AOS_FLASHER_AVR ? fl_avr_run() : J.opts.family == AOS_FLASHER_SWD ? fl_swd_run() : fl_esp_run();
+    bool ok = J.opts.family == AOS_FLASHER_AVR ? fl_avr_run() : J.opts.family == AOS_FLASHER_SWD ? fl_swd_run()
+            : J.opts.family == AOS_FLASHER_STM32 ? fl_stm32_run() : fl_esp_run();
     /* a console ends by a cancel, and that is how it is meant to end */
     if (J.job == AOS_FLASHER_JOB_CONSOLE && fl_cancel && fl_st.phase == AOS_FLASHER_CONSOLE) ok = true;
     bool cancelled = fl_cancel && !ok;

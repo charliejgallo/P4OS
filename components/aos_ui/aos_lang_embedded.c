@@ -2888,6 +2888,28 @@ static const char blob_en__sistema_lang[] =
     "%s: flash_exit_xip no volvió\t%s: flash_exit_xip didn't return\n"
     "RP2350: el firmware bloqueó ACCESSCTRL para el depurador: no se toca\tRP2350: the firmware locked ACCESSCTRL against the debugger: left alone\n"
     "RP2350: bootrom_state_reset no volvió\tRP2350: bootrom_state_reset didn't return\n"
+    "Al header con BOOT0 y NRST, y tocá Detectar\tTo the header with BOOT0 and NRST, then tap Detect\n"
+    "Sin EN/BOOT en modules.txt: poné BOOT0 en 1 y apretá reset al empezar\tNo EN/BOOT in modules.txt: set BOOT0 to 1 and press reset when it starts\n"
+    "RX del STM32 (PA10)\tSTM32's RX (PA10)\n"
+    "TX del STM32 (PA9)\tSTM32's TX (PA9)\n"
+    "NRST\tNRST\n"
+    "BOOT0 (el puente, en una Blue Pill)\tBOOT0 (the jumper, on a Blue Pill)\n"
+    "Sin EN/BOOT: poné BOOT0 en 1 y apretá el reset del STM32\tNo EN/BOOT: set BOOT0 to 1 and press the STM32's reset\n"
+    "El bootloader del STM32 no contestó: revisá TX/RX cruzados, GND, BOOT0 y NRST\tThe STM32's bootloader didn't answer: check TX/RX crossed, GND, BOOT0 and NRST\n"
+    "El bootloader no contestó a GET\tThe bootloader didn't answer GET\n"
+    "El bootloader no dijo qué chip es\tThe bootloader didn't say which chip it is\n"
+    "borrado extendido\textended erase\n"
+    "borrado clásico\tclassic erase\n"
+    "Protegido contra lectura (RDP): sólo se puede quitar borrando todo\tRead-protected (RDP): it can only go by erasing everything\n"
+    "Un STM32 que no está en la tabla: grabarlo borra todo antes\tAn STM32 not in the table: writing it erases everything first\n"
+    "Borrando toda la flash (este chip no tiene el mapa de páginas acá)\tErasing the whole flash (this chip's page map isn't here)\n"
+    "%d páginas o sectores borrados\t%d pages or sectors erased\n"
+    "El chip está protegido contra lectura: no se puede leer\tThe chip is read-protected: it can't be read\n"
+    "Quitando la protección: el chip se borra entero y se reinicia\tRemoving the protection: the chip erases itself whole and restarts\n"
+    "No se pudo quitar la protección\tCouldn't remove the protection\n"
+    "%s, NRST por EN (GPIO%d) y BOOT0 por BOOT (GPIO%d)\t%s, NRST by EN (GPIO%d) and BOOT0 by BOOT (GPIO%d)\n"
+    "%s, NRST por RTS y BOOT0 por DTR\t%s, NRST by RTS and BOOT0 by DTR\n"
+    "Eso no se hace con el bootloader del STM32\tThat isn't done through the STM32's bootloader\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5768,6 +5790,28 @@ static const char blob_de__sistema_lang[] =
     "%s: flash_exit_xip no volvió\t%s: flash_exit_xip kehrte nicht zurück\n"
     "RP2350: el firmware bloqueó ACCESSCTRL para el depurador: no se toca\tRP2350: die Firmware hat ACCESSCTRL für den Debugger gesperrt: bleibt unberührt\n"
     "RP2350: bootrom_state_reset no volvió\tRP2350: bootrom_state_reset kehrte nicht zurück\n"
+    "Al header con BOOT0 y NRST, y tocá Detectar\tAn den Header mit BOOT0 und NRST, dann auf Erkennen tippen\n"
+    "Sin EN/BOOT en modules.txt: poné BOOT0 en 1 y apretá reset al empezar\tKein EN/BOOT in modules.txt: BOOT0 auf 1 setzen und beim Start Reset drücken\n"
+    "RX del STM32 (PA10)\tRX des STM32 (PA10)\n"
+    "TX del STM32 (PA9)\tTX des STM32 (PA9)\n"
+    "NRST\tNRST\n"
+    "BOOT0 (el puente, en una Blue Pill)\tBOOT0 (die Brücke, bei einer Blue Pill)\n"
+    "Sin EN/BOOT: poné BOOT0 en 1 y apretá el reset del STM32\tKein EN/BOOT: BOOT0 auf 1 setzen und den Reset des STM32 drücken\n"
+    "El bootloader del STM32 no contestó: revisá TX/RX cruzados, GND, BOOT0 y NRST\tDer Bootloader des STM32 antwortete nicht: TX/RX gekreuzt, GND, BOOT0 und NRST prüfen\n"
+    "El bootloader no contestó a GET\tDer Bootloader antwortete nicht auf GET\n"
+    "El bootloader no dijo qué chip es\tDer Bootloader nannte den Chip nicht\n"
+    "borrado extendido\terweitertes Löschen\n"
+    "borrado clásico\tklassisches Löschen\n"
+    "Protegido contra lectura (RDP): sólo se puede quitar borrando todo\tAusleseschutz (RDP): nur durch komplettes Löschen entfernbar\n"
+    "Un STM32 que no está en la tabla: grabarlo borra todo antes\tEin STM32, der nicht in der Tabelle steht: Schreiben löscht vorher alles\n"
+    "Borrando toda la flash (este chip no tiene el mapa de páginas acá)\tLösche den ganzen Flash (die Seitenaufteilung dieses Chips fehlt hier)\n"
+    "%d páginas o sectores borrados\t%d Seiten oder Sektoren gelöscht\n"
+    "El chip está protegido contra lectura: no se puede leer\tDer Chip ist ausgeleseschützt: nicht lesbar\n"
+    "Quitando la protección: el chip se borra entero y se reinicia\tEntferne den Schutz: der Chip löscht sich komplett und startet neu\n"
+    "No se pudo quitar la protección\tSchutz konnte nicht entfernt werden\n"
+    "%s, NRST por EN (GPIO%d) y BOOT0 por BOOT (GPIO%d)\t%s, NRST per EN (GPIO%d) und BOOT0 per BOOT (GPIO%d)\n"
+    "%s, NRST por RTS y BOOT0 por DTR\t%s, NRST per RTS und BOOT0 per DTR\n"
+    "Eso no se hace con el bootloader del STM32\tDas geht nicht über den Bootloader des STM32\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -5775,7 +5819,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2873, 0, files_en, 1 },
-    { "de", "Deutsch", 2873, 0, files_de, 1 },
+    { "en", "English", 2895, 0, files_en, 1 },
+    { "de", "Deutsch", 2895, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

@@ -1058,9 +1058,9 @@ static const char *const FLASH_PHASE[] = { "idle", "opening", "connecting", "stu
                                            "writing", "verifying", "reading", "resetting", "console", "done", "failed",
                                            "cancelled" };
 static const char *const FLASH_JOB[] = { "", "detect", "flash", "read", "erase", "console" };
-static const char *const FLASH_FAMILY[] = { "esp", "avr", "swd" };
+static const char *const FLASH_FAMILY[] = { "esp", "avr", "swd", "stm32" };
 
-/* "family": "esp" (the default), "avr" or "swd" */
+/* "family": "esp" (the default), "avr", "swd" or "stm32" */
 static aos_flasher_family_t flash_family(const cJSON *b)
 {
     const char *f = jstr(b, "family");

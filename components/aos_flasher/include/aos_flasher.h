@@ -12,7 +12,9 @@
  * Arm Cortex-M through its SWD port (nRF52, RP2040, STM32F0/F1:
  * aos_flasher_swd.c), on the pins of a UART port of the header: TX is
  * SWCLK, RX is SWDIO, EN is NRST. An SWD job can also be the target's RTT
- * console: what its firmware writes, read from its RAM while it runs.
+ * console: what its firmware writes, read from its RAM while it runs. And
+ * an STM32 through the bootloader in its system memory, on a UART with
+ * BOOT0 on the port's BOOT line and NRST on EN (aos_flasher_stm32.c).
  *
  * A service, not an app: one job at a time runs in its own thread and goes on
  * with the Programador app closed. Everything here is callable from the LVGL
@@ -51,6 +53,7 @@ typedef enum {
     AOS_FLASHER_ESP = 0,        /* ESP32 / ESP8266 through the ROM's serial bootloader */
     AOS_FLASHER_AVR,            /* an Arduino through its bootloader: STK500 v1/v2, AVR109 */
     AOS_FLASHER_SWD,            /* an Arm Cortex-M through its debug port */
+    AOS_FLASHER_STM32,          /* an STM32 through its system bootloader (AN3155) */
     AOS_FLASHER_FAMILIES,
 } aos_flasher_family_t;
 

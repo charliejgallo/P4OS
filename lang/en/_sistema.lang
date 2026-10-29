@@ -9305,3 +9305,69 @@ RP2350: el firmware bloqueó ACCESSCTRL para el depurador: no se toca	RP2350: th
 
 #: components/aos_flasher (Programador, SWD)
 RP2350: bootrom_state_reset no volvió	RP2350: bootrom_state_reset didn't return
+
+#: components/aos_flasher (Programador, STM32)
+Al header con BOOT0 y NRST, y tocá Detectar	To the header with BOOT0 and NRST, then tap Detect
+
+#: components/aos_flasher (Programador, STM32)
+Sin EN/BOOT en modules.txt: poné BOOT0 en 1 y apretá reset al empezar	No EN/BOOT in modules.txt: set BOOT0 to 1 and press reset when it starts
+
+#: components/aos_flasher (Programador, STM32)
+RX del STM32 (PA10)	STM32's RX (PA10)
+
+#: components/aos_flasher (Programador, STM32)
+TX del STM32 (PA9)	STM32's TX (PA9)
+
+#: components/aos_flasher (Programador, STM32)
+NRST	NRST
+
+#: components/aos_flasher (Programador, STM32)
+BOOT0 (el puente, en una Blue Pill)	BOOT0 (the jumper, on a Blue Pill)
+
+#: components/aos_flasher (Programador, STM32)
+Sin EN/BOOT: poné BOOT0 en 1 y apretá el reset del STM32	No EN/BOOT: set BOOT0 to 1 and press the STM32's reset
+
+#: components/aos_flasher (Programador, STM32)
+El bootloader del STM32 no contestó: revisá TX/RX cruzados, GND, BOOT0 y NRST	The STM32's bootloader didn't answer: check TX/RX crossed, GND, BOOT0 and NRST
+
+#: components/aos_flasher (Programador, STM32)
+El bootloader no contestó a GET	The bootloader didn't answer GET
+
+#: components/aos_flasher (Programador, STM32)
+El bootloader no dijo qué chip es	The bootloader didn't say which chip it is
+
+#: components/aos_flasher (Programador, STM32)
+borrado extendido	extended erase
+
+#: components/aos_flasher (Programador, STM32)
+borrado clásico	classic erase
+
+#: components/aos_flasher (Programador, STM32)
+Protegido contra lectura (RDP): sólo se puede quitar borrando todo	Read-protected (RDP): it can only go by erasing everything
+
+#: components/aos_flasher (Programador, STM32)
+Un STM32 que no está en la tabla: grabarlo borra todo antes	An STM32 not in the table: writing it erases everything first
+
+#: components/aos_flasher (Programador, STM32)
+Borrando toda la flash (este chip no tiene el mapa de páginas acá)	Erasing the whole flash (this chip's page map isn't here)
+
+#: components/aos_flasher (Programador, STM32)
+%d páginas o sectores borrados	%d pages or sectors erased
+
+#: components/aos_flasher (Programador, STM32)
+El chip está protegido contra lectura: no se puede leer	The chip is read-protected: it can't be read
+
+#: components/aos_flasher (Programador, STM32)
+Quitando la protección: el chip se borra entero y se reinicia	Removing the protection: the chip erases itself whole and restarts
+
+#: components/aos_flasher (Programador, STM32)
+No se pudo quitar la protección	Couldn't remove the protection
+
+#: components/aos_flasher (Programador, STM32)
+%s, NRST por EN (GPIO%d) y BOOT0 por BOOT (GPIO%d)	%s, NRST by EN (GPIO%d) and BOOT0 by BOOT (GPIO%d)
+
+#: components/aos_flasher (Programador, STM32)
+%s, NRST por RTS y BOOT0 por DTR	%s, NRST by RTS and BOOT0 by DTR
+
+#: components/aos_flasher (Programador, STM32)
+Eso no se hace con el bootloader del STM32	That isn't done through the STM32's bootloader

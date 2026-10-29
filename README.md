@@ -301,7 +301,8 @@ header with who holds each pin.
   Nano, Pro Mini, Mega, Leonardo, Micro), from the `.hex` the Arduino IDE
   exports. And by SWD, on the same pins: an nRF52, an RP2040, an RP2350
   or an STM32F0/F1 written and verified, and the RTT console of the firmware
-  running on it.
+  running on it. Or an STM32 through its own serial bootloader, with
+  BOOT0 and NRST on the same lines an ESP32 uses.
 - **Modbus:** a Riden RD60xx supply over RTU, and a gateway.
 - **Bench:** a Rigol scope over the LAN, the Riden, a UNI-T generator over
   USB, and a logger to CSV.

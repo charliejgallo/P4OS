@@ -515,7 +515,7 @@ async function pageProgramador() {
   const portSel = h('select', { onchange: e => { flashPort = e.target.value; } });
   /* ESP32 or Arduino: the service's family, sent with every job */
   const famSel = h('select', { onchange: e => { flashFam = e.target.value; flashSel = ''; load(true); } },
-    [['esp', 'ESP32'], ['avr', 'Arduino (AVR)'], ['swd', 'SWD (Cortex-M)']].map(([v, n]) => h('option', { value: v, selected: v === flashFam }, n)));
+    [['esp', 'ESP32'], ['avr', 'Arduino (AVR)'], ['swd', 'SWD (Cortex-M)'], ['stm32', tr('STM32 (serie)')]].map(([v, n]) => h('option', { value: v, selected: v === flashFam }, n)));
   const bar = h('div', { class: 'prog' }, h('div'));
   const pickDir = h('input', { type: 'file', webkitdirectory: true, multiple: true, style: 'display:none',
     onchange: async e => { await uploadFolder(e.target.files, bar); load(true); } });
@@ -592,7 +592,7 @@ async function pageProgramador() {
               (x.files.length === 1 ? tr('1 archivo') : tr('%s archivos', x.files.length)) + ' · ' + fmtBytes(x.total)),
             on ? h('div', { class: 'small muted', style: 'font-family:ui-monospace,Menlo,monospace;margin-top:6px' },
               x.files.map(f => h('div', {}, f.offset + '  ' + f.name + '  (' + fmtBytes(f.size) + ')'))) : null));
-      }) : [h('div', { class: 'row muted' }, flashFam === 'swd' ? tr('No hay firmware en /firmware. Subí el .hex, .elf, .uf2 o .bin de tu firmware.') : flashFam === 'avr' ? tr('No hay firmware en /firmware. Subí el .hex de tu sketch (Sketch, Exportar binario compilado en el IDE de Arduino).')
+      }) : [h('div', { class: 'row muted' }, flashFam === 'swd' || flashFam === 'stm32' ? tr('No hay firmware en /firmware. Subí el .hex, .elf, .uf2 o .bin de tu firmware.') : flashFam === 'avr' ? tr('No hay firmware en /firmware. Subí el .hex de tu sketch (Sketch, Exportar binario compilado en el IDE de Arduino).')
         : tr('No hay firmware en /firmware. Subí una carpeta de build de ESP-IDF o un .bin.'))]);
     }
     /* the job */
@@ -626,7 +626,8 @@ async function pageProgramador() {
       h('div', {}, h('h2', { style: 'margin-top:0' }, tr('La placa a programar')), target,
         h('p', { class: 'note' }, tr('Conectada al header: TX, RX y GND al puerto, y EN y BOOT a los pines que dice modules.txt (module target … en= boot=).')),
         h('p', { class: 'note' }, tr('Un Arduino: EN va a su RESET, y el TX de uno de 5 V llega al RX de la placa por un divisor (1 kΩ y 2 kΩ) o un adaptador de niveles. Por USB, nada.')),
-        h('p', { class: 'note' }, tr('SWD: el TX del puerto es SWCLK, el RX es SWDIO y EN es NRST (opcional), con GND común.'))),
+        h('p', { class: 'note' }, tr('SWD: el TX del puerto es SWCLK, el RX es SWDIO y EN es NRST (opcional), con GND común.')),
+        h('p', { class: 'note' }, tr('STM32 por serie: TX al PA10, RX al PA9, EN al NRST y BOOT al BOOT0.'))),
       h('div', {}, h('h2', { style: 'margin-top:0' }, tr('Firmware en la tarjeta')), srcs,
         h('div', { class: 'btns', style: 'margin-top:12px' }, startBtn,
           h('button', { class: 'btn', onclick: () => pickDir.click() }, tr('Subir carpeta de build…')), pickDir,

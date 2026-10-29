@@ -8,7 +8,7 @@
  * and when it ends with the app out of sight a toast says so and the icon
  * gets a badge. This file is only the face of it:
  *
- *   the kind      ESP32, Arduino or SWD (the service's family): what Detectar
+ *   the kind      ESP32, Arduino, SWD or STM32 (the service's family): what Detectar
  *                 looks for, which firmware the list shows, how to wire it.
  *   the target    the port and its EN/BOOT pins from modules.txt, the speed,
  *                 and "Detectar" (connect, read the chip, reset it back to
@@ -287,15 +287,16 @@ static void refresh_target(void)
     aos_flasher_status_t st;
     aos_flasher_status(&st);
     bool detecting = st.busy && st.job == AOS_FLASHER_JOB_DETECT;
-    bool avr = S.fam == AOS_FLASHER_AVR, swd = S.fam == AOS_FLASHER_SWD;
+    bool avr = S.fam == AOS_FLASHER_AVR, swd = S.fam == AOS_FLASHER_SWD, stm = S.fam == AOS_FLASHER_STM32;
     char buf[128];
-    if (st.chip_known && strcmp(st.port, S.port) == 0 && (int)st.family == S.fam && (avr || swd)) {
+    if (st.chip_known && strcmp(st.port, S.port) == 0 && (int)st.family == S.fam && (avr || swd || stm)) {
         lv_label_set_text(U.chip_name, st.chip);
         char fl[16], pg[16];
         fmt_size(fl, sizeof fl, st.flash_size);
         if (st.page >= 1024) snprintf(pg, sizeof pg, "%u KB", st.page / 1024u);
         else snprintf(pg, sizeof pg, "%u B", st.page);
         if (st.secure) snprintf(buf, sizeof buf, "%s\n%s", _("Protegido contra lectura: sólo se puede borrar entero"), st.boot);
+        else if (st.flash_size && !st.page) snprintf(buf, sizeof buf, "%s %s\n%s", fl, _("de flash"), st.boot);
         else if (st.flash_size) snprintf(buf, sizeof buf, "%s %s  ·  %s %s\n%s", fl, _("de flash"), swd ? _("sector") : _("página"), pg, st.boot);
         else if (swd && st.page) snprintf(buf, sizeof buf, "%s  ·  %s %s\n%s", _("flash externa"), _("sector"), pg, st.boot);
         else snprintf(buf, sizeof buf, "%s\n%s", swd ? _("Sin driver de flash todavía") : _("Firma desconocida"), st.boot);
@@ -324,6 +325,7 @@ static void refresh_target(void)
         lv_label_set_text(U.chip_name, _("Placa sin detectar"));
         lv_label_set_text(U.chip_info, avr ? _("Conectá el Arduino y tocá Detectar")
                                      : swd ? _("SWCLK, SWDIO y GND al header, y tocá Detectar")
+                                     : stm ? _("Al header con BOOT0 y NRST, y tocá Detectar")
                                            : _("Conectala al header y tocá Detectar"));
         lv_obj_set_style_text_color(U.chip_info, AOS_C_DIM, 0);
     }
@@ -356,7 +358,7 @@ static void refresh_target(void)
     snprintf(buf, sizeof buf, "%u", (unsigned)BAUDS[S.baud_i]);
     lv_label_set_text(U.baud_lbl, buf);
     /* an Arduino's bootloader has its own speed */
-    lv_obj_set_flag(U.baud_chip, LV_OBJ_FLAG_HIDDEN, avr || swd);
+    lv_obj_set_flag(U.baud_chip, LV_OBJ_FLAG_HIDDEN, avr || swd || stm);
 
     /* somebody else on the port, or no EN/BOOT */
     char who[32];
@@ -368,7 +370,8 @@ static void refresh_target(void)
         lv_label_set_text(U.busy_lbl, buf);
         lv_obj_set_flag(U.busy_btn, LV_OBJ_FLAG_HIDDEN, strncmp(owner, "serial ", 7) != 0);
     } else if (warn) {
-        lv_label_set_text(U.busy_lbl, avr ? _("Sin EN en modules.txt para el RESET: apretá el reset del Arduino al empezar")
+        lv_label_set_text(U.busy_lbl, stm ? _("Sin EN/BOOT en modules.txt: poné BOOT0 en 1 y apretá reset al empezar")
+                                  : avr ? _("Sin EN en modules.txt para el RESET: apretá el reset del Arduino al empezar")
                                           : _("Sin EN/BOOT en modules.txt: poné la placa en modo descarga a mano"));
         lv_obj_add_flag(U.busy_btn, LV_OBJ_FLAG_HIDDEN);
     }
@@ -659,12 +662,12 @@ static void build_wiring(lv_obj_t *parent, int32_t w)
     section(parent, _("CONEXIÓN"));
     lv_obj_t *c = card(parent, w);
     lv_obj_set_style_pad_ver(c, 6, 0);
-    bool avr = S.fam == AOS_FLASHER_AVR, swd = S.fam == AOS_FLASHER_SWD;
+    bool avr = S.fam == AOS_FLASHER_AVR, swd = S.fam == AOS_FLASHER_SWD, stm = S.fam == AOS_FLASHER_STM32;
     struct { int gpio; const char *what, *to; } L[] = {
-        { p->pins[0], swd ? "SWCLK" : "TX", swd ? N_("SWCLK del objetivo") : avr ? N_("RX del Arduino (D0)") : N_("RX de la placa (U0RXD)") },
-        { p->pins[1], swd ? "SWDIO" : "RX", swd ? N_("SWDIO del objetivo") : avr ? N_("TX del Arduino (D1), ver abajo") : N_("TX de la placa (U0TXD)") },
-        { en, swd ? "NRST" : "EN", swd ? N_("RESET, si lo tiene a mano") : avr ? N_("RESET") : N_("EN / RST") },
-        { avr || swd ? -1 : boot, "BOOT", N_("GPIO0 (GPIO9 en C3/C6/H2, GPIO35 en P4)") },
+        { p->pins[0], swd ? "SWCLK" : "TX", swd ? N_("SWCLK del objetivo") : avr ? N_("RX del Arduino (D0)") : stm ? N_("RX del STM32 (PA10)") : N_("RX de la placa (U0RXD)") },
+        { p->pins[1], swd ? "SWDIO" : "RX", swd ? N_("SWDIO del objetivo") : avr ? N_("TX del Arduino (D1), ver abajo") : stm ? N_("TX del STM32 (PA9)") : N_("TX de la placa (U0TXD)") },
+        { en, swd ? "NRST" : "EN", swd ? N_("RESET, si lo tiene a mano") : avr ? N_("RESET") : stm ? N_("NRST") : N_("EN / RST") },
+        { avr || swd ? -1 : boot, "BOOT", stm ? N_("BOOT0 (el puente, en una Blue Pill)") : N_("GPIO0 (GPIO9 en C3/C6/H2, GPIO35 en P4)") },
         { -2, "GND", N_("GND, común a las dos") },
     };
     int n = 0;
@@ -816,7 +819,7 @@ static void build_sources(lv_obj_t *parent, int32_t w)
         lv_obj_set_flex_align(U.list, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
         aos_label(U.list, AOS_SYM_SD, &aos_sym_72, AOS_C_DIM);
         aos_label(U.list, aos_flasher_dir() ? _("No hay firmware en /firmware") : _("No hay tarjeta"), aos_font_body, AOS_C_TEXT);
-        lv_obj_t *h = aos_label(U.list, S.fam == AOS_FLASHER_SWD
+        lv_obj_t *h = aos_label(U.list, S.fam == AOS_FLASHER_SWD || S.fam == AOS_FLASHER_STM32
                                     ? _("Copiá ahí el .hex, .elf, .uf2 o .bin de tu firmware (un .bin va al comienzo de la flash).")
                                     : S.fam == AOS_FLASHER_AVR
                                     ? _("Copiá ahí el .hex de tu sketch: en el IDE de Arduino, Sketch > Exportar binario compilado. El que no dice with_bootloader.")

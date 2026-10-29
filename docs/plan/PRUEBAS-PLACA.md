@@ -537,6 +537,11 @@ Que necesitan la mano del usuario o equipos:
   - La Ekobadge 2026 (desde el 2026-10-31): ver su chip, grabar y RTT.
   - Una RP2350 (Pico 2), si aparece una: Detectar (`DPIDR 4C013477`,
     Cortex-M33) y grabar un `.uf2` que arranque (con su IMAGE_DEF).
+- [ ] Programador con STM32 por su bootloader serie (F4, 2026-10-29;
+      probado sólo en el simulador contra `tools/fake_stm32_boot.py`): una
+      Blue Pill o Black Pill en `uart.b` (TX al PA10, RX al PA9, EN al
+      NRST, BOOT al BOOT0), Detectar, grabar, leer y borrar. Cuando el
+      usuario compre una.
 - [ ] Programador con Arduino (F3, 2026-10-29, sin instalar; probado sólo
       en el simulador contra `tools/fake_avr_boot.py`). En la placa:
   - Un Uno o un Nano por USB (`usb0`, reset por DTR): Detectar (firma y

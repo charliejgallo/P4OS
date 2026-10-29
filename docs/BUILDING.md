@@ -198,7 +198,8 @@ Environment:
 - `P4_SIM_SWD=nrf52840` (or `stm32f103`, `rp2040`, `rp2350`, `none`;
   `:protected` after the first two, `:locked` after `rp2350`): the chip the Programador finds by SWD on a header
   port (`sim/swd_sim.c`); `P4_SIM_SWD_DUMP=<file>` writes its flash out.
-  For the AVR family, `tools/fake_avr_boot.py` on `P4_SIM_UART_B`.
+  For the AVR family, `tools/fake_avr_boot.py` on `P4_SIM_UART_B`; for an
+  STM32's serial bootloader, `tools/fake_stm32_boot.py`.
 - `P4_SIM_BATTERY=1`: pretend a battery is connected.
 - `P4_SIM_SCRIPT="wait 800; tap 360 700; shot a.png; quit"`: scripted input
   and screenshots (`wait`, `tap x y [ms]`, `drag x1 y1 x2 y2 [ms] [rest]`,

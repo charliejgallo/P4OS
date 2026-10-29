@@ -9305,3 +9305,69 @@ RP2350: el firmware bloqueó ACCESSCTRL para el depurador: no se toca	RP2350: di
 
 #: components/aos_flasher (Programador, SWD)
 RP2350: bootrom_state_reset no volvió	RP2350: bootrom_state_reset kehrte nicht zurück
+
+#: components/aos_flasher (Programador, STM32)
+Al header con BOOT0 y NRST, y tocá Detectar	An den Header mit BOOT0 und NRST, dann auf Erkennen tippen
+
+#: components/aos_flasher (Programador, STM32)
+Sin EN/BOOT en modules.txt: poné BOOT0 en 1 y apretá reset al empezar	Kein EN/BOOT in modules.txt: BOOT0 auf 1 setzen und beim Start Reset drücken
+
+#: components/aos_flasher (Programador, STM32)
+RX del STM32 (PA10)	RX des STM32 (PA10)
+
+#: components/aos_flasher (Programador, STM32)
+TX del STM32 (PA9)	TX des STM32 (PA9)
+
+#: components/aos_flasher (Programador, STM32)
+NRST	NRST
+
+#: components/aos_flasher (Programador, STM32)
+BOOT0 (el puente, en una Blue Pill)	BOOT0 (die Brücke, bei einer Blue Pill)
+
+#: components/aos_flasher (Programador, STM32)
+Sin EN/BOOT: poné BOOT0 en 1 y apretá el reset del STM32	Kein EN/BOOT: BOOT0 auf 1 setzen und den Reset des STM32 drücken
+
+#: components/aos_flasher (Programador, STM32)
+El bootloader del STM32 no contestó: revisá TX/RX cruzados, GND, BOOT0 y NRST	Der Bootloader des STM32 antwortete nicht: TX/RX gekreuzt, GND, BOOT0 und NRST prüfen
+
+#: components/aos_flasher (Programador, STM32)
+El bootloader no contestó a GET	Der Bootloader antwortete nicht auf GET
+
+#: components/aos_flasher (Programador, STM32)
+El bootloader no dijo qué chip es	Der Bootloader nannte den Chip nicht
+
+#: components/aos_flasher (Programador, STM32)
+borrado extendido	erweitertes Löschen
+
+#: components/aos_flasher (Programador, STM32)
+borrado clásico	klassisches Löschen
+
+#: components/aos_flasher (Programador, STM32)
+Protegido contra lectura (RDP): sólo se puede quitar borrando todo	Ausleseschutz (RDP): nur durch komplettes Löschen entfernbar
+
+#: components/aos_flasher (Programador, STM32)
+Un STM32 que no está en la tabla: grabarlo borra todo antes	Ein STM32, der nicht in der Tabelle steht: Schreiben löscht vorher alles
+
+#: components/aos_flasher (Programador, STM32)
+Borrando toda la flash (este chip no tiene el mapa de páginas acá)	Lösche den ganzen Flash (die Seitenaufteilung dieses Chips fehlt hier)
+
+#: components/aos_flasher (Programador, STM32)
+%d páginas o sectores borrados	%d Seiten oder Sektoren gelöscht
+
+#: components/aos_flasher (Programador, STM32)
+El chip está protegido contra lectura: no se puede leer	Der Chip ist ausgeleseschützt: nicht lesbar
+
+#: components/aos_flasher (Programador, STM32)
+Quitando la protección: el chip se borra entero y se reinicia	Entferne den Schutz: der Chip löscht sich komplett und startet neu
+
+#: components/aos_flasher (Programador, STM32)
+No se pudo quitar la protección	Schutz konnte nicht entfernt werden
+
+#: components/aos_flasher (Programador, STM32)
+%s, NRST por EN (GPIO%d) y BOOT0 por BOOT (GPIO%d)	%s, NRST per EN (GPIO%d) und BOOT0 per BOOT (GPIO%d)
+
+#: components/aos_flasher (Programador, STM32)
+%s, NRST por RTS y BOOT0 por DTR	%s, NRST per RTS und BOOT0 per DTR
+
+#: components/aos_flasher (Programador, STM32)
+Eso no se hace con el bootloader del STM32	Das geht nicht über den Bootloader des STM32

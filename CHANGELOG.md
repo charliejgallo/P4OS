@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **The Programmer writes STM32s through their serial bootloader** (ST's
+  AN3155), a fourth kind of board: BOOT0 on the port's BOOT line, NRST on
+  EN, 8E1. It finds the chip by its PID and the flash by its family's
+  size register, erases only the pages (or an F2/F4's sectors) the image
+  touches, writes and reads back to compare; it reads the flash to the
+  card and erases it. Read protection is said and kept; "Borrar" removes
+  it by the bootloader's own READOUT UNPROTECT, which erases everything.
+  In the simulator against `tools/fake_stm32_boot.py` (F103, F411, G071);
+  no STM32 on the bench yet.
 - **The Programmer speaks SWD.** A third kind of board: an Arm Cortex-M
   through its debug port, on the pins of a header UART port (TX is SWCLK,
   RX is SWDIO, EN is NRST), bit-banged by a new `aos_io_swd_*`. It finds

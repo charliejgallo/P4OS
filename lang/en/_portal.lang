@@ -2164,3 +2164,9 @@ SWD: el TX del puerto es SWCLK, el RX es SWDIO y EN es NRST (opcional), con GND 
 
 #: components/aos_flasher (Programador, SWD)
 Subir un archivo…	Upload a file…
+
+#: components/aos_flasher (Programador, STM32)
+STM32 (serie)	STM32 (serial)
+
+#: components/aos_flasher (Programador, STM32)
+STM32 por serie: TX al PA10, RX al PA9, EN al NRST y BOOT al BOOT0.	STM32 by serial: TX to PA10, RX to PA9, EN to NRST and BOOT to BOOT0.

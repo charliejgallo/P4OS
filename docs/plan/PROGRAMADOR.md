@@ -20,7 +20,8 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
 - **Terminal serie**: monitor de los UART del header y los USB.
 - **SWD** (F2, sin publicar): nRF52, STM32F0/F1, RP2040 y RP2350; grabar,
   verificar, borrar entero y la consola RTT.
-- **Nada de STM32 por serie.**
+- **STM32 por su bootloader serie** (F4, sin publicar): grabar, verificar,
+  leer y borrar, con RDP respetado.
 
 ## Familias y caminos
 
@@ -30,7 +31,7 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
 | Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, GD32 | SWD con 2-3 cables | hay (sim): nRF52, STM32F0/F1, RP2040 | sólo verificar | F2 |
 | AVR con bootloader serie | Uno, Nano, Pro Mini, Mega | STK500 v1 (optiboot) y v2 (Mega) | hay (sim) | hay (sim) | F3 |
 | AVR con USB propio | Leonardo, Micro, Pro Micro | AVR109 (Caterina), toque a 1200 baudios | hay (sim) | hay (sim) | F3 |
-| STM32 sin sonda | Blue Pill, Black Pill | bootloader serie de ST (AN3155), BOOT0 y NRST con las líneas EN/BOOT | F4 | F4 | F4 |
+| STM32 sin sonda | Blue Pill, Black Pill | bootloader serie de ST (AN3155), BOOT0 y NRST con las líneas EN/BOOT | hay (sim) | hay (sim) | F4 |
 | Desde la Mac, serie | esptool, avrdude, stm32flash | puente RFC2217 / TCP crudo al puerto | (la Mac) | (la Mac) | F4 |
 | Desde la Mac, SWD | OpenOCD, pyOCD, probe-rs | la placa como sonda CMSIS-DAP v2 por el USB OTG | (la Mac) | (la Mac) | F5 |
 | AVR sin bootloader | ATmega/ATtiny sueltos, grabar el bootloader de un Uno | ISP por `spi.a` + RESET; fusibles | F6 | F6 | F6 |
@@ -190,6 +191,23 @@ Lo planeado era:
   simulador.
 
 ## F4: STM32 por serie y el puente para la Mac
+
+**STM32 por su bootloader serie, hecho en el simulador el 2026-10-29**
+(el usuario no tiene un STM32 todavía). `aos_flasher_stm32.c`, el tipo
+"STM32" en la app y en el portal (`"family":"stm32"`), y
+`tools/fake_stm32_boot.py` (un F103, un F411 con sectores y un G071, con
+el borrado clásico o el extendido, y con RDP puesto). Probado: detectar,
+grabar borrando sólo las páginas o sectores que toca la imagen (un sector
+del medio queda como estaba), verificar, leer, borrar todo, y con RDP
+negarse a grabar y quitarla borrando todo. Decisiones:
+
+- BOOT0 por la línea BOOT y NRST por EN: el mismo `module target` de un
+  ESP32. 8E1, 115200 y después 57600.
+- El mapa de borrado por familia: páginas parejas (F0, F1, G0, G4, L0,
+  L1, L4) y los sectores de los F2/F4 (16, 16, 16, 16, 64 y 128 KB, el
+  segundo banco de 2 MB desde el 12). F7, H7 y G47x, todavía con borrado
+  total, avisando.
+- Al final, un reset con BOOT0 bajo; sin las líneas, GO a 0x08000000.
 
 - **Bootloader de ST (AN3155)**: BOOT0 en la línea BOOT y NRST en EN; 8E1;
   detectar (Get, Get ID), leer, borrar (normal y extendido), grabar,
