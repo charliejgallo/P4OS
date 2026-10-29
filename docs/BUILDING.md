@@ -195,6 +195,10 @@ Environment:
   answers on `spi.a` for each CS (that is the default); a bare chip name for
   every CS, `loop` for a jumper from MOSI to MISO, `none` for nothing
   (`docs/MODULES.md`, "SPI").
+- `P4_SIM_SWD=nrf52840` (or `stm32f103`, `rp2040`, `none`; `:protected`
+  after the first two): the chip the Programador finds by SWD on a header
+  port (`sim/swd_sim.c`); `P4_SIM_SWD_DUMP=<file>` writes its flash out.
+  For the AVR family, `tools/fake_avr_boot.py` on `P4_SIM_UART_B`.
 - `P4_SIM_BATTERY=1`: pretend a battery is connected.
 - `P4_SIM_SCRIPT="wait 800; tap 360 700; shot a.png; quit"`: scripted input
   and screenshots (`wait`, `tap x y [ms]`, `drag x1 y1 x2 y2 [ms] [rest]`,

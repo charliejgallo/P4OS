@@ -2,6 +2,21 @@
 
 ## Unreleased
 
+- **The Programmer speaks SWD.** A third kind of board: an Arm Cortex-M
+  through its debug port, on the pins of a header UART port (TX is SWCLK,
+  RX is SWDIO, EN is NRST), bit-banged by a new `aos_io_swd_*`. It finds
+  the chip (an RP2040 behind its multidrop DP, with the dormant wake-up
+  and TARGETSEL), writes a `.hex`, `.elf`, `.uf2` or `.bin` and reads it
+  back to compare: nRF52 through its NVMC, STM32F0/F1 through their flash
+  controller, RP2040 through its boot ROM's functions. Read protection is
+  said and kept; an nRF52's can only go with an erase of the whole chip
+  through its CTRL-AP. And the **RTT console**: what a running firmware
+  writes through SEGGER RTT, read from its RAM into the log, with a line
+  typed in the portal going down to it. Reading a chip's whole flash by
+  SWD is left out on purpose (`docs/plan/PROGRAMADOR.md`). In the
+  simulator, against an emulated target (`sim/swd_sim.c`,
+  `P4_SIM_SWD=nrf52840|stm32f103|rp2040`); the timing on the board's pins
+  is not measured yet.
 - **The Programmer writes Arduinos.** A new kind of board, "Arduino", next
   to "ESP32": an AVR through the bootloader it already has, as the Arduino
   IDE does with avrdude. STK500 v1 (optiboot on an Uno, a Nano or a Pro

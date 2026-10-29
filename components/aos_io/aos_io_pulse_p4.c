@@ -7,6 +7,13 @@
  * with the flash's cache off when the service was installed for that. It
  * is a few hundred bytes, only while a sensor has the pin open.
  *
+ * swd: bit-banged on the GPIO registers (gpio_ll), each packet inside a
+ * critical section, so a preemption cannot stretch a clock in the middle
+ * of one (a target does not mind slow clocks, but a WAIT retried forever
+ * would hide it). SWDIO is input and output at once with its pull-up; the
+ * direction is the output enable. The clock comes from a delay loop, not
+ * a timer: khz is approximate. Nothing here is in internal RAM.
+ *
  * shift_in: bit-banged, each clock's high time inside a critical section
  * (a microsecond with this core's interrupts off): an HX711 powers down
  * when its clock stays high more than 60 us, which a preemption in the
@@ -272,4 +279,132 @@ void aos_io_be_count_close(aos_io_count_t *c)
     }
     count_free(b);
     c->be = NULL;
+}
+
+/* ---- SWD ---- */
+
+typedef struct { uint32_t dly; } swd_p4_t;
+
+static inline void swd_wait(uint32_t n) { for (volatile uint32_t i = n; i; i--) {} }
+
+/* host drives: the target samples on the rising edge */
+static inline void swd_out(aos_io_swd_t *s, uint32_t dly, int bit)
+{
+    gpio_ll_set_level(&GPIO, (uint32_t)s->dio, (uint32_t)bit);
+    gpio_ll_set_level(&GPIO, (uint32_t)s->clk, 0);
+    swd_wait(dly);
+    gpio_ll_set_level(&GPIO, (uint32_t)s->clk, 1);
+    swd_wait(dly);
+}
+
+/* target drives: it changes on the rising edge, read before it */
+static inline int swd_in(aos_io_swd_t *s, uint32_t dly)
+{
+    gpio_ll_set_level(&GPIO, (uint32_t)s->clk, 0);
+    swd_wait(dly);
+    int b = gpio_ll_get_level(&GPIO, (uint32_t)s->dio);
+    gpio_ll_set_level(&GPIO, (uint32_t)s->clk, 1);
+    swd_wait(dly);
+    return b;
+}
+
+bool aos_io_be_swd_open(aos_io_swd_t *s)
+{
+    swd_p4_t *b = calloc(1, sizeof *b);
+    if (!b) return false;
+    /* ~5 cycles a turn of the loop at 360 MHz, two waits a clock */
+    b->dly = 360000u / (s->khz * 10u);
+    if (!b->dly) b->dly = 1;
+    gpio_config_t c = { .pin_bit_mask = 1ULL << s->clk, .mode = GPIO_MODE_OUTPUT };
+    gpio_config(&c);
+    gpio_set_level(s->clk, 1);
+    c.pin_bit_mask = 1ULL << s->dio;
+    c.mode = GPIO_MODE_INPUT_OUTPUT;
+    c.pull_up_en = GPIO_PULLUP_ENABLE;
+    gpio_config(&c);
+    gpio_set_level(s->dio, 1);
+    if (s->nrst >= 0) {
+        c.pin_bit_mask = 1ULL << s->nrst;
+        c.mode = GPIO_MODE_INPUT_OUTPUT_OD;
+        gpio_config(&c);
+        gpio_set_level(s->nrst, 1);
+    }
+    s->be = b;
+    return true;
+}
+
+bool aos_io_be_swd_seq(aos_io_swd_t *s, const uint8_t *bits, int n)
+{
+    uint32_t dly = ((swd_p4_t *)s->be)->dly;
+    gpio_ll_output_enable(&GPIO, (uint32_t)s->dio);
+    portENTER_CRITICAL(&s_mux);
+    for (int i = 0; i < n; i++) swd_out(s, dly, bits[i >> 3] >> (i & 7) & 1);
+    portEXIT_CRITICAL(&s_mux);
+    return true;
+}
+
+int aos_io_be_swd_xfer(aos_io_swd_t *s, uint8_t req, uint32_t *data, bool no_ack)
+{
+    uint32_t dly = ((swd_p4_t *)s->be)->dly;
+    bool rd = req & 0x04;
+    int ack = 0, ret;
+    portENTER_CRITICAL(&s_mux);
+    gpio_ll_output_enable(&GPIO, (uint32_t)s->dio);
+    for (int i = 0; i < 8; i++) swd_out(s, dly, req >> i & 1);
+    gpio_ll_output_disable(&GPIO, (uint32_t)s->dio);
+    swd_in(s, dly);                                         /* turnaround */
+    for (int i = 0; i < 3; i++) ack |= swd_in(s, dly) << i;
+    if (no_ack && !rd) ack = 1;
+    if (ack == 1 && rd) {
+        uint32_t v = 0;
+        int par = 0;
+        for (int i = 0; i < 32; i++) {
+            int b = swd_in(s, dly);
+            v |= (uint32_t)b << i;
+            par ^= b;
+        }
+        int p = swd_in(s, dly);
+        swd_in(s, dly);                                     /* turnaround */
+        gpio_ll_output_enable(&GPIO, (uint32_t)s->dio);
+        *data = v;
+        ret = p == par ? 1 : -1;
+    } else if (ack == 1) {
+        swd_in(s, dly);                                     /* turnaround */
+        gpio_ll_output_enable(&GPIO, (uint32_t)s->dio);
+        int par = 0;
+        for (int i = 0; i < 32; i++) {
+            int b = (int)(*data >> i & 1);
+            swd_out(s, dly, b);
+            par ^= b;
+        }
+        swd_out(s, dly, par);
+        ret = 1;
+    } else if (ack == 2 || ack == 4) {
+        swd_in(s, dly);
+        gpio_ll_output_enable(&GPIO, (uint32_t)s->dio);
+        ret = ack;
+    } else {
+        /* nobody, or garbage: let a data phase go by, then take the line */
+        for (int i = 0; i < 34; i++) swd_in(s, dly);
+        gpio_ll_output_enable(&GPIO, (uint32_t)s->dio);
+        ret = ack ? ack : 7;
+    }
+    for (int i = 0; i < 2; i++) swd_out(s, dly, 0);         /* idle */
+    portEXIT_CRITICAL(&s_mux);
+    return ret;
+}
+
+bool aos_io_be_swd_nrst(aos_io_swd_t *s, bool assert)
+{
+    return gpio_set_level(s->nrst, assert ? 0 : 1) == ESP_OK;
+}
+
+void aos_io_be_swd_close(aos_io_swd_t *s)
+{
+    /* the pins back to inputs: the target keeps running on its own */
+    gpio_reset_pin(s->clk);
+    gpio_reset_pin(s->dio);
+    if (s->nrst >= 0) gpio_reset_pin(s->nrst);
+    free(s->be);
+    s->be = NULL;
 }

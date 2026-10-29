@@ -18,14 +18,16 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
 - **Pico (RP2040) en BOOTSEL**: es un disco USB; copiar un `.uf2` a `/usb` lo
   graba (`docs/USB.md`). Fuera del Programador.
 - **Terminal serie**: monitor de los UART del header y los USB.
-- **Nada de SWD ni STM32.**
+- **SWD** (F2, sin publicar): nRF52, STM32F0/F1 y RP2040; grabar,
+  verificar, borrar entero y la consola RTT.
+- **Nada de STM32 por serie.**
 
 ## Familias y caminos
 
 | Familia | Ejemplos | Camino | Grabar | Leer | Fase |
 |---|---|---|---|---|---|
 | ESP32 / ESP8266 | DevKit, NodeMCU, módulos | ROM serie (hay) | hay | F1 | F1 |
-| Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, GD32 | SWD con 2-3 cables | F2 | sólo verificar | F2 |
+| Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, GD32 | SWD con 2-3 cables | hay (sim): nRF52, STM32F0/F1, RP2040 | sólo verificar | F2 |
 | AVR con bootloader serie | Uno, Nano, Pro Mini, Mega | STK500 v1 (optiboot) y v2 (Mega) | hay (sim) | hay (sim) | F3 |
 | AVR con USB propio | Leonardo, Micro, Pro Micro | AVR109 (Caterina), toque a 1200 baudios | hay (sim) | hay (sim) | F3 |
 | STM32 sin sonda | Blue Pill, Black Pill | bootloader serie de ST (AN3155), BOOT0 y NRST con las líneas EN/BOOT | F4 | F4 | F4 |
@@ -65,6 +67,38 @@ hasta que una familia que los use (SWD, AVR) los pida.
   los baja.
 
 ## F2: SWD
+
+**Grabar, verificar y la consola RTT, hechos en el simulador el
+2026-10-29** (falta la placa: la RP2040 y la Ekobadge). Lo que quedó,
+distinto de lo planeado abajo:
+
+- **Sin `swd.a` en `modules.txt`:** SWD usa los pines de un puerto UART
+  del header (TX = SWCLK, RX = SWDIO, su EN = NRST). El mismo cable sirve
+  para las dos cosas y no hizo falta tocar el parser.
+- **El motor** es `aos_io_swd_*` (`aos_io_pulse.c` y su backend
+  `aos_io_pulse_p4.c`): bit-bang por `gpio_ll`, cada paquete en una
+  sección crítica, el reloj por un lazo de espera (~1 MHz pedido, **sin
+  medir**). En el simulador, `sim/swd_sim.c` emula el objetivo a nivel de
+  paquetes (`P4_SIM_SWD=nrf52840|stm32f103|rp2040`, `:protected`).
+- **Sin algoritmos de flash cargados en el objetivo** (ni el pack de
+  probe-rs): cada familia se maneja desde acá por el bus. nRF52 por su
+  NVMC, STM32F0/F1 por su controlador (media palabra por vez, lento pero
+  simple), RP2040 por las funciones de su ROM llamadas con el trampolín
+  de depuración. Los STM32F4/G0/L4 se reconocen y dicen que todavía no.
+  El pack de probe-rs queda para cuando haga falta velocidad o más chips.
+- **Multidrop** (RP2040): si nadie contesta tras JTAG-a-SWD, se manda
+  SWD-a-dormido, el despertar, un reset de línea y TARGETSEL del núcleo 0.
+- **Protección:** un nRF52 con APPROTECT y un STM32 con RDP no se graban;
+  el nRF52 se puede borrar entero por su CTRL-AP (se va el firmware con la
+  protección). El RDP del STM32 (option bytes) todavía no.
+- **Consola RTT** (no estaba en el plan): busca el bloque "SEGGER RTT" en
+  la RAM con el objetivo corriendo (sin detenerlo), lee su buffer de
+  subida cada 30 ms al registro del Programador y escribe en el de bajada
+  lo que llega por `POST /api/flash/console/send`. En la app, "Consola RTT"
+  en lugar de "Leer la flash"; escribirle, por ahora, sólo desde el portal.
+- Leer la flash entera por SWD sigue afuera (ver "Alcance de SWD").
+
+Lo planeado era:
 
 - **Puerto `swd.a`** en `modules.txt`: `port swd.a swclk=3 swdio=4 nrst=5`. Por
   defecto, los mismos pines de `uart.b` (pines 12, 14 y 11 del header): el

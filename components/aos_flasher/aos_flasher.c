@@ -287,6 +287,7 @@ const char *aos_flasher_family_name(int family)
     switch (family) {
     case AOS_FLASHER_ESP: return "ESP32";
     case AOS_FLASHER_AVR: return "Arduino";
+    case AOS_FLASHER_SWD: return "SWD";
     default: return "?";
     }
 }
@@ -294,7 +295,9 @@ const char *aos_flasher_family_name(int family)
 static void worker(void *arg)
 {
     (void)arg;
-    bool ok = J.opts.family == AOS_FLASHER_AVR ? fl_avr_run() : fl_esp_run();
+    bool ok = J.opts.family == AOS_FLASHER_AVR ? fl_avr_run() : J.opts.family == AOS_FLASHER_SWD ? fl_swd_run() : fl_esp_run();
+    /* a console ends by a cancel, and that is how it is meant to end */
+    if (J.job == AOS_FLASHER_JOB_CONSOLE && fl_cancel && fl_st.phase == AOS_FLASHER_CONSOLE) ok = true;
     bool cancelled = fl_cancel && !ok;
     if (D.f) fl_dump_close(false, false, NULL);     /* a family that left one open */
     fl_lock();
@@ -308,7 +311,9 @@ static void worker(void *arg)
     fl_st.seq++;
     fl_unlock();
     uint32_t ms = fl_st.elapsed_ms;
-    if (ok && J.job != AOS_FLASHER_JOB_DETECT)
+    if (ok && J.job == AOS_FLASHER_JOB_CONSOLE)
+        fl_logf(L_INFO, "%s", _("Consola cerrada"));
+    else if (ok && J.job != AOS_FLASHER_JOB_DETECT)
         fl_logf(L_OK, _("Listo en %u,%u s"), (unsigned)(ms / 1000), (unsigned)(ms % 1000 / 100));
     else if (cancelled)
         fl_logf(L_WARN, "%s", _("Cancelado"));
@@ -322,6 +327,7 @@ static const char *job_word(aos_flasher_job_t job)
     case AOS_FLASHER_JOB_FLASH: return _("Grabar");
     case AOS_FLASHER_JOB_READ: return _("Leer");
     case AOS_FLASHER_JOB_ERASE: return _("Borrar");
+    case AOS_FLASHER_JOB_CONSOLE: return _("Consola");
     default: return "?";
     }
 }
@@ -353,7 +359,8 @@ static bool start(aos_flasher_job_t job, const char *port)
     }
     fl_st.elapsed_ms = (uint32_t)J.t0;      /* the start, while busy (see aos_flasher_status) */
     fl_unlock();
-    const char *what = job == AOS_FLASHER_JOB_FLASH ? J.src.name : job == AOS_FLASHER_JOB_DETECT ? "chip" : "flash";
+    const char *what = job == AOS_FLASHER_JOB_FLASH ? J.src.name : job == AOS_FLASHER_JOB_DETECT ? "chip"
+                     : job == AOS_FLASHER_JOB_CONSOLE ? "RTT" : "flash";
     fl_logf(L_INFO, _("%s %s en %s"), job_word(job), what, J.port);
     if (J.opts.family != AOS_FLASHER_ESP) fl_logf(L_INFO, _("Placa: %s"), aos_flasher_family_name(J.opts.family));
     if (!aos_hal_thread_start("flasher", worker, NULL, 8192, 5)) {
@@ -405,4 +412,37 @@ bool aos_flasher_erase(const char *port, const aos_flasher_opts_t *opts)
     if (fl_st.busy) return false;
     take_opts(opts);
     return start(AOS_FLASHER_JOB_ERASE, port);
+}
+
+/* What goes down to the console: a small queue the job empties */
+static struct { uint8_t b[256]; int n; } s_down;
+
+bool aos_flasher_console(const char *port, const aos_flasher_opts_t *opts)
+{
+    if (fl_st.busy) return false;
+    take_opts(opts);
+    s_down.n = 0;
+    J.opts.family = AOS_FLASHER_SWD;
+    return start(AOS_FLASHER_JOB_CONSOLE, port);
+}
+
+bool aos_flasher_console_send(const void *data, int n)
+{
+    if (!fl_st.busy || fl_st.job != AOS_FLASHER_JOB_CONSOLE || n <= 0) return false;
+    fl_lock();
+    bool ok = s_down.n + n <= (int)sizeof s_down.b;
+    if (ok) { memcpy(s_down.b + s_down.n, data, (size_t)n); s_down.n += n; }
+    fl_unlock();
+    return ok;
+}
+
+int fl_console_take(uint8_t *out, int max)
+{
+    fl_lock();
+    int n = s_down.n < max ? s_down.n : max;
+    memcpy(out, s_down.b, (size_t)n);
+    memmove(s_down.b, s_down.b + n, (size_t)(s_down.n - n));
+    s_down.n -= n;
+    fl_unlock();
+    return n;
 }

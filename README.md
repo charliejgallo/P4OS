@@ -36,7 +36,7 @@ the microSD, loaded as shared objects:
 - **The workshop:** I2C, SPI, 1-Wire and GPIO on the 40-pin header, with
   112 kinds of sensor read by themselves (temperature, pressure, air
   quality, light, motion, current, distance...), addressable LED strips on
-  any free pin (WLED's way), a serial terminal, an ESP32 and Arduino programmer,
+  any free pin (WLED's way), a serial terminal, an ESP32, Arduino and SWD programmer,
   Modbus, a bench supply and scope, an EEPROM reader and writer, a PWM and
   servo generator with an analog level (and sixteen more servos on a
   PCA9685), a learning
@@ -290,7 +290,9 @@ header with who holds each pin.
   reads its flash to the card, to keep or to clone, and erases it. The
   same for an AVR Arduino through the bootloader it already has (Uno,
   Nano, Pro Mini, Mega, Leonardo, Micro), from the `.hex` the Arduino IDE
-  exports.
+  exports. And by SWD, on the same pins: an nRF52, an RP2040 or an
+  STM32F0/F1 written and verified, and the RTT console of the firmware
+  running on it.
 - **Modbus:** a Riden RD60xx supply over RTU, and a gateway.
 - **Bench:** a Rigol scope over the LAN, the Riden, a UNI-T generator over
   USB, and a logger to CSV.

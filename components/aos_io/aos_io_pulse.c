@@ -1,6 +1,6 @@
 /*
- * P4OS - Pulses and counts on the header's pins (aos_io.h): the part the
- * board and the simulator share. It checks the pins and claims them for
+ * P4OS - Pulses, counts and SWD on the header's pins (aos_io.h): the part
+ * the board and the simulator share. It checks the pins and claims them for
  * the owner; the backends (aos_io_pulse_p4.c, sim/io_pulse_sim.c) time the
  * edges, clock the bits and count.
  */
@@ -91,4 +91,59 @@ void aos_io_count_close(aos_io_count_t *c)
     if (!c) return;
     aos_io_be_count_close(c);
     free(c);
+}
+
+/* ---- SWD ---- */
+
+aos_io_swd_t *aos_io_swd_open(int swclk, int swdio, int nrst, uint32_t khz, const char *owner)
+{
+    if (swclk == swdio || swclk == nrst || swdio == nrst) return NULL;
+    if (!take(swclk, owner, "swd")) return NULL;
+    if (!take(swdio, owner, "swd")) { aos_io_release(swclk, owner); return NULL; }
+    if (nrst >= 0 && !take(nrst, owner, "swd")) {
+        aos_io_release(swclk, owner);
+        aos_io_release(swdio, owner);
+        return NULL;
+    }
+    aos_io_swd_t *s = calloc(1, sizeof *s);
+    if (s) {
+        s->clk = (int8_t)swclk;
+        s->dio = (int8_t)swdio;
+        s->nrst = (int8_t)nrst;
+        s->khz = khz ? khz : 1000;
+        snprintf(s->owner, sizeof s->owner, "%s", owner);
+    }
+    if (!s || !aos_io_be_swd_open(s)) {
+        aos_io_release(swclk, owner);
+        aos_io_release(swdio, owner);
+        if (nrst >= 0) aos_io_release(nrst, owner);
+        free(s);
+        return NULL;
+    }
+    return s;
+}
+
+bool aos_io_swd_seq(aos_io_swd_t *s, const uint8_t *bits, int n)
+{
+    return s && bits && n > 0 && aos_io_be_swd_seq(s, bits, n);
+}
+
+int aos_io_swd_xfer(aos_io_swd_t *s, uint8_t req, uint32_t *data, bool no_ack)
+{
+    return s && data ? aos_io_be_swd_xfer(s, req, data, no_ack) : 7;
+}
+
+bool aos_io_swd_nrst(aos_io_swd_t *s, bool assert)
+{
+    return s && s->nrst >= 0 && aos_io_be_swd_nrst(s, assert);
+}
+
+void aos_io_swd_close(aos_io_swd_t *s)
+{
+    if (!s) return;
+    aos_io_be_swd_close(s);
+    aos_io_release(s->clk, s->owner);
+    aos_io_release(s->dio, s->owner);
+    if (s->nrst >= 0) aos_io_release(s->nrst, s->owner);
+    free(s);
 }

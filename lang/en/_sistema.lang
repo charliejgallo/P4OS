@@ -9119,3 +9119,153 @@ Programa borrado en %u,%u s (el bootloader queda)	Program erased in %u.%u s (the
 
 #: components/aos_flasher (Programador, Arduino)
 %s no es una imagen de ESP: es para un Arduino u otro micro	%s is not an ESP image: it's for an Arduino or another micro
+
+#: components/aos_flasher (Programador, SWD)
+Consola RTT abierta	RTT console open
+
+#: components/aos_flasher (Programador, SWD)
+Consola cerrada	Console closed
+
+#: components/aos_flasher (Programador, SWD)
+No se pudo abrir la consola	Couldn't open the console
+
+#: components/aos_flasher (Programador, SWD)
+Protegido contra lectura: sólo se puede borrar entero	Read-protected: it can only be erased whole
+
+#: components/aos_flasher (Programador, SWD)
+sector	sector
+
+#: components/aos_flasher (Programador, SWD)
+flash externa	external flash
+
+#: components/aos_flasher (Programador, SWD)
+Sin driver de flash todavía	No flash driver yet
+
+#: components/aos_flasher (Programador, SWD)
+SWCLK, SWDIO y GND al header, y tocá Detectar	SWCLK, SWDIO and GND to the header, then tap Detect
+
+#: components/aos_flasher (Programador, SWD)
+El chip en %s está protegido: borrarlo entero se lleva su firmware y la protección.	The chip on %s is protected: erasing it whole takes its firmware and the protection away.
+
+#: components/aos_flasher (Programador, SWD)
+El chip conectado en %s se queda sin programa.	The chip on %s is left without a program.
+
+#: components/aos_flasher (Programador, SWD)
+Consola RTT	RTT console
+
+#: components/aos_flasher (Programador, SWD)
+SWCLK del objetivo	Target's SWCLK
+
+#: components/aos_flasher (Programador, SWD)
+SWDIO del objetivo	Target's SWDIO
+
+#: components/aos_flasher (Programador, SWD)
+RESET, si lo tiene a mano	RESET, if it's at hand
+
+#: components/aos_flasher (Programador, SWD)
+Un objetivo de 3,3 V con su propia alimentación; el 3V3 de acá sólo si no la tiene. En una Pico: el conector DEBUG (SWCLK, GND, SWDIO).	A 3.3 V target with its own supply; this board's 3V3 only if it has none. On a Pico: the DEBUG header (SWCLK, GND, SWDIO).
+
+#: components/aos_flasher (Programador, SWD)
+Copiá ahí el .hex, .elf, .uf2 o .bin de tu firmware (un .bin va al comienzo de la flash).	Copy your firmware's .hex, .elf, .uf2 or .bin there (a .bin goes to the start of the flash).
+
+#: components/aos_flasher (Programador, SWD)
+lo que escribe su firmware, abajo	what its firmware writes, below
+
+#: components/aos_flasher (Programador, SWD)
+Cerrar la consola	Close console
+
+#: components/aos_flasher (Programador, SWD)
+Nadie contestó por SWD: revisá SWCLK, SWDIO, GND y que el objetivo tenga alimentación	Nobody answered over SWD: check SWCLK, SWDIO, GND and that the target is powered
+
+#: components/aos_flasher (Programador, SWD)
+El DP no aceptó el pedido de encendido	The DP refused the power-up request
+
+#: components/aos_flasher (Programador, SWD)
+El depurador del objetivo no se encendió	The target's debugger didn't power up
+
+#: components/aos_flasher (Programador, SWD)
+Todavía no sé grabar la flash de este chip	I can't write this chip's flash yet
+
+#: components/aos_flasher (Programador, SWD)
+El chip está protegido contra lectura: no se graba. Borralo entero primero.	The chip is read-protected: not written. Erase it whole first.
+
+#: components/aos_flasher (Programador, SWD)
+Todavía no sé grabar la flash de %s	I can't write the flash of %s yet
+
+#: components/aos_flasher (Programador, SWD)
+Una carpeta de ESP-IDF no es para este chip	An ESP-IDF folder is not for this chip
+
+#: components/aos_flasher (Programador, SWD)
+%s es un .uf2 para otro chip (familia 0x%08X)	%s is a .uf2 for another chip (family 0x%08X)
+
+#: components/aos_flasher (Programador, SWD)
+0x%08X queda fuera de la flash (0x%08X, %u KB)	0x%08X is outside the flash (0x%08X, %u KB)
+
+#: components/aos_flasher (Programador, SWD)
+%u sectores de %u KB desde 0x%08X	%u sectors of %u KB from 0x%08X
+
+#: components/aos_flasher (Programador, SWD)
+No se pudo preparar la flash (detener el núcleo, desbloquearla)	Couldn't prepare the flash (halt the core, unlock it)
+
+#: components/aos_flasher (Programador, SWD)
+0x%08X: no se pudo borrar	0x%08X: couldn't erase
+
+#: components/aos_flasher (Programador, SWD)
+0x%08X: falló la escritura	0x%08X: write failed
+
+#: components/aos_flasher (Programador, SWD)
+0x%08X: falló la lectura	0x%08X: read failed
+
+#: components/aos_flasher (Programador, SWD)
+0x%08X: el chip tiene %02X y el archivo %02X	0x%08X: the chip has %02X and the file %02X
+
+#: components/aos_flasher (Programador, SWD)
+Verificado: la flash es igual al archivo	Verified: the flash matches the file
+
+#: components/aos_flasher (Programador, SWD)
+Todavía no sé borrar la flash de %s	I can't erase the flash of %s yet
+
+#: components/aos_flasher (Programador, SWD)
+Para quitar la protección de este chip hace falta cambiar sus option bytes: todavía no	Removing this chip's protection needs its option bytes changed: not yet
+
+#: components/aos_flasher (Programador, SWD)
+Borrando todo por el CTRL-AP: se va la protección y el firmware	Erasing all through the CTRL-AP: the protection and the firmware go
+
+#: components/aos_flasher (Programador, SWD)
+Borrando toda la flash	Erasing the whole flash
+
+#: components/aos_flasher (Programador, SWD)
+Buscando el bloque de RTT en 0x%08X (%u KB)	Looking for the RTT block at 0x%08X (%u KB)
+
+#: components/aos_flasher (Programador, SWD)
+No hay bloque de RTT en la RAM: el firmware tiene que usar SEGGER RTT (y estar corriendo)	No RTT block in RAM: the firmware has to use SEGGER RTT (and be running)
+
+#: components/aos_flasher (Programador, SWD)
+El bloque de RTT no tiene un buffer de subida válido	The RTT block has no valid up buffer
+
+#: components/aos_flasher (Programador, SWD)
+RTT en 0x%08X: %u bytes de subida%s	RTT at 0x%08X: %u bytes up%s
+
+#: components/aos_flasher (Programador, SWD)
+, se le puede escribir	, it can be written to
+
+#: components/aos_flasher (Programador, SWD)
+Se perdió el contacto con el objetivo	Lost contact with the target
+
+#: components/aos_flasher (Programador, SWD)
+SWD va por los pines de un puerto del header (uart.a, uart.b): %s no es uno	SWD goes through the pins of a header port (uart.a, uart.b): %s is not one
+
+#: components/aos_flasher (Programador, SWD)
+SWCLK GPIO%d, SWDIO GPIO%d, NRST GPIO%d, ~%u kHz	SWCLK GPIO%d, SWDIO GPIO%d, NRST GPIO%d, ~%u kHz
+
+#: components/aos_flasher (Programador, SWD)
+SWCLK GPIO%d, SWDIO GPIO%d, sin NRST, ~%u kHz	SWCLK GPIO%d, SWDIO GPIO%d, no NRST, ~%u kHz
+
+#: components/aos_flasher (Programador, SWD)
+Por SWD no se lee la flash entera: sólo se verifica lo grabado	Over SWD the whole flash isn't read: only what was written is verified
+
+#: components/aos_flasher (Programador, SWD)
+Objetivo reiniciado	Target restarted
+
+#: components/aos_flasher (Programador, SWD)
+no hay una consola abierta	no console is open

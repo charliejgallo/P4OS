@@ -180,6 +180,18 @@ void aos_io_be_edges_close(aos_io_edges_t *e);
 bool aos_io_be_pulse_out(int gpio, int level, uint32_t us);
 bool aos_io_be_shift_in(int data, int clk, int bits, int extra, uint32_t *out);
 
+struct aos_io_swd {
+    int8_t   clk, dio, nrst;
+    uint32_t khz;
+    char     owner[24];
+    void    *be;
+};
+bool aos_io_be_swd_open(aos_io_swd_t *s);
+bool aos_io_be_swd_seq(aos_io_swd_t *s, const uint8_t *bits, int n);
+int  aos_io_be_swd_xfer(aos_io_swd_t *s, uint8_t req, uint32_t *data, bool no_ack);
+bool aos_io_be_swd_nrst(aos_io_swd_t *s, bool assert);
+void aos_io_be_swd_close(aos_io_swd_t *s);
+
 struct aos_io_count {
     int8_t   gpio;
     bool     both;

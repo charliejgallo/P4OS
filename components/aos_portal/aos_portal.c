@@ -1055,11 +1055,12 @@ static void api_fs_op(aos_httpd_req_t *r, const char *op)
 /* -------------------------------------------------------------------------- */
 
 static const char *const FLASH_PHASE[] = { "idle", "opening", "connecting", "stub", "baud", "info", "erasing",
-                                           "writing", "verifying", "reading", "resetting", "done", "failed", "cancelled" };
-static const char *const FLASH_JOB[] = { "", "detect", "flash", "read", "erase" };
-static const char *const FLASH_FAMILY[] = { "esp", "avr" };
+                                           "writing", "verifying", "reading", "resetting", "console", "done", "failed",
+                                           "cancelled" };
+static const char *const FLASH_JOB[] = { "", "detect", "flash", "read", "erase", "console" };
+static const char *const FLASH_FAMILY[] = { "esp", "avr", "swd" };
 
-/* "family": "esp" (the default) or "avr" */
+/* "family": "esp" (the default), "avr" or "swd" */
 static aos_flasher_family_t flash_family(const cJSON *b)
 {
     const char *f = jstr(b, "family");
@@ -1074,7 +1075,7 @@ static void api_flash(aos_httpd_req_t *r)
     aos_flasher_status(&st);
     cJSON *o = cJSON_CreateObject();
     cJSON_AddBoolToObject(o, "busy", st.busy);
-    cJSON_AddStringToObject(o, "job", st.job <= AOS_FLASHER_JOB_ERASE ? FLASH_JOB[st.job] : "");
+    cJSON_AddStringToObject(o, "job", st.job <= AOS_FLASHER_JOB_CONSOLE ? FLASH_JOB[st.job] : "");
     cJSON_AddStringToObject(o, "phase", st.phase <= AOS_FLASHER_CANCELLED ? FLASH_PHASE[st.phase] : "?");
     cJSON_AddStringToObject(o, "family", st.family < AOS_FLASHER_FAMILIES ? FLASH_FAMILY[st.family] : "?");
     cJSON_AddNumberToObject(o, "seq", st.seq);
@@ -1203,7 +1204,8 @@ static void api_flash_start(aos_httpd_req_t *r)
 }
 
 /* A dump ({"port", "from", "len"}, len 0 or missing: to the end of the
- * flash) or an erase ({"port"}); "family" as in the others */
+ * flash), an erase ({"port"}) or an SWD target's RTT console ({"port"},
+ * until flash/cancel); "family" as in the others */
 static void api_flash_job(aos_httpd_req_t *r, aos_flasher_job_t job)
 {
     cJSON *b = body_json(r);
@@ -1217,10 +1219,22 @@ static void api_flash_job(aos_httpd_req_t *r, aos_flasher_job_t job)
         .read_len = cJSON_IsNumber(len) ? (uint32_t)len->valuedouble : 0,
     };
     port = port && port[0] ? port : "uart.b";
-    bool ok = job == AOS_FLASHER_JOB_READ ? aos_flasher_read(port, &o) : aos_flasher_erase(port, &o);
+    bool ok = job == AOS_FLASHER_JOB_READ ? aos_flasher_read(port, &o)
+            : job == AOS_FLASHER_JOB_CONSOLE ? aos_flasher_console(port, &o) : aos_flasher_erase(port, &o);
     cJSON_Delete(b);
     if (ok) send_ok(r);
     else send_err(r, 409, _("ya hay un trabajo en curso"));
+}
+
+/* {"text": "..."} down the RTT console that is running */
+static void api_flash_send(aos_httpd_req_t *r)
+{
+    cJSON *b = body_json(r);
+    const char *t = jstr(b, "text");
+    bool ok = t && aos_flasher_console_send(t, (int)strlen(t));
+    cJSON_Delete(b);
+    if (ok) send_ok(r);
+    else send_err(r, 409, _("no hay una consola abierta"));
 }
 
 static void api_flash_detect(aos_httpd_req_t *r)
@@ -1630,6 +1644,8 @@ static void handler(aos_httpd_req_t *r)
     else if (post && !strcmp(p, "flash/read")) api_flash_job(r, AOS_FLASHER_JOB_READ);
     else if (post && !strcmp(p, "flash/erase")) api_flash_job(r, AOS_FLASHER_JOB_ERASE);
     else if (post && !strcmp(p, "flash/cancel")) { aos_flasher_cancel(); send_ok(r); }
+    else if (post && !strcmp(p, "flash/console")) api_flash_job(r, AOS_FLASHER_JOB_CONSOLE);
+    else if (post && !strcmp(p, "flash/console/send")) api_flash_send(r);
     else if (get && !strcmp(p, "flash/log")) api_flash_log(r);
     else if (get && !strcmp(p, "serial")) api_serial(r);
     else if (get && !strcmp(p, "serial/lines")) api_serial_lines(r);

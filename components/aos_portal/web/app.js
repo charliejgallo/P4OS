@@ -478,9 +478,9 @@ async function pageTerminal() {
 /* ---- Programador ---- */
 const PHASES = { idle: N_('Listo'), opening: N_('Abriendo el puerto'), connecting: N_('Conectando con la placa'), stub: N_('Cargando el stub'),
   baud: N_('Subiendo la velocidad'), info: N_('Leyendo el chip'), erasing: N_('Borrando'), writing: N_('Grabando'), verifying: N_('Verificando'),
-  reading: N_('Leyendo la flash'), resetting: N_('Reiniciando la placa'), done: N_('Grabación terminada'), failed: N_('Falló'), cancelled: N_('Cancelado') };
+  reading: N_('Leyendo la flash'), resetting: N_('Reiniciando la placa'), console: N_('Consola RTT abierta'), done: N_('Grabación terminada'), failed: N_('Falló'), cancelled: N_('Cancelado') };
 /* the end of a dump or an erase says what it was */
-const JOB_DONE = { read: N_('Volcado guardado'), erase: N_('Flash borrada') };
+const JOB_DONE = { read: N_('Volcado guardado'), erase: N_('Flash borrada'), console: N_('Consola cerrada') };
 /* "/sdcard/firmware/volcados/x.bin" -> "/firmware/volcados/x.bin", as the card's API names it */
 const cardPath = p => { const i = p.indexOf('/firmware/'); return i >= 0 ? p.slice(i) : p; };
 const dumpLink = (p, text) => h('a', { href: '/api/fs/get?attachment=1&path=' + encodeURIComponent(cardPath(p)) }, text);
@@ -515,11 +515,11 @@ async function pageProgramador() {
   const portSel = h('select', { onchange: e => { flashPort = e.target.value; } });
   /* ESP32 or Arduino: the service's family, sent with every job */
   const famSel = h('select', { onchange: e => { flashFam = e.target.value; flashSel = ''; load(true); } },
-    [['esp', 'ESP32'], ['avr', 'Arduino (AVR)']].map(([v, n]) => h('option', { value: v, selected: v === flashFam }, n)));
+    [['esp', 'ESP32'], ['avr', 'Arduino (AVR)'], ['swd', 'SWD (Cortex-M)']].map(([v, n]) => h('option', { value: v, selected: v === flashFam }, n)));
   const bar = h('div', { class: 'prog' }, h('div'));
   const pickDir = h('input', { type: 'file', webkitdirectory: true, multiple: true, style: 'display:none',
     onchange: async e => { await uploadFolder(e.target.files, bar); load(true); } });
-  const pickBin = h('input', { type: 'file', accept: '.bin,.hex', multiple: true, style: 'display:none',
+  const pickBin = h('input', { type: 'file', accept: '.bin,.hex,.elf,.uf2', multiple: true, style: 'display:none',
     onchange: async e => { cwd = '/firmware'; await fetch('/api/fs/mkdir?path=%2Ffirmware', { method: 'POST' }); await upload(e.target.files, bar); location.hash = '#programador'; load(true); } });
   let last = null, lastSources = '';
   /* the range of a dump, in hex or decimal ("0x10000", "1M", "512K"); empty: all */
@@ -531,8 +531,19 @@ async function pageProgramador() {
     if (isNaN(from) || isNaN(len)) { toast(tr('El rango va en hexadecimal (0x10000) o con K o M'), true); return; }
     try { await post('flash/read', { port: flashPort, family: flashFam, from, len }); flashLog = 0; put(log); load(); } catch (e) { toast(e.message, true); }
   };
+  /* SWD: the target's RTT console, into the log; a line typed goes down to it */
+  const openConsole = async () => {
+    try { await post('flash/console', { port: flashPort, family: 'swd' }); flashLog = 0; put(log); load(); } catch (e) { toast(e.message, true); }
+  };
+  const sendIn = h('input', { placeholder: tr('Escribile al firmware y Enter'), style: 'flex:1',
+    onkeydown: async e => {
+      if (e.key !== 'Enter') return;
+      try { await post('flash/console/send', { text: sendIn.value + '\n' }); sendIn.value = ''; } catch (err) { toast(err.message, true); }
+    } });
+  const sendRow = h('div', { class: 'btns', style: 'margin-top:8px;display:none' }, sendIn);
   const eraseFlash = async () => {
     if (!confirm(flashFam === 'avr' ? tr('¿Borrar el programa del Arduino en %s? Su bootloader queda. Para guardarlo antes, usá Leer la flash.', flashPort)
+      : flashFam === 'swd' ? tr('¿Borrar toda la flash del chip en %s? Se queda sin programa (y sin su protección, si la tenía).', flashPort)
       : tr('¿Borrar toda la flash de la placa en %s? Se queda sin programa. Para guardarlo antes, usá Leer la flash.', flashPort))) return;
     try { await post('flash/erase', { port: flashPort, family: flashFam }); flashLog = 0; put(log); load(); } catch (e) { toast(e.message, true); }
   };
@@ -554,11 +565,15 @@ async function pageProgramador() {
       h('div', { class: 'row' }, h('div', { class: 'grow' }, tr('Tipo de placa')), famSel),
       row(tr('Placa'), c ? `${c.name} ${c.revision || ''}` : tr('sin detectar'), c ? '' : 'muted'),
       c ? row('Flash', c.flash_size ? fmtBytes(c.flash_size) + (c.page ? ' · ' + tr('página %s B', c.page) : '') : '—') : null,
-      c && c.bootloader ? row('Bootloader', c.bootloader) : null,
+      c && c.bootloader ? row(flashFam === 'swd' ? tr('Núcleo') : 'Bootloader', c.bootloader) : null,
+      c && c.secure && flashFam === 'swd' ? h('div', { class: 'row warn' }, tr('Protegido contra lectura: sólo se puede borrar entero')) : null,
       c && c.mac ? row('MAC', c.mac) : null,
-      c && c.secure ? h('div', { class: 'row warn' }, tr('Flash cifrada o arranque seguro: no se puede grabar desde acá')) : null,
+      c && c.secure && flashFam === 'esp' ? h('div', { class: 'row warn' }, tr('Flash cifrada o arranque seguro: no se puede grabar desde acá')) : null,
       h('div', { class: 'row' }, h('div', { class: 'grow' }, portSel),
         h('button', { class: 'btn', disabled: st.busy, onclick: async () => { try { await post('flash/detect', { port: flashPort, family: flashFam }); load(); } catch (e) { toast(e.message, true); } } }, tr('Detectar'))),
+      flashFam === 'swd' ? h('div', { class: 'row' }, h('div', { class: 'grow' }),
+        h('button', { class: 'btn', disabled: st.busy, onclick: openConsole }, tr('Consola RTT')),
+        h('button', { class: 'btn red', disabled: st.busy, onclick: eraseFlash }, tr('Borrar la flash'))) :
       h('div', { class: 'row' }, h('div', { class: 'grow small muted' }, tr('Desde'), ' ', fromIn, ' ', tr('cuánto'), ' ', lenIn),
         h('button', { class: 'btn', disabled: st.busy, onclick: readFlash }, tr('Leer la flash')),
         h('button', { class: 'btn red', disabled: st.busy, onclick: eraseFlash }, flashFam === 'avr' ? tr('Borrar el programa') : tr('Borrar la flash'))));
@@ -577,7 +592,7 @@ async function pageProgramador() {
               (x.files.length === 1 ? tr('1 archivo') : tr('%s archivos', x.files.length)) + ' · ' + fmtBytes(x.total)),
             on ? h('div', { class: 'small muted', style: 'font-family:ui-monospace,Menlo,monospace;margin-top:6px' },
               x.files.map(f => h('div', {}, f.offset + '  ' + f.name + '  (' + fmtBytes(f.size) + ')'))) : null));
-      }) : [h('div', { class: 'row muted' }, flashFam === 'avr' ? tr('No hay firmware en /firmware. Subí el .hex de tu sketch (Sketch, Exportar binario compilado en el IDE de Arduino).')
+      }) : [h('div', { class: 'row muted' }, flashFam === 'swd' ? tr('No hay firmware en /firmware. Subí el .hex, .elf, .uf2 o .bin de tu firmware.') : flashFam === 'avr' ? tr('No hay firmware en /firmware. Subí el .hex de tu sketch (Sketch, Exportar binario compilado en el IDE de Arduino).')
         : tr('No hay firmware en /firmware. Subí una carpeta de build de ESP-IDF o un .bin.'))]);
     }
     /* the job */
@@ -587,7 +602,7 @@ async function pageProgramador() {
       h('div', { class: 'btns' }, h('b', { class: done ? 'ok' : failed ? 'bad' : '' }, tr(title)),
         h('span', { class: 'muted small' }, st.job === 'read' && st.dump ? dumpLink(st.dump.path, st.dump.path.split('/').pop()) :
           st.source + (st.file_count ? ' · ' + tr('archivo %s de %s: %s', st.file_index + 1, st.file_count, st.file_name) : '')),
-        st.busy ? h('button', { class: 'btn red', style: 'margin-left:auto', onclick: () => post('flash/cancel') }, tr('Cancelar')) : null),
+        st.busy ? h('button', { class: 'btn red', style: 'margin-left:auto', onclick: () => post('flash/cancel') }, st.job === 'console' ? tr('Cerrar la consola') : tr('Cancelar')) : null),
       h('div', { class: 'prog', style: 'height:10px;margin-top:12px' }, h('div', { style: `width:${st.percent}%;${done ? 'background:var(--green)' : failed ? 'background:var(--red)' : ''}` })),
       h('div', { class: 'small muted', style: 'margin-top:8px' },
         tr('%s de %s', fmtBytes(st.done), fmtBytes(st.total)) + ` · ${st.bytes_per_s ? fmtBytes(st.bytes_per_s) + '/s' : '—'} · ` +
@@ -595,6 +610,7 @@ async function pageProgramador() {
         (done && st.dump ? ' · SHA-256 ' + st.dump.sha256.slice(0, 16) + '…' : '')),
       failed && st.error ? h('div', { class: 'bad small', style: 'margin-top:6px' }, st.error) : null) : null);
     startBtn.disabled = st.busy || !flashSel;
+    sendRow.style.display = st.busy && st.job === 'console' ? '' : 'none';
     /* its log */
     if (st.log_count > flashLog) {
       const l = await api('flash/log?from=' + flashLog);
@@ -609,12 +625,13 @@ async function pageProgramador() {
     h('div', { class: 'grid2' },
       h('div', {}, h('h2', { style: 'margin-top:0' }, tr('La placa a programar')), target,
         h('p', { class: 'note' }, tr('Conectada al header: TX, RX y GND al puerto, y EN y BOOT a los pines que dice modules.txt (module target … en= boot=).')),
-        h('p', { class: 'note' }, tr('Un Arduino: EN va a su RESET, y el TX de uno de 5 V llega al RX de la placa por un divisor (1 kΩ y 2 kΩ) o un adaptador de niveles. Por USB, nada.'))),
+        h('p', { class: 'note' }, tr('Un Arduino: EN va a su RESET, y el TX de uno de 5 V llega al RX de la placa por un divisor (1 kΩ y 2 kΩ) o un adaptador de niveles. Por USB, nada.')),
+        h('p', { class: 'note' }, tr('SWD: el TX del puerto es SWCLK, el RX es SWDIO y EN es NRST (opcional), con GND común.'))),
       h('div', {}, h('h2', { style: 'margin-top:0' }, tr('Firmware en la tarjeta')), srcs,
         h('div', { class: 'btns', style: 'margin-top:12px' }, startBtn,
           h('button', { class: 'btn', onclick: () => pickDir.click() }, tr('Subir carpeta de build…')), pickDir,
-          h('button', { class: 'btn', onclick: () => pickBin.click() }, tr('Subir .bin o .hex…')), pickBin), bar)),
-    h('h2', {}, tr('Grabación')), job, h('h2', {}, tr('Registro del programador')), log);
+          h('button', { class: 'btn', onclick: () => pickBin.click() }, tr('Subir un archivo…')), pickBin), bar)),
+    h('h2', {}, tr('Grabación')), job, h('h2', {}, tr('Registro del programador')), log, sendRow);
   flashLog = 0;
   clearInterval(flashT);
   flashT = setInterval(() => { if (location.hash === '#programador') load(); else clearInterval(flashT); }, 700);

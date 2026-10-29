@@ -229,6 +229,7 @@ add_executable(p4os_sim
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_pca9685.c
     io_sim.c
     uart_emu_sim.c
+    swd_sim.c
     spi_emu_sim.c
     sensors_sim.c
     ${SIM_EMU_SRC}
@@ -283,6 +284,7 @@ target_link_directories(p4os_sim PRIVATE ${SDL2_LIBRARY_DIRS} ${AVCODEC_LIBRARY_
 target_sources(p4os_sim PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_avr.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_swd.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_esp.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_src.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_img.c)

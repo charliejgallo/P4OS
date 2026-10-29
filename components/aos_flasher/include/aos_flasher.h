@@ -7,8 +7,12 @@
  * card and a thread.
  *
  * Each job is for one family of targets (aos_flasher_opts_t.family): the
- * ESP32s above, or the AVR Arduinos through their own bootloader (Uno, Nano,
- * Pro Mini, Mega, Leonardo, Micro: aos_flasher_avr.c), from a .hex.
+ * ESP32s above, the AVR Arduinos through their own bootloader (Uno, Nano,
+ * Pro Mini, Mega, Leonardo, Micro: aos_flasher_avr.c), from a .hex, or an
+ * Arm Cortex-M through its SWD port (nRF52, RP2040, STM32F0/F1:
+ * aos_flasher_swd.c), on the pins of a UART port of the header: TX is
+ * SWCLK, RX is SWDIO, EN is NRST. An SWD job can also be the target's RTT
+ * console: what its firmware writes, read from its RAM while it runs.
  *
  * A service, not an app: one job at a time runs in its own thread and goes on
  * with the Programador app closed. Everything here is callable from the LVGL
@@ -46,6 +50,7 @@ extern "C" {
 typedef enum {
     AOS_FLASHER_ESP = 0,        /* ESP32 / ESP8266 through the ROM's serial bootloader */
     AOS_FLASHER_AVR,            /* an Arduino through its bootloader: STK500 v1/v2, AVR109 */
+    AOS_FLASHER_SWD,            /* an Arm Cortex-M through its debug port */
     AOS_FLASHER_FAMILIES,
 } aos_flasher_family_t;
 
@@ -119,6 +124,7 @@ typedef enum {
     AOS_FLASHER_VERIFYING,      /* MD5 of what the target has */
     AOS_FLASHER_READING,        /* a dump: the flash to the card */
     AOS_FLASHER_RESETTING,
+    AOS_FLASHER_CONSOLE,        /* the RTT console: reading until cancelled */
     AOS_FLASHER_DONE,
     AOS_FLASHER_FAILED,
     AOS_FLASHER_CANCELLED,
@@ -128,6 +134,7 @@ typedef enum {
     AOS_FLASHER_JOB_NONE = 0, AOS_FLASHER_JOB_DETECT, AOS_FLASHER_JOB_FLASH,
     AOS_FLASHER_JOB_READ,       /* a dump to the card */
     AOS_FLASHER_JOB_ERASE,      /* all of the flash */
+    AOS_FLASHER_JOB_CONSOLE,    /* SWD: the target's RTT console, until cancelled */
 } aos_flasher_job_t;
 
 typedef struct {
@@ -154,6 +161,11 @@ bool aos_flasher_flash(const char *port, const aos_flasher_source_t *src, const 
 bool aos_flasher_read(const char *port, const aos_flasher_opts_t *opts);
 /* Erases all of the target's flash: what is on it is gone. */
 bool aos_flasher_erase(const char *port, const aos_flasher_opts_t *opts);
+/* SWD: the target's RTT console. What its firmware writes to its first up
+ * buffer goes to the log, a line at a time (level 1), until cancelled;
+ * aos_flasher_console_send() puts bytes in its first down buffer. */
+bool aos_flasher_console(const char *port, const aos_flasher_opts_t *opts);
+bool aos_flasher_console_send(const void *data, int n);
 void aos_flasher_cancel(void);
 bool aos_flasher_busy(void);
 
@@ -186,10 +198,10 @@ typedef struct {
     uint32_t flash_size;        /* bytes, 0 unknown */
     bool     stub;              /* the flasher stub ran */
     uint32_t baud;              /* the speed the job ended up at */
-    bool     secure;            /* secure boot or flash encryption on */
+    bool     secure;            /* secure boot or flash encryption on; SWD: read protection */
     bool     lines;             /* the port has EN/BOOT */
     aos_flasher_family_t family;
-    char     boot[32];          /* an AVR: its bootloader, "optiboot 8.0, 115200" */
+    char     boot[32];          /* an AVR: its bootloader, "optiboot 8.0, 115200"; SWD: the core, "Cortex-M4, DP v2" */
     uint16_t page;              /* an AVR: the flash page, bytes */
     /* a dump: where it went (kept after the job; removed if the job failed),
      * the address it started at and its SHA-256 in hex */

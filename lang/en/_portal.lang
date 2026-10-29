@@ -2131,4 +2131,36 @@ verificado	verified
 Un Arduino: EN va a su RESET, y el TX de uno de 5 V llega al RX de la placa por un divisor (1 kΩ y 2 kΩ) o un adaptador de niveles. Por USB, nada.	An Arduino: EN goes to its RESET, and a 5 V one's TX reaches the board's RX through a divider (1 kΩ and 2 kΩ) or a level shifter. Over USB, nothing.
 
 #: components/aos_flasher (Programador, Arduino)
-Subir .bin o .hex…	Upload .bin or .hex…
+
+#: components/aos_flasher (Programador, SWD)
+Consola RTT abierta	RTT console open
+
+#: components/aos_flasher (Programador, SWD)
+Consola cerrada	Console closed
+
+#: components/aos_flasher (Programador, SWD)
+Escribile al firmware y Enter	Type to the firmware and press Enter
+
+#: components/aos_flasher (Programador, SWD)
+¿Borrar toda la flash del chip en %s? Se queda sin programa (y sin su protección, si la tenía).	Erase the whole flash of the chip on %s? It is left without a program (and without its protection, if it had one).
+
+#: components/aos_flasher (Programador, SWD)
+Núcleo	Core
+
+#: components/aos_flasher (Programador, SWD)
+Protegido contra lectura: sólo se puede borrar entero	Read-protected: it can only be erased whole
+
+#: components/aos_flasher (Programador, SWD)
+Consola RTT	RTT console
+
+#: components/aos_flasher (Programador, SWD)
+No hay firmware en /firmware. Subí el .hex, .elf, .uf2 o .bin de tu firmware.	No firmware in /firmware. Upload your firmware's .hex, .elf, .uf2 or .bin.
+
+#: components/aos_flasher (Programador, SWD)
+Cerrar la consola	Close console
+
+#: components/aos_flasher (Programador, SWD)
+SWD: el TX del puerto es SWCLK, el RX es SWDIO y EN es NRST (opcional), con GND común.	SWD: the port's TX is SWCLK, RX is SWDIO and EN is NRST (optional), with a common GND.
+
+#: components/aos_flasher (Programador, SWD)
+Subir un archivo…	Upload a file…

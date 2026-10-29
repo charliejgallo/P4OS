@@ -384,7 +384,7 @@ static bool load_image(const char *path, aos_flasher_source_t *src, char *err, s
     if (aos_flasher_image_fmt(path) == AOS_IMG_UF2) {
         uint8_t b[32];
         if (read_at(path, 0, b, sizeof b) == sizeof b && b[0] == 0x55 && b[1] == 0x46 && b[2] == 0x32 && b[3] == 0x0A &&
-            (b[8] & 0x20)) {
+            (b[9] & 0x20)) {                /* flags 0x2000: the family ID is there */
             uint32_t fam = b[28] | b[29] << 8 | b[30] << 16 | (uint32_t)b[31] << 24;
             const char *chip = fam == 0xE48BFF56 ? "RP2040" : fam == 0xE48BFF59 || fam == 0xE48BFF5B ? "RP2350"
                              : fam == 0xADA52840 ? "nRF52840" : fam == 0x68ED2B88 ? "SAMD21" : fam == 0x55114460 ? "SAMD51" : NULL;

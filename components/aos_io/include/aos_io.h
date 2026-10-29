@@ -298,6 +298,26 @@ void aos_io_edges_close(aos_io_edges_t *e);
 bool aos_io_pulse_out(int gpio, int level, uint32_t us, const char *owner);
 bool aos_io_shift_in(int data, int clk, int bits, int extra, uint32_t *out, const char *owner);
 
+/* ---- SWD: an Arm debug port on three pins (the Programador) ----
+ *
+ * The wire only: SWCLK and SWDIO bit-banged, NRST open drain (-1: none).
+ * seq clocks out n raw bits, LSB first, SWDIO driven (line resets, the
+ * JTAG-to-SWD and dormant wake-up sequences, idle cycles). xfer is one
+ * packet: the 8-bit request (start, APnDP, RnW, A[2:3], parity, stop,
+ * park), the turnaround, the 3-bit ACK and, with ACK OK, the 32 data bits
+ * and their parity, in or out; it returns the ACK (1 OK, 2 WAIT, 4 FAULT,
+ * 7 nobody driving the line), or -1 for a read whose parity was wrong.
+ * A write to TARGETSEL has no ACK to wait for: no_ack sends the data
+ * anyway. On the board each packet runs with this core's interrupts off;
+ * khz sets the clock (roughly: it is a delay loop). In the simulator the
+ * pins lead to an emulated target (sim/swd_sim.c, P4_SIM_SWD). */
+typedef struct aos_io_swd aos_io_swd_t;
+aos_io_swd_t *aos_io_swd_open(int swclk, int swdio, int nrst, uint32_t khz, const char *owner);
+bool aos_io_swd_seq(aos_io_swd_t *s, const uint8_t *bits, int n);
+int  aos_io_swd_xfer(aos_io_swd_t *s, uint8_t req, uint32_t *data, bool no_ack);
+bool aos_io_swd_nrst(aos_io_swd_t *s, bool assert);
+void aos_io_swd_close(aos_io_swd_t *s);
+
 typedef struct aos_io_count aos_io_count_t;
 aos_io_count_t *aos_io_count_open(int gpio, aos_gpio_mode_t pull, bool both_edges, uint32_t debounce_us, const char *owner);
 uint32_t aos_io_count_get(aos_io_count_t *c);

@@ -493,6 +493,14 @@ Que necesitan la mano del usuario o equipos:
     servidor, que desde una Mac (`openssl s_client -tls1_2 -reconnect`)
     tampoco retomó la primera sesión (salió otra, con otro certificado,
     RSA y después ECDSA) y sí las siguientes.
+- [ ] Programador por SWD (F2, 2026-10-29, sin instalar; probado sólo en el
+      simulador contra `sim/swd_sim.c`). En la placa:
+  - Medir el reloj (SWCLK) con el analizador o el osciloscopio: el lazo
+    de espera de `aos_io_pulse_p4.c` apunta a ~1 MHz sin medir.
+  - La RP2040 del usuario por el conector DEBUG a `uart.b` (pines 12 y 14,
+    GND): Detectar (`DPIDR 0BC12477 (TARGETSEL 01002927)`), grabar un
+    `.uf2` de Blink, y la consola RTT con un firmware que la use.
+  - La Ekobadge 2026 (desde el 2026-10-31): ver su chip, grabar y RTT.
 - [ ] Programador con Arduino (F3, 2026-10-29, sin instalar; probado sólo
       en el simulador contra `tools/fake_avr_boot.py`). En la placa:
   - Un Uno o un Nano por USB (`usb0`, reset por DTR): Detectar (firma y
