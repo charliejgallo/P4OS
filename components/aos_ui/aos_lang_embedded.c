@@ -2879,6 +2879,11 @@ static const char blob_en__sistema_lang[] =
     "Objetivo reiniciado\tTarget restarted\n"
     "no hay una consola abierta\tno console is open\n"
     "La RP2040 contestó pero no se pudo elegir su núcleo 0\tThe RP2040 answered but its core 0 couldn't be selected\n"
+    "RP2040: la ROM no tiene su marca (0x%04X)\tRP2040: the ROM lacks its magic (0x%04X)\n"
+    "RP2040: a la tabla de la ROM (0x%04X) le falta %.2s\tRP2040: the ROM table (0x%04X) has no %.2s\n"
+    "RP2040: el núcleo no se detuvo\tRP2040: the core didn't halt\n"
+    "RP2040: connect_internal_flash no volvió\tRP2040: connect_internal_flash didn't return\n"
+    "RP2040: flash_exit_xip no volvió\tRP2040: flash_exit_xip didn't return\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5750,6 +5755,11 @@ static const char blob_de__sistema_lang[] =
     "Objetivo reiniciado\tZiel neu gestartet\n"
     "no hay una consola abierta\tkeine Konsole offen\n"
     "La RP2040 contestó pero no se pudo elegir su núcleo 0\tDer RP2040 antwortete, aber sein Kern 0 ließ sich nicht wählen\n"
+    "RP2040: la ROM no tiene su marca (0x%04X)\tRP2040: der ROM fehlt seine Kennung (0x%04X)\n"
+    "RP2040: a la tabla de la ROM (0x%04X) le falta %.2s\tRP2040: in der ROM-Tabelle (0x%04X) fehlt %.2s\n"
+    "RP2040: el núcleo no se detuvo\tRP2040: der Kern hielt nicht an\n"
+    "RP2040: connect_internal_flash no volvió\tRP2040: connect_internal_flash kehrte nicht zurück\n"
+    "RP2040: flash_exit_xip no volvió\tRP2040: flash_exit_xip kehrte nicht zurück\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -5757,7 +5767,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2864, 0, files_en, 1 },
-    { "de", "Deutsch", 2864, 0, files_de, 1 },
+    { "en", "English", 2869, 0, files_en, 1 },
+    { "de", "Deutsch", 2869, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

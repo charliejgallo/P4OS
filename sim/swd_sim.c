@@ -144,9 +144,11 @@ static void chip_init(void)
         T.xip = true;
         T.rom = calloc(1, 0x4000);
         T.rom[0x10] = 'M'; T.rom[0x11] = 'u'; T.rom[0x12] = 1;      /* magic, version 1 */
-        T.rom[0x14] = 0x00; T.rom[0x15] = 0x02;                     /* the function table at 0x200 */
+        /* the function table at 0x7A, two bytes off a word, as a real ROM
+         * may have it: read by words it comes out shifted */
+        T.rom[0x14] = 0x7A; T.rom[0x15] = 0x00;
         for (size_t i = 0; i < sizeof RP_FUNCS / sizeof RP_FUNCS[0]; i++) {
-            uint8_t *t = T.rom + 0x200 + 4 * i;
+            uint8_t *t = T.rom + 0x7A + 4 * i;
             t[0] = (uint8_t)RP_FUNCS[i].c[0]; t[1] = (uint8_t)RP_FUNCS[i].c[1];
             t[2] = (uint8_t)RP_FUNCS[i].at; t[3] = (uint8_t)(RP_FUNCS[i].at >> 8);
         }
@@ -310,6 +312,8 @@ static bool mem_access(uint32_t a, int size, bool wr, uint32_t *lanes)
     if (size == 4 && !wr && reg_read(aligned, &v)) { *lanes = v; return true; }
     if (size == 4 && wr && reg_write(aligned, *lanes)) return true;
     if (!wr && reg_read(aligned, &v)) { *lanes = v; return true; }
+    /* the bus has no unaligned accesses: the low bits of TAR are dropped */
+    a &= ~(uint32_t)(size - 1);
     uint8_t *p = ptr(a);
     if (!p) {
         if (!wr) *lanes = 0;

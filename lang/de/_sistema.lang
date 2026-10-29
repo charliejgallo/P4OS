@@ -9272,3 +9272,18 @@ no hay una consola abierta	keine Konsole offen
 
 #: components/aos_flasher (Programador, SWD)
 La RP2040 contestó pero no se pudo elegir su núcleo 0	Der RP2040 antwortete, aber sein Kern 0 ließ sich nicht wählen
+
+#: components/aos_flasher (Programador, SWD)
+RP2040: la ROM no tiene su marca (0x%04X)	RP2040: der ROM fehlt seine Kennung (0x%04X)
+
+#: components/aos_flasher (Programador, SWD)
+RP2040: a la tabla de la ROM (0x%04X) le falta %.2s	RP2040: in der ROM-Tabelle (0x%04X) fehlt %.2s
+
+#: components/aos_flasher (Programador, SWD)
+RP2040: el núcleo no se detuvo	RP2040: der Kern hielt nicht an
+
+#: components/aos_flasher (Programador, SWD)
+RP2040: connect_internal_flash no volvió	RP2040: connect_internal_flash kehrte nicht zurück
+
+#: components/aos_flasher (Programador, SWD)
+RP2040: flash_exit_xip no volvió	RP2040: flash_exit_xip kehrte nicht zurück

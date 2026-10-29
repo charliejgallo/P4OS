@@ -507,8 +507,14 @@ Que necesitan la mano del usuario o equipos:
     quedan despiertos, contestan los tres juntos al primer DPIDR (el mismo
     valor) y el Programador no los elegía: todo lo demás chocaba. Ahora un
     DPIDR 0BC12477 siempre lleva a un reset de línea y TARGETSEL, y el
-    simulador hace chocar a los tres DP igual que la placa. Falta probarlo
-    en la placa: grabar `tools/swd_test/blink_pico/build/doble.uf2` (dos
+    simulador hace chocar a los tres DP igual que la placa. Con eso
+    instalado (`e03fa9c`) elegía bien el núcleo 0, y grabar fallaba en
+    "No se pudo preparar la flash": la tabla de funciones de la ROM se
+    leía por palabras desde su dirección, que no es múltiplo de 4, y el bus
+    alinea para abajo. Ahora se lee alineada y se recorre por medias
+    palabras, y cada paso de la preparación dice en el registro si falló;
+    el simulador pone su tabla desalineada y alinea los accesos como el
+    bus. Falta probarlo en la placa: grabar `tools/swd_test/blink_pico/build/doble.uf2` (dos
     destellos y una pausa) sobre el Blink de medio segundo, y la consola
     RTT.
   - La Ekobadge 2026 (desde el 2026-10-31): ver su chip, grabar y RTT.

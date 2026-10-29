@@ -9272,3 +9272,18 @@ no hay una consola abierta	no console is open
 
 #: components/aos_flasher (Programador, SWD)
 La RP2040 contestó pero no se pudo elegir su núcleo 0	The RP2040 answered but its core 0 couldn't be selected
+
+#: components/aos_flasher (Programador, SWD)
+RP2040: la ROM no tiene su marca (0x%04X)	RP2040: the ROM lacks its magic (0x%04X)
+
+#: components/aos_flasher (Programador, SWD)
+RP2040: a la tabla de la ROM (0x%04X) le falta %.2s	RP2040: the ROM table (0x%04X) has no %.2s
+
+#: components/aos_flasher (Programador, SWD)
+RP2040: el núcleo no se detuvo	RP2040: the core didn't halt
+
+#: components/aos_flasher (Programador, SWD)
+RP2040: connect_internal_flash no volvió	RP2040: connect_internal_flash didn't return
+
+#: components/aos_flasher (Programador, SWD)
+RP2040: flash_exit_xip no volvió	RP2040: flash_exit_xip didn't return

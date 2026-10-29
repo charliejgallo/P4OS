@@ -588,20 +588,33 @@ static const char RP_CODES[RP_N][2] = { "IF", "EX", "RE", "RP", "FC", "CX", "DT"
 #define RP_BUF      0x20010000u     /* where the data to program goes */
 #define RP_STACK    0x20040000u
 
+/* The boot ROM's table of functions: its 16-bit address at 0x14, then
+ * pairs of 16-bit (code, address) up to a code of 0. The table need not
+ * start on a word, and the bus has no unaligned accesses: it is read as
+ * aligned words and taken apart by halfwords (found on the board: read by
+ * words at its own address it came out shifted, and nothing was found). */
 static bool rp_lookup(swd_t *s)
 {
     uint32_t v;
+    if (!rd32(s, 0x10, &v) || (v & 0xFFFF) != ('M' | 'u' << 8)) {
+        fl_logf(L_ERR, _("RP2040: la ROM no tiene su marca (0x%04X)"), (unsigned)(v & 0xFFFF));
+        return false;
+    }
     if (!rd32(s, 0x14, &v)) return false;
-    uint32_t table = v & 0xFFFF;
-    for (int i = 0; i < 64; i++) {
-        uint32_t e;
-        if (!rd32(s, table + 4 * (uint32_t)i, &e)) return false;
-        uint16_t code = (uint16_t)e;
+    uint32_t table = v & 0xFFFF, from = table & ~3u;
+    uint8_t *b = s->buf;
+    if (!mem_read(s, from, b, 512)) return false;
+    for (uint32_t o = table - from; o + 4 <= 512; o += 4) {
+        uint16_t code = (uint16_t)(b[o] | b[o + 1] << 8), at = (uint16_t)(b[o + 2] | b[o + 3] << 8);
         if (!code) break;
         for (int k = 0; k < RP_N; k++)
-            if (code == (uint16_t)(RP_CODES[k][0] | RP_CODES[k][1] << 8)) s->rp_fn[k] = (uint16_t)(e >> 16);
+            if (code == (uint16_t)(RP_CODES[k][0] | RP_CODES[k][1] << 8)) s->rp_fn[k] = at;
     }
-    for (int k = 0; k < RP_N; k++) if (!s->rp_fn[k]) return false;
+    for (int k = 0; k < RP_N; k++) {
+        if (s->rp_fn[k]) continue;
+        fl_logf(L_ERR, _("RP2040: a la tabla de la ROM (0x%04X) le falta %.2s"), (unsigned)table, RP_CODES[k]);
+        return false;
+    }
     return true;
 }
 
@@ -624,9 +637,14 @@ static bool rp_call(swd_t *s, int fn, uint32_t r0, uint32_t r1, uint32_t r2, uin
     return false;
 }
 
+/* Each step says what failed: on the board that is all there is to go by */
 static bool rp_begin(swd_t *s)
 {
-    return halt(s) && rp_lookup(s) && rp_call(s, RP_IF, 0, 0, 0, 0, 100) && rp_call(s, RP_EX, 0, 0, 0, 0, 100);
+    if (!halt(s)) { fl_logf(L_ERR, "%s", _("RP2040: el núcleo no se detuvo")); return false; }
+    if (!rp_lookup(s)) return false;
+    if (!rp_call(s, RP_IF, 0, 0, 0, 0, 100)) { fl_logf(L_ERR, "%s", _("RP2040: connect_internal_flash no volvió")); return false; }
+    if (!rp_call(s, RP_EX, 0, 0, 0, 0, 100)) { fl_logf(L_ERR, "%s", _("RP2040: flash_exit_xip no volvió")); return false; }
+    return true;
 }
 
 static bool rp_erase(swd_t *s, uint32_t addr)
