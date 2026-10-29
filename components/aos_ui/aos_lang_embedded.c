@@ -2878,6 +2878,7 @@ static const char blob_en__sistema_lang[] =
     "Por SWD no se lee la flash entera: sólo se verifica lo grabado\tOver SWD the whole flash isn't read: only what was written is verified\n"
     "Objetivo reiniciado\tTarget restarted\n"
     "no hay una consola abierta\tno console is open\n"
+    "La RP2040 contestó pero no se pudo elegir su núcleo 0\tThe RP2040 answered but its core 0 couldn't be selected\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5748,6 +5749,7 @@ static const char blob_de__sistema_lang[] =
     "Por SWD no se lee la flash entera: sólo se verifica lo grabado\tÜber SWD wird nicht der ganze Flash gelesen: nur das Geschriebene wird verifiziert\n"
     "Objetivo reiniciado\tZiel neu gestartet\n"
     "no hay una consola abierta\tkeine Konsole offen\n"
+    "La RP2040 contestó pero no se pudo elegir su núcleo 0\tDer RP2040 antwortete, aber sein Kern 0 ließ sich nicht wählen\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -5755,7 +5757,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2863, 0, files_en, 1 },
-    { "de", "Deutsch", 2863, 0, files_de, 1 },
+    { "en", "English", 2864, 0, files_en, 1 },
+    { "de", "Deutsch", 2864, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

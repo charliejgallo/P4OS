@@ -497,9 +497,20 @@ Que necesitan la mano del usuario o equipos:
       simulador contra `sim/swd_sim.c`). En la placa:
   - Medir el reloj (SWCLK) con el analizador o el osciloscopio: el lazo
     de espera de `aos_io_pulse_p4.c` apunta a ~1 MHz sin medir.
-  - La RP2040 del usuario por el conector DEBUG a `uart.b` (pines 12 y 14,
-    GND): Detectar (`DPIDR 0BC12477 (TARGETSEL 01002927)`), grabar un
-    `.uf2` de Blink, y la consola RTT con un firmware que la use.
+  - La RP2040 del usuario (una Pico) por el conector DEBUG a `uart.b`
+    (pines 12 y 14, GND), con el firmware `015ae4f`: **Detectar anduvo**
+    (RP2040, Cortex-M0+, DPIDR 0BC12477, flash externa) - el bit-bang
+    contesta, al reloj que sea. Foto: `docs/img/photo-flasher-swd-rp2040.jpg`.
+  - Encontrado ahí: el trabajo siguiente (grabar `doble.uf2`) decía
+    "Cortex-M?" y "no sé grabar". La primera vez los DP de la RP2040 están
+    dormidos y se despiertan eligiendo el núcleo 0 con TARGETSEL; después
+    quedan despiertos, contestan los tres juntos al primer DPIDR (el mismo
+    valor) y el Programador no los elegía: todo lo demás chocaba. Ahora un
+    DPIDR 0BC12477 siempre lleva a un reset de línea y TARGETSEL, y el
+    simulador hace chocar a los tres DP igual que la placa. Falta probarlo
+    en la placa: grabar `tools/swd_test/blink_pico/build/doble.uf2` (dos
+    destellos y una pausa) sobre el Blink de medio segundo, y la consola
+    RTT.
   - La Ekobadge 2026 (desde el 2026-10-31): ver su chip, grabar y RTT.
 - [ ] Programador con Arduino (F3, 2026-10-29, sin instalar; probado sólo
       en el simulador contra `tools/fake_avr_boot.py`). En la placa:

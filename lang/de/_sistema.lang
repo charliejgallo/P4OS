@@ -9269,3 +9269,6 @@ Objetivo reiniciado	Ziel neu gestartet
 
 #: components/aos_flasher (Programador, SWD)
 no hay una consola abierta	keine Konsole offen
+
+#: components/aos_flasher (Programador, SWD)
+La RP2040 contestó pero no se pudo elegir su núcleo 0	Der RP2040 antwortete, aber sein Kern 0 ließ sich nicht wählen

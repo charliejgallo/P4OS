@@ -12,9 +12,13 @@
  *
  *   the wire       line resets (50 ones), JTAG-to-SWD, SWD-to-dormant and
  *                  the dormant wake-up (the selection alert and the SWD
- *                  activation code); the RP2040 is a multidrop target and
- *                  says nothing until a TARGETSEL right after a line reset
- *                  names its core 0.
+ *                  activation code). The RP2040 is a multidrop target: its
+ *                  three DPs (two cores and the rescue one) come up dormant
+ *                  and say nothing until woken; once awake, a line reset
+ *                  not followed by a TARGETSEL leaves all of them answering
+ *                  at once - the DPIDR, the same for all, reads fine, and
+ *                  anything else is a clash (a parity error), as on the
+ *                  board on 2026-10-29. TARGETSEL for core 0 picks it.
  *   the DP         DPIDR, ABORT, CTRL/STAT with the power-up handshake,
  *                  SELECT, RDBUFF; AP reads are posted, as on silicon: a
  *                  read gives the previous one's value, RDBUFF the last.
@@ -136,6 +140,7 @@ static void chip_init(void)
     case C_RP2040:
         T.dpidr = 0x0BC12477; T.flash_base = 0x10000000; T.flash_size = 2 << 20; T.page = 4096; T.ram_size = 264 << 10;
         T.multidrop = true;
+        T.dormant = true;
         T.xip = true;
         T.rom = calloc(1, 0x4000);
         T.rom[0x10] = 'M'; T.rom[0x11] = 'u'; T.rom[0x12] = 1;      /* magic, version 1 */
@@ -483,7 +488,11 @@ int aos_io_be_swd_xfer(aos_io_swd_t *s, uint8_t req, uint32_t *data, bool no_ack
         T.selected = *data == 0x01002927;
         return no_ack ? 1 : 7;
     }
-    if (T.multidrop && !T.selected) return 7;
+    if (T.multidrop && !T.selected) {
+        /* every DP at once: the DPIDR agrees, nothing else does */
+        if (!ap && rd && a == 0x0) { *data = T.dpidr; return 1; }
+        return rd ? -1 : 1;
+    }
     if (T.sticky && ap) return 4;
     int ack = 1;
     if (!ap) {

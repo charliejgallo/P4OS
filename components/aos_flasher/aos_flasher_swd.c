@@ -12,6 +12,11 @@
  *   connect    line reset, JTAG-to-SWD, DPIDR. Nobody answering may be a
  *              multidrop target (the RP2040): SWD-to-dormant, the dormant
  *              wake-up, a line reset, TARGETSEL for its core 0, DPIDR again.
+ *              An RP2040 left awake by an earlier job does answer the first
+ *              DPIDR - all three of its DPs at once, with the same value -
+ *              so its DPIDR also leads to a line reset and TARGETSEL: with
+ *              them all on the wire every other read is a clash (found on
+ *              the board: the second job read the core as "Cortex-M?").
  *              Then the sticky errors cleared and the debug power-up.
  *   MEM-AP     AP 0, 32-bit with auto-increment, TAR set again at every
  *              1 KB (where the increment wraps); reads pipelined (each AP
@@ -285,6 +290,18 @@ static void dormant_wake(swd_t *s)
     line_reset(s);
 }
 
+#define DPIDR_RP2040    0x0BC12477u
+#define TARGETSEL_CORE0 0x01002927u
+
+/* After a line reset: TARGETSEL for the RP2040's core 0 (it has no ACK),
+ * and its DPIDR, now from that DP alone. */
+static bool select_core0(swd_t *s)
+{
+    uint32_t sel = TARGETSEL_CORE0;
+    aos_io_swd_xfer(s->w, req_of(false, false, DP_TARGETSEL), &sel, true);
+    return dp_read(s, DP_DPIDR, &s->dpidr);
+}
+
 static bool connect(swd_t *s)
 {
     fl_phase(AOS_FLASHER_CONNECTING);
@@ -292,11 +309,17 @@ static bool connect(swd_t *s)
     s->csw = 0;
     jtag_to_swd(s);
     if (!dp_read(s, DP_DPIDR, &s->dpidr)) {
+        s->dpidr = 0;
+    } else if (s->dpidr == DPIDR_RP2040) {
+        /* awake from an earlier job, and every DP answering */
+        line_reset(s);
+        if (!select_core0(s)) return fl_cancel ? false : fl_fail("%s", _("La RP2040 contestó pero no se pudo elegir su núcleo 0"));
+        s->multidrop = true;
+    }
+    if (!s->dpidr) {
         /* a multidrop DP says nothing until it is named: the RP2040's core 0 */
         dormant_wake(s);
-        uint32_t sel = 0x01002927;
-        aos_io_swd_xfer(s->w, req_of(false, false, DP_TARGETSEL), &sel, true);
-        if (!dp_read(s, DP_DPIDR, &s->dpidr)) {
+        if (!select_core0(s)) {
             /* or one that only needed waking (no TARGETSEL) */
             dormant_wake(s);
             if (!dp_read(s, DP_DPIDR, &s->dpidr))
