@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **A bridge for the computer's tools.** "Puente para la Mac" lends the
+  Programador's port over TCP until it is closed: RFC 2217 on 4000 for
+  esptool and pyserial (`--port rfc2217://p4os.local:4000`, with its
+  speed and its reset through EN/BOOT), the bytes alone on 4001 for
+  avrdude (`-c arduino -P net:p4os.local:4001`, an Arduino reset at each
+  connection). One client at a time, and only from where the portal opens
+  without a password. In the simulator, esptool wrote with its MD5 checked
+  and avrdude wrote and verified through it.
 - **The Programmer writes STM32s through their serial bootloader** (ST's
   AN3155), a fourth kind of board: BOOT0 on the port's BOOT line, NRST on
   EN, 8E1. It finds the chip by its PID and the flash by its family's

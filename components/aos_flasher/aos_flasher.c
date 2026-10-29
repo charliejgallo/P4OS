@@ -297,10 +297,13 @@ const char *aos_flasher_family_name(int family)
 static void worker(void *arg)
 {
     (void)arg;
-    bool ok = J.opts.family == AOS_FLASHER_AVR ? fl_avr_run() : J.opts.family == AOS_FLASHER_SWD ? fl_swd_run()
+    bool ok = J.job == AOS_FLASHER_JOB_BRIDGE ? fl_bridge_run()
+            : J.opts.family == AOS_FLASHER_AVR ? fl_avr_run() : J.opts.family == AOS_FLASHER_SWD ? fl_swd_run()
             : J.opts.family == AOS_FLASHER_STM32 ? fl_stm32_run() : fl_esp_run();
-    /* a console ends by a cancel, and that is how it is meant to end */
-    if (J.job == AOS_FLASHER_JOB_CONSOLE && fl_cancel && fl_st.phase == AOS_FLASHER_CONSOLE) ok = true;
+    /* a console or the bridge ends by a cancel, and that is how it is meant to end */
+    if (fl_cancel && ((J.job == AOS_FLASHER_JOB_CONSOLE && fl_st.phase == AOS_FLASHER_CONSOLE) ||
+                      (J.job == AOS_FLASHER_JOB_BRIDGE && fl_st.phase == AOS_FLASHER_BRIDGE)))
+        ok = true;
     bool cancelled = fl_cancel && !ok;
     if (D.f) fl_dump_close(false, false, NULL);     /* a family that left one open */
     fl_lock();
@@ -316,6 +319,8 @@ static void worker(void *arg)
     uint32_t ms = fl_st.elapsed_ms;
     if (ok && J.job == AOS_FLASHER_JOB_CONSOLE)
         fl_logf(L_INFO, "%s", _("Consola cerrada"));
+    else if (ok && J.job == AOS_FLASHER_JOB_BRIDGE)
+        fl_logf(L_INFO, "%s", _("Puente cerrado"));
     else if (ok && J.job != AOS_FLASHER_JOB_DETECT)
         fl_logf(L_OK, _("Listo en %u,%u s"), (unsigned)(ms / 1000), (unsigned)(ms % 1000 / 100));
     else if (cancelled)
@@ -331,6 +336,7 @@ static const char *job_word(aos_flasher_job_t job)
     case AOS_FLASHER_JOB_READ: return _("Leer");
     case AOS_FLASHER_JOB_ERASE: return _("Borrar");
     case AOS_FLASHER_JOB_CONSOLE: return _("Consola");
+    case AOS_FLASHER_JOB_BRIDGE: return _("Puente");
     default: return "?";
     }
 }
@@ -363,9 +369,10 @@ static bool start(aos_flasher_job_t job, const char *port)
     fl_st.elapsed_ms = (uint32_t)J.t0;      /* the start, while busy (see aos_flasher_status) */
     fl_unlock();
     const char *what = job == AOS_FLASHER_JOB_FLASH ? J.src.name : job == AOS_FLASHER_JOB_DETECT ? "chip"
-                     : job == AOS_FLASHER_JOB_CONSOLE ? "RTT" : "flash";
+                     : job == AOS_FLASHER_JOB_CONSOLE ? "RTT" : job == AOS_FLASHER_JOB_BRIDGE ? "TCP" : "flash";
     fl_logf(L_INFO, _("%s %s en %s"), job_word(job), what, J.port);
-    if (J.opts.family != AOS_FLASHER_ESP) fl_logf(L_INFO, _("Placa: %s"), aos_flasher_family_name(J.opts.family));
+    if (J.opts.family != AOS_FLASHER_ESP && job != AOS_FLASHER_JOB_BRIDGE)
+        fl_logf(L_INFO, _("Placa: %s"), aos_flasher_family_name(J.opts.family));
     if (!aos_hal_thread_start("flasher", worker, NULL, 8192, 5)) {
         fl_lock();
         fl_st.busy = false;
@@ -415,6 +422,13 @@ bool aos_flasher_erase(const char *port, const aos_flasher_opts_t *opts)
     if (fl_st.busy) return false;
     take_opts(opts);
     return start(AOS_FLASHER_JOB_ERASE, port);
+}
+
+bool aos_flasher_bridge(const char *port, const aos_flasher_opts_t *opts)
+{
+    if (fl_st.busy) return false;
+    take_opts(opts);
+    return start(AOS_FLASHER_JOB_BRIDGE, port);
 }
 
 /* What goes down to the console: a small queue the job empties */

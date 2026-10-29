@@ -2910,6 +2910,26 @@ static const char blob_en__sistema_lang[] =
     "%s, NRST por EN (GPIO%d) y BOOT0 por BOOT (GPIO%d)\t%s, NRST by EN (GPIO%d) and BOOT0 by BOOT (GPIO%d)\n"
     "%s, NRST por RTS y BOOT0 por DTR\t%s, NRST by RTS and BOOT0 by DTR\n"
     "Eso no se hace con el bootloader del STM32\tThat isn't done through the STM32's bootloader\n"
+    "Puente abierto\tBridge open\n"
+    "Puente cerrado\tBridge closed\n"
+    "No se pudo abrir el puente\tCouldn't open the bridge\n"
+    "Puente para la Mac\tBridge for the Mac\n"
+    "Cerrar el puente\tClose bridge\n"
+    "Puente\tBridge\n"
+    "una red que no es de casa\ta network that isn't home\n"
+    "la red pide contraseña y un socket no la puede dar\tthe network asks for the password and a socket can't give it\n"
+    "Puente: %u baudios\tBridge: %u baud\n"
+    "Puente: se fue el cliente (%s); %u bytes al objetivo, %u de vuelta\tBridge: the client left (%s); %u bytes to the target, %u back\n"
+    "Puente: %s quiso entrar y ya hay alguien\tBridge: %s tried to connect and someone is already there\n"
+    "Puente: %s rechazado: %s\tBridge: %s refused: %s\n"
+    "Puente: %s conectado (%s)\tBridge: %s connected (%s)\n"
+    "crudo\traw\n"
+    "No se pudieron abrir los puertos %d y %d\tCouldn't open ports %d and %d\n"
+    "Puente abierto en %s a %u baudios\tBridge open on %s at %u baud\n"
+    "cerró\tclosed\n"
+    "error\terror\n"
+    "%s se desconectó\t%s was unplugged\n"
+    "se cerró el puente\tthe bridge closed\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5812,6 +5832,26 @@ static const char blob_de__sistema_lang[] =
     "%s, NRST por EN (GPIO%d) y BOOT0 por BOOT (GPIO%d)\t%s, NRST per EN (GPIO%d) und BOOT0 per BOOT (GPIO%d)\n"
     "%s, NRST por RTS y BOOT0 por DTR\t%s, NRST per RTS und BOOT0 per DTR\n"
     "Eso no se hace con el bootloader del STM32\tDas geht nicht über den Bootloader des STM32\n"
+    "Puente abierto\tBrücke offen\n"
+    "Puente cerrado\tBrücke geschlossen\n"
+    "No se pudo abrir el puente\tBrücke konnte nicht geöffnet werden\n"
+    "Puente para la Mac\tBrücke zum Mac\n"
+    "Cerrar el puente\tBrücke schließen\n"
+    "Puente\tBrücke\n"
+    "una red que no es de casa\tein Netz, das nicht Zuhause ist\n"
+    "la red pide contraseña y un socket no la puede dar\tdas Netz verlangt das Passwort, und ein Socket kann es nicht liefern\n"
+    "Puente: %u baudios\tBrücke: %u Baud\n"
+    "Puente: se fue el cliente (%s); %u bytes al objetivo, %u de vuelta\tBrücke: Client weg (%s); %u Bytes zum Ziel, %u zurück\n"
+    "Puente: %s quiso entrar y ya hay alguien\tBrücke: %s wollte verbinden, aber es ist schon jemand da\n"
+    "Puente: %s rechazado: %s\tBrücke: %s abgelehnt: %s\n"
+    "Puente: %s conectado (%s)\tBrücke: %s verbunden (%s)\n"
+    "crudo\troh\n"
+    "No se pudieron abrir los puertos %d y %d\tPorts %d und %d konnten nicht geöffnet werden\n"
+    "Puente abierto en %s a %u baudios\tBrücke offen an %s mit %u Baud\n"
+    "cerró\tgeschlossen\n"
+    "error\tFehler\n"
+    "%s se desconectó\t%s wurde getrennt\n"
+    "se cerró el puente\tdie Brücke wurde geschlossen\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -5819,7 +5859,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2895, 0, files_en, 1 },
-    { "de", "Deutsch", 2895, 0, files_de, 1 },
+    { "en", "English", 2915, 0, files_en, 1 },
+    { "de", "Deutsch", 2915, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

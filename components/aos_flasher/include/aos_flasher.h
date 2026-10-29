@@ -128,6 +128,7 @@ typedef enum {
     AOS_FLASHER_READING,        /* a dump: the flash to the card */
     AOS_FLASHER_RESETTING,
     AOS_FLASHER_CONSOLE,        /* the RTT console: reading until cancelled */
+    AOS_FLASHER_BRIDGE,         /* the port lent over TCP, until cancelled */
     AOS_FLASHER_DONE,
     AOS_FLASHER_FAILED,
     AOS_FLASHER_CANCELLED,
@@ -138,6 +139,7 @@ typedef enum {
     AOS_FLASHER_JOB_READ,       /* a dump to the card */
     AOS_FLASHER_JOB_ERASE,      /* all of the flash */
     AOS_FLASHER_JOB_CONSOLE,    /* SWD: the target's RTT console, until cancelled */
+    AOS_FLASHER_JOB_BRIDGE,     /* the port over TCP for the computer's tools, until cancelled */
 } aos_flasher_job_t;
 
 typedef struct {
@@ -169,6 +171,11 @@ bool aos_flasher_erase(const char *port, const aos_flasher_opts_t *opts);
  * aos_flasher_console_send() puts bytes in its first down buffer. */
 bool aos_flasher_console(const char *port, const aos_flasher_opts_t *opts);
 bool aos_flasher_console_send(const void *data, int n);
+/* The port lent to the computer over TCP (aos_flasher_bridge.c): RFC 2217
+ * on 4000 (esptool, pyserial), the bytes alone on 4001 with an Arduino's
+ * reset at each connection (avrdude), at opts->baud; until cancelled, and
+ * only from where the portal opens without a password. */
+bool aos_flasher_bridge(const char *port, const aos_flasher_opts_t *opts);
 void aos_flasher_cancel(void);
 bool aos_flasher_busy(void);
 

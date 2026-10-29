@@ -2170,3 +2170,15 @@ STM32 (serie)	STM32 (seriell)
 
 #: components/aos_flasher (Programador, STM32)
 STM32 por serie: TX al PA10, RX al PA9, EN al NRST y BOOT al BOOT0.	STM32 seriell: TX an PA10, RX an PA9, EN an NRST und BOOT an BOOT0.
+
+#: components/aos_flasher (Programador, puente)
+Puente abierto	Brücke offen
+
+#: components/aos_flasher (Programador, puente)
+Puente cerrado	Brücke geschlossen
+
+#: components/aos_flasher (Programador, puente)
+Puente para la Mac	Brücke zum Mac
+
+#: components/aos_flasher (Programador, puente)
+Cerrar el puente	Brücke schließen

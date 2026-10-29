@@ -9371,3 +9371,63 @@ No se pudo quitar la protección	Couldn't remove the protection
 
 #: components/aos_flasher (Programador, STM32)
 Eso no se hace con el bootloader del STM32	That isn't done through the STM32's bootloader
+
+#: components/aos_flasher (Programador, puente)
+Puente abierto	Bridge open
+
+#: components/aos_flasher (Programador, puente)
+Puente cerrado	Bridge closed
+
+#: components/aos_flasher (Programador, puente)
+No se pudo abrir el puente	Couldn't open the bridge
+
+#: components/aos_flasher (Programador, puente)
+Puente para la Mac	Bridge for the Mac
+
+#: components/aos_flasher (Programador, puente)
+Cerrar el puente	Close bridge
+
+#: components/aos_flasher (Programador, puente)
+Puente	Bridge
+
+#: components/aos_flasher (Programador, puente)
+una red que no es de casa	a network that isn't home
+
+#: components/aos_flasher (Programador, puente)
+la red pide contraseña y un socket no la puede dar	the network asks for the password and a socket can't give it
+
+#: components/aos_flasher (Programador, puente)
+Puente: %u baudios	Bridge: %u baud
+
+#: components/aos_flasher (Programador, puente)
+Puente: se fue el cliente (%s); %u bytes al objetivo, %u de vuelta	Bridge: the client left (%s); %u bytes to the target, %u back
+
+#: components/aos_flasher (Programador, puente)
+Puente: %s quiso entrar y ya hay alguien	Bridge: %s tried to connect and someone is already there
+
+#: components/aos_flasher (Programador, puente)
+Puente: %s rechazado: %s	Bridge: %s refused: %s
+
+#: components/aos_flasher (Programador, puente)
+Puente: %s conectado (%s)	Bridge: %s connected (%s)
+
+#: components/aos_flasher (Programador, puente)
+crudo	raw
+
+#: components/aos_flasher (Programador, puente)
+No se pudieron abrir los puertos %d y %d	Couldn't open ports %d and %d
+
+#: components/aos_flasher (Programador, puente)
+Puente abierto en %s a %u baudios	Bridge open on %s at %u baud
+
+#: components/aos_flasher (Programador, puente)
+cerró	closed
+
+#: components/aos_flasher (Programador, puente)
+error	error
+
+#: components/aos_flasher (Programador, puente)
+%s se desconectó	%s was unplugged
+
+#: components/aos_flasher (Programador, puente)
+se cerró el puente	the bridge closed

@@ -9371,3 +9371,63 @@ No se pudo quitar la protección	Schutz konnte nicht entfernt werden
 
 #: components/aos_flasher (Programador, STM32)
 Eso no se hace con el bootloader del STM32	Das geht nicht über den Bootloader des STM32
+
+#: components/aos_flasher (Programador, puente)
+Puente abierto	Brücke offen
+
+#: components/aos_flasher (Programador, puente)
+Puente cerrado	Brücke geschlossen
+
+#: components/aos_flasher (Programador, puente)
+No se pudo abrir el puente	Brücke konnte nicht geöffnet werden
+
+#: components/aos_flasher (Programador, puente)
+Puente para la Mac	Brücke zum Mac
+
+#: components/aos_flasher (Programador, puente)
+Cerrar el puente	Brücke schließen
+
+#: components/aos_flasher (Programador, puente)
+Puente	Brücke
+
+#: components/aos_flasher (Programador, puente)
+una red que no es de casa	ein Netz, das nicht Zuhause ist
+
+#: components/aos_flasher (Programador, puente)
+la red pide contraseña y un socket no la puede dar	das Netz verlangt das Passwort, und ein Socket kann es nicht liefern
+
+#: components/aos_flasher (Programador, puente)
+Puente: %u baudios	Brücke: %u Baud
+
+#: components/aos_flasher (Programador, puente)
+Puente: se fue el cliente (%s); %u bytes al objetivo, %u de vuelta	Brücke: Client weg (%s); %u Bytes zum Ziel, %u zurück
+
+#: components/aos_flasher (Programador, puente)
+Puente: %s quiso entrar y ya hay alguien	Brücke: %s wollte verbinden, aber es ist schon jemand da
+
+#: components/aos_flasher (Programador, puente)
+Puente: %s rechazado: %s	Brücke: %s abgelehnt: %s
+
+#: components/aos_flasher (Programador, puente)
+Puente: %s conectado (%s)	Brücke: %s verbunden (%s)
+
+#: components/aos_flasher (Programador, puente)
+crudo	roh
+
+#: components/aos_flasher (Programador, puente)
+No se pudieron abrir los puertos %d y %d	Ports %d und %d konnten nicht geöffnet werden
+
+#: components/aos_flasher (Programador, puente)
+Puente abierto en %s a %u baudios	Brücke offen an %s mit %u Baud
+
+#: components/aos_flasher (Programador, puente)
+cerró	geschlossen
+
+#: components/aos_flasher (Programador, puente)
+error	Fehler
+
+#: components/aos_flasher (Programador, puente)
+%s se desconectó	%s wurde getrennt
+
+#: components/aos_flasher (Programador, puente)
+se cerró el puente	die Brücke wurde geschlossen

@@ -151,3 +151,10 @@ and over the cable, HTTP keeps working: the scripts in `tools/` use it.
   portal: the trusted networks, the password and HTTPS.
 - **The card is readable by whoever holds it.** The cameras' passwords in
   `/cameras.txt`, for one, are in clear.
+- **The Programador's bridge is a raw socket** (TCP 4000 and 4001, only
+  while it is open, which is done on the board or from the portal): a
+  socket cannot log in, so a connection is kept only where the portal
+  opens without a password - the cable, the board's AP, a network marked as
+  home without "always ask" - and closed at once anywhere else, saying so
+  in its log. Whoever is on such a network can use the port while it is
+  open, as they can the portal.

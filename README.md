@@ -302,7 +302,9 @@ header with who holds each pin.
   exports. And by SWD, on the same pins: an nRF52, an RP2040, an RP2350
   or an STM32F0/F1 written and verified, and the RTT console of the firmware
   running on it. Or an STM32 through its own serial bootloader, with
-  BOOT0 and NRST on the same lines an ESP32 uses.
+  BOOT0 and NRST on the same lines an ESP32 uses. And it lends its port to
+  the computer: esptool over `rfc2217://p4os.local:4000`, avrdude over
+  `net:p4os.local:4001`.
 - **Modbus:** a Riden RD60xx supply over RTU, and a gateway.
 - **Bench:** a Rigol scope over the LAN, the Riden, a UNI-T generator over
   USB, and a logger to CSV.

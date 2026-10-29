@@ -209,6 +209,19 @@ negarse a grabar y quitarla borrando todo. Decisiones:
   total, avisando.
 - Al final, un reset con BOOT0 bajo; sin las líneas, GO a 0x08000000.
 
+**El puente, hecho el mismo día** (`aos_flasher_bridge.c`): un trabajo
+más ("Puente para la Mac" en la app y en el portal, `POST
+/api/flash/bridge`) que tiene el puerto y lo presta por TCP hasta que se
+cierra. 4000 es RFC 2217 (esptool y pyserial: velocidad, paridad y las
+líneas; en el header RTS es EN y DTR es BOOT, como el reset de esptool) y
+4001 los bytes solos, con un reset de Arduino en cada conexión porque
+avrdude no puede resetear por un socket. Un cliente por vez, y sólo desde
+donde el portal abre sin contraseña (`docs/SECURITY.md`). Probado en el
+simulador con las herramientas de verdad: `esptool chip_id` y `write_flash`
+(MD5 bien) por `rfc2217://` contra `fake_esp_rom.py`, y `avrdude -c arduino
+-P net:` grabando y verificando contra `fake_avr_boot.py`; desde una red
+ajena, la conexión se cierra y el registro lo dice. Sin probar en la placa.
+
 - **Bootloader de ST (AN3155)**: BOOT0 en la línea BOOT y NRST en EN; 8E1;
   detectar (Get, Get ID), leer, borrar (normal y extendido), grabar,
   quitar la protección de lectura avisando que borra todo.

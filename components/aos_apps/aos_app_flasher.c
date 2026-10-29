@@ -22,6 +22,9 @@
  *   the tools     "Leer" copies the target's whole flash to the card (a dump,
  *                 listed afterwards with the firmware, to write back) and
  *                 "Borrar" erases it, after asking.
+ *   the bridge    "Puente para la Mac": the port lent over TCP to esptool
+ *                 (rfc2217, 4000) and avrdude (net:, 4001) on the computer,
+ *                 until closed; the log says who connects.
  *   the console   SWD's RTT console: the target's lines in the log, and while
  *                 it is open the bar becomes a line to type (the screen's
  *                 keyboard) that goes down to the firmware with Enter.
@@ -79,6 +82,7 @@ static const char *const PHASE[] = {
     [AOS_FLASHER_READING] = N_("Leyendo la flash"),
     [AOS_FLASHER_RESETTING] = N_("Reiniciando la placa"),
     [AOS_FLASHER_CONSOLE] = N_("Consola RTT abierta"),
+    [AOS_FLASHER_BRIDGE] = N_("Puente abierto"),
     [AOS_FLASHER_DONE] = N_("Grabación terminada"),
     [AOS_FLASHER_FAILED] = N_("No se pudo grabar"),
     [AOS_FLASHER_CANCELLED] = N_("Grabación cancelada"),
@@ -160,6 +164,9 @@ static const char *phase_title(const aos_flasher_status_t *st)
         if (st->phase == AOS_FLASHER_DONE) return _("Volcado guardado");
         if (st->phase == AOS_FLASHER_FAILED) return _("No se pudo leer");
         if (st->phase == AOS_FLASHER_CANCELLED) return _("Lectura cancelada");
+    } else if (st->job == AOS_FLASHER_JOB_BRIDGE) {
+        if (st->phase == AOS_FLASHER_DONE || st->phase == AOS_FLASHER_CANCELLED) return _("Puente cerrado");
+        if (st->phase == AOS_FLASHER_FAILED) return _("No se pudo abrir el puente");
     } else if (st->job == AOS_FLASHER_JOB_CONSOLE) {
         if (st->phase == AOS_FLASHER_DONE || st->phase == AOS_FLASHER_CANCELLED) return _("Consola cerrada");
         if (st->phase == AOS_FLASHER_FAILED) return _("No se pudo abrir la consola");
@@ -467,6 +474,15 @@ static void read_cb(lv_event_t *e)
     job_started(S.fam == AOS_FLASHER_SWD ? aos_flasher_console(S.port, &o) : aos_flasher_read(S.port, &o));
 }
 
+static void bridge_cb(lv_event_t *e)
+{
+    if (aos_flasher_busy() || !port_free_or_say()) return;
+    aos_flasher_opts_t o = job_opts();
+    o.baud = BAUDS[S.baud_i] == 460800 ? 115200 : BAUDS[S.baud_i];     /* the tools set their own; a start */
+    S.log_from = aos_flasher_log_count();
+    job_started(aos_flasher_bridge(S.port, &o));
+}
+
 static void overlay_close(void)
 {
     if (U.overlay) lv_obj_delete(U.overlay);
@@ -631,6 +647,14 @@ static void build_target(lv_obj_t *parent, int32_t w, bool compact)
     if (U.land) {
         lv_obj_set_flex_grow(U.read_btn, 1);
         lv_obj_set_flex_grow(U.erase_btn, 1);
+    }
+    /* the port for the computer's own tools (not SWD's: that is a probe) */
+    if (S.fam != AOS_FLASHER_SWD) {
+        row = box(c, lv_pct(100), 64);
+        lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+        lv_obj_t *br = pill(row, AOS_SYM_LAN_CONNECT, _("Puente para la Mac"), AOS_C_CARD2, AOS_C_TEXT, bridge_cb, NULL);
+        lv_obj_set_height(br, 64);
+        if (U.land) lv_obj_set_flex_grow(br, 1);
     }
 
     /* the warning row, shown when it applies */
@@ -945,11 +969,11 @@ static void refresh_job(void)
         lv_obj_remove_flag(U.mark, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(U.mark, st.ok ? AOS_SYM_CHECK : st.phase == AOS_FLASHER_CANCELLED ? AOS_SYM_STOP : AOS_SYM_CLOSE);
         lv_obj_set_style_text_color(U.mark, col, 0);
-    } else if (st.job == AOS_FLASHER_JOB_CONSOLE) {
-        /* a console has no end to count towards */
+    } else if (st.job == AOS_FLASHER_JOB_CONSOLE || st.job == AOS_FLASHER_JOB_BRIDGE) {
+        /* a console or a bridge has no end to count towards */
         lv_obj_add_flag(U.pct, LV_OBJ_FLAG_HIDDEN);
         lv_obj_remove_flag(U.mark, LV_OBJ_FLAG_HIDDEN);
-        lv_label_set_text(U.mark, AOS_SYM_MESSAGE_TEXT_OUTLINE);
+        lv_label_set_text(U.mark, st.job == AOS_FLASHER_JOB_BRIDGE ? AOS_SYM_LAN_CONNECT : AOS_SYM_MESSAGE_TEXT_OUTLINE);
         lv_obj_set_style_text_color(U.mark, C_TINT, 0);
     } else {
         lv_obj_remove_flag(U.pct, LV_OBJ_FLAG_HIDDEN);
@@ -980,6 +1004,10 @@ static void refresh_job(void)
     } else if (st.phase >= AOS_FLASHER_ERASING && st.phase <= AOS_FLASHER_VERIFYING) {
         snprintf(buf, sizeof buf, "%s  ·  %s %d %s %d  ·  0x%X", st.file_name, _("archivo"), st.file_index + 1, _("de"),
                  st.file_count, (unsigned)st.file_offset);
+    } else if (st.phase == AOS_FLASHER_BRIDGE) {
+        const char *n = aos_hal_device_name();
+        snprintf(buf, sizeof buf, "esptool: rfc2217://%s.local:4000\navrdude: net:%s.local:4001", n && *n ? n : "p4os",
+                 n && *n ? n : "p4os");
     } else if (st.phase == AOS_FLASHER_CONSOLE) {
         snprintf(buf, sizeof buf, "%s  ·  %s", st.chip, _("lo que escribe su firmware, abajo"));
     } else if (st.chip_known && st.family != AOS_FLASHER_ESP) {
@@ -1272,6 +1300,8 @@ static void build_actions(void)
         lv_obj_align(U.con_kb, LV_ALIGN_BOTTOM_LEFT, 0, 0);
         aos_keyboard_style(U.con_kb, aos_font_small);
         lv_obj_add_flag(U.con_kb, LV_OBJ_FLAG_HIDDEN);
+    } else if (S.job_view && st.busy && st.job == AOS_FLASHER_JOB_BRIDGE) {
+        big_button(U.actions, AOS_SYM_STOP, _("Cerrar el puente"), AOS_C_CARD2, AOS_C_TEXT, cancel_cb, NULL);
     } else if (S.job_view && st.busy) {
         big_button(U.actions, AOS_SYM_STOP, _("Cancelar"), AOS_C_CARD2, AOS_C_RED, cancel_cb, NULL);
     } else if (S.job_view) {

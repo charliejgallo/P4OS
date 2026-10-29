@@ -537,6 +537,11 @@ Que necesitan la mano del usuario o equipos:
   - La Ekobadge 2026 (desde el 2026-10-31): ver su chip, grabar y RTT.
   - Una RP2350 (Pico 2), si aparece una: Detectar (`DPIDR 4C013477`,
     Cortex-M33) y grabar un `.uf2` que arranque (con su IMAGE_DEF).
+- [ ] El puente del Programador (F4, 2026-10-29; probado sólo en el
+      simulador con esptool y avrdude de la Mac): desde la Mac en la red
+      de casa, `esptool --port rfc2217://p4os.local:4000 chip_id` con un
+      ESP32 en `uart.b`, y `write_flash`; un Arduino con avrdude por
+      `net:p4os.local:4001`.
 - [ ] Programador con STM32 por su bootloader serie (F4, 2026-10-29;
       probado sólo en el simulador contra `tools/fake_stm32_boot.py`): una
       Blue Pill o Black Pill en `uart.b` (TX al PA10, RX al PA9, EN al

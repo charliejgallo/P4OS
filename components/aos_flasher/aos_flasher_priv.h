@@ -63,6 +63,8 @@ bool fl_esp_run(void);
 bool fl_avr_run(void);
 bool fl_swd_run(void);
 bool fl_stm32_run(void);
+/* Not a family: the port over TCP (aos_flasher_bridge.c) */
+bool fl_bridge_run(void);
 
 /* The console's queue to the target (aos_flasher_console_send): up to max
  * bytes out of it. */
