@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
 link.py - puts boot2.o and blink.o together for an RP2040 and writes
-blink.bin (from 0x10000000) and blink.uf2, without an ARM linker: the Mac
+<name>.bin (from 0x10000000) and <name>.uf2 (blink by default), without an ARM linker: the Mac
 has clang, which compiles for a Cortex-M0+, but no ld for ARM ELF.
 
-    link.py build/boot2.o build/blink.o build/
+    link.py build/boot2.o build/blink.o build/ [name]
 
 The flash, from 0x10000000:
     boot2       252 bytes of code and its CRC-32 (the boot ROM's, MPEG-2:
@@ -123,6 +123,7 @@ def uf2(image, base):
 
 def main():
     boot_o, prog_o, outdir = sys.argv[1:4]
+    name = sys.argv[4] if len(sys.argv) > 4 else "blink"
     boot, _ = link_blob(boot_o, 0x20041F00)          # where the ROM runs it; it uses no address of its own
     if len(boot) > 252:
         sys.exit(f"boot2 is {len(boot)} bytes: 252 at most")
@@ -134,9 +135,9 @@ def main():
             sys.exit(f"{prog_o}: no {need}")
     vec = struct.pack("<II", STACK, sym["reset_handler"] | 1) + struct.pack("<I", sym["fault"] | 1) * 14
     image = boot + vec + bytes(code)
-    open(f"{outdir}/blink.bin", "wb").write(image)
-    open(f"{outdir}/blink.uf2", "wb").write(uf2(image, FLASH))
-    print(f"blink.bin {len(image)} bytes, reset_handler at 0x{sym['reset_handler']:08x}; blink.uf2 {len(image) // 256 + 1} blocks")
+    open(f"{outdir}/{name}.bin", "wb").write(image)
+    open(f"{outdir}/{name}.uf2", "wb").write(uf2(image, FLASH))
+    print(f"{name}.bin {len(image)} bytes, reset_handler at 0x{sym['reset_handler']:08x}; {name}.uf2 {len(image) // 256 + 1} blocks")
 
 
 if __name__ == "__main__":

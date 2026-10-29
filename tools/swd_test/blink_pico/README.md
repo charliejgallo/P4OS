@@ -6,6 +6,10 @@ told through SEGGER RTT, which the Programador's RTT console reads. A line
 sent down the console (the portal's field) comes back as `recibido: ...`.
 On a Pico W the LED is on the radio chip and stays off; RTT works the same.
 
+`build/doble.uf2` is the same program built with `-DDOUBLE`: two short
+flashes and a second off, and "doble N" through RTT. Written after the
+other one, the eye sees whether the chip really runs what was written.
+
     tools/swd_test/blink_pico/build.sh
 
 It builds with the Mac's own clang (it compiles for a Cortex-M0+; there is

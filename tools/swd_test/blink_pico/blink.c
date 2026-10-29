@@ -9,6 +9,10 @@
  * built by hand at a fixed place in RAM, no division (the M0+ has none),
  * nothing in .data or .bss. It runs on the ring oscillator the boot ROM
  * leaves running (~6 MHz), so the delays are loops. Built by build.sh.
+ *
+ * With -DDOUBLE (doble.uf2) the LED gives two short flashes and stays off
+ * for a second: another firmware that the eye tells from the first, to see
+ * that a write really changed what the chip runs.
  */
 #include <stdint.h>
 
@@ -31,6 +35,8 @@
 typedef struct { uint32_t name, buf, size, wr, rd, flags; } ring_t;
 typedef struct { char id[16]; int32_t nup, ndn; ring_t up, dn; } rtt_t;
 #define CB              ((volatile rtt_t *)RTT_CB)
+
+static void echo(void);
 
 static void rtt_init(void)
 {
@@ -73,6 +79,15 @@ static void put_num(uint32_t n)
     put(out);
 }
 
+/* Tenths of a second, with what comes down the console answered meanwhile */
+static void wait_tenths(int n)
+{
+    for (int k = 0; k < n; k++) {
+        for (volatile uint32_t i = 0; i < 30000; i++) {}
+        echo();
+    }
+}
+
 /* What came down: echoed, a line at a time */
 static void echo(void)
 {
@@ -104,15 +119,28 @@ void reset_handler(void)
     REG(GPIO25_CTRL) = 5;                           /* SIO */
     REG(SIO_OE_SET) = LED;
     rtt_init();
+#ifdef DOUBLE
+    put("Doble destello de P4OS por SWD: GPIO25, dos destellos y una pausa\n");
+    for (uint32_t n = 1;; n++) {
+        for (int f = 0; f < 2; f++) {
+            REG(SIO_OUT_XOR) = LED;         /* on */
+            wait_tenths(1);
+            REG(SIO_OUT_XOR) = LED;         /* off */
+            wait_tenths(2);
+        }
+        put("doble ");
+        put_num(n);
+        put("\n");
+        wait_tenths(10);
+    }
+#else
     put("Blink de P4OS por SWD: GPIO25 cada medio segundo\n");
     for (uint32_t n = 1;; n++) {
         REG(SIO_OUT_XOR) = LED;
         put("vuelta ");
         put_num(n);
         put(n & 1 ? ": LED prendido\n" : ": LED apagado\n");
-        for (int k = 0; k < 10; k++) {
-            for (volatile uint32_t i = 0; i < 30000; i++) {}
-            echo();
-        }
+        wait_tenths(10);
     }
+#endif
 }
