@@ -535,6 +535,8 @@ Que necesitan la mano del usuario o equipos:
     (retardo 0): cada escritura de un GPIO cuesta casi medio microsegundo.
     Más rápido pide los GPIO dedicados del P4 o PARLIO, no este lazo.
   - La Ekobadge 2026 (desde el 2026-10-31): ver su chip, grabar y RTT.
+  - Una RP2350 (Pico 2), si aparece una: Detectar (`DPIDR 4C013477`,
+    Cortex-M33) y grabar un `.uf2` que arranque (con su IMAGE_DEF).
 - [ ] Programador con Arduino (F3, 2026-10-29, sin instalar; probado sólo
       en el simulador contra `tools/fake_avr_boot.py`). En la placa:
   - Un Uno o un Nano por USB (`usb0`, reset por DTR): Detectar (firma y

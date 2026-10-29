@@ -9271,20 +9271,10 @@ no hay una consola abierta	no console is open
 #: components/aos_flasher (Programador, SWD)
 La RP2040 contestó pero no se pudo elegir su núcleo 0	The RP2040 answered but its core 0 couldn't be selected
 
-#: components/aos_flasher (Programador, SWD)
-RP2040: la ROM no tiene su marca (0x%04X)	RP2040: the ROM lacks its magic (0x%04X)
 
-#: components/aos_flasher (Programador, SWD)
-RP2040: a la tabla de la ROM (0x%04X) le falta %.2s	RP2040: the ROM table (0x%04X) has no %.2s
 
-#: components/aos_flasher (Programador, SWD)
-RP2040: el núcleo no se detuvo	RP2040: the core didn't halt
 
-#: components/aos_flasher (Programador, SWD)
-RP2040: connect_internal_flash no volvió	RP2040: connect_internal_flash didn't return
 
-#: components/aos_flasher (Programador, SWD)
-RP2040: flash_exit_xip no volvió	RP2040: flash_exit_xip didn't return
 
 #: components/aos_apps/aos_app_flasher.c (consola RTT)
 Escribile al firmware…	Type to the firmware…
@@ -9294,3 +9284,24 @@ No entró: esperá que el firmware lea lo anterior	Didn't fit: wait for the firm
 
 #: components/aos_flasher (Programador, SWD)
 SWCLK medido: %u kHz; una lectura del DP cada %u µs (%u kHz efectivos, %d de 200 bien)	SWCLK measured: %u kHz; a DP read every %u µs (%u kHz effective, %d of 200 good)
+
+#: components/aos_flasher (Programador, SWD)
+%s: la ROM no tiene su marca (0x%06X)	%s: the ROM lacks its magic (0x%06X)
+
+#: components/aos_flasher (Programador, SWD)
+%s: a la tabla de la ROM (0x%04X) le falta %.2s	%s: the ROM table (0x%04X) has no %.2s
+
+#: components/aos_flasher (Programador, SWD)
+%s: el núcleo no se detuvo	%s: the core didn't halt
+
+#: components/aos_flasher (Programador, SWD)
+%s: connect_internal_flash no volvió	%s: connect_internal_flash didn't return
+
+#: components/aos_flasher (Programador, SWD)
+%s: flash_exit_xip no volvió	%s: flash_exit_xip didn't return
+
+#: components/aos_flasher (Programador, SWD)
+RP2350: el firmware bloqueó ACCESSCTRL para el depurador: no se toca	RP2350: the firmware locked ACCESSCTRL against the debugger: left alone
+
+#: components/aos_flasher (Programador, SWD)
+RP2350: bootrom_state_reset no volvió	RP2350: bootrom_state_reset didn't return

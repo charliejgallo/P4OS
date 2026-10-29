@@ -40,6 +40,16 @@
  *               do it (connect, exit XIP, erase, program from a buffer in
  *               RAM, flush, enter XIP), called on the halted core through
  *               the ROM's debug trampoline, as OpenOCD does.
+ *   RP2350      the same functions, from a ROM table with a pointer for
+ *               each architecture (the Secure Arm one is taken), called
+ *               through a stub of ours in RAM (no trampoline here): stack
+ *               limits cleared, blx r7, bkpt. Before, ACCESSCTRL back to
+ *               its defaults (unless locked against the debugger), CP7 on
+ *               and the ROM's state reset; after, the flush and the reset
+ *               of the address translation. Its debug port is ADIv6: APs
+ *               by address, core 0's at 0x2000, with the MEM-AP registers
+ *               at 0xD00 of it. As OpenOCD's rp2xxx.c and rp2350.cfg do;
+ *               tried only in the simulator (2026-10-29).
  * Every sector the image touches is erased whole and written (bytes the
  * image does not have there come out 0xFF); then what was written is read
  * back and compared. Verifying is the only reading done by SWD: dumping a
@@ -110,8 +120,11 @@ struct swd {
     const flash_ops_t *ops;
     bool prot;
     bool nrf;                       /* has the nRF52's CTRL-AP */
+    bool adiv6;                     /* APs by address (DPIDR version 3) */
+    uint32_t mem_ap;                /* the MEM-AP: an index (ADIv5), an address (ADIv6) */
+    bool rp2350;
     uint32_t uf2_family;
-    uint16_t rp_fn[8];              /* RP2040's ROM functions, in RP_* order */
+    uint16_t rp_fn[12];             /* the RP2040's/RP2350's ROM functions, in RP_* order */
     uint8_t *buf;                   /* a sector */
 };
 
@@ -151,22 +164,24 @@ static int xfer(swd_t *s, bool ap, bool rd, uint32_t a, uint32_t *v)
 static bool dp_read(swd_t *s, uint32_t a, uint32_t *v) { return xfer(s, false, true, a, v) == 1; }
 static bool dp_write(swd_t *s, uint32_t a, uint32_t v) { return xfer(s, false, false, a, &v) == 1; }
 
-static bool ap_sel(swd_t *s, int ap, uint32_t reg)
+static bool ap_sel(swd_t *s, uint32_t ap, uint32_t reg)
 {
-    uint32_t sel = (uint32_t)ap << 24 | (reg & 0xF0);
+    /* ADIv5: APSEL in the top byte; ADIv6: the AP's address, the MEM-AP's
+     * registers at 0xD00 of it */
+    uint32_t sel = s->adiv6 ? ap + 0xD00 + (reg & 0xF0) : ap << 24 | (reg & 0xF0);
     if (sel == s->select) return true;
     if (!dp_write(s, DP_SELECT, sel)) return false;
     s->select = sel;
     return true;
 }
 
-static bool ap_read(swd_t *s, int ap, uint32_t reg, uint32_t *v)
+static bool ap_read(swd_t *s, uint32_t ap, uint32_t reg, uint32_t *v)
 {
     uint32_t d;
     return ap_sel(s, ap, reg) && xfer(s, true, true, reg, &d) == 1 && dp_read(s, DP_RDBUFF, v);
 }
 
-static bool ap_write(swd_t *s, int ap, uint32_t reg, uint32_t v)
+static bool ap_write(swd_t *s, uint32_t ap, uint32_t reg, uint32_t v)
 {
     return ap_sel(s, ap, reg) && xfer(s, true, false, reg, &v) == 1;
 }
@@ -187,29 +202,29 @@ static bool sticky_ok(swd_t *s)
 static bool set_csw(swd_t *s, uint32_t csw)
 {
     if (csw == s->csw) return true;
-    if (!ap_write(s, 0, AP_CSW, csw)) return false;
+    if (!ap_write(s, s->mem_ap, AP_CSW, csw)) return false;
     s->csw = csw;
     return true;
 }
 
 static bool rd32(swd_t *s, uint32_t addr, uint32_t *v)
 {
-    return set_csw(s, CSW_32) && ap_write(s, 0, AP_TAR, addr) && ap_read(s, 0, AP_DRW, v);
+    return set_csw(s, CSW_32) && ap_write(s, s->mem_ap, AP_TAR, addr) && ap_read(s, s->mem_ap, AP_DRW, v);
 }
 
 static bool wr32(swd_t *s, uint32_t addr, uint32_t v)
 {
-    return set_csw(s, CSW_32) && ap_write(s, 0, AP_TAR, addr) && ap_write(s, 0, AP_DRW, v);
+    return set_csw(s, CSW_32) && ap_write(s, s->mem_ap, AP_TAR, addr) && ap_write(s, s->mem_ap, AP_DRW, v);
 }
 
 static bool wr16(swd_t *s, uint32_t addr, uint16_t v)
 {
-    return set_csw(s, CSW_16) && ap_write(s, 0, AP_TAR, addr) && ap_write(s, 0, AP_DRW, (uint32_t)v << (8 * (addr & 2)));
+    return set_csw(s, CSW_16) && ap_write(s, s->mem_ap, AP_TAR, addr) && ap_write(s, s->mem_ap, AP_DRW, (uint32_t)v << (8 * (addr & 2)));
 }
 
 static bool wr8(swd_t *s, uint32_t addr, uint8_t v)
 {
-    return set_csw(s, CSW_8) && ap_write(s, 0, AP_TAR, addr) && ap_write(s, 0, AP_DRW, (uint32_t)v << (8 * (addr & 3)));
+    return set_csw(s, CSW_8) && ap_write(s, s->mem_ap, AP_TAR, addr) && ap_write(s, s->mem_ap, AP_DRW, (uint32_t)v << (8 * (addr & 3)));
 }
 
 /* n bytes from addr, both multiples of four */
@@ -220,7 +235,7 @@ static bool mem_read(swd_t *s, uint32_t addr, uint8_t *buf, uint32_t n)
         uint32_t chunk = 1024 - (addr & 1023);
         if (chunk > n) chunk = n;
         uint32_t words = chunk / 4, v;
-        if (!ap_write(s, 0, AP_TAR, addr) || !ap_sel(s, 0, AP_DRW)) return false;
+        if (!ap_write(s, s->mem_ap, AP_TAR, addr) || !ap_sel(s, s->mem_ap, AP_DRW)) return false;
         if (xfer(s, true, true, AP_DRW, &v) != 1) return false;     /* posted: nothing yet */
         for (uint32_t i = 1; i < words; i++) {
             if (xfer(s, true, true, AP_DRW, &v) != 1) return false;
@@ -241,7 +256,7 @@ static bool mem_write(swd_t *s, uint32_t addr, const uint8_t *buf, uint32_t n)
     while (n) {
         uint32_t chunk = 1024 - (addr & 1023);
         if (chunk > n) chunk = n;
-        if (!ap_write(s, 0, AP_TAR, addr) || !ap_sel(s, 0, AP_DRW)) return false;
+        if (!ap_write(s, s->mem_ap, AP_TAR, addr) || !ap_sel(s, s->mem_ap, AP_DRW)) return false;
         for (uint32_t i = 0; i < chunk; i += 4) {
             uint32_t v;
             memcpy(&v, buf + i, 4);
@@ -319,14 +334,23 @@ static bool connect(swd_t *s)
     if (!s->dpidr) {
         /* a multidrop DP says nothing until it is named: the RP2040's core 0 */
         dormant_wake(s);
-        if (!select_core0(s)) {
-            /* or one that only needed waking (no TARGETSEL) */
+        bool picked = select_core0(s);
+        if (picked && s->dpidr == DPIDR_RP2040) {
+            s->multidrop = true;
+        } else if (!picked) {
+            /* or one that only needed waking: no TARGETSEL (a DP that knows
+             * TARGETSEL and was not the one named stays quiet until the next
+             * line reset, as the RP2350's) */
             dormant_wake(s);
             if (!dp_read(s, DP_DPIDR, &s->dpidr))
                 return fl_cancel ? false : fl_fail("%s", _("Nadie contestó por SWD: revisá SWCLK, SWDIO, GND y que el objetivo tenga alimentación"));
-        } else {
-            s->multidrop = true;
         }
+    }
+    /* DPIDR version 3: ADIv6, APs by address. The one ADIv6 chip known
+     * here is the RP2350, whose core 0 is at 0x2000. */
+    if ((s->dpidr >> 12 & 0xF) == 3) {
+        s->adiv6 = true;
+        s->mem_ap = 0x2000;
     }
     clear_errors(s);
     if (!dp_write(s, DP_CTRL, 0x50000000)) return fl_fail("%s", _("El DP no aceptó el pedido de encendido"));
@@ -583,49 +607,91 @@ static bool stm_identify(swd_t *s, bool m0)
 /* RP2040                                                                      */
 /* -------------------------------------------------------------------------- */
 
-enum { RP_IF, RP_EX, RP_RE, RP_RP, RP_FC, RP_CX, RP_DT, RP_DE, RP_N };
-static const char RP_CODES[RP_N][2] = { "IF", "EX", "RE", "RP", "FC", "CX", "DT", "DE" };
+enum { RP_IF, RP_EX, RP_RE, RP_RP, RP_FC, RP_CX, RP_DT, RP_DE, RP_SR, RP_RA, RP_N };
+static const char RP_CODES[RP_N][2] = { "IF", "EX", "RE", "RP", "FC", "CX", "DT", "DE", "SR", "RA" };
+/* which each chip needs (RA is optional on the RP2350) */
+#define RP2040_NEEDS ((1u << RP_IF) | (1u << RP_EX) | (1u << RP_RE) | (1u << RP_RP) | (1u << RP_FC) | (1u << RP_CX) | \
+                      (1u << RP_DT) | (1u << RP_DE))
+#define RP2350_NEEDS ((1u << RP_IF) | (1u << RP_EX) | (1u << RP_RE) | (1u << RP_RP) | (1u << RP_FC) | (1u << RP_SR))
 #define RP_BUF      0x20010000u     /* where the data to program goes */
 #define RP_STACK    0x20040000u
+#define RP_STUB     0x20000000u     /* the RP2350's call stub */
+
+/* RP2350's ROM table flags: a pointer follows for each one set */
+#define RT_FLAG_ARM_SEC 0x04
 
 /* The boot ROM's table of functions: its 16-bit address at 0x14, then
  * pairs of 16-bit (code, address) up to a code of 0. The table need not
  * start on a word, and the bus has no unaligned accesses: it is read as
  * aligned words and taken apart by halfwords (found on the board: read by
  * words at its own address it came out shifted, and nothing was found). */
+static void rp_take(swd_t *s, uint16_t code, uint16_t at)
+{
+    for (int k = 0; k < RP_N; k++)
+        if (code == (uint16_t)(RP_CODES[k][0] | RP_CODES[k][1] << 8)) s->rp_fn[k] = at;
+}
+
+/* The RP2350's: from 0x7C00 up (its A1 and later ROMs) a 16-bit code and
+ * 16-bit flags, then a halfword for each flag set, in the order of the
+ * bits; below that (the A0's), code, flags, one pointer: six bytes. */
+static void rp2350_walk(swd_t *s, const uint8_t *b, uint32_t o, uint32_t n, bool a1)
+{
+    while (o + 4 <= n) {
+        uint16_t code = (uint16_t)(b[o] | b[o + 1] << 8), flags = (uint16_t)(b[o + 2] | b[o + 3] << 8);
+        if (!code) break;
+        int ptrs = a1 ? __builtin_popcount(flags) : 1;
+        if ((flags & RT_FLAG_ARM_SEC) && o + 4 + 2u * (uint32_t)ptrs <= n) {
+            uint32_t i = a1 ? (uint32_t)__builtin_popcount(flags & (RT_FLAG_ARM_SEC - 1)) : 0;
+            rp_take(s, code, (uint16_t)(b[o + 4 + 2 * i] | b[o + 5 + 2 * i] << 8));
+        }
+        o += 4 + 2u * (uint32_t)ptrs;
+    }
+}
+
 static bool rp_lookup(swd_t *s)
 {
+    const char *who = s->rp2350 ? "RP2350" : "RP2040";
     uint32_t v;
-    if (!rd32(s, 0x10, &v) || (v & 0xFFFF) != ('M' | 'u' << 8)) {
-        fl_logf(L_ERR, _("RP2040: la ROM no tiene su marca (0x%04X)"), (unsigned)(v & 0xFFFF));
+    uint32_t magic = s->rp2350 ? 0x02754D : 0x01754D;      /* "Mu" and the ROM's version */
+    if (!rd32(s, 0x10, &v) || (v & 0xFFFFFF) != magic) {
+        fl_logf(L_ERR, _("%s: la ROM no tiene su marca (0x%06X)"), who, (unsigned)(v & 0xFFFFFF));
         return false;
     }
     if (!rd32(s, 0x14, &v)) return false;
-    uint32_t table = v & 0xFFFF, from = table & ~3u;
+    uint32_t table = v & 0xFFFF, from = table & ~3u, n = 1024;
+    if (s->rp2350 && from + n > 0x8000) n = 0x8000 - from;      /* the ROM ends at 32 KB */
     uint8_t *b = s->buf;
-    if (!mem_read(s, from, b, 512)) return false;
-    for (uint32_t o = table - from; o + 4 <= 512; o += 4) {
-        uint16_t code = (uint16_t)(b[o] | b[o + 1] << 8), at = (uint16_t)(b[o + 2] | b[o + 3] << 8);
-        if (!code) break;
-        for (int k = 0; k < RP_N; k++)
-            if (code == (uint16_t)(RP_CODES[k][0] | RP_CODES[k][1] << 8)) s->rp_fn[k] = at;
+    if (!n || !mem_read(s, from, b, n)) return false;
+    memset(s->rp_fn, 0, sizeof s->rp_fn);
+    if (s->rp2350) {
+        rp2350_walk(s, b, table - from, n, table >= 0x7C00);
+    } else {
+        for (uint32_t o = table - from; o + 4 <= n; o += 4) {
+            uint16_t code = (uint16_t)(b[o] | b[o + 1] << 8);
+            if (!code) break;
+            rp_take(s, code, (uint16_t)(b[o + 2] | b[o + 3] << 8));
+        }
     }
+    uint32_t need = s->rp2350 ? RP2350_NEEDS : RP2040_NEEDS;
     for (int k = 0; k < RP_N; k++) {
-        if (s->rp_fn[k]) continue;
-        fl_logf(L_ERR, _("RP2040: a la tabla de la ROM (0x%04X) le falta %.2s"), (unsigned)table, RP_CODES[k]);
+        if (s->rp_fn[k] || !(need & (1u << k))) continue;
+        fl_logf(L_ERR, _("%s: a la tabla de la ROM (0x%04X) le falta %.2s"), who, (unsigned)table, RP_CODES[k]);
         return false;
     }
     return true;
 }
 
-/* A ROM function on the halted core, through debug_trampoline: it calls
- * r7 with r0-r3 and stops at debug_trampoline_end. */
+/* A ROM function on the halted core, with r0-r3. RP2040: through
+ * debug_trampoline, which calls r7 and stops at debug_trampoline_end.
+ * RP2350: through our stub at RP_STUB, which clears the stack limits,
+ * calls r7 and stops at its bkpt. */
 static bool rp_call(swd_t *s, int fn, uint32_t r0, uint32_t r1, uint32_t r2, uint32_t r3, int ms)
 {
     uint32_t args[4] = { r0, r1, r2, r3 };
     for (int i = 0; i < 4; i++) if (!reg_write(s, i, args[i])) return false;
-    if (!reg_write(s, 7, s->rp_fn[fn]) || !reg_write(s, 13, RP_STACK) || !reg_write(s, 14, s->rp_fn[RP_DE]) ||
-        !reg_write(s, 15, s->rp_fn[RP_DT] & ~1u) || !reg_write(s, 16, 0x01000000))
+    uint32_t pc = s->rp2350 ? RP_STUB : s->rp_fn[RP_DT] & ~1u, lr = s->rp2350 ? (RP_STUB + 12) | 1 : s->rp_fn[RP_DE];
+    if (!reg_write(s, 7, s->rp_fn[fn]) || !reg_write(s, 13, RP_STACK) || !reg_write(s, 14, lr) ||
+        !reg_write(s, 15, pc) || !reg_write(s, 16, 0x01000000))
         return false;
     if (!wr32(s, DHCSR, DBGKEY | 1)) return false;
     for (int i = 0; i < ms; i++) {
@@ -637,13 +703,46 @@ static bool rp_call(swd_t *s, int fn, uint32_t r0, uint32_t r1, uint32_t r2, uin
     return false;
 }
 
+/* The RP2350's stub: movs r6,#0; msr MSPLIM,r6; msr PSPLIM,r6; blx r7;
+ * bkpt #0 (at +12); nop */
+static const uint8_t RP2350_STUB[16] = { 0x00, 0x26, 0x86, 0xF3, 0x0A, 0x88, 0x86, 0xF3,
+                                         0x0B, 0x88, 0xB8, 0x47, 0x00, 0xBE, 0x00, 0xBF };
+
+/* What OpenOCD does before calling the RP2350's ROM: ACCESSCTRL back to
+ * its defaults, so the core may reach the flash's QMI whatever the
+ * firmware set (unless the firmware locked it against the debugger, which
+ * is respected); the coprocessor the ROM's hardening uses, CP7, enabled;
+ * the stub in RAM; the ROM's own state reset. */
+#define ACCESSCTRL_LOCK     0x40060000u
+#define ACCESSCTRL_CFGRESET 0x40060008u
+#define CPACR               0xE000ED88u
+
+static bool rp2350_prepare(swd_t *s)
+{
+    uint32_t lock = 0, cpacr = 0;
+    if (!rd32(s, ACCESSCTRL_LOCK, &lock)) return false;
+    if (lock & 0x08) {
+        fl_logf(L_ERR, "%s", _("RP2350: el firmware bloqueó ACCESSCTRL para el depurador: no se toca"));
+        return false;
+    }
+    if (!wr32(s, ACCESSCTRL_CFGRESET, 0xACCE0001)) return false;
+    if (!rd32(s, CPACR, &cpacr) || !wr32(s, CPACR, cpacr | 3u << 14)) return false;
+    if (!mem_write(s, RP_STUB, RP2350_STUB, sizeof RP2350_STUB)) return false;
+    if (!rp_call(s, RP_SR, 0x01, 0, 0, 0, 100)) {       /* BOOTROM_STATE_RESET_CURRENT_CORE */
+        fl_logf(L_ERR, "%s", _("RP2350: bootrom_state_reset no volvió"));
+        return false;
+    }
+    return true;
+}
+
 /* Each step says what failed: on the board that is all there is to go by */
 static bool rp_begin(swd_t *s)
 {
-    if (!halt(s)) { fl_logf(L_ERR, "%s", _("RP2040: el núcleo no se detuvo")); return false; }
+    if (!halt(s)) { fl_logf(L_ERR, _("%s: el núcleo no se detuvo"), s->chip); return false; }
     if (!rp_lookup(s)) return false;
-    if (!rp_call(s, RP_IF, 0, 0, 0, 0, 100)) { fl_logf(L_ERR, "%s", _("RP2040: connect_internal_flash no volvió")); return false; }
-    if (!rp_call(s, RP_EX, 0, 0, 0, 0, 100)) { fl_logf(L_ERR, "%s", _("RP2040: flash_exit_xip no volvió")); return false; }
+    if (s->rp2350 && !rp2350_prepare(s)) return false;
+    if (!rp_call(s, RP_IF, 0, 0, 0, 0, 100)) { fl_logf(L_ERR, _("%s: connect_internal_flash no volvió"), s->chip); return false; }
+    if (!rp_call(s, RP_EX, 0, 0, 0, 0, 100)) { fl_logf(L_ERR, _("%s: flash_exit_xip no volvió"), s->chip); return false; }
     return true;
 }
 
@@ -658,10 +757,13 @@ static bool rp_program(swd_t *s, uint32_t addr, const uint8_t *d, uint32_t n)
     return mem_write(s, RP_BUF, d, n) && rp_call(s, RP_RP, addr - 0x10000000u, RP_BUF, n, 0, 2000);
 }
 
+/* Back to XIP: the RP2040 by its CX; the RP2350's ROM leaves the flash
+ * readable already, and resets its address translation (RA) */
 static void rp_end(swd_t *s)
 {
     rp_call(s, RP_FC, 0, 0, 0, 0, 100);
-    rp_call(s, RP_CX, 0, 0, 0, 0, 100);
+    if (!s->rp2350) rp_call(s, RP_CX, 0, 0, 0, 0, 100);
+    else if (s->rp_fn[RP_RA]) rp_call(s, RP_RA, 0, 0, 0, 0, 100);
 }
 
 static bool rp_erase_all(swd_t *s)
@@ -683,9 +785,9 @@ static bool identify(swd_t *s)
 {
     fl_phase(AOS_FLASHER_INFO);
     uint32_t idr = 0;
-    ap_read(s, 0, AP_IDR, &idr);
+    ap_read(s, s->mem_ap, AP_IDR, &idr);
     uint32_t ap1 = 0;
-    s->nrf = ap_read(s, 1, AP_IDR, &ap1) && ap1 == 0x02880000;
+    s->nrf = !s->adiv6 && ap_read(s, 1, AP_IDR, &ap1) && ap1 == 0x02880000;
     /* a protected nRF52 answers nothing on the bus: it is an M4 */
     if (!rd32(s, CPUID, &s->cpuid)) s->cpuid = s->nrf ? 0x410FC241 : 0;
     uint16_t part = (s->cpuid >> 4) & 0xFFF;
@@ -707,6 +809,17 @@ static bool identify(swd_t *s)
         s->ram_size = 264 << 10;
         s->ops = &RP2040;
         s->uf2_family = 0xE48BFF56;
+    } else if (part == 0xD21 && rd32(s, 0x40000000, &v) && (v & 0x0FFFFFFF) == 0x0004927) {
+        snprintf(s->chip, sizeof s->chip, "RP2350");
+        s->rp2350 = true;
+        s->flash_base = 0x10000000;
+        s->flash_size = 0;
+        s->sector = 4096;
+        s->ram_size = 520 << 10;
+        s->ops = &RP2040;           /* the same calls, rp_* tell the two apart */
+        s->uf2_family = 0xE48BFF59; /* Arm Secure; uf2_fits() takes its siblings too */
+    } else if (s->adiv6) {
+        snprintf(s->chip, sizeof s->chip, "ADIv6 %s", core);
     } else if (!stm_identify(s, part == 0xC20 || part == 0xC60)) {
         snprintf(s->chip, sizeof s->chip, "%s", core);
     }
@@ -763,7 +876,11 @@ static bool write_image(swd_t *s)
     if (!aos_flasher_image_load(J.src.path, at, &img, err, sizeof err)) return fl_fail("%s: %s", J.src.name, err);
     bool ok = false;
     uint32_t limit = s->flash_size ? s->flash_size : 16u << 20;
-    if (img.uf2_family && s->uf2_family && img.uf2_family != s->uf2_family) {
+    /* an RP2350 takes its "absolute", Arm Secure, RISC-V and Arm
+     * Non-secure families (0xE48BFF57, 59, 5A, 5B) */
+    bool fam_ok = !img.uf2_family || !s->uf2_family || img.uf2_family == s->uf2_family ||
+                  (s->rp2350 && (img.uf2_family == 0xE48BFF57 || (img.uf2_family >= 0xE48BFF59 && img.uf2_family <= 0xE48BFF5B)));
+    if (!fam_ok) {
         fl_fail(_("%s es un .uf2 para otro chip (familia 0x%08X)"), J.src.name, (unsigned)img.uf2_family);
         goto out;
     }

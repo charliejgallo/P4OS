@@ -2878,14 +2878,16 @@ static const char blob_en__sistema_lang[] =
     "Objetivo reiniciado\tTarget restarted\n"
     "no hay una consola abierta\tno console is open\n"
     "La RP2040 contestó pero no se pudo elegir su núcleo 0\tThe RP2040 answered but its core 0 couldn't be selected\n"
-    "RP2040: la ROM no tiene su marca (0x%04X)\tRP2040: the ROM lacks its magic (0x%04X)\n"
-    "RP2040: a la tabla de la ROM (0x%04X) le falta %.2s\tRP2040: the ROM table (0x%04X) has no %.2s\n"
-    "RP2040: el núcleo no se detuvo\tRP2040: the core didn't halt\n"
-    "RP2040: connect_internal_flash no volvió\tRP2040: connect_internal_flash didn't return\n"
-    "RP2040: flash_exit_xip no volvió\tRP2040: flash_exit_xip didn't return\n"
     "Escribile al firmware…\tType to the firmware…\n"
     "No entró: esperá que el firmware lea lo anterior\tDidn't fit: wait for the firmware to read the last one\n"
     "SWCLK medido: %u kHz; una lectura del DP cada %u µs (%u kHz efectivos, %d de 200 bien)\tSWCLK measured: %u kHz; a DP read every %u µs (%u kHz effective, %d of 200 good)\n"
+    "%s: la ROM no tiene su marca (0x%06X)\t%s: the ROM lacks its magic (0x%06X)\n"
+    "%s: a la tabla de la ROM (0x%04X) le falta %.2s\t%s: the ROM table (0x%04X) has no %.2s\n"
+    "%s: el núcleo no se detuvo\t%s: the core didn't halt\n"
+    "%s: connect_internal_flash no volvió\t%s: connect_internal_flash didn't return\n"
+    "%s: flash_exit_xip no volvió\t%s: flash_exit_xip didn't return\n"
+    "RP2350: el firmware bloqueó ACCESSCTRL para el depurador: no se toca\tRP2350: the firmware locked ACCESSCTRL against the debugger: left alone\n"
+    "RP2350: bootrom_state_reset no volvió\tRP2350: bootrom_state_reset didn't return\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5756,14 +5758,16 @@ static const char blob_de__sistema_lang[] =
     "Objetivo reiniciado\tZiel neu gestartet\n"
     "no hay una consola abierta\tkeine Konsole offen\n"
     "La RP2040 contestó pero no se pudo elegir su núcleo 0\tDer RP2040 antwortete, aber sein Kern 0 ließ sich nicht wählen\n"
-    "RP2040: la ROM no tiene su marca (0x%04X)\tRP2040: der ROM fehlt seine Kennung (0x%04X)\n"
-    "RP2040: a la tabla de la ROM (0x%04X) le falta %.2s\tRP2040: in der ROM-Tabelle (0x%04X) fehlt %.2s\n"
-    "RP2040: el núcleo no se detuvo\tRP2040: der Kern hielt nicht an\n"
-    "RP2040: connect_internal_flash no volvió\tRP2040: connect_internal_flash kehrte nicht zurück\n"
-    "RP2040: flash_exit_xip no volvió\tRP2040: flash_exit_xip kehrte nicht zurück\n"
     "Escribile al firmware…\tAn die Firmware schreiben…\n"
     "No entró: esperá que el firmware lea lo anterior\tPasst nicht: warten, bis die Firmware das Vorige gelesen hat\n"
     "SWCLK medido: %u kHz; una lectura del DP cada %u µs (%u kHz efectivos, %d de 200 bien)\tSWCLK gemessen: %u kHz; ein DP-Lesezugriff alle %u µs (%u kHz effektiv, %d von 200 gut)\n"
+    "%s: la ROM no tiene su marca (0x%06X)\t%s: dem ROM fehlt seine Kennung (0x%06X)\n"
+    "%s: a la tabla de la ROM (0x%04X) le falta %.2s\t%s: in der ROM-Tabelle (0x%04X) fehlt %.2s\n"
+    "%s: el núcleo no se detuvo\t%s: der Kern hielt nicht an\n"
+    "%s: connect_internal_flash no volvió\t%s: connect_internal_flash kehrte nicht zurück\n"
+    "%s: flash_exit_xip no volvió\t%s: flash_exit_xip kehrte nicht zurück\n"
+    "RP2350: el firmware bloqueó ACCESSCTRL para el depurador: no se toca\tRP2350: die Firmware hat ACCESSCTRL für den Debugger gesperrt: bleibt unberührt\n"
+    "RP2350: bootrom_state_reset no volvió\tRP2350: bootrom_state_reset kehrte nicht zurück\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -5771,7 +5775,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2871, 0, files_en, 1 },
-    { "de", "Deutsch", 2871, 0, files_de, 1 },
+    { "en", "English", 2873, 0, files_en, 1 },
+    { "de", "Deutsch", 2873, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

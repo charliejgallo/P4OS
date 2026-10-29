@@ -18,7 +18,7 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
 - **Pico (RP2040) en BOOTSEL**: es un disco USB; copiar un `.uf2` a `/usb` lo
   graba (`docs/USB.md`). Fuera del Programador.
 - **Terminal serie**: monitor de los UART del header y los USB.
-- **SWD** (F2, sin publicar): nRF52, STM32F0/F1 y RP2040; grabar,
+- **SWD** (F2, sin publicar): nRF52, STM32F0/F1, RP2040 y RP2350; grabar,
   verificar, borrar entero y la consola RTT.
 - **Nada de STM32 por serie.**
 
@@ -89,6 +89,16 @@ distinto de lo planeado abajo:
   simple), RP2040 por las funciones de su ROM llamadas con el trampolín
   de depuración. Los STM32F4/G0/L4 se reconocen y dicen que todavía no.
   El pack de probe-rs queda para cuando haga falta velocidad o más chips.
+- **RP2350** (agregada el 2026-10-29, sólo en el simulador: el usuario no
+  tiene una): DP ADIv6 (DPIDR versión 3), el MEM-AP del núcleo 0 en la
+  dirección 0x2000 con sus registros en 0xD00; la tabla de la ROM con un
+  puntero por arquitectura (se toma el de Arm seguro, en la A1 y en la A0);
+  sin trampolín: un stub nuestro en RAM (MSPLIM/PSPLIM a cero, `blx r7`,
+  `bkpt`); antes, ACCESSCTRL a su configuración de fábrica (si el firmware
+  no lo bloqueó para el depurador, y entonces no se toca), CP7 habilitado y
+  `bootrom_state_reset`; al final FC y RA. Todo como OpenOCD (`rp2xxx.c`,
+  `rp2350.cfg`). Un `.uf2` de RP2350 tiene que traer su bloque IMAGE_DEF
+  para arrancar: el Blink de `tools/swd_test` es sólo de RP2040.
 - **Multidrop** (RP2040): si nadie contesta tras JTAG-a-SWD, se manda
   SWD-a-dormido, el despertar, un reset de línea y TARGETSEL del núcleo 0.
 - **Protección:** un nRF52 con APPROTECT y un STM32 con RDP no se graban;

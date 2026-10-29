@@ -4,9 +4,10 @@
  * aos_flasher_swd.c) runs its whole path without a board.
  *
  * P4_SIM_SWD picks the chip: nrf52840 (the default), stm32f103, rp2040,
- * or none (nobody on the wire). ":protected" after nrf52840 starts it with
- * APPROTECT on (its memory unreachable until the CTRL-AP erases it all),
- * after stm32f103 with read protection set.
+ * rp2350, or none (nobody on the wire). ":protected" after nrf52840 starts
+ * it with APPROTECT on (its memory unreachable until the CTRL-AP erases it
+ * all), after stm32f103 with read protection set; ":locked" after rp2350
+ * locks its ACCESSCTRL against the debugger.
  *
  * What it plays, at the level of packets, not of edges:
  *
@@ -19,6 +20,11 @@
  *                  at once - the DPIDR, the same for all, reads fine, and
  *                  anything else is a clash (a parity error), as on the
  *                  board on 2026-10-29. TARGETSEL for core 0 picks it.
+ *                  The RP2350's one DP is ADIv6 (DPIDR version 3): also
+ *                  dormant at first, it answers without a TARGETSEL and
+ *                  stays quiet after one that is not its own (0x00040927).
+ *                  Its APs go by address: core 0's MEM-AP at 0x2000, its
+ *                  registers at 0xD00 of it.
  *   the DP         DPIDR, ABORT, CTRL/STAT with the power-up handshake,
  *                  SELECT, RDBUFF; AP reads are posted, as on silicon: a
  *                  read gives the previous one's value, RDBUFF the last.
@@ -35,7 +41,11 @@
  *                  at debug_trampoline, the function in r7 is done here
  *                  (connect, exit XIP, erase, program from RAM, flush,
  *                  enter XIP) and the core stops at debug_trampoline_end,
- *                  as on the real chip.
+ *                  as on the real chip. RP2350: its ROM table has a pointer
+ *                  per architecture (RISC-V and Arm Secure here, so taking
+ *                  the wrong one shows), and a function runs only when the
+ *                  core is let go at a stub in RAM that ends in a bkpt
+ *                  (blx r7, bkpt), where it stops afterwards.
  *   RTT            a "SEGGER RTT" control block in RAM with one up and one
  *                  down buffer. While the core runs, a line goes up every
  *                  half second, and what comes down is answered with an
@@ -52,14 +62,17 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum { C_NONE, C_NRF52840, C_STM32F103, C_RP2040 };
+enum { C_NONE, C_NRF52840, C_STM32F103, C_RP2040, C_RP2350 };
 
 typedef struct {
     int chip;
     bool protect;
     /* the wire */
     int ones;
-    bool after_reset, dormant, selected, multidrop;
+    bool after_reset, dormant, selected, multidrop, deselected;
+    uint32_t targetsel_id;      /* a DP that knows TARGETSEL: its own; 0 none */
+    uint32_t rom_size;
+    bool locked;                /* RP2350: ACCESSCTRL locked against the debugger */
     uint64_t hist;
     int alert_bits;
     /* the DP and the AP */
@@ -126,8 +139,9 @@ static void chip_init(void)
     if (e && *e) snprintf(name, sizeof name, "%s", e);
     char *colon = strchr(name, ':');
     T.protect = colon && !strcmp(colon + 1, "protected");
+    T.locked = colon && !strcmp(colon + 1, "locked");
     if (colon) *colon = 0;
-    T.chip = !strcmp(name, "stm32f103") ? C_STM32F103 : !strcmp(name, "rp2040") ? C_RP2040
+    T.chip = !strcmp(name, "stm32f103") ? C_STM32F103 : !strcmp(name, "rp2040") ? C_RP2040 : !strcmp(name, "rp2350") ? C_RP2350
            : !strcmp(name, "none") ? C_NONE : C_NRF52840;
     switch (T.chip) {
     case C_NRF52840:
@@ -140,9 +154,11 @@ static void chip_init(void)
     case C_RP2040:
         T.dpidr = 0x0BC12477; T.flash_base = 0x10000000; T.flash_size = 2 << 20; T.page = 4096; T.ram_size = 264 << 10;
         T.multidrop = true;
+        T.targetsel_id = 0x01002927;
         T.dormant = true;
         T.xip = true;
-        T.rom = calloc(1, 0x4000);
+        T.rom_size = 0x4000;
+        T.rom = calloc(1, T.rom_size);
         T.rom[0x10] = 'M'; T.rom[0x11] = 'u'; T.rom[0x12] = 1;      /* magic, version 1 */
         /* the function table at 0x7A, two bytes off a word, as a real ROM
          * may have it: read by words it comes out shifted */
@@ -153,6 +169,35 @@ static void chip_init(void)
             t[2] = (uint8_t)RP_FUNCS[i].at; t[3] = (uint8_t)(RP_FUNCS[i].at >> 8);
         }
         break;
+    case C_RP2350: {
+        T.dpidr = 0x4C013477; T.flash_base = 0x10000000; T.flash_size = 4 << 20; T.page = 4096; T.ram_size = 520 << 10;
+        T.targetsel_id = 0x00040927;
+        T.dormant = true;
+        T.xip = true;
+        T.rom_size = 0x8000;
+        T.rom = calloc(1, T.rom_size);
+        T.rom[0x10] = 'M'; T.rom[0x11] = 'u'; T.rom[0x12] = 2;      /* magic, version 2 */
+        /* the A1 table at 0x7E02: code, flags, a pointer per flag. The
+         * functions: RISC-V (0x01) and Arm Secure (0x04); a data entry
+         * (0x40) and one Arm Secure + Non-secure (0x14) in between */
+        T.rom[0x14] = 0x02; T.rom[0x15] = 0x7E;
+        uint8_t *t = T.rom + 0x7E02;
+        static const struct { char c[2]; uint16_t arm; } F2[] = {
+            { "SR", 0x2001 }, { "IF", 0x2011 }, { "EX", 0x2021 }, { "RE", 0x2031 }, { "RP", 0x2041 },
+            { "FC", 0x2051 }, { "RA", 0x2061 },
+        };
+        for (size_t i = 0; i < sizeof F2 / sizeof F2[0]; i++) {
+            uint16_t w[] = { (uint16_t)(F2[i].c[0] | F2[i].c[1] << 8), 0x05, (uint16_t)(F2[i].arm + 0x1000), F2[i].arm };
+            memcpy(t, w, sizeof w);
+            t += sizeof w;
+            if (i == 2) {
+                uint16_t d[] = { 'G' | 'P' << 8, 0x40, 0x0123, 'X' | 'Y' << 8, 0x14, 0x0F01, 0x0F11 };
+                memcpy(t, d, sizeof d);
+                t += sizeof d;
+            }
+        }
+        break;
+    }
     default: return;
     }
     T.flash = malloc(T.flash_size);
@@ -173,7 +218,7 @@ static uint8_t *ptr(uint32_t a)
     }
     if (T.chip == C_STM32F103 && a < T.flash_size) return T.flash + a;     /* the alias at 0 */
     if (T.ram && a >= RAM_BASE && a - RAM_BASE < T.ram_size) return T.ram + (a - RAM_BASE);
-    if (T.rom && a < 0x4000) return T.rom + a;
+    if (T.rom && a < T.rom_size) return T.rom + a;
     return NULL;
 }
 
@@ -198,7 +243,7 @@ static void reset_core(void)
 static bool reg_read(uint32_t a, uint32_t *v)
 {
     switch (a) {
-    case 0xE000ED00: *v = T.chip == C_RP2040 ? 0x410CC601 : T.chip == C_STM32F103 ? 0x411FC231 : 0x410FC241; return true;
+    case 0xE000ED00: *v = T.chip == C_RP2040 ? 0x410CC601 : T.chip == C_RP2350 ? 0x411FD210 : T.chip == C_STM32F103 ? 0x411FC231 : 0x410FC241; return true;
     case 0xE000EDF0: *v = 0x00010001 | (T.halted ? 0x00020002 : 0); return true;     /* S_REGRDY, C_DEBUGEN, S_HALT */
     case 0xE000EDF8: *v = T.dcrdr; return true;
     case 0xE000EDFC: *v = T.demcr; return true;
@@ -227,6 +272,9 @@ static bool reg_read(uint32_t a, uint32_t *v)
         }
     } else if (T.chip == C_RP2040) {
         if (a == 0x40000000) { *v = 0x10002927; return true; }
+    } else if (T.chip == C_RP2350) {
+        if (a == 0x40000000) { *v = 0x20004927; return true; }
+        if (a == 0x40060000) { *v = T.locked ? 0x08 : 0; return true; }
     }
     return false;
 }
@@ -251,6 +299,22 @@ static bool reg_write(uint32_t a, uint32_t v)
                 else if (fn == 0x1031 && !T.xip && r0 + r2 <= T.flash_size && r1 >= RAM_BASE && r1 - RAM_BASE + r2 <= T.ram_size)
                     for (uint32_t i = 0; i < r2; i++) T.flash[r0 + i] &= T.ram[r1 - RAM_BASE + i];
                 T.regs[15] = 0x1070;
+                T.halted = true;
+            }
+            /* RP2350: our stub in RAM (blx r7; bkpt) */
+            uint8_t *st = ptr(T.regs[15]);
+            if (T.chip == C_RP2350 && st && T.regs[15] >= RAM_BASE && st[10] == 0xB8 && st[11] == 0x47 && st[12] == 0x00 && st[13] == 0xBE) {
+                uint32_t fn = T.regs[7] | 1, r0 = T.regs[0], r1 = T.regs[1], r2 = T.regs[2];
+                if (fn >= 0x3000) return true;          /* a RISC-V pointer: the core runs off, never stops */
+                if (fn == 0x2021) T.xip = false;        /* EX: direct mode until the end */
+                else if (fn == 0x2061) T.xip = true;    /* RA */
+                else if (fn == 0x2031 && !T.xip) {
+                    uint32_t from = r0 & ~4095u, to = (r0 + r1 + 4095u) & ~4095u;
+                    if (to <= T.flash_size) memset(T.flash + from, 0xFF, to - from);
+                } else if (fn == 0x2041 && !T.xip && r0 + r2 <= T.flash_size && r1 >= RAM_BASE && r1 - RAM_BASE + r2 <= T.ram_size) {
+                    for (uint32_t i = 0; i < r2; i++) T.flash[r0 + i] &= T.ram[r1 - RAM_BASE + i];
+                }
+                T.regs[15] += 12;
                 T.halted = true;
             }
         }
@@ -410,7 +474,7 @@ static void line_bit(int b)
         return;
     }
     if (b) {
-        if (++T.ones >= 50) { T.after_reset = true; if (T.multidrop) T.selected = false; }
+        if (++T.ones >= 50) { T.after_reset = true; T.deselected = false; if (T.multidrop) T.selected = false; }
         return;
     }
     T.ones = 0;
@@ -439,7 +503,7 @@ static uint32_t ap_read(uint32_t reg, int *ack)
     switch (reg) {
     case 0x00: return T.csw | (T.protect && T.chip == C_NRF52840 ? 0 : 0x40);   /* DeviceEn */
     case 0x04: return T.tar;
-    case 0xFC: return T.chip == C_RP2040 ? 0x04770031 : T.chip == C_NRF52840 ? 0x24770011 : 0x14770011;
+    case 0xFC: return T.chip == C_RP2040 ? 0x04770031 : T.chip == C_RP2350 ? 0x34770008 : T.chip == C_NRF52840 ? 0x24770011 : 0x14770011;
     case 0xF8: return 0xE00FF003;
     case 0x0C: {
         int size = 1 << (T.csw & 3);
@@ -488,10 +552,12 @@ int aos_io_be_swd_xfer(aos_io_swd_t *s, uint8_t req, uint32_t *data, bool no_ack
     T.after_reset = false;
     T.ones = 0;
     if (!(req & 1) || (req & 0x40) || !(req & 0x80) || par != (req >> 5 & 1) || T.dormant) return 7;
-    if (!ap && !rd && a == 0x0C && first && T.multidrop) {      /* TARGETSEL */
-        T.selected = *data == 0x01002927;
+    if (!ap && !rd && a == 0x0C && first && T.targetsel_id) {   /* TARGETSEL */
+        T.selected = *data == T.targetsel_id;
+        T.deselected = !T.selected;
         return no_ack ? 1 : 7;
     }
+    if (T.deselected) return 7;
     if (T.multidrop && !T.selected) {
         /* every DP at once: the DPIDR agrees, nothing else does */
         if (!ap && rd && a == 0x0) { *data = T.dpidr; return 1; }
@@ -517,6 +583,11 @@ int aos_io_be_swd_xfer(aos_io_swd_t *s, uint8_t req, uint32_t *data, bool no_ack
         return ack;
     }
     uint32_t reg = (T.select & 0xF0) | a;
+    if (T.chip == C_RP2350 && (T.select & ~0xFFu) != 0x2D00) {
+        /* ADIv6: only core 0's MEM-AP (0x2000, its registers at 0xD00) is played */
+        if (rd) { *data = T.rdbuff; T.rdbuff = 0; }
+        return 1;
+    }
     if (rd) {
         uint32_t v = ap_read(reg, &ack);
         *data = T.rdbuff;           /* posted: the last read's value */

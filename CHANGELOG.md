@@ -8,7 +8,8 @@
   the chip (an RP2040 behind its multidrop DP, with the dormant wake-up
   and TARGETSEL), writes a `.hex`, `.elf`, `.uf2` or `.bin` and reads it
   back to compare: nRF52 through its NVMC, STM32F0/F1 through their flash
-  controller, RP2040 through its boot ROM's functions. Read protection is
+  controller, RP2040 and RP2350 through their boot ROM's functions (the
+  RP2350's debug port is ADIv6; tried only in the simulator). Read protection is
   said and kept; an nRF52's can only go with an erase of the whole chip
   through its CTRL-AP. And the **RTT console**: what a running firmware
   writes through SEGGER RTT, read from its RAM into the log, with a line

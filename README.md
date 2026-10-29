@@ -299,8 +299,8 @@ header with who holds each pin.
   reads its flash to the card, to keep or to clone, and erases it. The
   same for an AVR Arduino through the bootloader it already has (Uno,
   Nano, Pro Mini, Mega, Leonardo, Micro), from the `.hex` the Arduino IDE
-  exports. And by SWD, on the same pins: an nRF52, an RP2040 or an
-  STM32F0/F1 written and verified, and the RTT console of the firmware
+  exports. And by SWD, on the same pins: an nRF52, an RP2040, an RP2350
+  or an STM32F0/F1 written and verified, and the RTT console of the firmware
   running on it.
 - **Modbus:** a Riden RD60xx supply over RTU, and a gateway.
 - **Bench:** a Rigol scope over the LAN, the Riden, a UNI-T generator over
