@@ -542,6 +542,10 @@ Que necesitan la mano del usuario o equipos:
       de casa, `esptool --port rfc2217://p4os.local:4000 chip_id` con un
       ESP32 en `uart.b`, y `write_flash`; un Arduino con avrdude por
       `net:p4os.local:4001`.
+  - Con `2d38897` instalado: el puente abre en `uart.b`, acepta a la Mac
+    desde la red de casa y negocia RFC 2217 con pyserial (velocidad a
+    230400 incluida). Sin un ESP32 en el puerto todavía (está la Pico por
+    SWD), así que esptool queda para cuando haya uno conectado.
 - [ ] Programador con STM32 por su bootloader serie (F4, 2026-10-29;
       probado sólo en el simulador contra `tools/fake_stm32_boot.py`): una
       Blue Pill o Black Pill en `uart.b` (TX al PA10, RX al PA9, EN al
