@@ -69,7 +69,8 @@ hasta que una familia que los use (SWD, AVR) los pida.
 ## F2: SWD
 
 **Grabar, verificar y la consola RTT, hechos en el simulador el
-2026-10-29** (falta la placa: la RP2040 y la Ekobadge). Lo que quedó,
+2026-10-29; grabar y verificar, probados en la placa con la Pico del
+usuario el mismo día** (falta la consola RTT en la placa y la Ekobadge). Lo que quedó,
 distinto de lo planeado abajo:
 
 - **Sin `swd.a` en `modules.txt`:** SWD usa los pines de un puerto UART

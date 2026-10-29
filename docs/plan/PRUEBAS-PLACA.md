@@ -514,9 +514,10 @@ Que necesitan la mano del usuario o equipos:
     alinea para abajo. Ahora se lee alineada y se recorre por medias
     palabras, y cada paso de la preparación dice en el registro si falló;
     el simulador pone su tabla desalineada y alinea los accesos como el
-    bus. Falta probarlo en la placa: grabar `tools/swd_test/blink_pico/build/doble.uf2` (dos
-    destellos y una pausa) sobre el Blink de medio segundo, y la consola
-    RTT.
+    bus. **Con `3756ab5`, anduvo:** `doble.uf2` (de
+    `tools/swd_test/blink_pico/`) grabado sobre el Blink de medio segundo
+    en 0,4 s, verificado, el objetivo reiniciado y el LED con el doble
+    destello. Falta: la consola RTT con ese firmware, y medir el reloj.
   - La Ekobadge 2026 (desde el 2026-10-31): ver su chip, grabar y RTT.
 - [ ] Programador con Arduino (F3, 2026-10-29, sin instalar; probado sólo
       en el simulador contra `tools/fake_avr_boot.py`). En la placa:

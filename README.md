@@ -111,6 +111,14 @@ of a breath on it, from 3000 ppm back to the room's 600.</em></p>
 watch (an ESP32-S3 on its own USB) to the card, and writing it back: the
 watch came back with every setting it had.</em></p>
 
+<p align="center">
+  <img src="docs/img/photo-flasher-swd-rp2040.jpg" width="300" alt="The Flasher in SWD mode with a Raspberry Pi Pico wired to the header: RP2040, Cortex-M0+, DPIDR 0BC12477, doble.uf2 chosen to write">
+</p>
+
+<p align="center"><em>And by SWD, three wires to a Pico's debug header: the
+RP2040 found behind its multidrop port and a new firmware written and
+verified in under half a second.</em></p>
+
 ---
 
 ## What it does

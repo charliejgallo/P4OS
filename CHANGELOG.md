@@ -15,8 +15,11 @@
   typed in the portal going down to it. Reading a chip's whole flash by
   SWD is left out on purpose (`docs/plan/PROGRAMADOR.md`). In the
   simulator, against an emulated target (`sim/swd_sim.c`,
-  `P4_SIM_SWD=nrf52840|stm32f103|rp2040`); the timing on the board's pins
-  is not measured yet.
+  `P4_SIM_SWD=nrf52840|stm32f103|rp2040`). On the board, with a Pico on
+  `uart.b`: found, and a blink written and verified in 0.4 s, after two
+  fixes the board showed (its DPs, left awake, answering all at once; the
+  ROM's table of functions not starting on a word). A test firmware for
+  it, built with the Mac's own clang, is in `tools/swd_test/blink_pico`.
 - **The Programmer writes Arduinos.** A new kind of board, "Arduino", next
   to "ESP32": an AVR through the bootloader it already has, as the Arduino
   IDE does with avrdude. STK500 v1 (optiboot on an Uno, a Nano or a Pro
