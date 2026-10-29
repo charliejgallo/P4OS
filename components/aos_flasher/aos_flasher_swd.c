@@ -977,6 +977,27 @@ static bool console(swd_t *s)
     return false;       /* a cancel: the core counts it as the end it is */
 }
 
+/* The clock as it comes out of the pins, timed here: idle cycles clocked
+ * in one go are SWCLK alone (512 a call, in one critical section), and a
+ * DPIDR read is a whole packet with what it costs between two (48 clocks
+ * of request, turnarounds, ACK, data, parity and idle). Detectar logs it:
+ * the delay loop's khz is only a guess until measured. */
+static void measure_clock(swd_t *s)
+{
+    static const uint8_t IDLE[64] = { 0 };
+    uint64_t t0 = aos_hal_uptime_us();
+    for (int i = 0; i < 20; i++) aos_io_swd_seq(s->w, IDLE, 512);
+    uint64_t t_seq = aos_hal_uptime_us() - t0;
+    uint32_t v;
+    int ok = 0;
+    t0 = aos_hal_uptime_us();
+    for (int i = 0; i < 200; i++) ok += aos_io_swd_xfer(s->w, req_of(false, true, DP_DPIDR), &v, false) == 1 && v == s->dpidr;
+    uint64_t t_rd = aos_hal_uptime_us() - t0;
+    if (!t_seq || !t_rd) return;
+    fl_logf(L_INFO, _("SWCLK medido: %u kHz; una lectura del DP cada %u µs (%u kHz efectivos, %d de 200 bien)"),
+            (unsigned)(20u * 512u * 1000u / t_seq), (unsigned)(t_rd / 200), (unsigned)(200u * 48u * 1000u / t_rd), ok);
+}
+
 static bool run(swd_t *s)
 {
     fl_phase(AOS_FLASHER_OPENING);
@@ -1001,7 +1022,7 @@ static bool run(swd_t *s)
     fl_logf(L_INFO, "DPIDR %08X%s", (unsigned)s->dpidr, s->multidrop ? " (TARGETSEL 01002927)" : "");
     if (!identify(s)) return false;
     switch (J.job) {
-    case AOS_FLASHER_JOB_DETECT: return true;
+    case AOS_FLASHER_JOB_DETECT: measure_clock(s); return true;
     case AOS_FLASHER_JOB_FLASH: return write_image(s);
     case AOS_FLASHER_JOB_READ: return fl_fail("%s", _("Por SWD no se lee la flash entera: sólo se verifica lo grabado"));
     case AOS_FLASHER_JOB_ERASE: return erase_all(s);

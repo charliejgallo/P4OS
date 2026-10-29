@@ -12,7 +12,11 @@
  * of one (a target does not mind slow clocks, but a WAIT retried forever
  * would hide it). SWDIO is input and output at once with its pull-up; the
  * direction is the output enable. The clock comes from a delay loop, not
- * a timer: khz is approximate. Nothing here is in internal RAM.
+ * a timer, calibrated when the port opens: 512 idle clocks timed with two
+ * delays give what a turn of the loop costs and what the GPIO writes cost
+ * around it, and the delay for khz follows. Without that, the first guess
+ * (five cycles a turn) gave 390 kHz for 1000 on the board (2026-10-29).
+ * Nothing here is in internal RAM.
  *
  * shift_in: bit-banged, each clock's high time inside a critical section
  * (a microsecond with this core's interrupts off): an HX711 powers down
@@ -308,13 +312,22 @@ static inline int swd_in(aos_io_swd_t *s, uint32_t dly)
     return b;
 }
 
+/* 512 idle clocks (SWDIO low: the line at rest) with this delay, in us */
+static uint32_t swd_time(aos_io_swd_t *s, uint32_t dly)
+{
+    gpio_ll_set_level(&GPIO, (uint32_t)s->dio, 0);
+    portENTER_CRITICAL(&s_mux);
+    int64_t t0 = esp_timer_get_time();
+    for (int i = 0; i < 512; i++) swd_out(s, dly, 0);
+    int64_t t = esp_timer_get_time() - t0;
+    portEXIT_CRITICAL(&s_mux);
+    return (uint32_t)t;
+}
+
 bool aos_io_be_swd_open(aos_io_swd_t *s)
 {
     swd_p4_t *b = calloc(1, sizeof *b);
     if (!b) return false;
-    /* ~5 cycles a turn of the loop at 360 MHz, two waits a clock */
-    b->dly = 360000u / (s->khz * 10u);
-    if (!b->dly) b->dly = 1;
     gpio_config_t c = { .pin_bit_mask = 1ULL << s->clk, .mode = GPIO_MODE_OUTPUT };
     gpio_config(&c);
     gpio_set_level(s->clk, 1);
@@ -329,6 +342,17 @@ bool aos_io_be_swd_open(aos_io_swd_t *s)
         gpio_config(&c);
         gpio_set_level(s->nrst, 1);
     }
+    /* t(d) = 512 clocks x (2 waits of d turns + the writes): two points */
+    const uint32_t D1 = 4, D2 = 132;
+    uint32_t t1 = swd_time(s, D1), t2 = swd_time(s, D2);
+    float turn = t2 > t1 ? (float)(t2 - t1) / (512.0f * 2 * (D2 - D1)) : 0.01f;   /* us a turn */
+    float fixed = (float)t1 / 512.0f - 2 * D1 * turn;                           /* us a clock, d = 0 */
+    float want = 1000.0f / (float)s->khz;                                        /* us a clock */
+    float d = (want - fixed) / (2 * turn);
+    b->dly = d < 0 ? 0 : (uint32_t)(d + 0.5f);
+    float got = fixed + 2 * (float)b->dly * turn;
+    aos_hal_log("io", "swd: %u kHz asked, %u kHz got (delay %u; at most %u kHz)", (unsigned)s->khz,
+                (unsigned)(got > 0 ? 1000.0f / got : 0), (unsigned)b->dly, (unsigned)(fixed > 0 ? 1000.0f / fixed : 0));
     s->be = b;
     return true;
 }

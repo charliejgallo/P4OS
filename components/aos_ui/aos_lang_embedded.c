@@ -2885,6 +2885,7 @@ static const char blob_en__sistema_lang[] =
     "RP2040: flash_exit_xip no volvió\tRP2040: flash_exit_xip didn't return\n"
     "Escribile al firmware…\tType to the firmware…\n"
     "No entró: esperá que el firmware lea lo anterior\tDidn't fit: wait for the firmware to read the last one\n"
+    "SWCLK medido: %u kHz; una lectura del DP cada %u µs (%u kHz efectivos, %d de 200 bien)\tSWCLK measured: %u kHz; a DP read every %u µs (%u kHz effective, %d of 200 good)\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5762,6 +5763,7 @@ static const char blob_de__sistema_lang[] =
     "RP2040: flash_exit_xip no volvió\tRP2040: flash_exit_xip kehrte nicht zurück\n"
     "Escribile al firmware…\tAn die Firmware schreiben…\n"
     "No entró: esperá que el firmware lea lo anterior\tPasst nicht: warten, bis die Firmware das Vorige gelesen hat\n"
+    "SWCLK medido: %u kHz; una lectura del DP cada %u µs (%u kHz efectivos, %d de 200 bien)\tSWCLK gemessen: %u kHz; ein DP-Lesezugriff alle %u µs (%u kHz effektiv, %d von 200 gut)\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -5769,7 +5771,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2870, 0, files_en, 1 },
-    { "de", "Deutsch", 2870, 0, files_de, 1 },
+    { "en", "English", 2871, 0, files_en, 1 },
+    { "de", "Deutsch", 2871, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

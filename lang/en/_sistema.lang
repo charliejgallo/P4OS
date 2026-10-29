@@ -9291,3 +9291,6 @@ Escribile al firmware…	Type to the firmware…
 
 #: components/aos_apps/aos_app_flasher.c (consola RTT)
 No entró: esperá que el firmware lea lo anterior	Didn't fit: wait for the firmware to read the last one
+
+#: components/aos_flasher (Programador, SWD)
+SWCLK medido: %u kHz; una lectura del DP cada %u µs (%u kHz efectivos, %d de 200 bien)	SWCLK measured: %u kHz; a DP read every %u µs (%u kHz effective, %d of 200 good)

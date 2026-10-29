@@ -78,8 +78,10 @@ distinto de lo planeado abajo:
   para las dos cosas y no hizo falta tocar el parser.
 - **El motor** es `aos_io_swd_*` (`aos_io_pulse.c` y su backend
   `aos_io_pulse_p4.c`): bit-bang por `gpio_ll`, cada paquete en una
-  sección crítica, el reloj por un lazo de espera (~1 MHz pedido, **sin
-  medir**). En el simulador, `sim/swd_sim.c` emula el objetivo a nivel de
+  sección crítica, el reloj por un lazo de espera que se calibra al abrir
+  el puerto. Medido en la placa: 1005 kHz para 1000 pedidos; el techo de
+  este camino es ~1,14 MHz (lo que cuestan las escrituras de `gpio_ll`).
+  Para 2-4 MHz harían falta los GPIO dedicados del P4 o PARLIO. En el simulador, `sim/swd_sim.c` emula el objetivo a nivel de
   paquetes (`P4_SIM_SWD=nrf52840|stm32f103|rp2040`, `:protected`).
 - **Sin algoritmos de flash cargados en el objetivo** (ni el pack de
   probe-rs): cada familia se maneja desde acá por el bus. nRF52 por su

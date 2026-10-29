@@ -18,7 +18,9 @@
   `P4_SIM_SWD=nrf52840|stm32f103|rp2040`). On the board, with a Pico on
   `uart.b`: found, and a blink written and verified in 0.4 s, after two
   fixes the board showed (its DPs, left awake, answering all at once; the
-  ROM's table of functions not starting on a word). A test firmware for
+  ROM's table of functions not starting on a word). The clock calibrates
+  itself when the port opens, and Detectar measures it: 1005 kHz for the
+  1000 asked (the first guess gave 390), about 1.14 MHz at most this way. A test firmware for
   it, built with the Mac's own clang, is in `tools/swd_test/blink_pico`.
 - **The Programmer writes Arduinos.** A new kind of board, "Arduino", next
   to "ESP32": an AVR through the bootloader it already has, as the Arduino

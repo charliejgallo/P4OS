@@ -525,7 +525,15 @@ Que necesitan la mano del usuario o equipos:
     la consola llena los 512 B del buffer y el resto se pierde (el modo
     NO_BLOCK_SKIP de RTT, como en cualquier sonda): por eso las primeras
     líneas saltan de "doble 50" a "doble 817". La barra para escribirle
-    desde la app, sin probar en la placa. Falta medir el reloj.
+    desde la app, sin probar en la placa.
+  - **El reloj, medido desde la placa** (Detectar lo cronometra: 10240
+    ciclos en vacío y 200 lecturas del DP de 48 ciclos, con
+    `aos_hal_uptime_us`): con el primer retardo, 390 kHz para 1000
+    pedidos. Ahora el backend se calibra al abrir el puerto (512 ciclos con
+    dos retardos) y da 1005 kHz medidos, 200 lecturas de 200 bien; regrabar
+    `doble.uf2` bajó de 0,4 a 0,2 s. El techo con `gpio_ll` es ~1,14 MHz
+    (retardo 0): cada escritura de un GPIO cuesta casi medio microsegundo.
+    Más rápido pide los GPIO dedicados del P4 o PARLIO, no este lazo.
   - La Ekobadge 2026 (desde el 2026-10-31): ver su chip, grabar y RTT.
 - [ ] Programador con Arduino (F3, 2026-10-29, sin instalar; probado sólo
       en el simulador contra `tools/fake_avr_boot.py`). En la placa:
