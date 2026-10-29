@@ -518,7 +518,14 @@ Que necesitan la mano del usuario o equipos:
     bus. **Con `3756ab5`, anduvo:** `doble.uf2` (de
     `tools/swd_test/blink_pico/`) grabado sobre el Blink de medio segundo
     en 0,4 s, verificado, el objetivo reiniciado y el LED con el doble
-    destello. Falta: la consola RTT con ese firmware, y medir el reloj.
+    destello. **La consola RTT también, con `00e81f4`:** encontró el
+    bloque en 0x20001000 (buscando en los 264 KB de RAM), leyó las líneas
+    "doble N" y lo enviado por `POST /api/flash/console/send` volvió como
+    "recibido: hola desde P4OS". Lo que el firmware escribió antes de abrir
+    la consola llena los 512 B del buffer y el resto se pierde (el modo
+    NO_BLOCK_SKIP de RTT, como en cualquier sonda): por eso las primeras
+    líneas saltan de "doble 50" a "doble 817". La barra para escribirle
+    desde la app, sin probar en la placa. Falta medir el reloj.
   - La Ekobadge 2026 (desde el 2026-10-31): ver su chip, grabar y RTT.
 - [ ] Programador con Arduino (F3, 2026-10-29, sin instalar; probado sólo
       en el simulador contra `tools/fake_avr_boot.py`). En la placa:
