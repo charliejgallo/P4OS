@@ -566,6 +566,8 @@ static bool erase_flash(ctx_t *c)
 static bool run(ctx_t *c)
 {
     fl_phase(AOS_FLASHER_OPENING);
+    if (J.job == AOS_FLASHER_JOB_FLASH && J.src.kind == AOS_FLASHER_IMAGE)
+        return fl_fail(_("%s no es una imagen de ESP: es para un Arduino u otro micro"), J.src.name);
     const aos_io_port_t *pt = aos_io_port_find(J.port);
     bool usb = !strncmp(J.port, "usb", 3);      /* a USB serial port of the host */
     if (!usb && (!pt || pt->kind != AOS_PORT_UART)) return fl_fail(_("No hay un puerto serie %s"), J.port);

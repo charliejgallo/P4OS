@@ -2,6 +2,26 @@
 
 ## Unreleased
 
+- **The Programmer writes Arduinos.** A new kind of board, "Arduino", next
+  to "ESP32": an AVR through the bootloader it already has, as the Arduino
+  IDE does with avrdude. STK500 v1 (optiboot on an Uno, a Nano or a Pro
+  Mini, and the old ATmegaBOOT at 57600), STK500 v2 (the Mega 2560) and
+  AVR109 (Caterina: a Leonardo or a Micro on the USB host, sent to its
+  bootloader by the 1200-baud touch and found again when it comes back as
+  another device). The board is reset by DTR on USB, or by the port's EN
+  line wired to RESET on the header, and the protocol is found by trying,
+  in the order the USB ID makes likely. The chip comes from its signature.
+  It writes the `.hex` the IDE exports, every page read back and compared;
+  it refuses the "with_bootloader" one, which only an ISP can write. It
+  reads the flash to the card (each page twice) and writes a dump back
+  without touching the bootloader; it erases the program and keeps the
+  bootloader. The list shows `.hex`, `.elf` and `.uf2` files for the
+  families that take them; the portal page has the same choice
+  (`"family":"avr"` in its API). The wiring card says that a 5 V board's
+  TX needs a divider or a level shifter to reach the P4. In the simulator,
+  against `tools/fake_avr_boot.py` (optiboot, ATmegaBOOT, the Mega's and
+  Caterina on a pty, speaking only at their own speed): write, verify,
+  read, erase and a dump written back, byte for byte, with the four.
 - **The Programmer reads and erases.** "Leer la flash" copies a board's
   whole flash (or a range, from the portal) to the card, in
   `firmware/volcados/`, named after the chip, the board's MAC and the date,

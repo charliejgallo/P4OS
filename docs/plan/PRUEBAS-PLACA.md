@@ -493,6 +493,17 @@ Que necesitan la mano del usuario o equipos:
     servidor, que desde una Mac (`openssl s_client -tls1_2 -reconnect`)
     tampoco retomó la primera sesión (salió otra, con otro certificado,
     RSA y después ECDSA) y sí las siguientes.
+- [ ] Programador con Arduino (F3, 2026-10-29, sin instalar; probado sólo
+      en el simulador contra `tools/fake_avr_boot.py`). En la placa:
+  - Un Uno o un Nano por USB (`usb0`, reset por DTR): Detectar (firma y
+    "optiboot 8.0" o "STK500 v1 1.16, 57600"), grabar el `.hex` de Blink,
+    Monitor a 9600, Leer y Borrar el programa.
+  - El mismo por el header: TX/RX cruzados con un divisor en su TX, EN al
+    RESET. Uno de 3,3 V (Pro Mini) va directo.
+  - Un Mega 2560 por USB (STK500 v2; su VID:PID lo pone primero).
+  - Un Leonardo o Micro por USB: el toque a 1200 baudios, que el
+    bootloader aparezca como otro dispositivo (`El bootloader apareció
+    en usbN`) y que el sketch vuelva al final.
 - [x] Programador: leer y borrar (2026-10-27, después de la 0.22.2), en la
       placa con el reloj AmoledOS del usuario (ESP32-S3 v0.2, 16 MB) por
       su propia USB-Serial-JTAG en `usb0`:

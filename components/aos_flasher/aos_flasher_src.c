@@ -18,6 +18,12 @@
  *                              file is a bare application image, recognisable
  *                              by the app descriptor right after its first
  *                              segment header, which goes to 0x10000.
+ *   name.hex / .elf / .uf2     for the other families (an Arduino's sketch):
+ *                              the file says its own addresses, which are
+ *                              read by aos_flasher_img.c when a job starts.
+ *                              The list only notes the file: a scan runs on
+ *                              every look at the portal's page, and decoding
+ *                              a .hex there would be wasted.
  *
  * Every image header also says which chip it is for (chip_id, the same
  * numbering esp-serial-flasher uses), and an app image says its project name
@@ -288,6 +294,7 @@ static bool load_project(const char *dir, aos_flasher_source_t *src, char *err, 
     qsort(src->files, (size_t)src->nfiles, sizeof src->files[0], by_offset);
     src->project = true;
     src->kind = AOS_FLASHER_PROJECT;
+    src->family = AOS_FLASHER_ESP;
     for (int i = 0; i < src->nfiles; i++) {
         aos_flasher_file_t *fl = &src->files[i];
         snprintf(path, sizeof path, "%s/%s", dir, fl->name);
@@ -347,6 +354,7 @@ static bool load_bin(const char *path, aos_flasher_source_t *src, char *err, siz
     }
     note_revs(src, &hd);
     if (hd.chip) snprintf(src->chip, sizeof src->chip, "%s", hd.chip);
+    src->family = hd.chip ? AOS_FLASHER_ESP : -1;
     if (hd.app) {
         snprintf(src->app_name, sizeof src->app_name, "%s", hd.app_name);
         snprintf(src->app_version, sizeof src->app_version, "%s", hd.app_version);
@@ -360,6 +368,43 @@ static bool load_bin(const char *path, aos_flasher_source_t *src, char *err, siz
         }
     }
     return true;
+}
+
+/* A .hex, .elf or .uf2: one entry for the whole file. A .uf2 says its
+ * chip in the family ID of its first block. */
+static bool load_image(const char *path, aos_flasher_source_t *src, char *err, size_t err_len)
+{
+    aos_flasher_file_t *f = &src->files[0];
+    if (!file_size(path, &f->size)) return fail(err, err_len, "cannot read %s", path);
+    src->nfiles = 1;
+    src->total = f->size;
+    src->kind = AOS_FLASHER_IMAGE;
+    src->family = -1;
+    snprintf(f->name, sizeof f->name, "%.63s", base_name(path));
+    if (aos_flasher_image_fmt(path) == AOS_IMG_UF2) {
+        uint8_t b[32];
+        if (read_at(path, 0, b, sizeof b) == sizeof b && b[0] == 0x55 && b[1] == 0x46 && b[2] == 0x32 && b[3] == 0x0A &&
+            (b[8] & 0x20)) {
+            uint32_t fam = b[28] | b[29] << 8 | b[30] << 16 | (uint32_t)b[31] << 24;
+            const char *chip = fam == 0xE48BFF56 ? "RP2040" : fam == 0xE48BFF59 || fam == 0xE48BFF5B ? "RP2350"
+                             : fam == 0xADA52840 ? "nRF52840" : fam == 0x68ED2B88 ? "SAMD21" : fam == 0x55114460 ? "SAMD51" : NULL;
+            if (chip) snprintf(src->chip, sizeof src->chip, "%s", chip);
+        }
+    }
+    return true;
+}
+
+bool aos_flasher_source_fits(const aos_flasher_source_t *src, int family)
+{
+    if (src->family >= 0) return src->family == family;
+    if (family == AOS_FLASHER_ESP) return src->kind != AOS_FLASHER_IMAGE;
+    return true;
+}
+
+static bool is_image_name(const char *name)
+{
+    size_t l = strlen(name);
+    return l > 4 && strcasecmp(name + l - 4, ".bin") && aos_flasher_image_fmt(name) != AOS_IMG_BIN;
 }
 
 static bool is_dir(const char *path)
@@ -388,6 +433,8 @@ static void dump_chip(const char *bin, aos_flasher_source_t *src)
     char j[512];
     size_t n = read_at(jp, 0, (uint8_t *)j, sizeof j - 1);
     j[n] = 0;
+    if (strstr(j, "\"family\":\"avr\"")) src->family = AOS_FLASHER_AVR;
+    else if (strstr(j, "\"family\":\"esp\"")) src->family = AOS_FLASHER_ESP;
     const char *k = strstr(j, "\"chip\":\"");
     if (!k) return;
     k += 8;
@@ -429,8 +476,9 @@ bool aos_flasher_source_load(const char *path, aos_flasher_source_t *out, char *
     snprintf(out->path, sizeof out->path, "%s", dir);
     const char *dd = aos_flasher_dump_dir();
     out->dump = dd && !strncmp(dir, dd, strlen(dd)) && dir[strlen(dd)] == '/';
+    if (is_image_name(dir)) return load_image(dir, out, err, err_len);
     if (!load_bin(dir, out, err, err_len)) return false;
-    if (out->dump && !out->chip[0]) dump_chip(dir, out);
+    if (out->dump && (!out->chip[0] || out->family < 0)) dump_chip(dir, out);
     return true;
 }
 
@@ -467,7 +515,7 @@ int aos_flasher_scan(aos_flasher_source_t *out, int max)
         char p[256];
         snprintf(p, sizeof p, "%.190s/%.60s", dir, e->d_name);
         size_t l = strlen(e->d_name);
-        bool bin = l > 4 && !strcasecmp(e->d_name + l - 4, ".bin");
+        bool bin = (l > 4 && !strcasecmp(e->d_name + l - 4, ".bin")) || is_image_name(e->d_name);
         if (!bin && !is_dir(p)) continue;
         if (!bin) {
             char b[256];

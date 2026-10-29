@@ -576,7 +576,6 @@ Firmware en la tarjeta	Firmware on the card
 Subir carpeta de build…	Upload build folder…
 
 #: components/aos_portal/web/app.js:607
-Subir .bin…	Upload .bin…
 
 #: components/aos_portal/web/app.js:608
 Grabación	Flashing
@@ -2109,3 +2108,27 @@ La autoridad HTTPS de la placa	The board's HTTPS authority
 
 #: components/aos_portal/web/app.js:3077
 , para que el navegador confíe en ella.	, so the browser trusts it.
+
+#: components/aos_flasher (Programador, Arduino)
+¿Borrar el programa del Arduino en %s? Su bootloader queda. Para guardarlo antes, usá Leer la flash.	Erase the program of the Arduino on %s? Its bootloader stays. To keep it first, use Read flash.
+
+#: components/aos_flasher (Programador, Arduino)
+Tipo de placa	Board type
+
+#: components/aos_flasher (Programador, Arduino)
+página %s B	page %s B
+
+#: components/aos_flasher (Programador, Arduino)
+Borrar el programa	Erase program
+
+#: components/aos_flasher (Programador, Arduino)
+No hay firmware en /firmware. Subí el .hex de tu sketch (Sketch, Exportar binario compilado en el IDE de Arduino).	No firmware in /firmware. Upload your sketch's .hex (Sketch, Export Compiled Binary in the Arduino IDE).
+
+#: components/aos_flasher (Programador, Arduino)
+verificado	verified
+
+#: components/aos_flasher (Programador, Arduino)
+Un Arduino: EN va a su RESET, y el TX de uno de 5 V llega al RX de la placa por un divisor (1 kΩ y 2 kΩ) o un adaptador de niveles. Por USB, nada.	An Arduino: EN goes to its RESET, and a 5 V one's TX reaches the board's RX through a divider (1 kΩ and 2 kΩ) or a level shifter. Over USB, nothing.
+
+#: components/aos_flasher (Programador, Arduino)
+Subir .bin o .hex…	Upload .bin or .hex…

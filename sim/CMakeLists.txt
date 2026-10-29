@@ -282,6 +282,7 @@ target_link_directories(p4os_sim PRIVATE ${SDL2_LIBRARY_DIRS} ${AVCODEC_LIBRARY_
 # that says a firmware build is needed first.
 target_sources(p4os_sim PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_avr.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_esp.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_src.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_img.c)

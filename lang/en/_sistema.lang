@@ -8984,3 +8984,138 @@ Visor 3D	3D Viewer
 
 #: apps/vnc  (nombre de app)
 VNC	VNC
+
+#: components/aos_flasher (Programador, Arduino)
+Programa borrado	Program erased
+
+#: components/aos_flasher (Programador, Arduino)
+página	page
+
+#: components/aos_flasher (Programador, Arduino)
+Firma desconocida	Unknown signature
+
+#: components/aos_flasher (Programador, Arduino)
+Conectá el Arduino y tocá Detectar	Connect the Arduino and tap Detect
+
+#: components/aos_flasher (Programador, Arduino)
+Sin EN en modules.txt para el RESET: apretá el reset del Arduino al empezar	No EN in modules.txt for RESET: press the Arduino's reset when it starts
+
+#: components/aos_flasher (Programador, Arduino)
+¿Borrar el programa?	Erase the program?
+
+#: components/aos_flasher (Programador, Arduino)
+El Arduino conectado en %s se queda sin programa; su bootloader queda. Para guardarlo antes, usá Leer la flash.	The Arduino on %s is left without a program; its bootloader stays. To keep it first, use Read flash.
+
+#: components/aos_flasher (Programador, Arduino)
+Borrar el programa	Erase program
+
+#: components/aos_flasher (Programador, Arduino)
+RX del Arduino (D0)	Arduino's RX (D0)
+
+#: components/aos_flasher (Programador, Arduino)
+TX del Arduino (D1), ver abajo	Arduino's TX (D1), see below
+
+#: components/aos_flasher (Programador, Arduino)
+RESET	RESET
+
+#: components/aos_flasher (Programador, Arduino)
+Un Arduino de 5 V (Uno, Nano, Mega, Leonardo): su TX va al RX de acá por un divisor (1 kΩ en serie, 2 kΩ a GND) o un adaptador de niveles. Uno de 3,3 V va directo. Por USB no hace falta nada.	A 5 V Arduino (Uno, Nano, Mega, Leonardo): its TX reaches this RX through a divider (1 kΩ in series, 2 kΩ to GND) or a level shifter. A 3.3 V one connects directly. Over USB nothing is needed.
+
+#: components/aos_flasher (Programador, Arduino)
+Las direcciones salen del archivo	The addresses come from the file
+
+#: components/aos_flasher (Programador, Arduino)
+Copiá ahí el .hex de tu sketch: en el IDE de Arduino, Sketch > Exportar binario compilado. El que no dice with_bootloader.	Copy your sketch's .hex there: in the Arduino IDE, Sketch > Export Compiled Binary. The one without with_bootloader.
+
+#: components/aos_flasher (Programador, Arduino)
+leído dos veces	read twice
+
+#: components/aos_flasher (Programador, Arduino)
+verificado	verified
+
+#: components/aos_flasher (Programador, Arduino)
+Placa: %s	Board: %s
+
+#: components/aos_flasher (Programador, Arduino)
+Toque a 1200 baudios: la placa vuelve como su bootloader	1200 baud touch: the board comes back as its bootloader
+
+#: components/aos_flasher (Programador, Arduino)
+El bootloader apareció en %s	The bootloader showed up on %s
+
+#: components/aos_flasher (Programador, Arduino)
+El bootloader no apareció: apretá reset dos veces seguidas y probá de nuevo	The bootloader didn't show up: press reset twice quickly and try again
+
+#: components/aos_flasher (Programador, Arduino)
+El bootloader no contestó	The bootloader didn't answer
+
+#: components/aos_flasher (Programador, Arduino)
+Sin línea de reset: apretá el botón de reset de la placa	No reset line: press the board's reset button
+
+#: components/aos_flasher (Programador, Arduino)
+La placa no respondió: revisá TX/RX cruzados, GND y RESET	The board didn't answer: check TX/RX crossed, GND and RESET
+
+#: components/aos_flasher (Programador, Arduino)
+La placa no respondió: apretá reset justo después de empezar	The board didn't answer: press reset right after starting
+
+#: components/aos_flasher (Programador, Arduino)
+No se pudo leer la firma del chip	Couldn't read the chip's signature
+
+#: components/aos_flasher (Programador, Arduino)
+Firma %s: un chip que no conozco	Signature %s: a chip I don't know
+
+#: components/aos_flasher (Programador, Arduino)
+No sé el tamaño de su flash ni de su página	Its flash and page size are unknown
+
+#: components/aos_flasher (Programador, Arduino)
+Esta flash pasa de 128 KB: el STK500 v1 no llega	This flash is over 128 KB: STK500 v1 can't reach it
+
+#: components/aos_flasher (Programador, Arduino)
+Una carpeta de ESP-IDF no es para un Arduino	An ESP-IDF folder is not for an Arduino
+
+#: components/aos_flasher (Programador, Arduino)
+%s trae un bootloader (0x%X): grabá el .hex sin \"with_bootloader\"	%s carries a bootloader (0x%X): flash the .hex without \"with_bootloader\"
+
+#: components/aos_flasher (Programador, Arduino)
+El bootloader (desde 0x%X) no se toca	The bootloader (from 0x%X) is left alone
+
+#: components/aos_flasher (Programador, Arduino)
+El archivo no tiene nada para grabar	The file has nothing to write
+
+#: components/aos_flasher (Programador, Arduino)
+%u páginas de %u bytes (%u KB)	%u pages of %u bytes (%u KB)
+
+#: components/aos_flasher (Programador, Arduino)
+El bootloader no entró en modo de grabación	The bootloader didn't enter programming mode
+
+#: components/aos_flasher (Programador, Arduino)
+0x%X: falló la escritura	0x%X: write failed
+
+#: components/aos_flasher (Programador, Arduino)
+%s: escrito	%s: written
+
+#: components/aos_flasher (Programador, Arduino)
+0x%X: falló la lectura	0x%X: read failed
+
+#: components/aos_flasher (Programador, Arduino)
+0x%X: la placa tiene %02X y el archivo %02X	0x%X: the board has %02X and the file %02X
+
+#: components/aos_flasher (Programador, Arduino)
+Verificado: cada página igual al archivo	Verified: every page matches the file
+
+#: components/aos_flasher (Programador, Arduino)
+0x%X: dos lecturas distintas: revisá el cable	0x%X: two reads differ: check the cable
+
+#: components/aos_flasher (Programador, Arduino)
+Escribiendo 0xFF en el programa (%u KB)	Writing 0xFF over the program (%u KB)
+
+#: components/aos_flasher (Programador, Arduino)
+Programa borrado en %u,%u s (el bootloader queda)	Program erased in %u.%u s (the bootloader stays)
+
+#: components/aos_flasher (Programador, Arduino)
+%s, reset por DTR	%s, reset by DTR
+
+#: components/aos_flasher (Programador, Arduino)
+%s, RESET por EN (GPIO%d)	%s, RESET by EN (GPIO%d)
+
+#: components/aos_flasher (Programador, Arduino)
+%s no es una imagen de ESP: es para un Arduino u otro micro	%s is not an ESP image: it's for an Arduino or another micro

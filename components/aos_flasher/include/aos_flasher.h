@@ -6,6 +6,10 @@
  * esp-serial-flasher; this is the part of it that knows about ports, the
  * card and a thread.
  *
+ * Each job is for one family of targets (aos_flasher_opts_t.family): the
+ * ESP32s above, or the AVR Arduinos through their own bootloader (Uno, Nano,
+ * Pro Mini, Mega, Leonardo, Micro: aos_flasher_avr.c), from a .hex.
+ *
  * A service, not an app: one job at a time runs in its own thread and goes on
  * with the Programador app closed. Everything here is callable from the LVGL
  * task - the calls only copy state under a lock or start/stop the thread.
@@ -37,6 +41,17 @@ extern "C" {
 #define AOS_FLASHER_FILES_MAX 8
 #define AOS_FLASHER_SOURCES_MAX 24
 
+/* ---- families ---- */
+
+typedef enum {
+    AOS_FLASHER_ESP = 0,        /* ESP32 / ESP8266 through the ROM's serial bootloader */
+    AOS_FLASHER_AVR,            /* an Arduino through its bootloader: STK500 v1/v2, AVR109 */
+    AOS_FLASHER_FAMILIES,
+} aos_flasher_family_t;
+
+/* "ESP32", "Arduino" */
+const char *aos_flasher_family_name(int family);
+
 /* ---- firmware on the card ---- */
 
 typedef struct {
@@ -51,6 +66,7 @@ typedef enum {
     AOS_FLASHER_BIN_AT,         /* name@0x10000.bin */
     AOS_FLASHER_BIN_APP,        /* a bare app image: 0x10000, over the bootloader already there */
     AOS_FLASHER_BIN_MERGED,     /* anything else: a whole image from 0x0 */
+    AOS_FLASHER_IMAGE,          /* a .hex, .elf or .uf2: it says its own addresses */
 } aos_flasher_kind_t;
 
 typedef struct {
@@ -69,9 +85,17 @@ typedef struct {
     uint32_t total;             /* bytes of all the files */
     aos_flasher_kind_t kind;    /* how the offsets were decided */
     bool     dump;              /* read off a board by the programmer (firmware/volcados) */
+    int8_t   family;            /* the family it is for (an ESP image, a dump's .json), -1 not known */
 } aos_flasher_source_t;
 
-/* <sd>/firmware; NULL without a card. */
+/* Whether the list shows 'src' for a job of 'family': its own, or one that
+ * does not say - except a .hex/.elf/.uf2 for the ESP family, which only
+ * writes images. */
+bool aos_flasher_source_fits(const aos_flasher_source_t *src, int family);
+
+/* <sd>/firmware; NULL without a card. Besides the ESP folders and .bin
+ * files, any .hex, .elf or .uf2 in it is listed (AOS_FLASHER_IMAGE: one
+ * "file" from its lowest address, its size the bytes it holds). */
 const char *aos_flasher_dir(void);
 /* <sd>/firmware/volcados, where the dumps go; NULL without a card. */
 const char *aos_flasher_dump_dir(void);
@@ -107,7 +131,8 @@ typedef enum {
 } aos_flasher_job_t;
 
 typedef struct {
-    uint32_t baud;              /* for the writing; 0 = 460800. Falls back to 115200 */
+    aos_flasher_family_t family;    /* who the target is; 0 = an ESP */
+    uint32_t baud;              /* for the writing; 0 = 460800. Falls back to 115200. Not for an AVR */
     bool     no_stub;           /* talk to the ROM itself (slower, no ERASE_REGION) */
     bool     no_verify;         /* skip the MD5 of each file */
     bool     no_reset;          /* leave the target in its bootloader at the end */
@@ -118,6 +143,9 @@ typedef struct {
 
 /* Connects, reads the chip and resets the target back to its program. */
 bool aos_flasher_detect(const char *port);
+/* The same for a family other than the ESP's (opts->family; the rest is
+ * not used). */
+bool aos_flasher_detect_ex(const char *port, const aos_flasher_opts_t *opts);
 /* Flashes 'src' (copied) through 'port'. false: a job is running, or the
  * thread could not start. */
 bool aos_flasher_flash(const char *port, const aos_flasher_source_t *src, const aos_flasher_opts_t *opts);
@@ -160,6 +188,9 @@ typedef struct {
     uint32_t baud;              /* the speed the job ended up at */
     bool     secure;            /* secure boot or flash encryption on */
     bool     lines;             /* the port has EN/BOOT */
+    aos_flasher_family_t family;
+    char     boot[32];          /* an AVR: its bootloader, "optiboot 8.0, 115200" */
+    uint16_t page;              /* an AVR: the flash page, bytes */
     /* a dump: where it went (kept after the job; removed if the job failed),
      * the address it started at and its SHA-256 in hex */
     char     out_path[176];

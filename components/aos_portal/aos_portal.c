@@ -1057,6 +1057,16 @@ static void api_fs_op(aos_httpd_req_t *r, const char *op)
 static const char *const FLASH_PHASE[] = { "idle", "opening", "connecting", "stub", "baud", "info", "erasing",
                                            "writing", "verifying", "reading", "resetting", "done", "failed", "cancelled" };
 static const char *const FLASH_JOB[] = { "", "detect", "flash", "read", "erase" };
+static const char *const FLASH_FAMILY[] = { "esp", "avr" };
+
+/* "family": "esp" (the default) or "avr" */
+static aos_flasher_family_t flash_family(const cJSON *b)
+{
+    const char *f = jstr(b, "family");
+    for (int i = 0; f && i < AOS_FLASHER_FAMILIES; i++)
+        if (!strcmp(f, FLASH_FAMILY[i])) return (aos_flasher_family_t)i;
+    return AOS_FLASHER_ESP;
+}
 
 static void api_flash(aos_httpd_req_t *r)
 {
@@ -1066,6 +1076,7 @@ static void api_flash(aos_httpd_req_t *r)
     cJSON_AddBoolToObject(o, "busy", st.busy);
     cJSON_AddStringToObject(o, "job", st.job <= AOS_FLASHER_JOB_ERASE ? FLASH_JOB[st.job] : "");
     cJSON_AddStringToObject(o, "phase", st.phase <= AOS_FLASHER_CANCELLED ? FLASH_PHASE[st.phase] : "?");
+    cJSON_AddStringToObject(o, "family", st.family < AOS_FLASHER_FAMILIES ? FLASH_FAMILY[st.family] : "?");
     cJSON_AddNumberToObject(o, "seq", st.seq);
     cJSON_AddStringToObject(o, "port", st.port);
     cJSON_AddStringToObject(o, "source", st.source);
@@ -1102,6 +1113,8 @@ static void api_flash(aos_httpd_req_t *r)
         }
         cJSON_AddNumberToObject(c, "flash_size", st.flash_size);
         cJSON_AddBoolToObject(c, "secure", st.secure);
+        if (st.boot[0]) cJSON_AddStringToObject(c, "bootloader", st.boot);
+        if (st.page) cJSON_AddNumberToObject(c, "page", st.page);
     }
     cJSON *ports = cJSON_AddArrayToObject(o, "ports");
     for (int i = 0; i < aos_io_port_count(); i++) {
@@ -1138,6 +1151,11 @@ static void api_flash(aos_httpd_req_t *r)
         cJSON_AddStringToObject(e, "path", src[i].path);
         cJSON_AddBoolToObject(e, "project", src[i].project);
         cJSON_AddBoolToObject(e, "dump", src[i].dump);
+        cJSON_AddBoolToObject(e, "image", src[i].kind == AOS_FLASHER_IMAGE);
+        /* the families whose list shows it */
+        cJSON *fam = cJSON_AddArrayToObject(e, "families");
+        for (int f = 0; f < AOS_FLASHER_FAMILIES; f++)
+            if (aos_flasher_source_fits(&src[i], f)) cJSON_AddItemToArray(fam, cJSON_CreateString(FLASH_FAMILY[f]));
         cJSON_AddStringToObject(e, "chip", src[i].chip);
         cJSON_AddStringToObject(e, "chip_label", src[i].chip[0] ? aos_flasher_chip_label(src[i].chip) : "");
         cJSON_AddStringToObject(e, "app", src[i].app_name);
@@ -1174,7 +1192,7 @@ static void api_flash_start(aos_httpd_req_t *r)
     aos_hal_mutex_lock(mx);
     bool ok = path && aos_flasher_source_load(path, &src, err, sizeof err);
     if (ok) {
-        aos_flasher_opts_t o = { .baud = cJSON_IsNumber(baud) ? (uint32_t)baud->valueint : 0 };
+        aos_flasher_opts_t o = { .family = flash_family(b), .baud = cJSON_IsNumber(baud) ? (uint32_t)baud->valueint : 0 };
         ok = aos_flasher_flash(port && port[0] ? port : "uart.b", &src, &o);
         if (!ok) snprintf(err, sizeof err, "%s", aos_flasher_busy() ? _("ya hay una grabación en curso") : _("no se pudo empezar"));
     }
@@ -1185,7 +1203,7 @@ static void api_flash_start(aos_httpd_req_t *r)
 }
 
 /* A dump ({"port", "from", "len"}, len 0 or missing: to the end of the
- * flash) or an erase ({"port"}) */
+ * flash) or an erase ({"port"}); "family" as in the others */
 static void api_flash_job(aos_httpd_req_t *r, aos_flasher_job_t job)
 {
     cJSON *b = body_json(r);
@@ -1193,6 +1211,7 @@ static void api_flash_job(aos_httpd_req_t *r, aos_flasher_job_t job)
     const cJSON *from = cJSON_GetObjectItemCaseSensitive(b, "from"), *len = cJSON_GetObjectItemCaseSensitive(b, "len"),
                 *baud = cJSON_GetObjectItemCaseSensitive(b, "baud");
     aos_flasher_opts_t o = {
+        .family = flash_family(b),
         .baud = cJSON_IsNumber(baud) ? (uint32_t)baud->valuedouble : 0,
         .read_from = cJSON_IsNumber(from) ? (uint32_t)from->valuedouble : 0,
         .read_len = cJSON_IsNumber(len) ? (uint32_t)len->valuedouble : 0,
@@ -1208,7 +1227,8 @@ static void api_flash_detect(aos_httpd_req_t *r)
 {
     cJSON *b = body_json(r);
     const char *port = jstr(b, "port");
-    bool ok = aos_flasher_detect(port && port[0] ? port : "uart.b");
+    aos_flasher_opts_t o = { .family = flash_family(b) };
+    bool ok = aos_flasher_detect_ex(port && port[0] ? port : "uart.b", &o);
     cJSON_Delete(b);
     if (ok) send_ok(r);
     else send_err(r, 409, _("ya hay un trabajo en curso"));

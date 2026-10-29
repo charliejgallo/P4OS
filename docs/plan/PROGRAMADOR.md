@@ -13,10 +13,12 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
   (CP210x, CH34x, FTDI, CDC-ACM, la USB-Serial-JTAG propia de los C3/C6/S3/H2).
   Graba carpetas de ESP-IDF (`flasher_args.json`) y `.bin` sueltos, verifica
   por MD5. **No lee** (no hay volcado) ni borra.
+- **Arduino AVR por su bootloader** (F3, sin publicar): STK500 v1/v2 y
+  AVR109, desde un `.hex`; leer y borrar el programa.
 - **Pico (RP2040) en BOOTSEL**: es un disco USB; copiar un `.uf2` a `/usb` lo
   graba (`docs/USB.md`). Fuera del Programador.
 - **Terminal serie**: monitor de los UART del header y los USB.
-- **Nada de SWD, AVR ni STM32.**
+- **Nada de SWD ni STM32.**
 
 ## Familias y caminos
 
@@ -24,8 +26,8 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
 |---|---|---|---|---|---|
 | ESP32 / ESP8266 | DevKit, NodeMCU, módulos | ROM serie (hay) | hay | F1 | F1 |
 | Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, GD32 | SWD con 2-3 cables | F2 | sólo verificar | F2 |
-| AVR con bootloader serie | Uno, Nano, Pro Mini, Mega | STK500 v1 (optiboot) y v2 (Mega) | F3 | F3 | F3 |
-| AVR con USB propio | Leonardo, Micro, Pro Micro | AVR109 (Caterina), toque a 1200 baudios | F3 | F3 | F3 |
+| AVR con bootloader serie | Uno, Nano, Pro Mini, Mega | STK500 v1 (optiboot) y v2 (Mega) | hay (sim) | hay (sim) | F3 |
+| AVR con USB propio | Leonardo, Micro, Pro Micro | AVR109 (Caterina), toque a 1200 baudios | hay (sim) | hay (sim) | F3 |
 | STM32 sin sonda | Blue Pill, Black Pill | bootloader serie de ST (AN3155), BOOT0 y NRST con las líneas EN/BOOT | F4 | F4 | F4 |
 | Desde la Mac, serie | esptool, avrdude, stm32flash | puente RFC2217 / TCP crudo al puerto | (la Mac) | (la Mac) | F4 |
 | Desde la Mac, SWD | OpenOCD, pyOCD, probe-rs | la placa como sonda CMSIS-DAP v2 por el USB OTG | (la Mac) | (la Mac) | F5 |
@@ -95,6 +97,35 @@ hasta que una familia que los use (SWD, AVR) los pida.
   después la Ekobadge 2026 (SWD directo).
 
 ## F3: Arduino por su bootloader
+
+**Hecha en el simulador el 2026-10-29** (falta la placa: un Uno o Nano
+por el header y por USB, un Leonardo por USB). `aos_flasher_avr.c`, el
+tipo "Arduino" en la app y en el portal (`"family":"avr"`), y
+`tools/fake_avr_boot.py` con los cuatro bootloaders (optiboot,
+ATmegaBOOT, el del Mega y Caterina), que sólo contestan a su velocidad (la
+leen del termios del pty). Probado con los cuatro: detectar, grabar un
+`.hex` con verificación, negarse al `with_bootloader`, leer, borrar y
+grabar de vuelta un volcado, byte por byte. Decisiones:
+
+- El protocolo se busca probando (v1 a 115200, v1 a 57600, v2, AVR109 a
+  57600), con un reset antes de cada intento; el VID:PID de un Mega pone
+  v2 primero, el de un Leonardo/Micro/Pro Micro va directo al toque.
+- El bootloader no dice cuánto ocupa: se reserva lo de cada tipo (512 B
+  optiboot en 32 KB, 1 KB en chips más grandes, 2 KB ATmegaBOOT, 4 KB
+  Caterina, 8 KB el Mega). Un `.hex` que llega ahí se rechaza; un volcado
+  se graba sin esa parte.
+- Borrar: Caterina tiene su borrado; en los STK500 se escribe 0xFF sobre
+  el programa (el borrado del bootloader del Mega no anda en todas sus
+  versiones). En un Mega son ~25 s a 115200.
+- Verificar: cada página leída y comparada (no hay suma en el protocolo);
+  un volcado lee cada página dos veces.
+- Un Arduino de 5 V por el header necesita un divisor en su TX: lo dice
+  la tarjeta de conexión.
+- Sin probar: el toque a 1200 baudios en el host USB de la placa (si el
+  driver CDC-ACM manda SET_LINE_CODING y DTR como Caterina los espera, y
+  el índice en que vuelve el bootloader).
+
+Lo planeado era:
 
 - **STK500 v1** (optiboot y el viejo de los Uno/Nano/Pro Mini): reset por DTR
   (USB) o por la línea EN del header, firma del chip, grabar, verificar y leer

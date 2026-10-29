@@ -1,11 +1,14 @@
 /*
- * P4OS - Programador: flashes an ESP32-family board through the header.
+ * P4OS - Programador: flashes an ESP32-family board or an AVR Arduino through
+ * the header or a USB port.
  *
  * The work is the aos_flasher service's (components/aos_flasher): it owns the
  * port and the thread, so a flash started here goes on with the app closed,
  * and when it ends with the app out of sight a toast says so and the icon
  * gets a badge. This file is only the face of it:
  *
+ *   the kind      ESP32 or Arduino (the service's family): what Detectar
+ *                 looks for, which firmware the list shows, how to wire it.
  *   the target    the port and its EN/BOOT pins from modules.txt, the speed,
  *                 and "Detectar" (connect, read the chip, reset it back to
  *                 its program): chip, revision, flash size, MAC. If somebody
@@ -79,6 +82,7 @@ static const char *const PHASE[] = {
 /* What survives closing the app and turning the screen */
 static struct {
     char port[AOS_IO_PORT_NAME_MAX];
+    int fam;                        /* aos_flasher_family_t */
     int baud_i;
     char sel[256];                  /* path of the chosen source */
     bool job_view;                  /* the job's screen instead of the setup */
@@ -97,7 +101,7 @@ static struct {
     lv_timer_t *timer;
     /* target card */
     lv_obj_t *chip_name, *chip_info, *detect_btn, *detect_lbl, *busy_row, *busy_lbl, *busy_btn;
-    lv_obj_t *port_lbl, *baud_lbl;
+    lv_obj_t *port_lbl, *baud_lbl, *baud_chip;
     /* sources */
     lv_obj_t *list;
     /* job */
@@ -150,11 +154,17 @@ static const char *phase_title(const aos_flasher_status_t *st)
         if (st->phase == AOS_FLASHER_FAILED) return _("No se pudo leer");
         if (st->phase == AOS_FLASHER_CANCELLED) return _("Lectura cancelada");
     } else if (st->job == AOS_FLASHER_JOB_ERASE) {
-        if (st->phase == AOS_FLASHER_DONE) return _("Flash borrada");
+        if (st->phase == AOS_FLASHER_DONE) return st->family == AOS_FLASHER_AVR ? _("Programa borrado") : _("Flash borrada");
         if (st->phase == AOS_FLASHER_FAILED) return _("No se pudo borrar");
         if (st->phase == AOS_FLASHER_CANCELLED) return _("Borrado cancelado");
     }
     return _(PHASE[st->phase]);
+}
+
+static aos_flasher_opts_t job_opts(void)
+{
+    aos_flasher_opts_t o = { .family = (aos_flasher_family_t)S.fam, .baud = BAUDS[S.baud_i] };
+    return o;
 }
 
 static const aos_flasher_source_t *selected(void)
@@ -168,7 +178,8 @@ static void scan(void)
     if (!S.src) S.src = calloc(AOS_FLASHER_SOURCES_MAX, sizeof *S.src);
     S.nsrc = S.src ? aos_flasher_scan(S.src, AOS_FLASHER_SOURCES_MAX) : 0;
     S.scanned = true;
-    if (!selected()) S.sel[0] = 0;
+    const aos_flasher_source_t *s = selected();
+    if (!s || !aos_flasher_source_fits(s, S.fam)) S.sel[0] = 0;
 }
 
 /* Who holds the port's pins, if not the programmer; its friendly name. */
@@ -266,8 +277,17 @@ static void refresh_target(void)
     aos_flasher_status_t st;
     aos_flasher_status(&st);
     bool detecting = st.busy && st.job == AOS_FLASHER_JOB_DETECT;
+    bool avr = S.fam == AOS_FLASHER_AVR;
     char buf[128];
-    if (st.chip_known && strcmp(st.port, S.port) == 0) {
+    if (st.chip_known && strcmp(st.port, S.port) == 0 && (int)st.family == S.fam && avr) {
+        lv_label_set_text(U.chip_name, st.chip);
+        char fl[16];
+        fmt_size(fl, sizeof fl, st.flash_size);
+        if (st.flash_size) snprintf(buf, sizeof buf, "%s %s  ·  %s %u B\n%s", fl, _("de flash"), _("página"), st.page, st.boot);
+        else snprintf(buf, sizeof buf, "%s\n%s", _("Firma desconocida"), st.boot);
+        lv_label_set_text(U.chip_info, buf);
+        lv_obj_set_style_text_color(U.chip_info, AOS_C_DIM, 0);
+    } else if (st.chip_known && strcmp(st.port, S.port) == 0 && (int)st.family == S.fam) {
         lv_label_set_text(U.chip_name, st.chip);
         char rev[16] = "", fl[24] = "", mac[32] = "";
         if (st.revision != 0xFFFF) snprintf(rev, sizeof rev, "v%u.%u  ·  ", st.revision / 100, st.revision % 100);
@@ -282,13 +302,13 @@ static void refresh_target(void)
         lv_label_set_text(U.chip_name, _("Buscando la placa…"));
         lv_label_set_text(U.chip_info, phase_title(&st));
         lv_obj_set_style_text_color(U.chip_info, AOS_C_DIM, 0);
-    } else if (!st.busy && st.job == AOS_FLASHER_JOB_DETECT && !st.ok && !strcmp(st.port, S.port)) {
+    } else if (!st.busy && st.job == AOS_FLASHER_JOB_DETECT && !st.ok && !strcmp(st.port, S.port) && (int)st.family == S.fam) {
         lv_label_set_text(U.chip_name, _("No respondió"));
         lv_label_set_text(U.chip_info, st.error);
         lv_obj_set_style_text_color(U.chip_info, AOS_C_ORANGE, 0);
     } else {
         lv_label_set_text(U.chip_name, _("Placa sin detectar"));
-        lv_label_set_text(U.chip_info, _("Conectala al header y tocá Detectar"));
+        lv_label_set_text(U.chip_info, avr ? _("Conectá el Arduino y tocá Detectar") : _("Conectala al header y tocá Detectar"));
         lv_obj_set_style_text_color(U.chip_info, AOS_C_DIM, 0);
     }
     if (!U.detect_btn) return;      /* the compact card of the job's screen */
@@ -319,6 +339,8 @@ static void refresh_target(void)
     lv_obj_set_style_text_color(U.port_lbl, p || usb_ok ? AOS_C_TEXT : AOS_C_ORANGE, 0);
     snprintf(buf, sizeof buf, "%u", (unsigned)BAUDS[S.baud_i]);
     lv_label_set_text(U.baud_lbl, buf);
+    /* an Arduino's bootloader has its own speed */
+    lv_obj_set_flag(U.baud_chip, LV_OBJ_FLAG_HIDDEN, avr);
 
     /* somebody else on the port, or no EN/BOOT */
     char who[32];
@@ -330,7 +352,8 @@ static void refresh_target(void)
         lv_label_set_text(U.busy_lbl, buf);
         lv_obj_set_flag(U.busy_btn, LV_OBJ_FLAG_HIDDEN, strncmp(owner, "serial ", 7) != 0);
     } else if (warn) {
-        lv_label_set_text(U.busy_lbl, _("Sin EN/BOOT en modules.txt: poné la placa en modo descarga a mano"));
+        lv_label_set_text(U.busy_lbl, avr ? _("Sin EN en modules.txt para el RESET: apretá el reset del Arduino al empezar")
+                                          : _("Sin EN/BOOT en modules.txt: poné la placa en modo descarga a mano"));
         lv_obj_add_flag(U.busy_btn, LV_OBJ_FLAG_HIDDEN);
     }
 }
@@ -338,7 +361,8 @@ static void refresh_target(void)
 static void detect_cb(lv_event_t *e)
 {
     if (aos_flasher_busy()) return;
-    if (!aos_flasher_detect(S.port)) aos_ui_toast(_("No se pudo empezar"), 1800);
+    aos_flasher_opts_t o = job_opts();
+    if (!aos_flasher_detect_ex(S.port, &o)) aos_ui_toast(_("No se pudo empezar"), 1800);
     refresh_target();
 }
 
@@ -357,6 +381,17 @@ static void port_cb(lv_event_t *e)
     for (int i = 0; i < n; i++) if (!strcmp(names[i], S.port)) cur = i;
     if (n) snprintf(S.port, sizeof S.port, "%s", names[(cur + 1) % n]);
     aos_hal_pref_set_str("fl_port", S.port);
+    build();
+}
+
+static void fam_cb(lv_event_t *e)
+{
+    int f = (int)(intptr_t)lv_event_get_user_data(e);
+    if (aos_flasher_busy() || f == S.fam) return;
+    S.fam = f;
+    aos_hal_pref_set_i32("fl_fam", f);
+    const aos_flasher_source_t *s = selected();
+    if (s && !aos_flasher_source_fits(s, S.fam)) S.sel[0] = 0;
     build();
 }
 
@@ -400,7 +435,7 @@ static void job_started(bool ok)
 static void read_cb(lv_event_t *e)
 {
     if (aos_flasher_busy() || !port_free_or_say()) return;
-    aos_flasher_opts_t o = { .baud = BAUDS[S.baud_i] };
+    aos_flasher_opts_t o = job_opts();
     S.log_from = aos_flasher_log_count();
     job_started(aos_flasher_read(S.port, &o));
 }
@@ -417,7 +452,7 @@ static void erase_yes_cb(lv_event_t *e)
 {
     overlay_close();
     if (aos_flasher_busy() || !port_free_or_say()) return;
-    aos_flasher_opts_t o = { .baud = BAUDS[S.baud_i] };
+    aos_flasher_opts_t o = job_opts();
     S.log_from = aos_flasher_log_count();
     job_started(aos_flasher_erase(S.port, &o));
 }
@@ -436,11 +471,13 @@ static void erase_cb(lv_event_t *e)
     lv_obj_set_style_pad_all(c, 30, 0);
     lv_obj_set_style_pad_row(c, 16, 0);
     lv_obj_center(c);
-    lv_obj_t *t = aos_label(c, _("¿Borrar toda la flash?"), aos_font_title, AOS_C_TEXT);
+    bool avr = S.fam == AOS_FLASHER_AVR;
+    lv_obj_t *t = aos_label(c, avr ? _("¿Borrar el programa?") : _("¿Borrar toda la flash?"), aos_font_title, AOS_C_TEXT);
     lv_obj_set_width(t, w - 60);
     lv_label_set_long_mode(t, LV_LABEL_LONG_MODE_WRAP);
     char msg[200];
-    snprintf(msg, sizeof msg, _("La placa conectada en %s se queda sin programa. Para guardarlo antes, usá Leer la flash."), S.port);
+    snprintf(msg, sizeof msg, avr ? _("El Arduino conectado en %s se queda sin programa; su bootloader queda. Para guardarlo antes, usá Leer la flash.")
+                                  : _("La placa conectada en %s se queda sin programa. Para guardarlo antes, usá Leer la flash."), S.port);
     lv_obj_t *m = aos_label(c, msg, aos_font_body, AOS_C_DIM);
     lv_obj_set_width(m, w - 60);
     lv_label_set_long_mode(m, LV_LABEL_LONG_MODE_WRAP);
@@ -474,11 +511,36 @@ static lv_obj_t *chip_btn(lv_obj_t *parent, const char *glyph, lv_color_t gc, lv
     return b;
 }
 
+/* ESP32 | Arduino: two halves, the chosen one filled */
+static void build_kind(lv_obj_t *parent)
+{
+    lv_obj_t *seg = box(parent, lv_pct(100), 60);
+    lv_obj_set_style_bg_color(seg, AOS_C_CARD2, 0);
+    lv_obj_set_style_bg_opa(seg, LV_OPA_COVER, 0);
+    lv_obj_set_style_radius(seg, 30, 0);
+    lv_obj_set_style_pad_all(seg, 4, 0);
+    lv_obj_set_flex_flow(seg, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_column(seg, 4, 0);
+    for (int f = 0; f < AOS_FLASHER_FAMILIES; f++) {
+        bool on = f == S.fam;
+        lv_obj_t *b = box(seg, 1, lv_pct(100));
+        lv_obj_set_flex_grow(b, 1);
+        lv_obj_set_style_radius(b, 26, 0);
+        lv_obj_set_style_bg_color(b, C_TINT_DEEP, 0);
+        lv_obj_set_style_bg_opa(b, on ? LV_OPA_COVER : LV_OPA_TRANSP, 0);
+        lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_add_event_cb(b, fam_cb, LV_EVENT_CLICKED, (void *)(intptr_t)f);
+        lv_obj_t *l = aos_label(b, aos_flasher_family_name(f), aos_font_small, on ? lv_color_white() : AOS_C_DIM);
+        lv_obj_center(l);
+    }
+}
+
 static void build_target(lv_obj_t *parent, int32_t w, bool compact)
 {
     lv_obj_t *c = card(parent, w);
     lv_obj_set_style_pad_all(c, 24, 0);
     lv_obj_set_style_pad_row(c, 20, 0);
+    if (!compact) build_kind(c);
 
     /* the chip: what it is, or how to find out */
     /* tall enough for the name and two lines under it (revision and flash,
@@ -506,7 +568,11 @@ static void build_target(lv_obj_t *parent, int32_t w, bool compact)
     lv_obj_set_style_pad_column(row, 12, 0);
     lv_obj_t *pc = chip_btn(row, AOS_SYM_SERIAL_PORT, C_TINT, port_cb, &U.port_lbl, NULL);
     lv_obj_t *bc = chip_btn(row, AOS_SYM_SPEEDOMETER, AOS_C_DIM, baud_cb, &U.baud_lbl, "bps");
-    if (U.land) {
+    U.baud_chip = bc;
+    if (U.land && S.fam == AOS_FLASHER_AVR) {
+        /* no speed to choose: the port and Detectar fit in one row */
+        lv_obj_set_flex_grow(pc, 1);
+    } else if (U.land) {
         lv_obj_set_flex_grow(pc, 1);
         lv_obj_set_flex_grow(bc, 1);
         row = box(c, lv_pct(100), 64);
@@ -525,7 +591,8 @@ static void build_target(lv_obj_t *parent, int32_t w, bool compact)
     lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_column(row, 12, 0);
     U.read_btn = pill(row, AOS_SYM_DOWNLOAD, _("Leer la flash"), AOS_C_CARD2, AOS_C_TEXT, read_cb, NULL);
-    U.erase_btn = pill(row, AOS_SYM_ERASER, _("Borrar la flash"), AOS_C_CARD2, lv_color_hex(0xFF8A80), erase_cb, NULL);
+    U.erase_btn = pill(row, AOS_SYM_ERASER, S.fam != AOS_FLASHER_AVR ? _("Borrar la flash") : U.land ? _("Borrar") : _("Borrar el programa"), AOS_C_CARD2,
+                       lv_color_hex(0xFF8A80), erase_cb, NULL);
     lv_obj_set_height(U.read_btn, 64);
     lv_obj_set_height(U.erase_btn, 64);
     if (U.land) {
@@ -562,11 +629,12 @@ static void build_wiring(lv_obj_t *parent, int32_t w)
     section(parent, _("CONEXIÓN"));
     lv_obj_t *c = card(parent, w);
     lv_obj_set_style_pad_ver(c, 6, 0);
+    bool avr = S.fam == AOS_FLASHER_AVR;
     struct { int gpio; const char *what, *to; } L[] = {
-        { p->pins[0], "TX", N_("RX de la placa (U0RXD)") },
-        { p->pins[1], "RX", N_("TX de la placa (U0TXD)") },
-        { en, "EN", N_("EN / RST") },
-        { boot, "BOOT", N_("GPIO0 (GPIO9 en C3/C6/H2, GPIO35 en P4)") },
+        { p->pins[0], "TX", avr ? N_("RX del Arduino (D0)") : N_("RX de la placa (U0RXD)") },
+        { p->pins[1], "RX", avr ? N_("TX del Arduino (D1), ver abajo") : N_("TX de la placa (U0TXD)") },
+        { en, "EN", avr ? N_("RESET") : N_("EN / RST") },
+        { avr ? -1 : boot, "BOOT", N_("GPIO0 (GPIO9 en C3/C6/H2, GPIO35 en P4)") },
         { -2, "GND", N_("GND, común a las dos") },
     };
     int n = 0;
@@ -594,6 +662,14 @@ static void build_wiring(lv_obj_t *parent, int32_t w)
         lv_obj_t *to = aos_label(r, _(L[i].to), aos_font_caption, AOS_C_DIM);
         lv_obj_align(to, LV_ALIGN_RIGHT_MID, 0, 0);
         aos_make_decorative(r);
+    }
+    if (avr) {
+        /* the P4's pins are 3.3 V and do not take 5 */
+        lv_obj_t *n = aos_label(parent, _("Un Arduino de 5 V (Uno, Nano, Mega, Leonardo): su TX va al RX de acá por un divisor (1 kΩ en serie, 2 kΩ a GND) o un adaptador de niveles. Uno de 3,3 V va directo. Por USB no hace falta nada."),
+                                aos_font_caption, AOS_C_ORANGE);
+        lv_obj_set_width(n, w - 48);
+        lv_obj_set_style_pad_hor(n, 24, 0);
+        lv_label_set_long_mode(n, LV_LABEL_LONG_MODE_WRAP);
     }
 }
 
@@ -624,7 +700,7 @@ static const char *mismatch(const aos_flasher_source_t *s)
 {
     aos_flasher_status_t st;
     aos_flasher_status(&st);
-    if (!st.chip_known || !s->chip[0]) return "";
+    if (!st.chip_known || !s->chip[0] || (int)st.family != S.fam) return "";
     return strcasecmp(aos_flasher_chip_label(s->chip), st.chip) ? aos_flasher_chip_label(s->chip) : "";
 }
 
@@ -655,7 +731,8 @@ static void file_lines(lv_obj_t *parent, const aos_flasher_source_t *s)
         snprintf(buf, sizeof buf, "%s %s  ·  %s  ·  %s", _("Flash"), s->flash_mode, s->flash_size, s->flash_freq);
     const char *note = s->kind == AOS_FLASHER_BIN_APP ? _("Imagen de app: va a 0x10000, sobre el bootloader que la placa ya tenga")
                      : s->kind == AOS_FLASHER_BIN_MERGED ? _("Imagen completa: va entera desde 0x0")
-                     : s->kind == AOS_FLASHER_BIN_AT ? _("La dirección sale del nombre del archivo") : "";
+                     : s->kind == AOS_FLASHER_BIN_AT ? _("La dirección sale del nombre del archivo")
+                     : s->kind == AOS_FLASHER_IMAGE ? _("Las direcciones salen del archivo") : "";
     if (note[0]) snprintf(buf + strlen(buf), sizeof buf - strlen(buf), "%s%s", buf[0] ? "\n" : "", note);
     if (buf[0]) {
         lv_obj_t *nl = aos_label(blk, buf, aos_font_caption, AOS_C_DIM);
@@ -694,23 +771,29 @@ static void build_sources(lv_obj_t *parent, int32_t w)
     lv_obj_align(rb, LV_ALIGN_RIGHT_MID, 0, 0);
 
     U.list = card(parent, w);
-    if (!S.nsrc) {
+    int shown = 0;
+    for (int i = 0; i < S.nsrc; i++) shown += aos_flasher_source_fits(&S.src[i], S.fam);
+    if (!shown) {
         lv_obj_set_style_pad_all(U.list, 32, 0);
         lv_obj_set_style_pad_row(U.list, 14, 0);
         lv_obj_set_flex_align(U.list, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
         aos_label(U.list, AOS_SYM_SD, &aos_sym_72, AOS_C_DIM);
         aos_label(U.list, aos_flasher_dir() ? _("No hay firmware en /firmware") : _("No hay tarjeta"), aos_font_body, AOS_C_TEXT);
-        lv_obj_t *h = aos_label(U.list, _("Copiá ahí la carpeta build/ de un proyecto de ESP-IDF (la que tiene flasher_args.json) o un .bin. Un nombre como app@0x10000.bin dice dónde va."),
+        lv_obj_t *h = aos_label(U.list, S.fam == AOS_FLASHER_AVR
+                                    ? _("Copiá ahí el .hex de tu sketch: en el IDE de Arduino, Sketch > Exportar binario compilado. El que no dice with_bootloader.")
+                                    : _("Copiá ahí la carpeta build/ de un proyecto de ESP-IDF (la que tiene flasher_args.json) o un .bin. Un nombre como app@0x10000.bin dice dónde va."),
                                 aos_font_caption, AOS_C_DIM);
         lv_obj_set_width(h, lv_pct(100));
         lv_label_set_long_mode(h, LV_LABEL_LONG_MODE_WRAP);
         lv_obj_set_style_text_align(h, LV_TEXT_ALIGN_CENTER, 0);
         return;
     }
+    int row = 0;
     for (int i = 0; i < S.nsrc; i++) {
         const aos_flasher_source_t *s = &S.src[i];
+        if (!aos_flasher_source_fits(s, S.fam)) continue;
         bool sel = !strcmp(S.sel, s->path);
-        if (i) {
+        if (row++) {
             lv_obj_t *hl = hairline(U.list);
             lv_obj_set_style_margin_left(hl, 108, 0);
         }
@@ -739,9 +822,12 @@ static void build_sources(lv_obj_t *parent, int32_t w)
         if (mm0[0]) snprintf(chipbuf, sizeof chipbuf, "%s %s", _("Para"), mm0);
         else snprintf(chipbuf, sizeof chipbuf, "%s", s->chip[0] ? aos_flasher_chip_label(s->chip) : _("chip ?"));
         const char *chip = chipbuf;
+        const char *ext = strrchr(s->name, '.');
         if (s->project)
             snprintf(sub, sizeof sub, "%s  ·  %d %s  ·  %s%s%s", chip, s->nfiles, _("archivos"), sz,
                      s->app_version[0] ? "  ·  " : "", s->app_version);
+        else if (s->kind == AOS_FLASHER_IMAGE)
+            snprintf(sub, sizeof sub, "%s  ·  %s  ·  %s", chip, ext ? ext + 1 : "", sz);
         else
             snprintf(sub, sizeof sub, "%s  ·  0x%X  ·  %s%s%s", chip, (unsigned)s->files[0].offset, sz,
                      s->app_version[0] ? "  ·  " : "", s->app_version);
@@ -827,7 +913,7 @@ static void refresh_job(void)
     /* the line under the phase */
     if (done && st.ok && st.job == AOS_FLASHER_JOB_READ) {
         snprintf(buf, sizeof buf, "%s  ·  SHA-256 %.12s…  ·  %s", _("En firmware/volcados"), st.out_sha256,
-                 st.verified ? _("MD5 verificado") : _("sin verificar"));
+                 !st.verified ? _("sin verificar") : st.family == AOS_FLASHER_AVR ? _("leído dos veces") : _("MD5 verificado"));
     } else if (done && st.ok && st.job == AOS_FLASHER_JOB_ERASE) {
         snprintf(buf, sizeof buf, _("%s sin programa: lista para grabar"), st.chip);
     } else if (done && st.phase == AOS_FLASHER_CANCELLED && st.job == AOS_FLASHER_JOB_READ) {
@@ -838,7 +924,7 @@ static void refresh_job(void)
         snprintf(buf, sizeof buf, "%s  ·  0x%X - 0x%X", st.chip, (unsigned)st.out_from, (unsigned)(st.out_from + st.total));
     } else if (done && st.ok) {
         snprintf(buf, sizeof buf, "%s %s %s  ·  %s", st.source, _("en"), st.chip,
-                 st.verified ? _("MD5 verificado") : _("sin verificar"));
+                 !st.verified ? _("sin verificar") : st.family == AOS_FLASHER_AVR ? _("verificado") : _("MD5 verificado"));
     } else if (done && st.phase == AOS_FLASHER_CANCELLED && st.done) {
         snprintf(buf, sizeof buf, "%s", _("Quedó a medio grabar: grabala de nuevo para que arranque"));
     } else if (done) {
@@ -846,6 +932,8 @@ static void refresh_job(void)
     } else if (st.phase >= AOS_FLASHER_ERASING && st.phase <= AOS_FLASHER_VERIFYING) {
         snprintf(buf, sizeof buf, "%s  ·  %s %d %s %d  ·  0x%X", st.file_name, _("archivo"), st.file_index + 1, _("de"),
                  st.file_count, (unsigned)st.file_offset);
+    } else if (st.chip_known && st.family == AOS_FLASHER_AVR) {
+        snprintf(buf, sizeof buf, "%s  ·  %s", st.chip, st.boot);
     } else if (st.chip_known) {
         snprintf(buf, sizeof buf, "%s  ·  %s", st.chip, st.stub ? _("con stub") : _("con la ROM"));
     } else {
@@ -872,7 +960,9 @@ static void refresh_job(void)
     for (int f = 0; s && f < s->nfiles && f < AOS_FLASHER_FILES_MAX; f++) {
         lv_obj_t *g = U.file_state[f];
         if (!g) continue;
-        uint32_t sz = s->files[f].size;
+        /* one file: the job's own total (an AVR's pages, written and read
+         * back, are not the .hex's bytes) */
+        uint32_t sz = s->nfiles == 1 && st.total ? st.total : s->files[f].size;
         bool is_done = st.ok || st.done >= before + sz;
         bool cur = !is_done && f == st.file_index && st.phase >= AOS_FLASHER_ERASING;
         bool failed = done && !st.ok && f == st.file_index && st.phase == AOS_FLASHER_FAILED && st.file_count;
@@ -1013,7 +1103,7 @@ static void flash_cb(lv_event_t *e)
 {
     const aos_flasher_source_t *s = selected();
     if (!s || aos_flasher_busy() || !port_free_or_say()) return;
-    aos_flasher_opts_t o = { .baud = BAUDS[S.baud_i] };
+    aos_flasher_opts_t o = job_opts();
     S.log_from = aos_flasher_log_count();
     job_started(aos_flasher_flash(S.port, s, &o));
 }
@@ -1028,14 +1118,16 @@ static void done_cb(lv_event_t *e)
     build();
 }
 
-/* The Terminal on the same port: its capture channel 0 at 115200, and the
- * app itself, which shows that channel and remembers the port. */
+/* The Terminal on the same port: its capture channel 0 at 115200 (9600 for
+ * an Arduino, the speed of its examples), and the app itself, which shows
+ * that channel and remembers the port. */
 static void monitor_cb(lv_event_t *e)
 {
     if (aos_flasher_busy()) return;
+    uint32_t baud = S.fam == AOS_FLASHER_AVR ? 9600 : 115200;
     aos_hal_pref_set_str("ser_port", S.port);
-    aos_hal_pref_set_i32("ser_baud", 115200);
-    if (!aos_serial_start(0, S.port, 115200)) {
+    aos_hal_pref_set_i32("ser_baud", (int32_t)baud);
+    if (!aos_serial_start(0, S.port, baud)) {
         aos_ui_toast(_("No se pudo abrir el puerto"), 1800);
         return;
     }
@@ -1138,7 +1230,7 @@ static void build(void)
 {
     lv_obj_clean(U.root);
     U.chip_name = U.chip_info = U.detect_btn = U.detect_lbl = U.busy_row = U.busy_lbl = U.busy_btn = NULL;
-    U.port_lbl = U.baud_lbl = U.list = U.arc = U.log_col = U.actions = NULL;
+    U.port_lbl = U.baud_lbl = U.baud_chip = U.list = U.arc = U.log_col = U.actions = NULL;
     U.read_btn = U.erase_btn = NULL;
     memset(U.file_state, 0, sizeof U.file_state);
     aos_flasher_status_t st;
@@ -1236,6 +1328,9 @@ static void load_prefs(void)
     S.baud_i = 2;
     for (size_t i = 0; i < N_BAUDS; i++) if (BAUDS[i] == (uint32_t)b) S.baud_i = (int)i;
     aos_hal_pref_get_str("fl_sel", S.sel, sizeof S.sel);
+    int32_t f = AOS_FLASHER_ESP;
+    aos_hal_pref_get_i32("fl_fam", &f);
+    S.fam = f >= 0 && f < AOS_FLASHER_FAMILIES ? (int)f : AOS_FLASHER_ESP;
     aos_flasher_status_t st;
     aos_flasher_status(&st);
     S.seen_seq = st.seq;
@@ -1287,6 +1382,10 @@ static void open_arg(const char *path)
     if (!best) {
         aos_ui_toast(_("Ese archivo no es un firmware que se pueda grabar"), 2000);
         return;
+    }
+    if (!aos_flasher_source_fits(best, S.fam)) {
+        S.fam = best->family >= 0 ? best->family : AOS_FLASHER_AVR;
+        aos_hal_pref_set_i32("fl_fam", S.fam);
     }
     snprintf(S.sel, sizeof S.sel, "%s", best->path);
     aos_hal_pref_set_str("fl_sel", S.sel);

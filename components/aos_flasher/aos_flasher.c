@@ -6,9 +6,10 @@
  * and the log, the service does the rest with the app open or closed.
  *
  * The core knows nothing of any chip. It keeps the status, the log and the
- * cancel flag, and the dump file; the job itself is run by a family
- * (aos_flasher_priv.h): aos_flasher_esp.c for the ESP32 family, and those of
- * docs/plan/PROGRAMADOR.md after it.
+ * cancel flag, and the dump file; the job itself is run by the family the
+ * caller chose (aos_flasher_opts_t.family, aos_flasher_priv.h):
+ * aos_flasher_esp.c for the ESP32s, aos_flasher_avr.c for the Arduinos, and
+ * those of docs/plan/PROGRAMADOR.md after them.
  *
  * A dump is written to "<name>.part" while it is read, with a SHA-256 kept
  * on the way, and renamed to its final name only once the last byte is in:
@@ -281,10 +282,19 @@ void fl_dump_close(bool ok, bool verified, const char *extra)
 /* The job                                                                     */
 /* -------------------------------------------------------------------------- */
 
+const char *aos_flasher_family_name(int family)
+{
+    switch (family) {
+    case AOS_FLASHER_ESP: return "ESP32";
+    case AOS_FLASHER_AVR: return "Arduino";
+    default: return "?";
+    }
+}
+
 static void worker(void *arg)
 {
     (void)arg;
-    bool ok = fl_esp_run();
+    bool ok = J.opts.family == AOS_FLASHER_AVR ? fl_avr_run() : fl_esp_run();
     bool cancelled = fl_cancel && !ok;
     if (D.f) fl_dump_close(false, false, NULL);     /* a family that left one open */
     fl_lock();
@@ -334,6 +344,7 @@ static bool start(aos_flasher_job_t job, const char *port)
     fl_st.job = job;
     fl_st.phase = AOS_FLASHER_OPENING;
     fl_st.revision = 0xFFFF;
+    fl_st.family = J.opts.family;
     snprintf(fl_st.port, sizeof fl_st.port, "%s", J.port);
     if (job == AOS_FLASHER_JOB_FLASH) {
         snprintf(fl_st.source, sizeof fl_st.source, "%s", J.src.name);
@@ -344,6 +355,7 @@ static bool start(aos_flasher_job_t job, const char *port)
     fl_unlock();
     const char *what = job == AOS_FLASHER_JOB_FLASH ? J.src.name : job == AOS_FLASHER_JOB_DETECT ? "chip" : "flash";
     fl_logf(L_INFO, _("%s %s en %s"), job_word(job), what, J.port);
+    if (J.opts.family != AOS_FLASHER_ESP) fl_logf(L_INFO, _("Placa: %s"), aos_flasher_family_name(J.opts.family));
     if (!aos_hal_thread_start("flasher", worker, NULL, 8192, 5)) {
         fl_lock();
         fl_st.busy = false;
@@ -363,8 +375,13 @@ static void take_opts(const aos_flasher_opts_t *opts)
 
 bool aos_flasher_detect(const char *port)
 {
+    return aos_flasher_detect_ex(port, NULL);
+}
+
+bool aos_flasher_detect_ex(const char *port, const aos_flasher_opts_t *opts)
+{
     if (fl_st.busy) return false;
-    memset(&J.opts, 0, sizeof J.opts);
+    take_opts(opts);
     return start(AOS_FLASHER_JOB_DETECT, port);
 }
 

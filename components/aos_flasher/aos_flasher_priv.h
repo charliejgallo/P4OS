@@ -60,3 +60,4 @@ void fl_dump_close(bool ok, bool verified, const char *extra);
 
 /* The families: each runs a whole job (J) on J.port. */
 bool fl_esp_run(void);
+bool fl_avr_run(void);
