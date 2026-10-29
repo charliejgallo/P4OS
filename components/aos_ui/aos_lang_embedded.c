@@ -2845,7 +2845,6 @@ static const char blob_en__sistema_lang[] =
     "Un objetivo de 3,3 V con su propia alimentación; el 3V3 de acá sólo si no la tiene. En una Pico: el conector DEBUG (SWCLK, GND, SWDIO).\tA 3.3 V target with its own supply; this board's 3V3 only if it has none. On a Pico: the DEBUG header (SWCLK, GND, SWDIO).\n"
     "Copiá ahí el .hex, .elf, .uf2 o .bin de tu firmware (un .bin va al comienzo de la flash).\tCopy your firmware's .hex, .elf, .uf2 or .bin there (a .bin goes to the start of the flash).\n"
     "lo que escribe su firmware, abajo\twhat its firmware writes, below\n"
-    "Cerrar la consola\tClose console\n"
     "Nadie contestó por SWD: revisá SWCLK, SWDIO, GND y que el objetivo tenga alimentación\tNobody answered over SWD: check SWCLK, SWDIO, GND and that the target is powered\n"
     "El DP no aceptó el pedido de encendido\tThe DP refused the power-up request\n"
     "El depurador del objetivo no se encendió\tThe target's debugger didn't power up\n"
@@ -2884,6 +2883,8 @@ static const char blob_en__sistema_lang[] =
     "RP2040: el núcleo no se detuvo\tRP2040: the core didn't halt\n"
     "RP2040: connect_internal_flash no volvió\tRP2040: connect_internal_flash didn't return\n"
     "RP2040: flash_exit_xip no volvió\tRP2040: flash_exit_xip didn't return\n"
+    "Escribile al firmware…\tType to the firmware…\n"
+    "No entró: esperá que el firmware lea lo anterior\tDidn't fit: wait for the firmware to read the last one\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5721,7 +5722,6 @@ static const char blob_de__sistema_lang[] =
     "Un objetivo de 3,3 V con su propia alimentación; el 3V3 de acá sólo si no la tiene. En una Pico: el conector DEBUG (SWCLK, GND, SWDIO).\tEin 3,3-V-Ziel mit eigener Versorgung; das 3V3 von hier nur, wenn es keine hat. Bei einem Pico: der DEBUG-Anschluss (SWCLK, GND, SWDIO).\n"
     "Copiá ahí el .hex, .elf, .uf2 o .bin de tu firmware (un .bin va al comienzo de la flash).\tKopiere die .hex, .elf, .uf2 oder .bin deiner Firmware dorthin (eine .bin kommt an den Anfang des Flash).\n"
     "lo que escribe su firmware, abajo\twas seine Firmware schreibt, unten\n"
-    "Cerrar la consola\tKonsole schließen\n"
     "Nadie contestó por SWD: revisá SWCLK, SWDIO, GND y que el objetivo tenga alimentación\tKeine Antwort über SWD: SWCLK, SWDIO, GND und die Versorgung des Ziels prüfen\n"
     "El DP no aceptó el pedido de encendido\tDer DP lehnte die Einschaltanforderung ab\n"
     "El depurador del objetivo no se encendió\tDer Debugger des Ziels schaltete sich nicht ein\n"
@@ -5760,6 +5760,8 @@ static const char blob_de__sistema_lang[] =
     "RP2040: el núcleo no se detuvo\tRP2040: der Kern hielt nicht an\n"
     "RP2040: connect_internal_flash no volvió\tRP2040: connect_internal_flash kehrte nicht zurück\n"
     "RP2040: flash_exit_xip no volvió\tRP2040: flash_exit_xip kehrte nicht zurück\n"
+    "Escribile al firmware…\tAn die Firmware schreiben…\n"
+    "No entró: esperá que el firmware lea lo anterior\tPasst nicht: warten, bis die Firmware das Vorige gelesen hat\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -5767,7 +5769,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2869, 0, files_en, 1 },
-    { "de", "Deutsch", 2869, 0, files_de, 1 },
+    { "en", "English", 2870, 0, files_en, 1 },
+    { "de", "Deutsch", 2870, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

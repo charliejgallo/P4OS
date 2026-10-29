@@ -113,6 +113,7 @@ watch came back with every setting it had.</em></p>
 
 <p align="center">
   <img src="docs/img/photo-flasher-swd-rp2040.jpg" width="300" alt="The Flasher in SWD mode with a Raspberry Pi Pico wired to the header: RP2040, Cortex-M0+, DPIDR 0BC12477, doble.uf2 chosen to write">
+  <img src="docs/img/photo-flasher-swd-done.jpg" width="300" alt="The same Pico after the write: Flashing done, doble.uf2 on RP2040, verified, 8 of 8 KB at 25.9 KB/s">
 </p>
 
 <p align="center"><em>And by SWD, three wires to a Pico's debug header: the

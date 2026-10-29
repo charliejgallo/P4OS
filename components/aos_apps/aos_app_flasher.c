@@ -22,6 +22,9 @@
  *   the tools     "Leer" copies the target's whole flash to the card (a dump,
  *                 listed afterwards with the firmware, to write back) and
  *                 "Borrar" erases it, after asking.
+ *   the console   SWD's RTT console: the target's lines in the log, and while
+ *                 it is open the bar becomes a line to type (the screen's
+ *                 keyboard) that goes down to the firmware with Enter.
  *   the job       a ring with the percentage, the phase, bytes, speed and
  *                 time left, each file with its state (done, going, waiting),
  *                 the service's log; at the end the time it took and whether
@@ -115,6 +118,8 @@ static struct {
     lv_obj_t *actions, *main_btn, *main_lbl;
     lv_obj_t *read_btn, *erase_btn;
     lv_obj_t *overlay;              /* the erase's confirmation */
+    lv_obj_t *con_ta, *con_kb;      /* the console's line, and its keyboard */
+    int32_t bar_y, bar_h;           /* where the actions bar sits, without the keyboard */
     uint32_t shown_seq;
     int shown_phase;
     bool shown_busy;
@@ -1152,6 +1157,37 @@ static void flash_cb(lv_event_t *e)
 
 static void cancel_cb(lv_event_t *e) { aos_flasher_cancel(); }
 
+/* A line down the RTT console, with its newline */
+static void con_send_cb(lv_event_t *e)
+{
+    if (!U.con_ta) return;
+    const char *t = lv_textarea_get_text(U.con_ta);
+    char buf[200];
+    int n = snprintf(buf, sizeof buf, "%s\n", t);
+    if (n >= (int)sizeof buf) n = (int)sizeof buf - 1;
+    if (!aos_flasher_console_send(buf, n)) aos_ui_toast(_("No entró: esperá que el firmware lea lo anterior"), 1800);
+    else lv_textarea_set_text(U.con_ta, "");
+}
+
+/* The keyboard takes the bottom - in landscape only the left column's, so
+ * the log on the right stays in sight - and the bar goes up over it */
+static void con_ta_cb(lv_event_t *e)
+{
+    lv_event_code_t c = lv_event_get_code(e);
+    if (!U.con_kb || !U.actions) return;
+    if (c == LV_EVENT_FOCUSED) {
+        lv_keyboard_set_textarea(U.con_kb, U.con_ta);
+        lv_obj_remove_flag(U.con_kb, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_move_foreground(U.con_kb);
+        lv_obj_update_layout(U.con_kb);
+        lv_obj_set_y(U.actions, U.H - lv_obj_get_height(U.con_kb) - U.bar_h);
+    } else if (c == LV_EVENT_DEFOCUSED || c == LV_EVENT_READY || c == LV_EVENT_CANCEL) {
+        if (c == LV_EVENT_READY) { con_send_cb(e); return; }    /* Enter: sent, the keyboard stays */
+        lv_obj_add_flag(U.con_kb, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_set_y(U.actions, U.bar_y);
+    }
+}
+
 static void done_cb(lv_event_t *e)
 {
     if (aos_flasher_busy()) return;
@@ -1201,12 +1237,38 @@ static lv_obj_t *big_button(lv_obj_t *parent, const char *glyph, const char *tex
 static void build_actions(void)
 {
     lv_obj_clean(U.actions);
-    U.main_btn = U.main_lbl = NULL;
+    U.main_btn = U.main_lbl = U.con_ta = NULL;
+    if (U.con_kb) { lv_obj_delete(U.con_kb); U.con_kb = NULL; }
+    lv_obj_set_y(U.actions, U.bar_y);
     aos_flasher_status_t st;
     aos_flasher_status(&st);
     U.shown_busy = st.busy;
     if (S.job_view && st.busy && st.job == AOS_FLASHER_JOB_CONSOLE) {
-        big_button(U.actions, AOS_SYM_STOP, _("Cerrar la consola"), AOS_C_CARD2, AOS_C_TEXT, cancel_cb, NULL);
+        /* a line to type, send, and the square that closes the console */
+        U.con_ta = lv_textarea_create(U.actions);
+        lv_textarea_set_one_line(U.con_ta, true);
+        lv_textarea_set_placeholder_text(U.con_ta, _("Escribile al firmware…"));
+        lv_obj_set_height(U.con_ta, 104);
+        lv_obj_set_flex_grow(U.con_ta, 1);
+        lv_obj_set_style_text_font(U.con_ta, &aos_mono_22, 0);
+        lv_obj_set_style_bg_color(U.con_ta, AOS_C_CARD2, 0);
+        lv_obj_set_style_text_color(U.con_ta, AOS_C_TEXT, 0);
+        lv_obj_set_style_border_width(U.con_ta, 0, 0);
+        lv_obj_set_style_radius(U.con_ta, 52, 0);
+        lv_obj_set_style_pad_hor(U.con_ta, 32, 0);
+        lv_obj_set_style_pad_top(U.con_ta, 34, 0);
+        lv_obj_add_event_cb(U.con_ta, con_ta_cb, LV_EVENT_ALL, NULL);
+        lv_obj_t *send = big_button(U.actions, AOS_SYM_SEND, "", C_TINT, lv_color_white(), con_send_cb, NULL);
+        lv_obj_set_flex_grow(send, 0);
+        lv_obj_set_width(send, 104);
+        lv_obj_t *stop = big_button(U.actions, AOS_SYM_STOP, "", AOS_C_CARD2, AOS_C_TEXT, cancel_cb, NULL);
+        lv_obj_set_flex_grow(stop, 0);
+        lv_obj_set_width(stop, 104);
+        U.con_kb = lv_keyboard_create(U.root);
+        lv_obj_set_size(U.con_kb, U.land ? SIDE_W : U.W, U.land ? U.H / 2 : U.H / 3);
+        lv_obj_align(U.con_kb, LV_ALIGN_BOTTOM_LEFT, 0, 0);
+        aos_keyboard_style(U.con_kb, aos_font_small);
+        lv_obj_add_flag(U.con_kb, LV_OBJ_FLAG_HIDDEN);
     } else if (S.job_view && st.busy) {
         big_button(U.actions, AOS_SYM_STOP, _("Cancelar"), AOS_C_CARD2, AOS_C_RED, cancel_cb, NULL);
     } else if (S.job_view) {
@@ -1259,6 +1321,8 @@ static void actions_bar(lv_obj_t *parent, int32_t x, int32_t y, int32_t w, int32
 {
     U.actions = box(parent, w, h);
     lv_obj_set_pos(U.actions, x, y);
+    U.bar_y = y;
+    U.bar_h = h;
     lv_obj_set_style_pad_hor(U.actions, AOS_UI_PAD, 0);
     lv_obj_set_style_pad_top(U.actions, 14, 0);
     lv_obj_set_flex_flow(U.actions, LV_FLEX_FLOW_ROW);
@@ -1275,6 +1339,7 @@ static void actions_bar(lv_obj_t *parent, int32_t x, int32_t y, int32_t w, int32
 static void build(void)
 {
     lv_obj_clean(U.root);
+    U.con_kb = U.con_ta = NULL;
     U.chip_name = U.chip_info = U.detect_btn = U.detect_lbl = U.busy_row = U.busy_lbl = U.busy_btn = NULL;
     U.port_lbl = U.baud_lbl = U.baud_chip = U.list = U.arc = U.log_col = U.actions = NULL;
     U.read_btn = U.erase_btn = NULL;

@@ -9171,8 +9171,6 @@ Copiá ahí el .hex, .elf, .uf2 o .bin de tu firmware (un .bin va al comienzo de
 #: components/aos_flasher (Programador, SWD)
 lo que escribe su firmware, abajo	what its firmware writes, below
 
-#: components/aos_flasher (Programador, SWD)
-Cerrar la consola	Close console
 
 #: components/aos_flasher (Programador, SWD)
 Nadie contestó por SWD: revisá SWCLK, SWDIO, GND y que el objetivo tenga alimentación	Nobody answered over SWD: check SWCLK, SWDIO, GND and that the target is powered
@@ -9287,3 +9285,9 @@ RP2040: connect_internal_flash no volvió	RP2040: connect_internal_flash didn't 
 
 #: components/aos_flasher (Programador, SWD)
 RP2040: flash_exit_xip no volvió	RP2040: flash_exit_xip didn't return
+
+#: components/aos_apps/aos_app_flasher.c (consola RTT)
+Escribile al firmware…	Type to the firmware…
+
+#: components/aos_apps/aos_app_flasher.c (consola RTT)
+No entró: esperá que el firmware lea lo anterior	Didn't fit: wait for the firmware to read the last one

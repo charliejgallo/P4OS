@@ -500,7 +500,8 @@ Que necesitan la mano del usuario o equipos:
   - La RP2040 del usuario (una Pico) por el conector DEBUG a `uart.b`
     (pines 12 y 14, GND), con el firmware `015ae4f`: **Detectar anduvo**
     (RP2040, Cortex-M0+, DPIDR 0BC12477, flash externa) - el bit-bang
-    contesta, al reloj que sea. Foto: `docs/img/photo-flasher-swd-rp2040.jpg`.
+    contesta, al reloj que sea. Fotos: `docs/img/photo-flasher-swd-rp2040.jpg`
+    (detectada) y `photo-flasher-swd-done.jpg` (grabada, 25,9 KB/s).
   - Encontrado ahí: el trabajo siguiente (grabar `doble.uf2`) decía
     "Cortex-M?" y "no sé grabar". La primera vez los DP de la RP2040 están
     dormidos y se despiertan eligiendo el núcleo 0 con TARGETSEL; después

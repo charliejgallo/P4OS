@@ -96,7 +96,10 @@ distinto de lo planeado abajo:
   la RAM con el objetivo corriendo (sin detenerlo), lee su buffer de
   subida cada 30 ms al registro del Programador y escribe en el de bajada
   lo que llega por `POST /api/flash/console/send`. En la app, "Consola RTT"
-  en lugar de "Leer la flash"; escribirle, por ahora, sólo desde el portal.
+  en lugar de "Leer la flash", y mientras está abierta la barra de abajo
+  es una línea para escribirle (con el teclado de la pantalla; acostada,
+  el teclado ocupa sólo la columna izquierda y el registro sigue a la
+  vista).
 - Leer la flash entera por SWD sigue afuera (ver "Alcance de SWD").
 
 Lo planeado era:
