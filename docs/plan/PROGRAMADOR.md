@@ -256,7 +256,13 @@ para los chips que el Programador no conoce.
   BOS con los descriptores de Microsoft OS 2.0 para que Windows le ponga
   WinUSB sola, con el GUID de CMSIS-DAP v2. El modo no se recuerda al
   reiniciar, y al cerrar la sonda el puerto vuelve al modo que tenía; con
-  el modo Disco o el host de pendrives en el OTG no abre.
+  el modo Disco no abre.
+- **También desde Ajustes → USB** (pedido del usuario, el mismo día): una
+  fila "Sonda" junto a Teclado y Disco, que abre la sonda del Programador
+  en su último puerto del header; elegir otro modo la cierra y después pasa
+  a ése. Y **el host de pendrives le presta el conector OTG**: si lo usaba
+  (25/27 o los dos), mientras dura la sonda queda en 21/23 o apagado, y al
+  cerrarla vuelve como estaba, sin tocar su ajuste.
 - **Probado en el simulador con pyOCD de verdad.** El simulador pasa los
   paquetes por TCP (`sim/usb_probe_sim.c`, `P4_SIM_PROBE_PORT`) y
   `tools/swd_test/dap_tcp.py` le da a pyOCD una interfaz sobre ese socket:

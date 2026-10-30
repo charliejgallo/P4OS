@@ -11,7 +11,7 @@ devices plugged into the board, is a switch of its own, at the end):
 | Off | nothing | on the board |
 | Keyboard and mouse | a HID keyboard, mouse and media keys, a gamepad, a MIDI keyboard and a network (the Macro pad, `docs/MACROPAD.md`) | on the board |
 | Disk | the microSD as a USB drive | the computer's, until it ejects it |
-| Probe | a CMSIS-DAP v2 debug probe (the Programador's, not in this list: see below) | on the board |
+| Probe | a CMSIS-DAP v2 debug probe on a header port's SWD pins (the Programador's: see below) | on the board |
 
 The mode is remembered across restarts (pref `usb_mode`,
 `aos_hal_usb_restore()` once the boot has read the card): after an OTA the
@@ -149,13 +149,22 @@ internal RAM audit, `docs/MEMORY.md`).
 
 ## Probe mode
 
-The Programador's "Sonda para la computadora" (SWD) puts the port in a
-fourth mode while it runs: a CMSIS-DAP v2 debug probe on the SWD pins of a
-header port, for OpenOCD, pyOCD and probe-rs on the computer
-(`docs/plan/PROGRAMADOR.md`, F5). It is not in Settings' list: Settings
-shows it and sends you to the Programador to close it, and closing it puts
-the port back in the mode it had. It is not remembered across a restart.
-It does not open while the port is in disk mode or holds the pendrive host.
+A CMSIS-DAP v2 debug probe on the SWD pins of a header port, for OpenOCD,
+pyOCD and probe-rs on the computer (`docs/plan/PROGRAMADOR.md`, F5). It is
+a job of the Programador's, started from its SWD page ("Sonda para la
+computadora") or from Settings' row, which uses the Programador's last
+header port (`uart.b` if it has another). Closing it, in the Programador or
+by choosing another mode in Settings, puts the port back in the mode it had
+(and then in the one chosen). It is not remembered across a restart, and it
+does not open in disk mode.
+
+**The pendrive host lends it the OTG controller.** With the host on pins
+25/27 or on both, opening the probe leaves the host on 21/23 alone, or off
+while the probe lasts when 25/27 was all it had; closing the probe brings
+it back as it was. The host's own setting never changes, so a restart in
+the middle comes back with the host as chosen (`s_host_lent`,
+`host_map_now()` in `aos_usb_p4.c`). Turning the host on or off, or moving
+its pins, while the probe runs leaves the probe alone.
 
 What the computer sees: `303A:4020`, "P4OS <name> CMSIS-DAP", one vendor
 interface named "P4OS CMSIS-DAP" with a bulk OUT and a bulk IN (512 bytes

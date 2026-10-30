@@ -558,6 +558,9 @@ Que necesitan la mano del usuario o equipos:
     target/rp2040.cfg` y gdb con un breakpoint en el blink; y `program` de
     OpenOCD, que graba con su propio algoritmo.
   - Al cerrar la sonda el USB vuelve al modo que tenía (Ajustes → USB).
+  - Abrirla desde Ajustes → USB (fila "Sonda") con el host de pendrives en
+    "los dos": el host queda en 21/23 mientras dura, y al cerrarla (otro
+    modo en Ajustes) vuelve a los dos sin haber cambiado su ajuste.
   - La velocidad: cuánto tarda pyOCD en leer 64 KB de la flash.
 - [ ] Programador con STM32 por su bootloader serie (F4, 2026-10-29;
       probado sólo en el simulador contra `tools/fake_stm32_boot.py`): una

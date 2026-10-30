@@ -741,6 +741,17 @@ static unsigned host_map(int port)
     return port == AOS_HAL_USB_HOST_BOTH ? BIT0 | BIT1 : port == AOS_HAL_USB_HOST_HEADER ? BIT1 : BIT0;
 }
 static volatile bool s_want_host;
+/* The host is wanted on the OTG controller, which the probe has now: it
+ * waits (off, or on 21/23 alone) and comes back when the probe closes. */
+static volatile bool s_host_lent;
+
+/* The controllers the host may take now: while the probe runs, or is
+ * coming up, the OTG controller is the probe's */
+static unsigned host_map_now(void)
+{
+    unsigned m = host_map(aos_hal_usb_host_port());
+    return s_want == AOS_HAL_USB_PROBE ? m & ~BIT0 : m;
+}
 
 /* The FSLS PHYs as the chip has them after power-on: the USB-Serial-JTAG on
  * PHY 0 (GPIO24/25) with its pads on, the Full-Speed controller on PHY 1.
@@ -981,7 +992,7 @@ static bool host_start(void)
     if (!H.q) H.q = xQueueCreate(8, sizeof(msc_host_event_t));
     memset(H.slot, 0, sizeof H.slot);
     H.stop = H.lib_done = H.app_done = false;
-    H.map = host_map(aos_hal_usb_host_port());
+    H.map = host_map_now();
     gpio_drive_cap_t cap26 = GPIO_DRIVE_CAP_DEFAULT, cap27 = GPIO_DRIVE_CAP_DEFAULT;
     if (H.map & BIT1) {
         /* the USB-Serial-JTAG off its pads, and the Full-Speed controller
@@ -1103,8 +1114,11 @@ static void switch_task(void *arg)
     (void)arg;
     aos_hal_usb_mode_t want = s_want;
     bool host = s_want_host;
-    unsigned map = host_map(aos_hal_usb_host_port());
+    unsigned map = host_map_now();
     if (host && (map & BIT0)) want = AOS_HAL_USB_CONSOLE;
+    /* lent to the probe: on 21/23 alone, or off when 25/27 was all it had */
+    s_host_lent = host && map != host_map(aos_hal_usb_host_port());
+    if (host && !map) host = false;
     if (s_host_run && (!host || H.map != map)) {
         host_stop();
         s_host_run = false;
@@ -1141,7 +1155,9 @@ static void switch_task(void *arg)
     int32_t keep = s_mode == AOS_HAL_USB_DISK ? (int32_t)s_before_disk
                  : s_mode == AOS_HAL_USB_PROBE ? (int32_t)s_before_probe : (int32_t)s_mode, was = -1;
     if (!aos_hal_pref_get_i32(PREF_MODE, &was) || was != keep) aos_hal_pref_set_i32(PREF_MODE, keep);
-    if (!aos_hal_pref_get_i32(PREF_HOST, &was) || was != (int32_t)s_host_run) aos_hal_pref_set_i32(PREF_HOST, s_host_run);
+    /* a host lent to the probe is still on, for the next boot */
+    int32_t host_on = s_host_run || s_host_lent;
+    if (!aos_hal_pref_get_i32(PREF_HOST, &was) || was != host_on) aos_hal_pref_set_i32(PREF_HOST, host_on);
     s_buttons = 0;
     s_busy = false;
     vTaskDelete(NULL);
@@ -1174,10 +1190,12 @@ void aos_hal_usb_restore(void)
 bool aos_hal_usb_host_set(bool on)
 {
     if (s_busy) return false;
-    if (on == s_host_run) return true;
+    if (on == (s_host_run || s_host_lent)) return true;
     ESP_LOGI(TAG, "%s the pendrive host", on ? "starting" : "stopping");
-    /* on pins 25/27 the host takes the OTG controller from its role */
-    s_want = on && (host_map(aos_hal_usb_host_port()) & BIT0) ? AOS_HAL_USB_CONSOLE
+    /* on pins 25/27 the host takes the OTG controller from its role - but
+     * not from the probe, which keeps it until it closes */
+    s_want = s_mode == AOS_HAL_USB_PROBE ? AOS_HAL_USB_PROBE
+           : on && (host_map(aos_hal_usb_host_port()) & BIT0) ? AOS_HAL_USB_CONSOLE
            : s_mode == AOS_HAL_USB_HOST ? AOS_HAL_USB_CONSOLE : s_mode;
     s_want_host = on;
     return switch_start();
@@ -1189,11 +1207,12 @@ bool aos_hal_usb_host_port_set(int port)
     if (s_busy) return false;
     if (port == aos_hal_usb_host_port()) return true;
     aos_hal_pref_set_i32(PREF_HOST_PORT, port);
-    if (!s_host_run) return true;
+    if (!s_host_run && !s_host_lent) return true;
     /* host on: down and up again on the other controller */
     ESP_LOGI(TAG, "the pendrive's port is J3 %s now", port == AOS_HAL_USB_HOST_BOTH ? "21/23 and 25/27"
                                                      : port == AOS_HAL_USB_HOST_HEADER ? "21/23" : "25/27");
-    s_want = (host_map(port) & BIT0) || s_mode == AOS_HAL_USB_HOST ? AOS_HAL_USB_CONSOLE : s_mode;
+    s_want = s_mode == AOS_HAL_USB_PROBE ? AOS_HAL_USB_PROBE
+           : (host_map(port) & BIT0) || s_mode == AOS_HAL_USB_HOST ? AOS_HAL_USB_CONSOLE : s_mode;
     s_want_host = true;
     return switch_start();
 }
@@ -1215,7 +1234,10 @@ bool aos_hal_usb_mode_set(aos_hal_usb_mode_t mode)
                                              : mode == AOS_HAL_USB_DISK ? "the card as a disk"
                                              : mode == AOS_HAL_USB_PROBE ? "the CMSIS-DAP probe" : "idle");
     s_want = mode;
-    s_want_host = s_host_run && H.map == BIT1;
+    /* a role takes the OTG controller from the host; the probe only
+     * borrows it, so going in or out of it the host stays wanted */
+    s_want_host = mode == AOS_HAL_USB_PROBE || s_mode == AOS_HAL_USB_PROBE ? s_host_run || s_host_lent
+                : s_host_run && H.map == BIT1;
     return switch_start();
 }
 

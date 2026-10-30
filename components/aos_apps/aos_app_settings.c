@@ -37,6 +37,7 @@
 #include "aos_sys_glyphs.h"
 #include "aos_lock.h"
 #include "aos_access.h"
+#include "aos_flasher.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -76,7 +77,7 @@ static struct {
     lv_obj_t *wifi_list, *wifi_state, *side;
     /* USB page, refreshed by the timer: the port can change by itself (an
      * eject ends disk mode) */
-    lv_obj_t *usb_state, *usb_dot, *usb_tick[4], *usb_root, *host_state, *host_dot, *host_sw;
+    lv_obj_t *usb_state, *usb_dot, *usb_tick[AOS_HAL_USB_PROBE + 1], *usb_root, *host_state, *host_dot, *host_sw;
     int usb_shown;
     int32_t PW;                     /* width of the column being filled */
     int selected;                   /* landscape: the page on the right */
@@ -344,9 +345,9 @@ static void edit_home_cb(lv_event_t *e) { aos_ui_edit_home(); }
 
 /* ---- USB ---- */
 
-/* The rows' order IS aos_hal_usb_mode_t's: CONSOLE, KEYS, DISK (HOST is the
- * pendrive host holding the OTG controller, and PROBE the Programador's
- * debug probe: neither has a row of its own). */
+/* The rows are aos_hal_usb_mode_t's: CONSOLE, KEYS, DISK and PROBE (the
+ * Programador's debug probe, started from here too); HOST is the pendrive
+ * host holding the OTG controller, and has no row of its own. */
 static const char *usb_name(int mode)
 {
     switch (mode) {
@@ -397,8 +398,8 @@ static const char *usb_state_text(uint32_t *color)
         return _("Lo usa el host de pendrives, en los pines 25 y 27.");
     case AOS_HAL_USB_PROBE:
         *color = 0x5E5CE6;
-        return pc ? _("Es la sonda CMSIS-DAP del Programador, y la computadora la tiene. Se cierra en el Programador.")
-                  : _("Es la sonda CMSIS-DAP del Programador, esperando a la computadora. Se cierra en el Programador.");
+        return pc ? _("La computadora tiene la sonda CMSIS-DAP. Otro modo, acá o en el Programador, la cierra.")
+                  : _("La sonda CMSIS-DAP espera a la computadora. Otro modo, acá o en el Programador, la cierra.");
     default:
         return _("El puerto está libre: la placa no aparece en la computadora.");
     }
@@ -469,8 +470,17 @@ static const char *host_state_text(uint32_t *color)
     return t;
 }
 
+/* A mode chosen while the probe was up: the probe closes first (its job
+ * gives the port back), then this one is asked for. -1 none. */
+static int s_usb_after = -1;
+
 static void usb_refresh(void)
 {
+    if (s_usb_after >= 0 && !aos_flasher_busy() && !aos_hal_usb_busy()) {
+        int want = s_usb_after;
+        s_usb_after = -1;
+        if (want != (int)aos_hal_usb_mode()) aos_hal_usb_mode_set((aos_hal_usb_mode_t)want);
+    }
     int mode = aos_hal_usb_mode();
     aos_usb_host_info_t hi[AOS_USB_HOST_MAX];
     int hn = aos_hal_usb_host_on() ? aos_hal_usb_host_devices(hi, AOS_USB_HOST_MAX) : -1;
@@ -488,7 +498,7 @@ static void usb_refresh(void)
     uint32_t c;
     lv_label_set_text(U.usb_state, usb_state_text(&c));
     lv_obj_set_style_bg_color(U.usb_dot, lv_color_hex(c), 0);
-    for (int i = 0; i < 4; i++)
+    for (int i = 0; i <= AOS_HAL_USB_PROBE; i++)
         if (U.usb_tick[i]) lv_obj_set_flag(U.usb_tick[i], LV_OBJ_FLAG_HIDDEN, i != mode);
     if (U.host_state) {
         lv_label_set_text(U.host_state, host_state_text(&c));
@@ -541,12 +551,56 @@ static void usb_host_cb(lv_event_t *e)
     usb_refresh();
 }
 
+/* The header port the probe uses: the Programador's (a UART port of the
+ * header, SWD's pins), uart.b when it has another */
+static const char *probe_port(void)
+{
+    static char port[AOS_IO_PORT_NAME_MAX];
+    if (!aos_hal_pref_get_str("fl_port", port, sizeof port)) port[0] = 0;
+    const aos_io_port_t *pt = port[0] ? aos_io_port_find(port) : NULL;
+    if (!pt || pt->kind != AOS_PORT_UART) snprintf(port, sizeof port, "uart.b");
+    return port;
+}
+
+/* The probe from here: the Programador's job, on its port's SWD pins */
+static void usb_probe_start(void)
+{
+    if (aos_hal_usb_mode() == AOS_HAL_USB_DISK) { aos_ui_toast(_("La tarjeta la tiene la computadora (modo Disco)"), 2500); return; }
+    if (aos_flasher_busy()) { aos_ui_toast(_("El Programador está trabajando: esperá a que termine"), 2500); return; }
+    const char *port = probe_port();
+    const aos_io_port_t *pt = aos_io_port_find(port);
+    const char *who = pt ? aos_io_owner(pt->pins[0]) : NULL;
+    if (!who && pt) who = aos_io_owner(pt->pins[1]);
+    static char t[96];
+    if (who) {
+        snprintf(t, sizeof t, _("%s lo tiene %s"), port, who);
+        aos_ui_toast(t, 2500);
+        return;
+    }
+    aos_flasher_opts_t o = { .family = AOS_FLASHER_SWD };
+    if (!aos_flasher_probe(port, &o)) { aos_ui_toast(_("No se pudo abrir la sonda"), 2000); return; }
+    snprintf(t, sizeof t, _("Sonda en %s: SWCLK al TX, SWDIO al RX"), port);
+    aos_ui_toast(t, 2500);
+}
+
 static void usb_mode_cb(lv_event_t *e)
 {
     int want = (int)(intptr_t)lv_event_get_user_data(e);
     if (want == (int)aos_hal_usb_mode()) return;
     if (aos_hal_usb_busy()) { aos_ui_toast(_("El USB está cambiando de modo"), 1500); return; }
-    if (aos_hal_usb_mode() == AOS_HAL_USB_PROBE) { aos_ui_toast(_("Es la sonda del Programador: cerrala ahí"), 2500); return; }
+    if (want == AOS_HAL_USB_PROBE) {
+        usb_probe_start();
+        U.usb_shown = -1;
+        usb_refresh();
+        return;
+    }
+    if (aos_hal_usb_mode() == AOS_HAL_USB_PROBE) {
+        /* the probe's job closes and gives the port back; then this mode */
+        aos_flasher_cancel();
+        s_usb_after = want;
+        U.usb_shown = -1;
+        return;
+    }
     if (aos_hal_usb_mode() == AOS_HAL_USB_DISK && aos_hal_usb_connected())
         aos_ui_toast(_("Mejor expulsar la tarjeta en la computadora antes"), 2500);
     if (want == AOS_HAL_USB_DISK) {
@@ -646,6 +700,11 @@ static void build_usb(lv_obj_t *p)
     mode_row(g, AOS_HAL_USB_DISK, AOS_SYM_SD, 0xFF9F0A,
              _("La microSD aparece en la computadora como un pendrive, para copiar apps, música, fotos o mapas a la velocidad del USB. Mientras la tiene la computadora la placa no la toca: al elegirlo se cierran las otras apps, y las de la tarjeta no abren. Expulsala en la computadora y vuelve sola a la placa, con el modo de antes."),
              true);
+    char probe_desc[320];
+    snprintf(probe_desc, sizeof probe_desc,
+             _("La placa es una sonda de depuración CMSIS-DAP: OpenOCD, pyOCD y probe-rs depuran el chip conectado por SWD a %s (SWCLK al TX, SWDIO al RX, NRST al EN). Si el host de pendrives usa el conector OTG, se lo presta mientras dure."),
+             probe_port());
+    mode_row(g, AOS_HAL_USB_PROBE, AOS_SYM_CHIP, 0xBF5AF2, probe_desc, true);
     note(p, _("El conector OTG es el USB 2.0 de alta velocidad del P4 (480 Mbit/s). La placa puede alimentarse por él o por el UART, y pasar de uno al otro sin reiniciarse."));
 
     g = group(p, _("PENDRIVES Y TECLADOS"));

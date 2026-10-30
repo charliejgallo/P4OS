@@ -453,11 +453,15 @@ static bool serve(dap_t *d)
 bool fl_probe_run(void)
 {
     fl_phase(AOS_FLASHER_OPENING);
-    aos_hal_usb_mode_t before = aos_hal_usb_mode();
+    aos_hal_usb_mode_t before = aos_hal_usb_mode(), now = before;
     if (before == AOS_HAL_USB_DISK)
         return fl_fail("%s", _("El USB está en modo Disco: expulsá la tarjeta en la computadora primero"));
-    if (before == AOS_HAL_USB_HOST)
-        return fl_fail("%s", _("El conector OTG es el host de un pendrive: cambiá sus pines en Ajustes → USB"));
+    /* the pendrive host lends the OTG controller and takes it back after
+     * (aos_usb_p4.c): the port goes back to idle, and the host with it */
+    if (before == AOS_HAL_USB_HOST) {
+        fl_logf(L_INFO, "%s", _("El host de pendrives le presta el conector OTG a la sonda"));
+        before = AOS_HAL_USB_CONSOLE;
+    }
     /* the state and both packets in PSRAM (aos_hal_io_alloc), not the
      * internal RAM a plain malloc of this size would take */
     dap_t *d = aos_hal_io_alloc(sizeof *d);
@@ -470,7 +474,7 @@ bool fl_probe_run(void)
     d->w = fl_swd_open(d->khz);
     bool ok = false;
     if (d->w) {
-        if (!usb_settle(before, 5000) || !aos_hal_usb_mode_set(AOS_HAL_USB_PROBE) || !usb_settle(AOS_HAL_USB_PROBE, 5000)) {
+        if (!usb_settle(now, 5000) || !aos_hal_usb_mode_set(AOS_HAL_USB_PROBE) || !usb_settle(AOS_HAL_USB_PROBE, 5000)) {
             fl_fail("%s", _("El USB no pasó a modo sonda"));
         } else {
             d->packet = aos_hal_usb_probe_packet();

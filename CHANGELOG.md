@@ -8,8 +8,10 @@
   it with no driver (Windows too, through Microsoft's OS 2.0 descriptors)
   for breakpoints, stepping and their own flash algorithms. The probe's
   firmware is P4OS's own, on the same SWD wire as the Programador
-  (`aos_flasher_dap.c`), and the USB has a fourth mode for it that gives
-  the port back when it closes. In the simulator, pyOCD drives it over TCP
+  (`aos_flasher_dap.c`), and the USB has a fourth mode for it, also in
+  Settings → USB, that gives the port back when it closes. A pendrive host
+  on the OTG connector lends it for as long as the probe lasts, and its
+  setting stays as it was. In the simulator, pyOCD drives it over TCP
   (`tools/swd_test/dap_tcp.py`) against the emulated nRF52840, STM32F103
   and RP2040 (multidrop included): halt, registers, RAM, flash, a step.
   Not tried on the board yet.
