@@ -963,6 +963,15 @@ __attribute__((weak)) void aos_hal_usb_restore(void)
 __attribute__((weak)) bool aos_hal_usb_mouse_hold(int buttons)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) int aos_hal_usb_probe_read(uint8_t *buf, int cap, uint32_t timeout_ms)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_usb_probe_write(const uint8_t *buf, int len)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_usb_probe_packet(void)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) bool aos_hal_usb_host_on(void)
 { bool v; memset(&v, 0, sizeof v); return v; }
 

@@ -2182,3 +2182,9 @@ Puente para la Mac	Bridge for the Mac
 
 #: components/aos_flasher (Programador, puente)
 Cerrar el puente	Close bridge
+#: components/aos_flasher (Programador, sonda CMSIS-DAP)
+Sonda abierta	Probe open
+Sonda cerrada	Probe closed
+Sonda para la computadora	Probe for the computer
+CMSIS-DAP en el conector OTG: %s comandos, %s transferencias SWD	CMSIS-DAP on the OTG connector: %s commands, %s SWD transfers
+Cerrar la sonda	Close the probe

@@ -546,6 +546,19 @@ Que necesitan la mano del usuario o equipos:
     desde la red de casa y negocia RFC 2217 con pyserial (velocidad a
     230400 incluida). Sin un ESP32 en el puerto todavía (está la Pico por
     SWD), así que esptool queda para cuando haya uno conectado.
+- [ ] La sonda CMSIS-DAP del Programador (F5, 2026-10-30; probada sólo en
+      el simulador con pyOCD por TCP): la Pico en `uart.b` por SWD como
+      siempre, el conector OTG de la placa a la Mac, "Sonda para la
+      computadora". En la Mac:
+  - `pyocd list`: aparece "P4OS ... CMSIS-DAP" sin drivers.
+  - `pyocd commander -t rp2040`: halt, `reg`, `read32 0x20000000`, `step`,
+    `go`; el multidrop por `DAP_SWD_Sequence` es lo que el simulador sólo
+    imita.
+  - `openocd -f interface/cmsis-dap.cfg -c "transport select swd" -f
+    target/rp2040.cfg` y gdb con un breakpoint en el blink; y `program` de
+    OpenOCD, que graba con su propio algoritmo.
+  - Al cerrar la sonda el USB vuelve al modo que tenía (Ajustes → USB).
+  - La velocidad: cuánto tarda pyOCD en leer 64 KB de la flash.
 - [ ] Programador con STM32 por su bootloader serie (F4, 2026-10-29;
       probado sólo en el simulador contra `tools/fake_stm32_boot.py`): una
       Blue Pill o Black Pill en `uart.b` (TX al PA10, RX al PA9, EN al

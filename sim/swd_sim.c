@@ -71,6 +71,7 @@ typedef struct {
     int ones;
     bool after_reset, dormant, selected, multidrop, deselected;
     uint32_t targetsel_id;      /* a DP that knows TARGETSEL: its own; 0 none */
+    int ts_seq;                 /* a TARGETSEL made of raw sequences (a debugger's): 1 request out, 2 ACK let go */
     uint32_t rom_size;
     bool locked;                /* RP2350: ACCESSCTRL locked against the debugger */
     uint64_t hist;
@@ -239,9 +240,29 @@ static void reset_core(void)
     dump();
 }
 
+/* The CoreSight identification a debugger walks (the probe,
+ * aos_flasher_dap.c, with pyOCD or OpenOCD behind it): the MEM-AP's BASE
+ * points at a ROM table at 0xE00FF000 whose one entry is the SCS at
+ * 0xE000E000, each with its peripheral and component IDs. The SCS's part
+ * number is the core's (0x008 M0+, 0x000 M3, 0x00C M4). */
+static bool coresight_id(uint32_t a, uint32_t *v)
+{
+    if (a == 0xE00FF000) { *v = 0xFFF0F003; return true; }      /* present, 32-bit, 0xE000E000 */
+    uint32_t base = a & ~0xFFFu, off = a & 0xFFF;
+    if ((base != 0xE00FF000 && base != 0xE000E000) || off < 0xFD0) return false;
+    bool rom = base == 0xE00FF000;
+    uint16_t part = rom ? 0x4C4 : T.chip == C_RP2040 ? 0x008 : T.chip == C_STM32F103 ? 0x000 : 0x00C;
+    uint8_t id[12] = { 0x04, 0, 0, 0,                           /* PIDR4..7: JEP106 continuation 4 (Arm) */
+                       (uint8_t)part, (uint8_t)(0xB0 | part >> 8), 0x0B, 0,   /* PIDR0..3: Arm (0x43B) */
+                       0x0D, rom ? 0x10 : 0xE0, 0x05, 0xB1 };   /* CIDR: a ROM table, or generic IP */
+    *v = id[(off - 0xFD0) / 4];
+    return true;
+}
+
 /* registers that are not memory; false: not one of them */
 static bool reg_read(uint32_t a, uint32_t *v)
 {
+    if (coresight_id(a, v)) return true;
     switch (a) {
     case 0xE000ED00: *v = T.chip == C_RP2040 ? 0x410CC601 : T.chip == C_RP2350 ? 0x411FD210 : T.chip == C_STM32F103 ? 0x411FC231 : 0x410FC241; return true;
     case 0xE000EDF0: *v = 0x00010001 | (T.halted ? 0x00020002 : 0); return true;     /* S_REGRDY, C_DEBUGEN, S_HALT */
@@ -284,6 +305,8 @@ static bool reg_write(uint32_t a, uint32_t v)
     switch (a) {
     case 0xE000EDF0:
         if ((v >> 16) != 0xA05F) return true;
+        /* one step (C_STEP, not C_HALT): a 16-bit instruction, halted again */
+        if ((v & 4) && !(v & 2) && T.halted) { T.regs[15] += 2; return true; }
         if (v & 2) T.halted = true;
         else if (T.halted) {
             T.halted = false;
@@ -480,10 +503,41 @@ static void line_bit(int b)
     T.ones = 0;
 }
 
+/* A debugger behind the probe writes TARGETSEL as raw sequences (CMSIS-DAP's
+ * SWD_Sequence: the request out, five clocks let go, the 32 bits and their
+ * parity out), since the DP gives it no ACK: told apart here by their
+ * shape, right after a line reset. */
 bool aos_io_be_swd_seq(aos_io_swd_t *s, const uint8_t *bits, int n)
 {
     (void)s;
+    if (n == 8 && bits[0] == 0x99 && T.after_reset && T.targetsel_id) {
+        T.ts_seq = 1;
+    } else if (n == 33 && T.ts_seq == 2) {
+        uint32_t v = (uint32_t)bits[0] | bits[1] << 8 | bits[2] << 16 | (uint32_t)bits[3] << 24;
+        T.selected = v == T.targetsel_id;
+        T.deselected = !T.selected;
+        T.after_reset = false;
+        T.ts_seq = 0;
+        return true;
+    } else {
+        T.ts_seq = 0;
+    }
     for (int i = 0; i < n; i++) line_bit(bits[i >> 3] >> (i & 7) & 1);
+    return true;
+}
+
+bool aos_io_be_swd_seq_in(aos_io_swd_t *s, uint8_t *bits, int n)
+{
+    (void)s;
+    /* nobody drives the line: the pull-up reads ones */
+    for (int i = 0; i < n; i++) bits[i >> 3] |= (uint8_t)(1u << (i & 7));
+    T.ts_seq = T.ts_seq == 1 && n == 5 ? 2 : 0;
+    return true;
+}
+
+bool aos_io_be_swd_clock(aos_io_swd_t *s)
+{
+    (void)s;
     return true;
 }
 

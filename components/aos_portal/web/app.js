@@ -478,9 +478,9 @@ async function pageTerminal() {
 /* ---- Programador ---- */
 const PHASES = { idle: N_('Listo'), opening: N_('Abriendo el puerto'), connecting: N_('Conectando con la placa'), stub: N_('Cargando el stub'),
   baud: N_('Subiendo la velocidad'), info: N_('Leyendo el chip'), erasing: N_('Borrando'), writing: N_('Grabando'), verifying: N_('Verificando'),
-  reading: N_('Leyendo la flash'), resetting: N_('Reiniciando la placa'), console: N_('Consola RTT abierta'), bridge: N_('Puente abierto'), done: N_('Grabación terminada'), failed: N_('Falló'), cancelled: N_('Cancelado') };
+  reading: N_('Leyendo la flash'), resetting: N_('Reiniciando la placa'), console: N_('Consola RTT abierta'), bridge: N_('Puente abierto'), probe: N_('Sonda abierta'), done: N_('Grabación terminada'), failed: N_('Falló'), cancelled: N_('Cancelado') };
 /* the end of a dump or an erase says what it was */
-const JOB_DONE = { read: N_('Volcado guardado'), erase: N_('Flash borrada'), console: N_('Consola cerrada'), bridge: N_('Puente cerrado') };
+const JOB_DONE = { read: N_('Volcado guardado'), erase: N_('Flash borrada'), console: N_('Consola cerrada'), bridge: N_('Puente cerrado'), probe: N_('Sonda cerrada') };
 /* "/sdcard/firmware/volcados/x.bin" -> "/firmware/volcados/x.bin", as the card's API names it */
 const cardPath = p => { const i = p.indexOf('/firmware/'); return i >= 0 ? p.slice(i) : p; };
 const dumpLink = (p, text) => h('a', { href: '/api/fs/get?attachment=1&path=' + encodeURIComponent(cardPath(p)) }, text);
@@ -545,6 +545,10 @@ async function pageProgramador() {
   const openBridge = async () => {
     try { await post('flash/bridge', { port: flashPort, baud: 115200 }); flashLog = 0; put(log); load(); } catch (e) { toast(e.message, true); }
   };
+  /* SWD: the board as this computer's CMSIS-DAP probe, on its OTG connector */
+  const openProbe = async () => {
+    try { await post('flash/probe', { port: flashPort, family: 'swd' }); flashLog = 0; put(log); load(); } catch (e) { toast(e.message, true); }
+  };
   const eraseFlash = async () => {
     if (!confirm(flashFam === 'avr' ? tr('¿Borrar el programa del Arduino en %s? Su bootloader queda. Para guardarlo antes, usá Leer la flash.', flashPort)
       : flashFam === 'swd' ? tr('¿Borrar toda la flash del chip en %s? Se queda sin programa (y sin su protección, si la tenía).', flashPort)
@@ -577,6 +581,7 @@ async function pageProgramador() {
         h('button', { class: 'btn', disabled: st.busy, onclick: async () => { try { await post('flash/detect', { port: flashPort, family: flashFam }); load(); } catch (e) { toast(e.message, true); } } }, tr('Detectar'))),
       flashFam === 'swd' ? h('div', { class: 'row' }, h('div', { class: 'grow' }),
         h('button', { class: 'btn', disabled: st.busy, onclick: openConsole }, tr('Consola RTT')),
+        h('button', { class: 'btn', disabled: st.busy, onclick: openProbe, title: 'openocd -f interface/cmsis-dap.cfg · pyocd · probe-rs' }, tr('Sonda para la computadora')),
         h('button', { class: 'btn red', disabled: st.busy, onclick: eraseFlash }, tr('Borrar la flash'))) :
       h('div', { class: 'row' }, h('div', { class: 'grow small muted' }, tr('Desde'), ' ', fromIn, ' ', tr('cuánto'), ' ', lenIn),
         h('button', { class: 'btn', disabled: st.busy, onclick: readFlash }, tr('Leer la flash')),
@@ -607,11 +612,12 @@ async function pageProgramador() {
       h('div', { class: 'btns' }, h('b', { class: done ? 'ok' : failed ? 'bad' : '' }, tr(title)),
         h('span', { class: 'muted small' }, st.job === 'read' && st.dump ? dumpLink(st.dump.path, st.dump.path.split('/').pop()) :
           st.job === 'bridge' ? 'esptool --port rfc2217://' + location.hostname + ':4000 · avrdude -c arduino -P net:' + location.hostname + ':4001' :
+          st.job === 'probe' ? tr('CMSIS-DAP en el conector OTG: %s comandos, %s transferencias SWD', st.done, st.total) :
           st.source + (st.file_count ? ' · ' + tr('archivo %s de %s: %s', st.file_index + 1, st.file_count, st.file_name) : '')),
-        st.busy ? h('button', { class: 'btn red', style: 'margin-left:auto', onclick: () => post('flash/cancel') }, st.job === 'console' ? tr('Cerrar la consola') : st.job === 'bridge' ? tr('Cerrar el puente') : tr('Cancelar')) : null),
+        st.busy ? h('button', { class: 'btn red', style: 'margin-left:auto', onclick: () => post('flash/cancel') }, st.job === 'console' ? tr('Cerrar la consola') : st.job === 'bridge' ? tr('Cerrar el puente') : st.job === 'probe' ? tr('Cerrar la sonda') : tr('Cancelar')) : null),
       h('div', { class: 'prog', style: 'height:10px;margin-top:12px' }, h('div', { style: `width:${st.percent}%;${done ? 'background:var(--green)' : failed ? 'background:var(--red)' : ''}` })),
       h('div', { class: 'small muted', style: 'margin-top:8px' },
-        tr('%s de %s', fmtBytes(st.done), fmtBytes(st.total)) + ` · ${st.bytes_per_s ? fmtBytes(st.bytes_per_s) + '/s' : '—'} · ` +
+        (st.job === 'probe' ? '' : tr('%s de %s', fmtBytes(st.done), fmtBytes(st.total)) + ` · ${st.bytes_per_s ? fmtBytes(st.bytes_per_s) + '/s' : '—'} · `) +
         (st.busy ? (st.eta_ms ? tr('faltan %s', fmtMs(st.eta_ms)) : '') : tr('en %s', fmtMs(st.elapsed_ms))) + (done && st.verified ? ' · ' + (st.family === 'avr' ? tr('verificado') : tr('MD5 verificado')) : '') +
         (done && st.dump ? ' · SHA-256 ' + st.dump.sha256.slice(0, 16) + '…' : '')),
       failed && st.error ? h('div', { class: 'bad small', style: 'margin-top:6px' }, st.error) : null) : null);

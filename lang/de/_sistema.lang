@@ -9431,3 +9431,27 @@ error	Fehler
 
 #: components/aos_flasher (Programador, puente)
 se cerró el puente	die Brücke wurde geschlossen
+#: components/aos_flasher (Programador, sonda CMSIS-DAP)
+Sonda abierta	Sonde offen
+Sonda cerrada	Sonde geschlossen
+No se pudo abrir la sonda	Sonde konnte nicht geöffnet werden
+Sonda para la computadora	Sonde für den Computer
+La computadora la tiene: OpenOCD, pyOCD o probe-rs	Der Computer hat sie: OpenOCD, pyOCD oder probe-rs
+Conectá el conector OTG a la computadora	Verbinde den OTG-Anschluss mit dem Computer
+COMANDOS	BEFEHLE
+PAQUETES SWD	SWD-PAKETE
+Cerrar la sonda	Sonde schließen
+Sonda	Sonde
+Es la sonda CMSIS-DAP del Programador, y la computadora la tiene. Se cierra en el Programador.	Es ist die CMSIS-DAP-Sonde des Programmierers, und der Computer hat sie. Geschlossen wird sie im Programmierer.
+Es la sonda CMSIS-DAP del Programador, esperando a la computadora. Se cierra en el Programador.	Es ist die CMSIS-DAP-Sonde des Programmierers und wartet auf den Computer. Geschlossen wird sie im Programmierer.
+Es la sonda del Programador: cerrala ahí	Es ist die Sonde des Programmierers: dort schließen
+El depurador pidió SWCLK a %u kHz	Der Debugger will SWCLK mit %u kHz
+El depurador se conectó (SWD)	Der Debugger hat sich verbunden (SWD)
+El depurador se desconectó	Der Debugger hat sich getrennt
+El USB cambió de modo (Ajustes): la sonda se cerró	Der USB-Modus wurde geändert (Einstellungen): die Sonde ist zu
+La computadora tomó la sonda	Der Computer hat die Sonde übernommen
+La computadora soltó la sonda	Der Computer hat die Sonde freigegeben
+El USB está en modo Disco: expulsá la tarjeta en la computadora primero	Der USB ist im Laufwerksmodus: wirf die Karte zuerst am Computer aus
+El conector OTG es el host de un pendrive: cambiá sus pines en Ajustes → USB	Der OTG-Anschluss ist Host eines USB-Sticks: ändere seine Pins unter Einstellungen → USB
+El USB no pasó a modo sonda	Der USB ist nicht in den Sondenmodus gewechselt
+Sonda CMSIS-DAP lista en el conector OTG	CMSIS-DAP-Sonde am OTG-Anschluss bereit

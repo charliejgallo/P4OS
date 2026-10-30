@@ -129,6 +129,7 @@ typedef enum {
     AOS_FLASHER_RESETTING,
     AOS_FLASHER_CONSOLE,        /* the RTT console: reading until cancelled */
     AOS_FLASHER_BRIDGE,         /* the port lent over TCP, until cancelled */
+    AOS_FLASHER_PROBE,          /* the computer's debugger on the SWD pins, until cancelled */
     AOS_FLASHER_DONE,
     AOS_FLASHER_FAILED,
     AOS_FLASHER_CANCELLED,
@@ -140,6 +141,7 @@ typedef enum {
     AOS_FLASHER_JOB_ERASE,      /* all of the flash */
     AOS_FLASHER_JOB_CONSOLE,    /* SWD: the target's RTT console, until cancelled */
     AOS_FLASHER_JOB_BRIDGE,     /* the port over TCP for the computer's tools, until cancelled */
+    AOS_FLASHER_JOB_PROBE,      /* SWD: the board as the computer's CMSIS-DAP probe, until cancelled */
 } aos_flasher_job_t;
 
 typedef struct {
@@ -176,6 +178,13 @@ bool aos_flasher_console_send(const void *data, int n);
  * reset at each connection (avrdude), at opts->baud; until cancelled, and
  * only from where the portal opens without a password. */
 bool aos_flasher_bridge(const char *port, const aos_flasher_opts_t *opts);
+/* SWD: the board as a CMSIS-DAP v2 probe on its OTG connector
+ * (aos_flasher_dap.c): OpenOCD, pyOCD and probe-rs on the computer drive the
+ * port's SWD pins - breakpoints, stepping, their own flash algorithms. The
+ * USB goes to PROBE mode while it runs and back to the mode it had after;
+ * until cancelled. The status counts the commands (done) and the SWD
+ * transfers (total). */
+bool aos_flasher_probe(const char *port, const aos_flasher_opts_t *opts);
 void aos_flasher_cancel(void);
 bool aos_flasher_busy(void);
 

@@ -2930,6 +2930,29 @@ static const char blob_en__sistema_lang[] =
     "error\terror\n"
     "%s se desconectó\t%s was unplugged\n"
     "se cerró el puente\tthe bridge closed\n"
+    "Sonda abierta\tProbe open\n"
+    "Sonda cerrada\tProbe closed\n"
+    "No se pudo abrir la sonda\tCouldn't open the probe\n"
+    "Sonda para la computadora\tProbe for the computer\n"
+    "La computadora la tiene: OpenOCD, pyOCD o probe-rs\tThe computer has it: OpenOCD, pyOCD or probe-rs\n"
+    "Conectá el conector OTG a la computadora\tPlug the OTG connector into the computer\n"
+    "COMANDOS\tCOMMANDS\n"
+    "PAQUETES SWD\tSWD PACKETS\n"
+    "Cerrar la sonda\tClose the probe\n"
+    "Sonda\tProbe\n"
+    "Es la sonda CMSIS-DAP del Programador, y la computadora la tiene. Se cierra en el Programador.\tIt is the Programmer's CMSIS-DAP probe, and the computer has it. Close it in the Programmer.\n"
+    "Es la sonda CMSIS-DAP del Programador, esperando a la computadora. Se cierra en el Programador.\tIt is the Programmer's CMSIS-DAP probe, waiting for the computer. Close it in the Programmer.\n"
+    "Es la sonda del Programador: cerrala ahí\tIt is the Programmer's probe: close it there\n"
+    "El depurador pidió SWCLK a %u kHz\tThe debugger asked for SWCLK at %u kHz\n"
+    "El depurador se conectó (SWD)\tThe debugger connected (SWD)\n"
+    "El depurador se desconectó\tThe debugger disconnected\n"
+    "El USB cambió de modo (Ajustes): la sonda se cerró\tThe USB changed mode (Settings): the probe closed\n"
+    "La computadora tomó la sonda\tThe computer took the probe\n"
+    "La computadora soltó la sonda\tThe computer let go of the probe\n"
+    "El USB está en modo Disco: expulsá la tarjeta en la computadora primero\tThe USB is in Disk mode: eject the card on the computer first\n"
+    "El conector OTG es el host de un pendrive: cambiá sus pines en Ajustes → USB\tThe OTG connector is a USB stick's host: change its pins in Settings → USB\n"
+    "El USB no pasó a modo sonda\tThe USB didn't switch to probe mode\n"
+    "Sonda CMSIS-DAP lista en el conector OTG\tCMSIS-DAP probe ready on the OTG connector\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5852,6 +5875,29 @@ static const char blob_de__sistema_lang[] =
     "error\tFehler\n"
     "%s se desconectó\t%s wurde getrennt\n"
     "se cerró el puente\tdie Brücke wurde geschlossen\n"
+    "Sonda abierta\tSonde offen\n"
+    "Sonda cerrada\tSonde geschlossen\n"
+    "No se pudo abrir la sonda\tSonde konnte nicht geöffnet werden\n"
+    "Sonda para la computadora\tSonde für den Computer\n"
+    "La computadora la tiene: OpenOCD, pyOCD o probe-rs\tDer Computer hat sie: OpenOCD, pyOCD oder probe-rs\n"
+    "Conectá el conector OTG a la computadora\tVerbinde den OTG-Anschluss mit dem Computer\n"
+    "COMANDOS\tBEFEHLE\n"
+    "PAQUETES SWD\tSWD-PAKETE\n"
+    "Cerrar la sonda\tSonde schließen\n"
+    "Sonda\tSonde\n"
+    "Es la sonda CMSIS-DAP del Programador, y la computadora la tiene. Se cierra en el Programador.\tEs ist die CMSIS-DAP-Sonde des Programmierers, und der Computer hat sie. Geschlossen wird sie im Programmierer.\n"
+    "Es la sonda CMSIS-DAP del Programador, esperando a la computadora. Se cierra en el Programador.\tEs ist die CMSIS-DAP-Sonde des Programmierers und wartet auf den Computer. Geschlossen wird sie im Programmierer.\n"
+    "Es la sonda del Programador: cerrala ahí\tEs ist die Sonde des Programmierers: dort schließen\n"
+    "El depurador pidió SWCLK a %u kHz\tDer Debugger will SWCLK mit %u kHz\n"
+    "El depurador se conectó (SWD)\tDer Debugger hat sich verbunden (SWD)\n"
+    "El depurador se desconectó\tDer Debugger hat sich getrennt\n"
+    "El USB cambió de modo (Ajustes): la sonda se cerró\tDer USB-Modus wurde geändert (Einstellungen): die Sonde ist zu\n"
+    "La computadora tomó la sonda\tDer Computer hat die Sonde übernommen\n"
+    "La computadora soltó la sonda\tDer Computer hat die Sonde freigegeben\n"
+    "El USB está en modo Disco: expulsá la tarjeta en la computadora primero\tDer USB ist im Laufwerksmodus: wirf die Karte zuerst am Computer aus\n"
+    "El conector OTG es el host de un pendrive: cambiá sus pines en Ajustes → USB\tDer OTG-Anschluss ist Host eines USB-Sticks: ändere seine Pins unter Einstellungen → USB\n"
+    "El USB no pasó a modo sonda\tDer USB ist nicht in den Sondenmodus gewechselt\n"
+    "Sonda CMSIS-DAP lista en el conector OTG\tCMSIS-DAP-Sonde am OTG-Anschluss bereit\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -5859,7 +5905,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2915, 0, files_en, 1 },
-    { "de", "Deutsch", 2915, 0, files_de, 1 },
+    { "en", "English", 2938, 0, files_en, 1 },
+    { "de", "Deutsch", 2938, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

@@ -317,6 +317,11 @@ bool aos_io_swd_seq(aos_io_swd_t *s, const uint8_t *bits, int n);
 int  aos_io_swd_xfer(aos_io_swd_t *s, uint8_t req, uint32_t *data, bool no_ack);
 bool aos_io_swd_nrst(aos_io_swd_t *s, bool assert);
 void aos_io_swd_close(aos_io_swd_t *s);
+/* For the probe (a computer's debugger driving the wire, aos_flasher_dap.c):
+ * seq_in clocks n bits with SWDIO let go and reads them, LSB first; clock
+ * sets another speed on an open wire (measured again on the board). */
+bool aos_io_swd_seq_in(aos_io_swd_t *s, uint8_t *bits, int n);
+bool aos_io_swd_clock(aos_io_swd_t *s, uint32_t khz);
 
 typedef struct aos_io_count aos_io_count_t;
 aos_io_count_t *aos_io_count_open(int gpio, aos_gpio_mode_t pull, bool both_edges, uint32_t debounce_us, const char *owner);

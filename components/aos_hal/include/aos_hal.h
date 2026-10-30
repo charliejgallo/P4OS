@@ -1953,6 +1953,7 @@ typedef enum {
     AOS_HAL_USB_KEYS,
     AOS_HAL_USB_DISK,
     AOS_HAL_USB_HOST,
+    AOS_HAL_USB_PROBE,          /* P4OS: a CMSIS-DAP probe, the Programador's (aos_hal_usb_probe_read) */
 } aos_hal_usb_mode_t;
 
 aos_hal_usb_mode_t aos_hal_usb_mode(void);
@@ -1992,6 +1993,19 @@ void aos_hal_usb_restore(void);                /* at boot, once the card is read
                                                 * the restart (KEYS or idle; never DISK) */
 bool aos_hal_usb_mouse_hold(int buttons);      /* buttons held down for the next moves (bit 0 left,
                                                 * bit 1 right; 0 lets go): drag and drop */
+
+/* P4OS: PROBE mode, the port as a CMSIS-DAP v2 debug probe (the
+ * Programador's, aos_flasher_dap.c; docs/USB.md): one vendor interface
+ * named "CMSIS-DAP" with two bulk endpoints, which OpenOCD, pyOCD and
+ * probe-rs find with no driver (and Windows binds to WinUSB by itself). The
+ * HAL moves the packets and knows nothing of what is in them: read waits up
+ * to timeout_ms for the computer's next command, one packet (0 none yet, -1
+ * not in PROBE mode); write sends one response. Not remembered across a
+ * restart: the port comes back in the mode it had before. In the simulator
+ * the packets go over TCP instead (P4_SIM_PROBE_PORT, 2-byte length first). */
+int  aos_hal_usb_probe_read(uint8_t *buf, int cap, uint32_t timeout_ms);
+bool aos_hal_usb_probe_write(const uint8_t *buf, int len);
+int  aos_hal_usb_probe_packet(void);           /* the endpoint's size: 512 at High Speed, 64 at Full */
 
 /* P4OS: the pendrive host (aos_usb_p4.c, docs/USB.md), a switch of its own
  * beside the OTG connector's role: pendrives on the 40-pin header, with 5 V

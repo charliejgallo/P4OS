@@ -1115,26 +1115,40 @@ static void measure_clock(swd_t *s)
             (unsigned)(20u * 512u * 1000u / t_seq), (unsigned)(t_rd / 200), (unsigned)(200u * 48u * 1000u / t_rd), ok);
 }
 
-static bool run(swd_t *s)
+/* The port's pins as the wire: TX is SWCLK, RX is SWDIO, EN is NRST (when
+ * the port has it). Also the probe's (aos_flasher_dap.c). NULL after
+ * fl_fail. */
+aos_io_swd_t *fl_swd_open(uint32_t khz)
 {
-    fl_phase(AOS_FLASHER_OPENING);
     const aos_io_port_t *pt = aos_io_port_find(J.port);
-    if (!pt || pt->kind != AOS_PORT_UART)
-        return fl_fail(_("SWD va por los pines de un puerto del header (uart.a, uart.b): %s no es uno"), J.port);
+    if (!pt || pt->kind != AOS_PORT_UART) {
+        fl_fail(_("SWD va por los pines de un puerto del header (uart.a, uart.b): %s no es uno"), J.port);
+        return NULL;
+    }
     int en = -1, boot = -1;
     aos_io_port_lines(J.port, &en, &boot);
-    uint32_t khz = J.opts.baud && J.opts.baud <= 20000 ? J.opts.baud : KHZ_DEFAULT;
-    s->w = aos_io_swd_open(pt->pins[0], pt->pins[1], en, khz, AOS_FLASHER_OWNER);
-    if (!s->w) {
+    aos_io_swd_t *w = aos_io_swd_open(pt->pins[0], pt->pins[1], en, khz, AOS_FLASHER_OWNER);
+    if (!w) {
         const char *o = aos_io_owner(pt->pins[0]);
         if (!o) o = aos_io_owner(pt->pins[1]);
-        return o ? fl_fail(_("%s está ocupado: lo tiene %s"), J.port, o) : fl_fail(_("No se pudo abrir %s"), J.port);
+        if (o) fl_fail(_("%s está ocupado: lo tiene %s"), J.port, o);
+        else fl_fail(_("No se pudo abrir %s"), J.port);
+        return NULL;
     }
     if (en >= 0) fl_logf(L_INFO, _("SWCLK GPIO%d, SWDIO GPIO%d, NRST GPIO%d, ~%u kHz"), pt->pins[0], pt->pins[1], en, (unsigned)khz);
     else fl_logf(L_INFO, _("SWCLK GPIO%d, SWDIO GPIO%d, sin NRST, ~%u kHz"), pt->pins[0], pt->pins[1], (unsigned)khz);
     fl_lock();
     fl_st.lines = en >= 0;
     fl_unlock();
+    return w;
+}
+
+static bool run(swd_t *s)
+{
+    fl_phase(AOS_FLASHER_OPENING);
+    uint32_t khz = J.opts.baud && J.opts.baud <= 20000 ? J.opts.baud : KHZ_DEFAULT;
+    s->w = fl_swd_open(khz);
+    if (!s->w) return false;
     if (!connect(s)) return false;
     fl_logf(L_INFO, "DPIDR %08X%s", (unsigned)s->dpidr, s->multidrop ? " (TARGETSEL 01002927)" : "");
     if (!identify(s)) return false;

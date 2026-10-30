@@ -190,6 +190,8 @@ bool aos_io_be_swd_open(aos_io_swd_t *s);
 bool aos_io_be_swd_seq(aos_io_swd_t *s, const uint8_t *bits, int n);
 int  aos_io_be_swd_xfer(aos_io_swd_t *s, uint8_t req, uint32_t *data, bool no_ack);
 bool aos_io_be_swd_nrst(aos_io_swd_t *s, bool assert);
+bool aos_io_be_swd_seq_in(aos_io_swd_t *s, uint8_t *bits, int n);
+bool aos_io_be_swd_clock(aos_io_swd_t *s);  /* s->khz is the new speed */
 void aos_io_be_swd_close(aos_io_swd_t *s);
 
 struct aos_io_count {

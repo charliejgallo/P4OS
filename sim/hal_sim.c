@@ -632,8 +632,16 @@ bool aos_hal_sd_present(void) { return true; }
 /* USB (docs/USB.md): the simulator switches at once and its keyboard is
  * always ready in KEYS mode, so the screens can be drawn and clicked. */
 static aos_hal_usb_mode_t s_usb_mode = AOS_HAL_USB_CONSOLE;
+bool aos_hal_sim_probe_client(void);    /* usb_probe_sim.c: PROBE mode's packets over TCP */
+void aos_hal_sim_probe_close(void);
 aos_hal_usb_mode_t aos_hal_usb_mode(void) { return s_usb_mode; }
-bool aos_hal_usb_mode_set(aos_hal_usb_mode_t mode) { s_usb_mode = mode; printf("[hal] usb mode %d\n", (int)mode); return true; }
+bool aos_hal_usb_mode_set(aos_hal_usb_mode_t mode)
+{
+    if (s_usb_mode == AOS_HAL_USB_PROBE && mode != AOS_HAL_USB_PROBE) aos_hal_sim_probe_close();
+    s_usb_mode = mode;
+    printf("[hal] usb mode %d\n", (int)mode);
+    return true;
+}
 bool aos_hal_usb_busy(void) { return false; }
 bool aos_hal_usb_keys_ready(void) { return s_usb_mode == AOS_HAL_USB_KEYS; }
 bool aos_hal_usb_key(const char *name) { if (!aos_hal_usb_keys_ready()) return false; printf("[hal] usb key %s\n", name); return true; }
@@ -706,7 +714,8 @@ bool aos_hal_usb_midi_note(int note, int velocity, bool on) { if (!aos_hal_usb_k
 bool aos_hal_usb_midi_cc(int control, int value) { if (!aos_hal_usb_keys_ready()) return false; printf("[hal] midi cc %d %d\n", control, value); return true; }
 bool aos_hal_usb_midi_bend(int value) { if (!aos_hal_usb_keys_ready()) return false; printf("[hal] midi bend %d\n", value); return true; }
 bool aos_hal_usb_card_away(void) { return s_usb_mode == AOS_HAL_USB_DISK; }
-bool aos_hal_usb_connected(void) { return s_usb_mode != AOS_HAL_USB_CONSOLE; }   /* a pretend computer */
+/* a pretend computer; the probe's is a real client on its TCP port */
+bool aos_hal_usb_connected(void) { return s_usb_mode == AOS_HAL_USB_PROBE ? aos_hal_sim_probe_client() : s_usb_mode != AOS_HAL_USB_CONSOLE; }
 bool aos_hal_usb_net_up(void) { return s_usb_mode == AOS_HAL_USB_KEYS; }
 bool aos_hal_mdns_add_netif(void *esp_netif) { (void)esp_netif; return false; }
 void aos_hal_mdns_remove_netif(void *esp_netif) { (void)esp_netif; }

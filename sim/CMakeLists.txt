@@ -230,6 +230,7 @@ add_executable(p4os_sim
     io_sim.c
     uart_emu_sim.c
     swd_sim.c
+    usb_probe_sim.c
     spi_emu_sim.c
     sensors_sim.c
     ${SIM_EMU_SRC}
@@ -287,6 +288,7 @@ target_sources(p4os_sim PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_swd.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_stm32.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_bridge.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_dap.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_esp.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_src.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_img.c)

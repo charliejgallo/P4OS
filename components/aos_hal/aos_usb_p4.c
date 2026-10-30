@@ -10,8 +10,9 @@
  * reports -a keyboard, consumer control for the media keys, a mouse and a
  * gamepad-, a MIDI port, and a network over the cable (CDC-NCM,
  * aos_usb_net_p4.c: the portal at 192.168.7.1 with no Wi-Fi);
- * DISK with one mass storage interface that is the microSD, and CONSOLE
- * uninstalls it and leaves the port idle. Beside the role, the pendrive
+ * DISK with one mass storage interface that is the microSD; PROBE with one
+ * vendor interface, a CMSIS-DAP v2 probe for the Programador (below); and
+ * CONSOLE uninstalls it and leaves the port idle. Beside the role, the pendrive
  * host (below) is a switch of its own: pendrives on the 40-pin header,
  * through the P4's second, Full-Speed controller while the OTG connector
  * keeps its role, or through the High-Speed one (HOST: the OTG controller
@@ -65,6 +66,8 @@
 #include "tinyusb_msc.h"
 #include "class/hid/hid_device.h"
 #include "class/midi/midi_device.h"
+#include "class/vendor/vendor_device.h"
+#include "freertos/idf_additions.h"
 #include "usb/usb_host.h"
 #include "usb/msc_host.h"
 #include "usb/msc_host_vfs.h"
@@ -208,6 +211,54 @@ static const uint8_t s_disk_hs[] = {
     TUD_MSC_DESCRIPTOR(0, STR_MSC, EP_MSC_OUT, EP_MSC_IN, 512),
 };
 
+/* Probe mode: one vendor interface, the commands' bulk OUT first and the
+ * responses' IN after it, as CMSIS-DAP v2 has them. The debuggers find it
+ * by "CMSIS-DAP" in the product's or the interface's name, so both say it.
+ * The BOS (USB 2.1) carries Microsoft's OS 2.0 descriptors: Windows binds
+ * WinUSB to it with no .inf, under CMSIS-DAP v2's interface GUID; macOS and
+ * Linux need nothing (libusb opens a vendor interface as it is). */
+enum { PSTR_LANG = 0, PSTR_MANUFACTURER, PSTR_PRODUCT, PSTR_SERIAL, PSTR_DAP, PSTR_COUNT };
+#define EP_DAP_OUT 0x01
+#define EP_DAP_IN  0x81
+#define PROBE_LEN  (TUD_CONFIG_DESC_LEN + TUD_VENDOR_DESC_LEN)
+#define MS_VENDOR_CODE 0x01             /* the bRequest Windows asks the descriptor set with */
+#define MS_SET_LEN     162              /* header 10 + compatible ID 20 + the GUID property 132 */
+
+static const uint8_t s_probe_fs[] = {
+    TUD_CONFIG_DESCRIPTOR(1, 1, 0, PROBE_LEN, 0, 100),
+    TUD_VENDOR_DESCRIPTOR(0, PSTR_DAP, EP_DAP_OUT, EP_DAP_IN, 64),
+};
+
+static const uint8_t s_probe_hs[] = {
+    TUD_CONFIG_DESCRIPTOR(1, 1, 0, PROBE_LEN, 0, 100),
+    TUD_VENDOR_DESCRIPTOR(0, PSTR_DAP, EP_DAP_OUT, EP_DAP_IN, 512),
+};
+
+static const uint8_t s_probe_bos[] = {
+    TUD_BOS_DESCRIPTOR(TUD_BOS_DESC_LEN + TUD_BOS_MICROSOFT_OS_DESC_LEN, 1),
+    TUD_BOS_MS_OS_20_DESCRIPTOR(MS_SET_LEN, MS_VENDOR_CODE),
+};
+
+/* UTF-16LE of an ASCII character */
+#define W(c) (c), 0
+static const uint8_t s_ms_set[MS_SET_LEN] = {
+    /* the set's header: Windows 8.1 and later */
+    U16_TO_U8S_LE(10), U16_TO_U8S_LE(MS_OS_20_SET_HEADER_DESCRIPTOR), U32_TO_U8S_LE(0x06030000),
+    U16_TO_U8S_LE(MS_SET_LEN),
+    /* the device is one function: WinUSB for all of it */
+    U16_TO_U8S_LE(20), U16_TO_U8S_LE(MS_OS_20_FEATURE_COMPATBLE_ID),
+    'W', 'I', 'N', 'U', 'S', 'B', 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+    /* DeviceInterfaceGUIDs, REG_MULTI_SZ: CMSIS-DAP v2's own GUID */
+    U16_TO_U8S_LE(132), U16_TO_U8S_LE(MS_OS_20_FEATURE_REG_PROPERTY), U16_TO_U8S_LE(7), U16_TO_U8S_LE(42),
+    W('D'), W('e'), W('v'), W('i'), W('c'), W('e'), W('I'), W('n'), W('t'), W('e'), W('r'), W('f'), W('a'),
+    W('c'), W('e'), W('G'), W('U'), W('I'), W('D'), W('s'), 0, 0,
+    U16_TO_U8S_LE(80),
+    W('{'), W('C'), W('D'), W('B'), W('3'), W('B'), W('5'), W('A'), W('D'), W('-'), W('2'), W('9'), W('3'),
+    W('B'), W('-'), W('4'), W('6'), W('6'), W('3'), W('-'), W('A'), W('A'), W('3'), W('6'), W('-'), W('1'),
+    W('A'), W('A'), W('E'), W('4'), W('6'), W('4'), W('6'), W('3'), W('7'), W('7'), W('6'), W('}'), 0, 0, 0, 0,
+};
+#undef W
+
 static const tusb_desc_device_t s_dev = {
     .bLength = sizeof(tusb_desc_device_t),
     .bDescriptorType = TUSB_DESC_DEVICE,
@@ -241,6 +292,21 @@ static const tusb_desc_device_t s_dev_disk = {
     .bNumConfigurations = 1,
 };
 
+/* the probe: USB 2.1 for the BOS, and a product id of its own */
+static const tusb_desc_device_t s_dev_probe = {
+    .bLength = sizeof(tusb_desc_device_t),
+    .bDescriptorType = TUSB_DESC_DEVICE,
+    .bcdUSB = 0x0210,
+    .bMaxPacketSize0 = CFG_TUD_ENDPOINT0_SIZE,
+    .idVendor = 0x303A,
+    .idProduct = 0x4020,                /* esp_tinyusb's PID map: vendor */
+    .bcdDevice = 0x0100,
+    .iManufacturer = PSTR_MANUFACTURER,
+    .iProduct = PSTR_PRODUCT,
+    .iSerialNumber = PSTR_SERIAL,
+    .bNumConfigurations = 1,
+};
+
 static const tusb_desc_device_qualifier_t s_qualifier = {
     .bLength = sizeof(tusb_desc_device_qualifier_t),
     .bDescriptorType = TUSB_DESC_DEVICE_QUALIFIER,
@@ -265,6 +331,15 @@ static const char *s_strings[STR_COUNT] = {
     [STR_MSC]          = "P4OS microSD",
     [STR_NET]          = "P4OS network",
     [STR_MAC]          = s_net_mac,
+};
+
+static char s_probe_product[48];
+static const char *s_probe_strings[PSTR_COUNT] = {
+    [PSTR_LANG]         = (const char[]){ 0x09, 0x04 },
+    [PSTR_MANUFACTURER] = "P4OS",
+    [PSTR_PRODUCT]      = s_probe_product,
+    [PSTR_SERIAL]       = s_serial,
+    [PSTR_DAP]          = "P4OS CMSIS-DAP",
 };
 
 uint8_t const *tud_hid_descriptor_report_cb(uint8_t instance)
@@ -330,7 +405,7 @@ static void tusb_event_cb(tinyusb_event_t *ev, void *arg)
     }
 }
 
-static bool device_start(bool disk)
+static bool device_start(aos_hal_usb_mode_t m)
 {
     if (!s_serial[0]) {
         uint8_t mac[6] = { 0 };
@@ -339,23 +414,26 @@ static bool device_start(bool disk)
                  mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
         /* the name as the board is called now; fixed until the next install */
         snprintf(s_product, sizeof s_product, "P4OS %s", aos_hal_device_name());
+        snprintf(s_probe_product, sizeof s_probe_product, "P4OS %s CMSIS-DAP", aos_hal_device_name());
         aos_p4_usb_net_mac(mac);
         snprintf(s_net_mac, sizeof s_net_mac, "%02X%02X%02X%02X%02X%02X",
                  mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     }
+    bool disk = m == AOS_HAL_USB_DISK, probe = m == AOS_HAL_USB_PROBE;
     tinyusb_config_t cfg = TINYUSB_DEFAULT_CONFIG(tusb_event_cb);   /* HS port on the P4 */
-    cfg.descriptor.device = disk ? &s_dev_disk : &s_dev;
+    cfg.descriptor.device = disk ? &s_dev_disk : probe ? &s_dev_probe : &s_dev;
     cfg.descriptor.qualifier = &s_qualifier;
-    cfg.descriptor.string = s_strings;
-    cfg.descriptor.string_count = STR_COUNT;
-    cfg.descriptor.full_speed_config = disk ? s_disk_fs : s_cfg_fs;
-    cfg.descriptor.high_speed_config = disk ? s_disk_hs : s_cfg_hs;
+    cfg.descriptor.string = probe ? s_probe_strings : s_strings;
+    cfg.descriptor.string_count = probe ? PSTR_COUNT : STR_COUNT;
+    cfg.descriptor.full_speed_config = disk ? s_disk_fs : probe ? s_probe_fs : s_cfg_fs;
+    cfg.descriptor.high_speed_config = disk ? s_disk_hs : probe ? s_probe_hs : s_cfg_hs;
     esp_err_t e = tinyusb_driver_install(&cfg);
     if (e != ESP_OK) {
         ESP_LOGE(TAG, "tinyusb_driver_install: %s", esp_err_to_name(e));
         return false;
     }
-    ESP_LOGI(TAG, "%s up on the OTG port (%s)", disk ? "the card as a disk" : "keyboard and mouse", s_product);
+    ESP_LOGI(TAG, "%s up on the OTG port (%s)", disk ? "the card as a disk" : probe ? "the CMSIS-DAP probe" : "keyboard and mouse",
+             probe ? s_probe_product : s_product);
     return true;
 }
 
@@ -365,7 +443,7 @@ static void device_stop(void);
  * does not come up leaves the keyboard alone. */
 static bool keys_start(void)
 {
-    if (!device_start(false)) return false;
+    if (!device_start(AOS_HAL_USB_KEYS)) return false;
     if (!aos_p4_usb_net_start()) ESP_LOGW(TAG, "the network over the cable did not come up; keyboard only");
     return true;
 }
@@ -399,6 +477,7 @@ static sdmmc_card_t                *s_disk_card;
 static tinyusb_msc_storage_handle_t s_storage;
 static volatile bool                s_card_away;
 static aos_hal_usb_mode_t           s_before_disk;     /* where an eject goes back to */
+static aos_hal_usb_mode_t           s_before_probe;    /* what the next boot comes back as, while the probe is up */
 
 /* esp_tinyusb's storage events, from TinyUSB's task. The card back on the
  * board's side means the computer ejected it or went away: disk mode ends
@@ -487,7 +566,7 @@ static bool disk_start(void)
         return false;
     }
     s_card_away = true;
-    if (!device_start(true)) {
+    if (!device_start(AOS_HAL_USB_DISK)) {
         tinyusb_msc_delete_storage(s_storage);
         s_storage = NULL;
         tinyusb_msc_uninstall_driver();
@@ -512,6 +591,93 @@ static void disk_stop(void)
     disk_give_back();
 }
 
+
+/* -------------------------------------------------------------------------- */
+/* PROBE: the Programador's CMSIS-DAP                                          */
+/* -------------------------------------------------------------------------- */
+
+/* The vendor class runs without its FIFOs (CONFIG_TINYUSB_VENDOR_*_BUFSIZE
+ * 0): each command arrives whole in tud_vendor_rx_cb, as the computer sent
+ * it, and is copied to a queue the Programador's job reads; its response
+ * goes out as one transfer. The queue holds as many commands as the probe
+ * says it takes at once (aos_flasher_dap.c's packet count), in PSRAM. */
+#define PROBE_QUEUE 4
+typedef struct { uint16_t len; uint8_t data[512]; } probe_pkt_t;
+static QueueHandle_t s_probe_q;
+static EXT_RAM_BSS_ATTR probe_pkt_t s_probe_in;     /* TinyUSB's task fills it, one at a time */
+static uint32_t s_probe_lost;
+
+#if CFG_TUD_API_V0_19_COMPAT
+void tud_vendor_rx_cb(uint8_t idx, const uint8_t *buffer, uint16_t bufsize)
+#else
+void tud_vendor_rx_cb(uint8_t idx, const uint8_t *buffer, uint32_t bufsize)
+#endif
+{
+    (void)idx;
+    if (!s_probe_q || !buffer || !bufsize) return;
+    s_probe_in.len = (uint16_t)(bufsize > sizeof s_probe_in.data ? sizeof s_probe_in.data : bufsize);
+    memcpy(s_probe_in.data, buffer, s_probe_in.len);
+    if (xQueueSend(s_probe_q, &s_probe_in, 0) != pdTRUE) s_probe_lost++;
+}
+
+uint8_t const *tud_descriptor_bos_cb(void)
+{
+    return s_mode == AOS_HAL_USB_PROBE || s_want == AOS_HAL_USB_PROBE ? s_probe_bos : NULL;
+}
+
+/* Windows asks for the OS 2.0 descriptor set with the vendor code the BOS
+ * gave it; nothing else comes this way */
+bool tud_vendor_control_xfer_cb(uint8_t rhport, uint8_t stage, tusb_control_request_t const *request)
+{
+    if (stage != CONTROL_STAGE_SETUP) return true;
+    if (request->bmRequestType_bit.type == TUSB_REQ_TYPE_VENDOR && request->bRequest == MS_VENDOR_CODE &&
+        request->wIndex == 7)
+        return tud_control_xfer(rhport, request, (void *)(uintptr_t)s_ms_set, sizeof s_ms_set);
+    return false;
+}
+
+static bool probe_start(void)
+{
+    if (!s_probe_q) s_probe_q = xQueueCreateWithCaps(PROBE_QUEUE, sizeof(probe_pkt_t), MALLOC_CAP_SPIRAM);
+    if (!s_probe_q) return false;
+    xQueueReset(s_probe_q);
+    s_probe_lost = 0;
+    return device_start(AOS_HAL_USB_PROBE);
+}
+
+static void probe_stop(void)
+{
+    device_stop();
+    if (s_probe_lost) ESP_LOGW(TAG, "probe: %" PRIu32 " command(s) lost, the queue full", s_probe_lost);
+    if (s_probe_q) xQueueReset(s_probe_q);
+}
+
+int aos_hal_usb_probe_read(uint8_t *buf, int cap, uint32_t timeout_ms)
+{
+    if (s_mode != AOS_HAL_USB_PROBE || s_busy || !s_probe_q) {
+        vTaskDelay(pdMS_TO_TICKS(timeout_ms < 50 ? timeout_ms : 50));
+        return -1;
+    }
+    static EXT_RAM_BSS_ATTR probe_pkt_t pkt;        /* one reader: the Programador's job */
+    if (xQueueReceive(s_probe_q, &pkt, pdMS_TO_TICKS(timeout_ms)) != pdTRUE) return 0;
+    int n = pkt.len < cap ? pkt.len : cap;
+    memcpy(buf, pkt.data, (size_t)n);
+    return n;
+}
+
+bool aos_hal_usb_probe_write(const uint8_t *buf, int len)
+{
+    if (s_mode != AOS_HAL_USB_PROBE || s_busy || !tud_vendor_mounted()) return false;
+    /* the last response still going out: a computer that stopped reading
+     * gives up the wait after a second */
+    for (int i = 0; i < 1000 && !tud_vendor_write_available(); i++) vTaskDelay(1);
+    return tud_vendor_write_available() && tud_vendor_write(buf, (uint32_t)len) == (uint32_t)len;
+}
+
+int aos_hal_usb_probe_packet(void)
+{
+    return tud_speed_get() == TUSB_SPEED_HIGH ? 512 : 64;
+}
 
 /* -------------------------------------------------------------------------- */
 /* HOST: a pendrive                                                            */
@@ -950,9 +1116,11 @@ static void switch_task(void *arg)
         if (s_mode == AOS_HAL_USB_DISK) vTaskDelay(pdMS_TO_TICKS(200));
         if (s_mode == AOS_HAL_USB_KEYS) device_stop();
         else if (s_mode == AOS_HAL_USB_DISK) disk_stop();
+        else if (s_mode == AOS_HAL_USB_PROBE) probe_stop();
         s_mode = AOS_HAL_USB_CONSOLE;
         if (want == AOS_HAL_USB_KEYS && keys_start()) s_mode = AOS_HAL_USB_KEYS;
         else if (want == AOS_HAL_USB_DISK && disk_start()) s_mode = AOS_HAL_USB_DISK;
+        else if (want == AOS_HAL_USB_PROBE && probe_start()) s_mode = AOS_HAL_USB_PROBE;
     }
     if (host && !s_host_run) {
         if (host_start()) {
@@ -963,12 +1131,15 @@ static void switch_task(void *arg)
     s_want_host = s_host_run;
     ESP_LOGI(TAG, "the port is %s now%s", s_mode == AOS_HAL_USB_KEYS ? "keyboard and mouse"
                                          : s_mode == AOS_HAL_USB_DISK ? "the card as a disk"
+                                         : s_mode == AOS_HAL_USB_PROBE ? "the CMSIS-DAP probe"
                                          : s_mode == AOS_HAL_USB_HOST ? "the host of a pendrive" : "idle",
              s_host_run && H.map == BIT1 ? ", and the host of a pendrive on J3 21/23" : "");
     /* remembered for the next boot (aos_hal_usb_restore). Disk mode is
      * not: the boot reads the card, so a restart in disk mode comes back
-     * in the mode it had before. */
-    int32_t keep = s_mode == AOS_HAL_USB_DISK ? (int32_t)s_before_disk : (int32_t)s_mode, was = -1;
+     * in the mode it had before. Nor the probe, which lives with the
+     * Programador's job. */
+    int32_t keep = s_mode == AOS_HAL_USB_DISK ? (int32_t)s_before_disk
+                 : s_mode == AOS_HAL_USB_PROBE ? (int32_t)s_before_probe : (int32_t)s_mode, was = -1;
     if (!aos_hal_pref_get_i32(PREF_MODE, &was) || was != keep) aos_hal_pref_set_i32(PREF_MODE, keep);
     if (!aos_hal_pref_get_i32(PREF_HOST, &was) || was != (int32_t)s_host_run) aos_hal_pref_set_i32(PREF_HOST, s_host_run);
     s_buttons = 0;
@@ -1039,8 +1210,10 @@ bool aos_hal_usb_mode_set(aos_hal_usb_mode_t mode)
     if (s_busy) return false;
     if (mode == s_mode) return true;
     if (mode == AOS_HAL_USB_DISK) s_before_disk = s_mode == AOS_HAL_USB_HOST ? AOS_HAL_USB_CONSOLE : s_mode;
+    if (mode == AOS_HAL_USB_PROBE) s_before_probe = s_mode == AOS_HAL_USB_HOST || s_mode == AOS_HAL_USB_DISK ? AOS_HAL_USB_CONSOLE : s_mode;
     ESP_LOGI(TAG, "switching the port to %s", mode == AOS_HAL_USB_KEYS ? "keyboard and mouse"
-                                             : mode == AOS_HAL_USB_DISK ? "the card as a disk" : "idle");
+                                             : mode == AOS_HAL_USB_DISK ? "the card as a disk"
+                                             : mode == AOS_HAL_USB_PROBE ? "the CMSIS-DAP probe" : "idle");
     s_want = mode;
     s_want_host = s_host_run && H.map == BIT1;
     return switch_start();
@@ -1048,7 +1221,7 @@ bool aos_hal_usb_mode_set(aos_hal_usb_mode_t mode)
 
 bool aos_hal_usb_connected(void)
 {
-    return !s_busy && (s_mode == AOS_HAL_USB_KEYS || s_mode == AOS_HAL_USB_DISK) && tud_mounted();
+    return !s_busy && (s_mode == AOS_HAL_USB_KEYS || s_mode == AOS_HAL_USB_DISK || s_mode == AOS_HAL_USB_PROBE) && tud_mounted();
 }
 
 static bool usb_ready(void)

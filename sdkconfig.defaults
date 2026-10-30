@@ -142,6 +142,12 @@ CONFIG_TINYUSB_MIDI_COUNT=1
 CONFIG_TINYUSB_NET_MODE_NCM=y
 CONFIG_TINYUSB_NCM_OUT_NTB_BUFFS_COUNT=4
 CONFIG_TINYUSB_NCM_IN_NTB_BUFFS_COUNT=4
+# the Programador's probe (PROBE mode): CMSIS-DAP v2 is a vendor interface
+# with two bulk endpoints. No FIFOs: each command arrives whole in the
+# callback, as the computer sent it (aos_usb_p4.c)
+CONFIG_TINYUSB_VENDOR_COUNT=1
+CONFIG_TINYUSB_VENDOR_RX_BUFSIZE=0
+CONFIG_TINYUSB_VENDOR_TX_BUFSIZE=0
 CONFIG_TINYUSB_DESC_MANUFACTURER_STRING="P4OS"
 CONFIG_TINYUSB_DESC_PRODUCT_STRING="P4OS Macro pad"
 # the pendrive host (aos_usb_p4.c): pendrives behind a hub too, up to three,

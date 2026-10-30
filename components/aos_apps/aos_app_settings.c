@@ -345,13 +345,15 @@ static void edit_home_cb(lv_event_t *e) { aos_ui_edit_home(); }
 /* ---- USB ---- */
 
 /* The rows' order IS aos_hal_usb_mode_t's: CONSOLE, KEYS, DISK (HOST is the
- * pendrive host holding the OTG controller, and has no row of its own). */
+ * pendrive host holding the OTG controller, and PROBE the Programador's
+ * debug probe: neither has a row of its own). */
 static const char *usb_name(int mode)
 {
     switch (mode) {
     case AOS_HAL_USB_KEYS: return _("Teclado y mouse");   /* and gamepad, MIDI, network: the name stays short */
     case AOS_HAL_USB_DISK: return _("Disco");
     case AOS_HAL_USB_HOST: return "Host";
+    case AOS_HAL_USB_PROBE: return _("Sonda");
     default:               return _("Apagado");
     }
 }
@@ -393,6 +395,10 @@ static const char *usb_state_text(uint32_t *color)
     case AOS_HAL_USB_HOST:
         *color = 0x5E5CE6;
         return _("Lo usa el host de pendrives, en los pines 25 y 27.");
+    case AOS_HAL_USB_PROBE:
+        *color = 0x5E5CE6;
+        return pc ? _("Es la sonda CMSIS-DAP del Programador, y la computadora la tiene. Se cierra en el Programador.")
+                  : _("Es la sonda CMSIS-DAP del Programador, esperando a la computadora. Se cierra en el Programador.");
     default:
         return _("El puerto está libre: la placa no aparece en la computadora.");
     }
@@ -540,6 +546,7 @@ static void usb_mode_cb(lv_event_t *e)
     int want = (int)(intptr_t)lv_event_get_user_data(e);
     if (want == (int)aos_hal_usb_mode()) return;
     if (aos_hal_usb_busy()) { aos_ui_toast(_("El USB está cambiando de modo"), 1500); return; }
+    if (aos_hal_usb_mode() == AOS_HAL_USB_PROBE) { aos_ui_toast(_("Es la sonda del Programador: cerrala ahí"), 2500); return; }
     if (aos_hal_usb_mode() == AOS_HAL_USB_DISK && aos_hal_usb_connected())
         aos_ui_toast(_("Mejor expulsar la tarjeta en la computadora antes"), 2500);
     if (want == AOS_HAL_USB_DISK) {

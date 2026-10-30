@@ -22,6 +22,8 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
   verificar, borrar entero y la consola RTT.
 - **STM32 por su bootloader serie** (F4, sin publicar): grabar, verificar,
   leer y borrar, con RDP respetado.
+- **La placa como sonda CMSIS-DAP** (F5, sin publicar): OpenOCD, pyOCD y
+  probe-rs depuran por el conector OTG lo que está en los pines SWD.
 
 ## Familias y caminos
 
@@ -33,7 +35,7 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
 | AVR con USB propio | Leonardo, Micro, Pro Micro | AVR109 (Caterina), toque a 1200 baudios | hay (sim) | hay (sim) | F3 |
 | STM32 sin sonda | Blue Pill, Black Pill | bootloader serie de ST (AN3155), BOOT0 y NRST con las líneas EN/BOOT | hay (sim) | hay (sim) | F4 |
 | Desde la Mac, serie | esptool, avrdude, stm32flash | puente RFC2217 / TCP crudo al puerto | (la Mac) | (la Mac) | F4 |
-| Desde la Mac, SWD | OpenOCD, pyOCD, probe-rs | la placa como sonda CMSIS-DAP v2 por el USB OTG | (la Mac) | (la Mac) | F5 |
+| Desde la Mac, SWD | OpenOCD, pyOCD, probe-rs | la placa como sonda CMSIS-DAP v2 por el USB OTG (hay, sim) | (la Mac) | (la Mac) | F5 |
 | AVR sin bootloader | ATmega/ATtiny sueltos, grabar el bootloader de un Uno | ISP por `spi.a` + RESET; fusibles | F6 | F6 | F6 |
 | AVR nuevos | ATtiny 0/1/2, AVR Dx, Nano Every | UPDI por un UART (una resistencia) | F6 | F6 | F6 |
 | RP2040 / RP2350 en BOOTSEL | Pico, Pico 2 | UF2 al disco (hay) y PICOBOOT (lectura) | F6 | F6 | F6 |
@@ -231,11 +233,40 @@ ajena, la conexión se cierra y el registro lo dice. Sin probar en la placa.
 
 ## F5: la placa como sonda CMSIS-DAP
 
-- **free-dap** (BSD-3) sobre el mismo motor SWD, por el USB OTG como
-  dispositivo CMSIS-DAP v2 (bulk): OpenOCD, pyOCD y probe-rs en la Mac sin
-  drivers, para depurar con breakpoints lo que el Programador sólo graba.
-- Un modo más del USB (como Teclado o Disco), con los pines tomados a nombre
-  del Programador.
+**Hecho en el simulador el 2026-10-30.** "Sonda para la computadora" en la
+app (tipo SWD) y en el portal (`POST /api/flash/probe`): un trabajo que
+toma los pines SWD del puerto, como el resto de SWD, y pasa el USB a un
+modo más, PROBE, hasta que se cierra. La computadora ve una sonda CMSIS-DAP
+v2 en el conector OTG y OpenOCD, pyOCD y probe-rs la usan sin drivers:
+breakpoints, paso a paso, las variables, y sus propios algoritmos de flash
+para los chips que el Programador no conoce.
+
+- **El firmware de la sonda es propio** (`aos_flasher_dap.c`), no
+  free-dap: free-dap mueve los pines por su cuenta, y eso dejaba afuera al
+  simulador y al reloj calibrado. Son los comandos de CMSIS-DAP 2.1 para
+  SWD como los hace la implementación de Arm (las lecturas de AP diferidas,
+  el value match, `DAP_TransferBlock`, `DAP_SWD_Sequence` para el
+  TARGETSEL del multidrop) sobre `aos_io_swd_*`, con dos agregados al
+  cable: leer una secuencia con SWDIO suelto y cambiar el reloj con el
+  puerto abierto (se mide otra vez). Sin JTAG, SWO, UART ni
+  `DAP_QueueCommands`; `DAP_Info` lo dice.
+- **El USB** (`aos_usb_p4.c`): una interfaz de vendedor, "P4OS CMSIS-DAP",
+  con dos bulk de 512 bytes en High Speed; la clase vendor de TinyUSB sin
+  FIFOs, así cada comando llega entero y se encola (cuatro, en PSRAM).
+  BOS con los descriptores de Microsoft OS 2.0 para que Windows le ponga
+  WinUSB sola, con el GUID de CMSIS-DAP v2. El modo no se recuerda al
+  reiniciar, y al cerrar la sonda el puerto vuelve al modo que tenía; con
+  el modo Disco o el host de pendrives en el OTG no abre.
+- **Probado en el simulador con pyOCD de verdad.** El simulador pasa los
+  paquetes por TCP (`sim/usb_probe_sim.c`, `P4_SIM_PROBE_PORT`) y
+  `tools/swd_test/dap_tcp.py` le da a pyOCD una interfaz sobre ese socket:
+  contra el nRF52840, el STM32F103 y la RP2040 emulados (la RP2040 con el
+  `rp2040` de pyOCD, multidrop por `DAP_SWD_Sequence`) encuentra el
+  núcleo, frena, escribe y lee registros, 1 KB de RAM ida y vuelta, la
+  flash, un paso, y la suelta. El emulador ganó para esto una tabla ROM de
+  CoreSight, el paso a paso y el TARGETSEL hecho de secuencias.
+- **Sin probar en la placa**: falta la Mac por el cable OTG con OpenOCD o
+  pyOCD contra la Pico (`docs/plan/PRUEBAS-PLACA.md`).
 
 ## F6: el resto de los caminos
 

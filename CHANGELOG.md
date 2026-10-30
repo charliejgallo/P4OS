@@ -2,6 +2,17 @@
 
 ## Unreleased
 
+- **The board as the computer's debug probe.** "Sonda para la computadora"
+  (Programador, SWD) turns the OTG connector into a CMSIS-DAP v2 probe on
+  the port's SWD pins until it is closed: OpenOCD, pyOCD and probe-rs use
+  it with no driver (Windows too, through Microsoft's OS 2.0 descriptors)
+  for breakpoints, stepping and their own flash algorithms. The probe's
+  firmware is P4OS's own, on the same SWD wire as the Programador
+  (`aos_flasher_dap.c`), and the USB has a fourth mode for it that gives
+  the port back when it closes. In the simulator, pyOCD drives it over TCP
+  (`tools/swd_test/dap_tcp.py`) against the emulated nRF52840, STM32F103
+  and RP2040 (multidrop included): halt, registers, RAM, flash, a step.
+  Not tried on the board yet.
 - **A bridge for the computer's tools.** "Puente para la Mac" lends the
   Programador's port over TCP until it is closed: RFC 2217 on 4000 for
   esptool and pyserial (`--port rfc2217://p4os.local:4000`, with its

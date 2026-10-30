@@ -28,6 +28,10 @@
  *   the console   SWD's RTT console: the target's lines in the log, and while
  *                 it is open the bar becomes a line to type (the screen's
  *                 keyboard) that goes down to the firmware with Enter.
+ *   the probe     SWD's "Sonda para la computadora": the board as a CMSIS-DAP
+ *                 probe on its OTG connector, for OpenOCD, pyOCD and
+ *                 probe-rs, until closed; the commands and SWD transfers
+ *                 counted, the log says when the debugger comes and goes.
  *   the job       a ring with the percentage, the phase, bytes, speed and
  *                 time left, each file with its state (done, going, waiting),
  *                 the service's log; at the end the time it took and whether
@@ -40,9 +44,7 @@
  * button, and the list (or the files and the log) on the right. The state
  * that matters lives in S, so turning the screen rebuilds the same view.
  *
- * Not here yet (APPS.md): the RFC2217 bridge, which would be a third kind of
- * job in the service with its own card on this screen ("Puente para la
- * Mac"), downloads of a release from a URL, and STM32.
+ * Not here yet (APPS.md): downloads of a release from a URL.
  */
 #include "aos_apps.h"
 #include "aos_i18n.h"
@@ -83,6 +85,7 @@ static const char *const PHASE[] = {
     [AOS_FLASHER_RESETTING] = N_("Reiniciando la placa"),
     [AOS_FLASHER_CONSOLE] = N_("Consola RTT abierta"),
     [AOS_FLASHER_BRIDGE] = N_("Puente abierto"),
+    [AOS_FLASHER_PROBE] = N_("Sonda abierta"),
     [AOS_FLASHER_DONE] = N_("Grabación terminada"),
     [AOS_FLASHER_FAILED] = N_("No se pudo grabar"),
     [AOS_FLASHER_CANCELLED] = N_("Grabación cancelada"),
@@ -167,6 +170,9 @@ static const char *phase_title(const aos_flasher_status_t *st)
     } else if (st->job == AOS_FLASHER_JOB_BRIDGE) {
         if (st->phase == AOS_FLASHER_DONE || st->phase == AOS_FLASHER_CANCELLED) return _("Puente cerrado");
         if (st->phase == AOS_FLASHER_FAILED) return _("No se pudo abrir el puente");
+    } else if (st->job == AOS_FLASHER_JOB_PROBE) {
+        if (st->phase == AOS_FLASHER_DONE || st->phase == AOS_FLASHER_CANCELLED) return _("Sonda cerrada");
+        if (st->phase == AOS_FLASHER_FAILED) return _("No se pudo abrir la sonda");
     } else if (st->job == AOS_FLASHER_JOB_CONSOLE) {
         if (st->phase == AOS_FLASHER_DONE || st->phase == AOS_FLASHER_CANCELLED) return _("Consola cerrada");
         if (st->phase == AOS_FLASHER_FAILED) return _("No se pudo abrir la consola");
@@ -483,6 +489,18 @@ static void bridge_cb(lv_event_t *e)
     job_started(aos_flasher_bridge(S.port, &o));
 }
 
+static void probe_cb(lv_event_t *e)
+{
+    if (aos_flasher_busy() || !port_free_or_say()) return;
+    if (aos_hal_usb_mode() == AOS_HAL_USB_DISK) {
+        aos_ui_toast(_("La tarjeta la tiene la computadora (modo Disco)"), 2500);
+        return;
+    }
+    aos_flasher_opts_t o = job_opts();
+    S.log_from = aos_flasher_log_count();
+    job_started(aos_flasher_probe(S.port, &o));
+}
+
 static void overlay_close(void)
 {
     if (U.overlay) lv_obj_delete(U.overlay);
@@ -648,14 +666,15 @@ static void build_target(lv_obj_t *parent, int32_t w, bool compact)
         lv_obj_set_flex_grow(U.read_btn, 1);
         lv_obj_set_flex_grow(U.erase_btn, 1);
     }
-    /* the port for the computer's own tools (not SWD's: that is a probe) */
-    if (S.fam != AOS_FLASHER_SWD) {
-        row = box(c, lv_pct(100), 64);
-        lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
-        lv_obj_t *br = pill(row, AOS_SYM_LAN_CONNECT, _("Puente para la Mac"), AOS_C_CARD2, AOS_C_TEXT, bridge_cb, NULL);
-        lv_obj_set_height(br, 64);
-        if (U.land) lv_obj_set_flex_grow(br, 1);
-    }
+    /* the computer's own tools: the port over the network, or, for SWD,
+     * the board as their debug probe on the OTG connector */
+    row = box(c, lv_pct(100), 64);
+    lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+    lv_obj_t *br = S.fam == AOS_FLASHER_SWD
+                 ? pill(row, AOS_SYM_USB, _("Sonda para la computadora"), AOS_C_CARD2, AOS_C_TEXT, probe_cb, NULL)
+                 : pill(row, AOS_SYM_LAN_CONNECT, _("Puente para la Mac"), AOS_C_CARD2, AOS_C_TEXT, bridge_cb, NULL);
+    lv_obj_set_height(br, 64);
+    if (U.land) lv_obj_set_flex_grow(br, 1);
 
     /* the warning row, shown when it applies */
     U.busy_row = box(c, lv_pct(100), LV_SIZE_CONTENT);
@@ -969,11 +988,12 @@ static void refresh_job(void)
         lv_obj_remove_flag(U.mark, LV_OBJ_FLAG_HIDDEN);
         lv_label_set_text(U.mark, st.ok ? AOS_SYM_CHECK : st.phase == AOS_FLASHER_CANCELLED ? AOS_SYM_STOP : AOS_SYM_CLOSE);
         lv_obj_set_style_text_color(U.mark, col, 0);
-    } else if (st.job == AOS_FLASHER_JOB_CONSOLE || st.job == AOS_FLASHER_JOB_BRIDGE) {
-        /* a console or a bridge has no end to count towards */
+    } else if (st.job == AOS_FLASHER_JOB_CONSOLE || st.job == AOS_FLASHER_JOB_BRIDGE || st.job == AOS_FLASHER_JOB_PROBE) {
+        /* a console, a bridge or a probe has no end to count towards */
         lv_obj_add_flag(U.pct, LV_OBJ_FLAG_HIDDEN);
         lv_obj_remove_flag(U.mark, LV_OBJ_FLAG_HIDDEN);
-        lv_label_set_text(U.mark, st.job == AOS_FLASHER_JOB_BRIDGE ? AOS_SYM_LAN_CONNECT : AOS_SYM_MESSAGE_TEXT_OUTLINE);
+        lv_label_set_text(U.mark, st.job == AOS_FLASHER_JOB_BRIDGE ? AOS_SYM_LAN_CONNECT
+                                : st.job == AOS_FLASHER_JOB_PROBE ? AOS_SYM_USB : AOS_SYM_MESSAGE_TEXT_OUTLINE);
         lv_obj_set_style_text_color(U.mark, C_TINT, 0);
     } else {
         lv_obj_remove_flag(U.pct, LV_OBJ_FLAG_HIDDEN);
@@ -1008,6 +1028,9 @@ static void refresh_job(void)
         const char *n = aos_hal_device_name();
         snprintf(buf, sizeof buf, "esptool: rfc2217://%s.local:4000\navrdude: net:%s.local:4001", n && *n ? n : "p4os",
                  n && *n ? n : "p4os");
+    } else if (st.phase == AOS_FLASHER_PROBE) {
+        snprintf(buf, sizeof buf, "%s", aos_hal_usb_connected() ? _("La computadora la tiene: OpenOCD, pyOCD o probe-rs")
+                                                                : _("Conectá el conector OTG a la computadora"));
     } else if (st.phase == AOS_FLASHER_CONSOLE) {
         snprintf(buf, sizeof buf, "%s  ·  %s", st.chip, _("lo que escribe su firmware, abajo"));
     } else if (st.chip_known && st.family != AOS_FLASHER_ESP) {
@@ -1020,10 +1043,16 @@ static void refresh_job(void)
     lv_label_set_text(U.ph_sub, buf);
     lv_obj_set_style_text_color(U.ph_sub, done && !st.ok ? lv_color_hex(0xFF8A80) : AOS_C_DIM, 0);
 
-    /* the three numbers */
+    /* the three numbers; a probe's are the debugger's commands and the SWD
+     * transfers they made */
+    bool probe = st.job == AOS_FLASHER_JOB_PROBE;
+    lv_label_set_text(lv_obj_get_child(lv_obj_get_parent(U.stat[0]), 0), probe ? _("COMANDOS") : _("TRANSFERIDO"));
+    lv_label_set_text(lv_obj_get_child(lv_obj_get_parent(U.stat[1]), 0), probe ? _("PAQUETES SWD") : _("VELOCIDAD"));
     fmt_pair(buf, sizeof buf, st.done, st.total);
-    lv_label_set_text(U.stat[0], flash_job ? buf : "-");
-    if (st.bytes_per_s) snprintf(buf, sizeof buf, "%u,%u KB/s", (unsigned)(st.bytes_per_s / 1024), (unsigned)(st.bytes_per_s % 1024 * 10 / 1024));
+    if (probe) snprintf(buf, sizeof buf, "%u", (unsigned)st.done);
+    lv_label_set_text(U.stat[0], flash_job || probe ? buf : "-");
+    if (probe) snprintf(buf, sizeof buf, "%u", (unsigned)st.total);
+    else if (st.bytes_per_s) snprintf(buf, sizeof buf, "%u,%u KB/s", (unsigned)(st.bytes_per_s / 1024), (unsigned)(st.bytes_per_s % 1024 * 10 / 1024));
     else snprintf(buf, sizeof buf, "-");
     lv_label_set_text(U.stat[1], buf);
     if (done || !st.eta_ms) fmt_time(buf, sizeof buf, st.elapsed_ms);
@@ -1302,6 +1331,8 @@ static void build_actions(void)
         lv_obj_add_flag(U.con_kb, LV_OBJ_FLAG_HIDDEN);
     } else if (S.job_view && st.busy && st.job == AOS_FLASHER_JOB_BRIDGE) {
         big_button(U.actions, AOS_SYM_STOP, _("Cerrar el puente"), AOS_C_CARD2, AOS_C_TEXT, cancel_cb, NULL);
+    } else if (S.job_view && st.busy && st.job == AOS_FLASHER_JOB_PROBE) {
+        big_button(U.actions, AOS_SYM_STOP, _("Cerrar la sonda"), AOS_C_CARD2, AOS_C_TEXT, cancel_cb, NULL);
     } else if (S.job_view && st.busy) {
         big_button(U.actions, AOS_SYM_STOP, _("Cancelar"), AOS_C_CARD2, AOS_C_RED, cancel_cb, NULL);
     } else if (S.job_view) {

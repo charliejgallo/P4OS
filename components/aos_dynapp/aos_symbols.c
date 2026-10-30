@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3463 simbolos.
+ * Total: 3483 simbolos.
  */
 
 #include <stddef.h>
@@ -628,6 +628,9 @@ extern int aos_hal_usb_mode_set;
 extern int aos_hal_usb_mouse;
 extern int aos_hal_usb_mouse_hold;
 extern int aos_hal_usb_net_up;
+extern int aos_hal_usb_probe_packet;
+extern int aos_hal_usb_probe_read;
+extern int aos_hal_usb_probe_write;
 extern int aos_hal_usb_raw_claim;
 extern int aos_hal_usb_raw_close;
 extern int aos_hal_usb_raw_control;
@@ -774,6 +777,13 @@ extern int aos_io_be_spi_xfer;
 extern int aos_io_be_strip_close;
 extern int aos_io_be_strip_open;
 extern int aos_io_be_strip_send;
+extern int aos_io_be_swd_clock;
+extern int aos_io_be_swd_close;
+extern int aos_io_be_swd_nrst;
+extern int aos_io_be_swd_open;
+extern int aos_io_be_swd_seq;
+extern int aos_io_be_swd_seq_in;
+extern int aos_io_be_swd_xfer;
 extern int aos_io_be_uart_close;
 extern int aos_io_be_uart_lines;
 extern int aos_io_be_uart_lines_release;
@@ -880,6 +890,13 @@ extern int aos_io_strip_order_name;
 extern int aos_io_strip_show;
 extern int aos_io_strip_type_name;
 extern int aos_io_strip_type_rgbw;
+extern int aos_io_swd_clock;
+extern int aos_io_swd_close;
+extern int aos_io_swd_nrst;
+extern int aos_io_swd_open;
+extern int aos_io_swd_seq;
+extern int aos_io_swd_seq_in;
+extern int aos_io_swd_xfer;
 extern int aos_io_uart_close;
 extern int aos_io_uart_desc;
 extern int aos_io_uart_dtr_rts;
@@ -3469,9 +3486,12 @@ extern int strtoul;
 extern int strtoull;
 extern int tanf;
 extern int time;
+extern int tud_descriptor_bos_cb;
 extern int tud_hid_descriptor_report_cb;
 extern int tud_hid_get_report_cb;
 extern int tud_hid_set_report_cb;
+extern int tud_vendor_control_xfer_cb;
+extern int tud_vendor_rx_cb;
 extern int unlink;
 extern int vsnprintf;
 extern int write;
@@ -4094,6 +4114,9 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_usb_mouse),
     ESP_ELFSYM_EXPORT(aos_hal_usb_mouse_hold),
     ESP_ELFSYM_EXPORT(aos_hal_usb_net_up),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_probe_packet),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_probe_read),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_probe_write),
     ESP_ELFSYM_EXPORT(aos_hal_usb_raw_claim),
     ESP_ELFSYM_EXPORT(aos_hal_usb_raw_close),
     ESP_ELFSYM_EXPORT(aos_hal_usb_raw_control),
@@ -4240,6 +4263,13 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_be_strip_close),
     ESP_ELFSYM_EXPORT(aos_io_be_strip_open),
     ESP_ELFSYM_EXPORT(aos_io_be_strip_send),
+    ESP_ELFSYM_EXPORT(aos_io_be_swd_clock),
+    ESP_ELFSYM_EXPORT(aos_io_be_swd_close),
+    ESP_ELFSYM_EXPORT(aos_io_be_swd_nrst),
+    ESP_ELFSYM_EXPORT(aos_io_be_swd_open),
+    ESP_ELFSYM_EXPORT(aos_io_be_swd_seq),
+    ESP_ELFSYM_EXPORT(aos_io_be_swd_seq_in),
+    ESP_ELFSYM_EXPORT(aos_io_be_swd_xfer),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_close),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_lines),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_lines_release),
@@ -4346,6 +4376,13 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_strip_show),
     ESP_ELFSYM_EXPORT(aos_io_strip_type_name),
     ESP_ELFSYM_EXPORT(aos_io_strip_type_rgbw),
+    ESP_ELFSYM_EXPORT(aos_io_swd_clock),
+    ESP_ELFSYM_EXPORT(aos_io_swd_close),
+    ESP_ELFSYM_EXPORT(aos_io_swd_nrst),
+    ESP_ELFSYM_EXPORT(aos_io_swd_open),
+    ESP_ELFSYM_EXPORT(aos_io_swd_seq),
+    ESP_ELFSYM_EXPORT(aos_io_swd_seq_in),
+    ESP_ELFSYM_EXPORT(aos_io_swd_xfer),
     ESP_ELFSYM_EXPORT(aos_io_uart_close),
     ESP_ELFSYM_EXPORT(aos_io_uart_desc),
     ESP_ELFSYM_EXPORT(aos_io_uart_dtr_rts),
@@ -6935,9 +6972,12 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(strtoull),
     ESP_ELFSYM_EXPORT(tanf),
     ESP_ELFSYM_EXPORT(time),
+    ESP_ELFSYM_EXPORT(tud_descriptor_bos_cb),
     ESP_ELFSYM_EXPORT(tud_hid_descriptor_report_cb),
     ESP_ELFSYM_EXPORT(tud_hid_get_report_cb),
     ESP_ELFSYM_EXPORT(tud_hid_set_report_cb),
+    ESP_ELFSYM_EXPORT(tud_vendor_control_xfer_cb),
+    ESP_ELFSYM_EXPORT(tud_vendor_rx_cb),
     ESP_ELFSYM_EXPORT(unlink),
     ESP_ELFSYM_EXPORT(vsnprintf),
     ESP_ELFSYM_EXPORT(write),

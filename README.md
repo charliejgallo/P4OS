@@ -304,7 +304,8 @@ header with who holds each pin.
   running on it. Or an STM32 through its own serial bootloader, with
   BOOT0 and NRST on the same lines an ESP32 uses. And it lends its port to
   the computer: esptool over `rfc2217://p4os.local:4000`, avrdude over
-  `net:p4os.local:4001`.
+  `net:p4os.local:4001`; or becomes its CMSIS-DAP debug probe on the OTG
+  connector, for OpenOCD, pyOCD and probe-rs.
 - **Modbus:** a Riden RD60xx supply over RTU, and a gateway.
 - **Bench:** a Rigol scope over the LAN, the Riden, a UNI-T generator over
   USB, and a logger to CSV.

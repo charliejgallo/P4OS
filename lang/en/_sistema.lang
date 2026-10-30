@@ -9431,3 +9431,27 @@ error	error
 
 #: components/aos_flasher (Programador, puente)
 se cerró el puente	the bridge closed
+#: components/aos_flasher (Programador, sonda CMSIS-DAP)
+Sonda abierta	Probe open
+Sonda cerrada	Probe closed
+No se pudo abrir la sonda	Couldn't open the probe
+Sonda para la computadora	Probe for the computer
+La computadora la tiene: OpenOCD, pyOCD o probe-rs	The computer has it: OpenOCD, pyOCD or probe-rs
+Conectá el conector OTG a la computadora	Plug the OTG connector into the computer
+COMANDOS	COMMANDS
+PAQUETES SWD	SWD PACKETS
+Cerrar la sonda	Close the probe
+Sonda	Probe
+Es la sonda CMSIS-DAP del Programador, y la computadora la tiene. Se cierra en el Programador.	It is the Programmer's CMSIS-DAP probe, and the computer has it. Close it in the Programmer.
+Es la sonda CMSIS-DAP del Programador, esperando a la computadora. Se cierra en el Programador.	It is the Programmer's CMSIS-DAP probe, waiting for the computer. Close it in the Programmer.
+Es la sonda del Programador: cerrala ahí	It is the Programmer's probe: close it there
+El depurador pidió SWCLK a %u kHz	The debugger asked for SWCLK at %u kHz
+El depurador se conectó (SWD)	The debugger connected (SWD)
+El depurador se desconectó	The debugger disconnected
+El USB cambió de modo (Ajustes): la sonda se cerró	The USB changed mode (Settings): the probe closed
+La computadora tomó la sonda	The computer took the probe
+La computadora soltó la sonda	The computer let go of the probe
+El USB está en modo Disco: expulsá la tarjeta en la computadora primero	The USB is in Disk mode: eject the card on the computer first
+El conector OTG es el host de un pendrive: cambiá sus pines en Ajustes → USB	The OTG connector is a USB stick's host: change its pins in Settings → USB
+El USB no pasó a modo sonda	The USB didn't switch to probe mode
+Sonda CMSIS-DAP lista en el conector OTG	CMSIS-DAP probe ready on the OTG connector

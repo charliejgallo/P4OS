@@ -11,6 +11,7 @@ devices plugged into the board, is a switch of its own, at the end):
 | Off | nothing | on the board |
 | Keyboard and mouse | a HID keyboard, mouse and media keys, a gamepad, a MIDI keyboard and a network (the Macro pad, `docs/MACROPAD.md`) | on the board |
 | Disk | the microSD as a USB drive | the computer's, until it ejects it |
+| Probe | a CMSIS-DAP v2 debug probe (the Programador's, not in this list: see below) | on the board |
 
 The mode is remembered across restarts (pref `usb_mode`,
 `aos_hal_usb_restore()` once the boot has read the card): after an OTA the
@@ -145,6 +146,40 @@ internal RAM audit, `docs/MEMORY.md`).
 - **VBUS is not monitored,** so pulling the cable without ejecting looks to
   the board like a suspended bus, not an unplug: the card stays on the USB
   side until a mode is chosen in Settings.
+
+## Probe mode
+
+The Programador's "Sonda para la computadora" (SWD) puts the port in a
+fourth mode while it runs: a CMSIS-DAP v2 debug probe on the SWD pins of a
+header port, for OpenOCD, pyOCD and probe-rs on the computer
+(`docs/plan/PROGRAMADOR.md`, F5). It is not in Settings' list: Settings
+shows it and sends you to the Programador to close it, and closing it puts
+the port back in the mode it had. It is not remembered across a restart.
+It does not open while the port is in disk mode or holds the pendrive host.
+
+What the computer sees: `303A:4020`, "P4OS <name> CMSIS-DAP", one vendor
+interface named "P4OS CMSIS-DAP" with a bulk OUT and a bulk IN (512 bytes
+at High Speed, 64 at Full). The debuggers find it by that name, with no
+driver on macOS and Linux (on Linux, a udev rule for the device as for any
+probe, if the user is not root). The device is USB 2.1 with a BOS carrying
+Microsoft's OS 2.0 descriptors, so Windows binds WinUSB to it with CMSIS-DAP
+v2's interface GUID and no `.inf`.
+
+TinyUSB's vendor class runs without its FIFOs
+(`CONFIG_TINYUSB_VENDOR_RX_BUFSIZE=0`, `..._TX_BUFSIZE=0`): each command
+arrives whole in `tud_vendor_rx_cb`, as the computer sent it, and goes to a
+queue of four in PSRAM that the Programador's job reads
+(`aos_hal_usb_probe_read`); a response is one transfer. The probe says it
+takes four commands before an answer, so the queue never overflows; a lost
+one would be logged when the probe closes.
+
+```bash
+openocd -f interface/cmsis-dap.cfg -c "transport select swd" -f target/rp2040.cfg
+```
+
+```bash
+pyocd commander -t rp2040
+```
 
 ## The USB host
 

@@ -133,6 +133,21 @@ int aos_io_swd_xfer(aos_io_swd_t *s, uint8_t req, uint32_t *data, bool no_ack)
     return s && data ? aos_io_be_swd_xfer(s, req, data, no_ack) : 7;
 }
 
+bool aos_io_swd_seq_in(aos_io_swd_t *s, uint8_t *bits, int n)
+{
+    if (!s || !bits || n <= 0) return false;
+    memset(bits, 0, (size_t)(n + 7) / 8);
+    return aos_io_be_swd_seq_in(s, bits, n);
+}
+
+bool aos_io_swd_clock(aos_io_swd_t *s, uint32_t khz)
+{
+    if (!s || !khz) return false;
+    if (khz == s->khz) return true;
+    s->khz = khz;
+    return aos_io_be_swd_clock(s);
+}
+
 bool aos_io_swd_nrst(aos_io_swd_t *s, bool assert)
 {
     return s && s->nrst >= 0 && aos_io_be_swd_nrst(s, assert);

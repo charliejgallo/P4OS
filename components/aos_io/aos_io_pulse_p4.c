@@ -324,6 +324,22 @@ static uint32_t swd_time(aos_io_swd_t *s, uint32_t dly)
     return (uint32_t)t;
 }
 
+/* The delay for s->khz: t(d) = 512 clocks x (2 waits of d turns + the
+ * writes), timed at two points */
+static void swd_calibrate(aos_io_swd_t *s, swd_p4_t *b)
+{
+    const uint32_t D1 = 4, D2 = 132;
+    uint32_t t1 = swd_time(s, D1), t2 = swd_time(s, D2);
+    float turn = t2 > t1 ? (float)(t2 - t1) / (512.0f * 2 * (D2 - D1)) : 0.01f;   /* us a turn */
+    float fixed = (float)t1 / 512.0f - 2 * D1 * turn;                           /* us a clock, d = 0 */
+    float want = 1000.0f / (float)s->khz;                                        /* us a clock */
+    float d = (want - fixed) / (2 * turn);
+    b->dly = d < 0 ? 0 : (uint32_t)(d + 0.5f);
+    float got = fixed + 2 * (float)b->dly * turn;
+    aos_hal_log("io", "swd: %u kHz asked, %u kHz got (delay %u; at most %u kHz)", (unsigned)s->khz,
+                (unsigned)(got > 0 ? 1000.0f / got : 0), (unsigned)b->dly, (unsigned)(fixed > 0 ? 1000.0f / fixed : 0));
+}
+
 bool aos_io_be_swd_open(aos_io_swd_t *s)
 {
     swd_p4_t *b = calloc(1, sizeof *b);
@@ -342,18 +358,15 @@ bool aos_io_be_swd_open(aos_io_swd_t *s)
         gpio_config(&c);
         gpio_set_level(s->nrst, 1);
     }
-    /* t(d) = 512 clocks x (2 waits of d turns + the writes): two points */
-    const uint32_t D1 = 4, D2 = 132;
-    uint32_t t1 = swd_time(s, D1), t2 = swd_time(s, D2);
-    float turn = t2 > t1 ? (float)(t2 - t1) / (512.0f * 2 * (D2 - D1)) : 0.01f;   /* us a turn */
-    float fixed = (float)t1 / 512.0f - 2 * D1 * turn;                           /* us a clock, d = 0 */
-    float want = 1000.0f / (float)s->khz;                                        /* us a clock */
-    float d = (want - fixed) / (2 * turn);
-    b->dly = d < 0 ? 0 : (uint32_t)(d + 0.5f);
-    float got = fixed + 2 * (float)b->dly * turn;
-    aos_hal_log("io", "swd: %u kHz asked, %u kHz got (delay %u; at most %u kHz)", (unsigned)s->khz,
-                (unsigned)(got > 0 ? 1000.0f / got : 0), (unsigned)b->dly, (unsigned)(fixed > 0 ? 1000.0f / fixed : 0));
+    swd_calibrate(s, b);
     s->be = b;
+    return true;
+}
+
+bool aos_io_be_swd_clock(aos_io_swd_t *s)
+{
+    /* idle clocks with SWDIO low are what the line does between packets */
+    swd_calibrate(s, s->be);
     return true;
 }
 
@@ -363,6 +376,16 @@ bool aos_io_be_swd_seq(aos_io_swd_t *s, const uint8_t *bits, int n)
     gpio_ll_output_enable(&GPIO, (uint32_t)s->dio);
     portENTER_CRITICAL(&s_mux);
     for (int i = 0; i < n; i++) swd_out(s, dly, bits[i >> 3] >> (i & 7) & 1);
+    portEXIT_CRITICAL(&s_mux);
+    return true;
+}
+
+bool aos_io_be_swd_seq_in(aos_io_swd_t *s, uint8_t *bits, int n)
+{
+    uint32_t dly = ((swd_p4_t *)s->be)->dly;
+    gpio_ll_output_disable(&GPIO, (uint32_t)s->dio);
+    portENTER_CRITICAL(&s_mux);
+    for (int i = 0; i < n; i++) bits[i >> 3] |= (uint8_t)(swd_in(s, dly) << (i & 7));
     portEXIT_CRITICAL(&s_mux);
     return true;
 }

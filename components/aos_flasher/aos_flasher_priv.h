@@ -63,8 +63,13 @@ bool fl_esp_run(void);
 bool fl_avr_run(void);
 bool fl_swd_run(void);
 bool fl_stm32_run(void);
-/* Not a family: the port over TCP (aos_flasher_bridge.c) */
+/* Not a family: the port over TCP (aos_flasher_bridge.c), and the board as
+ * the computer's SWD probe (aos_flasher_dap.c) */
 bool fl_bridge_run(void);
+bool fl_probe_run(void);
+/* aos_flasher_swd.c: J.port's pins as an SWD wire (TX SWCLK, RX SWDIO, EN
+ * NRST), for the SWD family and the probe; NULL after fl_fail */
+aos_io_swd_t *fl_swd_open(uint32_t khz);
 
 /* The console's queue to the target (aos_flasher_console_send): up to max
  * bytes out of it. */
