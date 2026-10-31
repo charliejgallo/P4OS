@@ -360,3 +360,6 @@ archivo	Datei
 
 #: apps/rf/main/rf_src_rtl.c:40
 La RTL-SDR no respondió al abrirla	Der RTL-SDR antwortete beim Öffnen nicht
+
+#: apps/rf/main/rf.c:1390
+Si el conector OTG de la placa está enchufado a una computadora, sacalo: son los mismos cables que los pines 25/27 y la computadora se queda con la RTL-SDR.	Wenn der OTG-Anschluss der Platine an einem Computer steckt, abziehen: er teilt sich die Leitungen mit den Pins 25/27, und der Computer übernimmt den RTL-SDR.
