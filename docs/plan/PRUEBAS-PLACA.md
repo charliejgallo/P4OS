@@ -584,8 +584,13 @@ Que necesitan la mano del usuario o equipos:
     SHA-256, 36,7 s (cable 35,5 s, tarjeta 1,1 s, 4,6 millones de WAIT:
     la flash de la Pico de pruebas, en serie lenta, es el límite). Por
     la sonda, 64 KB de su RAM salen en 0,32 s y de su flash en 1,2 s.
-  - [ ] Volcar una Pico con un firmware del SDK (flash quad a 125 MHz),
-        donde el límite tendría que pasar a ser el cable.
+  - [x] Volcar una Pico que corre como un firmware del SDK (2026-10-31):
+        `rapido.uf2` de `tools/swd_test/blink_pico` (cristal y PLL a
+        125 MHz, flash quad a 62,5 MHz) grabado por SWD en 0,2 s. Los
+        2 MB salieron en 9,5 s (cable 8,2 s, tarjeta 1,2 s, 0 WAIT): el
+        límite es el cable, y la suma del DMA no se nota. Son byte a byte
+        lo grabado (el resto, lo de `blink256.uf2`), y la consola RTT
+        mostró el blink corriendo a medio segundo por vuelta.
 - [ ] La sonda con OpenOCD (`-f interface/cmsis-dap.cfg -f
       target/rp2040.cfg`) y gdb con un breakpoint en el blink; `program`
       de OpenOCD con su algoritmo; probe-rs; y abrirla desde la fila de

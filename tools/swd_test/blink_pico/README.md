@@ -10,6 +10,12 @@ On a Pico W the LED is on the radio chip and stays off; RTT works the same.
 flashes and a second off, and "doble N" through RTT. Written after the
 other one, the eye sees whether the chip really runs what was written.
 
+`build/rapido.uf2` blinks like the first one, but runs as a pico-sdk
+program does: the crystal and the system PLL at 125 MHz, the flash read in
+quad mode at 62.5 MHz, the half second counted by the microsecond timer.
+The other two leave the flash so slow that a dump by SWD waits on it; with
+this one only the wire is left to wait on.
+
     tools/swd_test/blink_pico/build.sh
 
 It builds with the Mac's own clang (it compiles for a Cortex-M0+; there is
@@ -18,9 +24,12 @@ pico-sdk, no ARM toolchain:
 
 - `boot2.S`: the second stage the boot ROM checks and runs, pico-sdk's
   `boot2_generic_03h` (XIP with the plain 03h read), then the vector table.
+  Built with `-DQUAD` (for `rapido`) it is `boot2_w25q080` instead: the QE
+  bit of a Pico's Winbond flash, then the quad EBh read in continuous mode.
 - `blink.c`: registers by address, the RTT block built by hand at
   0x20001000, nothing in `.data`/`.bss`, no division; it runs on the ring
-  oscillator the ROM leaves (~6 MHz), so the half second is a loop.
+  oscillator the ROM leaves (~6 MHz), so the half second is a loop. With
+  `-DFAST` it first sets the clocks as pico-sdk's `clocks_init` does.
 - `link.py`: boot2 with its CRC-32 (MPEG-2), the vector table at 0x100,
   the code at 0x140; `R_ARM_ABS32` and the Thumb calls, nothing else.
 

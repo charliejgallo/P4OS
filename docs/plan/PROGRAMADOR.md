@@ -162,8 +162,9 @@ distinto de lo planeado abajo:
   del cable, el de la tarjeta y cuántos WAIT hizo el chip. En la Pico de
   pruebas bajó de 44,8 a 36,7 s los 2 MB: su flash es el límite (el blink
   de prueba la deja en serie lenta con el oscilador interno, ~2 WAIT por
-  palabra), y la suma del DMA lee esa misma flash; con un firmware del SDK
-  (quad a 125 MHz) el límite es el cable y la suma casi no cuesta.
+  palabra), y la suma del DMA lee esa misma flash. Con la Pico corriendo
+  como un firmware del SDK (`rapido.uf2`: quad a 125 MHz) los 2 MB salen
+  en 9,5 s, sin un solo WAIT: el límite es el cable y la suma no se nota.
 - **RP2350** (agregada el 2026-10-29, sólo en el simulador: el usuario no
   tiene una): DP ADIv6 (DPIDR versión 3), el MEM-AP del núcleo 0 en la
   dirección 0x2000 con sus registros en 0xD00; la tabla de la ROM con un

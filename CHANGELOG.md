@@ -11,7 +11,9 @@
   RP2040, RP2350), byte for byte. On an RP each piece is read once and
   checked against a sum its own DMA makes of the same flash, instead of
   twice; on the board, a Pico's 2 MB came out the same, and the log says
-  how the time went (the wire, the card, the chip's waits).
+  how the time went (the wire, the card, the chip's waits). With the Pico
+  running as a pico-sdk program does (quad flash at 125 MHz), its 2 MB
+  take 9.5 s; `tools/swd_test/blink_pico` has such a blink, `rapido.uf2`.
 - **SWD four to nine times faster.** The wire runs on the P4's dedicated
   GPIO: the same two pins, moved by CPU instructions and timed in cycles,
   instead of register writes over the bus. The Programador starts at
