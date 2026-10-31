@@ -300,7 +300,8 @@ header with who holds each pin.
   same for an AVR Arduino through the bootloader it already has (Uno,
   Nano, Pro Mini, Mega, Leonardo, Micro), from the `.hex` the Arduino IDE
   exports. And by SWD, on the same pins: an nRF52, an RP2040, an RP2350
-  or an STM32F0/F1 written and verified, and the RTT console of the firmware
+  or an STM32 (F0, F1, F2, F4 like the Black Pill, G0, G4, L4) written and
+  verified, its read protection taken off by erasing it, and the RTT console of the firmware
   running on it. Or an STM32 through its own serial bootloader, with
   BOOT0 and NRST on the same lines an ESP32 uses. And it lends its port to
   the computer: esptool over `rfc2217://p4os.local:4000`, avrdude over

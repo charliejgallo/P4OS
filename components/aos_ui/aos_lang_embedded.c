@@ -2955,6 +2955,11 @@ static const char blob_en__sistema_lang[] =
     "Sonda en %s: SWCLK al TX, SWDIO al RX\tProbe on %s: SWCLK to TX, SWDIO to RX\n"
     "La placa es una sonda de depuración CMSIS-DAP: OpenOCD, pyOCD y probe-rs depuran el chip conectado por SWD a %s (SWCLK al TX, SWDIO al RX, NRST al EN). Si el host de pendrives usa el conector OTG, se lo presta mientras dure.\tThe board is a CMSIS-DAP debug probe: OpenOCD, pyOCD and probe-rs debug the chip wired by SWD to %s (SWCLK to TX, SWDIO to RX, NRST to EN). If the USB stick host uses the OTG connector, it lends it for as long as this lasts.\n"
     "El host de pendrives le presta el conector OTG a la sonda\tThe USB stick host lends the OTG connector to the probe\n"
+    "Dos bancos de %u KB\tTwo banks of %u KB\n"
+    "%u sectores, %u KB, desde 0x%08X\t%u sectors, %u KB, from 0x%08X\n"
+    "Quitando la protección (RDP): el chip borra toda su flash\tRemoving the protection (RDP): the chip erases all of its flash\n"
+    "Protección quitada y flash borrada en %u,%u s\tProtection removed and flash erased in %u.%u s\n"
+    "El chip se reinició para cargar sus option bytes: tocá Detectar\tThe chip restarted to load its option bytes: tap Detect\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5902,6 +5907,11 @@ static const char blob_de__sistema_lang[] =
     "Sonda en %s: SWCLK al TX, SWDIO al RX\tSonde an %s: SWCLK an TX, SWDIO an RX\n"
     "La placa es una sonda de depuración CMSIS-DAP: OpenOCD, pyOCD y probe-rs depuran el chip conectado por SWD a %s (SWCLK al TX, SWDIO al RX, NRST al EN). Si el host de pendrives usa el conector OTG, se lo presta mientras dure.\tDie Platine ist eine CMSIS-DAP-Debugsonde: OpenOCD, pyOCD und probe-rs debuggen den Chip, der per SWD an %s hängt (SWCLK an TX, SWDIO an RX, NRST an EN). Nutzt der USB-Stick-Host den OTG-Anschluss, leiht er ihn so lange aus.\n"
     "El host de pendrives le presta el conector OTG a la sonda\tDer USB-Stick-Host leiht der Sonde den OTG-Anschluss\n"
+    "Dos bancos de %u KB\tZwei Bänke zu %u KB\n"
+    "%u sectores, %u KB, desde 0x%08X\t%u Sektoren, %u KB, ab 0x%08X\n"
+    "Quitando la protección (RDP): el chip borra toda su flash\tSchutz (RDP) wird entfernt: der Chip löscht seinen ganzen Flash\n"
+    "Protección quitada y flash borrada en %u,%u s\tSchutz entfernt und Flash gelöscht in %u,%u s\n"
+    "El chip se reinició para cargar sus option bytes: tocá Detectar\tDer Chip hat neu gestartet, um seine Option Bytes zu laden: tippe auf Erkennen\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -5909,7 +5919,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2940, 0, files_en, 1 },
-    { "de", "Deutsch", 2940, 0, files_de, 1 },
+    { "en", "English", 2945, 0, files_en, 1 },
+    { "de", "Deutsch", 2945, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

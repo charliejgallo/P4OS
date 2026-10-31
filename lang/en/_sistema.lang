@@ -9458,3 +9458,9 @@ El Programador está trabajando: esperá a que termine	The Programmer is busy: w
 Sonda en %s: SWCLK al TX, SWDIO al RX	Probe on %s: SWCLK to TX, SWDIO to RX
 La placa es una sonda de depuración CMSIS-DAP: OpenOCD, pyOCD y probe-rs depuran el chip conectado por SWD a %s (SWCLK al TX, SWDIO al RX, NRST al EN). Si el host de pendrives usa el conector OTG, se lo presta mientras dure.	The board is a CMSIS-DAP debug probe: OpenOCD, pyOCD and probe-rs debug the chip wired by SWD to %s (SWCLK to TX, SWDIO to RX, NRST to EN). If the USB stick host uses the OTG connector, it lends it for as long as this lasts.
 El host de pendrives le presta el conector OTG a la sonda	The USB stick host lends the OTG connector to the probe
+#: components/aos_flasher (SWD: STM32F4, G0, G4, L4 y RDP)
+Dos bancos de %u KB	Two banks of %u KB
+%u sectores, %u KB, desde 0x%08X	%u sectors, %u KB, from 0x%08X
+Quitando la protección (RDP): el chip borra toda su flash	Removing the protection (RDP): the chip erases all of its flash
+Protección quitada y flash borrada en %u,%u s	Protection removed and flash erased in %u.%u s
+El chip se reinició para cargar sus option bytes: tocá Detectar	The chip restarted to load its option bytes: tap Detect

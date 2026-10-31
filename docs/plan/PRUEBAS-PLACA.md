@@ -570,6 +570,12 @@ Que necesitan la mano del usuario o equipos:
       Blue Pill o Black Pill en `uart.b` (TX al PA10, RX al PA9, EN al
       NRST, BOOT al BOOT0), Detectar, grabar, leer y borrar. Cuando el
       usuario compre una.
+- [ ] La misma Black Pill (o una Blue Pill) por SWD (2026-10-30, sólo en
+      el simulador: F411, G071, L476): SWCLK y SWDIO del conector de 4
+      pines de la placa al pin 12 y al 14 de `uart.b`, GND, y NRST al EN si
+      se quiere el reset. Detectar (STM32F411, 512 KB, sin página: sectores),
+      grabar un `.bin` o `.hex` que cruce el sector 4 (64 KB), verificar,
+      borrar todo. Y si aparece una con RDP, que "Borrar" la deje limpia.
 - [ ] Programador con Arduino (F3, 2026-10-29, sin instalar; probado sólo
       en el simulador contra `tools/fake_avr_boot.py`). En la placa:
   - Un Uno o un Nano por USB (`usb0`, reset por DTR): Detectar (firma y

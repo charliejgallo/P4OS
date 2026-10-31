@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **More STM32s by SWD:** the F2/F4 (the Black Pill's F401 and F411, the
+  F405/407, F446...) through their sector-based flash controller, and the
+  G0, G4 and L4 through the one they share (2 KB pages, double words, a
+  second bank where they have one). And "Borrar" now takes an STM32's read
+  protection off by the chip's own means, which erases all of its flash,
+  as it already did for an nRF52. In the simulator, against an emulated
+  F411, G071 and L476 (and the F103 again), comparing the whole flash after
+  each write; no STM32 on the bench yet.
 - **The board as the computer's debug probe.** "Sonda para la computadora"
   (Programador, SWD) turns the OTG connector into a CMSIS-DAP v2 probe on
   the port's SWD pins until it is closed: OpenOCD, pyOCD and probe-rs use

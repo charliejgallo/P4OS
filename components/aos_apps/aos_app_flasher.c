@@ -1,7 +1,8 @@
 /*
  * P4OS - Programador: flashes an ESP32-family board or an AVR Arduino through
  * the header or a USB port, or an Arm Cortex-M by SWD on the header's pins
- * (nRF52, RP2040, STM32F0/F1), whose RTT console it also opens.
+ * (nRF52, RP2040, RP2350, STM32F0/F1/F2/F4/G0/G4/L4), whose RTT console it
+ * also opens.
  *
  * The work is the aos_flasher service's (components/aos_flasher): it owns the
  * port and the thread, so a flash started here goes on with the app closed,

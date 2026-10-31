@@ -36,6 +36,12 @@
  *   STM32F0/F1  the FLASH controller: unlocked with its keys, PER+STRT for
  *               a page, PG and a halfword at a time, BSY and the error bits
  *               after each.
+ *   STM32F2/F4  their own controller at 0x40023C00: sectors of 16, 64 and
+ *               128 KB (SER and SNB; a 2 MB F42x's second bank too), a
+ *               word at a time (PSIZE x32).
+ *   STM32G0/G4/L4  the controller they share at 0x40022000: 2 KB pages
+ *               (4 KB on a single-bank G47x) numbered within their bank,
+ *               BKER for the second one, a double word at a time.
  *   RP2040      the flash is outside the chip: the boot ROM's own functions
  *               do it (connect, exit XIP, erase, program from a buffer in
  *               RAM, flush, enter XIP), called on the halted core through
@@ -57,8 +63,10 @@
  *
  * Read protection is said and respected: an nRF52 with APPROTECT, or an
  * STM32 with RDP, is not written; the only thing offered is the chip's own
- * erase-all (the nRF52's CTRL-AP ERASEALL), which takes the protected
- * firmware away with the protection.
+ * erase-all, which takes the protected firmware away with the protection:
+ * the nRF52's CTRL-AP ERASEALL, or an STM32's RDP put back to level 0 in its
+ * option bytes (an F1's erased and RDP's key written, an F4's OPTCR, a
+ * G0/G4/L4's OPTR and OBL_LAUNCH, which restarts the chip).
  *
  * The RTT console: the "SEGGER RTT" control block is looked for in the
  * target's RAM while it runs (never halted); then its first up buffer is
@@ -108,6 +116,9 @@ typedef struct {
     bool (*program)(swd_t *s, uint32_t addr, const uint8_t *d, uint32_t n); /* within a sector, n % 4 == 0 */
     bool (*erase_all)(swd_t *s);
     void (*end)(swd_t *s);
+    /* read protection off, which erases everything (NULL: not here);
+     * *reset: the chip restarted by itself and the link is gone */
+    bool (*unprotect)(swd_t *s, bool *reset);
 } flash_ops_t;
 
 struct swd {
@@ -117,6 +128,9 @@ struct swd {
     uint32_t cpuid;
     char chip[24], core[16];
     uint32_t flash_base, flash_size, sector, ram_base, ram_size;
+    bool f4_sectors;                /* STM32F2/F4: 16/64/128 KB sectors, not even pages */
+    uint32_t bank2;                 /* a second flash bank's offset (STM32), 0 none */
+    uint32_t bker;                  /* its bit in FLASH_CR (G0/G4/L4) */
     const flash_ops_t *ops;
     bool prot;
     bool nrf;                       /* has the nRF52's CTRL-AP */
@@ -460,7 +474,7 @@ static bool nrf_erase_all(swd_t *s)
 
 static void nrf_end(swd_t *s) { (void)s; }
 
-static const flash_ops_t NRF52 = { nrf_begin, nrf_erase, nrf_program, nrf_erase_all, nrf_end };
+static const flash_ops_t NRF52 = { nrf_begin, nrf_erase, nrf_program, nrf_erase_all, nrf_end, NULL };
 
 static bool nrf_identify(swd_t *s)
 {
@@ -553,7 +567,219 @@ static bool stm_erase_all(swd_t *s)
 
 static void stm_end(swd_t *s) { wr32(s, FL_CR, 0x80); }
 
-static const flash_ops_t STM32F1 = { stm_begin, stm_erase, stm_program, stm_erase_all, stm_end };
+/* RDP off: the option bytes erased (which reads as protected) and the
+ * key 0x5AA5 written to RDP, which erases the whole flash; the option
+ * bytes load at the next reset */
+#define FL_OPTKEYR 0x40022008u
+static bool stm_unprotect(swd_t *s, bool *reset)
+{
+    (void)reset;
+    uint32_t cr = 0;
+    if (!stm_begin(s) || !wr32(s, FL_OPTKEYR, 0x45670123) || !wr32(s, FL_OPTKEYR, 0xCDEF89AB) ||
+        !rd32(s, FL_CR, &cr) || !(cr & 0x200))                            /* OPTWRE */
+        return false;
+    bool ok = wr32(s, FL_CR, 0x220) && wr32(s, FL_CR, 0x260) && stm_wait(s, 1000) &&        /* OPTER, STRT */
+              wr32(s, FL_CR, 0x210) && wr16(s, 0x1FFFF800, 0x5AA5) && stm_wait(s, 30000);   /* OPTPG, RDP */
+    wr32(s, FL_CR, 0x80);
+    return ok;
+}
+
+static const flash_ops_t STM32F1 = { stm_begin, stm_erase, stm_program, stm_erase_all, stm_end, stm_unprotect };
+
+/* -------------------------------------------------------------------------- */
+/* STM32F2 / F4: sectors                                                       */
+/* -------------------------------------------------------------------------- */
+
+/* The controller at 0x40023C00. Each bank is sectors of 16, 16, 16, 16,
+ * 64 and then 128 KB; a 2 MB F42x/43x has a second bank of the same from
+ * 1 MB, its sectors 12-23 (SNB 0x10-0x1B). Written 32 bits at a time
+ * (PSIZE x32: a 2.7-3.6 V supply, any board's 3.3 V). */
+#define F4_KEYR    0x40023C04u
+#define F4_OPTKEYR 0x40023C08u
+#define F4_SR      0x40023C0Cu
+#define F4_CR      0x40023C10u
+#define F4_OPTCR   0x40023C14u
+#define F4_PSIZE32 (2u << 8)
+#define F4_STRT    (1u << 16)
+#define F4_LOCK    (1u << 31)
+
+/* The sector at offset o of the flash: its length, its SNB */
+static uint32_t f4_unit(const swd_t *s, uint32_t o, uint32_t *snb)
+{
+    uint32_t bank = s->bank2 && o >= s->bank2 ? s->bank2 : 0, r = o - bank, n, len;
+    if (r < 0x10000) { n = r >> 14; len = 0x4000; }
+    else if (r < 0x20000) { n = 4; len = 0x10000; }
+    else { n = 5 + ((r - 0x20000) >> 17); len = 0x20000; }
+    if (snb) *snb = bank ? 0x10 | n : n;
+    return len;
+}
+
+static bool f4_wait(swd_t *s, int ms)
+{
+    for (int i = 0; i <= ms; i++) {
+        uint32_t sr;
+        if (!rd32(s, F4_SR, &sr)) return false;
+        if (!(sr & (1u << 16))) {                                          /* BSY */
+            if (sr & 0x1F2) {                                              /* OPERR, WRPERR, PGAERR, PGPERR, PGSERR, RDERR */
+                fl_logf(L_WARN, "FLASH_SR %08X", (unsigned)sr);
+                wr32(s, F4_SR, 0x1F3);
+                return false;
+            }
+            return true;
+        }
+        if (ms) aos_hal_sleep_ms(1);
+    }
+    return false;
+}
+
+static bool f4_begin(swd_t *s)
+{
+    uint32_t cr = F4_LOCK;
+    if (!halt(s)) return false;
+    wr32(s, F4_SR, 0x1F3);
+    if (!wr32(s, F4_KEYR, 0x45670123) || !wr32(s, F4_KEYR, 0xCDEF89AB) || !rd32(s, F4_CR, &cr)) return false;
+    return !(cr & F4_LOCK);
+}
+
+static bool f4_erase(swd_t *s, uint32_t addr)
+{
+    uint32_t snb = 0;
+    f4_unit(s, addr - s->flash_base, &snb);
+    uint32_t cr = 2u | snb << 3 | F4_PSIZE32;                             /* SER */
+    bool ok = wr32(s, F4_CR, cr) && wr32(s, F4_CR, cr | F4_STRT) && f4_wait(s, 4000);   /* a 128 KB sector: up to 2 s */
+    return wr32(s, F4_CR, 0) && ok;
+}
+
+static bool f4_program(swd_t *s, uint32_t addr, const uint8_t *d, uint32_t n)
+{
+    bool ok = wr32(s, F4_CR, 1u | F4_PSIZE32);                            /* PG */
+    for (uint32_t i = 0; ok && i < n && !fl_cancel; i += 4)
+        ok = wr32(s, addr + i, (uint32_t)d[i] | d[i + 1] << 8 | d[i + 2] << 16 | (uint32_t)d[i + 3] << 24) && f4_wait(s, 5);
+    return wr32(s, F4_CR, 0) && ok && !fl_cancel;
+}
+
+static bool f4_erase_all(swd_t *s)
+{
+    if (!f4_begin(s)) return false;
+    uint32_t cr = 4u | (s->bank2 ? 1u << 15 : 0) | F4_PSIZE32;            /* MER (and MER1, the second bank) */
+    bool ok = wr32(s, F4_CR, cr) && wr32(s, F4_CR, cr | F4_STRT) && f4_wait(s, 40000);
+    wr32(s, F4_CR, F4_LOCK);
+    return ok;
+}
+
+static void f4_end(swd_t *s) { wr32(s, F4_CR, F4_LOCK); }
+
+/* RDP back to level 0 (0xAA) in OPTCR, the live option register: the
+ * chip erases all of its flash while it takes it, seconds */
+static bool f4_unprotect(swd_t *s, bool *reset)
+{
+    (void)reset;
+    uint32_t opt = 0;
+    if (!f4_begin(s) || !wr32(s, F4_OPTKEYR, 0x08192A3B) || !wr32(s, F4_OPTKEYR, 0x4C5D6E7F) ||
+        !rd32(s, F4_OPTCR, &opt) || (opt & 1))                             /* OPTLOCK still set */
+        return false;
+    opt = (opt & ~0xFF03u) | 0xAA00u;
+    bool ok = wr32(s, F4_OPTCR, opt) && wr32(s, F4_OPTCR, opt | 2) && f4_wait(s, 40000);   /* OPTSTRT */
+    wr32(s, F4_OPTCR, opt | 1);
+    f4_end(s);
+    return ok && rd32(s, F4_OPTCR, &opt) && (opt >> 8 & 0xFF) == 0xAA;
+}
+
+static const flash_ops_t STM32F4 = { f4_begin, f4_erase, f4_program, f4_erase_all, f4_end, f4_unprotect };
+
+/* -------------------------------------------------------------------------- */
+/* STM32G0 / G4 / L4: pages, 64 bits at a time                                 */
+/* -------------------------------------------------------------------------- */
+
+/* One controller for the three, at 0x40022000: pages of 2 KB (4 KB on a
+ * G47x in single-bank mode), numbered within their bank; a second bank
+ * (L47x/L49x, G0B1, a G47x in dual-bank mode) is erased with BKER. Each
+ * write is a double word: two words at an 8-byte boundary, the second one
+ * starts it. */
+#define L4_KEYR    0x40022008u
+#define L4_OPTKEYR 0x4002200Cu
+#define L4_SR      0x40022010u
+#define L4_CR      0x40022014u
+#define L4_OPTR    0x40022020u
+#define L4_STRT    (1u << 16)
+#define L4_LOCK    (1u << 31)
+
+static bool l4_wait(swd_t *s, int ms)
+{
+    for (int i = 0; i <= ms; i++) {
+        uint32_t sr;
+        if (!rd32(s, L4_SR, &sr)) return false;
+        if (!(sr & (1u << 16 | 1u << 18))) {                              /* BSY, and the G0's CFGBSY */
+            if (sr & 0xC3FA) {                                            /* OPERR, PROGERR, WRPERR, PGAERR, SIZERR, PGSERR, MISSERR, FASTERR, RDERR, OPTVERR */
+                fl_logf(L_WARN, "FLASH_SR %08X", (unsigned)sr);
+                wr32(s, L4_SR, 0xC3FB);
+                return false;
+            }
+            return true;
+        }
+        if (ms) aos_hal_sleep_ms(1);
+    }
+    return false;
+}
+
+static bool l4_begin(swd_t *s)
+{
+    uint32_t cr = L4_LOCK;
+    if (!halt(s)) return false;
+    wr32(s, L4_SR, 0xC3FB);
+    if (!wr32(s, L4_KEYR, 0x45670123) || !wr32(s, L4_KEYR, 0xCDEF89AB) || !rd32(s, L4_CR, &cr)) return false;
+    return !(cr & L4_LOCK);
+}
+
+static bool l4_erase(swd_t *s, uint32_t addr)
+{
+    uint32_t o = addr - s->flash_base;
+    bool b2 = s->bank2 && o >= s->bank2;
+    uint32_t page = (o - (b2 ? s->bank2 : 0)) / s->sector;
+    uint32_t cr = 2u | page << 3 | (b2 ? s->bker : 0);                    /* PER, PNB, BKER */
+    bool ok = wr32(s, L4_CR, cr) && wr32(s, L4_CR, cr | L4_STRT) && l4_wait(s, 100);
+    return wr32(s, L4_CR, 0) && ok;
+}
+
+static bool l4_program(swd_t *s, uint32_t addr, const uint8_t *d, uint32_t n)
+{
+    n = (n + 7) & ~7u;                  /* whole double words: d is a whole page, 0xFF after the image */
+    bool ok = wr32(s, L4_CR, 1);                                          /* PG */
+    for (uint32_t i = 0; ok && i < n && !fl_cancel; i += 8)
+        ok = wr32(s, addr + i, (uint32_t)d[i] | d[i + 1] << 8 | d[i + 2] << 16 | (uint32_t)d[i + 3] << 24) &&
+             wr32(s, addr + i + 4, (uint32_t)d[i + 4] | d[i + 5] << 8 | d[i + 6] << 16 | (uint32_t)d[i + 7] << 24) &&
+             l4_wait(s, 5);
+    return wr32(s, L4_CR, 0) && ok && !fl_cancel;
+}
+
+static bool l4_erase_all(swd_t *s)
+{
+    if (!l4_begin(s)) return false;
+    uint32_t cr = 4u | (s->bank2 ? 1u << 15 : 0);                         /* MER1, MER2 */
+    bool ok = wr32(s, L4_CR, cr) && wr32(s, L4_CR, cr | L4_STRT) && l4_wait(s, 30000);
+    wr32(s, L4_CR, L4_LOCK);
+    return ok;
+}
+
+static void l4_end(swd_t *s) { wr32(s, L4_CR, L4_LOCK); }
+
+/* RDP back to 0xAA in OPTR: OPTSTRT erases all of the flash and writes the
+ * option bytes, which load with OBL_LAUNCH - a reset of the chip, so the
+ * link goes with it */
+static bool l4_unprotect(swd_t *s, bool *reset)
+{
+    uint32_t cr = 0, optr = 0;
+    if (!l4_begin(s) || !wr32(s, L4_OPTKEYR, 0x08192A3B) || !wr32(s, L4_OPTKEYR, 0x4C5D6E7F) ||
+        !rd32(s, L4_CR, &cr) || (cr & 1u << 30) || !rd32(s, L4_OPTR, &optr))   /* OPTLOCK still set */
+        return false;
+    bool ok = wr32(s, L4_OPTR, (optr & ~0xFFu) | 0xAA) && wr32(s, L4_CR, 1u << 17) && l4_wait(s, 40000);   /* OPTSTRT */
+    if (!ok) { l4_end(s); return false; }
+    wr32(s, L4_CR, 1u << 27);                                             /* OBL_LAUNCH: the chip restarts */
+    *reset = true;
+    return true;
+}
+
+static const flash_ops_t STM32L4 = { l4_begin, l4_erase, l4_program, l4_erase_all, l4_end, l4_unprotect };
 
 static const struct { uint16_t dev; const char *name; uint16_t page; uint16_t ram_kb; bool f0; } STM_DEVS[] = {
     { 0x412, "STM32F1 low", 1024, 10, false },  { 0x410, "STM32F1 medium", 1024, 20, false },
@@ -564,13 +790,41 @@ static const struct { uint16_t dev; const char *name; uint16_t page; uint16_t ra
     { 0x442, "STM32F09x", 2048, 32, true },
 };
 
+/* The F2/F4s: their flash size at 0x1FFF7A22, UID at 0x1FFF7A10 */
+static const struct { uint16_t dev; const char *name; uint16_t ram_kb; } STM_F4[] = {
+    { 0x411, "STM32F2", 128 },          { 0x413, "STM32F405/407", 128 }, { 0x419, "STM32F42x/43x", 192 },
+    { 0x423, "STM32F401xB/C", 64 },     { 0x433, "STM32F401xD/E", 96 },  { 0x431, "STM32F411", 128 },
+    { 0x441, "STM32F412", 256 },        { 0x421, "STM32F446", 128 },     { 0x458, "STM32F410", 32 },
+    { 0x463, "STM32F413/423", 320 },
+};
+
+/* The G0/G4/L4s: flash size at 0x1FFF75E0, UID at 0x1FFF7590. dual: 0 one
+ * bank; 1 two when OPTR's DUALBANK (bit 21) says so, or with 1 MB; 2 the
+ * G47x's DBANK (bit 22): two banks of 2 KB pages, or one of 4 KB. */
+enum { FAM_G0, FAM_G4, FAM_L4 };
+static const struct { uint16_t dev; const char *name; uint16_t ram_kb; uint8_t fam, dual, bker; } STM_L4[] = {
+    { 0x466, "STM32G03x/04x", 8, FAM_G0, 0, 0 },    { 0x456, "STM32G05x/06x", 18, FAM_G0, 0, 0 },
+    { 0x460, "STM32G07x/08x", 36, FAM_G0, 0, 0 },   { 0x467, "STM32G0Bx/0Cx", 144, FAM_G0, 1, 13 },
+    { 0x468, "STM32G43x/44x", 32, FAM_G4, 0, 0 },   { 0x469, "STM32G47x/48x", 128, FAM_G4, 2, 11 },
+    { 0x479, "STM32G49x/4Ax", 112, FAM_G4, 2, 11 },
+    { 0x464, "STM32L41x/42x", 40, FAM_L4, 0, 0 },   { 0x435, "STM32L43x/44x", 64, FAM_L4, 0, 0 },
+    { 0x462, "STM32L45x/46x", 160, FAM_L4, 0, 0 },  { 0x415, "STM32L47x/48x", 96, FAM_L4, 1, 11 },
+    { 0x461, "STM32L49x/4Ax", 320, FAM_L4, 1, 11 },
+};
+
 /* Families with a different flash controller: named, not written yet */
 static const struct { uint16_t dev; const char *name; } STM_OTHER[] = {
-    { 0x413, "STM32F405/407" }, { 0x419, "STM32F42x/43x" }, { 0x423, "STM32F401xB/C" }, { 0x433, "STM32F401xD/E" },
-    { 0x431, "STM32F411" }, { 0x441, "STM32F412" }, { 0x421, "STM32F446" }, { 0x460, "STM32G07x/08x" },
-    { 0x466, "STM32G03x/04x" }, { 0x468, "STM32G43x/44x" }, { 0x469, "STM32G47x/48x" }, { 0x415, "STM32L47x/48x" },
-    { 0x435, "STM32L43x/44x" }, { 0x450, "STM32H74x/75x" }, { 0x417, "STM32L0x3" }, { 0x416, "STM32L1" },
+    { 0x470, "STM32L4R/L4S" }, { 0x450, "STM32H74x/75x" }, { 0x417, "STM32L0x3" }, { 0x416, "STM32L1" },
+    { 0x495, "STM32WB55" }, { 0x497, "STM32WLE5" }, { 0x449, "STM32F74x/75x" }, { 0x451, "STM32F76x/77x" },
+    { 0x422, "STM32F30x" }, { 0x438, "STM32F334" }, { 0x472, "STM32L5" }, { 0x482, "STM32U575/585" },
 };
+
+static void stm_uid(swd_t *s, uint32_t at)
+{
+    uint32_t u[3];
+    if (rd32(s, at, &u[0]) && rd32(s, at + 4, &u[1]) && rd32(s, at + 8, &u[2]))
+        fl_logf(L_INFO, "UID %08X%08X%08X", (unsigned)u[2], (unsigned)u[1], (unsigned)u[0]);
+}
 
 static bool stm_identify(swd_t *s, bool m0)
 {
@@ -591,10 +845,45 @@ static bool stm_identify(swd_t *s, bool m0)
         s->uf2_family = 0x5EE21072;     /* STM32F1; the F0's is not common */
         uint32_t obr = 0;
         if (rd32(s, FL_OBR, &obr)) s->prot = obr & 2;
-        uint32_t u[3];
-        uint32_t ua = STM_DEVS[i].f0 ? 0x1FFFF7ACu : 0x1FFFF7E8u;
-        if (rd32(s, ua, &u[0]) && rd32(s, ua + 4, &u[1]) && rd32(s, ua + 8, &u[2]))
-            fl_logf(L_INFO, "UID %08X%08X%08X", (unsigned)u[2], (unsigned)u[1], (unsigned)u[0]);
+        stm_uid(s, STM_DEVS[i].f0 ? 0x1FFFF7ACu : 0x1FFFF7E8u);
+        return true;
+    }
+    /* the sizes are halfwords: read the word they are in */
+    for (size_t i = 0; i < sizeof STM_F4 / sizeof STM_F4[0]; i++) {
+        if (STM_F4[i].dev != dev) continue;
+        uint32_t w = 0, opt = 0;
+        rd32(s, 0x1FFF7A20u, &w);
+        snprintf(s->chip, sizeof s->chip, "%s", STM_F4[i].name);
+        s->flash_size = (w >> 16) << 10;
+        s->f4_sectors = true;
+        s->sector = 0;
+        s->bank2 = dev == 0x419 && s->flash_size == 2u << 20 ? 1u << 20 : 0;
+        s->ram_size = (uint32_t)STM_F4[i].ram_kb << 10;
+        s->ops = &STM32F4;
+        s->uf2_family = dev == 0x411 ? 0x5D1A0A2E : 0x57755A57;           /* STM32F2, STM32F4 */
+        if (rd32(s, F4_OPTCR, &opt)) s->prot = (opt >> 8 & 0xFF) != 0xAA;
+        stm_uid(s, 0x1FFF7A10u);
+        return true;
+    }
+    for (size_t i = 0; i < sizeof STM_L4 / sizeof STM_L4[0]; i++) {
+        if (STM_L4[i].dev != dev) continue;
+        uint32_t w = 0, optr = 0;
+        rd32(s, 0x1FFF75E0u, &w);
+        rd32(s, L4_OPTR, &optr);
+        snprintf(s->chip, sizeof s->chip, "%s", STM_L4[i].name);
+        s->flash_size = (w & 0xFFFF) << 10;
+        s->sector = 2048;
+        bool dual = STM_L4[i].dual == 1 ? (optr >> 21 & 1) || s->flash_size >= 1u << 20
+                  : STM_L4[i].dual == 2 ? (optr >> 22 & 1) : false;
+        if (STM_L4[i].dual == 2 && !dual) s->sector = 4096;
+        s->bank2 = dual ? s->flash_size / 2 : 0;
+        s->bker = dual ? 1u << STM_L4[i].bker : 0;
+        s->ram_size = (uint32_t)STM_L4[i].ram_kb << 10;
+        s->ops = &STM32L4;
+        s->uf2_family = STM_L4[i].fam == FAM_G0 ? 0x300F5633 : STM_L4[i].fam == FAM_G4 ? 0x4C71240A : 0x00FF6919;
+        s->prot = (optr & 0xFF) != 0xAA;
+        if (dual) fl_logf(L_INFO, _("Dos bancos de %u KB"), (unsigned)(s->bank2 >> 10));
+        stm_uid(s, 0x1FFF7590u);
         return true;
     }
     for (size_t i = 0; i < sizeof STM_OTHER / sizeof STM_OTHER[0]; i++)
@@ -775,7 +1064,7 @@ static bool rp_erase_all(swd_t *s)
     return ok;
 }
 
-static const flash_ops_t RP2040 = { rp_begin, rp_erase, rp_program, rp_erase_all, rp_end };
+static const flash_ops_t RP2040 = { rp_begin, rp_erase, rp_program, rp_erase_all, rp_end, NULL };
 
 /* -------------------------------------------------------------------------- */
 /* Which chip                                                                  */
@@ -829,7 +1118,7 @@ static bool identify(swd_t *s)
     snprintf(fl_st.chip, sizeof fl_st.chip, "%.15s", s->chip);
     snprintf(fl_st.boot, sizeof fl_st.boot, "%s, DPIDR %08X", core, (unsigned)s->dpidr);
     fl_st.flash_size = s->flash_size;
-    fl_st.page = (uint16_t)(s->sector > 65535 ? 0 : s->sector);
+    fl_st.page = (uint16_t)(s->sector > 65535 ? 0 : s->sector);     /* 0: an F4's sectors, of three sizes */
     fl_st.secure = s->prot;
     fl_unlock();
     char fl[24] = "?";
@@ -864,6 +1153,12 @@ static bool sector_used(const aos_flasher_image_t *img, uint32_t addr, uint32_t 
     return false;
 }
 
+/* The erase unit at addr: a page, or an F2/F4's sector */
+static uint32_t unit_at(const swd_t *s, uint32_t addr)
+{
+    return s->f4_sectors ? f4_unit(s, addr - s->flash_base, NULL) : s->sector;
+}
+
 static bool write_image(swd_t *s)
 {
     if (s->prot) return fl_fail("%s", _("El chip está protegido contra lectura: no se graba. Borralo entero primero."));
@@ -879,7 +1174,8 @@ static bool write_image(swd_t *s)
     /* an RP2350 takes its "absolute", Arm Secure, RISC-V and Arm
      * Non-secure families (0xE48BFF57, 59, 5A, 5B) */
     bool fam_ok = !img.uf2_family || !s->uf2_family || img.uf2_family == s->uf2_family ||
-                  (s->rp2350 && (img.uf2_family == 0xE48BFF57 || (img.uf2_family >= 0xE48BFF59 && img.uf2_family <= 0xE48BFF5B)));
+                  (s->rp2350 && (img.uf2_family == 0xE48BFF57 || (img.uf2_family >= 0xE48BFF59 && img.uf2_family <= 0xE48BFF5B))) ||
+                  (s->uf2_family == 0x57755A57 && (img.uf2_family == 0x6D0922FA || img.uf2_family == 0x8FB060FE));   /* STM32F407's own */
     if (!fam_ok) {
         fl_fail(_("%s es un .uf2 para otro chip (familia 0x%08X)"), J.src.name, (unsigned)img.uf2_family);
         goto out;
@@ -891,22 +1187,29 @@ static bool write_image(swd_t *s)
             goto out;
         }
     }
-    uint32_t sec = s->sector, nsec = 0;
-    for (uint32_t a = s->flash_base; a < s->flash_base + limit; a += sec) nsec += sector_used(&img, a, sec);
+    uint32_t nsec = 0, bytes = 0;
+    for (uint32_t a = s->flash_base, sec; a < s->flash_base + limit; a += sec) {
+        sec = unit_at(s, a);
+        if (sector_used(&img, a, sec)) { nsec++; bytes += sec; }
+    }
     bool verify = !J.opts.no_verify;
     fl_lock();
     fl_st.file_count = 1;
     fl_st.file_index = 0;
     snprintf(fl_st.file_name, sizeof fl_st.file_name, "%s", J.src.name);
     fl_st.file_offset = img.r[0].addr;
-    fl_st.total = nsec * sec * (verify ? 2 : 1);
+    fl_st.total = bytes * (verify ? 2 : 1);
     fl_st.done = 0;
     fl_st.verified = false;
     fl_unlock();
-    fl_logf(L_INFO, _("%u sectores de %u KB desde 0x%08X"), (unsigned)nsec, (unsigned)(sec >> 10), (unsigned)img.r[0].addr);
+    if (s->f4_sectors)
+        fl_logf(L_INFO, _("%u sectores, %u KB, desde 0x%08X"), (unsigned)nsec, (unsigned)(bytes >> 10), (unsigned)img.r[0].addr);
+    else
+        fl_logf(L_INFO, _("%u sectores de %u KB desde 0x%08X"), (unsigned)nsec, (unsigned)(s->sector >> 10), (unsigned)img.r[0].addr);
     fl_phase(AOS_FLASHER_ERASING);
     if (!s->ops->begin(s)) { fl_fail("%s", _("No se pudo preparar la flash (detener el núcleo, desbloquearla)")); goto out; }
-    for (uint32_t a = s->flash_base; a < s->flash_base + limit && !fl_cancel; a += sec) {
+    for (uint32_t a = s->flash_base, sec; a < s->flash_base + limit && !fl_cancel; a += sec) {
+        sec = unit_at(s, a);
         if (!sector_used(&img, a, sec)) continue;
         uint32_t last = 0;
         for (uint32_t i = 0; i < sec; i++) {
@@ -932,7 +1235,8 @@ static bool write_image(swd_t *s)
     fl_logf(L_OK, _("%s: escrito"), J.src.name);
     if (verify) {
         fl_phase(AOS_FLASHER_VERIFYING);
-        for (uint32_t a = s->flash_base; a < s->flash_base + limit && !fl_cancel; a += sec) {
+        for (uint32_t a = s->flash_base, sec; a < s->flash_base + limit && !fl_cancel; a += sec) {
+            sec = unit_at(s, a);
             if (!sector_used(&img, a, sec)) continue;
             uint64_t t0 = aos_hal_uptime_ms();
             if (!mem_read(s, a, s->buf, sec)) { if (!fl_cancel) fl_fail(_("0x%08X: falló la lectura"), (unsigned)a); goto out; }
@@ -961,8 +1265,26 @@ out:
 static bool erase_all(swd_t *s)
 {
     if (!s->ops && !s->nrf) return fl_fail(_("Todavía no sé borrar la flash de %s"), s->chip);
-    if (s->prot && !s->nrf)
-        return fl_fail("%s", _("Para quitar la protección de este chip hace falta cambiar sus option bytes: todavía no"));
+    if (s->prot && !s->nrf) {
+        if (!s->ops->unprotect)
+            return fl_fail("%s", _("Para quitar la protección de este chip hace falta cambiar sus option bytes: todavía no"));
+        fl_phase(AOS_FLASHER_ERASING);
+        fl_logf(L_INFO, "%s", _("Quitando la protección (RDP): el chip borra toda su flash"));
+        uint64_t t0 = aos_hal_uptime_ms();
+        bool reset = false;
+        if (!s->ops->unprotect(s, &reset)) return fl_fail("%s", _("No se pudo quitar la protección"));
+        uint32_t ms = (uint32_t)(aos_hal_uptime_ms() - t0);
+        fl_logf(L_OK, _("Protección quitada y flash borrada en %u,%u s"), (unsigned)(ms / 1000), (unsigned)(ms % 1000 / 100));
+        if (reset) {
+            fl_logf(L_INFO, "%s", _("El chip se reinició para cargar sus option bytes: tocá Detectar"));
+            s->dpidr = 0;           /* the link went with it: no reset at the end */
+        }
+        s->prot = false;
+        fl_lock();
+        fl_st.secure = false;
+        fl_unlock();
+        return true;
+    }
     fl_phase(AOS_FLASHER_ERASING);
     fl_logf(L_INFO, "%s", s->prot ? _("Borrando todo por el CTRL-AP: se va la protección y el firmware") : _("Borrando toda la flash"));
     uint64_t t0 = aos_hal_uptime_ms();
@@ -1166,7 +1488,7 @@ bool fl_swd_run(void)
 {
     swd_t *s = calloc(1, sizeof *s);
     if (!s) return fl_fail("%s", _("Sin memoria"));
-    s->buf = malloc(65536 + 16);     /* a sector, up to the 64 KB of an STM32F4's bigger ones */
+    s->buf = malloc(131072 + 16);    /* a sector, up to the 128 KB of an STM32F4's bigger ones (PSRAM) */
     bool ok = s->buf ? run(s) : fl_fail("%s", _("Sin memoria"));
     if (s->w) {
         bool cancelled = fl_cancel;

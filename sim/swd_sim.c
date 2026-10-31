@@ -3,11 +3,13 @@
  * target, so the Programador's SWD family (components/aos_flasher/
  * aos_flasher_swd.c) runs its whole path without a board.
  *
- * P4_SIM_SWD picks the chip: nrf52840 (the default), stm32f103, rp2040,
- * rp2350, or none (nobody on the wire). ":protected" after nrf52840 starts
- * it with APPROTECT on (its memory unreachable until the CTRL-AP erases it
- * all), after stm32f103 with read protection set; ":locked" after rp2350
- * locks its ACCESSCTRL against the debugger.
+ * P4_SIM_SWD picks the chip: nrf52840 (the default), stm32f103, stm32f411
+ * (a Black Pill: 512 KB in sectors), stm32g071 (a Cortex-M0+, 128 KB),
+ * stm32l476 (1 MB in two banks), rp2040, rp2350, or none (nobody on the
+ * wire). ":protected" after nrf52840 starts it with APPROTECT on (its memory
+ * unreachable until the CTRL-AP erases it all), after an STM32 with read
+ * protection set (RDP level 1: its flash unreadable by the debugger);
+ * ":locked" after rp2350 locks its ACCESSCTRL against the debugger.
  *
  * What it plays, at the level of packets, not of edges:
  *
@@ -36,7 +38,15 @@
  *                  erasing shows. nRF52840: the NVMC (CONFIG, ERASEPAGE,
  *                  ERASEALL) and the CTRL-AP (AP 1: ERASEALL and its status,
  *                  APPROTECTSTATUS). STM32F103: KEYR, CR (PG, PER, MER,
- *                  STRT, LOCK), SR, AR, the halfword program. RP2040: the
+ *                  STRT, LOCK), SR, AR, the halfword program, and the option
+ *                  bytes' erase and RDP key (unprotected at the next reset).
+ *                  STM32F411: its controller at 0x40023C00 (SER and SNB over
+ *                  16/64/128 KB sectors, MER, PSIZE x32 enforced) and OPTCR,
+ *                  whose RDP back to 0xAA erases everything. STM32G071 and
+ *                  L476: the controller at 0x40022000 (PER, PNB, BKER for the
+ *                  L476's second bank, MER1/MER2), a double word programmed
+ *                  by its second word, PROGERR over bits not erased, OPTR
+ *                  and OPTSTRT, OBL_LAUNCH as a reset. RP2040: the
  *                  boot ROM's table of functions; when the core is let run
  *                  at debug_trampoline, the function in r7 is done here
  *                  (connect, exit XIP, erase, program from RAM, flush,
@@ -62,7 +72,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum { C_NONE, C_NRF52840, C_STM32F103, C_RP2040, C_RP2350 };
+enum { C_NONE, C_NRF52840, C_STM32F103, C_RP2040, C_RP2350, C_STM32F411, C_STM32G071, C_STM32L476 };
 
 typedef struct {
     int chip;
@@ -88,8 +98,12 @@ typedef struct {
     uint32_t flash_base, flash_size, page, ram_size;
     /* flash controllers */
     uint32_t nvmc_config, ctrlap_status;
-    int stm_keys;
+    int stm_keys, opt_keys;
     uint32_t stm_cr, stm_sr, stm_ar;
+    uint32_t optcr;             /* F411's OPTCR, G071/L476's OPTR */
+    bool f1_opt_erased, unprotect_at_reset;
+    uint32_t dw_addr, dw_lo;    /* G0/L4: a double word's first word, waiting for its second */
+    bool dw_open;
     bool xip;
     /* RTT */
     uint32_t rtt_cb;
@@ -99,6 +113,9 @@ typedef struct {
 
 static tgt_t T;
 static bool s_open;
+
+static bool is_stm(void) { return T.chip == C_STM32F103 || T.chip == C_STM32F411 || T.chip == C_STM32G071 || T.chip == C_STM32L476; }
+static bool is_l4(void) { return T.chip == C_STM32G071 || T.chip == C_STM32L476; }
 
 #define RAM_BASE   0x20000000u
 #define RTT_BUF_UP 1024u
@@ -143,7 +160,8 @@ static void chip_init(void)
     T.locked = colon && !strcmp(colon + 1, "locked");
     if (colon) *colon = 0;
     T.chip = !strcmp(name, "stm32f103") ? C_STM32F103 : !strcmp(name, "rp2040") ? C_RP2040 : !strcmp(name, "rp2350") ? C_RP2350
-           : !strcmp(name, "none") ? C_NONE : C_NRF52840;
+           : !strcmp(name, "stm32f411") ? C_STM32F411 : !strcmp(name, "stm32g071") ? C_STM32G071
+           : !strcmp(name, "stm32l476") ? C_STM32L476 : !strcmp(name, "none") ? C_NONE : C_NRF52840;
     switch (T.chip) {
     case C_NRF52840:
         T.dpidr = 0x2BA01477; T.flash_base = 0; T.flash_size = 1 << 20; T.page = 4096; T.ram_size = 256 << 10;
@@ -151,6 +169,18 @@ static void chip_init(void)
         break;
     case C_STM32F103:
         T.dpidr = 0x1BA01477; T.flash_base = 0x08000000; T.flash_size = 64 << 10; T.page = 1024; T.ram_size = 20 << 10;
+        break;
+    case C_STM32F411:
+        T.dpidr = 0x2BA01477; T.flash_base = 0x08000000; T.flash_size = 512 << 10; T.page = 16384; T.ram_size = 128 << 10;
+        T.optcr = T.protect ? 0x0FFF55ED : 0x0FFFAAED;          /* RDP 0x55 or 0xAA, OPTLOCK */
+        break;
+    case C_STM32G071:
+        T.dpidr = 0x0BC11477; T.flash_base = 0x08000000; T.flash_size = 128 << 10; T.page = 2048; T.ram_size = 36 << 10;
+        T.optcr = T.protect ? 0xFFFFFEBB : 0xFFFFFEAA;
+        break;
+    case C_STM32L476:
+        T.dpidr = 0x2BA01477; T.flash_base = 0x08000000; T.flash_size = 1 << 20; T.page = 2048; T.ram_size = 96 << 10;
+        T.optcr = T.protect ? 0xFFEFF8BB : 0xFFEFF8AA;          /* DUALBANK (bit 21) set */
         break;
     case C_RP2040:
         T.dpidr = 0x0BC12477; T.flash_base = 0x10000000; T.flash_size = 2 << 20; T.page = 4096; T.ram_size = 264 << 10;
@@ -206,6 +236,8 @@ static void chip_init(void)
     uint32_t x = 0x12345678;
     for (uint32_t i = 0; i < 16384; i++) { x = x * 1103515245u + 12345u; T.flash[i] = (uint8_t)(x >> 16); }
     T.ram = calloc(1, T.ram_size);
+    /* the STM32s come up with their flash controller locked */
+    T.stm_cr = T.chip == C_STM32F103 ? 0x80 : T.chip == C_STM32F411 ? 0x80000000u : is_l4() ? 0xC0000000u : 0;
     rtt_setup();
 }
 
@@ -217,7 +249,7 @@ static uint8_t *ptr(uint32_t a)
         if (T.chip == C_RP2040 && !T.xip) return NULL;
         return T.flash + (a - T.flash_base);
     }
-    if (T.chip == C_STM32F103 && a < T.flash_size) return T.flash + a;     /* the alias at 0 */
+    if (is_stm() && a < T.flash_size) return T.flash + a;                 /* the alias at 0 */
     if (T.ram && a >= RAM_BASE && a - RAM_BASE < T.ram_size) return T.ram + (a - RAM_BASE);
     if (T.rom && a < T.rom_size) return T.rom + a;
     return NULL;
@@ -225,7 +257,7 @@ static uint8_t *ptr(uint32_t a)
 
 static bool is_flash(uint32_t a)
 {
-    return T.flash && ((a >= T.flash_base && a - T.flash_base < T.flash_size) || (T.chip == C_STM32F103 && a < T.flash_size));
+    return T.flash && ((a >= T.flash_base && a - T.flash_base < T.flash_size) || (is_stm() && a < T.flash_size));
 }
 
 static uint32_t flash_off(uint32_t a) { return a >= T.flash_base ? a - T.flash_base : a; }
@@ -234,8 +266,11 @@ static void reset_core(void)
 {
     T.halted = T.catch_reset;
     T.nvmc_config = 0;
-    T.stm_keys = 0;
-    T.stm_cr = 0x80;            /* LOCK */
+    T.stm_keys = T.opt_keys = 0;
+    T.stm_cr = T.chip == C_STM32F103 ? 0x80 : T.chip == C_STM32F411 ? 0x80000000u : 0xC0000000u;   /* LOCK (and OPTLOCK) */
+    T.dw_open = false;
+    if (T.chip == C_STM32F411) T.optcr |= 1;                    /* OPTLOCK */
+    if (T.unprotect_at_reset) { T.protect = false; T.unprotect_at_reset = false; T.f1_opt_erased = false; }
     T.xip = true;
     dump();
 }
@@ -251,7 +286,7 @@ static bool coresight_id(uint32_t a, uint32_t *v)
     uint32_t base = a & ~0xFFFu, off = a & 0xFFF;
     if ((base != 0xE00FF000 && base != 0xE000E000) || off < 0xFD0) return false;
     bool rom = base == 0xE00FF000;
-    uint16_t part = rom ? 0x4C4 : T.chip == C_RP2040 ? 0x008 : T.chip == C_STM32F103 ? 0x000 : 0x00C;
+    uint16_t part = rom ? 0x4C4 : T.chip == C_RP2040 || T.chip == C_STM32G071 ? 0x008 : T.chip == C_STM32F103 ? 0x000 : 0x00C;
     uint8_t id[12] = { 0x04, 0, 0, 0,                           /* PIDR4..7: JEP106 continuation 4 (Arm) */
                        (uint8_t)part, (uint8_t)(0xB0 | part >> 8), 0x0B, 0,   /* PIDR0..3: Arm (0x43B) */
                        0x0D, rom ? 0x10 : 0xE0, 0x05, 0xB1 };   /* CIDR: a ROM table, or generic IP */
@@ -264,7 +299,7 @@ static bool reg_read(uint32_t a, uint32_t *v)
 {
     if (coresight_id(a, v)) return true;
     switch (a) {
-    case 0xE000ED00: *v = T.chip == C_RP2040 ? 0x410CC601 : T.chip == C_RP2350 ? 0x411FD210 : T.chip == C_STM32F103 ? 0x411FC231 : 0x410FC241; return true;
+    case 0xE000ED00: *v = T.chip == C_RP2040 || T.chip == C_STM32G071 ? 0x410CC601 : T.chip == C_RP2350 ? 0x411FD210 : T.chip == C_STM32F103 ? 0x411FC231 : 0x410FC241; return true;
     case 0xE000EDF0: *v = 0x00010001 | (T.halted ? 0x00020002 : 0); return true;     /* S_REGRDY, C_DEBUGEN, S_HALT */
     case 0xE000EDF8: *v = T.dcrdr; return true;
     case 0xE000EDFC: *v = T.demcr; return true;
@@ -289,7 +324,30 @@ static bool reg_read(uint32_t a, uint32_t *v)
         case 0x1FFFF7F0: *v = 0x87112434; return true;
         case 0x4002200C: *v = T.stm_sr; return true;
         case 0x40022010: *v = T.stm_cr; return true;
-        case 0x4002201C: *v = T.protect ? 2 : 0; return true;
+        case 0x4002201C: *v = T.protect || T.f1_opt_erased ? 2 : 0; return true;   /* erased option bytes read as protected */
+        }
+    } else if (T.chip == C_STM32F411) {
+        switch (a) {
+        case 0xE0042000: *v = 0x10006431; return true;
+        case 0x1FFF7A20: *v = (T.flash_size >> 10) << 16; return true;    /* the size is the upper halfword */
+        case 0x1FFF7A10: *v = 0x00470036; return true;
+        case 0x1FFF7A14: *v = 0x30385111; return true;
+        case 0x1FFF7A18: *v = 0x32333436; return true;
+        case 0x40023C0C: *v = T.stm_sr; return true;
+        case 0x40023C10: *v = T.stm_cr; return true;
+        case 0x40023C14: *v = T.optcr; return true;
+        }
+    } else if (is_l4()) {
+        switch (a) {
+        case 0x40015800: if (T.chip == C_STM32G071) { *v = 0x10006460; return true; } break;
+        case 0xE0042000: if (T.chip == C_STM32L476) { *v = 0x10076415; return true; } break;
+        case 0x1FFF75E0: *v = 0xFFFF0000u | T.flash_size >> 10; return true;
+        case 0x1FFF7590: *v = 0x002B0042; return true;
+        case 0x1FFF7594: *v = 0x4E4B5013; return true;
+        case 0x1FFF7598: *v = 0x20393833; return true;
+        case 0x40022010: *v = T.stm_sr; return true;
+        case 0x40022014: *v = T.stm_cr; return true;
+        case 0x40022020: *v = T.optcr; return true;
         }
     } else if (T.chip == C_RP2040) {
         if (a == 0x40000000) { *v = 0x10002927; return true; }
@@ -384,7 +442,102 @@ static bool reg_write(uint32_t a, uint32_t v)
                 memset(T.flash, 0xFF, T.flash_size);
                 T.stm_sr |= 0x20;
                 T.stm_cr &= ~0x40u;
+            } else if ((v & 0x40) && (v & 0x20) && (v & 0x200)) {    /* OPTER + STRT, with OPTWRE */
+                T.f1_opt_erased = true;
+                T.stm_sr |= 0x20;
+                T.stm_cr &= ~0x40u;
             }
+            if (T.opt_keys < 2) T.stm_cr &= ~0x200u;                 /* OPTWRE only through its keys */
+            return true;
+        case 0x40022008:                                            /* OPTKEYR */
+            if (T.stm_cr & 0x80) return true;
+            if ((T.opt_keys == 0 && v == 0x45670123) || (T.opt_keys == 1 && v == 0xCDEF89AB)) T.opt_keys++;
+            else T.opt_keys = 0;
+            if (T.opt_keys == 2) T.stm_cr |= 0x200;
+            return true;
+        }
+    } else if (T.chip == C_STM32F411) {
+        switch (a) {
+        case 0x40023C04:                                            /* KEYR */
+            if ((T.stm_keys == 0 && v == 0x45670123) || (T.stm_keys == 1 && v == 0xCDEF89AB)) T.stm_keys++;
+            else T.stm_keys = 0;
+            if (T.stm_keys == 2) T.stm_cr &= ~0x80000000u;
+            return true;
+        case 0x40023C08:                                            /* OPTKEYR */
+            if ((T.opt_keys == 0 && v == 0x08192A3B) || (T.opt_keys == 1 && v == 0x4C5D6E7F)) T.opt_keys++;
+            else T.opt_keys = 0;
+            if (T.opt_keys == 2) T.optcr &= ~1u;
+            return true;
+        case 0x40023C0C: T.stm_sr &= ~(v & 0x1F3); return true;
+        case 0x40023C10: {
+            if (T.stm_cr & 0x80000000u) return true;
+            T.stm_cr = v;
+            if (!(v & 0x10000)) return true;                        /* STRT */
+            if (v & 2) {                                            /* SER: sector SNB */
+                uint32_t n = v >> 3 & 0x1F, off, len;
+                if (n < 4) { off = n << 14; len = 0x4000; }
+                else if (n == 4) { off = 0x10000; len = 0x10000; }
+                else { off = 0x20000 + ((n - 5) << 17); len = 0x20000; }
+                if (off + len <= T.flash_size) memset(T.flash + off, 0xFF, len);
+                else T.stm_sr |= 0x80;                              /* PGSERR: no such sector */
+            } else if (v & 4) {
+                memset(T.flash, 0xFF, T.flash_size);
+            }
+            T.stm_sr |= 1;
+            T.stm_cr &= ~0x10000u;
+            return true;
+        }
+        case 0x40023C14:
+            if (T.optcr & 1) return true;                           /* OPTLOCK */
+            if ((v & 2) && T.protect && (v >> 8 & 0xFF) == 0xAA) {  /* OPTSTRT, RDP back to level 0 */
+                memset(T.flash, 0xFF, T.flash_size);
+                T.protect = false;
+            }
+            T.optcr = v & ~2u;
+            return true;
+        }
+    } else if (is_l4()) {
+        switch (a) {
+        case 0x40022008:                                            /* KEYR */
+            if ((T.stm_keys == 0 && v == 0x45670123) || (T.stm_keys == 1 && v == 0xCDEF89AB)) T.stm_keys++;
+            else T.stm_keys = 0;
+            if (T.stm_keys == 2) T.stm_cr &= ~0x80000000u;
+            return true;
+        case 0x4002200C:                                            /* OPTKEYR, the flash unlocked first */
+            if (T.stm_cr & 0x80000000u) return true;
+            if ((T.opt_keys == 0 && v == 0x08192A3B) || (T.opt_keys == 1 && v == 0x4C5D6E7F)) T.opt_keys++;
+            else T.opt_keys = 0;
+            if (T.opt_keys == 2) T.stm_cr &= ~0x40000000u;
+            return true;
+        case 0x40022010: T.stm_sr &= ~(v & 0xC3FB); return true;
+        case 0x40022014: {
+            if (T.stm_cr & 0x80000000u) return true;
+            T.stm_cr = v | (T.stm_cr & 0x40000000u);                 /* OPTLOCK only goes with its keys */
+            if (v & 0x8000000) { reset_core(); return true; }        /* OBL_LAUNCH: the option bytes load, the chip restarts */
+            if ((v & 0x20000) && !(T.stm_cr & 0x40000000u)) {        /* OPTSTRT */
+                if (T.protect && (T.optcr & 0xFF) == 0xAA) {
+                    memset(T.flash, 0xFF, T.flash_size);
+                    T.unprotect_at_reset = true;
+                }
+                T.stm_cr &= ~0x20000u;
+                return true;
+            }
+            if (!(v & 0x10000)) return true;                        /* STRT */
+            uint32_t bank = T.chip == C_STM32L476 ? T.flash_size / 2 : T.flash_size;
+            if (v & 2) {                                            /* PER: page PNB of the bank BKER says */
+                uint32_t off = ((v >> 3) & 0xFF) * T.page + ((v & 0x800) && T.chip == C_STM32L476 ? bank : 0);
+                if ((v >> 3 & 0xFF) * T.page < bank && off < T.flash_size) memset(T.flash + off, 0xFF, T.page);
+                else T.stm_sr |= 0x80;                              /* PGSERR */
+            } else {
+                if (v & 4) memset(T.flash, 0xFF, bank);             /* MER1 */
+                if ((v & 0x8000) && T.chip == C_STM32L476) memset(T.flash + bank, 0xFF, bank);  /* MER2 */
+            }
+            T.stm_sr |= 1;
+            T.stm_cr &= ~0x10000u;
+            return true;
+        }
+        case 0x40022020:
+            if (!(T.stm_cr & 0x40000000u)) T.optcr = v;              /* OPTR, while OPTLOCK is off */
             return true;
         }
     }
@@ -395,6 +548,17 @@ static bool reg_write(uint32_t a, uint32_t v)
 static bool mem_access(uint32_t a, int size, bool wr, uint32_t *lanes)
 {
     if (T.chip == C_NRF52840 && T.protect) return false;
+    /* an STM32 at RDP level 1 keeps its flash from the debugger */
+    if (is_stm() && T.protect && !wr && is_flash(a)) return false;
+    /* the F1's RDP option byte: its key unprotects, and erases all */
+    if (T.chip == C_STM32F103 && wr && (a & ~1u) == 0x1FFFF800 && size == 2) {
+        if ((T.stm_cr & 0x210) == 0x210 && (*lanes & 0xFFFF) == 0x5AA5) {
+            memset(T.flash, 0xFF, T.flash_size);
+            T.unprotect_at_reset = true;
+            T.stm_sr |= 0x20;
+        }
+        return true;
+    }
     uint32_t aligned = a & ~3u, v;
     if (size == 4 && !wr && reg_read(aligned, &v)) { *lanes = v; return true; }
     if (size == 4 && wr && reg_write(aligned, *lanes)) return true;
@@ -411,6 +575,30 @@ static bool mem_access(uint32_t a, int size, bool wr, uint32_t *lanes)
         uint32_t w = 0;
         for (int i = 0; i < size; i++) w |= (uint32_t)p[i] << (sh + 8 * i);
         *lanes = w;
+        return true;
+    }
+    if (is_flash(a) && T.chip == C_STM32F411) {
+        if (!(T.stm_cr & 1) || (T.stm_cr & 0x80000000u)) { T.stm_sr |= 0x80; return true; }     /* PGSERR */
+        if (size != 4 || (T.stm_cr >> 8 & 3) != 2) { T.stm_sr |= 0x40; return true; }        /* PGPERR: not PSIZE x32 */
+        for (int i = 0; i < size; i++) p[i] &= (uint8_t)(*lanes >> (sh + 8 * i));
+        T.stm_sr |= 1;
+        return true;
+    }
+    if (is_flash(a) && is_l4()) {
+        if (!(T.stm_cr & 1) || (T.stm_cr & 0x80000000u)) { T.stm_sr |= 0x80; return true; }     /* PGSERR */
+        if (size != 4) { T.stm_sr |= 0x40; return true; }                                     /* SIZERR */
+        if (!(a & 7)) {                         /* the first word: kept until its second */
+            T.dw_addr = a;
+            T.dw_lo = *lanes;
+            T.dw_open = true;
+            return true;
+        }
+        if (!T.dw_open || T.dw_addr != a - 4) { T.stm_sr |= 0x80; T.dw_open = false; return true; }   /* PGSERR */
+        T.dw_open = false;
+        uint8_t *q = p - 4;
+        for (int i = 0; i < 8; i++) if (q[i] != 0xFF) { T.stm_sr |= 0x08; return true; }      /* PROGERR: not erased */
+        for (int i = 0; i < 4; i++) { q[i] = (uint8_t)(T.dw_lo >> 8 * i); p[i] = (uint8_t)(*lanes >> 8 * i); }
+        T.stm_sr |= 1;
         return true;
     }
     if (is_flash(a)) {

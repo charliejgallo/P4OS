@@ -18,7 +18,7 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
 - **Pico (RP2040) en BOOTSEL**: es un disco USB; copiar un `.uf2` a `/usb` lo
   graba (`docs/USB.md`). Fuera del Programador.
 - **Terminal serie**: monitor de los UART del header y los USB.
-- **SWD** (F2, sin publicar): nRF52, STM32F0/F1, RP2040 y RP2350; grabar,
+- **SWD** (F2, sin publicar): nRF52, STM32F0/F1/F2/F4/G0/G4/L4, RP2040 y RP2350; grabar,
   verificar, borrar entero y la consola RTT.
 - **STM32 por su bootloader serie** (F4, sin publicar): grabar, verificar,
   leer y borrar, con RDP respetado.
@@ -30,7 +30,7 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
 | Familia | Ejemplos | Camino | Grabar | Leer | Fase |
 |---|---|---|---|---|---|
 | ESP32 / ESP8266 | DevKit, NodeMCU, módulos | ROM serie (hay) | hay | F1 | F1 |
-| Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, GD32 | SWD con 2-3 cables | hay (sim): nRF52, STM32F0/F1, RP2040 | sólo verificar | F2 |
+| Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, GD32 | SWD con 2-3 cables | hay: RP2040 (placa); nRF52, STM32F0/F1/F2/F4/G0/G4/L4, RP2350 (sim) | sólo verificar | F2 |
 | AVR con bootloader serie | Uno, Nano, Pro Mini, Mega | STK500 v1 (optiboot) y v2 (Mega) | hay (sim) | hay (sim) | F3 |
 | AVR con USB propio | Leonardo, Micro, Pro Micro | AVR109 (Caterina), toque a 1200 baudios | hay (sim) | hay (sim) | F3 |
 | STM32 sin sonda | Blue Pill, Black Pill | bootloader serie de ST (AN3155), BOOT0 y NRST con las líneas EN/BOOT | hay (sim) | hay (sim) | F4 |
@@ -90,8 +90,27 @@ distinto de lo planeado abajo:
   probe-rs): cada familia se maneja desde acá por el bus. nRF52 por su
   NVMC, STM32F0/F1 por su controlador (media palabra por vez, lento pero
   simple), RP2040 por las funciones de su ROM llamadas con el trampolín
-  de depuración. Los STM32F4/G0/L4 se reconocen y dicen que todavía no.
-  El pack de probe-rs queda para cuando haga falta velocidad o más chips.
+  de depuración. El pack de probe-rs queda para cuando haga falta
+  velocidad o más chips.
+- **STM32F2/F4, G0, G4 y L4** (agregados el 2026-10-30, sólo en el
+  simulador: la Black Pill es lo más usado y el usuario va a comprar una).
+  Dos controladoras más: la de F2/F4 en 0x40023C00, por sectores de 16,
+  64 y 128 KB (SER y SNB; el segundo banco de un F42x de 2 MB desde 1 MB)
+  y de a una palabra (PSIZE x32, que pide 2,7-3,6 V); y la que comparten
+  G0, G4 y L4 en 0x40022000, por páginas de 2 KB (4 KB en un G47x de un
+  banco) numeradas dentro de su banco, BKER para el segundo (L47x/L49x,
+  G0B1, G47x con DBANK), y de a doble palabra. Se borra sólo lo que toca
+  la imagen, como siempre. El emulador tiene un F411 (512 KB), un G071
+  (Cortex-M0+, 128 KB) y un L476 (1 MB en dos bancos), con sus errores
+  (PSIZE, la doble palabra, PROGERR sobre bits no borrados); la prueba
+  compara la flash entera contra lo esperado. Lo que sigue sin grabarse
+  se nombra igual: F3, F7, H7, L0, L1, L4R, L5, U5, WB, WL.
+- **Quitar RDP de un STM32 desde "Borrar"** (el mismo día): el borrado
+  total propio del chip, como el ERASEALL del nRF52, que se lleva el
+  firmware con la protección (ver "Alcance de SWD"). En un F1, borrar los
+  option bytes y escribir la llave 0x5AA5 en RDP (carga al reiniciar); en
+  un F2/F4, RDP a 0xAA en OPTCR; en G0/G4/L4, RDP a 0xAA en OPTR, OPTSTRT
+  y OBL_LAUNCH, que reinicia el chip (el registro pide tocar Detectar).
 - **RP2350** (agregada el 2026-10-29, sólo en el simulador: el usuario no
   tiene una): DP ADIv6 (DPIDR versión 3), el MEM-AP del núcleo 0 en la
   dirección 0x2000 con sus registros en 0xD00; la tabla de la ROM con un
@@ -287,6 +306,31 @@ para los chips que el Programador no conoce.
 - **RP2040/RP2350 en BOOTSEL**: el UF2 desde el Programador, y PICOBOOT (la
   interfaz de vendedor de la ROM) para leer la flash sin SWD.
 - **SAMD**: SAM-BA (BOSSA) por el CDC tras el toque a 1200 baudios.
+
+## Más adelante: los WCH (CH32V)
+
+Pedido del usuario (2026-10-30, "me re interesa"): los microcontroladores
+RISC-V de WCH, baratísimos y muy usados en la comunidad: CH32V003 (el de
+diez centavos), CH32V002/V006, CH32V203/V208, CH32V307, CH32X035,
+CH32L103. No son SWD: se depuran por **SDI**, el protocolo de un solo
+cable de WCH (SWIO, más GND; el V003 lo tiene en PD1), el mismo que usa el
+WCH-LinkE. Para hacerlo:
+
+- **El cable:** un pin bidireccional con tiempos de bit cortos (el host
+  manda pulsos bajos de distinto largo; el chip contesta estirándolos). El
+  bit-bang de `aos_io` alcanza para empezar; el RMT o PARLIO del P4 si
+  hace falta precisión. Otra familia en `aos_flasher` ("WCH"), con su
+  emulador en el simulador.
+- **Encima:** el Debug Module de RISC-V (DMI): detener el núcleo, leer y
+  escribir memoria por abstract commands o program buffer, y la
+  controladora de flash de WCH (parecida a la de un STM32F1, con páginas
+  de 64 bytes para escritura rápida en el V003).
+- **Referencias abiertas:** `minichlink` de ch32v003fun (MIT) y `wlink`,
+  que documentan el protocolo y los registros; el fork de OpenOCD de WCH.
+- **De paso:** los CH32F103 de WCH son Arm y hablan SWD: probablemente ya
+  anden como un STM32F1, a confirmar con uno.
+- **Para probar:** un CH32V003 (placa de desarrollo o el chip con su
+  programador) y un CH32V203.
 
 ## Hardware para probar
 
