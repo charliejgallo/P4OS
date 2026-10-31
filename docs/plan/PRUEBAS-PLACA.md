@@ -574,10 +574,12 @@ Que necesitan la mano del usuario o equipos:
       defecto) y 10,8 s a 9 MHz (48 KB/s). Más allá de 4 MHz manda la
       propia RP2040 borrando y grabando su flash QSPI. La Pico quedó con
       el blink de medio segundo.
-- [ ] Leer la flash por SWD (2026-10-31, sólo en el simulador): la Pico
-      en `uart.b`, "Leer la flash" (el registro dice el tamaño medido
-      donde se repite, 2048 KB en una Pico), el volcado igual a lo que
-      grabó `blink256.uf2` en sus primeros 256 KB; y un rango.
+- [x] Leer la flash por SWD (2026-10-31, `7786953`): la Pico en `uart.b`
+      a 4 MHz. Midió su flash donde se repite (2048 KB), la leyó entera dos
+      veces en 45,5 s (`RP2040-…@0x10000000.bin` en `firmware/volcados`) y
+      sus primeros 256 KB son byte a byte lo que grabó `blink256.uf2`.
+      Lento al lado del cable (cada lectura cuesta poco): el tiempo se va
+      en leer dos veces y en la tarjeta; para mejorar si hace falta.
 - [ ] La sonda con OpenOCD (`-f interface/cmsis-dap.cfg -f
       target/rp2040.cfg`) y gdb con un breakpoint en el blink; `program`
       de OpenOCD con su algoritmo; probe-rs; y abrirla desde la fila de
