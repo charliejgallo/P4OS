@@ -63,6 +63,9 @@
  *                  the wrong one shows), and a function runs only when the
  *                  core is let go at a stub in RAM that ends in a bkpt
  *                  (blx r7, bkpt), where it stops afterwards.
+ *   DMA            the RP2040's 12 channels and the RP2350's 16, run to the
+ *                  end at once when triggered, and the sniffer's SUM: how
+ *                  the Programador has an RP check what it read.
  *   XIP            the RP2040's and RP2350's 16 MB window repeats their
  *                  flash chip (2 and 4 MB here), as the chip's address
  *                  wraps: where the Programador finds a flash's size.
@@ -118,6 +121,8 @@ typedef struct {
     uint32_t sam_ctrla, sam_ctrlb, sam_addr, sam_status, sam_intflag, sam_dsu;
     uint8_t sam_pb[512];
     uint32_t sam_boot;          /* bytes BOOTPROT keeps */
+    /* RP: the DMA's channels (read, write, count, ctrl) and its sniffer */
+    uint32_t dma[16][4], sniff_ctrl, sniff_data;
     bool xip;
     /* RTT */
     uint32_t rtt_cb;
@@ -426,11 +431,60 @@ static void sam_buffer(uint32_t a, int size, uint32_t lanes)
     }
 }
 
+/* ---- RP: the DMA ---- */
+
+static bool rp(void) { return T.chip == C_RP2040 || T.chip == C_RP2350; }
+static uint32_t dma_n(void) { return T.chip == C_RP2350 ? 16 : 12; }
+static uint32_t dma_glob(uint32_t off2040) { return 0x50000000u + off2040 + (T.chip == C_RP2350 ? 0x20 : 0); }
+
+static void dma_run(uint32_t ch)
+{
+    uint32_t *c = T.dma[ch];
+    uint32_t sniff_en = T.chip == C_RP2350 ? 1u << 25 : 1u << 23;
+    for (uint32_t i = 0; i < (c[2] & 0x0FFFFFFF); i++) {
+        uint8_t *p = ptr(c[0] + 4 * i);
+        uint32_t w = p ? (uint32_t)p[0] | p[1] << 8 | p[2] << 16 | (uint32_t)p[3] << 24 : 0;
+        if ((c[3] & sniff_en) && (T.sniff_ctrl & 1) && (T.sniff_ctrl >> 1 & 0xF) == ch && (T.sniff_ctrl >> 5 & 0xF) == 0xF)
+            T.sniff_data += w;
+    }
+    c[3] &= ~1u;                    /* done: not busy */
+}
+
+static bool dma_read(uint32_t a, uint32_t *v)
+{
+    if (a >= 0x50000000u && a < 0x50000000u + 0x40 * dma_n()) {
+        uint32_t ch = (a - 0x50000000u) / 0x40, r = a & 0x3F;
+        *v = r < 0x0C ? T.dma[ch][r / 4] : T.dma[ch][3];
+        return true;
+    }
+    if (a == dma_glob(0x434)) { *v = T.sniff_ctrl; return true; }
+    if (a == dma_glob(0x438)) { *v = T.sniff_data; return true; }
+    if (a == dma_glob(0x448)) { *v = dma_n(); return true; }
+    return false;
+}
+
+static bool dma_write(uint32_t a, uint32_t v)
+{
+    if (a >= 0x50000000u && a < 0x50000000u + 0x40 * dma_n()) {
+        uint32_t ch = (a - 0x50000000u) / 0x40, r = a & 0x3F;
+        if (r < 0x0C) T.dma[ch][r / 4] = v;
+        else if (r == 0x0C || r == 0x10) {
+            T.dma[ch][3] = v;
+            if (r == 0x0C && (v & 1)) dma_run(ch);      /* CTRL_TRIG */
+        }
+        return true;
+    }
+    if (a == dma_glob(0x434)) { T.sniff_ctrl = v; return true; }
+    if (a == dma_glob(0x438)) { T.sniff_data = v; return true; }
+    return false;
+}
+
 /* registers that are not memory; false: not one of them */
 static bool sam_read(uint32_t a, uint32_t *v);
 
 static bool reg_read(uint32_t a, uint32_t *v)
 {
+    if (rp() && dma_read(a, v)) return true;
     if (is_sam() && sam_read(a, v)) return true;
     if (coresight_id(a, v)) return true;
     switch (a) {
@@ -495,6 +549,7 @@ static bool reg_read(uint32_t a, uint32_t *v)
 
 static bool reg_write(uint32_t a, uint32_t v)
 {
+    if (rp() && dma_write(a, v)) return true;
     switch (a) {
     case 0xE000EDF0:
         if ((v >> 16) != 0xA05F) return true;

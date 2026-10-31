@@ -2969,6 +2969,8 @@ static const char blob_en__sistema_lang[] =
     "Todavía no sé leer la flash de %s\tI can't read %s's flash yet\n"
     "La flash de la placa: %u KB (donde se repite)\tThe board's flash: %u KB (where it repeats)\n"
     "A %u kHz no contestó: pruebo a %u kHz\tNo answer at %u kHz: trying %u kHz\n"
+    "Cada pedazo se lee una vez y se compara con la suma que hace su DMA (canal %d)\tEach piece is read once and checked against the sum its DMA makes (channel %d)\n"
+    "Por el cable %u ms, en la tarjeta %u ms; el chip hizo esperar %u veces\tOn the wire %u ms, on the card %u ms; the chip made it wait %u times\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5930,6 +5932,8 @@ static const char blob_de__sistema_lang[] =
     "Todavía no sé leer la flash de %s\tDen Flash von %s kann ich noch nicht lesen\n"
     "La flash de la placa: %u KB (donde se repite)\tDer Flash der Platine: %u KB (wo er sich wiederholt)\n"
     "A %u kHz no contestó: pruebo a %u kHz\tBei %u kHz keine Antwort: versuche %u kHz\n"
+    "Cada pedazo se lee una vez y se compara con la suma que hace su DMA (canal %d)\tJedes Stück wird einmal gelesen und mit der Summe seiner DMA verglichen (Kanal %d)\n"
+    "Por el cable %u ms, en la tarjeta %u ms; el chip hizo esperar %u veces\tÜber die Leitung %u ms, auf der Karte %u ms; der Chip ließ %u-mal warten\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -5937,7 +5941,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2954, 0, files_en, 1 },
-    { "de", "Deutsch", 2954, 0, files_de, 1 },
+    { "en", "English", 2956, 0, files_en, 1 },
+    { "de", "Deutsch", 2956, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

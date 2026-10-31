@@ -9475,3 +9475,5 @@ El chip está protegido contra lectura: no se lee	Der Chip ist lesegeschützt: e
 Todavía no sé leer la flash de %s	Den Flash von %s kann ich noch nicht lesen
 La flash de la placa: %u KB (donde se repite)	Der Flash der Platine: %u KB (wo er sich wiederholt)
 A %u kHz no contestó: pruebo a %u kHz	Bei %u kHz keine Antwort: versuche %u kHz
+Cada pedazo se lee una vez y se compara con la suma que hace su DMA (canal %d)	Jedes Stück wird einmal gelesen und mit der Summe seiner DMA verglichen (Kanal %d)
+Por el cable %u ms, en la tarjeta %u ms; el chip hizo esperar %u veces	Über die Leitung %u ms, auf der Karte %u ms; der Chip ließ %u-mal warten

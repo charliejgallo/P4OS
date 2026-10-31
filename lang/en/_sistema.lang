@@ -9475,3 +9475,5 @@ El chip está protegido contra lectura: no se lee	The chip is read-protected: it
 Todavía no sé leer la flash de %s	I can't read %s's flash yet
 La flash de la placa: %u KB (donde se repite)	The board's flash: %u KB (where it repeats)
 A %u kHz no contestó: pruebo a %u kHz	No answer at %u kHz: trying %u kHz
+Cada pedazo se lee una vez y se compara con la suma que hace su DMA (canal %d)	Each piece is read once and checked against the sum its DMA makes (channel %d)
+Por el cable %u ms, en la tarjeta %u ms; el chip hizo esperar %u veces	On the wire %u ms, on the card %u ms; the chip made it wait %u times

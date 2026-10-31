@@ -153,6 +153,17 @@ distinto de lo planeado abajo:
   vuelta en la misma placa lleva su bootloader: si es el que ya tiene, se
   saltea y se graba el resto. En la app, "Leer la flash" vuelve al lado de
   "Borrar" y la consola RTT pasa al lado de la sonda ("Sonda USB").
+- **El volcado de una RP, más liviano** (2026-10-31): en vez de leer dos
+  veces, cada pedazo se lee una vez y se compara con la suma de 32 bits
+  que hace la propia RP con un canal libre de su DMA y el sniffer (lee
+  ese pedazo de flash hacia un registro de sólo lectura, sin frenar el
+  núcleo ni tocar su RAM; el canal se devuelve como estaba, y el DMA
+  vuelve al reset si el firmware no lo usaba). El registro dice el tiempo
+  del cable, el de la tarjeta y cuántos WAIT hizo el chip. En la Pico de
+  pruebas bajó de 44,8 a 36,7 s los 2 MB: su flash es el límite (el blink
+  de prueba la deja en serie lenta con el oscilador interno, ~2 WAIT por
+  palabra), y la suma del DMA lee esa misma flash; con un firmware del SDK
+  (quad a 125 MHz) el límite es el cable y la suma casi no cuesta.
 - **RP2350** (agregada el 2026-10-29, sólo en el simulador: el usuario no
   tiene una): DP ADIv6 (DPIDR versión 3), el MEM-AP del núcleo 0 en la
   dirección 0x2000 con sus registros en 0xD00; la tabla de la ROM con un

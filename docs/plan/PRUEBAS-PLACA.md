@@ -580,6 +580,12 @@ Que necesitan la mano del usuario o equipos:
       sus primeros 256 KB son byte a byte lo que grabó `blink256.uf2`.
       Lento al lado del cable (cada lectura cuesta poco): el tiempo se va
       en leer dos veces y en la tarjeta; para mejorar si hace falta.
+  - Con la suma del DMA de la RP en vez de la segunda lectura: el mismo
+    SHA-256, 36,7 s (cable 35,5 s, tarjeta 1,1 s, 4,6 millones de WAIT:
+    la flash de la Pico de pruebas, en serie lenta, es el límite). Por
+    la sonda, 64 KB de su RAM salen en 0,32 s y de su flash en 1,2 s.
+  - [ ] Volcar una Pico con un firmware del SDK (flash quad a 125 MHz),
+        donde el límite tendría que pasar a ser el cable.
 - [ ] La sonda con OpenOCD (`-f interface/cmsis-dap.cfg -f
       target/rp2040.cfg`) y gdb con un breakpoint en el blink; `program`
       de OpenOCD con su algoritmo; probe-rs; y abrirla desde la fila de

@@ -140,6 +140,7 @@ struct swd {
     uint32_t dpidr, select, csw;
     bool multidrop;
     bool quiet;                     /* connect: a failure is not the job's yet (a faster clock tried first) */
+    uint32_t waits;                 /* WAITs the target answered (a slow bus behind the AP) */
     uint32_t cpuid;
     char chip[24], core[16];
     uint32_t flash_base, flash_size, sector, ram_base, ram_size;
@@ -183,6 +184,7 @@ static int xfer(swd_t *s, bool ap, bool rd, uint32_t a, uint32_t *v)
         uint32_t d = rd ? 0 : *v;
         int ack = aos_io_swd_xfer(s->w, req_of(ap, rd, a), &d, false);
         if (ack == 2) {
+            s->waits++;
             if (i > 40) aos_hal_sleep_ms(1);
             continue;
         }
@@ -1503,6 +1505,97 @@ static uint32_t rp_flash_size(swd_t *s)
     return 16u << 20;
 }
 
+/* An RP's own check of what was read: one of its DMA channels reads the
+ * same piece of flash to nowhere (a read-only timer register takes the
+ * writes) with the sniffer adding up its words, so a piece is read once
+ * over the wire and compared with the chip's sum - instead of twice, which
+ * an RP's flash, slow behind the bus, makes costly. The last idle channel
+ * is borrowed and its registers and the sniffer's put back; a DMA the
+ * firmware never took out of reset (it does not use it) is taken out for
+ * the dump and put back in. Nothing halts and no RAM of the target's is
+ * touched. RP2040: 12 channels, the
+ * sniffer at 0x434; RP2350: 16, at 0x454, its CTRL's fields further up. */
+#define RP_DMA          0x50000000u
+typedef struct {
+    int ch;                         /* -1: no idle channel, read twice instead */
+    bool was_reset;                 /* the DMA was in reset (a firmware that does not use it): back there after */
+    uint32_t sniff_ctrl, sniff_data, regs[4];
+} rp_dma_t;
+
+/* RESETS: the DMA's bit, and the register's atomic clear and set aliases */
+#define RP_RESET_DMA    (1u << 2)
+
+static uint32_t rp_resets(const swd_t *s) { return s->rp2350 ? 0x40020000u : 0x4000C000u; }
+
+static uint32_t rp_dma_reg(const swd_t *s, uint32_t off2040, uint32_t off2350) { return RP_DMA + (s->rp2350 ? off2350 : off2040); }
+
+static void rp_dma_take(swd_t *s, rp_dma_t *d)
+{
+    d->ch = -1;
+    /* a DMA still in reset answers nothing: out of it for the dump */
+    uint32_t rst = 0, done = 0;
+    if (!rd32(s, rp_resets(s), &rst)) return;
+    if (rst & RP_RESET_DMA) {
+        if (!wr32(s, rp_resets(s) + 0x3000, RP_RESET_DMA)) return;                  /* RESET, atomic clear */
+        for (int i = 0; i < 10 && !(done & RP_RESET_DMA); i++) rd32(s, rp_resets(s) + 0x8, &done);   /* RESET_DONE */
+        if (!(done & RP_RESET_DMA)) return;
+        d->was_reset = true;
+    }
+    uint32_t n = 0;
+    if (!rd32(s, rp_dma_reg(s, 0x448, 0x468), &n) || n != (s->rp2350 ? 16u : 12u)) return;   /* N_CHANNELS */
+    uint32_t busy = s->rp2350 ? 1u << 26 : 1u << 24;
+    for (int ch = (int)n - 1; ch >= 0; ch--) {
+        uint32_t ctrl = 0;
+        if (!rd32(s, RP_DMA + 0x40u * ch + 0x10, &ctrl)) return;     /* AL1_CTRL: read without triggering */
+        if (ctrl & (busy | 1)) continue;                             /* enabled or busy: the firmware's */
+        d->ch = ch;
+        for (int i = 0; i < 3; i++) rd32(s, RP_DMA + 0x40u * ch + 4u * i, &d->regs[i]);
+        d->regs[3] = ctrl;
+        rd32(s, rp_dma_reg(s, 0x434, 0x454), &d->sniff_ctrl);
+        rd32(s, rp_dma_reg(s, 0x438, 0x458), &d->sniff_data);
+        return;
+    }
+}
+
+static void rp_dma_give(swd_t *s, const rp_dma_t *d)
+{
+    if (d->was_reset) {                         /* as it was: the registers go with the reset */
+        wr32(s, rp_resets(s) + 0x2000, RP_RESET_DMA);                               /* atomic set */
+        return;
+    }
+    if (d->ch < 0) return;
+    uint32_t c = RP_DMA + 0x40u * (uint32_t)d->ch;
+    wr32(s, c + 0x00, d->regs[0]);
+    wr32(s, c + 0x04, d->regs[1]);
+    wr32(s, c + 0x08, d->regs[2]);
+    wr32(s, c + 0x10, d->regs[3]);                                   /* AL1_CTRL: no trigger */
+    wr32(s, rp_dma_reg(s, 0x434, 0x454), d->sniff_ctrl);
+    wr32(s, rp_dma_reg(s, 0x438, 0x458), d->sniff_data);
+}
+
+/* the chip's 32-bit sum of n bytes from at; false: no answer from it */
+static bool rp_dma_sum(swd_t *s, const rp_dma_t *d, uint32_t at, uint32_t n, uint32_t *sum)
+{
+    uint32_t c = RP_DMA + 0x40u * (uint32_t)d->ch, ch = (uint32_t)d->ch;
+    /* EN, DATA_SIZE word, INCR_READ, CHAIN_TO itself, TREQ unpaced, IRQ_QUIET, SNIFF_EN */
+    uint32_t ctrl = s->rp2350 ? 1u | 2u << 2 | 1u << 4 | ch << 13 | 0x3Fu << 17 | 1u << 23 | 1u << 25
+                              : 1u | 2u << 2 | 1u << 4 | ch << 11 | 0x3Fu << 15 | 1u << 21 | 1u << 23;
+    uint32_t busy = s->rp2350 ? 1u << 26 : 1u << 24;
+    if (!wr32(s, rp_dma_reg(s, 0x438, 0x458), 0) ||                                 /* SNIFF_DATA: the seed */
+        !wr32(s, rp_dma_reg(s, 0x434, 0x454), 1u | ch << 1 | 0xFu << 5) ||           /* SNIFF_CTRL: EN, this channel, SUM */
+        !wr32(s, c + 0x00, at) || !wr32(s, c + 0x04, s->rp2350 ? 0x400B0028u : 0x40054028u) ||   /* TIMERAWL, read-only */
+        !wr32(s, c + 0x08, n / 4) || !wr32(s, c + 0x0C, ctrl))                       /* CTRL_TRIG: go */
+        return false;
+    for (int i = 0; i < 200; i++) {
+        uint32_t v = 0;
+        if (!rd32(s, c + 0x10, &v)) return false;
+        if (v & 0xE0000000u) return false;                                           /* AHB, read or write error */
+        if (!(v & busy)) return rd32(s, rp_dma_reg(s, 0x438, 0x458), sum);
+        if (i > 4) aos_hal_sleep_ms(1);
+    }
+    return false;
+}
+
 /* The flash to a file on the card (opts.read_from, read_len; 0: to the
  * end), while the target runs: it is read through the bus, as any
  * debugger reads memory. Each piece read twice and compared unless
@@ -1529,16 +1622,46 @@ static bool read_flash(swd_t *s)
     fl_phase(AOS_FLASHER_READING);
     bool verify = !J.opts.no_verify;
     uint8_t *a = s->buf, *b = s->buf + 4096;
-    for (uint32_t o = 0; o < len && !fl_cancel; o += 4096) {
+    uint64_t wire_ms = 0, t_start = aos_hal_uptime_ms();
+    s->waits = 0;
+    /* an RP checks each piece with its own sum; anything else reads it twice */
+    rp_dma_t dma = { .ch = -1 };
+    if (verify && s->flash_base == 0x10000000) {
+        rp_dma_take(s, &dma);
+        if (dma.ch >= 0) fl_logf(L_INFO, _("Cada pedazo se lee una vez y se compara con la suma que hace su DMA (canal %d)"), dma.ch);
+    }
+    bool ok = true;
+    for (uint32_t o = 0; o < len && !fl_cancel && ok; o += 4096) {
         uint32_t n = len - o < 4096 ? len - o : 4096, at = s->flash_base + from + o;
         uint64_t t0 = aos_hal_uptime_ms();
-        bool r = mem_read(s, at, a, n) && (!verify || mem_read(s, at, b, n));
+        bool r;
+        int bad = 0;
+        if (verify && dma.ch >= 0) {
+            /* a piece that does not add up is read again, once */
+            uint32_t mine = 0, chip = 0;
+            for (int tries = 0; tries < 2; tries++) {
+                r = mem_read(s, at, a, n) && rp_dma_sum(s, &dma, at, n, &chip);
+                if (!r) break;
+                mine = 0;
+                for (uint32_t i = 0; i < n; i += 4) mine += (uint32_t)a[i] | a[i + 1] << 8 | a[i + 2] << 16 | (uint32_t)a[i + 3] << 24;
+                bad = mine != chip;
+                if (!bad) break;
+            }
+        } else {
+            r = mem_read(s, at, a, n) && (!verify || mem_read(s, at, b, n));
+            bad = r && verify && memcmp(a, b, n);
+        }
+        wire_ms += aos_hal_uptime_ms() - t0;
         timed(t0, n);
-        if (!r) { fl_dump_close(false, false, NULL); return fl_cancel ? false : fl_fail(_("0x%08X: falló la lectura"), (unsigned)at); }
-        if (verify && memcmp(a, b, n)) { fl_dump_close(false, false, NULL); return fl_fail(_("0x%X: dos lecturas distintas: revisá el cable"), (unsigned)at); }
-        if (!fl_dump_write(a, n)) { fl_dump_close(false, false, NULL); return false; }
+        if (!r) { ok = fl_cancel ? false : fl_fail(_("0x%08X: falló la lectura"), (unsigned)at); break; }
+        if (bad) { ok = fl_fail(_("0x%X: dos lecturas distintas: revisá el cable"), (unsigned)at); break; }
+        if (!fl_dump_write(a, n)) { ok = false; break; }
     }
-    if (fl_cancel) { fl_dump_close(false, false, NULL); return false; }
+    rp_dma_give(s, &dma);
+    if (!ok || fl_cancel) { fl_dump_close(false, false, NULL); return false; }
+    uint32_t all_ms = (uint32_t)(aos_hal_uptime_ms() - t_start);
+    fl_logf(L_INFO, _("Por el cable %u ms, en la tarjeta %u ms; el chip hizo esperar %u veces"), (unsigned)wire_ms,
+            (unsigned)(all_ms - wire_ms), (unsigned)s->waits);
     char extra[96];
     snprintf(extra, sizeof extra, "\"family\":\"swd\",\"core\":\"%s\",\"dpidr\":\"%08X\"", s->core, (unsigned)s->dpidr);
     fl_dump_close(true, verify, extra);
