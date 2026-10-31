@@ -64,8 +64,12 @@
  *               tried only in the simulator (2026-10-29).
  * Every sector the image touches is erased whole and written (bytes the
  * image does not have there come out 0xFF); then what was written is read
- * back and compared. Verifying is the only reading done by SWD: dumping a
- * chip's flash this way is left out on purpose (see the plan).
+ * back and compared.
+ *
+ * Reading the flash to the card (a dump, as the ESP and STM32 families
+ * do), through the bus while the target runs, each piece read twice; an
+ * RP's external flash measured where the XIP window repeats it. Not on a
+ * protected chip.
  *
  * Read protection is said and respected: an nRF52 with APPROTECT, or an
  * STM32 with RDP, is not written; the only thing offered is the chip's own
@@ -1381,8 +1385,26 @@ static bool write_image(swd_t *s)
             goto out;
         }
     }
+    /* an image that carries the bootloader the chip has (a dump of this
+     * board) writes the rest; another bootloader is not written */
     for (int i = 0; i < img.n; i++) {
-        if (img.r[i].addr < s->flash_base + s->boot_keep) {
+        aos_flasher_region_t *r = &img.r[i];
+        uint32_t keep = s->flash_base + s->boot_keep;
+        if (r->addr >= keep) continue;
+        uint32_t cut = keep - r->addr < r->len ? keep - r->addr : r->len;
+        bool same = (r->addr & 3) == 0 && (cut & 3) == 0;
+        for (uint32_t o = 0; same && o < cut; o += 4096) {
+            uint32_t n = cut - o < 4096 ? cut - o : 4096;
+            same = mem_read(s, r->addr + o, s->buf, n) && !memcmp(s->buf, r->data + o, n);
+        }
+        if (!same) continue;
+        r->addr += cut;
+        r->data += cut;
+        r->len -= cut;
+        fl_logf(L_INFO, _("El bootloader del archivo es el que ya tiene: queda como está"));
+    }
+    for (int i = 0; i < img.n; i++) {
+        if (img.r[i].len && img.r[i].addr < s->flash_base + s->boot_keep) {
             fl_fail(_("El bootloader ocupa los primeros %u KB (BOOTPROT): el programa va desde 0x%X, no 0x%X"),
                     (unsigned)(s->boot_keep >> 10), (unsigned)(s->flash_base + s->boot_keep), (unsigned)img.r[i].addr);
             goto out;
@@ -1461,6 +1483,66 @@ static bool write_image(swd_t *s)
 out:
     aos_flasher_image_free(&img);
     return ok;
+}
+
+/* An RP2040's or RP2350's flash is a chip of its own, its size nowhere on
+ * the bus; but the XIP window repeats it, so its first 256 bytes (the
+ * boot2, or the RP2350's image) come back at its size. 0: not known (an
+ * empty flash repeats everywhere). */
+static uint32_t rp_flash_size(swd_t *s)
+{
+    uint8_t a[256], b[256];
+    if (!mem_read(s, s->flash_base, a, sizeof a)) return 0;
+    bool blank = true;
+    for (size_t i = 0; i < sizeof a && blank; i++) blank = a[i] == 0xFF;
+    if (blank) return 0;
+    for (uint32_t size = 256u << 10; size < 16u << 20; size <<= 1) {
+        if (!mem_read(s, s->flash_base + size, b, sizeof b)) return 0;
+        if (!memcmp(a, b, sizeof a)) return size;
+    }
+    return 16u << 20;
+}
+
+/* The flash to a file on the card (opts.read_from, read_len; 0: to the
+ * end), while the target runs: it is read through the bus, as any
+ * debugger reads memory. Each piece read twice and compared unless
+ * no_verify. A protected chip is not read: its protection is the
+ * firmware's author's, and nothing here goes around it. */
+static bool read_flash(swd_t *s)
+{
+    if (s->prot) return fl_fail("%s", _("El chip está protegido contra lectura: no se lee"));
+    if (!s->flash_base && !s->flash_size && !s->ops) return fl_fail(_("Todavía no sé leer la flash de %s"), s->chip);
+    uint32_t size = s->flash_size;
+    if (!size && s->flash_base == 0x10000000) {
+        size = rp_flash_size(s);
+        if (size) fl_logf(L_INFO, _("La flash de la placa: %u KB (donde se repite)"), (unsigned)(size >> 10));
+    }
+    uint32_t from = J.opts.read_from, len = J.opts.read_len;
+    if (from >= s->flash_base) from -= s->flash_base;
+    if (!size && !len) return fl_fail("%s", _("No se sabe el tamaño de la flash: indicá cuánto leer"));
+    if (!size) size = 16u << 20;
+    from &= ~3u;
+    if (from >= size) return fl_fail(_("0x%X queda fuera de la flash (%u KB)"), (unsigned)from, (unsigned)(size >> 10));
+    if (!len || len > size - from) len = size - from;
+    len = (len + 3) & ~3u;
+    if (!fl_dump_open(s->flash_base + from, len)) return false;
+    fl_phase(AOS_FLASHER_READING);
+    bool verify = !J.opts.no_verify;
+    uint8_t *a = s->buf, *b = s->buf + 4096;
+    for (uint32_t o = 0; o < len && !fl_cancel; o += 4096) {
+        uint32_t n = len - o < 4096 ? len - o : 4096, at = s->flash_base + from + o;
+        uint64_t t0 = aos_hal_uptime_ms();
+        bool r = mem_read(s, at, a, n) && (!verify || mem_read(s, at, b, n));
+        timed(t0, n);
+        if (!r) { fl_dump_close(false, false, NULL); return fl_cancel ? false : fl_fail(_("0x%08X: falló la lectura"), (unsigned)at); }
+        if (verify && memcmp(a, b, n)) { fl_dump_close(false, false, NULL); return fl_fail(_("0x%X: dos lecturas distintas: revisá el cable"), (unsigned)at); }
+        if (!fl_dump_write(a, n)) { fl_dump_close(false, false, NULL); return false; }
+    }
+    if (fl_cancel) { fl_dump_close(false, false, NULL); return false; }
+    char extra[96];
+    snprintf(extra, sizeof extra, "\"family\":\"swd\",\"core\":\"%s\",\"dpidr\":\"%08X\"", s->core, (unsigned)s->dpidr);
+    fl_dump_close(true, verify, extra);
+    return true;
 }
 
 static bool erase_all(swd_t *s)
@@ -1689,7 +1771,7 @@ static bool run(swd_t *s)
     switch (J.job) {
     case AOS_FLASHER_JOB_DETECT: measure_clock(s); return true;
     case AOS_FLASHER_JOB_FLASH: return write_image(s);
-    case AOS_FLASHER_JOB_READ: return fl_fail("%s", _("Por SWD no se lee la flash entera: sólo se verifica lo grabado"));
+    case AOS_FLASHER_JOB_READ: return read_flash(s);
     case AOS_FLASHER_JOB_ERASE: return erase_all(s);
     case AOS_FLASHER_JOB_CONSOLE: return console(s);
     default: return false;

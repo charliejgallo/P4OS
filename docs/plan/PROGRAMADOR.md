@@ -31,7 +31,7 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
 | Familia | Ejemplos | Camino | Grabar | Leer | Fase |
 |---|---|---|---|---|---|
 | ESP32 / ESP8266 | DevKit, NodeMCU, módulos | ROM serie (hay) | hay | F1 | F1 |
-| Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, GD32 | SWD con 2-3 cables | hay: RP2040 (placa); nRF52, STM32F0/F1/F2/F4/G0/G4/L4, SAMD21/D51, RP2350 (sim) | sólo verificar | F2 |
+| Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, GD32 | SWD con 2-3 cables | hay: RP2040 (placa); nRF52, STM32F0/F1/F2/F4/G0/G4/L4, SAMD21/D51, RP2350 (sim) | hay (sim) | F2 |
 | AVR con bootloader serie | Uno, Nano, Pro Mini, Mega | STK500 v1 (optiboot) y v2 (Mega) | hay (sim) | hay (sim) | F3 |
 | AVR con USB propio | Leonardo, Micro, Pro Micro | AVR109 (Caterina), toque a 1200 baudios | hay (sim) | hay (sim) | F3 |
 | STM32 sin sonda | Blue Pill, Black Pill | bootloader serie de ST (AN3155), BOOT0 y NRST con las líneas EN/BOOT | hay (sim) | hay (sim) | F4 |
@@ -143,6 +143,16 @@ distinto de lo planeado abajo:
   total de una con el bit de seguridad (el CTRL.CE del DSU) se lo lleva,
   y lo avisa. El emulador tiene una D21J18A y una D51J19A con su DSU, su
   buffer de página, MANW y LOCKE sobre las filas del bootloader.
+- **Leer la flash por SWD** (2026-10-31): el volcado a la tarjeta como el
+  de ESP y STM32 (`firmware/volcados`, su `.json` con `"family":"swd"`),
+  todo o un rango, por el bus mientras el objetivo corre, cada pedazo
+  leído dos veces. La flash de una RP2040/RP2350 es otro chip y su tamaño
+  no está en ningún registro: la ventana XIP de 16 MB la repite, así que
+  es donde sus primeros 256 bytes vuelven a aparecer (una flash vacía no
+  se mide: hay que decir cuánto leer). Un volcado de una SAM grabado de
+  vuelta en la misma placa lleva su bootloader: si es el que ya tiene, se
+  saltea y se graba el resto. En la app, "Leer la flash" vuelve al lado de
+  "Borrar" y la consola RTT pasa al lado de la sonda ("Sonda USB").
 - **RP2350** (agregada el 2026-10-29, sólo en el simulador: el usuario no
   tiene una): DP ADIv6 (DPIDR versión 3), el MEM-AP del núcleo 0 en la
   dirección 0x2000 con sus registros en 0xD00; la tabla de la ROM con un
@@ -388,9 +398,11 @@ Lo que no se hace, y por qué:
   que no es nuestro, aunque el aparato sí lo sea. Si un chip está protegido,
   el Programador lo dice y ofrece sólo el borrado total del propio chip
   (que se lleva el firmware protegido junto con la protección).
-- **Volcar la flash por SWD queda fuera por ahora.** Sí se lee lo justo
-  para verificar lo que se acaba de grabar. El volcado de ESP por serie de la
-  F1 sigue como está.
+- **Volcar la flash por SWD** quedó fuera al principio; **se hizo el
+  2026-10-31, a pedido del usuario**, con la misma regla de arriba: es lo
+  que hacen OpenOCD, pyOCD o probe-rs con la flash de una placa propia, y
+  un chip protegido no se lee (ni se intenta nada para leerlo): el
+  Programador lo dice y ofrece sólo su borrado total.
 - Al hacer este trabajo, dos respuestas de Claude se cortaron por un filtro
   automático de seguridad, que no dice qué lo disparó. No hay un motivo más
   preciso que dar que el de arriba; el foco se achicó a grabar y verificar

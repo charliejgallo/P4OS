@@ -477,8 +477,16 @@ static void read_cb(lv_event_t *e)
     if (aos_flasher_busy() || !port_free_or_say()) return;
     aos_flasher_opts_t o = job_opts();
     S.log_from = aos_flasher_log_count();
-    /* SWD does not dump a chip: its tool there is the RTT console */
-    job_started(S.fam == AOS_FLASHER_SWD ? aos_flasher_console(S.port, &o) : aos_flasher_read(S.port, &o));
+    job_started(aos_flasher_read(S.port, &o));
+}
+
+/* SWD: what the target's firmware writes through RTT */
+static void console_cb(lv_event_t *e)
+{
+    if (aos_flasher_busy() || !port_free_or_say()) return;
+    aos_flasher_opts_t o = job_opts();
+    S.log_from = aos_flasher_log_count();
+    job_started(aos_flasher_console(S.port, &o));
 }
 
 static void bridge_cb(lv_event_t *e)
@@ -657,8 +665,7 @@ static void build_target(lv_obj_t *parent, int32_t w, bool compact)
     lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_column(row, 12, 0);
-    U.read_btn = S.fam == AOS_FLASHER_SWD ? pill(row, AOS_SYM_MESSAGE_TEXT_OUTLINE, _("Consola RTT"), AOS_C_CARD2, AOS_C_TEXT, read_cb, NULL)
-                                          : pill(row, AOS_SYM_DOWNLOAD, _("Leer la flash"), AOS_C_CARD2, AOS_C_TEXT, read_cb, NULL);
+    U.read_btn = pill(row, AOS_SYM_DOWNLOAD, _("Leer la flash"), AOS_C_CARD2, AOS_C_TEXT, read_cb, NULL);
     U.erase_btn = pill(row, AOS_SYM_ERASER, S.fam != AOS_FLASHER_AVR ? _("Borrar la flash") : U.land ? _("Borrar") : _("Borrar el programa"), AOS_C_CARD2,
                        lv_color_hex(0xFF8A80), erase_cb, NULL);
     lv_obj_set_height(U.read_btn, 64);
@@ -668,11 +675,18 @@ static void build_target(lv_obj_t *parent, int32_t w, bool compact)
         lv_obj_set_flex_grow(U.erase_btn, 1);
     }
     /* the computer's own tools: the port over the network, or, for SWD,
-     * the board as their debug probe on the OTG connector */
+     * the board as their debug probe on the OTG connector - beside the
+     * RTT console */
     row = box(c, lv_pct(100), 64);
     lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_style_pad_column(row, 12, 0);
+    if (S.fam == AOS_FLASHER_SWD) {
+        lv_obj_t *con = pill(row, AOS_SYM_MESSAGE_TEXT_OUTLINE, _("Consola RTT"), AOS_C_CARD2, AOS_C_TEXT, console_cb, NULL);
+        lv_obj_set_height(con, 64);
+        if (U.land) lv_obj_set_flex_grow(con, 1);
+    }
     lv_obj_t *br = S.fam == AOS_FLASHER_SWD
-                 ? pill(row, AOS_SYM_USB, _("Sonda para la computadora"), AOS_C_CARD2, AOS_C_TEXT, probe_cb, NULL)
+                 ? pill(row, AOS_SYM_USB, _("Sonda USB"), AOS_C_CARD2, AOS_C_TEXT, probe_cb, NULL)
                  : pill(row, AOS_SYM_LAN_CONNECT, _("Puente para la Mac"), AOS_C_CARD2, AOS_C_TEXT, bridge_cb, NULL);
     lv_obj_set_height(br, 64);
     if (U.land) lv_obj_set_flex_grow(br, 1);
@@ -1006,7 +1020,7 @@ static void refresh_job(void)
     /* the line under the phase */
     if (done && st.ok && st.job == AOS_FLASHER_JOB_READ) {
         snprintf(buf, sizeof buf, "%s  ·  SHA-256 %.12s…  ·  %s", _("En firmware/volcados"), st.out_sha256,
-                 !st.verified ? _("sin verificar") : st.family == AOS_FLASHER_AVR ? _("leído dos veces") : _("MD5 verificado"));
+                 !st.verified ? _("sin verificar") : st.family != AOS_FLASHER_ESP ? _("leído dos veces") : _("MD5 verificado"));
     } else if (done && st.ok && st.job == AOS_FLASHER_JOB_ERASE) {
         snprintf(buf, sizeof buf, _("%s sin programa: lista para grabar"), st.chip);
     } else if (done && st.phase == AOS_FLASHER_CANCELLED && st.job == AOS_FLASHER_JOB_READ) {

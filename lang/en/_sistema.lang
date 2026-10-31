@@ -9260,7 +9260,6 @@ SWCLK GPIO%d, SWDIO GPIO%d, NRST GPIO%d, ~%u kHz	SWCLK GPIO%d, SWDIO GPIO%d, NRS
 SWCLK GPIO%d, SWDIO GPIO%d, sin NRST, ~%u kHz	SWCLK GPIO%d, SWDIO GPIO%d, no NRST, ~%u kHz
 
 #: components/aos_flasher (Programador, SWD)
-Por SWD no se lee la flash entera: sólo se verifica lo grabado	Over SWD the whole flash isn't read: only what was written is verified
 
 #: components/aos_flasher (Programador, SWD)
 Objetivo reiniciado	Target restarted
@@ -9435,7 +9434,6 @@ se cerró el puente	the bridge closed
 Sonda abierta	Probe open
 Sonda cerrada	Probe closed
 No se pudo abrir la sonda	Couldn't open the probe
-Sonda para la computadora	Probe for the computer
 La computadora la tiene: OpenOCD, pyOCD o probe-rs	The computer has it: OpenOCD, pyOCD or probe-rs
 Conectá el conector OTG a la computadora	Plug the OTG connector into the computer
 COMANDOS	COMMANDS
@@ -9470,3 +9468,10 @@ El borrado total de un SAM se lleva también su bootloader	A SAM's chip erase ta
 Bootloader protegido (BOOTPROT): los primeros %u KB	Protected bootloader (BOOTPROT): the first %u KB
 El bootloader ocupa los primeros %u KB (BOOTPROT): el programa va desde 0x%X, no 0x%X	The bootloader takes the first %u KB (BOOTPROT): the program goes from 0x%X, not 0x%X
 Un .bin sin dirección va después del bootloader, a 0x%X	A .bin with no address goes after the bootloader, at 0x%X
+#: components/aos_flasher (SWD: volcado, reloj)
+Sonda USB	USB probe
+El bootloader del archivo es el que ya tiene: queda como está	The file's bootloader is the one it already has: left as it is
+El chip está protegido contra lectura: no se lee	The chip is read-protected: it is not read
+Todavía no sé leer la flash de %s	I can't read %s's flash yet
+La flash de la placa: %u KB (donde se repite)	The board's flash: %u KB (where it repeats)
+A %u kHz no contestó: pruebo a %u kHz	No answer at %u kHz: trying %u kHz

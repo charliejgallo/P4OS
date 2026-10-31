@@ -2874,7 +2874,6 @@ static const char blob_en__sistema_lang[] =
     "SWD va por los pines de un puerto del header (uart.a, uart.b): %s no es uno\tSWD goes through the pins of a header port (uart.a, uart.b): %s is not one\n"
     "SWCLK GPIO%d, SWDIO GPIO%d, NRST GPIO%d, ~%u kHz\tSWCLK GPIO%d, SWDIO GPIO%d, NRST GPIO%d, ~%u kHz\n"
     "SWCLK GPIO%d, SWDIO GPIO%d, sin NRST, ~%u kHz\tSWCLK GPIO%d, SWDIO GPIO%d, no NRST, ~%u kHz\n"
-    "Por SWD no se lee la flash entera: sólo se verifica lo grabado\tOver SWD the whole flash isn't read: only what was written is verified\n"
     "Objetivo reiniciado\tTarget restarted\n"
     "no hay una consola abierta\tno console is open\n"
     "La RP2040 contestó pero no se pudo elegir su núcleo 0\tThe RP2040 answered but its core 0 couldn't be selected\n"
@@ -2933,7 +2932,6 @@ static const char blob_en__sistema_lang[] =
     "Sonda abierta\tProbe open\n"
     "Sonda cerrada\tProbe closed\n"
     "No se pudo abrir la sonda\tCouldn't open the probe\n"
-    "Sonda para la computadora\tProbe for the computer\n"
     "La computadora la tiene: OpenOCD, pyOCD o probe-rs\tThe computer has it: OpenOCD, pyOCD or probe-rs\n"
     "Conectá el conector OTG a la computadora\tPlug the OTG connector into the computer\n"
     "COMANDOS\tCOMMANDS\n"
@@ -2965,6 +2963,12 @@ static const char blob_en__sistema_lang[] =
     "Bootloader protegido (BOOTPROT): los primeros %u KB\tProtected bootloader (BOOTPROT): the first %u KB\n"
     "El bootloader ocupa los primeros %u KB (BOOTPROT): el programa va desde 0x%X, no 0x%X\tThe bootloader takes the first %u KB (BOOTPROT): the program goes from 0x%X, not 0x%X\n"
     "Un .bin sin dirección va después del bootloader, a 0x%X\tA .bin with no address goes after the bootloader, at 0x%X\n"
+    "Sonda USB\tUSB probe\n"
+    "El bootloader del archivo es el que ya tiene: queda como está\tThe file's bootloader is the one it already has: left as it is\n"
+    "El chip está protegido contra lectura: no se lee\tThe chip is read-protected: it is not read\n"
+    "Todavía no sé leer la flash de %s\tI can't read %s's flash yet\n"
+    "La flash de la placa: %u KB (donde se repite)\tThe board's flash: %u KB (where it repeats)\n"
+    "A %u kHz no contestó: pruebo a %u kHz\tNo answer at %u kHz: trying %u kHz\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5831,7 +5835,6 @@ static const char blob_de__sistema_lang[] =
     "SWD va por los pines de un puerto del header (uart.a, uart.b): %s no es uno\tSWD läuft über die Pins eines Header-Ports (uart.a, uart.b): %s ist keiner\n"
     "SWCLK GPIO%d, SWDIO GPIO%d, NRST GPIO%d, ~%u kHz\tSWCLK GPIO%d, SWDIO GPIO%d, NRST GPIO%d, ~%u kHz\n"
     "SWCLK GPIO%d, SWDIO GPIO%d, sin NRST, ~%u kHz\tSWCLK GPIO%d, SWDIO GPIO%d, ohne NRST, ~%u kHz\n"
-    "Por SWD no se lee la flash entera: sólo se verifica lo grabado\tÜber SWD wird nicht der ganze Flash gelesen: nur das Geschriebene wird verifiziert\n"
     "Objetivo reiniciado\tZiel neu gestartet\n"
     "no hay una consola abierta\tkeine Konsole offen\n"
     "La RP2040 contestó pero no se pudo elegir su núcleo 0\tDer RP2040 antwortete, aber sein Kern 0 ließ sich nicht wählen\n"
@@ -5890,7 +5893,6 @@ static const char blob_de__sistema_lang[] =
     "Sonda abierta\tSonde offen\n"
     "Sonda cerrada\tSonde geschlossen\n"
     "No se pudo abrir la sonda\tSonde konnte nicht geöffnet werden\n"
-    "Sonda para la computadora\tSonde für den Computer\n"
     "La computadora la tiene: OpenOCD, pyOCD o probe-rs\tDer Computer hat sie: OpenOCD, pyOCD oder probe-rs\n"
     "Conectá el conector OTG a la computadora\tVerbinde den OTG-Anschluss mit dem Computer\n"
     "COMANDOS\tBEFEHLE\n"
@@ -5922,6 +5924,12 @@ static const char blob_de__sistema_lang[] =
     "Bootloader protegido (BOOTPROT): los primeros %u KB\tGeschützter Bootloader (BOOTPROT): die ersten %u KB\n"
     "El bootloader ocupa los primeros %u KB (BOOTPROT): el programa va desde 0x%X, no 0x%X\tDer Bootloader belegt die ersten %u KB (BOOTPROT): das Programm beginnt bei 0x%X, nicht 0x%X\n"
     "Un .bin sin dirección va después del bootloader, a 0x%X\tEine .bin ohne Adresse kommt hinter den Bootloader, an 0x%X\n"
+    "Sonda USB\tUSB-Sonde\n"
+    "El bootloader del archivo es el que ya tiene: queda como está\tDer Bootloader der Datei ist der, den er schon hat: er bleibt\n"
+    "El chip está protegido contra lectura: no se lee\tDer Chip ist lesegeschützt: er wird nicht gelesen\n"
+    "Todavía no sé leer la flash de %s\tDen Flash von %s kann ich noch nicht lesen\n"
+    "La flash de la placa: %u KB (donde se repite)\tDer Flash der Platine: %u KB (wo er sich wiederholt)\n"
+    "A %u kHz no contestó: pruebo a %u kHz\tBei %u kHz keine Antwort: versuche %u kHz\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -5929,7 +5937,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2950, 0, files_en, 1 },
-    { "de", "Deutsch", 2950, 0, files_de, 1 },
+    { "en", "English", 2954, 0, files_en, 1 },
+    { "de", "Deutsch", 2954, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

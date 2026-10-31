@@ -579,14 +579,14 @@ async function pageProgramador() {
       c && c.secure && flashFam === 'esp' ? h('div', { class: 'row warn' }, tr('Flash cifrada o arranque seguro: no se puede grabar desde acá')) : null,
       h('div', { class: 'row' }, h('div', { class: 'grow' }, portSel),
         h('button', { class: 'btn', disabled: st.busy, onclick: async () => { try { await post('flash/detect', { port: flashPort, family: flashFam }); load(); } catch (e) { toast(e.message, true); } } }, tr('Detectar'))),
-      flashFam === 'swd' ? h('div', { class: 'row' }, h('div', { class: 'grow' }),
-        h('button', { class: 'btn', disabled: st.busy, onclick: openConsole }, tr('Consola RTT')),
-        h('button', { class: 'btn', disabled: st.busy, onclick: openProbe, title: 'openocd -f interface/cmsis-dap.cfg · pyocd · probe-rs' }, tr('Sonda para la computadora')),
-        h('button', { class: 'btn red', disabled: st.busy, onclick: eraseFlash }, tr('Borrar la flash'))) :
       h('div', { class: 'row' }, h('div', { class: 'grow small muted' }, tr('Desde'), ' ', fromIn, ' ', tr('cuánto'), ' ', lenIn),
         h('button', { class: 'btn', disabled: st.busy, onclick: readFlash }, tr('Leer la flash')),
-        h('button', { class: 'btn', disabled: st.busy, onclick: openBridge, title: 'esptool --port rfc2217://' + location.hostname + ':4000 · avrdude -P net:' + location.hostname + ':4001' }, tr('Puente para la Mac')),
-        h('button', { class: 'btn red', disabled: st.busy, onclick: eraseFlash }, flashFam === 'avr' ? tr('Borrar el programa') : tr('Borrar la flash'))));
+        flashFam === 'swd' ? null : h('button', { class: 'btn', disabled: st.busy, onclick: openBridge, title: 'esptool --port rfc2217://' + location.hostname + ':4000 · avrdude -P net:' + location.hostname + ':4001' }, tr('Puente para la Mac')),
+        h('button', { class: 'btn red', disabled: st.busy, onclick: eraseFlash }, flashFam === 'avr' ? tr('Borrar el programa') : tr('Borrar la flash'))),
+      /* SWD: the target's RTT console, and the board as this computer's probe */
+      flashFam === 'swd' ? h('div', { class: 'row' }, h('div', { class: 'grow' }),
+        h('button', { class: 'btn', disabled: st.busy, onclick: openConsole }, tr('Consola RTT')),
+        h('button', { class: 'btn', disabled: st.busy, onclick: openProbe, title: 'openocd -f interface/cmsis-dap.cfg · pyocd · probe-rs' }, tr('Sonda para la computadora'))) : null);
     /* firmware on the card; redrawn only when it changes */
     const sig = JSON.stringify(sources.map(x => x.path + x.total)) + flashSel + st.busy + flashFam;
     if (sig !== lastSources || force) {
@@ -618,7 +618,7 @@ async function pageProgramador() {
       h('div', { class: 'prog', style: 'height:10px;margin-top:12px' }, h('div', { style: `width:${st.percent}%;${done ? 'background:var(--green)' : failed ? 'background:var(--red)' : ''}` })),
       h('div', { class: 'small muted', style: 'margin-top:8px' },
         (st.job === 'probe' ? '' : tr('%s de %s', fmtBytes(st.done), fmtBytes(st.total)) + ` · ${st.bytes_per_s ? fmtBytes(st.bytes_per_s) + '/s' : '—'} · `) +
-        (st.busy ? (st.eta_ms ? tr('faltan %s', fmtMs(st.eta_ms)) : '') : tr('en %s', fmtMs(st.elapsed_ms))) + (done && st.verified ? ' · ' + (st.family === 'avr' ? tr('verificado') : tr('MD5 verificado')) : '') +
+        (st.busy ? (st.eta_ms ? tr('faltan %s', fmtMs(st.eta_ms)) : '') : tr('en %s', fmtMs(st.elapsed_ms))) + (done && st.verified ? ' · ' + (st.family === 'esp' ? tr('MD5 verificado') : st.job === 'read' ? tr('leído dos veces') : tr('verificado')) : '') +
         (done && st.dump ? ' · SHA-256 ' + st.dump.sha256.slice(0, 16) + '…' : '')),
       failed && st.error ? h('div', { class: 'bad small', style: 'margin-top:6px' }, st.error) : null) : null);
     startBtn.disabled = st.busy || !flashSel;

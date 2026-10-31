@@ -9260,7 +9260,6 @@ SWCLK GPIO%d, SWDIO GPIO%d, NRST GPIO%d, ~%u kHz	SWCLK GPIO%d, SWDIO GPIO%d, NRS
 SWCLK GPIO%d, SWDIO GPIO%d, sin NRST, ~%u kHz	SWCLK GPIO%d, SWDIO GPIO%d, ohne NRST, ~%u kHz
 
 #: components/aos_flasher (Programador, SWD)
-Por SWD no se lee la flash entera: sólo se verifica lo grabado	Über SWD wird nicht der ganze Flash gelesen: nur das Geschriebene wird verifiziert
 
 #: components/aos_flasher (Programador, SWD)
 Objetivo reiniciado	Ziel neu gestartet
@@ -9435,7 +9434,6 @@ se cerró el puente	die Brücke wurde geschlossen
 Sonda abierta	Sonde offen
 Sonda cerrada	Sonde geschlossen
 No se pudo abrir la sonda	Sonde konnte nicht geöffnet werden
-Sonda para la computadora	Sonde für den Computer
 La computadora la tiene: OpenOCD, pyOCD o probe-rs	Der Computer hat sie: OpenOCD, pyOCD oder probe-rs
 Conectá el conector OTG a la computadora	Verbinde den OTG-Anschluss mit dem Computer
 COMANDOS	BEFEHLE
@@ -9470,3 +9468,10 @@ El borrado total de un SAM se lleva también su bootloader	Das vollständige Lö
 Bootloader protegido (BOOTPROT): los primeros %u KB	Geschützter Bootloader (BOOTPROT): die ersten %u KB
 El bootloader ocupa los primeros %u KB (BOOTPROT): el programa va desde 0x%X, no 0x%X	Der Bootloader belegt die ersten %u KB (BOOTPROT): das Programm beginnt bei 0x%X, nicht 0x%X
 Un .bin sin dirección va después del bootloader, a 0x%X	Eine .bin ohne Adresse kommt hinter den Bootloader, an 0x%X
+#: components/aos_flasher (SWD: volcado, reloj)
+Sonda USB	USB-Sonde
+El bootloader del archivo es el que ya tiene: queda como está	Der Bootloader der Datei ist der, den er schon hat: er bleibt
+El chip está protegido contra lectura: no se lee	Der Chip ist lesegeschützt: er wird nicht gelesen
+Todavía no sé leer la flash de %s	Den Flash von %s kann ich noch nicht lesen
+La flash de la placa: %u KB (donde se repite)	Der Flash der Platine: %u KB (wo er sich wiederholt)
+A %u kHz no contestó: pruebo a %u kHz	Bei %u kHz keine Antwort: versuche %u kHz

@@ -2188,3 +2188,4 @@ Sonda cerrada	Probe closed
 Sonda para la computadora	Probe for the computer
 CMSIS-DAP en el conector OTG: %s comandos, %s transferencias SWD	CMSIS-DAP on the OTG connector: %s commands, %s SWD transfers
 Cerrar la sonda	Close the probe
+leído dos veces	read twice

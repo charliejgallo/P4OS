@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **Reading a chip's flash by SWD.** "Leer la flash" works for SWD too:
+  all of it or a range, to `firmware/volcados` on the card, each piece
+  read twice, while the target runs, and written back like any dump. An
+  RP2040's or RP2350's flash size is found where the XIP window repeats
+  it. A protected chip is not read, and nothing tries to. In the
+  simulator for every emulated chip (nRF52840, STM32F411/G071, SAMD21/51,
+  RP2040, RP2350), byte for byte.
 - **SWD four to nine times faster.** The wire runs on the P4's dedicated
   GPIO: the same two pins, moved by CPU instructions and timed in cycles,
   instead of register writes over the bus. The Programador starts at

@@ -63,6 +63,9 @@
  *                  the wrong one shows), and a function runs only when the
  *                  core is let go at a stub in RAM that ends in a bkpt
  *                  (blx r7, bkpt), where it stops afterwards.
+ *   XIP            the RP2040's and RP2350's 16 MB window repeats their
+ *                  flash chip (2 and 4 MB here), as the chip's address
+ *                  wraps: where the Programador finds a flash's size.
  *   RTT            a "SEGGER RTT" control block in RAM with one up and one
  *                  down buffer. While the core runs, a line goes up every
  *                  half second, and what comes down is answered with an
@@ -273,6 +276,9 @@ static uint8_t *ptr(uint32_t a)
         if (T.chip == C_RP2040 && !T.xip) return NULL;
         return T.flash + (a - T.flash_base);
     }
+    /* the RP's XIP window is 16 MB: the flash chip repeats in it */
+    if ((T.chip == C_RP2040 || T.chip == C_RP2350) && T.flash && T.xip && a >= T.flash_base && a - T.flash_base < (16u << 20))
+        return T.flash + (a - T.flash_base) % T.flash_size;
     if (is_stm() && a < T.flash_size) return T.flash + a;                 /* the alias at 0 */
     if (T.ram && a >= RAM_BASE && a - RAM_BASE < T.ram_size) return T.ram + (a - RAM_BASE);
     if (T.rom && a < T.rom_size) return T.rom + a;
