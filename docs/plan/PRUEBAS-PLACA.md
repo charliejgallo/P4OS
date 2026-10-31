@@ -560,6 +560,15 @@ Que necesitan la mano del usuario o equipos:
   - El préstamo del OTG: con el host de pendrives en "los dos", la sonda
     abre y el host queda en 21/23; pyOCD igual que arriba; al cerrarla el
     USB vuelve solo a host en los dos, el ajuste intacto.
+- [x] SWD por los GPIO dedicados (2026-10-31, `7abf845`): la Pico en
+      `uart.b`. Detectar a 1, 4 (el valor por defecto), 8 y 9 MHz pedidos:
+      0,93, 3,8 y 5,5 MHz medidos con lo que cuesta cada llamada, un DPIDR
+      cada 52, 14 y 8 µs, 200 de 200 bien en todas; la calibración da 4060
+      kHz para 4000, techo ~9 MHz. pyOCD por la sonda: 64 KB iguales a 1,
+      4, 8, 12 y 16 MHz pedidos, 34 KB/s a 1 MHz y ~55 KB/s arriba (el
+      límite es pyOCD: una ronda USB con la sonda tarda 0,16 ms).
+- [ ] Grabar la Pico con el Programador a 4 MHz y ver la velocidad
+      (antes 25,9 KB/s a 1 MHz).
 - [ ] La sonda con OpenOCD (`-f interface/cmsis-dap.cfg -f
       target/rp2040.cfg`) y gdb con un breakpoint en el blink; `program`
       de OpenOCD con su algoritmo; probe-rs; y abrirla desde la fila de
