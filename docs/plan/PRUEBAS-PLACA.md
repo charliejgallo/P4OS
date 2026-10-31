@@ -535,6 +535,27 @@ Que necesitan la mano del usuario o equipos:
     (retardo 0): cada escritura de un GPIO cuesta casi medio microsegundo.
     Más rápido pide los GPIO dedicados del P4 o PARLIO, no este lazo.
   - La Ekobadge 2026 (desde el 2026-10-31): ver su chip, grabar y RTT.
+    Para la primera vez (el Programador ya sabe de los nRF52 nuevos, los
+    que cierran el SWD en cada reinicio, sólo en el simulador):
+    1. Buscar en la badge SWDIO, SWCLK, GND (y RESET, si está a mano):
+       un conector de 10 pines de 1,27 mm, pads de prueba o un Tag-Connect.
+       Con su propia batería o USB; el 3V3 de acá sólo si no tiene.
+    2. SWCLK al pin 12, SWDIO al 14, GND, y RESET al 11 si hay. Detectar.
+       El registro dice el chip, la flash, si está protegido, y del UICR
+       la dirección del bootloader y si va por VDDH con sus pines a 3,3 V.
+       Si dice "APPROTECT por hardware", es de las revisiones nuevas.
+    3. **Abierto:** antes de tocar nada, Leer la flash entera: es la
+       copia del firmware de fábrica (`firmware/volcados`). Para volver a
+       él, grabar ese volcado: graba página por página y deja el UICR
+       (bootloader, REGOUT0) como está. Mejor no usar "Borrar la flash"
+       en una badge abierta: se lleva el UICR (REGOUT0 se repone solo).
+    4. **Protegido:** no se lee (se respeta). Sólo queda Borrar la flash,
+       que se lleva su firmware. Si es de las nuevas, queda abierta (el
+       UICR en HwDisabled y 24 bytes de arranque); si va por VDDH, avisa
+       que sus pines bajaron a 1,8 V: desconectar y que su firmware nuevo
+       ponga REGOUT0, o grabarle uno que lo haga.
+    5. Grabar algo propio (un blink o su firmware) y la consola RTT, si
+       el firmware la trae.
   - Una RP2350 (Pico 2), si aparece una: Detectar (`DPIDR 4C013477`,
     Cortex-M33) y grabar un `.uf2` que arranque (con su IMAGE_DEF).
 - [ ] El puente del Programador (F4, 2026-10-29; probado sólo en el

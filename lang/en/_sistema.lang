@@ -9477,3 +9477,33 @@ La flash de la placa: %u KB (donde se repite)	The board's flash: %u KB (where it
 A %u kHz no contestó: pruebo a %u kHz	No answer at %u kHz: trying %u kHz
 Cada pedazo se lee una vez y se compara con la suma que hace su DMA (canal %d)	Each piece is read once and checked against the sum its DMA makes (channel %d)
 Por el cable %u ms, en la tarjeta %u ms; el chip hizo esperar %u veces	On the wire %u ms, on the card %u ms; the chip made it wait %u times
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+UICR.APPROTECT en HwDisabled y un arranque de 24 bytes que abre el SWD, como nrfjprog --recover	UICR.APPROTECT at HwDisabled and a 24-byte start that opens SWD, as nrfjprog --recover does
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+UICR.APPROTECT en HwDisabled: el SWD sigue abierto si el firmware lo abre al arrancar	UICR.APPROTECT at HwDisabled: SWD stays open if the firmware opens it at startup
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+No pude dejar el SWD abierto en el UICR	Couldn't leave SWD open in the UICR
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+APPROTECT por hardware; UICR en HwDisabled: el firmware decide si el SWD queda abierto	APPROTECT in hardware; UICR at HwDisabled: the firmware decides whether SWD stays open
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+APPROTECT por hardware y el UICR no lo abre: al reiniciar se cierra el SWD	APPROTECT in hardware and the UICR doesn't open it: SWD closes at the next reset
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+Se borró, pero el chip volvió a cerrar el SWD al reiniciarse	Erased, but the chip closed SWD again when it restarted
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+Va por VDDH y su UICR quedó sin REGOUT0: sus pines bajan a 1,8 V y este SWD es de 3,3 V	It runs from VDDH and its UICR lost REGOUT0: its pins drop to 1.8 V and this SWD is 3.3 V
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+REGOUT0 repuesto: sus pines siguen a %u,%u V	REGOUT0 put back: its pins stay at %u.%u V
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+bootloader en 0x%08X	bootloader at 0x%08X
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+%sVDDH, pines a %u,%u V	%sVDDH, pins at %u.%u V

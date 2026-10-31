@@ -2,6 +2,15 @@
 
 ## Unreleased
 
+- **The newer nRF52s by SWD.** Those made since about 2021 close their
+  debug port at every reset unless their UICR and their firmware open it.
+  After erasing one whole, the Programador leaves what Nordic's own tool
+  leaves: the UICR set to keep it open and, on the empty flash, a 24-byte
+  start that opens it, so the next reset finds it open. An erase-all also
+  puts back the chip's own pin voltage (REGOUT0), and warns when a
+  protected one, powered through VDDH, is left with its pins at 1.8 V.
+  Detect shows its bootloader's address and its pin voltage. In the
+  simulator, for the newer nRF52840 open and protected.
 - **Reading a chip's flash by SWD.** "Leer la flash" works for SWD too:
   all of it or a range, to `firmware/volcados` on the card, each piece
   read twice, while the target runs, and written back like any dump. An

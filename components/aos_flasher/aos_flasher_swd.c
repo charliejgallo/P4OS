@@ -79,6 +79,20 @@
  * G0/G4/L4's OPTR and OBL_LAUNCH, which restarts the chip), or a SAM's
  * security bit gone with the DSU's chip erase (its bootloader too).
  *
+ * The nRF52s made since about 2021 (Nordic's errata 249: an nRF52840 from
+ * build code F, an nRF52832 from G, an nRF52833 from B...) close the debug
+ * port at every reset unless both UICR.APPROTECT is HwDisabled and their
+ * firmware writes SwDisable to APPROTECT.DISABLE when it starts (nrfx,
+ * Zephyr and the nRF5 SDK copy the UICR's value there). Erasing one whole
+ * empties its UICR too, so after an erase-all such a chip gets what
+ * nrfjprog --recover leaves: UICR.APPROTECT at HwDisabled and, on an
+ * empty flash, 24 bytes at 0 that write SwDisable and sleep, so the next
+ * reset finds the port open. The next firmware written replaces them.
+ * An erase-all also takes UICR.REGOUT0, the voltage an nRF52840 powered
+ * through VDDH gives its pins (1.8 V when erased, against this end's
+ * 3.3 V): an open chip gets its own back; a closed one, unknown before,
+ * gets a warning when it runs from VDDH.
+ *
  * The RTT console: the "SEGGER RTT" control block is looked for in the
  * target's RAM while it runs (never halted); then its first up buffer is
  * read every 30 ms into the log, a line at a time, and what
@@ -153,6 +167,8 @@ struct swd {
     const flash_ops_t *ops;
     bool prot;
     bool nrf;                       /* has the nRF52's CTRL-AP */
+    bool nrf_hwap;                  /* an nRF52 with APPROTECT in hardware (errata 249) */
+    uint32_t nrf_regout0;           /* its UICR.REGOUT0 when it was open (0xFFFFFFFF: none) */
     bool adiv6;                     /* APs by address (DPIDR version 3) */
     uint32_t mem_ap;                /* the MEM-AP: an index (ADIv5), an address (ADIv6) */
     bool rp2350;
@@ -474,6 +490,75 @@ static bool nrf_program(swd_t *s, uint32_t addr, const uint8_t *d, uint32_t n)
     return wr32(s, NVMC_CONFIG, 0) && ok;
 }
 
+#define UICR_APPROTECT  0x10001208u
+#define UICR_NRFFW0     0x10001014u     /* a bootloader's address, for the MBR */
+#define UICR_REGOUT0    0x10001304u
+#define MAINREGSTATUS   0x40000640u     /* nRF52833/840: 1 when powered through VDDH */
+#define HW_DISABLED     0x5Au
+
+/* REGOUT0's VOUT in tenths of a volt (7, erased: 1.8 V) */
+static unsigned regout_dv(uint32_t r)
+{
+    static const uint8_t DV[8] = { 18, 21, 24, 27, 30, 33, 18, 18 };
+    return DV[r & 7];
+}
+
+/* An nRF52840 on VDDH with REGOUT0 gone: its pins drop to 1.8 V */
+static void nrf_check_vddh(swd_t *s)
+{
+    uint32_t hv = 0, r = 0xFFFFFFFFu;
+    if (!rd32(s, MAINREGSTATUS, &hv) || !(hv & 1) || !rd32(s, UICR_REGOUT0, &r) || (r & 7) != 7) return;
+    fl_logf(L_WARN, "%s", _("Va por VDDH y su UICR quedó sin REGOUT0: sus pines bajan a 1,8 V y este SWD es de 3,3 V"));
+}
+
+/*
+ * Whether this nRF52 has APPROTECT in hardware, from the two FICR words
+ * nrfx's nrf52_configuration_249() reads: the part, then its revision.
+ */
+static bool nrf_new_approtect(swd_t *s)
+{
+    uint32_t part = 0, rev = 0;
+    if (!rd32(s, 0x10000130, &part) || !rd32(s, 0x10000134, &rev)) return false;
+    switch (part) {
+    case 0x06: return rev >= 7;     /* nRF52832 */
+    case 0x08: return rev >= 5;     /* nRF52840 */
+    case 0x0A: return rev >= 2;     /* nRF52810 */
+    case 0x0D: return rev >= 1;     /* nRF52833 */
+    case 0x0E: return rev >= 1;     /* nRF52811 */
+    case 0x0F: return rev >= 1;     /* nRF52805 */
+    case 0x10: return rev >= 3;     /* nRF52820 */
+    default: return false;
+    }
+}
+
+/*
+ * The port kept open after an erase-all, as nrfjprog --recover leaves it:
+ * UICR.APPROTECT at HwDisabled, and on an empty flash a program of 24
+ * bytes that writes SwDisable to APPROTECT.DISABLE (0x40000558) and sleeps.
+ */
+static bool nrf_keep_open(swd_t *s)
+{
+    static const uint32_t KEEP[] = {
+        0x20001000,     /* the stack: unused */
+        0x00000009,     /* reset: the code below, Thumb */
+        0x215A4802,     /* ldr r0, =0x40000558 ; movs r1, #0x5A */
+        0xBF306001,     /* str r1, [r0] ; wfi */
+        0xBF00E7FD,     /* b wfi ; nop */
+        0x40000558,
+    };
+    uint32_t first = 0;
+    bool empty = rd32(s, 0, &first) && first == 0xFFFFFFFFu;
+    bool ok = wr32(s, NVMC_CONFIG, 1) && wr32(s, UICR_APPROTECT, HW_DISABLED) && nvmc_wait(s, 100);
+    for (int i = 0; ok && empty && i < (int)(sizeof KEEP / 4); i++)
+        ok = wr32(s, 4u * (uint32_t)i, KEEP[i]) && nvmc_wait(s, 100);
+    wr32(s, NVMC_CONFIG, 0);
+    uint32_t v = 0;
+    if (!ok || !rd32(s, UICR_APPROTECT, &v) || v != HW_DISABLED) return false;
+    fl_logf(L_INFO, "%s", empty ? _("UICR.APPROTECT en HwDisabled y un arranque de 24 bytes que abre el SWD, como nrfjprog --recover")
+                                : _("UICR.APPROTECT en HwDisabled: el SWD sigue abierto si el firmware lo abre al arrancar"));
+    return true;
+}
+
 /* CTRL-AP (AP 1): the erase that works with APPROTECT on */
 static bool nrf_ctrlap_erase(swd_t *s)
 {
@@ -484,10 +569,16 @@ static bool nrf_ctrlap_erase(swd_t *s)
         if (!ap_read(s, 1, 0x08, &st)) return false;
     }
     ap_write(s, 1, 0x04, 0);
+    if (st) return false;
+    /* open until the next reset: one with APPROTECT in hardware is kept
+     * open now, before the reset below would close it again */
+    s->nrf_hwap = nrf_new_approtect(s);
+    if (s->nrf_hwap && !nrf_keep_open(s)) fl_logf(L_WARN, "%s", _("No pude dejar el SWD abierto en el UICR"));
     ap_write(s, 1, 0x00, 1);        /* RESET */
     aos_hal_sleep_ms(10);
     ap_write(s, 1, 0x00, 0);
-    return !st;
+    aos_hal_sleep_ms(10);
+    return true;
 }
 
 static bool nrf_erase_all(swd_t *s)
@@ -495,7 +586,15 @@ static bool nrf_erase_all(swd_t *s)
     if (s->prot) return nrf_ctrlap_erase(s);
     if (!halt(s)) return false;
     bool ok = wr32(s, NVMC_CONFIG, 2) && wr32(s, NVMC_ERASEALL, 1) && nvmc_wait(s, 2000);
-    return wr32(s, NVMC_CONFIG, 0) && ok;
+    ok = wr32(s, NVMC_CONFIG, 0) && ok;
+    if (ok && (s->nrf_regout0 & 7) != 7) {
+        /* the pins' voltage it had, back before anything restarts it */
+        bool r = wr32(s, NVMC_CONFIG, 1) && wr32(s, UICR_REGOUT0, s->nrf_regout0) && nvmc_wait(s, 100);
+        wr32(s, NVMC_CONFIG, 0);
+        if (r) fl_logf(L_INFO, _("REGOUT0 repuesto: sus pines siguen a %u,%u V"), regout_dv(s->nrf_regout0) / 10, regout_dv(s->nrf_regout0) % 10);
+    }
+    if (ok && s->nrf_hwap && !nrf_keep_open(s)) fl_logf(L_WARN, "%s", _("No pude dejar el SWD abierto en el UICR"));
+    return ok;
 }
 
 static void nrf_end(swd_t *s) { (void)s; }
@@ -530,6 +629,22 @@ static bool nrf_identify(swd_t *s)
     uint32_t id0 = 0, id1 = 0;
     if (rd32(s, 0x10000060, &id0) && rd32(s, 0x10000064, &id1))
         fl_logf(L_INFO, "DEVICEID %08X%08X", (unsigned)id1, (unsigned)id0);
+    uint32_t boot = 0xFFFFFFFFu, hv = 0;
+    s->nrf_regout0 = 0xFFFFFFFFu;
+    rd32(s, UICR_NRFFW0, &boot);
+    rd32(s, UICR_REGOUT0, &s->nrf_regout0);
+    bool vddh = rd32(s, MAINREGSTATUS, &hv) && (hv & 1);
+    char about[64] = "";
+    if (boot != 0xFFFFFFFFu) snprintf(about, sizeof about, _("bootloader en 0x%08X"), (unsigned)boot);
+    if (vddh)
+        snprintf(about + strlen(about), sizeof about - strlen(about), _("%sVDDH, pines a %u,%u V"), about[0] ? ", " : "",
+                 regout_dv(s->nrf_regout0) / 10, regout_dv(s->nrf_regout0) % 10);
+    if (about[0]) fl_logf(L_INFO, "UICR: %s", about);
+    s->nrf_hwap = nrf_new_approtect(s);
+    uint32_t uicr = 0;
+    if (s->nrf_hwap && rd32(s, UICR_APPROTECT, &uicr))
+        fl_logf(L_INFO, "%s", uicr == HW_DISABLED ? _("APPROTECT por hardware; UICR en HwDisabled: el firmware decide si el SWD queda abierto")
+                                                  : _("APPROTECT por hardware y el UICR no lo abre: al reiniciar se cierra el SWD"));
     return true;
 }
 
@@ -1403,7 +1518,7 @@ static bool write_image(swd_t *s)
         r->addr += cut;
         r->data += cut;
         r->len -= cut;
-        fl_logf(L_INFO, _("El bootloader del archivo es el que ya tiene: queda como está"));
+        fl_logf(L_INFO, "%s", _("El bootloader del archivo es el que ya tiene: queda como está"));
     }
     for (int i = 0; i < img.n; i++) {
         if (img.r[i].len && img.r[i].addr < s->flash_base + s->boot_keep) {
@@ -1699,6 +1814,14 @@ static bool erase_all(swd_t *s)
     if (!ok) return fl_fail("%s", _("No se pudo borrar"));
     uint32_t ms = (uint32_t)(aos_hal_uptime_ms() - t0);
     fl_logf(L_OK, _("Flash borrada en %u,%u s"), (unsigned)(ms / 1000), (unsigned)(ms % 1000 / 100));
+    if (s->prot && s->nrf) {
+        /* the CTRL-AP reset it: open now, or closed again by its hardware */
+        if (!connect(s)) return false;
+        identify(s);
+        if (s->prot) return fl_fail("%s", _("Se borró, pero el chip volvió a cerrar el SWD al reiniciarse"));
+        nrf_check_vddh(s);
+        return true;
+    }
     if (s->prot) {
         s->prot = false;
         fl_lock();

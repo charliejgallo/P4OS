@@ -2971,6 +2971,16 @@ static const char blob_en__sistema_lang[] =
     "A %u kHz no contestó: pruebo a %u kHz\tNo answer at %u kHz: trying %u kHz\n"
     "Cada pedazo se lee una vez y se compara con la suma que hace su DMA (canal %d)\tEach piece is read once and checked against the sum its DMA makes (channel %d)\n"
     "Por el cable %u ms, en la tarjeta %u ms; el chip hizo esperar %u veces\tOn the wire %u ms, on the card %u ms; the chip made it wait %u times\n"
+    "UICR.APPROTECT en HwDisabled y un arranque de 24 bytes que abre el SWD, como nrfjprog --recover\tUICR.APPROTECT at HwDisabled and a 24-byte start that opens SWD, as nrfjprog --recover does\n"
+    "UICR.APPROTECT en HwDisabled: el SWD sigue abierto si el firmware lo abre al arrancar\tUICR.APPROTECT at HwDisabled: SWD stays open if the firmware opens it at startup\n"
+    "No pude dejar el SWD abierto en el UICR\tCouldn't leave SWD open in the UICR\n"
+    "APPROTECT por hardware; UICR en HwDisabled: el firmware decide si el SWD queda abierto\tAPPROTECT in hardware; UICR at HwDisabled: the firmware decides whether SWD stays open\n"
+    "APPROTECT por hardware y el UICR no lo abre: al reiniciar se cierra el SWD\tAPPROTECT in hardware and the UICR doesn't open it: SWD closes at the next reset\n"
+    "Se borró, pero el chip volvió a cerrar el SWD al reiniciarse\tErased, but the chip closed SWD again when it restarted\n"
+    "Va por VDDH y su UICR quedó sin REGOUT0: sus pines bajan a 1,8 V y este SWD es de 3,3 V\tIt runs from VDDH and its UICR lost REGOUT0: its pins drop to 1.8 V and this SWD is 3.3 V\n"
+    "REGOUT0 repuesto: sus pines siguen a %u,%u V\tREGOUT0 put back: its pins stay at %u.%u V\n"
+    "bootloader en 0x%08X\tbootloader at 0x%08X\n"
+    "%sVDDH, pines a %u,%u V\t%sVDDH, pins at %u.%u V\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5934,6 +5944,16 @@ static const char blob_de__sistema_lang[] =
     "A %u kHz no contestó: pruebo a %u kHz\tBei %u kHz keine Antwort: versuche %u kHz\n"
     "Cada pedazo se lee una vez y se compara con la suma que hace su DMA (canal %d)\tJedes Stück wird einmal gelesen und mit der Summe seiner DMA verglichen (Kanal %d)\n"
     "Por el cable %u ms, en la tarjeta %u ms; el chip hizo esperar %u veces\tÜber die Leitung %u ms, auf der Karte %u ms; der Chip ließ %u-mal warten\n"
+    "UICR.APPROTECT en HwDisabled y un arranque de 24 bytes que abre el SWD, como nrfjprog --recover\tUICR.APPROTECT auf HwDisabled und ein 24-Byte-Start, der SWD öffnet, wie nrfjprog --recover\n"
+    "UICR.APPROTECT en HwDisabled: el SWD sigue abierto si el firmware lo abre al arrancar\tUICR.APPROTECT auf HwDisabled: SWD bleibt offen, wenn die Firmware es beim Start öffnet\n"
+    "No pude dejar el SWD abierto en el UICR\tSWD konnte im UICR nicht offen gelassen werden\n"
+    "APPROTECT por hardware; UICR en HwDisabled: el firmware decide si el SWD queda abierto\tAPPROTECT in Hardware; UICR auf HwDisabled: die Firmware entscheidet, ob SWD offen bleibt\n"
+    "APPROTECT por hardware y el UICR no lo abre: al reiniciar se cierra el SWD\tAPPROTECT in Hardware und das UICR öffnet es nicht: beim Neustart schließt sich SWD\n"
+    "Se borró, pero el chip volvió a cerrar el SWD al reiniciarse\tGelöscht, aber der Chip hat SWD beim Neustart wieder geschlossen\n"
+    "Va por VDDH y su UICR quedó sin REGOUT0: sus pines bajan a 1,8 V y este SWD es de 3,3 V\tLäuft über VDDH und sein UICR hat kein REGOUT0 mehr: seine Pins fallen auf 1,8 V, dieses SWD hat 3,3 V\n"
+    "REGOUT0 repuesto: sus pines siguen a %u,%u V\tREGOUT0 wiederhergestellt: seine Pins bleiben bei %u,%u V\n"
+    "bootloader en 0x%08X\tBootloader bei 0x%08X\n"
+    "%sVDDH, pines a %u,%u V\t%sVDDH, Pins bei %u,%u V\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -5941,7 +5961,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2956, 0, files_en, 1 },
-    { "de", "Deutsch", 2956, 0, files_de, 1 },
+    { "en", "English", 2966, 0, files_en, 1 },
+    { "de", "Deutsch", 2966, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

@@ -9477,3 +9477,33 @@ La flash de la placa: %u KB (donde se repite)	Der Flash der Platine: %u KB (wo e
 A %u kHz no contestó: pruebo a %u kHz	Bei %u kHz keine Antwort: versuche %u kHz
 Cada pedazo se lee una vez y se compara con la suma que hace su DMA (canal %d)	Jedes Stück wird einmal gelesen und mit der Summe seiner DMA verglichen (Kanal %d)
 Por el cable %u ms, en la tarjeta %u ms; el chip hizo esperar %u veces	Über die Leitung %u ms, auf der Karte %u ms; der Chip ließ %u-mal warten
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+UICR.APPROTECT en HwDisabled y un arranque de 24 bytes que abre el SWD, como nrfjprog --recover	UICR.APPROTECT auf HwDisabled und ein 24-Byte-Start, der SWD öffnet, wie nrfjprog --recover
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+UICR.APPROTECT en HwDisabled: el SWD sigue abierto si el firmware lo abre al arrancar	UICR.APPROTECT auf HwDisabled: SWD bleibt offen, wenn die Firmware es beim Start öffnet
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+No pude dejar el SWD abierto en el UICR	SWD konnte im UICR nicht offen gelassen werden
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+APPROTECT por hardware; UICR en HwDisabled: el firmware decide si el SWD queda abierto	APPROTECT in Hardware; UICR auf HwDisabled: die Firmware entscheidet, ob SWD offen bleibt
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+APPROTECT por hardware y el UICR no lo abre: al reiniciar se cierra el SWD	APPROTECT in Hardware und das UICR öffnet es nicht: beim Neustart schließt sich SWD
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+Se borró, pero el chip volvió a cerrar el SWD al reiniciarse	Gelöscht, aber der Chip hat SWD beim Neustart wieder geschlossen
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+Va por VDDH y su UICR quedó sin REGOUT0: sus pines bajan a 1,8 V y este SWD es de 3,3 V	Läuft über VDDH und sein UICR hat kein REGOUT0 mehr: seine Pins fallen auf 1,8 V, dieses SWD hat 3,3 V
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+REGOUT0 repuesto: sus pines siguen a %u,%u V	REGOUT0 wiederhergestellt: seine Pins bleiben bei %u,%u V
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+bootloader en 0x%08X	Bootloader bei 0x%08X
+
+#: components/aos_flasher (Programador, SWD, nRF52)
+%sVDDH, pines a %u,%u V	%sVDDH, Pins bei %u,%u V

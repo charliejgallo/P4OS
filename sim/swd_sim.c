@@ -8,7 +8,15 @@
  * stm32l476 (1 MB in two banks), samd21 (an Arduino Zero: 256 KB, an 8 KB
  * bootloader under BOOTPROT), samd51 (an Adafruit M4: 512 KB, 16 KB of
  * bootloader), rp2040, rp2350, or none (nobody on the wire). ":protected" after nrf52840 starts it with APPROTECT on (its memory
- * unreachable until the CTRL-AP erases it all), after an STM32 with read
+ * unreachable until the CTRL-AP erases it all); ":rev3" makes it one of
+ * the newer nRF52840s (build code F) whose APPROTECT is in hardware: open
+ * after a reset only with UICR.APPROTECT at HwDisabled and a program in
+ * its flash that writes SwDisable (any program counts here: it plays one
+ * built with nrfx, which copies the UICR's value), and ":rev3-protected"
+ * the same one closed. Its CTRL-AP's reset closes it again, the worst a
+ * real one could do. Both rev3s run from VDDH, as a badge on a battery
+ * may, with UICR.REGOUT0 at 3.3 V and a bootloader's address in NRFFW[0]
+ * (an erase-all takes both); after an STM32 with read
  * protection set (RDP level 1: its flash unreadable by the debugger), after
  * a SAM with its security bit (only the DSU answers);
  * ":locked" after rp2350 locks its ACCESSCTRL against the debugger.
@@ -111,6 +119,9 @@ typedef struct {
     uint32_t flash_base, flash_size, page, ram_size;
     /* flash controllers */
     uint32_t nvmc_config, ctrlap_status;
+    bool rev3;                  /* nRF52840: APPROTECT in hardware (errata 249) */
+    bool ctrlap_reset;
+    uint32_t uicr_approtect, sw_disable, uicr_regout0, uicr_nrffw0;
     int stm_keys, opt_keys;
     uint32_t stm_cr, stm_sr, stm_ar;
     uint32_t optcr;             /* F411's OPTCR, G071/L476's OPTR */
@@ -176,7 +187,8 @@ static void chip_init(void)
     char name[32] = "nrf52840";
     if (e && *e) snprintf(name, sizeof name, "%s", e);
     char *colon = strchr(name, ':');
-    T.protect = colon && !strcmp(colon + 1, "protected");
+    T.protect = colon && (!strcmp(colon + 1, "protected") || !strcmp(colon + 1, "rev3-protected"));
+    T.rev3 = colon && !strncmp(colon + 1, "rev3", 4);
     T.locked = colon && !strcmp(colon + 1, "locked");
     if (colon) *colon = 0;
     T.chip = !strcmp(name, "stm32f103") ? C_STM32F103 : !strcmp(name, "rp2040") ? C_RP2040 : !strcmp(name, "rp2350") ? C_RP2350
@@ -187,6 +199,10 @@ static void chip_init(void)
     case C_NRF52840:
         T.dpidr = 0x2BA01477; T.flash_base = 0; T.flash_size = 1 << 20; T.page = 4096; T.ram_size = 256 << 10;
         T.ctrlap_status = 0;
+        T.uicr_approtect = T.rev3 ? (T.protect ? 0xFFFFFFFF : 0x5A) : (T.protect ? 0xFFFFFF00 : 0xFFFFFFFF);
+        T.sw_disable = T.protect ? 0 : 0x5A;
+        T.uicr_regout0 = T.rev3 ? 0xFFFFFFFD : 0xFFFFFFFF;     /* VOUT 5: 3.3 V */
+        T.uicr_nrffw0 = T.rev3 ? 0x000F4000 : 0xFFFFFFFF;
         break;
     case C_STM32F103:
         T.dpidr = 0x1BA01477; T.flash_base = 0x08000000; T.flash_size = 64 << 10; T.page = 1024; T.ram_size = 20 << 10;
@@ -297,6 +313,26 @@ static bool is_flash(uint32_t a)
 
 static uint32_t flash_off(uint32_t a) { return a >= T.flash_base ? a - T.flash_base : a; }
 
+/*
+ * An nRF52840's APPROTECT as a reset leaves it: an older one's from the
+ * UICR alone (0xFF in its low byte: open); a rev3's open only with the UICR
+ * at HwDisabled and its firmware's SwDisable, which a flash with a program
+ * in it writes right away (the sim runs no code).
+ */
+static void uicr_erase(void)
+{
+    T.uicr_approtect = T.uicr_regout0 = T.uicr_nrffw0 = 0xFFFFFFFF;
+}
+
+static void nrf_approtect(void)
+{
+    if (!T.rev3) { T.protect = (T.uicr_approtect & 0xFF) != 0xFF; return; }
+    uint32_t first;
+    memcpy(&first, T.flash, 4);
+    T.sw_disable = first != 0xFFFFFFFFu ? T.uicr_approtect : 0;
+    T.protect = !(T.uicr_approtect == 0x5A && T.sw_disable == 0x5A);
+}
+
 static void reset_core(void)
 {
     T.halted = T.catch_reset;
@@ -306,6 +342,7 @@ static void reset_core(void)
     T.dw_open = false;
     if (T.chip == C_STM32F411) T.optcr |= 1;                    /* OPTLOCK */
     if (T.unprotect_at_reset) { T.protect = false; T.unprotect_at_reset = false; T.f1_opt_erased = false; }
+    if (T.chip == C_NRF52840) nrf_approtect();
     T.xip = true;
     dump();
 }
@@ -500,7 +537,13 @@ static bool reg_read(uint32_t a, uint32_t *v)
         case 0x10000060: *v = 0x8E5C21A7; return true;
         case 0x10000064: *v = 0x4D2F0B13; return true;
         case 0x10000100: *v = 0x52840; return true;
-        case 0x10000104: *v = 0x41414430; return true;  /* "AAD0" */
+        case 0x10000104: *v = T.rev3 ? 0x41414630 : 0x41414430; return true;  /* "AAF0" or "AAD0" */
+        case 0x10000130: *v = 0x08; return true;
+        case 0x10000134: *v = T.rev3 ? 0x05 : 0x03; return true;
+        case 0x10001208: *v = T.uicr_approtect; return true;
+        case 0x10001014: *v = T.uicr_nrffw0; return true;
+        case 0x10001304: *v = T.uicr_regout0; return true;
+        case 0x40000640: *v = T.rev3 ? 1 : 0; return true;     /* MAINREGSTATUS: VDDH */
         case 0x4001E400: *v = 1; return true;            /* READY */
         case 0x4001E504: *v = T.nvmc_config; return true;
         }
@@ -608,8 +651,15 @@ static bool reg_write(uint32_t a, uint32_t v)
             if (T.nvmc_config == 2 && v < T.flash_size) memset(T.flash + (v & ~4095u), 0xFF, 4096);
             return true;
         case 0x4001E50C:
-            if (T.nvmc_config == 2 && v == 1) memset(T.flash, 0xFF, T.flash_size);
+            if (T.nvmc_config == 2 && v == 1) { memset(T.flash, 0xFF, T.flash_size); uicr_erase(); }
             return true;
+        case 0x10001208:
+            if (T.nvmc_config == 1) T.uicr_approtect &= v;
+            return true;
+        case 0x10001304:
+            if (T.nvmc_config == 1) T.uicr_regout0 &= v;
+            return true;
+        case 0x40000558: T.sw_disable = v; return true;
         }
     } else if (T.chip == C_STM32F103) {
         switch (a) {
@@ -960,8 +1010,13 @@ static void ap_write(uint32_t reg, uint32_t v, int *ack)
     if (apsel == 1 && T.chip == C_NRF52840) {
         if (reg == 0x04 && v == 1) {
             memset(T.flash, 0xFF, T.flash_size);
-            T.protect = false;
+            uicr_erase();
+            T.protect = false;              /* open until the next reset */
             T.ctrlap_status = 1;            /* busy, for one read */
+        }
+        if (reg == 0x00) {                  /* RESET: held at 1, the chip restarts at 0 */
+            if (v & 1) T.ctrlap_reset = true;
+            else if (T.ctrlap_reset) { T.ctrlap_reset = false; reset_core(); }
         }
         return;
     }

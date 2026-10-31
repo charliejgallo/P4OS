@@ -180,6 +180,23 @@ distinto de lo planeado abajo:
 - **Protección:** un nRF52 con APPROTECT y un STM32 con RDP no se graban;
   el nRF52 se puede borrar entero por su CTRL-AP (se va el firmware con la
   protección). El RDP del STM32 (option bytes) todavía no.
+- **Los nRF52 nuevos** (2026-10-31, para la Ekobadge; sólo en el
+  simulador): desde ~2021 (errata 249 de Nordic: un nRF52840 desde el
+  build code F, un 52832 desde el G, un 52833 desde el B...) cierran el
+  SWD en cada reinicio salvo que UICR.APPROTECT esté en HwDisabled y su
+  firmware escriba SwDisable al arrancar (nrfx, Zephyr y el SDK de Nordic
+  copian ahí el valor del UICR). Un borrado entero vacía el UICR, así que
+  después le queda lo mismo que deja `nrfjprog --recover`: el UICR en
+  HwDisabled y, con la flash vacía, 24 bytes de arranque que abren el SWD
+  y duermen; el próximo firmware los reemplaza. Se reconocen por las dos
+  palabras del FICR que lee `nrf52_configuration_249()` de nrfx. El
+  borrado también se lleva REGOUT0 (la tensión de los pines de un
+  nRF52840 que va por VDDH; vacío es 1,8 V, contra los 3,3 V de nuestro
+  SWD): a uno abierto se le repone el suyo, y uno protegido, que no se
+  pudo leer antes, avisa si va por VDDH. Detectar muestra del UICR la
+  dirección del bootloader y la tensión de los pines si va por VDDH. El
+  simulador tiene `nrf52840:rev3` y `nrf52840:rev3-protected` (por VDDH,
+  y su CTRL-AP RESET los vuelve a cerrar: el peor caso).
 - **Consola RTT** (no estaba en el plan): busca el bloque "SEGGER RTT" en
   la RAM con el objetivo corriendo (sin detenerlo), lee su buffer de
   subida cada 30 ms al registro del Programador y escribe en el de bajada
