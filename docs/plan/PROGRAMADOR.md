@@ -97,7 +97,10 @@ distinto de lo planeado abajo:
   reloj que pide el depurador (pyOCD leyó 64 KB iguales a 1, 4, 8, 12 y
   16 MHz pedidos; se estanca en ~55 KB/s por pyOCD mismo: una ronda de
   USB con la sonda tarda 0,16 ms y 100 lecturas del DP, 1,35 ms).
-  PARLIO, más rápido todavía, queda sin usar: es una sola unidad. En el simulador, `sim/swd_sim.c` emula el objetivo a nivel de
+  Grabar 256 KB en la Pico, con la verificación: 16,7 s a 1 MHz, 11,6
+  a 4 y 10,8 a 9 (más allá manda la flash QSPI de la RP2040). PARLIO,
+  más rápido todavía, queda sin usar: es una sola unidad, y no haría
+  falta. En el simulador, `sim/swd_sim.c` emula el objetivo a nivel de
   paquetes (`P4_SIM_SWD=nrf52840|stm32f103|rp2040`, `:protected`).
 - **Sin algoritmos de flash cargados en el objetivo** (ni el pack de
   probe-rs): cada familia se maneja desde acá por el bus. nRF52 por su

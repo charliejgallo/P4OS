@@ -567,8 +567,13 @@ Que necesitan la mano del usuario o equipos:
       kHz para 4000, techo ~9 MHz. pyOCD por la sonda: 64 KB iguales a 1,
       4, 8, 12 y 16 MHz pedidos, 34 KB/s a 1 MHz y ~55 KB/s arriba (el
       límite es pyOCD: una ronda USB con la sonda tarda 0,16 ms).
-- [ ] Grabar la Pico con el Programador a 4 MHz y ver la velocidad
-      (antes 25,9 KB/s a 1 MHz).
+- [x] Grabar la Pico con el Programador por los GPIO dedicados
+      (2026-10-31): `blink256.uf2` en la tarjeta (el blink de medio
+      segundo y relleno hasta 256 KB, 64 sectores), grabado y verificado:
+      16,7 s a 1 MHz (31 KB/s), **11,6 s a 4 MHz** (44 KB/s, el valor por
+      defecto) y 10,8 s a 9 MHz (48 KB/s). Más allá de 4 MHz manda la
+      propia RP2040 borrando y grabando su flash QSPI. La Pico quedó con
+      el blink de medio segundo.
 - [ ] La sonda con OpenOCD (`-f interface/cmsis-dap.cfg -f
       target/rp2040.cfg`) y gdb con un breakpoint en el blink; `program`
       de OpenOCD con su algoritmo; probe-rs; y abrirla desde la fila de
