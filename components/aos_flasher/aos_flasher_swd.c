@@ -89,7 +89,10 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define KHZ_DEFAULT     1000
+/* the clock: 4 MHz, which a few cm of wire carry; a target that does not
+ * answer at it is tried again at 1 MHz (KHZ_SAFE) before giving up */
+#define KHZ_DEFAULT     4000
+#define KHZ_SAFE        1000
 
 /* DP registers (A[3:2]) */
 #define DP_DPIDR        0x0
@@ -132,6 +135,7 @@ struct swd {
     aos_io_swd_t *w;
     uint32_t dpidr, select, csw;
     bool multidrop;
+    bool quiet;                     /* connect: a failure is not the job's yet (a faster clock tried first) */
     uint32_t cpuid;
     char chip[24], core[16];
     uint32_t flash_base, flash_size, sector, ram_base, ram_size;
@@ -341,6 +345,12 @@ static bool select_core0(swd_t *s)
     return dp_read(s, DP_DPIDR, &s->dpidr);
 }
 
+/* connect's failures: the job's, unless it is only a first try */
+static bool cfail(swd_t *s, const char *why)
+{
+    return s->quiet || fl_cancel ? false : fl_fail("%s", why);
+}
+
 static bool connect(swd_t *s)
 {
     fl_phase(AOS_FLASHER_CONNECTING);
@@ -352,7 +362,7 @@ static bool connect(swd_t *s)
     } else if (s->dpidr == DPIDR_RP2040) {
         /* awake from an earlier job, and every DP answering */
         line_reset(s);
-        if (!select_core0(s)) return fl_cancel ? false : fl_fail("%s", _("La RP2040 contestó pero no se pudo elegir su núcleo 0"));
+        if (!select_core0(s)) return cfail(s, _("La RP2040 contestó pero no se pudo elegir su núcleo 0"));
         s->multidrop = true;
     }
     if (!s->dpidr) {
@@ -367,7 +377,7 @@ static bool connect(swd_t *s)
              * line reset, as the RP2350's) */
             dormant_wake(s);
             if (!dp_read(s, DP_DPIDR, &s->dpidr))
-                return fl_cancel ? false : fl_fail("%s", _("Nadie contestó por SWD: revisá SWCLK, SWDIO, GND y que el objetivo tenga alimentación"));
+                return cfail(s, _("Nadie contestó por SWD: revisá SWCLK, SWDIO, GND y que el objetivo tenga alimentación"));
         }
     }
     /* DPIDR version 3: ADIv6, APs by address. The one ADIv6 chip known
@@ -377,13 +387,13 @@ static bool connect(swd_t *s)
         s->mem_ap = 0x2000;
     }
     clear_errors(s);
-    if (!dp_write(s, DP_CTRL, 0x50000000)) return fl_fail("%s", _("El DP no aceptó el pedido de encendido"));
+    if (!dp_write(s, DP_CTRL, 0x50000000)) return cfail(s, _("El DP no aceptó el pedido de encendido"));
     uint32_t c = 0;
     for (int i = 0; i < 100 && !fl_cancel; i++) {
         if (dp_read(s, DP_CTRL, &c) && (c & 0xA0000000u) == 0xA0000000u) break;
         aos_hal_sleep_ms(1);
     }
-    if ((c & 0xA0000000u) != 0xA0000000u) return fl_fail("%s", _("El depurador del objetivo no se encendió"));
+    if ((c & 0xA0000000u) != 0xA0000000u) return cfail(s, _("El depurador del objetivo no se encendió"));
     return true;
 }
 
@@ -1662,7 +1672,18 @@ static bool run(swd_t *s)
     uint32_t khz = J.opts.baud && J.opts.baud <= 20000 ? J.opts.baud : KHZ_DEFAULT;
     s->w = fl_swd_open(khz);
     if (!s->w) return false;
-    if (!connect(s)) return false;
+    /* the default clock first, quietly; then the safe one, for real */
+    bool fast_try = khz > KHZ_SAFE && !(J.opts.baud && J.opts.baud <= 20000);
+    s->quiet = fast_try;
+    bool up = connect(s);
+    s->quiet = false;
+    if (!up && fast_try && !fl_cancel) {
+        fl_logf(L_INFO, _("A %u kHz no contestó: pruebo a %u kHz"), (unsigned)khz, KHZ_SAFE);
+        aos_io_swd_clock(s->w, KHZ_SAFE);
+        s->multidrop = false;
+        up = connect(s);
+    }
+    if (!up) return false;
     fl_logf(L_INFO, "DPIDR %08X%s", (unsigned)s->dpidr, s->multidrop ? " (TARGETSEL 01002927)" : "");
     if (!identify(s)) return false;
     switch (J.job) {

@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- **SWD four to nine times faster.** The wire runs on the P4's dedicated
+  GPIO: the same two pins, moved by CPU instructions and timed in cycles,
+  instead of register writes over the bus. The Programador starts at
+  4 MHz (it was 1) and falls back to 1 MHz by itself when nothing
+  answers; the probe goes as fast as the debugger asks, up to ~9 MHz.
+  Measured with a Pico: a DP read every 14 µs at 4 MHz, every 8 at the
+  top (50 before). An SWD Detectar from the portal takes `"baud"` as its
+  clock in kHz, to try a wire at another speed.
 - **SAMD21 and SAMD51 by SWD:** Arduino Zero, MKR and Nano 33 IoT,
   Adafruit's M0 and M4 boards, the Seeed XIAO SAMD21 (and their kin: D1x,
   D20, L2x, C2x, E5x). The bootloader BOOTPROT protects is kept: never

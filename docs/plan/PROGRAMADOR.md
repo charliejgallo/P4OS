@@ -81,11 +81,23 @@ distinto de lo planeado abajo:
   del header (TX = SWCLK, RX = SWDIO, su EN = NRST). El mismo cable sirve
   para las dos cosas y no hizo falta tocar el parser.
 - **El motor** es `aos_io_swd_*` (`aos_io_pulse.c` y su backend
-  `aos_io_pulse_p4.c`): bit-bang por `gpio_ll`, cada paquete en una
-  sección crítica, el reloj por un lazo de espera que se calibra al abrir
-  el puerto. Medido en la placa: 1005 kHz para 1000 pedidos; el techo de
-  este camino es ~1,14 MHz (lo que cuestan las escrituras de `gpio_ll`).
-  Para 2-4 MHz harían falta los GPIO dedicados del P4 o PARLIO. En el simulador, `sim/swd_sim.c` emula el objetivo a nivel de
+  `aos_io_pulse_p4.c`): bit-bang, cada paquete en una sección crítica.
+  Primero por `gpio_ll` con un lazo de espera calibrado (1005 kHz para
+  1000 pedidos; techo ~1,14 MHz). **Desde el 2026-10-31, por los GPIO
+  dedicados del P4:** SWCLK y SWDIO son dos canales del núcleo 0 (los
+  hilos del HAL están fijos ahí), cada flanco una instrucción CSR, el
+  medio ciclo contado en ciclos de CPU y calibrado al abrir (lo que cuesta
+  cada medio ciclo además de la espera, medido con dos esperas). La
+  dirección de SWDIO sigue en GPIO_ENABLE (sólo cambia en los
+  turnarounds). Mismos pines; `gpio_ll` queda de respaldo. Medido con la
+  Pico y cables de unos 15 cm: 4000 kHz pedidos dan 4060; el techo es
+  ~9 MHz; un DPIDR cada 14 µs a 4 MHz y cada 8 µs al máximo (antes 50),
+  200 de 200 bien. El Programador arranca a 4 MHz y, si nadie contesta,
+  prueba a 1 MHz sin anotar el primer intento como error; la sonda usa el
+  reloj que pide el depurador (pyOCD leyó 64 KB iguales a 1, 4, 8, 12 y
+  16 MHz pedidos; se estanca en ~55 KB/s por pyOCD mismo: una ronda de
+  USB con la sonda tarda 0,16 ms y 100 lecturas del DP, 1,35 ms).
+  PARLIO, más rápido todavía, queda sin usar: es una sola unidad. En el simulador, `sim/swd_sim.c` emula el objetivo a nivel de
   paquetes (`P4_SIM_SWD=nrf52840|stm32f103|rp2040`, `:protected`).
 - **Sin algoritmos de flash cargados en el objetivo** (ni el pack de
   probe-rs): cada familia se maneja desde acá por el bus. nRF52 por su

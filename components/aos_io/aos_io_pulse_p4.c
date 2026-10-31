@@ -7,15 +7,15 @@
  * with the flash's cache off when the service was installed for that. It
  * is a few hundred bytes, only while a sensor has the pin open.
  *
- * swd: bit-banged on the GPIO registers (gpio_ll), each packet inside a
- * critical section, so a preemption cannot stretch a clock in the middle
- * of one (a target does not mind slow clocks, but a WAIT retried forever
- * would hide it). SWDIO is input and output at once with its pull-up; the
- * direction is the output enable. The clock comes from a delay loop, not
- * a timer, calibrated when the port opens: 512 idle clocks timed with two
- * delays give what a turn of the loop costs and what the GPIO writes cost
- * around it, and the delay for khz follows. Without that, the first guess
- * (five cycles a turn) gave 390 kHz for 1000 on the board (2026-10-29).
+ * swd: bit-banged, each packet inside a critical section, so a preemption
+ * cannot stretch a clock in the middle of one (a target does not mind slow
+ * clocks, but a WAIT retried forever would hide it). SWDIO is input and
+ * output at once with its pull-up; the direction is the output enable.
+ * The pins are two channels of the core's dedicated GPIO, moved by CSR
+ * instructions with the half clocks counted in CPU cycles (several MHz);
+ * without free channels, the GPIO registers through gpio_ll and a delay
+ * loop calibrated when the port opens (~1.1 MHz at most; the first guess,
+ * five cycles a turn, gave 390 kHz for 1000 on the board, 2026-10-29).
  * Nothing here is in internal RAM.
  *
  * shift_in: bit-banged, each clock's high time inside a critical section
@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "driver/dedic_gpio.h"
 #include "driver/gpio.h"
 #include "driver/pulse_cnt.h"
 #include "esp_attr.h"
@@ -40,7 +41,11 @@
 #include "esp_rom_sys.h"
 #include "esp_timer.h"
 #include "freertos/FreeRTOS.h"
+#include "esp_cpu.h"
+#include "esp_rom_gpio.h"
+#include "hal/dedic_gpio_cpu_ll.h"
 #include "hal/gpio_ll.h"
+#include "soc/gpio_sig_map.h"
 #include "soc/gpio_struct.h"
 
 /* the GPIO interrupt service, shared with whoever else installs it */
@@ -287,57 +292,137 @@ void aos_io_be_count_close(aos_io_count_t *c)
 
 /* ---- SWD ---- */
 
-typedef struct { uint32_t dly; } swd_p4_t;
+/* Two ways to move the pins. The fast one: both are channels of the
+ * core's dedicated GPIO (dedic_gpio), set and read with one CSR
+ * instruction each, the half clocks timed by the cycle counter - up to
+ * several MHz. The slow one, the first: gpio_ll's register writes over the
+ * bus and a delay loop, ~1.1 MHz at most; it stays as the fallback when no
+ * channels are free, and it is what runs if a caller ever moved to the
+ * other core (the channels are the opening core's: the HAL's threads are
+ * pinned to core 0, so it does not happen). SWDIO's direction is the
+ * GPIO_ENABLE register in both ways (its output-enable source forced
+ * there): it changes only at the turnarounds. */
+typedef struct {
+    uint32_t dly;               /* slow: turns of the delay loop a half clock */
+    bool     fast;
+    int      core;
+    uint32_t clk_m, dio_m, in_m;    /* their bits in the CPU's GPIO CSRs */
+    uint32_t half;              /* fast: cycles a half clock */
+    dedic_gpio_bundle_handle_t bundle;
+} swd_p4_t;
 
 static inline void swd_wait(uint32_t n) { for (volatile uint32_t i = n; i; i--) {} }
+static inline void cyc_wait(uint32_t from, uint32_t n) { while (esp_cpu_get_cycle_count() - from < n) {} }
 
 /* host drives: the target samples on the rising edge */
-static inline void swd_out(aos_io_swd_t *s, uint32_t dly, int bit)
+static inline void swd_out(aos_io_swd_t *s, const swd_p4_t *b, int bit)
 {
+    if (b->fast) {
+        uint32_t t = esp_cpu_get_cycle_count();
+        dedic_gpio_cpu_ll_write_mask(b->clk_m | b->dio_m, bit ? b->dio_m : 0);
+        cyc_wait(t, b->half);
+        t = esp_cpu_get_cycle_count();
+        dedic_gpio_cpu_ll_write_mask(b->clk_m, b->clk_m);
+        cyc_wait(t, b->half);
+        return;
+    }
     gpio_ll_set_level(&GPIO, (uint32_t)s->dio, (uint32_t)bit);
     gpio_ll_set_level(&GPIO, (uint32_t)s->clk, 0);
-    swd_wait(dly);
+    swd_wait(b->dly);
     gpio_ll_set_level(&GPIO, (uint32_t)s->clk, 1);
-    swd_wait(dly);
+    swd_wait(b->dly);
 }
 
 /* target drives: it changes on the rising edge, read before it */
-static inline int swd_in(aos_io_swd_t *s, uint32_t dly)
+static inline int swd_in(aos_io_swd_t *s, const swd_p4_t *b)
 {
+    if (b->fast) {
+        uint32_t t = esp_cpu_get_cycle_count();
+        dedic_gpio_cpu_ll_write_mask(b->clk_m, 0);
+        cyc_wait(t, b->half);
+        int v = (dedic_gpio_cpu_ll_read_in() & b->in_m) != 0;
+        t = esp_cpu_get_cycle_count();
+        dedic_gpio_cpu_ll_write_mask(b->clk_m, b->clk_m);
+        cyc_wait(t, b->half);
+        return v;
+    }
     gpio_ll_set_level(&GPIO, (uint32_t)s->clk, 0);
-    swd_wait(dly);
-    int b = gpio_ll_get_level(&GPIO, (uint32_t)s->dio);
+    swd_wait(b->dly);
+    int v = gpio_ll_get_level(&GPIO, (uint32_t)s->dio);
     gpio_ll_set_level(&GPIO, (uint32_t)s->clk, 1);
-    swd_wait(dly);
+    swd_wait(b->dly);
+    return v;
+}
+
+/* the pins back to plain GPIO outputs, at the levels they had */
+static void swd_slow(aos_io_swd_t *s, swd_p4_t *b)
+{
+    uint32_t out = dedic_gpio_cpu_ll_read_out();
+    gpio_ll_set_level(&GPIO, (uint32_t)s->clk, (out & b->clk_m) != 0);
+    gpio_ll_set_level(&GPIO, (uint32_t)s->dio, (out & b->dio_m) != 0);
+    esp_rom_gpio_connect_out_signal(s->clk, SIG_GPIO_OUT_IDX, false, false);
+    esp_rom_gpio_connect_out_signal(s->dio, SIG_GPIO_OUT_IDX, false, false);
+    b->fast = false;
+}
+
+/* the backend, inside the critical section: the fast way only on its core */
+static swd_p4_t *swd_be(aos_io_swd_t *s)
+{
+    swd_p4_t *b = s->be;
+    if (b->fast && esp_cpu_get_core_id() != b->core) swd_slow(s, b);
     return b;
 }
 
-/* 512 idle clocks (SWDIO low: the line at rest) with this delay, in us */
-static uint32_t swd_time(aos_io_swd_t *s, uint32_t dly)
+/* 512 idle clocks (SWDIO low: the line at rest), in us */
+static uint32_t swd_time(aos_io_swd_t *s, const swd_p4_t *b)
 {
     gpio_ll_set_level(&GPIO, (uint32_t)s->dio, 0);
     portENTER_CRITICAL(&s_mux);
     int64_t t0 = esp_timer_get_time();
-    for (int i = 0; i < 512; i++) swd_out(s, dly, 0);
+    for (int i = 0; i < 512; i++) swd_out(s, b, 0);
     int64_t t = esp_timer_get_time() - t0;
     portEXIT_CRITICAL(&s_mux);
     return (uint32_t)t;
 }
 
-/* The delay for s->khz: t(d) = 512 clocks x (2 waits of d turns + the
- * writes), timed at two points */
+/* The slow way's delay for s->khz: t(d) = 512 clocks x (2 waits of d
+ * turns + the writes), timed at two points. The fast way's is cycles: the
+ * half clock's, less what each costs beyond its wait; what it reaches
+ * is timed the same and said. */
 static void swd_calibrate(aos_io_swd_t *s, swd_p4_t *b)
 {
+    bool fast = b->fast;
+    b->fast = false;
     const uint32_t D1 = 4, D2 = 132;
-    uint32_t t1 = swd_time(s, D1), t2 = swd_time(s, D2);
+    b->dly = D1;
+    uint32_t t1 = swd_time(s, b);
+    b->dly = D2;
+    uint32_t t2 = swd_time(s, b);
     float turn = t2 > t1 ? (float)(t2 - t1) / (512.0f * 2 * (D2 - D1)) : 0.01f;   /* us a turn */
     float fixed = (float)t1 / 512.0f - 2 * D1 * turn;                           /* us a clock, d = 0 */
     float want = 1000.0f / (float)s->khz;                                        /* us a clock */
     float d = (want - fixed) / (2 * turn);
     b->dly = d < 0 ? 0 : (uint32_t)(d + 0.5f);
     float got = fixed + 2 * (float)b->dly * turn;
-    aos_hal_log("io", "swd: %u kHz asked, %u kHz got (delay %u; at most %u kHz)", (unsigned)s->khz,
-                (unsigned)(got > 0 ? 1000.0f / got : 0), (unsigned)b->dly, (unsigned)(fixed > 0 ? 1000.0f / fixed : 0));
+    b->fast = fast;
+    if (!fast) {
+        aos_hal_log("io", "swd: %u kHz asked, %u kHz got (delay %u; at most %u kHz)", (unsigned)s->khz,
+                    (unsigned)(got > 0 ? 1000.0f / got : 0), (unsigned)b->dly, (unsigned)(fixed > 0 ? 1000.0f / fixed : 0));
+        return;
+    }
+    /* the wait counts from before the pins' write, so what a half clock
+     * takes over it is the call and the loop's last turn: timed with a
+     * wait of 64 cycles and taken off. With none at all: the ceiling. */
+    uint32_t mhz = esp_rom_get_cpu_ticks_per_us();
+    b->half = 0;
+    uint32_t t0 = swd_time(s, b);
+    b->half = 64;
+    uint32_t t64 = swd_time(s, b);
+    uint32_t want_c = mhz * 1000u / (2 * s->khz), over = t64 * mhz / 1024 > 64 ? t64 * mhz / 1024 - 64 : 0;
+    b->half = want_c > over ? want_c - over : 0;
+    uint32_t t = swd_time(s, b);
+    aos_hal_log("io", "swd: %u kHz asked, %u kHz got (dedicated GPIO, %u cycles a half clock; at most %u kHz)", (unsigned)s->khz,
+                (unsigned)(t ? 512000u / t : 0), (unsigned)b->half, (unsigned)(t0 ? 512000u / t0 : 0));
 }
 
 bool aos_io_be_swd_open(aos_io_swd_t *s)
@@ -358,85 +443,106 @@ bool aos_io_be_swd_open(aos_io_swd_t *s)
         gpio_config(&c);
         gpio_set_level(s->nrst, 1);
     }
-    swd_calibrate(s, b);
+    /* SWCLK and SWDIO as two channels of this core's dedicated GPIO */
+    const int pins[2] = { s->clk, s->dio };
+    dedic_gpio_bundle_config_t bc = { .gpio_array = pins, .array_size = 2, .flags = { .in_en = 1, .out_en = 1 } };
+    uint32_t oo = 0, io = 0;
+    if (dedic_gpio_new_bundle(&bc, &b->bundle) == ESP_OK && dedic_gpio_get_out_offset(b->bundle, &oo) == ESP_OK &&
+        dedic_gpio_get_in_offset(b->bundle, &io) == ESP_OK) {
+        b->clk_m = 1u << oo;
+        b->dio_m = 1u << (oo + 1);
+        b->in_m = 1u << (io + 1);
+        b->core = esp_cpu_get_core_id();
+        dedic_gpio_cpu_ll_write_mask(b->clk_m | b->dio_m, b->clk_m | b->dio_m);
+        /* the direction stays GPIO_ENABLE's, as the slow way has it */
+        gpio_ll_set_output_enable_ctrl(&GPIO, (uint8_t)s->clk, false, false);
+        gpio_ll_set_output_enable_ctrl(&GPIO, (uint8_t)s->dio, false, false);
+        gpio_ll_output_enable(&GPIO, (uint32_t)s->clk);
+        gpio_ll_output_enable(&GPIO, (uint32_t)s->dio);
+        b->fast = true;
+    } else {
+        if (b->bundle) dedic_gpio_del_bundle(b->bundle);
+        b->bundle = NULL;
+        aos_hal_log("io", "swd: no dedicated GPIO channels free, the slow way");
+    }
     s->be = b;
+    swd_calibrate(s, b);
     return true;
 }
 
 bool aos_io_be_swd_clock(aos_io_swd_t *s)
 {
-    /* idle clocks with SWDIO low are what the line does between packets */
     swd_calibrate(s, s->be);
     return true;
 }
 
 bool aos_io_be_swd_seq(aos_io_swd_t *s, const uint8_t *bits, int n)
 {
-    uint32_t dly = ((swd_p4_t *)s->be)->dly;
     gpio_ll_output_enable(&GPIO, (uint32_t)s->dio);
     portENTER_CRITICAL(&s_mux);
-    for (int i = 0; i < n; i++) swd_out(s, dly, bits[i >> 3] >> (i & 7) & 1);
+    const swd_p4_t *b = swd_be(s);
+    for (int i = 0; i < n; i++) swd_out(s, b, bits[i >> 3] >> (i & 7) & 1);
     portEXIT_CRITICAL(&s_mux);
     return true;
 }
 
 bool aos_io_be_swd_seq_in(aos_io_swd_t *s, uint8_t *bits, int n)
 {
-    uint32_t dly = ((swd_p4_t *)s->be)->dly;
     gpio_ll_output_disable(&GPIO, (uint32_t)s->dio);
     portENTER_CRITICAL(&s_mux);
-    for (int i = 0; i < n; i++) bits[i >> 3] |= (uint8_t)(swd_in(s, dly) << (i & 7));
+    const swd_p4_t *b = swd_be(s);
+    for (int i = 0; i < n; i++) bits[i >> 3] |= (uint8_t)(swd_in(s, b) << (i & 7));
     portEXIT_CRITICAL(&s_mux);
     return true;
 }
 
 int aos_io_be_swd_xfer(aos_io_swd_t *s, uint8_t req, uint32_t *data, bool no_ack)
 {
-    uint32_t dly = ((swd_p4_t *)s->be)->dly;
     bool rd = req & 0x04;
     int ack = 0, ret;
     portENTER_CRITICAL(&s_mux);
+    const swd_p4_t *b = swd_be(s);
     gpio_ll_output_enable(&GPIO, (uint32_t)s->dio);
-    for (int i = 0; i < 8; i++) swd_out(s, dly, req >> i & 1);
+    for (int i = 0; i < 8; i++) swd_out(s, b, req >> i & 1);
     gpio_ll_output_disable(&GPIO, (uint32_t)s->dio);
-    swd_in(s, dly);                                         /* turnaround */
-    for (int i = 0; i < 3; i++) ack |= swd_in(s, dly) << i;
+    swd_in(s, b);                                           /* turnaround */
+    for (int i = 0; i < 3; i++) ack |= swd_in(s, b) << i;
     if (no_ack && !rd) ack = 1;
     if (ack == 1 && rd) {
         uint32_t v = 0;
         int par = 0;
         for (int i = 0; i < 32; i++) {
-            int b = swd_in(s, dly);
-            v |= (uint32_t)b << i;
-            par ^= b;
+            int bit = swd_in(s, b);
+            v |= (uint32_t)bit << i;
+            par ^= bit;
         }
-        int p = swd_in(s, dly);
-        swd_in(s, dly);                                     /* turnaround */
+        int p = swd_in(s, b);
+        swd_in(s, b);                                       /* turnaround */
         gpio_ll_output_enable(&GPIO, (uint32_t)s->dio);
         *data = v;
         ret = p == par ? 1 : -1;
     } else if (ack == 1) {
-        swd_in(s, dly);                                     /* turnaround */
+        swd_in(s, b);                                       /* turnaround */
         gpio_ll_output_enable(&GPIO, (uint32_t)s->dio);
         int par = 0;
         for (int i = 0; i < 32; i++) {
-            int b = (int)(*data >> i & 1);
-            swd_out(s, dly, b);
-            par ^= b;
+            int bit = (int)(*data >> i & 1);
+            swd_out(s, b, bit);
+            par ^= bit;
         }
-        swd_out(s, dly, par);
+        swd_out(s, b, par);
         ret = 1;
     } else if (ack == 2 || ack == 4) {
-        swd_in(s, dly);
+        swd_in(s, b);
         gpio_ll_output_enable(&GPIO, (uint32_t)s->dio);
         ret = ack;
     } else {
         /* nobody, or garbage: let a data phase go by, then take the line */
-        for (int i = 0; i < 34; i++) swd_in(s, dly);
+        for (int i = 0; i < 34; i++) swd_in(s, b);
         gpio_ll_output_enable(&GPIO, (uint32_t)s->dio);
         ret = ack ? ack : 7;
     }
-    for (int i = 0; i < 2; i++) swd_out(s, dly, 0);         /* idle */
+    for (int i = 0; i < 2; i++) swd_out(s, b, 0);           /* idle */
     portEXIT_CRITICAL(&s_mux);
     return ret;
 }
@@ -448,10 +554,12 @@ bool aos_io_be_swd_nrst(aos_io_swd_t *s, bool assert)
 
 void aos_io_be_swd_close(aos_io_swd_t *s)
 {
+    swd_p4_t *b = s->be;
+    if (b->bundle) dedic_gpio_del_bundle(b->bundle);
     /* the pins back to inputs: the target keeps running on its own */
     gpio_reset_pin(s->clk);
     gpio_reset_pin(s->dio);
     if (s->nrst >= 0) gpio_reset_pin(s->nrst);
-    free(s->be);
+    free(b);
     s->be = NULL;
 }

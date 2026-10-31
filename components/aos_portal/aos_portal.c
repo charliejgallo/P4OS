@@ -1246,7 +1246,10 @@ static void api_flash_detect(aos_httpd_req_t *r)
 {
     cJSON *b = body_json(r);
     const char *port = jstr(b, "port");
+    const cJSON *baud = cJSON_GetObjectItemCaseSensitive(b, "baud");
     aos_flasher_opts_t o = { .family = flash_family(b) };
+    /* SWD: "baud" is the clock in kHz, to try a wire at another speed */
+    if (o.family == AOS_FLASHER_SWD && cJSON_IsNumber(baud)) o.baud = (uint32_t)baud->valuedouble;
     bool ok = aos_flasher_detect_ex(port && port[0] ? port : "uart.b", &o);
     cJSON_Delete(b);
     if (ok) send_ok(r);
