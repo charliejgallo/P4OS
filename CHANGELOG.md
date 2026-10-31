@@ -14,7 +14,8 @@
   setting stays as it was. In the simulator, pyOCD drives it over TCP
   (`tools/swd_test/dap_tcp.py`) against the emulated nRF52840, STM32F103
   and RP2040 (multidrop included): halt, registers, RAM, flash, a step.
-  Not tried on the board yet.
+  On the board, pyOCD on a Mac debugged a Pico through it: multidrop,
+  halt, registers, a step, RAM, and its flash read at 35.7 KB/s.
 - **A bridge for the computer's tools.** "Puente para la Mac" lends the
   Programador's port over TCP until it is closed: RFC 2217 on 4000 for
   esptool and pyserial (`--port rfc2217://p4os.local:4000`, with its

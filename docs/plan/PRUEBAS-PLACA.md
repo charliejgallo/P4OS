@@ -546,22 +546,25 @@ Que necesitan la mano del usuario o equipos:
     desde la red de casa y negocia RFC 2217 con pyserial (velocidad a
     230400 incluida). Sin un ESP32 en el puerto todavía (está la Pico por
     SWD), así que esptool queda para cuando haya uno conectado.
-- [ ] La sonda CMSIS-DAP del Programador (F5, 2026-10-30; probada sólo en
-      el simulador con pyOCD por TCP): la Pico en `uart.b` por SWD como
-      siempre, el conector OTG de la placa a la Mac, "Sonda para la
-      computadora". En la Mac:
-  - `pyocd list`: aparece "P4OS ... CMSIS-DAP" sin drivers.
-  - `pyocd commander -t rp2040`: halt, `reg`, `read32 0x20000000`, `step`,
-    `go`; el multidrop por `DAP_SWD_Sequence` es lo que el simulador sólo
-    imita.
-  - `openocd -f interface/cmsis-dap.cfg -c "transport select swd" -f
-    target/rp2040.cfg` y gdb con un breakpoint en el blink; y `program` de
-    OpenOCD, que graba con su propio algoritmo.
-  - Al cerrar la sonda el USB vuelve al modo que tenía (Ajustes → USB).
-  - Abrirla desde Ajustes → USB (fila "Sonda") con el host de pendrives en
-    "los dos": el host queda en 21/23 mientras dura, y al cerrarla (otro
-    modo en Ajustes) vuelve a los dos sin haber cambiado su ajuste.
-  - La velocidad: cuánto tarda pyOCD en leer 64 KB de la flash.
+- [x] La sonda CMSIS-DAP del Programador (F5, 2026-10-30, `adfe1b2`): la
+      Pico en `uart.b` (SWCLK al pin 12, SWDIO al 14, GND), el conector
+      OTG de la placa a la Mac, pyOCD 0.46 en la Mac:
+  - La primera vez macOS pide permiso para el accesorio nuevo, y hasta
+    aceptarlo la deja a medio enumerar (en `ioreg`, `!registered`);
+    después aparece en High Speed y `pyocd list` la muestra como "P4OS
+    p4os CMSIS-DAP", sin drivers.
+  - Con `-t rp2040`: conecta en 0,04 s con el multidrop (TARGETSEL por
+    `DAP_SWD_Sequence`, DPIDR 0BC12477, CHIP_ID 10002927), frena el blink,
+    lee los registros, un paso, 1 KB de RAM ida y vuelta, **64 KB de la
+    flash en 1,8 s (35,7 KB/s)**, y la suelta corriendo.
+  - El préstamo del OTG: con el host de pendrives en "los dos", la sonda
+    abre y el host queda en 21/23; pyOCD igual que arriba; al cerrarla el
+    USB vuelve solo a host en los dos, el ajuste intacto.
+- [ ] La sonda con OpenOCD (`-f interface/cmsis-dap.cfg -f
+      target/rp2040.cfg`) y gdb con un breakpoint en el blink; `program`
+      de OpenOCD con su algoritmo; probe-rs; y abrirla desde la fila de
+      Ajustes → USB (en el simulador anduvo; en la placa se abrió por la
+      API, que es el mismo trabajo).
 - [ ] Programador con STM32 por su bootloader serie (F4, 2026-10-29;
       probado sólo en el simulador contra `tools/fake_stm32_boot.py`): una
       Blue Pill o Black Pill en `uart.b` (TX al PA10, RX al PA9, EN al

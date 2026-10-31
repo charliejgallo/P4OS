@@ -271,8 +271,11 @@ para los chips que el Programador no conoce.
   núcleo, frena, escribe y lee registros, 1 KB de RAM ida y vuelta, la
   flash, un paso, y la suelta. El emulador ganó para esto una tabla ROM de
   CoreSight, el paso a paso y el TARGETSEL hecho de secuencias.
-- **Sin probar en la placa**: falta la Mac por el cable OTG con OpenOCD o
-  pyOCD contra la Pico (`docs/plan/PRUEBAS-PLACA.md`).
+- **En la placa, el mismo día**, con la Pico del usuario y pyOCD en la Mac
+  por el cable OTG: multidrop, frenar, registros, un paso, RAM, y la flash
+  a 35,7 KB/s (el Programador graba a ~26 KB/s por el mismo cable). El
+  préstamo del OTG también anduvo. Falta OpenOCD con gdb y probe-rs
+  (`docs/plan/PRUEBAS-PLACA.md`).
 
 ## F6: el resto de los caminos
 

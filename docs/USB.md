@@ -166,6 +166,10 @@ the middle comes back with the host as chosen (`s_host_lent`,
 `host_map_now()` in `aos_usb_p4.c`). Turning the host on or off, or moving
 its pins, while the probe runs leaves the probe alone.
 
+**The first time on a Mac**, macOS asks whether to allow the new accessory,
+and until it is allowed the device stays half enumerated (`ioreg` shows it
+`!registered`, and no debugger sees it); after that it is there at once.
+
 What the computer sees: `303A:4020`, "P4OS <name> CMSIS-DAP", one vendor
 interface named "P4OS CMSIS-DAP" with a bulk OUT and a bulk IN (512 bytes
 at High Speed, 64 at Full). The debuggers find it by that name, with no
