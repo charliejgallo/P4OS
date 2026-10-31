@@ -617,6 +617,17 @@ Que necesitan la mano del usuario o equipos:
       de OpenOCD con su algoritmo; probe-rs; y abrirla desde la fila de
       Ajustes → USB (en el simulador anduvo; en la placa se abrió por la
       API, que es el mismo trabajo).
+  - Preparado el 2026-10-31: OpenOCD 0.12, probe-rs 0.32 y
+    arm-none-eabi-gdb 18.1 en la Mac (Homebrew), y
+    `tools/swd_test/debuggers.sh rp2040|nrf52 [imagen]`, que hace todo de
+    una (probe-rs la lista; OpenOCD conecta, frena, lee y sigue; gdb con
+    un breakpoint de hardware en el reset handler; `program` si se le da
+    una imagen; probe-rs lee la flash). Los descriptores coinciden con lo
+    que pide el driver CMSIS-DAP v2 de OpenOCD 0.12 (interfaz vendor
+    "CMSIS-DAP", bulk OUT y después IN), y el TARGETSEL de la RP2040 lo
+    manda por DAP_SWD_Sequence (33 bits), que la sonda maneja. OpenOCD y
+    probe-rs sólo hablan USB: esto no corre contra el simulador. Con el
+    cable de la Mac en el OTG, nada en el enchufe "2.0".
 - [ ] Programador con STM32 por su bootloader serie (F4, 2026-10-29;
       probado sólo en el simulador contra `tools/fake_stm32_boot.py`): una
       Blue Pill o Black Pill en `uart.b` (TX al PA10, RX al PA9, EN al
