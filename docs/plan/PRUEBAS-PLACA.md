@@ -576,6 +576,13 @@ Que necesitan la mano del usuario o equipos:
       se quiere el reset. Detectar (STM32F411, 512 KB, sin página: sectores),
       grabar un `.bin` o `.hex` que cruce el sector 4 (64 KB), verificar,
       borrar todo. Y si aparece una con RDP, que "Borrar" la deje limpia.
+- [ ] Una SAMD21 o SAMD51 por SWD (2026-10-30, sólo en el simulador): una
+      Seeed XIAO SAMD21 (SWCLK y SWDIO en sus pads de abajo), una Arduino
+      Zero (su conector SWD de 10 pines) o una Adafruit M0/M4, al pin 12 y
+      14 de `uart.b` y GND. Detectar (BOOTPROT dice el bootloader), grabar
+      el `.bin` que exporta el IDE de Arduino (va solo a 0x2000 en una D21,
+      0x4000 en una D51), que arranque;
+      "Borrar" y ver que el bootloader UF2 sigue (doble toque al reset).
 - [ ] Programador con Arduino (F3, 2026-10-29, sin instalar; probado sólo
       en el simulador contra `tools/fake_avr_boot.py`). En la placa:
   - Un Uno o un Nano por USB (`usb0`, reset por DTR): Detectar (firma y

@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **SAMD21 and SAMD51 by SWD:** Arduino Zero, MKR and Nano 33 IoT,
+  Adafruit's M0 and M4 boards, the Seeed XIAO SAMD21 (and their kin: D1x,
+  D20, L2x, C2x, E5x). The bootloader BOOTPROT protects is kept: never
+  written or erased, an image over it refused with where a program for the
+  board starts, and "Borrar" removes the program only. A chip with its
+  security bit set is cleared by its own chip erase, bootloader included,
+  and says so. In the simulator against an emulated D21 and D51.
 - **More STM32s by SWD:** the F2/F4 (the Black Pill's F401 and F411, the
   F405/407, F446...) through their sector-based flash controller, and the
   G0, G4 and L4 through the one they share (2 KB pages, double words, a

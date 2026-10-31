@@ -18,7 +18,8 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
 - **Pico (RP2040) en BOOTSEL**: es un disco USB; copiar un `.uf2` a `/usb` lo
   graba (`docs/USB.md`). Fuera del Programador.
 - **Terminal serie**: monitor de los UART del header y los USB.
-- **SWD** (F2, sin publicar): nRF52, STM32F0/F1/F2/F4/G0/G4/L4, RP2040 y RP2350; grabar,
+- **SWD** (F2, sin publicar): nRF52, STM32F0/F1/F2/F4/G0/G4/L4, SAMD21/D51 (y sus
+  parientes D1x/D20/L2x/C2x/E5x), RP2040 y RP2350; grabar,
   verificar, borrar entero y la consola RTT.
 - **STM32 por su bootloader serie** (F4, sin publicar): grabar, verificar,
   leer y borrar, con RDP respetado.
@@ -30,7 +31,7 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
 | Familia | Ejemplos | Camino | Grabar | Leer | Fase |
 |---|---|---|---|---|---|
 | ESP32 / ESP8266 | DevKit, NodeMCU, módulos | ROM serie (hay) | hay | F1 | F1 |
-| Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, GD32 | SWD con 2-3 cables | hay: RP2040 (placa); nRF52, STM32F0/F1/F2/F4/G0/G4/L4, RP2350 (sim) | sólo verificar | F2 |
+| Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, GD32 | SWD con 2-3 cables | hay: RP2040 (placa); nRF52, STM32F0/F1/F2/F4/G0/G4/L4, SAMD21/D51, RP2350 (sim) | sólo verificar | F2 |
 | AVR con bootloader serie | Uno, Nano, Pro Mini, Mega | STK500 v1 (optiboot) y v2 (Mega) | hay (sim) | hay (sim) | F3 |
 | AVR con USB propio | Leonardo, Micro, Pro Micro | AVR109 (Caterina), toque a 1200 baudios | hay (sim) | hay (sim) | F3 |
 | STM32 sin sonda | Blue Pill, Black Pill | bootloader serie de ST (AN3155), BOOT0 y NRST con las líneas EN/BOOT | hay (sim) | hay (sim) | F4 |
@@ -111,6 +112,22 @@ distinto de lo planeado abajo:
   option bytes y escribir la llave 0x5AA5 en RDP (carga al reiniciar); en
   un F2/F4, RDP a 0xAA en OPTCR; en G0/G4/L4, RDP a 0xAA en OPTR, OPTSTRT
   y OBL_LAUNCH, que reinicia el chip (el registro pide tocar Detectar).
+- **SAMD21 y SAMD51** (2026-10-30, sólo en el simulador): las Arduino Zero,
+  MKR y Nano 33 IoT, las Adafruit M0 y M4, las Seeed XIAO SAMD21; y por la
+  misma controladora D10/D11/D20, L21/L22, C20/C21 y E51/E53/E54. El DSU
+  dice el chip (DID) y si está protegido (STATUSB.PROT), y el debugger lo
+  alcanza en su dirección externa (+0x100) aunque el chip esté protegido.
+  El NVMCTRL graba por un buffer de página que se llena escribiendo en las
+  direcciones de la flash, y borra filas de cuatro páginas (256 bytes en
+  una D21) o bloques de 8 KB (D51). **El bootloader se respeta:** lo que
+  cubre BOOTPROT (8 KB en una Zero, 16 KB en una M4) no se graba ni se
+  borra; una imagen que lo pisa se rechaza diciendo desde dónde va un
+  programa para esa placa, y "Borrar" deja el bootloader. Un `.bin` sin
+  `@0x` en el nombre va solo después del bootloader, donde lo enlazan
+  Arduino y Adafruit. Sólo el borrado
+  total de una con el bit de seguridad (el CTRL.CE del DSU) se lo lleva,
+  y lo avisa. El emulador tiene una D21J18A y una D51J19A con su DSU, su
+  buffer de página, MANW y LOCKE sobre las filas del bootloader.
 - **RP2350** (agregada el 2026-10-29, sólo en el simulador: el usuario no
   tiene una): DP ADIv6 (DPIDR versión 3), el MEM-AP del núcleo 0 en la
   dirección 0x2000 con sus registros en 0xD00; la tabla de la ROM con un

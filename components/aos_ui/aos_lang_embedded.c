@@ -2959,7 +2959,12 @@ static const char blob_en__sistema_lang[] =
     "%u sectores, %u KB, desde 0x%08X\t%u sectors, %u KB, from 0x%08X\n"
     "Quitando la protección (RDP): el chip borra toda su flash\tRemoving the protection (RDP): the chip erases all of its flash\n"
     "Protección quitada y flash borrada en %u,%u s\tProtection removed and flash erased in %u.%u s\n"
-    "El chip se reinició para cargar sus option bytes: tocá Detectar\tThe chip restarted to load its option bytes: tap Detect\n"
+    "El chip se reinició sin la protección: tocá Detectar\tThe chip restarted without the protection: tap Detect\n"
+    "El bootloader (%u KB, protegido por BOOTPROT) queda\tThe bootloader (%u KB, protected by BOOTPROT) stays\n"
+    "El borrado total de un SAM se lleva también su bootloader\tA SAM's chip erase takes its bootloader too\n"
+    "Bootloader protegido (BOOTPROT): los primeros %u KB\tProtected bootloader (BOOTPROT): the first %u KB\n"
+    "El bootloader ocupa los primeros %u KB (BOOTPROT): el programa va desde 0x%X, no 0x%X\tThe bootloader takes the first %u KB (BOOTPROT): the program goes from 0x%X, not 0x%X\n"
+    "Un .bin sin dirección va después del bootloader, a 0x%X\tA .bin with no address goes after the bootloader, at 0x%X\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5911,7 +5916,12 @@ static const char blob_de__sistema_lang[] =
     "%u sectores, %u KB, desde 0x%08X\t%u Sektoren, %u KB, ab 0x%08X\n"
     "Quitando la protección (RDP): el chip borra toda su flash\tSchutz (RDP) wird entfernt: der Chip löscht seinen ganzen Flash\n"
     "Protección quitada y flash borrada en %u,%u s\tSchutz entfernt und Flash gelöscht in %u,%u s\n"
-    "El chip se reinició para cargar sus option bytes: tocá Detectar\tDer Chip hat neu gestartet, um seine Option Bytes zu laden: tippe auf Erkennen\n"
+    "El chip se reinició sin la protección: tocá Detectar\tDer Chip hat ohne den Schutz neu gestartet: tippe auf Erkennen\n"
+    "El bootloader (%u KB, protegido por BOOTPROT) queda\tDer Bootloader (%u KB, durch BOOTPROT geschützt) bleibt\n"
+    "El borrado total de un SAM se lleva también su bootloader\tDas vollständige Löschen eines SAM nimmt auch seinen Bootloader mit\n"
+    "Bootloader protegido (BOOTPROT): los primeros %u KB\tGeschützter Bootloader (BOOTPROT): die ersten %u KB\n"
+    "El bootloader ocupa los primeros %u KB (BOOTPROT): el programa va desde 0x%X, no 0x%X\tDer Bootloader belegt die ersten %u KB (BOOTPROT): das Programm beginnt bei 0x%X, nicht 0x%X\n"
+    "Un .bin sin dirección va después del bootloader, a 0x%X\tEine .bin ohne Adresse kommt hinter den Bootloader, an 0x%X\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -5919,7 +5929,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2945, 0, files_en, 1 },
-    { "de", "Deutsch", 2945, 0, files_de, 1 },
+    { "en", "English", 2950, 0, files_en, 1 },
+    { "de", "Deutsch", 2950, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

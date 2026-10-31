@@ -42,6 +42,12 @@
  *   STM32G0/G4/L4  the controller they share at 0x40022000: 2 KB pages
  *               (4 KB on a single-bank G47x) numbered within their bank,
  *               BKER for the second one, a double word at a time.
+ *   SAM D/L/C, D5x/E5x  the NVMCTRL: a page buffer filled through the
+ *               flash's own addresses, then WP; rows of four pages (D21's
+ *               kind) or 8 KB blocks (D51) to erase. The bootloader under
+ *               BOOTPROT is never written nor erased (the user row's on a
+ *               D21, NVMCTRL STATUS on a D51); an image over it is refused
+ *               and says where a program for the board starts.
  *   RP2040      the flash is outside the chip: the boot ROM's own functions
  *               do it (connect, exit XIP, erase, program from a buffer in
  *               RAM, flush, enter XIP), called on the halted core through
@@ -66,7 +72,8 @@
  * erase-all, which takes the protected firmware away with the protection:
  * the nRF52's CTRL-AP ERASEALL, or an STM32's RDP put back to level 0 in its
  * option bytes (an F1's erased and RDP's key written, an F4's OPTCR, a
- * G0/G4/L4's OPTR and OBL_LAUNCH, which restarts the chip).
+ * G0/G4/L4's OPTR and OBL_LAUNCH, which restarts the chip), or a SAM's
+ * security bit gone with the DSU's chip erase (its bootloader too).
  *
  * The RTT console: the "SEGGER RTT" control block is looked for in the
  * target's RAM while it runs (never halted); then its first up buffer is
@@ -131,6 +138,9 @@ struct swd {
     bool f4_sectors;                /* STM32F2/F4: 16/64/128 KB sectors, not even pages */
     uint32_t bank2;                 /* a second flash bank's offset (STM32), 0 none */
     uint32_t bker;                  /* its bit in FLASH_CR (G0/G4/L4) */
+    bool sam51;                     /* a SAMD51/E5x (else a SAMD21's kind of controller) */
+    uint32_t page;                  /* SAM: the write page, inside the erase unit (s->sector) */
+    uint32_t boot_keep;             /* SAM: the bootloader BOOTPROT protects, bytes from the start */
     const flash_ops_t *ops;
     bool prot;
     bool nrf;                       /* has the nRF52's CTRL-AP */
@@ -893,6 +903,172 @@ static bool stm_identify(swd_t *s, bool m0)
 }
 
 /* -------------------------------------------------------------------------- */
+/* Microchip SAM D/L/C (Cortex-M0+) and D5x/E5x (Cortex-M4)                     */
+/* -------------------------------------------------------------------------- */
+
+/* The DSU says which chip (DID) and whether it is protected (STATUSB.PROT);
+ * the debugger reaches it at its external address, 0x100 above, even on a
+ * protected chip, and its chip erase (CTRL.CE) is the way out of one. The
+ * NVMCTRL says the flash (PARAM: pages and their size) and writes it: a
+ * page buffer filled by writing to the flash's own addresses, then a
+ * command. The bootloader most boards carry (Arduino's, Adafruit's UF2) is
+ * kept from writes by BOOTPROT: what it covers is neither written nor
+ * erased here, so "Borrar" leaves the bootloader; only the chip erase of a
+ * protected chip takes it too. */
+#define DSU_EXT     0x41002100u     /* CTRL, STATUSA, STATUSB in one word */
+#define DSU_DID     0x41002118u
+#define NVM         0x41004000u
+
+/* SAMD21's kind (D10/D11/D20/D21, L21/L22, C20/C21): CTRLA takes the
+ * command, ADDR is in halfwords, a row of four pages is the erase unit */
+#define N21_CTRLA   (NVM + 0x00)
+#define N21_CTRLB   (NVM + 0x04)
+#define N21_PARAM   (NVM + 0x08)
+#define N21_INTFLAG (NVM + 0x14)
+#define N21_STATUS  (NVM + 0x18)
+#define N21_ADDR    (NVM + 0x1C)
+/* the D5x/E5x: CTRLB takes the command, ADDR in bytes, 8 KB blocks */
+#define N51_CTRLA   (NVM + 0x00)
+#define N51_CTRLB   (NVM + 0x04)
+#define N51_PARAM   (NVM + 0x08)
+#define N51_INTFLAG (NVM + 0x10)    /* STATUS in its upper half */
+#define N51_ADDR    (NVM + 0x14)
+#define SAM_CMD(c)  (0xA500u | (c))
+
+static bool sam_wait(swd_t *s, int ms)
+{
+    for (int i = 0; i <= ms; i++) {
+        uint32_t f, st;
+        if (s->sam51) {
+            if (!rd32(s, N51_INTFLAG, &f)) return false;
+            if (!(f & 1u << 16)) { if (ms) aos_hal_sleep_ms(1); continue; }   /* STATUS.READY */
+            if (f & 0x7E) {                                                  /* ADDRE, PROGE, LOCKE, ECCSE, ECCDE, NVME */
+                fl_logf(L_WARN, "NVMCTRL INTFLAG %04X", (unsigned)(f & 0xFFFF));
+                wr16(s, N51_INTFLAG, 0x7E);
+                return false;
+            }
+            return true;
+        }
+        if (!rd32(s, N21_INTFLAG, &f)) return false;
+        if (!(f & 1)) { if (ms) aos_hal_sleep_ms(1); continue; }             /* READY */
+        if (!rd32(s, N21_STATUS, &st)) return false;
+        if (st & 0x1C) {                                                     /* PROGE, LOCKE, NVME */
+            fl_logf(L_WARN, "NVMCTRL STATUS %04X", (unsigned)(st & 0xFFFF));
+            wr16(s, N21_STATUS, 0x1C);
+            return false;
+        }
+        return true;
+    }
+    return false;
+}
+
+static bool sam_cmd(swd_t *s, uint32_t addr, uint8_t cmd, int ms)
+{
+    bool ok = s->sam51 ? wr32(s, N51_ADDR, addr) && wr16(s, N51_CTRLB, (uint16_t)SAM_CMD(cmd))
+                       : wr32(s, N21_ADDR, addr / 2) && wr16(s, N21_CTRLA, (uint16_t)SAM_CMD(cmd));
+    return ok && sam_wait(s, ms);
+}
+
+static bool sam_begin(swd_t *s)
+{
+    uint32_t v = 0;
+    if (!halt(s) || !sam_wait(s, 100)) return false;
+    /* pages written when we say so: MANW (D21), WMODE manual (D51) */
+    if (s->sam51) return rd32(s, N51_CTRLA, &v) && wr16(s, N51_CTRLA, (uint16_t)(v & ~0x30u));
+    return rd32(s, N21_CTRLB, &v) && wr32(s, N21_CTRLB, v | 0x80);
+}
+
+/* one row (D21) or block (D51) */
+static bool sam_erase(swd_t *s, uint32_t addr)
+{
+    return sam_cmd(s, addr, s->sam51 ? 0x01 : 0x02, 200);                     /* EB, ER */
+}
+
+static bool sam_program(swd_t *s, uint32_t addr, const uint8_t *d, uint32_t n)
+{
+    for (uint32_t o = 0; o < n && !fl_cancel; o += s->page) {
+        /* the page buffer cleared, filled through the flash's addresses, written */
+        if (!sam_cmd(s, addr + o, s->sam51 ? 0x15 : 0x44, 10) || !mem_write(s, addr + o, d + o, s->page) ||   /* PBC */
+            !sam_cmd(s, addr + o, s->sam51 ? 0x03 : 0x04, 20))                                                 /* WP */
+            return false;
+    }
+    return !fl_cancel;
+}
+
+/* the program: every unit after the bootloader */
+static bool sam_erase_all(swd_t *s)
+{
+    if (!sam_begin(s)) return false;
+    if (s->boot_keep) fl_logf(L_INFO, _("El bootloader (%u KB, protegido por BOOTPROT) queda"), (unsigned)(s->boot_keep >> 10));
+    for (uint32_t a = s->boot_keep; a < s->flash_size && !fl_cancel; a += s->sector)
+        if (!sam_erase(s, a)) return false;
+    return !fl_cancel;
+}
+
+static void sam_end(swd_t *s) { (void)s; }
+
+/* the DSU's chip erase: all of the flash, the bootloader too, and the
+ * protection with it; the chip restarts protected no more */
+static bool sam_unprotect(swd_t *s, bool *reset)
+{
+    uint32_t v = 0;
+    fl_logf(L_WARN, "%s", _("El borrado total de un SAM se lleva también su bootloader"));
+    if (!wr32(s, DSU_EXT, 0x0100) || !wr8(s, DSU_EXT, 0x10)) return false;   /* DONE cleared, CE */
+    for (int i = 0; i < 5000; i++) {
+        aos_hal_sleep_ms(1);
+        if (!rd32(s, DSU_EXT, &v)) continue;
+        if (v & 0x0800) return false;                                         /* STATUSA.FAIL */
+        if (v & 0x0100) { *reset = true; return true; }                       /* STATUSA.DONE */
+    }
+    return false;
+}
+
+static const flash_ops_t SAM = { sam_begin, sam_erase, sam_program, sam_erase_all, sam_end, sam_unprotect };
+
+static bool sam_identify(swd_t *s)
+{
+    uint32_t did = 0, dsu = 0;
+    if (!rd32(s, DSU_DID, &did) || !did) return false;
+    unsigned proc = did >> 28, fam = did >> 23 & 0x1F, ser = did >> 16 & 0x3F;
+    if (!(proc == 1 && fam <= 2) && !(proc == 6 && fam == 0)) return false;
+    static const struct { uint8_t proc, fam, ser; const char *name; } N[] = {
+        { 1, 0, 0, "SAMD20" }, { 1, 0, 1, "SAMD21" }, { 1, 0, 2, "SAMD10/D11" }, { 1, 1, 1, "SAML21" },
+        { 1, 1, 2, "SAML22" }, { 1, 2, 0, "SAMC20" }, { 1, 2, 1, "SAMC21" },
+        { 6, 0, 6, "SAMD51" }, { 6, 0, 1, "SAME51" }, { 6, 0, 3, "SAME53" }, { 6, 0, 4, "SAME54" },
+    };
+    const char *name = proc == 6 ? "SAMD5x/E5x" : "SAM D/L/C";
+    for (size_t i = 0; i < sizeof N / sizeof N[0]; i++)
+        if (N[i].proc == proc && N[i].fam == fam && N[i].ser == ser) name = N[i].name;
+    snprintf(s->chip, sizeof s->chip, "%s", name);
+    snprintf(s->core, sizeof s->core, "%s", proc == 6 ? "Cortex-M4" : "Cortex-M0+");
+    s->sam51 = proc == 6;
+    s->flash_base = 0;
+    s->ram_size = (s->sam51 ? 192u : 32u) << 10;
+    s->ops = &SAM;
+    s->uf2_family = s->sam51 ? 0x55114460 : ser == 1 && fam == 0 ? 0x68ED2B88 : 0;   /* SAMD51, SAMD21 */
+    if (rd32(s, DSU_EXT, &dsu)) s->prot = dsu >> 16 & 1;                   /* STATUSB.PROT */
+    fl_logf(L_INFO, "DID %08X", (unsigned)did);
+    if (s->prot) {
+        /* nothing but the DSU answers: the flash's size is not known */
+        s->sector = s->sam51 ? 8192 : 256;
+        return true;
+    }
+    uint32_t param = 0, v = 0;
+    rd32(s, s->sam51 ? N51_PARAM : N21_PARAM, &param);
+    s->page = 8u << (param >> 16 & 7);
+    s->flash_size = (param & 0xFFFF) * s->page;
+    s->sector = s->sam51 ? s->page * 16 : s->page * 4;
+    if (s->sam51) {
+        if (rd32(s, N51_INTFLAG, &v)) s->boot_keep = (15 - (v >> 24 & 0xF)) * 8192u;      /* STATUS.BOOTPROT */
+    } else if (rd32(s, 0x00804000u, &v)) {
+        unsigned bp = v & 7;                                                             /* the user row's BOOTPROT */
+        s->boot_keep = bp == 7 ? 0 : 512u << (6 - bp);
+    }
+    if (s->boot_keep) fl_logf(L_INFO, _("Bootloader protegido (BOOTPROT): los primeros %u KB"), (unsigned)(s->boot_keep >> 10));
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
 /* RP2040                                                                      */
 /* -------------------------------------------------------------------------- */
 
@@ -1109,6 +1285,8 @@ static bool identify(swd_t *s)
         s->uf2_family = 0xE48BFF59; /* Arm Secure; uf2_fits() takes its siblings too */
     } else if (s->adiv6) {
         snprintf(s->chip, sizeof s->chip, "ADIv6 %s", core);
+    } else if (sam_identify(s)) {
+        core = s->core;
     } else if (!stm_identify(s, part == 0xC20 || part == 0xC60)) {
         snprintf(s->chip, sizeof s->chip, "%s", core);
     }
@@ -1168,6 +1346,12 @@ static bool write_image(swd_t *s)
     char err[96];
     uint32_t at = J.src.kind == AOS_FLASHER_IMAGE ? 0 : J.src.files[0].offset;
     if (at < s->flash_base) at += s->flash_base;        /* a .bin: from the start of the flash */
+    /* ...or, on a SAM with a bootloader, after it: where Arduino's and
+     * Adafruit's .bin files are linked. One named @0x... goes where it says. */
+    if (J.src.kind == AOS_FLASHER_BIN_MERGED && s->boot_keep) {
+        at = s->flash_base + s->boot_keep;
+        fl_logf(L_INFO, _("Un .bin sin dirección va después del bootloader, a 0x%X"), (unsigned)at);
+    }
     if (!aos_flasher_image_load(J.src.path, at, &img, err, sizeof err)) return fl_fail("%s: %s", J.src.name, err);
     bool ok = false;
     uint32_t limit = s->flash_size ? s->flash_size : 16u << 20;
@@ -1184,6 +1368,13 @@ static bool write_image(swd_t *s)
         if (img.r[i].addr < s->flash_base || img.r[i].addr + img.r[i].len > s->flash_base + limit) {
             fl_fail(_("0x%08X queda fuera de la flash (0x%08X, %u KB)"), (unsigned)img.r[i].addr, (unsigned)s->flash_base,
                     (unsigned)(limit >> 10));
+            goto out;
+        }
+    }
+    for (int i = 0; i < img.n; i++) {
+        if (img.r[i].addr < s->flash_base + s->boot_keep) {
+            fl_fail(_("El bootloader ocupa los primeros %u KB (BOOTPROT): el programa va desde 0x%X, no 0x%X"),
+                    (unsigned)(s->boot_keep >> 10), (unsigned)(s->flash_base + s->boot_keep), (unsigned)img.r[i].addr);
             goto out;
         }
     }
@@ -1276,7 +1467,7 @@ static bool erase_all(swd_t *s)
         uint32_t ms = (uint32_t)(aos_hal_uptime_ms() - t0);
         fl_logf(L_OK, _("Protección quitada y flash borrada en %u,%u s"), (unsigned)(ms / 1000), (unsigned)(ms % 1000 / 100));
         if (reset) {
-            fl_logf(L_INFO, "%s", _("El chip se reinició para cargar sus option bytes: tocá Detectar"));
+            fl_logf(L_INFO, "%s", _("El chip se reinició sin la protección: tocá Detectar"));
             s->dpidr = 0;           /* the link went with it: no reset at the end */
         }
         s->prot = false;

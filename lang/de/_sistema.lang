@@ -9463,4 +9463,10 @@ Dos bancos de %u KB	Zwei Bänke zu %u KB
 %u sectores, %u KB, desde 0x%08X	%u Sektoren, %u KB, ab 0x%08X
 Quitando la protección (RDP): el chip borra toda su flash	Schutz (RDP) wird entfernt: der Chip löscht seinen ganzen Flash
 Protección quitada y flash borrada en %u,%u s	Schutz entfernt und Flash gelöscht in %u,%u s
-El chip se reinició para cargar sus option bytes: tocá Detectar	Der Chip hat neu gestartet, um seine Option Bytes zu laden: tippe auf Erkennen
+#: components/aos_flasher (SWD: SAMD21 y SAMD51)
+El chip se reinició sin la protección: tocá Detectar	Der Chip hat ohne den Schutz neu gestartet: tippe auf Erkennen
+El bootloader (%u KB, protegido por BOOTPROT) queda	Der Bootloader (%u KB, durch BOOTPROT geschützt) bleibt
+El borrado total de un SAM se lleva también su bootloader	Das vollständige Löschen eines SAM nimmt auch seinen Bootloader mit
+Bootloader protegido (BOOTPROT): los primeros %u KB	Geschützter Bootloader (BOOTPROT): die ersten %u KB
+El bootloader ocupa los primeros %u KB (BOOTPROT): el programa va desde 0x%X, no 0x%X	Der Bootloader belegt die ersten %u KB (BOOTPROT): das Programm beginnt bei 0x%X, nicht 0x%X
+Un .bin sin dirección va después del bootloader, a 0x%X	Eine .bin ohne Adresse kommt hinter den Bootloader, an 0x%X

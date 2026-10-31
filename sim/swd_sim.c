@@ -5,10 +5,12 @@
  *
  * P4_SIM_SWD picks the chip: nrf52840 (the default), stm32f103, stm32f411
  * (a Black Pill: 512 KB in sectors), stm32g071 (a Cortex-M0+, 128 KB),
- * stm32l476 (1 MB in two banks), rp2040, rp2350, or none (nobody on the
- * wire). ":protected" after nrf52840 starts it with APPROTECT on (its memory
+ * stm32l476 (1 MB in two banks), samd21 (an Arduino Zero: 256 KB, an 8 KB
+ * bootloader under BOOTPROT), samd51 (an Adafruit M4: 512 KB, 16 KB of
+ * bootloader), rp2040, rp2350, or none (nobody on the wire). ":protected" after nrf52840 starts it with APPROTECT on (its memory
  * unreachable until the CTRL-AP erases it all), after an STM32 with read
- * protection set (RDP level 1: its flash unreadable by the debugger);
+ * protection set (RDP level 1: its flash unreadable by the debugger), after
+ * a SAM with its security bit (only the DSU answers);
  * ":locked" after rp2350 locks its ACCESSCTRL against the debugger.
  *
  * What it plays, at the level of packets, not of edges:
@@ -46,7 +48,12 @@
  *                  L476: the controller at 0x40022000 (PER, PNB, BKER for the
  *                  L476's second bank, MER1/MER2), a double word programmed
  *                  by its second word, PROGERR over bits not erased, OPTR
- *                  and OPTSTRT, OBL_LAUNCH as a reset. RP2040: the
+ *                  and OPTSTRT, OBL_LAUNCH as a reset. SAMD21/51: the DSU
+ *                  (DID, STATUSB.PROT, the chip erase at its external
+ *                  address), the NVMCTRL (PARAM, the page buffer filled
+ *                  through the flash's addresses, PBC, WP, ER or EB, the
+ *                  D21's ADDR in halfwords, MANW's automatic write), and
+ *                  BOOTPROT: the bootloader's rows refuse with LOCKE. RP2040: the
  *                  boot ROM's table of functions; when the core is let run
  *                  at debug_trampoline, the function in r7 is done here
  *                  (connect, exit XIP, erase, program from RAM, flush,
@@ -72,7 +79,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-enum { C_NONE, C_NRF52840, C_STM32F103, C_RP2040, C_RP2350, C_STM32F411, C_STM32G071, C_STM32L476 };
+enum { C_NONE, C_NRF52840, C_STM32F103, C_RP2040, C_RP2350, C_STM32F411, C_STM32G071, C_STM32L476, C_SAMD21, C_SAMD51 };
 
 typedef struct {
     int chip;
@@ -104,6 +111,10 @@ typedef struct {
     bool f1_opt_erased, unprotect_at_reset;
     uint32_t dw_addr, dw_lo;    /* G0/L4: a double word's first word, waiting for its second */
     bool dw_open;
+    /* SAM: the NVMCTRL's registers and its page buffer, the DSU */
+    uint32_t sam_ctrla, sam_ctrlb, sam_addr, sam_status, sam_intflag, sam_dsu;
+    uint8_t sam_pb[512];
+    uint32_t sam_boot;          /* bytes BOOTPROT keeps */
     bool xip;
     /* RTT */
     uint32_t rtt_cb;
@@ -116,6 +127,7 @@ static bool s_open;
 
 static bool is_stm(void) { return T.chip == C_STM32F103 || T.chip == C_STM32F411 || T.chip == C_STM32G071 || T.chip == C_STM32L476; }
 static bool is_l4(void) { return T.chip == C_STM32G071 || T.chip == C_STM32L476; }
+static bool is_sam(void) { return T.chip == C_SAMD21 || T.chip == C_SAMD51; }
 
 #define RAM_BASE   0x20000000u
 #define RTT_BUF_UP 1024u
@@ -161,7 +173,8 @@ static void chip_init(void)
     if (colon) *colon = 0;
     T.chip = !strcmp(name, "stm32f103") ? C_STM32F103 : !strcmp(name, "rp2040") ? C_RP2040 : !strcmp(name, "rp2350") ? C_RP2350
            : !strcmp(name, "stm32f411") ? C_STM32F411 : !strcmp(name, "stm32g071") ? C_STM32G071
-           : !strcmp(name, "stm32l476") ? C_STM32L476 : !strcmp(name, "none") ? C_NONE : C_NRF52840;
+           : !strcmp(name, "stm32l476") ? C_STM32L476 : !strcmp(name, "samd21") ? C_SAMD21 : !strcmp(name, "samd51") ? C_SAMD51
+           : !strcmp(name, "none") ? C_NONE : C_NRF52840;
     switch (T.chip) {
     case C_NRF52840:
         T.dpidr = 0x2BA01477; T.flash_base = 0; T.flash_size = 1 << 20; T.page = 4096; T.ram_size = 256 << 10;
@@ -177,6 +190,17 @@ static void chip_init(void)
     case C_STM32G071:
         T.dpidr = 0x0BC11477; T.flash_base = 0x08000000; T.flash_size = 128 << 10; T.page = 2048; T.ram_size = 36 << 10;
         T.optcr = T.protect ? 0xFFFFFEBB : 0xFFFFFEAA;
+        break;
+    case C_SAMD21:
+        T.dpidr = 0x0BC11477; T.flash_base = 0; T.flash_size = 256 << 10; T.page = 64; T.ram_size = 32 << 10;
+        T.sam_boot = 8 << 10;
+        T.sam_dsu = T.protect ? 0x010000 : 0;
+        break;
+    case C_SAMD51:
+        T.dpidr = 0x2BA01477; T.flash_base = 0; T.flash_size = 512 << 10; T.page = 512; T.ram_size = 192 << 10;
+        T.sam_boot = 16 << 10;
+        T.sam_dsu = T.protect ? 0x010000 : 0;
+        T.sam_ctrla = 0x0004 | 0x30;            /* WMODE automatic until told otherwise */
         break;
     case C_STM32L476:
         T.dpidr = 0x2BA01477; T.flash_base = 0x08000000; T.flash_size = 1 << 20; T.page = 2048; T.ram_size = 96 << 10;
@@ -286,7 +310,7 @@ static bool coresight_id(uint32_t a, uint32_t *v)
     uint32_t base = a & ~0xFFFu, off = a & 0xFFF;
     if ((base != 0xE00FF000 && base != 0xE000E000) || off < 0xFD0) return false;
     bool rom = base == 0xE00FF000;
-    uint16_t part = rom ? 0x4C4 : T.chip == C_RP2040 || T.chip == C_STM32G071 ? 0x008 : T.chip == C_STM32F103 ? 0x000 : 0x00C;
+    uint16_t part = rom ? 0x4C4 : T.chip == C_RP2040 || T.chip == C_STM32G071 || T.chip == C_SAMD21 ? 0x008 : T.chip == C_STM32F103 ? 0x000 : 0x00C;
     uint8_t id[12] = { 0x04, 0, 0, 0,                           /* PIDR4..7: JEP106 continuation 4 (Arm) */
                        (uint8_t)part, (uint8_t)(0xB0 | part >> 8), 0x0B, 0,   /* PIDR0..3: Arm (0x43B) */
                        0x0D, rom ? 0x10 : 0xE0, 0x05, 0xB1 };   /* CIDR: a ROM table, or generic IP */
@@ -294,12 +318,117 @@ static bool coresight_id(uint32_t a, uint32_t *v)
     return true;
 }
 
+/* ---- SAM D21/D51: the DSU and the NVMCTRL ---- */
+
+static bool sam_read(uint32_t a, uint32_t *v)
+{
+    bool d51 = T.chip == C_SAMD51;
+    switch (a) {
+    case 0x41002000: case 0x41002100: *v = T.sam_dsu; return true;     /* CTRL, STATUSA, STATUSB */
+    case 0x41002018: case 0x41002118: *v = d51 ? 0x60060004 : 0x10010300; return true;   /* D51J19A, D21J18A */
+    }
+    if (T.protect) return false;
+    switch (a) {
+    case 0x41004000: *v = T.sam_ctrla; return true;
+    case 0x41004004: *v = T.sam_ctrlb; return true;
+    case 0x41004008: {                                                 /* PARAM: pages, PSZ */
+        uint32_t psz = 0;
+        while ((8u << psz) < T.page) psz++;
+        *v = psz << 16 | T.flash_size / T.page;
+        return true;
+    }
+    case 0x00804000: *v = d51 ? 0xF69A9239 : 0xD8E0C7FA; return true;  /* the user row: BOOTPROT 13 (16 KB), 2 (8 KB) */
+    }
+    if (d51) {
+        if (a == 0x41004010) { *v = T.sam_intflag | (T.sam_status | 13u << 8 | 1) << 16; return true; }   /* STATUS: READY, BOOTPROT */
+        if (a == 0x41004014) { *v = T.sam_addr; return true; }
+    } else {
+        if (a == 0x41004014) { *v = T.sam_intflag | 1; return true; }   /* READY */
+        if (a == 0x41004018) { *v = T.sam_status; return true; }
+        if (a == 0x4100401C) { *v = T.sam_addr; return true; }
+    }
+    return false;
+}
+
+static void sam_command(uint32_t cmd)
+{
+    bool d51 = T.chip == C_SAMD51;
+    uint32_t addr = d51 ? T.sam_addr : T.sam_addr * 2;
+    uint32_t unit = d51 ? T.page * 16 : T.page * 4;
+    uint32_t lock_err = d51 ? 0 : 0x08;
+    int er = d51 ? 0x01 : 0x02, wp = d51 ? 0x03 : 0x04, pbc = d51 ? 0x15 : 0x44;
+    if ((int)cmd == pbc) { memset(T.sam_pb, 0xFF, sizeof T.sam_pb); return; }
+    if (addr >= T.flash_size) { if (d51) T.sam_intflag |= 0x02; else T.sam_status |= 0x10; return; }   /* ADDRE, NVME */
+    if ((int)cmd == er || (int)cmd == wp) {
+        if (addr < T.sam_boot) { if (d51) T.sam_intflag |= 0x08; else T.sam_status |= lock_err; return; }   /* LOCKE */
+        if ((int)cmd == er) memset(T.flash + (addr & ~(unit - 1)), 0xFF, unit);
+        else for (uint32_t i = 0; i < T.page; i++) T.flash[(addr & ~(T.page - 1)) + i] &= T.sam_pb[i];
+        if (d51) T.sam_intflag |= 1;
+        return;
+    }
+    if (d51) T.sam_intflag |= 0x40; else T.sam_status |= 0x10;                                         /* NVME */
+}
+
+/* a write to the SAM's registers of 'size' bytes at a (its lanes as the bus has them) */
+static bool sam_write(uint32_t a, int size, uint32_t lanes)
+{
+    bool d51 = T.chip == C_SAMD51;
+    uint32_t w = a & ~3u;
+    uint32_t v = lanes >> 8 * (a & 3);
+    if (w == 0x41002100 || w == 0x41002000) {
+        if ((a & 3) == 0 && (v & 0x10)) {                               /* CTRL.CE: everything, and the protection */
+            memset(T.flash, 0xFF, T.flash_size);
+            T.protect = false;
+            T.sam_dsu = 0x0100;                                         /* STATUSA.DONE */
+        } else if (size == 4 && (lanes & 0x0100)) {
+            T.sam_dsu &= ~0x0100u;
+        }
+        return true;
+    }
+    if (T.protect) return a >= 0x41000000 && a < 0x42000000;            /* quietly ignored */
+    if (d51) {
+        switch (w) {
+        case 0x41004000: T.sam_ctrla = v & 0xFFFF; return true;
+        case 0x41004004:
+            if ((v >> 8 & 0xFF) == 0xA5) sam_command(v & 0x7F);
+            return true;
+        case 0x41004010: if ((a & 3) == 0) T.sam_intflag &= ~(v & 0xFF); return true;
+        case 0x41004014: T.sam_addr = lanes; return true;
+        }
+    } else {
+        switch (w) {
+        case 0x41004000:
+            if ((a & 3) == 0 && (v >> 8 & 0xFF) == 0xA5) sam_command(v & 0x7F);
+            return true;
+        case 0x41004004: T.sam_ctrlb = lanes; return true;
+        case 0x41004018: if ((a & 3) == 0) T.sam_status &= ~(v & 0x1C); return true;
+        case 0x4100401C: T.sam_addr = lanes; return true;
+        }
+    }
+    return false;
+}
+
+/* A write to the flash's addresses fills the page buffer; the D21 with
+ * MANW off writes the page by itself at its last word */
+static void sam_buffer(uint32_t a, int size, uint32_t lanes)
+{
+    uint32_t o = a & (T.page - 1);
+    for (int i = 0; i < size; i++) T.sam_pb[o + i] = (uint8_t)(lanes >> 8 * ((a & 3) + i));
+    if (T.chip == C_SAMD21 && !(T.sam_ctrlb & 0x80) && o + size == T.page) {
+        T.sam_addr = (a & ~(T.page - 1)) / 2;
+        sam_command(0x04);
+    }
+}
+
 /* registers that are not memory; false: not one of them */
+static bool sam_read(uint32_t a, uint32_t *v);
+
 static bool reg_read(uint32_t a, uint32_t *v)
 {
+    if (is_sam() && sam_read(a, v)) return true;
     if (coresight_id(a, v)) return true;
     switch (a) {
-    case 0xE000ED00: *v = T.chip == C_RP2040 || T.chip == C_STM32G071 ? 0x410CC601 : T.chip == C_RP2350 ? 0x411FD210 : T.chip == C_STM32F103 ? 0x411FC231 : 0x410FC241; return true;
+    case 0xE000ED00: *v = T.chip == C_RP2040 || T.chip == C_STM32G071 || T.chip == C_SAMD21 ? 0x410CC601 : T.chip == C_RP2350 ? 0x411FD210 : T.chip == C_STM32F103 ? 0x411FC231 : 0x410FC241; return true;
     case 0xE000EDF0: *v = 0x00010001 | (T.halted ? 0x00020002 : 0); return true;     /* S_REGRDY, C_DEBUGEN, S_HALT */
     case 0xE000EDF8: *v = T.dcrdr; return true;
     case 0xE000EDFC: *v = T.demcr; return true;
@@ -550,6 +679,12 @@ static bool mem_access(uint32_t a, int size, bool wr, uint32_t *lanes)
     if (T.chip == C_NRF52840 && T.protect) return false;
     /* an STM32 at RDP level 1 keeps its flash from the debugger */
     if (is_stm() && T.protect && !wr && is_flash(a)) return false;
+    /* a protected SAM: the DSU, nothing else */
+    if (is_sam()) {
+        if (wr && sam_write(a, size, *lanes)) return true;
+        if (T.protect && (a & ~0xFFFu) != 0x41002000) return false;
+        if (wr && is_flash(a)) { sam_buffer(a, size, *lanes); return true; }
+    }
     /* the F1's RDP option byte: its key unprotects, and erases all */
     if (T.chip == C_STM32F103 && wr && (a & ~1u) == 0x1FFFF800 && size == 2) {
         if ((T.stm_cr & 0x210) == 0x210 && (*lanes & 0xFFFF) == 0x5AA5) {
