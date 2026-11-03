@@ -535,6 +535,15 @@ Que necesitan la mano del usuario o equipos:
     (retardo 0): cada escritura de un GPIO cuesta casi medio microsegundo.
     Más rápido pide los GPIO dedicados del P4 o PARLIO, no este lazo.
   - La Ekobadge 2026 (desde el 2026-10-31): ver su chip, grabar y RTT.
+    **Probada el 2026-11-02** (SWCLK, SWDIO y GND a `uart.b`, con su
+    batería): Detectar dijo nRF52840 AAD0 (la revisión vieja, sin
+    APPROTECT por hardware), abierta, 1 MB, DPIDR 2BA01477, y del UICR el
+    bootloader en 0x000F4000. Leer la flash: 1 MB en 8 s (133 KB/s, leído
+    dos veces; 7,7 s de cable, 0 WAIT). Adentro: el MBR, la SoftDevice
+    desde 0x1000, Meshtastic 2.8.0 hecho para `ekoparty_badge_v1` desde
+    0x27000 (hasta 0xDA000), su LittleFS en 0xED000 y el bootloader UF2
+    0.11 de Adafruit ("Ekoparty Badge v1"). La consola RTT no encontró el
+    bloque: Meshtastic no usa RTT, habla por su USB.
     Para la primera vez (el Programador ya sabe de los nRF52 nuevos, los
     que cierran el SWD en cada reinicio, sólo en el simulador):
     1. Buscar en la badge SWDIO, SWCLK, GND (y RESET, si está a mano):
