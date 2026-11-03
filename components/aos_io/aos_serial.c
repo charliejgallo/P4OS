@@ -25,6 +25,10 @@
  *               .log, with the wall-clock time (or the uptime, before SNTP)
  *               in front. Flushed every two seconds: a pulled card loses at
  *               most that.
+ *   usbN        a USB serial device that goes away (unplugged, or a board
+ *               restarting, whose USB goes with it) is opened again when it
+ *               is back, so a capture catches the board's boot. Only the
+ *               reader swaps the port; sending holds the channel's mutex.
  */
 #include "aos_io.h"
 #include "aos_hal.h"
@@ -50,6 +54,8 @@ typedef struct {
     aos_io_uart_t *uart;
     volatile bool running, stop;
     char     port[AOS_IO_PORT_NAME_MAX];
+    char     desc[64];              /* the port's description, kept: the reader may swap the port */
+    uint64_t reopen_ms;
     uint32_t baud;
     line_t  *ring;
     volatile uint32_t lines;        /* committed so far */
@@ -329,14 +335,28 @@ static void reader(void *arg)
     chan_t *c = arg;
     int ch = (int)(c - s_ch);
     uint8_t buf[512];
+    bool usb = !strncmp(c->port, "usb", 3);
     while (!c->stop) {
-        int n = aos_io_uart_read(c->uart, buf, sizeof buf, 50);
+        int n = c->uart ? aos_io_uart_read(c->uart, buf, sizeof buf, 50) : -1;
         uint64_t now = aos_hal_uptime_ms();
         if (n > 0) {
             c->rx += (uint64_t)n;
             c->last_rx_ms = now;
             feed(c, ch, buf, n);
         } else if (n < 0) {
+            if (usb && now - c->reopen_ms >= 500) {
+                /* gone: opened again, twice a second, until it is back */
+                c->reopen_ms = now;
+                char owner[24];
+                snprintf(owner, sizeof owner, "serial %d", ch);
+                aos_hal_mutex_lock(c->mutex);
+                bool was = c->uart != NULL;
+                if (c->uart) aos_io_uart_close(c->uart);
+                c->uart = aos_io_uart_open(c->port, c->baud, false, owner);
+                aos_hal_mutex_unlock(c->mutex);
+                if (c->uart && !was) aos_hal_log("serial", "channel %d: %s is back", ch, c->port);
+                if (c->uart) continue;
+            }
             aos_hal_sleep_ms(100);
         } else if (c->cur_len && now - c->last_rx_ms > 250) {
             commit(c, ch);
@@ -350,8 +370,10 @@ static void reader(void *arg)
         if (c->rec && now - c->rec_flush_ms > 2000) { c->rec_flush_ms = now; fflush(c->rec); }
     }
     if (c->rec) { fclose(c->rec); c->rec = NULL; }
-    aos_io_uart_close(c->uart);
+    aos_hal_mutex_lock(c->mutex);
+    if (c->uart) aos_io_uart_close(c->uart);
     c->uart = NULL;
+    aos_hal_mutex_unlock(c->mutex);
     c->running = false;
 }
 
@@ -371,6 +393,7 @@ bool aos_serial_start(int ch, const char *port, uint32_t baud)
     c->uart = aos_io_uart_open(port, baud, false, owner);
     if (!c->uart) return false;
     snprintf(c->port, sizeof c->port, "%s", port);
+    snprintf(c->desc, sizeof c->desc, "%s", aos_io_uart_desc(c->uart));
     c->baud = baud;
     c->stop = false;
     c->running = true;
@@ -415,7 +438,7 @@ bool aos_serial_stat(int ch, aos_serial_stat_t *out)
     memset(out, 0, sizeof *out);
     out->running = c->running;
     snprintf(out->port, sizeof out->port, "%s", c->port);
-    snprintf(out->desc, sizeof out->desc, "%s", c->uart ? aos_io_uart_desc(c->uart) : "");
+    snprintf(out->desc, sizeof out->desc, "%s", c->running ? c->desc : "");
     out->baud = c->baud;
     out->lines = c->lines;
     out->first = c->first;
@@ -468,9 +491,12 @@ int aos_serial_raw(int ch, uint64_t from, uint8_t *out, int max, uint64_t *next)
 
 int aos_serial_send(int ch, const void *data, int len)
 {
-    if (ch < 0 || ch >= AOS_SERIAL_CHANNELS || !s_ch[ch].uart) return -1;
-    int n = aos_io_uart_write(s_ch[ch].uart, data, len);
-    if (n > 0) s_ch[ch].tx += (uint64_t)n;
+    if (ch < 0 || ch >= AOS_SERIAL_CHANNELS || !s_ch[ch].mutex) return -1;
+    chan_t *c = &s_ch[ch];
+    aos_hal_mutex_lock(c->mutex);
+    int n = c->uart ? aos_io_uart_write(c->uart, data, len) : -1;
+    aos_hal_mutex_unlock(c->mutex);
+    if (n > 0) c->tx += (uint64_t)n;
     return n;
 }
 

@@ -82,6 +82,8 @@ typedef struct {
     uint64_t hscan_total;
     uint8_t *hbuf;
     void (*text_done)(const char *);
+    int usb_n;              /* the host's USB serial ports the port list has */
+    char gone[AOS_IO_PORT_NAME_MAX];    /* the chosen port, unplugged: chosen again when it is back */
 } term_t;
 
 static term_t T;
@@ -391,7 +393,46 @@ static void refresh(bool force)
     lv_label_set_text(T.eol_lbl, aos_tr(EOL_NAME[S.eol]));
 }
 
-static void timer_cb(lv_timer_t *t) { refresh(false); }
+/* The header's UARTs, then the host's USB serial ports while plugged in:
+ * "usb0", "usb1" */
+static void port_options(char *ports, size_t cap)
+{
+    ports[0] = 0;
+    for (int i = 0; i < aos_io_port_count(); i++) {
+        const aos_io_port_t *p = aos_io_port_at(i);
+        if (p->kind != AOS_PORT_UART) continue;
+        if (ports[0]) strlcat(ports, "\n", cap);
+        strlcat(ports, p->name, cap);
+    }
+    T.usb_n = aos_hal_usb_serial_count();
+    for (int i = 0; i < T.usb_n && i < 4; i++) {
+        char u[8];
+        snprintf(u, sizeof u, "%susb%d", ports[0] ? "\n" : "", i);
+        strlcat(ports, u, cap);
+    }
+    if (!ports[0]) snprintf(ports, cap, "uart.b");
+}
+
+/* A USB serial device plugged in or out (or restarting) while the app is
+ * open: the list follows it, keeping the port chosen if it is still there */
+static void ports_follow(void)
+{
+    if (aos_hal_usb_serial_count() == T.usb_n || lv_dropdown_is_open(T.port_dd)) return;
+    char was[AOS_IO_PORT_NAME_MAX] = "", ports[160];
+    lv_dropdown_get_selected_str(T.port_dd, was, sizeof was);
+    if (T.gone[0]) snprintf(was, sizeof was, "%s", T.gone);
+    port_options(ports, sizeof ports);
+    lv_dropdown_set_options(T.port_dd, ports);
+    int sel = lv_dropdown_get_option_index(T.port_dd, was);
+    if (sel >= 0) lv_dropdown_set_selected(T.port_dd, (uint32_t)sel);
+    snprintf(T.gone, sizeof T.gone, "%s", sel >= 0 ? "" : was);
+}
+
+static void timer_cb(lv_timer_t *t)
+{
+    ports_follow();
+    refresh(false);
+}
 
 /* ---- the connection ---- */
 
@@ -420,6 +461,7 @@ static void connect_cb(lv_event_t *e)
     } else {
         char port[AOS_IO_PORT_NAME_MAX];
         lv_dropdown_get_selected_str(T.port_dd, port, sizeof port);
+        T.gone[0] = 0;          /* chosen now: the unplugged one is forgotten */
         uint32_t baud = BAUDS[lv_dropdown_get_selected(T.baud_dd)];
         if (!aos_serial_start(S.ch, port, baud)) {
             const aos_io_port_t *p = aos_io_port_find(port);
@@ -867,20 +909,9 @@ static void *create(aos_app_t *self, lv_obj_t *root)
         lv_obj_center(aos_label(s, c ? "B" : "A", aos_font_body, AOS_C_TEXT));
         T.seg[c] = s;
     }
-    char ports[160] = "";
-    for (int i = 0; i < aos_io_port_count(); i++) {
-        const aos_io_port_t *p = aos_io_port_at(i);
-        if (p->kind != AOS_PORT_UART) continue;
-        if (ports[0]) strlcat(ports, "\n", sizeof ports);
-        strlcat(ports, p->name, sizeof ports);
-    }
-    /* USB serial devices on the host, while plugged in: "usb0", "usb1" */
-    for (int i = 0; i < aos_hal_usb_serial_count() && i < 4; i++) {
-        char u[8];
-        snprintf(u, sizeof u, "%susb%d", ports[0] ? "\n" : "", i);
-        strlcat(ports, u, sizeof ports);
-    }
-    T.port_dd = dropdown(T.bar, ports[0] ? ports : "uart.b", 150);
+    char ports[160];
+    port_options(ports, sizeof ports);
+    T.port_dd = dropdown(T.bar, ports, 150);
     char bauds[160] = "";
     for (size_t i = 0; i < N_BAUDS; i++) {
         char b[12];

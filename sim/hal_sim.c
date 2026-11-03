@@ -3667,3 +3667,18 @@ void *aos_hal_module_sym(aos_module_t *m, const char *name)
 void aos_hal_module_close(aos_module_t *m) { (void)m; }
 
 int aos_hal_display_refresh_request(int hz) { return hz > 0 ? hz : 60; }
+
+/* The host's USB serial ports: none, unless P4_SIM_USB_SERIALS names a file
+ * holding how many - a test plugs and unplugs them by writing it. Only the
+ * count: opening one fails, as the stubs do. */
+int aos_hal_usb_serial_count(void)
+{
+    const char *f = getenv("P4_SIM_USB_SERIALS");
+    FILE *fp = f ? fopen(f, "r") : NULL;
+    int n = 0;
+    if (fp) {
+        if (fscanf(fp, "%d", &n) != 1) n = 0;
+        fclose(fp);
+    }
+    return n < 0 ? 0 : n;
+}
