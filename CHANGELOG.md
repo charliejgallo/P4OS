@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- **The Arduino Due by SWD.** The Programador knows the SAM3X/A: detect,
+  read, write and erase, both banks of its flash, its lock regions
+  cleared first and its boot bit set after a write (so it boots the
+  program, not the ROM's SAM-BA; an erase of it all goes back to the
+  SAM-BA, as the board's ERASE button). A chip with its security bit
+  answers nothing, and the Programador says the ERASE button frees it.
+  In the simulator; the user's Due is next.
 - **The Terminal and USB serial devices that come and go.** A USB serial
   device plugged in after the Terminal opened now shows up in its list,
   and a capture on it opens it again when it comes back (a board

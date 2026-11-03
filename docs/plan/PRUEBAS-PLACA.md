@@ -582,6 +582,16 @@ Que necesitan la mano del usuario o equipos:
        ponga REGOUT0, o grabarle uno que lo haga.
     5. Grabar algo propio (un blink o su firmware) y la consola RTT, si
        el firmware la trae.
+  - El Arduino Due del usuario (SAM3X8E, desde el 2026-11-02; hecho
+    sólo en el simulador): su conector "JTAG" de 10 pines a 1,27 mm
+    junto al chip, SWDIO (pin 2) al 14 del header, SWCLK (4) al 12, GND
+    (3, 5 o 9) a GND, y su reset (10) al 11 si se quiere; el Due con su
+    propio USB. Detectar: SAM3X8E, 512 KB, CIDR 285E0A60, y si arranca
+    desde la flash (GPNVM1). Leer la flash entera antes de tocar nada
+    (es el sketch que trae). Grabar un sketch (el `.bin` que deja el IDE
+    de Arduino va solo a 0x80000) y ver que corre al reiniciar; Borrar
+    entero y ver que queda el SAM-BA de la ROM (el puerto "Programming"
+    del Due lo ve como antes).
   - Una RP2350 (Pico 2), si aparece una: Detectar (`DPIDR 4C013477`,
     Cortex-M33) y grabar un `.uf2` que arranque (con su IMAGE_DEF).
 - [ ] El puente del Programador (F4, 2026-10-29; probado sólo en el

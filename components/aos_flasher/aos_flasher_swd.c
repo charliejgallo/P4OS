@@ -48,6 +48,14 @@
  *               BOOTPROT is never written nor erased (the user row's on a
  *               D21, NVMCTRL STATUS on a D51); an image over it is refused
  *               and says where a program for the board starts.
+ *   SAM3X/A     (an Arduino Due) two banks from 0x80000, each with its own
+ *               EEFC: a latch filled through the flash's addresses, then
+ *               "erase and write page" for each 256-byte page, with six
+ *               wait states while writing (a silicon bug OpenOCD's driver
+ *               works around the same way). Lock regions are cleared
+ *               first. GPNVM1 says whether it boots from the flash or from
+ *               the ROM's SAM-BA: set after a write, cleared by an erase of
+ *               it all, as the board's ERASE button leaves it.
  *   RP2040      the flash is outside the chip: the boot ROM's own functions
  *               do it (connect, exit XIP, erase, program from a buffer in
  *               RAM, flush, enter XIP), called on the halted core through
@@ -164,6 +172,10 @@ struct swd {
     bool sam51;                     /* a SAMD51/E5x (else a SAMD21's kind of controller) */
     uint32_t page;                  /* SAM: the write page, inside the erase unit (s->sector) */
     uint32_t boot_keep;             /* SAM: the bootloader BOOTPROT protects, bytes from the start */
+    uint32_t sam3_bank;             /* SAM3X/A: a bank's size (two of them); 0: not one */
+    uint32_t sam3_fmr[2];           /* their EEFC's FMR as found */
+    uint32_t sam3_pending;          /* a page "erased" (done with its write), not written yet; 0: none */
+    bool sam3_written;
     const flash_ops_t *ops;
     bool prot;
     bool nrf;                       /* has the nRF52's CTRL-AP */
@@ -1200,6 +1212,146 @@ static bool sam_identify(swd_t *s)
 }
 
 /* -------------------------------------------------------------------------- */
+/* SAM3X/A (Arduino Due)                                                       */
+/* -------------------------------------------------------------------------- */
+
+#define SAM3_CIDR       0x400E0940u
+#define SAM3_EEFC(b)    ((b) ? 0x400E0C00u : 0x400E0A00u)   /* FMR, FCR at +4, FSR at +8, FRR at +12 */
+#define SAM3_PAGE       256u
+#define SAM3_REGION     16384u                              /* a lock bit's */
+enum { E_WP = 0x01, E_EWP = 0x03, E_EA = 0x05, E_CLB = 0x09, E_GLB = 0x0A, E_SFB = 0x0B, E_CFB = 0x0C, E_GFB = 0x0D };
+
+/* One EEFC command: FRDY, then FCMDE or FLOCKE said */
+static bool sam3_cmd(swd_t *s, int bank, uint8_t cmd, uint32_t arg, int ms)
+{
+    uint32_t eefc = SAM3_EEFC(bank), f = 0;
+    if (!wr32(s, eefc + 4, 0x5Au << 24 | (arg & 0xFFFF) << 8 | cmd)) return false;
+    for (int i = 0; i <= ms; i++) {
+        if (!rd32(s, eefc + 8, &f)) return false;
+        if (f & 1) {
+            if (f & 6) fl_logf(L_WARN, "EEFC%d FSR %X (%s)", bank, (unsigned)f, f & 4 ? "FLOCKE" : "FCMDE");
+            return !(f & 6);
+        }
+        if (ms) aos_hal_sleep_ms(1);
+    }
+    return false;
+}
+
+static int sam3_bank_of(const swd_t *s, uint32_t addr) { return addr - s->flash_base >= s->sam3_bank; }
+
+/* the page's number within its bank */
+static uint32_t sam3_page_of(const swd_t *s, uint32_t addr)
+{
+    return (addr - s->flash_base - (uint32_t)sam3_bank_of(s, addr) * s->sam3_bank) / SAM3_PAGE;
+}
+
+static bool sam3_begin(swd_t *s)
+{
+    if (!halt(s)) return false;
+    s->sam3_pending = 0;
+    s->sam3_written = false;
+    for (int b = 0; b < 2; b++) {
+        uint32_t eefc = SAM3_EEFC(b), locks = 0;
+        /* six wait states while writing, whatever the program had */
+        if (!rd32(s, eefc, &s->sam3_fmr[b]) || !wr32(s, eefc, (s->sam3_fmr[b] & ~0xF00u) | 6u << 8)) return false;
+        if (!sam3_cmd(s, b, E_GLB, 0, 10) || !rd32(s, eefc + 12, &locks)) return false;
+        for (unsigned r = 0; r < s->sam3_bank / SAM3_REGION; r++) {
+            if (!(locks >> r & 1)) continue;
+            if (!sam3_cmd(s, b, E_CLB, r * (SAM3_REGION / SAM3_PAGE), 50)) return false;
+            fl_logf(L_INFO, _("Región %u del banco %d desbloqueada (16 KB)"), r, b);
+        }
+    }
+    return true;
+}
+
+/* a page with nothing to write: erased by an erase-and-write of an empty latch */
+static bool sam3_flush(swd_t *s)
+{
+    uint32_t a = s->sam3_pending;
+    s->sam3_pending = 0;
+    if (!a) return true;
+    static const uint8_t FF[SAM3_PAGE] = { [0 ... SAM3_PAGE - 1] = 0xFF };
+    return mem_write(s, a, FF, SAM3_PAGE) && sam3_cmd(s, sam3_bank_of(s, a), E_EWP, sam3_page_of(s, a), 50);
+}
+
+/* the erase goes with the page's write; one with none erases it later */
+static bool sam3_erase(swd_t *s, uint32_t addr)
+{
+    if (!sam3_flush(s)) return false;
+    s->sam3_pending = addr;
+    return true;
+}
+
+static bool sam3_program(swd_t *s, uint32_t addr, const uint8_t *d, uint32_t n)
+{
+    s->sam3_pending = 0;
+    /* the latch through the flash's addresses (it comes back to all ones
+     * after every command), then the page erased and written */
+    if (!mem_write(s, addr, d, n) || !sam3_cmd(s, sam3_bank_of(s, addr), E_EWP, sam3_page_of(s, addr), 50)) return false;
+    s->sam3_written = true;
+    return true;
+}
+
+static bool sam3_gpnvm(swd_t *s, uint32_t *bits)
+{
+    return sam3_cmd(s, 0, E_GFB, 0, 10) && rd32(s, SAM3_EEFC(0) + 12, bits);
+}
+
+static void sam3_end(swd_t *s)
+{
+    bool ok = sam3_flush(s);
+    for (int b = 0; b < 2; b++) wr32(s, SAM3_EEFC(b), s->sam3_fmr[b]);
+    uint32_t g = 0;
+    /* written: it boots from the flash, not from the ROM's SAM-BA */
+    if (ok && s->sam3_written && !fl_cancel && sam3_gpnvm(s, &g) && !(g & 2)) {
+        if (sam3_cmd(s, 0, E_SFB, 1, 50)) fl_logf(L_INFO, "%s", _("GPNVM1 en 1: arranca desde la flash"));
+        else fl_logf(L_WARN, "%s", _("No se pudo poner GPNVM1: seguirá arrancando el SAM-BA de la ROM"));
+    }
+}
+
+/* both banks, and GPNVM1 back to the ROM's SAM-BA, as the ERASE button leaves it */
+static bool sam3_erase_all(swd_t *s)
+{
+    if (!sam3_begin(s)) return false;
+    bool ok = sam3_cmd(s, 0, E_EA, 0, 10000) && sam3_cmd(s, 1, E_EA, 0, 10000);
+    uint32_t g = 0;
+    if (ok && sam3_gpnvm(s, &g) && (g & 2) && sam3_cmd(s, 0, E_CFB, 1, 50))
+        fl_logf(L_INFO, "%s", _("GPNVM1 en 0: arranca el SAM-BA de la ROM, como con el botón ERASE"));
+    for (int b = 0; b < 2; b++) wr32(s, SAM3_EEFC(b), s->sam3_fmr[b]);
+    return ok;
+}
+
+static const flash_ops_t SAM3 = { sam3_begin, sam3_erase, sam3_program, sam3_erase_all, sam3_end, NULL };
+
+/* CHIPID's CIDR (at 0x400E0940 on these two families): a Cortex-M3, its
+ * architecture SAM3A or SAM3X, and the flash's size */
+static bool sam3_identify(swd_t *s)
+{
+    uint32_t cidr = 0;
+    if (!rd32(s, SAM3_CIDR, &cidr) || (cidr >> 5 & 7) != 3) return false;
+    unsigned arch = cidr >> 20 & 0xFF;
+    if (arch < 0x83 || arch > 0x86) return false;
+    static const uint16_t KB[16] = { 0, 8, 16, 32, 0, 64, 0, 128, 0, 256, 512, 0, 1024, 0, 2048, 0 };
+    uint32_t size = (uint32_t)KB[cidr >> 8 & 0xF] << 10;
+    if (!size) return false;
+    char n = size >= 512u << 10 ? '8' : size >= 256u << 10 ? '4' : '2';
+    snprintf(s->chip, sizeof s->chip, "SAM3%c%c%c", arch == 0x83 ? 'A' : 'X', n, arch == 0x86 ? 'G' : arch == 0x85 ? 'E' : 'C');
+    s->flash_base = 0x00080000;
+    s->flash_size = size;
+    s->sam3_bank = size / 2;
+    s->sector = SAM3_PAGE;
+    s->page = SAM3_PAGE;
+    s->ram_base = 0x20070000;       /* SRAM0's mirror, SRAM1 right after it: one block, as Arduino links it */
+    s->ram_size = (size >= 512u << 10 ? 96u : 64u) << 10;
+    s->ops = &SAM3;
+    fl_logf(L_INFO, "CIDR %08X", (unsigned)cidr);
+    uint32_t g = 0;
+    if (sam3_gpnvm(s, &g))
+        fl_logf(L_INFO, "%s", g & 2 ? _("GPNVM1 en 1: arranca desde la flash") : _("GPNVM1 en 0: arranca el SAM-BA de la ROM"));
+    return true;
+}
+
+/* -------------------------------------------------------------------------- */
 /* RP2040                                                                      */
 /* -------------------------------------------------------------------------- */
 
@@ -1385,7 +1537,8 @@ static bool identify(swd_t *s)
     uint32_t ap1 = 0;
     s->nrf = !s->adiv6 && ap_read(s, 1, AP_IDR, &ap1) && ap1 == 0x02880000;
     /* a protected nRF52 answers nothing on the bus: it is an M4 */
-    if (!rd32(s, CPUID, &s->cpuid)) s->cpuid = s->nrf ? 0x410FC241 : 0;
+    bool bus = rd32(s, CPUID, &s->cpuid);
+    if (!bus) s->cpuid = s->nrf ? 0x410FC241 : 0;
     uint16_t part = (s->cpuid >> 4) & 0xFFF;
     const char *core = part == 0xC60 ? "Cortex-M0+" : part == 0xC20 ? "Cortex-M0" : part == 0xC23 ? "Cortex-M3"
                      : part == 0xC24 ? "Cortex-M4" : part == 0xC27 ? "Cortex-M7" : part == 0xD21 ? "Cortex-M33"
@@ -1418,6 +1571,8 @@ static bool identify(swd_t *s)
         snprintf(s->chip, sizeof s->chip, "ADIv6 %s", core);
     } else if (sam_identify(s)) {
         core = s->core;
+    } else if (part == 0xC23 && sam3_identify(s)) {
+        /* an Arduino Due's: CHIPID said the rest */
     } else if (!stm_identify(s, part == 0xC20 || part == 0xC60)) {
         snprintf(s->chip, sizeof s->chip, "%s", core);
     }
@@ -1434,6 +1589,7 @@ static bool identify(swd_t *s)
     if (s->flash_size) snprintf(fl, sizeof fl, "%u KB", (unsigned)(s->flash_size >> 10));
     fl_logf(L_OK, "%s (%s%s), flash %s", s->chip, core, s->multidrop ? ", multidrop" : "", fl);
     if (s->prot) fl_logf(L_WARN, "%s", _("Protegido contra lectura: sólo se puede borrar entero"));
+    else if (!bus) fl_logf(L_WARN, "%s", _("La memoria no contesta: está protegido (a un Arduino Due lo libera su botón ERASE)"));
     else if (!s->ops) fl_logf(L_WARN, "%s", _("Todavía no sé grabar la flash de este chip"));
     return true;
 }

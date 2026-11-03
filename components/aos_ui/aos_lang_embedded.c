@@ -2981,6 +2981,12 @@ static const char blob_en__sistema_lang[] =
     "REGOUT0 repuesto: sus pines siguen a %u,%u V\tREGOUT0 put back: its pins stay at %u.%u V\n"
     "bootloader en 0x%08X\tbootloader at 0x%08X\n"
     "%sVDDH, pines a %u,%u V\t%sVDDH, pins at %u.%u V\n"
+    "Región %u del banco %d desbloqueada (16 KB)\tRegion %u of bank %d unlocked (16 KB)\n"
+    "GPNVM1 en 1: arranca desde la flash\tGPNVM1 set: it boots from the flash\n"
+    "No se pudo poner GPNVM1: seguirá arrancando el SAM-BA de la ROM\tCouldn't set GPNVM1: it will keep booting the ROM's SAM-BA\n"
+    "GPNVM1 en 0: arranca el SAM-BA de la ROM, como con el botón ERASE\tGPNVM1 cleared: it boots the ROM's SAM-BA, as the ERASE button leaves it\n"
+    "GPNVM1 en 0: arranca el SAM-BA de la ROM\tGPNVM1 cleared: it boots the ROM's SAM-BA\n"
+    "La memoria no contesta: está protegido (a un Arduino Due lo libera su botón ERASE)\tThe memory doesn't answer: it is protected (an Arduino Due's ERASE button frees it)\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5954,6 +5960,12 @@ static const char blob_de__sistema_lang[] =
     "REGOUT0 repuesto: sus pines siguen a %u,%u V\tREGOUT0 wiederhergestellt: seine Pins bleiben bei %u,%u V\n"
     "bootloader en 0x%08X\tBootloader bei 0x%08X\n"
     "%sVDDH, pines a %u,%u V\t%sVDDH, Pins bei %u,%u V\n"
+    "Región %u del banco %d desbloqueada (16 KB)\tRegion %u von Bank %d entsperrt (16 KB)\n"
+    "GPNVM1 en 1: arranca desde la flash\tGPNVM1 gesetzt: startet aus dem Flash\n"
+    "No se pudo poner GPNVM1: seguirá arrancando el SAM-BA de la ROM\tGPNVM1 nicht setzbar: startet weiter den SAM-BA im ROM\n"
+    "GPNVM1 en 0: arranca el SAM-BA de la ROM, como con el botón ERASE\tGPNVM1 gelöscht: startet den SAM-BA im ROM, wie nach der ERASE-Taste\n"
+    "GPNVM1 en 0: arranca el SAM-BA de la ROM\tGPNVM1 gelöscht: startet den SAM-BA im ROM\n"
+    "La memoria no contesta: está protegido (a un Arduino Due lo libera su botón ERASE)\tSpeicher antwortet nicht: geschützt (beim Arduino Due hilft die ERASE-Taste)\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -5961,7 +5973,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2966, 0, files_en, 1 },
-    { "de", "Deutsch", 2966, 0, files_de, 1 },
+    { "en", "English", 2972, 0, files_en, 1 },
+    { "de", "Deutsch", 2972, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

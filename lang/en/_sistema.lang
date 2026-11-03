@@ -9507,3 +9507,21 @@ bootloader en 0x%08X	bootloader at 0x%08X
 
 #: components/aos_flasher (Programador, SWD, nRF52)
 %sVDDH, pines a %u,%u V	%sVDDH, pins at %u.%u V
+
+#: components/aos_flasher (Programador, SWD, SAM3X)
+Región %u del banco %d desbloqueada (16 KB)	Region %u of bank %d unlocked (16 KB)
+
+#: components/aos_flasher (Programador, SWD, SAM3X)
+GPNVM1 en 1: arranca desde la flash	GPNVM1 set: it boots from the flash
+
+#: components/aos_flasher (Programador, SWD, SAM3X)
+No se pudo poner GPNVM1: seguirá arrancando el SAM-BA de la ROM	Couldn't set GPNVM1: it will keep booting the ROM's SAM-BA
+
+#: components/aos_flasher (Programador, SWD, SAM3X)
+GPNVM1 en 0: arranca el SAM-BA de la ROM, como con el botón ERASE	GPNVM1 cleared: it boots the ROM's SAM-BA, as the ERASE button leaves it
+
+#: components/aos_flasher (Programador, SWD, SAM3X)
+GPNVM1 en 0: arranca el SAM-BA de la ROM	GPNVM1 cleared: it boots the ROM's SAM-BA
+
+#: components/aos_flasher (Programador, SWD, SAM3X)
+La memoria no contesta: está protegido (a un Arduino Due lo libera su botón ERASE)	The memory doesn't answer: it is protected (an Arduino Due's ERASE button frees it)

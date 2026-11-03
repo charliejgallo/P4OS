@@ -19,7 +19,7 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
   graba (`docs/USB.md`). Fuera del Programador.
 - **Terminal serie**: monitor de los UART del header y los USB.
 - **SWD** (F2, sin publicar): nRF52, STM32F0/F1/F2/F4/G0/G4/L4, SAMD21/D51 (y sus
-  parientes D1x/D20/L2x/C2x/E5x), RP2040 y RP2350; grabar,
+  parientes D1x/D20/L2x/C2x/E5x), SAM3X/A (el Arduino Due), RP2040 y RP2350; grabar,
   verificar, borrar entero y la consola RTT.
 - **STM32 por su bootloader serie** (F4, sin publicar): grabar, verificar,
   leer y borrar, con RDP respetado.
@@ -31,7 +31,7 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
 | Familia | Ejemplos | Camino | Grabar | Leer | Fase |
 |---|---|---|---|---|---|
 | ESP32 / ESP8266 | DevKit, NodeMCU, módulos | ROM serie (hay) | hay | F1 | F1 |
-| Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, GD32 | SWD con 2-3 cables | hay: RP2040 (placa); nRF52, STM32F0/F1/F2/F4/G0/G4/L4, SAMD21/D51, RP2350 (sim) | hay (sim) | F2 |
+| Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, SAM3X (Due), GD32 | SWD con 2-3 cables | hay: RP2040 y nRF52840 (placa); STM32F0/F1/F2/F4/G0/G4/L4, SAMD21/D51, SAM3X/A, RP2350 (sim) | hay (sim) | F2 |
 | AVR con bootloader serie | Uno, Nano, Pro Mini, Mega | STK500 v1 (optiboot) y v2 (Mega) | hay (sim) | hay (sim) | F3 |
 | AVR con USB propio | Leonardo, Micro, Pro Micro | AVR109 (Caterina), toque a 1200 baudios | hay (sim) | hay (sim) | F3 |
 | STM32 sin sonda | Blue Pill, Black Pill | bootloader serie de ST (AN3155), BOOT0 y NRST con las líneas EN/BOOT | hay (sim) | hay (sim) | F4 |
@@ -180,6 +180,25 @@ distinto de lo planeado abajo:
 - **Protección:** un nRF52 con APPROTECT y un STM32 con RDP no se graban;
   el nRF52 se puede borrar entero por su CTRL-AP (se va el firmware con la
   protección). El RDP del STM32 (option bytes) todavía no.
+- **SAM3X/A, el Arduino Due** (2026-11-02; sólo en el simulador, hasta
+  probar el Due del usuario): CHIPID en 0x400E0940 (CIDR: un Cortex-M3,
+  arquitectura SAM3A o SAM3X, el tamaño de la flash), dos bancos desde
+  0x80000, cada uno con su EEFC (0x400E0A00 y 0x400E0C00). Se escribe
+  como lo hace el driver at91sam3 de OpenOCD: el latch por las
+  direcciones de la flash y "borrar y escribir página" (EWP) por cada
+  página de 256 B, con FWS en 6 mientras tanto (un error del silicio:
+  con menos, una página puede perder bits; el simulador lo imita y la
+  verificación lo agarra). Una página que en el archivo es toda 0xFF se
+  borra con un EWP del latch vacío. Antes, las regiones bloqueadas (de
+  16 KB) se desbloquean. GPNVM1 dice si arranca desde la flash o desde
+  el SAM-BA de la ROM: se pone después de grabar, y borrar entero lo
+  vuelve a 0, como el botón ERASE de la placa. El bit de seguridad
+  (GPNVM0) se respeta: con él puesto nada contesta por el bus, y el
+  Programador dice que el botón ERASE lo libera (borra todo). La consola
+  RTT busca en 0x20070000 (96 KB: la SRAM0 espejada y la SRAM1, como
+  linkea Arduino). En el Due: el conector "JTAG" de 10 pines a 1,27 mm
+  junto al SAM3X (SWDIO 2, SWCLK 4, GND 3/5/9, reset 10, 3,3 V de
+  referencia en el 1).
 - **Los nRF52 nuevos** (2026-10-31, para la Ekobadge; sólo en el
   simulador): desde ~2021 (errata 249 de Nordic: un nRF52840 desde el
   build code F, un 52832 desde el G, un 52833 desde el B...) cierran el
