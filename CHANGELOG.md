@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- **The Terminal and USB serial devices that come and go.** A USB serial
+  device plugged in after the Terminal opened now shows up in its list,
+  and a capture on it opens it again when it comes back (a board
+  restarting takes its USB with it), so its boot is caught. Found with the
+  Ekoparty badge, whose Meshtastic log now reads in the Terminal.
 - **The newer nRF52s by SWD.** Those made since about 2021 close their
   debug port at every reset unless their UICR and their firmware open it.
   After erasing one whole, the Programador leaves what Nordic's own tool

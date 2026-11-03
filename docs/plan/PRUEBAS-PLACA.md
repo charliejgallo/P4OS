@@ -546,6 +546,21 @@ Que necesitan la mano del usuario o equipos:
     bloque: Meshtastic no usa RTT, habla por su USB.
 
     <p align="center"><img src="../img/photo-flasher-ekobadge-dump.jpg" width="300" alt="El Programador con la Ekobadge por SWD: volcado guardado, 1 MB en 8 s a 133 KB/s, leído dos veces"></p>
+
+    Su consola es la de Meshtastic por su USB: la badge en el host de la
+    placa ("Ekoparty Badge v1", cafe:e001, tomada como serie), y en la
+    Terminal `usb0` a 115200 sale el registro entero (paquetes LoRa de
+    otros nodos, la batería, el router, HopScaling). Es Meshtastic 2.8.0
+    de base; lo propio de la badge es un módulo `EkopartyBadge`: la intro
+    animada de la OLED (EKO/OS :: CHAOS, ORDER IS AN ILLUSION...), los
+    créditos en "Acerca de", sus mensajes rápidos, una melodía y las
+    animaciones de reposo. La Terminal no la listaba (armaba la lista al
+    abrirse): arreglado en `64fb8e4`, que también reabre `usb0` si el
+    aparato se va y vuelve. Probado: la lista con la badge enchufada y la
+    captura en el canal B. Falta: reiniciar la badge con la captura
+    abierta y ver que vuelve sola con las líneas del arranque.
+
+    <p align="center"><img src="../img/photo-terminal-ekobadge.jpg" width="300" alt="La Terminal leyendo usb0, la Ekobadge por USB: el registro de Meshtastic, con la badge al lado"></p>
     Para la primera vez (el Programador ya sabe de los nRF52 nuevos, los
     que cierran el SWD en cada reinicio, sólo en el simulador):
     1. Buscar en la badge SWDIO, SWCLK, GND (y RESET, si está a mano):
