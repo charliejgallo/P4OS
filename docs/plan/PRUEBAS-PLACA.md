@@ -544,6 +544,8 @@ Que necesitan la mano del usuario o equipos:
     0x27000 (hasta 0xDA000), su LittleFS en 0xED000 y el bootloader UF2
     0.11 de Adafruit ("Ekoparty Badge v1"). La consola RTT no encontró el
     bloque: Meshtastic no usa RTT, habla por su USB.
+
+    <p align="center"><img src="../img/photo-flasher-ekobadge-dump.jpg" width="300" alt="El Programador con la Ekobadge por SWD: volcado guardado, 1 MB en 8 s a 133 KB/s, leído dos veces"></p>
     Para la primera vez (el Programador ya sabe de los nRF52 nuevos, los
     que cierran el SWD en cada reinicio, sólo en el simulador):
     1. Buscar en la badge SWDIO, SWCLK, GND (y RESET, si está a mano):
