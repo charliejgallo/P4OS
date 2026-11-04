@@ -12,7 +12,11 @@
  *
  * What comes in lands in a stream buffer in PSRAM (16 KB) that the reader
  * empties; writing blocks up to half a second. A device unplugged while
- * open closes its port: reads answer -1 from then on.
+ * open closes its port: reads answer -1 from then on. So does the host
+ * stopping (the pendrive host off, or lent to the probe): an open port
+ * keeps its buffer, which its reader may be waiting on at that moment,
+ * until whoever has it closes it (2026-11-03: the Terminal on usb0 and the
+ * host turned off freed it under the reader, and the board fell).
  *
  * Once opened, the USB side stays open until the device goes (or the host
  * stops): closing the port only puts it to rest, dropping what comes in,
@@ -209,7 +213,11 @@ static void event_cb(const cdc_acm_host_dev_event_data_t *ev, void *arg)
 bool aos_p4_usb_serial_start(void)
 {
     if (!S.mx) S.mx = xSemaphoreCreateMutex();
-    memset(S.s, 0, sizeof S.s);
+    /* a port still open from before the host stopped stays, closed, until
+     * its owner closes it */
+    xSemaphoreTake(S.mx, portMAX_DELAY);
+    for (int i = 0; i < SER_MAX; i++) if (!S.s[i].in_use) memset(&S.s[i], 0, sizeof S.s[i]);
+    xSemaphoreGive(S.mx);
     const cdc_acm_host_driver_config_t cfg = { .driver_task_stack_size = 4096, .driver_task_priority = 5, .xCoreID = 0,
                                                .new_dev_cb = new_dev };
     esp_err_t e = cdc_acm_host_install(&cfg);
@@ -221,10 +229,23 @@ bool aos_p4_usb_serial_start(void)
 void aos_p4_usb_serial_stop(void)
 {
     if (!S.installed) return;
-    for (int i = 0; i < SER_MAX; i++) dispose(&S.s[i]);
-    cdc_acm_host_uninstall();
+    xSemaphoreTake(S.mx, portMAX_DELAY);
+    for (int i = 0; i < SER_MAX; i++) {
+        ser_t *s = &S.s[i];
+        if (s->in_use) {
+            /* its USB side goes; its buffer stays for the reader (as an
+             * unplugged device's), freed when the port is closed */
+            if (s->cdc) cdc_acm_host_close(s->cdc);
+            s->cdc = NULL;
+            s->closed = true;
+        } else {
+            dispose(s);
+            memset(s, 0, sizeof *s);
+        }
+    }
     S.installed = false;
-    memset(S.s, 0, sizeof S.s);
+    xSemaphoreGive(S.mx);
+    cdc_acm_host_uninstall();
 }
 
 int aos_hal_usb_serial_count(void)
@@ -358,7 +379,7 @@ bool aos_hal_usb_serial_lines(int h, bool dtr, bool rts)
 
 void aos_hal_usb_serial_close(int h)
 {
-    if (h < 0 || h >= SER_MAX || !S.installed) return;
+    if (h < 0 || h >= SER_MAX || !S.mx) return;        /* with the host stopped too: its buffer goes now */
     xSemaphoreTake(S.mx, portMAX_DELAY);
     ser_t *s = &S.s[h];
     s->in_use = false;                  /* at rest: the USB side stays open (see the top) */

@@ -557,8 +557,20 @@ Que necesitan la mano del usuario o equipos:
     animaciones de reposo. La Terminal no la listaba (armaba la lista al
     abrirse): arreglado en `64fb8e4`, que también reabre `usb0` si el
     aparato se va y vuelve. Probado: la lista con la badge enchufada y la
-    captura en el canal B. Falta: reiniciar la badge con la captura
-    abierta y ver que vuelve sola con las líneas del arranque.
+    captura en el canal B. **Probado el 2026-11-03:** con la Terminal en
+    `usb0` (canal B) se apagó y prendió la badge: se fue del host a los
+    80,7 s, volvió a los 84,5 y el canal la reabrió solo 250 ms después;
+    la Terminal tiene el arranque desde el segundo 0 (`S:B:255,2.8.0...,
+    ekoparty_badge_v1`, `EkopartyBadge enabled: startup demo, NeoPixel
+    pin=13, count=6`, la demo de ~12 s, el Bluetooth anunciado después).
+    Mientras no estaba, el registro decía "no USB serial port usb0" cada
+    medio segundo: ahora lo intenta sólo cuando el host tiene ese puerto
+    (una línea al irse). Y apagar el host USB con `usb0` abierto tiraba la
+    placa (`serial1`, un spinlock sobre memoria liberada): el host al
+    parar liberaba el búfer del puerto mientras el lector lo esperaba. Ya
+    no: un puerto abierto queda cerrado con su búfer hasta que su dueño lo
+    cierra, como al desenchufar. Probado: host apagado y prendido con
+    `usb0` abierto, sin caída, y el canal volvió solo.
 
     <p align="center"><img src="../img/photo-terminal-ekobadge.jpg" width="300" alt="La Terminal leyendo usb0, la Ekobadge por USB: el registro de Meshtastic, con la badge al lado"></p>
     Para la primera vez (el Programador ya sabe de los nRF52 nuevos, los

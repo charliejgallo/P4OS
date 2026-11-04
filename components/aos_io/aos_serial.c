@@ -344,8 +344,10 @@ static void reader(void *arg)
             c->last_rx_ms = now;
             feed(c, ch, buf, n);
         } else if (n < 0) {
-            if (usb && now - c->reopen_ms >= 500) {
-                /* gone: opened again, twice a second, until it is back */
+            /* gone: opened again, twice a second, once the host has that
+             * many USB serial ports again (asked before, the opening
+             * would log its absence every time) */
+            if (usb && now - c->reopen_ms >= 500 && (c->uart || aos_hal_usb_serial_count() > c->port[3] - '0')) {
                 c->reopen_ms = now;
                 char owner[24];
                 snprintf(owner, sizeof owner, "serial %d", ch);

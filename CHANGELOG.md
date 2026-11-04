@@ -14,6 +14,9 @@
   and a capture on it opens it again when it comes back (a board
   restarting takes its USB with it), so its boot is caught. Found with the
   Ekoparty badge, whose Meshtastic log now reads in the Terminal.
+- **Fixed: turning the USB host off with a USB serial port open restarted
+  the board.** The host freed the port's buffer while its reader waited on
+  it; an open port now stays, closed, until whoever has it closes it.
 - **The newer nRF52s by SWD.** Those made since about 2021 close their
   debug port at every reset unless their UICR and their firmware open it.
   After erasing one whole, the Programador leaves what Nordic's own tool
