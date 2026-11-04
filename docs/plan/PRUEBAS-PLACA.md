@@ -683,6 +683,13 @@ Que necesitan la mano del usuario o equipos:
     (la preferencia estaba en apagado; no hubo caída: el volcado que
     tiene es viejo, del 2026-10-26). No se pudo ver cuándo se guardó
     así: los cortes se llevaron el registro anterior. A mirar.
+    Revisado el mismo día por el portal, con reinicios: el host en
+    "both" vuelve prendido tanto si la placa se reinicia con la sonda
+    abierta (el host prestado a 21/23) como si se abre y se cierra antes.
+    No se reprodujo. El único camino que lo apaga es elegir la fila
+    "libre" del puerto OTG con el host en "both" (el OTG es del host, así
+    que esa fila lo apaga), con o sin sonda: si se cerró la sonda así,
+    es eso.
 - [ ] Programador con STM32 por su bootloader serie (F4, 2026-10-29;
       probado sólo en el simulador contra `tools/fake_stm32_boot.py`): una
       Blue Pill o Black Pill en `uart.b` (TX al PA10, RX al PA9, EN al
