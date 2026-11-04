@@ -51,8 +51,9 @@ step "gdb: reset, a breakpoint on the reset handler, continue" gdb arm-none-eabi
     -ex "hbreak *\$reset" \
     -ex "continue" \
     -ex "printf \"stopped at 0x%08x\\n\", \$pc" \
-    -ex "if \$pc != \$reset" -ex "quit 1" -ex "end" \
-    -ex "delete" -ex "monitor resume" -ex "detach"
+    -ex "set \$missed = (unsigned)\$pc != \$reset" \
+    -ex "delete" -ex "monitor resume" -ex "detach" \
+    -ex "quit \$missed"
 grep -E 'reset handler at|stopped at' "$LOG/gdb"
 kill "$OCD_PID" 2>/dev/null; wait "$OCD_PID" 2>/dev/null
 

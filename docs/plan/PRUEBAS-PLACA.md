@@ -665,6 +665,24 @@ Que necesitan la mano del usuario o equipos:
     manda por DAP_SWD_Sequence (33 bits), que la sonda maneja. OpenOCD y
     probe-rs sólo hablan USB: esto no corre contra el simulador. Con el
     cable de la Mac en el OTG, nada en el enchufe "2.0".
+  - **Probada el 2026-11-03 con la Ekobadge** (nRF52840 por SWD en
+    `uart.b`, con su batería): `debuggers.sh nrf52` todo bien. probe-rs
+    la lista ("P4OS p4os CMSIS-DAP", 303a:4020); OpenOCD 0.12 la toma
+    como CMSIS-DAP v2 (firmware 2.1.1), DPIDR 2BA01477, Cortex-M4 r0p1,
+    "nRF52840-xxAA (build code D0)", la frena, lee la PC y la RAM y la
+    suelta; gdb, con OpenOCD de servidor, la reinicia frenada, pone un
+    breakpoint de hardware en el reset handler (0xA80, el del MBR) y se
+    para justo ahí; probe-rs lee las primeras palabras de la flash. La
+    Mac la ve a High Speed. Lo que costó: con los cables de los enchufes
+    de atrás conectados al header (aun con la badge en el "1.1") la Mac
+    no la enumeraba (ni rastro en su registro; la placa sólo decía
+    "suspended by the computer"); sin ellos, al toque. Para usar la
+    sonda, los enchufes de atrás desconectados.
+  - Visto ese día: después de cortes de corriente (los cambios de
+    cable), la placa volvió con el host USB apagado y sin restaurarlo
+    (la preferencia estaba en apagado; no hubo caída: el volcado que
+    tiene es viejo, del 2026-10-26). No se pudo ver cuándo se guardó
+    así: los cortes se llevaron el registro anterior. A mirar.
 - [ ] Programador con STM32 por su bootloader serie (F4, 2026-10-29;
       probado sólo en el simulador contra `tools/fake_stm32_boot.py`): una
       Blue Pill o Black Pill en `uart.b` (TX al PA10, RX al PA9, EN al
