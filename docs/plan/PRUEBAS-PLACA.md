@@ -591,7 +591,8 @@ Que necesitan la mano del usuario o equipos:
     (es el sketch que trae). Grabar un sketch (el `.bin` que deja el IDE
     de Arduino va solo a 0x80000) y ver que corre al reiniciar; Borrar
     entero y ver que queda el SAM-BA de la ROM (el puerto "Programming"
-    del Due lo ve como antes).
+    del Due lo ve como antes). En espera (2026-11-03): faltan cables
+    de 1,27 mm para su conector; el firmware ya lo tiene (`6e5c65c`).
   - Una RP2350 (Pico 2), si aparece una: Detectar (`DPIDR 4C013477`,
     Cortex-M33) y grabar un `.uf2` que arranque (con su IMAGE_DEF).
 - [ ] El puente del Programador (F4, 2026-10-29; probado sólo en el
