@@ -1059,7 +1059,7 @@ static const char *const FLASH_PHASE[] = { "idle", "opening", "connecting", "stu
                                            "writing", "verifying", "reading", "resetting", "console", "bridge", "probe", "done",
                                            "failed", "cancelled" };
 static const char *const FLASH_JOB[] = { "", "detect", "flash", "read", "erase", "console", "bridge", "probe" };
-static const char *const FLASH_FAMILY[] = { "esp", "avr", "swd", "stm32" };
+static const char *const FLASH_FAMILY[] = { "esp", "avr", "swd", "stm32", "uboot" };
 
 /* "family": "esp" (the default), "avr", "swd" or "stm32" */
 static aos_flasher_family_t flash_family(const cJSON *b)
@@ -1205,7 +1205,8 @@ static void api_flash_start(aos_httpd_req_t *r)
 }
 
 /* A dump ({"port", "from", "len"}, len 0 or missing: to the end of the
- * flash), an erase ({"port"}), an SWD target's RTT console ({"port"},
+ * flash; U-Boot: "console_baud", 115200 if missing, "baud" the faster one
+ * for reading, and "ram", the address it reads into), an erase ({"port"}), an SWD target's RTT console ({"port"},
  * until flash/cancel), the bridge ({"port", "baud"}, until flash/cancel) or
  * the CMSIS-DAP probe on the OTG connector ({"port"}, until flash/cancel);
  * "family" as in the others */
@@ -1215,11 +1216,14 @@ static void api_flash_job(aos_httpd_req_t *r, aos_flasher_job_t job)
     const char *port = jstr(b, "port");
     const cJSON *from = cJSON_GetObjectItemCaseSensitive(b, "from"), *len = cJSON_GetObjectItemCaseSensitive(b, "len"),
                 *baud = cJSON_GetObjectItemCaseSensitive(b, "baud");
+    const cJSON *cb = cJSON_GetObjectItemCaseSensitive(b, "console_baud"), *ram = cJSON_GetObjectItemCaseSensitive(b, "ram");
     aos_flasher_opts_t o = {
         .family = flash_family(b),
         .baud = cJSON_IsNumber(baud) ? (uint32_t)baud->valuedouble : 0,
         .read_from = cJSON_IsNumber(from) ? (uint32_t)from->valuedouble : 0,
         .read_len = cJSON_IsNumber(len) ? (uint32_t)len->valuedouble : 0,
+        .console_baud = cJSON_IsNumber(cb) ? (uint32_t)cb->valuedouble : 0,
+        .ram = cJSON_IsNumber(ram) ? (uint32_t)ram->valuedouble : 0,
     };
     port = port && port[0] ? port : "uart.b";
     bool ok = job == AOS_FLASHER_JOB_READ ? aos_flasher_read(port, &o)
@@ -1248,8 +1252,11 @@ static void api_flash_detect(aos_httpd_req_t *r)
     const char *port = jstr(b, "port");
     const cJSON *baud = cJSON_GetObjectItemCaseSensitive(b, "baud");
     aos_flasher_opts_t o = { .family = flash_family(b) };
-    /* SWD: "baud" is the clock in kHz, to try a wire at another speed */
+    /* SWD: "baud" is the clock in kHz, to try a wire at another speed;
+     * U-Boot: "console_baud", the console's */
     if (o.family == AOS_FLASHER_SWD && cJSON_IsNumber(baud)) o.baud = (uint32_t)baud->valuedouble;
+    const cJSON *cb = cJSON_GetObjectItemCaseSensitive(b, "console_baud");
+    if (cJSON_IsNumber(cb)) o.console_baud = (uint32_t)cb->valuedouble;
     bool ok = aos_flasher_detect_ex(port && port[0] ? port : "uart.b", &o);
     cJSON_Delete(b);
     if (ok) send_ok(r);

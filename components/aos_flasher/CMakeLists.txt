@@ -11,7 +11,7 @@
 # they are translated here), so the simulator compiles the same files
 # (sim/CMakeLists.txt builds the library from managed_components/).
 idf_component_register(
-    SRCS "aos_flasher.c" "aos_flasher_avr.c" "aos_flasher_swd.c" "aos_flasher_stm32.c" "aos_flasher_bridge.c" "aos_flasher_dap.c" "aos_flasher_esp.c" "aos_flasher_src.c" "aos_flasher_img.c"
+    SRCS "aos_flasher.c" "aos_flasher_avr.c" "aos_flasher_swd.c" "aos_flasher_stm32.c" "aos_flasher_uboot.c" "aos_flasher_bridge.c" "aos_flasher_dap.c" "aos_flasher_esp.c" "aos_flasher_src.c" "aos_flasher_img.c"
     INCLUDE_DIRS "include"
     REQUIRES aos_hal aos_io
     PRIV_REQUIRES espressif__esp-serial-flasher aos_ui lwip

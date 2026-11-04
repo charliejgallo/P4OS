@@ -9525,3 +9525,78 @@ GPNVM1 en 0: arranca el SAM-BA de la ROM	GPNVM1 cleared: it boots the ROM's SAM-
 
 #: components/aos_flasher (Programador, SWD, SAM3X)
 La memoria no contesta: está protegido (a un Arduino Due lo libera su botón ERASE)	The memory doesn't answer: it is protected (an Arduino Due's ERASE button frees it)
+
+#: components/aos_flasher (Programador, U-Boot)
+EN (GPIO%d) en bajo un momento, por si va al reset del aparato	EN (GPIO%d) low for a moment, in case it goes to the device's reset
+
+#: components/aos_flasher (Programador, U-Boot)
+Prendé o reiniciá el aparato: se le frena el arranque	Power the device on or restart it: its boot gets stopped
+
+#: components/aos_flasher (Programador, U-Boot)
+Arrancó sin dejarse frenar: la consola puede estar cerrada (queda la pinza SOIC8)	It booted without stopping: the console may be closed (the SOIC8 clip is left)
+
+#: components/aos_flasher (Programador, U-Boot)
+Vi la cuenta del autoboot pero no se frenó: puede pedir otra tecla o una clave	The autoboot countdown showed but did not stop: it may want another key or a password
+
+#: components/aos_flasher (Programador, U-Boot)
+Llegaron %u bytes sin un prompt: ¿la velocidad no es %u, o falta GND?	%u bytes came with no prompt: is the speed not %u, or is GND missing?
+
+#: components/aos_flasher (Programador, U-Boot)
+No llegó nada: revisá TX/RX cruzados, GND y que el aparato se haya prendido	Nothing came: check TX/RX crossed, GND and that the device powered on
+
+#: components/aos_flasher (Programador, U-Boot)
+\"%s\" no es U-Boot: no contestó a version	\"%s\" is not U-Boot: it did not answer version
+
+#: components/aos_flasher (Programador, U-Boot)
+Prompt \"%s\", RAM de trabajo 0x%08X, %s	Prompt \"%s\", working RAM 0x%08X, %s
+
+#: components/aos_flasher (Programador, U-Boot)
+con crc32	with crc32
+
+#: components/aos_flasher (Programador, U-Boot)
+sin crc32: cada pedazo se lee dos veces	no crc32: each piece is read twice
+
+#: components/aos_flasher (Programador, U-Boot)
+sf probe 0 no anduvo: la flash no se puede leer por acá	sf probe 0 failed: the flash can't be read this way
+
+#: components/aos_flasher (Programador, U-Boot)
+Consola a %u baudios (sin saveenv: al reiniciar vuelve a %u)	Console at %u baud (no saveenv: a restart brings back %u)
+
+#: components/aos_flasher (Programador, U-Boot)
+La consola pasó a %u baudios y no contesta ahí: reiniciá el aparato	The console went to %u baud and doesn't answer there: restart the device
+
+#: components/aos_flasher (Programador, U-Boot)
+La consola se queda a %u baudios	The console stays at %u baud
+
+#: components/aos_flasher (Programador, U-Boot)
+Consola de vuelta a %u baudios	Console back at %u baud
+
+#: components/aos_flasher (Programador, U-Boot)
+0x%X: otra vez (%d)	0x%X: again (%d)
+
+#: components/aos_flasher (Programador, U-Boot)
+0x%X: %u pedazos de 4 KB repetidos	0x%X: %u pieces of 4 KB repeated
+
+#: components/aos_flasher (Programador, U-Boot)
+El registro de la consola: %s	The console's log: %s
+
+#: components/aos_flasher (Programador, U-Boot)
+Sin sf probe no se puede leer la flash por U-Boot	Without sf probe the flash can't be read through U-Boot
+
+#: components/aos_flasher (Programador, U-Boot)
+0x%X queda fuera de la flash (%u MB)	0x%X is outside the flash (%u MB)
+
+#: components/aos_flasher (Programador, U-Boot)
+0x%X: no salió bien en tres intentos	0x%X: not right after three tries
+
+#: components/aos_flasher (Programador, U-Boot)
+%u pedazos de 64 KB vacíos (todo 0xFF), sin imprimir	%u empty 64 KB pieces (all 0xFF), not printed
+
+#: components/aos_flasher (Programador, U-Boot)
+Por la consola de U-Boot sólo se lee: no se graba ni se borra	U-Boot's console only reads: nothing is written or erased
+
+#: components/aos_flasher (Programador, U-Boot)
+%s a %u baudios	%s at %u baud
+
+#: components/aos_flasher (Programador, U-Boot)
+Queda frenado en \"%s\": reset en la Terminal, o su corriente, lo arranca	Left stopped at \"%s\": reset in the Terminal, or its power, boots it

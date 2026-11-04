@@ -55,6 +55,8 @@ void fl_progress(uint32_t add);
  * with the family's own fields in 'extra', "\"key\":value,..." or NULL)
  * when ok, and removes it otherwise. */
 bool fl_dump_open(uint32_t from, uint32_t len);
+/* A file of its own beside the dumps: "<dir>/<chip>-<date><suffix>" */
+bool fl_dump_note_path(char *out, size_t cap, const char *suffix);
 bool fl_dump_write(const void *buf, uint32_t n);
 void fl_dump_close(bool ok, bool verified, const char *extra);
 
@@ -63,6 +65,7 @@ bool fl_esp_run(void);
 bool fl_avr_run(void);
 bool fl_swd_run(void);
 bool fl_stm32_run(void);
+bool fl_uboot_run(void);
 /* Not a family: the port over TCP (aos_flasher_bridge.c), and the board as
  * the computer's SWD probe (aos_flasher_dap.c) */
 bool fl_bridge_run(void);

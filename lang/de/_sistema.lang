@@ -9525,3 +9525,78 @@ GPNVM1 en 0: arranca el SAM-BA de la ROM	GPNVM1 gelöscht: startet den SAM-BA im
 
 #: components/aos_flasher (Programador, SWD, SAM3X)
 La memoria no contesta: está protegido (a un Arduino Due lo libera su botón ERASE)	Speicher antwortet nicht: geschützt (beim Arduino Due hilft die ERASE-Taste)
+
+#: components/aos_flasher (Programador, U-Boot)
+EN (GPIO%d) en bajo un momento, por si va al reset del aparato	EN (GPIO%d) kurz auf Low, falls er am Reset des Geräts hängt
+
+#: components/aos_flasher (Programador, U-Boot)
+Prendé o reiniciá el aparato: se le frena el arranque	Gerät einschalten oder neu starten: sein Start wird angehalten
+
+#: components/aos_flasher (Programador, U-Boot)
+Arrancó sin dejarse frenar: la consola puede estar cerrada (queda la pinza SOIC8)	Startete ohne anzuhalten: Konsole evtl. gesperrt (bleibt die SOIC8-Klemme)
+
+#: components/aos_flasher (Programador, U-Boot)
+Vi la cuenta del autoboot pero no se frenó: puede pedir otra tecla o una clave	Der Autoboot-Countdown kam, hielt aber nicht an: evtl. andere Taste oder Passwort
+
+#: components/aos_flasher (Programador, U-Boot)
+Llegaron %u bytes sin un prompt: ¿la velocidad no es %u, o falta GND?	%u Bytes ohne Prompt: ist die Geschwindigkeit nicht %u, oder fehlt GND?
+
+#: components/aos_flasher (Programador, U-Boot)
+No llegó nada: revisá TX/RX cruzados, GND y que el aparato se haya prendido	Nichts kam: TX/RX gekreuzt, GND und ob das Gerät an ist prüfen
+
+#: components/aos_flasher (Programador, U-Boot)
+\"%s\" no es U-Boot: no contestó a version	\"%s\" ist kein U-Boot: keine Antwort auf version
+
+#: components/aos_flasher (Programador, U-Boot)
+Prompt \"%s\", RAM de trabajo 0x%08X, %s	Prompt \"%s\", Arbeits-RAM 0x%08X, %s
+
+#: components/aos_flasher (Programador, U-Boot)
+con crc32	mit crc32
+
+#: components/aos_flasher (Programador, U-Boot)
+sin crc32: cada pedazo se lee dos veces	ohne crc32: jedes Stück wird zweimal gelesen
+
+#: components/aos_flasher (Programador, U-Boot)
+sf probe 0 no anduvo: la flash no se puede leer por acá	sf probe 0 fehlgeschlagen: der Flash ist so nicht lesbar
+
+#: components/aos_flasher (Programador, U-Boot)
+Consola a %u baudios (sin saveenv: al reiniciar vuelve a %u)	Konsole auf %u Baud (ohne saveenv: Neustart bringt %u zurück)
+
+#: components/aos_flasher (Programador, U-Boot)
+La consola pasó a %u baudios y no contesta ahí: reiniciá el aparato	Konsole wechselte auf %u Baud und antwortet nicht: Gerät neu starten
+
+#: components/aos_flasher (Programador, U-Boot)
+La consola se queda a %u baudios	Die Konsole bleibt auf %u Baud
+
+#: components/aos_flasher (Programador, U-Boot)
+Consola de vuelta a %u baudios	Konsole zurück auf %u Baud
+
+#: components/aos_flasher (Programador, U-Boot)
+0x%X: otra vez (%d)	0x%X: noch einmal (%d)
+
+#: components/aos_flasher (Programador, U-Boot)
+0x%X: %u pedazos de 4 KB repetidos	0x%X: %u Stücke à 4 KB wiederholt
+
+#: components/aos_flasher (Programador, U-Boot)
+El registro de la consola: %s	Das Konsolenprotokoll: %s
+
+#: components/aos_flasher (Programador, U-Boot)
+Sin sf probe no se puede leer la flash por U-Boot	Ohne sf probe ist der Flash über U-Boot nicht lesbar
+
+#: components/aos_flasher (Programador, U-Boot)
+0x%X queda fuera de la flash (%u MB)	0x%X liegt außerhalb des Flash (%u MB)
+
+#: components/aos_flasher (Programador, U-Boot)
+0x%X: no salió bien en tres intentos	0x%X: nach drei Versuchen nicht korrekt
+
+#: components/aos_flasher (Programador, U-Boot)
+%u pedazos de 64 KB vacíos (todo 0xFF), sin imprimir	%u leere 64-KB-Stücke (alles 0xFF), nicht ausgegeben
+
+#: components/aos_flasher (Programador, U-Boot)
+Por la consola de U-Boot sólo se lee: no se graba ni se borra	Über die U-Boot-Konsole wird nur gelesen: nichts geschrieben oder gelöscht
+
+#: components/aos_flasher (Programador, U-Boot)
+%s a %u baudios	%s mit %u Baud
+
+#: components/aos_flasher (Programador, U-Boot)
+Queda frenado en \"%s\": reset en la Terminal, o su corriente, lo arranca	Bleibt bei \"%s\" angehalten: reset im Terminal oder Strom startet es

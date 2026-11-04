@@ -2987,6 +2987,31 @@ static const char blob_en__sistema_lang[] =
     "GPNVM1 en 0: arranca el SAM-BA de la ROM, como con el botón ERASE\tGPNVM1 cleared: it boots the ROM's SAM-BA, as the ERASE button leaves it\n"
     "GPNVM1 en 0: arranca el SAM-BA de la ROM\tGPNVM1 cleared: it boots the ROM's SAM-BA\n"
     "La memoria no contesta: está protegido (a un Arduino Due lo libera su botón ERASE)\tThe memory doesn't answer: it is protected (an Arduino Due's ERASE button frees it)\n"
+    "EN (GPIO%d) en bajo un momento, por si va al reset del aparato\tEN (GPIO%d) low for a moment, in case it goes to the device's reset\n"
+    "Prendé o reiniciá el aparato: se le frena el arranque\tPower the device on or restart it: its boot gets stopped\n"
+    "Arrancó sin dejarse frenar: la consola puede estar cerrada (queda la pinza SOIC8)\tIt booted without stopping: the console may be closed (the SOIC8 clip is left)\n"
+    "Vi la cuenta del autoboot pero no se frenó: puede pedir otra tecla o una clave\tThe autoboot countdown showed but did not stop: it may want another key or a password\n"
+    "Llegaron %u bytes sin un prompt: ¿la velocidad no es %u, o falta GND?\t%u bytes came with no prompt: is the speed not %u, or is GND missing?\n"
+    "No llegó nada: revisá TX/RX cruzados, GND y que el aparato se haya prendido\tNothing came: check TX/RX crossed, GND and that the device powered on\n"
+    "\\\"%s\\\" no es U-Boot: no contestó a version\t\\\"%s\\\" is not U-Boot: it did not answer version\n"
+    "Prompt \\\"%s\\\", RAM de trabajo 0x%08X, %s\tPrompt \\\"%s\\\", working RAM 0x%08X, %s\n"
+    "con crc32\twith crc32\n"
+    "sin crc32: cada pedazo se lee dos veces\tno crc32: each piece is read twice\n"
+    "sf probe 0 no anduvo: la flash no se puede leer por acá\tsf probe 0 failed: the flash can't be read this way\n"
+    "Consola a %u baudios (sin saveenv: al reiniciar vuelve a %u)\tConsole at %u baud (no saveenv: a restart brings back %u)\n"
+    "La consola pasó a %u baudios y no contesta ahí: reiniciá el aparato\tThe console went to %u baud and doesn't answer there: restart the device\n"
+    "La consola se queda a %u baudios\tThe console stays at %u baud\n"
+    "Consola de vuelta a %u baudios\tConsole back at %u baud\n"
+    "0x%X: otra vez (%d)\t0x%X: again (%d)\n"
+    "0x%X: %u pedazos de 4 KB repetidos\t0x%X: %u pieces of 4 KB repeated\n"
+    "El registro de la consola: %s\tThe console's log: %s\n"
+    "Sin sf probe no se puede leer la flash por U-Boot\tWithout sf probe the flash can't be read through U-Boot\n"
+    "0x%X queda fuera de la flash (%u MB)\t0x%X is outside the flash (%u MB)\n"
+    "0x%X: no salió bien en tres intentos\t0x%X: not right after three tries\n"
+    "%u pedazos de 64 KB vacíos (todo 0xFF), sin imprimir\t%u empty 64 KB pieces (all 0xFF), not printed\n"
+    "Por la consola de U-Boot sólo se lee: no se graba ni se borra\tU-Boot's console only reads: nothing is written or erased\n"
+    "%s a %u baudios\t%s at %u baud\n"
+    "Queda frenado en \\\"%s\\\": reset en la Terminal, o su corriente, lo arranca\tLeft stopped at \\\"%s\\\": reset in the Terminal, or its power, boots it\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5966,6 +5991,31 @@ static const char blob_de__sistema_lang[] =
     "GPNVM1 en 0: arranca el SAM-BA de la ROM, como con el botón ERASE\tGPNVM1 gelöscht: startet den SAM-BA im ROM, wie nach der ERASE-Taste\n"
     "GPNVM1 en 0: arranca el SAM-BA de la ROM\tGPNVM1 gelöscht: startet den SAM-BA im ROM\n"
     "La memoria no contesta: está protegido (a un Arduino Due lo libera su botón ERASE)\tSpeicher antwortet nicht: geschützt (beim Arduino Due hilft die ERASE-Taste)\n"
+    "EN (GPIO%d) en bajo un momento, por si va al reset del aparato\tEN (GPIO%d) kurz auf Low, falls er am Reset des Geräts hängt\n"
+    "Prendé o reiniciá el aparato: se le frena el arranque\tGerät einschalten oder neu starten: sein Start wird angehalten\n"
+    "Arrancó sin dejarse frenar: la consola puede estar cerrada (queda la pinza SOIC8)\tStartete ohne anzuhalten: Konsole evtl. gesperrt (bleibt die SOIC8-Klemme)\n"
+    "Vi la cuenta del autoboot pero no se frenó: puede pedir otra tecla o una clave\tDer Autoboot-Countdown kam, hielt aber nicht an: evtl. andere Taste oder Passwort\n"
+    "Llegaron %u bytes sin un prompt: ¿la velocidad no es %u, o falta GND?\t%u Bytes ohne Prompt: ist die Geschwindigkeit nicht %u, oder fehlt GND?\n"
+    "No llegó nada: revisá TX/RX cruzados, GND y que el aparato se haya prendido\tNichts kam: TX/RX gekreuzt, GND und ob das Gerät an ist prüfen\n"
+    "\\\"%s\\\" no es U-Boot: no contestó a version\t\\\"%s\\\" ist kein U-Boot: keine Antwort auf version\n"
+    "Prompt \\\"%s\\\", RAM de trabajo 0x%08X, %s\tPrompt \\\"%s\\\", Arbeits-RAM 0x%08X, %s\n"
+    "con crc32\tmit crc32\n"
+    "sin crc32: cada pedazo se lee dos veces\tohne crc32: jedes Stück wird zweimal gelesen\n"
+    "sf probe 0 no anduvo: la flash no se puede leer por acá\tsf probe 0 fehlgeschlagen: der Flash ist so nicht lesbar\n"
+    "Consola a %u baudios (sin saveenv: al reiniciar vuelve a %u)\tKonsole auf %u Baud (ohne saveenv: Neustart bringt %u zurück)\n"
+    "La consola pasó a %u baudios y no contesta ahí: reiniciá el aparato\tKonsole wechselte auf %u Baud und antwortet nicht: Gerät neu starten\n"
+    "La consola se queda a %u baudios\tDie Konsole bleibt auf %u Baud\n"
+    "Consola de vuelta a %u baudios\tKonsole zurück auf %u Baud\n"
+    "0x%X: otra vez (%d)\t0x%X: noch einmal (%d)\n"
+    "0x%X: %u pedazos de 4 KB repetidos\t0x%X: %u Stücke à 4 KB wiederholt\n"
+    "El registro de la consola: %s\tDas Konsolenprotokoll: %s\n"
+    "Sin sf probe no se puede leer la flash por U-Boot\tOhne sf probe ist der Flash über U-Boot nicht lesbar\n"
+    "0x%X queda fuera de la flash (%u MB)\t0x%X liegt außerhalb des Flash (%u MB)\n"
+    "0x%X: no salió bien en tres intentos\t0x%X: nach drei Versuchen nicht korrekt\n"
+    "%u pedazos de 64 KB vacíos (todo 0xFF), sin imprimir\t%u leere 64-KB-Stücke (alles 0xFF), nicht ausgegeben\n"
+    "Por la consola de U-Boot sólo se lee: no se graba ni se borra\tÜber die U-Boot-Konsole wird nur gelesen: nichts geschrieben oder gelöscht\n"
+    "%s a %u baudios\t%s mit %u Baud\n"
+    "Queda frenado en \\\"%s\\\": reset en la Terminal, o su corriente, lo arranca\tBleibt bei \\\"%s\\\" angehalten: reset im Terminal oder Strom startet es\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -5973,7 +6023,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2972, 0, files_en, 1 },
-    { "de", "Deutsch", 2972, 0, files_de, 1 },
+    { "en", "English", 2997, 0, files_en, 1 },
+    { "de", "Deutsch", 2997, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

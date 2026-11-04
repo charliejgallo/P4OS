@@ -54,6 +54,7 @@ typedef enum {
     AOS_FLASHER_AVR,            /* an Arduino through its bootloader: STK500 v1/v2, AVR109 */
     AOS_FLASHER_SWD,            /* an Arm Cortex-M through its debug port */
     AOS_FLASHER_STM32,          /* an STM32 through its system bootloader (AN3155) */
+    AOS_FLASHER_UBOOT,          /* anything with U-Boot on a serial console: only read (aos_flasher_uboot.c) */
     AOS_FLASHER_FAMILIES,
 } aos_flasher_family_t;
 
@@ -153,6 +154,10 @@ typedef struct {
     /* a dump: from this address, this many bytes (0 = to the end of the
      * flash); with no_verify each piece is not checked against the target */
     uint32_t read_from, read_len;
+    /* U-Boot: the console's speed (0 = 115200; baud above is the faster one
+     * it is moved to for reading, 0 = the fastest it takes), and the RAM it
+     * reads the flash into (0 = from its loadaddr or bdinfo) */
+    uint32_t console_baud, ram;
 } aos_flasher_opts_t;
 
 /* Connects, reads the chip and resets the target back to its program. */

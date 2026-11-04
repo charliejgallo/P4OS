@@ -287,6 +287,7 @@ target_sources(p4os_sim PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_avr.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_swd.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_stm32.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_uboot.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_bridge.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_dap.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_flasher/aos_flasher_esp.c

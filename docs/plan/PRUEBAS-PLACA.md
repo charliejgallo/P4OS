@@ -594,6 +594,14 @@ Que necesitan la mano del usuario o equipos:
        ponga REGOUT0, o grabarle uno que lo haga.
     5. Grabar algo propio (un blink o su firmware) y la consola RTT, si
        el firmware la trae.
+  - La cámara SC10W del usuario por U-Boot (F7, 2026-11-04): su consola
+    en `uart.b` (TXD de la cámara al pin 14, RXD al 12, GND; su 3,3 V
+    no), la cámara con su propia fuente. Detectar con la familia U-Boot
+    y Leer la flash entera (16 MB); en la Mac, `binwalk` tiene que ver
+    U-Boot, el uImage y el jffs2 donde dice mtdparts, y un segundo
+    volcado dar el mismo SHA-256. Antes, a mano por el portal: la consola
+    a 115200, frenada con Ctrl+C, `version`, `printenv`, `sf probe 0`
+    (detalles en `PROGRAMADOR.md`, F7).
   - El Arduino Due del usuario (SAM3X8E, desde el 2026-11-02; hecho
     sólo en el simulador): su conector "JTAG" de 10 pines a 1,27 mm
     junto al chip, SWDIO (pin 2) al 14 del header, SWCLK (4) al 12, GND

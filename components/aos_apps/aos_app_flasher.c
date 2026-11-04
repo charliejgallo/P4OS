@@ -188,6 +188,9 @@ static const char *phase_title(const aos_flasher_status_t *st)
 static aos_flasher_opts_t job_opts(void)
 {
     aos_flasher_opts_t o = { .family = (aos_flasher_family_t)S.fam, .baud = BAUDS[S.baud_i] };
+    /* U-Boot: the console at 115200, and the job moves it to the fastest
+     * speed U-Boot takes for reading */
+    if (S.fam == AOS_FLASHER_UBOOT) o.baud = 0;
     return o;
 }
 
@@ -670,6 +673,7 @@ static void build_target(lv_obj_t *parent, int32_t w, bool compact)
                        lv_color_hex(0xFF8A80), erase_cb, NULL);
     lv_obj_set_height(U.read_btn, 64);
     lv_obj_set_height(U.erase_btn, 64);
+    if (S.fam == AOS_FLASHER_UBOOT) lv_obj_add_flag(U.erase_btn, LV_OBJ_FLAG_HIDDEN);     /* it only reads */
     if (U.land) {
         lv_obj_set_flex_grow(U.read_btn, 1);
         lv_obj_set_flex_grow(U.erase_btn, 1);

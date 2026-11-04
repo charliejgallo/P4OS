@@ -399,6 +399,48 @@ para los chips que el Programador no conoce.
   interfaz de vendedor de la ROM) para leer la flash sin SWD.
 - **SAMD**: SAM-BA (BOSSA) por el CDC tras el toque a 1200 baudios.
 
+## F7: U-Boot por consola (cámaras, routers, decos)
+
+**Hecha el 2026-11-04** para la cámara Orvibo SC10W del usuario
+(Hi3518EV200, `camara-sc10w/HANDOFF-P4OS.md`): `aos_flasher_uboot.c`, la
+familia "U-Boot" (`"family":"uboot"`). **Sólo lee**: ningún comando que
+escriba (ni `saveenv`, ni `sf erase/write`, ni `mw` fuera de la RAM de
+trabajo); grabar y borrar contestan que no.
+
+- **Detectar:** el puerto a la velocidad de la consola (115200, o
+  `console_baud`), se pide prender o reiniciar el aparato (EN en bajo un
+  momento si el puerto lo tiene), y van Ctrl+C y Enter cada 25 ms hasta
+  un prompt: una línea corta que termina en `#`, `>` o `=>`, confirmada
+  cuando un Enter la repite. `version` tiene que decir "U-Boot" (el `# `
+  de un Linux no se confunde). Después `printenv` (bootargs, mtdparts,
+  loadaddr), `bdinfo` (si existe) y `sf probe 0`; la flash (nombre, ID,
+  tamaño) sale de lo que dicen ellos y el arranque, en las formas de
+  cada versión de U-Boot, o de la suma de mtdparts. El arranque y las
+  respuestas van a un `.txt` en `firmware/volcados`.
+- **Leer:** de a 64 KB: `sf read` a la RAM de trabajo (`ram`, o loadaddr,
+  o la DRAM + 32 MB, o 0x82000000), `crc32` de eso y `md.l`, que se
+  parsea de vuelta a bytes. Si el CRC no es el de U-Boot, el `crc32` de
+  cada 4 KB dice cuáles vinieron mal y sólo esos se repiten; un pedazo
+  todo 0xFF ni se imprime. Sin `crc32`, cada pedazo dos veces. Antes, la
+  consola sube a 921600 (o 460800, 230400) con `setenv baudrate` y el
+  "press ENTER" de HiSilicon, sin `saveenv`, y al final vuelve sola. El
+  `.json` del volcado lleva la versión de U-Boot, la flash, mtdparts y
+  bootargs; el `.txt` al lado. El aparato queda frenado en el prompt.
+- **Simulador:** `tools/fake_uboot.py` sobre un pty (`P4_SIM_UART_B`),
+  calcado del U-Boot de la SC10W: 2010.06-dirty, se frena sólo con
+  Ctrl+C, sin `bdinfo`, su mtdparts. Probado: los 16 MB byte a byte (72 s
+  en el pty), sin `crc32`, con ruido en la línea (repite los 4 KB que
+  fallan), un U-Boot que no sube de 115200, y uno cerrado (lo dice y no
+  intenta nada). En ningún caso salió un comando que escriba.
+- **La cámara del usuario** (2026-11-04, a mano por el portal antes de
+  la familia): la consola anda a 115200 una vez cambiada la fuente (con
+  la otra no arrancaba bien y llegaba basura); U-Boot 2010.06-dirty
+  (Feb 27 2016), prompt `hisilicon # `, **se frena sólo con Ctrl+C**
+  aunque diga "any key", entorno "bad CRC, using default", sin `bdinfo`,
+  con `crc32` y `md`. Flash MX25L128 de 16 MB (ID c2 20 18), mtdparts
+  `512K(boot),2560K(kernel),12800K(rootfs),512K(config)`, rootfs jffs2;
+  el kernel se carga en 0x82000000. WiFi por USB con el driver `rt2870`.
+
 ## Más adelante: los WCH (CH32V)
 
 Pedido del usuario (2026-10-30, "me re interesa"): los microcontroladores

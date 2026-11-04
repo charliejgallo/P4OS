@@ -181,10 +181,11 @@ static void name_part(char *out, size_t cap, const char *s)
     out[n] = 0;
 }
 
-bool fl_dump_open(uint32_t from, uint32_t len)
+/* "<chip>[-<mac>]-<date>" in the dumps' folder, made if it is not there */
+static bool dump_stem(char *out, size_t cap)
 {
     const char *dir = aos_flasher_dump_dir();
-    if (!dir) return fl_fail("%s", _("No hay tarjeta para guardar el volcado"));
+    if (!dir) return false;
     mkdir(aos_flasher_dir(), 0777);
     mkdir(dir, 0777);
     char chip[24], id[8] = "", when[24];
@@ -199,7 +200,23 @@ bool fl_dump_open(uint32_t from, uint32_t len)
     } else {
         snprintf(when, sizeof when, "t%u", (unsigned)(aos_hal_uptime_ms() / 1000));
     }
-    snprintf(D.path, sizeof D.path, "%.100s/%.23s%.7s-%.15s@0x%X.bin", dir, chip, id, when, (unsigned)from);
+    snprintf(out, cap, "%.100s/%.23s%.7s-%.15s", dir, chip, id, when);
+    return true;
+}
+
+bool fl_dump_note_path(char *out, size_t cap, const char *suffix)
+{
+    char stem[160];
+    if (!dump_stem(stem, sizeof stem)) return false;
+    snprintf(out, cap, "%s%s", stem, suffix);
+    return true;
+}
+
+bool fl_dump_open(uint32_t from, uint32_t len)
+{
+    char stem[160];
+    if (!dump_stem(stem, sizeof stem)) return fl_fail("%s", _("No hay tarjeta para guardar el volcado"));
+    snprintf(D.path, sizeof D.path, "%s@0x%X.bin", stem, (unsigned)from);
     snprintf(D.part, sizeof D.part, "%s.part", D.path);
     D.f = fopen(D.part, "wb");
     if (!D.f) return fl_fail(_("No se pudo crear %s"), D.part);
@@ -290,6 +307,7 @@ const char *aos_flasher_family_name(int family)
     case AOS_FLASHER_AVR: return "Arduino";
     case AOS_FLASHER_SWD: return "SWD";
     case AOS_FLASHER_STM32: return "STM32";
+    case AOS_FLASHER_UBOOT: return "U-Boot";
     default: return "?";
     }
 }
@@ -299,7 +317,8 @@ static void worker(void *arg)
     (void)arg;
     bool ok = J.job == AOS_FLASHER_JOB_BRIDGE ? fl_bridge_run() : J.job == AOS_FLASHER_JOB_PROBE ? fl_probe_run()
             : J.opts.family == AOS_FLASHER_AVR ? fl_avr_run() : J.opts.family == AOS_FLASHER_SWD ? fl_swd_run()
-            : J.opts.family == AOS_FLASHER_STM32 ? fl_stm32_run() : fl_esp_run();
+            : J.opts.family == AOS_FLASHER_STM32 ? fl_stm32_run() : J.opts.family == AOS_FLASHER_UBOOT ? fl_uboot_run()
+            : fl_esp_run();
     /* a console, the bridge or the probe end by a cancel, and that is how
      * they are meant to end */
     if (fl_cancel && ((J.job == AOS_FLASHER_JOB_CONSOLE && fl_st.phase == AOS_FLASHER_CONSOLE) ||

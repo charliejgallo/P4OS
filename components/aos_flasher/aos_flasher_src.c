@@ -437,6 +437,7 @@ static void dump_chip(const char *bin, aos_flasher_source_t *src)
     else if (strstr(j, "\"family\":\"stm32\"")) src->family = AOS_FLASHER_STM32;
     else if (strstr(j, "\"family\":\"swd\"")) src->family = AOS_FLASHER_SWD;
     else if (strstr(j, "\"family\":\"esp\"")) src->family = AOS_FLASHER_ESP;
+    else if (strstr(j, "\"family\":\"uboot\"")) src->family = AOS_FLASHER_UBOOT;
     const char *k = strstr(j, "\"chip\":\"");
     if (!k) return;
     k += 8;
