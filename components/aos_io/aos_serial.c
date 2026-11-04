@@ -27,8 +27,12 @@
  *               most that.
  *   usbN        a USB serial device that goes away (unplugged, or a board
  *               restarting, whose USB goes with it) is opened again when it
- *               is back, so a capture catches the board's boot. Only the
- *               reader swaps the port; sending holds the channel's mutex.
+ *               is back, so a capture catches the board's boot. "Back" is
+ *               the same VID:PID at that place of the list: another device
+ *               that became usbN meanwhile is left alone (an Arduino plugged
+ *               in after a badge was taken by the badge's capture on
+ *               2026-11-03). Only the reader swaps the port; sending holds
+ *               the channel's mutex.
  */
 #include "aos_io.h"
 #include "aos_hal.h"
@@ -56,6 +60,7 @@ typedef struct {
     char     port[AOS_IO_PORT_NAME_MAX];
     char     desc[64];              /* the port's description, kept: the reader may swap the port */
     uint64_t reopen_ms;
+    uint16_t vid, pid;              /* a usbN port's device, to know it when it comes back */
     uint32_t baud;
     line_t  *ring;
     volatile uint32_t lines;        /* committed so far */
@@ -344,10 +349,13 @@ static void reader(void *arg)
             c->last_rx_ms = now;
             feed(c, ch, buf, n);
         } else if (n < 0) {
-            /* gone: opened again, twice a second, once the host has that
-             * many USB serial ports again (asked before, the opening
-             * would log its absence every time) */
-            if (usb && now - c->reopen_ms >= 500 && (c->uart || aos_hal_usb_serial_count() > c->port[3] - '0')) {
+            /* gone: opened again, twice a second, once its place in the
+             * host's list holds its device again (asked before, the
+             * opening would log its absence every time) */
+            uint16_t vid = 0, pid = 0;
+            int idx = c->port[3] - '0';
+            if (usb && now - c->reopen_ms >= 500 &&
+                (c->uart || (aos_hal_usb_serial_ids(idx, &vid, &pid) && vid == c->vid && pid == c->pid))) {
                 c->reopen_ms = now;
                 char owner[24];
                 snprintf(owner, sizeof owner, "serial %d", ch);
@@ -396,6 +404,8 @@ bool aos_serial_start(int ch, const char *port, uint32_t baud)
     if (!c->uart) return false;
     snprintf(c->port, sizeof c->port, "%s", port);
     snprintf(c->desc, sizeof c->desc, "%s", aos_io_uart_desc(c->uart));
+    c->vid = c->pid = 0;
+    if (!strncmp(port, "usb", 3)) aos_hal_usb_serial_ids(port[3] - '0', &c->vid, &c->pid);
     c->baud = baud;
     c->stop = false;
     c->running = true;
