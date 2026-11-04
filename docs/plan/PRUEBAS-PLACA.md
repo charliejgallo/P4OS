@@ -738,7 +738,9 @@ Que necesitan la mano del usuario o equipos:
     vuelta, todos 0xFF. De paso: la captura de la Terminal en `usb0` (de
     la badge, que ya no estaba) había tomado al Nano al ocupar ese lugar,
     y el Programador no lo podía abrir; arreglado en `30b6431` (reabre
-    sólo el mismo VID:PID), sin instalar todavía.
+    sólo el mismo VID:PID), instalado el mismo día.
+
+    <p align="center"><img src="../img/photo-terminal-nano.jpg" width="300" alt="La Terminal en usb0 a 115200 con el Nano por el host USB: las vueltas del programa charla, y el Nano al lado"></p>
   - El mismo por el header: TX/RX cruzados con un divisor en su TX, EN al
     RESET. Uno de 3,3 V (Pro Mini) va directo.
   - Un Mega 2560 por USB (STK500 v2; su VID:PID lo pone primero).
