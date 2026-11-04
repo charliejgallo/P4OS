@@ -440,6 +440,18 @@ trabajo); grabar y borrar contestan que no.
   con `crc32` y `md`. Flash MX25L128 de 16 MB (ID c2 20 18), mtdparts
   `512K(boot),2560K(kernel),12800K(rootfs),512K(config)`, rootfs jffs2;
   el kernel se carga en 0x82000000. WiFi por USB con el driver `rt2870`.
+- **El primer volcado de la cámara** (2026-11-04, con la familia, desde el
+  portal): 16 MB en 102 min, cada 64 KB contra su `crc32`, SHA-256
+  `1f508d27…`. A 115200 todo el tiempo: su U-Boot contestó "not
+  supported" a 921600, 460800 y 230400 (la tabla de velocidades de ese
+  2010.06 no las tiene), así que `md` va a ~10 mil caracteres por
+  segundo, unos 2,6 KB de flash. Ningún pedazo vacío: el jffs2 marca
+  cada bloque, aun los libres. Adentro, lo que dijo al arrancar: U-Boot
+  en 0, el uImage `Linux-3.4.35` de 2208808 bytes en 0x80000 (carga en
+  0x80008000), jffs2 desde 0x300000 y la config (otro jffs2) en
+  0xF80000. Para la próxima, más rápido: la pinza SOIC8 con la app
+  EEPROM (ya lee las 25Qxx por `spi.a`), o un `mmc write` de la RAM a una
+  microSD en la cámara.
 
 ## Más adelante: los WCH (CH32V)
 
