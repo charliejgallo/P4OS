@@ -725,6 +725,20 @@ Que necesitan la mano del usuario o equipos:
   - Un Uno o un Nano por USB (`usb0`, reset por DTR): Detectar (firma y
     "optiboot 8.0" o "STK500 v1 1.16, 57600"), grabar el `.hex` de Blink,
     Monitor a 9600, Leer y Borrar el programa.
+    **Hecho el 2026-11-03** con un Nano de cajón (CH340, 1a86:7523) en el
+    enchufe "1.1" del host: Detectar dijo ATmega328P (1E 95 0F), 32 KB,
+    "STK500 v1 1.16, 57600" (el bootloader viejo), reseteado por DTR.
+    Leer la flash: 32 KB en 16 s, leído dos veces. Grabar `rapido.hex` de
+    `tools/avr_test/blink_nano` (2 páginas) en 1,9 s, verificado, y el LED
+    "L" parpadeando rápido; `charla.hex` (6 páginas) en 2,1 s, y por la
+    Terminal en `usb0` a 115200 sus líneas y el eco de lo que se le manda
+    (la primera versión leía la entrada cada milisegundo y perdía casi
+    todo: ahora por interrupción). Borrar: 0xFF sobre los 30 KB del
+    programa en 8,9 s, el bootloader queda; los primeros 4 KB leídos de
+    vuelta, todos 0xFF. De paso: la captura de la Terminal en `usb0` (de
+    la badge, que ya no estaba) había tomado al Nano al ocupar ese lugar,
+    y el Programador no lo podía abrir; arreglado en `30b6431` (reabre
+    sólo el mismo VID:PID), sin instalar todavía.
   - El mismo por el header: TX/RX cruzados con un divisor en su TX, EN al
     RESET. Uno de 3,3 V (Pro Mini) va directo.
   - Un Mega 2560 por USB (STK500 v2; su VID:PID lo pone primero).

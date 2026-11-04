@@ -260,8 +260,10 @@ Lo planeado era:
 
 ## F3: Arduino por su bootloader
 
-**Hecha en el simulador el 2026-10-29** (falta la placa: un Uno o Nano
-por el header y por USB, un Leonardo por USB). `aos_flasher_avr.c`, el
+**Hecha en el simulador el 2026-10-29**; en la placa, un Nano con el
+bootloader viejo por el host USB el 2026-11-03 (detectar, leer, grabar,
+verificar, borrar). Falta: un Uno o Nano por el header, uno con
+optiboot, un Mega y un Leonardo por USB. `aos_flasher_avr.c`, el
 tipo "Arduino" en la app y en el portal (`"family":"avr"`), y
 `tools/fake_avr_boot.py` con los cuatro bootloaders (optiboot,
 ATmegaBOOT, el del Mega y Caterina), que sólo contestan a su velocidad (la
