@@ -3012,6 +3012,7 @@ static const char blob_en__sistema_lang[] =
     "Por la consola de U-Boot sólo se lee: no se graba ni se borra\tU-Boot's console only reads: nothing is written or erased\n"
     "%s a %u baudios\t%s at %u baud\n"
     "Queda frenado en \\\"%s\\\": reset en la Terminal, o su corriente, lo arranca\tLeft stopped at \\\"%s\\\": reset in the Terminal, or its power, boots it\n"
+    "TX, RX y GND a la consola del aparato, y tocá Detectar\tTX, RX and GND to the device's console, then tap Detect\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -6016,6 +6017,7 @@ static const char blob_de__sistema_lang[] =
     "Por la consola de U-Boot sólo se lee: no se graba ni se borra\tÜber die U-Boot-Konsole wird nur gelesen: nichts geschrieben oder gelöscht\n"
     "%s a %u baudios\t%s mit %u Baud\n"
     "Queda frenado en \\\"%s\\\": reset en la Terminal, o su corriente, lo arranca\tBleibt bei \\\"%s\\\" angehalten: reset im Terminal oder Strom startet es\n"
+    "TX, RX y GND a la consola del aparato, y tocá Detectar\tTX, RX und GND an die Konsole des Geräts, dann Erkennen tippen\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -6023,7 +6025,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2997, 0, files_en, 1 },
-    { "de", "Deutsch", 2997, 0, files_de, 1 },
+    { "en", "English", 2998, 0, files_en, 1 },
+    { "de", "Deutsch", 2998, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

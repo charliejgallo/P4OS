@@ -304,9 +304,10 @@ static void refresh_target(void)
     aos_flasher_status_t st;
     aos_flasher_status(&st);
     bool detecting = st.busy && st.job == AOS_FLASHER_JOB_DETECT;
-    bool avr = S.fam == AOS_FLASHER_AVR, swd = S.fam == AOS_FLASHER_SWD, stm = S.fam == AOS_FLASHER_STM32;
+    bool avr = S.fam == AOS_FLASHER_AVR, swd = S.fam == AOS_FLASHER_SWD, stm = S.fam == AOS_FLASHER_STM32,
+         uboot = S.fam == AOS_FLASHER_UBOOT;
     char buf[128];
-    if (st.chip_known && strcmp(st.port, S.port) == 0 && (int)st.family == S.fam && (avr || swd || stm)) {
+    if (st.chip_known && strcmp(st.port, S.port) == 0 && (int)st.family == S.fam && (avr || swd || stm || uboot)) {
         lv_label_set_text(U.chip_name, st.chip);
         char fl[16], pg[16];
         fmt_size(fl, sizeof fl, st.flash_size);
@@ -343,6 +344,7 @@ static void refresh_target(void)
         lv_label_set_text(U.chip_info, avr ? _("Conectá el Arduino y tocá Detectar")
                                      : swd ? _("SWCLK, SWDIO y GND al header, y tocá Detectar")
                                      : stm ? _("Al header con BOOT0 y NRST, y tocá Detectar")
+                                     : uboot ? _("TX, RX y GND a la consola del aparato, y tocá Detectar")
                                            : _("Conectala al header y tocá Detectar"));
         lv_obj_set_style_text_color(U.chip_info, AOS_C_DIM, 0);
     }

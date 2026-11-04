@@ -9600,3 +9600,6 @@ Por la consola de U-Boot sólo se lee: no se graba ni se borra	Über die U-Boot-
 
 #: components/aos_flasher (Programador, U-Boot)
 Queda frenado en \"%s\": reset en la Terminal, o su corriente, lo arranca	Bleibt bei \"%s\" angehalten: reset im Terminal oder Strom startet es
+
+#: components/aos_apps/aos_app_flasher.c (U-Boot)
+TX, RX y GND a la consola del aparato, y tocá Detectar	TX, RX und GND an die Konsole des Geräts, dann Erkennen tippen
