@@ -54,3 +54,8 @@ Copy the files to the card's `firmware/` folder.
   RX to PA9; or EN to R and BOOT to BOOT0's middle pin, and P4OS works the
   two lines.
 - **`charla` in the Terminal:** `uart.b` at 115200, TX to PA10, RX to PA9.
+
+Done on 2026-11-05 with a Blue Pill whose chip is a clone (DPIDR
+`2BA01477`, 128 KB): both programs by SWD and by the serial bootloader,
+running as they should, and `charla` talking in the Terminal. Its HSI runs
+about 1 % slow (202 ms turns), well inside what the UART tolerates.

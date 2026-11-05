@@ -126,7 +126,7 @@ verified in under half a second.</em></p>
 </p>
 
 <p align="center"><em>A cheap Wi-Fi camera (a Hi3518EV200) opened up, its
-console pads soldered to the header: U-Boot stopped with Ctrl+C and its
+console pads soldered to the header: U-Boot stopped with a mix of keys and its
 16 MB read out through its own commands, twice, with the same SHA-256 -
 the copy kept before giving it a new firmware.</em></p>
 
@@ -139,6 +139,15 @@ the copy kept before giving it a new firmware.</em></p>
 Meshtastic) read whole by SWD in 8 seconds, and an Arduino Nano from a
 drawer on the USB host: written by the Programmer, then talking in the
 Terminal.</em></p>
+
+<p align="center">
+  <img src="docs/img/photo-flasher-bluepill.jpg" width="300" alt="The Flasher in SWD mode with a Blue Pill wired to the header: STM32F1 medium, 128 KB flash in 1 KB sectors, Cortex-M3, DPIDR 2BA01477">
+</p>
+
+<p align="center"><em>A Blue Pill by SWD: its chip a clone (DPIDR 2BA01477,
+a CKS32) with 128 KB that really are there. Read whole in a second, written
+and erased; and the same again through ST's serial bootloader on the same
+two wires.</em></p>
 
 ---
 

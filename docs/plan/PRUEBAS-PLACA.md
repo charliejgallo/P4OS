@@ -723,27 +723,39 @@ Que necesitan la mano del usuario o equipos:
     "libre" del puerto OTG con el host en "both" (el OTG es del host, así
     que esa fila lo apaga), con o sin sonda: si se cerró la sonda así,
     es eso.
-- [ ] Programador con STM32 por su bootloader serie (F4, 2026-10-29;
-      probado sólo en el simulador contra `tools/fake_stm32_boot.py`): una
-      Blue Pill o Black Pill en `uart.b` (TX al PA10, RX al PA9, EN al
-      NRST, BOOT al BOOT0), Detectar, grabar, leer y borrar. Cuando el
-      usuario compre una.
-- [ ] La misma Black Pill (o una Blue Pill) por SWD (2026-10-30, sólo en
-      el simulador: F411, G071, L476): SWCLK y SWDIO del conector de 4
-      pines de la placa al pin 12 y al 14 de `uart.b`, GND, y NRST al EN si
-      se quiere el reset. Detectar (STM32F411, 512 KB, sin página: sectores),
-      grabar un `.bin` o `.hex` que cruce el sector 4 (64 KB), verificar,
-      borrar todo. Y si aparece una con RDP, que "Borrar" la deje limpia.
-- [ ] **La Blue Pill del usuario** (llegó el 2026-11-05), por los dos
-      caminos de arriba, con `tools/swd_test/blink_bluepill`: `rapido` (el
-      LED de PC13 cada 100 ms) y `charla` (cada 200 ms y USART1 a 115200
-      en PA9/PA10, como la del Nano). Probados antes en un Cortex-M3
-      emulado y grabados por SWD en el simulador (`.bin`, `.hex`, `.uf2`).
-      - SWD: Detectar dice "STM32F1 medium", 64 KB (o 128: muchas traen
-        128 aunque digan 64) y el DPIDR: `1BA01477` es un ST,
-        `2BA01477` un CKS32. Volcar lo de fábrica, grabar `rapido` (el LED
-        cambia de ritmo), `charla`, borrar todo (el LED queda quieto).
-      - Bootloader serie (BOOT0 en 1): lo mismo, y `charla` en la Terminal.
+- [x] **Programador con STM32 por su bootloader serie** (F4, 2026-10-29;
+      en la placa el 2026-11-05 con la Blue Pill de abajo): BOOT0 en 1 por
+      el jumper, `uart.b` TX al PA10 y RX al PA9, sin EN ni BOOT (el
+      "Placa reiniciada" del log no llega: el reset y BOOT0 a mano).
+      Detectar (AN3155 v2.2, 115200 8E1, PID 0x410, 128 KB, 1,4 s), leer
+      los 128 KB (32 s; igual al volcado por SWD), grabar un `.bin` y un
+      `.hex` (verificados, ~1 s), borrar todo (1,3 s; el volcado siguiente,
+      todo 0xFF). Con BOOT0 en 0 y reset, arrancó lo grabado. Falta: EN al
+      NRST y BOOT al BOOT0, para que P4OS maneje las dos líneas solo.
+- [ ] La Black Pill por SWD (2026-10-30, sólo en el simulador: F411, G071,
+      L476; el F1 ya probado con la Blue Pill): SWCLK y SWDIO del conector
+      de 4 pines de la placa al pin 12 y al 14 de `uart.b`, GND, y NRST al
+      EN si se quiere el reset. Detectar (STM32F411, 512 KB, sin página:
+      sectores), grabar un `.bin` o `.hex` que cruce el sector 4 (64 KB),
+      verificar, borrar todo. Y si aparece una con RDP, que "Borrar" la
+      deje limpia.
+- [x] **La Blue Pill del usuario por SWD** (2026-11-05), con
+      `tools/swd_test/blink_bluepill` (`rapido`: el LED de PC13 cada
+      100 ms; `charla`: cada 200 ms y USART1 a 115200). Foto en el README
+      (`docs/img/photo-flasher-bluepill.jpg`).
+      - **Es un clon:** DPIDR `2BA01477` (un CKS32; un ST dice `1BA01477`),
+        DBGMCU 0x410 como un F103 "medium". Dice 128 KB y los tiene: datos
+        al azar grabados en 0x08010000 y 0x0801F800 volvieron iguales, sin
+        repetir la mitad de abajo.
+      - SWCLK medido 3657 kHz (200 de 200 lecturas bien). Volcado de
+        fábrica, 128 KB en 1,1 s: 1,2 KB de programa (el blink de siempre,
+        sin textos). `rapido` grabado y verificado en 0,4 s, el LED a
+        100 ms; `charla` igual, a 200 ms.
+      - **Terminal** en `uart.b` (TX al PA10, RX al PA9): el saludo, las
+        vueltas (202 ms de promedio: el HSI del clon atrasa ~1 %, la UART ni
+        se entera) y `recibido: ...` de vuelta, con acentos y eñe. Basura
+        `0x7F`/`0xFF` antes del primer eco: ruido de mover los cables con el
+        programa andando, juntado en la línea hasta el primer Enter.
 - [ ] Una SAMD21 o SAMD51 por SWD (2026-10-30, sólo en el simulador): una
       Seeed XIAO SAMD21 (SWCLK y SWDIO en sus pads de abajo), una Arduino
       Zero (su conector SWD de 10 pines) o una Adafruit M0/M4, al pin 12 y

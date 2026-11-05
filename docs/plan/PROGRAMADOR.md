@@ -31,10 +31,10 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
 | Familia | Ejemplos | Camino | Grabar | Leer | Fase |
 |---|---|---|---|---|---|
 | ESP32 / ESP8266 | DevKit, NodeMCU, módulos | ROM serie (hay) | hay | F1 | F1 |
-| Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, SAM3X (Due), GD32 | SWD con 2-3 cables | hay: RP2040 y nRF52840 (placa); STM32F0/F1/F2/F4/G0/G4/L4, SAMD21/D51, SAM3X/A, RP2350 (sim) | hay (sim) | F2 |
+| Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, SAM3X (Due), GD32 | SWD con 2-3 cables | hay: RP2040, nRF52840 y STM32F1 (placa); STM32F0/F2/F4/G0/G4/L4, SAMD21/D51, SAM3X/A, RP2350 (sim) | hay (sim) | F2 |
 | AVR con bootloader serie | Uno, Nano, Pro Mini, Mega | STK500 v1 (optiboot) y v2 (Mega) | hay (sim) | hay (sim) | F3 |
 | AVR con USB propio | Leonardo, Micro, Pro Micro | AVR109 (Caterina), toque a 1200 baudios | hay (sim) | hay (sim) | F3 |
-| STM32 sin sonda | Blue Pill, Black Pill | bootloader serie de ST (AN3155), BOOT0 y NRST con las líneas EN/BOOT | hay (sim) | hay (sim) | F4 |
+| STM32 sin sonda | Blue Pill, Black Pill | bootloader serie de ST (AN3155), BOOT0 y NRST con las líneas EN/BOOT | hay (placa: Blue Pill) | hay (placa) | F4 |
 | Desde la Mac, serie | esptool, avrdude, stm32flash | puente RFC2217 / TCP crudo al puerto | (la Mac) | (la Mac) | F4 |
 | Desde la Mac, SWD | OpenOCD, pyOCD, probe-rs | la placa como sonda CMSIS-DAP v2 por el USB OTG (hay, sim) | (la Mac) | (la Mac) | F5 |
 | AVR sin bootloader | ATmega/ATtiny sueltos, grabar el bootloader de un Uno | ISP por `spi.a` + RESET; fusibles | F6 | F6 | F6 |

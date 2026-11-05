@@ -16,12 +16,17 @@ The flash, from 0x08000000:
 The relocating is blink_pico/link.py's (R_ARM_ABS32 and the Thumb calls,
 nothing else), reused as it is.
 """
+import importlib.util
 import os
 import struct
 import sys
 
-sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "blink_pico"))
-from link import link_blob  # noqa: E402
+# blink_pico's link.py by its path and under another name: both files are "link"
+_spec = importlib.util.spec_from_file_location(
+    "pico_link", os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "blink_pico", "link.py"))
+_pico = importlib.util.module_from_spec(_spec)
+_spec.loader.exec_module(_pico)
+link_blob = _pico.link_blob
 
 FLASH = 0x08000000
 STACK = 0x20005000
