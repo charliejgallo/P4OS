@@ -393,8 +393,97 @@ def eeprom24():
     s.save("bench-24lc.svg")
 
 
+def esp32_devkit():
+    """An ESP32 DevKit of 38 pins (DevKitC V4 and its many copies) on uart.b with EN and BOOT."""
+    s = Svg(1100, 950, "An ESP32 DevKit (38 pins) on the 40-pin header",
+            "uart.b with its EN and BOOT lines: the Programador puts it in download mode by itself, "
+            "and esptool does the same through the bridge")
+    c_tx, c_rx, c_boot, c_en = "#ea580c", "#16a34a", "#7c3aed", "#0891b2"
+    used = {1: "#dc2626", 8: c_boot, 11: c_en, 12: c_tx, 13: "#111111", 14: c_rx}
+    # the DevKit, from the top: the module (antenna up), 19 pins down each side, USB at the bottom
+    DX, DW, DY0 = 130, 200, ROW0 + STEP
+    left = ["3V3", "EN", "VP", "VN", "IO34", "IO35", "IO32", "IO33", "IO25", "IO26", "IO27", "IO14",
+            "IO12", "GND", "IO13", "SD2", "SD3", "CMD", "5V"]
+    right = ["GND", "IO23", "IO22", "TX0", "RX0", "IO21", "GND", "IO19", "IO18", "IO5", "IO17", "IO16",
+             "IO4", "IO0", "IO2", "IO15", "SD1", "SD0", "CLK"]
+    top, bot = DY0 - 66, DY0 + 18 * STEP + 70
+    lx, rx_ = DX + 14, DX + DW - 14
+    py = lambda i: DY0 + i * STEP                       # noqa: E731
+    s.add(f'<rect x="{DX}" y="{top}" width="{DW}" height="{bot-top}" rx="8" fill="#1e293b"/>')
+    s.add(f'<rect x="{DX+40}" y="{top+8}" width="{DW-80}" height="44" rx="3" fill="#cbd5e1" stroke="#94a3b8"/>')
+    s.add(f'<path d="M{DX+52} {top+20} h20 v12 h16 v-12 h16 v12 h16 v-12 h20" stroke="#64748b" stroke-width="2" fill="none"/>')
+    s.plain(DX + DW / 2, top + 47, "ESP32-WROOM-32", size=10, color="#334155", anchor="middle", bold=True)
+    s.add(f'<rect x="{DX+DW/2-30}" y="{py(5)}" width="60" height="150" rx="4" fill="#0f172a"/>')
+    s.plain(DX + DW / 2, py(8) + 4, "ESP32", size=13, color="#e2e8f0", anchor="middle", bold=True)
+    s.plain(DX + DW / 2, py(9) + 4, "DevKit", size=11, color="#94a3b8", anchor="middle")
+    s.plain(DX + DW / 2, py(10) + 4, "top view", size=10, color="#94a3b8", anchor="middle")
+    # the micro-USB and the two buttons at the bottom
+    s.add(f'<rect x="{DX+DW/2-22}" y="{bot-22}" width="44" height="30" rx="3" fill="#9ca3af" stroke="#6b7280"/>')
+    s.plain(DX + DW / 2, bot + 24, "micro-USB", size=11, color="#6b7280", anchor="middle")
+    for bx_, name in ((DX + 34, "EN"), (DX + DW - 34, "BOOT")):
+        s.add(f'<rect x="{bx_-12}" y="{bot-30}" width="24" height="18" rx="3" fill="#e5e7eb" stroke="#6b7280"/>')
+        s.plain(bx_, bot - 36, name, size=9, color="#e2e8f0", anchor="middle", bold=True)
+    on = {"EN": c_en, "5V": "#dc2626", "TX0": c_rx, "RX0": c_tx, "IO0": c_boot}
+    for i, nm in enumerate(left):
+        hot = on.get(nm) if nm in ("EN", "5V") else None
+        s.over(f'<circle cx="{lx}" cy="{py(i)}" r="{7 if hot else 6}" fill="{hot or "#d1a33a"}" stroke="#fff" stroke-width="{2 if hot else 0}"/>')
+        s.plain(lx + 14, py(i) + 4, nm, size=11, color=hot or "#e5e7eb", bold=bool(hot))
+    for i, nm in enumerate(right):
+        hot = on.get(nm) if nm in ("TX0", "RX0", "IO0") else ("#111111" if i == 0 else None)
+        fill = "#e5e7eb" if hot == "#111111" else hot
+        s.over(f'<circle cx="{rx_}" cy="{py(i)}" r="{7 if hot else 6}" fill="{hot or "#d1a33a"}" stroke="#fff" stroke-width="{2 if hot else 0}"/>')
+        s.plain(rx_ - 14, py(i) + 4, nm, size=11, color=fill or "#e5e7eb", anchor="end", bold=bool(hot))
+    # TX of uart.b (pin 12) to RX0, straight across; TX0 to RX of uart.b (pin 14): crossed
+    x12, y12 = pin_xy(12)
+    x14, y14 = pin_xy(14)
+    x8, y8 = pin_xy(8)
+    i_rx0, i_tx0, i_io0 = right.index("RX0"), right.index("TX0"), right.index("IO0")
+    lane_rx, lane_boot = 375, 405
+    s.wire([(x12 - 8, y12), (lane_rx - 10, y12), (lane_rx - 10, py(i_rx0)), (rx_ + 8, py(i_rx0))], c_tx, 3)
+    s.wire([(x14 - 8, y14), (lane_rx + 10, y14), (lane_rx + 10, py(i_tx0)), (rx_ + 8, py(i_tx0))], c_rx, 3)
+    s.wire([(x8 - 8, y8), (lane_boot, y8), (lane_boot, py(i_io0)), (rx_ + 8, py(i_io0))], c_boot, 3)
+    # EN and GND by tags: pin 11 and pin 13 are on the header's right column
+    x11, y11 = pin_xy(11)
+    x13, y13 = pin_xy(13)
+    s.wire([(x11 + 8, y11), (690, y11)], c_en, 3)
+    s.net(690, y11, "EN", c_en, side="right")
+    s.wire([(x13 + 8, y13), (690, y13)], C["gnd"], 3)
+    s.net(690, y13, "GND", C["gnd"], side="right")
+    s.wire([(lx - 8, py(1)), (100, py(1))], c_en, 3)
+    s.net(100, py(1), "EN", c_en)
+    s.wire([(rx_ + 8, py(0)), (352, py(0))], C["gnd"], 3)
+    s.net(352, py(0), "GND", C["gnd"], side="right")
+    # the legend: the six wires, header pin first
+    gx, gy = 730, pin_xy(23)[1] - 14
+    rows = [(c_tx, "pin 12, GPIO3 (uart.b TX)", "RX0"), (c_rx, "pin 14, GPIO4 (uart.b RX)", "TX0"),
+            (c_boot, "pin 8, GPIO2 (the BOOT line)", "IO0"), (c_en, "pin 11, GPIO5 (the EN line)", "EN"),
+            (C["gnd"], "pin 13, GND", "GND"), (C["p5"], "pin 1, 5 V", "5V")]
+    s.add(f'<rect x="{gx}" y="{gy}" width="330" height="{44 + 26 * len(rows)}" rx="8" fill="{C["card"]}" stroke="{C["line"]}"/>')
+    s.text(gx + 16, gy + 24, "The six wires: header → DevKit", size=13, color="#111", bold=True)
+    for k, (col, frm, to) in enumerate(rows):
+        y = gy + 50 + 26 * k
+        s.wire([(gx + 16, y - 4), (gx + 46, y - 4)], col, 4)
+        s.text(gx + 56, y, frm, size=12)
+        s.text(gx + 316, y, to, size=12, color=col if col != C["gnd"] else "#111", anchor="end", bold=True)
+    # 5 V from pin 1 over the top and down the left to the DevKit's 5V pin
+    x1, y1 = pin_xy(1)
+    v5 = 40
+    s.wire([(x1 + 8, y1), (640, y1), (640, top - 24), (v5, top - 24), (v5, py(18)), (lx - 8, py(18))], C["p5"], 3)
+    s.text(v5 + 10, top - 30, "5 V from pin 1 to its 5V pin (or its own micro-USB, not both)", color="#b91c1c")
+    s.notes(40, bot + 46, 1020, "What it is for (the Programador's ESP32 family by the header, and the bridge; not tried on the board yet)", [
+        "• uart.b crossed: TX (GPIO3, pin 12) to the DevKit's RX0, its TX0 to RX (GPIO4, pin 14); GND (pin 13) to one of its GND pins",
+        "• The EN line (GPIO5, pin 11) to EN, the BOOT line (GPIO2, pin 8) to IO0. Open-drain: they only pull down, so its buttons keep working",
+        "• Power from pin 1 (or 3) to its 5V pin, or from its own micro-USB; never both, and never its 3V3 from the header",
+        "• Programador: ESP32, port uart.b, Detect: it resets into the ROM by itself. Bridge: esptool --port rfc2217://p4os.local:4000 chip_id",
+        "• Tags with the same name (EN, GND) are one wire. Printed names vary by maker: TX0/TXD/TX, RX0/RXD/RX, IO0/G0",
+    ])
+    s.header(used)
+    s.save("bench-esp32.svg")
+
+
 if __name__ == "__main__":
     pwm()
     ir()
     strip()
     eeprom24()
+    esp32_devkit()

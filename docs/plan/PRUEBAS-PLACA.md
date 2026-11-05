@@ -1064,7 +1064,8 @@ laberinto, pong, radar, walkie, remoto y sensores.
 
 **Terminal y Programador**
 - [ ] El UART a 460800 por el header.
-- [ ] EN/BOOT reales para programar otra placa.
+- [ ] EN/BOOT reales para programar otra placa: un ESP32 DevKit de 38 pines
+      por `uart.b`, cableado en `docs/img/bench-esp32.svg`.
 - [x] esp-serial-flasher contra un ESP32 de verdad (por USB: 2026-10-05 y
       2026-10-27, el reloj AmoledOS leído y grabado entero).
 
