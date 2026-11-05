@@ -532,7 +532,8 @@ def nano_header():
     s.wire([(node, ty), (node, y14), (x14 - 8, y14)], c_rx, 3)
     s.dot(node, ty, c_rx)
     s.resistor_v(node, ty, ty + 96, "", C["gnd"])
-    s.text(node - 16, ty + 52, "2 kΩ", anchor="end")
+    s.text(node - 16, ty + 46, "2 kΩ", anchor="end")
+    s.text(node - 16, ty + 62, "(or 2 × 1 kΩ)", size=11, color=C["dim"], anchor="end")
     s.gnd_sym(node, ty + 96)
     s.text(node - 8, ty - 10, "3.3 V", size=11, color=c_rx, anchor="end", bold=True)
     # RST and GND by tags, as on the header's right column
@@ -564,7 +565,7 @@ def nano_header():
         s.text(gx + 316, y, to, size=12, color=col if col != C["gnd"] else "#111", anchor="end", bold=True)
     s.notes(40, NOTES_Y, 1020, "What it tries (not on the board yet; by USB the same Nano already worked, 2026-11-03)", [
         "• TX (GPIO3, pin 12) straight to RX0: 3.3 V is a high for a 5 V ATmega. Its TX1 is 5 V: to RX (GPIO4, pin 14) only through",
-        "  1 kΩ in series with 2 kΩ to GND (3.3 V at the node); never straight. A 3.3 V board (Pro Mini 3.3 V) needs no divider",
+        "  1 kΩ in series with 2 kΩ to GND (or two 1 kΩ in series: 3.33 V at the node); never straight. A 3.3 V Pro Mini needs none",
         "• The EN line (GPIO5, pin 11) to RST, open-drain: Detect and Write reset it into its bootloader (optiboot 115200, the old one 57600)",
         "• Bridge: avrdude -c arduino -p m328p -P net:p4os.local:4001 -b 115200 (57600 for the old bootloader): each connection resets it",
         "• Power: 5 V from pin 1 to its 5V pin, or its own USB; never both. Tags with the same name (EN, GND) are one wire",

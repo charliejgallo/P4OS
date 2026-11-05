@@ -17,7 +17,8 @@
 <path d="M390 665.0 L390 687" stroke="#111111" stroke-width="2.6" fill="none" stroke-linejoin="round"/>
 <rect x="380" y="613.0" width="20" height="52" rx="3" fill="#fde68a" stroke="#92400e" stroke-width="2"/>
 <text x="406" y="643.0" font-size="12" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke"></text>
-<text x="374" y="643" font-size="12" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">2 kΩ</text>
+<text x="374" y="637" font-size="12" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">2 kΩ</text>
+<text x="374" y="653" font-size="11" fill="#6b7280" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">(or 2 × 1 kΩ)</text>
 <path d="M390 687 V697 M378 697 H402 M382 702 H398 M386 707 H394" stroke="#111111" stroke-width="2.4" fill="none"/>
 <text x="382" y="581" font-size="11" fill="#16a34a" text-anchor="end" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">3.3 V</text>
 <path d="M224 539 L250 539" stroke="#0891b2" stroke-width="3" fill="none" stroke-linejoin="round"/>
@@ -54,7 +55,7 @@
 <rect x="40" y="715" width="1020" height="136" rx="8" fill="#f9fafb" stroke="#d1d5db"/>
 <text x="58" y="739" font-size="14" font-weight="bold" fill="#111">What it tries (not on the board yet; by USB the same Nano already worked, 2026-11-03)</text>
 <text x="58" y="761" font-size="12" fill="#374151">• TX (GPIO3, pin 12) straight to RX0: 3.3 V is a high for a 5 V ATmega. Its TX1 is 5 V: to RX (GPIO4, pin 14) only through</text>
-<text x="67" y="781" font-size="12" fill="#374151">1 kΩ in series with 2 kΩ to GND (3.3 V at the node); never straight. A 3.3 V board (Pro Mini 3.3 V) needs no divider</text>
+<text x="67" y="781" font-size="12" fill="#374151">1 kΩ in series with 2 kΩ to GND (or two 1 kΩ in series: 3.33 V at the node); never straight. A 3.3 V Pro Mini needs none</text>
 <text x="58" y="801" font-size="12" fill="#374151">• The EN line (GPIO5, pin 11) to RST, open-drain: Detect and Write reset it into its bootloader (optiboot 115200, the old one 57600)</text>
 <text x="58" y="821" font-size="12" fill="#374151">• Bridge: avrdude -c arduino -p m328p -P net:p4os.local:4001 -b 115200 (57600 for the old bootloader): each connection resets it</text>
 <text x="58" y="841" font-size="12" fill="#374151">• Power: 5 V from pin 1 to its 5V pin, or its own USB; never both. Tags with the same name (EN, GND) are one wire</text>
