@@ -450,6 +450,19 @@ trabajo); grabar y borrar contestan que no.
   familia mande esa mezcla. La cuenta dura 0,7 s y llega a los ~5 s de
   prender (antes lee la microSD buscando su propia actualización:
   `config`, `u-boot`, `kernel`, `rootfs`, `rootfsbk`).
+- **OpenIPC instalado en la cámara desde P4OS** (2026-11-05): por la
+  consola, con el canal A de la Terminal y `/api/serial/send` desde la
+  Mac. Pasos:
+  - frenarlo con la mezcla de teclas;
+  - `fatload` de `openipc.bin` desde la microSD de la cámara a 0x82000000,
+    con `crc32` igual al de la imagen (05f1243a);
+  - `sf erase` (66 s) y `sf write` (21 s);
+  - verificado con la RAM en ceros, `sf read` y otra vez `crc32` 05f1243a;
+  - `reset`, y en el U-Boot de OpenIPC `run setnor16m`.
+
+  Arrancó OpenIPC (kernel 4.9.37) y detectó solo el OV9732. La familia
+  U-Boot no graba: esto se hizo a mano, con el OK del usuario en cada paso
+  que escribía. Detalles en `camara-sc10w/HANDOFF-DESDE-P4OS.md`, sección 8.
 - **Los volcados de la cámara** (2026-11-04, con la familia, desde el
   portal): dos de 16 MB, 102 min cada uno, cada 64 KB contra su `crc32`,
   **iguales byte a byte** (SHA-256 `1f508d27…`). A 115200 todo el tiempo: su U-Boot contestó "not

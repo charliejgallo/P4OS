@@ -594,6 +594,9 @@ Que necesitan la mano del usuario o equipos:
        ponga REGOUT0, o grabarle uno que lo haga.
     5. Grabar algo propio (un blink o su firmware) y la consola RTT, si
        el firmware la trae.
+  - **2026-11-05: OpenIPC instalado** por la consola desde P4OS: a la RAM
+    desde la microSD de la cámara, grabado y verificado por CRC
+    (05f1243a); arranca OpenIPC con su OV9732 (`PROGRAMADOR.md`, F7).
   - **Hecho el 2026-11-04:** dos volcados enteros por la familia U-Boot,
     102 min cada uno (a 115200: su U-Boot no acepta más), **iguales byte
     a byte**, SHA-256 `1f508d2720af6fa0c129afbad47227b29da52cd5870247b70e3008b91b70e295`.
