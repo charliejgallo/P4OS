@@ -734,6 +734,16 @@ Que necesitan la mano del usuario o equipos:
       se quiere el reset. Detectar (STM32F411, 512 KB, sin página: sectores),
       grabar un `.bin` o `.hex` que cruce el sector 4 (64 KB), verificar,
       borrar todo. Y si aparece una con RDP, que "Borrar" la deje limpia.
+- [ ] **La Blue Pill del usuario** (llegó el 2026-11-05), por los dos
+      caminos de arriba, con `tools/swd_test/blink_bluepill`: `rapido` (el
+      LED de PC13 cada 100 ms) y `charla` (cada 200 ms y USART1 a 115200
+      en PA9/PA10, como la del Nano). Probados antes en un Cortex-M3
+      emulado y grabados por SWD en el simulador (`.bin`, `.hex`, `.uf2`).
+      - SWD: Detectar dice "STM32F1 medium", 64 KB (o 128: muchas traen
+        128 aunque digan 64) y el DPIDR: `1BA01477` es un ST,
+        `2BA01477` un CKS32. Volcar lo de fábrica, grabar `rapido` (el LED
+        cambia de ritmo), `charla`, borrar todo (el LED queda quieto).
+      - Bootloader serie (BOOT0 en 1): lo mismo, y `charla` en la Terminal.
 - [ ] Una SAMD21 o SAMD51 por SWD (2026-10-30, sólo en el simulador): una
       Seeed XIAO SAMD21 (SWCLK y SWDIO en sus pads de abajo), una Arduino
       Zero (su conector SWD de 10 pines) o una Adafruit M0/M4, al pin 12 y
