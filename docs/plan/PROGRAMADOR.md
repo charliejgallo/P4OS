@@ -440,6 +440,16 @@ trabajo); grabar y borrar contestan que no.
   con `crc32` y `md`. Flash MX25L128 de 16 MB (ID c2 20 18), mtdparts
   `512K(boot),2560K(kernel),12800K(rootfs),512K(config)`, rootfs jffs2;
   el kernel se carga en 0x82000000. WiFi por USB con el driver `rt2870`.
+- **Frenarla, corregido el 2026-11-05:** el U-Boot de la SC10W no se
+  frena con Ctrl+C solo, aunque diga "any key". Le llegaron 644 Ctrl+C a
+  12 por segundo y siguió de largo, con o sin microSD. Tampoco con la
+  mezcla rápida de Ctrl+C y Enter de la familia. Lo frena la mezcla
+  `Ctrl+C, Enter, Ctrl+C, espacio, Ctrl+C, q, Ctrl+C, x, Esc` a unas 12
+  teclas por segundo: la buena es espacio, `q`, `x` o Esc. Ayer anduvo
+  "con Ctrl+C" porque se mandó esa misma mezcla. **Pendiente:** que la
+  familia mande esa mezcla. La cuenta dura 0,7 s y llega a los ~5 s de
+  prender (antes lee la microSD buscando su propia actualización:
+  `config`, `u-boot`, `kernel`, `rootfs`, `rootfsbk`).
 - **Los volcados de la cámara** (2026-11-04, con la familia, desde el
   portal): dos de 16 MB, 102 min cada uno, cada 64 KB contra su `crc32`,
   **iguales byte a byte** (SHA-256 `1f508d27…`). A 115200 todo el tiempo: su U-Boot contestó "not
