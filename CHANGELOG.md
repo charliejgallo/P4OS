@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.23.0 — 2026-11-04
 
 - **The Programador reads anything with U-Boot on a serial console** (an
   IP camera, a router, a set-top box): a new family, "U-Boot", that only
