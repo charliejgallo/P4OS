@@ -149,6 +149,15 @@ a CKS32) with 128 KB that really are there. Read whole in a second, written
 and erased; and the same again through ST's serial bootloader on the same
 two wires.</em></p>
 
+<p align="center">
+  <img src="docs/img/photo-flasher-esp32-header.jpg" width="300" alt="The Flasher after writing hola_esp32 to an ESP32 DevKit wired to the header: Flashing done, MD5 verified, 200 KB">
+  <img src="docs/img/bench-esp32.svg" width="420" alt="Wiring diagram: an ESP32 DevKit of 38 pins on uart.b, with the EN line to EN and the BOOT line to IO0">
+</p>
+
+<p align="center"><em>An ESP32 DevKit on the header with six wires: the
+board resets it into its ROM by itself and writes it at up to 921600 baud;
+the Mac's esptool does the same through the board's bridge.</em></p>
+
 ---
 
 ## What it does

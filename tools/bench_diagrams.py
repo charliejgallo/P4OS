@@ -122,7 +122,8 @@ class Svg:
         self.add(f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="8" fill="{C["card"]}" stroke="{C["line"]}"/>')
         self.add(f'<text x="{x+18}" y="{y+24}" font-size="14" font-weight="bold" fill="#111">{title}</text>')
         for i, l in enumerate(lines):
-            self.add(f'<text x="{x+18}" y="{y+46+20*i}" font-size="12" fill="{C["text"]}">{l}</text>')
+            ind = 9 if l.startswith("  ") else 0         # a bullet's second line, under its text
+            self.add(f'<text x="{x+18+ind}" y="{y+46+20*i}" font-size="12" fill="{C["text"]}">{l.strip()}</text>')
 
     def header(self, used):
         """used: {pin: colour} for the pins wired in this diagram."""
@@ -395,8 +396,8 @@ def eeprom24():
 
 def esp32_devkit():
     """An ESP32 DevKit of 38 pins (DevKitC V4 and its many copies) on uart.b with EN and BOOT."""
-    s = Svg(1100, 950, "An ESP32 DevKit (38 pins) on the 40-pin header",
-            "uart.b with its EN and BOOT lines: the Programador puts it in download mode by itself, "
+    s = Svg(1100, 965, "An ESP32 DevKit (38 pins) on the 40-pin header",
+            "uart.b with its EN and BOOT lines: the Flasher puts it in download mode by itself, "
             "and esptool does the same through the bridge")
     c_tx, c_rx, c_boot, c_en = "#ea580c", "#16a34a", "#7c3aed", "#0891b2"
     used = {1: "#dc2626", 8: c_boot, 11: c_en, 12: c_tx, 13: "#111111", 14: c_rx}
@@ -417,6 +418,8 @@ def esp32_devkit():
     s.plain(DX + DW / 2, py(8) + 4, "ESP32", size=13, color="#e2e8f0", anchor="middle", bold=True)
     s.plain(DX + DW / 2, py(9) + 4, "DevKit", size=11, color="#94a3b8", anchor="middle")
     s.plain(DX + DW / 2, py(10) + 4, "top view", size=10, color="#94a3b8", anchor="middle")
+    s.plain(DX + DW / 2, py(16) + 4, "flash pins", size=10, color="#fca5a5", anchor="middle", bold=True)
+    s.plain(DX + DW / 2, py(17) + 4, "leave free", size=10, color="#fca5a5", anchor="middle")
     # the micro-USB and the two buttons at the bottom
     s.add(f'<rect x="{DX+DW/2-22}" y="{bot-22}" width="44" height="30" rx="3" fill="#9ca3af" stroke="#6b7280"/>')
     s.plain(DX + DW / 2, bot + 24, "micro-USB", size=11, color="#6b7280", anchor="middle")
@@ -424,15 +427,16 @@ def esp32_devkit():
         s.add(f'<rect x="{bx_-12}" y="{bot-30}" width="24" height="18" rx="3" fill="#e5e7eb" stroke="#6b7280"/>')
         s.plain(bx_, bot - 36, name, size=9, color="#e2e8f0", anchor="middle", bold=True)
     on = {"EN": c_en, "5V": "#dc2626", "TX0": c_rx, "RX0": c_tx, "IO0": c_boot}
+    flash = {"CMD", "SD0", "SD1", "SD2", "SD3", "CLK"}      # the SPI flash's own pins: nothing goes there
     for i, nm in enumerate(left):
         hot = on.get(nm) if nm in ("EN", "5V") else None
         s.over(f'<circle cx="{lx}" cy="{py(i)}" r="{7 if hot else 6}" fill="{hot or "#d1a33a"}" stroke="#fff" stroke-width="{2 if hot else 0}"/>')
-        s.plain(lx + 14, py(i) + 4, nm, size=11, color=hot or "#e5e7eb", bold=bool(hot))
+        s.plain(lx + 14, py(i) + 4, nm, size=11, color=hot or ("#fca5a5" if nm in flash else "#e5e7eb"), bold=bool(hot))
     for i, nm in enumerate(right):
         hot = on.get(nm) if nm in ("TX0", "RX0", "IO0") else ("#111111" if i == 0 else None)
         fill = "#e5e7eb" if hot == "#111111" else hot
         s.over(f'<circle cx="{rx_}" cy="{py(i)}" r="{7 if hot else 6}" fill="{hot or "#d1a33a"}" stroke="#fff" stroke-width="{2 if hot else 0}"/>')
-        s.plain(rx_ - 14, py(i) + 4, nm, size=11, color=fill or "#e5e7eb", anchor="end", bold=bool(hot))
+        s.plain(rx_ - 14, py(i) + 4, nm, size=11, color=fill or ("#fca5a5" if nm in flash else "#e5e7eb"), anchor="end", bold=bool(hot))
     # TX of uart.b (pin 12) to RX0, straight across; TX0 to RX of uart.b (pin 14): crossed
     x12, y12 = pin_xy(12)
     x14, y14 = pin_xy(14)
@@ -470,12 +474,13 @@ def esp32_devkit():
     v5 = 40
     s.wire([(x1 + 8, y1), (640, y1), (640, top - 24), (v5, top - 24), (v5, py(18)), (lx - 8, py(18))], C["p5"], 3)
     s.text(v5 + 10, top - 30, "5 V from pin 1 to its 5V pin (or its own micro-USB, not both)", color="#b91c1c")
-    s.notes(40, bot + 46, 1020, "What it is for (the Programador's ESP32 family by the header, and the bridge; not tried on the board yet)", [
+    s.notes(40, bot + 46, 1020, "What it tries (all of it worked on the board, 2026-11-05)", [
         "• uart.b crossed: TX (GPIO3, pin 12) to the DevKit's RX0, its TX0 to RX (GPIO4, pin 14); GND (pin 13) to one of its GND pins",
-        "• The EN line (GPIO5, pin 11) to EN, the BOOT line (GPIO2, pin 8) to IO0. Open-drain: they only pull down, so its buttons keep working",
-        "• Power from pin 1 (or 3) to its 5V pin, or from its own micro-USB; never both, and never its 3V3 from the header",
-        "• Programador: ESP32, port uart.b, Detect: it resets into the ROM by itself. Bridge: esptool --port rfc2217://p4os.local:4000 chip_id",
-        "• Tags with the same name (EN, GND) are one wire. Printed names vary by maker: TX0/TXD/TX, RX0/RXD/RX, IO0/G0",
+        "• The EN line (GPIO5, pin 11) to EN, the BOOT line (GPIO2, pin 8) to IO0: Detect resets it into the ROM by itself. Open-drain, so its buttons still work",
+        "• Written by the Flasher at 115200, 460800 and 921600 (89 KB/s), MD5 fine; the Terminal read it and talked back to it",
+        "• From the Mac through the bridge: esptool --port rfc2217://p4os.local:4000 chip_id, and write_flash at 460800, hashes verified",
+        "• Power: 5 V from pin 1 to its 5V pin, or its own micro-USB; never both. CMD, SD0-SD3 and CLK are the flash's: a wire there (GND on CMD)",
+        "  leaves the flash silent, ID ff/ffff and \"invalid header: 0xffffffff\" in a loop. Printed names vary: TX0/TXD/TX, RX0/RXD/RX, IO0/G0",
     ])
     s.header(used)
     s.save("bench-esp32.svg")

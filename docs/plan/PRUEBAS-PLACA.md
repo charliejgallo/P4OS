@@ -650,7 +650,14 @@ Que necesitan la mano del usuario o equipos:
     con el bootloader ya sincronizado por la anterior, stm32loader dice
     "activation timeout -- retrying" y sigue bien. Sin EN ni BOOT
     cableados; con ellos (EN al R, BOOT al BOOT0) irían `-s -B`, que no se
-    probó. Falta esptool con un ESP32 y avrdude por 4001.
+    probó. Falta avrdude por 4001.
+  - **Y con un ESP32 el mismo día**, cableado como en
+    `docs/img/bench-esp32.svg`: esptool 4.13 en la Mac,
+    `--port "rfc2217://<placa>:4000?ign_set_control"`. `chip_id` y
+    `write_flash` de `hola_esp32` a 460800 (el puente siguió los cambios de
+    velocidad: 9600 para el reset, 115200, 460800), los tres hashes bien,
+    y el reset al final por RTS lo dejó corriendo. El reset y el modo de
+    descarga, por RTS/DTR → EN/BOOT del header, como en el simulador.
 - [x] La sonda CMSIS-DAP del Programador (F5, 2026-10-30, `adfe1b2`): la
       Pico en `uart.b` (SWCLK al pin 12, SWDIO al 14, GND), el conector
       OTG de la placa a la Mac, pyOCD 0.46 en la Mac:
@@ -1063,9 +1070,20 @@ laberinto, pong, radar, walkie, remoto y sensores.
 ## Por app
 
 **Terminal y Programador**
-- [ ] El UART a 460800 por el header.
-- [ ] EN/BOOT reales para programar otra placa: un ESP32 DevKit de 38 pines
-      por `uart.b`, cableado en `docs/img/bench-esp32.svg`.
+- [x] El UART a 460800 por el header (2026-11-05): el Programador grabó un
+      ESP32 a 460800 (45 KB/s) y a 921600 (89 KB/s), MD5 bien. La Terminal
+      a 460800 todavía no (el programa de prueba habla a 115200).
+- [x] **EN/BOOT reales para programar otra placa** (2026-11-05): un ESP32
+      DevKit de 38 pines (ESP32-D0WD-V3 v3.1, flash 4 MB) por `uart.b`,
+      cableado en `docs/img/bench-esp32.svg`, foto en el README. Detectar
+      lo pone solo en modo de descarga (1,2 s); `hola_esp32` grabado a
+      115200, 460800 y 921600, y la Terminal leyó sus "Hola mundo" y le
+      contestó ("Recibido: ..."). **Lo que costó:** GND puesto en CMD (la
+      selección de la flash, al lado del GND de abajo a la izquierda): el
+      ESP32 contesta, el stub arranca, pero la flash no (ID ff/ffff, "Flash
+      size detection failed", la grabación "did not start") y en la consola
+      un bucle de "invalid header: 0xffffffff". El diagrama marca esas
+      patas.
 - [x] esp-serial-flasher contra un ESP32 de verdad (por USB: 2026-10-05 y
       2026-10-27, el reloj AmoledOS leído y grabado entero).
 
