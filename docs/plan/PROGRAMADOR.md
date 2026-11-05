@@ -446,8 +446,9 @@ trabajo); grabar y borrar contestan que no.
   mezcla rápida de Ctrl+C y Enter de la familia. Lo frena la mezcla
   `Ctrl+C, Enter, Ctrl+C, espacio, Ctrl+C, q, Ctrl+C, x, Esc` a unas 12
   teclas por segundo: la buena es espacio, `q`, `x` o Esc. Ayer anduvo
-  "con Ctrl+C" porque se mandó esa misma mezcla. **Pendiente:** que la
-  familia mande esa mezcla. La cuenta dura 0,7 s y llega a los ~5 s de
+  "con Ctrl+C" porque se mandó esa misma mezcla. **La familia ya la manda**
+  (una tecla cada 80 ms, Ctrl+C entre cada una); el U-Boot falso tiene
+  `--stop-key` y en el simulador se frena con `q`, espacio, Esc o Ctrl+C. La cuenta dura 0,7 s y llega a los ~5 s de
   prender (antes lee la microSD buscando su propia actualización:
   `config`, `u-boot`, `kernel`, `rootfs`, `rootfsbk`).
 - **OpenIPC instalado en la cámara desde P4OS** (2026-11-05): por la

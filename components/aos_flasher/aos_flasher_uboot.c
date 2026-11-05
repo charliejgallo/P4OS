@@ -7,8 +7,12 @@
  *
  * Detect: the port at the console's speed (115200 unless the job says
  * otherwise), and the user asked to power the device on, or reset it by EN
- * when the port has the line. Ctrl+C and Enter go out every 25 ms until a
- * prompt shows: a short line ending in "#", ">" or "=>" ("hisilicon # ",
+ * when the port has the line. Keys go out every 80 ms until a prompt shows:
+ * Ctrl+C between each of Enter, space, q, x and Esc, as "any key" is often
+ * not any - the user's camera, an Orvibo SC10W, says "Hit any key" and let
+ * 644 Ctrl+C and as many Enters by, but stops on that mix (2026-11-05). At
+ * the prompt the letters cost an "Unknown command", nothing more. A prompt
+ * is a short line ending in "#", ">" or "=>" ("hisilicon # ",
  * "=> ", "U-Boot> "), confirmed when an Enter brings the same line back.
  * "version" must then say "U-Boot": a Linux shell's "# " is not mistaken for
  * it. A console that will not stop (no countdown, a key or a password asked
@@ -366,11 +370,10 @@ static bool stop_autoboot(ub_t *s)
     }
     fl_logf(L_INFO, "%s", _("Prendé o reiniciá el aparato: se le frena el arranque"));
     uint64_t end = aos_hal_uptime_ms() + STOP_MS;
-    bool ctrl = true;
-    while (!fl_cancel && aos_hal_uptime_ms() < end) {
-        tx(s, ctrl ? "\x03" : "\r", 1);
-        ctrl = !ctrl;
-        pump(s, 25, 0, any_line, NULL);
+    static const char KEYS[] = { 0x03, '\r', 0x03, ' ', 0x03, 'q', 0x03, 'x', 0x03, 0x1B };
+    for (unsigned k = 0; !fl_cancel && aos_hal_uptime_ms() < end; k++) {
+        tx(s, &KEYS[k % sizeof KEYS], 1);
+        pump(s, 80, 0, any_line, NULL);
         if (!prompt_like(s->cur)) continue;
         /* settled, and an Enter brings the same line back */
         char cand[PROMPT_MAX];

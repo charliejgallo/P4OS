@@ -12,9 +12,10 @@ serve opens a pty and prints its path; run the simulator with
 P4_SIM_UART_B=<that path>. It plays U-Boot 2010.06 as HiSilicon ships it on a
 Hi3518EV200: nothing until the first byte comes in (the user powering the
 camera on), then its banner, the SPI NOR it found, and "Hit any key to stop
-autoboot" with a countdown of --bootdelay seconds. A Ctrl+C in that time
-stops it at the "hisilicon # " prompt (only Ctrl+C, as the user's SC10W:
-Enter does not, whatever the banner says; --any-key takes any byte);
+autoboot" with a countdown of --bootdelay seconds. One key stops it at the
+"hisilicon # " prompt, --stop-key ("q" by default), and nothing else: the
+user's SC10W says "Hit any key" and lets Ctrl+C and Enter by, stopping on
+one of space, q, x or Esc (2026-11-05); --any-key takes any byte;
 otherwise it boots "Linux" and ends at a login prompt, which answers each
 Enter with another. --locked: bootdelay 0 and no key stops it (a closed
 console). Like that camera, it has no bdinfo (--bdinfo gives it one) and
@@ -185,8 +186,8 @@ class Camera:
             return
         for c in data:
             if self.state == "countdown":
-                if c != 0x03 and not self.a.any_key:
-                    continue                        # this U-Boot stops on Ctrl+C alone
+                if not self.a.any_key and bytes([c]) != self.a.stop_key.encode().decode("unicode_escape").encode("latin-1"):
+                    continue                        # "any key" is one key here
                 self.send("\b\b\b 0 \n")
                 log("autoboot stopped")
                 self.prompt()
@@ -378,6 +379,7 @@ def main():
     s.add_argument("--no-crc", action="store_true")
     s.add_argument("--locked", action="store_true")
     s.add_argument("--any-key", action="store_true")
+    s.add_argument("--stop-key", default="q", help='the one key that stops it ("q", " ", "\\x1b"...)')
     s.add_argument("--bdinfo", action="store_true")
     s.add_argument("--noise", type=float, default=0.0)
     s.add_argument("--max-baud", type=int, default=921600)
