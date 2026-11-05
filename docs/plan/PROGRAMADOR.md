@@ -464,7 +464,9 @@ trabajo); grabar y borrar contestan que no.
   Arrancó OpenIPC (kernel 4.9.37) y detectó solo el OV9732. La familia
   U-Boot no graba: esto se hizo a mano, con el OK del usuario en cada paso
   que escribía. Detalles en `camara-sc10w/HANDOFF-DESDE-P4OS.md`, sección 8.
-- **El tutorial para cualquiera** (2026-11-05): `camara-sc10w/tutorial/`,
+- **El tutorial para cualquiera** (2026-11-05), público en
+  [github.com/charliejgallo/camara-sc10w](https://github.com/charliejgallo/camara-sc10w)
+  con las fotos y el firmware de OpenIPC (con sus créditos),
   con un adaptador USB-serie común y scripts de Python (pyserial):
   - `volcar.py`: el mismo método que la familia, sf read, crc32 y md.l,
     repitiendo los 4 KB que fallan;
