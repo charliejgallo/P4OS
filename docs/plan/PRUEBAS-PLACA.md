@@ -637,6 +637,20 @@ Que necesitan la mano del usuario o equipos:
     desde la red de casa y negocia RFC 2217 con pyserial (velocidad a
     230400 incluida). Sin un ESP32 en el puerto todavía (está la Pico por
     SWD), así que esptool queda para cuando haya uno conectado.
+  - **Hecho con un STM32 el 2026-11-05:** la Blue Pill en `uart.b` con
+    BOOT0 en 1 (TX al PA10, RX al PA9) y stm32loader 0.7.1 en la Mac por
+    `rfc2217://<placa>:4000`. stm32loader abre `serial.Serial(port=...)`,
+    que no acepta URLs: un envoltorio de cuatro líneas lo cambia por
+    `serial.serial_for_url`. El 8E1 se negoció por RFC 2217 solo.
+    Identificó (bootloader 0x22, 0x410, UID, 128 KB), borró todo, grabó
+    `charla.bin` y verificó ("Verification OK", 9 s), y leyó los 128 KB
+    (113 s: un pedido de 256 bytes por vez, cada uno con la ida y vuelta
+    por la red; el Programador directo tarda 32). El registro del puente
+    dice cada cliente y los bytes de cada lado. Si una conexión empieza
+    con el bootloader ya sincronizado por la anterior, stm32loader dice
+    "activation timeout -- retrying" y sigue bien. Sin EN ni BOOT
+    cableados; con ellos (EN al R, BOOT al BOOT0) irían `-s -B`, que no se
+    probó. Falta esptool con un ESP32 y avrdude por 4001.
 - [x] La sonda CMSIS-DAP del Programador (F5, 2026-10-30, `adfe1b2`): la
       Pico en `uart.b` (SWCLK al pin 12, SWDIO al 14, GND), el conector
       OTG de la placa a la Mac, pyOCD 0.46 en la Mac:

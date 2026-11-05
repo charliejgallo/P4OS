@@ -35,7 +35,7 @@ hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
 | AVR con bootloader serie | Uno, Nano, Pro Mini, Mega | STK500 v1 (optiboot) y v2 (Mega) | hay (sim) | hay (sim) | F3 |
 | AVR con USB propio | Leonardo, Micro, Pro Micro | AVR109 (Caterina), toque a 1200 baudios | hay (sim) | hay (sim) | F3 |
 | STM32 sin sonda | Blue Pill, Black Pill | bootloader serie de ST (AN3155), BOOT0 y NRST con las líneas EN/BOOT | hay (placa: Blue Pill) | hay (placa) | F4 |
-| Desde la Mac, serie | esptool, avrdude, stm32flash | puente RFC2217 / TCP crudo al puerto | (la Mac) | (la Mac) | F4 |
+| Desde la Mac, serie | esptool, avrdude, stm32flash | puente RFC2217 / TCP crudo al puerto (placa: stm32loader) | (la Mac) | (la Mac) | F4 |
 | Desde la Mac, SWD | OpenOCD, pyOCD, probe-rs | la placa como sonda CMSIS-DAP v2 por el USB OTG (hay, sim) | (la Mac) | (la Mac) | F5 |
 | AVR sin bootloader | ATmega/ATtiny sueltos, grabar el bootloader de un Uno | ISP por `spi.a` + RESET; fusibles | F6 | F6 | F6 |
 | AVR nuevos | ATtiny 0/1/2, AVR Dx, Nano Every | UPDI por un UART (una resistencia) | F6 | F6 | F6 |
@@ -333,7 +333,9 @@ donde el portal abre sin contraseña (`docs/SECURITY.md`). Probado en el
 simulador con las herramientas de verdad: `esptool chip_id` y `write_flash`
 (MD5 bien) por `rfc2217://` contra `fake_esp_rom.py`, y `avrdude -c arduino
 -P net:` grabando y verificando contra `fake_avr_boot.py`; desde una red
-ajena, la conexión se cierra y el registro lo dice. Sin probar en la placa.
+ajena, la conexión se cierra y el registro lo dice. En la placa el
+2026-11-05 con una Blue Pill y stm32loader desde la Mac por `rfc2217://`
+(`PRUEBAS-PLACA.md`); esptool y avrdude todavía no.
 
 - **Bootloader de ST (AN3155)**: BOOT0 en la línea BOOT y NRST en EN; 8E1;
   detectar (Get, Get ID), leer, borrar (normal y extendido), grabar,
