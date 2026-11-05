@@ -464,6 +464,18 @@ trabajo); grabar y borrar contestan que no.
   Arrancó OpenIPC (kernel 4.9.37) y detectó solo el OV9732. La familia
   U-Boot no graba: esto se hizo a mano, con el OK del usuario en cada paso
   que escribía. Detalles en `camara-sc10w/HANDOFF-DESDE-P4OS.md`, sección 8.
+- **El tutorial para cualquiera** (2026-11-05): `camara-sc10w/tutorial/`,
+  con un adaptador USB-serie común y scripts de Python (pyserial):
+  - `volcar.py`: el mismo método que la familia, sf read, crc32 y md.l,
+    repitiendo los 4 KB que fallan;
+  - `armar_imagen.py`, que reproduce la imagen instalada (CRC32 05f1243a);
+  - `instalar.py`, que graba desde la microSD de la cámara verificando por
+    CRC antes y después, sirve para OpenIPC o para volver a fábrica y hace
+    el `setnor16m`.
+
+  Probados de punta a punta contra `tools/fake_uboot.py --writable`:
+  volcar, instalar OpenIPC hasta el login y volver a fábrica, la flash
+  igual byte a byte.
 - **Los volcados de la cámara** (2026-11-04, con la familia, desde el
   portal): dos de 16 MB, 102 min cada uno, cada 64 KB contra su `crc32`,
   **iguales byte a byte** (SHA-256 `1f508d27…`). A 115200 todo el tiempo: su U-Boot contestó "not

@@ -1,5 +1,13 @@
 # Changelog
 
+## Unreleased
+
+- **The U-Boot family stops consoles whose "any key" is not any.** The
+  user's camera says "Hit any key" but let Ctrl+C and Enter by; it stops
+  on a mix of Ctrl+C, Enter, space, q, x and Esc, which the family now
+  sends while the device powers on. With it, OpenIPC was installed on that
+  camera from P4OS's console.
+
 ## 0.23.0 — 2026-11-04
 
 - **The Programador reads anything with U-Boot on a serial console** (an
