@@ -1,5 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 905" font-family="Helvetica, Arial, sans-serif" font-size="14">
-<rect width="1100" height="905" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1100 895" font-family="Helvetica, Arial, sans-serif" font-size="14">
+<rect width="1100" height="895" fill="#ffffff"/>
 <text x="550.0" y="40" text-anchor="middle" font-size="22" font-weight="bold" fill="#111">An Arduino Nano on the 40-pin header</text>
 <text x="550.0" y="64" text-anchor="middle" font-size="13" fill="#555">uart.b with the EN line on its reset: the Flasher writes it through its bootloader, and avrdude does the same through the bridge</text>
 <rect x="60" y="163" width="170" height="462" rx="6" fill="#1e3a8a"/>
@@ -52,13 +52,14 @@
 <path d="M746 597 L776 597" stroke="#dc2626" stroke-width="4" fill="none" stroke-linejoin="round"/>
 <text x="786" y="601" font-size="12" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">pin 1, 5 V</text>
 <text x="1046" y="601" font-size="12" fill="#dc2626" text-anchor="end" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">5V</text>
-<rect x="40" y="715" width="1020" height="136" rx="8" fill="#f9fafb" stroke="#d1d5db"/>
-<text x="58" y="739" font-size="14" font-weight="bold" fill="#111">What it tries (not on the board yet; by USB the same Nano already worked, 2026-11-03)</text>
+<rect x="40" y="715" width="1020" height="156" rx="8" fill="#f9fafb" stroke="#d1d5db"/>
+<text x="58" y="739" font-size="14" font-weight="bold" fill="#111">What it tries (all of it worked on the board, 2026-11-05)</text>
 <text x="58" y="761" font-size="12" fill="#374151">• TX (GPIO3, pin 12) straight to RX0: 3.3 V is a high for a 5 V ATmega. Its TX1 is 5 V: to RX (GPIO4, pin 14) only through</text>
 <text x="67" y="781" font-size="12" fill="#374151">1 kΩ in series with 2 kΩ to GND (or two 1 kΩ in series: 3.33 V at the node); never straight. A 3.3 V Pro Mini needs none</text>
-<text x="58" y="801" font-size="12" fill="#374151">• The EN line (GPIO5, pin 11) to RST, open-drain: Detect and Write reset it into its bootloader (optiboot 115200, the old one 57600)</text>
-<text x="58" y="821" font-size="12" fill="#374151">• Bridge: avrdude -c arduino -p m328p -P net:p4os.local:4001 -b 115200 (57600 for the old bootloader): each connection resets it</text>
-<text x="58" y="841" font-size="12" fill="#374151">• Power: 5 V from pin 1 to its 5V pin, or its own USB; never both. Tags with the same name (EN, GND) are one wire</text>
+<text x="58" y="801" font-size="12" fill="#374151">• The EN line (GPIO5, pin 11) to RST: Detect found its old bootloader (STK500 v1 1.16, 57600) and the Flasher wrote, read and verified it</text>
+<text x="67" y="821" font-size="12" fill="#374151">If Detect gets no answer while its program keeps running (a counter that never restarts), the EN wire is not on RST</text>
+<text x="58" y="841" font-size="12" fill="#374151">• Bridge: avrdude -c arduino -p m328p -P net:p4os.local:4001 -b 57600 wrote and verified it; each connection resets it through EN</text>
+<text x="58" y="861" font-size="12" fill="#374151">• Power: 5 V from pin 1 to its 5V pin, or its own USB; never both. Tags with the same name (EN, GND) are one wire</text>
 <rect x="500" y="158" width="80" height="528" rx="6" fill="#1f2937"/>
 <text x="540" y="149" text-anchor="middle" font-size="11" fill="#6b7280">the header, as it faces you</text>
 <text x="145.0" y="141" font-size="11" fill="#6b7280" text-anchor="middle">USB</text>

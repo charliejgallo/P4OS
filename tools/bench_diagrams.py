@@ -488,7 +488,7 @@ def esp32_devkit():
 
 def nano_header():
     """An Arduino Nano (5 V) on uart.b: its TX through a divider, the EN line to its reset."""
-    s = Svg(1100, 905, "An Arduino Nano on the 40-pin header",
+    s = Svg(1100, 895, "An Arduino Nano on the 40-pin header",
             "uart.b with the EN line on its reset: the Flasher writes it through its bootloader, "
             "and avrdude does the same through the bridge")
     c_tx, c_rx, c_en = "#ea580c", "#16a34a", "#0891b2"
@@ -563,11 +563,12 @@ def nano_header():
         s.wire([(gx + 16, y - 4), (gx + 46, y - 4)], col, 4)
         s.text(gx + 56, y, frm, size=12)
         s.text(gx + 316, y, to, size=12, color=col if col != C["gnd"] else "#111", anchor="end", bold=True)
-    s.notes(40, NOTES_Y, 1020, "What it tries (not on the board yet; by USB the same Nano already worked, 2026-11-03)", [
+    s.notes(40, NOTES_Y, 1020, "What it tries (all of it worked on the board, 2026-11-05)", [
         "• TX (GPIO3, pin 12) straight to RX0: 3.3 V is a high for a 5 V ATmega. Its TX1 is 5 V: to RX (GPIO4, pin 14) only through",
         "  1 kΩ in series with 2 kΩ to GND (or two 1 kΩ in series: 3.33 V at the node); never straight. A 3.3 V Pro Mini needs none",
-        "• The EN line (GPIO5, pin 11) to RST, open-drain: Detect and Write reset it into its bootloader (optiboot 115200, the old one 57600)",
-        "• Bridge: avrdude -c arduino -p m328p -P net:p4os.local:4001 -b 115200 (57600 for the old bootloader): each connection resets it",
+        "• The EN line (GPIO5, pin 11) to RST: Detect found its old bootloader (STK500 v1 1.16, 57600) and the Flasher wrote, read and verified it",
+        "  If Detect gets no answer while its program keeps running (a counter that never restarts), the EN wire is not on RST",
+        "• Bridge: avrdude -c arduino -p m328p -P net:p4os.local:4001 -b 57600 wrote and verified it; each connection resets it through EN",
         "• Power: 5 V from pin 1 to its 5V pin, or its own USB; never both. Tags with the same name (EN, GND) are one wire",
     ])
     s.header(used)

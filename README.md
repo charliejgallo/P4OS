@@ -158,6 +158,15 @@ two wires.</em></p>
 board resets it into its ROM by itself and writes it at up to 921600 baud;
 the Mac's esptool does the same through the board's bridge.</em></p>
 
+<p align="center">
+  <img src="docs/img/photo-terminal-nano-header.jpg" width="300" alt="The Terminal on uart.b at 115200 reading an Arduino Nano on a breadboard, wired to the header through a resistor divider">
+  <img src="docs/img/bench-nano.svg" width="420" alt="Wiring diagram: an Arduino Nano on uart.b, its 5 V TX through a 1 k / 2 k divider, the EN line on its reset">
+</p>
+
+<p align="center"><em>The same Nano, now on the header: its 5 V TX through
+a divider, the EN line on its reset. Written and read by the Flasher, and
+by avrdude on the Mac through the bridge.</em></p>
+
 ---
 
 ## What it does

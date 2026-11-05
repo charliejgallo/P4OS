@@ -650,7 +650,7 @@ Que necesitan la mano del usuario o equipos:
     con el bootloader ya sincronizado por la anterior, stm32loader dice
     "activation timeout -- retrying" y sigue bien. Sin EN ni BOOT
     cableados; con ellos (EN al R, BOOT al BOOT0) irían `-s -B`, que no se
-    probó. Falta avrdude por 4001.
+    probó.
   - **Y con un ESP32 el mismo día**, cableado como en
     `docs/img/bench-esp32.svg`: esptool 4.13 en la Mac,
     `--port "rfc2217://<placa>:4000?ign_set_control"`. `chip_id` y
@@ -658,6 +658,12 @@ Que necesitan la mano del usuario o equipos:
     velocidad: 9600 para el reset, 115200, 460800), los tres hashes bien,
     y el reset al final por RTS lo dejó corriendo. El reset y el modo de
     descarga, por RTS/DTR → EN/BOOT del header, como en el simulador.
+  - **Y avrdude por 4001 con el Nano** en el header (2026-11-05): el
+    puente a 57600 (su bootloader viejo) y el avrdude del IDE de Arduino,
+    `-c arduino -p m328p -P net:<placa>:4001`: la firma (1E 95 0F), y
+    `rapido.hex` y `charla.hex` grabados y verificados. Cada conexión lo
+    resetea por EN; el registro del puente dice cada una con sus bytes.
+    Con esto el puente queda probado con las tres herramientas.
 - [x] La sonda CMSIS-DAP del Programador (F5, 2026-10-30, `adfe1b2`): la
       Pico en `uart.b` (SWCLK al pin 12, SWDIO al 14, GND), el conector
       OTG de la placa a la Mac, pyOCD 0.46 en la Mac:
@@ -807,7 +813,13 @@ Que necesitan la mano del usuario o equipos:
     <p align="center"><img src="../img/photo-terminal-nano.jpg" width="300" alt="La Terminal en usb0 a 115200 con el Nano por el host USB: las vueltas del programa charla, y el Nano al lado"></p>
   - El mismo por el header: TX/RX cruzados con un divisor en su TX, EN al
     RESET. Uno de 3,3 V (Pro Mini) va directo. Cableado en
-    `docs/img/bench-nano.svg`.
+    `docs/img/bench-nano.svg`. **Hecho el 2026-11-05**, el divisor con tres
+    de 1 kΩ (3,33 V): la Terminal leyó `charla` y le contestó; Detectar
+    (ATmega328P, STK500 v1 1.16 a 57600, 2,2 s), grabar `rapido.hex`
+    (1,3 s) y `charla.hex` (1,7 s) verificados página por página, leer los
+    32 KB (15,5 s). La primera vez el cable de EN no estaba en RST:
+    Detectar "no respondió" y el contador de `charla` siguió de largo, sin
+    reiniciarse; el diagrama lo dice. Foto en el README.
   - Un Mega 2560 por USB (STK500 v2; su VID:PID lo pone primero).
   - Un Leonardo o Micro por USB: el toque a 1200 baudios, que el
     bootloader aparezca como otro dispositivo (`El bootloader apareció
