@@ -110,6 +110,7 @@ typedef struct {
     bool in_prog;
     uint8_t msg[300];               /* a v2 message: a 256-byte page and its header */
     uint8_t *pg, *rd;               /* a page to write, one read back */
+    uint32_t heard;                 /* bytes in since the last reset (connect's hint) */
 } avr_t;
 
 /* Exactly n bytes within ms, or false (a cancel too). */
@@ -125,6 +126,7 @@ static bool rx(avr_t *a, void *buf, int n, int ms)
         int r = aos_io_uart_read(a->u, b + got, n - got, left > 50 ? 50 : left);
         if (r < 0) return false;
         got += r;
+        a->heard += r;
         if (got < n && !left) return false;
     }
     return true;
@@ -153,8 +155,9 @@ static bool tx(avr_t *a, const void *buf, int n)
 static void drain(avr_t *a)
 {
     uint8_t junk[64];
+    int got;
     uint64_t end = aos_hal_uptime_ms() + 300;
-    while (aos_hal_uptime_ms() < end && aos_io_uart_read(a->u, junk, sizeof junk, 30) > 0) {}
+    while (aos_hal_uptime_ms() < end && (got = aos_io_uart_read(a->u, junk, sizeof junk, 30)) > 0) a->heard += got;
 }
 
 static bool open_port(avr_t *a, const char *name, uint32_t baud)
@@ -175,7 +178,9 @@ static bool open_port(avr_t *a, const char *name, uint32_t baud)
 
 /* Into the bootloader. USB: DTR off for a quarter of a second (the
  * capacitor empties), then on - its edge is the reset - as avrdude does.
- * The header: EN, wired to RESET, low and released. */
+ * The header: EN, wired to RESET, low and released. a->heard counts from
+ * the reset on: a bootloader says nothing until asked, so bytes coming in
+ * after it are a program still running. */
 static void reset_board(avr_t *a)
 {
     if (a->usb) {
@@ -184,6 +189,9 @@ static void reset_board(avr_t *a)
         aos_io_uart_dtr_rts(a->u, true, true);
         aos_hal_sleep_ms(50);
     } else if (a->lines) {
+        uint8_t junk[64];
+        while (aos_io_uart_read(a->u, junk, sizeof junk, 0) > 0) {}   /* what was there before */
+        a->heard = 0;
         aos_io_uart_lines(a->u, 0, -1);
         aos_hal_sleep_ms(50);
         aos_io_uart_lines(a->u, 1, -1);
@@ -622,11 +630,13 @@ static bool connect(avr_t *a)
         static const try_t MEGA[] = { { P_STK2, 115200 }, { P_STK1, 115200 }, { P_STK1, 57600 }, { P_AVR109, 57600 } };
         const try_t *order = ids && mega_ids(vid, pid) ? MEGA : ORDER;
         bool found = false;
+        int talking = 0;                /* resets after which a program kept talking */
         if (a->lines) {
             for (int i = 0; i < 4 && !found && !fl_cancel; i++) {
                 if (a->baud != order[i].baud) { aos_io_uart_set_baud(a->u, order[i].baud); a->baud = order[i].baud; }
                 reset_board(a);
                 found = hello(a, &order[i], boot, sizeof boot);
+                talking += a->heard > 8;
             }
         } else {
             /* the reset button by hand: knock on every door for ~15 s */
@@ -636,6 +646,13 @@ static bool connect(avr_t *a)
                 found = hello(a, &order[i], boot, sizeof boot);
         }
         if (fl_cancel) return false;
+        /* After a reset that works the bootloader keeps quiet, so any try
+         * with bytes coming in means a program that never stopped (or one
+         * started at once, with no bootloader to wait in). At the wrong
+         * speed they may come as framing errors and be lost: one try is
+         * enough. */
+        if (!found && !a->usb && talking)
+            return fl_fail("%s", _("Llegan datos de su programa: el reset no le llega (EN a RST) o no tiene bootloader"));
         if (!found)
             return fl_fail("%s", a->lines ? _("La placa no respondió: revisá TX/RX cruzados, GND y RESET")
                                           : _("La placa no respondió: apretá reset justo después de empezar"));

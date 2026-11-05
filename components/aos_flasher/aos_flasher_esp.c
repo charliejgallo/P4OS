@@ -412,6 +412,12 @@ static bool read_info(ctx_t *c)
     if (flash) snprintf(fl, sizeof fl, "%u MB", (unsigned)(flash >> 20));
     fl_logf(L_OK, "%s%s%s, flash %s%s", fl_st.chip, revs, macs, fl, fl_st.stub ? ", stub" : ", ROM");
     if (secure) fl_logf(L_WARN, "%s", _("Secure boot o descarga segura activos"));
+    /* No size from the flash's ID: it read ff ffff (or a part the library
+     * does not know). A flash that does not answer - a wire on one of its
+     * pins, GND on CMD once - otherwise shows only at the first erase, as a
+     * bare timeout. Secure download mode refuses the read, so not there. */
+    else if (!flash)
+        fl_logf(L_WARN, "%s", _("La flash no contestó su ID: si no graba, mirá que nada toque CMD, SD0-SD3 o CLK"));
     if (crypt && J.job == AOS_FLASHER_JOB_FLASH)
         return fl_fail("%s", _("La flash está cifrada: grabarla en claro la deja sin arrancar"));
     if (crypt && J.job == AOS_FLASHER_JOB_READ)

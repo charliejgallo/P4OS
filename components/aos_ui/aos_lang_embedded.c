@@ -3013,6 +3013,8 @@ static const char blob_en__sistema_lang[] =
     "%s a %u baudios\t%s at %u baud\n"
     "Queda frenado en \\\"%s\\\": reset en la Terminal, o su corriente, lo arranca\tLeft stopped at \\\"%s\\\": reset in the Terminal, or its power, boots it\n"
     "TX, RX y GND a la consola del aparato, y tocá Detectar\tTX, RX and GND to the device's console, then tap Detect\n"
+    "La flash no contestó su ID: si no graba, mirá que nada toque CMD, SD0-SD3 o CLK\tThe flash did not give its ID: if it will not write, check nothing touches CMD, SD0-SD3 or CLK\n"
+    "Llegan datos de su programa: el reset no le llega (EN a RST) o no tiene bootloader\tIts program is talking: the reset does not reach it (EN to RST) or it has no bootloader\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -6018,6 +6020,8 @@ static const char blob_de__sistema_lang[] =
     "%s a %u baudios\t%s mit %u Baud\n"
     "Queda frenado en \\\"%s\\\": reset en la Terminal, o su corriente, lo arranca\tBleibt bei \\\"%s\\\" angehalten: reset im Terminal oder Strom startet es\n"
     "TX, RX y GND a la consola del aparato, y tocá Detectar\tTX, RX und GND an die Konsole des Geräts, dann Erkennen tippen\n"
+    "La flash no contestó su ID: si no graba, mirá que nada toque CMD, SD0-SD3 o CLK\tFlash ohne ID: schreibt er nicht, prüfen, dass nichts CMD, SD0-SD3 oder CLK berührt\n"
+    "Llegan datos de su programa: el reset no le llega (EN a RST) o no tiene bootloader\tSein Programm sendet: der Reset kommt nicht an (EN an RST) oder kein Bootloader\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -6025,7 +6029,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 2998, 0, files_en, 1 },
-    { "de", "Deutsch", 2998, 0, files_de, 1 },
+    { "en", "English", 3000, 0, files_en, 1 },
+    { "de", "Deutsch", 3000, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

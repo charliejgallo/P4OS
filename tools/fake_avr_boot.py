@@ -5,7 +5,7 @@ AVR family (components/aos_flasher/aos_flasher_avr.c) without a board.
 
     tools/fake_avr_boot.py serve [--boot optiboot|atmegaboot|mega|caterina]
                                  [--chip atmega328p] [--lines lines.txt]
-                                 [--dump flash.bin] [--hold]
+                                 [--dump flash.bin] [--hold] [--no-reset]
     tools/fake_avr_boot.py check --dump flash.bin FILE.hex|FILE.bin [--at 0x0]
 
 serve opens a pty and prints its path; run the simulator with
@@ -23,7 +23,8 @@ nothing back, as a real one. After a reset - EN going low and back - the
 bootloader listens for a second (eight for Caterina; every command it
 understands starts the second again), then "runs the sketch", which prints a
 line every half second with the CRC of the flash. --hold keeps it in the
-bootloader for good (without --lines it always is).
+bootloader for good (without --lines it always is). --no-reset is a board
+whose RESET is not wired: its sketch runs from the start, whatever EN does.
 
 The flash starts with a made-up old sketch and the bootloader's bytes at the
 top. A page write erases and writes that page; one into the bootloader's
@@ -78,7 +79,7 @@ class Board:
         self.addr = 0               # bytes
         self.en = 1
         self.lines_pos = 0
-        self.in_boot = not a.lines
+        self.in_boot = not a.lines and not a.no_reset
         self.until = 0.0
         self.next_beat = 0.0
         self.seq = 0
@@ -326,7 +327,7 @@ class Board:
         self.until = time.monotonic() + self.listen
 
     def poll_lines(self):
-        if not self.a.lines:
+        if not self.a.lines or self.a.no_reset:
             return
         try:
             with open(self.a.lines) as f:
@@ -436,6 +437,8 @@ def main():
     s.add_argument("--lines")
     s.add_argument("--dump")
     s.add_argument("--hold", action="store_true")
+    s.add_argument("--no-reset", action="store_true",
+                   help="its RESET is not wired: the sketch runs from the start and never stops")
     c = sub.add_parser("check")
     c.add_argument("--dump", required=True)
     c.add_argument("--at", default="0")

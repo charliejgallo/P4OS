@@ -9603,3 +9603,9 @@ Queda frenado en \"%s\": reset en la Terminal, o su corriente, lo arranca	Bleibt
 
 #: components/aos_apps/aos_app_flasher.c (U-Boot)
 TX, RX y GND a la consola del aparato, y tocá Detectar	TX, RX und GND an die Konsole des Geräts, dann Erkennen tippen
+
+#: components/aos_flasher (Programador, ESP)
+La flash no contestó su ID: si no graba, mirá que nada toque CMD, SD0-SD3 o CLK	Flash ohne ID: schreibt er nicht, prüfen, dass nichts CMD, SD0-SD3 oder CLK berührt
+
+#: components/aos_flasher (Programador, Arduino)
+Llegan datos de su programa: el reset no le llega (EN a RST) o no tiene bootloader	Sein Programm sendet: der Reset kommt nicht an (EN an RST) oder kein Bootloader

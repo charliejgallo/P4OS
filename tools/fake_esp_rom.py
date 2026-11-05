@@ -26,6 +26,8 @@ every aos_io_uart_lines()). It answers what esp-serial-flasher 2.x sends:
     and the stub's READ_FLASH (packets of the size asked for, each waiting
     for the host's ack of the bytes so far, then the MD5 of all of it).
     Anything else is logged as UNKNOWN and answered with INVALID_COMMAND.
+    --mute-flash makes the flash chip silent, as a wire on its CMD pin does:
+    its ID reads ff ffff and FLASH_BEGIN gets no answer.
 
 The flash starts dirty (a fixed pseudo-random "old firmware"), so a region
 that was written without being erased first fails the check. --dump writes
@@ -181,7 +183,7 @@ class Target:
             if op == 0x9F:
                 cap = {1 << 20: 0x14, 2 << 20: 0x15, 4 << 20: 0x16, 8 << 20: 0x17, 16 << 20: 0x18,
                        32 << 20: 0x19}.get(self.flash_size, 0x16)
-                self.regs[spi + r["w0"]] = 0xEF | (0x40 << 8) | (cap << 16)
+                self.regs[spi + r["w0"]] = 0xFFFFFF if self.a.mute_flash else 0xEF | (0x40 << 8) | (cap << 16)
             else:
                 log(f"  SPI user command 0x{op:02x} (not emulated)")
             value &= ~(1 << 18)             # done at once
@@ -330,6 +332,8 @@ class Target:
         erase, packets, psize, off = struct.unpack_from("<IIII", d)
         enc = struct.unpack_from("<I", d, 16)[0] if len(d) >= 20 else None
         log(f"FLASH_BEGIN 0x{off:06x} erase {erase} B, {packets} x {psize} B" + (f", encrypted={enc}" if enc is not None else ""))
+        if self.a.mute_flash:
+            return log("  the flash does not answer: no reply")
         if off + erase > self.flash_size:
             return self.reply(cmd, ok=False, err=COMMAND_FAILED)
         self.erase(off, erase)
@@ -624,6 +628,8 @@ def main():
     s.add_argument("--lines")
     s.add_argument("--fast", action="store_true", help="no simulated wire or erase time")
     s.add_argument("--no-stub-support", action="store_true", help="MEM_END does not start a stub")
+    s.add_argument("--mute-flash", action="store_true",
+                   help="a flash chip that never answers (a wire on its CMD pin): ID ff ffff, FLASH_BEGIN unanswered")
     c = sub.add_parser("check")
     c.add_argument("--dump", required=True)
     c.add_argument("source")

@@ -7,6 +7,25 @@
   on a mix of Ctrl+C, Enter, space, q, x and Esc, which the family now
   sends while the device powers on. With it, OpenIPC was installed on that
   camera from P4OS's console.
+- **The Programador says what is wrong when a wire is.** Two mistakes made
+  on the bench, each of which got only a vague error:
+  - An ESP32 whose flash does not answer (a GND wire on its CMD pin): the
+    chip and its ROM answer, the flash's ID reads ff ffff and the write
+    then fails with a bare timeout. Detect now warns at once that the
+    flash gave no ID and which pins to look at.
+  - An Arduino on the header whose RESET is not wired: its program keeps
+    talking while the Programador knocks at its bootloader. It now says
+    the reset is not reaching the board (or that it has no bootloader)
+    instead of "check TX/RX, GND and RESET".
+
+  `tools/fake_esp_rom.py --mute-flash` and `tools/fake_avr_boot.py
+  --no-reset` imitate both for the simulator.
+- **Tried on the board, with no change to the code:** a Blue Pill (a CKS32
+  clone) by SWD and by ST's serial bootloader; an ESP32 DevKit and an
+  Arduino Nano on the header, with the EN and BOOT lines, at up to 921600
+  baud; the Terminal at 460800; and the bridge from the Mac with
+  stm32loader, esptool and avrdude. Wiring diagrams in
+  `docs/img/bench-esp32.svg` and `docs/img/bench-nano.svg`.
 
 ## 0.23.0 — 2026-11-04
 
