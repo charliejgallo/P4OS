@@ -806,7 +806,8 @@ Que necesitan la mano del usuario o equipos:
 
     <p align="center"><img src="../img/photo-terminal-nano.jpg" width="300" alt="La Terminal en usb0 a 115200 con el Nano por el host USB: las vueltas del programa charla, y el Nano al lado"></p>
   - El mismo por el header: TX/RX cruzados con un divisor en su TX, EN al
-    RESET. Uno de 3,3 V (Pro Mini) va directo.
+    RESET. Uno de 3,3 V (Pro Mini) va directo. Cableado en
+    `docs/img/bench-nano.svg`.
   - Un Mega 2560 por USB (STK500 v2; su VID:PID lo pone primero).
   - Un Leonardo o Micro por USB: el toque a 1200 baudios, que el
     bootloader aparezca como otro dispositivo (`El bootloader apareció
@@ -1071,8 +1072,11 @@ laberinto, pong, radar, walkie, remoto y sensores.
 
 **Terminal y Programador**
 - [x] El UART a 460800 por el header (2026-11-05): el Programador grabó un
-      ESP32 a 460800 (45 KB/s) y a 921600 (89 KB/s), MD5 bien. La Terminal
-      a 460800 todavía no (el programa de prueba habla a 115200).
+      ESP32 a 460800 (45 KB/s) y a 921600 (89 KB/s), MD5 bien. Y la
+      Terminal a 460800 con `hola_esp32` compilado con la consola a esa
+      velocidad (`sdkconfig.defaults.460800`): sus "Hola mundo" y diez
+      líneas de 120 caracteres mandadas seguidas, devueltas idénticas, sin
+      un byte raro.
 - [x] **EN/BOOT reales para programar otra placa** (2026-11-05): un ESP32
       DevKit de 38 pines (ESP32-D0WD-V3 v3.1, flash 4 MB) por `uart.b`,
       cableado en `docs/img/bench-esp32.svg`, foto en el README. Detectar

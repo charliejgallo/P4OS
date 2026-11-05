@@ -486,9 +486,97 @@ def esp32_devkit():
     s.save("bench-esp32.svg")
 
 
+def nano_header():
+    """An Arduino Nano (5 V) on uart.b: its TX through a divider, the EN line to its reset."""
+    s = Svg(1100, 905, "An Arduino Nano on the 40-pin header",
+            "uart.b with the EN line on its reset: the Flasher writes it through its bootloader, "
+            "and avrdude does the same through the bridge")
+    c_tx, c_rx, c_en = "#ea580c", "#16a34a", "#0891b2"
+    used = {1: "#dc2626", 11: c_en, 12: c_tx, 13: "#111111", 14: c_rx}
+    # the Nano from the top, USB up: D12..D2, GND, RST, RX0, TX1 down the side facing the header
+    DX, DW, DY0 = 60, 170, ROW0 + 2 * STEP
+    left = ["D13", "3V3", "REF", "A0", "A1", "A2", "A3", "A4", "A5", "A6", "A7", "5V", "RST", "GND", "VIN"]
+    right = ["D12", "D11", "D10", "D9", "D8", "D7", "D6", "D5", "D4", "D3", "D2", "GND", "RST", "RX0", "TX1"]
+    top, bot = DY0 - 64, DY0 + 14 * STEP + 34
+    lx, rx_ = DX + 14, DX + DW - 14
+    py = lambda i: DY0 + i * STEP                       # noqa: E731
+    s.add(f'<rect x="{DX}" y="{top}" width="{DW}" height="{bot-top}" rx="6" fill="#1e3a8a"/>')
+    s.add(f'<rect x="{DX+DW/2-26}" y="{top-14}" width="52" height="40" rx="3" fill="#9ca3af" stroke="#6b7280"/>')
+    s.plain(DX + DW / 2, top - 22, "USB", size=11, color="#6b7280", anchor="middle")
+    s.add(f'<rect x="{DX+DW/2-34}" y="{py(5)}" width="68" height="68" rx="3" fill="#0f172a" transform="rotate(45 {DX+DW/2} {py(5)+34})"/>')
+    s.plain(DX + DW / 2, py(6) + 10, "ATmega", size=11, color="#e2e8f0", anchor="middle", bold=True)
+    s.plain(DX + DW / 2, py(7) + 4, "328P", size=11, color="#e2e8f0", anchor="middle", bold=True)
+    s.plain(DX + DW / 2, py(10) + 4, "Nano", size=13, color="#e2e8f0", anchor="middle", bold=True)
+    s.plain(DX + DW / 2, py(11) + 4, "top view", size=10, color="#93c5fd", anchor="middle")
+    s.add(f'<rect x="{DX+DW/2-12}" y="{py(12)-6}" width="24" height="20" rx="3" fill="#e5e7eb" stroke="#6b7280"/>')
+    s.plain(DX + DW / 2, py(13) + 14, "RESET", size=9, color="#e2e8f0", anchor="middle", bold=True)
+    hot_r = {"RX0": c_tx, "TX1": c_rx, "RST": c_en, "GND": "#111111"}
+    for i, nm in enumerate(left):
+        hot = "#dc2626" if nm == "5V" else None
+        s.over(f'<circle cx="{lx}" cy="{py(i)}" r="{7 if hot else 6}" fill="{hot or "#d1a33a"}" stroke="#fff" stroke-width="{2 if hot else 0}"/>')
+        s.plain(lx + 14, py(i) + 4, nm, size=11, color=hot or "#e5e7eb", bold=bool(hot))
+    for i, nm in enumerate(right):
+        hot = hot_r.get(nm)
+        s.over(f'<circle cx="{rx_}" cy="{py(i)}" r="{7 if hot else 6}" fill="{hot or "#d1a33a"}" stroke="#fff" stroke-width="{2 if hot else 0}"/>')
+        txt = "#e5e7eb" if hot in (None, "#111111") else hot
+        s.plain(rx_ - 14, py(i) + 4, nm, size=11, color=txt, anchor="end", bold=bool(hot))
+    i_gnd, i_rst, i_rx0, i_tx1 = 11, 12, 13, 14
+    x12, y12 = pin_xy(12)
+    x14, y14 = pin_xy(14)
+    lane_tx, node = 305, 390
+    # TX of uart.b (pin 12) straight to RX0: 3.3 V is a high for a 5 V ATmega
+    s.wire([(x12 - 8, y12), (lane_tx, y12), (lane_tx, py(i_rx0)), (rx_ + 8, py(i_rx0))], c_tx, 3)
+    # TX1 is 5 V: 1 kOhm to the node, 2 kOhm from the node down to GND, the node (3.3 V) up to RX (pin 14)
+    ty = py(i_tx1)
+    s.resistor_h(rx_ + 8, node, ty, "1 kΩ", above=False)
+    s.wire([(node, ty), (node, y14), (x14 - 8, y14)], c_rx, 3)
+    s.dot(node, ty, c_rx)
+    s.resistor_v(node, ty, ty + 96, "", C["gnd"])
+    s.text(node - 16, ty + 52, "2 kΩ", anchor="end")
+    s.gnd_sym(node, ty + 96)
+    s.text(node - 8, ty - 10, "3.3 V", size=11, color=c_rx, anchor="end", bold=True)
+    # RST and GND by tags, as on the header's right column
+    s.wire([(rx_ + 8, py(i_rst)), (250, py(i_rst))], c_en, 3)
+    s.net(250, py(i_rst), "EN", c_en, side="right")
+    s.wire([(rx_ + 8, py(i_gnd)), (250, py(i_gnd))], C["gnd"], 3)
+    s.net(250, py(i_gnd), "GND", C["gnd"], side="right")
+    x11, y11 = pin_xy(11)
+    x13, y13 = pin_xy(13)
+    s.wire([(x11 + 8, y11), (690, y11)], c_en, 3)
+    s.net(690, y11, "EN", c_en, side="right")
+    s.wire([(x13 + 8, y13), (690, y13)], C["gnd"], 3)
+    s.net(690, y13, "GND", C["gnd"], side="right")
+    # 5 V from pin 1 over the top and down the left to its 5V pin
+    x1, y1 = pin_xy(1)
+    v5 = 30
+    s.wire([(x1 + 8, y1), (640, y1), (640, top - 50), (v5, top - 50), (v5, py(11)), (lx - 8, py(11))], C["p5"], 3)
+    s.text(v5 + 10, top - 56, "5 V from pin 1 to its 5V pin (or its own USB, not both)", color="#b91c1c")
+    # the legend
+    gx, gy = 730, pin_xy(23)[1] - 14
+    rows = [(c_tx, "pin 12, GPIO3 (uart.b TX)", "RX0 (D0)"), (c_rx, "pin 14, GPIO4 (uart.b RX)", "TX1 (D1) via 1k/2k"),
+            (c_en, "pin 11, GPIO5 (the EN line)", "RST"), (C["gnd"], "pin 13, GND", "GND"), (C["p5"], "pin 1, 5 V", "5V")]
+    s.add(f'<rect x="{gx}" y="{gy}" width="330" height="{44 + 26 * len(rows)}" rx="8" fill="{C["card"]}" stroke="{C["line"]}"/>')
+    s.text(gx + 16, gy + 24, "The five wires: header → Nano", size=13, color="#111", bold=True)
+    for k, (col, frm, to) in enumerate(rows):
+        y = gy + 50 + 26 * k
+        s.wire([(gx + 16, y - 4), (gx + 46, y - 4)], col, 4)
+        s.text(gx + 56, y, frm, size=12)
+        s.text(gx + 316, y, to, size=12, color=col if col != C["gnd"] else "#111", anchor="end", bold=True)
+    s.notes(40, NOTES_Y, 1020, "What it tries (not on the board yet; by USB the same Nano already worked, 2026-11-03)", [
+        "• TX (GPIO3, pin 12) straight to RX0: 3.3 V is a high for a 5 V ATmega. Its TX1 is 5 V: to RX (GPIO4, pin 14) only through",
+        "  1 kΩ in series with 2 kΩ to GND (3.3 V at the node); never straight. A 3.3 V board (Pro Mini 3.3 V) needs no divider",
+        "• The EN line (GPIO5, pin 11) to RST, open-drain: Detect and Write reset it into its bootloader (optiboot 115200, the old one 57600)",
+        "• Bridge: avrdude -c arduino -p m328p -P net:p4os.local:4001 -b 115200 (57600 for the old bootloader): each connection resets it",
+        "• Power: 5 V from pin 1 to its 5V pin, or its own USB; never both. Tags with the same name (EN, GND) are one wire",
+    ])
+    s.header(used)
+    s.save("bench-nano.svg")
+
+
 if __name__ == "__main__":
     pwm()
     ir()
     strip()
     eeprom24()
     esp32_devkit()
+    nano_header()

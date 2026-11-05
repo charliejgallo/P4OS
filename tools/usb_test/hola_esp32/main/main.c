@@ -2,7 +2,8 @@
  * on the console every two seconds, and echoes back each line it receives.
  * The console is UART0 (a dev board's USB-serial converter) or, on a chip
  * with its own USB (C3, C6, S3, H2), the USB-Serial-JTAG
- * (sdkconfig.defaults.<target>). */
+ * (sdkconfig.defaults.<target>). sdkconfig.defaults.460800 builds it with the
+ * UART console at 460800 instead of 115200, to try the Terminal that fast. */
 #include <stdio.h>
 #include <string.h>
 #include "freertos/FreeRTOS.h"
@@ -42,6 +43,9 @@ void app_main(void)
     esp_chip_info_t ci;
     esp_chip_info(&ci);
     printf("\r\nHola mundo desde el %s (rev %d), grabado por P4OS\r\n", CONFIG_IDF_TARGET, ci.revision);
+#if CONFIG_ESP_CONSOLE_UART
+    printf("Consola a %d baudios\r\n", CONFIG_ESP_CONSOLE_UART_BAUDRATE);
+#endif
     char line[128];
     int n = 0, count = 0;
     TickType_t next = xTaskGetTickCount();

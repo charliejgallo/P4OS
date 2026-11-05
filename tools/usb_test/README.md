@@ -56,3 +56,13 @@ those paths, and the Programmer lists it. Tried on 2026-10-05 with an
 ESP32 dev board on a CP2102 at `usb0`: written and verified in 6.6 s at
 460800 baud, with no button pressed, and read back in the Terminal; and
 with an ESP32-C3 on its own USB: 1.5 s.
+
+With the console at 460800 instead (`sdkconfig.defaults.460800`), into a
+build directory of its own so the usual one stays at 115200:
+
+    idf.py -B build-460800 -D SDKCONFIG=build-460800/sdkconfig \
+      -D SDKCONFIG_DEFAULTS="sdkconfig.defaults;sdkconfig.defaults.460800" build
+
+It says `Consola a 460800 baudios` after its greeting. Tried on 2026-11-05
+with an ESP32 DevKit on the header's `uart.b`: the Terminal at 460800 read
+it, and ten 120-character lines sent in a row came back intact.
