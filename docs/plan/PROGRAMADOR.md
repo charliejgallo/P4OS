@@ -440,9 +440,9 @@ trabajo); grabar y borrar contestan que no.
   con `crc32` y `md`. Flash MX25L128 de 16 MB (ID c2 20 18), mtdparts
   `512K(boot),2560K(kernel),12800K(rootfs),512K(config)`, rootfs jffs2;
   el kernel se carga en 0x82000000. WiFi por USB con el driver `rt2870`.
-- **El primer volcado de la cámara** (2026-11-04, con la familia, desde el
-  portal): 16 MB en 102 min, cada 64 KB contra su `crc32`, SHA-256
-  `1f508d27…`. A 115200 todo el tiempo: su U-Boot contestó "not
+- **Los volcados de la cámara** (2026-11-04, con la familia, desde el
+  portal): dos de 16 MB, 102 min cada uno, cada 64 KB contra su `crc32`,
+  **iguales byte a byte** (SHA-256 `1f508d27…`). A 115200 todo el tiempo: su U-Boot contestó "not
   supported" a 921600, 460800 y 230400 (la tabla de velocidades de ese
   2010.06 no las tiene), así que `md` va a ~10 mil caracteres por
   segundo, unos 2,6 KB de flash. Ningún pedazo vacío: el jffs2 marca

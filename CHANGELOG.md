@@ -9,8 +9,8 @@
   U-Boot's own commands, each 64 KB checked by U-Boot's crc32 (only the
   4 KB parts that came wrong are read again), with the console moved to
   921600 meanwhile and back at the end. The boot log goes to a .txt
-  beside the dump. Made for the user's HiSilicon camera; tried in the
-  simulator against a fake of its U-Boot.
+  beside the dump. Made for the user's HiSilicon camera (a Hi3518EV200):
+  its 16 MB read twice through its console, the same SHA-256 both times.
 - **The Arduino Due by SWD.** The Programador knows the SAM3X/A: detect,
   read, write and erase, both banks of its flash, its lock regions
   cleared first and its boot bit set after a write (so it boots the

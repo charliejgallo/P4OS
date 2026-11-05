@@ -120,6 +120,26 @@ watch came back with every setting it had.</em></p>
 RP2040 found behind its multidrop port and a new firmware written and
 verified in under half a second.</em></p>
 
+<p align="center">
+  <img src="docs/img/photo-flasher-uboot-camera.jpg" width="300" alt="The Flasher reading a HiSilicon IP camera's 16 MB flash through its U-Boot console on uart.b: U-Boot 2010.06, mtdparts, working RAM 0x82000000 with crc32">
+  <img src="docs/img/photo-terminal-camera.jpg" width="300" alt="The Terminal on uart.b at 115200 with the camera's console: its Linux and its app starting, the OV9732 sensor">
+</p>
+
+<p align="center"><em>A cheap Wi-Fi camera (a Hi3518EV200) opened up, its
+console pads soldered to the header: U-Boot stopped with Ctrl+C and its
+16 MB read out through its own commands, twice, with the same SHA-256 -
+the copy kept before giving it a new firmware.</em></p>
+
+<p align="center">
+  <img src="docs/img/photo-flasher-ekobadge-dump.jpg" width="300" alt="The Flasher with the Ekoparty 2026 badge by SWD: nRF52840, 1 MB read twice in 8 s at 133 KB/s">
+  <img src="docs/img/photo-terminal-nano.jpg" width="300" alt="The Terminal on usb0 at 115200 with an Arduino Nano on the USB host, its program printing each blink">
+</p>
+
+<p align="center"><em>The Ekoparty 2026 badge (an nRF52840 running
+Meshtastic) read whole by SWD in 8 seconds, and an Arduino Nano from a
+drawer on the USB host: written by the Programmer, then talking in the
+Terminal.</em></p>
+
 ---
 
 ## What it does
@@ -300,11 +320,14 @@ header with who holds each pin.
   same for an AVR Arduino through the bootloader it already has (Uno,
   Nano, Pro Mini, Mega, Leonardo, Micro), from the `.hex` the Arduino IDE
   exports. And by SWD, on the same pins: an nRF52, an RP2040, an RP2350,
-  an STM32 (F0, F1, F2, F4 like the Black Pill, G0, G4, L4) or a SAMD21 or
+  an STM32 (F0, F1, F2, F4 like the Black Pill, G0, G4, L4), a SAMD21 or
   SAMD51 (Arduino Zero and MKR, Adafruit M0 and M4, Seeed XIAO, their
-  bootloader kept) written and verified, its read protection taken off by
-  erasing it, and the RTT console of the firmware
-  running on it. Or an STM32 through its own serial bootloader, with
+  bootloader kept) or a SAM3X (an Arduino Due) written, verified and read
+  to the card, its read protection taken off by erasing it, and the RTT
+  console of the firmware running on it. Anything with U-Boot on a
+  serial console - an IP camera, a router, a set-top box - has its
+  whole flash read out through U-Boot's own commands, each piece checked
+  by U-Boot's CRC, and nothing written. Or an STM32 through its own serial bootloader, with
   BOOT0 and NRST on the same lines an ESP32 uses. And it lends its port to
   the computer: esptool over `rfc2217://p4os.local:4000`, avrdude over
   `net:p4os.local:4001`; or becomes its CMSIS-DAP debug probe on the OTG

@@ -594,6 +594,16 @@ Que necesitan la mano del usuario o equipos:
        ponga REGOUT0, o grabarle uno que lo haga.
     5. Grabar algo propio (un blink o su firmware) y la consola RTT, si
        el firmware la trae.
+  - **Hecho el 2026-11-04:** dos volcados enteros por la familia U-Boot,
+    102 min cada uno (a 115200: su U-Boot no acepta más), **iguales byte
+    a byte**, SHA-256 `1f508d2720af6fa0c129afbad47227b29da52cd5870247b70e3008b91b70e295`.
+    Revisado en la Mac (sin binwalk, a mano): U-Boot en 0, el uImage
+    `Linux-3.4.35` de 2208808 bytes en 0x80000, jffs2 en 0x300000 y la
+    config en 0xF80000, como dice mtdparts. Lo que costó: la fuente de la
+    cámara (con la primera llegaba basura), y que se frena sólo con
+    Ctrl+C. Para la cámara: `camara-sc10w/HANDOFF-DESDE-P4OS.md`.
+
+    <p align="center"><img src="../img/photo-flasher-uboot-camera.jpg" width="300" alt="El Programador leyendo la flash de la cámara por su U-Boot"></p>
   - La cámara SC10W del usuario por U-Boot (F7, 2026-11-04): su consola
     en `uart.b` (TXD de la cámara al pin 14, RXD al 12, GND; su 3,3 V
     no), la cámara con su propia fuente. Detectar con la familia U-Boot
