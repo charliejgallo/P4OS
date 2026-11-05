@@ -32,6 +32,16 @@ termios): at a speed other than the console's, what it sends comes out as
 garbage and what it hears is ignored. Above --max-baud the switch is refused
 ("not supported"), as a U-Boot whose table lacks that speed.
 
+--writable lets it be written, to try the camera's install scripts
+(camara-sc10w/tutorial: instalar.py) without the camera: --sd DIR is its
+microSD (mmcinfo, fatls mmc 0, fatload mmc 0 <ram> <file>), and mw.b, sf
+erase and sf write do what they say. After a reset, a flash that no longer
+starts with the factory U-Boot boots as OpenIPC's ("OpenIPC # ", any key
+stops it): Linux panics for want of its rootfs and the camera restarts,
+until "run setnor16m" saves the 16 MB layout; then it ends at OpenIPC's
+login. Without --writable, anything that writes is refused, as below.
+kill -USR1 <its pid> unplugs it: the next byte that comes in powers it on.
+
 --noise P garbles each byte of md's output with probability P, to exercise
 the Programador's per-chunk CRC and its retries.
 
@@ -111,6 +121,11 @@ class Camera:
         self.forbidden = 0
         self.rnd = random.Random(7)
         self.out = bytearray()
+        self.openipc = False                        # the flash boots OpenIPC's U-Boot
+        self.nor16 = False                          # ... with its 16 MB layout saved
+        self.writes = 0
+        self.factory_boot = bytes(self.flash[0x100:0x100 + len(VERSION)])
+        self.prompt_text = PROMPT
 
     # -- the wire ---------------------------------------------------------------
 
@@ -147,6 +162,19 @@ class Camera:
         mb = self.a.flash_mb
         self.baud = 115200
         self.probed = False
+        self.openipc = bytes(self.flash[0x100:0x100 + len(VERSION)]) != self.factory_boot
+        if self.openipc:
+            self.prompt_text = b"OpenIPC # "
+            self.send(f"\n\nSystem startup\n\nU-Boot 2010.06 (Oct 04 2026 - 11:27:52)\n\n"
+                      f"SPI Nor total size: {mb}MB\n" + ("" if self.nor16 else
+                      "*** Warning - bad CRC, using default environment\n\n*** Write default environment to flash\n")
+                      + "In:    serial\nOut:   serial\nErr:   serial\n")
+            self.send(f"Hit any key to stop autoboot: {self.a.bootdelay:2d} ")
+            self.state = "countdown"
+            self.until = time.monotonic() + self.a.bootdelay
+            log("OpenIPC's U-Boot, counting down")
+            return
+        self.prompt_text = PROMPT
         self.send(f"\n\n{VERSION}\n\nCheck Flash Memory Controller v100 ... Found\n"
                   f"SPI Nor(cs 0) ID: 0xc2 0x20 0x{0x18 if mb == 16 else 0x17:02x}\n"
                   f"Block:64KB Chip:{mb}MB Name:\"MX25L{mb * 8}XX\"\n"
@@ -162,6 +190,21 @@ class Camera:
         log("booted, counting down")
 
     def boot_linux(self):
+        if self.openipc:
+            if not self.nor16:
+                self.send("## Booting kernel from Legacy Image at 82000000 ...\n   Image Name:   Linux-4.9.37-hi3518ev200\n"
+                          "No filesystem could mount root, tried:  squashfs\n"
+                          "Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(31,3)\n"
+                          "Rebooting in 20 seconds..\n")
+                self.state = "panic"
+                self.until = time.monotonic() + 2
+                log("OpenIPC with the 8 MB layout: panic")
+                return
+            self.send("## Booting kernel from Legacy Image at 82000000 ...\nStarting kernel ...\n"
+                      "Linux version 4.9.37\nStarting majestic: OK\n\nWelcome to OpenIPC\nopenipc-hi3518ev200 login: ")
+            self.state = "linux"
+            log("OpenIPC up")
+            return
         self.send(f"{self.a.flash_mb * 1024} KiB hi_fmc at 0:0 is now current device\n\n"
                   "## Booting kernel from Legacy Image at 82000000 ...\n   Image Name:   Linux-3.4.35\n"
                   "Starting kernel ...\n\nUncompressing Linux... done, booting the kernel.\n"
@@ -172,7 +215,7 @@ class Camera:
         log("autoboot not stopped: Linux")
 
     def prompt(self):
-        self.send(PROMPT)
+        self.send(self.prompt_text)
         self.state = "prompt"
 
     # -- input ------------------------------------------------------------------
@@ -186,7 +229,7 @@ class Camera:
             return
         for c in data:
             if self.state == "countdown":
-                if not self.a.any_key and bytes([c]) != self.a.stop_key.encode().decode("unicode_escape").encode("latin-1"):
+                if not (self.a.any_key or self.openipc) and bytes([c]) != self.a.stop_key.encode().decode("unicode_escape").encode("latin-1"):
                     continue                        # "any key" is one key here
                 self.send("\b\b\b 0 \n")
                 log("autoboot stopped")
@@ -194,7 +237,7 @@ class Camera:
                 continue
             if self.state == "linux":
                 if c == 0x0D:
-                    self.send("\n(none) login: ")
+                    self.send("\nopenipc-hi3518ev200 login: " if self.openipc else "\n(none) login: ")
                 continue
             if self.state == "baudwait":
                 if c == 0x0D:
@@ -223,6 +266,9 @@ class Camera:
         if self.state == "countdown" and time.monotonic() > self.until:
             self.send("\b\b\b 0 \n")
             self.boot_linux()
+        if self.state == "panic" and time.monotonic() > self.until:
+            self.state = "off"
+            self.power_on()
 
     # -- commands -----------------------------------------------------------------
 
@@ -238,7 +284,7 @@ class Camera:
         self.count(name if name != "sf" or len(w) < 2 else "sf " + w[1])
         try:
             if name == "version":
-                self.send(f"\n{VERSION}\n")
+                self.send("\nU-Boot 2010.06 (Oct 04 2026 - 11:27:52)\n" if self.openipc else f"\n{VERSION}\n")
             elif name == "printenv":
                 for k, v in self.env.items():
                     self.send(f"{k}={v}\n")
@@ -261,7 +307,27 @@ class Camera:
                     else:
                         self.ram[ram - RAM_BASE:ram - RAM_BASE + n] = self.flash[off:off + n]
             elif name == "sf" and len(w) >= 2 and w[1] in ("erase", "write", "update"):
-                self.refuse(cmd)
+                if not self.a.writable:
+                    self.refuse(cmd)
+                elif w[1] == "erase" and len(w) == 4:
+                    off, n = self.num(w[2]), self.num(w[3])
+                    if off % 0x10000 or n % 0x10000 or off + n > len(self.flash):
+                        self.send("ERROR: erase area not aligned or past the flash\n")
+                    else:
+                        for o in range(off, off + n, 0x10000):
+                            self.flash[o:o + 0x10000] = b"\xff" * 0x10000
+                        self.send("".join(f"Erasing at 0x{o + 0x10000:x} -- {(o - off + 0x10000) * 100 // n:3d}% complete.\n"
+                                          for o in range(off, off + n, n // 8 or 0x10000)))
+                        self.writes += 1
+                elif w[1] == "write" and len(w) == 5:
+                    ram, off, n = self.num(w[2]), self.num(w[3]), self.num(w[4])
+                    src = self.ram[ram - RAM_BASE:ram - RAM_BASE + n]
+                    for i in range(n):
+                        self.flash[off + i] &= src[i]       # NOR: a write only clears bits
+                    self.send(f"Writing at 0x{off + n:x} -- 100% complete.\n")
+                    self.writes += 1
+                else:
+                    raise ValueError
             elif name.startswith("md"):
                 self.md(name, w)
             elif name == "crc32":
@@ -277,6 +343,33 @@ class Camera:
                         return
                 elif len(w) >= 2:
                     self.env[w[1]] = " ".join(w[2:])
+            elif self.a.writable and name in ("mw", "mw.b"):
+                a, v, n = self.num(w[1]), self.num(w[2]), self.num(w[3])
+                self.ram[a - RAM_BASE:a - RAM_BASE + n] = bytes([v & 0xFF]) * n
+            elif self.a.writable and name == "mmcinfo" and self.a.sd:
+                self.send("Device: HIMCI_V200\nName: SD16G \nCapacity: 15523119104\nBus Width: 4-bit\n")
+            elif self.a.writable and name == "fatls" and self.a.sd:
+                files = sorted(f for f in os.listdir(self.a.sd) if os.path.isfile(os.path.join(self.a.sd, f)))
+                for f in files:
+                    self.send(f" {os.path.getsize(os.path.join(self.a.sd, f)):8d}   {f} \n")
+                self.send(f"\n{len(files)} file(s), 0 dir(s)\n\n")
+            elif self.a.writable and name == "fatload" and self.a.sd and len(w) == 5:
+                path = os.path.join(self.a.sd, w[4])
+                if not os.path.isfile(path):
+                    self.send(f"** Unable to read \"{w[4]}\" from mmc 0:1 **\n")
+                else:
+                    data = open(path, "rb").read()
+                    a = self.num(w[3])
+                    self.ram[a - RAM_BASE:a - RAM_BASE + len(data)] = data
+                    self.send(f"reading {w[4]}\n\n{len(data)} bytes read\n")
+            elif self.openipc and name == "run" and w[1:] == ["setnor16m"]:
+                self.send("Saving Environment to SPI Flash...\nWriting to SPI flash, offset 0x00040000 size 64K ...done\n"
+                          "resetting ...\n")
+                self.nor16 = True
+                self.writes += 1
+                self.state = "off"
+                self.power_on()
+                return
             elif name in ("saveenv", "mw", "tftp", "tftpboot", "erase", "protect", "cp"):
                 self.refuse(cmd)
             elif name == "reset":
@@ -338,6 +431,10 @@ class Camera:
     def summary(self):
         log(f"commands: {self.counts}")
         log(f"FORBIDDEN (writing) commands: {self.forbidden}")
+        if self.a.writable:
+            log(f"writes (allowed, --writable): {self.writes}; OpenIPC {self.openipc}, 16 MB layout {self.nor16}")
+            if self.a.flash_out:
+                open(self.a.flash_out + ".after", "wb").write(self.flash)
 
 
 def serve(a):
@@ -358,6 +455,11 @@ def serve(a):
         sys.exit(0)
     signal.signal(signal.SIGTERM, bye)
     signal.signal(signal.SIGINT, bye)
+
+    def unplug(*_):                                 # kill -USR1: the camera unplugged; the next byte powers it on
+        cam.state = "off"
+        log("unplugged")
+    signal.signal(signal.SIGUSR1, unplug)
     while True:
         r, _, _ = select.select([master], [], [], 0.003)
         if r:
@@ -379,6 +481,8 @@ def main():
     s.add_argument("--no-crc", action="store_true")
     s.add_argument("--locked", action="store_true")
     s.add_argument("--any-key", action="store_true")
+    s.add_argument("--writable", action="store_true")
+    s.add_argument("--sd")
     s.add_argument("--stop-key", default="q", help='the one key that stops it ("q", " ", "\\x1b"...)')
     s.add_argument("--bdinfo", action="store_true")
     s.add_argument("--noise", type=float, default=0.0)
