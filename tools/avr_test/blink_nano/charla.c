@@ -1,4 +1,4 @@
-/* The Nano's "L" LED (PB5) every 200 ms, and its serial port at 115200
+/* The "L" LED (D13) every 200 ms, and its serial port at 115200
  * (U2X, UBRR 16: 2.1 % off, as Arduino's own Serial at that speed): a
  * line at each change, and what comes in answered a line at a time. */
 #define F_CPU 16000000UL
@@ -6,10 +6,20 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
+#if defined(__AVR_ATmega2560__)
+#define LED PB7                 /* a Mega 2560's "L" LED (D13) */
+#define BOARD "el Mega 2560"
+#define RX_VECT USART0_RX_vect
+#else
+#define LED PB5                 /* a Nano's or an Uno's "L" LED (D13) */
+#define BOARD "el Nano"
+#define RX_VECT USART_RX_vect
+#endif
+
 /* what comes in, by interrupt: at 115200 a byte every 87 us */
 static volatile char rxq[64];
 static volatile unsigned char rx_w, rx_r;
-ISR(USART_RX_vect)
+ISR(RX_VECT)
 {
     char c = (char)UDR0;
     unsigned char n = (unsigned char)((rx_w + 1) & 63);
@@ -34,20 +44,20 @@ static void put_num(unsigned long n)
 
 int main(void)
 {
-    DDRB |= _BV(PB5);
+    DDRB |= _BV(LED);
     UCSR0A = _BV(U2X0);
     UBRR0 = 16;
     UCSR0B = _BV(RXEN0) | _BV(TXEN0) | _BV(RXCIE0);
     UCSR0C = _BV(UCSZ01) | _BV(UCSZ00);
     sei();
-    put("\r\nHola desde P4OS: el Nano grabado por el Programador\r\n");
+    put("\r\nHola desde P4OS: " BOARD " grabado por el Programador\r\n");
     char line[64];
     unsigned char k = 0;
     for (unsigned long n = 1;; n++) {
-        PINB = _BV(PB5);
+        PINB = _BV(LED);
         put("vuelta ");
         put_num(n);
-        put(PINB & _BV(PB5) ? ": LED prendido\r\n" : ": LED apagado\r\n");
+        put(PINB & _BV(LED) ? ": LED prendido\r\n" : ": LED apagado\r\n");
         for (int t = 0; t < 200; t++) {
             _delay_ms(1);
             while (rx_r != rx_w) {

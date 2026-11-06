@@ -167,6 +167,15 @@ the Mac's esptool does the same through the board's bridge.</em></p>
 a divider, the EN line on its reset. Written and read by the Flasher, and
 by avrdude on the Mac through the bridge.</em></p>
 
+<p align="center">
+  <img src="docs/img/photo-flasher-mega.jpg" width="300" alt="The Flasher after writing a program to an Arduino Mega 2560 on the USB host: verified">
+  <img src="docs/img/photo-flasher-promicro.jpg" width="300" alt="The Flasher with a Pro Micro on the USB host: the 1200-baud touch, an ATmega32U4 with Caterina, its flash saved">
+</p>
+
+<p align="center"><em>A Mega 2560 from an old 3D printer and a Pro Micro on
+the USB host: the Mega's own bootloader, and the Pro Micro's, reached with
+the 1200-baud touch.</em></p>
+
 ---
 
 ## What it does

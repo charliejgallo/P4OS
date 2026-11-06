@@ -35,6 +35,13 @@ On the board, with the Terminal (or `/api/serial`) on `usb0`, sending `!`
 types into the text field whose on-screen keyboard is open (Notas only
 takes keys while its keyboard is up).
 
+Built with `-prefs=compiler.cpp.extra_flags=-DRAPIDO` it also blinks the
+"L" LED every 100 ms and says `P4OS Leonardo rapido <n>`, so a write by
+the Programador shows. With both on the card, the Programador's Arduino
+family wrote them to a Pro Micro on the USB host on 2026-11-05: the
+1200-baud touch, the bootloader coming back as another device, and the
+sketch back by itself after the write.
+
 ## hola_esp32
 
 An ESP-IDF project for an ESP32, to try the Programmer and the Terminal

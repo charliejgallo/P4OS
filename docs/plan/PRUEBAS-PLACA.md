@@ -834,10 +834,33 @@ Que necesitan la mano del usuario o equipos:
     (en la 0.23.1) eso tiene su mensaje: con el cable de RST afuera,
     Detectar dijo "Its program is talking: the reset does not reach it (EN
     to RST) or it has no bootloader"; con el cable puesto, lo encontró.
-- [ ] Arduino, lo que queda: un Mega 2560 por USB (STK500 v2; su VID:PID
-      lo pone primero), y un Leonardo o Micro por USB: el toque a 1200
-      baudios, que el bootloader aparezca como otro dispositivo (`El
-      bootloader apareció en usbN`) y que el sketch vuelva al final.
+- [x] **Un Mega 2560 y una Pro Micro por USB** (2026-11-05), con
+      `tools/avr_test/blink_nano` (que ahora arma también `mega-rapido` y
+      `mega-charla`) y `tools/usb_test/p4os_leonardo` (con `-DRAPIDO`, otra
+      línea para notar el cambio).
+  - El Mega (de un cajón; venía de una impresora 3D): Detectar dijo
+    ATmega2560 (1E 98 01), STK500 v2 "AVRISP_2" a 115200, reset por DTR.
+    Leer los 256 KB: 61 s, leídos dos veces. Traía un sketch casero en
+    castellano (un panel con reloj, SD, mails por ESP8266 y SMS por un
+    SIM800) y detrás, sin pisar, la cola de un Marlin 1.0.2 de una Replikat
+    XY: el bootloader sólo regraba las páginas del sketch nuevo. El volcado
+    queda en la tarjeta; tiene un número de teléfono, no copiarlo al repo.
+    Grabar `mega-rapido` (0,5 s) y `mega-charla` (0,6 s), verificados; la
+    Terminal en `usb0` leyó las vueltas y devolvió lo mandado. Borrar el
+    programa: 0xFF sobre 248 KB en 37 s, el bootloader queda; los primeros
+    8 KB leídos de vuelta, todos 0xFF.
+
+    <p align="center"><img src="../img/photo-flasher-mega.jpg" width="300" alt="El Programador después de grabar mega-charla.hex en un Arduino Mega 2560 por USB: verificado"></p>
+  - La Pro Micro (CJMCU, ATmega32U4 con Caterina; es la placa de las
+    pruebas del host USB, con `p4os_leonardo` adentro): **el toque a 1200
+    baudios anduvo a la primera**, el bootloader volvió como otro aparato y
+    el Programador lo tomó. Detectar: ATmega32U4 (1E 95 87), AVR109
+    (Caterina). Leer los 32 KB en 2 s. Grabar la variante `rapido` (48
+    páginas, 1,2 s), verificada, y el sketch volvió solo: la Terminal leyó
+    "P4OS Leonardo rapido N" y devolvió "HOLA PRO MICRO". Borrar en 1,8 s
+    (los primeros 4 KB leídos de vuelta, 0xFF) y de nuevo su sketch.
+
+    <p align="center"><img src="../img/photo-flasher-promicro.jpg" width="300" alt="El Programador con una Pro Micro por USB: el toque a 1200 baudios, ATmega32U4 con Caterina, volcado guardado"></p>
 - [x] Programador: leer y borrar (2026-10-27, después de la 0.22.2), en la
       placa con el reloj AmoledOS del usuario (ESP32-S3 v0.2, 16 MB) por
       su propia USB-Serial-JTAG en `usb0`:

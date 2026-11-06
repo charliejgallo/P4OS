@@ -20,8 +20,8 @@ paréntesis, con qué se probó en la placa; los detalles, en
   header hasta 921600, un C3, el reloj AmoledOS de 16 MB leído y vuelto a
   grabar.)
 - **Arduino AVR por su bootloader** (F3): STK500 v1/v2 y AVR109, desde un
-  `.hex`; leer y borrar el programa. (Un Nano por USB y por el header; el
-  Mega y el Leonardo, sin probar.)
+  `.hex`; leer y borrar el programa. (Un Nano por USB y por el header, un
+  Mega 2560 y una Pro Micro por USB.)
 - **SWD** (F2): nRF52, STM32F0/F1/F2/F4/G0/G4/L4, SAMD21/D51 (y sus
   parientes D1x/D20/L2x/C2x/E5x), SAM3X/A (el Arduino Due), RP2040 y RP2350;
   grabar, verificar, leer, borrar entero y la consola RTT. (Una Pico, la
@@ -46,8 +46,8 @@ paréntesis, con qué se probó en la placa; los detalles, en
 |---|---|---|---|---|---|
 | ESP32 / ESP8266 | DevKit, NodeMCU, módulos | ROM serie (hay) | hay (placa) | hay (placa) | F1 |
 | Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, SAM3X (Due), GD32 | SWD con 2-3 cables | hay: RP2040, nRF52840 y STM32F1 (placa); STM32F0/F2/F4/G0/G4/L4, SAMD21/D51, SAM3X/A, RP2350 (sim) | hay (placa: nRF52840, STM32F1) | F2 |
-| AVR con bootloader serie | Uno, Nano, Pro Mini, Mega | STK500 v1 (optiboot) y v2 (Mega) | hay (placa: Nano; Mega, sim) | hay (placa) | F3 |
-| AVR con USB propio | Leonardo, Micro, Pro Micro | AVR109 (Caterina), toque a 1200 baudios | hay (sim) | hay (sim) | F3 |
+| AVR con bootloader serie | Uno, Nano, Pro Mini, Mega | STK500 v1 (optiboot) y v2 (Mega) | hay (placa: Nano, Mega 2560) | hay (placa) | F3 |
+| AVR con USB propio | Leonardo, Micro, Pro Micro | AVR109 (Caterina), toque a 1200 baudios | hay (placa: Pro Micro) | hay (placa) | F3 |
 | STM32 sin sonda | Blue Pill, Black Pill | bootloader serie de ST (AN3155), BOOT0 y NRST con las líneas EN/BOOT | hay (placa: Blue Pill) | hay (placa) | F4 |
 | Desde la Mac, serie | esptool, avrdude, stm32flash | puente RFC2217 / TCP crudo al puerto (placa: stm32loader, esptool, avrdude) | (la Mac) | (la Mac) | F4 |
 | Desde la Mac, SWD | OpenOCD, pyOCD, probe-rs | la placa como sonda CMSIS-DAP v2 por el USB OTG (hay, placa: con la Ekobadge) | (la Mac) | (la Mac) | F5 |
@@ -299,9 +299,11 @@ grabar de vuelta un volcado, byte por byte. Decisiones:
   un volcado lee cada página dos veces.
 - Un Arduino de 5 V por el header necesita un divisor en su TX: lo dice
   la tarjeta de conexión.
-- Sin probar: el toque a 1200 baudios en el host USB de la placa (si el
-  driver CDC-ACM manda SET_LINE_CODING y DTR como Caterina los espera, y
-  el índice en que vuelve el bootloader).
+- El toque a 1200 baudios en el host USB de la placa, probado el
+  2026-11-05 con una Pro Micro: el driver CDC-ACM manda SET_LINE_CODING y
+  DTR como Caterina los espera, el bootloader vuelve como otro aparato y el
+  Programador lo encuentra; leer, grabar y borrar, y el sketch vuelve solo
+  (`PRUEBAS-PLACA.md`).
 
 Lo planeado era:
 

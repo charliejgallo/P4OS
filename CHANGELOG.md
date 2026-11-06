@@ -23,7 +23,8 @@
 - **Tried on the board, with no change to the code:** a Blue Pill (a CKS32
   clone) by SWD and by ST's serial bootloader; an ESP32 DevKit and an
   Arduino Nano on the header, with the EN and BOOT lines, at up to 921600
-  baud; the Terminal at 460800; and the bridge from the Mac with
+  baud; a Mega 2560 and a Pro Micro (Caterina, the 1200-baud touch) on the
+  USB host; the Terminal at 460800; and the bridge from the Mac with
   stm32loader, esptool and avrdude. Wiring diagrams in
   `docs/img/bench-esp32.svg` and `docs/img/bench-nano.svg`.
 
