@@ -819,7 +819,10 @@ Que necesitan la mano del usuario o equipos:
     (1,3 s) y `charla.hex` (1,7 s) verificados página por página, leer los
     32 KB (15,5 s). La primera vez el cable de EN no estaba en RST:
     Detectar "no respondió" y el contador de `charla` siguió de largo, sin
-    reiniciarse; el diagrama lo dice. Foto en el README.
+    reiniciarse; el diagrama lo dice. Foto en el README. Desde `57d715d`
+    (en la 0.23.1) eso tiene su mensaje: con el cable de RST afuera,
+    Detectar dijo "Its program is talking: the reset does not reach it (EN
+    to RST) or it has no bootloader"; con el cable puesto, lo encontró.
   - Un Mega 2560 por USB (STK500 v2; su VID:PID lo pone primero).
   - Un Leonardo o Micro por USB: el toque a 1200 baudios, que el
     bootloader aparezca como otro dispositivo (`El bootloader apareció

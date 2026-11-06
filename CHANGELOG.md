@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.23.1 — 2026-11-05
 
 - **The U-Boot family stops consoles whose "any key" is not any.** The
   user's camera says "Hit any key" but let Ctrl+C and Enter by; it stops
