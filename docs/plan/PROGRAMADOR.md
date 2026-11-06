@@ -6,37 +6,51 @@ computadora está, prestarle sus pines como sonda. Este archivo dice qué se
 hace, en qué orden y cómo se prueba; cada fase, al terminar, pasa a
 `docs/MODULES.md` (lo que quedó) y a `PRUEBAS-PLACA.md` (lo medido).
 
-## Lo que hay hoy (0.22.2)
+## Lo que hay hoy (0.23.1)
+
+Todo publicado (las fases F1 a F5 y F7 salieron en la 0.23.0). Entre
+paréntesis, con qué se probó en la placa; los detalles, en
+`PRUEBAS-PLACA.md`.
 
 - **ESP32 y ESP8266 por serie** (`components/aos_flasher`, sobre
   esp-serial-flasher): desde `uart.b` del header con EN y BOOT, o por USB
   (CP210x, CH34x, FTDI, CDC-ACM, la USB-Serial-JTAG propia de los C3/C6/S3/H2).
   Graba carpetas de ESP-IDF (`flasher_args.json`) y `.bin` sueltos, verifica
-  por MD5. **No lee** (no hay volcado) ni borra.
-- **Arduino AVR por su bootloader** (F3, sin publicar): STK500 v1/v2 y
-  AVR109, desde un `.hex`; leer y borrar el programa.
+  por MD5, lee la flash entera y la borra. (Un DevKit por USB y por el
+  header hasta 921600, un C3, el reloj AmoledOS de 16 MB leído y vuelto a
+  grabar.)
+- **Arduino AVR por su bootloader** (F3): STK500 v1/v2 y AVR109, desde un
+  `.hex`; leer y borrar el programa. (Un Nano por USB y por el header; el
+  Mega y el Leonardo, sin probar.)
+- **SWD** (F2): nRF52, STM32F0/F1/F2/F4/G0/G4/L4, SAMD21/D51 (y sus
+  parientes D1x/D20/L2x/C2x/E5x), SAM3X/A (el Arduino Due), RP2040 y RP2350;
+  grabar, verificar, leer, borrar entero y la consola RTT. (Una Pico, la
+  Ekobadge y una Blue Pill; el resto, en el simulador.)
+- **STM32 por su bootloader serie** (F4): grabar, verificar, leer y borrar,
+  con RDP respetado. (La Blue Pill.)
+- **El puente para la Mac** (F4): RFC 2217 en el 4000 y bytes crudos en el
+  4001. (stm32loader, esptool y avrdude.)
+- **La placa como sonda CMSIS-DAP** (F5): OpenOCD, pyOCD y probe-rs depuran
+  por el conector OTG lo que está en los pines SWD. (OpenOCD, gdb y probe-rs
+  con la Ekobadge.)
+- **U-Boot por una consola serie** (F7): sólo lee la flash entera con los
+  comandos del propio U-Boot. (La cámara SC10W, dos volcados iguales.)
 - **Pico (RP2040) en BOOTSEL**: es un disco USB; copiar un `.uf2` a `/usb` lo
   graba (`docs/USB.md`). Fuera del Programador.
-- **Terminal serie**: monitor de los UART del header y los USB.
-- **SWD** (F2, sin publicar): nRF52, STM32F0/F1/F2/F4/G0/G4/L4, SAMD21/D51 (y sus
-  parientes D1x/D20/L2x/C2x/E5x), SAM3X/A (el Arduino Due), RP2040 y RP2350; grabar,
-  verificar, borrar entero y la consola RTT.
-- **STM32 por su bootloader serie** (F4, sin publicar): grabar, verificar,
-  leer y borrar, con RDP respetado.
-- **La placa como sonda CMSIS-DAP** (F5, sin publicar): OpenOCD, pyOCD y
-  probe-rs depuran por el conector OTG lo que está en los pines SWD.
+- **Terminal serie**: monitor de los UART del header (probada a 460800) y los
+  USB.
 
 ## Familias y caminos
 
 | Familia | Ejemplos | Camino | Grabar | Leer | Fase |
 |---|---|---|---|---|---|
-| ESP32 / ESP8266 | DevKit, NodeMCU, módulos | ROM serie (hay) | hay | F1 | F1 |
-| Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, SAM3X (Due), GD32 | SWD con 2-3 cables | hay: RP2040, nRF52840 y STM32F1 (placa); STM32F0/F2/F4/G0/G4/L4, SAMD21/D51, SAM3X/A, RP2350 (sim) | hay (sim) | F2 |
-| AVR con bootloader serie | Uno, Nano, Pro Mini, Mega | STK500 v1 (optiboot) y v2 (Mega) | hay (sim) | hay (sim) | F3 |
+| ESP32 / ESP8266 | DevKit, NodeMCU, módulos | ROM serie (hay) | hay (placa) | hay (placa) | F1 |
+| Cortex-M por SWD | RP2040, nRF52 (la Ekobadge), STM32, SAMD, SAM3X (Due), GD32 | SWD con 2-3 cables | hay: RP2040, nRF52840 y STM32F1 (placa); STM32F0/F2/F4/G0/G4/L4, SAMD21/D51, SAM3X/A, RP2350 (sim) | hay (placa: nRF52840, STM32F1) | F2 |
+| AVR con bootloader serie | Uno, Nano, Pro Mini, Mega | STK500 v1 (optiboot) y v2 (Mega) | hay (placa: Nano; Mega, sim) | hay (placa) | F3 |
 | AVR con USB propio | Leonardo, Micro, Pro Micro | AVR109 (Caterina), toque a 1200 baudios | hay (sim) | hay (sim) | F3 |
 | STM32 sin sonda | Blue Pill, Black Pill | bootloader serie de ST (AN3155), BOOT0 y NRST con las líneas EN/BOOT | hay (placa: Blue Pill) | hay (placa) | F4 |
 | Desde la Mac, serie | esptool, avrdude, stm32flash | puente RFC2217 / TCP crudo al puerto (placa: stm32loader, esptool, avrdude) | (la Mac) | (la Mac) | F4 |
-| Desde la Mac, SWD | OpenOCD, pyOCD, probe-rs | la placa como sonda CMSIS-DAP v2 por el USB OTG (hay, sim) | (la Mac) | (la Mac) | F5 |
+| Desde la Mac, SWD | OpenOCD, pyOCD, probe-rs | la placa como sonda CMSIS-DAP v2 por el USB OTG (hay, placa: con la Ekobadge) | (la Mac) | (la Mac) | F5 |
 | AVR sin bootloader | ATmega/ATtiny sueltos, grabar el bootloader de un Uno | ISP por `spi.a` + RESET; fusibles | F6 | F6 | F6 |
 | AVR nuevos | ATtiny 0/1/2, AVR Dx, Nano Every | UPDI por un UART (una resistencia) | F6 | F6 | F6 |
 | RP2040 / RP2350 en BOOTSEL | Pico, Pico 2 | UF2 al disco (hay) y PICOBOOT (lectura) | F6 | F6 | F6 |

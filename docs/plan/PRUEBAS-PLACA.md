@@ -37,7 +37,7 @@ se prueba.
 ### Pendientes, en resumen
 
 Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
-- [ ] **BLE** (`apps/ble`, docs/BLUETOOTH.md "The apps' scanner"). **Instalada
+- [x] **BLE** (`apps/ble`, docs/BLUETOOTH.md "The apps' scanner"). **Instalada
       el 2026-10-07** (firmware `0973f16`, por OTA). Medido: escanea (10-12
       equipos reales, ~9 paquetes/s al 30 %, ~16 al 100 %, ninguno perdido);
       el Wi-Fi sigue arriba sin pérdidas y baja de ~0,9 a ~0,7-0,8 MB/s al
@@ -135,10 +135,10 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       baja potencia: de cerca puede quemar la entrada del R820T y la placa
       se reinició con uno cerca, sin volcado: sospecha de RF en los cables
       del host USB), y que siga sonando bloqueada y con otra app adelante.
-- [ ] **Apps del taller** (los cableados en `docs/img/bench-*.svg`, que arma
+- [x] **Apps del taller** (los cableados en `docs/img/bench-*.svg`, que arma
       `tools/bench_diagrams.py`: PWM, IR, tira WS2812B y 24LC;
-      instaladas el 2026-10-05, probadas sólo en el
-      simulador): EEPROM con una 24LC256 en i2c.ext (pines 15/17,
+      instaladas el 2026-10-05, probadas en la placa salvo el CAN con
+      transceptores, que sigue abajo como pendiente): EEPROM con una 24LC256 en i2c.ext (pines 15/17,
       pull-ups de 4,7 kΩ): detectada en 0x50 y el tamaño medido
       escribiendo da 24LC256 (2026-10-05); leída entera y guardada como
       versión, editada, escrita y verificada, restaurada a la original y
@@ -174,6 +174,8 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       que los toques parecen no hacer nada; una tecla la despierta);
       Dibujo con el dedo y el mouse USB (**probado por el usuario en la
       placa, funciona bien**, confirmado el 2026-10-09).
+- [ ] CAN con dos transceptores SN65HVD230 (o parecidos) entre la placa y
+      otro nodo: la autoprueba ya anduvo; falta el bus de verdad.
 - [x] Red, pestaña Wi-Fi fluida (2026-10-06, `5362893`): los gráficos de
       canales y el nivel en vivo se dibujaban en cada cuadro del scroll;
       ahora se pintan una vez en una imagen en PSRAM cuando cambian los
@@ -270,7 +272,8 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       ni los dos reinicios del vigilante de red; el botón de reset (que
       corta la alimentación) sí, al instante. Desde ahora el registro se
       guarda en `/sdcard/logs/sin-red-N.txt` antes de reintentar: la
-      próxima vez, leerlo de la tarjeta.
+      próxima vez, leerlo de la tarjeta. **Hay tres, del 2026-10-09**
+      (`sin-red-1.txt` a `-3.txt`, ~21 KB cada uno), sin leer todavía.
 
 Hecho el 2026-10-04 (0.7.0):
 - [x] Bluetooth con el iPhone 15 Pro Max: aparece en Ajustes del iPhone
@@ -315,7 +318,7 @@ Hecho el 2026-10-04 (0.7.0):
       (2026-10-04). Radio probada en la placa por el usuario: emisoras
       nuevas en las teclas. Cámaras, sólo en el simulador con la cámara
       falsa.
-- [ ] Red guarda cada barrido en `/redes` (NDJSON, los 40 últimos) y el
+- [x] Red guarda cada barrido en `/redes` (NDJSON, los 40 últimos) y el
       portal tiene la página Red: lanzar un barrido (`/api/net`), ver los
       guardados, cambios contra el anterior, gráfico de canales, CSV.
       Barrido real en la placa hecho por el usuario (2026-10-04): anda.
@@ -446,8 +449,8 @@ Que necesitan la mano del usuario o equipos:
 - [ ] **Cartero** (`apps/cartero`, 2026-10-26): hecha y probada en el
       simulador contra `apps/cartero/tools/fake_api.py` (la colección demo:
       18 pedidos, 36 tests, en la pantalla y en el Runner del portal vía la
-      placa). Falta en la placa: un pedido por HTTPS a un servicio público
-      (el certificado, el primer apretón TLS), una respuesta grande (4 MB)
+      placa). Falta en la placa (el HTTPS a un servicio público ya anduvo,
+      abajo): una respuesta grande (4 MB)
       y cuánto tarda en el árbol JSON, el tiempo de una corrida (el
       intérprete con doble precisión por software), la página del portal
       vía la placa con otra app adelante, y la RAM interna libre antes y
@@ -493,8 +496,9 @@ Que necesitan la mano del usuario o equipos:
     servidor, que desde una Mac (`openssl s_client -tls1_2 -reconnect`)
     tampoco retomó la primera sesión (salió otra, con otro certificado,
     RSA y después ECDSA) y sí las siguientes.
-- [ ] Programador por SWD (F2, 2026-10-29, sin instalar; probado sólo en el
-      simulador contra `sim/swd_sim.c`). En la placa:
+- [x] Programador por SWD (F2, 2026-10-29): en la placa con una RP2040,
+      un nRF52840 (la Ekobadge) y un STM32F1 (la Blue Pill, más abajo); lo
+      que falta, en el ítem siguiente a éste. En la placa:
   - Medir el reloj (SWCLK) con el analizador o el osciloscopio: el lazo
     de espera de `aos_io_pulse_p4.c` apunta a ~1 MHz sin medir.
   - La RP2040 del usuario (una Pico) por el conector DEBUG a `uart.b`
@@ -628,8 +632,11 @@ Que necesitan la mano del usuario o equipos:
     de 1,27 mm para su conector; el firmware ya lo tiene (`6e5c65c`).
   - Una RP2350 (Pico 2), si aparece una: Detectar (`DPIDR 4C013477`,
     Cortex-M33) y grabar un `.uf2` que arranque (con su IMAGE_DEF).
-- [ ] El puente del Programador (F4, 2026-10-29; probado sólo en el
-      simulador con esptool y avrdude de la Mac): desde la Mac en la red
+- [ ] SWD, lo que queda: el Arduino Due (en espera de cables de 1,27 mm;
+      cómo, en el ítem de arriba), una RP2350 si aparece, y escribirle a la
+      consola RTT desde la barra de la app (por el portal anduvo).
+- [x] El puente del Programador (F4, 2026-10-29; en la placa el
+      2026-11-05 con stm32loader, esptool y avrdude): desde la Mac en la red
       de casa, `esptool --port rfc2217://p4os.local:4000 chip_id` con un
       ESP32 en `uart.b`, y `write_flash`; un Arduino con avrdude por
       `net:p4os.local:4001`.
@@ -709,7 +716,7 @@ Que necesitan la mano del usuario o equipos:
         límite es el cable, y la suma del DMA no se nota. Son byte a byte
         lo grabado (el resto, lo de `blink256.uf2`), y la consola RTT
         mostró el blink corriendo a medio segundo por vuelta.
-- [ ] La sonda con OpenOCD (`-f interface/cmsis-dap.cfg -f
+- [x] La sonda con OpenOCD (`-f interface/cmsis-dap.cfg -f
       target/rp2040.cfg`) y gdb con un breakpoint en el blink; `program`
       de OpenOCD con su algoritmo; probe-rs; y abrirla desde la fila de
       Ajustes → USB (en el simulador anduvo; en la placa se abrió por la
@@ -750,6 +757,9 @@ Que necesitan la mano del usuario o equipos:
     "libre" del puerto OTG con el host en "both" (el OTG es del host, así
     que esa fila lo apaga), con o sin sonda: si se cerró la sonda así,
     es eso.
+- [ ] La sonda, lo que queda: `program` de OpenOCD con su algoritmo (la
+      Ekobadge no se grabó, sólo se leyó), y abrirla desde la fila de
+      Ajustes → USB en vez de por la API.
 - [x] **Programador con STM32 por su bootloader serie** (F4, 2026-10-29;
       en la placa el 2026-11-05 con la Blue Pill de abajo): BOOT0 en 1 por
       el jumper, `uart.b` TX al PA10 y RX al PA9, sin EN ni BOOT (el
@@ -790,8 +800,9 @@ Que necesitan la mano del usuario o equipos:
       el `.bin` que exporta el IDE de Arduino (va solo a 0x2000 en una D21,
       0x4000 en una D51), que arranque;
       "Borrar" y ver que el bootloader UF2 sigue (doble toque al reset).
-- [ ] Programador con Arduino (F3, 2026-10-29, sin instalar; probado sólo
-      en el simulador contra `tools/fake_avr_boot.py`). En la placa:
+- [x] Programador con Arduino (F3, 2026-10-29): en la placa un Nano por
+      USB (2026-11-03) y por el header (2026-11-05); el Mega y el Leonardo,
+      en el ítem siguiente. En la placa:
   - Un Uno o un Nano por USB (`usb0`, reset por DTR): Detectar (firma y
     "optiboot 8.0" o "STK500 v1 1.16, 57600"), grabar el `.hex` de Blink,
     Monitor a 9600, Leer y Borrar el programa.
@@ -823,10 +834,10 @@ Que necesitan la mano del usuario o equipos:
     (en la 0.23.1) eso tiene su mensaje: con el cable de RST afuera,
     Detectar dijo "Its program is talking: the reset does not reach it (EN
     to RST) or it has no bootloader"; con el cable puesto, lo encontró.
-  - Un Mega 2560 por USB (STK500 v2; su VID:PID lo pone primero).
-  - Un Leonardo o Micro por USB: el toque a 1200 baudios, que el
-    bootloader aparezca como otro dispositivo (`El bootloader apareció
-    en usbN`) y que el sketch vuelva al final.
+- [ ] Arduino, lo que queda: un Mega 2560 por USB (STK500 v2; su VID:PID
+      lo pone primero), y un Leonardo o Micro por USB: el toque a 1200
+      baudios, que el bootloader aparezca como otro dispositivo (`El
+      bootloader apareció en usbN`) y que el sketch vuelva al final.
 - [x] Programador: leer y borrar (2026-10-27, después de la 0.22.2), en la
       placa con el reloj AmoledOS del usuario (ESP32-S3 v0.2, 16 MB) por
       su propia USB-Serial-JTAG en `usb0`:
@@ -979,12 +990,15 @@ Que necesitan la mano del usuario o equipos:
 - [x] USB como teclado, mouse y macro pad (2026-09-30): enumera en HS,
       los tres reports, despierta la Mac y la placa se alimenta por el OTG.
 - [x] USB como disco (2026-09-30): la tarjeta en la Mac y de vuelta.
-- [ ] Cámaras (timbre y exterior).
+- [ ] Cámaras: la de la entrada (manda H.264 Main y sólo se decodifica
+      Baseline). El timbre anda desde la 0.21.5 (arriba).
 - [ ] Ganancia del micrófono (ES7210), calentamiento del amplificador y
       latencia.
-- [ ] Riden por TTL y Rigol por la LAN, Terminal a 460800 y Programador contra
-      un ESP32.
-- [ ] HA con `wss://` real, Mosquitto real y módulos I2C reales.
+- [ ] Riden por TTL y Rigol por la LAN. (La Terminal a 460800 y el
+      Programador contra un ESP32, hechos: 2026-10-05 por USB y 2026-11-05
+      por el header.)
+- [ ] HA con `wss://` real y Mosquitto real. (Módulos I2C reales, hechos:
+      BME280, AHT10, SGP30, INA219, 24LC256.)
 - [ ] La prueba 17: la hora con una pila en H3.
 - [ ] Jugar a mano en la placa lo que no se puede tocar por el portal: Mila y
       Golf leen el táctil del panel.
@@ -1294,8 +1308,9 @@ por el Registro del portal sin cable serie)
 **Módulos**
 - [ ] Abrir y cerrar el bus I2C en cada vuelta.
 - [ ] Más de 8 dispositivos en un puerto.
-- [ ] Que los chips reales se identifiquen como supone el código (SHT4x,
-      INA219, AHT20).
+- [ ] Que los chips reales se identifiquen como supone el código: falta un
+      SHT4x y un AHT20 de verdad (el INA219 y el AHT10, que antes se tomaba
+      por AHT20, ya: 2026-10-19).
 - [ ] Precisión contra un instrumento de referencia.
 
 **Lienzo retro**

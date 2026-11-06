@@ -63,7 +63,8 @@ segundo nodo).
 - [x] Relevar la placa: hardware, pines, riesgos (HARDWARE.md).
 - [x] Relevar AmoledOS: arquitectura, 60 apps, qué es del reloj (APPS.md).
 - [x] Diseñar la interfaz (UI.md) y el sistema de módulos (EXPANSION.md).
-- [ ] Revisar este plan juntos y cerrar las preguntas abiertas (abajo).
+- [x] Revisar este plan juntos y cerrar las preguntas abiertas (abajo): cerradas al
+      empezar la Fase 1, cuando llegó la placa (2026-09-28).
 
 ### Fase 1 — Todo lo que se puede sin placa (hasta que llegue) — cerrada el 2026-09-28
 La placa llegó el 2026-09-28. Lo que falta confirmar en ella está junto en
