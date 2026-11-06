@@ -506,18 +506,29 @@ static bool leave(avr_t *a)
 
 typedef struct { int proto; uint32_t baud; } try_t;
 
-/* The Arduino and Arduino.org IDs of a Leonardo, a Micro, an Esplora and
- * their bootloaders (the low byte 0x36/0x37/0x3C, 0x80 more for the sketch),
- * and SparkFun's Pro Micro (9205/9206, 9203/9204 at 3.3 V). */
+/* The boards whose USB is the ATmega32U4's own, with Caterina: Arduino's and
+ * Arduino.org's, SparkFun's Pro Micro (9205/9206, 9203/9204 at 3.3 V) and
+ * Adafruit's Circuit Playground. *boot: this is the bootloader itself. */
 static bool caterina_ids(uint16_t vid, uint16_t pid, bool *boot)
 {
-    uint8_t lo = (uint8_t)pid;
-    if ((vid == 0x2341 || vid == 0x2A03) && (lo == 0x36 || lo == 0x37 || lo == 0x3C) && (pid >> 8 == 0x00 || pid >> 8 == 0x80)) {
-        *boot = pid >> 8 == 0x00;
+    /* The Arduino IDE's boards.txt: Leonardo 36, Micro 37 (and 237), Esplora
+     * 3C, Leonardo ETH 40, Yún 41, Yún Mini 50, Industrial 101 56, Linino
+     * One 01 (2A03 only: 2341:0001 is an Uno). The bootloader's PID has the
+     * high bit clear, the sketch's set. */
+    uint8_t lo = (uint8_t)pid, hi = (uint8_t)(pid >> 8) & 0x7F;
+    bool ours = vid == 0x2341 || vid == 0x2A03;
+    if (ours && (hi == 0x00 || (hi == 0x02 && lo == 0x37)) &&
+        (lo == 0x36 || lo == 0x37 || lo == 0x3C || lo == 0x40 || lo == 0x41 || lo == 0x50 || lo == 0x56 ||
+         (lo == 0x01 && vid == 0x2A03))) {
+        *boot = !(pid & 0x8000);
         return true;
     }
-    if (vid == 0x1B4F && pid >= 0x9203 && pid <= 0x9206) {
+    if (vid == 0x1B4F && pid >= 0x9203 && pid <= 0x9206) {      /* SparkFun Pro Micro */
         *boot = pid == 0x9203 || pid == 0x9205;
+        return true;
+    }
+    if (vid == 0x239A && (pid == 0x0011 || pid == 0x8011)) {    /* Adafruit Circuit Playground */
+        *boot = pid == 0x0011;
         return true;
     }
     return false;

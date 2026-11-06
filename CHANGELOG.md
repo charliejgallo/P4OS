@@ -7,6 +7,15 @@
   started free: the other four never counted, so the mosaic and the rest
   shared six. Tried on the Mac: ten connect, the eleventh is refused.
 
+## Unreleased
+
+- **The Programador knows every Arduino whose USB is its own chip's.** The
+  Arduino family took a Leonardo, Micro, Esplora or SparkFun Pro Micro to
+  its bootloader with the 1200-baud touch, but not a Yún, Yún Mini,
+  Leonardo ETH, Industrial 101, Linino One, the newer Micro or Adafruit's
+  Circuit Playground: their USB IDs, from the Arduino IDE's own list, are
+  in now. Tried with a Yún on the USB host: detected, read and written.
+
 ## 0.23.1 — 2026-11-05
 
 - **The U-Boot family stops consoles whose "any key" is not any.** The
