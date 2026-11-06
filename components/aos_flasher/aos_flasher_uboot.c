@@ -11,11 +11,14 @@
  * Ctrl+C between each of Enter, space, q, x and Esc, as "any key" is often
  * not any - the user's camera, an Orvibo SC10W, says "Hit any key" and let
  * 644 Ctrl+C and as many Enters by, but stops on that mix (2026-11-05). At
- * the prompt the letters cost an "Unknown command", nothing more. A prompt
+ * the prompt the letters cost an "Unknown command", nothing more. A U-Boot
+ * that names its word ("stop with 'lin'", Linino's; "Hit 'tpl'", TP-Link's)
+ * gets that word typed instead. A prompt
  * is a short line ending in "#", ">" or "=>" ("hisilicon # ",
  * "=> ", "U-Boot> "), confirmed when an Enter brings the same line back.
  * "version" must then say "U-Boot": a Linux shell's "# " is not mistaken for
- * it. A console that will not stop (no countdown, a key or a password asked
+ * it - the device was on already - and the keys go on until the user restarts
+ * it (an Arduino Yún's Linux answers at its console). A console that will not stop (no countdown, a key or a password asked
  * for) is said, and nothing more is tried. Then version, printenv (bootargs,
  * mtdparts, loadaddr), bdinfo (where the DRAM starts) and "sf probe 0"; the
  * flash's name, JEDEC ID and size come from what it and the boot log say,
@@ -32,12 +35,23 @@
  * bad character in 64 KB of md - some 256 thousand - no longer costs the
  * whole piece); three rounds at most. A piece whose
  * CRC is that of all 0xFF is not printed at all (an erased flash is mostly
- * that). A U-Boot without crc32 has each piece printed twice and compared.
+ * that). A U-Boot without crc32 has each piece voted on, line by line.
+ * Without sf (an old Atheros U-Boot, 1.1.4, as an Arduino Yún's AR9331 has;
+ * routers of its age too) the NOR is mapped into memory and md reads it
+ * there: its base is bootcmd's "bootm" address rounded down to the flash's
+ * size ("Flash: 16 MB" at boot, or mtdparts), 0x9f000000 on the Yún, and a
+ * look with md says whether anything answers there. A CPU that shows its
+ * words big-endian (a MIPS) is told apart by md.b against md.l. Such a
+ * U-Boot has no crc32 either: each piece is read twice and taken line by
+ * line where the two agree, the lines that do not printed again until two
+ * prints of each agree (read_vote).
  * At 115200 md.l moves about 3.9 characters a byte - 16 MB in some 70
  * minutes - so first the console goes faster: "setenv baudrate 921600"
  * (then 460800, 230400), which HiSilicon's U-Boot 2010.06 answers with
  * "press ENTER" at the new speed; never saveenv, so a restart brings the
- * speed back, and the job brings it back itself at the end.
+ * speed back, and the job brings it back itself at the end. Not through an
+ * Arduino's USB (a Yún's 32U4 bridging its Linux's console): the bridge's
+ * own speed stays where it is, and the console would be lost.
  *
  * The boot log and what the commands said go in a .txt beside the dump (or,
  * for a detect, on their own in firmware/volcados): that is where the
@@ -83,10 +97,14 @@ struct ub {
     uint32_t heard;                 /* bytes, all of them */
     /* what U-Boot said */
     char ver[64], soc[16], flash_name[32], flash_id[40], baudrate_env[12];
-    char bootargs[480], mtdparts[240];
+    char bootargs[480], mtdparts[240], bootcmd[200];
+    char stop_word[12];             /* the word its countdown asks for, if it names one */
     uint32_t flash_size, loadaddr, dram, ram;
-    bool has_crc, probed;
-    uint8_t *a, *b;                 /* CHUNK each */
+    uint32_t mmap;                  /* where the NOR is mapped, without sf; 0 none */
+    bool has_crc, probed, big;      /* big: md shows big-endian words */
+    bool order_known;
+    uint8_t *a, *b, *c;             /* CHUNK each */
+    uint8_t *ok;                    /* CHUNK / 16: which of md's lines two prints agree on */
 };
 
 /* -------------------------------------------------------------------------- */
@@ -247,6 +265,16 @@ static void flash_line(ub_t *s, const char *l)
     if ((p = strstr(l, "Chip:")) && sscanf(p + 5, "%u", &v) == 1 && v) s->flash_size = v << 20;
     if ((p = strstr(l, "total size:")) && sscanf(p + 11, " %u", &v) == 1 && v) s->flash_size = v << 20;
     if ((p = strstr(l, "total ")) && strstr(p, "MiB") && sscanf(p + 6, "%u", &v) == 1 && v) s->flash_size = v << 20;
+    /* an Atheros U-Boot 1.1.4: "Flash: 16 MB", "flash size 16777216, sector count = 256",
+     * "Flash Manuf Id 0xef, DeviceId0 0x40, DeviceId1 0x18" */
+    if ((p = strstr(l, "Flash:")) && sscanf(p + 6, " %u", &v) == 1 && v) {
+        const char *u = p + 6;
+        while (*u == ' ' || isdigit((unsigned char)*u)) u++;
+        if (*u == 'M') s->flash_size = v << 20;
+        else if (*u == 'k' || *u == 'K') s->flash_size = v << 10;
+    }
+    if ((p = strstr(l, "flash size ")) && sscanf(p + 11, "%u", &v) == 1 && v >= 65536) s->flash_size = v;
+    if ((p = strstr(l, "Manuf Id "))) snprintf(s->flash_id, sizeof s->flash_id, "%.39s", p + 9);
     if ((p = strstr(l, "Name:\""))) copy_word(s->flash_name, sizeof s->flash_name, p + 6);
     if ((p = strstr(l, "SF: Detected "))) copy_word(s->flash_name, sizeof s->flash_name, p + 13);
     if ((p = strstr(l, "ID:")) && strstr(l, "0x")) {
@@ -256,18 +284,38 @@ static void flash_line(ub_t *s, const char *l)
     }
 }
 
-/* "hi3518ev200" anywhere: the SoC, as HiSilicon writes it */
+/* The SoC, wherever the boot names it: HiSilicon's "hi3518ev200" (written
+ * Hi3518EV200), Atheros' and Qualcomm's "ar9331", "qca9531", MediaTek's "mt7620" */
 static void soc_from(ub_t *s, const char *l)
 {
     if (s->soc[0]) return;
-    const char *p = strcasestr(l, "hi35");
-    if (!p) p = strcasestr(l, "hi37");
+    static const char *const PRE[] = { "hi35", "hi37", "ar93", "ar91", "ar71", "ar72", "qca9", "mt76" };
+    const char *p = NULL;
+    for (size_t i = 0; i < sizeof PRE / sizeof PRE[0] && !p; i++) {
+        p = strcasestr(l, PRE[i]);
+        if (p && (p > l && isalnum((unsigned char)p[-1]))) p = NULL;      /* inside a longer word */
+    }
     if (!p) return;
     size_t k = 0;
-    s->soc[k++] = 'H';
-    s->soc[k++] = 'i';
-    for (p += 2; isalnum((unsigned char)*p) && k + 1 < sizeof s->soc; p++) s->soc[k++] = (char)toupper((unsigned char)*p);
+    bool hi = !strncasecmp(p, "hi", 2);
+    for (; isalnum((unsigned char)*p) && k + 1 < sizeof s->soc; p++, k++)
+        s->soc[k] = hi && k == 1 ? 'i' : (char)toupper((unsigned char)*p);
     s->soc[k] = 0;
+}
+
+/* "autoboot in 4 seconds (stop with 'lin')", "Hit 'tpl' to stop autoboot":
+ * the word in quotes, when the line is about stopping */
+static void stop_word_from(ub_t *s, const char *l)
+{
+    if (s->stop_word[0] || !strcasestr(l, "boot") ||
+        !(strcasestr(l, "stop") || strcasestr(l, "hit") || strcasestr(l, "type"))) return;
+    const char *q = strchr(l, '\'');
+    if (!q) return;
+    size_t k = 0;
+    for (q++; isalnum((unsigned char)*q) && k + 1 < sizeof s->stop_word; q++) s->stop_word[k++] = *q;
+    if (*q != '\'' || k < 2) return;
+    s->stop_word[k] = 0;
+    fl_logf(L_INFO, _("Pide que se escriba \"%s\" para frenar: se lo escribo"), s->stop_word);
 }
 
 /* Every line of the boot, and of every command but md */
@@ -276,6 +324,7 @@ static void any_line(ub_t *s, const char *l, void *ctx)
     (void)ctx;
     if (strcasestr(l, "autoboot") || strcasestr(l, "any key")) s->saw_countdown = true;
     if (strstr(l, "Starting kernel") || strstr(l, "Linux version") || strstr(l, "Uncompressing Linux")) s->saw_linux = true;
+    stop_word_from(s, l);
     flash_line(s, l);
     soc_from(s, l);
 }
@@ -298,6 +347,7 @@ static void env_line(ub_t *s, const char *l, void *ctx)
     if (!strncmp(l, "bootargs=", 9)) snprintf(s->bootargs, sizeof s->bootargs, "%s", l + 9);
     else if (!strncmp(l, "mtdparts=", 9)) snprintf(s->mtdparts, sizeof s->mtdparts, "%s", l + 9);
     else if (!strncmp(l, "loadaddr=", 9)) s->loadaddr = (uint32_t)strtoul(l + 9, NULL, 16);
+    else if (!strncmp(l, "bootcmd=", 8)) snprintf(s->bootcmd, sizeof s->bootcmd, "%s", l + 8);
     else if (!strncmp(l, "baudrate=", 9)) snprintf(s->baudrate_env, sizeof s->baudrate_env, "%.11s", l + 9);
 }
 
@@ -371,10 +421,13 @@ static bool stop_autoboot(ub_t *s)
     fl_logf(L_INFO, "%s", _("Prendé o reiniciá el aparato: se le frena el arranque"));
     uint64_t end = aos_hal_uptime_ms() + STOP_MS;
     static const char KEYS[] = { 0x03, '\r', 0x03, ' ', 0x03, 'q', 0x03, 'x', 0x03, 0x1B };
+    char other[PROMPT_MAX] = "";    /* a prompt that answered, but not as U-Boot */
     for (unsigned k = 0; !fl_cancel && aos_hal_uptime_ms() < end; k++) {
-        tx(s, &KEYS[k % sizeof KEYS], 1);
+        stop_word_from(s, s->cur);  /* a countdown line may not have ended yet */
+        if (s->stop_word[0]) tx(s, s->stop_word, (int)strlen(s->stop_word));
+        else tx(s, &KEYS[k % sizeof KEYS], 1);
         pump(s, 80, 0, any_line, NULL);
-        if (!prompt_like(s->cur)) continue;
+        if (!prompt_like(s->cur) || !strcmp(s->cur, other)) continue;
         /* settled, and an Enter brings the same line back */
         char cand[PROMPT_MAX];
         snprintf(cand, sizeof cand, "%s", s->cur);
@@ -385,16 +438,25 @@ static bool stop_autoboot(ub_t *s)
             pump(s, 300, 120, any_line, NULL);
             if (s->lines_in && !strcmp(s->cur, cand)) {
                 snprintf(s->prompt, sizeof s->prompt, "%s", cand);
-                return true;
+                /* U-Boot's, or the Linux of a device that was on already */
+                if (run_cmd(s, "version", 2000, version_line, NULL) && s->ver[0]) return true;
+                fl_logf(L_WARN, _("\"%s\" no es U-Boot (¿su Linux?): reiniciá el aparato, sigo esperando"), cand);
+                snprintf(other, sizeof other, "%s", cand);
+                s->prompt[0] = 0;
+                break;
             }
         }
     }
     if (fl_cancel) return false;
+    if (other[0]) return fl_fail(_("Sólo contestó \"%s\", que no es U-Boot: reinicialo mientras se lo frena"), other);
     if (s->saw_linux) return fl_fail("%s", _("Arrancó sin dejarse frenar: la consola puede estar cerrada (queda la pinza SOIC8)"));
     if (s->saw_countdown) return fl_fail("%s", _("Vi la cuenta del autoboot pero no se frenó: puede pedir otra tecla o una clave"));
     if (s->heard) return fl_fail(_("Llegaron %u bytes sin un prompt: ¿la velocidad no es %u, o falta GND?"), (unsigned)s->heard, (unsigned)s->baud);
     return fl_fail("%s", _("No llegó nada: revisá TX/RX cruzados, GND y que el aparato se haya prendido"));
 }
+
+static bool detect_order(ub_t *s, uint32_t addr);
+static uint32_t find_mmap(ub_t *s);
 
 static bool read_info(ub_t *s)
 {
@@ -417,7 +479,9 @@ static bool read_info(ub_t *s)
     crc_t c = { 0, false, false };
     run_cmd(s, cmd, 2000, crc_line, &c);
     s->has_crc = c.got;
+    if (!s->probed && (s->mmap = find_mmap(s)) != 0) detect_order(s, s->mmap);
     if (!s->soc[0] && strcasestr(s->prompt, "hisilicon")) snprintf(s->soc, sizeof s->soc, "HiSilicon");
+    if (!s->soc[0] && !strncmp(s->prompt, "ar7", 3)) snprintf(s->soc, sizeof s->soc, "Atheros");
 
     fl_lock();
     fl_st.chip_known = true;
@@ -434,7 +498,8 @@ static bool read_info(ub_t *s)
     if (s->mtdparts[0]) fl_logf(L_INFO, "mtdparts %.80s", s->mtdparts);
     fl_logf(L_INFO, _("Prompt \"%s\", RAM de trabajo 0x%08X, %s"), s->prompt, (unsigned)s->ram,
             s->has_crc ? _("con crc32") : _("sin crc32: cada pedazo se lee dos veces"));
-    if (!s->probed) fl_logf(L_WARN, "%s", _("sf probe 0 no anduvo: la flash no se puede leer por acá"));
+    if (s->mmap) fl_logf(L_OK, _("Sin sf: la flash está mapeada en 0x%08X y se lee con md"), (unsigned)s->mmap);
+    else if (!s->probed) fl_logf(L_WARN, "%s", _("sf probe 0 no anduvo: la flash no se puede leer por acá"));
     return true;
 }
 
@@ -487,6 +552,14 @@ static bool switch_to(ub_t *s, uint32_t b, bool *lost)
 static bool go_fast(ub_t *s)
 {
     if (J.opts.baud && J.opts.baud <= s->baud) return true;
+    /* An Arduino's own USB is a bridge (a Yún's 32U4 to its Linux's console):
+     * its speed toward the device does not follow ours, and a U-Boot moved
+     * to another one would be lost */
+    uint16_t vid = 0, pid = 0;
+    if (s->usb && aos_hal_usb_serial_ids(atoi(J.port + 3), &vid, &pid) && (vid == 0x2341 || vid == 0x2A03)) {
+        fl_logf(L_INFO, "%s", _("Por el USB de un Arduino (un puente) la velocidad de la consola no se cambia"));
+        return true;
+    }
     static const uint32_t TRY[] = { 921600, 460800, 230400 };
     for (size_t i = 0; i < sizeof TRY / sizeof TRY[0]; i++) {
         uint32_t b = J.opts.baud ? J.opts.baud : TRY[i];
@@ -526,7 +599,6 @@ typedef struct {
  * is not that, or out of the range, is not taken */
 static void md_line(ub_t *s, const char *l, void *ctx)
 {
-    (void)s;
     md_t *m = ctx;
     char *e;
     unsigned long addr = strtoul(l, &e, 16);
@@ -544,29 +616,90 @@ static void md_line(ub_t *s, const char *l, void *ctx)
     if (k != 4 && addr + 4u * (uint32_t)k != m->base + m->n) return;     /* short only at the end */
     for (int i = 0; i < k; i++) {
         uint8_t *d = m->buf + (addr - m->base) + 4 * i;
-        d[0] = (uint8_t)w[i];
-        d[1] = (uint8_t)(w[i] >> 8);
-        d[2] = (uint8_t)(w[i] >> 16);
-        d[3] = (uint8_t)(w[i] >> 24);
+        for (int j = 0; j < 4; j++) d[s->big ? 3 - j : j] = (uint8_t)(w[i] >> (8 * j));
     }
     m->got += (uint32_t)k;
 }
 
-/* The RAM at ram+off, n bytes, into buf+off */
-static bool md_read(ub_t *s, uint8_t *buf, uint32_t off, uint32_t n)
+/* n bytes of the device's memory at addr, into buf */
+static bool md_at(ub_t *s, uint8_t *buf, uint32_t addr, uint32_t n)
 {
-    md_t m = { buf + off, s->ram + off, n, 0 };
+    md_t m = { buf, addr, n, 0 };
     char cmd[48];
-    snprintf(cmd, sizeof cmd, "md.l 0x%x 0x%x", (unsigned)(s->ram + off), (unsigned)(n / 4));
+    snprintf(cmd, sizeof cmd, "md.l 0x%x 0x%x", (unsigned)addr, (unsigned)(n / 4));
     return run_cmd(s, cmd, 3000, md_line, &m);
 }
 
-/* U-Boot's CRC-32 of the RAM at ram+off */
-static bool crc_of(ub_t *s, uint32_t off, uint32_t n, uint32_t *out)
+typedef struct { uint8_t b[16]; uint32_t base; int got; } mdb_t;
+
+/* "9f000000: 10 00 00 ff ed 65 e0 7a ..." - md.b's first line */
+static void mdb_line(ub_t *s, const char *l, void *ctx)
+{
+    (void)s;
+    mdb_t *m = ctx;
+    char *e;
+    if (strtoul(l, &e, 16) != m->base || e - l != 8 || *e != ':' || m->got) return;
+    for (const char *p = e + 1; m->got < 16 && p[0] == ' ' && isxdigit((unsigned char)p[1]); p += 3) {
+        if (!isxdigit((unsigned char)p[2]) || (p[3] && p[3] != ' ')) break;
+        m->b[m->got++] = (uint8_t)strtoul((char[]){ p[1], p[2], 0 }, NULL, 16);
+    }
+}
+
+/* md.b against md.l at addr: whether md's words are big-endian (a MIPS).
+ * False when it cannot tell: 16 bytes each word of which reads the same
+ * both ways (zeros, 0xFF) say nothing. */
+static bool detect_order(ub_t *s, uint32_t addr)
+{
+    char cmd[48];
+    mdb_t b = { { 0 }, addr, 0 };
+    snprintf(cmd, sizeof cmd, "md.b 0x%x 0x10", (unsigned)addr);
+    if (!run_cmd(s, cmd, 2000, mdb_line, &b) || b.got < 16) return false;
+    uint8_t w[16];
+    bool was = s->big;
+    s->big = false;
+    md_t m = { w, addr, 16, 0 };
+    snprintf(cmd, sizeof cmd, "md.l 0x%x 4", (unsigned)addr);
+    bool ok = run_cmd(s, cmd, 2000, md_line, &m) && m.got == 4;
+    s->big = was;
+    if (!ok) return false;
+    bool same = !memcmp(w, b.b, 16), swapped = true, sym = true;
+    for (int i = 0; i < 16; i++) {
+        if (w[i] != b.b[(i & ~3) + 3 - (i & 3)]) swapped = false;
+        if (b.b[i] != b.b[(i & ~3) + 3 - (i & 3)]) sym = false;
+    }
+    if (sym || same == swapped) return false;
+    s->big = swapped;
+    s->order_known = true;
+    if (s->big) fl_logf(L_INFO, "%s", _("md muestra las palabras en big-endian (un MIPS): se dan vuelta"));
+    return true;
+}
+
+/* Where the NOR is mapped, for a U-Boot without sf: bootcmd's first address
+ * in a window where SoCs map their boot flash (Atheros/Qualcomm 0x9f/0xbf,
+ * Broadcom 0xbfc, Ralink/MediaTek 0xbc, physical 0x1f/0x1c), rounded down to
+ * the flash's size; then something must answer to md there. */
+static uint32_t find_mmap(ub_t *s)
+{
+    if (!s->flash_size || (s->flash_size & (s->flash_size - 1))) return 0;
+    for (const char *p = s->bootcmd; (p = strstr(p, "0x")); p += 2) {
+        uint32_t a = (uint32_t)strtoul(p, NULL, 16), top = a >> 24;
+        if (top != 0x9F && top != 0xBF && top != 0xBC && top != 0x1F && top != 0x1C) continue;
+        uint32_t base = a & ~(s->flash_size - 1);
+        uint8_t w[16];
+        md_t m = { w, base, 16, 0 };
+        char cmd[48];
+        snprintf(cmd, sizeof cmd, "md.l 0x%x 4", (unsigned)base);
+        if (run_cmd(s, cmd, 2000, md_line, &m) && m.got == 4) return base;
+    }
+    return 0;
+}
+
+/* U-Boot's CRC-32 of the device's memory at addr */
+static bool crc_at(ub_t *s, uint32_t addr, uint32_t n, uint32_t *out)
 {
     char cmd[48];
     crc_t c = { 0, false, false };
-    snprintf(cmd, sizeof cmd, "crc32 0x%x 0x%x", (unsigned)(s->ram + off), (unsigned)n);
+    snprintf(cmd, sizeof cmd, "crc32 0x%x 0x%x", (unsigned)addr, (unsigned)n);
     if (!run_cmd(s, cmd, 5000, crc_line, &c) || !c.got) return false;
     *out = c.crc;
     return true;
@@ -581,35 +714,83 @@ static void sf_line(ub_t *s, const char *l, void *ctx)
 
 #define PART 4096                    /* what is printed again when a piece's CRC is wrong */
 
-/* One piece, read until it is right (three rounds at most) */
+/* Without crc32: a vote, line by line (md's 16 bytes). The n bytes at addr
+ * are printed twice, into a (started at 0x00) and b (at 0xFF), so a line
+ * that did not come cannot agree; a line is taken when two prints of it
+ * agree. Where none do yet, only the span from the first such line to the
+ * last of each 4 KB is printed again (into c, started at 0x5A), and agrees
+ * with a or b or takes the place of the older of the two. A garbled
+ * character costs that line again, not the piece: with one in 20000 bytes
+ * of md, two clean prints of 4 KB (19500 characters each) are rare. */
+#define VLINE 16
+static bool read_vote(ub_t *s, uint32_t addr, uint32_t n)
+{
+    uint32_t lines = n / VLINE, redone = 0;
+    memset(s->a, 0x00, n);
+    memset(s->b, 0xFF, n);
+    md_at(s, s->a, addr, n);
+    md_at(s, s->b, addr, n);
+    uint8_t *ok = s->ok;
+    for (uint32_t i = 0; i < lines; i++) ok[i] = !memcmp(s->a + i * VLINE, s->b + i * VLINE, VLINE);
+    for (int round = 0; round < 8 && !fl_cancel; round++) {
+        bool left = false;
+        for (uint32_t o = 0; o < n && !fl_cancel; o += PART) {
+            uint32_t l0 = o / VLINE, l1 = (o + PART < n ? o + PART : n) / VLINE, f = l1, t = l0;
+            for (uint32_t i = l0; i < l1; i++) if (!ok[i]) { if (i < f) f = i; t = i + 1; }
+            if (f >= t) continue;
+            uint32_t from = f * VLINE, len = (t - f) * VLINE;
+            memset(s->c + from, 0x5A, len);
+            md_at(s, s->c + from, addr + from, len);
+            redone++;
+            for (uint32_t i = f; i < t; i++) {
+                if (ok[i]) continue;
+                uint8_t *A = s->a + i * VLINE, *B = s->b + i * VLINE, *C = s->c + i * VLINE;
+                if (!memcmp(C, A, VLINE)) ok[i] = 1;
+                else if (!memcmp(C, B, VLINE)) { memcpy(A, B, VLINE); ok[i] = 1; }
+                else memcpy(round & 1 ? A : B, C, VLINE);       /* the older guess out */
+                left |= !ok[i];
+            }
+        }
+        if (!left) break;
+    }
+    for (uint32_t i = 0; i < lines; i++) if (!ok[i]) return false;
+    if (redone) fl_logf(L_INFO, _("0x%X: %u tramos repetidos hasta que dos lecturas coincidieron"), (unsigned)addr, (unsigned)redone);
+    return true;
+}
+
+/* One piece, read until it is right (three rounds at most): from the RAM
+ * after sf read, or straight from the mapped NOR */
 static bool read_piece(ub_t *s, uint32_t off, uint32_t n)
 {
     char cmd[64];
     for (int t = 0; t < 3 && !fl_cancel; t++) {
         if (t) fl_logf(L_WARN, _("0x%X: otra vez (%d)"), (unsigned)off, t + 1);
-        bool bad = false;
-        snprintf(cmd, sizeof cmd, "sf read 0x%x 0x%x 0x%x", (unsigned)s->ram, (unsigned)off, (unsigned)n);
-        if (!run_cmd(s, cmd, 5000, sf_line, &bad) || bad) continue;
+        uint32_t src = s->mmap ? s->mmap + off : s->ram;
+        if (!s->mmap) {
+            bool bad = false;
+            snprintf(cmd, sizeof cmd, "sf read 0x%x 0x%x 0x%x", (unsigned)s->ram, (unsigned)off, (unsigned)n);
+            if (!run_cmd(s, cmd, 5000, sf_line, &bad) || bad) continue;
+            if (!s->order_known) detect_order(s, s->ram);          /* the flash's bytes, now in the RAM */
+        }
         if (!s->has_crc) {
-            /* twice, and the same both times */
-            if (md_read(s, s->a, 0, n) && md_read(s, s->b, 0, n) && !memcmp(s->a, s->b, n)) return true;
+            if (read_vote(s, src, n)) return true;
             continue;
         }
         uint32_t want;
-        if (!crc_of(s, 0, n, &want)) continue;
+        if (!crc_at(s, src, n, &want)) continue;
         if (want == crc32_ff(n)) {
             memset(s->a, 0xFF, n);
             return true;
         }
         memset(s->a, 0, n);
-        md_read(s, s->a, 0, n);
+        md_at(s, s->a, src, n);
         if (crc32_add(0, s->a, n) == want) return true;
         /* which 4 KB came wrong, and those again */
         uint32_t redone = 0;
         for (uint32_t o = 0; o < n && !fl_cancel; o += PART) {
             uint32_t m = n - o < PART ? n - o : PART, w;
-            if (!crc_of(s, o, m, &w)) break;
-            for (int k = 0; k < 4 && crc32_add(0, s->a + o, m) != w && !fl_cancel; k++, redone++) md_read(s, s->a, o, m);
+            if (!crc_at(s, src + o, m, &w)) break;
+            for (int k = 0; k < 4 && crc32_add(0, s->a + o, m) != w && !fl_cancel; k++, redone++) md_at(s, s->a + o, src + o, m);
         }
         if (redone) fl_logf(L_INFO, _("0x%X: %u pedazos de 4 KB repetidos"), (unsigned)off, (unsigned)redone);
         if (crc32_add(0, s->a, n) == want) return true;
@@ -647,7 +828,7 @@ static void json_clean(char *out, size_t cap, const char *in)
 
 static bool read_flash(ub_t *s)
 {
-    if (!s->probed) return fl_fail("%s", _("Sin sf probe no se puede leer la flash por U-Boot"));
+    if (!s->probed && !s->mmap) return fl_fail("%s", _("Sin sf probe no se puede leer la flash por U-Boot"));
     uint32_t from = J.opts.read_from, len = J.opts.read_len;
     if (!s->flash_size && !len) return fl_fail("%s", _("No se sabe el tamaño de la flash: indicá cuánto leer"));
     if (s->flash_size && from >= s->flash_size)
@@ -673,7 +854,8 @@ static bool read_flash(ub_t *s)
     }
     s->logging = true;
     if (fl_cancel) { fl_dump_close(false, false, NULL); return false; }
-    fl_logf(L_INFO, _("%u pedazos de 64 KB vacíos (todo 0xFF), sin imprimir"), (unsigned)blank);
+    if (s->has_crc) fl_logf(L_INFO, _("%u pedazos de 64 KB vacíos (todo 0xFF), sin imprimir"), (unsigned)blank);
+    else fl_logf(L_INFO, _("%u pedazos de 64 KB vacíos (todo 0xFF)"), (unsigned)blank);
     char *extra = malloc(1024);
     if (extra) {
         char m[240], b[480], v[64], fn[32], id[40];
@@ -683,7 +865,8 @@ static bool read_flash(ub_t *s)
         json_clean(fn, sizeof fn, s->flash_name);
         json_clean(id, sizeof id, s->flash_id);
         snprintf(extra, 1024, "\"family\":\"uboot\",\"uboot\":\"%s\",\"flash\":\"%s\",\"flash_id\":\"%s\",\"mtdparts\":\"%s\","
-                 "\"bootargs\":\"%s\",\"ram\":\"0x%08x\",\"crc32\":%s", v, fn, id, m, b, (unsigned)s->ram, s->has_crc ? "true" : "false");
+                 "\"bootargs\":\"%s\",\"ram\":\"0x%08x\",\"mapped\":\"0x%08x\",\"big_endian\":%s,\"crc32\":%s",
+                 v, fn, id, m, b, (unsigned)s->ram, (unsigned)s->mmap, s->big ? "true" : "false", s->has_crc ? "true" : "false");
     }
     fl_dump_close(true, true, extra);
     free(extra);
@@ -736,7 +919,9 @@ bool fl_uboot_run(void)
     s->log = malloc(LOG_CAP);
     s->a = malloc(CHUNK);
     s->b = malloc(CHUNK);
-    bool ok = s->log && s->a && s->b ? run(s) : fl_fail("%s", _("Sin memoria"));
+    s->c = malloc(CHUNK);
+    s->ok = malloc(CHUNK / VLINE);
+    bool ok = s->log && s->a && s->b && s->c && s->ok ? run(s) : fl_fail("%s", _("Sin memoria"));
     if (s->u) {
         bool cancelled = fl_cancel;
         fl_cancel = false;
@@ -750,6 +935,8 @@ bool fl_uboot_run(void)
     free(s->log);
     free(s->a);
     free(s->b);
+    free(s->c);
+    free(s->ok);
     free(s);
     return ok;
 }

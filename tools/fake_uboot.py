@@ -7,6 +7,7 @@ aos_flasher_uboot.c) without a camera.
     tools/fake_uboot.py serve [--flash-mb 16] [--bootdelay 1] [--no-crc]
                               [--locked] [--noise 0.0005] [--max-baud 921600]
                               [--flash-out flash.bin]
+                              [--atheros [--stop-word lin] [--linux-first]]
 
 serve opens a pty and prints its path; run the simulator with
 P4_SIM_UART_B=<that path>. It plays U-Boot 2010.06 as HiSilicon ships it on a
@@ -45,6 +46,15 @@ kill -USR1 <its pid> unplugs it: the next byte that comes in powers it on.
 --noise P garbles each byte of md's output with probability P, to exercise
 the Programador's per-chunk CRC and its retries.
 
+--atheros plays an Arduino Yún's Atheros AR9331 instead (2026-11-05): its
+U-Boot 1.1.4, prompt "ar7240> ", which has no sf, no crc32 and no bdinfo; its
+16 MB NOR is mapped at 0x9f000000 (and 0xbf000000) and read with md, and md
+shows big-endian words, as on a MIPS. It says "Flash: 16 MB" at boot, and its
+bootcmd is "bootm 0x9fea0000". "Hit any key" stops it with any key, or, with
+--stop-word lin, only that word typed (Linino's "stop with 'lin'"; TP-Link's
+routers ask "tpl"). --linux-first starts it already booted, at a Linux shell
+("root@Arduinoyun1:/# "), until kill -USR1 restarts it.
+
 The flash is made up, laid out as the SC10W's (mtdparts in bootargs):
 512K boot (U-Boot), 2560K kernel (a uImage at 0x80000), 12800K rootfs (a
 jffs2 at 0x300000, mostly erased) and 512K config - most of it 0xFF. --flash-out
@@ -67,6 +77,10 @@ import zlib
 
 PROMPT = b"hisilicon # "
 VERSION = "U-Boot 2010.06-dirty (Feb 27 2016 - 14:46:03)"
+AR_PROMPT = b"ar7240> "
+AR_VERSION = "U-Boot 1.1.4-gd995931a-dirty (Aug  7 2013 - 16:16:04)"
+AR_FLASH = (0x9f000000, 0xbf000000)                 # the NOR, cached and uncached
+SHELL = "root@Arduinoyun1:/# "
 RAM_BASE, RAM_SIZE = 0x80000000, 64 << 20
 
 
@@ -94,6 +108,30 @@ def make_flash(mb):
     return f
 
 
+def make_flash_ar():
+    rnd = random.Random(9331)
+    f = bytearray(b"\xff" * (16 << 20))
+    boot = bytearray(rnd.randbytes(0x28000))
+    boot[0:4] = b"\x10\x00\x00\xff"                # a MIPS branch, as the Yún's
+    boot[0x200:0x200 + len(AR_VERSION)] = AR_VERSION.encode()
+    f[0:len(boot)] = boot
+    root = rnd.randbytes(0x600000)
+    f[0x50000:0x50000 + len(root)] = root
+    kernel = bytearray(rnd.randbytes(0x100000))
+    kernel[0:4] = b"\x27\x05\x19\x56"
+    f[0xEA0000:0xEA0000 + len(kernel)] = kernel
+    f[0xFF0000:0xFF0010] = bytes.fromhex("b4218a000000b4218a000001ffffffff")    # ART: the MACs
+    return f
+
+
+AR_ENV = [
+    "bootargs=console=ttyS0,115200 root=31:02 rootfstype=squashfs init=/sbin/init "
+    "mtdparts=ar7240-nor0:256k(u-boot),64k(u-boot-env),14656k(rootfs),1280k(uImage),64k(nvram),64k(ART)",
+    "bootcmd=bootm 0x9fea0000", "bootdelay=4", "baudrate=115200", "ethaddr=0xb4:0x21:0x8a:0x00:0x00:0x10",
+    "ipaddr=192.168.1.2", "serverip=192.168.1.1", "stdin=serial", "stdout=serial", "stderr=serial", "ethact=eth0",
+]
+
+
 def ENV(mb):
     root = (mb << 10) - 512 - 2560 - 512
     return [
@@ -109,8 +147,9 @@ def ENV(mb):
 class Camera:
     def __init__(self, a, master, slave):
         self.a, self.master, self.slave = a, master, slave
-        self.flash = make_flash(a.flash_mb)
-        self.env = dict(e.split("=", 1) for e in ENV(a.flash_mb))
+        self.flash = make_flash_ar() if a.atheros else make_flash(a.flash_mb)
+        self.env = dict(e.split("=", 1) for e in (AR_ENV if a.atheros else ENV(a.flash_mb)))
+        self.typed = b""
         self.ram = bytearray(RAM_SIZE)
         self.baud = 115200
         self.state = "off"                          # off, countdown, prompt, linux, baudwait
@@ -159,6 +198,23 @@ class Camera:
     # -- booting ----------------------------------------------------------------
 
     def power_on(self):
+        if self.a.atheros:
+            self.baud = 115200
+            self.prompt_text = AR_PROMPT
+            self.typed = b""
+            self.send(f"\n\n{AR_VERSION}\n\nArduino Yun (ar9331) U-boot\n\nDRAM:  64 MB\n"
+                      "Top of RAM usable for U-Boot at: 84000000\nNow running in RAM - U-Boot at: 83fdc000\n"
+                      "Flash Manuf Id 0xef, DeviceId0 0x40, DeviceId1 0x18\nflash size 16777216, sector count = 256\n"
+                      "Flash: 16 MB\nUsing default environment\n\nIn:    serial\nOut:   serial\nErr:   serial\n"
+                      "Net:   ag7240_enet_initialize...\neth0, eth1\n")
+            if self.a.stop_word:
+                self.send(f"autoboot in {self.a.bootdelay} seconds (stop with '{self.a.stop_word}')...\n")
+            else:
+                self.send(f"Hit any key to stop autoboot: {self.a.bootdelay:2d} ")
+            self.state = "countdown"
+            self.until = time.monotonic() + self.a.bootdelay
+            log("the Yún's U-Boot, counting down")
+            return
         mb = self.a.flash_mb
         self.baud = 115200
         self.probed = False
@@ -190,6 +246,13 @@ class Camera:
         log("booted, counting down")
 
     def boot_linux(self):
+        if self.a.atheros:
+            self.send("## Booting image at 9fea0000 ...\nStarting kernel ...\n\n"
+                      "Linux version 3.8.3 (mips) #8 Mon Aug 19 16:22:39 CEST 2013\n"
+                      "Please press Enter to activate this console.\n\n" + SHELL)
+            self.state = "shell"
+            log("autoboot not stopped: Linux")
+            return
         if self.openipc:
             if not self.nor16:
                 self.send("## Booting kernel from Legacy Image at 82000000 ...\n   Image Name:   Linux-4.9.37-hi3518ev200\n"
@@ -228,6 +291,29 @@ class Camera:
             self.power_on()
             return
         for c in data:
+            if self.state == "shell":                   # a Linux shell: a line is a command it does not know
+                if c == 0x0D:
+                    cmd = self.line.decode(errors="replace").strip()
+                    self.line.clear()
+                    self.send("\n" + (f"-ash: {cmd}: not found\n" if cmd else "") + SHELL)
+                    if cmd:
+                        self.count("shell " + cmd)
+                elif c == 0x03:
+                    self.line.clear()
+                    self.send("^C\n" + SHELL)
+                elif 32 <= c < 127:
+                    self.line.append(c)
+                    self.send(bytes([c]))
+                continue
+            if self.state == "countdown" and self.a.atheros:
+                if self.a.stop_word:
+                    self.typed = (self.typed + bytes([c]))[-len(self.a.stop_word):]
+                    if self.typed != self.a.stop_word.encode():
+                        continue
+                self.send("\b\b\b 0 \n")
+                log("autoboot stopped")
+                self.prompt()
+                continue
             if self.state == "countdown":
                 if not (self.a.any_key or self.openipc) and bytes([c]) != self.a.stop_key.encode().decode("unicode_escape").encode("latin-1"):
                     continue                        # "any key" is one key here
@@ -283,8 +369,11 @@ class Camera:
         name = w[0]
         self.count(name if name != "sf" or len(w) < 2 else "sf " + w[1])
         try:
-            if name == "version":
-                self.send("\nU-Boot 2010.06 (Oct 04 2026 - 11:27:52)\n" if self.openipc else f"\n{VERSION}\n")
+            if self.a.atheros and (name in ("sf", "crc32", "bdinfo", "flinfo") or name.startswith("crc")):
+                self.send(f"Unknown command '{name}' - try 'help'\n")
+            elif name == "version":
+                self.send(f"\n{AR_VERSION}\n" if self.a.atheros else
+                          "\nU-Boot 2010.06 (Oct 04 2026 - 11:27:52)\n" if self.openipc else f"\n{VERSION}\n")
             elif name == "printenv":
                 for k, v in self.env.items():
                     self.send(f"{k}={v}\n")
@@ -407,17 +496,22 @@ class Camera:
         a = self.num(w[1])
         count = self.num(w[2]) if len(w) > 2 else 64
         n = count * size
-        if not (RAM_BASE <= a and a + n <= RAM_BASE + RAM_SIZE):
+        fbase = next((b for b in AR_FLASH if b <= a < b + len(self.flash)), None) if self.a.atheros else None
+        if fbase is not None and a + n <= fbase + len(self.flash):
+            buf = self.flash[a - fbase:a - fbase + n]
+        elif RAM_BASE <= a and a + n <= RAM_BASE + RAM_SIZE:
+            buf = self.ram[a - RAM_BASE:a - RAM_BASE + n]
+        else:
             self.send("Bad address\n")
             return
-        buf = self.ram[a - RAM_BASE:a - RAM_BASE + n]
+        e = ">" if self.a.atheros else "<"           # a MIPS shows its words big-endian
         out = []
         for o in range(0, n, 16):
             row = buf[o:o + 16]
             if size == 4:
-                cells = " ".join(f"{v:08x}" for v in struct.unpack(f"<{len(row) // 4}I", row))
+                cells = " ".join(f"{v:08x}" for v in struct.unpack(f"{e}{len(row) // 4}I", row))
             elif size == 2:
-                cells = " ".join(f"{v:04x}" for v in struct.unpack(f"<{len(row) // 2}H", row))
+                cells = " ".join(f"{v:04x}" for v in struct.unpack(f"{e}{len(row) // 2}H", row))
             else:
                 cells = " ".join(f"{v:02x}" for v in row)
             asc = "".join(chr(c) if 32 <= c < 127 else "." for c in row)
@@ -443,6 +537,8 @@ def serve(a):
     os.set_blocking(master, False)
     path = os.ttyname(slave)
     cam = Camera(a, master, slave)
+    if a.linux_first:
+        cam.state = "shell"
     if a.flash_out:
         open(a.flash_out, "wb").write(cam.flash)
     print(f"PTY {path}", flush=True)
@@ -457,6 +553,10 @@ def serve(a):
     signal.signal(signal.SIGINT, bye)
 
     def unplug(*_):                                 # kill -USR1: the camera unplugged; the next byte powers it on
+        if a.atheros:                               # the Yún: its reset button, it boots at once
+            log("reset")
+            cam.power_on()
+            return
         cam.state = "off"
         log("unplugged")
     signal.signal(signal.SIGUSR1, unplug)
@@ -488,6 +588,9 @@ def main():
     s.add_argument("--noise", type=float, default=0.0)
     s.add_argument("--max-baud", type=int, default=921600)
     s.add_argument("--flash-out")
+    s.add_argument("--atheros", action="store_true", help="an Arduino Yún's AR9331: no sf, no crc32, the flash mapped")
+    s.add_argument("--stop-word", default="", help="with --atheros: the word that stops autoboot (lin, ard, tpl)")
+    s.add_argument("--linux-first", action="store_true", help="start at a Linux shell, until kill -USR1")
     a = p.parse_args()
     sys.exit(serve(a))
 

@@ -510,6 +510,35 @@ trabajo); grabar y borrar contestan que no.
   0xF80000. Para la próxima, más rápido: la pinza SOIC8 con la app
   EEPROM (ya lee las 25Qxx por `spi.a`), o un `mmc write` de la RAM a una
   microSD en la cámara.
+- **Un U-Boot sin `sf` ni `crc32`: el Arduino Yún** (2026-11-05). Su
+  Atheros AR9331 corre OpenWrt con un U-Boot 1.1.4 de 2013 (prompt
+  `ar7240> `) que sólo tiene `md`, `cp`, `mw`, `erase`, `bootm` y poco
+  más; su consola está detrás del 32U4, así que se llega con el sketch
+  `YunSerialTerminal` (del IDE de Arduino) por `usb0`, a 250000 aunque su
+  entorno diga `baudrate=115200`. Lo que cambió en la familia:
+  - Sin `sf`, la NOR está mapeada en memoria: la base sale del primer
+    número de `bootcmd` en una ventana de flash conocida (0x9f/0xbf de
+    Atheros y Qualcomm, 0xbfc de Broadcom, 0xbc de Ralink, 0x1f/0x1c
+    físicas) redondeado al tamaño (`bootm 0x9fea0000` → 0x9f000000), y se
+    lee directo con `md`. El tamaño, de "Flash: 16 MB" o de mtdparts.
+  - MIPS big-endian: `md.b` contra `md.l` dice cómo dar vuelta las
+    palabras (también en el camino con `sf`, por si aparece uno).
+  - Sin `crc32`, un voto por línea de `md`: dos lecturas y, donde no
+    coinciden, sólo esas líneas otra vez hasta que dos coincidan (leer dos
+    veces por bloques de 4 KB no aguantaba ruido en el simulador).
+  - La palabra para frenar, si el arranque la nombra ("stop with 'lin'"
+    en los de Linino; "tpl" en los TP-Link), se escribe.
+  - Un prompt que no contesta `version` como U-Boot (el Linux de un
+    aparato que ya estaba prendido) se deja de lado y se espera el
+    reinicio, en vez de fallar.
+  - Por el USB de un Arduino (un puente) no se cambia la velocidad.
+
+  En el Yún: Detectar en 1,9 s (AR7240 por el prompt, 16 MB mapeados en
+  0x9F000000, big-endian); los primeros 256 KB leídos en 91 s (2,8 KB/s,
+  con 3 a 12 tramos repetidos por cada 64 KB: el puente pierde algún
+  byte), y su MD5 igual al que calcula el Linux del Yún para `/dev/mtd0`.
+  Probado antes contra `tools/fake_uboot.py --atheros` (con `--stop-word`,
+  `--linux-first` y ruido).
 
 ## Más adelante: los WCH (CH32V)
 

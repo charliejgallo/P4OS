@@ -3015,6 +3015,14 @@ static const char blob_en__sistema_lang[] =
     "TX, RX y GND a la consola del aparato, y tocá Detectar\tTX, RX and GND to the device's console, then tap Detect\n"
     "La flash no contestó su ID: si no graba, mirá que nada toque CMD, SD0-SD3 o CLK\tThe flash did not give its ID: if it will not write, check nothing touches CMD, SD0-SD3 or CLK\n"
     "Llegan datos de su programa: el reset no le llega (EN a RST) o no tiene bootloader\tIts program is talking: the reset does not reach it (EN to RST) or it has no bootloader\n"
+    "Pide que se escriba \\\"%s\\\" para frenar: se lo escribo\tIt asks for \\\"%s\\\" to be typed to stop: typing it\n"
+    "\\\"%s\\\" no es U-Boot (¿su Linux?): reiniciá el aparato, sigo esperando\t\\\"%s\\\" is not U-Boot (its Linux?): restart the device, still waiting\n"
+    "Sólo contestó \\\"%s\\\", que no es U-Boot: reinicialo mientras se lo frena\tOnly \\\"%s\\\" answered, which is not U-Boot: restart it while it is being stopped\n"
+    "Sin sf: la flash está mapeada en 0x%08X y se lee con md\tNo sf: the flash is mapped at 0x%08X and read with md\n"
+    "Por el USB de un Arduino (un puente) la velocidad de la consola no se cambia\tThrough an Arduino's USB (a bridge) the console's speed is not changed\n"
+    "md muestra las palabras en big-endian (un MIPS): se dan vuelta\tmd shows the words big-endian (a MIPS): they are turned around\n"
+    "0x%X: %u tramos repetidos hasta que dos lecturas coincidieron\t0x%X: %u spans read again until two reads agreed\n"
+    "%u pedazos de 64 KB vacíos (todo 0xFF)\t%u empty 64 KB pieces (all 0xFF)\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -6022,6 +6030,14 @@ static const char blob_de__sistema_lang[] =
     "TX, RX y GND a la consola del aparato, y tocá Detectar\tTX, RX und GND an die Konsole des Geräts, dann Erkennen tippen\n"
     "La flash no contestó su ID: si no graba, mirá que nada toque CMD, SD0-SD3 o CLK\tFlash ohne ID: schreibt er nicht, prüfen, dass nichts CMD, SD0-SD3 oder CLK berührt\n"
     "Llegan datos de su programa: el reset no le llega (EN a RST) o no tiene bootloader\tSein Programm sendet: der Reset kommt nicht an (EN an RST) oder kein Bootloader\n"
+    "Pide que se escriba \\\"%s\\\" para frenar: se lo escribo\tEs verlangt \\\"%s\\\" zum Anhalten: wird getippt\n"
+    "\\\"%s\\\" no es U-Boot (¿su Linux?): reiniciá el aparato, sigo esperando\t\\\"%s\\\" ist kein U-Boot (sein Linux?): Gerät neu starten, warte weiter\n"
+    "Sólo contestó \\\"%s\\\", que no es U-Boot: reinicialo mientras se lo frena\tNur \\\"%s\\\" antwortete, kein U-Boot: neu starten, während angehalten wird\n"
+    "Sin sf: la flash está mapeada en 0x%08X y se lee con md\tKein sf: der Flash liegt ab 0x%08X im Speicher und wird mit md gelesen\n"
+    "Por el USB de un Arduino (un puente) la velocidad de la consola no se cambia\tÜber den USB eines Arduino (eine Brücke) bleibt die Konsolengeschwindigkeit\n"
+    "md muestra las palabras en big-endian (un MIPS): se dan vuelta\tmd zeigt die Wörter big-endian (ein MIPS): sie werden umgedreht\n"
+    "0x%X: %u tramos repetidos hasta que dos lecturas coincidieron\t0x%X: %u Abschnitte erneut gelesen, bis zwei Lesungen übereinstimmten\n"
+    "%u pedazos de 64 KB vacíos (todo 0xFF)\t%u leere 64-KB-Stücke (alles 0xFF)\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -6029,7 +6045,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3000, 0, files_en, 1 },
-    { "de", "Deutsch", 3000, 0, files_de, 1 },
+    { "en", "English", 3008, 0, files_en, 1 },
+    { "de", "Deutsch", 3008, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

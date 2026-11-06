@@ -15,6 +15,22 @@
   Leonardo ETH, Industrial 101, Linino One, the newer Micro or Adafruit's
   Circuit Playground: their USB IDs, from the Arduino IDE's own list, are
   in now. Tried with a Yún on the USB host: detected, read and written.
+- **The U-Boot family reads old U-Boots too: no sf, no crc32, big-endian.**
+  An Arduino Yún's Atheros AR9331 has a U-Boot 1.1.4 from 2013 with little
+  more than md. The family now:
+  - finds the NOR where the SoC maps it (bootcmd's address rounded down
+    to the flash's size: 0x9f000000 on the Yún) and reads it with md;
+  - tells a big-endian CPU's words (a MIPS) by md.b against md.l;
+  - without crc32, takes each line of md when two prints of it agree,
+    and prints again only the lines that do not;
+  - types the word a countdown asks for ("stop with 'lin'");
+  - waits for a restart when the prompt it found is the device's Linux,
+    instead of failing;
+  - keeps the console's speed through an Arduino's USB bridge.
+
+  Through the Yún's 32U4 bridge, its first 256 KB came out with the same
+  MD5 its own Linux gives for that partition. `tools/fake_uboot.py
+  --atheros` plays that U-Boot for the simulator.
 
 ## 0.23.1 — 2026-11-05
 

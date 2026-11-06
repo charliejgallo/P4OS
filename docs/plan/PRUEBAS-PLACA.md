@@ -834,6 +834,15 @@ Que necesitan la mano del usuario o equipos:
     (en la 0.23.1) eso tiene su mensaje: con el cable de RST afuera,
     Detectar dijo "Its program is talking: the reset does not reach it (EN
     to RST) or it has no bootloader"; con el cable puesto, lo encontró.
+- [x] **Un Arduino Yún por USB** (2026-11-05): su 32U4 con el Programador
+      (los IDs del Yún faltaban en la lista de Caterina: `ac84f47`),
+      `YunSerialTerminal` grabado, y por ese puente su Linux (OpenWrt de
+      2013, root sin clave) y su U-Boot 1.1.4 (`ar7240>`, 250000 baudios,
+      se frena con cualquier tecla). Con la familia U-Boot nueva: Detectar
+      y los primeros 256 KB (su U-Boot) leídos sin `sf` ni `crc32`, con el
+      mismo MD5 que su `/dev/mtd0` (`PROGRAMADOR.md`, F7). Su Linux tira
+      errores de squashfs al arrancar: tiene parte de la flash corrupta.
+      Falta: leer los 16 MB enteros (~1,5 h por el puente).
 - [x] **Un Mega 2560 y una Pro Micro por USB** (2026-11-05), con
       `tools/avr_test/blink_nano` (que ahora arma también `mega-rapido` y
       `mega-charla`) y `tools/usb_test/p4os_leonardo` (con `-DRAPIDO`, otra

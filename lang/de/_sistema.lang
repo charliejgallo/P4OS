@@ -9609,3 +9609,27 @@ La flash no contestó su ID: si no graba, mirá que nada toque CMD, SD0-SD3 o CL
 
 #: components/aos_flasher (Programador, Arduino)
 Llegan datos de su programa: el reset no le llega (EN a RST) o no tiene bootloader	Sein Programm sendet: der Reset kommt nicht an (EN an RST) oder kein Bootloader
+
+#: components/aos_flasher (Programador, U-Boot)
+Pide que se escriba \"%s\" para frenar: se lo escribo	Es verlangt \"%s\" zum Anhalten: wird getippt
+
+#: components/aos_flasher (Programador, U-Boot)
+\"%s\" no es U-Boot (¿su Linux?): reiniciá el aparato, sigo esperando	\"%s\" ist kein U-Boot (sein Linux?): Gerät neu starten, warte weiter
+
+#: components/aos_flasher (Programador, U-Boot)
+Sólo contestó \"%s\", que no es U-Boot: reinicialo mientras se lo frena	Nur \"%s\" antwortete, kein U-Boot: neu starten, während angehalten wird
+
+#: components/aos_flasher (Programador, U-Boot)
+Sin sf: la flash está mapeada en 0x%08X y se lee con md	Kein sf: der Flash liegt ab 0x%08X im Speicher und wird mit md gelesen
+
+#: components/aos_flasher (Programador, U-Boot)
+Por el USB de un Arduino (un puente) la velocidad de la consola no se cambia	Über den USB eines Arduino (eine Brücke) bleibt die Konsolengeschwindigkeit
+
+#: components/aos_flasher (Programador, U-Boot)
+md muestra las palabras en big-endian (un MIPS): se dan vuelta	md zeigt die Wörter big-endian (ein MIPS): sie werden umgedreht
+
+#: components/aos_flasher (Programador, U-Boot)
+0x%X: %u tramos repetidos hasta que dos lecturas coincidieron	0x%X: %u Abschnitte erneut gelesen, bis zwei Lesungen übereinstimmten
+
+#: components/aos_flasher (Programador, U-Boot)
+%u pedazos de 64 KB vacíos (todo 0xFF)	%u leere 64-KB-Stücke (alles 0xFF)
