@@ -1087,7 +1087,9 @@ laberinto, pong, radar, walkie, remoto y sensores.
   - [x] throughput y ventana TCP (2026-09-29): 1,1 MB/s de subida y 1,8
         de bajada por el portal, detalle en `docs/MEMORY.md`;
   - [ ] cuántos sockets entran a la vez: portal + HA + MQTT + cámaras;
-    `aos_tcp` ahora tiene 6.
+    `aos_tcp` dice tener 10 lugares, pero hasta el 2026-11-05 usaba 6: los
+    últimos cuatro arrancaban en 0 y nunca contaban como libres (arreglado,
+    probado en la Mac: entran 10, la 11 da sin lugar; falta en la placa).
 - [ ] **Audio:**
   - [ ] calentamiento del amplificador;
   - [ ] curva de volumen: la de esp_codec_dev (-50..0 dB, lineal) dejaba
@@ -1202,9 +1204,15 @@ laberinto, pong, radar, walkie, remoto y sensores.
   cambian en las preferencias (`claude_*`) sin grabar firmware.
 
 **Cámaras**
-- [ ] tinyh264 a la resolución del timbre.
-- [ ] El motor JPEG con los MJPEG.
-- [ ] El escalado por CPU (si no alcanza, pasar al PPA).
+- [x] tinyh264 a la resolución del timbre: 704x576 directo al framebuffer
+      a 7-9 fps sin descartar; 1920x1080 a ~1 cuadro por segundo (590 ms de
+      decodificación), 2026-10-22, en "Fondos, cámaras..." arriba.
+- [x] El motor JPEG con los MJPEG (`aos_jpeg_p4.c`, el motor del P4 para
+      JPEG baseline): una webcam USB por MJPEG a 640x480, 14,6-16,5 fps con
+      6 ms por cuadro, 2026-10-25, en "Impresoras 3D" arriba.
+- [x] El escalado por CPU: alcanza, y el PPA convirtiendo cámaras dio menos
+      (6,1 fps contra 8,9 por CPU), así que quedó apagado (`video_hw`),
+      2026-10-22.
 - [ ] Cuatro cámaras a la vez con la RAM interna que queda.
 
 **Macro pad (USB OTG en modo dispositivo)** (probado el 2026-09-30, todo seguido

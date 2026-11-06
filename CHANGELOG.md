@@ -1,5 +1,12 @@
 # Changelog
 
+## Unreleased
+
+- **Ten TCP connections for the apps, not six.** `aos_tcp` (the cameras'
+  RTSP, MQTT, Modbus TCP, the scope) had ten slots, but only the first six
+  started free: the other four never counted, so the mosaic and the rest
+  shared six. Tried on the Mac: ten connect, the eleventh is refused.
+
 ## 0.23.1 — 2026-11-05
 
 - **The U-Boot family stops consoles whose "any key" is not any.** The

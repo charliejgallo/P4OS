@@ -16,8 +16,8 @@
  *     so nothing in here can block forever: connect, send and receive all
  *     give up on their own.
  *   - Handles, not file descriptors. The table is small (AOS_TCP_SLOTS) and
- *     lwIP's sockets are a firmware-wide resource (CONFIG_LWIP_MAX_SOCKETS is
- *     10, shared with the portal and aos_http.c), so an app that leaks one
+ *     lwIP's sockets are a firmware-wide resource (CONFIG_LWIP_MAX_SOCKETS,
+ *     shared with the portal and aos_http.c), so an app that leaks one
  *     leaks it into a table it can see, not into lwIP.
  *   - No TLS. RTSP cameras and go2rtc speak plain TCP on the LAN, and
  *     mbedTLS would take internal RAM that the H.264 decoder needs.
@@ -51,7 +51,9 @@
 #define SLOT_FREE     (-1)
 #define SLOT_TAKEN    (-2)      /* reserved by a connect in progress */
 
-static int s_fd[AOS_TCP_SLOTS] = { -1, -1, -1, -1, -1, -1 };
+/* every slot free: a slot left at 0 would never match SLOT_FREE, and the
+ * table was 6 slots in practice until 2026-11-05 */
+static int s_fd[AOS_TCP_SLOTS] = { [0 ... AOS_TCP_SLOTS - 1] = SLOT_FREE };
 
 static int slot_fd(int handle)
 {
