@@ -537,6 +537,9 @@ trabajo); grabar y borrar contestan que no.
   0x9F000000, big-endian); los primeros 256 KB leídos en 91 s (2,8 KB/s,
   con 3 a 12 tramos repetidos por cada 64 KB: el puente pierde algún
   byte), y su MD5 igual al que calcula el Linux del Yún para `/dev/mtd0`.
+  Después los 16 MB enteros, solos: vio su Linux, esperó el reinicio, lo
+  frenó y leyó todo en 94,5 min; el uImage adentro pasa los dos CRC de su
+  encabezado.
   Probado antes contra `tools/fake_uboot.py --atheros` (con `--stop-word`,
   `--linux-first` y ruido).
 

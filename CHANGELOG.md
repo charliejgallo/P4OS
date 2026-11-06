@@ -29,7 +29,9 @@
   - keeps the console's speed through an Arduino's USB bridge.
 
   Through the Yún's 32U4 bridge, its first 256 KB came out with the same
-  MD5 its own Linux gives for that partition. `tools/fake_uboot.py
+  MD5 its own Linux gives for that partition, and then the whole 16 MB in
+  95 minutes, on its own: the kernel inside passes both CRCs of its
+  header. `tools/fake_uboot.py
   --atheros` plays that U-Boot for the simulator.
 
 ## 0.23.1 — 2026-11-05

@@ -176,6 +176,14 @@ by avrdude on the Mac through the bridge.</em></p>
 the USB host: the Mega's own bootloader, and the Pro Micro's, reached with
 the 1200-baud touch.</em></p>
 
+<p align="center">
+  <img src="docs/img/photo-terminal-yun.jpg" width="300" alt="The Terminal on usb0 with an Arduino Yún's Linux through its 32U4: md5sum of its U-Boot partition, the same as the board's dump">
+</p>
+
+<p align="center"><em>An Arduino Yún: its Linux in the Terminal through the
+32U4, and its old U-Boot (no sf, no crc32, a big-endian MIPS) read whole by
+the Programador, the same MD5 its Linux gives.</em></p>
+
 ---
 
 ## What it does

@@ -842,7 +842,17 @@ Que necesitan la mano del usuario o equipos:
       y los primeros 256 KB (su U-Boot) leídos sin `sf` ni `crc32`, con el
       mismo MD5 que su `/dev/mtd0` (`PROGRAMADOR.md`, F7). Su Linux tira
       errores de squashfs al arrancar: tiene parte de la flash corrupta.
-      Falta: leer los 16 MB enteros (~1,5 h por el puente).
+      **Los 16 MB enteros** (2026-11-05/06, `75432b5`): sin tocar nada, la
+      familia vio su Linux ("no es U-Boot"), lo esperó, frenó el U-Boot al
+      reiniciarse (AR9331, flash Winbond 0xEF 40 18) y leyó todo en 94,5
+      min (2,9 KB/s; en 66 de los 256 pedazos repitió algún tramo, 7
+      vacíos). Revisado en la Mac: los 256 KB de U-Boot con el MD5 de su
+      Linux, el uImage "MIPS OpenWrt Linux-3.8.3" con los dos CRC de su
+      encabezado bien (1,17 MB leídos sin un error), el squashfs (6,8 MB)
+      en 0x50000, el jffs2 en 0x720000 y ART con la MAC. El volcado queda
+      en la tarjeta (tiene su MAC y su configuración: no va al repo).
+
+      <p align="center"><img src="../img/photo-terminal-yun.jpg" width="300" alt="La Terminal en usb0 con el Linux del Yún a través del puente del 32U4: md5sum de /dev/mtd0, el mismo del volcado por U-Boot"></p>
 - [x] **Un Mega 2560 y una Pro Micro por USB** (2026-11-05), con
       `tools/avr_test/blink_nano` (que ahora arma también `mega-rapido` y
       `mega-charla`) y `tools/usb_test/p4os_leonardo` (con `-DRAPIDO`, otra
