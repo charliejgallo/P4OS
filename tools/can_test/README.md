@@ -55,25 +55,37 @@ receivers are only for other tools.
 
 ### OBD-II
 
-It answers mode 01 requests as an engine unit does: a request on 0x7DF (to
-every unit) or 0x7E0 gets its answer on 0x7E8. Byte 0 is the length, then
-the mode and the PID:
+It answers mode 01 (SAE J1979) as two units, like the simulator's car, so
+the CAN app's OBD tab reads it as it reads a real car:
 
-| Ask (Send tab, id 7DF) | Answer on 7E8 | Means |
+| Unit | Answers on | Asked at | PIDs |
+|---|---|---|---|
+| engine | 7E8 (18DAF110) | 7DF or 7E0 (18DB33F1 or 18DA10F1) | 01 04 05 0C 0D 0F 10 11 1C 1F 2F 33 42 46 51 5C 5E A6, and the maps 00 20 40 60 80 A0 |
+| gearbox | 7E9 (18DAF118) | 7DF or 7E1 (18DB33F1 or 18DA18F1) | 01 0D, and the map 00 |
+
+The values come from the car's own state: load and throttle, air flow (MAF),
+coolant, oil, intake and ambient temperature, a 50 l tank that empties at
+the rate the engine burns (PID 5E, about 0.8 l/h idling and 6-8 l/h on the
+road) and an odometer that counts the loop's kilometres. A PID it does not
+know gets no answer, as on most cars.
+
+By hand, from the Send tab: byte 0 is the length, then the mode and the PID.
+
+| Ask (id 7DF) | Answer | Means |
 |---|---|---|
-| `02 01 00 00 00 00 00 00` | `06 41 00 08 18 80 00 ..` | the PIDs it knows: 05, 0C, 0D, 11 |
-| `02 01 0C 00 00 00 00 00` | `04 41 0C A B ..` | engine speed, (A x 256 + B) / 4 rpm |
-| `02 01 0D 00 00 00 00 00` | `03 41 0D A ..` | speed, A km/h |
-| `02 01 05 00 00 00 00 00` | `03 41 05 A ..` | coolant, A - 40 °C |
-| `02 01 11 00 00 00 00 00` | `03 41 11 A ..` | throttle, A x 100 / 255 % |
+| `02 01 00 00 00 00 00 00` | 7E8 `06 41 00 98 1B 80 13 ..` and 7E9 `06 41 00 80 08 00 00 ..` | each unit's map of PIDs 01-20: bit 7 of A is PID 01 |
+| `02 01 0C 00 00 00 00 00` | 7E8 `04 41 0C A B ..` | engine speed, (A x 256 + B) / 4 rpm |
+| `02 01 0D 00 00 00 00 00` | 7E8 and 7E9 `03 41 0D A ..` | speed, A km/h: both units know it |
+| `02 01 2F 00 00 00 00 00` | 7E8 `03 41 2F A ..` | fuel level, A x 100 / 255 % |
 
-A PID it does not know gets no answer, as on most cars.
+On the console, each question received says how many units answered it.
 
 ### The console
 
-A dashboard line a second (speed, gear, rpm, throttle, temperatures), the
-node's state and error counters, frames sent, received and dropped, and the
-bus errors by kind: bit, form, stuff, ACK, and arbitration lost. The P4 does
+A dashboard line a second (speed, gear, rpm, throttle, temperatures, fuel,
+odometer), the node's state and error counters, frames sent, received and
+dropped, OBD questions and answers, and the bus errors by kind: bit, form,
+stuff, ACK, and arbitration lost. The P4 does
 not show the kind yet, so the ESP32's console is where to read it. Every
 frame received is printed (up to 20 a second), and every state change.
 

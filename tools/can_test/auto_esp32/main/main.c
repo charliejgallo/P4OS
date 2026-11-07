@@ -16,10 +16,12 @@
  *   0x3E8  every 500 ms  coolant and oil temperature, +40 C, bytes 0 and 1
  *   0x18FEF100  100 ms   an extended id (J1939 style), a counter in bytes 1-2
  *
- * It also answers OBD-II requests as a car's engine unit does: a request on
- * 0x7DF (to every unit) or 0x7E0, mode 01, gets its answer on 0x7E8 (PIDs
- * 00, 05, 0C, 0D, 11). From the app's Send tab: 7DF with 02 01 0C 00 00 00
- * 00 00 asks for the engine speed.
+ * It also answers OBD-II, mode 01, as the simulator's car does, so the CAN
+ * app's OBD tab reads it: two units, the engine on 0x7E8 with some twenty
+ * PIDs from the car's own state (load, air flow, fuel level and use, oil,
+ * the odometer...) and the gearbox on 0x7E9, asked at 0x7DF (or 18DB33F1
+ * with 29-bit ids). From the Send tab: 7DF with 02 01 0C 00 00 00 00 00
+ * asks for the engine speed.
  *
  * The console (UART0, the board's USB-serial converter at 115200, so the
  * P4's Terminal on usb0) shows a dashboard line a second, every frame
@@ -49,7 +51,7 @@ static QueueHandle_t s_rxq, s_evq;
 /* counted in the driver's callbacks (an ISR), read by the task */
 static volatile uint32_t s_err_bit, s_err_form, s_err_stuff, s_err_ack, s_arb_lost;
 static volatile uint32_t s_tx_ok, s_tx_fail;
-static uint32_t s_rx, s_dropped;
+static uint32_t s_rx, s_dropped, s_obd_q, s_obd_a;
 
 typedef struct { uint32_t id; uint8_t len, ext, rtr, data[8]; } frame_t;
 typedef struct { twai_error_state_t from, to; } state_ev_t;
@@ -158,7 +160,16 @@ static struct {
     float throttle;     /* 0-100 % */
     bool brake;
     float coolant, oil; /* C */
-} car = { .rpm = 800, .coolant = 20, .oil = 20 };
+    float maf;          /* air into the engine, g/s */
+    float fuel;         /* litres in a 50 l tank */
+    double km;          /* the odometer */
+} car = { .rpm = 800, .coolant = 20, .oil = 20, .fuel = 31, .km = 123456.7 };
+
+#define TANK_L 50.0f
+#define AMBIENT_C 22
+
+/* litres an hour: air over a stoichiometric 14.7 and petrol's 740 g/l */
+static float fuel_lph(void) { return car.maf * 3600.0f / (14.7f * 740.0f); }
 
 static bool s_running = true;
 
@@ -202,6 +213,11 @@ static void car_step(float t)
     /* warming up: coolant to 90 C in a few minutes, oil slower */
     car.coolant += (90 - car.coolant) * dt / 90;
     car.oil += (car.coolant - 5 - car.oil) * dt / 150;
+    /* about 2.5 g/s at idle, 15-25 g/s cruising or pulling */
+    car.maf = 2.5f * car.rpm / 800 * (1 + car.throttle / 25);
+    car.fuel -= fuel_lph() * dt / 3600;
+    if (car.fuel < 4) car.fuel = 45;             /* refilled, so a long test never runs dry */
+    car.km += car.speed * dt / 3600;
 }
 
 static void car_send(uint32_t tick)
@@ -227,26 +243,79 @@ static void car_send(uint32_t tick)
 
 /* ---- OBD-II, mode 01 ---- */
 
-static void obd_answer(const frame_t *q)
+/* Two units, as the simulator's car (sim/io_signal_sim.c): the engine
+ * answers on 7E8 (18DAF110 with 29-bit ids) and knows ENGINE_PIDS, the
+ * gearbox on 7E9 (18DAF118) only 01 and 0D. A question to 7DF (18DB33F1)
+ * reaches both, one to 7E0 or 7E1 (18DA10F1, 18DA18F1) only that one. The
+ * PIDs 20, 40... in a list say that the next map is there too. */
+static const uint8_t ENGINE_PIDS[] = { 0x01, 0x04, 0x05, 0x0C, 0x0D, 0x0F, 0x10, 0x11, 0x1C, 0x1F, 0x20, 0x2F,
+                                       0x33, 0x40, 0x42, 0x46, 0x51, 0x5C, 0x5E, 0x60, 0x80, 0xA0, 0xA6 };
+static const uint8_t GEARBOX_PIDS[] = { 0x01, 0x0D };
+
+static bool knows(int ecu, uint8_t pid)
 {
-    /* a single frame: byte 0 the length, byte 1 the mode, byte 2 the PID */
-    if (q->len < 3 || q->data[0] < 2 || q->data[1] != 0x01) return;
-    uint8_t pid = q->data[2], a[8] = { 0, 0x41, pid, 0, 0, 0, 0, 0 }, n;
+    const uint8_t *p = ecu ? GEARBOX_PIDS : ENGINE_PIDS;
+    size_t n = ecu ? sizeof GEARBOX_PIDS : sizeof ENGINE_PIDS;
+    return memchr(p, pid, n) != NULL;
+}
+
+/* the answer's bytes A, B... for a PID, or -1 if the unit does not know it */
+static int obd_value(int ecu, uint8_t pid, uint8_t *o)
+{
+    uint32_t v;
+    if ((pid & 0x1F) == 0) {                      /* a map: bit 7 of A is pid + 1 */
+        if (pid && !knows(ecu, pid)) return -1;
+        v = 0;
+        for (int k = 1; k <= 32; k++)
+            if (knows(ecu, (uint8_t)(pid + k))) v |= 1u << (32 - k);
+        o[0] = v >> 24; o[1] = v >> 16; o[2] = v >> 8; o[3] = (uint8_t)v;
+        return 4;
+    }
+    if (!knows(ecu, pid)) return -1;
     switch (pid) {
-    case 0x00:                                    /* which PIDs 01-20 it knows */
-        a[3] = 0x08; a[4] = 0x18; a[5] = 0x80; a[6] = 0x00; n = 4; break;
-    case 0x05: a[3] = (uint8_t)(car.coolant + 40); n = 1; break;
-    case 0x0C: {
-        uint16_t r4 = (uint16_t)(car.rpm * 4);
-        a[3] = r4 >> 8; a[4] = (uint8_t)r4; n = 2; break;
+    /* monitor status: no fault light, no codes; the engine's tests as a petrol car's */
+    case 0x01: o[0] = 0; o[1] = ecu ? 0 : 0x07; o[2] = ecu ? 0 : 0x65; o[3] = 0; return 4;
+    case 0x04: o[0] = (uint8_t)((15 + car.throttle * 0.8f) * 255 / 100); return 1;
+    case 0x05: o[0] = (uint8_t)(car.coolant + 40); return 1;
+    case 0x0C: v = (uint32_t)(car.rpm * 4); o[0] = v >> 8; o[1] = (uint8_t)v; return 2;
+    case 0x0D: o[0] = (uint8_t)car.speed; return 1;
+    case 0x0F: o[0] = AMBIENT_C + 5 + 40; return 1;
+    case 0x10: v = (uint32_t)(car.maf * 100); o[0] = v >> 8; o[1] = (uint8_t)v; return 2;
+    case 0x11: o[0] = (uint8_t)(car.throttle * 255 / 100); return 1;
+    case 0x1C: o[0] = 6; return 1;                /* EOBD */
+    case 0x1F: v = (uint32_t)(esp_timer_get_time() / 1000000); o[0] = v >> 8; o[1] = (uint8_t)v; return 2;
+    case 0x2F: o[0] = (uint8_t)(car.fuel / TANK_L * 255); return 1;
+    case 0x33: o[0] = 101; return 1;              /* kPa, sea level */
+    case 0x42: v = 14100; o[0] = v >> 8; o[1] = (uint8_t)v; return 2;     /* mV, alternator charging */
+    case 0x46: o[0] = AMBIENT_C + 40; return 1;
+    case 0x51: o[0] = 1; return 1;                /* petrol */
+    case 0x5C: o[0] = (uint8_t)(car.oil + 40); return 1;
+    case 0x5E: v = (uint32_t)(fuel_lph() * 20); o[0] = v >> 8; o[1] = (uint8_t)v; return 2;
+    case 0xA6: v = (uint32_t)(car.km * 10); o[0] = v >> 24; o[1] = v >> 16; o[2] = v >> 8; o[3] = (uint8_t)v; return 4;
+    default: return -1;
     }
-    case 0x0D: a[3] = (uint8_t)car.speed; n = 1; break;
-    case 0x11: a[3] = (uint8_t)(car.throttle * 255 / 100); n = 1; break;
-    default: return;                              /* a PID it does not know: no answer */
+}
+
+/* a question, as a single ISO-TP frame (byte 0 the length, then mode 01 and
+ * the PID), answered by each unit it is for that knows the PID; returns how
+ * many answered */
+static int obd_answer(const frame_t *q)
+{
+    int to;                                       /* -1 nobody, 0 engine, 1 gearbox, 2 both */
+    if (!q->ext) to = q->id == 0x7DF ? 2 : q->id == 0x7E0 ? 0 : q->id == 0x7E1 ? 1 : -1;
+    else to = q->id == 0x18DB33F1 ? 2 : q->id == 0x18DA10F1 ? 0 : q->id == 0x18DA18F1 ? 1 : -1;
+    if (to < 0 || q->rtr || q->len < 3 || q->data[0] < 2 || q->data[0] > 7 || q->data[1] != 0x01) return 0;
+    int answered = 0;
+    for (int ecu = 0; ecu < 2; ecu++) {
+        if (to != 2 && to != ecu) continue;
+        uint8_t a[8] = { 0, 0x41, q->data[2], 0, 0, 0, 0, 0 };
+        int n = obd_value(ecu, q->data[2], &a[3]);
+        if (n < 0) continue;                      /* a PID it does not know: no answer, as on most cars */
+        a[0] = (uint8_t)(2 + n);
+        send(q->ext ? (ecu ? 0x18DAF118 : 0x18DAF110) : 0x7E8 + ecu, q->ext, a, 8);
+        answered++;
     }
-    a[0] = 2 + n;
-    send(0x7E8, false, a, 8);
-    printf("OBD: pedido PID %02X, respondido en 7E8\r\n", pid);
+    return answered;
 }
 
 /* ---- the console ---- */
@@ -278,7 +347,7 @@ static void key(int c)
         break;
     case 'e':
         s_err_bit = s_err_form = s_err_stuff = s_err_ack = s_arb_lost = 0;
-        s_tx_ok = s_tx_fail = s_rx = s_dropped = 0;
+        s_tx_ok = s_tx_fail = s_rx = s_dropped = s_obd_q = s_obd_a = 0;
         printf("Contadores en cero\r\n");
         break;
     case 'h': case '?': help(); break;
@@ -290,11 +359,13 @@ static void dashboard(void)
 {
     twai_node_status_t st = { 0 };
     if (s_node) twai_node_get_info(s_node, &st, NULL);
-    printf("%5.1f km/h %dª %4.0f rpm acel %3.0f%%%s agua %2.0f°C aceite %2.0f°C | %s TEC %u REC %u | "
-           "tx %lu rx %lu desc %lu | errores bit %lu forma %lu relleno %lu ack %lu arbitraje %lu\r\n",
+    printf("%5.1f km/h %dª %4.0f rpm acel %3.0f%%%s agua %2.0f°C aceite %2.0f°C nafta %4.1f l %.1f km | "
+           "%s TEC %u REC %u | tx %lu rx %lu desc %lu OBD %lu/%lu | "
+           "errores bit %lu forma %lu relleno %lu ack %lu arbitraje %lu\r\n",
            car.speed, car.gear, car.rpm, car.throttle, car.brake ? " FRENO" : "", car.coolant, car.oil,
-           state_name(st.state), st.tx_error_count, st.rx_error_count,
+           car.fuel, car.km, state_name(st.state), st.tx_error_count, st.rx_error_count,
            (unsigned long)s_tx_ok, (unsigned long)s_rx, (unsigned long)s_dropped,
+           (unsigned long)s_obd_q, (unsigned long)s_obd_a,
            (unsigned long)s_err_bit, (unsigned long)s_err_form, (unsigned long)s_err_stuff,
            (unsigned long)s_err_ack, (unsigned long)s_arb_lost);
 }
@@ -319,11 +390,13 @@ void app_main(void)
         frame_t r;
         while (xQueueReceive(s_rxq, &r, 0) == pdTRUE) {
             s_rx++;
-            if (!r.ext && (r.id == 0x7DF || r.id == 0x7E0)) obd_answer(&r);
+            int answered = obd_answer(&r);
+            if (answered) { s_obd_q++; s_obd_a += answered; }
             if (printed < 20) {                       /* at most 20 lines a second */
                 printf("RX %s%03lX [%u]", r.ext ? "x" : "", (unsigned long)r.id, r.len);
                 if (r.rtr) printf(" remota");
                 else for (int i = 0; i < r.len; i++) printf(" %02X", r.data[i]);
+                if (answered) printf("  OBD PID %02X: %d respuesta%s", r.data[2], answered, answered > 1 ? "s" : "");
                 printf("\r\n");
                 if (++printed == 20) printf("(demasiadas tramas: muestro 20 por segundo)\r\n");
             }
