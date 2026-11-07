@@ -51,6 +51,10 @@ static QueueHandle_t s_rxq, s_evq;
 /* counted in the driver's callbacks (an ISR), read by the task */
 static volatile uint32_t s_err_bit, s_err_form, s_err_stuff, s_err_ack, s_arb_lost;
 static volatile uint32_t s_tx_ok, s_tx_fail;
+/* the driver refuses (and logs an error for) every frame handed to it in bus
+ * off: a hundred and sixty lines a second. The state is kept here, so that
+ * nothing is handed to it then */
+static volatile twai_error_state_t s_state;
 static uint32_t s_rx, s_dropped, s_obd_q, s_obd_a;
 
 typedef struct { uint32_t id; uint8_t len, ext, rtr, data[8]; } frame_t;
@@ -92,6 +96,7 @@ static bool on_error(twai_node_handle_t node, const twai_error_event_data_t *ed,
 static bool on_state(twai_node_handle_t node, const twai_state_change_event_data_t *ed, void *user)
 {
     (void)node; (void)user;
+    s_state = ed->new_sta;
     state_ev_t e = { ed->old_sta, ed->new_sta };
     BaseType_t hp = pdFALSE;
     xQueueSendFromISR(s_evq, &e, &hp);
@@ -124,6 +129,7 @@ static bool node_start(void)
     twai_event_callbacks_t cb = { .on_rx_done = on_rx, .on_error = on_error,
                                   .on_state_change = on_state, .on_tx_done = on_tx };
     twai_node_register_event_callbacks(s_node, &cb, NULL);
+    s_state = TWAI_ERROR_ACTIVE;
     twai_node_enable(s_node);
     return true;
 }
@@ -141,7 +147,14 @@ static void send(uint32_t id, bool ext, const uint8_t *data, uint8_t len)
     static twai_frame_t slot[TX_SLOTS];
     static uint8_t buf[TX_SLOTS][8];
     static unsigned next;
-    if (!s_node) return;
+    /* nothing in bus off, nor into a full queue (nobody acknowledging): the
+     * driver would log an error for each one */
+    twai_node_status_t st;
+    if (!s_node || s_state == TWAI_ERROR_BUS_OFF || twai_node_get_info(s_node, &st, NULL) != ESP_OK ||
+        st.state == TWAI_ERROR_BUS_OFF || st.tx_queue_remaining == 0) {
+        s_dropped++;
+        return;
+    }
     unsigned k = next % TX_SLOTS;
     memcpy(buf[k], data, len);
     slot[k] = (twai_frame_t){ .header = { .id = id, .dlc = len, .ide = ext }, .buffer = buf[k], .buffer_len = len };
@@ -402,8 +415,11 @@ void app_main(void)
             }
         }
         state_ev_t e;
-        while (xQueueReceive(s_evq, &e, 0) == pdTRUE)
+        while (xQueueReceive(s_evq, &e, 0) == pdTRUE) {
             printf("Estado: %s -> %s\r\n", state_name(e.from), state_name(e.to));
+            if (e.to == TWAI_ERROR_BUS_OFF)
+                printf("Bus off: el auto se desconectó del bus y no manda nada. Con la P4 en Normal, tecla r\r\n");
+        }
 
         uint8_t c;
         while (uart_read_bytes(UART_NUM_0, &c, 1, 0) == 1) key(c);
