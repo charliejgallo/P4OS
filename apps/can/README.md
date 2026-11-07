@@ -79,7 +79,8 @@ app's `CMakeLists.txt` adds `components/aos_io/include`, which
 In the simulator every CAN node shares a bus with a car (0x0C0 engine
 speed, 0x1A0 vehicle speed, 0x3E8 temperatures, 0x18FEF100 extended); a
 node in the self test hears only itself. On the board, with no transceiver,
-Autoprueba on one pin; a real bus waits for SN65HVD230 transceivers.
+Autoprueba on one pin; the real bus, the P4 and an ESP32 each with an
+SN65HVD230, is wired as in `docs/img/bench-can.svg`.
 
 What only the board can confirm: the error counters and the bus-off
 recovery on a real bus, the load estimate against a scope, and that the

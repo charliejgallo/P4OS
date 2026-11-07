@@ -394,19 +394,17 @@ def eeprom24():
     s.save("bench-24lc.svg")
 
 
-def esp32_devkit():
-    """An ESP32 DevKit of 38 pins (DevKitC V4 and its many copies) on uart.b with EN and BOOT."""
-    s = Svg(1100, 965, "An ESP32 DevKit (38 pins) on the 40-pin header",
-            "uart.b with its EN and BOOT lines: the Flasher puts it in download mode by itself, "
-            "and esptool does the same through the bridge")
-    c_tx, c_rx, c_boot, c_en = "#ea580c", "#16a34a", "#7c3aed", "#0891b2"
-    used = {1: "#dc2626", 8: c_boot, 11: c_en, 12: c_tx, 13: "#111111", 14: c_rx}
-    # the DevKit, from the top: the module (antenna up), 19 pins down each side, USB at the bottom
-    DX, DW, DY0 = 130, 200, ROW0 + STEP
-    left = ["3V3", "EN", "VP", "VN", "IO34", "IO35", "IO32", "IO33", "IO25", "IO26", "IO27", "IO14",
-            "IO12", "GND", "IO13", "SD2", "SD3", "CMD", "5V"]
-    right = ["GND", "IO23", "IO22", "TX0", "RX0", "IO21", "GND", "IO19", "IO18", "IO5", "IO17", "IO16",
-             "IO4", "IO0", "IO2", "IO15", "SD1", "SD0", "CLK"]
+DEVKIT_LEFT = ["3V3", "EN", "VP", "VN", "IO34", "IO35", "IO32", "IO33", "IO25", "IO26", "IO27", "IO14",
+               "IO12", "GND", "IO13", "SD2", "SD3", "CMD", "5V"]
+DEVKIT_RIGHT = ["GND", "IO23", "IO22", "TX0", "RX0", "IO21", "GND", "IO19", "IO18", "IO5", "IO17", "IO16",
+                "IO4", "IO0", "IO2", "IO15", "SD1", "SD0", "CLK"]
+
+
+def devkit(s, DX, DY0, hot, DW=200):
+    """An ESP32 DevKit of 38 pins from the top: the module (antenna up), 19 pins down each side, USB
+    at the bottom. hot: {("L" or "R", index): colour} for the pins wired. Returns the left and right
+    pin columns' x, the pins' y as a function of the index, and the board's top and bottom."""
+    left, right = DEVKIT_LEFT, DEVKIT_RIGHT
     top, bot = DY0 - 66, DY0 + 18 * STEP + 70
     lx, rx_ = DX + 14, DX + DW - 14
     py = lambda i: DY0 + i * STEP                       # noqa: E731
@@ -426,17 +424,28 @@ def esp32_devkit():
     for bx_, name in ((DX + 34, "EN"), (DX + DW - 34, "BOOT")):
         s.add(f'<rect x="{bx_-12}" y="{bot-30}" width="24" height="18" rx="3" fill="#e5e7eb" stroke="#6b7280"/>')
         s.plain(bx_, bot - 36, name, size=9, color="#e2e8f0", anchor="middle", bold=True)
-    on = {"EN": c_en, "5V": "#dc2626", "TX0": c_rx, "RX0": c_tx, "IO0": c_boot}
     flash = {"CMD", "SD0", "SD1", "SD2", "SD3", "CLK"}      # the SPI flash's own pins: nothing goes there
-    for i, nm in enumerate(left):
-        hot = on.get(nm) if nm in ("EN", "5V") else None
-        s.over(f'<circle cx="{lx}" cy="{py(i)}" r="{7 if hot else 6}" fill="{hot or "#d1a33a"}" stroke="#fff" stroke-width="{2 if hot else 0}"/>')
-        s.plain(lx + 14, py(i) + 4, nm, size=11, color=hot or ("#fca5a5" if nm in flash else "#e5e7eb"), bold=bool(hot))
-    for i, nm in enumerate(right):
-        hot = on.get(nm) if nm in ("TX0", "RX0", "IO0") else ("#111111" if i == 0 else None)
-        fill = "#e5e7eb" if hot == "#111111" else hot
-        s.over(f'<circle cx="{rx_}" cy="{py(i)}" r="{7 if hot else 6}" fill="{hot or "#d1a33a"}" stroke="#fff" stroke-width="{2 if hot else 0}"/>')
-        s.plain(rx_ - 14, py(i) + 4, nm, size=11, color=fill or ("#fca5a5" if nm in flash else "#e5e7eb"), anchor="end", bold=bool(hot))
+    for side, names, x, anchor, dx in (("L", left, lx, "start", 14), ("R", right, rx_, "end", -14)):
+        for i, nm in enumerate(names):
+            h = hot.get((side, i))
+            fill = "#e5e7eb" if h == "#111111" else h       # a black (GND) pin keeps a light name
+            s.over(f'<circle cx="{x}" cy="{py(i)}" r="{7 if h else 6}" fill="{h or "#d1a33a"}" stroke="#fff" stroke-width="{2 if h else 0}"/>')
+            s.plain(x + dx, py(i) + 4, nm, size=11, color=fill or ("#fca5a5" if nm in flash else "#e5e7eb"),
+                    anchor=anchor, bold=bool(h))
+    return lx, rx_, py, top, bot
+
+
+def esp32_devkit():
+    """An ESP32 DevKit of 38 pins (DevKitC V4 and its many copies) on uart.b with EN and BOOT."""
+    s = Svg(1100, 965, "An ESP32 DevKit (38 pins) on the 40-pin header",
+            "uart.b with its EN and BOOT lines: the Flasher puts it in download mode by itself, "
+            "and esptool does the same through the bridge")
+    c_tx, c_rx, c_boot, c_en = "#ea580c", "#16a34a", "#7c3aed", "#0891b2"
+    used = {1: "#dc2626", 8: c_boot, 11: c_en, 12: c_tx, 13: "#111111", 14: c_rx}
+    right = DEVKIT_RIGHT
+    lx, rx_, py, top, bot = devkit(s, 130, ROW0 + STEP, {
+        ("L", 1): c_en, ("L", 18): "#dc2626", ("R", 0): "#111111",
+        ("R", 3): c_rx, ("R", 4): c_tx, ("R", 13): c_boot})
     # TX of uart.b (pin 12) to RX0, straight across; TX0 to RX of uart.b (pin 14): crossed
     x12, y12 = pin_xy(12)
     x14, y14 = pin_xy(14)
@@ -575,6 +584,108 @@ def nano_header():
     s.save("bench-nano.svg")
 
 
+def sn65(s, x, w, ys, side, title, chip_y, smd_y):
+    """An SN65HVD230 board (the blue GY-230 and its copies) with its six pins down one edge, 'left'
+    or 'right', at the y of ys (3V3, GND, CTX, CRX, CANH, CANL); returns where a wire meets each
+    pin. The chip is marked VP230; the SMD marked 121 is its 120 ohm across CANH and CANL."""
+    top, bot = min(ys[0], chip_y) - 28, max(ys[-1], smd_y) + 32
+    s.add(f'<rect x="{x}" y="{top}" width="{w}" height="{bot-top}" rx="6" fill="#1e3a8a"/>')
+    s.text(x + w / 2, top - 12, title, size=13, color="#111", anchor="middle", bold=True)
+    px = x + w - 14 if side == "right" else x + 14
+    inner = x + 14 if side == "right" else x + w - 68        # the chip and the SMD, away from the pins
+    # the chip, legs up and down as on the board, pin 1 dot at the bottom left
+    s.add(f'<rect x="{inner}" y="{chip_y}" width="54" height="40" rx="3" fill="#0f172a"/>')
+    for k in range(4):
+        lx = inner + 9 + k * 12
+        s.add(f'<rect x="{lx-2}" y="{chip_y-6}" width="4" height="6" fill="#9ca3af"/>')
+        s.add(f'<rect x="{lx-2}" y="{chip_y+40}" width="4" height="6" fill="#9ca3af"/>')
+    s.add(f'<circle cx="{inner+8}" cy="{chip_y+32}" r="2.5" fill="#475569"/>')
+    s.plain(inner + 27, chip_y + 24, "VP230", size=10, color="#e2e8f0", anchor="middle", bold=True)
+    s.add(f'<rect x="{inner}" y="{smd_y-8}" width="30" height="16" rx="2" fill="#111827" stroke="#9ca3af"/>')
+    s.plain(inner + 15, smd_y + 4, "121", size=9, color="#e5e7eb", anchor="middle", bold=True)
+    s.plain(inner + 36, smd_y + 4, "120 Ω", size=10, color="#fde68a", bold=True)
+    names = ["3V3", "GND", "CTX", "CRX", "CANH", "CANL"]
+    for nm, y in zip(names, ys):
+        s.over(f'<circle cx="{px}" cy="{y}" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>')
+        if side == "right":
+            s.plain(px - 14, y + 4, nm, size=11, anchor="end", bold=True)
+        else:
+            s.plain(px + 14, y + 4, nm, size=11, bold=True)
+    return px + 8 if side == "right" else px - 8
+
+
+def can():
+    """Two SN65HVD230 on one bus: the P4's TWAI on the header, an ESP32 DevKit's on its IO21/IO22."""
+    s = Svg(1200, 1090, "CAN on the 40-pin header: the P4 and an ESP32 on one bus",
+            "two 3.3 V SN65HVD230 transceivers and a twisted pair with 120 Ω at each end; "
+            "the P4's TWAI on GPIO28/29, the ESP32's on IO21/IO22")
+    c_tx, c_rx, c_h, c_l, c_p = "#ea580c", "#16a34a", "#ca8a04", "#2563eb", C["p3"]
+    used = {16: c_tx, 18: c_p, 19: "#111111", 20: c_rx}
+    y_h, y_l = 830, 852                                 # the bus, under everything
+    # the P4's transceiver, left of the header: CTX straight from pin 16, CRX from pin 20
+    x16, y16 = pin_xy(16)
+    x18, y18 = pin_xy(18)
+    x19, y19 = pin_xy(19)
+    x20, y20 = pin_xy(20)
+    ys1 = [y16 - 4 * STEP, y16 - 2 * STEP, y16, y20, y20 + 2 * STEP, y20 + 4 * STEP]
+    m1 = sn65(s, 190, 150, ys1, "right", "SN65HVD230 #1", ys1[0] + 34, (ys1[4] + ys1[5]) / 2)
+    s.wire([(x16 - 8, y16), (m1, y16)], c_tx, 3)
+    s.wire([(x20 - 8, y20), (m1, y20)], c_rx, 3)
+    # power by tags: the board's 3V3 and GND are the header's pins 18 and 19
+    s.wire([(m1, ys1[0]), (380, ys1[0])], c_p, 3)
+    s.net(380, ys1[0], "3V3", side="right")
+    s.wire([(m1, ys1[1]), (380, ys1[1])], C["gnd"], 3)
+    s.net(380, ys1[1], "GND", C["gnd"], side="right")
+    s.wire([(x18 - 8, y18), (440, y18)], c_p, 3)
+    s.net(440, y18, "3V3")
+    s.wire([(x19 + 8, y19), (690, y19)], C["gnd"], 3)
+    s.net(690, y19, "GND", C["gnd"], side="right")
+    # the ESP32 DevKit, right of the header: IO21 is its TX, IO22 its RX
+    right = DEVKIT_RIGHT
+    i_gnd, i_rx, i_tx = 0, right.index("IO22"), right.index("IO21")
+    lx, rx_, py, top, bot = devkit(s, 760, ROW0 + STEP, {
+        ("L", 0): c_p, ("R", i_gnd): "#111111", ("R", i_rx): c_rx, ("R", i_tx): c_tx})
+    ys2 = [py(-1), py(0), py(1), py(2), py(3), py(4)]
+    m2 = sn65(s, 1030, 150, ys2, "left", "SN65HVD230 #2", py(0) - 6, py(3) + 4)
+    s.wire([(rx_ + 8, py(i_gnd)), (m2, ys2[1])], C["gnd"], 3)
+    s.wire([(rx_ + 8, py(i_rx)), (m2, ys2[3])], c_rx, 3)
+    s.wire([(rx_ + 8, py(i_tx)), (975, py(i_tx)), (975, ys2[2]), (m2, ys2[2])], c_tx, 3)
+    s.wire([(lx - 8, py(0)), (744, py(0)), (744, top - 24), (990, top - 24), (990, ys2[0]), (m2, ys2[0])], c_p, 3)
+    s.text(760, top - 30, "the DevKit's 3V3 feeds transceiver #2")
+    s.text(985, bot + 46, "its micro-USB on a USB host socket of the P4: 5 V, a GND shared with the P4, its console",
+           color=C["dim"], anchor="end")
+    # the bus: down from each board, twisted along the bottom
+    h1, l1, h2, l2 = 390, 372, 1000, 1016
+    s.wire([(m1, ys1[4]), (h1, ys1[4]), (h1, y_h), (450, y_h)], c_h, 3)
+    s.wire([(m1, ys1[5]), (l1, ys1[5]), (l1, y_l), (450, y_l)], c_l, 3)
+    s.wire([(930, y_h), (h2, y_h), (h2, ys2[4]), (m2, ys2[4])], c_h, 3)
+    s.wire([(930, y_l), (l2, y_l), (l2, ys2[5]), (m2, ys2[5])], c_l, 3)
+    for col, start in ((c_l, 1), (c_h, 0)):
+        d, y0 = "", (y_h, y_l)
+        for k in range(12):
+            a, b = y0[(k + start) % 2], y0[(k + start + 1) % 2]
+            x0 = 450 + 40 * k
+            d += f"{'M' if k == 0 else ' L'}{x0} {a} C{x0+20} {a} {x0+20} {b} {x0+40} {b}"
+        s.add(f'<path d="{d}" stroke="{col}" stroke-width="3" fill="none"/>')
+    s.text(h1 + 8, 640, "CANH", color=c_h, bold=True)
+    s.text(l1 - 8, 660, "CANL", color=c_l, anchor="end", bold=True)
+    s.text(h2 - 8, 760, "CANH", color=c_h, anchor="end", bold=True)
+    s.text(l2 + 8, 760, "CANL", color=c_l, bold=True)
+    s.text(690, y_h - 18, "a twisted pair (two wires twisted by hand will do on a bench)", anchor="middle")
+    s.text(690, y_l + 28, "60 Ω between CANH and CANL with everything off: the two 120 Ω in parallel",
+           anchor="middle", bold=True)
+    s.notes(40, y_l + 50, 1120, "Wiring it (the bus itself is still to be tried on the board: docs/plan/PRUEBAS-PLACA.md)", [
+        "• P4: TX (GPIO28, pin 16) to CTX and RX (GPIO29, pin 20) to CRX, not crossed as on a UART; 3V3 from pin 18, GND from pin 19",
+        "• ESP32: IO21 to CTX and IO22 to CRX, its own 3V3 and GND. Not IO5 nor the other pins that toggle at boot: garbage on the bus",
+        "• The ESP32's micro-USB on a USB host socket of the P4 (docs/USB.md): its 5 V, a GND shared with the P4, its console in the Terminal",
+        "• 120 Ω at each end of the bus (these boards carry one, marked 121): 60 Ω between CANH and CANL with everything off (60.3 Ω measured)",
+        "  A third node in the middle of the bus goes without its own. Tags with the same name (3V3, GND) are one wire",
+        "• Only 3.3 V transceivers (SN65HVD230, 231, 232): a 5 V one (MCP2551, TJA1050) puts 5 V on the header. The same speed on every node",
+    ])
+    s.header(used)
+    s.save("bench-can.svg")
+
+
 if __name__ == "__main__":
     pwm()
     ir()
@@ -582,3 +693,4 @@ if __name__ == "__main__":
     eeprom24()
     esp32_devkit()
     nano_header()
+    can()

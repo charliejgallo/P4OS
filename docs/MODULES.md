@@ -602,6 +602,14 @@ moved by itself on a line held weakly high.
 
 **On a real CAN bus** a 3.3 V transceiver goes between the pins and
 CANH/CANL (SN65HVD230 and kin): the header's pins are not 5 V tolerant.
+The bench's bus is the P4 and an ESP32 DevKit, each with its own
+SN65HVD230, on a twisted pair:
+
+![CAN on the header: the P4 and an ESP32, each with an SN65HVD230, on one twisted pair](img/bench-can.svg)
+
+Wired as drawn on 2026-11-07: 60.3 Ω between CANH and CANL with
+everything off, the two boards' 120 Ω (the SMD marked 121) in parallel.
+The frames on it are still to be tried.
 
 **The clock of the LEDC.** All its timers share one clock, and the
 backlight's (set up by the BSP) is the crystal. Asking for the 80 MHz PLL
