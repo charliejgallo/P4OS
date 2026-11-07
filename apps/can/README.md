@@ -203,12 +203,35 @@ Tried in the simulator on 2026-11-07: opendbc's vw_mqb.dbc and tesla_can.dbc
 and nberlette's OBD2.dbc read with the counts a separate parser gives;
 `VAL_` names and plain and extended multiplexing decoded on the tab and on
 the page; the scanner at 11 and 29 bits, both units; the choice made on the
-page taken by the board. On the board, with no transceiver,
-Autoprueba on one pin; the real bus, the P4 and an ESP32 each with an
-SN65HVD230, is wired as in `docs/img/bench-can.svg`.
+page taken by the board.
 
-What only the board can confirm: the error counters and the bus-off
-recovery on a real bus, the load estimate against a scope, that the bus
-thread keeps up with a busy 500 kbit/s bus (the driver's queue is 64
-frames), how long a big `.dbc` takes to read from the card, and the scanner
-against the ESP32 car and a real one.
+On the board, with no transceiver, Autoprueba on one pin. The real bus, the
+P4 and an ESP32 each with an SN65HVD230, is wired as in
+`docs/img/bench-can.svg`.
+
+### On a real bus (2026-11-07)
+
+The P4 and the ESP32 car of `tools/can_test/auto_esp32`, each with its
+SN65HVD230 (an MCU-230 board), at 500 kbit/s in Normal mode: about 162
+frames a second, 4 % of the bus, no errors and nothing lost after 25000
+frames. Por id shows each id at the rate the ESP32 sends it (0x0C0 every
+10 ms, 99.6 a second; 0x1A0 every 20 ms, 49.8; 0x3E8 every 500 ms; the
+extended 0x18FEF100 every 100 ms), and Señales, with two messages of
+`senales.dbc` chosen, charts the engine speed climbing through the gears,
+1052 to 3019 rpm, and the coolant warming up.
+
+<p align="center">
+  <img src="../../docs/img/photo-can-frames.jpg" width="270" alt="Tramas on the board: 0C0, 1A0 and 18FEF100 from the ESP32 at 500 kbit/s, 162 frames a second, 4 % load, no errors">
+  <img src="../../docs/img/photo-can-byid.jpg" width="270" alt="Por id: four ids at 99.6, 49.8, 2.0 and 10.0 a second, the bytes that change lit">
+  <img src="../../docs/img/photo-can-signals.jpg" width="270" alt="Señales: RPM of 0C0 charted over 30 s, a sawtooth through the gears up to 3019 rpm, and the coolant and oil temperatures">
+</p>
+
+<p align="center">
+  <img src="../../docs/img/photo-can-esp32.jpg" width="270" alt="The ESP32 DevKit that plays the car, with its SN65HVD230 board (an MCU-230)">
+</p>
+
+What the board has still to confirm: the bus-off recovery and the error
+counters with faults on the bus, the load estimate against a scope, a busy
+bus (this one is 4 %; the driver's queue is 64 frames), how long a big
+`.dbc` takes to read from the card, and the OBD tab against the ESP32 car
+(which answers 00, 05, 0C, 0D and 11) and a real one.

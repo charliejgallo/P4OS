@@ -412,8 +412,11 @@ pins it uses, has a wiring drawing on the board and a page in the portal.
   Panasonic, RC5, RC6, or raw) and sends them back; air conditioners, TVs, fans and lights
   from [SmartIR](https://github.com/litinoveweedle/SmartIR)'s code library.
 - **CAN:** a bus analyser on the P4's TWAI controller: frames live, by id,
-  sending, decoding signals, and recording to the card. It needs a 3.3 V
-  transceiver (SN65HVD230); its self test needs none.
+  sending, decoding signals, and recording to the card. The signals come
+  from any `.dbc` in a folder of the card (opendbc's and nberlette/canbus's
+  open libraries read as they are), and an OBD-II scanner asks a car the
+  PIDs of SAE J1979. It needs a 3.3 V transceiver (SN65HVD230); its self
+  test needs none.
 
 Tried on the bench on 2026-10-05: PWM at three frequencies at once with a
 servo and the analog level checked with a meter (1.34 V asked, 1.313 V
@@ -421,6 +424,15 @@ measured), a WS2812B strip straight from 3.3 V, a monitor's remote learned
 and sent back, and a 24LC256 read, edited, written and restored with its
 checksums matching on a computer. The wiring drawings and the numbers are
 in [docs/MODULES.md](docs/MODULES.md).
+
+<p align="center">
+  <img src="docs/img/photo-can-frames.jpg" width="300" alt="The CAN app on the board: the frames of an ESP32 playing a car, 162 a second at 500 kbit/s, no errors">
+  <img src="docs/img/photo-can-signals.jpg" width="300" alt="The CAN app's Signals tab charting the engine speed through the gears, up to 3019 rpm, decoded from a .dbc">
+</p>
+
+<p align="center"><em>A CAN bus on the bench: an ESP32 with an SN65HVD230
+playing a car, the P4 with another. Every frame, no errors, and the engine
+speed decoded from a .dbc and charted through the gears.</em></p>
 
 <p align="center">
   <img src="docs/img/bench-pwm-photo.jpg" width="230" alt="PWM on the bench: two LEDs, a servo, the RC filter and a meter reading 1.313 V">
