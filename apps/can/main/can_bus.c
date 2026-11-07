@@ -14,8 +14,10 @@
  * the page writes and this thread reads and deletes, and
  * <data>/can_live.json, which this thread writes once a second while the
  * page has said, in the last 15 s, that it is looking. The commands, a line
- * each: "watch", "send <candump frame>", "rec on", "rec off", "clear", and
- * "reload" (enviar.txt or senales.dbc changed).
+ * each: "watch", "send <candump frame>", "rec on", "rec off", "clear",
+ * "reload" (enviar.txt, a .dbc or the choice of one changed), and "obd on",
+ * "obd on29", "obd off" (the OBD-II scanner, can_obd.c, which this thread
+ * drives too).
  */
 #include "can.h"
 
@@ -54,7 +56,7 @@ void cn_unlock(void) { aos_hal_mutex_unlock(s_mx); }
 uint64_t cn_us(void) { return aos_hal_uptime_us(); }
 uint32_t cn_ms(void) { return (uint32_t)(aos_hal_uptime_us() / 1000); }
 
-static void *big_alloc(size_t n)
+void *cn_big_alloc(size_t n)
 {
 #if !defined(AOS_SIM) && !defined(AOS_SIM_BUILTIN)
     void *p = heap_caps_malloc(n, MALLOC_CAP_SPIRAM);
@@ -66,7 +68,7 @@ static void *big_alloc(size_t n)
     return calloc(1, n);
 }
 
-static void big_free(void *p)
+void cn_big_free(void *p)
 {
 #if !defined(AOS_SIM) && !defined(AOS_SIM_BUILTIN)
     heap_caps_free(p);
@@ -132,11 +134,69 @@ static void id_update(const cn_frame_t *f)
     e->last_us = f->t_us;
 }
 
+/* the multiplexors' value of a frame: their raw bits, hashed */
+static uint32_t mux_bits(const uint8_t *d, int len, uint16_t start, uint16_t n, bool motorola)
+{
+    uint32_t raw = 0;
+    int pos = start;
+    for (int i = 0; i < n; i++) {
+        int p = motorola ? pos : start + i;
+        if ((p >> 3) >= len) return 0xFFFFFFFFu;
+        uint32_t b = (uint32_t)(d[p >> 3] >> (p & 7) & 1);
+        if (motorola) {
+            raw = raw << 1 | b;
+            if ((pos & 7) == 0) pos += 15;
+            else pos--;
+        } else {
+            raw |= b << i;
+        }
+    }
+    return raw;
+}
+
+static void mux_put(const cn_frame_t *f)
+{
+    if (!CB.muxc || f->fl & CN_RTR) return;
+    bool ext = f->fl & CN_EXT;
+    const cn_muxspec_t *sp = NULL;
+    for (int i = 0; i < CB.nmuxspec && !sp; i++)
+        if (CB.muxspec[i].id == f->id && CB.muxspec[i].ext == ext) sp = &CB.muxspec[i];
+    if (!sp) return;
+    uint32_t key = 2166136261u;
+    for (int k = 0; k < sp->n; k++)
+        key = (key ^ mux_bits(f->data, f->len, sp->start[k], sp->len[k], sp->motorola[k])) * 16777619u;
+    cn_muxframe_t *slot = NULL, *old = &CB.muxc[0];
+    for (int i = 0; i < CN_MUXCACHE && !slot; i++) {
+        cn_muxframe_t *m = &CB.muxc[i];
+        if (m->t_us && m->id == f->id && m->ext == ext && m->key == key) slot = m;
+        else if (m->t_us < old->t_us) old = m;
+    }
+    if (!slot) slot = old;
+    slot->id = f->id;
+    slot->ext = ext;
+    slot->key = key;
+    slot->len = f->len;
+    memcpy(slot->data, f->data, 8);
+    slot->t_us = f->t_us ? f->t_us : 1;
+}
+
+void cn_mux_set(const cn_muxspec_t *spec, int n)
+{
+    cn_lock();
+    if (n > CN_MUXSPEC) n = CN_MUXSPEC;
+    if (n > 0) memcpy(CB.muxspec, spec, sizeof(cn_muxspec_t) * (size_t)n);
+    else n = 0;
+    CB.nmuxspec = n;
+    if (CB.muxc) memset(CB.muxc, 0, sizeof(cn_muxframe_t) * CN_MUXCACHE);
+    cn_unlock();
+}
+
 static void ring_put(const cn_frame_t *f)
 {
     CB.ring[CB.seq % CN_RING] = *f;
     CB.seq++;
     id_update(f);
+    if (CB.nmuxspec) mux_put(f);
     s_frames_acc++;
     s_bits_acc += frame_bits(f);
 }
@@ -148,6 +208,7 @@ void cn_bus_clear(void)
     CB.rec_seq = 0;
     CB.nids = 0;
     CB.ids_gen++;
+    if (CB.muxc) memset(CB.muxc, 0, sizeof(cn_muxframe_t) * CN_MUXCACHE);
     cn_unlock();
 }
 
@@ -168,6 +229,7 @@ static void stop_sending_locked(void)
     for (int i = 0; i < CN_PERIODIC; i++) CB.per[i].on = false;
     for (int i = 0; i < CN_SAVED_MAX; i++) CN_SAVED[i].running = false;
     CB.replay = false;
+    cn_obd_stop_locked();
 }
 
 static void send_now(const cn_frame_t *f)
@@ -211,7 +273,10 @@ static void bus_main(void *arg)
         int no = 0;
         bool recover = false;
         cn_lock();
-        for (int i = 0; i < n; i++) ring_put(&batch[i]);
+        for (int i = 0; i < n; i++) {
+            ring_put(&batch[i]);
+            cn_obd_rx_locked(&batch[i]);
+        }
         /* what to send: the UI's queue, the periodic ones that are due, the replay's */
         for (int i = 0; i < CB.ntxq; i++) out[no++] = CB.txq[i];
         CB.ntxq = 0;
@@ -222,6 +287,7 @@ static void bus_main(void *arg)
             CB.per[i].next_us += p;
             if (CB.per[i].next_us < now) CB.per[i].next_us = now + p;   /* fell behind: no burst */
         }
+        if (cn_obd_step_locked(now, &out[no])) no++;
         while (CB.replay && CB.rq_n && CB.rq[CB.rq_head].t_us <= now && no < (int)(sizeof out / sizeof out[0])) {
             out[no++] = CB.rq[CB.rq_head];
             CB.rq_head = (CB.rq_head + 1) % CN_REPLAYQ;
@@ -312,6 +378,7 @@ void cn_bus_close(void)
 {
     if (!s_can) return;
     cn_rec_stop();
+    cn_obd_stop();
     cn_lock();
     stop_sending_locked();
     cn_unlock();
@@ -640,6 +707,13 @@ static void web_commands(void)
             cn_rec_stop();
         } else if (!strcmp(s, "clear")) {
             cn_bus_clear();
+        } else if (!strcmp(s, "obd on") || !strcmp(s, "obd on29")) {
+            cn_lock();
+            bool normal = CB.open && CB.cfg.mode == CN_MODE_NORMAL;
+            cn_unlock();
+            if (normal) cn_obd_start(s[6] == '2');
+        } else if (!strcmp(s, "obd off")) {
+            cn_obd_stop();
         } else if (!strcmp(s, "reload")) {
             cn_lock();
             CB.want_reload = true;      /* the UI's lists: the UI does it */
@@ -648,7 +722,7 @@ static void web_commands(void)
     }
 }
 
-#define LIVE_MAX (24 * 1024)
+#define LIVE_MAX (48 * 1024)       /* 192 ids, the OBD answers and the multiplexed frames */
 static char *s_json;
 
 static void jcat(int *n, const char *fmt, ...) __attribute__((format(printf, 2, 3)));
@@ -668,7 +742,7 @@ static void web_snapshot(void)
     static uint32_t count;
     static cn_frame_t last[32];
     static cn_id_t ids[CN_IDS];
-    if (!s_json && !(s_json = big_alloc(LIVE_MAX))) return;
+    if (!s_json && !(s_json = cn_big_alloc(LIVE_MAX))) return;
     int n = 0, nids, nlast = 0;
     uint32_t now_ms = cn_ms();
     static cn_bus_t b;          /* static: it is 7 KB, the stack is 6 */
@@ -703,7 +777,29 @@ static void web_snapshot(void)
         jcat(&n, "%s[\"%s\",%d,%u,\"%s\",%u,%.1f,%u]", i ? "," : "", id, ids[i].fl & CN_EXT ? 1 : 0, ids[i].len,
              data, recent, (double)ids[i].hz, (unsigned)ids[i].count);
     }
-    jcat(&n, "],\"last\":[");
+    static char obd[8192];
+    cn_obd_json(obd, sizeof obd);
+    jcat(&n, "],\"obd\":%s", obd);
+    /* the multiplexed messages' recent frames, one per multiplexor value
+     * (can.h): the page decodes them as the Signals tab does */
+    jcat(&n, ",\"mux\":[");
+    static cn_muxframe_t mx[64];
+    int nmx = 0;
+    uint64_t now_us = cn_us();
+    cn_lock();
+    for (int i = 0; CB.muxc && i < CN_MUXCACHE && nmx < 64; i++)
+        if (CB.muxc[i].t_us && now_us - CB.muxc[i].t_us < 2000000) mx[nmx++] = CB.muxc[i];
+    cn_unlock();
+    for (int i = 0; i < nmx; i++) {
+        cn_frame_t f = { .id = mx[i].id, .fl = mx[i].ext ? CN_EXT : 0, .len = mx[i].len };
+        memcpy(f.data, mx[i].data, 8);
+        char id[12], data[32];
+        cn_fmt_id(&f, id, sizeof id);
+        cn_fmt_data(&f, data, sizeof data);
+        jcat(&n, "%s[\"%s\",%d,\"%s\"]", i ? "," : "", id, mx[i].ext ? 1 : 0, data);
+    }
+    jcat(&n, "]");
+    jcat(&n, ",\"last\":[");
     for (int i = 0; i < nlast; i++) {
         char id[12], data[32];
         cn_fmt_id(&last[i], id, sizeof id);
@@ -762,8 +858,9 @@ static void io_main(void *arg)
 void cn_bus_init(void)
 {
     if (!s_mx) s_mx = aos_hal_mutex_create();
-    if (!CB.ring) CB.ring = big_alloc(sizeof(cn_frame_t) * CN_RING);
-    if (!CB.ids) CB.ids = big_alloc(sizeof(cn_id_t) * CN_IDS);
+    if (!CB.ring) CB.ring = cn_big_alloc(sizeof(cn_frame_t) * CN_RING);
+    if (!CB.ids) CB.ids = cn_big_alloc(sizeof(cn_id_t) * CN_IDS);
+    if (!CB.muxc) CB.muxc = cn_big_alloc(sizeof(cn_muxframe_t) * CN_MUXCACHE);
     if (s_io_done) {
         s_io_stop = false;
         s_io_done = false;
@@ -778,12 +875,15 @@ void cn_bus_deinit(void)
     for (int w = 0; !s_io_done && w < 600; w++) aos_hal_sleep_ms(5);
     if (!s_io_done) return;          /* stuck on the card: keep its buffers */
     cn_lock();
-    big_free(CB.ring);
-    big_free(CB.ids);
+    cn_big_free(CB.ring);
+    cn_big_free(CB.ids);
+    cn_big_free(CB.muxc);
+    CB.muxc = NULL;
+    CB.nmuxspec = 0;
     CB.ring = NULL;
     CB.ids = NULL;
     CB.nids = 0;
     CB.seq = 0;
     cn_unlock();
-    if (s_json) { big_free(s_json); s_json = NULL; }
+    if (s_json) { cn_big_free(s_json); s_json = NULL; }
 }

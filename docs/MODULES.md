@@ -629,7 +629,9 @@ in the room presses a key every 6 s (`P4_SIM_IR_REMOTE=0` stops it). All
 the CAN nodes share a bus with a car on it (engine speed 0x0C0, vehicle
 speed 0x1A0, temperatures 0x3E8, a J1939-style 0x18FEF100;
 `P4_SIM_CAN_TRAFFIC=0` takes it off), and a node in the self test hears
-only itself.
+only itself. The car answers OBD-II too, mode 01, as two units: the engine
+on 7E8 (18DAF110 with 29-bit ids) with some twenty PIDs, the gearbox on
+7E9 (18DAF118) with 01 and 0D; the CAN app's OBD tab scans it.
 
 **EEPROMs** have no API of their own: they are I2C, SPI or GPIO. A 24LC
 on the header's I2C bus:

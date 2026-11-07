@@ -5,185 +5,500 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/can/web/can.js:53
+#: apps/can/web/can.js:71
 activo	aktiv
 
-#: apps/can/web/can.js:53
+#: apps/can/web/can.js:71
 con avisos	Warnung
 
-#: apps/can/web/can.js:53
+#: apps/can/web/can.js:71
 pasivo	passiv
 
-#: apps/can/web/can.js:53
+#: apps/can/web/can.js:71
 fuera del bus	Bus aus
 
-#: apps/can/web/can.js:54
+#: apps/can/web/can.js:72
 Solo escucha	Nur hören
 
-#: apps/can/web/can.js:54
+#: apps/can/web/can.js:72
 Normal	Normal
 
-#: apps/can/web/can.js:54
+#: apps/can/web/can.js:72
 Autoprueba	Selbsttest
 
-#: apps/can/web/can.js:62
-#: apps/can/web/can.js:244
-CAN	CAN
+#: apps/can/web/can.js:153
+Luz de falla y códigos	Motorkontrollleuchte und Codes
 
-#: apps/can/web/can.js:91
-Abierta en la placa	Auf der Platine geöffnet
+#: apps/can/web/can.js:153
+Carga calculada	Berechnete Last
 
-#: apps/can/web/can.js:91
-Abrir CAN en la placa	CAN auf der Platine öffnen
+#: apps/can/web/can.js:154
+Refrigerante	Kühlmittel
 
-#: apps/can/web/can.js:104
-Parar la grabación	Aufnahme stoppen
+#: apps/can/web/can.js:154
+Corrección corta, banco 1	Kurzzeit-Trimm, Bank 1
 
-#: apps/can/web/can.js:105
-Grabar	Aufnehmen
+#: apps/can/web/can.js:155
+Corrección larga, banco 1	Langzeit-Trimm, Bank 1
 
-#: apps/can/web/can.js:106
-Limpiar	Leeren
+#: apps/can/web/can.js:155
+Corrección corta, banco 2	Kurzzeit-Trimm, Bank 2
 
-#: apps/can/web/can.js:111
-La app dejó de contestar.	Die App antwortet nicht mehr.
+#: apps/can/web/can.js:156
+Corrección larga, banco 2	Langzeit-Trimm, Bank 2
 
-#: apps/can/web/can.js:111
-Esperando a la app…	Warte auf die App…
+#: apps/can/web/can.js:156
+Presión de combustible	Kraftstoffdruck
 
-#: apps/can/web/can.js:112
-La página ve el bus a través de la app CAN: tiene que estar abierta en la placa (al frente o atrás). El bus se conecta desde ahí.	Diese Seite sieht den Bus über die CAN-App: Sie muss auf der Platine geöffnet sein (im Vordergrund oder Hintergrund). Der Bus wird dort verbunden.
+#: apps/can/web/can.js:157
+Presión del múltiple	Saugrohrdruck
 
-#: apps/can/web/can.js:116
-desconectado	getrennt
+#: apps/can/web/can.js:157
+Régimen del motor	Motordrehzahl
 
-#: apps/can/web/can.js:120
-Sin bus: se conecta desde la app, tocando la conexión.	Kein Bus: in der App verbinden, durch Tippen auf die Verbindung.
+#: apps/can/web/can.js:158
+Velocidad	Geschwindigkeit
 
-#: apps/can/web/can.js:124
-tramas/s	Frames/s
+#: apps/can/web/can.js:158
+Avance del encendido	Zündzeitpunkt
 
-#: apps/can/web/can.js:125
-de carga	Last
+#: apps/can/web/can.js:159
+Aire de admisión	Ansaugluft
 
-#: apps/can/web/can.js:126
-recibidas	empfangen
+#: apps/can/web/can.js:159
+Caudal de aire (MAF)	Luftmasse (MAF)
 
-#: apps/can/web/can.js:127
-enviadas	gesendet
+#: apps/can/web/can.js:160
+Mariposa	Drosselklappe
 
-#: apps/can/web/can.js:128
-perdidas	verloren
+#: apps/can/web/can.js:160
+Sonda de oxígeno, banco 1, 1	Lambdasonde, Bank 1, 1
 
-#: apps/can/web/can.js:129
-errores TX / RX	Fehler TX / RX
+#: apps/can/web/can.js:161
+Sonda de oxígeno, banco 1, 2	Lambdasonde, Bank 1, 2
 
-#: apps/can/web/can.js:130
-Grabando %s: %d tramas.	Aufnahme %s: %d Frames.
+#: apps/can/web/can.js:161
+Norma OBD	OBD-Norm
 
-#: apps/can/web/can.js:131
-Repitiendo %s.	Wiedergabe von %s.
+#: apps/can/web/can.js:162
+Desde el arranque	Seit dem Motorstart
 
-#: apps/can/web/can.js:136
-Esperando tramas…	Warte auf Frames…
+#: apps/can/web/can.js:162
+Recorrido con la luz de falla	Strecke mit Kontrollleuchte
 
-#: apps/can/web/can.js:136
-Sin tramas.	Keine Frames.
+#: apps/can/web/can.js:163
+Presión del riel (relativa)	Raildruck (relativ)
 
-#: apps/can/web/can.js:141
-id	ID
+#: apps/can/web/can.js:163
+Presión del riel	Raildruck
 
-#: apps/can/web/can.js:141
-n	n
+#: apps/can/web/can.js:164
+EGR comandada	Soll-AGR
 
-#: apps/can/web/can.js:141
-datos	Daten
+#: apps/can/web/can.js:164
+Error de la EGR	AGR-Fehler
 
-#: apps/can/web/can.js:141
-por s	pro s
+#: apps/can/web/can.js:165
+Purga del cánister	Tankentlüftung
 
-#: apps/can/web/can.js:141
-vistas	gesehen
+#: apps/can/web/can.js:165
+Nivel de combustible	Tankfüllstand
+
+#: apps/can/web/can.js:166
+Calentamientos desde el borrado	Warmläufe seit dem Löschen
+
+#: apps/can/web/can.js:166
+Recorrido desde el borrado	Strecke seit dem Löschen
+
+#: apps/can/web/can.js:167
+Presión barométrica	Luftdruck
+
+#: apps/can/web/can.js:167
+Catalizador, banco 1, 1	Katalysator, Bank 1, 1
+
+#: apps/can/web/can.js:168
+Catalizador, banco 2, 1	Katalysator, Bank 2, 1
+
+#: apps/can/web/can.js:168
+Tensión del módulo	Steuergerätespannung
+
+#: apps/can/web/can.js:169
+Carga absoluta	Absolute Last
+
+#: apps/can/web/can.js:169
+Lambda comandada	Soll-Lambda
+
+#: apps/can/web/can.js:170
+Mariposa relativa	Drosselklappe relativ
+
+#: apps/can/web/can.js:170
+Temperatura ambiente	Außentemperatur
+
+#: apps/can/web/can.js:171
+Mariposa absoluta B	Drosselklappe absolut B
+
+#: apps/can/web/can.js:171
+Pedal D	Pedal D
+
+#: apps/can/web/can.js:172
+Pedal E	Pedal E
+
+#: apps/can/web/can.js:172
+Mariposa comandada	Soll-Drosselklappe
 
 #: apps/can/web/can.js:173
-La app no está contestando: lo que mandes se manda cuando vuelva.	Die App antwortet nicht: Gesendetes geht raus, sobald sie zurück ist.
+Tiempo con la luz de falla	Zeit mit Kontrollleuchte
+
+#: apps/can/web/can.js:173
+Tiempo desde el borrado	Zeit seit dem Löschen
 
 #: apps/can/web/can.js:174
-El bus está desconectado en la app.	Der Bus ist in der App getrennt.
+Combustible	Kraftstoff
+
+#: apps/can/web/can.js:174
+Etanol	Ethanol
 
 #: apps/can/web/can.js:175
-La app está en Solo escucha: no sale nada. El modo se cambia en la placa.	Die App ist im Modus Nur hören: Nichts geht hinaus. Der Modus wird auf der Platine geändert.
+Presión del riel (absoluta)	Raildruck (absolut)
+
+#: apps/can/web/can.js:175
+Pedal relativo	Pedal relativ
 
 #: apps/can/web/can.js:176
-Autoprueba: vuelve sólo a la placa, no sale al bus.	Selbsttest: Es kommt nur zur Platine zurück und geht nicht auf den Bus.
+Batería del híbrido	Hybridbatterie
+
+#: apps/can/web/can.js:176
+Aceite	Öl
 
 #: apps/can/web/can.js:177
-Normal: sale al bus. Nunca al de un auto en marcha.	Normal: Es geht auf den Bus. Nie auf den eines fahrenden Autos.
+Inyección	Einspritzzeitpunkt
+
+#: apps/can/web/can.js:177
+Consumo	Verbrauch
+
+#: apps/can/web/can.js:178
+Par pedido	Soll-Drehmoment
+
+#: apps/can/web/can.js:178
+Par real	Ist-Drehmoment
+
+#: apps/can/web/can.js:179
+Par de referencia	Referenzdrehmoment
+
+#: apps/can/web/can.js:179
+Odómetro	Kilometerstand
 
 #: apps/can/web/can.js:182
-Como en candump: 123#11223344, 18FEF100#FF00 o 7DF#R	Wie bei candump: 123#11223344, 18FEF100#FF00 oder 7DF#R
+sin dato	keine Angabe
 
-#: apps/can/web/can.js:184
-Mandada a la app: %s	An die App gesendet: %s
+#: apps/can/web/can.js:182
+nafta	Benzin
+
+#: apps/can/web/can.js:182
+metanol	Methanol
+
+#: apps/can/web/can.js:182
+etanol	Ethanol
+
+#: apps/can/web/can.js:182
+diésel	Diesel
+
+#: apps/can/web/can.js:182
+GLP	LPG
+
+#: apps/can/web/can.js:182
+GNC	CNG
+
+#: apps/can/web/can.js:182
+propano	Propan
+
+#: apps/can/web/can.js:182
+eléctrico	elektrisch
+
+#: apps/can/web/can.js:183
+sin OBD	kein OBD
 
 #: apps/can/web/can.js:191
-cada %d ms (las periódicas se arrancan en la placa)	alle %d ms (periodische werden auf der Platine gestartet)
-
 #: apps/can/web/can.js:192
-#: apps/can/web/can.js:196
-#: apps/can/web/can.js:247
-Mandar	Senden
+código %d	Code %d
 
-#: apps/can/web/can.js:192
-Sin tramas guardadas.	Keine gespeicherten Frames.
-
-#: apps/can/web/can.js:198
-Guardadas en la placa	Auf der Platine gespeichert
-
-#: apps/can/web/can.js:212
-Bajar	Herunterladen
-
-#: apps/can/web/can.js:214
-Se está grabando: pararla primero	Wird gerade aufgenommen: zuerst stoppen
-
-#: apps/can/web/can.js:215
-¿Borrar %s? No se puede deshacer.	%s löschen? Das lässt sich nicht rückgängig machen.
-
-#: apps/can/web/can.js:216
-Borrada	Gelöscht
-
-#: apps/can/web/can.js:217
-Borrar	Löschen
-
-#: apps/can/web/can.js:218
-Todavía no hay grabaciones: se graba desde la placa o con el botón de arriba.	Noch keine Aufnahmen: auf der Platine oder mit der Schaltfläche oben aufnehmen.
+#: apps/can/web/can.js:202
+#: apps/can/web/can.js:579
+CAN	CAN
 
 #: apps/can/web/can.js:231
-Guardado: la app lo vuelve a leer	Gespeichert: Die App liest es neu ein
+Abierta en la placa	Auf der Platine geöffnet
 
-#: apps/can/web/can.js:234
-Guardar	Speichern
+#: apps/can/web/can.js:231
+Abrir CAN en la placa	CAN auf der Platine öffnen
 
-#: apps/can/web/can.js:240
-Tramas guardadas	Gespeicherte Frames
-
-#: apps/can/web/can.js:240
-can/enviar.txt: una por línea, la trama, el período en ms (0 a mano) y un nombre.	can/enviar.txt: eine pro Zeile, der Frame, die Periode in ms (0 von Hand) und ein Name.
-
-#: apps/can/web/can.js:241
-Señales	Signale
-
-#: apps/can/web/can.js:241
-can/senales.dbc: un .dbc (BO_ y SG_; lo demás se saltea). La app las decodifica y grafica.	can/senales.dbc: eine .dbc (BO_ und SG_; der Rest wird übersprungen). Die App dekodiert sie und zeichnet sie als Grafik.
+#: apps/can/web/can.js:244
+Parar la grabación	Aufnahme stoppen
 
 #: apps/can/web/can.js:245
-Por id	Nach ID
+Grabar	Aufnehmen
 
 #: apps/can/web/can.js:246
+Limpiar	Leeren
+
+#: apps/can/web/can.js:251
+La app dejó de contestar.	Die App antwortet nicht mehr.
+
+#: apps/can/web/can.js:251
+Esperando a la app…	Warte auf die App…
+
+#: apps/can/web/can.js:252
+La página ve el bus a través de la app CAN: tiene que estar abierta en la placa (al frente o atrás). El bus se conecta desde ahí.	Diese Seite sieht den Bus über die CAN-App: Sie muss auf der Platine geöffnet sein (im Vordergrund oder Hintergrund). Der Bus wird dort verbunden.
+
+#: apps/can/web/can.js:256
+desconectado	getrennt
+
+#: apps/can/web/can.js:260
+Sin bus: se conecta desde la app, tocando la conexión.	Kein Bus: in der App verbinden, durch Tippen auf die Verbindung.
+
+#: apps/can/web/can.js:264
+tramas/s	Frames/s
+
+#: apps/can/web/can.js:265
+de carga	Last
+
+#: apps/can/web/can.js:266
+recibidas	empfangen
+
+#: apps/can/web/can.js:267
+enviadas	gesendet
+
+#: apps/can/web/can.js:268
+perdidas	verloren
+
+#: apps/can/web/can.js:269
+errores TX / RX	Fehler TX / RX
+
+#: apps/can/web/can.js:270
+Grabando %s: %d tramas.	Aufnahme %s: %d Frames.
+
+#: apps/can/web/can.js:271
+Repitiendo %s.	Wiedergabe von %s.
+
+#: apps/can/web/can.js:276
+Esperando tramas…	Warte auf Frames…
+
+#: apps/can/web/can.js:276
+Sin tramas.	Keine Frames.
+
+#: apps/can/web/can.js:281
+id	ID
+
+#: apps/can/web/can.js:281
+n	n
+
+#: apps/can/web/can.js:281
+datos	Daten
+
+#: apps/can/web/can.js:281
+por s	pro s
+
+#: apps/can/web/can.js:281
+vistas	gesehen
+
+#: apps/can/web/can.js:310
+Buscar un mensaje por id o nombre	Botschaft nach ID oder Name suchen
+
+#: apps/can/web/can.js:358
+No está can/%s	can/%s fehlt
+
+#: apps/can/web/can.js:369
+%s no es un .dbc	%s ist keine .dbc
+
+#: apps/can/web/can.js:372
+Subido a can/dbc	Nach can/dbc hochgeladen
+
+#: apps/can/web/can.js:388
+Subir .dbc	.dbc hochladen
+
+#: apps/can/web/can.js:390
+¿Borrar %s de la tarjeta? No se puede deshacer.	%s von der Karte löschen? Das lässt sich nicht rückgängig machen.
+
+#: apps/can/web/can.js:393
+#: apps/can/web/can.js:552
+Borrar	Löschen
+
+#: apps/can/web/can.js:394
+%d mensajes, %d señales. La placa muestra los mensajes elegidos acá, o los que pasan por el bus.	%d Botschaften, %d Signale. Die Platine zeigt die hier gewählten Botschaften oder die auf dem Bus.
+
+#: apps/can/web/can.js:394
+Leyendo…	Lese…
+
+#: apps/can/web/can.js:395
+Los .dbc van en la carpeta can/dbc de la tarjeta. Bibliotecas abiertas: opendbc de comma.ai (github.com/commaai/opendbc, carpeta opendbc/dbc) y nberlette/canbus (carpeta dbc, con OBD-II y J1939 genéricos); las dos con licencia MIT.	Die .dbc-Dateien kommen in den Ordner can/dbc der Karte. Offene Bibliotheken: opendbc von comma.ai (github.com/commaai/opendbc, Ordner opendbc/dbc) und nberlette/canbus (Ordner dbc, mit generischem OBD-II und J1939); beide unter MIT-Lizenz.
+
+#: apps/can/web/can.js:397
+Los que pasan por el bus	Die auf dem Bus
+
+#: apps/can/web/can.js:399
+Marcá los mensajes que querés ver	Markiere die Botschaften, die du sehen willst
+
+#: apps/can/web/can.js:401
+Elegidos: %d	Gewählt: %d
+
+#: apps/can/web/can.js:419
+Hasta %d mensajes	Bis zu %d Botschaften
+
+#: apps/can/web/can.js:428
+%d señales	%d Signale
+
+#: apps/can/web/can.js:429
+en el bus	auf dem Bus
+
+#: apps/can/web/can.js:430
+Y %d más: buscá para acotar.	Und %d weitere: suche, um einzugrenzen.
+
+#: apps/can/web/can.js:447
+Ningún mensaje del archivo pasa por el bus (o la app no está mirando).	Keine Botschaft der Datei ist auf dem Bus (oder die App schaut nicht hin).
+
+#: apps/can/web/can.js:447
+Sin mensajes elegidos.	Keine Botschaften gewählt.
+
+#: apps/can/web/can.js:472
+Preguntar (11 bits)	Fragen (11 Bit)
+
+#: apps/can/web/can.js:473
+Preguntar (29 bits)	Fragen (29 Bit)
+
+#: apps/can/web/can.js:474
+Parar	Stopp
+
+#: apps/can/web/can.js:475
+Pregunta los PIDs del modo 01 de SAE J1979 a 7DF (o 18DB33F1): primero el PID 00, el mapa de los que conoce el auto, y después esos, en vuelta. Necesita el modo Normal, que se elige en la placa: la app abre siempre en Solo escucha. En muchos autos modernos el conector OBD da sólo diagnóstico, porque un gateway separa los buses internos.	Fragt 7DF (oder 18DB33F1) nach den PIDs von Modus 01 von SAE J1979: zuerst PID 00, die Übersicht der PIDs, die das Auto kennt, dann diese der Reihe nach. Braucht den Modus Normal, der auf der Platine gewählt wird: die App öffnet immer in Nur hören. Bei vielen modernen Autos liefert der OBD-Stecker nur Diagnose, weil ein Gateway die internen Busse trennt.
+
+#: apps/can/web/can.js:477
+Detenido	Angehalten
+
+#: apps/can/web/can.js:477
+Preguntando qué PIDs conoce…	Frage, welche PIDs es kennt…
+
+#: apps/can/web/can.js:477
+En vivo	Live
+
+#: apps/can/web/can.js:477
+Nadie contestó	Niemand hat geantwortet
+
+#: apps/can/web/can.js:477
+Detenido: hace falta el modo Normal	Angehalten: braucht den Modus Normal
+
+#: apps/can/web/can.js:477
+Detenido: nadie confirma lo que manda	Angehalten: niemand bestätigt, was es sendet
+
+#: apps/can/web/can.js:480
+Sin datos de la app.	Keine Daten von der App.
+
+#: apps/can/web/can.js:484
+contestan %s · %d respuestas	es antworten %s · %d Antworten
+
+#: apps/can/web/can.js:485
+#: apps/can/web/can.js:509
+El bus está desconectado en la app.	Der Bus ist in der App getrennt.
+
+#: apps/can/web/can.js:485
+La app está en %s: para preguntar hace falta Normal, y se cambia en la placa.	Die App ist in %s: zum Fragen braucht es Normal, das auf der Platine umgestellt wird.
+
+#: apps/can/web/can.js:488
+PID	PID
+
+#: apps/can/web/can.js:488
+qué	was
+
+#: apps/can/web/can.js:488
+valor	Wert
+
+#: apps/can/web/can.js:488
+de	von
+
+#: apps/can/web/can.js:488
+hace	vor
+
+#: apps/can/web/can.js:493
+sin fórmula	ohne Formel
+
+#: apps/can/web/can.js:508
+La app no está contestando: lo que mandes se manda cuando vuelva.	Die App antwortet nicht: Gesendetes geht raus, sobald sie zurück ist.
+
+#: apps/can/web/can.js:510
+La app está en Solo escucha: no sale nada. El modo se cambia en la placa.	Die App ist im Modus Nur hören: Nichts geht hinaus. Der Modus wird auf der Platine geändert.
+
+#: apps/can/web/can.js:511
+Autoprueba: vuelve sólo a la placa, no sale al bus.	Selbsttest: Es kommt nur zur Platine zurück und geht nicht auf den Bus.
+
+#: apps/can/web/can.js:512
+Normal: sale al bus. Nunca al de un auto en marcha.	Normal: Es geht auf den Bus. Nie auf den eines fahrenden Autos.
+
+#: apps/can/web/can.js:517
+Como en candump: 123#11223344, 18FEF100#FF00 o 7DF#R	Wie bei candump: 123#11223344, 18FEF100#FF00 oder 7DF#R
+
+#: apps/can/web/can.js:519
+Mandada a la app: %s	An die App gesendet: %s
+
+#: apps/can/web/can.js:526
+cada %d ms (las periódicas se arrancan en la placa)	alle %d ms (periodische werden auf der Platine gestartet)
+
+#: apps/can/web/can.js:527
+#: apps/can/web/can.js:531
+#: apps/can/web/can.js:585
+Mandar	Senden
+
+#: apps/can/web/can.js:527
+Sin tramas guardadas.	Keine gespeicherten Frames.
+
+#: apps/can/web/can.js:533
+Guardadas en la placa	Auf der Platine gespeichert
+
+#: apps/can/web/can.js:547
+Bajar	Herunterladen
+
+#: apps/can/web/can.js:549
+Se está grabando: pararla primero	Wird gerade aufgenommen: zuerst stoppen
+
+#: apps/can/web/can.js:550
+¿Borrar %s? No se puede deshacer.	%s löschen? Das lässt sich nicht rückgängig machen.
+
+#: apps/can/web/can.js:551
+Borrada	Gelöscht
+
+#: apps/can/web/can.js:553
+Todavía no hay grabaciones: se graba desde la placa o con el botón de arriba.	Noch keine Aufnahmen: auf der Platine oder mit der Schaltfläche oben aufnehmen.
+
+#: apps/can/web/can.js:566
+Guardado: la app lo vuelve a leer	Gespeichert: Die App liest es neu ein
+
+#: apps/can/web/can.js:569
+Guardar	Speichern
+
+#: apps/can/web/can.js:575
+Tramas guardadas	Gespeicherte Frames
+
+#: apps/can/web/can.js:575
+can/enviar.txt: una por línea, la trama, el período en ms (0 a mano) y un nombre.	can/enviar.txt: eine pro Zeile, der Frame, die Periode in ms (0 von Hand) und ein Name.
+
+#: apps/can/web/can.js:576
+Señales propias	Eigene Signale
+
+#: apps/can/web/can.js:576
+can/senales.dbc: un .dbc propio (BO_, SG_, VAL_). Los bajados van en can/dbc y se eligen arriba.	can/senales.dbc: eine eigene .dbc (BO_, SG_, VAL_). Heruntergeladene kommen nach can/dbc und werden oben gewählt.
+
+#: apps/can/web/can.js:580
+Por id	Nach ID
+
+#: apps/can/web/can.js:581
+Señales	Signale
+
+#: apps/can/web/can.js:583
+OBD-II	OBD-II
+
+#: apps/can/web/can.js:584
 Últimas tramas	Letzte Frames
 
-#: apps/can/web/can.js:248
+#: apps/can/web/can.js:586
 Grabaciones	Aufnahmen
 
-#: apps/can/web/can.js:249
+#: apps/can/web/can.js:587
 Archivos de la app	Dateien der App

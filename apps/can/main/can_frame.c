@@ -1,5 +1,5 @@
 /*
- * P4OS - CAN: frames as text, the signals file and the saved frames.
+ * P4OS - CAN: frames as text and the saved frames.
  *
  * A frame is written the way candump and cansend write it: the id in hex,
  * three digits for an 11-bit one and eight for a 29-bit one, a '#', and the
@@ -7,11 +7,7 @@
  * remote frame, "123#R4" one asking for four bytes. Spaces and dots between
  * the bytes are allowed when reading.
  *
- * The signals come from <card>/can/senales.dbc, a subset of the DBC format
- * (what Vector's CANdb++, SavvyCAN and cantools write): the BO_ lines give a
- * message's id, the SG_ lines under it its signals, with the start bit,
- * length, byte order (@1 Intel, @0 Motorola), sign, scale, offset and unit.
- * Multiplexed signals and everything else in the file are skipped.
+ * The signals' file, the .dbc, is can_dbc.c's.
  *
  * The saved frames are <card>/can/enviar.txt, one a line:
  *     <frame> <period ms, 0 = by hand> <name>
@@ -147,147 +143,6 @@ const char *cn_mode_name(cn_mode_t m)
     case CN_MODE_SELFTEST: return _("Autoprueba");
     default:               return _("Solo escucha");
     }
-}
-
-/* ---- signals ---- */
-
-static const char *sig_path(char *out, size_t cap)
-{
-    snprintf(out, cap, "%s/senales.dbc", cn_dir());
-    return out;
-}
-
-/* SG_ name : 23|16@0+ (0.25,0) [0|16000] "rpm" receivers */
-static bool parse_sg(const char *s, cn_sig_t *g)
-{
-    while (*s == ' ' || *s == '\t') s++;
-    if (strncmp(s, "SG_ ", 4)) return false;
-    s += 4;
-    while (*s == ' ') s++;
-    int n = 0;
-    while (*s && *s != ' ' && *s != ':' && n < (int)sizeof g->name - 1) g->name[n++] = *s++;
-    g->name[n] = 0;
-    while (*s == ' ') s++;
-    if (*s != ':') return false;                /* "M" or "m3": multiplexed, skipped */
-    s++;
-    char *e;
-    g->start = (uint16_t)strtoul(s, &e, 10);
-    if (*e != '|') return false;
-    g->len = (uint16_t)strtoul(e + 1, &e, 10);
-    if (*e != '@' || g->len < 1 || g->len > 32) return false;      /* longer ones: skipped */
-    g->motorola = e[1] == '0';
-    g->is_signed = e[2] == '-';
-    s = strchr(e, '(');
-    if (!s) return false;
-    g->scale = strtof(s + 1, &e);
-    if (*e != ',') return false;
-    g->offset = strtof(e + 1, &e);
-    g->unit[0] = 0;
-    s = strchr(e, '"');
-    if (s) {
-        s++;
-        n = 0;
-        while (*s && *s != '"' && n < (int)sizeof g->unit - 1) g->unit[n++] = *s++;
-        g->unit[n] = 0;
-    }
-    return true;
-}
-
-int cn_sig_load(cn_sig_t *out, int max, char *err, int err_cap)
-{
-    char path[128];
-    FILE *f = fopen(sig_path(path, sizeof path), "r");
-    if (err) err[0] = 0;
-    if (!f) {
-        if (err) snprintf(err, err_cap, _("No está %s"), "can/senales.dbc");
-        return 0;
-    }
-    char line[200];
-    int n = 0;
-    bool in_msg = false;
-    uint32_t id = 0;
-    bool ext = false;
-    while (n < max && fgets(line, sizeof line, f)) {
-        char *s = line;
-        while (*s == ' ' || *s == '\t') s++;
-        if (!strncmp(s, "BO_ ", 4)) {
-            char *e;
-            uint32_t raw = (uint32_t)strtoul(s + 4, &e, 10);
-            in_msg = e != s + 4;
-            ext = raw & 0x80000000u;
-            id = raw & 0x1FFFFFFFu;
-            if (!ext && id > 0x7FF) ext = true;
-            continue;
-        }
-        if (!strncmp(s, "SG_ ", 4) && in_msg) {
-            cn_sig_t g;
-            memset(&g, 0, sizeof g);
-            if (!parse_sg(s, &g)) continue;
-            g.id = id;
-            g.ext = ext;
-            out[n++] = g;
-            continue;
-        }
-        if (*s && *s != '\r' && *s != '\n') in_msg = false;
-    }
-    fclose(f);
-    if (!n && err) snprintf(err, err_cap, "%s", _("El archivo no tiene señales (BO_ y SG_)"));
-    return n;
-}
-
-static int bit_at(const uint8_t *d, int pos) { return d[pos >> 3] >> (pos & 7) & 1; }
-
-bool cn_sig_value(const cn_sig_t *g, const uint8_t *data, int len, float *out)
-{
-    /* 32 bits at most (parse_sg skips longer ones): 64-bit shifts and
-     * conversions are not in the firmware's table */
-    uint32_t raw = 0;
-    if (g->motorola) {
-        /* the start bit is the most significant one; walking down a byte
-         * and on to bit 7 of the next */
-        int pos = g->start;
-        for (int i = 0; i < g->len; i++) {
-            if ((pos >> 3) >= len) return false;
-            raw = raw << 1 | (uint32_t)bit_at(data, pos);
-            if ((pos & 7) == 0) pos += 15;
-            else pos--;
-        }
-    } else {
-        for (int i = 0; i < g->len; i++) {
-            int pos = g->start + i;
-            if ((pos >> 3) >= len) return false;
-            raw |= (uint32_t)bit_at(data, pos) << i;
-        }
-    }
-    float v;
-    if (g->is_signed && g->len < 32 && (raw >> (g->len - 1) & 1)) v = (float)(int32_t)(raw | (~0u << g->len));
-    else if (g->is_signed && g->len == 32) v = (float)(int32_t)raw;
-    else v = (float)raw;
-    *out = v * g->scale + g->offset;
-    return true;
-}
-
-void cn_sig_write_example(void)
-{
-    char path[128];
-    struct stat sb;
-    if (stat(sig_path(path, sizeof path), &sb) == 0) return;
-    FILE *f = fopen(path, "w");
-    if (!f) return;
-    fputs("VERSION \"\"\n\n"
-          "NS_ :\n\nBS_:\n\nBU_: Motor\n\n"
-          "CM_ \"P4OS: ejemplo, las senales del auto del simulador. Reemplazalo por el .dbc de tu bus.\";\n\n"
-          "BO_ 192 Motor: 8 Motor\n"
-          " SG_ RPM : 23|16@0+ (0.25,0) [0|16000] \"rpm\" Vector__XXX\n"
-          " SG_ Contador : 56|8@1+ (1,0) [0|255] \"\" Vector__XXX\n\n"
-          "BO_ 416 Velocidad: 4 Motor\n"
-          " SG_ Velocidad : 7|16@0+ (0.01,0) [0|300] \"km/h\" Vector__XXX\n\n"
-          "BO_ 1000 Temperaturas: 2 Motor\n"
-          " SG_ Agua : 0|8@1+ (1,-40) [-40|215] \"\xC2\xB0" "C\" Vector__XXX\n"
-          " SG_ Aceite : 8|8@1+ (1,-40) [-40|215] \"\xC2\xB0" "C\" Vector__XXX\n\n"
-          "BO_ 2566844672 J1939_FEF1: 8 Motor\n"
-          " SG_ Contador_J : 15|16@0+ (1,0) [0|65535] \"\" Vector__XXX\n", f);
-    fclose(f);
 }
 
 /* ---- saved frames ---- */

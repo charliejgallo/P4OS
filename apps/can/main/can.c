@@ -3,13 +3,15 @@
  *
  * A bar on top - the connection (pins, speed, mode; tap it to change it),
  * connect, record, pause, the recordings, clear, the wiring - then the
- * controller's state, always in view, and four tabs:
+ * controller's state, always in view, and five tabs:
  *
  *   Tramas    every frame as it comes, with its time from the connection
  *   Por id    one row per id: the last data, how many a second, and the
  *             bytes that are changing lit up; tap one for its bits
  *   Enviar    a frame by hand on a hex pad, the saved ones, periodic ones
- *   Señales   the signals of a .dbc decoded, and one of them drawn in time
+ *   Señales   the signals of a .dbc decoded, and one of them drawn in time;
+ *             the .dbc is chosen from a folder of them on the card
+ *   OBD       the OBD-II scanner: the PIDs of mode 01 a car answers
  *
  * It opens in "solo escucha" every time: on a bus that is not ours (a car)
  * the board must not acknowledge nor send anything until the user says so.
@@ -49,7 +51,7 @@ static const uint8_t CAN_ICON[] = {
     AIC_END
 };
 
-static const char *const TAB_NAME[CN_TAB_COUNT] = { N_("Tramas"), N_("Por id"), N_("Enviar"), N_("Señales") };
+static const char *const TAB_NAME[CN_TAB_COUNT] = { N_("Tramas"), N_("Por id"), N_("Enviar"), N_("Señales"), N_("OBD") };
 
 /* ---- settings ---- */
 
@@ -359,6 +361,7 @@ void cn_ui_set_tab(int tab)
     case CN_TAB_LIVE: cn_live_build(U.content); break;
     case CN_TAB_IDS:  cn_ids_build(U.content); break;
     case CN_TAB_SEND: cn_send_build(U.content); break;
+    case CN_TAB_OBD:  cn_obd_build(U.content); break;
     default:          cn_sig_build(U.content); break;
     }
 }
@@ -374,7 +377,7 @@ static void timer_cb(lv_timer_t *t)
     }
     cn_sig_sample();
     if (CB.want_reload) {
-        /* the portal rewrote the saved frames or the signals */
+        /* the portal rewrote the saved frames, a .dbc or the choice of one */
         cn_lock();
         CB.want_reload = false;
         cn_unlock();
@@ -388,6 +391,7 @@ static void timer_cb(lv_timer_t *t)
     case CN_TAB_LIVE: cn_live_refresh(false); break;
     case CN_TAB_IDS:  if (ticks % 2 == 0) cn_ids_refresh(false); break;
     case CN_TAB_SEND: if (ticks % 5 == 0) cn_send_refresh(); break;
+    case CN_TAB_OBD:  if (ticks % 3 == 0) cn_obd_refresh(); break;
     default:          if (ticks % 3 == 0) cn_sig_refresh(); break;
     }
 }
@@ -469,7 +473,7 @@ void cn_ui_rebuild(void)
     y += 34;
 
     /* the tabs */
-    int32_t tw = (U.W - 2 * pad - 3 * 8) / CN_TAB_COUNT;
+    int32_t tw = (U.W - 2 * pad - (CN_TAB_COUNT - 1) * 8) / CN_TAB_COUNT;
     for (int i = 0; i < CN_TAB_COUNT; i++) {
         lv_obj_t *t = lv_obj_create(root);
         lv_obj_remove_style_all(t);
@@ -533,6 +537,7 @@ static void destroy(aos_app_t *self, void *inst)
     U.status = NULL;
     cn_bus_deinit();
     cn_spy_free();
+    cn_dbc_free();
     U.paused = false;
 }
 

@@ -18,6 +18,13 @@
  * 0x18FEF100 (an extended id, J1939 style, 100 ms); it acknowledges what a
  * NORMAL node sends. Frames reach a node through its filter and a queue of
  * 64 that drops the oldest, as on the board.
+ *
+ * The car also answers OBD-II, mode 01 (SAE J1979 on ISO 15765-4), as two
+ * units: the engine (7E8, or 18DAF110 with 29-bit ids) knows the PIDs of
+ * CAR_ENGINE_PIDS, the gearbox (7E9, 18DAF118) only 01 and 0D. A question to
+ * 7DF (18DB33F1) reaches both, one to 7E0/7E1 (18DA10F1/18DA18F1) one; the
+ * answers come within 10 ms, from the same engine as the frames above. PID
+ * 65 has no formula in the CAN app's table, on purpose.
  */
 #include "aos_io_backend.h"
 #include "aos_hal.h"
@@ -272,6 +279,15 @@ typedef struct can_sim {
 static can_sim_t *s_can;
 static bool s_car_on;
 
+/* OBD-II: the questions waiting for the car's thread to answer them */
+typedef struct { uint8_t ecu, pid; bool ext; uint64_t due_us; } obd_pending_t;
+static obd_pending_t s_obd_q[16];
+static int s_obd_n;
+
+static const uint8_t CAR_ENGINE_PIDS[] = { 0x01, 0x04, 0x05, 0x0C, 0x0D, 0x0F, 0x10, 0x11, 0x1C, 0x1F, 0x20, 0x21,
+                                           0x2F, 0x33, 0x40, 0x42, 0x46, 0x51, 0x5C, 0x60, 0x65, 0x80, 0xA0, 0xA6 };
+static const uint8_t CAR_GEARBOX_PIDS[] = { 0x01, 0x0D };
+
 static void can_deliver(const can_sim_t *from, const aos_can_frame_t *f)
 {
     aos_can_frame_t g = *f;
@@ -285,6 +301,93 @@ static void can_deliver(const can_sim_t *from, const aos_can_frame_t *f)
         n->q[(n->head + n->count) % CAN_Q] = g;
         n->count++;
         pthread_cond_broadcast(&n->cv);
+    }
+}
+
+static void can_deliver(const can_sim_t *from, const aos_can_frame_t *f);
+
+/* a supported-PIDs map: bit 31 is base + 1 */
+static uint32_t obd_map(const uint8_t *pids, int n, int base)
+{
+    uint32_t w = 0;
+    for (int i = 0; i < n; i++)
+        if (pids[i] > base && pids[i] <= base + 32) w |= 1u << (31 - (pids[i] - base - 1));
+    return w;
+}
+
+/* the answer's data bytes (A, B, ...) or -1: the unit does not know it */
+static int obd_value(int ecu, int pid, double t, double rpm, double kmh, uint8_t cool, uint8_t *o)
+{
+    const uint8_t *pids = ecu ? CAR_GEARBOX_PIDS : CAR_ENGINE_PIDS;
+    int np = ecu ? (int)sizeof CAR_GEARBOX_PIDS : (int)sizeof CAR_ENGINE_PIDS;
+    if ((pid & 0x1F) == 0) {
+        if (pid && !memchr(pids, pid, (size_t)np)) return -1;
+        uint32_t w = obd_map(pids, np, pid);
+        o[0] = (uint8_t)(w >> 24); o[1] = (uint8_t)(w >> 16); o[2] = (uint8_t)(w >> 8); o[3] = (uint8_t)w;
+        return 4;
+    }
+    if (!memchr(pids, pid, (size_t)np)) return -1;
+    double load = (rpm - 800) / 2600;
+    uint32_t v;
+    switch (pid) {
+    case 0x01: o[0] = 0; o[1] = ecu ? 0 : 0x07; o[2] = ecu ? 0 : 0x65; o[3] = 0; return 4;
+    case 0x04: o[0] = (uint8_t)((20 + 60 * load) * 255 / 100); return 1;
+    case 0x05: o[0] = cool; return 1;
+    case 0x0C: v = (uint32_t)(rpm * 4); o[0] = (uint8_t)(v >> 8); o[1] = (uint8_t)v; return 2;
+    case 0x0D: o[0] = (uint8_t)kmh; return 1;
+    case 0x0F: o[0] = 25 + 40; return 1;
+    case 0x10: v = (uint32_t)(rpm / 800 * 3.5 * 100); o[0] = (uint8_t)(v >> 8); o[1] = (uint8_t)v; return 2;
+    case 0x11: o[0] = (uint8_t)((12 + 70 * load) * 255 / 100); return 1;
+    case 0x1C: o[0] = 6; return 1;                              /* EOBD */
+    case 0x1F: v = (uint32_t)t & 0xFFFF; o[0] = (uint8_t)(v >> 8); o[1] = (uint8_t)v; return 2;
+    case 0x21: o[0] = 0; o[1] = 0; return 2;
+    case 0x2F: o[0] = 158; return 1;                            /* 62 % */
+    case 0x33: o[0] = 101; return 1;
+    case 0x42: v = 14100; o[0] = (uint8_t)(v >> 8); o[1] = (uint8_t)v; return 2;
+    case 0x46: o[0] = 22 + 40; return 1;
+    case 0x51: o[0] = 1; return 1;                              /* gasoline */
+    case 0x5C: o[0] = (uint8_t)(cool + 6); return 1;
+    case 0x65: o[0] = 0x03; o[1] = 0x01; return 2;
+    case 0xA6:
+        v = 1234567 + (uint32_t)(t * 0.11);
+        o[0] = (uint8_t)(v >> 24); o[1] = (uint8_t)(v >> 16); o[2] = (uint8_t)(v >> 8); o[3] = (uint8_t)v;
+        return 4;
+    default: return -1;
+    }
+}
+
+/* with s_mx held: the answers that are due */
+static void obd_answer_due(double t, double rpm, double kmh, uint8_t cool)
+{
+    uint64_t now = aos_hal_uptime_us();
+    for (int i = 0; i < s_obd_n;) {
+        obd_pending_t q = s_obd_q[i];
+        if (q.due_us > now) { i++; continue; }
+        s_obd_q[i] = s_obd_q[--s_obd_n];
+        uint8_t v[4];
+        int n = obd_value(q.ecu, q.pid, t, rpm, kmh, cool, v);
+        if (n < 0) continue;            /* a PID it does not know: no answer, as on most cars */
+        aos_can_frame_t a = { .id = q.ext ? (q.ecu ? 0x18DAF118u : 0x18DAF110u) : 0x7E8u + q.ecu, .ext = q.ext, .len = 8 };
+        a.data[0] = (uint8_t)(n + 2);
+        a.data[1] = 0x41;
+        a.data[2] = q.pid;
+        memcpy(&a.data[3], v, (size_t)n);
+        can_deliver(NULL, &a);
+    }
+}
+
+/* with s_mx held: a NORMAL node sent f; is it a question for the car? */
+static void obd_request(const aos_can_frame_t *f)
+{
+    if (!s_car_on || f->rtr || f->len < 3 || f->data[0] < 2 || f->data[0] > 7 || f->data[1] != 0x01) return;
+    int to = -1;                        /* -1 nobody, 0 engine, 1 gearbox, 2 both */
+    if (!f->ext) to = f->id == 0x7DF ? 2 : f->id == 0x7E0 ? 0 : f->id == 0x7E1 ? 1 : -1;
+    else to = f->id == 0x18DB33F1u ? 2 : f->id == 0x18DA10F1u ? 0 : f->id == 0x18DA18F1u ? 1 : -1;
+    if (to < 0) return;
+    for (int ecu = 0; ecu < 2; ecu++) {
+        if ((to != 2 && to != ecu) || s_obd_n >= (int)(sizeof s_obd_q / sizeof s_obd_q[0])) continue;
+        s_obd_q[s_obd_n++] = (obd_pending_t){ .ecu = (uint8_t)ecu, .pid = f->data[2], .ext = f->ext,
+                                              .due_us = aos_hal_uptime_us() + 2000 + 3000 * (uint64_t)ecu };
     }
 }
 
@@ -311,11 +414,12 @@ static void *car_main(void *arg)
                                   .data = { 0xFF, (uint8_t)(tick >> 8), (uint8_t)tick, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF } };
             can_deliver(NULL, &j);
         }
+        uint8_t cool = (uint8_t)(40 + 88 - 48 * exp(-t / 120.0));       /* warming up to 88 C, +40 */
         if (tick % 50 == 0) {
-            uint8_t cool = (uint8_t)(40 + 88 - 48 * exp(-t / 120.0));   /* warming up to 88 C, +40 */
             aos_can_frame_t c = { .id = 0x3E8, .len = 2, .data = { cool, (uint8_t)(cool + 6) } };
             can_deliver(NULL, &c);
         }
+        if (s_obd_n) obd_answer_due(t, rpm, 40 + 25 * sin(t * 0.1), cool);
         pthread_mutex_unlock(&s_mx);
     }
     return NULL;
@@ -363,6 +467,7 @@ bool aos_io_be_can_send(aos_io_can_t *c, const aos_can_frame_t *f, int timeout_m
     bool acked = c->mode == AOS_CAN_SELFTEST || s_car_on;
     for (can_sim_t *o = s_can; o && !acked; o = o->next) if (o != n && o->c->mode == AOS_CAN_NORMAL) acked = true;
     if (acked) can_deliver(n, f);
+    if (acked && c->mode == AOS_CAN_NORMAL) obd_request(f);
     pthread_mutex_unlock(&s_mx);
     return acked;
 }

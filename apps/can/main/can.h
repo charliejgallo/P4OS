@@ -81,6 +81,30 @@ typedef struct {
 
 #define CN_SAVED_MAX 32
 
+/* Multiplexed messages: the table of ids keeps a message's last frame, which
+ * carries one multiplexed set only (an OBD answer for one PID of the dozen
+ * asked in turn). So the bus thread also keeps, for the messages the .dbc
+ * multiplexes, the last frame for each value of their multiplexors. */
+#define CN_MUXSPEC   32         /* multiplexed messages followed */
+#define CN_MUXSIG    4          /* multiplexors in one (extended multiplexing) */
+#define CN_MUXCACHE  256        /* frames kept (PSRAM) */
+
+struct cn_sig_s;
+typedef struct {
+    uint32_t id;
+    bool     ext;
+    int      n;
+    uint16_t start[CN_MUXSIG], len[CN_MUXSIG];
+    bool     motorola[CN_MUXSIG];
+} cn_muxspec_t;
+
+typedef struct {
+    uint32_t id, key;           /* key: the multiplexors' values */
+    uint8_t  ext, len;
+    uint8_t  data[8];
+    uint64_t t_us;
+} cn_muxframe_t;
+
 /* ---- the shared state ---- */
 
 typedef struct {
@@ -123,9 +147,14 @@ typedef struct {
     int      rq_head, rq_n;
     bool     rq_eof;
 
+    /* multiplexed messages */
+    cn_muxspec_t muxspec[CN_MUXSPEC];
+    int      nmuxspec;
+    cn_muxframe_t *muxc;        /* CN_MUXCACHE */
+
     /* the portal */
     uint32_t web_until_ms;
-    bool     want_reload;       /* the page rewrote enviar.txt or senales.dbc */
+    bool     want_reload;       /* the page rewrote enviar.txt, a .dbc or can_dbc.txt */
 } cn_bus_t;
 
 extern cn_bus_t CB;
@@ -140,6 +169,7 @@ const char *cn_bus_open(const cn_cfg_t *cfg);   /* NULL ok, else the reason */
 void        cn_bus_close(void);
 bool        cn_bus_send(const cn_frame_t *f);   /* queued; false if it cannot go */
 void        cn_bus_clear(void);
+void        cn_mux_set(const cn_muxspec_t *spec, int n);      /* the .dbc's; clears the cache */
 bool        cn_rec_start(void);
 void        cn_rec_stop(void);
 bool        cn_replay_start(const char *name, bool loop);
@@ -149,6 +179,8 @@ void        cn_periodic_stop_all(void);
 const char *cn_dir(void);               /* <card>/can, made if missing */
 uint64_t    cn_us(void);
 uint32_t    cn_ms(void);                /* the frames' clock in ms (the simulator's uptime_ms has another origin) */
+void       *cn_big_alloc(size_t n);     /* zeroed, in PSRAM on the board */
+void        cn_big_free(void *p);
 
 /* can_frame.c: text forms */
 int  cn_fmt_id(const cn_frame_t *f, char *out, int cap);          /* "0C0", "18FEF100" */
@@ -160,20 +192,80 @@ const char *cn_state_name(const char *state);                     /* translated 
 lv_color_t  cn_state_color(const char *state);
 const char *cn_mode_name(cn_mode_t m);
 
-/* the signals: a DBC subset (BO_ and SG_) */
-#define CN_SIG_MAX 64
-typedef struct {
-    char     name[24];
+/* ---- the signals: a .dbc (can_dbc.c) ----
+ *
+ * The file in use is <card>/can/senales.dbc or one of <card>/can/dbc/, as
+ * <data>/can_dbc.txt says, with the messages to show. It is read whole into
+ * PSRAM and parsed into three tables sized to it: the messages (BO_), their
+ * signals (SG_, a message's ones together) and the value names (VAL_). */
+#define CN_DBC_MSG_MAX  2048
+#define CN_DBC_SIG_MAX  16384
+#define CN_DBC_VAL_MAX  16384
+#define CN_DBC_FILE_MAX (4 * 1024 * 1024)
+#define CN_SHOW_MAX     64          /* messages chosen by hand */
+
+typedef struct cn_sig_s {
+    char     name[32];
     char     unit[12];
     uint32_t id;
     bool     ext;
-    uint16_t start, len;
     bool     motorola, is_signed;
+    uint16_t start, len;
+    uint16_t msg;                   /* index in the messages */
+    bool     is_mux;                /* a multiplexor: "M", or "m3M" */
+    bool     muxed;                 /* there for some values of its multiplexor only: "m3" */
+    int32_t  mux_lo, mux_hi;        /* those values */
+    int32_t  muxsig;                /* its multiplexor (SG_MUL_VAL_), or -1: the message's */
+    uint32_t val0;                  /* its value names: val[val0 .. val0 + nval) */
+    uint16_t nval;
     float    scale, offset;
 } cn_sig_t;
-int  cn_sig_load(cn_sig_t *out, int max, char *err, int err_cap);   /* how many */
-bool cn_sig_value(const cn_sig_t *s, const uint8_t *data, int len, float *out);
-void cn_sig_write_example(void);
+
+typedef struct {
+    char     name[32];
+    uint32_t id;
+    bool     ext;
+    uint8_t  dlc;
+    uint16_t nsig;
+    uint32_t sig0;
+    int32_t  mux;                   /* its multiplexor signal ("M"), or -1 */
+} cn_msg_t;
+
+typedef struct {
+    int32_t raw;
+    char    txt[24];
+} cn_val_t;
+
+typedef struct {
+    char      file[64];             /* relative to <card>/can: "senales.dbc", "dbc/x.dbc" */
+    cn_msg_t *msg;
+    cn_sig_t *sig;
+    cn_val_t *val;
+    int       nmsg, nsig, nval;
+    int       skipped;              /* signals the app cannot decode (over 32 bits) */
+    uint32_t  bytes;
+    /* what the tab shows: show_bus, or the messages in show[] */
+    bool      show_bus;
+    int       nshow;
+    uint32_t  show[CN_SHOW_MAX];
+    uint8_t   show_ext[CN_SHOW_MAX];
+} cn_dbc_t;
+
+extern cn_dbc_t CN_DBC;             /* the UI's: only LVGL's thread touches it */
+
+void        cn_dbc_load(char *err, int err_cap);    /* the selection and its file */
+void        cn_dbc_free(void);
+void        cn_dbc_choose(const char *file);        /* another file: shows the ones on the bus */
+void        cn_dbc_save_sel(void);
+int         cn_dbc_files(char (*out)[64], uint32_t *sizes, int max);   /* senales.dbc first */
+int         cn_dbc_find(uint32_t id, bool ext);     /* a message's index, or -1 */
+bool        cn_dbc_shown(int msg);                  /* chosen by hand */
+bool        cn_sig_raw(const cn_sig_t *g, const uint8_t *data, int len, int32_t *raw);
+bool        cn_sig_value(const cn_sig_t *g, const uint8_t *data, int len, float *out);
+bool        cn_sig_present(const cn_sig_t *g, const uint8_t *data, int len);   /* its multiplexor says so */
+const char *cn_sig_val_name(const cn_sig_t *g, int32_t raw);                 /* VAL_, or NULL */
+void        cn_sig_write_example(void);
+
 void cn_saved_load(void);
 void cn_saved_save(void);
 extern cn_saved_t CN_SAVED[CN_SAVED_MAX];
@@ -181,7 +273,7 @@ extern int        CN_NSAVED;
 
 /* ---- the UI ---- */
 
-enum { CN_TAB_LIVE = 0, CN_TAB_IDS, CN_TAB_SEND, CN_TAB_SIG, CN_TAB_COUNT };
+enum { CN_TAB_LIVE = 0, CN_TAB_IDS, CN_TAB_SEND, CN_TAB_SIG, CN_TAB_OBD, CN_TAB_COUNT };
 
 typedef struct {
     lv_obj_t *root, *content;
@@ -245,3 +337,15 @@ void cn_sig_refresh(void);
 void cn_sig_sample(void);       /* every 100 ms, also off the tab */
 void cn_sig_adhoc(uint32_t id, uint8_t fl, int byte, int bits, bool motorola);
 void cn_sig_reload(void);
+
+/* can_obd.c: the OBD-II scanner. The bus thread calls the two _locked ones
+ * with cn_lock held: every frame received, and once a round for the next
+ * question to send. */
+void cn_obd_rx_locked(const cn_frame_t *f);
+bool cn_obd_step_locked(uint64_t now, cn_frame_t *out);
+void cn_obd_stop_locked(void);
+void cn_obd_start(bool ext29);
+void cn_obd_stop(void);
+int  cn_obd_json(char *out, int cap);           /* the portal's part of can_live.json */
+void cn_obd_build(lv_obj_t *parent);
+void cn_obd_refresh(void);

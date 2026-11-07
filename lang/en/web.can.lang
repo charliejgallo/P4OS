@@ -5,185 +5,500 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/can/web/can.js:53
+#: apps/can/web/can.js:71
 activo	active
 
-#: apps/can/web/can.js:53
+#: apps/can/web/can.js:71
 con avisos	warning
 
-#: apps/can/web/can.js:53
+#: apps/can/web/can.js:71
 pasivo	passive
 
-#: apps/can/web/can.js:53
+#: apps/can/web/can.js:71
 fuera del bus	bus off
 
-#: apps/can/web/can.js:54
+#: apps/can/web/can.js:72
 Solo escucha	Listen only
 
-#: apps/can/web/can.js:54
+#: apps/can/web/can.js:72
 Normal	Normal
 
-#: apps/can/web/can.js:54
+#: apps/can/web/can.js:72
 Autoprueba	Self test
 
-#: apps/can/web/can.js:62
-#: apps/can/web/can.js:244
-CAN	CAN
+#: apps/can/web/can.js:153
+Luz de falla y códigos	Check engine light and codes
 
-#: apps/can/web/can.js:91
-Abierta en la placa	Opened on the board
+#: apps/can/web/can.js:153
+Carga calculada	Calculated load
 
-#: apps/can/web/can.js:91
-Abrir CAN en la placa	Open CAN on the board
+#: apps/can/web/can.js:154
+Refrigerante	Coolant
 
-#: apps/can/web/can.js:104
-Parar la grabación	Stop recording
+#: apps/can/web/can.js:154
+Corrección corta, banco 1	Short fuel trim, bank 1
 
-#: apps/can/web/can.js:105
-Grabar	Record
+#: apps/can/web/can.js:155
+Corrección larga, banco 1	Long fuel trim, bank 1
 
-#: apps/can/web/can.js:106
-Limpiar	Clear
+#: apps/can/web/can.js:155
+Corrección corta, banco 2	Short fuel trim, bank 2
 
-#: apps/can/web/can.js:111
-La app dejó de contestar.	The app stopped answering.
+#: apps/can/web/can.js:156
+Corrección larga, banco 2	Long fuel trim, bank 2
 
-#: apps/can/web/can.js:111
-Esperando a la app…	Waiting for the app…
+#: apps/can/web/can.js:156
+Presión de combustible	Fuel pressure
 
-#: apps/can/web/can.js:112
-La página ve el bus a través de la app CAN: tiene que estar abierta en la placa (al frente o atrás). El bus se conecta desde ahí.	This page sees the bus through the CAN app: it must be open on the board (in front or in the background). The bus is connected from there.
+#: apps/can/web/can.js:157
+Presión del múltiple	Manifold pressure
 
-#: apps/can/web/can.js:116
-desconectado	disconnected
+#: apps/can/web/can.js:157
+Régimen del motor	Engine speed
 
-#: apps/can/web/can.js:120
-Sin bus: se conecta desde la app, tocando la conexión.	No bus: connect it from the app, by tapping the connection.
+#: apps/can/web/can.js:158
+Velocidad	Speed
 
-#: apps/can/web/can.js:124
-tramas/s	frames/s
+#: apps/can/web/can.js:158
+Avance del encendido	Timing advance
 
-#: apps/can/web/can.js:125
-de carga	load
+#: apps/can/web/can.js:159
+Aire de admisión	Intake air
 
-#: apps/can/web/can.js:126
-recibidas	received
+#: apps/can/web/can.js:159
+Caudal de aire (MAF)	Air flow (MAF)
 
-#: apps/can/web/can.js:127
-enviadas	sent
+#: apps/can/web/can.js:160
+Mariposa	Throttle
 
-#: apps/can/web/can.js:128
-perdidas	lost
+#: apps/can/web/can.js:160
+Sonda de oxígeno, banco 1, 1	Oxygen sensor, bank 1, 1
 
-#: apps/can/web/can.js:129
-errores TX / RX	TX / RX errors
+#: apps/can/web/can.js:161
+Sonda de oxígeno, banco 1, 2	Oxygen sensor, bank 1, 2
 
-#: apps/can/web/can.js:130
-Grabando %s: %d tramas.	Recording %s: %d frames.
+#: apps/can/web/can.js:161
+Norma OBD	OBD standard
 
-#: apps/can/web/can.js:131
-Repitiendo %s.	Replaying %s.
+#: apps/can/web/can.js:162
+Desde el arranque	Since the engine started
 
-#: apps/can/web/can.js:136
-Esperando tramas…	Waiting for frames…
+#: apps/can/web/can.js:162
+Recorrido con la luz de falla	Distance with the light on
 
-#: apps/can/web/can.js:136
-Sin tramas.	No frames.
+#: apps/can/web/can.js:163
+Presión del riel (relativa)	Fuel rail pressure (relative)
 
-#: apps/can/web/can.js:141
-id	id
+#: apps/can/web/can.js:163
+Presión del riel	Fuel rail pressure
 
-#: apps/can/web/can.js:141
-n	n
+#: apps/can/web/can.js:164
+EGR comandada	Commanded EGR
 
-#: apps/can/web/can.js:141
-datos	data
+#: apps/can/web/can.js:164
+Error de la EGR	EGR error
 
-#: apps/can/web/can.js:141
-por s	per s
+#: apps/can/web/can.js:165
+Purga del cánister	Evaporative purge
 
-#: apps/can/web/can.js:141
-vistas	seen
+#: apps/can/web/can.js:165
+Nivel de combustible	Fuel level
+
+#: apps/can/web/can.js:166
+Calentamientos desde el borrado	Warm-ups since clearing
+
+#: apps/can/web/can.js:166
+Recorrido desde el borrado	Distance since clearing
+
+#: apps/can/web/can.js:167
+Presión barométrica	Barometric pressure
+
+#: apps/can/web/can.js:167
+Catalizador, banco 1, 1	Catalyst, bank 1, 1
+
+#: apps/can/web/can.js:168
+Catalizador, banco 2, 1	Catalyst, bank 2, 1
+
+#: apps/can/web/can.js:168
+Tensión del módulo	Module voltage
+
+#: apps/can/web/can.js:169
+Carga absoluta	Absolute load
+
+#: apps/can/web/can.js:169
+Lambda comandada	Commanded lambda
+
+#: apps/can/web/can.js:170
+Mariposa relativa	Relative throttle
+
+#: apps/can/web/can.js:170
+Temperatura ambiente	Ambient temperature
+
+#: apps/can/web/can.js:171
+Mariposa absoluta B	Absolute throttle B
+
+#: apps/can/web/can.js:171
+Pedal D	Pedal D
+
+#: apps/can/web/can.js:172
+Pedal E	Pedal E
+
+#: apps/can/web/can.js:172
+Mariposa comandada	Commanded throttle
 
 #: apps/can/web/can.js:173
-La app no está contestando: lo que mandes se manda cuando vuelva.	The app is not answering: what you send goes out when it comes back.
+Tiempo con la luz de falla	Time with the light on
+
+#: apps/can/web/can.js:173
+Tiempo desde el borrado	Time since clearing
 
 #: apps/can/web/can.js:174
-El bus está desconectado en la app.	The bus is disconnected in the app.
+Combustible	Fuel
+
+#: apps/can/web/can.js:174
+Etanol	Ethanol
 
 #: apps/can/web/can.js:175
-La app está en Solo escucha: no sale nada. El modo se cambia en la placa.	The app is in Listen only: nothing goes out. The mode is changed on the board.
+Presión del riel (absoluta)	Fuel rail pressure (absolute)
+
+#: apps/can/web/can.js:175
+Pedal relativo	Relative pedal
 
 #: apps/can/web/can.js:176
-Autoprueba: vuelve sólo a la placa, no sale al bus.	Self test: it comes back to the board only, it does not go out to the bus.
+Batería del híbrido	Hybrid battery
+
+#: apps/can/web/can.js:176
+Aceite	Oil
 
 #: apps/can/web/can.js:177
-Normal: sale al bus. Nunca al de un auto en marcha.	Normal: it goes out to the bus. Never onto a moving car's.
+Inyección	Injection timing
+
+#: apps/can/web/can.js:177
+Consumo	Fuel rate
+
+#: apps/can/web/can.js:178
+Par pedido	Demanded torque
+
+#: apps/can/web/can.js:178
+Par real	Actual torque
+
+#: apps/can/web/can.js:179
+Par de referencia	Reference torque
+
+#: apps/can/web/can.js:179
+Odómetro	Odometer
 
 #: apps/can/web/can.js:182
-Como en candump: 123#11223344, 18FEF100#FF00 o 7DF#R	As in candump: 123#11223344, 18FEF100#FF00 or 7DF#R
+sin dato	not available
 
-#: apps/can/web/can.js:184
-Mandada a la app: %s	Sent to the app: %s
+#: apps/can/web/can.js:182
+nafta	gasoline
+
+#: apps/can/web/can.js:182
+metanol	methanol
+
+#: apps/can/web/can.js:182
+etanol	ethanol
+
+#: apps/can/web/can.js:182
+diésel	diesel
+
+#: apps/can/web/can.js:182
+GLP	LPG
+
+#: apps/can/web/can.js:182
+GNC	CNG
+
+#: apps/can/web/can.js:182
+propano	propane
+
+#: apps/can/web/can.js:182
+eléctrico	electric
+
+#: apps/can/web/can.js:183
+sin OBD	no OBD
 
 #: apps/can/web/can.js:191
-cada %d ms (las periódicas se arrancan en la placa)	every %d ms (periodic ones are started on the board)
-
 #: apps/can/web/can.js:192
-#: apps/can/web/can.js:196
-#: apps/can/web/can.js:247
-Mandar	Send
+código %d	code %d
 
-#: apps/can/web/can.js:192
-Sin tramas guardadas.	No saved frames.
-
-#: apps/can/web/can.js:198
-Guardadas en la placa	Saved on the board
-
-#: apps/can/web/can.js:212
-Bajar	Download
-
-#: apps/can/web/can.js:214
-Se está grabando: pararla primero	It is being recorded: stop it first
-
-#: apps/can/web/can.js:215
-¿Borrar %s? No se puede deshacer.	Delete %s? This cannot be undone.
-
-#: apps/can/web/can.js:216
-Borrada	Deleted
-
-#: apps/can/web/can.js:217
-Borrar	Delete
-
-#: apps/can/web/can.js:218
-Todavía no hay grabaciones: se graba desde la placa o con el botón de arriba.	No recordings yet: record from the board or with the button above.
+#: apps/can/web/can.js:202
+#: apps/can/web/can.js:579
+CAN	CAN
 
 #: apps/can/web/can.js:231
-Guardado: la app lo vuelve a leer	Saved: the app reads it again
+Abierta en la placa	Opened on the board
 
-#: apps/can/web/can.js:234
-Guardar	Save
+#: apps/can/web/can.js:231
+Abrir CAN en la placa	Open CAN on the board
 
-#: apps/can/web/can.js:240
-Tramas guardadas	Saved frames
-
-#: apps/can/web/can.js:240
-can/enviar.txt: una por línea, la trama, el período en ms (0 a mano) y un nombre.	can/enviar.txt: one per line, the frame, the period in ms (0 by hand) and a name.
-
-#: apps/can/web/can.js:241
-Señales	Signals
-
-#: apps/can/web/can.js:241
-can/senales.dbc: un .dbc (BO_ y SG_; lo demás se saltea). La app las decodifica y grafica.	can/senales.dbc: a .dbc (BO_ and SG_; the rest is skipped). The app decodes and plots them.
+#: apps/can/web/can.js:244
+Parar la grabación	Stop recording
 
 #: apps/can/web/can.js:245
-Por id	By id
+Grabar	Record
 
 #: apps/can/web/can.js:246
+Limpiar	Clear
+
+#: apps/can/web/can.js:251
+La app dejó de contestar.	The app stopped answering.
+
+#: apps/can/web/can.js:251
+Esperando a la app…	Waiting for the app…
+
+#: apps/can/web/can.js:252
+La página ve el bus a través de la app CAN: tiene que estar abierta en la placa (al frente o atrás). El bus se conecta desde ahí.	This page sees the bus through the CAN app: it must be open on the board (in front or in the background). The bus is connected from there.
+
+#: apps/can/web/can.js:256
+desconectado	disconnected
+
+#: apps/can/web/can.js:260
+Sin bus: se conecta desde la app, tocando la conexión.	No bus: connect it from the app, by tapping the connection.
+
+#: apps/can/web/can.js:264
+tramas/s	frames/s
+
+#: apps/can/web/can.js:265
+de carga	load
+
+#: apps/can/web/can.js:266
+recibidas	received
+
+#: apps/can/web/can.js:267
+enviadas	sent
+
+#: apps/can/web/can.js:268
+perdidas	lost
+
+#: apps/can/web/can.js:269
+errores TX / RX	TX / RX errors
+
+#: apps/can/web/can.js:270
+Grabando %s: %d tramas.	Recording %s: %d frames.
+
+#: apps/can/web/can.js:271
+Repitiendo %s.	Replaying %s.
+
+#: apps/can/web/can.js:276
+Esperando tramas…	Waiting for frames…
+
+#: apps/can/web/can.js:276
+Sin tramas.	No frames.
+
+#: apps/can/web/can.js:281
+id	id
+
+#: apps/can/web/can.js:281
+n	n
+
+#: apps/can/web/can.js:281
+datos	data
+
+#: apps/can/web/can.js:281
+por s	per s
+
+#: apps/can/web/can.js:281
+vistas	seen
+
+#: apps/can/web/can.js:310
+Buscar un mensaje por id o nombre	Search a message by id or name
+
+#: apps/can/web/can.js:358
+No está can/%s	can/%s is missing
+
+#: apps/can/web/can.js:369
+%s no es un .dbc	%s is not a .dbc
+
+#: apps/can/web/can.js:372
+Subido a can/dbc	Uploaded to can/dbc
+
+#: apps/can/web/can.js:388
+Subir .dbc	Upload .dbc
+
+#: apps/can/web/can.js:390
+¿Borrar %s de la tarjeta? No se puede deshacer.	Delete %s from the card? It cannot be undone.
+
+#: apps/can/web/can.js:393
+#: apps/can/web/can.js:552
+Borrar	Delete
+
+#: apps/can/web/can.js:394
+%d mensajes, %d señales. La placa muestra los mensajes elegidos acá, o los que pasan por el bus.	%d messages, %d signals. The board shows the messages chosen here, or the ones on the bus.
+
+#: apps/can/web/can.js:394
+Leyendo…	Reading…
+
+#: apps/can/web/can.js:395
+Los .dbc van en la carpeta can/dbc de la tarjeta. Bibliotecas abiertas: opendbc de comma.ai (github.com/commaai/opendbc, carpeta opendbc/dbc) y nberlette/canbus (carpeta dbc, con OBD-II y J1939 genéricos); las dos con licencia MIT.	The .dbc files go in the card's can/dbc folder. Open libraries: comma.ai's opendbc (github.com/commaai/opendbc, folder opendbc/dbc) and nberlette/canbus (folder dbc, with generic OBD-II and J1939); both MIT licensed.
+
+#: apps/can/web/can.js:397
+Los que pasan por el bus	The ones on the bus
+
+#: apps/can/web/can.js:399
+Marcá los mensajes que querés ver	Tick the messages you want to see
+
+#: apps/can/web/can.js:401
+Elegidos: %d	Chosen: %d
+
+#: apps/can/web/can.js:419
+Hasta %d mensajes	Up to %d messages
+
+#: apps/can/web/can.js:428
+%d señales	%d signals
+
+#: apps/can/web/can.js:429
+en el bus	on the bus
+
+#: apps/can/web/can.js:430
+Y %d más: buscá para acotar.	And %d more: search to narrow it down.
+
+#: apps/can/web/can.js:447
+Ningún mensaje del archivo pasa por el bus (o la app no está mirando).	No message of the file is on the bus (or the app is not looking).
+
+#: apps/can/web/can.js:447
+Sin mensajes elegidos.	No messages chosen.
+
+#: apps/can/web/can.js:472
+Preguntar (11 bits)	Ask (11 bits)
+
+#: apps/can/web/can.js:473
+Preguntar (29 bits)	Ask (29 bits)
+
+#: apps/can/web/can.js:474
+Parar	Stop
+
+#: apps/can/web/can.js:475
+Pregunta los PIDs del modo 01 de SAE J1979 a 7DF (o 18DB33F1): primero el PID 00, el mapa de los que conoce el auto, y después esos, en vuelta. Necesita el modo Normal, que se elige en la placa: la app abre siempre en Solo escucha. En muchos autos modernos el conector OBD da sólo diagnóstico, porque un gateway separa los buses internos.	Asks 7DF (or 18DB33F1) for the PIDs of mode 01 of SAE J1979: first PID 00, the map of the ones the car knows, then those, round and round. It needs the Normal mode, chosen on the board: the app always opens in Listen only. On many modern cars the OBD connector gives diagnostics only, because a gateway keeps the inner buses apart.
+
+#: apps/can/web/can.js:477
+Detenido	Stopped
+
+#: apps/can/web/can.js:477
+Preguntando qué PIDs conoce…	Asking which PIDs it knows…
+
+#: apps/can/web/can.js:477
+En vivo	Live
+
+#: apps/can/web/can.js:477
+Nadie contestó	Nobody answered
+
+#: apps/can/web/can.js:477
+Detenido: hace falta el modo Normal	Stopped: it needs the Normal mode
+
+#: apps/can/web/can.js:477
+Detenido: nadie confirma lo que manda	Stopped: nobody acknowledges what it sends
+
+#: apps/can/web/can.js:480
+Sin datos de la app.	No data from the app.
+
+#: apps/can/web/can.js:484
+contestan %s · %d respuestas	%s answering · %d answers
+
+#: apps/can/web/can.js:485
+#: apps/can/web/can.js:509
+El bus está desconectado en la app.	The bus is disconnected in the app.
+
+#: apps/can/web/can.js:485
+La app está en %s: para preguntar hace falta Normal, y se cambia en la placa.	The app is in %s: asking needs Normal, which is changed on the board.
+
+#: apps/can/web/can.js:488
+PID	PID
+
+#: apps/can/web/can.js:488
+qué	what
+
+#: apps/can/web/can.js:488
+valor	value
+
+#: apps/can/web/can.js:488
+de	from
+
+#: apps/can/web/can.js:488
+hace	ago
+
+#: apps/can/web/can.js:493
+sin fórmula	no formula
+
+#: apps/can/web/can.js:508
+La app no está contestando: lo que mandes se manda cuando vuelva.	The app is not answering: what you send goes out when it comes back.
+
+#: apps/can/web/can.js:510
+La app está en Solo escucha: no sale nada. El modo se cambia en la placa.	The app is in Listen only: nothing goes out. The mode is changed on the board.
+
+#: apps/can/web/can.js:511
+Autoprueba: vuelve sólo a la placa, no sale al bus.	Self test: it comes back to the board only, it does not go out to the bus.
+
+#: apps/can/web/can.js:512
+Normal: sale al bus. Nunca al de un auto en marcha.	Normal: it goes out to the bus. Never onto a moving car's.
+
+#: apps/can/web/can.js:517
+Como en candump: 123#11223344, 18FEF100#FF00 o 7DF#R	As in candump: 123#11223344, 18FEF100#FF00 or 7DF#R
+
+#: apps/can/web/can.js:519
+Mandada a la app: %s	Sent to the app: %s
+
+#: apps/can/web/can.js:526
+cada %d ms (las periódicas se arrancan en la placa)	every %d ms (periodic ones are started on the board)
+
+#: apps/can/web/can.js:527
+#: apps/can/web/can.js:531
+#: apps/can/web/can.js:585
+Mandar	Send
+
+#: apps/can/web/can.js:527
+Sin tramas guardadas.	No saved frames.
+
+#: apps/can/web/can.js:533
+Guardadas en la placa	Saved on the board
+
+#: apps/can/web/can.js:547
+Bajar	Download
+
+#: apps/can/web/can.js:549
+Se está grabando: pararla primero	It is being recorded: stop it first
+
+#: apps/can/web/can.js:550
+¿Borrar %s? No se puede deshacer.	Delete %s? This cannot be undone.
+
+#: apps/can/web/can.js:551
+Borrada	Deleted
+
+#: apps/can/web/can.js:553
+Todavía no hay grabaciones: se graba desde la placa o con el botón de arriba.	No recordings yet: record from the board or with the button above.
+
+#: apps/can/web/can.js:566
+Guardado: la app lo vuelve a leer	Saved: the app reads it again
+
+#: apps/can/web/can.js:569
+Guardar	Save
+
+#: apps/can/web/can.js:575
+Tramas guardadas	Saved frames
+
+#: apps/can/web/can.js:575
+can/enviar.txt: una por línea, la trama, el período en ms (0 a mano) y un nombre.	can/enviar.txt: one per line, the frame, the period in ms (0 by hand) and a name.
+
+#: apps/can/web/can.js:576
+Señales propias	Own signals
+
+#: apps/can/web/can.js:576
+can/senales.dbc: un .dbc propio (BO_, SG_, VAL_). Los bajados van en can/dbc y se eligen arriba.	can/senales.dbc: a .dbc of your own (BO_, SG_, VAL_). Downloaded ones go in can/dbc and are chosen above.
+
+#: apps/can/web/can.js:580
+Por id	By id
+
+#: apps/can/web/can.js:581
+Señales	Signals
+
+#: apps/can/web/can.js:583
+OBD-II	OBD-II
+
+#: apps/can/web/can.js:584
 Últimas tramas	Latest frames
 
-#: apps/can/web/can.js:248
+#: apps/can/web/can.js:586
 Grabaciones	Recordings
 
-#: apps/can/web/can.js:249
+#: apps/can/web/can.js:587
 Archivos de la app	The app's files
