@@ -225,14 +225,14 @@ The home screen has icon pages, folders, a dock and widgets.
   the encoder's YUV, the hardware H.264 encoder compresses it (70 ms a
   frame between them, 15 fps on a quiet screen and 7-9 while apps move),
   and the CPU mostly waits. It plays on a Mac or a phone as it is.
-- **Typing** (2026-11-08): the field being edited shows a blinking cursor
+- **Typing** (since 0.24.0): the field being edited shows a blinking cursor
   and a ring in the accent colour. The keyboard has an ñ, holding a key
   opens its accents (á, ü, ñ, ¿...), shift gives one capital or locks with
   two taps, and dragging along the space bar moves the cursor. Holding a
   field selects, cuts, copies and pastes; the clipboard is shared with the
   apps and with the portal, which can type a long password or an address
   straight into the field open on the board.
-- **Search** (2026-11-08): a swipe down from the middle of the home screen
+- **Search** (since 0.24.0): a swipe down from the middle of the home screen
   finds apps, the pages of Settings, notes by their text and the card's
   files, and works out a sum typed in.
 - **The status bar** shows the Wi-Fi or the board's own network, the card
@@ -1033,6 +1033,13 @@ reads them.
   permission command, also from the portal. That thermometer activated
   from the board (a new bind key in ~5 s, its readings decrypted with it
   right after).
+- SSH both ways (0.24.0): `ssh p4os.local` from a Mac (`ls`, `top`, `log`,
+  `free`), and the SSH app into a Raspberry Pi 4 running `htop`.
+- CAN on a real bus at 500 kbit/s: the P4 and an ESP32 playing a car, each
+  with an SN65HVD230; frames, by id and signals decoded from a `.dbc`.
+- Typing (0.24.0): the Spanish keyboard, the cursor moved with the space
+  bar, copy and paste on the board and from the portal's clipboard box,
+  and the search (a page of Settings, an app and an MP3 found and opened).
 
 **Waiting for hardware on the bench:**
 
@@ -1044,8 +1051,6 @@ reads them.
   (MH-Z19, PMS5003, PZEM-004T, LD2410): they run against their emulated
   twins in the simulator.
 - A PCA9685's real oscillator against a scope, for `osc=`.
-- CAN on a real bus, with two SN65HVD230 transceivers and an ESP32-C3 as
-  the other node.
 - A 25xx SPI EEPROM in the EEPROM app.
 - The Riden over TTL, the Rigol over the LAN, and the terminal at 460800.
 - The microphone's gain, and the speaker's latency and heating.
@@ -1225,8 +1230,8 @@ idioma de la tarjeta, la de la placa y la del portal web. Los documentos del pla
 
 | | |
 |---|---|
-| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 23 apps propias y 46 de la tarjeta (juegos, un pinball 3D de seis mesas, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, y taller con I2C, SPI, 1-Wire, GPIO y tiras LED direccionables |
-| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el emulador (GBA y Neo Geo a 60 cuadros, el táctil con varios dedos a la vez), el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, una termocupla MAX6675 y un DS18B20 registrados por Datalog en segundo plano, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante), BLE escuchando con el iPhone y la Mac conectados y leyendo un termómetro Xiaomi cifrado con su clave, dos cámaras IP (un timbre H.264 directo a la pantalla y una MJPEG) y la grabación de pantalla en MP4 por el codificador H.264 del P4 |
+| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 23 apps propias y 46 de la tarjeta (juegos, un pinball 3D de seis mesas, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN y tiras LED direccionables |
+| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el emulador (GBA y Neo Geo a 60 cuadros, el táctil con varios dedos a la vez), el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, una termocupla MAX6675 y un DS18B20 registrados por Datalog en segundo plano, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante), BLE escuchando con el iPhone y la Mac conectados y leyendo un termómetro Xiaomi cifrado con su clave, dos cámaras IP (un timbre H.264 directo a la pantalla y una MJPEG), la grabación de pantalla en MP4 por el codificador H.264 del P4, SSH desde la Mac y hacia una Raspberry Pi, un bus CAN real con un ESP32, y el teclado, copiar y pegar y el buscador |
 | Qué falta | probar en la placa el RC522, RF con un sensor de 433 MHz y con tráfico real de AM y FM angosta, y encontrar por qué se cortó la red durante dos OTA |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
 | Cómo se instala | la primera vez por el CH340; después `tools/ota.sh p4os.local` o el portal |

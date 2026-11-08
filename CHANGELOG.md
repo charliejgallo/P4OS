@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.24.0 — 2026-11-08
 
 - **SSH: a console on the board.** `ssh p4os.local` opens a shell with
   the card's files (`ls`, `cd`, `cat`, `head`, `tail`, `cp`, `mv`, `rm`,
@@ -94,6 +94,20 @@
   something running). And a card app that does not fit when opened closes
   the hidden idle apps, lets the wallpaper photos go and tries again,
   instead of failing.
+- **The games' memory.** Monster Hop loads its menu's map with about 4 MB
+  instead of 9.7 (it was left without it on the board): the map is
+  unpacked a stretch at a time straight into the picture. Turbo opens with
+  1.5 MB less at its peak (the stage's backdrop unpacked straight into
+  colour and alpha, the player's car coloured a view at a time), and Golf
+  holds 0.9 MB less outside its 3D view (that view's two small buffers only
+  while it draws). Nothing changes on screen.
+- **CAN: a library of .dbc files and an OBD-II scanner.** The Signals tab
+  reads any `.dbc` in the card's `can/dbc` (chosen on the board or on the
+  portal page), whole and without a line limit, with value names and plain
+  and extended multiplexing. A new OBD tab asks mode 01 of SAE J1979 and
+  shows the PIDs the car knows. Tried on a real bus: the P4 and an ESP32
+  playing a car (`tools/can_test`), each with an SN65HVD230, at
+  500 kbit/s ([apps/can/README.md](apps/can/README.md)).
 
 ## 0.23.2 — 2026-11-06
 
