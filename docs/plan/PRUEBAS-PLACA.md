@@ -43,6 +43,10 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       9,4 MB en todo el escaneo (9,2 MB en el inicio ya arrancada; 15 MB con
       una app al frente, sin la foto del bloqueo). Las fotos de fondo
       parten la PSRAM: el commit siguiente las suelta antes de reintentar.
+      `f249946` instalado el 2026-11-08: soltó las fotos (libre 14,0 -> 15,9
+      MB) y el bloque mayor siguió en 9,4 MB: no son las fotos. Lo que parte
+      la PSRAM es otra cosa: `free -m` en la consola SSH y el registro del
+      fallo dan ahora el mapa de bloques grandes.
       Tras la OTA de `64fbdb0` CAS faltó en el inicio: el
       escaneo lo abrió con la PSRAM partida (`5553904 B of code: no PSRAM
       block`; el mínimo libre del arranque fue 7,6 MB). En la placa: tras la

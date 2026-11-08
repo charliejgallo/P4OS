@@ -508,6 +508,42 @@ static bool module_release(void *handle, dynapp_t *self)
     return true;
 }
 
+#if AOS_CODE_IN_PSRAM
+/* The big blocks of the PSRAM heap in address order, used and free, for
+ * seeing what splits it (2026-11-08: 14 MB free and the largest block 9.4
+ * MB, and a 5.5 MB app that did not fit). Collected under the heap's lock
+ * into a buffer taken before, printed after. */
+typedef struct { uint32_t off, size; bool used; } pblk_t;
+typedef struct { pblk_t *b; int n, max; uintptr_t base; } pwalk_t;
+
+static bool pwalk_cb(walker_heap_into_t heap, walker_block_info_t blk, void *user)
+{
+    pwalk_t *w = user;
+    if (!w->base) w->base = (uintptr_t)heap.start;
+    bool big = blk.used ? blk.size >= 256 * 1024 : blk.size >= 512 * 1024;
+    if (big && w->n < w->max) {
+        w->b[w->n].off = (uint32_t)((uintptr_t)blk.ptr - w->base);
+        w->b[w->n].size = (uint32_t)blk.size;
+        w->b[w->n].used = blk.used;
+        w->n++;
+    }
+    return true;
+}
+
+static void psram_map_log(void)
+{
+    pwalk_t w = { .max = 48 };
+    w.b = heap_caps_malloc(w.max * sizeof *w.b, MALLOC_CAP_SPIRAM);
+    if (!w.b) return;
+    heap_caps_walk(MALLOC_CAP_SPIRAM, pwalk_cb, &w);
+    ESP_LOGW(TAG, "PSRAM blocks of 256 KB used or 512 KB free and up, by address:");
+    for (int i = 0; i < w.n; i++)
+        ESP_LOGW(TAG, "  +%5u KB  %5u KB  %s", (unsigned)(w.b[i].off / 1024), (unsigned)(w.b[i].size / 1024),
+                 w.b[i].used ? "used" : "free");
+    free(w.b);
+}
+#endif
+
 static bool module_open(const char *filename, uint32_t index,
                         void **out_handle, aos_app_t *out_app)
 {
@@ -558,6 +594,7 @@ static bool module_open(const char *filename, uint32_t index,
         ESP_LOGW(TAG, "PSRAM after the failure: free %u KB, largest block %u KB",
                  (unsigned)(heap_caps_get_free_size(MALLOC_CAP_SPIRAM) / 1024),
                  (unsigned)(heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM) / 1024));
+        if (s_oom) psram_map_log();
 #else
         /* The map of the executable heap: it distinguishes "there is no
          * memory" from "there is, but in pieces". With 54 KB free and the

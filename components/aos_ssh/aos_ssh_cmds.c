@@ -863,10 +863,52 @@ static int c_uname(sh_t *s, int argc, char **argv)
     return 0;
 }
 
+#ifndef AOS_SIM
+#include "esp_heap_caps.h"
+/* The big blocks of the PSRAM heap in address order, used and free, for
+ * seeing what splits it (2026-11-08: 14 MB free and the largest block 9.4
+ * MB, and a 5.5 MB app that did not fit). Collected under the heap's lock
+ * into a buffer taken before, printed after. */
+typedef struct { uint32_t off, size; bool used; } pblk_t;
+typedef struct { pblk_t *b; int n, max; uintptr_t base; } pwalk_t;
+
+static bool pwalk_cb(walker_heap_into_t heap, walker_block_info_t blk, void *user)
+{
+    pwalk_t *w = user;
+    if (!w->base) w->base = (uintptr_t)heap.start;
+    bool big = blk.used ? blk.size >= 256 * 1024 : blk.size >= 512 * 1024;
+    if (big && w->n < w->max) {
+        w->b[w->n].off = (uint32_t)((uintptr_t)blk.ptr - w->base);
+        w->b[w->n].size = (uint32_t)blk.size;
+        w->b[w->n].used = blk.used;
+        w->n++;
+    }
+    return true;
+}
+
+/* free -m: that map, with the stretches of small blocks between them */
+static void free_map(sh_t *s)
+{
+    pwalk_t w = { .max = 64 };
+    w.b = heap_caps_malloc(w.max * sizeof *w.b, MALLOC_CAP_SPIRAM);
+    if (!w.b) return;
+    heap_caps_walk(MALLOC_CAP_SPIRAM, pwalk_cb, &w);
+    sh_printf(s, "\nPSRAM:\n");
+    uint32_t at = 0;
+    for (int i = 0; i < w.n; i++) {
+        if (w.b[i].off > at + 64 * 1024)
+            sh_printf(s, "  +%6u KB  %6u KB  ...\n", (unsigned)(at / 1024), (unsigned)((w.b[i].off - at) / 1024));
+        sh_printf(s, "  +%6u KB  %6u KB  %s\n", (unsigned)(w.b[i].off / 1024), (unsigned)(w.b[i].size / 1024),
+                  w.b[i].used ? _("usada") : _("libre"));
+        at = w.b[i].off + w.b[i].size;
+    }
+    free(w.b);
+}
+#endif
+
 static int c_free(sh_t *s, int argc, char **argv)
 {
-    (void)argc;
-    (void)argv;
+    bool map = argc > 1 && !strcmp(argv[1], "-m");
     aos_sys_info_t in;
     memset(&in, 0, sizeof in);
     if (!aos_hal_sys_info(&in)) return 1;
@@ -882,6 +924,11 @@ static int c_free(sh_t *s, int argc, char **argv)
         human(m->min_free, e, sizeof e);
         sh_printf(s, "%-8s %8s %8s %8s %8s %8s\n", _(NAMES[i]), a, b, c, d, e);
     }
+#ifndef AOS_SIM
+    if (map) free_map(s);
+#else
+    (void)map;
+#endif
     return 0;
 }
 
@@ -1193,7 +1240,7 @@ const sh_cmd_t SH_CMDS[] = {
     { "log",    "[-f] [-p] [-n N]",   N_("el registro (-f lo sigue, -p el arranque anterior)"), c_log },
     { "top",    "",                   N_("las tareas y cuánto usan, cada segundo"),        c_top },
     { "ps",     "",                   N_("las tareas, una vez"),                           c_ps },
-    { "free",   "",                   N_("la memoria: interna, DMA y PSRAM"),              c_free },
+    { "free",   "[-m]",               N_("la memoria: interna, DMA y PSRAM"),              c_free },
     { "uptime", "",                   N_("cuánto hace que está prendida"),                 c_uptime },
     { "date",   "",                   N_("la fecha y la hora"),                            c_date },
     { "uname",  "",                   N_("versión, chip y último reinicio"),               c_uname },
