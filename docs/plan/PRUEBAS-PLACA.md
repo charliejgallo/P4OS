@@ -145,6 +145,14 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       deja **11 KB** de PSRAM: `worker: no memory for the split helper on
       core 1` en cada cuadro (un núcleo, 15 fps), y la captura y el SSH no
       responden mientras se juega; volviendo al inicio la memoria vuelve.
+      **Con `ee576bb` (las fotos de fondo se sueltan detrás de un juego):**
+      Monster Hop abre con 17,8 MB libres (16,0 antes; la foto del bloqueo
+      es la misma del inicio, así que se suelta sólo una), el nivel 1-1
+      carga en 0,9 s y corre en los dos núcleos a 22 fps (15 antes), sin
+      el error del ayudante. Su caché de arte toma lo que haya (7,6 MB esta
+      vez), así que la captura sigue sin salir durante el nivel. Al volver:
+      `wallpaper photos back`, la foto del inicio en el mismo lugar
+      (+5976 KB) y la PSRAM libre en 11,9 + 2,9 MB.
       Después de Monster Hop y Turbo el bloque libre mayor quedó en 8,8 y
       4,4 MB con 15 MB libres: lo que guardan las apps escondidas sigue
       partiendo la PSRAM (pendiente en `HANDOFF-SISTEMA.md`). Ideas: soltar
