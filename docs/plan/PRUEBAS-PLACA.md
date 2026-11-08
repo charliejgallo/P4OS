@@ -90,7 +90,10 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       abiertas seguidas, la más vieja sin nada andando se cierra (`more than
       3 apps alive`). Mila y Monster Hop: el usuario dice que andaban mal
       por la PSRAM; falta ver cómo, con el registro.
-- [ ] **Copiar y pegar** (2026-11-08, `aos_textsel.c`, sin instalar).
+- [ ] **Copiar y pegar** (2026-11-08, `aos_textsel.c`). **Instalado el
+      2026-11-08** (firmware `6537d8a` por OTA, y `install_lang.sh en de`):
+      arrancó y se confirmó, sin errores; el idioma pasó de 5817 a 5820
+      cadenas; `GET /api/clip` responde.
       Probado en el simulador con ASan: doble toque selecciona la palabra
       y abre el globo; Copiar llega a `/api/clip`; mantener un campo vacío
       ofrece Pegar y pega; la barra agranda la selección y una tecla la
