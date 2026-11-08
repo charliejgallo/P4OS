@@ -48,7 +48,9 @@
   wherever the decoder had put them, at boot in the middle of the PSRAM,
   and the 14 MB free were two pieces of 6.4 and 7.5 MB. Each photo now has
   a slot of its own taken as the shell starts, right after the screen's
-  frame buffers, and is copied into it. The lock screen's photo stays
+  frame buffers, and is copied into it; and they are decoded once the
+  boot's scan of the card's apps is over, so the decoder's own buffers do
+  not leave holes among what the boot keeps. The lock screen's photo stays
   decoded behind an app (it used to be let go and decoded again on
   locking); an app that needs every megabyte still has them let go.
   `free -m` in the SSH console shows the PSRAM's big blocks by address.

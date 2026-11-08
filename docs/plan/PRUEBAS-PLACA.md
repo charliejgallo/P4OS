@@ -53,6 +53,12 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       framebuffers (3 x 1800 KB) al principio, y las dos fotos de fondo
       (1824 KB cada una) en +7607 KB y +15815 KB, partiendo la PSRAM libre
       en 6,4 y 7,5 MB. Falta: que las fotos no queden en el medio.
+      `fc39250` instalado el 2026-11-08: CAS falló al principio (bloque
+      mayor 6,5 MB), se soltaron las fotos, el reintento entró (11 MB) y
+      quedó en la caché: el respaldo anda. Pero las ranuras quedaron en
+      +9,0 y +12,7 MB: las fotos se decodificaban durante el arranque y los
+      búferes del decodificador dejaban huecos. El commit siguiente reserva
+      las ranuras al empezar `aos_ui_init` y decodifica después del escaneo.
       **Ranuras para las fotos** (2026-11-08, sin instalar): tras instalar,
       `free -m` tiene que mostrar las dos fotos al lado de los framebuffers
       y un solo bloque libre grande (~14 MB); la foto del inicio y la del

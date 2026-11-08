@@ -23,8 +23,13 @@
  * let go while it is in front with aos_ui_wall_photo_spare().
  *
  * Where in PSRAM (2026-11-08). Each photo has a slot of its own, a screen's
- * worth (1.8 MB), taken when the shell starts, right after the panel's
- * frame buffers: the decoder's result is copied into it and freed. Before,
+ * worth (1.8 MB), taken first thing when the shell starts, right after the
+ * panel's frame buffers (aos_wall_photo_reserve): the decoder's result is
+ * copied into it and freed. And the photos are decoded only once the boot
+ * is over (aos_wall_photo_start, after the scan of the card's apps): the
+ * decoder's own buffers, let go when it ends, left holes among what the
+ * boot keeps, and the scan opens every app (measured with the slots but
+ * decoding at once: the free PSRAM's largest block 6.5 MB). Before,
  * the photos lay wherever the decoder's buffer had landed, at boot in the
  * middle of the heap (+7.6 MB and +15.8 MB of 25), and the 14 MB free were
  * two pieces of 6.4 and 7.5 MB: CAS (a 5.3 MB file and 5.5 MB of code at
@@ -213,12 +218,15 @@ static void slot_free(wall_t *v)
     v->slot = NULL;
 }
 
+static bool s_started;              /* the boot is over: decodes may run */
+
 static void request(int which)
 {
     wall_t *v = &W[which];
     bool album = which == AOS_WALL_LOCK && s_album[0];
     v->gen++;
     v->want = true;
+    if (!s_started) return;             /* aos_wall_photo_start() asks for it */
     if (!v->path[0] && !album) {                  /* none: back to the gradient at once */
         aos_hal_mutex_lock(s_mx);
         if (v->ready && v->new_px) aos_hal_image_free(v->new_px);
@@ -332,10 +340,11 @@ void aos_wall_photo_want(int which, bool want)
     aos_wall_photo_release(which);
 }
 
-void aos_wall_photo_release(int which)
+bool aos_wall_photo_release(int which)
 {
-    if (which < 0 || which > 1 || !s_mx) return;
+    if (which < 0 || which > 1 || !s_mx) return false;
     wall_t *v = &W[which];
+    bool had = v->px || v->slot;
     v->gen++;                           /* whatever is being decoded is dropped when it comes */
     v->want = false;
     if (which == AOS_WALL_HOME && s_home_img) {
@@ -350,6 +359,7 @@ void aos_wall_photo_release(int which)
         memset(&v->dsc, 0, sizeof v->dsc);
     }
     slot_free(v);
+    return had;
 }
 
 void aos_ui_wall_photo_spare(bool spare)
@@ -417,19 +427,36 @@ bool aos_wall_photo_next(void)
     return true;
 }
 
+static bool configured(int i)
+{
+    return W[i].path[0] || (i == AOS_WALL_LOCK && s_album[0]);
+}
+
+void aos_wall_photo_reserve(void)
+{
+    if (!aos_hal_pref_get_str("lock_album", s_album, sizeof s_album)) s_album[0] = 0;
+    for (int i = 0; i < 2; i++) {
+        if (!aos_hal_pref_get_str(PREF[i], W[i].path, sizeof W[i].path)) W[i].path[0] = 0;
+        if (configured(i)) slot_take(&W[i]);        /* now, at the bottom of the PSRAM */
+    }
+}
+
 void aos_wall_photo_init(void)
 {
     if (s_mx) return;
     s_mx = aos_hal_mutex_create();
     s_poll = lv_timer_create(poll_cb, 100, NULL);
     lv_timer_pause(s_poll);
-    if (!aos_hal_pref_get_str("lock_album", s_album, sizeof s_album)) s_album[0] = 0;
+}
+
+void aos_wall_photo_start(void)
+{
+    if (!s_mx || s_started) return;
+    s_started = true;
     for (int i = 0; i < 2; i++) {
-        if (!aos_hal_pref_get_str(PREF[i], W[i].path, sizeof W[i].path)) W[i].path[0] = 0;
-        if (W[i].path[0] || (i == AOS_WALL_LOCK && s_album[0])) {
-            slot_take(&W[i]);           /* now, at the bottom of the PSRAM (see the top) */
-            request(i);
-        }
+        if (!configured(i)) continue;
+        slot_take(&W[i]);               /* let go during the scan (aos_ui_make_room) */
+        request(i);
     }
 }
 

@@ -690,6 +690,7 @@ bool aos_ui_start_hidden(const char *id)
 
 void aos_ui_boot_start_run(void)
 {
+    aos_wall_photo_start();         /* after the scan: aos_wallpaper.c says why */
     if (aos_ui_safe_mode()) return;
     char l[BOOT_MAX];
     aos_ui_boot_start_ids(l, sizeof l);
@@ -803,12 +804,8 @@ int aos_ui_make_room(void)
 {
     int n = 0;
     /* also when it is still being decoded: that one is dropped as it comes */
-    if (!aos_lock_is_locked()) {
-        if (aos_wall_photo_dsc(AOS_WALL_LOCK)) n++;
-        aos_wall_photo_release(AOS_WALL_LOCK);
-    }
-    if (aos_wall_photo_dsc(AOS_WALL_HOME)) n++;
-    aos_wall_photo_release(AOS_WALL_HOME);
+    if (!aos_lock_is_locked() && aos_wall_photo_release(AOS_WALL_LOCK)) n++;
+    if (aos_wall_photo_release(AOS_WALL_HOME)) n++;
     if (n) aos_hal_log("ui", "the wallpaper photos let go: another app needs their memory");
     for (int i = 0; i < AOS_MAX_APPS; i++) {
         aos_app_t *a = &s_apps[i];
@@ -1565,6 +1562,7 @@ static void ui_button_cb(aos_button_t button, aos_button_action_t action)
 
 void aos_ui_init(void)
 {
+    aos_wall_photo_reserve();       /* before anything else of the shell's (aos_wallpaper.c) */
     aos_hal_set_button_cb(ui_button_cb);
     aos_theme_init();
     aos_i18n_init();

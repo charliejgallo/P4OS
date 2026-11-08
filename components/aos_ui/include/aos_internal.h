@@ -32,11 +32,13 @@ void aos_screenrec_toggle(void);
 bool aos_screenrec_on(void);
 
 /* ---- the wallpaper's photos (aos_wallpaper.c) ---- */
+void aos_wall_photo_reserve(void);  /* first thing: the photos' PSRAM slots, at the bottom */
 void aos_wall_photo_init(void);
+void aos_wall_photo_start(void);    /* the boot is over: decode them */
 void aos_wall_photo_relayout(void);
 const lv_image_dsc_t *aos_wall_photo_dsc(int which);     /* NULL: the gradient */
 void aos_wall_photo_want(int which, bool want);           /* let it go / decode it again */
-void aos_wall_photo_release(int which);                   /* let it go, its PSRAM slot too */
+bool aos_wall_photo_release(int which);                   /* let it go, its PSRAM slot too */
 uint32_t aos_wall_photo_tint(int which);                  /* 0xRRGGBB, 0 before the first decode */
 bool aos_wall_photo_next(void);                           /* locking: the album's next photo */
 
