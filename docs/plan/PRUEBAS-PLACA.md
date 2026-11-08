@@ -127,6 +127,48 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       (293 KB) escondidas, la PSRAM quedó con 13 MB libres y el bloque
       mayor de **3,9 MB**: lo que guardan las apps escondidas cayó en el
       medio de lo que dejaron los juegos.
+      **Los juegos, más livianos** (2026-11-08, sesión de apps, medido en
+      el simulador; **sin instalar**). PSRAM del juego por encima del
+      inicio, pico / quieto, antes y después; en el simulador cada pico se
+      toma después de cada reserva grande, sin la ventana de la Mac:
+      - **Monster Hop** (`03053be`): el mapa se descomprime por tramos
+        (ventana de 256 KB) directo a su imagen, sin los 2,4 + 5,9 MB de
+        antes. Cargarlo pide ~4 MB en vez de ~9,7 sobre lo que el juego ya
+        tiene (6,1 MB medidos en la placa). Pico al abrir **16,3 → 13,8
+        MB**; quieto en el menú 13,5 (igual). El mapa sale idéntico byte
+        por byte y vuelve al salir de un nivel (`menus back ... map ok`).
+      - **Golf** (`d16cc7c`): los dos búferes de la vista 3D a un cuarto
+        de resolución (0,9 MB) se reservan sólo mientras se dibuja.
+        Quieto (menú, mapa, vuelo) **12,3 → 11,4 MB**; pico al dibujar la
+        vista 3D 12,3-12,4 → 12,1; al abrir con el menú dibujado de cero
+        12,7 → 11,3. La imagen del menú que se guarda en la tarjeta es
+        idéntica byte por byte. En la placa, de 15,4 MB: ~2,4 MB libres en
+        el menú (eran 216 KB de 14) y ~1,7 MB durante cada vista 3D (una
+        fracción de segundo por golpe).
+      - **Turbo** (`d2a9926`): los sprites se descomprimen directo en sus
+        planos de color y alfa (el fondo de la etapa, 1,9 MB, estaba dos
+        veces), y el auto del jugador se pinta de a una vista (antes, las
+        siete en crudo, 1,3 MB, al lado de las pintadas). Pico al abrir
+        **16,1 → 14,6 MB**; quieto en el menú 14,4 (igual); el menú se ve
+        igual pixel por pixel. En la placa, de 15,4 MB: ~2,6 MB libres en
+        el menú y ya no baja de ahí al cargar. La carrera usa ~2,5 MB más
+        que el menú (los autos del tráfico y el auto pintado), y eso no
+        cambió.
+      - **Pinball**: sin cambios. Mesa cargada 14,2 / 14,0 MB. No hay nada
+        duplicado: el cuadro (1,8 MB, se copia al panel sólo lo que
+        cambia) y su profundidad (1,5), la imagen de la mesa (1,5) y su
+        profundidad (1,5), luces, blancos y paletas (~2,8) y el sonido
+        (0,6) se usan en cada cuadro; las tarjetas del carrusel ya se
+        sueltan antes de cargar la mesa. Bajarlo es profundidad de 8 bits
+        o descomprimir en cada cuadro: calidad o fps. En la placa, ~1,5
+        MB libres de 15,4.
+      Falta en la placa, después de instalar `monsterhop`, `golf` y
+      `turbo`: el mapa de Monster Hop en el menú (sin `the sheet did not
+      load`); la línea `golf: menu ... psram free` del menú; una carrera
+      de Turbo; y **un nivel de Monster Hop**: en el simulador un nivel
+      ocupa ~19 MB con dos cuadros (arte 7,6 MB, el anillo del mundo 4,9 y
+      los cuadros 3,6), más que los 15,4 MB libres. Si la placa dice
+      `level N FAILED`, eso es lo próximo.
 - [ ] **Cursor y campo activo** (2026-11-08, `aos_textfield.c`).
       **Instalado el 2026-11-08** (firmware `64fbdb0`, por OTA; arrancó y
       se confirmó, 212 KB de RAM interna libre). Falta que el usuario lo
