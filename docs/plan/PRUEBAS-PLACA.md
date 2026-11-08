@@ -66,9 +66,12 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       en la caché. El escaneo empezó a los 3,0 s (antes 6,4 s; sin ver
       todavía si es por las fotos o por el Wi-Fi). Falta mirar a mano las
       fotos (inicio, bloqueo, acostada, álbum).
-      **Fotos más chicas** (2026-11-08, sin instalar): el bloqueo a media
+      **Fotos más chicas** (2026-11-08): el bloqueo a media
       resolución estirada, y la misma foto en inicio y bloqueo compartida.
-      En la placa: `free -m` con las fotos en 1824 + 460 KB (o sólo 1824
+      **`2d3c8de` instalado el 2026-11-08:** `free -m` con la foto del
+      inicio en 1824 KB y la del bloqueo en 456 KB (fotos distintas), y la
+      PSRAM libre en un bloque de **15425 KB** (antes 14080). CAS entró a
+      la primera. Falta mirar a mano: `free -m` con las fotos en 1824 + 460 KB (o sólo 1824
       con la misma foto); el bloqueo se ve bien (algo más blando) parado y
       acostado; con la misma foto, el bloqueo un poco más oscuro que el
       inicio; cambiar una foto desde Fotos o Ajustes pasa de compartida a
