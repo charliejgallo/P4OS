@@ -90,6 +90,12 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       abiertas seguidas, la más vieja sin nada andando se cierra (`more than
       3 apps alive`). Mila y Monster Hop: el usuario dice que andaban mal
       por la PSRAM; falta ver cómo, con el registro.
+- [ ] **Ojito en las contraseñas y borrar por palabras** (2026-11-08, sin
+      instalar). Probado en el simulador con ASan: el ojo en la contraseña
+      de MQTT muestra y oculta; el borrar mantenido pasó de letras a
+      palabras. En la placa: el ojo en la contraseña de la app SSH, de
+      MQTT y del Wi-Fi; que al cerrar el teclado vuelva a ocultarse; que
+      mostrada no se pueda copiar; el borrar mantenido.
 - [x] **Copiar y pegar** (2026-11-08, `aos_textsel.c`). **Probado por el
       usuario el 2026-11-08: anda, también desde el portapapeles del
       portal.** **Instalado el

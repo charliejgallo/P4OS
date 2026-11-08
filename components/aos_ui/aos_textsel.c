@@ -208,7 +208,7 @@ static void select_word(lv_obj_t *ta)
 
 static void do_copy(lv_obj_t *ta, bool cut)
 {
-    if (lv_textarea_get_password_mode(ta)) return;
+    if (aos_textfield_is_password(ta)) return;
     char *c = sel_text();
     if (!c) return;
     aos_ui_clip_set(c);
@@ -309,7 +309,7 @@ static void menu_add(lv_obj_t *row, const char *text, int what)
 static void menu_open(lv_obj_t *ta)
 {
     menu_close();
-    bool sel = aos_textsel_has(ta), pwd = lv_textarea_get_password_mode(ta);
+    bool sel = aos_textsel_has(ta), pwd = aos_textfield_is_password(ta);
     bool text = char_count(ta) > 0, clip = s_clip_len > 0;
     if (!sel && !text && !clip) return;
 

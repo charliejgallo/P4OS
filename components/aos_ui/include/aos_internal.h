@@ -98,6 +98,7 @@ void aos_textfield_accent(void);         /* the accent changed: recolour them */
 void aos_keyboard_init(void);            /* aos_keyboard.c: the Spanish maps, once */
 void aos_keyboard_attach(lv_obj_t *kb);  /* each lv_keyboard, from the theme */
 lv_obj_t *aos_textfield_active(void);    /* the field of the keyboard shown, or NULL */
+bool aos_textfield_is_password(lv_obj_t *ta);  /* hidden or shown by its eye */
 /* aos_textsel.c: selecting text in a field, and the clipboard */
 void aos_textsel_attach(lv_obj_t *ta);   /* each lv_textarea, from the theme */
 bool aos_textsel_has(lv_obj_t *ta);      /* something selected in it */

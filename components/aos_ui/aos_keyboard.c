@@ -17,7 +17,8 @@
  *     down in a text of several lines; no space is typed then. A plain tap
  *     types the space when the finger lifts.
  *   - Letters no longer repeat while held (the hold is for the bubble);
- *     backspace and the arrows still do.
+ *     backspace and the arrows still do, and backspace held goes from
+ *     letters to whole words after BS_LETTERS of them.
  *   - With text selected (aos_textsel.c): a key typed replaces it,
  *     backspace deletes it, an arrow lets it go, and the trackpad moves the
  *     selection's end instead of the cursor.
@@ -43,6 +44,7 @@
 #define STEP_X          22          /* px of drag per letter */
 #define STEP_Y          44          /* px of drag per line */
 #define DOUBLE_TAP_MS   400
+#define BS_LETTERS      8           /* backspace held: words after these letters */
 #define CELL_W          76
 #define CELL_H          92
 
@@ -153,6 +155,7 @@ typedef struct {
     const variants_t *var;
     int       nvar, sel;
     lv_area_t key_area;         /* the held key, on the screen */
+    uint16_t  bs_count;         /* backspace held: how many it deleted */
 } kst_t;
 
 static kst_t s_k[MAX_KB];
@@ -192,6 +195,29 @@ static void type_text(lv_obj_t *kb, kst_t *s, const char *txt)
         lv_textarea_add_text(ta, txt);
     }
     if (s->once) set_lower(kb, s);
+}
+
+static bool is_sep(uint32_t c)
+{
+    return c <= ' ' || (c < 0x80 && strchr(".,;:!?()[]{}<>\"'/\\|=+*&^%$#@~`-_", (int)c));
+}
+
+/* the character before character index i of t */
+static uint32_t char_before(const char *t, uint32_t i)
+{
+    uint32_t b = lv_text_encoded_get_byte_id(t, i - 1);
+    return lv_text_encoded_next(t, &b);
+}
+
+/* Backspace on a word: the spaces before the cursor and the word before them */
+static void delete_word(lv_obj_t *ta)
+{
+    const char *t = lv_textarea_get_text(ta);
+    uint32_t i = lv_textarea_get_cursor_pos(ta), n = 0;
+    while (i > 0 && char_before(t, i) <= ' ') { i--; n++; }
+    while (i > 0 && !is_sep(char_before(t, i))) { i--; n++; }
+    if (!n && i > 0) n = 1;                       /* a lone sign: one */
+    while (n--) lv_textarea_delete_char(ta);
 }
 
 static bool is_letter(const char *t)
@@ -313,6 +339,12 @@ static void pre_cb(lv_event_t *e)
         return;
     }
     lv_obj_t *ta = ta_of(kb);
+    if (ta && !aos_textsel_has(ta) && !strcmp(txt, LV_SYMBOL_BACKSPACE) && ++s->bs_count > BS_LETTERS) {
+        lv_event_stop_processing(e);    /* held long: whole words */
+        click();
+        delete_word(ta);
+        return;
+    }
     if (aos_textsel_has(ta)) {
         if (!strcmp(txt, LV_SYMBOL_BACKSPACE)) {
             lv_event_stop_processing(e);
@@ -371,6 +403,7 @@ static void post_cb(lv_event_t *e)
         const char *txt = btn == LV_BUTTONMATRIX_BUTTON_NONE ? NULL : lv_buttonmatrix_get_button_text(kb, btn);
         s->space = txt && !strcmp(txt, " ");
         s->moved = false;
+        s->bs_count = 0;
         s->last = p;
         s->acc_x = s->acc_y = 0;
         pop_close(s);

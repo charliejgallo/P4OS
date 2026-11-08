@@ -25,6 +25,13 @@
  * USB keyboard's (aos_hwkbd.c): the field being edited is the one of the
  * open keyboard. The keyboards are found as they are created (the theme
  * sees every object), and a timer looks at them while there is any.
+ *
+ * A password field being edited gets an eye at its right end (2026-11-08):
+ * a tap shows what was typed, another hides it, and closing the keyboard
+ * hides it again. It is a floating child of the field, in padding added
+ * for it, and takes no focus. Whether a field is a password one is asked
+ * of the eye once it has one (shown, the field is not in password mode):
+ * aos_textfield_is_password(), so the clipboard still does not copy it.
  */
 #include "aos_internal.h"
 #include "aos_theme.h"
@@ -64,10 +71,70 @@ static bool on_screen(lv_obj_t *o)
     return true;
 }
 
+/* ---- the eye of a password field ---- */
+
+#define EYE_W 64
+
+static void eye_cb(lv_event_t *e);
+
+static lv_obj_t *eye_of(lv_obj_t *ta)
+{
+    for (uint32_t i = 0; ta && i < lv_obj_get_child_count(ta); i++) {
+        lv_obj_t *c = lv_obj_get_child(ta, (int32_t)i);
+        for (uint32_t k = 0; k < lv_obj_get_event_count(c); k++)
+            if (lv_event_dsc_get_cb(lv_obj_get_event_dsc(c, k)) == eye_cb) return c;
+    }
+    return NULL;
+}
+
+bool aos_textfield_is_password(lv_obj_t *ta)
+{
+    return ta && (lv_textarea_get_password_mode(ta) || eye_of(ta));
+}
+
+static void eye_show(lv_obj_t *ta, lv_obj_t *eye, bool shown)
+{
+    lv_textarea_set_password_mode(ta, !shown);
+    lv_label_set_text(lv_obj_get_child(eye, 0), shown ? LV_SYMBOL_EYE_CLOSE : LV_SYMBOL_EYE_OPEN);
+}
+
+static void eye_cb(lv_event_t *e)
+{
+    lv_obj_t *eye = lv_event_get_current_target(e);
+    lv_obj_t *ta = lv_obj_get_parent(eye);
+    eye_show(ta, eye, lv_textarea_get_password_mode(ta));
+}
+
+static void eye_add(lv_obj_t *ta)
+{
+    if (!ta || !lv_textarea_get_password_mode(ta) || eye_of(ta)) return;
+    lv_obj_set_style_pad_right(ta, lv_obj_get_style_pad_right(ta, LV_PART_MAIN) + EYE_W, 0);
+    lv_obj_t *b = lv_obj_create(ta);
+    lv_obj_remove_style_all(b);
+    lv_obj_add_flag(b, LV_OBJ_FLAG_FLOATING | LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_remove_flag(b, LV_OBJ_FLAG_CLICK_FOCUSABLE | LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_size(b, EYE_W, lv_pct(100));
+    lv_obj_align(b, LV_ALIGN_RIGHT_MID, EYE_W, 0);
+    lv_obj_t *l = lv_label_create(b);
+    lv_label_set_text(l, LV_SYMBOL_EYE_OPEN);
+    lv_obj_set_style_text_color(l, AOS_C_DIM, 0);
+    lv_obj_center(l);
+    lv_obj_add_event_cb(b, eye_cb, LV_EVENT_CLICKED, NULL);
+}
+
+/* the keyboard closed: a password shown is hidden again */
+static void eye_hide(lv_obj_t *ta)
+{
+    lv_obj_t *eye = eye_of(ta);
+    if (eye && !lv_textarea_get_password_mode(ta)) eye_show(ta, eye, false);
+}
+
 /* the keyboard stopped editing ta: it is not the field being edited any more */
 static void let_go(lv_obj_t *ta)
 {
-    if (ta && !lv_obj_get_group(ta)) lv_obj_remove_state(ta, LV_STATE_FOCUSED);
+    if (!ta) return;
+    eye_hide(ta);
+    if (!lv_obj_get_group(ta)) lv_obj_remove_state(ta, LV_STATE_FOCUSED);
 }
 
 static void tick_cb(lv_timer_t *t)
@@ -92,6 +159,7 @@ static void tick_cb(lv_timer_t *t)
         }
         if (!s->ta) continue;
         bool shown = on_screen(s->kb);
+        if (shown) eye_add(s->ta);
         if (shown && !lv_obj_has_state(s->ta, LV_STATE_FOCUSED)) {
             lv_obj_add_state(s->ta, LV_STATE_FOCUSED);
             s->held = true;

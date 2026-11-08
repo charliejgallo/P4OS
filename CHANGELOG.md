@@ -33,6 +33,11 @@
   keyboard keeps the ring while the form behind it is touched or
   scrolled, and loses it when the keyboard closes. It reaches the apps on
   the card too, with no new build of them (`components/aos_ui/aos_textfield.c`).
+- **An eye in password fields, and backspace by words.** A password field
+  being edited shows an eye at its right end: a tap shows what was typed,
+  another hides it, and closing the keyboard hides it again (and it is
+  still not copied). Backspace held deletes eight letters and then whole
+  words.
 - **Copy and paste.** Hold a text field for a bubble: Seleccionar, Todo,
   Pegar, and with something selected Cortar and Copiar (not in a password
   field). A double tap selects a word; with something selected, the space
