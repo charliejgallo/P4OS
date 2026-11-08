@@ -41,6 +41,15 @@
  * megabyte (aos_ui_wall_photo_spare) or one that does not fit
  * (aos_ui_make_room); the next decode takes a new one wherever it can.
  *
+ * Smaller still (2026-11-08, asked for by the user). The lock screen's photo
+ * is kept at half the screen's width and height (460 KB, not 1.8 MB) and
+ * stretched to the screen when drawn: behind the big clock, darker and
+ * covered by the notifications, the softness hardly shows. And when the
+ * lock screen's photo is the home screen's (the same file, no album), it
+ * has no slot nor decode of its own: it shows the home screen's pixels,
+ * darkened the rest of the way by a recolour while they are drawn. The
+ * photos went from 3.6 MB to 2.3 MB, or 1.8 MB with the same photo.
+ *
  * Or a folder behind the lock screen, a different photo of it every time
  * the board locks (2026-10-25): pref "lock_album". The worker picks one at
  * random among the folder's photos, never the one just shown, so the
@@ -201,15 +210,38 @@ static void worker(void *arg)
     free(j);
 }
 
-/* A screen's worth, whichever way the screen is turned */
-static size_t slot_bytes(void)
+/* The size a photo is kept at: the screen's for the home screen, half of
+ * it each way for the lock screen's (see the top) */
+static void photo_size(int which, int *w, int *h)
 {
-    return (size_t)aos_hal_screen_w() * aos_hal_screen_h() * 2;
+    const aos_geo_t *g = aos_ui_geo();
+    int k = which == AOS_WALL_LOCK ? 2 : 1;
+    *w = g->w / k;
+    *h = g->h / k;
+}
+
+/* A slot holds the photo whichever way the screen is turned */
+static size_t slot_bytes(int which)
+{
+    size_t n = (size_t)aos_hal_screen_w() * aos_hal_screen_h() * 2;
+    return which == AOS_WALL_LOCK ? n / 4 : n;
 }
 
 static void slot_take(wall_t *v)
 {
-    if (!v->slot) v->slot = malloc(slot_bytes());       /* PSRAM: over 1 KB */
+    if (!v->slot) v->slot = malloc(slot_bytes((int)(v - W)));   /* PSRAM: over 1 KB */
+}
+
+static bool configured(int i)
+{
+    return W[i].path[0] || (i == AOS_WALL_LOCK && s_album[0]);
+}
+
+/* The lock screen shows the home screen's photo: the same file, no album */
+static bool lock_shares(void)
+{
+    return !s_album[0] && W[AOS_WALL_LOCK].path[0] &&
+           !strcmp(W[AOS_WALL_LOCK].path, W[AOS_WALL_HOME].path);
 }
 
 static void slot_free(wall_t *v)
@@ -220,10 +252,19 @@ static void slot_free(wall_t *v)
 
 static bool s_started;              /* the boot is over: decodes may run */
 
+static void request(int which);
+
 static void request(int which)
 {
     wall_t *v = &W[which];
     bool album = which == AOS_WALL_LOCK && s_album[0];
+    if (which == AOS_WALL_LOCK && lock_shares()) {
+        /* nothing of its own: the home screen's photo is the one */
+        aos_wall_photo_release(AOS_WALL_LOCK);
+        if (s_started && !W[AOS_WALL_HOME].px && !W[AOS_WALL_HOME].want) request(AOS_WALL_HOME);
+        aos_lock_layout();
+        return;
+    }
     v->gen++;
     v->want = true;
     if (!s_started) return;             /* aos_wall_photo_start() asks for it */
@@ -239,11 +280,9 @@ static void request(int which)
     } else {
         job_t *j = malloc(sizeof *j);
         if (!j) return;
-        const aos_geo_t *g = aos_ui_geo();
         j->which = which;
         j->gen = v->gen;
-        j->w = g->w;
-        j->h = g->h;
+        photo_size(which, &j->w, &j->h);
         snprintf(j->path, sizeof j->path, "%s", v->path);
         snprintf(j->album, sizeof j->album, "%s", album ? s_album : "");
         if (!aos_hal_thread_start("wallpaper", worker, j, 8192, 3)) { free(j); v->want = false; return; }
@@ -295,7 +334,7 @@ static void poll_cb(lv_timer_t *t)
         /* into the slot (see the top): the decoder's buffer goes back */
         if (px) {
             slot_take(v);
-            if (v->slot && (size_t)w * h * 2 <= slot_bytes()) {
+            if (v->slot && (size_t)w * h * 2 <= slot_bytes(i)) {
                 memcpy(v->slot, px, (size_t)w * h * 2);
                 aos_hal_image_free(px);
                 px = v->slot;
@@ -319,7 +358,7 @@ static void poll_cb(lv_timer_t *t)
             v->dsc.data_size = (uint32_t)w * h * 2;
         }
         if (i == AOS_WALL_HOME) apply_home();
-        else aos_lock_layout();
+        if (i == AOS_WALL_LOCK || lock_shares()) aos_lock_layout();
         if (old) aos_hal_image_free(old);
     }
     if (!W[0].want && !W[1].want && !W[0].inflight && !W[1].inflight) lv_timer_pause(t);
@@ -331,6 +370,10 @@ void aos_wall_photo_want(int which, bool want)
     if (which < 0 || which > 1 || !s_mx) return;
     wall_t *v = &W[which];
     if (!v->path[0] && !(which == AOS_WALL_LOCK && s_album[0])) return;
+    if (which == AOS_WALL_LOCK && lock_shares()) {
+        if (want) aos_wall_photo_want(AOS_WALL_HOME, true);
+        return;                         /* the home screen's is not the lock's to let go */
+    }
     if (want) {
         if (!v->px && !v->want) request(which);
         return;
@@ -370,13 +413,33 @@ void aos_ui_wall_photo_spare(bool spare)
 
 uint32_t aos_wall_photo_tint(int which)
 {
+    if (which == AOS_WALL_LOCK && lock_shares()) which = AOS_WALL_HOME;
     return which >= 0 && which <= 1 && W[which].path[0] ? W[which].tint : 0;
 }
 
 const lv_image_dsc_t *aos_wall_photo_dsc(int which)
 {
+    if (which == AOS_WALL_LOCK && lock_shares()) which = AOS_WALL_HOME;
     if (which < 0 || which > 1 || !W[which].px) return NULL;
     return &W[which].dsc;
+}
+
+uint8_t aos_wall_photo_lock_dim(void)
+{
+    /* the home screen's photo was darkened to LUMA_HOME; the lock's wants
+     * LUMA_LOCK: black over it for the difference */
+    return lock_shares() ? (uint8_t)(255 - 255 * LUMA_LOCK / LUMA_HOME) : 0;
+}
+
+/* A photo changed: the lock screen starts or stops sharing the home
+ * screen's, and gives back its own or decodes it */
+static void lock_sync(void)
+{
+    if (lock_shares()) {
+        if (aos_wall_photo_release(AOS_WALL_LOCK)) aos_lock_layout();
+    } else if (configured(AOS_WALL_LOCK) && !W[AOS_WALL_LOCK].px && !W[AOS_WALL_LOCK].want) {
+        request(AOS_WALL_LOCK);
+    }
 }
 
 void aos_ui_wall_photo_set(int which, const char *path)
@@ -389,6 +452,7 @@ void aos_ui_wall_photo_set(int which, const char *path)
     snprintf(W[which].path, sizeof W[which].path, "%s", path ? path : "");
     aos_hal_pref_set_str(PREF[which], W[which].path);
     request(which);
+    lock_sync();
 }
 
 bool aos_ui_wall_photo(int which, char *out, size_t len)
@@ -406,6 +470,7 @@ void aos_ui_lock_album_set(const char *dir)
     if (!s_album[0]) {
         /* the photo on show stays, as the one photo */
         aos_hal_pref_set_str(PREF[AOS_WALL_LOCK], W[AOS_WALL_LOCK].path);
+        lock_sync();
         return;
     }
     request(AOS_WALL_LOCK);
@@ -427,17 +492,13 @@ bool aos_wall_photo_next(void)
     return true;
 }
 
-static bool configured(int i)
-{
-    return W[i].path[0] || (i == AOS_WALL_LOCK && s_album[0]);
-}
-
 void aos_wall_photo_reserve(void)
 {
     if (!aos_hal_pref_get_str("lock_album", s_album, sizeof s_album)) s_album[0] = 0;
     for (int i = 0; i < 2; i++) {
         if (!aos_hal_pref_get_str(PREF[i], W[i].path, sizeof W[i].path)) W[i].path[0] = 0;
-        if (configured(i)) slot_take(&W[i]);        /* now, at the bottom of the PSRAM */
+        if (configured(i) && !(i == AOS_WALL_LOCK && lock_shares()))
+            slot_take(&W[i]);           /* now, at the bottom of the PSRAM */
     }
 }
 
@@ -455,7 +516,8 @@ void aos_wall_photo_start(void)
     s_started = true;
     for (int i = 0; i < 2; i++) {
         if (!configured(i)) continue;
-        slot_take(&W[i]);               /* let go during the scan (aos_ui_make_room) */
+        if (!(i == AOS_WALL_LOCK && lock_shares()))
+            slot_take(&W[i]);           /* let go during the scan (aos_ui_make_room) */
         request(i);
     }
 }
@@ -464,8 +526,10 @@ void aos_wall_photo_start(void)
 void aos_wall_photo_relayout(void)
 {
     if (!s_mx) return;
-    const aos_geo_t *g = aos_ui_geo();
-    for (int i = 0; i < 2; i++)
-        if (W[i].path[0] && (W[i].w != g->w || W[i].h != g->h)) request(i);
+    for (int i = 0; i < 2; i++) {
+        int w, h;
+        photo_size(i, &w, &h);
+        if (W[i].path[0] && (W[i].w != w || W[i].h != h)) request(i);
+    }
     if (s_home_img) lv_obj_center(s_home_img);
 }

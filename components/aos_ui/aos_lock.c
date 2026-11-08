@@ -598,7 +598,16 @@ static void build(void)
         lv_obj_t *im = lv_image_create(L.layer);
         lv_obj_remove_flag(im, LV_OBJ_FLAG_CLICKABLE);
         lv_image_set_src(im, photo);
+        /* kept at half size (or the home screen's, at full): stretched to
+         * the screen either way (aos_wallpaper.c) */
+        lv_obj_set_size(im, g->w, g->h);
+        lv_image_set_inner_align(im, LV_IMAGE_ALIGN_STRETCH);
         lv_obj_center(im);
+        uint8_t dim = aos_wall_photo_lock_dim();
+        if (dim) {
+            lv_obj_set_style_image_recolor(im, lv_color_black(), 0);
+            lv_obj_set_style_image_recolor_opa(im, dim, 0);
+        }
     }
 
     /* the clock: big, under the status bar; in landscape on the left, the

@@ -39,6 +39,7 @@ void aos_wall_photo_relayout(void);
 const lv_image_dsc_t *aos_wall_photo_dsc(int which);     /* NULL: the gradient */
 void aos_wall_photo_want(int which, bool want);           /* let it go / decode it again */
 bool aos_wall_photo_release(int which);                   /* let it go, its PSRAM slot too */
+uint8_t aos_wall_photo_lock_dim(void);                    /* black over the lock's photo when it is the home's */
 uint32_t aos_wall_photo_tint(int which);                  /* 0xRRGGBB, 0 before the first decode */
 bool aos_wall_photo_next(void);                           /* locking: the album's next photo */
 

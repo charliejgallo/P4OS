@@ -52,7 +52,10 @@
   boot's scan of the card's apps is over, so the decoder's own buffers do
   not leave holes among what the boot keeps. The lock screen's photo stays
   decoded behind an app (it used to be let go and decoded again on
-  locking); an app that needs every megabyte still has them let go.
+  locking); an app that needs every megabyte still has them let go. The
+  lock screen's photo is kept at half size (460 KB) and stretched, and when
+  it is the same photo as the home screen's it takes nothing of its own:
+  the photos went from 3.6 MB to 2.3 MB, or 1.8 MB with the same photo.
   `free -m` in the SSH console shows the PSRAM's big blocks by address.
 - **Two apps in the background, not three.** Beside the one in front, two
   apps stay hidden; one more closes the least recently used (never one with
