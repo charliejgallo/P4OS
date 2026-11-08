@@ -65,7 +65,7 @@ if(NOT DEFINED P4OS_SIM_APPS)
     set(P4OS_SIM_APPS hello_app cotiz clima burbujas simon dados flappy gemas buscaminas atasco radio recorder afinador
         arkanos topos cjump g2043 claudito camaras pixel neon blackjack truco lua video doom chatarra
         visor3d mapas monsterhop turbo mila golf notas eeprom dibujo pwm infrarrojo can vnc rf datalog
-        impresoras cartero)
+        impresoras cartero ssh)
 endif()
 set(AOS_DYNAPP_SRC "")
 foreach(a ${P4OS_SIM_APPS})
@@ -195,6 +195,7 @@ add_executable(p4os_sim
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/aos_ssh.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/aos_ssh_wire.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/aos_ssh_crypto.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/aos_ssh_chacha.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/aos_ssh_shell.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/aos_ssh_cmds.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/monocypher/monocypher.c

@@ -14,6 +14,16 @@
   key where it asks for one, closed where it is closed. A new key asks on
   the board's screen, with its fingerprint. `docs/SSH.md`. Asked for by
   Pocho at Home Assistant's Community Day in Buenos Aires.
+- **SSH the other way: the SSH app.** A terminal on the board into a Mac,
+  a Raspberry Pi or any SSH server: saved computers, known_hosts with the
+  fingerprint shown the first time and a red warning when it changes, the
+  board's own Ed25519 key and a padlock that installs it in the computer's
+  authorized_keys, password or keyboard-interactive otherwise (never
+  kept). An xterm with 256 colours, the alternate screen and 1000 lines of
+  scrollback; a keyboard with Esc, Tab, Ctrl, Alt, arrows and F1-F12, or a
+  USB one. `apps/ssh/README.md`. The server learnt
+  chacha20-poly1305@openssh.com for it, and the firmware now lends the apps
+  Monocypher and the SSH wire helpers.
 
 ## 0.23.2 — 2026-11-06
 

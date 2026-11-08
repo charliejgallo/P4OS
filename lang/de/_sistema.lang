@@ -9924,3 +9924,6 @@ cierra la sesión (también Ctrl-D)	beendet die Sitzung (auch Strg-D)
 
 #: components/aos_ssh/aos_ssh_shell.c:701
 «help» muestra los comandos; Ctrl-D o «exit» para salir.\n	„help“ zeigt die Befehle; Strg-D oder „exit“ zum Beenden.\n
+
+#: apps/ssh/main/sc_app.c (the app's name)
+SSH	SSH

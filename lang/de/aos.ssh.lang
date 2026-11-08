@@ -1,0 +1,196 @@
+# amoledos-lang 1   es -> de
+# aos.ssh.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/ssh/main/sc_app.c:198
+No se pudo hacer la clave	Der Schlüssel konnte nicht erstellt werden
+
+#: apps/ssh/main/sc_app.c:202
+La clave de la placa	Der Schlüssel der Platine
+
+#: apps/ssh/main/sc_app.c:203
+Para entrar sin contraseña, esta línea va en ~/.ssh/authorized_keys del equipo. Lo más fácil: entrá una vez con la contraseña y tocá el candado de arriba.	Um ohne Passwort hineinzukommen, gehört diese Zeile in ~/.ssh/authorized_keys des Computers. Am einfachsten: einmal mit Passwort anmelden und oben auf das Schloss tippen.
+
+#: apps/ssh/main/sc_app.c:221
+Con el SSH de la placa, desde la Mac: ssh %s.local cat %s/ssh/id_ed25519.pub	Mit dem SSH der Platine, vom Computer aus: ssh %s.local cat %s/ssh/id_ed25519.pub
+
+#: apps/ssh/main/sc_app.c:225
+Listo	Fertig
+
+#: apps/ssh/main/sc_app.c:240
+No entran más equipos	Kein Platz für weitere Computer
+
+#: apps/ssh/main/sc_app.c:308
+Ningún equipo todavía: agregalo con +.\n\nEn la Mac: Ajustes del Sistema, General, Compartir, «Sesión remota». En una Raspberry Pi: sudo raspi-config, Interface Options, SSH.	Noch keine Computer: mit + hinzufügen.\n\nAuf dem Mac: Systemeinstellungen, Allgemein, Teilen, „Entfernte Anmeldung“. Auf einem Raspberry Pi: sudo raspi-config, Interface Options, SSH.
+
+#: apps/ssh/main/sc_app.c:402
+Falta la dirección	Die Adresse fehlt
+
+#: apps/ssh/main/sc_app.c:406
+Falta el usuario	Der Benutzer fehlt
+
+#: apps/ssh/main/sc_app.c:418
+No se pudo guardar en la tarjeta	Konnte nicht auf der Karte gespeichert werden
+
+#: apps/ssh/main/sc_app.c:431
+Tocá otra vez para borrar	Zum Löschen nochmal tippen
+
+#: apps/ssh/main/sc_app.c:459
+Equipo nuevo	Neuer Computer
+
+#: apps/ssh/main/sc_app.c:459
+Equipo	Computer
+
+#: apps/ssh/main/sc_app.c:465
+Nombre	Name
+
+#: apps/ssh/main/sc_app.c:466
+Dirección (IP o nombre)	Adresse (IP oder Name)
+
+#: apps/ssh/main/sc_app.c:468
+Puerto	Port
+
+#: apps/ssh/main/sc_app.c:470
+Usuario	Benutzer
+
+#: apps/ssh/main/sc_app.c:472
+La contraseña no se guarda: se pide al conectar. Con la clave de la placa instalada en el equipo no hace falta.	Das Passwort wird nicht gespeichert: es wird beim Verbinden abgefragt. Mit dem Schlüssel der Platine auf dem Computer ist es nicht nötig.
+
+#: apps/ssh/main/sc_app.c:480
+Guardar	Speichern
+
+#: apps/ssh/main/sc_app.c:481
+Borrar	Löschen
+
+#: apps/ssh/main/sc_app.c:655
+Volver	Zurück
+
+#: apps/ssh/main/sc_app.c:656
+Reconectar	Neu verbinden
+
+#: apps/ssh/main/sc_app.c:701
+¡La clave de este equipo cambió!	Der Schlüssel dieses Computers hat sich geändert!
+
+#: apps/ssh/main/sc_app.c:701
+Primera vez con este equipo	Zum ersten Mal mit diesem Computer
+
+#: apps/ssh/main/sc_app.c:707
+Puede que lo hayan reinstalado, o que alguien se haya puesto en el medio. Si no sabés por qué cambió, no te conectes.	Vielleicht wurde er neu installiert, oder jemand hat sich dazwischengeschaltet. Wenn du nicht weißt, warum er sich geändert hat, verbinde dich nicht.
+
+#: apps/ssh/main/sc_app.c:708
+Para estar seguro, compará la huella con la del equipo: en él, ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub. Se recuerda para la próxima.	Zur Sicherheit den Fingerabdruck mit dem des Computers vergleichen: dort ssh-keygen -lf /etc/ssh/ssh_host_ed25519_key.pub. Er wird für das nächste Mal gemerkt.
+
+#: apps/ssh/main/sc_app.c:711
+#: apps/ssh/main/sc_app.c:763
+Cancelar	Abbrechen
+
+#: apps/ssh/main/sc_app.c:712
+Aceptar la nueva	Den neuen annehmen
+
+#: apps/ssh/main/sc_app.c:712
+Conectar	Verbinden
+
+#: apps/ssh/main/sc_app.c:746
+Contraseña de %s	Passwort für %s
+
+#: apps/ssh/main/sc_app.c:749
+No anduvo: probá de nuevo.	Das hat nicht geklappt: nochmal versuchen.
+
+#: apps/ssh/main/sc_app.c:764
+Entrar	Anmelden
+
+#: apps/ssh/main/sc_app.c:789
+No hay memoria para la terminal	Kein Speicher für das Terminal
+
+#: apps/ssh/main/sc_app.c:797
+No se pudo empezar la conexión	Die Verbindung konnte nicht gestartet werden
+
+#: apps/ssh/main/sc_app.c:842
+Conectando con %s…	Verbinde mit %s…
+
+#: apps/ssh/main/sc_conn.c:177
+Se cortó la conexión.	Die Verbindung ist abgebrochen.
+
+#: apps/ssh/main/sc_conn.c:193
+#: apps/ssh/main/sc_conn.c:204
+#: apps/ssh/main/sc_conn.c:236
+#: apps/ssh/main/sc_conn.c:408
+El equipo mandó algo que no es SSH.	Der Computer hat etwas geschickt, das kein SSH ist.
+
+#: apps/ssh/main/sc_conn.c:199
+Un paquete llegó dañado.	Ein Paket kam beschädigt an.
+
+#: apps/ssh/main/sc_conn.c:218
+El equipo cerró la conexión.	Der Computer hat die Verbindung geschlossen.
+
+#: apps/ssh/main/sc_conn.c:245
+#: apps/ssh/main/sc_conn.c:942
+El equipo cortó: %s	Der Computer hat aufgelegt: %s
+
+#: apps/ssh/main/sc_conn.c:374
+El equipo no tiene curve25519 (ningún algoritmo en común).	Der Computer kann kein curve25519 (kein gemeinsamer Algorithmus).
+
+#: apps/ssh/main/sc_conn.c:378
+El equipo no tiene un tipo de clave que la placa conozca.	Der Computer hat keinen Schlüsseltyp, den die Platine kennt.
+
+#: apps/ssh/main/sc_conn.c:382
+El equipo no tiene chacha20-poly1305 (ningún cifrado en común).	Der Computer kann kein chacha20-poly1305 (keine gemeinsame Verschlüsselung).
+
+#: apps/ssh/main/sc_conn.c:386
+El equipo sólo acepta compresión.	Der Computer akzeptiert nur Kompression.
+
+#: apps/ssh/main/sc_conn.c:445
+La firma del equipo no coincide con su clave.	Die Signatur des Computers passt nicht zu seinem Schlüssel.
+
+#: apps/ssh/main/sc_conn.c:457
+La clave del equipo cambió: no se conectó.	Der Schlüssel des Computers hat sich geändert: nicht verbunden.
+
+#: apps/ssh/main/sc_conn.c:457
+No se aceptó la clave del equipo.	Der Schlüssel des Computers wurde nicht angenommen.
+
+#: apps/ssh/main/sc_conn.c:463
+La clave del equipo cambió en medio de la sesión.	Der Schlüssel des Computers hat sich mitten in der Sitzung geändert.
+
+#: apps/ssh/main/sc_conn.c:648
+El equipo no acepta la clave de la placa ni contraseña (%s).	Der Computer akzeptiert weder den Schlüssel der Platine noch ein Passwort (%s).
+
+#: apps/ssh/main/sc_conn.c:655
+#: apps/ssh/main/sc_conn.c:674
+No se entró.	Nicht angemeldet.
+
+#: apps/ssh/main/sc_conn.c:682
+La contraseña no anduvo tres veces.	Das Passwort ging dreimal nicht.
+
+#: apps/ssh/main/sc_conn.c:724
+El equipo no abrió una sesión.	Der Computer hat keine Sitzung geöffnet.
+
+#: apps/ssh/main/sc_conn.c:836
+El equipo no abrió un segundo canal para instalar la clave.	Der Computer hat keinen zweiten Kanal zum Installieren des Schlüssels geöffnet.
+
+#: apps/ssh/main/sc_conn.c:875
+La clave de la placa quedó en ~/.ssh/authorized_keys: la próxima vez entra sin contraseña.	Der Schlüssel der Platine steht jetzt in ~/.ssh/authorized_keys: beim nächsten Mal geht es ohne Passwort.
+
+#: apps/ssh/main/sc_conn.c:876
+No se pudo instalar la clave (¿no es un Unix?).	Der Schlüssel konnte nicht installiert werden (kein Unix?).
+
+#: apps/ssh/main/sc_conn.c:885
+El equipo no dejó correr el comando para instalar la clave.	Der Computer hat den Befehl zum Installieren des Schlüssels nicht ausgeführt.
+
+#: apps/ssh/main/sc_conn.c:886
+El equipo no abrió una consola.	Der Computer hat keine Konsole geöffnet.
+
+#: apps/ssh/main/sc_conn.c:897
+#: apps/ssh/main/sc_conn.c:1002
+La sesión terminó.	Die Sitzung ist beendet.
+
+#: apps/ssh/main/sc_conn.c:957
+No se encontró %s.	%s wurde nicht gefunden.
+
+#: apps/ssh/main/sc_conn.c:957
+No se pudo conectar con %s.	Konnte keine Verbindung zu %s herstellen.
+
+#: apps/ssh/main/sc_conn.c:988
+%s no contestó como un servidor SSH.	%s hat nicht wie ein SSH-Server geantwortet.
