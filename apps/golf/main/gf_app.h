@@ -93,8 +93,6 @@ struct app {
     uint16_t   *fb;             /* the canvas                                */
     uint16_t   *mapbuf;         /* the map as rendered for this shot          */
     uint16_t   *v3dbuf;         /* the 3D view as rendered for this shot      */
-    uint16_t   *v3dlow;         /* its ground and sky, at half the pixels     */
-    uint16_t   *depth;          /* their depth, the same size                 */
     uint16_t   *albedo;
     int         atw, ath;
     float       ampp;

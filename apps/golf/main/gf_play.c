@@ -1248,13 +1248,46 @@ static void finish_shot(app_t *a)
  * did there, spread over two cores. */
 #define V3D_DIV 2
 
+/* sky and grass, without a camera: the view before any swing, or when
+ * PSRAM has no room for drawing one */
+static void plain_sky(app_t *a)
+{
+    int hz = GF_H * 250 / 448;
+    for (int y = 0; y < GF_H; y++) {
+        uint16_t *row = a->v3dbuf + (size_t)y * GF_W;
+        for (int x = 0; x < GF_W; x++) {
+            int t = y < hz ? y * 256 / hz : (y - hz) * 256 / (GF_H - hz);
+            row[x] = y < hz ? gf_dither(52 + 134 * t / 256, 112 + 100 * t / 256, 200 + 32 * t / 256, x, y)
+                            : gf_dither(64 + 22 * t / 256, 140 + 34 * t / 256, 52 + 12 * t / 256, x, y);
+        }
+    }
+}
+
+/* The ground and the sky at a quarter of the pixels, and their depth, are
+ * only needed while a view is drawn: 0.9 MB that the menu, the map and the
+ * flight used to hold too (the board's PSRAM was down to 216 KB on the
+ * menu, 2026-11-08). They come and go with each view. */
 static void render_3d_with(app_t *a, const gf_cam_t *cam)
 {
     s_menu_course = -1;                 /* v3dbuf is no longer the menu's */
     uint64_t t0 = aos_hal_uptime_ms();
+    size_t low = (size_t)(GF_W / V3D_DIV) * (GF_H / V3D_DIV) * 2;
+    uint16_t *lowbuf = (uint16_t *)gf_malloc(low);
+    uint16_t *depth = (uint16_t *)gf_malloc(low);
+    if (!lowbuf || !depth) {
+        gf_free(lowbuf);
+        gf_free(depth);
+        uint32_t hi = 0, hp = 0;
+        aos_hal_heap_info(&hi, &hp);
+        aos_hal_log("golf", "3D view: no room to draw it (psram free %u KB)", (unsigned)(hp / 1024));
+        plain_sky(a);
+        return;
+    }
     gf_albedo_t alb = { a->albedo, a->atw, a->ath, a->ampp };
-    gf_v3d_target_t t = { a->v3dbuf, GF_W, GF_H, a->v3dlow, a->depth, V3D_DIV };
+    gf_v3d_target_t t = { a->v3dbuf, GF_W, GF_H, lowbuf, depth, V3D_DIV };
     gf_view3d_render(&a->world, cam, &alb, &t);
+    gf_free(lowbuf);
+    gf_free(depth);
     uint32_t pp = gf_prof_get(7);
     aos_hal_log("golf", "3D view %dx%d %u ms (passes %u + %u): ground %u (%u samples, %u seen), sky %u, "
                 "up %u, trees %u",
@@ -1278,15 +1311,7 @@ static void render_3d_last(app_t *a)
     gf_cam_t c = a->cam_last;
     if (!a->world.def || c.f <= 0.0f || !a->world.gw) {
         /* no swing seen yet (the menu came from the card): sky and grass */
-        int hz = GF_H * 250 / 448;
-        for (int y = 0; y < GF_H; y++) {
-            uint16_t *row = a->v3dbuf + (size_t)y * GF_W;
-            for (int x = 0; x < GF_W; x++) {
-                int t = y < hz ? y * 256 / hz : (y - hz) * 256 / (GF_H - hz);
-                row[x] = y < hz ? gf_dither(52 + 134 * t / 256, 112 + 100 * t / 256, 200 + 32 * t / 256, x, y)
-                                : gf_dither(64 + 22 * t / 256, 140 + 34 * t / 256, 52 + 12 * t / 256, x, y);
-            }
-        }
+        plain_sky(a);
         return;
     }
     gf_cam_set(&c, c.x, c.y, c.z, c.yaw, c.pitch);

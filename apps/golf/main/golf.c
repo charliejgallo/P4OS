@@ -1509,10 +1509,8 @@ static void free_all(app_t *a)
     gf_free(a->fb);
     gf_free(a->mapbuf);
     gf_free(a->v3dbuf);
-    gf_free(a->v3dlow);
-    gf_free(a->depth);
     gf_free(a->albedo);
-    a->fb = a->mapbuf = a->v3dbuf = a->v3dlow = a->depth = a->albedo = NULL;
+    a->fb = a->mapbuf = a->v3dbuf = a->albedo = NULL;
     a->zoombuf = NULL;
     gf_world_free(&a->world);
     gf_art_free();
@@ -1664,12 +1662,9 @@ static void *golf_create(aos_app_t *self, lv_obj_t *root)
 
     /* the screen-sized buffers hold either orientation */
     size_t scr = (size_t)GF_MAXPX * 2;
-    size_t low = (size_t)(GF_MAXPX / 4) * 2;
     a->fb = (uint16_t *)gf_malloc(scr);
     a->mapbuf = (uint16_t *)gf_malloc(scr);
     a->v3dbuf = (uint16_t *)gf_malloc(scr);
-    a->v3dlow = (uint16_t *)gf_malloc(low);
-    a->depth = (uint16_t *)gf_malloc(low);
     /* the grid and the ground texture are sized for the biggest hole of
      * every course (the texture is half a metre per texel) */
     int cells = 0;
@@ -1682,7 +1677,7 @@ static void *golf_create(aos_app_t *self, lv_obj_t *root)
         }
     }
     a->albedo = (uint16_t *)gf_malloc((size_t)cells * 4 * 2);
-    if (!a->fb || !a->mapbuf || !a->v3dbuf || !a->v3dlow || !a->depth || !a->albedo ||
+    if (!a->fb || !a->mapbuf || !a->v3dbuf || !a->albedo ||
         !gf_world_init(&a->world, cells)) {
         aos_hal_log("golf", "out of memory");
         free_all(a);
