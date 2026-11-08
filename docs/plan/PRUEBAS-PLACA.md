@@ -90,7 +90,10 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       abiertas seguidas, la más vieja sin nada andando se cierra (`more than
       3 apps alive`). Mila y Monster Hop: el usuario dice que andaban mal
       por la PSRAM; falta ver cómo, con el registro.
-- [ ] **El buscador** (2026-11-08, `aos_search.c`, sin instalar). Probado
+- [ ] **El buscador** (2026-11-08, `aos_search.c`). **Instalado el
+      2026-11-08:** `notas.so` nuevo (`NORESTART=1 install_apps.sh`), el
+      firmware `68a67c9` por OTA e `install_lang.sh en de`; arrancó y se
+      confirmó sin errores, Notas registrada, el idioma con 5828 cadenas. Probado
       en el simulador con ASan: el gesto lo abre; "comp" y "leche" hallan la
       nota Compras con su línea; "aju" la app Ajustes y `ajustes.txt`;
       "2*(3+4)" da 14; tocar "Wi-Fi" abre Ajustes en Wi-Fi, la nota abre
