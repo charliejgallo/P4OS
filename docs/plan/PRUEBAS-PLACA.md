@@ -59,7 +59,14 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       +9,0 y +12,7 MB: las fotos se decodificaban durante el arranque y los
       búferes del decodificador dejaban huecos. El commit siguiente reserva
       las ranuras al empezar `aos_ui_init` y decodifica después del escaneo.
-      **Ranuras para las fotos** (2026-11-08, sin instalar): tras instalar,
+      **`88f5081` instalado el 2026-11-08: resuelto.** `free -m`: los
+      framebuffers en +148 KB, las dos fotos en +5937 y +7761 KB, y la
+      PSRAM libre en **un solo bloque de 14080 KB** (antes 6,4 + 7,5 MB).
+      CAS entró a la primera en el escaneo (bloque mayor 14080 KB) y quedó
+      en la caché. El escaneo empezó a los 3,0 s (antes 6,4 s; sin ver
+      todavía si es por las fotos o por el Wi-Fi). Falta mirar a mano las
+      fotos (inicio, bloqueo, acostada, álbum).
+      **Ranuras para las fotos** (2026-11-08): tras instalar,
       `free -m` tiene que mostrar las dos fotos al lado de los framebuffers
       y un solo bloque libre grande (~14 MB); la foto del inicio y la del
       bloqueo se ven como antes, también acostada y con un álbum en el
