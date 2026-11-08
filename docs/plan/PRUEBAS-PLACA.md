@@ -46,7 +46,13 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       `f249946` instalado el 2026-11-08: soltó las fotos (libre 14,0 -> 15,9
       MB) y el bloque mayor siguió en 9,4 MB: no son las fotos. Lo que parte
       la PSRAM es otra cosa: `free -m` en la consola SSH y el registro del
-      fallo dan ahora el mapa de bloques grandes.
+      fallo dan ahora el mapa de bloques grandes. `8ac8459` instalado el
+      2026-11-08: **CAS entró en el escaneo** (bloque mayor 7,2 MB, pero
+      dos libres de 6,4 y 7,5 MB: uno para el archivo y otro para el
+      código) y quedó en la caché. `free -m` en el inicio: los tres
+      framebuffers (3 x 1800 KB) al principio, y las dos fotos de fondo
+      (1824 KB cada una) en +7607 KB y +15815 KB, partiendo la PSRAM libre
+      en 6,4 y 7,5 MB. Falta: que las fotos no queden en el medio.
       Tras la OTA de `64fbdb0` CAS faltó en el inicio: el
       escaneo lo abrió con la PSRAM partida (`5553904 B of code: no PSRAM
       block`; el mínimo libre del arranque fue 7,6 MB). En la placa: tras la
