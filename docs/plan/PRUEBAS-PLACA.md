@@ -80,6 +80,19 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       abiertas seguidas, la más vieja sin nada andando se cierra (`more than
       3 apps alive`). Mila y Monster Hop: el usuario dice que andaban mal
       por la PSRAM; falta ver cómo, con el registro.
+- [ ] **Mila y Monster Hop con la PSRAM en un bloque** (2026-11-08, firmware
+      `88f5081`, abiertas por SSH con permiso del usuario). **Mila:** abre
+      con 12 MB libres de corrido, pero `pack MISSING, 0 worlds`: en la
+      tarjeta está sólo `mila_p4.pak` (7.500.000 B, la primera parte) y su
+      índice llega a 16.914.956 B; faltan `mila_p4.pak.1` y `.2`
+      (`apps/mila/build/`). No es la PSRAM. **Monster Hop:** el paquete
+      abre, pero `map: the sheet did not load (PSRAM free 7913860 B)`: el
+      menú queda sin el mapa de fondo. El mapa pide 2,4 MB comprimidos más
+      5,9 MB descomprimidos a la vez (8,4 MB), con el juego ya ocupando
+      ~9,2 MB en el menú: ~17,6 MB contra 14 libres. Es de presupuesto, no
+      de fragmentación; se arregla en la app (decodificar el mapa por filas
+      sin el bloque de 5,9 MB), o soltando las fotos de fondo detrás de un
+      juego (+3,6 MB, justo).
 - [ ] **Cursor y campo activo** (2026-11-08, `aos_textfield.c`).
       **Instalado el 2026-11-08** (firmware `64fbdb0`, por OTA; arrancó y
       se confirmó, 212 KB de RAM interna libre). Falta que el usuario lo
