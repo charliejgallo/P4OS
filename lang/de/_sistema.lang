@@ -9927,3 +9927,12 @@ cierra la sesión (también Ctrl-D)	beendet die Sitzung (auch Strg-D)
 
 #: apps/ssh/main/sc_app.c (the app's name)
 SSH	SSH
+
+#: components/aos_portal/aos_portal.c
+la placa está ocupada	das Board ist beschäftigt
+
+#: components/aos_ui/aos_textsel.c
+Pegar	Einsetzen
+
+#: components/aos_ui/aos_textsel.c
+Todo	Alles

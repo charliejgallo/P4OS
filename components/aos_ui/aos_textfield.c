@@ -147,10 +147,18 @@ static void apply_cb(lv_theme_t *th, lv_obj_t *obj)
         lv_obj_add_style(obj, &s_ring, LV_STATE_FOCUSED);
         lv_obj_add_style(obj, &s_placeholder, LV_PART_TEXTAREA_PLACEHOLDER);
         lv_obj_add_event_cb(obj, ta_deleted_cb, LV_EVENT_DELETE, NULL);
+        aos_textsel_attach(obj);        /* select, copy, paste (aos_textsel.c) */
     } else if (lv_obj_check_type(obj, &lv_keyboard_class)) {
         add_keyboard(obj);
         aos_keyboard_attach(obj);       /* ñ, accents, shift, the space bar (aos_keyboard.c) */
     }
+}
+
+lv_obj_t *aos_textfield_active(void)
+{
+    for (int i = 0; i < MAX_KB; i++)
+        if (s_kb[i].used && s_kb[i].kb && s_kb[i].ta && s_kb[i].shown) return s_kb[i].ta;
+    return NULL;
 }
 
 void aos_textfield_accent(void)

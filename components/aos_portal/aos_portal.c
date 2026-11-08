@@ -325,6 +325,44 @@ static void api_nav(aos_httpd_req_t *r)
     send_ok(r);
 }
 
+/* GET  /api/clip                        {"text": the board's clipboard}
+ * POST /api/clip {"text": "...", "paste": true}   into the clipboard; with
+ *      paste, also typed into the field being edited ({"pasted": bool})
+ * The Pantalla page's box: text from the Mac to the board and back
+ * (aos_textsel.c). */
+static void api_clip(aos_httpd_req_t *r, bool post)
+{
+    if (!post) {
+        char *t = malloc(16 * 1024 + 1);
+        if (!t) { send_err(r, 500, _("sin memoria")); return; }
+        t[0] = 0;
+        if (aos_hal_lock(1000)) {
+            aos_ui_clip_get(t, 16 * 1024 + 1);
+            aos_hal_unlock();
+        }
+        cJSON *o = cJSON_CreateObject();
+        cJSON_AddStringToObject(o, "text", t);
+        free(t);
+        send_cjson(r, 200, o);
+        return;
+    }
+    char *b = aos_httpd_body_all(r, 128 * 1024);
+    cJSON *j = b ? cJSON_Parse(b) : NULL;
+    free(b);
+    const char *text = jstr(j, "text");
+    if (!text) { cJSON_Delete(j); send_err(r, 400, "text"); return; }
+    bool paste = cJSON_IsTrue(cJSON_GetObjectItemCaseSensitive(j, "paste")), pasted = false;
+    if (!aos_hal_lock(1000)) { cJSON_Delete(j); send_err(r, 503, _("la placa está ocupada")); return; }
+    aos_ui_clip_set(text);
+    if (paste) pasted = aos_ui_clip_paste_here();
+    aos_hal_unlock();
+    cJSON_Delete(j);
+    cJSON *o = cJSON_CreateObject();
+    cJSON_AddTrueToObject(o, "ok");
+    if (paste) cJSON_AddBoolToObject(o, "pasted", pasted);
+    send_cjson(r, 200, o);
+}
+
 static void api_open(aos_httpd_req_t *r)
 {
     char id[48];
@@ -1618,6 +1656,7 @@ static void handler(aos_httpd_req_t *r)
     else if (get && !strcmp(p, "screen.bmp")) api_screen(r);
     else if (post && !strcmp(p, "touch")) api_touch(r);
     else if (post && !strcmp(p, "nav")) api_nav(r);
+    else if (!strcmp(p, "clip")) api_clip(r, post);
     else if (post && !strcmp(p, "open")) api_open(r);
     else if (get && !strcmp(p, "apps")) api_apps(r);
     else if (get && !strcmp(p, "apps/icon")) api_app_icon(r);

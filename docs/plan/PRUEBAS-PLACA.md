@@ -90,6 +90,15 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       abiertas seguidas, la más vieja sin nada andando se cierra (`more than
       3 apps alive`). Mila y Monster Hop: el usuario dice que andaban mal
       por la PSRAM; falta ver cómo, con el registro.
+- [ ] **Copiar y pegar** (2026-11-08, `aos_textsel.c`, sin instalar).
+      Probado en el simulador con ASan: doble toque selecciona la palabra
+      y abre el globo; Copiar llega a `/api/clip`; mantener un campo vacío
+      ofrece Pegar y pega; la barra agranda la selección y una tecla la
+      reemplaza; `POST /api/clip {"paste":true}` escribe en el campo
+      abierto. En la placa: lo mismo con el dedo, en SSH y en Módulos; un
+      campo de contraseña no ofrece Copiar; Ctrl+C/V con un teclado USB;
+      el recuadro Portapapeles de la página Pantalla del portal (también
+      "Traer de la placa"); y el globo en inglés tras `install_lang.sh`.
 - [x] **El teclado: ñ, acentos, mayúsculas y la barra como trackpad**
       (2026-11-08, `aos_keyboard.c`). **Instalado el 2026-11-08**
       (firmware `2b19dbc`, por OTA): arrancó y se confirmó, sin errores en

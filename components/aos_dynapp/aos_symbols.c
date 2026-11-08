@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3568 simbolos.
+ * Total: 3584 simbolos.
  */
 
 #include <stddef.h>
@@ -910,6 +910,8 @@ extern int aos_io_uart_set_format;
 extern int aos_io_uart_write;
 extern int aos_io_validate;
 extern int aos_jpeg_probe_picture;
+extern int aos_keyboard_attach;
+extern int aos_keyboard_init;
 extern int aos_keyboard_style;
 extern int aos_label;
 extern int aos_label_boxed;
@@ -1161,6 +1163,15 @@ extern int aos_sym_72;
 extern int aos_tasks_p4_start;
 extern int aos_text_font_has;
 extern int aos_text_safe;
+extern int aos_textfield_accent;
+extern int aos_textfield_active;
+extern int aos_textfield_init;
+extern int aos_textsel_attach;
+extern int aos_textsel_clear;
+extern int aos_textsel_delete;
+extern int aos_textsel_extend;
+extern int aos_textsel_has;
+extern int aos_textsel_key;
 extern int aos_theme_accent;
 extern int aos_theme_accent_at;
 extern int aos_theme_accent_rgb;
@@ -1200,6 +1211,9 @@ extern int aos_ui_boot_start_ids;
 extern int aos_ui_boot_start_run;
 extern int aos_ui_boot_start_set;
 extern int aos_ui_button;
+extern int aos_ui_clip_get;
+extern int aos_ui_clip_paste_here;
+extern int aos_ui_clip_set;
 extern int aos_ui_close;
 extern int aos_ui_close_others;
 extern int aos_ui_current_app;
@@ -1220,6 +1234,7 @@ extern int aos_ui_keyclick_set;
 extern int aos_ui_landscape;
 extern int aos_ui_lock_album;
 extern int aos_ui_lock_album_set;
+extern int aos_ui_make_room;
 extern int aos_ui_open;
 extern int aos_ui_open_app_with;
 extern int aos_ui_overlay;
@@ -1235,6 +1250,7 @@ extern int aos_ui_request_open;
 extern int aos_ui_request_snapshot;
 extern int aos_ui_request_toast;
 extern int aos_ui_restyle;
+extern int aos_ui_room_back;
 extern int aos_ui_safe_mode;
 extern int aos_ui_screenrec;
 extern int aos_ui_set_badge;
@@ -4481,6 +4497,8 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_uart_write),
     ESP_ELFSYM_EXPORT(aos_io_validate),
     ESP_ELFSYM_EXPORT(aos_jpeg_probe_picture),
+    ESP_ELFSYM_EXPORT(aos_keyboard_attach),
+    ESP_ELFSYM_EXPORT(aos_keyboard_init),
     ESP_ELFSYM_EXPORT(aos_keyboard_style),
     ESP_ELFSYM_EXPORT(aos_label),
     ESP_ELFSYM_EXPORT(aos_label_boxed),
@@ -4732,6 +4750,15 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_tasks_p4_start),
     ESP_ELFSYM_EXPORT(aos_text_font_has),
     ESP_ELFSYM_EXPORT(aos_text_safe),
+    ESP_ELFSYM_EXPORT(aos_textfield_accent),
+    ESP_ELFSYM_EXPORT(aos_textfield_active),
+    ESP_ELFSYM_EXPORT(aos_textfield_init),
+    ESP_ELFSYM_EXPORT(aos_textsel_attach),
+    ESP_ELFSYM_EXPORT(aos_textsel_clear),
+    ESP_ELFSYM_EXPORT(aos_textsel_delete),
+    ESP_ELFSYM_EXPORT(aos_textsel_extend),
+    ESP_ELFSYM_EXPORT(aos_textsel_has),
+    ESP_ELFSYM_EXPORT(aos_textsel_key),
     ESP_ELFSYM_EXPORT(aos_theme_accent),
     ESP_ELFSYM_EXPORT(aos_theme_accent_at),
     ESP_ELFSYM_EXPORT(aos_theme_accent_rgb),
@@ -4771,6 +4798,9 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_ui_boot_start_run),
     ESP_ELFSYM_EXPORT(aos_ui_boot_start_set),
     ESP_ELFSYM_EXPORT(aos_ui_button),
+    ESP_ELFSYM_EXPORT(aos_ui_clip_get),
+    ESP_ELFSYM_EXPORT(aos_ui_clip_paste_here),
+    ESP_ELFSYM_EXPORT(aos_ui_clip_set),
     ESP_ELFSYM_EXPORT(aos_ui_close),
     ESP_ELFSYM_EXPORT(aos_ui_close_others),
     ESP_ELFSYM_EXPORT(aos_ui_current_app),
@@ -4791,6 +4821,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_ui_landscape),
     ESP_ELFSYM_EXPORT(aos_ui_lock_album),
     ESP_ELFSYM_EXPORT(aos_ui_lock_album_set),
+    ESP_ELFSYM_EXPORT(aos_ui_make_room),
     ESP_ELFSYM_EXPORT(aos_ui_open),
     ESP_ELFSYM_EXPORT(aos_ui_open_app_with),
     ESP_ELFSYM_EXPORT(aos_ui_overlay),
@@ -4806,6 +4837,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_ui_request_snapshot),
     ESP_ELFSYM_EXPORT(aos_ui_request_toast),
     ESP_ELFSYM_EXPORT(aos_ui_restyle),
+    ESP_ELFSYM_EXPORT(aos_ui_room_back),
     ESP_ELFSYM_EXPORT(aos_ui_safe_mode),
     ESP_ELFSYM_EXPORT(aos_ui_screenrec),
     ESP_ELFSYM_EXPORT(aos_ui_set_badge),

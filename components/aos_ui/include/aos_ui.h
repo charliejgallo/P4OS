@@ -121,6 +121,16 @@ void        aos_ui_boot_start_run(void);
  * does too. Up to four apps at once: false when the bar is full. From any
  * thread: the bar draws it at its next tick, within 200 ms. */
 bool        aos_ui_status_icon_set(const char *app_id, const char *glyph, uint32_t rgb);
+/* The system's clipboard (aos_textsel.c): plain UTF-8 text, up to 16 KB,
+ * shared by every text field (hold one: Cortar, Copiar, Pegar), the apps
+ * and the portal (/api/clip). set(NULL or "") empties it. get copies it
+ * into out (cut to size, always ended) and returns its whole length; get
+ * (NULL, 0) only asks. paste_here types it into the field being edited,
+ * the one of the keyboard shown; false: there is none, or nothing to
+ * paste. From LVGL's task or with the UI's lock. */
+void        aos_ui_clip_set(const char *text);
+size_t      aos_ui_clip_get(char *out, size_t size);
+bool        aos_ui_clip_paste_here(void);
 /* The live apps (in front or hidden), most recent first. */
 int         aos_ui_alive(aos_app_t **out, int max);
 /* Room in PSRAM for a card app that did not fit (aos_dynapp.c): closes the

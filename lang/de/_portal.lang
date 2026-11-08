@@ -2189,3 +2189,36 @@ Sonda para la computadora	Sonde für den Computer
 CMSIS-DAP en el conector OTG: %s comandos, %s transferencias SWD	CMSIS-DAP am OTG-Anschluss: %s Befehle, %s SWD-Transfers
 Cerrar la sonda	Sonde schließen
 leído dos veces	zweimal gelesen
+
+#: components/aos_portal/web/app.js
+Portapapeles	Zwischenablage
+
+#: components/aos_portal/web/app.js
+Texto para la placa, o lo que copiaste en ella	Text für das Board oder was du dort kopiert hast
+
+#: components/aos_portal/web/app.js
+Quedó en el portapapeles: no hay un campo abierto en la placa	Es liegt in der Zwischenablage: auf dem Board ist kein Feld offen
+
+#: components/aos_portal/web/app.js
+Escrito en la placa	Auf dem Board eingegeben
+
+#: components/aos_portal/web/app.js
+En el portapapeles de la placa	In der Zwischenablage des Boards
+
+#: components/aos_portal/web/app.js
+El portapapeles de la placa está vacío	Die Zwischenablage des Boards ist leer
+
+#: components/aos_portal/web/app.js
+Copiado también en esta computadora	Auch auf diesem Computer kopiert
+
+#: components/aos_portal/web/app.js
+Escribir en la placa	Auf dem Board eingeben
+
+#: components/aos_portal/web/app.js
+Copiar en la placa	Auf dem Board kopieren
+
+#: components/aos_portal/web/app.js
+Traer de la placa	Vom Board holen
+
+#: components/aos_portal/web/app.js
+"Escribir" lo pega en el campo abierto en la placa; en la placa, mantené apretado un campo para Copiar o Pegar.	„Eingeben" fügt es in das offene Feld auf dem Board ein; auf dem Board hältst du ein Feld gedrückt, um zu kopieren oder einzusetzen.

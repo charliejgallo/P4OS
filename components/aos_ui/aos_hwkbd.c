@@ -111,7 +111,30 @@ void aos_hwkbd_tick(void)
             continue;
         }
         lv_obj_t *ta = lv_keyboard_get_textarea(kb);
-        if (!ta || (ev.mods & 0x99)) continue;      /* Ctrl or Cmd: a shortcut, not text */
+        if (!ta) continue;
+        /* Ctrl or Cmd: a shortcut, not text. C, X, V, A: the clipboard and
+         * the selection (aos_textsel.c); a letter may come as itself or as
+         * its control code (1-26) */
+        if (ev.mods & 0x99) {
+            uint32_t k = ev.key >= 1 && ev.key <= 26 ? 'a' + ev.key - 1 : ev.key | 0x20;
+            if (k == 'c' || k == 'x' || k == 'v' || k == 'a') aos_textsel_key(ta, (char)k);
+            continue;
+        }
+        /* Shift + arrows: select */
+        if ((ev.mods & 0x22) && (ev.key == AOS_KEY_LEFT || ev.key == AOS_KEY_RIGHT ||
+                                 ev.key == AOS_KEY_UP || ev.key == AOS_KEY_DOWN)) {
+            aos_textsel_extend(ta, ev.key == AOS_KEY_RIGHT ? 1 : ev.key == AOS_KEY_LEFT ? -1 : 0,
+                               ev.key == AOS_KEY_DOWN ? 1 : ev.key == AOS_KEY_UP ? -1 : 0);
+            continue;
+        }
+        if (aos_textsel_has(ta)) {
+            if (ev.key == AOS_KEY_BACKSPACE || ev.key == AOS_KEY_DEL) {
+                aos_textsel_delete(ta);
+                continue;
+            }
+            if (ev.key >= 32 || (ev.key == AOS_KEY_ENTER && !lv_textarea_get_one_line(ta))) aos_textsel_delete(ta);
+            else aos_textsel_clear();
+        }
         switch (ev.key) {
         case AOS_KEY_BACKSPACE: lv_textarea_delete_char(ta); break;
         case AOS_KEY_DEL:       lv_textarea_delete_char_forward(ta); break;

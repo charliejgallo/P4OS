@@ -97,6 +97,14 @@ void aos_textfield_init(void);           /* aos_textfield.c: the cursor and the 
 void aos_textfield_accent(void);         /* the accent changed: recolour them */
 void aos_keyboard_init(void);            /* aos_keyboard.c: the Spanish maps, once */
 void aos_keyboard_attach(lv_obj_t *kb);  /* each lv_keyboard, from the theme */
+lv_obj_t *aos_textfield_active(void);    /* the field of the keyboard shown, or NULL */
+/* aos_textsel.c: selecting text in a field, and the clipboard */
+void aos_textsel_attach(lv_obj_t *ta);   /* each lv_textarea, from the theme */
+bool aos_textsel_has(lv_obj_t *ta);      /* something selected in it */
+void aos_textsel_clear(void);
+bool aos_textsel_delete(lv_obj_t *ta);   /* delete what is selected; false: nothing was */
+void aos_textsel_extend(lv_obj_t *ta, int dx, int dy);  /* move the selection's end */
+void aos_textsel_key(lv_obj_t *ta, char k);             /* 'c', 'x', 'v', 'a' */
 void aos_hwkbd_tick(void);               /* a USB keyboard types into the open keyboard (aos_hwkbd.c) */
 void aos_hwkbd_app_gone(const char *id); /* the app closes: its key handler goes */
 void aos_hwmouse_tick(void);             /* a USB mouse points on the screen (aos_hwmouse.c) */

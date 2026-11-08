@@ -161,6 +161,33 @@ function pagePantalla() {
   const apps = h('select', { onchange: async e => { if (!e.target.value) return; await api('open?id=' + encodeURIComponent(e.target.value), { method: 'POST' }); e.target.value = ''; after(); } },
     h('option', { value: '' }, tr('Abrir una app…')));
   api('apps').then(list => list.sort((a, b) => a.name.localeCompare(b.name)).forEach(a => apps.append(h('option', { value: a.id }, a.name)))).catch(() => {});
+  /* The board's clipboard (/api/clip): text from here into a field on the
+   * board (a long password, an address) or from the board to here. */
+  const clipTa = h('textarea', { rows: 3, placeholder: tr('Texto para la placa, o lo que copiaste en ella'),
+    style: 'width:100%;box-sizing:border-box;resize:vertical' });
+  const clipSend = async paste => {
+    try {
+      const j = await post('clip', { text: clipTa.value, paste });
+      if (paste && !j.pasted) toast(tr('Quedó en el portapapeles: no hay un campo abierto en la placa'));
+      else toast(paste ? tr('Escrito en la placa') : tr('En el portapapeles de la placa'));
+      if (paste) after();
+    } catch (err) { toast(err.message, true); }
+  };
+  const clipGet = async () => {
+    try {
+      const j = await api('clip');
+      clipTa.value = j.text || '';
+      if (!j.text) { toast(tr('El portapapeles de la placa está vacío')); return; }
+      try { await navigator.clipboard.writeText(j.text); toast(tr('Copiado también en esta computadora')); } catch {}
+    } catch (err) { toast(err.message, true); }
+  };
+  const clipBox = h('div', {},
+    clipTa,
+    h('div', { class: 'btns', style: 'margin-top:8px' },
+      h('button', { class: 'btn pri', onclick: () => clipSend(true) }, tr('Escribir en la placa')),
+      h('button', { class: 'btn', onclick: () => clipSend(false) }, tr('Copiar en la placa')),
+      h('button', { class: 'btn', onclick: clipGet }, tr('Traer de la placa'))),
+    h('p', { class: 'note' }, tr('"Escribir" lo pega en el campo abierto en la placa; en la placa, mantené apretado un campo para Copiar o Pegar.')));
   const side = h('div', { class: 'side' },
     h('div', { class: 'btns' },
       h('button', { class: 'btn', onclick: nav('home') }, tr('Inicio')),
@@ -170,6 +197,8 @@ function pagePantalla() {
       h('button', { class: 'btn', onclick: save }, tr('Guardar PNG'))),
     h('div', { style: 'margin-top:12px' }, apps),
     h('p', { class: 'note' }, tr('Un clic es un toque; arrastrar es deslizar. Desde el borde de abajo hacia arriba vas al inicio, como en la placa.')),
+    h('h2', {}, tr('Portapapeles')),
+    clipBox,
     h('h2', {}, tr('La placa')),
     h('div', { class: 'card', id: 'infocard' }));
   put(main, h('h1', {}, tr('Pantalla')), h('div', { class: 'screen-wrap' }, h('div', { class: 'screen' }, img, busy), side));

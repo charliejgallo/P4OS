@@ -18,6 +18,9 @@
  *     types the space when the finger lifts.
  *   - Letters no longer repeat while held (the hold is for the bubble);
  *     backspace and the arrows still do.
+ *   - With text selected (aos_textsel.c): a key typed replaces it,
+ *     backspace deletes it, an arrow lets it go, and the trackpad moves the
+ *     selection's end instead of the cursor.
  *
  * LVGL's keyboard keeps doing the rest (lv_keyboard_def_event_cb). Its maps
  * are global (kb_map in lv_keyboard.c), so ours are set once, at start, for
@@ -184,7 +187,10 @@ static void set_upper(lv_obj_t *kb, kst_t *s, bool once)
 static void type_text(lv_obj_t *kb, kst_t *s, const char *txt)
 {
     lv_obj_t *ta = ta_of(kb);
-    if (ta) lv_textarea_add_text(ta, txt);
+    if (ta) {
+        aos_textsel_delete(ta);         /* what is selected, the key replaces */
+        lv_textarea_add_text(ta, txt);
+    }
     if (s->once) set_lower(kb, s);
 }
 
@@ -306,6 +312,20 @@ static void pre_cb(lv_event_t *e)
         lv_event_stop_processing(e);
         return;
     }
+    lv_obj_t *ta = ta_of(kb);
+    if (aos_textsel_has(ta)) {
+        if (!strcmp(txt, LV_SYMBOL_BACKSPACE)) {
+            lv_event_stop_processing(e);
+            click();
+            aos_textsel_delete(ta);
+            return;
+        }
+        if (!strcmp(txt, LV_SYMBOL_LEFT) || !strcmp(txt, LV_SYMBOL_RIGHT)) aos_textsel_clear();
+        else if (!strcmp(txt, " ") && s->moved) {}  /* the trackpad moved it: nothing typed */
+        else if (strcmp(txt, "1#") && strcmp(txt, "abc") && strcmp(txt, SHIFT_KEY) && strcmp(txt, CAPS_KEY) &&
+                 strcmp(txt, LV_SYMBOL_KEYBOARD) && strcmp(txt, LV_SYMBOL_OK))
+            aos_textsel_delete(ta);     /* typed over: then the key goes in as usual */
+    }
     if (!strcmp(txt, " ")) {
         lv_event_stop_processing(e);
         if (!s->moved && ta_of(kb)) {
@@ -372,11 +392,21 @@ static void post_cb(lv_event_t *e)
         s->last = p;
         lv_obj_t *ta = ta_of(kb);
         if (!ta) return;
-        while (s->acc_x >= STEP_X) { lv_textarea_cursor_right(ta); s->acc_x -= STEP_X; }
-        while (s->acc_x <= -STEP_X) { lv_textarea_cursor_left(ta); s->acc_x += STEP_X; }
+        int mx = 0, my = 0;
+        while (s->acc_x >= STEP_X) { mx++; s->acc_x -= STEP_X; }
+        while (s->acc_x <= -STEP_X) { mx--; s->acc_x += STEP_X; }
         if (lv_textarea_get_one_line(ta)) s->acc_y = 0;
-        while (s->acc_y >= STEP_Y) { lv_textarea_cursor_down(ta); s->acc_y -= STEP_Y; }
-        while (s->acc_y <= -STEP_Y) { lv_textarea_cursor_up(ta); s->acc_y += STEP_Y; }
+        while (s->acc_y >= STEP_Y) { my++; s->acc_y -= STEP_Y; }
+        while (s->acc_y <= -STEP_Y) { my--; s->acc_y += STEP_Y; }
+        if (!mx && !my) return;
+        if (aos_textsel_has(ta)) {      /* the selection's end, not the cursor */
+            aos_textsel_extend(ta, mx, my);
+            return;
+        }
+        for (; mx > 0; mx--) lv_textarea_cursor_right(ta);
+        for (; mx < 0; mx++) lv_textarea_cursor_left(ta);
+        for (; my > 0; my--) lv_textarea_cursor_down(ta);
+        for (; my < 0; my++) lv_textarea_cursor_up(ta);
     } else if (code == LV_EVENT_LONG_PRESSED) {
         if (s->space) {
             s->moved = true;            /* held: a trackpad, no space */

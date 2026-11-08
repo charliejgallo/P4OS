@@ -2189,3 +2189,36 @@ Sonda para la computadora	Probe for the computer
 CMSIS-DAP en el conector OTG: %s comandos, %s transferencias SWD	CMSIS-DAP on the OTG connector: %s commands, %s SWD transfers
 Cerrar la sonda	Close the probe
 leído dos veces	read twice
+
+#: components/aos_portal/web/app.js
+Portapapeles	Clipboard
+
+#: components/aos_portal/web/app.js
+Texto para la placa, o lo que copiaste en ella	Text for the board, or what you copied on it
+
+#: components/aos_portal/web/app.js
+Quedó en el portapapeles: no hay un campo abierto en la placa	It is on the clipboard: no field is open on the board
+
+#: components/aos_portal/web/app.js
+Escrito en la placa	Typed on the board
+
+#: components/aos_portal/web/app.js
+En el portapapeles de la placa	On the board's clipboard
+
+#: components/aos_portal/web/app.js
+El portapapeles de la placa está vacío	The board's clipboard is empty
+
+#: components/aos_portal/web/app.js
+Copiado también en esta computadora	Copied on this computer too
+
+#: components/aos_portal/web/app.js
+Escribir en la placa	Type on the board
+
+#: components/aos_portal/web/app.js
+Copiar en la placa	Copy on the board
+
+#: components/aos_portal/web/app.js
+Traer de la placa	Get from the board
+
+#: components/aos_portal/web/app.js
+"Escribir" lo pega en el campo abierto en la placa; en la placa, mantené apretado un campo para Copiar o Pegar.	"Type" pastes it into the field open on the board; on the board, hold a field to Copy or Paste.

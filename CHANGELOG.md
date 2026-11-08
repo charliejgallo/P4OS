@@ -33,6 +33,15 @@
   keyboard keeps the ring while the form behind it is touched or
   scrolled, and loses it when the keyboard closes. It reaches the apps on
   the card too, with no new build of them (`components/aos_ui/aos_textfield.c`).
+- **Copy and paste.** Hold a text field for a bubble: Seleccionar, Todo,
+  Pegar, and with something selected Cortar and Copiar (not in a password
+  field). A double tap selects a word; with something selected, the space
+  bar's trackpad moves its end, a key typed replaces it and backspace
+  deletes it. A USB keyboard does Ctrl or Cmd + C, X, V, A and Shift +
+  arrows. The clipboard is the system's, for the apps too
+  (`aos_ui_clip_set/get`), and the portal's Pantalla page has a box to send
+  text into the field open on the board, or bring the board's clipboard to
+  the computer (`/api/clip`; `components/aos_ui/aos_textsel.c`).
 - **The keyboard writes Spanish and moves the cursor.** Every on-screen
   keyboard of the system and of the card's apps (no new build of them):
   an ñ key beside the l; hold a key for its variants in a bubble (á à ä â,

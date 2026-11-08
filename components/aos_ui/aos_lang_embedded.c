@@ -3121,6 +3121,9 @@ static const char blob_en__sistema_lang[] =
     "%s: no existe ese comando; «help» muestra los que hay.\\n\t%s: no such command; “help” shows the ones there are.\\n\n"
     "«help» muestra los comandos; Ctrl-D o «exit» para salir.\\n\t“help” shows the commands; Ctrl-D or “exit” to leave.\\n\n"
     "SSH\tSSH\n"
+    "la placa está ocupada\tthe board is busy\n"
+    "Pegar\tPaste\n"
+    "Todo\tAll\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -6234,6 +6237,9 @@ static const char blob_de__sistema_lang[] =
     "%s: no existe ese comando; «help» muestra los que hay.\\n\t%s: diesen Befehl gibt es nicht; „help“ zeigt die vorhandenen.\\n\n"
     "«help» muestra los comandos; Ctrl-D o «exit» para salir.\\n\t„help“ zeigt die Befehle; Strg-D oder „exit“ zum Beenden.\\n\n"
     "SSH\tSSH\n"
+    "la placa está ocupada\tdas Board ist beschäftigt\n"
+    "Pegar\tEinsetzen\n"
+    "Todo\tAlles\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -6241,7 +6247,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3106, 0, files_en, 1 },
-    { "de", "Deutsch", 3106, 0, files_de, 1 },
+    { "en", "English", 3109, 0, files_en, 1 },
+    { "de", "Deutsch", 3109, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;
