@@ -90,7 +90,11 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       abiertas seguidas, la más vieja sin nada andando se cierra (`more than
       3 apps alive`). Mila y Monster Hop: el usuario dice que andaban mal
       por la PSRAM; falta ver cómo, con el registro.
-- [ ] **El buscador** (2026-11-08, `aos_search.c`). **Instalado el
+- [x] **El buscador** (2026-11-08, `aos_search.c`). **Probado por el
+      usuario el 2026-11-08:** "brillo" abrió Ajustes en Pantalla, "CAS"
+      la app, un MP3 por su nombre lo abrió en Archivos; "bastante rápido
+      todo", sin llegar a ver el "Buscando en la tarjeta…". Falta: una nota
+      por su texto. **Instalado el
       2026-11-08:** `notas.so` nuevo (`NORESTART=1 install_apps.sh`), el
       firmware `68a67c9` por OTA e `install_lang.sh en de`; arrancó y se
       confirmó sin errores, Notas registrada, el idioma con 5828 cadenas. Probado
