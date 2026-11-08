@@ -31,6 +31,7 @@ what that asks for. The full texts are in [LICENSES/](LICENSES).
 | esp_audio_codec (prebuilt, AAC for the radio) | fetched | **Espressif Modified MIT**: use and redistribution only with Espressif products | [Espressif-Modified-MIT-esp_audio_codec.txt](LICENSES/Espressif-Modified-MIT-esp_audio_codec.txt) |
 | libpng, zlib | fetched | libpng licence, zlib licence | [libpng.txt](LICENSES/libpng.txt), [zlib.txt](LICENSES/zlib.txt) |
 | **elf_loader 1.3.3** (Espressif, esp-iot-solution `5d75f3f`) | **vendored**, `components/elf_loader/` | Apache-2.0 | **modified**: the changes are marked `AmoledOS:` / `P4OS:` in the source; [Apache-2.0.txt](LICENSES/Apache-2.0.txt) |
+| **Monocypher 4.0.2** (Loup Vaillant, Michael Savage, Fabio Scotoni) | **vendored**, `components/monocypher/` | BSD-2-Clause or CC0-1.0, either | unchanged: `monocypher.c` and `optional/monocypher-ed25519.c` with their headers; X25519 and Ed25519 for SSH (`docs/SSH.md`); [BSD-2-Clause-or-CC0-Monocypher.txt](LICENSES/BSD-2-Clause-or-CC0-Monocypher.txt) |
 | **minimp3** (lieff) | **vendored**, `components/aos_hal/minimp3/` | CC0-1.0 | one change, marked `AmoledOS:` (the caller's scratch buffer) |
 | **ESP-IDF's USB host library** (`components/usb` of release/v5.5, `c94f345e`) | **vendored**, `components/usb/` | Apache-2.0 | **modified**: two root ports at once, retries of failed enumerations, a hub fix; the changes are in [components/usb/P4OS.md](components/usb/P4OS.md) and marked `P4OS:` in the source; [Apache-2.0.txt](LICENSES/Apache-2.0.txt) |
 
