@@ -50,6 +50,14 @@
  * darkened the rest of the way by a recolour while they are drawn. The
  * photos went from 3.6 MB to 2.3 MB, or 1.8 MB with the same photo.
  *
+ * Behind a game (2026-11-08): an app full screen that keeps the screen on
+ * and is not kept in the background (the games, Video, Cameras) gets both
+ * photos' memory, 2.3 MB: a Monster Hop level left 11 KB free with them.
+ * They are let go when it opens (aos_wall_photo_for_game) and taken back
+ * once it has been destroyed, slots first and decodes after, so they land
+ * where the game's memory was and the free PSRAM stays in one piece. In
+ * between, nothing asks for them (aos_wall_photo_want does nothing).
+ *
  * Or a folder behind the lock screen, a different photo of it every time
  * the board locks (2026-10-25): pref "lock_album". The worker picks one at
  * random among the folder's photos, never the one just shown, so the
@@ -251,6 +259,7 @@ static void slot_free(wall_t *v)
 }
 
 static bool s_started;              /* the boot is over: decodes may run */
+static bool s_spared;               /* let go for a game (see the top) */
 
 static void request(int which);
 
@@ -370,6 +379,7 @@ void aos_wall_photo_want(int which, bool want)
     if (which < 0 || which > 1 || !s_mx) return;
     wall_t *v = &W[which];
     if (!v->path[0] && !(which == AOS_WALL_LOCK && s_album[0])) return;
+    if (want && s_spared) return;       /* a game has their memory */
     if (which == AOS_WALL_LOCK && lock_shares()) {
         if (want) aos_wall_photo_want(AOS_WALL_HOME, true);
         return;                         /* the home screen's is not the lock's to let go */
@@ -508,6 +518,27 @@ void aos_wall_photo_init(void)
     s_mx = aos_hal_mutex_create();
     s_poll = lv_timer_create(poll_cb, 100, NULL);
     lv_timer_pause(s_poll);
+}
+
+void aos_wall_photo_for_game(bool game)
+{
+    if (!s_mx) return;
+    if (game) {
+        if (s_spared) return;
+        s_spared = true;
+        aos_wall_photo_release(AOS_WALL_HOME);
+        if (!aos_lock_is_locked()) aos_wall_photo_release(AOS_WALL_LOCK);
+        aos_hal_log("ui", "wallpaper photos let go for a full-screen app");
+        return;
+    }
+    if (!s_spared) return;
+    s_spared = false;
+    aos_hal_log("ui", "wallpaper photos back");
+    if (!s_started) return;
+    for (int i = 0; i < 2; i++)         /* the places first, where the game was */
+        if (configured(i) && !(i == AOS_WALL_LOCK && lock_shares())) slot_take(&W[i]);
+    for (int i = 0; i < 2; i++)
+        if (configured(i) && !W[i].px) request(i);
 }
 
 void aos_wall_photo_start(void)

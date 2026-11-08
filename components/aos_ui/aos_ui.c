@@ -704,6 +704,15 @@ void aos_ui_boot_start_run(void)
     }
 }
 
+/* A game: full screen, the screen kept on, not kept in the background. It
+ * gets the wallpaper photos' memory while it runs (aos_wallpaper.c). */
+static bool is_game(const aos_app_t *app)
+{
+    uint32_t f = app->desc.flags;
+    return (f & AOS_APP_FLAG_FULLSCREEN) && (f & AOS_APP_FLAG_KEEP_AWAKE) &&
+           !(f & (AOS_APP_FLAG_KEEP | AOS_APP_FLAG_BACKGROUND));
+}
+
 static void leave_current(bool destroy_now)
 {
     aos_app_t *app = s_cur;
@@ -712,6 +721,7 @@ static void leave_current(bool destroy_now)
     if (app->hide && app->running) app->hide(app, app->inst);
     if (destroy_now || !keepable(app) || !keep_on_leaving(app)) destroy_app(app);
     else if (app->root) lv_obj_add_flag(app->root, LV_OBJ_FLAG_HIDDEN);
+    if (is_game(app) && !app->running) aos_wall_photo_for_game(false);
     aos_hal_app_context_set(NULL);
     aos_hal_audio_foreground(NULL);
     aos_hal_display_refresh_request(0);     /* a rate it asked for was its own */
@@ -761,6 +771,7 @@ bool aos_ui_open(const char *id)
         lv_obj_remove_flag(app->root, LV_OBJ_FLAG_SCROLLABLE);
         place_root(app);
         lv_obj_update_layout(app->root);
+        if (is_game(app)) aos_wall_photo_for_game(true);
         trim_for_memory();
         s_psram_at_create_kb[slot_of_app(app)] = psram_free_kb();
         s_creates++;

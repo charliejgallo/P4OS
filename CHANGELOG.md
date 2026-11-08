@@ -13,7 +13,8 @@
   the portal's rules: open where the portal is, the portal's password or a
   key where it asks for one, closed where it is closed. A new key asks on
   the board's screen, with its fingerprint. `docs/SSH.md`. Asked for by
-  Pocho at Home Assistant's Community Day in Buenos Aires.
+  Pocho ([Pocho Labs](https://www.pocholabs.com.ar)) at Home Assistant's
+  Community Day in Buenos Aires.
 - **SSH the other way: the SSH app.** A terminal on the board into a Mac,
   a Raspberry Pi or any SSH server: saved computers, known_hosts with the
   fingerprint shown the first time and a red warning when it changes, the
@@ -100,7 +101,10 @@
   1.5 MB less at its peak (the stage's backdrop unpacked straight into
   colour and alpha, the player's car coloured a view at a time), and Golf
   holds 0.9 MB less outside its 3D view (that view's two small buffers only
-  while it draws). Nothing changes on screen.
+  while it draws). Nothing changes on screen. And a game in front (full
+  screen, the screen kept on: the games, Video, Cameras) gets the
+  wallpaper photos' 2.3 MB while it runs; they come back when it closes,
+  into the same place. A Monster Hop level had left 11 KB free with them.
 - **CAN: a library of .dbc files and an OBD-II scanner.** The Signals tab
   reads any `.dbc` in the card's `can/dbc` (chosen on the board or on the
   portal page), whole and without a line limit, with value names and plain
