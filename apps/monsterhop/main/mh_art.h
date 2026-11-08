@@ -59,6 +59,14 @@ bool mh_art_has(const char *name);
 /* loads one sheet; false if missing or out of memory (out is zeroed) */
 bool mh_art_load(const char *name, mh_anim_t *out);
 void mh_anim_free(mh_anim_t *a);
+/* A sheet's first frame row by row, without unpacking the whole sheet: the
+ * pack's LZ4 block goes through a window of a few hundred KB and fn gets
+ * each row as soon as it is out. fn is called first with y = -1 (w and h
+ * set, x0 = x1 = 0, px NULL) to make room, then once per row that has
+ * pixels: px holds x1 - x0 pixels of the sheet's format. A false from fn
+ * stops it. For the map, whose unpacked sheet alone is 5.9 MB. */
+typedef bool (*mh_rows_fn)(void *ctx, int fmt, int w, int h, int y, int x0, int x1, const uint8_t *px);
+bool mh_art_rows(const char *name, mh_rows_fn fn, void *ctx);
 /* a raw entry (levels, palettes); free() it */
 uint8_t *mh_art_blob(const char *name, uint32_t *len);
 /* bytes of PSRAM the loaded sheets hold (for the logs) */

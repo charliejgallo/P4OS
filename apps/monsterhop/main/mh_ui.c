@@ -178,41 +178,56 @@ static bool uimg_sheet(mh_uimg_t *u, const char *name, int frame, const mh_lut_t
  * anything else growing in PSRAM (taller LVGL buffers, the bands moved
  * there) left the map unloaded and the screen lying down without it
  * (2026-09-30). Pixels that are not fully opaque are blended over black,
- * which is what the picture's edges are drawn on anyway. */
+ * which is what the picture's edges are drawn on anyway.
+ * The sheet is not unpacked whole any more: its rows come out of a window
+ * of a quarter of a megabyte straight into the picture (mh_art_rows). The
+ * whole sheet (5.9 MB) and its compressed block (2.4 MB) at once were 8.3 MB
+ * on top of the ~6 MB the game holds then, and with 14 MB free on the board
+ * the map did not load and the menus had no background (2026-11-08). */
+typedef struct {
+    mh_uimg_t *u;
+    bool       no_room;
+} opaque_t;
+
+static bool opaque_row(void *ctx, int fmt, int w, int h, int y, int x0, int x1, const uint8_t *px)
+{
+    opaque_t *o = (opaque_t *)ctx;
+    mh_uimg_t *u = o->u;
+    if (y < 0) {
+        u->buf = (uint8_t *)mh_calloc((size_t)w * h, 2);
+        if (!u->buf) {
+            o->no_room = true;
+            return false;
+        }
+        u->w = (int16_t)w;
+        u->h = (int16_t)h;
+        return true;
+    }
+    uint16_t *col = (uint16_t *)u->buf + (size_t)y * u->w;
+    int bpp = fmt == MH_PX_COL ? 4 : 3;
+    for (int q = x0; q < x1; q++, px += bpp) {
+        uint16_t c;
+        int al = spr_px(px, fmt, NULL, &c);
+        if (al) col[q] = al >= 255 ? c : mh_blend(0, c, al);
+    }
+    return true;
+}
+
+
 static bool uimg_sheet_opaque(mh_uimg_t *u, const char *name)
 {
-    mh_anim_t an;
     uimg_free(u);
-    if (!mh_art_load(name, &an)) {
+    opaque_t o = { u, false };
+    if (!mh_art_rows(name, opaque_row, &o)) {
         uint32_t fi = 0, fp = 0;
         aos_hal_heap_info(&fi, &fp);
-        aos_hal_log("mhop", "%s: the sheet did not load (PSRAM free %u B)", name, (unsigned)fp);
+        if (o.no_room)
+            aos_hal_log("mhop", "%s: no block for the picture (PSRAM free %u B)", name, (unsigned)fp);
+        else
+            aos_hal_log("mhop", "%s: the sheet did not load (PSRAM free %u B)", name, (unsigned)fp);
+        uimg_free(u);
         return false;
     }
-    const mh_spr_t *s = &an.f[0];
-    u->buf = (uint8_t *)mh_calloc((size_t)s->w * s->h, 2);
-    if (!u->buf) {
-        uint32_t fi = 0, fp = 0;
-        aos_hal_heap_info(&fi, &fp);
-        aos_hal_log("mhop", "%s: no block of %u B for the picture (PSRAM free %u B)", name,
-                    (unsigned)((size_t)s->w * s->h * 2), (unsigned)fp);
-        mh_anim_free(&an);
-        return false;
-    }
-    u->w = (int16_t)s->w;
-    u->h = (int16_t)s->h;
-    uint16_t *col = (uint16_t *)u->buf;
-    int bpp = an.fmt == MH_PX_COL ? 4 : 3;
-    for (int r = 0; r < s->h; r++) {
-        int x0, x1;
-        const uint8_t *px = mh_spr_row(s, r, &x0, &x1);
-        for (int q = x0; q < x1; q++, px += bpp) {
-            uint16_t c;
-            int al = spr_px(px, an.fmt, NULL, &c);
-            if (al) col[(size_t)r * u->w + q] = al >= 255 ? c : mh_blend(0, c, al);
-        }
-    }
-    mh_anim_free(&an);
     u->dsc.header.cf = LV_COLOR_FORMAT_RGB565;      /* wrap() keeps it */
     return true;
 }

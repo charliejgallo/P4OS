@@ -281,6 +281,231 @@ bad:
     return false;
 }
 
+/* -------------------------------------------------------------------------- */
+/* A sheet's first frame, streamed (mh_art_rows)                              */
+/* -------------------------------------------------------------------------- */
+
+/* LZ4 copies reach at most 64 KB back, so that much of what came out stays
+ * in the window when it is full; the rest of it is new rows. A larger
+ * window moves the history less often (every 192 KB of output). */
+#define RS_HIST  65536
+#define RS_WIN   (RS_HIST + 196608)
+#define RS_IN    16384
+
+typedef struct {
+    /* the compressed block, read from the card a piece at a time */
+    size_t   src_off, src_left;
+    uint8_t *in;
+    size_t   in_pos, in_len;
+    /* what came out: win[0] is byte `base` of the unpacked sheet */
+    uint8_t *win;
+    size_t   o, base;
+    /* the frame */
+    int      fmt, bpp, w, h, y;     /* y: next row; -1 before the header */
+    size_t   data0;                 /* where the frame's pixels start      */
+    uint16_t *span;
+    uint32_t *rowoff;
+    mh_rows_fn fn;
+    void    *ctx;
+    bool     fail;
+} rs_t;
+
+static int px_bytes(int fmt)
+{
+    switch (fmt) {
+    case MH_PX_COL: return 4;
+    case MH_PX_LID: return 3;
+    case MH_PX_PLANE: return 1;
+    case MH_PX_GLOW: return 2;
+    default: return 3;              /* MH_PX_IMG */
+    }
+}
+
+static bool rs_fill(rs_t *s)
+{
+    if (!s->src_left) return false;
+    size_t n = s->src_left < RS_IN ? s->src_left : RS_IN;
+    if (!read_at(s->src_off, s->in, n)) return false;
+    s->src_off += n;
+    s->src_left -= n;
+    s->in_pos = 0;
+    s->in_len = n;
+    s_read += (uint32_t)n;
+    return true;
+}
+
+static inline int rs_byte(rs_t *s)
+{
+    if (s->in_pos == s->in_len && !rs_fill(s)) return -1;
+    return s->in[s->in_pos++];
+}
+
+static inline bool rs_more(const rs_t *s)
+{
+    return s->in_pos < s->in_len || s->src_left > 0;
+}
+
+/* hands fn every row that is complete in the window; at the first call
+ * also the header and the row tables, which must be in it whole */
+static void rs_rows(rs_t *s)
+{
+    size_t upto = s->base + s->o;
+    if (s->y < 0) {
+        if (s->base != 0 || upto < 12) return;
+        s->w = (int16_t)rd16(s->win);
+        s->h = (int16_t)rd16(s->win + 2);
+        size_t tab = 12 + (size_t)s->h * 8;
+        if (s->w <= 0 || s->h <= 0) {
+            s->fail = true;
+            return;
+        }
+        if (upto < tab) return;
+        s->span = (uint16_t *)mh_malloc((size_t)s->h * 4);
+        s->rowoff = (uint32_t *)mh_malloc((size_t)s->h * 4);
+        if (!s->span || !s->rowoff) {
+            s->fail = true;
+            return;
+        }
+        for (int r = 0; r < s->h; r++) {
+            s->span[2 * r] = rd16(s->win + 12 + (size_t)r * 4);
+            s->span[2 * r + 1] = rd16(s->win + 14 + (size_t)r * 4);
+            s->rowoff[r] = rd32(s->win + 12 + (size_t)s->h * 4 + (size_t)r * 4);
+        }
+        s->data0 = tab;
+        s->y = 0;
+        if (!s->fn(s->ctx, s->fmt, s->w, s->h, -1, 0, 0, NULL)) {
+            s->fail = true;
+            return;
+        }
+    }
+    while (s->y < s->h) {
+        int x0 = s->span[2 * s->y], x1 = s->span[2 * s->y + 1];
+        if (x1 <= x0) {
+            s->y++;
+            continue;
+        }
+        size_t a = s->data0 + s->rowoff[s->y], b = a + (size_t)(x1 - x0) * s->bpp;
+        if (b > upto) return;
+        if (a < s->base || x1 > s->w) {
+            s->fail = true;     /* rows out of order: not what the packer writes */
+            return;
+        }
+        if (!s->fn(s->ctx, s->fmt, s->w, s->h, s->y, x0, x1, s->win + (a - s->base))) {
+            s->fail = true;
+            return;
+        }
+        s->y++;
+    }
+}
+
+/* the window is full: rows out, then keep only the history */
+static void rs_flush(rs_t *s)
+{
+    rs_rows(s);
+    if (s->fail) return;
+    if (s->y < 0) {         /* the tables did not fit in the window */
+        s->fail = true;
+        return;
+    }
+    memmove(s->win, s->win + s->o - RS_HIST, RS_HIST);
+    s->base += s->o - RS_HIST;
+    s->o = RS_HIST;
+    mh_yield();
+}
+
+static bool rs_done(const rs_t *s)
+{
+    return s->fail || (s->y >= 0 && s->y >= s->h);
+}
+
+/* lz4_decode() above, reading and writing a piece at a time */
+static void rs_decode(rs_t *s, size_t rawlen)
+{
+    while (rs_more(s) && !rs_done(s)) {
+        int tok = rs_byte(s);
+        if (tok < 0) break;
+        size_t lit = (size_t)tok >> 4;
+        if (lit == 15) {
+            int b;
+            do {
+                if ((b = rs_byte(s)) < 0) goto bad;
+                lit += (size_t)b;
+            } while (b == 255);
+        }
+        if (s->base + s->o + lit > rawlen) goto bad;
+        while (lit) {
+            if (s->in_pos == s->in_len && !rs_fill(s)) goto bad;
+            if (s->o == RS_WIN) {
+                rs_flush(s);
+                if (rs_done(s)) return;
+            }
+            size_t n = s->in_len - s->in_pos;
+            if (n > lit) n = lit;
+            if (n > RS_WIN - s->o) n = RS_WIN - s->o;
+            memcpy(s->win + s->o, s->in + s->in_pos, n);
+            s->in_pos += n;
+            s->o += n;
+            lit -= n;
+        }
+        if (!rs_more(s)) break;
+        int lo = rs_byte(s), hi = rs_byte(s);
+        if (lo < 0 || hi < 0) goto bad;
+        size_t off = (size_t)lo | ((size_t)hi << 8);
+        size_t m = (size_t)(tok & 15) + 4;
+        if ((tok & 15) == 15) {
+            int b;
+            do {
+                if ((b = rs_byte(s)) < 0) goto bad;
+                m += (size_t)b;
+            } while (b == 255);
+        }
+        if (off == 0 || off > s->base + s->o || s->base + s->o + m > rawlen) goto bad;
+        while (m) {
+            if (s->o == RS_WIN) {
+                rs_flush(s);
+                if (rs_done(s)) return;
+            }
+            size_t n = RS_WIN - s->o;
+            if (n > m) n = m;
+            uint8_t *d = s->win + s->o;
+            for (size_t k = 0; k < n; k++) d[k] = d[(ptrdiff_t)k - (ptrdiff_t)off];
+            s->o += n;
+            m -= n;
+        }
+    }
+    rs_rows(s);
+    return;
+bad:
+    s->fail = true;
+}
+
+bool mh_art_rows(const char *name, mh_rows_fn fn, void *ctx)
+{
+    int i = find(name);
+    if (i < 0) return false;
+    const entry_t *e = &s_ent[i];
+    if (e->type == MH_BLOB || e->frames == 0 || !s_fp || e->off + e->clen > s_len) return false;
+    rs_t s;
+    memset(&s, 0, sizeof s);
+    s.src_off = e->off;
+    s.src_left = e->clen;
+    s.fmt = e->type;
+    s.bpp = px_bytes(e->type);
+    s.y = -1;
+    s.fn = fn;
+    s.ctx = ctx;
+    s.in = (uint8_t *)mh_malloc(RS_IN);
+    s.win = (uint8_t *)mh_malloc(RS_WIN);
+    if (s.in && s.win) rs_decode(&s, e->rawlen);
+    bool ok = s.in && s.win && !s.fail && s.y >= 0 && s.y >= s.h;
+    free(s.in);
+    free(s.win);
+    free(s.span);
+    free(s.rowoff);
+    mh_yield();
+    return ok;
+}
+
 void mh_anim_free(mh_anim_t *a)
 {
     if (!a) return;
