@@ -37,8 +37,11 @@ se prueba.
 ### Pendientes, en resumen
 
 Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
-- [ ] **SSH** (2026-11-07, `docs/SSH.md`). Probado sólo en el simulador.
-      En la placa: prenderlo en Ajustes, Portal web; `ssh p4os.local` desde
+- [ ] **SSH** (2026-11-07, `docs/SSH.md`). **Instalado el 2026-11-07**
+      (firmware `e88852f`, por OTA): el usuario entró desde la Mac por la
+      red de casa (abierta, sin contraseña), la huella la mostró ssh, `ls`
+      en columnas, y lo probó a mano: "genial". Falta lo de abajo con
+      números. En la placa: prenderlo en Ajustes, Portal web; `ssh p4os.local` desde
       la Mac (la huella que muestra ssh tiene que ser la de Ajustes); `ls`,
       `top`, `log -f`, `free` (la RAM interna libre no debería moverse con
       una sesión abierta); `ssh p4os.local cat /apps/<algo>.pak | shasum`
