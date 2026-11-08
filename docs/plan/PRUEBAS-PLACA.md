@@ -37,6 +37,14 @@ se prueba.
 ### Pendientes, en resumen
 
 Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
+- [ ] **App SSH (cliente)** (2026-11-07, `apps/ssh/README.md`). Instalada
+      el 2026-11-07 con el firmware `65c8642` (por OTA; la app necesita
+      sus símbolos nuevos): la placa la carga y la registra. Falta todo lo
+      de usarla, que hace el usuario contra su Mac y su Raspberry Pi: la
+      huella la primera vez, la contraseña (en la Mac por
+      keyboard-interactive), el candado que instala la clave y entrar
+      después sin contraseña, `vim`/`htop`, el teclado USB, girar la
+      pantalla con una sesión abierta.
 - [ ] **SSH** (2026-11-07, `docs/SSH.md`). **Instalado el 2026-11-07**
       (firmware `e88852f`, por OTA): el usuario entró desde la Mac por la
       red de casa (abierta, sin contraseña), la huella la mostró ssh, `ls`
