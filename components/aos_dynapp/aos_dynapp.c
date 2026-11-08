@@ -663,10 +663,11 @@ static bool module_ensure_open(dynapp_t *app)
 
     /* One retry, after recovering whatever can be recovered without breaking
      * anything. On the P4 the memory is PSRAM, and what holds it is mostly
-     * the apps hidden in the background: those with nothing running go
-     * (aos_ui_close_hidden), and their modules with them. */
+     * the apps hidden in the background and the wallpaper photos: those go
+     * (aos_ui_make_room), the hidden apps' modules with them. Called from
+     * create(), with the UI's lock. */
     bool freed = false;
-    if (s_oom && aos_ui_close_hidden() > 0) freed = true;
+    if (s_oom && aos_ui_make_room() > 0) freed = true;
     if (liberar_ejecutable(app)) freed = true;
     if (freed && module_open(app->file, app->index, &app->handle, &app->loaded)) {
         ESP_LOGI(TAG, "%s loaded on the second attempt", app->file);
@@ -1384,6 +1385,14 @@ int aos_dynapp_scan(void)
      * size and date) puts it on the home screen anyway, and its code is
      * loaded when it is opened, with the PSRAM of a quiet board. That record
      * is not carried into the new cache: the next boot opens it for real. */
+    /* the photos split the PSRAM: they go for the retries, and the home
+     * screen's is asked for again after them (the lock screen's comes back
+     * when the screen locks) */
+    bool room = false;
+    if (n_oom && aos_hal_lock(1000)) {
+        room = aos_ui_make_room() > 0;
+        aos_hal_unlock();
+    }
     for (int i = 0; i < n_oom; i++) {
         uint32_t total = 0;
         int before = s_count;
@@ -1413,6 +1422,10 @@ int aos_dynapp_scan(void)
             ESP_LOGW(TAG, "%s registered from an older cache record: it loads when opened", oom[i].file);
         }
         if (locked) aos_hal_unlock();
+    }
+    if (room && aos_hal_lock(1000)) {
+        aos_ui_room_back();
+        aos_hal_unlock();
     }
     /* the ones from the cache, in batches under one lock: nothing opened */
     {

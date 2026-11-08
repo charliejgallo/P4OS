@@ -38,7 +38,12 @@ se prueba.
 
 Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
 - [ ] **CAS después de una actualización y dos apps de fondo** (2026-11-08).
-      Sin instalar. Tras la OTA de `64fbdb0` CAS faltó en el inicio: el
+      `52a367b` instalado el 2026-11-08: el reintento tampoco entró y la
+      caché vieja no tenía a CAS. Medido: 14 MB libres y el bloque mayor de
+      9,4 MB en todo el escaneo (9,2 MB en el inicio ya arrancada; 15 MB con
+      una app al frente, sin la foto del bloqueo). Las fotos de fondo
+      parten la PSRAM: el commit siguiente las suelta antes de reintentar.
+      Tras la OTA de `64fbdb0` CAS faltó en el inicio: el
       escaneo lo abrió con la PSRAM partida (`5553904 B of code: no PSRAM
       block`; el mínimo libre del arranque fue 7,6 MB). En la placa: tras la
       OTA, CAS en el inicio (o la línea `registered from an older cache

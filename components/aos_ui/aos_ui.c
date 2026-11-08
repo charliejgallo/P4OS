@@ -800,9 +800,17 @@ static bool s_safe_mode;
 void aos_ui_set_safe_mode(bool on) { s_safe_mode = on; }
 bool aos_ui_safe_mode(void) { return s_safe_mode; }
 
-int aos_ui_close_hidden(void)
+int aos_ui_make_room(void)
 {
     int n = 0;
+    /* also when it is still being decoded: that one is dropped as it comes */
+    if (!aos_lock_is_locked()) {
+        if (aos_wall_photo_dsc(AOS_WALL_LOCK)) n++;
+        aos_wall_photo_want(AOS_WALL_LOCK, false);
+    }
+    if (aos_wall_photo_dsc(AOS_WALL_HOME)) n++;
+    aos_wall_photo_want(AOS_WALL_HOME, false);
+    if (n) aos_hal_log("ui", "the wallpaper photos let go: another app needs their memory");
     for (int i = 0; i < AOS_MAX_APPS; i++) {
         aos_app_t *a = &s_apps[i];
         if (!s_used[i] || !a->running || a == s_cur) continue;
@@ -815,6 +823,11 @@ int aos_ui_close_hidden(void)
         n++;
     }
     return n;
+}
+
+void aos_ui_room_back(void)
+{
+    if (!s_cur) aos_wall_photo_want(AOS_WALL_HOME, true);
 }
 
 void aos_ui_close_others(void)

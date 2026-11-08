@@ -168,8 +168,9 @@ when it ends. So:
 - At most two apps stay hidden beside the one in front; one more closes the
   least recently used that has nothing running.
 - A card app whose code does not fit in PSRAM when it is opened closes the
-  hidden apps with nothing running and tries once more (`ui: closing X:
-  another app needs its memory`).
+  hidden apps with nothing running, lets the wallpaper photos go (they
+  split the PSRAM) and tries once more (`ui: closing X: another app needs
+  its memory`, `ui: the wallpaper photos let go`).
 
 Measured on the board (2026-10-08): Photos 2.1 MB, Pixel Art 2.0 MB and
 Drawing 1.7 MB are closed; Radio 490 KB, Notes 343 KB, Music 156 KB, CAN

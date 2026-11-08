@@ -123,10 +123,16 @@ void        aos_ui_boot_start_run(void);
 bool        aos_ui_status_icon_set(const char *app_id, const char *glyph, uint32_t rgb);
 /* The live apps (in front or hidden), most recent first. */
 int         aos_ui_alive(aos_app_t **out, int max);
-/* Closes the hidden apps that have nothing running (not the one in front,
- * nor one being created): an app that does not fit asks for this before
- * giving up (aos_dynapp.c). Returns how many were closed. */
-int         aos_ui_close_hidden(void);
+/* Room in PSRAM for a card app that did not fit (aos_dynapp.c): closes the
+ * hidden apps that have nothing running (not the one in front, nor one
+ * being created) and lets go of the wallpaper photos (1.8 MB each, and the
+ * lock screen's sits in the middle of the PSRAM: 2026-11-08, CAS needs a
+ * block of 5.5 MB beside its 5.3 MB file). The lock screen's photo is
+ * decoded again when the screen locks, the home screen's on the way home;
+ * aos_ui_room_back() asks for the home one at once (the boot's scan).
+ * Returns how many things were let go. With the UI's lock. */
+int         aos_ui_make_room(void);
+void        aos_ui_room_back(void);
 void        aos_ui_close_others(void);     /* ends every app but the one in front (USB disk mode) */
 void        aos_ui_set_safe_mode(bool on); /* main.c: this boot is the BOOT button's safe mode */
 /* Settings, Developer (aos_devtools.c): overlays and the log's level, kept as

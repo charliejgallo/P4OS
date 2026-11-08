@@ -36,15 +36,19 @@
 - **CAS no longer goes missing after an update.** After a firmware update
   the board opens every app on the card once to describe it, and CAS
   (5.3 MB of code, about 11 MB of PSRAM at once) could land on a moment
-  without a block that big and was left off the home screen. An app that
-  runs out of memory there is tried again at the end, and if it still does
-  not fit, the description the previous firmware saved puts it on the home
-  screen anyway; its code loads when it is opened. The log now says the
-  PSRAM free and its largest block for every app opened.
+  without a block that big and was left off the home screen: 14 MB were
+  free, but the largest block was 9.4 MB, split by the wallpaper photos
+  (1.8 MB each). An app that runs out of memory there is tried again at the
+  end with the photos let go (they are decoded again on the way home and
+  when the screen locks), and if it still does not fit, the description
+  the previous firmware saved puts it on the home screen anyway; its code
+  loads when it is opened. The log now says the PSRAM free and its largest
+  block for every app opened.
 - **Two apps in the background, not three.** Beside the one in front, two
   apps stay hidden; one more closes the least recently used (never one with
   something running). And a card app that does not fit when opened closes
-  the hidden idle apps and tries again, instead of failing.
+  the hidden idle apps, lets the wallpaper photos go and tries again,
+  instead of failing.
 
 ## 0.23.2 — 2026-11-06
 
