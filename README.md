@@ -225,6 +225,13 @@ The home screen has icon pages, folders, a dock and widgets.
   the encoder's YUV, the hardware H.264 encoder compresses it (70 ms a
   frame between them, 15 fps on a quiet screen and 7-9 while apps move),
   and the CPU mostly waits. It plays on a Mac or a phone as it is.
+- **Typing** (2026-11-08): the field being edited shows a blinking cursor
+  and a ring in the accent colour. The keyboard has an ñ, holding a key
+  opens its accents (á, ü, ñ, ¿...), shift gives one capital or locks with
+  two taps, and dragging along the space bar moves the cursor. Holding a
+  field selects, cuts, copies and pastes; the clipboard is shared with the
+  apps and with the portal, which can type a long password or an address
+  straight into the field open on the board.
 - **The status bar** shows the Wi-Fi or the board's own network, the card
   and the USB.
 - **The orientation** is chosen in Settings or the control centre, because
@@ -864,6 +871,24 @@ Frame rates measured on the board:
 
 [docs/APPS-P4.md](docs/APPS-P4.md) has them all, and explains how to write
 an app.
+
+### SSH
+
+Both ways. **The SSH app** is a terminal on the board into a Mac, a
+Raspberry Pi or any SSH server ([apps/ssh/README.md](apps/ssh/README.md)):
+saved computers, the fingerprint shown the first time, the board's own
+Ed25519 key installed on the computer with the padlock, an xterm with 256
+colours where `htop` and `vim` run, and a keyboard with Esc, Tab, Ctrl,
+Alt, the arrows and F1-F12 (or a USB one). **The board's console:**
+`ssh p4os.local` opens a shell with the card's files, the log, the tasks
+and the memory (`free -m` maps the PSRAM's big blocks), under the portal's
+own rules ([docs/SSH.md](docs/SSH.md)).
+
+<p align="center">
+  <img src="docs/img/app-ssh-htop.png" width="230" alt="htop on a Raspberry Pi 4, over SSH from the board">
+</p>
+
+<p align="center"><em>htop on a Raspberry Pi, from the board.</em></p>
 
 ### Connected
 

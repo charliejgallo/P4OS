@@ -90,7 +90,9 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       abiertas seguidas, la más vieja sin nada andando se cierra (`more than
       3 apps alive`). Mila y Monster Hop: el usuario dice que andaban mal
       por la PSRAM; falta ver cómo, con el registro.
-- [ ] **Copiar y pegar** (2026-11-08, `aos_textsel.c`). **Instalado el
+- [x] **Copiar y pegar** (2026-11-08, `aos_textsel.c`). **Probado por el
+      usuario el 2026-11-08: anda, también desde el portapapeles del
+      portal.** **Instalado el
       2026-11-08** (firmware `6537d8a` por OTA, y `install_lang.sh en de`):
       arrancó y se confirmó, sin errores; el idioma pasó de 5817 a 5820
       cadenas; `GET /api/clip` responde.
@@ -190,7 +192,10 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       anillo marca el campo del teclado abierto, sigue al tocar el fondo y
       se va al cerrar el teclado; tocar el texto pone el cursor ahí. Que el
       cambio de color de acento en Ajustes los recolore.
-- [ ] **App SSH (cliente)** (2026-11-07, `apps/ssh/README.md`). Instalada
+- [ ] **App SSH (cliente)** (2026-11-07, `apps/ssh/README.md`).
+      **2026-11-08:** el usuario entró a una Raspberry Pi de casa y corrió
+      `htop` (la captura está en el README, `docs/img/app-ssh-htop.png`).
+      Instalada
       el 2026-11-07 con el firmware `65c8642` (por OTA; la app necesita
       sus símbolos nuevos): la placa la carga y la registra. Falta todo lo
       de usarla, que hace el usuario contra su Mac y su Raspberry Pi: la
