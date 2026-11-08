@@ -3,7 +3,7 @@
  * three layers of SSH-2 a console needs.
  *
  *   transport (RFC 4253)    version lines, KEXINIT, curve25519-sha256,
- *                           NEWKEYS, AES-GCM packets; the client may
+ *                           NEWKEYS, AES-GCM or ChaCha20-Poly1305 packets; the client may
  *                           exchange keys again at any time. "Strict KEX"
  *                           (OpenSSH's answer to Terrapin) when the client
  *                           offers it: sequence numbers start over at every
@@ -83,7 +83,9 @@ enum { DIS_PROTOCOL = 2, DIS_KEX_FAILED = 3, DIS_MAC = 5, DIS_SERVICE = 7, DIS_B
 
 static const char KEX_ALGS[] = "curve25519-sha256,curve25519-sha256@libssh.org,ext-info-s,kex-strict-s-v00@openssh.com";
 static const char HOSTKEY_ALGS[] = "ssh-ed25519";
-static const char CIPHERS[] = "aes128-gcm@openssh.com,aes256-gcm@openssh.com";
+/* the client's order decides: OpenSSH puts ChaCha20 first, the board's
+ * client app speaks only that one */
+static const char CIPHERS[] = "aes128-gcm@openssh.com,aes256-gcm@openssh.com,chacha20-poly1305@openssh.com";
 /* with an AEAD cipher the MAC is not used; some clients want a match all the same */
 static const char MACS[] = "hmac-sha2-256";
 
@@ -112,10 +114,10 @@ typedef struct conn {
     bool in_kex;                /* our KEXINIT sent, client's NEWKEYS not yet */
     bool got_kexinit;
     bool first_kex, strict, ext_info, ignore_next;
-    int key_c2s, key_s2c;       /* 16 or 32: AES-128 or AES-256 */
+    char enc_c2s[32], enc_s2c[32];  /* the ciphers chosen, by name */
     uint8_t sid[32];
     bool have_sid;
-    ssh_gcm_t *rx, *tx, *rx_next;
+    ssh_cipher_t *rx, *tx, *rx_next;
     uint32_t seq_rx, seq_tx;
 
     uint8_t *in, *out;
@@ -162,7 +164,7 @@ static bool pk_send(conn_t *c, wbuf_t *b)
     }
     /* GCM: the length is not encrypted and does not count for the block;
      * in clear (before the first NEWKEYS) everything does, in blocks of 8 */
-    size_t block = c->tx ? 16 : 8, head = c->tx ? 1 : 5;
+    size_t block = c->tx ? (size_t)ssh_cipher_block(c->tx) : 8, head = c->tx ? 1 : 5;
     size_t pad = block - (head + b->len) % block;
     if (pad < 4) pad += block;
     size_t L = 1 + b->len + pad;
@@ -175,7 +177,7 @@ static bool pk_send(conn_t *c, wbuf_t *b)
     ssh_random(o + 5 + b->len, pad);
     size_t total = 4 + L;
     if (c->tx) {
-        if (!ssh_gcm_seal(c->tx, o, L)) {
+        if (!ssh_cipher_seal(c->tx, o, L, c->seq_tx)) {
             c->dead = true;
             return false;
         }
@@ -300,16 +302,15 @@ static void on_kexinit(conn_t *c, const uint8_t *pay, size_t n, uint32_t seq)
             return;
         }
     }
-    char kex[40], hk[24], e1[32], e2[32], comp[8];
+    char kex[40], hk[24], comp[8];
+    char *e1 = c->enc_c2s, *e2 = c->enc_s2c;
     if (!choose(l[0], ln[0], KEX_ALGS, kex, sizeof kex) || !choose(l[1], ln[1], HOSTKEY_ALGS, hk, sizeof hk) ||
-        !choose(l[2], ln[2], CIPHERS, e1, sizeof e1) || !choose(l[3], ln[3], CIPHERS, e2, sizeof e2) ||
+        !choose(l[2], ln[2], CIPHERS, e1, sizeof c->enc_c2s) || !choose(l[3], ln[3], CIPHERS, e2, sizeof c->enc_s2c) ||
         !choose(l[6], ln[6], "none", comp, sizeof comp) || !choose(l[7], ln[7], "none", comp, sizeof comp)) {
         aos_hal_log(TAG, "%s: no algorithm in common (the board: %s / %s / %s)", c->from, KEX_ALGS, HOSTKEY_ALGS, CIPHERS);
         disconnect(c, DIS_KEX_FAILED, "no algorithm in common");
         return;
     }
-    c->key_c2s = strstr(e1, "256") ? 32 : 16;
-    c->key_s2c = strstr(e2, "256") ? 32 : 16;
     /* a guess that did not come true: its packet is skipped (RFC 4253, 7) */
     c->ignore_next = follows && !(first_is(l[0], ln[0], kex) && first_is(l[1], ln[1], hk));
     free(c->i_c);
@@ -406,19 +407,19 @@ static void on_ecdh_init(conn_t *c, const uint8_t *pay, size_t n)
         c->have_sid = true;
     }
 
-    uint8_t iv_c[12], iv_s[12], key_c[32], key_s[32];
-    derive(c, kmp, kb.len, h, 'A', iv_c, 12);
-    derive(c, kmp, kb.len, h, 'B', iv_s, 12);
-    derive(c, kmp, kb.len, h, 'C', key_c, (size_t)c->key_c2s);
-    derive(c, kmp, kb.len, h, 'D', key_s, (size_t)c->key_s2c);
+    uint8_t iv_c[12] = { 0 }, iv_s[12] = { 0 }, key_c[64], key_s[64];
+    if (ssh_cipher_iv_len(c->enc_c2s)) derive(c, kmp, kb.len, h, 'A', iv_c, 12);
+    if (ssh_cipher_iv_len(c->enc_s2c)) derive(c, kmp, kb.len, h, 'B', iv_s, 12);
+    derive(c, kmp, kb.len, h, 'C', key_c, (size_t)ssh_cipher_key_len(c->enc_c2s));
+    derive(c, kmp, kb.len, h, 'D', key_s, (size_t)ssh_cipher_key_len(c->enc_s2c));
     memset(kmp, 0, sizeof kmp);
-    ssh_gcm_free(c->rx_next);
-    c->rx_next = ssh_gcm_new(key_c, (size_t)c->key_c2s, iv_c);
-    ssh_gcm_t *tx_next = ssh_gcm_new(key_s, (size_t)c->key_s2c, iv_s);
+    ssh_cipher_free(c->rx_next);
+    c->rx_next = ssh_cipher_new(c->enc_c2s, key_c, iv_c);
+    ssh_cipher_t *tx_next = ssh_cipher_new(c->enc_s2c, key_s, iv_s);
     memset(key_c, 0, sizeof key_c);
     memset(key_s, 0, sizeof key_s);
     if (!c->rx_next || !tx_next) {
-        ssh_gcm_free(tx_next);
+        ssh_cipher_free(tx_next);
         memset(seed, 0, sizeof seed);
         disconnect(c, DIS_KEX_FAILED, "out of memory");
         return;
@@ -433,7 +434,7 @@ static void on_ecdh_init(conn_t *c, const uint8_t *pay, size_t n)
 
     b = pk_begin(c, MSG_NEWKEYS);
     pk_send(c, &b);
-    ssh_gcm_free(c->tx);
+    ssh_cipher_free(c->tx);
     c->tx = tx_next;
     if (c->strict) c->seq_tx = 0;
 
@@ -454,7 +455,7 @@ static void on_newkeys(conn_t *c)
         disconnect(c, DIS_PROTOCOL, "NEWKEYS before the exchange");
         return;
     }
-    ssh_gcm_free(c->rx);
+    ssh_cipher_free(c->rx);
     c->rx = c->rx_next;
     c->rx_next = NULL;
     if (c->strict) c->seq_rx = 0;
@@ -977,16 +978,23 @@ static void take_packets(conn_t *c)
 {
     while (!c->dead && c->in_len >= 4) {
         uint8_t *q = c->in;
-        uint32_t L = (uint32_t)q[0] << 24 | (uint32_t)q[1] << 16 | (uint32_t)q[2] << 8 | q[3];
         bool enc = c->rx != NULL;
-        /* at least 16 bytes with the length (RFC 4253, 6): 12 in clear */
-        if (L < (enc ? 16u : 12u) || L > PKT_MAX || (enc ? L % 16 : (L + 4) % 8)) {
+        uint32_t L = enc ? ssh_cipher_length(c->rx, q, c->seq_rx)
+                         : (uint32_t)q[0] << 24 | (uint32_t)q[1] << 16 | (uint32_t)q[2] << 8 | q[3];
+        /* in clear, at least 16 bytes with the length (RFC 4253, 6); an
+         * encrypted one is whole blocks of its cipher, the length not
+         * counted, and one block at least: OpenSSH's ChaCha20 sends a
+         * NEWKEYS of 8 */
+        uint32_t blk = enc ? (uint32_t)ssh_cipher_block(c->rx) : 8;
+        if (L < (enc ? blk : 12u) || L > PKT_MAX || (enc ? L % blk : (L + 4) % 8)) {
+            aos_hal_log(TAG, "%s: bad length %u (seq %u, %s, %u bytes in)", c->from, (unsigned)L, (unsigned)c->seq_rx,
+                        enc ? c->enc_c2s : "clear", (unsigned)c->in_len);
             disconnect(c, DIS_PROTOCOL, "bad packet length");
             return;
         }
         size_t total = 4 + L + (enc ? 16 : 0);
         if (c->in_len < total) return;
-        if (enc && !ssh_gcm_open(c->rx, q, L)) {
+        if (enc && !ssh_cipher_open(c->rx, q, L, c->seq_rx)) {
             disconnect(c, DIS_MAC, "corrupt packet");
             return;
         }
@@ -1101,9 +1109,9 @@ static void conn_thread(void *arg)
     for (int i = 0; i < MAX_CH; i++)
         if (c->ch[i].used) chan_free(c, &c->ch[i]);
     close(c->fd);
-    ssh_gcm_free(c->rx);
-    ssh_gcm_free(c->tx);
-    ssh_gcm_free(c->rx_next);
+    ssh_cipher_free(c->rx);
+    ssh_cipher_free(c->tx);
+    ssh_cipher_free(c->rx_next);
     free(c->i_c);
     free(c->i_s);
     free(c->in);

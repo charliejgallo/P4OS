@@ -32,7 +32,17 @@ DEFAULT_LIBS = ["lvgl__lvgl", "lvgl_port_lib",
                 # without this line a .so calling the USB port fails only at load.
                 "aos_usb",
                 # P4OS: the ports and sensors (aos_io.h) are the apps' too
-                "aos_io"]
+                "aos_io",
+                # X25519, Ed25519, ChaCha20, Poly1305... for the SSH client app
+                "monocypher",
+                # of the SSH server, only what ONLY_PREFIXES lets through
+                "aos_ssh"]
+
+# Libraries of which only some names are the apps': aos_ssh is the board's
+# SSH server and its shell; an app gets the wire helpers, the packet cipher
+# and the signature check (aos_ssh_wire.h, aos_ssh_chacha.h), not the server.
+ONLY_PREFIXES = {"aos_ssh": ("wb_", "rb_", "namelist_has", "ssh_chachapoly_", "ssh_key_verify",
+                             "ssh_key_describe", "SSH_SIG_ALGS")}
 
 # libc and libm functions nearly any app will need and that the table
 # elf_loader brings does NOT include (snprintf, for instance: there you only
@@ -247,7 +257,7 @@ SKIP_OBJECTS = re.compile(
     r"|lv_font_simsun|lv_font_source_han_sans)")
 
 
-def collect(nm, archive):
+def collect(nm, archive, only=None):
     out = subprocess.run([nm, "-g", "--defined-only", archive],
                          capture_output=True, text=True)
     if out.returncode != 0:
@@ -276,6 +286,8 @@ def collect(nm, archive):
             continue
         if SKIP_OBJECTS.search(name):
             continue
+        if only and not name.startswith(only):
+            continue
         symbols.append(name)
     return symbols
 
@@ -302,7 +314,7 @@ def main():
         for base, _dirs, files in os.walk(args.build):
             for name in files:
                 if name == f"lib{lib}.a":
-                    archives.append(os.path.join(base, name))
+                    archives.append((os.path.join(base, name), ONLY_PREFIXES.get(lib)))
                     found = True
         if not found:
             print(f"  warning: lib{lib}.a not found, skipping it")
@@ -325,8 +337,8 @@ def main():
             seen.add(name)
             symbols.append(name)
 
-    for archive in archives:
-        for name in collect(nm, archive):
+    for archive, only in archives:
+        for name in collect(nm, archive, only):
             if name not in seen:
                 seen.add(name)
                 symbols.append(name)

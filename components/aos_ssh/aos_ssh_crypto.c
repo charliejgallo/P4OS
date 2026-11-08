@@ -5,7 +5,9 @@
  *   key exchange  curve25519-sha256 (RFC 8731), X25519 from Monocypher
  *   host key      ssh-ed25519 (RFC 8709), Monocypher
  *   cipher        aes128-gcm@openssh.com, aes256-gcm@openssh.com (RFC 5647
- *                 as OpenSSH does it): mbedTLS, with the P4's AES engine
+ *                 as OpenSSH does it): mbedTLS, with the P4's AES engine;
+ *                 chacha20-poly1305@openssh.com (aos_ssh_chacha.c), which
+ *                 OpenSSH picks first and the client app speaks
  *   client keys   ssh-ed25519 (Monocypher), ecdsa-sha2-nistp256 and
  *                 rsa-sha2-256/512 (mbedTLS); never ssh-rsa with SHA-1
  *
@@ -14,6 +16,7 @@
  * (docs/en/api-reference/system/random.rst).
  */
 #include "aos_ssh_int.h"
+#include "aos_ssh_chacha.h"
 
 #include "monocypher.h"
 #include "monocypher-ed25519.h"
@@ -65,32 +68,64 @@ void ssh_sha256_end(ssh_sha256_ctx_t *c, uint8_t out[32])
     free(c);
 }
 
-/* ---- AES-GCM ---- */
+/* ---- the packet ciphers ---- */
 
-struct ssh_gcm {
+typedef struct {
     mbedtls_gcm_context c;
     uint8_t iv[12];
+} gcm_t;
+
+struct ssh_cipher {
+    bool chacha;
+    gcm_t g;
+    ssh_chachapoly_t cp;
 };
 
-ssh_gcm_t *ssh_gcm_new(const uint8_t *key, size_t key_len, const uint8_t iv[12])
+int ssh_cipher_key_len(const char *name)
 {
-    ssh_gcm_t *g = calloc(1, sizeof *g);
-    if (!g) return NULL;
-    mbedtls_gcm_init(&g->c);
-    if (mbedtls_gcm_setkey(&g->c, MBEDTLS_CIPHER_ID_AES, key, (unsigned)(key_len * 8))) {
-        ssh_gcm_free(g);
-        return NULL;
-    }
-    memcpy(g->iv, iv, 12);
-    return g;
+    if (!strcmp(name, "aes128-gcm@openssh.com")) return 16;
+    if (!strcmp(name, "aes256-gcm@openssh.com")) return 32;
+    if (!strcmp(name, "chacha20-poly1305@openssh.com")) return 64;
+    return 0;
 }
 
-void ssh_gcm_free(ssh_gcm_t *g)
+int ssh_cipher_iv_len(const char *name) { return strstr(name, "-gcm@") ? 12 : 0; }
+
+ssh_cipher_t *ssh_cipher_new(const char *name, const uint8_t *key, const uint8_t *iv)
 {
-    if (!g) return;
-    mbedtls_gcm_free(&g->c);
-    memset(g, 0, sizeof *g);
-    free(g);
+    int kl = ssh_cipher_key_len(name);
+    if (!kl) return NULL;
+    ssh_cipher_t *c = calloc(1, sizeof *c);
+    if (!c) return NULL;
+    c->chacha = kl == 64;
+    if (c->chacha) {
+        ssh_chachapoly_init(&c->cp, key);
+        return c;
+    }
+    mbedtls_gcm_init(&c->g.c);
+    if (mbedtls_gcm_setkey(&c->g.c, MBEDTLS_CIPHER_ID_AES, key, (unsigned)(kl * 8))) {
+        ssh_cipher_free(c);
+        return NULL;
+    }
+    memcpy(c->g.iv, iv, 12);
+    return c;
+}
+
+void ssh_cipher_free(ssh_cipher_t *c)
+{
+    if (!c) return;
+    if (c->chacha) ssh_chachapoly_wipe(&c->cp);
+    else mbedtls_gcm_free(&c->g.c);
+    memset(c, 0, sizeof *c);
+    free(c);
+}
+
+int ssh_cipher_block(const ssh_cipher_t *c) { return c->chacha ? 8 : 16; }
+
+uint32_t ssh_cipher_length(const ssh_cipher_t *c, const uint8_t buf[4], uint32_t seq)
+{
+    if (c->chacha) return ssh_chachapoly_length(&c->cp, buf, seq);
+    return (uint32_t)buf[0] << 24 | (uint32_t)buf[1] << 16 | (uint32_t)buf[2] << 8 | buf[3];
 }
 
 /* the invocation counter: the IV's last 8 bytes, big-endian, plus one */
@@ -100,18 +135,23 @@ static void iv_next(uint8_t iv[12])
         if (++iv[i]) break;
 }
 
-bool ssh_gcm_seal(ssh_gcm_t *g, uint8_t *buf, size_t len)
+bool ssh_cipher_seal(ssh_cipher_t *c, uint8_t *buf, size_t len, uint32_t seq)
 {
-    bool ok = !mbedtls_gcm_crypt_and_tag(&g->c, MBEDTLS_GCM_ENCRYPT, len, g->iv, 12, buf, 4, buf + 4, buf + 4,
+    if (c->chacha) {
+        ssh_chachapoly_seal(&c->cp, buf, len, seq);
+        return true;
+    }
+    bool ok = !mbedtls_gcm_crypt_and_tag(&c->g.c, MBEDTLS_GCM_ENCRYPT, len, c->g.iv, 12, buf, 4, buf + 4, buf + 4,
                                          16, buf + 4 + len);
-    iv_next(g->iv);
+    iv_next(c->g.iv);
     return ok;
 }
 
-bool ssh_gcm_open(ssh_gcm_t *g, uint8_t *buf, size_t len)
+bool ssh_cipher_open(ssh_cipher_t *c, uint8_t *buf, size_t len, uint32_t seq)
 {
-    bool ok = !mbedtls_gcm_auth_decrypt(&g->c, len, g->iv, 12, buf, 4, buf + 4 + len, 16, buf + 4, buf + 4);
-    iv_next(g->iv);
+    if (c->chacha) return ssh_chachapoly_open(&c->cp, buf, len, seq);
+    bool ok = !mbedtls_gcm_auth_decrypt(&c->g.c, len, c->g.iv, 12, buf, 4, buf + 4 + len, 16, buf + 4, buf + 4);
+    iv_next(c->g.iv);
     return ok;
 }
 

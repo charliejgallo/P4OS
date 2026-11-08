@@ -2,9 +2,9 @@
  * GENERADO POR tools/gen_symbols.py - no editar a mano.
  *
  * Simbolos que el firmware le presta a las apps dinamicas.
- * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io
+ * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3483 simbolos.
+ * Total: 3568 simbolos.
  */
 
 #include <stddef.h>
@@ -16,6 +16,7 @@ extern int NT_KNOWN_N;
 extern int NT_KNOWN_PORTS;
 extern int NT_MDNS_NTYPES;
 extern int NT_MDNS_TYPES;
+extern int SSH_SIG_ALGS;
 extern int __adddf3;
 extern int __ashldi3;
 extern int __divdf3;
@@ -1138,6 +1139,10 @@ extern int aos_serial_trigger_remove;
 extern int aos_serial_trigger_rename;
 extern int aos_serial_trigger_set;
 extern int aos_settings_font;
+extern int aos_sshkey_ui_cancel;
+extern int aos_sshkey_ui_layout;
+extern int aos_sshkey_ui_tick;
+extern int aos_sshkey_ui_visible;
 extern int aos_stats_flush;
 extern int aos_stats_tick;
 extern int aos_statusbar_app_gone;
@@ -1286,6 +1291,66 @@ extern int clock;
 extern int close;
 extern int closedir;
 extern int cosf;
+extern int crypto_aead_init_djb;
+extern int crypto_aead_init_ietf;
+extern int crypto_aead_init_x;
+extern int crypto_aead_lock;
+extern int crypto_aead_read;
+extern int crypto_aead_unlock;
+extern int crypto_aead_write;
+extern int crypto_argon2;
+extern int crypto_argon2_no_extras;
+extern int crypto_blake2b;
+extern int crypto_blake2b_final;
+extern int crypto_blake2b_init;
+extern int crypto_blake2b_keyed;
+extern int crypto_blake2b_keyed_init;
+extern int crypto_blake2b_update;
+extern int crypto_chacha20_djb;
+extern int crypto_chacha20_h;
+extern int crypto_chacha20_ietf;
+extern int crypto_chacha20_x;
+extern int crypto_ed25519_check;
+extern int crypto_ed25519_key_pair;
+extern int crypto_ed25519_ph_check;
+extern int crypto_ed25519_ph_sign;
+extern int crypto_ed25519_sign;
+extern int crypto_eddsa_check;
+extern int crypto_eddsa_check_equation;
+extern int crypto_eddsa_key_pair;
+extern int crypto_eddsa_mul_add;
+extern int crypto_eddsa_reduce;
+extern int crypto_eddsa_scalarbase;
+extern int crypto_eddsa_sign;
+extern int crypto_eddsa_to_x25519;
+extern int crypto_eddsa_trim_scalar;
+extern int crypto_elligator_key_pair;
+extern int crypto_elligator_map;
+extern int crypto_elligator_rev;
+extern int crypto_poly1305;
+extern int crypto_poly1305_final;
+extern int crypto_poly1305_init;
+extern int crypto_poly1305_update;
+extern int crypto_sha512;
+extern int crypto_sha512_final;
+extern int crypto_sha512_hkdf;
+extern int crypto_sha512_hkdf_expand;
+extern int crypto_sha512_hmac;
+extern int crypto_sha512_hmac_final;
+extern int crypto_sha512_hmac_init;
+extern int crypto_sha512_hmac_update;
+extern int crypto_sha512_init;
+extern int crypto_sha512_update;
+extern int crypto_verify16;
+extern int crypto_verify32;
+extern int crypto_verify64;
+extern int crypto_wipe;
+extern int crypto_x25519;
+extern int crypto_x25519_dirty_fast;
+extern int crypto_x25519_dirty_small;
+extern int crypto_x25519_inverse;
+extern int crypto_x25519_public_key;
+extern int crypto_x25519_to_eddsa;
 extern int dsps_biquad_f32_ansi;
 extern int dsps_biquad_f32_arp4;
 extern int dsps_biquad_gen_bpf_f32;
@@ -3403,6 +3468,7 @@ extern int music_cover_offer;
 extern int music_cover_request;
 extern int music_cover_take;
 extern int music_folder_cover;
+extern int namelist_has;
 extern int nt_big_calloc;
 extern int nt_guess;
 extern int nt_init;
@@ -3447,6 +3513,12 @@ extern int qrcodegen_makeEci;
 extern int qrcodegen_makeNumeric;
 extern int qrcodegen_version2size;
 extern int qsort;
+extern int rb_bool;
+extern int rb_byte;
+extern int rb_cstr;
+extern int rb_mpint;
+extern int rb_string;
+extern int rb_u32;
 extern int read;
 extern int readdir;
 extern int realloc;
@@ -3461,6 +3533,13 @@ extern int snprintf;
 extern int sprintf;
 extern int sqrtf;
 extern int sscanf;
+extern int ssh_chachapoly_init;
+extern int ssh_chachapoly_length;
+extern int ssh_chachapoly_open;
+extern int ssh_chachapoly_seal;
+extern int ssh_chachapoly_wipe;
+extern int ssh_key_describe;
+extern int ssh_key_verify;
 extern int stat;
 extern int strcasecmp;
 extern int strcat;
@@ -3494,6 +3573,12 @@ extern int tud_vendor_control_xfer_cb;
 extern int tud_vendor_rx_cb;
 extern int unlink;
 extern int vsnprintf;
+extern int wb_byte;
+extern int wb_bytes;
+extern int wb_cstr;
+extern int wb_mpint;
+extern int wb_string;
+extern int wb_u32;
 extern int write;
 #pragma GCC diagnostic pop
 
@@ -3502,6 +3587,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(NT_KNOWN_PORTS),
     ESP_ELFSYM_EXPORT(NT_MDNS_NTYPES),
     ESP_ELFSYM_EXPORT(NT_MDNS_TYPES),
+    ESP_ELFSYM_EXPORT(SSH_SIG_ALGS),
     ESP_ELFSYM_EXPORT(__adddf3),
     ESP_ELFSYM_EXPORT(__ashldi3),
     ESP_ELFSYM_EXPORT(__divdf3),
@@ -4624,6 +4710,10 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_serial_trigger_rename),
     ESP_ELFSYM_EXPORT(aos_serial_trigger_set),
     ESP_ELFSYM_EXPORT(aos_settings_font),
+    ESP_ELFSYM_EXPORT(aos_sshkey_ui_cancel),
+    ESP_ELFSYM_EXPORT(aos_sshkey_ui_layout),
+    ESP_ELFSYM_EXPORT(aos_sshkey_ui_tick),
+    ESP_ELFSYM_EXPORT(aos_sshkey_ui_visible),
     ESP_ELFSYM_EXPORT(aos_stats_flush),
     ESP_ELFSYM_EXPORT(aos_stats_tick),
     ESP_ELFSYM_EXPORT(aos_statusbar_app_gone),
@@ -4772,6 +4862,66 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(close),
     ESP_ELFSYM_EXPORT(closedir),
     ESP_ELFSYM_EXPORT(cosf),
+    ESP_ELFSYM_EXPORT(crypto_aead_init_djb),
+    ESP_ELFSYM_EXPORT(crypto_aead_init_ietf),
+    ESP_ELFSYM_EXPORT(crypto_aead_init_x),
+    ESP_ELFSYM_EXPORT(crypto_aead_lock),
+    ESP_ELFSYM_EXPORT(crypto_aead_read),
+    ESP_ELFSYM_EXPORT(crypto_aead_unlock),
+    ESP_ELFSYM_EXPORT(crypto_aead_write),
+    ESP_ELFSYM_EXPORT(crypto_argon2),
+    ESP_ELFSYM_EXPORT(crypto_argon2_no_extras),
+    ESP_ELFSYM_EXPORT(crypto_blake2b),
+    ESP_ELFSYM_EXPORT(crypto_blake2b_final),
+    ESP_ELFSYM_EXPORT(crypto_blake2b_init),
+    ESP_ELFSYM_EXPORT(crypto_blake2b_keyed),
+    ESP_ELFSYM_EXPORT(crypto_blake2b_keyed_init),
+    ESP_ELFSYM_EXPORT(crypto_blake2b_update),
+    ESP_ELFSYM_EXPORT(crypto_chacha20_djb),
+    ESP_ELFSYM_EXPORT(crypto_chacha20_h),
+    ESP_ELFSYM_EXPORT(crypto_chacha20_ietf),
+    ESP_ELFSYM_EXPORT(crypto_chacha20_x),
+    ESP_ELFSYM_EXPORT(crypto_ed25519_check),
+    ESP_ELFSYM_EXPORT(crypto_ed25519_key_pair),
+    ESP_ELFSYM_EXPORT(crypto_ed25519_ph_check),
+    ESP_ELFSYM_EXPORT(crypto_ed25519_ph_sign),
+    ESP_ELFSYM_EXPORT(crypto_ed25519_sign),
+    ESP_ELFSYM_EXPORT(crypto_eddsa_check),
+    ESP_ELFSYM_EXPORT(crypto_eddsa_check_equation),
+    ESP_ELFSYM_EXPORT(crypto_eddsa_key_pair),
+    ESP_ELFSYM_EXPORT(crypto_eddsa_mul_add),
+    ESP_ELFSYM_EXPORT(crypto_eddsa_reduce),
+    ESP_ELFSYM_EXPORT(crypto_eddsa_scalarbase),
+    ESP_ELFSYM_EXPORT(crypto_eddsa_sign),
+    ESP_ELFSYM_EXPORT(crypto_eddsa_to_x25519),
+    ESP_ELFSYM_EXPORT(crypto_eddsa_trim_scalar),
+    ESP_ELFSYM_EXPORT(crypto_elligator_key_pair),
+    ESP_ELFSYM_EXPORT(crypto_elligator_map),
+    ESP_ELFSYM_EXPORT(crypto_elligator_rev),
+    ESP_ELFSYM_EXPORT(crypto_poly1305),
+    ESP_ELFSYM_EXPORT(crypto_poly1305_final),
+    ESP_ELFSYM_EXPORT(crypto_poly1305_init),
+    ESP_ELFSYM_EXPORT(crypto_poly1305_update),
+    ESP_ELFSYM_EXPORT(crypto_sha512),
+    ESP_ELFSYM_EXPORT(crypto_sha512_final),
+    ESP_ELFSYM_EXPORT(crypto_sha512_hkdf),
+    ESP_ELFSYM_EXPORT(crypto_sha512_hkdf_expand),
+    ESP_ELFSYM_EXPORT(crypto_sha512_hmac),
+    ESP_ELFSYM_EXPORT(crypto_sha512_hmac_final),
+    ESP_ELFSYM_EXPORT(crypto_sha512_hmac_init),
+    ESP_ELFSYM_EXPORT(crypto_sha512_hmac_update),
+    ESP_ELFSYM_EXPORT(crypto_sha512_init),
+    ESP_ELFSYM_EXPORT(crypto_sha512_update),
+    ESP_ELFSYM_EXPORT(crypto_verify16),
+    ESP_ELFSYM_EXPORT(crypto_verify32),
+    ESP_ELFSYM_EXPORT(crypto_verify64),
+    ESP_ELFSYM_EXPORT(crypto_wipe),
+    ESP_ELFSYM_EXPORT(crypto_x25519),
+    ESP_ELFSYM_EXPORT(crypto_x25519_dirty_fast),
+    ESP_ELFSYM_EXPORT(crypto_x25519_dirty_small),
+    ESP_ELFSYM_EXPORT(crypto_x25519_inverse),
+    ESP_ELFSYM_EXPORT(crypto_x25519_public_key),
+    ESP_ELFSYM_EXPORT(crypto_x25519_to_eddsa),
     ESP_ELFSYM_EXPORT(dsps_biquad_f32_ansi),
     ESP_ELFSYM_EXPORT(dsps_biquad_f32_arp4),
     ESP_ELFSYM_EXPORT(dsps_biquad_gen_bpf_f32),
@@ -6889,6 +7039,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(music_cover_request),
     ESP_ELFSYM_EXPORT(music_cover_take),
     ESP_ELFSYM_EXPORT(music_folder_cover),
+    ESP_ELFSYM_EXPORT(namelist_has),
     ESP_ELFSYM_EXPORT(nt_big_calloc),
     ESP_ELFSYM_EXPORT(nt_guess),
     ESP_ELFSYM_EXPORT(nt_init),
@@ -6933,6 +7084,12 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(qrcodegen_makeNumeric),
     ESP_ELFSYM_EXPORT(qrcodegen_version2size),
     ESP_ELFSYM_EXPORT(qsort),
+    ESP_ELFSYM_EXPORT(rb_bool),
+    ESP_ELFSYM_EXPORT(rb_byte),
+    ESP_ELFSYM_EXPORT(rb_cstr),
+    ESP_ELFSYM_EXPORT(rb_mpint),
+    ESP_ELFSYM_EXPORT(rb_string),
+    ESP_ELFSYM_EXPORT(rb_u32),
     ESP_ELFSYM_EXPORT(read),
     ESP_ELFSYM_EXPORT(readdir),
     ESP_ELFSYM_EXPORT(realloc),
@@ -6947,6 +7104,13 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(sprintf),
     ESP_ELFSYM_EXPORT(sqrtf),
     ESP_ELFSYM_EXPORT(sscanf),
+    ESP_ELFSYM_EXPORT(ssh_chachapoly_init),
+    ESP_ELFSYM_EXPORT(ssh_chachapoly_length),
+    ESP_ELFSYM_EXPORT(ssh_chachapoly_open),
+    ESP_ELFSYM_EXPORT(ssh_chachapoly_seal),
+    ESP_ELFSYM_EXPORT(ssh_chachapoly_wipe),
+    ESP_ELFSYM_EXPORT(ssh_key_describe),
+    ESP_ELFSYM_EXPORT(ssh_key_verify),
     ESP_ELFSYM_EXPORT(stat),
     ESP_ELFSYM_EXPORT(strcasecmp),
     ESP_ELFSYM_EXPORT(strcat),
@@ -6980,6 +7144,12 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(tud_vendor_rx_cb),
     ESP_ELFSYM_EXPORT(unlink),
     ESP_ELFSYM_EXPORT(vsnprintf),
+    ESP_ELFSYM_EXPORT(wb_byte),
+    ESP_ELFSYM_EXPORT(wb_bytes),
+    ESP_ELFSYM_EXPORT(wb_cstr),
+    ESP_ELFSYM_EXPORT(wb_mpint),
+    ESP_ELFSYM_EXPORT(wb_string),
+    ESP_ELFSYM_EXPORT(wb_u32),
     ESP_ELFSYM_EXPORT(write),
     ESP_ELFSYM_END,
 };

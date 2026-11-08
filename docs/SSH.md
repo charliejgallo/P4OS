@@ -102,7 +102,7 @@ shell has no redirection.
 
 | Layer | What the board does |
 |---|---|
-| Transport (RFC 4253) | `curve25519-sha256` (RFC 8731), `ssh-ed25519` host key, `aes128-gcm@openssh.com` and `aes256-gcm@openssh.com` (the P4's AES engine), no compression. "Strict KEX" (`kex-strict-s-v00@openssh.com`, OpenSSH's answer to Terrapin, CVE-2023-48795) when the client offers it. The client may exchange keys again at any time (tested with `RekeyLimit=1M` during an 8 MB `cat`). `server-sig-algs` (RFC 8308), so an RSA key signs with SHA-2 |
+| Transport (RFC 4253) | `curve25519-sha256` (RFC 8731), `ssh-ed25519` host key, `aes128-gcm@openssh.com` and `aes256-gcm@openssh.com` (the P4's AES engine) and `chacha20-poly1305@openssh.com` (software; what OpenSSH clients pick first, the client's order deciding), no compression. "Strict KEX" (`kex-strict-s-v00@openssh.com`, OpenSSH's answer to Terrapin, CVE-2023-48795) when the client offers it. The client may exchange keys again at any time (tested with `RekeyLimit=1M` during an 8 MB `cat`, and with each of the three ciphers at `RekeyLimit=200K`: ChaCha20's NEWKEYS is an 8-byte packet, under the 16 the first version took as the least). `server-sig-algs` (RFC 8308), so an RSA key signs with SHA-2 |
 | Authentication (RFC 4252) | `none` where the portal is open, `password` (the portal's, with its growing wait after three wrong ones), `publickey`. Six tries, two minutes to log in |
 | Connection (RFC 4254) | two `session` channels per connection; `pty-req`, `shell`, `exec`, `window-change`. Everything else is refused: `direct-tcpip`, `tcpip-forward`, `subsystem`, X11, the agent |
 
@@ -126,6 +126,17 @@ shell has no redirection.
 - **Why not a library:** wolfSSH is GPLv3 (P4OS is MIT), libssh is LGPL and
   wants pthreads and a big footprint, Dropbear and TinySSH are built around
   `fork()` and a Unix pty.
+
+## The other way: the SSH app
+
+`apps/ssh` is a client: a terminal on the board into a Mac or a Raspberry
+Pi, with saved computers, known_hosts, the board's own key and a padlock
+that installs it in the computer's `~/.ssh/authorized_keys` after a first
+login with the password. It shares this component's wire helpers and
+ChaCha20 (`include/aos_ssh_wire.h`, `include/aos_ssh_chacha.h`) and
+Monocypher, which the firmware lends to the apps since 2026-11-07
+(`tools/gen_symbols.py`: everything of Monocypher, of `aos_ssh` only those
+headers' names). Its README has the rest.
 
 ## The warning from OpenSSH 10
 
