@@ -53,6 +53,11 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       framebuffers (3 x 1800 KB) al principio, y las dos fotos de fondo
       (1824 KB cada una) en +7607 KB y +15815 KB, partiendo la PSRAM libre
       en 6,4 y 7,5 MB. Falta: que las fotos no queden en el medio.
+      **Ranuras para las fotos** (2026-11-08, sin instalar): tras instalar,
+      `free -m` tiene que mostrar las dos fotos al lado de los framebuffers
+      y un solo bloque libre grande (~14 MB); la foto del inicio y la del
+      bloqueo se ven como antes, también acostada y con un álbum en el
+      bloqueo; bloquear con una app al frente muestra la foto al instante.
       Tras la OTA de `64fbdb0` CAS faltó en el inicio: el
       escaneo lo abrió con la PSRAM partida (`5553904 B of code: no PSRAM
       block`; el mínimo libre del arranque fue 7,6 MB). En la placa: tras la

@@ -22,6 +22,20 @@
  * doorbell's 1920x1080 stream was short of both photos, 2026-10-22) has it
  * let go while it is in front with aos_ui_wall_photo_spare().
  *
+ * Where in PSRAM (2026-11-08). Each photo has a slot of its own, a screen's
+ * worth (1.8 MB), taken when the shell starts, right after the panel's
+ * frame buffers: the decoder's result is copied into it and freed. Before,
+ * the photos lay wherever the decoder's buffer had landed, at boot in the
+ * middle of the heap (+7.6 MB and +15.8 MB of 25), and the 14 MB free were
+ * two pieces of 6.4 and 7.5 MB: CAS (a 5.3 MB file and 5.5 MB of code at
+ * once) fitted or not depending on the boot. With the slots at the bottom
+ * the free PSRAM is one piece. So the lock screen's photo is no longer let
+ * go behind an app (its slot would come back as a hole the next decode
+ * might not find again): it stays decoded, and locking shows it at once.
+ * Only aos_wall_photo_release() gives a slot back: an app that needs every
+ * megabyte (aos_ui_wall_photo_spare) or one that does not fit
+ * (aos_ui_make_room); the next decode takes a new one wherever it can.
+ *
  * Or a folder behind the lock screen, a different photo of it every time
  * the board locks (2026-10-25): pref "lock_album". The worker picks one at
  * random among the folder's photos, never the one just shown, so the
@@ -65,6 +79,7 @@ typedef struct {
     bool           new_thread;          /* from a decode (else from request(), with none) */
     uint32_t       tint, new_tint;      /* the photo's colour, lightened: the lock clock's */
     char           new_path[PATH_MAX_]; /* the album's photo the worker picked */
+    uint16_t      *slot;                /* where px lives: a screen's worth, kept */
 } wall_t;
 
 AOS_BSS_PSRAM static wall_t W[2];
@@ -181,6 +196,23 @@ static void worker(void *arg)
     free(j);
 }
 
+/* A screen's worth, whichever way the screen is turned */
+static size_t slot_bytes(void)
+{
+    return (size_t)aos_hal_screen_w() * aos_hal_screen_h() * 2;
+}
+
+static void slot_take(wall_t *v)
+{
+    if (!v->slot) v->slot = malloc(slot_bytes());       /* PSRAM: over 1 KB */
+}
+
+static void slot_free(wall_t *v)
+{
+    free(v->slot);
+    v->slot = NULL;
+}
+
 static void request(int which)
 {
     wall_t *v = &W[which];
@@ -252,6 +284,17 @@ static void poll_cb(lv_timer_t *t)
         v->want = false;
         uint16_t *old = v->px;
         lv_image_cache_drop(&v->dsc);
+        /* into the slot (see the top): the decoder's buffer goes back */
+        if (px) {
+            slot_take(v);
+            if (v->slot && (size_t)w * h * 2 <= slot_bytes()) {
+                memcpy(v->slot, px, (size_t)w * h * 2);
+                aos_hal_image_free(px);
+                px = v->slot;
+            }
+        }
+        if (old == v->slot) old = NULL;                 /* the slot is not freed */
+        if (!px) slot_free(v);                          /* no photo: no slot either */
         v->px = px;
         v->w = w;
         v->h = h;
@@ -284,6 +327,15 @@ void aos_wall_photo_want(int which, bool want)
         if (!v->px && !v->want) request(which);
         return;
     }
+    /* in its slot it stays decoded: nothing to give back (see the top) */
+    if (v->px && v->px == v->slot) return;
+    aos_wall_photo_release(which);
+}
+
+void aos_wall_photo_release(int which)
+{
+    if (which < 0 || which > 1 || !s_mx) return;
+    wall_t *v = &W[which];
     v->gen++;                           /* whatever is being decoded is dropped when it comes */
     v->want = false;
     if (which == AOS_WALL_HOME && s_home_img) {
@@ -292,17 +344,18 @@ void aos_wall_photo_want(int which, bool want)
     }
     if (v->px) {
         lv_image_cache_drop(&v->dsc);
-        aos_hal_image_free(v->px);
+        if (v->px != v->slot) aos_hal_image_free(v->px);
         v->px = NULL;
         v->w = v->h = 0;
         memset(&v->dsc, 0, sizeof v->dsc);
     }
+    slot_free(v);
 }
 
 void aos_ui_wall_photo_spare(bool spare)
 {
     if (!spare) aos_wall_photo_want(AOS_WALL_HOME, true);      /* back, before the way home */
-    else if (aos_ui_current_app()) aos_wall_photo_want(AOS_WALL_HOME, false);
+    else if (aos_ui_current_app()) aos_wall_photo_release(AOS_WALL_HOME);
 }
 
 uint32_t aos_wall_photo_tint(int which)
@@ -373,7 +426,10 @@ void aos_wall_photo_init(void)
     if (!aos_hal_pref_get_str("lock_album", s_album, sizeof s_album)) s_album[0] = 0;
     for (int i = 0; i < 2; i++) {
         if (!aos_hal_pref_get_str(PREF[i], W[i].path, sizeof W[i].path)) W[i].path[0] = 0;
-        if (W[i].path[0] || (i == AOS_WALL_LOCK && s_album[0])) request(i);
+        if (W[i].path[0] || (i == AOS_WALL_LOCK && s_album[0])) {
+            slot_take(&W[i]);           /* now, at the bottom of the PSRAM (see the top) */
+            request(i);
+        }
     }
 }
 

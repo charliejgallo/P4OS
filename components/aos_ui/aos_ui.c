@@ -423,11 +423,10 @@ static void home_hide_done(lv_anim_t *a)
 {
     if (!s_cur) return;
     lv_obj_add_flag(s_home, LV_OBJ_FLAG_HIDDEN);
-    /* nobody sees the lock screen's photo behind an app: 1.8 MB of PSRAM
-     * back to it, decoded again as the screen goes dark and locks. The
-     * home screen's stays: decoded again on the way home it showed the
-     * gradient for a second and a half (2026-10-25); an app that needs it
-     * all says so (aos_ui_wall_photo_spare) */
+    /* nobody sees the lock screen's photo behind an app: a decode on its
+     * way is dropped; one already in its PSRAM slot stays (aos_wallpaper.c:
+     * the slots keep the free PSRAM in one piece). The home screen's stays
+     * too; an app that needs it all says so (aos_ui_wall_photo_spare) */
     if (!aos_lock_is_locked()) aos_wall_photo_want(AOS_WALL_LOCK, false);
     lv_obj_set_style_bg_color(s_appl, lv_obj_get_style_bg_color(s_cur->root, 0), 0);
     lv_obj_set_style_bg_opa(s_appl, LV_OPA_COVER, 0);
@@ -806,10 +805,10 @@ int aos_ui_make_room(void)
     /* also when it is still being decoded: that one is dropped as it comes */
     if (!aos_lock_is_locked()) {
         if (aos_wall_photo_dsc(AOS_WALL_LOCK)) n++;
-        aos_wall_photo_want(AOS_WALL_LOCK, false);
+        aos_wall_photo_release(AOS_WALL_LOCK);
     }
     if (aos_wall_photo_dsc(AOS_WALL_HOME)) n++;
-    aos_wall_photo_want(AOS_WALL_HOME, false);
+    aos_wall_photo_release(AOS_WALL_HOME);
     if (n) aos_hal_log("ui", "the wallpaper photos let go: another app needs their memory");
     for (int i = 0; i < AOS_MAX_APPS; i++) {
         aos_app_t *a = &s_apps[i];

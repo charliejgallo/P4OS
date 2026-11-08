@@ -44,6 +44,14 @@
   the previous firmware saved puts it on the home screen anyway; its code
   loads when it is opened. The log now says the PSRAM free and its largest
   block for every app opened.
+- **The free PSRAM in one piece.** The wallpaper photos (1.8 MB each) lay
+  wherever the decoder had put them, at boot in the middle of the PSRAM,
+  and the 14 MB free were two pieces of 6.4 and 7.5 MB. Each photo now has
+  a slot of its own taken as the shell starts, right after the screen's
+  frame buffers, and is copied into it. The lock screen's photo stays
+  decoded behind an app (it used to be let go and decoded again on
+  locking); an app that needs every megabyte still has them let go.
+  `free -m` in the SSH console shows the PSRAM's big blocks by address.
 - **Two apps in the background, not three.** Beside the one in front, two
   apps stay hidden; one more closes the least recently used (never one with
   something running). And a card app that does not fit when opened closes
