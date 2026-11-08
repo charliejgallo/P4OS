@@ -149,6 +149,7 @@ static void apply_cb(lv_theme_t *th, lv_obj_t *obj)
         lv_obj_add_event_cb(obj, ta_deleted_cb, LV_EVENT_DELETE, NULL);
     } else if (lv_obj_check_type(obj, &lv_keyboard_class)) {
         add_keyboard(obj);
+        aos_keyboard_attach(obj);       /* ñ, accents, shift, the space bar (aos_keyboard.c) */
     }
 }
 
@@ -191,4 +192,5 @@ void aos_textfield_init(void)
     lv_theme_set_apply_cb(s_theme, apply_cb);
     aos_textfield_accent();
     lv_display_set_theme(disp, s_theme);
+    aos_keyboard_init();
 }

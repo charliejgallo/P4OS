@@ -95,6 +95,8 @@ void aos_banner_layout(void);
 void aos_banner_tick(void);              /* polls aos_hal_notif_* for new ones */
 void aos_textfield_init(void);           /* aos_textfield.c: the cursor and the ring of the field being edited */
 void aos_textfield_accent(void);         /* the accent changed: recolour them */
+void aos_keyboard_init(void);            /* aos_keyboard.c: the Spanish maps, once */
+void aos_keyboard_attach(lv_obj_t *kb);  /* each lv_keyboard, from the theme */
 void aos_hwkbd_tick(void);               /* a USB keyboard types into the open keyboard (aos_hwkbd.c) */
 void aos_hwkbd_app_gone(const char *id); /* the app closes: its key handler goes */
 void aos_hwmouse_tick(void);             /* a USB mouse points on the screen (aos_hwmouse.c) */

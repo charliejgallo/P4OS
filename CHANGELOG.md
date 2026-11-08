@@ -33,6 +33,15 @@
   keyboard keeps the ring while the form behind it is touched or
   scrolled, and loses it when the keyboard closes. It reaches the apps on
   the card too, with no new build of them (`components/aos_ui/aos_textfield.c`).
+- **The keyboard writes Spanish and moves the cursor.** Every on-screen
+  keyboard of the system and of the card's apps (no new build of them):
+  an ñ key beside the l; hold a key for its variants in a bubble (á à ä â,
+  é, í, ó, ú ü, ñ, ç, ¿, ¡, —, …, €), slide onto one and let go. Shift as
+  on a phone: one tap for one capital, two quick taps lock it (the key
+  reads ABC). The space bar is a trackpad: drag along it, or hold it and
+  drag, and the cursor moves by letters, and by lines in a text of several
+  lines. Keys type when the finger lifts, so sliding off one cancels it,
+  and letters no longer repeat while held (`components/aos_ui/aos_keyboard.c`).
 - **CAS no longer goes missing after an update.** After a firmware update
   the board opens every app on the card once to describe it, and CAS
   (5.3 MB of code, about 11 MB of PSRAM at once) could land on a moment

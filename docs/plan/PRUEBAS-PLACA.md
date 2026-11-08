@@ -90,6 +90,14 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       abiertas seguidas, la más vieja sin nada andando se cierra (`more than
       3 apps alive`). Mila y Monster Hop: el usuario dice que andaban mal
       por la PSRAM; falta ver cómo, con el registro.
+- [ ] **El teclado: ñ, acentos, mayúsculas y la barra como trackpad**
+      (2026-11-08, `aos_keyboard.c`, sin instalar). En la placa, en la app
+      SSH, Módulos (editar `modules.txt`) y un teclado de una app de la
+      tarjeta (Impresoras, VNC): la ñ; mantener a, e, i, o, u, n, c, ?, !
+      abre el globo y deslizar elige; un toque de la flecha da una
+      mayúscula, dos toques la dejan fija (ABC); arrastrar la barra mueve
+      el cursor, y en `modules.txt` también de línea; un toque de la barra
+      escribe el espacio. Que ninguna app con teclado haya quedado rara.
 - [ ] **Mila y Monster Hop con la PSRAM en un bloque** (2026-11-08, firmware
       `88f5081`, abiertas por SSH con permiso del usuario). **Mila:** abre
       con 12 MB libres de corrido, pero `pack MISSING, 0 worlds`: en la
