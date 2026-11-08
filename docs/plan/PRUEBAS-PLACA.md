@@ -93,6 +93,19 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       de fragmentación; se arregla en la app (decodificar el mapa por filas
       sin el bloque de 5,9 MB), o soltando las fotos de fondo detrás de un
       juego (+3,6 MB, justo).
+      **Después, el mismo día:** subidas `mila_p4.pak.1` y `.2` (la primera
+      parte de la tarjeta coincidía con `apps/mila/build/`): Mila abre sus
+      5 mundos, la casita a 14-43 fps con 8,5 MB de PSRAM. Los 12 `.pak`
+      de la tarjeta coinciden en tamaño con los de la Mac. Abiertas una
+      por una (PSRAM libre con la app al frente, de 14 MB al abrir):
+      Golf anda, el juego ocupa 11,5 MB y la PSRAM libre llegó a **216 KB**
+      en el menú; Pinball anda, mínima de **214 KB**; Turbo anda (etapa 0
+      cargada), 1,3 MB libres; Notas e Infrarrojo andan (quedaron
+      escondidas, Infrarrojo con algo andando). Todas devuelven su PSRAM al
+      cerrarse. Pero al volver al inicio, con Notas (196 KB) e Infrarrojo
+      (293 KB) escondidas, la PSRAM quedó con 13 MB libres y el bloque
+      mayor de **3,9 MB**: lo que guardan las apps escondidas cayó en el
+      medio de lo que dejaron los juegos.
 - [ ] **Cursor y campo activo** (2026-11-08, `aos_textfield.c`).
       **Instalado el 2026-11-08** (firmware `64fbdb0`, por OTA; arrancó y
       se confirmó, 212 KB de RAM interna libre). Falta que el usuario lo
