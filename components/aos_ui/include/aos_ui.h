@@ -24,8 +24,12 @@ extern "C" {
 #define AOS_BUILTIN_RESERVE 32
 
 /* Apps kept alive at once when the person switches between them (each keeps
- * its LVGL tree; the least recently used is closed when one more opens). */
-#define AOS_UI_ALIVE_MAX    4
+ * its LVGL tree; the least recently used is closed when one more opens): the
+ * one in front and two hidden. It was four until 2026-11-08; the user asked
+ * for two in the background, since what they hold is PSRAM the big apps
+ * (CAS, Mila, Monster Hop) need. One with something running is never
+ * closed for this. */
+#define AOS_UI_ALIVE_MAX    3
 
 /* Starts the shell on LVGL's active screen and registers the built-in apps. */
 void aos_ui_init(void);
@@ -119,6 +123,10 @@ void        aos_ui_boot_start_run(void);
 bool        aos_ui_status_icon_set(const char *app_id, const char *glyph, uint32_t rgb);
 /* The live apps (in front or hidden), most recent first. */
 int         aos_ui_alive(aos_app_t **out, int max);
+/* Closes the hidden apps that have nothing running (not the one in front,
+ * nor one being created): an app that does not fit asks for this before
+ * giving up (aos_dynapp.c). Returns how many were closed. */
+int         aos_ui_close_hidden(void);
 void        aos_ui_close_others(void);     /* ends every app but the one in front (USB disk mode) */
 void        aos_ui_set_safe_mode(bool on); /* main.c: this boot is the BOOT button's safe mode */
 /* Settings, Developer (aos_devtools.c): overlays and the log's level, kept as

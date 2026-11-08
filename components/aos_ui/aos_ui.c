@@ -20,7 +20,8 @@
  *
  * Apps keep AmoledOS's life cycle. What P4OS adds is multitasking: leaving
  * an app with AOS_APP_FLAG_KEEP or BACKGROUND hides it instead of destroying
- * it (up to AOS_UI_ALIVE_MAX of them; the least recently used goes first).
+ * it (up to AOS_UI_ALIVE_MAX of them, the one in front and two hidden; the
+ * least recently used goes first).
  * Watch apps have neither flag and are destroyed on leaving, exactly as on
  * the watch, because some of them only stop their timers in destroy().
  *
@@ -798,6 +799,23 @@ void aos_ui_close(const char *id)
 static bool s_safe_mode;
 void aos_ui_set_safe_mode(bool on) { s_safe_mode = on; }
 bool aos_ui_safe_mode(void) { return s_safe_mode; }
+
+int aos_ui_close_hidden(void)
+{
+    int n = 0;
+    for (int i = 0; i < AOS_MAX_APPS; i++) {
+        aos_app_t *a = &s_apps[i];
+        if (!s_used[i] || !a->running || a == s_cur) continue;
+        /* a root on the screen: the app being created right now */
+        if (a->root && !lv_obj_has_flag(a->root, LV_OBJ_FLAG_HIDDEN)) continue;
+        const char *why = busy_why(a, false);
+        if (why) continue;
+        aos_hal_log("ui", "closing %s: another app needs its memory", a->desc.id);
+        destroy_app(a);
+        n++;
+    }
+    return n;
+}
 
 void aos_ui_close_others(void)
 {

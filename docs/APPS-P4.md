@@ -165,6 +165,11 @@ when it ends. So:
 - The log says what was decided and what each app held (`ui: keeping ... /
   closing ... on leaving: it holds N KB of PSRAM`), and whether an app that
   was closed gave its PSRAM back.
+- At most two apps stay hidden beside the one in front; one more closes the
+  least recently used that has nothing running.
+- A card app whose code does not fit in PSRAM when it is opened closes the
+  hidden apps with nothing running and tries once more (`ui: closing X:
+  another app needs its memory`).
 
 Measured on the board (2026-10-08): Photos 2.1 MB, Pixel Art 2.0 MB and
 Drawing 1.7 MB are closed; Radio 490 KB, Notes 343 KB, Music 156 KB, CAN
@@ -198,7 +203,8 @@ that must go on after a power cut or a firmware update.
   one of `aos_sys_glyphs.h` left of the system's (Datalog's red dot while
   it logs), and `NULL` takes it off; closing the app does too. Up to four
   apps at once. Callable from any thread: the bar draws it within 200 ms.
-- **The limit of apps alive** (four besides the one in front) never closes
+- **The limit of apps alive** (two besides the one in front, since
+  2026-11-08; it was three) never closes
   an app with something running: `AOS_APP_FLAG_BACKGROUND`, busy, pins,
   sound. Only the idle ones go, the least recently used first.
 - The clock may not be set yet at that moment: there is no battery-backed

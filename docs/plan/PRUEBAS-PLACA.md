@@ -37,6 +37,16 @@ se prueba.
 ### Pendientes, en resumen
 
 Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
+- [ ] **CAS después de una actualización y dos apps de fondo** (2026-11-08).
+      Sin instalar. Tras la OTA de `64fbdb0` CAS faltó en el inicio: el
+      escaneo lo abrió con la PSRAM partida (`5553904 B of code: no PSRAM
+      block`; el mínimo libre del arranque fue 7,6 MB). En la placa: tras la
+      OTA, CAS en el inicio (o la línea `registered from an older cache
+      record`), y las líneas `opening X | PSRAM: free ... largest ...` del
+      escaneo para ver quién parte la PSRAM; abrir CAS. Con cuatro apps
+      abiertas seguidas, la más vieja sin nada andando se cierra (`more than
+      3 apps alive`). Mila y Monster Hop: el usuario dice que andaban mal
+      por la PSRAM; falta ver cómo, con el registro.
 - [ ] **Cursor y campo activo** (2026-11-08, `aos_textfield.c`).
       **Instalado el 2026-11-08** (firmware `64fbdb0`, por OTA; arrancó y
       se confirmó, 212 KB de RAM interna libre). Falta que el usuario lo

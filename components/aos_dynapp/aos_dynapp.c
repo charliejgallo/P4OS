@@ -294,7 +294,21 @@ bool aos_dynapp_code_in_psram(void)
 #endif
 }
 
+/* Set when one of the loader's allocations comes back empty: the dlopen
+ * that follows failed for memory, not for a broken .so, and is worth
+ * another try once memory is back (the scan, dyn_create). */
+static bool s_oom;
+
+static void *elf_malloc(uint32_t n, bool exec);
+
 void *__wrap_esp_elf_malloc(uint32_t n, bool exec)
+{
+    void *p = elf_malloc(n, exec);
+    if (!p) s_oom = true;
+    return p;
+}
+
+static void *elf_malloc(uint32_t n, bool exec)
 {
 #if CONFIG_ELF_LOADER_TEXT_PSRAM_MMU
     /* RAM audit prototype: the code goes to PSRAM, 64 KB-aligned so that the
@@ -519,6 +533,14 @@ static bool module_open(const char *filename, uint32_t index,
         }
     }
 
+#if AOS_CODE_IN_PSRAM
+    /* the code goes to PSRAM: that is the memory to look at. A .so needs
+     * about twice its size at once (the file read whole, then the image). */
+    ESP_LOGI(TAG, "opening %s | PSRAM: free %u KB, largest block %u KB",
+             filename,
+             (unsigned)(heap_caps_get_free_size(MALLOC_CAP_SPIRAM) / 1024),
+             (unsigned)(heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM) / 1024));
+#else
     ESP_LOGI(TAG, "opening %s | executable: free %u B, largest block %u B | "
                   "internal: free %u B, largest block %u B",
              filename,
@@ -526,16 +548,24 @@ static bool module_open(const char *filename, uint32_t index,
              (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_EXEC),
              (unsigned)heap_caps_get_free_size(MALLOC_CAP_INTERNAL),
              (unsigned)heap_caps_get_largest_free_block(MALLOC_CAP_INTERNAL));
+#endif
 
+    s_oom = false;
     void *handle = dlopen(relative, RTLD_NOW);
     if (!handle) {
-        ESP_LOGE(TAG, "dlopen(%s) failed: %s", relative, dlerror());
+        ESP_LOGE(TAG, "dlopen(%s) failed: %s%s", relative, dlerror(), s_oom ? " (out of memory)" : "");
+#if AOS_CODE_IN_PSRAM
+        ESP_LOGW(TAG, "PSRAM after the failure: free %u KB, largest block %u KB",
+                 (unsigned)(heap_caps_get_free_size(MALLOC_CAP_SPIRAM) / 1024),
+                 (unsigned)(heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM) / 1024));
+#else
         /* The map of the executable heap: it distinguishes "there is no
          * memory" from "there is, but in pieces". With 54 KB free and the
          * largest hole at 36 KB, a 45 KB app does not fit even though the
          * total is there. */
         ESP_LOGW(TAG, "--- blocks of the executable heap ---");
         heap_caps_dump(MALLOC_CAP_EXEC);
+#endif
         return false;
     }
 
@@ -632,9 +662,13 @@ static bool module_ensure_open(dynapp_t *app)
     }
 
     /* One retry, after recovering whatever can be recovered without breaking
-     * anything. */
-    if (liberar_ejecutable(app) &&
-        module_open(app->file, app->index, &app->handle, &app->loaded)) {
+     * anything. On the P4 the memory is PSRAM, and what holds it is mostly
+     * the apps hidden in the background: those with nothing running go
+     * (aos_ui_close_hidden), and their modules with them. */
+    bool freed = false;
+    if (s_oom && aos_ui_close_hidden() > 0) freed = true;
+    if (liberar_ejecutable(app)) freed = true;
+    if (freed && module_open(app->file, app->index, &app->handle, &app->loaded)) {
         ESP_LOGI(TAG, "%s loaded on the second attempt", app->file);
         return true;
     }
@@ -1099,6 +1133,7 @@ typedef struct {
 static cache_rec_t *s_cache_old, *s_cache_new;
 static int s_cache_old_n, s_cache_new_n;
 static bool s_cache_dirty;
+static bool s_cache_stale;      /* s_cache_old is another firmware's */
 
 static void cache_path(char *out, size_t n)
 {
@@ -1117,6 +1152,7 @@ static void cache_load(void)
     s_cache_new = heap_caps_calloc(MAX_DYNAPPS, sizeof(cache_rec_t), MALLOC_CAP_SPIRAM);
     s_cache_old_n = s_cache_new_n = 0;
     s_cache_dirty = false;
+    s_cache_stale = false;
     if (!s_cache_old || !s_cache_new) return;
     char path[96];
     cache_path(path, sizeof path);
@@ -1129,17 +1165,27 @@ static void cache_load(void)
     char fw[24];
     cache_fw(fw, sizeof fw);
     if (fread(&h, sizeof h, 1, f) == 1 && h.magic == CACHE_MAGIC && h.version == CACHE_VERSION &&
-        !memcmp(h.fw, fw, sizeof fw) && h.count <= MAX_DYNAPPS &&
-        fread(s_cache_old, sizeof(cache_rec_t), h.count, f) == h.count) {
+        h.count <= MAX_DYNAPPS && fread(s_cache_old, sizeof(cache_rec_t), h.count, f) == h.count) {
         s_cache_old_n = (int)h.count;
-    } else {
+        s_cache_stale = memcmp(h.fw, fw, sizeof fw) != 0;
+    }
+    if (!s_cache_old_n || s_cache_stale) {
+        /* another firmware's records are only a last resort, for a .so the
+         * scan could not open for lack of memory (aos_dynapp_scan) */
         ESP_LOGI(TAG, "apps cache: none for this firmware, every .so is opened once");
         s_cache_dirty = true;
     }
     fclose(f);
 }
 
+static const cache_rec_t *cache_find_any(const char *file, uint32_t size, uint32_t mtime);
+
 static const cache_rec_t *cache_find(const char *file, uint32_t size, uint32_t mtime)
+{
+    return s_cache_stale ? NULL : cache_find_any(file, size, mtime);
+}
+
+static const cache_rec_t *cache_find_any(const char *file, uint32_t size, uint32_t mtime)
 {
     for (int i = 0; i < s_cache_old_n; i++) {
         const cache_rec_t *r = &s_cache_old[i];
@@ -1269,9 +1315,13 @@ int aos_dynapp_scan(void)
     s_resolve_us = 0;
     s_resolve_calls = 0;
     int64_t t0 = esp_timer_get_time();
-    enum { DEFERRED_MAX = 8 };
+    enum { DEFERRED_MAX = 8, OOM_MAX = 8 };
     char deferred[DEFERRED_MAX][64];
     int n_deferred = 0;
+    /* modules that could not be opened for lack of memory: once more at the
+     * end, and from another firmware's cache if that fails too */
+    struct { char file[64]; uint32_t size, mtime; } oom[OOM_MAX];
+    int n_oom = 0;
 
     int loaded = 0;
     struct dirent *item;
@@ -1317,9 +1367,53 @@ int aos_dynapp_scan(void)
                 snprintf(deferred[n_deferred++], sizeof(deferred[0]), "%s", item->d_name);
             }
             if (total == 1 && size && s_count == before + 1) cache_note(item->d_name, size, mtime, &s_apps[before]);
+        } else if (s_oom && n_oom < OOM_MAX) {
+            snprintf(oom[n_oom].file, sizeof oom[n_oom].file, "%.63s", item->d_name);
+            oom[n_oom].size = size;
+            oom[n_oom].mtime = mtime;
+            n_oom++;
         }
     }
     closedir(dir);
+    /* The PSRAM at boot is the most it will ever be, but the scan runs
+     * beside the boot's own allocations (the home and lock photos decoded,
+     * the radio, Bluetooth) and a big .so (cas.so, 5.3 MB: about 11 MB at
+     * once) can land on a moment without a block for it (2026-11-08: the
+     * app was simply missing from the home screen). Once more now; and if
+     * it still does not fit, the record another firmware left (same file,
+     * size and date) puts it on the home screen anyway, and its code is
+     * loaded when it is opened, with the PSRAM of a quiet board. That record
+     * is not carried into the new cache: the next boot opens it for real. */
+    for (int i = 0; i < n_oom; i++) {
+        uint32_t total = 0;
+        int before = s_count;
+        ESP_LOGW(TAG, "%s: out of memory while scanning, trying again", oom[i].file);
+        if (register_apps(oom[i].file, true, &total) > 0) {
+            loaded++;
+            opened++;
+            if (total > 1 && n_deferred < DEFERRED_MAX) {
+                snprintf(deferred[n_deferred++], sizeof(deferred[0]), "%.63s", oom[i].file);
+            }
+            if (total == 1 && oom[i].size && s_count == before + 1)
+                cache_note(oom[i].file, oom[i].size, oom[i].mtime, &s_apps[before]);
+            continue;
+        }
+        const cache_rec_t *r = oom[i].size ? cache_find_any(oom[i].file, oom[i].size, oom[i].mtime) : NULL;
+        if (!r) {
+            ESP_LOGE(TAG, "%s left out: no memory to describe it and no record of it", oom[i].file);
+            continue;
+        }
+        aos_app_desc_t d;
+        cache_desc(r, &d);
+        bool locked = false;
+        int in_batch = 0;
+        if (register_one(r->file, 0, &d, r->aic, r->aic_len, &locked, &in_batch)) {
+            loaded++;
+            from_cache++;
+            ESP_LOGW(TAG, "%s registered from an older cache record: it loads when opened", oom[i].file);
+        }
+        if (locked) aos_hal_unlock();
+    }
     /* the ones from the cache, in batches under one lock: nothing opened */
     {
         bool locked = false;
