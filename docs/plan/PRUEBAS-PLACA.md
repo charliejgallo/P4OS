@@ -90,11 +90,12 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       abiertas seguidas, la más vieja sin nada andando se cierra (`more than
       3 apps alive`). Mila y Monster Hop: el usuario dice que andaban mal
       por la PSRAM; falta ver cómo, con el registro.
-- [ ] **El teclado: ñ, acentos, mayúsculas y la barra como trackpad**
+- [x] **El teclado: ñ, acentos, mayúsculas y la barra como trackpad**
       (2026-11-08, `aos_keyboard.c`). **Instalado el 2026-11-08**
       (firmware `2b19dbc`, por OTA): arrancó y se confirmó, sin errores en
       el registro, 206 KB de RAM interna y 16 MB de PSRAM libres en un
-      bloque. Falta que el usuario lo use con el dedo. En la placa, en la app
+      bloque. **Probado por el usuario el 2026-11-08: "me gusta".** Lo que
+      se pidió probar, en la app
       SSH, Módulos (editar `modules.txt`) y un teclado de una app de la
       tarjeta (Impresoras, VNC): la ñ; mantener a, e, i, o, u, n, c, ?, !
       abre el globo y deslizar elige; un toque de la flecha da una
