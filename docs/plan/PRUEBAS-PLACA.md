@@ -137,6 +137,19 @@ Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
       mayúscula, dos toques la dejan fija (ABC); arrastrar la barra mueve
       el cursor, y en `modules.txt` también de línea; un toque de la barra
       escribe el espacio. Que ninguna app con teclado haya quedado rara.
+- [ ] **Los juegos de la 0.24.0 en la placa** (2026-11-08, los `.so` del
+      borrador de la release, firmware `68a67c9`). **Golf:** menú con 4,7 MB
+      libres (antes 216 KB), el juego en 10,6 MB. **Turbo:** etapa 0
+      cargada con 4,3 MB libres (antes 2,4). **Monster Hop:** el menú con su
+      mapa; el nivel 1-1 carga (`level 0 ok in 693 ms, art 6180 KB`) pero
+      deja **11 KB** de PSRAM: `worker: no memory for the split helper on
+      core 1` en cada cuadro (un núcleo, 15 fps), y la captura y el SSH no
+      responden mientras se juega; volviendo al inicio la memoria vuelve.
+      Después de Monster Hop y Turbo el bloque libre mayor quedó en 8,8 y
+      4,4 MB con 15 MB libres: lo que guardan las apps escondidas sigue
+      partiendo la PSRAM (pendiente en `HANDOFF-SISTEMA.md`). Ideas: soltar
+      las fotos de fondo detrás de un juego a pantalla completa (+2,3 MB) y
+      que Monster Hop baje el arte de un nivel.
 - [ ] **Mila y Monster Hop con la PSRAM en un bloque** (2026-11-08, firmware
       `88f5081`, abiertas por SSH con permiso del usuario). **Mila:** abre
       con 12 MB libres de corrido, pero `pack MISSING, 0 worlds`: en la
