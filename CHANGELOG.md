@@ -24,6 +24,15 @@
   USB one. `apps/ssh/README.md`. The server learnt
   chacha20-poly1305@openssh.com for it, and the firmware now lends the apps
   Monocypher and the SSH wire helpers.
+- **You can see where you are typing.** The cursor of every text field
+  was drawn in LVGL's light-theme text colour, almost black on the dark
+  fields, and could not be seen. A theme of P4OS's own on top of LVGL's
+  now gives every field a blinking cursor in the accent colour, a ring in
+  the accent colour around the field being edited, and dimmer example text
+  (placeholders) so it does not read as typed. The field of an open
+  keyboard keeps the ring while the form behind it is touched or
+  scrolled, and loses it when the keyboard closes. It reaches the apps on
+  the card too, with no new build of them (`components/aos_ui/aos_textfield.c`).
 
 ## 0.23.2 — 2026-11-06
 

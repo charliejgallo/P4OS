@@ -4,6 +4,7 @@
 #include "aos_fonts.h"
 #include "aos_i18n.h"
 #include "aos_emoji.h"
+#include "aos_internal.h"
 #include <string.h>
 
 const lv_font_t *aos_font_huge    = NULL;
@@ -87,6 +88,7 @@ void aos_theme_set_accent(uint32_t rgb)
 {
     s_accent = rgb & 0xFFFFFF;
     aos_hal_pref_set_i32("accent", (int32_t)s_accent);
+    aos_textfield_accent();
 }
 
 void aos_theme_init(void)
@@ -126,6 +128,7 @@ void aos_theme_init(void)
     lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, 0);
     lv_obj_set_style_text_color(scr, AOS_C_TEXT, 0);
     lv_obj_set_style_text_font(scr, aos_font_body, 0);
+    aos_textfield_init();
 }
 
 lv_obj_t *aos_page(lv_obj_t *parent)

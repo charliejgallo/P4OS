@@ -37,6 +37,12 @@ se prueba.
 ### Pendientes, en resumen
 
 Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
+- [ ] **Cursor y campo activo** (2026-11-08, `aos_textfield.c`). Sin
+      instalar. En la placa: el cursor de acento titila en el editor de la
+      app SSH y en el de `modules.txt` (Módulos, Puertos, Editar); el
+      anillo marca el campo del teclado abierto, sigue al tocar el fondo y
+      se va al cerrar el teclado; tocar el texto pone el cursor ahí. Que el
+      cambio de color de acento en Ajustes los recolore.
 - [ ] **App SSH (cliente)** (2026-11-07, `apps/ssh/README.md`). Instalada
       el 2026-11-07 con el firmware `65c8642` (por OTA; la app necesita
       sus símbolos nuevos): la placa la carga y la registra. Falta todo lo
