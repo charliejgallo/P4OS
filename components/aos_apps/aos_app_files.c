@@ -4971,6 +4971,19 @@ static void show(aos_app_t *self, void *inst)
 {
     (void)self; (void)inst;
     if (U.timer) lv_timer_resume(U.timer);
+    /* Opened on a path (the system's search, aos_search.c): its folder, or
+     * the folder itself */
+    const char *arg = aos_ui_take_open_arg(APP_ID);
+    const char *rel = arg ? rel_of(arg) : NULL;
+    if (rel) {
+        char r[PATH_LEN];
+        scpy(r, sizeof r, rel);
+        if (!is_dir_path(arg)) rel_up(r);
+        if (U.viewing) viewer_close();
+        go_to(r);
+        usage_request();
+        return;
+    }
     /* back from somewhere else: the card may have changed meanwhile */
     if (U.tick > 2 && !U.viewing) relist();
     usage_request();

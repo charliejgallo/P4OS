@@ -3124,6 +3124,10 @@ static const char blob_en__sistema_lang[] =
     "la placa está ocupada\tthe board is busy\n"
     "Pegar\tPaste\n"
     "Todo\tAll\n"
+    "Cuenta\tCalculation\n"
+    "Tocá para copiarlo\tTap to copy it\n"
+    "Buscando en la tarjeta…\tSearching the card…\n"
+    "Nada con eso\tNothing found\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -6240,6 +6244,10 @@ static const char blob_de__sistema_lang[] =
     "la placa está ocupada\tdas Board ist beschäftigt\n"
     "Pegar\tEinsetzen\n"
     "Todo\tAlles\n"
+    "Cuenta\tRechnung\n"
+    "Tocá para copiarlo\tZum Kopieren tippen\n"
+    "Buscando en la tarjeta…\tDurchsuche die Karte…\n"
+    "Nada con eso\tNichts gefunden\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -6247,7 +6255,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3109, 0, files_en, 1 },
-    { "de", "Deutsch", 3109, 0, files_de, 1 },
+    { "en", "English", 3113, 0, files_en, 1 },
+    { "de", "Deutsch", 3113, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

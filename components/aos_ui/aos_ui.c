@@ -15,7 +15,8 @@
  * (read_wrap): a drag that starts on an edge and goes the right way is taken
  * from the app (lv_indev_wait_release, so nothing under the finger clicks)
  * and drives the shell instead. Bottom edge up: home, or the switcher if
- * the finger rests. Left edge right: back. Top edge down: notifications on
+ * the finger rests. Left edge right: back. Down from the middle of the home
+ * screen: the search (aos_search.c). Top edge down: notifications on
  * the left half, the control centre on the right half.
  *
  * Apps keep AmoledOS's life cycle. What P4OS adds is multitasking: leaving
@@ -355,6 +356,7 @@ static void refit_app(aos_app_t *app)
 
 static void relayout_all(void)
 {
+    aos_search_close();             /* laid out for the other shape */
     geo_update();
     lv_obj_t *layers[] = { s_wall, s_home, s_appl };
     for (int i = 0; i < 3; i++) {
@@ -726,6 +728,7 @@ bool aos_ui_open(const char *id)
     }
     aos_panel_close();
     aos_switcher_close();
+    aos_search_close();
     if (aos_home_editing()) aos_home_edit(false);
     if (s_cur == app) return true;
 
@@ -834,6 +837,7 @@ void aos_ui_close_others(void)
 
 void aos_ui_home(void)
 {
+    aos_search_close();
     aos_panel_close();
     aos_switcher_close();
     aos_app_t *app = s_cur;
@@ -909,7 +913,7 @@ void aos_ui_toast(const char *text, uint32_t ms) { aos_toast_show(text, ms); }
 /* System gestures                                                             */
 /* -------------------------------------------------------------------------- */
 
-typedef enum { G_NONE = 0, G_HOME, G_BACK, G_NOTIF, G_CONTROL, G_DEAD } gkind_t;
+typedef enum { G_NONE = 0, G_HOME, G_BACK, G_NOTIF, G_CONTROL, G_SEARCH, G_DEAD } gkind_t;
 
 static struct {
     bool     down;
@@ -952,6 +956,7 @@ static void gesture_begin(int32_t x, int32_t y)
     if (y >= s_geo.h - EDGE_BOTTOM) g.kind = G_HOME;
     else if (y <= s_geo.bar_h) g.kind = x < s_geo.w / 2 ? G_NOTIF : G_CONTROL;
     else if (x <= EDGE_LEFT && s_cur && !(s_cur->desc.flags & AOS_APP_FLAG_NO_SWIPE)) g.kind = G_BACK;
+    else if (!s_cur && !aos_search_is_open() && aos_home_idle()) g.kind = G_SEARCH;
     else g.kind = G_DEAD;
 }
 
@@ -1007,6 +1012,8 @@ static void gesture_move(int32_t x, int32_t y)
         case G_BACK:    go = dx > CAPTURE_PX && dx > LV_ABS(dy); break;
         case G_NOTIF:
         case G_CONTROL: go = dy > CAPTURE_PX && dy > LV_ABS(dx); break;
+        /* steeper than the others: a sideways page turn must stay the home's */
+        case G_SEARCH:  go = dy > CAPTURE_PX * 2 && dy > 2 * LV_ABS(dx); break;
         default: break;
         }
         if (go) {
@@ -1032,6 +1039,10 @@ static void gesture_move(int32_t x, int32_t y)
         break;
     case G_NOTIF:   aos_panel_drag(AOS_PANEL_NOTIF, y - g.y0); break;
     case G_CONTROL: aos_panel_drag(AOS_PANEL_CONTROL, y - g.y0); break;
+    case G_SEARCH:
+        aos_search_open();
+        g.kind = G_DEAD;                /* the rest of this drag is nobody's */
+        break;
     default: break;
     }
 }
@@ -1052,9 +1063,10 @@ static void gesture_end(void)
     case G_HOME: {
         int32_t up = g.y0 - g.y;
         if (!s_cur) {
-            /* on the home screen the bottom edge closes a folder or the edit
-             * mode, or goes back to the first page */
-            aos_home_back();
+            /* on the home screen the bottom edge closes the search, a folder
+             * or the edit mode, or goes back to the first page */
+            if (aos_search_is_open()) aos_search_close();
+            else aos_home_back();
         } else if (up > s_geo.h / 7 || g.vy < -12) {
             if (s_cur && s_cur->root) {
                 lv_obj_set_style_opa(s_cur->root, LV_OPA_COVER, 0);

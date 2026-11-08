@@ -9936,3 +9936,15 @@ Pegar	Paste
 
 #: components/aos_ui/aos_textsel.c
 Todo	All
+
+#: components/aos_ui/aos_search.c
+Cuenta	Calculation
+
+#: components/aos_ui/aos_search.c
+Tocá para copiarlo	Tap to copy it
+
+#: components/aos_ui/aos_search.c
+Buscando en la tarjeta…	Searching the card…
+
+#: components/aos_ui/aos_search.c
+Nada con eso	Nothing found

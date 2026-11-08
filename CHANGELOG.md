@@ -33,6 +33,15 @@
   keyboard keeps the ring while the form behind it is touched or
   scrolled, and loses it when the keyboard closes. It reaches the apps on
   the card too, with no new build of them (`components/aos_ui/aos_textfield.c`).
+- **Search.** A swipe down from the middle of the home screen, as on a
+  phone, opens the system's search: the apps by name, the pages of
+  Settings by name and a few words each, a sum typed in (copied with a
+  tap), the notes by title and text, and the card's files by name. A tap
+  opens the app, Settings on that page, Notes on that note or Files in that
+  folder; ✓ opens the first. Notes and files are a walk of the card on a
+  thread with caps, nothing indexed beforehand; accents and case do not
+  matter. Notes needs its new build to open on a note
+  (`components/aos_ui/aos_search.c`).
 - **An eye in password fields, and backspace by words.** A password field
   being edited shows an eye at its right end: a tap shows what was typed,
   another hides it, and closing the keyboard hides it again (and it is

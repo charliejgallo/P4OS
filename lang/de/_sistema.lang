@@ -9936,3 +9936,15 @@ Pegar	Einsetzen
 
 #: components/aos_ui/aos_textsel.c
 Todo	Alles
+
+#: components/aos_ui/aos_search.c
+Cuenta	Rechnung
+
+#: components/aos_ui/aos_search.c
+Tocá para copiarlo	Zum Kopieren tippen
+
+#: components/aos_ui/aos_search.c
+Buscando en la tarjeta…	Durchsuche die Karte…
+
+#: components/aos_ui/aos_search.c
+Nada con eso	Nichts gefunden

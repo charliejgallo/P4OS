@@ -1687,11 +1687,30 @@ static void notas_destroy(aos_app_t *self, void *inst)
     S.root = NULL;
 }
 
+/* A note by its file name (the system's search hands it over, aos_search.c):
+ * the one open is closed (saved) first, and the list read again */
+static void open_named(const char *file)
+{
+    if (S.open) close_note();
+    for (int pass = 0; pass < 2; pass++) {
+        for (int i = 0; i < S.ix.n; i++)
+            if (!strcmp(S.ix.e[i].file, file)) { open_entry(i); return; }
+        nt_index_scan(&S.ix, false);    /* not in the list yet: read it */
+    }
+}
+
 static void notas_show(aos_app_t *self, void *inst)
 {
     (void)self;
     (void)inst;
     statusbar();
+    const char *arg = aos_ui_take_open_arg("aos.notas");
+    if (arg) {
+        char f[sizeof S.file];
+        snprintf(f, sizeof f, "%s", arg);
+        open_named(f);
+        return;
+    }
     /* the portal may have changed the folder, or the note, meanwhile */
     if (S.screen == SCR_LIST) build();
     else watch_card();

@@ -125,6 +125,8 @@ static void finish(void)
     if (done) done(AOS_WEDIT_APPLY, w, h, arg);
 }
 
+bool aos_wedit_open(void) { return E.sheet != NULL; }
+
 bool aos_wedit_close(void)
 {
     if (!E.sheet) return false;

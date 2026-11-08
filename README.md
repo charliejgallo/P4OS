@@ -232,6 +232,9 @@ The home screen has icon pages, folders, a dock and widgets.
   field selects, cuts, copies and pastes; the clipboard is shared with the
   apps and with the portal, which can type a long password or an address
   straight into the field open on the board.
+- **Search** (2026-11-08): a swipe down from the middle of the home screen
+  finds apps, the pages of Settings, notes by their text and the card's
+  files, and works out a sum typed in.
 - **The status bar** shows the Wi-Fi or the board's own network, the card
   and the USB.
 - **The orientation** is chosen in Settings or the control centre, because

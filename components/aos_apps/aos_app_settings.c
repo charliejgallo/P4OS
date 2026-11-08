@@ -2778,6 +2778,29 @@ static void destroy(aos_app_t *self, void *inst)
 
 static bool back(aos_app_t *self, void *inst) { return pop(); }
 
+/* Opened on a page (the system's search, aos_search.c): its key as the
+ * open argument, the page over the list as if chosen from it */
+static void settings_show(aos_app_t *self, void *inst)
+{
+    (void)self; (void)inst;
+    const char *arg = aos_ui_take_open_arg("aos.settings");
+    if (!arg) return;
+    static const struct { const char *key; int pg; } K[] = {
+        { "wifi", PG_WIFI }, { "display", PG_DISPLAY }, { "sound", PG_SOUND }, { "wallpaper", PG_WALL },
+        { "expansion", PG_EXP }, { "language", PG_LANG }, { "time", PG_TIME }, { "about", PG_ABOUT },
+        { "usb", PG_USB }, { "storage", PG_STORAGE }, { "update", PG_UPDATE }, { "diag", PG_DIAG },
+        { "lock", PG_LOCK }, { "bluetooth", PG_BT }, { "developer", PG_DEV }, { "portal", PG_PORTAL },
+    };
+    for (size_t i = 0; i < sizeof K / sizeof K[0]; i++) {
+        if (strcmp(arg, K[i].key)) continue;
+        kb_close();
+        U.depth = 1;
+        U.stack[0] = PG_ROOT;
+        show(K[i].pg);
+        return;
+    }
+}
+
 void aos_app_settings_get(aos_app_t *app)
 {
     *app = (aos_app_t){
@@ -2786,6 +2809,6 @@ void aos_app_settings_get(aos_app_t *app)
             .color_a = 0x8E8E93, .color_b = 0x48484A,
             .flags = AOS_APP_FLAG_KEEP, .order = 900,
         },
-        .create = create, .destroy = destroy, .back = back,
+        .create = create, .destroy = destroy, .back = back, .show = settings_show,
     };
 }

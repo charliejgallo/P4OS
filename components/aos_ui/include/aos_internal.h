@@ -49,6 +49,11 @@ void aos_home_rebuild(void);             /* the model or the orientation changed
 bool aos_home_back(void);                /* closes a folder / leaves edit mode   */
 void aos_home_edit(bool on);
 bool aos_home_editing(void);
+bool aos_home_idle(void);                /* no edit mode, folder or widget sheet open */
+/* aos_search.c: the system's search, a swipe down on the home screen */
+void aos_search_open(void);
+void aos_search_close(void);
+bool aos_search_is_open(void);
 void aos_home_badges_refresh(void);
 /* The on-screen rectangle of an app's icon (for the zoom out); false if the
  * app is not visible on the current page. */
@@ -137,6 +142,7 @@ typedef void (*aos_wedit_done_t)(aos_wedit_action_t action, int w, int h, const 
 void        aos_wedit_add(void (*picked)(const char *type));
 void        aos_wedit_config(const char *type, int w, int h, const char *arg, aos_wedit_done_t done);
 bool        aos_wedit_close(void);                  /* true if a sheet was open */
+bool        aos_wedit_open(void);
 const char *aos_wedit_glyph(const char *type);      /* the described glyph, or a generic one */
 
 #ifdef __cplusplus

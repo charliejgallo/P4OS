@@ -1393,6 +1393,10 @@ void aos_home_rebuild(void) { if (s_root) build(); }
 
 bool aos_home_editing(void) { return s_editing; }
 
+/* nothing of its own open: no edit mode, folder or widget sheet (the
+ * search's swipe, aos_ui.c) */
+bool aos_home_idle(void) { return !s_editing && !s_folder_ov && !aos_wedit_open(); }
+
 void aos_home_edit(bool on)
 {
     if (s_editing == on) return;

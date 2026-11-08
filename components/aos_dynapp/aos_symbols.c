@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3585 simbolos.
+ * Total: 3589 simbolos.
  */
 
 #include <stddef.h>
@@ -688,6 +688,7 @@ extern int aos_home_create;
 extern int aos_home_edit;
 extern int aos_home_editing;
 extern int aos_home_icon_rect;
+extern int aos_home_idle;
 extern int aos_home_rebuild;
 extern int aos_home_tick;
 extern int aos_http_stream_close;
@@ -1100,6 +1101,9 @@ extern int aos_scope_screenshot_file;
 extern int aos_scope_start;
 extern int aos_scope_status;
 extern int aos_scope_wave;
+extern int aos_search_close;
+extern int aos_search_is_open;
+extern int aos_search_open;
 extern int aos_sensor_at;
 extern int aos_sensor_candidates;
 extern int aos_sensor_cat_name;
@@ -4276,6 +4280,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_home_edit),
     ESP_ELFSYM_EXPORT(aos_home_editing),
     ESP_ELFSYM_EXPORT(aos_home_icon_rect),
+    ESP_ELFSYM_EXPORT(aos_home_idle),
     ESP_ELFSYM_EXPORT(aos_home_rebuild),
     ESP_ELFSYM_EXPORT(aos_home_tick),
     ESP_ELFSYM_EXPORT(aos_http_stream_close),
@@ -4688,6 +4693,9 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_scope_start),
     ESP_ELFSYM_EXPORT(aos_scope_status),
     ESP_ELFSYM_EXPORT(aos_scope_wave),
+    ESP_ELFSYM_EXPORT(aos_search_close),
+    ESP_ELFSYM_EXPORT(aos_search_is_open),
+    ESP_ELFSYM_EXPORT(aos_search_open),
     ESP_ELFSYM_EXPORT(aos_sensor_at),
     ESP_ELFSYM_EXPORT(aos_sensor_candidates),
     ESP_ELFSYM_EXPORT(aos_sensor_cat_name),
