@@ -135,6 +135,18 @@ and over the cable, HTTP keeps working: the scripts in `tools/` use it.
 - "Autoridad nueva" in Settings throws both away: the next start makes new
   ones, and they have to be trusted again.
 
+## SSH
+
+Off until Settings, Portal web switches it on (`docs/SSH.md`). It follows
+the table above: where the portal opens without a password, so does SSH;
+where the portal asks for the password, SSH takes it or a key on the
+board's list; where the portal is closed, the connection is cut before a
+word. A key gets on the list only from the board's own screen, with its
+fingerprint, once the board is unlocked: getting into the portal is not
+enough to add a way in. A new password, "Close every session", taking a key
+off the list or switching SSH off close the SSH sessions too. The board's
+host key is Ed25519, kept in preferences like the HTTPS authority's.
+
 ## What is not covered
 
 - **HTTPS is off until it is turned on**, and plain HTTP stays open at home,
@@ -149,6 +161,10 @@ and over the cable, HTTP keeps working: the scripts in `tools/` use it.
   firmware, and P4OS is meant to be open: anyone can build and load their
   own. What guards the firmware page is what guards the rest of the
   portal: the trusted networks, the password and HTTPS.
+- **SSH has no post-quantum key exchange yet** (`mlkem768x25519-sha256`):
+  OpenSSH 10.1 and later warn about it on every connection. Today's
+  connections are safe; recorded ones would be readable to a future
+  quantum computer. `docs/SSH.md` says how to quiet the warning.
 - **The card is readable by whoever holds it.** The cameras' passwords in
   `/cameras.txt`, for one, are in clear.
 - **The Programador's bridge is a raw socket** (TCP 4000 and 4001, only

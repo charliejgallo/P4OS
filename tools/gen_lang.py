@@ -58,7 +58,9 @@ FIRMWARE_DIRS = ["components/aos_ui", "components/aos_apps", "components/aos_dyn
                  # aos_tr() itself; the HAL cannot, and marks its keys N_()
                  "components/aos_flasher", "components/aos_hal",
                  # the API's messages, which the portal shows as they come
-                 "components/aos_portal"]
+                 "components/aos_portal",
+                 # the SSH shell's, which an ssh client shows as they come
+                 "components/aos_ssh"]
 
 # `_("...")` and `N_("...")`, allowing the adjacent-literal concatenation C
 # does for you:

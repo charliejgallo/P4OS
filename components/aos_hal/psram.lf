@@ -42,6 +42,11 @@ archive: libaos_flasher.a
 entries:
     * (aos_extram_bss)
 
+[mapping:aos_ssh_psram]
+archive: libaos_ssh.a
+entries:
+    * (aos_extram_bss)
+
 [mapping:aos_hal_psram]
 archive: libaos_hal.a
 entries:

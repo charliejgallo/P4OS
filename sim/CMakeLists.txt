@@ -192,6 +192,13 @@ add_executable(p4os_sim
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_macropad.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_modules.c
     ${AOS_WEB_C}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/aos_ssh.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/aos_ssh_wire.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/aos_ssh_crypto.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/aos_ssh_shell.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/aos_ssh_cmds.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/monocypher/monocypher.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/monocypher/monocypher-ed25519.c
     main.c
     hal_sim.c
     dirscan_sim.c
@@ -252,6 +259,8 @@ target_include_directories(p4os_sim PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_fonts/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/monocypher/include
     ${SDL2_INCLUDE_DIRS}
     ${MBEDTLS_INCLUDE_DIR}
     ${AVCODEC_INCLUDE_DIRS}

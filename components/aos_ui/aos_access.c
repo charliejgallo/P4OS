@@ -321,7 +321,13 @@ void aos_access_session_end(const char *id)
     sess_save(list, k);
 }
 
-void aos_access_sessions_clear(void) { aos_hal_pref_erase(K_SESS); }
+/* SSH's sessions go too: a new password and "close every session" are
+ * meant for whoever is in, whatever way they came in (aos_access_ssh.c) */
+void aos_access_sessions_clear(void)
+{
+    aos_hal_pref_erase(K_SESS);
+    aos_access_ssh_kick();
+}
 
 int aos_access_session_count(void)
 {

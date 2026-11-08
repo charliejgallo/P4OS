@@ -48,6 +48,7 @@
 #include "aos_hal.h"
 #include "aos_i18n.h"
 #include "aos_portal.h"
+#include "aos_ssh.h"
 #include "lvgl/src/libs/lodepng/lodepng.h"
 
 #include <stdio.h>
@@ -398,6 +399,8 @@ int main(int argc, char **argv)
     aos_ui_init();
     aos_ui_boot_start_run();            /* the apps that start with the board, hidden */
     aos_portal_start(getenv("P4_SIM_PORTAL_PORT") ? atoi(getenv("P4_SIM_PORTAL_PORT")) : 8080);
+    /* SSH only when asked for, on a port of its own (22 needs root) */
+    if (getenv("P4_SIM_SSH_PORT")) aos_ssh_start(atoi(getenv("P4_SIM_SSH_PORT")));
 
     s_pad_keys = getenv("P4_SIM_PAD") && atoi(getenv("P4_SIM_PAD"));
     if (s_pad_keys) aos_hal_sim_pad(true, 0, 0, 0, -1);

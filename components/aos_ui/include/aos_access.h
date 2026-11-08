@@ -93,6 +93,52 @@ void aos_access_tls_forget(void);           /* a new authority at the next start
 /* "AB:CD:..." of the authority, "" if there is none yet */
 void aos_access_tls_fingerprint(char *out, size_t n);
 
+/* ---- SSH (port 22, components/aos_ssh; aos_access_ssh.c) ----
+ * Off until Settings, Portal web switches it on. It follows the portal's
+ * rules: closed where the portal is closed; where the portal needs the
+ * password, the password or a key on the list; where it is open, anyone.
+ * A key not on the list can ask to be let in: the board shows its
+ * fingerprint and whoever is in front of it says yes or no. That is the
+ * only way a key gets on the list, so getting into the portal is not enough
+ * to add one (the rules and the password are set on the board only). */
+bool aos_access_ssh(void);
+void aos_access_set_ssh(bool on);
+/* The board's host key, Ed25519, made the first time it is asked for: the
+ * 32-byte seed (secret) and the public key. false only if it cannot be kept. */
+bool aos_access_ssh_host_key(unsigned char seed[32], unsigned char pub[32]);
+/* "SHA256:..." as ssh prints it; "" before the key exists */
+void aos_access_ssh_host_fingerprint(char *out, size_t n);
+void aos_access_ssh_host_forget(void);      /* a new host key at the next connection */
+
+/* The keys that may log in, one OpenSSH line each: "ssh-ed25519 AAAA... comment" */
+#define AOS_ACCESS_SSH_KEYS 8
+bool aos_access_ssh_key_get(int i, char *line, size_t n);   /* false: no key i */
+int  aos_access_ssh_key_find(const char *type, const char *b64);  /* index, or -1 */
+bool aos_access_ssh_key_add(const char *line);              /* false: the list is full */
+void aos_access_ssh_key_remove(int i);                      /* and closes every SSH session */
+/* the "SHA256:..." of a line's key, "" if it does not parse */
+void aos_access_ssh_key_fingerprint(const char *line, char *out, size_t n);
+
+/* A key not on the list asking in. aos_ssh calls ask() from its connection's
+ * thread and waits up to timeout_s for the board's answer: 1 yes (the key is
+ * on the list now), 0 no or no answer, -1 another question is on screen.
+ * The UI polls asking() from its tick and answers with answer(). */
+typedef struct {
+    char type[24];          /* "ED25519", "ECDSA", "RSA 3072" */
+    char fp[56];            /* "SHA256:..." */
+    char comment[48];       /* what the key's owner called it, often user@host */
+    char from[48];          /* the address it comes from */
+} aos_access_ssh_ask_t;
+int  aos_access_ssh_ask(const aos_access_ssh_ask_t *q, const char *line, int timeout_s);
+bool aos_access_ssh_asking(aos_access_ssh_ask_t *out);
+void aos_access_ssh_answer(bool yes);
+
+/* Bumped by whatever must close the SSH sessions open now: a new password,
+ * "close every session", a key taken off the list, SSH switched off, a new
+ * host key. Each connection compares it with the one it started with. */
+unsigned aos_access_ssh_generation(void);
+void     aos_access_ssh_kick(void);
+
 /* Called from the shell's tick: keeps mDNS quiet on networks that are not
  * home, and marks the first network as home when the rules are new (an
  * update must not lock the user out of the board they had open). */

@@ -2293,6 +2293,71 @@ static void pt_cert_cb(lv_event_t *e)
 static void pick_row(lv_obj_t *g, const char *label, bool on, lv_event_cb_t cb, void *ud);
 static void dev_restart_cb(lv_event_t *e);
 
+/* ---- SSH (components/aos_ssh, docs/SSH.md) ---- */
+
+static void pt_ssh_cb(lv_event_t *e)
+{
+    aos_access_set_ssh(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
+    show(PG_PORTAL);
+}
+
+static void pt_ssh_key_rm_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez para quitarla"))) return;
+    aos_access_ssh_key_remove((int)(intptr_t)lv_event_get_user_data(e));
+    show(PG_PORTAL);
+}
+
+static void pt_ssh_host_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez: ssh va a avisar que la placa cambió"))) return;
+    aos_access_ssh_host_forget();
+    aos_ui_toast(_("La placa tiene una clave nueva"), 2000);
+    show(PG_PORTAL);
+}
+
+/* the comment of a key line ("type base64 comment"), else its type */
+static void ssh_key_label(const char *line, char *out, size_t n)
+{
+    const char *b = strchr(line, ' ');
+    const char *c = b ? strchr(b + 1, ' ') : NULL;
+    while (c && *c == ' ') c++;
+    if (c && *c) snprintf(out, n, "%s", c);
+    else snprintf(out, n, "%.*s", b ? (int)(b - line) : (int)strlen(line), line);
+}
+
+static void build_ssh(lv_obj_t *p)
+{
+    lv_obj_t *g = group(p, "SSH");
+    bool on = aos_access_ssh();
+    row_switch(g, AOS_SYM_KEYBOARD_OUTLINE, 0xFF9F0A, _("SSH (puerto 22)"), on, pt_ssh_cb);
+    char fp[64];
+    aos_access_ssh_host_fingerprint(fp, sizeof fp);
+    if (fp[0]) action_row(g, _("Clave nueva de la placa"), AOS_C_RED, pt_ssh_host_cb);
+    if (on && fp[0]) {
+        lv_obj_t *f = aos_label(p, fp, aos_font_caption, AOS_C_TEXT);
+        lv_obj_set_width(f, lv_pct(100));
+        lv_label_set_long_mode(f, LV_LABEL_LONG_MODE_WRAP);
+        lv_obj_set_style_pad_hor(f, 24, 0);
+    }
+    note(p, _("Una consola de la placa desde la Mac: ssh p4os.local. Sigue las reglas de arriba: donde el portal está abierto entra cualquiera, donde pide la contraseña entra con ella o con una clave de la lista, y donde está cerrado no entra nadie. Lo de arriba es la huella de la placa: ssh la muestra la primera vez."));
+
+    char *line = malloc(1024);
+    if (!line) return;
+    g = group(p, _("CLAVES QUE PUEDEN ENTRAR"));
+    int n = 0;
+    for (int i = 0; i < AOS_ACCESS_SSH_KEYS; i++) {
+        if (!aos_access_ssh_key_get(i, line, 1024)) continue;
+        char label[64];
+        ssh_key_label(line, label, sizeof label);
+        row(g, NULL, 0, label, _("quitar"), false, pt_ssh_key_rm_cb, (void *)(intptr_t)i);
+        n++;
+    }
+    free(line);
+    if (!n) row(g, NULL, 0, _("Ninguna"), NULL, false, NULL, NULL);
+    note(p, _("Una clave que no está en la lista pide permiso acá, en la pantalla, con su huella: compará con la que da ssh-keygen -lf en la Mac. Quitar una cierra las sesiones de SSH abiertas."));
+}
+
 static void build_access(lv_obj_t *p)
 {
     U.pt_shown = portal_key();
@@ -2342,6 +2407,8 @@ static void build_access(lv_obj_t *p)
         lv_obj_set_style_pad_hor(f, 24, 0);
     }
     note(p, _("Con HTTPS, lo que viaja va cifrado, la contraseña incluida, y fuera de casa el portal manda del HTTP al HTTPS. La placa tiene su propia autoridad: se baja desde el portal (Ajustes, Seguridad) y se instala una vez como confiable en la Mac o el iPhone, y el navegador deja de avisar. Lo de arriba es su huella SHA-256, para compararla. Se aplica al reiniciar."));
+
+    build_ssh(p);
 
     char v[16];
     g = group(p, _("SESIONES Y SCRIPTS"));

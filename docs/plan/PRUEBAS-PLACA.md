@@ -37,6 +37,15 @@ se prueba.
 ### Pendientes, en resumen
 
 Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
+- [ ] **SSH** (2026-11-07, `docs/SSH.md`). Probado sólo en el simulador.
+      En la placa: prenderlo en Ajustes, Portal web; `ssh p4os.local` desde
+      la Mac (la huella que muestra ssh tiene que ser la de Ajustes); `ls`,
+      `top`, `log -f`, `free` (la RAM interna libre no debería moverse con
+      una sesión abierta); `ssh p4os.local cat /apps/<algo>.pak | shasum`
+      contra el archivo, y cuánto tarda; con contraseña y "también en casa",
+      la contraseña y una clave nueva aprobada en la pantalla (y que no
+      aparezca con la placa bloqueada hasta desbloquearla); quitar la
+      clave en Ajustes corta la sesión; apagar SSH deja de escuchar.
 - [x] **BLE** (`apps/ble`, docs/BLUETOOTH.md "The apps' scanner"). **Instalada
       el 2026-10-07** (firmware `0973f16`, por OTA). Medido: escanea (10-12
       equipos reales, ~9 paquetes/s al 30 %, ~16 al 100 %, ninguno perdido);

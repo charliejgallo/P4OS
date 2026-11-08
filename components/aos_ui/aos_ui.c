@@ -43,6 +43,7 @@
 #include "aos_access.h"
 #include "aos_lock.h"
 #include "aos_pair_ui.h"
+#include "aos_sshkey_ui.h"
 #include "aos_hal.h"
 #include "aos_theme.h"
 #include "aos_i18n.h"
@@ -367,6 +368,7 @@ static void relayout_all(void)
     if (s_cur) refit_app(s_cur);
     aos_lock_layout();
     aos_pair_ui_layout();
+    aos_sshkey_ui_layout();
     aos_wall_photo_relayout();
 }
 
@@ -830,6 +832,7 @@ void aos_ui_home(void)
 void aos_ui_back(void)
 {
     if (aos_pair_ui_visible()) { aos_pair_ui_cancel(); return; }     /* a Bluetooth code waiting: Back is a no */
+    if (aos_sshkey_ui_visible()) { aos_sshkey_ui_cancel(); return; } /* an SSH key asking: the same */
     if (aos_panel_close() || aos_switcher_close()) return;
     if (s_cur) {
         if (s_cur->back && s_cur->back(s_cur, s_cur->inst)) return;
@@ -1367,6 +1370,7 @@ void aos_ui_tick(void)
     aos_banner_tick();
     aos_lock_tick();
     aos_pair_ui_tick();
+    aos_sshkey_ui_tick();
     aos_access_tick();              /* mDNS by the portal's rules; once a second inside */
     aos_hwkbd_tick();               /* a USB keyboard on the host types into the open keyboard */
     aos_hwmouse_tick();             /* and a USB mouse points */
@@ -1506,6 +1510,10 @@ static void ui_button_cb(aos_button_t button, aos_button_action_t action)
     bool used = false;
     if (action == AOS_BUTTON_CLICK && aos_pair_ui_visible()) {
         if (aos_hal_lock(300)) { aos_pair_ui_cancel(); aos_hal_unlock(); }
+        return;
+    }
+    if (action == AOS_BUTTON_CLICK && aos_sshkey_ui_visible()) {
+        if (aos_hal_lock(300)) { aos_sshkey_ui_cancel(); aos_hal_unlock(); }
         return;
     }
     if (aos_lock_is_locked()) used = action != AOS_BUTTON_LONG;     /* locked: only the screenshot */

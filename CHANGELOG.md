@@ -1,5 +1,20 @@
 # Changelog
 
+## Unreleased
+
+- **SSH: a console on the board.** `ssh p4os.local` opens a shell with
+  the card's files (`ls`, `cd`, `cat`, `head`, `tail`, `cp`, `mv`, `rm`,
+  `mkdir`, `df`), the log (`log -f`, `log -p` for the previous boot), the
+  tasks (`top`, `ps`), the memory (`free`), the network (`ip`) and the apps
+  (`apps`, `open`, `home`); `ssh p4os.local log -n 50` runs one command.
+  Line editing, history and Tab like a terminal expects. It is P4OS's own
+  server (curve25519-sha256, an Ed25519 host key, AES-GCM on the P4's AES
+  engine, strict KEX), switched on in Settings, Portal web, and it follows
+  the portal's rules: open where the portal is, the portal's password or a
+  key where it asks for one, closed where it is closed. A new key asks on
+  the board's screen, with its fingerprint. `docs/SSH.md`. Asked for by
+  Pocho at Home Assistant's Community Day in Buenos Aires.
+
 ## 0.23.2 — 2026-11-06
 
 - **Ten TCP connections for the apps, not six.** `aos_tcp` (the cameras'

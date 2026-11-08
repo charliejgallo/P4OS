@@ -9633,3 +9633,294 @@ md muestra las palabras en big-endian (un MIPS): se dan vuelta	md zeigt die Wör
 
 #: components/aos_flasher (Programador, U-Boot)
 %u pedazos de 64 KB vacíos (todo 0xFF)	%u leere 64-KB-Stücke (alles 0xFF)
+
+#: components/aos_ui/aos_sshkey_ui.c:87
+¿Dejar entrar esta clave por SSH?	Diesen Schlüssel per SSH hereinlassen?
+
+#: components/aos_ui/aos_sshkey_ui.c:89
+%s, como «%s», desde %s	%s, als „%s“, von %s
+
+#: components/aos_ui/aos_sshkey_ui.c:93
+Queda en la lista de Ajustes, Portal web, hasta que la saques.	Er bleibt in der Liste unter Einstellungen, Webportal, bis du ihn entfernst.
+
+#: components/aos_ui/aos_sshkey_ui.c:103
+Permitir	Erlauben
+
+#: components/aos_apps/aos_app_settings.c:2313
+Tocá otra vez: ssh va a avisar que la placa cambió	Nochmal tippen: ssh wird melden, dass sich die Platine geändert hat
+
+#: components/aos_apps/aos_app_settings.c:2315
+La placa tiene una clave nueva	Die Platine hat einen neuen Schlüssel
+
+#: components/aos_apps/aos_app_settings.c:2333
+SSH (puerto 22)	SSH (Port 22)
+
+#: components/aos_apps/aos_app_settings.c:2336
+Clave nueva de la placa	Neuer Schlüssel für die Platine
+
+#: components/aos_apps/aos_app_settings.c:2343
+Una consola de la placa desde la Mac: ssh p4os.local. Sigue las reglas de arriba: donde el portal está abierto entra cualquiera, donde pide la contraseña entra con ella o con una clave de la lista, y donde está cerrado no entra nadie. Lo de arriba es la huella de la placa: ssh la muestra la primera vez.	Eine Konsole der Platine vom Computer aus: ssh p4os.local. Es gelten die Regeln oben: wo das Portal offen ist, kommt jeder hinein, wo es das Passwort verlangt, mit diesem oder einem Schlüssel aus der Liste, und wo es geschlossen ist, niemand. Oben steht der Fingerabdruck der Platine: ssh zeigt ihn beim ersten Mal.
+
+#: components/aos_apps/aos_app_settings.c:2347
+CLAVES QUE PUEDEN ENTRAR	SCHLÜSSEL MIT ZUGANG
+
+#: components/aos_apps/aos_app_settings.c:2358
+Una clave que no está en la lista pide permiso acá, en la pantalla, con su huella: compará con la que da ssh-keygen -lf en la Mac. Quitar una cierra las sesiones de SSH abiertas.	Ein Schlüssel, der nicht in der Liste steht, bittet hier auf dem Bildschirm um Erlaubnis, mit seinem Fingerabdruck: vergleiche ihn mit der Ausgabe von ssh-keygen -lf auf dem Computer. Wird einer entfernt, schließen sich die offenen SSH-Sitzungen.
+
+#: components/aos_ssh/aos_ssh.c:576
+abierta	offen
+
+#: components/aos_ssh/aos_ssh.c:599
+Esta clave (%s %s) no está en la lista de la placa. Mirá su pantalla: tenés %d segundos para permitirla.	Dieser Schlüssel (%s %s) steht nicht in der Liste der Platine. Schau auf ihren Bildschirm: du hast %d Sekunden, um ihn zu erlauben.
+
+#: components/aos_ssh/aos_ssh.c:608
+La placa está preguntando por otra clave; probá de nuevo en un rato.	Die Platine fragt gerade wegen eines anderen Schlüssels; versuch es gleich noch einmal.
+
+#: components/aos_ssh/aos_ssh.c:609
+La placa no permitió la clave.	Die Platine hat den Schlüssel nicht erlaubt.
+
+#: components/aos_ssh/aos_ssh.c:652
+contraseña	Passwort
+
+#: components/aos_ssh/aos_ssh.c:657
+Demasiados intentos: esperá %d s.	Zu viele Versuche: warte %d s.
+
+#: components/aos_ssh/aos_ssh_cmds.c:140
+%s: no conozco la opción -%c\n	%s: unbekannte Option -%c\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:177
+help: no existe «%s»\n	help: „%s“ gibt es nicht\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:221
+no es una carpeta	kein Ordner
+
+#: components/aos_ssh/aos_ssh_cmds.c:357
+(y más: se muestran las primeras %d)\n	(und mehr: die ersten %d werden gezeigt)\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:433
+cat: ¿qué archivo?\n	cat: welche Datei?\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:472
+%s: ¿qué archivo?\n	%s: welche Datei?\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:574
+rm: ¿qué borro?\n	rm: was soll gelöscht werden?\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:586
+eso no se borra	das kann nicht gelöscht werden
+
+#: components/aos_ssh/aos_ssh_cmds.c:596
+es una carpeta (rm -r)	ist ein Ordner (rm -r)
+
+#: components/aos_ssh/aos_ssh_cmds.c:614
+mkdir: ¿qué carpeta?\n	mkdir: welcher Ordner?\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:648
+rmdir: ¿qué carpeta?\n	rmdir: welcher Ordner?\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:682
+mv: mv origen destino\n	mv: mv Quelle Ziel\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:688
+eso no se mueve	das kann nicht verschoben werden
+
+#: components/aos_ssh/aos_ssh_cmds.c:729
+cp: no terminó; el destino se borró\n	cp: nicht fertig geworden; das Ziel wurde gelöscht\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:738
+cp: cp origen destino\n	cp: cp Quelle Ziel\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:745
+es una carpeta	ist ein Ordner
+
+#: components/aos_ssh/aos_ssh_cmds.c:792
+total	gesamt
+
+#: components/aos_ssh/aos_ssh_cmds.c:792
+usado	belegt
+
+#: components/aos_ssh/aos_ssh_cmds.c:817
+%u d %u h %u min	%u T %u h %u min
+
+#: components/aos_ssh/aos_ssh_cmds.c:818
+%u h %u min	%u h %u min
+
+#: components/aos_ssh/aos_ssh_cmds.c:819
+%u min %u s	%u min %u s
+
+#: components/aos_ssh/aos_ssh_cmds.c:828
+prendida hace %s\n	läuft seit %s\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:837
+la placa todavía no sabe la hora\n	die Platine kennt die Uhrzeit noch nicht\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:856
+%s rev %d.%d, %d núcleos a %d MHz · ESP-IDF %s\n	%s Rev. %d.%d, %d Kerne mit %d MHz · ESP-IDF %s\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:858
+ranura %s · último reinicio: %s\n	Slot %s · letzter Neustart: %s\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:870
+interna	intern
+
+#: components/aos_ssh/aos_ssh_cmds.c:871
+usada	belegt
+
+#: components/aos_ssh/aos_ssh_cmds.c:871
+bloque	Block
+
+#: components/aos_ssh/aos_ssh_cmds.c:871
+mínima	Minimum
+
+#: components/aos_ssh/aos_ssh_cmds.c:913
+tarea	Task
+
+#: components/aos_ssh/aos_ssh_cmds.c:913
+cpu	CPU
+
+#: components/aos_ssh/aos_ssh_cmds.c:913
+prio	Prio
+
+#: components/aos_ssh/aos_ssh_cmds.c:913
+núcleo	Kern
+
+#: components/aos_ssh/aos_ssh_cmds.c:913
+pila	Stack
+
+#: components/aos_ssh/aos_ssh_cmds.c:924
+(y %d más)\n	(und %d weitere)\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:934
+cpu: % de un núcleo · pila: K* en PSRAM · libre: lo mínimo que tuvo, en bytes\n	CPU: % eines Kerns · Stack: K* im PSRAM · frei: das Wenigste, das er je hatte, in Bytes\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:952
+P4OS %s · prendida hace %s · libre: %s interna, %s PSRAM · q sale\n\n	P4OS %s · läuft seit %s · frei: %s intern, %s PSRAM · q beendet\n\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:990
+[se perdieron %u bytes del registro]\n	[%u Bytes des Protokolls gingen verloren]\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1013
+log: log [-f] [-p] [-n líneas]\n	log: log [-f] [-p] [-n Zeilen]\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1023
+no hay registro del arranque anterior\n	kein Protokoll vom vorigen Start\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1062
+ · canal %d	 · Kanal %d
+
+#: components/aos_ssh/aos_ssh_cmds.c:1067
+Red propia: %s · %s · %d conectados\n	Eigenes Netz: %s · %s · %d verbunden\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1088
+> al frente · * abierta\n	> im Vordergrund · * offen\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1110
+open: ¿qué app? («apps» las lista)\n	open: welche App? („apps“ listet sie auf)\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1118
+open: no encuentro «%s»\n	open: „%s“ nicht gefunden\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1143
+%-12s desde %-16s hace %u min (%s)\n	%-12s von %-16s vor %u min (%s)\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1168
+Reiniciando la placa...\n	Die Platine startet neu...\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1176
+esta lista	diese Liste
+
+#: components/aos_ssh/aos_ssh_cmds.c:1177
+lo que hay en una carpeta (-l con detalle)	Inhalt eines Ordners (-l ausführlich)
+
+#: components/aos_ssh/aos_ssh_cmds.c:1178
+cambia de carpeta (sola: la raíz de la tarjeta)	wechselt den Ordner (allein: Wurzel der Karte)
+
+#: components/aos_ssh/aos_ssh_cmds.c:1179
+la carpeta en la que estás	der aktuelle Ordner
+
+#: components/aos_ssh/aos_ssh_cmds.c:1180
+muestra archivos	zeigt Dateien
+
+#: components/aos_ssh/aos_ssh_cmds.c:1181
+las primeras líneas	die ersten Zeilen
+
+#: components/aos_ssh/aos_ssh_cmds.c:1182
+las últimas líneas	die letzten Zeilen
+
+#: components/aos_ssh/aos_ssh_cmds.c:1183
+copia un archivo	kopiert eine Datei
+
+#: components/aos_ssh/aos_ssh_cmds.c:1184
+mueve o renombra	verschiebt oder benennt um
+
+#: components/aos_ssh/aos_ssh_cmds.c:1185
+borra (-r: carpetas con todo adentro)	löscht (-r: Ordner mit Inhalt)
+
+#: components/aos_ssh/aos_ssh_cmds.c:1186
+crea carpetas	legt Ordner an
+
+#: components/aos_ssh/aos_ssh_cmds.c:1187
+borra carpetas vacías	löscht leere Ordner
+
+#: components/aos_ssh/aos_ssh_cmds.c:1188
+crea archivos vacíos	legt leere Dateien an
+
+#: components/aos_ssh/aos_ssh_cmds.c:1189
+el espacio de la tarjeta y los pendrives	Platz auf der Karte und den USB-Sticks
+
+#: components/aos_ssh/aos_ssh_cmds.c:1190
+el registro (-f lo sigue, -p el arranque anterior)	das Protokoll (-f folgt ihm, -p voriger Start)
+
+#: components/aos_ssh/aos_ssh_cmds.c:1191
+las tareas y cuánto usan, cada segundo	die Tasks und ihr Verbrauch, jede Sekunde
+
+#: components/aos_ssh/aos_ssh_cmds.c:1192
+las tareas, una vez	die Tasks, einmal
+
+#: components/aos_ssh/aos_ssh_cmds.c:1193
+la memoria: interna, DMA y PSRAM	Speicher: intern, DMA und PSRAM
+
+#: components/aos_ssh/aos_ssh_cmds.c:1194
+cuánto hace que está prendida	wie lange sie schon läuft
+
+#: components/aos_ssh/aos_ssh_cmds.c:1195
+la fecha y la hora	Datum und Uhrzeit
+
+#: components/aos_ssh/aos_ssh_cmds.c:1196
+versión, chip y último reinicio	Version, Chip und letzter Neustart
+
+#: components/aos_ssh/aos_ssh_cmds.c:1197
+el Wi-Fi y las direcciones	das WLAN und die Adressen
+
+#: components/aos_ssh/aos_ssh_cmds.c:1198
+las apps instaladas	die installierten Apps
+
+#: components/aos_ssh/aos_ssh_cmds.c:1199
+abre una app en la pantalla	öffnet eine App auf dem Bildschirm
+
+#: components/aos_ssh/aos_ssh_cmds.c:1200
+vuelve al inicio en la pantalla	zurück zum Startbildschirm
+
+#: components/aos_ssh/aos_ssh_cmds.c:1201
+atrás, en la pantalla	zurück, auf dem Bildschirm
+
+#: components/aos_ssh/aos_ssh_cmds.c:1202
+quiénes están conectados por SSH	wer per SSH verbunden ist
+
+#: components/aos_ssh/aos_ssh_cmds.c:1203
+reinicia la placa	startet die Platine neu
+
+#: components/aos_ssh/aos_ssh_cmds.c:1204
+limpia la pantalla	leert den Bildschirm
+
+#: components/aos_ssh/aos_ssh_cmds.c:1205
+escribe lo que le pasen	gibt die Argumente aus
+
+#: components/aos_ssh/aos_ssh_cmds.c:1206
+cierra la sesión (también Ctrl-D)	beendet die Sitzung (auch Strg-D)
+
+#: components/aos_ssh/aos_ssh_shell.c:492
+%s: no existe ese comando; «help» muestra los que hay.\n	%s: diesen Befehl gibt es nicht; „help“ zeigt die vorhandenen.\n
+
+#: components/aos_ssh/aos_ssh_shell.c:701
+«help» muestra los comandos; Ctrl-D o «exit» para salir.\n	„help“ zeigt die Befehle; Strg-D oder „exit“ zum Beenden.\n

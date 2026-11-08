@@ -9633,3 +9633,294 @@ md muestra las palabras en big-endian (un MIPS): se dan vuelta	md shows the word
 
 #: components/aos_flasher (Programador, U-Boot)
 %u pedazos de 64 KB vacíos (todo 0xFF)	%u empty 64 KB pieces (all 0xFF)
+
+#: components/aos_ui/aos_sshkey_ui.c:87
+¿Dejar entrar esta clave por SSH?	Let this key in over SSH?
+
+#: components/aos_ui/aos_sshkey_ui.c:89
+%s, como «%s», desde %s	%s, as “%s”, from %s
+
+#: components/aos_ui/aos_sshkey_ui.c:93
+Queda en la lista de Ajustes, Portal web, hasta que la saques.	It stays on the list in Settings, Web portal, until you remove it.
+
+#: components/aos_ui/aos_sshkey_ui.c:103
+Permitir	Allow
+
+#: components/aos_apps/aos_app_settings.c:2313
+Tocá otra vez: ssh va a avisar que la placa cambió	Tap again: ssh will warn that the board changed
+
+#: components/aos_apps/aos_app_settings.c:2315
+La placa tiene una clave nueva	The board has a new key
+
+#: components/aos_apps/aos_app_settings.c:2333
+SSH (puerto 22)	SSH (port 22)
+
+#: components/aos_apps/aos_app_settings.c:2336
+Clave nueva de la placa	New key for the board
+
+#: components/aos_apps/aos_app_settings.c:2343
+Una consola de la placa desde la Mac: ssh p4os.local. Sigue las reglas de arriba: donde el portal está abierto entra cualquiera, donde pide la contraseña entra con ella o con una clave de la lista, y donde está cerrado no entra nadie. Lo de arriba es la huella de la placa: ssh la muestra la primera vez.	A console on the board from your computer: ssh p4os.local. It follows the rules above: where the portal is open anyone gets in, where it asks for the password you get in with it or with a key on the list, and where it is closed nobody does. Above is the board's fingerprint: ssh shows it the first time.
+
+#: components/aos_apps/aos_app_settings.c:2347
+CLAVES QUE PUEDEN ENTRAR	KEYS THAT MAY LOG IN
+
+#: components/aos_apps/aos_app_settings.c:2358
+Una clave que no está en la lista pide permiso acá, en la pantalla, con su huella: compará con la que da ssh-keygen -lf en la Mac. Quitar una cierra las sesiones de SSH abiertas.	A key that is not on the list asks for permission here, on the screen, with its fingerprint: compare it with what ssh-keygen -lf gives on your computer. Removing one closes the open SSH sessions.
+
+#: components/aos_ssh/aos_ssh.c:576
+abierta	open
+
+#: components/aos_ssh/aos_ssh.c:599
+Esta clave (%s %s) no está en la lista de la placa. Mirá su pantalla: tenés %d segundos para permitirla.	This key (%s %s) is not on the board's list. Look at its screen: you have %d seconds to allow it.
+
+#: components/aos_ssh/aos_ssh.c:608
+La placa está preguntando por otra clave; probá de nuevo en un rato.	The board is asking about another key; try again in a moment.
+
+#: components/aos_ssh/aos_ssh.c:609
+La placa no permitió la clave.	The board did not allow the key.
+
+#: components/aos_ssh/aos_ssh.c:652
+contraseña	password
+
+#: components/aos_ssh/aos_ssh.c:657
+Demasiados intentos: esperá %d s.	Too many tries: wait %d s.
+
+#: components/aos_ssh/aos_ssh_cmds.c:140
+%s: no conozco la opción -%c\n	%s: unknown option -%c\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:177
+help: no existe «%s»\n	help: there is no “%s”\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:221
+no es una carpeta	not a folder
+
+#: components/aos_ssh/aos_ssh_cmds.c:357
+(y más: se muestran las primeras %d)\n	(and more: the first %d are shown)\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:433
+cat: ¿qué archivo?\n	cat: which file?\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:472
+%s: ¿qué archivo?\n	%s: which file?\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:574
+rm: ¿qué borro?\n	rm: delete what?\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:586
+eso no se borra	that cannot be deleted
+
+#: components/aos_ssh/aos_ssh_cmds.c:596
+es una carpeta (rm -r)	is a folder (rm -r)
+
+#: components/aos_ssh/aos_ssh_cmds.c:614
+mkdir: ¿qué carpeta?\n	mkdir: which folder?\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:648
+rmdir: ¿qué carpeta?\n	rmdir: which folder?\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:682
+mv: mv origen destino\n	mv: mv source destination\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:688
+eso no se mueve	that cannot be moved
+
+#: components/aos_ssh/aos_ssh_cmds.c:729
+cp: no terminó; el destino se borró\n	cp: did not finish; the destination was deleted\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:738
+cp: cp origen destino\n	cp: cp source destination\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:745
+es una carpeta	is a folder
+
+#: components/aos_ssh/aos_ssh_cmds.c:792
+total	total
+
+#: components/aos_ssh/aos_ssh_cmds.c:792
+usado	used
+
+#: components/aos_ssh/aos_ssh_cmds.c:817
+%u d %u h %u min	%u d %u h %u min
+
+#: components/aos_ssh/aos_ssh_cmds.c:818
+%u h %u min	%u h %u min
+
+#: components/aos_ssh/aos_ssh_cmds.c:819
+%u min %u s	%u min %u s
+
+#: components/aos_ssh/aos_ssh_cmds.c:828
+prendida hace %s\n	up for %s\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:837
+la placa todavía no sabe la hora\n	the board does not know the time yet\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:856
+%s rev %d.%d, %d núcleos a %d MHz · ESP-IDF %s\n	%s rev %d.%d, %d cores at %d MHz · ESP-IDF %s\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:858
+ranura %s · último reinicio: %s\n	slot %s · last reset: %s\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:870
+interna	internal
+
+#: components/aos_ssh/aos_ssh_cmds.c:871
+usada	used
+
+#: components/aos_ssh/aos_ssh_cmds.c:871
+bloque	block
+
+#: components/aos_ssh/aos_ssh_cmds.c:871
+mínima	lowest
+
+#: components/aos_ssh/aos_ssh_cmds.c:913
+tarea	task
+
+#: components/aos_ssh/aos_ssh_cmds.c:913
+cpu	cpu
+
+#: components/aos_ssh/aos_ssh_cmds.c:913
+prio	prio
+
+#: components/aos_ssh/aos_ssh_cmds.c:913
+núcleo	core
+
+#: components/aos_ssh/aos_ssh_cmds.c:913
+pila	stack
+
+#: components/aos_ssh/aos_ssh_cmds.c:924
+(y %d más)\n	(and %d more)\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:934
+cpu: % de un núcleo · pila: K* en PSRAM · libre: lo mínimo que tuvo, en bytes\n	cpu: % of one core · stack: K* in PSRAM · free: the least it ever had, in bytes\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:952
+P4OS %s · prendida hace %s · libre: %s interna, %s PSRAM · q sale\n\n	P4OS %s · up for %s · free: %s internal, %s PSRAM · q quits\n\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:990
+[se perdieron %u bytes del registro]\n	[%u bytes of the log were lost]\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1013
+log: log [-f] [-p] [-n líneas]\n	log: log [-f] [-p] [-n lines]\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1023
+no hay registro del arranque anterior\n	there is no log of the previous boot\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1062
+ · canal %d	 · channel %d
+
+#: components/aos_ssh/aos_ssh_cmds.c:1067
+Red propia: %s · %s · %d conectados\n	Own network: %s · %s · %d connected\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1088
+> al frente · * abierta\n	> in front · * open\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1110
+open: ¿qué app? («apps» las lista)\n	open: which app? (“apps” lists them)\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1118
+open: no encuentro «%s»\n	open: cannot find “%s”\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1143
+%-12s desde %-16s hace %u min (%s)\n	%-12s from %-16s %u min ago (%s)\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1168
+Reiniciando la placa...\n	Restarting the board...\n
+
+#: components/aos_ssh/aos_ssh_cmds.c:1176
+esta lista	this list
+
+#: components/aos_ssh/aos_ssh_cmds.c:1177
+lo que hay en una carpeta (-l con detalle)	what is in a folder (-l with details)
+
+#: components/aos_ssh/aos_ssh_cmds.c:1178
+cambia de carpeta (sola: la raíz de la tarjeta)	changes folder (alone: the card's root)
+
+#: components/aos_ssh/aos_ssh_cmds.c:1179
+la carpeta en la que estás	the folder you are in
+
+#: components/aos_ssh/aos_ssh_cmds.c:1180
+muestra archivos	shows files
+
+#: components/aos_ssh/aos_ssh_cmds.c:1181
+las primeras líneas	the first lines
+
+#: components/aos_ssh/aos_ssh_cmds.c:1182
+las últimas líneas	the last lines
+
+#: components/aos_ssh/aos_ssh_cmds.c:1183
+copia un archivo	copies a file
+
+#: components/aos_ssh/aos_ssh_cmds.c:1184
+mueve o renombra	moves or renames
+
+#: components/aos_ssh/aos_ssh_cmds.c:1185
+borra (-r: carpetas con todo adentro)	deletes (-r: folders with everything in them)
+
+#: components/aos_ssh/aos_ssh_cmds.c:1186
+crea carpetas	makes folders
+
+#: components/aos_ssh/aos_ssh_cmds.c:1187
+borra carpetas vacías	deletes empty folders
+
+#: components/aos_ssh/aos_ssh_cmds.c:1188
+crea archivos vacíos	makes empty files
+
+#: components/aos_ssh/aos_ssh_cmds.c:1189
+el espacio de la tarjeta y los pendrives	space on the card and the USB drives
+
+#: components/aos_ssh/aos_ssh_cmds.c:1190
+el registro (-f lo sigue, -p el arranque anterior)	the log (-f follows it, -p the previous boot)
+
+#: components/aos_ssh/aos_ssh_cmds.c:1191
+las tareas y cuánto usan, cada segundo	the tasks and what they use, every second
+
+#: components/aos_ssh/aos_ssh_cmds.c:1192
+las tareas, una vez	the tasks, once
+
+#: components/aos_ssh/aos_ssh_cmds.c:1193
+la memoria: interna, DMA y PSRAM	memory: internal, DMA and PSRAM
+
+#: components/aos_ssh/aos_ssh_cmds.c:1194
+cuánto hace que está prendida	how long it has been on
+
+#: components/aos_ssh/aos_ssh_cmds.c:1195
+la fecha y la hora	the date and time
+
+#: components/aos_ssh/aos_ssh_cmds.c:1196
+versión, chip y último reinicio	version, chip and last reset
+
+#: components/aos_ssh/aos_ssh_cmds.c:1197
+el Wi-Fi y las direcciones	the Wi-Fi and the addresses
+
+#: components/aos_ssh/aos_ssh_cmds.c:1198
+las apps instaladas	the installed apps
+
+#: components/aos_ssh/aos_ssh_cmds.c:1199
+abre una app en la pantalla	opens an app on the screen
+
+#: components/aos_ssh/aos_ssh_cmds.c:1200
+vuelve al inicio en la pantalla	goes to the home screen
+
+#: components/aos_ssh/aos_ssh_cmds.c:1201
+atrás, en la pantalla	back, on the screen
+
+#: components/aos_ssh/aos_ssh_cmds.c:1202
+quiénes están conectados por SSH	who is connected over SSH
+
+#: components/aos_ssh/aos_ssh_cmds.c:1203
+reinicia la placa	restarts the board
+
+#: components/aos_ssh/aos_ssh_cmds.c:1204
+limpia la pantalla	clears the screen
+
+#: components/aos_ssh/aos_ssh_cmds.c:1205
+escribe lo que le pasen	prints its arguments
+
+#: components/aos_ssh/aos_ssh_cmds.c:1206
+cierra la sesión (también Ctrl-D)	ends the session (Ctrl-D too)
+
+#: components/aos_ssh/aos_ssh_shell.c:492
+%s: no existe ese comando; «help» muestra los que hay.\n	%s: no such command; “help” shows the ones there are.\n
+
+#: components/aos_ssh/aos_ssh_shell.c:701
+«help» muestra los comandos; Ctrl-D o «exit» para salir.\n	“help” shows the commands; Ctrl-D or “exit” to leave.\n
