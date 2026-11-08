@@ -632,13 +632,13 @@ static void car_cache(tb_render_t *r, int car)
     if (r->cc_valid && r->cc_car == car && r->cc_night == night &&
         !memcmp(&r->cc_paint, &r->paint_player, sizeof(tb_paint_t))) return;
     car_cache_free(r);
-    /* the frames as ids and light, read again if they were dropped */
-    tb_art_load_near(car);
     tb_lut_t lut;
     tb_lut_build(&lut, &r->paint_player, 0, 0, false, night);
+    /* the frames as ids and light, one at a time: read, coloured, freed */
     for (int f = 0; f < TB_NEAR_FRAMES; f++) {
-        const tb_vspr_t *v = tb_art_near(car, f);
-        if (!v || !v->px) continue;
+        tb_vspr_t frame;
+        if (!tb_art_near_frame(car, f, &frame) || !frame.px) continue;
+        const tb_vspr_t *v = &frame;
         size_t np = (size_t)v->w * v->h;
         tb_sprite_t *sp = &r->car_spr[f];
         memset(sp, 0, sizeof(*sp));
@@ -646,6 +646,7 @@ static void car_cache(tb_render_t *r, int car)
         sp->a = (uint8_t *)tb_malloc(np);
         if (!sp->px || !sp->a) {
             tb_sprite_free(sp);
+            free(frame.px);
             continue;
         }
         sp->w = v->w;
@@ -669,6 +670,7 @@ static void car_cache(tb_render_t *r, int car)
             }
             r->ntail[f] = nt;
         }
+        free(frame.px);
         tb_sprite_runs(sp);
         tb_yield();
     }
@@ -677,8 +679,6 @@ static void car_cache(tb_render_t *r, int car)
     r->cc_paint = r->paint_player;
     r->cc_valid = true;
     tb_lut_build(&r->lut_brake, &r->paint_player, 0, 0, true, night);
-    /* coloured: the id + light frames are not needed until the paint changes */
-    tb_art_drop_near();
 }
 
 /* the road's centre (screen x), its px per metre and the floor's row at a

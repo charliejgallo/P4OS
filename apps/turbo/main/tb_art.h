@@ -73,16 +73,14 @@ uint32_t tb_art_bytes(void);
  * others; the first call also reads the cars' shadows */
 bool tb_art_load_vehicles(uint32_t mask);
 uint32_t tb_art_vehicles_loaded(void);
-/* one car's near frames (the one driven, or looked at in the garage) */
-bool tb_art_load_near(int car);
-/* the near frames are only needed until the renderer colours them (~350 KB) */
-void tb_art_drop_near(void);
+/* one of a car's near frames (ids and light), read for the renderer to
+ * colour: the caller frees out->px. They are only needed until then. */
+bool tb_art_near_frame(int car, int frame, tb_vspr_t *out);
 /* the backdrop is only needed until the renderer composites it */
 void tb_art_drop_backdrop(void);
 /* the props a track uses and its backdrop (drops the previous stage's) */
 bool tb_art_load_stage(const tb_track_t *t);
 
-const tb_vspr_t *tb_art_near(int car, int frame);
 const tb_sprite_t *tb_art_near_shadow(int car, int frame);  /* alpha only    */
 const tb_vmip_t *tb_art_far(int model, int view);
 const tb_mip_t *tb_art_far_shadow(int model, int view);

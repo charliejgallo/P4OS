@@ -6,6 +6,7 @@
 #endif
 #include "tb_art.h"
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -30,9 +31,7 @@ static size_t     s_len;
 static entry_t   *s_ent;
 static int        s_nent;
 
-static tb_vspr_t  s_near[CAR_N][TB_NEAR_FRAMES];
 static tb_sprite_t s_near_sh[CAR_N];           /* one per car, the straight frame's */
-static int        s_near_car = -1;              /* whose frames are loaded           */
 static tb_vmip_t  s_far[VH_N][TB_FAR_VIEWS];
 static tb_mip_t   s_far_sh[VH_N][TB_FAR_VIEWS];
 static bool       s_vehicles;
@@ -338,9 +337,13 @@ static void vmip_free(tb_vmip_t *m)
 static uint16_t rd16(const uint8_t *p) { return (uint16_t)(p[0] | (p[1] << 8)); }
 static uint32_t rd32(const uint8_t *p) { return (uint32_t)p[0] | ((uint32_t)p[1] << 8) | ((uint32_t)p[2] << 16) | ((uint32_t)p[3] << 24); }
 
-static bool lz4_decode(const uint8_t *src, size_t slen, uint8_t *dst, size_t dlen)
+/* One LZ4 block into two buffers end to end: the first n1 bytes of what it
+ * unpacks to go to d1 and the next n2 to d2, so a sprite's colour and alpha
+ * planes come out where they stay, with no third buffer for the whole */
+static bool lz4_decode2(const uint8_t *src, size_t slen, uint8_t *d1, size_t n1, uint8_t *d2, size_t n2)
 {
-    size_t i = 0, o = 0;
+    size_t i = 0, o = 0, dlen = n1 + n2;
+#define LZ_AT(p) ((p) < n1 ? d1 + (p) : d2 + ((p) - n1))
     while (i < slen) {
         uint8_t tok = src[i++];
         size_t lit = tok >> 4;
@@ -353,7 +356,12 @@ static bool lz4_decode(const uint8_t *src, size_t slen, uint8_t *dst, size_t dle
             } while (b == 255);
         }
         if (i + lit > slen || o + lit > dlen) return false;
-        memcpy(dst + o, src + i, lit);
+        size_t k = 0;
+        if (o < n1) {
+            k = lit < n1 - o ? lit : n1 - o;
+            memcpy(d1 + o, src + i, k);
+        }
+        if (lit > k) memcpy(d2 + (o + k - n1), src + i + k, lit - k);
         i += lit;
         o += lit;
         if (i >= slen) break;
@@ -370,9 +378,23 @@ static bool lz4_decode(const uint8_t *src, size_t slen, uint8_t *dst, size_t dle
             } while (b == 255);
         }
         if (off == 0 || off > o || o + m > dlen) return false;
-        for (size_t k = 0; k < m; k++, o++) dst[o] = dst[o - off];
+        if (o + m <= n1) {
+            for (size_t q = 0; q < m; q++, o++) d1[o] = d1[o - off];
+        } else if (o - off >= n1) {
+            uint8_t *d = d2 + (o - n1);
+            for (size_t q = 0; q < m; q++) d[q] = d[(ptrdiff_t)q - (ptrdiff_t)off];
+            o += m;
+        } else {
+            for (size_t q = 0; q < m; q++, o++) *LZ_AT(o) = *LZ_AT(o - off);
+        }
     }
+#undef LZ_AT
     return o == dlen;
+}
+
+static bool lz4_decode(const uint8_t *src, size_t slen, uint8_t *dst, size_t dlen)
+{
+    return lz4_decode2(src, slen, dst, dlen, NULL, 0);
 }
 
 static int find(const char *name)
@@ -398,6 +420,19 @@ static uint8_t *unpack(int idx)
         return NULL;
     }
     return raw;
+}
+
+/* an entry unpacked into two buffers of the caller (lz4_decode2) */
+static bool unpack_split(int idx, uint8_t *d1, size_t n1, uint8_t *d2, size_t n2)
+{
+    const entry_t *e = &s_ent[idx];
+    if (!s_fp || e->off + e->clen > s_len || e->rawlen != n1 + n2) return false;
+    uint8_t *src = (uint8_t *)tb_malloc(e->clen ? e->clen : 1);
+    bool ok = src && fseek(s_fp, (long)e->off, SEEK_SET) == 0 && fread(src, 1, e->clen, s_fp) == e->clen &&
+              lz4_decode2(src, e->clen, d1, n1, d2, n2);
+    free(src);
+    tb_yield();
+    return ok;
 }
 
 bool tb_art_open(const char *path)
@@ -454,21 +489,19 @@ static bool load_sprite(const char *name, tb_sprite_t *out, float *ppm)
     memset(out, 0, sizeof(*out));
     int i = find(name);
     if (i < 0 || s_ent[i].type != T_SPRITE) return false;
-    uint8_t *raw = unpack(i);
-    if (!raw) return false;
     const entry_t *e = &s_ent[i];
     size_t np = (size_t)e->w * e->h;
+    /* unpacked straight into its two planes: a stage's backdrop is 1.9 MB,
+     * and unpacking it whole beside them was 1.9 MB more at the peak of
+     * loading a stage */
     uint16_t *px = (uint16_t *)tb_malloc(np * 2);
     uint8_t *a = (uint8_t *)tb_malloc(np);
-    if (!px || !a) {
+    if (!px || !a || !unpack_split(i, (uint8_t *)px, np * 2, a, np)) {
         free(px);
         free(a);
-        free(raw);
         return false;
     }
-    for (size_t k = 0; k < np; k++) px[k] = rd16(raw + k * 2);
-    memcpy(a, raw + np * 2, np);
-    free(raw);
+    for (size_t k = 0; k < np; k++) px[k] = rd16((const uint8_t *)&px[k]);
     out->px = px;
     out->a = a;
     out->w = (int16_t)e->w;
@@ -504,17 +537,17 @@ static bool load_vehicle(const char *name, tb_vspr_t *out, float *ppm)
     if (!raw) return false;
     const entry_t *e = &s_ent[i];
     size_t np = (size_t)e->w * e->h;
-    uint16_t *px = (uint16_t *)tb_malloc(np * 2);
-    if (!px) {
+    if (e->rawlen < np * 2) {
         free(raw);
         return false;
     }
-    /* stored as (id << 4 | alpha >> 4), light */
+    /* stored as (id << 4 | alpha >> 4), light: each pixel's two bytes
+     * become its two bytes, in place (no second copy while it loads) */
+    uint16_t *px = (uint16_t *)raw;
     for (size_t k = 0; k < np; k++) {
         uint8_t ia = raw[k * 2], li = raw[k * 2 + 1];
         px[k] = (uint16_t)(((ia >> 4) << 12) | ((ia & 15) << 8) | li);
     }
-    free(raw);
     out->px = px;
     out->w = (int16_t)e->w;
     out->h = (int16_t)e->h;
@@ -584,38 +617,16 @@ uint32_t tb_art_vehicles_loaded(void)
     return m;
 }
 
-static void free_near(void)
+/* One frame of a car seen from behind (~200 KB), for the renderer to
+ * colour and free. It used to read all seven and keep them until the
+ * coloured copies (1.8 MB) were made: 1.3 MB more at that moment. */
+bool tb_art_near_frame(int car, int frame, tb_vspr_t *out)
 {
-    for (int f = 0; f < TB_NEAR_FRAMES; f++) {
-        for (int c = 0; c < CAR_N; c++) {
-            free(s_near[c][f].px);
-            s_near[c][f].px = NULL;
-        }
-    }
-    s_near_car = -1;
-}
-
-/* the player's car seen from behind, seven yaw frames (~350 KB): only the
- * car being driven or looked at in the garage */
-bool tb_art_load_near(int car)
-{
-    if (car < 0 || car >= CAR_N) return false;
-    if (s_near_car == car) return true;
-    free_near();
-    if (!s_fp) return false;
+    memset(out, 0, sizeof(*out));
+    if (car < 0 || car >= CAR_N || frame < 0 || frame >= TB_NEAR_FRAMES || !s_fp) return false;
     char nm[NAME_LEN];
-    int ok = 0;
-    for (int f = 0; f < TB_NEAR_FRAMES; f++) {
-        snprintf(nm, sizeof nm, "near_%s_y%d", veh_name(car), f);
-        if (load_vehicle(nm, &s_near[car][f], NULL)) ok++;
-    }
-    s_near_car = car;
-    return ok == TB_NEAR_FRAMES;
-}
-
-void tb_art_drop_near(void)
-{
-    free_near();
+    snprintf(nm, sizeof nm, "near_%s_y%d", veh_name(car), frame);
+    return load_vehicle(nm, out, NULL);
 }
 
 void tb_art_drop_backdrop(void)
@@ -670,7 +681,6 @@ bool tb_art_load_stage(const tb_track_t *t)
 void tb_art_close(void)
 {
     free_stage();
-    free_near();
     for (int c = 0; c < CAR_N; c++) free(s_near_sh[c].a);
     memset(s_near_sh, 0, sizeof s_near_sh);
     for (int v = 0; v < VH_N; v++) free_far(v);
@@ -680,12 +690,6 @@ void tb_art_close(void)
     free(s_ent);
     s_ent = NULL;
     s_nent = 0;
-}
-
-const tb_vspr_t *tb_art_near(int car, int frame)
-{
-    if (car < 0 || car >= CAR_N || frame < 0 || frame >= TB_NEAR_FRAMES) return NULL;
-    return s_near[car][frame].px ? &s_near[car][frame] : NULL;
 }
 
 const tb_sprite_t *tb_art_near_shadow(int car, int frame)
@@ -759,12 +763,7 @@ uint32_t tb_art_bytes(void)
     for (int v = 0; v < VH_N; v++) {
         for (int k = 0; k < TB_FAR_VIEWS; k++) n += vmip_bytes(&s_far[v][k]) + mip_bytes(&s_far_sh[v][k]);
     }
-    for (int c = 0; c < CAR_N; c++) {
-        n += spr_bytes(&s_near_sh[c]);
-        for (int f = 0; f < TB_NEAR_FRAMES; f++) {
-            if (s_near[c][f].px) n += (uint32_t)s_near[c][f].w * (uint32_t)s_near[c][f].h * 2;
-        }
-    }
+    for (int c = 0; c < CAR_N; c++) n += spr_bytes(&s_near_sh[c]);
     n += spr_bytes(&s_bg);
     return n;
 }
