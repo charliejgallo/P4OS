@@ -123,6 +123,8 @@ Later the same night: a fixture in universe 2, a group of three pixels and
 blue on it alone, a scene's own fade, and Art-Net to 127.0.0.1 with base 3,
 heard by a Python listener as universes 3 and 4 at 40 packets a second;
 the DMX app's node in the same simulator took universe 3 and put it out.
+On the board the next morning: Art-Net to the Mac's IP with base 7 came
+in as universe 7, about 40 packets a second.
 
 On the board, the same day: Luces on `uart.a` driving the bench's ESP32
 (`tools/rs485_test/esp32`, DMX light role, channels 1-24) through the two

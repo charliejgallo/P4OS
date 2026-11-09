@@ -413,9 +413,31 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       la carga medida contra el Rigol; un bus cargado (el driver encola
       64 tramas); cuánto tarda en leerse un `.dbc` grande de la tarjeta; y
       grabar y abrir el CSV en SavvyCAN.
-- [ ] **La noche del 2026-11-09: RS485, DMX y Luces nuevos** (todo
-      compilado y probado en el simulador, nada instalado: la OTA y las
-      instalaciones esperan el OK del usuario). Lo pedido, en orden:
+- [x] **La noche del 2026-11-09: RS485, DMX y Luces nuevos** (**anduvo en
+      la placa el 2026-11-09 a la mañana**, con el OK del usuario: OTA
+      confirmada, las tres apps y los idiomas, el ESP32 grabado por `usb0`
+      y verificado). Lo probado:
+      - **RDM** con los módulos automáticos: la búsqueda encontró al ESP32
+        (UID 7FF0:E90AEBA8, "Tira del banco", canales 1-24) con 0
+        respuestas malas; Identificar on y off; la dirección a 25 y de
+        vuelta a 1 (el ESP32 pasó a leer 25-27). El DMX siguió a 40
+        paquetes/s con 0 malos mientras tanto.
+      - **Nodo Art-Net:** desde la Mac a la IP de la placa, universo 0, 35
+        paquetes/s por Wi-Fi; el arcoíris de la Mac llegó a la tira del
+        ESP32 por RS485.
+      - **Buscar velocidad** con el ESP32 en 19200 8E1: 8E1 limpio y
+        primero; 8N1 con 3 bytes errados, 8O1 con 7, 8N2 con 3.
+      - **Pasarela** en el puerto 502: desde la Mac, lecturas del variador
+        del ESP32, una escritura releída, 0B para las unidades 2 y 9.
+      - **Luces con Art-Net** a la IP de la Mac, base 7: llegó el universo
+        7, ~40 paquetes/s.
+      - Visto en el camino y arreglado: en inglés, el texto del nodo
+        ("Receive from the network and send it out as DMX") empujaba el
+        interruptor fuera de la pantalla; ahora el texto se parte en dos
+        líneas (lo mismo en Luces y en la pasarela de Modbus).
+      Falta: sACN y el ArtPoll desde una consola de verdad, el esclavo por
+      TCP en la placa, el importador de YAML y los perfiles nuevos en la
+      página, el RDM contra un aparato comercial. Lo pedido era, en orden:
       1. Firmware nuevo por OTA (`tools/ota.sh`): `aos_io_uart_errors`,
          `aos_io_dmx_rdm`, `aos_hal_tcp_listen`/`accept`,
          `aos_hal_udp_*`. Las apps nuevas usan esos símbolos: sin el

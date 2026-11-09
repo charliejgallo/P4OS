@@ -94,6 +94,17 @@ modules of the Modbus bench, at 250000 baud, the first time:
 
 <img src="../../docs/img/bench-dmx-photo.jpg" width="360" alt="The P4's Consola sending a rainbow; the ESP32 in the DMX light role shows it on its strip">
 
+The next morning, with the new firmware and the ESP32 answering RDM:
+
+- **RDM:** Buscar aparatos found the ESP32 (UID 7FF0:E90AEBA8, "Tira del
+  banco", 24 channels at 1) through the automatic modules with no bad
+  answer; identify on and off; its address moved to 25 and back to 1 (the
+  ESP32 read 25-27 meanwhile). DMX went on at 40 packets a second with no
+  bad packet while it happened.
+- **Red, Art-Net:** a rainbow sent from the Mac to the board's IP over
+  Wi-Fi (universe 0, 35 packets a second) came out on RS485 and reached the
+  ESP32's strip.
+
 The MAB on the wire is longer than asked (16 µs asked, 33 and 50 µs
 measured): the time from letting the line go to the UART's first start
 bit. Still within the standard (8 µs at least, no upper limit worth

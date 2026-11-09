@@ -254,6 +254,13 @@ twisted pair, the modules' own 120 Ω.
 - **Monitor** with the ESP32 polling a unit nobody plays: each request
   counted, every one unanswered.
 
+Later the same day, with the firmware that counts line errors: Buscar
+velocidad against the ESP32 at 19200 8E1 put 19200 8E1 first, clean; 8N1
+and 8N2 came with 3 bytes wrong, 8O1 with 7. The **gateway** on port 502
+answered a Modbus TCP client on the Mac with the ESP32 drive's registers
+(the setpoint 0x05AA, 1450 rpm), wrote one and read it back, and gave 0B
+for units nobody plays.
+
 ## Files
 
 - `main/mb.h` what the files share; the shared state and the log
