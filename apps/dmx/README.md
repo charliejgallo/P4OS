@@ -59,7 +59,10 @@ modules of the Modbus bench, at 250000 baud, the first time:
   code 0, BREAK measured 176 µs (it sends 176), MAB 50 µs, no bad packet.
 - **Consola (rainbow) → ESP32 light:** 40 packets a second, 512 slots,
   BREAK 177 µs as the ESP32 measures it (176 sent), MAB 33 µs, no bad
-  packet in hundreds, channels 1-3 following the rainbow.
+  packet in hundreds, channels 1-3 following the rainbow, and the strip
+  showing it (the strip on IO18 is in `docs/img/bench-rs485.svg`):
+
+<img src="../../docs/img/bench-dmx-photo.jpg" width="360" alt="The P4's Consola sending a rainbow; the ESP32 in the DMX light role shows it on its strip">
 
 The MAB on the wire is longer than asked (16 µs asked, 33 and 50 µs
 measured): the time from letting the line go to the UART's first start

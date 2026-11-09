@@ -140,11 +140,15 @@ Two more roles (`r` or BOOT goes round the four): **DMX console** and
 | GND | GND |
 | DIN | IO18 (300-470 Ω in series if there is one) |
 
+The drawing above has it too, under the DevKit, by tags.
+
 Cut on the copper pads between two LEDs and keep the piece whose DIN is at
 the cut (the printed arrow points away from it). A 470-1000 µF capacitor
 across 5V and GND next to the strip helps; with 8 pixels it works without.
 The firmware keeps the strip at a third of its brightness: eight pixels at
 full white draw almost half an amp, all from the USB.
+
+<img src="../../docs/img/bench-dmx-photo.jpg" width="360" alt="The P4's DMX console sending a rainbow; the ESP32 below, in the DMX light role, shows it on its strip of 8 WS2812B pixels">
 
 - **DMX console:** 512 slots, 40 packets a second, BREAK 176 µs, MAB
   16 µs (TX inverted for the BREAK), DE held high. `p` goes round the

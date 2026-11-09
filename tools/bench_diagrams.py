@@ -731,11 +731,12 @@ def auto485(s, x, top, title):
 
 def rs485():
     """Two automatic RS485 modules on one bus: the P4's uart.a on the header, an ESP32 DevKit's UART2."""
-    s = Svg(1240, 1260, "RS485 on the 40-pin header: the P4 and an ESP32 on one bus",
-            "two automatic \"RS485 to TTL\" modules (no DE pin) fed from 3.3 V, and a twisted pair; each module carries "
-            "its 120 Ω; the P4's uart.a on GPIO30/31, the ESP32's UART2 on IO17/IO4")
+    s = Svg(1240, 1280, "RS485 on the 40-pin header: the P4 and an ESP32 on one bus",
+            "two automatic \"RS485 to TTL\" modules (no DE pin, 120 Ω each) on 3.3 V and a twisted pair; the P4's uart.a "
+            "on GPIO30/31, the ESP32's UART2 on IO17/IO4, and a WS2812B strip on its IO18 for DMX")
     c_tx, c_rx, c_a, c_b, c_p = "#ea580c", "#16a34a", "#ca8a04", "#2563eb", C["p3"]
     used = {18: c_p, 22: c_tx, 24: c_rx, 26: "#111111"}
+    c_din = "#7c3aed"
     y_a, y_b = 1000, 1022
     x18, y18 = pin_xy(18)
     x22, y22 = pin_xy(22)
@@ -758,9 +759,11 @@ def rs485():
     s.text(440, pin_xy(20)[1] + 4, "pin 20 (DE): free", color=C["dim"], anchor="end")
     # the ESP32 DevKit and its module
     right = DEVKIT_RIGHT
-    i_gnd, i_tx, i_rx = 0, right.index("IO17"), right.index("IO4")
+    i_gnd, i_tx, i_rx, i_din = 0, right.index("IO17"), right.index("IO4"), right.index("IO18")
+    i_5v, i_g2 = DEVKIT_LEFT.index("5V"), DEVKIT_LEFT.index("GND")
     lx, rx_, py, top, bot = devkit(s, 760, ROW0 + STEP, {
-        ("L", 0): c_p, ("R", i_gnd): "#111111", ("R", i_tx): c_tx, ("R", i_rx): c_rx})
+        ("L", 0): c_p, ("R", i_gnd): "#111111", ("R", i_tx): c_tx, ("R", i_rx): c_rx,
+        ("R", i_din): c_din, ("L", i_5v): C["p5"], ("L", i_g2): "#111111"})
     p2, t2, yp2, yt2 = auto485(s, 1010, 260, "RS485 module #2 (the ESP32's)")
     s.wire([(rx_ + 8, py(i_tx)), (985, py(i_tx)), (985, yp2 + 70), (p2["TXD"], yp2 + 70), (p2["TXD"], yp2 + 8)], c_tx, 3)
     s.wire([(rx_ + 8, py(i_rx)), (1000, py(i_rx)), (1000, yp2 + 50), (p2["RXD"], yp2 + 50), (p2["RXD"], yp2 + 8)], c_rx, 3)
@@ -774,6 +777,29 @@ def rs485():
     s.net(990, py(i_gnd), "GND", C["gnd"], side="right")
     s.text(985, bot + 46, "its micro-USB on a USB host socket of the P4 (or the Mac): 5 V, GND, its console",
            color=C["dim"], anchor="end")
+    # the DMX light: 8 WS2812B pixels, by tags (IO18 to DIN, the DevKit's 5V and a GND)
+    s.wire([(rx_ + 8, py(i_din)), (962, py(i_din))], c_din, 3)
+    s.net(962, py(i_din), "DIN", c_din, side="right")
+    s.wire([(lx - 8, py(i_5v)), (732, py(i_5v))], C["p5"], 3)
+    s.net(732, py(i_5v), "ESP 5V", C["p5"])
+    s.wire([(lx - 8, py(i_g2)), (742, py(i_g2))], C["gnd"], 3)
+    s.net(742, py(i_g2), "GND", C["gnd"])
+    sx0, sx1, sy = 470, 870, 836
+    s.add(f'<rect x="{sx0}" y="{sy}" width="{sx1-sx0}" height="68" rx="8" fill="#111827"/>')
+    for i in range(8):
+        cx_ = sx1 - 40 - i * 46
+        col = ["#ef4444", "#f97316", "#facc15", "#22c55e", "#06b6d4", "#3b82f6", "#8b5cf6", "#ec4899"][i]
+        s.add(f'<rect x="{cx_-15}" y="{sy+19}" width="30" height="30" rx="4" fill="#f9fafb"/>')
+        s.add(f'<circle cx="{cx_}" cy="{sy+34}" r="9" fill="{col}"/>')
+    s.plain(sx0 + 12, sy + 88, "8 WS2812B pixels (the DMX light role: channels 1-24, RGB each); data runs right to left",
+            size=11, color=C["dim"])
+    pads = {"5V": sy + 10, "GND": sy + 34, "DIN": sy + 58}
+    lab = {"5V": ("ESP 5V", C["p5"]), "GND": ("GND", C["gnd"]), "DIN": ("DIN", c_din)}
+    for name, y in pads.items():
+        s.add(f'<rect x="{sx1}" y="{y-6}" width="14" height="12" rx="2" fill="#d1a33a"/>')
+        s.wire([(sx1 + 14, y), (sx1 + 40, y)], lab[name][1], 3)
+        s.net(sx1 + 40, y, lab[name][0], lab[name][1], side="right")
+    s.text(sx0 + 4, sy - 12, "WS2812B strip on the ESP32 (only for DMX)", size=13, color="#111", bold=True)
     # the bus: from each terminal block, round the board and along the bottom
     s.wire([(t1["A+"], yt1 - 14), (t1["A+"], 214), (120, 214), (120, y_a), (450, y_a)], c_a, 3)
     s.wire([(t1["B-"], yt1 - 14), (t1["B-"], 200), (104, 200), (104, y_b), (450, y_b)], c_b, 3)
@@ -796,6 +822,7 @@ def rs485():
     s.notes(40, y_b + 50, 1160, "Wiring it (tools/rs485_test/README.md; the Modbus app's Cableado tab says the same)", [
         "• P4: TX (GPIO30, pin 22) to TXD, RX (GPIO31, pin 24) to RXD; VCC to 3V3 (pin 18), GND to pin 26. GPIO29 (DE) stays free",
         "• ESP32: IO17 to TXD, IO4 to RXD, VCC to its 3V3, GND to its GND. IO16 (DE) stays free",
+        "• DMX light: the strip's DIN to IO18, its 5V to the DevKit's 5V pin (from its USB), GND to a GND. 8 pixels at a third of the light",
         "• These modules name TXD and RXD the MCU's way (TX to TXD). If the TXD LED does not blink when the P4 sends, or nobody",
         "  answers, swap TXD and RXD on that module: at 3.3 V on both sides nothing gets hurt",
         "• Feed them from 3.3 V, not 5 V: at 5 V the RXD pin would put 5 V on the header, which is not 5 V tolerant",
