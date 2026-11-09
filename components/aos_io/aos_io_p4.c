@@ -27,16 +27,28 @@
 
 static bool s_uart_used[SOC_UART_HP_NUM];
 
+/* A free UART of the pool (UART0 is the console's), -1 when all are taken.
+ * The DMX backend takes one this way too. */
+int aos_io_be_uart_take(void)
+{
+    for (int i = 1; i < SOC_UART_HP_NUM; i++) if (!s_uart_used[i]) { s_uart_used[i] = true; return i; }
+    return -1;
+}
+
+void aos_io_be_uart_give(int num)
+{
+    if (num > 0 && num < SOC_UART_HP_NUM) s_uart_used[num] = false;
+}
+
 bool aos_io_be_uart_open(aos_io_uart_t *u, bool rs485)
 {
-    int num = -1;
-    for (int i = 1; i < SOC_UART_HP_NUM; i++) if (!s_uart_used[i]) { num = i; break; }
+    int num = aos_io_be_uart_take();
     if (num < 0) { aos_hal_log("io", "no UART left for %s", u->port->name); return false; }
     uart_config_t c = {
         .baud_rate = (int)u->baud, .data_bits = UART_DATA_8_BITS, .parity = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_1, .flow_ctrl = UART_HW_FLOWCTRL_DISABLE, .source_clk = UART_SCLK_DEFAULT,
     };
-    if (uart_driver_install(num, 8192, 2048, 0, NULL, 0) != ESP_OK) return false;
+    if (uart_driver_install(num, 8192, 2048, 0, NULL, 0) != ESP_OK) { aos_io_be_uart_give(num); return false; }
     uart_param_config(num, &c);
     int de = rs485 ? u->port->pins[2] : UART_PIN_NO_CHANGE;
     uart_set_pin(num, u->port->pins[0], u->port->pins[1], de, UART_PIN_NO_CHANGE);
@@ -48,7 +60,6 @@ bool aos_io_be_uart_open(aos_io_uart_t *u, bool rs485)
          * RTU is the reference) */
         uart_set_rx_timeout(num, 3);
     }
-    s_uart_used[num] = true;
     u->be = (void *)(intptr_t)num;
     return true;
 }
@@ -80,7 +91,7 @@ void aos_io_be_uart_close(aos_io_uart_t *u)
 {
     int num = (int)(intptr_t)u->be;
     uart_driver_delete(num);
-    s_uart_used[num] = false;
+    aos_io_be_uart_give(num);
     gpio_reset_pin(u->port->pins[0]);
     gpio_reset_pin(u->port->pins[1]);
 }

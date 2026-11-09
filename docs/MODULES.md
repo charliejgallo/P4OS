@@ -709,6 +709,41 @@ plays slaves, a master, or a busy bus on one, and `P4_SIM_UART_A=<pty>`
 puts it on `uart.a`. `P4_SIM_UART_A=/dev/cu.usbserial-…` puts a real
 USB-RS485 adapter there instead, so the simulator talks to the ESP32 too.
 
+## DMX512
+
+Since 2026-11-09. `aos_io_dmx_*` (`aos_io.h`) puts DMX on a UART port of
+`modules.txt` through an RS485 transceiver: 250000 baud 8N2, a BREAK, a
+MAB, a start code and up to 512 slots. The shared part is
+`components/aos_io/aos_io_dmx.c` (it claims the port's TX, RX and DE for
+the owner and keeps the universe), the board's `aos_io_dmx_p4.c`, the
+simulator's `sim/io_dmx_sim.c`.
+
+- **Sending:** ESP-IDF's UART driver and a task that, every period (25 ms
+  by default), waits for the last packet to be out, holds TX low for the
+  BREAK by inverting the line, lets it go for the MAB, and queues the
+  start code and the slots. DE stays high while it is open: DMX goes one
+  way. Slots, BREAK (88-2000 µs), MAB (8-1000 µs), period and start code
+  are settable.
+- **Receiving:** not the driver, whose ring buffer would hand the last bytes
+  of one packet (still in the FIFO when the BREAK is detected) to the next.
+  An interrupt of its own takes every byte as it comes (FIFO threshold 1:
+  about 22700 interrupts a second at full rate, a few per cent of a core)
+  and closes the packet at each BREAK, dropping the BREAK's own NUL. It
+  then times the BREAK and the MAB on the RX pin: the BREAK is detected
+  about 10 bit times (40 µs) after it starts, so its length is that plus
+  the time until the line rises, and the MAB the time until it falls
+  again; the polling gives up after 3 ms. Not IRAM: while the flash is
+  busy a packet or two may come out short and count as bad.
+- **What a reader gets:** the last whole packet (start code and slots) and
+  the stats: packets, bad ones (framing error or too long), other start
+  codes, short BREAK/MAB, the rate, the BREAK and MAB as measured, the age
+  of the last packet.
+- **In the simulator** one bus for all: what an app sends, a receiver
+  gets; with nobody sending, a console plays a show (`apps/dmx/README.md`).
+
+The app is **DMX** (`apps/dmx`); the bench's ESP32 plays a console and a
+light with a pixel strip (`tools/rs485_test`). Not tried on the board yet.
+
 ## Not done yet
 
 - **Relays** (a Phase 6 extra): not in this round.

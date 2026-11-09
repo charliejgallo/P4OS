@@ -13,7 +13,7 @@ else()
     file(GLOB SENS_SRCS CONFIGURE_DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/sensors/*.c)
 endif()
 idf_component_register(
-    SRCS "aos_io.c" "aos_io_wire.c" "aos_leds.c" "aos_serial.c" "aos_sensors.c" "aos_modules.c" "aos_io_signal.c" "aos_io_pulse.c" "aos_pca9685.c" "aos_io_p4.c" "aos_io_signal_p4.c" "aos_io_pulse_p4.c"
+    SRCS "aos_io.c" "aos_io_wire.c" "aos_leds.c" "aos_serial.c" "aos_sensors.c" "aos_modules.c" "aos_io_signal.c" "aos_io_pulse.c" "aos_io_dmx.c" "aos_pca9685.c" "aos_io_p4.c" "aos_io_signal_p4.c" "aos_io_pulse_p4.c" "aos_io_dmx_p4.c"
     ${SENS_SRCS}
     INCLUDE_DIRS "include"
     REQUIRES aos_hal

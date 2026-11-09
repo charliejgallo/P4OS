@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3588 simbolos.
+ * Total: 3598 simbolos.
  */
 
 #include <stddef.h>
@@ -741,6 +741,9 @@ extern int aos_io_be_count_open;
 extern int aos_io_be_dac_close;
 extern int aos_io_be_dac_open;
 extern int aos_io_be_dac_set;
+extern int aos_io_be_dmx_close;
+extern int aos_io_be_dmx_open;
+extern int aos_io_be_dmx_read;
 extern int aos_io_be_edges_arm;
 extern int aos_io_be_edges_close;
 extern int aos_io_be_edges_get;
@@ -786,12 +789,14 @@ extern int aos_io_be_swd_seq;
 extern int aos_io_be_swd_seq_in;
 extern int aos_io_be_swd_xfer;
 extern int aos_io_be_uart_close;
+extern int aos_io_be_uart_give;
 extern int aos_io_be_uart_lines;
 extern int aos_io_be_uart_lines_release;
 extern int aos_io_be_uart_open;
 extern int aos_io_be_uart_read;
 extern int aos_io_be_uart_set_baud;
 extern int aos_io_be_uart_set_format;
+extern int aos_io_be_uart_take;
 extern int aos_io_be_uart_write;
 extern int aos_io_can_close;
 extern int aos_io_can_filter;
@@ -808,6 +813,11 @@ extern int aos_io_dac_close;
 extern int aos_io_dac_level;
 extern int aos_io_dac_open;
 extern int aos_io_dac_set;
+extern int aos_io_dmx_close;
+extern int aos_io_dmx_config;
+extern int aos_io_dmx_open;
+extern int aos_io_dmx_read;
+extern int aos_io_dmx_write;
 extern int aos_io_ds18b20_convert_all;
 extern int aos_io_ds18b20_read;
 extern int aos_io_ds18b20_set_bits;
@@ -4332,6 +4342,9 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_be_dac_close),
     ESP_ELFSYM_EXPORT(aos_io_be_dac_open),
     ESP_ELFSYM_EXPORT(aos_io_be_dac_set),
+    ESP_ELFSYM_EXPORT(aos_io_be_dmx_close),
+    ESP_ELFSYM_EXPORT(aos_io_be_dmx_open),
+    ESP_ELFSYM_EXPORT(aos_io_be_dmx_read),
     ESP_ELFSYM_EXPORT(aos_io_be_edges_arm),
     ESP_ELFSYM_EXPORT(aos_io_be_edges_close),
     ESP_ELFSYM_EXPORT(aos_io_be_edges_get),
@@ -4377,12 +4390,14 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_be_swd_seq_in),
     ESP_ELFSYM_EXPORT(aos_io_be_swd_xfer),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_close),
+    ESP_ELFSYM_EXPORT(aos_io_be_uart_give),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_lines),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_lines_release),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_open),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_read),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_set_baud),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_set_format),
+    ESP_ELFSYM_EXPORT(aos_io_be_uart_take),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_write),
     ESP_ELFSYM_EXPORT(aos_io_can_close),
     ESP_ELFSYM_EXPORT(aos_io_can_filter),
@@ -4399,6 +4414,11 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_dac_level),
     ESP_ELFSYM_EXPORT(aos_io_dac_open),
     ESP_ELFSYM_EXPORT(aos_io_dac_set),
+    ESP_ELFSYM_EXPORT(aos_io_dmx_close),
+    ESP_ELFSYM_EXPORT(aos_io_dmx_config),
+    ESP_ELFSYM_EXPORT(aos_io_dmx_open),
+    ESP_ELFSYM_EXPORT(aos_io_dmx_read),
+    ESP_ELFSYM_EXPORT(aos_io_dmx_write),
     ESP_ELFSYM_EXPORT(aos_io_ds18b20_convert_all),
     ESP_ELFSYM_EXPORT(aos_io_ds18b20_read),
     ESP_ELFSYM_EXPORT(aos_io_ds18b20_set_bits),

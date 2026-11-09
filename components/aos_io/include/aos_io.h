@@ -487,6 +487,53 @@ bool aos_io_can_status(aos_io_can_t *c, aos_can_status_t *st);
 bool aos_io_can_recover(aos_io_can_t *c);        /* out of bus_off */
 void aos_io_can_close(aos_io_can_t *c);
 
+/* ---- DMX512 (ANSI E1.11) on a UART port ----
+ *
+ * The lighting bus: RS485 at 250000 baud, 8N2, a packet over and over:
+ * a BREAK (the line low, >= 88 us), a MARK AFTER BREAK (high, >= 8 us),
+ * a start code (0: levels) and up to 512 slots, one byte a channel. One
+ * way only: a console sends, the fixtures listen.
+ *
+ * On a UART port of modules.txt ("uart.a": TX 30, RX 31, DE 29) through an
+ * RS485 transceiver. SEND drives DE high for as long as it is open (DMX is
+ * one way) and puts out a packet every period_ms; RECEIVE keeps DE low and
+ * hands over the last whole packet with what it measured of it.
+ *
+ * The board receives with an interrupt of its own: every byte as it comes,
+ * and at each BREAK the packet so far is closed, so the bytes of one never
+ * leak into the next; the BREAK and the MAB are timed from the RX pin to a
+ * few microseconds. In the simulator a console plays on the bus (a chase
+ * on 24 channels and a 7-channel PAR) unless an app sends; what an app
+ * sends, another one (or itself) receives. */
+typedef enum { AOS_DMX_SEND = 0, AOS_DMX_RECEIVE } aos_dmx_dir_t;
+typedef struct {
+    uint16_t slots;             /* send: channels after the start code, 1..512 (0 = 512) */
+    uint16_t break_us;          /* send: 88..2000 (0 = 176) */
+    uint16_t mab_us;            /* send: 8..1000 (0 = 16) */
+    uint16_t period_ms;         /* send: a packet every, 0 = 25 (40 a second); never faster than it takes */
+    uint8_t  start_code;        /* send: 0 */
+} aos_dmx_cfg_t;
+typedef struct {
+    uint32_t packets;           /* whole packets since open */
+    uint32_t bad;               /* with a framing error, or more than 513 bytes */
+    uint32_t other_code;        /* whose start code was not 0 (RDM 0xCC, text 0x17...) */
+    uint32_t short_break;       /* with a BREAK under 88 us or a MAB under 8 us */
+    float    hz;                /* packets a second, over the last second or so */
+    uint16_t slots;             /* of the last packet */
+    uint8_t  start_code;        /* of the last packet */
+    uint16_t break_us, mab_us;  /* of the last packet as measured (0: not measured) */
+    uint32_t age_ms;            /* since the last packet; large: no signal */
+} aos_dmx_stats_t;
+typedef struct aos_io_dmx aos_io_dmx_t;
+aos_io_dmx_t *aos_io_dmx_open(const char *port, aos_dmx_dir_t dir, const char *owner);
+bool aos_io_dmx_config(aos_io_dmx_t *d, const aos_dmx_cfg_t *c);
+/* send: levels from slot 'first' (1..512) on; they go out with the next packet */
+void aos_io_dmx_write(aos_io_dmx_t *d, int first, const uint8_t *v, int n);
+/* receive: the last whole packet, start code in out[0] and slots in out[1..];
+ * its slot count (0: none yet). st may be NULL. In SEND, st has the packets sent. */
+int  aos_io_dmx_read(aos_io_dmx_t *d, uint8_t *out, int max, aos_dmx_stats_t *st);
+void aos_io_dmx_close(aos_io_dmx_t *d);
+
 /* ---- the serial capture service (aos_serial.c) ----
  *
  * Up to two channels read a UART port into a ring of lines in the

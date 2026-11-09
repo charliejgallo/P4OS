@@ -164,6 +164,28 @@ bool aos_io_be_can_status(aos_io_can_t *c, aos_can_status_t *st);
 bool aos_io_be_can_recover(aos_io_can_t *c);
 void aos_io_be_can_close(aos_io_can_t *c);
 
+/* DMX512 (aos_io_dmx.c): the front claims the port's pins and keeps the
+ * universe to send; the backend moves it and keeps what it receives. */
+struct aos_io_dmx {
+    const aos_io_port_t *port;
+    char     owner[24];
+    aos_dmx_dir_t dir;
+    aos_dmx_cfg_t cfg;
+    void    *mx;                /* guards tx[] and cfg */
+    uint8_t  tx[513];           /* start code + 512 slots, what goes out next */
+    uint32_t hz_packets, hz_ms; /* for the rate */
+    float    hz;
+    void    *be;
+};
+bool aos_io_be_dmx_open(aos_io_dmx_t *d);
+/* the last whole packet and the backend's counts (packets, bad, other_code,
+ * short_break, slots, start_code, break_us, mab_us, age_ms); hz is the front's */
+int  aos_io_be_dmx_read(aos_io_dmx_t *d, uint8_t *out, int max, aos_dmx_stats_t *st);
+void aos_io_be_dmx_close(aos_io_dmx_t *d);
+/* the board's UART pool (aos_io_p4.c), shared with the DMX backend */
+int  aos_io_be_uart_take(void);
+void aos_io_be_uart_give(int num);
+
 /* Pulses and counts (aos_io_pulse.c): the pins are claimed by the front */
 #define AOS_IO_EDGES_MAX 160
 struct aos_io_edges {
