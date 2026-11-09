@@ -15,6 +15,7 @@
 #include <stdlib.h>
 
 #include "driver/uart.h"
+#include "hal/uart_ll.h"          /* UART_INTR_FRAM_ERR */
 #include "driver/gpio.h"
 #include "driver/i2c_master.h"
 #include "driver/spi_master.h"
@@ -26,6 +27,35 @@
 /* ---- UART ---- */
 
 static bool s_uart_used[SOC_UART_HP_NUM];
+
+/* The driver's event queue of each UART, and what it counted: the line's
+ * errors (aos_io_uart_errors). The queue is how the driver tells about a
+ * parity error, a framing error or a BREAK; it is drained on every read
+ * and when the counts are asked for, so it never fills with data events.
+ * 32 events of 12 bytes: the driver makes it with xQueueCreate, in
+ * internal RAM, about 450 bytes a UART that is open. */
+#define UART_EVQ 32
+static QueueHandle_t s_uart_evq[SOC_UART_HP_NUM];
+static aos_uart_errors_t s_uart_err[SOC_UART_HP_NUM];
+static portMUX_TYPE s_uart_err_mux = portMUX_INITIALIZER_UNLOCKED;
+
+static void uart_drain(int num)
+{
+    QueueHandle_t q = s_uart_evq[num];
+    uart_event_t ev;
+    while (q && xQueueReceive(q, &ev, 0) == pdTRUE) {
+        portENTER_CRITICAL(&s_uart_err_mux);
+        switch (ev.type) {
+        case UART_PARITY_ERR: s_uart_err[num].parity++; break;
+        case UART_FRAME_ERR: s_uart_err[num].frame++; break;
+        case UART_BREAK: s_uart_err[num].breaks++; break;
+        case UART_FIFO_OVF:
+        case UART_BUFFER_FULL: s_uart_err[num].overflow++; break;
+        default: break;
+        }
+        portEXIT_CRITICAL(&s_uart_err_mux);
+    }
+}
 
 /* A free UART of the pool (UART0 is the console's), -1 when all are taken.
  * The DMX backend takes one this way too. */
@@ -48,8 +78,12 @@ bool aos_io_be_uart_open(aos_io_uart_t *u, bool rs485)
         .baud_rate = (int)u->baud, .data_bits = UART_DATA_8_BITS, .parity = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_1, .flow_ctrl = UART_HW_FLOWCTRL_DISABLE, .source_clk = UART_SCLK_DEFAULT,
     };
-    if (uart_driver_install(num, 8192, 2048, 0, NULL, 0) != ESP_OK) { aos_io_be_uart_give(num); return false; }
+    s_uart_evq[num] = NULL;
+    if (uart_driver_install(num, 8192, 2048, UART_EVQ, &s_uart_evq[num], 0) != ESP_OK) { aos_io_be_uart_give(num); return false; }
+    memset(&s_uart_err[num], 0, sizeof s_uart_err[num]);
     uart_param_config(num, &c);
+    /* the driver asks for parity errors and BREAKs; framing errors too */
+    uart_enable_intr_mask(num, UART_INTR_FRAM_ERR);
     int de = rs485 ? u->port->pins[2] : UART_PIN_NO_CHANGE;
     uart_set_pin(num, u->port->pins[0], u->port->pins[1], de, UART_PIN_NO_CHANGE);
     if (rs485) {
@@ -66,7 +100,21 @@ bool aos_io_be_uart_open(aos_io_uart_t *u, bool rs485)
 
 int aos_io_be_uart_read(aos_io_uart_t *u, void *buf, int len, int timeout_ms)
 {
-    return uart_read_bytes((int)(intptr_t)u->be, buf, len, pdMS_TO_TICKS(timeout_ms));
+    int num = (int)(intptr_t)u->be;
+    int n = uart_read_bytes(num, buf, len, pdMS_TO_TICKS(timeout_ms));
+    uart_drain(num);
+    return n;
+}
+
+bool aos_io_be_uart_errors(aos_io_uart_t *u, aos_uart_errors_t *out, bool clear)
+{
+    int num = (int)(intptr_t)u->be;
+    uart_drain(num);
+    portENTER_CRITICAL(&s_uart_err_mux);
+    if (out) *out = s_uart_err[num];
+    if (clear) memset(&s_uart_err[num], 0, sizeof s_uart_err[num]);
+    portEXIT_CRITICAL(&s_uart_err_mux);
+    return true;
 }
 
 int aos_io_be_uart_write(aos_io_uart_t *u, const void *buf, int len)
@@ -90,7 +138,8 @@ bool aos_io_be_uart_set_format(aos_io_uart_t *u, char parity, int stop_bits)
 void aos_io_be_uart_close(aos_io_uart_t *u)
 {
     int num = (int)(intptr_t)u->be;
-    uart_driver_delete(num);
+    uart_driver_delete(num);                /* deletes the event queue too */
+    s_uart_evq[num] = NULL;
     aos_io_be_uart_give(num);
     gpio_reset_pin(u->port->pins[0]);
     gpio_reset_pin(u->port->pins[1]);

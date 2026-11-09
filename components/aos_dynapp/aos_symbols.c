@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3598 simbolos.
+ * Total: 3605 simbolos.
  */
 
 #include <stddef.h>
@@ -567,8 +567,10 @@ extern int aos_hal_steps_set_goal;
 extern int aos_hal_sys_info;
 extern int aos_hal_sys_stats;
 extern int aos_hal_tasks;
+extern int aos_hal_tcp_accept;
 extern int aos_hal_tcp_close;
 extern int aos_hal_tcp_connect;
+extern int aos_hal_tcp_listen;
 extern int aos_hal_tcp_recv;
 extern int aos_hal_tcp_send;
 extern int aos_hal_thread_start;
@@ -591,6 +593,9 @@ extern int aos_hal_touch_sleep_enable;
 extern int aos_hal_touch_sleep_enabled;
 extern int aos_hal_touch_stats;
 extern int aos_hal_tune_reset;
+extern int aos_hal_udp_open;
+extern int aos_hal_udp_recv;
+extern int aos_hal_udp_send;
 extern int aos_hal_unlock;
 extern int aos_hal_uptime_ms;
 extern int aos_hal_uptime_us;
@@ -789,6 +794,7 @@ extern int aos_io_be_swd_seq;
 extern int aos_io_be_swd_seq_in;
 extern int aos_io_be_swd_xfer;
 extern int aos_io_be_uart_close;
+extern int aos_io_be_uart_errors;
 extern int aos_io_be_uart_give;
 extern int aos_io_be_uart_lines;
 extern int aos_io_be_uart_lines_release;
@@ -911,6 +917,7 @@ extern int aos_io_swd_xfer;
 extern int aos_io_uart_close;
 extern int aos_io_uart_desc;
 extern int aos_io_uart_dtr_rts;
+extern int aos_io_uart_errors;
 extern int aos_io_uart_is_usb_jtag;
 extern int aos_io_uart_lines;
 extern int aos_io_uart_open;
@@ -4168,8 +4175,10 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_sys_info),
     ESP_ELFSYM_EXPORT(aos_hal_sys_stats),
     ESP_ELFSYM_EXPORT(aos_hal_tasks),
+    ESP_ELFSYM_EXPORT(aos_hal_tcp_accept),
     ESP_ELFSYM_EXPORT(aos_hal_tcp_close),
     ESP_ELFSYM_EXPORT(aos_hal_tcp_connect),
+    ESP_ELFSYM_EXPORT(aos_hal_tcp_listen),
     ESP_ELFSYM_EXPORT(aos_hal_tcp_recv),
     ESP_ELFSYM_EXPORT(aos_hal_tcp_send),
     ESP_ELFSYM_EXPORT(aos_hal_thread_start),
@@ -4192,6 +4201,9 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_touch_sleep_enabled),
     ESP_ELFSYM_EXPORT(aos_hal_touch_stats),
     ESP_ELFSYM_EXPORT(aos_hal_tune_reset),
+    ESP_ELFSYM_EXPORT(aos_hal_udp_open),
+    ESP_ELFSYM_EXPORT(aos_hal_udp_recv),
+    ESP_ELFSYM_EXPORT(aos_hal_udp_send),
     ESP_ELFSYM_EXPORT(aos_hal_unlock),
     ESP_ELFSYM_EXPORT(aos_hal_uptime_ms),
     ESP_ELFSYM_EXPORT(aos_hal_uptime_us),
@@ -4390,6 +4402,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_be_swd_seq_in),
     ESP_ELFSYM_EXPORT(aos_io_be_swd_xfer),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_close),
+    ESP_ELFSYM_EXPORT(aos_io_be_uart_errors),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_give),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_lines),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_lines_release),
@@ -4512,6 +4525,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_uart_close),
     ESP_ELFSYM_EXPORT(aos_io_uart_desc),
     ESP_ELFSYM_EXPORT(aos_io_uart_dtr_rts),
+    ESP_ELFSYM_EXPORT(aos_io_uart_errors),
     ESP_ELFSYM_EXPORT(aos_io_uart_is_usb_jtag),
     ESP_ELFSYM_EXPORT(aos_io_uart_lines),
     ESP_ELFSYM_EXPORT(aos_io_uart_open),

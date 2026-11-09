@@ -40,6 +40,7 @@
 #include <sys/time.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
+#include <arpa/inet.h>
 
 #include "mbedtls/md5.h"
 
@@ -216,6 +217,174 @@ void aos_hal_tcp_close(int handle)
         close(fd);
         s_fd[handle - 1] = SLOT_FREE;
     }
+}
+
+/* ---- servers and datagrams (P4OS) ---- */
+
+/* A free slot, taken (SLOT_TAKEN) until the caller stores its socket. */
+static int slot_take(void)
+{
+    for (int i = 0; i < AOS_TCP_SLOTS; i++) {
+        if (__sync_bool_compare_and_swap(&s_fd[i], SLOT_FREE, SLOT_TAKEN)) {
+            return i;
+        }
+    }
+    return -1;
+}
+
+static void peer_text(const struct sockaddr_in *a, char *out, int out_len)
+{
+    if (!out || out_len <= 0) {
+        return;
+    }
+    char ip[16];
+    inet_ntop(AF_INET, &a->sin_addr, ip, sizeof(ip));
+    snprintf(out, (size_t)out_len, "%s:%u", ip, (unsigned)ntohs(a->sin_port));
+}
+
+int aos_hal_tcp_listen(int port)
+{
+    if (port <= 0 || port > 65535) {
+        return AOS_TCP_ERR_ARG;
+    }
+    int slot = slot_take();
+    if (slot < 0) {
+        return AOS_TCP_ERR_SLOTS;
+    }
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0) {
+        s_fd[slot] = SLOT_FREE;
+        return AOS_TCP_ERR_SLOTS;
+    }
+    int one = 1;
+    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+    struct sockaddr_in a = { .sin_family = AF_INET, .sin_port = htons((uint16_t)port), .sin_addr.s_addr = htonl(INADDR_ANY) };
+#ifdef AOS_SIM
+    a.sin_len = sizeof(a);
+#endif
+    if (bind(fd, (struct sockaddr *)&a, sizeof(a)) < 0 || listen(fd, 4) < 0) {
+        close(fd);
+        s_fd[slot] = SLOT_FREE;
+        return AOS_TCP_ERR_CONNECT;
+    }
+    s_fd[slot] = fd;
+    return slot + 1;
+}
+
+int aos_hal_tcp_accept(int listener, int timeout_ms, char *peer, int peer_len)
+{
+    int lfd = slot_fd(listener);
+    if (lfd < 0) {
+        return AOS_TCP_ERR_ARG;
+    }
+    int w = wait_fd(lfd, false, timeout_ms);
+    if (w <= 0) {
+        return w == 0 ? 0 : AOS_TCP_ERR_CLOSED;
+    }
+    struct sockaddr_in a;
+    socklen_t al = sizeof(a);
+    int fd = accept(lfd, (struct sockaddr *)&a, &al);
+    if (fd < 0) {
+        return errno == EAGAIN || errno == EINTR ? 0 : AOS_TCP_ERR_CLOSED;
+    }
+    int slot = slot_take();
+    if (slot < 0) {
+        close(fd);
+        return AOS_TCP_ERR_SLOTS;
+    }
+    int one = 1;
+    setsockopt(fd, IPPROTO_TCP, TCP_NODELAY, &one, sizeof(one));
+#ifdef AOS_SIM
+    setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &one, sizeof(one));
+#endif
+    peer_text(&a, peer, peer_len);
+    s_fd[slot] = fd;
+    return slot + 1;
+}
+
+int aos_hal_udp_open(int port, const char *group)
+{
+    if (port < 0 || port > 65535) {
+        return AOS_TCP_ERR_ARG;
+    }
+    int slot = slot_take();
+    if (slot < 0) {
+        return AOS_TCP_ERR_SLOTS;
+    }
+    int fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) {
+        s_fd[slot] = SLOT_FREE;
+        return AOS_TCP_ERR_SLOTS;
+    }
+    int one = 1;
+    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof(one));
+#ifdef SO_REUSEPORT
+    setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, &one, sizeof(one));
+#endif
+    setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &one, sizeof(one));
+    struct sockaddr_in a = { .sin_family = AF_INET, .sin_port = htons((uint16_t)port), .sin_addr.s_addr = htonl(INADDR_ANY) };
+#ifdef AOS_SIM
+    a.sin_len = sizeof(a);
+#endif
+    if (bind(fd, (struct sockaddr *)&a, sizeof(a)) < 0) {
+        close(fd);
+        s_fd[slot] = SLOT_FREE;
+        return AOS_TCP_ERR_CONNECT;
+    }
+    if (group && group[0]) {
+        struct ip_mreq m = { .imr_interface.s_addr = htonl(INADDR_ANY) };
+        if (inet_pton(AF_INET, group, &m.imr_multiaddr) != 1 ||
+            setsockopt(fd, IPPROTO_IP, IP_ADD_MEMBERSHIP, &m, sizeof(m)) < 0) {
+            close(fd);
+            s_fd[slot] = SLOT_FREE;
+            return AOS_TCP_ERR_CONNECT;
+        }
+    }
+    s_fd[slot] = fd;
+    return slot + 1;
+}
+
+int aos_hal_udp_recv(int handle, void *buf, int max, int timeout_ms, char *from, int from_len)
+{
+    int fd = slot_fd(handle);
+    if (fd < 0 || !buf || max <= 0) {
+        return AOS_TCP_ERR_ARG;
+    }
+    int w = wait_fd(fd, false, timeout_ms);
+    if (w <= 0) {
+        return w == 0 ? 0 : AOS_TCP_ERR_CLOSED;
+    }
+    struct sockaddr_in a;
+    socklen_t al = sizeof(a);
+    int n = (int)recvfrom(fd, buf, (size_t)max, 0, (struct sockaddr *)&a, &al);
+    if (n < 0) {
+        return errno == EAGAIN || errno == EINTR ? 0 : AOS_TCP_ERR_CLOSED;
+    }
+    peer_text(&a, from, from_len);
+    return n;
+}
+
+int aos_hal_udp_send(int handle, const char *host, int port, const void *data, int len)
+{
+    int fd = slot_fd(handle);
+    if (fd < 0 || !host || !host[0] || port <= 0 || port > 65535 || !data || len < 0) {
+        return AOS_TCP_ERR_ARG;
+    }
+    struct sockaddr_in a = { .sin_family = AF_INET, .sin_port = htons((uint16_t)port) };
+#ifdef AOS_SIM
+    a.sin_len = sizeof(a);
+#endif
+    if (inet_pton(AF_INET, host, &a.sin_addr) != 1) {
+        struct addrinfo hints = { .ai_family = AF_INET, .ai_socktype = SOCK_DGRAM };
+        struct addrinfo *res = NULL;
+        if (getaddrinfo(host, NULL, &hints, &res) != 0 || !res) {
+            return AOS_TCP_ERR_DNS;
+        }
+        a.sin_addr = ((struct sockaddr_in *)res->ai_addr)->sin_addr;
+        freeaddrinfo(res);
+    }
+    int n = (int)sendto(fd, data, (size_t)len, 0, (struct sockaddr *)&a, sizeof(a));
+    return n < 0 ? AOS_TCP_ERR_CLOSED : n;
 }
 
 void aos_hal_md5_hex(const void *data, size_t len, char out[33])

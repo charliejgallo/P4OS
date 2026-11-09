@@ -42,6 +42,7 @@ int  aos_io_be_uart_read(aos_io_uart_t *u, void *buf, int len, int timeout_ms);
 int  aos_io_be_uart_write(aos_io_uart_t *u, const void *buf, int len);
 bool aos_io_be_uart_set_baud(aos_io_uart_t *u, uint32_t baud);
 bool aos_io_be_uart_set_format(aos_io_uart_t *u, char parity, int stop_bits);
+bool aos_io_be_uart_errors(aos_io_uart_t *u, aos_uart_errors_t *out, bool clear);
 void aos_io_be_uart_close(aos_io_uart_t *u);
 /* Drives the target's lines (u->en_gpio / u->boot_gpio, already claimed):
  * levels 1/0, -1 leaves one alone, BOOT before EN. _release lets them go

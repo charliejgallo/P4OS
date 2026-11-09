@@ -1317,6 +1317,21 @@ __attribute__((weak)) int aos_hal_tcp_recv(int handle, void *buf, int max, int t
 __attribute__((weak)) void aos_hal_tcp_close(int handle)
 { }
 
+__attribute__((weak)) int aos_hal_tcp_listen(int port)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_tcp_accept(int listener, int timeout_ms, char *peer, int peer_len)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_udp_open(int port, const char *group)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_udp_recv(int handle, void *buf, int max, int timeout_ms, char *from, int from_len)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) int aos_hal_udp_send(int handle, const char *host, int port, const void *data, int len)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) aos_ws_t * aos_hal_ws_open(const char *url, const char *extra_headers, int timeout_ms)
 { return NULL; }
 

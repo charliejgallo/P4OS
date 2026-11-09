@@ -2576,6 +2576,27 @@ int  aos_hal_tcp_send(int handle, const void *data, int len, int timeout_ms);
 int  aos_hal_tcp_recv(int handle, void *buf, int max, int timeout_ms);
 void aos_hal_tcp_close(int handle);
 
+/* A server (P4OS, 2026-11-09: Modbus TCP as a slave and as a gateway).
+ * listen takes a slot for the port, on every interface, with up to 4
+ * connections waiting; AOS_TCP_ERR_CONNECT when the port is taken. accept
+ * waits up to timeout_ms for one: a handle (> 0) to use with send, recv and
+ * close like a connect's, 0 when none came, AOS_TCP_ERR_SLOTS when the table
+ * is full (the waiting peer is turned away). peer, if given, gets
+ * "a.b.c.d:port". Close the listener with aos_hal_tcp_close too. */
+int  aos_hal_tcp_listen(int port);
+int  aos_hal_tcp_accept(int listener, int timeout_ms, char *peer, int peer_len);
+
+/* UDP datagrams (P4OS, 2026-11-09: Art-Net and sACN for DMX), from the same
+ * table of slots. open binds the port on every interface (0: any free port,
+ * for sending only) and, with group, joins that IPv4 multicast group too
+ * (sACN's 239.255.x.y). recv waits up to timeout_ms for one datagram: its
+ * length, 0 when none came; from, if given, gets "a.b.c.d:port". send sends
+ * one to host:port (a name, an address, the broadcast 255.255.255.255 or a
+ * multicast group); len or AOS_TCP_ERR_*. Close with aos_hal_tcp_close. */
+int  aos_hal_udp_open(int port, const char *group);
+int  aos_hal_udp_recv(int handle, void *buf, int max, int timeout_ms, char *from, int from_len);
+int  aos_hal_udp_send(int handle, const char *host, int port, const void *data, int len);
+
 /* --------------------------------------------------------------------------
  * WebSocket client (aos_ws.c, both HALs; P4OS, for Home Assistant)
  *

@@ -438,6 +438,13 @@ bool aos_io_port_lines(const char *port, int *en_gpio, int *boot_gpio)
     return en >= 0 || boot >= 0;
 }
 
+bool aos_io_uart_errors(aos_io_uart_t *u, aos_uart_errors_t *out, bool clear)
+{
+    if (out) memset(out, 0, sizeof *out);
+    if (!u || u->usb >= 0) return false;
+    return aos_io_be_uart_errors(u, out, clear);
+}
+
 bool aos_io_uart_lines(aos_io_uart_t *u, int en, int boot)
 {
     if (u && u->usb >= 0) {

@@ -17,6 +17,16 @@
  * port but the board's with their chips' real protocols, and win over the
  * plain register blobs at their addresses.
  *
+ * The line's errors (aos_io_uart_errors): a pty carries bytes, not bits, so
+ * P4_SIM_UART_A_FORMAT=8E1 (and _B) says what format the far end talks.
+ * When the app's format is another, every byte read counts errors the way
+ * a UART would see them: half of them with a bad parity when the app
+ * expects a parity bit the line does not send (or another one), half with
+ * a bad stop bit when the line sends a parity bit the app takes for its
+ * stop bit, or when the app wants two stop bits and the line sends one.
+ * That is enough to try a tool that tells formats apart (Modbus's Buscar
+ * velocidad) against tools/fake_modbus.py.
+ *
  * The target's EN and BOOT (aos_io_uart_lines): on a real adapter they are
  * RTS and DTR, esptool's classic reset (asserted = low at the chip, through
  * the usual two-transistor circuit), set together with one TIOCMSET. A pty
@@ -54,6 +64,10 @@ typedef struct {
     char pending[256];
     int pend_len, pend_pos;
     void *emu;              /* P4_SIM_<PORT>=sensor:<model>: uart_emu_sim.c */
+    char line_par, app_par; /* P4_SIM_<PORT>_FORMAT and aos_io_uart_set_format */
+    int line_stop, app_stop;
+    aos_uart_errors_t err;
+    uint32_t err_rng;
 } sim_uart_t;
 
 /* uart_emu_sim.c: an emulated sensor on the port */
@@ -87,6 +101,9 @@ bool aos_io_be_uart_open(aos_io_uart_t *u, bool rs485)
     (void)rs485;
     sim_uart_t *s = calloc(1, sizeof *s);
     s->fd = -1;
+    s->app_par = 'N';
+    s->app_stop = 1;
+    s->err_rng = 0x9E3779B9u;
     char env[40];
     env_name(u->port->name, env, sizeof env);
     const char *dev = getenv(env);
@@ -109,6 +126,12 @@ bool aos_io_be_uart_open(aos_io_uart_t *u, bool rs485)
         snprintf(lenv, sizeof lenv, "%s_LINES", env);
         const char *lp = getenv(lenv);
         if (lp) snprintf(s->lines_path, sizeof s->lines_path, "%s", lp);
+        snprintf(lenv, sizeof lenv, "%s_FORMAT", env);
+        const char *fm = getenv(lenv);
+        if (fm && strlen(fm) == 3 && strchr("NEO", fm[1]) && (fm[2] == '1' || fm[2] == '2')) {
+            s->line_par = fm[1];
+            s->line_stop = fm[2] - '0';
+        }
     } else {
         snprintf(u->desc, sizeof u->desc, "%s (simulated ESP32)", u->port->name);
     }
@@ -158,6 +181,14 @@ int aos_io_be_uart_read(aos_io_uart_t *u, void *buf, int len, int timeout_ms)
         if (r <= 0) return 0;
         ssize_t n = read(s->fd, buf, (size_t)len);
         if (n < 0) return (errno == EAGAIN) ? 0 : -1;
+        if (s->line_par) {
+            for (ssize_t i = 0; i < n; i++) {
+                s->err_rng ^= s->err_rng << 13; s->err_rng ^= s->err_rng >> 17; s->err_rng ^= s->err_rng << 5;
+                bool half = s->err_rng & 1;
+                if (s->app_par != 'N' && s->app_par != s->line_par) { if (half) s->err.parity++; }
+                else if ((s->app_par == 'N' && s->line_par != 'N') || (s->app_stop == 2 && s->line_stop == 1)) { if (half) s->err.frame++; }
+            }
+        }
         return (int)n;
     }
     uint64_t now = aos_hal_uptime_ms();
@@ -206,9 +237,19 @@ int aos_io_be_uart_write(aos_io_uart_t *u, const void *buf, int len)
     return len;
 }
 
+bool aos_io_be_uart_errors(aos_io_uart_t *u, aos_uart_errors_t *out, bool clear)
+{
+    sim_uart_t *s = u->be;
+    if (out) *out = s->err;
+    if (clear) memset(&s->err, 0, sizeof s->err);
+    return true;
+}
+
 bool aos_io_be_uart_set_format(aos_io_uart_t *u, char parity, int stop_bits)
 {
     sim_uart_t *s = u->be;
+    s->app_par = parity;
+    s->app_stop = stop_bits;
     if (s->fd < 0) return true;
     struct termios t;
     if (tcgetattr(s->fd, &t)) return false;

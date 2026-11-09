@@ -118,6 +118,21 @@ bool aos_io_uart_set_baud(aos_io_uart_t *u, uint32_t baud);
 /* 8 data bits always; parity 'N', 'E' or 'O', 1 or 2 stop bits. A port
  * opens as 8N1. Modbus RTU wants 8E1 by the book, and many meters do. */
 bool aos_io_uart_set_format(aos_io_uart_t *u, char parity, int stop_bits);
+/* What the line did wrong since the port opened (or since the last call
+ * with clear): bytes with a parity error, bytes with a framing error (no
+ * stop bit where it should be), BREAKs (the line held low for longer than
+ * a byte), and bytes lost because nobody read in time. A byte with a bad
+ * parity or stop bit is still handed to aos_io_uart_read.
+ *
+ * At the right speed every format "answers" (a UART does not drop a byte
+ * with a parity error), so this is how a tool tells 8N1 from 8E1: talk to
+ * the device in each, and the right one is the one that comes with no
+ * errors. Noise on a bus shows here too. false for a USB port (the host's
+ * adapter does not say). */
+typedef struct {
+    uint32_t parity, frame, breaks, overflow;
+} aos_uart_errors_t;
+bool aos_io_uart_errors(aos_io_uart_t *u, aos_uart_errors_t *out, bool clear);
 /* The two lines a target board resets and boots with (programmer): its EN
  * (reset, low = held in reset) and its BOOT/GPIO0 (low while EN rises =
  * the ROM's download mode). Levels as the target sees them, 1/0; -1 leaves
