@@ -420,7 +420,11 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       tira con el arcoíris de la Consola anduvo (foto en
       `docs/img/bench-dmx-photo.jpg`). Falta Aparato con el ESP32 de
       consola, el Rigol, y paquetes malos mientras se escribe la flash.
-- [ ] **Luces con la tira del ESP32** (`apps/luces`, 2026-11-09): el
+- [x] **Luces con la tira del ESP32** (`apps/luces`, 2026-11-09; **anduvo**
+      con las escenas de muestra en `uart.a`, video en
+      `docs/img/luces-strip.gif`). Falta: el
+      tap, Blackout y master con la tira, la página del portal desde el
+      celular, y la salida con la app en segundo plano. Lo pedido: el
       primer show son los 8 pixeles RGB en 1-24 y un PAR en 25. A probar:
       elegir pixeles y darles color, efectos, dos escenas y la secuencia
       con tap, Blackout y master; lo mismo desde la página del portal en

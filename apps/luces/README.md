@@ -102,10 +102,17 @@ at 120 BPM, the output at 40 packets a second, the four tabs in portrait and
 landscape; from the portal page in a phone-sized window, the same plus
 adding fixtures, changing an address and writing a new type to the card.
 
-On the bench, the DMX app's console already lights the ESP32's strip
+On the board, the same day: Luces on `uart.a` driving the bench's ESP32
 (`tools/rs485_test/esp32`, DMX light role, channels 1-24) through the two
-automatic RS485 modules (`docs/img/bench-rs485.svg`). Luces's first show is
-that strip, so it is the next thing to try on the board.
+automatic RS485 modules (`docs/img/bench-rs485.svg`), its strip of eight
+pixels following the stage:
+
+<img src="../../docs/img/luces-strip.gif" width="260" alt="Luces on the P4's screen, and the ESP32's strip of eight WS2812B pixels changing colour with it">
+
+The first try showed why the chase needs two scenes: with a single dark
+one it called the same scene over and over and nothing moved (and the
+output was on `uart.b`, where nothing is wired); hence the sample scenes and
+the warning.
 
 ## Files
 
