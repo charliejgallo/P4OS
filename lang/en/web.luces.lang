@@ -121,10 +121,10 @@ Al centro	Centre
 Todos	All
 
 #: apps/luces/web/luces.js:160
-Pares	Odd
+Pares	Even
 
 #: apps/luces/web/luces.js:161
-Impares	Even
+Impares	Odd
 
 #: apps/luces/web/luces.js:166
 Intensidad	Intensity

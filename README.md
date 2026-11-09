@@ -343,9 +343,9 @@ port (`i2c.ext`, `spi.a`, `uart.*`, GPIO) and which modules hang from them.
 While an app uses a port it owns it, and Settings, Expansion draws the
 header with who holds each pin.
 
-| Bus (I2C scan) | Modules | Terminal | Programmer | Modbus | Electronics |
+| Bus (I2C scan) | Modules | Terminal | Programmer | Equipos (Riden) | Electronics |
 |---|---|---|---|---|---|
-| <img src="docs/img/app-bus.png" width="125"> | <img src="docs/img/app-modules.png" width="125"> | <img src="docs/img/app-serial.png" width="125"> | <img src="docs/img/app-flasher.png" width="125"> | <img src="docs/img/app-modbus.png" width="125"> | <img src="docs/img/app-elec.png" width="125"> |
+| <img src="docs/img/app-bus.png" width="125"> | <img src="docs/img/app-modules.png" width="125"> | <img src="docs/img/app-serial.png" width="125"> | <img src="docs/img/app-flasher.png" width="125"> | <img src="docs/img/app-equipos.png" width="125"> | <img src="docs/img/app-elec.png" width="125"> |
 
 - **Bus:** scans I2C and names what answers, talks to SPI chips with presets
   (flash memories, the MAX31855 and MAX6675 thermocouples, the MCP3008, the
@@ -486,6 +486,34 @@ turn behind the last ([video](docs/media/pca9685-servos.mp4)).
   <a href="docs/media/pca9685-servos.mp4"><img src="docs/img/pca9685-servos.gif" width="240" alt="Five servos on a PCA9685 moving in a wave, driven by the PWM app on the board"></a>
   <img src="docs/img/photo-pwm-pca9685-centre.jpg" width="240" alt="The PWM app with the servos at 90 degrees, the PCA9685 and five servos">
   <img src="docs/img/photo-pwm-pca9685-wave.jpg" width="240" alt="The servos mid-wave, the app showing a 4 s period">
+</p>
+
+### RS485: Modbus, DMX and Luces
+
+Since 0.25, three apps on the card for the header's RS485 port (`uart.a`,
+with a 3.3 V transceiver or an automatic "RS485 to TTL" module), each with
+a page in the portal (the Modbus, DMX, Luces and Equipos bullets above say
+what they do).
+
+| Modbus: a slave playing a profile | Modbus: traffic | DMX: analyzer | DMX: RDM | Luces: stage | Luces: scenes |
+|---|---|---|---|---|---|
+| <img src="docs/img/app-modbus.png" width="125"> | <img src="docs/img/app-modbus-traffic.png" width="125"> | <img src="docs/img/app-dmx-analyzer.png" width="125"> | <img src="docs/img/app-dmx-rdm.png" width="125"> | <img src="docs/img/app-luces-stage.png" width="125"> | <img src="docs/img/app-luces-scenes.png" width="125"> |
+
+The bench is the P4 and an ESP32 DevKit, each with an automatic module, on
+a twisted pair (`tools/rs485_test`): the ESP32 plays a Modbus slave or
+master, a DMX console, or a DMX light on a strip of 8 WS2812B pixels that
+also answers RDM. On the board: Modbus both ways with thousands of requests
+and only the errors played on purpose, the format of a slave found by the
+line's errors, DMX at 40 packets a second both ways, RDM finding the ESP32
+and moving its address, and Art-Net from a Mac coming out as DMX.
+
+<p align="center">
+  <img src="docs/img/bench-rs485-photo.jpg" width="230" alt="The P4 reading the ESP32 drive through two RS485 modules on a twisted pair">
+  <img src="docs/img/bench-dmx-photo.jpg" width="230" alt="The DMX console on the P4 sending a rainbow; the ESP32 in the DMX light role shows it on its strip">
+  <img src="docs/img/luces-strip.gif" width="230" alt="Luces on the P4 lighting the ESP32's strip">
+</p>
+<p align="center">
+  <img src="docs/img/bench-rs485.svg" width="560" alt="Wiring: the P4 and an ESP32, each with an automatic RS485 module, on one twisted pair, and the strip on the ESP32">
 </p>
 
 ### Datalog

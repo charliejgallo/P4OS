@@ -1,5 +1,13 @@
 # Changelog
 
+## Next
+
+- **Luces:** "Pares" selected fixtures 1, 3, 5... (the odd ones: it counted
+  from 0); now Pares is 2, 4, 6... and Impares 1, 3, 5..., on the board and
+  on the portal page. The app's own title and its fades (0.5 s) translate.
+- The README has captures of Modbus, DMX and Luces, and the Riden panel's
+  capture is Equipos'.
+
 ## 0.25.0 — 2026-11-09
 
 RS485 on the header, tried on a bench with an ESP32 and two automatic

@@ -32,6 +32,9 @@ saliendo por %s · %.0f paquetes/s%s%s	sendet über %s · %.0f Pakete/s%s%s
 #: apps/luces/main/luces.c:359
 salida cerrada (%s)%s	Ausgang geschlossen (%s)%s
 
+#: apps/luces/main/luces.c:428
+Luces	Licht
+
 #: apps/luces/main/lz_core.c:763
 #: apps/luces/main/lz_stage.c:22
 Rojo	Rot
@@ -88,7 +91,7 @@ Medio	Mittel
 Rápido	Schnell
 
 #: apps/luces/main/lz_stage.c:30
-#: apps/luces/main/lz_stage.c:199
+#: apps/luces/main/lz_stage.c:201
 Ninguno	Keiner
 
 #: apps/luces/main/lz_stage.c:30
@@ -106,64 +109,64 @@ Colores	Farben
 #: apps/luces/main/lz_stage.c:31
 Respirar	Atmen
 
-#: apps/luces/main/lz_stage.c:75
+#: apps/luces/main/lz_stage.c:77
 elegí aparatos antes de guardar un grupo	vor dem Speichern einer Gruppe Geräte wählen
 
-#: apps/luces/main/lz_stage.c:83
+#: apps/luces/main/lz_stage.c:85
 Grupo %d	Gruppe %d
 
-#: apps/luces/main/lz_stage.c:84
+#: apps/luces/main/lz_stage.c:86
 Nombre del grupo (con los aparatos elegidos)	Name der Gruppe (mit den gewählten Geräten)
 
-#: apps/luces/main/lz_stage.c:99
+#: apps/luces/main/lz_stage.c:101
 Borrar el grupo (los aparatos quedan)	Gruppe löschen (die Geräte bleiben)
 
-#: apps/luces/main/lz_stage.c:199
+#: apps/luces/main/lz_stage.c:201
 Todos	Alle
 
-#: apps/luces/main/lz_stage.c:199
-Pares	Ungerade
+#: apps/luces/main/lz_stage.c:201
+Pares	Gerade
 
-#: apps/luces/main/lz_stage.c:199
-Impares	Gerade
-
-#: apps/luces/main/lz_stage.c:210
-+ Grupo	+ Gruppe
+#: apps/luces/main/lz_stage.c:201
+Impares	Ungerade
 
 #: apps/luces/main/lz_stage.c:212
++ Grupo	+ Gruppe
+
+#: apps/luces/main/lz_stage.c:214
 No hay aparatos: agregalos en Patch.	Keine Geräte: in Patch hinzufügen.
 
-#: apps/luces/main/lz_stage.c:246
+#: apps/luces/main/lz_stage.c:248
 Intensidad	Helligkeit
 
-#: apps/luces/main/lz_stage.c:265
+#: apps/luces/main/lz_stage.c:267
 Color	Farbe
 
-#: apps/luces/main/lz_stage.c:295
+#: apps/luces/main/lz_stage.c:297
 Posición (pan y tilt)	Position (Pan und Tilt)
 
-#: apps/luces/main/lz_stage.c:321
+#: apps/luces/main/lz_stage.c:323
 Al centro	Zur Mitte
 
-#: apps/luces/main/lz_stage.c:325
+#: apps/luces/main/lz_stage.c:327
 Efectos y pruebas	Effekte und Tests
 
-#: apps/luces/main/lz_stage.c:328
+#: apps/luces/main/lz_stage.c:330
 Velocidad	Tempo
 
-#: apps/luces/main/lz_stage.c:330
+#: apps/luces/main/lz_stage.c:332
 El efecto corre sobre los aparatos elegidos al tocarlo (todos, si no hay ninguno elegido), encima de la escena.	Der Effekt läuft auf den Geräten, die beim Antippen gewählt sind (alle, wenn keines gewählt ist), über der Szene.
 
-#: apps/luces/main/lz_stage.c:331
+#: apps/luces/main/lz_stage.c:333
 Pruebas: Recorrido prende un aparato por vez en blanco (cuál es cuál; uno fuera de turno tiene la dirección mal). Colores pasa todos por rojo, verde, azul y blanco (uno de otro color tiene los canales en otro orden que su tipo). Respirar sube y baja la intensidad despacio (escalones o parpadeo abajo son la curva del aparato).	Tests: Durchlauf schaltet ein Gerät nach dem anderen weiß ein (welches welches ist; eines außer der Reihe hat eine falsche Adresse). Farben schickt alle durch Rot, Grün, Blau und Weiß (eines in anderer Farbe hat die Kanäle in anderer Reihenfolge als sein Typ). Atmen fährt die Helligkeit langsam auf und ab (Stufen oder Flackern unten sind die Kurve des Geräts).
 
-#: apps/luces/main/lz_stage.c:337
+#: apps/luces/main/lz_stage.c:339
 Baja la intensidad de todo lo que sale, sin tocar las escenas. Blackout, arriba, apaga todo de golpe.	Dimmt alles, was hinausgeht, ohne die Szenen zu ändern. Blackout, oben, schaltet alles auf einmal aus.
 
-#: apps/luces/main/lz_stage.c:357
+#: apps/luces/main/lz_stage.c:359
 %d elegidos	%d gewählt
 
-#: apps/luces/main/lz_stage.c:358
+#: apps/luces/main/lz_stage.c:360
 ninguno elegido: todos	keines gewählt: alle
 
 #: apps/luces/main/lz_tabs.c:26
@@ -348,3 +351,6 @@ Apagado.	Aus.
 
 #: apps/luces/main/lz_tabs.c:674
 %lu paquetes mandados a %s	%lu Pakete an %s gesendet
+
+#: apps/luces/main/lz_tabs.c (a fade: seconds, decimal comma or point)
+%u,%u s	%u,%u s

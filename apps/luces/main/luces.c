@@ -425,7 +425,7 @@ static void build_screen(lv_obj_t *root)
     const int32_t tab_h = LZU.land ? 92 : 112, bar_h = 96;
     lv_obj_t *bar = lz_box(root, LZU.W, bar_h);
     lv_obj_set_style_pad_hor(bar, AOS_UI_PAD, 0);
-    lv_obj_align(aos_label(bar, "Luces", aos_font_large, AOS_C_TEXT), LV_ALIGN_TOP_LEFT, 0, 4);
+    lv_obj_align(aos_label(bar, _("Luces"), aos_font_large, AOS_C_TEXT), LV_ALIGN_TOP_LEFT, 0, 4);
     LZU.bar_state = aos_label(bar, "", aos_font_tiny, AOS_C_DIM);
     lv_obj_set_width(LZU.bar_state, LZU.W - 2 * AOS_UI_PAD - 330);
     lv_label_set_long_mode(LZU.bar_state, LV_LABEL_LONG_MODE_DOTS);

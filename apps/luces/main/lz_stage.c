@@ -58,7 +58,9 @@ static void tile_cb(lv_event_t *e)
 static void sel_cb(lv_event_t *e)
 {
     int k = (int)(intptr_t)lv_event_get_user_data(e);
-    for (int i = 0; i < LZ.nfix; i++) LZ.sel[i] = k == 0 ? true : k == 1 ? false : k == 2 ? i % 2 == 0 : i % 2 == 1;
+    /* Pares and Impares by the fixture's number as the user counts them, from 1:
+     * place 0 is fixture 1, odd */
+    for (int i = 0; i < LZ.nfix; i++) LZ.sel[i] = k == 0 ? true : k == 1 ? false : k == 2 ? i % 2 == 1 : i % 2 == 0;
     lz_stage_refresh();
 }
 

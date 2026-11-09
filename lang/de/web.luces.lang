@@ -121,10 +121,10 @@ Al centro	Zur Mitte
 Todos	Alle
 
 #: apps/luces/web/luces.js:160
-Pares	Ungerade
+Pares	Gerade
 
 #: apps/luces/web/luces.js:161
-Impares	Gerade
+Impares	Ungerade
 
 #: apps/luces/web/luces.js:166
 Intensidad	Helligkeit

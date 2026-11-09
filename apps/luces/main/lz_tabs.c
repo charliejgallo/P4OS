@@ -105,7 +105,7 @@ static void scene_menu_cb(lv_event_t *e)
     for (int k = 0; k < 6; k++) {
         char t[16];
         if (FADE_MS[k] == 0) snprintf(t, sizeof t, "%s", _("Corte"));
-        else if (FADE_MS[k] % 1000) snprintf(t, sizeof t, "%u,%u s", FADE_MS[k] / 1000, FADE_MS[k] % 1000 / 100);
+        else if (FADE_MS[k] % 1000) snprintf(t, sizeof t, _("%u,%u s"), FADE_MS[k] / 1000, FADE_MS[k] % 1000 / 100);
         else snprintf(t, sizeof t, "%u s", FADE_MS[k] / 1000);
         lz_chip(fr, t, LZ.scenes[i].fade_ms == FADE_MS[k], scene_fade_cb, (void *)(intptr_t)k);
     }
@@ -158,7 +158,7 @@ void lz_scenes_build(lv_obj_t *parent, int32_t ch)
     for (int k = 0; k < 6; k++) {
         char t[16];
         if (FADE_MS[k] == 0) snprintf(t, sizeof t, "%s", _("Corte"));
-        else if (FADE_MS[k] % 1000) snprintf(t, sizeof t, "%u,%u s", FADE_MS[k] / 1000, FADE_MS[k] % 1000 / 100);
+        else if (FADE_MS[k] % 1000) snprintf(t, sizeof t, _("%u,%u s"), FADE_MS[k] / 1000, FADE_MS[k] % 1000 / 100);
         else snprintf(t, sizeof t, "%u s", FADE_MS[k] / 1000);
         P->fade_chip[k] = lz_chip(r, t, false, fade_cb, (void *)(intptr_t)k);
     }
@@ -182,7 +182,7 @@ void lz_scenes_build(lv_obj_t *parent, int32_t ch)
         char fd[16];
         uint16_t fm = LZ.scenes[i].fade_ms;
         if (!fm) snprintf(fd, sizeof fd, "%s", _("corte"));
-        else if (fm % 1000) snprintf(fd, sizeof fd, "%u,%u s", fm / 1000, fm % 1000 / 100);
+        else if (fm % 1000) snprintf(fd, sizeof fd, _("%u,%u s"), fm / 1000, fm % 1000 / 100);
         else snprintf(fd, sizeof fd, "%u s", fm / 1000);
         lv_obj_align(aos_label(t, fd, aos_font_tiny, AOS_C_DIM), LV_ALIGN_TOP_RIGHT, -14, 10);
         lv_obj_t *l = aos_label(t, LZ.scenes[i].name, aos_font_small, AOS_C_TEXT);
