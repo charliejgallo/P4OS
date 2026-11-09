@@ -510,6 +510,120 @@ void dx_analyzer_build(lv_obj_t *parent, int32_t ch)
 }
 
 /* ======================================================================== */
+/* Red: the board as an Art-Net / sACN node                                  */
+/* ======================================================================== */
+
+static uint32_t s_net_last_n, s_net_last_ms;
+static float s_net_hz;
+
+static void net_on_cb(lv_event_t *e)
+{
+    DX.net_on = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
+    if (DX.net_on) {
+        memset(DX.uni + 1, 0, 512);             /* until the network says otherwise */
+        DX.pattern = DX_PAT_NONE;
+        if (!DX.want_open) { DX.want_open = true; DX.err[0] = 0; }
+    }
+    dx_save();
+    dx_rebuild();
+}
+
+static void net_proto_cb(lv_event_t *e)
+{
+    int p = (int)(intptr_t)lv_event_get_user_data(e);
+    if (p != DX.net_proto) {
+        DX.net_proto = p;
+        if (p == DX_NET_SACN && DX.net_univ == 0) DX.net_univ = 1;   /* sACN starts at 1 */
+    }
+    dx_save();
+    dx_rebuild();
+}
+
+static void net_univ_done(int v)
+{
+    int max = DX.net_proto == DX_NET_SACN ? 63999 : 32767, min = DX.net_proto == DX_NET_SACN ? 1 : 0;
+    if (v >= min && v <= max) DX.net_univ = (uint16_t)v;
+    dx_save();
+    dx_rebuild();
+}
+
+static void net_univ_cb(lv_event_t *e)
+{
+    (void)e;
+    dx_keypad(DX.net_proto == DX_NET_SACN ? _("Universo sACN (1 a 63999)") : _("Universo Art-Net (0 a 32767)"), DX.net_univ, net_univ_done);
+}
+
+void dx_net_refresh(void)
+{
+    if (!DXU.net_stats) return;
+    uint32_t now = now_ms(), n = DX.net_packets;
+    if (now - s_net_last_ms >= 1000) {
+        s_net_hz = s_net_last_ms ? (float)(n - s_net_last_n) * 1000.0f / (float)(now - s_net_last_ms) : 0;
+        s_net_last_n = n;
+        s_net_last_ms = now;
+    }
+    char t[300];
+    const char *ip = aos_hal_net_ip();
+    if (!DX.net_on) snprintf(t, sizeof t, "%s", _("Apagado: prendelo para que la placa reciba de la red."));
+    else if (DX.net_err[0]) snprintf(t, sizeof t, "%s", DX.net_err);
+    else if (!n) snprintf(t, sizeof t, _("Esperando %s del universo %u en %s…"), DX.net_proto == DX_NET_SACN ? "sACN" : "Art-Net", DX.net_univ,
+                          ip && ip[0] ? ip : "?");
+    else {
+        uint32_t age = now - DX.net_ms;
+        snprintf(t, sizeof t, _("%.0f paquetes/s de %s · %lu en total · el último hace %lu ms · %lu de otros universos · %lu ArtPoll contestados%s"),
+                 (double)s_net_hz, DX.net_from, (unsigned long)n, (unsigned long)age, (unsigned long)DX.net_other, (unsigned long)DX.net_polls,
+                 age > 2000 ? _(" · SIN DATOS (la salida mantiene lo último)") : "");
+    }
+    lv_label_set_text(DXU.net_stats, t);
+    lv_obj_set_style_text_color(DXU.net_stats, !DX.net_on ? AOS_C_DIM : DX.net_err[0] || (n && now - DX.net_ms > 2000) ? AOS_C_ORANGE : AOS_C_TEXT, 0);
+    if (DXU.net_nums) {
+        char b[600];
+        size_t k = 0;
+        for (int i = 0; i < 32; i++)
+            k += (size_t)snprintf(b + k, sizeof b - k, "%03d:%3d%s", i + 1, DX.uni[i + 1], i % 4 == 3 ? "\n" : "   ");
+        if (k) b[k - 1] = 0;
+        lv_label_set_text(DXU.net_nums, b);
+    }
+}
+
+void dx_net_build(lv_obj_t *parent, int32_t ch)
+{
+    int32_t w = DXU.W - 2 * AOS_UI_PAD;
+    lv_obj_t *col = dx_column(parent, w, ch);
+    lv_obj_t *c = dx_card(col, w, LV_SIZE_CONTENT);
+    lv_obj_set_style_pad_all(c, 18, 0);
+    lv_obj_set_flex_flow(c, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(c, 12, 0);
+    lv_obj_t *r = dx_box(c, w - 36, 60);
+    lv_obj_set_flex_flow(r, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(r, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_column(r, 14, 0);
+    aos_label(r, _("Recibir de la red y sacarlo por DMX"), aos_font_body, AOS_C_TEXT);
+    lv_obj_t *sw = lv_switch_create(r);
+    lv_obj_set_size(sw, 96, 52);
+    lv_obj_set_style_bg_color(sw, DX_TEAL, LV_PART_INDICATOR | LV_STATE_CHECKED);
+    if (DX.net_on) lv_obj_add_state(sw, LV_STATE_CHECKED);
+    lv_obj_add_event_cb(sw, net_on_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    r = dx_chips_row(c, w - 36);
+    dx_chip(r, "Art-Net", DX.net_proto == DX_NET_ARTNET, net_proto_cb, (void *)(intptr_t)DX_NET_ARTNET);
+    dx_chip(r, "sACN (E1.31)", DX.net_proto == DX_NET_SACN, net_proto_cb, (void *)(intptr_t)DX_NET_SACN);
+    char u[32];
+    snprintf(u, sizeof u, "%s %u", _("Universo"), DX.net_univ);
+    dx_chip(r, u, false, net_univ_cb, NULL);
+    DXU.net_stats = aos_label(c, "", aos_font_small, AOS_C_TEXT);
+    lv_obj_set_width(DXU.net_stats, w - 36);
+    lv_label_set_long_mode(DXU.net_stats, LV_LABEL_LONG_MODE_WRAP);
+    dx_section(col, _("LOS PRIMEROS 32 CANALES COMO SALEN"));
+    lv_obj_t *nc = dx_card(col, w, LV_SIZE_CONTENT);
+    lv_obj_set_style_pad_all(nc, 16, 0);
+    DXU.net_nums = lv_label_create(nc);
+    lv_obj_set_style_text_font(DXU.net_nums, &aos_mono_22, 0);
+    lv_obj_set_style_text_color(DXU.net_nums, AOS_C_TEXT, 0);
+    dx_caption(col, _("La placa hace de nodo: lo que una consola, un programa de la PC o Luces en otra placa mandan por la red para ese universo sale por el puerto RS485 como DMX. Art-Net por UDP 6454 (contesta el ArtPoll, así la consola la ve en su lista de nodos); sACN por multicast 239.255.x.y, puerto 5568. Si la red deja de mandar, la salida mantiene lo último. Sigue andando con la app en segundo plano."), w);
+    dx_net_refresh();
+}
+
+/* ======================================================================== */
 /* Cableado                                                                  */
 /* ======================================================================== */
 

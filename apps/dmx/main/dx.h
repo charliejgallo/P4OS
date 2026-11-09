@@ -15,6 +15,8 @@
  *   Analizador  the app listens: rate, slots, start code, BREAK and MAB as
  *               measured, bad packets, and the 512 channels as a map, the
  *               ones moving lit
+ *   Red         the board as a node: Art-Net or sACN for one universe from
+ *               the network goes out as DMX (dx_net.c)
  *   Cableado    XLR, the terminator, what not to do
  *
  * No thread of its own: sending and receiving run in the firmware, and the
@@ -32,7 +34,8 @@
 #define DX_TEAL  lv_color_hex(0x7C3AED)
 #define DX_AMBER lv_color_hex(0xF59E0B)
 
-enum { DX_TAB_CONSOLE = 0, DX_TAB_FIXTURE, DX_TAB_ANALYZER, DX_TAB_WIRE, DX_TAB_COUNT };
+enum { DX_TAB_CONSOLE = 0, DX_TAB_FIXTURE, DX_TAB_ANALYZER, DX_TAB_NET, DX_TAB_WIRE, DX_TAB_COUNT };
+enum { DX_NET_ARTNET = 0, DX_NET_SACN };
 enum { DX_PAT_NONE = 0, DX_PAT_CHASE, DX_PAT_RAMP, DX_PAT_RAINBOW, DX_PAT_COUNT };
 enum { DX_FX_DIMMER = 0, DX_FX_RGB, DX_FX_RGBW, DX_FX_PAR7, DX_FX_HEAD, DX_FX_BAR8, DX_FX_COUNT };
 
@@ -59,6 +62,16 @@ typedef struct {
     uint8_t prev[513];
     uint32_t chg_ms[513];
     int an_page;                /* 32 channels shown as numbers */
+    /* the node (dx_net.c): its thread writes these, the timer reads them */
+    bool net_on;
+    int net_proto;              /* DX_NET_* */
+    uint16_t net_univ;          /* Art-Net port-address, or sACN universe */
+    uint8_t net_uni[513];
+    uint16_t net_slots;
+    volatile uint32_t net_packets, net_other, net_polls, net_ms;
+    char net_from[24];
+    bool net_fresh;
+    char net_err[64];
 } dx_state_t;
 
 typedef struct {
@@ -74,6 +87,8 @@ typedef struct {
     lv_obj_t *fx_draw, *fx_list, *fx_state;
     /* analyzer */
     lv_obj_t *an_stats, *an_map, *an_nums, *an_page_l;
+    /* network */
+    lv_obj_t *net_stats, *net_nums;
     /* keypad */
     char kp_text[16];
     lv_obj_t *kp_value;
@@ -107,5 +122,12 @@ void dx_fixture_refresh(void);
 void dx_analyzer_build(lv_obj_t *parent, int32_t ch);
 void dx_analyzer_refresh(void);
 void dx_wire_build(lv_obj_t *parent, int32_t ch);
+void dx_net_build(lv_obj_t *parent, int32_t ch);
+void dx_net_refresh(void);
+
+/* dx_net.c */
+void dx_net_start(void);
+void dx_net_stop(void);
+bool dx_net_take(void);         /* the newest levels into DX.uni; true when new ones came */
 const char *dx_fx_name(int kind);
 int dx_fx_slots(int kind);

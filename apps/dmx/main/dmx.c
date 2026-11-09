@@ -22,8 +22,8 @@
 dx_state_t DX;
 dx_ui_t DXU;
 
-static const char *const TAB_NAME[DX_TAB_COUNT] = { N_("Consola"), N_("Aparato"), N_("Analizador"), N_("Cableado") };
-static const char *const TAB_GLYPH[DX_TAB_COUNT] = { AOS_SYM_TOGGLE_SWITCH, AOS_SYM_LIGHTBULB, AOS_SYM_PULSE, AOS_SYM_CONNECTION };
+static const char *const TAB_NAME[DX_TAB_COUNT] = { N_("Consola"), N_("Aparato"), N_("Analizador"), N_("Red"), N_("Cableado") };
+static const char *const TAB_GLYPH[DX_TAB_COUNT] = { AOS_SYM_TOGGLE_SWITCH, AOS_SYM_LIGHTBULB, AOS_SYM_PULSE, AOS_SYM_LAN, AOS_SYM_CONNECTION };
 
 /* ---- settings ---- */
 
@@ -41,6 +41,9 @@ static void load(void)
     DX.fx_kind = aos_hal_pref_get_i32("dmx_fxk", &v) && v >= 0 && v < DX_FX_COUNT ? v : DX_FX_PAR7;
     DX.fx_addr = aos_hal_pref_get_i32("dmx_fxa", &v) && v >= 1 && v <= 512 ? v : 1;
     DXU.tab = aos_hal_pref_get_i32("dmx_tab", &v) && v >= 0 && v < DX_TAB_COUNT ? v : DX_TAB_ANALYZER;
+    DX.net_on = aos_hal_pref_get_i32("dmx_neton", &v) && v;
+    DX.net_proto = aos_hal_pref_get_i32("dmx_netp", &v) && v == DX_NET_SACN ? DX_NET_SACN : DX_NET_ARTNET;
+    DX.net_univ = aos_hal_pref_get_i32("dmx_netu", &v) && v >= 0 && v < 64000 ? (uint16_t)v : (DX.net_proto == DX_NET_SACN ? 1 : 0);
 }
 
 void dx_save(void)
@@ -53,6 +56,9 @@ void dx_save(void)
     aos_hal_pref_set_i32("dmx_fxk", DX.fx_kind);
     aos_hal_pref_set_i32("dmx_fxa", DX.fx_addr);
     aos_hal_pref_set_i32("dmx_tab", DXU.tab);
+    aos_hal_pref_set_i32("dmx_neton", DX.net_on);
+    aos_hal_pref_set_i32("dmx_netp", DX.net_proto);
+    aos_hal_pref_set_i32("dmx_netu", DX.net_univ);
 }
 
 /* ---- little widgets ---- */
@@ -224,7 +230,7 @@ static void link_close(void)
 
 static void link_tick(void)
 {
-    aos_dmx_dir_t want = DXU.tab == DX_TAB_CONSOLE ? AOS_DMX_SEND : AOS_DMX_RECEIVE;
+    aos_dmx_dir_t want = DXU.tab == DX_TAB_CONSOLE || DXU.tab == DX_TAB_NET ? AOS_DMX_SEND : AOS_DMX_RECEIVE;
     if (DXU.tab == DX_TAB_WIRE && DX.h) want = DX.dir;
     if (DX.h && (!DX.want_open || DX.dir != want)) link_close();
     if (DX.want_open && !DX.h) {
@@ -334,6 +340,7 @@ void dx_rebuild(void)
     memset(DXU.fader_v, 0, sizeof DXU.fader_v);
     DXU.page_l = DXU.fx_draw = DXU.fx_list = DXU.fx_state = NULL;
     DXU.an_stats = DXU.an_map = DXU.an_nums = DXU.an_page_l = NULL;
+    DXU.net_stats = DXU.net_nums = NULL;
     for (int i = 0; i < DX_TAB_COUNT; i++) {
         lv_color_t c = i == DXU.tab ? DX_TEAL : AOS_C_DIM;
         lv_obj_set_style_text_color(lv_obj_get_child(DXU.tabs[i], 0), c, 0);
@@ -347,6 +354,7 @@ void dx_rebuild(void)
     case DX_TAB_CONSOLE: dx_console_build(DXU.content, ch); break;
     case DX_TAB_FIXTURE: dx_fixture_build(DXU.content, ch); break;
     case DX_TAB_ANALYZER: dx_analyzer_build(DXU.content, ch); break;
+    case DX_TAB_NET: dx_net_build(DXU.content, ch); break;
     default: dx_wire_build(DXU.content, ch); break;
     }
     bar_refresh();
@@ -365,12 +373,17 @@ static void timer_cb(lv_timer_t *t)
     (void)t;
     static uint32_t n;
     n++;
-    dx_console_tick();
+    bool net = DXU.tab == DX_TAB_NET;
+    /* the node passes levels on every 25 ms; the rest of the app is fine at 100 */
+    lv_timer_set_period(DXU.timer, net && DX.net_on ? 25 : 100);
+    if (net && DX.net_on) { if (dx_net_take()) dx_send_universe(); }
+    else dx_console_tick();
     link_tick();
-    if (n % 2 == 0) {
+    if (n % (net && DX.net_on ? 8 : 2) == 0) {
         bar_refresh();
         if (DXU.tab == DX_TAB_FIXTURE) dx_fixture_refresh();
         else if (DXU.tab == DX_TAB_ANALYZER) dx_analyzer_refresh();
+        else if (net) dx_net_refresh();
     }
 }
 
@@ -431,6 +444,7 @@ static void *create(aos_app_t *self, lv_obj_t *root)
     memset(&DX, 0, sizeof DX);
     load();
     DX.want_open = false;           /* never send on somebody's rig before the user says so */
+    dx_net_start();
     build_screen(root);
     DXU.timer = lv_timer_create(timer_cb, 100, NULL);
     return &DXU;
@@ -442,6 +456,7 @@ static void destroy(aos_app_t *self, void *inst)
     (void)inst;
     if (DXU.timer) lv_timer_delete(DXU.timer);
     DXU.timer = NULL;
+    dx_net_stop();
     link_close();
     dx_save();
     memset(&DXU, 0, sizeof DXU);
@@ -456,7 +471,14 @@ static bool resize(aos_app_t *self, void *inst, lv_obj_t *root)
 }
 
 static void show(aos_app_t *self, void *inst) { (void)self; (void)inst; if (DXU.timer) lv_timer_resume(DXU.timer); }
-static void hide(aos_app_t *self, void *inst) { (void)self; (void)inst; if (DXU.timer) lv_timer_pause(DXU.timer); }
+/* hidden, the timer stops, except when the board is a network node: the
+ * show on the other side must not freeze because the user left the app */
+static void hide(aos_app_t *self, void *inst)
+{
+    (void)self;
+    (void)inst;
+    if (DXU.timer && !(DXU.tab == DX_TAB_NET && DX.net_on)) lv_timer_pause(DXU.timer);
+}
 
 static bool back(aos_app_t *self, void *inst)
 {
