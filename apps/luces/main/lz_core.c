@@ -12,7 +12,9 @@
  * with a name for whoever reads the file). The built-in types are written
  * the same way below. '#' starts a comment.
  *
- * The patch is luces/patch.csv (name, type name, address); the scenes,
+ * The patch is luces/patch.csv (name, type name, address and, from 2026-11-09,
+ * the universe 1-4, 1 when missing); the groups luces/grupos.txt (name|i,i);
+ * the scenes,
  * luces/escenas.txt, a line each: name|fade ms|i:dim,r,g,b,w,amber,uv,
  * strobe,pan,tilt;i:... with i the fixture's place in the patch.
  */
@@ -52,6 +54,10 @@ static const char *const BUILTIN[][2] = {
     { "Cabeza móvil (9 canales)", "pan,pan_fino,tilt,tilt_fino,velocidad=0,dimmer,rojo,verde,azul" },
     { "Strobe (2 canales)", "dimmer,strobe" },
     { "Máquina de humo", "dimmer" },
+    /* 2026-11-09: three more of the usual */
+    { "Dimmer + RGB (4 canales)", "dimmer,rojo,verde,azul" },
+    { "Wash RGBW (6 canales)", "dimmer,rojo,verde,azul,blanco,strobe" },
+    { "PAR RGBW de 8 canales", "dimmer,rojo,verde,azul,blanco,strobe,macro=0,velocidad=0" },
 };
 
 /* ---- the folder ---- */
@@ -215,6 +221,7 @@ int lz_fix_add(int type, uint16_t addr, const char *name)
     lz_fix_t *f = &LZ.fix[i];
     f->type = type;
     f->addr = addr;
+    f->univ = 0;
     if (name && name[0]) snprintf(f->name, sizeof f->name, "%s", name);
     else snprintf(f->name, sizeof f->name, "%.18s %u", LZ.types[type].name, (unsigned)(uint8_t)(i + 1));
     look_default(&LZ.look[i]);
@@ -237,15 +244,21 @@ void lz_fix_remove(int i)
     memmove(&LZ.fx_on[i], &LZ.fx_on[i + 1], (size_t)n * sizeof LZ.fx_on[0]);
     for (int s = 0; s < LZ.nscenes && LZ.scenes; s++)
         memmove(&LZ.scenes[s].look[i], &LZ.scenes[s].look[i + 1], (size_t)n * sizeof LZ.look[0]);
+    /* the groups: the bits above i come down one */
+    for (int g = 0; g < LZ.ngroups; g++) {
+        uint64_t m = LZ.groups[g].mask, low = m & ((1ull << i) - 1);
+        LZ.groups[g].mask = low | ((m >> 1) & ~((1ull << i) - 1));
+    }
     LZ.nfix--;
     LZ.changed++;
 }
 
-int lz_next_free(int nch)
+int lz_next_free(int univ, int nch)
 {
     for (int a = 1; a + nch - 1 <= 512; a++) {
         bool ok = true;
         for (int i = 0; i < LZ.nfix && ok; i++) {
+            if (LZ.fix[i].univ != univ) continue;
             int b = LZ.fix[i].addr, e = b + LZ.types[LZ.fix[i].type].n - 1;
             if (a <= e && a + nch - 1 >= b) { ok = false; a = e; }
         }
@@ -259,7 +272,7 @@ bool lz_fix_overlaps(int i)
     int b = LZ.fix[i].addr, e = b + LZ.types[LZ.fix[i].type].n - 1;
     if (e > 512) return true;
     for (int j = 0; j < LZ.nfix; j++) {
-        if (j == i) continue;
+        if (j == i || LZ.fix[j].univ != LZ.fix[i].univ) continue;
         int b2 = LZ.fix[j].addr, e2 = b2 + LZ.types[LZ.fix[j].type].n - 1;
         if (b <= e2 && e >= b2 && !(b == b2 && LZ.fix[j].type == LZ.fix[i].type)) return true;
     }
@@ -273,8 +286,9 @@ bool lz_patch_save(void)
     snprintf(tmp, sizeof tmp, "%s.tmp", p);
     FILE *f = fopen(tmp, "w");
     if (!f) return false;
-    fputs("# P4OS Luces: el patch (nombre,tipo,direccion)\n", f);
-    for (int i = 0; i < LZ.nfix; i++) fprintf(f, "%s,%s,%u\n", LZ.fix[i].name, LZ.types[LZ.fix[i].type].name, LZ.fix[i].addr);
+    fputs("# P4OS Luces: el patch (nombre,tipo,direccion,universo)\n", f);
+    for (int i = 0; i < LZ.nfix; i++)
+        fprintf(f, "%s,%s,%u,%u\n", LZ.fix[i].name, LZ.types[LZ.fix[i].type].name, LZ.fix[i].addr, LZ.fix[i].univ + 1);
     bool ok = fclose(f) == 0;
     if (ok) { remove(p); ok = rename(tmp, p) == 0; }
     return ok;
@@ -352,6 +366,85 @@ static void scenes_load(void)
     fclose(f);
 }
 
+/* ---- groups ---- */
+
+bool lz_groups_save(void)
+{
+    char p[140], tmp[150];
+    snprintf(p, sizeof p, "%s/grupos.txt", lz_dir());
+    snprintf(tmp, sizeof tmp, "%s.tmp", p);
+    FILE *f = fopen(tmp, "w");
+    if (!f) return false;
+    fputs("# P4OS Luces: los grupos (nombre|i,i,... con i el lugar del aparato en el patch)\n", f);
+    for (int g = 0; g < LZ.ngroups; g++) {
+        fprintf(f, "%s|", LZ.groups[g].name);
+        bool first = true;
+        for (int i = 0; i < LZ_FIX; i++)
+            if (LZ.groups[g].mask >> i & 1) { fprintf(f, "%s%d", first ? "" : ",", i); first = false; }
+        fputc('\n', f);
+    }
+    bool ok = fclose(f) == 0;
+    if (ok) { remove(p); ok = rename(tmp, p) == 0; }
+    return ok;
+}
+
+static void groups_load(void)
+{
+    LZ.ngroups = 0;
+    char p[140];
+    snprintf(p, sizeof p, "%s/grupos.txt", lz_dir());
+    FILE *f = fopen(p, "r");
+    if (!f) return;
+    char line[400];
+    while (fgets(line, sizeof line, f) && LZ.ngroups < LZ_GROUPS) {
+        char *s = trim(line);
+        if (!*s || *s == '#') continue;
+        char *bar = strchr(s, '|');
+        if (!bar) continue;
+        *bar = 0;
+        lz_group_t *g = &LZ.groups[LZ.ngroups];
+        memset(g, 0, sizeof *g);
+        snprintf(g->name, sizeof g->name, "%.19s", trim(s));
+        for (char *q = bar + 1, *next; q && *q; q = next) {
+            next = strchr(q, ',');
+            if (next) *next++ = 0;
+            int i = atoi(q);
+            if (i >= 0 && i < LZ_FIX) g->mask |= 1ull << i;
+        }
+        LZ.ngroups++;
+    }
+    fclose(f);
+}
+
+int lz_group_store(const char *name)
+{
+    if (LZ.ngroups >= LZ_GROUPS) return -1;
+    uint64_t m = 0;
+    for (int i = 0; i < LZ.nfix; i++) if (LZ.sel[i]) m |= 1ull << i;
+    if (!m) return -1;
+    lz_group_t *g = &LZ.groups[LZ.ngroups];
+    snprintf(g->name, sizeof g->name, "%.19s", name && name[0] ? name : "?");
+    g->mask = m;
+    LZ.changed++;
+    lz_groups_save();
+    return LZ.ngroups++;
+}
+
+void lz_group_select(int i)
+{
+    if (i < 0 || i >= LZ.ngroups) return;
+    for (int k = 0; k < LZ.nfix; k++) LZ.sel[k] = LZ.groups[i].mask >> k & 1;
+}
+
+void lz_group_delete(int i)
+{
+    if (i < 0 || i >= LZ.ngroups) return;
+    memmove(&LZ.groups[i], &LZ.groups[i + 1], (size_t)(LZ.ngroups - i - 1) * sizeof LZ.groups[0]);
+    LZ.ngroups--;
+    LZ.changed++;
+    lz_groups_save();
+}
+
 void lz_show_load(void)
 {
     if (!LZ.scenes) LZ.scenes = big(sizeof(lz_scene_t) * LZ_SCENES);
@@ -364,13 +457,23 @@ void lz_show_load(void)
         while (fgets(line, sizeof line, f)) {
             char *s = trim(line);
             if (!*s || *s == '#') continue;
+            /* name,type,address[,universe]: the type's name may have commas */
             char *c1 = strchr(s, ','), *c2 = c1 ? strrchr(c1 + 1, ',') : NULL;
             if (!c1 || !c2) continue;
-            *c1 = 0;
+            int univ = 0;
+            char *c0 = c2;
             *c2 = 0;
+            char *c3 = strrchr(c1 + 1, ',');
+            if (c3 && c3 > c1) {                /* four fields: the last was the universe */
+                univ = atoi(c0 + 1) - 1;
+                c0 = c3;
+                *c3 = 0;
+            }
+            *c1 = 0;
             int t = type_by_name(trim(c1 + 1));
-            if (t >= 0) lz_fix_add(t, (uint16_t)atoi(c2 + 1), trim(s));
-            else aos_hal_log("luces", "patch: no type called %s", trim(c1 + 1));
+            int k = t >= 0 ? lz_fix_add(t, (uint16_t)atoi(c0 + 1), trim(s)) : -1;
+            if (k >= 0 && univ > 0 && univ < LZ_UNIV) LZ.fix[k].univ = (uint8_t)univ;
+            if (t < 0) aos_hal_log("luces", "patch: no type called %s", trim(c1 + 1));
         }
         fclose(f);
     } else {
@@ -383,6 +486,7 @@ void lz_show_load(void)
         lz_fix_add(3, 25, "PAR 1");
         lz_patch_save();
     }
+    groups_load();
     if (LZ.scenes) {
         snprintf(p, sizeof p, "%s/escenas.txt", lz_dir());
         struct stat sb;
@@ -449,6 +553,12 @@ void lz_scene_recall(int i, uint16_t fade_ms)
     LZ.fade_t0 = now_ms();
     LZ.fade_ms = fade_ms;
     LZ.cur_scene = i;
+}
+
+void lz_scene_call(int i)
+{
+    if (!LZ.scenes || i < 0 || i >= LZ.nscenes) return;
+    lz_scene_recall(i, LZ.scenes[i].fade_ms);
 }
 
 void lz_scene_delete(int i)
@@ -594,12 +704,15 @@ void lz_tick(void)
     }
     /* the universe */
     memset(LZ.uni, 0, sizeof LZ.uni);
+    uint8_t used = 0;
     unsigned m = LZ.blackout ? 0 : LZ.master;
     for (int i = 0; i < LZ.nfix; i++) {
         const lz_fix_t *f = &LZ.fix[i];
         const lz_type_t *t = &LZ.types[f->type];
         const lz_look_t *s = &LZ.shown[i];
         unsigned dim = (unsigned)s->dim * m / 255;
+        uint8_t *uni = LZ.uni[f->univ < LZ_UNIV ? f->univ : 0];
+        used |= (uint8_t)(1u << (f->univ < LZ_UNIV ? f->univ : 0));
         for (int c = 0; c < t->n; c++) {
             int ch = f->addr + c;
             if (ch < 1 || ch > 512) break;
@@ -621,9 +734,10 @@ void lz_tick(void)
             }
             /* a type with no dimmer: the colours carry the intensity */
             if (!t->has_dim && t->attr[c] >= LZ_A_R && t->attr[c] <= LZ_A_UV) v = v * dim / 255;
-            LZ.uni[ch] = (uint8_t)v;
+            uni[ch] = (uint8_t)v;
         }
     }
+    LZ.used_univ = used;
 }
 
 lz_look_t lz_shown_color(int i, uint8_t *r, uint8_t *g, uint8_t *b)

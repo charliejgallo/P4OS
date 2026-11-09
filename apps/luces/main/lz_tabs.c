@@ -49,7 +49,7 @@ static void store_cb(lv_event_t *e)
 static void scene_cb(lv_event_t *e)
 {
     int i = (int)(intptr_t)lv_event_get_user_data(e);
-    lz_scene_recall(i, LZ.scene_fade_ms);
+    lz_scene_call(i);
     lz_scenes_refresh();
 }
 
@@ -85,11 +85,30 @@ static void delete_scene_cb(lv_event_t *e)
     lz_rebuild();
 }
 
+static void scene_fade_cb(lv_event_t *e)
+{
+    int i = LZU.edit;
+    if (i < 0 || i >= LZ.nscenes) return;
+    LZ.scenes[i].fade_ms = FADE_MS[(int)(intptr_t)lv_event_get_user_data(e)];
+    lz_scenes_save();
+    lz_overlay_close();
+    lz_rebuild();
+}
+
 static void scene_menu_cb(lv_event_t *e)
 {
     int i = (int)(intptr_t)lv_event_get_user_data(e);
     LZU.edit = i;
     lv_obj_t *c = lz_sheet(LZ.scenes[i].name);
+    lz_section(c, _("SU FUNDIDO AL LLAMARLA"));
+    lv_obj_t *fr = lz_chips_row(c, LZU.W - 2 * AOS_UI_PAD - 40);
+    for (int k = 0; k < 6; k++) {
+        char t[16];
+        if (FADE_MS[k] == 0) snprintf(t, sizeof t, "%s", _("Corte"));
+        else if (FADE_MS[k] % 1000) snprintf(t, sizeof t, "%u,%u s", FADE_MS[k] / 1000, FADE_MS[k] % 1000 / 100);
+        else snprintf(t, sizeof t, "%u s", FADE_MS[k] / 1000);
+        lz_chip(fr, t, LZ.scenes[i].fade_ms == FADE_MS[k], scene_fade_cb, (void *)(intptr_t)k);
+    }
     lz_pill(c, AOS_SYM_RECORD, _("Volver a grabar con lo que hay ahora"), LZ_ACCENT, rerecord_cb, NULL);
     lz_pill(c, AOS_SYM_PENCIL, _("Cambiar el nombre"), AOS_C_CARD2, rename_cb, NULL);
     lz_pill(c, AOS_SYM_DELETE, _("Borrar"), AOS_C_RED, delete_scene_cb, NULL);
@@ -134,7 +153,7 @@ void lz_scenes_build(lv_obj_t *parent, int32_t ch)
     lv_obj_set_style_pad_gap(top, 10, 0);
     lz_pill(top, AOS_SYM_PLUS, _("Guardar lo que hay"), LZ_ACCENT, store_cb, NULL);
     lz_pill(top, AOS_SYM_AUTO_FIX, _("Escenas de muestra"), AOS_C_CARD2, demo_cb, NULL);
-    lz_section(col, _("FUNDIDO AL LLAMAR UNA ESCENA"));
+    lz_section(col, _("FUNDIDO DE LAS ESCENAS NUEVAS (CADA UNA GUARDA EL SUYO)"));
     lv_obj_t *r = lz_chips_row(col, w);
     for (int k = 0; k < 6; k++) {
         char t[16];
@@ -160,6 +179,12 @@ void lz_scenes_build(lv_obj_t *parent, int32_t ch)
         char n[8];
         snprintf(n, sizeof n, "%d", i + 1);
         lv_obj_align(aos_label(t, n, aos_font_tiny, AOS_C_DIM), LV_ALIGN_TOP_LEFT, 14, 10);
+        char fd[16];
+        uint16_t fm = LZ.scenes[i].fade_ms;
+        if (!fm) snprintf(fd, sizeof fd, "%s", _("corte"));
+        else if (fm % 1000) snprintf(fd, sizeof fd, "%u,%u s", fm / 1000, fm % 1000 / 100);
+        else snprintf(fd, sizeof fd, "%u s", fm / 1000);
+        lv_obj_align(aos_label(t, fd, aos_font_tiny, AOS_C_DIM), LV_ALIGN_TOP_RIGHT, -14, 10);
         lv_obj_t *l = aos_label(t, LZ.scenes[i].name, aos_font_small, AOS_C_TEXT);
         lv_obj_set_width(l, tw - 28);
         lv_label_set_long_mode(l, LV_LABEL_LONG_MODE_DOTS);
@@ -227,6 +252,7 @@ static void patch_changed(void)
 
 static void add_type_cb(lv_event_t *e);
 static void add_n_cb(lv_event_t *e);
+static void add_univ_cb(lv_event_t *e);
 static void add_go_cb(lv_event_t *e);
 
 static void add_sheet(void)
@@ -248,8 +274,15 @@ static void add_sheet(void)
         snprintf(s, sizeof s, "%d", N[k]);
         lz_chip(r, s, N[k] == LZU.add_n, add_n_cb, (void *)(intptr_t)N[k]);
     }
+    lz_section(c, _("UNIVERSO (EL 1 SALE POR RS485; LOS DEMÁS, SÓLO POR ART-NET)"));
+    r = lz_chips_row(c, w);
+    for (int u = 0; u < LZ_UNIV; u++) {
+        char s[8];
+        snprintf(s, sizeof s, "U%d", u + 1);
+        lz_chip(r, s, u == LZU.add_univ, add_univ_cb, (void *)(intptr_t)u);
+    }
     const lz_type_t *t = &LZ.types[LZU.add_type];
-    int a = lz_next_free(t->n);
+    int a = lz_next_free(LZU.add_univ, t->n);
     char s[120];
     if (a > 0) snprintf(s, sizeof s, _("Desde la dirección %d, uno tras otro, %u canales cada uno."), a, t->n);
     else snprintf(s, sizeof s, "%s", _("No quedan canales libres para ese tipo."));
@@ -259,6 +292,7 @@ static void add_sheet(void)
 
 static void add_type_cb(lv_event_t *e) { LZU.add_type = (int)(intptr_t)lv_event_get_user_data(e); add_sheet(); }
 static void add_n_cb(lv_event_t *e) { LZU.add_n = (int)(intptr_t)lv_event_get_user_data(e); add_sheet(); }
+static void add_univ_cb(lv_event_t *e) { LZU.add_univ = (int)(intptr_t)lv_event_get_user_data(e); add_sheet(); }
 
 static void add_go_cb(lv_event_t *e)
 {
@@ -272,11 +306,13 @@ static void add_go_cb(lv_event_t *e)
     int have = 0;
     for (int i = 0; i < LZ.nfix; i++) have += LZ.fix[i].type == LZU.add_type;
     for (int k = 0; k < LZU.add_n; k++) {
-        int a = lz_next_free(t->n);
+        int a = lz_next_free(LZU.add_univ, t->n);
         if (a < 0) break;
         char n[24];
         snprintf(n, sizeof n, "%.18s %u", base, (unsigned)(uint8_t)(have + k + 1));
-        if (lz_fix_add(LZU.add_type, (uint16_t)a, n) < 0) break;
+        int fi = lz_fix_add(LZU.add_type, (uint16_t)a, n);
+        if (fi < 0) break;
+        LZ.fix[fi].univ = (uint8_t)LZU.add_univ;
     }
     patch_changed();
     lz_overlay_close();
@@ -318,6 +354,13 @@ static void fix_type_cb(lv_event_t *e)
     fix_sheet();
 }
 
+static void fix_univ_cb(lv_event_t *e)
+{
+    LZ.fix[LZU.edit].univ = (uint8_t)(intptr_t)lv_event_get_user_data(e);
+    patch_changed();
+    fix_sheet();
+}
+
 static void fix_del_cb(lv_event_t *e)
 {
     (void)e;
@@ -344,6 +387,13 @@ static void fix_sheet(void)
         char s[56];
         snprintf(s, sizeof s, "%.40s · %u", LZ.types[t].name, LZ.types[t].n);
         lz_chip(r, s, t == f->type, fix_type_cb, (void *)(intptr_t)t);
+    }
+    lz_section(c, _("UNIVERSO"));
+    r = lz_chips_row(c, w);
+    for (int u = 0; u < LZ_UNIV; u++) {
+        char s[8];
+        snprintf(s, sizeof s, "U%d", u + 1);
+        lz_chip(r, s, u == f->univ, fix_univ_cb, (void *)(intptr_t)u);
     }
     const lz_type_t *t = &LZ.types[f->type];
     char s[200];
@@ -403,9 +453,10 @@ void lz_patch_build(lv_obj_t *parent, int32_t ch)
         lv_label_set_long_mode(d, LV_LABEL_LONG_MODE_DOTS);
         lv_obj_align(d, LV_ALIGN_BOTTOM_LEFT, 0, -14);
         bool bad = lz_fix_overlaps(i);
-        char a[32];
-        if (t->n > 1) snprintf(a, sizeof a, "%u-%u", f->addr, f->addr + t->n - 1);
-        else snprintf(a, sizeof a, "%u", f->addr);
+        char a[32], u[6] = "";
+        if (f->univ) snprintf(u, sizeof u, "U%u ", f->univ + 1);
+        if (t->n > 1) snprintf(a, sizeof a, "%s%u-%u", u, f->addr, f->addr + t->n - 1);
+        else snprintf(a, sizeof a, "%s%u", u, f->addr);
         lv_obj_align(aos_label(c, a, aos_font_title, bad ? AOS_C_ORANGE : LZ_ACCENT), LV_ALIGN_RIGHT_MID, 0, 0);
     }
     lz_section(col, _("TIPOS DE APARATO"));
@@ -442,6 +493,7 @@ static int s_pick = 1;          /* the channel tapped on the map */
 static int fixture_of(int chn, int *k)
 {
     for (int i = 0; i < LZ.nfix; i++) {
+        if (LZ.fix[i].univ != LZU.out_univ) continue;
         int a = LZ.fix[i].addr, n = LZ.types[LZ.fix[i].type].n;
         if (chn >= a && chn < a + n) { if (k) *k = chn - a; return i; }
     }
@@ -458,15 +510,17 @@ static void out_draw_cb(lv_event_t *e)
     static bool patched[513];
     memset(patched, 0, sizeof patched);
     for (int i = 0; i < LZ.nfix; i++) {
+        if (LZ.fix[i].univ != LZU.out_univ) continue;
         int b = LZ.fix[i].addr, n = LZ.types[LZ.fix[i].type].n;
         for (int c = b; c < b + n && c <= 512; c++) patched[c] = true;
     }
+    const uint8_t *uni = LZ.uni[LZU.out_univ];
     lv_draw_rect_dsc_t d;
     lv_draw_rect_dsc_init(&d);
     d.bg_opa = LV_OPA_COVER;
     d.radius = 2;
     for (int i = 0; i < 512; i++) {
-        int chn = i + 1, v = LZ.uni[chn];
+        int chn = i + 1, v = uni[chn];
         if (!patched[chn]) d.bg_color = lv_color_hex(0x161618);
         else d.bg_color = lv_color_make((uint8_t)(40 + v * 196 / 255), (uint8_t)(30 + v * 42 / 255), (uint8_t)(50 + v * 103 / 255));
         d.border_width = chn == s_pick ? 2 : 0;
@@ -491,6 +545,41 @@ static void out_click_cb(lv_event_t *e)
     lz_out_refresh();
 }
 
+static void univ_view_cb(lv_event_t *e)
+{
+    LZU.out_univ = (int)(intptr_t)lv_event_get_user_data(e);
+    lz_rebuild();
+}
+
+static void an_on_cb(lv_event_t *e)
+{
+    LZN.on = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
+    lz_save();
+    lz_out_refresh();
+}
+
+static void an_base_done(int v)
+{
+    if (v >= 0 && v < 32768) LZN.base = (uint16_t)v;
+    lz_save();
+    lz_rebuild();
+}
+
+static void an_base_cb(lv_event_t *e) { (void)e; lz_keypad(_("Universo Art-Net del U1 (0 a 32767)"), LZN.base, an_base_done); }
+
+static void an_dest_done(const char *v)
+{
+    snprintf(LZN.dest, sizeof LZN.dest, "%.39s", v);
+    lz_save();
+    lz_rebuild();
+}
+
+static void an_dest_cb(lv_event_t *e)
+{
+    if ((int)(intptr_t)lv_event_get_user_data(e) == 0) { LZN.dest[0] = 0; lz_save(); lz_rebuild(); return; }
+    lz_text(_("Dirección IP del nodo Art-Net"), LZN.dest, an_dest_done);
+}
+
 static void port_cb(lv_event_t *e)
 {
     lz_set_port((const char *)lv_event_get_user_data(e));
@@ -513,10 +602,45 @@ void lz_out_build(lv_obj_t *parent, int32_t ch)
     }
     lv_obj_t *c = lz_card(col, w, LV_SIZE_CONTENT);
     lv_obj_set_style_pad_all(c, 18, 0);
+    lv_obj_set_flex_flow(c, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(c, 12, 0);
     P->out_stats = aos_label(c, "", aos_font_small, AOS_C_TEXT);
     lv_obj_set_width(P->out_stats, w - 36);
     lv_label_set_long_mode(P->out_stats, LV_LABEL_LONG_MODE_WRAP);
+    /* Art-Net */
+    lz_section(col, "ART-NET");
+    lv_obj_t *ac = lz_card(col, w, LV_SIZE_CONTENT);
+    lv_obj_set_style_pad_all(ac, 18, 0);
+    lv_obj_set_flex_flow(ac, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(ac, 12, 0);
+    lv_obj_t *ar = lz_box(ac, w - 36, 60);
+    lv_obj_set_flex_flow(ar, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(ar, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_column(ar, 14, 0);
+    aos_label(ar, _("Mandar por la red"), aos_font_body, AOS_C_TEXT);
+    lv_obj_t *sw = lv_switch_create(ar);
+    lv_obj_set_size(sw, 96, 52);
+    lv_obj_set_style_bg_color(sw, LZ_ACCENT, LV_PART_INDICATOR | LV_STATE_CHECKED);
+    if (LZN.on) lv_obj_add_state(sw, LV_STATE_CHECKED);
+    lv_obj_add_event_cb(sw, an_on_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    r = lz_chips_row(ac, w - 36);
+    lz_chip(r, _("A toda la red"), !LZN.dest[0], an_dest_cb, (void *)0);
+    char dt[56];
+    snprintf(dt, sizeof dt, LZN.dest[0] ? "%s" : "%s", LZN.dest[0] ? LZN.dest : _("A un nodo…"));
+    lz_chip(r, dt, LZN.dest[0] != 0, an_dest_cb, (void *)1);
+    char bt[40];
+    snprintf(bt, sizeof bt, _("U1 = universo %u"), LZN.base);
+    lz_chip(r, bt, false, an_base_cb, NULL);
+    P->an_stats = aos_label(ac, "", aos_font_caption, AOS_C_DIM);
+    lz_caption(ac, _("Cada universo con algún aparato sale 40 veces por segundo como Art-Net (UDP 6454): a toda la red, o a la IP de un nodo. U1 lleva el universo elegido, U2 el siguiente, y así. Para un nodo Art-Net a DMX, consolas y programas de la PC."), w - 36);
+
     lz_section(col, _("LOS 512 CANALES COMO SALEN (OSCUROS: SIN APARATO)"));
+    r = lz_chips_row(col, w);
+    for (int u = 0; u < LZ_UNIV; u++) {
+        char s[16];
+        snprintf(s, sizeof s, "U%d%s", u + 1, LZ.used_univ >> u & 1 ? " ·" : "");
+        lz_chip(r, s, u == LZU.out_univ, univ_view_cb, (void *)(intptr_t)u);
+    }
     P->out_map = lz_card(col, w, (w / 32) * 16);
     lv_obj_add_flag(P->out_map, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(P->out_map, out_draw_cb, LV_EVENT_DRAW_MAIN, NULL);
@@ -532,7 +656,7 @@ void lz_out_refresh(void)
     lv_obj_invalidate(P->out_map);
     char t[240];
     int k = 0, i = fixture_of(s_pick, &k);
-    size_t n = (size_t)snprintf(t, sizeof t, _("Canal %d: %u"), s_pick, LZ.uni[s_pick]);
+    size_t n = (size_t)snprintf(t, sizeof t, _("Canal %d: %u"), s_pick, LZ.uni[LZU.out_univ][s_pick]);
     if (i >= 0) {
         const lz_type_t *ty = &LZ.types[LZ.fix[i].type];
         n += (size_t)snprintf(t + n, sizeof t - n, " · %s, %s", LZ.fix[i].name, ty->attr[k] == LZ_A_CONST ? _("fijo") : lz_attr_name(ty->attr[k]));
@@ -541,4 +665,9 @@ void lz_out_refresh(void)
         snprintf(t + n, sizeof t - n, _("\nSaliendo por %s: %.1f paquetes/s, %lu mandados."), LZU.port, (double)LZU.st.hz, (unsigned long)LZU.st.packets);
     else snprintf(t + n, sizeof t - n, _("\nSalida cerrada (%s)."), LZU.port);
     lv_label_set_text(P->out_stats, t);
+    if (P->an_stats) {
+        if (!LZN.on) lv_label_set_text(P->an_stats, _("Apagado."));
+        else if (LZN.err[0]) lv_label_set_text(P->an_stats, LZN.err);
+        else lv_label_set_text_fmt(P->an_stats, _("%lu paquetes mandados a %s"), (unsigned long)LZN.packets, LZN.dest[0] ? LZN.dest : "255.255.255.255");
+    }
 }

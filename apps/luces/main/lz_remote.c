@@ -11,13 +11,17 @@
  *   escena=i     fundido=ms   guardar=name   regrabar=i   borrar=i
  *   renombrar=i,name
  *   secuencia=1|0   bpm=n   tap=1   corte=0..100 (the chase's fade, %)
- *   agregar=type,n         n fixtures of that type at the next free addresses
- *   aparato=i,addr,type,name   change one     quitar=i
+ *   agregar=type,n[,univ]  n fixtures of that type at the next free addresses
+ *                          of that universe (0-3)
+ *   aparato=i,addr,type,name   change one     quitar=i     universo=i,u
+ *   grupo=i (select it)    grupo_nuevo=name (the selection)   grupo_borrar=i
+ *   fundido_escena=i,ms    the scene's own fade
+ *   artnet=1|0   artnet_ip=a.b.c.d ("" for the whole network)   artnet_base=n
  *   tipos=1               read the card's types again
  *   muestra=1             add the five demo scenes
  *
  * and reads one key while it looks, "estado", a JSON with all of it and the
- * 512 channels as hex, four times a second.
+ * four universes' 512 channels as hex, four times a second.
  */
 #include "lz_ui.h"
 
@@ -122,7 +126,26 @@ static void order(const char *key, char *v)
         if (numbers(v, n, 2) == 2) lz_set_pos((uint16_t)clampi(n[0], 0, 65535), (uint16_t)clampi(n[1], 0, 65535));
     } else if (!strcmp(key, "efecto")) lz_effect(clampi(atol(v), 0, LZ_FX_COUNT - 1));
     else if (!strcmp(key, "velocidad")) LZ.fx_speed = (uint8_t)clampi(atol(v), 1, 100);
-    else if (!strcmp(key, "escena")) lz_scene_recall(atoi(v), LZ.scene_fade_ms);
+    else if (!strcmp(key, "escena")) lz_scene_call(atoi(v));
+    else if (!strcmp(key, "fundido_escena")) {
+        if (numbers(v, n, 2) == 2 && LZ.scenes && n[0] >= 0 && n[0] < LZ.nscenes) {
+            LZ.scenes[n[0]].fade_ms = (uint16_t)clampi(n[1], 0, 30000);
+            lz_scenes_save();
+            LZ.changed++;
+        }
+    }
+    else if (!strcmp(key, "grupo")) lz_group_select(atoi(v));
+    else if (!strcmp(key, "grupo_nuevo")) lz_group_store(v);
+    else if (!strcmp(key, "grupo_borrar")) lz_group_delete(atoi(v));
+    else if (!strcmp(key, "universo")) {
+        if (numbers(v, n, 2) == 2 && n[0] >= 0 && n[0] < LZ.nfix) {
+            LZ.fix[n[0]].univ = (uint8_t)clampi(n[1], 0, LZ_UNIV - 1);
+            patch_changed();
+        }
+    }
+    else if (!strcmp(key, "artnet")) LZN.on = flag(v);
+    else if (!strcmp(key, "artnet_ip")) snprintf(LZN.dest, sizeof LZN.dest, "%.39s", v);
+    else if (!strcmp(key, "artnet_base")) LZN.base = (uint16_t)clampi(atol(v), 0, 32767);
     else if (!strcmp(key, "fundido")) LZ.scene_fade_ms = (uint16_t)clampi(atol(v), 0, 30000);
     else if (!strcmp(key, "guardar")) lz_scene_store(v);
     else if (!strcmp(key, "regrabar")) {
@@ -148,7 +171,9 @@ static void order(const char *key, char *v)
     else if (!strcmp(key, "tap")) lz_tap();
     else if (!strcmp(key, "corte")) LZ.chase_fade = (uint8_t)clampi(atol(v), 0, 100);
     else if (!strcmp(key, "agregar")) {
-        if (numbers(v, n, 2) == 2 && n[0] >= 0 && n[0] < LZ.ntypes) {
+        int k3 = numbers(v, n, 3);
+        int univ = k3 == 3 ? clampi(n[2], 0, LZ_UNIV - 1) : 0;
+        if (k3 >= 2 && n[0] >= 0 && n[0] < LZ.ntypes) {
             const lz_type_t *t = &LZ.types[n[0]];
             char base[24];
             snprintf(base, sizeof base, "%.20s", t->name);
@@ -157,10 +182,12 @@ static void order(const char *key, char *v)
             int have = 0;
             for (int i = 0; i < LZ.nfix; i++) have += LZ.fix[i].type == n[0];
             for (int k = 0; k < clampi(n[1], 1, LZ_FIX); k++) {
-                int a = lz_next_free(t->n);
+                int a = lz_next_free(univ, t->n);
                 char nm[24];
                 snprintf(nm, sizeof nm, "%.18s %u", base, (unsigned)(uint8_t)(have + k + 1));
-                if (a < 0 || lz_fix_add((int)n[0], (uint16_t)a, nm) < 0) break;
+                int fi = a < 0 ? -1 : lz_fix_add((int)n[0], (uint16_t)a, nm);
+                if (fi < 0) break;
+                LZ.fix[fi].univ = (uint8_t)univ;
             }
             patch_changed();
         }
@@ -214,7 +241,7 @@ static void take_orders(void)
 
 static void put_state(void)
 {
-    static char buf[24576];
+    static char buf[32768];
     jw_t w = { buf, sizeof buf, 0 };
     jw_fmt(&w, "{\"salida\":{\"quiere\":%s,\"abierta\":%s,\"puerto\":", LZU.want_open ? "true" : "false", LZU.h ? "true" : "false");
     jw_str(&w, LZU.port);
@@ -241,13 +268,30 @@ static void put_state(void)
         lz_shown_color(i, &r, &g, &b);
         jw_raw(&w, i ? ",{\"n\":" : "{\"n\":");
         jw_str(&w, f->name);
-        jw_fmt(&w, ",\"t\":%d,\"a\":%u,\"sel\":%s,\"pisa\":%s,\"ve\":\"#%02x%02x%02x\",\"dim\":%u,\"rgb\":[%u,%u,%u,%u],\"strobe\":%u,\"pan\":%u,\"tilt\":%u}",
-               f->type, f->addr, LZ.sel[i] ? "true" : "false", lz_fix_overlaps(i) ? "true" : "false", r, g, b, l->dim, l->r, l->g, l->b, l->w,
+        jw_fmt(&w, ",\"t\":%d,\"a\":%u,\"u\":%u,\"sel\":%s,\"pisa\":%s,\"ve\":\"#%02x%02x%02x\",\"dim\":%u,\"rgb\":[%u,%u,%u,%u],\"strobe\":%u,\"pan\":%u,\"tilt\":%u}",
+               f->type, f->addr, f->univ, LZ.sel[i] ? "true" : "false", lz_fix_overlaps(i) ? "true" : "false", r, g, b, l->dim, l->r, l->g, l->b, l->w,
                l->strobe, l->pan, l->tilt);
     }
     jw_raw(&w, "],\"escenas\":[");
     for (int i = 0; i < LZ.nscenes; i++) { if (i) jw_raw(&w, ","); jw_str(&w, LZ.scenes[i].name); }
-    jw_raw(&w, "],\"tipos\":[");
+    jw_raw(&w, "],\"fundidos\":[");
+    for (int i = 0; i < LZ.nscenes; i++) jw_fmt(&w, "%s%u", i ? "," : "", LZ.scenes[i].fade_ms);
+    jw_raw(&w, "],\"grupos\":[");
+    for (int g = 0; g < LZ.ngroups; g++) {
+        jw_raw(&w, g ? ",{\"n\":" : "{\"n\":");
+        jw_str(&w, LZ.groups[g].name);
+        jw_raw(&w, ",\"aparatos\":[");
+        bool first = true;
+        for (int i = 0; i < LZ.nfix; i++)
+            if (LZ.groups[g].mask >> i & 1) { jw_fmt(&w, "%s%d", first ? "" : ",", i); first = false; }
+        jw_raw(&w, "]}");
+    }
+    jw_fmt(&w, "],\"artnet\":{\"on\":%s,\"base\":%u,\"paquetes\":%lu,\"ip\":", LZN.on ? "true" : "false", LZN.base,
+           (unsigned long)LZN.packets);
+    jw_str(&w, LZN.dest);
+    jw_raw(&w, ",\"error\":");
+    jw_str(&w, LZN.err);
+    jw_raw(&w, "},\"tipos\":[");
     for (int i = 0; i < LZ.ntypes; i++) {
         const lz_type_t *t = &LZ.types[i];
         jw_raw(&w, i ? ",{\"n\":" : "{\"n\":");
@@ -263,10 +307,20 @@ static void put_state(void)
         }
         jw_raw(&w, "]}");
     }
+    /* the universes: "universo" is the first, as before; "universos" all four */
+    static const char HEX[] = "0123456789abcdef";
+    jw_fmt(&w, "],\"usados\":%u,\"universos\":[", LZ.used_univ);
+    for (int u = 0; u < LZ_UNIV; u++) {
+        jw_raw(&w, u ? ",\"" : "\"");
+        if (w.k + 1030 < w.n) {
+            for (int c = 1; c <= 512; c++) { w.b[w.k++] = HEX[LZ.uni[u][c] >> 4]; w.b[w.k++] = HEX[LZ.uni[u][c] & 15]; }
+            w.b[w.k] = 0;
+        }
+        jw_raw(&w, "\"");
+    }
     jw_raw(&w, "],\"universo\":\"");
     if (w.k + 1030 < w.n) {
-        static const char HEX[] = "0123456789abcdef";
-        for (int c = 1; c <= 512; c++) { w.b[w.k++] = HEX[LZ.uni[c] >> 4]; w.b[w.k++] = HEX[LZ.uni[c] & 15]; }
+        for (int c = 1; c <= 512; c++) { w.b[w.k++] = HEX[LZ.uni[0][c] >> 4]; w.b[w.k++] = HEX[LZ.uni[0][c] & 15]; }
         w.b[w.k] = 0;
     }
     jw_raw(&w, "\"}");

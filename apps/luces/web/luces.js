@@ -135,6 +135,7 @@ P.registerPage({
 
     /* ---- Escenario ---- */
     const tiles = h('div', { class: 'tiles' });
+    const groupsRow = h('div', { class: 'chips' });
     const selNote = h('span', { class: 'note' });
     const dim = h('input', { type: 'range', min: 0, max: 255, oninput: e => { send('dim', e.target.value); dimV.textContent = pct(e.target.value); } });
     const dimV = h('b', {}, '');
@@ -158,6 +159,7 @@ P.registerPage({
           h('button', { class: 'btn', onclick: () => pick(st.aparatos.map((_, i) => i).filter(i => i % 2 === 0)) }, tr('Pares')),
           h('button', { class: 'btn', onclick: () => pick(st.aparatos.map((_, i) => i).filter(i => i % 2 === 1)) }, tr('Impares')),
           selNote),
+        groupsRow,
         tiles),
       h('div', { class: 'card pad' },
         h('label', { class: 'sl' }, h('span', {}, tr('Intensidad')), dim, dimV),
@@ -217,7 +219,7 @@ P.registerPage({
       h('div', { class: 'card pad' },
         h('div', { class: 'chips' }, h('button', { class: 'btn lzp', onclick: store }, tr('Guardar lo que hay')),
           h('button', { class: 'btn', onclick: () => send('muestra', 1) }, tr('Escenas de muestra'))),
-        h('h3', {}, tr('Fundido al llamar una escena')), h('div', { class: 'chips' }, ...fadeBtns)),
+        h('h3', {}, tr('Fundido de las escenas nuevas (cada una guarda el suyo)')), h('div', { class: 'chips' }, ...fadeBtns)),
       h('div', { class: 'card pad' }, scenes),
       h('div', { class: 'card pad' }, h('h3', {}, tr('Secuencia: una escena tras otra, al tiempo')),
         h('div', { class: 'row' }, chaseBtn, bpm, h('span', { class: 'note' }, 'BPM'),
@@ -245,8 +247,12 @@ P.registerPage({
 
     function sceneMenu(i) {
       const name = st.escenas[i];
-      const what = prompt(tr('%s: 1 volver a grabar con lo que hay ahora, 2 cambiar el nombre, 3 borrar', name), '');
+      const what = prompt(tr('%s: 1 volver a grabar con lo que hay ahora, 2 cambiar el nombre, 3 borrar, 4 su fundido', name), '');
       if (what === '1') send('regrabar', i);
+      else if (what === '4') {
+        const s = prompt(tr('Fundido de %s al llamarla, en segundos', name), String((st.fundidos[i] || 0) / 1000));
+        if (s !== null && !isNaN(parseFloat(s.replace(',', '.')))) send('fundido_escena', i + ',' + Math.round(parseFloat(s.replace(',', '.')) * 1000));
+      }
       else if (what === '2') {
         const n = prompt(tr('Nombre de la escena'), name);
         if (n) send('renombrar', i + ',' + n.replace(/[\n|;]/g, ' ').slice(0, 23));
@@ -257,6 +263,7 @@ P.registerPage({
     const patchBody = h('div');
     const addType = h('select');
     const addN = h('input', { type: 'number', min: 1, max: 64, value: 1 });
+    const addU = h('select', {}, ...[0, 1, 2, 3].map(u => h('option', { value: u }, 'U' + (u + 1))));
     const typesBox = h('div', { class: 'types' });
     const ntName = h('input', { placeholder: tr('PAR de 8 canales') });
     const ntCh = h('input', { placeholder: 'dimmer,rojo,verde,azul,blanco,strobe,0,0' });
@@ -265,7 +272,8 @@ P.registerPage({
         h('div', { class: 'f' },
           h('label', {}, tr('Tipo'), addType),
           h('label', {}, tr('Cuántos'), addN),
-          h('button', { class: 'btn lzp', onclick: () => send('agregar', addType.value + ',' + (addN.value || 1)) }, tr('Agregar'))),
+          h('label', {}, tr('Universo'), addU),
+          h('button', { class: 'btn lzp', onclick: () => send('agregar', addType.value + ',' + (addN.value || 1) + ',' + addU.value) }, tr('Agregar'))),
         h('p', { class: 'note' }, tr('Van desde la primera dirección libre, uno tras otro.'))),
       h('div', { class: 'card pad' }, patchBody),
       h('div', { class: 'card pad' }, h('h3', {}, tr('Tipos de aparato')), typesBox,
@@ -302,10 +310,12 @@ P.registerPage({
         const name = h('input', { value: a.n });
         const addr = h('input', { class: 'n', type: 'number', min: 1, max: 512, value: a.a });
         const type = h('select', {}, ...opts(a.t));
+        const univ = h('select', { onchange: () => send('universo', i + ',' + univ.value) },
+          ...[0, 1, 2, 3].map(u => h('option', { value: u, selected: u === (a.u || 0) ? '' : null }, 'U' + (u + 1))));
         const save = () => send('aparato', `${i},${addr.value},${type.value},${name.value.replace(/[\n,]/g, ' ').slice(0, 23)}`);
         name.onchange = addr.onchange = type.onchange = save;
         return h('tr', {},
-          h('td', {}, name), h('td', {}, type), h('td', {}, addr),
+          h('td', {}, name), h('td', {}, type), h('td', {}, univ), h('td', {}, addr),
           h('td', { class: 'ch' + (a.pisa ? ' bad' : ''), title: a.pisa ? tr('Se pisa con otro aparato o se pasa del canal 512') : '' },
             n > 1 ? `${a.a}-${a.a + n - 1}` : String(a.a)),
           h('td', {}, h('button', { class: 'btn', title: tr('Sacar del patch'),
@@ -314,7 +324,7 @@ P.registerPage({
       put(patchBody,
         h('h3', {}, tr('%d aparatos, %d canales de 512', st.aparatos.length, used)),
         h('div', { class: 'scroll' }, h('table', {},
-          h('tr', {}, h('th', {}, tr('Nombre')), h('th', {}, tr('Tipo')), h('th', {}, tr('Dirección')), h('th', {}, tr('Canales')), h('th')),
+          h('tr', {}, h('th', {}, tr('Nombre')), h('th', {}, tr('Tipo')), h('th', {}, tr('Universo')), h('th', {}, tr('Dirección')), h('th', {}, tr('Canales')), h('th')),
           ...rows)));
       put(typesBox, ...st.tipos.map(t => h('div', {}, h('b', {}, t.n), ' ', h('small', {}, t.archivo || tr('incluido')), h('br'),
         h('small', {}, t.canales.join(', ')))));
@@ -322,6 +332,12 @@ P.registerPage({
 
     /* ---- Salida ---- */
     const portSel = h('select', { onchange: e => send('puerto', e.target.value) });
+    const anOn = h('input', { type: 'checkbox', onchange: e => send('artnet', e.target.checked ? 1 : 0) });
+    const anIp = h('input', { placeholder: tr('vacío: a toda la red'), onchange: e => send('artnet_ip', e.target.value.trim()) });
+    const anBase = h('input', { type: 'number', min: 0, max: 32767, onchange: e => send('artnet_base', e.target.value) });
+    const anInfo = h('p', { class: 'note' });
+    const univBtns = [0, 1, 2, 3].map(u => h('button', { class: 'btn', onclick: () => { viewU = u; drawOut(); } }, 'U' + (u + 1)));
+    let viewU = 0;
     const outStats = h('p', { class: 'note' });
     const map = h('canvas', { class: 'map', width: 32 * 12, height: 16 * 12 });
     const pickInfo = h('p', {});
@@ -334,11 +350,19 @@ P.registerPage({
     };
     const outView = h('div', {},
       h('div', { class: 'card pad' }, h('div', { class: 'f' }, h('label', {}, tr('Puerto'), portSel)), outStats),
-      h('div', { class: 'card pad' }, h('h3', {}, tr('Los 512 canales como salen')), map, pickInfo,
+      h('div', { class: 'card pad' }, h('h3', {}, 'Art-Net'),
+        h('div', { class: 'f' },
+          h('label', { style: 'flex-direction: row; align-items: center; gap: 8px' }, anOn, tr('Mandar por la red')),
+          h('label', {}, tr('IP del nodo'), anIp),
+          h('label', {}, tr('Universo Art-Net del U1'), anBase)),
+        anInfo,
+        h('p', { class: 'note' }, tr('Cada universo con algún aparato sale 40 veces por segundo como Art-Net (UDP 6454). U1 lleva el universo elegido, U2 el siguiente, y así. El U1 también sale por RS485.'))),
+      h('div', { class: 'card pad' }, h('h3', {}, tr('Los 512 canales como salen')), h('div', { class: 'chips' }, ...univBtns), map, pickInfo,
         h('p', { class: 'note' }, tr('Oscuros: sin aparato. Tocá un canal para ver qué es.'))));
 
     function fixtureOf(ch) {
-      for (const [i, a] of st.aparatos.entries()) {
+      for (const a of st.aparatos) {
+        if ((a.u || 0) !== viewU) continue;
         const t = st.tipos[a.t];
         if (ch >= a.a && ch < a.a + t.canales.length) return [a, t.canales[ch - a.a]];
       }
@@ -349,17 +373,19 @@ P.registerPage({
       if (!st) return;
       const ctx = map.getContext('2d');
       const patched = new Uint8Array(513);
-      st.aparatos.forEach(a => { for (let c = a.a; c < a.a + st.tipos[a.t].canales.length && c <= 512; c++) patched[c] = 1; });
+      st.aparatos.forEach(a => { if ((a.u || 0) === viewU) for (let c = a.a; c < a.a + st.tipos[a.t].canales.length && c <= 512; c++) patched[c] = 1; });
+      const uhex = (st.universos && st.universos[viewU]) || st.universo;
+      univBtns.forEach((b, u) => { on(b, u === viewU); b.textContent = 'U' + (u + 1) + ((st.usados >> u) & 1 ? ' ·' : ''); });
       ctx.fillStyle = '#000';
       ctx.fillRect(0, 0, map.width, map.height);
       for (let i = 0; i < 512; i++) {
-        const v = parseInt(st.universo.substr(i * 2, 2), 16) || 0;
+        const v = parseInt(uhex.substr(i * 2, 2), 16) || 0;
         ctx.fillStyle = patched[i + 1] ? `rgb(${40 + v * 196 / 255 | 0},${30 + v * 42 / 255 | 0},${50 + v * 103 / 255 | 0})` : '#161618';
         ctx.fillRect((i % 32) * 12 + 1, (i / 32 | 0) * 12 + 1, 10, 10);
         if (i + 1 === pickCh) { ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.strokeRect((i % 32) * 12 + 1, (i / 32 | 0) * 12 + 1, 10, 10); }
       }
       const f = fixtureOf(pickCh);
-      const v = parseInt(st.universo.substr((pickCh - 1) * 2, 2), 16) || 0;
+      const v = parseInt(uhex.substr((pickCh - 1) * 2, 2), 16) || 0;
       pickInfo.textContent = tr('Canal %d: %d', pickCh, v) + ' · ' + (f ? `${f[0].n}, ${/^\d+$/.test(f[1]) ? tr('fijo') : f[1]}` : tr('sin aparato'));
       const s = st.salida;
       outStats.textContent = s.abierta ? tr('Saliendo por %s: %s paquetes/s, %d mandados.', s.puerto, s.hz.toFixed(1), s.paquetes)
@@ -367,14 +393,40 @@ P.registerPage({
       if (document.activeElement !== portSel && portSel.options.length !== s.puertos.length)
         put(portSel, ...s.puertos.map(p => h('option', { value: p }, p)));
       if (document.activeElement !== portSel) portSel.value = s.puerto;
+      const an = st.artnet;
+      if (an) {
+        anOn.checked = an.on;
+        if (document.activeElement !== anIp) anIp.value = an.ip;
+        if (document.activeElement !== anBase) anBase.value = an.base;
+        anInfo.textContent = !an.on ? tr('Apagado.') : an.error || tr('%s paquetes mandados a %s', an.paquetes, an.ip || '255.255.255.255');
+      }
     }
 
     /* ---- the state ---- */
     function pct(v) { return Math.round(v * 100 / 255) + ' %'; }
     const on = (b, yes) => b.classList.toggle('on', !!yes);
 
+    function newGroup() {
+      if (!currentSel().length) { P.toast(tr('Elegí aparatos antes de guardar un grupo'), true); return; }
+      const n = prompt(tr('Nombre del grupo (con los aparatos elegidos)'), tr('Grupo %d', st.grupos.length + 1));
+      if (n) send('grupo_nuevo', n.replace(/[\n|]/g, ' ').slice(0, 19));
+    }
+
+    function drawGroups() {
+      const k = JSON.stringify(st.grupos.map(g => g.n));
+      if (groupsRow.dataset.k !== k) {
+        groupsRow.dataset.k = k;
+        put(groupsRow, ...st.grupos.map((g, i) => h('button', { class: 'btn', onclick: () => { pick(g.aparatos); send('grupo', i); },
+          oncontextmenu: e => { e.preventDefault(); if (confirm(tr('¿Borrar el grupo %s? Los aparatos quedan.', g.n))) send('grupo_borrar', i); } }, g.n)),
+        h('button', { class: 'btn', onclick: newGroup }, tr('+ Grupo')));
+      }
+      const sel = currentSel().join(',');
+      st.grupos.forEach((g, i) => on(groupsRow.children[i], sel && g.aparatos.join(',') === sel));
+    }
+
     function drawStage() {
       if (!st) return;
+      drawGroups();
       const sel = currentSel();
       if (tiles.childElementCount !== st.aparatos.length) {
         put(tiles, ...st.aparatos.map((a, i) => h('button', { class: 'tile', onclick: () => {
@@ -403,10 +455,11 @@ P.registerPage({
     }
 
     function drawScenes() {
-      if (scenes.dataset.k !== String(st.cambios) + '/' + st.escenas.length) {
-        scenes.dataset.k = String(st.cambios) + '/' + st.escenas.length;
+      const sk = String(st.cambios) + '/' + st.escenas.length + '/' + (st.fundidos || []).join(',');
+      if (scenes.dataset.k !== sk) {
+        scenes.dataset.k = sk;
         put(scenes, ...(st.escenas.length ? st.escenas.map((n, i) => h('div', { class: 'scene', onclick: () => send('escena', i) },
-          h('small', {}, String(i + 1)), n,
+          h('small', {}, `${i + 1} · ${(st.fundidos && st.fundidos[i]) ? (st.fundidos[i] / 1000).toLocaleString() + ' s' : tr('corte')}`), n,
           h('button', { class: 'm', title: tr('Grabar, renombrar o borrar'), onclick: e => { e.stopPropagation(); sceneMenu(i); } }, '⋯')))
           : [h('p', { class: 'note' }, tr('Todavía no hay escenas. Armá un look en Escenario y guardalo acá.'))]));
       }

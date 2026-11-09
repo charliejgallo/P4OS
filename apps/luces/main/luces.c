@@ -52,6 +52,9 @@ static void load(void)
     LZ.chase_fade = aos_hal_pref_get_i32("lz_cfade", &v) && v >= 0 && v <= 100 ? (uint8_t)v : 50;
     LZ.fx_speed = aos_hal_pref_get_i32("lz_fxs", &v) && v >= 1 && v <= 100 ? (uint8_t)v : 30;
     LZU.tab = aos_hal_pref_get_i32("lz_tab", &v) && v >= 0 && v < LZ_TAB_COUNT ? v : LZ_TAB_STAGE;
+    LZN.on = aos_hal_pref_get_i32("lz_an", &v) && v;
+    LZN.base = aos_hal_pref_get_i32("lz_anb", &v) && v >= 0 && v < 32768 ? (uint16_t)v : 0;
+    if (!aos_hal_pref_get_str("lz_andst", LZN.dest, sizeof LZN.dest)) LZN.dest[0] = 0;
 }
 
 void lz_save(void)
@@ -63,6 +66,9 @@ void lz_save(void)
     aos_hal_pref_set_i32("lz_cfade", LZ.chase_fade);
     aos_hal_pref_set_i32("lz_fxs", LZ.fx_speed);
     aos_hal_pref_set_i32("lz_tab", LZU.tab);
+    aos_hal_pref_set_i32("lz_an", LZN.on);
+    aos_hal_pref_set_i32("lz_anb", LZN.base);
+    aos_hal_pref_set_str("lz_andst", LZN.dest);
 }
 
 /* ---- little widgets ---- */
@@ -334,7 +340,7 @@ void lz_output_tick(void)
         aos_io_dmx_config(LZU.h, &c);
     }
     if (LZU.h) {
-        aos_io_dmx_write(LZU.h, 1, LZ.uni + 1, 512);
+        aos_io_dmx_write(LZU.h, 1, LZ.uni[0] + 1, 512);     /* universe 1; the rest only over Art-Net */
         aos_io_dmx_read(LZU.h, NULL, 0, &LZU.st);
     }
 }
@@ -346,10 +352,11 @@ void lz_bar_refresh(void)
         lv_label_set_text(LZU.bar_state, LZU.err);
         lv_obj_set_style_text_color(LZU.bar_state, AOS_C_ORANGE, 0);
     } else if (LZU.h) {
-        lv_label_set_text_fmt(LZU.bar_state, _("saliendo por %s · %.0f paquetes/s%s"), LZU.port, (double)LZU.st.hz, LZ.blackout ? " · BLACKOUT" : "");
+        lv_label_set_text_fmt(LZU.bar_state, _("saliendo por %s · %.0f paquetes/s%s%s"), LZU.port, (double)LZU.st.hz, LZN.on ? " · Art-Net" : "",
+                              LZ.blackout ? " · BLACKOUT" : "");
         lv_obj_set_style_text_color(LZU.bar_state, LZ.blackout ? AOS_C_RED : AOS_C_GREEN, 0);
     } else {
-        lv_label_set_text_fmt(LZU.bar_state, _("salida cerrada (%s)"), LZU.port);
+        lv_label_set_text_fmt(LZU.bar_state, _("salida cerrada (%s)%s"), LZU.port, LZN.on ? " · Art-Net" : "");
         lv_obj_set_style_text_color(LZU.bar_state, AOS_C_DIM, 0);
     }
     lv_obj_set_style_bg_color(LZU.bar_btn, LZU.want_open ? AOS_C_RED : LZ_ACCENT, 0);
@@ -461,6 +468,7 @@ static void *create(aos_app_t *self, lv_obj_t *root)
     }
     load();
     LZU.want_open = false;
+    lz_net_start();
     build_screen(root);
     LZU.timer = lv_timer_create(timer_cb, 40, NULL);
     return &LZU;
@@ -472,6 +480,7 @@ static void destroy(aos_app_t *self, void *inst)
     (void)inst;
     if (LZU.timer) lv_timer_delete(LZU.timer);
     if (LZU.h) aos_io_dmx_close(LZU.h);
+    lz_net_stop();
     aos_hal_live_clear("aos.luces");
     lz_save();
     memset(&LZU, 0, sizeof LZU);

@@ -32,6 +32,8 @@
 #define LZ_FIX       64
 #define LZ_SCENES    48
 #define LZ_CH        32         /* channels a type may have */
+#define LZ_UNIV      4          /* universes: the first on RS485 and Art-Net, the rest Art-Net only */
+#define LZ_GROUPS    16
 
 /* channel meanings */
 enum {
@@ -57,11 +59,17 @@ typedef struct {
     char     name[24];
     int      type;              /* index into the types */
     uint16_t addr;              /* 1..512 */
+    uint8_t  univ;              /* 0..LZ_UNIV-1 */
 } lz_fix_t;
 
 typedef struct {
+    char     name[20];
+    uint64_t mask;              /* the fixtures, by place in the patch */
+} lz_group_t;
+
+typedef struct {
     char      name[24];
-    uint16_t  fade_ms;
+    uint16_t  fade_ms;          /* its own fade when called back */
     lz_look_t look[LZ_FIX];
 } lz_scene_t;
 
@@ -76,6 +84,8 @@ typedef struct {
     int        nfix;
     lz_scene_t *scenes;         /* LZ_SCENES, PSRAM */
     int        nscenes;
+    lz_group_t groups[LZ_GROUPS];
+    int        ngroups;
     /* the live state */
     lz_look_t  look[LZ_FIX];    /* what the programmer and the scenes set */
     bool       sel[LZ_FIX];
@@ -85,7 +95,7 @@ typedef struct {
     lz_look_t  from[LZ_FIX];
     uint32_t   fade_t0, fade_ms;
     int        cur_scene;       /* the last one recalled, -1 none */
-    uint16_t   scene_fade_ms;   /* the fade a recall uses */
+    uint16_t   scene_fade_ms;   /* the fade a new scene is stored with */
     /* the chase: every scene in turn */
     bool       chase;
     uint16_t   bpm;
@@ -98,7 +108,8 @@ typedef struct {
     bool       fx_on[LZ_FIX];
     uint8_t    fx_speed;        /* 1..100 */
     /* what goes out */
-    uint8_t    uni[513];
+    uint8_t    uni[LZ_UNIV][513];   /* [u][0] the start code, [u][1..512] the levels */
+    uint8_t    used_univ;       /* bit u: some fixture is patched in universe u */
     lz_look_t  shown[LZ_FIX];   /* the looks after fades and effects, for the screen */
     uint32_t   changed;         /* bumps when the show (patch, scenes) changes */
 } lz_t;
@@ -112,15 +123,21 @@ int  lz_types_reload(void);                     /* again, the patch kept by type
 void lz_show_load(void);                        /* patch and scenes */
 bool lz_patch_save(void);
 bool lz_scenes_save(void);
-int  lz_fix_add(int type, uint16_t addr, const char *name);   /* index or -1 */
+int  lz_fix_add(int type, uint16_t addr, const char *name);   /* index or -1; universe 0 */
 void lz_fix_remove(int i);
-int  lz_next_free(int nch);                     /* the first address where nch channels fit */
+int  lz_next_free(int univ, int nch);           /* the first address of that universe where nch channels fit */
 bool lz_fix_overlaps(int i);                    /* shares a channel with another fixture */
 int  lz_scene_store(const char *name);          /* the current looks as a new scene */
-void lz_scene_recall(int i, uint16_t fade_ms);
+void lz_scene_recall(int i, uint16_t fade_ms);   /* with that fade */
+void lz_scene_call(int i);                       /* with the scene's own */
 void lz_scene_delete(int i);
 int  lz_scenes_demo(void);                      /* adds five scenes for the patch there is; how many */
 void lz_tap(void);                              /* tap tempo */
+/* groups: the selection, kept with a name (luces/grupos.txt) */
+int  lz_group_store(const char *name);          /* index or -1 */
+void lz_group_select(int i);
+void lz_group_delete(int i);
+bool lz_groups_save(void);
 /* the programmer: on the selected fixtures */
 void lz_set_dim(uint8_t v);
 void lz_set_rgb(uint8_t r, uint8_t g, uint8_t b, uint8_t w);

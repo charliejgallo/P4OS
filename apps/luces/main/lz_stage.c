@@ -62,6 +62,43 @@ static void sel_cb(lv_event_t *e)
     lz_stage_refresh();
 }
 
+/* ---- groups ---- */
+
+static void group_cb(lv_event_t *e)
+{
+    lz_group_select((int)(intptr_t)lv_event_get_user_data(e));
+    lz_stage_refresh();
+}
+
+static void group_new_done(const char *name)
+{
+    if (lz_group_store(name) < 0) snprintf(LZU.err, sizeof LZU.err, "%s", _("elegí aparatos antes de guardar un grupo"));
+    lz_rebuild();
+}
+
+static void group_new_cb(lv_event_t *e)
+{
+    (void)e;
+    char n[20];
+    snprintf(n, sizeof n, _("Grupo %d"), LZ.ngroups + 1);
+    lz_text(_("Nombre del grupo (con los aparatos elegidos)"), n, group_new_done);
+}
+
+static void group_del_cb(lv_event_t *e)
+{
+    (void)e;
+    lz_group_delete(LZU.edit);
+    lz_overlay_close();
+    lz_rebuild();
+}
+
+static void group_menu_cb(lv_event_t *e)
+{
+    LZU.edit = (int)(intptr_t)lv_event_get_user_data(e);
+    lv_obj_t *c = lz_sheet(LZ.groups[LZU.edit].name);
+    lz_pill(c, AOS_SYM_DELETE, _("Borrar el grupo (los aparatos quedan)"), AOS_C_RED, group_del_cb, NULL);
+}
+
 /* ---- the programmer ---- */
 
 static void dim_cb(lv_event_t *e)
@@ -163,6 +200,14 @@ void lz_stage_build(lv_obj_t *parent, int32_t ch)
     for (int k = 0; k < 4; k++) lz_chip(sr, aos_tr(SEL[k]), false, sel_cb, (void *)(intptr_t)k);
     P->sel_l = aos_label(sr, "", aos_font_caption, AOS_C_DIM);
     lv_obj_set_style_pad_left(P->sel_l, 8, 0);
+    /* the groups: a tap selects them, a long press offers to delete one */
+    lv_obj_t *gr = lz_chips_row(col, w);
+    for (int g = 0; g < LZ.ngroups; g++) {
+        P->group[g] = lz_chip(gr, LZ.groups[g].name, false, NULL, NULL);
+        lv_obj_add_event_cb(P->group[g], group_cb, LV_EVENT_SHORT_CLICKED, (void *)(intptr_t)g);
+        lv_obj_add_event_cb(P->group[g], group_menu_cb, LV_EVENT_LONG_PRESSED, (void *)(intptr_t)g);
+    }
+    if (LZ.ngroups < LZ_GROUPS) lz_chip(gr, _("+ Grupo"), false, group_new_cb, NULL);
 
     if (!LZ.nfix) lz_caption(col, _("No hay aparatos: agregalos en Patch."), w);
     int cols = LZU.land ? 8 : 5;
@@ -190,7 +235,8 @@ void lz_stage_build(lv_obj_t *parent, int32_t ch)
         lv_label_set_long_mode(n, LV_LABEL_LONG_MODE_DOTS);
         lv_obj_align(n, LV_ALIGN_BOTTOM_MID, 0, -30);
         char a[16];
-        snprintf(a, sizeof a, "%u", LZ.fix[i].addr);
+        if (LZ.fix[i].univ) snprintf(a, sizeof a, "U%u · %u", LZ.fix[i].univ + 1, LZ.fix[i].addr);
+        else snprintf(a, sizeof a, "%u", LZ.fix[i].addr);
         lv_obj_align(aos_label(t, a, aos_font_tiny, AOS_C_DIM), LV_ALIGN_BOTTOM_MID, 0, -6);
         P->tile[i] = t;
         P->tile_dot[i] = d;
@@ -304,6 +350,9 @@ void lz_stage_refresh(void)
         lv_obj_set_style_bg_color(P->tile_dot[i], lv_color_make(r, g, b), 0);
         lv_obj_set_style_border_width(P->tile[i], LZ.sel[i] ? 4 : 0, 0);
     }
+    uint64_t selm = 0;
+    for (int i = 0; i < LZ.nfix; i++) if (LZ.sel[i]) selm |= 1ull << i;
+    for (int g = 0; g < LZ.ngroups; g++) lz_chip_set(P->group[g], selm && LZ.groups[g].mask == selm);
     int n = count_selected();
     if (n) lv_label_set_text_fmt(P->sel_l, _("%d elegidos"), n);
     else lv_label_set_text(P->sel_l, _("ninguno elegido: todos"));

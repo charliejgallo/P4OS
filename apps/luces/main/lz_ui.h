@@ -16,17 +16,30 @@
 
 enum { LZ_TAB_STAGE = 0, LZ_TAB_SCENES, LZ_TAB_PATCH, LZ_TAB_OUT, LZ_TAB_COUNT };
 
+/* Art-Net out (lz_net.c) */
+typedef struct {
+    bool     on;
+    char     dest[40];          /* "" = the broadcast 255.255.255.255 */
+    uint16_t base;              /* the port-address of universe 1 */
+    uint32_t packets;
+    char     err[48];
+} lz_net_t;
+
+extern lz_net_t LZN;
+void lz_net_start(void);
+void lz_net_stop(void);
+
 /* what a page builds and its refresh looks at; cleared on every rebuild */
 typedef struct {
     /* Escenario */
     lv_obj_t *tile[LZ_FIX], *tile_dot[LZ_FIX];
     lv_obj_t *dim_s, *dim_l, *master_s, *master_l, *speed_s;
     lv_obj_t *fx_chip[LZ_FX_COUNT], *strobe_chip[4];
-    lv_obj_t *pad, *pad_dot, *sel_l;
+    lv_obj_t *pad, *pad_dot, *sel_l, *group[LZ_GROUPS];
     /* Escenas */
     lv_obj_t *scene[LZ_SCENES], *chase_btn, *bpm_l, *fade_chip[6], *cfade_chip[3];
     /* Salida */
-    lv_obj_t *out_map, *out_stats;
+    lv_obj_t *out_map, *out_stats, *an_stats;
 } lz_page_t;
 
 typedef struct {
@@ -49,7 +62,8 @@ typedef struct {
     void (*kp_done)(int v);
     bool kp_fresh;
     int edit;                   /* the fixture or scene an overlay is about */
-    int add_type, add_n;        /* Patch, adding */
+    int add_type, add_n, add_univ;  /* Patch, adding */
+    int out_univ;               /* Salida: the universe the map shows */
     uint32_t seen_changed;      /* LZ.changed when the page was built */
 } lz_ui_t;
 
