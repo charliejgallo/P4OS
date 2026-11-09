@@ -21,6 +21,15 @@
  * Polling inside the interrupt is short (a BREAK is ~0.1-0.2 ms on real
  * consoles) and gives up after 3 ms.
  *
+ * RDM (aos_io_dmx_rdm): the sending task takes a request between two DMX
+ * packets: its BREAK and MAB as for DMX, the bytes, the wait until the last
+ * stop bit is out; then DE goes low (when the port has one), whatever the
+ * RX pin picked up is thrown away and the answer is read from the driver's
+ * buffer: the first byte within the timeout, the rest until 2 ms of
+ * silence. A normal answer's BREAK arrives as a NUL with a framing error,
+ * dropped here. In SEND the driver has the RX pin too, with its pull-up,
+ * for this.
+ *
  * Not IRAM: while the flash is busy (a preference being written) the
  * interrupt waits, and a packet or two may come out short and be counted
  * as bad. Nothing here goes to internal RAM on purpose.
@@ -64,6 +73,11 @@ typedef struct {
     int64_t last_us;
     /* send */
     volatile bool stop, stopped;
+    /* RDM: the caller fills req and sets rdm = 1; the task sets 3 while it
+     * is on the line and 2 with the answer in resp */
+    volatile int rdm;
+    uint8_t rdm_req[260], rdm_resp[300];
+    int rdm_len, rdm_max, rdm_tmo, rdm_got;
 } be_t;
 
 /* ---- receive ---- */
@@ -178,12 +192,52 @@ static void rx_close(be_t *b)
 
 /* ---- send ---- */
 
+/* One RDM request and its answer, between two DMX packets (tx_task). */
+static void rdm_exchange(be_t *b, const aos_dmx_cfg_t *c)
+{
+    b->rdm = 3;
+    uart_wait_tx_done(b->num, pdMS_TO_TICKS(50));
+    if (b->de >= 0) gpio_set_level(b->de, 1);
+    uart_set_line_inverse(b->num, UART_SIGNAL_TXD_INV);          /* BREAK */
+    esp_rom_delay_us(c->break_us);
+    uart_set_line_inverse(b->num, 0);                            /* MAB */
+    esp_rom_delay_us(c->mab_us);
+    uart_write_bytes(b->num, b->rdm_req, (size_t)b->rdm_len);
+    uart_wait_tx_done(b->num, pdMS_TO_TICKS(20));
+    if (b->de >= 0) gpio_set_level(b->de, 0);                    /* listen */
+    uart_flush_input(b->num);
+    int got = 0, max = b->rdm_max < (int)sizeof b->rdm_resp ? b->rdm_max : (int)sizeof b->rdm_resp;
+    int64_t t0 = esp_timer_get_time(), last = 0;
+    for (;;) {
+        int64_t now = esp_timer_get_time();
+        if (!got && now - t0 > (int64_t)b->rdm_tmo * 1000) break;            /* nobody answered */
+        if (got && now - last > 2000) break;                                  /* the answer is over */
+        if (now - t0 > 30000) break;
+        int n = uart_read_bytes(b->num, b->rdm_resp + got, (uint32_t)(max - got), 1);
+        if (n > 0) { got += n; last = esp_timer_get_time(); if (got >= max) break; }
+    }
+    /* a normal answer's BREAK: zero bytes before its 0xCC */
+    int skip = 0;
+    while (skip < got && b->rdm_resp[skip] == 0) skip++;
+    if (skip && skip < got && b->rdm_resp[skip] == 0xCC) { memmove(b->rdm_resp, b->rdm_resp + skip, (size_t)(got - skip)); got -= skip; }
+    b->rdm_got = got;
+    if (b->de >= 0) gpio_set_level(b->de, 1);
+    b->rdm = 2;
+}
+
 static void tx_task(void *arg)
 {
     be_t *b = arg;
     aos_io_dmx_t *d = b->d;
     static uint8_t buf[PKT_MAX];
     while (!b->stop) {
+        if (b->rdm == 1) {
+            aos_hal_mutex_lock(d->mx);
+            aos_dmx_cfg_t rc = d->cfg;
+            aos_hal_mutex_unlock(d->mx);
+            rdm_exchange(b, &rc);
+            vTaskDelay(1);
+        }
         int64_t t0 = esp_timer_get_time();
         aos_hal_mutex_lock(d->mx);
         aos_dmx_cfg_t c = d->cfg;
@@ -215,11 +269,12 @@ static bool tx_open(be_t *b)
         .baud_rate = 250000, .data_bits = UART_DATA_8_BITS, .parity = UART_PARITY_DISABLE,
         .stop_bits = UART_STOP_BITS_2, .flow_ctrl = UART_HW_FLOWCTRL_DISABLE, .source_clk = UART_SCLK_DEFAULT,
     };
-    if (uart_driver_install(b->num, 256, 1024, 0, NULL, 0) != ESP_OK) return false;
-    if (uart_param_config(b->num, &c) != ESP_OK || uart_set_pin(b->num, b->tx, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE) != ESP_OK) {
+    if (uart_driver_install(b->num, 512, 1024, 0, NULL, 0) != ESP_OK) return false;
+    if (uart_param_config(b->num, &c) != ESP_OK || uart_set_pin(b->num, b->tx, b->rx, UART_PIN_NO_CHANGE, UART_PIN_NO_CHANGE) != ESP_OK) {
         uart_driver_delete(b->num);
         return false;
     }
+    gpio_set_pull_mode(b->rx, GPIO_PULLUP_ONLY);                 /* an idle line reads high */
     if (b->de >= 0) { gpio_set_direction(b->de, GPIO_MODE_OUTPUT); gpio_set_level(b->de, 1); }
     b->stop = b->stopped = false;
     if (!aos_hal_thread_start("dmx_tx", tx_task, b, 4096, 6)) {
@@ -289,6 +344,29 @@ int aos_io_be_dmx_read(aos_io_dmx_t *d, uint8_t *out, int max, aos_dmx_stats_t *
     int64_t age = last ? (esp_timer_get_time() - last) / 1000 : INT32_MAX;
     st->age_ms = (uint32_t)(age > UINT32_MAX ? UINT32_MAX : age);
     return d->dir == AOS_DMX_RECEIVE ? (n > 0 ? n - 1 : 0) : d->cfg.slots;
+}
+
+int aos_io_be_dmx_rdm(aos_io_dmx_t *d, const uint8_t *req, int len, uint8_t *out, int max, int timeout_ms)
+{
+    be_t *b = d->be;
+    if (!b) return -1;
+    if (b->rdm == 2) b->rdm = 0;            /* an answer nobody waited for (the last call gave up) */
+    if (b->rdm) return -1;                  /* one on the line still */
+    memcpy(b->rdm_req, req, (size_t)len);
+    b->rdm_len = len;
+    b->rdm_max = max;
+    b->rdm_tmo = timeout_ms;
+    b->rdm_got = 0;
+    b->rdm = 1;
+    /* a DMX period at most until the task takes it, then the answer */
+    int wait = (int)d->cfg.period_ms + 80;
+    for (int i = 0; i < wait && b->rdm != 2 && !b->stop; i++) aos_hal_sleep_ms(1);
+    if (b->rdm == 1) { b->rdm = 0; return 0; }      /* the task never took it */
+    if (b->rdm != 2) return 0;                      /* still on the line: the next call clears it */
+    int n = b->rdm_got < max ? b->rdm_got : max;
+    memcpy(out, b->rdm_resp, (size_t)n);
+    b->rdm = 0;
+    return n;
 }
 
 void aos_io_be_dmx_close(aos_io_dmx_t *d)

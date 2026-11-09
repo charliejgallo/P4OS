@@ -17,6 +17,9 @@
  *               ones moving lit
  *   Red         the board as a node: Art-Net or sACN for one universe from
  *               the network goes out as DMX (dx_net.c)
+ *   RDM         the fixtures on the line that speak RDM: find them, read
+ *               what they are, set their address and label, make them
+ *               show themselves (dx_rdm.c)
  *   Cableado    XLR, the terminator, what not to do
  *
  * No thread of its own: sending and receiving run in the firmware, and the
@@ -34,7 +37,17 @@
 #define DX_TEAL  lv_color_hex(0x7C3AED)
 #define DX_AMBER lv_color_hex(0xF59E0B)
 
-enum { DX_TAB_CONSOLE = 0, DX_TAB_FIXTURE, DX_TAB_ANALYZER, DX_TAB_NET, DX_TAB_WIRE, DX_TAB_COUNT };
+enum { DX_TAB_CONSOLE = 0, DX_TAB_FIXTURE, DX_TAB_ANALYZER, DX_TAB_NET, DX_TAB_RDM, DX_TAB_WIRE, DX_TAB_COUNT };
+enum { DX_RDM_DISCOVER = 0, DX_RDM_IDENTIFY, DX_RDM_ADDRESS, DX_RDM_LABEL };
+#define DX_RDM_MAX 16
+
+typedef struct {
+    uint8_t  uid[6];
+    bool     ok;                /* DEVICE_INFO came */
+    uint16_t addr, footprint, model_id;
+    bool     identify;
+    char     label[33], model[33], maker[33];
+} dx_rdm_dev_t;
 enum { DX_NET_ARTNET = 0, DX_NET_SACN };
 enum { DX_PAT_NONE = 0, DX_PAT_CHASE, DX_PAT_RAMP, DX_PAT_RAINBOW, DX_PAT_COUNT };
 enum { DX_FX_DIMMER = 0, DX_FX_RGB, DX_FX_RGBW, DX_FX_PAR7, DX_FX_HEAD, DX_FX_BAR8, DX_FX_COUNT };
@@ -72,6 +85,13 @@ typedef struct {
     char net_from[24];
     bool net_fresh;
     char net_err[64];
+    /* RDM (dx_rdm.c): its thread writes these */
+    dx_rdm_dev_t rdm_dev[DX_RDM_MAX];
+    volatile int rdm_n;
+    char rdm_msg[96];
+    volatile uint32_t rdm_req, rdm_ans, rdm_bad, rdm_coll, rdm_seq;
+    int rdm_act, rdm_act_dev, rdm_act_val;
+    char rdm_act_text[33];
 } dx_state_t;
 
 typedef struct {
@@ -89,6 +109,10 @@ typedef struct {
     lv_obj_t *an_stats, *an_map, *an_nums, *an_page_l;
     /* network */
     lv_obj_t *net_stats, *net_nums;
+    /* RDM */
+    lv_obj_t *rdm_msg, *rdm_list;
+    uint32_t rdm_seen;
+    lv_obj_t *ta;
     /* keypad */
     char kp_text[16];
     lv_obj_t *kp_value;
@@ -109,6 +133,7 @@ lv_obj_t *dx_chips_row(lv_obj_t *parent, int32_t w);
 lv_obj_t *dx_caption(lv_obj_t *parent, const char *text, int32_t w);
 lv_obj_t *dx_section(lv_obj_t *parent, const char *text);
 void      dx_keypad(const char *title, int value, void (*done)(int v));
+void      dx_text(const char *title, const char *value, void (*done)(const char *v));
 void      dx_overlay_close(void);
 void      dx_rebuild(void);
 void      dx_save(void);
@@ -124,6 +149,13 @@ void dx_analyzer_refresh(void);
 void dx_wire_build(lv_obj_t *parent, int32_t ch);
 void dx_net_build(lv_obj_t *parent, int32_t ch);
 void dx_net_refresh(void);
+void dx_rdm_build(lv_obj_t *parent, int32_t ch);
+void dx_rdm_refresh(void);
+
+/* dx_rdm.c */
+bool dx_rdm_start(int job);     /* DX_RDM_*: false while one runs or the link is not sending */
+void dx_rdm_stop(void);
+bool dx_rdm_busy(void);
 
 /* dx_net.c */
 void dx_net_start(void);

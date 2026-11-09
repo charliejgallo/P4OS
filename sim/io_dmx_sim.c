@@ -14,9 +14,16 @@
  * and, every 15 s, one packet with a BREAK of 60 us, which a receiver
  * counts as short. P4_SIM_DMX=0 takes the console off the bus (a receiver
  * then sees no signal).
+ *
+ * RDM: two make-believe fixtures answer on the bus (the responder of the
+ * bench's ESP32, tools/rs485_test/esp32/main/rdm_resp.c): a PAR at 25 and a
+ * pixel bar at 1, with prototype UIDs 7FF0:00000101 and 7FF0:00000102.
+ * When both answer a discovery branch at once their answers collide, OR'd
+ * byte by byte, as two drivers on one pair garble each other.
  */
 #include "aos_io_backend.h"
 #include "aos_hal.h"
+#include "rdm_resp.h"
 
 #include <math.h>
 #include <stdlib.h>
@@ -113,6 +120,31 @@ int aos_io_be_dmx_read(aos_io_dmx_t *d, uint8_t *out, int max, aos_dmx_stats_t *
     int n = slots + 1 < max ? slots + 1 : max;
     if (out && n > 0) memcpy(out, u, (size_t)n);
     return slots;
+}
+
+static rdm_dev_t s_rdm[2] = {
+    { .uid = { 0x7F, 0xF0, 0, 0, 0x01, 0x01 }, .addr = 25, .footprint = 7, .model_id = 0x0107, .label = "PAR del fondo",
+      .model = "PAR RGB 7ch (simulated)", .maker = "P4OS simulator", .version = "1.0" },
+    { .uid = { 0x7F, 0xF0, 0, 0, 0x01, 0x02 }, .addr = 1, .footprint = 24, .model_id = 0x0108, .label = "Barra de pixeles",
+      .model = "Pixel bar 8x RGB (simulated)", .maker = "P4OS simulator", .version = "1.0" },
+};
+
+int aos_io_be_dmx_rdm(aos_io_dmx_t *d, const uint8_t *req, int len, uint8_t *out, int max, int timeout_ms)
+{
+    (void)d;
+    (void)timeout_ms;
+    aos_hal_sleep_ms(25);                   /* the next gap between DMX packets */
+    uint8_t a[64];
+    int got = 0;
+    for (int k = 0; k < 2; k++) {
+        bool brk;
+        int n = rdm_handle(&s_rdm[k], req, len, a, &brk);
+        if (n <= 0) continue;
+        if (n > max) n = max;
+        if (!got) { memcpy(out, a, (size_t)n); got = n; }
+        else for (int i = 0; i < n && i < got; i++) out[i] |= a[i];      /* a collision */
+    }
+    return got;
 }
 
 void aos_io_be_dmx_close(aos_io_dmx_t *d)

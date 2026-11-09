@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3605 simbolos.
+ * Total: 3607 simbolos.
  */
 
 #include <stddef.h>
@@ -748,6 +748,7 @@ extern int aos_io_be_dac_open;
 extern int aos_io_be_dac_set;
 extern int aos_io_be_dmx_close;
 extern int aos_io_be_dmx_open;
+extern int aos_io_be_dmx_rdm;
 extern int aos_io_be_dmx_read;
 extern int aos_io_be_edges_arm;
 extern int aos_io_be_edges_close;
@@ -822,6 +823,7 @@ extern int aos_io_dac_set;
 extern int aos_io_dmx_close;
 extern int aos_io_dmx_config;
 extern int aos_io_dmx_open;
+extern int aos_io_dmx_rdm;
 extern int aos_io_dmx_read;
 extern int aos_io_dmx_write;
 extern int aos_io_ds18b20_convert_all;
@@ -4356,6 +4358,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_be_dac_set),
     ESP_ELFSYM_EXPORT(aos_io_be_dmx_close),
     ESP_ELFSYM_EXPORT(aos_io_be_dmx_open),
+    ESP_ELFSYM_EXPORT(aos_io_be_dmx_rdm),
     ESP_ELFSYM_EXPORT(aos_io_be_dmx_read),
     ESP_ELFSYM_EXPORT(aos_io_be_edges_arm),
     ESP_ELFSYM_EXPORT(aos_io_be_edges_close),
@@ -4430,6 +4433,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_dmx_close),
     ESP_ELFSYM_EXPORT(aos_io_dmx_config),
     ESP_ELFSYM_EXPORT(aos_io_dmx_open),
+    ESP_ELFSYM_EXPORT(aos_io_dmx_rdm),
     ESP_ELFSYM_EXPORT(aos_io_dmx_read),
     ESP_ELFSYM_EXPORT(aos_io_dmx_write),
     ESP_ELFSYM_EXPORT(aos_io_ds18b20_convert_all),

@@ -22,8 +22,8 @@
 dx_state_t DX;
 dx_ui_t DXU;
 
-static const char *const TAB_NAME[DX_TAB_COUNT] = { N_("Consola"), N_("Aparato"), N_("Analizador"), N_("Red"), N_("Cableado") };
-static const char *const TAB_GLYPH[DX_TAB_COUNT] = { AOS_SYM_TOGGLE_SWITCH, AOS_SYM_LIGHTBULB, AOS_SYM_PULSE, AOS_SYM_LAN, AOS_SYM_CONNECTION };
+static const char *const TAB_NAME[DX_TAB_COUNT] = { N_("Consola"), N_("Aparato"), N_("Analizador"), N_("Red"), "RDM", N_("Cableado") };
+static const char *const TAB_GLYPH[DX_TAB_COUNT] = { AOS_SYM_TOGGLE_SWITCH, AOS_SYM_LIGHTBULB, AOS_SYM_PULSE, AOS_SYM_LAN, AOS_SYM_RADAR, AOS_SYM_CONNECTION };
 
 /* ---- settings ---- */
 
@@ -156,6 +156,52 @@ void dx_overlay_close(void)
     if (DXU.overlay) lv_obj_delete(DXU.overlay);
     DXU.overlay = NULL;
     DXU.kp_value = NULL;
+    DXU.ta = NULL;
+}
+
+/* ---- a line of text, with the keyboard ---- */
+
+static void (*s_text_done)(const char *);
+
+static void text_cb(lv_event_t *e)
+{
+    lv_event_code_t c = lv_event_get_code(e);
+    if (c != LV_EVENT_READY && c != LV_EVENT_CANCEL) return;
+    char v[40];
+    snprintf(v, sizeof v, "%s", lv_textarea_get_text(DXU.ta));
+    void (*done)(const char *) = c == LV_EVENT_READY ? s_text_done : NULL;
+    dx_overlay_close();
+    if (done) done(v);
+}
+
+void dx_text(const char *title, const char *value, void (*done)(const char *))
+{
+    dx_overlay_close();
+    s_text_done = done;
+    DXU.overlay = dx_box(DXU.root, DXU.W, DXU.H);
+    lv_obj_set_style_bg_color(DXU.overlay, lv_color_hex(0x121216), 0);
+    lv_obj_set_style_bg_opa(DXU.overlay, LV_OPA_COVER, 0);
+    lv_obj_add_flag(DXU.overlay, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_align(aos_label(DXU.overlay, title, aos_font_title, AOS_C_TEXT), LV_ALIGN_TOP_LEFT, AOS_UI_PAD, 24);
+    DXU.ta = lv_textarea_create(DXU.overlay);
+    lv_textarea_set_one_line(DXU.ta, true);
+    lv_textarea_set_max_length(DXU.ta, 32);
+    lv_textarea_set_text(DXU.ta, value);
+    lv_obj_set_size(DXU.ta, DXU.W - 2 * AOS_UI_PAD, 88);
+    lv_obj_align(DXU.ta, LV_ALIGN_TOP_LEFT, AOS_UI_PAD, DXU.land ? 80 : 110);
+    lv_obj_set_style_text_font(DXU.ta, aos_font_body, 0);
+    lv_obj_set_style_bg_color(DXU.ta, AOS_C_CARD, 0);
+    lv_obj_set_style_text_color(DXU.ta, AOS_C_TEXT, 0);
+    lv_obj_set_style_border_width(DXU.ta, 0, 0);
+    lv_obj_set_style_radius(DXU.ta, 20, 0);
+    lv_obj_set_style_pad_hor(DXU.ta, 24, 0);
+    lv_obj_set_style_pad_ver(DXU.ta, 22, 0);
+    lv_obj_t *kb = lv_keyboard_create(DXU.overlay);
+    lv_obj_set_size(kb, DXU.W, DXU.land ? DXU.H / 2 : DXU.H * 2 / 5);
+    lv_obj_align(kb, LV_ALIGN_BOTTOM_MID, 0, 0);
+    aos_keyboard_style(kb, aos_font_body);
+    lv_keyboard_set_textarea(kb, DXU.ta);
+    lv_obj_add_event_cb(kb, text_cb, LV_EVENT_ALL, NULL);
 }
 
 static void kp_cb(lv_event_t *e)
@@ -230,8 +276,9 @@ static void link_close(void)
 
 static void link_tick(void)
 {
-    aos_dmx_dir_t want = DXU.tab == DX_TAB_CONSOLE || DXU.tab == DX_TAB_NET ? AOS_DMX_SEND : AOS_DMX_RECEIVE;
+    aos_dmx_dir_t want = DXU.tab == DX_TAB_CONSOLE || DXU.tab == DX_TAB_NET || DXU.tab == DX_TAB_RDM ? AOS_DMX_SEND : AOS_DMX_RECEIVE;
     if (DXU.tab == DX_TAB_WIRE && DX.h) want = DX.dir;
+    if (dx_rdm_busy()) return;          /* an RDM job uses the link: it closes after */
     if (DX.h && (!DX.want_open || DX.dir != want)) link_close();
     if (DX.want_open && !DX.h) {
         DX.h = aos_io_dmx_open(DX.port, want, "DMX");
@@ -341,6 +388,7 @@ void dx_rebuild(void)
     DXU.page_l = DXU.fx_draw = DXU.fx_list = DXU.fx_state = NULL;
     DXU.an_stats = DXU.an_map = DXU.an_nums = DXU.an_page_l = NULL;
     DXU.net_stats = DXU.net_nums = NULL;
+    DXU.rdm_msg = DXU.rdm_list = NULL;
     for (int i = 0; i < DX_TAB_COUNT; i++) {
         lv_color_t c = i == DXU.tab ? DX_TEAL : AOS_C_DIM;
         lv_obj_set_style_text_color(lv_obj_get_child(DXU.tabs[i], 0), c, 0);
@@ -355,6 +403,7 @@ void dx_rebuild(void)
     case DX_TAB_FIXTURE: dx_fixture_build(DXU.content, ch); break;
     case DX_TAB_ANALYZER: dx_analyzer_build(DXU.content, ch); break;
     case DX_TAB_NET: dx_net_build(DXU.content, ch); break;
+    case DX_TAB_RDM: dx_rdm_build(DXU.content, ch); break;
     default: dx_wire_build(DXU.content, ch); break;
     }
     bar_refresh();
@@ -384,6 +433,7 @@ static void timer_cb(lv_timer_t *t)
         if (DXU.tab == DX_TAB_FIXTURE) dx_fixture_refresh();
         else if (DXU.tab == DX_TAB_ANALYZER) dx_analyzer_refresh();
         else if (net) dx_net_refresh();
+        else if (DXU.tab == DX_TAB_RDM) dx_rdm_refresh();
     }
 }
 
@@ -457,6 +507,7 @@ static void destroy(aos_app_t *self, void *inst)
     if (DXU.timer) lv_timer_delete(DXU.timer);
     DXU.timer = NULL;
     dx_net_stop();
+    dx_rdm_stop();
     link_close();
     dx_save();
     memset(&DXU, 0, sizeof DXU);

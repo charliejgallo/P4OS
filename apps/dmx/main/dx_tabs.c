@@ -624,6 +624,117 @@ void dx_net_build(lv_obj_t *parent, int32_t ch)
 }
 
 /* ======================================================================== */
+/* RDM                                                                       */
+/* ======================================================================== */
+
+static void rdm_find_cb(lv_event_t *e)
+{
+    (void)e;
+    if (!DX.h || DX.dir != AOS_DMX_SEND) {
+        DX.want_open = true;
+        DX.err[0] = 0;
+        snprintf(DX.rdm_msg, sizeof DX.rdm_msg, "%s", _("Abriendo el puerto: tocá Buscar otra vez."));
+        dx_rdm_refresh();
+        return;
+    }
+    if (!dx_rdm_start(DX_RDM_DISCOVER)) return;
+    DXU.rdm_seen = DX.rdm_seq;
+    dx_rdm_refresh();
+}
+
+static void rdm_identify_cb(lv_event_t *e)
+{
+    DX.rdm_act = DX_RDM_IDENTIFY;
+    DX.rdm_act_dev = (int)(intptr_t)lv_event_get_user_data(e);
+    dx_rdm_start(DX_RDM_IDENTIFY);
+}
+
+static void rdm_addr_done(int v)
+{
+    if (v < 1 || v > 512) return;
+    DX.rdm_act = DX_RDM_ADDRESS;
+    DX.rdm_act_val = v;
+    dx_rdm_start(DX_RDM_ADDRESS);
+}
+
+static void rdm_addr_cb(lv_event_t *e)
+{
+    DX.rdm_act_dev = (int)(intptr_t)lv_event_get_user_data(e);
+    dx_keypad(_("Dirección DMX nueva (1 a 512)"), DX.rdm_dev[DX.rdm_act_dev].addr, rdm_addr_done);
+}
+
+static void rdm_label_done(const char *v)
+{
+    snprintf(DX.rdm_act_text, sizeof DX.rdm_act_text, "%.32s", v);
+    DX.rdm_act = DX_RDM_LABEL;
+    dx_rdm_start(DX_RDM_LABEL);
+}
+
+static void rdm_label_cb(lv_event_t *e)
+{
+    DX.rdm_act_dev = (int)(intptr_t)lv_event_get_user_data(e);
+    dx_text(_("Nombre del aparato (DEVICE_LABEL)"), DX.rdm_dev[DX.rdm_act_dev].label, rdm_label_done);
+}
+
+static void rdm_list_fill(void)
+{
+    lv_obj_clean(DXU.rdm_list);
+    int32_t w = lv_obj_get_width(DXU.rdm_list);
+    for (int i = 0; i < DX.rdm_n; i++) {
+        const dx_rdm_dev_t *dv = &DX.rdm_dev[i];
+        lv_obj_t *c = dx_card(DXU.rdm_list, w, LV_SIZE_CONTENT);
+        lv_obj_set_style_pad_all(c, 16, 0);
+        lv_obj_set_flex_flow(c, LV_FLEX_FLOW_COLUMN);
+        lv_obj_set_style_pad_row(c, 8, 0);
+        aos_label(c, dv->label[0] ? dv->label : dv->model[0] ? dv->model : _("(sin nombre)"), aos_font_body, dv->identify ? DX_AMBER : AOS_C_TEXT);
+        char t[160];
+        snprintf(t, sizeof t, "%02X%02X:%02X%02X%02X%02X · %.32s%s%.32s", dv->uid[0], dv->uid[1], dv->uid[2], dv->uid[3], dv->uid[4], dv->uid[5],
+                 dv->model, dv->maker[0] ? " · " : "", dv->maker);
+        dx_caption(c, t, w - 32);
+        if (dv->ok) snprintf(t, sizeof t, _("Canales %u a %u (%u canales)"), dv->addr, dv->addr + dv->footprint - (dv->footprint ? 1 : 0), dv->footprint);
+        else snprintf(t, sizeof t, "%s", _("No contestó DEVICE_INFO."));
+        aos_label(c, t, aos_font_small, DX_TEAL);
+        lv_obj_t *r = dx_chips_row(c, w - 32);
+        dx_chip(r, dv->identify ? _("Dejar de identificar") : _("Identificar"), dv->identify, rdm_identify_cb, (void *)(intptr_t)i);
+        dx_chip(r, _("Dirección"), false, rdm_addr_cb, (void *)(intptr_t)i);
+        dx_chip(r, _("Nombre"), false, rdm_label_cb, (void *)(intptr_t)i);
+    }
+}
+
+void dx_rdm_refresh(void)
+{
+    if (!DXU.rdm_msg) return;
+    char t[200];
+    snprintf(t, sizeof t, "%s%s", dx_rdm_busy() ? "" : "", DX.rdm_msg[0] ? DX.rdm_msg : _("Tocá Buscar: la app pregunta en la línea quién habla RDM."));
+    size_t k = strlen(t);
+    if (DX.rdm_req) snprintf(t + k, sizeof t - k, _(" · %lu pedidos, %lu respuestas, %lu choques en la búsqueda, %lu respuestas malas"),
+                             (unsigned long)DX.rdm_req, (unsigned long)DX.rdm_ans, (unsigned long)DX.rdm_coll, (unsigned long)DX.rdm_bad);
+    lv_label_set_text(DXU.rdm_msg, t);
+    if (DXU.rdm_seen != DX.rdm_seq && !dx_rdm_busy()) {
+        DXU.rdm_seen = DX.rdm_seq;
+        rdm_list_fill();
+    }
+}
+
+void dx_rdm_build(lv_obj_t *parent, int32_t ch)
+{
+    int32_t w = DXU.W - 2 * AOS_UI_PAD;
+    lv_obj_t *col = dx_column(parent, w, ch);
+    lv_obj_t *top = dx_box(col, w, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(top, LV_FLEX_FLOW_ROW_WRAP);
+    lv_obj_set_style_pad_gap(top, 10, 0);
+    dx_pill(top, AOS_SYM_MAGNIFY, _("Buscar aparatos"), DX_TEAL, rdm_find_cb, NULL);
+    DXU.rdm_msg = dx_caption(col, "", w);
+    DXU.rdm_list = dx_box(col, w, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(DXU.rdm_list, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(DXU.rdm_list, 12, 0);
+    dx_caption(col, _("RDM va por el mismo par que DMX: entre paquete y paquete la placa pregunta y el aparato contesta. La búsqueda encuentra a cada uno por su UID sin conocerlo (partiendo el espacio en dos cuando contestan varios a la vez); después se le puede cambiar la dirección y el nombre o pedirle que se muestre. Sólo los aparatos con RDM contestan, y un splitter DMX común corta la vuelta."), w);
+    rdm_list_fill();
+    DXU.rdm_seen = DX.rdm_seq;
+    dx_rdm_refresh();
+}
+
+/* ======================================================================== */
 /* Cableado                                                                  */
 /* ======================================================================== */
 

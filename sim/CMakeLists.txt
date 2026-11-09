@@ -247,6 +247,8 @@ add_executable(p4os_sim
     io_signal_sim.c
     io_pulse_sim.c
     io_dmx_sim.c
+    # the bench ESP32's RDM responder plays the simulator's RDM fixtures
+    ${CMAKE_CURRENT_SOURCE_DIR}/../tools/rs485_test/esp32/main/rdm_resp.c
     ${AOS_UI_SRC}
     ${AOS_APPS_SRC}
     ${AOS_FONT_SRC}
@@ -255,6 +257,7 @@ add_executable(p4os_sim
 
 target_include_directories(p4os_sim PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}
+    ${CMAKE_CURRENT_SOURCE_DIR}/../tools/rs485_test/esp32/main
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ui/include

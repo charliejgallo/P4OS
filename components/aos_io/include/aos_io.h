@@ -548,6 +548,18 @@ void aos_io_dmx_write(aos_io_dmx_t *d, int first, const uint8_t *v, int n);
  * its slot count (0: none yet). st may be NULL. In SEND, st has the packets sent. */
 int  aos_io_dmx_read(aos_io_dmx_t *d, uint8_t *out, int max, aos_dmx_stats_t *st);
 void aos_io_dmx_close(aos_io_dmx_t *d);
+/* RDM (ANSI E1.20, 2026-11-09) on a port opened to SEND: one request, the
+ * whole packet from the 0xCC start code to its checksum, goes out between
+ * two DMX packets with its BREAK and MAB, and the line is listened to for
+ * the answer. A normal answer comes with a BREAK of its own (out starts at
+ * its 0xCC); a discovery answer has none (out starts at its 0xFE preamble
+ * or 0xAA). Up to max bytes, the first within timeout_ms (the standard
+ * gives a fixture 2 ms; 0 means 3), the rest until the line is quiet for 2
+ * ms. Returns the bytes, 0 when nothing came, -1 when the port is not
+ * sending. Blocks up to a DMX period plus the answer: call it from a
+ * thread, not LVGL's. With DE on the port, DE is let go while listening;
+ * an automatic module turns around by itself. */
+int  aos_io_dmx_rdm(aos_io_dmx_t *d, const uint8_t *req, int len, uint8_t *out, int max, int timeout_ms);
 
 /* ---- the serial capture service (aos_serial.c) ----
  *

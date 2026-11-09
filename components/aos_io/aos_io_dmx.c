@@ -99,6 +99,12 @@ int aos_io_dmx_read(aos_io_dmx_t *d, uint8_t *out, int max, aos_dmx_stats_t *st)
     return n;
 }
 
+int aos_io_dmx_rdm(aos_io_dmx_t *d, const uint8_t *req, int len, uint8_t *out, int max, int timeout_ms)
+{
+    if (!d || d->dir != AOS_DMX_SEND || !req || len < 3 || len > 257 || !out || max <= 0) return -1;
+    return aos_io_be_dmx_rdm(d, req, len, out, max, timeout_ms > 0 ? timeout_ms : 3);
+}
+
 void aos_io_dmx_close(aos_io_dmx_t *d)
 {
     if (!d) return;

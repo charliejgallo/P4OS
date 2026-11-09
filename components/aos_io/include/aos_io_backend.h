@@ -183,6 +183,7 @@ bool aos_io_be_dmx_open(aos_io_dmx_t *d);
  * short_break, slots, start_code, break_us, mab_us, age_ms); hz is the front's */
 int  aos_io_be_dmx_read(aos_io_dmx_t *d, uint8_t *out, int max, aos_dmx_stats_t *st);
 void aos_io_be_dmx_close(aos_io_dmx_t *d);
+int  aos_io_be_dmx_rdm(aos_io_dmx_t *d, const uint8_t *req, int len, uint8_t *out, int max, int timeout_ms);
 /* the board's UART pool (aos_io_p4.c), shared with the DMX backend */
 int  aos_io_be_uart_take(void);
 void aos_io_be_uart_give(int num);
