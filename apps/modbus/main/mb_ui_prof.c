@@ -226,6 +226,13 @@ void prof_chip(lv_obj_t *parent, int32_t w)
     if (on) mb_chip(r, _("Editar"), false, edit_cb, NULL);
 }
 
+/* "hr 0 · u16 · rw · seno": what a point is, under its name */
+static void sub_text(const mb_point_t *pt, bool slave, char *o, size_t n)
+{
+    snprintf(o, n, "%s %u · %s%s%s%s", MB_TABLE_NAME[pt->table], pt->addr, MB_TYPE_NAME[pt->type], pt->rw ? " · rw" : "",
+             slave && pt->sim ? " · " : "", slave && pt->sim ? MB_SIM_NAME[pt->sim] : "");
+}
+
 void prof_refresh(void)
 {
     mb_lock();
@@ -252,6 +259,9 @@ void prof_refresh(void)
                                   rc[i] == MB_E_TIMEOUT && !open ? _("sin leer") : mb_strerror(rc[i]));
             continue;
         }
+        char sub[80];
+        sub_text(&p.pt[i], P.slave_view, sub, sizeof sub);
+        if (strcmp(lv_label_get_text(P.sub[i]), sub)) lv_label_set_text(P.sub[i], sub);   /* an error shown before goes */
         mb_pt_format(&p.pt[i], v[i], t, sizeof t);
         lv_label_set_text(P.val[i], t);
         lv_obj_set_style_text_color(P.val[i], p.pt[i].type == MB_T_BIT ? (v[i] ? AOS_C_GREEN : AOS_C_DIM) : C_AMBER, 0);
@@ -292,10 +302,9 @@ void prof_points(lv_obj_t *parent, int32_t w, bool slave)
         lv_obj_set_size(n, cw * 45 / 100, lv_font_get_line_height(aos_font_small));
         lv_label_set_long_mode(n, LV_LABEL_LONG_MODE_DOTS);
         lv_obj_align(n, LV_ALIGN_TOP_LEFT, 0, 10);
-        P.sub[i] = aos_label(c, "", aos_font_tiny, AOS_C_DIM);
-        lv_label_set_text_fmt(P.sub[i], "%s %u · %s%s%s", MB_TABLE_NAME[pt->table], pt->addr, MB_TYPE_NAME[pt->type],
-                              pt->rw ? " · rw" : "", slave && pt->sim ? " · " : "");
-        if (slave && pt->sim) lv_label_ins_text(P.sub[i], LV_LABEL_POS_LAST, MB_SIM_NAME[pt->sim]);
+        char sub[80];
+        sub_text(pt, slave, sub, sizeof sub);
+        P.sub[i] = aos_label(c, sub, aos_font_tiny, AOS_C_DIM);
         lv_obj_align(P.sub[i], LV_ALIGN_BOTTOM_LEFT, 0, -10);
         P.val[i] = aos_label(c, "—", cols > 1 || w < 640 ? aos_font_body : aos_font_title, C_AMBER);
         lv_obj_align(P.val[i], LV_ALIGN_RIGHT_MID, 0, 0);

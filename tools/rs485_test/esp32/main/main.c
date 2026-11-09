@@ -25,9 +25,9 @@
  * Terminal on usb0) prints every frame both ways, in hex, with the silence
  * before it, and takes one-key commands; h for the list.
  *
- * Frames are split by silence here: UART2's receive timeout is set to 3.5
- * characters, which is what RTU frames by; a read that times out ends a
- * frame. Simple, and right for a bench with two nodes.
+ * Frames end where their CRC closes (read_frame): UART2 delivers a frame
+ * 4 characters after the line goes quiet, and the answer goes out a
+ * millisecond or two later, as a real device's does.
  */
 #include <inttypes.h>
 #include <math.h>
@@ -156,17 +156,27 @@ static void show(const char *dir, const uint8_t *f, int n, const char *note)
     gpio_set_level(PIN_LED, 1);
 }
 
-/* Reads one frame: bytes until the line has been quiet for a while. 0 when
- * nothing came by the deadline. */
+/* Reads one frame. UART2 hands its bytes over 4 characters after the line
+ * goes quiet, so a whole frame usually arrives at once: as soon as what is
+ * there ends in a good CRC it is a frame, and the answer can go out within a
+ * few milliseconds, as a real device's does. Without a good CRC it waits
+ * for 30 characters of silence (a long frame comes in FIFO-sized pieces) and
+ * returns what came, for the caller to call damaged. 0 when nothing came by
+ * the deadline. */
 static int read_frame(uint8_t *buf, int max, int wait_ms)
 {
-    int n = uart_read_bytes(BUS, buf, max, pdMS_TO_TICKS(wait_ms));
-    if (n <= 0) return 0;
+    int64_t end = esp_timer_get_time() + (int64_t)wait_ms * 1000, last = 0;
+    int n = 0;
     for (;;) {
-        int gap_ms = (int)(char_us(3.5f) / 1000) + 2;
-        int r = uart_read_bytes(BUS, buf + n, max - n, pdMS_TO_TICKS(gap_ms));
-        if (r <= 0 || n + r >= max) return n + (r > 0 ? r : 0);
-        n += r;
+        int r = uart_read_bytes(BUS, buf + n, max - n, 0);
+        int64_t now = esp_timer_get_time();
+        if (r > 0) {
+            n += r;
+            last = now;
+            if (n >= max || crc_ok(buf, n)) return n;
+        } else if (n && now - last >= (int64_t)char_us(30.0f)) return n;
+        else if (!n && now >= end) return 0;
+        vTaskDelay(1);
     }
 }
 

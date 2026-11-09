@@ -695,6 +695,15 @@ and a monitor that listens without driving the line) and **Equipos**
 (`apps/equipos`: the Riden and the DOMCOM gateway). DMX512 and the rest of
 what RS485 carries: `docs/plan/RS485.md`.
 
+**On the board** (2026-11-09, `apps/modbus/README.md` "On the board"):
+the P4 and the ESP32 with two automatic modules talked at 9600 8N1 for
+thousands of requests with no error but those played on purpose, both
+ways (the P4 as master and as slave) and with the P4 listening as
+monitor. Two things learnt: the modules need nothing but TX, RX, 3.3 V and
+GND, TXD to TX as named; and a UART does not drop a byte with a parity
+error, so a slave answers with a good CRC whatever the parity: the speed
+can be found by trying, the format cannot without counting parity errors.
+
 **In the simulator** a pty stands for the bus: `tools/fake_modbus.py`
 plays slaves, a master, or a busy bus on one, and `P4_SIM_UART_A=<pty>`
 puts it on `uart.a`. `P4_SIM_UART_A=/dev/cu.usbserial-…` puts a real

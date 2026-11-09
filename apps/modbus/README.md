@@ -167,6 +167,40 @@ On a pty the bytes arrive at once, so the delays shown there are not the
 wire's. On the board, with the ESP32 of `tools/rs485_test`: see
 `docs/plan/PRUEBAS-PLACA.md`.
 
+## On the board (2026-11-09)
+
+The bench of `tools/rs485_test`, wired as `docs/img/bench-rs485.svg`: the
+P4 on `uart.a` and an ESP32 DevKit, each with an automatic "RS485 to TTL"
+module fed from 3.3 V (TXD to TX, RXD to RX worked the first time), a
+twisted pair, the modules' own 120 Ω.
+
+<img src="../../docs/img/bench-rs485-photo.jpg" width="360" alt="The P4 reading the ESP32 drive through two RS485 modules on a twisted pair">
+
+- **Master with the drive's profile**, 9600 8N1: thousands of requests, no
+  error that was not played on purpose. "Marcha" tapped on the board
+  started the ESP32's drive: 1450 rpm along the ramp, the current and the
+  temperature following. With the ESP32 answering as soon as a frame's CRC
+  closes, 14 ms on average from the end of a request to the start of its
+  answer, the line busy ~33 ms a request.
+- **The ESP32's faults** showed on each point as what they are: silent and
+  slow (400 ms, past the 300 ms timeout) as "sin respuesta", a broken CRC
+  as "respuesta dañada (CRC)", busy as "esclavo ocupado"; the counts add
+  up (requests = answers + unanswered + damaged).
+- **08, 17 and 43** on the wire: the identification read "P4OS bench ·
+  ESP32 drive · 1.2", the Id "ESP32-VFD" with its run indicator.
+- **Buscar velocidad** found the ESP32 moved to 19200 8E1, but at 19200
+  every format answered: neither UART drops a byte with a parity error, so
+  a good CRC comes back whatever the parity. The speed is certain, the
+  format is not; the tab says so (counting parity errors would need the
+  firmware to report them).
+- **Slave**, playing the drive's profile for the ESP32 as master: every
+  request answered (the profile's values moving), and each fault seen on
+  the other side: mute and slow as no answer (slow's late answers then
+  collide with the next request and come back as "not the answer to
+  that"), the broken CRC as bad CRC, busy and failure as exceptions.
+- **Monitor** with the ESP32 polling a unit nobody plays: each request
+  counted, every one unanswered.
+
 ## Files
 
 - `main/mb.h` what the files share; the shared state and the log

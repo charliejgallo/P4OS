@@ -380,7 +380,7 @@ Pausa	Pause
 Sólo errores	Nur Fehler
 
 #: apps/modbus/main/mb_tabs.c:797
-Borrar	Löschen
+Borrar	Leeren
 
 #: apps/modbus/main/mb_tabs.c:819
 Lo más nuevo arriba. Los tiempos son de cuando los bytes llegaron a la app (unos caracteres después de pasar por el cable); \"+\" es el silencio antes de la trama. El botón BOOT pausa.	Das Neueste oben. Die Zeiten sind, wann die Bytes die App erreichten (einige Zeichen nachdem sie über die Leitung gingen); \"+\" ist die Pause vor dem Frame. Die BOOT-Taste pausiert.
@@ -709,3 +709,7 @@ Tráfico sigue	Verkehr läuft weiter
 
 #: apps/modbus/main/modbus.c:714
 No hay memoria para el banco Modbus	Nicht genug Speicher für die Modbus-Werkbank
+
+
+#: apps/modbus/main/mb_tabs.c
+La velocidad es segura; el formato no: los UART no descartan un byte con error de paridad, así que a la velocidad buena contestan varios. El manual del equipo dice cuál (el estándar pide 8E1).	Die Geschwindigkeit ist sicher, das Format nicht: UARTs verwerfen ein Byte mit Paritätsfehler nicht, also antworten bei der richtigen Geschwindigkeit mehrere Formate. Das Handbuch des Geräts sagt, welches (der Standard verlangt 8E1).

@@ -374,13 +374,13 @@ CRC MALO	BAD CRC
 Seguir	Resume
 
 #: apps/modbus/main/mb_tabs.c:795
-Pausa	Paused
+Pausa	Pause
 
 #: apps/modbus/main/mb_tabs.c:796
 Sólo errores	Errors only
 
 #: apps/modbus/main/mb_tabs.c:797
-Borrar	Delete
+Borrar	Clear
 
 #: apps/modbus/main/mb_tabs.c:819
 Lo más nuevo arriba. Los tiempos son de cuando los bytes llegaron a la app (unos caracteres después de pasar por el cable); \"+\" es el silencio antes de la trama. El botón BOOT pausa.	Newest on top. Times are when the bytes reached the app (a few characters after they went over the wire); \"+\" is the silence before the frame. The BOOT button pauses.
@@ -709,3 +709,7 @@ Tráfico sigue	Traffic goes on
 
 #: apps/modbus/main/modbus.c:714
 No hay memoria para el banco Modbus	Not enough memory for the Modbus bench
+
+
+#: apps/modbus/main/mb_tabs.c
+La velocidad es segura; el formato no: los UART no descartan un byte con error de paridad, así que a la velocidad buena contestan varios. El manual del equipo dice cuál (el estándar pide 8E1).	The speed is certain; the format is not: UARTs do not drop a byte with a parity error, so at the right speed several formats answer. The device's manual says which (the standard asks for 8E1).

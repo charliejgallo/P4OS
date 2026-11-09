@@ -339,6 +339,13 @@ static void m_tool_fill(void)
         any++;
     }
     for (int i = 0; i < nb; i++) { mb_chip(MBU.m_found, bauds[i], false, m_found_baud_cb, (void *)(intptr_t)i); any++; }
+    if (nb > 1 && !tool) {
+        /* seen on the board: neither UART drops a byte with a parity error,
+         * so at the right speed every format gets a good answer */
+        lv_obj_t *c = mb_caption(MBU.m_found, _("La velocidad es segura; el formato no: los UART no descartan un byte con error de paridad, así que a la velocidad buena contestan varios. El manual del equipo dice cuál (el estándar pide 8E1)."),
+                                 lv_obj_get_width(MBU.m_found));
+        lv_obj_set_style_text_color(c, AOS_C_ORANGE, 0);
+    }
     if (!any && !tool && pos > 0) aos_label(MBU.m_found, _("Nadie contestó."), aos_font_caption, AOS_C_ORANGE);
 }
 

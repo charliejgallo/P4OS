@@ -58,6 +58,20 @@ It starts as a **slave**, unit 1, 9600 8N1. The BOOT button, or `r` on the
 console, switches it to **master** and back; speed, format, unit and role
 are kept across resets.
 
+**Without unplugging anything**, from the Mac through the board: put the
+build on the card as above (`PUT /api/fs/put?path=/firmware/rs485_esp32/...`,
+the four files with their folders) and `POST /api/flash/start` with
+`{"path":"/sdcard/firmware/rs485_esp32","port":"usb0","family":"esp"}`;
+`GET /api/flash` says when it is written and verified (about 25 s). The
+console is readable the same way: `POST /api/serial/start`
+`{"ch":1,"port":"usb0","baud":115200}`, `GET /api/serial/lines?ch=1&from=`,
+and `POST /api/serial/send` `{"ch":1,"text":"x","eol":""}` presses a key.
+
+On the board, 2026-11-09: it answers 0.6 ms after a request's CRC closes
+(the UART hands the frame over 4 characters after the line goes quiet);
+the P4 measures 14 ms from the end of its request to the answer's start
+at 9600. The photo and the rest are in `apps/modbus/README.md`.
+
 ### As a slave: a made-up drive
 
 What the P4's Maestro tab talks to. A variable-speed drive, so the values

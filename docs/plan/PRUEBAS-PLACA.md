@@ -413,8 +413,19 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       la carga medida contra el Rigol; un bus cargado (el driver encola
       64 tramas); cuánto tarda en leerse un `.dbc` grande de la tarjeta; y
       grabar y abrir el CSV en SavvyCAN.
-- [ ] **RS485 y Modbus con el ESP32 de `tools/rs485_test`** (2026-11-08;
-      sólo probado en el simulador). Cableado como
+- [x] **RS485 y Modbus con el ESP32 de `tools/rs485_test`** (**anduvo el
+      2026-11-09**, foto y detalle en `apps/modbus/README.md`, "On the
+      board"): maestro con el perfil del variador (Marcha desde la placa,
+      14 ms de demora), las fallas del ESP32 en cada punto, 08/17/43,
+      Buscar velocidad (la velocidad sí, el formato no: la paridad no se
+      ve en la respuesta), la P4 de esclava con cada falla vista del otro
+      lado, y el monitor. Queda: instalar el `modbus.so` con el rótulo
+      "sin respuesta" que se borra al leer bien (ya compilado), Equipos con
+      la Riden, y la página del portal en la placa. Visto en el camino, del
+      portal y no de la app: después de un `GET /api/serial/lines` los
+      `POST /api/touch` se pierden un rato (los toques de verdad no se
+      probaron así); y desde la Mac `p4os.local` tarda 5 s en resolver por
+      IPv6 (`curl -4` contesta en 30 ms). Lo pedido antes: Cableado como
       `docs/img/bench-rs485.svg`: la P4 en `uart.a` (TX 30, RX 31, DE 29) y
       el ESP32 en IO17/IO4, dos módulos automáticos "RS485 to TTL" (sin DE,
       con su 120 Ω) alimentados con 3,3 V (60 Ω entre A y B con todo
