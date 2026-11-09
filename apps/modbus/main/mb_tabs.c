@@ -196,11 +196,14 @@ static void m_gateway(lv_obj_t *left, int32_t lw)
     lv_obj_set_style_pad_all(c, 16, 0);
     lv_obj_set_flex_flow(c, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_style_pad_row(c, 12, 0);
-    lv_obj_t *r = mb_box(c, lw - 32, 60);
+    lv_obj_t *r = mb_box(c, lw - 32, LV_SIZE_CONTENT);
+    lv_obj_set_style_min_height(r, 60, 0);
     lv_obj_set_flex_flow(r, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(r, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_column(r, 14, 0);
-    aos_label(r, _("Atender clientes TCP"), aos_font_body, AOS_C_TEXT);
+    lv_obj_t *swl = aos_label(r, _("Atender clientes TCP"), aos_font_body, AOS_C_TEXT);
+    lv_obj_set_flex_grow(swl, 1);
+    lv_label_set_long_mode(swl, LV_LABEL_LONG_MODE_WRAP);
     mb_switch(r, on, m_gw_cb);
     char t[32];
     snprintf(t, sizeof t, "%s %u", _("Puerto"), port);

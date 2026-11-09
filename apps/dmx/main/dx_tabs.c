@@ -594,11 +594,15 @@ void dx_net_build(lv_obj_t *parent, int32_t ch)
     lv_obj_set_style_pad_all(c, 18, 0);
     lv_obj_set_flex_flow(c, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_style_pad_row(c, 12, 0);
-    lv_obj_t *r = dx_box(c, w - 36, 60);
+    /* the label wraps and the switch keeps its place: in English the text is
+     * longer than the row */
+    lv_obj_t *r = dx_box(c, w - 36, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(r, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(r, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_column(r, 14, 0);
-    aos_label(r, _("Recibir de la red y sacarlo por DMX"), aos_font_body, AOS_C_TEXT);
+    lv_obj_t *nl = aos_label(r, _("Recibir de la red y sacarlo por DMX"), aos_font_body, AOS_C_TEXT);
+    lv_obj_set_flex_grow(nl, 1);
+    lv_label_set_long_mode(nl, LV_LABEL_LONG_MODE_WRAP);
     lv_obj_t *sw = lv_switch_create(r);
     lv_obj_set_size(sw, 96, 52);
     lv_obj_set_style_bg_color(sw, DX_TEAL, LV_PART_INDICATOR | LV_STATE_CHECKED);

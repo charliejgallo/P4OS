@@ -613,11 +613,14 @@ void lz_out_build(lv_obj_t *parent, int32_t ch)
     lv_obj_set_style_pad_all(ac, 18, 0);
     lv_obj_set_flex_flow(ac, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_style_pad_row(ac, 12, 0);
-    lv_obj_t *ar = lz_box(ac, w - 36, 60);
+    lv_obj_t *ar = lz_box(ac, w - 36, LV_SIZE_CONTENT);
+    lv_obj_set_style_min_height(ar, 60, 0);
     lv_obj_set_flex_flow(ar, LV_FLEX_FLOW_ROW);
     lv_obj_set_flex_align(ar, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_column(ar, 14, 0);
-    aos_label(ar, _("Mandar por la red"), aos_font_body, AOS_C_TEXT);
+    lv_obj_t *swl = aos_label(ar, _("Mandar por la red"), aos_font_body, AOS_C_TEXT);
+    lv_obj_set_flex_grow(swl, 1);
+    lv_label_set_long_mode(swl, LV_LABEL_LONG_MODE_WRAP);
     lv_obj_t *sw = lv_switch_create(ar);
     lv_obj_set_size(sw, 96, 52);
     lv_obj_set_style_bg_color(sw, LZ_ACCENT, LV_PART_INDICATOR | LV_STATE_CHECKED);
