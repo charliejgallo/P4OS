@@ -1129,7 +1129,7 @@ static void form_build(void)
     if (F.cat == AOS_SENSOR_CAT_OTHER) chip(r, "RS485", F.kind == F_RS485, f_kind_cb, (void *)(intptr_t)F_RS485);
     bool rs = F.kind == F_RS485;
     const aos_sensor_chip_t *c = rs ? NULL : aos_sensor_chip_at(F.kind);
-    caption(sh, rs ? _("Un transceptor RS485 (MAX485 o uno automático) para Modbus RTU; el DE va en el pin de del puerto.")
+    caption(sh, rs ? _("Un transceptor RS485 de 3,3 V (MAX3485, SP3485 o uno automático) para Modbus RTU o DMX; el DE va en el pin de del puerto.")
                    : chip_what(c->id), iw);
 
     const aos_io_port_t *pts[AOS_IO_PORT_MAX];

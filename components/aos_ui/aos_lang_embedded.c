@@ -345,7 +345,7 @@ static const char blob_en__sistema_lang[] =
     "Entrada\tInput\n"
     "Protección\tProtection\n"
     "ÚLTIMOS 2 MINUTOS\tLAST 2 MINUTES\n"
-    "La fuente se conecta por su puerto TTL (3,3 V) al puerto que elegiste en Modbus, pestaña Riden; el enlace es el mismo. Cada valor que se escribe se vuelve a leer, porque la Riden rechaza en silencio lo que no le gusta.\tThe supply connects through its TTL port (3.3 V) to the port you picked in Modbus, Riden tab; the link is the same. Every value written is read back, because the Riden silently rejects what it doesn't like.\n"
+    "La fuente se conecta por su puerto TTL (3,3 V) al puerto que elegiste en Equipos, pestaña Riden; el enlace es el mismo. Cada valor que se escribe se vuelve a leer, porque la Riden rechaza en silencio lo que no le gusta.\tThe supply connects through its TTL port (3.3 V) to the port you picked in Equipment, Riden tab; the link is the same. Every value written is read back, because the Riden silently rejects what it doesn't like.\n"
     "generador de funciones, 2 canales, 30 MHz\tfunction generator, 2 channels, 30 MHz\n"
     "Necesita un hub USB con alimentación\tNeeds a powered USB hub\n"
     "El generador habla USBTMC por USB, sin red ni puerto serie. El puerto USB-OTG de la placa no entrega 5 V, así que el generador se enchufa a un hub alimentado y el hub a la placa. Cuando esté el hub, esta pestaña maneja los dos canales.\tThe generator speaks USBTMC over USB, with no network or serial port. The board's USB-OTG port doesn't supply 5 V, so the generator plugs into a powered hub and the hub into the board. Once the hub is there, this tab drives both channels.\n"
@@ -1396,7 +1396,7 @@ static const char blob_en__sistema_lang[] =
     "Agregar módulo\tAdd module\n"
     "QUÉ MIDE\tWHAT IT MEASURES\n"
     "QUÉ ES\tWHAT IT IS\n"
-    "Un transceptor RS485 (MAX485 o uno automático) para Modbus RTU; el DE va en el pin de del puerto.\tAn RS485 transceiver (MAX485 or an automatic one) for Modbus RTU; DE goes on the port's de pin.\n"
+    "Un transceptor RS485 de 3,3 V (MAX3485, SP3485 o uno automático) para Modbus RTU o DMX; el DE va en el pin de del puerto.\tA 3.3 V RS485 transceiver (MAX3485, SP3485 or an automatic one) for Modbus RTU or DMX; DE goes on the port's de pin.\n"
     "EL BUS (UN PIN)\tTHE BUS (ONE PIN)\n"
     "PRIMER PIN\tFIRST PIN\n"
     "EL PIN\tTHE PIN\n"
@@ -2728,6 +2728,7 @@ static const char blob_en__sistema_lang[] =
     "Tiras LED\tLED Strips\n"
     "Macro pad\tMacro pad\n"
     "Modbus\tModbus\n"
+    "Equipos\tEquipment\n"
     "Módulos\tModules\n"
     "MQTT\tMQTT\n"
     "Pato goma\tPato goma\n"
@@ -3465,7 +3466,7 @@ static const char blob_de__sistema_lang[] =
     "Entrada\tEingang\n"
     "Protección\tSchutz\n"
     "ÚLTIMOS 2 MINUTOS\tLETZTE 2 MINUTEN\n"
-    "La fuente se conecta por su puerto TTL (3,3 V) al puerto que elegiste en Modbus, pestaña Riden; el enlace es el mismo. Cada valor que se escribe se vuelve a leer, porque la Riden rechaza en silencio lo que no le gusta.\tDas Netzteil hängt über seinen TTL-Port (3,3 V) an dem Port, den du in Modbus, Tab Riden, gewählt hast; die Verbindung ist dieselbe. Jeder geschriebene Wert wird zurückgelesen, weil die Riden stillschweigend ablehnt, was ihr nicht passt.\n"
+    "La fuente se conecta por su puerto TTL (3,3 V) al puerto que elegiste en Equipos, pestaña Riden; el enlace es el mismo. Cada valor que se escribe se vuelve a leer, porque la Riden rechaza en silencio lo que no le gusta.\tDas Netzteil hängt über seinen TTL-Port (3,3 V) an dem Port, den du in Geräte, Tab Riden, gewählt hast; die Verbindung ist dieselbe. Jeder geschriebene Wert wird zurückgelesen, weil die Riden stillschweigend ablehnt, was ihr nicht passt.\n"
     "generador de funciones, 2 canales, 30 MHz\tFunktionsgenerator, 2 Kanäle, 30 MHz\n"
     "Necesita un hub USB con alimentación\tBraucht einen aktiven USB-Hub\n"
     "El generador habla USBTMC por USB, sin red ni puerto serie. El puerto USB-OTG de la placa no entrega 5 V, así que el generador se enchufa a un hub alimentado y el hub a la placa. Cuando esté el hub, esta pestaña maneja los dos canales.\tDer Generator spricht USBTMC über USB, ohne Netzwerk oder seriellen Port. Der USB-OTG-Port der Platine liefert keine 5 V, also kommt der Generator an einen aktiven Hub und der Hub an die Platine. Mit dem Hub steuert dieser Tab beide Kanäle.\n"
@@ -4516,7 +4517,7 @@ static const char blob_de__sistema_lang[] =
     "Agregar módulo\tModul hinzufügen\n"
     "QUÉ MIDE\tWAS ES MISST\n"
     "QUÉ ES\tWAS ES IST\n"
-    "Un transceptor RS485 (MAX485 o uno automático) para Modbus RTU; el DE va en el pin de del puerto.\tEin RS485-Transceiver (MAX485 oder automatisch) für Modbus RTU; DE kommt an den de-Pin des Ports.\n"
+    "Un transceptor RS485 de 3,3 V (MAX3485, SP3485 o uno automático) para Modbus RTU o DMX; el DE va en el pin de del puerto.\tEin 3,3-V-RS485-Transceiver (MAX3485, SP3485 oder automatisch) für Modbus RTU oder DMX; DE kommt an den de-Pin des Ports.\n"
     "EL BUS (UN PIN)\tDER BUS (EIN PIN)\n"
     "PRIMER PIN\tERSTER PIN\n"
     "EL PIN\tDER PIN\n"
@@ -5848,6 +5849,7 @@ static const char blob_de__sistema_lang[] =
     "Tiras LED\tLED-Streifen\n"
     "Macro pad\tMakropad\n"
     "Modbus\tModbus\n"
+    "Equipos\tGeräte\n"
     "Módulos\tModule\n"
     "MQTT\tMQTT\n"
     "Pato goma\tPato goma\n"
@@ -6255,7 +6257,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3113, 0, files_en, 1 },
-    { "de", "Deutsch", 3113, 0, files_de, 1 },
+    { "en", "English", 3114, 0, files_en, 1 },
+    { "de", "Deutsch", 3114, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

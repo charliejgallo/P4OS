@@ -35,8 +35,6 @@ static const soon_t SOON[] = {
       N_("Graba ESP32, ESP8266 y STM32 por el header, o desde la Mac por RFC2217.") },
     { "aos.bus",      "Bus",            AOS_SYM_CONNECTION,     0xF59E0B, 0xB45309, 5,
       N_("Scanner I2C, registros, GPIO en vivo, PWM y ADC.") },
-    { "aos.modbus",   "Modbus",         AOS_SYM_LAN,            0x10B981, 0x047857, 5,
-      N_("Maestro RTU y TCP, con perfiles para el gateway DOMCOM y la Riden.") },
     { "aos.elec",     "Electrónica",    AOS_SYM_LIGHTNING_BOLT, 0xFACC15, 0xCA8A04, 5,
       N_("Colores de resistencias, códigos SMD, Ohm, divisores, 555.") },
     { "aos.settings", "Ajustes",        AOS_SYM_COG,            0x8E8E93, 0x48484A, 4,

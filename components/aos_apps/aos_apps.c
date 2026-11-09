@@ -20,7 +20,6 @@ void aos_apps_register_builtin(void)
         aos_app_life_get,
         aos_app_bus_get,
         aos_app_ha_get,
-        aos_app_modbus_get,
         aos_app_flasher_get,
         aos_app_bench_get,
         aos_app_files_get,

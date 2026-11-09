@@ -1147,7 +1147,7 @@ Protección	Schutz
 ÚLTIMOS 2 MINUTOS	LETZTE 2 MINUTEN
 
 #: components/aos_apps/aos_app_bench.c:603
-La fuente se conecta por su puerto TTL (3,3 V) al puerto que elegiste en Modbus, pestaña Riden; el enlace es el mismo. Cada valor que se escribe se vuelve a leer, porque la Riden rechaza en silencio lo que no le gusta.	Das Netzteil hängt über seinen TTL-Port (3,3 V) an dem Port, den du in Modbus, Tab Riden, gewählt hast; die Verbindung ist dieselbe. Jeder geschriebene Wert wird zurückgelesen, weil die Riden stillschweigend ablehnt, was ihr nicht passt.
+La fuente se conecta por su puerto TTL (3,3 V) al puerto que elegiste en Equipos, pestaña Riden; el enlace es el mismo. Cada valor que se escribe se vuelve a leer, porque la Riden rechaza en silencio lo que no le gusta.	Das Netzteil hängt über seinen TTL-Port (3,3 V) an dem Port, den du in Geräte, Tab Riden, gewählt hast; die Verbindung ist dieselbe. Jeder geschriebene Wert wird zurückgelesen, weil die Riden stillschweigend ablehnt, was ihr nicht passt.
 
 #: components/aos_apps/aos_app_bench.c:617
 generador de funciones, 2 canales, 30 MHz	Funktionsgenerator, 2 Kanäle, 30 MHz
@@ -4616,7 +4616,7 @@ QUÉ MIDE	WAS ES MISST
 QUÉ ES	WAS ES IST
 
 #: components/aos_apps/aos_app_modules.c:1132
-Un transceptor RS485 (MAX485 o uno automático) para Modbus RTU; el DE va en el pin de del puerto.	Ein RS485-Transceiver (MAX485 oder automatisch) für Modbus RTU; DE kommt an den de-Pin des Ports.
+Un transceptor RS485 de 3,3 V (MAX3485, SP3485 o uno automático) para Modbus RTU o DMX; el DE va en el pin de del puerto.	Ein 3,3-V-RS485-Transceiver (MAX3485, SP3485 oder automatisch) für Modbus RTU oder DMX; DE kommt an den de-Pin des Ports.
 
 #: components/aos_apps/aos_app_modules.c:1143
 EL BUS (UN PIN)	DER BUS (EIN PIN)
@@ -8818,6 +8818,9 @@ Macro pad	Makropad
 
 #: components/aos_apps/aos_app_modbus.c:1492  (nombre de app)
 Modbus	Modbus
+
+#: apps/equipos/main/equipos.c
+Equipos	Geräte
 
 #: components/aos_apps/aos_app_modules.c:1758  (nombre de app)
 Módulos	Module

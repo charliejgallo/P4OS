@@ -1147,7 +1147,7 @@ Protección	Protection
 ÚLTIMOS 2 MINUTOS	LAST 2 MINUTES
 
 #: components/aos_apps/aos_app_bench.c:603
-La fuente se conecta por su puerto TTL (3,3 V) al puerto que elegiste en Modbus, pestaña Riden; el enlace es el mismo. Cada valor que se escribe se vuelve a leer, porque la Riden rechaza en silencio lo que no le gusta.	The supply connects through its TTL port (3.3 V) to the port you picked in Modbus, Riden tab; the link is the same. Every value written is read back, because the Riden silently rejects what it doesn't like.
+La fuente se conecta por su puerto TTL (3,3 V) al puerto que elegiste en Equipos, pestaña Riden; el enlace es el mismo. Cada valor que se escribe se vuelve a leer, porque la Riden rechaza en silencio lo que no le gusta.	The supply connects through its TTL port (3.3 V) to the port you picked in Equipment, Riden tab; the link is the same. Every value written is read back, because the Riden silently rejects what it doesn't like.
 
 #: components/aos_apps/aos_app_bench.c:617
 generador de funciones, 2 canales, 30 MHz	function generator, 2 channels, 30 MHz
@@ -4616,7 +4616,7 @@ QUÉ MIDE	WHAT IT MEASURES
 QUÉ ES	WHAT IT IS
 
 #: components/aos_apps/aos_app_modules.c:1132
-Un transceptor RS485 (MAX485 o uno automático) para Modbus RTU; el DE va en el pin de del puerto.	An RS485 transceiver (MAX485 or an automatic one) for Modbus RTU; DE goes on the port's de pin.
+Un transceptor RS485 de 3,3 V (MAX3485, SP3485 o uno automático) para Modbus RTU o DMX; el DE va en el pin de del puerto.	A 3.3 V RS485 transceiver (MAX3485, SP3485 or an automatic one) for Modbus RTU or DMX; DE goes on the port's de pin.
 
 #: components/aos_apps/aos_app_modules.c:1143
 EL BUS (UN PIN)	THE BUS (ONE PIN)
@@ -8818,6 +8818,9 @@ Macro pad	Macro pad
 
 #: components/aos_apps/aos_app_modbus.c:1492  (nombre de app)
 Modbus	Modbus
+
+#: apps/equipos/main/equipos.c
+Equipos	Equipment
 
 #: components/aos_apps/aos_app_modules.c:1758  (nombre de app)
 Módulos	Modules

@@ -600,7 +600,7 @@ static void build_psu(void)
     U.p_sv = lv_chart_add_series(U.p_chart, AOS_C_GREEN, LV_CHART_AXIS_PRIMARY_Y);
     U.p_si = lv_chart_add_series(U.p_chart, AOS_C_ORANGE, LV_CHART_AXIS_SECONDARY_Y);
     psu_chart_fill();
-    caption(right, _("La fuente se conecta por su puerto TTL (3,3 V) al puerto que elegiste en Modbus, pestaña Riden; el enlace es el mismo. Cada valor que se escribe se vuelve a leer, porque la Riden rechaza en silencio lo que no le gusta."), rw);
+    caption(right, _("La fuente se conecta por su puerto TTL (3,3 V) al puerto que elegiste en Equipos, pestaña Riden; el enlace es el mismo. Cada valor que se escribe se vuelve a leer, porque la Riden rechaza en silencio lo que no le gusta."), rw);
     psu_refresh();
 }
 

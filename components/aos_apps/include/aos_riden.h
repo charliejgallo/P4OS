@@ -2,10 +2,11 @@
  * P4OS - the bench's power supply: a Riden RD60xx over Modbus RTU
  * (aos_riden.c), as a service.
  *
- * The Modbus app has its own Riden tab with its own worker; this is the one
- * the Banco and its logger use, so the supply can be read with the app
- * closed while a log runs. The link is the Modbus app's (its preferences
- * mb_rd_port, mb_rd_baud, mb_rd_unit): one place to say where the supply is.
+ * The Equipos app (apps/equipos, installed from the card) has its own Riden
+ * tab with its own worker; this is the one the Banco and its logger use, so
+ * the supply can be read with that app closed while a log runs. The link is
+ * kept in the preferences mb_rd_port, mb_rd_baud and mb_rd_unit, which
+ * Equipos sets: one place to say where the supply is.
  * Only one of the two can hold the port at a time; the other says who has it.
  *
  * The service runs while somebody wants it: aos_riden_keep() at least every
@@ -50,7 +51,7 @@ void aos_riden_status(aos_riden_status_t *out);
 bool aos_riden_set_v(float v);
 bool aos_riden_set_i(float a);
 bool aos_riden_set_output(bool on);
-/* The Modbus app changed the link: take the preferences again. */
+/* Equipos changed the link: take the preferences again. */
 void aos_riden_reload(void);
 
 #ifdef __cplusplus

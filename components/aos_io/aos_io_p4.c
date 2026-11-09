@@ -40,7 +40,14 @@ bool aos_io_be_uart_open(aos_io_uart_t *u, bool rs485)
     uart_param_config(num, &c);
     int de = rs485 ? u->port->pins[2] : UART_PIN_NO_CHANGE;
     uart_set_pin(num, u->port->pins[0], u->port->pins[1], de, UART_PIN_NO_CHANGE);
-    if (rs485) uart_set_mode(num, UART_MODE_RS485_HALF_DUPLEX);
+    if (rs485) {
+        uart_set_mode(num, UART_MODE_RS485_HALF_DUPLEX);
+        /* hand a frame over 3 character times after the line goes quiet, not
+         * the driver's default 10: a Modbus app splitting frames and timing
+         * answers sees them that much sooner (the 3.5-character silence of
+         * RTU is the reference) */
+        uart_set_rx_timeout(num, 3);
+    }
     s_uart_used[num] = true;
     u->be = (void *)(intptr_t)num;
     return true;

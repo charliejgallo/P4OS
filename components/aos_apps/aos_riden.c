@@ -2,7 +2,7 @@
  * P4OS - the Riden RD60xx as a service for the Banco (aos_riden.h).
  *
  * The register map is the one measured on the real unit (riden-psu/README.md),
- * the same the Modbus app's Riden tab reads: 0-3 model, serial and firmware;
+ * the same the Equipos app's Riden tab reads: 0-3 model, serial and firmware;
  * 4-19 the live block (temperature, setpoints, output, power, input, lock,
  * protection, CV/CC, enable); 38-41 Ah and Wh.
  */
