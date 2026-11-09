@@ -68,7 +68,7 @@
 <text x="690" y="812" font-size="12" fill="#374151" text-anchor="middle" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">a twisted pair (two wires twisted by hand will do on a bench)</text>
 <text x="690" y="880" font-size="12" fill="#374151" text-anchor="middle" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">60 Ω between CANH and CANL with everything off: the two 120 Ω in parallel</text>
 <rect x="40" y="902" width="1120" height="156" rx="8" fill="#f9fafb" stroke="#d1d5db"/>
-<text x="58" y="926" font-size="14" font-weight="bold" fill="#111">Wiring it (the bus itself is still to be tried on the board: docs/plan/PRUEBAS-PLACA.md)</text>
+<text x="58" y="926" font-size="14" font-weight="bold" fill="#111">Wiring it (it worked on the board, 2026-11-07: 162 frames a second at 500 kbit/s, no errors)</text>
 <text x="58" y="948" font-size="12" fill="#374151">• P4: TX (GPIO28, pin 16) to CTX and RX (GPIO29, pin 20) to CRX, not crossed as on a UART; 3V3 from pin 18, GND from pin 19</text>
 <text x="58" y="968" font-size="12" fill="#374151">• ESP32: IO21 to CTX and IO22 to CRX, its own 3V3 and GND. Not IO5 nor the other pins that toggle at boot: garbage on the bus</text>
 <text x="58" y="988" font-size="12" fill="#374151">• The ESP32's micro-USB on a USB host socket of the P4 (docs/USB.md): its 5 V, a GND shared with the P4, its console in the Terminal</text>

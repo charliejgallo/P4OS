@@ -609,7 +609,21 @@ SN65HVD230, on a twisted pair:
 
 Wired as drawn on 2026-11-07: 60.3 Ω between CANH and CANL with
 everything off, the two boards' 120 Ω (the SMD marked 121) in parallel.
-The frames on it are still to be tried.
+The same day the ESP32 car of `tools/can_test` and the CAN app talked at
+500 kbit/s: about 162 frames a second, no errors in 25000 frames
+(apps/can/README.md, with photos). On the way:
+
+- **The P4 alone on the bus, in Normal,** goes error passive (TEC 128) and
+  stays there, retrying: nobody acknowledges, and the standard stops the
+  count for a passive node with only ACK errors. Seen on the board.
+- **Self test with TX and RX on two pins** (28 and 29) sends each bit
+  through the transceiver and back without needing an ACK: the test for
+  the four wires and the transceiver. Here two of the wires were wrong;
+  every frame was then a bit error, which goes bus off in Normal too.
+- **The ESP32 with the P4 in Solo escucha** got no ACK in 10753 tries and
+  went bus off, not passive: its few bit and stuff errors do not add up
+  to that, so the classic ESP32 may count ACK errors past 128. Not looked
+  into further.
 
 **The clock of the LEDC.** All its timers share one clock, and the
 backlight's (set up by the BSP) is the crystal. Asking for the 80 MHz PLL

@@ -196,8 +196,9 @@ node in the self test hears only itself. The car answers OBD-II mode 01
 (`sim/io_signal_sim.c`): the engine on 7E8 / 18DAF110 with 19 PIDs (65 has
 no formula on purpose, to show the bytes), the gearbox on 7E9 / 18DAF118
 with 01 and 0D. To try the scanner: Conexión, Normal, Conectar, then OBD,
-Preguntar. The ESP32 car of `tools/can_test/auto_esp32` answers 00, 05, 0C,
-0D and 11 on the real bus.
+Preguntar. The ESP32 car of `tools/can_test/auto_esp32` answers the same
+way on the real bus: the engine on 7E8 with 18 PIDs and the maps up to A0,
+the gearbox on 7E9 (`tools/can_test/README.md`).
 
 Tried in the simulator on 2026-11-07: opendbc's vw_mqb.dbc and tesla_can.dbc
 and nberlette's OBD2.dbc read with the counts a separate parser gives;
@@ -234,4 +235,4 @@ What the board has still to confirm: the bus-off recovery and the error
 counters with faults on the bus, the load estimate against a scope, a busy
 bus (this one is 4 %; the driver's queue is 64 frames), how long a big
 `.dbc` takes to read from the card, and the OBD tab against the ESP32 car
-(which answers 00, 05, 0C, 0D and 11) and a real one.
+(its firmware of 9471b0b, with the two units) and a real one.

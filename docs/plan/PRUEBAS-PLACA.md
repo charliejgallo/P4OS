@@ -357,8 +357,8 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       del host USB), y que siga sonando bloqueada y con otra app adelante.
 - [x] **Apps del taller** (los cableados en `docs/img/bench-*.svg`, que arma
       `tools/bench_diagrams.py`: PWM, IR, tira WS2812B y 24LC;
-      instaladas el 2026-10-05, probadas en la placa salvo el CAN con
-      transceptores, que sigue abajo como pendiente): EEPROM con una 24LC256 en i2c.ext (pines 15/17,
+      instaladas el 2026-10-05, probadas en la placa; el CAN con
+      transceptores, recién el 2026-11-07, más abajo): EEPROM con una 24LC256 en i2c.ext (pines 15/17,
       pull-ups de 4,7 kΩ): detectada en 0x50 y el tamaño medido
       escribiendo da 24LC256 (2026-10-05); leída entera y guardada como
       versión, editada, escrita y verificada, restaurada a la original y
@@ -379,8 +379,8 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       un texto de la pila sin `text_local`; aprender anduvo: un botón del
       control del monitor quedó como Samsung, dirección 0x0707, comando 7,
       y se volvió a mandar, y el monitor subió el volumen; con la base de
-      SmartIR, "subir volumen" desde el listado también anduvo); CAN con los
-      transceptores SN65HVD230 cuando lleguen (la autoprueba ya anduvo);
+      SmartIR, "subir volumen" desde el listado también anduvo); CAN, la
+      autoprueba en un pin (el bus con transceptores, más abajo);
       Visor VNC contra una computadora (**anduvo el 2026-10-05** con una
       MacBook Air y dos monitores, Compartir pantalla con contraseña VNC,
       RFB 3.889, ZRLE: login escrito con la burbuja del teclado, mouse y
@@ -394,8 +394,25 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       que los toques parecen no hacer nada; una tecla la despierta);
       Dibujo con el dedo y el mouse USB (**probado por el usuario en la
       placa, funciona bien**, confirmado el 2026-10-09).
-- [ ] CAN con dos transceptores SN65HVD230 (o parecidos) entre la placa y
-      otro nodo: la autoprueba ya anduvo; falta el bus de verdad.
+- [x] CAN con dos transceptores SN65HVD230 entre la placa y otro nodo
+      (**anduvo el 2026-11-07**): la P4 y un ESP32 DevKit que hace de auto
+      (`tools/can_test/auto_esp32`), cableados como
+      `docs/img/bench-can.svg`, 60,3 Ω entre CANH y CANL. A 500 kbit/s en
+      Normal, unas 162 tramas por segundo (4 % del bus), sin errores ni
+      pérdidas en 25 000 tramas; Por id y Señales con las RPM y las
+      temperaturas del auto (fotos en `apps/can/README.md`). En el camino:
+      la P4 sola en Normal queda en *passive* con el TEC en 128, como dice
+      la norma; la autoprueba con TX y RX en dos pines prueba los cables y
+      el transceptor (así aparecieron dos cables mal puestos); el ESP32 con
+      la P4 en Solo escucha llegó a bus off sólo con errores de ACK.
+- [ ] CAN, lo que queda del bus de verdad (cuando haga falta): la pestaña
+      OBD contra el auto del ESP32 grabado con el firmware de `9471b0b`
+      (dos unidades, 18 PIDs) y contra un auto de verdad (sólo leer); el
+      bus off y su recuperación con fallas a propósito (CANL suelto, sin
+      terminación, velocidades distintas: el ESP32 cambia con 1/2/5/m);
+      la carga medida contra el Rigol; un bus cargado (el driver encola
+      64 tramas); cuánto tarda en leerse un `.dbc` grande de la tarjeta; y
+      grabar y abrir el CSV en SavvyCAN.
 - [x] Red, pestaña Wi-Fi fluida (2026-10-06, `5362893`): los gráficos de
       canales y el nivel en vivo se dibujaban en cada cuadro del scroll;
       ahora se pintan una vez en una imagen en PSRAM cuando cambian los
