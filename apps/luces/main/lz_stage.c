@@ -27,7 +27,8 @@ static const swatch_t SWATCH[] = {
 
 static const uint8_t STROBE_V[4] = { 0, 60, 140, 230 };
 static const char *const STROBE_NAME[4] = { N_("Sin strobe"), N_("Lento"), N_("Medio"), N_("Rápido") };
-static const char *const FX_NAME[LZ_FX_COUNT] = { N_("Ninguno"), N_("Arcoíris"), N_("Ola"), N_("Destellos") };
+static const char *const FX_NAME[LZ_FX_COUNT] = { N_("Ninguno"), N_("Arcoíris"), N_("Ola"), N_("Destellos"),
+                                                  N_("Recorrido"), N_("Colores"), N_("Respirar") };
 
 static int first_selected(void)
 {
@@ -275,12 +276,13 @@ void lz_stage_build(lv_obj_t *parent, int32_t ch)
     }
 
     /* effects */
-    c = card_titled(col, w, _("Efecto"), NULL);
+    c = card_titled(col, w, _("Efectos y pruebas"), NULL);
     r = lz_chips_row(c, w - 36);
     for (int k = 0; k < LZ_FX_COUNT; k++) P->fx_chip[k] = lz_chip(r, aos_tr(FX_NAME[k]), LZ.fx == k, fx_cb, (void *)(intptr_t)k);
     aos_label(c, _("Velocidad"), aos_font_caption, AOS_C_DIM);
     P->speed_s = lz_slider(c, w - 60, 1, 100, LZ.fx_speed, speed_cb, NULL);
     lz_caption(c, _("El efecto corre sobre los aparatos elegidos al tocarlo (todos, si no hay ninguno elegido), encima de la escena."), w - 36);
+    lz_caption(c, _("Pruebas: Recorrido prende un aparato por vez en blanco (cuál es cuál; uno fuera de turno tiene la dirección mal). Colores pasa todos por rojo, verde, azul y blanco (uno de otro color tiene los canales en otro orden que su tipo). Respirar sube y baja la intensidad despacio (escalones o parpadeo abajo son la curva del aparato)."), w - 36);
 
     /* master */
     c = card_titled(col, w, "Master", &P->master_l);

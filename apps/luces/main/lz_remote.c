@@ -14,6 +14,7 @@
  *   agregar=type,n         n fixtures of that type at the next free addresses
  *   aparato=i,addr,type,name   change one     quitar=i
  *   tipos=1               read the card's types again
+ *   muestra=1             add the five demo scenes
  *
  * and reads one key while it looks, "estado", a JSON with all of it and the
  * 512 channels as hex, four times a second.
@@ -184,6 +185,7 @@ static void order(const char *key, char *v)
         lz_fix_remove(atoi(v));
         patch_changed();
     } else if (!strcmp(key, "tipos")) lz_types_reload();
+    else if (!strcmp(key, "muestra")) lz_scenes_demo();
 }
 
 static void take_orders(void)

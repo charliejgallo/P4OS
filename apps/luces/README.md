@@ -31,11 +31,24 @@ The sending (BREAK, timing, 40 packets a second) is the firmware's
   Intensity (a slider and 0-100 %), eleven colours (a colour on a dark
   fixture turns it on), strobe, a pan/tilt pad (when some fixture moves),
   effects (rainbow, wave, sparkle) with their speed, and the master.
+  Three **test modes** next to the effects, for a rig that does not do
+  what it should:
+  - **Recorrido** lights one fixture at a time in white: which is which,
+    and a fixture lit out of turn (or two at once) has a wrong address.
+  - **Colores** takes them all through red, green, blue and white: a
+    fixture in another colour has its channels in another order than its
+    type says.
+  - **Respirar** raises and lowers the intensity slowly in the look's
+    colour: steps or flicker at the bottom are the fixture's dimming curve.
 - **Escenas:** "Guardar lo que hay" stores every fixture's look as a
   scene; a tap calls it back with the chosen fade (cut to 5 s), a long
   press records it again, renames it or deletes it. The chase goes through
   every scene in order at a tempo (BPM by hand or by tapping Tap to the
-  music) with a cut, half or all of each step as a fade.
+  music) with a cut, half or all of each step as a fade. It needs two
+  different scenes at least (with one it calls the same over and over, and
+  nothing changes; the tab says so). **Escenas de muestra** adds five for
+  whatever is patched (red, green, blue, a rainbow across the fixtures,
+  odd and even in two colours); a first show starts with them.
 - **Patch:** the fixtures with their addresses (orange when they overlap
   or go past 512); a tap edits the name, the address and the type, or
   removes it. "Agregar aparatos" adds 1 to 16 of a type at the next free
@@ -53,7 +66,7 @@ in the background.
 
 - `patch.csv`: `nombre,tipo,direccion` a line. The first time, eight RGB
   pixels at 1-24 (the bench's strip) and a 7-channel PAR at 25.
-- `escenas.txt`: a scene a line, `name|fade ms|i:dim,r,g,b,w,amber,uv,strobe,pan,tilt;...`
+- `escenas.txt`: a scene a line (the five sample scenes when it is missing), `name|fade ms|i:dim,r,g,b,w,amber,uv,strobe,pan,tilt;...`
   with `i` the fixture's place in the patch.
 - `aparatos/*.csv`: the types, two lines each:
 

@@ -43,7 +43,10 @@
   (intensity, colours, strobe, a pan/tilt pad), effects (rainbow, wave,
   sparkle), scenes called back with a fade, a chase on the beat with tap
   tempo, a master and Blackout, and the 512 channels as they go out. Its
-  portal page is a second console made for a phone.
+  portal page is a second console made for a phone. Sample scenes to try
+  the chase with, and three test modes: one fixture at a time (wrong
+  addresses), red-green-blue-white (channels in the wrong order) and a
+  slow breath (the dimming curve).
 - **Equipos.** The Riden and DOMCOM gateway panels left the Modbus app for
   an app of their own (`apps/equipos`); the Banco keeps its Fuente, and
   the link is set from Equipos.

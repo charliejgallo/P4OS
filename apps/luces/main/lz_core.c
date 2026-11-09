@@ -19,6 +19,7 @@
 #include "lz.h"
 
 #include "aos_hal.h"
+#include "aos_i18n.h"
 
 #if !defined(AOS_SIM) && !defined(AOS_SIM_BUILTIN)
 #include "esp_heap_caps.h"
@@ -382,7 +383,12 @@ void lz_show_load(void)
         lz_fix_add(3, 25, "PAR 1");
         lz_patch_save();
     }
-    if (LZ.scenes) scenes_load();
+    if (LZ.scenes) {
+        snprintf(p, sizeof p, "%s/escenas.txt", lz_dir());
+        struct stat sb;
+        if (stat(p, &sb) == 0) scenes_load();
+        else lz_scenes_demo();                  /* a first show: something for the chase to go through */
+    }
     LZ.cur_scene = -1;
 }
 
@@ -553,6 +559,35 @@ void lz_tick(void)
             case LZ_FX_SPARKLE:
                 s->dim = (rng() % 100) < 12 ? (s->dim ? s->dim : 255) : 0;
                 break;
+            /* Test modes. Recorrido lights one fixture at a time, full
+             * white: which one is which, and an address set wrong shows as
+             * a fixture lit out of turn (or two at once). */
+            case LZ_FX_WALK: {
+                int on = n ? (int)(t * 2.0f) % n : 0;
+                *s = (lz_look_t){ .pan = s->pan, .tilt = s->tilt };
+                if (j - 1 == on) { s->dim = 255; s->r = s->g = s->b = s->w = 255; }
+                break;
+            }
+            /* Colores: all of them red, green, blue, then white, in turn: a
+             * fixture showing another colour has its channels in another
+             * order than its type says. */
+            case LZ_FX_RGBTEST: {
+                int k = (int)(t * 2.0f) % 4;
+                *s = (lz_look_t){ .dim = 255, .pan = s->pan, .tilt = s->tilt };
+                if (k == 0) s->r = 255;
+                else if (k == 1) s->g = 255;
+                else if (k == 2) s->b = 255;
+                else s->r = s->g = s->b = s->w = 255;
+                break;
+            }
+            /* Respirar: the intensity up and down slowly, in the look's
+             * colour (white when it has none): steps or flicker at the low
+             * end are the fixture's dimming curve. */
+            case LZ_FX_BREATHE:
+                if (!s->r && !s->g && !s->b && !s->w) s->r = s->g = s->b = 255;
+                s->dim = (uint8_t)(255.0f * (0.5f - 0.5f * cosf(6.2831853f * t * 0.25f)));
+                s->strobe = 0;
+                break;
             default: break;
             }
         }
@@ -604,4 +639,36 @@ lz_look_t lz_shown_color(int i, uint8_t *r, uint8_t *g, uint8_t *b)
     *g = (uint8_t)((G > 255 ? 255 : G) * dim / 255);
     *b = (uint8_t)((B > 255 ? 255 : B) * dim / 255);
     return s;
+}
+
+/* Five scenes for whatever is patched: three plain colours, a rainbow
+ * across the fixtures and two colours taking turns. A first show gets them,
+ * and Escenas can add them again. */
+int lz_scenes_demo(void)
+{
+    static const char *const NAME[5] = { N_("Rojo"), N_("Verde"), N_("Azul"), N_("Arcoíris"), N_("Pares e impares") };
+    int added = 0;
+    for (int k = 0; k < 5 && LZ.scenes && LZ.nscenes < LZ_SCENES; k++) {
+        lz_scene_t *sc = &LZ.scenes[LZ.nscenes];
+        memset(sc, 0, sizeof *sc);
+        snprintf(sc->name, sizeof sc->name, "%.23s", aos_tr(NAME[k]));
+        sc->fade_ms = 1000;
+        for (int i = 0; i < LZ_FIX; i++) {
+            lz_look_t *l = &sc->look[i];
+            look_default(l);
+            l->r = l->g = l->b = 0;
+            l->dim = 255;
+            if (k == 0) l->r = 255;
+            else if (k == 1) l->g = 255;
+            else if (k == 2) l->b = 255;
+            else if (k == 3) hue(LZ.nfix ? (float)i / (float)LZ.nfix : 0, &l->r, &l->g, &l->b);
+            else if (i % 2) { l->g = 200; l->b = 255; }
+            else { l->r = 255; l->b = 200; }
+        }
+        LZ.nscenes++;
+        added++;
+    }
+    LZ.changed++;
+    lz_scenes_save();
+    return added;
 }

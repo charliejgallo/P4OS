@@ -425,6 +425,11 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       elegir pixeles y darles color, efectos, dos escenas y la secuencia
       con tap, Blackout y master; lo mismo desde la página del portal en
       el celular; y que siga saliendo con la app en segundo plano.
+      El primer intento (2026-11-09): la secuencia no cambiaba nada porque
+      había una sola escena, oscura, y la salida estaba en `uart.b` (el
+      banco está en `uart.a`). Desde entonces: "Escenas de muestra", un
+      aviso con menos de dos escenas, y los modos de prueba Recorrido,
+      Colores y Respirar.
       Lo pedido antes: Firmware nuevo (`aos_io_dmx_*`), `dmx.so`, y el ESP32
       con los roles DMX y la tira de 8 WS2812B en IO18. A probar: si los
       módulos automáticos andan a 250 000 baudios con el BREAK (si no, uno

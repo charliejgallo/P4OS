@@ -65,7 +65,8 @@ typedef struct {
     lz_look_t look[LZ_FIX];
 } lz_scene_t;
 
-enum { LZ_FX_NONE = 0, LZ_FX_RAINBOW, LZ_FX_WAVE, LZ_FX_SPARKLE, LZ_FX_COUNT };
+/* effects, and test modes (from WALK on): what they are for is in lz_core.c, lz_tick() */
+enum { LZ_FX_NONE = 0, LZ_FX_RAINBOW, LZ_FX_WAVE, LZ_FX_SPARKLE, LZ_FX_WALK, LZ_FX_RGBTEST, LZ_FX_BREATHE, LZ_FX_COUNT };
 
 typedef struct {
     /* the library and the show */
@@ -118,6 +119,7 @@ bool lz_fix_overlaps(int i);                    /* shares a channel with another
 int  lz_scene_store(const char *name);          /* the current looks as a new scene */
 void lz_scene_recall(int i, uint16_t fade_ms);
 void lz_scene_delete(int i);
+int  lz_scenes_demo(void);                      /* adds five scenes for the patch there is; how many */
 void lz_tap(void);                              /* tap tempo */
 /* the programmer: on the selected fixtures */
 void lz_set_dim(uint8_t v);

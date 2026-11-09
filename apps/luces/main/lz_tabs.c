@@ -103,6 +103,7 @@ static void fade_cb(lv_event_t *e)
 }
 
 static void chase_cb(lv_event_t *e) { (void)e; lz_chase_set(!LZ.chase); lz_scenes_refresh(); }
+static void demo_cb(lv_event_t *e) { (void)e; lz_scenes_demo(); lz_rebuild(); }
 static void tap_cb(lv_event_t *e) { (void)e; lz_tap(); lz_save(); lz_scenes_refresh(); }
 
 static void bpm_done(int v)
@@ -132,6 +133,7 @@ void lz_scenes_build(lv_obj_t *parent, int32_t ch)
     lv_obj_set_flex_align(top, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_set_style_pad_gap(top, 10, 0);
     lz_pill(top, AOS_SYM_PLUS, _("Guardar lo que hay"), LZ_ACCENT, store_cb, NULL);
+    lz_pill(top, AOS_SYM_AUTO_FIX, _("Escenas de muestra"), AOS_C_CARD2, demo_cb, NULL);
     lz_section(col, _("FUNDIDO AL LLAMAR UNA ESCENA"));
     lv_obj_t *r = lz_chips_row(col, w);
     for (int k = 0; k < 6; k++) {
@@ -187,6 +189,10 @@ void lz_scenes_build(lv_obj_t *parent, int32_t ch)
     lz_pill(row, AOS_SYM_GESTURE_TAP_BUTTON, "Tap", AOS_C_CARD2, tap_cb, NULL);
     r = lz_chips_row(c, w - 36);
     for (int k = 0; k < 3; k++) P->cfade_chip[k] = lz_chip(r, aos_tr(CFADE_NAME[k]), false, cfade_cb, (void *)(intptr_t)k);
+    if (LZ.nscenes < 2) {
+        lv_obj_t *wl = lz_caption(c, _("Hacen falta al menos dos escenas distintas: con una sola, la secuencia llama siempre a la misma. \"Escenas de muestra\" agrega cinco."), w - 36);
+        lv_obj_set_style_text_color(wl, AOS_C_ORANGE, 0);
+    }
     lz_caption(c, _("Pasa por todas las escenas en orden, una por golpe. Tap: tocalo al ritmo de la música, tres o cuatro veces. Corte, mitad o todo fundido: cuánto de cada paso es fundido."), w - 36);
     lz_scenes_refresh();
 }

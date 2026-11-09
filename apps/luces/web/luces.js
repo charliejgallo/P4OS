@@ -25,7 +25,7 @@ const SWATCH = [['Rojo', 255, 0, 0, 0], ['Naranja', 255, 96, 0, 0], ['Ámbar', 2
   ['Verde', 0, 255, 0, 0], ['Cian', 0, 255, 255, 0], ['Azul', 0, 0, 255, 0], ['Violeta', 128, 0, 255, 0],
   ['Magenta', 255, 0, 200, 0], ['Cálido', 255, 180, 90, 0], ['Blanco', 255, 255, 255, 255]];
 const STROBE = [['Sin strobe', 0], ['Lento', 60], ['Medio', 140], ['Rápido', 230]];
-const FX = ['Ninguno', 'Arcoíris', 'Ola', 'Destellos'];
+const FX = ['Ninguno', 'Arcoíris', 'Ola', 'Destellos', 'Recorrido', 'Colores', 'Respirar'];
 const FADES = [[0, 'Corte'], [500, '0,5 s'], [1000, '1 s'], [2000, '2 s'], [3000, '3 s'], [5000, '5 s']];
 const CUTS = [[0, 'Corte'], [50, 'Mitad'], [100, 'Todo fundido']];
 const WORDS = ['dimmer', 'rojo', 'verde', 'azul', 'blanco', 'ambar', 'uv', 'strobe', 'pan', 'pan_fino', 'tilt', 'tilt_fino'];
@@ -168,9 +168,10 @@ P.registerPage({
             h('i', { style: `background: rgb(${r},${g},${b})` }), tr(t))),
           h('div', { style: 'text-align:center;font-size:11px;color:var(--dim)' }, colorIn, h('br'), tr('Otro')))),
       strobeCard, posCard,
-      h('div', { class: 'card pad' }, h('h3', {}, tr('Efecto')), h('div', { class: 'chips' }, ...fxBtns),
+      h('div', { class: 'card pad' }, h('h3', {}, tr('Efectos y pruebas')), h('div', { class: 'chips' }, ...fxBtns),
         h('label', { class: 'sl' }, h('span', {}, tr('Velocidad')), speed),
-        h('p', { class: 'note' }, tr('El efecto corre sobre los aparatos elegidos al tocarlo (todos, si no hay ninguno elegido), encima de la escena.'))));
+        h('p', { class: 'note' }, tr('El efecto corre sobre los aparatos elegidos al tocarlo (todos, si no hay ninguno elegido), encima de la escena.')),
+        h('p', { class: 'note' }, tr('Pruebas: Recorrido prende un aparato por vez en blanco (cuál es cuál; uno fuera de turno tiene la dirección mal). Colores pasa todos por rojo, verde, azul y blanco (uno de otro color tiene los canales en otro orden que su tipo). Respirar sube y baja la intensidad despacio (escalones o parpadeo abajo son la curva del aparato).'))));
 
     function colour(r, g, b, w) {
       send('color', [r, g, b, w].join(','));
@@ -209,16 +210,20 @@ P.registerPage({
     const fadeBtns = FADES.map(([ms, t]) => h('button', { class: 'btn', onclick: () => send('fundido', ms) }, tr(t)));
     const chaseBtn = h('button', { class: 'btn lzp', onclick: () => send('secuencia', st && st.secuencia ? 0 : 1) }, tr('Andar'));
     const bpm = h('input', { type: 'number', min: 20, max: 300, style: 'width: 90px', onchange: e => send('bpm', e.target.value) });
+    const chaseWarn = h('p', { class: 'note', style: 'color: var(--orange)' },
+      tr('Hacen falta al menos dos escenas distintas: con una sola, la secuencia llama siempre a la misma. "Escenas de muestra" agrega cinco.'));
     const cutBtns = CUTS.map(([v, t]) => h('button', { class: 'btn', onclick: () => send('corte', v) }, tr(t)));
     const scenesView = h('div', {},
       h('div', { class: 'card pad' },
-        h('div', { class: 'chips' }, h('button', { class: 'btn lzp', onclick: store }, tr('Guardar lo que hay'))),
+        h('div', { class: 'chips' }, h('button', { class: 'btn lzp', onclick: store }, tr('Guardar lo que hay')),
+          h('button', { class: 'btn', onclick: () => send('muestra', 1) }, tr('Escenas de muestra'))),
         h('h3', {}, tr('Fundido al llamar una escena')), h('div', { class: 'chips' }, ...fadeBtns)),
       h('div', { class: 'card pad' }, scenes),
       h('div', { class: 'card pad' }, h('h3', {}, tr('Secuencia: una escena tras otra, al tiempo')),
         h('div', { class: 'row' }, chaseBtn, bpm, h('span', { class: 'note' }, 'BPM'),
           h('button', { class: 'btn tap', onclick: tap }, 'Tap')),
         h('div', { class: 'chips' }, ...cutBtns),
+        chaseWarn,
         h('p', { class: 'note' }, tr('Pasa por todas las escenas en orden, una por golpe. Tap: tocalo al ritmo de la música, tres o cuatro veces.'))));
 
     /* tap tempo here, not on the board: the network's jitter would be in the count */
@@ -408,6 +413,7 @@ P.registerPage({
       [...scenes.children].forEach((c, i) => c.classList && c.classList.toggle('cur', i === st.escena));
       FADES.forEach(([ms], k) => on(fadeBtns[k], st.fundido === ms));
       CUTS.forEach(([v], k) => on(cutBtns[k], st.corte === v));
+      chaseWarn.style.display = st.escenas.length < 2 ? '' : 'none';
       chaseBtn.textContent = st.secuencia ? tr('Parar') : tr('Andar');
       chaseBtn.className = 'btn ' + (st.secuencia ? 'red' : 'lzp');
       if (document.activeElement !== bpm) bpm.value = st.bpm;
