@@ -37,6 +37,13 @@
   code, BREAK and MAB as measured, bad packets, a map of the 512
   channels) and the XLR wiring. The bench's ESP32 plays a DMX console and
   a light with a strip of 8 WS2812B pixels.
+- **Luces, a lighting console.** An app on the card (`apps/luces`) to run
+  DMX fixtures by name: a patch of types (nine built in, more as CSV files
+  on the card) at addresses, a programmer for the selected fixtures
+  (intensity, colours, strobe, a pan/tilt pad), effects (rainbow, wave,
+  sparkle), scenes called back with a fade, a chase on the beat with tap
+  tempo, a master and Blackout, and the 512 channels as they go out. Its
+  portal page is a second console made for a phone.
 - **Equipos.** The Riden and DOMCOM gateway panels left the Modbus app for
   an app of their own (`apps/equipos`); the Banco keeps its Fuente, and
   the link is set from Equipos.

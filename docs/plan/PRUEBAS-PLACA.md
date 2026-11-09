@@ -416,9 +416,15 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
 - [x] **DMX con el ESP32 de `tools/rs485_test`** (**anduvo el 2026-11-09**
       con los módulos automáticos: 40 paquetes/s en las dos direcciones,
       512 canales, 0 malos, BREAK medido 176-177 µs; el MAB sale de 33-50
-      µs aunque se pidan 16, dentro de norma; `apps/dmx/README.md`). Falta
-      mirar la tira con el arcoíris (foto), Aparato con el ESP32 de
+      µs aunque se pidan 16, dentro de norma; `apps/dmx/README.md`). La
+      tira con el arcoíris de la Consola anduvo (foto en
+      `docs/img/bench-dmx-photo.jpg`). Falta Aparato con el ESP32 de
       consola, el Rigol, y paquetes malos mientras se escribe la flash.
+- [ ] **Luces con la tira del ESP32** (`apps/luces`, 2026-11-09): el
+      primer show son los 8 pixeles RGB en 1-24 y un PAR en 25. A probar:
+      elegir pixeles y darles color, efectos, dos escenas y la secuencia
+      con tap, Blackout y master; lo mismo desde la página del portal en
+      el celular; y que siga saliendo con la app en segundo plano.
       Lo pedido antes: Firmware nuevo (`aos_io_dmx_*`), `dmx.so`, y el ESP32
       con los roles DMX y la tira de 8 WS2812B en IO18. A probar: si los
       módulos automáticos andan a 250 000 baudios con el BREAK (si no, uno

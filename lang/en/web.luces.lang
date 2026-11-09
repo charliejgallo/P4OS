@@ -1,0 +1,257 @@
+# amoledos-lang 1   es -> en
+# web.luces.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/luces/web/luces.js:117
+#: apps/luces/web/luces.js:460
+Luces	Lights
+
+#: apps/luces/web/luces.js:124
+La app Luces no está abierta en la placa (%s)	The Lights app is not open on the board (%s)
+
+#: apps/luces/web/luces.js:127
+Buscando la app…	Looking for the app…
+
+#: apps/luces/web/luces.js:128
+#: apps/luces/web/luces.js:422
+Abrir salida	Open output
+
+#: apps/luces/web/luces.js:149
+Posición (pan y tilt)	Position (pan and tilt)
+
+#: apps/luces/web/luces.js:150
+Al centro	Centre
+
+#: apps/luces/web/luces.js:156
+Todos	All
+
+#: apps/luces/web/luces.js:157
+Ninguno	None
+
+#: apps/luces/web/luces.js:158
+Pares	Odd
+
+#: apps/luces/web/luces.js:159
+Impares	Even
+
+#: apps/luces/web/luces.js:163
+Intensidad	Intensity
+
+#: apps/luces/web/luces.js:165
+Color	Colour
+
+#: apps/luces/web/luces.js:169
+Otro	Other
+
+#: apps/luces/web/luces.js:171
+Efecto	Effect
+
+#: apps/luces/web/luces.js:172
+Velocidad	Speed
+
+#: apps/luces/web/luces.js:173
+El efecto corre sobre los aparatos elegidos al tocarlo (todos, si no hay ninguno elegido), encima de la escena.	The effect runs on the fixtures selected when you tap it (all of them if none is), on top of the scene.
+
+#: apps/luces/web/luces.js:210
+#: apps/luces/web/luces.js:411
+Andar	Run
+
+#: apps/luces/web/luces.js:215
+Guardar lo que hay	Store what is on
+
+#: apps/luces/web/luces.js:216
+Fundido al llamar una escena	Fade when a scene is called
+
+#: apps/luces/web/luces.js:218
+Secuencia: una escena tras otra, al tiempo	Chase: one scene after another, on the beat
+
+#: apps/luces/web/luces.js:222
+Pasa por todas las escenas en orden, una por golpe. Tap: tocalo al ritmo de la música, tres o cuatro veces.	Goes through every scene in order, one per beat. Tap: tap it to the music, three or four times.
+
+#: apps/luces/web/luces.js:237
+#: apps/luces/web/luces.js:246
+Nombre de la escena	Scene name
+
+#: apps/luces/web/luces.js:237
+Escena %d	Scene %d
+
+#: apps/luces/web/luces.js:243
+%s: 1 volver a grabar con lo que hay ahora, 2 cambiar el nombre, 3 borrar	%s: 1 record again with what is on now, 2 rename, 3 delete
+
+#: apps/luces/web/luces.js:248
+¿Borrar la escena %s?	Delete the scene %s?
+
+#: apps/luces/web/luces.js:256
+PAR de 8 canales	8-channel PAR
+
+#: apps/luces/web/luces.js:259
+Agregar aparatos	Add fixtures
+
+#: apps/luces/web/luces.js:261
+#: apps/luces/web/luces.js:312
+Tipo	Type
+
+#: apps/luces/web/luces.js:262
+Cuántos	How many
+
+#: apps/luces/web/luces.js:263
+Agregar	Add
+
+#: apps/luces/web/luces.js:264
+Van desde la primera dirección libre, uno tras otro.	They go from the first free address, one after another.
+
+#: apps/luces/web/luces.js:266
+Tipos de aparato	Fixture types
+
+#: apps/luces/web/luces.js:267
+Un tipo nuevo	A new type
+
+#: apps/luces/web/luces.js:268
+#: apps/luces/web/luces.js:312
+Nombre	Name
+
+#: apps/luces/web/luces.js:268
+Canales, en orden	Channels, in order
+
+#: apps/luces/web/luces.js:269
+Guardar en la tarjeta	Save on the card
+
+#: apps/luces/web/luces.js:270
+Una palabra por canal, como dice el manual del aparato: %s; o un número, para un canal fijo en ese valor (un modo, una macro en 0).	One word per channel, as the fixture's manual says: %s; or a number, for a channel held at that value (a mode, a macro at 0). The words stay in Spanish.
+
+#: apps/luces/web/luces.js:274
+Falta el nombre o los canales	The name or the channels are missing
+
+#: apps/luces/web/luces.js:276
+No entiendo: %s	Not understood: %s
+
+#: apps/luces/web/luces.js:284
+Guardado en %s	Saved in %s
+
+#: apps/luces/web/luces.js:304
+Se pisa con otro aparato o se pasa del canal 512	Overlaps another fixture or goes past channel 512
+
+#: apps/luces/web/luces.js:306
+Sacar del patch	Remove from the patch
+
+#: apps/luces/web/luces.js:307
+¿Sacar %s del patch?	Remove %s from the patch?
+
+#: apps/luces/web/luces.js:310
+%d aparatos, %d canales de 512	%d fixtures, %d channels of 512
+
+#: apps/luces/web/luces.js:312
+Dirección	Address
+
+#: apps/luces/web/luces.js:312
+Canales	Channels
+
+#: apps/luces/web/luces.js:314
+incluido	built in
+
+#: apps/luces/web/luces.js:331
+Puerto	Port
+
+#: apps/luces/web/luces.js:332
+Los 512 canales como salen	The 512 channels as they go out
+
+#: apps/luces/web/luces.js:333
+Oscuros: sin aparato. Tocá un canal para ver qué es.	Dark: no fixture. Tap a channel to see what it is.
+
+#: apps/luces/web/luces.js:358
+Canal %d: %d	Channel %d: %d
+
+#: apps/luces/web/luces.js:358
+fijo	fixed
+
+#: apps/luces/web/luces.js:358
+sin aparato	no fixture
+
+#: apps/luces/web/luces.js:360
+Saliendo por %s: %s paquetes/s, %d mandados.	Sending on %s: %s packets/s, %d sent.
+
+#: apps/luces/web/luces.js:361
+Salida cerrada (%s).	Output closed (%s).
+
+#: apps/luces/web/luces.js:387
+%d elegidos	%d selected
+
+#: apps/luces/web/luces.js:387
+ninguno elegido: todos	none selected: all
+
+#: apps/luces/web/luces.js:405
+Grabar, renombrar o borrar	Record, rename or delete
+
+#: apps/luces/web/luces.js:406
+Todavía no hay escenas. Armá un look en Escenario y guardalo acá.	No scenes yet. Build a look in Stage and store it here.
+
+#: apps/luces/web/luces.js:411
+Parar	Stop
+
+#: apps/luces/web/luces.js:420
+Saliendo por %s · %s paquetes/s	Sending on %s · %s packets/s
+
+#: apps/luces/web/luces.js:421
+Salida cerrada (%s)	Output closed (%s)
+
+#: apps/luces/web/luces.js:422
+Cerrar salida	Close output
+
+#: apps/luces/web/luces.js:442
+La app Luces no está abierta en la placa: abrila ahí (o desde Apps) y esta página la maneja.	The Lights app is not open on the board: open it there (or from Apps) and this page drives it.
+
+#: apps/luces/web/luces.js (names in tables, through tr())
+Escenario	Stage
+
+Escenas	Scenes
+
+Patch	Patch
+
+Salida	Output
+
+Rojo	Red
+
+Naranja	Orange
+
+Ámbar	Amber
+
+Amarillo	Yellow
+
+Verde	Green
+
+Cian	Cyan
+
+Azul	Blue
+
+Violeta	Violet
+
+Magenta	Magenta
+
+Cálido	Warm
+
+Blanco	White
+
+Sin strobe	No strobe
+
+Lento	Slow
+
+Medio	Medium
+
+Rápido	Fast
+
+Arcoíris	Rainbow
+
+Ola	Wave
+
+Destellos	Sparkle
+
+Corte	Cut
+
+Mitad	Half
+
+Todo fundido	All fade
+
+0,5 s	0.5 s

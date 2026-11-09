@@ -8819,6 +8819,9 @@ Macro pad	Macro pad
 #: components/aos_apps/aos_app_modbus.c:1492  (nombre de app)
 Modbus	Modbus
 
+#: apps/luces/main/luces.c
+Luces	Lights
+
 #: apps/equipos/main/equipos.c
 Equipos	Equipment
 
