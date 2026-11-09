@@ -116,6 +116,30 @@ active profile again when its file changes, and while the page looks it
 sends the values it reads or plays (the live channel), shown in the
 table's "En la placa" column.
 
+## From the portal
+
+The portal's **Modbus** page (`web/modbus.js`) has two tabs:
+
+- **Control** drives the app on the board as if from its screen: open and
+  close the link, the role, port, speed, format, timeout and silence; as
+  master a request by hand (unit, function, address, count, values), live
+  or once, its values in U16/S16/hex/binary, the counts, find units and
+  find speed; as slave its unit, the fault and the delay, moving values;
+  as monitor the table per unit. Under it the Traffic: the newest 80
+  frames in hex and in words, paused or only the errors.
+- **Perfiles**, the profiles' editor (above).
+
+No firmware of its own: the live channel (`docs/PORTAL-PAGES.md`, "Live
+data", `main/mb_remote.c`). The app puts `estado` (JSON, twice a second)
+and `trafico` (the frames, when new ones come) while a page looks; the
+page sends lines of `key=value`: `abrir=1`, `rol=0|1|2`, `puerto=`,
+`baud=`, `formato=8N1`, `espera=`, `silencio=`, `pedido=unit,fc,addr,n[,v
+v v]` (for 05/06/08 the fourth number is the value), `vivo=1`,
+`periodo=`, `punto=<i>,<value>`, `falla=0..5`, `demora=`, `unidad=`,
+`animar=1`, `borrar=cuentas|trafico`, `herramienta=unidades|velocidad|parar`,
+`perfil=<file>`. The app has to be open on the board (in front): the page
+says so, and "Abrir la app en la placa" brings it.
+
 ## How it reads the line
 
 All three roles read the line the same way (`main/mb_bus.c`). The UART
@@ -210,4 +234,5 @@ twisted pair, the modules' own 120 Ω.
 - `main/mb_tabs.c` the five tabs
 - `main/mb_prof.c` profiles: the file, the examples, values, simulations, the reads
 - `main/mb_ui_prof.c` profiles on the screen: the chooser, the editor, the values
+- `main/mb_remote.c` the portal's page driving the app: orders in, state and traffic out
 - `web/modbus.js` the portal's page

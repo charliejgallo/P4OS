@@ -649,6 +649,7 @@ static void timer_cb(lv_timer_t *t)
     if (MBU.tab == TAB_TRAFFIC && !MBU.paused && lseq != MBU.logseen) { MBU.logseen = lseq; tab_traffic_refresh(); }
     if (MBU.tab <= TAB_SLAVE && !MBU.overlay) prof_refresh();
     prof_tick();
+    remote_tick();
 }
 
 static void build_screen(lv_obj_t *root)

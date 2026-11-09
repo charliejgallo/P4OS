@@ -23,6 +23,10 @@
   page, which also uploads, downloads and picks the one the board uses,
   and shows the values live. Four examples (the bench's ESP32 drive, a
   multisensor, an energy meter, a temperature and humidity sensor).
+- **Modbus from the portal.** The Modbus page's Control tab drives the
+  app on the board: the link, the role, a request by hand, live polling,
+  the slave's faults, the tools, the monitor's table and the traffic in
+  hex and in words, through the live channel.
 - **Equipos.** The Riden and DOMCOM gateway panels left the Modbus app for
   an app of their own (`apps/equipos`); the Banco keeps its Fuente, and
   the link is set from Equipos.

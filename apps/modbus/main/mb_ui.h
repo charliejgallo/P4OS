@@ -72,6 +72,8 @@ void tab_traffic_build(lv_obj_t *parent, int32_t ch);
 void tab_traffic_refresh(void);
 void tab_wire_build(lv_obj_t *parent, int32_t ch);
 
+const char *mb_note_text(int note);     /* "sin respuesta"... (mb_tabs.c) */
+
 /* mb_ui_prof.c: device profiles */
 void prof_init(void);
 void prof_tick(void);
@@ -80,3 +82,8 @@ void prof_points(lv_obj_t *parent, int32_t w, bool slave);
 void prof_refresh(void);
 void prof_forget(void);
 void prof_sheet(void);
+bool prof_use(const char *file);        /* NULL or "": none */
+void prof_point_write(int i, double v); /* master: write it; slave: set it */
+
+/* mb_remote.c: the portal's page drives the app through the live channel */
+void remote_tick(void);

@@ -723,7 +723,7 @@ static void t_pause_cb(lv_event_t *e) { (void)e; MBU.paused = !MBU.paused; mb_re
 static void t_err_cb(lv_event_t *e) { (void)e; MBU.only_err = !MBU.only_err; mb_rebuild_page(); }
 static void t_clear_cb(lv_event_t *e) { (void)e; mb_bus_clear_log(); mb_rebuild_page(); }
 
-static const char *note_text(int note)
+const char *mb_note_text(int note)
 {
     switch (note) {
     case MB_NOTE_TIMEOUT: return _("sin respuesta");
@@ -767,8 +767,8 @@ void tab_traffic_refresh(void)
         char what[128];
         lv_color_t col = AOS_C_TEXT;
         if (e.fl & MB_LF_NOTE) {
-            snprintf(what, sizeof what, "%s", note_text(e.note));
-            if (e.note == MB_NOTE_TIMEOUT && len >= 2) snprintf(what, sizeof what, "%s: U%u %s", note_text(e.note), d[0], mb_fc_name(d[1]));
+            snprintf(what, sizeof what, "%s", mb_note_text(e.note));
+            if (e.note == MB_NOTE_TIMEOUT && len >= 2) snprintf(what, sizeof what, "%s: U%u %s", mb_note_text(e.note), d[0], mb_fc_name(d[1]));
             lv_label_set_text_fmt(hdr, "%s  --", ts);
             col = e.note == MB_NOTE_TIMEOUT || e.note == MB_NOTE_SILENT ? AOS_C_ORANGE : AOS_C_DIM;
         } else {
@@ -783,7 +783,7 @@ void tab_traffic_refresh(void)
                 memcpy(f + 1, d + 7, (size_t)(len - 7));
                 mb_describe(f, len - 6, e.fl & MB_LF_REQ, what, sizeof what);
             } else mb_describe(d, len, (e.fl & MB_LF_REQ) != 0, what, sizeof what);
-            if (e.note) { size_t l = strlen(what); snprintf(what + l, sizeof what - l, " (%s)", note_text(e.note)); }
+            if (e.note) { size_t l = strlen(what); snprintf(what + l, sizeof what - l, " (%s)", mb_note_text(e.note)); }
             if (e.gap_us) { char g[16]; fmt_time(g, sizeof g, e.gap_us); snprintf(gap, sizeof gap, " +%s", g); }
             if ((e.fl & MB_LF_RSP) && e.rt_ms) { size_t l = strlen(what); snprintf(what + l, sizeof what - l, _(" · contestó en %u ms"), e.rt_ms); }
             lv_label_set_text_fmt(hdr, "%s%s %s %s", ts, gap, e.fl & MB_LF_TX ? "TX" : "RX", hex);

@@ -110,18 +110,6 @@ void prof_tick(void)
             }
         }
     }
-    /* the page asks: "perfil=<file>" uses one, "perfil=" none */
-    char msg[96];
-    int ml = aos_hal_live_take(LIVE_APP, msg, sizeof msg - 1);
-    if (ml > 0) {
-        msg[ml] = 0;
-        if (!strncmp(msg, "perfil=", 7)) {
-            if (msg[7]) load_and_activate(msg + 7, true);
-            else activate(NULL);
-            if (!MBU.overlay) mb_rebuild_page();
-            mb_bar_refresh();
-        }
-    }
     if (n % 3 || aos_hal_live_idle_ms(LIVE_APP) > 4000) return;
     static char j[8192];
     static mb_prof_t p;
@@ -183,6 +171,19 @@ static void write_done(double v)
     }
     mb_unlock();
     open_link();
+}
+
+bool prof_use(const char *file)
+{
+    if (!file || !file[0]) { activate(NULL); return true; }
+    return load_and_activate(file, true);
+}
+
+void prof_point_write(int i, double v)
+{
+    if (i < 0 || i >= MB_PTS) return;
+    s_tap = i;
+    write_done(v);
 }
 
 static void point_cb(lv_event_t *e)

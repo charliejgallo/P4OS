@@ -104,7 +104,261 @@ function css() {
     .mbh input { padding: 7px 8px; font: inherit; font-size: 14px; border: 1px solid var(--line); border-radius: 8px;
       background: var(--card); color: var(--fg, inherit); }
     .mbscroll { overflow-x: auto; }
+    .mbctl > .card, .mbctl > div > .card { margin-bottom: 14px; }
+    .mbstate { font-weight: 600; }
+    .mbstate.ok { color: var(--green); }
+    .mbstate.bad, .mberr { color: var(--red); }
+    .mbok { color: var(--green); font-weight: 600; }
+    .mbwarn { color: var(--orange); }
+    .mbck { display: inline-flex; align-items: center; gap: 6px; }
+    .mbh select { padding: 7px 8px; font: inherit; font-size: 14px; border: 1px solid var(--line); border-radius: 8px;
+      background: var(--card); color: inherit; }
+    .mbgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 6px; margin: 8px 0; }
+    .mbcell { display: flex; justify-content: space-between; padding: 6px 10px; border-radius: 8px; background: var(--card2); }
+    .mbcell .a { color: var(--orange); font-family: ui-monospace, monospace; font-size: 12px; }
+    .mbcell .v { font-family: ui-monospace, monospace; font-weight: 600; }
+    .mbcell.on .v { color: var(--green); }
+    .mbtraffic { max-height: 520px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
+    .mbfr { padding: 6px 10px; border-radius: 8px; background: var(--card2); }
+    .mbfr .mono { font-family: ui-monospace, monospace; font-size: 12px; word-break: break-all; }
+    .mbfr.tx .mono { color: var(--accent); }
+    .mbfr.bad .mono { color: var(--red); }
+    .mbfr.warn .mono { color: var(--orange); }
   `));
+}
+
+/* ---- the Control tab: the app on the board, driven from here ---- */
+
+const FCS = [[1, '01 Coils'], [2, '02 Entradas'], [3, '03 Holding'], [4, '04 Input'], [5, '05 Coil'], [6, '06 Registro'],
+  [15, '15 Coils'], [16, '16 Registros'], [8, '08 Eco'], [17, '17 Id'], [43, '43 Identificación']];
+const FAULTS = ['Normal', 'Mudo', 'Lento', 'CRC malo', 'Ocupado (06)', 'Falla (04)'];
+const BAUDS = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200];
+const ROLES = [['maestro', 'Maestro'], ['esclavo', 'Esclavo'], ['monitor', 'Monitor']];
+
+function control(box, hidden) {
+  const send = (...lines) => P.api(LIVE, { method: 'POST', body: lines.join('\n') })
+    .then(() => setTimeout(poll, 300))
+    .catch(e => P.toast(tr('La app Modbus no está abierta en la placa (%s)', e.message), true));
+  let st = null, timer = null, paused = false, lastTraffic = -1;
+
+  /* fields that keep what is typed while the board's state comes in */
+  const inp = (attrs = {}) => h('input', { ...attrs });
+  const sel = (opts, attrs = {}) => h('select', attrs, ...opts.map(([v, t]) => h('option', { value: v }, t)));
+  const setv = (el, v) => { if (document.activeElement !== el && v !== undefined && v !== null) el.value = String(v); };
+
+  const stateLine = h('div', { class: 'mbstate' });
+  const openBtn = h('button', { class: 'btn pri', onclick: () => send('abrir=' + (st && st.quiere ? 0 : 1)) });
+  const roleBtn = ROLES.map(([, t], i) => h('button', { class: 'btn', onclick: () => send('rol=' + i) }, tr(t)));
+  const roleBtns = h('div', { class: 'btns' }, ...roleBtn);
+  const port = inp({ list: 'mbports', size: 8 });
+  const baud = sel(BAUDS.map(b => [b, b]));
+  const fmt = sel(['8N1', '8E1', '8O1', '8N2'].map(f => [f, f]));
+  const wait = inp({ size: 5, inputmode: 'numeric' });
+  const gap = inp({ size: 4, inputmode: 'numeric' });
+  const applyLink = () => send('puerto=' + port.value.trim(), 'baud=' + baud.value, 'formato=' + fmt.value,
+    'espera=' + wait.value, 'silencio=' + gap.value);
+
+  /* master */
+  const mUnit = inp({ size: 4, inputmode: 'numeric' }), mFc = sel(FCS.map(([v, t]) => [v, tr(t)]));
+  const mAddr = inp({ size: 6 }), mN = inp({ size: 5, inputmode: 'numeric' }), mVals = inp({ size: 18, placeholder: tr('valores (escrituras)') });
+  const mLive = h('input', { type: 'checkbox', onchange: e => send('vivo=' + (e.target.checked ? 1 : 0), 'periodo=' + mPer.value) });
+  const mPer = sel([100, 250, 500, 1000, 2000].map(v => [v, v + ' ms']), { onchange: () => send('periodo=' + mPer.value) });
+  const mFmt = sel([['u16', 'U16'], ['s16', 'S16'], ['hex', 'HEX'], ['bin', 'BIN']], { onchange: () => drawMaster(true) });
+  const mRes = h('div'), mCounts = h('div', { class: 'muted small' }), mTool = h('div');
+  const sendReq = () => {
+    const fc = +mFc.value, one = fc === 5 || fc === 6 || fc === 8;
+    const vals = mVals.value.trim().split(/[\s,;]+/).filter(Boolean);
+    const line = one ? `${mUnit.value},${fc},${mAddr.value},${vals[0] ?? mN.value}`
+      : `${mUnit.value},${fc},${mAddr.value},${mN.value}${vals.length ? ',' + vals.join(' ') : ''}`;
+    send('pedido=' + line);
+  };
+  const masterCard = h('div', { class: 'card pad' },
+    h('h2', { style: 'margin-top:0' }, tr('Maestro')),
+    h('div', { class: 'mbh' },
+      h('label', {}, tr('Unidad'), mUnit), h('label', {}, tr('Función'), mFc), h('label', {}, tr('Desde'), mAddr),
+      h('label', {}, tr('Cantidad'), mN), h('label', {}, tr('Valores'), mVals)),
+    h('div', { class: 'btns' },
+      h('button', { class: 'btn pri', onclick: sendReq }, tr('Enviar')),
+      h('label', { class: 'mbck' }, mLive, tr('En vivo')), mPer, mFmt),
+    mRes, mCounts,
+    h('div', { class: 'btns', style: 'margin-top:10px' },
+      h('button', { class: 'btn', onclick: () => send('herramienta=unidades') }, tr('Buscar unidades')),
+      h('button', { class: 'btn', onclick: () => send('herramienta=velocidad') }, tr('Buscar velocidad')),
+      h('button', { class: 'btn', onclick: () => send('herramienta=parar') }, tr('Detener')),
+      h('button', { class: 'btn', onclick: () => send('borrar=cuentas') }, tr('Borrar cuentas'))),
+    mTool);
+
+  /* slave */
+  const sUnit = inp({ size: 4, inputmode: 'numeric' }), sFault = sel(FAULTS.map((f, i) => [i, tr(f)]), { onchange: () => send('falla=' + sFault.value) });
+  const sDelay = inp({ size: 5, inputmode: 'numeric' }), sAnim = h('input', { type: 'checkbox', onchange: e => send('animar=' + (e.target.checked ? 1 : 0)) });
+  const sInfo = h('div', { class: 'muted small' });
+  const slaveCard = h('div', { class: 'card pad' },
+    h('h2', { style: 'margin-top:0' }, tr('Esclavo')),
+    h('div', { class: 'mbh' },
+      h('label', {}, tr('Unidad'), sUnit), h('label', {}, tr('Falla'), sFault), h('label', {}, tr('Demora (ms)'), sDelay)),
+    h('div', { class: 'btns' },
+      h('button', { class: 'btn pri', onclick: () => send('unidad=' + sUnit.value, 'demora=' + sDelay.value) }, tr('Aplicar')),
+      h('label', { class: 'mbck' }, sAnim, tr('Valores que se mueven')),
+      h('button', { class: 'btn', onclick: () => send('borrar=cuentas') }, tr('Borrar cuentas'))),
+    sInfo);
+
+  /* monitor */
+  const monInfo = h('div'), monTable = h('div', { class: 'mbscroll' });
+  const monCard = h('div', { class: 'card pad' },
+    h('h2', { style: 'margin-top:0' }, tr('Monitor')), monInfo, monTable,
+    h('div', { class: 'btns', style: 'margin-top:10px' }, h('button', { class: 'btn', onclick: () => send('borrar=cuentas') }, tr('Borrar cuentas'))));
+
+  /* traffic */
+  const trTable = h('div', { class: 'mbtraffic' });
+  const pauseCk = h('input', { type: 'checkbox', onchange: e => { paused = e.target.checked; } });
+  const errCk = h('input', { type: 'checkbox', onchange: () => { lastTraffic = -1; pollTraffic(); } });
+  const trafficCard = h('div', { class: 'card pad' },
+    h('h2', { style: 'margin-top:0' }, tr('Tráfico')),
+    h('div', { class: 'btns' },
+      h('label', { class: 'mbck' }, pauseCk, tr('Pausa')), h('label', { class: 'mbck' }, errCk, tr('Sólo errores')),
+      h('button', { class: 'btn', onclick: () => send('borrar=trafico') }, tr('Borrar'))),
+    trTable);
+
+  const linkCard = h('div', { class: 'card pad' },
+    h('div', { class: 'row' }, h('div', { class: 'grow' }, stateLine), openBtn),
+    roleBtns,
+    h('div', { class: 'mbh', style: 'margin-top:12px' },
+      h('label', {}, tr('Puerto'), port), h('label', {}, tr('Velocidad'), baud), h('label', {}, tr('Formato'), fmt),
+      h('label', {}, tr('Espera (ms)'), wait), h('label', {}, tr('Silencio (ms)'), gap)),
+    h('datalist', { id: 'mbports' }, ...['uart.a', 'uart.b', 'usb0', 'usb1'].map(p => h('option', { value: p }))),
+    h('div', { class: 'btns' }, h('button', { class: 'btn', onclick: applyLink }, tr('Aplicar conexión')),
+      h('button', { class: 'btn', onclick: () => P.openApp(APP).then(() => P.toast(tr('Abierta en la placa'))) }, tr('Abrir la app en la placa'))));
+  const roleBox = h('div');
+  box.className = 'mbctl';
+  put(box, linkCard, roleBox, trafficCard);
+
+  function fmtVal(v) {
+    switch (mFmt.value) {
+      case 's16': return v > 32767 ? v - 65536 : v;
+      case 'hex': return '0x' + v.toString(16).toUpperCase().padStart(4, '0');
+      case 'bin': return v.toString(2).padStart(16, '0').replace(/(.{4})/g, '$1 ').trim();
+      default: return v;
+    }
+  }
+
+  let lastMaster = '';
+  function drawMaster(force) {
+    if (!st) return;
+    const m = st.maestro;
+    const key = JSON.stringify([m.seq, m.rc, m.herramienta, st.perfil, mFmt.value, m.cuentas]);
+    if (key === lastMaster && force !== true) return;
+    lastMaster = key;
+    if (st.perfil) {
+      put(mRes, h('p', { class: 'note' }, tr('Con el perfil "%s" la app lo lee entero: los valores están en la pestaña Perfiles.', st.perfil_nombre),
+        ' ', h('button', { class: 'btn small', onclick: () => send('perfil=') }, tr('Pasar a pedido a mano'))));
+    } else if (!m.seq) put(mRes, h('p', { class: 'muted' }, tr('Todavía no hay respuesta.')));
+    else if (m.rc) put(mRes, h('p', { class: 'mberr' }, m.resultado));
+    else {
+      const bits = m.fc <= 2;
+      put(mRes,
+        h('p', { class: 'mbok' }, tr('OK · %s ms', m.cuentas.ultima_ms)),
+        m.texto ? h('p', {}, m.texto) : null,
+        m.vals.length ? h('div', { class: 'mbgrid' }, ...m.vals.map((v, i) => h('div', { class: 'mbcell' + (bits && v ? ' on' : '') },
+          h('span', { class: 'a' }, String(m.desde + i)), h('span', { class: 'v' }, bits ? String(v) : String(fmtVal(v)))))) : null);
+    }
+    const c = m.cuentas;
+    mCounts.textContent = tr('%s pedidos · %s respuestas · %s sin respuesta · %s CRC · %s excepciones · promedio %s ms, máximo %s ms',
+      c.pedidos, c.respuestas, c.sin_respuesta, c.crc, c.excepciones, c.promedio_ms, c.maxima_ms);
+    const t = m.herramienta;
+    put(mTool,
+      t.activa ? h('p', { class: 'muted' }, tr('Herramienta en curso: %s de %s', t.pos, t.total)) : null,
+      (t.unidades.length || t.velocidades.length) ? h('div', { class: 'btns' },
+        ...t.unidades.map(([u, k]) => h('button', { class: 'btn small', onclick: () => { mUnit.value = u; } }, `U${u}${k === 2 ? ' (exc)' : k === 3 ? ' (CRC)' : ''}`)),
+        ...t.velocidades.map(v => h('button', { class: 'btn small', onclick: () => { const [b, f] = v.split(' '); send('baud=' + b, 'formato=' + f); } }, v))) : null,
+      t.velocidades.length > 1 ? h('p', { class: 'note small' }, tr('La velocidad es segura; el formato no: los UART no descartan un byte con error de paridad, así que a la velocidad buena contestan varios. El manual del equipo dice cuál (el estándar pide 8E1).')) : null);
+  }
+
+  function drawSlave() {
+    const e = st.esclavo, c = e.cuentas;
+    sInfo.textContent = tr('%s tramas oídas · %s para esta unidad · %s para otras · %s broadcast · %s CRC malos · %s excepciones',
+      c.oidas, c.propias, c.otras, c.broadcast, c.crc, c.excepciones) + (e.ultimo ? ' · ' + tr('Último pedido:') + ' ' + e.ultimo : '');
+  }
+
+  function drawMonitor() {
+    const m = st.monitor;
+    monInfo.textContent = tr('%s tramas · %s bytes · %s con CRC malo · %s bytes de ruido', m.tramas, m.bytes, m.crc, m.ruido);
+    put(monTable, m.unidades.length ? h('table', { class: 'mbt', style: 'min-width:0' },
+      h('thead', {}, h('tr', {}, ...[tr('Unidad'), tr('Pedidos'), tr('Respuestas'), tr('Sin respuesta'), tr('Excepciones'), 'CRC', tr('Demora'), tr('Último')].map(t => h('th', {}, t)))),
+      h('tbody', {}, ...m.unidades.map(u => h('tr', {},
+        ...[u.unidad || 'bc', u.pedidos, u.respuestas, u.sin_respuesta, u.excepciones, u.crc, `${u.promedio_ms} / ${u.maxima_ms} ms`, u.ultimo]
+          .map((v, i) => h('td', { class: i === 3 && u.sin_respuesta ? 'mbwarn' : '' }, String(v))))))) : null);
+  }
+
+  function draw() {
+    if (!st) return;
+    const open = st.abierto, want = st.quiere;
+    stateLine.className = 'mbstate ' + (st.error ? 'bad' : open ? 'ok' : '');
+    stateLine.textContent = st.error ? st.error
+      : open ? `${tr(ROLES.find(r => r[0] === st.rol)[1])} · ${st.desc}`
+      : want ? tr('abriendo…') : tr('cerrado');
+    openBtn.textContent = want ? tr('Cerrar') : tr('Abrir');
+    openBtn.className = 'btn ' + (want ? 'red' : 'pri');
+    ROLES.forEach(([id], i) => { roleBtn[i].className = 'btn' + (st.rol === id ? ' pri' : ''); });
+    const k = st.conexion;
+    setv(port, k.puerto); setv(baud, k.baud); setv(fmt, k.formato); setv(wait, k.espera); setv(gap, k.silencio);
+    const m = st.maestro.pedido;
+    setv(mUnit, m.unidad); setv(mFc, m.fc); setv(mAddr, m.desde); setv(mN, m.cantidad);
+    const writes = [5, 6, 8, 15, 16].includes(+m.fc);
+    if (document.activeElement !== mVals && writes && m.valores.length && !mVals.value) mVals.value = m.valores.join(' ');
+    mLive.checked = st.maestro.vivo;
+    setv(mPer, st.maestro.periodo);
+    const e = st.esclavo;
+    setv(sUnit, e.unidad); setv(sFault, e.falla); setv(sDelay, e.demora);
+    sAnim.checked = e.animar;
+    const card = st.rol === 'maestro' ? masterCard : st.rol === 'esclavo' ? slaveCard : monCard;
+    if (roleBox.firstChild !== card) put(roleBox, card);
+    if (st.rol === 'maestro') drawMaster();
+    else if (st.rol === 'esclavo') drawSlave();
+    else drawMonitor();
+  }
+
+  async function poll() {
+    if (hidden()) return;
+    try {
+      st = await P.api(LIVE + '&key=estado');
+      draw();
+    } catch {
+      stateLine.className = 'mbstate';
+      stateLine.textContent = tr('La app Modbus no está abierta en la placa.');
+    }
+  }
+
+  async function pollTraffic() {
+    if (hidden() || paused) return;
+    let j;
+    try { j = await P.api(LIVE + '&key=trafico'); } catch { return; }
+    if (j.seq === lastTraffic) return;
+    lastTraffic = j.seq;
+    const err = f => (f.fl & (0x02 | 0x04 | 0x08)) || f.nota === 1 || f.nota === 2;
+    const rows = j.tramas.filter(f => !errCk.checked || err(f));
+    put(trTable, ...rows.map(f => {
+      const tx = f.fl & 0x01, cls = (f.fl & 0x0A) ? 'bad' : (f.fl & 0x04) || f.nota === 1 || f.nota === 2 ? 'warn' : tx ? 'tx' : '';
+      const t = (f.t / 1000).toFixed(3).replace('.', ',');
+      const gapTxt = f.silencio_us ? ` +${(f.silencio_us / 1000).toFixed(1).replace('.', ',')} ms` : '';
+      const rt = f.rt && (f.fl & 0x20) ? ' · ' + tr('contestó en %s ms', f.rt) : '';
+      return h('div', { class: 'mbfr ' + cls },
+        h('div', { class: 'mono' }, `${t}${gapTxt} ${f.fl & 0x40 ? '--' : tx ? 'TX' : 'RX'} ${f.hex}`),
+        h('div', { class: 'small' }, f.que + rt));
+    }));
+  }
+
+  return {
+    wake() {
+      if (timer) return;
+      const loop = () => {
+        if (hidden()) { timer = null; return; }
+        poll();
+        pollTraffic();
+        timer = setTimeout(loop, 800);
+      };
+      loop();
+    },
+  };
 }
 
 P.registerPage({
@@ -295,7 +549,23 @@ P.registerPage({
       if (!gone) setTimeout(tick, 1000);
     };
 
-    put(main, h('h1', {}, tr('Modbus')), h('div', { class: 'mbw' }, listBox, edBox));
+    const profBox = h('div', { class: 'mbw' }, listBox, edBox);
+    const ctlBox = h('div');
+    let view = 'control';
+    try { view = localStorage.getItem('mb_view') || 'control'; } catch { /* private window */ }
+    const tabs = h('div', { class: 'btns', style: 'margin-bottom:14px' });
+    const ctl = control(ctlBox, () => gone || view !== 'control');
+    function show(v) {
+      view = v;
+      try { localStorage.setItem('mb_view', v); } catch { /* fine */ }
+      profBox.style.display = v === 'perfiles' ? '' : 'none';
+      ctlBox.style.display = v === 'control' ? '' : 'none';
+      put(tabs, ...[['control', tr('Control')], ['perfiles', tr('Perfiles')]].map(([id, t]) =>
+        h('button', { class: 'btn' + (id === v ? ' pri' : ''), onclick: () => show(id) }, t)));
+      if (v === 'control') ctl.wake();
+    }
+    put(main, h('h1', {}, tr('Modbus')), tabs, ctlBox, profBox);
+    show(view);
     drawList();
     drawEditor();
     loadList();

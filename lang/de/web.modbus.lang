@@ -5,130 +5,292 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/modbus/web/modbus.js:112
-#: apps/modbus/web/modbus.js:298
-Modbus	Modbus
-
-#: apps/modbus/web/modbus.js:134
-Perfiles	Profile
-
-#: apps/modbus/web/modbus.js:135
-No hay perfiles todavía. La app escribe cuatro de ejemplo la primera vez que se abre.	Noch keine Profile. Die App schreibt beim ersten Öffnen vier Beispiele.
-
-#: apps/modbus/web/modbus.js:138
-Nuevo	Neu
-
-#: apps/modbus/web/modbus.js:139
-Subir .csv	.csv hochladen
-
 #: apps/modbus/web/modbus.js:141
-Un perfil dice qué tiene un equipo Modbus y dónde. En Maestro la app lo lee entero; en Esclavo hace de ese equipo.	Ein Profil sagt, was ein Modbus-Gerät hat und wo. Als Master liest die App alles; als Slave spielt sie dieses Gerät.
+La app Modbus no está abierta en la placa (%s)	Die Modbus-App ist auf der Platine nicht geöffnet (%s)
 
-#: apps/modbus/web/modbus.js:145
-Hay cambios sin guardar. ¿Descartarlos?	Es gibt ungespeicherte Änderungen. Verwerfen?
+#: apps/modbus/web/modbus.js:163
+valores (escrituras)	Werte (Schreiben)
 
-#: apps/modbus/web/modbus.js:151
-%s líneas sin entender	%s Zeilen nicht verstanden
+#: apps/modbus/web/modbus.js:176
+Maestro	Meister
 
-#: apps/modbus/web/modbus.js:173
-Elegí un perfil de la lista, o hacé uno nuevo.	Ein Profil aus der Liste wählen oder ein neues anlegen.
-
-#: apps/modbus/web/modbus.js:179
-Quitar	Entfernen
-
-#: apps/modbus/web/modbus.js:184
-#: apps/modbus/web/modbus.js:190
-Nombre	Name
-
-#: apps/modbus/web/modbus.js:184
-Nota	Notiz
-
-#: apps/modbus/web/modbus.js:185
-Esclavo (unidad)	Slave (Einheit)
-
-#: apps/modbus/web/modbus.js:186
-Velocidad	Tempo
-
-#: apps/modbus/web/modbus.js:187
-Formato	Format
-
-#: apps/modbus/web/modbus.js:188
-Leerlo cada (ms)	Lesen alle (ms)
-
-#: apps/modbus/web/modbus.js:190
-Tabla	Tabelle
-
-#: apps/modbus/web/modbus.js:190
-Dirección	Adresse
-
-#: apps/modbus/web/modbus.js:190
-Tipo	Typ
-
-#: apps/modbus/web/modbus.js:190
-Escala	Skala
-
-#: apps/modbus/web/modbus.js:190
+#: apps/modbus/web/modbus.js:178
+#: apps/modbus/web/modbus.js:198
+#: apps/modbus/web/modbus.js:286
+#: apps/modbus/web/modbus.js:444
 Unidad	Unit
 
-#: apps/modbus/web/modbus.js:190
-Acceso	Zugriff
+#: apps/modbus/web/modbus.js:178
+Función	Funktion
 
-#: apps/modbus/web/modbus.js:191
-Mín	Min
+#: apps/modbus/web/modbus.js:178
+Desde	Von
 
-#: apps/modbus/web/modbus.js:191
-Máx	Max
+#: apps/modbus/web/modbus.js:179
+Cantidad	Anzahl
 
-#: apps/modbus/web/modbus.js:191
-Simulación	Simulation
+#: apps/modbus/web/modbus.js:179
+Valores	Werte
 
-#: apps/modbus/web/modbus.js:191
-Inicial	Anfang
+#: apps/modbus/web/modbus.js:181
+Enviar	Senden
 
-#: apps/modbus/web/modbus.js:191
-En la placa	Auf der Platine
+#: apps/modbus/web/modbus.js:182
+En vivo	Live
 
-#: apps/modbus/web/modbus.js:194
-Agregar punto	Punkt hinzufügen
+#: apps/modbus/web/modbus.js:185
+Buscar unidades	Einheiten suchen
 
-#: apps/modbus/web/modbus.js:195
-Guardar	Speichern
+#: apps/modbus/web/modbus.js:186
+Buscar velocidad	Geschwindigkeit suchen
+
+#: apps/modbus/web/modbus.js:187
+Detener	Stopp
+
+#: apps/modbus/web/modbus.js:188
+#: apps/modbus/web/modbus.js:202
+#: apps/modbus/web/modbus.js:209
+Borrar cuentas	Zähler löschen
 
 #: apps/modbus/web/modbus.js:196
-Usar en la placa	Auf der Platine verwenden
-
-#: apps/modbus/web/modbus.js:197
-Descargar	Herunterladen
+Esclavo	Slave
 
 #: apps/modbus/web/modbus.js:198
-Duplicar	Duplizieren
+Falla	Fehler
 
-#: apps/modbus/web/modbus.js:199
-Borrar	Löschen
+#: apps/modbus/web/modbus.js:198
+Demora (ms)	Verzögerung (ms)
 
 #: apps/modbus/web/modbus.js:200
-Tablas: coil, di (entradas), hr (holding), ir (input). Tipos de 32 bits: el registro alto primero; los "cdab", el bajo primero. Valor = crudo × escala. La simulación es para cuando la app hace de esclavo: se mueve entre mín y máx (contador: sube máx por hora). La columna "En la placa" muestra lo que la app lee o hace ahora, si está abierta con este perfil.	Tabellen: coil, di (Eingänge), hr (Holding), ir (Input). 32-Bit-Typen: das hohe Register zuerst; die "cdab", das niedrige zuerst. Wert = roh × Skala. Die Simulation gilt, wenn die App den Slave spielt: sie bewegt sich zwischen min und max (contador: steigt um max pro Stunde). Die Spalte "Auf der Platine" zeigt, was die App gerade liest oder spielt, wenn sie mit diesem Profil offen ist.
+Aplicar	Anwenden
 
-#: apps/modbus/web/modbus.js:207
-Valor %s	Wert %s
+#: apps/modbus/web/modbus.js:201
+Valores que se mueven	Bewegte Werte
+
+#: apps/modbus/web/modbus.js:208
+Monitor	Monitor
+
+#: apps/modbus/web/modbus.js:216
+Tráfico	Datenverkehr
 
 #: apps/modbus/web/modbus.js:218
-Guardado: la app lo vuelve a leer sola	Gespeichert: die App liest es von selbst neu
+Pausa	Pause
 
-#: apps/modbus/web/modbus.js:228
-La placa usa %s	Die Platine verwendet %s
+#: apps/modbus/web/modbus.js:218
+Sólo errores	Nur Fehler
 
-#: apps/modbus/web/modbus.js:246
-Nombre del perfil nuevo	Name des neuen Profils
+#: apps/modbus/web/modbus.js:219
+#: apps/modbus/web/modbus.js:453
+Borrar	Löschen
+
+#: apps/modbus/web/modbus.js:226
+Puerto	Port
+
+#: apps/modbus/web/modbus.js:226
+#: apps/modbus/web/modbus.js:440
+Velocidad	Tempo
+
+#: apps/modbus/web/modbus.js:226
+#: apps/modbus/web/modbus.js:441
+Formato	Format
+
+#: apps/modbus/web/modbus.js:227
+Espera (ms)	Wartezeit (ms)
+
+#: apps/modbus/web/modbus.js:227
+Silencio (ms)	Pause (ms)
+
+#: apps/modbus/web/modbus.js:229
+Aplicar conexión	Verbindung übernehmen
+
+#: apps/modbus/web/modbus.js:230
+Abierta en la placa	Auf der Platine geöffnet
+
+#: apps/modbus/web/modbus.js:230
+Abrir la app en la placa	App auf der Platine öffnen
+
+#: apps/modbus/web/modbus.js:252
+Con el perfil "%s" la app lo lee entero: los valores están en la pestaña Perfiles.	Mit dem Profil "%s" liest die App alles: die Werte stehen im Tab Profile.
 
 #: apps/modbus/web/modbus.js:253
+Pasar a pedido a mano	Zu Anfragen von Hand wechseln
+
+#: apps/modbus/web/modbus.js:254
+Todavía no hay respuesta.	Noch keine Antwort.
+
+#: apps/modbus/web/modbus.js:259
+OK · %s ms	OK · %s ms
+
+#: apps/modbus/web/modbus.js:265
+%s pedidos · %s respuestas · %s sin respuesta · %s CRC · %s excepciones · promedio %s ms, máximo %s ms	%s Anfragen · %s Antworten · %s ohne Antwort · %s CRC · %s Ausnahmen · Mittel %s ms, max. %s ms
+
+#: apps/modbus/web/modbus.js:269
+Herramienta en curso: %s de %s	Werkzeug läuft: %s von %s
+
+#: apps/modbus/web/modbus.js:273
+La velocidad es segura; el formato no: los UART no descartan un byte con error de paridad, así que a la velocidad buena contestan varios. El manual del equipo dice cuál (el estándar pide 8E1).	Die Geschwindigkeit ist sicher, das Format nicht: UARTs verwerfen ein Byte mit Paritätsfehler nicht, also antworten bei der richtigen Geschwindigkeit mehrere Formate. Das Handbuch des Geräts sagt, welches (der Standard verlangt 8E1).
+
+#: apps/modbus/web/modbus.js:278
+%s tramas oídas · %s para esta unidad · %s para otras · %s broadcast · %s CRC malos · %s excepciones	%s Frames gehört · %s für diese Einheit · %s für andere · %s Broadcast · %s falsche CRC · %s Ausnahmen
+
+#: apps/modbus/web/modbus.js:279
+Último pedido:	Letzte Anfrage:
+
+#: apps/modbus/web/modbus.js:284
+%s tramas · %s bytes · %s con CRC malo · %s bytes de ruido	%s Frames · %s Bytes · %s mit falscher CRC · %s Bytes Rauschen
+
+#: apps/modbus/web/modbus.js:286
+Pedidos	Anfragen
+
+#: apps/modbus/web/modbus.js:286
+Respuestas	Antworten
+
+#: apps/modbus/web/modbus.js:286
+Sin respuesta	Ohne Antwort
+
+#: apps/modbus/web/modbus.js:286
+Excepciones	Ausnahmen
+
+#: apps/modbus/web/modbus.js:286
+Demora	Verzögerung
+
+#: apps/modbus/web/modbus.js:286
+Último	Letzte
+
+#: apps/modbus/web/modbus.js:298
+abriendo…	öffne…
+
+#: apps/modbus/web/modbus.js:298
+cerrado	geschlossen
+
+#: apps/modbus/web/modbus.js:299
+Cerrar	Schließen
+
+#: apps/modbus/web/modbus.js:299
+Abrir	Öffnen
+
+#: apps/modbus/web/modbus.js:327
+La app Modbus no está abierta en la placa.	Die Modbus-App ist auf der Platine nicht geöffnet.
+
+#: apps/modbus/web/modbus.js:343
+contestó en %s ms	antwortete in %s ms
+
+#: apps/modbus/web/modbus.js:366
+#: apps/modbus/web/modbus.js:567
+Modbus	Modbus
+
+#: apps/modbus/web/modbus.js:388
+#: apps/modbus/web/modbus.js:563
+Perfiles	Profile
+
+#: apps/modbus/web/modbus.js:389
+No hay perfiles todavía. La app escribe cuatro de ejemplo la primera vez que se abre.	Noch keine Profile. Die App schreibt beim ersten Öffnen vier Beispiele.
+
+#: apps/modbus/web/modbus.js:392
+Nuevo	Neu
+
+#: apps/modbus/web/modbus.js:393
+Subir .csv	.csv hochladen
+
+#: apps/modbus/web/modbus.js:395
+Un perfil dice qué tiene un equipo Modbus y dónde. En Maestro la app lo lee entero; en Esclavo hace de ese equipo.	Ein Profil sagt, was ein Modbus-Gerät hat und wo. Als Master liest die App alles; als Slave spielt sie dieses Gerät.
+
+#: apps/modbus/web/modbus.js:399
+Hay cambios sin guardar. ¿Descartarlos?	Es gibt ungespeicherte Änderungen. Verwerfen?
+
+#: apps/modbus/web/modbus.js:405
+%s líneas sin entender	%s Zeilen nicht verstanden
+
+#: apps/modbus/web/modbus.js:427
+Elegí un perfil de la lista, o hacé uno nuevo.	Ein Profil aus der Liste wählen oder ein neues anlegen.
+
+#: apps/modbus/web/modbus.js:433
+Quitar	Entfernen
+
+#: apps/modbus/web/modbus.js:438
+#: apps/modbus/web/modbus.js:444
+Nombre	Name
+
+#: apps/modbus/web/modbus.js:438
+Nota	Notiz
+
+#: apps/modbus/web/modbus.js:439
+Esclavo (unidad)	Slave (Einheit)
+
+#: apps/modbus/web/modbus.js:442
+Leerlo cada (ms)	Lesen alle (ms)
+
+#: apps/modbus/web/modbus.js:444
+Tabla	Tabelle
+
+#: apps/modbus/web/modbus.js:444
+Dirección	Adresse
+
+#: apps/modbus/web/modbus.js:444
+Tipo	Typ
+
+#: apps/modbus/web/modbus.js:444
+Escala	Skala
+
+#: apps/modbus/web/modbus.js:444
+Acceso	Zugriff
+
+#: apps/modbus/web/modbus.js:445
+Mín	Min
+
+#: apps/modbus/web/modbus.js:445
+Máx	Max
+
+#: apps/modbus/web/modbus.js:445
+Simulación	Simulation
+
+#: apps/modbus/web/modbus.js:445
+Inicial	Anfang
+
+#: apps/modbus/web/modbus.js:445
+En la placa	Auf der Platine
+
+#: apps/modbus/web/modbus.js:448
+Agregar punto	Punkt hinzufügen
+
+#: apps/modbus/web/modbus.js:449
+Guardar	Speichern
+
+#: apps/modbus/web/modbus.js:450
+Usar en la placa	Auf der Platine verwenden
+
+#: apps/modbus/web/modbus.js:451
+Descargar	Herunterladen
+
+#: apps/modbus/web/modbus.js:452
+Duplicar	Duplizieren
+
+#: apps/modbus/web/modbus.js:454
+Tablas: coil, di (entradas), hr (holding), ir (input). Tipos de 32 bits: el registro alto primero; los "cdab", el bajo primero. Valor = crudo × escala. La simulación es para cuando la app hace de esclavo: se mueve entre mín y máx (contador: sube máx por hora). La columna "En la placa" muestra lo que la app lee o hace ahora, si está abierta con este perfil.	Tabellen: coil, di (Eingänge), hr (Holding), ir (Input). 32-Bit-Typen: das hohe Register zuerst; die "cdab", das niedrige zuerst. Wert = roh × Skala. Die Simulation gilt, wenn die App den Slave spielt: sie bewegt sich zwischen min und max (contador: steigt um max pro Stunde). Die Spalte "Auf der Platine" zeigt, was die App gerade liest oder spielt, wenn sie mit diesem Profil offen ist.
+
+#: apps/modbus/web/modbus.js:461
+Valor %s	Wert %s
+
+#: apps/modbus/web/modbus.js:472
+Guardado: la app lo vuelve a leer sola	Gespeichert: die App liest es von selbst neu
+
+#: apps/modbus/web/modbus.js:482
+La placa usa %s	Die Platine verwendet %s
+
+#: apps/modbus/web/modbus.js:500
+Nombre del perfil nuevo	Name des neuen Profils
+
+#: apps/modbus/web/modbus.js:507
 Nombre de la copia	Name der Kopie
 
-#: apps/modbus/web/modbus.js:260
+#: apps/modbus/web/modbus.js:514
 ¿Borrar %s de la tarjeta? No se puede deshacer.	%s von der Karte löschen? Das lässt sich nicht rückgängig machen.
 
-#: apps/modbus/web/modbus.js:275
+#: apps/modbus/web/modbus.js:529
 %s no parece un perfil: no tiene puntos	%s sieht nicht wie ein Profil aus: es hat keine Punkte
 
-#: apps/modbus/web/modbus.js:276
+#: apps/modbus/web/modbus.js:530
 Subido	Hochgeladen
+
+#: apps/modbus/web/modbus.js:563
+Control	Steuerung
