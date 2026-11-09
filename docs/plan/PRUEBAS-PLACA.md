@@ -413,6 +413,28 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       la carga medida contra el Rigol; un bus cargado (el driver encola
       64 tramas); cuánto tarda en leerse un `.dbc` grande de la tarjeta; y
       grabar y abrir el CSV en SavvyCAN.
+- [ ] **RS485 y Modbus con el ESP32 de `tools/rs485_test`** (2026-11-08;
+      sólo probado en el simulador). Cableado como
+      `docs/img/bench-rs485.svg`: la P4 en `uart.a` (TX 30, RX 31, DE 29) y
+      el ESP32 en IO17/IO4, dos módulos automáticos "RS485 to TTL" (sin DE,
+      con su 120 Ω) alimentados con 3,3 V (60 Ω entre A y B con todo
+      apagado); TX a TXD y RX a RXD, o al revés si el LED TXD no parpadea. Hace falta el
+      firmware nuevo (sin la Modbus integrada, y el RS485 que entrega a 3
+      caracteres) y las apps `modbus` y `equipos` instaladas. A probar:
+      que el módulo automático dé vuelta la línea a tiempo a cada
+      velocidad (el ESP32 esclavo contesta a Maestro, de 1200 a 115200);
+      Buscar unidades y Buscar velocidad (cambiando la del ESP32 con `b` y
+      `f`); `05 Coil` 0 encendida y `04 Input` en vivo (la velocidad sube
+      por la rampa); las cuatro fallas del ESP32 (`x`) en las cuentas y en
+      Tráfico; el ESP32 de maestro contra Esclavo, con cada falla de la
+      app vista del otro lado; Monitor con el ESP32 de maestro; las
+      demoras que muestra Tráfico contra el Rigol; A y B invertidos (nadie
+      contesta, nada se rompe); sin terminación a 115200. Y que Equipos
+      siga hablando con la Riden y que el Banco la siga viendo. **Perfiles**:
+      `variador-esp32.csv` en Maestro contra el ESP32 esclavo (la marcha
+      con un toque en "Marcha", la velocidad subiendo), el multisensor en
+      Esclavo con el ESP32 de maestro, y la página Modbus del portal
+      (editar, subir, bajar, "Usar en la placa", la columna en vivo).
 - [x] Red, pestaña Wi-Fi fluida (2026-10-06, `5362893`): los gráficos de
       canales y el nivel en vivo se dibujaban en cada cuadro del scroll;
       ahora se pintan una vez en una imagen en PSRAM cuando cambian los

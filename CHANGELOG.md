@@ -1,5 +1,36 @@
 # Changelog
 
+## Next
+
+- **RS485 and a Modbus bench.** The Modbus app is now a tester for Modbus
+  RTU on RS485, installed from the card (`apps/modbus`): a **master** (any
+  function, once or live, values in seven formats, a tap writes; "find
+  units" asks 1-247, "find speed" tries eight speeds and four formats), a
+  **slave** (tables 0-999 the user edits, values that move by themselves,
+  and faults on demand: silent, slow, broken CRC, busy, failure) and a
+  **monitor** that listens without ever driving the line and keeps a row
+  per unit with its answers, silences, exceptions and delays. Every frame
+  in hex and in words in the Traffic tab; the wiring drawn with the chosen
+  port's pins. `tools/rs485_test/esp32` is the bench's other node, an ESP32
+  that plays a slave (a made-up drive) or a master, with faults of its own;
+  `docs/img/bench-rs485.svg` the wiring.
+- **Modbus device profiles.** A CSV per device (its unit, speed, format,
+  and named points with their type, scale, unit and access) chosen from a
+  list: in Maestro the app reads it all over and over and shows each value
+  with its name and unit, a tap writes; in Esclavo the app *is* that
+  device, its values moving as the profile says, to try a PLC or a SCADA
+  without the device. Edited on the board or on the portal's new Modbus
+  page, which also uploads, downloads and picks the one the board uses,
+  and shows the values live. Four examples (the bench's ESP32 drive, a
+  multisensor, an energy meter, a temperature and humidity sensor).
+- **Equipos.** The Riden and DOMCOM gateway panels left the Modbus app for
+  an app of their own (`apps/equipos`); the Banco keeps its Fuente, and
+  the link is set from Equipos.
+- An RS485 port hands its bytes over 3 character times after the line
+  goes quiet instead of 10, so frames are split and answers timed closer to
+  the wire. The firmware's Modbus app is gone (the installable one takes
+  its place and its id).
+
 ## 0.24.0 — 2026-11-08
 
 - **SSH: a console on the board.** `ssh p4os.local` opens a shell with

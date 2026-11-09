@@ -666,6 +666,40 @@ The simulator emulates the three families (`sim/eeprom_sim.c`): 24xx on I2C
 (`P4_SIM_EEPROM`, a 24LC256 at 0x50 by default), 25xx on SPI (a 25LC640 on
 CS GPIO46) and a 93xx clocked on GPIOs (`P4_SIM_93C`).
 
+## RS485
+
+Since 2026-11-08. RS485 is a UART with a transceiver: `aos_io_uart_open`
+with `rs485 = true` on a port that has a `de=` pin puts the UART in
+half-duplex RS485 mode, and the UART raises DE itself while it transmits
+(`uart.a` in the default profile: TX 30, RX 31, DE 29). A port without DE
+works with an automatic transceiver (no DE pin), and `usb0`/`usb1` with a
+USB-RS485 adapter on the USB host. On the board an RS485 port hands its
+bytes over 3 character times after the line goes quiet (the driver's
+default is 10), which is what lets an app split Modbus frames and time
+answers close to the wire.
+
+**The transceiver has to be a 3.3 V one** (MAX3485, SP3485, THVD1420, a
+3.3 V "TTL to RS485" module): the common MAX485 is a 5 V part and, fed from
+5 V, puts 5 V on the header's RX. DE and /RE tied together go to the DE
+pin. 120 Ω at the two ends of the bus only.
+
+The bench's bus is the P4 and an ESP32 DevKit, each with an automatic
+"RS485 to TTL" module (TXD, RXD, VCC, GND, a 120 Ω on board; no DE) fed
+from 3.3 V, on a twisted pair (`tools/rs485_test`, which plays a Modbus
+slave or master):
+
+![RS485 on the header: the P4 and an ESP32, each with an automatic RS485 module, on one twisted pair](img/bench-rs485.svg)
+
+The apps: **Modbus** (`apps/modbus`: master, slave with faults on demand,
+and a monitor that listens without driving the line) and **Equipos**
+(`apps/equipos`: the Riden and the DOMCOM gateway). DMX512 and the rest of
+what RS485 carries: `docs/plan/RS485.md`.
+
+**In the simulator** a pty stands for the bus: `tools/fake_modbus.py`
+plays slaves, a master, or a busy bus on one, and `P4_SIM_UART_A=<pty>`
+puts it on `uart.a`. `P4_SIM_UART_A=/dev/cu.usbserial-…` puts a real
+USB-RS485 adapter there instead, so the simulator talks to the ESP32 too.
+
 ## Not done yet
 
 - **Relays** (a Phase 6 extra): not in this round.

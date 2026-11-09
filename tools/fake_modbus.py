@@ -16,6 +16,18 @@ Make-believe Modbus slaves for the Modbus app, standard library only.
         as coils, dimmers as holding registers, sensors that drift as input
         registers, two magnetic sensors as discrete inputs.
 
+For the Modbus tester (apps/modbus), on a pty too:
+
+--slaves 1,2,5     generic slaves at those units (a meter: holding 0-99,
+                   input 0-99 that move, coils and inputs 0-31), so the
+                   master's tab and "Buscar unidades" have somebody to find;
+--master UNIT      a master that polls the app playing slave at UNIT: reads,
+                   writes, a broadcast, a function it does not know, a frame
+                   with a broken CRC now and then; it prints what it got;
+--bus              what a monitor would hear on a busy bus: a master polling
+                   units 1 and 2 (2 answers slowly), unit 7 that never
+                   answers, an exception, a damaged answer, a burst of noise.
+
 Function codes 1, 2, 3, 4, 5, 6, 15 and 16; exception 01 for the rest and 02
 for addresses outside a map.
 """
@@ -267,11 +279,165 @@ def serve_tcp(slave: Slave, port: int):
         threading.Thread(target=client, args=(c,), daemon=True).start()
 
 
+class Meter(Slave):
+    """A generic device: what most Modbus meters and controllers look like."""
+    def __init__(self, unit):
+        super().__init__()
+        for a in range(100):
+            self.holding[a] = 0
+            self.input[a] = 0
+        for a in range(32):
+            self.coils[a] = 0
+            self.discrete[a] = 0
+        self.holding[0] = unit
+        self.holding[1] = 9600 // 100
+        self.unit = unit
+        self.t0 = time.time()
+
+    def tick(self):
+        t = time.time() - self.t0
+        self.input[0] = int(t) & 0xFFFF
+        self.input[1] = int(2300 + math.sin(t / 5) * 40)          # 230.0 V x10
+        self.input[2] = int(abs(math.sin(t / 3)) * 1500)           # A x100
+        self.discrete[0] = int(t) // 2 % 2
+
+
+def open_pty():
+    master, slave_fd = pty.openpty()
+    tty.setraw(master)
+    tty.setraw(slave_fd)
+    print("PTY", os.ttyname(slave_fd), flush=True)
+    print("ENV P4_SIM_UART_A=%s" % os.ttyname(slave_fd), flush=True)
+    return master
+
+
+def read_frame(fd, timeout):
+    """Bytes until 4 ms of silence, or nothing by the timeout."""
+    buf, end = b"", time.time() + timeout
+    while True:
+        left = end - time.time() if not buf else 0.004
+        if left <= 0:
+            return buf
+        r, _, _ = select.select([fd], [], [], left)
+        if not r:
+            if buf:
+                return buf
+            continue
+        buf += os.read(fd, 512)
+
+
+def rtu(unit, pdu):
+    f = bytes([unit]) + pdu
+    return f + struct.pack("<H", crc16(f))
+
+
+def serve_slaves(units):
+    fd = open_pty()
+    slaves = {u: Meter(u) for u in units}
+    while True:
+        frame = read_frame(fd, 1.0)
+        if not frame:
+            continue
+        if len(frame) < 4 or crc16(frame[:-2]) != struct.unpack("<H", frame[-2:])[0]:
+            print("  rtu: bad frame", frame.hex())
+            continue
+        s = slaves.get(frame[0])
+        if not s:
+            continue
+        time.sleep(0.004)
+        os.write(fd, rtu(frame[0], s.pdu(frame[1:-2])))
+
+
+def run_master(unit):
+    """Polls the app (playing slave) and says what came back."""
+    fd = open_pty()
+    time.sleep(1)
+    reqs = [
+        ("read holding 0..9", rtu(unit, struct.pack(">BHH", 3, 0, 10))),
+        ("read input 0..7", rtu(unit, struct.pack(">BHH", 4, 0, 8))),
+        ("read coils 0..15", rtu(unit, struct.pack(">BHH", 1, 0, 16))),
+        ("write holding 5 = 1234", rtu(unit, struct.pack(">BHH", 6, 5, 1234))),
+        ("write coil 3 on", rtu(unit, struct.pack(">BHH", 5, 3, 0xFF00))),
+        ("write holding 10..12", rtu(unit, struct.pack(">BHHBHHH", 16, 10, 3, 6, 7, 8, 9))),
+        ("read holding 2000 (out of map)", rtu(unit, struct.pack(">BHH", 3, 2000, 2))),
+        ("function 0x41 (unknown)", rtu(unit, bytes([0x41, 0, 0]))),
+        ("report slave id", rtu(unit, bytes([17]))),
+        ("device identification", rtu(unit, bytes([43, 14, 1, 0]))),
+        ("broadcast write holding 20 = 7", rtu(0, struct.pack(">BHH", 6, 20, 7))),
+        ("bad CRC", rtu(unit, struct.pack(">BHH", 3, 0, 2))[:-1] + b"\x00"),
+        ("another unit", rtu(unit + 1, struct.pack(">BHH", 3, 0, 2))),
+    ]
+    n = 0
+    while True:
+        for name, f in reqs:
+            os.write(fd, f)
+            t0 = time.time()
+            a = read_frame(fd, 0.5)
+            ms = (time.time() - t0) * 1000
+            if not a:
+                print("%-34s -> (nothing)" % name, flush=True)
+            elif crc16(a[:-2]) != struct.unpack("<H", a[-2:])[0]:
+                print("%-34s -> BAD CRC %s" % (name, a.hex(" ")), flush=True)
+            else:
+                print("%-34s -> %s  (%.0f ms)" % (name, a.hex(" "), ms), flush=True)
+            time.sleep(0.15)
+        n += 1
+        print("-- round %d" % n, flush=True)
+        time.sleep(1)
+
+
+def play_bus():
+    """A busy bus, as a monitor hears it: both directions on the one line."""
+    fd = open_pty()
+    meters = {1: Meter(1), 2: Meter(2)}
+    k = 0
+    while True:
+        k += 1
+        for unit, slow in ((1, 0.008), (2, 0.060), (7, None)):
+            req = rtu(unit, struct.pack(">BHH", 3, 0, 4))
+            os.write(fd, req)
+            time.sleep(0.004 + len(req) * 0.00104)
+            if slow is None:
+                time.sleep(0.3)                     # nobody: the master gives up
+                continue
+            time.sleep(slow)
+            rsp = rtu(unit, meters[unit].pdu(req[1:-2]))
+            if unit == 2 and k % 5 == 0:
+                rsp = rsp[:5] + bytes([rsp[5] ^ 0x10]) + rsp[6:]     # damaged on the way
+            os.write(fd, rsp)
+            time.sleep(0.05)
+        if k % 3 == 0:                              # an exception
+            req = rtu(1, struct.pack(">BHH", 3, 500, 2))
+            os.write(fd, req)
+            time.sleep(0.02)
+            os.write(fd, rtu(1, meters[1].pdu(req[1:-2])))
+            time.sleep(0.05)
+        if k % 4 == 0:                              # a write
+            req = rtu(2, struct.pack(">BHH", 6, 3, k))
+            os.write(fd, req)
+            time.sleep(0.02)
+            os.write(fd, rtu(2, meters[2].pdu(req[1:-2])))
+            time.sleep(0.05)
+        if k % 7 == 0:                              # noise: a contactor nearby
+            os.write(fd, bytes(random.randint(0, 255) for _ in range(5)))
+            time.sleep(0.05)
+        time.sleep(0.4)
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--rtu", action="store_true", help="a Riden RD6012 on a pty")
     ap.add_argument("--tcp", type=int, default=0, help="a DOMCOM gateway on this TCP port")
+    ap.add_argument("--slaves", default="", help="generic slaves at these units, on a pty (1,2,5)")
+    ap.add_argument("--master", type=int, default=0, help="a master polling the app as slave at this unit")
+    ap.add_argument("--bus", action="store_true", help="a busy bus for the monitor")
     a = ap.parse_args()
+    if a.slaves:
+        serve_slaves([int(x) for x in a.slaves.split(",")])
+    if a.master:
+        run_master(a.master)
+    if a.bus:
+        play_bus()
     if not a.rtu and not a.tcp:
         a.rtu, a.tcp = True, 1502
     if a.tcp:

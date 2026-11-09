@@ -686,6 +686,126 @@ def can():
     s.save("bench-can.svg")
 
 
+def auto485(s, x, top, title):
+    """The bench's RS485 module as it sits on the table, parts up: an automatic-direction "RS485 to
+    TTL" board (an 8-pin transceiver, a 74HC-type chip that switches the direction on the data,
+    TXD and RXD LEDs, fuses and TVS diodes, 120 ohm marked 121 across A and B). The green terminal
+    block on top (A+, B-, earth), the four pins at the bottom (VCC, TXD, RXD, GND). Returns the x
+    of each pin and terminal, and where the pins end and the screws start."""
+    w, h = 150, 330
+    s.add(f'<rect x="{x}" y="{top}" width="{w}" height="{h}" rx="5" fill="#1e3a8a"/>')
+    s.text(x + w / 2, top - 92, title, size=13, color="#111", anchor="middle", bold=True)
+    # the terminal block
+    s.add(f'<rect x="{x+6}" y="{top-34}" width="{w-12}" height="44" rx="3" fill="#4ade80" stroke="#15803d"/>')
+    tx = {"A+": x + 33, "B-": x + 75, "E": x + 117}
+    for nm, cx in tx.items():
+        s.add(f'<circle cx="{cx}" cy="{top-12}" r="13" fill="#d1d5db" stroke="#6b7280" stroke-width="2"/>')
+        s.add(f'<path d="M{cx-7} {top-12} h14 M{cx} {top-19} v14" stroke="#6b7280" stroke-width="2"/>')
+        s.plain(cx, top + 26, "⏚" if nm == "E" else nm.replace("-", "−"), size=12, color="#fde68a", anchor="middle", bold=True)
+    # the parts: two fuses, the TVS, the transceiver, the direction chip, the LEDs, the 120 ohm
+    s.add(f'<rect x="{x+16}" y="{top+44}" width="30" height="40" rx="2" fill="#ca8a04"/>')
+    s.add(f'<rect x="{x+54}" y="{top+44}" width="30" height="40" rx="2" fill="#ca8a04"/>')
+    s.add(f'<rect x="{x+92}" y="{top+46}" width="20" height="34" rx="2" fill="#111827"/>')
+    s.add(f'<rect x="{x+118}" y="{top+46}" width="20" height="34" rx="2" fill="#111827"/>')
+    s.add(f'<rect x="{x+60}" y="{top+120}" width="56" height="44" rx="3" fill="#0f172a"/>')
+    s.plain(x + 88, top + 146, "485", size=10, color="#e2e8f0", anchor="middle", bold=True)
+    s.add(f'<rect x="{x+40}" y="{top+210}" width="90" height="40" rx="3" fill="#0f172a"/>')
+    s.plain(x + 85, top + 234, "74HC", size=10, color="#e2e8f0", anchor="middle", bold=True)
+    s.plain(x + 85, top + 268, "auto direction", size=9, color="#bfdbfe", anchor="middle")
+    for k, nm in enumerate(("TXD", "RXD")):
+        lx = x + 18 + k * 26
+        s.add(f'<rect x="{lx}" y="{top+150}" width="10" height="16" rx="2" fill="#f87171"/>')
+        s.plain(lx + 5, top + 182, nm, size=8, color="#e5e7eb", anchor="middle")
+    s.add(f'<rect x="{x+16}" y="{top+96}" width="22" height="10" rx="2" fill="#111827" stroke="#9ca3af"/>')
+    s.plain(x + 27, top + 104, "121", size=7, color="#e5e7eb", anchor="middle", bold=True)
+    s.plain(x + 44, top + 105, "120 Ω on board", size=9, color="#fde68a", bold=True)
+    # the pins
+    px = {nm: x + 30 + 30 * k for k, nm in enumerate(("VCC", "TXD", "RXD", "GND"))}
+    bot = top + h
+    for nm, cx in px.items():
+        s.add(f'<rect x="{cx-5}" y="{bot}" width="10" height="20" fill="#9ca3af"/>')
+        s.over(f'<circle cx="{cx}" cy="{bot+22}" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>')
+        s.plain(cx, bot - 10, nm, size=10, color="#e5e7eb", anchor="middle", bold=True)
+    return px, tx, bot + 22, top - 12
+
+
+def rs485():
+    """Two automatic RS485 modules on one bus: the P4's uart.a on the header, an ESP32 DevKit's UART2."""
+    s = Svg(1240, 1260, "RS485 on the 40-pin header: the P4 and an ESP32 on one bus",
+            "two automatic \"RS485 to TTL\" modules (no DE pin) fed from 3.3 V, and a twisted pair; each module carries "
+            "its 120 Ω; the P4's uart.a on GPIO30/31, the ESP32's UART2 on IO17/IO4")
+    c_tx, c_rx, c_a, c_b, c_p = "#ea580c", "#16a34a", "#ca8a04", "#2563eb", C["p3"]
+    used = {18: c_p, 22: c_tx, 24: c_rx, 26: "#111111"}
+    y_a, y_b = 1000, 1022
+    x18, y18 = pin_xy(18)
+    x22, y22 = pin_xy(22)
+    x24, y24 = pin_xy(24)
+    x26, y26 = pin_xy(26)
+    # the P4's module, left of the header
+    p1, t1, yp1, yt1 = auto485(s, 150, 260, "RS485 module #1 (the P4's)")
+    s.wire([(x22 - 8, y22), (400, y22), (400, yp1 + 70), (p1["TXD"], yp1 + 70), (p1["TXD"], yp1 + 8)], c_tx, 3)
+    s.wire([(x24 - 8, y24), (380, y24), (380, yp1 + 50), (p1["RXD"], yp1 + 50), (p1["RXD"], yp1 + 8)], c_rx, 3)
+    s.text(406, y22 - 8, "TX → TXD", color=c_tx, bold=True)
+    s.text(374, y24 + 18, "RX ← RXD", color=c_rx, anchor="end", bold=True)
+    s.wire([(p1["VCC"], yp1 + 8), (p1["VCC"], yp1 + 22)], c_p, 3)
+    s.net(p1["VCC"] + 6, yp1 + 33, "3V3", side="left")
+    s.wire([(p1["GND"], yp1 + 8), (p1["GND"], yp1 + 22)], C["gnd"], 3)
+    s.net(p1["GND"] - 6, yp1 + 33, "GND", C["gnd"], side="right")
+    s.wire([(x18 - 8, y18), (450, y18)], c_p, 3)
+    s.net(450, y18, "3V3")
+    s.wire([(x26 - 8, y26), (450, y26)], C["gnd"], 3)
+    s.net(450, y26, "GND", C["gnd"])
+    s.text(440, pin_xy(20)[1] + 4, "pin 20 (DE): free", color=C["dim"], anchor="end")
+    # the ESP32 DevKit and its module
+    right = DEVKIT_RIGHT
+    i_gnd, i_tx, i_rx = 0, right.index("IO17"), right.index("IO4")
+    lx, rx_, py, top, bot = devkit(s, 760, ROW0 + STEP, {
+        ("L", 0): c_p, ("R", i_gnd): "#111111", ("R", i_tx): c_tx, ("R", i_rx): c_rx})
+    p2, t2, yp2, yt2 = auto485(s, 1010, 260, "RS485 module #2 (the ESP32's)")
+    s.wire([(rx_ + 8, py(i_tx)), (985, py(i_tx)), (985, yp2 + 70), (p2["TXD"], yp2 + 70), (p2["TXD"], yp2 + 8)], c_tx, 3)
+    s.wire([(rx_ + 8, py(i_rx)), (1000, py(i_rx)), (1000, yp2 + 50), (p2["RXD"], yp2 + 50), (p2["RXD"], yp2 + 8)], c_rx, 3)
+    s.wire([(p2["VCC"], yp2 + 8), (p2["VCC"], yp2 + 22)], c_p, 3)
+    s.net(p2["VCC"] + 6, yp2 + 33, "ESP 3V3", side="left")
+    s.wire([(p2["GND"], yp2 + 8), (p2["GND"], yp2 + 22)], C["gnd"], 3)
+    s.net(p2["GND"] - 6, yp2 + 33, "GND", C["gnd"], side="right")
+    s.wire([(lx - 8, py(0)), (730, py(0))], c_p, 3)
+    s.net(730, py(0), "ESP 3V3")
+    s.wire([(rx_ + 8, py(i_gnd)), (990, py(i_gnd))], C["gnd"], 3)
+    s.net(990, py(i_gnd), "GND", C["gnd"], side="right")
+    s.text(985, bot + 46, "its micro-USB on a USB host socket of the P4 (or the Mac): 5 V, GND, its console",
+           color=C["dim"], anchor="end")
+    # the bus: from each terminal block, round the board and along the bottom
+    s.wire([(t1["A+"], yt1 - 14), (t1["A+"], 214), (120, 214), (120, y_a), (450, y_a)], c_a, 3)
+    s.wire([(t1["B-"], yt1 - 14), (t1["B-"], 200), (104, 200), (104, y_b), (450, y_b)], c_b, 3)
+    s.wire([(t2["B-"], yt2 - 14), (t2["B-"], 214), (1190, 214), (1190, y_a), (890, y_a)], c_b, 3)
+    s.wire([(t2["A+"], yt2 - 14), (t2["A+"], 200), (1206, 200), (1206, y_b), (890, y_b)], c_a, 3)
+    for col, start in ((c_b, 1), (c_a, 0)):
+        d, y0 = "", (y_a, y_b)
+        for k in range(11):                     # an odd count: A and B swap lanes, as a twist does
+            a, b = y0[(k + start) % 2], y0[(k + start + 1) % 2]
+            x0 = 450 + 40 * k
+            d += f"{'M' if k == 0 else ' L'}{x0} {a} C{x0+20} {a} {x0+20} {b} {x0+40} {b}"
+        s.add(f'<path d="{d}" stroke="{col}" stroke-width="3" fill="none"/>')
+    s.text(126, 760, "A+", color=c_a, bold=True)
+    s.text(98, 780, "B−", color=c_b, anchor="end", bold=True)
+    s.text(1184, 860, "B−", color=c_b, anchor="end", bold=True)
+    s.text(1212, 880, "A+", color=c_a, bold=True)
+    s.text(670, y_a - 18, "a twisted pair: A+ to A+ and B− to B−", anchor="middle")
+    s.text(670, y_b + 28, "60 Ω between A and B with everything off: the two modules' 120 Ω in parallel",
+           anchor="middle", bold=True)
+    s.notes(40, y_b + 50, 1160, "Wiring it (tools/rs485_test/README.md; the Modbus app's Cableado tab says the same)", [
+        "• P4: TX (GPIO30, pin 22) to TXD, RX (GPIO31, pin 24) to RXD; VCC to 3V3 (pin 18), GND to pin 26. GPIO29 (DE) stays free",
+        "• ESP32: IO17 to TXD, IO4 to RXD, VCC to its 3V3, GND to its GND. IO16 (DE) stays free",
+        "• These modules name TXD and RXD the MCU's way (TX to TXD). If the TXD LED does not blink when the P4 sends, or nobody",
+        "  answers, swap TXD and RXD on that module: at 3.3 V on both sides nothing gets hurt",
+        "• Feed them from 3.3 V, not 5 V: at 5 V the RXD pin would put 5 V on the header, which is not 5 V tolerant",
+        "• Each module carries its 120 Ω (marked 121): right for a bus of two. A third module in the middle needs its 121 lifted",
+        "• The third screw (earth) is for a cable's shield; on the bench the two boards share GND through the USB already",
+    ])
+    s.header(used)
+    s.save("bench-rs485.svg")
+
+
 if __name__ == "__main__":
     pwm()
     ir()
@@ -694,3 +814,4 @@ if __name__ == "__main__":
     esp32_devkit()
     nano_header()
     can()
+    rs485()
