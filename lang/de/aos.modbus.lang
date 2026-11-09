@@ -5,35 +5,41 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/modbus/main/mb_bus.c:78
+#: apps/modbus/main/mb_bus.c:90
+no se pudo escuchar en el puerto %u (¿lo usa otro?)	Port %u lässt sich nicht öffnen (benutzt ihn etwas anderes?)
+
+#: apps/modbus/main/mb_bus.c:103
+Modbus TCP, escuchando en el puerto %u	Modbus TCP, wartet auf Port %u
+
+#: apps/modbus/main/mb_bus.c:112
 no se pudo abrir %s (¿lo tiene otra app?)	%s ließ sich nicht öffnen (von anderer App belegt?)
 
-#: apps/modbus/main/mb_bus.c:84
+#: apps/modbus/main/mb_bus.c:118
 %s no acepta 8%c%d	%s unterstützt 8%c%d nicht
 
-#: apps/modbus/main/mb_bus.c:93
+#: apps/modbus/main/mb_bus.c:127
 no contesta %s:%d	keine Antwort von %s:%d
 
-#: apps/modbus/main/mb_bus.c:416
+#: apps/modbus/main/mb_bus.c:452
 Id	Id
 
-#: apps/modbus/main/mb_bus.c:422
+#: apps/modbus/main/mb_bus.c:458
 Fabricante	Hersteller
 
-#: apps/modbus/main/mb_bus.c:422
+#: apps/modbus/main/mb_bus.c:458
 Producto	Produkt
 
-#: apps/modbus/main/mb_bus.c:422
+#: apps/modbus/main/mb_bus.c:458
 Versión	Version
 
-#: apps/modbus/main/mb_bus.c:459
+#: apps/modbus/main/mb_bus.c:495
 El eco volvió igual.	Das Echo kam gleich zurück.
 
-#: apps/modbus/main/mb_bus.c:459
+#: apps/modbus/main/mb_bus.c:495
 El eco volvió distinto.	Das Echo kam anders zurück.
 
-#: apps/modbus/main/mb_bus.c:1034
-Como esclavo y como monitor, sólo RTU por ahora.	Als Slave und als Monitor vorerst nur RTU.
+#: apps/modbus/main/mb_bus.c:1260
+El monitor escucha un bus RS485: por TCP no hay nada que escuchar.	Der Monitor hört einen RS485-Bus ab: über TCP gibt es nichts abzuhören.
 
 #: apps/modbus/main/mb_proto.c:150
 leer coils	Coils lesen
@@ -108,7 +114,7 @@ valores	Werte
 dato	Daten
 
 #: apps/modbus/main/mb_proto.c:232
-#: apps/modbus/main/mb_tabs.c:722
+#: apps/modbus/main/mb_tabs.c:818
 sin respuesta	keine Antwort
 
 #: apps/modbus/main/mb_proto.c:233
@@ -122,6 +128,10 @@ falló el puerto o la conexión	Port oder Verbindung fehlgeschlagen
 
 #: apps/modbus/main/mb_proto.c:236
 pedido inválido	ungültige Anfrage
+
+#: apps/modbus/main/mb_remote.c:369
+#: apps/modbus/main/mb_tabs.c:864
+ruido: bytes que no forman una trama	Rauschen: Bytes, die keinen Frame bilden
 
 #: apps/modbus/main/mb_tabs.c:42
 01 Coils	01 Coils
@@ -163,13 +173,13 @@ Unidad (0 = broadcast, sin respuesta)	Einheit (0 = Broadcast, keine Antwort)
 Dirección inicial (desde 0)	Startadresse (ab 0)
 
 #: apps/modbus/main/mb_tabs.c:81
-#: apps/modbus/main/mb_tabs.c:434
+#: apps/modbus/main/mb_tabs.c:526
 Cantidad	Anzahl
 
 #: apps/modbus/main/mb_tabs.c:87
-#: apps/modbus/main/mb_tabs.c:437
-#: apps/modbus/main/mb_tabs.c:440
-#: apps/modbus/main/mb_ui_prof.c:466
+#: apps/modbus/main/mb_tabs.c:529
+#: apps/modbus/main/mb_tabs.c:532
+#: apps/modbus/main/mb_ui_prof.c:476
 Valor	Wert
 
 #: apps/modbus/main/mb_tabs.c:104
@@ -184,442 +194,479 @@ Registros a escribir, separados por espacios (100 0x1F -5)	Zu schreibende Regist
 #: apps/modbus/main/mb_tabs.c:154
 Sólo por RTU	Nur über RTU
 
-#: apps/modbus/main/mb_tabs.c:225
+#: apps/modbus/main/mb_tabs.c:185
+Puerto TCP de la pasarela	TCP-Port des Gateways
+
+#: apps/modbus/main/mb_tabs.c:194
+PASARELA MODBUS TCP → RTU	MODBUS-TCP → RTU-GATEWAY
+
+#: apps/modbus/main/mb_tabs.c:203
+Atender clientes TCP	TCP-Clients bedienen
+
+#: apps/modbus/main/mb_tabs.c:206
+Puerto	Port
+
+#: apps/modbus/main/mb_tabs.c:211
+Un programa de la PC (Modbus Poll, un SCADA, Home Assistant) pide por la red a esta placa, y ella le pregunta al equipo por el bus: la unidad del pedido es la del equipo. Si el equipo no contesta, el cliente recibe la excepción 0B. Anda con la conexión abierta.	Ein Programm am PC (Modbus Poll, ein SCADA, Home Assistant) fragt diese Platine über das Netz, und sie fragt das Gerät am Bus: die Unit der Anfrage ist die des Geräts. Antwortet das Gerät nicht, bekommt der Client die Ausnahme 0B. Läuft bei offener Verbindung.
+
+#: apps/modbus/main/mb_tabs.c:228
+Apagada.	Aus.
+
+#: apps/modbus/main/mb_tabs.c:229
+Prendida: arranca al abrir la conexión.	An: startet beim Öffnen der Verbindung.
+
+#: apps/modbus/main/mb_tabs.c:230
+Escuchando en %s:%u · cliente: %s · %u pedidos, %u contestados, %u sin respuesta	Wartet auf %s:%u · Client: %s · %u Anfragen, %u beantwortet, %u ohne Antwort
+
+#: apps/modbus/main/mb_tabs.c:231
+ninguno	keiner
+
+#: apps/modbus/main/mb_tabs.c:300
 Escribir el registro %u (FC 06)	Register %u schreiben (FC 06)
 
-#: apps/modbus/main/mb_tabs.c:307
+#: apps/modbus/main/mb_tabs.c:382
 y %d más	und %d weitere
 
-#: apps/modbus/main/mb_tabs.c:323
+#: apps/modbus/main/mb_tabs.c:398
 Buscando unidades: %d de %d…	Suche Einheiten: %d von %d…
 
-#: apps/modbus/main/mb_tabs.c:323
+#: apps/modbus/main/mb_tabs.c:398
 Probando velocidades: %d de %d…	Teste Geschwindigkeiten: %d von %d…
 
-#: apps/modbus/main/mb_tabs.c:342
+#: apps/modbus/main/mb_tabs.c:428
+Lo marcado contestó sin errores de línea: ése es el formato. Los otros contestaron con bytes de paridad o de parada malos.	Das Markierte antwortete ohne Leitungsfehler: das ist das Format. Die anderen antworteten mit falschen Paritäts- oder Stoppbits.
+
+#: apps/modbus/main/mb_tabs.c:429
+La velocidad es segura; el formato no salió claro (contestaron varios sin errores, o todos con errores). El manual del equipo dice cuál (el estándar pide 8E1).	Die Geschwindigkeit ist sicher; das Format nicht eindeutig (mehrere ohne Fehler oder alle mit Fehlern). Das Handbuch des Geräts sagt welches (der Standard verlangt 8E1).
+
+#: apps/modbus/main/mb_tabs.c:433
 Nadie contestó.	Niemand hat geantwortet.
 
-#: apps/modbus/main/mb_tabs.c:356
+#: apps/modbus/main/mb_tabs.c:447
 Tocá Enviar.	Senden tippen.
 
-#: apps/modbus/main/mb_tabs.c:356
+#: apps/modbus/main/mb_tabs.c:447
 Enviar abre la conexión.	Senden öffnet die Verbindung.
 
-#: apps/modbus/main/mb_tabs.c:361
+#: apps/modbus/main/mb_tabs.c:452
 %u pedidos · %u respuestas · %u sin respuesta · %u CRC · %u excepciones · promedio %u ms, máximo %u ms	%u Anfragen · %u Antworten · %u ohne Antwort · %u CRC · %u Ausnahmen · Mittel %u ms, max. %u ms
 
-#: apps/modbus/main/mb_tabs.c:371
+#: apps/modbus/main/mb_tabs.c:463
 HERRAMIENTAS	WERKZEUGE
 
-#: apps/modbus/main/mb_tabs.c:377
-#: apps/modbus/main/mb_tabs.c:379
+#: apps/modbus/main/mb_tabs.c:469
+#: apps/modbus/main/mb_tabs.c:471
 Detener	Stopp
 
-#: apps/modbus/main/mb_tabs.c:377
+#: apps/modbus/main/mb_tabs.c:469
 Buscar unidades	Einheiten suchen
 
-#: apps/modbus/main/mb_tabs.c:379
+#: apps/modbus/main/mb_tabs.c:471
 Buscar velocidad	Geschwindigkeit suchen
 
-#: apps/modbus/main/mb_tabs.c:386
+#: apps/modbus/main/mb_tabs.c:478
 Buscar unidades pregunta a las 1 a 247 por el holding 0. Buscar velocidad prueba ocho velocidades y cuatro formatos con la unidad elegida; tocá un resultado para usarlo.	Einheiten suchen fragt die Einheiten 1 bis 247 nach Holding 0. Geschwindigkeit suchen probiert acht Geschwindigkeiten und vier Formate mit der gewählten Einheit; ein Ergebnis antippen, um es zu übernehmen.
 
-#: apps/modbus/main/mb_tabs.c:418
+#: apps/modbus/main/mb_tabs.c:510
 PEDIDO	ANFRAGE
 
-#: apps/modbus/main/mb_tabs.c:427
-#: apps/modbus/main/mb_tabs.c:611
-#: apps/modbus/main/mb_tabs.c:676
-#: apps/modbus/main/mb_ui_prof.c:585
+#: apps/modbus/main/mb_tabs.c:519
+#: apps/modbus/main/mb_tabs.c:706
+#: apps/modbus/main/mb_tabs.c:772
+#: apps/modbus/main/mb_ui_prof.c:595
 Unidad	Unit
 
-#: apps/modbus/main/mb_tabs.c:430
+#: apps/modbus/main/mb_tabs.c:522
 Desde	Von
 
-#: apps/modbus/main/mb_tabs.c:440
+#: apps/modbus/main/mb_tabs.c:532
 Dato	Daten
 
-#: apps/modbus/main/mb_tabs.c:443
+#: apps/modbus/main/mb_tabs.c:535
 Valores	Werte
 
-#: apps/modbus/main/mb_tabs.c:453
+#: apps/modbus/main/mb_tabs.c:545
 Enviar	Senden
 
-#: apps/modbus/main/mb_tabs.c:455
+#: apps/modbus/main/mb_tabs.c:547
 En vivo	Live
 
-#: apps/modbus/main/mb_tabs.c:467
+#: apps/modbus/main/mb_tabs.c:559
 RESPUESTA	ANTWORT
 
-#: apps/modbus/main/mb_tabs.c:471
-#: apps/modbus/main/mb_tabs.c:632
-#: apps/modbus/main/mb_tabs.c:701
+#: apps/modbus/main/mb_tabs.c:563
+#: apps/modbus/main/mb_tabs.c:727
+#: apps/modbus/main/mb_tabs.c:797
 Borrar cuentas	Zähler löschen
 
-#: apps/modbus/main/mb_tabs.c:483
+#: apps/modbus/main/mb_tabs.c:575
 Tocá una coil para invertirla (FC 05).	Coil antippen zum Umschalten (FC 05).
 
-#: apps/modbus/main/mb_tabs.c:483
+#: apps/modbus/main/mb_tabs.c:575
 Tocá un registro para escribirlo (FC 06).	Register antippen zum Schreiben (FC 06).
 
-#: apps/modbus/main/mb_tabs.c:492
+#: apps/modbus/main/mb_tabs.c:584
 Normal	Normal
 
-#: apps/modbus/main/mb_tabs.c:492
+#: apps/modbus/main/mb_tabs.c:584
 Mudo	Stumm
 
-#: apps/modbus/main/mb_tabs.c:492
+#: apps/modbus/main/mb_tabs.c:584
 Lento	Langsam
 
-#: apps/modbus/main/mb_tabs.c:492
+#: apps/modbus/main/mb_tabs.c:584
 CRC malo	Falsche CRC
 
-#: apps/modbus/main/mb_tabs.c:492
+#: apps/modbus/main/mb_tabs.c:584
 Ocupado (06)	Beschäftigt (06)
 
-#: apps/modbus/main/mb_tabs.c:492
+#: apps/modbus/main/mb_tabs.c:584
 Falla (04)	Fehler (04)
 
-#: apps/modbus/main/mb_tabs.c:495
+#: apps/modbus/main/mb_tabs.c:587
 Contestar como la unidad	Antworten als Einheit
 
-#: apps/modbus/main/mb_tabs.c:498
+#: apps/modbus/main/mb_tabs.c:590
 Demora de la respuesta	Antwortverzögerung
 
-#: apps/modbus/main/mb_tabs.c:513
+#: apps/modbus/main/mb_tabs.c:605
 Holding %d	Holding %d
 
-#: apps/modbus/main/mb_tabs.c:541
+#: apps/modbus/main/mb_tabs.c:635
 %u tramas oídas · %u para esta unidad · %u para otras · %u broadcast · %u CRC malos · %u excepciones	%u Frames gehört · %u für diese Einheit · %u für andere · %u Broadcast · %u falsche CRC · %u Ausnahmen
 
-#: apps/modbus/main/mb_tabs.c:543
+#: apps/modbus/main/mb_tabs.c:637
 Abrí la conexión para que conteste.	Verbindung öffnen, damit es antwortet.
 
-#: apps/modbus/main/mb_tabs.c:544
+#: apps/modbus/main/mb_tabs.c:638
+Cliente:	Client:
+
+#: apps/modbus/main/mb_tabs.c:638
+ninguno todavía	noch keiner
+
+#: apps/modbus/main/mb_tabs.c:638
+#: apps/modbus/main/mb_tabs.c:639
 Último pedido:	Letzte Anfrage:
 
-#: apps/modbus/main/mb_tabs.c:604
+#: apps/modbus/main/mb_tabs.c:699
 COMO CONTESTA	WIE ES ANTWORTET
 
-#: apps/modbus/main/mb_tabs.c:613
+#: apps/modbus/main/mb_tabs.c:708
 Demora	Verzögerung
 
-#: apps/modbus/main/mb_tabs.c:622
+#: apps/modbus/main/mb_tabs.c:717
 Valores que se mueven	Bewegte Werte
 
-#: apps/modbus/main/mb_tabs.c:625
+#: apps/modbus/main/mb_tabs.c:720
 Mudo no contesta; Lento contesta después de la demora; CRC malo manda la respuesta con el CRC roto; Ocupado y Falla contestan esas excepciones. Para ver cómo se las arregla el maestro.	Stumm antwortet nicht; Langsam antwortet nach der Verzögerung; Falsche CRC schickt die Antwort mit kaputter CRC; Beschäftigt und Fehler antworten mit diesen Ausnahmen. Um zu sehen, wie der Master damit umgeht.
 
-#: apps/modbus/main/mb_tabs.c:634
+#: apps/modbus/main/mb_tabs.c:729
 EL EQUIPO QUE HACE	DAS GERÄT, DAS ES SPIELT
 
-#: apps/modbus/main/mb_tabs.c:639
+#: apps/modbus/main/mb_tabs.c:734
 Cada tabla va de 0 a 9999; fuera de eso contesta la excepción 02. Input 0: segundos; 1: un seno x1000; 2: una temperatura x10; 3: ruido; 4-5: un contador de 32 bits; 6-7: un float. Entradas 0 y 1 cambian solas. También contesta las funciones 08, 17 y 43.	Jede Tabelle reicht von 0 bis 9999; außerhalb antwortet es mit Ausnahme 02. Input 0: Sekunden; 1: ein Sinus x1000; 2: eine Temperatur x10; 3: Rauschen; 4-5: ein 32-Bit-Zähler; 6-7: ein Float. Eingänge 0 und 1 ändern sich von selbst. Es antwortet auch auf die Funktionen 08, 17 und 43.
 
-#: apps/modbus/main/mb_tabs.c:642
+#: apps/modbus/main/mb_tabs.c:737
 HOLDING 0-15 (TOCÁ PARA CAMBIAR)	HOLDING 0-15 (ANTIPPEN ZUM ÄNDERN)
 
-#: apps/modbus/main/mb_tabs.c:643
+#: apps/modbus/main/mb_tabs.c:738
 COILS 0-15 (TOCÁ PARA INVERTIR)	COILS 0-15 (ANTIPPEN ZUM UMSCHALTEN)
 
-#: apps/modbus/main/mb_tabs.c:644
+#: apps/modbus/main/mb_tabs.c:739
 INPUT 0-7	INPUT 0-7
 
-#: apps/modbus/main/mb_tabs.c:645
+#: apps/modbus/main/mb_tabs.c:740
 ENTRADAS 0-7 (TOCÁ PARA INVERTIR)	EINGÄNGE 0-7 (ANTIPPEN ZUM UMSCHALTEN)
 
-#: apps/modbus/main/mb_tabs.c:666
+#: apps/modbus/main/mb_tabs.c:761
 Abrí la conexión para escuchar.	Verbindung öffnen, um zuzuhören.
 
-#: apps/modbus/main/mb_tabs.c:667
-%u tramas · %u bytes · %u con CRC malo · %u bytes de ruido	%u Frames · %u Bytes · %u mit falscher CRC · %u Bytes Rauschen
+#: apps/modbus/main/mb_tabs.c:762
+%u tramas · %u bytes · %u con CRC malo · %u bytes de ruido · %u bytes con error de línea	%u Rahmen · %u Bytes · %u mit falschem CRC · %u Bytes Rauschen · %u Bytes mit Leitungsfehler
 
-#: apps/modbus/main/mb_tabs.c:677
+#: apps/modbus/main/mb_tabs.c:773
 Broadcast	Broadcast
 
-#: apps/modbus/main/mb_tabs.c:685
+#: apps/modbus/main/mb_tabs.c:781
 %u pedidos · %u respuestas · %u sin respuesta · %u excepciones · %u CRC\ndemora promedio %u ms, máxima %u ms\núltimo: %s	%u Anfragen · %u Antworten · %u ohne Antwort · %u Ausnahmen · %u CRC\nVerzögerung im Mittel %u ms, max. %u ms\nletzte: %s
 
-#: apps/modbus/main/mb_tabs.c:696
+#: apps/modbus/main/mb_tabs.c:792
 LO QUE PASA POR EL BUS	WAS ÜBER DEN BUS GEHT
 
-#: apps/modbus/main/mb_tabs.c:705
+#: apps/modbus/main/mb_tabs.c:801
 Escucha sin transmitir nunca: el DE queda abajo, como si la placa no estuviera. Junta cada pedido con su respuesta; un pedido que se queda sin respuesta (otro pedido llega antes, o pasa un segundo) cuenta como sin respuesta de esa unidad. Cada trama, en Tráfico.	Hört zu, ohne je zu senden: DE bleibt unten, als wäre die Platine nicht da. Ordnet jeder Anfrage ihre Antwort zu; eine Anfrage ohne Antwort (eine andere kommt vorher, oder eine Sekunde vergeht) zählt als unbeantwortet für diese Einheit. Jeder Frame unter Verkehr.
 
-#: apps/modbus/main/mb_tabs.c:723
+#: apps/modbus/main/mb_tabs.c:819
 el esclavo se calla (falla elegida)	der Slave schweigt (gewählter Fehler)
 
-#: apps/modbus/main/mb_tabs.c:724
+#: apps/modbus/main/mb_tabs.c:820
 llegó fuera de un pedido	kam außerhalb einer Anfrage
 
-#: apps/modbus/main/mb_tabs.c:725
+#: apps/modbus/main/mb_tabs.c:821
 no es la respuesta esperada	nicht die erwartete Antwort
 
-#: apps/modbus/main/mb_tabs.c:726
+#: apps/modbus/main/mb_tabs.c:822
 conexión abierta	Verbindung geöffnet
 
-#: apps/modbus/main/mb_tabs.c:727
+#: apps/modbus/main/mb_tabs.c:823
 conexión cerrada	Verbindung geschlossen
 
-#: apps/modbus/main/mb_tabs.c:768
-ruido: bytes que no forman una trama	Rauschen: Bytes, die keinen Frame bilden
-
-#: apps/modbus/main/mb_tabs.c:772
+#: apps/modbus/main/mb_tabs.c:868
 CRC MALO	FALSCHE CRC
 
-#: apps/modbus/main/mb_tabs.c:781
+#: apps/modbus/main/mb_tabs.c:877
  · contestó en %u ms	 · antwortete in %u ms
 
-#: apps/modbus/main/mb_tabs.c:795
+#: apps/modbus/main/mb_tabs.c:891
 Seguir	Weiter
 
-#: apps/modbus/main/mb_tabs.c:795
+#: apps/modbus/main/mb_tabs.c:891
 Pausa	Pause
 
-#: apps/modbus/main/mb_tabs.c:796
+#: apps/modbus/main/mb_tabs.c:892
 Sólo errores	Nur Fehler
 
-#: apps/modbus/main/mb_tabs.c:797
+#: apps/modbus/main/mb_tabs.c:893
 Borrar	Leeren
 
-#: apps/modbus/main/mb_tabs.c:819
+#: apps/modbus/main/mb_tabs.c:915
 Lo más nuevo arriba. Los tiempos son de cuando los bytes llegaron a la app (unos caracteres después de pasar por el cable); \"+\" es el silencio antes de la trama. El botón BOOT pausa.	Das Neueste oben. Die Zeiten sind, wann die Bytes die App erreichten (einige Zeichen nachdem sie über die Leitung gingen); \"+\" ist die Pause vor dem Frame. Die BOOT-Taste pausiert.
 
-#: apps/modbus/main/mb_tabs.c:858
-#: apps/modbus/main/mb_tabs.c:858
+#: apps/modbus/main/mb_tabs.c:954
+#: apps/modbus/main/mb_tabs.c:954
 equipo	Gerät
 
-#: apps/modbus/main/mb_tabs.c:878
+#: apps/modbus/main/mb_tabs.c:974
 DEL HEADER AL TRANSCEPTOR	VOM HEADER ZUM TRANSCEIVER
 
-#: apps/modbus/main/mb_tabs.c:885
+#: apps/modbus/main/mb_tabs.c:981
 → TXD del módulo (DI en un transceptor suelto)	→ TXD des Moduls (DI bei einem einzelnen Transceiver)
 
-#: apps/modbus/main/mb_tabs.c:885
+#: apps/modbus/main/mb_tabs.c:981
 ← RXD del módulo (RO)	← RXD des Moduls (RO)
 
-#: apps/modbus/main/mb_tabs.c:886
+#: apps/modbus/main/mb_tabs.c:982
 → DE y /RE unidos; libre con un módulo automático	→ DE und /RE verbunden; frei bei einem automatischen Modul
 
-#: apps/modbus/main/mb_tabs.c:908
+#: apps/modbus/main/mb_tabs.c:1004
 Este puerto no tiene DE: sirve con un módulo de dirección automática (sólo TX, RX, VCC y GND).	Dieser Port hat kein DE: er geht mit einem Modul mit automatischer Richtung (nur TX, RX, VCC und GND).
 
-#: apps/modbus/main/mb_tabs.c:910
+#: apps/modbus/main/mb_tabs.c:1006
 Un adaptador USB-RS485 (CH340 o FT232 con un transceptor automático) en el host USB de la placa: A, B y GND al bus; nada más que cablear.	Ein USB-RS485-Adapter (CH340 oder FT232 mit automatischem Transceiver) am USB-Host der Platine: A, B und GND an den Bus; sonst nichts zu verdrahten.
 
-#: apps/modbus/main/mb_tabs.c:912
+#: apps/modbus/main/mb_tabs.c:1008
 Por TCP no hay cables: el equipo está en la red.	Über TCP gibt es keine Kabel: das Gerät ist im Netz.
 
-#: apps/modbus/main/mb_tabs.c:914
+#: apps/modbus/main/mb_tabs.c:1010
 EL BUS	DER BUS
 
-#: apps/modbus/main/mb_tabs.c:916
+#: apps/modbus/main/mb_tabs.c:1012
 LO QUE HAY QUE SABER	GUT ZU WISSEN
 
-#: apps/modbus/main/mb_tabs.c:918
+#: apps/modbus/main/mb_tabs.c:1014
 Un módulo \"RS485 to TTL\" automático (VCC, TXD, RXD, GND; sin DE) cambia de dirección solo: alcanza con TX, RX y alimentarlo con 3,3 V. Si el LED TXD no parpadea cuando la placa manda, invertí TXD y RXD: con 3,3 V de los dos lados no se rompe nada.	Ein automatisches Modul \"RS485 to TTL\" (VCC, TXD, RXD, GND; kein DE) schaltet die Richtung selbst um: TX, RX und 3,3 V genügen. Blinkt die TXD-LED nicht, wenn die Platine sendet, TXD und RXD tauschen: mit 3,3 V auf beiden Seiten geht nichts kaputt.
 
-#: apps/modbus/main/mb_tabs.c:919
+#: apps/modbus/main/mb_tabs.c:1015
 Alimentá el módulo con 3,3 V, no con 5 V: a 5 V su salida pone 5 V en el header, y los pines del P4 no lo aguantan. El MAX485 suelto es de 5 V; los de 3,3 V son MAX3485, SP3485, THVD1420.	Das Modul mit 3,3 V versorgen, nicht mit 5 V: bei 5 V legt sein Ausgang 5 V an den Header, das halten die Pins des P4 nicht aus. Der einzelne MAX485 ist ein 5-V-Teil; 3,3-V-Teile sind MAX3485, SP3485, THVD1420.
 
-#: apps/modbus/main/mb_tabs.c:920
+#: apps/modbus/main/mb_tabs.c:1016
 Con un transceptor que tiene DE, DE y /RE van juntos al pin DE: el P4 lo sube mientras transmite y lo baja para escuchar. Como monitor no transmite nunca.	Bei einem Transceiver mit DE gehen DE und /RE zusammen an den DE-Pin: der P4 setzt ihn beim Senden hoch und zum Zuhören herunter. Als Monitor sendet er nie.
 
-#: apps/modbus/main/mb_tabs.c:921
+#: apps/modbus/main/mb_tabs.c:1017
 120 Ω sólo en las dos puntas del bus, no en cada equipo (muchos módulos ya traen una, marcada 121). Con todo apagado, entre A y B se miden unos 60 Ω (las dos en paralelo).	120 Ω nur an den beiden Enden des Busses, nicht an jedem Gerät (viele Module haben einen, markiert 121). Alles aus: zwischen A und B etwa 60 Ω (beide parallel).
 
-#: apps/modbus/main/mb_tabs.c:922
+#: apps/modbus/main/mb_tabs.c:1018
 A y B: el estándar dice A = D− y B = D+, pero muchos fabricantes los rotulan al revés. Si nadie contesta, invertirlos no rompe nada.	A und B: der Standard sagt A = D− und B = D+, aber viele Hersteller beschriften sie umgekehrt. Wenn niemand antwortet, schadet Vertauschen nicht.
 
-#: apps/modbus/main/mb_tabs.c:923
+#: apps/modbus/main/mb_tabs.c:1019
 Polarización: una resistencia de A a 3,3 V y otra de B a GND (unos 680 Ω), en un solo lugar del bus, dejan la línea quieta en 1 cuando nadie habla. Muchos módulos ya las traen; sin ellas el monitor ve ruido entre tramas.	Vorspannung: ein Widerstand von A nach 3,3 V und einer von B nach GND (etwa 680 Ω), an einer Stelle des Busses, halten die Leitung auf 1, wenn niemand spricht. Viele Module haben sie; ohne sie sieht der Monitor Rauschen zwischen den Frames.
 
-#: apps/modbus/main/mb_tabs.c:924
+#: apps/modbus/main/mb_tabs.c:1020
 GND común entre los equipos (el tercer cable), sobre todo con fuentes distintas: RS485 aguanta diferencias de unos pocos volts, no más.	Gemeinsame Masse zwischen den Geräten (die dritte Ader), vor allem bei verschiedenen Netzteilen: RS485 verträgt nur wenige Volt Unterschied.
 
-#: apps/modbus/main/mb_tabs.c:925
+#: apps/modbus/main/mb_tabs.c:1021
 Par trenzado para A y B. A 9600 baudios el bus puede tener cientos de metros; a 115200, mucho menos.	Verdrilltes Paar für A und B. Bei 9600 Baud kann der Bus Hunderte Meter lang sein; bei 115200 viel weniger.
 
 #: apps/modbus/main/mb_ui_prof.c:108
 Perfil actualizado	Profil aktualisiert
 
-#: apps/modbus/main/mb_ui_prof.c:223
+#: apps/modbus/main/mb_ui_prof.c:224
 Perfil	Profil
 
-#: apps/modbus/main/mb_ui_prof.c:224
+#: apps/modbus/main/mb_ui_prof.c:225
 Sin perfil: a mano	Kein Profil: von Hand
 
-#: apps/modbus/main/mb_ui_prof.c:226
+#: apps/modbus/main/mb_ui_prof.c:227
 Editar	Bearbeiten
 
-#: apps/modbus/main/mb_ui_prof.c:252
+#: apps/modbus/main/mb_ui_prof.c:260
 sin leer	nicht gelesen
 
-#: apps/modbus/main/mb_ui_prof.c:273
-#: apps/modbus/main/mb_ui_prof.c:404
+#: apps/modbus/main/mb_ui_prof.c:284
+#: apps/modbus/main/mb_ui_prof.c:414
 #: apps/modbus/main/modbus.c:44
 esclavo	Slave
 
-#: apps/modbus/main/mb_ui_prof.c:273
+#: apps/modbus/main/mb_ui_prof.c:284
 cada	alle
 
-#: apps/modbus/main/mb_ui_prof.c:275
+#: apps/modbus/main/mb_ui_prof.c:286
 Este perfil no tiene puntos todavía: Editar los agrega.	Dieses Profil hat noch keine Punkte: Bearbeiten fügt sie hinzu.
 
-#: apps/modbus/main/mb_ui_prof.c:303
+#: apps/modbus/main/mb_ui_prof.c:313
 La app hace de este equipo: contesta en sus direcciones y los valores se mueven como dice el perfil. Tocá uno para cambiarlo (uno que se mueve vuelve a moverse).	Die App spielt dieses Gerät: sie antwortet an seinen Adressen und die Werte bewegen sich wie im Profil. Einen antippen, um ihn zu ändern (ein bewegter bewegt sich wieder).
 
-#: apps/modbus/main/mb_ui_prof.c:304
+#: apps/modbus/main/mb_ui_prof.c:314
 Lee el perfil entero cada período. Tocá un valor que se puede escribir (rw) para cambiarlo.	Liest das ganze Profil in jeder Periode. Einen schreibbaren Wert (rw) antippen, um ihn zu ändern.
 
-#: apps/modbus/main/mb_ui_prof.c:326
-#: apps/modbus/main/modbus.c:454
+#: apps/modbus/main/mb_ui_prof.c:336
+#: apps/modbus/main/modbus.c:459
 Listo	Fertig
 
-#: apps/modbus/main/mb_ui_prof.c:361
-#: apps/modbus/main/mb_ui_prof.c:420
+#: apps/modbus/main/mb_ui_prof.c:371
+#: apps/modbus/main/mb_ui_prof.c:430
 No se pudo escribir en la tarjeta	Schreiben auf die Karte fehlgeschlagen
 
-#: apps/modbus/main/mb_ui_prof.c:367
+#: apps/modbus/main/mb_ui_prof.c:377
 Nombre del perfil nuevo	Name des neuen Profils
 
-#: apps/modbus/main/mb_ui_prof.c:373
+#: apps/modbus/main/mb_ui_prof.c:383
 Perfiles	Profile
 
-#: apps/modbus/main/mb_ui_prof.c:387
+#: apps/modbus/main/mb_ui_prof.c:397
 Sin perfil: el pedido a mano	Kein Profil: die Anfrage von Hand
 
-#: apps/modbus/main/mb_ui_prof.c:404
+#: apps/modbus/main/mb_ui_prof.c:414
 puntos	Punkte
 
-#: apps/modbus/main/mb_ui_prof.c:412
+#: apps/modbus/main/mb_ui_prof.c:422
 Nuevo	Neu
 
-#: apps/modbus/main/mb_ui_prof.c:413
+#: apps/modbus/main/mb_ui_prof.c:423
 Un perfil dice qué tiene un equipo y dónde: al elegirlo, Maestro lo lee entero y Esclavo hace de ese equipo. Toma su unidad, velocidad y formato. Son archivos CSV en la tarjeta (modbus/perfiles): la página Modbus del portal los edita, los sube y los baja.	Ein Profil sagt, was ein Gerät hat und wo: gewählt, liest Master alles und Slave spielt dieses Gerät. Es übernimmt Einheit, Geschwindigkeit und Format. Es sind CSV-Dateien auf der Karte (modbus/perfiles): die Modbus-Seite des Portals bearbeitet, lädt hoch und herunter.
 
-#: apps/modbus/main/mb_ui_prof.c:436
-#: apps/modbus/main/mb_ui_prof.c:492
-#: apps/modbus/main/mb_ui_prof.c:583
+#: apps/modbus/main/mb_ui_prof.c:446
+#: apps/modbus/main/mb_ui_prof.c:502
+#: apps/modbus/main/mb_ui_prof.c:593
 Nombre	Name
 
-#: apps/modbus/main/mb_ui_prof.c:437
+#: apps/modbus/main/mb_ui_prof.c:447
 Nota (qué es, de dónde salió el mapa)	Notiz (was es ist, woher die Tabelle stammt)
 
-#: apps/modbus/main/mb_ui_prof.c:439
+#: apps/modbus/main/mb_ui_prof.c:449
 Unidad del esclavo	Einheit des Slaves
 
-#: apps/modbus/main/mb_ui_prof.c:457
+#: apps/modbus/main/mb_ui_prof.c:467
 No entran más puntos	Kein Platz für weitere Punkte
 
-#: apps/modbus/main/mb_ui_prof.c:474
+#: apps/modbus/main/mb_ui_prof.c:484
 Tocá de nuevo para borrar el archivo	Nochmals tippen, um die Datei zu löschen
 
-#: apps/modbus/main/mb_ui_prof.c:494
+#: apps/modbus/main/mb_ui_prof.c:504
 Nota…	Notiz…
 
-#: apps/modbus/main/mb_ui_prof.c:496
+#: apps/modbus/main/mb_ui_prof.c:506
 #: apps/modbus/main/modbus.c:42
 Esclavo	Slave
 
-#: apps/modbus/main/mb_ui_prof.c:498
+#: apps/modbus/main/mb_ui_prof.c:508
 tomar la de la conexión	die der Verbindung nehmen
 
-#: apps/modbus/main/mb_ui_prof.c:499
+#: apps/modbus/main/mb_ui_prof.c:509
 Velocidad: tomar la de la conexión	Geschwindigkeit: die der Verbindung nehmen
 
-#: apps/modbus/main/mb_ui_prof.c:501
+#: apps/modbus/main/mb_ui_prof.c:511
 LEERLO CADA	LESEN ALLE
 
-#: apps/modbus/main/mb_ui_prof.c:507
+#: apps/modbus/main/mb_ui_prof.c:517
 PUNTOS	PUNKTE
 
-#: apps/modbus/main/mb_ui_prof.c:527
+#: apps/modbus/main/mb_ui_prof.c:537
 Agregar punto	Punkt hinzufügen
 
-#: apps/modbus/main/mb_ui_prof.c:528
+#: apps/modbus/main/mb_ui_prof.c:538
 Borrar perfil	Profil löschen
 
-#: apps/modbus/main/mb_ui_prof.c:529
+#: apps/modbus/main/mb_ui_prof.c:539
 Cada cambio se guarda en la tarjeta. Un punto nuevo sigue al último; tocalo para cambiarlo.	Jede Änderung wird auf der Karte gespeichert. Ein neuer Punkt folgt dem letzten; antippen, um ihn zu ändern.
 
-#: apps/modbus/main/mb_ui_prof.c:538
+#: apps/modbus/main/mb_ui_prof.c:548
 Nombre del punto	Name des Punkts
 
-#: apps/modbus/main/mb_ui_prof.c:539
+#: apps/modbus/main/mb_ui_prof.c:549
 Unidad (°C, V, rpm…)	Einheit (°C, V, rpm…)
 
-#: apps/modbus/main/mb_ui_prof.c:551
+#: apps/modbus/main/mb_ui_prof.c:561
 Dirección (desde 0; 0x para hex)	Adresse (ab 0; 0x für hex)
 
-#: apps/modbus/main/mb_ui_prof.c:556
+#: apps/modbus/main/mb_ui_prof.c:566
 Escala: el valor es el número crudo por esto	Skala: der Wert ist die Rohzahl mal diese
 
-#: apps/modbus/main/mb_ui_prof.c:562
+#: apps/modbus/main/mb_ui_prof.c:572
 Mínimo	Minimum
 
-#: apps/modbus/main/mb_ui_prof.c:563
+#: apps/modbus/main/mb_ui_prof.c:573
 Máximo	Maximum
 
-#: apps/modbus/main/mb_ui_prof.c:564
+#: apps/modbus/main/mb_ui_prof.c:574
 Valor inicial	Anfangswert
 
-#: apps/modbus/main/mb_ui_prof.c:587
+#: apps/modbus/main/mb_ui_prof.c:597
 TABLA Y DIRECCIÓN	TABELLE UND ADRESSE
 
-#: apps/modbus/main/mb_ui_prof.c:589
+#: apps/modbus/main/mb_ui_prof.c:599
 coil (01)	Coil (01)
 
-#: apps/modbus/main/mb_ui_prof.c:589
+#: apps/modbus/main/mb_ui_prof.c:599
 entrada (02)	Eingang (02)
 
-#: apps/modbus/main/mb_ui_prof.c:589
+#: apps/modbus/main/mb_ui_prof.c:599
 holding (03)	Holding (03)
 
-#: apps/modbus/main/mb_ui_prof.c:589
+#: apps/modbus/main/mb_ui_prof.c:599
 input (04)	Input (04)
 
-#: apps/modbus/main/mb_ui_prof.c:591
+#: apps/modbus/main/mb_ui_prof.c:601
 Dirección	Adresse
 
-#: apps/modbus/main/mb_ui_prof.c:594
+#: apps/modbus/main/mb_ui_prof.c:604
 TIPO	TYP
 
-#: apps/modbus/main/mb_ui_prof.c:597
+#: apps/modbus/main/mb_ui_prof.c:607
 32 bits: u32, s32 y f32 toman dos registros, el alto primero (ABCD); los \"cdab\", el bajo primero.	32 Bit: u32, s32 und f32 belegen zwei Register, das hohe zuerst (ABCD); die \"cdab\", das niedrige zuerst.
 
-#: apps/modbus/main/mb_ui_prof.c:598
+#: apps/modbus/main/mb_ui_prof.c:608
 ESCALA (VALOR = CRUDO x ESCALA)	SKALA (WERT = ROH x SKALA)
 
-#: apps/modbus/main/mb_ui_prof.c:606
-#: apps/modbus/main/modbus.c:486
+#: apps/modbus/main/mb_ui_prof.c:616
+#: apps/modbus/main/modbus.c:491
 otra…	andere…
 
-#: apps/modbus/main/mb_ui_prof.c:613
+#: apps/modbus/main/mb_ui_prof.c:623
 ACCESO	ZUGRIFF
 
-#: apps/modbus/main/mb_ui_prof.c:615
+#: apps/modbus/main/mb_ui_prof.c:625
 sólo lectura	nur lesen
 
-#: apps/modbus/main/mb_ui_prof.c:616
+#: apps/modbus/main/mb_ui_prof.c:626
 lectura y escritura	lesen und schreiben
 
-#: apps/modbus/main/mb_ui_prof.c:618
+#: apps/modbus/main/mb_ui_prof.c:628
 CUANDO LA APP HACE DE ESCLAVO	WENN DIE APP DEN SLAVE SPIELT
 
-#: apps/modbus/main/mb_ui_prof.c:624
+#: apps/modbus/main/mb_ui_prof.c:634
 mín	min
 
-#: apps/modbus/main/mb_ui_prof.c:627
+#: apps/modbus/main/mb_ui_prof.c:637
 máx	max
 
-#: apps/modbus/main/mb_ui_prof.c:630
+#: apps/modbus/main/mb_ui_prof.c:640
 empieza en	beginnt bei
 
-#: apps/modbus/main/mb_ui_prof.c:632
+#: apps/modbus/main/mb_ui_prof.c:642
 fijo se queda en el valor inicial; seno y rampa van de mín a máx en un minuto; deriva camina al azar entre los dos; contador sube máx por hora; alterna cambia cada pocos segundos; azar salta una vez por segundo.	fijo bleibt beim Anfangswert; seno und rampa gehen in einer Minute von min bis max; deriva wandert zufällig dazwischen; contador steigt um max pro Stunde; alterna wechselt alle paar Sekunden; azar springt einmal pro Sekunde.
 
-#: apps/modbus/main/mb_ui_prof.c:634
+#: apps/modbus/main/mb_ui_prof.c:644
 Borrar este punto	Diesen Punkt löschen
 
 #: apps/modbus/main/modbus.c:42
@@ -640,76 +687,79 @@ maestro	Master
 #: apps/modbus/main/modbus.c:44
 monitor	Monitor
 
-#: apps/modbus/main/modbus.c:317
+#: apps/modbus/main/modbus.c:322
 Cancelar	Abbrechen
 
-#: apps/modbus/main/modbus.c:317
+#: apps/modbus/main/modbus.c:322
 Aplicar	Anwenden
 
-#: apps/modbus/main/modbus.c:403
+#: apps/modbus/main/modbus.c:408
 Velocidad (baudios)	Geschwindigkeit (Baud)
 
-#: apps/modbus/main/modbus.c:433
+#: apps/modbus/main/modbus.c:438
 Equipo Modbus TCP (dirección:puerto)	Modbus-TCP-Gerät (Adresse:Port)
 
-#: apps/modbus/main/modbus.c:453
+#: apps/modbus/main/modbus.c:458
 Conexión	Verbindung
 
-#: apps/modbus/main/modbus.c:459
+#: apps/modbus/main/modbus.c:464
 PUERTO	PORT
 
-#: apps/modbus/main/modbus.c:475
+#: apps/modbus/main/modbus.c:480
 Un puerto con pin DE maneja el transceptor RS485 solo; usb0 es un adaptador USB-RS485 enchufado al host USB.	Ein Port mit DE-Pin steuert den RS485-Transceiver selbst; usb0 ist ein USB-RS485-Adapter am USB-Host.
 
-#: apps/modbus/main/modbus.c:476
+#: apps/modbus/main/modbus.c:481
 VELOCIDAD	GESCHWINDIGKEIT
 
-#: apps/modbus/main/modbus.c:489
+#: apps/modbus/main/modbus.c:494
 FORMATO	FORMAT
 
-#: apps/modbus/main/modbus.c:493
+#: apps/modbus/main/modbus.c:498
 El estándar pide 8E1; muchos equipos vienen en 8N1 o 8N2. Si no contesta, en Maestro está \"Buscar velocidad\".	Der Standard verlangt 8E1; viele Geräte kommen mit 8N1 oder 8N2. Antwortet es nicht: unter Master gibt es \"Geschwindigkeit suchen\".
 
-#: apps/modbus/main/modbus.c:495
+#: apps/modbus/main/modbus.c:500
 EQUIPO	TEAM
 
-#: apps/modbus/main/modbus.c:499
+#: apps/modbus/main/modbus.c:504
 tocá para poner la dirección	zum Eingeben der Adresse tippen
 
-#: apps/modbus/main/modbus.c:501
+#: apps/modbus/main/modbus.c:506
 Por TCP la app es sólo maestro, por ahora.	Über TCP ist die App vorerst nur Master.
 
-#: apps/modbus/main/modbus.c:503
+#: apps/modbus/main/modbus.c:508
 ESPERA DE LA RESPUESTA (MAESTRO)	ANTWORTZEIT (MASTER)
 
-#: apps/modbus/main/modbus.c:510
+#: apps/modbus/main/modbus.c:515
 SILENCIO ANTES DE CADA PEDIDO	PAUSE VOR JEDER ANFRAGE
 
-#: apps/modbus/main/modbus.c:517
+#: apps/modbus/main/modbus.c:522
 Algunos equipos (la Riden, varios medidores) dejan de contestar si los pedidos llegan pegados.	Manche Geräte (die Riden, einige Zähler) antworten nicht mehr, wenn Anfragen direkt aufeinander folgen.
 
-#: apps/modbus/main/modbus.c:558
+#: apps/modbus/main/modbus.c:563
 abriendo… (%s)	öffne… (%s)
 
-#: apps/modbus/main/modbus.c:558
+#: apps/modbus/main/modbus.c:563
 cerrado · rol: %s	geschlossen · Rolle: %s
 
-#: apps/modbus/main/modbus.c:563
+#: apps/modbus/main/modbus.c:568
 Cerrar	Schließen
 
-#: apps/modbus/main/modbus.c:563
-#: apps/modbus/main/modbus.c:680
+#: apps/modbus/main/modbus.c:568
+#: apps/modbus/main/modbus.c:686
 Abrir	Öffnen
 
-#: apps/modbus/main/modbus.c:632
+#: apps/modbus/main/modbus.c:637
 Tráfico en pausa	Verkehr pausiert
 
-#: apps/modbus/main/modbus.c:632
+#: apps/modbus/main/modbus.c:637
 Tráfico sigue	Verkehr läuft weiter
 
-#: apps/modbus/main/modbus.c:714
+#: apps/modbus/main/modbus.c:720
 No hay memoria para el banco Modbus	Nicht genug Speicher für die Modbus-Werkbank
 
+#: (kept from the previous catalog: strings the extractor cannot see)
+Como esclavo y como monitor, sólo RTU por ahora.	Als Slave und als Monitor vorerst nur RTU.
 
-#: apps/modbus/main/mb_tabs.c
+%u tramas · %u bytes · %u con CRC malo · %u bytes de ruido	%u Frames · %u Bytes · %u mit falscher CRC · %u Bytes Rauschen
+
 La velocidad es segura; el formato no: los UART no descartan un byte con error de paridad, así que a la velocidad buena contestan varios. El manual del equipo dice cuál (el estándar pide 8E1).	Die Geschwindigkeit ist sicher, das Format nicht: UARTs verwerfen ein Byte mit Paritätsfehler nicht, also antworten bei der richtigen Geschwindigkeit mehrere Formate. Das Handbuch des Geräts sagt, welches (der Standard verlangt 8E1).

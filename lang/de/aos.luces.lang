@@ -17,38 +17,38 @@ Patch	Patch
 #: apps/luces/main/luces.c:38
 Salida	Ausgang
 
-#: apps/luces/main/luces.c:272
+#: apps/luces/main/luces.c:278
 Cancelar	Abbrechen
 
-#: apps/luces/main/luces.c:272
+#: apps/luces/main/luces.c:278
 Aplicar	Übernehmen
 
-#: apps/luces/main/luces.c:328
+#: apps/luces/main/luces.c:334
 no se pudo abrir %s (¿lo tiene otra app?)	%s ließ sich nicht öffnen (nutzt es eine andere App?)
 
-#: apps/luces/main/luces.c:349
-saliendo por %s · %.0f paquetes/s%s	sendet über %s · %.0f Pakete/s%s
+#: apps/luces/main/luces.c:355
+saliendo por %s · %.0f paquetes/s%s%s	sendet über %s · %.0f Pakete/s%s%s
 
-#: apps/luces/main/luces.c:352
-salida cerrada (%s)	Ausgang geschlossen (%s)
+#: apps/luces/main/luces.c:359
+salida cerrada (%s)%s	Ausgang geschlossen (%s)%s
 
-#: apps/luces/main/lz_core.c:649
+#: apps/luces/main/lz_core.c:763
 #: apps/luces/main/lz_stage.c:22
 Rojo	Rot
 
-#: apps/luces/main/lz_core.c:649
+#: apps/luces/main/lz_core.c:763
 #: apps/luces/main/lz_stage.c:23
 Verde	Grün
 
-#: apps/luces/main/lz_core.c:649
+#: apps/luces/main/lz_core.c:763
 #: apps/luces/main/lz_stage.c:24
 Azul	Blau
 
-#: apps/luces/main/lz_core.c:649
+#: apps/luces/main/lz_core.c:763
 #: apps/luces/main/lz_stage.c:30
 Arcoíris	Regenbogen
 
-#: apps/luces/main/lz_core.c:649
+#: apps/luces/main/lz_core.c:763
 Pares e impares	Gerade und ungerade
 
 #: apps/luces/main/lz_stage.c:22
@@ -88,7 +88,7 @@ Medio	Mittel
 Rápido	Schnell
 
 #: apps/luces/main/lz_stage.c:30
-#: apps/luces/main/lz_stage.c:162
+#: apps/luces/main/lz_stage.c:199
 Ninguno	Keiner
 
 #: apps/luces/main/lz_stage.c:30
@@ -106,53 +106,69 @@ Colores	Farben
 #: apps/luces/main/lz_stage.c:31
 Respirar	Atmen
 
-#: apps/luces/main/lz_stage.c:162
+#: apps/luces/main/lz_stage.c:75
+elegí aparatos antes de guardar un grupo	vor dem Speichern einer Gruppe Geräte wählen
+
+#: apps/luces/main/lz_stage.c:83
+Grupo %d	Gruppe %d
+
+#: apps/luces/main/lz_stage.c:84
+Nombre del grupo (con los aparatos elegidos)	Name der Gruppe (mit den gewählten Geräten)
+
+#: apps/luces/main/lz_stage.c:99
+Borrar el grupo (los aparatos quedan)	Gruppe löschen (die Geräte bleiben)
+
+#: apps/luces/main/lz_stage.c:199
 Todos	Alle
 
-#: apps/luces/main/lz_stage.c:162
+#: apps/luces/main/lz_stage.c:199
 Pares	Ungerade
 
-#: apps/luces/main/lz_stage.c:162
+#: apps/luces/main/lz_stage.c:199
 Impares	Gerade
 
-#: apps/luces/main/lz_stage.c:167
+#: apps/luces/main/lz_stage.c:210
++ Grupo	+ Gruppe
+
+#: apps/luces/main/lz_stage.c:212
 No hay aparatos: agregalos en Patch.	Keine Geräte: in Patch hinzufügen.
 
-#: apps/luces/main/lz_stage.c:200
+#: apps/luces/main/lz_stage.c:246
 Intensidad	Helligkeit
 
-#: apps/luces/main/lz_stage.c:219
+#: apps/luces/main/lz_stage.c:265
 Color	Farbe
 
-#: apps/luces/main/lz_stage.c:249
+#: apps/luces/main/lz_stage.c:295
 Posición (pan y tilt)	Position (Pan und Tilt)
 
-#: apps/luces/main/lz_stage.c:275
+#: apps/luces/main/lz_stage.c:321
 Al centro	Zur Mitte
 
-#: apps/luces/main/lz_stage.c:279
+#: apps/luces/main/lz_stage.c:325
 Efectos y pruebas	Effekte und Tests
 
-#: apps/luces/main/lz_stage.c:282
+#: apps/luces/main/lz_stage.c:328
 Velocidad	Tempo
 
-#: apps/luces/main/lz_stage.c:284
+#: apps/luces/main/lz_stage.c:330
 El efecto corre sobre los aparatos elegidos al tocarlo (todos, si no hay ninguno elegido), encima de la escena.	Der Effekt läuft auf den Geräten, die beim Antippen gewählt sind (alle, wenn keines gewählt ist), über der Szene.
 
-#: apps/luces/main/lz_stage.c:285
+#: apps/luces/main/lz_stage.c:331
 Pruebas: Recorrido prende un aparato por vez en blanco (cuál es cuál; uno fuera de turno tiene la dirección mal). Colores pasa todos por rojo, verde, azul y blanco (uno de otro color tiene los canales en otro orden que su tipo). Respirar sube y baja la intensidad despacio (escalones o parpadeo abajo son la curva del aparato).	Tests: Durchlauf schaltet ein Gerät nach dem anderen weiß ein (welches welches ist; eines außer der Reihe hat eine falsche Adresse). Farben schickt alle durch Rot, Grün, Blau und Weiß (eines in anderer Farbe hat die Kanäle in anderer Reihenfolge als sein Typ). Atmen fährt die Helligkeit langsam auf und ab (Stufen oder Flackern unten sind die Kurve des Geräts).
 
-#: apps/luces/main/lz_stage.c:291
+#: apps/luces/main/lz_stage.c:337
 Baja la intensidad de todo lo que sale, sin tocar las escenas. Blackout, arriba, apaga todo de golpe.	Dimmt alles, was hinausgeht, ohne die Szenen zu ändern. Blackout, oben, schaltet alles auf einmal aus.
 
-#: apps/luces/main/lz_stage.c:308
+#: apps/luces/main/lz_stage.c:357
 %d elegidos	%d gewählt
 
-#: apps/luces/main/lz_stage.c:309
+#: apps/luces/main/lz_stage.c:358
 ninguno elegido: todos	keines gewählt: alle
 
 #: apps/luces/main/lz_tabs.c:26
-#: apps/luces/main/lz_tabs.c:141
+#: apps/luces/main/lz_tabs.c:107
+#: apps/luces/main/lz_tabs.c:160
 Corte	Schnitt
 
 #: apps/luces/main/lz_tabs.c:26
@@ -168,128 +184,174 @@ Escena %d	Szene %d
 #: apps/luces/main/lz_tabs.c:77
 Nombre de la escena	Name der Szene
 
-#: apps/luces/main/lz_tabs.c:93
+#: apps/luces/main/lz_tabs.c:103
+SU FUNDIDO AL LLAMARLA	IHRE ÜBERBLENDUNG BEIM AUFRUFEN
+
+#: apps/luces/main/lz_tabs.c:112
 Volver a grabar con lo que hay ahora	Mit dem aktuellen Bild neu speichern
 
-#: apps/luces/main/lz_tabs.c:94
+#: apps/luces/main/lz_tabs.c:113
 Cambiar el nombre	Umbenennen
 
-#: apps/luces/main/lz_tabs.c:95
+#: apps/luces/main/lz_tabs.c:114
 Borrar	Löschen
 
-#: apps/luces/main/lz_tabs.c:116
+#: apps/luces/main/lz_tabs.c:135
 Tiempo (golpes por minuto)	Tempo (Schläge pro Minute)
 
-#: apps/luces/main/lz_tabs.c:135
+#: apps/luces/main/lz_tabs.c:154
 Guardar lo que hay	Aktuelles speichern
 
-#: apps/luces/main/lz_tabs.c:136
+#: apps/luces/main/lz_tabs.c:155
 Escenas de muestra	Beispielszenen
 
-#: apps/luces/main/lz_tabs.c:137
-FUNDIDO AL LLAMAR UNA ESCENA	ÜBERBLENDUNG BEIM AUFRUFEN
+#: apps/luces/main/lz_tabs.c:156
+FUNDIDO DE LAS ESCENAS NUEVAS (CADA UNA GUARDA EL SUYO)	ÜBERBLENDUNG NEUER SZENEN (JEDE BEHÄLT IHRE)
 
-#: apps/luces/main/lz_tabs.c:147
+#: apps/luces/main/lz_tabs.c:166
 ESCENAS · MANTENÉ UNA PARA GRABARLA O BORRARLA	SZENEN · GEDRÜCKT HALTEN ZUM SPEICHERN ODER LÖSCHEN
 
-#: apps/luces/main/lz_tabs.c:148
+#: apps/luces/main/lz_tabs.c:167
 Todavía no hay escenas. Armá un look en Escenario (intensidad, color, posición) y guardalo acá.	Noch keine Szenen. Ein Bild in Bühne bauen (Helligkeit, Farbe, Position) und hier speichern.
 
-#: apps/luces/main/lz_tabs.c:170
+#: apps/luces/main/lz_tabs.c:184
+corte	Schnitt
+
+#: apps/luces/main/lz_tabs.c:195
 SECUENCIA: UNA ESCENA TRAS OTRA, AL TIEMPO	LAUFLICHT: EINE SZENE NACH DER ANDEREN, IM TAKT
 
-#: apps/luces/main/lz_tabs.c:179
-#: apps/luces/main/lz_tabs.c:214
+#: apps/luces/main/lz_tabs.c:204
+#: apps/luces/main/lz_tabs.c:239
 Andar	Start
 
-#: apps/luces/main/lz_tabs.c:193
+#: apps/luces/main/lz_tabs.c:218
 Hacen falta al menos dos escenas distintas: con una sola, la secuencia llama siempre a la misma. \"Escenas de muestra\" agrega cinco.	Es braucht mindestens zwei verschiedene Szenen: mit nur einer ruft das Lauflicht immer dieselbe auf. \"Beispielszenen\" fügt fünf hinzu.
 
-#: apps/luces/main/lz_tabs.c:196
+#: apps/luces/main/lz_tabs.c:221
 Pasa por todas las escenas en orden, una por golpe. Tap: tocalo al ritmo de la música, tres o cuatro veces. Corte, mitad o todo fundido: cuánto de cada paso es fundido.	Geht alle Szenen der Reihe nach durch, eine pro Schlag. Tap: drei- oder viermal im Takt der Musik tippen. Schnitt, halb oder ganz: wie viel jedes Schritts Überblendung ist.
 
-#: apps/luces/main/lz_tabs.c:214
+#: apps/luces/main/lz_tabs.c:239
 Parar	Stopp
 
-#: apps/luces/main/lz_tabs.c:234
-#: apps/luces/main/lz_tabs.c:383
+#: apps/luces/main/lz_tabs.c:260
+#: apps/luces/main/lz_tabs.c:433
 Agregar aparatos	Geräte hinzufügen
 
-#: apps/luces/main/lz_tabs.c:236
-#: apps/luces/main/lz_tabs.c:341
+#: apps/luces/main/lz_tabs.c:262
+#: apps/luces/main/lz_tabs.c:384
 TIPO	TYP
 
-#: apps/luces/main/lz_tabs.c:243
+#: apps/luces/main/lz_tabs.c:269
 CUÁNTOS	WIE VIELE
 
-#: apps/luces/main/lz_tabs.c:254
+#: apps/luces/main/lz_tabs.c:277
+UNIVERSO (EL 1 SALE POR RS485; LOS DEMÁS, SÓLO POR ART-NET)	UNIVERSUM (1 GEHT ÜBER RS485 HINAUS; DIE ANDEREN NUR ÜBER ART-NET)
+
+#: apps/luces/main/lz_tabs.c:287
 Desde la dirección %d, uno tras otro, %u canales cada uno.	Ab Adresse %d, eins nach dem anderen, je %u Kanäle.
 
-#: apps/luces/main/lz_tabs.c:255
+#: apps/luces/main/lz_tabs.c:288
 No quedan canales libres para ese tipo.	Für diesen Typ sind keine Kanäle mehr frei.
 
-#: apps/luces/main/lz_tabs.c:257
+#: apps/luces/main/lz_tabs.c:290
 Agregar	Hinzufügen
 
-#: apps/luces/main/lz_tabs.c:303
+#: apps/luces/main/lz_tabs.c:339
 Nombre del aparato	Name des Geräts
 
-#: apps/luces/main/lz_tabs.c:312
+#: apps/luces/main/lz_tabs.c:348
 Dirección DMX (1 a 512)	DMX-Adresse (1 bis 512)
 
-#: apps/luces/main/lz_tabs.c:337
+#: apps/luces/main/lz_tabs.c:380
 Nombre	Name
 
-#: apps/luces/main/lz_tabs.c:339
+#: apps/luces/main/lz_tabs.c:382
 Dirección %u	Adresse %u
 
-#: apps/luces/main/lz_tabs.c:350
+#: apps/luces/main/lz_tabs.c:391
+UNIVERSO	UNIVERSUM
+
+#: apps/luces/main/lz_tabs.c:400
 Canales %u a %u: 	Kanäle %u bis %u: 
 
-#: apps/luces/main/lz_tabs.c:357
+#: apps/luces/main/lz_tabs.c:407
 Se pisa con otro aparato o se pasa del canal 512.	Überschneidet sich mit einem anderen Gerät oder geht über Kanal 512.
 
-#: apps/luces/main/lz_tabs.c:360
+#: apps/luces/main/lz_tabs.c:410
 Sacar del patch	Aus dem Patch nehmen
 
-#: apps/luces/main/lz_tabs.c:372
+#: apps/luces/main/lz_tabs.c:422
 faltan tipos: esos aparatos quedaron como dimmer	Typen fehlen: diese Geräte sind jetzt Dimmer
 
-#: apps/luces/main/lz_tabs.c:387
+#: apps/luces/main/lz_tabs.c:437
 %d aparatos, %d canales de 512	%d Geräte, %d von 512 Kanälen
 
-#: apps/luces/main/lz_tabs.c:411
+#: apps/luces/main/lz_tabs.c:462
 TIPOS DE APARATO	GERÄTETYPEN
 
-#: apps/luces/main/lz_tabs.c:419
+#: apps/luces/main/lz_tabs.c:470
 incluido	eingebaut
 
-#: apps/luces/main/lz_tabs.c:430
+#: apps/luces/main/lz_tabs.c:481
 Volver a leer los tipos de la tarjeta	Typen von der Karte neu lesen
 
-#: apps/luces/main/lz_tabs.c:432
+#: apps/luces/main/lz_tabs.c:483
 Un tipo nuevo es un archivo .csv en %s/aparatos, con una línea nombre y una línea canales (ahí hay un ejemplo). Desde el portal también se pueden escribir.	Ein neuer Typ ist eine .csv-Datei in %s/aparatos mit einer Zeile nombre und einer Zeile canales (dort liegt ein Beispiel). Das Portal kann sie auch schreiben.
 
-#: apps/luces/main/lz_tabs.c:505
+#: apps/luces/main/lz_tabs.c:568
+Universo Art-Net del U1 (0 a 32767)	Art-Net-Universum von U1 (0 bis 32767)
+
+#: apps/luces/main/lz_tabs.c:580
+Dirección IP del nodo Art-Net	IP-Adresse des Art-Net-Knotens
+
+#: apps/luces/main/lz_tabs.c:594
 PUERTO	PORT
 
-#: apps/luces/main/lz_tabs.c:519
+#: apps/luces/main/lz_tabs.c:620
+Mandar por la red	Über das Netz senden
+
+#: apps/luces/main/lz_tabs.c:627
+A toda la red	An das ganze Netz
+
+#: apps/luces/main/lz_tabs.c:629
+A un nodo…	An einen Knoten…
+
+#: apps/luces/main/lz_tabs.c:632
+U1 = universo %u	U1 = Universum %u
+
+#: apps/luces/main/lz_tabs.c:635
+Cada universo con algún aparato sale 40 veces por segundo como Art-Net (UDP 6454): a toda la red, o a la IP de un nodo. U1 lleva el universo elegido, U2 el siguiente, y así. Para un nodo Art-Net a DMX, consolas y programas de la PC.	Jedes Universum mit einem Gerät geht 40-mal pro Sekunde als Art-Net hinaus (UDP 6454): an das ganze Netz oder an die IP eines Knotens. U1 trägt das gewählte Universum, U2 das nächste und so weiter. Für einen Art-Net-zu-DMX-Knoten, Konsolen und PC-Programme.
+
+#: apps/luces/main/lz_tabs.c:637
 LOS 512 CANALES COMO SALEN (OSCUROS: SIN APARATO)	DIE 512 KANÄLE, WIE SIE HINAUSGEHEN (DUNKEL: KEIN GERÄT)
 
-#: apps/luces/main/lz_tabs.c:524
+#: apps/luces/main/lz_tabs.c:648
 La salida arranca cerrada cada vez que se abre la app: ▶ arriba la abre. Sigue saliendo con la app en segundo plano. 40 paquetes por segundo, 512 canales, BREAK de 176 µs. Para ver qué llega del otro lado, la app DMX en Analizador.	Der Ausgang startet bei jedem Öffnen der App geschlossen: ▶ oben öffnet ihn. Er läuft im Hintergrund weiter. 40 Pakete pro Sekunde, 512 Kanäle, BREAK von 176 µs. Was am anderen Ende ankommt, zeigt die DMX-App im Analysator.
 
-#: apps/luces/main/lz_tabs.c:535
+#: apps/luces/main/lz_tabs.c:659
 Canal %d: %u	Kanal %d: %u
 
-#: apps/luces/main/lz_tabs.c:538
+#: apps/luces/main/lz_tabs.c:662
 fijo	fest
 
-#: apps/luces/main/lz_tabs.c:539
+#: apps/luces/main/lz_tabs.c:663
 sin aparato	kein Gerät
 
-#: apps/luces/main/lz_tabs.c:541
+#: apps/luces/main/lz_tabs.c:665
 \nSaliendo por %s: %.1f paquetes/s, %lu mandados.	\nSendet über %s: %.1f Pakete/s, %lu gesendet.
 
-#: apps/luces/main/lz_tabs.c:542
+#: apps/luces/main/lz_tabs.c:666
 \nSalida cerrada (%s).	\nAusgang geschlossen (%s).
+
+#: apps/luces/main/lz_tabs.c:669
+Apagado.	Aus.
+
+#: apps/luces/main/lz_tabs.c:671
+%lu paquetes mandados a %s	%lu Pakete an %s gesendet
+
+#: (kept from the previous catalog: strings the extractor cannot see)
+saliendo por %s · %.0f paquetes/s%s	sendet über %s · %.0f Pakete/s%s
+
+salida cerrada (%s)	Ausgang geschlossen (%s)
+
+FUNDIDO AL LLAMAR UNA ESCENA	ÜBERBLENDUNG BEIM AUFRUFEN

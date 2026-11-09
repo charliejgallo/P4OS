@@ -704,6 +704,17 @@ GND, TXD to TX as named; and a UART does not drop a byte with a parity
 error, so a slave answers with a good CRC whatever the parity: the speed
 can be found by trying, the format cannot without counting parity errors.
 
+**The line's errors** (2026-11-09): `aos_io_uart_errors(u, &e, clear)`
+counts, since the port opened or the last clear, the bytes with a bad
+parity, the bytes with a bad stop bit (framing), the BREAKs and the bytes
+lost to a full buffer, from the UART driver's event queue (drained on every
+read; ~450 bytes of internal RAM an open UART, the driver's own
+xQueueCreate). A byte with an error still reaches `aos_io_uart_read`. The
+Modbus app's Buscar velocidad uses it to tell the format, and its monitor
+to count bad bytes. In the simulator `P4_SIM_UART_A_FORMAT=8E1` says what
+format the far end talks, and a different one counts errors as a UART
+would.
+
 **In the simulator** a pty stands for the bus: `tools/fake_modbus.py`
 plays slaves, a master, or a busy bus on one, and `P4_SIM_UART_A=<pty>`
 puts it on `uart.a`. `P4_SIM_UART_A=/dev/cu.usbserial-…` puts a real
@@ -740,6 +751,18 @@ simulator's `sim/io_dmx_sim.c`.
   of the last packet.
 - **In the simulator** one bus for all: what an app sends, a receiver
   gets; with nobody sending, a console plays a show (`apps/dmx/README.md`).
+- **RDM** (2026-11-09): `aos_io_dmx_rdm(d, req, len, out, max, timeout_ms)`
+  on a port open to send. The sending task takes the request between two
+  DMX packets: BREAK and MAB as for DMX, the bytes, the wait for the last
+  stop bit; then DE goes low (when the port has one), what the RX pin
+  picked up is thrown away and the answer is read from the driver (in SEND
+  it has the RX pin too, with its pull-up): the first byte within the
+  timeout (2 ms by the standard, 3 by default), the rest until 2 ms of
+  silence. A normal answer's BREAK arrives as zero bytes, dropped; a
+  discovery answer has no BREAK. Call it from a thread: it waits up to a
+  DMX period plus the answer. In the simulator two make-believe fixtures
+  answer (the bench ESP32's responder, `tools/rs485_test/esp32/main/
+  rdm_resp.c`).
 
 The app is **DMX** (`apps/dmx`); the bench's ESP32 plays a console and a
 light with a pixel strip (`tools/rs485_test`). **On the board** on

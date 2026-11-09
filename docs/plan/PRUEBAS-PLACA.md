@@ -413,6 +413,35 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       la carga medida contra el Rigol; un bus cargado (el driver encola
       64 tramas); cuánto tarda en leerse un `.dbc` grande de la tarjeta; y
       grabar y abrir el CSV en SavvyCAN.
+- [ ] **La noche del 2026-11-09: RS485, DMX y Luces nuevos** (todo
+      compilado y probado en el simulador, nada instalado: la OTA y las
+      instalaciones esperan el OK del usuario). Lo pedido, en orden:
+      1. Firmware nuevo por OTA (`tools/ota.sh`): `aos_io_uart_errors`,
+         `aos_io_dmx_rdm`, `aos_hal_tcp_listen`/`accept`,
+         `aos_hal_udp_*`. Las apps nuevas usan esos símbolos: sin el
+         firmware no cargan.
+      2. Las apps `modbus`, `dmx` y `luces` y los idiomas en/de
+         (`tools/install_apps.sh p4os.local modbus dmx luces`,
+         `tools/install_lang.sh p4os.local en de`).
+      3. El ESP32 del banco con RDM (`tools/rs485_test/esp32/build`, por
+         el Programador de la P4 por `usb0`, como la otra vez).
+      A probar:
+      - **RDM:** el ESP32 en el rol de luz, la app DMX en la pestaña RDM:
+        Buscar lo encuentra (UID 7FF0 y el final de su MAC), Identificar
+        hace parpadear la tira en blanco, una dirección nueva corre los
+        pixeles. Medir si la respuesta llega a tiempo con los módulos
+        automáticos (el ESP32 contesta 200 µs después del pedido).
+      - **Nodo Art-Net:** la pestaña Red en Art-Net universo 0; desde la
+        Mac, un emisor Art-Net a la IP de la placa (o Luces en el
+        simulador con Art-Net a esa IP): la tira del ESP32 sigue lo que
+        llega. sACN igual, por multicast.
+      - **Luces con Art-Net:** a la IP de la Mac (no a toda la red: puede
+        haber equipos del usuario), escuchado con un receptor UDP.
+      - **Modbus:** Buscar velocidad con el ESP32 en 19200 8E1 (ahora tiene
+        que marcar 8E1 limpio); el monitor contando errores de línea con el
+        ESP32 en otro formato; la pasarela en el puerto 502 con un cliente
+        Modbus TCP desde la Mac pidiendo al ESP32 esclavo; el esclavo por
+        TCP; los dos perfiles nuevos y el importador de YAML en la página.
 - [x] **DMX con el ESP32 de `tools/rs485_test`** (**anduvo el 2026-11-09**
       con los módulos automáticos: 40 paquetes/s en las dos direcciones,
       512 canales, 0 malos, BREAK medido 176-177 µs; el MAB sale de 33-50

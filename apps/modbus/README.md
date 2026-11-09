@@ -18,7 +18,14 @@ The app is one of three things on the line, one at a time:
   0 and lists who answers (or refuses: an exception also says somebody is
   there); **Buscar velocidad** tries eight speeds (1200-115200) and four
   formats (8N1, 8E1, 8O1, 8N2) with the chosen unit, and a tap on a result
-  sets it.
+  sets it. Since 2026-11-09 it also tells the format: the firmware counts
+  the bytes that come with a bad parity or stop bit (`aos_io_uart_errors`),
+  the format that reads the answer clean goes first, lit, and the tab names
+  it; the others show how many bytes came wrong.
+  **Pasarela Modbus TCP → RTU** (on RTU): a PC program, a SCADA or Home
+  Assistant asks the board over the network (port 502 by default) and the
+  board asks the unit on the bus and answers; exception 0B when the unit is
+  silent. One client at a time, while the link is open.
 - **Esclavo:** the app answers as unit N (1-247), and takes broadcasts
   without answering them. Coils, discrete inputs, holding and input
   registers from 0 to 9999 each; past that exception 02, a bad count 03, an
@@ -28,12 +35,16 @@ The app is one of three things on the line, one at a time:
   32-bit counter, a float), so a master has something to watch. **Faults**
   on demand, to see how a master copes: Mudo (no answer), Lento (answers
   after a delay, 500 ms by default), CRC malo, Ocupado (exception 06) and
-  Falla (04). Also 08, 17 ("P4OS") and 43/14.
+  Falla (04). Also 08, 17 ("P4OS") and 43/14. With the link set to TCP
+  the slave is a **Modbus TCP server** on the chosen port: the same tables
+  and faults (a broken CRC becomes an answer to another transaction), units
+  0 and 255 taken as its own.
 - **Monitor:** listens without ever driving the line (DE stays low, as if
   the board were not there). It splits what goes by into frames, pairs each
   request with its answer and keeps a row per unit: requests, answers,
   unanswered, exceptions, bad CRCs, the average and longest delay, and the
-  last request. Totals of frames, bytes, damaged frames and noise.
+  last request. Totals of frames, bytes, damaged frames, noise and bytes
+  with a line error (a wrong format, or noise).
 
 **Tráfico** shows every frame of any role, newest on top: the time since
 the link opened, the silence before it, TX or RX, the bytes in hex, and what
@@ -98,12 +109,22 @@ a spreadsheet opens:
   random value every second);
 - numbers in decimal with a point, or `0x` hex; `#` starts a comment.
 
-Up to 64 points. The first run writes four examples: the drive the
+Up to 64 points. The first run writes six examples: the drive the
 bench's ESP32 plays (`variador-esp32.csv`, its own map), a generic
 multisensor, a single-phase DIN-rail energy meter laid out like the
-Eastron SDM120's (floats in input registers) and a temperature and
-humidity sensor like the XY-MD02's. The meter's and the sensor's maps are
-the usual ones for those families; check them against the device's manual.
+Eastron SDM120's (floats in input registers), a temperature and humidity
+sensor like the XY-MD02's, a hybrid solar inverter and an 8-cell LiFePO4
+battery BMS. The meter's and the sensor's maps are the usual ones for those
+families; the inverter and the BMS are generic (every brand has its own
+map): check them against the device's manual. A card that already had the
+first four gets the last two once.
+
+**Importing a map:** the portal page takes a Home Assistant YAML (`modbus:`
+with its `sensors`, `binary_sensors` and `switches`: address, input_type,
+data_type, swap, scale, unit, slave, and the hub's baudrate and parity) or
+an ESPHome one (`modbus_controller` and the `modbus_controller` platforms:
+address, register_type, value_type, the multiply filter, the uart's speed
+and parity) and makes a profile of it, to check and save.
 
 **Editing them:** on the board, "Editar" next to the chip (name, note,
 unit, speed, period; each point's name, unit, table, address, type,
@@ -137,7 +158,7 @@ page sends lines of `key=value`: `abrir=1`, `rol=0|1|2`, `puerto=`,
 v v]` (for 05/06/08 the fourth number is the value), `vivo=1`,
 `periodo=`, `punto=<i>,<value>`, `falla=0..5`, `demora=`, `unidad=`,
 `animar=1`, `borrar=cuentas|trafico`, `herramienta=unidades|velocidad|parar`,
-`perfil=<file>`. The app has to be open on the board (in front): the page
+`perfil=<file>`, `pasarela=1|0`, `pasarela_puerto=`. The app has to be open on the board (in front): the page
 says so, and "Abrir la app en la placa" brings it.
 
 ## How it reads the line
@@ -186,6 +207,14 @@ right (reads, writes, FC 16, exception 02 out of the map, 01 for an unknown
 function, 17, 43, a broadcast written and not answered, a bad CRC and
 another unit ignored); as monitor it kept the three units apart, with unit
 2's damaged answers as CRC errors and unit 7 as never answering.
+
+Tried on 2026-11-09, with `P4_SIM_UART_A_FORMAT=8E1` (the simulator then
+counts line errors as a UART would when the app's format is another one):
+Buscar velocidad put 8E1 first, clean, and named it; the gateway on port
+1502 answered a Python Modbus TCP client for the two fake slaves (reads, a
+write read back, exception 0B for a unit nobody plays); the TCP slave on
+port 1503 answered unit 1, ignored unit 2, and played "Ocupado" as
+exception 06.
 
 On a pty the bytes arrive at once, so the delays shown there are not the
 wire's. On the board, with the ESP32 of `tools/rs485_test`: see

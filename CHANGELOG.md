@@ -46,7 +46,28 @@
   portal page is a second console made for a phone. Sample scenes to try
   the chase with, and three test modes: one fixture at a time (wrong
   addresses), red-green-blue-white (channels in the wrong order) and a
-  slow breath (the dimming curve).
+  slow breath (the dimming curve). Four universes, the first on RS485 and
+  all of them as **Art-Net** to the network or one node; groups; each
+  scene with its own fade; twelve built-in types.
+- **DMX: a network node and RDM.** The DMX app's Red tab makes the board an
+  Art-Net or sACN (E1.31) node: one universe from the network goes out of
+  the RS485 port, and an ArtPoll is answered. Its RDM tab finds the RDM
+  fixtures on the line by discovery, reads what they are, sets their
+  address and label and makes them show themselves; the firmware sends the
+  requests between DMX packets (`aos_io_dmx_rdm`). The bench's ESP32
+  answers RDM in its light role.
+- **Modbus:** Buscar velocidad also finds the format, by the line's errors
+  (`aos_io_uart_errors`, new: bytes with a bad parity or stop bit), and the
+  monitor counts them; the slave serves **Modbus TCP**; the master on RTU
+  can be a **TCP → RTU gateway** for a PC program or a SCADA; the portal
+  imports Home Assistant and ESPHome YAML maps as profiles; a solar
+  inverter and a battery BMS join the sample profiles.
+- Apps get a TCP server (`aos_hal_tcp_listen`/`accept`) and UDP with
+  multicast (`aos_hal_udp_open`/`recv`/`send`).
+- It was not the portal: taps sent from the Mac seemed lost after reading
+  the serial channel, but they were requests with a 5 s limit waiting on
+  `p4os.local`'s IPv6 lookup, which the board never answers (`curl -4`
+  answers in tens of ms).
 - **Equipos.** The Riden and DOMCOM gateway panels left the Modbus app for
   an app of their own (`apps/equipos`); the Banco keeps its Fuente, and
   the link is set from Equipos.

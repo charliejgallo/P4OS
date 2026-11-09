@@ -28,6 +28,8 @@ The sending (BREAK, timing, 40 packets a second) is the firmware's
 - **Escenario:** the fixtures as tiles in the colour they show; a tap
   selects one, a long press selects only that one, and Todos / Ninguno /
   Pares / Impares. With none selected, what follows acts on all of them.
+  **Groups** keep a selection with a name ("+ Grupo" stores the selected
+  fixtures): a tap selects the group, a long press offers to delete it.
   Intensity (a slider and 0-100 %), eleven colours (a colour on a dark
   fixture turns it on), strobe, a pan/tilt pad (when some fixture moves),
   effects (rainbow, wave, sparkle) with their speed, and the master.
@@ -41,20 +43,33 @@ The sending (BREAK, timing, 40 packets a second) is the firmware's
   - **Respirar** raises and lowers the intensity slowly in the look's
     colour: steps or flicker at the bottom are the fixture's dimming curve.
 - **Escenas:** "Guardar lo que hay" stores every fixture's look as a
-  scene; a tap calls it back with the chosen fade (cut to 5 s), a long
-  press records it again, renames it or deletes it. The chase goes through
+  scene, with the fade the chips say (cut to 5 s); each scene keeps its
+  own fade, shown on its tile, and a tap calls it back with it. A long
+  press records it again, changes its fade, renames it or deletes it. The chase goes through
   every scene in order at a tempo (BPM by hand or by tapping Tap to the
   music) with a cut, half or all of each step as a fade. It needs two
   different scenes at least (with one it calls the same over and over, and
   nothing changes; the tab says so). **Escenas de muestra** adds five for
   whatever is patched (red, green, blue, a rainbow across the fixtures,
   odd and even in two colours); a first show starts with them.
-- **Patch:** the fixtures with their addresses (orange when they overlap
-  or go past 512); a tap edits the name, the address and the type, or
-  removes it. "Agregar aparatos" adds 1 to 16 of a type at the next free
-  addresses. Below, the types with their channels.
-- **Salida:** the port, what goes out, and the 512 channels as a map (dark:
-  no fixture); a tap on a channel says its value and whose it is.
+- **Patch:** the fixtures with their universe and addresses (orange when
+  they overlap or go past 512); a tap edits the name, the address, the
+  universe and the type, or removes it. "Agregar aparatos" adds 1 to 16 of
+  a type at the next free addresses of a universe. Below, the types with
+  their channels: twelve built in (a dimmer, RGB, RGBW, dimmer + RGB, a
+  7-channel PAR, an 8-channel RGBW PAR, an RGBWA+UV PAR, an RGBW wash, two
+  moving heads, a strobe, a fog machine) and the card's.
+- **Salida:** the port, **Art-Net**, and the 512 channels of each universe
+  as a map (dark: no fixture); a tap on a channel says its value and whose
+  it is.
+
+**Four universes:** universe 1 goes out on the RS485 port; every universe
+with a fixture also goes out as **Art-Net** when it is on (ArtDmx on UDP
+6454, 40 times a second, `main/lz_net.c`, a thread of its own): to the
+whole network (the broadcast) or to one node's IP, universe 1 with the
+chosen Art-Net universe (port-address) and the rest after it. For an
+Art-Net to DMX node (the DMX app's Red tab on another board is one), a
+console or a PC program.
 
 **The output opens closed** every time the app opens (▶ in the bar): sending
 on somebody's rig is the user's call. Once open it keeps going with the app
@@ -64,8 +79,11 @@ in the background.
 
 `<card>/luces/`:
 
-- `patch.csv`: `nombre,tipo,direccion` a line. The first time, eight RGB
-  pixels at 1-24 (the bench's strip) and a 7-channel PAR at 25.
+- `patch.csv`: `nombre,tipo,direccion,universo` a line (the universe 1-4,
+  1 when missing). The first time, eight RGB pixels at 1-24 (the bench's
+  strip) and a 7-channel PAR at 25.
+- `grupos.txt`: a group a line, `name|i,i,...` with `i` the fixture's place
+  in the patch.
 - `escenas.txt`: a scene a line (the five sample scenes when it is missing), `name|fade ms|i:dim,r,g,b,w,amber,uv,strobe,pan,tilt;...`
   with `i` the fixture's place in the patch.
 - `aparatos/*.csv`: the types, two lines each:
@@ -101,6 +119,10 @@ colours, the pad), two scenes stored and called back with a fade, the chase
 at 120 BPM, the output at 40 packets a second, the four tabs in portrait and
 landscape; from the portal page in a phone-sized window, the same plus
 adding fixtures, changing an address and writing a new type to the card.
+Later the same night: a fixture in universe 2, a group of three pixels and
+blue on it alone, a scene's own fade, and Art-Net to 127.0.0.1 with base 3,
+heard by a Python listener as universes 3 and 4 at 40 packets a second;
+the DMX app's node in the same simulator took universe 3 and put it out.
 
 On the board, the same day: Luces on `uart.a` driving the bench's ESP32
 (`tools/rs485_test/esp32`, DMX light role, channels 1-24) through the two
@@ -117,7 +139,9 @@ the warning.
 ## Files
 
 - `main/lz.h` the model; `main/lz_core.c` the library, the show on the
-  card, the programmer, the fades, the chase, the effects and the universe
+  card, the programmer, the groups, the fades, the chase, the effects and
+  the universes
+- `main/lz_net.c` Art-Net out, from a thread of its own
 - `main/lz_ui.h`, `main/luces.c` the frame (bar, tabs, keypad, keyboard,
   the output); `main/lz_stage.c` Escenario; `main/lz_tabs.c` Escenas,
   Patch and Salida

@@ -6,7 +6,7 @@
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
 #: apps/luces/web/luces.js:117
-#: apps/luces/web/luces.js:466
+#: apps/luces/web/luces.js:519
 Luces	Licht
 
 #: apps/luces/web/luces.js:124
@@ -16,208 +16,256 @@ La app Luces no está abierta en la placa (%s)	Die App Licht ist auf der Platine
 Buscando la app…	Suche die App…
 
 #: apps/luces/web/luces.js:128
-#: apps/luces/web/luces.js:428
+#: apps/luces/web/luces.js:481
 Abrir salida	Ausgang öffnen
 
-#: apps/luces/web/luces.js:149
+#: apps/luces/web/luces.js:150
 Posición (pan y tilt)	Position (Pan und Tilt)
 
-#: apps/luces/web/luces.js:150
+#: apps/luces/web/luces.js:151
 Al centro	Zur Mitte
 
-#: apps/luces/web/luces.js:156
+#: apps/luces/web/luces.js:157
 Todos	Alle
 
-#: apps/luces/web/luces.js:157
+#: apps/luces/web/luces.js:158
 Ninguno	Keiner
 
-#: apps/luces/web/luces.js:158
+#: apps/luces/web/luces.js:159
 Pares	Ungerade
 
-#: apps/luces/web/luces.js:159
+#: apps/luces/web/luces.js:160
 Impares	Gerade
 
-#: apps/luces/web/luces.js:163
+#: apps/luces/web/luces.js:165
 Intensidad	Helligkeit
 
-#: apps/luces/web/luces.js:165
+#: apps/luces/web/luces.js:167
 Color	Farbe
 
-#: apps/luces/web/luces.js:169
+#: apps/luces/web/luces.js:171
 Otro	Andere
 
-#: apps/luces/web/luces.js:171
+#: apps/luces/web/luces.js:173
 Efectos y pruebas	Effekte und Tests
 
-#: apps/luces/web/luces.js:172
+#: apps/luces/web/luces.js:174
 Velocidad	Tempo
 
-#: apps/luces/web/luces.js:173
+#: apps/luces/web/luces.js:175
 El efecto corre sobre los aparatos elegidos al tocarlo (todos, si no hay ninguno elegido), encima de la escena.	Der Effekt läuft auf den Geräten, die beim Antippen gewählt sind (alle, wenn keines gewählt ist), über der Szene.
 
-#: apps/luces/web/luces.js:174
+#: apps/luces/web/luces.js:176
 Pruebas: Recorrido prende un aparato por vez en blanco (cuál es cuál; uno fuera de turno tiene la dirección mal). Colores pasa todos por rojo, verde, azul y blanco (uno de otro color tiene los canales en otro orden que su tipo). Respirar sube y baja la intensidad despacio (escalones o parpadeo abajo son la curva del aparato).	Tests: Durchlauf schaltet ein Gerät nach dem anderen weiß ein (welches welches ist; eines außer der Reihe hat eine falsche Adresse). Farben schickt alle durch Rot, Grün, Blau und Weiß (eines in anderer Farbe hat die Kanäle in anderer Reihenfolge als sein Typ). Atmen fährt die Helligkeit langsam auf und ab (Stufen oder Flackern unten sind die Kurve des Geräts).
 
-#: apps/luces/web/luces.js:211
-#: apps/luces/web/luces.js:417
+#: apps/luces/web/luces.js:213
+#: apps/luces/web/luces.js:470
 Andar	Start
 
-#: apps/luces/web/luces.js:214
+#: apps/luces/web/luces.js:216
 Hacen falta al menos dos escenas distintas: con una sola, la secuencia llama siempre a la misma. "Escenas de muestra" agrega cinco.	Es braucht mindestens zwei verschiedene Szenen: mit nur einer ruft das Lauflicht immer dieselbe auf. "Beispielszenen" fügt fünf hinzu.
 
-#: apps/luces/web/luces.js:218
+#: apps/luces/web/luces.js:220
 Guardar lo que hay	Aktuelles speichern
 
-#: apps/luces/web/luces.js:219
+#: apps/luces/web/luces.js:221
 Escenas de muestra	Beispielszenen
 
-#: apps/luces/web/luces.js:220
-Fundido al llamar una escena	Überblendung beim Aufrufen einer Szene
-
 #: apps/luces/web/luces.js:222
+Fundido de las escenas nuevas (cada una guarda el suyo)	Überblendung neuer Szenen (jede behält ihre)
+
+#: apps/luces/web/luces.js:224
 Secuencia: una escena tras otra, al tiempo	Lauflicht: eine Szene nach der anderen, im Takt
 
-#: apps/luces/web/luces.js:227
+#: apps/luces/web/luces.js:229
 Pasa por todas las escenas en orden, una por golpe. Tap: tocalo al ritmo de la música, tres o cuatro veces.	Geht alle Szenen der Reihe nach durch, eine pro Schlag. Tap: drei- oder viermal im Takt der Musik tippen.
 
-#: apps/luces/web/luces.js:242
-#: apps/luces/web/luces.js:251
+#: apps/luces/web/luces.js:244
+#: apps/luces/web/luces.js:257
 Nombre de la escena	Name der Szene
 
-#: apps/luces/web/luces.js:242
+#: apps/luces/web/luces.js:244
 Escena %d	Szene %d
 
-#: apps/luces/web/luces.js:248
-%s: 1 volver a grabar con lo que hay ahora, 2 cambiar el nombre, 3 borrar	%s: 1 mit dem Aktuellen neu speichern, 2 umbenennen, 3 löschen
+#: apps/luces/web/luces.js:250
+%s: 1 volver a grabar con lo que hay ahora, 2 cambiar el nombre, 3 borrar, 4 su fundido	%s: 1 mit dem Aktuellen neu speichern, 2 umbenennen, 3 löschen, 4 ihre Überblendung
 
 #: apps/luces/web/luces.js:253
+Fundido de %s al llamarla, en segundos	Überblendung von %s beim Aufrufen, in Sekunden
+
+#: apps/luces/web/luces.js:259
 ¿Borrar la escena %s?	Szene %s löschen?
 
-#: apps/luces/web/luces.js:261
+#: apps/luces/web/luces.js:268
 PAR de 8 canales	PAR mit 8 Kanälen
 
-#: apps/luces/web/luces.js:264
+#: apps/luces/web/luces.js:271
 Agregar aparatos	Geräte hinzufügen
 
-#: apps/luces/web/luces.js:266
-#: apps/luces/web/luces.js:317
+#: apps/luces/web/luces.js:273
+#: apps/luces/web/luces.js:327
 Tipo	Typ
 
-#: apps/luces/web/luces.js:267
+#: apps/luces/web/luces.js:274
 Cuántos	Wie viele
 
-#: apps/luces/web/luces.js:268
+#: apps/luces/web/luces.js:275
+#: apps/luces/web/luces.js:327
+Universo	Universum
+
+#: apps/luces/web/luces.js:276
 Agregar	Hinzufügen
 
-#: apps/luces/web/luces.js:269
+#: apps/luces/web/luces.js:277
 Van desde la primera dirección libre, uno tras otro.	Ab der ersten freien Adresse, eins nach dem anderen.
 
-#: apps/luces/web/luces.js:271
+#: apps/luces/web/luces.js:279
 Tipos de aparato	Gerätetypen
 
-#: apps/luces/web/luces.js:272
+#: apps/luces/web/luces.js:280
 Un tipo nuevo	Ein neuer Typ
 
-#: apps/luces/web/luces.js:273
-#: apps/luces/web/luces.js:317
+#: apps/luces/web/luces.js:281
+#: apps/luces/web/luces.js:327
 Nombre	Name
 
-#: apps/luces/web/luces.js:273
+#: apps/luces/web/luces.js:281
 Canales, en orden	Kanäle, der Reihe nach
 
-#: apps/luces/web/luces.js:274
+#: apps/luces/web/luces.js:282
 Guardar en la tarjeta	Auf der Karte speichern
 
-#: apps/luces/web/luces.js:275
+#: apps/luces/web/luces.js:283
 Una palabra por canal, como dice el manual del aparato: %s; o un número, para un canal fijo en ese valor (un modo, una macro en 0).	Ein Wort pro Kanal, wie im Handbuch des Geräts: %s; oder eine Zahl für einen Kanal, der auf diesem Wert bleibt (ein Modus, ein Makro auf 0). Die Wörter bleiben spanisch.
 
-#: apps/luces/web/luces.js:279
+#: apps/luces/web/luces.js:287
 Falta el nombre o los canales	Name oder Kanäle fehlen
 
-#: apps/luces/web/luces.js:281
+#: apps/luces/web/luces.js:289
 No entiendo: %s	Nicht verstanden: %s
 
-#: apps/luces/web/luces.js:289
+#: apps/luces/web/luces.js:297
 Guardado en %s	Gespeichert in %s
 
-#: apps/luces/web/luces.js:309
+#: apps/luces/web/luces.js:319
 Se pisa con otro aparato o se pasa del canal 512	Überschneidet sich mit einem anderen Gerät oder geht über Kanal 512
 
-#: apps/luces/web/luces.js:311
+#: apps/luces/web/luces.js:321
 Sacar del patch	Aus dem Patch nehmen
 
-#: apps/luces/web/luces.js:312
+#: apps/luces/web/luces.js:322
 ¿Sacar %s del patch?	%s aus dem Patch nehmen?
 
-#: apps/luces/web/luces.js:315
+#: apps/luces/web/luces.js:325
 %d aparatos, %d canales de 512	%d Geräte, %d von 512 Kanälen
 
-#: apps/luces/web/luces.js:317
+#: apps/luces/web/luces.js:327
 Dirección	Adresse
 
-#: apps/luces/web/luces.js:317
+#: apps/luces/web/luces.js:327
 Canales	Kanäle
 
-#: apps/luces/web/luces.js:319
+#: apps/luces/web/luces.js:329
 incluido	eingebaut
 
 #: apps/luces/web/luces.js:336
+vacío: a toda la red	leer: das ganze Netz
+
+#: apps/luces/web/luces.js:352
 Puerto	Port
 
-#: apps/luces/web/luces.js:337
+#: apps/luces/web/luces.js:355
+Mandar por la red	Über das Netz senden
+
+#: apps/luces/web/luces.js:356
+IP del nodo	Knoten-IP
+
+#: apps/luces/web/luces.js:357
+Universo Art-Net del U1	Art-Net-Universum von U1
+
+#: apps/luces/web/luces.js:359
+Cada universo con algún aparato sale 40 veces por segundo como Art-Net (UDP 6454). U1 lleva el universo elegido, U2 el siguiente, y así. El U1 también sale por RS485.	Jedes Universum mit einem Gerät geht 40-mal pro Sekunde als Art-Net hinaus (UDP 6454). U1 trägt das gewählte Universum, U2 das nächste und so weiter. U1 geht auch über RS485 hinaus.
+
+#: apps/luces/web/luces.js:360
 Los 512 canales como salen	Die 512 Kanäle, wie sie hinausgehen
 
-#: apps/luces/web/luces.js:338
+#: apps/luces/web/luces.js:361
 Oscuros: sin aparato. Tocá un canal para ver qué es.	Dunkel: kein Gerät. Einen Kanal antippen, um zu sehen, was er ist.
 
-#: apps/luces/web/luces.js:363
+#: apps/luces/web/luces.js:389
 Canal %d: %d	Kanal %d: %d
 
-#: apps/luces/web/luces.js:363
+#: apps/luces/web/luces.js:389
 fijo	fest
 
-#: apps/luces/web/luces.js:363
+#: apps/luces/web/luces.js:389
 sin aparato	kein Gerät
 
-#: apps/luces/web/luces.js:365
+#: apps/luces/web/luces.js:391
 Saliendo por %s: %s paquetes/s, %d mandados.	Sendet über %s: %s Pakete/s, %d gesendet.
 
-#: apps/luces/web/luces.js:366
+#: apps/luces/web/luces.js:392
 Salida cerrada (%s).	Ausgang geschlossen (%s).
 
-#: apps/luces/web/luces.js:392
-%d elegidos	%d gewählt
+#: apps/luces/web/luces.js:401
+Apagado.	Aus.
 
-#: apps/luces/web/luces.js:392
-ninguno elegido: todos	keines gewählt: alle
+#: apps/luces/web/luces.js:401
+%s paquetes mandados a %s	%s Pakete an %s gesendet
 
 #: apps/luces/web/luces.js:410
-Grabar, renombrar o borrar	Speichern, umbenennen oder löschen
+Elegí aparatos antes de guardar un grupo	Vor dem Speichern einer Gruppe Geräte wählen
 
 #: apps/luces/web/luces.js:411
+Nombre del grupo (con los aparatos elegidos)	Name der Gruppe (mit den gewählten Geräten)
+
+#: apps/luces/web/luces.js:411
+Grupo %d	Gruppe %d
+
+#: apps/luces/web/luces.js:420
+¿Borrar el grupo %s? Los aparatos quedan.	Gruppe %s löschen? Die Geräte bleiben.
+
+#: apps/luces/web/luces.js:421
++ Grupo	+ Gruppe
+
+#: apps/luces/web/luces.js:444
+%d elegidos	%d gewählt
+
+#: apps/luces/web/luces.js:444
+ninguno elegido: todos	keines gewählt: alle
+
+#: apps/luces/web/luces.js:462
+corte	Schnitt
+
+#: apps/luces/web/luces.js:463
+Grabar, renombrar o borrar	Speichern, umbenennen oder löschen
+
+#: apps/luces/web/luces.js:464
 Todavía no hay escenas. Armá un look en Escenario y guardalo acá.	Noch keine Szenen. Ein Bild in Bühne bauen und hier speichern.
 
-#: apps/luces/web/luces.js:417
+#: apps/luces/web/luces.js:470
 Parar	Stopp
 
-#: apps/luces/web/luces.js:426
+#: apps/luces/web/luces.js:479
 Saliendo por %s · %s paquetes/s	Sendet über %s · %s Pakete/s
 
-#: apps/luces/web/luces.js:427
+#: apps/luces/web/luces.js:480
 Salida cerrada (%s)	Ausgang geschlossen (%s)
 
-#: apps/luces/web/luces.js:428
+#: apps/luces/web/luces.js:481
 Cerrar salida	Ausgang schließen
 
-#: apps/luces/web/luces.js:448
+#: apps/luces/web/luces.js:501
 La app Luces no está abierta en la placa: abrila ahí (o desde Apps) y esta página la maneja.	Die App Licht ist auf der Platine nicht offen: dort (oder unter Apps) öffnen, dann steuert diese Seite sie.
 
-#: apps/luces/web/luces.js (names in tables, through tr())
+#: (kept from the previous catalog: strings the extractor cannot see)
+Fundido al llamar una escena	Überblendung beim Aufrufen einer Szene
+
+%s: 1 volver a grabar con lo que hay ahora, 2 cambiar el nombre, 3 borrar	%s: 1 mit dem Aktuellen neu speichern, 2 umbenennen, 3 löschen
+
 Escenario	Bühne
 
 Escenas	Szenen
-
-Patch	Patch
 
 Salida	Ausgang
 
@@ -236,8 +284,6 @@ Cian	Cyan
 Azul	Blau
 
 Violeta	Violett
-
-Magenta	Magenta
 
 Cálido	Warm
 
@@ -262,8 +308,6 @@ Corte	Schnitt
 Mitad	Halb
 
 Todo fundido	Ganz geblendet
-
-0,5 s	0,5 s
 
 Recorrido	Durchlauf
 

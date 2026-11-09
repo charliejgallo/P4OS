@@ -15,42 +15,72 @@ Aparato	Device
 Analizador	Analyzer
 
 #: apps/dmx/main/dmx.c:25
+Red	Network
+
+#: apps/dmx/main/dmx.c:25
 Cableado	Wiring
 
-#: apps/dmx/main/dmx.c:207
+#: apps/dmx/main/dmx.c:259
 Cancelar	Cancel
 
-#: apps/dmx/main/dmx.c:207
+#: apps/dmx/main/dmx.c:259
 Aplicar	Apply
 
-#: apps/dmx/main/dmx.c:233
+#: apps/dmx/main/dmx.c:286
 no se pudo abrir %s (¿lo tiene otra app?)	could not open %s (is another app using it?)
 
-#: apps/dmx/main/dmx.c:263
+#: apps/dmx/main/dmx.c:316
 #: apps/dmx/main/dx_tabs.c:432
 cerrado	closed
 
-#: apps/dmx/main/dmx.c:266
+#: apps/dmx/main/dmx.c:319
 mandando · %u canales · %.0f paquetes/s	sending · %u channels · %.0f packets/s
 
-#: apps/dmx/main/dmx.c:271
+#: apps/dmx/main/dmx.c:324
 recibiendo · %u canales · %.0f paquetes/s	receiving · %u channels · %.0f packets/s
 
-#: apps/dmx/main/dmx.c:272
+#: apps/dmx/main/dmx.c:325
 escuchando · sin señal	listening · no signal
 
-#: apps/dmx/main/dmx.c:278
+#: apps/dmx/main/dmx.c:331
 Cerrar	Close
 
-#: apps/dmx/main/dmx.c:278
-#: apps/dmx/main/dmx.c:401
+#: apps/dmx/main/dmx.c:331
+#: apps/dmx/main/dmx.c:464
 Abrir	Open
 
-#: apps/dmx/main/dmx.c:315
+#: apps/dmx/main/dmx.c:368
 Puerto	Port
 
-#: apps/dmx/main/dmx.c:324
+#: apps/dmx/main/dmx.c:377
 DMX necesita un puerto UART del header con un transceptor RS485. Un puerto con DE lo deja arriba para mandar y abajo para escuchar.	DMX needs a UART port of the header with an RS485 transceiver. A port with DE keeps it high to send and low to listen.
+
+#: apps/dmx/main/dx_net.c:97
+no se pudo escuchar el puerto %u	could not listen on port %u
+
+#: apps/dmx/main/dx_rdm.c:156
+Buscando…	Searching…
+
+#: apps/dmx/main/dx_rdm.c:188
+Buscando… %d encontrados	Searching… %d found
+
+#: apps/dmx/main/dx_rdm.c:193
+Leyendo %d de %d…	Reading %d of %d…
+
+#: apps/dmx/main/dx_rdm.c:197
+%d aparatos RDM	%d RDM fixtures
+
+#: apps/dmx/main/dx_rdm.c:198
+Ningún aparato contestó RDM.	No fixture answered RDM.
+
+#: apps/dmx/main/dx_rdm.c:228
+Hecho.	Done.
+
+#: apps/dmx/main/dx_rdm.c:229
+El aparato no lo acepta (NACK).	The fixture does not accept it (NACK).
+
+#: apps/dmx/main/dx_rdm.c:230
+El aparato no contestó.	The fixture did not answer.
 
 #: apps/dmx/main/dx_tabs.c:55
 Ir al canal	Go to channel
@@ -184,6 +214,7 @@ Pixel	Pixel
 Dirección de inicio (1-512)	Start address (1-512)
 
 #: apps/dmx/main/dx_tabs.c:348
+#: apps/dmx/main/dx_tabs.c:699
 Dirección	Address
 
 #: apps/dmx/main/dx_tabs.c:360
@@ -231,35 +262,104 @@ LOS 512 CANALES (NARANJA: SE MUEVEN)	THE 512 CHANNELS (ORANGE: MOVING)
 #: apps/dmx/main/dx_tabs.c:508
 BREAK y MAB medidos en el pin, con unos pocos µs de error. Un BREAK de menos de 88 µs o un MAB de menos de 8 son de una consola fuera de norma: muchos aparatos parpadean o ignoran esos paquetes. Malos: con error de trama o cortados. Tocá el mapa para ver esos canales en números.	BREAK and MAB measured on the pin, within a few µs. A BREAK under 88 µs or a MAB under 8 come from a console out of the standard: many fixtures flicker or ignore those packets. Bad: with a framing error or cut short. Tap the map to see those channels as numbers.
 
-#: apps/dmx/main/dx_tabs.c:544
-LOS CONECTORES (DE FRENTE, LADO HEMBRA)	THE CONNECTORS (FRONT, FEMALE SIDE)
-
-#: apps/dmx/main/dx_tabs.c:546
-XLR de 3 (lo común)	3-pin XLR (the usual)
-
-#: apps/dmx/main/dx_tabs.c:547
-XLR de 5 (el estándar)	5-pin XLR (the standard)
-
-#: apps/dmx/main/dx_tabs.c:548
-1: masa o malla. 2 (azul): D−, al B− del módulo. 3 (ámbar): D+, al A+. 4 y 5 no se usan.	1: ground or shield. 2 (blue): D−, to the module's B−. 3 (amber): D+, to A+. 4 and 5 are not used.
-
-#: apps/dmx/main/dx_tabs.c:550
-LO QUE HAY QUE SABER	WHAT TO KNOW
-
-#: apps/dmx/main/dx_tabs.c:552
-En cadena: consola → DMX IN del aparato 1 → su DMX OUT → aparato 2… El último lleva un terminador de 120 Ω entre los pines 2 y 3. Sin él, las luces parpadean o tiemblan.	Daisy-chained: console → fixture 1's DMX IN → its DMX OUT → fixture 2… The last one gets a 120 Ω terminator between pins 2 and 3. Without it, lights flicker or shake.
+#: apps/dmx/main/dx_tabs.c:553
+Universo sACN (1 a 63999)	sACN universe (1 to 63999)
 
 #: apps/dmx/main/dx_tabs.c:553
+Universo Art-Net (0 a 32767)	Art-Net universe (0 to 32767)
+
+#: apps/dmx/main/dx_tabs.c:567
+Apagado: prendelo para que la placa reciba de la red.	Off: turn it on for the board to receive from the network.
+
+#: apps/dmx/main/dx_tabs.c:569
+Esperando %s del universo %u en %s…	Waiting for %s on universe %u at %s…
+
+#: apps/dmx/main/dx_tabs.c:573
+%.0f paquetes/s de %s · %lu en total · el último hace %lu ms · %lu de otros universos · %lu ArtPoll contestados%s	%.0f packets/s from %s · %lu in all · the last %lu ms ago · %lu for other universes · %lu ArtPolls answered%s
+
+#: apps/dmx/main/dx_tabs.c:575
+ · SIN DATOS (la salida mantiene lo último)	 · NO DATA (the output holds the last levels)
+
+#: apps/dmx/main/dx_tabs.c:601
+Recibir de la red y sacarlo por DMX	Receive from the network and send it out as DMX
+
+#: apps/dmx/main/dx_tabs.c:611
+Universo	Universe
+
+#: apps/dmx/main/dx_tabs.c:616
+LOS PRIMEROS 32 CANALES COMO SALEN	THE FIRST 32 CHANNELS AS THEY GO OUT
+
+#: apps/dmx/main/dx_tabs.c:622
+La placa hace de nodo: lo que una consola, un programa de la PC o Luces en otra placa mandan por la red para ese universo sale por el puerto RS485 como DMX. Art-Net por UDP 6454 (contesta el ArtPoll, así la consola la ve en su lista de nodos); sACN por multicast 239.255.x.y, puerto 5568. Si la red deja de mandar, la salida mantiene lo último. Sigue andando con la app en segundo plano.	The board is a node: what a console, a PC program or Lights on another board sends over the network for that universe goes out of the RS485 port as DMX. Art-Net on UDP 6454 (it answers ArtPoll, so the console lists it among its nodes); sACN by multicast 239.255.x.y, port 5568. If the network stops sending, the output holds the last levels. It keeps going with the app in the background.
+
+#: apps/dmx/main/dx_tabs.c:636
+Abriendo el puerto: tocá Buscar otra vez.	Opening the port: tap Search again.
+
+#: apps/dmx/main/dx_tabs.c:663
+Dirección DMX nueva (1 a 512)	New DMX address (1 to 512)
+
+#: apps/dmx/main/dx_tabs.c:676
+Nombre del aparato (DEVICE_LABEL)	Fixture name (DEVICE_LABEL)
+
+#: apps/dmx/main/dx_tabs.c:689
+(sin nombre)	(no name)
+
+#: apps/dmx/main/dx_tabs.c:694
+Canales %u a %u (%u canales)	Channels %u to %u (%u channels)
+
+#: apps/dmx/main/dx_tabs.c:695
+No contestó DEVICE_INFO.	It did not answer DEVICE_INFO.
+
+#: apps/dmx/main/dx_tabs.c:698
+Dejar de identificar	Stop identifying
+
+#: apps/dmx/main/dx_tabs.c:698
+Identificar	Identify
+
+#: apps/dmx/main/dx_tabs.c:700
+Nombre	Name
+
+#: apps/dmx/main/dx_tabs.c:708
+Tocá Buscar: la app pregunta en la línea quién habla RDM.	Tap Search: the app asks on the line who speaks RDM.
+
+#: apps/dmx/main/dx_tabs.c:710
+ · %lu pedidos, %lu respuestas, %lu choques en la búsqueda, %lu respuestas malas	 · %lu requests, %lu answers, %lu collisions while searching, %lu bad answers
+
+#: apps/dmx/main/dx_tabs.c:726
+Buscar aparatos	Search fixtures
+
+#: apps/dmx/main/dx_tabs.c:731
+RDM va por el mismo par que DMX: entre paquete y paquete la placa pregunta y el aparato contesta. La búsqueda encuentra a cada uno por su UID sin conocerlo (partiendo el espacio en dos cuando contestan varios a la vez); después se le puede cambiar la dirección y el nombre o pedirle que se muestre. Sólo los aparatos con RDM contestan, y un splitter DMX común corta la vuelta.	RDM goes over the same pair as DMX: between packets the board asks and the fixture answers. The search finds each one by its UID without knowing it (splitting the space in two when several answer at once); then its address and name can be changed, or it can be asked to show itself. Only fixtures with RDM answer, and a plain DMX splitter cuts the way back.
+
+#: apps/dmx/main/dx_tabs.c:769
+LOS CONECTORES (DE FRENTE, LADO HEMBRA)	THE CONNECTORS (FRONT, FEMALE SIDE)
+
+#: apps/dmx/main/dx_tabs.c:771
+XLR de 3 (lo común)	3-pin XLR (the usual)
+
+#: apps/dmx/main/dx_tabs.c:772
+XLR de 5 (el estándar)	5-pin XLR (the standard)
+
+#: apps/dmx/main/dx_tabs.c:773
+1: masa o malla. 2 (azul): D−, al B− del módulo. 3 (ámbar): D+, al A+. 4 y 5 no se usan.	1: ground or shield. 2 (blue): D−, to the module's B−. 3 (amber): D+, to A+. 4 and 5 are not used.
+
+#: apps/dmx/main/dx_tabs.c:775
+LO QUE HAY QUE SABER	WHAT TO KNOW
+
+#: apps/dmx/main/dx_tabs.c:777
+En cadena: consola → DMX IN del aparato 1 → su DMX OUT → aparato 2… El último lleva un terminador de 120 Ω entre los pines 2 y 3. Sin él, las luces parpadean o tiemblan.	Daisy-chained: console → fixture 1's DMX IN → its DMX OUT → fixture 2… The last one gets a 120 Ω terminator between pins 2 and 3. Without it, lights flicker or shake.
+
+#: apps/dmx/main/dx_tabs.c:778
 Nunca un cable en Y: para ramificar se usa un splitter DMX. Hasta 32 aparatos por tramo.	Never a Y cable: to branch, use a DMX splitter. Up to 32 fixtures per run.
 
-#: apps/dmx/main/dx_tabs.c:554
+#: apps/dmx/main/dx_tabs.c:779
 Cable de 110-120 Ω (cable DMX o de datos), no de micrófono: en tramos cortos anda igual, en tramos largos da errores.	110-120 Ω cable (DMX or data cable), not microphone cable: on short runs it works anyway, on long ones it gives errors.
 
-#: apps/dmx/main/dx_tabs.c:555
+#: apps/dmx/main/dx_tabs.c:780
 Algunos equipos baratos traen D+ y D− al revés. Si un aparato no responde, probá invertir los pines 2 y 3.	Some cheap gear has D+ and D− swapped. If a fixture does not respond, try swapping pins 2 and 3.
 
-#: apps/dmx/main/dx_tabs.c:556
+#: apps/dmx/main/dx_tabs.c:781
 A 250 000 baudios, un módulo RS485 automático puede no llegar: si los paquetes salen malos, un módulo con pin DE (MAX3485, SP3485) resuelve.	At 250000 baud an automatic RS485 module may not keep up: if packets come out bad, a module with a DE pin (MAX3485, SP3485) fixes it.
 
-#: apps/dmx/main/dx_tabs.c:557
+#: apps/dmx/main/dx_tabs.c:782
 Cada aparato tiene una dirección de inicio y una cantidad de canales según su modo; dos aparatos con la misma dirección hacen lo mismo.	Each fixture has a start address and a number of channels depending on its mode; two fixtures at the same address do the same thing.

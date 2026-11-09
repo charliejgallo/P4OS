@@ -30,12 +30,32 @@ pins: 1 ground, 2 D−, 3 D+), 120 Ω at the far end, no Y cables.
   measured on the pin** (red when under the standard), packets, bad ones,
   other start codes, short BREAKs, and the 512 channels as a map, the ones
   moving lit orange; a tap on the map shows those 32 as numbers.
+- **Red** (2026-11-09): the board as a **network node**. What a console, a
+  PC program or Luces on another board sends over the network for one
+  universe goes out of the RS485 port as DMX: **Art-Net** (UDP 6454, the
+  port-address; an ArtPoll gets an ArtPollReply, so a console lists the
+  board among its nodes) or **sACN / E1.31** (multicast 239.255.x.y, port
+  5568; preview and stream-ending packets skipped). Packets a second, the
+  source, how long since the last one, packets for other universes, the
+  first 32 channels as they go out. If the network stops, the output holds
+  the last levels; with the node on it keeps going in the background
+  (`main/dx_net.c`, a thread of its own).
+- **RDM** (2026-11-09): the fixtures on the line that speak RDM (ANSI
+  E1.20). **Buscar aparatos** finds them by their UIDs with the standard's
+  binary search (un-mute everyone, DISC_UNIQUE_BRANCH over a range, split
+  it when answers collide, mute each one found), then reads DEVICE_INFO
+  (address, footprint, model) and the labels. For each: **Identificar**
+  (on and off), a new **Dirección**, a new **Nombre** (DEVICE_LABEL).
+  Counts of requests, answers, collisions and bad answers. The firmware
+  sends each request between two DMX packets and reads the answer
+  (`aos_io_dmx_rdm`); the app runs the jobs in a thread (`main/dx_rdm.c`).
+  A plain DMX splitter does not pass the answers back.
 - **Cableado:** the XLR pins and what to know (termination, no Y, cable,
   D+/D− swapped by some makers, automatic modules at 250 kbaud).
 
-**The link** opens closed every time and follows the tab: Consola sends,
-Aparato and Analizador receive (Cableado keeps whatever it had). Port:
-any UART port of `modules.txt` (`uart.a`: TX 30, RX 31, DE 29).
+**The link** opens closed every time and follows the tab: Consola, Red and
+RDM send, Aparato and Analizador receive (Cableado keeps whatever it had).
+Port: any UART port of `modules.txt` (`uart.a`: TX 30, RX 31, DE 29).
 
 ## In the simulator
 
@@ -48,6 +68,16 @@ rainbow on channels 1-24, a 7-channel PAR on 25-31, a fog machine on 32,
 Tried there on 2026-11-09: the analyzer showed 40 packets a second, 512
 slots, BREAK 176 µs and MAB 12 µs; the fixture drew the PAR and the bar;
 the console sent its patterns.
+
+Two make-believe RDM fixtures answer on the simulator's bus (the bench
+ESP32's responder, `tools/rs485_test/esp32/main/rdm_resp.c`): a PAR at 25
+and a pixel bar at 1, UIDs 7FF0:00000101 and 7FF0:00000102; when both
+answer a discovery branch their answers collide. Tried there: both found
+(47 collisions on the way: their UIDs differ in the last bit), their
+labels and channels read, identify on, the PAR moved to 40. The node, with
+Luces in the same simulator sending Art-Net to 127.0.0.1 (universe 3, the
+pixels in green) and a Python sACN sender (universe 3, channel i = 7i): the
+levels came through, the ArtPolls were answered.
 
 ## On the bench (2026-11-09)
 
@@ -72,5 +102,7 @@ minding); the BREAK is exact.
 ## Files
 
 - `main/dx.h` what the files share
-- `main/dmx.c` the app: the bar, the link, the tabs, the keypad, settings
-- `main/dx_tabs.c` the four tabs
+- `main/dmx.c` the app: the bar, the link, the tabs, the keypad, a text field, settings
+- `main/dx_tabs.c` the six tabs
+- `main/dx_net.c` the network node: Art-Net and sACN in, ArtPollReply out
+- `main/dx_rdm.c` RDM: requests, answers, discovery, the actions

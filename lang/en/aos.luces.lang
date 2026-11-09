@@ -17,38 +17,38 @@ Patch	Patch
 #: apps/luces/main/luces.c:38
 Salida	Output
 
-#: apps/luces/main/luces.c:272
+#: apps/luces/main/luces.c:278
 Cancelar	Cancel
 
-#: apps/luces/main/luces.c:272
+#: apps/luces/main/luces.c:278
 Aplicar	Apply
 
-#: apps/luces/main/luces.c:328
+#: apps/luces/main/luces.c:334
 no se pudo abrir %s (¿lo tiene otra app?)	could not open %s (is another app using it?)
 
-#: apps/luces/main/luces.c:349
-saliendo por %s · %.0f paquetes/s%s	sending on %s · %.0f packets/s%s
+#: apps/luces/main/luces.c:355
+saliendo por %s · %.0f paquetes/s%s%s	sending on %s · %.0f packets/s%s%s
 
-#: apps/luces/main/luces.c:352
-salida cerrada (%s)	output closed (%s)
+#: apps/luces/main/luces.c:359
+salida cerrada (%s)%s	output closed (%s)%s
 
-#: apps/luces/main/lz_core.c:649
+#: apps/luces/main/lz_core.c:763
 #: apps/luces/main/lz_stage.c:22
 Rojo	Red
 
-#: apps/luces/main/lz_core.c:649
+#: apps/luces/main/lz_core.c:763
 #: apps/luces/main/lz_stage.c:23
 Verde	Green
 
-#: apps/luces/main/lz_core.c:649
+#: apps/luces/main/lz_core.c:763
 #: apps/luces/main/lz_stage.c:24
 Azul	Blue
 
-#: apps/luces/main/lz_core.c:649
+#: apps/luces/main/lz_core.c:763
 #: apps/luces/main/lz_stage.c:30
 Arcoíris	Rainbow
 
-#: apps/luces/main/lz_core.c:649
+#: apps/luces/main/lz_core.c:763
 Pares e impares	Odd and even
 
 #: apps/luces/main/lz_stage.c:22
@@ -88,7 +88,7 @@ Medio	Medium
 Rápido	Fast
 
 #: apps/luces/main/lz_stage.c:30
-#: apps/luces/main/lz_stage.c:162
+#: apps/luces/main/lz_stage.c:199
 Ninguno	None
 
 #: apps/luces/main/lz_stage.c:30
@@ -106,53 +106,69 @@ Colores	Colours
 #: apps/luces/main/lz_stage.c:31
 Respirar	Breathe
 
-#: apps/luces/main/lz_stage.c:162
+#: apps/luces/main/lz_stage.c:75
+elegí aparatos antes de guardar un grupo	select fixtures before storing a group
+
+#: apps/luces/main/lz_stage.c:83
+Grupo %d	Group %d
+
+#: apps/luces/main/lz_stage.c:84
+Nombre del grupo (con los aparatos elegidos)	Group name (with the selected fixtures)
+
+#: apps/luces/main/lz_stage.c:99
+Borrar el grupo (los aparatos quedan)	Delete the group (the fixtures stay)
+
+#: apps/luces/main/lz_stage.c:199
 Todos	All
 
-#: apps/luces/main/lz_stage.c:162
+#: apps/luces/main/lz_stage.c:199
 Pares	Odd
 
-#: apps/luces/main/lz_stage.c:162
+#: apps/luces/main/lz_stage.c:199
 Impares	Even
 
-#: apps/luces/main/lz_stage.c:167
+#: apps/luces/main/lz_stage.c:210
++ Grupo	+ Group
+
+#: apps/luces/main/lz_stage.c:212
 No hay aparatos: agregalos en Patch.	No fixtures: add them in Patch.
 
-#: apps/luces/main/lz_stage.c:200
+#: apps/luces/main/lz_stage.c:246
 Intensidad	Intensity
 
-#: apps/luces/main/lz_stage.c:219
+#: apps/luces/main/lz_stage.c:265
 Color	Colour
 
-#: apps/luces/main/lz_stage.c:249
+#: apps/luces/main/lz_stage.c:295
 Posición (pan y tilt)	Position (pan and tilt)
 
-#: apps/luces/main/lz_stage.c:275
+#: apps/luces/main/lz_stage.c:321
 Al centro	Centre
 
-#: apps/luces/main/lz_stage.c:279
+#: apps/luces/main/lz_stage.c:325
 Efectos y pruebas	Effects and tests
 
-#: apps/luces/main/lz_stage.c:282
+#: apps/luces/main/lz_stage.c:328
 Velocidad	Speed
 
-#: apps/luces/main/lz_stage.c:284
+#: apps/luces/main/lz_stage.c:330
 El efecto corre sobre los aparatos elegidos al tocarlo (todos, si no hay ninguno elegido), encima de la escena.	The effect runs on the fixtures selected when you tap it (all of them if none is), on top of the scene.
 
-#: apps/luces/main/lz_stage.c:285
+#: apps/luces/main/lz_stage.c:331
 Pruebas: Recorrido prende un aparato por vez en blanco (cuál es cuál; uno fuera de turno tiene la dirección mal). Colores pasa todos por rojo, verde, azul y blanco (uno de otro color tiene los canales en otro orden que su tipo). Respirar sube y baja la intensidad despacio (escalones o parpadeo abajo son la curva del aparato).	Tests: Walk lights one fixture at a time in white (which is which; one lit out of turn has a wrong address). Colours takes them all through red, green, blue and white (one in another colour has its channels in another order than its type). Breathe raises and lowers the intensity slowly (steps or flicker at the bottom are the fixture's curve).
 
-#: apps/luces/main/lz_stage.c:291
+#: apps/luces/main/lz_stage.c:337
 Baja la intensidad de todo lo que sale, sin tocar las escenas. Blackout, arriba, apaga todo de golpe.	Dims everything that goes out without touching the scenes. Blackout, above, turns it all off at once.
 
-#: apps/luces/main/lz_stage.c:308
+#: apps/luces/main/lz_stage.c:357
 %d elegidos	%d selected
 
-#: apps/luces/main/lz_stage.c:309
+#: apps/luces/main/lz_stage.c:358
 ninguno elegido: todos	none selected: all
 
 #: apps/luces/main/lz_tabs.c:26
-#: apps/luces/main/lz_tabs.c:141
+#: apps/luces/main/lz_tabs.c:107
+#: apps/luces/main/lz_tabs.c:160
 Corte	Cut
 
 #: apps/luces/main/lz_tabs.c:26
@@ -168,128 +184,174 @@ Escena %d	Scene %d
 #: apps/luces/main/lz_tabs.c:77
 Nombre de la escena	Scene name
 
-#: apps/luces/main/lz_tabs.c:93
+#: apps/luces/main/lz_tabs.c:103
+SU FUNDIDO AL LLAMARLA	ITS FADE WHEN CALLED
+
+#: apps/luces/main/lz_tabs.c:112
 Volver a grabar con lo que hay ahora	Record again with what is on now
 
-#: apps/luces/main/lz_tabs.c:94
+#: apps/luces/main/lz_tabs.c:113
 Cambiar el nombre	Rename
 
-#: apps/luces/main/lz_tabs.c:95
+#: apps/luces/main/lz_tabs.c:114
 Borrar	Delete
 
-#: apps/luces/main/lz_tabs.c:116
+#: apps/luces/main/lz_tabs.c:135
 Tiempo (golpes por minuto)	Tempo (beats per minute)
 
-#: apps/luces/main/lz_tabs.c:135
+#: apps/luces/main/lz_tabs.c:154
 Guardar lo que hay	Store what is on
 
-#: apps/luces/main/lz_tabs.c:136
+#: apps/luces/main/lz_tabs.c:155
 Escenas de muestra	Sample scenes
 
-#: apps/luces/main/lz_tabs.c:137
-FUNDIDO AL LLAMAR UNA ESCENA	FADE WHEN A SCENE IS CALLED
+#: apps/luces/main/lz_tabs.c:156
+FUNDIDO DE LAS ESCENAS NUEVAS (CADA UNA GUARDA EL SUYO)	FADE OF NEW SCENES (EACH KEEPS ITS OWN)
 
-#: apps/luces/main/lz_tabs.c:147
+#: apps/luces/main/lz_tabs.c:166
 ESCENAS · MANTENÉ UNA PARA GRABARLA O BORRARLA	SCENES · HOLD ONE TO RECORD OR DELETE IT
 
-#: apps/luces/main/lz_tabs.c:148
+#: apps/luces/main/lz_tabs.c:167
 Todavía no hay escenas. Armá un look en Escenario (intensidad, color, posición) y guardalo acá.	No scenes yet. Build a look in Stage (intensity, colour, position) and store it here.
 
-#: apps/luces/main/lz_tabs.c:170
+#: apps/luces/main/lz_tabs.c:184
+corte	cut
+
+#: apps/luces/main/lz_tabs.c:195
 SECUENCIA: UNA ESCENA TRAS OTRA, AL TIEMPO	CHASE: ONE SCENE AFTER ANOTHER, ON THE BEAT
 
-#: apps/luces/main/lz_tabs.c:179
-#: apps/luces/main/lz_tabs.c:214
+#: apps/luces/main/lz_tabs.c:204
+#: apps/luces/main/lz_tabs.c:239
 Andar	Run
 
-#: apps/luces/main/lz_tabs.c:193
+#: apps/luces/main/lz_tabs.c:218
 Hacen falta al menos dos escenas distintas: con una sola, la secuencia llama siempre a la misma. \"Escenas de muestra\" agrega cinco.	It takes at least two different scenes: with only one, the chase calls the same one over and over. \"Sample scenes\" adds five.
 
-#: apps/luces/main/lz_tabs.c:196
+#: apps/luces/main/lz_tabs.c:221
 Pasa por todas las escenas en orden, una por golpe. Tap: tocalo al ritmo de la música, tres o cuatro veces. Corte, mitad o todo fundido: cuánto de cada paso es fundido.	Goes through every scene in order, one per beat. Tap: tap it to the music, three or four times. Cut, half or all fade: how much of each step is a fade.
 
-#: apps/luces/main/lz_tabs.c:214
+#: apps/luces/main/lz_tabs.c:239
 Parar	Stop
 
-#: apps/luces/main/lz_tabs.c:234
-#: apps/luces/main/lz_tabs.c:383
+#: apps/luces/main/lz_tabs.c:260
+#: apps/luces/main/lz_tabs.c:433
 Agregar aparatos	Add fixtures
 
-#: apps/luces/main/lz_tabs.c:236
-#: apps/luces/main/lz_tabs.c:341
+#: apps/luces/main/lz_tabs.c:262
+#: apps/luces/main/lz_tabs.c:384
 TIPO	TYPE
 
-#: apps/luces/main/lz_tabs.c:243
+#: apps/luces/main/lz_tabs.c:269
 CUÁNTOS	HOW MANY
 
-#: apps/luces/main/lz_tabs.c:254
+#: apps/luces/main/lz_tabs.c:277
+UNIVERSO (EL 1 SALE POR RS485; LOS DEMÁS, SÓLO POR ART-NET)	UNIVERSE (1 GOES OUT ON RS485; THE REST ONLY OVER ART-NET)
+
+#: apps/luces/main/lz_tabs.c:287
 Desde la dirección %d, uno tras otro, %u canales cada uno.	From address %d, one after another, %u channels each.
 
-#: apps/luces/main/lz_tabs.c:255
+#: apps/luces/main/lz_tabs.c:288
 No quedan canales libres para ese tipo.	No free channels left for that type.
 
-#: apps/luces/main/lz_tabs.c:257
+#: apps/luces/main/lz_tabs.c:290
 Agregar	Add
 
-#: apps/luces/main/lz_tabs.c:303
+#: apps/luces/main/lz_tabs.c:339
 Nombre del aparato	Fixture name
 
-#: apps/luces/main/lz_tabs.c:312
+#: apps/luces/main/lz_tabs.c:348
 Dirección DMX (1 a 512)	DMX address (1 to 512)
 
-#: apps/luces/main/lz_tabs.c:337
+#: apps/luces/main/lz_tabs.c:380
 Nombre	Name
 
-#: apps/luces/main/lz_tabs.c:339
+#: apps/luces/main/lz_tabs.c:382
 Dirección %u	Address %u
 
-#: apps/luces/main/lz_tabs.c:350
+#: apps/luces/main/lz_tabs.c:391
+UNIVERSO	UNIVERSE
+
+#: apps/luces/main/lz_tabs.c:400
 Canales %u a %u: 	Channels %u to %u: 
 
-#: apps/luces/main/lz_tabs.c:357
+#: apps/luces/main/lz_tabs.c:407
 Se pisa con otro aparato o se pasa del canal 512.	Overlaps another fixture or goes past channel 512.
 
-#: apps/luces/main/lz_tabs.c:360
+#: apps/luces/main/lz_tabs.c:410
 Sacar del patch	Remove from the patch
 
-#: apps/luces/main/lz_tabs.c:372
+#: apps/luces/main/lz_tabs.c:422
 faltan tipos: esos aparatos quedaron como dimmer	types missing: those fixtures are dimmers now
 
-#: apps/luces/main/lz_tabs.c:387
+#: apps/luces/main/lz_tabs.c:437
 %d aparatos, %d canales de 512	%d fixtures, %d channels of 512
 
-#: apps/luces/main/lz_tabs.c:411
+#: apps/luces/main/lz_tabs.c:462
 TIPOS DE APARATO	FIXTURE TYPES
 
-#: apps/luces/main/lz_tabs.c:419
+#: apps/luces/main/lz_tabs.c:470
 incluido	built in
 
-#: apps/luces/main/lz_tabs.c:430
+#: apps/luces/main/lz_tabs.c:481
 Volver a leer los tipos de la tarjeta	Read the card's types again
 
-#: apps/luces/main/lz_tabs.c:432
+#: apps/luces/main/lz_tabs.c:483
 Un tipo nuevo es un archivo .csv en %s/aparatos, con una línea nombre y una línea canales (ahí hay un ejemplo). Desde el portal también se pueden escribir.	A new type is a .csv file in %s/aparatos, with a nombre line and a canales line (there is an example there). The portal can write them too.
 
-#: apps/luces/main/lz_tabs.c:505
+#: apps/luces/main/lz_tabs.c:568
+Universo Art-Net del U1 (0 a 32767)	Art-Net universe of U1 (0 to 32767)
+
+#: apps/luces/main/lz_tabs.c:580
+Dirección IP del nodo Art-Net	IP address of the Art-Net node
+
+#: apps/luces/main/lz_tabs.c:594
 PUERTO	PORT
 
-#: apps/luces/main/lz_tabs.c:519
+#: apps/luces/main/lz_tabs.c:620
+Mandar por la red	Send over the network
+
+#: apps/luces/main/lz_tabs.c:627
+A toda la red	To the whole network
+
+#: apps/luces/main/lz_tabs.c:629
+A un nodo…	To one node…
+
+#: apps/luces/main/lz_tabs.c:632
+U1 = universo %u	U1 = universe %u
+
+#: apps/luces/main/lz_tabs.c:635
+Cada universo con algún aparato sale 40 veces por segundo como Art-Net (UDP 6454): a toda la red, o a la IP de un nodo. U1 lleva el universo elegido, U2 el siguiente, y así. Para un nodo Art-Net a DMX, consolas y programas de la PC.	Every universe with a fixture goes out 40 times a second as Art-Net (UDP 6454): to the whole network, or to one node's IP. U1 carries the chosen universe, U2 the next, and so on. For an Art-Net to DMX node, consoles and PC programs.
+
+#: apps/luces/main/lz_tabs.c:637
 LOS 512 CANALES COMO SALEN (OSCUROS: SIN APARATO)	THE 512 CHANNELS AS THEY GO OUT (DARK: NO FIXTURE)
 
-#: apps/luces/main/lz_tabs.c:524
+#: apps/luces/main/lz_tabs.c:648
 La salida arranca cerrada cada vez que se abre la app: ▶ arriba la abre. Sigue saliendo con la app en segundo plano. 40 paquetes por segundo, 512 canales, BREAK de 176 µs. Para ver qué llega del otro lado, la app DMX en Analizador.	The output starts closed every time the app opens: ▶ above opens it. It keeps going with the app in the background. 40 packets a second, 512 channels, a 176 µs BREAK. To see what arrives at the other end, the DMX app's Analyzer.
 
-#: apps/luces/main/lz_tabs.c:535
+#: apps/luces/main/lz_tabs.c:659
 Canal %d: %u	Channel %d: %u
 
-#: apps/luces/main/lz_tabs.c:538
+#: apps/luces/main/lz_tabs.c:662
 fijo	fixed
 
-#: apps/luces/main/lz_tabs.c:539
+#: apps/luces/main/lz_tabs.c:663
 sin aparato	no fixture
 
-#: apps/luces/main/lz_tabs.c:541
+#: apps/luces/main/lz_tabs.c:665
 \nSaliendo por %s: %.1f paquetes/s, %lu mandados.	\nSending on %s: %.1f packets/s, %lu sent.
 
-#: apps/luces/main/lz_tabs.c:542
+#: apps/luces/main/lz_tabs.c:666
 \nSalida cerrada (%s).	\nOutput closed (%s).
+
+#: apps/luces/main/lz_tabs.c:669
+Apagado.	Off.
+
+#: apps/luces/main/lz_tabs.c:671
+%lu paquetes mandados a %s	%lu packets sent to %s
+
+#: (kept from the previous catalog: strings the extractor cannot see)
+saliendo por %s · %.0f paquetes/s%s	sending on %s · %.0f packets/s%s
+
+salida cerrada (%s)	output closed (%s)
+
+FUNDIDO AL LLAMAR UNA ESCENA	FADE WHEN A SCENE IS CALLED
