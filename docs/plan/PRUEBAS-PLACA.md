@@ -413,6 +413,15 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       la carga medida contra el Rigol; un bus cargado (el driver encola
       64 tramas); cuánto tarda en leerse un `.dbc` grande de la tarjeta; y
       grabar y abrir el CSV en SavvyCAN.
+- [ ] **DMX con el ESP32 de `tools/rs485_test`** (2026-11-09; sólo en el
+      simulador). Firmware nuevo (`aos_io_dmx_*`), `dmx.so`, y el ESP32
+      con los roles DMX y la tira de 8 WS2812B en IO18. A probar: si los
+      módulos automáticos andan a 250 000 baudios con el BREAK (si no, uno
+      con DE); la Consola de la P4 contra el ESP32 de luz (el arcoíris en
+      la tira, el recorrido pixel por pixel); el ESP32 de consola contra
+      Analizador (40 paquetes/s, 512 canales, BREAK ~176 µs y MAB ~16 µs
+      medidos) y Aparato; los BREAK y MAB que mide cada lado contra el
+      Rigol; paquetes malos mientras se escribe la flash.
 - [x] **RS485 y Modbus con el ESP32 de `tools/rs485_test`** (**anduvo el
       2026-11-09**, foto y detalle en `apps/modbus/README.md`, "On the
       board"): maestro con el perfil del variador (Marcha desde la placa,

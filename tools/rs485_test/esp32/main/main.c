@@ -5,8 +5,9 @@
  * together on IO16, which the UART drives either way. Wired as in
  * docs/img/bench-rs485.svg and tools/rs485_test/README.md.
  *
- * It plays one of two roles, chosen with the BOOT button or from the
- * console, and kept across resets:
+ * It plays one of four roles, chosen with the BOOT button or from the
+ * console, and kept across resets: a Modbus slave or master (here), or a
+ * DMX console or light with a strip of 8 WS2812B pixels on IO18 (dmx.c):
  *
  *   slave    unit 1 (by default) of a made-up variable-speed drive: holding
  *            0-9 its settings (setpoint, ramps, limits), input 0-9 what it
@@ -48,8 +49,16 @@
 #define PIN_BOOT   0
 #define PIN_LED    2
 
-enum { ROLE_SLAVE = 0, ROLE_MASTER, ROLE_COUNT };
-static const char *const ROLE_NAME[ROLE_COUNT] = { "slave", "master" };
+enum { ROLE_SLAVE = 0, ROLE_MASTER, ROLE_DMX_CONSOLE, ROLE_DMX_LIGHT, ROLE_COUNT };
+static const char *const ROLE_NAME[ROLE_COUNT] = { "Modbus slave", "Modbus master", "DMX console", "DMX light" };
+
+/* dmx.c */
+void dmx_start(bool console);
+void dmx_stop(void);
+void dmx_console_round(void);
+void dmx_light_round(void);
+void dmx_pattern_next(void);
+void dmx_addr_step(int d);
 enum { FAULT_NONE = 0, FAULT_SILENT, FAULT_SLOW, FAULT_CRC, FAULT_BUSY, FAULT_COUNT };
 static const char *const FAULT_NAME[FAULT_COUNT] = { "none", "silent", "slow (400 ms)", "broken CRC", "busy (06)" };
 static const uint32_t BAUDS[] = { 9600, 19200, 38400, 57600, 115200, 4800, 2400 };
@@ -118,6 +127,11 @@ static void put16(uint8_t *p, uint16_t v) { p[0] = (uint8_t)(v >> 8); p[1] = (ui
 
 static void line_setup(void)
 {
+    if (C.role >= ROLE_DMX_CONSOLE) {
+        dmx_start(C.role == ROLE_DMX_CONSOLE);
+        return;
+    }
+    dmx_stop();
     uart_config_t c = {
         .baud_rate = (int)BAUDS[C.baud_i],
         .data_bits = UART_DATA_8_BITS,
@@ -410,13 +424,15 @@ static void master_round(void)
 static void help(void)
 {
     printf("\nRS485 bench node. Keys:\n"
-           "  r  role: slave <-> master (or the BOOT button)\n"
+           "  r  role: Modbus slave, Modbus master, DMX console, DMX light (or the BOOT button)\n"
            "  b  next speed (9600 19200 38400 57600 115200 4800 2400)\n"
            "  f  next format (8N1 8E1 8O1 8N2)\n"
            "  u  next unit (1..5, the one it answers as or asks)\n"
            "  x  slave: next fault (none, silent, slow, broken CRC, busy)\n"
            "  q  quiet: stop / start printing every frame\n"
            "  s  the master's counts, now\n"
+           "  p  DMX console: next pattern (show, chase, all at a third, black)\n"
+           "  + - >  DMX light: address up, down, up 24\n"
            "  h  this\n");
 }
 
@@ -431,6 +447,10 @@ static void key(char c)
     case 'q': C.quiet = !C.quiet; printf("quiet %s\n", C.quiet ? "on" : "off"); return;
     case 's': printf("%" PRIu32 " requests, %" PRIu32 " ok, %" PRIu32 " no answer, %" PRIu32 " bad CRC\n", m_req, m_ok, m_tmo, m_crc); return;
     case 'h': help(); return;
+    case 'p': dmx_pattern_next(); return;
+    case '+': dmx_addr_step(1); return;
+    case '-': dmx_addr_step(-1); return;
+    case '>': dmx_addr_step(24); return;
     default: return;
     }
     cfg_save();
@@ -459,6 +479,8 @@ void app_main(void)
         boot_was = boot;
         gpio_set_level(PIN_LED, 0);
         if (C.role == ROLE_SLAVE) slave_round();
-        else master_round();
+        else if (C.role == ROLE_MASTER) master_round();
+        else if (C.role == ROLE_DMX_CONSOLE) dmx_console_round();
+        else dmx_light_round();
     }
 }

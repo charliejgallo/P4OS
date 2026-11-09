@@ -1,0 +1,265 @@
+# amoledos-lang 1   es -> en
+# aos.dmx.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/dmx/main/dmx.c:25
+Consola	Console
+
+#: apps/dmx/main/dmx.c:25
+Aparato	Device
+
+#: apps/dmx/main/dmx.c:25
+Analizador	Analyzer
+
+#: apps/dmx/main/dmx.c:25
+Cableado	Wiring
+
+#: apps/dmx/main/dmx.c:207
+Cancelar	Cancel
+
+#: apps/dmx/main/dmx.c:207
+Aplicar	Apply
+
+#: apps/dmx/main/dmx.c:233
+no se pudo abrir %s (¿lo tiene otra app?)	could not open %s (is another app using it?)
+
+#: apps/dmx/main/dmx.c:263
+#: apps/dmx/main/dx_tabs.c:432
+cerrado	closed
+
+#: apps/dmx/main/dmx.c:266
+mandando · %u canales · %.0f paquetes/s	sending · %u channels · %.0f packets/s
+
+#: apps/dmx/main/dmx.c:271
+recibiendo · %u canales · %.0f paquetes/s	receiving · %u channels · %.0f packets/s
+
+#: apps/dmx/main/dmx.c:272
+escuchando · sin señal	listening · no signal
+
+#: apps/dmx/main/dmx.c:278
+Cerrar	Close
+
+#: apps/dmx/main/dmx.c:278
+#: apps/dmx/main/dmx.c:401
+Abrir	Open
+
+#: apps/dmx/main/dmx.c:315
+Puerto	Port
+
+#: apps/dmx/main/dmx.c:324
+DMX necesita un puerto UART del header con un transceptor RS485. Un puerto con DE lo deja arriba para mandar y abajo para escuchar.	DMX needs a UART port of the header with an RS485 transceiver. A port with DE keeps it high to send and low to listen.
+
+#: apps/dmx/main/dx_tabs.c:55
+Ir al canal	Go to channel
+
+#: apps/dmx/main/dx_tabs.c:73
+Todos los canales a	Every channel to
+
+#: apps/dmx/main/dx_tabs.c:147
+#: apps/dmx/main/dx_tabs.c:457
+Canales %d a %d	Channels %d to %d
+
+#: apps/dmx/main/dx_tabs.c:149
+Ir a…	Go to…
+
+#: apps/dmx/main/dx_tabs.c:186
+Todo a 0	All to 0
+
+#: apps/dmx/main/dx_tabs.c:187
+Todo a 255	All to 255
+
+#: apps/dmx/main/dx_tabs.c:188
+Todo a…	All to…
+
+#: apps/dmx/main/dx_tabs.c:189
+PATRONES	PATTERNS
+
+#: apps/dmx/main/dx_tabs.c:191
+Quieto	Still
+
+#: apps/dmx/main/dx_tabs.c:191
+Recorrer canal por canal	Chase channel by channel
+
+#: apps/dmx/main/dx_tabs.c:191
+Rampa en todos	Ramp on all
+
+#: apps/dmx/main/dx_tabs.c:191
+Arcoíris en 8 pixeles RGB	Rainbow on 8 RGB pixels
+
+#: apps/dmx/main/dx_tabs.c:193
+Recorrer prende un canal por vez a 255, tres por segundo: para encontrar qué canal mueve qué. El arcoíris va en los canales 1 a 24 (ocho pixeles RGB, como la tira del ESP32 del banco).	Chase lights one channel at a time at 255, three a second: to find which channel moves what. The rainbow goes on channels 1 to 24 (eight RGB pixels, like the bench ESP32's strip).
+
+#: apps/dmx/main/dx_tabs.c:195
+EL PAQUETE	THE PACKET
+
+#: apps/dmx/main/dx_tabs.c:202
+%u canales	%u channels
+
+#: apps/dmx/main/dx_tabs.c:208
+%u por segundo	%u a second
+
+#: apps/dmx/main/dx_tabs.c:209
+El estándar pide BREAK de 88 µs o más y MAB de 8 µs o más; 176 y 16 es lo de casi todas las consolas. Con los límites y con paquetes cortos se ve si un aparato los aguanta.	The standard asks for a BREAK of 88 µs or more and a MAB of 8 µs or more; 176 and 16 is what nearly every console does. At the limits and with short packets you see whether a fixture stands them.
+
+#: apps/dmx/main/dx_tabs.c:217
+Dimmer (1 canal)	Dimmer (1 channel)
+
+#: apps/dmx/main/dx_tabs.c:217
+Intensidad	Intensity
+
+#: apps/dmx/main/dx_tabs.c:218
+RGB (3 canales)	RGB (3 channels)
+
+#: apps/dmx/main/dx_tabs.c:218
+#: apps/dmx/main/dx_tabs.c:219
+#: apps/dmx/main/dx_tabs.c:220
+#: apps/dmx/main/dx_tabs.c:221
+Rojo	Red
+
+#: apps/dmx/main/dx_tabs.c:218
+#: apps/dmx/main/dx_tabs.c:219
+#: apps/dmx/main/dx_tabs.c:220
+#: apps/dmx/main/dx_tabs.c:221
+Verde	Green
+
+#: apps/dmx/main/dx_tabs.c:218
+#: apps/dmx/main/dx_tabs.c:219
+#: apps/dmx/main/dx_tabs.c:220
+#: apps/dmx/main/dx_tabs.c:221
+Azul	Blue
+
+#: apps/dmx/main/dx_tabs.c:219
+RGBW (4 canales)	RGBW (4 channels)
+
+#: apps/dmx/main/dx_tabs.c:219
+Blanco	White
+
+#: apps/dmx/main/dx_tabs.c:220
+PAR de 7 canales	7-channel PAR
+
+#: apps/dmx/main/dx_tabs.c:220
+#: apps/dmx/main/dx_tabs.c:221
+Dimmer	Dimmer
+
+#: apps/dmx/main/dx_tabs.c:220
+Strobe	Strobe
+
+#: apps/dmx/main/dx_tabs.c:220
+Macro	Macro
+
+#: apps/dmx/main/dx_tabs.c:220
+Velocidad	Speed
+
+#: apps/dmx/main/dx_tabs.c:221
+Cabeza móvil (6 canales)	Moving head (6 channels)
+
+#: apps/dmx/main/dx_tabs.c:221
+Pan	Bread
+
+#: apps/dmx/main/dx_tabs.c:221
+Tilt	Tilt
+
+#: apps/dmx/main/dx_tabs.c:222
+Barra de 8 pixeles (24 canales)	8-pixel bar (24 channels)
+
+#: apps/dmx/main/dx_tabs.c:309
+Abrí la conexión para escuchar.	Open the link to listen.
+
+#: apps/dmx/main/dx_tabs.c:310
+Sin señal: nadie manda DMX.	No signal: nobody sends DMX.
+
+#: apps/dmx/main/dx_tabs.c:312
+La consola manda %d canales: este aparato necesita hasta el %d.	The console sends %d channels: this fixture needs up to %d.
+
+#: apps/dmx/main/dx_tabs.c:313
+Recibiendo: canales %d a %d.	Receiving: channels %d to %d.
+
+#: apps/dmx/main/dx_tabs.c:323
+Pixel	Pixel
+
+#: apps/dmx/main/dx_tabs.c:338
+Dirección de inicio (1-512)	Start address (1-512)
+
+#: apps/dmx/main/dx_tabs.c:348
+Dirección	Address
+
+#: apps/dmx/main/dx_tabs.c:360
+La placa hace de aparato: escucha el bus y dibuja lo que haría uno de estos con esa dirección. Sirve para ver si una consola manda, y qué manda en cada canal.	The board plays a fixture: it listens to the bus and draws what one of these would do at that address. To see whether a console sends, and what it sends on each channel.
+
+#: apps/dmx/main/dx_tabs.c:432
+hay señal	signal
+
+#: apps/dmx/main/dx_tabs.c:432
+sin señal	no signal
+
+#: apps/dmx/main/dx_tabs.c:438
+niveles	levels
+
+#: apps/dmx/main/dx_tabs.c:438
+texto	text
+
+#: apps/dmx/main/dx_tabs.c:476
+Estado	Status
+
+#: apps/dmx/main/dx_tabs.c:476
+Paquetes/s	Packets/s
+
+#: apps/dmx/main/dx_tabs.c:476
+Canales	Channels
+
+#: apps/dmx/main/dx_tabs.c:476
+Código de inicio	Start code
+
+#: apps/dmx/main/dx_tabs.c:477
+Paquetes	Packets
+
+#: apps/dmx/main/dx_tabs.c:477
+Malos	Bad
+
+#: apps/dmx/main/dx_tabs.c:477
+Otros códigos	Other codes
+
+#: apps/dmx/main/dx_tabs.c:477
+BREAK cortos	Short BREAKs
+
+#: apps/dmx/main/dx_tabs.c:491
+LOS 512 CANALES (NARANJA: SE MUEVEN)	THE 512 CHANNELS (ORANGE: MOVING)
+
+#: apps/dmx/main/dx_tabs.c:508
+BREAK y MAB medidos en el pin, con unos pocos µs de error. Un BREAK de menos de 88 µs o un MAB de menos de 8 son de una consola fuera de norma: muchos aparatos parpadean o ignoran esos paquetes. Malos: con error de trama o cortados. Tocá el mapa para ver esos canales en números.	BREAK and MAB measured on the pin, within a few µs. A BREAK under 88 µs or a MAB under 8 come from a console out of the standard: many fixtures flicker or ignore those packets. Bad: with a framing error or cut short. Tap the map to see those channels as numbers.
+
+#: apps/dmx/main/dx_tabs.c:544
+LOS CONECTORES (DE FRENTE, LADO HEMBRA)	THE CONNECTORS (FRONT, FEMALE SIDE)
+
+#: apps/dmx/main/dx_tabs.c:546
+XLR de 3 (lo común)	3-pin XLR (the usual)
+
+#: apps/dmx/main/dx_tabs.c:547
+XLR de 5 (el estándar)	5-pin XLR (the standard)
+
+#: apps/dmx/main/dx_tabs.c:548
+1: masa o malla. 2 (azul): D−, al B− del módulo. 3 (ámbar): D+, al A+. 4 y 5 no se usan.	1: ground or shield. 2 (blue): D−, to the module's B−. 3 (amber): D+, to A+. 4 and 5 are not used.
+
+#: apps/dmx/main/dx_tabs.c:550
+LO QUE HAY QUE SABER	WHAT TO KNOW
+
+#: apps/dmx/main/dx_tabs.c:552
+En cadena: consola → DMX IN del aparato 1 → su DMX OUT → aparato 2… El último lleva un terminador de 120 Ω entre los pines 2 y 3. Sin él, las luces parpadean o tiemblan.	Daisy-chained: console → fixture 1's DMX IN → its DMX OUT → fixture 2… The last one gets a 120 Ω terminator between pins 2 and 3. Without it, lights flicker or shake.
+
+#: apps/dmx/main/dx_tabs.c:553
+Nunca un cable en Y: para ramificar se usa un splitter DMX. Hasta 32 aparatos por tramo.	Never a Y cable: to branch, use a DMX splitter. Up to 32 fixtures per run.
+
+#: apps/dmx/main/dx_tabs.c:554
+Cable de 110-120 Ω (cable DMX o de datos), no de micrófono: en tramos cortos anda igual, en tramos largos da errores.	110-120 Ω cable (DMX or data cable), not microphone cable: on short runs it works anyway, on long ones it gives errors.
+
+#: apps/dmx/main/dx_tabs.c:555
+Algunos equipos baratos traen D+ y D− al revés. Si un aparato no responde, probá invertir los pines 2 y 3.	Some cheap gear has D+ and D− swapped. If a fixture does not respond, try swapping pins 2 and 3.
+
+#: apps/dmx/main/dx_tabs.c:556
+A 250 000 baudios, un módulo RS485 automático puede no llegar: si los paquetes salen malos, un módulo con pin DE (MAX3485, SP3485) resuelve.	At 250000 baud an automatic RS485 module may not keep up: if packets come out bad, a module with a DE pin (MAX3485, SP3485) fixes it.
+
+#: apps/dmx/main/dx_tabs.c:557
+Cada aparato tiene una dirección de inicio y una cantidad de canales según su modo; dos aparatos con la misma dirección hacen lo mismo.	Each fixture has a start address and a number of channels depending on its mode; two fixtures at the same address do the same thing.

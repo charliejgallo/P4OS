@@ -14,6 +14,7 @@ app aos.bus
 folder taller 5E6B80 3A4150 v tools w Taller
   app aos.modbus
   app aos.equipos
+  app aos.dmx
   app aos.bench
   app aos.elec
   app aos.mqtt

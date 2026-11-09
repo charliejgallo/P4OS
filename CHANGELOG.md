@@ -27,6 +27,16 @@
   app on the board: the link, the role, a request by hand, live polling,
   the slave's faults, the tools, the monitor's table and the traffic in
   hex and in words, through the live channel.
+- **DMX512.** The firmware sends and receives DMX on an RS485 port
+  (`aos_io_dmx_*`): the BREAK by inverting TX, and on the receiving side
+  an interrupt of its own that closes each packet at its BREAK and times
+  the BREAK and the MAB on the pin. The **DMX** app on the card: a test
+  console (512 faders, a chase to find channels, a ramp, a rainbow, the
+  packet's shape), a fixture the board plays (dimmer, RGB, RGBW, a PAR, a
+  moving head, a pixel bar, drawn live), an analyzer (rate, slots, start
+  code, BREAK and MAB as measured, bad packets, a map of the 512
+  channels) and the XLR wiring. The bench's ESP32 plays a DMX console and
+  a light with a strip of 8 WS2812B pixels.
 - **Equipos.** The Riden and DOMCOM gateway panels left the Modbus app for
   an app of their own (`apps/equipos`); the Banco keeps its Fuente, and
   the link is set from Equipos.

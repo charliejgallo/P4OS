@@ -128,6 +128,39 @@ shows each unit's questions, answers, silences and delays. Without a third
 node, the ESP32 as master and nobody answering is already a monitor test:
 every request counts as unanswered.
 
+### DMX: a console and a light
+
+Two more roles (`r` or BOOT goes round the four): **DMX console** and
+**DMX light**, on the same RS485 module at 250000 baud 8N2, with a strip of
+**8 WS2812B pixels** cut from a reel:
+
+| Strip | ESP32 DevKit |
+|---|---|
+| 5V | VIN / 5V (the USB's) |
+| GND | GND |
+| DIN | IO18 (300-470 Ω in series if there is one) |
+
+Cut on the copper pads between two LEDs and keep the piece whose DIN is at
+the cut (the printed arrow points away from it). A 470-1000 µF capacitor
+across 5V and GND next to the strip helps; with 8 pixels it works without.
+The firmware keeps the strip at a third of its brightness: eight pixels at
+full white draw almost half an amp, all from the USB.
+
+- **DMX console:** 512 slots, 40 packets a second, BREAK 176 µs, MAB
+  16 µs (TX inverted for the BREAK), DE held high. `p` goes round the
+  patterns: a show (a rainbow on 1-24, a 7-channel PAR on 25-31), a chase
+  (one channel at a time, 0.3 s each), all at a third, black. Its own
+  strip shows channels 1-24.
+- **DMX light:** receives with its own interrupt, as the P4 does, and puts
+  24 channels from its address on the strip (pixel i = address + 3i: R, G,
+  B). `+` / `-` move the address by one, `>` by 24. A line a second with
+  packets a second, slots, start code, BREAK and MAB as measured, bad
+  packets.
+
+With the P4's DMX app: **Consola** on the P4 and the ESP32 as light (the
+rainbow pattern lands on the strip; the chase lights one pixel colour at a
+time), or the ESP32 as console and **Analizador** / **Aparato** on the P4.
+
 ### The console
 
     r  role: slave <-> master (or the BOOT button)
@@ -137,6 +170,8 @@ every request counts as unanswered.
     x  slave: next fault (none, silent, slow, broken CRC, busy)
     q  quiet: stop / start printing every frame
     s  the master's counts, now
+    p  DMX console: next pattern
+    + - >  DMX light: address up, down, up 24
     h  the list
 
 Every frame is printed both ways in hex, with the time since the last one.
