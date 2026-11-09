@@ -298,10 +298,10 @@ Vaciar	Empty
 #: apps/notas/main/notas.c:1591
 La papelera está vacía	The bin is empty
 
-#: apps/notas/main/notas.c:1754
+#: apps/notas/main/notas.c:1773
 La nota se borró desde el portal	The note was deleted from the portal
 
-#: apps/notas/main/notas.c:1768
+#: apps/notas/main/notas.c:1787
 Actualizada desde el portal	Updated from the portal
 
 #: apps/notas/main/nt_editor.c:549

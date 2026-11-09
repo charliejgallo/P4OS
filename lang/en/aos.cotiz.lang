@@ -5,63 +5,63 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/cotiz/main/cotiz.c:198
+#: apps/cotiz/main/cotiz.c:241
 dólar	dollar
 
-#: apps/cotiz/main/cotiz.c:198
+#: apps/cotiz/main/cotiz.c:241
 moneda	currency
 
-#: apps/cotiz/main/cotiz.c:240
+#: apps/cotiz/main/cotiz.c:283
 compra %s	buy %s
 
-#: apps/cotiz/main/cotiz.c:265
+#: apps/cotiz/main/cotiz.c:308
 actualizando…	updating…
 
-#: apps/cotiz/main/cotiz.c:269
+#: apps/cotiz/main/cotiz.c:312
 dolarapi.com  ·  al día	dolarapi.com  ·  up to date
 
-#: apps/cotiz/main/cotiz.c:271
+#: apps/cotiz/main/cotiz.c:314
 la más vieja, %s	oldest, %s
 
-#: apps/cotiz/main/cotiz.c:276
-#: apps/cotiz/main/cotiz.c:455
+#: apps/cotiz/main/cotiz.c:319
+#: apps/cotiz/main/cotiz.c:498
 sin conexión	no connection
 
-#: apps/cotiz/main/cotiz.c:278
+#: apps/cotiz/main/cotiz.c:321
 esperando la hora de la red…	waiting for network time…
 
-#: apps/cotiz/main/cotiz.c:280
+#: apps/cotiz/main/cotiz.c:323
 no pude verificar el servidor	could not verify the server
 
-#: apps/cotiz/main/cotiz.c:282
+#: apps/cotiz/main/cotiz.c:325
 no se pudo consultar (%d)	could not query (%d)
 
-#: apps/cotiz/main/cotiz.c:284
+#: apps/cotiz/main/cotiz.c:327
 tocá para actualizar  ·  elegí cuáles en el portal	tap to refresh  ·  choose which in the portal
 
-#: apps/cotiz/main/cotiz.c:479
+#: apps/cotiz/main/cotiz.c:522
 Cotizaciones	Currencies
 
 #: apps/cotiz/main/cz_api.c:23
-Oficial	Oficial
+Oficial	Official
 
 #: apps/cotiz/main/cz_api.c:24
 Blue	Blue
 
 #: apps/cotiz/main/cz_api.c:25
-Bolsa (MEP)	Bolsa (MEP)
+Bolsa (MEP)	Stock market (MEP)
 
 #: apps/cotiz/main/cz_api.c:26
-Contado c/liqui	Contado c/liqui
+Contado c/liqui	Cash settlement (CCL)
 
 #: apps/cotiz/main/cz_api.c:27
-Mayorista	Mayorista
+Mayorista	Wholesale
 
 #: apps/cotiz/main/cz_api.c:28
-Cripto	Cripto
+Cripto	Crypto
 
 #: apps/cotiz/main/cz_api.c:29
-Tarjeta	Tarjeta
+Tarjeta	Card
 
 #: apps/cotiz/main/cz_api.c:30
 Euro	Euro

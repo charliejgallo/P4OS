@@ -5,20 +5,20 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/dados/main/dados.c:426
+#: apps/dados/main/dados.c:435
 1 dado	1 Würfel
 
-#: apps/dados/main/dados.c:428
+#: apps/dados/main/dados.c:437
 %d dados	%d Würfel
 
-#: apps/dados/main/dados.c:664
+#: apps/dados/main/dados.c:686
 TIRAR	WÜRFELN
 
-#: apps/dados/main/dados.c:679
+#: apps/dados/main/dados.c:701
 Últimas	Letzte
 
-#: apps/dados/main/dados.c:694
+#: apps/dados/main/dados.c:716
 Agitá la placa o tocá los dados	Platine schütteln oder Würfel antippen
 
-#: apps/dados/main/dados.c:695
+#: apps/dados/main/dados.c:717
 Tocá los dados para tirar	Würfel antippen zum Würfeln

@@ -5,99 +5,99 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/clima/main/clima.c:374
+#: apps/clima/main/clima.c:459
 dia\x04Dom	So
 
-#: apps/clima/main/clima.c:374
+#: apps/clima/main/clima.c:459
 dia\x04Lun	Mo
 
-#: apps/clima/main/clima.c:375
+#: apps/clima/main/clima.c:460
 dia\x04Mar	Di
 
-#: apps/clima/main/clima.c:375
+#: apps/clima/main/clima.c:460
 dia\x04Mie	Mi
 
-#: apps/clima/main/clima.c:376
+#: apps/clima/main/clima.c:461
 dia\x04Jue	Do
 
-#: apps/clima/main/clima.c:376
+#: apps/clima/main/clima.c:461
 dia\x04Vie	Fr
 
-#: apps/clima/main/clima.c:377
+#: apps/clima/main/clima.c:462
 dia\x04Sab	Sa
 
-#: apps/clima/main/clima.c:279
-#: apps/clima/main/clima.c:601
+#: apps/clima/main/clima.c:364
+#: apps/clima/main/clima.c:686
 Clima	Wetter
 
-#: apps/clima/main/clima.c:553
+#: apps/clima/main/clima.c:638
 Hoy	Heute
 
-#: apps/clima/main/clima.c:606
+#: apps/clima/main/clima.c:691
 Sin datos todavia	Noch keine Daten
 
-#: apps/clima/main/clima.c:606
+#: apps/clima/main/clima.c:691
 Elegi una ciudad	Stadt auswählen
 
-#: apps/clima/main/clima.c:636
+#: apps/clima/main/clima.c:721
 ST %s\xC2\xB0     HUM %d%%     %d km/h	GF %s\xC2\xB0     FEU %d%%     %d km/h
 
-#: apps/clima/main/clima.c:664
+#: apps/clima/main/clima.c:749
 actualizando...	aktualisiere...
 
-#: apps/clima/main/clima.c:667
+#: apps/clima/main/clima.c:752
 sin datos	keine Daten
 
-#: apps/clima/main/clima.c:668
+#: apps/clima/main/clima.c:753
 sin conexion	offline
 
-#: apps/clima/main/clima.c:671
+#: apps/clima/main/clima.c:756
 guardado	gespeichert
 
-#: apps/clima/main/clima.c:673
+#: apps/clima/main/clima.c:758
 %s   -   recien	%s   -   gerade eben
 
-#: apps/clima/main/clima.c:675
+#: apps/clima/main/clima.c:760
 %s   -   hace %d min	%s   -   vor %d Min
 
-#: apps/clima/main/clima.c:758
+#: apps/clima/main/clima.c:843
 No se pudo actualizar	Aktualisieren fehlgeschlagen
 
-#: apps/clima/main/clima.c:891
+#: apps/clima/main/clima.c:976
 No hay ninguna ciudad asi	Keine Stadt mit diesem Namen
 
-#: apps/clima/main/clima.c:892
-#: apps/clima/main/clima.c:915
+#: apps/clima/main/clima.c:977
+#: apps/clima/main/clima.c:1000
 No se pudo buscar	Suche fehlgeschlagen
 
-#: apps/clima/main/clima.c:900
+#: apps/clima/main/clima.c:985
 Escribi al menos dos letras	Mindestens zwei Buchstaben eingeben
 
-#: apps/clima/main/clima.c:904
+#: apps/clima/main/clima.c:989
 Sin conexion a la red	Keine Netzwerkverbindung
 
-#: apps/clima/main/clima.c:915
+#: apps/clima/main/clima.c:1000
 Buscando...	Suche...
 
-#: apps/clima/main/clima.c:938
+#: apps/clima/main/clima.c:1023
 Ciudad	Stadt
 
-#: apps/clima/main/clima.c:949
+#: apps/clima/main/clima.c:1034
 Buscar una ciudad	Stadt suchen
 
-#: apps/clima/main/clima.c:1004
+#: apps/clima/main/clima.c:1089
 Buscar otra ciudad	Andere Stadt suchen
 
-#: apps/clima/main/clima.c:1005
+#: apps/clima/main/clima.c:1090
 Buscar tu ciudad	Deine Stadt suchen
 
-#: apps/clima/main/clima.c:1009
+#: apps/clima/main/clima.c:1094
 o desde http://%s/clima	oder über http://%s/clima
 
-#: apps/clima/main/clima.c:1012
+#: apps/clima/main/clima.c:1097
 sin conexion a la red	keine Netzwerkverbindung
 
-#: apps/clima/main/clima.c:1206
+#: apps/clima/main/clima.c:1313
 Demostracion	Demo
 
 #: apps/clima/main/wx_api.c:385

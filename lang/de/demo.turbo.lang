@@ -30,196 +30,196 @@ Actualizá los dos para correr juntos.	Aktualisiere beide, um zusammen zu fahren
 #: apps/turbo/main/tb_link.c:376
 Sin señal de %s	Kein Signal von %s
 
-#: apps/turbo/main/turbo.c:915
+#: apps/turbo/main/turbo.c:987
 TIEMPO	ZEIT
 
-#: apps/turbo/main/turbo.c:916
+#: apps/turbo/main/turbo.c:988
 km/h	km/h
 
-#: apps/turbo/main/turbo.c:917
+#: apps/turbo/main/turbo.c:989
 ¡TIEMPO EXTRA!	EXTRAZEIT!
 
-#: apps/turbo/main/turbo.c:918
+#: apps/turbo/main/turbo.c:990
 ¡YA!	LOS!
 
-#: apps/turbo/main/turbo.c:919
-#: apps/turbo/main/turbo.c:1178
+#: apps/turbo/main/turbo.c:991
+#: apps/turbo/main/turbo.c:1250
 ¡LLEGADA!	ZIEL!
 
-#: apps/turbo/main/turbo.c:920
-#: apps/turbo/main/turbo.c:1178
+#: apps/turbo/main/turbo.c:992
+#: apps/turbo/main/turbo.c:1250
 SIN TIEMPO	ZEIT UM
 
-#: apps/turbo/main/turbo.c:921
+#: apps/turbo/main/turbo.c:993
 ¡APURATE!	BEEIL DICH!
 
-#: apps/turbo/main/turbo.c:1024
+#: apps/turbo/main/turbo.c:1096
 Cargando	Lade
 
-#: apps/turbo/main/turbo.c:1117
+#: apps/turbo/main/turbo.c:1189
 Tiempo	Zeit
 
-#: apps/turbo/main/turbo.c:1118
+#: apps/turbo/main/turbo.c:1190
 Recorrido	Strecke
 
-#: apps/turbo/main/turbo.c:1119
+#: apps/turbo/main/turbo.c:1191
 Récord	Rekord
 
-#: apps/turbo/main/turbo.c:1120
+#: apps/turbo/main/turbo.c:1192
   ¡nuevo!	  neu!
 
-#: apps/turbo/main/turbo.c:1121
+#: apps/turbo/main/turbo.c:1193
 Punta	Spitze
 
-#: apps/turbo/main/turbo.c:1122
+#: apps/turbo/main/turbo.c:1194
 choques	Unfälle
 
-#: apps/turbo/main/turbo.c:1126
+#: apps/turbo/main/turbo.c:1198
 Gira	Tour
 
-#: apps/turbo/main/turbo.c:1127
+#: apps/turbo/main/turbo.c:1199
 ¡Gira completa!	Tour geschafft!
 
-#: apps/turbo/main/turbo.c:1132
+#: apps/turbo/main/turbo.c:1204
 todavía corre...	fährt noch...
 
-#: apps/turbo/main/turbo.c:1139
+#: apps/turbo/main/turbo.c:1211
 ¡Ganaste!	Gewonnen!
 
-#: apps/turbo/main/turbo.c:1139
+#: apps/turbo/main/turbo.c:1211
 Ganó el otro reloj	Die andere Uhr hat gewonnen
 
-#: apps/turbo/main/turbo.c:1149
+#: apps/turbo/main/turbo.c:1221
 monedas	Münzen
 
-#: apps/turbo/main/turbo.c:1181
+#: apps/turbo/main/turbo.c:1253
 Siguiente	Weiter
 
-#: apps/turbo/main/turbo.c:1181
+#: apps/turbo/main/turbo.c:1253
 Menú	Menü
 
-#: apps/turbo/main/turbo.c:1429
+#: apps/turbo/main/turbo.c:1534
 Contra	Gegen
 
-#: apps/turbo/main/turbo.c:1449
+#: apps/turbo/main/turbo.c:1554
 carreras contra el reloj	Rennen gegen die Uhr
 
-#: apps/turbo/main/turbo.c:1455
+#: apps/turbo/main/turbo.c:1560
 Gira completa	Ganze Tour
 
-#: apps/turbo/main/turbo.c:1456
-#: apps/turbo/main/turbo.c:1499
+#: apps/turbo/main/turbo.c:1561
+#: apps/turbo/main/turbo.c:1604
 Contrarreloj	Zeitfahren
 
-#: apps/turbo/main/turbo.c:1459
-#: apps/turbo/main/turbo.c:1641
+#: apps/turbo/main/turbo.c:1564
+#: apps/turbo/main/turbo.c:1746
 Garage	Garage
 
-#: apps/turbo/main/turbo.c:1460
-#: apps/turbo/main/turbo.c:1788
+#: apps/turbo/main/turbo.c:1565
+#: apps/turbo/main/turbo.c:1893
 Ajustes	Optionen
 
-#: apps/turbo/main/turbo.c:1473
+#: apps/turbo/main/turbo.c:1578
 Se abre con una gira	Öffnet nach einer Tour
 
-#: apps/turbo/main/turbo.c:1474
+#: apps/turbo/main/turbo.c:1579
 Terminá	Beende
 
-#: apps/turbo/main/turbo.c:1499
+#: apps/turbo/main/turbo.c:1604
 Elegí el tramo	Strecke wählen
 
-#: apps/turbo/main/turbo.c:1513
+#: apps/turbo/main/turbo.c:1618
 récord	Rekord
 
-#: apps/turbo/main/turbo.c:1571
+#: apps/turbo/main/turbo.c:1676
 Comprar	Kaufen
 
-#: apps/turbo/main/turbo.c:1572
+#: apps/turbo/main/turbo.c:1677
 Tu auto	Dein Auto
 
-#: apps/turbo/main/turbo.c:1572
+#: apps/turbo/main/turbo.c:1677
 Elegir	Wählen
 
-#: apps/turbo/main/turbo.c:1606
+#: apps/turbo/main/turbo.c:1711
 No alcanzan las monedas	Nicht genug Münzen
 
-#: apps/turbo/main/turbo.c:1657
+#: apps/turbo/main/turbo.c:1762
 Velocidad	Tempo
 
-#: apps/turbo/main/turbo.c:1657
+#: apps/turbo/main/turbo.c:1762
 Aceleración	Beschleunigung
 
-#: apps/turbo/main/turbo.c:1657
+#: apps/turbo/main/turbo.c:1762
 Agarre	Grip
 
-#: apps/turbo/main/turbo.c:1657
+#: apps/turbo/main/turbo.c:1762
 Todo terreno	Gelände
 
-#: apps/turbo/main/turbo.c:1789
+#: apps/turbo/main/turbo.c:1894
 Fácil	Leicht
 
-#: apps/turbo/main/turbo.c:1789
+#: apps/turbo/main/turbo.c:1894
 Normal	Normal
 
-#: apps/turbo/main/turbo.c:1789
+#: apps/turbo/main/turbo.c:1894
 Difícil	Schwer
 
-#: apps/turbo/main/turbo.c:1790
+#: apps/turbo/main/turbo.c:1895
 Dificultad	Schwierigkeit
 
-#: apps/turbo/main/turbo.c:1791
+#: apps/turbo/main/turbo.c:1896
 Volante	Lenkrad
 
-#: apps/turbo/main/turbo.c:1791
+#: apps/turbo/main/turbo.c:1896
 Flechas	Pfeile
 
-#: apps/turbo/main/turbo.c:1792
+#: apps/turbo/main/turbo.c:1897
 Dirección	Lenkung
 
-#: apps/turbo/main/turbo.c:1793
+#: apps/turbo/main/turbo.c:1898
 Suave	Sanft
 
-#: apps/turbo/main/turbo.c:1793
+#: apps/turbo/main/turbo.c:1898
 Medio	Mittel
 
-#: apps/turbo/main/turbo.c:1793
+#: apps/turbo/main/turbo.c:1898
 Rápido	Schnell
 
-#: apps/turbo/main/turbo.c:1794
+#: apps/turbo/main/turbo.c:1899
 Sensibilidad	Empfindlichkeit
 
-#: apps/turbo/main/turbo.c:1796
+#: apps/turbo/main/turbo.c:1901
 Acelerar solo	Auto-Gas
 
-#: apps/turbo/main/turbo.c:1797
+#: apps/turbo/main/turbo.c:1902
 Sonido	Ton
 
-#: apps/turbo/main/turbo.c:1802
+#: apps/turbo/main/turbo.c:1907
 Volante: arrastrá el pulgar izquierdo de costado. Pedales a la derecha: freno y acelerador.	Lenkrad: linken Daumen seitlich ziehen. Pedale rechts: Bremse und Gas.
 
-#: apps/turbo/main/turbo.c:1875
+#: apps/turbo/main/turbo.c:1980
 Otra vez	Nochmal
 
-#: apps/turbo/main/turbo.c:1884
+#: apps/turbo/main/turbo.c:1989
 Pausa	Pause
 
-#: apps/turbo/main/turbo.c:1885
+#: apps/turbo/main/turbo.c:1990
 Seguir	Weiter
 
-#: apps/turbo/main/turbo.c:1886
+#: apps/turbo/main/turbo.c:1991
 Reiniciar	Neustart
 
-#: apps/turbo/main/turbo.c:1887
+#: apps/turbo/main/turbo.c:1992
 Salir al menú	Zum Menü
 
-#: apps/turbo/main/turbo.c:1891
+#: apps/turbo/main/turbo.c:1996
 Contra el otro reloj	Gegen die andere Uhr
 
-#: apps/turbo/main/turbo.c:1893
+#: apps/turbo/main/turbo.c:1998
 Cancelar	Abbrechen
 
-#: apps/turbo/main/turbo.c:1899
+#: apps/turbo/main/turbo.c:2004
 Cargando...	Lade...
 
-#: apps/turbo/main/turbo.c:2110
+#: apps/turbo/main/turbo.c:2244
 No hay memoria para el tramo	Kein Speicher für die Strecke

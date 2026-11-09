@@ -11,99 +11,99 @@ Dibujo %s	Drawing %s
 #: apps/dibujo/web/dibujo.js:178
 Cargando…	Loading…
 
-#: apps/dibujo/web/dibujo.js:190
+#: apps/dibujo/web/dibujo.js:188
 no se lee	unreadable
 
-#: apps/dibujo/web/dibujo.js:192
+#: apps/dibujo/web/dibujo.js:190
 %d × %d · %d capa	%d × %d · %d layer
 
-#: apps/dibujo/web/dibujo.js:192
+#: apps/dibujo/web/dibujo.js:190
 %d × %d · %d capas	%d × %d · %d layers
 
-#: apps/dibujo/web/dibujo.js:199
+#: apps/dibujo/web/dibujo.js:197
 Armando el dibujo…	Putting the drawing together…
 
-#: apps/dibujo/web/dibujo.js:203
+#: apps/dibujo/web/dibujo.js:201
 %s no se lee	%s is unreadable
 
-#: apps/dibujo/web/dibujo.js:218
+#: apps/dibujo/web/dibujo.js:216
 Capa	Layer
 
-#: apps/dibujo/web/dibujo.js:219
+#: apps/dibujo/web/dibujo.js:217
 oculta en la placa	hidden on the board
 
-#: apps/dibujo/web/dibujo.js:224
+#: apps/dibujo/web/dibujo.js:222
 %d × %d px · fondo %s	%d × %d px · background %s
 
-#: apps/dibujo/web/dibujo.js:224
+#: apps/dibujo/web/dibujo.js:222
 %d × %d px · fondo transparente	%d × %d px · transparent background
 
-#: apps/dibujo/web/dibujo.js:226
+#: apps/dibujo/web/dibujo.js:224
 Bajar PNG	Download PNG
 
-#: apps/dibujo/web/dibujo.js:227
+#: apps/dibujo/web/dibujo.js:225
 Bajar .dib	Download .dib
 
-#: apps/dibujo/web/dibujo.js:228
+#: apps/dibujo/web/dibujo.js:226
 Abrir la app	Open the app
 
-#: apps/dibujo/web/dibujo.js:229
+#: apps/dibujo/web/dibujo.js:227
 Capas (destildá una para sacarla del PNG; el archivo no cambia)	Layers (untick one to leave it out of the PNG; the file does not change)
 
-#: apps/dibujo/web/dibujo.js:231
+#: apps/dibujo/web/dibujo.js:229
 ¿Borrar %s de la tarjeta? No se puede deshacer.	Delete %s from the card? This cannot be undone.
 
-#: apps/dibujo/web/dibujo.js:232
+#: apps/dibujo/web/dibujo.js:230
 Borrado	Deleted
 
-#: apps/dibujo/web/dibujo.js:233
+#: apps/dibujo/web/dibujo.js:231
 Borrar de la tarjeta	Delete from the card
 
-#: apps/dibujo/web/dibujo.js:241
+#: apps/dibujo/web/dibujo.js:239
 Bajar	Download
 
-#: apps/dibujo/web/dibujo.js:243
+#: apps/dibujo/web/dibujo.js:241
 ¿Borrar %s?	Delete %s?
 
-#: apps/dibujo/web/dibujo.js:245
+#: apps/dibujo/web/dibujo.js:243
 Borrar	Delete
 
-#: apps/dibujo/web/dibujo.js:260
+#: apps/dibujo/web/dibujo.js:258
 Todavía no hay dibujos. Se hacen en la placa, con la app Dibujo.	No drawings yet. They are made on the board, with the Drawing app.
 
-#: apps/dibujo/web/dibujo.js:262
+#: apps/dibujo/web/dibujo.js:260
 Ninguno todavía: en la app, Menú → Exportar PNG.	None yet: in the app, Menu → Export PNG.
 
-#: apps/dibujo/web/dibujo.js:264
+#: apps/dibujo/web/dibujo.js:262
 No hay imágenes subidas.	No pictures uploaded.
 
-#: apps/dibujo/web/dibujo.js:273
+#: apps/dibujo/web/dibujo.js:271
 Preparando %s…	Preparing %s…
 
-#: apps/dibujo/web/dibujo.js:276
+#: apps/dibujo/web/dibujo.js:274
 Subiendo %s: %d	Uploading %s: %d
 
-#: apps/dibujo/web/dibujo.js:277
+#: apps/dibujo/web/dibujo.js:275
 %s (%d × %d) subida	%s (%d × %d) uploaded
 
-#: apps/dibujo/web/dibujo.js:284
-#: apps/dibujo/web/dibujo.js:297
+#: apps/dibujo/web/dibujo.js:282
+#: apps/dibujo/web/dibujo.js:295
 Dibujo	Drawing
 
-#: apps/dibujo/web/dibujo.js:285
+#: apps/dibujo/web/dibujo.js:283
 Dibujos	Drawings
 
-#: apps/dibujo/web/dibujo.js:287
+#: apps/dibujo/web/dibujo.js:285
 Exportados	Exported
 
-#: apps/dibujo/web/dibujo.js:288
+#: apps/dibujo/web/dibujo.js:286
 Imágenes para importar	Pictures to import
 
-#: apps/dibujo/web/dibujo.js:289
+#: apps/dibujo/web/dibujo.js:287
 En la app: Menú → Importar una imagen. Van a una capa nueva, abajo de todo, para calcar o pintar encima.	In the app: Menu → Import a picture. They go to a new layer at the very bottom, to trace or paint over.
 
-#: apps/dibujo/web/dibujo.js:291
+#: apps/dibujo/web/dibujo.js:289
 Subir imágenes	Upload pictures
 
-#: apps/dibujo/web/dibujo.js:292
+#: apps/dibujo/web/dibujo.js:290
 Los dibujos están en /dibujo de la tarjeta, con sus capas (.dib). El PNG que se baja acá lo arma el navegador, igual al que exporta la app.	The drawings are in /dibujo on the card, with their layers (.dib). The PNG downloaded here is put together by the browser, the same as the one the app exports.

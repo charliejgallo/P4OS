@@ -16,18 +16,19 @@
 const P = window.P4OS;
 const { h, put } = P;
 const tr = P.tr || ((s, ...a) => { let i = 0; return s.replace(/%[sd]/g, () => a[i++]); });
+const N_ = s => s;           /* marks a table's names for tools/gen_lang.py; tr() at use */
 
 const APP = 'aos.luces';
 const LIVE = 'live?app=' + APP;
 const TYPES_DIR = '/luces/aparatos';
 
-const SWATCH = [['Rojo', 255, 0, 0, 0], ['Naranja', 255, 96, 0, 0], ['Ámbar', 255, 160, 0, 0], ['Amarillo', 255, 230, 0, 0],
-  ['Verde', 0, 255, 0, 0], ['Cian', 0, 255, 255, 0], ['Azul', 0, 0, 255, 0], ['Violeta', 128, 0, 255, 0],
-  ['Magenta', 255, 0, 200, 0], ['Cálido', 255, 180, 90, 0], ['Blanco', 255, 255, 255, 255]];
-const STROBE = [['Sin strobe', 0], ['Lento', 60], ['Medio', 140], ['Rápido', 230]];
-const FX = ['Ninguno', 'Arcoíris', 'Ola', 'Destellos', 'Recorrido', 'Colores', 'Respirar'];
-const FADES = [[0, 'Corte'], [500, '0,5 s'], [1000, '1 s'], [2000, '2 s'], [3000, '3 s'], [5000, '5 s']];
-const CUTS = [[0, 'Corte'], [50, 'Mitad'], [100, 'Todo fundido']];
+const SWATCH = [[N_('Rojo'), 255, 0, 0, 0], [N_('Naranja'), 255, 96, 0, 0], [N_('Ámbar'), 255, 160, 0, 0], [N_('Amarillo'), 255, 230, 0, 0],
+  [N_('Verde'), 0, 255, 0, 0], [N_('Cian'), 0, 255, 255, 0], [N_('Azul'), 0, 0, 255, 0], [N_('Violeta'), 128, 0, 255, 0],
+  [N_('Magenta'), 255, 0, 200, 0], [N_('Cálido'), 255, 180, 90, 0], [N_('Blanco'), 255, 255, 255, 255]];
+const STROBE = [[N_('Sin strobe'), 0], [N_('Lento'), 60], [N_('Medio'), 140], [N_('Rápido'), 230]];
+const FX = [N_('Ninguno'), N_('Arcoíris'), N_('Ola'), N_('Destellos'), N_('Recorrido'), N_('Colores'), N_('Respirar')];
+const FADES = [[0, N_('Corte')], [500, N_('0,5 s')], [1000, N_('1 s')], [2000, N_('2 s')], [3000, N_('3 s')], [5000, N_('5 s')]];
+const CUTS = [[0, N_('Corte')], [50, N_('Mitad')], [100, N_('Todo fundido')]];
 const WORDS = ['dimmer', 'rojo', 'verde', 'azul', 'blanco', 'ambar', 'uv', 'strobe', 'pan', 'pan_fino', 'tilt', 'tilt_fino'];
 
 function css() {
@@ -506,7 +507,7 @@ P.registerPage({
 
     /* ---- the tabs ---- */
     const views = { escenario: stage, escenas: scenesView, patch: patchView, salida: outView };
-    const names = { escenario: 'Escenario', escenas: 'Escenas', patch: 'Patch', salida: 'Salida' };
+    const names = { escenario: N_('Escenario'), escenas: N_('Escenas'), patch: N_('Patch'), salida: N_('Salida') };
     const tabs = h('div', { class: 'tabs' });
     function show(v) {
       view = v;

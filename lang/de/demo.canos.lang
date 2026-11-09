@@ -56,82 +56,82 @@ Dificultad	Schwierigkeit
 #: apps/canos/main/canos.c:510
 Mundos	Welten
 
-#: apps/canos/main/canos.c:583
+#: apps/canos/main/canos.c:585
 Primero pasá el nivel anterior	Schaffe zuerst das vorige Level
 
-#: apps/canos/main/canos.c:942
+#: apps/canos/main/canos.c:945
 Elegí un caño de la bandeja	Wähle ein Rohr aus der Ablage
 
-#: apps/canos/main/canos.c:1014
+#: apps/canos/main/canos.c:1017
 Girá los caños y abrí la llave	Drehe die Rohre und öffne das Ventil
 
-#: apps/canos/main/canos.c:1014
+#: apps/canos/main/canos.c:1017
 Poné los caños y abrí la llave	Lege die Rohre und öffne das Ventil
 
-#: apps/canos/main/canos.c:1016
+#: apps/canos/main/canos.c:1019
 Abrir llave	Ventil öffnen
 
-#: apps/canos/main/canos.c:1023
+#: apps/canos/main/canos.c:1026
 Abriendo la llave...	Ventil wird geöffnet...
 
-#: apps/canos/main/canos.c:1025
+#: apps/canos/main/canos.c:1028
 Corre el líquido: %d caños	Es fließt: %d Rohre
 
-#: apps/canos/main/canos.c:1027
-#: apps/canos/main/canos.c:1300
+#: apps/canos/main/canos.c:1030
+#: apps/canos/main/canos.c:1303
 ¡Llegó al desagüe!	Es ist im Abfluss!
 
-#: apps/canos/main/canos.c:1029
-#: apps/canos/main/canos.c:1321
+#: apps/canos/main/canos.c:1032
+#: apps/canos/main/canos.c:1324
 ¡Fuga!	Leck!
 
-#: apps/canos/main/canos.c:1033
+#: apps/canos/main/canos.c:1036
 Más despacio	Langsamer
 
-#: apps/canos/main/canos.c:1033
+#: apps/canos/main/canos.c:1036
 Acelerar	Schneller
 
-#: apps/canos/main/canos.c:1292
+#: apps/canos/main/canos.c:1295
 Pausa	Pause
 
-#: apps/canos/main/canos.c:1293
+#: apps/canos/main/canos.c:1296
 nivel	Level
 
-#: apps/canos/main/canos.c:1295
+#: apps/canos/main/canos.c:1298
 Seguir	Weiter
 
-#: apps/canos/main/canos.c:1296
-#: apps/canos/main/canos.c:1316
-#: apps/canos/main/canos.c:1323
+#: apps/canos/main/canos.c:1299
+#: apps/canos/main/canos.c:1319
+#: apps/canos/main/canos.c:1326
 Otra vez	Nochmal
 
-#: apps/canos/main/canos.c:1297
-#: apps/canos/main/canos.c:1315
-#: apps/canos/main/canos.c:1317
-#: apps/canos/main/canos.c:1324
+#: apps/canos/main/canos.c:1300
+#: apps/canos/main/canos.c:1318
+#: apps/canos/main/canos.c:1320
+#: apps/canos/main/canos.c:1327
 Niveles	Level
 
-#: apps/canos/main/canos.c:1306
 #: apps/canos/main/canos.c:1309
+#: apps/canos/main/canos.c:1312
 Puntos	Punkte
 
-#: apps/canos/main/canos.c:1306
 #: apps/canos/main/canos.c:1309
+#: apps/canos/main/canos.c:1312
 Caños llenos	Volle Rohre
 
-#: apps/canos/main/canos.c:1307
+#: apps/canos/main/canos.c:1310
 Giros	Drehungen
 
-#: apps/canos/main/canos.c:1310
+#: apps/canos/main/canos.c:1313
 Piezas	Teile
 
-#: apps/canos/main/canos.c:1315
+#: apps/canos/main/canos.c:1318
 Siguiente	Weiter
 
-#: apps/canos/main/canos.c:1411
+#: apps/canos/main/canos.c:1414
 No hay memoria para el tablero	Nicht genug Speicher für das Feld
 
-#: apps/canos/main/canos.c:1557
+#: apps/canos/main/canos.c:1560
 ¡Se abrió la llave!	Das Ventil ist offen!
 
 #: apps/canos/main/cn_world.c:10

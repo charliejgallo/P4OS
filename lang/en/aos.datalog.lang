@@ -48,7 +48,7 @@ nota	note
 Analógica %s	Analog %s
 
 #: apps/datalog/main/dl_edit.c:71
-#: apps/datalog/main/dl_edit.c:632
+#: apps/datalog/main/dl_edit.c:644
 Nombre	Name
 
 #: apps/datalog/main/dl_edit.c:119
@@ -66,335 +66,343 @@ Hasta 8 horas por lectura	Up to 8 times per reading
 #: apps/datalog/main/dl_edit.c:136
 A qué hora lee	Time to read
 
-#: apps/datalog/main/dl_edit.c:215
+#: apps/datalog/main/dl_edit.c:220
 Rango de ±%s V guardado en modules.txt	Range of ±%s V saved to modules.txt
 
-#: apps/datalog/main/dl_edit.c:218
+#: apps/datalog/main/dl_edit.c:223
 No se pudo cambiar modules.txt	Could not change modules.txt
 
-#: apps/datalog/main/dl_edit.c:222
+#: apps/datalog/main/dl_edit.c:227
 Buscando sensores…	Looking for sensors…
 
-#: apps/datalog/main/dl_edit.c:227
+#: apps/datalog/main/dl_edit.c:232
 Alarma baja: menos de	Low alarm: below
 
-#: apps/datalog/main/dl_edit.c:228
+#: apps/datalog/main/dl_edit.c:233
 Alarma alta: más de	High alarm: above
 
-#: apps/datalog/main/dl_edit.c:229
-#: apps/datalog/main/dl_edit.c:559
+#: apps/datalog/main/dl_edit.c:234
+#: apps/datalog/main/dl_edit.c:571
 Histéresis	Hysteresis
 
-#: apps/datalog/main/dl_edit.c:234
+#: apps/datalog/main/dl_edit.c:239
 Tensión del punto 1 (V)	Voltage of point 1 (V)
 
-#: apps/datalog/main/dl_edit.c:235
+#: apps/datalog/main/dl_edit.c:240
 Valor del punto 1	Value of point 1
 
-#: apps/datalog/main/dl_edit.c:236
+#: apps/datalog/main/dl_edit.c:241
 Tensión del punto 2 (V)	Voltage of point 2 (V)
 
-#: apps/datalog/main/dl_edit.c:237
+#: apps/datalog/main/dl_edit.c:242
 Valor del punto 2	Value of point 2
 
-#: apps/datalog/main/dl_edit.c:239
-#: apps/datalog/main/dl_edit.c:490
+#: apps/datalog/main/dl_edit.c:244
+#: apps/datalog/main/dl_edit.c:502
 Unidad	Unit
 
-#: apps/datalog/main/dl_edit.c:253
+#: apps/datalog/main/dl_edit.c:258
 Falta elegir qué lee	Choose what it reads first
 
-#: apps/datalog/main/dl_edit.c:254
+#: apps/datalog/main/dl_edit.c:259
 Agregá al menos una hora	Add at least one time
 
-#: apps/datalog/main/dl_edit.c:256
+#: apps/datalog/main/dl_edit.c:261
 La alarma baja tiene que ser menor que la alta	The low alarm must be below the high one
 
-#: apps/datalog/main/dl_edit.c:258
+#: apps/datalog/main/dl_edit.c:263
 La salida de la alarma no puede ser el pin que lee	The alarm's output cannot be the pin it reads
 
-#: apps/datalog/main/dl_edit.c:268
+#: apps/datalog/main/dl_edit.c:273
 El GPIO%d lo lee «%s»	GPIO%d is read by “%s”
 
-#: apps/datalog/main/dl_edit.c:270
+#: apps/datalog/main/dl_edit.c:275
 El GPIO%d es la salida de una alarma de «%s»	GPIO%d is an alarm output of “%s”
 
-#: apps/datalog/main/dl_edit.c:275
+#: apps/datalog/main/dl_edit.c:280
 Lectura	Reading
 
-#: apps/datalog/main/dl_edit.c:276
+#: apps/datalog/main/dl_edit.c:281
 No se pudo guardar	Could not save
 
-#: apps/datalog/main/dl_edit.c:280
+#: apps/datalog/main/dl_edit.c:285
 Guardado	Saved
 
-#: apps/datalog/main/dl_edit.c:280
+#: apps/datalog/main/dl_edit.c:285
 Guardado. Tocá ▶ para empezar a registrar.	Saved. Tap ▶ to start logging.
 
-#: apps/datalog/main/dl_edit.c:289
+#: apps/datalog/main/dl_edit.c:294
 Lectura borrada; su CSV queda en la tarjeta	Reading deleted; its CSV stays on the card
 
-#: apps/datalog/main/dl_edit.c:296
+#: apps/datalog/main/dl_edit.c:301
 ¿Borrar esta lectura? Deja de leer; el archivo con lo que ya anotó queda en la tarjeta.	Delete this reading? It stops reading; the file with what it logged stays on the card.
 
-#: apps/datalog/main/dl_edit.c:296
+#: apps/datalog/main/dl_edit.c:301
 #: apps/datalog/main/dl_view.c:283
 Borrar	Delete
 
-#: apps/datalog/main/dl_edit.c:321
+#: apps/datalog/main/dl_edit.c:326
 CADA CUÁNTO LEE	HOW OFTEN IT READS
 
-#: apps/datalog/main/dl_edit.c:323
+#: apps/datalog/main/dl_edit.c:328
 Cada cierto tiempo	Every so often
 
-#: apps/datalog/main/dl_edit.c:324
+#: apps/datalog/main/dl_edit.c:329
 A ciertas horas	At set times
 
-#: apps/datalog/main/dl_edit.c:329
+#: apps/datalog/main/dl_edit.c:334
 Cada	Every
 
-#: apps/datalog/main/dl_edit.c:331
+#: apps/datalog/main/dl_edit.c:336
 segundos	seconds
 
-#: apps/datalog/main/dl_edit.c:332
+#: apps/datalog/main/dl_edit.c:337
 minutos	minutes
 
-#: apps/datalog/main/dl_edit.c:333
+#: apps/datalog/main/dl_edit.c:338
 horas	hours
 
-#: apps/datalog/main/dl_edit.c:340
+#: apps/datalog/main/dl_edit.c:345
 Lee apenas empieza a registrar y después a horario fijo: cada 5 min es a las :00, :05, :10…	It reads as soon as logging starts, then on the clock: every 5 min is at :00, :05, :10…
 
-#: apps/datalog/main/dl_edit.c:348
+#: apps/datalog/main/dl_edit.c:353
 + Hora	+ Time
 
-#: apps/datalog/main/dl_edit.c:349
+#: apps/datalog/main/dl_edit.c:354
 Todos los días a esas horas. Necesita la hora de la red: sin ella no lee.	Every day at those times. It needs the time from the network: without it, it does not read.
 
-#: apps/datalog/main/dl_edit.c:361
+#: apps/datalog/main/dl_edit.c:366
 Buscar de nuevo	Search again
 
-#: apps/datalog/main/dl_edit.c:362
+#: apps/datalog/main/dl_edit.c:367
 Abrir Módulos	Open Modules
 
-#: apps/datalog/main/dl_edit.c:386
+#: apps/datalog/main/dl_edit.c:395
 No hay ningún ADS1115. Conectalo a i2c.ext (SDA GPIO21 pin 15, SCL GPIO22 pin 17, 3V3 y GND): se reconoce solo en unos segundos.	There is no ADS1115. Connect it to i2c.ext (SDA GPIO21 pin 15, SCL GPIO22 pin 17, 3V3 and GND): it is recognised by itself in a few seconds.
 
-#: apps/datalog/main/dl_edit.c:387
+#: apps/datalog/main/dl_edit.c:396
+No hay sensores I2C. Los conocidos se reconocen solos en i2c.ext (SDA GPIO21, SCL GPIO22); los pocos que no se pueden reconocer sin riesgo (PCF8591, PCF8574, LM75…) se declaran en Módulos.	No I2C sensors. The known ones are recognised by themselves on i2c.ext (SDA GPIO21, SCL GPIO22); the few that cannot be recognised safely (PCF8591, PCF8574, LM75…) are declared in Modules.
 
-#: apps/datalog/main/dl_edit.c:388
+#: apps/datalog/main/dl_edit.c:397
+No hay sensores SPI. Una termocupla (MAX6675, MAX31855), una PT100 (MAX31865) o un MCP3008 se declaran en Módulos (Puertos, Agregar): el puerto spi.a y su CS.	No SPI sensors. A thermocouple (MAX6675, MAX31855), a PT100 (MAX31865) or an MCP3008 is declared in Modules (Ports, Add): the spi.a port and its CS.
 
-#: apps/datalog/main/dl_edit.c:389
+#: apps/datalog/main/dl_edit.c:398
+No hay sensores de pines. Un DHT22, un HC-SR04, una balanza HX711, un caudalímetro o un PIR se declaran en Módulos (Puertos, Agregar): se eligen sus pines.	No pin sensors. A DHT22, an HC-SR04, an HX711 scale, a flow meter or a PIR is declared in Modules (Ports, Add): you choose its pins.
+
+#: apps/datalog/main/dl_edit.c:399
+No hay sensores por puerto serie. Un MH-Z19, un PMS5003, un PZEM-004T o un radar LD2410 se declaran en Módulos (Puertos, Agregar), en uart.a.	No serial sensors. An MH-Z19, a PMS5003, a PZEM-004T or an LD2410 radar is declared in Modules (Ports, Add), on uart.a.
+
+#: apps/datalog/main/dl_edit.c:400
 No hay sensores 1-Wire. Un bus de DS18B20 se declara en Módulos (Puertos, Agregar, DS18B20): se elige el pin.	No 1-Wire sensors. A bus of DS18B20s is declared in Modules (Ports, Add, DS18B20): you pick the pin.
 
-#: apps/datalog/main/dl_edit.c:396
+#: apps/datalog/main/dl_edit.c:407
 BUS 1-WIRE	1-WIRE BUS
 
-#: apps/datalog/main/dl_edit.c:396
+#: apps/datalog/main/dl_edit.c:407
 BUS	BUS
 
-#: apps/datalog/main/dl_edit.c:409
+#: apps/datalog/main/dl_edit.c:420
 SENSOR	SENSOR
 
-#: apps/datalog/main/dl_edit.c:422
+#: apps/datalog/main/dl_edit.c:433
 Ese sensor no está ahora: la lectura anota el error hasta que vuelva.	That sensor is not there now: the reading logs the error until it comes back.
 
-#: apps/datalog/main/dl_edit.c:437
+#: apps/datalog/main/dl_edit.c:448
 ENTRADA	INPUT
 
-#: apps/datalog/main/dl_edit.c:437
+#: apps/datalog/main/dl_edit.c:448
 VARIABLE	VALUE
 
-#: apps/datalog/main/dl_edit.c:461
+#: apps/datalog/main/dl_edit.c:473
 RANGO	RANGE
 
-#: apps/datalog/main/dl_edit.c:469
+#: apps/datalog/main/dl_edit.c:481
 Es el gain= del ADS1115 en modules.txt y vale para sus cuatro entradas; se guarda al elegirlo. Nunca más de 3,3 V en una entrada, sea cual sea el rango.	It is the ADS1115's gain= in modules.txt and holds for its four inputs; it is saved when you pick it. Never more than 3.3 V on an input, whatever the range.
 
-#: apps/datalog/main/dl_edit.c:470
+#: apps/datalog/main/dl_edit.c:482
 QUÉ ANOTA	WHAT IT LOGS
 
-#: apps/datalog/main/dl_edit.c:472
+#: apps/datalog/main/dl_edit.c:484
 Tensión (V)	Voltage (V)
 
-#: apps/datalog/main/dl_edit.c:473
+#: apps/datalog/main/dl_edit.c:485
 Crudo (cuentas)	Raw (counts)
 
-#: apps/datalog/main/dl_edit.c:474
+#: apps/datalog/main/dl_edit.c:486
 Estimado (escala)	Estimated (scale)
 
-#: apps/datalog/main/dl_edit.c:478
+#: apps/datalog/main/dl_edit.c:490
 Las cuentas del convertidor, de -32768 a 32767: 32767 son %s V con este rango.	The converter's counts, from -32768 to 32767: 32767 is %s V in this range.
 
-#: apps/datalog/main/dl_edit.c:483
+#: apps/datalog/main/dl_edit.c:495
 Punto 1: tensión	Point 1: voltage
 
-#: apps/datalog/main/dl_edit.c:485
+#: apps/datalog/main/dl_edit.c:497
 Punto 1: valor	Point 1: value
 
-#: apps/datalog/main/dl_edit.c:487
+#: apps/datalog/main/dl_edit.c:499
 Punto 2: tensión	Point 2: voltage
 
-#: apps/datalog/main/dl_edit.c:489
+#: apps/datalog/main/dl_edit.c:501
 Punto 2: valor	Point 2: value
 
-#: apps/datalog/main/dl_edit.c:490
+#: apps/datalog/main/dl_edit.c:502
 ninguna	none
 
-#: apps/datalog/main/dl_edit.c:491
+#: apps/datalog/main/dl_edit.c:503
 Una recta por los dos puntos: un sensor de presión que da 0,5 V a 0 bar y 4,5 V a 10 bar es 0,5 → 0 y 4,5 → 10, en bar.	A straight line through the two points: a pressure sensor that gives 0.5 V at 0 bar and 4.5 V at 10 bar is 0.5 → 0 and 4.5 → 10, in bar.
 
-#: apps/datalog/main/dl_edit.c:497
+#: apps/datalog/main/dl_edit.c:509
 PIN	PIN
 
-#: apps/datalog/main/dl_edit.c:517
+#: apps/datalog/main/dl_edit.c:529
 Es el pin %d del header; ahora lo tiene %s.	It is pin %d of the header; %s has it now.
 
-#: apps/datalog/main/dl_edit.c:518
+#: apps/datalog/main/dl_edit.c:530
 Es el pin %d del header. Sólo 3,3 V: nunca 5 V en un GPIO.	It is pin %d of the header. 3.3 V only: never 5 V on a GPIO.
 
-#: apps/datalog/main/dl_edit.c:521
+#: apps/datalog/main/dl_edit.c:533
 Los pines que no son de un bus de sensores (i2c.ext, spi.a, un 1-Wire) ni de otra app; los de un puerto serie o un módulo, al final.	The pins that belong to no sensor bus (i2c.ext, spi.a, a 1-Wire) and no other app; those of a serial port or a module, last.
 
-#: apps/datalog/main/dl_edit.c:523
+#: apps/datalog/main/dl_edit.c:535
 RESISTENCIA	RESISTOR
 
-#: apps/datalog/main/dl_edit.c:527
-#: apps/datalog/main/dl_edit.c:569
+#: apps/datalog/main/dl_edit.c:539
+#: apps/datalog/main/dl_edit.c:581
 Ninguna	None
 
-#: apps/datalog/main/dl_edit.c:528
+#: apps/datalog/main/dl_edit.c:540
 Con pull-up un contacto o botón a GND lee 0 cuando se cierra.	With a pull-up, a contact or button to GND reads 0 when it closes.
 
-#: apps/datalog/main/dl_edit.c:529
+#: apps/datalog/main/dl_edit.c:541
 Con pull-down un contacto a 3V3 lee 1 cuando se cierra.	With a pull-down, a contact to 3V3 reads 1 when it closes.
 
-#: apps/datalog/main/dl_edit.c:530
+#: apps/datalog/main/dl_edit.c:542
 Sin resistencia: para una salida que siempre maneja el nivel (un módulo con su propio pull-up).	No resistor: for an output that always drives the level (a module with its own pull-up).
 
-#: apps/datalog/main/dl_edit.c:531
+#: apps/datalog/main/dl_edit.c:543
 LÓGICA	LOGIC
 
-#: apps/datalog/main/dl_edit.c:533
+#: apps/datalog/main/dl_edit.c:545
 Normal: alto es 1	Normal: high is 1
 
-#: apps/datalog/main/dl_edit.c:534
+#: apps/datalog/main/dl_edit.c:546
 Invertida: alto es 0	Inverted: high is 0
 
-#: apps/datalog/main/dl_edit.c:539
+#: apps/datalog/main/dl_edit.c:551
 QUÉ VALOR	WHICH VALUE
 
-#: apps/datalog/main/dl_edit.c:542
+#: apps/datalog/main/dl_edit.c:554
 Valores de la placa misma, para seguir la red o la memoria a lo largo de un día.	Values of the board itself, to follow the network or the memory over a day.
 
-#: apps/datalog/main/dl_edit.c:547
+#: apps/datalog/main/dl_edit.c:559
 #: apps/datalog/main/dl_view.c:290
 ALARMAS	ALARMS
 
-#: apps/datalog/main/dl_edit.c:549
+#: apps/datalog/main/dl_edit.c:561
 Baja	Low
 
-#: apps/datalog/main/dl_edit.c:550
+#: apps/datalog/main/dl_edit.c:562
 Alta	High
 
-#: apps/datalog/main/dl_edit.c:552
+#: apps/datalog/main/dl_edit.c:564
 Una alarma avisa cuando el valor pasa un límite: con sonido y un mensaje, o sólo con una nota en el CSV; y puede manejar un GPIO (un relé, una luz).	An alarm tells you when the value crosses a limit: with a sound and a message, or only with a note in the CSV; and it can drive a GPIO (a relay, a light).
 
-#: apps/datalog/main/dl_edit.c:556
+#: apps/datalog/main/dl_edit.c:568
 Baja: menos de	Low: below
 
-#: apps/datalog/main/dl_edit.c:557
+#: apps/datalog/main/dl_edit.c:569
 Alta: más de	High: above
 
-#: apps/datalog/main/dl_edit.c:560
+#: apps/datalog/main/dl_edit.c:572
 Para que no se prenda y se apague cerca del límite: una alarma alta termina cuando el valor baja de alta menos la histéresis (y una baja, al revés).	So that it does not flicker on and off near the limit: a high alarm ends when the value falls below high minus the hysteresis (and a low one the other way round).
 
-#: apps/datalog/main/dl_edit.c:561
+#: apps/datalog/main/dl_edit.c:573
 AVISO	NOTICE
 
-#: apps/datalog/main/dl_edit.c:563
+#: apps/datalog/main/dl_edit.c:575
 Sonido y mensaje en pantalla	Sound and message on screen
 
-#: apps/datalog/main/dl_edit.c:564
+#: apps/datalog/main/dl_edit.c:576
 Sólo una nota en el CSV	Only a note in the CSV
 
-#: apps/datalog/main/dl_edit.c:565
+#: apps/datalog/main/dl_edit.c:577
 SALIDA	OUTPUT
 
-#: apps/datalog/main/dl_edit.c:584
+#: apps/datalog/main/dl_edit.c:596
 NIVEL CON ALARMA	LEVEL DURING AN ALARM
 
-#: apps/datalog/main/dl_edit.c:586
+#: apps/datalog/main/dl_edit.c:598
 Alto (3V3)	High (3V3)
 
-#: apps/datalog/main/dl_edit.c:587
+#: apps/datalog/main/dl_edit.c:599
 Bajo (GND)	Low (GND)
 
-#: apps/datalog/main/dl_edit.c:590
+#: apps/datalog/main/dl_edit.c:602
 El GPIO%d (pin %d) queda en ese nivel mientras dure la alarma, y en el otro el resto del tiempo y en pausa. Para un módulo de relé, el nivel con el que se activa (muchos, con GND).	GPIO%d (pin %d) stays at that level while the alarm lasts, and at the other one the rest of the time and while paused. For a relay module, the level that switches it on (GND for many).
 
-#: apps/datalog/main/dl_edit.c:600
+#: apps/datalog/main/dl_edit.c:612
 Elegí qué lee	Choose what it reads
 
-#: apps/datalog/main/dl_edit.c:601
+#: apps/datalog/main/dl_edit.c:613
 El pin se lee una vez guardada la lectura	The pin is read once the reading is saved
 
-#: apps/datalog/main/dl_edit.c:605
+#: apps/datalog/main/dl_edit.c:617
 Ahora: %s	Now: %s
 
-#: apps/datalog/main/dl_edit.c:632
+#: apps/datalog/main/dl_edit.c:644
 (se pone solo)	(set by itself)
 
-#: apps/datalog/main/dl_edit.c:635
+#: apps/datalog/main/dl_edit.c:647
 TIPO DE SENSOR	KIND OF SENSOR
 
-#: apps/datalog/main/dl_edit.c:640
+#: apps/datalog/main/dl_edit.c:652
 Digital	Digital
 
-#: apps/datalog/main/dl_edit.c:641
+#: apps/datalog/main/dl_edit.c:653
 Analógica (ADS1115)	Analog (ADS1115)
 
-#: apps/datalog/main/dl_edit.c:661
+#: apps/datalog/main/dl_edit.c:673
 Borrar esta lectura	Delete this reading
 
-#: apps/datalog/main/dl_edit.c:700
+#: apps/datalog/main/dl_edit.c:717
 #: apps/datalog/main/dl_ui.c:346
 Cancelar	Cancel
 
-#: apps/datalog/main/dl_edit.c:702
+#: apps/datalog/main/dl_edit.c:719
 Guardar	Save
 
-#: apps/datalog/main/dl_edit.c:704
+#: apps/datalog/main/dl_edit.c:721
 Editar	Edit
 
-#: apps/datalog/main/dl_edit.c:704
+#: apps/datalog/main/dl_edit.c:721
 Nueva lectura	New reading
 
-#: apps/datalog/main/dl_engine.c:199
+#: apps/datalog/main/dl_engine.c:201
 El GPIO%d lo tiene %s	GPIO%d is held by %s
 
-#: apps/datalog/main/dl_engine.c:200
+#: apps/datalog/main/dl_engine.c:202
 No se pudo tomar el GPIO%d	Could not take GPIO%d
 
-#: apps/datalog/main/dl_engine.c:313
+#: apps/datalog/main/dl_engine.c:315
 sin hora	no clock
 
-#: apps/datalog/main/dl_engine.c:330
+#: apps/datalog/main/dl_engine.c:332
 ALTA: más de %s	HIGH: above %s
 
-#: apps/datalog/main/dl_engine.c:331
+#: apps/datalog/main/dl_engine.c:333
 BAJA: menos de %s	LOW: below %s
 
-#: apps/datalog/main/dl_engine.c:332
+#: apps/datalog/main/dl_engine.c:334
 Vuelve a lo normal	Back to normal
 
-#: apps/datalog/main/dl_engine.c:333
+#: apps/datalog/main/dl_engine.c:335
 alta	high
 
-#: apps/datalog/main/dl_engine.c:334
+#: apps/datalog/main/dl_engine.c:336
 baja	low
 
-#: apps/datalog/main/dl_engine.c:354
+#: apps/datalog/main/dl_engine.c:356
 No se pudo escribir en la tarjeta	Could not write to the card
 
 #: apps/datalog/main/dl_list.c:40
@@ -463,101 +471,137 @@ ALTA	HIGH
 #: apps/datalog/main/dl_list.c:337
 BAJA	LOW
 
-#: apps/datalog/main/dl_src.c:55
+#: apps/datalog/main/dl_src.c:79
+Pines	Pins
+
+#: apps/datalog/main/dl_src.c:80
+Serie	Serial
+
+#: apps/datalog/main/dl_src.c:81
 Otros	Other
 
-#: apps/datalog/main/dl_src.c:62
+#: apps/datalog/main/dl_src.c:88
 Señal Wi-Fi	Wi-Fi signal
 
-#: apps/datalog/main/dl_src.c:63
+#: apps/datalog/main/dl_src.c:89
 PSRAM libre	Free PSRAM
 
-#: apps/datalog/main/dl_src.c:64
+#: apps/datalog/main/dl_src.c:90
 RAM interna libre	Free internal RAM
 
-#: apps/datalog/main/dl_src.c:65
+#: apps/datalog/main/dl_src.c:91
 Tiempo encendida	Uptime
 
-#: apps/datalog/main/dl_src.c:71
+#: apps/datalog/main/dl_src.c:97
 Temperatura	Temperature
 
-#: apps/datalog/main/dl_src.c:72
+#: apps/datalog/main/dl_src.c:98
 Humedad	Humidity
 
-#: apps/datalog/main/dl_src.c:73
+#: apps/datalog/main/dl_src.c:99
 Presión	Pressure
 
-#: apps/datalog/main/dl_src.c:74
+#: apps/datalog/main/dl_src.c:100
 Luz	Light
 
-#: apps/datalog/main/dl_src.c:75
+#: apps/datalog/main/dl_src.c:101
 Tensión	Voltage
 
-#: apps/datalog/main/dl_src.c:76
+#: apps/datalog/main/dl_src.c:102
 Corriente	Current
 
-#: apps/datalog/main/dl_src.c:77
+#: apps/datalog/main/dl_src.c:103
 Potencia	Power
 
-#: apps/datalog/main/dl_src.c:78
+#: apps/datalog/main/dl_src.c:104
 En el shunt	Across the shunt
 
-#: apps/datalog/main/dl_src.c:223
+#: apps/datalog/main/dl_src.c:271
 No contesta: MISO quedó en 1. ¿Alimentación, CS, cables?	No answer: MISO stayed at 1. Power, CS, wiring?
 
-#: apps/datalog/main/dl_src.c:224
+#: apps/datalog/main/dl_src.c:272
 No contesta en el bus 1-Wire. ¿Alimentación, la resistencia de 4,7 kΩ, cables?	No answer on the 1-Wire bus. Power, the 4.7 kΩ resistor, wiring?
 
-#: apps/datalog/main/dl_src.c:225
+#: apps/datalog/main/dl_src.c:273
+No contesta en el pin. ¿Alimentación, cables, el modelo?	No answer on the pin. Power, wiring, the model?
+
+#: apps/datalog/main/dl_src.c:274
+No contesta por el puerto serie. ¿TX y RX cruzados, alimentación?	No answer on the serial port. TX and RX crossed, power?
+
+#: apps/datalog/main/dl_src.c:275
 No contesta en esa dirección	No answer at that address
 
-#: apps/datalog/main/dl_src.c:226
+#: apps/datalog/main/dl_src.c:276
+No se entiende lo que manda: ¿otra velocidad u otro sensor?	Cannot make sense of what it sends: another speed or another sensor?
+
+#: apps/datalog/main/dl_src.c:277
 Llegó una lectura con el CRC mal	A reading came with a bad CRC
 
-#: apps/datalog/main/dl_src.c:227
+#: apps/datalog/main/dl_src.c:278
 En esa dirección hay otro chip (dice %s)	Another chip is at that address (it says %s)
 
-#: apps/datalog/main/dl_src.c:228
-#: apps/datalog/main/dl_src.c:402
+#: apps/datalog/main/dl_src.c:279
+#: apps/datalog/main/dl_src.c:460
 Todavía no midió	It has not measured yet
 
-#: apps/datalog/main/dl_src.c:229
+#: apps/datalog/main/dl_src.c:280
 Los pines los tiene %s	%s has the pins
 
-#: apps/datalog/main/dl_src.c:230
+#: apps/datalog/main/dl_src.c:281
 No se pudo abrir el puerto	Could not open the port
 
-#: apps/datalog/main/dl_src.c:231
+#: apps/datalog/main/dl_src.c:282
 Ahí está el %s de la placa	The board's %s is there
 
-#: apps/datalog/main/dl_src.c:232
+#: apps/datalog/main/dl_src.c:283
+La RTD está abierta o le falta un cable	The RTD is open or a wire is missing
+
+#: apps/datalog/main/dl_src.c:284
+La termocupla está en corto a GND	The thermocouple is shorted to GND
+
+#: apps/datalog/main/dl_src.c:285
+La termocupla está en corto a VCC	The thermocouple is shorted to VCC
+
+#: apps/datalog/main/dl_src.c:286
+Una punta de la termocupla toca VCC o GND	A thermocouple lead touches VCC or GND
+
+#: apps/datalog/main/dl_src.c:287
 La termocupla está abierta (o no está conectada)	The thermocouple is open (or not connected)
 
-#: apps/datalog/main/dl_src.c:381
+#: apps/datalog/main/dl_src.c:288
+La RTD está en corto	The RTD is shorted
+
+#: apps/datalog/main/dl_src.c:289
+Fuera de rango	Out of range
+
+#: apps/datalog/main/dl_src.c:290
+Falta %s= en la línea del módulo	The module line lacks %s=
+
+#: apps/datalog/main/dl_src.c:439
 No se pudo leer el pin	Could not read the pin
 
-#: apps/datalog/main/dl_src.c:389
+#: apps/datalog/main/dl_src.c:447
 Sin Wi-Fi	No Wi-Fi
 
-#: apps/datalog/main/dl_src.c:400
+#: apps/datalog/main/dl_src.c:458
 El sensor no está: ¿se desconectó o se borró de modules.txt?	The sensor is not there: unplugged, or removed from modules.txt?
 
-#: apps/datalog/main/dl_src.c:409
+#: apps/datalog/main/dl_src.c:467
 La escala tiene los dos puntos en la misma tensión	The scale has both points at the same voltage
 
-#: apps/datalog/main/dl_src.c:427
+#: apps/datalog/main/dl_src.c:485
 sin resistencia	no resistor
 
-#: apps/datalog/main/dl_src.c:428
+#: apps/datalog/main/dl_src.c:486
  · invertida	 · inverted
 
-#: apps/datalog/main/dl_src.c:440
+#: apps/datalog/main/dl_src.c:498
 en volts	in volts
 
-#: apps/datalog/main/dl_src.c:440
+#: apps/datalog/main/dl_src.c:498
 crudo	raw
 
-#: apps/datalog/main/dl_src.c:440
+#: apps/datalog/main/dl_src.c:498
 escalado	scaled
 
 #: apps/datalog/main/dl_ui.c:215
@@ -643,19 +687,3 @@ Borrar los datos	Delete the data
 
 #: apps/datalog/main/dl_view.c:377
 Cargando…	Loading…
-No hay sensores I2C. Los conocidos se reconocen solos en i2c.ext (SDA GPIO21, SCL GPIO22); los pocos que no se pueden reconocer sin riesgo (PCF8591, PCF8574, LM75…) se declaran en Módulos.	No I2C sensors. The known ones are recognised by themselves on i2c.ext (SDA GPIO21, SCL GPIO22); the few that cannot be recognised safely (PCF8591, PCF8574, LM75…) are declared in Modules.
-No contesta en el pin. ¿Alimentación, cables, el modelo?	No answer on the pin. Power, wiring, the model?
-No contesta por el puerto serie. ¿TX y RX cruzados, alimentación?	No answer on the serial port. TX and RX crossed, power?
-Fuera de rango	Out of range
-No hay sensores SPI. Una termocupla (MAX6675, MAX31855), una PT100 (MAX31865) o un MCP3008 se declaran en Módulos (Puertos, Agregar): el puerto spi.a y su CS.	No SPI sensors. A thermocouple (MAX6675, MAX31855), a PT100 (MAX31865) or an MCP3008 is declared in Modules (Ports, Add): the spi.a port and its CS.
-No hay sensores de pines. Un DHT22, un HC-SR04, una balanza HX711, un caudalímetro o un PIR se declaran en Módulos (Puertos, Agregar): se eligen sus pines.	No pin sensors. A DHT22, an HC-SR04, an HX711 scale, a flow meter or a PIR is declared in Modules (Ports, Add): you choose its pins.
-No hay sensores por puerto serie. Un MH-Z19, un PMS5003, un PZEM-004T o un radar LD2410 se declaran en Módulos (Puertos, Agregar), en uart.a.	No serial sensors. An MH-Z19, a PMS5003, a PZEM-004T or an LD2410 radar is declared in Modules (Ports, Add), on uart.a.
-Pines	Pins
-Serie	Serial
-La RTD está abierta o le falta un cable	The RTD is open or a wire is missing
-La termocupla está en corto a GND	The thermocouple is shorted to GND
-La termocupla está en corto a VCC	The thermocouple is shorted to VCC
-Una punta de la termocupla toca VCC o GND	A thermocouple lead touches VCC or GND
-La RTD está en corto	The RTD is shorted
-Falta %s= en la línea del módulo	The module line lacks %s=
-No se entiende lo que manda: ¿otra velocidad u otro sensor?	Cannot make sense of what it sends: another speed or another sensor?

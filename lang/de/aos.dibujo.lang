@@ -67,7 +67,7 @@ Pegar	Einfügen
 
 #: apps/dibujo/main/dib_editor.c:1708
 #: apps/dibujo/main/dib_panels.c:688
-#: apps/dibujo/main/dibujo.c:550
+#: apps/dibujo/main/dibujo.c:558
 Duplicar	Duplizieren
 
 #: apps/dibujo/main/dib_editor.c:1709
@@ -75,7 +75,7 @@ Copiar	Kopieren
 
 #: apps/dibujo/main/dib_editor.c:1712
 #: apps/dibujo/main/dib_panels.c:688
-#: apps/dibujo/main/dibujo.c:551
+#: apps/dibujo/main/dibujo.c:559
 Borrar	Löschen
 
 #: apps/dibujo/main/dib_editor.c:1719
@@ -176,12 +176,12 @@ Recientes	Zuletzt
 Mantené apretado un color para sacarlo de la paleta	Farbe gedrückt halten, um sie zu entfernen
 
 #: apps/dibujo/main/dib_panels.c:611
-#: apps/dibujo/main/dibujo.c:755
-#: apps/dibujo/main/dibujo.c:781
+#: apps/dibujo/main/dibujo.c:763
+#: apps/dibujo/main/dibujo.c:789
 Ya hay 8 capas	Es gibt schon 8 Ebenen
 
 #: apps/dibujo/main/dib_panels.c:620
-#: apps/dibujo/main/dibujo.c:367
+#: apps/dibujo/main/dibujo.c:375
 Capa	Ebene
 
 #: apps/dibujo/main/dib_panels.c:649
@@ -243,7 +243,7 @@ las dos	beide
 Guardar	Speichern
 
 #: apps/dibujo/main/dib_panels.c:844
-#: apps/dibujo/main/dibujo.c:549
+#: apps/dibujo/main/dibujo.c:557
 Exportar PNG	PNG exportieren
 
 #: apps/dibujo/main/dib_panels.c:845
@@ -294,7 +294,7 @@ No hay imágenes (JPG, PNG o BMP) en dibujo/importar ni en fotos.	Keine Bilder (
 Escribí el texto	Text eingeben
 
 #: apps/dibujo/main/dib_panels.c:1130
-#: apps/dibujo/main/dibujo.c:552
+#: apps/dibujo/main/dibujo.c:560
 Cancelar	Abbrechen
 
 #: apps/dibujo/main/dib_panels.c:1132
@@ -318,79 +318,79 @@ A4 acostada	A4 quer
 #: apps/dibujo/main/dib_panels.c:1219
 Cuadrado	Quadrat
 
-#: apps/dibujo/main/dibujo.c:152
+#: apps/dibujo/main/dibujo.c:160
 Básica	Basis
 
-#: apps/dibujo/main/dibujo.c:152
+#: apps/dibujo/main/dibujo.c:160
 Pastel	Pastell
 
-#: apps/dibujo/main/dibujo.c:152
+#: apps/dibujo/main/dibujo.c:160
 Tierra	Erde
 
-#: apps/dibujo/main/dibujo.c:152
+#: apps/dibujo/main/dibujo.c:160
 Mía	Meine
 
-#: apps/dibujo/main/dibujo.c:293
+#: apps/dibujo/main/dibujo.c:301
 No se pudo guardar	Speichern fehlgeschlagen
 
-#: apps/dibujo/main/dibujo.c:322
-#: apps/dibujo/main/dibujo.c:621
+#: apps/dibujo/main/dibujo.c:330
+#: apps/dibujo/main/dibujo.c:629
 Dibujo	Zeichnung
 
-#: apps/dibujo/main/dibujo.c:352
+#: apps/dibujo/main/dibujo.c:360
 No se pudo abrir	Öffnen fehlgeschlagen
 
-#: apps/dibujo/main/dibujo.c:364
+#: apps/dibujo/main/dibujo.c:372
 No hay memoria para un dibujo de ese tamaño	Nicht genug Speicher für diese Größe
 
-#: apps/dibujo/main/dibujo.c:499
+#: apps/dibujo/main/dibujo.c:507
 Duplicado	Dupliziert
 
-#: apps/dibujo/main/dibujo.c:499
+#: apps/dibujo/main/dibujo.c:507
 No se pudo duplicar	Duplizieren fehlgeschlagen
 
-#: apps/dibujo/main/dibujo.c:511
+#: apps/dibujo/main/dibujo.c:519
 ¿Seguro? Tocá de nuevo	Sicher? Nochmal tippen
 
-#: apps/dibujo/main/dibujo.c:563
+#: apps/dibujo/main/dibujo.c:571
 Todavía no hay dibujos. Tocá «Nuevo» para empezar uno.	Noch keine Zeichnungen. Tippe auf „Neu“, um eine anzufangen.
 
-#: apps/dibujo/main/dibujo.c:626
+#: apps/dibujo/main/dibujo.c:634
 Nuevo	Neu
 
-#: apps/dibujo/main/dibujo.c:700
+#: apps/dibujo/main/dibujo.c:708
 Ocupado, probá de nuevo	Beschäftigt, nochmal versuchen
 
-#: apps/dibujo/main/dibujo.c:712
-#: apps/dibujo/main/dibujo.c:774
+#: apps/dibujo/main/dibujo.c:720
+#: apps/dibujo/main/dibujo.c:782
 Exportando…	Exportiere…
 
-#: apps/dibujo/main/dibujo.c:727
+#: apps/dibujo/main/dibujo.c:735
 Exportado:	Exportiert:
 
-#: apps/dibujo/main/dibujo.c:727
+#: apps/dibujo/main/dibujo.c:735
 No se pudo exportar	Export fehlgeschlagen
 
-#: apps/dibujo/main/dibujo.c:733
+#: apps/dibujo/main/dibujo.c:741
 No se pudo leer la imagen	Bild nicht lesbar
 
-#: apps/dibujo/main/dibujo.c:742
+#: apps/dibujo/main/dibujo.c:750
 No hay memoria para la imagen	Nicht genug Speicher für das Bild
 
-#: apps/dibujo/main/dibujo.c:753
+#: apps/dibujo/main/dibujo.c:761
 Imagen	Bild
 
-#: apps/dibujo/main/dibujo.c:784
+#: apps/dibujo/main/dibujo.c:792
 Leyendo la imagen…	Lese das Bild…
 
-#: apps/dibujo/main/dibujo.c:813
+#: apps/dibujo/main/dibujo.c:821
 Cielo	Himmel
 
-#: apps/dibujo/main/dibujo.c:830
+#: apps/dibujo/main/dibujo.c:838
 Paisaje	Landschaft
 
-#: apps/dibujo/main/dibujo.c:874
+#: apps/dibujo/main/dibujo.c:882
 Texto	Text
 
-#: apps/dibujo/main/dibujo.c:879
+#: apps/dibujo/main/dibujo.c:887
 ¡Hola, Dibujo!	Hallo, Zeichnung!

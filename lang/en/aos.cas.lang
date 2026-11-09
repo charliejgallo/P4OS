@@ -5,50 +5,50 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/cas/main/cas_app.c:125
+#: apps/cas/main/cas_app.c:127
 Motor apagado	Engine off
 
-#: apps/cas/main/cas_app.c:126
+#: apps/cas/main/cas_app.c:128
 Iniciando...	Starting...
 
-#: apps/cas/main/cas_app.c:127
+#: apps/cas/main/cas_app.c:129
 Calculando...	Calculating...
 
-#: apps/cas/main/cas_app.c:174
+#: apps/cas/main/cas_app.c:256
 El motor no aceptó el cálculo	The engine did not take the calculation
 
-#: apps/cas/main/cas_app.c:270
+#: apps/cas/main/cas_app.c:358
 Memoria del motor: %u KB	Engine memory: %u KB
 
-#: apps/cas/main/cas_app.c:278
+#: apps/cas/main/cas_app.c:366
 Parar el cálculo	Stop the calculation
 
-#: apps/cas/main/cas_app.c:279
+#: apps/cas/main/cas_app.c:367
 Borrar el historial	Clear the history
 
-#: apps/cas/main/cas_app.c:280
+#: apps/cas/main/cas_app.c:368
 Banco de pruebas	Benchmark
 
-#: apps/cas/main/cas_app.c:352
+#: apps/cas/main/cas_app.c:442
 Cálculo	Calculate
 
-#: apps/cas/main/cas_app.c:352
+#: apps/cas/main/cas_app.c:442
 #: apps/cas/main/cas_stats.c:976
 Gráfico	Graph
 
-#: apps/cas/main/cas_app.c:352
+#: apps/cas/main/cas_app.c:442
 Geometría	Geometry
 
-#: apps/cas/main/cas_app.c:352
+#: apps/cas/main/cas_app.c:442
 Estadística	Statistics
 
-#: apps/cas/main/cas_app.c:352
+#: apps/cas/main/cas_app.c:442
 Finanzas	Finance
 
-#: apps/cas/main/cas_app.c:352
+#: apps/cas/main/cas_app.c:442
 Ciencias	Sciences
 
-#: apps/cas/main/cas_app.c:438
+#: apps/cas/main/cas_app.c:528
 No se pudo arrancar el motor. Cerrá la app y volvé a abrirla.	The engine could not start. Close the app and open it again.
 
 #: apps/cas/main/cas_bio.c:33
@@ -70,10 +70,10 @@ los dos padres necesitan los mismos genes	both parents need the same genes
 #: apps/cas/main/cas_bio.c:89
 los dos padres necesitan los mismos genes, en el mismo orden	both parents need the same genes, in the same order
 
-#: apps/cas/main/cas_calc.c:154
+#: apps/cas/main/cas_calc.c:155
 Error	Error
 
-#: apps/cas/main/cas_calc.c:197
+#: apps/cas/main/cas_calc.c:205
 El motor no está listo	The engine is not ready
 
 #: apps/cas/main/cas_chem.c:120
@@ -706,7 +706,7 @@ Longitud	Length
 Área	Area
 
 #: apps/cas/main/cas_geo.c:55
-#: apps/cas/main/cas_sci.c:1170
+#: apps/cas/main/cas_sci.c:1173
 Ecuación	Equation
 
 #: apps/cas/main/cas_geo.c:55
@@ -832,21 +832,21 @@ Perímetro	Perimeter
 #: apps/cas/main/cas_geom.c:734
 no existe	does not exist
 
-#: apps/cas/main/cas_graph.c:95
-#: apps/cas/main/cas_graph.c:112
+#: apps/cas/main/cas_graph.c:96
+#: apps/cas/main/cas_graph.c:113
 no se puede graficar	cannot be graphed
 
-#: apps/cas/main/cas_graph.c:95
+#: apps/cas/main/cas_graph.c:96
 no se entiende	not understood
 
-#: apps/cas/main/cas_graph.c:492
+#: apps/cas/main/cas_graph.c:494
 #: apps/cas/main/cas_sci.c:317
 tocá para escribir	tap to type
 
-#: apps/cas/main/cas_graph.c:701
+#: apps/cas/main/cas_graph.c:703
 Listo	Done
 
-#: apps/cas/main/cas_graph.c:733
+#: apps/cas/main/cas_graph.c:735
 Sin memoria para el gráfico	No memory for the graph
 
 #: apps/cas/main/cas_keypad.c:66
@@ -1078,8 +1078,8 @@ Fluidos	Fluids
 Densidad	Density
 
 #: apps/cas/main/cas_phys.c:81
-#: apps/cas/main/cas_sci.c:1182
-#: apps/cas/main/cas_sci.c:1183
+#: apps/cas/main/cas_sci.c:1185
+#: apps/cas/main/cas_sci.c:1186
 Presión	Pressure
 
 #: apps/cas/main/cas_phys.c:82
@@ -1362,7 +1362,7 @@ concentración	concentration
 masa de soluto	mass of solute
 
 #: apps/cas/main/cas_sci.c:47
-#: apps/cas/main/cas_sci.c:581
+#: apps/cas/main/cas_sci.c:584
 masa molar	molar mass
 
 #: apps/cas/main/cas_sci.c:47
@@ -1372,7 +1372,7 @@ volumen de solución	volume of solution
 Dilución	Dilution
 
 #: apps/cas/main/cas_sci.c:50
-#: apps/cas/main/cas_sci.c:1147
+#: apps/cas/main/cas_sci.c:1150
 concentración inicial	initial concentration
 
 #: apps/cas/main/cas_sci.c:50
@@ -1456,275 +1456,275 @@ Estados de oxidación	Oxidation states
 #: apps/cas/main/cas_sci.c:531
 Sumar %s a la fórmula	Add %s to the formula
 
-#: apps/cas/main/cas_sci.c:568
+#: apps/cas/main/cas_sci.c:571
 Fórmula (Ca(OH)2, CuSO4.5H2O, SO4^2-)	Formula (Ca(OH)2, CuSO4.5H2O, SO4^2-)
 
-#: apps/cas/main/cas_sci.c:593
+#: apps/cas/main/cas_sci.c:596
 Gramos y moles	Grams and moles
 
-#: apps/cas/main/cas_sci.c:594
+#: apps/cas/main/cas_sci.c:597
 masa (g)	mass (g)
 
-#: apps/cas/main/cas_sci.c:595
+#: apps/cas/main/cas_sci.c:598
 cantidad (mol)	amount (mol)
 
-#: apps/cas/main/cas_sci.c:598
+#: apps/cas/main/cas_sci.c:601
 partículas	particles
 
-#: apps/cas/main/cas_sci.c:613
+#: apps/cas/main/cas_sci.c:616
 Sustancia	Substance
 
-#: apps/cas/main/cas_sci.c:613
+#: apps/cas/main/cas_sci.c:616
 Coef.	Coef.
 
-#: apps/cas/main/cas_sci.c:650
+#: apps/cas/main/cas_sci.c:653
 Gramos de %s	Grams of %s
 
-#: apps/cas/main/cas_sci.c:656
+#: apps/cas/main/cas_sci.c:659
 Ecuación (Fe + O2 = Fe2O3; iones: Fe^3+)	Equation (Fe + O2 = Fe2O3; ions: Fe^3+)
 
-#: apps/cas/main/cas_sci.c:666
+#: apps/cas/main/cas_sci.c:669
 Estequiometría: tocá una sustancia para escribir cuántos gramos hay; el resto sale de ahí.	Stoichiometry: tap a substance to type how many grams there are; the rest follows.
 
-#: apps/cas/main/cas_sci.c:679
+#: apps/cas/main/cas_sci.c:682
 Llená cuatro y tocá =? en el que falta. La temperatura va en kelvin: 0 °C son 273,15 K.	Fill in four and tap =? on the missing one. Temperature is in kelvin: 0 °C is 273.15 K.
 
-#: apps/cas/main/cas_sci.c:704
+#: apps/cas/main/cas_sci.c:707
 Ácido fuerte	Strong acid
 
-#: apps/cas/main/cas_sci.c:704
+#: apps/cas/main/cas_sci.c:707
 Base fuerte	Strong base
 
-#: apps/cas/main/cas_sci.c:704
+#: apps/cas/main/cas_sci.c:707
 Ácido débil	Weak acid
 
-#: apps/cas/main/cas_sci.c:704
+#: apps/cas/main/cas_sci.c:707
 Base débil	Weak base
 
-#: apps/cas/main/cas_sci.c:708
+#: apps/cas/main/cas_sci.c:711
 concentración (mol/L)	concentration (mol/L)
 
-#: apps/cas/main/cas_sci.c:716
+#: apps/cas/main/cas_sci.c:719
 A 25 °C (Kw = 10⁻¹⁴).	At 25 °C (Kw = 10⁻¹⁴).
 
-#: apps/cas/main/cas_sci.c:735
+#: apps/cas/main/cas_sci.c:738
 ionizado	ionised
 
-#: apps/cas/main/cas_sci.c:764
-#: apps/cas/main/cas_sci.c:1224
+#: apps/cas/main/cas_sci.c:767
+#: apps/cas/main/cas_sci.c:1227
 Fórmulas	Formulas
 
-#: apps/cas/main/cas_sci.c:767
+#: apps/cas/main/cas_sci.c:770
 Llená los datos y tocá =? en el que querés saber. Los ángulos van en grados.	Fill in what you know and tap =? on what you want. Angles are in degrees.
 
-#: apps/cas/main/cas_sci.c:847
+#: apps/cas/main/cas_sci.c:850
 Con esa altura no llega al suelo.	From that height it never reaches the ground.
 
-#: apps/cas/main/cas_sci.c:853
+#: apps/cas/main/cas_sci.c:856
 Tiempo de vuelo	Time of flight
 
-#: apps/cas/main/cas_sci.c:854
+#: apps/cas/main/cas_sci.c:857
 Alcance	Range
 
-#: apps/cas/main/cas_sci.c:855
+#: apps/cas/main/cas_sci.c:858
 Altura máxima	Maximum height
 
-#: apps/cas/main/cas_sci.c:856
+#: apps/cas/main/cas_sci.c:859
 Velocidad al caer	Speed on landing
 
-#: apps/cas/main/cas_sci.c:857
+#: apps/cas/main/cas_sci.c:860
 Ángulo al caer	Angle on landing
 
-#: apps/cas/main/cas_sci.c:864
+#: apps/cas/main/cas_sci.c:867
 v₀ velocidad inicial (m/s)	v₀ initial speed (m/s)
 
-#: apps/cas/main/cas_sci.c:864
+#: apps/cas/main/cas_sci.c:867
 θ ángulo (°)	θ angle (°)
 
-#: apps/cas/main/cas_sci.c:865
+#: apps/cas/main/cas_sci.c:868
 h₀ altura inicial (m)	h₀ initial height (m)
 
-#: apps/cas/main/cas_sci.c:865
+#: apps/cas/main/cas_sci.c:868
 g gravedad (m/s²)	g gravity (m/s²)
 
-#: apps/cas/main/cas_sci.c:890
+#: apps/cas/main/cas_sci.c:893
 CODATA 2018. Desde 2019 c, h, e, Nₐ y kB son exactas por definición.	CODATA 2018. Since 2019 c, h, e, Nₐ and kB are exact by definition.
 
-#: apps/cas/main/cas_sci.c:920
-#: apps/cas/main/cas_sci.c:1170
+#: apps/cas/main/cas_sci.c:923
+#: apps/cas/main/cas_sci.c:1173
 Padre 1	Parent 1
 
-#: apps/cas/main/cas_sci.c:921
-#: apps/cas/main/cas_sci.c:1170
+#: apps/cas/main/cas_sci.c:924
+#: apps/cas/main/cas_sci.c:1173
 Padre 2	Parent 2
 
-#: apps/cas/main/cas_sci.c:935
+#: apps/cas/main/cas_sci.c:938
 Fenotipos	Phenotypes
 
-#: apps/cas/main/cas_sci.c:941
+#: apps/cas/main/cas_sci.c:944
 Genotipos	Genotypes
 
-#: apps/cas/main/cas_sci.c:947
+#: apps/cas/main/cas_sci.c:950
 Mayúscula: el alelo dominante. A_ quiere decir AA o Aa.	Capital: the dominant allele. A_ means AA or Aa.
 
-#: apps/cas/main/cas_sci.c:960
+#: apps/cas/main/cas_sci.c:963
 Con los genotipos contados	From genotype counts
 
-#: apps/cas/main/cas_sci.c:965
+#: apps/cas/main/cas_sci.c:968
 Con la frecuencia del fenotipo recesivo	From the recessive phenotype's frequency
 
-#: apps/cas/main/cas_sci.c:983
+#: apps/cas/main/cas_sci.c:986
 Esperados (AA, Aa, aa)	Expected (AA, Aa, aa)
 
-#: apps/cas/main/cas_sci.c:988
+#: apps/cas/main/cas_sci.c:991
 #: apps/cas/main/cas_stats.c:944
 valor p	p-value
 
-#: apps/cas/main/cas_sci.c:989
+#: apps/cas/main/cas_sci.c:992
 No está en equilibrio (p < 0,05)	Not in equilibrium (p < 0.05)
 
-#: apps/cas/main/cas_sci.c:989
+#: apps/cas/main/cas_sci.c:992
 Compatible con el equilibrio (p ≥ 0,05)	Consistent with equilibrium (p ≥ 0.05)
 
-#: apps/cas/main/cas_sci.c:1000
+#: apps/cas/main/cas_sci.c:1003
 AA (p²)	AA (p²)
 
-#: apps/cas/main/cas_sci.c:1001
+#: apps/cas/main/cas_sci.c:1004
 portadores Aa (2pq)	carriers Aa (2pq)
 
-#: apps/cas/main/cas_sci.c:1025
+#: apps/cas/main/cas_sci.c:1028
 Secuencia (ADN o ARN)	Sequence (DNA or RNA)
 
-#: apps/cas/main/cas_sci.c:1028
+#: apps/cas/main/cas_sci.c:1031
 Se dejaron afuera %d letras que no son bases.	%d letters that are not bases were left out.
 
-#: apps/cas/main/cas_sci.c:1036
+#: apps/cas/main/cas_sci.c:1039
 Largo	Length
 
-#: apps/cas/main/cas_sci.c:1039
+#: apps/cas/main/cas_sci.c:1042
 Masa (hebra simple)	Mass (single strand)
 
-#: apps/cas/main/cas_sci.c:1041
+#: apps/cas/main/cas_sci.c:1044
 Complementaria	Complement
 
-#: apps/cas/main/cas_sci.c:1043
+#: apps/cas/main/cas_sci.c:1046
 Reversa complementaria	Reverse complement
 
-#: apps/cas/main/cas_sci.c:1045
+#: apps/cas/main/cas_sci.c:1048
 ARN mensajero	Messenger RNA
 
-#: apps/cas/main/cas_sci.c:1046
+#: apps/cas/main/cas_sci.c:1049
 Marco 1	Frame 1
 
-#: apps/cas/main/cas_sci.c:1046
+#: apps/cas/main/cas_sci.c:1049
 Marco 2	Frame 2
 
-#: apps/cas/main/cas_sci.c:1046
+#: apps/cas/main/cas_sci.c:1049
 Marco 3	Frame 3
 
-#: apps/cas/main/cas_sci.c:1046
+#: apps/cas/main/cas_sci.c:1049
 Desde ATG	From ATG
 
-#: apps/cas/main/cas_sci.c:1051
+#: apps/cas/main/cas_sci.c:1054
 Proteína (código estándar; * es stop)	Protein (standard code; * is stop)
 
-#: apps/cas/main/cas_sci.c:1052
+#: apps/cas/main/cas_sci.c:1055
 Tm: regla de Wallace hasta 13 bases, la fórmula de GC desde 14. Una estimación: no reemplaza a la de la sal y la concentración.	Tm: Wallace's rule up to 13 bases, the GC formula from 14. An estimate: it does not replace one with salt and concentration.
 
-#: apps/cas/main/cas_sci.c:1094
+#: apps/cas/main/cas_sci.c:1097
 exponencial	exponential
 
-#: apps/cas/main/cas_sci.c:1095
+#: apps/cas/main/cas_sci.c:1098
 logística	logistic
 
-#: apps/cas/main/cas_sci.c:1106
+#: apps/cas/main/cas_sci.c:1109
 Exponencial N(t)	Exponential N(t)
 
-#: apps/cas/main/cas_sci.c:1107
+#: apps/cas/main/cas_sci.c:1110
 Logística N(t)	Logistic N(t)
 
-#: apps/cas/main/cas_sci.c:1108
+#: apps/cas/main/cas_sci.c:1111
 Tiempo de duplicación	Doubling time
 
-#: apps/cas/main/cas_sci.c:1119
+#: apps/cas/main/cas_sci.c:1122
 Tubo %d	Tube %d
 
-#: apps/cas/main/cas_sci.c:1125
+#: apps/cas/main/cas_sci.c:1128
 Dilución total	Total dilution
 
-#: apps/cas/main/cas_sci.c:1132
+#: apps/cas/main/cas_sci.c:1135
 Crecimiento de una población	Population growth
 
-#: apps/cas/main/cas_sci.c:1133
+#: apps/cas/main/cas_sci.c:1136
 N₀ población inicial	N₀ initial population
 
-#: apps/cas/main/cas_sci.c:1133
+#: apps/cas/main/cas_sci.c:1136
 r tasa de crecimiento	r growth rate
 
-#: apps/cas/main/cas_sci.c:1134
+#: apps/cas/main/cas_sci.c:1137
 K capacidad de carga	K carrying capacity
 
-#: apps/cas/main/cas_sci.c:1134
+#: apps/cas/main/cas_sci.c:1137
 t tiempo	t time
 
-#: apps/cas/main/cas_sci.c:1146
+#: apps/cas/main/cas_sci.c:1149
 Diluciones seriadas	Serial dilutions
 
-#: apps/cas/main/cas_sci.c:1147
+#: apps/cas/main/cas_sci.c:1150
 factor por paso	factor per step
 
-#: apps/cas/main/cas_sci.c:1147
+#: apps/cas/main/cas_sci.c:1150
 pasos	steps
 
-#: apps/cas/main/cas_sci.c:1170
+#: apps/cas/main/cas_sci.c:1173
 Fórmula	Formula
 
-#: apps/cas/main/cas_sci.c:1170
+#: apps/cas/main/cas_sci.c:1173
 Secuencia	Sequence
 
-#: apps/cas/main/cas_sci.c:1181
+#: apps/cas/main/cas_sci.c:1184
 Temperatura	Temperature
 
-#: apps/cas/main/cas_sci.c:1218
+#: apps/cas/main/cas_sci.c:1221
 Química	Chemistry
 
-#: apps/cas/main/cas_sci.c:1218
+#: apps/cas/main/cas_sci.c:1221
 Física	Physics
 
-#: apps/cas/main/cas_sci.c:1218
+#: apps/cas/main/cas_sci.c:1221
 Biología	Biology
 
-#: apps/cas/main/cas_sci.c:1223
+#: apps/cas/main/cas_sci.c:1226
 Tabla	Table
 
-#: apps/cas/main/cas_sci.c:1223
+#: apps/cas/main/cas_sci.c:1226
 Masa molar	Molar mass
 
-#: apps/cas/main/cas_sci.c:1223
+#: apps/cas/main/cas_sci.c:1226
 Balancear	Balance
 
-#: apps/cas/main/cas_sci.c:1223
+#: apps/cas/main/cas_sci.c:1226
 Gases	Gases
 
-#: apps/cas/main/cas_sci.c:1223
+#: apps/cas/main/cas_sci.c:1226
 Soluciones	Solutions
 
-#: apps/cas/main/cas_sci.c:1224
+#: apps/cas/main/cas_sci.c:1227
 Tiro oblicuo	Projectile
 
-#: apps/cas/main/cas_sci.c:1224
+#: apps/cas/main/cas_sci.c:1227
 Constantes	Constants
 
-#: apps/cas/main/cas_sci.c:1225
+#: apps/cas/main/cas_sci.c:1228
 Punnett	Punnett
 
-#: apps/cas/main/cas_sci.c:1225
+#: apps/cas/main/cas_sci.c:1228
 Hardy-W.	Hardy-W.
 
-#: apps/cas/main/cas_sci.c:1225
+#: apps/cas/main/cas_sci.c:1228
 ADN	DNA
 
-#: apps/cas/main/cas_sci.c:1225
+#: apps/cas/main/cas_sci.c:1228
 Crecimiento	Growth
 
 #: apps/cas/main/cas_stats.c:235

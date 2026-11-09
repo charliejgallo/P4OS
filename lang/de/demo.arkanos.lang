@@ -12,8 +12,8 @@ NIVEL 	LEVEL
 SUPERADO	GESCHAFFT
 
 #: apps/arkanos/main/ak_draw.c:700
-#: apps/arkanos/main/arkanos.c:483
-#: apps/arkanos/main/arkanos.c:505
+#: apps/arkanos/main/arkanos.c:520
+#: apps/arkanos/main/arkanos.c:543
 OTRA VEZ	NOCHMAL
 
 #: apps/arkanos/main/ak_level.c:72
@@ -70,81 +70,81 @@ CLAUDITO	CLAUDITO
 #: apps/arkanos/main/ak_level.c:238
 EL JEFE	DER BOSS
 
-#: apps/arkanos/main/arkanos.c:309
-#: apps/arkanos/main/arkanos.c:310
+#: apps/arkanos/main/arkanos.c:340
+#: apps/arkanos/main/arkanos.c:341
 SONIDO SI	TON AN
 
-#: apps/arkanos/main/arkanos.c:309
-#: apps/arkanos/main/arkanos.c:310
+#: apps/arkanos/main/arkanos.c:340
+#: apps/arkanos/main/arkanos.c:341
 SONIDO NO	TON AUS
 
-#: apps/arkanos/main/arkanos.c:311
-#: apps/arkanos/main/arkanos.c:312
+#: apps/arkanos/main/arkanos.c:342
+#: apps/arkanos/main/arkanos.c:343
 FPS SI	FPS AN
 
-#: apps/arkanos/main/arkanos.c:311
-#: apps/arkanos/main/arkanos.c:312
+#: apps/arkanos/main/arkanos.c:342
+#: apps/arkanos/main/arkanos.c:343
 FPS NO	FPS AUS
 
-#: apps/arkanos/main/arkanos.c:318
+#: apps/arkanos/main/arkanos.c:349
 RECORD  %lu	BEST  %lu
 
-#: apps/arkanos/main/arkanos.c:425
+#: apps/arkanos/main/arkanos.c:456
 ARKANOS	ARKANOS
 
-#: apps/arkanos/main/arkanos.c:426
+#: apps/arkanos/main/arkanos.c:457
 DOCE MUROS Y UNA BOLA	ZWOELF MAUERN UND EIN BALL
 
-#: apps/arkanos/main/arkanos.c:428
+#: apps/arkanos/main/arkanos.c:459
 JUGAR	SPIELEN
 
-#: apps/arkanos/main/arkanos.c:428
+#: apps/arkanos/main/arkanos.c:459
 arrastra el dedo	Finger ziehen
 
-#: apps/arkanos/main/arkanos.c:441
+#: apps/arkanos/main/arkanos.c:473
 EL DEDO SOBRE LA CANCHA MUEVE LA PALETA	DER FINGER AUF DEM FELD BEWEGT DEN SCHLAEGER
 
-#: apps/arkanos/main/arkanos.c:442
+#: apps/arkanos/main/arkanos.c:474
 EL DEDO EN LA FRANJA DE ABAJO MUEVE LA PALETA	DER FINGER UNTEN IM STREIFEN BEWEGT DEN SCHLAEGER
 
-#: apps/arkanos/main/arkanos.c:444
+#: apps/arkanos/main/arkanos.c:476
 SUELTA EL DEDO PARA SACAR	FINGER HEBEN ZUM AUFSCHLAG
 
-#: apps/arkanos/main/arkanos.c:445
+#: apps/arkanos/main/arkanos.c:477
 CON DISPARO, EL DEDO APOYADO DISPARA	MIT LASER SCHIESST DER AUFGELEGTE FINGER
 
-#: apps/arkanos/main/arkanos.c:446
+#: apps/arkanos/main/arkanos.c:478
 EL BOTON II DE LA DERECHA PAUSA	DIE TASTE II RECHTS PAUSIERT
 
-#: apps/arkanos/main/arkanos.c:447
+#: apps/arkanos/main/arkanos.c:479
 TOCA EL MARCADOR PARA PAUSAR	ZUM PAUSIEREN PUNKTE ANTIPPEN
 
-#: apps/arkanos/main/arkanos.c:455
+#: apps/arkanos/main/arkanos.c:487
 RECORD 0	BEST 0
 
-#: apps/arkanos/main/arkanos.c:456
-#: apps/arkanos/main/arkanos.c:469
-#: apps/arkanos/main/arkanos.c:487
+#: apps/arkanos/main/arkanos.c:490
+#: apps/arkanos/main/arkanos.c:503
+#: apps/arkanos/main/arkanos.c:525
 SALIR	BEENDEN
 
-#: apps/arkanos/main/arkanos.c:465
+#: apps/arkanos/main/arkanos.c:499
 PAUSA	PAUSE
 
-#: apps/arkanos/main/arkanos.c:466
+#: apps/arkanos/main/arkanos.c:500
 SEGUIR	WEITER
 
-#: apps/arkanos/main/arkanos.c:480
-#: apps/arkanos/main/arkanos.c:497
+#: apps/arkanos/main/arkanos.c:517
+#: apps/arkanos/main/arkanos.c:535
 FIN DEL JUEGO	SPIEL VORBEI
 
-#: apps/arkanos/main/arkanos.c:486
+#: apps/arkanos/main/arkanos.c:524
 MENU	MENUE
 
-#: apps/arkanos/main/arkanos.c:497
+#: apps/arkanos/main/arkanos.c:535
 TERMINASTE	DURCHGESPIELT
 
-#: apps/arkanos/main/arkanos.c:501
+#: apps/arkanos/main/arkanos.c:539
 %lu  (RECORD %lu)	%lu  (BEST %lu)
 
-#: apps/arkanos/main/arkanos.c:505
+#: apps/arkanos/main/arkanos.c:543
 OTRA VUELTA	NOCH EINE RUNDE

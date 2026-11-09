@@ -432,7 +432,7 @@ Cuerpo	Body
 Auth	Auth
 
 #: apps/cartero/main/ct_ui_req.c:1045
-Scripts	Scripts
+Scripts	Skripte
 
 #: apps/cartero/main/ct_ui_req.c:1095
 Guardar	Speichern

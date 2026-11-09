@@ -193,105 +193,105 @@ TRAGAMONEDAS	SPIELAUTOMAT
 #: apps/pinball/main/pb_video.c:472
 DUELO	DUELL
 
-#: apps/pinball/main/pinball.c:723
-#: apps/pinball/main/pinball.c:758
-#: apps/pinball/main/pinball.c:1217
+#: apps/pinball/main/pinball.c:724
+#: apps/pinball/main/pinball.c:759
+#: apps/pinball/main/pinball.c:1224
 Efectos: sí	Effekte: an
 
-#: apps/pinball/main/pinball.c:723
-#: apps/pinball/main/pinball.c:758
-#: apps/pinball/main/pinball.c:1217
+#: apps/pinball/main/pinball.c:724
+#: apps/pinball/main/pinball.c:759
+#: apps/pinball/main/pinball.c:1224
 Efectos: no	Effekte: aus
 
-#: apps/pinball/main/pinball.c:733
-#: apps/pinball/main/pinball.c:759
-#: apps/pinball/main/pinball.c:1218
+#: apps/pinball/main/pinball.c:734
+#: apps/pinball/main/pinball.c:760
+#: apps/pinball/main/pinball.c:1225
 Música: sí	Musik: an
 
-#: apps/pinball/main/pinball.c:733
-#: apps/pinball/main/pinball.c:759
-#: apps/pinball/main/pinball.c:1218
+#: apps/pinball/main/pinball.c:734
+#: apps/pinball/main/pinball.c:760
+#: apps/pinball/main/pinball.c:1225
 Música: no	Musik: aus
 
-#: apps/pinball/main/pinball.c:753
-#: apps/pinball/main/pinball.c:865
+#: apps/pinball/main/pinball.c:754
+#: apps/pinball/main/pinball.c:866
 Pausa	Pause
 
-#: apps/pinball/main/pinball.c:755
+#: apps/pinball/main/pinball.c:756
 Seguir	Weiter
 
-#: apps/pinball/main/pinball.c:756
+#: apps/pinball/main/pinball.c:757
 Empezar de nuevo	Neu starten
 
-#: apps/pinball/main/pinball.c:757
+#: apps/pinball/main/pinball.c:758
 Cómo se juega	Spielanleitung
 
-#: apps/pinball/main/pinball.c:760
-#: apps/pinball/main/pinball.c:781
+#: apps/pinball/main/pinball.c:761
+#: apps/pinball/main/pinball.c:782
 Elegir otra mesa	Anderen Tisch wählen
 
-#: apps/pinball/main/pinball.c:769
+#: apps/pinball/main/pinball.c:770
 Fin del juego	Spiel vorbei
 
-#: apps/pinball/main/pinball.c:774
+#: apps/pinball/main/pinball.c:775
 ¡Récord nuevo!	Neuer Rekord!
 
-#: apps/pinball/main/pinball.c:777
+#: apps/pinball/main/pinball.c:778
 Récord: %s	Rekord: %s
 
-#: apps/pinball/main/pinball.c:780
+#: apps/pinball/main/pinball.c:781
 Otra vez	Nochmal
 
-#: apps/pinball/main/pinball.c:837
+#: apps/pinball/main/pinball.c:838
 Tocá acá:\npaleta izquierda	Hier tippen:\nlinker Flipper
 
-#: apps/pinball/main/pinball.c:838
+#: apps/pinball/main/pinball.c:839
 Tocá acá:\npaleta derecha	Hier tippen:\nrechter Flipper
 
-#: apps/pinball/main/pinball.c:841
+#: apps/pinball/main/pinball.c:842
 Deslizá rápido el dedo por acá para sacudir la mesa.\n¡Si la sacudís mucho, TILT!	Hier schnell wischen, um den Tisch anzustoßen.\nZu viel davon und es heißt TILT!
 
-#: apps/pinball/main/pinball.c:851
+#: apps/pinball/main/pinball.c:852
 Cuando aparece este botón, tocalo para lanzar la bola. Mantenelo apretado para elegir la fuerza.	Wenn diese Taste erscheint, tippe sie an, um die Kugel abzuschießen. Halte sie gedrückt, um die Stärke zu wählen.
 
-#: apps/pinball/main/pinball.c:869
+#: apps/pinball/main/pinball.c:870
 ¡A jugar!	Los geht's!
 
-#: apps/pinball/main/pinball.c:1050
+#: apps/pinball/main/pinball.c:1057
 No hay memoria para la mesa: cerrá otras apps y probá de nuevo	Nicht genug Speicher für den Tisch: schließe andere Apps und versuche es erneut
 
-#: apps/pinball/main/pinball.c:1051
+#: apps/pinball/main/pinball.c:1058
 No se pudo cargar la mesa	Der Tisch ließ sich nicht laden
 
-#: apps/pinball/main/pinball.c:1095
+#: apps/pinball/main/pinball.c:1102
 Preparando la mesa...	Tisch wird vorbereitet...
 
-#: apps/pinball/main/pinball.c:1116
+#: apps/pinball/main/pinball.c:1123
 Récord:	Rekord:
 
-#: apps/pinball/main/pinball.c:1192
+#: apps/pinball/main/pinball.c:1199
 El tutorial sale en la próxima partida	Die Anleitung kommt im nächsten Spiel
 
-#: apps/pinball/main/pinball.c:1203
+#: apps/pinball/main/pinball.c:1210
 Récords borrados	Rekorde gelöscht
 
-#: apps/pinball/main/pinball.c:1216
+#: apps/pinball/main/pinball.c:1223
 Ajustes	Einstellungen
 
-#: apps/pinball/main/pinball.c:1219
+#: apps/pinball/main/pinball.c:1226
 Ver el tutorial otra vez	Anleitung nochmal zeigen
 
-#: apps/pinball/main/pinball.c:1220
+#: apps/pinball/main/pinball.c:1227
 Borrar los récords	Rekorde löschen
 
-#: apps/pinball/main/pinball.c:1221
+#: apps/pinball/main/pinball.c:1228
 Listo	Fertig
 
-#: apps/pinball/main/pinball.c:1247
+#: apps/pinball/main/pinball.c:1254
 Pinball 3D	Pinball 3D
 
-#: apps/pinball/main/pinball.c:1264
+#: apps/pinball/main/pinball.c:1271
 No hay mesas en la tarjeta.\n\nCopiá los archivos pinball_*_p4.pak a la carpeta apps de la tarjeta.	Keine Tische auf der Karte.\n\nKopiere die Dateien pinball_*_p4.pak in den Ordner apps der Karte.
 
-#: apps/pinball/main/pinball.c:1362
+#: apps/pinball/main/pinball.c:1369
 Jugar	Spielen

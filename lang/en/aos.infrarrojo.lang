@@ -8,7 +8,7 @@
 #: apps/infrarrojo/main/infrarrojo.c:400
 #: apps/infrarrojo/main/ir_learn.c:374
 #: apps/infrarrojo/main/ir_learn.c:528
-#: apps/infrarrojo/main/ir_remote.c:1094
+#: apps/infrarrojo/main/ir_remote.c:1101
 Cancelar	Cancel
 
 #: apps/infrarrojo/main/infrarrojo.c:449
@@ -45,92 +45,92 @@ Cerrar	Close
 #: apps/infrarrojo/main/infrarrojo.c:525
 Mandando un NEC y escuchando…	Sending a NEC frame and listening…
 
-#: apps/infrarrojo/main/infrarrojo.c:604
-#: apps/infrarrojo/main/infrarrojo.c:623
+#: apps/infrarrojo/main/infrarrojo.c:609
+#: apps/infrarrojo/main/infrarrojo.c:628
 GPIO%d (pata %d)	GPIO%d (pin %d)
 
-#: apps/infrarrojo/main/infrarrojo.c:606
+#: apps/infrarrojo/main/infrarrojo.c:611
 GND (pata 19)	GND (pin 19)
 
-#: apps/infrarrojo/main/infrarrojo.c:607
+#: apps/infrarrojo/main/infrarrojo.c:612
 3V3 (pata 18)	3V3 (pin 18)
 
-#: apps/infrarrojo/main/infrarrojo.c:637
+#: apps/infrarrojo/main/infrarrojo.c:642
 LED IR (cátodo abajo)	IR LED (cathode down)
 
-#: apps/infrarrojo/main/infrarrojo.c:641
+#: apps/infrarrojo/main/infrarrojo.c:646
 5V (pata 1)	5V (pin 1)
 
-#: apps/infrarrojo/main/infrarrojo.c:646
+#: apps/infrarrojo/main/infrarrojo.c:651
 GND (pata 26)	GND (pin 26)
 
-#: apps/infrarrojo/main/infrarrojo.c:694
-#: apps/infrarrojo/main/infrarrojo.c:784
+#: apps/infrarrojo/main/infrarrojo.c:699
+#: apps/infrarrojo/main/infrarrojo.c:789
 Cableado	Wiring
 
-#: apps/infrarrojo/main/infrarrojo.c:704
+#: apps/infrarrojo/main/infrarrojo.c:709
 Pines	Pins
 
-#: apps/infrarrojo/main/infrarrojo.c:705
+#: apps/infrarrojo/main/infrarrojo.c:710
 Receptor	Receiver
 
-#: apps/infrarrojo/main/infrarrojo.c:706
+#: apps/infrarrojo/main/infrarrojo.c:711
 LED	LED
 
-#: apps/infrarrojo/main/infrarrojo.c:708
+#: apps/infrarrojo/main/infrarrojo.c:713
 Cualquier pin libre del conector de atrás. La app los toma mientras los usa y los suelta al cerrarse.	Any free pin of the rear header. The app holds them while it uses them and lets go when it closes.
 
-#: apps/infrarrojo/main/infrarrojo.c:709
+#: apps/infrarrojo/main/infrarrojo.c:714
 Prueba de lazo	Loop test
 
-#: apps/infrarrojo/main/infrarrojo.c:711
+#: apps/infrarrojo/main/infrarrojo.c:716
 Con el LED apuntando al receptor: manda un código y mira si vuelve.	With the LED aimed at the receiver: sends a code and checks that it comes back.
 
-#: apps/infrarrojo/main/infrarrojo.c:715
+#: apps/infrarrojo/main/infrarrojo.c:720
 El receptor	The receiver
 
-#: apps/infrarrojo/main/infrarrojo.c:720
+#: apps/infrarrojo/main/infrarrojo.c:725
 Un receptor con demodulador de 38 kHz (TSOP38238, VS1838B y parecidos). Alimentarlo con 3,3 V, nunca con 5 V: su salida iría con 5 V al pin, y el conector no los aguanta.	A receiver with a 38 kHz demodulator (TSOP38238, VS1838B and the like). Power it from 3.3 V, never 5 V: its output would put 5 V on the pin, and the header does not take it.
 
-#: apps/infrarrojo/main/infrarrojo.c:721
+#: apps/infrarrojo/main/infrarrojo.c:726
 Las patas cambian de orden según el modelo: mirar su hoja de datos. Un capacitor de 100 nF entre VS y GND, cerca del receptor, evita lecturas falsas.	The order of the legs changes from model to model: check its datasheet. A 100 nF capacitor between VS and GND, close to the receiver, avoids false readings.
 
-#: apps/infrarrojo/main/infrarrojo.c:725
+#: apps/infrarrojo/main/infrarrojo.c:730
 El LED	The LED
 
-#: apps/infrarrojo/main/infrarrojo.c:730
+#: apps/infrarrojo/main/infrarrojo.c:735
 Nunca el LED directo al pin: un GPIO da unos 20 mA y un LED IR quiere 50 a 100 mA en pulsos. El pin maneja la base de un transistor con 1 kΩ, y el LED va del colector a 5 V con su resistencia.	Never the LED straight on the pin: a GPIO gives about 20 mA and an IR LED wants 50 to 100 mA in pulses. The pin drives a transistor's base through 1 kΩ, and the LED goes from the collector to 5 V with its resistor.
 
-#: apps/infrarrojo/main/infrarrojo.c:731
+#: apps/infrarrojo/main/infrarrojo.c:736
 Con 5 V y 33 Ω pasan unos 100 mA: alcanza para 5 a 8 m apuntando. Con 3,3 V y 22 Ω, unos 70 mA y algo menos de alcance. Dos LED en serie con 15 Ω cubren más ángulo.	With 5 V and 33 Ω about 100 mA flow: enough for 5 to 8 m when aimed. With 3.3 V and 22 Ω, about 70 mA and a little less range. Two LEDs in series with 15 Ω cover a wider angle.
 
-#: apps/infrarrojo/main/infrarrojo.c:732
+#: apps/infrarrojo/main/infrarrojo.c:737
 Las patas de 5 V tienen tensión aun con la placa apagada.	The 5 V pins are live even with the board off.
 
-#: apps/infrarrojo/main/infrarrojo.c:736
+#: apps/infrarrojo/main/infrarrojo.c:741
 La base de códigos	The code library
 
-#: apps/infrarrojo/main/infrarrojo.c:737
+#: apps/infrarrojo/main/infrarrojo.c:742
 Los códigos de televisores, aires, ventiladores y luces son de SmartIR (licencia MIT, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle), empaquetados para la tarjeta en infrarrojo_p4.pak.	The codes of televisions, air conditioners, fans and lights are SmartIR's (MIT licence, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle), packed for the card in infrarrojo_p4.pak.
 
-#: apps/infrarrojo/main/infrarrojo.c:746
+#: apps/infrarrojo/main/infrarrojo.c:751
 Volvió: el LED y el receptor andan.	It came back: the LED and the receiver work.
 
-#: apps/infrarrojo/main/infrarrojo.c:747
+#: apps/infrarrojo/main/infrarrojo.c:752
 No volvió nada. Revisar el cableado, la alimentación del receptor y que el LED apunte a él.	Nothing came back. Check the wiring, the receiver's power and that the LED points at it.
 
-#: apps/infrarrojo/main/infrarrojo.c:784
+#: apps/infrarrojo/main/infrarrojo.c:789
 #: apps/infrarrojo/main/ir_remote.c:180
 #: apps/infrarrojo/main/ir_remote.c:815
 Controles	Remotes
 
-#: apps/infrarrojo/main/infrarrojo.c:784
+#: apps/infrarrojo/main/infrarrojo.c:789
 #: apps/infrarrojo/main/ir_base.c:592
 #: apps/infrarrojo/main/ir_learn.c:507
-#: apps/infrarrojo/main/ir_remote.c:861
+#: apps/infrarrojo/main/ir_remote.c:868
 Aprender	Learn
 
-#: apps/infrarrojo/main/infrarrojo.c:784
+#: apps/infrarrojo/main/infrarrojo.c:789
 #: apps/infrarrojo/main/ir_base.c:563
 #: apps/infrarrojo/main/ir_base.c:598
 Códigos	Codes
@@ -358,7 +358,7 @@ No se pudo mandar	Could not send
 
 #: apps/infrarrojo/main/ir_base.c:313
 #: apps/infrarrojo/main/ir_learn.c:287
-#: apps/infrarrojo/main/ir_remote.c:1117
+#: apps/infrarrojo/main/ir_remote.c:1124
 No se pudo escribir en la tarjeta	Could not write to the card
 
 #: apps/infrarrojo/main/ir_base.c:314
@@ -448,12 +448,12 @@ Ya hay una búsqueda en curso	A search is already running
 Aprendido: %s	Learned: %s
 
 #: apps/infrarrojo/main/ir_learn.c:269
-#: apps/infrarrojo/main/ir_remote.c:899
-#: apps/infrarrojo/main/ir_remote.c:1038
+#: apps/infrarrojo/main/ir_remote.c:906
+#: apps/infrarrojo/main/ir_remote.c:1045
 Botón	Button
 
 #: apps/infrarrojo/main/ir_learn.c:276
-#: apps/infrarrojo/main/ir_remote.c:1138
+#: apps/infrarrojo/main/ir_remote.c:1145
 Aparato nuevo	New device
 
 #: apps/infrarrojo/main/ir_learn.c:301
@@ -463,12 +463,12 @@ Guardado: %s	Saved: %s
 Guardar el botón	Save the button
 
 #: apps/infrarrojo/main/ir_learn.c:349
-#: apps/infrarrojo/main/ir_remote.c:1039
-#: apps/infrarrojo/main/ir_remote.c:1139
+#: apps/infrarrojo/main/ir_remote.c:1046
+#: apps/infrarrojo/main/ir_remote.c:1146
 Nombre	Name
 
 #: apps/infrarrojo/main/ir_learn.c:350
-#: apps/infrarrojo/main/ir_remote.c:1041
+#: apps/infrarrojo/main/ir_remote.c:1048
 Función en el control	Role on the remote
 
 #: apps/infrarrojo/main/ir_learn.c:358
@@ -481,8 +481,8 @@ Aparato nuevo…	New device…
 Nombre del aparato nuevo	Name of the new device
 
 #: apps/infrarrojo/main/ir_learn.c:375
-#: apps/infrarrojo/main/ir_remote.c:1095
-#: apps/infrarrojo/main/ir_remote.c:1156
+#: apps/infrarrojo/main/ir_remote.c:1102
+#: apps/infrarrojo/main/ir_remote.c:1163
 Guardar	Save
 
 #: apps/infrarrojo/main/ir_learn.c:438
@@ -618,8 +618,8 @@ Se borra %s y todos sus botones.	%s and all its buttons will be deleted.
 ¿Borrar el aparato?	Delete the device?
 
 #: apps/infrarrojo/main/ir_remote.c:375
-#: apps/infrarrojo/main/ir_remote.c:997
-#: apps/infrarrojo/main/ir_remote.c:1092
+#: apps/infrarrojo/main/ir_remote.c:1004
+#: apps/infrarrojo/main/ir_remote.c:1099
 Borrar	Delete
 
 #: apps/infrarrojo/main/ir_remote.c:482
@@ -659,59 +659,59 @@ Mandar otra vez	Send again
 Ese estado no está en la base de este aire	That state is not in this unit's codes
 
 #: apps/infrarrojo/main/ir_remote.c:816
-#: apps/infrarrojo/main/ir_remote.c:860
+#: apps/infrarrojo/main/ir_remote.c:867
 Editar	Edit
 
-#: apps/infrarrojo/main/ir_remote.c:853
+#: apps/infrarrojo/main/ir_remote.c:860
 Sin botones. Tocá Editar y agregá uno, o aprendelo en Aprender.	No buttons. Tap Edit and add one, or learn it in Learn.
 
-#: apps/infrarrojo/main/ir_remote.c:870
-#: apps/infrarrojo/main/ir_remote.c:1138
+#: apps/infrarrojo/main/ir_remote.c:877
+#: apps/infrarrojo/main/ir_remote.c:1145
 Nombre y tipo	Name and kind
 
-#: apps/infrarrojo/main/ir_remote.c:871
+#: apps/infrarrojo/main/ir_remote.c:878
 Borrar aparato	Delete device
 
-#: apps/infrarrojo/main/ir_remote.c:873
+#: apps/infrarrojo/main/ir_remote.c:880
 Archivo: ir/%s (se edita también desde el portal)	File: ir/%s (also editable from the portal)
 
-#: apps/infrarrojo/main/ir_remote.c:974
+#: apps/infrarrojo/main/ir_remote.c:981
 No hay código para mandar	No code to send
 
-#: apps/infrarrojo/main/ir_remote.c:997
+#: apps/infrarrojo/main/ir_remote.c:1004
 ¿Borrar el botón?	Delete the button?
 
-#: apps/infrarrojo/main/ir_remote.c:997
+#: apps/infrarrojo/main/ir_remote.c:1004
 Se borra con su código.	It goes with its code.
 
-#: apps/infrarrojo/main/ir_remote.c:1038
+#: apps/infrarrojo/main/ir_remote.c:1045
 Botón nuevo	New button
 
-#: apps/infrarrojo/main/ir_remote.c:1059
+#: apps/infrarrojo/main/ir_remote.c:1066
 crudo · %d duraciones · %u kHz	raw · %d durations · %u kHz
 
-#: apps/infrarrojo/main/ir_remote.c:1060
+#: apps/infrarrojo/main/ir_remote.c:1067
 sin código todavía	no code yet
 
-#: apps/infrarrojo/main/ir_remote.c:1082
+#: apps/infrarrojo/main/ir_remote.c:1089
 Dirección (hexa)	Address (hex)
 
-#: apps/infrarrojo/main/ir_remote.c:1084
+#: apps/infrarrojo/main/ir_remote.c:1091
 Comando (hexa)	Command (hex)
 
-#: apps/infrarrojo/main/ir_remote.c:1090
+#: apps/infrarrojo/main/ir_remote.c:1097
 Probar	Try
 
-#: apps/infrarrojo/main/ir_remote.c:1091
+#: apps/infrarrojo/main/ir_remote.c:1098
 Código a mano	Code by hand
 
-#: apps/infrarrojo/main/ir_remote.c:1111
+#: apps/infrarrojo/main/ir_remote.c:1118
 Falta el nombre	The name is missing
 
-#: apps/infrarrojo/main/ir_remote.c:1148
+#: apps/infrarrojo/main/ir_remote.c:1155
 Un aire acondicionado se agrega desde Códigos: manda el estado entero y necesita su modelo.	An air conditioner is added from Codes: it sends its whole state and needs its model.
 
-#: apps/infrarrojo/main/ir_remote.c:1156
+#: apps/infrarrojo/main/ir_remote.c:1163
 Crear	Create
 
 #: apps/infrarrojo/main/ir_store.c:152

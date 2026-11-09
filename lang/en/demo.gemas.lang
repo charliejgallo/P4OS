@@ -5,100 +5,100 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/gemas/main/gemas.c:155
+#: apps/gemas/main/gemas.c:164
 Fácil	Easy
 
-#: apps/gemas/main/gemas.c:156
+#: apps/gemas/main/gemas.c:165
 Normal	Normal
 
-#: apps/gemas/main/gemas.c:157
+#: apps/gemas/main/gemas.c:166
 Difícil	Hard
 
-#: apps/gemas/main/gemas.c:430
-#: apps/gemas/main/gemas.c:468
+#: apps/gemas/main/gemas.c:447
+#: apps/gemas/main/gemas.c:485
 Nivel %d	Level %d
 
-#: apps/gemas/main/gemas.c:434
-#: apps/gemas/main/gemas.c:1641
+#: apps/gemas/main/gemas.c:451
+#: apps/gemas/main/gemas.c:1783
 Mejor %s	Best %s
 
-#: apps/gemas/main/gemas.c:703
+#: apps/gemas/main/gemas.c:720
 Cadena x%d	Chain x%d
 
-#: apps/gemas/main/gemas.c:862
+#: apps/gemas/main/gemas.c:879
 Sin jugadas	No moves
 
-#: apps/gemas/main/gemas.c:1218
+#: apps/gemas/main/gemas.c:1238
 Se acabó el tiempo	Time's up
 
-#: apps/gemas/main/gemas.c:1620
+#: apps/gemas/main/gemas.c:1762
 Contrarreloj	Time attack
 
-#: apps/gemas/main/gemas.c:1620
+#: apps/gemas/main/gemas.c:1762
 Sin apuro	Relaxed
 
-#: apps/gemas/main/gemas.c:1625
+#: apps/gemas/main/gemas.c:1767
 Sí	Yes
 
-#: apps/gemas/main/gemas.c:1625
+#: apps/gemas/main/gemas.c:1767
 No	No
 
-#: apps/gemas/main/gemas.c:1663
+#: apps/gemas/main/gemas.c:1805
 Nivel %d  ·  Mejor %s	Level %d  ·  Best %s
 
-#: apps/gemas/main/gemas.c:2002
+#: apps/gemas/main/gemas.c:2146
 Próximo nivel	Next level
 
-#: apps/gemas/main/gemas.c:2042
+#: apps/gemas/main/gemas.c:2186
 Cuatro en línea	Four in a row
 
-#: apps/gemas/main/gemas.c:2042
+#: apps/gemas/main/gemas.c:2186
 Llama: explota alrededor	Flame: blasts around it
 
-#: apps/gemas/main/gemas.c:2043
+#: apps/gemas/main/gemas.c:2187
 En L o en T	L or T shape
 
-#: apps/gemas/main/gemas.c:2043
+#: apps/gemas/main/gemas.c:2187
 Estrella: fila y columna	Star: row and column
 
-#: apps/gemas/main/gemas.c:2044
+#: apps/gemas/main/gemas.c:2188
 Cinco en línea	Five in a row
 
-#: apps/gemas/main/gemas.c:2044
+#: apps/gemas/main/gemas.c:2188
 Hipercubo: todo un color	Hypercube: a whole color
 
-#: apps/gemas/main/gemas.c:2149
+#: apps/gemas/main/gemas.c:2293
 Gemas	Gems
 
-#: apps/gemas/main/gemas.c:2150
+#: apps/gemas/main/gemas.c:2294
 Alineá tres o más	Match three or more
 
-#: apps/gemas/main/gemas.c:2171
+#: apps/gemas/main/gemas.c:2315
 Modo	Mode
 
-#: apps/gemas/main/gemas.c:2172
+#: apps/gemas/main/gemas.c:2316
 Dificultad	Difficulty
 
-#: apps/gemas/main/gemas.c:2173
-#: apps/gemas/main/gemas.c:2194
+#: apps/gemas/main/gemas.c:2317
+#: apps/gemas/main/gemas.c:2343
 Sonido	Sound
 
-#: apps/gemas/main/gemas.c:2178
+#: apps/gemas/main/gemas.c:2325
 Jugar	Play
 
-#: apps/gemas/main/gemas.c:2191
+#: apps/gemas/main/gemas.c:2339
 Pausa	Pause
 
-#: apps/gemas/main/gemas.c:2192
+#: apps/gemas/main/gemas.c:2340
 Seguir	Resume
 
-#: apps/gemas/main/gemas.c:2196
-#: apps/gemas/main/gemas.c:2220
+#: apps/gemas/main/gemas.c:2346
+#: apps/gemas/main/gemas.c:2373
 Menú	Menu
 
-#: apps/gemas/main/gemas.c:2197
-#: apps/gemas/main/gemas.c:2221
+#: apps/gemas/main/gemas.c:2348
+#: apps/gemas/main/gemas.c:2375
 Salir	Exit
 
-#: apps/gemas/main/gemas.c:2218
+#: apps/gemas/main/gemas.c:2370
 Otra vez	Again

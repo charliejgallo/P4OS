@@ -53,78 +53,78 @@ Astronauta	Astronaut
 #: apps/cjump/main/cj_skins.c:47
 Fiesta	Party
 
-#: apps/cjump/main/cjump.c:474
+#: apps/cjump/main/cjump.c:496
 SONIDO	TON
 
-#: apps/cjump/main/cjump.c:478
+#: apps/cjump/main/cjump.c:500
 Botones a los costados, o arrastrá el dedo	Tasten an den Seiten oder Finger ziehen
 
-#: apps/cjump/main/cjump.c:486
+#: apps/cjump/main/cjump.c:508
 Récord	Rekord
 
-#: apps/cjump/main/cjump.c:489
-#: apps/cjump/main/cjump.c:512
+#: apps/cjump/main/cjump.c:511
+#: apps/cjump/main/cjump.c:534
 Monedas	Münzen
 
-#: apps/cjump/main/cjump.c:519
-#: apps/cjump/main/cjump.c:709
+#: apps/cjump/main/cjump.c:541
+#: apps/cjump/main/cjump.c:731
 monedas	Münzen
 
-#: apps/cjump/main/cjump.c:525
+#: apps/cjump/main/cjump.c:547
 Comprar	Kaufen
 
-#: apps/cjump/main/cjump.c:525
+#: apps/cjump/main/cjump.c:547
 No alcanza	Zu wenig
 
-#: apps/cjump/main/cjump.c:531
+#: apps/cjump/main/cjump.c:553
 Puesto	Getragen
 
-#: apps/cjump/main/cjump.c:534
+#: apps/cjump/main/cjump.c:556
 Comprado	Gekauft
 
-#: apps/cjump/main/cjump.c:536
+#: apps/cjump/main/cjump.c:558
 Ponerme este	Anziehen
 
-#: apps/cjump/main/cjump.c:564
+#: apps/cjump/main/cjump.c:586
 Todavía no alcanza	Noch nicht genug Münzen
 
-#: apps/cjump/main/cjump.c:572
+#: apps/cjump/main/cjump.c:594
 Disfraz desbloqueado	Kostüm freigeschaltet
 
-#: apps/cjump/main/cjump.c:701
+#: apps/cjump/main/cjump.c:723
 Nuevo récord	Neuer Rekord
 
-#: apps/cjump/main/cjump.c:702
+#: apps/cjump/main/cjump.c:724
 Se acabó	Vorbei
 
-#: apps/cjump/main/cjump.c:713
+#: apps/cjump/main/cjump.c:735
 Juntadas	Gesammelt
 
-#: apps/cjump/main/cjump.c:714
+#: apps/cjump/main/cjump.c:736
 por altura	für Höhe
 
-#: apps/cjump/main/cjump.c:976
+#: apps/cjump/main/cjump.c:1062
 Jugar	Spielen
 
-#: apps/cjump/main/cjump.c:978
-#: apps/cjump/main/cjump.c:996
+#: apps/cjump/main/cjump.c:1064
+#: apps/cjump/main/cjump.c:1083
 Tienda	Laden
 
-#: apps/cjump/main/cjump.c:1015
+#: apps/cjump/main/cjump.c:1103
 Deslizá para ver los demás	Wischen für die anderen
 
-#: apps/cjump/main/cjump.c:1026
+#: apps/cjump/main/cjump.c:1114
 Pausa	Pause
 
-#: apps/cjump/main/cjump.c:1028
+#: apps/cjump/main/cjump.c:1116
 Seguir	Weiter
 
-#: apps/cjump/main/cjump.c:1030
-#: apps/cjump/main/cjump.c:1050
+#: apps/cjump/main/cjump.c:1118
+#: apps/cjump/main/cjump.c:1138
 Menú	Menü
 
-#: apps/cjump/main/cjump.c:1032
+#: apps/cjump/main/cjump.c:1120
 Salir	Beenden
 
-#: apps/cjump/main/cjump.c:1048
+#: apps/cjump/main/cjump.c:1136
 Otra vez	Nochmal

@@ -102,7 +102,7 @@ el número de serie	die Seriennummer
 %d h %s min	%d h %s min
 
 #: apps/impresoras/web/impresoras.js:138
-%d min	%d min
+%d min	%d Min.
 
 #: apps/impresoras/web/impresoras.js:139
 %d s	%d s

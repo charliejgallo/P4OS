@@ -28,7 +28,7 @@ No se encuentra el servidor	Server not found
 
 #: apps/camaras/main/cam_http.c:132
 #: apps/camaras/main/cam_rtsp.c:462
-#: apps/camaras/main/cam_view.c:507
+#: apps/camaras/main/cam_view.c:587
 Sin conexiones libres	No free connections
 
 #: apps/camaras/main/cam_http.c:133
@@ -91,122 +91,132 @@ La cámara cortó la conexión	The camera closed the connection
 #: apps/camaras/main/cam_rtsp.c:597
 La cámara dejó de mandar video	The camera stopped sending video
 
-#: apps/camaras/main/cam_view.c:256
+#: apps/camaras/main/cam_usb.c:32
+La cámara USB no está conectada	The USB camera is not connected
+
+#: apps/camaras/main/cam_usb.c:36
+La cámara USB no arrancó	The USB camera did not start
+
+#: apps/camaras/main/cam_usb.c:42
+Sin memoria para la cámara	No memory for the camera
+
+#: apps/camaras/main/cam_usb.c:53
+Se desenchufó la cámara USB	The USB camera was unplugged
+
+#: apps/camaras/main/cam_usb.c:65
+La cámara USB no manda imagen	The USB camera sends no picture
+
+#: apps/camaras/main/cam_view.c:270
 H.264 %s: la placa sólo\ndecodifica el perfil Baseline.	H.264 %s: the board only\ndecodes the Baseline profile.
 
-#: apps/camaras/main/cam_view.c:289
+#: apps/camaras/main/cam_view.c:303
 Esta placa todavía no\ndecodifica H.264	This board can't decode\nH.264 yet
 
-#: apps/camaras/main/cam_view.c:300
+#: apps/camaras/main/cam_view.c:314
 %dx%d no entra en\nla memoria de la placa.	%dx%d doesn't fit in\nthe board's memory.
 
-#: apps/camaras/main/cam_view.c:408
+#: apps/camaras/main/cam_view.c:487
 El decodificador JPEG no abrió	The JPEG decoder did not open
 
-#: apps/camaras/main/cam_view.c:545
+#: apps/camaras/main/cam_view.c:625
 La dirección no es\nrtsp:// ni http://	The address is neither\nrtsp:// nor http://
 
-#: apps/camaras/main/cam_view.c:556
+#: apps/camaras/main/cam_view.c:636
 No hay lugar para otra tarea	No room for another task
 
-#: apps/camaras/main/camaras.c:203
+#: apps/camaras/main/camaras.c:212
 Conectando…	Connecting…
 
-#: apps/camaras/main/camaras.c:204
+#: apps/camaras/main/camaras.c:213
 Abriendo el video…	Opening the video…
 
-#: apps/camaras/main/camaras.c:205
+#: apps/camaras/main/camaras.c:214
 Esperando la imagen…	Waiting for the picture…
 
-#: apps/camaras/main/camaras.c:215
+#: apps/camaras/main/camaras.c:224
 Este video no se puede ver en la placa.\nPasá la cámara a H.264 Baseline\no a MJPEG.	This video can't be played on the board.\nSwitch the camera to H.264 Baseline\nor MJPEG.
 
-#: apps/camaras/main/camaras.c:222
+#: apps/camaras/main/camaras.c:231
 Reintentando…	Retrying…
 
-#: apps/camaras/main/camaras.c:372
+#: apps/camaras/main/camaras.c:386
 sin imagen	no image
 
-#: apps/camaras/main/camaras.c:372
+#: apps/camaras/main/camaras.c:386
 conectando	connecting
 
-#: apps/camaras/main/camaras.c:374
+#: apps/camaras/main/camaras.c:388
 en vivo	live
 
-#: apps/camaras/main/camaras.c:396
+#: apps/camaras/main/camaras.c:410
 foto cada %s s	snapshot every %s s
 
-#: apps/camaras/main/camaras.c:465
+#: apps/camaras/main/camaras.c:479
 Todavía no hay cámaras	No cameras yet
 
-#: apps/camaras/main/camaras.c:470
+#: apps/camaras/main/camaras.c:484
 Agregalas en %s, un bloque por cámara con su url rtsp:// o http://. Desde la compu: el portal, http://%s, Archivos > Editar cameras.txt.	Add them in %s, one block per camera with its rtsp:// or http:// url. From the computer: the portal, http://%s, Files > Edit cameras.txt.
 
-#: apps/camaras/main/camaras.c:504
+#: apps/camaras/main/camaras.c:518
 Actualizando…	Updating…
 
-#: apps/camaras/main/camaras.c:510
+#: apps/camaras/main/camaras.c:524
 Persona	Person
 
-#: apps/camaras/main/camaras.c:510
+#: apps/camaras/main/camaras.c:524
 Auto	Car
 
-#: apps/camaras/main/camaras.c:510
+#: apps/camaras/main/camaras.c:524
 Perro	Dog
 
-#: apps/camaras/main/camaras.c:511
+#: apps/camaras/main/camaras.c:525
 Gato	Cat
 
-#: apps/camaras/main/camaras.c:511
+#: apps/camaras/main/camaras.c:525
 Bicicleta	Bicycle
 
-#: apps/camaras/main/camaras.c:511
+#: apps/camaras/main/camaras.c:525
 Moto	Motorcycle
 
-#: apps/camaras/main/camaras.c:512
+#: apps/camaras/main/camaras.c:526
 Pájaro	Bird
 
-#: apps/camaras/main/camaras.c:512
+#: apps/camaras/main/camaras.c:526
 Paquete	Package
 
-#: apps/camaras/main/camaras.c:512
+#: apps/camaras/main/camaras.c:526
 Camión	Truck
 
-#: apps/camaras/main/camaras.c:529
+#: apps/camaras/main/camaras.c:543
 ayer %02d:%02d	yesterday %02d:%02d
 
-#: apps/camaras/main/camaras.c:561
+#: apps/camaras/main/camaras.c:575
 Sin eventos recientes.	No recent events.
 
-#: apps/camaras/main/camaras.c:642
+#: apps/camaras/main/camaras.c:656
 Frigate no tiene cámaras.	Frigate has no cameras.
 
-#: apps/camaras/main/camaras.c:673
+#: apps/camaras/main/camaras.c:687
 Cargando…	Loading…
 
-#: apps/camaras/main/camaras.c:734
+#: apps/camaras/main/camaras.c:748
 Eventos	Events
 
-#: apps/camaras/main/camaras.c:811
-#: apps/camaras/main/camaras.c:818
+#: apps/camaras/main/camaras.c:825
+#: apps/camaras/main/camaras.c:832
 Cámaras	Cameras
 
-#: apps/camaras/main/camaras.c:888
+#: apps/camaras/main/camaras.c:1024
 Sin tarjeta: no hay dónde guardar la foto	No card: nowhere to save the photo
 
-#: apps/camaras/main/camaras.c:1117
+#: apps/camaras/main/camaras.c:1278
 Foto guardada en Fotos > camaras	Photo saved to Photos > camaras
 
-#: apps/camaras/main/camaras.c:1117
+#: apps/camaras/main/camaras.c:1278
 No se pudo guardar la foto	Couldn't save the photo
 
-#: apps/camaras/main/camaras.c:1144
+#: apps/camaras/main/camaras.c:1305
 Foto JPEG	JPEG photo
 
-#: apps/camaras/main/camaras.c:1148
+#: apps/camaras/main/camaras.c:1309
   ·  audio sin reproducir	  ·  audio not played
-La cámara USB no está conectada	The USB camera is not connected
-La cámara USB no arrancó	The USB camera did not start
-Sin memoria para la cámara	No memory for the camera
-Se desenchufó la cámara USB	The USB camera was unplugged
-La cámara USB no manda imagen	The USB camera sends no picture

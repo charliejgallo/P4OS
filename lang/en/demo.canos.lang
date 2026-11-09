@@ -56,82 +56,82 @@ Dificultad	Difficulty
 #: apps/canos/main/canos.c:510
 Mundos	Worlds
 
-#: apps/canos/main/canos.c:583
+#: apps/canos/main/canos.c:585
 Primero pasá el nivel anterior	Beat the previous level first
 
-#: apps/canos/main/canos.c:942
+#: apps/canos/main/canos.c:945
 Elegí un caño de la bandeja	Pick a pipe from the tray
 
-#: apps/canos/main/canos.c:1014
+#: apps/canos/main/canos.c:1017
 Girá los caños y abrí la llave	Turn the pipes and open the valve
 
-#: apps/canos/main/canos.c:1014
+#: apps/canos/main/canos.c:1017
 Poné los caños y abrí la llave	Lay the pipes and open the valve
 
-#: apps/canos/main/canos.c:1016
+#: apps/canos/main/canos.c:1019
 Abrir llave	Open valve
 
-#: apps/canos/main/canos.c:1023
+#: apps/canos/main/canos.c:1026
 Abriendo la llave...	Opening the valve...
 
-#: apps/canos/main/canos.c:1025
+#: apps/canos/main/canos.c:1028
 Corre el líquido: %d caños	The liquid runs: %d pipes
 
-#: apps/canos/main/canos.c:1027
-#: apps/canos/main/canos.c:1300
+#: apps/canos/main/canos.c:1030
+#: apps/canos/main/canos.c:1303
 ¡Llegó al desagüe!	It reached the drain!
 
-#: apps/canos/main/canos.c:1029
-#: apps/canos/main/canos.c:1321
+#: apps/canos/main/canos.c:1032
+#: apps/canos/main/canos.c:1324
 ¡Fuga!	Leak!
 
-#: apps/canos/main/canos.c:1033
+#: apps/canos/main/canos.c:1036
 Más despacio	Slower
 
-#: apps/canos/main/canos.c:1033
+#: apps/canos/main/canos.c:1036
 Acelerar	Speed up
 
-#: apps/canos/main/canos.c:1292
+#: apps/canos/main/canos.c:1295
 Pausa	Paused
 
-#: apps/canos/main/canos.c:1293
+#: apps/canos/main/canos.c:1296
 nivel	level
 
-#: apps/canos/main/canos.c:1295
+#: apps/canos/main/canos.c:1298
 Seguir	Resume
 
-#: apps/canos/main/canos.c:1296
-#: apps/canos/main/canos.c:1316
-#: apps/canos/main/canos.c:1323
+#: apps/canos/main/canos.c:1299
+#: apps/canos/main/canos.c:1319
+#: apps/canos/main/canos.c:1326
 Otra vez	Again
 
-#: apps/canos/main/canos.c:1297
-#: apps/canos/main/canos.c:1315
-#: apps/canos/main/canos.c:1317
-#: apps/canos/main/canos.c:1324
+#: apps/canos/main/canos.c:1300
+#: apps/canos/main/canos.c:1318
+#: apps/canos/main/canos.c:1320
+#: apps/canos/main/canos.c:1327
 Niveles	Levels
 
-#: apps/canos/main/canos.c:1306
 #: apps/canos/main/canos.c:1309
+#: apps/canos/main/canos.c:1312
 Puntos	Points
 
-#: apps/canos/main/canos.c:1306
 #: apps/canos/main/canos.c:1309
+#: apps/canos/main/canos.c:1312
 Caños llenos	Pipes filled
 
-#: apps/canos/main/canos.c:1307
+#: apps/canos/main/canos.c:1310
 Giros	Turns
 
-#: apps/canos/main/canos.c:1310
+#: apps/canos/main/canos.c:1313
 Piezas	Pieces
 
-#: apps/canos/main/canos.c:1315
+#: apps/canos/main/canos.c:1318
 Siguiente	Next
 
-#: apps/canos/main/canos.c:1411
+#: apps/canos/main/canos.c:1414
 No hay memoria para el tablero	Not enough memory for the board
 
-#: apps/canos/main/canos.c:1557
+#: apps/canos/main/canos.c:1560
 ¡Se abrió la llave!	The valve opened!
 
 #: apps/canos/main/cn_world.c:10

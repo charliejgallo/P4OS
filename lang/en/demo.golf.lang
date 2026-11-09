@@ -18,9 +18,9 @@
 ¡Birdie!	Birdie!
 
 #: apps/golf/main/gf_game.c:319
-#: apps/golf/main/gf_play.c:244
-#: apps/golf/main/gf_play.c:562
-#: apps/golf/main/golf.c:732
+#: apps/golf/main/gf_play.c:247
+#: apps/golf/main/gf_play.c:565
+#: apps/golf/main/golf.c:735
 Par	Par
 
 #: apps/golf/main/gf_game.c:320
@@ -36,8 +36,8 @@ Triple bogey	Triple bogey
 ¡Increíble!	Incredible!
 
 #: apps/golf/main/gf_game.c:323
-#: apps/golf/main/gf_play.c:1125
-#: apps/golf/main/golf.c:730
+#: apps/golf/main/gf_play.c:1231
+#: apps/golf/main/golf.c:733
 Recogida	Picked up
 
 #: apps/golf/main/gf_link.c:130
@@ -198,230 +198,230 @@ Palos	Clubs
 #: apps/golf/main/gf_outfit.c:77
 Aspecto	Looks
 
-#: apps/golf/main/gf_play.c:105
+#: apps/golf/main/gf_play.c:108
 Rough	Rough
 
-#: apps/golf/main/gf_play.c:105
+#: apps/golf/main/gf_play.c:108
 Fairway	Fairway
 
-#: apps/golf/main/gf_play.c:105
+#: apps/golf/main/gf_play.c:108
 Primer corte	First cut
 
-#: apps/golf/main/gf_play.c:106
+#: apps/golf/main/gf_play.c:109
 Salida	Tee
 
-#: apps/golf/main/gf_play.c:106
+#: apps/golf/main/gf_play.c:109
 Antegreen	Fringe
 
-#: apps/golf/main/gf_play.c:106
+#: apps/golf/main/gf_play.c:109
 Green	Green
 
-#: apps/golf/main/gf_play.c:107
+#: apps/golf/main/gf_play.c:110
 Búnker	Bunker
 
-#: apps/golf/main/gf_play.c:107
+#: apps/golf/main/gf_play.c:110
 Agua	Water
 
-#: apps/golf/main/gf_play.c:107
+#: apps/golf/main/gf_play.c:110
 Camino	Cart path
 
-#: apps/golf/main/gf_play.c:108
+#: apps/golf/main/gf_play.c:111
 Rough alto	Deep rough
 
-#: apps/golf/main/gf_play.c:108
+#: apps/golf/main/gf_play.c:111
 Bosque	Woods
 
-#: apps/golf/main/gf_play.c:108
+#: apps/golf/main/gf_play.c:111
 Arena y matas	Waste area
 
-#: apps/golf/main/gf_play.c:109
+#: apps/golf/main/gf_play.c:112
 Fuera de límites	Out of bounds
 
-#: apps/golf/main/gf_play.c:244
-#: apps/golf/main/gf_play.c:558
-#: apps/golf/main/golf.c:732
+#: apps/golf/main/gf_play.c:247
+#: apps/golf/main/gf_play.c:561
+#: apps/golf/main/golf.c:735
 Hoyo	Hole
 
-#: apps/golf/main/gf_play.c:248
+#: apps/golf/main/gf_play.c:251
 J	P
 
-#: apps/golf/main/gf_play.c:248
-#: apps/golf/main/gf_play.c:250
+#: apps/golf/main/gf_play.c:251
+#: apps/golf/main/gf_play.c:253
 Golpe	Shot
 
-#: apps/golf/main/gf_play.c:260
+#: apps/golf/main/gf_play.c:263
 Putter	Putter
 
-#: apps/golf/main/gf_play.c:527
-#: apps/golf/main/gf_play.c:848
-#: apps/golf/main/golf.c:889
+#: apps/golf/main/gf_play.c:530
+#: apps/golf/main/gf_play.c:851
+#: apps/golf/main/golf.c:892
 Tocá: carga, potencia, precisión	Tap: swing, power, accuracy
 
-#: apps/golf/main/gf_play.c:642
+#: apps/golf/main/gf_play.c:645
 Juega	Playing:
 
-#: apps/golf/main/gf_play.c:648
+#: apps/golf/main/gf_play.c:651
 Turno del jugador	Player's turn:
 
-#: apps/golf/main/gf_play.c:1107
+#: apps/golf/main/gf_play.c:1213
 ¡Al agua! +1	In the water! +1
 
-#: apps/golf/main/gf_play.c:1111
+#: apps/golf/main/gf_play.c:1217
 Fuera de límites +1	Out of bounds +1
 
-#: apps/golf/main/gf_shop.c:197
-#: apps/golf/main/gf_shop.c:221
+#: apps/golf/main/gf_shop.c:198
+#: apps/golf/main/gf_shop.c:222
 Puesto	Wearing
 
-#: apps/golf/main/gf_shop.c:200
+#: apps/golf/main/gf_shop.c:201
 Tuyo	Owned
 
-#: apps/golf/main/gf_shop.c:224
+#: apps/golf/main/gf_shop.c:225
 Usar	Wear
 
-#: apps/golf/main/gf_shop.c:227
+#: apps/golf/main/gf_shop.c:228
 Comprar	Buy
 
-#: apps/golf/main/gf_shop.c:252
-#: apps/golf/main/golf.c:963
+#: apps/golf/main/gf_shop.c:253
+#: apps/golf/main/golf.c:966
 Tienda	Shop
 
-#: apps/golf/main/golf.c:372
+#: apps/golf/main/golf.c:375
 Golpear	Swing
 
-#: apps/golf/main/golf.c:377
+#: apps/golf/main/golf.c:380
 Pegar	Putt
 
-#: apps/golf/main/golf.c:435
-#: apps/golf/main/golf.c:958
+#: apps/golf/main/golf.c:438
+#: apps/golf/main/golf.c:961
 Juego rápido	Quick game
 
-#: apps/golf/main/golf.c:435
-#: apps/golf/main/golf.c:959
+#: apps/golf/main/golf.c:438
+#: apps/golf/main/golf.c:962
 Torneo	Tournament
 
-#: apps/golf/main/golf.c:435
-#: apps/golf/main/golf.c:960
+#: apps/golf/main/golf.c:438
+#: apps/golf/main/golf.c:963
 Práctica	Practice
 
-#: apps/golf/main/golf.c:435
-#: apps/golf/main/golf.c:435
-#: apps/golf/main/golf.c:961
+#: apps/golf/main/golf.c:438
+#: apps/golf/main/golf.c:438
+#: apps/golf/main/golf.c:964
 Multijugador	Multiplayer
 
-#: apps/golf/main/golf.c:437
+#: apps/golf/main/golf.c:440
 Fácil	Easy
 
-#: apps/golf/main/golf.c:437
+#: apps/golf/main/golf.c:440
 Normal	Normal
 
-#: apps/golf/main/golf.c:437
+#: apps/golf/main/golf.c:440
 Profesional	Pro
 
-#: apps/golf/main/golf.c:439
+#: apps/golf/main/golf.c:442
 Poco viento, medidor lento, ves dónde cae	Light wind, slow meter, see where it lands
 
-#: apps/golf/main/golf.c:440
+#: apps/golf/main/golf.c:443
 Viento real, medidor ágil	Real wind, quick meter
 
-#: apps/golf/main/golf.c:441
+#: apps/golf/main/golf.c:444
 Viento fuerte, medidor rápido, sin ayudas	Strong wind, fast meter, no help
 
-#: apps/golf/main/golf.c:538
+#: apps/golf/main/golf.c:541
 En esta placa, pasándola	On this board, passing it around
 
-#: apps/golf/main/golf.c:542
+#: apps/golf/main/golf.c:545
 jugadores	players
 
-#: apps/golf/main/golf.c:552
+#: apps/golf/main/golf.c:555
 Contra	Against
 
-#: apps/golf/main/golf.c:555
+#: apps/golf/main/golf.c:558
 Aparea otra placa en Enlace para jugar a distancia	Pair another board in Link to play remotely
 
-#: apps/golf/main/golf.c:601
+#: apps/golf/main/golf.c:604
 Metros	Metres
 
-#: apps/golf/main/golf.c:601
+#: apps/golf/main/golf.c:604
 Yardas	Yards
 
-#: apps/golf/main/golf.c:602
+#: apps/golf/main/golf.c:605
 Sonido: sí	Sound: on
 
-#: apps/golf/main/golf.c:602
+#: apps/golf/main/golf.c:605
 Sonido: no	Sound: off
 
-#: apps/golf/main/golf.c:700
-#: apps/golf/main/golf.c:701
+#: apps/golf/main/golf.c:703
+#: apps/golf/main/golf.c:704
 Vos	You
 
-#: apps/golf/main/golf.c:702
+#: apps/golf/main/golf.c:705
 Jugador	Player
 
-#: apps/golf/main/golf.c:732
-#: apps/golf/main/golf.c:794
+#: apps/golf/main/golf.c:735
+#: apps/golf/main/golf.c:797
 golpes	shots
 
-#: apps/golf/main/golf.c:737
+#: apps/golf/main/golf.c:740
 Monedas	Coins
 
-#: apps/golf/main/golf.c:783
+#: apps/golf/main/golf.c:786
 Terminaste	Place
 
-#: apps/golf/main/golf.c:784
+#: apps/golf/main/golf.c:787
 ¡Campeón!	Champion!
 
-#: apps/golf/main/golf.c:787
+#: apps/golf/main/golf.c:790
 ¡Ganaste!	You won!
 
-#: apps/golf/main/golf.c:787
+#: apps/golf/main/golf.c:790
 Empate	Tie
 
-#: apps/golf/main/golf.c:787
+#: apps/golf/main/golf.c:790
 Perdiste	You lost
 
-#: apps/golf/main/golf.c:789
+#: apps/golf/main/golf.c:792
 ¡Nuevo récord!	New best!
 
-#: apps/golf/main/golf.c:789
+#: apps/golf/main/golf.c:792
 Fin de la vuelta	Round over
 
-#: apps/golf/main/golf.c:799
+#: apps/golf/main/golf.c:802
 monedas	coins
 
-#: apps/golf/main/golf.c:799
+#: apps/golf/main/golf.c:802
 Total	Total
 
-#: apps/golf/main/golf.c:1004
+#: apps/golf/main/golf.c:1007
 Ajustes	Settings
 
-#: apps/golf/main/golf.c:1007
+#: apps/golf/main/golf.c:1010
 Distancias en	Distances in
 
-#: apps/golf/main/golf.c:1010
+#: apps/golf/main/golf.c:1013
 Ganás monedas al jugar: más en torneo, en difícil y con birdies. Gastalas en la tienda.	You earn coins by playing: more in tournaments, on harder levels and with birdies. Spend them in the shop.
 
-#: apps/golf/main/golf.c:1080
+#: apps/golf/main/golf.c:1083
 Cargando	Loading
 
-#: apps/golf/main/golf.c:1080
+#: apps/golf/main/golf.c:1083
 Preparando la cancha	Getting the course ready
 
-#: apps/golf/main/golf.c:1130
+#: apps/golf/main/golf.c:1133
 Pausa	Paused
 
-#: apps/golf/main/golf.c:1131
+#: apps/golf/main/golf.c:1134
 Seguir	Resume
 
-#: apps/golf/main/golf.c:1132
-#: apps/golf/main/golf.c:1182
+#: apps/golf/main/golf.c:1135
+#: apps/golf/main/golf.c:1185
 Menú	Menu
 
-#: apps/golf/main/golf.c:1133
+#: apps/golf/main/golf.c:1136
 Salir	Exit
 
-#: apps/golf/main/golf.c:1164
+#: apps/golf/main/golf.c:1167
 Continuar	Continue
 
-#: apps/golf/main/golf.c:1181
+#: apps/golf/main/golf.c:1184
 Otra vez	Again

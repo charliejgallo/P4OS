@@ -6,25 +6,25 @@
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
 #: apps/cotiz/web/cotiz.js:17
-Oficial	Oficial
+Oficial	Offiziell
 
 #: apps/cotiz/web/cotiz.js:18
 Blue	Blue
 
 #: apps/cotiz/web/cotiz.js:19
-Bolsa (MEP)	Bolsa (MEP)
+Bolsa (MEP)	Börse (MEP)
 
 #: apps/cotiz/web/cotiz.js:20
-Contado c/liqui	Contado c/liqui
+Contado c/liqui	Kassa mit Abwicklung (CCL)
 
 #: apps/cotiz/web/cotiz.js:21
-Mayorista	Mayorista
+Mayorista	Großhandel
 
 #: apps/cotiz/web/cotiz.js:22
-Cripto	Cripto
+Cripto	Krypto
 
 #: apps/cotiz/web/cotiz.js:23
-Tarjeta	Tarjeta
+Tarjeta	Karte
 
 #: apps/cotiz/web/cotiz.js:24
 Euro	Euro

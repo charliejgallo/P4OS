@@ -298,10 +298,10 @@ Vaciar	Leeren
 #: apps/notas/main/notas.c:1591
 La papelera está vacía	Der Papierkorb ist leer
 
-#: apps/notas/main/notas.c:1754
+#: apps/notas/main/notas.c:1773
 La nota se borró desde el portal	Die Notiz wurde im Portal gelöscht
 
-#: apps/notas/main/notas.c:1768
+#: apps/notas/main/notas.c:1787
 Actualizada desde el portal	Im Portal aktualisiert
 
 #: apps/notas/main/nt_editor.c:549

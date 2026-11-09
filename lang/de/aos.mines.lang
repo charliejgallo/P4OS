@@ -5,57 +5,57 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/buscaminas/main/buscaminas.c:53
+#: apps/buscaminas/main/buscaminas.c:60
 Fácil	Leicht
 
-#: apps/buscaminas/main/buscaminas.c:53
+#: apps/buscaminas/main/buscaminas.c:60
 Medio	Mittel
 
-#: apps/buscaminas/main/buscaminas.c:53
+#: apps/buscaminas/main/buscaminas.c:60
 Difícil	Schwer
 
-#: apps/buscaminas/main/buscaminas.c:53
+#: apps/buscaminas/main/buscaminas.c:60
 Experto	Experte
 
-#: apps/buscaminas/main/buscaminas.c:53
+#: apps/buscaminas/main/buscaminas.c:60
 Maestro	Meister
 
-#: apps/buscaminas/main/buscaminas.c:461
+#: apps/buscaminas/main/buscaminas.c:498
 Récord %s	Rekord %s
 
-#: apps/buscaminas/main/buscaminas.c:464
+#: apps/buscaminas/main/buscaminas.c:501
 Sin récord	Kein Rekord
 
-#: apps/buscaminas/main/buscaminas.c:477
+#: apps/buscaminas/main/buscaminas.c:514
 ¡Ganaste!	Gewonnen!
 
-#: apps/buscaminas/main/buscaminas.c:481
+#: apps/buscaminas/main/buscaminas.c:518
 %s, nuevo récord	%s, neuer Rekord
 
-#: apps/buscaminas/main/buscaminas.c:484
+#: apps/buscaminas/main/buscaminas.c:521
 ¡Boom!	Bumm!
 
-#: apps/buscaminas/main/buscaminas.c:486
+#: apps/buscaminas/main/buscaminas.c:523
 Pisaste una mina	Auf eine Mine getreten
 
-#: apps/buscaminas/main/buscaminas.c:949
+#: apps/buscaminas/main/buscaminas.c:1002
 Dificultad	Schwierigkeit
 
-#: apps/buscaminas/main/buscaminas.c:969
+#: apps/buscaminas/main/buscaminas.c:1024
 %d\xC3\x97%d, %d minas	%d\xC3\x97%d, %d Minen
 
-#: apps/buscaminas/main/buscaminas.c:1055
+#: apps/buscaminas/main/buscaminas.c:1183
 Cavar	Graben
 
-#: apps/buscaminas/main/buscaminas.c:1061
+#: apps/buscaminas/main/buscaminas.c:1189
 Bandera	Flagge
 
-#: apps/buscaminas/main/buscaminas.c:1078
+#: apps/buscaminas/main/buscaminas.c:1206
 Jugar otra	Nochmal
 
-#: apps/buscaminas/main/buscaminas.c:1144
-#: apps/buscaminas/main/buscaminas.c:1167
+#: apps/buscaminas/main/buscaminas.c:1275
+#: apps/buscaminas/main/buscaminas.c:1298
 minas	Minen
 
-#: apps/buscaminas/main/buscaminas.c:1195
+#: apps/buscaminas/main/buscaminas.c:1326
 Sin memoria	Kein Speicher

@@ -8,7 +8,7 @@
 #: apps/infrarrojo/main/infrarrojo.c:400
 #: apps/infrarrojo/main/ir_learn.c:374
 #: apps/infrarrojo/main/ir_learn.c:528
-#: apps/infrarrojo/main/ir_remote.c:1094
+#: apps/infrarrojo/main/ir_remote.c:1101
 Cancelar	Abbrechen
 
 #: apps/infrarrojo/main/infrarrojo.c:449
@@ -45,92 +45,92 @@ Cerrar	Schließen
 #: apps/infrarrojo/main/infrarrojo.c:525
 Mandando un NEC y escuchando…	Sende einen NEC-Code und höre zu…
 
-#: apps/infrarrojo/main/infrarrojo.c:604
-#: apps/infrarrojo/main/infrarrojo.c:623
+#: apps/infrarrojo/main/infrarrojo.c:609
+#: apps/infrarrojo/main/infrarrojo.c:628
 GPIO%d (pata %d)	GPIO%d (Pin %d)
 
-#: apps/infrarrojo/main/infrarrojo.c:606
+#: apps/infrarrojo/main/infrarrojo.c:611
 GND (pata 19)	GND (Pin 19)
 
-#: apps/infrarrojo/main/infrarrojo.c:607
+#: apps/infrarrojo/main/infrarrojo.c:612
 3V3 (pata 18)	3V3 (Pin 18)
 
-#: apps/infrarrojo/main/infrarrojo.c:637
+#: apps/infrarrojo/main/infrarrojo.c:642
 LED IR (cátodo abajo)	IR-LED (Kathode unten)
 
-#: apps/infrarrojo/main/infrarrojo.c:641
+#: apps/infrarrojo/main/infrarrojo.c:646
 5V (pata 1)	5V (Pin 1)
 
-#: apps/infrarrojo/main/infrarrojo.c:646
+#: apps/infrarrojo/main/infrarrojo.c:651
 GND (pata 26)	GND (Pin 26)
 
-#: apps/infrarrojo/main/infrarrojo.c:694
-#: apps/infrarrojo/main/infrarrojo.c:784
+#: apps/infrarrojo/main/infrarrojo.c:699
+#: apps/infrarrojo/main/infrarrojo.c:789
 Cableado	Verkabelung
 
-#: apps/infrarrojo/main/infrarrojo.c:704
+#: apps/infrarrojo/main/infrarrojo.c:709
 Pines	Pins
 
-#: apps/infrarrojo/main/infrarrojo.c:705
+#: apps/infrarrojo/main/infrarrojo.c:710
 Receptor	Empfänger
 
-#: apps/infrarrojo/main/infrarrojo.c:706
+#: apps/infrarrojo/main/infrarrojo.c:711
 LED	LED
 
-#: apps/infrarrojo/main/infrarrojo.c:708
+#: apps/infrarrojo/main/infrarrojo.c:713
 Cualquier pin libre del conector de atrás. La app los toma mientras los usa y los suelta al cerrarse.	Jeder freie Pin der hinteren Stiftleiste. Die App belegt sie, solange sie sie nutzt, und gibt sie beim Schließen frei.
 
-#: apps/infrarrojo/main/infrarrojo.c:709
+#: apps/infrarrojo/main/infrarrojo.c:714
 Prueba de lazo	Schleifentest
 
-#: apps/infrarrojo/main/infrarrojo.c:711
+#: apps/infrarrojo/main/infrarrojo.c:716
 Con el LED apuntando al receptor: manda un código y mira si vuelve.	Mit der LED auf den Empfänger gerichtet: sendet einen Code und prüft, ob er zurückkommt.
 
-#: apps/infrarrojo/main/infrarrojo.c:715
+#: apps/infrarrojo/main/infrarrojo.c:720
 El receptor	Der Empfänger
 
-#: apps/infrarrojo/main/infrarrojo.c:720
+#: apps/infrarrojo/main/infrarrojo.c:725
 Un receptor con demodulador de 38 kHz (TSOP38238, VS1838B y parecidos). Alimentarlo con 3,3 V, nunca con 5 V: su salida iría con 5 V al pin, y el conector no los aguanta.	Ein Empfänger mit 38-kHz-Demodulator (TSOP38238, VS1838B und ähnliche). Mit 3,3 V versorgen, nie mit 5 V: sein Ausgang legte 5 V an den Pin, und die Stiftleiste verträgt das nicht.
 
-#: apps/infrarrojo/main/infrarrojo.c:721
+#: apps/infrarrojo/main/infrarrojo.c:726
 Las patas cambian de orden según el modelo: mirar su hoja de datos. Un capacitor de 100 nF entre VS y GND, cerca del receptor, evita lecturas falsas.	Die Reihenfolge der Beine hängt vom Modell ab: im Datenblatt nachsehen. Ein 100-nF-Kondensator zwischen VS und GND nahe am Empfänger verhindert Fehllesungen.
 
-#: apps/infrarrojo/main/infrarrojo.c:725
+#: apps/infrarrojo/main/infrarrojo.c:730
 El LED	Die LED
 
-#: apps/infrarrojo/main/infrarrojo.c:730
+#: apps/infrarrojo/main/infrarrojo.c:735
 Nunca el LED directo al pin: un GPIO da unos 20 mA y un LED IR quiere 50 a 100 mA en pulsos. El pin maneja la base de un transistor con 1 kΩ, y el LED va del colector a 5 V con su resistencia.	Die LED nie direkt an den Pin: ein GPIO liefert etwa 20 mA, eine IR-LED will 50 bis 100 mA in Pulsen. Der Pin steuert über 1 kΩ die Basis eines Transistors, die LED liegt mit ihrem Widerstand zwischen Kollektor und 5 V.
 
-#: apps/infrarrojo/main/infrarrojo.c:731
+#: apps/infrarrojo/main/infrarrojo.c:736
 Con 5 V y 33 Ω pasan unos 100 mA: alcanza para 5 a 8 m apuntando. Con 3,3 V y 22 Ω, unos 70 mA y algo menos de alcance. Dos LED en serie con 15 Ω cubren más ángulo.	Mit 5 V und 33 Ω fließen etwa 100 mA: reicht gezielt für 5 bis 8 m. Mit 3,3 V und 22 Ω etwa 70 mA und etwas weniger Reichweite. Zwei LEDs in Reihe mit 15 Ω decken einen größeren Winkel ab.
 
-#: apps/infrarrojo/main/infrarrojo.c:732
+#: apps/infrarrojo/main/infrarrojo.c:737
 Las patas de 5 V tienen tensión aun con la placa apagada.	Die 5-V-Pins führen Spannung, auch wenn die Platine aus ist.
 
-#: apps/infrarrojo/main/infrarrojo.c:736
+#: apps/infrarrojo/main/infrarrojo.c:741
 La base de códigos	Die Code-Bibliothek
 
-#: apps/infrarrojo/main/infrarrojo.c:737
+#: apps/infrarrojo/main/infrarrojo.c:742
 Los códigos de televisores, aires, ventiladores y luces son de SmartIR (licencia MIT, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle), empaquetados para la tarjeta en infrarrojo_p4.pak.	Die Codes für Fernseher, Klimaanlagen, Ventilatoren und Lampen stammen von SmartIR (MIT-Lizenz, © 2019 Vassilis Panos, 2024 Li Tin O've Weedle), für die Karte gepackt in infrarrojo_p4.pak.
 
-#: apps/infrarrojo/main/infrarrojo.c:746
+#: apps/infrarrojo/main/infrarrojo.c:751
 Volvió: el LED y el receptor andan.	Er kam zurück: LED und Empfänger funktionieren.
 
-#: apps/infrarrojo/main/infrarrojo.c:747
+#: apps/infrarrojo/main/infrarrojo.c:752
 No volvió nada. Revisar el cableado, la alimentación del receptor y que el LED apunte a él.	Nichts kam zurück. Verkabelung, Versorgung des Empfängers und Ausrichtung der LED prüfen.
 
-#: apps/infrarrojo/main/infrarrojo.c:784
+#: apps/infrarrojo/main/infrarrojo.c:789
 #: apps/infrarrojo/main/ir_remote.c:180
 #: apps/infrarrojo/main/ir_remote.c:815
 Controles	Fernbedienungen
 
-#: apps/infrarrojo/main/infrarrojo.c:784
+#: apps/infrarrojo/main/infrarrojo.c:789
 #: apps/infrarrojo/main/ir_base.c:592
 #: apps/infrarrojo/main/ir_learn.c:507
-#: apps/infrarrojo/main/ir_remote.c:861
+#: apps/infrarrojo/main/ir_remote.c:868
 Aprender	Lernen
 
-#: apps/infrarrojo/main/infrarrojo.c:784
+#: apps/infrarrojo/main/infrarrojo.c:789
 #: apps/infrarrojo/main/ir_base.c:563
 #: apps/infrarrojo/main/ir_base.c:598
 Códigos	Codes
@@ -358,7 +358,7 @@ No se pudo mandar	Senden fehlgeschlagen
 
 #: apps/infrarrojo/main/ir_base.c:313
 #: apps/infrarrojo/main/ir_learn.c:287
-#: apps/infrarrojo/main/ir_remote.c:1117
+#: apps/infrarrojo/main/ir_remote.c:1124
 No se pudo escribir en la tarjeta	Konnte nicht auf die Karte schreiben
 
 #: apps/infrarrojo/main/ir_base.c:314
@@ -448,12 +448,12 @@ Ya hay una búsqueda en curso	Es läuft schon eine Suche
 Aprendido: %s	Gelernt: %s
 
 #: apps/infrarrojo/main/ir_learn.c:269
-#: apps/infrarrojo/main/ir_remote.c:899
-#: apps/infrarrojo/main/ir_remote.c:1038
+#: apps/infrarrojo/main/ir_remote.c:906
+#: apps/infrarrojo/main/ir_remote.c:1045
 Botón	Taste
 
 #: apps/infrarrojo/main/ir_learn.c:276
-#: apps/infrarrojo/main/ir_remote.c:1138
+#: apps/infrarrojo/main/ir_remote.c:1145
 Aparato nuevo	Neues Gerät
 
 #: apps/infrarrojo/main/ir_learn.c:301
@@ -463,12 +463,12 @@ Guardado: %s	Gespeichert: %s
 Guardar el botón	Taste speichern
 
 #: apps/infrarrojo/main/ir_learn.c:349
-#: apps/infrarrojo/main/ir_remote.c:1039
-#: apps/infrarrojo/main/ir_remote.c:1139
+#: apps/infrarrojo/main/ir_remote.c:1046
+#: apps/infrarrojo/main/ir_remote.c:1146
 Nombre	Name
 
 #: apps/infrarrojo/main/ir_learn.c:350
-#: apps/infrarrojo/main/ir_remote.c:1041
+#: apps/infrarrojo/main/ir_remote.c:1048
 Función en el control	Funktion auf der Fernbedienung
 
 #: apps/infrarrojo/main/ir_learn.c:358
@@ -481,8 +481,8 @@ Aparato nuevo…	Neues Gerät…
 Nombre del aparato nuevo	Name des neuen Geräts
 
 #: apps/infrarrojo/main/ir_learn.c:375
-#: apps/infrarrojo/main/ir_remote.c:1095
-#: apps/infrarrojo/main/ir_remote.c:1156
+#: apps/infrarrojo/main/ir_remote.c:1102
+#: apps/infrarrojo/main/ir_remote.c:1163
 Guardar	Speichern
 
 #: apps/infrarrojo/main/ir_learn.c:438
@@ -618,8 +618,8 @@ Se borra %s y todos sus botones.	%s und alle Tasten werden gelöscht.
 ¿Borrar el aparato?	Gerät löschen?
 
 #: apps/infrarrojo/main/ir_remote.c:375
-#: apps/infrarrojo/main/ir_remote.c:997
-#: apps/infrarrojo/main/ir_remote.c:1092
+#: apps/infrarrojo/main/ir_remote.c:1004
+#: apps/infrarrojo/main/ir_remote.c:1099
 Borrar	Löschen
 
 #: apps/infrarrojo/main/ir_remote.c:482
@@ -659,59 +659,59 @@ Mandar otra vez	Erneut senden
 Ese estado no está en la base de este aire	Dieser Zustand fehlt in den Codes des Geräts
 
 #: apps/infrarrojo/main/ir_remote.c:816
-#: apps/infrarrojo/main/ir_remote.c:860
+#: apps/infrarrojo/main/ir_remote.c:867
 Editar	Bearbeiten
 
-#: apps/infrarrojo/main/ir_remote.c:853
+#: apps/infrarrojo/main/ir_remote.c:860
 Sin botones. Tocá Editar y agregá uno, o aprendelo en Aprender.	Keine Tasten. Tippe auf Bearbeiten und füge eine hinzu, oder lerne sie unter Lernen.
 
-#: apps/infrarrojo/main/ir_remote.c:870
-#: apps/infrarrojo/main/ir_remote.c:1138
+#: apps/infrarrojo/main/ir_remote.c:877
+#: apps/infrarrojo/main/ir_remote.c:1145
 Nombre y tipo	Name und Art
 
-#: apps/infrarrojo/main/ir_remote.c:871
+#: apps/infrarrojo/main/ir_remote.c:878
 Borrar aparato	Gerät löschen
 
-#: apps/infrarrojo/main/ir_remote.c:873
+#: apps/infrarrojo/main/ir_remote.c:880
 Archivo: ir/%s (se edita también desde el portal)	Datei: ir/%s (auch im Portal bearbeitbar)
 
-#: apps/infrarrojo/main/ir_remote.c:974
+#: apps/infrarrojo/main/ir_remote.c:981
 No hay código para mandar	Kein Code zum Senden
 
-#: apps/infrarrojo/main/ir_remote.c:997
+#: apps/infrarrojo/main/ir_remote.c:1004
 ¿Borrar el botón?	Taste löschen?
 
-#: apps/infrarrojo/main/ir_remote.c:997
+#: apps/infrarrojo/main/ir_remote.c:1004
 Se borra con su código.	Sie wird mit ihrem Code gelöscht.
 
-#: apps/infrarrojo/main/ir_remote.c:1038
+#: apps/infrarrojo/main/ir_remote.c:1045
 Botón nuevo	Neue Taste
 
-#: apps/infrarrojo/main/ir_remote.c:1059
+#: apps/infrarrojo/main/ir_remote.c:1066
 crudo · %d duraciones · %u kHz	roh · %d Dauern · %u kHz
 
-#: apps/infrarrojo/main/ir_remote.c:1060
+#: apps/infrarrojo/main/ir_remote.c:1067
 sin código todavía	noch kein Code
 
-#: apps/infrarrojo/main/ir_remote.c:1082
+#: apps/infrarrojo/main/ir_remote.c:1089
 Dirección (hexa)	Adresse (hex)
 
-#: apps/infrarrojo/main/ir_remote.c:1084
+#: apps/infrarrojo/main/ir_remote.c:1091
 Comando (hexa)	Befehl (hex)
 
-#: apps/infrarrojo/main/ir_remote.c:1090
+#: apps/infrarrojo/main/ir_remote.c:1097
 Probar	Testen
 
-#: apps/infrarrojo/main/ir_remote.c:1091
+#: apps/infrarrojo/main/ir_remote.c:1098
 Código a mano	Code von Hand
 
-#: apps/infrarrojo/main/ir_remote.c:1111
+#: apps/infrarrojo/main/ir_remote.c:1118
 Falta el nombre	Der Name fehlt
 
-#: apps/infrarrojo/main/ir_remote.c:1148
+#: apps/infrarrojo/main/ir_remote.c:1155
 Un aire acondicionado se agrega desde Códigos: manda el estado entero y necesita su modelo.	Eine Klimaanlage wird unter Codes hinzugefügt: Sie sendet ihren ganzen Zustand und braucht ihr Modell.
 
-#: apps/infrarrojo/main/ir_remote.c:1156
+#: apps/infrarrojo/main/ir_remote.c:1163
 Crear	Anlegen
 
 #: apps/infrarrojo/main/ir_store.c:152

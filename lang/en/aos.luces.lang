@@ -307,51 +307,44 @@ Dirección IP del nodo Art-Net	IP address of the Art-Net node
 #: apps/luces/main/lz_tabs.c:594
 PUERTO	PORT
 
-#: apps/luces/main/lz_tabs.c:620
+#: apps/luces/main/lz_tabs.c:621
 Mandar por la red	Send over the network
 
-#: apps/luces/main/lz_tabs.c:627
+#: apps/luces/main/lz_tabs.c:630
 A toda la red	To the whole network
 
-#: apps/luces/main/lz_tabs.c:629
+#: apps/luces/main/lz_tabs.c:632
 A un nodo…	To one node…
 
-#: apps/luces/main/lz_tabs.c:632
+#: apps/luces/main/lz_tabs.c:635
 U1 = universo %u	U1 = universe %u
 
-#: apps/luces/main/lz_tabs.c:635
+#: apps/luces/main/lz_tabs.c:638
 Cada universo con algún aparato sale 40 veces por segundo como Art-Net (UDP 6454): a toda la red, o a la IP de un nodo. U1 lleva el universo elegido, U2 el siguiente, y así. Para un nodo Art-Net a DMX, consolas y programas de la PC.	Every universe with a fixture goes out 40 times a second as Art-Net (UDP 6454): to the whole network, or to one node's IP. U1 carries the chosen universe, U2 the next, and so on. For an Art-Net to DMX node, consoles and PC programs.
 
-#: apps/luces/main/lz_tabs.c:637
+#: apps/luces/main/lz_tabs.c:640
 LOS 512 CANALES COMO SALEN (OSCUROS: SIN APARATO)	THE 512 CHANNELS AS THEY GO OUT (DARK: NO FIXTURE)
 
-#: apps/luces/main/lz_tabs.c:648
+#: apps/luces/main/lz_tabs.c:651
 La salida arranca cerrada cada vez que se abre la app: ▶ arriba la abre. Sigue saliendo con la app en segundo plano. 40 paquetes por segundo, 512 canales, BREAK de 176 µs. Para ver qué llega del otro lado, la app DMX en Analizador.	The output starts closed every time the app opens: ▶ above opens it. It keeps going with the app in the background. 40 packets a second, 512 channels, a 176 µs BREAK. To see what arrives at the other end, the DMX app's Analyzer.
 
-#: apps/luces/main/lz_tabs.c:659
+#: apps/luces/main/lz_tabs.c:662
 Canal %d: %u	Channel %d: %u
 
-#: apps/luces/main/lz_tabs.c:662
+#: apps/luces/main/lz_tabs.c:665
 fijo	fixed
 
-#: apps/luces/main/lz_tabs.c:663
+#: apps/luces/main/lz_tabs.c:666
 sin aparato	no fixture
 
-#: apps/luces/main/lz_tabs.c:665
+#: apps/luces/main/lz_tabs.c:668
 \nSaliendo por %s: %.1f paquetes/s, %lu mandados.	\nSending on %s: %.1f packets/s, %lu sent.
 
-#: apps/luces/main/lz_tabs.c:666
+#: apps/luces/main/lz_tabs.c:669
 \nSalida cerrada (%s).	\nOutput closed (%s).
 
-#: apps/luces/main/lz_tabs.c:669
+#: apps/luces/main/lz_tabs.c:672
 Apagado.	Off.
 
-#: apps/luces/main/lz_tabs.c:671
+#: apps/luces/main/lz_tabs.c:674
 %lu paquetes mandados a %s	%lu packets sent to %s
-
-#: (kept from the previous catalog: strings the extractor cannot see)
-saliendo por %s · %.0f paquetes/s%s	sending on %s · %.0f packets/s%s
-
-salida cerrada (%s)	output closed (%s)
-
-FUNDIDO AL LLAMAR UNA ESCENA	FADE WHEN A SCENE IS CALLED

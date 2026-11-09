@@ -5,120 +5,120 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/g2043/main/g2043.c:362
+#: apps/g2043/main/g2043.c:370
 DOBLE	DOPPEL
 
-#: apps/g2043/main/g2043.c:362
+#: apps/g2043/main/g2043.c:370
 TRIPLE	DREIFACH
 
-#: apps/g2043/main/g2043.c:362
+#: apps/g2043/main/g2043.c:370
 LASER	LASER
 
-#: apps/g2043/main/g2043.c:362
+#: apps/g2043/main/g2043.c:370
 ONDA	WELLE
 
-#: apps/g2043/main/g2043.c:362
+#: apps/g2043/main/g2043.c:370
 ENERGIA	ENERGIE
 
-#: apps/g2043/main/g2043.c:363
+#: apps/g2043/main/g2043.c:371
 ESCUDO	SCHILD
 
-#: apps/g2043/main/g2043.c:363
+#: apps/g2043/main/g2043.c:371
 NAVE EXTRA	EXTRASCHIFF
 
-#: apps/g2043/main/g2043.c:1412
+#: apps/g2043/main/g2043.c:1420
 ALERTA	ALARM
 
-#: apps/g2043/main/g2043.c:1417
+#: apps/g2043/main/g2043.c:1425
 PLANETA LIBERADO	PLANET BEFREIT
 
-#: apps/g2043/main/g2043.c:1420
-#: apps/g2043/main/g2043.c:1812
+#: apps/g2043/main/g2043.c:1428
+#: apps/g2043/main/g2043.c:1842
 SISTEMA LIBERADO	SYSTEM BEFREIT
 
-#: apps/g2043/main/g2043.c:1420
+#: apps/g2043/main/g2043.c:1428
 GRACIAS POR JUGAR	DANKE FUERS SPIELEN
 
-#: apps/g2043/main/g2043.c:1612
+#: apps/g2043/main/g2043.c:1631
 AUTO SI	AUTO AN
 
-#: apps/g2043/main/g2043.c:1612
+#: apps/g2043/main/g2043.c:1631
 AUTO NO	AUTO AUS
 
-#: apps/g2043/main/g2043.c:1613
+#: apps/g2043/main/g2043.c:1632
 SONIDO SI	TON AN
 
-#: apps/g2043/main/g2043.c:1613
+#: apps/g2043/main/g2043.c:1632
 SONIDO NO	TON AUS
 
-#: apps/g2043/main/g2043.c:1619
+#: apps/g2043/main/g2043.c:1638
 FPS SI	FPS AN
 
-#: apps/g2043/main/g2043.c:1619
+#: apps/g2043/main/g2043.c:1638
 FPS NO	FPS AUS
 
-#: apps/g2043/main/g2043.c:1626
+#: apps/g2043/main/g2043.c:1645
 RECORD  %lu	BEST  %lu
 
-#: apps/g2043/main/g2043.c:1725
+#: apps/g2043/main/g2043.c:1744
 LA BATALLA DE CERES	DIE SCHLACHT UM CERES
 
-#: apps/g2043/main/g2043.c:1728
+#: apps/g2043/main/g2043.c:1747
 JUGAR	SPIELEN
 
-#: apps/g2043/main/g2043.c:1728
+#: apps/g2043/main/g2043.c:1747
 arrastrá el dedo para volar	Finger ziehen zum Fliegen
 
-#: apps/g2043/main/g2043.c:1734
-#: apps/g2043/main/g2043.c:1918
+#: apps/g2043/main/g2043.c:1754
+#: apps/g2043/main/g2043.c:1948
 ARRASTRÁ EL DEDO Y LA NAVE LO SIGUE	FINGER ZIEHEN, DAS SCHIFF FOLGT
 
-#: apps/g2043/main/g2043.c:1735
+#: apps/g2043/main/g2043.c:1755
 DISPARAR: MANTENELO APRETADO	FEUERN: GEDRUECKT HALTEN
 
-#: apps/g2043/main/g2043.c:1736
+#: apps/g2043/main/g2043.c:1756
 TONEL: UN GIRO INVULNERABLE	ROLLE: UNVERWUNDBARE DREHUNG
 
-#: apps/g2043/main/g2043.c:1737
+#: apps/g2043/main/g2043.c:1757
 PAUSA: ARRIBA A LA DERECHA	PAUSE: OBEN RECHTS
 
-#: apps/g2043/main/g2043.c:1751
+#: apps/g2043/main/g2043.c:1771
 RECORD 0	BEST 0
 
-#: apps/g2043/main/g2043.c:1753
-#: apps/g2043/main/g2043.c:1774
-#: apps/g2043/main/g2043.c:1795
+#: apps/g2043/main/g2043.c:1773
+#: apps/g2043/main/g2043.c:1798
+#: apps/g2043/main/g2043.c:1824
 SALIR	BEENDEN
 
-#: apps/g2043/main/g2043.c:1764
+#: apps/g2043/main/g2043.c:1787
 PAUSA	PAUSE
 
-#: apps/g2043/main/g2043.c:1766
+#: apps/g2043/main/g2043.c:1789
 SEGUIR	WEITER
 
-#: apps/g2043/main/g2043.c:1785
-#: apps/g2043/main/g2043.c:1812
+#: apps/g2043/main/g2043.c:1813
+#: apps/g2043/main/g2043.c:1842
 FIN DEL JUEGO	SPIEL VORBEI
 
-#: apps/g2043/main/g2043.c:1791
+#: apps/g2043/main/g2043.c:1819
 OTRA VEZ	NOCHMAL
 
-#: apps/g2043/main/g2043.c:1794
+#: apps/g2043/main/g2043.c:1823
 MENU	MENUE
 
-#: apps/g2043/main/g2043.c:1814
+#: apps/g2043/main/g2043.c:1844
 PUNTOS  %lu\nRECORD  %lu	PUNKTE  %lu\nBEST  %lu
 
-#: apps/g2043/main/g2043.c:1905
-#: apps/g2043/main/g2043.c:1913
-#: apps/g2043/main/g2043.c:1971
+#: apps/g2043/main/g2043.c:1935
+#: apps/g2043/main/g2043.c:1943
+#: apps/g2043/main/g2043.c:2001
 DISPARAR	FEUER
 
-#: apps/g2043/main/g2043.c:1906
-#: apps/g2043/main/g2043.c:1914
+#: apps/g2043/main/g2043.c:1936
+#: apps/g2043/main/g2043.c:1944
 TONEL	ROLLE
 
-#: apps/g2043/main/g2043.c:1971
+#: apps/g2043/main/g2043.c:2001
 DISPARO\nAUTO	AUTO\nFEUER
 
 #: apps/g2043/main/gx_foe.c:745

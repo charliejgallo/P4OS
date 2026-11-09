@@ -12,6 +12,7 @@
 const P = window.P4OS;
 const { h, put } = P;
 const tr = P.tr || ((s, ...a) => { let i = 0; return s.replace(/%[sd]/g, () => a[i++]); });
+const N_ = s => s;           /* marks a table's names for tools/gen_lang.py; tr() at use */
 
 const APP = 'aos.modbus';
 const DIR = '/modbus/perfiles';
@@ -211,11 +212,11 @@ function css() {
 
 /* ---- the Control tab: the app on the board, driven from here ---- */
 
-const FCS = [[1, '01 Coils'], [2, '02 Entradas'], [3, '03 Holding'], [4, '04 Input'], [5, '05 Coil'], [6, '06 Registro'],
-  [15, '15 Coils'], [16, '16 Registros'], [8, '08 Eco'], [17, '17 Id'], [43, '43 Identificación']];
-const FAULTS = ['Normal', 'Mudo', 'Lento', 'CRC malo', 'Ocupado (06)', 'Falla (04)'];
+const FCS = [[1, N_('01 Coils')], [2, N_('02 Entradas')], [3, N_('03 Holding')], [4, N_('04 Input')], [5, N_('05 Coil')], [6, N_('06 Registro')],
+  [15, N_('15 Coils')], [16, N_('16 Registros')], [8, N_('08 Eco')], [17, N_('17 Id')], [43, N_('43 Identificación')]];
+const FAULTS = [N_('Normal'), N_('Mudo'), N_('Lento'), N_('CRC malo'), N_('Ocupado (06)'), N_('Falla (04)')];
 const BAUDS = [1200, 2400, 4800, 9600, 19200, 38400, 57600, 115200];
-const ROLES = [['maestro', 'Maestro'], ['esclavo', 'Esclavo'], ['monitor', 'Monitor']];
+const ROLES = [['maestro', N_('Maestro')], ['esclavo', N_('Esclavo')], ['monitor', N_('Monitor')]];
 
 function control(box, hidden) {
   const send = (...lines) => P.api(LIVE, { method: 'POST', body: lines.join('\n') })

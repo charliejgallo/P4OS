@@ -122,7 +122,7 @@ TE DEJA: %s	LAESST: %s
 GANAS %d EXP Y %d CRED.	+%d EXP, +%d KREDITE
 
 #: apps/chatarra/main/ch_battle.c:587
-#: apps/chatarra/main/ch_ui.c:1884
+#: apps/chatarra/main/ch_ui.c:1890
 MOCHILA LLENA!	RUCKSACK IST VOLL!
 
 #: apps/chatarra/main/ch_battle.c:589
@@ -200,51 +200,51 @@ NO PUDISTE ESCAPAR!	FLUCHT MISSLUNGEN!
 #: apps/chatarra/main/ch_battle.c:1062
 TIPO %s   A%d D%d V%d	TYP %s   A%d V%d T%d
 
-#: apps/chatarra/main/ch_battle.c:1149
+#: apps/chatarra/main/ch_battle.c:1200
 CAMBIAN DE ROBOT.	BEIDE TAUSCHEN ROBOTER.
 
-#: apps/chatarra/main/ch_battle.c:1150
+#: apps/chatarra/main/ch_battle.c:1201
 NADIE ATACA ESTE TURNO.	NIEMAND GREIFT AN.
 
-#: apps/chatarra/main/ch_battle.c:1193
+#: apps/chatarra/main/ch_battle.c:1244
 #: apps/chatarra/main/ch_ui.c:344
-#: apps/chatarra/main/ch_ui.c:1273
-#: apps/chatarra/main/ch_ui.c:1736
+#: apps/chatarra/main/ch_ui.c:1279
+#: apps/chatarra/main/ch_ui.c:1742
 N%d	ST%d
 
-#: apps/chatarra/main/ch_battle.c:1666
-#: apps/chatarra/main/ch_ui.c:1804
+#: apps/chatarra/main/ch_battle.c:1717
+#: apps/chatarra/main/ch_ui.c:1810
 VOLVER	ZURUCK
 
-#: apps/chatarra/main/ch_battle.c:1674
+#: apps/chatarra/main/ch_battle.c:1725
 #: apps/chatarra/main/ch_link.c:781
 ESPERANDO...	WARTEN...
 
-#: apps/chatarra/main/ch_feria.c:140
+#: apps/chatarra/main/ch_feria.c:171
 CINTA DE CHATARRA	DAS SCHROTTBAND
 
-#: apps/chatarra/main/ch_feria.c:170
+#: apps/chatarra/main/ch_feria.c:201
 %d PIEZAS	%d TEILE
 
-#: apps/chatarra/main/ch_feria.c:172
+#: apps/chatarra/main/ch_feria.c:203
 +%d CREDITOS	+%d CREDITS
 
-#: apps/chatarra/main/ch_feria.c:174
+#: apps/chatarra/main/ch_feria.c:205
 RECORD %d	BESTE %d
 
-#: apps/chatarra/main/ch_feria.c:177
+#: apps/chatarra/main/ch_feria.c:208
 TE GANASTE UNA PIEZA!	DU HAST EIN TEIL GEWONNEN!
 
-#: apps/chatarra/main/ch_feria.c:180
+#: apps/chatarra/main/ch_feria.c:211
 TE GANASTE UNA PIEZA	DU HAST EIN TEIL GEWONNEN
 
-#: apps/chatarra/main/ch_feria.c:182
+#: apps/chatarra/main/ch_feria.c:213
 PERO NO TENES LUGAR	ABER DU HAST KEINEN PLATZ
 
-#: apps/chatarra/main/ch_feria.c:185
+#: apps/chatarra/main/ch_feria.c:216
 TOCA PARA SALIR	TIPPEN ZUM GEHEN
 
-#: apps/chatarra/main/ch_feria.c:195
+#: apps/chatarra/main/ch_feria.c:226
 PIEZAS %d	TEILE %d
 
 #: apps/chatarra/main/ch_link.c:279
@@ -265,7 +265,7 @@ BUEN COMBATE.	GUTER KAMPF.
 
 #: apps/chatarra/main/ch_link.c:405
 #: apps/chatarra/main/ch_link.c:556
-#: apps/chatarra/main/ch_map.c:752
+#: apps/chatarra/main/ch_map.c:844
 TU EQUIPO QUEDO COMO NUEVO.	DEIN TEAM IST WIE NEU.
 
 #: apps/chatarra/main/ch_link.c:427
@@ -280,7 +280,7 @@ OTRA VERSION DEL JUEGO.	EINE ANDERE VERSION.
 
 #: apps/chatarra/main/ch_link.c:483
 #: apps/chatarra/main/ch_link.c:487
-#: apps/chatarra/main/ch_link.c:888
+#: apps/chatarra/main/ch_link.c:938
 CONECTADO CON	VERBUNDEN MIT
 
 #: apps/chatarra/main/ch_link.c:544
@@ -389,13 +389,13 @@ OFERTA MANDADA.	ANGEBOT GESENDET.
 #: apps/chatarra/main/ch_link.c:872
 RETIRADO.	ZURUCKGEZOGEN.
 
-#: apps/chatarra/main/ch_map.c:690
+#: apps/chatarra/main/ch_map.c:782
 %s\nENCONTRASTE %s!	%s\nDU HAST %s GEFUNDEN!
 
-#: apps/chatarra/main/ch_map.c:738
+#: apps/chatarra/main/ch_map.c:830
 ENCONTRASTE %s!	GEFUNDEN: %s!
 
-#: apps/chatarra/main/ch_map.c:753
+#: apps/chatarra/main/ch_map.c:845
 TU ROBOT QUEDO COMO NUEVO.	DEIN BOT IST WIE NEU.
 
 #: apps/chatarra/main/ch_parts.c:74
@@ -862,18 +862,18 @@ TRIO	TRIO
 DUO	PAAR
 
 #: apps/chatarra/main/ch_ui.c:280
-#: apps/chatarra/main/ch_ui.c:1012
+#: apps/chatarra/main/ch_ui.c:1018
 MENU	MENUE
 
 #: apps/chatarra/main/ch_ui.c:280
-#: apps/chatarra/main/ch_ui.c:978
-#: apps/chatarra/main/ch_ui.c:2603
-#: apps/chatarra/main/ch_ui.c:2604
+#: apps/chatarra/main/ch_ui.c:984
+#: apps/chatarra/main/ch_ui.c:2609
+#: apps/chatarra/main/ch_ui.c:2610
 MAPA	KARTE
 
 #: apps/chatarra/main/ch_ui.c:324
 #: apps/chatarra/main/ch_ui.c:372
-#: apps/chatarra/main/ch_ui.c:2378
+#: apps/chatarra/main/ch_ui.c:2384
 %dC	%dK
 
 #: apps/chatarra/main/ch_ui.c:327
@@ -891,330 +891,330 @@ EXP	EXP
 #: apps/chatarra/main/ch_ui.c:370
 %s  N%d	%s  S%d
 
-#: apps/chatarra/main/ch_ui.c:970
-#: apps/chatarra/main/ch_ui.c:1008
+#: apps/chatarra/main/ch_ui.c:976
+#: apps/chatarra/main/ch_ui.c:1014
 LO TUYO	DEINS
 
-#: apps/chatarra/main/ch_ui.c:971
-#: apps/chatarra/main/ch_ui.c:1010
+#: apps/chatarra/main/ch_ui.c:977
+#: apps/chatarra/main/ch_ui.c:1016
 EL JUEGO	DAS SPIEL
 
-#: apps/chatarra/main/ch_ui.c:974
-#: apps/chatarra/main/ch_ui.c:1250
-#: apps/chatarra/main/ch_ui.c:1325
+#: apps/chatarra/main/ch_ui.c:980
+#: apps/chatarra/main/ch_ui.c:1256
+#: apps/chatarra/main/ch_ui.c:1331
 #: apps/chatarra/main/ch_zonas.c:2805
 TALLER	WERKSTATT
 
-#: apps/chatarra/main/ch_ui.c:975
-#: apps/chatarra/main/ch_ui.c:1509
+#: apps/chatarra/main/ch_ui.c:981
+#: apps/chatarra/main/ch_ui.c:1515
 OBJETOS	ITEMS
 
-#: apps/chatarra/main/ch_ui.c:976
+#: apps/chatarra/main/ch_ui.c:982
 EQUIPO	TEAM
 
-#: apps/chatarra/main/ch_ui.c:977
-#: apps/chatarra/main/ch_ui.c:2047
-#: apps/chatarra/main/ch_ui.c:2049
+#: apps/chatarra/main/ch_ui.c:983
+#: apps/chatarra/main/ch_ui.c:2053
+#: apps/chatarra/main/ch_ui.c:2055
 REGISTRO	ARCHIV
 
-#: apps/chatarra/main/ch_ui.c:979
-#: apps/chatarra/main/ch_ui.c:2440
-#: apps/chatarra/main/ch_ui.c:2442
+#: apps/chatarra/main/ch_ui.c:985
+#: apps/chatarra/main/ch_ui.c:2446
+#: apps/chatarra/main/ch_ui.c:2448
 DIARIO	TAGEBUCH
 
-#: apps/chatarra/main/ch_ui.c:982
-#: apps/chatarra/main/ch_ui.c:2499
+#: apps/chatarra/main/ch_ui.c:988
+#: apps/chatarra/main/ch_ui.c:2505
 AYUDA	HILFE
 
-#: apps/chatarra/main/ch_ui.c:983
+#: apps/chatarra/main/ch_ui.c:989
 SONIDO	TON
 
-#: apps/chatarra/main/ch_ui.c:984
+#: apps/chatarra/main/ch_ui.c:990
 DIFICULTAD	SCHWIERIGKEIT
 
-#: apps/chatarra/main/ch_ui.c:985
+#: apps/chatarra/main/ch_ui.c:991
 GUARDAR	SICHERN
 
-#: apps/chatarra/main/ch_ui.c:986
+#: apps/chatarra/main/ch_ui.c:992
 CERRAR	SCHLIESSEN
 
-#: apps/chatarra/main/ch_ui.c:990
+#: apps/chatarra/main/ch_ui.c:996
 NORMAL	NORMAL
 
-#: apps/chatarra/main/ch_ui.c:990
+#: apps/chatarra/main/ch_ui.c:996
 FACIL	LEICHT
 
-#: apps/chatarra/main/ch_ui.c:990
+#: apps/chatarra/main/ch_ui.c:996
 DURO	SCHWER
 
-#: apps/chatarra/main/ch_ui.c:993
+#: apps/chatarra/main/ch_ui.c:999
 MUDO	AUS
 
-#: apps/chatarra/main/ch_ui.c:993
+#: apps/chatarra/main/ch_ui.c:999
 EFECTOS	NUR FX
 
-#: apps/chatarra/main/ch_ui.c:993
+#: apps/chatarra/main/ch_ui.c:999
 TODO	ALLES
 
-#: apps/chatarra/main/ch_ui.c:1050
+#: apps/chatarra/main/ch_ui.c:1056
 DESLIZA PARA VOLVER	WISCHEN ZUM ZURUECK
 
-#: apps/chatarra/main/ch_ui.c:1112
+#: apps/chatarra/main/ch_ui.c:1118
 CAB	KOP
 
-#: apps/chatarra/main/ch_ui.c:1112
+#: apps/chatarra/main/ch_ui.c:1118
 TOR	RUM
 
-#: apps/chatarra/main/ch_ui.c:1113
+#: apps/chatarra/main/ch_ui.c:1119
 BRA	ARM
 
-#: apps/chatarra/main/ch_ui.c:1113
+#: apps/chatarra/main/ch_ui.c:1119
 PIE	BEI
 
-#: apps/chatarra/main/ch_ui.c:1244
-#: apps/chatarra/main/ch_ui.c:1710
+#: apps/chatarra/main/ch_ui.c:1250
+#: apps/chatarra/main/ch_ui.c:1716
 %s  %s +%d%%	%s  %s +%d%%
 
-#: apps/chatarra/main/ch_ui.c:1247
+#: apps/chatarra/main/ch_ui.c:1253
 TIPO %s	TYP %s
 
-#: apps/chatarra/main/ch_ui.c:1310
+#: apps/chatarra/main/ch_ui.c:1316
 GANA COMBATES	KAEMPFE GEWINNEN
 
-#: apps/chatarra/main/ch_ui.c:1312
+#: apps/chatarra/main/ch_ui.c:1318
 PARA PIEZAS	FUER TEILE
 
-#: apps/chatarra/main/ch_ui.c:1326
+#: apps/chatarra/main/ch_ui.c:1332
 TOCA 2 VECES	ZWEIMAL TIPPEN
 
-#: apps/chatarra/main/ch_ui.c:1330
+#: apps/chatarra/main/ch_ui.c:1336
 NO TENES OTRA DE ESTE TIPO	KEINE WEITEREN DIESER ART
 
-#: apps/chatarra/main/ch_ui.c:1343
-#: apps/chatarra/main/ch_ui.c:1343
-#: apps/chatarra/main/ch_ui.c:2381
-#: apps/chatarra/main/ch_ui.c:2382
+#: apps/chatarra/main/ch_ui.c:1349
+#: apps/chatarra/main/ch_ui.c:1349
+#: apps/chatarra/main/ch_ui.c:2387
+#: apps/chatarra/main/ch_ui.c:2388
 TOCA 2X	2X TIPPEN
 
-#: apps/chatarra/main/ch_ui.c:1353
+#: apps/chatarra/main/ch_ui.c:1359
 JUEGO %d>%d	SATZ %d>%d
 
-#: apps/chatarra/main/ch_ui.c:1381
-#: apps/chatarra/main/ch_ui.c:2376
+#: apps/chatarra/main/ch_ui.c:1387
+#: apps/chatarra/main/ch_ui.c:2382
 PV%d E%d	LP%d E%d
 
-#: apps/chatarra/main/ch_ui.c:1392
-#: apps/chatarra/main/ch_ui.c:1393
+#: apps/chatarra/main/ch_ui.c:1398
+#: apps/chatarra/main/ch_ui.c:1399
 PUESTA	MONTIERT
 
-#: apps/chatarra/main/ch_ui.c:1509
+#: apps/chatarra/main/ch_ui.c:1515
 TOCA UNO PARA USARLO	ZUM BENUTZEN TIPPEN
 
-#: apps/chatarra/main/ch_ui.c:1516
+#: apps/chatarra/main/ch_ui.c:1522
 NO TENES NADA.	DU HAST NICHTS.
 
-#: apps/chatarra/main/ch_ui.c:1548
+#: apps/chatarra/main/ch_ui.c:1554
 NADA SE TE ACERCA	NICHTS KOMMT DIR NAHE
 
-#: apps/chatarra/main/ch_ui.c:1556
+#: apps/chatarra/main/ch_ui.c:1562
 AHORA CAMINAS AL DOBLE	DU GEHST DOPPELT SO SCHNELL
 
-#: apps/chatarra/main/ch_ui.c:1564
+#: apps/chatarra/main/ch_ui.c:1570
 MOCHILA: %d LUGARES	RUCKSACK: %d PLAETZE
 
-#: apps/chatarra/main/ch_ui.c:1575
+#: apps/chatarra/main/ch_ui.c:1581
 +%d DE VIDA	+%d LP
 
-#: apps/chatarra/main/ch_ui.c:1584
+#: apps/chatarra/main/ch_ui.c:1590
 +%d DE ENERGIA	+%d ENERGIE
 
-#: apps/chatarra/main/ch_ui.c:1595
-#: apps/chatarra/main/ch_ui.c:2187
+#: apps/chatarra/main/ch_ui.c:1601
+#: apps/chatarra/main/ch_ui.c:2193
 NIVEL %d	STUFE %d
 
-#: apps/chatarra/main/ch_ui.c:1713
+#: apps/chatarra/main/ch_ui.c:1719
 NIVEL %d   TIPO %s	STUFE %d   TYP %s
 
-#: apps/chatarra/main/ch_ui.c:1729
+#: apps/chatarra/main/ch_ui.c:1735
 VACIO	LEER
 
-#: apps/chatarra/main/ch_ui.c:1739
+#: apps/chatarra/main/ch_ui.c:1745
 SALE	AKTIV
 
-#: apps/chatarra/main/ch_ui.c:1739
+#: apps/chatarra/main/ch_ui.c:1745
 ROTO	HIN
 
-#: apps/chatarra/main/ch_ui.c:1754
+#: apps/chatarra/main/ch_ui.c:1760
 NUMEROS	WERTE
 
-#: apps/chatarra/main/ch_ui.c:1755
+#: apps/chatarra/main/ch_ui.c:1761
 GOLPES	ANGRIFFE
 
-#: apps/chatarra/main/ch_ui.c:1759
+#: apps/chatarra/main/ch_ui.c:1765
 VIDA	LP
 
-#: apps/chatarra/main/ch_ui.c:1759
+#: apps/chatarra/main/ch_ui.c:1765
 ENER	ENE
 
-#: apps/chatarra/main/ch_ui.c:1759
+#: apps/chatarra/main/ch_ui.c:1765
 ATAQ	ANG
 
-#: apps/chatarra/main/ch_ui.c:1760
+#: apps/chatarra/main/ch_ui.c:1766
 DEFE	VER
 
-#: apps/chatarra/main/ch_ui.c:1760
+#: apps/chatarra/main/ch_ui.c:1766
 VELO	TEM
 
-#: apps/chatarra/main/ch_ui.c:1794
+#: apps/chatarra/main/ch_ui.c:1800
 %d/%dE	%d/%dE
 
-#: apps/chatarra/main/ch_ui.c:1803
+#: apps/chatarra/main/ch_ui.c:1809
 ARMAR OTRO	NEUEN BAUEN
 
-#: apps/chatarra/main/ch_ui.c:1807
+#: apps/chatarra/main/ch_ui.c:1813
 QUE SALGA ESTE	DIESEN RAUS
 
-#: apps/chatarra/main/ch_ui.c:1808
+#: apps/chatarra/main/ch_ui.c:1814
 DESARMAR	ZERLEGEN
 
-#: apps/chatarra/main/ch_ui.c:1825
-#: apps/chatarra/main/ch_ui.c:1856
+#: apps/chatarra/main/ch_ui.c:1831
+#: apps/chatarra/main/ch_ui.c:1862
 ROBOT ARMADO!	ROBOTER GEBAUT!
 
-#: apps/chatarra/main/ch_ui.c:1830
-#: apps/chatarra/main/ch_ui.c:1861
+#: apps/chatarra/main/ch_ui.c:1836
+#: apps/chatarra/main/ch_ui.c:1867
 FALTAN PIEZAS SUELTAS	ZU WENIG LOSE TEILE
 
-#: apps/chatarra/main/ch_ui.c:1867
+#: apps/chatarra/main/ch_ui.c:1873
 ESTA ROTO: AL TALLER	HIN: AB ZUR WERKSTATT
 
-#: apps/chatarra/main/ch_ui.c:1872
+#: apps/chatarra/main/ch_ui.c:1878
 CAMBIASTE DE ROBOT	ROBOTER GEWECHSELT
 
-#: apps/chatarra/main/ch_ui.c:1880
+#: apps/chatarra/main/ch_ui.c:1886
 PIEZAS A LA MOCHILA	TEILE IN DEN RUCKSACK
 
-#: apps/chatarra/main/ch_ui.c:1923
-#: apps/chatarra/main/ch_ui.c:2347
+#: apps/chatarra/main/ch_ui.c:1929
+#: apps/chatarra/main/ch_ui.c:2353
 TENES %d CREDITOS	DU HAST %d KREDITE
 
-#: apps/chatarra/main/ch_ui.c:1924
+#: apps/chatarra/main/ch_ui.c:1930
 TIENDA	LADEN
 
-#: apps/chatarra/main/ch_ui.c:1931
+#: apps/chatarra/main/ch_ui.c:1937
 %dC x%d	%dC x%d
 
-#: apps/chatarra/main/ch_ui.c:1973
+#: apps/chatarra/main/ch_ui.c:1979
 NO TE ALCANZA	NICHT GENUG KREDITE
 
-#: apps/chatarra/main/ch_ui.c:1979
+#: apps/chatarra/main/ch_ui.c:1985
 COMPRADO	GEKAUFT
 
-#: apps/chatarra/main/ch_ui.c:2062
+#: apps/chatarra/main/ch_ui.c:2068
 SIN DATOS	KEINE DATEN
 
-#: apps/chatarra/main/ch_ui.c:2066
+#: apps/chatarra/main/ch_ui.c:2072
 PV%d A%d D%d V%d E%d	LP%d A%d V%d T%d E%d
 
-#: apps/chatarra/main/ch_ui.c:2175
-#: apps/chatarra/main/ch_ui.c:2175
+#: apps/chatarra/main/ch_ui.c:2181
+#: apps/chatarra/main/ch_ui.c:2181
 CAMPEON	CHAMPION
 
-#: apps/chatarra/main/ch_ui.c:2188
+#: apps/chatarra/main/ch_ui.c:2194
 COMBATES %d	KAEMPFE %d
 
-#: apps/chatarra/main/ch_ui.c:2189
+#: apps/chatarra/main/ch_ui.c:2195
 PIEZAS %d/%d	TEILE %d/%d
 
-#: apps/chatarra/main/ch_ui.c:2190
+#: apps/chatarra/main/ch_ui.c:2196
 PASOS %d	SCHRITTE %d
 
-#: apps/chatarra/main/ch_ui.c:2202
+#: apps/chatarra/main/ch_ui.c:2208
 NI UNA PIEZA TE LA REGALARON	KEIN TEIL WAR EIN GESCHENK
 
-#: apps/chatarra/main/ch_ui.c:2217
+#: apps/chatarra/main/ch_ui.c:2223
 TU ROBOT SON CUATRO PIEZAS:\nCABEZA, TORSO, BRAZOS Y\nPIERNAS.\n\nCADA UNA APORTA VIDA,\nATAQUE, DEFENSA, VELOCIDAD\nY ENERGIA, Y TRAE SUS\nPROPIOS ATAQUES.\n\nEL TORSO ADEMAS DECIDE EL\nTIPO DE TU ROBOT.	DEIN BOT SIND VIER TEILE:\nKOPF, RUMPF, ARME UND\nBEINE.\n\nJEDES GIBT LP, ANGRIFF,\nABWEHR, TEMPO UND ENERGIE,\nUND BRINGT EIGENE\nANGRIFFE MIT.\n\nDER RUMPF SETZT AUSSERDEM\nDEINEN TYP.
 
-#: apps/chatarra/main/ch_ui.c:2228
+#: apps/chatarra/main/ch_ui.c:2234
 AL GANAR UN COMBATE PODES\nARRANCARLE UNA PIEZA AL\nRIVAL.\n\nVA A LA MOCHILA Y SE MONTA\nEN EL MENU, EN TALLER.\n\nLA QUE TENIAS PUESTA VUELVE\nA LA MOCHILA: NUNCA SE\nPIERDE NADA.	WENN DU GEWINNST, KANNST\nDU DEM VERLIERER EIN TEIL\nABREISSEN.\n\nES LANDET IM RUCKSACK UND\nWIRD IM MENUE UNTER\nWERKSTATT EINGEBAUT.\n\nDAS ALTE TEIL GEHT ZURUECK\nIN DEN RUCKSACK.
 
-#: apps/chatarra/main/ch_ui.c:2238
+#: apps/chatarra/main/ch_ui.c:2244
 HAY SEIS TIPOS Y SE GANAN\nENTRE ELLOS:\n\nIMPACTO > CRIO Y ACIDO\nPLASMA  > IMPACTO Y VOLT\nFUEGO   > CRIO Y ACIDO\nCRIO    > PLASMA Y VOLT\nVOLT    > FUEGO E IMPACTO\nACIDO   > VOLT Y PLASMA\n\nPEGAR CON TU PROPIO TIPO\nHACE MAS DANO.	SECHS TYPEN SCHLAGEN\nEINANDER:\n\nWUCHT  > KRYO UND SAEURE\nPLASMA > WUCHT UND VOLT\nFEUER  > KRYO UND SAEURE\nKRYO   > PLASMA UND VOLT\nVOLT   > FEUER UND WUCHT\nSAEURE > VOLT UND PLASMA\n\nMIT DEM EIGENEN TYP HAUST\nDU HAERTER ZU.
 
-#: apps/chatarra/main/ch_ui.c:2250
+#: apps/chatarra/main/ch_ui.c:2256
 CADA ZONA TIENE UN DUNGEON\nY UN SUBJEFE AL FONDO.\n\nVENCERLO TE DA UN PASE DE\nSECTOR, Y ESE PASE ABRE EL\nCONTROL DE LA ZONA QUE\nSIGUE.\n\nTOCA DONDE QUERES CAMINAR.\nEL BOTON MENU, O TOCAR TU\nROBOT, ABRE ESTE MENU.\nCON DOS DEDOS ACERCAS O\nALEJAS EL MAPA.	JEDE ZONE HAT EIN DUNGEON\nMIT EINEM ZWISCHENBOSS.\n\nBESIEGST DU IHN, GIBT ES\nEINEN SEKTORPASS, UND DER\nOEFFNET DIE KONTROLLE\nDER NAECHSTEN ZONE.\n\nTIPPEN, UM ZU LAUFEN.\nDIE MENUTASTE ODER DEIN\nROBOTER OEFFNEN DAS MENU.\nMIT ZWEI FINGERN ZOOMST\nDU DIE KARTE.
 
-#: apps/chatarra/main/ch_ui.c:2348
+#: apps/chatarra/main/ch_ui.c:2354
 CHATARRERO	SCHROTTHAENDLER
 
-#: apps/chatarra/main/ch_ui.c:2351
+#: apps/chatarra/main/ch_ui.c:2357
 NO TENES PIEZAS SUELTAS	DU HAST KEINE LOSEN TEILE
 
-#: apps/chatarra/main/ch_ui.c:2419
+#: apps/chatarra/main/ch_ui.c:2425
 +%dC	+%dC
 
-#: apps/chatarra/main/ch_ui.c:2440
+#: apps/chatarra/main/ch_ui.c:2446
 LO QUE TE PIDIERON	WORUM MAN DICH BAT
 
-#: apps/chatarra/main/ch_ui.c:2446
+#: apps/chatarra/main/ch_ui.c:2452
 NADIE TE PIDIO NADA	NIEMAND HAT DICH UM ETWAS GEBETEN
 
-#: apps/chatarra/main/ch_ui.c:2471
+#: apps/chatarra/main/ch_ui.c:2477
 ENTREGADO	ABGEGEBEN
 
-#: apps/chatarra/main/ch_ui.c:2473
+#: apps/chatarra/main/ch_ui.c:2479
 LO TENES: VOLVE	DU HAST ES: GEH ZURUECK
 
-#: apps/chatarra/main/ch_ui.c:2475
+#: apps/chatarra/main/ch_ui.c:2481
 TRAE: %s	BRING: %s
 
-#: apps/chatarra/main/ch_ui.c:2478
+#: apps/chatarra/main/ch_ui.c:2484
 PENDIENTE	OFFEN
 
-#: apps/chatarra/main/ch_ui.c:2510
+#: apps/chatarra/main/ch_ui.c:2516
 TOCA PARA SEGUIR	TIPPEN ZUM WEITER
 
-#: apps/chatarra/main/ch_ui.c:2570
+#: apps/chatarra/main/ch_ui.c:2576
 TODAVIA NO ESTUVISTE AHI	DA WARST DU NOCH NICHT
 
-#: apps/chatarra/main/ch_ui.c:2575
+#: apps/chatarra/main/ch_ui.c:2581
 YA ESTAS AHI	DU BIST SCHON DA
 
-#: apps/chatarra/main/ch_ui.c:2579
+#: apps/chatarra/main/ch_ui.c:2585
 VIAJANDO...	UNTERWEGS...
 
-#: apps/chatarra/main/ch_ui.c:2603
+#: apps/chatarra/main/ch_ui.c:2609
 TOCA PARA VIAJAR	TIPPEN ZUM REISEN
 
-#: apps/chatarra/main/ch_ui.c:2636
+#: apps/chatarra/main/ch_ui.c:2642
 SIN EXPLORAR	UNERFORSCHT
 
-#: apps/chatarra/main/ch_ui.c:2637
+#: apps/chatarra/main/ch_ui.c:2643
 ESTAS AQUI	DU BIST HIER
 
-#: apps/chatarra/main/ch_ui.c:2638
+#: apps/chatarra/main/ch_ui.c:2644
 VENCIDA - VIAJAR	BESIEGT - REISEN
 
-#: apps/chatarra/main/ch_ui.c:2639
+#: apps/chatarra/main/ch_ui.c:2645
 VIAJAR	REISEN
 
-#: apps/chatarra/main/ch_ui.c:2735
+#: apps/chatarra/main/ch_ui.c:2741
 RPG DE ROBOTS	EIN ROBOTER-RPG
 
-#: apps/chatarra/main/ch_ui.c:2741
-#: apps/chatarra/main/ch_ui.c:2742
+#: apps/chatarra/main/ch_ui.c:2747
+#: apps/chatarra/main/ch_ui.c:2748
 EMPEZAR	START
 
-#: apps/chatarra/main/ch_ui.c:2748
+#: apps/chatarra/main/ch_ui.c:2754
 TOCA DONDE QUERES CAMINAR	TIPPE, WOHIN DU WILLST
 
-#: apps/chatarra/main/ch_ui.c:2750
+#: apps/chatarra/main/ch_ui.c:2756
 DOS DEDOS: ACERCAR Y ALEJAR	ZWEI FINGER: ZOOMEN
 
-#: apps/chatarra/main/ch_ui.c:2752
+#: apps/chatarra/main/ch_ui.c:2758
 EL BOTON MENU, O TU ROBOT	MENUTASTE ODER DEIN ROBOTER
 
-#: apps/chatarra/main/ch_ui.c:2905
+#: apps/chatarra/main/ch_ui.c:2911
 PARTIDA GUARDADA	SPIEL GESICHERT
 
 #: apps/chatarra/main/ch_zonas.c:233
@@ -1821,5 +1821,5 @@ TORRE -2	TURM -2
 #: apps/chatarra/main/ch_zonas.c:2929
 LA CUMBRE	DER GIPFEL
 
-#: apps/chatarra/main/chatarra.c:305
+#: apps/chatarra/main/chatarra.c:309
 EL OTRO EQUIPO	DAS ANDERE GERAET

@@ -271,7 +271,7 @@ Marciano	Martian
 Fantasma	Ghost
 
 #: apps/monsterhop/main/mh_shop.c:72
-#: apps/monsterhop/main/mh_ui.c:58
+#: apps/monsterhop/main/mh_ui.c:59
 Zombi	Zombie
 
 #: apps/monsterhop/main/mh_shop.c:74
@@ -331,447 +331,447 @@ Piel	Skin
 #: apps/monsterhop/main/mh_shop.c:127
 Pelo	Hair
 
-#: apps/monsterhop/main/mh_ui.c:59
+#: apps/monsterhop/main/mh_ui.c:60
 Perro zombi	Zombie dog
 
-#: apps/monsterhop/main/mh_ui.c:60
-#: apps/monsterhop/main/monsterhop.c:107
+#: apps/monsterhop/main/mh_ui.c:61
+#: apps/monsterhop/main/monsterhop.c:109
 Pueblo Zombi	Zombie Town
 
-#: apps/monsterhop/main/mh_ui.c:61
+#: apps/monsterhop/main/mh_ui.c:62
 El Grandote	The Brute
 
-#: apps/monsterhop/main/mh_ui.c:62
+#: apps/monsterhop/main/mh_ui.c:63
 Vampiro	Vampire
 
-#: apps/monsterhop/main/mh_ui.c:63
+#: apps/monsterhop/main/mh_ui.c:64
 Armadura embrujada	Haunted armour
 
-#: apps/monsterhop/main/mh_ui.c:64
+#: apps/monsterhop/main/mh_ui.c:65
 Murciélago	Bat
 
-#: apps/monsterhop/main/mh_ui.c:65
+#: apps/monsterhop/main/mh_ui.c:66
 El Conde	The Count
 
-#: apps/monsterhop/main/mh_ui.c:66
+#: apps/monsterhop/main/mh_ui.c:67
 Momia	Mummy
 
-#: apps/monsterhop/main/mh_ui.c:67
+#: apps/monsterhop/main/mh_ui.c:68
 Escarabajo	Scarab
 
-#: apps/monsterhop/main/mh_ui.c:68
-#: apps/monsterhop/main/monsterhop.c:109
+#: apps/monsterhop/main/mh_ui.c:69
+#: apps/monsterhop/main/monsterhop.c:111
 Desierto de las Momias	Mummy Desert
 
-#: apps/monsterhop/main/mh_ui.c:69
+#: apps/monsterhop/main/mh_ui.c:70
 El Faraón	The Pharaoh
 
-#: apps/monsterhop/main/mh_ui.c:70
+#: apps/monsterhop/main/mh_ui.c:71
 Hombre lobo	Werewolf
 
-#: apps/monsterhop/main/mh_ui.c:71
+#: apps/monsterhop/main/mh_ui.c:72
 Cuervo	Crow
 
-#: apps/monsterhop/main/mh_ui.c:72
+#: apps/monsterhop/main/mh_ui.c:73
 Raptor	Raptor
 
-#: apps/monsterhop/main/mh_ui.c:73
+#: apps/monsterhop/main/mh_ui.c:74
 Pterodáctilo	Pterodactyl
 
-#: apps/monsterhop/main/mh_ui.c:74
+#: apps/monsterhop/main/mh_ui.c:75
 Triceratops	Triceratops
 
-#: apps/monsterhop/main/mh_ui.c:75
+#: apps/monsterhop/main/mh_ui.c:76
 El T-Rex	The T-Rex
 
-#: apps/monsterhop/main/mh_ui.c:76
+#: apps/monsterhop/main/mh_ui.c:77
 Cangrejo gigante	Giant crab
 
-#: apps/monsterhop/main/mh_ui.c:77
+#: apps/monsterhop/main/mh_ui.c:78
 Medusa	Jellyfish
 
-#: apps/monsterhop/main/mh_ui.c:78
+#: apps/monsterhop/main/mh_ui.c:79
 Hombre pez	Fish-man
 
-#: apps/monsterhop/main/mh_ui.c:79
+#: apps/monsterhop/main/mh_ui.c:80
 El Kraken	The Kraken
 
-#: apps/monsterhop/main/mh_ui.c:80
-#: apps/monsterhop/main/monsterhop.c:110
+#: apps/monsterhop/main/mh_ui.c:81
+#: apps/monsterhop/main/monsterhop.c:112
 Bosque Lobizón	Werewolf Forest
 
-#: apps/monsterhop/main/mh_ui.c:81
+#: apps/monsterhop/main/mh_ui.c:82
 El Alfa	The Alpha
 
-#: apps/monsterhop/main/mh_ui.c:577
+#: apps/monsterhop/main/mh_ui.c:603
 moneda	coin
 
-#: apps/monsterhop/main/mh_ui.c:577
+#: apps/monsterhop/main/mh_ui.c:603
 monedas	coins
 
-#: apps/monsterhop/main/mh_ui.c:675
-#: apps/monsterhop/main/mh_ui.c:681
-#: apps/monsterhop/main/mh_ui.c:925
-#: apps/monsterhop/main/mh_ui.c:941
+#: apps/monsterhop/main/mh_ui.c:701
+#: apps/monsterhop/main/mh_ui.c:707
+#: apps/monsterhop/main/mh_ui.c:960
+#: apps/monsterhop/main/mh_ui.c:976
 Jugar	Play
 
-#: apps/monsterhop/main/mh_ui.c:676
-#: apps/monsterhop/main/mh_ui.c:682
-#: apps/monsterhop/main/mh_ui.c:1096
-#: apps/monsterhop/main/mh_ui.c:1105
+#: apps/monsterhop/main/mh_ui.c:702
+#: apps/monsterhop/main/mh_ui.c:708
+#: apps/monsterhop/main/mh_ui.c:1132
+#: apps/monsterhop/main/mh_ui.c:1141
 La casa de Tommy	Tommy's house
 
-#: apps/monsterhop/main/mh_ui.c:742
+#: apps/monsterhop/main/mh_ui.c:770
 Hacen falta %d estrellas para abrir esta zona	You need %d stars to open this zone
 
-#: apps/monsterhop/main/mh_ui.c:743
+#: apps/monsterhop/main/mh_ui.c:771
 Termina el nivel anterior	Finish the level before
 
-#: apps/monsterhop/main/mh_ui.c:749
+#: apps/monsterhop/main/mh_ui.c:777
 Récord	Best
 
-#: apps/monsterhop/main/mh_ui.c:749
+#: apps/monsterhop/main/mh_ui.c:777
 Figurita	Sticker
 
-#: apps/monsterhop/main/mh_ui.c:750
+#: apps/monsterhop/main/mh_ui.c:778
 encontrada	found
 
-#: apps/monsterhop/main/mh_ui.c:750
+#: apps/monsterhop/main/mh_ui.c:778
 escondida	hidden
 
-#: apps/monsterhop/main/mh_ui.c:826
+#: apps/monsterhop/main/mh_ui.c:860
 Próximamente: una zona nueva	Coming soon: a new zone
 
-#: apps/monsterhop/main/mh_ui.c:847
-#: apps/monsterhop/main/mh_ui.c:1511
+#: apps/monsterhop/main/mh_ui.c:881
+#: apps/monsterhop/main/mh_ui.c:1553
 Estrellas	Stars
 
-#: apps/monsterhop/main/mh_ui.c:926
+#: apps/monsterhop/main/mh_ui.c:961
 Cerrar	Close
 
-#: apps/monsterhop/main/mh_ui.c:945
+#: apps/monsterhop/main/mh_ui.c:980
 Zonas	Zones
 
-#: apps/monsterhop/main/mh_ui.c:1039
+#: apps/monsterhop/main/mh_ui.c:1075
 Faltan %d estrellas	%d more stars
 
-#: apps/monsterhop/main/mh_ui.c:1062
+#: apps/monsterhop/main/mh_ui.c:1098
 Primero aparea otro reloj en Enlace	Pair a watch in Link first
 
-#: apps/monsterhop/main/mh_ui.c:1087
-#: apps/monsterhop/main/mh_ui.c:1338
+#: apps/monsterhop/main/mh_ui.c:1123
+#: apps/monsterhop/main/mh_ui.c:1379
 Guardarropas	Wardrobe
 
-#: apps/monsterhop/main/mh_ui.c:1087
-#: apps/monsterhop/main/mh_ui.c:1338
+#: apps/monsterhop/main/mh_ui.c:1123
+#: apps/monsterhop/main/mh_ui.c:1379
 Tienda	Shop
 
-#: apps/monsterhop/main/mh_ui.c:1087
+#: apps/monsterhop/main/mh_ui.c:1123
 Álbum	Album
 
-#: apps/monsterhop/main/mh_ui.c:1087
-#: apps/monsterhop/main/mh_ui.c:1436
+#: apps/monsterhop/main/mh_ui.c:1123
+#: apps/monsterhop/main/mh_ui.c:1478
 Trofeos	Trophies
 
-#: apps/monsterhop/main/mh_ui.c:1087
-#: apps/monsterhop/main/mh_ui.c:1490
+#: apps/monsterhop/main/mh_ui.c:1123
+#: apps/monsterhop/main/mh_ui.c:1532
 Estadísticas	Stats
 
-#: apps/monsterhop/main/mh_ui.c:1088
+#: apps/monsterhop/main/mh_ui.c:1124
 Jugar con un amigo	Play with a friend
 
-#: apps/monsterhop/main/mh_ui.c:1088
-#: apps/monsterhop/main/mh_ui.c:1566
+#: apps/monsterhop/main/mh_ui.c:1124
+#: apps/monsterhop/main/mh_ui.c:1608
 Ajustes	Settings
 
-#: apps/monsterhop/main/mh_ui.c:1088
-#: apps/monsterhop/main/mh_ui.c:1712
-#: apps/monsterhop/main/mh_ui.c:1941
+#: apps/monsterhop/main/mh_ui.c:1124
+#: apps/monsterhop/main/mh_ui.c:1754
+#: apps/monsterhop/main/mh_ui.c:1983
 Al mapa	To the map
 
-#: apps/monsterhop/main/mh_ui.c:1162
+#: apps/monsterhop/main/mh_ui.c:1198
 Comprar	Buy
 
-#: apps/monsterhop/main/mh_ui.c:1163
+#: apps/monsterhop/main/mh_ui.c:1199
 Sacárselo	Take off
 
-#: apps/monsterhop/main/mh_ui.c:1163
+#: apps/monsterhop/main/mh_ui.c:1199
 Puesto	Wearing
 
-#: apps/monsterhop/main/mh_ui.c:1164
+#: apps/monsterhop/main/mh_ui.c:1200
 Ponérselo	Put on
 
-#: apps/monsterhop/main/mh_ui.c:1178
+#: apps/monsterhop/main/mh_ui.c:1214
 Te faltan monedas	Not enough coins
 
-#: apps/monsterhop/main/mh_ui.c:1358
+#: apps/monsterhop/main/mh_ui.c:1399
 Escondida en %s	Hidden in %s
 
-#: apps/monsterhop/main/mh_ui.c:1376
+#: apps/monsterhop/main/mh_ui.c:1417
 Álbum de figuritas	Sticker album
 
-#: apps/monsterhop/main/mh_ui.c:1511
+#: apps/monsterhop/main/mh_ui.c:1553
 Niveles terminados	Levels finished
 
-#: apps/monsterhop/main/mh_ui.c:1512
+#: apps/monsterhop/main/mh_ui.c:1554
 Figuritas	Stickers
 
-#: apps/monsterhop/main/mh_ui.c:1512
+#: apps/monsterhop/main/mh_ui.c:1554
 Llaves juntadas	Keys collected
 
-#: apps/monsterhop/main/mh_ui.c:1513
+#: apps/monsterhop/main/mh_ui.c:1555
 Monedas juntadas	Coins collected
 
-#: apps/monsterhop/main/mh_ui.c:1513
+#: apps/monsterhop/main/mh_ui.c:1555
 Saltos	Hops
 
-#: apps/monsterhop/main/mh_ui.c:1514
+#: apps/monsterhop/main/mh_ui.c:1556
 Atrapado por monstruos	Caught by monsters
 
-#: apps/monsterhop/main/mh_ui.c:1514
+#: apps/monsterhop/main/mh_ui.c:1556
 Al agua	Into the water
 
-#: apps/monsterhop/main/mh_ui.c:1515
+#: apps/monsterhop/main/mh_ui.c:1557
 Caídas	Falls
 
-#: apps/monsterhop/main/mh_ui.c:1515
+#: apps/monsterhop/main/mh_ui.c:1557
 Carreras ganadas	Races won
 
-#: apps/monsterhop/main/mh_ui.c:1516
+#: apps/monsterhop/main/mh_ui.c:1558
 Tiempo jugado	Time played
 
-#: apps/monsterhop/main/mh_ui.c:1572
+#: apps/monsterhop/main/mh_ui.c:1614
 Dificultad	Difficulty
 
-#: apps/monsterhop/main/mh_ui.c:1573
+#: apps/monsterhop/main/mh_ui.c:1615
 Fácil	Easy
 
-#: apps/monsterhop/main/mh_ui.c:1573
+#: apps/monsterhop/main/mh_ui.c:1615
 Normal	Normal
 
-#: apps/monsterhop/main/mh_ui.c:1573
+#: apps/monsterhop/main/mh_ui.c:1615
 Difícil	Hard
 
-#: apps/monsterhop/main/mh_ui.c:1579
+#: apps/monsterhop/main/mh_ui.c:1621
 Fácil: 5 vidas y sin reloj. Normal: 3 vidas y reloj. Difícil: 1 vida y un poco menos de tiempo.	Easy: 5 lives and no clock. Normal: 3 lives and a clock. Hard: 1 life and a little less time.
 
-#: apps/monsterhop/main/mh_ui.c:1582
+#: apps/monsterhop/main/mh_ui.c:1624
 Sonido	Sound
 
-#: apps/monsterhop/main/mh_ui.c:1584
+#: apps/monsterhop/main/mh_ui.c:1626
 Efectos	Sounds
 
-#: apps/monsterhop/main/mh_ui.c:1585
+#: apps/monsterhop/main/mh_ui.c:1627
 Música	Music
 
-#: apps/monsterhop/main/mh_ui.c:1587
+#: apps/monsterhop/main/mh_ui.c:1629
 Controles	Controls
 
-#: apps/monsterhop/main/mh_ui.c:1588
+#: apps/monsterhop/main/mh_ui.c:1630
 Flechas en pantalla	On-screen arrows
 
-#: apps/monsterhop/main/mh_ui.c:1589
+#: apps/monsterhop/main/mh_ui.c:1631
 Desliza el dedo para saltar, o toca para saltar hacia adelante. El botón dorado tira de las palancas, empuja cajas, abre cofres y, si no hay nada, da un súper salto.	Swipe to hop, or tap to hop forward. The gold button pulls levers, pushes crates, opens chests and, if there's nothing around, does a super jump.
 
-#: apps/monsterhop/main/mh_ui.c:1653
-#: apps/monsterhop/main/mh_ui.c:1658
+#: apps/monsterhop/main/mh_ui.c:1695
+#: apps/monsterhop/main/mh_ui.c:1700
 Cargando...	Loading...
 
-#: apps/monsterhop/main/mh_ui.c:1672
-#: apps/monsterhop/main/mh_ui.c:1681
+#: apps/monsterhop/main/mh_ui.c:1714
+#: apps/monsterhop/main/mh_ui.c:1723
 Pausa	Paused
 
-#: apps/monsterhop/main/mh_ui.c:1696
-#: apps/monsterhop/main/mh_ui.c:1710
+#: apps/monsterhop/main/mh_ui.c:1738
+#: apps/monsterhop/main/mh_ui.c:1752
 Seguir	Go on
 
-#: apps/monsterhop/main/mh_ui.c:1698
-#: apps/monsterhop/main/mh_ui.c:1940
+#: apps/monsterhop/main/mh_ui.c:1740
+#: apps/monsterhop/main/mh_ui.c:1982
 Reintentar	Try again
 
-#: apps/monsterhop/main/mh_ui.c:1699
+#: apps/monsterhop/main/mh_ui.c:1741
 Salir al mapa	Back to the map
 
-#: apps/monsterhop/main/mh_ui.c:1717
+#: apps/monsterhop/main/mh_ui.c:1759
 Carrera de llaves	Key race
 
-#: apps/monsterhop/main/mh_ui.c:1723
+#: apps/monsterhop/main/mh_ui.c:1765
 Una llave, un punto. El primero en salir suma dos.	A key is a point. The first one out gets two more.
 
-#: apps/monsterhop/main/mh_ui.c:1725
+#: apps/monsterhop/main/mh_ui.c:1767
 ¡A correr!	Race!
 
-#: apps/monsterhop/main/mh_ui.c:1726
+#: apps/monsterhop/main/mh_ui.c:1768
 Cancelar	Cancel
 
-#: apps/monsterhop/main/mh_ui.c:1808
+#: apps/monsterhop/main/mh_ui.c:1850
 Llaves	Keys
 
-#: apps/monsterhop/main/mh_ui.c:1808
-#: apps/monsterhop/main/mh_ui.c:1910
-#: apps/monsterhop/main/mh_ui.c:1911
-#: apps/monsterhop/main/mh_ui.c:1933
+#: apps/monsterhop/main/mh_ui.c:1850
+#: apps/monsterhop/main/mh_ui.c:1952
+#: apps/monsterhop/main/mh_ui.c:1953
+#: apps/monsterhop/main/mh_ui.c:1975
 Monedas	Coins
 
-#: apps/monsterhop/main/mh_ui.c:1809
+#: apps/monsterhop/main/mh_ui.c:1851
 Vidas	Lives
 
-#: apps/monsterhop/main/mh_ui.c:1813
-#: apps/monsterhop/main/mh_ui.c:1932
+#: apps/monsterhop/main/mh_ui.c:1855
+#: apps/monsterhop/main/mh_ui.c:1974
 Tiempo	Time
 
-#: apps/monsterhop/main/mh_ui.c:1888
+#: apps/monsterhop/main/mh_ui.c:1930
 Trofeo	Trophy
 
-#: apps/monsterhop/main/mh_ui.c:1906
+#: apps/monsterhop/main/mh_ui.c:1948
 ¡Ganaste la carrera!	You won the race!
 
-#: apps/monsterhop/main/mh_ui.c:1906
+#: apps/monsterhop/main/mh_ui.c:1948
 Perdiste la carrera	You lost the race
 
-#: apps/monsterhop/main/mh_ui.c:1907
+#: apps/monsterhop/main/mh_ui.c:1949
 Dejaste la carrera	You left the race
 
-#: apps/monsterhop/main/mh_ui.c:1911
+#: apps/monsterhop/main/mh_ui.c:1953
 Tú	You
 
-#: apps/monsterhop/main/mh_ui.c:1916
+#: apps/monsterhop/main/mh_ui.c:1958
 Otra carrera	Another race
 
-#: apps/monsterhop/main/mh_ui.c:1924
+#: apps/monsterhop/main/mh_ui.c:1966
 ¡Nivel completo!	Level complete!
 
-#: apps/monsterhop/main/mh_ui.c:1924
+#: apps/monsterhop/main/mh_ui.c:1966
 Fin del juego	Game over
 
-#: apps/monsterhop/main/mh_ui.c:1933
+#: apps/monsterhop/main/mh_ui.c:1975
   ¡récord!	  best!
 
-#: apps/monsterhop/main/mh_ui.c:1933
+#: apps/monsterhop/main/mh_ui.c:1975
 Vidas perdidas	Lives lost
 
-#: apps/monsterhop/main/mh_ui.c:1936
+#: apps/monsterhop/main/mh_ui.c:1978
 ¡Encontraste la figurita!	You found the sticker!
 
-#: apps/monsterhop/main/mh_ui.c:1940
+#: apps/monsterhop/main/mh_ui.c:1982
 Siguiente nivel	Next level
 
-#: apps/monsterhop/main/monsterhop.c:76
+#: apps/monsterhop/main/monsterhop.c:78
 Calle Principal	Main Street
 
-#: apps/monsterhop/main/monsterhop.c:77
+#: apps/monsterhop/main/monsterhop.c:79
 Las Cloacas	The Sewers
 
-#: apps/monsterhop/main/monsterhop.c:78
+#: apps/monsterhop/main/monsterhop.c:80
 El Desarmadero	The Junkyard
 
-#: apps/monsterhop/main/monsterhop.c:79
+#: apps/monsterhop/main/monsterhop.c:81
 La Municipalidad	City Hall
 
-#: apps/monsterhop/main/monsterhop.c:80
+#: apps/monsterhop/main/monsterhop.c:82
 El Foso	The Moat
 
-#: apps/monsterhop/main/monsterhop.c:81
+#: apps/monsterhop/main/monsterhop.c:83
 El Gran Salón	The Great Hall
 
-#: apps/monsterhop/main/monsterhop.c:82
+#: apps/monsterhop/main/monsterhop.c:84
 La Torre del Reloj	The Clock Tower
 
-#: apps/monsterhop/main/monsterhop.c:83
+#: apps/monsterhop/main/monsterhop.c:85
 La Cámara del Conde	The Count's Chamber
 
-#: apps/monsterhop/main/monsterhop.c:84
+#: apps/monsterhop/main/monsterhop.c:86
 Mar de Dunas	Dune Sea
 
-#: apps/monsterhop/main/monsterhop.c:85
+#: apps/monsterhop/main/monsterhop.c:87
 El Oasis	The Oasis
 
-#: apps/monsterhop/main/monsterhop.c:86
+#: apps/monsterhop/main/monsterhop.c:88
 Salas del Templo	Temple Halls
 
-#: apps/monsterhop/main/monsterhop.c:87
+#: apps/monsterhop/main/monsterhop.c:89
 La Tumba del Faraón	The Pharaoh's Tomb
 
-#: apps/monsterhop/main/monsterhop.c:88
+#: apps/monsterhop/main/monsterhop.c:90
 El Sendero	The Trail
 
-#: apps/monsterhop/main/monsterhop.c:89
+#: apps/monsterhop/main/monsterhop.c:91
 El Río Bravo	Rushing River
 
-#: apps/monsterhop/main/monsterhop.c:90
+#: apps/monsterhop/main/monsterhop.c:92
 El Viejo Molino	The Old Mill
 
-#: apps/monsterhop/main/monsterhop.c:91
+#: apps/monsterhop/main/monsterhop.c:93
 El Claro de la Luna	Moon Clearing
 
-#: apps/monsterhop/main/monsterhop.c:92
+#: apps/monsterhop/main/monsterhop.c:94
 La Selva Humeante	The Steaming Jungle
 
-#: apps/monsterhop/main/monsterhop.c:93
+#: apps/monsterhop/main/monsterhop.c:95
 Los Pozos de Brea	The Tar Pits
 
-#: apps/monsterhop/main/monsterhop.c:94
+#: apps/monsterhop/main/monsterhop.c:96
 El Río de Lava	The Lava River
 
-#: apps/monsterhop/main/monsterhop.c:95
+#: apps/monsterhop/main/monsterhop.c:97
 La Carrera del T-Rex	The T-Rex Run
 
-#: apps/monsterhop/main/monsterhop.c:96
+#: apps/monsterhop/main/monsterhop.c:98
 El Muelle	The Pier
 
-#: apps/monsterhop/main/monsterhop.c:97
+#: apps/monsterhop/main/monsterhop.c:99
 Marea Alta	High Tide
 
-#: apps/monsterhop/main/monsterhop.c:98
+#: apps/monsterhop/main/monsterhop.c:100
 El Barco Hundido	The Wreck
 
-#: apps/monsterhop/main/monsterhop.c:99
+#: apps/monsterhop/main/monsterhop.c:101
 La Guarida del Kraken	The Kraken's Lair
 
-#: apps/monsterhop/main/monsterhop.c:100
+#: apps/monsterhop/main/monsterhop.c:102
 Campo de Prueba	Test Field
 
-#: apps/monsterhop/main/monsterhop.c:108
+#: apps/monsterhop/main/monsterhop.c:110
 Castillo Vampiro	Vampire Castle
 
-#: apps/monsterhop/main/monsterhop.c:111
+#: apps/monsterhop/main/monsterhop.c:113
 Valle Perdido	Lost Valley
 
-#: apps/monsterhop/main/monsterhop.c:112
+#: apps/monsterhop/main/monsterhop.c:114
 Bahía Abisal	Abyss Bay
 
-#: apps/monsterhop/main/monsterhop.c:803
+#: apps/monsterhop/main/monsterhop.c:805
 No hay memoria para girar la pantalla	Not enough memory to rotate the screen
 
-#: apps/monsterhop/main/monsterhop.c:860
+#: apps/monsterhop/main/monsterhop.c:862
 ¡Llave!	Key!
 
-#: apps/monsterhop/main/monsterhop.c:861
+#: apps/monsterhop/main/monsterhop.c:863
 ¡Se abrió la salida!	The exit is open!
 
-#: apps/monsterhop/main/monsterhop.c:862
+#: apps/monsterhop/main/monsterhop.c:864
 Punto de control	Checkpoint
 
-#: apps/monsterhop/main/monsterhop.c:863
+#: apps/monsterhop/main/monsterhop.c:865
 ¡Sin tiempo!	Time's up!
 
-#: apps/monsterhop/main/monsterhop.c:864
+#: apps/monsterhop/main/monsterhop.c:866
 ¿Listo?	Ready?
 
-#: apps/monsterhop/main/monsterhop.c:865
+#: apps/monsterhop/main/monsterhop.c:867
 ¡Ya!	Go!
 
-#: apps/monsterhop/main/monsterhop.c:866
+#: apps/monsterhop/main/monsterhop.c:868
 ¡Una vida más!	Extra life!
 
-#: apps/monsterhop/main/monsterhop.c:867
+#: apps/monsterhop/main/monsterhop.c:869
 +30 segundos	+30 seconds
 
-#: apps/monsterhop/main/monsterhop.c:868
+#: apps/monsterhop/main/monsterhop.c:870
 ¡Rápido!	Hurry!
 
-#: apps/monsterhop/main/monsterhop.c:1433
+#: apps/monsterhop/main/monsterhop.c:1479
 Falta monsterhop.pak en la tarjeta	monsterhop.pak is missing from the card
 
-#: apps/monsterhop/main/monsterhop.c:1561
+#: apps/monsterhop/main/monsterhop.c:1608
 No se pudo cargar el nivel	The level could not be loaded

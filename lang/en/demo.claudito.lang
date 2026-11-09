@@ -11,109 +11,111 @@ PATIO	PARK
 #: apps/claudito/main/cl_scene.c:861
 CASA	HOME
 
-#: apps/claudito/main/claudito.c:264
+#: apps/claudito/main/claudito.c:272
 PELOTA	BALL
 
-#: apps/claudito/main/claudito.c:265
+#: apps/claudito/main/claudito.c:273
 GLOBO	BALLOON
 
-#: apps/claudito/main/claudito.c:266
+#: apps/claudito/main/claudito.c:274
 BURBUJAS	BUBBLES
 
-#: apps/claudito/main/claudito.c:267
+#: apps/claudito/main/claudito.c:275
 CUBOS	BLOCKS
 
-#: apps/claudito/main/claudito.c:917
+#: apps/claudito/main/claudito.c:925
 DIA %d	DAY %d
 
-#: apps/claudito/main/claudito.c:1064
+#: apps/claudito/main/claudito.c:1079
 QUE COMEMOS?	WHAT'S TO EAT?
 
-#: apps/claudito/main/claudito.c:1064
+#: apps/claudito/main/claudito.c:1079
 A QUE JUGAMOS?	WHAT SHALL WE PLAY?
 
-#: apps/claudito/main/claudito.c:1151
+#: apps/claudito/main/claudito.c:1170
 NO ENTRA	NO ROOM
 
-#: apps/claudito/main/claudito.c:1151
-#: apps/claudito/main/claudito.c:2035
+#: apps/claudito/main/claudito.c:1170
+#: apps/claudito/main/claudito.c:2057
 MAS!	MORE!
 
-#: apps/claudito/main/claudito.c:1185
+#: apps/claudito/main/claudito.c:1204
 RICO!	YUM!
 
-#: apps/claudito/main/claudito.c:1210
+#: apps/claudito/main/claudito.c:1229
 FROTAME!	RUB ME!
 
-#: apps/claudito/main/claudito.c:1223
+#: apps/claudito/main/claudito.c:1242
 TOCAME LA	RUB MY
 
-#: apps/claudito/main/claudito.c:1223
+#: apps/claudito/main/claudito.c:1242
 PANZA!	TUMMY!
 
-#: apps/claudito/main/claudito.c:1230
+#: apps/claudito/main/claudito.c:1249
 BUEN DIA!	MORNING!
 
-#: apps/claudito/main/claudito.c:1235
+#: apps/claudito/main/claudito.c:1254
 A DORMIR...	BEDTIME...
 
-#: apps/claudito/main/claudito.c:1244
+#: apps/claudito/main/claudito.c:1263
 AL PATIO!	TO THE PARK!
 
-#: apps/claudito/main/claudito.c:1244
+#: apps/claudito/main/claudito.c:1263
 A CASA!	BACK HOME!
 
-#: apps/claudito/main/claudito.c:1288
+#: apps/claudito/main/claudito.c:1307
 TENGO	I AM
 
-#: apps/claudito/main/claudito.c:1288
+#: apps/claudito/main/claudito.c:1307
 HAMBRE	HUNGRY
 
-#: apps/claudito/main/claudito.c:1290
+#: apps/claudito/main/claudito.c:1309
 ESTOY	I AM
 
-#: apps/claudito/main/claudito.c:1290
+#: apps/claudito/main/claudito.c:1309
 SUCIO	DIRTY
 
-#: apps/claudito/main/claudito.c:1292
+#: apps/claudito/main/claudito.c:1311
 QUE SUENO	SO SLEEPY
 
-#: apps/claudito/main/claudito.c:1294
+#: apps/claudito/main/claudito.c:1313
 JUGAMOS?	PLAY?
 
-#: apps/claudito/main/claudito.c:1296
-#: apps/claudito/main/claudito.c:2386
+#: apps/claudito/main/claudito.c:1315
+#: apps/claudito/main/claudito.c:2532
 HOLA!	HI!
 
-#: apps/claudito/main/claudito.c:1296
+#: apps/claudito/main/claudito.c:1315
 TODO BIEN	ALL GOOD
 
-#: apps/claudito/main/claudito.c:1297
+#: apps/claudito/main/claudito.c:1316
 QUE LINDO	SO NICE
 
-#: apps/claudito/main/claudito.c:1297
+#: apps/claudito/main/claudito.c:1316
 HOLA HOLA	HI THERE
 
-#: apps/claudito/main/claudito.c:1504
+#: apps/claudito/main/claudito.c:1523
 LIMPIO!	CLEAN!
 
-#: apps/claudito/main/claudito.c:1680
+#: apps/claudito/main/claudito.c:1699
 DIA 1!	DAY 1!
 
-#: apps/claudito/main/claudito.c:1680
+#: apps/claudito/main/claudito.c:1699
 DE NUEVO	ALL OVER
 
-#: apps/claudito/main/claudito.c:2034
+#: apps/claudito/main/claudito.c:2056
 JI JI JI!	HEE HEE!
 
-#: apps/claudito/main/claudito.c:2034
+#: apps/claudito/main/claudito.c:2056
 JA JA!	HA HA!
 
-#: apps/claudito/main/claudito.c:2035
+#: apps/claudito/main/claudito.c:2057
 BASTA!	STOP IT!
 
-#: apps/claudito/main/claudito.c:2169
+#: apps/claudito/main/claudito.c:2193
+#: apps/claudito/main/claudito.c:2288
 MANTENE PARA	HOLD TO
 
-#: apps/claudito/main/claudito.c:2169
+#: apps/claudito/main/claudito.c:2193
+#: apps/claudito/main/claudito.c:2288
 REINICIAR	RESTART

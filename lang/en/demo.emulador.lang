@@ -11,12 +11,12 @@ Juegos	Games
 #: apps/emulador/main/em_files.c:100
 Copiá acá los juegos de esta consola (también en subcarpetas).\nbios/ guarda los archivos de sistema que la consola pueda usar;\nsaves/ y states/ los escribe el emulador.	Copy this console's games here (subfolders work too).\nbios/ holds the system files the console may use;\nsaves/ and states/ are written by the emulator.
 
-#: apps/emulador/main/em_game.c:1136
-#: apps/emulador/main/em_game.c:1278
+#: apps/emulador/main/em_game.c:1154
+#: apps/emulador/main/em_game.c:1296
 Tocá para volver	Tap to go back
 
-#: apps/emulador/main/em_game.c:1271
-#: apps/emulador/main/em_game.c:1324
+#: apps/emulador/main/em_game.c:1289
+#: apps/emulador/main/em_game.c:1342
 #: apps/emulador/main/em_menu.c:210
 Cargando...	Loading...
 

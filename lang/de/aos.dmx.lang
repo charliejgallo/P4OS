@@ -214,7 +214,7 @@ Pixel	Pixel
 Dirección de inicio (1-512)	Startadresse (1-512)
 
 #: apps/dmx/main/dx_tabs.c:348
-#: apps/dmx/main/dx_tabs.c:699
+#: apps/dmx/main/dx_tabs.c:703
 Dirección	Adresse
 
 #: apps/dmx/main/dx_tabs.c:360
@@ -280,86 +280,86 @@ Esperando %s del universo %u en %s…	Warte auf %s für Universum %u an %s…
 #: apps/dmx/main/dx_tabs.c:575
  · SIN DATOS (la salida mantiene lo último)	 · KEINE DATEN (der Ausgang hält die letzten Werte)
 
-#: apps/dmx/main/dx_tabs.c:601
+#: apps/dmx/main/dx_tabs.c:603
 Recibir de la red y sacarlo por DMX	Aus dem Netz empfangen und als DMX ausgeben
 
-#: apps/dmx/main/dx_tabs.c:611
+#: apps/dmx/main/dx_tabs.c:615
 Universo	Universum
 
-#: apps/dmx/main/dx_tabs.c:616
+#: apps/dmx/main/dx_tabs.c:620
 LOS PRIMEROS 32 CANALES COMO SALEN	DIE ERSTEN 32 KANÄLE, WIE SIE HINAUSGEHEN
 
-#: apps/dmx/main/dx_tabs.c:622
+#: apps/dmx/main/dx_tabs.c:626
 La placa hace de nodo: lo que una consola, un programa de la PC o Luces en otra placa mandan por la red para ese universo sale por el puerto RS485 como DMX. Art-Net por UDP 6454 (contesta el ArtPoll, así la consola la ve en su lista de nodos); sACN por multicast 239.255.x.y, puerto 5568. Si la red deja de mandar, la salida mantiene lo último. Sigue andando con la app en segundo plano.	Die Platine ist ein Knoten: was eine Konsole, ein PC-Programm oder Licht auf einer anderen Platine für dieses Universum ins Netz schickt, geht am RS485-Port als DMX hinaus. Art-Net über UDP 6454 (beantwortet ArtPoll, so sieht die Konsole sie in ihrer Knotenliste); sACN per Multicast 239.255.x.y, Port 5568. Schickt das Netz nichts mehr, hält der Ausgang die letzten Werte. Läuft auch im Hintergrund weiter.
 
-#: apps/dmx/main/dx_tabs.c:636
+#: apps/dmx/main/dx_tabs.c:640
 Abriendo el puerto: tocá Buscar otra vez.	Port wird geöffnet: noch einmal Suchen tippen.
 
-#: apps/dmx/main/dx_tabs.c:663
+#: apps/dmx/main/dx_tabs.c:667
 Dirección DMX nueva (1 a 512)	Neue DMX-Adresse (1 bis 512)
 
-#: apps/dmx/main/dx_tabs.c:676
+#: apps/dmx/main/dx_tabs.c:680
 Nombre del aparato (DEVICE_LABEL)	Name des Geräts (DEVICE_LABEL)
 
-#: apps/dmx/main/dx_tabs.c:689
+#: apps/dmx/main/dx_tabs.c:693
 (sin nombre)	(ohne Namen)
 
-#: apps/dmx/main/dx_tabs.c:694
+#: apps/dmx/main/dx_tabs.c:698
 Canales %u a %u (%u canales)	Kanäle %u bis %u (%u Kanäle)
 
-#: apps/dmx/main/dx_tabs.c:695
+#: apps/dmx/main/dx_tabs.c:699
 No contestó DEVICE_INFO.	Keine Antwort auf DEVICE_INFO.
 
-#: apps/dmx/main/dx_tabs.c:698
+#: apps/dmx/main/dx_tabs.c:702
 Dejar de identificar	Identifizieren beenden
 
-#: apps/dmx/main/dx_tabs.c:698
+#: apps/dmx/main/dx_tabs.c:702
 Identificar	Identifizieren
 
-#: apps/dmx/main/dx_tabs.c:700
+#: apps/dmx/main/dx_tabs.c:704
 Nombre	Name
 
-#: apps/dmx/main/dx_tabs.c:708
+#: apps/dmx/main/dx_tabs.c:712
 Tocá Buscar: la app pregunta en la línea quién habla RDM.	Suchen tippen: die App fragt auf der Leitung, wer RDM spricht.
 
-#: apps/dmx/main/dx_tabs.c:710
+#: apps/dmx/main/dx_tabs.c:714
  · %lu pedidos, %lu respuestas, %lu choques en la búsqueda, %lu respuestas malas	 · %lu Anfragen, %lu Antworten, %lu Kollisionen bei der Suche, %lu fehlerhafte Antworten
 
-#: apps/dmx/main/dx_tabs.c:726
+#: apps/dmx/main/dx_tabs.c:730
 Buscar aparatos	Geräte suchen
 
-#: apps/dmx/main/dx_tabs.c:731
+#: apps/dmx/main/dx_tabs.c:735
 RDM va por el mismo par que DMX: entre paquete y paquete la placa pregunta y el aparato contesta. La búsqueda encuentra a cada uno por su UID sin conocerlo (partiendo el espacio en dos cuando contestan varios a la vez); después se le puede cambiar la dirección y el nombre o pedirle que se muestre. Sólo los aparatos con RDM contestan, y un splitter DMX común corta la vuelta.	RDM läuft über dasselbe Paar wie DMX: zwischen den Paketen fragt die Platine und das Gerät antwortet. Die Suche findet jedes über seine UID, ohne sie zu kennen (der Bereich wird geteilt, wenn mehrere gleichzeitig antworten); danach lassen sich Adresse und Name ändern oder das Gerät bitten, sich zu zeigen. Nur Geräte mit RDM antworten, und ein einfacher DMX-Splitter unterbricht den Rückweg.
 
-#: apps/dmx/main/dx_tabs.c:769
+#: apps/dmx/main/dx_tabs.c:773
 LOS CONECTORES (DE FRENTE, LADO HEMBRA)	DIE STECKER (VON VORN, BUCHSE)
 
-#: apps/dmx/main/dx_tabs.c:771
+#: apps/dmx/main/dx_tabs.c:775
 XLR de 3 (lo común)	XLR 3-polig (üblich)
 
-#: apps/dmx/main/dx_tabs.c:772
+#: apps/dmx/main/dx_tabs.c:776
 XLR de 5 (el estándar)	XLR 5-polig (Standard)
 
-#: apps/dmx/main/dx_tabs.c:773
+#: apps/dmx/main/dx_tabs.c:777
 1: masa o malla. 2 (azul): D−, al B− del módulo. 3 (ámbar): D+, al A+. 4 y 5 no se usan.	1: Masse oder Schirm. 2 (blau): D−, an B− des Moduls. 3 (bernstein): D+, an A+. 4 und 5 bleiben frei.
 
-#: apps/dmx/main/dx_tabs.c:775
+#: apps/dmx/main/dx_tabs.c:779
 LO QUE HAY QUE SABER	GUT ZU WISSEN
 
-#: apps/dmx/main/dx_tabs.c:777
+#: apps/dmx/main/dx_tabs.c:781
 En cadena: consola → DMX IN del aparato 1 → su DMX OUT → aparato 2… El último lleva un terminador de 120 Ω entre los pines 2 y 3. Sin él, las luces parpadean o tiemblan.	In Kette: Pult → DMX IN von Gerät 1 → sein DMX OUT → Gerät 2… Das letzte bekommt einen 120-Ω-Abschluss zwischen Pin 2 und 3. Ohne ihn flackern oder zittern die Lichter.
 
-#: apps/dmx/main/dx_tabs.c:778
+#: apps/dmx/main/dx_tabs.c:782
 Nunca un cable en Y: para ramificar se usa un splitter DMX. Hasta 32 aparatos por tramo.	Nie ein Y-Kabel: zum Verzweigen einen DMX-Splitter. Bis zu 32 Geräte pro Strang.
 
-#: apps/dmx/main/dx_tabs.c:779
+#: apps/dmx/main/dx_tabs.c:783
 Cable de 110-120 Ω (cable DMX o de datos), no de micrófono: en tramos cortos anda igual, en tramos largos da errores.	110-120-Ω-Kabel (DMX- oder Datenkabel), kein Mikrofonkabel: kurz geht es trotzdem, lang gibt es Fehler.
 
-#: apps/dmx/main/dx_tabs.c:780
+#: apps/dmx/main/dx_tabs.c:784
 Algunos equipos baratos traen D+ y D− al revés. Si un aparato no responde, probá invertir los pines 2 y 3.	Manche billigen Geräte haben D+ und D− vertauscht. Reagiert ein Gerät nicht, Pin 2 und 3 tauschen.
 
-#: apps/dmx/main/dx_tabs.c:781
+#: apps/dmx/main/dx_tabs.c:785
 A 250 000 baudios, un módulo RS485 automático puede no llegar: si los paquetes salen malos, un módulo con pin DE (MAX3485, SP3485) resuelve.	Bei 250000 Baud kommt ein automatisches RS485-Modul eventuell nicht mit: wenn Pakete fehlerhaft sind, hilft ein Modul mit DE-Pin (MAX3485, SP3485).
 
-#: apps/dmx/main/dx_tabs.c:782
+#: apps/dmx/main/dx_tabs.c:786
 Cada aparato tiene una dirección de inicio y una cantidad de canales según su modo; dos aparatos con la misma dirección hacen lo mismo.	Jedes Gerät hat eine Startadresse und je nach Modus eine Kanalzahl; zwei Geräte mit derselben Adresse tun dasselbe.

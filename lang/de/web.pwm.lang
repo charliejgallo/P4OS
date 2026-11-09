@@ -38,152 +38,156 @@ Seno	Sinus
 #: apps/pwm/web/pwm.js:29
 Pasos	Schritte
 
-#: apps/pwm/web/pwm.js:117
+#: apps/pwm/web/pwm.js:120
 %s · %d bits	%s · %d Bit
 
-#: apps/pwm/web/pwm.js:119
+#: apps/pwm/web/pwm.js:122
 ciclo %s	Tastgrad %s
 
-#: apps/pwm/web/pwm.js:120
+#: apps/pwm/web/pwm.js:123
 %d de 255	%d von 255
 
-#: apps/pwm/web/pwm.js:225
-#: apps/pwm/web/pwm.js:492
+#: apps/pwm/web/pwm.js:228
+#: apps/pwm/web/pwm.js:510
 Generador PWM	PWM-Generator
 
-#: apps/pwm/web/pwm.js:237
+#: apps/pwm/web/pwm.js:240
 nombre del preset	Name des Presets
 
-#: apps/pwm/web/pwm.js:249
+#: apps/pwm/web/pwm.js:252
 No se pudo mandar: %s	Senden fehlgeschlagen: %s
 
-#: apps/pwm/web/pwm.js:252
+#: apps/pwm/web/pwm.js:255
 La app no está abierta en la placa: lo toma al abrirla	Die App ist auf der Platine nicht geöffnet: Sie übernimmt es beim Öffnen
 
-#: apps/pwm/web/pwm.js:279
+#: apps/pwm/web/pwm.js:291
 Borrar el canal	Kanal löschen
 
-#: apps/pwm/web/pwm.js:294
+#: apps/pwm/web/pwm.js:306
 Frecuencia	Frequenz
 
-#: apps/pwm/web/pwm.js:316
+#: apps/pwm/web/pwm.js:328
 Pin	Pin
 
-#: apps/pwm/web/pwm.js:324
+#: apps/pwm/web/pwm.js:336
 Patrón	Muster
 
-#: apps/pwm/web/pwm.js:325
+#: apps/pwm/web/pwm.js:337
 Período	Periode
 
-#: apps/pwm/web/pwm.js:326
+#: apps/pwm/web/pwm.js:338
 Desde	Von
 
-#: apps/pwm/web/pwm.js:327
+#: apps/pwm/web/pwm.js:339
 Hasta	Bis
 
-#: apps/pwm/web/pwm.js:329
+#: apps/pwm/web/pwm.js:341
 Pasos (%)	Schritte (%)
 
-#: apps/pwm/web/pwm.js:344
+#: apps/pwm/web/pwm.js:356
 Invertir la salida	Ausgang invertieren
 
-#: apps/pwm/web/pwm.js:345
+#: apps/pwm/web/pwm.js:357
 Mínimo	Minimum
 
-#: apps/pwm/web/pwm.js:345
+#: apps/pwm/web/pwm.js:357
 Máximo	Maximum
 
-#: apps/pwm/web/pwm.js:346
+#: apps/pwm/web/pwm.js:358
 Recorrido	Stellweg
 
-#: apps/pwm/web/pwm.js:347
+#: apps/pwm/web/pwm.js:359
 Gamma	Gamma
 
-#: apps/pwm/web/pwm.js:348
+#: apps/pwm/web/pwm.js:360
 Con 1 kΩ en serie y 1 µF a GND: de 0 a 3,3 V.	Mit 1 kΩ in Reihe und 1 µF gegen GND: 0 bis 3,3 V.
 
-#: apps/pwm/web/pwm.js:364
+#: apps/pwm/web/pwm.js:378
 sin pin	kein Pin
 
-#: apps/pwm/web/pwm.js:365
+#: apps/pwm/web/pwm.js:379
 GPIO%d · pata %d (otro canal)	GPIO%d · Pin %d (anderer Kanal)
 
-#: apps/pwm/web/pwm.js:365
+#: apps/pwm/web/pwm.js:379
 GPIO%d · pata %d	GPIO%d · Pin %d
 
-#: apps/pwm/web/pwm.js:370
+#: apps/pwm/web/pwm.js:382
+salida %d (otro canal)	Ausgang %d (anderer Kanal)
+
+#: apps/pwm/web/pwm.js:382
+salida %d	Ausgang %d
+
+#: apps/pwm/web/pwm.js:388
 real %s · %d bits	real %s · %d Bit
 
-#: apps/pwm/web/pwm.js:370
+#: apps/pwm/web/pwm.js:388
 apagado	aus
 
-#: apps/pwm/web/pwm.js:380
+#: apps/pwm/web/pwm.js:398
 entre %s y %s	zwischen %s und %s
 
-#: apps/pwm/web/pwm.js:421
+#: apps/pwm/web/pwm.js:439
 La app está abierta en la placa	Die App ist auf der Platine geöffnet
 
-#: apps/pwm/web/pwm.js:421
+#: apps/pwm/web/pwm.js:439
 La app no está abierta en la placa: las salidas están apagadas	Die App ist auf der Platine nicht geöffnet: Die Ausgänge sind aus
 
-#: apps/pwm/web/pwm.js:423
+#: apps/pwm/web/pwm.js:441
 Abierta en la placa	Auf der Platine geöffnet
 
-#: apps/pwm/web/pwm.js:423
+#: apps/pwm/web/pwm.js:441
 Abrir en la placa	Auf der Platine öffnen
 
-#: apps/pwm/web/pwm.js:424
+#: apps/pwm/web/pwm.js:442
 Apagar todo	Alles ausschalten
 
-#: apps/pwm/web/pwm.js:432
+#: apps/pwm/web/pwm.js:450
 + Canal	+ Kanal
 
-#: apps/pwm/web/pwm.js:438
+#: apps/pwm/web/pwm.js:456
 Ningún PWM encendido	Kein PWM an
 
-#: apps/pwm/web/pwm.js:439
+#: apps/pwm/web/pwm.js:457
 (%d de 3 frecuencias): el LEDC no da más de tres	(%d von 3 Frequenzen): Der LEDC kann nicht mehr als drei
 
-#: apps/pwm/web/pwm.js:439
+#: apps/pwm/web/pwm.js:457
 (%d de 3 frecuencias)	(%d von 3 Frequenzen)
 
-#: apps/pwm/web/pwm.js:450
+#: apps/pwm/web/pwm.js:468
 Guardar	Speichern
 
-#: apps/pwm/web/pwm.js:451
+#: apps/pwm/web/pwm.js:469
 Subir	Hochladen
 
-#: apps/pwm/web/pwm.js:454
+#: apps/pwm/web/pwm.js:472
 Cargar	Laden
 
-#: apps/pwm/web/pwm.js:455
+#: apps/pwm/web/pwm.js:473
 Bajar	Herunterladen
 
-#: apps/pwm/web/pwm.js:456
+#: apps/pwm/web/pwm.js:474
 Borrar	Löschen
 
-#: apps/pwm/web/pwm.js:457
+#: apps/pwm/web/pwm.js:475
 Todavía no hay presets.	Noch keine Presets.
 
-#: apps/pwm/web/pwm.js:464
+#: apps/pwm/web/pwm.js:482
 Guardado: %s	Gespeichert: %s
 
-#: apps/pwm/web/pwm.js:472
+#: apps/pwm/web/pwm.js:490
 el preset no tiene canales	das Preset hat keine Kanäle
 
-#: apps/pwm/web/pwm.js:474
+#: apps/pwm/web/pwm.js:492
 Cargado: %s	Geladen: %s
 
-#: apps/pwm/web/pwm.js:478
+#: apps/pwm/web/pwm.js:496
 ¿Borrar el preset %s?	Preset %s löschen?
 
-#: apps/pwm/web/pwm.js:494
+#: apps/pwm/web/pwm.js:512
 Los canales de la app PWM de la placa, en vivo. Las perillas giran como en la placa (Mayúsculas o la rueda: más fino). Los patrones se ven animados acá con su forma, no con la fase de la placa.	Die Kanäle der PWM-App der Platine, live. Die Drehknöpfe drehen sich wie auf der Platine (Umschalttaste oder Mausrad: feiner). Muster werden hier mit ihrer Form animiert, nicht mit der Phase der Platine.
 
-#: apps/pwm/web/pwm.js:496
+#: apps/pwm/web/pwm.js:514
 Presets	Presets
 
-#: apps/pwm/web/pwm.js:498
+#: apps/pwm/web/pwm.js:516
 En /pwm de la tarjeta, una línea por canal. Al cargar uno, los canales encendidos se encienden en la placa.	In /pwm auf der Karte, eine Zeile pro Kanal. Beim Laden werden die eingeschalteten Kanäle auf der Platine eingeschaltet.
-salida %d (otro canal)	Ausgang %d (anderer Kanal)
-salida %d	Ausgang %d

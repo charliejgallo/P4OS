@@ -5,8 +5,8 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/lua/main/lua_app.c:894
+#: apps/lua/main/lua_app.c:903
 Tocá para cargarlo de nuevo	Tap to load it again
 
-#: apps/lua/main/lua_app.c:1380
+#: apps/lua/main/lua_app.c:1401
 No hay guiones en /lua de la tarjeta	No scripts in /lua on the card

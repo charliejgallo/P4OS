@@ -11,99 +11,99 @@ Dibujo %s	Zeichnung %s
 #: apps/dibujo/web/dibujo.js:178
 Cargando…	Lädt…
 
-#: apps/dibujo/web/dibujo.js:190
+#: apps/dibujo/web/dibujo.js:188
 no se lee	nicht lesbar
 
-#: apps/dibujo/web/dibujo.js:192
+#: apps/dibujo/web/dibujo.js:190
 %d × %d · %d capa	%d × %d · %d Ebene
 
-#: apps/dibujo/web/dibujo.js:192
+#: apps/dibujo/web/dibujo.js:190
 %d × %d · %d capas	%d × %d · %d Ebenen
 
-#: apps/dibujo/web/dibujo.js:199
+#: apps/dibujo/web/dibujo.js:197
 Armando el dibujo…	Setze die Zeichnung zusammen…
 
-#: apps/dibujo/web/dibujo.js:203
+#: apps/dibujo/web/dibujo.js:201
 %s no se lee	%s ist nicht lesbar
 
-#: apps/dibujo/web/dibujo.js:218
+#: apps/dibujo/web/dibujo.js:216
 Capa	Ebene
 
-#: apps/dibujo/web/dibujo.js:219
+#: apps/dibujo/web/dibujo.js:217
 oculta en la placa	auf der Platine ausgeblendet
 
-#: apps/dibujo/web/dibujo.js:224
+#: apps/dibujo/web/dibujo.js:222
 %d × %d px · fondo %s	%d × %d px · Hintergrund %s
 
-#: apps/dibujo/web/dibujo.js:224
+#: apps/dibujo/web/dibujo.js:222
 %d × %d px · fondo transparente	%d × %d px · transparenter Hintergrund
 
-#: apps/dibujo/web/dibujo.js:226
+#: apps/dibujo/web/dibujo.js:224
 Bajar PNG	PNG herunterladen
 
-#: apps/dibujo/web/dibujo.js:227
+#: apps/dibujo/web/dibujo.js:225
 Bajar .dib	.dib herunterladen
 
-#: apps/dibujo/web/dibujo.js:228
+#: apps/dibujo/web/dibujo.js:226
 Abrir la app	App öffnen
 
-#: apps/dibujo/web/dibujo.js:229
+#: apps/dibujo/web/dibujo.js:227
 Capas (destildá una para sacarla del PNG; el archivo no cambia)	Ebenen (eine abwählen, um sie aus dem PNG zu lassen; die Datei ändert sich nicht)
 
-#: apps/dibujo/web/dibujo.js:231
+#: apps/dibujo/web/dibujo.js:229
 ¿Borrar %s de la tarjeta? No se puede deshacer.	%s von der Karte löschen? Das lässt sich nicht rückgängig machen.
 
-#: apps/dibujo/web/dibujo.js:232
+#: apps/dibujo/web/dibujo.js:230
 Borrado	Gelöscht
 
-#: apps/dibujo/web/dibujo.js:233
+#: apps/dibujo/web/dibujo.js:231
 Borrar de la tarjeta	Von der Karte löschen
 
-#: apps/dibujo/web/dibujo.js:241
+#: apps/dibujo/web/dibujo.js:239
 Bajar	Herunterladen
 
-#: apps/dibujo/web/dibujo.js:243
+#: apps/dibujo/web/dibujo.js:241
 ¿Borrar %s?	%s löschen?
 
-#: apps/dibujo/web/dibujo.js:245
+#: apps/dibujo/web/dibujo.js:243
 Borrar	Löschen
 
-#: apps/dibujo/web/dibujo.js:260
+#: apps/dibujo/web/dibujo.js:258
 Todavía no hay dibujos. Se hacen en la placa, con la app Dibujo.	Noch keine Zeichnungen. Sie entstehen auf der Platine, mit der App Zeichnen.
 
-#: apps/dibujo/web/dibujo.js:262
+#: apps/dibujo/web/dibujo.js:260
 Ninguno todavía: en la app, Menú → Exportar PNG.	Noch keine: in der App, Menü → PNG exportieren.
 
-#: apps/dibujo/web/dibujo.js:264
+#: apps/dibujo/web/dibujo.js:262
 No hay imágenes subidas.	Keine hochgeladenen Bilder.
 
-#: apps/dibujo/web/dibujo.js:273
+#: apps/dibujo/web/dibujo.js:271
 Preparando %s…	Bereite %s vor…
 
-#: apps/dibujo/web/dibujo.js:276
+#: apps/dibujo/web/dibujo.js:274
 Subiendo %s: %d	Lade %s hoch: %d
 
-#: apps/dibujo/web/dibujo.js:277
+#: apps/dibujo/web/dibujo.js:275
 %s (%d × %d) subida	%s (%d × %d) hochgeladen
 
-#: apps/dibujo/web/dibujo.js:284
-#: apps/dibujo/web/dibujo.js:297
+#: apps/dibujo/web/dibujo.js:282
+#: apps/dibujo/web/dibujo.js:295
 Dibujo	Zeichnen
 
-#: apps/dibujo/web/dibujo.js:285
+#: apps/dibujo/web/dibujo.js:283
 Dibujos	Zeichnungen
 
-#: apps/dibujo/web/dibujo.js:287
+#: apps/dibujo/web/dibujo.js:285
 Exportados	Exportiert
 
-#: apps/dibujo/web/dibujo.js:288
+#: apps/dibujo/web/dibujo.js:286
 Imágenes para importar	Bilder zum Importieren
 
-#: apps/dibujo/web/dibujo.js:289
+#: apps/dibujo/web/dibujo.js:287
 En la app: Menú → Importar una imagen. Van a una capa nueva, abajo de todo, para calcar o pintar encima.	In der App: Menü → Bild importieren. Sie kommen auf eine neue Ebene ganz unten, zum Abpausen oder Übermalen.
 
-#: apps/dibujo/web/dibujo.js:291
+#: apps/dibujo/web/dibujo.js:289
 Subir imágenes	Bilder hochladen
 
-#: apps/dibujo/web/dibujo.js:292
+#: apps/dibujo/web/dibujo.js:290
 Los dibujos están en /dibujo de la tarjeta, con sus capas (.dib). El PNG que se baja acá lo arma el navegador, igual al que exporta la app.	Die Zeichnungen liegen in /dibujo auf der Karte, mit ihren Ebenen (.dib). Das hier heruntergeladene PNG erstellt der Browser, genau wie das, das die App exportiert.

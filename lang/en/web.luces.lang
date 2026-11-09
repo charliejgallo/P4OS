@@ -5,314 +5,356 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/luces/web/luces.js:117
-#: apps/luces/web/luces.js:519
-Luces	Lights
-
-#: apps/luces/web/luces.js:124
-La app Luces no está abierta en la placa (%s)	The Lights app is not open on the board (%s)
-
-#: apps/luces/web/luces.js:127
-Buscando la app…	Looking for the app…
-
-#: apps/luces/web/luces.js:128
-#: apps/luces/web/luces.js:481
-Abrir salida	Open output
-
-#: apps/luces/web/luces.js:150
-Posición (pan y tilt)	Position (pan and tilt)
-
-#: apps/luces/web/luces.js:151
-Al centro	Centre
-
-#: apps/luces/web/luces.js:157
-Todos	All
-
-#: apps/luces/web/luces.js:158
-Ninguno	None
-
-#: apps/luces/web/luces.js:159
-Pares	Odd
-
-#: apps/luces/web/luces.js:160
-Impares	Even
-
-#: apps/luces/web/luces.js:165
-Intensidad	Intensity
-
-#: apps/luces/web/luces.js:167
-Color	Colour
-
-#: apps/luces/web/luces.js:171
-Otro	Other
-
-#: apps/luces/web/luces.js:173
-Efectos y pruebas	Effects and tests
-
-#: apps/luces/web/luces.js:174
-Velocidad	Speed
-
-#: apps/luces/web/luces.js:175
-El efecto corre sobre los aparatos elegidos al tocarlo (todos, si no hay ninguno elegido), encima de la escena.	The effect runs on the fixtures selected when you tap it (all of them if none is), on top of the scene.
-
-#: apps/luces/web/luces.js:176
-Pruebas: Recorrido prende un aparato por vez en blanco (cuál es cuál; uno fuera de turno tiene la dirección mal). Colores pasa todos por rojo, verde, azul y blanco (uno de otro color tiene los canales en otro orden que su tipo). Respirar sube y baja la intensidad despacio (escalones o parpadeo abajo son la curva del aparato).	Tests: Walk lights one fixture at a time in white (which is which; one lit out of turn has a wrong address). Colours takes them all through red, green, blue and white (one in another colour has its channels in another order than its type). Breathe raises and lowers the intensity slowly (steps or flicker at the bottom are the fixture's curve).
-
-#: apps/luces/web/luces.js:213
-#: apps/luces/web/luces.js:470
-Andar	Run
-
-#: apps/luces/web/luces.js:216
-Hacen falta al menos dos escenas distintas: con una sola, la secuencia llama siempre a la misma. "Escenas de muestra" agrega cinco.	It takes at least two different scenes: with only one, the chase calls the same one over and over. "Sample scenes" adds five.
-
-#: apps/luces/web/luces.js:220
-Guardar lo que hay	Store what is on
-
-#: apps/luces/web/luces.js:221
-Escenas de muestra	Sample scenes
-
-#: apps/luces/web/luces.js:222
-Fundido de las escenas nuevas (cada una guarda el suyo)	Fade of new scenes (each keeps its own)
-
-#: apps/luces/web/luces.js:224
-Secuencia: una escena tras otra, al tiempo	Chase: one scene after another, on the beat
-
-#: apps/luces/web/luces.js:229
-Pasa por todas las escenas en orden, una por golpe. Tap: tocalo al ritmo de la música, tres o cuatro veces.	Goes through every scene in order, one per beat. Tap: tap it to the music, three or four times.
-
-#: apps/luces/web/luces.js:244
-#: apps/luces/web/luces.js:257
-Nombre de la escena	Scene name
-
-#: apps/luces/web/luces.js:244
-Escena %d	Scene %d
-
-#: apps/luces/web/luces.js:250
-%s: 1 volver a grabar con lo que hay ahora, 2 cambiar el nombre, 3 borrar, 4 su fundido	%s: 1 record again with what is on now, 2 rename, 3 delete, 4 its fade
-
-#: apps/luces/web/luces.js:253
-Fundido de %s al llamarla, en segundos	Fade of %s when called, in seconds
-
-#: apps/luces/web/luces.js:259
-¿Borrar la escena %s?	Delete the scene %s?
-
-#: apps/luces/web/luces.js:268
-PAR de 8 canales	8-channel PAR
-
-#: apps/luces/web/luces.js:271
-Agregar aparatos	Add fixtures
-
-#: apps/luces/web/luces.js:273
-#: apps/luces/web/luces.js:327
-Tipo	Type
-
-#: apps/luces/web/luces.js:274
-Cuántos	How many
-
-#: apps/luces/web/luces.js:275
-#: apps/luces/web/luces.js:327
-Universo	Universe
-
-#: apps/luces/web/luces.js:276
-Agregar	Add
-
-#: apps/luces/web/luces.js:277
-Van desde la primera dirección libre, uno tras otro.	They go from the first free address, one after another.
-
-#: apps/luces/web/luces.js:279
-Tipos de aparato	Fixture types
-
-#: apps/luces/web/luces.js:280
-Un tipo nuevo	A new type
-
-#: apps/luces/web/luces.js:281
-#: apps/luces/web/luces.js:327
-Nombre	Name
-
-#: apps/luces/web/luces.js:281
-Canales, en orden	Channels, in order
-
-#: apps/luces/web/luces.js:282
-Guardar en la tarjeta	Save on the card
-
-#: apps/luces/web/luces.js:283
-Una palabra por canal, como dice el manual del aparato: %s; o un número, para un canal fijo en ese valor (un modo, una macro en 0).	One word per channel, as the fixture's manual says: %s; or a number, for a channel held at that value (a mode, a macro at 0). The words stay in Spanish.
-
-#: apps/luces/web/luces.js:287
-Falta el nombre o los canales	The name or the channels are missing
-
-#: apps/luces/web/luces.js:289
-No entiendo: %s	Not understood: %s
-
-#: apps/luces/web/luces.js:297
-Guardado en %s	Saved in %s
-
-#: apps/luces/web/luces.js:319
-Se pisa con otro aparato o se pasa del canal 512	Overlaps another fixture or goes past channel 512
-
-#: apps/luces/web/luces.js:321
-Sacar del patch	Remove from the patch
-
-#: apps/luces/web/luces.js:322
-¿Sacar %s del patch?	Remove %s from the patch?
-
-#: apps/luces/web/luces.js:325
-%d aparatos, %d canales de 512	%d fixtures, %d channels of 512
-
-#: apps/luces/web/luces.js:327
-Dirección	Address
-
-#: apps/luces/web/luces.js:327
-Canales	Channels
-
-#: apps/luces/web/luces.js:329
-incluido	built in
-
-#: apps/luces/web/luces.js:336
-vacío: a toda la red	empty: the whole network
-
-#: apps/luces/web/luces.js:352
-Puerto	Port
-
-#: apps/luces/web/luces.js:355
-Mandar por la red	Send over the network
-
-#: apps/luces/web/luces.js:356
-IP del nodo	Node IP
-
-#: apps/luces/web/luces.js:357
-Universo Art-Net del U1	Art-Net universe of U1
-
-#: apps/luces/web/luces.js:359
-Cada universo con algún aparato sale 40 veces por segundo como Art-Net (UDP 6454). U1 lleva el universo elegido, U2 el siguiente, y así. El U1 también sale por RS485.	Every universe with a fixture goes out 40 times a second as Art-Net (UDP 6454). U1 carries the chosen universe, U2 the next, and so on. U1 also goes out on RS485.
-
-#: apps/luces/web/luces.js:360
-Los 512 canales como salen	The 512 channels as they go out
-
-#: apps/luces/web/luces.js:361
-Oscuros: sin aparato. Tocá un canal para ver qué es.	Dark: no fixture. Tap a channel to see what it is.
-
-#: apps/luces/web/luces.js:389
-Canal %d: %d	Channel %d: %d
-
-#: apps/luces/web/luces.js:389
-fijo	fixed
-
-#: apps/luces/web/luces.js:389
-sin aparato	no fixture
-
-#: apps/luces/web/luces.js:391
-Saliendo por %s: %s paquetes/s, %d mandados.	Sending on %s: %s packets/s, %d sent.
-
-#: apps/luces/web/luces.js:392
-Salida cerrada (%s).	Output closed (%s).
-
-#: apps/luces/web/luces.js:401
-Apagado.	Off.
-
-#: apps/luces/web/luces.js:401
-%s paquetes mandados a %s	%s packets sent to %s
-
-#: apps/luces/web/luces.js:410
-Elegí aparatos antes de guardar un grupo	Select fixtures before storing a group
-
-#: apps/luces/web/luces.js:411
-Nombre del grupo (con los aparatos elegidos)	Group name (with the selected fixtures)
-
-#: apps/luces/web/luces.js:411
-Grupo %d	Group %d
-
-#: apps/luces/web/luces.js:420
-¿Borrar el grupo %s? Los aparatos quedan.	Delete the group %s? The fixtures stay.
-
-#: apps/luces/web/luces.js:421
-+ Grupo	+ Group
-
-#: apps/luces/web/luces.js:444
-%d elegidos	%d selected
-
-#: apps/luces/web/luces.js:444
-ninguno elegido: todos	none selected: all
-
-#: apps/luces/web/luces.js:462
-corte	cut
-
-#: apps/luces/web/luces.js:463
-Grabar, renombrar o borrar	Record, rename or delete
-
-#: apps/luces/web/luces.js:464
-Todavía no hay escenas. Armá un look en Escenario y guardalo acá.	No scenes yet. Build a look in Stage and store it here.
-
-#: apps/luces/web/luces.js:470
-Parar	Stop
-
-#: apps/luces/web/luces.js:479
-Saliendo por %s · %s paquetes/s	Sending on %s · %s packets/s
-
-#: apps/luces/web/luces.js:480
-Salida cerrada (%s)	Output closed (%s)
-
-#: apps/luces/web/luces.js:481
-Cerrar salida	Close output
-
-#: apps/luces/web/luces.js:501
-La app Luces no está abierta en la placa: abrila ahí (o desde Apps) y esta página la maneja.	The Lights app is not open on the board: open it there (or from Apps) and this page drives it.
-
-#: (kept from the previous catalog: strings the extractor cannot see)
-Fundido al llamar una escena	Fade when a scene is called
-
-%s: 1 volver a grabar con lo que hay ahora, 2 cambiar el nombre, 3 borrar	%s: 1 record again with what is on now, 2 rename, 3 delete
-
-Escenario	Stage
-
-Escenas	Scenes
-
-Salida	Output
-
+#: apps/luces/web/luces.js:25
 Rojo	Red
 
+#: apps/luces/web/luces.js:25
 Naranja	Orange
 
+#: apps/luces/web/luces.js:25
 Ámbar	Amber
 
+#: apps/luces/web/luces.js:25
 Amarillo	Yellow
 
+#: apps/luces/web/luces.js:26
 Verde	Green
 
+#: apps/luces/web/luces.js:26
 Cian	Cyan
 
+#: apps/luces/web/luces.js:26
 Azul	Blue
 
+#: apps/luces/web/luces.js:26
 Violeta	Violet
 
+#: apps/luces/web/luces.js:27
+Magenta	Magenta
+
+#: apps/luces/web/luces.js:27
 Cálido	Warm
 
+#: apps/luces/web/luces.js:27
 Blanco	White
 
+#: apps/luces/web/luces.js:28
 Sin strobe	No strobe
 
+#: apps/luces/web/luces.js:28
 Lento	Slow
 
+#: apps/luces/web/luces.js:28
 Medio	Medium
 
+#: apps/luces/web/luces.js:28
 Rápido	Fast
 
+#: apps/luces/web/luces.js:29
+#: apps/luces/web/luces.js:159
+Ninguno	None
+
+#: apps/luces/web/luces.js:29
 Arcoíris	Rainbow
 
+#: apps/luces/web/luces.js:29
 Ola	Wave
 
+#: apps/luces/web/luces.js:29
 Destellos	Sparkle
 
-Corte	Cut
-
-Mitad	Half
-
-Todo fundido	All fade
-
-0,5 s	0.5 s
-
+#: apps/luces/web/luces.js:29
 Recorrido	Walk
 
+#: apps/luces/web/luces.js:29
 Colores	Colours
 
+#: apps/luces/web/luces.js:29
 Respirar	Breathe
+
+#: apps/luces/web/luces.js:30
+#: apps/luces/web/luces.js:31
+Corte	Cut
+
+#: apps/luces/web/luces.js:30
+0,5 s	0.5 s
+
+#: apps/luces/web/luces.js:30
+1 s	1 s
+
+#: apps/luces/web/luces.js:30
+2 s	2 s
+
+#: apps/luces/web/luces.js:30
+3 s	3 s
+
+#: apps/luces/web/luces.js:30
+5 s	5 s
+
+#: apps/luces/web/luces.js:31
+Mitad	Half
+
+#: apps/luces/web/luces.js:31
+Todo fundido	All fade
+
+#: apps/luces/web/luces.js:118
+#: apps/luces/web/luces.js:520
+Luces	Lights
+
+#: apps/luces/web/luces.js:125
+La app Luces no está abierta en la placa (%s)	The Lights app is not open on the board (%s)
+
+#: apps/luces/web/luces.js:128
+Buscando la app…	Looking for the app…
+
+#: apps/luces/web/luces.js:129
+#: apps/luces/web/luces.js:482
+Abrir salida	Open output
+
+#: apps/luces/web/luces.js:151
+Posición (pan y tilt)	Position (pan and tilt)
+
+#: apps/luces/web/luces.js:152
+Al centro	Centre
+
+#: apps/luces/web/luces.js:158
+Todos	All
+
+#: apps/luces/web/luces.js:160
+Pares	Odd
+
+#: apps/luces/web/luces.js:161
+Impares	Even
+
+#: apps/luces/web/luces.js:166
+Intensidad	Intensity
+
+#: apps/luces/web/luces.js:168
+Color	Colour
+
+#: apps/luces/web/luces.js:172
+Otro	Other
+
+#: apps/luces/web/luces.js:174
+Efectos y pruebas	Effects and tests
+
+#: apps/luces/web/luces.js:175
+Velocidad	Speed
+
+#: apps/luces/web/luces.js:176
+El efecto corre sobre los aparatos elegidos al tocarlo (todos, si no hay ninguno elegido), encima de la escena.	The effect runs on the fixtures selected when you tap it (all of them if none is), on top of the scene.
+
+#: apps/luces/web/luces.js:177
+Pruebas: Recorrido prende un aparato por vez en blanco (cuál es cuál; uno fuera de turno tiene la dirección mal). Colores pasa todos por rojo, verde, azul y blanco (uno de otro color tiene los canales en otro orden que su tipo). Respirar sube y baja la intensidad despacio (escalones o parpadeo abajo son la curva del aparato).	Tests: Walk lights one fixture at a time in white (which is which; one lit out of turn has a wrong address). Colours takes them all through red, green, blue and white (one in another colour has its channels in another order than its type). Breathe raises and lowers the intensity slowly (steps or flicker at the bottom are the fixture's curve).
+
+#: apps/luces/web/luces.js:214
+#: apps/luces/web/luces.js:471
+Andar	Run
+
+#: apps/luces/web/luces.js:217
+Hacen falta al menos dos escenas distintas: con una sola, la secuencia llama siempre a la misma. "Escenas de muestra" agrega cinco.	It takes at least two different scenes: with only one, the chase calls the same one over and over. "Sample scenes" adds five.
+
+#: apps/luces/web/luces.js:221
+Guardar lo que hay	Store what is on
+
+#: apps/luces/web/luces.js:222
+Escenas de muestra	Sample scenes
+
+#: apps/luces/web/luces.js:223
+Fundido de las escenas nuevas (cada una guarda el suyo)	Fade of new scenes (each keeps its own)
+
+#: apps/luces/web/luces.js:225
+Secuencia: una escena tras otra, al tiempo	Chase: one scene after another, on the beat
+
+#: apps/luces/web/luces.js:230
+Pasa por todas las escenas en orden, una por golpe. Tap: tocalo al ritmo de la música, tres o cuatro veces.	Goes through every scene in order, one per beat. Tap: tap it to the music, three or four times.
+
+#: apps/luces/web/luces.js:245
+#: apps/luces/web/luces.js:258
+Nombre de la escena	Scene name
+
+#: apps/luces/web/luces.js:245
+Escena %d	Scene %d
+
+#: apps/luces/web/luces.js:251
+%s: 1 volver a grabar con lo que hay ahora, 2 cambiar el nombre, 3 borrar, 4 su fundido	%s: 1 record again with what is on now, 2 rename, 3 delete, 4 its fade
+
+#: apps/luces/web/luces.js:254
+Fundido de %s al llamarla, en segundos	Fade of %s when called, in seconds
+
+#: apps/luces/web/luces.js:260
+¿Borrar la escena %s?	Delete the scene %s?
+
+#: apps/luces/web/luces.js:269
+PAR de 8 canales	8-channel PAR
+
+#: apps/luces/web/luces.js:272
+Agregar aparatos	Add fixtures
+
+#: apps/luces/web/luces.js:274
+#: apps/luces/web/luces.js:328
+Tipo	Type
+
+#: apps/luces/web/luces.js:275
+Cuántos	How many
+
+#: apps/luces/web/luces.js:276
+#: apps/luces/web/luces.js:328
+Universo	Universe
+
+#: apps/luces/web/luces.js:277
+Agregar	Add
+
+#: apps/luces/web/luces.js:278
+Van desde la primera dirección libre, uno tras otro.	They go from the first free address, one after another.
+
+#: apps/luces/web/luces.js:280
+Tipos de aparato	Fixture types
+
+#: apps/luces/web/luces.js:281
+Un tipo nuevo	A new type
+
+#: apps/luces/web/luces.js:282
+#: apps/luces/web/luces.js:328
+Nombre	Name
+
+#: apps/luces/web/luces.js:282
+Canales, en orden	Channels, in order
+
+#: apps/luces/web/luces.js:283
+Guardar en la tarjeta	Save on the card
+
+#: apps/luces/web/luces.js:284
+Una palabra por canal, como dice el manual del aparato: %s; o un número, para un canal fijo en ese valor (un modo, una macro en 0).	One word per channel, as the fixture's manual says: %s; or a number, for a channel held at that value (a mode, a macro at 0). The words stay in Spanish.
+
+#: apps/luces/web/luces.js:288
+Falta el nombre o los canales	The name or the channels are missing
+
+#: apps/luces/web/luces.js:290
+No entiendo: %s	Not understood: %s
+
+#: apps/luces/web/luces.js:298
+Guardado en %s	Saved in %s
+
+#: apps/luces/web/luces.js:320
+Se pisa con otro aparato o se pasa del canal 512	Overlaps another fixture or goes past channel 512
+
+#: apps/luces/web/luces.js:322
+Sacar del patch	Remove from the patch
+
+#: apps/luces/web/luces.js:323
+¿Sacar %s del patch?	Remove %s from the patch?
+
+#: apps/luces/web/luces.js:326
+%d aparatos, %d canales de 512	%d fixtures, %d channels of 512
+
+#: apps/luces/web/luces.js:328
+Dirección	Address
+
+#: apps/luces/web/luces.js:328
+Canales	Channels
+
+#: apps/luces/web/luces.js:330
+incluido	built in
+
+#: apps/luces/web/luces.js:337
+vacío: a toda la red	empty: the whole network
+
+#: apps/luces/web/luces.js:353
+Puerto	Port
+
+#: apps/luces/web/luces.js:356
+Mandar por la red	Send over the network
+
+#: apps/luces/web/luces.js:357
+IP del nodo	Node IP
+
+#: apps/luces/web/luces.js:358
+Universo Art-Net del U1	Art-Net universe of U1
+
+#: apps/luces/web/luces.js:360
+Cada universo con algún aparato sale 40 veces por segundo como Art-Net (UDP 6454). U1 lleva el universo elegido, U2 el siguiente, y así. El U1 también sale por RS485.	Every universe with a fixture goes out 40 times a second as Art-Net (UDP 6454). U1 carries the chosen universe, U2 the next, and so on. U1 also goes out on RS485.
+
+#: apps/luces/web/luces.js:361
+Los 512 canales como salen	The 512 channels as they go out
+
+#: apps/luces/web/luces.js:362
+Oscuros: sin aparato. Tocá un canal para ver qué es.	Dark: no fixture. Tap a channel to see what it is.
+
+#: apps/luces/web/luces.js:390
+Canal %d: %d	Channel %d: %d
+
+#: apps/luces/web/luces.js:390
+fijo	fixed
+
+#: apps/luces/web/luces.js:390
+sin aparato	no fixture
+
+#: apps/luces/web/luces.js:392
+Saliendo por %s: %s paquetes/s, %d mandados.	Sending on %s: %s packets/s, %d sent.
+
+#: apps/luces/web/luces.js:393
+Salida cerrada (%s).	Output closed (%s).
+
+#: apps/luces/web/luces.js:402
+Apagado.	Off.
+
+#: apps/luces/web/luces.js:402
+%s paquetes mandados a %s	%s packets sent to %s
+
+#: apps/luces/web/luces.js:411
+Elegí aparatos antes de guardar un grupo	Select fixtures before storing a group
+
+#: apps/luces/web/luces.js:412
+Nombre del grupo (con los aparatos elegidos)	Group name (with the selected fixtures)
+
+#: apps/luces/web/luces.js:412
+Grupo %d	Group %d
+
+#: apps/luces/web/luces.js:421
+¿Borrar el grupo %s? Los aparatos quedan.	Delete the group %s? The fixtures stay.
+
+#: apps/luces/web/luces.js:422
++ Grupo	+ Group
+
+#: apps/luces/web/luces.js:445
+%d elegidos	%d selected
+
+#: apps/luces/web/luces.js:445
+ninguno elegido: todos	none selected: all
+
+#: apps/luces/web/luces.js:463
+corte	cut
+
+#: apps/luces/web/luces.js:464
+Grabar, renombrar o borrar	Record, rename or delete
+
+#: apps/luces/web/luces.js:465
+Todavía no hay escenas. Armá un look en Escenario y guardalo acá.	No scenes yet. Build a look in Stage and store it here.
+
+#: apps/luces/web/luces.js:471
+Parar	Stop
+
+#: apps/luces/web/luces.js:480
+Saliendo por %s · %s paquetes/s	Sending on %s · %s packets/s
+
+#: apps/luces/web/luces.js:481
+Salida cerrada (%s)	Output closed (%s)
+
+#: apps/luces/web/luces.js:482
+Cerrar salida	Close output
+
+#: apps/luces/web/luces.js:502
+La app Luces no está abierta en la placa: abrila ahí (o desde Apps) y esta página la maneja.	The Lights app is not open on the board: open it there (or from Apps) and this page drives it.
+
+#: apps/luces/web/luces.js:510
+Escenario	Stage
+
+#: apps/luces/web/luces.js:510
+Escenas	Scenes
+
+#: apps/luces/web/luces.js:510
+Patch	Patch
+
+#: apps/luces/web/luces.js:510
+Salida	Output

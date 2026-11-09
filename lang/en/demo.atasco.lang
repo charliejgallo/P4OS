@@ -5,50 +5,50 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/atasco/main/atasco.c:315
+#: apps/atasco/main/atasco.c:339
 Nivel %d	Level %d
 
-#: apps/atasco/main/atasco.c:318
+#: apps/atasco/main/atasco.c:342
 %d movimiento	%d move
 
-#: apps/atasco/main/atasco.c:318
+#: apps/atasco/main/atasco.c:342
 %d movimientos	%d moves
 
-#: apps/atasco/main/atasco.c:385
+#: apps/atasco/main/atasco.c:437
 %d de %d completados	%d of %d completed
 
-#: apps/atasco/main/atasco.c:388
+#: apps/atasco/main/atasco.c:440
 Jugar de nuevo	Play again
 
-#: apps/atasco/main/atasco.c:390
+#: apps/atasco/main/atasco.c:442
 Jugar nivel %d	Play level %d
 
-#: apps/atasco/main/atasco.c:435
+#: apps/atasco/main/atasco.c:499
 Estacionamiento despejado	Car park cleared
 
-#: apps/atasco/main/atasco.c:436
+#: apps/atasco/main/atasco.c:500
 Auto afuera	Car is out
 
-#: apps/atasco/main/atasco.c:442
+#: apps/atasco/main/atasco.c:506
 Nivel %d completado en %d movimiento	Level %d done in %d move
 
-#: apps/atasco/main/atasco.c:443
+#: apps/atasco/main/atasco.c:507
 Nivel %d completado en %d movimientos	Level %d done in %d moves
 
-#: apps/atasco/main/atasco.c:729
+#: apps/atasco/main/atasco.c:855
 Atasco	Traffic Jam
 
-#: apps/atasco/main/atasco.c:732
+#: apps/atasco/main/atasco.c:858
 Sacá el auto rojo	Get the red car out
 
-#: apps/atasco/main/atasco.c:912
+#: apps/atasco/main/atasco.c:1047
 Deslizá los autos para sacar al rojo	Slide the cars to free the red one
 
-#: apps/atasco/main/atasco.c:918
+#: apps/atasco/main/atasco.c:1053
 Deshacer	Undo
 
-#: apps/atasco/main/atasco.c:959
+#: apps/atasco/main/atasco.c:1094
 Menú	Menu
 
-#: apps/atasco/main/atasco.c:962
+#: apps/atasco/main/atasco.c:1097
 Siguiente	Next

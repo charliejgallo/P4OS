@@ -307,51 +307,44 @@ Dirección IP del nodo Art-Net	IP-Adresse des Art-Net-Knotens
 #: apps/luces/main/lz_tabs.c:594
 PUERTO	PORT
 
-#: apps/luces/main/lz_tabs.c:620
+#: apps/luces/main/lz_tabs.c:621
 Mandar por la red	Über das Netz senden
 
-#: apps/luces/main/lz_tabs.c:627
+#: apps/luces/main/lz_tabs.c:630
 A toda la red	An das ganze Netz
 
-#: apps/luces/main/lz_tabs.c:629
+#: apps/luces/main/lz_tabs.c:632
 A un nodo…	An einen Knoten…
 
-#: apps/luces/main/lz_tabs.c:632
+#: apps/luces/main/lz_tabs.c:635
 U1 = universo %u	U1 = Universum %u
 
-#: apps/luces/main/lz_tabs.c:635
+#: apps/luces/main/lz_tabs.c:638
 Cada universo con algún aparato sale 40 veces por segundo como Art-Net (UDP 6454): a toda la red, o a la IP de un nodo. U1 lleva el universo elegido, U2 el siguiente, y así. Para un nodo Art-Net a DMX, consolas y programas de la PC.	Jedes Universum mit einem Gerät geht 40-mal pro Sekunde als Art-Net hinaus (UDP 6454): an das ganze Netz oder an die IP eines Knotens. U1 trägt das gewählte Universum, U2 das nächste und so weiter. Für einen Art-Net-zu-DMX-Knoten, Konsolen und PC-Programme.
 
-#: apps/luces/main/lz_tabs.c:637
+#: apps/luces/main/lz_tabs.c:640
 LOS 512 CANALES COMO SALEN (OSCUROS: SIN APARATO)	DIE 512 KANÄLE, WIE SIE HINAUSGEHEN (DUNKEL: KEIN GERÄT)
 
-#: apps/luces/main/lz_tabs.c:648
+#: apps/luces/main/lz_tabs.c:651
 La salida arranca cerrada cada vez que se abre la app: ▶ arriba la abre. Sigue saliendo con la app en segundo plano. 40 paquetes por segundo, 512 canales, BREAK de 176 µs. Para ver qué llega del otro lado, la app DMX en Analizador.	Der Ausgang startet bei jedem Öffnen der App geschlossen: ▶ oben öffnet ihn. Er läuft im Hintergrund weiter. 40 Pakete pro Sekunde, 512 Kanäle, BREAK von 176 µs. Was am anderen Ende ankommt, zeigt die DMX-App im Analysator.
 
-#: apps/luces/main/lz_tabs.c:659
+#: apps/luces/main/lz_tabs.c:662
 Canal %d: %u	Kanal %d: %u
 
-#: apps/luces/main/lz_tabs.c:662
+#: apps/luces/main/lz_tabs.c:665
 fijo	fest
 
-#: apps/luces/main/lz_tabs.c:663
+#: apps/luces/main/lz_tabs.c:666
 sin aparato	kein Gerät
 
-#: apps/luces/main/lz_tabs.c:665
+#: apps/luces/main/lz_tabs.c:668
 \nSaliendo por %s: %.1f paquetes/s, %lu mandados.	\nSendet über %s: %.1f Pakete/s, %lu gesendet.
 
-#: apps/luces/main/lz_tabs.c:666
+#: apps/luces/main/lz_tabs.c:669
 \nSalida cerrada (%s).	\nAusgang geschlossen (%s).
 
-#: apps/luces/main/lz_tabs.c:669
+#: apps/luces/main/lz_tabs.c:672
 Apagado.	Aus.
 
-#: apps/luces/main/lz_tabs.c:671
+#: apps/luces/main/lz_tabs.c:674
 %lu paquetes mandados a %s	%lu Pakete an %s gesendet
-
-#: (kept from the previous catalog: strings the extractor cannot see)
-saliendo por %s · %.0f paquetes/s%s	sendet über %s · %.0f Pakete/s%s
-
-salida cerrada (%s)	Ausgang geschlossen (%s)
-
-FUNDIDO AL LLAMAR UNA ESCENA	ÜBERBLENDUNG BEIM AUFRUFEN

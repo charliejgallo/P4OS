@@ -5,39 +5,39 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/mila/main/mila.c:1169
+#: apps/mila/main/mila.c:1172
 Tocá para empezar	Tap to start
 
-#: apps/mila/main/mila.c:1170
+#: apps/mila/main/mila.c:1173
 Par	Par
 
-#: apps/mila/main/mila.c:1171
+#: apps/mila/main/mila.c:1174
 ¡Muy bien!	Well done!
 
-#: apps/mila/main/mila.c:1181
+#: apps/mila/main/mila.c:1184
 Jugar	Play
 
-#: apps/mila/main/mila.c:1182
-#: apps/mila/main/ml_ui.c:766
+#: apps/mila/main/mila.c:1185
+#: apps/mila/main/ml_ui.c:774
 Tienda	Shop
 
-#: apps/mila/main/mila.c:1183
-#: apps/mila/main/ml_ui.c:847
+#: apps/mila/main/mila.c:1186
+#: apps/mila/main/ml_ui.c:855
 Ajustes	Settings
 
-#: apps/mila/main/mila.c:1184
+#: apps/mila/main/mila.c:1187
 Amigo	Friend
 
-#: apps/mila/main/mila.c:1185
+#: apps/mila/main/mila.c:1188
 Próximamente	Coming soon
 
-#: apps/mila/main/mila.c:1648
+#: apps/mila/main/mila.c:1760
 Falta mila_p4.pak en la tarjeta	mila_p4.pak missing from the card
 
-#: apps/mila/main/mila.c:1753
+#: apps/mila/main/mila.c:1866
 No hay memoria para girar la pantalla	Not enough memory to rotate the screen
 
-#: apps/mila/main/mila.c:1762
+#: apps/mila/main/mila.c:1875
 No se pudo cargar el nivel	Could not load the level
 
 #: apps/mila/main/ml_link.c:110
@@ -150,132 +150,132 @@ Hamaca de ventana	Window hammock
 #: apps/mila/main/ml_shop.c:34
 Pecera	Fish bowl
 
-#: apps/mila/main/ml_ui.c:320
+#: apps/mila/main/ml_ui.c:325
 Mantené el dedo sobre Mila para ver todo el nivel.	Hold your finger on Mila to see the whole level.
 
-#: apps/mila/main/ml_ui.c:321
+#: apps/mila/main/ml_ui.c:326
 Tocá una casilla y Mila camina sola hasta ahí.	Tap a cell and Mila walks there by herself.
 
-#: apps/mila/main/ml_ui.c:322
+#: apps/mila/main/ml_ui.c:327
 El botón de abajo a la izquierda deshace el último paso.	The bottom-left button undoes the last move.
 
-#: apps/mila/main/ml_ui.c:323
+#: apps/mila/main/ml_ui.c:328
 Arrastrá el ratoncito y Mila lo va a perseguir.	Drag the toy mouse and Mila will chase it.
 
-#: apps/mila/main/ml_ui.c:324
+#: apps/mila/main/ml_ui.c:329
 Terminar un mundo le regala algo a Mila.	Finishing a world brings Mila a present.
 
-#: apps/mila/main/ml_ui.c:325
+#: apps/mila/main/ml_ui.c:330
 Pellizcá con dos dedos para ver todo el nivel.	Pinch with two fingers to see the whole level.
 
-#: apps/mila/main/ml_ui.c:326
+#: apps/mila/main/ml_ui.c:331
 Cada día hay un regalito junto a la cucha.	Every day there is a little present by the bed.
 
-#: apps/mila/main/ml_ui.c:369
+#: apps/mila/main/ml_ui.c:374
 Cargando...	Loading...
 
-#: apps/mila/main/ml_ui.c:441
+#: apps/mila/main/ml_ui.c:446
 Seguir	Continue
 
-#: apps/mila/main/ml_ui.c:443
+#: apps/mila/main/ml_ui.c:448
 Empezar de nuevo	Start again
 
-#: apps/mila/main/ml_ui.c:445
-#: apps/mila/main/ml_ui.c:498
-#: apps/mila/main/ml_ui.c:540
+#: apps/mila/main/ml_ui.c:450
+#: apps/mila/main/ml_ui.c:503
+#: apps/mila/main/ml_ui.c:545
 Mapa	Map
 
-#: apps/mila/main/ml_ui.c:447
-#: apps/mila/main/ml_ui.c:559
+#: apps/mila/main/ml_ui.c:452
+#: apps/mila/main/ml_ui.c:564
 Casita	Home
 
-#: apps/mila/main/ml_ui.c:482
-#: apps/mila/main/ml_ui.c:515
+#: apps/mila/main/ml_ui.c:487
+#: apps/mila/main/ml_ui.c:520
 ¡Nivel completo!	Level complete!
 
-#: apps/mila/main/ml_ui.c:494
-#: apps/mila/main/ml_ui.c:540
+#: apps/mila/main/ml_ui.c:499
+#: apps/mila/main/ml_ui.c:545
 Siguiente	Next
 
-#: apps/mila/main/ml_ui.c:497
+#: apps/mila/main/ml_ui.c:502
 Otra vez	Again
 
-#: apps/mila/main/ml_ui.c:517
+#: apps/mila/main/ml_ui.c:522
 Movimientos: %d   (par %d)	Moves: %d   (par %d)
 
-#: apps/mila/main/ml_ui.c:519
-#: apps/mila/main/ml_ui.c:555
+#: apps/mila/main/ml_ui.c:524
+#: apps/mila/main/ml_ui.c:560
 +%d monedas	+%d coins
 
-#: apps/mila/main/ml_ui.c:520
+#: apps/mila/main/ml_ui.c:525
 ¡Perfecto!	Perfect!
 
-#: apps/mila/main/ml_ui.c:520
+#: apps/mila/main/ml_ui.c:525
 Probá llegar al par	Try to reach par
 
-#: apps/mila/main/ml_ui.c:525
+#: apps/mila/main/ml_ui.c:530
 ¡Regalo: %s!	Gift: %s!
 
-#: apps/mila/main/ml_ui.c:551
+#: apps/mila/main/ml_ui.c:556
 ¡Ganaste la carrera!	You won the race!
 
-#: apps/mila/main/ml_ui.c:551
+#: apps/mila/main/ml_ui.c:556
 Ganó tu amigo	Your friend won
 
-#: apps/mila/main/ml_ui.c:553
+#: apps/mila/main/ml_ui.c:558
 Vos: %d movimientos   %s: %d	You: %d moves   %s: %d
 
-#: apps/mila/main/ml_ui.c:598
+#: apps/mila/main/ml_ui.c:603
 En la casita	At home
 
-#: apps/mila/main/ml_ui.c:599
+#: apps/mila/main/ml_ui.c:604
 Sacar	Take off
 
-#: apps/mila/main/ml_ui.c:600
+#: apps/mila/main/ml_ui.c:605
 Ponérselo	Wear it
 
-#: apps/mila/main/ml_ui.c:603
+#: apps/mila/main/ml_ui.c:608
 Premio por terminar %s	Prize for finishing %s
 
-#: apps/mila/main/ml_ui.c:604
+#: apps/mila/main/ml_ui.c:609
 Bloqueado	Locked
 
-#: apps/mila/main/ml_ui.c:607
+#: apps/mila/main/ml_ui.c:612
 Comprar  %d	Buy  %d
 
-#: apps/mila/main/ml_ui.c:708
+#: apps/mila/main/ml_ui.c:716
 Te faltan monedas	Not enough coins
 
-#: apps/mila/main/ml_ui.c:770
+#: apps/mila/main/ml_ui.c:778
 Gorros	Hats
 
-#: apps/mila/main/ml_ui.c:770
+#: apps/mila/main/ml_ui.c:778
 Cuello	Neck
 
-#: apps/mila/main/ml_ui.c:770
+#: apps/mila/main/ml_ui.c:778
 Juguetes	Toys
 
-#: apps/mila/main/ml_ui.c:812
-#: apps/mila/main/ml_ui.c:857
+#: apps/mila/main/ml_ui.c:820
+#: apps/mila/main/ml_ui.c:865
 Volver	Back
 
-#: apps/mila/main/ml_ui.c:822
+#: apps/mila/main/ml_ui.c:830
 Niveles resueltos: %d\nMovimientos: %d\nCaricias: %d\nEstrellas: %d	Levels solved: %d\nMoves: %d\nPets: %d\nStars: %d
 
-#: apps/mila/main/ml_ui.c:850
+#: apps/mila/main/ml_ui.c:858
 Efectos	Effects
 
-#: apps/mila/main/ml_ui.c:852
+#: apps/mila/main/ml_ui.c:860
 Música	Music
 
-#: apps/mila/main/ml_ui.c:879
+#: apps/mila/main/ml_ui.c:887
 Con un amigo	With a friend
 
-#: apps/mila/main/ml_ui.c:882
+#: apps/mila/main/ml_ui.c:890
 Visitar su casita	Visit their home
 
-#: apps/mila/main/ml_ui.c:884
+#: apps/mila/main/ml_ui.c:892
 Carrera en un nivel	Race on a level
 
-#: apps/mila/main/ml_ui.c:886
+#: apps/mila/main/ml_ui.c:894
 Cancelar	Cancel

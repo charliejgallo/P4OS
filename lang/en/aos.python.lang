@@ -11,29 +11,29 @@ El Python de P4OS es MicroPython 1.29.\n\nEscribí una expresión y Enter:\n  2*
 #: apps/python/main/mod_p4.c:189
 Y los .py y .mpy de /python y /python/lib.\n	And the .py and .mpy in /python and /python/lib.\n
 
-#: apps/python/main/py_app.c:409
+#: apps/python/main/py_app.c:405
 Hay algo corriendo: detenelo primero\n	Something is running: stop it first\n
 
-#: apps/python/main/py_app.c:427
+#: apps/python/main/py_app.c:423
 No se pudo leer %s\n	Could not read %s\n
 
-#: apps/python/main/py_app.c:492
+#: apps/python/main/py_app.c:488
 MicroPython no arrancó	MicroPython did not start
 
-#: apps/python/main/py_app.c:493
+#: apps/python/main/py_app.c:489
 esperando una línea	waiting for a line
 
-#: apps/python/main/py_app.c:494
+#: apps/python/main/py_app.c:490
 corriendo…	running…
 
-#: apps/python/main/py_app.c:593
+#: apps/python/main/py_app.c:589
 Detener	Stop
 
-#: apps/python/main/py_app.c:596
+#: apps/python/main/py_app.c:592
 Limpiar	Clear
 
-#: apps/python/main/py_app.c:640
+#: apps/python/main/py_app.c:636
 MicroPython 1.29 en P4OS · help() para empezar\n	MicroPython 1.29 on P4OS · help() to start\n
 
-#: apps/python/main/py_script.c:276
+#: apps/python/main/py_script.c:278
 Tocá para correrlo de nuevo	Tap to run it again
