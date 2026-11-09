@@ -54,22 +54,56 @@ static void put16(uint8_t *p, uint16_t v) { p[0] = (uint8_t)(v >> 8); p[1] = (ui
 
 static aos_io_uart_t *s_u;
 static int s_tcp;
+static int s_listen, s_client;  /* the server: the slave over TCP, the gateway */
+static mb_role_t s_open_role;   /* what the link was opened for: TCP is a client or a server */
 static uint16_t s_tid;
 static mb_cfg_t s_cfg;          /* what is open */
 static bool s_open;
+
+static void server_close(void)
+{
+    if (s_client > 0) aos_hal_tcp_close(s_client);
+    if (s_listen > 0) aos_hal_tcp_close(s_listen);
+    s_client = s_listen = 0;
+    mb_lock();
+    MB.tcp_peer[0] = 0;
+    MB.seq++;
+    mb_unlock();
+}
 
 static void link_close(void)
 {
     if (s_u) aos_io_uart_close(s_u);
     if (s_tcp > 0) aos_hal_tcp_close(s_tcp);
+    server_close();
     s_u = NULL;
     s_tcp = 0;
     s_open = false;
 }
 
-static bool link_open(const mb_cfg_t *c, char *err, size_t n, char *desc, size_t dn)
+static bool server_open(uint16_t port, char *err, size_t n)
+{
+    if (s_listen > 0) return true;
+    s_listen = aos_hal_tcp_listen(port);
+    if (s_listen <= 0) {
+        s_listen = 0;
+        snprintf(err, n, _("no se pudo escuchar en el puerto %u (¿lo usa otro?)"), port);
+        return false;
+    }
+    return true;
+}
+
+static bool link_open(const mb_cfg_t *c, mb_role_t role, char *err, size_t n, char *desc, size_t dn)
 {
     s_cfg = *c;
+    s_open_role = role;
+    if (c->tr == MB_TR_TCP && role == MB_ROLE_SLAVE) {
+        uint16_t port = c->tport ? c->tport : 502;
+        if (!server_open(port, err, n)) return false;
+        snprintf(desc, dn, _("Modbus TCP, escuchando en el puerto %u"), port);
+        s_open = true;
+        return true;
+    }
     if (c->tr == MB_TR_RTU) {
         const aos_io_port_t *p = aos_io_port_find(c->port);
         bool rs485 = p && p->kind == AOS_PORT_UART && p->pins[2] >= 0;   /* a DE pin: half duplex */
@@ -156,6 +190,8 @@ void mb_bus_clear_stats(void)
     memset(MB.units, 0, sizeof MB.units);
     MB.nunits = 0;
     MB.mon_frames = MB.mon_bytes = MB.mon_crc = MB.mon_noise = 0;
+    MB.mon_parity = MB.mon_frame = 0;
+    MB.gw_req = MB.gw_ok = MB.gw_fail = 0;
     MB.seq++;
     mb_unlock();
 }
@@ -514,12 +550,20 @@ static void tool_scan(void)
     }
 }
 
-/* At what speed and format a unit answers: every pair, a read of holding 0. */
+/* At what speed and format a unit answers: every pair, a read of holding 0.
+ * At the right speed several formats answer (a UART hands over a byte with
+ * a bad parity too), so the line's errors while the answer comes in tell
+ * them apart (aos_io_uart_errors): the right format reads it clean, a wrong
+ * one sees bad parity or stop bits in about half the bytes. The clean ones
+ * go first in the list. */
 static void tool_baud(uint8_t unit)
 {
     int nb = (int)(sizeof SCAN_BAUDS / sizeof SCAN_BAUDS[0]), nf = (int)(sizeof SCAN_FMT / sizeof SCAN_FMT[0]);
+    char clean[8][24], dirty[8][24];
+    int nc = 0, nd = 0;
     mb_lock();
     MB.nbauds_found = 0;
+    MB.nbauds_clean = 0;
     MB.tool_total = nb * nf;
     mb_unlock();
     mb_cfg_t keep = s_cfg;
@@ -537,12 +581,24 @@ static void tool_baud(uint8_t unit)
             int rl, rc = MB_E_TIMEOUT;
             uint32_t rt;
             uint16_t tmo = (uint16_t)(mb_char_us(&s_cfg, 30.0f) / 1000 + 80);
-            for (int tries = 0; tries < 2 && rc == MB_E_TIMEOUT; tries++) rc = rtu_transact(f, 8, r, &rl, tmo, &rt, true);
+            aos_uart_errors_t le;
+            for (int tries = 0; tries < 2 && rc == MB_E_TIMEOUT; tries++) {
+                aos_io_uart_errors(s_u, NULL, true);
+                rc = rtu_transact(f, 8, r, &rl, tmo, &rt, true);
+            }
+            bool counted = aos_io_uart_errors(s_u, &le, true);
             if (rc >= 0) {
+                unsigned bad = le.parity + le.frame;
+                if (counted && !bad && nc < 8)
+                    snprintf(clean[nc++], sizeof clean[0], "%u 8%c%u", (unsigned)SCAN_BAUDS[b], SCAN_FMT[k].par, SCAN_FMT[k].stop);
+                else if (nd < 8)
+                    snprintf(dirty[nd++], sizeof dirty[0], counted ? "%u 8%c%u · %u err" : "%u 8%c%u", (unsigned)SCAN_BAUDS[b],
+                             SCAN_FMT[k].par, SCAN_FMT[k].stop, bad);
                 mb_lock();
-                if (MB.nbauds_found < 8)
-                    snprintf(MB.bauds_found[MB.nbauds_found++], sizeof MB.bauds_found[0], "%u 8%c%u", (unsigned)SCAN_BAUDS[b],
-                             SCAN_FMT[k].par, SCAN_FMT[k].stop);
+                MB.nbauds_found = 0;
+                for (int i = 0; i < nc && MB.nbauds_found < 8; i++) memcpy(MB.bauds_found[MB.nbauds_found++], clean[i], sizeof clean[0]);
+                MB.nbauds_clean = MB.nbauds_found;
+                for (int i = 0; i < nd && MB.nbauds_found < 8; i++) memcpy(MB.bauds_found[MB.nbauds_found++], dirty[i], sizeof dirty[0]);
                 mb_unlock();
                 log_put(r, rl, (uint8_t)(MB_LF_RSP | (rc ? MB_LF_EXC : 0)), 0, now_us(), 0, rt);
             }
@@ -597,9 +653,30 @@ static void prof_poll(void)
     }
 }
 
+static void gateway_step(void);
+static bool server_open(uint16_t port, char *err, size_t n);
+static void server_close(void);
+
 static void master_step(void)
 {
     prof_take();
+    /* the gateway, only on a bus: TCP clients asking the RTU units */
+    if (s_cfg.tr == MB_TR_RTU) {
+        mb_lock();
+        bool gw = MB.gw_on;
+        uint16_t gp = MB.gw_port ? MB.gw_port : 502;
+        mb_unlock();
+        if (gw && s_listen <= 0) {
+            char e[64] = "";
+            bool ok = server_open(gp, e, sizeof e);
+            mb_lock();
+            snprintf(MB.tcp_err, sizeof MB.tcp_err, "%s", e);
+            if (!ok) MB.gw_on = false;
+            MB.seq++;
+            mb_unlock();
+        } else if (!gw && s_listen > 0) server_close();
+        if (s_listen > 0) gateway_step();
+    }
     mb_lock();
     int tool = MB.tool;
     mb_mreq_t w;
@@ -659,6 +736,100 @@ static void master_step(void)
         int n;
         while ((n = rx_frame(f, &fl, &t, &gap)) > 0) log_put(f, n, fl, fl ? 0 : MB_NOTE_LATE, t, gap, 0);
     } else aos_hal_sleep_ms(10);
+}
+
+/* ---- the server: Modbus TCP for clients on the network ----
+ *
+ * One client at a time (a second one waits in the listen queue until the
+ * first goes): a PLC, a SCADA, Modbus Poll on a PC. An ADU is the MBAP
+ * header (transaction, protocol 0, length, unit) and the PDU; the answer
+ * goes back with the same header. Polled from the thread's loop, so the
+ * slave and the gateway never block the rest of it for long. */
+
+static uint8_t s_tin[MB_MAXF + 8];
+static int s_tinn;
+
+/* A whole request from the client, or 0 (nothing yet) or -1 (it left). */
+static int server_take(uint8_t *adu)
+{
+    if (s_listen <= 0) return -1;
+    if (s_client <= 0) {
+        char peer[24] = "";
+        int c = aos_hal_tcp_accept(s_listen, 5, peer, sizeof peer);
+        if (c <= 0) return 0;
+        s_client = c;
+        s_tinn = 0;
+        mb_lock();
+        snprintf(MB.tcp_peer, sizeof MB.tcp_peer, "%s", peer);
+        MB.seq++;
+        mb_unlock();
+        log_note(MB_NOTE_OPEN, MB_LF_TCP, NULL, 0);
+    }
+    int r = aos_hal_tcp_recv(s_client, s_tin + s_tinn, (int)sizeof s_tin - s_tinn, 5);
+    if (r < 0) {
+        aos_hal_tcp_close(s_client);
+        s_client = 0;
+        mb_lock();
+        MB.tcp_peer[0] = 0;
+        MB.seq++;
+        mb_unlock();
+        log_note(MB_NOTE_CLOSE, MB_LF_TCP, NULL, 0);
+        return -1;
+    }
+    s_tinn += r;
+    if (s_tinn < 7) return 0;
+    int len = get16(s_tin + 4) + 6;
+    if (get16(s_tin + 2) != 0 || len < 8 || len > MB_MAXF) { s_tinn = 0; return 0; }    /* not Modbus: dropped */
+    if (s_tinn < len) return 0;
+    memcpy(adu, s_tin, (size_t)len);
+    memmove(s_tin, s_tin + len, (size_t)(s_tinn - len));
+    s_tinn -= len;
+    return len;
+}
+
+/* Sends an answer PDU (pdu[0] = function) for the request adu. */
+static void server_reply(const uint8_t *adu, const uint8_t *pdu, int plen, uint32_t rt)
+{
+    uint8_t o[MB_MAXF + 8];
+    memcpy(o, adu, 4);
+    put16(o + 4, (uint16_t)(plen + 1));
+    o[6] = adu[6];
+    memcpy(o + 7, pdu, (size_t)plen);
+    if (s_client > 0) aos_hal_tcp_send(s_client, o, plen + 7, 1000);
+    bool exc = pdu[0] & 0x80;
+    log_put(o, plen + 7, (uint8_t)(MB_LF_TX | MB_LF_RSP | MB_LF_TCP | (exc ? MB_LF_EXC : 0)), 0, now_us(), 0, rt);
+}
+
+/* The gateway: a TCP client's request goes out on the bus as RTU, and the
+ * answer goes back. While it waits for the bus nothing else is asked. */
+static void gateway_step(void)
+{
+    uint8_t adu[MB_MAXF + 8];
+    int n;
+    while ((n = server_take(adu)) > 0) {
+        uint64_t t = now_us();
+        log_put(adu, n, MB_LF_REQ | MB_LF_TCP, 0, t, 0, 0);
+        uint8_t f[MB_MAXF], r[MB_MAXF];
+        int fl = n - 6;                 /* unit + PDU */
+        memcpy(f, adu + 6, (size_t)fl);
+        mb_crc_put(f, fl);
+        int rl = 0;
+        uint32_t rt = 0;
+        aos_hal_sleep_ms(s_cfg.gap_ms);
+        int rc = rtu_transact(f, fl + 2, r, &rl, s_cfg.timeout_ms ? s_cfg.timeout_ms : 1000, &rt, false);
+        mb_lock();
+        MB.gw_req++;
+        if (rc >= 0) MB.gw_ok++; else MB.gw_fail++;
+        MB.seq++;
+        mb_unlock();
+        if (f[0] == 0) continue;                    /* a broadcast: nobody answers */
+        if (rc >= 0 && rl >= 4) server_reply(adu, r + 1, rl - 3, rt);
+        else {
+            /* 0x0B: the gateway's target did not answer (a bad CRC counts) */
+            uint8_t e[2] = { (uint8_t)(adu[7] | 0x80), 0x0B };
+            server_reply(adu, e, 2, rt);
+        }
+    }
 }
 
 /* ---- slave ---- */
@@ -909,6 +1080,53 @@ static void slave_step(void)
     }
 }
 
+/* The slave over Modbus TCP: the same tables and faults, a client on the
+ * network instead of a master on the bus. A request to another unit is
+ * not answered, as on a bus (unit 0 and 255 are taken as this one: many
+ * clients send them to a device that is not behind a gateway). */
+static void slave_tcp_step(void)
+{
+    slave_anim();
+    uint8_t adu[MB_MAXF + 8];
+    int n;
+    while ((n = server_take(adu)) > 0) {
+        uint64_t t = now_us();
+        log_put(adu, n, MB_LF_REQ | MB_LF_TCP, 0, t, 0, 0);
+        mb_lock();
+        uint8_t unit = MB.s_unit ? MB.s_unit : 1;
+        int fault = MB.s_fault;
+        uint16_t delay = MB.s_delay_ms;
+        MB.s_req++;
+        mb_unlock();
+        uint8_t u = adu[6];
+        if (u != unit && u != 0 && u != 0xFF) {
+            mb_lock(); MB.s_other++; MB.seq++; mb_unlock();
+            continue;
+        }
+        uint8_t o[MB_MAXF];
+        int ol = slave_answer(adu + 6, n - 6, o);
+        char what[96];
+        mb_describe(adu + 6, n - 6, true, what, sizeof what);
+        mb_lock();
+        MB.s_mine++;
+        snprintf(MB.s_last, sizeof MB.s_last, "%s", what);
+        MB.s_seq++;
+        MB.seq++;
+        mb_unlock();
+        if (fault == MB_FAULT_SILENT) { log_note(MB_NOTE_SILENT, MB_LF_TCP, adu + 6, 2); continue; }
+        if (fault == MB_FAULT_BUSY || fault == MB_FAULT_FAIL) {
+            o[0] = (uint8_t)(adu[7] | 0x80);
+            o[1] = fault == MB_FAULT_BUSY ? 6 : 4;
+            ol = 2;
+        }
+        if (fault == MB_FAULT_SLOW) aos_hal_sleep_ms(delay);
+        /* TCP has no CRC: the broken-answer fault answers another transaction */
+        if (fault == MB_FAULT_CRC) adu[1] ^= 0x5A;
+        if (o[0] & 0x80) { mb_lock(); MB.s_exc++; mb_unlock(); }
+        server_reply(adu, o, ol, (uint32_t)((now_us() - t) / 1000));
+    }
+}
+
 /* ---- monitor ---- */
 
 static struct { bool on; uint8_t unit, fc; uint16_t addr, n; uint64_t t; } s_pend;
@@ -940,6 +1158,14 @@ static void pend_expire(uint64_t now, bool force)
 static void monitor_step(void)
 {
     if (rx_pump(5) < 0) { aos_hal_sleep_ms(10); return; }
+    aos_uart_errors_t le;
+    if (s_u && aos_io_uart_errors(s_u, &le, true) && (le.parity || le.frame)) {
+        mb_lock();
+        MB.mon_parity += le.parity;
+        MB.mon_frame += le.frame;
+        MB.seq++;
+        mb_unlock();
+    }
     uint8_t f[MB_MAXF], fl;
     uint64_t t;
     uint32_t gap;
@@ -1029,15 +1255,15 @@ static void bus_main(void *arg)
         if (!want) { aos_hal_sleep_ms(50); continue; }
         if (!s_open) {
             char err[96] = "", desc[64] = "";
-            if (cfg.tr == MB_TR_TCP && role != MB_ROLE_MASTER) {
+            if (cfg.tr == MB_TR_TCP && role == MB_ROLE_MONITOR) {
                 mb_lock();
-                snprintf(MB.err, sizeof MB.err, "%s", _("Como esclavo y como monitor, sólo RTU por ahora."));
+                snprintf(MB.err, sizeof MB.err, "%s", _("El monitor escucha un bus RS485: por TCP no hay nada que escuchar."));
                 MB.seq++;
                 mb_unlock();
                 aos_hal_sleep_ms(200);
                 continue;
             }
-            bool ok = link_open(&cfg, err, sizeof err, desc, sizeof desc);
+            bool ok = link_open(&cfg, role, err, sizeof err, desc, sizeof desc);
             mb_lock();
             MB.open = ok;
             snprintf(MB.err, sizeof MB.err, "%s", ok ? "" : err);
@@ -1057,7 +1283,8 @@ static void bus_main(void *arg)
         if (role != last_role) {
             last_role = role;
             s_pend.on = false;
-            if (cfg.tr == MB_TR_TCP && role != MB_ROLE_MASTER) {
+            if (cfg.tr == MB_TR_TCP && (role == MB_ROLE_SLAVE) != (s_open_role == MB_ROLE_SLAVE)) {
+                /* a client and a server are different links */
                 link_close();
                 mb_lock(); MB.open = false; MB.seq++; mb_unlock();
                 continue;
@@ -1065,7 +1292,7 @@ static void bus_main(void *arg)
         }
         switch (role) {
         case MB_ROLE_MASTER: master_step(); break;
-        case MB_ROLE_SLAVE: slave_step(); break;
+        case MB_ROLE_SLAVE: if (s_cfg.tr == MB_TR_TCP) slave_tcp_step(); else slave_step(); break;
         default: monitor_step(); break;
         }
     }

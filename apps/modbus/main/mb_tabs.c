@@ -156,6 +156,81 @@ static void m_tool_cb(lv_event_t *e)
     mb_rebuild_page();
 }
 
+/* the gateway: TCP clients on the network asking the units on this bus */
+static void m_gw_cb(lv_event_t *e)
+{
+    bool on = lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED);
+    mb_lock();
+    MB.gw_on = on;
+    MB.tcp_err[0] = 0;
+    mb_unlock();
+    if (on) ensure_open();
+    m_changed();
+}
+
+static void m_gwp_done(double v)
+{
+    mb_lock();
+    if (v >= 1 && v <= 65535) MB.gw_port = (uint16_t)v;
+    bool on = MB.gw_on;
+    MB.gw_on = false;                       /* the thread closes the old port... */
+    mb_unlock();
+    aos_hal_sleep_ms(120);
+    mb_lock();
+    MB.gw_on = on;                          /* ...and opens the new one */
+    mb_unlock();
+    m_changed();
+}
+
+static void m_gwp_cb(lv_event_t *e) { (void)e; mb_keypad(_("Puerto TCP de la pasarela"), MB.gw_port ? MB.gw_port : 502, 0, "", m_gwp_done); }
+
+static void m_gateway(lv_obj_t *left, int32_t lw)
+{
+    mb_lock();
+    bool on = MB.gw_on, rtu = MB.cfg.tr == MB_TR_RTU;
+    uint16_t port = MB.gw_port ? MB.gw_port : 502;
+    mb_unlock();
+    if (!rtu) return;
+    mb_section(left, _("PASARELA MODBUS TCP → RTU"));
+    lv_obj_t *c = mb_card(left, lw, LV_SIZE_CONTENT);
+    lv_obj_set_style_pad_all(c, 16, 0);
+    lv_obj_set_flex_flow(c, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(c, 12, 0);
+    lv_obj_t *r = mb_box(c, lw - 32, 60);
+    lv_obj_set_flex_flow(r, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(r, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_column(r, 14, 0);
+    aos_label(r, _("Atender clientes TCP"), aos_font_body, AOS_C_TEXT);
+    mb_switch(r, on, m_gw_cb);
+    char t[32];
+    snprintf(t, sizeof t, "%s %u", _("Puerto"), port);
+    mb_chip(r, t, false, m_gwp_cb, NULL);
+    MBU.m_gw = aos_label(c, "", aos_font_caption, AOS_C_TEXT);
+    lv_obj_set_width(MBU.m_gw, lw - 32);
+    lv_label_set_long_mode(MBU.m_gw, LV_LABEL_LONG_MODE_WRAP);
+    mb_caption(c, _("Un programa de la PC (Modbus Poll, un SCADA, Home Assistant) pide por la red a esta placa, y ella le pregunta al equipo por el bus: la unidad del pedido es la del equipo. Si el equipo no contesta, el cliente recibe la excepción 0B. Anda con la conexión abierta."), lw - 32);
+}
+
+static void m_gw_fill(void)
+{
+    if (!MBU.m_gw) return;
+    mb_lock();
+    bool on = MB.gw_on, open = MB.open;
+    uint32_t req = MB.gw_req, ok = MB.gw_ok, fail = MB.gw_fail;
+    char peer[24], err[64];
+    snprintf(peer, sizeof peer, "%s", MB.tcp_peer);
+    snprintf(err, sizeof err, "%s", MB.tcp_err);
+    uint16_t port = MB.gw_port ? MB.gw_port : 502;
+    mb_unlock();
+    const char *ip = aos_hal_net_ip();
+    if (err[0]) { lv_label_set_text(MBU.m_gw, err); lv_obj_set_style_text_color(MBU.m_gw, AOS_C_ORANGE, 0); return; }
+    lv_obj_set_style_text_color(MBU.m_gw, AOS_C_TEXT, 0);
+    if (!on) lv_label_set_text(MBU.m_gw, _("Apagada."));
+    else if (!open) lv_label_set_text(MBU.m_gw, _("Prendida: arranca al abrir la conexión."));
+    else lv_label_set_text_fmt(MBU.m_gw, _("Escuchando en %s:%u · cliente: %s · %u pedidos, %u contestados, %u sin respuesta"),
+                               ip && ip[0] ? ip : "?", port, peer[0] ? peer : _("ninguno"), (unsigned)req, (unsigned)ok, (unsigned)fail);
+}
+
 static void m_found_unit_cb(lv_event_t *e)
 {
     mb_lock();
@@ -313,7 +388,7 @@ static void m_tool_fill(void)
 {
     if (!MBU.m_found) return;
     mb_lock();
-    int tool = MB.tool, pos = MB.tool_pos, total = MB.tool_total, nb = MB.nbauds_found;
+    int tool = MB.tool, pos = MB.tool_pos, total = MB.tool_total, nb = MB.nbauds_found, nclean = MB.nbauds_clean;
     uint8_t found[248];
     memcpy(found, MB.found, sizeof found);
     char bauds[8][24];
@@ -338,13 +413,22 @@ static void m_tool_fill(void)
         mb_chip(MBU.m_found, t, false, m_found_unit_cb, (void *)(intptr_t)u);
         any++;
     }
-    for (int i = 0; i < nb; i++) { mb_chip(MBU.m_found, bauds[i], false, m_found_baud_cb, (void *)(intptr_t)i); any++; }
+    for (int i = 0; i < nb; i++) { mb_chip(MBU.m_found, bauds[i], i < nclean, m_found_baud_cb, (void *)(intptr_t)i); any++; }
     if (nb > 1 && !tool) {
-        /* seen on the board: neither UART drops a byte with a parity error,
-         * so at the right speed every format gets a good answer */
-        lv_obj_t *c = mb_caption(MBU.m_found, _("La velocidad es segura; el formato no: los UART no descartan un byte con error de paridad, así que a la velocidad buena contestan varios. El manual del equipo dice cuál (el estándar pide 8E1)."),
+        /* At the right speed every format gets an answer (a UART hands over
+         * a byte with a bad parity too); the line's errors tell them apart. */
+        /* one format answered clean (at one speed or, on a line with no
+         * speed of its own like the simulator's, at all of them) */
+        bool one = nclean >= 1;
+        const char *f0 = nclean ? strchr(bauds[0], ' ') : NULL;
+        for (int i = 1; i < nclean && one; i++) {
+            const char *fi = strchr(bauds[i], ' ');
+            one = f0 && fi && !strncmp(f0, fi, 5);
+        }
+        lv_obj_t *c = mb_caption(MBU.m_found, one ? _("Lo marcado contestó sin errores de línea: ése es el formato. Los otros contestaron con bytes de paridad o de parada malos.")
+                                                  : _("La velocidad es segura; el formato no salió claro (contestaron varios sin errores, o todos con errores). El manual del equipo dice cuál (el estándar pide 8E1)."),
                                  lv_obj_get_width(MBU.m_found));
-        lv_obj_set_style_text_color(c, AOS_C_ORANGE, 0);
+        lv_obj_set_style_text_color(c, one ? AOS_C_GREEN : AOS_C_ORANGE, 0);
     }
     if (!any && !tool && pos > 0) aos_label(MBU.m_found, _("Nadie contestó."), aos_font_caption, AOS_C_ORANGE);
 }
@@ -370,6 +454,7 @@ void tab_master_refresh(bool values)
                               (unsigned)(ans ? sum / ans : 0), (unsigned)mx);
     }
     if (values) { m_grid_fill(); m_tool_fill(); }
+    m_gw_fill();
 }
 
 static void m_tools(lv_obj_t *left, int32_t lw, int tool)
@@ -470,7 +555,7 @@ void tab_master_build(lv_obj_t *parent, int32_t ch)
         }
     }
 
-    if (MBU.land) m_tools(left, lw, tool);
+    if (MBU.land) { m_tools(left, lw, tool); m_gateway(left, lw); }
     mb_section(right, _("RESPUESTA"));
     MBU.m_status = aos_label(right, "", aos_font_body, AOS_C_DIM);
     MBU.m_stats = mb_caption(right, "", rw);
@@ -488,7 +573,7 @@ void tab_master_build(lv_obj_t *parent, int32_t ch)
     lv_obj_set_flex_flow(MBU.m_grid, LV_FLEX_FLOW_ROW_WRAP);
     lv_obj_set_style_pad_gap(MBU.m_grid, 10, 0);
     if (q.fc == 1 || q.fc == 3) mb_caption(right, q.fc == 1 ? _("Tocá una coil para invertirla (FC 05).") : _("Tocá un registro para escribirlo (FC 06)."), rw);
-    if (!MBU.land) m_tools(left, lw, tool);
+    if (!MBU.land) { m_tools(left, lw, tool); m_gateway(left, lw); }
     tab_master_refresh(true);
 }
 
@@ -542,12 +627,15 @@ void tab_slave_refresh(void)
     uint16_t hr[16], ir[8];
     uint8_t coil[16], di[8];
     if (MB.s_hr) { memcpy(hr, MB.s_hr, sizeof hr); memcpy(ir, MB.s_ir, sizeof ir); memcpy(coil, MB.s_coil, sizeof coil); memcpy(di, MB.s_di, sizeof di); }
-    bool open = MB.open;
+    bool open = MB.open, tcp = MB.cfg.tr == MB_TR_TCP;
+    char peer[24];
+    snprintf(peer, sizeof peer, "%s", MB.tcp_peer);
     mb_role_t role = MB.role;
     mb_unlock();
     lv_label_set_text_fmt(MBU.s_stats, _("%u tramas oídas · %u para esta unidad · %u para otras · %u broadcast · %u CRC malos · %u excepciones"),
                           (unsigned)req, (unsigned)mine, (unsigned)other, (unsigned)bc, (unsigned)crc, (unsigned)exc);
     if (!open || role != MB_ROLE_SLAVE) lv_label_set_text(MBU.s_last, _("Abrí la conexión para que conteste."));
+    else if (tcp) lv_label_set_text_fmt(MBU.s_last, "%s %s · %s %s", _("Cliente:"), peer[0] ? peer : _("ninguno todavía"), _("Último pedido:"), last[0] ? last : "—");
     else lv_label_set_text_fmt(MBU.s_last, "%s %s", _("Último pedido:"), last[0] ? last : "—");
     char t[16];
     for (int i = 0; i < 16; i++) {
@@ -663,7 +751,7 @@ void tab_mon_refresh(void)
 {
     if (!MBU.mon_tot) return;
     mb_lock();
-    uint32_t fr = MB.mon_frames, by = MB.mon_bytes, crc = MB.mon_crc, noise = MB.mon_noise;
+    uint32_t fr = MB.mon_frames, by = MB.mon_bytes, crc = MB.mon_crc, noise = MB.mon_noise, lerr = MB.mon_parity + MB.mon_frame;
     int nu = MB.nunits;
     static mb_unit_t u[MB_UNITS];
     memcpy(u, MB.units, sizeof u);
@@ -671,7 +759,8 @@ void tab_mon_refresh(void)
     mb_role_t role = MB.role;
     mb_unlock();
     if (!open || role != MB_ROLE_MONITOR) lv_label_set_text(MBU.mon_tot, _("Abrí la conexión para escuchar."));
-    else lv_label_set_text_fmt(MBU.mon_tot, _("%u tramas · %u bytes · %u con CRC malo · %u bytes de ruido"), (unsigned)fr, (unsigned)by, (unsigned)crc, (unsigned)noise);
+    else lv_label_set_text_fmt(MBU.mon_tot, _("%u tramas · %u bytes · %u con CRC malo · %u bytes de ruido · %u bytes con error de línea"), (unsigned)fr, (unsigned)by,
+                               (unsigned)crc, (unsigned)noise, (unsigned)lerr);
     lv_obj_clean(MBU.mon_rows);
     int32_t w = lv_obj_get_width(MBU.mon_rows);
     for (int i = 0; i < nu; i++) {

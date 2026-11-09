@@ -149,6 +149,7 @@ typedef struct {
     uint8_t   found[248];       /* scan: 1 = answered, 2 = refused (exception) */
     char      bauds_found[8][24];
     int       nbauds_found;
+    int       nbauds_clean;     /* the first ones of bauds_found came with no line errors */
     uint32_t  tool_seq;
 
     /* slave */
@@ -161,6 +162,15 @@ typedef struct {
     uint32_t  s_req, s_mine, s_other, s_bcast, s_crc, s_exc;
     char      s_last[96];
     uint32_t  s_seq;
+
+    /* Modbus TCP served by the app (mb_bus.c, "the server"): the slave over
+     * TCP listens on cfg.tport; the gateway, while the master is open on
+     * RTU, answers TCP clients on gw_port by asking the bus */
+    bool      gw_on;
+    uint16_t  gw_port;
+    uint32_t  gw_req, gw_ok, gw_fail;
+    char      tcp_peer[24];     /* the client connected, "" none */
+    char      tcp_err[64];      /* the port could not be opened */
 
     /* the device profile (mb_prof.h), shared by the master and the slave:
      * the UI loads it and bumps prof_gen, the thread takes a copy */
@@ -175,6 +185,7 @@ typedef struct {
     mb_unit_t units[MB_UNITS];
     int       nunits;
     uint32_t  mon_frames, mon_bytes, mon_crc, mon_noise;
+    uint32_t  mon_parity, mon_frame;    /* bytes the UART saw with a bad parity or stop bit */
 } mb_shared_t;
 
 extern mb_shared_t MB;

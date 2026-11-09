@@ -13,6 +13,7 @@
  *   vivo=1|0  periodo=500            the same request over and over
  *   punto=<i>,<value>                write a profile point (or set it, as slave)
  *   falla=0..5  demora=ms  unidad=n  animar=1|0     the slave
+ *   pasarela=1|0  pasarela_puerto=502   the TCP -> RTU gateway (master on RTU)
  *   borrar=cuentas | borrar=trafico
  *   herramienta=unidades | velocidad | parar
  *
@@ -156,6 +157,8 @@ static void order(char *key, char *v)
     else if (!strcmp(key, "demora")) { int t = atoi(v); if (t >= 0 && t <= 5000) MB.s_delay_ms = (uint16_t)t; }
     else if (!strcmp(key, "unidad")) { int u = atoi(v); if (u >= 1 && u <= 247) MB.s_unit = (uint8_t)u; }
     else if (!strcmp(key, "animar")) MB.s_anim = flag(v);
+    else if (!strcmp(key, "pasarela")) { MB.gw_on = flag(v); MB.tcp_err[0] = 0; if (MB.gw_on) MB.want_open = true; }
+    else if (!strcmp(key, "pasarela_puerto")) { long p = atol(v); if (p > 0 && p < 65536) MB.gw_port = (uint16_t)p; }
     else if (!strcmp(key, "herramienta")) {
         bool rtu = MB.cfg.tr == MB_TR_RTU;
         if (!strcmp(v, "parar")) MB.tool_stop = true;
@@ -248,6 +251,11 @@ static void put_state(void)
     memcpy(s.units, MB.units, sizeof s.units);
     s.nunits = MB.nunits;
     s.mon_frames = MB.mon_frames; s.mon_bytes = MB.mon_bytes; s.mon_crc = MB.mon_crc; s.mon_noise = MB.mon_noise;
+    s.mon_parity = MB.mon_parity; s.mon_frame = MB.mon_frame;
+    s.gw_on = MB.gw_on; s.gw_port = MB.gw_port; s.gw_req = MB.gw_req; s.gw_ok = MB.gw_ok; s.gw_fail = MB.gw_fail;
+    memcpy(s.tcp_peer, MB.tcp_peer, sizeof s.tcp_peer);
+    memcpy(s.tcp_err, MB.tcp_err, sizeof s.tcp_err);
+    s.nbauds_clean = MB.nbauds_clean;
     s.prof_on = MB.prof_on;
     memcpy(s.prof.file, MB.prof.file, sizeof s.prof.file);
     memcpy(s.prof.name, MB.prof.name, sizeof s.prof.name);
@@ -294,9 +302,17 @@ static void put_state(void)
         jw_fmt(&w, "%s[%d,%u]", first ? "" : ",", u, s.found[u]);
         first = false;
     }
-    jw_raw(&w, "],\"velocidades\":[");
+    jw_fmt(&w, "],\"limpias\":%d,\"velocidades\":[", s.nbauds_clean);
     for (int i = 0; i < s.nbauds_found && i < 8; i++) { if (i) jw_raw(&w, ","); jw_str(&w, s.bauds_found[i]); }
     jw_raw(&w, "]}}");
+
+    /* the gateway, and the client of the TCP server (gateway or TCP slave) */
+    jw_fmt(&w, ",\"pasarela\":{\"on\":%s,\"puerto\":%u,\"pedidos\":%lu,\"ok\":%lu,\"fallas\":%lu,\"cliente\":",
+           s.gw_on ? "true" : "false", s.gw_port ? s.gw_port : 502, (unsigned long)s.gw_req, (unsigned long)s.gw_ok, (unsigned long)s.gw_fail);
+    jw_str(&w, s.tcp_peer);
+    jw_raw(&w, ",\"error\":");
+    jw_str(&w, s.tcp_err);
+    jw_raw(&w, "}");
 
     /* slave */
     jw_fmt(&w, ",\"esclavo\":{\"unidad\":%u,\"falla\":%d,\"demora\":%u,\"animar\":%s,\"cuentas\":{\"oidas\":%lu,\"propias\":%lu,"
@@ -307,8 +323,9 @@ static void put_state(void)
     jw_raw(&w, "}");
 
     /* monitor */
-    jw_fmt(&w, ",\"monitor\":{\"tramas\":%lu,\"bytes\":%lu,\"crc\":%lu,\"ruido\":%lu,\"unidades\":[",
-           (unsigned long)s.mon_frames, (unsigned long)s.mon_bytes, (unsigned long)s.mon_crc, (unsigned long)s.mon_noise);
+    jw_fmt(&w, ",\"monitor\":{\"tramas\":%lu,\"bytes\":%lu,\"crc\":%lu,\"ruido\":%lu,\"paridad\":%lu,\"parada\":%lu,\"unidades\":[",
+           (unsigned long)s.mon_frames, (unsigned long)s.mon_bytes, (unsigned long)s.mon_crc, (unsigned long)s.mon_noise,
+           (unsigned long)s.mon_parity, (unsigned long)s.mon_frame);
     for (int i = 0; i < s.nunits; i++) {
         const mb_unit_t *u = &s.units[i];
         char last[80];

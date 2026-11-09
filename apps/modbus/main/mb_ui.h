@@ -28,7 +28,7 @@ typedef struct {
     bool paused, only_err;
     bool boot;                  /* the BOOT button was pressed */
     /* tab widgets, NULL when the tab is not shown */
-    lv_obj_t *m_status, *m_stats, *m_grid, *m_text, *m_tool, *m_tool_bar, *m_found;
+    lv_obj_t *m_status, *m_stats, *m_grid, *m_text, *m_tool, *m_tool_bar, *m_found, *m_gw;
     lv_obj_t *s_stats, *s_last, *s_hr[16], *s_coil[16], *s_ir[8], *s_di[8];
     lv_obj_t *mon_tot, *mon_rows;
     lv_obj_t *t_list, *t_rows[60], *t_pause;

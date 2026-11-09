@@ -330,20 +330,84 @@ static const struct { const char *file, *text; } EXAMPLES[] = {
       "hr,0x102,Velocidad (0 9600 / 1 14400 / 2 19200),u16,1,,rw,0,2,,0\n"
       "hr,0x103,Corrección de temperatura,s16,0.1,°C,rw,-10,10,,0\n"
       "hr,0x104,Corrección de humedad,s16,0.1,%,rw,-10,10,,0\n" },
+    /* added 2026-11-09: written once on boards that already had the first four */
+    { "inversor-solar.csv",
+      "# P4OS Modbus profile: a generic hybrid solar inverter, an example. Every\n"
+      "# brand has its own map: copy this one and set the addresses from the manual.\n"
+      "nombre,Inversor solar híbrido\n"
+      "nota,\"Un ejemplo genérico: paneles, batería, red y consumo\"\n"
+      "esclavo,1\nvelocidad,9600\nformato,8N1\nperiodo,2000\n"
+      "# tabla,direccion,nombre,tipo,escala,unidad,acceso,min,max,simulacion,valor\n"
+      "ir,0,Tensión de paneles,u16,0.1,V,r,280,360,seno,320\n"
+      "ir,1,Corriente de paneles,u16,0.1,A,r,0,9,seno,6\n"
+      "ir,2,Potencia de paneles,u16,1,W,r,0,3000,seno,1800\n"
+      "ir,10,Tensión de batería,u16,0.01,V,r,51.2,54.8,deriva,52.8\n"
+      "ir,11,Corriente de batería,s16,0.1,A,r,-40,40,deriva,10\n"
+      "ir,12,Carga de batería,u16,1,%,r,20,100,rampa,65\n"
+      "ir,20,Tensión de red,u16,0.1,V,r,215,235,seno,225\n"
+      "ir,21,Frecuencia de red,u16,0.01,Hz,r,49.9,50.1,seno,50\n"
+      "ir,30,Potencia de consumo,u16,1,W,r,200,2500,azar,900\n"
+      "ir,40,Energía de hoy,u32,0.1,kWh,r,0,0.02,contador,8.4\n"
+      "ir,50,Temperatura del inversor,s16,0.1,°C,r,30,55,deriva,38\n"
+      "di,0,Red presente,bit,,,r,,,,1\n"
+      "di,1,Falla,bit,,,r,,,,0\n"
+      "hr,0,Modo (0 red / 1 solar / 2 batería),u16,1,,rw,0,2,,1\n"
+      "hr,1,Corriente máxima de carga,u16,1,A,rw,0,100,,40\n"
+      "hr,2,Corte por batería baja,u16,0.1,V,rw,44,52,,48\n"
+      "coil,0,Salida habilitada,bit,,,rw,,,,1\n" },
+    { "bms-bateria.csv",
+      "# P4OS Modbus profile: a generic battery BMS, 8 cells of LiFePO4, an example.\n"
+      "# Daly, JK and the rest have their own maps (some not Modbus at all).\n"
+      "nombre,BMS de batería (8 celdas)\n"
+      "nota,\"Un ejemplo genérico de LiFePO4 8S: celdas, corriente, carga y alarmas\"\n"
+      "esclavo,1\nvelocidad,9600\nformato,8N1\nperiodo,1000\n"
+      "# tabla,direccion,nombre,tipo,escala,unidad,acceso,min,max,simulacion,valor\n"
+      "ir,0,Tensión del paquete,u16,0.01,V,r,26.4,26.8,deriva,26.6\n"
+      "ir,1,Corriente,s16,0.01,A,r,-20,20,deriva,3.5\n"
+      "ir,2,Carga,u16,1,%,r,30,100,rampa,72\n"
+      "ir,3,Ciclos,u16,1,,r,0,0,,143\n"
+      "ir,10,Celda 1,u16,1,mV,r,3310,3340,deriva,3325\n"
+      "ir,11,Celda 2,u16,1,mV,r,3310,3340,deriva,3324\n"
+      "ir,12,Celda 3,u16,1,mV,r,3310,3340,deriva,3327\n"
+      "ir,13,Celda 4,u16,1,mV,r,3310,3340,deriva,3323\n"
+      "ir,14,Celda 5,u16,1,mV,r,3310,3340,deriva,3326\n"
+      "ir,15,Celda 6,u16,1,mV,r,3310,3340,deriva,3325\n"
+      "ir,16,Celda 7,u16,1,mV,r,3310,3340,deriva,3322\n"
+      "ir,17,Celda 8,u16,1,mV,r,3300,3340,deriva,3318\n"
+      "ir,20,Temperatura 1,s16,0.1,°C,r,22,30,deriva,25\n"
+      "ir,21,Temperatura 2,s16,0.1,°C,r,22,30,deriva,25.5\n"
+      "di,0,Sobretensión,bit,,,r,,,,0\n"
+      "di,1,Subtensión,bit,,,r,,,,0\n"
+      "di,2,Sobrecorriente,bit,,,r,,,,0\n"
+      "di,3,Temperatura alta,bit,,,r,,,,0\n"
+      "di,4,Balanceando,bit,,,r,,,alterna,0\n"
+      "coil,0,Carga habilitada,bit,,,rw,,,,1\n"
+      "coil,1,Descarga habilitada,bit,,,rw,,,,1\n" },
 };
 
+#define EXAMPLES_FIRST 4        /* the ones a new card gets; the rest came later */
+
+/* All of them on an empty folder. The ones added later go once to a card
+ * that already had profiles (a pref remembers it), and never over a file
+ * of the same name: one the user deleted after that stays deleted. */
 void mb_prof_examples(void)
 {
     char names[1][48];
-    if (mb_prof_list(names, 1) > 0) return;
+    int32_t v = 0;
+    bool fresh = mb_prof_list(names, 1) <= 0;
+    bool later = !aos_hal_pref_get_i32("mbt_exv", &v) || v < 2;
     for (size_t i = 0; i < sizeof EXAMPLES / sizeof EXAMPLES[0]; i++) {
+        if (!fresh && (i < EXAMPLES_FIRST || !later)) continue;
         char p[160];
         path_of(EXAMPLES[i].file, p, sizeof p);
+        struct stat sb;
+        if (!fresh && stat(p, &sb) == 0) continue;
         FILE *f = fopen(p, "w");
         if (!f) return;
         fputs(EXAMPLES[i].text, f);
         fclose(f);
     }
+    aos_hal_pref_set_i32("mbt_exv", 2);
 }
 
 /* ---- values ---- */

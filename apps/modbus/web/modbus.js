@@ -70,6 +70,88 @@ function serialize(p) {
   return L.join('\n') + '\n';
 }
 
+/* ---- importing a register map from Home Assistant or ESPHome ----
+ *
+ * What people already have in text: Home Assistant's `modbus:` (sensors,
+ * binary_sensors, switches, with address, input_type, data_type, scale,
+ * slave) and ESPHome's `modbus_controller` platforms (address,
+ * register_type, value_type, a multiply filter). Not a YAML parser: the
+ * list items ("- ...") with their keys, by indentation, which is all these
+ * files are. A list inside an item (ESPHome's filters) lends its keys to
+ * the item. */
+function yamlItems(text) {
+  const items = [], open = [], keys = [], top = {};
+  for (const raw of text.replace(/\r/g, '').split('\n')) {
+    const line = raw.replace(/(^|\s)#.*$/, '');
+    if (!line.trim()) continue;
+    const ind = line.search(/\S/);
+    let body = line.trim();
+    while (open.length && ind <= open[open.length - 1].ind) open.pop();
+    while (keys.length && ind <= keys[keys.length - 1].ind) keys.pop();
+    let item = null;
+    if (body === '-' || body.startsWith('- ')) {
+      item = { ind, ctx: keys.map(k => k.key), f: {}, parent: open.length ? open[open.length - 1] : null };
+      items.push(item);
+      open.push(item);
+      body = body.slice(1).trim();
+      if (!body) continue;
+    }
+    const m = body.match(/^([A-Za-z_][\w.-]*)\s*:\s*(.*)$/);
+    if (!m) continue;
+    const key = m[1].toLowerCase(), val = m[2].replace(/^["']|["']$/g, '').trim();
+    if (!val) { keys.push({ ind: item ? ind + 2 : ind, key }); continue; }
+    const target = item || (open.length ? open[open.length - 1] : null);
+    if (target) { if (!(key in target.f)) target.f[key] = val; }
+    else if (!(key in top)) top[key] = val;
+  }
+  /* an item with no address inside one with it (ESPHome's filters) lends it its keys */
+  for (const it of items)
+    if (!('address' in it.f) && it.parent && 'address' in it.parent.f)
+      for (const [k, v] of Object.entries(it.f)) if (!(k in it.parent.f)) it.parent.f[k] = v;
+  return { items, top };
+}
+
+const HA_TYPE = { int16: 's16', uint16: 'u16', int32: 's32', uint32: 'u32', float32: 'f32', int: 's16', uint: 'u16', float: 'f32' };
+const EH_TYPE = { u_word: 'u16', s_word: 's16', u_dword: 'u32', s_dword: 's32', fp32: 'f32', u_dword_r: 'u32cdab', s_dword_r: 's32cdab', fp32_r: 'f32cdab' };
+const TABLE = { holding: 'hr', input: 'ir', read: 'ir', coil: 'coil', discrete_input: 'di', discrete: 'di' };
+
+function importYaml(text, fname) {
+  const p = { nombre: fname.replace(/\.(ya?ml)$/i, ''), nota: '', esclavo: '1', velocidad: '', formato: '', periodo: '1000', pts: [], bad: 0 };
+  const esphome = /modbus_controller/.test(text);
+  let skipped = 0;
+  const { items, top } = yamlItems(text);
+  for (const it of [{ f: top, ctx: [] }, ...items]) {
+    const f = it.f, ctx = it.ctx.join('/');
+    if (f.baudrate || f.baud_rate) p.velocidad = f.baudrate || f.baud_rate;
+    if (f.parity) p.formato = '8' + ({ e: 'E', even: 'E', o: 'O', odd: 'O' }[f.parity.toLowerCase()] || 'N') + ((f.stopbits || f.stop_bits) === '2' ? '2' : '1');
+    if (/modbus_controller$/.test(ctx) && f.address) { p.esclavo = String(parseInt(f.address)); continue; }
+    if (!('address' in f) || it === undefined || !it.ctx.length) continue;
+    if (esphome && f.platform && f.platform !== 'modbus_controller') continue;
+    const unit = f.slave || f.device_address;
+    if (unit && p.pts.length === 0) p.esclavo = String(parseInt(unit));
+    const writes = /switch|number|select|output/.test(ctx);
+    const bits = /binary_sensor/.test(ctx);
+    let tabla = TABLE[(f.register_type || f.input_type || f.write_type || '').toLowerCase()] || (bits ? 'coil' : writes && /switch/.test(ctx) ? 'coil' : 'hr');
+    let tipo = 'u16';
+    if (tabla === 'coil' || tabla === 'di') tipo = 'bit';
+    else if (f.value_type) tipo = EH_TYPE[f.value_type.toLowerCase()] || 'u16';
+    else if (f.data_type) {
+      tipo = HA_TYPE[f.data_type.toLowerCase()] || 'u16';
+      if (/^(word|word_byte)$/.test((f.swap || '').toLowerCase()) && /32/.test(tipo)) tipo += 'cdab';
+    }
+    if (!['u16', 's16', 'bit', 'u32', 's32', 'f32', 'u32cdab', 's32cdab', 'f32cdab'].includes(tipo)) { skipped++; continue; }
+    const addr = parseInt(f.address);
+    if (isNaN(addr)) { skipped++; continue; }
+    p.pts.push({
+      tabla, direccion: String(addr), nombre: (f.name || `${tabla} ${addr}`).replace(/,/g, ' ').slice(0, 31), tipo,
+      escala: f.scale || f.multiply || '', unidad: (f.unit_of_measurement || '').replace(/,/g, ' '),
+      acceso: writes ? 'rw' : 'r', min: f.min_value || '', max: f.max_value || '', simulacion: '', valor: '',
+    });
+  }
+  p.nota = (esphome ? tr('Importado de ESPHome') : tr('Importado de Home Assistant')) + (skipped ? ' · ' + tr('%s entradas sin traer', skipped) : '');
+  return p;
+}
+
 function slug(name) {
   const s = (P.fsSlug ? P.fsSlug(name, 40, 'perfil') : name.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '')) || 'perfil';
   return s + '.csv';
@@ -165,6 +247,9 @@ function control(box, hidden) {
   const mPer = sel([100, 250, 500, 1000, 2000].map(v => [v, v + ' ms']), { onchange: () => send('periodo=' + mPer.value) });
   const mFmt = sel([['u16', 'U16'], ['s16', 'S16'], ['hex', 'HEX'], ['bin', 'BIN']], { onchange: () => drawMaster(true) });
   const mRes = h('div'), mCounts = h('div', { class: 'muted small' }), mTool = h('div');
+  const gwOn = h('input', { type: 'checkbox', onchange: e => send('pasarela=' + (e.target.checked ? 1 : 0)) });
+  const gwPort = inp({ size: 6, inputmode: 'numeric' });
+  const gwInfo = h('div', { class: 'muted small' });
   const sendReq = () => {
     const fc = +mFc.value, one = fc === 5 || fc === 6 || fc === 8;
     const vals = mVals.value.trim().split(/[\s,;]+/).filter(Boolean);
@@ -186,7 +271,14 @@ function control(box, hidden) {
       h('button', { class: 'btn', onclick: () => send('herramienta=velocidad') }, tr('Buscar velocidad')),
       h('button', { class: 'btn', onclick: () => send('herramienta=parar') }, tr('Detener')),
       h('button', { class: 'btn', onclick: () => send('borrar=cuentas') }, tr('Borrar cuentas'))),
-    mTool);
+    mTool,
+    h('h3', {}, tr('Pasarela Modbus TCP → RTU')),
+    h('div', { class: 'btns' },
+      h('label', { class: 'mbck' }, gwOn, tr('Atender clientes TCP')),
+      h('label', { class: 'mbck' }, tr('Puerto'), gwPort),
+      h('button', { class: 'btn', onclick: () => send('pasarela_puerto=' + gwPort.value) }, tr('Aplicar'))),
+    gwInfo,
+    h('p', { class: 'note small' }, tr('Un programa de la PC (Modbus Poll, un SCADA, Home Assistant) pide por la red a la placa, y ella le pregunta al equipo por el bus. Si el equipo no contesta, el cliente recibe la excepción 0B.')));
 
   /* slave */
   const sUnit = inp({ size: 4, inputmode: 'numeric' }), sFault = sel(FAULTS.map((f, i) => [i, tr(f)]), { onchange: () => send('falla=' + sFault.value) });
@@ -269,19 +361,32 @@ function control(box, hidden) {
       t.activa ? h('p', { class: 'muted' }, tr('Herramienta en curso: %s de %s', t.pos, t.total)) : null,
       (t.unidades.length || t.velocidades.length) ? h('div', { class: 'btns' },
         ...t.unidades.map(([u, k]) => h('button', { class: 'btn small', onclick: () => { mUnit.value = u; } }, `U${u}${k === 2 ? ' (exc)' : k === 3 ? ' (CRC)' : ''}`)),
-        ...t.velocidades.map(v => h('button', { class: 'btn small', onclick: () => { const [b, f] = v.split(' '); send('baud=' + b, 'formato=' + f); } }, v))) : null,
-      t.velocidades.length > 1 ? h('p', { class: 'note small' }, tr('La velocidad es segura; el formato no: los UART no descartan un byte con error de paridad, así que a la velocidad buena contestan varios. El manual del equipo dice cuál (el estándar pide 8E1).')) : null);
+        ...t.velocidades.map((v, i) => h('button', { class: 'btn small' + (i < t.limpias ? ' pri' : ''), onclick: () => { const [b, f] = v.split(' '); send('baud=' + b, 'formato=' + f); } }, v))) : null,
+      t.velocidades.length > 1 ? h('p', { class: 'note small' }, t.limpias >= 1 && new Set(t.velocidades.slice(0, t.limpias).map(v => v.split(' ')[1])).size === 1
+        ? tr('Lo marcado contestó sin errores de línea: ése es el formato. Los otros contestaron con bytes de paridad o de parada malos.')
+        : tr('La velocidad es segura; el formato no salió claro (contestaron varios sin errores, o todos con errores). El manual del equipo dice cuál (el estándar pide 8E1).')) : null);
+  }
+
+  function drawGateway() {
+    const g = st.pasarela;
+    if (!g) return;
+    gwOn.checked = g.on;
+    setv(gwPort, g.puerto);
+    gwInfo.className = g.error ? 'mberr small' : 'muted small';
+    gwInfo.textContent = g.error || (!g.on ? tr('Apagada.') : tr('Cliente: %s · %s pedidos, %s contestados, %s sin respuesta',
+      g.cliente || tr('ninguno'), g.pedidos, g.ok, g.fallas));
   }
 
   function drawSlave() {
     const e = st.esclavo, c = e.cuentas;
-    sInfo.textContent = tr('%s tramas oídas · %s para esta unidad · %s para otras · %s broadcast · %s CRC malos · %s excepciones',
+    sInfo.textContent = (st.conexion.tr === 'tcp' ? tr('Modbus TCP en el puerto %s · cliente: %s', st.conexion.tport, (st.pasarela && st.pasarela.cliente) || tr('ninguno')) + ' · ' : '') + tr('%s tramas oídas · %s para esta unidad · %s para otras · %s broadcast · %s CRC malos · %s excepciones',
       c.oidas, c.propias, c.otras, c.broadcast, c.crc, c.excepciones) + (e.ultimo ? ' · ' + tr('Último pedido:') + ' ' + e.ultimo : '');
   }
 
   function drawMonitor() {
     const m = st.monitor;
-    monInfo.textContent = tr('%s tramas · %s bytes · %s con CRC malo · %s bytes de ruido', m.tramas, m.bytes, m.crc, m.ruido);
+    monInfo.textContent = tr('%s tramas · %s bytes · %s con CRC malo · %s bytes de ruido · %s bytes con error de línea', m.tramas, m.bytes, m.crc, m.ruido,
+      (m.paridad || 0) + (m.parada || 0));
     put(monTable, m.unidades.length ? h('table', { class: 'mbt', style: 'min-width:0' },
       h('thead', {}, h('tr', {}, ...[tr('Unidad'), tr('Pedidos'), tr('Respuestas'), tr('Sin respuesta'), tr('Excepciones'), 'CRC', tr('Demora'), tr('Último')].map(t => h('th', {}, t)))),
       h('tbody', {}, ...m.unidades.map(u => h('tr', {},
@@ -312,7 +417,7 @@ function control(box, hidden) {
     sAnim.checked = e.animar;
     const card = st.rol === 'maestro' ? masterCard : st.rol === 'esclavo' ? slaveCard : monCard;
     if (roleBox.firstChild !== card) put(roleBox, card);
-    if (st.rol === 'maestro') drawMaster();
+    if (st.rol === 'maestro') { drawMaster(); drawGateway(); }
     else if (st.rol === 'esclavo') drawSlave();
     else drawMonitor();
   }
@@ -370,7 +475,7 @@ P.registerPage({
     let files = [], sel = null, prof = null, dirty = false, live = null, gone = false;
     const listBox = h('div', { class: 'mbl' });
     const edBox = h('div');
-    const fileIn = h('input', { type: 'file', accept: '.csv,text/csv', style: 'display:none', onchange: upload });
+    const fileIn = h('input', { type: 'file', accept: '.csv,text/csv,.yaml,.yml', style: 'display:none', onchange: upload });
 
     async function loadList() {
       try {
@@ -390,9 +495,10 @@ P.registerPage({
           ...files.map(f => h('button', { class: 'mbi' + (f === sel ? ' on' : ''), onclick: () => choose(f) }, h('div', { class: 'mbn' }, f))),
           h('div', { class: 'btns', style: 'margin-top:12px' },
             h('button', { class: 'btn pri', onclick: create }, tr('Nuevo')),
-            h('button', { class: 'btn', onclick: () => fileIn.click() }, tr('Subir .csv'))),
+            h('button', { class: 'btn', onclick: () => fileIn.click() }, tr('Subir .csv o importar YAML'))),
           fileIn,
-          h('p', { class: 'note small' }, tr('Un perfil dice qué tiene un equipo Modbus y dónde. En Maestro la app lo lee entero; en Esclavo hace de ese equipo.'))));
+          h('p', { class: 'note small' }, tr('Un perfil dice qué tiene un equipo Modbus y dónde. En Maestro la app lo lee entero; en Esclavo hace de ese equipo.')),
+          h('p', { class: 'note small' }, tr('Importar: un YAML de Home Assistant (modbus:) o de ESPHome (modbus_controller) se vuelve un perfil con sus registros, tipos, escalas y unidades.'))));
     }
 
     async function choose(f) {
@@ -525,9 +631,10 @@ P.registerPage({
       e.target.value = '';
       if (!f) return;
       const text = await f.text();
-      const p = parse(text);
+      const yaml = /\.ya?ml$/i.test(f.name) || /^\s*(modbus|modbus_controller|sensor)\s*:/m.test(text);
+      const p = yaml ? importYaml(text, f.name) : parse(text);
       if (!p.pts.length) { P.toast(tr('%s no parece un perfil: no tiene puntos', f.name), true); return; }
-      try { await newFile(p.nombre || f.name.replace(/\.csv$/i, ''), p); P.toast(tr('Subido')); }
+      try { await newFile(p.nombre || f.name.replace(/\.csv$/i, ''), p); P.toast(yaml ? tr('Importados %s puntos: revisalos y guardá', p.pts.length) : tr('Subido')); }
       catch (err) { P.toast(err.message, true); }
     }
 

@@ -72,6 +72,8 @@ static void settings_load(void)
     MB.s_unit = aos_hal_pref_get_i32("mbt_sunit", &v) && v >= 1 && v <= 247 ? (uint8_t)v : 1;
     MB.s_delay_ms = aos_hal_pref_get_i32("mbt_sdel", &v) && v >= 0 && v <= 5000 ? (uint16_t)v : 500;
     MB.s_anim = !aos_hal_pref_get_i32("mbt_sanim", &v) || v;
+    MB.gw_on = aos_hal_pref_get_i32("mbt_gw", &v) && v;
+    MB.gw_port = aos_hal_pref_get_i32("mbt_gwp", &v) && v > 0 && v < 65536 ? (uint16_t)v : 502;
     MBU.fmt = aos_hal_pref_get_i32("mbt_fmt", &v) && v >= 0 && v < FMT_COUNT ? v : FMT_U16;
     MBU.swap = aos_hal_pref_get_i32("mbt_swap", &v) && v;
     MBU.tab = aos_hal_pref_get_i32("mbt_tab", &v) && v >= 0 && v < TAB_COUNT ? v : TAB_MASTER;
@@ -84,7 +86,10 @@ void mb_settings_save(void)
     mb_cfg_t c = MB.cfg;
     mb_mreq_t q = MB.mreq;
     int per = MB.m_period_ms, su = MB.s_unit, sd = MB.s_delay_ms, sa = MB.s_anim, role = MB.role;
+    int gw = MB.gw_on, gwp = MB.gw_port;
     mb_unlock();
+    aos_hal_pref_set_i32("mbt_gw", gw);
+    aos_hal_pref_set_i32("mbt_gwp", gwp);
     aos_hal_pref_set_i32("mbt_tr", c.tr);
     aos_hal_pref_set_str("mbt_port", c.port);
     aos_hal_pref_set_i32("mbt_baud", (int32_t)c.baud);
@@ -576,7 +581,7 @@ void mb_rebuild_page(void)
     mb_overlay_close();
     prof_forget();
     lv_obj_clean(MBU.content);
-    MBU.m_status = MBU.m_stats = MBU.m_grid = MBU.m_text = MBU.m_tool = MBU.m_tool_bar = MBU.m_found = NULL;
+    MBU.m_status = MBU.m_stats = MBU.m_grid = MBU.m_text = MBU.m_tool = MBU.m_tool_bar = MBU.m_found = MBU.m_gw = NULL;
     MBU.s_stats = MBU.s_last = NULL;
     memset(MBU.s_hr, 0, sizeof MBU.s_hr);
     memset(MBU.s_coil, 0, sizeof MBU.s_coil);
