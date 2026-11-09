@@ -37,7 +37,9 @@ the microSD, loaded as shared objects:
   112 kinds of sensor read by themselves (temperature, pressure, air
   quality, light, motion, current, distance...), addressable LED strips on
   any free pin (WLED's way), a serial terminal, an ESP32, Arduino and SWD programmer,
-  Modbus, a bench supply and scope, an EEPROM reader and writer, a PWM and
+  RS485 with a Modbus tester (master, slave, monitor, a TCP gateway) and
+  DMX512 (a test console, an analyzer, RDM, an Art-Net and sACN node, and a
+  lighting console for a phone), a bench supply and scope, an EEPROM reader and writer, a PWM and
   servo generator with an analog level (and sixteen more servos on a
   PCA9685), a learning
   infrared remote with SmartIR's codes, and a CAN bus analyser. Each one
@@ -386,7 +388,29 @@ header with who holds each pin.
   the computer: esptool over `rfc2217://p4os.local:4000`, avrdude over
   `net:p4os.local:4001`; or becomes its CMSIS-DAP debug probe on the OTG
   connector, for OpenOCD, pyOCD and probe-rs.
-- **Modbus:** a Riden RD60xx supply over RTU, and a gateway.
+- **Modbus** (on the card since 0.25.0): a tester for Modbus RTU on RS485.
+  A master (any function, once or live; find the units on a bus, and its
+  speed and format, the format by the line's parity and framing errors),
+  a slave with faults on demand (silent, slow, broken CRC, busy) that also
+  serves Modbus TCP, and a monitor that only listens. Device profiles as
+  CSV (six examples; Home Assistant and ESPHome YAML imported on the
+  portal), so a master reads "Temperatura 23.4 °C" and a slave plays the
+  device. A TCP → RTU gateway for a PC program or a SCADA, every frame in
+  hex and in words, and the portal page drives it all.
+- **Equipos:** the Riden RD60xx supply over RTU and a DOMCOM gateway, out
+  of the old Modbus app.
+- **DMX** (0.25.0): DMX512 on the same RS485 port. A test console (512
+  faders, a chase to find channels, the packet's shape), a fixture the
+  board plays, an analyzer with the BREAK and MAB measured on the pin, an
+  Art-Net and sACN node (the network out as DMX, ArtPoll answered), and
+  RDM: the fixtures on the line found by discovery, their address and name
+  set, identify.
+- **Luces** (0.25.0): a lighting console. Fixture types (twelve built in,
+  more as CSV), a patch in four universes, a programmer for the selected
+  fixtures (intensity, colour, strobe, a pan/tilt pad), groups, effects and
+  three test modes, scenes with their own fade, a chase with tap tempo;
+  universe 1 on RS485 and all of them as Art-Net. Its portal page is a
+  second console for a phone.
 - **Bench:** a Rigol scope over the LAN, the Riden, a UNI-T generator over
   USB, and a logger to CSV.
 - **Electronics:** resistor colours, Ohm's law, dividers, LEDs, the 555 and
@@ -1040,6 +1064,13 @@ reads them.
 - Typing (0.24.0): the Spanish keyboard, the cursor moved with the space
   bar, copy and paste on the board and from the portal's clipboard box,
   and the search (a page of Settings, an app and an MP3 found and opened).
+- RS485 (0.25.0), the P4 and an ESP32 with two automatic modules on a
+  twisted pair: Modbus both ways and the monitor, the format found by the
+  line's errors (19200 8E1 told from 8N1), the TCP gateway asked from a
+  Mac; DMX at 40 packets a second both ways with no bad packet, a pixel
+  strip lit by the console and by Luces, RDM discovery, identify and a new
+  address on the ESP32, and Art-Net from a Mac through the board to the
+  strip.
 
 **Waiting for hardware on the bench:**
 
@@ -1230,8 +1261,8 @@ idioma de la tarjeta, la de la placa y la del portal web. Los documentos del pla
 
 | | |
 |---|---|
-| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 23 apps propias y 46 de la tarjeta (juegos, un pinball 3D de seis mesas, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN y tiras LED direccionables |
-| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el emulador (GBA y Neo Geo a 60 cuadros, el táctil con varios dedos a la vez), el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, una termocupla MAX6675 y un DS18B20 registrados por Datalog en segundo plano, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante), BLE escuchando con el iPhone y la Mac conectados y leyendo un termómetro Xiaomi cifrado con su clave, dos cámaras IP (un timbre H.264 directo a la pantalla y una MJPEG), la grabación de pantalla en MP4 por el codificador H.264 del P4, SSH desde la Mac y hacia una Raspberry Pi, un bus CAN real con un ESP32, y el teclado, copiar y pegar y el buscador |
+| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 22 apps propias y 50 de la tarjeta (juegos, un pinball 3D de seis mesas, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN, tiras LED direccionables y RS485: Modbus (maestro, esclavo, monitor, perfiles de equipos y pasarela TCP), DMX con RDM y nodo Art-Net/sACN, y una consola de luces que también se maneja desde el celular |
+| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el emulador (GBA y Neo Geo a 60 cuadros, el táctil con varios dedos a la vez), el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, una termocupla MAX6675 y un DS18B20 registrados por Datalog en segundo plano, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante), BLE escuchando con el iPhone y la Mac conectados y leyendo un termómetro Xiaomi cifrado con su clave, dos cámaras IP (un timbre H.264 directo a la pantalla y una MJPEG), la grabación de pantalla en MP4 por el codificador H.264 del P4, SSH desde la Mac y hacia una Raspberry Pi, un bus CAN real con un ESP32, el teclado, copiar y pegar y el buscador, y RS485 con un ESP32 y dos módulos automáticos: Modbus en las dos direcciones, DMX con una tira de pixeles, RDM y Art-Net desde la Mac |
 | Qué falta | probar en la placa el RC522, RF con un sensor de 433 MHz y con tráfico real de AM y FM angosta, y encontrar por qué se cortó la red durante dos OTA |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
 | Cómo se instala | la primera vez por el CH340; después `tools/ota.sh p4os.local` o el portal |

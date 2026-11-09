@@ -1,80 +1,70 @@
 # Changelog
 
-## Next
+## 0.25.0 — 2026-11-09
 
-- **RS485 and a Modbus bench.** The Modbus app is now a tester for Modbus
-  RTU on RS485, installed from the card (`apps/modbus`): a **master** (any
-  function, once or live, values in seven formats, a tap writes; "find
-  units" asks 1-247, "find speed" tries eight speeds and four formats), a
-  **slave** (tables 0-999 the user edits, values that move by themselves,
-  and faults on demand: silent, slow, broken CRC, busy, failure) and a
-  **monitor** that listens without ever driving the line and keeps a row
-  per unit with its answers, silences, exceptions and delays. Every frame
-  in hex and in words in the Traffic tab; the wiring drawn with the chosen
-  port's pins. `tools/rs485_test/esp32` is the bench's other node, an ESP32
-  that plays a slave (a made-up drive) or a master, with faults of its own;
-  `docs/img/bench-rs485.svg` the wiring.
-- **Modbus device profiles.** A CSV per device (its unit, speed, format,
-  and named points with their type, scale, unit and access) chosen from a
-  list: in Maestro the app reads it all over and over and shows each value
-  with its name and unit, a tap writes; in Esclavo the app *is* that
-  device, its values moving as the profile says, to try a PLC or a SCADA
-  without the device. Edited on the board or on the portal's new Modbus
-  page, which also uploads, downloads and picks the one the board uses,
-  and shows the values live. Four examples (the bench's ESP32 drive, a
-  multisensor, an energy meter, a temperature and humidity sensor).
-- **Modbus from the portal.** The Modbus page's Control tab drives the
-  app on the board: the link, the role, a request by hand, live polling,
-  the slave's faults, the tools, the monitor's table and the traffic in
-  hex and in words, through the live channel.
-- **DMX512.** The firmware sends and receives DMX on an RS485 port
-  (`aos_io_dmx_*`): the BREAK by inverting TX, and on the receiving side
-  an interrupt of its own that closes each packet at its BREAK and times
-  the BREAK and the MAB on the pin. The **DMX** app on the card: a test
-  console (512 faders, a chase to find channels, a ramp, a rainbow, the
-  packet's shape), a fixture the board plays (dimmer, RGB, RGBW, a PAR, a
-  moving head, a pixel bar, drawn live), an analyzer (rate, slots, start
-  code, BREAK and MAB as measured, bad packets, a map of the 512
-  channels) and the XLR wiring. The bench's ESP32 plays a DMX console and
-  a light with a strip of 8 WS2812B pixels.
-- **Luces, a lighting console.** An app on the card (`apps/luces`) to run
-  DMX fixtures by name: a patch of types (nine built in, more as CSV files
-  on the card) at addresses, a programmer for the selected fixtures
-  (intensity, colours, strobe, a pan/tilt pad), effects (rainbow, wave,
-  sparkle), scenes called back with a fade, a chase on the beat with tap
-  tempo, a master and Blackout, and the 512 channels as they go out. Its
-  portal page is a second console made for a phone. Sample scenes to try
-  the chase with, and three test modes: one fixture at a time (wrong
-  addresses), red-green-blue-white (channels in the wrong order) and a
-  slow breath (the dimming curve). Four universes, the first on RS485 and
-  all of them as **Art-Net** to the network or one node; groups; each
-  scene with its own fade; twelve built-in types.
-- **DMX: a network node and RDM.** The DMX app's Red tab makes the board an
-  Art-Net or sACN (E1.31) node: one universe from the network goes out of
-  the RS485 port, and an ArtPoll is answered. Its RDM tab finds the RDM
-  fixtures on the line by discovery, reads what they are, sets their
-  address and label and makes them show themselves; the firmware sends the
-  requests between DMX packets (`aos_io_dmx_rdm`). The bench's ESP32
-  answers RDM in its light role.
-- **Modbus:** Buscar velocidad also finds the format, by the line's errors
-  (`aos_io_uart_errors`, new: bytes with a bad parity or stop bit), and the
-  monitor counts them; the slave serves **Modbus TCP**; the master on RTU
-  can be a **TCP → RTU gateway** for a PC program or a SCADA; the portal
-  imports Home Assistant and ESPHome YAML maps as profiles; a solar
-  inverter and a battery BMS join the sample profiles.
-- Apps get a TCP server (`aos_hal_tcp_listen`/`accept`) and UDP with
-  multicast (`aos_hal_udp_open`/`recv`/`send`).
+RS485 on the header, tried on a bench with an ESP32 and two automatic
+"RS485 to TTL" modules on a twisted pair (`tools/rs485_test`,
+`docs/img/bench-rs485.svg`).
+
+- **Modbus, a tester on the card** (`apps/modbus`, in place of the
+  firmware's old Modbus app):
+  - a **master**: any function, once or live, values in seven formats, a
+    tap writes; "Buscar unidades" asks units 1-247 and "Buscar velocidad"
+    tries eight speeds and four formats, and finds the format too, by the
+    line's parity and framing errors;
+  - a **slave** with tables the user edits, values that move by
+    themselves and faults on demand (silent, slow, broken CRC, busy,
+    failure); it also serves **Modbus TCP**;
+  - a **monitor** that only listens, a row per unit with its answers,
+    silences, exceptions and delays, and the bytes with line errors;
+  - a **TCP → RTU gateway** in the master, for a PC program or a SCADA;
+  - **device profiles**: a CSV per device (unit, speed, format, named
+    points with type, scale, unit and access); the master reads it and
+    shows each value by name, the slave plays the device. Six examples
+    (the bench's ESP32 drive, a multisensor, an energy meter, a temperature
+    and humidity sensor, a solar inverter, a battery BMS);
+  - every frame in hex and in words, the wiring drawn with the port's
+    pins, and a **portal page** that drives the app and edits, uploads and
+    downloads profiles, and imports Home Assistant and ESPHome YAML maps.
+- **Equipos.** The Riden supply and the DOMCOM gateway left the Modbus app
+  for an app of their own (`apps/equipos`); the Banco keeps its Fuente.
+- **DMX512** (`aos_io_dmx_*`): sending with the BREAK made by inverting
+  TX, receiving with an interrupt of its own that times the BREAK and MAB
+  on the pin, and **RDM** requests between DMX packets
+  (`aos_io_dmx_rdm`). The **DMX** app (`apps/dmx`):
+  - a test console (512 faders, a chase to find channels, a ramp, a
+    rainbow, the packet's shape);
+  - a fixture the board plays, drawn live;
+  - an analyzer: rate, slots, start code, BREAK and MAB as measured, bad
+    packets, a map of the 512 channels;
+  - **Red**: the board as an **Art-Net or sACN node**, one universe from
+    the network out on RS485, ArtPoll answered;
+  - **RDM**: the fixtures on the line found by discovery, what they are,
+    their address and label set, identify;
+  - the XLR wiring.
+- **Luces, a lighting console** (`apps/luces`): fixtures by name, twelve
+  built-in types and more as CSV, a patch in four universes, a programmer
+  for the selected fixtures (intensity, colour, strobe, a pan/tilt pad),
+  groups, effects, three test modes (one fixture at a time, red-green-
+  blue-white, a slow breath), scenes with their own fade and sample ones,
+  a chase with tap tempo, master and Blackout. Universe 1 goes out on
+  RS485 and every universe as **Art-Net**. Its portal page is a second
+  console for a phone.
+- **The bench's ESP32** (`tools/rs485_test/esp32`) plays a Modbus slave (a
+  made-up drive) or master with faults of its own, a DMX console, and a
+  DMX light on a strip of 8 WS2812B pixels that also answers RDM.
+- **For apps:** `aos_io_uart_errors` (a UART's parity and framing errors,
+  BREAKs and lost bytes), a TCP server (`aos_hal_tcp_listen`/`accept`) and
+  UDP with multicast (`aos_hal_udp_open`/`recv`/`send`). An RS485 port
+  hands its bytes over 3 character times after the line goes quiet
+  instead of 10.
+- **Translations:** every catalog checked again in English and German; the
+  portal pages of Modbus and Luces now translate the names in their
+  tables, and Cotiz the names of its rates.
 - It was not the portal: taps sent from the Mac seemed lost after reading
   the serial channel, but they were requests with a 5 s limit waiting on
-  `p4os.local`'s IPv6 lookup, which the board never answers (`curl -4`
+  `p4os.local`'s IPv6 lookup, which the board does not answer (`curl -4`
   answers in tens of ms).
-- **Equipos.** The Riden and DOMCOM gateway panels left the Modbus app for
-  an app of their own (`apps/equipos`); the Banco keeps its Fuente, and
-  the link is set from Equipos.
-- An RS485 port hands its bytes over 3 character times after the line
-  goes quiet instead of 10, so frames are split and answers timed closer to
-  the wire. The firmware's Modbus app is gone (the installable one takes
-  its place and its id).
 
 ## 0.24.0 — 2026-11-08
 
