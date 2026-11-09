@@ -159,11 +159,24 @@ full white draw almost half an amp, all from the USB.
   24 channels from its address on the strip (pixel i = address + 3i: R, G,
   B). `+` / `-` move the address by one, `>` by 24. A line a second with
   packets a second, slots, start code, BREAK and MAB as measured, bad
-  packets.
+  packets and RDM answers.
+  It also **answers RDM** (2026-11-09, `main/rdm_resp.c`, the same file the
+  simulator's make-believe fixtures use): UID 7FF0 (the prototype
+  manufacturer range) and the last four bytes of its MAC, printed when the
+  role starts; discovery, DEVICE_INFO (24 channels from its address),
+  SUPPORTED_PARAMETERS, the model, maker, software and device labels,
+  DMX_START_ADDRESS (a SET moves the strip's channels) and IDENTIFY_DEVICE
+  (the strip blinks white). A request is answered as soon as its last byte
+  is in (its length is in its third byte), from a task the interrupt
+  wakes, 200 µs after it, with the receive interrupt off while the answer
+  goes out; the TX pin is on the UART in this role, idle high, so the
+  automatic module only drives the bus while it answers.
 
 With the P4's DMX app: **Consola** on the P4 and the ESP32 as light (the
 rainbow pattern lands on the strip; the chase lights one pixel colour at a
-time), or the ESP32 as console and **Analizador** / **Aparato** on the P4.
+time), or the ESP32 as console and **Analizador** / **Aparato** on the P4,
+or **RDM** on the P4 and the ESP32 as light (it is found, identify blinks
+the strip, a new address moves its pixels).
 
 ### The console
 
