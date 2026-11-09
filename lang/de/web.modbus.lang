@@ -1,0 +1,134 @@
+# amoledos-lang 1   es -> de
+# web.modbus.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/modbus/web/modbus.js:112
+#: apps/modbus/web/modbus.js:298
+Modbus	Modbus
+
+#: apps/modbus/web/modbus.js:134
+Perfiles	Profile
+
+#: apps/modbus/web/modbus.js:135
+No hay perfiles todavía. La app escribe cuatro de ejemplo la primera vez que se abre.	Noch keine Profile. Die App schreibt beim ersten Öffnen vier Beispiele.
+
+#: apps/modbus/web/modbus.js:138
+Nuevo	Neu
+
+#: apps/modbus/web/modbus.js:139
+Subir .csv	.csv hochladen
+
+#: apps/modbus/web/modbus.js:141
+Un perfil dice qué tiene un equipo Modbus y dónde. En Maestro la app lo lee entero; en Esclavo hace de ese equipo.	Ein Profil sagt, was ein Modbus-Gerät hat und wo. Als Master liest die App alles; als Slave spielt sie dieses Gerät.
+
+#: apps/modbus/web/modbus.js:145
+Hay cambios sin guardar. ¿Descartarlos?	Es gibt ungespeicherte Änderungen. Verwerfen?
+
+#: apps/modbus/web/modbus.js:151
+%s líneas sin entender	%s Zeilen nicht verstanden
+
+#: apps/modbus/web/modbus.js:173
+Elegí un perfil de la lista, o hacé uno nuevo.	Ein Profil aus der Liste wählen oder ein neues anlegen.
+
+#: apps/modbus/web/modbus.js:179
+Quitar	Entfernen
+
+#: apps/modbus/web/modbus.js:184
+#: apps/modbus/web/modbus.js:190
+Nombre	Name
+
+#: apps/modbus/web/modbus.js:184
+Nota	Notiz
+
+#: apps/modbus/web/modbus.js:185
+Esclavo (unidad)	Slave (Einheit)
+
+#: apps/modbus/web/modbus.js:186
+Velocidad	Tempo
+
+#: apps/modbus/web/modbus.js:187
+Formato	Format
+
+#: apps/modbus/web/modbus.js:188
+Leerlo cada (ms)	Lesen alle (ms)
+
+#: apps/modbus/web/modbus.js:190
+Tabla	Tabelle
+
+#: apps/modbus/web/modbus.js:190
+Dirección	Adresse
+
+#: apps/modbus/web/modbus.js:190
+Tipo	Typ
+
+#: apps/modbus/web/modbus.js:190
+Escala	Skala
+
+#: apps/modbus/web/modbus.js:190
+Unidad	Unit
+
+#: apps/modbus/web/modbus.js:190
+Acceso	Zugriff
+
+#: apps/modbus/web/modbus.js:191
+Mín	Min
+
+#: apps/modbus/web/modbus.js:191
+Máx	Max
+
+#: apps/modbus/web/modbus.js:191
+Simulación	Simulation
+
+#: apps/modbus/web/modbus.js:191
+Inicial	Anfang
+
+#: apps/modbus/web/modbus.js:191
+En la placa	Auf der Platine
+
+#: apps/modbus/web/modbus.js:194
+Agregar punto	Punkt hinzufügen
+
+#: apps/modbus/web/modbus.js:195
+Guardar	Speichern
+
+#: apps/modbus/web/modbus.js:196
+Usar en la placa	Auf der Platine verwenden
+
+#: apps/modbus/web/modbus.js:197
+Descargar	Herunterladen
+
+#: apps/modbus/web/modbus.js:198
+Duplicar	Duplizieren
+
+#: apps/modbus/web/modbus.js:199
+Borrar	Löschen
+
+#: apps/modbus/web/modbus.js:200
+Tablas: coil, di (entradas), hr (holding), ir (input). Tipos de 32 bits: el registro alto primero; los "cdab", el bajo primero. Valor = crudo × escala. La simulación es para cuando la app hace de esclavo: se mueve entre mín y máx (contador: sube máx por hora). La columna "En la placa" muestra lo que la app lee o hace ahora, si está abierta con este perfil.	Tabellen: coil, di (Eingänge), hr (Holding), ir (Input). 32-Bit-Typen: das hohe Register zuerst; die "cdab", das niedrige zuerst. Wert = roh × Skala. Die Simulation gilt, wenn die App den Slave spielt: sie bewegt sich zwischen min und max (contador: steigt um max pro Stunde). Die Spalte "Auf der Platine" zeigt, was die App gerade liest oder spielt, wenn sie mit diesem Profil offen ist.
+
+#: apps/modbus/web/modbus.js:207
+Valor %s	Wert %s
+
+#: apps/modbus/web/modbus.js:218
+Guardado: la app lo vuelve a leer sola	Gespeichert: die App liest es von selbst neu
+
+#: apps/modbus/web/modbus.js:228
+La placa usa %s	Die Platine verwendet %s
+
+#: apps/modbus/web/modbus.js:246
+Nombre del perfil nuevo	Name des neuen Profils
+
+#: apps/modbus/web/modbus.js:253
+Nombre de la copia	Name der Kopie
+
+#: apps/modbus/web/modbus.js:260
+¿Borrar %s de la tarjeta? No se puede deshacer.	%s von der Karte löschen? Das lässt sich nicht rückgängig machen.
+
+#: apps/modbus/web/modbus.js:275
+%s no parece un perfil: no tiene puntos	%s sieht nicht wie ein Profil aus: es hat keine Punkte
+
+#: apps/modbus/web/modbus.js:276
+Subido	Hochgeladen

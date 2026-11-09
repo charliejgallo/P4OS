@@ -1,0 +1,204 @@
+# amoledos-lang 1   es -> en
+# aos.equipos.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/equipos/main/equipos.c:158
+La fuente no aceptó %s	The power supply didn't accept %s
+
+#: apps/equipos/main/equipos.c:173
+modelo	model
+
+#: apps/equipos/main/equipos.c:174
+presets	presets
+
+#: apps/equipos/main/equipos.c:175
+lectura	read
+
+#: apps/equipos/main/equipos.c:176
+contadores	counters
+
+#: apps/equipos/main/equipos.c:180
+sensores	sensors
+
+#: apps/equipos/main/equipos.c:181
+relés	relays
+
+#: apps/equipos/main/equipos.c:182
+módulos	modules
+
+#: apps/equipos/main/equipos.c:183
+dimmers	dimmers
+
+#: apps/equipos/main/equipos.c:184
+magnéticos	magnetic
+
+#: apps/equipos/main/equipos.c:431
+Falta la dirección del equipo.	The device address is missing.
+
+#: apps/equipos/main/equipos.c:444
+#: apps/equipos/main/equipos.c:445
+unidad	unit
+
+#: apps/equipos/main/equipos.c:447
+conectando…	connecting…
+
+#: apps/equipos/main/equipos.c:530
+Cancelar	Cancel
+
+#: apps/equipos/main/equipos.c:530
+Aplicar	Apply
+
+#: apps/equipos/main/equipos.c:610
+Unidad (esclavo)	Unit (slave)
+
+#: apps/equipos/main/equipos.c:631
+Equipo Modbus TCP (dirección:puerto)	Modbus TCP device (address:port)
+
+#: apps/equipos/main/equipos.c:657
+#: apps/equipos/main/equipos.c:665
+Unidad	Unit
+
+#: apps/equipos/main/equipos.c:661
+tocá para poner la dirección	tap to set the address
+
+#: apps/equipos/main/equipos.c:703
+Tensión de salida	Output voltage
+
+#: apps/equipos/main/equipos.c:711
+Límite de corriente	Current limit
+
+#: apps/equipos/main/equipos.c:719
+encender	turn on
+
+#: apps/equipos/main/equipos.c:719
+apagar	turn off
+
+#: apps/equipos/main/equipos.c:749
+firmware	firmware
+
+#: apps/equipos/main/equipos.c:769
+SALIDA APAGADA	OUTPUT OFF
+
+#: apps/equipos/main/equipos.c:772
+Salida encendida	Output on
+
+#: apps/equipos/main/equipos.c:772
+Salida apagada	Output off
+
+#: apps/equipos/main/equipos.c:782
+Tope %s V: la entrada es de %s V y la fuente no eleva.	Max %s V: the input is %s V and the supply can't step up.
+
+#: apps/equipos/main/equipos.c:793
+ninguna	none
+
+#: apps/equipos/main/equipos.c:794
+bloqueado	locked
+
+#: apps/equipos/main/equipos.c:794
+libre	free
+
+#: apps/equipos/main/equipos.c:851
+buscando la fuente…	looking for the supply…
+
+#: apps/equipos/main/equipos.c:890
+Salida	Output
+
+#: apps/equipos/main/equipos.c:895
+Tensión	Voltage
+
+#: apps/equipos/main/equipos.c:896
+Corriente	Current
+
+#: apps/equipos/main/equipos.c:906
+Entrada	Input
+
+#: apps/equipos/main/equipos.c:906
+#: apps/equipos/main/equipos.c:977
+Temperatura	Temperature
+
+#: apps/equipos/main/equipos.c:906
+Protección	Protection
+
+#: apps/equipos/main/equipos.c:906
+Teclado	Keypad
+
+#: apps/equipos/main/equipos.c:916
+POTENCIA, ÚLTIMOS 60 s	POWER, LAST 60 s
+
+#: apps/equipos/main/equipos.c:932
+PRESETS: TOCÁ UNO PARA CARGARLO	PRESETS: TAP ONE TO LOAD IT
+
+#: apps/equipos/main/equipos.c:939
+CONEXIÓN	CONNECTION
+
+#: apps/equipos/main/equipos.c:941
+La fuente habla por su puerto TTL a 115200 (3,3 V): TX, RX y GND al puerto elegido. Cada valor que se escribe se vuelve a leer, porque la Riden rechaza en silencio lo que no le gusta.	The power supply talks over its TTL port at 115200 (3.3 V): TX, RX and GND to the chosen port. Every value written is read back, because the Riden silently rejects what it doesn't like.
+
+#: apps/equipos/main/equipos.c:958
+relé %d	relay %d
+
+#: apps/equipos/main/equipos.c:958
+módulo %d	module %d
+
+#: apps/equipos/main/equipos.c:977
+Humedad	Humidity
+
+#: apps/equipos/main/equipos.c:977
+Presión	Pressure
+
+#: apps/equipos/main/equipos.c:977
+Calidad del aire	Air quality
+
+#: apps/equipos/main/equipos.c:978
+Encendido hace	Up for
+
+#: apps/equipos/main/equipos.c:978
+Estado	Status
+
+#: apps/equipos/main/equipos.c:1001
+sin red	no network
+
+#: apps/equipos/main/equipos.c:1004
+ausente	absent
+
+#: apps/equipos/main/equipos.c:1011
+error de sensor	sensor error
+
+#: apps/equipos/main/equipos.c:1017
+Encendido	On
+
+#: apps/equipos/main/equipos.c:1017
+Apagado	Off
+
+#: apps/equipos/main/equipos.c:1024
+Abierto	Open
+
+#: apps/equipos/main/equipos.c:1024
+Cerrado	Closed
+
+#: apps/equipos/main/equipos.c:1037
+Poné la dirección del gateway (el puerto Modbus TCP es 502 salvo que lo hayas cambiado).	Enter the gateway address (the Modbus TCP port is 502 unless you changed it).
+
+#: apps/equipos/main/equipos.c:1042
+SENSORES	SENSORS
+
+#: apps/equipos/main/equipos.c:1053
+RELÉS Y MÓDULOS	RELAYS AND MODULES
+
+#: apps/equipos/main/equipos.c:1066
+Relé %d	Relay %d
+
+#: apps/equipos/main/equipos.c:1066
+Módulo %d	Module %d
+
+#: apps/equipos/main/equipos.c:1072
+DIMMERS	DIMMERS
+
+#: apps/equipos/main/equipos.c:1094
+SENSORES MAGNÉTICOS	MAGNETIC SENSORS
+
+#: apps/equipos/main/equipos.c:1102
+Puerta %d	Door %d

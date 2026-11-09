@@ -1,0 +1,204 @@
+# amoledos-lang 1   es -> de
+# aos.equipos.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/equipos/main/equipos.c:158
+La fuente no aceptó %s	Netzteil nahm %s nicht an
+
+#: apps/equipos/main/equipos.c:173
+modelo	Modell
+
+#: apps/equipos/main/equipos.c:174
+presets	Presets
+
+#: apps/equipos/main/equipos.c:175
+lectura	gelesen
+
+#: apps/equipos/main/equipos.c:176
+contadores	Zähler
+
+#: apps/equipos/main/equipos.c:180
+sensores	Sensoren
+
+#: apps/equipos/main/equipos.c:181
+relés	Relais
+
+#: apps/equipos/main/equipos.c:182
+módulos	Module
+
+#: apps/equipos/main/equipos.c:183
+dimmers	Dimmer
+
+#: apps/equipos/main/equipos.c:184
+magnéticos	Magnetkontakte
+
+#: apps/equipos/main/equipos.c:431
+Falta la dirección del equipo.	Die Geräteadresse fehlt.
+
+#: apps/equipos/main/equipos.c:444
+#: apps/equipos/main/equipos.c:445
+unidad	Unit
+
+#: apps/equipos/main/equipos.c:447
+conectando…	verbinde…
+
+#: apps/equipos/main/equipos.c:530
+Cancelar	Abbrechen
+
+#: apps/equipos/main/equipos.c:530
+Aplicar	Anwenden
+
+#: apps/equipos/main/equipos.c:610
+Unidad (esclavo)	Unit (Slave)
+
+#: apps/equipos/main/equipos.c:631
+Equipo Modbus TCP (dirección:puerto)	Modbus-TCP-Gerät (Adresse:Port)
+
+#: apps/equipos/main/equipos.c:657
+#: apps/equipos/main/equipos.c:665
+Unidad	Unit
+
+#: apps/equipos/main/equipos.c:661
+tocá para poner la dirección	zum Eingeben der Adresse tippen
+
+#: apps/equipos/main/equipos.c:703
+Tensión de salida	Ausgangsspannung
+
+#: apps/equipos/main/equipos.c:711
+Límite de corriente	Stromgrenze
+
+#: apps/equipos/main/equipos.c:719
+encender	einschalten
+
+#: apps/equipos/main/equipos.c:719
+apagar	ausschalten
+
+#: apps/equipos/main/equipos.c:749
+firmware	Firmware
+
+#: apps/equipos/main/equipos.c:769
+SALIDA APAGADA	AUSGANG AUS
+
+#: apps/equipos/main/equipos.c:772
+Salida encendida	Ausgang an
+
+#: apps/equipos/main/equipos.c:772
+Salida apagada	Ausgang aus
+
+#: apps/equipos/main/equipos.c:782
+Tope %s V: la entrada es de %s V y la fuente no eleva.	Max. %s V: Eingang hat %s V, das Netzteil kann nicht hochsetzen.
+
+#: apps/equipos/main/equipos.c:793
+ninguna	keine
+
+#: apps/equipos/main/equipos.c:794
+bloqueado	gesperrt
+
+#: apps/equipos/main/equipos.c:794
+libre	frei
+
+#: apps/equipos/main/equipos.c:851
+buscando la fuente…	suche Netzteil…
+
+#: apps/equipos/main/equipos.c:890
+Salida	Ausgang
+
+#: apps/equipos/main/equipos.c:895
+Tensión	Spannung
+
+#: apps/equipos/main/equipos.c:896
+Corriente	Strom
+
+#: apps/equipos/main/equipos.c:906
+Entrada	Eingang
+
+#: apps/equipos/main/equipos.c:906
+#: apps/equipos/main/equipos.c:977
+Temperatura	Temperatur
+
+#: apps/equipos/main/equipos.c:906
+Protección	Schutz
+
+#: apps/equipos/main/equipos.c:906
+Teclado	Tasten
+
+#: apps/equipos/main/equipos.c:916
+POTENCIA, ÚLTIMOS 60 s	LEISTUNG, LETZTE 60 s
+
+#: apps/equipos/main/equipos.c:932
+PRESETS: TOCÁ UNO PARA CARGARLO	PRESETS: ZUM LADEN ANTIPPEN
+
+#: apps/equipos/main/equipos.c:939
+CONEXIÓN	VERBINDUNG
+
+#: apps/equipos/main/equipos.c:941
+La fuente habla por su puerto TTL a 115200 (3,3 V): TX, RX y GND al puerto elegido. Cada valor que se escribe se vuelve a leer, porque la Riden rechaza en silencio lo que no le gusta.	Das Netzteil spricht über seinen TTL-Port mit 115200 (3,3 V): TX, RX und GND an den gewählten Port. Jeder geschriebene Wert wird zurückgelesen, weil das Riden stillschweigend ablehnt, was ihm nicht passt.
+
+#: apps/equipos/main/equipos.c:958
+relé %d	Relais %d
+
+#: apps/equipos/main/equipos.c:958
+módulo %d	Modul %d
+
+#: apps/equipos/main/equipos.c:977
+Humedad	Feuchte
+
+#: apps/equipos/main/equipos.c:977
+Presión	Druck
+
+#: apps/equipos/main/equipos.c:977
+Calidad del aire	Luftqualität
+
+#: apps/equipos/main/equipos.c:978
+Encendido hace	Laufzeit
+
+#: apps/equipos/main/equipos.c:978
+Estado	Status
+
+#: apps/equipos/main/equipos.c:1001
+sin red	kein Netz
+
+#: apps/equipos/main/equipos.c:1004
+ausente	fehlt
+
+#: apps/equipos/main/equipos.c:1011
+error de sensor	Sensorfehler
+
+#: apps/equipos/main/equipos.c:1017
+Encendido	An
+
+#: apps/equipos/main/equipos.c:1017
+Apagado	Aus
+
+#: apps/equipos/main/equipos.c:1024
+Abierto	Offen
+
+#: apps/equipos/main/equipos.c:1024
+Cerrado	Geschlossen
+
+#: apps/equipos/main/equipos.c:1037
+Poné la dirección del gateway (el puerto Modbus TCP es 502 salvo que lo hayas cambiado).	Gateway-Adresse eingeben (der Modbus-TCP-Port ist 502, außer du hast ihn geändert).
+
+#: apps/equipos/main/equipos.c:1042
+SENSORES	SENSOREN
+
+#: apps/equipos/main/equipos.c:1053
+RELÉS Y MÓDULOS	RELAIS UND MODULE
+
+#: apps/equipos/main/equipos.c:1066
+Relé %d	Relais %d
+
+#: apps/equipos/main/equipos.c:1066
+Módulo %d	Modul %d
+
+#: apps/equipos/main/equipos.c:1072
+DIMMERS	DIMMER
+
+#: apps/equipos/main/equipos.c:1094
+SENSORES MAGNÉTICOS	MAGNETSENSOREN
+
+#: apps/equipos/main/equipos.c:1102
+Puerta %d	Tür %d
