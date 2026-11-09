@@ -49,10 +49,22 @@ Tried there on 2026-11-09: the analyzer showed 40 packets a second, 512
 slots, BREAK 176 µs and MAB 12 µs; the fixture drew the PAR and the bar;
 the console sent its patterns.
 
-## On the bench
+## On the bench (2026-11-09)
 
 `tools/rs485_test/esp32` has a DMX console and a DMX light with a strip of
-8 WS2812B pixels (its README). Not tried on the board yet.
+8 WS2812B pixels (its README). With the two automatic "RS485 to TTL"
+modules of the Modbus bench, at 250000 baud, the first time:
+
+- **ESP32 console → Analizador:** 40.0 packets a second, 512 slots, start
+  code 0, BREAK measured 176 µs (it sends 176), MAB 50 µs, no bad packet.
+- **Consola (rainbow) → ESP32 light:** 40 packets a second, 512 slots,
+  BREAK 177 µs as the ESP32 measures it (176 sent), MAB 33 µs, no bad
+  packet in hundreds, channels 1-3 following the rainbow.
+
+The MAB on the wire is longer than asked (16 µs asked, 33 and 50 µs
+measured): the time from letting the line go to the UART's first start
+bit. Still within the standard (8 µs at least, no upper limit worth
+minding); the BREAK is exact.
 
 ## Files
 

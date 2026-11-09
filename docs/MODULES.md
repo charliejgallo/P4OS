@@ -742,7 +742,12 @@ simulator's `sim/io_dmx_sim.c`.
   gets; with nobody sending, a console plays a show (`apps/dmx/README.md`).
 
 The app is **DMX** (`apps/dmx`); the bench's ESP32 plays a console and a
-light with a pixel strip (`tools/rs485_test`). Not tried on the board yet.
+light with a pixel strip (`tools/rs485_test`). **On the board** on
+2026-11-09, with the automatic modules of the Modbus bench: 40 packets a
+second both ways, 512 slots, no bad packet, the BREAK measured as sent
+(176-177 µs) on both sides. The MAB comes out longer than asked (16 µs
+asked, 33-50 µs on the wire: the time until the UART's first start bit),
+which the standard allows.
 
 ## Not done yet
 
