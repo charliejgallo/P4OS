@@ -32,6 +32,9 @@ sim/build-*/
 # the pseudo-locale is generated from the sources (gen_lang.py pseudo xx)
 lang/xx/
 
+# Waveshare's 3D model of the board, kept next to the case (case/README.md)
+case/ESP32-P4-WIFI6-Touch-LCD-5_3d-*.stl
+
 # the C6 flash backup (docs/C6.md): Waveshare's firmware, and its NVS may hold
 # Wi-Fi credentials; it stays on this machine
 c6/backup/

@@ -113,6 +113,12 @@ What the board fetches at runtime:
   covers come from the iTunes Search API. Streams and logos belong to their
   stations.
 
+## The case
+
+| What | How it gets here | Licence | Notes |
+|---|---|---|---|
+| `case/v1/` (the enclosure and its buttons) | vendored, remixed | CC0, public domain | from [Waveshare ESP32-P4 5inch Touchscreen Enclosure](https://www.printables.com/model/1787054-waveshare-esp32-p4-5inch-touchscreen-enclosure) on Printables; see [case/README.md](case/README.md) |
+
 ## Names and marks
 
 Doom is a trademark of id Software. Duke Nukem is a trademark of Gearbox
