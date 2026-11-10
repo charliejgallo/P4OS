@@ -38,3 +38,10 @@ case/ESP32-P4-WIFI6-Touch-LCD-5_3d-*.stl
 # the C6 flash backup (docs/C6.md): Waveshare's firmware, and its NVS may hold
 # Wi-Fi credentials; it stays on this machine
 c6/backup/
+
+# KiCad: backups, caches and what it regenerates
+hw/**/*-backups/
+hw/**/*.kicad_prl
+hw/**/fp-info-cache
+hw/**/*.lck
+hw/**/gerbers/

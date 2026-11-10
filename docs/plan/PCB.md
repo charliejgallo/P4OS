@@ -8,7 +8,9 @@ una tapa impresa con dos USB.
 
 **Estado (2026-11-10): sólo el plan.** El mapa de pines quedó cerrado ese
 día (`docs/img/pinout.svg`, [EXPANSION.md](EXPANSION.md)) y salió con la
-0.25.1; no hay esquemático todavía. **Decidido por el usuario ese día:** se
+0.25.1. Hay un primer esquemático de la variante casera en
+`hw/aux-board/` (80 partes, 64 redes, ERC de KiCad sin observaciones); sin
+trazado todavía. **Decidido por el usuario ese día:** se
 hacen las dos variantes, la casera (placa de dos capas pedida a JLCPCB,
 soldada a mano) y la PCBA con SMD; `i2c.board` sale sólo a 3,3 V; el
 adaptador de nivel a 5 V va en `i2c.ext`, que también tiene sus tiras de
@@ -119,15 +121,30 @@ seguido: se confirma en la página del fabricante el día del pedido.
 - El pedido mínimo suele ser de 5 placas, con la opción de armar sólo
   algunas.
 
-## Mecánica: lo que falta medir
+## Mecánica
 
-- La posición del header respecto de los cuatro agujeros M2.5
-  (`docs/hw/ESP32-P4-WIFI6-Touch-LCD-5-dimensions-20260408.pdf`:
-  126,9 × 70,7 mm) y de qué lado quedan los componentes altos. Hay de dónde
-  sacarlo: el modelo 3D de la placa de Waveshare (una copia local en
-  `case/`, fuera de git) y la carcasa actual, `case/v1/`.
-- La altura libre entre la placa y la tapa impresa, y si los USB-A salen
-  por un costado o por atrás.
+Medido el 2026-11-10 sobre el modelo 3D de la placa de Waveshare (una copia
+local en `case/`, fuera de git), con el origen en una esquina del circuito
+impreso, mirándolo de atrás:
+
+| Qué | Medida |
+|---|---|
+| Circuito impreso | 64,51 × 118,49 mm, 1,6 mm de espesor (la pantalla sobresale: 70,7 × 126,9 mm) |
+| Agujeros de montaje | cuatro, en (3,75; 3,25), (60,75; 3,25), (3,75; 115,25) y (60,75; 115,25): 57,0 × 112,0 mm entre centros |
+| Header de 40 pines | paralelo al lado largo, su eje a 4,42 mm de ese borde; las dos filas en x = 3,15 y 5,69; los pines de y = 14,17 a 62,43 (paso 2,54) |
+| Alto del header | su cuerpo llega a 5,2 mm sobre la placa en el modelo |
+| Otros componentes altos de ese lado | un conector en x 1,0-6,2, y 80,0-87,7 (3,4 mm de alto) y otro en x 57,9-62,8, y 86,4-92,2 (4,3 mm) |
+| USB-C | los dos sobre el lado corto de y = 118,49 |
+
+Falta saber, y el modelo no lo dice:
+
+- **En qué extremo del header está el pin 1** (del lado de los USB-C o del
+  opuesto).
+- **Si el header de la placa es de pines o de zócalo**: define qué lleva la
+  placa auxiliar para enchufarse (el esquemático supone pines en la placa y
+  un zócalo de 2×20 en la auxiliar).
+- La altura libre entre la placa y la tapa impresa (`case/v1/`), y por
+  dónde salen los USB-A.
 - Dónde mira el LED infrarrojo con la placa en su soporte.
 
 ## Herramientas
@@ -144,9 +161,11 @@ seguido: se confirma en la página del fabricante el día del pedido.
 
 ## Lo que sigue
 
-1. Medir la mecánica de arriba.
+1. Lo que falta de la mecánica de arriba (pin 1, pines o zócalo, alturas).
 2. Decidir si el Ethernet de la PCBA va integrado o en zócalo.
-3. El esquemático en KiCad, con los números de catálogo cargados.
+3. El esquemático: la casera está empezada (`hw/aux-board/gen.py`); falta
+   revisarla pieza por pieza, el zócalo del módulo W5500 cuando se sepa cuál
+   es, y la lista de la PCBA con sus números de catálogo.
 4. Probar en el banco, antes de fabricar, lo que cambia de pin: CAN en
    46/47 con un bus real, y un módulo W5500 en `spi.a` con su CS (pide
    el driver en el firmware: `esp_eth` con el W5500, una interfaz más de
