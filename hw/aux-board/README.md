@@ -7,7 +7,9 @@ is [docs/img/pinout.svg](../../docs/img/pinout.svg).
 
 **Where it stands (2026-11-10): a first schematic of the through-hole
 variant, nothing laid out, nothing built.** Every part value and footprint
-is a first choice to review against its datasheet.
+is a first choice to review against its datasheet. RS485 and CAN are not on
+the board: their modules plug onto pin headers (the automatic "RS485 to
+TTL" one on 3V3, TX, RX, GND; an SN65HVD230 on 3V3, GND, CTX, CRX).
 
 | File | What it is |
 |---|---|
@@ -20,7 +22,7 @@ python3 hw/aux-board/gen.py --check
 ```
 
 writes the schematic and asks KiCad (`kicad-cli`) for its ERC and its
-netlist, and compares that netlist with the list: 80 parts, 64 nets, no
+netlist, and compares that netlist with the list: 64 parts, 51 nets, no
 violation, none different.
 
 The schematic has no wires: each pin carries a label with its net's name,

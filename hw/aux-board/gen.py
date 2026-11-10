@@ -5,12 +5,15 @@
     python3 hw/aux-board/gen.py --check    and asks KiCad for its ERC and its netlist
 
 docs/plan/PCB.md is the plan and docs/img/pinout.svg the pin map this follows.
-This is the through-hole variant ("th"): every chip in a DIP socket, every
-bridge a 2.54 mm jumper, the parts a soldering iron can do. The SMD variant
-for assembly will be a second list here over the same nets.
+This is the through-hole variant ("th"): every bridge a 2.54 mm jumper, the
+parts a soldering iron can do. The SMD variant for assembly will be a second
+list here over the same nets.
 
-Each block reaches its GPIO through a jumper, so a pin can be given back:
-the pass-through header J2 carries all forty pins whatever the jumpers say.
+RS485 and CAN are not on the board: their transceivers are the modules of
+the bench (an automatic "RS485 to TTL" one, an SN65HVD230), each on a pin
+header in the module's own order. What is on the board reaches its GPIO
+through a jumper, so a pin can be given back, and the pass-through socket J2
+carries all forty pins whatever the jumpers say.
 """
 import collections
 import datetime
@@ -40,7 +43,6 @@ R_FP = "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
 C_FP = "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
 CP_FP = "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm"
 TO92 = "Package_TO_SOT_THT:TO-92_Inline"
-DIP8 = "Package_DIP:DIP-8_W7.62mm_Socket"
 SCREW3 = "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-3-5.08_1x03_P5.08mm_Horizontal"
 USB_FP = "Connector_USB:USB_A_Molex_67643_Horizontal"
 PTC_FP = "Fuse:Fuse_Bourns_MF-RG300"
@@ -72,11 +74,6 @@ def bridge(ref, value, a, b, closed=True):
     return Part(ref, "Jumper:Jumper_2_Bridged" if closed else "Jumper:Jumper_2_Open", value, HDR % 2, {1: a, 2: b})
 
 
-def select(ref, value, common, first, second):
-    """A three-pin header: the jumper joins the middle pin to 'first' as shipped, or to 'second'."""
-    return Part(ref, "Jumper:Jumper_3_Bridged12", value, HDR % 3, {1: first, 2: common, 3: second})
-
-
 def flag(ref, net):
     return Part(ref, "power:PWR_FLAG", "PWR_FLAG", "", {1: net})
 
@@ -84,11 +81,11 @@ def flag(ref, net):
 def blocks():
     """[(title, x, y, [(part, dx, dy)])]: a block's parts, placed from its corner."""
     b = []
-    b.append(("THE HEADER: J1 mates with the board, J2 passes all forty pins through", 25, 25, [
-        (Part("J1", "Connector_Generic:Conn_02x20_Odd_Even", "to the P4 (2x20 socket)",
-              "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical", HEADER), 45, 60),
-        (Part("J2", "Connector_Generic:Conn_02x20_Odd_Even", "pass-through (2x20 pins)",
-              "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical", HEADER), 125, 60),
+    b.append(("THE HEADER: J1's pins go into the board's socket, J2 is the same socket again on top", 25, 25, [
+        (Part("J1", "Connector_Generic:Conn_02x20_Odd_Even", "to the P4 (2x20 pins, underneath)",
+              "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical", HEADER), 45, 60),
+        (Part("J2", "Connector_Generic:Conn_02x20_Odd_Even", "pass-through (2x20 socket)",
+              "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical", HEADER), 125, 60),
     ]))
     b.append(("5 V, SWITCHED BY THE 3V3 RAIL: off with the board, JP1 to bypass", 205, 25, [
         (Part("Q1", "Transistor_FET:IRF9540N", "logic-level P-FET, TO-220 (NDP6020P)",
@@ -129,19 +126,8 @@ def blocks():
         (bridge("JP3", "SDA", "SDA_BOARD", "SDA_BOARD_J"), 70, 135),
         (bridge("JP4", "SCL", "SCL_BOARD", "SCL_BOARD_J"), 115, 135),
     ]))
-    b.append(("RS485 ON uart.a: a 3.3 V transceiver, 120 ohm by JP8, the bare UART on J10", 25, 150, [
-        (Part("U1", "Interface_UART:MAX3485", "MAX3485 (DIP-8)", DIP8,
-              {"RO": "RS485_RO", "~{RE}": "RS485_DE", "DE": "RS485_DE", "DI": "RS485_DI",
-               "A": "RS485_A", "B": "RS485_B", "VCC": "+3V3", "GND": "GND"}), 35, 45),
-        (C("C5", "100n", "+3V3", "GND"), 70, 45),
-        (bridge("JP5", "TX", "UARTA_TX", "RS485_DI"), 100, 30),
-        (bridge("JP6", "RX", "UARTA_RX", "RS485_RO"), 100, 48),
-        (bridge("JP7", "DE", "UARTA_DE", "RS485_DE"), 100, 66),
-        (R("R8", "10k", "RS485_DE", "GND"), 135, 45),
-        (R("R9", "120", "RS485_A", "RS485_TERM"), 155, 45),
-        (bridge("JP8", "120 ohm", "RS485_TERM", "RS485_B", closed=False), 185, 45),
-        (screw("J9", "RS485: A B GND", ["RS485_A", "RS485_B", "GND"]), 225, 45),
-        (conn("J10", "uart.a", ["GND", "+3V3", "UARTA_TX", "UARTA_RX", "UARTA_DE"]), 265, 45),
+    b.append(("uart.a: an automatic RS485 module plugs on the first four pins (3V3 TX RX GND); DE is the fifth", 25, 150, [
+        (conn("J9", "uart.a / RS485 module", ["+3V3", "UARTA_TX", "UARTA_RX", "GND", "UARTA_DE"]), 35, 45),
     ]))
     b.append(("uart.b, THE FLASHER'S TARGET, AND SWD ON THE SAME PINS", 25, 245, [
         (conn("J11", "uart.b + target", ["GND", "+3V3", "UARTB_TX", "UARTB_RX", "TGT_EN", "TGT_BOOT", "RX_FROM_5V"]), 35, 45),
@@ -152,22 +138,13 @@ def blocks():
         (bridge("JP9", "5 V target", "UARTB_RX_DIV", "UARTB_RX", closed=False), 125, 45),
         (conn("J12", "SWD", ["+3V3", "UARTB_RX", "UARTB_TX", "TGT_EN", "GND"]), 175, 45),
     ]))
-    b.append(("CAN: a transceiver with a 3.3 V logic side; JP10/JP11 give GPIO46/47 to it or to the SPI header", 205, 245, [
-        (Part("U2", "Interface_CAN_LIN:MCP2562-E-P", "MCP2562 (DIP-8)", DIP8,
-              {"TXD": "CAN_TXD", "RXD": "CAN_RXD", "VDD": "+5V_SW", "Vio": "+3V3", "VSS": "GND",
-               "STBY": "GND", "CANH": "CAN_H", "CANL": "CAN_L"}), 40, 45),
-        (C("C6", "100n", "+5V_SW", "GND"), 80, 45),
-        (C("C7", "100n", "+3V3", "GND"), 95, 45),
-        (select("JP10", "GPIO46", "GPIO46", "CAN_TXD", "AUX1"), 125, 35),
-        (select("JP11", "GPIO47", "GPIO47", "CAN_RXD", "AUX2"), 125, 60),
-        (R("R12", "120", "CAN_H", "CAN_TERM"), 160, 45),
-        (bridge("JP12", "120 ohm", "CAN_TERM", "CAN_L", closed=False), 190, 45),
-        (screw("J13", "CAN: H L GND", ["CAN_H", "CAN_L", "GND"]), 215, 45),
+    b.append(("CAN: an SN65HVD230 module on four pins (3V3 GND CTX CRX)", 205, 245, [
+        (conn("J13", "CAN module", ["+3V3", "GND", "GPIO46", "GPIO47"]), 40, 45),
     ]))
-    b.append(("spi.a, WITH THE TWO PINS CAN LEAVES FREE", 435, 200, [
+    b.append(("spi.a, AND GPIO46/47 WHEN NO CAN MODULE IS ON THEM", 435, 200, [
         (Part("J14", "Connector_Generic:Conn_02x04_Odd_Even", "spi.a",
               "Connector_PinHeader_2.54mm:PinHeader_2x04_P2.54mm_Vertical",
-              {1: "+3V3", 2: "GND", 3: "SPI_SCK", 4: "SPI_MOSI", 5: "SPI_MISO", 6: "SPI_CS", 7: "AUX1", 8: "AUX2"}), 40, 35),
+              {1: "+3V3", 2: "GND", 3: "SPI_SCK", 4: "SPI_MOSI", 5: "SPI_MISO", 6: "SPI_CS", 7: "GPIO46", 8: "GPIO47"}), 40, 35),
     ]))
     b.append(("INFRARED: the receiver on GPIO28, the LED on GPIO32 through Q5", 435, 255, [
         (Part("U3", "Interface_Optical:TSOP382xx", "TSOP38238", "OptoDevice:Vishay_MINICAST-3Pin",

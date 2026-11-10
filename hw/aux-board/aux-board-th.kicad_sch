@@ -3852,733 +3852,6 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Interface_UART:MAX3485"
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "U"
-				(at -6.985 13.97 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "MAX3485"
-				(at 1.905 13.97 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 -17.78 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" "https://datasheets.maximintegrated.com/en/ds/MAX3483-MAX3491.pdf"
-				(at 0 1.27 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "True RS-485/RS-422, 10Mbps, Slew-Rate Limited, with low-power shutdown, with receiver/driver enable, 32 receiver drive capacitity, DIP-8 and SOIC-8"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_keywords" "RS-485 RS-422 UART line-driver transceiver"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_fp_filters" "DIP*W7.62mm* SOIC*3.9x4.9mm*P1.27mm*"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "MAX3485_0_1"
-				(rectangle
-					(start -7.62 12.7)
-					(end 7.62 -12.7)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-				(polyline
-					(pts
-						(xy -4.191 2.54)
-						(xy -1.27 2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -4.191 0)
-						(xy -0.889 0)
-						(xy -0.889 -2.286)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -3.175 5.08)
-						(xy -4.191 5.08)
-						(xy -4.064 5.08)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -2.54 -5.08)
-						(xy -4.191 -5.08)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -2.413 -5.08)
-						(xy -2.413 -1.27)
-						(xy 2.667 -4.826)
-						(xy -2.413 -8.89)
-						(xy -2.413 -5.08)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.635 -7.62)
-						(xy 5.08 -7.62)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 0.381 -2.54)
-					(radius 0.508)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0.889 -2.54)
-						(xy 3.81 -2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 2.032 7.62)
-						(xy 5.715 7.62)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 3.048 2.54)
-						(xy 5.715 2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 3.81 2.54)
-					(radius 0.2794)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(polyline
-					(pts
-						(xy 3.81 -2.54)
-						(xy 3.81 2.54)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 5.08 -7.62)
-						(xy 5.08 7.62)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "MAX3485_1_1"
-				(circle
-					(center -0.762 2.54)
-					(radius 0.508)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 2.032 4.826)
-						(xy 2.032 8.636)
-						(xy -3.048 5.08)
-						(xy 2.032 1.016)
-						(xy 2.032 4.826)
-					)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 2.54 2.54)
-					(radius 0.508)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 5.08 7.62)
-					(radius 0.2794)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type outline)
-					)
-				)
-				(pin output line
-					(at -10.16 5.08 0)
-					(length 2.54)
-					(name "RO"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin input line
-					(at -10.16 2.54 0)
-					(length 2.54)
-					(name "~{RE}"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin input line
-					(at -10.16 0 0)
-					(length 2.54)
-					(name "DE"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin input line
-					(at -10.16 -5.08 0)
-					(length 2.54)
-					(name "DI"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "4"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_in line
-					(at 0 -15.24 90)
-					(length 2.54)
-					(name "GND"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 10.16 7.62 180)
-					(length 2.54)
-					(name "A"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "6"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 10.16 2.54 180)
-					(length 2.54)
-					(name "B"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "7"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_in line
-					(at 0 15.24 270)
-					(length 2.54)
-					(name "VCC"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "8"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
-		(symbol "Connector:Screw_Terminal_01x03"
-			(pin_names
-				(offset 1.016)
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "J"
-				(at 0 5.08 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "Screw_Terminal_01x03"
-				(at 0 -5.08 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "Generic screw terminal, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_keywords" "screw terminal"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_fp_filters" "TerminalBlock*:*"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "Screw_Terminal_01x03_1_1"
-				(rectangle
-					(start -1.27 3.81)
-					(end 1.27 -3.81)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.5334 2.8702)
-						(xy 0.3302 2.032)
-					)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.5334 0.3302)
-						(xy 0.3302 -0.508)
-					)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.5334 -2.2098)
-						(xy 0.3302 -3.048)
-					)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.3556 3.048)
-						(xy 0.508 2.2098)
-					)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.3556 0.508)
-						(xy 0.508 -0.3302)
-					)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy -0.3556 -2.032)
-						(xy 0.508 -2.8702)
-					)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 0 2.54)
-					(radius 0.635)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 0 0)
-					(radius 0.635)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 0 -2.54)
-					(radius 0.635)
-					(stroke
-						(width 0.1524)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(pin passive line
-					(at -5.08 2.54 0)
-					(length 3.81)
-					(name "Pin_1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -5.08 0 0)
-					(length 3.81)
-					(name "Pin_2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at -5.08 -2.54 0)
-					(length 3.81)
-					(name "Pin_3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
 		(symbol "Connector_Generic:Conn_01x05"
 			(pin_names
 				(offset 1.016)
@@ -5117,459 +4390,6 @@
 						)
 					)
 					(number "7"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
-		(symbol "Interface_CAN_LIN:MCP2562-E-P"
-			(pin_names
-				(offset 1.016)
-			)
-			(exclude_from_sim no)
-			(in_bom yes)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "U"
-				(at -10.16 8.89 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-				)
-			)
-			(property "Value" "MCP2562-E-P"
-				(at 2.54 8.89 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-					(justify left)
-				)
-			)
-			(property "Footprint" "Package_DIP:DIP-8_W7.62mm"
-				(at 0 -12.7 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-						(italic yes)
-					)
-				)
-			)
-			(property "Datasheet" "http://ww1.microchip.com/downloads/en/DeviceDoc/25167A.pdf"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "High-Speed CAN Transceiver, 1Mbps, 5V supply, Vio pin, -40C to +125C, DIP-8"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_keywords" "High-Speed CAN Transceiver"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_fp_filters" "DIP*W7.62mm*"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "MCP2562-E-P_0_1"
-				(rectangle
-					(start -10.16 7.62)
-					(end 10.16 -7.62)
-					(stroke
-						(width 0.254)
-						(type default)
-					)
-					(fill
-						(type background)
-					)
-				)
-			)
-			(symbol "MCP2562-E-P_1_1"
-				(pin input line
-					(at -12.7 5.08 0)
-					(length 2.54)
-					(name "TXD"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_in line
-					(at 0 -10.16 90)
-					(length 2.54)
-					(name "VSS"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_in line
-					(at 0 10.16 270)
-					(length 2.54)
-					(name "VDD"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin output line
-					(at -12.7 2.54 0)
-					(length 2.54)
-					(name "RXD"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "4"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin power_in line
-					(at -12.7 -2.54 0)
-					(length 2.54)
-					(name "Vio"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "5"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 12.7 -2.54 180)
-					(length 2.54)
-					(name "CANL"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "6"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin bidirectional line
-					(at 12.7 2.54 180)
-					(length 2.54)
-					(name "CANH"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "7"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin input line
-					(at -12.7 -5.08 0)
-					(length 2.54)
-					(name "STBY"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "8"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-			)
-			(embedded_fonts no)
-		)
-		(symbol "Jumper:Jumper_3_Bridged12"
-			(pin_names
-				(offset 0)
-				(hide yes)
-			)
-			(exclude_from_sim no)
-			(in_bom no)
-			(on_board yes)
-			(in_pos_files yes)
-			(duplicate_pin_numbers_are_jumpers no)
-			(property "Reference" "JP"
-				(at -2.54 -2.54 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Value" "Jumper_3_Bridged12"
-				(at 0 2.794 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Footprint" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Datasheet" ""
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "Description" "Jumper, 3-pole, pins 1+2 closed/bridged"
-				(at 0 -11.43 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_keywords" "Jumper SPDT"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(property "ki_fp_filters" "Jumper* TestPoint*3Pads* TestPoint*Bridge*"
-				(at 0 0 0)
-				(show_name no)
-				(do_not_autoplace no)
-				(hide yes)
-				(effects
-					(font
-						(size 1.27 1.27)
-					)
-				)
-			)
-			(symbol "Jumper_3_Bridged12_0_0"
-				(circle
-					(center -2.032 0)
-					(radius 0.508)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 0 0)
-					(radius 0.508)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(circle
-					(center 2.032 0)
-					(radius 0.508)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "Jumper_3_Bridged12_0_1"
-				(arc
-					(start -2.032 0.508)
-					(mid -1.143 0.8155)
-					(end -0.254 0.508)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-				(polyline
-					(pts
-						(xy 0 -1.27)
-						(xy 0 -0.508)
-					)
-					(stroke
-						(width 0)
-						(type default)
-					)
-					(fill
-						(type none)
-					)
-				)
-			)
-			(symbol "Jumper_3_Bridged12_1_1"
-				(pin passive line
-					(at -5.08 0 0)
-					(length 2.54)
-					(name "A"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "1"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 0 -3.81 90)
-					(length 2.54)
-					(name "C"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "2"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-				)
-				(pin passive line
-					(at 5.08 0 180)
-					(length 2.54)
-					(name "B"
-						(effects
-							(font
-								(size 1.27 1.27)
-							)
-						)
-					)
-					(number "3"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -6593,6 +5413,271 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Connector:Screw_Terminal_01x03"
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at 0 5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Screw_Terminal_01x03"
+				(at 0 -5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Generic screw terminal, single row, 01x03, script generated (kicad-library-utils/schlib/autogen/connector/)"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "screw terminal"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "TerminalBlock*:*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Screw_Terminal_01x03_1_1"
+				(rectangle
+					(start -1.27 3.81)
+					(end 1.27 -3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.5334 2.8702)
+						(xy 0.3302 2.032)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.5334 0.3302)
+						(xy 0.3302 -0.508)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.5334 -2.2098)
+						(xy 0.3302 -3.048)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.3556 3.048)
+						(xy 0.508 2.2098)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.3556 0.508)
+						(xy 0.508 -0.3302)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy -0.3556 -2.032)
+						(xy 0.508 -2.8702)
+					)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 0 2.54)
+					(radius 0.635)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 0 0)
+					(radius 0.635)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 0 -2.54)
+					(radius 0.635)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at -5.08 2.54 0)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 0 0)
+					(length 3.81)
+					(name "Pin_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -2.54 0)
+					(length 3.81)
+					(name "Pin_3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Mechanical:MountingHole"
 			(pin_names
 				(offset 1.016)
@@ -6693,7 +5778,7 @@
 			(embedded_fonts no)
 		)
 	)
-	(text "THE HEADER: J1 mates with the board, J2 passes all forty pins through"
+	(text "THE HEADER: J1's pins go into the board's socket, J2 is the same socket again on top"
 		(exclude_from_sim no)
 		(at 25 25 0)
 		(effects
@@ -6702,7 +5787,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "98559f87-63e8-5025-81f5-961a9c3e077d")
+		(uuid "c5f34bb4-4f8c-5165-a7d7-ce3e9efafd41")
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_02x20_Odd_Even")
@@ -6722,7 +5807,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "to the P4 (2x20 socket)"
+		(property "Value" "to the P4 (2x20 pins, underneath)"
 			(at 66.04 114.3 0)
 			(effects
 				(font
@@ -6731,7 +5816,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical"
 			(at 71.12 83.82 0)
 			(hide yes)
 			(effects
@@ -7308,7 +6393,7 @@
 				(justify left)
 			)
 		)
-		(property "Value" "pass-through (2x20 pins)"
+		(property "Value" "pass-through (2x20 socket)"
 			(at 144.78 114.3 0)
 			(effects
 				(font
@@ -7317,7 +6402,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical"
+		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical"
 			(at 149.86 83.82 0)
 			(hide yes)
 			(effects
@@ -11180,7 +10265,7 @@
 		)
 		(uuid "c642883e-d350-5695-b230-45eb6529a5c3")
 	)
-	(text "RS485 ON uart.a: a 3.3 V transceiver, 120 ohm by JP8, the bare UART on J10"
+	(text "uart.a: an automatic RS485 module plugs on the first four pins (3V3 TX RX GND); DE is the fifth"
 		(exclude_from_sim no)
 		(at 25 150 0)
 		(effects
@@ -11189,825 +10274,11 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "0d5e2431-16a1-5857-9e28-3f0fb365f095")
+		(uuid "eb3786ab-db82-5e91-af8d-895679be7207")
 	)
 	(symbol
-		(lib_id "Interface_UART:MAX3485")
+		(lib_id "Connector_Generic:Conn_01x05")
 		(at 60.96 195.58 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "4c596533-dc51-5078-9e1d-7874eaa71e0e")
-		(property "Reference" "U1"
-			(at 50.8 176.53 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "MAX3485 (DIP-8)"
-			(at 50.8 215.9 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Package_DIP:DIP-8_W7.62mm_Socket"
-			(at 60.96 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 60.96 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 60.96 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "1c3a4f42-390b-5448-96e5-45c55f0062f9")
-		)
-		(pin "2"
-			(uuid "2d13a088-f143-56f0-8f5e-bda94386de36")
-		)
-		(pin "3"
-			(uuid "c5fe4b9e-fbac-5d6d-86d6-ab6eeecdd658")
-		)
-		(pin "4"
-			(uuid "af392cfb-034e-5e04-8067-7ff296af8d8e")
-		)
-		(pin "5"
-			(uuid "e4de9f02-8cd9-5aed-8be7-fd8884f56ac0")
-		)
-		(pin "6"
-			(uuid "75a01ced-e03c-54f1-89ca-c5c4336a4b9f")
-		)
-		(pin "7"
-			(uuid "150e26ea-af5b-5ed8-8183-1d285fefda52")
-		)
-		(pin "8"
-			(uuid "f5f99d5e-f418-5a81-ae82-1409050bee01")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "U1")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(label "RS485_RO"
-		(at 50.8 190.5 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "47d97cde-14e9-5ed9-9710-9e621374c7b8")
-	)
-	(label "RS485_DE"
-		(at 50.8 193.04 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "5b4fde91-b4fa-5ebb-b610-8e313dad5a98")
-	)
-	(label "RS485_DE"
-		(at 50.8 195.58 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "52cd798b-6bba-5763-8e3c-3e0792cf1ddc")
-	)
-	(label "RS485_DI"
-		(at 50.8 200.66 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "902f2c1c-86ef-5e80-a507-52d7ff49c4d2")
-	)
-	(label "GND"
-		(at 60.96 210.82 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "6383a720-6001-5036-8d59-7ac4aa2ad88f")
-	)
-	(label "RS485_A"
-		(at 71.12 187.96 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "726e8119-644e-5373-9f60-6f9ae603032c")
-	)
-	(label "RS485_B"
-		(at 71.12 193.04 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "c9fc38ba-882e-5851-b588-0f2403f6e822")
-	)
-	(label "+3V3"
-		(at 60.96 180.34 90)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "bfdd041d-2aef-5416-a50b-2293fe139a26")
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 93.98 195.58 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "e5cf9688-e5db-52bf-928b-ce3a83aba719")
-		(property "Reference" "C5"
-			(at 96.52 194.31 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "100n"
-			(at 96.52 196.85 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
-			(at 93.98 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 93.98 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 93.98 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "fa3ad1fa-f60c-55e4-b87d-e212aaf880bd")
-		)
-		(pin "2"
-			(uuid "cf8cf53e-52fd-5504-be8d-a37af694610e")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "C5")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(label "+3V3"
-		(at 93.98 191.77 90)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "a5595f6f-f875-57bb-810e-eb8253b1e289")
-	)
-	(label "GND"
-		(at 93.98 199.39 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "0ec664fb-00cd-50d4-a18e-95f207a64e39")
-	)
-	(symbol
-		(lib_id "Jumper:Jumper_2_Bridged")
-		(at 124.46000000000001 180.34 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "f629f781-2fb3-5b13-a042-72846af50ee1")
-		(property "Reference" "JP5"
-			(at 119.38 176.53 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "TX"
-			(at 119.38 185.42 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
-			(at 124.46 180.34 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 124.46 180.34 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 124.46 180.34 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "f7f08ee1-3b1e-5612-a54d-6dd2815f7048")
-		)
-		(pin "2"
-			(uuid "7af5e116-8d4d-5cfb-bdac-4299b112d598")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "JP5")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(label "UARTA_TX"
-		(at 119.38 180.34 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "e475c527-a5cc-5ac7-9106-afc23f2ac5af")
-	)
-	(label "RS485_DI"
-		(at 129.54 180.34 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "da0de41a-a435-5fd9-9c21-1ec4969f2d02")
-	)
-	(symbol
-		(lib_id "Jumper:Jumper_2_Bridged")
-		(at 124.46000000000001 198.12 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "6dc24208-f11a-5ce9-804b-3e900b32694c")
-		(property "Reference" "JP6"
-			(at 119.38 194.31 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "RX"
-			(at 119.38 203.2 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
-			(at 124.46 198.12 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 124.46 198.12 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 124.46 198.12 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "ae6b859c-1e73-523b-ac76-15c3786a5571")
-		)
-		(pin "2"
-			(uuid "e9adf80b-8bb9-5dd0-880e-d268e863178f")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "JP6")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(label "UARTA_RX"
-		(at 119.38 198.12 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "ee4714a1-5975-567e-9239-afea04dcafd1")
-	)
-	(label "RS485_RO"
-		(at 129.54 198.12 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "a4989459-c4a9-5a82-a21a-c44d5f550167")
-	)
-	(symbol
-		(lib_id "Jumper:Jumper_2_Bridged")
-		(at 124.46000000000001 215.9 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "c008212c-f4c7-5fd7-b55b-66fc78d02ad6")
-		(property "Reference" "JP7"
-			(at 119.38 212.09 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "DE"
-			(at 119.38 220.98 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
-			(at 124.46 215.9 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 124.46 215.9 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 124.46 215.9 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "08a232e3-0a79-5baf-86de-46c57605fcaa")
-		)
-		(pin "2"
-			(uuid "cfce567a-22d6-50b7-88c7-3c55c315a5f0")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "JP7")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(label "UARTA_DE"
-		(at 119.38 215.9 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "6ce939dc-3a52-5612-b099-3747e89d16d1")
-	)
-	(label "RS485_DE"
-		(at 129.54 215.9 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "34da538a-e6e5-5d2d-82f1-b31a72c32ef9")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 160.02 195.58 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "f0e0dc54-6c48-5eb3-84a5-2d5192256639")
-		(property "Reference" "R8"
-			(at 162.56 194.31 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "10k"
-			(at 162.56 196.85 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
-			(at 160.02 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 160.02 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 160.02 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "4df109a1-50cd-569f-9e06-dc9e0585e61c")
-		)
-		(pin "2"
-			(uuid "352be7d9-354e-54de-b3c4-119358f4bbbd")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "R8")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(label "RS485_DE"
-		(at 160.02 191.77 90)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "7a3eb868-9e64-577a-8a15-8188f7ca5a1c")
-	)
-	(label "GND"
-		(at 160.02 199.39 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "f21069a7-83c8-556c-bf4f-f554efeea7c9")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 180.34 195.58 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "e2838e17-7c40-52fc-af03-dee09de5bc15")
-		(property "Reference" "R9"
-			(at 182.88 194.31 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "120"
-			(at 182.88 196.85 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
-			(at 180.34 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 180.34 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 180.34 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "d8fc142e-51f2-5000-a3b1-c42300fc1159")
-		)
-		(pin "2"
-			(uuid "639d1579-5ab7-514c-9b19-8cf538f05aec")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "R9")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(label "RS485_A"
-		(at 180.34 191.77 90)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "532c37f3-3266-5d0f-94ef-5e68f87c6135")
-	)
-	(label "RS485_TERM"
-		(at 180.34 199.39 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "9eed35e3-a69d-5f1f-a5ee-072e168c1c85")
-	)
-	(symbol
-		(lib_id "Jumper:Jumper_2_Open")
-		(at 210.82 195.58 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "3797a65d-29f3-5c34-a1ca-b4adea649b13")
-		(property "Reference" "JP8"
-			(at 205.74 191.77 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "120 ohm"
-			(at 205.74 200.66 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
-			(at 210.82 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 210.82 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 210.82 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "f97116f3-8edd-5f67-a4b7-4e51d5f97a5d")
-		)
-		(pin "2"
-			(uuid "6a223e82-2196-5249-ae5a-f021146cd495")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "JP8")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(label "RS485_TERM"
-		(at 205.74 195.58 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "2c2cb752-9388-50d5-be85-a126d1704f9b")
-	)
-	(label "RS485_B"
-		(at 215.9 195.58 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "a08f3dee-6005-5517-804d-32e14d0a952d")
-	)
-	(symbol
-		(lib_id "Connector:Screw_Terminal_01x03")
-		(at 248.92000000000002 195.58 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -12015,7 +10286,7 @@
 		(dnp no)
 		(uuid "0b939888-3899-50de-baea-bb07d70a7398")
 		(property "Reference" "J9"
-			(at 243.84 189.23 0)
+			(at 55.88 186.69 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12023,8 +10294,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "RS485: A B GND"
-			(at 243.84 203.2 0)
+		(property "Value" "uart.a / RS485 module"
+			(at 55.88 205.74 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -12032,8 +10303,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-3-5.08_1x03_P5.08mm_Horizontal"
-			(at 248.92 195.58 0)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical"
+			(at 60.96 195.58 0)
 			(hide yes)
 			(effects
 				(font
@@ -12043,7 +10314,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 248.92 195.58 0)
+			(at 60.96 195.58 0)
 			(hide yes)
 			(effects
 				(font
@@ -12053,7 +10324,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 248.92 195.58 0)
+			(at 60.96 195.58 0)
 			(hide yes)
 			(effects
 				(font
@@ -12071,6 +10342,12 @@
 		(pin "3"
 			(uuid "3c4add02-2f6f-503f-b4ed-f0a3effdeaa2")
 		)
+		(pin "4"
+			(uuid "8d4dc2ae-fe91-56af-af4a-e652cc62f241")
+		)
+		(pin "5"
+			(uuid "adc12086-5c03-5989-8d06-f118b756e4e6")
+		)
 		(instances
 			(project "aux-board-th"
 				(path "/0b368187-5759-54d4-bd95-40af371deb44"
@@ -12080,8 +10357,8 @@
 			)
 		)
 	)
-	(label "RS485_A"
-		(at 243.84 193.04 180)
+	(label "+3V3"
+		(at 55.88 190.5 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -12090,8 +10367,8 @@
 		)
 		(uuid "3fd82f6a-1bdd-58ca-8ed5-3d366b4e9dce")
 	)
-	(label "RS485_B"
-		(at 243.84 195.58 180)
+	(label "UARTA_TX"
+		(at 55.88 193.04 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -12100,8 +10377,8 @@
 		)
 		(uuid "2c4030ea-e092-57de-a741-2fccb3486cec")
 	)
-	(label "GND"
-		(at 243.84 198.12 180)
+	(label "UARTA_RX"
+		(at 55.88 195.58 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -12110,136 +10387,25 @@
 		)
 		(uuid "7e3f543e-ce44-5620-a9ef-041ac011e150")
 	)
-	(symbol
-		(lib_id "Connector_Generic:Conn_01x05")
-		(at 289.56 195.58 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "2cdcbc94-87f2-5dda-9e01-aaeb33e8fa6f")
-		(property "Reference" "J10"
-			(at 284.48 186.69 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "uart.a"
-			(at 284.48 205.74 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x05_P2.54mm_Vertical"
-			(at 289.56 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 289.56 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 289.56 195.58 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "507b9bbd-0699-5e89-935d-1c516f1c00c4")
-		)
-		(pin "2"
-			(uuid "d132a07f-8dae-5129-9025-9c62b4de1813")
-		)
-		(pin "3"
-			(uuid "7d35e15d-8164-58e3-b1eb-4a044891fc3f")
-		)
-		(pin "4"
-			(uuid "f5de3f3d-e5b3-5bed-a769-1e8af0fbd9f0")
-		)
-		(pin "5"
-			(uuid "643fc2c8-cbb9-5b25-981a-3fb483d503f2")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "J10")
-					(unit 1)
-				)
-			)
-		)
-	)
 	(label "GND"
-		(at 284.48 190.5 180)
+		(at 55.88 198.12 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify right bottom)
 		)
-		(uuid "270f77db-3c5d-5b34-9255-6fecf3c9ad1a")
-	)
-	(label "+3V3"
-		(at 284.48 193.04 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "7ef8bdff-3830-5002-83f8-1de1cbae0914")
-	)
-	(label "UARTA_TX"
-		(at 284.48 195.58 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "191158f9-28ae-5acb-b2d0-cd12dc8ded16")
-	)
-	(label "UARTA_RX"
-		(at 284.48 198.12 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "39f050c2-594b-5814-98a1-5c57a48379de")
+		(uuid "87ca99b2-49ae-5bff-9e9c-57b3ef37d226")
 	)
 	(label "UARTA_DE"
-		(at 284.48 200.66 180)
+		(at 55.88 200.66 180)
 		(effects
 			(font
 				(size 1.27 1.27)
 			)
 			(justify right bottom)
 		)
-		(uuid "8d2b779d-0cb4-5305-bfae-b072e92ad195")
+		(uuid "35a485f5-ed40-5ce6-b3fb-d5125fb5e47f")
 	)
 	(text "uart.b, THE FLASHER'S TARGET, AND SWD ON THE SAME PINS"
 		(exclude_from_sim no)
@@ -12816,7 +10982,7 @@
 		)
 		(uuid "f538488d-2b88-5a4f-a010-497da88610e4")
 	)
-	(text "CAN: a transceiver with a 3.3 V logic side; JP10/JP11 give GPIO46/47 to it or to the SPI header"
+	(text "CAN: an SN65HVD230 module on four pins (3V3 GND CTX CRX)"
 		(exclude_from_sim no)
 		(at 205 245 0)
 		(effects
@@ -12825,759 +10991,11 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "26da0bd4-74f4-576c-b57d-ad5166593390")
+		(uuid "62d1fea8-1084-574a-9cbf-5c0520d96173")
 	)
 	(symbol
-		(lib_id "Interface_CAN_LIN:MCP2562-E-P")
+		(lib_id "Connector_Generic:Conn_01x04")
 		(at 243.84 289.56 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "42c71e10-1641-5e89-9824-3db7b2ad30c6")
-		(property "Reference" "U2"
-			(at 231.14 275.59 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "MCP2562 (DIP-8)"
-			(at 231.14 304.8 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Package_DIP:DIP-8_W7.62mm_Socket"
-			(at 243.84 289.56 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 243.84 289.56 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 243.84 289.56 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "4ba4cf6b-3ac6-5463-9f4b-70b215bc5e6e")
-		)
-		(pin "2"
-			(uuid "5ba13333-d160-5b15-84ad-32a295490315")
-		)
-		(pin "3"
-			(uuid "a3fd2af5-d724-5c46-961b-613d0c07bc11")
-		)
-		(pin "4"
-			(uuid "936a7e91-37e3-5747-ba20-44460024e2e6")
-		)
-		(pin "5"
-			(uuid "8e517d50-9e67-5f1f-84b6-5f4c70ef5bb7")
-		)
-		(pin "6"
-			(uuid "dea7374f-eb8c-530c-8e96-526b1a8e04b9")
-		)
-		(pin "7"
-			(uuid "632f0e96-bcb5-523b-ae3f-7ebed530d3cf")
-		)
-		(pin "8"
-			(uuid "a0b6503e-b5ed-5823-a78b-a97b862f08e6")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "U2")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(label "CAN_TXD"
-		(at 231.14 284.48 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "3feafa9e-46d3-56c0-84d0-471cd89333a3")
-	)
-	(label "GND"
-		(at 243.84 299.72 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "774d8969-8462-59bb-8421-5b6d96f77efa")
-	)
-	(label "+5V_SW"
-		(at 243.84 279.4 90)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "1581a925-0d4c-541b-9e30-fd623eb65d97")
-	)
-	(label "CAN_RXD"
-		(at 231.14 287.02 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "c615284c-dbf4-5a2d-b421-ab5ca215d650")
-	)
-	(label "+3V3"
-		(at 231.14 292.1 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "0c094081-fd7e-52a2-a612-9d961b3f0554")
-	)
-	(label "CAN_L"
-		(at 256.54 292.1 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "18451e9d-b7b1-5625-a330-9638d79797ed")
-	)
-	(label "CAN_H"
-		(at 256.54 287.02 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "c020efc5-80f3-594a-9dc9-d82ea80eea14")
-	)
-	(label "GND"
-		(at 231.14 294.64 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "1378be19-4771-5b9b-a664-e2ca5726998a")
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 284.48 289.56 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "cb2c80b6-bdd0-5e64-a3ce-796dcf2d398c")
-		(property "Reference" "C6"
-			(at 287.02 288.29 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "100n"
-			(at 287.02 290.83 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
-			(at 284.48 289.56 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 284.48 289.56 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 284.48 289.56 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "e4ffaaaf-b688-500e-971c-44efdfd67c77")
-		)
-		(pin "2"
-			(uuid "f57e4434-4729-56b1-82dd-8f7cf2dfba70")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "C6")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(label "+5V_SW"
-		(at 284.48 285.75 90)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "2fe2940f-0761-5347-83c1-da483fdd476b")
-	)
-	(label "GND"
-		(at 284.48 293.37 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "cf9c7f82-a5b9-56a2-b440-d87de31f63fb")
-	)
-	(symbol
-		(lib_id "Device:C")
-		(at 299.72 289.56 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "ed54be7d-510f-50b3-aac2-d276b97c9638")
-		(property "Reference" "C7"
-			(at 302.26 288.29 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "100n"
-			(at 302.26 290.83 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
-			(at 299.72 289.56 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 299.72 289.56 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 299.72 289.56 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "87c5ebaa-45ca-5078-9051-0e3eeb4ceab9")
-		)
-		(pin "2"
-			(uuid "4b374ed2-7cda-5685-948d-8856b60b06bb")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "C7")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(label "+3V3"
-		(at 299.72 285.75 90)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "e33b228f-bdac-54bb-b52d-4e744b67dbaa")
-	)
-	(label "GND"
-		(at 299.72 293.37 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "8f61e934-5ce9-503a-9d9e-859c81daca30")
-	)
-	(symbol
-		(lib_id "Jumper:Jumper_3_Bridged12")
-		(at 330.2 279.4 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "74540647-58f1-557f-a77e-dbeb7fd54dc4")
-		(property "Reference" "JP10"
-			(at 325.12 275.59 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "GPIO46"
-			(at 325.12 288.29 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical"
-			(at 330.2 279.4 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 330.2 279.4 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 330.2 279.4 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "4ba7c045-0749-5200-9e17-1abda96ec7c3")
-		)
-		(pin "2"
-			(uuid "be6e0c64-31ab-55c3-b1f6-010d92d736b9")
-		)
-		(pin "3"
-			(uuid "5d269dd2-7ecd-5d28-b9c3-176765d60b6b")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "JP10")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(label "CAN_TXD"
-		(at 325.12 279.4 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "0e89b9f9-55e2-5734-bd94-e9572ea705cd")
-	)
-	(label "GPIO46"
-		(at 330.2 283.21 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "38b42dea-056b-53e2-b56e-d030166dbd7e")
-	)
-	(label "AUX1"
-		(at 335.28 279.4 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "92619519-286a-5c62-828e-5fb79cd405d0")
-	)
-	(symbol
-		(lib_id "Jumper:Jumper_3_Bridged12")
-		(at 330.2 304.8 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "1d92c622-632d-55c0-a11d-99472499a22e")
-		(property "Reference" "JP11"
-			(at 325.12 300.99 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "GPIO47"
-			(at 325.12 313.69 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical"
-			(at 330.2 304.8 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 330.2 304.8 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 330.2 304.8 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "6dbc1a35-1cb8-5e84-ad87-d4faf33ce6e1")
-		)
-		(pin "2"
-			(uuid "22967087-8da7-515e-80df-24506b2839ac")
-		)
-		(pin "3"
-			(uuid "0290969c-9ffe-5f95-9467-dc4a7df75ce2")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "JP11")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(label "CAN_RXD"
-		(at 325.12 304.8 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "dea5a0ad-304e-5184-be8e-2e0d224393cf")
-	)
-	(label "GPIO47"
-		(at 330.2 308.61 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "4a2a4557-8a0c-560e-aa34-35380ac49644")
-	)
-	(label "AUX2"
-		(at 335.28 304.8 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "6d76b490-c72b-5f33-9a58-ebc03509b253")
-	)
-	(symbol
-		(lib_id "Device:R")
-		(at 365.76 289.56 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "8c2cb8dd-1b31-5d6f-b2ba-74cbc14325c5")
-		(property "Reference" "R12"
-			(at 368.3 288.29 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "120"
-			(at 368.3 290.83 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
-			(at 365.76 289.56 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 365.76 289.56 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 365.76 289.56 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "e9fc815d-3e0f-50a8-80c5-487e0be924e8")
-		)
-		(pin "2"
-			(uuid "81bd949a-08e6-54d4-8186-533b4943a4f7")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "R12")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(label "CAN_H"
-		(at 365.76 285.75 90)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "1e9aa6c3-e0dd-50be-84f4-9758da363b5b")
-	)
-	(label "CAN_TERM"
-		(at 365.76 293.37 270)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "f46de88f-ff26-5368-baa0-8a04b6647941")
-	)
-	(symbol
-		(lib_id "Jumper:Jumper_2_Open")
-		(at 396.24 289.56 0)
-		(unit 1)
-		(exclude_from_sim no)
-		(in_bom yes)
-		(on_board yes)
-		(dnp no)
-		(uuid "835e5d91-addc-595b-8b5c-aa72d3651556")
-		(property "Reference" "JP12"
-			(at 391.16 285.75 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Value" "120 ohm"
-			(at 391.16 294.64 0)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
-			(at 396.24 289.56 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Datasheet" ""
-			(at 396.24 289.56 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(property "Description" ""
-			(at 396.24 289.56 0)
-			(hide yes)
-			(effects
-				(font
-					(size 1.27 1.27)
-				)
-				(justify left)
-			)
-		)
-		(pin "1"
-			(uuid "df748b19-9fe1-5eff-ad3b-566183945d70")
-		)
-		(pin "2"
-			(uuid "4655c236-755b-5b28-9da6-b2206f4642d7")
-		)
-		(instances
-			(project "aux-board-th"
-				(path "/0b368187-5759-54d4-bd95-40af371deb44"
-					(reference "JP12")
-					(unit 1)
-				)
-			)
-		)
-	)
-	(label "CAN_TERM"
-		(at 391.16 289.56 180)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify right bottom)
-		)
-		(uuid "091ce6c3-edb2-5d26-a502-d17d9ee89f5e")
-	)
-	(label "CAN_L"
-		(at 401.32 289.56 0)
-		(effects
-			(font
-				(size 1.27 1.27)
-			)
-			(justify left bottom)
-		)
-		(uuid "c0790773-2918-5f97-8f60-095b18efac12")
-	)
-	(symbol
-		(lib_id "Connector:Screw_Terminal_01x03")
-		(at 419.1 289.56 0)
 		(unit 1)
 		(exclude_from_sim no)
 		(in_bom yes)
@@ -13585,7 +11003,7 @@
 		(dnp no)
 		(uuid "80b820a2-2245-5a44-b50e-8cd4aeaaaa85")
 		(property "Reference" "J13"
-			(at 414.02 283.21 0)
+			(at 238.76 283.21 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13593,8 +11011,8 @@
 				(justify left)
 			)
 		)
-		(property "Value" "CAN: H L GND"
-			(at 414.02 297.18 0)
+		(property "Value" "CAN module"
+			(at 238.76 299.72 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -13602,8 +11020,8 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-3-5.08_1x03_P5.08mm_Horizontal"
-			(at 419.1 289.56 0)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x04_P2.54mm_Vertical"
+			(at 243.84 289.56 0)
 			(hide yes)
 			(effects
 				(font
@@ -13613,7 +11031,7 @@
 			)
 		)
 		(property "Datasheet" ""
-			(at 419.1 289.56 0)
+			(at 243.84 289.56 0)
 			(hide yes)
 			(effects
 				(font
@@ -13623,7 +11041,7 @@
 			)
 		)
 		(property "Description" ""
-			(at 419.1 289.56 0)
+			(at 243.84 289.56 0)
 			(hide yes)
 			(effects
 				(font
@@ -13641,6 +11059,9 @@
 		(pin "3"
 			(uuid "3db69c0d-edd6-5a44-b229-0037c66c4860")
 		)
+		(pin "4"
+			(uuid "cc4509b1-6c30-5f6e-ac06-bfff7c70587f")
+		)
 		(instances
 			(project "aux-board-th"
 				(path "/0b368187-5759-54d4-bd95-40af371deb44"
@@ -13650,8 +11071,8 @@
 			)
 		)
 	)
-	(label "CAN_H"
-		(at 414.02 287.02 180)
+	(label "+3V3"
+		(at 238.76 287.02 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -13660,8 +11081,8 @@
 		)
 		(uuid "5efe9163-1422-5514-b5cd-1a043984b635")
 	)
-	(label "CAN_L"
-		(at 414.02 289.56 180)
+	(label "GND"
+		(at 238.76 289.56 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -13670,8 +11091,8 @@
 		)
 		(uuid "49366468-d1d0-5dad-bc0d-7f7710bb7f46")
 	)
-	(label "GND"
-		(at 414.02 292.1 180)
+	(label "GPIO46"
+		(at 238.76 292.1 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -13680,7 +11101,17 @@
 		)
 		(uuid "5b2da499-4068-5572-ad4c-bb80f2611515")
 	)
-	(text "spi.a, WITH THE TWO PINS CAN LEAVES FREE"
+	(label "GPIO47"
+		(at 238.76 294.64 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "a9fbbc79-089e-5195-b254-51dd2a001643")
+	)
+	(text "spi.a, AND GPIO46/47 WHEN NO CAN MODULE IS ON THEM"
 		(exclude_from_sim no)
 		(at 435 200 0)
 		(effects
@@ -13689,7 +11120,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "fed08fde-905a-5d2e-a4a5-a2478ffd24dd")
+		(uuid "b5d45de5-7a8b-577a-a171-2f81019e6b84")
 	)
 	(symbol
 		(lib_id "Connector_Generic:Conn_02x04_Odd_Even")
@@ -13841,7 +11272,7 @@
 		)
 		(uuid "806ed1d3-8f4e-58e9-bf50-c15db50bdd1a")
 	)
-	(label "AUX1"
+	(label "GPIO46"
 		(at 469.9 241.3 180)
 		(effects
 			(font
@@ -13851,7 +11282,7 @@
 		)
 		(uuid "ce0f9dbe-53d1-5ef1-a231-2b96e31f5e1d")
 	)
-	(label "AUX2"
+	(label "GPIO47"
 		(at 482.6 241.3 0)
 		(effects
 			(font

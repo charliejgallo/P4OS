@@ -9,20 +9,23 @@ una tapa impresa con dos USB.
 **Estado (2026-11-10): sólo el plan.** El mapa de pines quedó cerrado ese
 día (`docs/img/pinout.svg`, [EXPANSION.md](EXPANSION.md)) y salió con la
 0.25.1. Hay un primer esquemático de la variante casera en
-`hw/aux-board/` (80 partes, 64 redes, ERC de KiCad sin observaciones); sin
+`hw/aux-board/` (64 partes, 51 redes, ERC de KiCad sin observaciones); sin
 trazado todavía. **Decidido por el usuario ese día:** se
 hacen las dos variantes, la casera (placa de dos capas pedida a JLCPCB,
 soldada a mano) y la PCBA con SMD; `i2c.board` sale sólo a 3,3 V; el
 adaptador de nivel a 5 V va en `i2c.ext`, que también tiene sus tiras de
-3,3 V. Todo lo de abajo que nombra una pieza concreta es una
+3,3 V; **RS485 y CAN van con módulos externos**, no con chips en la placa:
+el "RS485 a TTL" automático del banco (3V3, TX, RX, GND) y un SN65HVD230
+(3V3, GND, CTX, CRX), cada uno en su tira de pines. Todo lo de abajo que nombra una pieza concreta es una
 propuesta a revisar contra su hoja de datos y el stock del fabricante al
 dibujar el esquemático: nada de esto se armó ni se midió.
 
 ## Reglas
 
 - **Para cualquiera**, como las apps: nada ajustado al banco del usuario.
-- **Nada fijo que no se pueda soltar.** Cada bloque con un chip (RS485,
-  CAN, Ethernet, infrarrojo) llega a sus GPIO por puentes: quitado el
+- **Nada fijo que no se pueda soltar.** Cada bloque soldado a la placa
+  (infrarrojo, Ethernet, las resistencias de pull-up) llega a sus GPIO por
+  puentes; RS485 y CAN son módulos que se sacan: quitado el
   puente, el pin vuelve a ser un pin libre en una tira de al lado. El mapa
   de pines es un perfil por defecto, no una ley, y la placa no lo tiene que
   convertir en una.
@@ -39,19 +42,19 @@ dibujar el esquemático: nada de esto se armó ni se midió.
 
 | Bloque | GPIO (pin) | Conector | Notas |
 |---|---|---|---|
-| Header | todos | tira hembra 2×20 de 2,54 | La numeración es la de la placa: pin 1 arriba a la derecha |
+| Header | todos | tira de pines 2×20 de 2,54 hacia abajo, y un zócalo 2×20 igual al de la placa hacia arriba | El de la placa es un zócalo hembra. Una tira "stacking" (zócalo con pines largos) hace las dos cosas en una sola pieza. Al ir enfrentada, la huella va espejada: se revisa en el trazado |
 | 5 V conmutado | pines 1 y 3 | — | Llave habilitada por 3V3; un fusible rearmable por USB |
 | USB host "2.0" | USBD_N/P (25, 27) | USB-A hembra | High Speed: par diferencial de 90 Ω, corto y sin vías; protección ESD |
 | USB host "1.1" | 24, 25 (21, 23) | USB-A hembra | Full Speed |
 | `i2c.ext` 3,3 V | 21, 22 (15, 17) | JST-SH de 4 (Qwiic / STEMMA QT) y tira de 4 | Pull-ups de 4,7 kΩ con puente |
 | `i2c.ext` 5 V | los mismos | tira de 4 | Adaptador de nivel de dos canales, pull-ups a 5 V del otro lado; el 5 V es el conmutado |
 | `i2c.board` 3,3 V | 7, 8 (4, 6) | tira de 4 | Sólo a 3,3 V, sin adaptador de nivel: es el bus del táctil y del audio, y un sensor que lo cuelga se lleva la pantalla. Ya tiene pull-ups de 2,2 kΩ en la placa |
-| `uart.a` RS485 | 30, 31, 29 (22, 24, 20) | bornera de 3 (A, B, GND) | Transceptor de 3,3 V; 120 Ω con puente; tira TTL (TX, RX, DE) si se sacan los puentes |
+| `uart.a` / RS485 | 30, 31, 29 (22, 24, 20) | tira de 5: 3V3, TX, RX, GND, DE | El módulo RS485 automático se enchufa en los cuatro primeros; el quinto es DE, para un transceptor que lo pida o para usar el UART pelado |
 | `uart.b` + objetivo | 3, 4, 5, 2 (12, 14, 11, 8) | tira de 6: GND, 3V3, TX, RX, EN, BOOT | El cable del Programador y de la Terminal. Divisor con puente en RX para un objetivo de 5 V (el Nano) |
 | SWD | 3 = SWCLK, 4 = SWDIO, 5 = NRST | Cortex Debug 2×5 de 1,27 (o tira de 5) | Los mismos pines que `uart.b`: es otro conector, no otro puerto |
-| `spi.a` | 52, 50, 51, 49 (38, 34, 36, 32) | tira 2×4: 3V3, GND, SCK, MOSI, MISO, CS y dos auxiliares | Los auxiliares salen de los puentes de CAN / Ethernet cuando esos bloques no se usan |
+| `spi.a` | 52, 50, 51, 49 (38, 34, 36, 32) | tira 2×4: 3V3, GND, SCK, MOSI, MISO, CS, y GPIO46 y 47 | Los dos últimos son los de CAN: libres como auxiliares cuando no hay módulo CAN puesto |
 | Ethernet | `spi.a` con su CS, 49 (32), por puente | RJ45 | W5500. Con el puente puesto es el chip de `spi.a`; otro chip SPI a la vez toma su CS de un auxiliar. La interrupción no se cablea: el driver puede sondear. **Falta el driver en el firmware** |
-| CAN | TX 46, RX 47 (35, 37) | bornera de 3 (H, L, GND) | Transceptor de 3,3 V; 120 Ω con puente |
+| CAN | TX 46, RX 47 (35, 37) | tira de 4: 3V3, GND, CTX, CRX | Para un módulo SN65HVD230, que trae su bornera y su 120 Ω |
 | Infrarrojo | receptor 28 (16), LED 32 (31) | en la placa, hacia adelante | Receptor de 38 kHz a 3V3; LED por un NPN desde el 5 V conmutado |
 | 1-Wire | 34 (28) | bornera de 3: 3V3, dato, GND | 4,7 kΩ a 3V3 con puente. Es un pin de strapping (la fuente del JTAG), que el chip sólo mira si se quemó el eFuse JTAG_SEL_ENABLE; el pull-up elige lo que ya es el valor de fábrica |
 | Tira LED / servo | 48 (39) | bornera de 3: 5 V conmutado, dato, GND | 330 Ω en serie; lugar para un capacitor de 470 µF |
@@ -72,8 +75,8 @@ El esquemático es uno solo. Cambia con qué se resuelve cada bloque:
 
 | Bloque | PCBA (SMD, armada en fábrica) | Casera (thru-hole y módulos) |
 |---|---|---|
-| RS485 | SP3485 o THVD1420 en SOIC-8, TVS en la línea | MAX3485 en DIP-8 con zócalo, o el módulo automático de 3,3 V ya probado en el banco |
-| CAN | SN65HVD230 en SOIC-8 | Zócalo para el módulo SN65HVD230 (el del banco), o un MCP2562 en DIP-8 con su VIO a 3,3 V |
+| RS485 | Tira de pines para el módulo automático | Lo mismo |
+| CAN | Tira de pines para el módulo SN65HVD230 | Lo mismo |
 | Ethernet | W5500 (LQFP-48), cristal de 25 MHz y RJ45 con transformador | Zócalo para un módulo W5500 de tira de pines |
 | Adaptador de nivel I2C | Dos BSS138 por bus y sus resistencias | Dos 2N7000 por bus, o el módulo de 4 canales en zócalo |
 | 5 V conmutado | Llave de carga con límite de corriente por puerto USB | MOSFET P con un NPN, y un fusible rearmable por puerto |
@@ -136,13 +139,15 @@ impreso, mirándolo de atrás:
 | Otros componentes altos de ese lado | un conector en x 1,0-6,2, y 80,0-87,7 (3,4 mm de alto) y otro en x 57,9-62,8, y 86,4-92,2 (4,3 mm) |
 | USB-C | los dos sobre el lado corto de y = 118,49 |
 
+Dicho por el usuario con la placa en la mano (2026-11-10): **el header es
+un zócalo hembra de 2×20**, y **el pin 1 está en el extremo opuesto a los
+USB-C**, o sea en y = 14,17. De ahí, y de que mirando el header con el pin 1
+arriba los impares quedan a la derecha, sale que **la fila de los impares
+es la de afuera** (x = 3,15, la más cercana al borde); esto último es
+deducido del modelo y se confirma con el tester antes de trazar.
+
 Falta saber, y el modelo no lo dice:
 
-- **En qué extremo del header está el pin 1** (del lado de los USB-C o del
-  opuesto).
-- **Si el header de la placa es de pines o de zócalo**: define qué lleva la
-  placa auxiliar para enchufarse (el esquemático supone pines en la placa y
-  un zócalo de 2×20 en la auxiliar).
 - La altura libre entre la placa y la tapa impresa (`case/v1/`), y por
   dónde salen los USB-A.
 - Dónde mira el LED infrarrojo con la placa en su soporte.
@@ -161,7 +166,7 @@ Falta saber, y el modelo no lo dice:
 
 ## Lo que sigue
 
-1. Lo que falta de la mecánica de arriba (pin 1, pines o zócalo, alturas).
+1. Lo que falta de la mecánica de arriba (alturas, salida de los USB-A) y confirmar la fila de los impares.
 2. Decidir si el Ethernet de la PCBA va integrado o en zócalo.
 3. El esquemático: la casera está empezada (`hw/aux-board/gen.py`); falta
    revisarla pieza por pieza, el zócalo del módulo W5500 cuando se sepa cuál
