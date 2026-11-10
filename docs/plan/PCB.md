@@ -9,8 +9,10 @@ una tapa impresa con dos USB.
 **Estado (2026-11-10): sólo el plan.** El mapa de pines quedó cerrado ese
 día (`docs/img/pinout.svg`, [EXPANSION.md](EXPANSION.md)) y salió con la
 0.25.1. Hay un primer esquemático de la variante casera en
-`hw/aux-board/` (71 partes, 54 redes, ERC de KiCad sin observaciones), con
-una primera ubicación de las partes en la placa; sin
+`hw/aux-board/`, y otro de la PCBA sobre las mismas 54 redes (71 y 73
+partes, ERC de KiCad sin observaciones), cada uno con una primera ubicación
+de las partes en la placa, la serigrafía con el nombre de cada pin y la
+máscara negra con que se van a pedir; sin
 trazado todavía. **Decidido por el usuario ese día:** se
 hacen las dos variantes, la casera (placa de dos capas pedida a JLCPCB,
 soldada a mano) y la PCBA con SMD; `i2c.board` sale sólo a 3,3 V; el

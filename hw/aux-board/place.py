@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""A first placement of the through-hole variant: the parts of gen.py on a board, with their nets.
+"""A first placement of both variants: the parts of gen.py on a board, with their nets and silkscreen.
 
-    <KiCad's python3> hw/aux-board/place.py          writes aux-board-th.kicad_pcb
+    <KiCad's python3> hw/aux-board/place.py     writes aux-board-th.kicad_pcb and aux-board-smd.kicad_pcb
 
 It runs under KiCad's own Python (it needs pcbnew):
 /Applications/KiCad/KiCad.app/Contents/Frameworks/Python.framework/Versions/Current/bin/python3
@@ -11,6 +11,9 @@ measured on Waveshare's 3D model (docs/plan/PCB.md, "Mecánica"), seen from
 the back of the P4: x to the right, y down, the USB-C connectors along the
 top edge, the 40-pin header down the left edge with pin 1 at its bottom.
 Nothing is routed. This is a draft to look at and to move by hand.
+
+The silkscreen names every connector and every pin of it, and every bridge.
+The solder mask is black, as the boards will be ordered.
 """
 import os
 
@@ -26,7 +29,7 @@ PIN1 = (3.15, 104.32)                   # the header's pin 1; odd pins on the ed
 
 # The W5500 Lite: where the middle of its two rows of pins goes, and how far apart the rows are.
 # 20.32 mm (0.8 in) is a guess from the board's 23.5 mm width: measure the module before routing.
-ETH, ETH_ROWS = (47.5, 78.3), 20.32
+ETH, ETH_ROWS = (51.0, 79.0), 20.32
 
 # ref -> (x, y, degrees): the middle of the part, mm from the top left corner
 AT = {
@@ -36,40 +39,113 @@ AT = {
     "Q3": (13, 33, 0), "Q4": (13, 39, 0), "R6": (24, 33, 0), "R7": (24, 39, 0),
     "JP3": (11, 46, 90), "JP4": (11, 51, 90),
     # infrared, looking out of the top edge
-    "U3": (32, 4, 180), "D1": (42, 4, 0), "R13": (32, 11, 0), "C8": (27, 18, 0), "JP13": (36, 19, 90),
-    "R16": (53, 10, 0), "Q5": (44, 12, 0), "R14": (50, 17, 0), "R15": (50, 21, 0), "JP14": (48, 27, 90),
+    "U3": (32, 4, 180), "D1": (42, 4, 0), "R13": (32, 11, 0), "C8": (28, 20.5, 0), "JP13": (36, 19, 90),
+    "R16": (53, 10, 0), "Q5": (44, 13, 0), "R14": (50, 17, 0), "R15": (50, 21, 0), "JP14": (48, 27, 90),
     # 1-wire and the strip, on the right edge
-    "J15": (58.5, 38, 90), "R17": (46, 34, 0), "JP15": (46, 39, 90),
-    "J16": (58.5, 58, 90), "R18": (48, 52, 0), "C9": (50, 61, 0),
+    "J15": (58.5, 38, 90), "R17": (41.5, 36, 90), "JP15": (46, 39, 90),
+    "J16": (58.5, 58, 90), "R18": (48, 47, 0), "C9": (35.5, 30, 0),
     # the ports, in the middle
-    "J9": (19, 64, 0), "J13": (25, 63, 0), "J11": (31, 66.5, 0), "J12": (36.5, 64, 0),
-    "R10": (26, 80, 0), "R11": (26, 84, 0), "JP9": (35, 81, 0),
-    "J14": (27, 50, 90),
+    "J9": (23, 64, 0), "J13": (30, 63, 0), "J11": (37, 66.5, 0), "J12": (44, 62, 0),
+    "R10": (26, 80, 0), "R11": (26, 84, 0), "JP9": (33, 76, 0),
+    "J14": (27, 48, 90),
     # ethernet: the module lies over ETH, its RJ45 past the right edge; two low parts go under it
     "J17": (ETH[0], ETH[1] - ETH_ROWS / 2, 90), "J18": (ETH[0], ETH[1] + ETH_ROWS / 2, 90),
-    "R19": (ETH[0], ETH[1] - 3, 0), "C10": (ETH[0], ETH[1] + 3, 0),
-    "JP16": (37.5, 50, 0), "J19": (44, 57.5, 90), "C11": (39.5, 43.5, 0),
+    "R19": (ETH[0] - 6.5, ETH[1], 0), "C10": (ETH[0] + 6.5, ETH[1], 0),
+    "JP16": (37.5, 50, 0), "J19": (57.5, 24.5, 90), "C11": (35, 41, 0),
     # the 5 V switch and the USB sockets, at the bottom
-    "Q1": (21, 91, 0), "R1": (32.5, 88, 0), "R2": (32.5, 92, 0), "R3": (32.5, 96, 0), "Q2": (44, 94.5, 0),
-    "JP1": (52, 94.5, 90), "C1": (60, 96, 0), "C2": (50, 99.5, 0),
-    "F1": (20, 99, 0), "C3": (30, 101, 0), "F2": (42, 101, 0), "C4": (57, 104, 0),
-    "J3": (24, 111.2, 0), "J4": (46, 111.2, 0),
+    "Q1": (26.5, 91.5, 0), "R1": (37, 90.5, 0), "R2": (37, 94, 0), "R3": (37, 97.5, 0), "Q2": (49.5, 94, 0),
+    "JP1": (54.5, 94.5, 90), "C1": (60.8, 98.2, 0), "C2": (51.5, 99.5, 0),
+    "F1": (25, 99.5, 0), "C3": (33.5, 85.5, 0), "F2": (41, 100.5, 0), "C4": (60, 105.5, 0),
+    "U4": (31.5, 100.5, 0), "U5": (46, 100.5, 0),
+    "J3": (27.5, 111.2, 0), "J4": (47.5, 111.2, 0),
 }
-SILK = {"J5": "I2C 3V3", "J6": "I2C 3V3", "J7": "I2C 5V", "J8": "BOARD I2C", "J9": "RS485", "J13": "CAN",
-        "J11": "UART B", "J12": "SWD", "J14": "SPI", "J15": "1-WIRE", "J16": "LED / SERVO", "J3": "USB 2.0",
-        "J4": "USB 1.1", "U3": "IR", "J2": "P4 PINS", "J17": "W5500"}
+AT_SMD = {"J6": (3.6, 25, 270)}         # the Qwiic socket, its mouth to the left edge
+
+# what the silkscreen says of each connector: its name (one line or two) and its pins, pin 1 first
+NAME = {"J5": ["I2C 3V3"], "J6": ["I2C 3V3"], "J7": ["I2C 5V"], "J8": ["BOARD I2C"], "J9": ["UART A", "RS485"],
+        "J13": ["CAN"], "J11": ["UART B"], "J12": ["SWD"], "J15": ["1-WIRE"], "J16": ["LED / SERVO"]}
+PINS = {
+    "J5": ["GND", "3V3", "SDA", "SCL"], "J6": ["GND", "3V3", "SDA", "SCL"], "J7": ["GND", "5V", "SDA", "SCL"],
+    "J8": ["GND", "3V3", "SDA", "SCL"], "J9": ["3V3", "TX", "RX", "GND", "DE"], "J13": ["3V3", "GND", "CTX", "CRX"],
+    "J11": ["GND", "3V3", "TX", "RX", "EN", "BOOT", "RX5V"], "J12": ["3V3", "DIO", "CLK", "RST", "GND"],
+    "J14": ["3V3", "GND", "SCK", "MOSI", "MISO", "CS", "46", "47"], "J15": ["3V3", "DQ", "GND"],
+    "J16": ["5V", "DIN", "GND"], "J17": ["G", "G", "MO", "SCK", "CS", "INT"],
+    "J18": ["GND", "V", "V", "NC", "RST", "MI"], "J19": ["ETH INT", "ETH RST"],
+}
+SIDE = {"J17": "S", "J18": "N", "J19": "N", "J15": "W", "J16": "W"}        # where the pin names go; else east
+BRIDGE = {"JP1": "5V BYPASS", "JP2": "PULL-UPS", "JP3": "SDA", "JP4": "SCL", "JP9": "RX 5V", "JP13": "IR RX",
+          "JP14": "IR LED", "JP15": "1W PULL-UP", "JP16": "ETH CS"}
+# free text: (text, x, y, degrees, size)
+TEXT = [("USB 2.0", 15.2, 112.5, 90, 1.2), ("USB 1.1", 58.3, 112.2, 90, 1.2), ("SPI A", 20.3, 48, 90, 1.0),
+        ("IR RX", 24.5, 4, 0, 0.8), ("IR LED", 48.5, 4, 0, 0.8), ("GPIO", 17.2, 54.4, 0, 0.8),
+        ("W5500 LITE", ETH[0], ETH[1] - 4, 0, 1.0), ("RJ45 >", ETH[0], ETH[1] + 4, 0, 0.8)]
+# the forty pins as the pass-through socket shows them: GPIO numbers, G for ground
+GPIO = {1: "5V", 2: "3V3", 3: "5V", 4: "7", 5: "G", 6: "8", 7: "37", 8: "2", 9: "38", 10: "G", 11: "5", 12: "3",
+        13: "G", 14: "4", 15: "21", 16: "28", 17: "22", 18: "3V3", 19: "G", 20: "29", 21: "24", 22: "30",
+        23: "25", 24: "31", 25: "D-", 26: "G", 27: "D+", 28: "34", 29: "G", 30: "35", 31: "32", 32: "49",
+        33: "G", 34: "50", 35: "46", 36: "51", 37: "47", 38: "52", 39: "48", 40: "G"}
+
+STACKUP = """		(stackup
+			(layer "F.SilkS" (type "Top Silk Screen") (color "White"))
+			(layer "F.Paste" (type "Top Solder Paste"))
+			(layer "F.Mask" (type "Top Solder Mask") (color "Black") (thickness 0.01))
+			(layer "F.Cu" (type "copper") (thickness 0.035))
+			(layer "dielectric 1" (type "core") (thickness 1.51) (material "FR4") (epsilon_r 4.5) (loss_tangent 0.02))
+			(layer "B.Cu" (type "copper") (thickness 0.035))
+			(layer "B.Mask" (type "Bottom Solder Mask") (color "Black") (thickness 0.01))
+			(layer "B.Paste" (type "Bottom Solder Paste"))
+			(layer "B.SilkS" (type "Bottom Silk Screen") (color "White"))
+			(copper_finish "HAL lead-free")
+			(dielectric_constraints no)
+		)
+"""
 
 
 def mm(x, y):
     return pcbnew.VECTOR2I(pcbnew.FromMM(x), pcbnew.FromMM(y))
 
 
-def middle(fp):
+def xy(v):
+    return pcbnew.ToMM(v.x), pcbnew.ToMM(v.y)
+
+
+def text(board, s, x, y, angle=0, size=0.8, just="c"):
+    t = pcbnew.PCB_TEXT(board)
+    t.SetText(s)
+    t.SetLayer(pcbnew.F_SilkS)
+    t.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(size), pcbnew.FromMM(size)))
+    t.SetTextThickness(pcbnew.FromMM(0.15))
+    t.SetHorizJustify({"c": pcbnew.GR_TEXT_H_ALIGN_CENTER, "l": pcbnew.GR_TEXT_H_ALIGN_LEFT,
+                       "r": pcbnew.GR_TEXT_H_ALIGN_RIGHT}[just])
+    t.SetVertJustify(pcbnew.GR_TEXT_V_ALIGN_CENTER)
+    t.SetTextAngleDegrees(angle)
+    t.SetPosition(mm(x, y))
+    board.Add(t)
+
+
+def pin_names(board, fp, names, side):
+    """The name of each pad beside it: east or west of a column, north or south of a row."""
     bb = fp.GetBoundingBox(False)
-    return pcbnew.ToMM(bb.GetCenter().x), pcbnew.ToMM(bb.GetCenter().y)
+    cx, cy = xy(bb.GetCenter())
+    half_w, half_h = pcbnew.ToMM(bb.GetWidth()) / 2, pcbnew.ToMM(bb.GetHeight()) / 2
+    pads = {p.GetNumber(): xy(p.GetPosition()) for p in fp.Pads()}
+    two_rows = len({round(v[0], 1) for v in pads.values()}) > 1 and len({round(v[1], 1) for v in pads.values()}) > 1
+    for i, name in enumerate(names):
+        px, py = pads[str(i + 1)]
+        s = side
+        if two_rows:                        # each row's names on its own outer side
+            s = ("N" if py < cy else "S") if half_w > half_h else ("W" if px < cx else "E")
+        if s == "E":
+            text(board, name, cx + half_w + 0.5, py, 0, 0.8, "l")
+        elif s == "W":
+            text(board, name, cx - half_w - 0.5, py, 0, 0.8, "r")
+        elif s == "N":
+            text(board, name, px, cy - half_h - 0.5, 90, 0.8, "l")
+        else:
+            text(board, name, px, cy + half_h + 0.5, 90, 0.8, "r")
 
 
-def main():
+def build(variant):
     board = pcbnew.BOARD()
     for a, b in (((0, 0), (W, 0)), ((W, 0), (W, H)), ((W, H), (0, H)), ((0, H), (0, 0))):
         seg = pcbnew.PCB_SHAPE(board)
@@ -87,9 +163,10 @@ def main():
             board.Add(nets[name])
         return nets[name]
 
+    at = dict(AT, **(AT_SMD if variant == "smd" else {}))
     holes = iter(HOLES)
     missing = []
-    for _, _, _, parts in gen.blocks():
+    for _, _, _, parts in gen.blocks(variant):
         for part, _, _ in parts:
             if not part.footprint:
                 continue
@@ -98,20 +175,25 @@ def main():
             fp.SetReference(part.ref)
             fp.SetValue(part.value)
             board.Add(fp)
+            if part.ref[0] == "J":          # connectors and bridges are named by what they are, below
+                fp.Reference().SetVisible(False)
             if part.ref == "J1":            # underneath, its pins into the P4's socket
                 fp.SetPosition(mm(*PIN1))
                 fp.Flip(mm(*PIN1), pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
                 fp.SetOrientationDegrees(0)     # flipped and at 0: pin 2 inward, the rows going up, as the socket
             elif part.ref == "J2":          # the same socket again, beside it, pin for pin
-                fp.SetPosition(mm(PIN1[0] + 8.2, PIN1[1]))
+                fp.SetPosition(mm(PIN1[0] + 7.62, PIN1[1]))
                 fp.SetOrientationDegrees(180)
+                for n in range(1, 40, 2):
+                    px, py = xy(next(p for p in fp.Pads() if p.GetNumber() == str(n)).GetPosition())
+                    text(board, "%s %s" % (GPIO[n], GPIO[n + 1]), px + 4.6, py, 0, 0.8, "l")
             elif part.ref.startswith("H"):
                 fp.SetPosition(mm(*next(holes)))
-            elif part.ref in AT:
-                x, y, rot = AT[part.ref]
+            elif part.ref in at:
+                x, y, rot = at[part.ref]
                 fp.SetOrientationDegrees(rot)
-                cx, cy = middle(fp)
-                px, py = pcbnew.ToMM(fp.GetPosition().x), pcbnew.ToMM(fp.GetPosition().y)
+                cx, cy = xy(fp.GetBoundingBox(False).GetCenter())
+                px, py = xy(fp.GetPosition())
                 fp.SetPosition(mm(px + x - cx, py + y - cy))
             else:
                 missing.append(part.ref)
@@ -123,26 +205,36 @@ def main():
                         for pad in fp.Pads():
                             if pad.GetNumber() == p[0]:
                                 pad.SetNet(net(n))
-            if part.ref in SILK:
-                t = pcbnew.PCB_TEXT(board)
-                t.SetText(SILK[part.ref])
-                t.SetLayer(pcbnew.F_SilkS)
-                t.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(1.2), pcbnew.FromMM(1.2)))
-                t.SetTextThickness(pcbnew.FromMM(0.2))
-                bb = fp.GetBoundingBox(False)
-                wide = bb.GetWidth() >= bb.GetHeight()
-                if wide:
-                    t.SetPosition(pcbnew.VECTOR2I(bb.GetCenter().x, bb.GetTop() - pcbnew.FromMM(1.4)))
+            bb = fp.GetBoundingBox(False)
+            cx, cy = xy(bb.GetCenter())
+            top, bot = pcbnew.ToMM(bb.GetTop()), pcbnew.ToMM(bb.GetBottom())
+            if part.ref in PINS and not (variant == "smd" and part.ref == "J6"):
+                pin_names(board, fp, PINS[part.ref], SIDE.get(part.ref, "E"))
+            for k, line in enumerate(reversed(NAME.get(part.ref, []))):
+                if cx < 6:                  # against the left edge: start at the edge rather than centre on it
+                    text(board, line, 0.6, top - 0.9 - 1.3 * k, 0, 0.9, "l")
                 else:
-                    t.SetTextAngleDegrees(90)
-                    t.SetPosition(pcbnew.VECTOR2I(bb.GetRight() + pcbnew.FromMM(1.4), bb.GetCenter().y))
-                board.Add(t)
+                    text(board, line, cx, top - 0.9 - 1.3 * k, 0, 0.9)
+            if part.ref in BRIDGE:
+                if part.ref in ("JP3", "JP4"):
+                    text(board, BRIDGE[part.ref], pcbnew.ToMM(bb.GetRight()) + 0.6, cy, 0, 0.8, "l")
+                else:
+                    text(board, BRIDGE[part.ref], cx, bot + 0.9, 0, 0.8)
+    for s, x, y, angle, size in TEXT:
+        text(board, s, x, y, angle, size)
+    text(board, "P4OS AUX BOARD 0.1 " + variant.upper(), 62.6, 17.5, 90, 1.1)
     if missing:
         raise SystemExit("no place for " + ", ".join(missing))
-    out = os.path.join(HERE, "aux-board-th.kicad_pcb")
+    out = os.path.join(HERE, "aux-board-%s.kicad_pcb" % variant)
     pcbnew.SaveBoard(out, board)
+    # the mask's colour lives in the stackup, which the scripting interface does not reach
+    with open(out, encoding="utf-8") as f:
+        doc = f.read()
+    with open(out, "w", encoding="utf-8") as f:
+        f.write(doc.replace("\t(setup\n", "\t(setup\n" + STACKUP, 1))
     print("wrote", os.path.relpath(out), "with", len(board.GetFootprints()), "footprints and", len(nets), "nets")
 
 
 if __name__ == "__main__":
-    main()
+    for v in ("th", "smd"):
+        build(v)

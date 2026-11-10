@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """The auxiliary board for the 40-pin header: its parts and nets, as a KiCad schematic.
 
-    python3 hw/aux-board/gen.py            writes aux-board-th.kicad_sch
-    python3 hw/aux-board/gen.py --check    and asks KiCad for its ERC and its netlist
+    python3 hw/aux-board/gen.py            writes aux-board-th.kicad_sch and aux-board-smd.kicad_sch
+    python3 hw/aux-board/gen.py --check    and asks KiCad for each one's ERC and netlist
 
 docs/plan/PCB.md is the plan and docs/img/pinout.svg the pin map this follows.
-This is the through-hole variant ("th"): every bridge a 2.54 mm jumper, the
-parts a soldering iron can do. The SMD variant for assembly will be a second
-list here over the same nets.
+Two variants over the same nets. "th" is for a soldering iron: axial
+resistors, TO-92 transistors, every bridge a 2.54 mm jumper. "smd" is for
+assembly at the factory: 0603 passives, SOT-23 transistors, solder bridges,
+a Qwiic socket and ESD protection on the USB lines; its connectors are the
+same through-hole ones, soldered by hand afterwards.
 
 RS485 and CAN are not on the board: their transceivers are the modules of
 the bench (an automatic "RS485 to TTL" one, an SN65HVD230), each on a pin
@@ -38,26 +40,58 @@ HEADER = {
     35: "GPIO46", 36: "SPI_MISO", 37: "GPIO47", 38: "SPI_SCK", 39: "GPIO48", 40: "GND",
 }
 
+VARIANT = "th"          # set by build(): the helpers below pick each part's package from it
 HDR = "Connector_PinHeader_2.54mm:PinHeader_1x%02d_P2.54mm_Vertical"
-R_FP = "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
-C_FP = "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
-CP_FP = "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm"
 TO92 = "Package_TO_SOT_THT:TO-92_Inline"
+SOT23 = "Package_TO_SOT_SMD:SOT-23"
 SCREW3 = "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-1,5-3-5.08_1x03_P5.08mm_Horizontal"
 USB_FP = "Connector_USB:USB_A_Molex_67643_Horizontal"
-PTC_FP = "Fuse:Fuse_Bourns_MF-RG300"
+
+
+def smd():
+    return VARIANT == "smd"
 
 
 def R(ref, value, a, b):
-    return Part(ref, "Device:R", value, R_FP, {1: a, 2: b})
+    fp = "Resistor_SMD:R_0603_1608Metric" if smd() else "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
+    return Part(ref, "Device:R", value, fp, {1: a, 2: b})
 
 
 def C(ref, value, a, b):
-    return Part(ref, "Device:C", value, C_FP, {1: a, 2: b})
+    fp = "Capacitor_SMD:C_0603_1608Metric" if smd() else "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+    return Part(ref, "Device:C", value, fp, {1: a, 2: b})
 
 
-def CP(ref, value, plus, minus, fp=CP_FP, dnp=False):
-    return Part(ref, "Device:C_Polarized", value, fp, {1: plus, 2: minus}, dnp=dnp)
+def CP(ref, value, plus, minus, big=False):
+    if smd():
+        fp = "Capacitor_SMD:CP_Elec_8x10" if big else "Capacitor_SMD:CP_Elec_6.3x5.4"
+    else:
+        fp = "Capacitor_THT:CP_Radial_D8.0mm_P3.50mm" if big else "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm"
+    return Part(ref, "Device:C_Polarized", value, fp, {1: plus, 2: minus})
+
+
+def npn(ref, c, b, e):
+    if smd():
+        return Part(ref, "Transistor_BJT:MMBT2222A", "MMBT2222A", SOT23, {"C": c, "B": b, "E": e})
+    return Part(ref, "Transistor_BJT:BC337", "BC337", TO92, {"C": c, "B": b, "E": e})
+
+
+def nfet(ref, g, s, d):
+    if smd():
+        return Part(ref, "Transistor_FET:BSS138", "BSS138", SOT23, {"G": g, "S": s, "D": d})
+    return Part(ref, "Transistor_FET:2N7000", "2N7000", TO92, {"G": g, "S": s, "D": d})
+
+
+def pfet(ref, g, s, d):
+    if smd():
+        return Part(ref, "Transistor_FET:AO3401A", "AO3401A", SOT23, {"G": g, "S": s, "D": d})
+    return Part(ref, "Transistor_FET:IRF9540N", "logic-level P-FET, TO-220 (NDP6020P)",
+                "Package_TO_SOT_THT:TO-220-3_Vertical", {"G": g, "S": s, "D": d})
+
+
+def fuse(ref, a, b):
+    fp = "Fuse:Fuse_1206_3216Metric" if smd() else "Fuse:Fuse_Bourns_MF-RG300"
+    return Part(ref, "Device:Polyfuse", "500 mA", fp, {1: a, 2: b})
 
 
 def conn(ref, value, nets):
@@ -70,16 +104,27 @@ def screw(ref, value, nets):
 
 
 def bridge(ref, value, a, b, closed=True):
-    """A two-pin header with a jumper on it (closed) or left bare (open)."""
+    """th: a two-pin header with a jumper on it (closed) or bare (open). smd: a solder bridge, made or not."""
+    if smd():
+        kind = "Bridged" if closed else "Open"
+        return Part(ref, "Jumper:SolderJumper_2_" + kind, value,
+                    "Jumper:SolderJumper-2_P1.3mm_%s_RoundedPad1.0x1.5mm" % kind, {1: a, 2: b})
     return Part(ref, "Jumper:Jumper_2_Bridged" if closed else "Jumper:Jumper_2_Open", value, HDR % 2, {1: a, 2: b})
+
+
+def esd(ref, dm, dp, vbus):
+    return Part(ref, "Power_Protection:USBLC6-2SC6", "USBLC6-2SC6", "Package_TO_SOT_SMD:SOT-23-6",
+                {"I/O1": dm, "I/O2": dp, "VBUS": vbus, "GND": "GND"})
 
 
 def flag(ref, net):
     return Part(ref, "power:PWR_FLAG", "PWR_FLAG", "", {1: net})
 
 
-def blocks():
+def blocks(variant="th"):
     """[(title, x, y, [(part, dx, dy)])]: a block's parts, placed from its corner."""
+    global VARIANT
+    VARIANT = variant
     b = []
     b.append(("THE HEADER: J1's pins go into the board's socket, J2 is the same socket again on top", 25, 25, [
         (Part("J1", "Connector_Generic:Conn_02x20_Odd_Even", "to the P4 (2x20 pins, underneath)",
@@ -88,10 +133,9 @@ def blocks():
               "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical", HEADER), 125, 60),
     ]))
     b.append(("5 V, SWITCHED BY THE 3V3 RAIL: off with the board, JP1 to bypass", 205, 25, [
-        (Part("Q1", "Transistor_FET:IRF9540N", "logic-level P-FET, TO-220 (NDP6020P)",
-              "Package_TO_SOT_THT:TO-220-3_Vertical", {"S": "+5V", "D": "+5V_SW", "G": "SW_GATE"}), 20, 40),
+        (pfet("Q1", "SW_GATE", "+5V", "+5V_SW"), 20, 40),
         (R("R1", "100k", "+5V", "SW_GATE"), 55, 40),
-        (Part("Q2", "Transistor_BJT:BC337", "BC337", TO92, {"C": "SW_GATE", "B": "SW_BASE", "E": "GND"}), 85, 40),
+        (npn("Q2", "SW_GATE", "SW_BASE", "GND"), 85, 40),
         (R("R2", "10k", "+3V3", "SW_BASE"), 115, 40),
         (R("R3", "100k", "SW_BASE", "GND"), 135, 40),
         (bridge("JP1", "bypass", "+5V", "+5V_SW", closed=False), 165, 40),
@@ -104,21 +148,26 @@ def blocks():
     b.append(("USB HOST: J3 High Speed (pins 25/27), J4 Full Speed (pins 21/23)", 205, 125, [
         (Part("J3", "Connector:USB_A", "USB 2.0", USB_FP,
               {"VBUS": "VBUS_HS", "D-": "USB_HS_DM", "D+": "USB_HS_DP", "GND": "GND", "Shield": "GND"}), 20, 40),
-        (Part("F1", "Device:Polyfuse", "500 mA", PTC_FP, {1: "+5V_SW", 2: "VBUS_HS"}), 60, 40),
+        (fuse("F1", "+5V_SW", "VBUS_HS"), 60, 40),
         (CP("C3", "100u", "VBUS_HS", "GND"), 80, 40),
         (Part("J4", "Connector:USB_A", "USB 1.1", USB_FP,
               {"VBUS": "VBUS_FS", "D-": "USB_FS_DM", "D+": "USB_FS_DP", "GND": "GND", "Shield": "GND"}), 120, 40),
-        (Part("F2", "Device:Polyfuse", "500 mA", PTC_FP, {1: "+5V_SW", 2: "VBUS_FS"}), 160, 40),
+        (fuse("F2", "+5V_SW", "VBUS_FS"), 160, 40),
         (CP("C4", "100u", "VBUS_FS", "GND"), 180, 40),
-    ]))
+    ] + ([(esd("U4", "USB_HS_DM", "USB_HS_DP", "VBUS_HS"), 60, 80),
+          (esd("U5", "USB_FS_DM", "USB_FS_DP", "VBUS_FS"), 160, 80)] if smd() else [])))
     b.append(("I2C: i2c.ext at 3.3 V and, through Q3/Q4, at 5 V; i2c.board at 3.3 V only", 435, 25, [
         (conn("J5", "i2c.ext 3V3", ["GND", "+3V3", "SDA_EXT", "SCL_EXT"]), 25, 35),
-        (conn("J6", "i2c.ext 3V3", ["GND", "+3V3", "SDA_EXT", "SCL_EXT"]), 60, 35),
+        # the second 3.3 V connector: a Qwiic / STEMMA QT socket where a machine solders it, pins otherwise
+        (Part("J6", "Connector_Generic:Conn_01x04", "i2c.ext Qwiic",
+              "Connector_JST:JST_SH_SM04B-SRSS-TB_1x04-1MP_P1.00mm_Horizontal",
+              {1: "GND", 2: "+3V3", 3: "SDA_EXT", 4: "SCL_EXT"}) if smd() else
+         conn("J6", "i2c.ext 3V3", ["GND", "+3V3", "SDA_EXT", "SCL_EXT"]), 60, 35),
         (R("R4", "4k7", "PU_EXT", "SDA_EXT"), 85, 35),
         (R("R5", "4k7", "PU_EXT", "SCL_EXT"), 105, 35),
         (bridge("JP2", "pull-ups", "+3V3", "PU_EXT"), 130, 35),
-        (Part("Q3", "Transistor_FET:2N7000", "2N7000", TO92, {"G": "+3V3", "S": "SDA_EXT", "D": "SDA_5V"}), 20, 85),
-        (Part("Q4", "Transistor_FET:2N7000", "2N7000", TO92, {"G": "+3V3", "S": "SCL_EXT", "D": "SCL_5V"}), 55, 85),
+        (nfet("Q3", "+3V3", "SDA_EXT", "SDA_5V"), 20, 85),
+        (nfet("Q4", "+3V3", "SCL_EXT", "SCL_5V"), 55, 85),
         (R("R6", "4k7", "+5V_SW", "SDA_5V"), 85, 85),
         (R("R7", "4k7", "+5V_SW", "SCL_5V"), 105, 85),
         (conn("J7", "i2c.ext 5V", ["GND", "+5V_SW", "SDA_5V", "SCL_5V"]), 135, 85),
@@ -172,7 +221,7 @@ def blocks():
         (bridge("JP14", "LED", "GPIO32", "IR_DRV"), 20, 90),
         (R("R14", "1k", "IR_DRV", "IR_BASE"), 50, 90),
         (R("R15", "10k", "IR_BASE", "GND"), 68, 90),
-        (Part("Q5", "Transistor_BJT:BC337", "BC337", TO92, {"C": "IR_K", "B": "IR_BASE", "E": "GND"}), 92, 90),
+        (npn("Q5", "IR_K", "IR_BASE", "GND"), 92, 90),
         (Part("D1", "Device:LED", "IR 940 nm", "LED_THT:LED_D5.0mm", {"K": "IR_K", "A": "IR_A"}), 120, 90),
         (R("R16", "47", "+5V_SW", "IR_A"), 143, 90),
     ]))
@@ -182,13 +231,13 @@ def blocks():
         (bridge("JP15", "pull-up", "+3V3", "OW_PU"), 90, 35),
         (screw("J16", "strip: 5V DIN GND", ["+5V_SW", "LED_DATA", "GND"]), 140, 35),
         (R("R18", "330", "GPIO48", "LED_DATA"), 170, 35),
-        (CP("C9", "470u", "+5V_SW", "GND", fp="Capacitor_THT:CP_Radial_D8.0mm_P3.50mm"), 190, 35),
+        (CP("C9", "470u", "+5V_SW", "GND", big=True), 190, 35),
     ] + [(Part("H%d" % k, "Mechanical:MountingHole", "M2.5", "MountingHole:MountingHole_2.7mm_M2.5", {}), 230 + 20 * k, 35)
          for k in range(1, 5)]))
     return b
 
 
-def check(sch):
+def check(sch, variant):
     """KiCad's own word on the file: its ERC, and its netlist against the list above."""
     cli = os.environ.get("KICAD_CLI", "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli")
     with tempfile.TemporaryDirectory() as tmp:
@@ -210,7 +259,7 @@ def check(sch):
                 if not ref.startswith("FLG"):
                     got[name].add((ref, str(next(x for x in a if isinstance(x, list) and x[0] == "pin")[1])))
     want = collections.defaultdict(set)
-    for _, _, _, parts in blocks():
+    for _, _, _, parts in blocks(variant):
         for part, _, _ in parts:
             lib, name = part.sym.split(":")
             for key, n in part.pins.items():
@@ -225,17 +274,24 @@ def check(sch):
     return not (found or wrong or lonely)
 
 
+TITLE = {"th": "through-hole", "smd": "SMD for assembly"}
+
+
 def main():
-    sh = Sheet("aux-board-th", "P4OS auxiliary board for the 40-pin header, through-hole", "0.1")
-    for title, bx, by, parts in blocks():
-        sh.text(bx, by, title)
-        for part, dx, dy in parts:
-            # on the 2.54 mm grid, where KiCad's pins are
-            sh.place(part, round((bx + dx) / 2.54) * 2.54, round((by + dy) / 2.54) * 2.54)
-    out = os.path.join(HERE, "aux-board-th.kicad_sch")
-    sh.write(out, datetime.date.today().isoformat())
-    print("wrote", os.path.relpath(out), "with", len(sh.refs), "parts")
-    if "--check" in sys.argv and not check(out):
+    ok = True
+    for variant in ("th", "smd"):
+        sh = Sheet("aux-board-" + variant, "P4OS auxiliary board for the 40-pin header, " + TITLE[variant], "0.1")
+        for title, bx, by, parts in blocks(variant):
+            sh.text(bx, by, title)
+            for part, dx, dy in parts:
+                # on the 2.54 mm grid, where KiCad's pins are
+                sh.place(part, round((bx + dx) / 2.54) * 2.54, round((by + dy) / 2.54) * 2.54)
+        out = os.path.join(HERE, "aux-board-%s.kicad_sch" % variant)
+        sh.write(out, datetime.date.today().isoformat())
+        print("wrote", os.path.relpath(out), "with", len(sh.refs), "parts")
+        if "--check" in sys.argv:
+            ok = check(out, variant) and ok
+    if not ok:
         sys.exit(1)
 
 
