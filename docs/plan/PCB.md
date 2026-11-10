@@ -141,10 +141,8 @@ impreso, mirándolo de atrás:
 
 Dicho por el usuario con la placa en la mano (2026-11-10): **el header es
 un zócalo hembra de 2×20**, y **el pin 1 está en el extremo opuesto a los
-USB-C**, o sea en y = 14,17. De ahí, y de que mirando el header con el pin 1
-arriba los impares quedan a la derecha, sale que **la fila de los impares
-es la de afuera** (x = 3,15, la más cercana al borde); esto último es
-deducido del modelo y se confirma con el tester antes de trazar.
+USB-C**, o sea en y = 14,17, y **los impares son la fila más cercana al
+borde** (x = 3,15), que es también lo que da el modelo.
 
 Falta saber, y el modelo no lo dice:
 
@@ -166,7 +164,7 @@ Falta saber, y el modelo no lo dice:
 
 ## Lo que sigue
 
-1. Lo que falta de la mecánica de arriba (alturas, salida de los USB-A) y confirmar la fila de los impares.
+1. Lo que falta de la mecánica de arriba (alturas, salida de los USB-A).
 2. Decidir si el Ethernet de la PCBA va integrado o en zócalo.
 3. El esquemático: la casera está empezada (`hw/aux-board/gen.py`); falta
    revisarla pieza por pieza, el zócalo del módulo W5500 cuando se sepa cuál

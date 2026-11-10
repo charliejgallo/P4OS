@@ -6,7 +6,8 @@ connector with a name. The plan, the blocks and the two variants are in
 is [docs/img/pinout.svg](../../docs/img/pinout.svg).
 
 **Where it stands (2026-11-10): a first schematic of the through-hole
-variant, nothing laid out, nothing built.** Every part value and footprint
+variant and a first placement of its parts, nothing routed, nothing
+built.** Every part value and footprint
 is a first choice to review against its datasheet. RS485 and CAN are not on
 the board: their modules plug onto pin headers (the automatic "RS485 to
 TTL" one on 3V3, TX, RX, GND; an SN65HVD230 on 3V3, GND, CTX, CRX).
@@ -16,6 +17,13 @@ TTL" one on 3V3, TX, RX, GND; an SN65HVD230 on 3V3, GND, CTX, CRX).
 | `gen.py` | the board as a list: its parts and the net on each pin |
 | `kisch.py` | writes a KiCad schematic from that list, with KiCad's own symbols |
 | `aux-board-th.kicad_sch` | the through-hole variant, generated: open it in KiCad 10 |
+| `place.py` | puts those parts on a board with the P4's outline and holes, with their nets; it runs under KiCad's Python |
+| `aux-board-th.kicad_pcb` | that board, generated: a draft to look at and to move, with no tracks |
+
+<img src="draft-th-3d.jpg" width="520" alt="A 3D render of the draft: the 2x20 socket down the left edge, the I2C headers above it, two USB-A sockets on the bottom edge, two screw terminals on the right, pin headers for RS485, CAN, uart.b, SWD and SPI in the middle, the infrared receiver and LED at the top">
+
+*The draft as KiCad renders it. The board is the size of the P4's own and
+sits on its four holes; where each part goes is a first guess.*
 
 ```
 python3 hw/aux-board/gen.py --check
