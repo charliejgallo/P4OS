@@ -4732,6 +4732,438 @@
 			)
 			(embedded_fonts no)
 		)
+		(symbol "Connector_Generic:Conn_01x06"
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at 0 7.62 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Conn_01x06"
+				(at 0 -10.16 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x06, script generated (kicad-library-utils/schlib/autogen/connector/)"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "connector"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "Connector*:*_1x??_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Conn_01x06_1_1"
+				(rectangle
+					(start -1.27 6.35)
+					(end 1.27 -8.89)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(rectangle
+					(start -1.27 5.207)
+					(end 0 4.953)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start -1.27 2.667)
+					(end 0 2.413)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start -1.27 0.127)
+					(end 0 -0.127)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start -1.27 -2.413)
+					(end 0 -2.667)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start -1.27 -4.953)
+					(end 0 -5.207)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start -1.27 -7.493)
+					(end 0 -7.747)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at -5.08 5.08 0)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 2.54 0)
+					(length 3.81)
+					(name "Pin_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 0 0)
+					(length 3.81)
+					(name "Pin_3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -2.54 0)
+					(length 3.81)
+					(name "Pin_4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "4"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -5.08 0)
+					(length 3.81)
+					(name "Pin_5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "5"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -7.62 0)
+					(length 3.81)
+					(name "Pin_6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "6"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Connector_Generic:Conn_01x02"
+			(pin_names
+				(offset 1.016)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom yes)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "J"
+				(at 0 2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Conn_01x02"
+				(at 0 -5.08 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Generic connector, single row, 01x02, script generated (kicad-library-utils/schlib/autogen/connector/)"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "connector"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "Connector*:*_1x??_*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Conn_01x02_1_1"
+				(rectangle
+					(start -1.27 1.27)
+					(end 1.27 -3.81)
+					(stroke
+						(width 0.254)
+						(type default)
+					)
+					(fill
+						(type background)
+					)
+				)
+				(rectangle
+					(start -1.27 0.127)
+					(end 0 -0.127)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start -1.27 -2.413)
+					(end 0 -2.667)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(pin passive line
+					(at -5.08 0 0)
+					(length 3.81)
+					(name "Pin_1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -2.54 0)
+					(length 3.81)
+					(name "Pin_2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
 		(symbol "Interface_Optical:TSOP382xx"
 			(exclude_from_sim no)
 			(in_bom yes)
@@ -11291,6 +11723,759 @@
 			(justify left bottom)
 		)
 		(uuid "5b792c19-755a-503a-92dc-966349e1f190")
+	)
+	(text "ETHERNET: a W5500 Lite module on two sockets, spi.a's chip select through JP16"
+		(exclude_from_sim no)
+		(at 435 330 0)
+		(effects
+			(font
+				(size 2.54 2.54)
+			)
+			(justify left bottom)
+		)
+		(uuid "dceb18da-5ec9-5e07-8626-0f878a346119")
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x06")
+		(at 459.74 365.76 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "d095f229-1d5b-51c5-b554-59187321251e")
+		(property "Reference" "J17"
+			(at 454.66 356.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "W5500 left: G G MO SCK CS INT"
+			(at 454.66 378.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x06_P2.54mm_Vertical"
+			(at 459.74 365.76 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Datasheet" ""
+			(at 459.74 365.76 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Description" ""
+			(at 459.74 365.76 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "13a598fa-93fc-576d-935c-36ae2e8bcd5a")
+		)
+		(pin "2"
+			(uuid "ae1f224f-4622-57b8-8a47-28bc6d941ecf")
+		)
+		(pin "3"
+			(uuid "a85de831-c9d2-5cbf-abda-ef11a30c1c01")
+		)
+		(pin "4"
+			(uuid "62eccc42-b765-51cf-a7a1-89b77a180300")
+		)
+		(pin "5"
+			(uuid "9437454f-393d-5b04-b172-231dd66e5be7")
+		)
+		(pin "6"
+			(uuid "62282e0a-1258-535a-a5f6-1acd25de5f89")
+		)
+		(instances
+			(project "aux-board-th"
+				(path "/0b368187-5759-54d4-bd95-40af371deb44"
+					(reference "J17")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "GND"
+		(at 454.66 360.68 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "2214b4c6-d101-50ca-96a9-1a35263618a0")
+	)
+	(label "GND"
+		(at 454.66 363.22 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "ea9fa72e-1461-5cd3-a94a-66c484b234fe")
+	)
+	(label "SPI_MOSI"
+		(at 454.66 365.76 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "6386d4f7-98fd-54b6-abfa-55fe6ce670ef")
+	)
+	(label "SPI_SCK"
+		(at 454.66 368.3 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "7591807e-7201-52d0-bab6-bed401e8e678")
+	)
+	(label "ETH_CS"
+		(at 454.66 370.84 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "7522014d-bc80-5834-9675-a9c81bdbbd43")
+	)
+	(label "ETH_INT"
+		(at 454.66 373.38 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "71dd758b-8a4d-5d41-9027-cb8d26f55c17")
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x06")
+		(at 500.38 365.76 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "d4a2fedf-af69-5fff-bd57-4648d715a56a")
+		(property "Reference" "J18"
+			(at 495.3 356.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "W5500 right: GND V V NC RST MI"
+			(at 495.3 378.46 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_PinSocket_2.54mm:PinSocket_1x06_P2.54mm_Vertical"
+			(at 500.38 365.76 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Datasheet" ""
+			(at 500.38 365.76 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Description" ""
+			(at 500.38 365.76 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "3a20f1e9-3982-5fd4-99c1-bc250274c194")
+		)
+		(pin "2"
+			(uuid "9a3345e6-d3ba-516a-8cae-b86f2cad9d3a")
+		)
+		(pin "3"
+			(uuid "42de5fa3-11b4-5d0c-95ad-386a71f819a4")
+		)
+		(pin "4"
+			(uuid "8d33ef6c-994b-592a-bcc9-c548b77b0d12")
+		)
+		(pin "5"
+			(uuid "a66f7b39-d2f8-5cb6-9a45-ce558ae9886d")
+		)
+		(pin "6"
+			(uuid "ca960d8b-d8a9-5c72-b7e8-1a2e36afaf6d")
+		)
+		(instances
+			(project "aux-board-th"
+				(path "/0b368187-5759-54d4-bd95-40af371deb44"
+					(reference "J18")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "GND"
+		(at 495.3 360.68 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "dc5636ba-15ee-5a6e-b8ac-affcb092331f")
+	)
+	(label "+3V3"
+		(at 495.3 363.22 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "3ef3d380-058f-5b36-a238-d62c6a8b761f")
+	)
+	(label "+3V3"
+		(at 495.3 365.76 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "73e23a05-cf9d-51c7-a805-af19af7bd640")
+	)
+	(no_connect
+		(at 495.3 368.3)
+		(uuid "6ead4094-34df-5c60-aa7e-654b99abeb26")
+	)
+	(label "ETH_RST"
+		(at 495.3 370.84 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "dab66c22-5ef8-5a9d-a3a3-d1f088dc22f5")
+	)
+	(label "SPI_MISO"
+		(at 495.3 373.38 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "e4a1009b-f23f-5799-92a9-26f6281f4162")
+	)
+	(symbol
+		(lib_id "Jumper:Jumper_2_Bridged")
+		(at 535.94 360.68 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "a06efec9-084b-5ea6-941e-c39154d2d26d")
+		(property "Reference" "JP16"
+			(at 530.86 356.87 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "chip select"
+			(at 530.86 365.76 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 535.94 360.68 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Datasheet" ""
+			(at 535.94 360.68 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Description" ""
+			(at 535.94 360.68 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "527b821c-f53b-59f1-9011-dc077e40b88e")
+		)
+		(pin "2"
+			(uuid "29731c98-7068-5a58-b73f-3ea0e69539f3")
+		)
+		(instances
+			(project "aux-board-th"
+				(path "/0b368187-5759-54d4-bd95-40af371deb44"
+					(reference "JP16")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "SPI_CS"
+		(at 530.86 360.68 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "090d305d-e912-5dd1-81e6-0ab7d0addf99")
+	)
+	(label "ETH_CS"
+		(at 541.02 360.68 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "9769c030-9512-5f09-b06a-97eb5d81d930")
+	)
+	(symbol
+		(lib_id "Connector_Generic:Conn_01x02")
+		(at 535.94 381.0 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "aa7ab23f-b707-502f-b25f-00399dc5da20")
+		(property "Reference" "J19"
+			(at 530.86 377.19 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "INT RST"
+			(at 530.86 388.62 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x02_P2.54mm_Vertical"
+			(at 535.94 381.0 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Datasheet" ""
+			(at 535.94 381.0 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Description" ""
+			(at 535.94 381.0 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "5fb259f3-6a2b-5a07-b92d-4d3209bc139f")
+		)
+		(pin "2"
+			(uuid "f1107c2d-fdb7-585a-aa92-8c9b114def94")
+		)
+		(instances
+			(project "aux-board-th"
+				(path "/0b368187-5759-54d4-bd95-40af371deb44"
+					(reference "J19")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "ETH_INT"
+		(at 530.86 381.0 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "53bf15fb-37a0-573e-b83a-bbafdf7fda45")
+	)
+	(label "ETH_RST"
+		(at 530.86 383.54 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "04ba8257-5633-588a-ad1c-2b5cd060db37")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 558.8 365.76 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "db10a3d9-7b10-5cf2-b6de-33f1e69e0fb9")
+		(property "Reference" "R19"
+			(at 561.34 364.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "10k"
+			(at 561.34 367.03 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
+			(at 558.8 365.76 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Datasheet" ""
+			(at 558.8 365.76 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Description" ""
+			(at 558.8 365.76 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "7b251456-e2a2-51d3-b265-e64fec64d96c")
+		)
+		(pin "2"
+			(uuid "8325c412-30ba-5b6d-8aa5-67e30d03b047")
+		)
+		(instances
+			(project "aux-board-th"
+				(path "/0b368187-5759-54d4-bd95-40af371deb44"
+					(reference "R19")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "+3V3"
+		(at 558.8 361.95 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "9f77f038-5ecc-5474-8be1-2b0190928cb0")
+	)
+	(label "ETH_RST"
+		(at 558.8 369.57 270)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "c932c638-456c-5de0-923b-198456c3c31e")
+	)
+	(symbol
+		(lib_id "Device:C")
+		(at 574.04 365.76 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "6db35cce-8fa8-5b59-bb12-f0f9cf78eca6")
+		(property "Reference" "C10"
+			(at 576.58 364.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100n"
+			(at 576.58 367.03 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_THT:C_Disc_D5.0mm_W2.5mm_P5.00mm"
+			(at 574.04 365.76 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Datasheet" ""
+			(at 574.04 365.76 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Description" ""
+			(at 574.04 365.76 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "f94aaeee-4da8-5859-80f4-1bfedfb8a1da")
+		)
+		(pin "2"
+			(uuid "a9ac75a3-1b8e-533f-a7a2-83a6e5c6cea2")
+		)
+		(instances
+			(project "aux-board-th"
+				(path "/0b368187-5759-54d4-bd95-40af371deb44"
+					(reference "C10")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "+3V3"
+		(at 574.04 361.95 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "9d05f142-9f7a-5a5c-bdd1-b52d7f32cd2a")
+	)
+	(label "GND"
+		(at 574.04 369.57 270)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "9626fd80-9dc1-5182-a0e2-29db70c27278")
+	)
+	(symbol
+		(lib_id "Device:C_Polarized")
+		(at 586.74 365.76 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "e55aa691-d7cb-5c1d-be9e-85931d75dc44")
+		(property "Reference" "C11"
+			(at 589.28 364.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "100u"
+			(at 589.28 367.03 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm"
+			(at 586.74 365.76 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Datasheet" ""
+			(at 586.74 365.76 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Description" ""
+			(at 586.74 365.76 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "9878f2fc-4a5f-5386-b816-e8b5a42a330e")
+		)
+		(pin "2"
+			(uuid "0974c421-ea65-5925-a54a-b53559a523e1")
+		)
+		(instances
+			(project "aux-board-th"
+				(path "/0b368187-5759-54d4-bd95-40af371deb44"
+					(reference "C11")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "+3V3"
+		(at 586.74 361.95 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "ae007bb1-cf63-5f81-8e02-ba5feaca9f5f")
+	)
+	(label "GND"
+		(at 586.74 369.57 270)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "1e5057d1-3c50-537f-9799-5c03ff587754")
 	)
 	(text "INFRARED: the receiver on GPIO28, the LED on GPIO32 through Q5"
 		(exclude_from_sim no)

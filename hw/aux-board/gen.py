@@ -146,6 +146,23 @@ def blocks():
               "Connector_PinHeader_2.54mm:PinHeader_2x04_P2.54mm_Vertical",
               {1: "+3V3", 2: "GND", 3: "SPI_SCK", 4: "SPI_MOSI", 5: "SPI_MISO", 6: "SPI_CS", 7: "GPIO46", 8: "GPIO47"}), 40, 35),
     ]))
+    # The "W5500 Lite" / "Mini W5500" (HW-884): 28.5 x 23.5 mm, six pins down each long side, 3.3 V
+    # only, about 200 mA. Its pins as printed, RJ45 end first: left G G MO SCK CS INT, right GND V V
+    # NC RST MI. It is spi.a's chip while JP16 is on; its interrupt is not wired to a GPIO (the driver
+    # can poll), INT and RST come out on J19.
+    b.append(("ETHERNET: a W5500 Lite module on two sockets, spi.a's chip select through JP16", 435, 330, [
+        (Part("J17", "Connector_Generic:Conn_01x06", "W5500 left: G G MO SCK CS INT",
+              "Connector_PinSocket_2.54mm:PinSocket_1x06_P2.54mm_Vertical",
+              {1: "GND", 2: "GND", 3: "SPI_MOSI", 4: "SPI_SCK", 5: "ETH_CS", 6: "ETH_INT"}), 25, 35),
+        (Part("J18", "Connector_Generic:Conn_01x06", "W5500 right: GND V V NC RST MI",
+              "Connector_PinSocket_2.54mm:PinSocket_1x06_P2.54mm_Vertical",
+              {1: "GND", 2: "+3V3", 3: "+3V3", 5: "ETH_RST", 6: "SPI_MISO"}), 65, 35),
+        (bridge("JP16", "chip select", "SPI_CS", "ETH_CS"), 100, 30),
+        (conn("J19", "INT RST", ["ETH_INT", "ETH_RST"]), 100, 50),
+        (R("R19", "10k", "+3V3", "ETH_RST"), 125, 35),
+        (C("C10", "100n", "+3V3", "GND"), 140, 35),
+        (CP("C11", "100u", "+3V3", "GND"), 152, 35),
+    ]))
     b.append(("INFRARED: the receiver on GPIO28, the LED on GPIO32 through Q5", 435, 255, [
         (Part("U3", "Interface_Optical:TSOP382xx", "TSOP38238", "OptoDevice:Vishay_MINICAST-3Pin",
               {"OUT": "IR_OUT", "GND": "GND", "Vs": "IR_VS"}), 15, 40),
@@ -185,6 +202,8 @@ def check(sch):
     got = collections.defaultdict(set)
     for n in next(e for e in tree if isinstance(e, list) and e[0] == "nets")[1:]:
         name = next(a for a in n if isinstance(a, list) and a[0] == "name")[1].lstrip("/")
+        if name.startswith("unconnected-"):         # KiCad's own name for a pin marked no-connect
+            continue
         for a in n:
             if isinstance(a, list) and a[0] == "node":
                 ref = next(x for x in a if isinstance(x, list) and x[0] == "ref")[1]

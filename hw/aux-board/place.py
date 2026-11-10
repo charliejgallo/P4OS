@@ -24,6 +24,10 @@ W, H = 64.51, 118.49                    # the P4's board
 HOLES = [(3.75, 3.24), (60.75, 3.24), (3.75, 115.24), (60.75, 115.24)]
 PIN1 = (3.15, 104.32)                   # the header's pin 1; odd pins on the edge side, rows going up
 
+# The W5500 Lite: where the middle of its two rows of pins goes, and how far apart the rows are.
+# 20.32 mm (0.8 in) is a guess from the board's 23.5 mm width: measure the module before routing.
+ETH, ETH_ROWS = (47.5, 78.3), 20.32
+
 # ref -> (x, y, degrees): the middle of the part, mm from the top left corner
 AT = {
     # i2c, down the left edge above the header
@@ -38,18 +42,22 @@ AT = {
     "J15": (58.5, 38, 90), "R17": (46, 34, 0), "JP15": (46, 39, 90),
     "J16": (58.5, 58, 90), "R18": (48, 52, 0), "C9": (50, 61, 0),
     # the ports, in the middle
-    "J9": (21, 64, 0), "J13": (28, 63, 0), "J11": (35, 66.5, 0), "J12": (42, 64, 0),
-    "R10": (26, 80, 0), "R11": (26, 84, 0), "JP9": (42, 80, 0),
-    "J14": (57, 76, 90),
+    "J9": (19, 64, 0), "J13": (25, 63, 0), "J11": (31, 66.5, 0), "J12": (36.5, 64, 0),
+    "R10": (26, 80, 0), "R11": (26, 84, 0), "JP9": (35, 81, 0),
+    "J14": (27, 50, 90),
+    # ethernet: the module lies over ETH, its RJ45 past the right edge; two low parts go under it
+    "J17": (ETH[0], ETH[1] - ETH_ROWS / 2, 90), "J18": (ETH[0], ETH[1] + ETH_ROWS / 2, 90),
+    "R19": (ETH[0], ETH[1] - 3, 0), "C10": (ETH[0], ETH[1] + 3, 0),
+    "JP16": (37.5, 50, 0), "J19": (44, 57.5, 90), "C11": (39.5, 43.5, 0),
     # the 5 V switch and the USB sockets, at the bottom
-    "Q1": (22, 91, 0), "R1": (35, 88, 0), "R2": (35, 92, 0), "R3": (35, 96, 0), "Q2": (46, 91, 0),
-    "JP1": (54, 89, 90), "C1": (59, 97, 0), "C2": (50, 97, 0),
+    "Q1": (21, 91, 0), "R1": (32.5, 88, 0), "R2": (32.5, 92, 0), "R3": (32.5, 96, 0), "Q2": (44, 94.5, 0),
+    "JP1": (52, 94.5, 90), "C1": (60, 96, 0), "C2": (50, 99.5, 0),
     "F1": (20, 99, 0), "C3": (30, 101, 0), "F2": (42, 101, 0), "C4": (57, 104, 0),
     "J3": (24, 111.2, 0), "J4": (46, 111.2, 0),
 }
 SILK = {"J5": "I2C 3V3", "J6": "I2C 3V3", "J7": "I2C 5V", "J8": "BOARD I2C", "J9": "RS485", "J13": "CAN",
         "J11": "UART B", "J12": "SWD", "J14": "SPI", "J15": "1-WIRE", "J16": "LED / SERVO", "J3": "USB 2.0",
-        "J4": "USB 1.1", "U3": "IR", "J2": "P4 PINS"}
+        "J4": "USB 1.1", "U3": "IR", "J2": "P4 PINS", "J17": "W5500"}
 
 
 def mm(x, y):

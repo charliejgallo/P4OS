@@ -9,7 +9,8 @@ una tapa impresa con dos USB.
 **Estado (2026-11-10): sólo el plan.** El mapa de pines quedó cerrado ese
 día (`docs/img/pinout.svg`, [EXPANSION.md](EXPANSION.md)) y salió con la
 0.25.1. Hay un primer esquemático de la variante casera en
-`hw/aux-board/` (64 partes, 51 redes, ERC de KiCad sin observaciones); sin
+`hw/aux-board/` (71 partes, 54 redes, ERC de KiCad sin observaciones), con
+una primera ubicación de las partes en la placa; sin
 trazado todavía. **Decidido por el usuario ese día:** se
 hacen las dos variantes, la casera (placa de dos capas pedida a JLCPCB,
 soldada a mano) y la PCBA con SMD; `i2c.board` sale sólo a 3,3 V; el
@@ -53,7 +54,7 @@ dibujar el esquemático: nada de esto se armó ni se midió.
 | `uart.b` + objetivo | 3, 4, 5, 2 (12, 14, 11, 8) | tira de 6: GND, 3V3, TX, RX, EN, BOOT | El cable del Programador y de la Terminal. Divisor con puente en RX para un objetivo de 5 V (el Nano) |
 | SWD | 3 = SWCLK, 4 = SWDIO, 5 = NRST | Cortex Debug 2×5 de 1,27 (o tira de 5) | Los mismos pines que `uart.b`: es otro conector, no otro puerto |
 | `spi.a` | 52, 50, 51, 49 (38, 34, 36, 32) | tira 2×4: 3V3, GND, SCK, MOSI, MISO, CS, y GPIO46 y 47 | Los dos últimos son los de CAN: libres como auxiliares cuando no hay módulo CAN puesto |
-| Ethernet | `spi.a` con su CS, 49 (32), por puente | RJ45 | W5500. Con el puente puesto es el chip de `spi.a`; otro chip SPI a la vez toma su CS de un auxiliar. La interrupción no se cablea: el driver puede sondear. **Falta el driver en el firmware** |
+| Ethernet | `spi.a` con su CS, 49 (32), por puente | dos zócalos de 6 para un módulo "W5500 Lite" (HW-884) | El módulo que consiguió el usuario: 28,5 × 23,5 mm, seis pines por lado (G G MO SCK CS INT / GND V V NC RST MI), sólo 3,3 V, unos 200 mA. Con el puente puesto es el chip de `spi.a`. INT y RST salen a una tira de 2: la interrupción no va a un GPIO (el driver puede sondear). **Falta el driver en el firmware**, y medir la separación entre las dos filas del módulo |
 | CAN | TX 46, RX 47 (35, 37) | tira de 4: 3V3, GND, CTX, CRX | Para un módulo SN65HVD230, que trae su bornera y su 120 Ω |
 | Infrarrojo | receptor 28 (16), LED 32 (31) | en la placa, hacia adelante | Receptor de 38 kHz a 3V3; LED por un NPN desde el 5 V conmutado |
 | 1-Wire | 34 (28) | bornera de 3: 3V3, dato, GND | 4,7 kΩ a 3V3 con puente. Es un pin de strapping (la fuente del JTAG), que el chip sólo mira si se quemó el eFuse JTAG_SEL_ENABLE; el pull-up elige lo que ya es el valor de fábrica |
@@ -77,7 +78,7 @@ El esquemático es uno solo. Cambia con qué se resuelve cada bloque:
 |---|---|---|
 | RS485 | Tira de pines para el módulo automático | Lo mismo |
 | CAN | Tira de pines para el módulo SN65HVD230 | Lo mismo |
-| Ethernet | W5500 (LQFP-48), cristal de 25 MHz y RJ45 con transformador | Zócalo para un módulo W5500 de tira de pines |
+| Ethernet | Zócalos para el módulo W5500 Lite en la primera tanda; integrado (W5500, cristal de 25 MHz, RJ45 con transformador) más adelante, si hace falta | Zócalos para el módulo W5500 Lite |
 | Adaptador de nivel I2C | Dos BSS138 por bus y sus resistencias | Dos 2N7000 por bus, o el módulo de 4 canales en zócalo |
 | 5 V conmutado | Llave de carga con límite de corriente por puerto USB | MOSFET P con un NPN, y un fusible rearmable por puerto |
 | ESD del USB | Arreglo de diodos en SOT-23-6 | Sin protección, o el mismo arreglo soldado a mano (es grande) |
