@@ -1565,7 +1565,7 @@ reservado	reserviert
 de la placa	Platine
 
 #: components/aos_apps/aos_app_bus.c:1530
-IN ↑ / IN ↓: con pull-up o pull-down interno. Los pines 35 a 39 van por el LDO VO4: medí antes de colgarles algo.	IN ↑ / IN ↓: mit internem Pull-up bzw. Pull-down. Die Pins 35 bis 39 hängen am LDO VO4: vor dem Anschließen messen.
+IN ↑ / IN ↓: con pull-up o pull-down interno.	IN ↑ / IN ↓: mit internem Pull-up bzw. Pull-down.
 
 #: components/aos_apps/aos_app_bus.c:1646
 Abriendo el bus…	Bus wird geöffnet…
@@ -3970,7 +3970,7 @@ Blanco (canal W)	Weiß (W-Kanal)
 PIN DE DATOS	DATENPIN
 
 #: components/aos_apps/aos_app_leds.c:405
-GPIO · pin del conector. Los que tiene otra app aparecen apagados. * con cuidado: arranque, dominio VO4 o USB (Ajustes, Expansión).	GPIO · Pin der Stiftleiste. Von einer anderen App belegte sind ausgegraut. * mit Vorsicht: Boot, VO4-Domäne oder USB (Einstellungen, Erweiterung).
+GPIO · pin del conector. Los que tiene otra app aparecen apagados. Sugerido para una tira: GPIO48 (pin 39). * con cuidado: arranque o USB (Ajustes, Expansión).	GPIO · Pin der Stiftleiste. Von einer anderen App belegte sind ausgegraut. Empfohlen für einen Streifen: GPIO48 (Pin 39). * mit Vorsicht: Boot oder USB (Einstellungen, Erweiterung).
 
 #: components/aos_apps/aos_app_leds.c:407
 TIPO DE LED	LED-TYP
@@ -4521,10 +4521,6 @@ ADC2 canal 0	ADC2 Kanal 0
 #: components/aos_apps/aos_app_modules.c:280
 #: components/aos_portal/aos_portal_modules.c:99
 ADC2 canal 1	ADC2 Kanal 1
-
-#: components/aos_apps/aos_app_modules.c:281
-#: components/aos_portal/aos_portal_modules.c:100
-Dominio VO4: medí la tensión antes de usarlo	VO4-Domäne: vor Gebrauch Spannung messen
 
 #: components/aos_apps/aos_app_modules.c:282
 #: components/aos_portal/aos_portal_modules.c:101

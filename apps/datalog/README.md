@@ -129,7 +129,7 @@ The emulated bench has a BME280, SHT31, BH1750, INA219 and ADS1115 on
 
 ```
 port spi.a sck=52 mosi=50 miso=51 cs=49 freq=1000000
-port gpio.ow pin=28
+port gpio.ow pin=34
 module max6675 spi.a
 module ds18b20 gpio.ow
 ```

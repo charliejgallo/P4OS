@@ -1249,7 +1249,7 @@ static void build_exp(lv_obj_t *p)
               : owner ? PC_TAKEN
               : (pin->flags & (AOS_PIN_RESERVED | AOS_PIN_BOARD)) ? PC_BOARD
               : in_port ? PC_PORT
-              : (pin->flags & (AOS_PIN_STRAPPING | AOS_PIN_VO4 | AOS_PIN_USB_JTAG)) ? PC_CARE
+              : (pin->flags & (AOS_PIN_STRAPPING | AOS_PIN_USB_JTAG)) ? PC_CARE
               : PC_FREE;
         const char *desc = owner ? owner : in_port ? port : pin->note;
         lv_obj_t *c = lv_obj_create(grid);

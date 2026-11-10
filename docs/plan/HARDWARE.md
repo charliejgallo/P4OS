@@ -78,8 +78,9 @@ El header de 40 pines y su plan de uso están en [EXPANSION.md](EXPANSION.md).
 3. **Revisión del chip.** Un binario rev3 no arranca en rev1.x y al revés:
    `sdkconfig.defaults` con dos perfiles y un directorio de build por perfil.
 4. **GPIO46-48 del header** están en el dominio VDD_IO_5, que se alimenta del
-   LDO VO4 (50 mA máximo, el mismo de la SD). Medir la tensión en esos pines
-   antes de conectarles nada.
+   LDO VO4 (50 mA máximo, el mismo de la SD). **Medido el 2026-11-10: 3,25 V**
+   en GPIO48 puesto en alto, con la tarjeta puesta, y lo mismo en 46 y 47. Sirven como señales de
+   3,3 V; lo que sigue valiendo es el límite de corriente del LDO.
 5. **El 5 V del header** sale antes del interruptor de encendido: los módulos
    externos probablemente siguen alimentados con la placa "apagada".
 6. **Táctil sin interrupción** si R108 no está puesta: polling del GT911.

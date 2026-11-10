@@ -57,11 +57,11 @@ static const aos_io_pin_t HEADER[40] = {
     { 49, 32, A,     "GPIO49", "ADC2 ch0" },
     { -1, 33, R,     "GND",    "" },
     { 50, 34, A,     "GPIO50", "ADC2 ch1" },
-    { 46, 35, V,     "GPIO46", "VO4 domain: measure first" },
+    { 46, 35, V,     "GPIO46", "VO4 domain: 3.3 V" },
     { 51, 36, A,     "GPIO51", "ADC2 ch2, comparator" },
-    { 47, 37, V,     "GPIO47", "VO4 domain" },
+    { 47, 37, V,     "GPIO47", "VO4 domain: 3.3 V" },
     { 52, 38, A,     "GPIO52", "ADC2 ch3, comparator" },
-    { 48, 39, V,     "GPIO48", "VO4 domain" },
+    { 48, 39, V,     "GPIO48", "VO4 domain: 3.3 V" },
     { -1, 40, R,     "GND",    "" },
 };
 #undef B

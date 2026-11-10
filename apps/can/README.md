@@ -6,8 +6,8 @@ to 8 bytes), 25 kbit/s to 1 Mbit/s, through `aos_io_can_*`
 (`components/aos_io/include/aos_io.h`, `docs/MODULES.md`, "PWM, an analog
 level, infrared and CAN").
 
-- **Connection:** TX and RX pins (the header's usable GPIOs, with the owner
-  of the taken ones), speed (125k, 250k, 500k, 1M or any other in kbit/s,
+- **Connection:** TX and RX pins (GPIO46 and GPIO47 until you choose: any
+  usable GPIO of the header, with the owner of the taken ones), speed (125k, 250k, 500k, 1M or any other in kbit/s,
   83.3 say), mode and the controller's filter (id and mask, 11 or 29 bits).
   The state of the controller (active, warning, passive, bus off), its
   error counters, frames a second and the bus load are always in view; bus
@@ -208,7 +208,11 @@ page taken by the board.
 
 On the board, with no transceiver, Autoprueba on one pin. The real bus, the
 P4 and an ESP32 each with an SN65HVD230, is wired as in
-`docs/img/bench-can.svg`.
+`docs/img/bench-can.svg`. That bench was on GPIO28 and GPIO29, the app's
+first default; since 2026-11-10 it starts on GPIO46 and GPIO47 (pins 35
+and 37), which leaves GPIO29 to the RS485 port's DE and GPIO28 to the
+infrared receiver, and the drawing shows those. A real bus on the new
+pins is still to be tried.
 
 ### On a real bus (2026-11-07)
 

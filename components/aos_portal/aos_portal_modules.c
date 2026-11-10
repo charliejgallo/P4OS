@@ -97,9 +97,8 @@ static const char *pin_note(int pin)
     case 30: return _("BOOT: strapping, con pull-up de 4,7K");
     case 32: return _("ADC2 canal 0");
     case 34: return _("ADC2 canal 1");
-    case 35: return _("Dominio VO4: medí la tensión antes de usarlo");
     case 36: return _("ADC2 canal 2, comparador");
-    case 37: case 39: return _("Dominio VO4");
+    case 35: case 37: case 39: return _("Dominio VO4");
     case 38: return _("ADC2 canal 3, comparador");
     default: return "";
     }
@@ -161,7 +160,7 @@ static const char *pin_class(const aos_io_pin_t *p)
     if (p->flags & AOS_PIN_RESERVED) return "rsv";
     if (p->flags & AOS_PIN_BOARD) return "board";
     if (port_of(p->gpio, NULL)) return "port";
-    if (p->flags & (AOS_PIN_STRAPPING | AOS_PIN_VO4 | AOS_PIN_USB_JTAG)) return "care";
+    if (p->flags & (AOS_PIN_STRAPPING | AOS_PIN_USB_JTAG)) return "care";
     if (p->flags & AOS_PIN_ADC) return "adc";
     return "free";
 }

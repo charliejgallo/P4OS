@@ -21,7 +21,7 @@ the wiring and `modules.txt` itself are in [MODULES.md](MODULES.md).
 |---|---|---|
 | I2C | `i2c.ext`: SDA GPIO21 (pin 15), SCL GPIO22 (pin 17), 3V3 (pin 18), GND | Recognises it by itself in a few seconds, unless the table says "declared" |
 | SPI | `spi.a`, each chip with its own CS | Declared: `module max31855 spi.a cs=48` |
-| 1-Wire | a GPIO port: `port gpio.ow pin=28` | Declared bus; its sensors are found by a search |
+| 1-Wire | a GPIO port: `port gpio.ow pin=34` | Declared bus; its sensors are found by a search |
 | GPIO | a GPIO port, and `pin2=` for a second pin | Declared: `port gpio.dht pin=2` and `module dht22 gpio.dht` |
 | UART | `uart.a` (TX GPIO30, RX GPIO31) | Declared: `module mhz19 uart.a`; the sensor sets the speed |
 

@@ -399,10 +399,10 @@ static void build_strip(lv_obj_t *col)
         const char *who = aos_io_owner(p->gpio);
         bool mine = p->gpio == c.gpio;
         bool free_ = !who || mine || !strcmp(who, "LEDs");
-        snprintf(t, sizeof t, "GPIO%d · %d%s", p->gpio, p->pin, (p->flags & (AOS_PIN_STRAPPING | AOS_PIN_VO4 | AOS_PIN_USB_JTAG)) ? " *" : "");
+        snprintf(t, sizeof t, "GPIO%d · %d%s", p->gpio, p->pin, (p->flags & (AOS_PIN_STRAPPING | AOS_PIN_USB_JTAG)) ? " *" : "");
         chip(pins, t, mine, free_, gpio_cb, (void *)(intptr_t)p->gpio);
     }
-    caption(pc, _("GPIO · pin del conector. Los que tiene otra app aparecen apagados. * con cuidado: arranque, dominio VO4 o USB (Ajustes, Expansión)."));
+    caption(pc, _("GPIO · pin del conector. Los que tiene otra app aparecen apagados. Sugerido para una tira: GPIO48 (pin 39). * con cuidado: arranque o USB (Ajustes, Expansión)."));
 
     section(col, _("TIPO DE LED"));
     lv_obj_t *tc = card(col);

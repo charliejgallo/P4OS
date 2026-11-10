@@ -35,7 +35,7 @@
 #include <string.h>
 
 cn_ui_t  U;
-cn_cfg_t CN_CFG = { .tx = 28, .rx = 29, .rate = 500000, .mode = CN_MODE_LISTEN };
+cn_cfg_t CN_CFG = { .tx = 46, .rx = 47, .rate = 500000, .mode = CN_MODE_LISTEN };
 
 /* Three nodes hanging from the two wires of the bus. */
 static const uint8_t CAN_ICON[] = {

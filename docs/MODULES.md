@@ -55,6 +55,34 @@ pins that sit together:
   when you have to. P4OS never autodetects on it, and it refuses the
   board's own addresses.
 
+## Suggested pins
+
+The whole header, with the ports and these pins, is one drawing:
+
+![The 40-pin header: the default ports, the pins the apps start with and the suggested ones](img/pinout.svg)
+
+Infrared, CAN, 1-Wire, LED strips and PWM take any free GPIO. These are
+the ones that leave every default port (`i2c.ext`, `uart.a`, `uart.b`,
+`spi.a`) and the two USB host ports alone, and what the apps and the
+drawings on this page use:
+
+| For | GPIO (pin) | Who sets it | Beside it |
+|---|---|---|---|
+| Infrared receiver | 28 (16) | the Infrarrojo app starts there | 3V3 on pin 18 |
+| Infrared LED | 32 (31) | the Infrarrojo app starts there | GND on pin 33 |
+| CAN TX, RX | 46 (35), 47 (37) | the CAN app starts there | GND on pin 33 |
+| 1-Wire | 34 (28) | Bus starts there; `port gpio.ow pin=34` | GND on pin 26 |
+| A LED strip | 48 (39) | suggested in LED Strips | GND on pin 40, 5 V on pins 1 and 3 |
+| One PWM output, a servo | 48 (39), then 34 (28) | suggested | |
+| More PWM outputs | 46, 47 if CAN is not in use; or a PCA9685 on `i2c.ext` | suggested | |
+
+GPIO34 is a strapping pin (the JTAG source). The chip looks at it at reset
+only if the JTAG_SEL_ENABLE eFuse was burnt, which it is not out of the
+box, and a pull-up there, as 1-Wire has, selects what is already the
+default. GPIO46, 47 and 48 are fed by the VO4 LDO, the microSD's: 3.3 V
+signals like the rest (3.25 V measured on GPIO48 on 2026-11-10 with the
+card in; GPIO46 and 47 measured too), not a supply for anything.
+
 ## Supported sensors
 
 The full list is [SENSORS.md](SENSORS.md): temperature and humidity,
@@ -76,7 +104,7 @@ they came in (2026-10-15 to 10-18), with what each driver does.
 | INA226 | bus voltage, shunt voltage, current, power | 0x40 to 0x4F | manufacturer id 0x5449 ("TI") at 0xFE | `module ina226 i2c.ext addr=0x40 shunt=100` |
 | ADS1115 | four single-ended voltages, A0 to A3 | 0x48 to 0x4B | threshold registers at 0x8000/0x7FFF | `module ads1115 i2c.ext addr=0x48 gain=4096` |
 | MAX6675 (SPI) | a type K thermocouple, 0 to 1023.75 °C | its CS | cannot be: declared only | `module max6675 spi.a`, `module horno spi.a chip=max6675 cs=48` |
-| DS18B20 (1-Wire; also DS18S20, DS1822, MAX31850) | temperature | its ROM, on a GPIO port | the bus is declared, its sensors found by a search | `port gpio.ow pin=28` and `module ds18b20 gpio.ow` |
+| DS18B20 (1-Wire; also DS18S20, DS1822, MAX31850) | temperature | its ROM, on a GPIO port | the bus is declared, its sensors found by a search | `port gpio.ow pin=34` and `module ds18b20 gpio.ow` |
 
 ### Units
 
@@ -168,7 +196,7 @@ The UIs scale them for a bench: mV, mA and mW below 1. The value keys are:
   from Módulos it was read every second with no error, and a lighter at the
   tip took it from 26 to 63 °C in 15 s.
 - **DS18B20 and its family on 1-Wire (2026-10-18):**
-  - A bus is a GPIO port (`port gpio.ow pin=28`) with a module line on it
+  - A bus is a GPIO port (`port gpio.ow pin=34`) with a module line on it
     (`module ds18b20 gpio.ow`). A GPIO port without one is never driven:
     the pin may hold a relay, and a reset pulse would click it.
   - Every sensor a search finds on the bus is read. Its name is the
@@ -490,6 +518,9 @@ because its buffer would be internal RAM.
 
 ![A WS2812B strip on the header](img/bench-ws2812.svg)
 
+The drawing is on GPIO48, the pin suggested for a strip since the pin map
+of 2026-11-10; the test below was on GPIO4, which is `uart.b`'s RX.
+
 Tried on the board on 2026-10-05: a strip of 12 WS2812B on GPIO4, its data
 straight from the 3.3 V pin with no level shifter, powered from the
 header's 5 V. Red, green and blue came out as asked with the GRB order,
@@ -566,14 +597,16 @@ sensor service went on reading the same I2C port meanwhile.
 <img src="img/photo-pwm-pca9685-centre.jpg" width="240" alt="The PWM app with five servos at 90 degrees">
 
 
-**Wiring for a bench test of PWM** (what was tried on the board): two
-LEDs at two frequencies, a servo at 50 Hz on its own 5 V, and the analog
-level through its RC filter, with a meter on it.
+**Wiring for a bench test of PWM:** two LEDs at two frequencies, a servo
+at 50 Hz on its own 5 V, and the analog level through its RC filter, with
+a meter on it. The drawing uses the pins the pin map of 2026-11-10 leaves
+free (GPIO34, 46, 47 and 48); the test below was the same circuit on
+GPIO28, 29, 30 and 32, as the photo shows.
 
 ![PWM on the header: two LEDs, a servo and an analog level](img/bench-pwm.svg)
 
-Tried on the board on 2026-10-05, wired as drawn on a breadboard, all
-four channels at once from the PWM app:
+Tried on the board on 2026-10-05 on a breadboard, all four channels at
+once from the PWM app:
 
 | Channel | Asked | What the hardware gives |
 |---|---|---|
@@ -585,13 +618,15 @@ four channels at once from the PWM app:
 <img src="img/bench-pwm-photo.jpg" width="360" alt="The bench: the board, the breadboard with the LED, the RC filter and the meter reading 1.313 V">
 
 **Wiring for a bench test of infrared:** a demodulating receiver on
-GPIO5 (not GPIO21/22, which the I2C service scans by itself) and an IR LED
-driven through an NPN transistor from 5 V.
+GPIO28 (not GPIO21/22, which the I2C service scans by itself) and an IR
+LED on GPIO32, driven through an NPN transistor from 5 V. Those are the
+pins the Infrarrojo app starts with.
 
 ![Infrared on the header: a receiver and an IR LED through a transistor](img/bench-ir.svg)
 
-Tried on the board on 2026-10-05 with the Infrarrojo app, wired as drawn
-(receiver on GPIO5, the LED's transistor on GPIO31): a monitor's remote
+Tried on the board on 2026-10-05 with the Infrarrojo app, the same
+circuit on other pins (receiver on GPIO5, the LED's transistor on
+GPIO31): a monitor's remote
 learned as Samsung, address 0x0707, command 7, sent back, and the monitor
 turned its volume up; "volume up" from SmartIR's code library worked too.
 

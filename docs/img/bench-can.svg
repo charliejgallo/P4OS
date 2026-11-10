@@ -1,28 +1,28 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1090" font-family="Helvetica, Arial, sans-serif" font-size="14">
-<rect width="1200" height="1090" fill="#ffffff"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1180" font-family="Helvetica, Arial, sans-serif" font-size="14">
+<rect width="1200" height="1180" fill="#ffffff"/>
 <text x="600.0" y="40" text-anchor="middle" font-size="22" font-weight="bold" fill="#111">CAN on the 40-pin header: the P4 and an ESP32 on one bus</text>
-<text x="600.0" y="64" text-anchor="middle" font-size="13" fill="#555">two 3.3 V SN65HVD230 transceivers and a twisted pair with 120 Ω at each end; the P4's TWAI on GPIO28/29, the ESP32's on IO21/IO22</text>
-<rect x="190" y="225" width="150" height="320" rx="6" fill="#1e3a8a"/>
-<text x="265.0" y="213" font-size="13" fill="#111" text-anchor="middle" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">SN65HVD230 #1</text>
-<rect x="204" y="287" width="54" height="40" rx="3" fill="#0f172a"/>
-<rect x="211" y="281" width="4" height="6" fill="#9ca3af"/>
-<rect x="211" y="327" width="4" height="6" fill="#9ca3af"/>
-<rect x="223" y="281" width="4" height="6" fill="#9ca3af"/>
-<rect x="223" y="327" width="4" height="6" fill="#9ca3af"/>
-<rect x="235" y="281" width="4" height="6" fill="#9ca3af"/>
-<rect x="235" y="327" width="4" height="6" fill="#9ca3af"/>
-<rect x="247" y="281" width="4" height="6" fill="#9ca3af"/>
-<rect x="247" y="327" width="4" height="6" fill="#9ca3af"/>
-<circle cx="212" cy="319" r="2.5" fill="#475569"/>
-<rect x="204" y="479.0" width="30" height="16" rx="2" fill="#111827" stroke="#9ca3af"/>
-<path d="M514 357 L334 357" stroke="#ea580c" stroke-width="3" fill="none" stroke-linejoin="round"/>
-<path d="M514 409 L334 409" stroke="#16a34a" stroke-width="3" fill="none" stroke-linejoin="round"/>
-<path d="M334 253 L380 253" stroke="#dc2626" stroke-width="3" fill="none" stroke-linejoin="round"/>
-<rect x="380" y="242" width="36" height="22" rx="11" fill="#fff" stroke="#dc2626" stroke-width="2"/>
-<text x="398.0" y="257" text-anchor="middle" font-size="11" font-weight="bold" fill="#dc2626">3V3</text>
-<path d="M334 305 L380 305" stroke="#111111" stroke-width="3" fill="none" stroke-linejoin="round"/>
-<rect x="380" y="294" width="36" height="22" rx="11" fill="#fff" stroke="#111111" stroke-width="2"/>
-<text x="398.0" y="309" text-anchor="middle" font-size="11" font-weight="bold" fill="#111111">GND</text>
+<text x="600.0" y="64" text-anchor="middle" font-size="13" fill="#555">two 3.3 V SN65HVD230 transceivers and a twisted pair with 120 Ω at each end; the P4's TWAI on GPIO46/47, the ESP32's on IO21/IO22</text>
+<rect x="190" y="572" width="150" height="320" rx="6" fill="#1e3a8a"/>
+<text x="265.0" y="560" font-size="13" fill="#111" text-anchor="middle" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">SN65HVD230 #1</text>
+<rect x="204" y="634" width="54" height="40" rx="3" fill="#0f172a"/>
+<rect x="211" y="628" width="4" height="6" fill="#9ca3af"/>
+<rect x="211" y="674" width="4" height="6" fill="#9ca3af"/>
+<rect x="223" y="628" width="4" height="6" fill="#9ca3af"/>
+<rect x="223" y="674" width="4" height="6" fill="#9ca3af"/>
+<rect x="235" y="628" width="4" height="6" fill="#9ca3af"/>
+<rect x="235" y="674" width="4" height="6" fill="#9ca3af"/>
+<rect x="247" y="628" width="4" height="6" fill="#9ca3af"/>
+<rect x="247" y="674" width="4" height="6" fill="#9ca3af"/>
+<circle cx="212" cy="666" r="2.5" fill="#475569"/>
+<rect x="204" y="826.0" width="30" height="16" rx="2" fill="#111827" stroke="#9ca3af"/>
+<path d="M566 617 L712 617 L712 704 L334 704" stroke="#ea580c" stroke-width="3" fill="none" stroke-linejoin="round"/>
+<path d="M566 643 L728 643 L728 756 L334 756" stroke="#16a34a" stroke-width="3" fill="none" stroke-linejoin="round"/>
+<path d="M334 600 L380 600" stroke="#dc2626" stroke-width="3" fill="none" stroke-linejoin="round"/>
+<rect x="380" y="589" width="36" height="22" rx="11" fill="#fff" stroke="#dc2626" stroke-width="2"/>
+<text x="398.0" y="604" text-anchor="middle" font-size="11" font-weight="bold" fill="#dc2626">3V3</text>
+<path d="M334 652 L380 652" stroke="#111111" stroke-width="3" fill="none" stroke-linejoin="round"/>
+<rect x="380" y="641" width="36" height="22" rx="11" fill="#fff" stroke="#111111" stroke-width="2"/>
+<text x="398.0" y="656" text-anchor="middle" font-size="11" font-weight="bold" fill="#111111">GND</text>
 <path d="M514 383 L440 383" stroke="#dc2626" stroke-width="3" fill="none" stroke-linejoin="round"/>
 <rect x="404" y="372" width="36" height="22" rx="11" fill="#fff" stroke="#dc2626" stroke-width="2"/>
 <text x="422.0" y="387" text-anchor="middle" font-size="11" font-weight="bold" fill="#dc2626">3V3</text>
@@ -55,43 +55,43 @@
 <path d="M766 201 L744 201 L744 111 L990 111 L990 175 L1036 175" stroke="#dc2626" stroke-width="3" fill="none" stroke-linejoin="round"/>
 <text x="760" y="105" font-size="12" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">the DevKit's 3V3 feeds transceiver #2</text>
 <text x="985" y="785" font-size="12" fill="#6b7280" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">its micro-USB on a USB host socket of the P4: 5 V, a GND shared with the P4, its console</text>
-<path d="M334 461 L390 461 L390 830 L450 830" stroke="#ca8a04" stroke-width="3" fill="none" stroke-linejoin="round"/>
-<path d="M334 513 L372 513 L372 852 L450 852" stroke="#2563eb" stroke-width="3" fill="none" stroke-linejoin="round"/>
-<path d="M930 830 L1000 830 L1000 279 L1036 279" stroke="#ca8a04" stroke-width="3" fill="none" stroke-linejoin="round"/>
-<path d="M930 852 L1016 852 L1016 305 L1036 305" stroke="#2563eb" stroke-width="3" fill="none" stroke-linejoin="round"/>
-<path d="M450 852 C470 852 470 830 490 830 L490 830 C510 830 510 852 530 852 L530 852 C550 852 550 830 570 830 L570 830 C590 830 590 852 610 852 L610 852 C630 852 630 830 650 830 L650 830 C670 830 670 852 690 852 L690 852 C710 852 710 830 730 830 L730 830 C750 830 750 852 770 852 L770 852 C790 852 790 830 810 830 L810 830 C830 830 830 852 850 852 L850 852 C870 852 870 830 890 830 L890 830 C910 830 910 852 930 852" stroke="#2563eb" stroke-width="3" fill="none"/>
-<path d="M450 830 C470 830 470 852 490 852 L490 852 C510 852 510 830 530 830 L530 830 C550 830 550 852 570 852 L570 852 C590 852 590 830 610 830 L610 830 C630 830 630 852 650 852 L650 852 C670 852 670 830 690 830 L690 830 C710 830 710 852 730 852 L730 852 C750 852 750 830 770 830 L770 830 C790 830 790 852 810 852 L810 852 C830 852 830 830 850 830 L850 830 C870 830 870 852 890 852 L890 852 C910 852 910 830 930 830" stroke="#ca8a04" stroke-width="3" fill="none"/>
-<text x="398" y="640" font-size="12" fill="#ca8a04" text-anchor="start" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">CANH</text>
-<text x="364" y="660" font-size="12" fill="#2563eb" text-anchor="end" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">CANL</text>
+<path d="M334 808 L390 808 L390 910 L450 910" stroke="#ca8a04" stroke-width="3" fill="none" stroke-linejoin="round"/>
+<path d="M334 860 L372 860 L372 932 L450 932" stroke="#2563eb" stroke-width="3" fill="none" stroke-linejoin="round"/>
+<path d="M930 910 L1000 910 L1000 279 L1036 279" stroke="#ca8a04" stroke-width="3" fill="none" stroke-linejoin="round"/>
+<path d="M930 932 L1016 932 L1016 305 L1036 305" stroke="#2563eb" stroke-width="3" fill="none" stroke-linejoin="round"/>
+<path d="M450 932 C470 932 470 910 490 910 L490 910 C510 910 510 932 530 932 L530 932 C550 932 550 910 570 910 L570 910 C590 910 590 932 610 932 L610 932 C630 932 630 910 650 910 L650 910 C670 910 670 932 690 932 L690 932 C710 932 710 910 730 910 L730 910 C750 910 750 932 770 932 L770 932 C790 932 790 910 810 910 L810 910 C830 910 830 932 850 932 L850 932 C870 932 870 910 890 910 L890 910 C910 910 910 932 930 932" stroke="#2563eb" stroke-width="3" fill="none"/>
+<path d="M450 910 C470 910 470 932 490 932 L490 932 C510 932 510 910 530 910 L530 910 C550 910 550 932 570 932 L570 932 C590 932 590 910 610 910 L610 910 C630 910 630 932 650 932 L650 932 C670 932 670 910 690 910 L690 910 C710 910 710 932 730 932 L730 932 C750 932 750 910 770 910 L770 910 C790 910 790 932 810 932 L810 932 C830 932 830 910 850 910 L850 910 C870 910 870 932 890 932 L890 932 C910 932 910 910 930 910" stroke="#ca8a04" stroke-width="3" fill="none"/>
+<text x="398" y="880" font-size="12" fill="#ca8a04" text-anchor="start" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">CANH</text>
+<text x="364" y="918" font-size="12" fill="#2563eb" text-anchor="end" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">CANL</text>
 <text x="992" y="760" font-size="12" fill="#ca8a04" text-anchor="end" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">CANH</text>
 <text x="1024" y="760" font-size="12" fill="#2563eb" text-anchor="start" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">CANL</text>
-<text x="690" y="812" font-size="12" fill="#374151" text-anchor="middle" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">a twisted pair (two wires twisted by hand will do on a bench)</text>
-<text x="690" y="880" font-size="12" fill="#374151" text-anchor="middle" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">60 Ω between CANH and CANL with everything off: the two 120 Ω in parallel</text>
-<rect x="40" y="902" width="1120" height="156" rx="8" fill="#f9fafb" stroke="#d1d5db"/>
-<text x="58" y="926" font-size="14" font-weight="bold" fill="#111">Wiring it (it worked on the board, 2026-11-07: 162 frames a second at 500 kbit/s, no errors)</text>
-<text x="58" y="948" font-size="12" fill="#374151">• P4: TX (GPIO28, pin 16) to CTX and RX (GPIO29, pin 20) to CRX, not crossed as on a UART; 3V3 from pin 18, GND from pin 19</text>
-<text x="58" y="968" font-size="12" fill="#374151">• ESP32: IO21 to CTX and IO22 to CRX, its own 3V3 and GND. Not IO5 nor the other pins that toggle at boot: garbage on the bus</text>
-<text x="58" y="988" font-size="12" fill="#374151">• The ESP32's micro-USB on a USB host socket of the P4 (docs/USB.md): its 5 V, a GND shared with the P4, its console in the Terminal</text>
-<text x="58" y="1008" font-size="12" fill="#374151">• 120 Ω at each end of the bus (these boards carry one, marked 121): 60 Ω between CANH and CANL with everything off (60.3 Ω measured)</text>
-<text x="67" y="1028" font-size="12" fill="#374151">A third node in the middle of the bus goes without its own. Tags with the same name (3V3, GND) are one wire</text>
-<text x="58" y="1048" font-size="12" fill="#374151">• Only 3.3 V transceivers (SN65HVD230, 231, 232): a 5 V one (MCP2551, TJA1050) puts 5 V on the header. The same speed on every node</text>
+<text x="690" y="892" font-size="12" fill="#374151" text-anchor="middle" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">a twisted pair (two wires twisted by hand will do on a bench)</text>
+<text x="690" y="960" font-size="12" fill="#374151" text-anchor="middle" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">60 Ω between CANH and CANL with everything off: the two 120 Ω in parallel</text>
+<rect x="40" y="982" width="1120" height="156" rx="8" fill="#f9fafb" stroke="#d1d5db"/>
+<text x="58" y="1006" font-size="14" font-weight="bold" fill="#111">Wiring it (the CAN app's own pins; on GPIO28/29 it worked on the board, 2026-11-07: 162 frames a second at 500 kbit/s, no errors)</text>
+<text x="58" y="1028" font-size="12" fill="#374151">• P4: TX (GPIO46, pin 35) to CTX and RX (GPIO47, pin 37) to CRX, not crossed as on a UART; 3V3 from pin 18, GND from pin 19</text>
+<text x="58" y="1048" font-size="12" fill="#374151">• ESP32: IO21 to CTX and IO22 to CRX, its own 3V3 and GND. Not IO5 nor the other pins that toggle at boot: garbage on the bus</text>
+<text x="58" y="1068" font-size="12" fill="#374151">• The ESP32's micro-USB on a USB host socket of the P4 (docs/USB.md): its 5 V, a GND shared with the P4, its console in the Terminal</text>
+<text x="58" y="1088" font-size="12" fill="#374151">• 120 Ω at each end of the bus (these boards carry one, marked 121): 60 Ω between CANH and CANL with everything off (60.3 Ω measured)</text>
+<text x="67" y="1108" font-size="12" fill="#374151">A third node in the middle of the bus goes without its own. Tags with the same name (3V3, GND) are one wire</text>
+<text x="58" y="1128" font-size="12" fill="#374151">• Only 3.3 V transceivers (SN65HVD230, 231, 232): a 5 V one (MCP2551, TJA1050) puts 5 V on the header. The same speed on every node</text>
 <rect x="500" y="158" width="80" height="528" rx="6" fill="#1f2937"/>
 <text x="540" y="149" text-anchor="middle" font-size="11" fill="#6b7280">the header, as it faces you</text>
-<text x="231" y="311" font-size="10" fill="#e2e8f0" text-anchor="middle" font-weight="bold">VP230</text>
-<text x="219" y="491.0" font-size="9" fill="#e5e7eb" text-anchor="middle" font-weight="bold">121</text>
-<text x="240" y="491.0" font-size="10" fill="#fde68a" text-anchor="start" font-weight="bold">120 Ω</text>
-<circle cx="326" cy="253" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>
-<text x="312" y="257" font-size="11" fill="#e5e7eb" text-anchor="end" font-weight="bold">3V3</text>
-<circle cx="326" cy="305" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>
-<text x="312" y="309" font-size="11" fill="#e5e7eb" text-anchor="end" font-weight="bold">GND</text>
-<circle cx="326" cy="357" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>
-<text x="312" y="361" font-size="11" fill="#e5e7eb" text-anchor="end" font-weight="bold">CTX</text>
-<circle cx="326" cy="409" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>
-<text x="312" y="413" font-size="11" fill="#e5e7eb" text-anchor="end" font-weight="bold">CRX</text>
-<circle cx="326" cy="461" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>
-<text x="312" y="465" font-size="11" fill="#e5e7eb" text-anchor="end" font-weight="bold">CANH</text>
-<circle cx="326" cy="513" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>
-<text x="312" y="517" font-size="11" fill="#e5e7eb" text-anchor="end" font-weight="bold">CANL</text>
+<text x="231" y="658" font-size="10" fill="#e2e8f0" text-anchor="middle" font-weight="bold">VP230</text>
+<text x="219" y="838.0" font-size="9" fill="#e5e7eb" text-anchor="middle" font-weight="bold">121</text>
+<text x="240" y="838.0" font-size="10" fill="#fde68a" text-anchor="start" font-weight="bold">120 Ω</text>
+<circle cx="326" cy="600" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>
+<text x="312" y="604" font-size="11" fill="#e5e7eb" text-anchor="end" font-weight="bold">3V3</text>
+<circle cx="326" cy="652" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>
+<text x="312" y="656" font-size="11" fill="#e5e7eb" text-anchor="end" font-weight="bold">GND</text>
+<circle cx="326" cy="704" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>
+<text x="312" y="708" font-size="11" fill="#e5e7eb" text-anchor="end" font-weight="bold">CTX</text>
+<circle cx="326" cy="756" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>
+<text x="312" y="760" font-size="11" fill="#e5e7eb" text-anchor="end" font-weight="bold">CRX</text>
+<circle cx="326" cy="808" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>
+<text x="312" y="812" font-size="11" fill="#e5e7eb" text-anchor="end" font-weight="bold">CANH</text>
+<circle cx="326" cy="860" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>
+<text x="312" y="864" font-size="11" fill="#e5e7eb" text-anchor="end" font-weight="bold">CANL</text>
 <text x="860.0" y="182" font-size="10" fill="#334155" text-anchor="middle" font-weight="bold">ESP32-WROOM-32</text>
 <text x="860.0" y="413" font-size="13" fill="#e2e8f0" text-anchor="middle" font-weight="bold">ESP32</text>
 <text x="860.0" y="439" font-size="11" fill="#94a3b8" text-anchor="middle">DevKit</text>
@@ -222,16 +222,16 @@
 <text x="502" y="335" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO4  14</text>
 <circle cx="558" cy="357" r="7" fill="#9ca3af"/>
 <text x="578" y="361" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">15  GPIO21 SDA</text>
-<circle cx="522" cy="357" r="8" fill="#ea580c" stroke="#fff" stroke-width="2"/>
-<text x="502" y="361" font-size="11.5" fill="#ea580c" text-anchor="end" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO28  16</text>
+<circle cx="522" cy="357" r="7" fill="#9ca3af"/>
+<text x="502" y="361" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO28  16</text>
 <circle cx="558" cy="383" r="7" fill="#9ca3af"/>
 <text x="578" y="387" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">17  GPIO22 SCL</text>
 <circle cx="522" cy="383" r="8" fill="#dc2626" stroke="#fff" stroke-width="2"/>
 <text x="502" y="387" font-size="11.5" fill="#dc2626" text-anchor="end" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">3V3  18</text>
 <circle cx="558" cy="409" r="8" fill="#111111" stroke="#fff" stroke-width="2"/>
 <text x="578" y="413" font-size="11.5" fill="#111" text-anchor="start" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">19  GND</text>
-<circle cx="522" cy="409" r="8" fill="#16a34a" stroke="#fff" stroke-width="2"/>
-<text x="502" y="413" font-size="11.5" fill="#16a34a" text-anchor="end" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO29  20</text>
+<circle cx="522" cy="409" r="7" fill="#9ca3af"/>
+<text x="502" y="413" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO29  20</text>
 <circle cx="558" cy="435" r="7" fill="#9ca3af"/>
 <text x="578" y="439" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">21  GPIO24</text>
 <circle cx="522" cy="435" r="7" fill="#9ca3af"/>
@@ -260,12 +260,12 @@
 <text x="578" y="595" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">33  GND</text>
 <circle cx="522" cy="591" r="7" fill="#9ca3af"/>
 <text x="502" y="595" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO50  34</text>
-<circle cx="558" cy="617" r="7" fill="#9ca3af"/>
-<text x="578" y="621" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">35  GPIO46</text>
+<circle cx="558" cy="617" r="8" fill="#ea580c" stroke="#fff" stroke-width="2"/>
+<text x="578" y="621" font-size="11.5" fill="#ea580c" text-anchor="start" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">35  GPIO46</text>
 <circle cx="522" cy="617" r="7" fill="#9ca3af"/>
 <text x="502" y="621" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO51  36</text>
-<circle cx="558" cy="643" r="7" fill="#9ca3af"/>
-<text x="578" y="647" font-size="11.5" fill="#374151" text-anchor="start" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">37  GPIO47</text>
+<circle cx="558" cy="643" r="8" fill="#16a34a" stroke="#fff" stroke-width="2"/>
+<text x="578" y="647" font-size="11.5" fill="#16a34a" text-anchor="start" font-weight="bold" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">37  GPIO47</text>
 <circle cx="522" cy="643" r="7" fill="#9ca3af"/>
 <text x="502" y="647" font-size="11.5" fill="#374151" text-anchor="end" stroke="#fff" stroke-width="4" stroke-linejoin="round" paint-order="stroke">GPIO52  38</text>
 <circle cx="558" cy="669" r="7" fill="#9ca3af"/>

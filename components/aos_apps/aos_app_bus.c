@@ -1527,7 +1527,7 @@ static void build_gpio(lv_obj_t *parent)
             pin_refresh(p->gpio);
         }
     }
-    lv_obj_t *leg = caption(col, _("IN ↑ / IN ↓: con pull-up o pull-down interno. Los pines 35 a 39 van por el LDO VO4: medí antes de colgarles algo."), w);
+    lv_obj_t *leg = caption(col, _("IN ↑ / IN ↓: con pull-up o pull-down interno."), w);
     (void)leg;
 }
 
@@ -1559,7 +1559,7 @@ static struct {
     bool read_ok[OW_MAX];
     int8_t open_gpio;
 } OW;
-__attribute__((constructor)) static void OW_defaults(void) { OW.gpio = 28; OW.pullup = true; OW.n = -1; OW.open_gpio = -1; }
+__attribute__((constructor)) static void OW_defaults(void) { OW.gpio = 34; OW.pullup = true; OW.n = -1; OW.open_gpio = -1; }
 
 static struct {
     lv_obj_t *status, *dev_temp[OW_MAX], *dev_bits[OW_MAX][4];

@@ -34,14 +34,25 @@ hace falta adaptador).
 | 30 | GPIO35 | 🔴 BOOT (strapping, pull-up 4,7K) | 29 | GND |  |
 | 32 | GPIO49 | 🟢 ADC2 canal 0 | 31 | GPIO32 | 🟢 |
 | 34 | GPIO50 | 🟢 ADC2 canal 1 | 33 | GND |  |
-| 36 | GPIO51 | 🟢 ADC2 canal 2, comparador | 35 | GPIO46 | 🟡 dominio VO4: **medir tensión** |
-| 38 | GPIO52 | 🟢 ADC2 canal 3, comparador | 37 | GPIO47 | 🟡 dominio VO4 |
-| 40 | GND |  | 39 | GPIO48 | 🟡 dominio VO4 |
+| 36 | GPIO51 | 🟢 ADC2 canal 2, comparador | 35 | GPIO46 | 🟢 dominio VO4 (3,3 V) |
+| 38 | GPIO52 | 🟢 ADC2 canal 3, comparador | 37 | GPIO47 | 🟢 dominio VO4 (3,3 V) |
+| 40 | GND |  | 39 | GPIO48 | 🟢 dominio VO4 (3,3 V) |
 
 🟢 libre · 🟡 libre con condiciones · 🔴 ocupado · ⚡ alimentación
 
-**Libres de verdad: 14** (3, 4, 5, 21, 22, 28, 29, 30, 31, 32, 49, 50, 51, 52),
-más 2, 34 y 46-48 con condiciones, y 24/25 si se renuncia al USB-JTAG.
+**Libres de verdad: 17** (3, 4, 5, 21, 22, 28, 29, 30, 31, 32, 46, 47, 48, 49,
+50, 51, 52), más 2 y 34 con condiciones, y 24/25 si no se usa el USB host
+Full Speed. GPIO46-48 van por el LDO VO4, el de la microSD: el 2026-11-10 se
+midieron 3,25 V en GPIO48 puesto en alto desde Bus, con la tarjeta puesta, y
+después GPIO46 y GPIO47, que dan lo mismo que el pin de 3V3. Son pines de
+señal como los demás; no para alimentar nada desde ellos.
+
+Los pines sugeridos para lo que no tiene puerto (infrarrojo, CAN, 1-Wire,
+tira LED, PWM) están en [MODULES.md](../MODULES.md#suggested-pins).
+
+El dibujo de todo esto, con los puertos y los pines con que arranca cada
+app, es `docs/img/pinout.svg` (lo arma `tools/pinout_diagram.py`); el plan
+de la placa auxiliar que lo lleva a conectores está en [PCB.md](PCB.md).
 
 ### Sobre GPIO37/38 para RS485
 
@@ -72,8 +83,8 @@ cerca, y se pueda armar un cable o una placa hija simple.
 | `uart.a` | TX 30 (22), RX 31 (24), DE/RTS 29 (20), GND (26) | RS485 / Modbus RTU (el UART del P4 maneja DE solo en modo RS485 half-duplex) |
 | `uart.b` + control | TX 3 (12), RX 4 (14), EN 5 (11), BOOT 2 (8), GND (10/13) | Terminal serie y **programador de otras placas** (reset y modo boot del objetivo) |
 | `spi.a` | SCK 52 (38), MOSI 50 (34), MISO 51 (36), CS 49 (32) | LoRa, pantallas, ADCs externos |
-| `spi.a` auxiliares | 46 (35), 47 (37), 48 (39) | DIO1 / BUSY / RST de un SX1262 o SX127x (**si la tensión de VO4 da 3,3 V**) |
-| `gpio` sueltos | 28 (16), 32 (31), 34 (28) | 1-Wire, WS2812, relés, entradas, CAN (TWAI TX/RX + transceptor) |
+| `spi.a` auxiliares | 46 (35), 47 (37), 48 (39) | DIO1 / BUSY / RST de un SX1262 o SX127x. Desde el 2026-11-10 la app CAN arranca en 46/47 y el 48 es el sugerido para una tira LED o un PWM: en la placa auxiliar se reparten con puentes ([PCB.md](PCB.md)) |
+| `gpio` sueltos | 28 (16), 32 (31), 34 (28), 48 (39) | Infrarrojo (receptor 28, LED 32, lo que trae la app); 34 para 1-Wire; 48 para una tira LED o un servo |
 | `adc` | 21, 22 (si no se usa `i2c.ext`), 49-52 (si no se usa `spi.a`) | Voltímetro / registrador |
 
 Nada de esto es fijo: el perfil es un archivo en la SD y se edita desde Ajustes o
