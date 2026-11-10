@@ -343,6 +343,8 @@ port (`i2c.ext`, `spi.a`, `uart.*`, GPIO) and which modules hang from them.
 While an app uses a port it owns it, and Settings, Expansion draws the
 header with who holds each pin.
 
+The whole header, pin by pin, is under [The hardware](#the-40-pin-header).
+
 | Bus (I2C scan) | Modules | Terminal | Programmer | Equipos (Riden) | Electronics |
 |---|---|---|---|---|---|
 | <img src="docs/img/app-bus.png" width="125"> | <img src="docs/img/app-modules.png" width="125"> | <img src="docs/img/app-serial.png" width="125"> | <img src="docs/img/app-flasher.png" width="125"> | <img src="docs/img/app-equipos.png" width="125"> | <img src="docs/img/app-elec.png" width="125"> |
@@ -1144,7 +1146,40 @@ The board-side checklist is in
 | Memory | 768 KB internal RAM, 32 MB PSRAM, 32 MB flash |
 | Radio | ESP32-C6 over SDIO (esp_hosted 3.0.9): Wi-Fi 6 at 2.4 GHz |
 | Audio | ES8311 (speaker) + ES7210 (two microphones), full duplex |
-| Other | microSD (4-bit), CH340 serial, RS485, USB 2.0 OTG, the 40-pin header, BOOT, RESET and POWER |
+| Other | microSD (4-bit), CH340 serial, USB 2.0 OTG, the 40-pin header, BOOT, RESET and POWER |
+
+### The 40-pin header
+
+This drawing is the reference for every pin on the rear header: the
+documents, the wiring drawings and the apps follow it.
+
+<p align="center"><img src="docs/img/pinout.svg" width="760" alt="The 40-pin header as it faces you on the board, with the default ports of modules.txt (i2c.board, i2c.ext, uart.a for RS485, uart.b with the target's EN and BOOT and SWD, spi.a), the two USB host ports, the pins the apps start with (infrared on GPIO28 and GPIO32, CAN on GPIO46 and GPIO47) and the suggested ones (1-Wire on GPIO34, a LED strip or a servo on GPIO48)"></p>
+
+<p align="center"><em>The header out of the box. Only the console, BOOT and
+the board's own I2C bus are fixed: the rest is the default profile, and
+<code>modules.txt</code> on the card or an app's own choice moves it.</em></p>
+
+| For | GPIO (pin) | Set by |
+|---|---|---|
+| `i2c.ext`, the sensors' bus | SDA 21 (15), SCL 22 (17) | `modules.txt` |
+| `i2c.board`, the board's own bus (touch, audio) | SDA 7 (4), SCL 8 (6) | fixed |
+| `uart.a`, RS485 | TX 30 (22), RX 31 (24), DE 29 (20) | `modules.txt` |
+| `uart.b`, the Terminal and the Flasher's target | TX 3 (12), RX 4 (14), EN 5 (11), BOOT 2 (8) | `modules.txt` |
+| SWD | SWCLK 3 (12), SWDIO 4 (14), NRST 5 (11) | `uart.b`'s pins |
+| `spi.a` | SCK 52 (38), MOSI 50 (34), MISO 51 (36), CS 49 (32) | `modules.txt` |
+| USB host, Full Speed | D− 24 (21), D+ 25 (23), 5 V on pins 1 and 3 | Settings, USB |
+| USB host, High Speed | pins 25 and 27, the OTG connector's lines | Settings, USB |
+| Infrared | receiver 28 (16), LED 32 (31) | the Infrarrojo app's start |
+| CAN | TX 46 (35), RX 47 (37) | the CAN app's start |
+| 1-Wire | 34 (28) | suggested; Bus starts there |
+| A LED strip, a servo, one PWM output | 48 (39) | suggested |
+| The console and BOOT | 37, 38 (7, 9) and 35 (30) | the board: not for use |
+
+Signals are 3.3 V on every pin. Pins 1 and 3 give 5 V even with the board
+switched off. More in [docs/MODULES.md](docs/MODULES.md#suggested-pins).
+
+The case on the photos is in [case/](case): a remix of a public-domain
+enclosure, with the two USB host sockets on the back.
 
 ## Building
 
@@ -1292,5 +1327,6 @@ idioma de la tarjeta, la de la placa y la del portal web. Los documentos del pla
 | Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 22 apps propias y 50 de la tarjeta (juegos, un pinball 3D de seis mesas, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN, tiras LED direccionables y RS485: Modbus (maestro, esclavo, monitor, perfiles de equipos y pasarela TCP), DMX con RDM y nodo Art-Net/sACN, y una consola de luces que también se maneja desde el celular |
 | Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el emulador (GBA y Neo Geo a 60 cuadros, el táctil con varios dedos a la vez), el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, una termocupla MAX6675 y un DS18B20 registrados por Datalog en segundo plano, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante), BLE escuchando con el iPhone y la Mac conectados y leyendo un termómetro Xiaomi cifrado con su clave, dos cámaras IP (un timbre H.264 directo a la pantalla y una MJPEG), la grabación de pantalla en MP4 por el codificador H.264 del P4, SSH desde la Mac y hacia una Raspberry Pi, un bus CAN real con un ESP32, el teclado, copiar y pegar y el buscador, y RS485 con un ESP32 y dos módulos automáticos: Modbus en las dos direcciones, DMX con una tira de pixeles, RDM y Art-Net desde la Mac |
 | Qué falta | probar en la placa el RC522, RF con un sensor de 433 MHz y con tráfico real de AM y FM angosta, y encontrar por qué se cortó la red durante dos OTA |
+| El conector de 40 pines | el dibujo de referencia de todos los pines, con los puertos, los pines con que arranca cada app y los sugeridos, está en [The 40-pin header](#the-40-pin-header); la carcasa impresa, en [case/](case) |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
 | Cómo se instala | la primera vez por el CH340; después `tools/ota.sh p4os.local` o el portal |

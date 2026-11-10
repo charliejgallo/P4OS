@@ -1,6 +1,28 @@
 # Changelog
 
-## Next
+## 0.25.1 — 2026-11-10
+
+The 40-pin header gets one pin map, and everything follows it.
+
+- **The pinout** (`docs/img/pinout.svg`, drawn by `tools/pinout_diagram.py`)
+  is the reference for the header, in the README's hardware section and in
+  `docs/MODULES.md`: the default ports, the pins each app starts with and
+  the ones suggested for what has no default.
+- **GPIO46, 47 and 48 are plain 3.3 V pins.** They hang from the VO4 LDO and
+  the system asked to measure them before use: 3.25 V measured on the
+  board, so the warnings are gone from Bus, Modules, Settings, LED Strips
+  and the portal.
+- **CAN starts on GPIO46 and GPIO47** (it was GPIO28 and 29: the infrared
+  receiver's pin and the RS485 port's DE). A board that already chose its
+  pins keeps them.
+- **1-Wire in Bus starts on GPIO34** (it was GPIO28), and LED Strips
+  suggests GPIO48. The examples in the documents say `port gpio.ow pin=34`.
+- **The bench drawings** of PWM, infrared, the LED strip and CAN are on the
+  pins of the map; each says on which pins it was tried on the board.
+- **The case** (`case/`): the printed enclosure of the photos, a remix of a
+  public-domain one, with the two USB host sockets on its back.
+- The plan of an auxiliary board for the header is in `docs/plan/PCB.md`
+  (Spanish).
 
 - **Luces:** "Pares" selected fixtures 1, 3, 5... (the odd ones: it counted
   from 0); now Pares is 2, 4, 6... and Impares 1, 3, 5..., on the board and
