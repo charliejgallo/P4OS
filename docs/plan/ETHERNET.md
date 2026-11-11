@@ -147,6 +147,27 @@ que está ella misma por Wi-Fi, así que son un piso, no el techo del cable.
   recepción (4 KB) y los dos buffers DMA del puerto SPI; falta ver qué del
   resto se puede pasar a PSRAM.
 
+**Fase 2, 2026-11-11**, con el firmware de la rama y el mismo banco:
+
+- **El cable es la red.** Con el Wi-Fi conectado a la vez, la dirección que
+  informa el sistema (`aos_hal_net_ip`, `/api/info`) es la del cable, que
+  llegó a los 6 s del arranque; el Wi-Fi, a los 10 s.
+- **Wi-Fi apagado en la placa:** sigue contestando por el cable, con su
+  hora; `p4os.local` se resuelve a la dirección del cable; la del Wi-Fi deja
+  de contestar. Ping de 9 a 26 ms, sin pérdidas.
+- **Arranque sin Wi-Fi** (RESET con el Wi-Fi apagado): vuelve por el cable
+  con la misma dirección, contesta el ping y el nombre; 80 pings en 80 s sin
+  perder ninguno, o sea que no reinició pasado el primer minuto.
+- **El portal, en ese arranque, manda a HTTPS y pide la contraseña** (302 y
+  después 401). No es una falla: las redes de confianza se reconocen por el
+  nombre del Wi-Fi (`aos_access_is_trusted(aos_hal_net_ssid())`), y una red
+  por cable no tiene nombre, así que la placa se cree fuera de casa. Es lo
+  seguro por defecto. **Falta decidir cómo se le da confianza a una red por
+  cable** (abajo, en las preguntas abiertas); se cambia sólo en la placa.
+- **No probado:** el caso que el cambio protege en el vigilante de red, que
+  es el Wi-Fi habilitado sin poder conectar con el cable puesto (habría que
+  apagar el router); sacar y poner el cable; 12 h seguidas.
+
 **Lo que apareció de paso, y no es de Ethernet:** la preferencia del reloj
 no se guardaba porque **el almacén de preferencias de la placa (NVS, 24 KB)
 está lleno**: 630 entradas usadas de 756 y ninguna disponible; 422 claves
@@ -254,6 +275,12 @@ escucha todo el día), una forma de pedir el puerto compartido.
 
 ## Preguntas abiertas
 
+- **¿Cómo se confía en una red por cable?** Hoy, sólo con el cable, el
+  portal trata la red como ajena (HTTPS y contraseña). Posibilidades: un
+  interruptor en la placa "la red por cable es de confianza"; reconocerla
+  por la puerta de enlace (su MAC), como se reconoce un Wi-Fi por su nombre;
+  o dejarla siempre como ajena. Lo decide el usuario, y se configura en la
+  placa (`docs/SECURITY.md`).
 - ¿"Redes" reemplaza a "Wi-Fi" en la lista de Ajustes, o Ethernet es una
   fila aparte? (Acá se propone lo primero.)
 - ¿La IP fija entra en la fase 3 o se deja para cuando alguien la pida?
