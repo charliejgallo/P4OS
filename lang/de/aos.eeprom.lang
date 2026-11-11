@@ -862,3 +862,5 @@ borrada	gelöscht
 
 #: apps/eeprom/main/eeprom.c:397
 No se pudo escribir	Schreiben fehlgeschlagen
+
+Ethernet usa este puerto: al leer o grabar se pone en pausa y la red por cable se corta. Vuelve solo unos segundos después.	Ethernet benutzt diesen Port: Beim Lesen oder Schreiben pausiert es, und das Kabelnetz fällt aus. Es kommt ein paar Sekunden später von selbst zurück.

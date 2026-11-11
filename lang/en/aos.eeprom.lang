@@ -862,3 +862,5 @@ borrada	erased
 
 #: apps/eeprom/main/eeprom.c:397
 No se pudo escribir	Could not write
+
+Ethernet usa este puerto: al leer o grabar se pone en pausa y la red por cable se corta. Vuelve solo unos segundos después.	Ethernet uses this port: reading or writing pauses it and the wired network drops. It comes back by itself a few seconds later.

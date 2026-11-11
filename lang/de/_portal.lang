@@ -2229,3 +2229,33 @@ La autoridad HTTPS de la placa	Die HTTPS-Zertifizierungsstelle der Platine
 
 #: components/aos_portal/web/app.js:3145
 , para que el navegador confíe en ella.	, damit der Browser ihr vertraut.
+
+Wi-Fi y Ethernet	WLAN und Ethernet
+
+En pausa: %s usa el puerto	Pausiert: %s benutzt den Port
+
+Sin módulo	Kein Modul
+
+Sin cable	Kein Kabel
+
+Sin dirección	Keine Adresse
+
+Enlace	Verbindung
+
+dúplex completo	Vollduplex
+
+medio dúplex	Halbduplex
+
+Puerta de enlace	Gateway
+
+Estás entrando por el cable: al apagar Ethernet esta página deja de contestar. ¿Apagarlo?	Du kommst über das Kabel: Ohne Ethernet antwortet diese Seite nicht mehr. Ausschalten?
+
+El reloj nuevo se usa la próxima vez que arranque Ethernet	Der neue Takt gilt beim nächsten Start von Ethernet
+
+Apagar Ethernet	Ethernet ausschalten
+
+Prender Ethernet	Ethernet einschalten
+
+Reloj del SPI	SPI-Takt
+
+Red por cable con un módulo W5500 en el puerto spi.a del conector de 40 pines. Con cable y Wi-Fi a la vez, la placa sale por el cable. Si la red por cable es de confianza se elige sólo en la placa (Ajustes, Portal web).	Kabelnetz über ein W5500-Modul am Port spi.a der 40-poligen Leiste. Mit Kabel und WLAN zugleich geht das Board über das Kabel. Ob das Kabelnetz vertrauenswürdig ist, wird nur am Board gewählt (Einstellungen, Webportal).

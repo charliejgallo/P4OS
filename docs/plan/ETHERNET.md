@@ -17,8 +17,11 @@ conexión) y **Ethernet** (el interruptor, el estado, el reloj del SPI, la
 confianza), el ícono del cable en la barra, y el aviso en Bus antes de
 pausarlo. En la placa: instalado, Ethernet arriba y el ícono del cable en
 la barra (visto en una captura de su pantalla); el usuario recorrió Redes,
-Ethernet y el aviso de Bus en la placa y se ven bien. Falta la página del
-portal y el aviso en EEPROM. El trabajo de firmware va en la rama
+Ethernet y el aviso de Bus en la placa y se ven bien. **El portal** tiene
+a Ethernet en su página "Wi-Fi y Ethernet" (estado, prender y apagar, el
+reloj; la confianza no, que se cambia sólo en la placa) y **la app EEPROM**
+avisa, donde se elige el puerto, que usarlo pausa a Ethernet: los dos
+vistos en el simulador, falta en la placa. El trabajo de firmware va en la rama
 `ethernet` (un árbol de trabajo aparte, `.claude/worktrees/ethernet`), no
 en `main`, hasta que ande en la placa.
 
@@ -113,7 +116,7 @@ se usa: el driver sondea.
 | **0. El chip contesta** ✅ 2026-11-11 | Cablear al header. Sin firmware nuevo: en Bus, SPI, `spi.a`, CS 49, modo 0, 1 MHz, mandar `00 39 00 00` | El cuarto byte de la respuesta es `04` (el registro de versión del W5500): **devolvió `00 00 00 04`** |
 | **1. Enlace** ✅ 2026-11-11 | `aos_eth_p4.c` (en `aos_io`): el driver sobre `aos_io_spi`, sondeando, detrás de una preferencia; DHCP; todo al registro. `sdkconfig`: `ETH_USE_SPI_ETHERNET`, `ETH_SPI_ETHERNET_W5500` | La placa toma IP por el cable y contesta ping. Medir: velocidad a 8, 20 y 33 MHz de SPI con los cables del banco, RAM interna que cuesta, CPU |
 | **2. Convivencia** ✅ 2026-11-11, salvo lo anotado | Ruta por defecto, el vigilante de red, mDNS y SNTP por el cable, sacar y poner el cable, arrancar sin Wi-Fi, arrancar sin módulo | El portal, la OTA y SSH andan por cable con el Wi-Fi apagado; sacar el cable no reinicia ni cuelga; 12 h prendida sin perder el enlace |
-| **3. Interfaz** ✅ 2026-11-11, salvo el portal y EEPROM | Ajustes → Redes; ícono en la barra; `GET/POST /api/eth` y la página Red del portal; IP fija optativa; el módulo en Módulos | Se prende, se apaga y se ve el estado sin tocar un archivo; en el simulador, un Ethernet falso (`P4_SIM_ETH=1`, o `nolink` para el módulo sin cable) |
+| **3. Interfaz** ✅ 2026-11-11 | Ajustes → Redes; ícono en la barra; `GET/POST /api/eth` y la página Red del portal; IP fija optativa; el módulo en Módulos | Se prende, se apaga y se ve el estado sin tocar un archivo; en el simulador, un Ethernet falso (`P4_SIM_ETH=1`, o `nolink` para el módulo sin cable) |
 | **4. Para las apps** | Las apps ya usan sockets y no cambian. Lo nuevo: lista de interfaces con su estado para las herramientas de red (`aos_hal_netif_*`), elegir por cuál sale un socket, modo promiscuo y tramas crudas para las de diagnóstico | Red (la app) muestra las dos interfaces; Modbus TCP, Art-Net y SSH probados por cable |
 | **5. Apps de taller** | Las de abajo, de a una | Cada una con su prueba en el banco |
 | **6. Placa auxiliar** | Los zócalos del módulo con sus medidas reales; ver si conviene el chip integrado en la PCBA | El módulo entra en la placa impresa de prueba |

@@ -407,6 +407,11 @@ static void card_conn(lv_obj_t *col, int32_t w)
             char t[96];
             snprintf(t, sizeof t, "SCK GPIO%d · MOSI GPIO%d · MISO GPIO%d · %s 0", p->pins[0], p->pins[1], p->pins[2], _("modo"));
             ee_caption(k, t, iw);
+            /* Ethernet lives on this port (aos_eth.h): it lets go while the app has it. Said before
+             * the chip is touched, by asking the pin arbiter: no call an older firmware lacks. */
+            const char *o = p->pins[0] >= 0 ? aos_io_owner(p->pins[0]) : NULL;
+            if (o && !strcmp(o, "Ethernet"))
+                ee_caption(k, _("Ethernet usa este puerto: al leer o grabar se pone en pausa y la red por cable se corta. Vuelve solo unos segundos después."), iw);
         }
     } else {
         static const char *const NAME[4] = { "CS", "SK", "DI", "DO" };

@@ -2229,3 +2229,33 @@ La autoridad HTTPS de la placa	The board's HTTPS authority
 
 #: components/aos_portal/web/app.js:3145
 , para que el navegador confíe en ella.	, so the browser trusts it.
+
+Wi-Fi y Ethernet	Wi-Fi and Ethernet
+
+En pausa: %s usa el puerto	Paused: %s is using the port
+
+Sin módulo	No module
+
+Sin cable	No cable
+
+Sin dirección	No address
+
+Enlace	Link
+
+dúplex completo	full duplex
+
+medio dúplex	half duplex
+
+Puerta de enlace	Gateway
+
+Estás entrando por el cable: al apagar Ethernet esta página deja de contestar. ¿Apagarlo?	You are coming in by the wire: with Ethernet off this page stops answering. Switch it off?
+
+El reloj nuevo se usa la próxima vez que arranque Ethernet	The new clock is used the next time Ethernet starts
+
+Apagar Ethernet	Switch Ethernet off
+
+Prender Ethernet	Switch Ethernet on
+
+Reloj del SPI	SPI clock
+
+Red por cable con un módulo W5500 en el puerto spi.a del conector de 40 pines. Con cable y Wi-Fi a la vez, la placa sale por el cable. Si la red por cable es de confianza se elige sólo en la placa (Ajustes, Portal web).	A wired network through a W5500 module on the spi.a port of the 40-pin header. With a wire and Wi-Fi at once, the board goes out by the wire. Whether the wired network is trusted is chosen only on the board (Settings, Web portal).
