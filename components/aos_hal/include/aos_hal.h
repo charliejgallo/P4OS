@@ -1538,6 +1538,13 @@ void aos_hal_net_low_latency(bool on);
 const char *aos_hal_net_ssid(void);
 int         aos_hal_net_rssi(void);         /* dBm */
 const char *aos_hal_net_ip(void);
+/* The wire: Ethernet on a module of the header (aos_eth.h, in aos_io, which
+ * the HAL cannot call, so it is told). While the wire has an address,
+ * aos_hal_net_state() is AOS_NET_CONNECTED and aos_hal_net_ip() is the
+ * wire's, whatever the Wi-Fi is doing: "there is a network" does not mean
+ * "there is Wi-Fi". aos_hal_net_ssid() and _rssi() stay the Wi-Fi's. */
+void aos_hal_net_wired_set(bool up, const char *ip);
+bool aos_hal_net_wired(void);
 /* P4OS: mDNS on the Wi-Fi station: answering and announcing the board's name
  * there, or quiet (the portal's rules keep it quiet on networks that are not
  * home, aos_access.c). The AP and the USB cable are not affected. */

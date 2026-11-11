@@ -362,7 +362,12 @@ bool aos_net_p4_up(void) { return s_inited; }
 
 /* ---- the HAL's network API ---- */
 
-aos_net_state_t aos_hal_net_state(void) { return s_state; }
+/* The wire (aos_hal.h): it has an address or it does not. With one, there is a network. */
+static volatile bool s_wired;
+static char s_wired_ip[16];
+
+aos_net_state_t aos_hal_net_state(void) { return s_wired ? AOS_NET_CONNECTED : s_state; }
+bool aos_hal_net_wired(void) { return s_wired; }
 const char *aos_hal_net_coprocessor_fw(void) { return s_c6_fw; }
 
 bool aos_hal_net_test_freeze_link(void)
@@ -515,7 +520,7 @@ void aos_hal_net_coprocessor_status(aos_c6_update_t *out)
 {
     if (out) *out = s_c6up;
 }
-const char *aos_hal_net_ip(void) { return s_ip; }
+const char *aos_hal_net_ip(void) { return s_wired ? s_wired_ip : s_ip; }
 const char *aos_hal_net_ssid(void) { return s_ssid; }
 
 /* The last reading, kept by the stats task (aos_tasks_p4.c, every 5 s). Not
@@ -586,9 +591,23 @@ void aos_hal_net_retry_info(uint32_t *failures, bool *parked, uint32_t *next_s, 
 
 bool aos_hal_net_sync_time(void)
 {
-    if (s_state != AOS_NET_CONNECTED) return false;
+    if (aos_hal_net_state() != AOS_NET_CONNECTED) return false;
     start_services();
     return true;
+}
+
+void aos_hal_net_wired_set(bool up, const char *ip)
+{
+    up = up && ip && ip[0];
+    if (up) snprintf(s_wired_ip, sizeof s_wired_ip, "%s", ip);
+    bool was = s_wired;
+    s_wired = up;
+    if (up && !was) {
+        ESP_LOGI(TAG, "the wire has %s: the network is there, Wi-Fi or not", s_wired_ip);
+        start_services();           /* the time and the name, as when the Wi-Fi gets its address */
+    } else if (!up && was) {
+        ESP_LOGI(TAG, "the wire is gone: the network is the Wi-Fi's again (%s)", s_state == AOS_NET_CONNECTED ? s_ip : "not connected");
+    }
 }
 
 void aos_hal_net_low_latency(bool on)

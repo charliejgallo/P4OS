@@ -753,6 +753,12 @@ __attribute__((weak)) int aos_hal_net_rssi(void)
 __attribute__((weak)) const char * aos_hal_net_ip(void)
 { return ""; }
 
+__attribute__((weak)) void aos_hal_net_wired_set(bool up, const char *ip)
+{ }
+
+__attribute__((weak)) bool aos_hal_net_wired(void)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) void aos_hal_net_mdns_visible(bool on)
 { }
 

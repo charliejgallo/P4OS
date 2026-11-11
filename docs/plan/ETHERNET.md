@@ -9,7 +9,9 @@ y se prende desde Ajustes**; nada del sistema lo da por supuesto.
 cableado al header como en el dibujo, contesta por SPI, y con el firmware
 de la rama `ethernet` la placa negocia el enlace, toma dirección por DHCP y
 sirve el portal por el cable (abajo, "Lo medido"). Se prende sólo por la
-API; falta la convivencia (fase 2) y la interfaz (fase 3). El trabajo de firmware va en la rama
+API. De la convivencia (fase 2) está escrito que el cable cuente como red
+(`aos_hal_net_wired_set`): falta correrlo en la placa. Falta la interfaz
+(fase 3). El trabajo de firmware va en la rama
 `ethernet` (un árbol de trabajo aparte, `.claude/worktrees/ethernet`), no
 en `main`, hasta que ande en la placa.
 
@@ -202,6 +204,40 @@ Con el Wi-Fi solo, sin cable, ya salen la 7 (parte), la 8 y la mitad de la
 **Límites que conviene saber:** el W5500 por SPI da del orden de 10 a
 20 Mbit/s, no 100; es un solo puerto; no entrega ni toma PoE; y el modo
 promiscuo ve sólo lo que llega a esa boca.
+
+## El puerto SPI, compartido o no
+
+Pedido del usuario (2026-11-11): que quede claro qué pasa con `spi.a`
+cuando Ethernet está prendido, y avisar o apagar Ethernet si otra cosa lo
+necesita.
+
+**Lo que hace hoy el código:** Ethernet abre `spi.a` con dueño "Ethernet"
+y el árbitro de pines le da los tres hilos a él solo. Mientras está
+prendido, **nadie más puede abrir `spi.a`**: Bus (pestaña SPI), la app
+EEPROM y el servicio de sensores (una termocupla MAX6675 o MAX31855
+declarada ahí) reciben "GPIO52 lo tiene Ethernet". Cambiar el reloj en Bus
+no puede afectar a Ethernet porque Bus ni llega a abrir el puerto; y aunque
+lo abriera, cada dispositivo SPI tiene su propio reloj: el de uno no cambia
+el del otro. Lo que sí pasaría al compartir es otra cosa: mientras otro
+dispositivo usa los hilos, Ethernet espera, y una transferencia larga o
+lenta (leer entera una memoria flash a 1 MHz) lo deja sin atender varios
+segundos.
+
+**Opciones, a decidir antes de la fase 3:**
+
+1. **Exclusivo, con relevo.** Como hoy, pero quien necesita el puerto lo
+   dice claro ("`spi.a` lo usa Ethernet") y ofrece **pausarlo**: Ethernet
+   suelta el puerto, la app trabaja, y Ethernet vuelve solo cuando el puerto
+   queda libre. Simple y sin sorpresas; el cable se cae mientras tanto.
+2. **Compartido.** Otros dueños pueden sumar su dispositivo, con su propio
+   chip select, mientras Ethernet anda. Sirve sin más para lo corto (un
+   sensor que lee dos bytes por segundo); para lo largo hay que avisar
+   ("esto frena a Ethernet") o partir la transferencia en tramos.
+3. **Las dos:** compartido para el servicio de sensores y las lecturas
+   cortas, relevo para lo pesado (leer o grabar una memoria entera).
+
+La placa auxiliar ya supone que se comparte: el chip select del módulo va
+por un puente y la tira de SPI sigue ahí.
 
 ## Preguntas abiertas
 

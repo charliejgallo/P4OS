@@ -146,6 +146,7 @@ static void on_event(void *arg, esp_event_base_t base, int32_t id, void *data)
         E.info.link = false;
         E.info.speed_mbps = 0;
         E.info.ip[0] = E.info.mask[0] = E.info.gw[0] = 0;
+        aos_hal_net_wired_set(false, NULL);
         aos_hal_log("eth", "link down");
     } else if (base == IP_EVENT && id == IP_EVENT_ETH_GOT_IP) {
         const ip_event_got_ip_t *ev = data;
@@ -154,8 +155,10 @@ static void on_event(void *arg, esp_event_base_t base, int32_t id, void *data)
         snprintf(E.info.mask, sizeof E.info.mask, IPSTR, IP2STR(&ev->ip_info.netmask));
         snprintf(E.info.gw, sizeof E.info.gw, IPSTR, IP2STR(&ev->ip_info.gw));
         aos_hal_log("eth", "address %s, gateway %s", E.info.ip, E.info.gw);
+        aos_hal_net_wired_set(true, E.info.ip);
     } else if (base == IP_EVENT && id == IP_EVENT_ETH_LOST_IP) {
         E.info.ip[0] = E.info.mask[0] = E.info.gw[0] = 0;
+        aos_hal_net_wired_set(false, NULL);
         aos_hal_log("eth", "address lost");
     }
 }
@@ -176,6 +179,7 @@ static void teardown(void)
     E.info.running = E.info.link = false;
     E.info.speed_mbps = 0;
     E.info.ip[0] = E.info.mask[0] = E.info.gw[0] = 0;
+    aos_hal_net_wired_set(false, NULL);
 }
 
 static bool fail(const char *why, esp_err_t e)
