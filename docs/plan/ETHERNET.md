@@ -247,7 +247,9 @@ Programador. `docs/SECURITY.md` tiene la tabla.
 cable en la misma red y el interruptor apagado: el portal contesta por la
 dirección del Wi-Fi (200) y por la del cable manda a HTTPS (302), que es la
 red ajena; el nombre `p4os.local` se anuncia sólo por el Wi-Fi y se resuelve
-a esa dirección. Falta verlo con el interruptor prendido.
+a esa dirección. Con el interruptor prendido en la placa, sin reiniciar: el
+portal contesta también por la dirección del cable (200) y el nombre pasa
+a anunciarse por las dos.
 
 ## El puerto SPI, compartido o no
 
