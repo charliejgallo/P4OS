@@ -59,6 +59,8 @@
 #include "driver/gpio.h"
 #include "sd_pwr_ctrl_by_on_chip_ldo.h"
 #include "nvs_flash.h"
+#include "esp_ota_ops.h"
+#include "esp_partition.h"
 #include "nvs.h"
 #include "bsp/esp-bsp.h"
 #include "bsp/display.h"
@@ -170,8 +172,34 @@ const char *aos_hal_timezone_get(void) { return s_tz; }
 /* -------------------------------------------------------------------------- */
 /* Preferences (NVS namespace "p4os")                                          */
 /* -------------------------------------------------------------------------- */
+/*
+ * Where they live. The table's "nvs" partition is 24 KB: 630 entries, shared
+ * with the Bluetooth bonds. Every app on the card keeps its settings and
+ * scores there too, and on 2026-11-11 the user's board had all 630 in use
+ * (422 keys, most of them the apps'): every set failed, in silence, the
+ * system's own among them.
+ *
+ * So the preferences have a store of their own: PREFS_SIZE at the start of
+ * the 12 MB "storage" partition, which nothing ever mounted. A board flashed
+ * with a table that names it (partitions.csv, "prefs") has it as a partition;
+ * one updated over the air still has the old table, and the same bytes are
+ * reached through a partition made up here. NVS takes either.
+ *
+ * The first boot with it copies every key over (prefs_move). The old store
+ * is left as it was until the image is confirmed, so a firmware that is
+ * rolled back finds everything; after that it is trimmed (prefs_trim) to
+ * what an older firmware needs to be reached and to stay locked, which gives
+ * the Bluetooth bonds their room back.
+ */
+#define PREFS_SIZE      0x40000         /* 256 KB: 63 pages of 126 entries */
+#define PREFS_CARVED    "p4os_prefs"
+#define PREFS_MOVED     "_moved"        /* u8 marks: PREF_LIST shows only numbers and strings */
+#define PREFS_TRIMMED   "_trimmed"
 
-static nvs_handle_t s_nvs;
+static nvs_handle_t s_nvs;                              /* the store in use */
+static nvs_handle_t s_old;                              /* the first one, when s_nvs is the large one */
+static const char  *s_part = NVS_DEFAULT_PART_NAME;     /* the partition s_nvs is on */
+static esp_partition_t s_carved;
 
 /* Every NVS call goes through aos_flash_call (aos_flashop_p4.c): a thread
  * whose stack is in PSRAM may not touch the flash itself. */
@@ -193,10 +221,167 @@ typedef struct {
     bool ok;
 } pref_op_t;
 
+/* The large store's partition label, initialised; NULL when the flash has no room laid out for it. */
+static const char *prefs_large(void)
+{
+    const esp_partition_t *p = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_NVS, "prefs");
+    if (!p) {
+        const esp_partition_t *st = esp_partition_find_first(ESP_PARTITION_TYPE_DATA, ESP_PARTITION_SUBTYPE_DATA_FAT, "storage");
+        if (!st || st->size < PREFS_SIZE) return NULL;
+        s_carved = *st;
+        s_carved.size = PREFS_SIZE;
+        s_carved.subtype = ESP_PARTITION_SUBTYPE_DATA_NVS;
+        snprintf(s_carved.label, sizeof s_carved.label, "%s", PREFS_CARVED);
+        p = &s_carved;
+    }
+    esp_err_t e = nvs_flash_init_partition_ptr(p);
+    if (e == ESP_ERR_NVS_NO_FREE_PAGES || e == ESP_ERR_NVS_NEW_VERSION_FOUND) {
+        esp_partition_erase_range(p, 0, p->size);
+        e = nvs_flash_init_partition_ptr(p);
+    }
+    if (e != ESP_OK) {
+        ESP_LOGW("pref", "the large store at 0x%x would not start: %s", (unsigned)p->address, esp_err_to_name(e));
+        return NULL;
+    }
+    return p->label;
+}
+
+/* Every key of the first store that the large one does not have yet. Run again, it copies nothing. */
+static void prefs_move(void)
+{
+    uint8_t mark = 0;
+    if (nvs_get_u8(s_nvs, PREFS_MOVED, &mark) == ESP_OK) return;
+    int64_t t0 = esp_timer_get_time();
+    int moved = 0, there = 0, bad = 0;
+    nvs_iterator_t it = NULL;
+    for (esp_err_t e = nvs_entry_find(NVS_DEFAULT_PART_NAME, "p4os", NVS_TYPE_ANY, &it); e == ESP_OK; e = nvs_entry_next(&it)) {
+        nvs_entry_info_t info;
+        nvs_entry_info(it, &info);
+        nvs_type_t type;
+        if (nvs_find_key(s_nvs, info.key, &type) == ESP_OK) { there++; continue; }
+        esp_err_t w = ESP_ERR_NOT_SUPPORTED;
+        if (info.type == NVS_TYPE_I32) {
+            int32_t v = 0;
+            w = nvs_get_i32(s_old, info.key, &v);
+            if (w == ESP_OK) w = nvs_set_i32(s_nvs, info.key, v);
+        } else if (info.type == NVS_TYPE_STR) {
+            size_t len = 0;
+            w = nvs_get_str(s_old, info.key, NULL, &len);
+            char *str = w == ESP_OK ? heap_caps_malloc(len + 1, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT) : NULL;
+            if (w == ESP_OK && !str) w = ESP_ERR_NO_MEM;
+            if (w == ESP_OK) w = nvs_get_str(s_old, info.key, str, &len);
+            if (w == ESP_OK) w = nvs_set_str(s_nvs, info.key, str);
+            heap_caps_free(str);
+        }
+        if (w == ESP_OK) moved++;
+        else { bad++; ESP_LOGW("pref", "%s was not moved: %s", info.key, esp_err_to_name(w)); }
+    }
+    nvs_release_iterator(it);
+    nvs_set_u8(s_nvs, PREFS_MOVED, bad ? 2 : 1);        /* 2: some did not make it, and the first store stays whole */
+    nvs_commit(s_nvs);
+    ESP_LOGW("pref", "moved to the large store: %d keys in %d ms (%d already there, %d not moved)",
+             moved, (int)((esp_timer_get_time() - t0) / 1000), there, bad);
+}
+
+/* What an older firmware, put back by hand, still finds in the first store: how to get on the
+ * network and how it is locked. The rest of that store goes, and the Bluetooth bonds get its room. */
+static bool prefs_keep_old(const char *key)
+{
+    static const char *const KEEP[] = { "wifi_", "wf_", "net_", "ap_", "lock_", "pt_", "ssh_", "bt_", "tz", "landscape" };
+    for (size_t i = 0; i < sizeof KEEP / sizeof KEEP[0]; i++)
+        if (!strncmp(key, KEEP[i], strlen(KEEP[i]))) return true;
+    return false;
+}
+
+static void prefs_trim(void)
+{
+    uint8_t mark = 0, done = 0;
+    if (nvs_get_u8(s_nvs, PREFS_MOVED, &mark) != ESP_OK || mark != 1) return;
+    if (nvs_get_u8(s_nvs, PREFS_TRIMMED, &done) == ESP_OK) return;
+    /* an image still on trial may be rolled back to one that reads the first store: leave it whole */
+    esp_ota_img_states_t st = ESP_OTA_IMG_UNDEFINED;
+    const esp_partition_t *run = esp_ota_get_running_partition();
+    if (run && esp_ota_get_state_partition(run, &st) == ESP_OK && st == ESP_OTA_IMG_PENDING_VERIFY) return;
+    /* the names first, then the erasing: not while the iterator walks them */
+    enum { CAP = 700 };
+    char (*keys)[NVS_KEY_NAME_MAX_SIZE] = heap_caps_malloc(CAP * NVS_KEY_NAME_MAX_SIZE, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    if (!keys) return;
+    int n = 0, kept = 0;
+    nvs_iterator_t it = NULL;
+    for (esp_err_t e = nvs_entry_find(NVS_DEFAULT_PART_NAME, "p4os", NVS_TYPE_ANY, &it); e == ESP_OK; e = nvs_entry_next(&it)) {
+        nvs_entry_info_t info;
+        nvs_entry_info(it, &info);
+        nvs_type_t type;
+        /* only what the large store is seen to have goes: a key it lacks stays where it is */
+        if (prefs_keep_old(info.key) || nvs_find_key(s_nvs, info.key, &type) != ESP_OK) kept++;
+        else if (n < CAP) snprintf(keys[n++], NVS_KEY_NAME_MAX_SIZE, "%s", info.key);
+    }
+    nvs_release_iterator(it);
+    for (int i = 0; i < n; i++) nvs_erase_key(s_old, keys[i]);
+    nvs_commit(s_old);
+    heap_caps_free(keys);
+    nvs_set_u8(s_nvs, PREFS_TRIMMED, 1);
+    nvs_commit(s_nvs);
+    ESP_LOGW("pref", "the first store trimmed: %d keys erased, %d kept for an older firmware", n, kept);
+}
+
 static bool nvs_ok(void)
 {
     if (s_nvs) return true;
-    return nvs_open("p4os", NVS_READWRITE, &s_nvs) == ESP_OK;
+    nvs_handle_t old = 0, large = 0;
+    bool have_old = nvs_open("p4os", NVS_READWRITE, &old) == ESP_OK;
+    const char *label = prefs_large();
+    if (label && nvs_open_from_partition(label, "p4os", NVS_READWRITE, &large) == ESP_OK) {
+        s_nvs = large;
+        s_part = label;
+        s_old = have_old ? old : 0;
+        if (s_old) {
+            prefs_move();
+            prefs_trim();
+        }
+        nvs_stats_t st;
+        if (nvs_get_stats(s_part, &st) == ESP_OK)
+            ESP_LOGI("pref", "store %s: %u entries used of %u", s_part, (unsigned)st.used_entries, (unsigned)st.total_entries);
+        return true;
+    }
+    ESP_LOGW("pref", "no large store on this flash: the preferences stay in the 24 KB one");
+    if (!have_old) return false;
+    s_nvs = old;
+    return true;
+}
+
+/* Once a boot, when a preference does not fit: how full the store is and whose entries they are. */
+static void nvs_report(void)
+{
+    static bool done;
+    if (done) return;
+    done = true;
+    nvs_stats_t st;
+    if (nvs_get_stats(s_part, &st) == ESP_OK)
+        ESP_LOGW("pref", "%s: %u entries used, %u free, %u available of %u, %u namespaces", s_part,
+                 (unsigned)st.used_entries, (unsigned)st.free_entries, (unsigned)st.available_entries,
+                 (unsigned)st.total_entries, (unsigned)st.namespace_count);
+    struct { char ns[NVS_NS_NAME_MAX_SIZE]; int keys, strs, blobs; } by[12] = { 0 };
+    char line[200];
+    int ln = 0;
+    nvs_iterator_t it = NULL;
+    for (esp_err_t e = nvs_entry_find(s_part, NULL, NVS_TYPE_ANY, &it); e == ESP_OK; e = nvs_entry_next(&it)) {
+        nvs_entry_info_t info;
+        nvs_entry_info(it, &info);
+        int k = 0;
+        while (k < 11 && by[k].ns[0] && strcmp(by[k].ns, info.namespace_name)) k++;
+        if (!by[k].ns[0]) snprintf(by[k].ns, sizeof by[k].ns, "%s", info.namespace_name);
+        by[k].keys++;
+        if (info.type == NVS_TYPE_STR) by[k].strs++;
+        if (info.type == NVS_TYPE_BLOB) by[k].blobs++;
+        /* the keys themselves, a dozen a line: what filled it is in their names */
+        ln += snprintf(line + ln, sizeof line - ln, "%s%s ", info.key, info.type == NVS_TYPE_STR ? "$" : "");
+        if (ln > 150) { ESP_LOGW("pref", "keys: %s", line); ln = 0; }
+    }
+    if (ln) ESP_LOGW("pref", "keys: %s", line);
+    nvs_release_iterator(it);
+    for (int k = 0; k < 12 && by[k].ns[0]; k++)
+        ESP_LOGW("pref", "%s has %d keys (%d strings, %d blobs)", by[k].ns, by[k].keys, by[k].strs, by[k].blobs);
 }
 
 static void pref_do(void *arg)
@@ -208,24 +393,39 @@ static void pref_do(void *arg)
     case PREF_GET_I32:
         o->ok = nvs_get_i32(s_nvs, o->key, o->i32_out) == ESP_OK;
         break;
-    case PREF_SET_I32:
-        o->ok = nvs_set_i32(s_nvs, o->key, o->i32) == ESP_OK && nvs_commit(s_nvs) == ESP_OK;
+    case PREF_SET_I32: {
+        esp_err_t e = nvs_set_i32(s_nvs, o->key, o->i32);
+        if (e == ESP_OK) e = nvs_commit(s_nvs);
+        o->ok = e == ESP_OK;
+        /* a preference that is not kept is lost at the next restart with nobody told: say which and why */
+        if (!o->ok) {
+            ESP_LOGW("pref", "%s not kept: %s", o->key, esp_err_to_name(e));
+            nvs_report();
+        }
         break;
+    }
     case PREF_GET_STR: {
         size_t len = o->str_len;
         o->ok = nvs_get_str(s_nvs, o->key, o->str_out, &len) == ESP_OK;
         break;
     }
-    case PREF_SET_STR:
-        o->ok = nvs_set_str(s_nvs, o->key, o->str) == ESP_OK && nvs_commit(s_nvs) == ESP_OK;
+    case PREF_SET_STR: {
+        esp_err_t e = nvs_set_str(s_nvs, o->key, o->str);
+        if (e == ESP_OK) e = nvs_commit(s_nvs);
+        o->ok = e == ESP_OK;
+        if (!o->ok) {
+            ESP_LOGW("pref", "%s not kept: %s", o->key, esp_err_to_name(e));
+            nvs_report();
+        }
         break;
+    }
     case PREF_ERASE:
         o->ok = nvs_erase_key(s_nvs, o->key) == ESP_OK;
         nvs_commit(s_nvs);
         break;
     case PREF_LIST: {
         nvs_iterator_t it = NULL;
-        esp_err_t e = nvs_entry_find(NVS_DEFAULT_PART_NAME, "p4os", NVS_TYPE_ANY, &it);
+        esp_err_t e = nvs_entry_find(s_part, "p4os", NVS_TYPE_ANY, &it);
         while (e == ESP_OK && o->nkeys < o->cap) {
             nvs_entry_info_t info;
             nvs_entry_info(it, &info);
@@ -278,7 +478,7 @@ bool aos_hal_pref_erase(const char *key)
  * visit() runs on the caller's stack and not on the flash helper's. */
 int aos_hal_pref_foreach(aos_hal_pref_visit_t visit, void *ctx)
 {
-    pref_op_t o = { .op = PREF_LIST, .cap = 256 };
+    pref_op_t o = { .op = PREF_LIST, .cap = 2048 };     /* it was 256, and the board had 422 */
     o.keys = heap_caps_malloc(o.cap * sizeof *o.keys, MALLOC_CAP_SPIRAM);
     if (!o.keys || !pref_run(&o)) {
         free(o.keys);
