@@ -5,12 +5,13 @@ header de 40 pines: hoy con cables, después en la placa auxiliar
 ([PCB.md](PCB.md)). Como el módulo puede no estar, **Ethernet viene apagado
 y se prende desde Ajustes**; nada del sistema lo da por supuesto.
 
-**Estado (2026-11-11): fases 0 y 1 cumplidas en la placa.** El módulo,
+**Estado (2026-11-11): fases 0, 1 y 2 cumplidas en la placa.** El módulo,
 cableado al header como en el dibujo, contesta por SPI, y con el firmware
 de la rama `ethernet` la placa negocia el enlace, toma dirección por DHCP y
-sirve el portal por el cable (abajo, "Lo medido"). Se prende sólo por la
-API. De la convivencia (fase 2) está escrito que el cable cuente como red
-(`aos_hal_net_wired_set`): falta correrlo en la placa. Falta la interfaz
+sirve el portal por el cable (abajo, "Lo medido"). La convivencia (fase
+2) también: el cable cuenta como red, la placa arranca y sigue sin Wi-Fi,
+una app que abre el SPI lo pausa y vuelve solo, y la red por cable se
+confía con un interruptor. Se prende sólo por la API: falta la interfaz
 (fase 3). El trabajo de firmware va en la rama
 `ethernet` (un árbol de trabajo aparte, `.claude/worktrees/ethernet`), no
 en `main`, hasta que ande en la placa.
@@ -105,7 +106,7 @@ se usa: el driver sondea.
 |---|---|---|
 | **0. El chip contesta** ✅ 2026-11-11 | Cablear al header. Sin firmware nuevo: en Bus, SPI, `spi.a`, CS 49, modo 0, 1 MHz, mandar `00 39 00 00` | El cuarto byte de la respuesta es `04` (el registro de versión del W5500): **devolvió `00 00 00 04`** |
 | **1. Enlace** ✅ 2026-11-11 | `aos_eth_p4.c` (en `aos_io`): el driver sobre `aos_io_spi`, sondeando, detrás de una preferencia; DHCP; todo al registro. `sdkconfig`: `ETH_USE_SPI_ETHERNET`, `ETH_SPI_ETHERNET_W5500` | La placa toma IP por el cable y contesta ping. Medir: velocidad a 8, 20 y 33 MHz de SPI con los cables del banco, RAM interna que cuesta, CPU |
-| **2. Convivencia** | Ruta por defecto, el vigilante de red, mDNS y SNTP por el cable, sacar y poner el cable, arrancar sin Wi-Fi, arrancar sin módulo | El portal, la OTA y SSH andan por cable con el Wi-Fi apagado; sacar el cable no reinicia ni cuelga; 12 h prendida sin perder el enlace |
+| **2. Convivencia** ✅ 2026-11-11, salvo lo anotado | Ruta por defecto, el vigilante de red, mDNS y SNTP por el cable, sacar y poner el cable, arrancar sin Wi-Fi, arrancar sin módulo | El portal, la OTA y SSH andan por cable con el Wi-Fi apagado; sacar el cable no reinicia ni cuelga; 12 h prendida sin perder el enlace |
 | **3. Interfaz** | Ajustes → Redes; ícono en la barra; `GET/POST /api/eth` y la página Red del portal; IP fija optativa; el módulo en Módulos | Se prende, se apaga y se ve el estado sin tocar un archivo; en el simulador, un Ethernet falso (`P4_SIM_ETH`) |
 | **4. Para las apps** | Las apps ya usan sockets y no cambian. Lo nuevo: lista de interfaces con su estado para las herramientas de red (`aos_hal_netif_*`), elegir por cuál sale un socket, modo promiscuo y tramas crudas para las de diagnóstico | Red (la app) muestra las dos interfaces; Modbus TCP, Art-Net y SSH probados por cable |
 | **5. Apps de taller** | Las de abajo, de a una | Cada una con su prueba en el banco |
@@ -164,9 +165,13 @@ que está ella misma por Wi-Fi, así que son un piso, no el techo del cable.
   por cable no tiene nombre, así que la placa se cree fuera de casa. Es lo
   seguro por defecto. **Falta decidir cómo se le da confianza a una red por
   cable** (abajo, en las preguntas abiertas); se cambia sólo en la placa.
+- **Sacar y poner el cable de red** (18 s afuera): el enlace cae, la red
+  pasa a ser la del Wi-Fi en el mismo instante, y al enchufarlo negocia otra
+  vez a 100 Mbit/s, toma la misma dirección 1 s después y vuelve a anunciar
+  el nombre por el cable. Sin reinicio.
 - **No probado:** el caso que el cambio protege en el vigilante de red, que
   es el Wi-Fi habilitado sin poder conectar con el cable puesto (habría que
-  apagar el router); sacar y poner el cable; 12 h seguidas.
+  apagar el router); y 12 h seguidas.
 
 **Lo que apareció de paso, y no es de Ethernet:** la preferencia del reloj
 no se guardaba porque **el almacén de preferencias de la placa (NVS, 24 KB)
