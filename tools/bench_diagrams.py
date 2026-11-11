@@ -904,11 +904,11 @@ def w5500():
         "• the fourth byte back must be 04:",
         "  the W5500's version register",
     ])
-    s.notes(40, NOTES_Y + 20, 1020, "Wiring it (the plan of 2026-11-11: not tried on the board yet)", [
+    s.notes(40, NOTES_Y + 20, 1020, "Wiring it (it worked on the board, 2026-11-11: the chip answered 00 00 00 04, its version, at 1 MHz)", [
         "• SCK to GPIO52 (pin 38), MO to GPIO50 (pin 34), MI to GPIO51 (pin 36), CS to GPIO49 (pin 32): the header's spi.a",
         "• V to 3V3 (pin 18), GND to pin 26. The module is 3.3 V only, about 200 mA, with no regulator of its own: never 5 V",
         "• INT, NC, RST and the second V and G stay free: the driver polls. If the chip does not answer, try RST to 3V3",
-        "• The row G, G, MO, SCK, CS, INT is as printed on the board; the other is drawn as the seller lists it: read yours before powering it",
+        "• The pins as printed on the board: G, G, MO, SCK, CS, INT down one side, GND, V, V, NC, RST, MI down the other. Read yours before powering it",
         "• Short wires: the SPI runs at several MHz. Tags with the same name (3V3, GND) are one wire. The two rows are 20.32 mm apart",
     ])
     s.header(used)

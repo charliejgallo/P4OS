@@ -33,11 +33,11 @@
 <text x="738" y="416" font-size="12" fill="#374151">• the fourth byte back must be 04:</text>
 <text x="747" y="436" font-size="12" fill="#374151">the W5500's version register</text>
 <rect x="40" y="735" width="1020" height="136" rx="8" fill="#f9fafb" stroke="#d1d5db"/>
-<text x="58" y="759" font-size="14" font-weight="bold" fill="#111">Wiring it (the plan of 2026-11-11: not tried on the board yet)</text>
+<text x="58" y="759" font-size="14" font-weight="bold" fill="#111">Wiring it (it worked on the board, 2026-11-11: the chip answered 00 00 00 04, its version, at 1 MHz)</text>
 <text x="58" y="781" font-size="12" fill="#374151">• SCK to GPIO52 (pin 38), MO to GPIO50 (pin 34), MI to GPIO51 (pin 36), CS to GPIO49 (pin 32): the header's spi.a</text>
 <text x="58" y="801" font-size="12" fill="#374151">• V to 3V3 (pin 18), GND to pin 26. The module is 3.3 V only, about 200 mA, with no regulator of its own: never 5 V</text>
 <text x="58" y="821" font-size="12" fill="#374151">• INT, NC, RST and the second V and G stay free: the driver polls. If the chip does not answer, try RST to 3V3</text>
-<text x="58" y="841" font-size="12" fill="#374151">• The row G, G, MO, SCK, CS, INT is as printed on the board; the other is drawn as the seller lists it: read yours before powering it</text>
+<text x="58" y="841" font-size="12" fill="#374151">• The pins as printed on the board: G, G, MO, SCK, CS, INT down one side, GND, V, V, NC, RST, MI down the other. Read yours before powering it</text>
 <text x="58" y="861" font-size="12" fill="#374151">• Short wires: the SPI runs at several MHz. Tags with the same name (3V3, GND) are one wire. The two rows are 20.32 mm apart</text>
 <rect x="500" y="158" width="80" height="528" rx="6" fill="#1f2937"/>
 <text x="540" y="149" text-anchor="middle" font-size="11" fill="#6b7280">the header, as it faces you</text>

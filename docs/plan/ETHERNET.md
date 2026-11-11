@@ -5,8 +5,9 @@ header de 40 pines: hoy con cables, después en la placa auxiliar
 ([PCB.md](PCB.md)). Como el módulo puede no estar, **Ethernet viene apagado
 y se prende desde Ajustes**; nada del sistema lo da por supuesto.
 
-**Estado (2026-11-11): sólo el plan.** El usuario tiene el módulo; no se
-cableó ni se escribió código. El trabajo de firmware va en la rama
+**Estado (2026-11-11): fase 0 cumplida.** El módulo, cableado al header
+como en el dibujo, contesta por SPI: en Bus, `00 39 00 00` a 1 MHz devolvió
+`00 00 00 04`, el registro de versión del W5500. Falta todo lo demás. El trabajo de firmware va en la rama
 `ethernet` (un árbol de trabajo aparte, `.claude/worktrees/ethernet`), no
 en `main`, hasta que ande en la placa.
 
@@ -46,8 +47,10 @@ El dibujo es `docs/img/bench-w5500.svg` (lo arma `tools/bench_diagrams.py`):
 | CS | pin 32 | 49 |
 | RST, INT, NC | sin conectar | — |
 
-RST queda en alto por el propio módulo (a confirmar: si el chip no
-contesta, RST a 3V3). INT no se usa: el driver sondea.
+RST queda en alto por el propio módulo: contestó con RST al aire. INT no
+se usa: el driver sondea.
+
+<img src="../img/bench-w5500-photo.jpg" width="360" alt="La placa con Bus en la pestaña SPI: TX 00 39 00 00, RX 00 00 00 04, y el módulo W5500 Lite cableado al lado">
 
 ## Decisiones de diseño
 
@@ -96,7 +99,7 @@ contesta, RST a 3V3). INT no se usa: el driver sondea.
 
 | Fase | Qué | Cómo se sabe que está |
 |---|---|---|
-| **0. El chip contesta** | Cablear al header. Sin firmware nuevo: en Bus, SPI, `spi.a`, CS 49, modo 0, 1 MHz, mandar `00 39 00 00` | El cuarto byte de la respuesta es `04` (el registro de versión del W5500) |
+| **0. El chip contesta** ✅ 2026-11-11 | Cablear al header. Sin firmware nuevo: en Bus, SPI, `spi.a`, CS 49, modo 0, 1 MHz, mandar `00 39 00 00` | El cuarto byte de la respuesta es `04` (el registro de versión del W5500): **devolvió `00 00 00 04`** |
 | **1. Enlace** | `aos_eth_p4.c` en el HAL: el driver sobre `aos_io_spi`, sondeando, detrás de una preferencia; DHCP; todo al registro. `sdkconfig`: `ETH_USE_SPI_ETHERNET`, `ETH_SPI_ETHERNET_W5500` | La placa toma IP por el cable y contesta ping. Medir: velocidad a 8, 20 y 33 MHz de SPI con los cables del banco, RAM interna que cuesta, CPU |
 | **2. Convivencia** | Ruta por defecto, el vigilante de red, mDNS y SNTP por el cable, sacar y poner el cable, arrancar sin Wi-Fi, arrancar sin módulo | El portal, la OTA y SSH andan por cable con el Wi-Fi apagado; sacar el cable no reinicia ni cuelga; 12 h prendida sin perder el enlace |
 | **3. Interfaz** | Ajustes → Redes; ícono en la barra; `GET/POST /api/eth` y la página Red del portal; IP fija optativa; el módulo en Módulos | Se prende, se apaga y se ve el estado sin tocar un archivo; en el simulador, un Ethernet falso (`P4_SIM_ETH`) |
