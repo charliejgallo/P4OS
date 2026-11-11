@@ -199,6 +199,40 @@ static bool nvs_ok(void)
     return nvs_open("p4os", NVS_READWRITE, &s_nvs) == ESP_OK;
 }
 
+/* Once a boot, when a preference does not fit: how full the store is and whose entries they are. */
+static void nvs_report(void)
+{
+    static bool done;
+    if (done) return;
+    done = true;
+    nvs_stats_t st;
+    if (nvs_get_stats(NULL, &st) == ESP_OK)
+        ESP_LOGW("pref", "nvs: %u entries used, %u free, %u available of %u, %u namespaces",
+                 (unsigned)st.used_entries, (unsigned)st.free_entries, (unsigned)st.available_entries,
+                 (unsigned)st.total_entries, (unsigned)st.namespace_count);
+    struct { char ns[NVS_NS_NAME_MAX_SIZE]; int keys, strs, blobs; } by[12] = { 0 };
+    char line[200];
+    int ln = 0;
+    nvs_iterator_t it = NULL;
+    for (esp_err_t e = nvs_entry_find(NVS_DEFAULT_PART_NAME, NULL, NVS_TYPE_ANY, &it); e == ESP_OK; e = nvs_entry_next(&it)) {
+        nvs_entry_info_t info;
+        nvs_entry_info(it, &info);
+        int k = 0;
+        while (k < 11 && by[k].ns[0] && strcmp(by[k].ns, info.namespace_name)) k++;
+        if (!by[k].ns[0]) snprintf(by[k].ns, sizeof by[k].ns, "%s", info.namespace_name);
+        by[k].keys++;
+        if (info.type == NVS_TYPE_STR) by[k].strs++;
+        if (info.type == NVS_TYPE_BLOB) by[k].blobs++;
+        /* the keys themselves, a dozen a line: what filled it is in their names */
+        ln += snprintf(line + ln, sizeof line - ln, "%s%s ", info.key, info.type == NVS_TYPE_STR ? "$" : "");
+        if (ln > 150) { ESP_LOGW("pref", "nvs keys: %s", line); ln = 0; }
+    }
+    if (ln) ESP_LOGW("pref", "nvs keys: %s", line);
+    nvs_release_iterator(it);
+    for (int k = 0; k < 12 && by[k].ns[0]; k++)
+        ESP_LOGW("pref", "nvs: %s has %d keys (%d strings, %d blobs)", by[k].ns, by[k].keys, by[k].strs, by[k].blobs);
+}
+
 static void pref_do(void *arg)
 {
     pref_op_t *o = arg;
@@ -208,9 +242,17 @@ static void pref_do(void *arg)
     case PREF_GET_I32:
         o->ok = nvs_get_i32(s_nvs, o->key, o->i32_out) == ESP_OK;
         break;
-    case PREF_SET_I32:
-        o->ok = nvs_set_i32(s_nvs, o->key, o->i32) == ESP_OK && nvs_commit(s_nvs) == ESP_OK;
+    case PREF_SET_I32: {
+        esp_err_t e = nvs_set_i32(s_nvs, o->key, o->i32);
+        if (e == ESP_OK) e = nvs_commit(s_nvs);
+        o->ok = e == ESP_OK;
+        /* a preference that is not kept is lost at the next restart with nobody told: say which and why */
+        if (!o->ok) {
+            ESP_LOGW("pref", "%s not kept: %s", o->key, esp_err_to_name(e));
+            nvs_report();
+        }
         break;
+    }
     case PREF_GET_STR: {
         size_t len = o->str_len;
         o->ok = nvs_get_str(s_nvs, o->key, o->str_out, &len) == ESP_OK;

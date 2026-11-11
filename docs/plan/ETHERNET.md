@@ -5,9 +5,11 @@ header de 40 pines: hoy con cables, después en la placa auxiliar
 ([PCB.md](PCB.md)). Como el módulo puede no estar, **Ethernet viene apagado
 y se prende desde Ajustes**; nada del sistema lo da por supuesto.
 
-**Estado (2026-11-11): fase 0 cumplida.** El módulo, cableado al header
-como en el dibujo, contesta por SPI: en Bus, `00 39 00 00` a 1 MHz devolvió
-`00 00 00 04`, el registro de versión del W5500. Falta todo lo demás. El trabajo de firmware va en la rama
+**Estado (2026-11-11): fases 0 y 1 cumplidas en la placa.** El módulo,
+cableado al header como en el dibujo, contesta por SPI, y con el firmware
+de la rama `ethernet` la placa negocia el enlace, toma dirección por DHCP y
+sirve el portal por el cable (abajo, "Lo medido"). Se prende sólo por la
+API; falta la convivencia (fase 2) y la interfaz (fase 3). El trabajo de firmware va en la rama
 `ethernet` (un árbol de trabajo aparte, `.claude/worktrees/ethernet`), no
 en `main`, hasta que ande en la placa.
 
@@ -100,7 +102,7 @@ se usa: el driver sondea.
 | Fase | Qué | Cómo se sabe que está |
 |---|---|---|
 | **0. El chip contesta** ✅ 2026-11-11 | Cablear al header. Sin firmware nuevo: en Bus, SPI, `spi.a`, CS 49, modo 0, 1 MHz, mandar `00 39 00 00` | El cuarto byte de la respuesta es `04` (el registro de versión del W5500): **devolvió `00 00 00 04`** |
-| **1. Enlace** | `aos_eth_p4.c` en el HAL: el driver sobre `aos_io_spi`, sondeando, detrás de una preferencia; DHCP; todo al registro. `sdkconfig`: `ETH_USE_SPI_ETHERNET`, `ETH_SPI_ETHERNET_W5500` | La placa toma IP por el cable y contesta ping. Medir: velocidad a 8, 20 y 33 MHz de SPI con los cables del banco, RAM interna que cuesta, CPU |
+| **1. Enlace** ✅ 2026-11-11 | `aos_eth_p4.c` (en `aos_io`): el driver sobre `aos_io_spi`, sondeando, detrás de una preferencia; DHCP; todo al registro. `sdkconfig`: `ETH_USE_SPI_ETHERNET`, `ETH_SPI_ETHERNET_W5500` | La placa toma IP por el cable y contesta ping. Medir: velocidad a 8, 20 y 33 MHz de SPI con los cables del banco, RAM interna que cuesta, CPU |
 | **2. Convivencia** | Ruta por defecto, el vigilante de red, mDNS y SNTP por el cable, sacar y poner el cable, arrancar sin Wi-Fi, arrancar sin módulo | El portal, la OTA y SSH andan por cable con el Wi-Fi apagado; sacar el cable no reinicia ni cuelga; 12 h prendida sin perder el enlace |
 | **3. Interfaz** | Ajustes → Redes; ícono en la barra; `GET/POST /api/eth` y la página Red del portal; IP fija optativa; el módulo en Módulos | Se prende, se apaga y se ve el estado sin tocar un archivo; en el simulador, un Ethernet falso (`P4_SIM_ETH`) |
 | **4. Para las apps** | Las apps ya usan sockets y no cambian. Lo nuevo: lista de interfaces con su estado para las herramientas de red (`aos_hal_netif_*`), elegir por cuál sale un socket, modo promiscuo y tramas crudas para las de diagnóstico | Red (la app) muestra las dos interfaces; Modbus TCP, Art-Net y SSH probados por cable |
@@ -108,6 +110,50 @@ se usa: el driver sondea.
 | **6. Placa auxiliar** | Los zócalos del módulo con sus medidas reales; ver si conviene el chip integrado en la PCBA | El módulo entra en la placa impresa de prueba |
 
 Cada fase termina con lo medido anotado acá y en `PRUEBAS-PLACA.md`.
+
+## Lo medido
+
+**Fase 1, 2026-11-11**, con el módulo en cables Dupont de unos 15 cm y un
+cable de red a un switch doméstico. Las descargas se midieron desde una Mac
+que está ella misma por Wi-Fi, así que son un piso, no el techo del cable.
+
+- **Enlace:** 100 Mbit/s, dúplex completo, a los 2 s de arrancar el driver;
+  dirección por DHCP 1,0 a 1,6 s después. El driver arranca solo al
+  reiniciar con la preferencia puesta.
+- **El portal por el cable** contesta en la dirección del cable con el
+  Wi-Fi también conectado (las dos en la misma subred).
+- **Ping** desde la Mac por Wi-Fi: 5 ms de mínimo, 23 de promedio; al Wi-Fi
+  de la placa, 7 y 36. El sondeo cada 10 ms entra en esos números.
+- **Descarga de un archivo de 3,2 MB de la tarjeta** (`/api/fs/get`), dos
+  veces por reloj, todas con el mismo MD5:
+
+  | Reloj del SPI pedido | El que hace el hardware | Descarga |
+  |---|---|---|
+  | 8 MHz | 8 MHz | 0,49 a 0,52 MB/s |
+  | 20 MHz | 20 MHz | 0,72 a 0,75 MB/s |
+  | 33 MHz | 34,3 MHz | 0,68 a 0,87 MB/s |
+  | 40 MHz | 40 MHz | 0,88 a 0,89 MB/s |
+
+  El mismo archivo por el Wi-Fi de la placa, ese día: 0,24 a 0,25 MB/s.
+  Con cables sueltos anduvo sin errores hasta los 40 MHz, el tope del
+  servicio SPI. Subir de 8 a 40 MHz no llega a duplicar: el reloj no es lo
+  único que frena (el sondeo cada 10 ms, la tarjeta, el servidor HTTP).
+  **Queda por medir:** con la Mac por cable, con el sondeo más corto, y la
+  subida.
+- **RAM:** prenderlo cuesta 12,7 KB de RAM interna (211 503 a 198 779
+  bytes libres) y 3,6 KB de PSRAM. Parte es la pila de la tarea de
+  recepción (4 KB) y los dos buffers DMA del puerto SPI; falta ver qué del
+  resto se puede pasar a PSRAM.
+
+**Lo que apareció de paso, y no es de Ethernet:** la preferencia del reloj
+no se guardaba porque **el almacén de preferencias de la placa (NVS, 24 KB)
+está lleno**: 630 entradas usadas de 756 y ninguna disponible; 422 claves
+en `p4os`, la mayoría de las apps (84 de Monster Hop, 30 de Turbo, 26 y 19
+de Modbus, 24 de Mila...). Con el almacén así no se guarda ningún cambio de
+ninguna preferencia, tampoco las del sistema (`boot_bad` falla en cada
+arranque). El firmware de la rama ahora lo dice en el registro (`pref: ...
+not kept`, y una vez por arranque cuánto hay y de quién). Es un arreglo de
+sistema aparte, antes de la fase 3.
 
 ## Qué gana el taller con un cable de red
 

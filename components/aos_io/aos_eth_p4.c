@@ -59,6 +59,7 @@ static struct {
     aos_eth_info_t     info;
     int64_t            link_at;
     char               module[24];      /* "w5500" when modules.txt has it, "" for spi.a's own CS */
+    uint32_t           want_hz;         /* the clock asked for since the boot, kept or not */
 } E;
 
 /* ---- the driver's SPI, on ours ---- */
@@ -199,7 +200,10 @@ static bool start(void)
     snprintf(E.module, sizeof E.module, "%s", m ? "w5500" : "");
     snprintf(E.info.port, sizeof E.info.port, "%s", m ? m->port : "spi.a");
     int32_t hz = 0;
-    E.info.spi_hz = aos_hal_pref_get_i32(PREF_HZ, &hz) && hz >= 100000 ? (uint32_t)hz : AOS_ETH_DEFAULT_HZ;
+    bool kept = aos_hal_pref_get_i32(PREF_HZ, &hz);
+    if (E.want_hz) { hz = (int32_t)E.want_hz; kept = true; }
+    E.info.spi_hz = kept && hz >= 100000 ? (uint32_t)hz : AOS_ETH_DEFAULT_HZ;
+    uint32_t asked = E.info.spi_hz;
 
     /* whoever came first made these: a second call says so and changes nothing */
     esp_netif_init();
@@ -248,8 +252,8 @@ static bool start(void)
     if (e != ESP_OK) return fail("el W5500 no arrancó", e);
 
     E.info.running = true;
-    aos_hal_log("eth", "W5500 on %s CS%d at %u Hz, %02X:%02X:%02X:%02X:%02X:%02X, polled every %d ms",
-                E.info.port, E.info.cs, (unsigned)E.info.spi_hz, E.info.mac[0], E.info.mac[1], E.info.mac[2],
+    aos_hal_log("eth", "W5500 on %s CS%d at %u Hz (%u asked%s), %02X:%02X:%02X:%02X:%02X:%02X, polled every %d ms",
+                E.info.port, E.info.cs, (unsigned)E.info.spi_hz, (unsigned)asked, kept ? "" : ", the default", E.info.mac[0], E.info.mac[1], E.info.mac[2],
                 E.info.mac[3], E.info.mac[4], E.info.mac[5], POLL_MS);
     return true;
 }
@@ -285,7 +289,8 @@ void aos_eth_set_clock(uint32_t hz)
 {
     if (hz < AOS_IO_SPI_MIN_HZ) hz = AOS_IO_SPI_MIN_HZ;
     if (hz > AOS_IO_SPI_MAX_HZ) hz = AOS_IO_SPI_MAX_HZ;
-    aos_hal_pref_set_i32(PREF_HZ, (int32_t)hz);
+    E.want_hz = hz;
+    if (!aos_hal_pref_set_i32(PREF_HZ, (int32_t)hz)) aos_hal_log("eth", "the SPI clock could not be kept (%u Hz)", (unsigned)hz);
 }
 
 void aos_eth_info(aos_eth_info_t *out)
