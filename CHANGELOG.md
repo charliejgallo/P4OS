@@ -1,5 +1,19 @@
 # Changelog
 
+## Next
+
+- **Preferences were not being kept on a board with many apps, in silence.**
+  The 24 KB NVS partition holds 630 entries, and the apps' settings and
+  scores filled them (422 keys on the board it was found on): every change
+  of every preference failed, the system's own among them, and so did new
+  Bluetooth bonds, which share it. The preferences now have 256 KB of their
+  own (8064 entries) at the start of a partition nothing used, reached with
+  the partition table every board already has: it arrives over the air. The
+  first boot moves every key (422 in 0.35 s) and a later one trims the old
+  store. A preference that cannot be kept says so in the log, and the
+  backup of the preferences no longer stops at 256 keys. `docs/BUILDING.md`
+  has the layout and what going back to an older firmware keeps.
+
 ## 0.25.1 — 2026-11-10
 
 The 40-pin header gets one pin map, and everything follows it.

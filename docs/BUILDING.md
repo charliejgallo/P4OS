@@ -51,10 +51,24 @@ writes an app slot and nothing else. The table is:
 
 | Partition | Offset | Size | |
 |---|---|---|---|
-| nvs, otadata, phy_init | 0x9000 | 32 KB | settings, which slot boots |
+| nvs, otadata, phy_init | 0x9000 | 32 KB | the Bluetooth bonds, which slot boots |
 | ota_0, ota_1 | 0x20000, 0x810000 | 7.94 MB each | the firmware, twice |
-| storage | 0x1000000 | 12 MB | a FAT nobody mounts yet |
+| prefs | 0x1000000 | 256 KB | the preferences, the system's and the apps' |
+| storage | 0x1040000 | 11.75 MB | a FAT nobody mounts yet |
 | coredump | 0x1C00000 | 1 MB | the last crash, for the portal |
+
+**The preferences are in `prefs`, not in `nvs`.** The 24 KB of `nvs` hold
+630 entries, and the apps' settings and scores filled them: on 2026-11-11 a
+board had all 630 in use and no preference was being kept, in silence. Since
+then they live in 256 KB of their own (8064 entries), the first of what was
+`storage`. A board updated over the air still has the table without `prefs`,
+and the firmware reaches the same bytes by address, so nothing has to be
+flashed by serial. The first boot copies every key over (422 keys in 0.35 s
+on that board) and, once the image is confirmed, trims the old store to what
+an older firmware needs to get on the network and stay locked (Wi-Fi, the
+lock, the portal's access, SSH, Bluetooth): going back by hand to a firmware
+from before this keeps those and loses the rest. A preference that cannot be
+kept now says so in the log (`pref: ... not kept`).
 
 **Both app slots must lie whole in the first 16 MB.** The cache maps the
 flash with 24-bit addresses: an image that reaches past 0x1000000 fails its
