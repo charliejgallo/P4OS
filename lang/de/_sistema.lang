@@ -9966,3 +9966,15 @@ Ethernet en pausa: %s lo usa %s	Ethernet pausiert: %s wird von %s benutzt
 
 #: components/aos_ui/aos_ui.c
 Ethernet volvió	Ethernet ist wieder da
+
+#: components/aos_apps/aos_app_settings.c
+LA RED POR CABLE	DAS KABELNETZ
+
+#: components/aos_apps/aos_app_settings.c
+De confianza	Vertrauenswürdig
+
+#: components/aos_apps/aos_app_settings.c
+De confianza: por cable el portal está abierto.	Vertrauenswürdig: über das Kabel ist das Portal offen.
+
+#: components/aos_apps/aos_app_settings.c
+Por cable el portal se porta como en una red que no es de confianza. Una red por cable no tiene nombre para reconocerla: prendelo sólo donde confiás en todo lo que está enchufado.	Über das Kabel verhält sich das Portal wie in einem nicht vertrauenswürdigen Netz. Ein Kabelnetz hat keinen Namen, an dem man es erkennt: nur dort einschalten, wo du allem Angeschlossenen vertraust.

@@ -37,6 +37,7 @@
 #include "aos_sys_glyphs.h"
 #include "aos_lock.h"
 #include "aos_access.h"
+#include "aos_eth.h"
 #include "aos_flasher.h"
 
 #include <stdio.h>
@@ -2198,13 +2199,20 @@ static int portal_key(void)
 static const char *portal_root_text(void)
 {
     if (aos_hal_net_state() != AOS_NET_CONNECTED) return NULL;
-    aos_access_t a = aos_access_need(aos_access_here_trusted() ? AOS_ZONE_HOME : AOS_ZONE_AWAY);
+    /* of the network the board goes out by: the wire when it has one */
+    aos_access_t a = aos_access_need(aos_access_ip_trusted(aos_hal_net_ip()) ? AOS_ZONE_HOME : AOS_ZONE_AWAY);
     return a == AOS_ACCESS_OPEN ? _("abierto") : a == AOS_ACCESS_LOGIN ? _("con contraseña") : _("cerrado acá");
 }
 
 static void pt_trust_cb(lv_event_t *e)
 {
     aos_access_trust(aos_hal_net_ssid(), lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
+    show(PG_PORTAL);
+}
+
+static void pt_wire_cb(lv_event_t *e)
+{
+    aos_access_set_wire_trusted(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
     show(PG_PORTAL);
 }
 
@@ -2361,9 +2369,20 @@ static void build_ssh(lv_obj_t *p)
 static void build_access(lv_obj_t *p)
 {
     U.pt_shown = portal_key();
-    bool up = aos_hal_net_state() == AOS_NET_CONNECTED, pw = aos_access_has_password();
+    /* the Wi-Fi's own state: with a wire, aos_hal_net_state() is "connected" whatever the Wi-Fi does */
+    bool up = aos_hal_net_wifi_state() == AOS_NET_CONNECTED, pw = aos_access_has_password();
     const char *ssid = aos_hal_net_ssid();
     lv_obj_t *g;
+    /* the wire, when the board has one switched on: no name to know its network by, so a switch */
+    aos_eth_info_t eth;
+    aos_eth_info(&eth);
+    if (eth.enabled || aos_hal_net_wired()) {
+        g = group(p, _("LA RED POR CABLE"));
+        row_switch(g, AOS_SYM_SERVER_NETWORK, 0x30B0C7, _("De confianza"), aos_access_wire_trusted(), pt_wire_cb);
+        note(p, aos_access_wire_trusted()
+                    ? _("De confianza: por cable el portal está abierto.")
+                    : _("Por cable el portal se porta como en una red que no es de confianza. Una red por cable no tiene nombre para reconocerla: prendelo sólo donde confiás en todo lo que está enchufado."));
+    }
     if (up && ssid[0]) {
         g = group(p, _("ESTA RED"));
         row_switch(g, AOS_SYM_WIFI, 0x0A84FF, ssid, aos_access_is_trusted(ssid), pt_trust_cb);

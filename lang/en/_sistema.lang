@@ -9966,3 +9966,15 @@ Ethernet en pausa: %s lo usa %s	Ethernet paused: %s is in use by %s
 
 #: components/aos_ui/aos_ui.c
 Ethernet volvió	Ethernet is back
+
+#: components/aos_apps/aos_app_settings.c
+LA RED POR CABLE	THE WIRED NETWORK
+
+#: components/aos_apps/aos_app_settings.c
+De confianza	Trusted
+
+#: components/aos_apps/aos_app_settings.c
+De confianza: por cable el portal está abierto.	Trusted: over the wire the portal is open.
+
+#: components/aos_apps/aos_app_settings.c
+Por cable el portal se porta como en una red que no es de confianza. Una red por cable no tiene nombre para reconocerla: prendelo sólo donde confiás en todo lo que está enchufado.	Over the wire the portal behaves as on a network that is not trusted. A wired network has no name to know it by: switch this on only where you trust everything that is plugged in.

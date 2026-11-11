@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3613 simbolos.
+ * Total: 3620 simbolos.
  */
 
 #include <stddef.h>
@@ -131,7 +131,10 @@ extern int aos_emoji_ready;
 extern int aos_eth_boot;
 extern int aos_eth_enable;
 extern int aos_eth_info;
+extern int aos_eth_on_pause;
+extern int aos_eth_port_free;
 extern int aos_eth_set_clock;
+extern int aos_eth_yield;
 extern int aos_flash_call;
 extern int aos_flashop_init;
 extern int aos_folder_font;
@@ -409,6 +412,7 @@ extern int aos_hal_net_ip;
 extern int aos_hal_net_low_latency;
 extern int aos_hal_net_mac;
 extern int aos_hal_net_mdns_visible;
+extern int aos_hal_net_mdns_visible_wired;
 extern int aos_hal_net_retry_info;
 extern int aos_hal_net_rssi;
 extern int aos_hal_net_scan;
@@ -419,7 +423,10 @@ extern int aos_hal_net_state;
 extern int aos_hal_net_sync_time;
 extern int aos_hal_net_test_absent;
 extern int aos_hal_net_test_freeze_link;
+extern int aos_hal_net_wifi_ip;
+extern int aos_hal_net_wifi_state;
 extern int aos_hal_net_wired;
+extern int aos_hal_net_wired_ip;
 extern int aos_hal_net_wired_set;
 extern int aos_hal_night_info;
 extern int aos_hal_night_sleep_enable;
@@ -3747,7 +3754,10 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_eth_boot),
     ESP_ELFSYM_EXPORT(aos_eth_enable),
     ESP_ELFSYM_EXPORT(aos_eth_info),
+    ESP_ELFSYM_EXPORT(aos_eth_on_pause),
+    ESP_ELFSYM_EXPORT(aos_eth_port_free),
     ESP_ELFSYM_EXPORT(aos_eth_set_clock),
+    ESP_ELFSYM_EXPORT(aos_eth_yield),
     ESP_ELFSYM_EXPORT(aos_flash_call),
     ESP_ELFSYM_EXPORT(aos_flashop_init),
     ESP_ELFSYM_EXPORT(aos_folder_font),
@@ -4025,6 +4035,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_net_low_latency),
     ESP_ELFSYM_EXPORT(aos_hal_net_mac),
     ESP_ELFSYM_EXPORT(aos_hal_net_mdns_visible),
+    ESP_ELFSYM_EXPORT(aos_hal_net_mdns_visible_wired),
     ESP_ELFSYM_EXPORT(aos_hal_net_retry_info),
     ESP_ELFSYM_EXPORT(aos_hal_net_rssi),
     ESP_ELFSYM_EXPORT(aos_hal_net_scan),
@@ -4035,7 +4046,10 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_net_sync_time),
     ESP_ELFSYM_EXPORT(aos_hal_net_test_absent),
     ESP_ELFSYM_EXPORT(aos_hal_net_test_freeze_link),
+    ESP_ELFSYM_EXPORT(aos_hal_net_wifi_ip),
+    ESP_ELFSYM_EXPORT(aos_hal_net_wifi_state),
     ESP_ELFSYM_EXPORT(aos_hal_net_wired),
+    ESP_ELFSYM_EXPORT(aos_hal_net_wired_ip),
     ESP_ELFSYM_EXPORT(aos_hal_net_wired_set),
     ESP_ELFSYM_EXPORT(aos_hal_night_info),
     ESP_ELFSYM_EXPORT(aos_hal_night_sleep_enable),

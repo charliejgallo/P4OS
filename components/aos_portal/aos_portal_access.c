@@ -109,7 +109,7 @@ static aos_zone_t zone_of(aos_httpd_req_t *r)
 #endif
     if (!strcmp(ip, "192.168.7.1")) return AOS_ZONE_CABLE;
     if (!strcmp(ip, aos_hal_net_ap_ip())) return AOS_ZONE_AP;
-    return aos_access_here_trusted() ? AOS_ZONE_HOME : AOS_ZONE_AWAY;
+    return aos_access_ip_trusted(ip) ? AOS_ZONE_HOME : AOS_ZONE_AWAY;
 }
 
 static const char *const ZONE[] = { "cable", "ap", "home", "away" };

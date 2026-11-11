@@ -56,6 +56,7 @@ static void rnd(void *buf, size_t n) { arc4random_buf(buf, n); }
 #define K_HTTPS "pt_https"
 #define K_CRT   "pt_crt"
 #define K_KEY   "pt_key"
+#define K_WIRE  "pt_wire"           /* the wired network is trusted */
 #define SEP     '\x1f'
 
 #define PBKDF2_ITER  10000          /* ~0.2 s on the board, with its SHA engine */
@@ -178,11 +179,23 @@ static void first_home(const char *ssid)
     }
 }
 
+/* The Wi-Fi's own state: with a wire, aos_hal_net_state() says "connected" whatever the Wi-Fi does,
+ * and its name may be a network it is no longer on. */
 bool aos_access_here_trusted(void)
 {
-    if (aos_hal_net_state() != AOS_NET_CONNECTED) return false;
+    if (aos_hal_net_wifi_state() != AOS_NET_CONNECTED) return false;
     first_home(aos_hal_net_ssid());
     return aos_access_is_trusted(aos_hal_net_ssid());
+}
+
+bool aos_access_wire_trusted(void) { return pref_i(K_WIRE, 0) != 0; }
+void aos_access_set_wire_trusted(bool on) { aos_hal_pref_set_i32(K_WIRE, on); }
+
+bool aos_access_ip_trusted(const char *local_ip)
+{
+    const char *wire = aos_hal_net_wired_ip();
+    if (local_ip && wire[0] && !strcmp(local_ip, wire)) return aos_access_wire_trusted();
+    return aos_access_here_trusted();
 }
 
 /* ---- the password ---- */
@@ -553,7 +566,10 @@ static bool make_ca(void)
 
 static void leaf_for(char *out, size_t n)
 {
-    snprintf(out, n, "%s|%s", aos_hal_device_name(), aos_hal_net_state() == AOS_NET_CONNECTED ? aos_hal_net_ip() : "");
+    /* the Wi-Fi's address as it always was, and the wire's after a "+" when there is one */
+    const char *wire = aos_hal_net_wired_ip();
+    snprintf(out, n, "%s|%s%s%s", aos_hal_device_name(),
+             aos_hal_net_wifi_state() == AOS_NET_CONNECTED ? aos_hal_net_wifi_ip() : "", wire[0] ? "+" : "", wire);
 }
 
 static bool make_leaf(void)
@@ -598,21 +614,27 @@ static bool make_leaf(void)
         /* <name>.local, the bare name, the AP, the cable and, if there is
          * one, the Wi-Fi address */
         static const uint8_t AP_IP[4] = { 192, 168, 4, 1 }, USB_IP[4] = { 192, 168, 7, 1 };
-        uint8_t sta[4];
+        uint8_t sta[4], wire[4];
         int nsan = 4;
         unsigned a0, a1, a2, a3;
-        if (aos_hal_net_state() == AOS_NET_CONNECTED && sscanf(aos_hal_net_ip(), "%u.%u.%u.%u", &a0, &a1, &a2, &a3) == 4) {
-            sta[0] = (uint8_t)a0; sta[1] = (uint8_t)a1; sta[2] = (uint8_t)a2; sta[3] = (uint8_t)a3;
-            snprintf(ip, sizeof ip, "%s", aos_hal_net_ip());
-            nsan = 5;
-        }
-        mbedtls_x509_san_list san[5];
+        mbedtls_x509_san_list san[6];
         memset(san, 0, sizeof san);
-        const struct { int type; const void *p; size_t len; } S[5] = {
+        struct { int type; const void *p; size_t len; } S[6] = {
             { MBEDTLS_X509_SAN_DNS_NAME, local, strlen(local) }, { MBEDTLS_X509_SAN_DNS_NAME, name, strlen(name) },
             { MBEDTLS_X509_SAN_IP_ADDRESS, AP_IP, 4 }, { MBEDTLS_X509_SAN_IP_ADDRESS, USB_IP, 4 },
-            { MBEDTLS_X509_SAN_IP_ADDRESS, sta, 4 },
         };
+        if (aos_hal_net_wifi_state() == AOS_NET_CONNECTED && sscanf(aos_hal_net_wifi_ip(), "%u.%u.%u.%u", &a0, &a1, &a2, &a3) == 4) {
+            sta[0] = (uint8_t)a0; sta[1] = (uint8_t)a1; sta[2] = (uint8_t)a2; sta[3] = (uint8_t)a3;
+            snprintf(ip, sizeof ip, "%s", aos_hal_net_wifi_ip());
+            S[nsan].type = MBEDTLS_X509_SAN_IP_ADDRESS; S[nsan].p = sta; S[nsan].len = 4;
+            nsan++;
+        }
+        /* and the wire's, when it has one */
+        if (sscanf(aos_hal_net_wired_ip(), "%u.%u.%u.%u", &a0, &a1, &a2, &a3) == 4) {
+            wire[0] = (uint8_t)a0; wire[1] = (uint8_t)a1; wire[2] = (uint8_t)a2; wire[3] = (uint8_t)a3;
+            S[nsan].type = MBEDTLS_X509_SAN_IP_ADDRESS; S[nsan].p = wire; S[nsan].len = 4;
+            nsan++;
+        }
         for (int i = 0; i < nsan; i++) {
             san[i].node.type = S[i].type;
             san[i].node.san.unstructured_name.p = (unsigned char *)S[i].p;
@@ -716,7 +738,15 @@ void aos_access_tick(void)
     if (now - last < 1000) return;
     last = now;
 
-    bool up = aos_hal_net_state() == AOS_NET_CONNECTED;
+    /* the wire: its name is announced only on a wired network that is trusted */
+    static int wire_shown = -1;
+    int wire_want = aos_hal_net_wired() ? (aos_access_wire_trusted() ? 1 : 0) : -1;
+    if (wire_want != wire_shown) {
+        if (wire_want >= 0) aos_hal_net_mdns_visible_wired(wire_want == 1);
+        wire_shown = wire_want;
+    }
+
+    bool up = aos_hal_net_wifi_state() == AOS_NET_CONNECTED;
     const char *ssid = aos_hal_net_ssid();
     if (up) first_home(ssid);
     /* mDNS answers on a home network and is quiet on any other: it would tell

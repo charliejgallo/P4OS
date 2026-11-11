@@ -53,6 +53,16 @@ bool aos_access_is_trusted(const char *ssid);
 void aos_access_trust(const char *ssid, bool on);
 /* the Wi-Fi the board is on is a home one (false with none) */
 bool aos_access_here_trusted(void);
+/* A wired network (Ethernet on a module of the header) has no name to know
+ * it by: it is trusted when this is on, set on the board like the rest, and
+ * off until then. Off, a connection that comes in by the wire is one from a
+ * network that is not home. */
+bool aos_access_wire_trusted(void);
+void aos_access_set_wire_trusted(bool on);
+/* A connection came in on this address of ours: is the network it is on
+ * trusted? The wire's by its switch, anything else by the Wi-Fi's name. Each
+ * connection is judged by where it came in, never by the other interface. */
+bool aos_access_ip_trusted(const char *local_ip);
 
 /* ---- the password ---- */
 bool aos_access_has_password(void);

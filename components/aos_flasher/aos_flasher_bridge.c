@@ -118,7 +118,7 @@ static bool zone_open(int s, char *why, size_t n)
 #else
     if (!strcmp(ip, "192.168.7.1")) z = AOS_ZONE_CABLE;
     else if (!strcmp(ip, aos_hal_net_ap_ip())) z = AOS_ZONE_AP;
-    else z = aos_access_here_trusted() ? AOS_ZONE_HOME : AOS_ZONE_AWAY;
+    else z = aos_access_ip_trusted(ip) ? AOS_ZONE_HOME : AOS_ZONE_AWAY;
 #endif
     if (aos_access_need(z) == AOS_ACCESS_OPEN) return true;
     snprintf(why, n, "%s", z == AOS_ZONE_AWAY ? _("una red que no es de casa") : _("la red pide contraseña y un socket no la puede dar"));

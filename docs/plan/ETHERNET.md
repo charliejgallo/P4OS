@@ -226,6 +226,26 @@ Con el Wi-Fi solo, sin cable, ya salen la 7 (parte), la 8 y la mitad de la
 20 Mbit/s, no 100; es un solo puerto; no entrega ni toma PoE; y el modo
 promiscuo ve sólo lo que llega a esa boca.
 
+## La confianza en la red por cable
+
+**Decidido por el usuario (2026-11-11): un interruptor en la placa.** En
+Ajustes, Portal web, "La red por cable: de confianza", apagado de fábrica
+y visible sólo con Ethernet prendido. Apagado, lo que entra por el cable se
+trata como una red ajena (portal cerrado o con contraseña, HTTPS, sin
+anunciar el nombre); prendido, como un Wi-Fi de confianza.
+
+Al escribirlo apareció un agujero que había abierto la fase 2: como "hay
+red" pasó a incluir al cable, con el Wi-Fi en una red de confianza **todo lo
+que entraba por el cable se tomaba también por de confianza**, fuera la red
+que fuera (y con el Wi-Fi recién apagado, por el nombre de la última red).
+Ahora cada conexión se juzga por la interfaz por la que entró
+(`aos_access_ip_trusted`): la del cable por su interruptor, las demás por
+el nombre del Wi-Fi. Lo usan el portal, SSH y el puente serie del
+Programador. `docs/SECURITY.md` tiene la tabla.
+
+Escrito y visto en el simulador (el interruptor aparece, se guarda);
+**falta probarlo en la placa.**
+
 ## El puerto SPI, compartido o no
 
 Pedido del usuario (2026-11-11): que quede claro qué pasa con `spi.a`
@@ -275,12 +295,6 @@ escucha todo el día), una forma de pedir el puerto compartido.
 
 ## Preguntas abiertas
 
-- **¿Cómo se confía en una red por cable?** Hoy, sólo con el cable, el
-  portal trata la red como ajena (HTTPS y contraseña). Posibilidades: un
-  interruptor en la placa "la red por cable es de confianza"; reconocerla
-  por la puerta de enlace (su MAC), como se reconoce un Wi-Fi por su nombre;
-  o dejarla siempre como ajena. Lo decide el usuario, y se configura en la
-  placa (`docs/SECURITY.md`).
 - ¿"Redes" reemplaza a "Wi-Fi" en la lista de Ajustes, o Ethernet es una
   fila aparte? (Acá se propone lo primero.)
 - ¿La IP fija entra en la fase 3 o se deja para cuando alguien la pida?

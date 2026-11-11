@@ -759,6 +759,18 @@ __attribute__((weak)) void aos_hal_net_wired_set(bool up, const char *ip)
 __attribute__((weak)) bool aos_hal_net_wired(void)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) aos_net_state_t aos_hal_net_wifi_state(void)
+{ aos_net_state_t v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) const char * aos_hal_net_wifi_ip(void)
+{ return ""; }
+
+__attribute__((weak)) const char * aos_hal_net_wired_ip(void)
+{ return ""; }
+
+__attribute__((weak)) void aos_hal_net_mdns_visible_wired(bool on)
+{ }
+
 __attribute__((weak)) void aos_hal_net_mdns_visible(bool on)
 { }
 

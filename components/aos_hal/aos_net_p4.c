@@ -192,6 +192,14 @@ void aos_hal_net_mdns_visible(bool on)
     ESP_LOGI(TAG, "mDNS on the Wi-Fi: %s (%s)", on ? "answers" : "quiet", esp_err_to_name(e));
 }
 
+void aos_hal_net_mdns_visible_wired(bool on)
+{
+    esp_netif_t *eth = esp_netif_get_handle_from_ifkey("ETH_DEF");
+    if (!s_mdns || !eth) return;
+    esp_err_t e = mdns_netif_action(eth, on ? (MDNS_EVENT_ENABLE_IP4 | MDNS_EVENT_ANNOUNCE_IP4) : MDNS_EVENT_DISABLE_IP4);
+    ESP_LOGI(TAG, "mDNS on the wire: %s (%s)", on ? "answers" : "quiet", esp_err_to_name(e));
+}
+
 bool aos_hal_mdns_add_netif(void *esp_netif)
 {
     mdns_up();
@@ -368,6 +376,8 @@ static char s_wired_ip[16];
 
 aos_net_state_t aos_hal_net_state(void) { return s_wired ? AOS_NET_CONNECTED : s_state; }
 bool aos_hal_net_wired(void) { return s_wired; }
+aos_net_state_t aos_hal_net_wifi_state(void) { return s_state; }
+const char *aos_hal_net_wired_ip(void) { return s_wired ? s_wired_ip : ""; }
 const char *aos_hal_net_coprocessor_fw(void) { return s_c6_fw; }
 
 bool aos_hal_net_test_freeze_link(void)
@@ -521,6 +531,7 @@ void aos_hal_net_coprocessor_status(aos_c6_update_t *out)
     if (out) *out = s_c6up;
 }
 const char *aos_hal_net_ip(void) { return s_wired ? s_wired_ip : s_ip; }
+const char *aos_hal_net_wifi_ip(void) { return s_ip; }
 const char *aos_hal_net_ssid(void) { return s_ssid; }
 
 /* The last reading, kept by the stats task (aos_tasks_p4.c, every 5 s). Not

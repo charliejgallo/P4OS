@@ -1135,7 +1135,7 @@ static aos_zone_t zone_of(int s)
     if (getsockname(s, (struct sockaddr *)&me, &l) == 0) inet_ntop(AF_INET, &me.sin_addr, ip, sizeof ip);
     if (!strcmp(ip, "192.168.7.1")) return AOS_ZONE_CABLE;
     if (!strcmp(ip, aos_hal_net_ap_ip())) return AOS_ZONE_AP;
-    return aos_access_here_trusted() ? AOS_ZONE_HOME : AOS_ZONE_AWAY;
+    return aos_access_ip_trusted(ip) ? AOS_ZONE_HOME : AOS_ZONE_AWAY;
 #endif
 }
 

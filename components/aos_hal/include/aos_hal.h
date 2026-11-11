@@ -1545,6 +1545,15 @@ const char *aos_hal_net_ip(void);
  * "there is Wi-Fi". aos_hal_net_ssid() and _rssi() stay the Wi-Fi's. */
 void aos_hal_net_wired_set(bool up, const char *ip);
 bool aos_hal_net_wired(void);
+/* The Wi-Fi alone and the wire alone, for what has to tell them apart: which
+ * network a connection came in by and whether that one is trusted
+ * (aos_access.c). aos_hal_net_wired_ip() is "" without the wire. */
+aos_net_state_t aos_hal_net_wifi_state(void);
+const char *aos_hal_net_wifi_ip(void);
+const char *aos_hal_net_wired_ip(void);
+/* mDNS on the wire: quiet on a wired network that is not trusted, as
+ * aos_hal_net_mdns_visible() does on a Wi-Fi that is not home. */
+void aos_hal_net_mdns_visible_wired(bool on);
 /* P4OS: mDNS on the Wi-Fi station: answering and announcing the board's name
  * there, or quiet (the portal's rules keep it quiet on networks that are not
  * home, aos_access.c). The AP and the USB cable are not affected. */

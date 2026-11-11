@@ -36,16 +36,28 @@ depends on where it came in (`components/aos_ui/aos_access.c`):
 | The board's own network (`192.168.4.1`) | nothing, or the password if "at home too" is chosen. It has its own WPA2 password |
 | A trusted Wi-Fi network | the same |
 | Any other Wi-Fi network | closed, or the password if chosen so |
+| The wire (Ethernet on a module of the header), marked as trusted | as a trusted Wi-Fi network |
+| The wire, not marked | as any other Wi-Fi network |
 
 - **Trusted networks** are marked by name in Settings, Portal web. When the
   rules first appear (the first boot with this firmware), the network the
   board is on becomes trusted, so an update does not close the portal on its
   owner.
+- **A wired network has no name to know it by,** so it is trusted by a
+  switch, "La red por cable: de confianza", in the same page and off until
+  someone turns it on at the board. The page shows it only when Ethernet is
+  switched on.
+- **Each connection is judged by the interface it came in by.** With the
+  Wi-Fi on a trusted network and the wire on another, a request that comes
+  in by the wire is the wire's, whatever the Wi-Fi is on, and the other way
+  round. The portal, SSH and the Flasher's serial bridge all decide it in
+  one place (`aos_access_ip_trusted`).
 - **On an untrusted network the board also stays quiet on mDNS:** it does
   not announce `p4os.local` there, and the Red app's mDNS tab finds nothing
   on that network either. It is applied again on every connection, because
   mDNS turns itself back on when an address comes; for that second the name
-  may be heard.
+  may be heard. The same on the wire: it answers there only while the wired
+  network is marked as trusted.
 - **The password** is set on the board, typed twice, six characters or more.
   It is kept as PBKDF2-HMAC-SHA256 (10 000 rounds, a random salt). After
   three wrong ones the portal waits 2, 4, 8 seconds and so on, up to five
