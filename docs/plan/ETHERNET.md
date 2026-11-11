@@ -15,7 +15,10 @@ confía con un interruptor. De la interfaz (fase 3) está escrito y visto
 en el simulador: Ajustes, **Redes** (por dónde sale la placa y cada
 conexión) y **Ethernet** (el interruptor, el estado, el reloj del SPI, la
 confianza), el ícono del cable en la barra, y el aviso en Bus antes de
-pausarlo. Falta en la placa, la página del portal y el aviso en EEPROM. El trabajo de firmware va en la rama
+pausarlo. En la placa: instalado, Ethernet arriba y el ícono del cable en
+la barra (visto en una captura de su pantalla); las páginas de Ajustes las
+tiene que recorrer el usuario, también en horizontal. Falta la página del
+portal y el aviso en EEPROM. El trabajo de firmware va en la rama
 `ethernet` (un árbol de trabajo aparte, `.claude/worktrees/ethernet`), no
 en `main`, hasta que ande en la placa.
 
