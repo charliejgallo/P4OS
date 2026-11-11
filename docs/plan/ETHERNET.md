@@ -21,14 +21,20 @@ usuario:
   una fila, desde el frente del RJ45 hacia atrás: **G, G, MO, SCK, CS,
   INT**. La otra, según la página del módulo: **GND, V, V, NC, RST, MI**.
 - Sólo 3,3 V, sin regulador, unos 200 mA.
-- **Falta medir:** la separación entre las dos filas (parece 20,32 mm; se
-  confirma contando columnas en el protoboard) y a cuánto del borde
-  trasero empieza la primera pata. De eso salen los zócalos de la placa
-  auxiliar (`ETH_ROWS` en `hw/aux-board/place.py`).
+- **Las dos filas están a 20,32 mm** (0,8 pulgadas): en el protoboard del
+  usuario caen en las columnas C e I, ocho pasos de 2,54. Es lo que ya
+  tenían los zócalos de la placa auxiliar (`ETH_ROWS` en
+  `hw/aux-board/place.py`).
+- **Falta medir:** a cuánto del borde trasero empieza la primera pata, para
+  saber cuánto sobresale el módulo de la placa auxiliar; y confirmar en la
+  serigrafía el orden de la fila de V y MI antes de darle tensión.
 
 ## Cableado de banco
 
-Al puerto `spi.a` del header, con cables cortos (el SPI va a varios MHz):
+Al puerto `spi.a` del header, con cables cortos (el SPI va a varios MHz).
+El dibujo es `docs/img/bench-w5500.svg` (lo arma `tools/bench_diagrams.py`):
+
+![El W5500 Lite en el header](../img/bench-w5500.svg)
 
 | Módulo | Header | GPIO |
 |---|---|---|

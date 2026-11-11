@@ -852,6 +852,69 @@ def rs485():
     s.save("bench-rs485.svg")
 
 
+def w5500():
+    """A W5500 Lite Ethernet module (HW-884) on spi.a, seen from above with its RJ45 at the top."""
+    s = Svg(1100, 905, "A W5500 Ethernet module on the 40-pin header",
+            "the W5500 Lite (HW-884) on spi.a with jumper wires: the bench before the auxiliary board")
+    c_sck, c_mo, c_mi, c_cs = "#2563eb", "#16a34a", "#ca8a04", "#ea580c"
+    used = {18: C["p3"], 26: "#111111", 32: c_cs, 34: c_mo, 36: c_mi, 38: c_sck}
+    x18, y18 = pin_xy(18)
+    x26, y26 = pin_xy(26)
+    x32, y32 = pin_xy(32)
+    x34, y34 = pin_xy(34)
+    x36, y36 = pin_xy(36)
+    x38, y38 = pin_xy(38)
+    # the module: two rows of six pins 20.32 mm apart (eight pitches), MI level with the header's pin 36
+    lx, rx = 76, 76 + 8 * STEP
+    ys = [y36 - (5 - k) * STEP for k in range(6)]
+    s.add(f'<rect x="{lx-18}" y="{ys[0]-32}" width="{rx-lx+36}" height="{ys[5]-ys[0]+70}" rx="5" fill="#15803d"/>')
+    s.add(f'<rect x="{lx+42}" y="{ys[0]-107}" width="{rx-lx-84}" height="205" rx="4" fill="#9ca3af" stroke="#6b7280" stroke-width="2"/>')
+    s.add(f'<rect x="{lx+60}" y="{ys[0]-107}" width="{rx-lx-120}" height="34" fill="#374151"/>')
+    s.plain((lx + rx) / 2, ys[0] - 40, "RJ45", size=13, color="#374151", anchor="middle", bold=True)
+    s.plain((lx + rx) / 2, ys[0] - 22, "top view", size=10, color="#4b5563", anchor="middle")
+    s.plain((lx + rx) / 2, ys[5] + 26, "W5500 Lite", size=12, color="#dcfce7", anchor="middle", bold=True)
+    for nm, y in zip(["G", "G", "MO", "SCK", "CS", "INT"], ys):
+        s.over(f'<circle cx="{lx}" cy="{y}" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>')
+        s.plain(lx + 13, y + 4, nm, size=11, bold=True)
+    for nm, y in zip(["GND", "V", "V", "NC", "RST", "MI"], ys):
+        s.over(f'<circle cx="{rx}" cy="{y}" r="7" fill="#d1a33a" stroke="#fff" stroke-width="2"/>')
+        s.plain(rx - 13, y + 4, nm, size=11, anchor="end", bold=True)
+    # MISO straight across; SCK round the bottom; CS and MOSI over the top, to the far row
+    s.wire([(x36 - 8, y36), (rx + 8, ys[5])], c_mi, 3)
+    s.wire([(x38 - 8, y38), (400, y38), (400, 700), (20, 700), (20, ys[3]), (lx - 8, ys[3])], c_sck, 3)
+    s.wire([(36, ys[3] - 9), (36, ys[3] + 9)], "#ffffff", 9)        # CS hops over SCK: the one crossing
+    s.wire([(x32 - 8, y32), (380, y32), (380, 340), (36, 340), (36, ys[4]), (lx - 8, ys[4])], c_cs, 3)
+    s.wire([(x34 - 8, y34), (360, y34), (360, 355), (52, 355), (52, ys[2]), (lx - 8, ys[2])], c_mo, 3)
+    s.text(400 + 8, 690, "SCK", color=c_sck, bold=True)
+    s.text(380 + 8, 334, "CS", color=c_cs, bold=True)
+    s.text(322, 372, "MOSI", color=c_mo, bold=True)
+    s.text(350, y36 - 8, "MISO", color=c_mi, bold=True)
+    # power by tags: every tag with the same name is one wire
+    s.wire([(x18 - 8, y18), (440, y18)], C["p3"])
+    s.net(440, y18, "3V3")
+    s.wire([(x26 - 8, y26), (440, y26)], C["gnd"])
+    s.net(440, y26, "GND", C["gnd"])
+    s.wire([(rx + 8, ys[0]), (rx + 24, ys[0])], C["gnd"])
+    s.net(rx + 24, ys[0], "GND", C["gnd"], side="right")
+    s.wire([(rx + 8, ys[1]), (rx + 24, ys[1])], C["p3"])
+    s.net(rx + 24, ys[1], "3V3", side="right")
+    s.notes(720, 330, 340, "The first test, with no new firmware", [
+        "• Bus, SPI: port spi.a, CS 49, mode 0, 1 MHz",
+        "• send the bytes 00 39 00 00",
+        "• the fourth byte back must be 04:",
+        "  the W5500's version register",
+    ])
+    s.notes(40, NOTES_Y + 20, 1020, "Wiring it (the plan of 2026-11-11: not tried on the board yet)", [
+        "• SCK to GPIO52 (pin 38), MO to GPIO50 (pin 34), MI to GPIO51 (pin 36), CS to GPIO49 (pin 32): the header's spi.a",
+        "• V to 3V3 (pin 18), GND to pin 26. The module is 3.3 V only, about 200 mA, with no regulator of its own: never 5 V",
+        "• INT, NC, RST and the second V and G stay free: the driver polls. If the chip does not answer, try RST to 3V3",
+        "• The row G, G, MO, SCK, CS, INT is as printed on the board; the other is drawn as the seller lists it: read yours before powering it",
+        "• Short wires: the SPI runs at several MHz. Tags with the same name (3V3, GND) are one wire. The two rows are 20.32 mm apart",
+    ])
+    s.header(used)
+    s.save("bench-w5500.svg")
+
+
 if __name__ == "__main__":
     pwm()
     ir()
@@ -861,3 +924,4 @@ if __name__ == "__main__":
     nano_header()
     can()
     rs485()
+    w5500()

@@ -18,8 +18,8 @@ value and footprint is a first choice to review against its datasheet.
 RS485 and CAN are not on the board in either: their modules plug onto pin
 headers (the automatic "RS485 to TTL" one on 3V3, TX, RX, GND; an
 SN65HVD230 on 3V3, GND, CTX, CRX). Ethernet is a "W5500 Lite" module
-(HW-884) on two sockets of six; how far apart its two rows are is a guess
-until one is measured (`ETH_ROWS` in `place.py`).
+(HW-884) on two sockets of six, 20.32 mm apart as measured on the module
+(`ETH_ROWS` in `place.py`).
 
 | File | What it is |
 |---|---|

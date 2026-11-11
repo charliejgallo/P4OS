@@ -28,7 +28,7 @@ HOLES = [(3.75, 3.24), (60.75, 3.24), (3.75, 115.24), (60.75, 115.24)]
 PIN1 = (3.15, 104.32)                   # the header's pin 1; odd pins on the edge side, rows going up
 
 # The W5500 Lite: where the middle of its two rows of pins goes, and how far apart the rows are.
-# 20.32 mm (0.8 in) is a guess from the board's 23.5 mm width: measure the module before routing.
+# 20.32 mm (0.8 in): on the user's breadboard the rows sit in columns C and I, eight pitches apart.
 ETH, ETH_ROWS = (51.5, 84.76), 20.32
 
 # ref -> (x, y, degrees): the middle of the part, mm from the top left corner. Laid out on the
