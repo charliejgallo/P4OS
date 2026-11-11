@@ -238,8 +238,17 @@ poder usar el puerto como siempre. Quedó así, y está escrito:
   `GET /api/eth` lo informa (`paused`, `paused_by`).
 - Mientras dura la pausa la salida a internet vuelve al Wi-Fi, si lo hay.
 
-Lo que falta: probarlo en la placa; que Bus y EEPROM avisen **antes** de
-abrir el puerto, no sólo cuando ya pausaron (fase 3, con la interfaz); y,
+**En la placa (2026-11-11):** con Ethernet arriba, varios envíos seguidos
+desde Bus (pestaña SPI, `00 39 00 00`) contestaron `04`; Ethernet se pausó
+una vez, con su aviso, y volvió 8 s después del último envío: enlace a los
+2 s, dirección 1 s más tarde. La primera versión volvía al instante: Bus
+abre el puerto sólo durante cada envío, la pausa duraba 4 ms y la red se
+cortaba 3 s por envío, con el aviso de pausa tapado por el de vuelta. Por
+eso espera a que nadie pida el puerto durante 8 s (`RESUME_MS`).
+
+Lo que falta: que Bus y EEPROM avisen **antes** de
+abrir el puerto, no sólo cuando ya pausaron (fase 3, con la interfaz);
+probar los sensores compartiendo el puerto (hace falta una termocupla); y,
 para una app que quiera convivir con Ethernet sin pausarlo (una radio que
 escucha todo el día), una forma de pedir el puerto compartido.
 
