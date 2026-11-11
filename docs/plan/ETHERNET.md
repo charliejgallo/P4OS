@@ -243,8 +243,11 @@ Ahora cada conexión se juzga por la interfaz por la que entró
 el nombre del Wi-Fi. Lo usan el portal, SSH y el puente serie del
 Programador. `docs/SECURITY.md` tiene la tabla.
 
-Escrito y visto en el simulador (el interruptor aparece, se guarda);
-**falta probarlo en la placa.**
+**En la placa (2026-11-11),** con el Wi-Fi en una red de confianza, el
+cable en la misma red y el interruptor apagado: el portal contesta por la
+dirección del Wi-Fi (200) y por la del cable manda a HTTPS (302), que es la
+red ajena; el nombre `p4os.local` se anuncia sólo por el Wi-Fi y se resuelve
+a esa dirección. Falta verlo con el interruptor prendido.
 
 ## El puerto SPI, compartido o no
 
