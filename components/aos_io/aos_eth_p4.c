@@ -39,6 +39,7 @@
 #define RX_STACK    4096
 #define FRAME_MAX   1600                /* an Ethernet frame and the chip's two-byte length in front */
 #define ROUTE_PRIO  150                 /* the Wi-Fi station has 100, the USB cable 5: the wire goes first */
+#define RESUME_MS   8000                /* an app let the port go: this long with nobody on it, and Ethernet is back */
 #define PREF_ON     "eth"
 #define PREF_HZ     "eth_hz"
 
@@ -61,6 +62,9 @@ static struct {
     char               module[24];      /* "w5500" when modules.txt has it, "" for spi.a's own CS */
     uint32_t           want_hz;         /* the clock asked for since the boot, kept or not */
     aos_eth_notice_t   notice;
+    volatile bool      busy;            /* paused, and an app has the port right now */
+    volatile int64_t   resume_at;       /* paused, the port free: when to come back (esp_timer time) */
+    volatile bool      waiting;         /* the thread that brings it back is alive */
 } E;
 
 /* ---- the driver's SPI, on ours ---- */
@@ -292,15 +296,53 @@ bool aos_eth_enable(bool on)
     return ok;
 }
 
+/* An app has the port for a moment at a time: Bus opens it for each "Send" and closes it at once.
+ * Coming back at every close would take the network down three seconds a transfer (the link, then
+ * DHCP), so Ethernet waits until nobody has asked for the port for RESUME_MS. */
+static void resume_thread(void *arg)
+{
+    (void)arg;
+    for (;;) {
+        aos_hal_sleep_ms(250);
+        if (!E.info.paused) break;                      /* switched off or on by hand meanwhile */
+        if (E.busy || esp_timer_get_time() < E.resume_at) continue;
+        take();
+        bool back = E.info.paused && E.info.enabled && !E.busy;
+        if (back) {
+            E.info.paused = false;
+            aos_hal_log("eth", "%s has been free %d s: back", E.info.port, RESUME_MS / 1000);
+            if (!start()) {                             /* somebody took the port in between: wait again */
+                E.info.paused = true;
+                E.resume_at = esp_timer_get_time() + (int64_t)RESUME_MS * 1000;
+                back = false;
+            } else {
+                E.info.paused_by[0] = 0;
+            }
+        }
+        xSemaphoreGive(E.lock);
+        if (back) {
+            if (E.notice) E.notice(false, E.info.port, "");
+            break;
+        }
+    }
+    E.waiting = false;
+}
+
 bool aos_eth_yield(const char *port, const char *to)
 {
+    /* asked at every open of every SPI port by an app: nothing to do unless this is ours */
+    if (!E.info.running && !E.info.paused) return false;
+    if (strcmp(E.info.port, port)) return false;
     take();
-    bool mine = E.info.running && !strcmp(E.info.port, port);
+    bool mine = E.info.running;
     if (mine) {
         teardown();                     /* closes the port: aos_eth_port_free() finds nothing paused yet */
         E.info.paused = true;
+        aos_hal_log("eth", "paused: %s has %s", to ? to : "?", port);
+    }
+    if (E.info.paused) {
+        E.busy = true;
         snprintf(E.info.paused_by, sizeof E.info.paused_by, "%s", to ? to : "");
-        aos_hal_log("eth", "paused: %s has %s", E.info.paused_by, port);
     }
     xSemaphoreGive(E.lock);
     if (mine && E.notice) E.notice(true, port, to ? to : "");
@@ -309,18 +351,14 @@ bool aos_eth_yield(const char *port, const char *to)
 
 void aos_eth_port_free(const char *port)
 {
-    /* asked at every close of every SPI port, this one's own among them, with E.lock held: look first */
+    /* asked at every last close of every SPI port, this one's own among them, with E.lock held: look first */
     if (!E.info.paused || strcmp(E.info.port, port)) return;
-    take();
-    bool back = E.info.paused && E.info.enabled;
-    if (back) {
-        E.info.paused = false;
-        E.info.paused_by[0] = 0;
-        aos_hal_log("eth", "%s is free: back", port);
-        start();
+    E.resume_at = esp_timer_get_time() + (int64_t)RESUME_MS * 1000;
+    E.busy = false;
+    if (!E.waiting) {
+        E.waiting = true;
+        if (!aos_hal_thread_start("eth-back", resume_thread, NULL, 6144, 3)) E.waiting = false;
     }
-    xSemaphoreGive(E.lock);
-    if (back && E.notice) E.notice(false, port, "");
 }
 
 void aos_eth_on_pause(aos_eth_notice_t cb) { E.notice = cb; }

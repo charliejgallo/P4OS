@@ -763,13 +763,8 @@ aos_io_spi_t *aos_io_spi_open(const char *port, const char *owner, const aos_io_
     for (int k = 0; k < 3; k++)
         if (cs >= 0 && p->pins[k] == cs) { aos_hal_log("io", "%s: CS GPIO%d is one of the port's wires", p->name, cs); return NULL; }
 
-    /* an app asking for the port Ethernet is on: Ethernet lets go, and comes back at the last close */
-    if (!spi_resident(owner)) {
-        lock();
-        bool eth = spi_port_has(p->name, AOS_ETH_OWNER, NULL);
-        unlock();
-        if (eth) aos_eth_yield(p->name, owner);
-    }
+    /* an app asking for the port Ethernet is on: Ethernet lets go, and comes back a while after the last close */
+    if (!spi_resident(owner)) aos_eth_yield(p->name, owner);
 
     aos_io_spi_t *s = calloc(1, sizeof *s);
     if (!s) return NULL;

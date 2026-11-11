@@ -17,7 +17,8 @@
  * its own on the same port with Ethernet running (a thermocouple: two bytes
  * a second). An app that opens the port - Bus, EEPROM, a radio, a card
  * reader - gets it whole: Ethernet stops for as long as the app has the
- * port, says so, and comes back by itself when the port is let go. A long
+ * port, says so, and comes back by itself a few seconds after the port was
+ * last let go (an app opens and closes it for every transfer). A long
  * or slow transfer on shared wires would starve it anyway, and a bench tool
  * must not have to wonder.
  */
@@ -60,9 +61,10 @@ bool aos_eth_enable(bool on);
 void aos_eth_set_clock(uint32_t hz);
 void aos_eth_info(aos_eth_info_t *out);
 
-/* For the SPI service (aos_io.c). An app asks for the port Ethernet is on:
- * Ethernet stops and lets it go, true if it was there. And the port has
- * nobody on it any more: a paused Ethernet starts again. */
+/* For the SPI service (aos_io.c). An app asks for a port: if Ethernet is on
+ * it, it stops and lets it go (true), and if it was already waiting for that
+ * port, it goes on waiting. And a port has nobody on it any more: a paused
+ * Ethernet counts a few seconds from here and starts again. */
 bool aos_eth_yield(const char *port, const char *to);
 void aos_eth_port_free(const char *port);
 /* Told when Ethernet pauses for an app and when it is back, to say so on the
