@@ -40,6 +40,10 @@ ETH = (W - ETH_PIN1 - 6.35, 88.76)                      # the module's edge on t
 ETH_BOX = (ETH[0] + 6.35 + ETH_PIN1 - ETH_LEN, ETH[1] - ETH_WID / 2, ETH[0] + 6.35 + ETH_PIN1, ETH[1] + ETH_WID / 2)
 LOW = ("R", "U")                                        # what may go under it, by its reference: a TO-92 "Q" may not
 
+SIDE_X = 14.8                           # the column of small headers beside the 2x20
+POWER_ROW = PIN1[1] - 2.54 * 8          # the row of the header's pin 18, +3V3
+SPARE_ROW = PIN1[1] - 2.54 * 14         # the row of pin 30, GPIO35
+
 # ref -> (x, y, degrees): the middle of the part, mm from the top left corner. Laid out on the
 # larger of each part's two packages, so both variants share it; build() refuses an overlap.
 AT = {
@@ -73,13 +77,17 @@ AT = {
     "C3": (13, 111, 0), "C4": (60.5, 106.1, 90),
     "JP1": (33.5, 26.5, 90), "C2": (32.6, 81.4, 0),
     "J3": (27.5, 111.2, 0), "J4": (47.5, 111.2, 0),
+    # beside the header, in one column: 5 V, 3.3 V and the GPIO nothing else carries. POWER_ROW
+    # puts a 3.3 V pin level with the header's pin 18, and the GPIO's with pin 30, for a straight track
+    "J20": (SIDE_X, 99.24, 0), "J21": (SIDE_X, POWER_ROW - 1.27, 0), "J22": (SIDE_X, SPARE_ROW + 1.27, 0),
 }
 # the Qwiic socket, its mouth to the left edge; and three parts whose smaller package leaves its
 # reference or a pad under a neighbour's lettering
 AT_SMD = {"J6": (3.6, 23.6, 270), "C9": (44.0, 44.3, 0), "R18": (45, 51.6, 0), "U5": (42.5, 97.6, 0)}
 
 # what the silkscreen says of each connector: its name (one line or two) and its pins, pin 1 first
-NAME = {"J5": ["I2C 3V3"], "J6": ["I2C 3V3"], "J7": ["I2C 5V"], "J8": ["BOARD I2C"], "J9": ["UART A", "RS485"],
+NAME = {"J20": ["5V"], "J21": ["3V3"], "J22": ["GPIO"],
+        "J5": ["I2C 3V3"], "J6": ["I2C 3V3"], "J7": ["I2C 5V"], "J8": ["BOARD I2C"], "J9": ["UART A", "RS485"],
         "J13": ["CAN"], "J11": ["UART B"], "J12": ["SWD"], "J15": ["1-WIRE"], "J16": ["LED / SERVO"]}
 PINS = {
     "J5": ["GND", "3V3", "SDA", "SCL"], "J6": ["GND", "3V3", "SDA", "SCL"], "J7": ["GND", "5V", "SDA", "SCL"],
@@ -88,6 +96,7 @@ PINS = {
     "J14": ["3V3", "GND", "SCK", "MOSI", "MISO", "CS", "46", "47"], "J15": ["3V3", "DQ", "GND"],
     "J16": ["5V", "DIN", "GND"], "J17": ["G", "G", "MO", "SCK", "CS", "INT"],
     "J18": ["GND", "V", "V", "NC", "RST", "MI"], "J19": ["INT", "RST"],
+    "J20": ["GND", "5V", "5V", "GND"], "J21": ["GND", "3V3", "3V3", "GND"], "J22": ["GND", "35", "38", "37"],
 }
 REF = {"D1": (37.2, 2.8), "Q2": (45.6, 74.6)}          # a reference that its part's own place would hide
 SIDE = {"J17": "S", "J18": "N", "J19": "N", "J15": "W", "J16": "W"}        # where the pin names go; else east
@@ -95,10 +104,10 @@ BRIDGE = {"JP1": "5V BYPASS", "JP2": "PULL-UPS", "JP3": "SDA", "JP4": "SCL", "JP
           "JP14": "IR LED", "JP15": "1W PULL-UP", "JP16": "ETH CS"}
 # free text: (text, x, y, degrees, size)
 TEXT = [("USB 2.0", 12.5, 116.6, 0, 1.0), ("USB 1.1", 60.4, 111.9, 0, 0.9), ("SPI A", 24, 40.2, 0, 0.9),
-        ("IR RX", 24.5, 5.4, 0, 0.8), ("IR LED", 49.5, 4, 0, 0.8), ("GPIO", 17.3, 53.3, 0, 0.8),
+        ("IR RX", 24.5, 5.4, 0, 0.8), ("IR LED", 49.5, 4, 0, 0.8), ("HEADER", 9.8, 53.3, 0, 0.8),
         ("W5500 INT RST", 58, 26.3, 0, 0.8),
         ("W5500 LITE", ETH[0] - 4, ETH[1] - 3.6, 0, 1.0), ("RJ45 >", ETH[0] - 4, ETH[1] + 3.6, 0, 0.8)]
-# the forty pins as the pass-through socket shows them: GPIO numbers, G for ground
+# the forty pins as the silkscreen beside the header shows them: GPIO numbers, G for ground
 GPIO = {1: "5V", 2: "3V3", 3: "5V", 4: "7", 5: "G", 6: "8", 7: "37", 8: "2", 9: "38", 10: "G", 11: "5", 12: "3",
         13: "G", 14: "4", 15: "21", 16: "28", 17: "22", 18: "3V3", 19: "G", 20: "29", 21: "24", 22: "30",
         23: "25", 24: "31", 25: "D-", 26: "G", 27: "D+", 28: "34", 29: "G", 30: "35", 31: "32", 32: "49",
@@ -242,22 +251,26 @@ def track(board, net, layer, points, width):
 
 
 def route(board, net):
-    """The tracks a script can lay without choosing anything: each of the header's forty pins across
-    to the same pin of the socket beside it, and a ground plane on each face. Returns how many tracks.
+    """The tracks a script can lay without choosing anything: the header's pins that go to the small
+    headers beside it, and a ground plane on each face. Returns how many tracks.
 
-    An odd pin has the even pin of its own row in the way, and an even pin the socket's odd one, so
-    each goes round through the gap to the next row: the odd ones above their row on the front, the
-    even ones below theirs on the back. On one face the two would meet in the same gap."""
+    A pin of the header's outer row has the inner row's pin in the way, so its track goes round
+    through the gap to the next row."""
     pads = {r: {p.GetNumber(): xy(p.GetPosition()) for p in board.FindFootprintByReference(r).Pads()}
-            for r in ("J1", "J2")}
+            for r in ("J1", "J21", "J22")}
     half = 1.27
-    for n in range(1, 41):
-        (x1, y), (x2, _) = pads["J1"][str(n)], pads["J2"][str(n)]
-        name = gen.HEADER[n]
-        lane = y - half if n % 2 else y + half
-        layer = pcbnew.F_Cu if n % 2 else pcbnew.B_Cu
-        track(board, net(name), layer, [(x1, y), (x1 + half, lane), (x2 - half, lane), (x2, y)],
-              POWER if name in SUPPLY else SIGNAL)
+    # +3V3: pin 18 straight across on the back to the header's nearer 3.3 V pin, and on to the other
+    (x1, y1), (x2, y2), (x3, y3) = pads["J1"]["18"], pads["J21"]["3"], pads["J21"]["2"]
+    track(board, net("+3V3"), pcbnew.B_Cu, [(x1, y1), (x2, y2), (x3, y3)], 0.8)
+    # GPIO35: pin 30 straight across on the front
+    track(board, net("GPIO35_BOOT"), pcbnew.F_Cu, [pads["J1"]["30"], pads["J22"]["2"]], SIGNAL)
+    # GPIO38 and GPIO37: pins 9 and 7, each round its neighbour and up the lane between the header's
+    # lettering and the column; the lower pin takes the outer lane, so the two never cross
+    for pin, to, lane_x in (("9", "3", 9.6), ("7", "4", 10.8)):
+        (x1, y1), (x2, y2) = pads["J1"][pin], pads["J22"][to]
+        track(board, net(gen.HEADER[int(pin)]), pcbnew.F_Cu,
+              [(x1, y1), (x1 + half, y1 - half), (lane_x - half, y1 - half), (lane_x, y1 - 2 * half),
+               (lane_x, y2 + half), (lane_x + half, y2), (x2, y2)], SIGNAL)
     for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
         zone = pcbnew.ZONE(board)
         zone.SetLayer(layer)
@@ -343,12 +356,9 @@ def build(variant):
                 fp.SetPosition(mm(*PIN1))
                 fp.Flip(mm(*PIN1), pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
                 fp.SetOrientationDegrees(0)     # flipped and at 0: pin 2 inward, the rows going up, as the socket
-            elif part.ref == "J2":          # the same socket again, beside it, pin for pin
-                fp.SetPosition(mm(PIN1[0] + 7.62, PIN1[1]))
-                fp.SetOrientationDegrees(180)
-                for n in range(1, 40, 2):
+                for n in range(1, 40, 2):   # its solder side is the front: each row's two pins named beside it
                     px, py = xy(next(p for p in fp.Pads() if p.GetNumber() == str(n)).GetPosition())
-                    text(board, "%s %s" % (GPIO[n], GPIO[n + 1]), px + 4.6, py, 0, 0.8, "l")
+                    text(board, "%s %s" % (GPIO[n], GPIO[n + 1]), px + 4.4, py, 0, 0.8, "l")
             elif part.ref.startswith("H"):
                 fp.SetPosition(mm(*next(holes)))
             elif part.ref in at:

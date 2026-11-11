@@ -14,8 +14,9 @@ same through-hole ones, soldered by hand afterwards.
 RS485 and CAN are not on the board: their transceivers are the modules of
 the bench (an automatic "RS485 to TTL" one, an SN65HVD230), each on a pin
 header in the module's own order. What is on the board reaches its GPIO
-through a jumper, so a pin can be given back, and the pass-through socket J2
-carries all forty pins whatever the jumpers say.
+through a jumper, so a pin can be given back. There is no second socket
+with the forty pins again: beside the header there are pins for 5 V, for
+3.3 V and for the three GPIO that no other connector carries.
 """
 import collections
 import datetime
@@ -126,11 +127,13 @@ def blocks(variant="th"):
     global VARIANT
     VARIANT = variant
     b = []
-    b.append(("THE HEADER: J1's pins go into the board's socket, J2 is the same socket again on top", 25, 25, [
+    b.append(("THE HEADER: J1's pins go into the board's socket. Beside it, power and the GPIO nothing else carries", 25, 25, [
         (Part("J1", "Connector_Generic:Conn_02x20_Odd_Even", "to the P4 (2x20 pins, underneath)",
               "Connector_PinHeader_2.54mm:PinHeader_2x20_P2.54mm_Vertical", HEADER), 45, 60),
-        (Part("J2", "Connector_Generic:Conn_02x20_Odd_Even", "pass-through (2x20 socket)",
-              "Connector_PinSocket_2.54mm:PinSocket_2x20_P2.54mm_Vertical", HEADER), 125, 60),
+        (conn("J20", "5 V, switched", ["GND", "+5V_SW", "+5V_SW", "GND"]), 125, 40),
+        (conn("J21", "3.3 V", ["GND", "+3V3", "+3V3", "GND"]), 125, 65),
+        # the console's two pins and a strapping pin: on no other connector of this board
+        (conn("J22", "spare GPIO", ["GND", "GPIO35_BOOT", "GPIO38_CONSOLE", "GPIO37_CONSOLE"]), 125, 90),
     ]))
     b.append(("5 V, SWITCHED BY THE 3V3 RAIL: off with the board, JP1 to bypass", 205, 25, [
         (pfet("Q1", "SW_GATE", "+5V", "+5V_SW"), 20, 40),

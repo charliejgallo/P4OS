@@ -20,6 +20,13 @@ headers (the automatic "RS485 to TTL" one on 3V3, TX, RX, GND; an
 SN65HVD230 on 3V3, GND, CTX, CRX). Ethernet is a "W5500 Lite" module
 (HW-884) on two sockets of six.
 
+**There is no second 2x20 socket with the forty pins again** (taken out on
+2026-11-11: nothing used it). Beside the header, in one column, there are
+four pins of switched 5 V and ground, four of 3.3 V and ground, and the
+three GPIO that no other connector of the board carries: 35 (a strapping
+pin) and 37 and 38 (the console's UART). The silkscreen names the header's
+forty pins beside their solder joints.
+
 ## The Ethernet module's place
 
 The module that answered on the bench (`docs/plan/ETHERNET.md`) has its
@@ -50,7 +57,7 @@ edge. The silkscreen draws where it lies.
 
 | Through-hole | SMD |
 |---|---|
-| <img src="draft-th-3d.jpg" width="400" alt="A 3D render of the through-hole draft on a black board: the 2x20 socket down the left edge with the GPIO number of each pin beside it, the I2C headers above it, two USB-A sockets on the bottom edge, two screw terminals on the right, pin headers for UART A / RS485, CAN, UART B, SWD and SPI in the middle with each pin named, two sockets for the W5500 module, the infrared receiver and LED at the top"> | <img src="draft-smd-3d.jpg" width="400" alt="The same board with surface-mount parts: small resistors, SOT-23 transistors, solder bridges and a Qwiic socket"> |
+| <img src="draft-th-3d.jpg" width="400" alt="A 3D render of the through-hole draft on a black board: the header's forty solder joints down the left edge with the GPIO number of each pin beside them and three small headers for 5 V, 3.3 V and spare GPIO, the I2C headers above, two USB-A sockets on the bottom edge, two screw terminals on the right, pin headers for UART A / RS485, CAN, UART B, SWD and SPI in the middle with each pin named, two sockets for the W5500 module, the infrared receiver and LED at the top"> | <img src="draft-smd-3d.jpg" width="400" alt="The same board with surface-mount parts: small resistors, SOT-23 transistors, solder bridges and a Qwiic socket"> |
 
 *The drafts as KiCad renders them, black as they would be ordered. The
 board is the size of the P4's own and sits on its four holes. The
@@ -62,21 +69,21 @@ overlap or one leaves the board (the USB sockets overhang on purpose).*
 
 `place.py` lays what needs no choice, and lays it again every time it runs:
 
-- **The forty pins, from the header underneath to the socket beside it.**
-  Each track goes round the pin in its way through the gap to the next
-  row: the odd pins on the front, the even ones on the back. 0.3 mm for
-  signals, 0.4 mm for 5 V, 3.3 V and ground.
+- **The header's pins that go to the column beside it:** 3.3 V from pin
+  18 straight across on the back (0.8 mm), GPIO35 from pin 30 straight
+  across on the front, GPIO38 and GPIO37 from pins 9 and 7 round their
+  neighbours and up two lanes (0.3 mm).
 - **A ground plane on each face.** The files keep the planes unfilled
   (filled, each file is more than twice the size): KiCad fills them with B.
 
 It then asks KiCad for its design rule check on a copy with the planes
 filled, and prints what is left:
 
-    routed: 120 track segments and two ground planes; still to join: 111 connections
+    routed: 15 track segments and two ground planes; still to join: 113 connections
     design rules: silk_edge_clearance x4
 
-Ground is joined everywhere by the planes; 111 connections of the other
-53 nets are still to route (121 on the SMD variant). The four warnings are
+Ground is joined everywhere by the planes; 113 connections of the other
+53 nets are still to route (123 on the SMD variant). The four warnings are
 the USB sockets' outlines, which overhang the edge on purpose.
 
 **The boards are generated, so a track drawn by hand in KiCad is lost the
@@ -85,16 +92,12 @@ the script; routing by hand starts once the placement is frozen (the
 measures above, the fit test on the P4), and from then on `place.py` is
 not run again.
 
-Open on the tracks: the USB 2.0 pair (pins 25 and 27) also goes across to
-the pass-through socket, which leaves a stub of about 8 mm on a 480 Mbit/s
-line. Leaving those two pins out of the socket is the alternative.
-
 ```
 python3 hw/aux-board/gen.py --check
 ```
 
 writes the schematic and asks KiCad (`kicad-cli`) for its ERC and its
-netlist, and compares each netlist with the list: 71 parts (th) or 73
+netlist, and compares each netlist with the list: 73 parts (th) or 75
 (smd), the same 54 nets, no violation, none different.
 
 The schematic has no wires: each pin carries a label with its net's name,
