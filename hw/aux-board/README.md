@@ -28,6 +28,7 @@ until one is measured (`ETH_ROWS` in `place.py`).
 | `aux-board-th.kicad_sch`, `aux-board-smd.kicad_sch` | the schematics, generated: open them in KiCad 10 |
 | `place.py` | puts those parts on a board with the P4's outline and holes, with their nets and the silkscreen; it runs under KiCad's Python |
 | `aux-board-th.kicad_pcb`, `aux-board-smd.kicad_pcb` | those boards, generated: drafts to look at and to move, with no tracks |
+| `fit-test-th.svg`, `fit-test-th-print.svg` | the through-hole board's outline with every hole, 1 unit = 1 mm: a slicer extrudes it into a plate to try the fit on the P4. The second has each hole 0.4 mm wider, for a printer that closes small holes |
 
 | Through-hole | SMD |
 |---|---|
@@ -36,7 +37,8 @@ until one is measured (`ETH_ROWS` in `place.py`).
 *The drafts as KiCad renders them, black as they would be ordered. The
 board is the size of the P4's own and sits on its four holes. The
 silkscreen names every connector, every pin and every bridge; where each
-part goes is a first guess, and some labels still sit too close to a part.*
+part goes is a first guess. `place.py` refuses a placement where two parts
+overlap or one leaves the board (the USB sockets overhang on purpose).*
 
 ```
 python3 hw/aux-board/gen.py --check
