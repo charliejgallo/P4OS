@@ -9960,3 +9960,9 @@ Visor 3D	3D Viewer
 
 #: apps/vnc  (nombre de app)
 VNC	VNC
+
+#: components/aos_ui/aos_ui.c
+Ethernet en pausa: %s lo usa %s	Ethernet paused: %s is in use by %s
+
+#: components/aos_ui/aos_ui.c
+Ethernet volvió	Ethernet is back

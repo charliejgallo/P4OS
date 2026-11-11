@@ -41,6 +41,7 @@
  * holds its pins and stays; RF stays while it plays.
  */
 #include "aos_ui.h"
+#include "aos_eth.h"
 #include "aos_internal.h"
 #include "aos_access.h"
 #include "aos_lock.h"
@@ -1583,8 +1584,23 @@ static void ui_button_cb(aos_button_t button, aos_button_action_t action)
     }
 }
 
+/* Ethernet stops while an app has its SPI port and comes back by itself (aos_eth.h): the screen
+ * says both, so that a bench tool opening the port is never a network that went away unexplained.
+ * It runs in the thread that opened or closed the port, which may or may not be LVGL's. */
+static void eth_pause_notice(bool paused, const char *port, const char *by)
+{
+    char t[96];
+    if (paused) snprintf(t, sizeof t, _("Ethernet en pausa: %s lo usa %s"), port, by);
+    else snprintf(t, sizeof t, "%s", _("Ethernet volvió"));
+    if (aos_hal_lock(200)) {
+        aos_toast_show(t, 3500);
+        aos_hal_unlock();
+    }
+}
+
 void aos_ui_init(void)
 {
+    aos_eth_on_pause(eth_pause_notice);
     aos_wall_photo_reserve();       /* before anything else of the shell's (aos_wallpaper.c) */
     aos_hal_set_button_cb(ui_button_cb);
     aos_theme_init();

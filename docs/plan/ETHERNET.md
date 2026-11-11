@@ -223,21 +223,25 @@ dispositivo usa los hilos, Ethernet espera, y una transferencia larga o
 lenta (leer entera una memoria flash a 1 MHz) lo deja sin atender varios
 segundos.
 
-**Opciones, a decidir antes de la fase 3:**
+**Decidido por el usuario (2026-11-11): que Ethernet no le saque el SPI al
+banco.** Una EEPROM, una radio LoRa, un lector RC522 o Bus tienen que
+poder usar el puerto como siempre. Quedó así, y está escrito:
 
-1. **Exclusivo, con relevo.** Como hoy, pero quien necesita el puerto lo
-   dice claro ("`spi.a` lo usa Ethernet") y ofrece **pausarlo**: Ethernet
-   suelta el puerto, la app trabaja, y Ethernet vuelve solo cuando el puerto
-   queda libre. Simple y sin sorpresas; el cable se cae mientras tanto.
-2. **Compartido.** Otros dueños pueden sumar su dispositivo, con su propio
-   chip select, mientras Ethernet anda. Sirve sin más para lo corto (un
-   sensor que lee dos bytes por segundo); para lo largo hay que avisar
-   ("esto frena a Ethernet") o partir la transferencia en tramos.
-3. **Las dos:** compartido para el servicio de sensores y las lecturas
-   cortas, relevo para lo pesado (leer o grabar una memoria entera).
+- **Los sensores comparten.** El servicio de sensores abre su chip en el
+  mismo puerto con Ethernet andando (otro chip select, su propio reloj, unos
+  bytes por ronda). Los hilos son del que llegó primero y pasan al otro
+  cuando ese se va.
+- **Una app se lleva el puerto entero.** Cuando Bus, EEPROM o cualquier app
+  abre el puerto, **Ethernet se pone en pausa** mientras lo tenga, y vuelve
+  solo cuando el puerto queda libre. La pantalla lo dice las dos veces
+  ("Ethernet en pausa: spi.a lo usa Bus SPI", "Ethernet volvió") y
+  `GET /api/eth` lo informa (`paused`, `paused_by`).
+- Mientras dura la pausa la salida a internet vuelve al Wi-Fi, si lo hay.
 
-La placa auxiliar ya supone que se comparte: el chip select del módulo va
-por un puente y la tira de SPI sigue ahí.
+Lo que falta: probarlo en la placa; que Bus y EEPROM avisen **antes** de
+abrir el puerto, no sólo cuando ya pausaron (fase 3, con la interfaz); y,
+para una app que quiera convivir con Ethernet sin pausarlo (una radio que
+escucha todo el día), una forma de pedir el puerto compartido.
 
 ## Preguntas abiertas
 

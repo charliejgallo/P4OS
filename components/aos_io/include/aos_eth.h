@@ -12,6 +12,14 @@
  *
  * While it has a link and an address the wire is the way out: its route
  * goes before the Wi-Fi's, and pulling the cable gives the route back.
+ *
+ * The SPI port is not lost to the bench. The sensor service reads a chip of
+ * its own on the same port with Ethernet running (a thermocouple: two bytes
+ * a second). An app that opens the port - Bus, EEPROM, a radio, a card
+ * reader - gets it whole: Ethernet stops for as long as the app has the
+ * port, says so, and comes back by itself when the port is let go. A long
+ * or slow transfer on shared wires would starve it anyway, and a bench tool
+ * must not have to wonder.
  */
 #pragma once
 
@@ -39,6 +47,8 @@ typedef struct {
     uint32_t link_s;            /* seconds the link has been up */
     uint32_t links;             /* times the link came up since it started */
     char     err[80];           /* why it is not running, in Spanish; "" when it is */
+    bool     paused;            /* stopped while an app has its SPI port; back when the port is free */
+    char     paused_by[24];     /* that app, as it named itself to the pin arbiter */
 } aos_eth_info_t;
 
 /* Reads the preference and starts it if it is on. Once, at boot. */
@@ -49,6 +59,16 @@ bool aos_eth_enable(bool on);
 /* The SPI clock, kept as a preference; it takes effect at the next start. */
 void aos_eth_set_clock(uint32_t hz);
 void aos_eth_info(aos_eth_info_t *out);
+
+/* For the SPI service (aos_io.c). An app asks for the port Ethernet is on:
+ * Ethernet stops and lets it go, true if it was there. And the port has
+ * nobody on it any more: a paused Ethernet starts again. */
+bool aos_eth_yield(const char *port, const char *to);
+void aos_eth_port_free(const char *port);
+/* Told when Ethernet pauses for an app and when it is back, to say so on the
+ * screen. It runs in the thread that opened or closed the port. */
+typedef void (*aos_eth_notice_t)(bool paused, const char *port, const char *by);
+void aos_eth_on_pause(aos_eth_notice_t cb);
 
 #ifdef __cplusplus
 }

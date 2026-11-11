@@ -60,6 +60,7 @@ static struct {
     int64_t            link_at;
     char               module[24];      /* "w5500" when modules.txt has it, "" for spi.a's own CS */
     uint32_t           want_hz;         /* the clock asked for since the boot, kept or not */
+    aos_eth_notice_t   notice;
 } E;
 
 /* ---- the driver's SPI, on ours ---- */
@@ -283,11 +284,46 @@ bool aos_eth_enable(bool on)
     E.info.enabled = on;
     aos_hal_pref_set_i32(PREF_ON, on ? 1 : 0);
     bool ok = true;
+    E.info.paused = false;              /* switched by hand: whatever it was waiting for no longer counts */
+    E.info.paused_by[0] = 0;
     if (on) ok = start();
     else if (E.info.running) { teardown(); aos_hal_log("eth", "stopped"); }
     xSemaphoreGive(E.lock);
     return ok;
 }
+
+bool aos_eth_yield(const char *port, const char *to)
+{
+    take();
+    bool mine = E.info.running && !strcmp(E.info.port, port);
+    if (mine) {
+        teardown();                     /* closes the port: aos_eth_port_free() finds nothing paused yet */
+        E.info.paused = true;
+        snprintf(E.info.paused_by, sizeof E.info.paused_by, "%s", to ? to : "");
+        aos_hal_log("eth", "paused: %s has %s", E.info.paused_by, port);
+    }
+    xSemaphoreGive(E.lock);
+    if (mine && E.notice) E.notice(true, port, to ? to : "");
+    return mine;
+}
+
+void aos_eth_port_free(const char *port)
+{
+    /* asked at every close of every SPI port, this one's own among them, with E.lock held: look first */
+    if (!E.info.paused || strcmp(E.info.port, port)) return;
+    take();
+    bool back = E.info.paused && E.info.enabled;
+    if (back) {
+        E.info.paused = false;
+        E.info.paused_by[0] = 0;
+        aos_hal_log("eth", "%s is free: back", port);
+        start();
+    }
+    xSemaphoreGive(E.lock);
+    if (back && E.notice) E.notice(false, port, "");
+}
+
+void aos_eth_on_pause(aos_eth_notice_t cb) { E.notice = cb; }
 
 void aos_eth_set_clock(uint32_t hz)
 {

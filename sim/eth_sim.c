@@ -25,3 +25,6 @@ bool aos_eth_enable(bool on)
 
 void aos_eth_set_clock(uint32_t hz) { aos_hal_pref_set_i32("eth_hz", (int32_t)hz); }
 void aos_eth_info(aos_eth_info_t *out) { *out = s_info; }
+bool aos_eth_yield(const char *port, const char *to) { (void)port; (void)to; return false; }
+void aos_eth_port_free(const char *port) { (void)port; }
+void aos_eth_on_pause(aos_eth_notice_t cb) { (void)cb; }

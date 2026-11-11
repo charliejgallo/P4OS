@@ -3,6 +3,7 @@
  * Platform-free: the drivers are in aos_io_p4.c / sim/io_sim.c.
  */
 #include "aos_io.h"
+#include "aos_eth.h"
 #include "aos_io_backend.h"
 #include "aos_hal.h"
 
@@ -707,6 +708,27 @@ static void spi_release_wires(const aos_io_port_t *p, const char *owner)
     for (int k = 0; k < 3; k++) if (p->pins[k] >= 0) aos_io_release(p->pins[k], owner);
 }
 
+/* Two owners are there all the time, the sensor service and Ethernet
+ * (aos_eth.h), and they may be on one SPI port together: each has its chip
+ * select and its clock, and a sensor's round is a few bytes. The wires stay
+ * claimed by whoever came first and pass to the other when it leaves. An app
+ * is another matter: it gets the port whole, and Ethernet waits. */
+static bool spi_resident(const char *owner)
+{
+    return !strcmp(owner, AOS_IO_OWNER_SENSORS) || !strcmp(owner, AOS_ETH_OWNER);
+}
+
+/* 'owner' has a device on the port; with owner NULL, somebody who is not a resident has. */
+static bool spi_port_has(const char *port, const char *owner, const aos_io_spi_t *except)
+{
+    for (int i = 0; i < SPI_OPEN_MAX; i++) {
+        const aos_io_spi_t *u = s_spi_open[i];
+        if (!u || u == except || strcmp(u->port->name, port)) continue;
+        if (owner ? !strcmp(u->owner, owner) : !spi_resident(u->owner)) return true;
+    }
+    return false;
+}
+
 aos_io_spi_t *aos_io_spi_open(const char *port, const char *owner, const aos_io_spi_cfg_t *cfg)
 {
     static const aos_io_spi_cfg_t DEF = { 0 };
@@ -741,6 +763,14 @@ aos_io_spi_t *aos_io_spi_open(const char *port, const char *owner, const aos_io_
     for (int k = 0; k < 3; k++)
         if (cs >= 0 && p->pins[k] == cs) { aos_hal_log("io", "%s: CS GPIO%d is one of the port's wires", p->name, cs); return NULL; }
 
+    /* an app asking for the port Ethernet is on: Ethernet lets go, and comes back at the last close */
+    if (!spi_resident(owner)) {
+        lock();
+        bool eth = spi_port_has(p->name, AOS_ETH_OWNER, NULL);
+        unlock();
+        if (eth) aos_eth_yield(p->name, owner);
+    }
+
     aos_io_spi_t *s = calloc(1, sizeof *s);
     if (!s) return NULL;
     s->pcopy = *p;
@@ -758,12 +788,14 @@ aos_io_spi_t *aos_io_spi_open(const char *port, const char *owner, const aos_io_
     for (int i = 0; i < SPI_OPEN_MAX; i++) if (!s_spi_open[i]) { slot = i; break; }
     bool first = spi_users(p->name, NULL) == 0;
     bool cs_shared = cs >= 0 && cs_in_use(cs, NULL);
+    /* a resident joining residents: the wires are already theirs, and it does not claim them again */
+    bool guest = !first && spi_resident(owner) && !spi_port_has(p->name, NULL, NULL);
     if (slot >= 0) s_spi_open[slot] = s;
     unlock();
     if (slot < 0) { aos_hal_log("io", "too many SPI devices open"); free(s); return NULL; }
 
     bool wires = false, cs_held = false;
-    if (!(wires = spi_claim_wires(p, owner))) goto fail;
+    if (!guest && !(wires = spi_claim_wires(p, owner))) goto fail;
     if (cs >= 0 && !(cs_held = aos_io_claim(cs, owner))) goto fail;
     if (!aos_io_be_spi_open(s, first)) goto fail;
     spi_desc(s);
@@ -830,11 +862,29 @@ void aos_io_spi_close(aos_io_spi_t *s)
     for (int i = 0; i < SPI_OPEN_MAX; i++) if (s_spi_open[i] == s) s_spi_open[i] = NULL;
     bool last = spi_users(s->port->name, NULL) == 0;
     bool cs_free = s->cs >= 0 && !cs_in_use(s->cs, NULL);
+    /* who the wires go to when this one held them and a resident stays on the port */
+    char heir[sizeof s->owner] = "";
+    if (!last && !spi_port_has(s->port->name, s->owner, NULL))
+        for (int i = 0; i < SPI_OPEN_MAX && !heir[0]; i++)
+            if (s_spi_open[i] && !strcmp(s_spi_open[i]->port->name, s->port->name))
+                snprintf(heir, sizeof heir, "%s", s_spi_open[i]->owner);
     unlock();
     aos_io_be_spi_close(s, last);
     if (cs_free) aos_io_release(s->cs, s->owner);
-    if (last) spi_release_wires(s->port, s->owner);
+    /* the wires are whoever came first's, which need not be this one: let go under that name */
+    char holder[sizeof s->owner] = "";
+    const char *wo = s->port->pins[0] >= 0 ? aos_io_owner(s->port->pins[0]) : NULL;
+    snprintf(holder, sizeof holder, "%s", wo ? wo : s->owner);
+    if (last) {
+        spi_release_wires(s->port, holder);
+    } else if (heir[0] && !strcmp(holder, s->owner)) {
+        spi_release_wires(s->port, holder);
+        spi_claim_wires(s->port, heir);
+    }
+    char port[AOS_IO_PORT_NAME_MAX];
+    snprintf(port, sizeof port, "%s", s->port->name);
     free(s);
+    if (last) aos_eth_port_free(port);      /* an Ethernet that waited for an app to finish starts again */
 }
 
 /* -------------------------------------------------------------------------- */

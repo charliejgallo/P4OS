@@ -36,6 +36,8 @@ static void send_state(aos_httpd_req_t *r, int status, bool ok)
     cJSON_AddNumberToObject(o, "link_s", i.link_s);
     cJSON_AddNumberToObject(o, "links", i.links);
     cJSON_AddStringToObject(o, "error", i.err);
+    cJSON_AddBoolToObject(o, "paused", i.paused);
+    cJSON_AddStringToObject(o, "paused_by", i.paused_by);
     char *s = cJSON_PrintUnformatted(o);
     aos_httpd_send_json(r, status, s ? s : "{}");
     free(s);
