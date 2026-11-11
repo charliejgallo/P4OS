@@ -10,11 +10,16 @@
 # Growing them needs that 32-bit mapping or a smaller firmware; storage
 # (nothing mounts it) does not help, being above 16 MB. A new table goes on
 # by serial (esptool), never by OTA (docs/BUILDING.md).
+# The preferences (aos_hal_p4.c, "Where they live") are in "prefs", not in
+# the 24 KB "nvs", which the apps' keys filled (2026-11-11). It is the first
+# 256 KB of what was "storage": a board that still has the table without it,
+# as every one updated over the air does, reaches the same bytes by address.
 # Name,     Type, SubType,  Offset,     Size
 nvs,        data, nvs,      0x9000,     0x6000
 otadata,    data, ota,      0xf000,     0x2000
 phy_init,   data, phy,      0x11000,    0x1000
 ota_0,      app,  ota_0,    0x20000,    0x7F0000
 ota_1,      app,  ota_1,    0x810000,   0x7F0000
-storage,    data, fat,      0x1000000,  12M
+prefs,      data, nvs,      0x1000000,  256K
+storage,    data, fat,      0x1040000,  0xBC0000
 coredump,   data, coredump, 0x1C00000,  1M

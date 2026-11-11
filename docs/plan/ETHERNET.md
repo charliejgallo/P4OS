@@ -151,9 +151,10 @@ está lleno**: 630 entradas usadas de 756 y ninguna disponible; 422 claves
 en `p4os`, la mayoría de las apps (84 de Monster Hop, 30 de Turbo, 26 y 19
 de Modbus, 24 de Mila...). Con el almacén así no se guarda ningún cambio de
 ninguna preferencia, tampoco las del sistema (`boot_bad` falla en cada
-arranque). El firmware de la rama ahora lo dice en el registro (`pref: ...
-not kept`, y una vez por arranque cuánto hay y de quién). Es un arreglo de
-sistema aparte, antes de la fase 3.
+arranque). **Arreglado ese mismo día, en `main`:** las preferencias pasaron
+a un almacén propio de 256 KB (`docs/BUILDING.md`, "The preferences are in
+`prefs`"); en la placa se movieron las 422 claves y la del reloj quedó
+guardada tras un reinicio.
 
 ## Qué gana el taller con un cable de red
 
