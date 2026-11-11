@@ -34,6 +34,7 @@
 #include "aos_hal.h"
 #include "aos_ui.h"
 #include "aos_io.h"
+#include "aos_eth.h"
 #include "aos_sensors.h"
 #include "aos_sys_glyphs.h"
 #include "aos_mono.h"
@@ -1220,6 +1221,15 @@ static void build_spi_top(lv_obj_t *parent, int32_t w)
         if (pt->pins[2] >= 0) snprintf(miso, sizeof miso, " · MISO %d", pt->pins[2]);
         if (pt->pins[3] >= 0) snprintf(cs, sizeof cs, " · CS %d", pt->pins[3]);
         lv_label_set_text_fmt(st, "SCK %d · MOSI %d%s%s", pt->pins[0], pt->pins[1], miso, cs);
+    }
+    /* Ethernet lives on this port: sending here stops it for a while (aos_eth.h). Said before, not after. */
+    aos_eth_info_t eth;
+    aos_eth_info(&eth);
+    if (eth.enabled && (eth.running || eth.paused) && !strcmp(eth.port, S.spi_port)) {
+        lv_obj_t *w2 = caption(parent, eth.paused ? _("Ethernet está en pausa mientras se usa este puerto. Vuelve solo unos segundos después del último envío.")
+                                                  : _("Ethernet usa este puerto: al enviar se pone en pausa y la red por cable se corta. Vuelve solo unos segundos después."), w);
+        lv_obj_set_style_pad_left(w2, 12, 0);
+        lv_obj_set_style_text_color(w2, C_AMBER, 0);
     }
 }
 

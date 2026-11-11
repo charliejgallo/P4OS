@@ -414,7 +414,8 @@ static void tiles_refresh(void)
     set_text(U.tile_sub[SEC_MEM], s);
     /* Sistema: the uptime, the signal below */
     fmt_dur(v, sizeof v, (uint32_t)(aos_hal_uptime_ms() / 1000));
-    if (aos_hal_net_state() == AOS_NET_CONNECTED) snprintf(s, sizeof s, "WiFi %d dBm", aos_hal_net_rssi());
+    if (aos_hal_net_wired()) snprintf(s, sizeof s, "%s", _("por cable"));
+    else if (aos_hal_net_state() == AOS_NET_CONNECTED) snprintf(s, sizeof s, "WiFi %d dBm", aos_hal_net_rssi());
     else snprintf(s, sizeof s, "%s", _("sin WiFi"));
     set_text(U.tile_val[SEC_SYS], v);
     set_text(U.tile_sub[SEC_SYS], s);

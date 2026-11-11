@@ -9978,3 +9978,75 @@ De confianza: por cable el portal está abierto.	Vertrauenswürdig: über das Ka
 
 #: components/aos_apps/aos_app_settings.c
 Por cable el portal se porta como en una red que no es de confianza. Una red por cable no tiene nombre para reconocerla: prendelo sólo donde confiás en todo lo que está enchufado.	Über das Kabel verhält sich das Portal wie in einem nicht vertrauenswürdigen Netz. Ein Kabelnetz hat keinen Namen, an dem man es erkennt: nur dort einschalten, wo du allem Angeschlossenen vertraust.
+
+#: firmware (Ethernet)
+SALIDA A INTERNET	WEG INS INTERNET
+
+#: firmware (Ethernet)
+Por cable	Per Kabel
+
+#: firmware (Ethernet)
+Con cable y Wi-Fi a la vez, la placa sale por el cable. Si el cable se va, sigue por el Wi-Fi sin tocar nada.	Mit Kabel und WLAN zugleich geht das Board über das Kabel. Fällt das Kabel weg, läuft es über WLAN weiter, ohne dass etwas zu tun ist.
+
+#: firmware (Ethernet)
+Red propia	Eigenes Netz
+
+#: firmware (Ethernet)
+Redes	Netzwerke
+
+#: firmware (Ethernet)
+Sin módulo	Kein Modul
+
+#: firmware (Ethernet)
+Sin cable	Kein Kabel
+
+#: firmware (Ethernet)
+Sin dirección	Keine Adresse
+
+#: firmware (Ethernet)
+Red por cable con un módulo W5500 en el puerto spi.a del conector de 40 pines. Apagado, no usa el puerto.	Kabelnetz über ein W5500-Modul am Port spi.a der 40-poligen Leiste. Ausgeschaltet belegt es den Port nicht.
+
+#: firmware (Ethernet)
+Lo usa	Belegt von
+
+#: firmware (Ethernet)
+Una app está usando el puerto. Ethernet vuelve solo unos segundos después de que lo suelte.	Eine App benutzt den Port. Ethernet kommt von selbst zurück, ein paar Sekunden nachdem sie ihn freigibt.
+
+#: firmware (Ethernet)
+No arrancó.	Nicht gestartet.
+
+#: firmware (Ethernet)
+dúplex completo	Vollduplex
+
+#: firmware (Ethernet)
+medio dúplex	Halbduplex
+
+#: firmware (Ethernet)
+Enlace	Verbindung
+
+#: firmware (Ethernet)
+RELOJ DEL SPI	SPI-TAKT
+
+#: firmware (Ethernet)
+Con cables sueltos, 8 MHz. Con el módulo en una placa, hasta 40: más reloj es más velocidad de red.	Mit losen Kabeln 8 MHz. Mit dem Modul auf einer Platine bis 40: schnellerer Takt ist schnelleres Netz.
+
+#: firmware (Ethernet)
+EN EL PORTAL	IM PORTAL
+
+#: firmware (Ethernet)
+Una red por cable no tiene nombre para reconocerla. Con esto apagado, lo que entra por el cable se trata como una red que no es de confianza.	Ein Kabelnetz hat keinen Namen, an dem man es erkennt. Ist dies aus, gilt alles, was über das Kabel kommt, als nicht vertrauenswürdiges Netz.
+
+#: firmware (Ethernet)
+Mientras una app usa el puerto (Bus, EEPROM), Ethernet se pone en pausa y vuelve solo.	Solange eine App den Port benutzt (Bus, EEPROM), pausiert Ethernet und kommt von selbst zurück.
+
+#: firmware (Ethernet)
+no hay un W5500 que conteste en el puerto	kein W5500 antwortet am Port
+
+#: firmware (Ethernet)
+Ethernet está en pausa mientras se usa este puerto. Vuelve solo unos segundos después del último envío.	Ethernet ist pausiert, solange dieser Port benutzt wird. Es kommt ein paar Sekunden nach dem letzten Senden von selbst zurück.
+
+#: firmware (Ethernet)
+Ethernet usa este puerto: al enviar se pone en pausa y la red por cable se corta. Vuelve solo unos segundos después.	Ethernet benutzt diesen Port: Beim Senden pausiert es, und das Kabelnetz fällt aus. Es kommt ein paar Sekunden später von selbst zurück.
+
+#: firmware (Ethernet)
+por cable	per Kabel

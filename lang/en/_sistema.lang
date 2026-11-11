@@ -9978,3 +9978,75 @@ De confianza: por cable el portal está abierto.	Trusted: over the wire the port
 
 #: components/aos_apps/aos_app_settings.c
 Por cable el portal se porta como en una red que no es de confianza. Una red por cable no tiene nombre para reconocerla: prendelo sólo donde confiás en todo lo que está enchufado.	Over the wire the portal behaves as on a network that is not trusted. A wired network has no name to know it by: switch this on only where you trust everything that is plugged in.
+
+#: firmware (Ethernet)
+SALIDA A INTERNET	WAY OUT TO THE INTERNET
+
+#: firmware (Ethernet)
+Por cable	By wire
+
+#: firmware (Ethernet)
+Con cable y Wi-Fi a la vez, la placa sale por el cable. Si el cable se va, sigue por el Wi-Fi sin tocar nada.	With a wire and Wi-Fi at once, the board goes out by the wire. If the wire goes, it carries on by Wi-Fi with nothing to touch.
+
+#: firmware (Ethernet)
+Red propia	Its own network
+
+#: firmware (Ethernet)
+Redes	Networks
+
+#: firmware (Ethernet)
+Sin módulo	No module
+
+#: firmware (Ethernet)
+Sin cable	No cable
+
+#: firmware (Ethernet)
+Sin dirección	No address
+
+#: firmware (Ethernet)
+Red por cable con un módulo W5500 en el puerto spi.a del conector de 40 pines. Apagado, no usa el puerto.	A wired network through a W5500 module on the spi.a port of the 40-pin header. Off, it does not use the port.
+
+#: firmware (Ethernet)
+Lo usa	In use by
+
+#: firmware (Ethernet)
+Una app está usando el puerto. Ethernet vuelve solo unos segundos después de que lo suelte.	An app is using the port. Ethernet comes back by itself a few seconds after it lets go.
+
+#: firmware (Ethernet)
+No arrancó.	It did not start.
+
+#: firmware (Ethernet)
+dúplex completo	full duplex
+
+#: firmware (Ethernet)
+medio dúplex	half duplex
+
+#: firmware (Ethernet)
+Enlace	Link
+
+#: firmware (Ethernet)
+RELOJ DEL SPI	SPI CLOCK
+
+#: firmware (Ethernet)
+Con cables sueltos, 8 MHz. Con el módulo en una placa, hasta 40: más reloj es más velocidad de red.	With loose wires, 8 MHz. With the module on a board, up to 40: a faster clock is a faster network.
+
+#: firmware (Ethernet)
+EN EL PORTAL	IN THE PORTAL
+
+#: firmware (Ethernet)
+Una red por cable no tiene nombre para reconocerla. Con esto apagado, lo que entra por el cable se trata como una red que no es de confianza.	A wired network has no name to know it by. With this off, what comes in by the wire is treated as a network that is not trusted.
+
+#: firmware (Ethernet)
+Mientras una app usa el puerto (Bus, EEPROM), Ethernet se pone en pausa y vuelve solo.	While an app uses the port (Bus, EEPROM), Ethernet pauses and comes back by itself.
+
+#: firmware (Ethernet)
+no hay un W5500 que conteste en el puerto	no W5500 answers on the port
+
+#: firmware (Ethernet)
+Ethernet está en pausa mientras se usa este puerto. Vuelve solo unos segundos después del último envío.	Ethernet is paused while this port is in use. It comes back by itself a few seconds after the last send.
+
+#: firmware (Ethernet)
+Ethernet usa este puerto: al enviar se pone en pausa y la red por cable se corta. Vuelve solo unos segundos después.	Ethernet uses this port: sending pauses it and the wired network drops. It comes back by itself a few seconds later.
+
+#: firmware (Ethernet)
+por cable	by wire

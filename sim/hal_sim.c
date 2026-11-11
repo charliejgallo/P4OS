@@ -2695,7 +2695,16 @@ int         aos_hal_net_rssi(void)      { return -54; }
 const char *aos_hal_net_ip(void)        { return "127.0.0.1"; }
 aos_net_state_t aos_hal_net_wifi_state(void) { return AOS_NET_CONNECTED; }
 const char *aos_hal_net_wifi_ip(void)   { return "127.0.0.1"; }
-const char *aos_hal_net_wired_ip(void)  { return ""; }
+/* the wire: only what sim/eth_sim.c says of it (P4_SIM_ETH) */
+static bool s_wired;
+static char s_wired_ip[16];
+void aos_hal_net_wired_set(bool up, const char *ip)
+{
+    s_wired = up && ip && ip[0];
+    snprintf(s_wired_ip, sizeof s_wired_ip, "%s", s_wired ? ip : "");
+}
+bool        aos_hal_net_wired(void)     { return s_wired; }
+const char *aos_hal_net_wired_ip(void)  { return s_wired_ip; }
 bool        aos_hal_net_sync_time(void) { return true; }
 
 /* Network onboarding of 27/08: the firmware gained stored credentials and a

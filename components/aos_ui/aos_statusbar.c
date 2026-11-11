@@ -152,7 +152,9 @@ void aos_statusbar_apps_tick(void)
 
 static const char *wifi_glyph(void)
 {
-    aos_net_state_t st = aos_hal_net_state();
+    /* the wire, when it is the way out: a plug, not the Wi-Fi's bars */
+    if (aos_hal_net_wired()) return AOS_SYM_LAN_CONNECT;
+    aos_net_state_t st = aos_hal_net_wifi_state();
     /* the board's own access point, when it is not on a network as well */
     if (st != AOS_NET_CONNECTED && aos_hal_net_ap_active()) return AOS_SYM_ACCESS_POINT;
     if (st == AOS_NET_OFF) return NULL;

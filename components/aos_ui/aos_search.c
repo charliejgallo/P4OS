@@ -203,7 +203,9 @@ typedef struct {
 } spage_t;
 
 static const spage_t PAGES[] = {
+    { "network",   N_("Redes"),               "redes red network internet salida conexion cable wifi" },
     { "wifi",      N_("Wi-Fi"),               "wifi wi-fi red internet network contrasena password" },
+    { "ethernet",  "Ethernet",                "ethernet cable red lan w5500 rj45 network" },
     { "display",   N_("Pantalla"),            "pantalla brillo display brightness orientacion rotation girar apagar" },
     { "sound",     N_("Sonido"),              "sonido volumen sound volume parlante speaker teclado click" },
     { "wallpaper", N_("Fondo"),               "fondo wallpaper foto photo color acento accent" },
