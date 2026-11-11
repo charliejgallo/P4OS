@@ -40,6 +40,7 @@
  *   POST /api/serial/start {ch,port,baud}   /api/serial/stop {ch}   /api/serial/send {ch,text,eol}
  *   POST /api/serial/record {ch,on}    /api/serial/trigger {add|remove|index,flags|index,text}
  *   GET  /api/bench ...                the Banco: supply, scope, logger (aos_portal_bench.c)
+ *   GET  /api/eth, POST /api/eth       Ethernet on a W5500 of the header (aos_portal_eth.c)
  *   GET  /api/claude ...               the Claude plan's usage and its sign-in (aos_portal_claude.c)
  *   GET  /api/mqtt ...                 MQTT: the topics seen, publish, settings (aos_portal_mqtt.c)
  *   GET  /api/sysmon[?hist=0]          the Monitor: CPU, tasks, memory, network, card (aos_portal_sysmon.c)
@@ -66,6 +67,7 @@
 #include "aos_menu.h"
 #include "aos_icon_ops.h"
 #include "aos_portal_bench.h"
+#include "aos_portal_eth.h"
 #include "aos_portal_radio.h"
 #include "aos_portal_live.h"
 #include "aos_portal_net.h"
@@ -1710,6 +1712,7 @@ static void handler(aos_httpd_req_t *r)
     else if (aos_portal_radio(r, m, p)) {}
     else if (aos_portal_live(r, m, p)) {}
     else if (aos_portal_net(r, m, p)) {}
+    else if (aos_portal_eth(r, m, p)) {}
     else if (aos_portal_claude(r, m, p)) {}
     else if (aos_portal_mqtt(r, m, p)) {}
     else if (aos_portal_sysmon(r, m, p)) {}

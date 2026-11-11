@@ -184,6 +184,7 @@ add_executable(p4os_sim
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_live.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_live.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_net.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_eth.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_access.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_claude.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_mqtt.c
@@ -237,6 +238,7 @@ add_executable(p4os_sim
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_io_dmx.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_pca9685.c
     io_sim.c
+    eth_sim.c
     uart_emu_sim.c
     swd_sim.c
     usb_probe_sim.c

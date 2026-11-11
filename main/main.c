@@ -24,6 +24,7 @@
 #include "aos_apps.h"
 #include "aos_portal.h"
 #include "aos_ssh.h"
+#include "aos_eth.h"
 #include "aos_dynapp.h"
 #include "aos_i18n.h"
 #include "xip_check.h"
@@ -175,6 +176,7 @@ void app_main(void)
     aos_hal_boot_stage("portal");
     aos_portal_start(80);           /* serves as soon as the Wi-Fi is up */
     aos_ssh_start(22);              /* listens only while Settings has SSH on */
+    aos_eth_boot();                 /* the wire, when it was left on and its module answers */
     /* The apps on the card (.so files in /sdcard/apps): only their descriptors are
      * read now; the code is loaded when one is opened. */
     /* Safe mode: the BOOT button held while the boot screen shows (not at
