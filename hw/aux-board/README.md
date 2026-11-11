@@ -5,8 +5,8 @@ connector with a name. The plan, the blocks and the two variants are in
 [docs/plan/PCB.md](../../docs/plan/PCB.md) (Spanish); the pin map it follows
 is [docs/img/pinout.svg](../../docs/img/pinout.svg).
 
-**Where it stands (2026-11-10): a first schematic of both variants and a
-first placement of their parts, nothing routed, nothing built.** Every part
+**Where it stands (2026-11-11): a first schematic of both variants, a first
+placement of their parts and the first tracks; nothing built.** Every part
 value and footprint is a first choice to review against its datasheet.
 
 - **th**, for a soldering iron: axial resistors, TO-92 transistors, every
@@ -18,8 +18,25 @@ value and footprint is a first choice to review against its datasheet.
 RS485 and CAN are not on the board in either: their modules plug onto pin
 headers (the automatic "RS485 to TTL" one on 3V3, TX, RX, GND; an
 SN65HVD230 on 3V3, GND, CTX, CRX). Ethernet is a "W5500 Lite" module
-(HW-884) on two sockets of six, 20.32 mm apart as measured on the module
-(`ETH_ROWS` in `place.py`).
+(HW-884) on two sockets of six.
+
+## The Ethernet module's place
+
+The module that answered on the bench (`docs/plan/ETHERNET.md`) has its
+pins and its chip on one face and the RJ45 on the other, so on its sockets
+it lies chip down with the RJ45 on top, its mouth to the board's right
+edge. The silkscreen draws where it lies.
+
+- The two rows are 20.32 mm apart (`ETH_ROWS` in `place.py`), measured.
+- Pin 1 of each socket (G and GND) is the pin nearest the RJ45's mouth,
+  as on the module. The row G, G, MO, SCK, CS, INT is the upper one.
+- **Not measured yet:** how far the first pin is from the module's edge
+  on the RJ45 side. `ETH_PIN1` says 2.5 mm, read off photographs; with it
+  the module's edge is on the board's and the RJ45 sticks out past it.
+  A ruler on the module settles it, and the sockets move with the number.
+- Under the module there are 8.5 mm (the sockets' height): a resistor, a
+  small capacitor or SMD parts fit, a pin header or an electrolytic do
+  not. `place.py` refuses a tall part there.
 
 | File | What it is |
 |---|---|
@@ -27,7 +44,8 @@ SN65HVD230 on 3V3, GND, CTX, CRX). Ethernet is a "W5500 Lite" module
 | `kisch.py` | writes a KiCad schematic from that list, with KiCad's own symbols |
 | `aux-board-th.kicad_sch`, `aux-board-smd.kicad_sch` | the schematics, generated: open them in KiCad 10 |
 | `place.py` | puts those parts on a board with the P4's outline and holes, with their nets and the silkscreen; it runs under KiCad's Python |
-| `aux-board-th.kicad_pcb`, `aux-board-smd.kicad_pcb` | those boards, generated: drafts to look at and to move, with no tracks |
+| `aux-board-th.kicad_pcb`, `aux-board-smd.kicad_pcb` | those boards, generated: drafts to look at and to move, with the first tracks (below) |
+| `paper-th.svg` | the through-hole board's front at its real size, outline, lettering and pads: printed on paper at 100 %, it is laid on the P4 and the parts are stood on it |
 | `fit-test-th.svg`, `fit-test-th-print.svg` | the through-hole board's outline with every hole, 1 unit = 1 mm: a slicer extrudes it into a plate to try the fit on the P4. The second has each hole 0.4 mm wider, for a printer that closes small holes |
 
 | Through-hole | SMD |
@@ -39,6 +57,37 @@ board is the size of the P4's own and sits on its four holes. The
 silkscreen names every connector, every pin and every bridge; where each
 part goes is a first guess. `place.py` refuses a placement where two parts
 overlap or one leaves the board (the USB sockets overhang on purpose).*
+
+## The tracks so far
+
+`place.py` lays what needs no choice, and lays it again every time it runs:
+
+- **The forty pins, from the header underneath to the socket beside it.**
+  Each track goes round the pin in its way through the gap to the next
+  row: the odd pins on the front, the even ones on the back. 0.3 mm for
+  signals, 0.4 mm for 5 V, 3.3 V and ground.
+- **A ground plane on each face.** The files keep the planes unfilled
+  (filled, each file is more than twice the size): KiCad fills them with B.
+
+It then asks KiCad for its design rule check on a copy with the planes
+filled, and prints what is left:
+
+    routed: 120 track segments and two ground planes; still to join: 111 connections
+    design rules: silk_edge_clearance x4
+
+Ground is joined everywhere by the planes; 111 connections of the other
+53 nets are still to route (121 on the SMD variant). The four warnings are
+the USB sockets' outlines, which overhang the edge on purpose.
+
+**The boards are generated, so a track drawn by hand in KiCad is lost the
+next time `place.py` runs.** While parts are still moving, tracks go in
+the script; routing by hand starts once the placement is frozen (the
+measures above, the fit test on the P4), and from then on `place.py` is
+not run again.
+
+Open on the tracks: the USB 2.0 pair (pins 25 and 27) also goes across to
+the pass-through socket, which leaves a stub of about 8 mm on a 480 Mbit/s
+line. Leaving those two pins out of the socket is the alternative.
 
 ```
 python3 hw/aux-board/gen.py --check

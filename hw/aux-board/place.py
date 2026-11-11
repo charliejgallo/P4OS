@@ -27,9 +27,18 @@ W, H = 64.51, 118.49                    # the P4's board
 HOLES = [(3.75, 3.24), (60.75, 3.24), (3.75, 115.24), (60.75, 115.24)]
 PIN1 = (3.15, 104.32)                   # the header's pin 1; odd pins on the edge side, rows going up
 
-# The W5500 Lite: where the middle of its two rows of pins goes, and how far apart the rows are.
-# 20.32 mm (0.8 in): on the user's breadboard the rows sit in columns C and I, eight pitches apart.
-ETH, ETH_ROWS = (51.5, 84.76), 20.32
+# The W5500 Lite (HW-884), as it sits on its two sockets: chip side down, the RJ45 on top with its
+# mouth to the board's right edge. ETH is the middle of its two rows of pins.
+#   ETH_ROWS   20.32 mm between the rows: columns C and I of a breadboard, measured by the user.
+#   the board  28.5 x 23.5 mm. Its pins are at the RJ45 end: G, the first, about ETH_PIN1 from that
+#              edge, read off the user's photos and NOT measured: check with a ruler before routing.
+#   the RJ45   sticks out ETH_JACK past that edge, also from the photos.
+# The sockets are 8.5 mm tall: under the module only what is lower than that (a resistor, a small
+# capacitor, SMD), never a pin header or an electrolytic. overlaps() holds the tall ones out.
+ETH_ROWS, ETH_LEN, ETH_WID, ETH_PIN1, ETH_JACK = 20.32, 28.5, 23.5, 2.5, 3.5
+ETH = (W - ETH_PIN1 - 6.35, 88.76)                      # the module's edge on the board's, the RJ45 past it
+ETH_BOX = (ETH[0] + 6.35 + ETH_PIN1 - ETH_LEN, ETH[1] - ETH_WID / 2, ETH[0] + 6.35 + ETH_PIN1, ETH[1] + ETH_WID / 2)
+LOW = ("R", "U")                                        # what may go under it, by its reference: a TO-92 "Q" may not
 
 # ref -> (x, y, degrees): the middle of the part, mm from the top left corner. Laid out on the
 # larger of each part's two packages, so both variants share it; build() refuses an overlap.
@@ -37,7 +46,7 @@ AT = {
     # i2c, down the left edge above the header, and what serves it
     "J5": (3, 12.2, 0), "J6": (3, 23.6, 0), "J7": (3, 35, 0), "J8": (3, 46.4, 0),
     "R4": (17.5, 9, 0), "R5": (17.5, 12.5, 0), "JP2": (26.5, 10.6, 0),
-    "Q3": (13.5, 20, 0), "Q4": (13.5, 26, 0), "R6": (24, 20, 0), "R7": (24, 26, 0),
+    "Q3": (13.5, 20, 0), "Q4": (13.5, 26.8, 0), "R6": (24, 20, 0), "R7": (24, 26, 0),
     "JP3": (15, 44, 90), "JP4": (15, 48.5, 90),
     # infrared, looking out of the top edge
     "U3": (32, 4, 180), "D1": (42, 4, 0), "R13": (36, 9.5, 0), "C8": (34.5, 16.5, 0), "JP13": (42.6, 15.5, 90),
@@ -53,16 +62,21 @@ AT = {
     "J9": (23, 64.9, 0), "J13": (30.3, 63.6, 0), "J11": (37.6, 67.4, 0), "J12": (44.9, 64.9, 0),
     "R10": (27.5, 74, 0), "R11": (27.5, 77.5, 0), "JP9": (25, 81.5, 90),
     # ethernet: the module lies over ETH, its RJ45 past the right edge; two low parts go under it
-    "J17": (ETH[0], ETH[1] - ETH_ROWS / 2, 90), "J18": (ETH[0], ETH[1] + ETH_ROWS / 2, 90),
-    "R19": (45.6, ETH[1], 0), "C10": (57.2, ETH[1], 0),
+    # at 270 degrees a socket's pin 1 is at its right end: G and GND, the pins nearest the RJ45's mouth
+    "J17": (ETH[0], ETH[1] - ETH_ROWS / 2, 270), "J18": (ETH[0], ETH[1] + ETH_ROWS / 2, 270),
+    "R19": (ETH[0] - 12, ETH[1], 0), "C10": (ETH[0] + 2.5, ETH[1], 0),
     # the 5 V switch and the USB sockets, at the bottom
     "R1": (27.7, 86.5, 0), "R2": (27.7, 90, 0), "R3": (27.7, 93.5, 0), "Q1": (27, 98.7, 0),
-    "Q2": (37.5, 89, 0), "F1": (38.2, 80.9, 0), "U4": (37, 84.5, 0), "C3": (38.8, 97.3, 90),
-    "JP1": (47, 99.5, 90), "F2": (58, 69.7, 0), "U5": (61.9, 98.8, 0), "C4": (60.5, 105.5, 90),
-    "C2": (12.5, 109, 0),
+    "Q2": (50.2, 74.4, 0),                              # beside the fuses: a TO-92 is too tall to go under the module
+    "U4": (40.5, 84.5, 0), "U5": (42.5, 100.3, 0),
+    "F1": (57.5, 74.3, 0), "F2": (57.5, 69.7, 0),       # the two fuses, between the terminal and the module
+    "C3": (13, 111, 0), "C4": (60.5, 106.1, 90),
+    "JP1": (33.5, 26.5, 90), "C2": (32.6, 81.4, 0),
     "J3": (27.5, 111.2, 0), "J4": (47.5, 111.2, 0),
 }
-AT_SMD = {"J6": (3.6, 23.6, 270)}       # the Qwiic socket, its mouth to the left edge
+# the Qwiic socket, its mouth to the left edge; and three parts whose smaller package leaves its
+# reference or a pad under a neighbour's lettering
+AT_SMD = {"J6": (3.6, 23.6, 270), "C9": (44.0, 44.3, 0), "R18": (45, 51.6, 0), "U5": (42.5, 97.6, 0)}
 
 # what the silkscreen says of each connector: its name (one line or two) and its pins, pin 1 first
 NAME = {"J5": ["I2C 3V3"], "J6": ["I2C 3V3"], "J7": ["I2C 5V"], "J8": ["BOARD I2C"], "J9": ["UART A", "RS485"],
@@ -75,14 +89,15 @@ PINS = {
     "J16": ["5V", "DIN", "GND"], "J17": ["G", "G", "MO", "SCK", "CS", "INT"],
     "J18": ["GND", "V", "V", "NC", "RST", "MI"], "J19": ["INT", "RST"],
 }
+REF = {"D1": (37.2, 2.8), "Q2": (45.6, 74.6)}          # a reference that its part's own place would hide
 SIDE = {"J17": "S", "J18": "N", "J19": "N", "J15": "W", "J16": "W"}        # where the pin names go; else east
 BRIDGE = {"JP1": "5V BYPASS", "JP2": "PULL-UPS", "JP3": "SDA", "JP4": "SCL", "JP9": "RX 5V", "JP13": "IR RX",
           "JP14": "IR LED", "JP15": "1W PULL-UP", "JP16": "ETH CS"}
 # free text: (text, x, y, degrees, size)
-TEXT = [("USB 2.0", 12.5, 116.4, 0, 1.0), ("USB 1.1", 60.4, 111.4, 0, 0.9), ("SPI A", 24, 40.2, 0, 0.9),
+TEXT = [("USB 2.0", 12.5, 116.6, 0, 1.0), ("USB 1.1", 60.4, 111.9, 0, 0.9), ("SPI A", 24, 40.2, 0, 0.9),
         ("IR RX", 24.5, 5.4, 0, 0.8), ("IR LED", 49.5, 4, 0, 0.8), ("GPIO", 17.3, 53.3, 0, 0.8),
         ("W5500 INT RST", 58, 26.3, 0, 0.8),
-        ("W5500 LITE", ETH[0], ETH[1] - 3.6, 0, 1.0), ("RJ45 >", ETH[0], ETH[1] + 3.6, 0, 0.8)]
+        ("W5500 LITE", ETH[0] - 4, ETH[1] - 3.6, 0, 1.0), ("RJ45 >", ETH[0] - 4, ETH[1] + 3.6, 0, 0.8)]
 # the forty pins as the pass-through socket shows them: GPIO numbers, G for ground
 GPIO = {1: "5V", 2: "3V3", 3: "5V", 4: "7", 5: "G", 6: "8", 7: "37", 8: "2", 9: "38", 10: "G", 11: "5", 12: "3",
         13: "G", 14: "4", 15: "21", 16: "28", 17: "22", 18: "3V3", 19: "G", 20: "29", 21: "24", 22: "30",
@@ -165,6 +180,13 @@ def overlaps(board):
                 out.append((a[0], b[0], round(min(w, h), 2)))
     off = [b[0] for b in boxes if b[1] < -0.01 or b[2] < -0.01 or b[3] > W + 0.01
            or (b[4] > H + 0.01 and b[0] not in ("J3", "J4"))]       # the USB sockets stick out on purpose
+    # and under the Ethernet module only what is low: its own two sockets and what LOW allows
+    x0, y0, x1, y1 = ETH_BOX
+    for b in boxes:
+        w = min(b[3], x1) - max(b[1], x0)
+        h = min(b[4], y1) - max(b[2], y0)
+        if w > 0.6 and h > 0.6 and b[0] not in ("J17", "J18") and not b[0].startswith(LOW) and b[0] != "C10":
+            out.append((b[0], "W5500", round(min(w, h), 2)))
     return out, off
 
 
@@ -202,6 +224,88 @@ def holes_svg(board, path, grow=0.0):
     return n
 
 
+# The tracks' widths, mm. Between two pads of a 2.54 mm header there are 0.84 mm: a 0.4 mm track
+# passes with 0.22 mm to each side, over the 0.2 mm the default rules ask for.
+SIGNAL, POWER = 0.3, 0.4
+SUPPLY = ("GND", "+5V", "+3V3")
+
+
+def track(board, net, layer, points, width):
+    for a, b in zip(points, points[1:]):
+        t = pcbnew.PCB_TRACK(board)
+        t.SetStart(mm(*a))
+        t.SetEnd(mm(*b))
+        t.SetWidth(pcbnew.FromMM(width))
+        t.SetLayer(layer)
+        t.SetNet(net)
+        board.Add(t)
+
+
+def route(board, net):
+    """The tracks a script can lay without choosing anything: each of the header's forty pins across
+    to the same pin of the socket beside it, and a ground plane on each face. Returns how many tracks.
+
+    An odd pin has the even pin of its own row in the way, and an even pin the socket's odd one, so
+    each goes round through the gap to the next row: the odd ones above their row on the front, the
+    even ones below theirs on the back. On one face the two would meet in the same gap."""
+    pads = {r: {p.GetNumber(): xy(p.GetPosition()) for p in board.FindFootprintByReference(r).Pads()}
+            for r in ("J1", "J2")}
+    half = 1.27
+    for n in range(1, 41):
+        (x1, y), (x2, _) = pads["J1"][str(n)], pads["J2"][str(n)]
+        name = gen.HEADER[n]
+        lane = y - half if n % 2 else y + half
+        layer = pcbnew.F_Cu if n % 2 else pcbnew.B_Cu
+        track(board, net(name), layer, [(x1, y), (x1 + half, lane), (x2 - half, lane), (x2, y)],
+              POWER if name in SUPPLY else SIGNAL)
+    for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
+        zone = pcbnew.ZONE(board)
+        zone.SetLayer(layer)
+        zone.SetNet(net("GND"))
+        zone.SetZoneName("GND")
+        outline = zone.Outline()
+        outline.NewOutline()
+        for x, y in ((0, 0), (W, 0), (W, H), (0, H)):
+            outline.Append(pcbnew.FromMM(x), pcbnew.FromMM(y))
+        zone.SetLocalClearance(pcbnew.FromMM(0.3))
+        zone.SetMinThickness(pcbnew.FromMM(0.25))
+        zone.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
+        zone.SetThermalReliefGap(pcbnew.FromMM(0.3))
+        zone.SetThermalReliefSpokeWidth(pcbnew.FromMM(0.5))
+        zone.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_ALWAYS)
+        board.Add(zone)                     # left unfilled: KiCad fills it on opening (B), and drc() on a copy
+    return len(board.GetTracks())
+
+
+def drc(path):
+    """KiCad's design rule check on a copy of the board with its planes filled: what breaks a rule,
+    and what is still to be joined. The board in the repository keeps its planes empty: filled, each
+    regeneration would add hundreds of kilobytes to the history."""
+    import json, shutil, subprocess, tempfile
+    with tempfile.TemporaryDirectory() as tmp:
+        copy = os.path.join(tmp, os.path.basename(path))
+        shutil.copy(path, copy)
+        report = os.path.join(tmp, "drc.json")
+        subprocess.run([os.environ.get("KICAD_CLI", "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"), "pcb", "drc", "--refill-zones", "--save-board", "--severity-all",
+                        "--format", "json", "-o", report, copy], capture_output=True, check=False)
+        with open(report, encoding="utf-8") as f:
+            found = json.load(f)
+    kinds = {}
+    for v in found.get("violations", []):
+        kinds[v["type"]] = kinds.get(v["type"], 0) + 1
+    return kinds, len(found.get("unconnected_items", []))
+
+
+def paper(path, out):
+    """The front as a sheet of paper shows it, at its real size: the outline, the lettering, every pad
+    with its hole. Printed at 100 %, it is laid on the P4 and the parts are stood on it."""
+    import subprocess
+    subprocess.run([os.environ.get("KICAD_CLI", "/Applications/KiCad/KiCad.app/Contents/MacOS/kicad-cli"), "pcb",
+                    "export", "svg", "--layers", "F.Mask,F.SilkS,Edge.Cuts", "--black-and-white",
+                    "--exclude-drawing-sheet", "--page-size-mode", "2", "--drill-shape-opt", "2", "--mode-single",
+                    "-o", out, path], capture_output=True, check=True)
+
+
 def build(variant):
     board = pcbnew.BOARD()
     for a, b in (((0, 0), (W, 0)), ((W, 0), (W, H)), ((W, H), (0, H)), ((0, H), (0, 0))):
@@ -234,6 +338,7 @@ def build(variant):
             board.Add(fp)
             if part.ref[0] in "JH":         # connectors, bridges and holes: named by what they are, or not at all
                 fp.Reference().SetVisible(False)
+            centred = name.startswith(("R_Axial", "C_Disc", "Fuse_Bourns"))    # set once the part is in its place, below
             if part.ref == "J1":            # underneath, its pins into the P4's socket
                 fp.SetPosition(mm(*PIN1))
                 fp.Flip(mm(*PIN1), pcbnew.FLIP_DIRECTION_LEFT_RIGHT)
@@ -265,6 +370,14 @@ def build(variant):
             bb = fp.GetBoundingBox(False)
             cx, cy = xy(bb.GetCenter())
             top, bot = pcbnew.ToMM(bb.GetTop()), pcbnew.ToMM(bb.GetBottom())
+            if part.ref in REF:
+                fp.Reference().SetPosition(mm(*REF[part.ref]))
+            if centred:                     # a part that lies between its two holes: its reference under its
+                ref = fp.Reference()        # body, where no neighbour's covers it; read while soldering
+                ref.SetPosition(mm(cx, cy))
+                ref.SetTextAngleDegrees(0)
+                ref.SetTextSize(pcbnew.VECTOR2I(pcbnew.FromMM(0.8), pcbnew.FromMM(0.8)))
+                ref.SetTextThickness(pcbnew.FromMM(0.15))
             if part.ref in PINS and not (variant == "smd" and part.ref == "J6"):
                 pin_names(board, fp, PINS[part.ref], SIDE.get(part.ref, "E"))
             for k, line in enumerate(reversed(NAME.get(part.ref, []))):
@@ -273,15 +386,28 @@ def build(variant):
                 else:
                     text(board, line, cx, top - 0.9 - 1.3 * k, 0, 0.9)
             if part.ref in BRIDGE:
-                if part.ref in ("JP1", "JP3", "JP4"):
+                if part.ref in ("JP3", "JP4"):
                     text(board, BRIDGE[part.ref], pcbnew.ToMM(bb.GetRight()) + 0.6, cy, 0, 0.8, "l")
                 else:
                     text(board, BRIDGE[part.ref], cx, bot + 0.9, 0, 0.8)
     for s, x, y, angle, size in TEXT:
         text(board, s, x, y, angle, size)
+    # where the Ethernet module lies over its sockets, the part past the board's edge left out, and
+    # how far its RJ45 reaches
+    x0, y0, x1, y1 = ETH_BOX
+    xe = min(x1, W - 0.15)
+    for a, b in (((xe, y0), (x0, y0)), ((x0, y0), (x0, y1)), ((x0, y1), (xe, y1))):
+        seg = pcbnew.PCB_SHAPE(board)
+        seg.SetShape(pcbnew.SHAPE_T_SEGMENT)
+        seg.SetStart(mm(*a))
+        seg.SetEnd(mm(*b))
+        seg.SetLayer(pcbnew.F_SilkS)
+        seg.SetWidth(pcbnew.FromMM(0.15))
+        board.Add(seg)
     text(board, "P4OS AUX BOARD 0.1 " + variant.upper(), 17, 2.3, 0, 1.0)
     if missing:
         raise SystemExit("no place for " + ", ".join(missing))
+    tracks = route(board, net)
     out = os.path.join(HERE, "aux-board-%s.kicad_pcb" % variant)
     pcbnew.SaveBoard(out, board)
     # the mask's colour lives in the stackup, which the scripting interface does not reach
@@ -294,9 +420,14 @@ def build(variant):
         n = holes_svg(board, os.path.join(HERE, "fit-test-th.svg"))
         holes_svg(board, os.path.join(HERE, "fit-test-th-print.svg"), grow=0.4)
         print("  fit-test-th.svg and fit-test-th-print.svg (holes 0.4 mm wider):", n, "holes")
+        paper(out, os.path.join(HERE, "paper-th.svg"))
+        print("  paper-th.svg: the front at its real size, to print on paper")
     clash, off = overlaps(board)
     print("  parts that overlap:", ", ".join("%s/%s %.1f mm" % c for c in clash) or "none")
     print("  parts past the edge:", ", ".join(off) or "none")
+    kinds, loose = drc(out)
+    print("  routed: %d track segments and two ground planes; still to join: %d connections" % (tracks, loose))
+    print("  design rules:", ", ".join("%s x%d" % k for k in sorted(kinds.items())) or "clean")
     return not clash and not off
 
 

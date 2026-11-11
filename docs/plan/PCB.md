@@ -6,8 +6,12 @@ P4OS a un conector con nombre: los dos USB host, los dos I2C (a 3,3 V y a
 infrarrojo y un pin de uso general. Hoy eso es un mazo de cables Dupont y
 una tapa impresa con dos USB.
 
-**Estado (2026-11-10): sólo el plan.** El mapa de pines quedó cerrado ese
-día (`docs/img/pinout.svg`, [EXPANSION.md](EXPANSION.md)) y salió con la
+**Estado (2026-11-11): borradores, nada fabricado.** Los zócalos del
+módulo W5500 están ubicados con la geometría del módulo que anduvo en el
+banco, y hay un primer trazado hecho por el script (los cuarenta pines del
+header al zócalo de al lado y un plano de masa por cara, DRC de KiCad sin
+errores, 111 conexiones por unir): ver `hw/aux-board/README.md`. El mapa de
+pines quedó cerrado el 2026-11-10 (`docs/img/pinout.svg`, [EXPANSION.md](EXPANSION.md)) y salió con la
 0.25.1. Hay un primer esquemático de la variante casera en
 `hw/aux-board/`, y otro de la PCBA sobre las mismas 54 redes (71 y 73
 partes, ERC de KiCad sin observaciones), cada uno con una primera ubicación
@@ -167,7 +171,11 @@ Falta saber, y el modelo no lo dice:
 
 ## Lo que sigue
 
-1. Lo que falta de la mecánica de arriba (alturas, salida de los USB-A).
+1. Lo que falta de la mecánica de arriba (alturas, salida de los USB-A), y
+   **una medida del módulo W5500**: del borde del lado del RJ45 a la
+   primera pata (`ETH_PIN1` en `place.py`, hoy 2,5 mm sacados de las
+   fotos). Probar el calce con la placa impresa (`fit-test-th-print.svg`)
+   y con la hoja a escala (`paper-th.svg`).
 2. Decidir si el Ethernet de la PCBA va integrado o en zócalo.
 3. El esquemático: la casera está empezada (`hw/aux-board/gen.py`); falta
    revisarla pieza por pieza, el zócalo del módulo W5500 cuando se sepa cuál
@@ -176,4 +184,6 @@ Falta saber, y el modelo no lo dice:
    46/47 con un bus real, y un módulo W5500 en `spi.a` con su CS (pide
    el driver en el firmware: `esp_eth` con el W5500, una interfaz más de
    `esp_netif`).
-5. Trazado, DRC, y el pedido.
+5. Trazado, DRC, y el pedido. El trazado a mano empieza con la ubicación
+   congelada: `place.py` arma la placa de cero cada vez y pisa lo dibujado
+   en KiCad.
