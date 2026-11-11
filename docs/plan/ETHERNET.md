@@ -21,7 +21,13 @@ Ethernet y el aviso de Bus en la placa y se ven bien. **El portal** tiene
 a Ethernet en su página "Wi-Fi y Ethernet" (estado, prender y apagar, el
 reloj; la confianza no, que se cambia sólo en la placa) y **la app EEPROM**
 avisa, donde se elige el puerto, que usarlo pausa a Ethernet: los dos
-vistos en el simulador, falta en la placa. El trabajo de firmware va en la rama
+vistos en el simulador e instalados en la placa (la página nueva es la
+que sirve; falta que el usuario la recorra).
+
+**Corrida larga, empezada el 2026-11-11 a las 20:07** con este firmware:
+Ethernet a 20 MHz, un enlace desde el arranque, 197 915 bytes de RAM
+interna libres a los 42 s. A la mañana: el tiempo encendida (sin
+reinicios), cuántas veces levantó el enlace y la RAM libre. El trabajo de firmware va en la rama
 `ethernet` (un árbol de trabajo aparte, `.claude/worktrees/ethernet`), no
 en `main`, hasta que ande en la placa.
 
