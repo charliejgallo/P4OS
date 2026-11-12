@@ -234,12 +234,15 @@ tenía enlace y no pasaba nada por él.** Lo que dice el registro:
 - A las 14 h de encendida (hacia las 10:04 y las 10:26, con el usuario
   trabajando en el banco) el enlace cayó dos veces y volvió a los 2 s; la
   segunda vez tomó dirección por DHCP sin problema.
-- Nueve horas justas después de esa última dirección (32 400 s: lo que dura
-  la concesión de esa red), la dirección se perdió con el enlace arriba. O
-  sea que **la concesión no se renovó ni una vez**: la renovación de la
-  mitad de la concesión, a las 4 h 30, ya no tuvo respuesta. En algún
-  momento entre las 10:26 y las 14:56 la interfaz dejó de pasar tramas, sin
-  un solo aviso.
+- Nueve horas justas después de esa última dirección (32 400 s), la
+  dirección se perdió con el enlace arriba. La concesión de esa red dura
+  2 h (lo mostró después la pestaña Cable) y se renueva a la hora: 32 400 s
+  son siete renovaciones de una hora que anduvieron y una concesión de dos
+  horas que venció sin renovarse. O sea que **la última renovación buena
+  fue hacia las 17:27 y la de las 18:27 ya no tuvo respuesta**: en esa hora
+  la interfaz dejó de pasar tramas, sin un solo aviso. (La primera lectura
+  de esto supuso una concesión de 9 h y un corte entre las 10:26 y las
+  14:56: estaba mal.)
 - A las 19:34 el enlace cayó y volvió otra vez, y el DHCP tampoco contestó.
 - El Wi-Fi de la placa anduvo todo el tiempo, y al reiniciar la placa el
   cable tomó dirección en 1,6 s: el servidor DHCP estaba y contestaba.
@@ -248,7 +251,10 @@ tenía enlace y no pasaba nada por él.** Lo que dice el registro:
 registros que se borran si su alimentación tiembla (cables sueltos en un
 protoboard, una mano cerca), y ni él ni el driver de la IDF avisan: el
 enlace vuelve solo y el driver sigue sondeando un chip sin zócalo abierto.
-No se pudo comprobar: el reinicio borró el estado.
+No se pudo comprobar: el reinicio borró el estado. El usuario confirmó
+después que a todas esas horas estuvo trabajando en el escritorio al lado
+de la placa y que los cables pudieron moverse: apoya la explicación, no la
+prueba.
 
 **Lo que se hizo: un vigilante en el driver** (`watch_thread` en
 `aos_eth_p4.c`). Cada 5 s, con Ethernet andando, lo arranca de nuevo si el
@@ -286,9 +292,13 @@ enchufado el Ethernet:
   anuncio que el switch manda solo (LLDP cada 30 s; CDP de Cisco cada 60).
   Un switch no gestionable no dice nada, y la pantalla lo dice a los 75 s.
 - **La salida**, al tocar "Probar la salida": tres pings a la puerta de
-  enlace, resolver `example.com`, y tres pings a lo que resolvió (o a
+  enlace, resolver un nombre de prueba, y tres pings a lo que resolvió (o a
   `1.1.1.1` si no resolvió, para distinguir un DNS caído de una línea
-  caída). Sale por la interfaz que la placa esté usando: el cable si está
+  caída). Los nombres son tres (`example.com`, `.org`, `.net`) y alcanza con
+  uno: en la placa del usuario, la primera prueba dio "example.com no
+  resuelve" con todo lo demás andando, y era cierto: el DNS de su proveedor
+  contesta "no existe" para ese nombre solo (desde la Mac, igual). Una
+  herramienta que da la alarma por un nombre no sirve. Sale por la interfaz que la placa esté usando: el cable si está
   arriba.
 - **Las interfaces** que tiene la placa, cada una con su dirección, y cuál
   es la salida.
@@ -312,8 +322,13 @@ tramas de verdad armadas ahí y leídas por el mismo código que en la placa.
 La prueba de salida del simulador no sale a la red: sus respuestas son de
 ejemplo.
 
-**Falta en la placa:** todo. Y saber si conviene dejar la escucha prendida
-más tiempo o bajar el sondeo mientras escucha.
+**En la placa, 2026-11-12:** el enlace, la dirección, la máscara, la puerta
+de enlace, los DNS, el servidor DHCP y la concesión se ven y son los de la
+red; la prueba de salida anda (puerta de enlace y `1.1.1.1` contestan). La
+escucha del switch quedó "escuchando": el usuario no tiene un switch
+gestionable, así que **sigue sin saberse si el W5500 entrega los anuncios**
+ni cómo se lee uno de verdad. Falta también saber si conviene dejar la
+escucha prendida más tiempo o bajar el sondeo mientras escucha.
 
 ## Qué gana el taller con un cable de red
 

@@ -148,7 +148,11 @@ const nt_wifi_t *nt_wifi(void);             /* under nt_lock() */
 
 /* ---- the cable test: is there a way out by this network ---- */
 
-#define NT_CABLE_NAME "example.com"     /* the name asked for: the one reserved for examples */
+/* The names asked for, until one resolves: the three reserved for examples.
+ * One alone is not a test: on the bench where this was first tried the
+ * provider's resolver answered "no such name" for example.com and resolved
+ * everything else. */
+#define NT_CABLE_NAMES { "example.com", "example.org", "example.net" }
 #define NT_CABLE_FAR  "1.1.1.1"         /* pinged when no name resolves, to tell a dead DNS from a dead line */
 
 typedef struct {
@@ -157,13 +161,14 @@ typedef struct {
     char     gw[16];
     float    gw_ms;             /* the best of three; < 0: it did not answer */
     bool     dns_ok;
-    uint32_t dns_ms;
+    uint32_t dns_ms;            /* what the one that resolved took */
+    char     name[24];          /* the name that resolved */
     char     far[16];           /* what was pinged out there: the name's address, or NT_CABLE_FAR */
     float    far_ms;            /* < 0: no answer */
     uint32_t seq;
 } nt_cable_t;
 
-/* One run: three pings to the gateway, the name, three pings out. It goes
+/* One run: three pings to the gateway, the names, three pings out. It goes
  * out by whichever interface the board is using, the wire when it is up. */
 bool nt_cable_start(const char *gw);
 const nt_cable_t *nt_cable(void);       /* under nt_lock() */

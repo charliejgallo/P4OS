@@ -10127,7 +10127,7 @@ no hay puerta de enlace	there is no gateway
 %s resuelve en %u ms	%s resolves in %u ms
 
 #: firmware (Red, Cable)
-%s no resuelve	%s does not resolve
+no resuelve ninguno de los tres nombres de prueba	none of the three test names resolves
 
 #: firmware (Red, Cable)
 %s responde en %s ms	%s answers in %s ms

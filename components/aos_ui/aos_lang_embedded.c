@@ -485,7 +485,7 @@ static const char blob_en__sistema_lang[] =
     "no responde al ping\tdoes not answer the ping\n"
     "no hay puerta de enlace\tthere is no gateway\n"
     "%s resuelve en %u ms\t%s resolves in %u ms\n"
-    "%s no resuelve\t%s does not resolve\n"
+    "no resuelve ninguno de los tres nombres de prueba\tnone of the three test names resolves\n"
     "%s responde en %s ms\t%s answers in %s ms\n"
     "%s no responde\t%s does not answer\n"
     "La boca de red a la que está enchufado el Ethernet\tThe network port the Ethernet is plugged into\n"

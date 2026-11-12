@@ -1955,11 +1955,10 @@ static void cable_refresh(bool now)
             if (busy && c.step < 2) say(g->c_t_dns, "-", AOS_C_DIM);
             else if (busy && c.step == 2) say(g->c_t_dns, _("probando…"), AOS_C_DIM);
             else if (c.dns_ok) {
-                snprintf(t, sizeof t, _("%s resuelve en %u ms"), NT_CABLE_NAME, (unsigned)c.dns_ms);
+                snprintf(t, sizeof t, _("%s resuelve en %u ms"), c.name, (unsigned)c.dns_ms);
                 say(g->c_t_dns, t, C_GOOD);
             } else {
-                snprintf(t, sizeof t, _("%s no resuelve"), NT_CABLE_NAME);
-                say(g->c_t_dns, t, C_BAD);
+                say(g->c_t_dns, _("no resuelve ninguno de los tres nombres de prueba"), C_BAD);
             }
             if (busy && c.step < 3) say(g->c_t_far, "-", AOS_C_DIM);
             else if (busy) say(g->c_t_far, _("probando…"), AOS_C_DIM);

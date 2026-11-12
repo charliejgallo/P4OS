@@ -10127,7 +10127,7 @@ no hay puerta de enlace	kein Gateway vorhanden
 %s resuelve en %u ms	%s wird in %u ms aufgelöst
 
 #: firmware (Red, Cable)
-%s no resuelve	%s wird nicht aufgelöst
+no resuelve ninguno de los tres nombres de prueba	keiner der drei Testnamen wird aufgelöst
 
 #: firmware (Red, Cable)
 %s responde en %s ms	%s antwortet in %s ms

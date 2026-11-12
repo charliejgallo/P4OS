@@ -1509,9 +1509,13 @@ static void cable_thread(void *arg)
     cable_step(1);
     c.gw_ms = ip_parse(c.gw, &ip) ? echo_best(ip, 3) : -1;
     cable_step(2);
-    int64_t t0 = now_us();
-    c.dns_ok = resolve(NT_CABLE_NAME, &ip);
-    c.dns_ms = (uint32_t)((now_us() - t0) / 1000);
+    static const char *const NAMES[] = NT_CABLE_NAMES;
+    for (size_t k = 0; k < sizeof NAMES / sizeof NAMES[0] && !c.dns_ok && app_alive(); k++) {
+        int64_t t0 = now_us();
+        c.dns_ok = resolve(NAMES[k], &ip);
+        c.dns_ms = (uint32_t)((now_us() - t0) / 1000);
+        if (c.dns_ok) snprintf(c.name, sizeof c.name, "%s", NAMES[k]);
+    }
     if (!c.dns_ok) ip_parse(NT_CABLE_FAR, &ip);
     nt_ip_str(ip, c.far, sizeof c.far);
     cable_step(3);
@@ -1526,6 +1530,7 @@ static void cable_thread(void *arg)
     aos_hal_sleep_ms(500);
     c.dns_ok = true;
     c.dns_ms = 18;
+    snprintf(c.name, sizeof c.name, "example.org");     /* as if the first had not resolved */
     snprintf(c.far, sizeof c.far, "192.0.2.10");
     cable_step(3);
     aos_hal_sleep_ms(700);
