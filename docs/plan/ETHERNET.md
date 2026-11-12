@@ -261,7 +261,10 @@ red. `/api/eth` dice cuántas tramas entraron (`rx`) y cuántas veces lo
 arrancó el vigilante (`restarts`), para que la próxima vez haya con qué
 mirar.
 
-**Sin probar:** que el vigilante actúe. No hay cómo reiniciar el chip desde
+**En la placa, 2026-11-12 por la noche:** instalado. El vigilante lee el
+chip: a los 8 s del arranque anotó el estado del zócalo, `0x42` (MACRAW,
+el que tiene que ser), y en el primer minuto y medio entraron 360 tramas
+sin que arrancara nada de nuevo. **Sin probar:** que el vigilante actúe. No hay cómo reiniciar el chip desde
 afuera con el cableado de hoy (RST está al aire); en la placa auxiliar RST
 sale a una tira y se va a poder.
 
