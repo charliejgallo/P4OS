@@ -1,6 +1,9 @@
 # Changelog
 
-## Next
+## 0.25.2 — 2026-11-11
+
+A fix every board with many apps wants, and the start of two pieces of
+hardware.
 
 - **Preferences were not being kept on a board with many apps, in silence.**
   The 24 KB NVS partition holds 630 entries, and the apps' settings and
@@ -13,6 +16,15 @@
   store. A preference that cannot be kept says so in the log, and the
   backup of the preferences no longer stops at 256 keys. `docs/BUILDING.md`
   has the layout and what going back to an older firmware keeps.
+- **An auxiliary board for the header** (`hw/aux-board/`, plan in
+  `docs/plan/PCB.md`): a first schematic in two variants, through-hole and
+  SMD, written as a list of parts and nets that KiCad checks, and a first
+  placement on the P4's outline with every pin named on the silkscreen.
+  Drafts: nothing is routed and nothing was built.
+- **Ethernet, the plan and the first test** (`docs/plan/ETHERNET.md`): an
+  optional W5500 module on `spi.a`. Wired to the header as in
+  `docs/img/bench-w5500.svg`, the chip answers from Bus. The driver is not
+  in this version.
 
 ## 0.25.1 — 2026-11-10
 
