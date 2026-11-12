@@ -1551,6 +1551,18 @@ bool aos_hal_net_wired(void);
 aos_net_state_t aos_hal_net_wifi_state(void);
 const char *aos_hal_net_wifi_ip(void);
 const char *aos_hal_net_wired_ip(void);
+/* Every network interface the board has right now, for the tools that want
+ * more than "is there a network": the Wi-Fi, the wire, the USB cable, the
+ * board's own access point. Returns how many it wrote, at most max. */
+typedef struct {
+    char    name[8];            /* as the stack calls it: "st1", "en2" */
+    char    kind[12];           /* "wifi", "ethernet", "usb", "ap"; else the stack's key for it */
+    bool    up;                 /* it has a link and an address */
+    bool    way_out;            /* the one the board goes out by: the default route */
+    char    ip[16], mask[16], gw[16];
+    uint8_t mac[6];
+} aos_netif_t;
+int aos_hal_netif_list(aos_netif_t *out, int max);
 /* mDNS on the wire: quiet on a wired network that is not trusted, as
  * aos_hal_net_mdns_visible() does on a Wi-Fi that is not home. */
 void aos_hal_net_mdns_visible_wired(bool on);

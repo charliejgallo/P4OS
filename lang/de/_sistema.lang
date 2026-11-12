@@ -10050,3 +10050,120 @@ Ethernet usa este puerto: al enviar se pone en pausa y la red por cable se corta
 
 #: firmware (Ethernet)
 por cable	per Kabel
+
+#: firmware (Red, Cable)
+%u días	%u Tage
+
+#: firmware (Red, Cable)
+Cable USB	USB-Kabel
+
+#: firmware (Red, Cable)
+sin dirección	keine Adresse
+
+#: firmware (Red, Cable)
+salida	Ausgang
+
+#: firmware (Red, Cable)
+Ninguna interfaz de red arriba	Keine Netzwerkschnittstelle aktiv
+
+#: firmware (Red, Cable)
+Ethernet está apagado: se prende en Ajustes, Redes	Ethernet ist aus: Einschalten unter Einstellungen, Netzwerke
+
+#: firmware (Red, Cable)
+En pausa: %s está usando el puerto SPI	Pausiert: %s benutzt den SPI-Port
+
+#: firmware (Red, Cable)
+El módulo no arrancó	Das Modul ist nicht gestartet
+
+#: firmware (Red, Cable)
+Sin cable, o con nadie del otro lado	Kein Kabel oder niemand am anderen Ende
+
+#: firmware (Red, Cable)
+%d Mbit/s, dúplex completo	%d Mbit/s, Vollduplex
+
+#: firmware (Red, Cable)
+%d Mbit/s, medio dúplex	%d Mbit/s, Halbduplex
+
+#: firmware (Red, Cable)
+esperando al DHCP…	warte auf DHCP…
+
+#: firmware (Red, Cable)
+%s, dada hace %s	%s, vor %s vergeben
+
+#: firmware (Red, Cable)
+Sin enlace no hay a quién escuchar	Ohne Verbindung gibt es niemanden zum Zuhören
+
+#: firmware (Red, Cable)
+Se anunció por %s hace %s	Hat sich per %s vor %s gemeldet
+
+#: firmware (Red, Cable)
+Escuchando el anuncio del switch… %u s. Un switch gestionable lo manda cada 30 s (LLDP) o cada 60 (CDP)	Warte auf die Meldung des Switches… %u s. Ein verwaltbarer Switch sendet sie alle 30 s (LLDP) oder alle 60 (CDP)
+
+#: firmware (Red, Cable)
+Nada en %u s: este switch no se anuncia. No es gestionable, o tiene LLDP apagado	Nichts in %u s: Dieser Switch meldet sich nicht. Er ist nicht verwaltbar, oder LLDP ist aus
+
+#: firmware (Red, Cable)
+la boca da alimentación	der Port liefert Strom
+
+#: firmware (Red, Cable)
+la boca no da alimentación	der Port liefert keinen Strom
+
+#: firmware (Red, Cable)
+Probar la salida	Ausgang testen
+
+#: firmware (Red, Cable)
+probando…	teste…
+
+#: firmware (Red, Cable)
+responde en %s ms	antwortet in %s ms
+
+#: firmware (Red, Cable)
+no responde al ping	antwortet nicht auf den Ping
+
+#: firmware (Red, Cable)
+no hay puerta de enlace	kein Gateway vorhanden
+
+#: firmware (Red, Cable)
+%s resuelve en %u ms	%s wird in %u ms aufgelöst
+
+#: firmware (Red, Cable)
+%s no resuelve	%s wird nicht aufgelöst
+
+#: firmware (Red, Cable)
+%s responde en %s ms	%s antwortet in %s ms
+
+#: firmware (Red, Cable)
+%s no responde	%s antwortet nicht
+
+#: firmware (Red, Cable)
+La boca de red a la que está enchufado el Ethernet	Der Netzwerkanschluss, an dem das Ethernet steckt
+
+#: firmware (Red, Cable)
+Servidor DHCP	DHCP-Server
+
+#: firmware (Red, Cable)
+Concesión	Lease
+
+#: firmware (Red, Cable)
+SALIDA	AUSGANG
+
+#: firmware (Red, Cable)
+Nombres	Namen
+
+#: firmware (Red, Cable)
+Boca	Port
+
+#: firmware (Red, Cable)
+Descripción	Beschreibung
+
+#: firmware (Red, Cable)
+Equipo	Gerät
+
+#: firmware (Red, Cable)
+Gestión	Verwaltung
+
+#: firmware (Red, Cable)
+INTERFACES	SCHNITTSTELLEN
+
+#: firmware (Red, Cable)
+Simulador: el switch y las respuestas de la prueba son de ejemplo.	Simulator: Der Switch und die Testergebnisse sind Beispiele.

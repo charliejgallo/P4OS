@@ -33,7 +33,11 @@
 #include "esp_heap_caps.h"
 #include "esp_mac.h"
 #include "esp_netif.h"
+#include "esp_netif_net_stack.h"
 #include "esp_timer.h"
+#include "lwip/dhcp.h"
+#include "lwip/ip4_addr.h"
+#include "lwip/netif.h"
 
 #define POLL_MS     10
 #define RX_STACK    4096
@@ -65,7 +69,20 @@ static struct {
     volatile bool      busy;            /* paused, and an app has the port right now */
     volatile int64_t   resume_at;       /* paused, the port free: when to come back (esp_timer time) */
     volatile bool      waiting;         /* the thread that brings it back is alive */
+    int64_t            ip_at;           /* when the address came */
+    /* listening for the switch's announcement (aos_eth_listen) */
+    volatile bool      listen;          /* a tool wants it */
+    bool               promisc;         /* the chip is passing every frame on */
+    esp_timer_handle_t listen_off;      /* switches it off when the tool goes quiet */
+    SemaphoreHandle_t  heard_lock;
+    uint8_t           *frame;           /* the last announcement, whole, in PSRAM: read when someone asks */
+    uint16_t           frame_len;
+    int64_t            frame_at;
+    uint32_t           heard;
 } E;
+
+#define LISTEN_MS   5000                /* how long listening outlives the last call that asked for it */
+#define FRAME_MAX_L 1536
 
 /* ---- the driver's SPI, on ours ---- */
 
@@ -131,6 +148,57 @@ static esp_err_t spi_write(void *ctx, uint32_t cmd, uint32_t addr, const void *d
     return spi_rw(ctx, cmd, addr, data, NULL, len);
 }
 
+/* ---- every frame that comes in, before the stack sees it ---- */
+
+/* The driver's receive task, 4 KB of stack: it only looks at the destination
+ * and keeps a copy. While listening the chip passes on what is not ours too.
+ * An announcement is kept for whoever asks (parsed there, not here) and goes
+ * no further; another station's frame is dropped; the rest is the stack's,
+ * as the driver's own glue would hand it over. The buffer is malloc'ed by
+ * the driver and freed by whoever takes it. */
+static esp_err_t eth_input(esp_eth_handle_t eth, uint8_t *buf, uint32_t len, void *priv)
+{
+    (void)eth;
+    if (E.listen && len >= 14 && (buf[0] & 1)) {
+        static const uint8_t LLDP[5] = { 0x01, 0x80, 0xC2, 0x00, 0x00 }, CDP[6] = { 0x01, 0x00, 0x0C, 0xCC, 0xCC, 0xCC };
+        if (!memcmp(buf, LLDP, 5) || !memcmp(buf, CDP, 6)) {
+            if (E.frame && len <= FRAME_MAX_L && xSemaphoreTake(E.heard_lock, pdMS_TO_TICKS(10))) {
+                memcpy(E.frame, buf, len);
+                E.frame_len = (uint16_t)len;
+                E.frame_at = esp_timer_get_time();
+                E.heard++;
+                xSemaphoreGive(E.heard_lock);
+            }
+            free(buf);
+            return ESP_OK;
+        }
+    } else if (E.promisc && len >= 6 && memcmp(buf, E.info.mac, 6)) {
+        free(buf);                      /* to another station: here only because the filter is off */
+        return ESP_OK;
+    }
+    return esp_netif_receive((esp_netif_t *)priv, buf, len, NULL);
+}
+
+/* The chip's address filter off or on, when the driver is up and nobody is
+ * starting or stopping it; false to try again later. */
+static bool promisc_apply(void)
+{
+    if (!E.lock || !xSemaphoreTake(E.lock, 0)) return false;
+    if (E.eth && E.info.running && E.promisc != E.listen) {
+        bool on = E.listen;
+        if (esp_eth_ioctl(E.eth, ETH_CMD_S_PROMISCUOUS, &on) == ESP_OK) E.promisc = on;
+    }
+    xSemaphoreGive(E.lock);
+    return true;
+}
+
+static void listen_timeout(void *arg)
+{
+    (void)arg;
+    E.listen = false;
+    if (!promisc_apply()) esp_timer_start_once(E.listen_off, 500000);
+}
+
 /* ---- what the link and the address are doing ---- */
 
 static void on_event(void *arg, esp_event_base_t base, int32_t id, void *data)
@@ -151,6 +219,11 @@ static void on_event(void *arg, esp_event_base_t base, int32_t id, void *data)
         E.info.link = false;
         E.info.speed_mbps = 0;
         E.info.ip[0] = E.info.mask[0] = E.info.gw[0] = 0;
+        if (E.heard_lock && xSemaphoreTake(E.heard_lock, pdMS_TO_TICKS(50))) {
+            E.frame_len = 0;            /* the next cable may go to another switch */
+            E.heard = 0;
+            xSemaphoreGive(E.heard_lock);
+        }
         aos_hal_net_wired_set(false, NULL);
         aos_hal_log("eth", "link down");
     } else if (base == IP_EVENT && id == IP_EVENT_ETH_GOT_IP) {
@@ -159,6 +232,7 @@ static void on_event(void *arg, esp_event_base_t base, int32_t id, void *data)
         snprintf(E.info.ip, sizeof E.info.ip, IPSTR, IP2STR(&ev->ip_info.ip));
         snprintf(E.info.mask, sizeof E.info.mask, IPSTR, IP2STR(&ev->ip_info.netmask));
         snprintf(E.info.gw, sizeof E.info.gw, IPSTR, IP2STR(&ev->ip_info.gw));
+        E.ip_at = esp_timer_get_time();
         aos_hal_log("eth", "address %s, gateway %s", E.info.ip, E.info.gw);
         aos_hal_net_wired_set(true, E.info.ip);
     } else if (base == IP_EVENT && id == IP_EVENT_ETH_LOST_IP) {
@@ -257,8 +331,14 @@ static bool start(void)
     E.glue = esp_eth_new_netif_glue(E.eth);
     e = E.glue ? esp_netif_attach(E.netif, E.glue) : ESP_ERR_NO_MEM;
     if (e != ESP_OK) return fail("no se pudo unir el W5500 a la red", e);
+    esp_eth_update_input_path(E.eth, eth_input, E.netif);       /* ours first, then the stack's (eth_input) */
     e = esp_eth_start(E.eth);
     if (e != ESP_OK) return fail("el W5500 no arrancó", e);
+    E.promisc = false;
+    if (E.listen) {                     /* a tool was listening when it stopped for an app */
+        bool on = true;
+        if (esp_eth_ioctl(E.eth, ETH_CMD_S_PROMISCUOUS, &on) == ESP_OK) E.promisc = true;
+    }
 
     E.info.running = true;
     aos_hal_log("eth", "W5500 on %s CS%d at %u Hz (%u asked%s), %02X:%02X:%02X:%02X:%02X:%02X, polled every %d ms",
@@ -375,4 +455,64 @@ void aos_eth_info(aos_eth_info_t *out)
 {
     *out = E.info;
     out->link_s = E.info.link ? (uint32_t)((esp_timer_get_time() - E.link_at) / 1000000) : 0;
+}
+
+/* The server and the lease are lwIP's own record of the DHCP exchange, read
+ * without its lock: four words that change once in hours. The DNS servers
+ * are the stack's, one list for every interface: with the Wi-Fi up too they
+ * are whichever DHCP answered last. */
+void aos_eth_dhcp(aos_eth_dhcp_t *out)
+{
+    memset(out, 0, sizeof *out);
+    if (!E.netif || !E.info.ip[0]) return;
+    out->valid = true;
+    out->age_s = (uint32_t)((esp_timer_get_time() - E.ip_at) / 1000000);
+    struct netif *n = esp_netif_get_netif_impl(E.netif);
+    struct dhcp *d = n ? netif_dhcp_data(n) : NULL;
+    if (d && !ip4_addr_isany_val(*ip_2_ip4(&d->server_ip_addr))) {
+        ip4addr_ntoa_r(ip_2_ip4(&d->server_ip_addr), out->server, sizeof out->server);
+        out->lease_s = d->offered_t0_lease;
+    }
+    esp_netif_dns_info_t dns;
+    if (esp_netif_get_dns_info(E.netif, ESP_NETIF_DNS_MAIN, &dns) == ESP_OK && dns.ip.u_addr.ip4.addr)
+        snprintf(out->dns1, sizeof out->dns1, IPSTR, IP2STR(&dns.ip.u_addr.ip4));
+    if (esp_netif_get_dns_info(E.netif, ESP_NETIF_DNS_BACKUP, &dns) == ESP_OK && dns.ip.u_addr.ip4.addr)
+        snprintf(out->dns2, sizeof out->dns2, IPSTR, IP2STR(&dns.ip.u_addr.ip4));
+}
+
+void aos_eth_listen(bool on)
+{
+    if (!E.heard_lock) {
+        if (!on) return;
+        E.heard_lock = xSemaphoreCreateMutex();
+        /* one frame, kept whole: PSRAM, nothing in it is touched from an interrupt */
+        E.frame = heap_caps_malloc(FRAME_MAX_L, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+        const esp_timer_create_args_t ta = { .callback = listen_timeout, .name = "eth-listen" };
+        esp_timer_create(&ta, &E.listen_off);
+        if (!E.heard_lock || !E.frame || !E.listen_off) return;
+    }
+    if (on && !E.listen) {              /* a new listen: what was heard before may be another switch's */
+        xSemaphoreTake(E.heard_lock, portMAX_DELAY);
+        E.frame_len = 0;
+        E.heard = 0;
+        xSemaphoreGive(E.heard_lock);
+    }
+    E.listen = on;
+    esp_timer_stop(E.listen_off);
+    if (on) esp_timer_start_once(E.listen_off, LISTEN_MS * 1000);
+    if (E.promisc != on) promisc_apply();
+}
+
+bool aos_eth_neighbor(aos_eth_neighbor_t *out)
+{
+    memset(out, 0, sizeof *out);
+    if (!E.heard_lock || !E.frame) return false;
+    xSemaphoreTake(E.heard_lock, portMAX_DELAY);
+    bool ok = E.frame_len && aos_eth_parse_announce(E.frame, E.frame_len, out);
+    if (ok) {
+        out->age_s = (uint32_t)((esp_timer_get_time() - E.frame_at) / 1000000);
+        out->heard = E.heard;
+    }
+    xSemaphoreGive(E.heard_lock);
+    return ok;
 }

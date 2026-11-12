@@ -520,6 +520,14 @@ page.
   (`docs/SECURITY.md`).
 - **In the simulator:** `P4_SIM_ETH=1` (a cable and an address) or
   `P4_SIM_ETH=nolink`.
+- **A tester for the port it is plugged into** (not in a release yet): Red,
+  the Cable tab. The link, what the DHCP server gave, which switch and
+  which of its ports this is when the switch says so (LLDP or CDP), a test
+  of the gateway, a name and the internet, and the board's interfaces. For
+  apps of the card: `aos_eth_dhcp()`, `aos_eth_listen()` and
+  `aos_eth_neighbor()` in `aos_eth.h`, `aos_hal_netif_list()` in
+  `aos_hal.h`. In the simulator the switch is made up
+  (`P4_SIM_ETH=cdp`, `=quiet`).
 
 `docs/plan/ETHERNET.md` (Spanish) has the phases, everything measured and
 what is next.

@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3620 simbolos.
+ * Total: 3627 simbolos.
  */
 
 #include <stddef.h>
@@ -129,9 +129,13 @@ extern int aos_emoji_init;
 extern int aos_emoji_match;
 extern int aos_emoji_ready;
 extern int aos_eth_boot;
+extern int aos_eth_dhcp;
 extern int aos_eth_enable;
 extern int aos_eth_info;
+extern int aos_eth_listen;
+extern int aos_eth_neighbor;
 extern int aos_eth_on_pause;
+extern int aos_eth_parse_announce;
 extern int aos_eth_port_free;
 extern int aos_eth_set_clock;
 extern int aos_eth_yield;
@@ -428,6 +432,7 @@ extern int aos_hal_net_wifi_state;
 extern int aos_hal_net_wired;
 extern int aos_hal_net_wired_ip;
 extern int aos_hal_net_wired_set;
+extern int aos_hal_netif_list;
 extern int aos_hal_night_info;
 extern int aos_hal_night_sleep_enable;
 extern int aos_hal_night_sleep_enabled;
@@ -3522,6 +3527,8 @@ extern int music_cover_take;
 extern int music_folder_cover;
 extern int namelist_has;
 extern int nt_big_calloc;
+extern int nt_cable;
+extern int nt_cable_start;
 extern int nt_guess;
 extern int nt_init;
 extern int nt_ip_str;
@@ -3752,9 +3759,13 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_emoji_match),
     ESP_ELFSYM_EXPORT(aos_emoji_ready),
     ESP_ELFSYM_EXPORT(aos_eth_boot),
+    ESP_ELFSYM_EXPORT(aos_eth_dhcp),
     ESP_ELFSYM_EXPORT(aos_eth_enable),
     ESP_ELFSYM_EXPORT(aos_eth_info),
+    ESP_ELFSYM_EXPORT(aos_eth_listen),
+    ESP_ELFSYM_EXPORT(aos_eth_neighbor),
     ESP_ELFSYM_EXPORT(aos_eth_on_pause),
+    ESP_ELFSYM_EXPORT(aos_eth_parse_announce),
     ESP_ELFSYM_EXPORT(aos_eth_port_free),
     ESP_ELFSYM_EXPORT(aos_eth_set_clock),
     ESP_ELFSYM_EXPORT(aos_eth_yield),
@@ -4051,6 +4062,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_net_wired),
     ESP_ELFSYM_EXPORT(aos_hal_net_wired_ip),
     ESP_ELFSYM_EXPORT(aos_hal_net_wired_set),
+    ESP_ELFSYM_EXPORT(aos_hal_netif_list),
     ESP_ELFSYM_EXPORT(aos_hal_night_info),
     ESP_ELFSYM_EXPORT(aos_hal_night_sleep_enable),
     ESP_ELFSYM_EXPORT(aos_hal_night_sleep_enabled),
@@ -7145,6 +7157,8 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(music_folder_cover),
     ESP_ELFSYM_EXPORT(namelist_has),
     ESP_ELFSYM_EXPORT(nt_big_calloc),
+    ESP_ELFSYM_EXPORT(nt_cable),
+    ESP_ELFSYM_EXPORT(nt_cable_start),
     ESP_ELFSYM_EXPORT(nt_guess),
     ESP_ELFSYM_EXPORT(nt_init),
     ESP_ELFSYM_EXPORT(nt_ip_str),

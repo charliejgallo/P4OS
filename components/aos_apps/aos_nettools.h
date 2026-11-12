@@ -146,6 +146,28 @@ void nt_wifi_run(void);         /* starts the sampler (2 Hz) if it is not runnin
 bool nt_wifi_scan(void);        /* one scan; false if one is under way */
 const nt_wifi_t *nt_wifi(void);             /* under nt_lock() */
 
+/* ---- the cable test: is there a way out by this network ---- */
+
+#define NT_CABLE_NAME "example.com"     /* the name asked for: the one reserved for examples */
+#define NT_CABLE_FAR  "1.1.1.1"         /* pinged when no name resolves, to tell a dead DNS from a dead line */
+
+typedef struct {
+    int      state;             /* NT_BUSY while it runs, NT_DONE with the answers below */
+    int      step;              /* 1 the gateway, 2 the name, 3 out there */
+    char     gw[16];
+    float    gw_ms;             /* the best of three; < 0: it did not answer */
+    bool     dns_ok;
+    uint32_t dns_ms;
+    char     far[16];           /* what was pinged out there: the name's address, or NT_CABLE_FAR */
+    float    far_ms;            /* < 0: no answer */
+    uint32_t seq;
+} nt_cable_t;
+
+/* One run: three pings to the gateway, the name, three pings out. It goes
+ * out by whichever interface the board is using, the wire when it is up. */
+bool nt_cable_start(const char *gw);
+const nt_cable_t *nt_cable(void);       /* under nt_lock() */
+
 /* ---- mDNS ---- */
 
 #define NT_MAX_SVC 64

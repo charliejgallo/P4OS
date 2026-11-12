@@ -768,6 +768,9 @@ __attribute__((weak)) const char * aos_hal_net_wifi_ip(void)
 __attribute__((weak)) const char * aos_hal_net_wired_ip(void)
 { return ""; }
 
+__attribute__((weak)) int aos_hal_netif_list(aos_netif_t *out, int max)
+{ int v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) void aos_hal_net_mdns_visible_wired(bool on)
 { }
 

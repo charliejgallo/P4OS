@@ -49,6 +49,13 @@ avisarlo una vez.
 después de esa corrida. Lo que sigue (fase 4 en adelante) va en `main`
 como el resto del firmware.
 
+**Fase 4 empezada y primera herramienta de la fase 5, 2026-11-12, en la
+rama `ethernet` (sin instalar en la placa):** la pestaña **Cable** de Red,
+el probador de boca. Visto en el simulador con un switch de ejemplo; en la
+placa falta todo, y en particular lo que sólo ella puede decir: si el
+W5500 con el filtro de direcciones apagado entrega las tramas de LLDP y
+CDP, y lo que dice un switch de verdad. Abajo, "El probador de boca".
+
 ## El módulo
 
 Un "W5500 Lite" (también "Mini W5500", HW-884), visto en las fotos del
@@ -141,8 +148,8 @@ se usa: el driver sondea.
 | **1. Enlace** ✅ 2026-11-11 | `aos_eth_p4.c` (en `aos_io`): el driver sobre `aos_io_spi`, sondeando, detrás de una preferencia; DHCP; todo al registro. `sdkconfig`: `ETH_USE_SPI_ETHERNET`, `ETH_SPI_ETHERNET_W5500` | La placa toma IP por el cable y contesta ping. Medir: velocidad a 8, 20 y 33 MHz de SPI con los cables del banco, RAM interna que cuesta, CPU |
 | **2. Convivencia** ✅ 2026-11-11, salvo lo anotado | Ruta por defecto, el vigilante de red, mDNS y SNTP por el cable, sacar y poner el cable, arrancar sin Wi-Fi, arrancar sin módulo | El portal, la OTA y SSH andan por cable con el Wi-Fi apagado; sacar el cable no reinicia ni cuelga; 12 h prendida sin perder el enlace |
 | **3. Interfaz** ✅ 2026-11-11 | Ajustes → Redes; ícono en la barra; `GET/POST /api/eth` y la página Red del portal; IP fija optativa; el módulo en Módulos | Se prende, se apaga y se ve el estado sin tocar un archivo; en el simulador, un Ethernet falso (`P4_SIM_ETH=1`, o `nolink` para el módulo sin cable) |
-| **4. Para las apps** | Las apps ya usan sockets y no cambian. Lo nuevo: lista de interfaces con su estado para las herramientas de red (`aos_hal_netif_*`), elegir por cuál sale un socket, modo promiscuo y tramas crudas para las de diagnóstico | Red (la app) muestra las dos interfaces; Modbus TCP, Art-Net y SSH probados por cable |
-| **5. Apps de taller** | Las de abajo, de a una | Cada una con su prueba en el banco |
+| **4. Para las apps**, empezada 2026-11-12 | Las apps ya usan sockets y no cambian. Lo nuevo: lista de interfaces con su estado para las herramientas de red (`aos_hal_netif_*`), elegir por cuál sale un socket, modo promiscuo y tramas crudas para las de diagnóstico | Red (la app) muestra las dos interfaces; Modbus TCP, Art-Net y SSH probados por cable. **Hecho:** la lista de interfaces (`aos_hal_netif_list`), los datos del DHCP (`aos_eth_dhcp`) y la escucha del anuncio del switch (`aos_eth_listen`, `aos_eth_neighbor`), exportados a las apps de la tarjeta. **Falta:** elegir por cuál interfaz sale un socket, y las tramas crudas para una app (hoy el firmware sólo guarda el anuncio) |
+| **5. Apps de taller** | Las de abajo, de a una. La 1, el probador de boca, está en el simulador (2026-11-12) | Cada una con su prueba en el banco |
 | **6. Placa auxiliar** | Los zócalos del módulo con sus medidas reales; ver si conviene el chip integrado en la PCBA | El módulo entra en la placa impresa de prueba |
 
 Cada fase termina con lo medido anotado acá y en `PRUEBAS-PLACA.md`.
@@ -216,6 +223,53 @@ arranque). **Arreglado ese mismo día, en `main`:** las preferencias pasaron
 a un almacén propio de 256 KB (`docs/BUILDING.md`, "The preferences are in
 `prefs`"); en la placa se movieron las 422 claves y la del reloj quedó
 guardada tras un reinicio.
+
+## El probador de boca (Red, pestaña Cable)
+
+Una pestaña más de Red, no una app de la tarjeta: necesita las tramas que
+llegan al chip, y eso es del firmware. Muestra, de la boca a la que está
+enchufado el Ethernet:
+
+- **El enlace:** velocidad y dúplex, o por qué no hay (apagado, sin
+  módulo, sin cable, en pausa por una app).
+- **Lo que dio el DHCP:** dirección, máscara, puerta de enlace, DNS, el
+  servidor y la concesión con su edad. El servidor y la concesión salen del
+  registro que lwIP guarda del intercambio; los DNS son los de la pila, una
+  sola lista para todas las interfaces: con el Wi-Fi arriba a la vez son los
+  del último DHCP que contestó.
+- **El switch y la boca:** nombre, boca, descripción de la boca, VLAN sin
+  etiqueta, si la boca da PoE, modelo y dirección de gestión, leídos del
+  anuncio que el switch manda solo (LLDP cada 30 s; CDP de Cisco cada 60).
+  Un switch no gestionable no dice nada, y la pantalla lo dice a los 75 s.
+- **La salida**, al tocar "Probar la salida": tres pings a la puerta de
+  enlace, resolver `example.com`, y tres pings a lo que resolvió (o a
+  `1.1.1.1` si no resolvió, para distinguir un DNS caído de una línea
+  caída). Sale por la interfaz que la placa esté usando: el cable si está
+  arriba.
+- **Las interfaces** que tiene la placa, cada una con su dirección, y cuál
+  es la salida.
+
+Cómo escucha al switch: los anuncios van a direcciones de grupo que el
+W5500 no deja pasar con su filtro prendido (el driver de la IDF dice que
+con filtro sólo entran las multidifusiones de IP). Mientras la pestaña está
+abierta, el firmware apaga el filtro (`ETH_CMD_S_PROMISCUOUS`): el chip
+entrega todo lo que llega a la boca, y una función propia en la entrada
+(`eth_input`, antes de lwIP) guarda el anuncio, descarta lo que es para
+otra estación y deja pasar el resto. Se apaga sola a los 5 s de que nadie
+la pida. La trama se guarda entera (1,5 KB, en PSRAM) y se lee recién
+cuando alguien pregunta, fuera de la tarea de recepción, que tiene 4 KB de
+pila. El lector (`aos_eth_announce.c`) no le cree nada a la trama: pasó
+tres millones de tramas rotas bajo el sanitizador de direcciones sin una
+falla.
+
+En el simulador: `P4_SIM_ETH=1` trae un switch de ejemplo que se anuncia
+por LLDP a los 3 s (`cdp`: por CDP; `quiet`: uno que no dice nada), con
+tramas de verdad armadas ahí y leídas por el mismo código que en la placa.
+La prueba de salida del simulador no sale a la red: sus respuestas son de
+ejemplo.
+
+**Falta en la placa:** todo. Y saber si conviene dejar la escucha prendida
+más tiempo o bajar el sondeo mientras escucha.
 
 ## Qué gana el taller con un cable de red
 

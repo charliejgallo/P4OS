@@ -377,6 +377,44 @@ static char s_wired_ip[16];
 aos_net_state_t aos_hal_net_state(void) { return s_wired ? AOS_NET_CONNECTED : s_state; }
 bool aos_hal_net_wired(void) { return s_wired; }
 aos_net_state_t aos_hal_net_wifi_state(void) { return s_state; }
+
+/* The list is the stack's own, walked in the stack's thread: an interface
+ * can go while it is read (Ethernet stops for an app that takes its SPI). */
+typedef struct { aos_netif_t *out; int max, n; } netif_walk_t;
+
+static esp_err_t netif_walk(void *ctx)
+{
+    netif_walk_t *w = ctx;
+    esp_netif_t *def = esp_netif_get_default_netif();
+    for (esp_netif_t *it = esp_netif_next_unsafe(NULL); it && w->n < w->max; it = esp_netif_next_unsafe(it)) {
+        aos_netif_t *o = &w->out[w->n++];
+        memset(o, 0, sizeof *o);
+        char name[8] = "";
+        esp_netif_get_netif_impl_name(it, name);
+        snprintf(o->name, sizeof o->name, "%s", name);
+        const char *key = esp_netif_get_ifkey(it);
+        if (!key) key = "";
+        snprintf(o->kind, sizeof o->kind, "%s", strstr(key, "STA") ? "wifi" : strstr(key, "AP") ? "ap"
+                 : strstr(key, "ETH") ? "ethernet" : strstr(key, "USB") || strstr(key, "NCM") ? "usb" : key);
+        esp_netif_ip_info_t ip;
+        if (esp_netif_get_ip_info(it, &ip) == ESP_OK && ip.ip.addr) {
+            snprintf(o->ip, sizeof o->ip, IPSTR, IP2STR(&ip.ip));
+            snprintf(o->mask, sizeof o->mask, IPSTR, IP2STR(&ip.netmask));
+            if (ip.gw.addr) snprintf(o->gw, sizeof o->gw, IPSTR, IP2STR(&ip.gw));
+        }
+        o->up = esp_netif_is_netif_up(it) && o->ip[0];
+        o->way_out = o->up && it == def;
+        esp_netif_get_mac(it, o->mac);
+    }
+    return ESP_OK;
+}
+
+int aos_hal_netif_list(aos_netif_t *out, int max)
+{
+    netif_walk_t w = { .out = out, .max = max, .n = 0 };
+    if (!out || max <= 0 || esp_netif_tcpip_exec(netif_walk, &w) != ESP_OK) return 0;
+    return w.n;
+}
 const char *aos_hal_net_wired_ip(void) { return s_wired ? s_wired_ip : ""; }
 const char *aos_hal_net_coprocessor_fw(void) { return s_c6_fw; }
 

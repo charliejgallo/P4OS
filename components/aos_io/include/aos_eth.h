@@ -27,6 +27,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#include <stddef.h>
+
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -60,6 +62,46 @@ bool aos_eth_enable(bool on);
 /* The SPI clock, kept as a preference; it takes effect at the next start. */
 void aos_eth_set_clock(uint32_t hz);
 void aos_eth_info(aos_eth_info_t *out);
+
+/* ---- for the tools that test a network port (Red, Cable) ---- */
+
+/* What the DHCP server gave with the address. */
+typedef struct {
+    bool     valid;             /* the wire has an address */
+    char     server[16];        /* who gave it; "" when it was not DHCP */
+    char     dns1[16], dns2[16];
+    uint32_t lease_s;           /* for how long it was given */
+    uint32_t age_s;             /* how long ago */
+} aos_eth_dhcp_t;
+void aos_eth_dhcp(aos_eth_dhcp_t *out);
+
+/* The switch at the other end of the cable, as it announces itself: LLDP,
+ * or Cisco's CDP. A switch that is not managed says nothing. */
+typedef struct {
+    char     proto[8];          /* "LLDP" or "CDP" */
+    char     system[64];        /* the switch's name */
+    char     port[48];          /* this port, as the switch calls it */
+    char     port_desc[64];     /* and as whoever set it up described it */
+    char     descr[96];         /* the model and its software */
+    char     chassis[32];       /* its MAC or identifier */
+    char     mgmt[40];          /* where it is managed from */
+    int      vlan;              /* the port's untagged VLAN; 0 not said */
+    int      poe;               /* 1 the port offers power, 0 it does not, -1 not said */
+    uint32_t ttl_s;             /* for how long the switch says this holds */
+    uint32_t age_s;             /* since the last announcement */
+    uint32_t heard;             /* announcements since listening began */
+} aos_eth_neighbor_t;
+
+/* Listening for the announcement. The chip then passes on every frame on
+ * the wire, not only the board's, so it is on only while a tool asks: call
+ * it again every second or two, it switches itself off five seconds after
+ * the last call. Turning it on forgets what was heard before. */
+void aos_eth_listen(bool on);
+/* false: nothing heard since listening began. */
+bool aos_eth_neighbor(aos_eth_neighbor_t *out);
+/* Reads a whole Ethernet frame: true when it is an announcement, with what
+ * it says (age_s and heard left at 0). aos_eth_announce.c. */
+bool aos_eth_parse_announce(const uint8_t *frame, size_t len, aos_eth_neighbor_t *out);
 
 /* For the SPI service (aos_io.c). An app asks for a port: if Ethernet is on
  * it, it stops and lets it go (true), and if it was already waiting for that

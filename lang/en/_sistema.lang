@@ -10050,3 +10050,120 @@ Ethernet usa este puerto: al enviar se pone en pausa y la red por cable se corta
 
 #: firmware (Ethernet)
 por cable	by wire
+
+#: firmware (Red, Cable)
+%u días	%u days
+
+#: firmware (Red, Cable)
+Cable USB	USB cable
+
+#: firmware (Red, Cable)
+sin dirección	no address
+
+#: firmware (Red, Cable)
+salida	way out
+
+#: firmware (Red, Cable)
+Ninguna interfaz de red arriba	No network interface is up
+
+#: firmware (Red, Cable)
+Ethernet está apagado: se prende en Ajustes, Redes	Ethernet is off: it is switched on in Settings, Networks
+
+#: firmware (Red, Cable)
+En pausa: %s está usando el puerto SPI	Paused: %s is using the SPI port
+
+#: firmware (Red, Cable)
+El módulo no arrancó	The module did not start
+
+#: firmware (Red, Cable)
+Sin cable, o con nadie del otro lado	No cable, or nobody at the other end
+
+#: firmware (Red, Cable)
+%d Mbit/s, dúplex completo	%d Mbit/s, full duplex
+
+#: firmware (Red, Cable)
+%d Mbit/s, medio dúplex	%d Mbit/s, half duplex
+
+#: firmware (Red, Cable)
+esperando al DHCP…	waiting for DHCP…
+
+#: firmware (Red, Cable)
+%s, dada hace %s	%s, given %s ago
+
+#: firmware (Red, Cable)
+Sin enlace no hay a quién escuchar	With no link there is nobody to listen to
+
+#: firmware (Red, Cable)
+Se anunció por %s hace %s	Announced itself by %s %s ago
+
+#: firmware (Red, Cable)
+Escuchando el anuncio del switch… %u s. Un switch gestionable lo manda cada 30 s (LLDP) o cada 60 (CDP)	Listening for the switch's announcement… %u s. A managed switch sends it every 30 s (LLDP) or every 60 (CDP)
+
+#: firmware (Red, Cable)
+Nada en %u s: este switch no se anuncia. No es gestionable, o tiene LLDP apagado	Nothing in %u s: this switch does not announce itself. It is not a managed one, or its LLDP is off
+
+#: firmware (Red, Cable)
+la boca da alimentación	the port supplies power
+
+#: firmware (Red, Cable)
+la boca no da alimentación	the port supplies no power
+
+#: firmware (Red, Cable)
+Probar la salida	Test the way out
+
+#: firmware (Red, Cable)
+probando…	testing…
+
+#: firmware (Red, Cable)
+responde en %s ms	answers in %s ms
+
+#: firmware (Red, Cable)
+no responde al ping	does not answer the ping
+
+#: firmware (Red, Cable)
+no hay puerta de enlace	there is no gateway
+
+#: firmware (Red, Cable)
+%s resuelve en %u ms	%s resolves in %u ms
+
+#: firmware (Red, Cable)
+%s no resuelve	%s does not resolve
+
+#: firmware (Red, Cable)
+%s responde en %s ms	%s answers in %s ms
+
+#: firmware (Red, Cable)
+%s no responde	%s does not answer
+
+#: firmware (Red, Cable)
+La boca de red a la que está enchufado el Ethernet	The network port the Ethernet is plugged into
+
+#: firmware (Red, Cable)
+Servidor DHCP	DHCP server
+
+#: firmware (Red, Cable)
+Concesión	Lease
+
+#: firmware (Red, Cable)
+SALIDA	WAY OUT
+
+#: firmware (Red, Cable)
+Nombres	Names
+
+#: firmware (Red, Cable)
+Boca	Port
+
+#: firmware (Red, Cable)
+Descripción	Description
+
+#: firmware (Red, Cable)
+Equipo	Device
+
+#: firmware (Red, Cable)
+Gestión	Management
+
+#: firmware (Red, Cable)
+INTERFACES	INTERFACES
+
+#: firmware (Red, Cable)
+Simulador: el switch y las respuestas de la prueba son de ejemplo.	Simulator: the switch and the test's answers are examples.

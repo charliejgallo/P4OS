@@ -91,6 +91,7 @@ typedef struct {
     nt_ports_t ports;
     nt_wifi_t  wifi;
     nt_mdns_t  mdns;
+    nt_cable_t cable;
 } nt_state_t;
 
 static nt_state_t *T;
@@ -134,6 +135,7 @@ const nt_scan_t  *nt_scan(void)  { return &S; }
 const nt_ports_t *nt_ports(void) { return &R; }
 const nt_wifi_t  *nt_wifi(void)  { return &W; }
 const nt_mdns_t  *nt_mdns(void)  { return &M; }
+const nt_cable_t *nt_cable(void) { return &T->cable; }
 
 void nt_ip_str(uint32_t ip, char *out, size_t n)
 {
@@ -1449,6 +1451,120 @@ void nt_wifi_run(void)
         s_wifi_run = false;
         nt_unlock();
     }
+}
+
+/* -------------------------------------------------------------------------- */
+/* The cable test                                                              */
+/* -------------------------------------------------------------------------- */
+
+static bool s_cable_run;
+
+#ifdef ESP_PLATFORM
+/* The best of 'tries' pings, a second's wait each; < 0 when none came back. */
+static float echo_best(uint32_t ip, int tries)
+{
+    int fd = icmp_open();
+    if (fd < 0) return -1;
+    uint16_t id = (uint16_t)rand();
+    float best = -1;
+    for (int seq = 1; seq <= tries && app_alive(); seq++) {
+        int64_t start = now_us();
+        float ms = -1;
+        if (icmp_send(fd, ip, id, (uint16_t)seq)) {
+            while (ms < 0 && now_us() - start < 1000000) {
+                if (!wait_read(fd, 100)) continue;
+                uint32_t src;
+                uint16_t rid, rseq;
+                int ttl, r;
+                while ((r = icmp_recv(fd, &src, &rid, &rseq, &ttl)) == 1)
+                    if (src == ip && rid == id && rseq == seq) { ms = (float)(now_us() - start) / 1000.0f; break; }
+                if (r < 0) break;
+            }
+        }
+        if (ms >= 0 && (best < 0 || ms < best)) best = ms;
+        if (ms >= 0 && seq < tries) aos_hal_sleep_ms(150);
+    }
+    close(fd);
+    return best;
+}
+#endif
+
+static void cable_step(int step)
+{
+    nt_lock();
+    T->cable.step = step;
+    T->cable.seq++;
+    nt_unlock();
+}
+
+static void cable_thread(void *arg)
+{
+    (void)arg;
+    nt_cable_t c;
+    nt_lock();
+    c = T->cable;
+    nt_unlock();
+#ifdef ESP_PLATFORM
+    uint32_t ip = 0;
+    cable_step(1);
+    c.gw_ms = ip_parse(c.gw, &ip) ? echo_best(ip, 3) : -1;
+    cable_step(2);
+    int64_t t0 = now_us();
+    c.dns_ok = resolve(NT_CABLE_NAME, &ip);
+    c.dns_ms = (uint32_t)((now_us() - t0) / 1000);
+    if (!c.dns_ok) ip_parse(NT_CABLE_FAR, &ip);
+    nt_ip_str(ip, c.far, sizeof c.far);
+    cable_step(3);
+    c.far_ms = echo_best(ip, 3);
+#else
+    /* The simulator's Ethernet is made up, and so are its answers: nothing
+     * here goes out to the network of whoever runs it. */
+    cable_step(1);
+    aos_hal_sleep_ms(500);
+    c.gw_ms = 0.6f;
+    cable_step(2);
+    aos_hal_sleep_ms(500);
+    c.dns_ok = true;
+    c.dns_ms = 18;
+    snprintf(c.far, sizeof c.far, "192.0.2.10");
+    cable_step(3);
+    aos_hal_sleep_ms(700);
+    c.far_ms = 14.2f;
+#endif
+    nt_lock();
+    c.seq = T->cable.seq + 1;
+    c.step = 0;
+    c.state = NT_DONE;
+    T->cable = c;
+    s_cable_run = false;
+    nt_unlock();
+}
+
+bool nt_cable_start(const char *gw)
+{
+    nt_keepalive();
+    nt_lock();
+    bool busy = s_cable_run;
+    if (!busy) {
+        uint32_t seq = T->cable.seq + 1;
+        memset(&T->cable, 0, sizeof T->cable);
+        T->cable.seq = seq;
+        T->cable.state = NT_BUSY;
+        T->cable.gw_ms = T->cable.far_ms = -1;
+        snprintf(T->cable.gw, sizeof T->cable.gw, "%s", gw ? gw : "");
+        s_cable_run = true;
+    }
+    nt_unlock();
+    if (busy) return false;
+    if (!aos_hal_thread_start("nt_cable", cable_thread, NULL, STACK, PRIO)) {
+        nt_lock();
+        s_cable_run = false;
+        T->cable.state = NT_FAILED;
+        T->cable.seq++;
+        nt_unlock();
+        return false;
+    }
+    return true;
 }
 
 bool nt_wifi_scan(void)

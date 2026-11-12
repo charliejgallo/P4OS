@@ -1,7 +1,7 @@
 /*
  * P4OS - Red: the network tools of the bench, over aos_nettools.c.
  *
- * Four tabs:
+ * Five tabs:
  *
  *   Ping    any host or address: a ping a second with the latency as bars,
  *           min/avg/max, loss and jitter, and what the name resolved to.
@@ -17,6 +17,12 @@
  *           signal of the one we are on, live.
  *   mDNS    who announces what: Home Assistant, ESPHome, MQTT, web pages,
  *           HomeKit, printers...
+ *   Cable   the network port the board's Ethernet is plugged into, as a
+ *           tester shows it: the link and what it negotiated, what the DHCP
+ *           server gave, which switch and which of its ports this is (the
+ *           switch says, by LLDP or CDP, when it is a managed one), whether
+ *           the gateway, a name and the internet answer, and every
+ *           interface the board has with the one it goes out by.
  *
  * Nothing here touches the network: the service's threads do, and the
  * screen reads what they leave from an lv_timer. Leaving the app stops them.
@@ -26,6 +32,7 @@
 #include "aos_i18n.h"
 #include "aos_theme.h"
 #include "aos_hal.h"
+#include "aos_eth.h"
 #include "aos_ui.h"
 #include "aos_sys_glyphs.h"
 #include "aos_fonts.h"
@@ -39,9 +46,13 @@
 #define C_NET_D   lv_color_hex(0x0369A1)
 #define C_KEYTOP  lv_color_hex(0xF2F2F7)
 
-enum { TAB_PING, TAB_HOSTS, TAB_WIFI, TAB_MDNS, TAB_COUNT };
-static const char *const TAB_NAME[TAB_COUNT] = { "Ping", "Hosts", "WiFi", "mDNS" };
-static const char *const TAB_GLYPH[TAB_COUNT] = { AOS_SYM_PULSE, AOS_SYM_LAN_PENDING, AOS_SYM_WIFI, AOS_SYM_DNS };
+enum { TAB_PING, TAB_HOSTS, TAB_WIFI, TAB_MDNS, TAB_CABLE, TAB_COUNT };
+static const char *const TAB_NAME[TAB_COUNT] = { "Ping", "Hosts", "WiFi", "mDNS", "Cable" };
+static const char *const TAB_GLYPH[TAB_COUNT] = { AOS_SYM_PULSE, AOS_SYM_LAN_PENDING, AOS_SYM_WIFI, AOS_SYM_DNS,
+                                                  AOS_SYM_LAN_CONNECT };
+
+#define C_GOOD    AOS_C_GREEN
+#define C_BAD     AOS_C_RED
 
 #define RECENT_MAX 6
 
@@ -142,6 +153,15 @@ typedef struct {
     /* mDNS */
     lv_obj_t *m_btn, *m_state, *m_list, *m_filters;
     uint32_t m_seen;
+    /* Cable */
+    lv_obj_t *c_link, *c_ip, *c_mask, *c_gw, *c_dns, *c_dhcp, *c_lease;
+    lv_obj_t *c_sw_state, *c_sw[7];
+    lv_obj_t *c_btn, *c_t_gw, *c_t_dns, *c_t_far;
+    lv_obj_t *c_ifs;
+    int32_t c_ifs_w;
+    uint32_t c_tick, c_listen_ms, c_test_seen;
+    bool c_linked;
+    char c_ifs_sig[200];
 } page_t;
 
 AOS_BSS_PSRAM static struct {
@@ -1756,6 +1776,254 @@ static void build_mdns(void)
 }
 
 /* -------------------------------------------------------------------------- */
+/* Cable: the port the wire is plugged into                                    */
+/* -------------------------------------------------------------------------- */
+
+/* A line of a card: what it is on the left, its value on the right, which is
+ * the label returned. */
+static lv_obj_t *kv(lv_obj_t *parent, int32_t w, const char *key)
+{
+    lv_obj_t *r = box(parent, w, LV_SIZE_CONTENT);
+    int32_t kw = w * 40 / 100;
+    lv_obj_t *k = aos_label(r, key, aos_font_small, AOS_C_DIM);
+    lv_obj_set_width(k, kw - 8);
+    lv_label_set_long_mode(k, LV_LABEL_LONG_MODE_WRAP);
+    lv_obj_t *v = aos_label(r, "", aos_font_small, AOS_C_TEXT);
+    lv_obj_set_width(v, w - kw);
+    lv_obj_set_x(v, kw);
+    lv_label_set_long_mode(v, LV_LABEL_LONG_MODE_WRAP);
+    return v;
+}
+
+/* Sets a label only when it says something else: this runs twice a second. */
+static void say(lv_obj_t *l, const char *text, lv_color_t col)
+{
+    if (!l) return;
+    if (strcmp(lv_label_get_text(l), text)) lv_label_set_text(l, text);
+    lv_obj_set_style_text_color(l, col, 0);
+}
+
+static void fmt_span(char *out, size_t n, uint32_t s)
+{
+    if (s >= 172800) snprintf(out, n, _("%u días"), (unsigned)(s / 86400));
+    else if (s >= 7200) snprintf(out, n, "%u h", (unsigned)(s / 3600));
+    else if (s >= 120) snprintf(out, n, "%u min", (unsigned)(s / 60));
+    else snprintf(out, n, "%u s", (unsigned)s);
+}
+
+static const char *kind_name(const char *kind)
+{
+    if (!strcmp(kind, "wifi")) return "Wi-Fi";
+    if (!strcmp(kind, "ethernet")) return "Ethernet";
+    if (!strcmp(kind, "usb")) return _("Cable USB");
+    if (!strcmp(kind, "ap")) return _("Red propia");
+    return kind;
+}
+
+static void cable_test_cb(lv_event_t *e)
+{
+    aos_eth_info_t i;
+    aos_eth_info(&i);
+    const char *gw = i.gw;
+    aos_netif_t a[6];                   /* with no wire, the gateway of whatever the board goes out by */
+    int n = i.gw[0] ? 0 : aos_hal_netif_list(a, 6);
+    for (int k = 0; k < n; k++) if (a[k].way_out) gw = a[k].gw;
+    nt_cable_start(gw);
+    U.pg.c_test_seen = 0xFFFFFFFFu;
+}
+
+static void cable_ifs_build(void)
+{
+    page_t *g = &U.pg;
+    aos_netif_t a[6];
+    int n = aos_hal_netif_list(a, 6);
+    char sig[sizeof g->c_ifs_sig] = "";
+    for (int i = 0; i < n; i++) {
+        size_t at = strlen(sig);
+        snprintf(sig + at, sizeof sig - at, "%s:%s:%d%d;", a[i].kind, a[i].ip, a[i].up, a[i].way_out);
+    }
+    if (!sig[0]) snprintf(sig, sizeof sig, "-");
+    if (!strcmp(sig, g->c_ifs_sig)) return;
+    snprintf(g->c_ifs_sig, sizeof g->c_ifs_sig, "%s", sig);
+    lv_obj_clean(g->c_ifs);
+    int32_t w = g->c_ifs_w;
+    for (int i = 0; i < n; i++) {
+        lv_obj_t *r = box(g->c_ifs, w, 64);
+        lv_obj_align(aos_label(r, kind_name(a[i].kind), aos_font_small, a[i].up ? AOS_C_TEXT : AOS_C_DIM),
+                     LV_ALIGN_LEFT_MID, 0, 0);
+        lv_obj_t *ip = aos_label(r, a[i].ip[0] ? a[i].ip : _("sin dirección"), aos_font_small, AOS_C_DIM);
+        lv_obj_align(ip, LV_ALIGN_LEFT_MID, w * 34 / 100, 0);
+        if (a[i].way_out) lv_obj_align(aos_label(r, _("salida"), aos_font_caption, C_NET), LV_ALIGN_RIGHT_MID, 0, 0);
+    }
+    if (!n) caption(g->c_ifs, _("Ninguna interfaz de red arriba"), w);
+}
+
+static void cable_refresh(bool now)
+{
+    page_t *g = &U.pg;
+    if (!g->c_link) return;
+    if (!now && ++g->c_tick % 4) return;        /* twice a second is plenty */
+    char t[160], a[24];
+    aos_eth_info_t i;
+    aos_eth_info(&i);
+    aos_eth_dhcp_t d;
+    aos_eth_dhcp(&d);
+
+    /* the link */
+    if (!i.enabled) say(g->c_link, _("Ethernet está apagado: se prende en Ajustes, Redes"), AOS_C_DIM);
+    else if (i.paused) {
+        snprintf(t, sizeof t, _("En pausa: %s está usando el puerto SPI"), i.paused_by);
+        say(g->c_link, t, AOS_C_ORANGE);
+    } else if (!i.running) say(g->c_link, i.err[0] ? aos_tr(i.err) : _("El módulo no arrancó"), C_BAD);
+    else if (!i.link) say(g->c_link, _("Sin cable, o con nadie del otro lado"), AOS_C_ORANGE);
+    else {
+        snprintf(t, sizeof t, i.full_duplex ? _("%d Mbit/s, dúplex completo") : _("%d Mbit/s, medio dúplex"), i.speed_mbps);
+        say(g->c_link, t, C_GOOD);
+    }
+    say(g->c_ip, i.ip[0] ? i.ip : i.link ? _("esperando al DHCP…") : "-", i.ip[0] ? AOS_C_TEXT : AOS_C_DIM);
+    say(g->c_mask, i.mask[0] ? i.mask : "-", AOS_C_TEXT);
+    say(g->c_gw, i.gw[0] ? i.gw : "-", AOS_C_TEXT);
+    if (d.dns1[0] && d.dns2[0]) snprintf(t, sizeof t, "%s, %s", d.dns1, d.dns2);
+    else snprintf(t, sizeof t, "%s", d.dns1[0] ? d.dns1 : "-");
+    say(g->c_dns, t, AOS_C_TEXT);
+    say(g->c_dhcp, d.server[0] ? d.server : "-", AOS_C_TEXT);
+    if (d.lease_s) {
+        char ago[24];
+        fmt_span(a, sizeof a, d.lease_s);
+        fmt_span(ago, sizeof ago, d.age_s);
+        snprintf(t, sizeof t, _("%s, dada hace %s"), a, ago);
+    } else snprintf(t, sizeof t, "-");
+    say(g->c_lease, t, AOS_C_TEXT);
+
+    /* the switch: listen while this tab is up and there is a link */
+    uint32_t ms = (uint32_t)aos_hal_uptime_ms();
+    if (i.link != g->c_linked) {
+        g->c_linked = i.link;
+        g->c_listen_ms = ms;
+        if (!i.link) aos_eth_listen(false);     /* the next cable may go to another switch */
+    }
+    if (i.link) aos_eth_listen(true);
+    aos_eth_neighbor_t nb;
+    bool heard = i.link && aos_eth_neighbor(&nb);
+    uint32_t waited = (ms - g->c_listen_ms) / 1000;
+    if (!i.link) say(g->c_sw_state, _("Sin enlace no hay a quién escuchar"), AOS_C_DIM);
+    else if (heard) {
+        fmt_span(a, sizeof a, nb.age_s);
+        snprintf(t, sizeof t, _("Se anunció por %s hace %s"), nb.proto, a);
+        say(g->c_sw_state, t, C_GOOD);
+    } else if (waited < 75) {
+        snprintf(t, sizeof t, _("Escuchando el anuncio del switch… %u s. Un switch gestionable lo manda cada 30 s (LLDP) o cada 60 (CDP)"),
+                 (unsigned)waited);
+        say(g->c_sw_state, t, AOS_C_DIM);
+    } else {
+        snprintf(t, sizeof t, _("Nada en %u s: este switch no se anuncia. No es gestionable, o tiene LLDP apagado"), (unsigned)waited);
+        say(g->c_sw_state, t, AOS_C_ORANGE);
+    }
+    const char *v[7] = { "-", "-", "-", "-", "-", "-", "-" };
+    char vlan[16];
+    if (heard) {
+        if (nb.system[0]) v[0] = nb.system;
+        if (nb.port[0]) v[1] = nb.port;
+        if (nb.port_desc[0]) v[2] = nb.port_desc;
+        if (nb.vlan) { snprintf(vlan, sizeof vlan, "%d", nb.vlan); v[3] = vlan; }
+        if (nb.poe >= 0) v[4] = nb.poe ? _("la boca da alimentación") : _("la boca no da alimentación");
+        if (nb.descr[0]) v[5] = nb.descr;
+        if (nb.mgmt[0]) v[6] = nb.mgmt;
+        else if (nb.chassis[0]) v[6] = nb.chassis;
+    }
+    for (int k = 0; k < 7; k++) say(g->c_sw[k], v[k], heard ? AOS_C_TEXT : AOS_C_DIM);
+
+    /* the test, when it moved */
+    nt_lock();
+    nt_cable_t c = *nt_cable();
+    nt_unlock();
+    if (c.seq != g->c_test_seen) {
+        g->c_test_seen = c.seq;
+        bool busy = c.state == NT_BUSY;
+        pill_set(g->c_btn, AOS_SYM_PULSE, busy ? _("Probando…") : _("Probar la salida"), busy ? AOS_C_CARD2 : C_NET_D);
+        if (c.state == NT_IDLE) {
+            say(g->c_t_gw, "-", AOS_C_DIM);
+            say(g->c_t_dns, "-", AOS_C_DIM);
+            say(g->c_t_far, "-", AOS_C_DIM);
+        } else {
+            if (busy && c.step <= 1) say(g->c_t_gw, _("probando…"), AOS_C_DIM);
+            else if (c.gw_ms >= 0) {
+                fmt_ms(a, sizeof a, c.gw_ms);
+                snprintf(t, sizeof t, _("responde en %s ms"), a);
+                say(g->c_t_gw, t, C_GOOD);
+            } else say(g->c_t_gw, c.gw[0] ? _("no responde al ping") : _("no hay puerta de enlace"), C_BAD);
+            if (busy && c.step < 2) say(g->c_t_dns, "-", AOS_C_DIM);
+            else if (busy && c.step == 2) say(g->c_t_dns, _("probando…"), AOS_C_DIM);
+            else if (c.dns_ok) {
+                snprintf(t, sizeof t, _("%s resuelve en %u ms"), NT_CABLE_NAME, (unsigned)c.dns_ms);
+                say(g->c_t_dns, t, C_GOOD);
+            } else {
+                snprintf(t, sizeof t, _("%s no resuelve"), NT_CABLE_NAME);
+                say(g->c_t_dns, t, C_BAD);
+            }
+            if (busy && c.step < 3) say(g->c_t_far, "-", AOS_C_DIM);
+            else if (busy) say(g->c_t_far, _("probando…"), AOS_C_DIM);
+            else if (c.far_ms >= 0) {
+                fmt_ms(a, sizeof a, c.far_ms);
+                snprintf(t, sizeof t, _("%s responde en %s ms"), c.far, a);
+                say(g->c_t_far, t, C_GOOD);
+            } else {
+                snprintf(t, sizeof t, _("%s no responde"), c.far);
+                say(g->c_t_far, t, C_BAD);
+            }
+        }
+    }
+    cable_ifs_build();
+}
+
+static void build_cable(void)
+{
+    page_t *g = &U.pg;
+    lv_obj_t *left, *right;
+    int32_t lw, rw;
+    split(U.content, 560, &left, &right, &lw, &rw);
+    lv_obj_t *cap;
+    header(left, lw, "Cable", &cap);
+    lv_label_set_text(cap, _("La boca de red a la que está enchufado el Ethernet"));
+    lv_obj_t *c = vcard(left, lw, 20, 10);
+    g->c_link = aos_label(c, "", aos_font_body, AOS_C_TEXT);
+    lv_obj_set_width(g->c_link, lw - 40);
+    lv_label_set_long_mode(g->c_link, LV_LABEL_LONG_MODE_WRAP);
+    g->c_ip = kv(c, lw - 40, _("Dirección"));
+    g->c_mask = kv(c, lw - 40, _("Máscara"));
+    g->c_gw = kv(c, lw - 40, _("Puerta de enlace"));
+    g->c_dns = kv(c, lw - 40, "DNS");
+    g->c_dhcp = kv(c, lw - 40, _("Servidor DHCP"));
+    g->c_lease = kv(c, lw - 40, _("Concesión"));
+
+    section(left, _("SALIDA"));
+    c = vcard(left, lw, 20, 10);
+    lv_obj_t *br = row(c, lw - 40, 80, 12);
+    g->c_btn = pill(br, AOS_SYM_PULSE, _("Probar la salida"), C_NET_D, cable_test_cb, NULL);
+    g->c_t_gw = kv(c, lw - 40, _("Puerta de enlace"));
+    g->c_t_dns = kv(c, lw - 40, _("Nombres"));
+    g->c_t_far = kv(c, lw - 40, "Internet");
+
+    section(right, "SWITCH");
+    c = vcard(right, rw, 20, 10);
+    g->c_sw_state = caption(c, "", rw - 40);
+    static const char *const KEYS[7] = { N_("Nombre"), N_("Boca"), N_("Descripción"), "VLAN", "PoE", N_("Equipo"), N_("Gestión") };
+    for (int k = 0; k < 7; k++) g->c_sw[k] = kv(c, rw - 40, aos_tr(KEYS[k]));
+
+    section(right, _("INTERFACES"));
+    c = vcard(right, rw, 20, 0);
+    g->c_ifs = box(c, rw - 40, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(g->c_ifs, LV_FLEX_FLOW_COLUMN);
+    g->c_ifs_w = rw - 40;
+#ifdef AOS_SIM
+    caption(right, _("Simulador: el switch y las respuestas de la prueba son de ejemplo."), rw);
+#endif
+    g->c_listen_ms = (uint32_t)aos_hal_uptime_ms();
+    g->c_test_seen = 0xFFFFFFFFu;
+    cable_refresh(true);
+}
+
+/* -------------------------------------------------------------------------- */
 /* Pages                                                                       */
 /* -------------------------------------------------------------------------- */
 
@@ -1769,9 +2037,11 @@ static void build_page(void)
         lv_obj_set_style_text_color(lv_obj_get_child(U.tabs[i], 0), c, 0);
         lv_obj_set_style_text_color(lv_obj_get_child(U.tabs[i], 1), c, 0);
     }
+    if (S.tab != TAB_CABLE) aos_eth_listen(false);      /* only the Cable tab listens to the switch */
     if (S.tab == TAB_PING) build_ping();
     else if (S.tab == TAB_HOSTS) build_hosts();
     else if (S.tab == TAB_WIFI) build_wifi();
+    else if (S.tab == TAB_CABLE) build_cable();
     else build_mdns();
 }
 
@@ -1792,6 +2062,7 @@ static void timer_cb(lv_timer_t *t)
     if (S.tab == TAB_PING) ping_refresh();
     else if (S.tab == TAB_HOSTS) { hosts_refresh(); detail_refresh(); }
     else if (S.tab == TAB_WIFI) wifi_refresh();
+    else if (S.tab == TAB_CABLE) cable_refresh(false);
     else mdns_refresh();
 }
 
@@ -1841,6 +2112,7 @@ static void destroy(aos_app_t *self, void *inst)
     U.timer = NULL;
     U.overlay = U.ta = U.kb = NULL;
     memset(&U.pg, 0, sizeof U.pg);
+    aos_eth_listen(false);
     /* the service's threads notice the silence and stop in ~3 s */
 }
 
