@@ -26,8 +26,24 @@ que sirve; falta que el usuario la recorra).
 
 **Corrida larga, empezada el 2026-11-11 a las 20:07** con este firmware:
 Ethernet a 20 MHz, un enlace desde el arranque, 197 915 bytes de RAM
-interna libres a los 42 s. A la mañana: el tiempo encendida (sin
-reinicios), cuántas veces levantó el enlace y la RAM libre. El trabajo de firmware va en la rama
+interna libres a los 42 s.
+
+**Leída el 2026-11-12 a las 09:10, 13 h 3 min después: pasó.** Encendida
+46 971 s sin reinicios; el enlace arriba 46 968 s, o sea desde el
+arranque, y **levantado una sola vez** (`links` 1): no se cayó en toda la
+noche. 100 Mbit/s dúplex completo, sin error y sin pausa. En el registro,
+de Ethernet sólo están las líneas del arranque; ningún error de red, del
+SPI ni del vigilante. La placa siguió con lo suyo mientras tanto (avisos
+de las impresoras, Bluetooth). RAM interna libre: 193 311 bytes, 4 604
+menos que a los 42 s, y lo mismo en dos lecturas separadas por 47 s; con
+una sola lectura de base tan temprana no se sabe si es algo que se pidió
+una vez (el audio de los avisos se abrió después) o una pérdida lenta: a
+ese ritmo serían unos 350 bytes por hora. Otra lectura más tarde lo dice.
+
+Visto de paso, y no es de Ethernet: el registro tiene 772 veces "1-wire:
+reset bus failed: no devices found", una por minuto, de Sensores leyendo
+un bus 1-Wire sin nada conectado. Tapa el resto del registro: conviene
+avisarlo una vez. El trabajo de firmware va en la rama
 `ethernet` (un árbol de trabajo aparte, `.claude/worktrees/ethernet`), no
 en `main`, hasta que ande en la placa.
 
