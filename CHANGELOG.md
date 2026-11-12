@@ -1,5 +1,46 @@
 # Changelog
 
+## 0.26.0 — 2026-11-12
+
+Ethernet, for a board that has the module.
+
+- **Ethernet over a W5500 module on the header's SPI port** (`spi.a`, chip
+  select on GPIO49), wired as in `docs/img/bench-w5500.svg`. It is off
+  until it is switched on in Settings, Redes, Ethernet, or in the portal's
+  "Wi-Fi y Ethernet" page: a board without the module loses nothing, and
+  one with Ethernet on and no module says so and goes on. The driver is
+  ESP-IDF's, over P4OS's own SPI service and polling, so it takes no pin
+  of its own. `docs/MODULES.md` has the wiring and `docs/plan/ETHERNET.md`
+  what was measured.
+- **The wire is a network like the Wi-Fi.** With both up the board goes
+  out by the wire and the portal answers on either; pulling the cable
+  hands the way out back to the Wi-Fi at once. The board boots and works
+  with the Wi-Fi off, and no longer restarts for lack of Wi-Fi while the
+  wire is up. The status bar shows a cable when the way out is the wire.
+- **Settings, "Redes"** takes the place of "Wi-Fi": where the board goes
+  out and each connection with its state, and the Wi-Fi's page inside it
+  as before.
+- **Ethernet never keeps the SPI port from a tool.** Sensors on the port
+  share it. An app that opens it (Bus, EEPROM, a radio) pauses Ethernet,
+  says so on the screen, and Ethernet comes back by itself eight seconds
+  after the app lets go. Bus and EEPROM warn before.
+- **A wired network is trusted by a switch on the board**, off until
+  someone turns it on (`docs/SECURITY.md`). Each connection to the portal,
+  SSH and the Flasher's bridge is now judged by the interface it came in
+  by: a trusted Wi-Fi no longer vouches for the wire, nor the other way.
+- **In the simulator**, a fake Ethernet: `P4_SIM_ETH=1`, or `nolink` for
+  the module with no cable.
+
+Measured on the board: link at 100 Mbit/s full duplex and an address in
+about a second; a download from the portal at 0.5 MB/s with the SPI clock
+at 8 MHz and 0.89 MB/s at 40 MHz (0.25 MB/s over the same board's Wi-Fi
+that day); 12.7 KB of internal RAM while it is on; thirteen hours with the
+link never dropping.
+
+Not tried on the board yet: a sensor sharing the port with Ethernet, the
+Wi-Fi switched on but unable to connect while the wire is up, and the
+landscape layout of the new Settings pages.
+
 ## 0.25.2 — 2026-11-11
 
 A fix every board with many apps wants, and the start of two pieces of

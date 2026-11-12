@@ -43,9 +43,11 @@ ese ritmo serían unos 350 bytes por hora. Otra lectura más tarde lo dice.
 Visto de paso, y no es de Ethernet: el registro tiene 772 veces "1-wire:
 reset bus failed: no devices found", una por minuto, de Sensores leyendo
 un bus 1-Wire sin nada conectado. Tapa el resto del registro: conviene
-avisarlo una vez. El trabajo de firmware va en la rama
-`ethernet` (un árbol de trabajo aparte, `.claude/worktrees/ethernet`), no
-en `main`, hasta que ande en la placa.
+avisarlo una vez.
+
+**En `main` desde el 2026-11-12** (0.26.0): la rama `ethernet` se unió
+después de esa corrida. Lo que sigue (fase 4 en adelante) va en `main`
+como el resto del firmware.
 
 ## El módulo
 

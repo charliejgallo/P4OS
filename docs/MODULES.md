@@ -482,6 +482,48 @@ port's, those of its modules, or none. Then:
 The tab claims pins as `Bus SPI`, not `Bus`. A pin the GPIO tab holds is
 then refused, not taken over.
 
+## Ethernet (a W5500 on `spi.a`, since 0.26.0)
+
+A "W5500 Lite" module (HW-884, 3.3 V only, about 200 mA) on the SPI port
+gives the board a wired network. It is optional and off until it is
+switched on: Settings, Redes, Ethernet, or the portal's "Wi-Fi y Ethernet"
+page.
+
+![The W5500 Lite on the header](img/bench-w5500.svg)
+
+| Module | Header | GPIO |
+|---|---|---|
+| V (either) | pin 18, 3V3 | |
+| G / GND | pin 33 or 40 | |
+| SCK | pin 38 | 52 |
+| MO (MOSI) | pin 34 | 50 |
+| MI (MISO) | pin 36 | 51 |
+| CS | pin 32 | 49 |
+| RST, INT, NC | not connected | |
+
+- **No interrupt pin:** the driver polls every 10 ms (`aos_eth_p4.c`, over
+  `aos_io_spi_*`: ESP-IDF's W5500 driver with a custom SPI layer, so the
+  port stays the pin arbiter's, owner "Ethernet").
+- **The clock** is 8 MHz by default and chosen in the same page, up to
+  40 MHz. With loose wires on the bench it ran clean at 40 MHz; a download
+  went from 0.5 MB/s at 8 MHz to 0.89 MB/s at 40 MHz.
+- **Sharing the port.** A sensor declared on `spi.a` shares it with
+  Ethernet, each with its own CS. An app that opens the port (Bus, EEPROM)
+  pauses Ethernet, which the screen says, and Ethernet comes back eight
+  seconds after the last one closes it. Nothing an app does on SPI is
+  refused because Ethernet is on.
+- **Which network is used:** the wire when it has a link and an address,
+  then the Wi-Fi, then the USB cable. Both can be up; the portal answers
+  on either.
+- **Trust:** a wired network opens the portal without a password only
+  after "La red por cable: de confianza" is switched on at the board
+  (`docs/SECURITY.md`).
+- **In the simulator:** `P4_SIM_ETH=1` (a cable and an address) or
+  `P4_SIM_ETH=nolink`.
+
+`docs/plan/ETHERNET.md` (Spanish) has the phases, everything measured and
+what is next.
+
 ## 1-Wire
 
 `aos_io_ow_*` opens a 1-Wire bus on any usable GPIO of the header, with an

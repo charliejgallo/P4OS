@@ -40,6 +40,12 @@ file lists what cannot, and why, so that new code follows it.
   sound cards' isochronous ones. The class drivers' own rings and frame
   buffers (the webcam's MJPEG frames, the serial ports' 16 KB, the sound
   card's) are in PSRAM where they ask for it. `docs/USB.md`.
+- **Ethernet, while it is switched on** (0.26.0): 12.7 KB, measured
+  (211 503 to 198 779 bytes free). The receive task's 4 KB stack, which
+  ESP-IDF's driver allocates itself, and the SPI port's two DMA buffers
+  are part of it; the frame buffers of the driver's SPI layer are in
+  PSRAM. What the rest is, and whether it can move, is not looked at yet.
+  Off, it costs nothing.
 
 ## The panel's three frame buffers (2026-09-29)
 
