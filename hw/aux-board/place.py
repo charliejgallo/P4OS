@@ -236,7 +236,7 @@ def holes_svg(board, path, grow=0.0):
 
 # The tracks' widths, mm. Between two pads of a 2.54 mm header there are 0.84 mm: a 0.4 mm track
 # passes with 0.22 mm to each side, over the 0.2 mm the default rules ask for.
-SIGNAL, POWER = 0.3, 0.4
+SIGNAL, POWER = 0.25, 0.4
 SUPPLY = ("GND", "+5V", "+3V3")
 
 
@@ -252,26 +252,41 @@ def track(board, net, layer, points, width):
 
 
 def route(board, net):
-    """The tracks a script can lay without choosing anything: the header's pins that go to the small
-    headers beside it, and a ground plane on each face. Returns how many tracks.
+    """What a script can lay without choosing anything, around the 2x20 header. Returns how many tracks.
 
-    A pin of the header's outer row has the inner row's pin in the way, so its track goes round
-    through the gap to the next row."""
-    pads = {r: {p.GetNumber(): xy(p.GetPosition()) for p in board.FindFootprintByReference(r).Pads()}
-            for r in ("J1", "J21", "J22")}
-    half = 1.27
-    # +3V3: pin 18 straight across on the back to the header's nearer 3.3 V pin, and on to the other
-    (x1, y1), (x2, y2), (x3, y3) = pads["J1"]["18"], pads["J21"]["3"], pads["J21"]["2"]
-    track(board, net("+3V3"), pcbnew.B_Cu, [(x1, y1), (x2, y2), (x3, y3)], 0.8)
-    # GPIO35: pin 30 straight across on the front
-    track(board, net("GPIO35_BOOT"), pcbnew.F_Cu, [pads["J1"]["30"], pads["J22"]["2"]], SIGNAL)
-    # GPIO38 and GPIO37: pins 9 and 7, each round its neighbour and up the lane between the header's
-    # lettering and the column; the lower pin takes the outer lane, so the two never cross
-    for pin, to, lane_x in (("9", "3", 9.6), ("7", "4", 10.8)):
-        (x1, y1), (x2, y2) = pads["J1"][pin], pads["J22"][to]
-        track(board, net(gen.HEADER[int(pin)]), pcbnew.F_Cu,
-              [(x1, y1), (x1 + half, y1 - half), (lane_x - half, y1 - half), (lane_x, y1 - 2 * half),
-               (lane_x, y2 + half), (lane_x + half, y2), (x2, y2)], SIGNAL)
+    A trial of the routing (autoroute.py) showed the header is where the board is tight: a track of
+    another net through one of its gaps shuts a pin of the outer row in, and tracks on the back
+    there cut its ground pins off the plane. So:
+
+    - every pin that is not ground leaves on the front to a column just right of the header: the
+      inner row straight, the outer row through the gap above its own row;
+    - under the header the back takes no track and no via: the ground pins reach the back plane by
+      the strip each side of the two rows;
+    - a ground plane on each face."""
+    pads = {p.GetNumber(): xy(p.GetPosition()) for p in board.FindFootprintByReference("J1").Pads()}
+    out_x = pads["2"][0] + 1.905        # six steps of the router's grid, which starts on pin 1
+    for n in range(1, 41):
+        name = gen.HEADER[n]
+        if name == "GND":
+            continue
+        x, y = pads[str(n)]
+        points = [(x, y), (x + 1.27, y - 1.27), (out_x, y - 1.27)] if n % 2 else [(x, y), (out_x, y)]
+        track(board, net(name), pcbnew.F_Cu, points, POWER if name in SUPPLY else SIGNAL)
+    area = pcbnew.ZONE(board)
+    area.SetIsRuleArea(True)
+    area.SetZoneName("back under the header: ground only")
+    area.SetLayer(pcbnew.B_Cu)
+    area.SetDoNotAllowTracks(True)
+    area.SetDoNotAllowVias(True)
+    area.SetDoNotAllowPads(False)
+    area.SetDoNotAllowFootprints(False)
+    area.SetDoNotAllowZoneFills(False)
+    outline = area.Outline()
+    outline.NewOutline()
+    x1, y0, y1 = pads["2"][0] + 2.4, pads["39"][1] - 2.4, pads["1"][1] + 2.4
+    for x, y in ((0, y0), (x1, y0), (x1, y1), (0, y1)):
+        outline.Append(pcbnew.FromMM(x), pcbnew.FromMM(y))
+    board.Add(area)
     for layer in (pcbnew.F_Cu, pcbnew.B_Cu):
         zone = pcbnew.ZONE(board)
         zone.SetLayer(layer)

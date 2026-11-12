@@ -191,3 +191,14 @@ Falta saber, y el modelo no lo dice:
 5. Trazado, DRC, y el pedido. El trazado a mano empieza con la ubicación
    congelada: `place.py` arma la placa de cero cada vez y pisa lo dibujado
    en KiCad.
+   **Prueba de trazado, 2026-11-12** (`hw/aux-board/autoroute.py`, un
+   ruteador propio que corre en medio minuto sobre la placa generada): las
+   dos variantes se rutean enteras en dos capas, sin errores de separación.
+   Lo que mostró: el header 2×20 es el cuello de botella (la fila de afuera
+   sólo sale por los huecos de la de adentro), y por eso `place.py` ahora
+   saca cada pin a una columna al lado y deja la cara de atrás bajo el
+   header sólo para masa; la masa hay que cuidarla (en la casera cuatro
+   pads quedaron aislados de los planos); los dos pares USB hay que
+   trazarlos a mano, primero y sin vías; y la franja entre el header y las
+   tiras del medio es donde se amontona todo. Las placas de prueba
+   (`trial-*.kicad_pcb`) no van a git ni a fábrica.

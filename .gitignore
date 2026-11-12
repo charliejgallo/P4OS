@@ -44,4 +44,7 @@ hw/**/*-backups/
 hw/**/*.kicad_prl
 hw/**/fp-info-cache
 hw/**/*.lck
+# the trial router's boards (hw/aux-board/autoroute.py): made again in half a minute
+hw/**/trial-*.kicad_pcb
+hw/**/trial-*.kicad_pro
 hw/**/gerbers/
