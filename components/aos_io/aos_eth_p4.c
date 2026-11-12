@@ -43,6 +43,7 @@
 #define RX_STACK    4096
 #define FRAME_MAX   1600                /* an Ethernet frame and the chip's two-byte length in front */
 #define ROUTE_PRIO  150                 /* the Wi-Fi station has 100, the USB cable 5: the wire goes first */
+#define BENCH_PRIO  3                   /* the bench network leads nowhere: last of all */
 #define RESUME_MS   8000                /* an app let the port go: this long with nobody on it, and Ethernet is back */
 #define PREF_ON     "eth"
 #define PREF_HZ     "eth_hz"
@@ -92,6 +93,8 @@ static struct {
     int64_t            rx_at;
     bool               silence_done;    /* restarted once for this silence: not again until a frame comes */
     bool               lost;            /* the watch stopped it and it did not start again: it goes on trying */
+    aos_eth_mode_t     mode;            /* a client, or the bench network (aos_eth_bench) */
+    char               bench_ip[16];
 } E;
 
 #define WATCH_MS    5000                /* how often the watch looks */
@@ -259,6 +262,8 @@ static void on_event(void *arg, esp_event_base_t base, int32_t id, void *data)
         }
         aos_hal_net_wired_set(false, NULL);
         aos_hal_log("eth", "link down");
+    } else if (base == IP_EVENT && E.mode != AOS_ETH_CLIENT) {
+        /* the bench network's address is set by hand, in start(): no lease to come or go */
     } else if (base == IP_EVENT && id == IP_EVENT_ETH_GOT_IP) {
         const ip_event_got_ip_t *ev = data;
         if (ev->esp_netif != E.netif) return;
@@ -360,11 +365,33 @@ static bool start(void)
     esp_eth_ioctl(E.eth, ETH_CMD_S_MAC_ADDR, E.info.mac);
 
     esp_netif_inherent_config_t base = ESP_NETIF_INHERENT_DEFAULT_ETH();
-    base.route_prio = ROUTE_PRIO;
+    base.route_prio = E.mode == AOS_ETH_CLIENT ? ROUTE_PRIO : BENCH_PRIO;
+    esp_netif_ip_info_t fixed = { 0 };
+    if (E.mode != AOS_ETH_CLIENT) {
+        fixed.ip.addr = esp_ip4addr_aton(E.bench_ip);
+        fixed.netmask.addr = esp_ip4addr_aton("255.255.255.0");
+        if (E.mode == AOS_ETH_SERVER) {
+            /* as the Wi-Fi's own access point: up from the start, the server with it, itself as the gateway it offers */
+            fixed.gw = fixed.ip;
+            base.flags = (esp_netif_flags_t)(ESP_NETIF_DHCP_SERVER | ESP_NETIF_FLAG_AUTOUP);
+            base.ip_info = &fixed;
+        }
+    }
     esp_netif_config_t nc = { .base = &base, .stack = ESP_NETIF_NETSTACK_DEFAULT_ETH };
     E.netif = esp_netif_new(&nc);
     if (!E.netif) return fail("no se pudo crear la interfaz de red", ESP_OK);
     esp_netif_set_hostname(E.netif, aos_hal_device_name());
+    if (E.mode == AOS_ETH_STATIC) {     /* no DHCP client: the address is this one from the moment the link is up */
+        esp_netif_dhcpc_stop(E.netif);
+        esp_netif_set_ip_info(E.netif, &fixed);
+    }
+    if (E.mode != AOS_ETH_CLIENT) {
+        snprintf(E.info.ip, sizeof E.info.ip, "%s", E.bench_ip);
+        snprintf(E.info.mask, sizeof E.info.mask, "255.255.255.0");
+        E.info.gw[0] = 0;
+        E.ip_at = esp_timer_get_time();
+    }
+    E.info.mode = E.mode;
     E.glue = esp_eth_new_netif_glue(E.eth);
     e = E.glue ? esp_netif_attach(E.netif, E.glue) : ESP_ERR_NO_MEM;
     if (e != ESP_OK) return fail("no se pudo unir el W5500 a la red", e);
@@ -450,7 +477,8 @@ static void watch_thread(void *arg)
                 E.rx_seen = E.rx_frames;
                 E.rx_at = now;
                 E.silence_done = false;
-            } else if (!why && E.info.link && E.info.ip[0] && !E.silence_done && now - E.rx_at > (int64_t)SILENCE_MS * 1000) {
+            } else if (!why && E.mode == AOS_ETH_CLIENT && E.info.link && E.info.ip[0] && !E.silence_done
+                       && now - E.rx_at > (int64_t)SILENCE_MS * 1000) {     /* on the bench, one quiet device is the usual */
                 why = "a link, an address and not a frame in five minutes";
                 E.silence_done = true;
             }
@@ -566,6 +594,26 @@ void aos_eth_port_free(const char *port)
 }
 
 void aos_eth_on_pause(aos_eth_notice_t cb) { E.notice = cb; }
+
+bool aos_eth_bench(aos_eth_mode_t mode, const char *ip)
+{
+    unsigned a, b, c, d;
+    if (mode == AOS_ETH_SERVER && (!ip || !ip[0])) ip = AOS_ETH_BENCH_IP;
+    if (mode != AOS_ETH_CLIENT && (!ip || sscanf(ip, "%u.%u.%u.%u", &a, &b, &c, &d) != 4 || a > 255 || b > 255 || c > 255 || d < 1 || d > 254))
+        return false;
+    take();
+    bool was = E.info.running;
+    if (was) teardown();
+    E.mode = mode;
+    E.info.mode = mode;
+    if (mode != AOS_ETH_CLIENT) snprintf(E.bench_ip, sizeof E.bench_ip, "%u.%u.%u.%u", a, b, c, d);
+    else E.bench_ip[0] = 0;
+    aos_hal_log("eth", mode == AOS_ETH_CLIENT ? "a client of the network again" : mode == AOS_ETH_SERVER
+                ? "the bench network: %s, giving addresses out" : "the bench network: %s, next to a device", E.bench_ip);
+    bool ok = !E.info.enabled || E.info.paused || start();
+    xSemaphoreGive(E.lock);
+    return ok;
+}
 
 void aos_eth_set_clock(uint32_t hz)
 {

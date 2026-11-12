@@ -23,7 +23,7 @@
 
 typedef struct {
     aos_eth_station_t s;
-    uint32_t last_ms;
+    uint32_t last_ms, first_ms;
     bool used;
 } slot_t;
 
@@ -59,7 +59,7 @@ static slot_t *slot_for(const uint8_t *mac, uint32_t now)
     memset(oldest, 0, sizeof *oldest);          /* a free one, or the one silent the longest */
     oldest->used = true;
     memcpy(oldest->s.mac, mac, 6);
-    oldest->last_ms = now;
+    oldest->last_ms = oldest->first_ms = now;
     return oldest;
 }
 
@@ -118,19 +118,21 @@ static void mdns_name(aos_eth_station_t *s, const uint8_t *p, size_t len)
     if (k > 6 && !strcmp(name + k - 6, ".local")) snprintf(s->name, sizeof s->name, "%s", name);
 }
 
-/* What an SSDP announcement says it runs: the line "SERVER: ...". */
-static void ssdp_server(aos_eth_station_t *s, const uint8_t *p, size_t len)
+/* A line of an SSDP announcement, "SERVER: ..." or "LOCATION: ...": its value, when out is still empty. */
+static void ssdp_line(char *out, size_t n, const char *key, const uint8_t *p, size_t len)
 {
-    if (s->vendor[0]) return;
-    for (size_t i = 0; i + 8 < len; i++) {
-        if ((i == 0 || p[i - 1] == '\n') && (p[i] == 'S' || p[i] == 's') && (p[i + 6] == ':')
-            && (p[i + 1] | 32) == 'e' && (p[i + 2] | 32) == 'r' && (p[i + 3] | 32) == 'v' && (p[i + 4] | 32) == 'e' && (p[i + 5] | 32) == 'r') {
-            size_t a = i + 7, b;
-            while (a < len && p[a] == ' ') a++;
-            for (b = a; b < len && p[b] != '\r' && p[b] != '\n'; b++) {}
-            put_text(s->vendor, sizeof s->vendor, p + a, b - a);
-            return;
-        }
+    size_t kn = strlen(key);
+    if (out[0]) return;
+    for (size_t i = 0; i + kn + 1 < len; i++) {
+        if (i && p[i - 1] != '\n') continue;
+        size_t k = 0;
+        while (k < kn && (p[i + k] | 32) == key[k]) k++;
+        if (k < kn || p[i + kn] != ':') continue;
+        size_t a = i + kn + 1, b;
+        while (a < len && p[a] == ' ') a++;
+        for (b = a; b < len && p[b] != '\r' && p[b] != '\n'; b++) {}
+        put_text(out, n, p + a, b - a);
+        return;
     }
 }
 
@@ -171,7 +173,8 @@ void aos_eth_station_note(const uint8_t *f, size_t len, const uint8_t *self, uin
                 mdns_name(s, p, n);
             } else if (dport == 1900) {
                 s->said |= AOS_ETH_SAID_SSDP;
-                ssdp_server(s, p, n);
+                ssdp_line(s->vendor, sizeof s->vendor, "server", p, n);
+                ssdp_line(s->location, sizeof s->location, "location", p, n);
             } else if (dport == 137) {
                 s->said |= AOS_ETH_SAID_NBNS;
                 nbns_name(s, p, n);
@@ -201,6 +204,7 @@ int aos_eth_station_list(aos_eth_station_t *out, int max, uint32_t now_ms)
         if (!s_tab[i].used) continue;
         out[n] = s_tab[i].s;
         out[n].age_s = (now_ms - s_tab[i].last_ms) / 1000;
+        out[n].since_s = (now_ms - s_tab[i].first_ms) / 1000;
         n++;
     }
     return n;

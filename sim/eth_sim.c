@@ -25,6 +25,7 @@ static void apply(bool on)
 {
     const char *e = getenv("P4_SIM_ETH");
     s_info.enabled = on;
+    s_info.mode = AOS_ETH_CLIENT;
     s_info.running = s_info.link = false;
     s_info.ip[0] = s_info.mask[0] = s_info.gw[0] = s_info.err[0] = 0;
     s_info.speed_mbps = 0;
@@ -240,6 +241,14 @@ static void stations_talk(uint32_t now)
             n = udp_frame(f, CAM, WSD_MAC, IP, WSD, 3702, 3702, B("<Hello/>"));
             aos_eth_station_note(f, n, SELF, now);
         }
+        if (t >= 6500 && !(s_said & 16)) {      /* and announces itself by SSDP, with where its description is */
+            s_said |= 16;
+            static const uint8_t SSDP[4] = { 239, 255, 255, 250 };
+            n = udp_frame(f, CAM, WSD_MAC, IP, SSDP, 1900, 1900,
+                          B("NOTIFY * HTTP/1.1\r\nHOST: 239.255.255.250:1900\r\nNT: upnp:rootdevice\r\n"
+                            "SERVER: Linux/3.10 UPnP/1.0 camara-ejemplo/1.4\r\nLOCATION: http://192.168.1.64:49152/desc.xml\r\n\r\n"));
+            aos_eth_station_note(f, n, SELF, now);
+        }
         if (s_asked_cam && !(s_said & 8)) {
             s_said |= 8;
             n = arp_frame(f, CAM, SELF, 2, IP, NONE);
@@ -325,6 +334,26 @@ bool aos_eth_neighbor(aos_eth_neighbor_t *out)
     uint32_t every = !strcmp(e, "cdp") ? 60 : 30, since = (uint32_t)((now - s_listen_at - 3000) / 1000);
     out->age_s = since % every;
     out->heard = 1 + since / every;
+    return true;
+}
+
+/* The bench network: the made-up wire takes the address it is given, and stops being "the network". */
+bool aos_eth_bench(aos_eth_mode_t mode, const char *ip)
+{
+    read_once();
+    if (mode == AOS_ETH_SERVER && (!ip || !ip[0])) ip = AOS_ETH_BENCH_IP;
+    if (mode != AOS_ETH_CLIENT && (!ip || !ip[0])) return false;
+    s_info.mode = mode;
+    if (mode == AOS_ETH_CLIENT) {
+        apply(s_info.enabled);
+        return true;
+    }
+    if (s_info.running) {
+        snprintf(s_info.ip, sizeof s_info.ip, "%s", ip);
+        snprintf(s_info.mask, sizeof s_info.mask, "255.255.255.0");
+        s_info.gw[0] = 0;
+    }
+    aos_hal_net_wired_set(false, NULL);
     return true;
 }
 

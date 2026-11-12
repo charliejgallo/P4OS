@@ -47,6 +47,12 @@ depends on where it came in (`components/aos_ui/aos_access.c`):
   switch, "La red por cable: de confianza", in the same page and off until
   someone turns it on at the board. The page shows it only when Ethernet is
   switched on.
+- **The bench network follows the wire's switch.** Red, Equipo can make the
+  wire a network for a device plugged straight into it, with an address
+  set by hand or with the board giving addresses out (`aos_eth_bench`).
+  Whatever comes in by that address is the wire's, and is trusted only
+  with "La red por cable: de confianza" on; off, that device finds the
+  portal and SSH closed, as on any network that is not home.
 - **Each connection is judged by the interface it came in by.** With the
   Wi-Fi on a trusted network and the wire on another, a request that comes
   in by the wire is the wire's, whatever the Wi-Fi is on, and the other way

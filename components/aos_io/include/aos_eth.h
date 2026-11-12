@@ -52,6 +52,7 @@ typedef struct {
     char     err[80];           /* why it is not running, in Spanish; "" when it is */
     bool     paused;            /* stopped while an app has its SPI port; back when the port is free */
     char     paused_by[24];     /* that app, as it named itself to the pin arbiter */
+    int      mode;              /* aos_eth_mode_t: a client of the network, or the bench's */
     uint32_t rx_frames;         /* frames that came in since it started */
     uint32_t restarts;          /* times the watch found it dead and started it again, since the boot */
 } aos_eth_info_t;
@@ -105,6 +106,25 @@ bool aos_eth_neighbor(aos_eth_neighbor_t *out);
  * it says (age_s and heard left at 0). aos_eth_announce.c. */
 bool aos_eth_parse_announce(const uint8_t *frame, size_t len, aos_eth_neighbor_t *out);
 
+/* The bench network: the wire not as one more client of the house's network
+ * but for a device plugged straight into it.
+ *
+ *   AOS_ETH_CLIENT   the usual: an address by DHCP, and the way out.
+ *   AOS_ETH_STATIC   an address given here, next to a device whose own is
+ *                    known, to reach its page: "192.168.1.200" for a device
+ *                    at 192.168.1.64. The mask is 255.255.255.0.
+ *   AOS_ETH_SERVER   the board is AOS_ETH_BENCH_IP and gives addresses out
+ *                    by DHCP to whatever is plugged in.
+ *
+ * In the last two the wire is not the board's way out, the Wi-Fi goes on
+ * being it, and whoever comes in by it is judged by the wired network's
+ * trust switch, off unless turned on at the board (aos_access.c). It is not
+ * kept: after a restart the wire is a client again. Changing it starts the
+ * driver again; false when it did not start. */
+typedef enum { AOS_ETH_CLIENT = 0, AOS_ETH_STATIC, AOS_ETH_SERVER } aos_eth_mode_t;
+#define AOS_ETH_BENCH_IP "192.168.77.1"
+bool aos_eth_bench(aos_eth_mode_t mode, const char *ip);
+
 /* Who is talking on the wire, for the tool that finds a device of unknown
  * address plugged straight into the board: every station heard while
  * listening (aos_eth_listen), with the address it said was its own and
@@ -126,12 +146,14 @@ typedef struct {
     char     ip[16];            /* its own address, as it said it; "" not heard yet */
     char     name[40];          /* the name it gave: DHCP, mDNS or NetBIOS */
     char     vendor[48];        /* what it says it is: DHCP's vendor class, SSDP's server line */
+    char     location[72];      /* where its UPnP description is: SSDP's location line */
     uint16_t said;              /* AOS_ETH_SAID_* */
     bool     wants_dhcp;        /* it asked for an address by DHCP */
     char     wants[16];         /* the address it asked DHCP for */
     bool     answered;          /* it answered a question of aos_eth_arp_ask() */
     uint32_t frames;
     uint32_t age_s;             /* since it was last heard */
+    uint32_t since_s;           /* since it was first heard */
 } aos_eth_station_t;
 
 /* The stations heard since listening began; how many it wrote, at most max. */

@@ -534,7 +534,12 @@ page.
   NetBIOS, SSDP, WS-Discovery), and a sweep by ARP of the networks devices
   come set to finds the one that says nothing. For apps of the card:
   `aos_eth_stations()` and `aos_eth_arp_ask()`. In the simulator,
-  `P4_SIM_ETH=device` is a cable straight to a made-up camera.
+  `P4_SIM_ETH=device` is a cable straight to a made-up camera. A tap on a
+  device opens it: everything it said, a ping, and "Ponerme en su red",
+  which gives the wire an address next to the device's
+  (`aos_eth_bench()`); "Repartir direcciones" makes the board a DHCP
+  server for whatever is plugged in. In both the Wi-Fi stays the board's
+  way out, and a restart undoes them.
 
 `docs/plan/ETHERNET.md` (Spanish) has the phases, everything measured and
 what is next.

@@ -10212,3 +10212,108 @@ EN ESTE CABLE	AN DIESEM KABEL
 
 #: firmware (Red, Equipo)
 Simulador: los equipos son de ejemplo.	Simulator: Die Geräte sind Beispiele.
+
+#: firmware (Red, Equipo)
+La placa está en la red del equipo, como %s	Die Platine ist im Netz des Geräts, als %s
+
+#: firmware (Red, Equipo)
+Red de banco: la placa es %s y reparte direcciones	Werkbank-Netz: Die Platine ist %s und vergibt Adressen
+
+#: firmware (Red, Equipo)
+El cable es un cliente más de la red: lo normal	Das Kabel ist ein gewöhnlicher Client im Netz: der Normalfall
+
+#: firmware (Red, Equipo)
+El Ethernet no arrancó de esa forma	Ethernet ist so nicht gestartet
+
+#: firmware (Red, Equipo)
+ARP: dijo qué dirección tiene, o preguntó por otra	ARP: Es hat seine Adresse genannt oder nach einer anderen gefragt
+
+#: firmware (Red, Equipo)
+mDNS: se anuncia o busca a otros por nombres .local	mDNS: Es meldet sich oder sucht andere über .local-Namen
+
+#: firmware (Red, Equipo)
+SSDP: se anuncia por UPnP, como los routers, las teles y muchas cámaras	SSDP: Es meldet sich per UPnP, wie Router, Fernseher und viele Kameras
+
+#: firmware (Red, Equipo)
+NetBIOS: nombres de red de Windows	NetBIOS: Windows-Netzwerknamen
+
+#: firmware (Red, Equipo)
+LLMNR: busca nombres en la red local, como hace Windows	LLMNR: Es sucht Namen im lokalen Netz, wie Windows
+
+#: firmware (Red, Equipo)
+WS-Discovery: como se anuncian las cámaras ONVIF y las impresoras	WS-Discovery: So melden sich ONVIF-Kameras und Drucker
+
+#: firmware (Red, Equipo)
+LLDP, CDP o spanning tree: lo que dicen los switches	LLDP, CDP oder Spanning Tree: was Switches senden
+
+#: firmware (Red, Equipo)
+IPv6: también habla IPv6	IPv6: Es spricht auch IPv6
+
+#: firmware (Red, Equipo)
+Otro tráfico dirigido a todos	Anderer Verkehr an alle
+
+#: firmware (Red, Equipo)
+DHCP: pidió una dirección, y quería la %s	DHCP: Es hat eine Adresse angefragt und wollte %s
+
+#: firmware (Red, Equipo)
+DHCP: pidió una dirección	DHCP: Es hat eine Adresse angefragt
+
+#: firmware (Red, Equipo)
+Su descripción UPnP está en %s	Seine UPnP-Beschreibung liegt unter %s
+
+#: firmware (Red, Equipo)
+Ya no está en la lista	Nicht mehr in der Liste
+
+#: firmware (Red, Equipo)
+ (privada: la eligió el equipo, no su fabricante)	 (privat: vom Gerät gewählt, nicht vom Hersteller)
+
+#: firmware (Red, Equipo)
+no, o todavía no se le preguntó	nein, oder noch nicht gefragt
+
+#: firmware (Red, Equipo)
+hace %s	vor %s
+
+#: firmware (Red, Equipo)
+%u tramas en %s	%u Frames in %s
+
+#: firmware (Red, Equipo)
+Volver a lo normal	Zurück zum Normalfall
+
+#: firmware (Red, Equipo)
+Ponerme en su red	In sein Netz wechseln
+
+#: firmware (Red, Equipo)
+La placa toma una dirección al lado de la suya en el cable, para llegarle: ping, y las apps que hablan con equipos. Mientras tanto el cable no es la salida de la placa, sigue el Wi-Fi. Se deshace acá o reiniciando.	Die Platine nimmt am Kabel eine Adresse neben der des Geräts, um es zu erreichen: Ping und die Apps, die mit Geräten sprechen. Solange ist das Kabel nicht der Ausgang der Platine, das bleibt das WLAN. Hier oder per Neustart rückgängig.
+
+#: firmware (Red, Equipo)
+Está en la misma red que el cable de la placa: se le llega sin cambiar nada.	Es ist im selben Netz wie das Kabel der Platine: ohne Änderung erreichbar.
+
+#: firmware (Red, Equipo)
+Todavía no dijo qué dirección tiene. Buscalo en las redes de fábrica.	Es hat seine Adresse noch nicht genannt. In den Werksnetzen suchen.
+
+#: firmware (Red, Equipo)
+Dice ser	Gibt sich aus als
+
+#: firmware (Red, Equipo)
+Contestó al ARP	Auf ARP geantwortet
+
+#: firmware (Red, Equipo)
+Se lo oyó	Zuletzt gehört
+
+#: firmware (Red, Equipo)
+En total	Insgesamt
+
+#: firmware (Red, Equipo)
+ACCIONES	AKTIONEN
+
+#: firmware (Red, Equipo)
+LO QUE DIJO	WAS ES GESAGT HAT
+
+#: firmware (Red, Equipo)
+Repartir direcciones	Adressen vergeben
+
+#: firmware (Red, Equipo)
+RED DE BANCO	WERKBANK-NETZ
+
+#: firmware (Red, Equipo)
+Para un equipo que espera que le den dirección: la placa se la da por DHCP. Mientras tanto el cable no es la salida de la placa, sigue el Wi-Fi. Tocá un equipo de la lista para ver más y para ponerte en su red.	Für ein Gerät, das auf eine Adresse wartet: Die Platine vergibt sie per DHCP. Solange ist das Kabel nicht der Ausgang der Platine, das bleibt das WLAN. Ein Gerät in der Liste antippen, um mehr zu sehen und in sein Netz zu wechseln.

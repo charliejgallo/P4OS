@@ -384,10 +384,47 @@ ejemplo, sin red ni DHCP: pide dirección, no se la dan, queda en
 pregunta por esa dirección. Con `P4_SIM_ETH=1` hablan el router, una PC
 (por NetBIOS) y una impresora (por mDNS) de la red de ejemplo.
 
-**Lo que sigue de esta herramienta:** una vez encontrado el equipo en otra
-red, ponerse en su red para entrar a su página (una segunda dirección en
-el cable, o la red de banco con DHCP propio, que es la herramienta 3); y el
-fabricante por la MAC (`oui.txt` de la tarjeta).
+**En la placa, 2026-11-12:** el usuario la probó en su red y anda (lista a
+los que hablan). Pidió que al tocar un equipo se abra con más datos: hecho
+ese día, abajo.
+
+**El detalle de un equipo.** Un toque en uno de la lista lo abre: su
+dirección, la MAC (y si es privada, elegida por el equipo y no por su
+fabricante), el nombre, lo que dice ser, si contestó al ARP, hace cuánto se
+lo oyó y cuántas tramas; cada cosa que dijo explicada en una línea (qué es
+ARP, mDNS, SSDP, NetBIOS, WS-Discovery...), con la dirección que le pidió
+al DHCP y dónde está su descripción UPnP; y las acciones: **Ping** y
+**Ponerme en su red**.
+
+**La red de banco** (`aos_eth_bench`, fase 5, herramienta 3, empezada). El
+cable deja de ser un cliente más de la red de la casa y pasa a ser para el
+equipo enchufado:
+
+- **Ponerme en su red:** la placa toma una dirección fija al lado de la
+  del equipo (su red, host 200; 201 si el equipo es el 200), sin cliente
+  DHCP. Sirve para llegarle desde la placa: ping, y las apps que hablan
+  con equipos (Cámaras, Modbus TCP, Impresoras).
+- **Repartir direcciones:** la placa es `192.168.77.1` y da direcciones
+  por DHCP (el servidor de la IDF, el mismo de la red propia del Wi-Fi) a
+  lo que se enchufe.
+- En las dos el cable **no es la salida** de la placa (prioridad de ruta 3,
+  debajo de todo): sigue el Wi-Fi. La placa no cuenta ese cable como "la
+  red" y no anuncia mDNS ahí. **No se guarda:** al reiniciar, el cable
+  vuelve a ser cliente.
+- **Seguridad:** lo que entra por la dirección de banco se juzga con el
+  interruptor de confianza de la red por cable, apagado salvo que se
+  prenda en la placa. Sin eso, `aos_access_ip_trusted` no reconocía esa
+  dirección y la juzgaba con la confianza del Wi-Fi, como si el equipo
+  enchufado estuviera en casa. `docs/SECURITY.md`.
+
+Visto en el simulador (la cámara de ejemplo, el detalle, ponerse en su
+red, volver). **En la placa falta todo lo de la red de banco**: que el
+cable levante con dirección fija, que el servidor DHCP entregue, y que el
+Wi-Fi siga siendo la salida.
+
+**Lo que sigue:** los servicios de la red de banco (TFTP para darle un
+firmware, hora por NTP, recibir su syslog), el escaneo de puertos desde el
+detalle, y el fabricante por la MAC (`oui.txt` de la tarjeta).
 
 ## Qué gana el taller con un cable de red
 

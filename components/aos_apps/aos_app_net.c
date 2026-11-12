@@ -74,6 +74,8 @@ static struct {
     int nrecent;
     bool full;
     uint32_t sel;               /* the host open in Hosts, 0 none */
+    bool fopen;                 /* a station open in Equipo, */
+    uint8_t fsel[6];            /* and which, by its MAC */
     int mfilter;                /* -1 all, else an NT_MDNS_TYPES index */
 } S = { .mfilter = -1 };
 
@@ -170,8 +172,13 @@ typedef struct {
     char c_ifs_sig[200];
     /* Equipo */
     lv_obj_t *f_link, *f_btn, *f_bar, *f_state, *f_list;
+    lv_obj_t *f_bench, *f_bench_btn;
     int32_t f_list_w;
     uint32_t f_tick, f_seen, f_sig;
+    /* a station's detail */
+    lv_obj_t *fd_title, *fd_kv[8], *fd_said, *fd_join, *fd_join_cap;
+    int32_t fd_w;
+    char fd_ip[16];
 } page_t;
 
 AOS_BSS_PSRAM static struct {
@@ -2068,6 +2075,193 @@ static void said_text(char *out, size_t n, uint16_t said)
     if (!out[0]) snprintf(out, n, "%s", _("otro tráfico"));
 }
 
+static uint8_t s_fmacs[AOS_ETH_STATIONS][6];        /* the stations of the list on the screen, in its order */
+
+static void find_open_cb(lv_event_t *e)
+{
+    memcpy(S.fsel, s_fmacs[(int)(intptr_t)lv_event_get_user_data(e)], 6);
+    S.fopen = true;
+    build_page();
+}
+
+static void find_close_cb(lv_event_t *e)
+{
+    S.fopen = false;
+    build_page();
+}
+
+/* The wire's part in a line: a client of the network, or one of the bench's two ways. */
+static void bench_say(lv_obj_t *l, const aos_eth_info_t *i)
+{
+    char t[120];
+    if (i->mode == AOS_ETH_STATIC) snprintf(t, sizeof t, _("La placa está en la red del equipo, como %s"), i->ip);
+    else if (i->mode == AOS_ETH_SERVER) snprintf(t, sizeof t, _("Red de banco: la placa es %s y reparte direcciones"), i->ip);
+    else snprintf(t, sizeof t, "%s", _("El cable es un cliente más de la red: lo normal"));
+    say(l, t, i->mode == AOS_ETH_CLIENT ? AOS_C_DIM : AOS_C_ORANGE);
+}
+
+/* Changing the wire's part starts its driver again: a couple of seconds here. */
+static void bench_set(aos_eth_mode_t mode, const char *ip)
+{
+    if (!aos_eth_bench(mode, ip)) aos_ui_toast(_("El Ethernet no arrancó de esa forma"), 2500);
+    U.pg.f_seen = 0xFFFFFFFFu;
+}
+
+static void bench_server_cb(lv_event_t *e)
+{
+    aos_eth_info_t i;
+    aos_eth_info(&i);
+    bench_set(i.mode == AOS_ETH_CLIENT ? AOS_ETH_SERVER : AOS_ETH_CLIENT, NULL);
+}
+
+/* Is the wire on the same /24 as this address? */
+static bool same_net(const aos_eth_info_t *i, const char *ip)
+{
+    const char *a = strrchr(i->ip, '.'), *b = strrchr(ip, '.');
+    return a && b && a - i->ip == b - ip && !strncmp(i->ip, ip, (size_t)(a - i->ip));
+}
+
+static void fd_join_cb(lv_event_t *e)
+{
+    aos_eth_info_t i;
+    aos_eth_info(&i);
+    const char *ip = U.pg.fd_ip;
+    if (i.mode != AOS_ETH_CLIENT) { bench_set(AOS_ETH_CLIENT, NULL); return; }
+    const char *dot = strrchr(ip, '.');
+    if (!dot) return;
+    char mine[16];                      /* its network, host 200: or 201 when the device is the 200 itself */
+    snprintf(mine, sizeof mine, "%.*s.%d", (int)(dot - ip), ip, atoi(dot + 1) == 200 ? 201 : 200);
+    bench_set(AOS_ETH_STATIC, mine);
+}
+
+static void fd_ping_cb(lv_event_t *e)
+{
+    if (!U.pg.fd_ip[0]) return;
+    char ip[16];
+    snprintf(ip, sizeof ip, "%s", U.pg.fd_ip);
+    S.tab = TAB_PING;
+    ping_go(ip);
+    build_page();
+}
+
+/* What each thing it was heard saying means, one line each. */
+static void fd_said_build(const aos_eth_station_t *st)
+{
+    page_t *g = &U.pg;
+    lv_obj_clean(g->fd_said);
+    int32_t w = g->fd_w;
+    char t[200];
+    static const struct { uint16_t bit; const char *what; } WHY[] = {
+        { AOS_ETH_SAID_ARP, N_("ARP: dijo qué dirección tiene, o preguntó por otra") },
+        { AOS_ETH_SAID_MDNS, N_("mDNS: se anuncia o busca a otros por nombres .local") },
+        { AOS_ETH_SAID_SSDP, N_("SSDP: se anuncia por UPnP, como los routers, las teles y muchas cámaras") },
+        { AOS_ETH_SAID_NBNS, N_("NetBIOS: nombres de red de Windows") },
+        { AOS_ETH_SAID_LLMNR, N_("LLMNR: busca nombres en la red local, como hace Windows") },
+        { AOS_ETH_SAID_WSD, N_("WS-Discovery: como se anuncian las cámaras ONVIF y las impresoras") },
+        { AOS_ETH_SAID_SWITCH, N_("LLDP, CDP o spanning tree: lo que dicen los switches") },
+        { AOS_ETH_SAID_IPV6, N_("IPv6: también habla IPv6") },
+        { AOS_ETH_SAID_OTHER, N_("Otro tráfico dirigido a todos") },
+    };
+    if (st->said & AOS_ETH_SAID_DHCP) {
+        if (st->wants[0]) snprintf(t, sizeof t, _("DHCP: pidió una dirección, y quería la %s"), st->wants);
+        else snprintf(t, sizeof t, "%s", _("DHCP: pidió una dirección"));
+        caption(g->fd_said, t, w);
+    }
+    for (size_t k = 0; k < sizeof WHY / sizeof WHY[0]; k++)
+        if (st->said & WHY[k].bit) caption(g->fd_said, aos_tr(WHY[k].what), w);
+    if (st->location[0]) {
+        snprintf(t, sizeof t, _("Su descripción UPnP está en %s"), st->location);
+        caption(g->fd_said, t, w);
+    }
+}
+
+static void find_detail_refresh(bool now)
+{
+    page_t *g = &U.pg;
+    if (!g->fd_title) return;
+    if (!now && ++g->f_tick % 4) return;
+    aos_eth_listen(true);
+    aos_eth_info_t i;
+    aos_eth_info(&i);
+    static aos_eth_station_t st[AOS_ETH_STATIONS];
+    int n = aos_eth_stations(st, AOS_ETH_STATIONS), at = -1;
+    for (int k = 0; k < n; k++) if (!memcmp(st[k].mac, S.fsel, 6)) at = k;
+    char t[160], a[24];
+    if (at < 0) {
+        say(g->fd_title, _("Ya no está en la lista"), AOS_C_DIM);
+        return;
+    }
+    const aos_eth_station_t *q = &st[at];
+    snprintf(g->fd_ip, sizeof g->fd_ip, "%s", q->ip);
+    say(g->fd_title, q->ip[0] ? q->ip : _("sin dirección todavía"), q->ip[0] ? AOS_C_TEXT : AOS_C_DIM);
+    snprintf(t, sizeof t, "%02X:%02X:%02X:%02X:%02X:%02X%s", q->mac[0], q->mac[1], q->mac[2], q->mac[3], q->mac[4], q->mac[5],
+             (q->mac[0] & 2) ? _(" (privada: la eligió el equipo, no su fabricante)") : "");
+    say(g->fd_kv[0], t, AOS_C_TEXT);
+    say(g->fd_kv[1], q->name[0] ? q->name : "-", AOS_C_TEXT);
+    say(g->fd_kv[2], q->vendor[0] ? q->vendor : "-", AOS_C_TEXT);
+    say(g->fd_kv[3], q->answered ? _("sí") : _("no, o todavía no se le preguntó"), q->answered ? C_GOOD : AOS_C_DIM);
+    fmt_span(a, sizeof a, q->age_s);
+    snprintf(t, sizeof t, _("hace %s"), a);
+    say(g->fd_kv[4], t, AOS_C_TEXT);
+    fmt_span(a, sizeof a, q->since_s);
+    snprintf(t, sizeof t, _("%u tramas en %s"), (unsigned)q->frames, a);
+    say(g->fd_kv[5], t, AOS_C_TEXT);
+
+    uint32_t sig = 2166136261u;
+    const uint8_t *p = (const uint8_t *)q;
+    for (size_t b = 0; b < offsetof(aos_eth_station_t, frames); b++) sig = (sig ^ p[b]) * 16777619u;
+    if (sig != g->f_sig || now) {
+        g->f_sig = sig;
+        fd_said_build(q);
+    }
+
+    /* getting on its network: offered when it has an address the wire cannot reach as it is */
+    bool bench = i.mode != AOS_ETH_CLIENT, near = q->ip[0] && i.ip[0] && same_net(&i, q->ip);
+    if (bench) {
+        pill_set(g->fd_join, AOS_SYM_LAN_DISCONNECT, _("Volver a lo normal"), AOS_C_CARD2);
+        bench_say(g->fd_join_cap, &i);
+        lv_obj_remove_flag(g->fd_join, LV_OBJ_FLAG_HIDDEN);
+    } else if (q->ip[0] && !near) {
+        pill_set(g->fd_join, AOS_SYM_LAN_CONNECT, _("Ponerme en su red"), C_NET_D);
+        say(g->fd_join_cap, _("La placa toma una dirección al lado de la suya en el cable, para llegarle: ping, y las apps que hablan con equipos. Mientras tanto el cable no es la salida de la placa, sigue el Wi-Fi. Se deshace acá o reiniciando."), AOS_C_DIM);
+        lv_obj_remove_flag(g->fd_join, LV_OBJ_FLAG_HIDDEN);
+    } else {
+        lv_obj_add_flag(g->fd_join, LV_OBJ_FLAG_HIDDEN);
+        say(g->fd_join_cap, q->ip[0] ? _("Está en la misma red que el cable de la placa: se le llega sin cambiar nada.")
+                                      : _("Todavía no dijo qué dirección tiene. Buscalo en las redes de fábrica."), AOS_C_DIM);
+    }
+}
+
+static void build_find_detail(void)
+{
+    page_t *g = &U.pg;
+    lv_obj_t *left, *right;
+    int32_t lw, rw;
+    split(U.content, 560, &left, &right, &lw, &rw);
+    lv_obj_t *back = row(left, lw, 64, 6);
+    lv_obj_add_flag(back, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(back, find_close_cb, LV_EVENT_CLICKED, NULL);
+    aos_make_decorative(aos_label(back, AOS_SYM_CHEVRON_LEFT, &aos_sym_28, C_NET));
+    aos_make_decorative(aos_label(back, aos_tr(TAB_NAME[TAB_FIND]), aos_font_body, C_NET));
+    lv_obj_t *c = vcard(left, lw, 20, 10);
+    g->fd_title = aos_label(c, "", aos_font_large, AOS_C_TEXT);
+    static const char *const KEYS[6] = { "MAC", N_("Nombre"), N_("Dice ser"), N_("Contestó al ARP"), N_("Se lo oyó"), N_("En total") };
+    for (int k = 0; k < 6; k++) g->fd_kv[k] = kv(c, lw - 40, aos_tr(KEYS[k]));
+    section(left, _("ACCIONES"));
+    c = vcard(left, lw, 20, 12);
+    lv_obj_t *br = row(c, lw - 40, 80, 12);
+    pill(br, AOS_SYM_PULSE, "Ping", C_NET_D, fd_ping_cb, NULL);
+    g->fd_join = pill(br, AOS_SYM_LAN_CONNECT, _("Ponerme en su red"), C_NET_D, fd_join_cb, NULL);
+    g->fd_join_cap = caption(c, "", lw - 40);
+    section(right, _("LO QUE DIJO"));
+    c = vcard(right, rw, 20, 8);
+    g->fd_said = box(c, rw - 40, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(g->fd_said, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(g->fd_said, 8, 0);
+    g->fd_w = rw - 40;
+    find_detail_refresh(true);
+}
+
 static void find_list_build(const aos_eth_station_t *s, int n)
 {
     page_t *g = &U.pg;
@@ -2080,6 +2274,10 @@ static void find_list_build(const aos_eth_station_t *s, int n)
     }
     for (int i = 0; i < n; i++) {
         lv_obj_t *c = vcard(g->f_list, w, 18, 6);
+        memcpy(s_fmacs[i], s[i].mac, 6);
+        lv_obj_add_flag(c, LV_OBJ_FLAG_CLICKABLE);              /* a tap opens it */
+        lv_obj_set_style_bg_color(c, AOS_C_CARD2, LV_STATE_PRESSED);
+        lv_obj_add_event_cb(c, find_open_cb, LV_EVENT_CLICKED, (void *)(intptr_t)i);
         lv_obj_t *head = box(c, w - 36, 44);
         lv_obj_align(aos_label(head, s[i].ip[0] ? s[i].ip : _("sin dirección todavía"), aos_font_body,
                                s[i].ip[0] ? AOS_C_TEXT : AOS_C_DIM), LV_ALIGN_LEFT_MID, 0, 0);
@@ -2112,6 +2310,9 @@ static void find_refresh(bool now)
     aos_eth_info_t i;
     aos_eth_info(&i);
     link_say(g->f_link, &i);
+    bench_say(g->f_bench, &i);
+    pill_set(g->f_bench_btn, i.mode == AOS_ETH_CLIENT ? AOS_SYM_LAN_PENDING : AOS_SYM_LAN_DISCONNECT,
+             i.mode == AOS_ETH_CLIENT ? _("Repartir direcciones") : _("Volver a lo normal"), i.mode == AOS_ETH_CLIENT ? C_NET_D : AOS_C_CARD2);
     aos_eth_listen(true);               /* while this tab is up; it keeps what it heard through a link that comes and goes */
 
     static aos_eth_station_t st[AOS_ETH_STATIONS];
@@ -2145,6 +2346,7 @@ static void find_refresh(bool now)
 
 static void build_find(void)
 {
+    if (S.fopen) { build_find_detail(); return; }
     page_t *g = &U.pg;
     lv_obj_t *left, *right;
     int32_t lw, rw;
@@ -2160,6 +2362,14 @@ static void build_find(void)
     g->f_btn = pill(br, AOS_SYM_MAGNIFY, _("Buscar en redes de fábrica"), C_NET_D, find_btn_cb, NULL);
     g->f_bar = progress(c, lw - 40);
     g->f_state = caption(c, "", lw - 40);
+    section(left, _("RED DE BANCO"));
+    c = vcard(left, lw, 20, 12);
+    g->f_bench = aos_label(c, "", aos_font_small, AOS_C_DIM);
+    lv_obj_set_width(g->f_bench, lw - 40);
+    lv_label_set_long_mode(g->f_bench, LV_LABEL_LONG_MODE_WRAP);
+    br = row(c, lw - 40, 80, 12);
+    g->f_bench_btn = pill(br, AOS_SYM_LAN_PENDING, _("Repartir direcciones"), C_NET_D, bench_server_cb, NULL);
+    caption(c, _("Para un equipo que espera que le den dirección: la placa se la da por DHCP. Mientras tanto el cable no es la salida de la placa, sigue el Wi-Fi. Tocá un equipo de la lista para ver más y para ponerte en su red."), lw - 40);
     section(right, _("EN ESTE CABLE"));
     g->f_list = box(right, rw, LV_SIZE_CONTENT);
     g->f_list_w = rw;
@@ -2199,6 +2409,7 @@ static void tab_cb(lv_event_t *e)
 {
     int t = (int)(intptr_t)lv_event_get_user_data(e);
     if (t == S.tab && t == TAB_HOSTS && S.sel && !U.land) S.sel = 0;   /* a second tap goes back to the list */
+    if (t == S.tab && t == TAB_FIND) S.fopen = false;
     S.tab = t;
     settings_save();
     build_page();
@@ -2213,7 +2424,7 @@ static void timer_cb(lv_timer_t *t)
     else if (S.tab == TAB_HOSTS) { hosts_refresh(); detail_refresh(); }
     else if (S.tab == TAB_WIFI) wifi_refresh();
     else if (S.tab == TAB_CABLE) cable_refresh(false);
-    else if (S.tab == TAB_FIND) find_refresh(false);
+    else if (S.tab == TAB_FIND) { if (S.fopen) find_detail_refresh(false); else find_refresh(false); }
     else mdns_refresh();
 }
 
@@ -2272,6 +2483,7 @@ static bool back(aos_app_t *self, void *inst)
     if (!U.content) return false;
     if (U.overlay) { kp_close(); return true; }
     if (S.tab == TAB_HOSTS && S.sel) { S.sel = 0; build_page(); return true; }
+    if (S.tab == TAB_FIND && S.fopen) { S.fopen = false; build_page(); return true; }
     return false;
 }
 

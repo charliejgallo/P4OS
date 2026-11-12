@@ -21,6 +21,7 @@
  */
 #include "aos_access.h"
 #include "aos_hal.h"
+#include "aos_eth.h"
 
 #include "mbedtls/md.h"
 #include "mbedtls/pkcs5.h"
@@ -195,6 +196,12 @@ bool aos_access_ip_trusted(const char *local_ip)
 {
     const char *wire = aos_hal_net_wired_ip();
     if (local_ip && wire[0] && !strcmp(local_ip, wire)) return aos_access_wire_trusted();
+    /* The wire's address when it is the bench network's (aos_eth_bench): the board does not count
+     * that as "the network", so aos_hal_net_wired_ip() is empty, but whoever comes in by it came in
+     * by the wire. Without this it would be judged by the Wi-Fi's trust, as if it were at home. */
+    aos_eth_info_t eth;
+    aos_eth_info(&eth);
+    if (local_ip && eth.ip[0] && !strcmp(local_ip, eth.ip)) return aos_access_wire_trusted();
     return aos_access_here_trusted();
 }
 
