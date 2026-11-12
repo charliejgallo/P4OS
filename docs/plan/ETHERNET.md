@@ -322,9 +322,15 @@ tramas de verdad armadas ahí y leídas por el mismo código que en la placa.
 La prueba de salida del simulador no sale a la red: sus respuestas son de
 ejemplo.
 
+<img src="../img/bench-w5500-cable.jpg" width="360" alt="La placa con Red en la pestaña Cable: 100 Mbit/s full duplex, la concesión de 2 h, la prueba de salida con la puerta de enlace, example.org y un ping hacia afuera en verde, y la sección Switch escuchando; al lado, el módulo W5500 cableado. Las direcciones de la red están tapadas">
+
+*La pestaña en la placa, en inglés, con la prueba de salida hecha. Las
+direcciones de la red del usuario están tapadas en la foto.*
+
 **En la placa, 2026-11-12:** el enlace, la dirección, la máscara, la puerta
 de enlace, los DNS, el servidor DHCP y la concesión se ven y son los de la
 red; la prueba de salida anda (puerta de enlace y `1.1.1.1` contestan). La
+prueba de nombres, ya con los tres, dio "example.org resuelve en 40 ms". La
 escucha del switch quedó "escuchando": el usuario no tiene un switch
 gestionable, así que **sigue sin saberse si el W5500 entrega los anuncios**
 ni cómo se lee uno de verdad. Falta también saber si conviene dejar la
