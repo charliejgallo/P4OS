@@ -179,7 +179,9 @@ Falta saber, y el modelo no lo dice:
    (`fit-test-th-print.svg`): los cuatro agujeros y el header calzan en la
    P4. Los zócalos del W5500 estaban 5 mm demasiado afuera y se corrieron
    (`ETH_PIN1` en `place.py`, 7,5 mm del borde del módulo a la primera
-   pata); falta volver a probarlos con el módulo puesto.
+   pata). **Vueltos a probar esa noche con el módulo puesto en una segunda
+   placa de plástico: entra, el RJ45 sale por el borde y la placa del
+   módulo no sobresale.**
 2. Decidir si el Ethernet de la PCBA va integrado o en zócalo.
 3. El esquemático: la casera está empezada (`hw/aux-board/gen.py`); falta
    revisarla pieza por pieza, el zócalo del módulo W5500 cuando se sepa cuál

@@ -51,7 +51,10 @@ edge. The silkscreen draws where it lies.
   (`ETH_PIN1`), behind the module's two mounting holes: with it the
   module's edge is on the board's and the RJ45 sticks out past it. Found
   with the printed plate on 2026-11-12: the first guess, 2.5 mm read off
-  photographs, left the sockets 5 mm too far out.
+  photographs, left the sockets 5 mm too far out. **Tried again that
+  evening on a second plate, with the module on it: its pins go into the
+  two rows, the RJ45 comes out at the edge and the module's board does not
+  stick out past the plate.**
 - Under the module there are 8.5 mm (the sockets' height): a resistor, a
   small capacitor or SMD parts fit, a pin header or an electrolytic do
   not. `place.py` refuses a tall part there.
