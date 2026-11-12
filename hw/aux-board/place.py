@@ -41,17 +41,13 @@ ETH = (W - ETH_PIN1 - 6.35, 88.76)                      # the module's edge on t
 ETH_BOX = (ETH[0] + 6.35 + ETH_PIN1 - ETH_LEN, ETH[1] - ETH_WID / 2, ETH[0] + 6.35 + ETH_PIN1, ETH[1] + ETH_WID / 2)
 LOW = ("R", "U")                                        # what may go under it, by its reference: a TO-92 "Q" may not
 
-SIDE_X = 14.8                           # the column of small headers beside the 2x20
-POWER_ROW = PIN1[1] - 2.54 * 8          # the row of the header's pin 18, +3V3
-SPARE_ROW = PIN1[1] - 2.54 * 14         # the row of pin 30, GPIO35
-
 # ref -> (x, y, degrees): the middle of the part, mm from the top left corner. Laid out on the
 # larger of each part's two packages, so both variants share it; build() refuses an overlap.
 AT = {
     # i2c, down the left edge above the header, and what serves it
     "J5": (3, 12.2, 0), "J6": (3, 23.6, 0), "J7": (3, 35, 0), "J8": (3, 46.4, 0),
     "R4": (17.5, 9, 0), "R5": (17.5, 12.5, 0), "JP2": (26.5, 10.6, 0),
-    "Q3": (13.5, 20, 0), "Q4": (13.5, 26.8, 0), "R6": (24, 20, 0), "R7": (24, 26, 0),
+    "Q3": (13.5, 19.6, 0), "Q4": (13.5, 26.0, 0), "R6": (24, 20, 0), "R7": (24, 26, 0),
     "JP3": (15, 44, 90), "JP4": (15, 48.5, 90),
     # infrared, looking out of the top edge
     "U3": (32, 4, 180), "D1": (42, 4, 0), "R13": (36, 9.5, 0), "C8": (34.5, 16.5, 0), "JP13": (42.6, 15.5, 90),
@@ -60,8 +56,12 @@ AT = {
     # 1-wire and the strip, on the right edge
     "J15": (58.5, 38, 90), "R17": (43, 29, 0), "JP15": (44, 34.8, 90),
     "J16": (58.5, 58, 90), "R18": (45, 50.8, 0), "C9": (45.5, 44.5, 0),
-    # the two bulk capacitors that found no room beside what they feed (a draft)
-    "C1": (22.5, 33.5, 0), "C11": (32.4, 36, 0),
+    # two bulk capacitors beside the header, in the band where the routing trial found the tracks
+    # crowd: two holes each there, where three headers had twelve. The 5 V one is next to its switch
+    # (Q1), the 3.3 V one level with the header's own 3.3 V pin 18.
+    "C1": (16.2, 98.5, 0), "C11": (16.2, 82.5, 0),
+    # 5 V, 3.3 V and the GPIO nothing else carries: three headers above the 2x20, out of that band
+    "J20": (14.0, 34.2, 0), "J21": (23.0, 34.2, 0), "J22": (32.0, 34.2, 0),
     # the ports, in the middle
     "J14": (27, 47.5, 90), "JP16": (36.5, 47.5, 0),
     "J9": (23, 64.9, 0), "J13": (30.3, 63.6, 0), "J11": (37.6, 67.4, 0), "J12": (44.9, 64.9, 0),
@@ -76,11 +76,8 @@ AT = {
     "U4": (40.5, 84.5, 0), "U5": (42.5, 100.3, 0),
     "F1": (57.5, 74.3, 0), "F2": (57.5, 69.7, 0),       # the two fuses, between the terminal and the module
     "C3": (13, 111, 0), "C4": (60.5, 106.1, 90),
-    "JP1": (33.5, 26.5, 90), "C2": (32.6, 81.4, 0),
+    "JP1": (37.5, 21.8, 90), "C2": (32.6, 81.4, 0),
     "J3": (27.5, 111.2, 0), "J4": (47.5, 111.2, 0),
-    # beside the header, in one column: 5 V, 3.3 V and the GPIO nothing else carries. POWER_ROW
-    # puts a 3.3 V pin level with the header's pin 18, and the GPIO's with pin 30, for a straight track
-    "J20": (SIDE_X, 99.24, 0), "J21": (SIDE_X, POWER_ROW - 1.27, 0), "J22": (SIDE_X, SPARE_ROW + 1.27, 0),
 }
 # the Qwiic socket, its mouth to the left edge; and three parts whose smaller package leaves its
 # reference or a pad under a neighbour's lettering
@@ -300,7 +297,7 @@ def route(board, net):
         zone.SetMinThickness(pcbnew.FromMM(0.25))
         zone.SetPadConnection(pcbnew.ZONE_CONNECTION_THERMAL)
         zone.SetThermalReliefGap(pcbnew.FromMM(0.3))
-        zone.SetThermalReliefSpokeWidth(pcbnew.FromMM(0.5))
+        zone.SetThermalReliefSpokeWidth(pcbnew.FromMM(0.8))    # four of them carry a ground pin's current
         zone.SetIslandRemovalMode(pcbnew.ISLAND_REMOVAL_MODE_ALWAYS)
         board.Add(zone)                     # left unfilled: KiCad fills it on opening (B), and drc() on a copy
     return len(board.GetTracks())
@@ -409,6 +406,8 @@ def build(variant):
             for k, line in enumerate(reversed(NAME.get(part.ref, []))):
                 if cx < 6:                  # against the left edge: its name stands beside its pins' names
                     text(board, line, 9.3, cy, 90, 0.9)
+                elif part.ref in ("J20", "J21", "J22"):     # no room above them: the name stands to their left
+                    text(board, line, pcbnew.ToMM(bb.GetLeft()) - 0.9, cy, 90, 0.9)
                 else:
                     text(board, line, cx, top - 0.9 - 1.3 * k, 0, 0.9)
             if part.ref in BRIDGE:

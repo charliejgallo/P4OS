@@ -24,11 +24,18 @@ SN65HVD230 on 3V3, GND, CTX, CRX). Ethernet is a "W5500 Lite" module
 (HW-884) on two sockets of six.
 
 **There is no second 2x20 socket with the forty pins again** (taken out on
-2026-11-11: nothing used it). Beside the header, in one column, there are
-four pins of switched 5 V and ground, four of 3.3 V and ground, and the
-three GPIO that no other connector of the board carries: 35 (a strapping
-pin) and 37 and 38 (the console's UART). The silkscreen names the header's
-forty pins beside their solder joints.
+2026-11-11: nothing used it). In its place three headers of four pins:
+switched 5 V and ground, 3.3 V and ground, and the three GPIO that no
+other connector of the board carries, 35 (a strapping pin) and 37 and 38
+(the console's UART). They stand above the 2x20, between the I2C headers
+and the SPI one; beside the 2x20 there are only two bulk capacitors, the
+5 V one next to its switch. The silkscreen names the header's forty pins
+beside their solder joints.
+
+**Supplies and ground are not to be routed thin:** 0.8 mm at least to the
+5 V and 3.3 V headers and wherever it fits, 0.5 mm only through a passage
+that takes no more. The ground planes join each ground pin by four spokes
+of 0.8 mm.
 
 ## The Ethernet module's place
 
@@ -62,7 +69,7 @@ edge. The silkscreen draws where it lies.
 
 | Through-hole | SMD |
 |---|---|
-| <img src="draft-th-3d.jpg" width="400" alt="A 3D render of the through-hole draft on a black board: the header's forty solder joints down the left edge with the GPIO number of each pin beside them and three small headers for 5 V, 3.3 V and spare GPIO, the I2C headers above, two USB-A sockets on the bottom edge, two screw terminals on the right, pin headers for UART A / RS485, CAN, UART B, SWD and SPI in the middle with each pin named, two sockets for the W5500 module, the infrared receiver and LED at the top"> | <img src="draft-smd-3d.jpg" width="400" alt="The same board with surface-mount parts: small resistors, SOT-23 transistors, solder bridges and a Qwiic socket"> |
+| <img src="draft-th-3d.jpg" width="400" alt="A 3D render of the through-hole draft on a black board: the header's forty solder joints down the left edge with the GPIO number of each pin beside them and two bulk capacitors, the I2C headers above with three small headers for 5 V, 3.3 V and spare GPIO next to them, two USB-A sockets on the bottom edge, two screw terminals on the right, pin headers for UART A / RS485, CAN, UART B, SWD and SPI in the middle with each pin named, two sockets for the W5500 module, the infrared receiver and LED at the top"> | <img src="draft-smd-3d.jpg" width="400" alt="The same board with surface-mount parts: small resistors, SOT-23 transistors, solder bridges and a Qwiic socket"> |
 
 *The drafts as KiCad renders them, black as they would be ordered. The
 board is the size of the P4's own and sits on its four holes. The
@@ -114,8 +121,9 @@ look.
 <img src="trial-th.png" width="360" alt="The through-hole board routed by the trial router: front tracks in red, back tracks in blue, dense between the 2x20 header on the left and the pin headers in the middle, sparse at the top and on the right">
 
 It is a plain maze router on a 0.3175 mm grid that starts on the header's
-pin 1: 0.25 mm tracks, 0.5 mm for the supplies, 0.6 mm vias, KiCad's
-default 0.2 mm clearance, ground last. A net with no way takes off the
+pin 1: 0.25 mm tracks, 0.8 mm for the supplies and for ground (0.5 mm,
+then 0.25 mm, where 0.8 finds no room; it says where), 0.6 mm vias,
+KiCad's default 0.2 mm clearance, ground last. A net with no way takes off the
 nets in its way and they are routed again after it. Its tracks pass
 KiCad's rules and are not pretty: **the trial boards are not for
 manufacture.**
@@ -123,8 +131,8 @@ manufacture.**
 What it found:
 
 - **The board routes on two layers.** Every signal and supply net was
-  joined on both variants, with no clearance error. It took 153 vias (th)
-  and 176 (smd) and about 3.5 m of track, which a person will better by
+  joined on both variants, with no clearance error. It took 136 vias (th)
+  and 196 (smd) and about 3.6 m of track, which a person will better by
   far.
 - **The 2x20 header is the tight spot.** A pin of its outer row has one
   way out, the gap between two pins of the inner row, and a track of
@@ -134,16 +142,21 @@ What it found:
   each pin its way out; even so the router needed its rip-up and several
   settings to join everything.
 - **Ground does not take care of itself.** With tracks on both faces the
-  planes are cut into pieces: on the through-hole trial four ground pads
-  (on J3, J9, J14 and J21) were reached by no plane and no track. The
-  real routing has to keep the back mostly whole, or tie the pieces with
-  vias and short tracks. The SMD trial left none.
-- **The supplies fit at 0.5 mm** everywhere on the through-hole board; on
-  the SMD one a single stretch of the USB 1.1 socket's 5 V went at
-  0.25 mm.
+  planes are cut into pieces: on the through-hole trial three ground pads
+  (on C11, J14 and R11) were reached by no plane and no track, and four on
+  the SMD one. The real routing has to keep the back mostly whole, or tie
+  the pieces with vias and short tracks.
+- **The supplies fit at 0.8 mm almost everywhere.** On the through-hole
+  board every stretch of 5 V, switched 5 V and the two USB sockets' 5 V
+  went at 0.8 mm, and 3.3 V all but two (one of them to a pin of the
+  3.3 V header, at 0.5 mm). On the SMD one the stretches to the USB
+  sockets' protection chips went thinner, one at 0.25 mm: their pads are
+  0.95 mm apart.
 - **The band between the header and the pin headers in the middle** is
   where the tracks crowd; the top and the right of the board are almost
-  empty. The three small headers beside the 2x20 stand in that band.
+  empty. The three small headers stood in that band at first, twelve
+  holes in the way; with them moved above the 2x20 the router joined
+  everything at its first setting, where before it needed its fifth.
 - **Not tried by it:** the two USB pairs as pairs. The router treats D+
   and D- as two wires; the USB 2.0 pair (pins 25 and 27 to J3) wants to be
   routed first, by hand, together and with no via.

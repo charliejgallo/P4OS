@@ -52,7 +52,7 @@ dibujar el esquemático: nada de esto se armó ni se midió.
 
 | Bloque | GPIO (pin) | Conector | Notas |
 |---|---|---|---|
-| Header | todos | tira de pines 2×20 de 2,54 hacia abajo; al lado, tres tiras de 4: 5 V conmutados y masa, 3,3 V y masa, y GPIO 35, 38 y 37 con masa | El de la placa es un zócalo hembra, así que la tira va del lado de abajo y espejada. No hay zócalo de paso con los cuarenta pines (sacado el 2026-11-11): cada pin sale por su conector, y los tres que no tenían ninguno van a la tira de GPIO. La serigrafía nombra los cuarenta pines al lado de sus soldaduras |
+| Header | todos | tira de pines 2×20 de 2,54 hacia abajo; arriba de ella, tres tiras de 4: 5 V conmutados y masa, 3,3 V y masa, y GPIO 35, 38 y 37 con masa | El de la placa es un zócalo hembra, así que la tira va del lado de abajo y espejada. No hay zócalo de paso con los cuarenta pines (sacado el 2026-11-11): cada pin sale por su conector, y los tres que no tenían ninguno van a la tira de GPIO. La serigrafía nombra los cuarenta pines al lado de sus soldaduras |
 | 5 V conmutado | pines 1 y 3 | — | Llave habilitada por 3V3; un fusible rearmable por USB |
 | USB host "2.0" | USBD_N/P (25, 27) | USB-A hembra | High Speed: par diferencial de 90 Ω, corto y sin vías; protección ESD |
 | USB host "1.1" | 24, 25 (21, 23) | USB-A hembra | Full Speed |
@@ -201,4 +201,9 @@ Falta saber, y el modelo no lo dice:
    pads quedaron aislados de los planos); los dos pares USB hay que
    trazarlos a mano, primero y sin vías; y la franja entre el header y las
    tiras del medio es donde se amontona todo. Las placas de prueba
-   (`trial-*.kicad_pcb`) no van a git ni a fábrica.
+   (`trial-*.kicad_pcb`) no van a git ni a fábrica. **Por eso las tres
+   tiras chicas (5 V, 3,3 V, GPIO) se mudaron ese día arriba del header**,
+   entre los I2C y el SPI, y en la franja quedaron dos capacitores; con eso
+   el ruteador unió todo al primer intento. **Alimentación y masa no van
+   finas** (pedido del usuario): 0,8 mm como mínimo hasta esas tiras y
+   donde entre, 0,5 mm sólo en un paso que no dé para más.

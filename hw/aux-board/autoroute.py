@@ -34,7 +34,7 @@ KICAD_CLI = os.environ.get("KICAD_CLI", "/Applications/KiCad/KiCad.app/Contents/
 G = 0.3175                      # the grid: an eighth of the headers' 2.54 mm
 CLR = 0.2                       # copper to copper, KiCad's default rule
 EDGE = 0.5                      # copper to the board's edge
-SIG, PWR = 0.25, 0.5            # track widths
+SIG, PWR, FAT = 0.25, 0.5, 0.8  # track widths: signals; supplies and ground where FAT finds no room; supplies
 VIA, VIA_DRILL = 0.6, 0.3
 POWER = ("+5V", "+5V_SW", "+3V3", "VBUS_HS", "VBUS_FS")
 PLANES = ("GND",)               # routed last: the planes join most of them, tracks make sure of the rest
@@ -159,7 +159,7 @@ def read(board):
 def base_maps(b):
     """The two maps before any routing: one for signal tracks, one for power tracks and vias."""
     nx, ny = int(b["W"] / G) + 1, int(b["H"] / G) + 1
-    maps = {"sig": Map(nx, ny, SIG / 2), "wide": Map(nx, ny, max(PWR, VIA) / 2)}
+    maps = {"sig": Map(nx, ny, SIG / 2), "wide": Map(nx, ny, max(PWR, VIA) / 2), "fat": Map(nx, ny, FAT / 2)}
     for m in maps.values():
         rim = EDGE + m.half + 0.1       # the edge's own line is 0.1 mm wide, and KiCad measures from its middle
         for j in range(ny):
@@ -359,8 +359,8 @@ def route_net(b, maps, net, grouped, name, out, base=None):
     for q, extra in enumerate(hung):
         nodes[q] += [(None, s) for s in extra if sig.owner[s[0]][s[1]] in (FREE, net)]
 
-    def roomy(states):                  # the states where the wide track fits too
-        return [s for s in states if wide.owner[s[0]][s[1]] in (FREE, net)]
+    def roomy(states, m):               # the states where that map's track fits too
+        return [s for s in states if m.owner[s[0]][s[1]] in (FREE, net)]
     order = sorted(range(len(grouped)), key=lambda q: -len(grouped[q]))
     tree = {s for _, s in nodes[order[0]]}
     left, victims = order[1:], set()
@@ -372,12 +372,15 @@ def route_net(b, maps, net, grouped, name, out, base=None):
         left.remove(q)
         targets = [s for _, s in nodes[q]]
         path, width = None, SIG
-        if fat and roomy(targets) and roomy(tree):
-            path, width = search(wide, wide, net, roomy(tree), roomy(targets), through, b["novia"]), PWR
+        for w, m in ((FAT, maps["fat"]), (PWR, wide)) if fat else ():
+            if not path and roomy(targets, m) and roomy(tree, m):
+                path, width = search(m, wide, net, roomy(tree, m), roomy(targets, m), through, b["novia"]), w
         if not path and targets and tree:
             path, width = search(sig, wide, net, tree, targets, through, b["novia"]), SIG
-            if path and fat:            # a pad or a passage with no room for the wide track
-                out["thin"].append(name)
+        if path and fat:                # how wide each join of a supply came out, and at which pads
+            ends = sorted({"%s.%s" % (b["pads"][of[e]]["ref"], b["pads"][of[e]]["pin"])
+                           for e in (path[0], path[-1]) if of.get(e) is not None})
+            out["thin"].append((name, width, ends))
         if not path:
             a = b["pads"][grouped[q][0]]
             if name in PLANES:          # no track reaches it: the plane may, and KiCad's check says
@@ -537,10 +540,14 @@ def main():
             break
     write(board, b, out, dst)
     print("wrote %s: %d tracks, %d vias" % (os.path.basename(dst), len(out["tracks"]), len(out["vias"])))
-    if out["thin"]:
-        thin = {n: out["thin"].count(n) for n in sorted(set(out["thin"]))}
-        print("power joins made with the thin track, no room for %.1f mm: %s" % (
-            PWR, ", ".join("%s x%d" % kv for kv in thin.items())))
+    widths = {}
+    for name, width, ends in out["thin"]:
+        widths.setdefault(name, {}).setdefault(width, []).extend(ends)
+    for name in sorted(widths):
+        print("  %-8s %s" % (name, "; ".join("%d joins at %.2f mm%s" % (
+            sum(1 for n, w, _ in out["thin"] if n == name and w == width), width,
+            " (%s)" % ", ".join(sorted(set(widths[name][width]))) if width < FAT else "")
+            for width in sorted(widths[name], reverse=True))))
     for f in out["failed"]:
         print("  not joined:", f)
     if out["plane"]:
