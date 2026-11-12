@@ -39,6 +39,8 @@ menos que a los 42 s, y lo mismo en dos lecturas separadas por 47 s; con
 una sola lectura de base tan temprana no se sabe si es algo que se pidió
 una vez (el audio de los avisos se abrió después) o una pérdida lenta: a
 ese ritmo serían unos 350 bytes por hora. Otra lectura más tarde lo dice.
+**Lo dijo: a las 23 h 40 min encendida seguían libres los mismos 193 311
+bytes.** No es una pérdida: fue algo que se pidió una vez.
 
 Visto de paso, y no es de Ethernet: el registro tiene 772 veces "1-wire:
 reset bus failed: no devices found", una por minuto, de Sensores leyendo
@@ -223,6 +225,45 @@ arranque). **Arreglado ese mismo día, en `main`:** las preferencias pasaron
 a un almacén propio de 256 KB (`docs/BUILDING.md`, "The preferences are in
 `prefs`"); en la placa se movieron las 422 claves y la del reloj quedó
 guardada tras un reinicio.
+
+## La interfaz trabada, 2026-11-12
+
+La misma corrida, leída a las 19:47 con 23 h 40 min encendida: **el cable
+tenía enlace y no pasaba nada por él.** Lo que dice el registro:
+
+- A las 14 h de encendida (hacia las 10:04 y las 10:26, con el usuario
+  trabajando en el banco) el enlace cayó dos veces y volvió a los 2 s; la
+  segunda vez tomó dirección por DHCP sin problema.
+- Nueve horas justas después de esa última dirección (32 400 s: lo que dura
+  la concesión de esa red), la dirección se perdió con el enlace arriba. O
+  sea que **la concesión no se renovó ni una vez**: la renovación de la
+  mitad de la concesión, a las 4 h 30, ya no tuvo respuesta. En algún
+  momento entre las 10:26 y las 14:56 la interfaz dejó de pasar tramas, sin
+  un solo aviso.
+- A las 19:34 el enlace cayó y volvió otra vez, y el DHCP tampoco contestó.
+- El Wi-Fi de la placa anduvo todo el tiempo, y al reiniciar la placa el
+  cable tomó dirección en 1,6 s: el servidor DHCP estaba y contestaba.
+
+**No se sabe por qué.** Lo que encaja: el W5500 guarda su configuración en
+registros que se borran si su alimentación tiembla (cables sueltos en un
+protoboard, una mano cerca), y ni él ni el driver de la IDF avisan: el
+enlace vuelve solo y el driver sigue sondeando un chip sin zócalo abierto.
+No se pudo comprobar: el reinicio borró el estado.
+
+**Lo que se hizo: un vigilante en el driver** (`watch_thread` en
+`aos_eth_p4.c`). Cada 5 s, con Ethernet andando, lo arranca de nuevo si el
+chip ya no tiene la dirección MAC que se le dio (lo reiniciaron), si el
+estado de su zócalo no es el que tenía con tráfico, si la dirección se
+perdió con el enlace arriba, o si hay enlace y dirección y no entró una
+trama en cinco minutos (una vez por silencio: un cable con un solo equipo
+callado no es una falla). Arrancar de nuevo cuesta dos o tres segundos de
+red. `/api/eth` dice cuántas tramas entraron (`rx`) y cuántas veces lo
+arrancó el vigilante (`restarts`), para que la próxima vez haya con qué
+mirar.
+
+**Sin probar:** que el vigilante actúe. No hay cómo reiniciar el chip desde
+afuera con el cableado de hoy (RST está al aire); en la placa auxiliar RST
+sale a una tira y se va a poder.
 
 ## El probador de boca (Red, pestaña Cable)
 

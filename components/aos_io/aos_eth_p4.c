@@ -79,7 +79,19 @@ static struct {
     uint16_t           frame_len;
     int64_t            frame_at;
     uint32_t           heard;
+    /* the watch (watch_thread) */
+    eth_spi_t         *spi_ctx;         /* the driver's SPI, to ask the chip how it is */
+    volatile uint32_t  rx_frames;
+    bool               watching;        /* its thread is alive */
+    const char *volatile kick;          /* an event that asks for a restart, and why */
+    int                sr_ok;           /* the socket's status when it was seen working; -1 not seen yet */
+    uint32_t           rx_seen;         /* rx_frames at the last look, and when it last moved */
+    int64_t            rx_at;
+    bool               silence_done;    /* restarted once for this silence: not again until a frame comes */
 } E;
+
+#define WATCH_MS    5000                /* how often the watch looks */
+#define SILENCE_MS  300000              /* link, address and not a frame in this long: start it again, once */
 
 #define LISTEN_MS   5000                /* how long listening outlives the last call that asked for it */
 #define FRAME_MAX_L 1536
@@ -108,12 +120,14 @@ static void *spi_init(const void *config)
     }
     E.info.spi_hz = aos_io_spi_clock(s->spi);
     E.info.cs = aos_io_spi_cs_gpio(s->spi);
+    E.spi_ctx = s;
     return s;
 }
 
 static esp_err_t spi_deinit(void *ctx)
 {
     eth_spi_t *s = ctx;
+    if (E.spi_ctx == s) E.spi_ctx = NULL;
     aos_io_spi_close(s->spi);
     vSemaphoreDelete(s->lock);
     heap_caps_free(s->tx);
@@ -159,6 +173,7 @@ static esp_err_t spi_write(void *ctx, uint32_t cmd, uint32_t addr, const void *d
 static esp_err_t eth_input(esp_eth_handle_t eth, uint8_t *buf, uint32_t len, void *priv)
 {
     (void)eth;
+    E.rx_frames++;
     if (E.listen && len >= 14 && (buf[0] & 1)) {
         static const uint8_t LLDP[5] = { 0x01, 0x80, 0xC2, 0x00, 0x00 }, CDP[6] = { 0x01, 0x00, 0x0C, 0xCC, 0xCC, 0xCC };
         if (!memcmp(buf, LLDP, 5) || !memcmp(buf, CDP, 6)) {
@@ -239,8 +254,12 @@ static void on_event(void *arg, esp_event_base_t base, int32_t id, void *data)
         E.info.ip[0] = E.info.mask[0] = E.info.gw[0] = 0;
         aos_hal_net_wired_set(false, NULL);
         aos_hal_log("eth", "address lost");
+        /* with the link up, the lease ran out with nobody answering the renewals: the watch's business */
+        if (E.info.link) E.kick = "the address was lost with the link up";
     }
 }
+
+static void watch_thread(void *arg);
 
 static void teardown(void)
 {
@@ -341,10 +360,78 @@ static bool start(void)
     }
 
     E.info.running = true;
+    E.sr_ok = -1;
+    E.kick = NULL;
+    E.rx_frames = E.rx_seen = 0;
+    E.rx_at = esp_timer_get_time();
+    E.silence_done = false;
+    if (!E.watching) E.watching = aos_hal_thread_start("eth-watch", watch_thread, NULL, 6144, 2);
     aos_hal_log("eth", "W5500 on %s CS%d at %u Hz (%u asked%s), %02X:%02X:%02X:%02X:%02X:%02X, polled every %d ms",
                 E.info.port, E.info.cs, (unsigned)E.info.spi_hz, (unsigned)asked, kept ? "" : ", the default", E.info.mac[0], E.info.mac[1], E.info.mac[2],
                 E.info.mac[3], E.info.mac[4], E.info.mac[5], POLL_MS);
     return true;
+}
+
+/* ---- the watch ---- */
+
+/* Found on the bench on 2026-11-12: after a day up, the interface had a link
+ * and passed nothing. Its lease was not renewed for hours, ran out, and no
+ * new one came, with the DHCP server answering everyone else; a restart of
+ * the board brought it back at once. Why was not seen. The chip keeps its
+ * setup in registers that a glitch on its supply clears, and neither it nor
+ * ESP-IDF's driver says so: the link comes up again by itself and the
+ * driver goes on polling a chip that has no socket open.
+ *
+ * So, every WATCH_MS while it runs, the driver is started again when:
+ *   - the chip's own MAC address is not the one it was given (it was reset);
+ *   - its socket's status is not what it was while traffic flowed;
+ *   - the address was lost with the link up (on_event says);
+ *   - there is a link and an address and no frame came in for SILENCE_MS,
+ *     once per silence: a wire with one quiet device on it is not a fault.
+ * Starting again costs the network two or three seconds. The thread's stack
+ * is in PSRAM, as every thread of aos_hal_thread_start; it touches no flash. */
+static void watch_thread(void *arg)
+{
+    (void)arg;
+    for (;;) {
+        aos_hal_sleep_ms(WATCH_MS);
+        if (!E.info.running) continue;
+        xSemaphoreTake(E.lock, portMAX_DELAY);
+        const char *why = NULL;
+        if (E.info.running && E.eth) {
+            int64_t now = esp_timer_get_time();
+            why = E.kick;
+            E.kick = NULL;
+            uint8_t mac[6] = { 0 }, sr = 0;
+            /* the chip's address and its control byte: SHAR in the common block, Sn_SR of socket 0 */
+            if (!why && E.spi_ctx && spi_read(E.spi_ctx, 0x0009, 0x00, mac, 6) == ESP_OK
+                && spi_read(E.spi_ctx, 0x0003, 0x08, &sr, 1) == ESP_OK) {
+                if (memcmp(mac, E.info.mac, 6)) why = "the chip lost its address: it was reset";
+                else if (E.sr_ok >= 0 && sr != E.sr_ok) why = "the chip's socket is not as it was";
+                else if (E.sr_ok < 0 && E.info.ip[0]) {
+                    E.sr_ok = sr;
+                    aos_hal_log("eth", "watching: the socket's status is 0x%02X with traffic flowing", sr);
+                }
+            }
+            if (E.rx_frames != E.rx_seen) {
+                E.rx_seen = E.rx_frames;
+                E.rx_at = now;
+                E.silence_done = false;
+            } else if (!why && E.info.link && E.info.ip[0] && !E.silence_done && now - E.rx_at > (int64_t)SILENCE_MS * 1000) {
+                why = "a link, an address and not a frame in five minutes";
+                E.silence_done = true;
+            }
+            if (why) {
+                bool silent = E.silence_done;
+                aos_hal_log("eth", "%s: starting it again", why);
+                teardown();
+                E.info.restarts++;
+                if (!start()) aos_hal_log("eth", "it did not start again: %s", E.info.err);
+                E.silence_done = silent;
+            }
+        }
+        xSemaphoreGive(E.lock);
+    }
 }
 
 static void take(void)
@@ -455,6 +542,7 @@ void aos_eth_info(aos_eth_info_t *out)
 {
     *out = E.info;
     out->link_s = E.info.link ? (uint32_t)((esp_timer_get_time() - E.link_at) / 1000000) : 0;
+    out->rx_frames = E.rx_frames;
 }
 
 /* The server and the lease are lwIP's own record of the DHCP exchange, read

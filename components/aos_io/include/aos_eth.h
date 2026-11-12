@@ -52,6 +52,8 @@ typedef struct {
     char     err[80];           /* why it is not running, in Spanish; "" when it is */
     bool     paused;            /* stopped while an app has its SPI port; back when the port is free */
     char     paused_by[24];     /* that app, as it named itself to the pin arbiter */
+    uint32_t rx_frames;         /* frames that came in since it started */
+    uint32_t restarts;          /* times the watch found it dead and started it again, since the boot */
 } aos_eth_info_t;
 
 /* Reads the preference and starts it if it is on. Once, at boot. */
