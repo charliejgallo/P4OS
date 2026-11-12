@@ -10167,3 +10167,48 @@ INTERFACES	SCHNITTSTELLEN
 
 #: firmware (Red, Cable)
 Simulador: el switch y las respuestas de la prueba son de ejemplo.	Simulator: Der Switch und die Testergebnisse sind Beispiele.
+
+#: firmware (Red, Equipo)
+otro tráfico	anderer Verkehr
+
+#: firmware (Red, Equipo)
+Todavía no habló nadie. Enchufá el equipo directo al Ethernet de la placa y prendelo: lo que dice al arrancar aparece acá. Si no dice nada, buscalo en las redes de fábrica.	Noch hat niemand gesprochen. Das Gerät direkt an das Ethernet der Platine anschließen und einschalten: Was es beim Start sagt, erscheint hier. Sagt es nichts, in den Werksnetzen suchen.
+
+#: firmware (Red, Equipo)
+sin dirección todavía	noch keine Adresse
+
+#: firmware (Red, Equipo)
+contestó	hat geantwortet
+
+#: firmware (Red, Equipo)
+Se lo oyó por %s	Gehört über %s
+
+#: firmware (Red, Equipo)
+Pidió una dirección por DHCP: quería la %s	Hat per DHCP eine Adresse angefragt: gewünscht war %s
+
+#: firmware (Red, Equipo)
+Pidió una dirección por DHCP	Hat per DHCP eine Adresse angefragt
+
+#: firmware (Red, Equipo)
+Dice ser: %s	Gibt sich aus als: %s
+
+#: firmware (Red, Equipo)
+Buscar en redes de fábrica	In den Werksnetzen suchen
+
+#: firmware (Red, Equipo)
+Preguntando en %s: %d de %d	Frage in %s: %d von %d
+
+#: firmware (Red, Equipo)
+Preguntó por %d direcciones	%d Adressen abgefragt
+
+#: firmware (Red, Equipo)
+Pregunta por ARP por unas cinco mil direcciones en un cuarto de minuto. Es para un equipo enchufado directo, no para una red con gente	Fragt per ARP rund fünftausend Adressen in einer Viertelminute ab. Gedacht für ein direkt angeschlossenes Gerät, nicht für ein Netz mit Nutzern
+
+#: firmware (Red, Equipo)
+Enchufado directo, de dirección desconocida	Direkt angeschlossen, Adresse unbekannt
+
+#: firmware (Red, Equipo)
+EN ESTE CABLE	AN DIESEM KABEL
+
+#: firmware (Red, Equipo)
+Simulador: los equipos son de ejemplo.	Simulator: Die Geräte sind Beispiele.

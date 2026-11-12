@@ -173,6 +173,24 @@ typedef struct {
 bool nt_cable_start(const char *gw);
 const nt_cable_t *nt_cable(void);       /* under nt_lock() */
 
+/* ---- finding a device on the wire: asking the usual factory networks ---- */
+
+typedef struct {
+    int      state;             /* NT_BUSY while it asks */
+    int      done, total;       /* addresses asked */
+    char     now[20];           /* the network being asked: "192.168.88.x" */
+    uint32_t seq;
+} nt_find_t;
+
+/* Asks by ARP for every address of the networks devices come set to from the
+ * factory, about five thousand in a quarter of a minute. Whoever has one
+ * answers, whatever network the board is on, and shows in
+ * aos_eth_stations(). It floods the wire with questions: for a device
+ * plugged straight in, not for a network with people on it. */
+bool nt_find_start(void);
+void nt_find_stop(void);
+const nt_find_t *nt_find(void);         /* under nt_lock() */
+
 /* ---- mDNS ---- */
 
 #define NT_MAX_SVC 64

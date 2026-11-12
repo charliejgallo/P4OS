@@ -151,7 +151,7 @@ se usa: el driver sondea.
 | **2. Convivencia** ✅ 2026-11-11, salvo lo anotado | Ruta por defecto, el vigilante de red, mDNS y SNTP por el cable, sacar y poner el cable, arrancar sin Wi-Fi, arrancar sin módulo | El portal, la OTA y SSH andan por cable con el Wi-Fi apagado; sacar el cable no reinicia ni cuelga; 12 h prendida sin perder el enlace |
 | **3. Interfaz** ✅ 2026-11-11 | Ajustes → Redes; ícono en la barra; `GET/POST /api/eth` y la página Red del portal; IP fija optativa; el módulo en Módulos | Se prende, se apaga y se ve el estado sin tocar un archivo; en el simulador, un Ethernet falso (`P4_SIM_ETH=1`, o `nolink` para el módulo sin cable) |
 | **4. Para las apps**, empezada 2026-11-12 | Las apps ya usan sockets y no cambian. Lo nuevo: lista de interfaces con su estado para las herramientas de red (`aos_hal_netif_*`), elegir por cuál sale un socket, modo promiscuo y tramas crudas para las de diagnóstico | Red (la app) muestra las dos interfaces; Modbus TCP, Art-Net y SSH probados por cable. **Hecho:** la lista de interfaces (`aos_hal_netif_list`), los datos del DHCP (`aos_eth_dhcp`) y la escucha del anuncio del switch (`aos_eth_listen`, `aos_eth_neighbor`), exportados a las apps de la tarjeta. **Falta:** elegir por cuál interfaz sale un socket, y las tramas crudas para una app (hoy el firmware sólo guarda el anuncio) |
-| **5. Apps de taller** | Las de abajo, de a una. La 1, el probador de boca, está en el simulador (2026-11-12) | Cada una con su prueba en el banco |
+| **5. Apps de taller** | Las de abajo, de a una. La 1, el probador de boca, probada en la placa salvo el switch (2026-11-12); la 2, encontrar un equipo, en el simulador (2026-11-12) | Cada una con su prueba en el banco |
 | **6. Placa auxiliar** | Los zócalos del módulo con sus medidas reales; ver si conviene el chip integrado en la PCBA | El módulo entra en la placa impresa de prueba |
 
 Cada fase termina con lo medido anotado acá y en `PRUEBAS-PLACA.md`.
@@ -270,7 +270,11 @@ mirar.
 **En la placa, 2026-11-12 por la noche:** instalado. El vigilante lee el
 chip: a los 8 s del arranque anotó el estado del zócalo, `0x42` (MACRAW,
 el que tiene que ser), y en el primer minuto y medio entraron 360 tramas
-sin que arrancara nada de nuevo. **Sin probar:** que el vigilante actúe. No hay cómo reiniciar el chip desde
+sin que arrancara nada de nuevo. **Sin probar:** que el vigilante actúe. Si al arrancarlo de nuevo el chip
+no contesta (sacaron el módulo, sigue sin alimentación), el vigilante
+insiste cada 15 s mientras Ethernet esté prendido: venía andando, así que
+se lo espera de vuelta. No es lo que pasa al arrancar sin módulo, donde
+avisa y no insiste. No hay cómo reiniciar el chip desde
 afuera con el cableado de hoy (RST está al aire); en la placa auxiliar RST
 sale a una tira y se va a poder.
 
@@ -335,6 +339,55 @@ escucha del switch quedó "escuchando": el usuario no tiene un switch
 gestionable, así que **sigue sin saberse si el W5500 entrega los anuncios**
 ni cómo se lee uno de verdad. Falta también saber si conviene dejar la
 escucha prendida más tiempo o bajar el sondeo mientras escucha.
+
+## Encontrar un equipo (Red, pestaña Equipo)
+
+La segunda herramienta: una cámara, un PLC, un router o una pasarela de
+dirección desconocida, enchufado directo al Ethernet de la placa. Escrita y
+vista en el simulador el 2026-11-12; **en la placa falta todo**.
+
+- **Escuchar.** Un equipo se delata al arrancar: pide dirección por DHCP
+  con su nombre y lo que dice ser, anuncia por ARP la dirección en la que
+  queda, busca a sus vecinos por mDNS, SSDP o NetBIOS, una cámara saluda
+  por WS-Discovery (ONVIF). Todo eso va para todos, así que alcanza con
+  escuchar. La pestaña lista cada estación oída con su MAC, la dirección
+  que dijo tener, el nombre que dio, por qué protocolos habló, la
+  dirección que le pidió al DHCP y lo que dice ser.
+- **Preguntar.** Para el que no dice nada: "Buscar en redes de fábrica"
+  pregunta por ARP por las 254 direcciones de 21 redes /24 con las que
+  suelen venir los equipos (192.168.0 a .4, .8, .10, .11, .31, .50, .68,
+  .88, .100, .123, .178, .254; 10.0.0, 10.0.1, 10.1.1, 10.10.10;
+  172.16.0): 5334 preguntas en un cuarto de minuto. El que tiene la
+  dirección contesta aunque la placa esté en otra red, o en ninguna (se
+  pregunta sin dirección de origen, como hace una estación antes de tomar
+  una). Inunda el cable de preguntas: es para un equipo enchufado directo,
+  y la pantalla lo dice.
+
+De quién es una dirección: la MAC de origen de una trama es siempre de la
+estación, pero la IP de origen de un paquete ruteado es de alguien lejano.
+Por eso la dirección se toma del ARP, que habla por el que lo manda, y de
+los paquetes IP dirigidos a todos (difusión o multidifusión), que ningún
+router reenvía.
+
+En el firmware: con la escucha prendida, la entrada guarda en un anillo en
+PSRAM (24 tramas, sus primeros 600 bytes) lo que va para todos y las
+respuestas ARP a la placa; `aos_eth_stations()` las pasa a una tabla de 24
+estaciones cuando alguien pregunta, fuera de la tarea de recepción
+(`aos_eth_stations.c`, que tampoco le cree nada a la trama: cuatro millones
+de tramas rotas bajo el sanitizador, sin una falla). `aos_eth_arp_ask()`
+manda la pregunta, una trama cruda de 60 bytes. Las dos están exportadas a
+las apps de la tarjeta.
+
+En el simulador: `P4_SIM_ETH=device` es un cable directo a una cámara de
+ejemplo, sin red ni DHCP: pide dirección, no se la dan, queda en
+192.168.1.64, lo anuncia y saluda por WS-Discovery, y contesta cuando se
+pregunta por esa dirección. Con `P4_SIM_ETH=1` hablan el router, una PC
+(por NetBIOS) y una impresora (por mDNS) de la red de ejemplo.
+
+**Lo que sigue de esta herramienta:** una vez encontrado el equipo en otra
+red, ponerse en su red para entrar a su página (una segunda dirección en
+el cable, o la red de banco con DHCP propio, que es la herramienta 3); y el
+fabricante por la MAC (`oui.txt` de la tarjeta).
 
 ## Qué gana el taller con un cable de red
 

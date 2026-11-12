@@ -28,6 +28,7 @@
  * noticed within a tenth of a second.
  */
 #include "aos_nettools.h"
+#include "aos_eth.h"
 #include "aos_i18n.h"
 
 #include <stdio.h>
@@ -92,6 +93,7 @@ typedef struct {
     nt_wifi_t  wifi;
     nt_mdns_t  mdns;
     nt_cable_t cable;
+    nt_find_t  find;
 } nt_state_t;
 
 static nt_state_t *T;
@@ -136,6 +138,7 @@ const nt_ports_t *nt_ports(void) { return &R; }
 const nt_wifi_t  *nt_wifi(void)  { return &W; }
 const nt_mdns_t  *nt_mdns(void)  { return &M; }
 const nt_cable_t *nt_cable(void) { return &T->cable; }
+const nt_find_t  *nt_find(void)  { return &T->find; }
 
 void nt_ip_str(uint32_t ip, char *out, size_t n)
 {
@@ -1571,6 +1574,83 @@ bool nt_cable_start(const char *gw)
     }
     return true;
 }
+
+/* -------------------------------------------------------------------------- */
+/* Finding a device: the factory networks, asked by ARP                         */
+/* -------------------------------------------------------------------------- */
+
+/* The /24 networks routers, cameras, access points, PLCs and gateways come
+ * set to. Each as its first three bytes. */
+static const uint8_t FIND_NETS[][3] = {
+    { 192, 168, 0 }, { 192, 168, 1 }, { 192, 168, 2 }, { 192, 168, 3 }, { 192, 168, 4 }, { 192, 168, 8 },
+    { 192, 168, 10 }, { 192, 168, 11 }, { 192, 168, 31 }, { 192, 168, 50 }, { 192, 168, 68 }, { 192, 168, 88 },
+    { 192, 168, 100 }, { 192, 168, 123 }, { 192, 168, 178 }, { 192, 168, 254 },
+    { 10, 0, 0 }, { 10, 0, 1 }, { 10, 1, 1 }, { 10, 10, 10 }, { 172, 16, 0 },
+};
+#define FIND_N ((int)(sizeof FIND_NETS / sizeof FIND_NETS[0]))
+
+static bool s_find_run, s_find_stop;
+
+static void find_thread(void *arg)
+{
+    (void)arg;
+    int done = 0;
+    for (int k = 0; k < FIND_N && !s_find_stop && app_alive(); k++) {
+        const uint8_t *p = FIND_NETS[k];
+        nt_lock();
+        snprintf(T->find.now, sizeof T->find.now, "%u.%u.%u.x", p[0], p[1], p[2]);
+        T->find.seq++;
+        nt_unlock();
+        for (int h = 1; h <= 254 && !s_find_stop && app_alive(); h++) {
+            aos_eth_arp_ask((uint32_t)p[0] << 24 | (uint32_t)p[1] << 16 | (uint32_t)p[2] << 8 | (uint32_t)h);
+            done++;
+            if (h % 2 == 0) aos_hal_sleep_ms(5);            /* some four hundred a second */
+            if (h % 32 == 0) {
+                nt_lock();
+                T->find.done = done;
+                T->find.seq++;
+                nt_unlock();
+            }
+        }
+    }
+    aos_hal_sleep_ms(600);                                  /* the last answers */
+    nt_lock();
+    T->find.done = done;
+    T->find.state = NT_DONE;
+    T->find.now[0] = 0;
+    T->find.seq++;
+    s_find_run = false;
+    nt_unlock();
+}
+
+bool nt_find_start(void)
+{
+    nt_keepalive();
+    nt_lock();
+    bool busy = s_find_run;
+    if (!busy) {
+        uint32_t seq = T->find.seq + 1;
+        memset(&T->find, 0, sizeof T->find);
+        T->find.seq = seq;
+        T->find.state = NT_BUSY;
+        T->find.total = FIND_N * 254;
+        s_find_run = true;
+        s_find_stop = false;
+    }
+    nt_unlock();
+    if (busy) return false;
+    if (!aos_hal_thread_start("nt_find", find_thread, NULL, STACK, PRIO)) {
+        nt_lock();
+        s_find_run = false;
+        T->find.state = NT_FAILED;
+        T->find.seq++;
+        nt_unlock();
+        return false;
+    }
+    return true;
+}
+
+void nt_find_stop(void) { s_find_stop = true; }
 
 bool nt_wifi_scan(void)
 {

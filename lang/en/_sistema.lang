@@ -10167,3 +10167,48 @@ INTERFACES	INTERFACES
 
 #: firmware (Red, Cable)
 Simulador: el switch y las respuestas de la prueba son de ejemplo.	Simulator: the switch and the test's answers are examples.
+
+#: firmware (Red, Equipo)
+otro tráfico	other traffic
+
+#: firmware (Red, Equipo)
+Todavía no habló nadie. Enchufá el equipo directo al Ethernet de la placa y prendelo: lo que dice al arrancar aparece acá. Si no dice nada, buscalo en las redes de fábrica.	Nobody has spoken yet. Plug the device straight into the board's Ethernet and switch it on: what it says as it starts shows here. If it says nothing, look for it on the factory networks.
+
+#: firmware (Red, Equipo)
+sin dirección todavía	no address yet
+
+#: firmware (Red, Equipo)
+contestó	answered
+
+#: firmware (Red, Equipo)
+Se lo oyó por %s	Heard by %s
+
+#: firmware (Red, Equipo)
+Pidió una dirección por DHCP: quería la %s	It asked for an address by DHCP: it wanted %s
+
+#: firmware (Red, Equipo)
+Pidió una dirección por DHCP	It asked for an address by DHCP
+
+#: firmware (Red, Equipo)
+Dice ser: %s	Says it is: %s
+
+#: firmware (Red, Equipo)
+Buscar en redes de fábrica	Search the factory networks
+
+#: firmware (Red, Equipo)
+Preguntando en %s: %d de %d	Asking on %s: %d of %d
+
+#: firmware (Red, Equipo)
+Preguntó por %d direcciones	Asked for %d addresses
+
+#: firmware (Red, Equipo)
+Pregunta por ARP por unas cinco mil direcciones en un cuarto de minuto. Es para un equipo enchufado directo, no para una red con gente	It asks by ARP for some five thousand addresses in a quarter of a minute. It is for a device plugged straight in, not for a network with people on it
+
+#: firmware (Red, Equipo)
+Enchufado directo, de dirección desconocida	Plugged straight in, its address unknown
+
+#: firmware (Red, Equipo)
+EN ESTE CABLE	ON THIS WIRE
+
+#: firmware (Red, Equipo)
+Simulador: los equipos son de ejemplo.	Simulator: the devices are examples.

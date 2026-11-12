@@ -4,7 +4,13 @@
  *
  * The cable goes to a made-up switch that announces itself three seconds after someone listens,
  * by LLDP (P4_SIM_ETH=cdp: by CDP; P4_SIM_ETH=quiet: a switch that says nothing). The announcement
- * is a real frame, built here and read by the same code as on the board (aos_eth_announce.c). */
+ * is a real frame, built here and read by the same code as on the board (aos_eth_announce.c).
+ *
+ * And somebody talks on the wire, for the tool that finds a device (aos_eth_stations.c), also
+ * with real frames. On the made-up network: its router, a PC that looks for a name by NetBIOS and
+ * a printer that answers by mDNS. With P4_SIM_ETH=device there is no network: the cable goes
+ * straight to a camera that asks for an address by DHCP, gets none, settles on 192.168.1.64,
+ * says so by ARP and says hello by WS-Discovery; it answers when asked for that address. */
 #include "aos_eth.h"
 #include "aos_hal.h"
 
@@ -29,7 +35,11 @@ static void apply(bool on)
         memcpy(s_info.mac, MAC, 6);
         s_info.running = true;
         if (!s_info.spi_hz) s_info.spi_hz = AOS_ETH_DEFAULT_HZ;
-        if (strcmp(e, "nolink")) {
+        if (!strcmp(e, "device")) {             /* a device and no DHCP server: a link and no address */
+            s_info.link = true;
+            s_info.speed_mbps = 100;
+            s_info.full_duplex = true;
+        } else if (strcmp(e, "nolink")) {
             s_info.link = true;
             s_info.speed_mbps = 100;
             s_info.full_duplex = true;
@@ -143,8 +153,160 @@ static size_t cdp_frame(uint8_t *f)
     return n;
 }
 
+/* ---- the stations on the made-up wire ---- */
+
+static const uint8_t ALL[6] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+static const uint8_t SELF[6] = { 0x02, 0x50, 0x34, 0x4F, 0x53, 0x01 };
+static unsigned s_said;                 /* which of the made-up frames went out already */
+static bool s_asked_cam, s_asked_router;
+
+static size_t arp_frame(uint8_t *f, const uint8_t *src, const uint8_t *dst, int op, const uint8_t *spa, const uint8_t *tpa)
+{
+    memset(f, 0, 60);
+    memcpy(f, dst, 6);
+    memcpy(f + 6, src, 6);
+    static const uint8_t HEAD[9] = { 0x08, 0x06, 0x00, 0x01, 0x08, 0x00, 6, 4, 0x00 };
+    memcpy(f + 12, HEAD, 9);
+    f[21] = (uint8_t)op;
+    memcpy(f + 22, src, 6);
+    memcpy(f + 28, spa, 4);
+    if (op == 2) memcpy(f + 32, dst, 6);
+    memcpy(f + 38, tpa, 4);
+    return 60;
+}
+
+static size_t udp_frame(uint8_t *f, const uint8_t *src, const uint8_t *dst, const uint8_t *sip, const uint8_t *dip,
+                        unsigned sport, unsigned dport, const void *payload, size_t n)
+{
+    memcpy(f, dst, 6);
+    memcpy(f + 6, src, 6);
+    f[12] = 0x08;
+    f[13] = 0x00;
+    uint8_t *ip = f + 14;
+    memset(ip, 0, 28);
+    ip[0] = 0x45;
+    ip[2] = (uint8_t)((28 + n) >> 8);
+    ip[3] = (uint8_t)(28 + n);
+    ip[8] = 64;
+    ip[9] = 17;
+    memcpy(ip + 12, sip, 4);
+    memcpy(ip + 16, dip, 4);
+    uint8_t *u = ip + 20;
+    u[0] = (uint8_t)(sport >> 8);
+    u[1] = (uint8_t)sport;
+    u[2] = (uint8_t)(dport >> 8);
+    u[3] = (uint8_t)dport;
+    u[4] = (uint8_t)((8 + n) >> 8);
+    u[5] = (uint8_t)(8 + n);
+    memcpy(u + 8, payload, n);
+    return 42 + n;
+}
+
+/* What the made-up stations say, each frame once, as the time since listening began goes by. */
+static void stations_talk(uint32_t now)
+{
+    const char *e = getenv("P4_SIM_ETH");
+    uint32_t t = now - (uint32_t)s_listen_at;
+    static uint8_t f[700];
+    size_t n;
+    if (e && !strcmp(e, "device")) {
+        static const uint8_t CAM[6] = { 0x02, 0xCA, 0x4D, 0x7C, 0x2A, 0x11 }, NONE[4] = { 0, 0, 0, 0 }, BCAST[4] = { 255, 255, 255, 255 };
+        static const uint8_t IP[4] = { 192, 168, 1, 64 }, WSD[4] = { 239, 255, 255, 250 }, WSD_MAC[6] = { 0x01, 0x00, 0x5E, 0x7F, 0xFF, 0xFA };
+        if (t >= 1500 && !(s_said & 1)) {       /* a DHCP discover: its name, what it runs, the address it would like */
+            s_said |= 1;
+            static uint8_t b[300];
+            memset(b, 0, sizeof b);
+            b[0] = 1;
+            b[1] = 1;
+            b[2] = 6;
+            memcpy(b + 28, CAM, 6);
+            memcpy(b + 236, "\x63\x82\x53\x63", 4);
+            size_t k = 240;
+            memcpy(b + k, "\x35\x01\x01", 3); k += 3;
+            memcpy(b + k, "\x0C\x0Aipcam-7c2a", 12); k += 12;
+            memcpy(b + k, "\x3C\x0Cudhcp 1.24.2", 14); k += 14;
+            memcpy(b + k, "\x32\x04\xC0\xA8\x01\x40", 6); k += 6;
+            b[k++] = 255;
+            n = udp_frame(f, CAM, ALL, NONE, BCAST, 68, 67, b, k);
+            aos_eth_station_note(f, n, SELF, now);
+        }
+        if (t >= 4000 && !(s_said & 2)) {       /* nobody answered: its factory address, announced */
+            s_said |= 2;
+            n = arp_frame(f, CAM, ALL, 1, IP, IP);
+            aos_eth_station_note(f, n, SELF, now);
+        }
+        if (t >= 5500 && !(s_said & 4)) {
+            s_said |= 4;
+            n = udp_frame(f, CAM, WSD_MAC, IP, WSD, 3702, 3702, B("<Hello/>"));
+            aos_eth_station_note(f, n, SELF, now);
+        }
+        if (s_asked_cam && !(s_said & 8)) {
+            s_said |= 8;
+            n = arp_frame(f, CAM, SELF, 2, IP, NONE);
+            aos_eth_station_note(f, n, SELF, now);
+        }
+        return;
+    }
+    static const uint8_t ROUTER[6] = { 0x02, 0x10, 0x00, 0x00, 0x00, 0x01 }, PC[6] = { 0x02, 0x10, 0x00, 0x00, 0x00, 0x17 };
+    static const uint8_t PRN[6] = { 0x02, 0x10, 0x00, 0x00, 0x00, 0x1F };
+    static const uint8_t R_IP[4] = { 10, 0, 0, 1 }, PC_IP[4] = { 10, 0, 0, 23 }, PRN_IP[4] = { 10, 0, 0, 31 }, NET_ALL[4] = { 10, 0, 0, 255 };
+    static const uint8_t MDNS[4] = { 224, 0, 0, 251 }, MDNS_MAC[6] = { 0x01, 0x00, 0x5E, 0x00, 0x00, 0xFB }, ME[4] = { 10, 0, 0, 50 };
+    if (t >= 800 && !(s_said & 1)) {            /* the router looks for somebody */
+        s_said |= 1;
+        n = arp_frame(f, ROUTER, ALL, 1, R_IP, PC_IP);
+        aos_eth_station_note(f, n, SELF, now);
+    }
+    if (t >= 2200 && !(s_said & 2)) {           /* a PC asks for a NetBIOS name, and gives its own away */
+        s_said |= 2;
+        uint8_t q[50] = { 0x12, 0x34, 0x01, 0x10, 0, 1, 0, 0, 0, 0, 0, 0, 32 };
+        const char *name = "PC-TALLER      ";
+        for (int i = 0; i < 16; i++) {
+            uint8_t c = i < 15 ? (uint8_t)name[i] : 0;
+            q[13 + 2 * i] = (uint8_t)('A' + (c >> 4));
+            q[14 + 2 * i] = (uint8_t)('A' + (c & 15));
+        }
+        q[46] = 0x00;
+        q[47] = 0x20;
+        q[49] = 0x01;
+        n = udp_frame(f, PC, ALL, PC_IP, NET_ALL, 137, 137, q, sizeof q);
+        aos_eth_station_note(f, n, SELF, now);
+    }
+    if (t >= 3500 && !(s_said & 4)) {           /* a printer answers an mDNS question with its name */
+        s_said |= 4;
+        n = udp_frame(f, PRN, MDNS_MAC, PRN_IP, MDNS, 5353, 5353,
+                      B("\x00\x00\x84\x00\x00\x00\x00\x01\x00\x00\x00\x00\x09impresora\x05local\x00\x00\x01\x80\x01\x00\x00\x00\x78\x00\x04\x0A\x00\x00\x1F"));
+        aos_eth_station_note(f, n, SELF, now);
+    }
+    if (s_asked_router && !(s_said & 8)) {
+        s_said |= 8;
+        n = arp_frame(f, ROUTER, SELF, 2, R_IP, ME);
+        aos_eth_station_note(f, n, SELF, now);
+    }
+}
+
+int aos_eth_stations(aos_eth_station_t *out, int max)
+{
+    uint64_t now = aos_hal_uptime_ms();
+    if (!s_listen || !s_info.link || now - s_listen_seen > 5000) return 0;
+    stations_talk((uint32_t)now);
+    return aos_eth_station_list(out, max, (uint32_t)now);
+}
+
+bool aos_eth_arp_ask(uint32_t ip)
+{
+    if (!s_info.link) return false;
+    if (ip == 0xC0A80140u) s_asked_cam = true;          /* 192.168.1.64 */
+    if (ip == 0x0A000001u) s_asked_router = true;       /* 10.0.0.1 */
+    return true;
+}
+
 void aos_eth_listen(bool on)
 {
+    if (on && !s_listen) {
+        aos_eth_station_clear();
+        s_said = 0;
+        s_asked_cam = s_asked_router = false;
+    }
     if (on && !s_listen) s_listen_at = aos_hal_uptime_ms();
     s_listen = on;
     s_listen_seen = aos_hal_uptime_ms();

@@ -79,6 +79,9 @@ static struct {
     uint16_t           frame_len;
     int64_t            frame_at;
     uint32_t           heard;
+    uint8_t           *ring;            /* the frames said to everyone, their first RING_LEN bytes, in PSRAM: */
+    uint16_t           ring_len[24];    /* read into the stations' table when someone asks (aos_eth_stations) */
+    volatile uint8_t   ring_head, ring_n;
     /* the watch (watch_thread) */
     eth_spi_t         *spi_ctx;         /* the driver's SPI, to ask the chip how it is */
     volatile uint32_t  rx_frames;
@@ -88,13 +91,17 @@ static struct {
     uint32_t           rx_seen;         /* rx_frames at the last look, and when it last moved */
     int64_t            rx_at;
     bool               silence_done;    /* restarted once for this silence: not again until a frame comes */
+    bool               lost;            /* the watch stopped it and it did not start again: it goes on trying */
 } E;
 
 #define WATCH_MS    5000                /* how often the watch looks */
 #define SILENCE_MS  300000              /* link, address and not a frame in this long: start it again, once */
+#define RETRY_EVERY 3                   /* a chip that went away is tried again every this many looks */
 
 #define LISTEN_MS   5000                /* how long listening outlives the last call that asked for it */
 #define FRAME_MAX_L 1536
+#define RING_N      24
+#define RING_LEN    600                 /* a DHCP request with its options fits */
 
 /* ---- the driver's SPI, on ours ---- */
 
@@ -174,6 +181,17 @@ static esp_err_t eth_input(esp_eth_handle_t eth, uint8_t *buf, uint32_t len, voi
 {
     (void)eth;
     E.rx_frames++;
+    /* for the stations' table: what was said to everyone, and an ARP answer to us */
+    if (E.listen && E.ring && len >= 14 && ((buf[0] & 1) || (buf[12] == 0x08 && buf[13] == 0x06))
+        && xSemaphoreTake(E.heard_lock, pdMS_TO_TICKS(5))) {
+        uint8_t k = E.ring_head;
+        uint16_t n = len < RING_LEN ? (uint16_t)len : RING_LEN;
+        memcpy(E.ring + (size_t)k * RING_LEN, buf, n);
+        E.ring_len[k] = n;
+        E.ring_head = (uint8_t)((k + 1) % RING_N);
+        if (E.ring_n < RING_N) E.ring_n++;
+        xSemaphoreGive(E.heard_lock);
+    }
     if (E.listen && len >= 14 && (buf[0] & 1)) {
         static const uint8_t LLDP[5] = { 0x01, 0x80, 0xC2, 0x00, 0x00 }, CDP[6] = { 0x01, 0x00, 0x0C, 0xCC, 0xCC, 0xCC };
         if (!memcmp(buf, LLDP, 5) || !memcmp(buf, CDP, 6)) {
@@ -286,7 +304,7 @@ static bool fail(const char *why, esp_err_t e)
         if (e != ESP_OK) snprintf(E.info.err, sizeof E.info.err, "%s (%s)", why, esp_err_to_name(e));
         else snprintf(E.info.err, sizeof E.info.err, "%s", why);
     }
-    aos_hal_log("eth", "not started: %s", E.info.err);
+    if (!E.lost) aos_hal_log("eth", "not started: %s", E.info.err);     /* the watch's retries say it once */
     teardown();
     return false;
 }
@@ -360,6 +378,7 @@ static bool start(void)
     }
 
     E.info.running = true;
+    E.lost = false;
     E.sr_ok = -1;
     E.kick = NULL;
     E.rx_frames = E.rx_seen = 0;
@@ -389,12 +408,26 @@ static bool start(void)
  *   - there is a link and an address and no frame came in for SILENCE_MS,
  *     once per silence: a wire with one quiet device on it is not a fault.
  * Starting again costs the network two or three seconds. The thread's stack
- * is in PSRAM, as every thread of aos_hal_thread_start; it touches no flash. */
+ * is in PSRAM, as every thread of aos_hal_thread_start; it touches no flash.
+ *
+ * When it does not start again - the module was pulled off, its supply is
+ * still down - it goes on trying every quarter of a minute for as long as
+ * Ethernet is switched on: it was working, so it is expected back. That is
+ * not what happens at boot with no module, where it says so and gives up. */
 static void watch_thread(void *arg)
 {
     (void)arg;
-    for (;;) {
+    for (unsigned look = 0;; look++) {
         aos_hal_sleep_ms(WATCH_MS);
+        if (E.lost && E.info.enabled && !E.info.running && !E.info.paused && look % RETRY_EVERY == 0) {
+            xSemaphoreTake(E.lock, portMAX_DELAY);
+            if (E.lost && E.info.enabled && !E.info.running && !E.info.paused && start()) {
+                E.info.restarts++;
+                aos_hal_log("eth", "the chip is back: started again");
+            }
+            xSemaphoreGive(E.lock);
+            continue;
+        }
         if (!E.info.running) continue;
         xSemaphoreTake(E.lock, portMAX_DELAY);
         const char *why = NULL;
@@ -425,8 +458,11 @@ static void watch_thread(void *arg)
                 bool silent = E.silence_done;
                 aos_hal_log("eth", "%s: starting it again", why);
                 teardown();
-                E.info.restarts++;
-                if (!start()) aos_hal_log("eth", "it did not start again: %s", E.info.err);
+                if (start()) E.info.restarts++;
+                else {
+                    E.lost = true;
+                    aos_hal_log("eth", "it did not start again (%s): trying every %d s", E.info.err, WATCH_MS * RETRY_EVERY / 1000);
+                }
                 E.silence_done = silent;
             }
         }
@@ -455,6 +491,7 @@ bool aos_eth_enable(bool on)
     E.info.enabled = on;
     aos_hal_pref_set_i32(PREF_ON, on ? 1 : 0);
     bool ok = true;
+    E.lost = false;                     /* switched by hand: the watch has nothing to bring back */
     E.info.paused = false;              /* switched by hand: whatever it was waiting for no longer counts */
     E.info.paused_by[0] = 0;
     if (on) ok = start();
@@ -575,20 +612,65 @@ void aos_eth_listen(bool on)
         E.heard_lock = xSemaphoreCreateMutex();
         /* one frame, kept whole: PSRAM, nothing in it is touched from an interrupt */
         E.frame = heap_caps_malloc(FRAME_MAX_L, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+        E.ring = heap_caps_malloc((size_t)RING_N * RING_LEN, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
         const esp_timer_create_args_t ta = { .callback = listen_timeout, .name = "eth-listen" };
         esp_timer_create(&ta, &E.listen_off);
-        if (!E.heard_lock || !E.frame || !E.listen_off) return;
+        if (!E.heard_lock || !E.frame || !E.ring || !E.listen_off) return;
     }
     if (on && !E.listen) {              /* a new listen: what was heard before may be another switch's */
         xSemaphoreTake(E.heard_lock, portMAX_DELAY);
         E.frame_len = 0;
         E.heard = 0;
+        E.ring_n = E.ring_head = 0;
+        aos_eth_station_clear();
         xSemaphoreGive(E.heard_lock);
     }
     E.listen = on;
     esp_timer_stop(E.listen_off);
     if (on) esp_timer_start_once(E.listen_off, LISTEN_MS * 1000);
     if (E.promisc != on) promisc_apply();
+}
+
+int aos_eth_stations(aos_eth_station_t *out, int max)
+{
+    if (!E.heard_lock || !E.ring || !out || max <= 0) return 0;
+    uint32_t now = (uint32_t)(esp_timer_get_time() / 1000);
+    xSemaphoreTake(E.heard_lock, portMAX_DELAY);
+    /* the frames kept since the last call, oldest first, into the table */
+    for (uint8_t i = 0, k = (uint8_t)((E.ring_head + RING_N - E.ring_n) % RING_N); i < E.ring_n; i++, k = (uint8_t)((k + 1) % RING_N))
+        aos_eth_station_note(E.ring + (size_t)k * RING_LEN, E.ring_len[k], E.info.mac, now);
+    E.ring_n = 0;
+    int n = aos_eth_station_list(out, max, now);
+    xSemaphoreGive(E.heard_lock);
+    return n;
+}
+
+/* "Who has this address? Tell me": one broadcast frame of 60 bytes. From an
+ * address of ours when the one asked for is on our own network; from none
+ * otherwise, as a station does before it takes an address (an ARP probe),
+ * which whoever has it answers all the same. */
+bool aos_eth_arp_ask(uint32_t ip)
+{
+    if (!E.lock || !xSemaphoreTake(E.lock, pdMS_TO_TICKS(50))) return false;
+    bool ok = false;
+    if (E.eth && E.info.running && E.info.link) {
+        uint8_t f[60] = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+        memcpy(f + 6, E.info.mac, 6);
+        static const uint8_t HEAD[10] = { 0x08, 0x06, 0x00, 0x01, 0x08, 0x00, 6, 4, 0x00, 0x01 };
+        memcpy(f + 12, HEAD, 10);
+        memcpy(f + 22, E.info.mac, 6);
+        esp_netif_ip_info_t me;
+        if (E.netif && E.info.ip[0] && esp_netif_get_ip_info(E.netif, &me) == ESP_OK
+            && ((ntohl(me.ip.addr) ^ ip) & ntohl(me.netmask.addr)) == 0)
+            memcpy(f + 28, &me.ip.addr, 4);
+        f[38] = (uint8_t)(ip >> 24);
+        f[39] = (uint8_t)(ip >> 16);
+        f[40] = (uint8_t)(ip >> 8);
+        f[41] = (uint8_t)ip;
+        ok = esp_eth_transmit(E.eth, f, sizeof f) == ESP_OK;
+    }
+    xSemaphoreGive(E.lock);
+    return ok;
 }
 
 bool aos_eth_neighbor(aos_eth_neighbor_t *out)

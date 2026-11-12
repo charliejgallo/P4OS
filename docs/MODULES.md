@@ -528,6 +528,13 @@ page.
   `aos_eth_neighbor()` in `aos_eth.h`, `aos_hal_netif_list()` in
   `aos_hal.h`. In the simulator the switch is made up
   (`P4_SIM_ETH=cdp`, `=quiet`).
+- **Finding a device of unknown address** (not in a release yet): Red, the
+  Equipo tab. Plugged straight into the board's Ethernet, a device shows
+  with the address and the name it gave as it started (ARP, DHCP, mDNS,
+  NetBIOS, SSDP, WS-Discovery), and a sweep by ARP of the networks devices
+  come set to finds the one that says nothing. For apps of the card:
+  `aos_eth_stations()` and `aos_eth_arp_ask()`. In the simulator,
+  `P4_SIM_ETH=device` is a cable straight to a made-up camera.
 
 `docs/plan/ETHERNET.md` (Spanish) has the phases, everything measured and
 what is next.

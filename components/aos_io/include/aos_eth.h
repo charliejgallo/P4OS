@@ -105,6 +105,47 @@ bool aos_eth_neighbor(aos_eth_neighbor_t *out);
  * it says (age_s and heard left at 0). aos_eth_announce.c. */
 bool aos_eth_parse_announce(const uint8_t *frame, size_t len, aos_eth_neighbor_t *out);
 
+/* Who is talking on the wire, for the tool that finds a device of unknown
+ * address plugged straight into the board: every station heard while
+ * listening (aos_eth_listen), with the address it said was its own and
+ * what it said of itself. aos_eth_stations.c. */
+#define AOS_ETH_STATIONS    24
+#define AOS_ETH_SAID_ARP    0x001
+#define AOS_ETH_SAID_DHCP   0x002
+#define AOS_ETH_SAID_MDNS   0x004
+#define AOS_ETH_SAID_SSDP   0x008
+#define AOS_ETH_SAID_NBNS   0x010       /* NetBIOS names */
+#define AOS_ETH_SAID_LLMNR  0x020
+#define AOS_ETH_SAID_WSD    0x040       /* WS-Discovery: ONVIF cameras, printers */
+#define AOS_ETH_SAID_SWITCH 0x080       /* what switches say: LLDP, CDP, spanning tree */
+#define AOS_ETH_SAID_IPV6   0x100
+#define AOS_ETH_SAID_OTHER  0x200
+
+typedef struct {
+    uint8_t  mac[6];
+    char     ip[16];            /* its own address, as it said it; "" not heard yet */
+    char     name[40];          /* the name it gave: DHCP, mDNS or NetBIOS */
+    char     vendor[48];        /* what it says it is: DHCP's vendor class, SSDP's server line */
+    uint16_t said;              /* AOS_ETH_SAID_* */
+    bool     wants_dhcp;        /* it asked for an address by DHCP */
+    char     wants[16];         /* the address it asked DHCP for */
+    bool     answered;          /* it answered a question of aos_eth_arp_ask() */
+    uint32_t frames;
+    uint32_t age_s;             /* since it was last heard */
+} aos_eth_station_t;
+
+/* The stations heard since listening began; how many it wrote, at most max. */
+int aos_eth_stations(aos_eth_station_t *out, int max);
+/* Asks the wire who has this address (host byte order), by ARP: the one that
+ * has it answers, whatever network the board itself is on, and the answer
+ * shows in aos_eth_stations(). false: no link, or the driver is busy. */
+bool aos_eth_arp_ask(uint32_t ip);
+/* The table itself, for the platforms: a frame heard (self: the board's own
+ * MAC, left out), the list, and forgetting everything. Not locked. */
+void aos_eth_station_note(const uint8_t *frame, size_t len, const uint8_t *self, uint32_t now_ms);
+int  aos_eth_station_list(aos_eth_station_t *out, int max, uint32_t now_ms);
+void aos_eth_station_clear(void);
+
 /* For the SPI service (aos_io.c). An app asks for a port: if Ethernet is on
  * it, it stops and lets it go (true), and if it was already waiting for that
  * port, it goes on waiting. And a port has nobody on it any more: a paused

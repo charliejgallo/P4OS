@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3627 simbolos.
+ * Total: 3635 simbolos.
  */
 
 #include <stddef.h>
@@ -128,6 +128,7 @@ extern int aos_emoji_font;
 extern int aos_emoji_init;
 extern int aos_emoji_match;
 extern int aos_emoji_ready;
+extern int aos_eth_arp_ask;
 extern int aos_eth_boot;
 extern int aos_eth_dhcp;
 extern int aos_eth_enable;
@@ -138,6 +139,10 @@ extern int aos_eth_on_pause;
 extern int aos_eth_parse_announce;
 extern int aos_eth_port_free;
 extern int aos_eth_set_clock;
+extern int aos_eth_station_clear;
+extern int aos_eth_station_list;
+extern int aos_eth_station_note;
+extern int aos_eth_stations;
 extern int aos_eth_yield;
 extern int aos_flash_call;
 extern int aos_flashop_init;
@@ -3529,6 +3534,9 @@ extern int namelist_has;
 extern int nt_big_calloc;
 extern int nt_cable;
 extern int nt_cable_start;
+extern int nt_find;
+extern int nt_find_start;
+extern int nt_find_stop;
 extern int nt_guess;
 extern int nt_init;
 extern int nt_ip_str;
@@ -3758,6 +3766,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_emoji_init),
     ESP_ELFSYM_EXPORT(aos_emoji_match),
     ESP_ELFSYM_EXPORT(aos_emoji_ready),
+    ESP_ELFSYM_EXPORT(aos_eth_arp_ask),
     ESP_ELFSYM_EXPORT(aos_eth_boot),
     ESP_ELFSYM_EXPORT(aos_eth_dhcp),
     ESP_ELFSYM_EXPORT(aos_eth_enable),
@@ -3768,6 +3777,10 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_eth_parse_announce),
     ESP_ELFSYM_EXPORT(aos_eth_port_free),
     ESP_ELFSYM_EXPORT(aos_eth_set_clock),
+    ESP_ELFSYM_EXPORT(aos_eth_station_clear),
+    ESP_ELFSYM_EXPORT(aos_eth_station_list),
+    ESP_ELFSYM_EXPORT(aos_eth_station_note),
+    ESP_ELFSYM_EXPORT(aos_eth_stations),
     ESP_ELFSYM_EXPORT(aos_eth_yield),
     ESP_ELFSYM_EXPORT(aos_flash_call),
     ESP_ELFSYM_EXPORT(aos_flashop_init),
@@ -7159,6 +7172,9 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(nt_big_calloc),
     ESP_ELFSYM_EXPORT(nt_cable),
     ESP_ELFSYM_EXPORT(nt_cable_start),
+    ESP_ELFSYM_EXPORT(nt_find),
+    ESP_ELFSYM_EXPORT(nt_find_start),
+    ESP_ELFSYM_EXPORT(nt_find_stop),
     ESP_ELFSYM_EXPORT(nt_guess),
     ESP_ELFSYM_EXPORT(nt_init),
     ESP_ELFSYM_EXPORT(nt_ip_str),
