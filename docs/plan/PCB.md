@@ -174,11 +174,12 @@ Falta saber, y el modelo no lo dice:
 
 ## Lo que sigue
 
-1. Lo que falta de la mecánica de arriba (alturas, salida de los USB-A), y
-   **una medida del módulo W5500**: del borde del lado del RJ45 a la
-   primera pata (`ETH_PIN1` en `place.py`, hoy 2,5 mm sacados de las
-   fotos). Probar el calce con la placa impresa (`fit-test-th-print.svg`)
-   y con la hoja a escala (`paper-th.svg`).
+1. Lo que falta de la mecánica de arriba (alturas, salida de los USB-A).
+   **Probado el 2026-11-12 con la placa impresa en plástico**
+   (`fit-test-th-print.svg`): los cuatro agujeros y el header calzan en la
+   P4. Los zócalos del W5500 estaban 5 mm demasiado afuera y se corrieron
+   (`ETH_PIN1` en `place.py`, 7,5 mm del borde del módulo a la primera
+   pata); falta volver a probarlos con el módulo puesto.
 2. Decidir si el Ethernet de la PCBA va integrado o en zócalo.
 3. El esquemático: la casera está empezada (`hw/aux-board/gen.py`); falta
    revisarla pieza por pieza, el zócalo del módulo W5500 cuando se sepa cuál

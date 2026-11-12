@@ -30,12 +30,13 @@ PIN1 = (3.15, 104.32)                   # the header's pin 1; odd pins on the ed
 # The W5500 Lite (HW-884), as it sits on its two sockets: chip side down, the RJ45 on top with its
 # mouth to the board's right edge. ETH is the middle of its two rows of pins.
 #   ETH_ROWS   20.32 mm between the rows: columns C and I of a breadboard, measured by the user.
-#   the board  28.5 x 23.5 mm. Its pins are at the RJ45 end: G, the first, about ETH_PIN1 from that
-#              edge, read off the user's photos and NOT measured: check with a ruler before routing.
+#   the board  28.5 x 23.5 mm. Its pins are towards the RJ45 end, behind two mounting holes: G, the
+#              first, is ETH_PIN1 from that edge. Found with the printed plate on 2026-11-12: the
+#              sockets were 5 mm too far out with the 2.5 mm first read off photographs.
 #   the RJ45   sticks out ETH_JACK past that edge, also from the photos.
 # The sockets are 8.5 mm tall: under the module only what is lower than that (a resistor, a small
 # capacitor, SMD), never a pin header or an electrolytic. overlaps() holds the tall ones out.
-ETH_ROWS, ETH_LEN, ETH_WID, ETH_PIN1, ETH_JACK = 20.32, 28.5, 23.5, 2.5, 3.5
+ETH_ROWS, ETH_LEN, ETH_WID, ETH_PIN1, ETH_JACK = 20.32, 28.5, 23.5, 7.5, 3.5
 ETH = (W - ETH_PIN1 - 6.35, 88.76)                      # the module's edge on the board's, the RJ45 past it
 ETH_BOX = (ETH[0] + 6.35 + ETH_PIN1 - ETH_LEN, ETH[1] - ETH_WID / 2, ETH[0] + 6.35 + ETH_PIN1, ETH[1] + ETH_WID / 2)
 LOW = ("R", "U")                                        # what may go under it, by its reference: a TO-92 "Q" may not
@@ -68,7 +69,7 @@ AT = {
     # ethernet: the module lies over ETH, its RJ45 past the right edge; two low parts go under it
     # at 270 degrees a socket's pin 1 is at its right end: G and GND, the pins nearest the RJ45's mouth
     "J17": (ETH[0], ETH[1] - ETH_ROWS / 2, 270), "J18": (ETH[0], ETH[1] + ETH_ROWS / 2, 270),
-    "R19": (ETH[0] - 12, ETH[1], 0), "C10": (ETH[0] + 2.5, ETH[1], 0),
+    "R19": (ETH_BOX[0] + 7.5, ETH[1], 0), "C10": (ETH_BOX[0] + 20.5, ETH[1], 0),
     # the 5 V switch and the USB sockets, at the bottom
     "R1": (27.7, 86.5, 0), "R2": (27.7, 90, 0), "R3": (27.7, 93.5, 0), "Q1": (27, 98.7, 0),
     "Q2": (50.2, 74.4, 0),                              # beside the fuses: a TO-92 is too tall to go under the module
@@ -83,7 +84,7 @@ AT = {
 }
 # the Qwiic socket, its mouth to the left edge; and three parts whose smaller package leaves its
 # reference or a pad under a neighbour's lettering
-AT_SMD = {"J6": (3.6, 23.6, 270), "C9": (44.0, 44.3, 0), "R18": (45, 51.6, 0), "U5": (42.5, 97.6, 0)}
+AT_SMD = {"J6": (3.6, 23.6, 270), "C9": (44.0, 44.3, 0), "R18": (45, 51.6, 0), "U5": (39.3, 95.5, 0)}
 
 # what the silkscreen says of each connector: its name (one line or two) and its pins, pin 1 first
 NAME = {"J20": ["5V"], "J21": ["3V3"], "J22": ["GPIO"],
@@ -106,7 +107,7 @@ BRIDGE = {"JP1": "5V BYPASS", "JP2": "PULL-UPS", "JP3": "SDA", "JP4": "SCL", "JP
 TEXT = [("USB 2.0", 12.5, 116.6, 0, 1.0), ("USB 1.1", 60.4, 111.9, 0, 0.9), ("SPI A", 24, 40.2, 0, 0.9),
         ("IR RX", 24.5, 5.4, 0, 0.8), ("IR LED", 49.5, 4, 0, 0.8), ("HEADER", 9.8, 53.3, 0, 0.8),
         ("W5500 INT RST", 58, 26.3, 0, 0.8),
-        ("W5500 LITE", ETH[0] - 4, ETH[1] - 3.6, 0, 1.0), ("RJ45 >", ETH[0] - 4, ETH[1] + 3.6, 0, 0.8)]
+        ("W5500 LITE", ETH_BOX[0] + 14, ETH[1] - 3.6, 0, 1.0), ("RJ45 >", ETH_BOX[0] + 14, ETH[1] + 3.6, 0, 0.8)]
 # the forty pins as the silkscreen beside the header shows them: GPIO numbers, G for ground
 GPIO = {1: "5V", 2: "3V3", 3: "5V", 4: "7", 5: "G", 6: "8", 7: "37", 8: "2", 9: "38", 10: "G", 11: "5", 12: "3",
         13: "G", 14: "4", 15: "21", 16: "28", 17: "22", 18: "3V3", 19: "G", 20: "29", 21: "24", 22: "30",

@@ -5,8 +5,10 @@ connector with a name. The plan, the blocks and the two variants are in
 [docs/plan/PCB.md](../../docs/plan/PCB.md) (Spanish); the pin map it follows
 is [docs/img/pinout.svg](../../docs/img/pinout.svg).
 
-**Where it stands (2026-11-11): a first schematic of both variants, a first
-placement of their parts and the first tracks; nothing built.** Every part
+**Where it stands (2026-11-12): a first schematic of both variants, a first
+placement of their parts and the first tracks; nothing built. The outline
+printed in plastic (`fit-test-th-print.svg`) was tried on the P4: the four
+holes and the header fit.** Every part
 value and footprint is a first choice to review against its datasheet.
 
 - **th**, for a soldering iron: axial resistors, TO-92 transistors, every
@@ -37,10 +39,11 @@ edge. The silkscreen draws where it lies.
 - The two rows are 20.32 mm apart (`ETH_ROWS` in `place.py`), measured.
 - Pin 1 of each socket (G and GND) is the pin nearest the RJ45's mouth,
   as on the module. The row G, G, MO, SCK, CS, INT is the upper one.
-- **Not measured yet:** how far the first pin is from the module's edge
-  on the RJ45 side. `ETH_PIN1` says 2.5 mm, read off photographs; with it
-  the module's edge is on the board's and the RJ45 sticks out past it.
-  A ruler on the module settles it, and the sockets move with the number.
+- The first pin is 7.5 mm from the module's edge on the RJ45 side
+  (`ETH_PIN1`), behind the module's two mounting holes: with it the
+  module's edge is on the board's and the RJ45 sticks out past it. Found
+  with the printed plate on 2026-11-12: the first guess, 2.5 mm read off
+  photographs, left the sockets 5 mm too far out.
 - Under the module there are 8.5 mm (the sockets' height): a resistor, a
   small capacitor or SMD parts fit, a pin header or an electrolytic do
   not. `place.py` refuses a tall part there.
