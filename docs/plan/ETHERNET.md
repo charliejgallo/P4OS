@@ -331,6 +331,10 @@ ejemplo.
 *La pestaña en la placa, en inglés, con la prueba de salida hecha. Las
 direcciones de la red del usuario están tapadas en la foto.*
 
+**El aviso del switch que no se anuncia** también se vio en la placa: a los
+256 s decía "this switch does not announce itself", que es lo esperado en
+una red sin switch gestionable.
+
 **En la placa, 2026-11-12:** el enlace, la dirección, la máscara, la puerta
 de enlace, los DNS, el servidor DHCP y la concesión se ven y son los de la
 red; la prueba de salida anda (puerta de enlace y `1.1.1.1` contestan). La
@@ -549,6 +553,30 @@ vio el emisor. **En la placa falta todo**, y sobre todo lo que sólo ella
 dice: que el ping atado a la dirección del Wi-Fi salga de verdad por el
 Wi-Fi con el cable arriba.
 
+**En la placa, 2026-11-12** (el usuario, con la Mac por Wi-Fi: no tiene
+placa de red por cable):
+
+- **Comparar anda, y los dos salen por donde tienen que salir.** Por el
+  cable 10,2 ms de media (de 8,92 a 10,3), por el Wi-Fi 26,2 ms (de 4,56 a
+  117), ninguno perdido de diez. Son distintos, así que el ping atado a la
+  dirección del Wi-Fi sale por el Wi-Fi con el cable arriba.
+- **Lo que dice ese número del cable:** 10 ms clavados no es la red, es la
+  placa. El driver le pregunta al chip cada 10 ms si llegó algo (`POLL_MS`,
+  no hay pata de interrupción), y eso es lo que tarda en enterarse de la
+  respuesta. El mejor ping del Wi-Fi (4,56 ms) le gana al mejor del cable.
+- **Medir velocidad anda** (la regla de acceso dejó pasar a la Mac): **por
+  el cable 1,5 Mbit/s** (2,0 MB en 11 s), por el Wi-Fi 3,1 Mbit/s (4,0 MB
+  en 11 s), los dos con la Mac por Wi-Fi. Recibir por el cable es lento, y
+  lo más probable es el mismo sondeo: entre una pregunta y la siguiente la
+  computadora puede mandar una ventana TCP entera (23 KB) y el chip guarda
+  16 KB, así que se pierden tramas y TCP frena. No está medido: es lo que
+  cierra con los números. Bajar una página del portal por el cable había
+  dado de 4 a 7 Mbit/s: mandar no tiene ese problema.
+
+**Lo que sigue de acá:** probar con el sondeo más corto (2 ms) y volver a
+medir las dos cosas; y, en la placa auxiliar, llevar la pata INT del módulo
+a un GPIO, que hoy sale a una tira suelta.
+
 **Falta de esta herramienta:** que la placa sea la que manda (cliente
 iperf hacia un servidor), y medir también de la placa hacia afuera.
 
@@ -578,7 +606,8 @@ Wi-Fi solo.
 En el simulador: los estados son de ejemplo y no se manda nada a la red;
 probados la lista, quitar, el botón de despertar cuando hay MAC y el equipo
 no responde, y el alta desde Equipo, que dejó en el archivo el nombre, la
-dirección y la MAC de la cámara de ejemplo. **En la placa falta todo.**
+dirección y la MAC de la cámara de ejemplo. **En la placa, 2026-11-12:** el
+usuario lo probó y anda.
 
 De paso, en la pestaña Equipo la lista de equipos quedaba en vertical
 debajo de las tarjetas de banco: ahora va arriba de ellas; y un toque en el
