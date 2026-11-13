@@ -506,9 +506,19 @@ rotas bajo el sanitizador sin una falla.
 En el simulador: la captura escribe un pcap de verdad con tráfico de
 ejemplo; `P4_SIM_ETH=storm` es una red con todo mal a la vez. Probado así:
 los tres avisos aparecieron, y `tcpdump` leyó el archivo (4045 tramas, las
-dos respuestas DHCP decodificadas). **En la placa falta todo**: cuántas
-tramas por segundo aguanta la tarjeta, y cuánto tarda el W5500 por SPI en
-perder tramas con una red cargada.
+dos respuestas DHCP decodificadas).
+
+**En la placa, 2026-11-12:** el usuario la dejó capturando 8 min 53 s en la
+red de su casa. 4540 tramas, 914 KB, **ninguna perdida**, sin avisos. El
+archivo, bajado por el portal y leído registro por registro: cabecera
+correcta, 4540 registros (los que contó la placa), ni un byte de más, 532 s
+de punta a punta, la trama más larga de 1465 bytes; unas 3 tramas por
+segundo para todos. La RAM interna no se movió y el vigilante no actuó.
+De paso contesta la duda del probador de boca: **con el filtro apagado el
+W5500 entrega también las tramas de grupo que no son IP** (la mitad de lo
+capturado no era ni ARP ni IP), así que los anuncios LLDP y CDP de un
+switch tendrían que llegar. Falta la otra punta: una red cargada, para
+saber a cuántas tramas por segundo empieza a perder.
 
 ## Medir un enlace: el cable contra el Wi-Fi (Red, pestaña Cable)
 
