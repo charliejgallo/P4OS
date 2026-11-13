@@ -94,6 +94,7 @@ typedef struct {
     nt_mdns_t  mdns;
     nt_cable_t cable;
     nt_find_t  find;
+    nt_bench_t bench;
 } nt_state_t;
 
 static nt_state_t *T;
@@ -139,6 +140,7 @@ const nt_wifi_t  *nt_wifi(void)  { return &W; }
 const nt_mdns_t  *nt_mdns(void)  { return &M; }
 const nt_cable_t *nt_cable(void) { return &T->cable; }
 const nt_find_t  *nt_find(void)  { return &T->find; }
+const nt_bench_t *nt_bench(void) { return &T->bench; }
 
 void nt_ip_str(uint32_t ip, char *out, size_t n)
 {
@@ -1651,6 +1653,337 @@ bool nt_find_start(void)
 }
 
 void nt_find_stop(void) { s_find_stop = true; }
+
+/* -------------------------------------------------------------------------- */
+/* The bench network's services: TFTP, NTP and syslog                           */
+/* -------------------------------------------------------------------------- */
+
+#define B (T->bench)
+
+/* Their ports. The simulator has no right to the low ones and no wire: there
+ * they are these plus 6900, 1000 and 5000 on 127.0.0.1, to be tried with a
+ * client on the same machine. */
+#ifdef ESP_PLATFORM
+#define PORT_TFTP   69
+#define PORT_NTP    123
+#define PORT_SYSLOG 514
+#else
+#define PORT_TFTP   6969
+#define PORT_NTP    1123
+#define PORT_SYSLOG 5514
+#endif
+#define TFTP_BLOCK  512
+#define TFTP_RETRY  6
+
+static bool s_bench_run, s_bench_stop;
+
+typedef struct {
+    int      fd;                /* its own socket: a transfer answers from a port of its own */
+    FILE    *f;
+    struct sockaddr_in peer;
+    uint16_t block;
+    uint8_t  pkt[4 + TFTP_BLOCK];
+    size_t   len;               /* of pkt, the block on its way */
+    int      tries;
+    int64_t  sent_at;
+    long     size, sent;
+} tftp_t;
+
+static int udp_bound(uint32_t ip, uint16_t port)
+{
+    int fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) return -1;
+    int one = 1;
+    setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &one, sizeof one);
+    struct sockaddr_in a;
+    memset(&a, 0, sizeof a);
+    a.sin_family = AF_INET;
+    a.sin_port = htons(port);
+    a.sin_addr.s_addr = htonl(ip);
+    if (bind(fd, (struct sockaddr *)&a, sizeof a) < 0) { close(fd); return -1; }
+    set_nonblock(fd);
+    return fd;
+}
+
+static void tftp_error(int fd, const struct sockaddr_in *to, int code, const char *text)
+{
+    uint8_t e[64] = { 0, 5, 0, (uint8_t)code };
+    size_t n = strlen(text);
+    if (n > sizeof e - 5) n = sizeof e - 5;
+    memcpy(e + 4, text, n);
+    sendto(fd, e, 4 + n + 1, 0, (const struct sockaddr *)to, sizeof *to);
+}
+
+static void tftp_end(tftp_t *x, bool whole)
+{
+    if (x->f) fclose(x->f);
+    if (x->fd >= 0) close(x->fd);
+    x->f = NULL;
+    x->fd = -1;
+    nt_lock();
+    if (whole) B.tftp_files++;
+    else B.tftp_failed++;
+    B.tftp_pct = -1;
+    B.seq++;
+    nt_unlock();
+}
+
+/* Reads the next block of the file into the packet and sends it. */
+static void tftp_next(tftp_t *x)
+{
+    x->block++;
+    x->pkt[0] = 0;
+    x->pkt[1] = 3;
+    x->pkt[2] = (uint8_t)(x->block >> 8);
+    x->pkt[3] = (uint8_t)x->block;
+    size_t n = fread(x->pkt + 4, 1, TFTP_BLOCK, x->f);
+    x->len = 4 + n;
+    x->sent += (long)n;
+    x->tries = 0;
+    x->sent_at = now_us();
+    sendto(x->fd, x->pkt, x->len, 0, (struct sockaddr *)&x->peer, sizeof x->peer);
+    nt_lock();
+    B.tftp_pct = x->size > 0 ? (int)(x->sent * 100 / x->size) : 100;
+    if ((x->block & 63) == 1) B.seq++;
+    nt_unlock();
+}
+
+/* A request on the well-known port: only reading, one file at a time, by a bare name. */
+static void tftp_request(tftp_t *x, int fd, uint32_t ip, const char *dir)
+{
+    uint8_t rq[300];
+    struct sockaddr_in from;
+    socklen_t fl = sizeof from;
+    ssize_t n = recvfrom(fd, rq, sizeof rq - 1, 0, (struct sockaddr *)&from, &fl);
+    if (n < 4) return;
+    rq[n] = 0;
+    char name[128];                     /* a firmware image's name can be long; the screen shows its start */
+    snprintf(name, sizeof name, "%.*s", (int)sizeof name - 1, (const char *)rq + 2);
+    nt_lock();
+    snprintf(B.tftp_last, sizeof B.tftp_last, "%.*s", (int)sizeof B.tftp_last - 1, name);
+    B.seq++;
+    nt_unlock();
+    if (rq[1] != 1) { tftp_error(fd, &from, 2, "read only"); return; }
+    if (x->f) { tftp_error(fd, &from, 0, "busy with another file"); return; }
+    const char *base = name;
+    while (*base == '/') base++;
+    if (!base[0] || strstr(base, "..") || strchr(base, '/') || strchr(base, '\\') || strchr(base, ':')) {
+        tftp_error(fd, &from, 2, "a bare file name, please");
+        nt_lock();
+        B.tftp_failed++;
+        nt_unlock();
+        return;
+    }
+    char path[224];
+    snprintf(path, sizeof path, "%s/%s", dir, base);
+    FILE *f = fopen(path, "rb");
+    if (!f) {
+        tftp_error(fd, &from, 1, "no such file in the bench folder");
+        nt_lock();
+        B.tftp_failed++;
+        B.seq++;
+        nt_unlock();
+        return;
+    }
+    x->fd = udp_bound(ip, 0);
+    if (x->fd < 0) { fclose(f); tftp_error(fd, &from, 0, "no socket"); return; }
+    fseek(f, 0, SEEK_END);
+    x->size = ftell(f);
+    fseek(f, 0, SEEK_SET);
+    x->f = f;
+    x->peer = from;
+    x->block = 0;
+    x->sent = 0;
+    tftp_next(x);               /* the request's options, if any, are let pass: the first block is the answer */
+}
+
+/* An acknowledgement on the transfer's socket, or its silence. */
+static void tftp_step(tftp_t *x, bool readable)
+{
+    if (readable) {
+        uint8_t a[64];
+        struct sockaddr_in from;
+        socklen_t fl = sizeof from;
+        ssize_t n = recvfrom(x->fd, a, sizeof a, 0, (struct sockaddr *)&from, &fl);
+        if (n >= 4 && from.sin_port == x->peer.sin_port && from.sin_addr.s_addr == x->peer.sin_addr.s_addr) {
+            if (a[1] == 5) { tftp_end(x, false); return; }                     /* it gave up */
+            if (a[1] == 4 && (uint16_t)(a[2] << 8 | a[3]) == x->block) {
+                if (x->len < 4 + TFTP_BLOCK) { tftp_end(x, true); return; }    /* the short block was the last */
+                tftp_next(x);
+                return;
+            }
+        }
+    }
+    if (now_us() - x->sent_at > 1000000) {                  /* a second with no answer: the same block again */
+        if (++x->tries > TFTP_RETRY) { tftp_end(x, false); return; }
+        x->sent_at = now_us();
+        sendto(x->fd, x->pkt, x->len, 0, (struct sockaddr *)&x->peer, sizeof x->peer);
+    }
+}
+
+/* The time, to whoever asks: the client's own stamp back, and ours twice. With
+ * no clock set it says so (stratum 0, "not synchronized") and no time is taken from it. */
+static void ntp_answer(int fd)
+{
+    uint8_t q[48], r[48];
+    struct sockaddr_in from;
+    socklen_t fl = sizeof from;
+    if (recvfrom(fd, q, sizeof q, 0, (struct sockaddr *)&from, &fl) < 48) return;
+    struct timeval tv;
+    gettimeofday(&tv, NULL);
+    bool ok = aos_hal_time_is_valid();
+    uint32_t sec = (uint32_t)tv.tv_sec + 2208988800u;       /* from 1970 to NTP's 1900 */
+    uint32_t frac = (uint32_t)((uint64_t)tv.tv_usec * 4294967296ull / 1000000ull);
+    memset(r, 0, sizeof r);
+    r[0] = (uint8_t)((ok ? 0 : 3) << 6 | 4 << 3 | 4);       /* leap, version 4, a server */
+    r[1] = ok ? 3 : 0;                                      /* stratum: its own clock came from the network */
+    r[2] = q[2];
+    r[3] = 0xEC;                                            /* precision, about a microsecond... of a board */
+    memcpy(r + 12, ok ? "P4OS" : "INIT", 4);
+    for (int k = 0; k < 2; k++) {                           /* reference at 16 is left as received below */
+        uint8_t *t = r + 32 + 8 * k;
+        t[0] = (uint8_t)(sec >> 24); t[1] = (uint8_t)(sec >> 16); t[2] = (uint8_t)(sec >> 8); t[3] = (uint8_t)sec;
+        t[4] = (uint8_t)(frac >> 24); t[5] = (uint8_t)(frac >> 16); t[6] = (uint8_t)(frac >> 8); t[7] = (uint8_t)frac;
+    }
+    memcpy(r + 16, r + 32, 8);                              /* when the clock was last set: now, near enough */
+    memcpy(r + 24, q + 40, 8);                              /* the client's transmit stamp, as its origin */
+    sendto(fd, r, sizeof r, 0, (struct sockaddr *)&from, sizeof from);
+    nt_lock();
+    B.ntp_answers++;
+    B.seq++;
+    nt_unlock();
+}
+
+/* A line of the device's log: its priority taken off, cleaned, the oldest pushed out. */
+static void syslog_line(int fd)
+{
+    char m[400];
+    struct sockaddr_in from;
+    socklen_t fl = sizeof from;
+    ssize_t n = recvfrom(fd, m, sizeof m - 1, 0, (struct sockaddr *)&from, &fl);
+    if (n <= 0) return;
+    m[n] = 0;
+    const char *t = m;
+    if (*t == '<') {
+        const char *e = strchr(t, '>');
+        if (e && e - t <= 4) t = e + 1;
+    }
+    char line[NT_SYSLOG_LEN];
+    size_t k = 0;
+    for (; *t && k + 1 < sizeof line; t++) {
+        unsigned char c = (unsigned char)*t;
+        if (c == '\n' || c == '\r') { if (!t[1]) break; c = ' '; }
+        line[k++] = c >= 32 && c < 127 ? (char)c : '.';
+    }
+    line[k] = 0;
+    nt_lock();
+    if (B.syslog_n == NT_SYSLOG_LINES) {
+        memmove(B.syslog[0], B.syslog[1], (size_t)(NT_SYSLOG_LINES - 1) * NT_SYSLOG_LEN);
+        B.syslog_n--;
+    }
+    snprintf(B.syslog[B.syslog_n++], NT_SYSLOG_LEN, "%s", line);
+    B.syslog_total++;
+    B.seq++;
+    nt_unlock();
+}
+
+static void bench_thread(void *arg)
+{
+    (void)arg;
+    char ipt[16], dir[sizeof B.dir];
+    nt_lock();
+    snprintf(ipt, sizeof ipt, "%s", B.ip);
+    snprintf(dir, sizeof dir, "%s", B.dir);
+    nt_unlock();
+    uint32_t ip = 0;
+    ip_parse(ipt, &ip);
+#ifndef ESP_PLATFORM
+    ip = 0x7F000001u;           /* the simulator's wire is made up: on this machine only */
+#endif
+    int tf = udp_bound(ip, PORT_TFTP), nf = udp_bound(ip, PORT_NTP), sf = udp_bound(ip, PORT_SYSLOG);
+    static tftp_t x;            /* one thread at a time: s_bench_run */
+    memset(&x, 0, sizeof x);
+    x.fd = -1;
+    const char *why = tf < 0 || nf < 0 || sf < 0 ? N_("No se pudieron abrir los puertos en el cable") : NULL;
+    while (!why && !s_bench_stop && app_alive()) {
+        fd_set set;
+        FD_ZERO(&set);
+        FD_SET(tf, &set);
+        FD_SET(nf, &set);
+        FD_SET(sf, &set);
+        int top = tf > nf ? tf : nf;
+        if (sf > top) top = sf;
+        if (x.fd >= 0) { FD_SET(x.fd, &set); if (x.fd > top) top = x.fd; }
+        struct timeval tv = { .tv_sec = 0, .tv_usec = 200000 };
+        int r = select(top + 1, &set, NULL, NULL, &tv);
+        if (r > 0 && FD_ISSET(nf, &set)) ntp_answer(nf);
+        if (r > 0 && FD_ISSET(sf, &set)) syslog_line(sf);
+        if (x.fd >= 0) tftp_step(&x, r > 0 && FD_ISSET(x.fd, &set));
+        if (r > 0 && FD_ISSET(tf, &set)) tftp_request(&x, tf, ip, dir);
+#ifdef ESP_PLATFORM
+        aos_eth_info_t e;       /* the wire changed its address, or lost it: these were for the old one */
+        aos_eth_info(&e);
+        if (strcmp(e.ip, ipt)) why = N_("El cable cambió de dirección");
+#endif
+    }
+    if (x.fd >= 0 || x.f) tftp_end(&x, false);
+    if (tf >= 0) close(tf);
+    if (nf >= 0) close(nf);
+    if (sf >= 0) close(sf);
+    nt_lock();
+    B.state = why ? NT_FAILED : NT_IDLE;
+    snprintf(B.err, sizeof B.err, "%s", why ? why : "");
+    B.tftp_pct = -1;
+    B.seq++;
+    s_bench_run = false;
+    nt_unlock();
+}
+
+bool nt_bench_start(void)
+{
+    nt_keepalive();
+    aos_eth_info_t e;
+    aos_eth_info(&e);
+    nt_lock();
+    bool busy = s_bench_run;
+    if (!busy) {
+        uint32_t seq = B.seq + 1;
+        memset(&B, 0, sizeof B);
+        B.seq = seq;
+        B.tftp_pct = -1;
+        const char *card = aos_hal_path_sd_root();
+        snprintf(B.dir, sizeof B.dir, "%s/banco", card ? card : "");          /* the card's "banco" folder */
+        snprintf(B.ip, sizeof B.ip, "%s", e.ip);
+        if (!e.ip[0] || !card) {
+            B.state = NT_FAILED;
+            snprintf(B.err, sizeof B.err, "%s", !card ? N_("No hay tarjeta de la que dar archivos") : N_("El cable no tiene dirección"));
+        } else {
+            B.state = NT_BUSY;
+            s_bench_run = true;
+            s_bench_stop = false;
+        }
+    }
+    bool go = !busy && s_bench_run;
+    char dir[sizeof B.dir];
+    snprintf(dir, sizeof dir, "%s", B.dir);
+    nt_unlock();
+    if (!go) return false;
+    mkdir(dir, 0777);           /* there from the first time, to put the files in */
+    if (!aos_hal_thread_start("nt_bench", bench_thread, NULL, STACK, PRIO)) {
+        nt_lock();
+        s_bench_run = false;
+        B.state = NT_FAILED;
+        snprintf(B.err, sizeof B.err, "%s", N_("No hay memoria para empezar"));
+        B.seq++;
+        nt_unlock();
+        return false;
+    }
+    return true;
+}
+
+void nt_bench_stop(void) { s_bench_stop = true; }
+
+#undef B
 
 bool nt_wifi_scan(void)
 {

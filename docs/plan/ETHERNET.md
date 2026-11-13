@@ -422,9 +422,34 @@ red, volver). **En la placa falta todo lo de la red de banco**: que el
 cable levante con dirección fija, que el servidor DHCP entregue, y que el
 Wi-Fi siga siendo la salida.
 
-**Lo que sigue:** los servicios de la red de banco (TFTP para darle un
-firmware, hora por NTP, recibir su syslog), el escaneo de puertos desde el
-detalle, y el fabricante por la MAC (`oui.txt` de la tarjeta).
+**Los servicios de banco** (2026-11-12, `nt_bench_*` en `aos_nettools.c`),
+tres servidores UDP chicos que se prenden desde la pestaña Equipo:
+
+- **TFTP** le da a un equipo los archivos de la carpeta `banco` de la
+  tarjeta: así toma un firmware un router, una cámara o una placa desde su
+  cargador de arranque. Sólo lectura, de a un archivo, por nombre pelado
+  (sin carpetas ni `..`); bloques de 512, reintenta seis veces; las
+  opciones del pedido se dejan pasar.
+- **NTP** le da la hora de la placa, sin internet. Si la placa no tiene la
+  hora puesta lo dice (estrato 0, "no sincronizado") y nadie se la toma.
+- **Syslog** recibe lo que el equipo registra hacia la red y muestra las
+  últimas líneas, limpias.
+
+Atienden **sólo en la dirección del cable**, nunca por el Wi-Fi, y se
+apagan al cerrar Red o si el cable cambia de dirección.
+
+Probados en el simulador contra clientes de verdad en la misma máquina (ahí
+atienden en 127.0.0.1, puertos 6969, 1123 y 5514): `curl` bajó por TFTP un
+archivo de 300 KB idéntico al original y uno de 1024 bytes justos (el caso
+del último bloque vacío), recibió "no existe" para uno que no estaba y
+"acceso" para `../`; la respuesta NTP volvió con la hora al segundo y el
+sello del cliente devuelto; tres líneas de syslog llegaron y se ven en la
+pantalla. **En la placa falta todo**: los puertos reales (69, 123, 514)
+atados a la dirección del cable, y un equipo de verdad pidiendo.
+
+**Lo que sigue:** el escaneo de puertos desde el detalle, el fabricante por
+la MAC (`oui.txt` de la tarjeta), recibir archivos por TFTP (respaldos), y
+que los servicios puedan seguir con Red cerrada.
 
 ## Qué gana el taller con un cable de red
 

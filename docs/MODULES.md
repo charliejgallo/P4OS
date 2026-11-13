@@ -539,7 +539,10 @@ page.
   which gives the wire an address next to the device's
   (`aos_eth_bench()`); "Repartir direcciones" makes the board a DHCP
   server for whatever is plugged in. In both the Wi-Fi stays the board's
-  way out, and a restart undoes them.
+  way out, and a restart undoes them. "Prender los servicios" starts three
+  small servers on the wire's address only: TFTP (the files of the card's
+  `banco` folder, read only), NTP (the board's time) and syslog (the
+  device's log, its last lines on the screen).
 
 `docs/plan/ETHERNET.md` (Spanish) has the phases, everything measured and
 what is next.

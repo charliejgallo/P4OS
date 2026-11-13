@@ -10317,3 +10317,51 @@ RED DE BANCO	BENCH NETWORK
 
 #: firmware (Red, Equipo)
 Para un equipo que espera que le den dirección: la placa se la da por DHCP. Mientras tanto el cable no es la salida de la placa, sigue el Wi-Fi. Tocá un equipo de la lista para ver más y para ponerte en su red.	For a device that waits to be given an address: the board gives it one by DHCP. Meanwhile the wire is not the board's way out, the Wi-Fi goes on being it. Tap a device on the list to see more and to get on its network.
+
+#: firmware (Red, Equipo)
+Apagar los servicios	Switch the services off
+
+#: firmware (Red, Equipo)
+Prender los servicios	Switch the services on
+
+#: firmware (Red, Equipo)
+Atienden en %s, sólo por el cable	Answering on %s, on the wire only
+
+#: firmware (Red, Equipo)
+Apagados. Le dan archivos y la hora a un equipo y reciben su registro, sólo por el cable	Off. They give a device files and the time and take its log, on the wire only
+
+#: firmware (Red, Equipo)
+dando %s: %d %%	giving %s: %d %%
+
+#: firmware (Red, Equipo)
+%u dados, %u fallidos; el último pedido: %s	%u given, %u failed; the last one asked for: %s
+
+#: firmware (Red, Equipo)
+da los archivos de la carpeta banco de la tarjeta	gives the files of the card's banco folder
+
+#: firmware (Red, Equipo)
+la placa no tiene la hora puesta: avisa que no la sabe	the board's clock is not set: it says it does not know the time
+
+#: firmware (Red, Equipo)
+%u respuestas	%u answers
+
+#: firmware (Red, Equipo)
+%u líneas	%u lines
+
+#: firmware (Red, Equipo)
+SERVICIOS DE BANCO	BENCH SERVICES
+
+#: firmware (Red, Equipo)
+Hora (NTP)	Time (NTP)
+
+#: firmware (Red, Equipo)
+No se pudieron abrir los puertos en el cable	The ports could not be opened on the wire
+
+#: firmware (Red, Equipo)
+El cable cambió de dirección	The wire's address changed
+
+#: firmware (Red, Equipo)
+No hay tarjeta de la que dar archivos	There is no card to give files from
+
+#: firmware (Red, Equipo)
+El cable no tiene dirección	The wire has no address

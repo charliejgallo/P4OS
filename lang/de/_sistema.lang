@@ -10317,3 +10317,51 @@ RED DE BANCO	WERKBANK-NETZ
 
 #: firmware (Red, Equipo)
 Para un equipo que espera que le den dirección: la placa se la da por DHCP. Mientras tanto el cable no es la salida de la placa, sigue el Wi-Fi. Tocá un equipo de la lista para ver más y para ponerte en su red.	Für ein Gerät, das auf eine Adresse wartet: Die Platine vergibt sie per DHCP. Solange ist das Kabel nicht der Ausgang der Platine, das bleibt das WLAN. Ein Gerät in der Liste antippen, um mehr zu sehen und in sein Netz zu wechseln.
+
+#: firmware (Red, Equipo)
+Apagar los servicios	Dienste ausschalten
+
+#: firmware (Red, Equipo)
+Prender los servicios	Dienste einschalten
+
+#: firmware (Red, Equipo)
+Atienden en %s, sólo por el cable	Erreichbar unter %s, nur über das Kabel
+
+#: firmware (Red, Equipo)
+Apagados. Le dan archivos y la hora a un equipo y reciben su registro, sólo por el cable	Aus. Sie geben einem Gerät Dateien und die Uhrzeit und nehmen sein Log entgegen, nur über das Kabel
+
+#: firmware (Red, Equipo)
+dando %s: %d %%	sende %s: %d %%
+
+#: firmware (Red, Equipo)
+%u dados, %u fallidos; el último pedido: %s	%u gesendet, %u fehlgeschlagen; zuletzt angefragt: %s
+
+#: firmware (Red, Equipo)
+da los archivos de la carpeta banco de la tarjeta	liefert die Dateien aus dem Ordner banco der Karte
+
+#: firmware (Red, Equipo)
+la placa no tiene la hora puesta: avisa que no la sabe	die Uhr der Platine ist nicht gestellt: Sie meldet, dass sie die Zeit nicht kennt
+
+#: firmware (Red, Equipo)
+%u respuestas	%u Antworten
+
+#: firmware (Red, Equipo)
+%u líneas	%u Zeilen
+
+#: firmware (Red, Equipo)
+SERVICIOS DE BANCO	WERKBANK-DIENSTE
+
+#: firmware (Red, Equipo)
+Hora (NTP)	Uhrzeit (NTP)
+
+#: firmware (Red, Equipo)
+No se pudieron abrir los puertos en el cable	Die Ports am Kabel konnten nicht geöffnet werden
+
+#: firmware (Red, Equipo)
+El cable cambió de dirección	Die Adresse des Kabels hat sich geändert
+
+#: firmware (Red, Equipo)
+No hay tarjeta de la que dar archivos	Keine Karte vorhanden, von der Dateien geliefert werden können
+
+#: firmware (Red, Equipo)
+El cable no tiene dirección	Das Kabel hat keine Adresse

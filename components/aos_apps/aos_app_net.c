@@ -173,6 +173,9 @@ typedef struct {
     /* Equipo */
     lv_obj_t *f_link, *f_btn, *f_bar, *f_state, *f_list;
     lv_obj_t *f_bench, *f_bench_btn;
+    lv_obj_t *f_srv_state, *f_srv_btn, *f_srv_kv[3], *f_srv_log;
+    int32_t f_srv_w;
+    uint32_t f_srv_seen;
     int32_t f_list_w;
     uint32_t f_tick, f_seen, f_sig;
     /* a station's detail */
@@ -2103,8 +2106,50 @@ static void bench_say(lv_obj_t *l, const aos_eth_info_t *i)
 /* Changing the wire's part starts its driver again: a couple of seconds here. */
 static void bench_set(aos_eth_mode_t mode, const char *ip)
 {
+    nt_bench_stop();                    /* its servers answered on the address that is going */
     if (!aos_eth_bench(mode, ip)) aos_ui_toast(_("El Ethernet no arrancó de esa forma"), 2500);
     U.pg.f_seen = 0xFFFFFFFFu;
+}
+
+static void bench_srv_cb(lv_event_t *e)
+{
+    nt_lock();
+    bool busy = nt_bench()->state == NT_BUSY;
+    nt_unlock();
+    if (busy) nt_bench_stop();
+    else nt_bench_start();
+    U.pg.f_srv_seen = 0xFFFFFFFFu;
+}
+
+/* The three servers of the bench network: whether they run, what they gave, what they heard. */
+static void bench_srv_refresh(void)
+{
+    page_t *g = &U.pg;
+    static nt_bench_t b;                /* 2 KB of log lines: not on the stack */
+    nt_lock();
+    b = *nt_bench();
+    nt_unlock();
+    if (b.seq == g->f_srv_seen) return;
+    g->f_srv_seen = b.seq;
+    bool on = b.state == NT_BUSY;
+    char t[160];
+    pill_set(g->f_srv_btn, AOS_SYM_SERVER_NETWORK, on ? _("Apagar los servicios") : _("Prender los servicios"), on ? AOS_C_CARD2 : C_NET_D);
+    if (on) snprintf(t, sizeof t, _("Atienden en %s, sólo por el cable"), b.ip);
+    else if (b.state == NT_FAILED && b.err[0]) snprintf(t, sizeof t, "%s", aos_tr(b.err));
+    else snprintf(t, sizeof t, "%s", _("Apagados. Le dan archivos y la hora a un equipo y reciben su registro, sólo por el cable"));
+    say(g->f_srv_state, t, on ? C_GOOD : b.state == NT_FAILED ? C_BAD : AOS_C_DIM);
+    if (on && b.tftp_pct >= 0 && b.tftp_last[0]) snprintf(t, sizeof t, _("dando %s: %d %%"), b.tftp_last, b.tftp_pct);
+    else if (b.tftp_files || b.tftp_failed)
+        snprintf(t, sizeof t, _("%u dados, %u fallidos; el último pedido: %s"), (unsigned)b.tftp_files, (unsigned)b.tftp_failed, b.tftp_last);
+    else snprintf(t, sizeof t, "%s", _("da los archivos de la carpeta banco de la tarjeta"));
+    say(g->f_srv_kv[0], t, AOS_C_TEXT);
+    if (!aos_hal_time_is_valid()) snprintf(t, sizeof t, "%s", _("la placa no tiene la hora puesta: avisa que no la sabe"));
+    else snprintf(t, sizeof t, _("%u respuestas"), (unsigned)b.ntp_answers);
+    say(g->f_srv_kv[1], t, AOS_C_TEXT);
+    snprintf(t, sizeof t, _("%u líneas"), (unsigned)b.syslog_total);
+    say(g->f_srv_kv[2], t, AOS_C_TEXT);
+    lv_obj_clean(g->f_srv_log);
+    for (int k = b.syslog_n > 6 ? b.syslog_n - 6 : 0; k < b.syslog_n; k++) caption(g->f_srv_log, b.syslog[k], g->f_srv_w);
 }
 
 static void bench_server_cb(lv_event_t *e)
@@ -2314,6 +2359,7 @@ static void find_refresh(bool now)
     pill_set(g->f_bench_btn, i.mode == AOS_ETH_CLIENT ? AOS_SYM_LAN_PENDING : AOS_SYM_LAN_DISCONNECT,
              i.mode == AOS_ETH_CLIENT ? _("Repartir direcciones") : _("Volver a lo normal"), i.mode == AOS_ETH_CLIENT ? C_NET_D : AOS_C_CARD2);
     aos_eth_listen(true);               /* while this tab is up; it keeps what it heard through a link that comes and goes */
+    bench_srv_refresh();
 
     static aos_eth_station_t st[AOS_ETH_STATIONS];
     int n = aos_eth_stations(st, AOS_ETH_STATIONS);
@@ -2370,6 +2416,19 @@ static void build_find(void)
     br = row(c, lw - 40, 80, 12);
     g->f_bench_btn = pill(br, AOS_SYM_LAN_PENDING, _("Repartir direcciones"), C_NET_D, bench_server_cb, NULL);
     caption(c, _("Para un equipo que espera que le den dirección: la placa se la da por DHCP. Mientras tanto el cable no es la salida de la placa, sigue el Wi-Fi. Tocá un equipo de la lista para ver más y para ponerte en su red."), lw - 40);
+    section(left, _("SERVICIOS DE BANCO"));
+    c = vcard(left, lw, 20, 10);
+    g->f_srv_state = caption(c, "", lw - 40);
+    br = row(c, lw - 40, 80, 12);
+    g->f_srv_btn = pill(br, AOS_SYM_SERVER_NETWORK, _("Prender los servicios"), C_NET_D, bench_srv_cb, NULL);
+    g->f_srv_kv[0] = kv(c, lw - 40, "TFTP");
+    g->f_srv_kv[1] = kv(c, lw - 40, _("Hora (NTP)"));
+    g->f_srv_kv[2] = kv(c, lw - 40, "Syslog");
+    g->f_srv_log = box(c, lw - 40, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(g->f_srv_log, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(g->f_srv_log, 4, 0);
+    g->f_srv_w = lw - 40;
+    g->f_srv_seen = 0xFFFFFFFFu;
     section(right, _("EN ESTE CABLE"));
     g->f_list = box(right, rw, LV_SIZE_CONTENT);
     g->f_list_w = rw;

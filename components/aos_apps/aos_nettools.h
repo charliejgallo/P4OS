@@ -191,6 +191,39 @@ bool nt_find_start(void);
 void nt_find_stop(void);
 const nt_find_t *nt_find(void);         /* under nt_lock() */
 
+/* ---- the bench network's services: files, the time, and what the device says ---- */
+
+#define NT_SYSLOG_LINES 16
+#define NT_SYSLOG_LEN   112
+
+typedef struct {
+    int      state;             /* NT_BUSY while they run */
+    char     err[72];           /* why they are not running, in Spanish */
+    char     ip[16];            /* the address they answer on: the wire's */
+    char     dir[64];           /* the card folder TFTP gives files from */
+    uint32_t tftp_files;        /* files given whole */
+    uint32_t tftp_failed;       /* asked for and not found, or cut short */
+    char     tftp_last[48];     /* the last one asked for */
+    int      tftp_pct;          /* of the one going out now; -1 none */
+    uint32_t ntp_answers;
+    uint32_t syslog_total;
+    char     syslog[NT_SYSLOG_LINES][NT_SYSLOG_LEN];    /* the last ones, oldest first */
+    int      syslog_n;
+    uint32_t seq;
+} nt_bench_t;
+
+/* Three small servers on the wire's address, for a device plugged into it:
+ *   TFTP    gives it files from the card's "banco" folder: how a router, a
+ *           camera or a board in its boot loader takes a firmware. Reading
+ *           only; a file is asked for by its name, with no folders.
+ *   NTP     gives it the board's time, with no internet.
+ *   syslog  takes what it logs to the network and shows the last lines.
+ * They answer on the wire only, never on the Wi-Fi, and stop when Red is
+ * closed. false, with err: the wire has no address. */
+bool nt_bench_start(void);
+void nt_bench_stop(void);
+const nt_bench_t *nt_bench(void);       /* under nt_lock() */
+
 /* ---- mDNS ---- */
 
 #define NT_MAX_SVC 64
