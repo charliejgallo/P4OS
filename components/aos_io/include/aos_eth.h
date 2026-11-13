@@ -28,6 +28,7 @@
 #include <stdint.h>
 
 #include <stddef.h>
+#include <stdio.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -171,6 +172,50 @@ bool aos_eth_arp_ask(uint32_t ip);
 void aos_eth_station_note(const uint8_t *frame, size_t len, const uint8_t *self, uint32_t now_ms);
 int  aos_eth_station_list(aos_eth_station_t *out, int max, uint32_t now_ms);
 void aos_eth_station_clear(void);
+
+/* Looking at the traffic that reaches the port: every frame into a file on
+ * the card, in the pcap format (Wireshark opens it), with what was counted
+ * and noticed on the way. On a switch that is what is sent to everyone and
+ * to the board; on a mirror port, everything. What the board itself sends
+ * is not in it. aos_eth_watch.c. */
+typedef struct {
+    uint32_t frames, bytes;
+    uint32_t bcast, mcast, others;      /* by whom they were for: everyone, a group, another station */
+    uint32_t arp, dhcp, ipv4, ipv6, other;
+    uint32_t bcast_now, bcast_peak;     /* broadcasts in the last second, and in the worst one */
+    int      dhcp_n;                    /* DHCP servers heard answering: more than one is trouble */
+    char     dhcp_srv[3][16];
+    bool     dup;                       /* one address claimed by two stations */
+    char     dup_ip[16];
+    uint8_t  dup_a[6], dup_b[6];
+    bool     storm;                     /* hundreds of broadcasts a second, for seconds */
+} aos_eth_watch_t;
+
+typedef struct {
+    bool     on;
+    char     file[40];          /* its name in the card's folder of network surveys */
+    uint32_t seconds;           /* it has been going for */
+    uint32_t kept;              /* frames written */
+    uint32_t size;              /* bytes of file */
+    uint32_t dropped;           /* frames that came faster than the card took them */
+    char     err[64];           /* why it stopped by itself, in Spanish; "" */
+    aos_eth_watch_t seen;
+} aos_eth_capture_t;
+
+/* Starts a capture into a new file. false, with err in the info: no card,
+ * Ethernet not running. It stops at AOS_ETH_CAPTURE_MAX bytes of file, and
+ * five seconds after the last aos_eth_capture_info(): whoever shows it
+ * keeps it going. */
+#define AOS_ETH_CAPTURE_MAX (16u * 1024 * 1024)
+bool aos_eth_capture_start(void);
+void aos_eth_capture_stop(void);
+void aos_eth_capture_info(aos_eth_capture_t *out);
+/* The counting and the file themselves, for the platforms. Not locked. */
+void aos_eth_watch_reset(void);
+void aos_eth_watch_note(const uint8_t *frame, size_t len, const uint8_t *self, uint32_t now_ms);
+void aos_eth_watch_get(aos_eth_watch_t *out, uint32_t now_ms);
+bool aos_eth_pcap_header(FILE *f);
+bool aos_eth_pcap_record(FILE *f, const uint8_t *frame, uint32_t kept, uint32_t whole, uint32_t sec, uint32_t usec);
 
 /* For the SPI service (aos_io.c). An app asks for a port: if Ethernet is on
  * it, it stops and lets it go (true), and if it was already waiting for that

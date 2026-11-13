@@ -10,13 +10,19 @@
  * with real frames. On the made-up network: its router, a PC that looks for a name by NetBIOS and
  * a printer that answers by mDNS. With P4_SIM_ETH=device there is no network: the cable goes
  * straight to a camera that asks for an address by DHCP, gets none, settles on 192.168.1.64,
- * says so by ARP and says hello by WS-Discovery; it answers when asked for that address. */
+ * says so by ARP and says hello by WS-Discovery; it answers when asked for that address.
+ *
+ * A capture (aos_eth_capture_start) writes a real pcap file of made-up traffic into the surveys'
+ * folder: a quiet network, or with P4_SIM_ETH=storm one with everything wrong at once, a
+ * broadcast storm, two DHCP servers and an address claimed by two stations. */
 #include "aos_eth.h"
 #include "aos_hal.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <time.h>
 
 static aos_eth_info_t s_info;
 static bool s_read;
@@ -335,6 +341,100 @@ bool aos_eth_neighbor(aos_eth_neighbor_t *out)
     out->age_s = since % every;
     out->heard = 1 + since / every;
     return true;
+}
+
+/* ---- a capture of made-up traffic ---- */
+
+static FILE *s_cap_f;
+static aos_eth_capture_t s_cap;
+static uint64_t s_cap_from, s_cap_fed;
+
+static void cap_put(const uint8_t *f, size_t n, uint64_t at_ms)
+{
+    aos_eth_watch_note(f, n, SELF, (uint32_t)at_ms);
+    time_t now = time(NULL);
+    if (aos_eth_pcap_record(s_cap_f, f, (uint32_t)n, (uint32_t)n, (uint32_t)now, (uint32_t)(at_ms % 1000) * 1000)) {
+        s_cap.kept++;
+        s_cap.size += 16u + (uint32_t)n;
+    }
+}
+
+/* The traffic of the time since the last call, a tenth of a second at a time. */
+static void cap_feed(uint64_t now)
+{
+    const char *e = getenv("P4_SIM_ETH");
+    bool storm = e && !strcmp(e, "storm");
+    static const uint8_t ROUTER[6] = { 0x02, 0x10, 0, 0, 0, 0x01 }, PC[6] = { 0x02, 0x10, 0, 0, 0, 0x17 }, ROGUE[6] = { 0x02, 0x66, 0, 0, 0, 0xFE };
+    static const uint8_t R_IP[4] = { 10, 0, 0, 1 }, PC_IP[4] = { 10, 0, 0, 23 }, ROGUE_IP[4] = { 10, 0, 0, 254 }, ME[4] = { 10, 0, 0, 50 };
+    static const uint8_t BCAST[4] = { 255, 255, 255, 255 }, MDNS[4] = { 224, 0, 0, 251 }, MDNS_MAC[6] = { 0x01, 0, 0x5E, 0, 0, 0xFB };
+    static uint8_t f[700], offer[300];
+    for (; s_cap_fed + 100 <= now; s_cap_fed += 100) {
+        uint64_t t = s_cap_fed, tick = (t - s_cap_from) / 100;
+        size_t n;
+        if (tick % 10 == 0) { n = arp_frame(f, ROUTER, ALL, 1, R_IP, PC_IP); cap_put(f, n, t); }
+        if (tick % 15 == 3) { n = udp_frame(f, PC, MDNS_MAC, PC_IP, MDNS, 5353, 5353, B("\x00\x00\x00\x00\x00\x01\x00\x00\x00\x00\x00\x00\x05local\x00\x00\x0c\x00\x01")); cap_put(f, n, t); }
+        if (tick % 4 == 1) { n = udp_frame(f, ROUTER, SELF, R_IP, ME, 53, 40000, B("una respuesta para la placa")); cap_put(f, n, t); }
+        if (!storm) continue;
+        for (int k = 0; k < 45; k++) {                      /* 450 broadcasts a second, looking for nobody */
+            uint8_t who[4] = { 10, 0, 0, (uint8_t)(100 + k) };
+            n = arp_frame(f, PC, ALL, 1, PC_IP, who);
+            cap_put(f, n, t);
+        }
+        if (tick == 12 || tick == 14) {                     /* two servers answer the same request */
+            memset(offer, 0, sizeof offer);
+            offer[0] = 2;
+            memcpy(offer + 236, "\x63\x82\x53\x63\x35\x01\x02\x36\x04", 9);
+            memcpy(offer + 245, tick == 12 ? R_IP : ROGUE_IP, 4);
+            offer[249] = 255;
+            n = udp_frame(f, tick == 12 ? ROUTER : ROGUE, ALL, tick == 12 ? R_IP : ROGUE_IP, BCAST, 67, 68, offer, 250);
+            cap_put(f, n, t);
+        }
+        if (tick == 20) { n = arp_frame(f, ROGUE, ALL, 1, PC_IP, PC_IP); cap_put(f, n, t); }      /* and another station says it is the PC */
+    }
+}
+
+bool aos_eth_capture_start(void)
+{
+    if (s_cap_f) return false;
+    memset(&s_cap, 0, sizeof s_cap);
+    if (!s_info.running) { snprintf(s_cap.err, sizeof s_cap.err, "Ethernet no está andando"); return false; }
+    char path[160];
+    struct tm t;
+    aos_hal_time_now(&t);
+    strftime(s_cap.file, sizeof s_cap.file, "captura-%Y%m%d-%H%M%S.pcap", &t);
+    mkdir(aos_hal_path_scans(), 0777);
+    snprintf(path, sizeof path, "%s/%s", aos_hal_path_scans(), s_cap.file);
+    s_cap_f = fopen(path, "wb");
+    if (!s_cap_f || !aos_eth_pcap_header(s_cap_f)) {
+        if (s_cap_f) fclose(s_cap_f);
+        s_cap_f = NULL;
+        snprintf(s_cap.err, sizeof s_cap.err, "no se pudo crear el archivo en la tarjeta");
+        return false;
+    }
+    s_cap.on = true;
+    s_cap.size = 24;
+    s_cap_from = s_cap_fed = aos_hal_uptime_ms();
+    aos_eth_watch_reset();
+    return true;
+}
+
+void aos_eth_capture_stop(void)
+{
+    if (!s_cap_f) return;
+    fclose(s_cap_f);
+    s_cap_f = NULL;
+    s_cap.on = false;
+}
+
+void aos_eth_capture_info(aos_eth_capture_t *out)
+{
+    uint64_t now = aos_hal_uptime_ms();
+    if (s_cap_f) {
+        cap_feed(now);
+        s_cap.seconds = (uint32_t)((now - s_cap_from) / 1000);
+    }
+    *out = s_cap;
+    if (s_cap.on || s_cap.kept) aos_eth_watch_get(&out->seen, (uint32_t)now);
 }
 
 /* The bench network: the made-up wire takes the address it is given, and stops being "the network". */

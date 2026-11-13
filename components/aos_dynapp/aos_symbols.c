@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3643 simbolos.
+ * Total: 3651 simbolos.
  */
 
 #include <stddef.h>
@@ -131,6 +131,9 @@ extern int aos_emoji_ready;
 extern int aos_eth_arp_ask;
 extern int aos_eth_bench;
 extern int aos_eth_boot;
+extern int aos_eth_capture_info;
+extern int aos_eth_capture_start;
+extern int aos_eth_capture_stop;
 extern int aos_eth_dhcp;
 extern int aos_eth_enable;
 extern int aos_eth_info;
@@ -138,12 +141,17 @@ extern int aos_eth_listen;
 extern int aos_eth_neighbor;
 extern int aos_eth_on_pause;
 extern int aos_eth_parse_announce;
+extern int aos_eth_pcap_header;
+extern int aos_eth_pcap_record;
 extern int aos_eth_port_free;
 extern int aos_eth_set_clock;
 extern int aos_eth_station_clear;
 extern int aos_eth_station_list;
 extern int aos_eth_station_note;
 extern int aos_eth_stations;
+extern int aos_eth_watch_get;
+extern int aos_eth_watch_note;
+extern int aos_eth_watch_reset;
 extern int aos_eth_yield;
 extern int aos_flash_call;
 extern int aos_flashop_init;
@@ -3777,6 +3785,9 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_eth_arp_ask),
     ESP_ELFSYM_EXPORT(aos_eth_bench),
     ESP_ELFSYM_EXPORT(aos_eth_boot),
+    ESP_ELFSYM_EXPORT(aos_eth_capture_info),
+    ESP_ELFSYM_EXPORT(aos_eth_capture_start),
+    ESP_ELFSYM_EXPORT(aos_eth_capture_stop),
     ESP_ELFSYM_EXPORT(aos_eth_dhcp),
     ESP_ELFSYM_EXPORT(aos_eth_enable),
     ESP_ELFSYM_EXPORT(aos_eth_info),
@@ -3784,12 +3795,17 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_eth_neighbor),
     ESP_ELFSYM_EXPORT(aos_eth_on_pause),
     ESP_ELFSYM_EXPORT(aos_eth_parse_announce),
+    ESP_ELFSYM_EXPORT(aos_eth_pcap_header),
+    ESP_ELFSYM_EXPORT(aos_eth_pcap_record),
     ESP_ELFSYM_EXPORT(aos_eth_port_free),
     ESP_ELFSYM_EXPORT(aos_eth_set_clock),
     ESP_ELFSYM_EXPORT(aos_eth_station_clear),
     ESP_ELFSYM_EXPORT(aos_eth_station_list),
     ESP_ELFSYM_EXPORT(aos_eth_station_note),
     ESP_ELFSYM_EXPORT(aos_eth_stations),
+    ESP_ELFSYM_EXPORT(aos_eth_watch_get),
+    ESP_ELFSYM_EXPORT(aos_eth_watch_note),
+    ESP_ELFSYM_EXPORT(aos_eth_watch_reset),
     ESP_ELFSYM_EXPORT(aos_eth_yield),
     ESP_ELFSYM_EXPORT(aos_flash_call),
     ESP_ELFSYM_EXPORT(aos_flashop_init),

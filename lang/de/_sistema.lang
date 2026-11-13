@@ -10377,3 +10377,66 @@ Compartir el Wi-Fi	WLAN teilen
 
 #: firmware (Red, Equipo)
 Lo mismo, y además lo que enchufes sale a internet por el Wi-Fi de la placa: para un equipo sin Wi-Fi propio. Ese equipo llega también a los demás de tu red, como cualquiera que esté en tu Wi-Fi.	Dasselbe, und zusätzlich geht das angeschlossene Gerät über das WLAN der Platine ins Internet: für ein Gerät ohne eigenes WLAN. Es erreicht auch die anderen Geräte in deinem Netz, wie alles in deinem WLAN.
+
+#: firmware (Red, Cable)
+La captura no empezó	Die Aufzeichnung ist nicht gestartet
+
+#: firmware (Red, Cable)
+Detener la captura	Aufzeichnung anhalten
+
+#: firmware (Red, Cable)
+Capturar a la tarjeta	Auf die Karte aufzeichnen
+
+#: firmware (Red, Cable)
+Capturando en %s: %u tramas, %s, %s	Zeichne auf in %s: %u Frames, %s, %s
+
+#: firmware (Red, Cable)
+Guardado en la carpeta de barridos como %s: %u tramas, %s	Im Ordner der Scans gespeichert als %s: %u Frames, %s
+
+#: firmware (Red, Cable)
+Guarda en la tarjeta todo lo que llega a esta boca, para abrirlo con Wireshark. En un switch es lo que va para todos y para la placa; en un puerto espejo, todo.	Speichert alles, was an diesem Port ankommt, auf der Karte, zum Öffnen mit Wireshark. An einem Switch ist das der Verkehr an alle und an die Platine; an einem Mirror-Port alles.
+
+#: firmware (Red, Cable)
+%u; %u por segundo ahora, %u en el peor	%u; jetzt %u pro Sekunde, höchstens %u
+
+#: firmware (Red, Cable)
+Hay %d servidores DHCP contestando: %s y %s. En una red tiene que haber uno solo	Es antworten %d DHCP-Server: %s und %s. In einem Netz darf es nur einen geben
+
+#: firmware (Red, Cable)
+La dirección %s la reclaman dos equipos: %02X:%02X:%02X:%02X:%02X:%02X y %02X:%02X:%02X:%02X:%02X:%02X	Die Adresse %s wird von zwei Geräten beansprucht: %02X:%02X:%02X:%02X:%02X:%02X und %02X:%02X:%02X:%02X:%02X:%02X
+
+#: firmware (Red, Cable)
+Tormenta de difusión: cientos de tramas por segundo para todos, durante varios segundos	Broadcast-Sturm: Hunderte Frames pro Sekunde an alle, über mehrere Sekunden
+
+#: firmware (Red, Cable)
+Se perdieron tramas: llegaron más rápido de lo que la tarjeta las toma	Frames gingen verloren: Sie kamen schneller, als die Karte sie aufnimmt
+
+#: firmware (Red, Cable)
+Nada raro hasta ahora: un solo servidor DHCP o ninguno, ninguna dirección repetida, sin tormenta	Bisher nichts Auffälliges: ein DHCP-Server oder keiner, keine doppelte Adresse, kein Sturm
+
+#: firmware (Red, Cable)
+TRÁFICO	VERKEHR
+
+#: firmware (Red, Cable)
+Para todos	An alle
+
+#: firmware (Red, Cable)
+Por protocolo	Nach Protokoll
+
+#: firmware (Red, Cable)
+llegó al tamaño máximo	die maximale Größe wurde erreicht
+
+#: firmware (Red, Cable)
+la tarjeta dejó de tomar datos	die Karte nimmt keine Daten mehr an
+
+#: firmware (Red, Cable)
+no hay memoria para capturar	kein Speicher für die Aufzeichnung
+
+#: firmware (Red, Cable)
+Ethernet no está andando	Ethernet läuft nicht
+
+#: firmware (Red, Cable)
+no hay tarjeta donde guardar	keine Karte zum Speichern vorhanden
+
+#: firmware (Red, Cable)
+no se pudo crear el archivo en la tarjeta	die Datei konnte auf der Karte nicht angelegt werden

@@ -23,6 +23,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
+#include <sys/time.h>
+#include <time.h>
 
 #include "freertos/FreeRTOS.h"
 #include "freertos/semphr.h"
@@ -95,7 +98,21 @@ static struct {
     bool               lost;            /* the watch stopped it and it did not start again: it goes on trying */
     aos_eth_mode_t     mode;            /* a client, or the bench network (aos_eth_bench) */
     char               bench_ip[16];
+    /* a capture to the card (aos_eth_capture_start) */
+    volatile bool      capturing;
+    SemaphoreHandle_t  cap_lock;
+    uint8_t           *cap_slots;       /* CAP_SLOTS frames waiting for the card, in PSRAM */
+    uint16_t           cap_len[128];
+    int64_t            cap_at[128];
+    volatile uint8_t   cap_head, cap_n;
+    aos_eth_capture_t  cap;
+    int64_t            cap_from, cap_seen;      /* when it began, and when its info was last asked for */
+    bool               cap_thread;
 } E;
+
+#define CAP_SLOTS   128                 /* at a broadcast storm's pace the card is the slow one: what does not fit is counted */
+#define CAP_LEN     1518
+#define CAP_IDLE_MS 5000                /* nobody asked how it is going for this long: it stops */
 
 #define WATCH_MS    5000                /* how often the watch looks */
 #define SILENCE_MS  300000              /* link, address and not a frame in this long: start it again, once */
@@ -184,6 +201,19 @@ static esp_err_t eth_input(esp_eth_handle_t eth, uint8_t *buf, uint32_t len, voi
 {
     (void)eth;
     E.rx_frames++;
+    if (E.capturing && E.cap_slots && len >= 14 && xSemaphoreTake(E.cap_lock, pdMS_TO_TICKS(2))) {
+        if (E.cap_n < CAP_SLOTS) {
+            uint8_t k = (uint8_t)((E.cap_head + E.cap_n) % CAP_SLOTS);
+            uint16_t n = len < CAP_LEN ? (uint16_t)len : CAP_LEN;
+            memcpy(E.cap_slots + (size_t)k * CAP_LEN, buf, n);
+            E.cap_len[k] = n;
+            E.cap_at[k] = esp_timer_get_time();
+            E.cap_n++;
+        } else {
+            E.cap.dropped++;
+        }
+        xSemaphoreGive(E.cap_lock);
+    }
     /* for the stations' table: what was said to everyone, and an ARP answer to us */
     if (E.listen && E.ring && len >= 14 && ((buf[0] & 1) || (buf[12] == 0x08 && buf[13] == 0x06))
         && xSemaphoreTake(E.heard_lock, pdMS_TO_TICKS(5))) {
@@ -220,8 +250,8 @@ static esp_err_t eth_input(esp_eth_handle_t eth, uint8_t *buf, uint32_t len, voi
 static bool promisc_apply(void)
 {
     if (!E.lock || !xSemaphoreTake(E.lock, 0)) return false;
-    if (E.eth && E.info.running && E.promisc != E.listen) {
-        bool on = E.listen;
+    if (E.eth && E.info.running && E.promisc != (E.listen || E.capturing)) {
+        bool on = E.listen || E.capturing;       /* either wants every frame of the wire */
         if (esp_eth_ioctl(E.eth, ETH_CMD_S_PROMISCUOUS, &on) == ESP_OK) E.promisc = on;
     }
     xSemaphoreGive(E.lock);
@@ -402,7 +432,7 @@ static bool start(void)
     if (E.mode == AOS_ETH_SHARE && !aos_hal_net_share_on(E.netif))
         aos_hal_log("eth", "the bench network is up, but sharing the way out did not start");
     E.promisc = false;
-    if (E.listen) {                     /* a tool was listening when it stopped for an app */
+    if (E.listen || E.capturing) {      /* a tool was listening when it stopped for an app */
         bool on = true;
         if (esp_eth_ioctl(E.eth, ETH_CMD_S_PROMISCUOUS, &on) == ESP_OK) E.promisc = true;
     }
@@ -680,7 +710,118 @@ void aos_eth_listen(bool on)
     E.listen = on;
     esp_timer_stop(E.listen_off);
     if (on) esp_timer_start_once(E.listen_off, LISTEN_MS * 1000);
-    if (E.promisc != on) promisc_apply();
+    if (E.promisc != (on || E.capturing)) promisc_apply();
+}
+
+/* ---- a capture to the card ---- */
+
+/* The receive task only copies a frame into a slot. This thread, with its stack in PSRAM and no
+ * hurry, takes them out one by one, counts them and writes them: the card is slow and stalls, and
+ * neither the network nor the screen waits for it. */
+static void capture_thread(void *arg)
+{
+    FILE *f = arg;
+    static uint8_t frame[CAP_LEN];      /* one capture at a time: cap_thread */
+    struct timeval now;
+    gettimeofday(&now, NULL);
+    int64_t wall = (int64_t)now.tv_sec * 1000000 + now.tv_usec - esp_timer_get_time();     /* the clock, from the timer */
+    const char *why = NULL;
+    int64_t flushed = esp_timer_get_time();
+    while (E.capturing && !why) {
+        bool got = false;
+        uint16_t n = 0;
+        int64_t at = 0;
+        xSemaphoreTake(E.cap_lock, portMAX_DELAY);
+        if (E.cap_n) {
+            uint8_t k = E.cap_head;
+            n = E.cap_len[k];
+            at = E.cap_at[k];
+            memcpy(frame, E.cap_slots + (size_t)k * CAP_LEN, n);
+            E.cap_head = (uint8_t)((k + 1) % CAP_SLOTS);
+            E.cap_n--;
+            got = true;
+            aos_eth_watch_note(frame, n, E.info.mac, (uint32_t)(at / 1000));
+        }
+        xSemaphoreGive(E.cap_lock);
+        int64_t t = esp_timer_get_time();
+        if (got) {
+            int64_t w = wall + at;
+            if (!aos_eth_pcap_record(f, frame, n, n, (uint32_t)(w / 1000000), (uint32_t)(w % 1000000))) why = "la tarjeta dejó de tomar datos";
+            E.cap.kept++;
+            E.cap.size += 16u + n;
+            if (E.cap.size >= AOS_ETH_CAPTURE_MAX) why = "llegó al tamaño máximo";
+        } else {
+            aos_hal_sleep_ms(20);
+        }
+        if (t - flushed > 1000000) { fflush(f); flushed = t; }
+        if (t - E.cap_seen > (int64_t)CAP_IDLE_MS * 1000) break;      /* nobody is watching it any more */
+    }
+    fclose(f);
+    xSemaphoreTake(E.cap_lock, portMAX_DELAY);
+    E.capturing = false;
+    E.cap.on = false;
+    E.cap_n = 0;
+    snprintf(E.cap.err, sizeof E.cap.err, "%s", why ? why : "");
+    xSemaphoreGive(E.cap_lock);
+    aos_hal_log("eth", "capture %s: %u frames, %u bytes, %u dropped%s%s", E.cap.file, (unsigned)E.cap.kept,
+                (unsigned)E.cap.size, (unsigned)E.cap.dropped, why ? ": " : "", why ? why : "");
+    promisc_apply();
+    E.cap_thread = false;
+}
+
+bool aos_eth_capture_start(void)
+{
+    if (E.capturing || E.cap_thread) return false;
+    if (!E.cap_lock) E.cap_lock = xSemaphoreCreateMutex();
+    /* 190 KB of frames in waiting: PSRAM, nothing in them is touched from an interrupt */
+    if (!E.cap_slots) E.cap_slots = heap_caps_malloc((size_t)CAP_SLOTS * CAP_LEN, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    memset(&E.cap, 0, sizeof E.cap);
+    const char *dir = aos_hal_path_scans();
+    if (!E.cap_lock || !E.cap_slots) { snprintf(E.cap.err, sizeof E.cap.err, "no hay memoria para capturar"); return false; }
+    if (!E.info.running) { snprintf(E.cap.err, sizeof E.cap.err, "Ethernet no está andando"); return false; }
+    if (!dir || !aos_hal_sd_present()) { snprintf(E.cap.err, sizeof E.cap.err, "no hay tarjeta donde guardar"); return false; }
+    struct tm t;
+    aos_hal_time_now(&t);
+    if (aos_hal_time_is_valid()) strftime(E.cap.file, sizeof E.cap.file, "captura-%Y%m%d-%H%M%S.pcap", &t);
+    else snprintf(E.cap.file, sizeof E.cap.file, "captura-%u.pcap", (unsigned)(esp_timer_get_time() / 1000000));
+    char path[128];
+    mkdir(dir, 0777);
+    snprintf(path, sizeof path, "%s/%s", dir, E.cap.file);
+    FILE *f = fopen(path, "wb");
+    if (!f || !aos_eth_pcap_header(f)) {
+        if (f) fclose(f);
+        snprintf(E.cap.err, sizeof E.cap.err, "no se pudo crear el archivo en la tarjeta");
+        return false;
+    }
+    E.cap.size = 24;
+    E.cap.on = true;
+    E.cap_head = E.cap_n = 0;
+    E.cap_from = E.cap_seen = esp_timer_get_time();
+    aos_eth_watch_reset();
+    E.cap_thread = true;
+    E.capturing = true;
+    if (!aos_hal_thread_start("eth-capture", capture_thread, f, 6144, 2)) {
+        E.capturing = E.cap_thread = E.cap.on = false;
+        fclose(f);
+        snprintf(E.cap.err, sizeof E.cap.err, "no hay memoria para capturar");
+        return false;
+    }
+    promisc_apply();
+    aos_hal_log("eth", "capturing to %s", path);
+    return true;
+}
+
+void aos_eth_capture_stop(void) { E.capturing = false; }
+
+void aos_eth_capture_info(aos_eth_capture_t *out)
+{
+    E.cap_seen = esp_timer_get_time();
+    if (!E.cap_lock) { memset(out, 0, sizeof *out); return; }
+    xSemaphoreTake(E.cap_lock, portMAX_DELAY);
+    if (E.cap.on) E.cap.seconds = (uint32_t)((E.cap_seen - E.cap_from) / 1000000);
+    *out = E.cap;
+    if (E.cap.on || E.cap.kept) aos_eth_watch_get(&out->seen, (uint32_t)(E.cap_seen / 1000));
+    xSemaphoreGive(E.cap_lock);
 }
 
 int aos_eth_stations(aos_eth_station_t *out, int max)

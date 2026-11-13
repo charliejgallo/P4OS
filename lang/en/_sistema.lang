@@ -10377,3 +10377,66 @@ Compartir el Wi-Fi	Share the Wi-Fi
 
 #: firmware (Red, Equipo)
 Lo mismo, y además lo que enchufes sale a internet por el Wi-Fi de la placa: para un equipo sin Wi-Fi propio. Ese equipo llega también a los demás de tu red, como cualquiera que esté en tu Wi-Fi.	The same, and what you plug in also goes out to the internet by the board's Wi-Fi: for a device with no Wi-Fi of its own. That device reaches the others on your network too, as anything on your Wi-Fi does.
+
+#: firmware (Red, Cable)
+La captura no empezó	The capture did not start
+
+#: firmware (Red, Cable)
+Detener la captura	Stop the capture
+
+#: firmware (Red, Cable)
+Capturar a la tarjeta	Capture to the card
+
+#: firmware (Red, Cable)
+Capturando en %s: %u tramas, %s, %s	Capturing to %s: %u frames, %s, %s
+
+#: firmware (Red, Cable)
+Guardado en la carpeta de barridos como %s: %u tramas, %s	Kept in the surveys' folder as %s: %u frames, %s
+
+#: firmware (Red, Cable)
+Guarda en la tarjeta todo lo que llega a esta boca, para abrirlo con Wireshark. En un switch es lo que va para todos y para la placa; en un puerto espejo, todo.	Keeps on the card everything that reaches this port, to open with Wireshark. On a switch that is what is sent to everyone and to the board; on a mirror port, everything.
+
+#: firmware (Red, Cable)
+%u; %u por segundo ahora, %u en el peor	%u; %u a second now, %u at the worst
+
+#: firmware (Red, Cable)
+Hay %d servidores DHCP contestando: %s y %s. En una red tiene que haber uno solo	There are %d DHCP servers answering: %s and %s. A network must have only one
+
+#: firmware (Red, Cable)
+La dirección %s la reclaman dos equipos: %02X:%02X:%02X:%02X:%02X:%02X y %02X:%02X:%02X:%02X:%02X:%02X	The address %s is claimed by two devices: %02X:%02X:%02X:%02X:%02X:%02X and %02X:%02X:%02X:%02X:%02X:%02X
+
+#: firmware (Red, Cable)
+Tormenta de difusión: cientos de tramas por segundo para todos, durante varios segundos	Broadcast storm: hundreds of frames a second for everyone, for several seconds
+
+#: firmware (Red, Cable)
+Se perdieron tramas: llegaron más rápido de lo que la tarjeta las toma	Frames were lost: they came faster than the card takes them
+
+#: firmware (Red, Cable)
+Nada raro hasta ahora: un solo servidor DHCP o ninguno, ninguna dirección repetida, sin tormenta	Nothing odd so far: one DHCP server or none, no address repeated, no storm
+
+#: firmware (Red, Cable)
+TRÁFICO	TRAFFIC
+
+#: firmware (Red, Cable)
+Para todos	For everyone
+
+#: firmware (Red, Cable)
+Por protocolo	By protocol
+
+#: firmware (Red, Cable)
+llegó al tamaño máximo	it reached the largest size
+
+#: firmware (Red, Cable)
+la tarjeta dejó de tomar datos	the card stopped taking data
+
+#: firmware (Red, Cable)
+no hay memoria para capturar	there is no memory to capture
+
+#: firmware (Red, Cable)
+Ethernet no está andando	Ethernet is not running
+
+#: firmware (Red, Cable)
+no hay tarjeta donde guardar	there is no card to keep it on
+
+#: firmware (Red, Cable)
+no se pudo crear el archivo en la tarjeta	the file could not be created on the card

@@ -477,6 +477,39 @@ equipo sin Wi-Fi propio.
 la MAC (`oui.txt` de la tarjeta), recibir archivos por TFTP (respaldos), y
 que los servicios puedan seguir con Red cerrada.
 
+## Mirar el tráfico (Red, pestaña Cable, sección Tráfico)
+
+La herramienta 6 del plan, 2026-11-12. "Capturar a la tarjeta" guarda cada
+trama que llega a la boca en un archivo pcap en la carpeta de barridos
+(`/redes`), que se baja con el explorador del portal y se abre con
+Wireshark, y mientras tanto cuenta y avisa:
+
+- **Cuenta:** tramas para todos (ahora por segundo y en el peor segundo),
+  y cuántas son ARP, DHCP, IPv4 e IPv6.
+- **Avisa** de lo que una red no tiene que tener: **dos servidores DHCP**
+  contestando (y cuáles), **una dirección reclamada por dos equipos** (y
+  sus MAC), y **una tormenta de difusión** (300 o más tramas para todos por
+  segundo, tres segundos seguidos).
+- En un switch llega lo que va para todos y para la placa; para verlo todo
+  hace falta un puerto espejo. Lo que manda la placa no queda en el
+  archivo.
+
+En el firmware: con la captura prendida el chip entrega todo (igual que al
+escuchar al switch). La tarea de recepción sólo copia la trama a una de
+128 casillas en PSRAM (190 KB, pedidos la primera vez); un hilo con la pila
+en PSRAM las saca, las cuenta y las escribe, porque la tarjeta es lenta y
+se traba. Lo que no entra se cuenta como perdido y se dice. Para a los
+16 MB, o a los 5 s de que nadie pregunte cómo va (o sea, al salir de la
+pestaña). El lector (`aos_eth_watch.c`) pasó cuatro millones de tramas
+rotas bajo el sanitizador sin una falla.
+
+En el simulador: la captura escribe un pcap de verdad con tráfico de
+ejemplo; `P4_SIM_ETH=storm` es una red con todo mal a la vez. Probado así:
+los tres avisos aparecieron, y `tcpdump` leyó el archivo (4045 tramas, las
+dos respuestas DHCP decodificadas). **En la placa falta todo**: cuántas
+tramas por segundo aguanta la tarjeta, y cuánto tarda el W5500 por SPI en
+perder tramas con una red cargada.
+
 ## Qué gana el taller con un cable de red
 
 Ordenadas por lo que más resuelve en un banco. Varias necesitan la fase 4.

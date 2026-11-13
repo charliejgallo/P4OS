@@ -545,6 +545,11 @@ page.
   device's log, its last lines on the screen). "Compartir el Wi-Fi" is
   "Repartir direcciones" plus a way out to the internet through the
   board's Wi-Fi (NAT), for a device with none of its own.
+- **Looking at the traffic** (not in a release yet): Red, Cable, "Capturar
+  a la tarjeta" keeps every frame that reaches the port in a pcap file in
+  the card's `/redes` folder, for Wireshark, and says what a network
+  should not have: two DHCP servers, an address claimed by two stations, a
+  broadcast storm. In the simulator, `P4_SIM_ETH=storm` has all three.
 
 `docs/plan/ETHERNET.md` (Spanish) has the phases, everything measured and
 what is next.

@@ -240,6 +240,7 @@ add_executable(p4os_sim
     io_sim.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_eth_announce.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_eth_stations.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/aos_eth_watch.c
     eth_sim.c
     uart_emu_sim.c
     swd_sim.c

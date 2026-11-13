@@ -166,7 +166,9 @@ typedef struct {
     lv_obj_t *c_sw_state, *c_sw[7];
     lv_obj_t *c_btn, *c_t_gw, *c_t_dns, *c_t_far;
     lv_obj_t *c_ifs;
-    int32_t c_ifs_w;
+    lv_obj_t *c_cap_btn, *c_cap_state, *c_cap_kv[2], *c_cap_find;
+    int32_t c_ifs_w, c_cap_w;
+    uint32_t c_cap_sig;
     uint32_t c_tick, c_listen_ms, c_test_seen;
     bool c_linked;
     char c_ifs_sig[200];
@@ -1868,6 +1870,80 @@ static void cable_test_cb(lv_event_t *e)
     U.pg.c_test_seen = 0xFFFFFFFFu;
 }
 
+static void cap_btn_cb(lv_event_t *e)
+{
+    aos_eth_capture_t c;
+    aos_eth_capture_info(&c);
+    if (c.on) aos_eth_capture_stop();
+    else if (!aos_eth_capture_start()) {
+        aos_eth_capture_info(&c);
+        aos_ui_toast(c.err[0] ? aos_tr(c.err) : _("La captura no empezó"), 3000);
+    }
+}
+
+static void fmt_size(char *out, size_t n, uint32_t bytes)
+{
+    char a[16];
+    if (bytes >= 1024 * 1024) { fmt_num(a, sizeof a, bytes / 1048576.0, 1); snprintf(out, n, "%s MB", a); }
+    else snprintf(out, n, "%u KB", (unsigned)((bytes + 1023) / 1024));
+}
+
+/* The capture: how it is going, what was counted, and what should not be there. Asking how it is
+ * going is also what keeps it going. */
+static void cable_cap_refresh(void)
+{
+    page_t *g = &U.pg;
+    static aos_eth_capture_t c;
+    aos_eth_capture_info(&c);
+    char t[220], a[24], b[24];
+    pill_set(g->c_cap_btn, AOS_SYM_PULSE, c.on ? _("Detener la captura") : _("Capturar a la tarjeta"), c.on ? AOS_C_CARD2 : C_NET_D);
+    fmt_size(a, sizeof a, c.size);
+    fmt_span(b, sizeof b, c.seconds);
+    if (c.on) snprintf(t, sizeof t, _("Capturando en %s: %u tramas, %s, %s"), c.file, (unsigned)c.kept, a, b);
+    else if (c.err[0]) snprintf(t, sizeof t, "%s: %s", c.file[0] ? c.file : "-", aos_tr(c.err));
+    else if (c.kept) snprintf(t, sizeof t, _("Guardado en la carpeta de barridos como %s: %u tramas, %s"), c.file, (unsigned)c.kept, a);
+    else snprintf(t, sizeof t, "%s", _("Guarda en la tarjeta todo lo que llega a esta boca, para abrirlo con Wireshark. En un switch es lo que va para todos y para la placa; en un puerto espejo, todo."));
+    say(g->c_cap_state, t, c.on ? C_GOOD : c.err[0] ? C_BAD : AOS_C_DIM);
+    const aos_eth_watch_t *w = &c.seen;
+    if (!c.on && !c.kept) {
+        say(g->c_cap_kv[0], "-", AOS_C_DIM);
+        say(g->c_cap_kv[1], "-", AOS_C_DIM);
+    } else {
+        snprintf(t, sizeof t, _("%u; %u por segundo ahora, %u en el peor"), (unsigned)w->bcast, (unsigned)w->bcast_now, (unsigned)w->bcast_peak);
+        say(g->c_cap_kv[0], t, AOS_C_TEXT);
+        snprintf(t, sizeof t, "ARP %u, DHCP %u, IPv4 %u, IPv6 %u", (unsigned)w->arp, (unsigned)w->dhcp, (unsigned)w->ipv4, (unsigned)w->ipv6);
+        say(g->c_cap_kv[1], t, AOS_C_TEXT);
+    }
+    /* what should not be there: rebuilt when it changes */
+    uint32_t sig = (uint32_t)w->dhcp_n | (uint32_t)w->dup << 4 | (uint32_t)w->storm << 5 | (c.dropped ? 64u : 0) | (c.on ? 128u : 0) | (c.kept ? 256u : 0);
+    if (sig == g->c_cap_sig) return;
+    g->c_cap_sig = sig;
+    lv_obj_clean(g->c_cap_find);
+    int32_t wd = g->c_cap_w;
+    bool any = false;
+    if (w->dhcp_n >= 2) {
+        snprintf(t, sizeof t, _("Hay %d servidores DHCP contestando: %s y %s. En una red tiene que haber uno solo"), w->dhcp_n, w->dhcp_srv[0], w->dhcp_srv[1]);
+        lv_obj_set_style_text_color(caption(g->c_cap_find, t, wd), C_BAD, 0);
+        any = true;
+    }
+    if (w->dup) {
+        snprintf(t, sizeof t, _("La dirección %s la reclaman dos equipos: %02X:%02X:%02X:%02X:%02X:%02X y %02X:%02X:%02X:%02X:%02X:%02X"), w->dup_ip,
+                 w->dup_a[0], w->dup_a[1], w->dup_a[2], w->dup_a[3], w->dup_a[4], w->dup_a[5],
+                 w->dup_b[0], w->dup_b[1], w->dup_b[2], w->dup_b[3], w->dup_b[4], w->dup_b[5]);
+        lv_obj_set_style_text_color(caption(g->c_cap_find, t, wd), C_BAD, 0);
+        any = true;
+    }
+    if (w->storm) {
+        lv_obj_set_style_text_color(caption(g->c_cap_find, _("Tormenta de difusión: cientos de tramas por segundo para todos, durante varios segundos"), wd), C_BAD, 0);
+        any = true;
+    }
+    if (c.dropped) {
+        lv_obj_set_style_text_color(caption(g->c_cap_find, _("Se perdieron tramas: llegaron más rápido de lo que la tarjeta las toma"), wd), AOS_C_ORANGE, 0);
+        any = true;
+    }
+    if (!any && (c.on || c.kept)) caption(g->c_cap_find, _("Nada raro hasta ahora: un solo servidor DHCP o ninguno, ninguna dirección repetida, sin tormenta"), wd);
+}
+
 static void cable_ifs_build(void)
 {
     page_t *g = &U.pg;
@@ -1999,6 +2075,7 @@ static void cable_refresh(bool now)
         }
     }
     cable_ifs_build();
+    cable_cap_refresh();
 }
 
 static void build_cable(void)
@@ -2040,6 +2117,19 @@ static void build_cable(void)
     g->c_ifs = box(c, rw - 40, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(g->c_ifs, LV_FLEX_FLOW_COLUMN);
     g->c_ifs_w = rw - 40;
+
+    section(right, _("TRÁFICO"));
+    c = vcard(right, rw, 20, 10);
+    g->c_cap_state = caption(c, "", rw - 40);
+    br = row(c, rw - 40, 80, 12);
+    g->c_cap_btn = pill(br, AOS_SYM_PULSE, _("Capturar a la tarjeta"), C_NET_D, cap_btn_cb, NULL);
+    g->c_cap_kv[0] = kv(c, rw - 40, _("Para todos"));
+    g->c_cap_kv[1] = kv(c, rw - 40, _("Por protocolo"));
+    g->c_cap_find = box(c, rw - 40, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(g->c_cap_find, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(g->c_cap_find, 6, 0);
+    g->c_cap_w = rw - 40;
+    g->c_cap_sig = 0xFFFFFFFFu;
 #ifdef AOS_SIM
     caption(right, _("Simulador: el switch y las respuestas de la prueba son de ejemplo."), rw);
 #endif
