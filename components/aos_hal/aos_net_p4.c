@@ -34,6 +34,11 @@
 #include "esp_event.h"
 #include "esp_log.h"
 #include "esp_netif.h"
+#include "esp_netif_net_stack.h"
+#include "lwip/def.h"
+#include "lwip/ip.h"
+#include "lwip/ip4_addr.h"
+#include "lwip/netif.h"
 #include "esp_netif_sntp.h"
 #include "esp_timer.h"
 #include "esp_wifi.h"
@@ -408,6 +413,68 @@ static esp_err_t netif_walk(void *ctx)
     }
     return ESP_OK;
 }
+
+/* ---- sharing the way out ---- */
+
+static struct netif *volatile s_share_inner;   /* the shared network's interface; NULL: nothing is forwarded */
+static esp_netif_t *s_share_netif;
+
+/* lwIP asks before forwarding a packet (aos_lwip_hooks.h), in its own thread.
+ * Only two kinds pass, and only while sharing: what comes in from the shared
+ * network, and the answers to it, which the NAT has already readdressed to a
+ * station of that network. Everything else the board keeps to itself, as it
+ * did before forwarding was built in. */
+int aos_ip4_canforward(struct pbuf *p, unsigned int dest)
+{
+    (void)p;
+    struct netif *inner = s_share_inner;
+    if (!inner) return 0;
+    if (ip_current_input_netif() == inner) return -1;
+    ip4_addr_t d;
+    d.addr = lwip_htonl(dest);
+    if (ip4_addr_netcmp(&d, netif_ip4_addr(inner), netif_ip4_netmask(inner))) return -1;
+    return 0;
+}
+
+bool aos_hal_net_share_on(void *netif)
+{
+    esp_netif_t *n = netif;
+    if (!n) return false;
+    if (s_share_netif) aos_hal_net_share_off();
+    /* its DHCP server hands out the name servers the board itself uses: without them a device
+     * given an address and a gateway still resolves nothing */
+    esp_netif_dns_info_t dns = { 0 };
+    esp_netif_t *out = esp_netif_get_default_netif();
+    if (out && out != n) esp_netif_get_dns_info(out, ESP_NETIF_DNS_MAIN, &dns);
+    if (dns.ip.u_addr.ip4.addr) {
+        uint8_t offer = 2;                      /* OFFER_DNS, as the IDF's own router example sets it */
+        esp_netif_dhcps_stop(n);
+        esp_netif_dhcps_option(n, ESP_NETIF_OP_SET, ESP_NETIF_DOMAIN_NAME_SERVER, &offer, sizeof offer);
+        esp_netif_set_dns_info(n, ESP_NETIF_DNS_MAIN, &dns);
+        esp_netif_dhcps_start(n);
+    }
+    esp_err_t e = esp_netif_napt_enable(n);
+    if (e != ESP_OK) {
+        ESP_LOGW(TAG, "sharing: the address translation did not start (%s)", esp_err_to_name(e));
+        return false;
+    }
+    s_share_netif = n;
+    s_share_inner = esp_netif_get_netif_impl(n);
+    ESP_LOGI(TAG, "sharing the way out with the network on %s%s", esp_netif_get_ifkey(n),
+             dns.ip.u_addr.ip4.addr ? "" : " (no name server to offer: the board has none)");
+    return true;
+}
+
+void aos_hal_net_share_off(void)
+{
+    if (!s_share_netif) return;
+    s_share_inner = NULL;                       /* first: from here nothing is forwarded */
+    esp_netif_napt_disable(s_share_netif);
+    s_share_netif = NULL;
+    ESP_LOGI(TAG, "sharing: off");
+}
+
+bool aos_hal_net_sharing(void) { return s_share_inner != NULL; }
 
 int aos_hal_netif_list(aos_netif_t *out, int max)
 {

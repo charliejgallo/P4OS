@@ -53,6 +53,16 @@ depends on where it came in (`components/aos_ui/aos_access.c`):
   Whatever comes in by that address is the wire's, and is trusted only
   with "La red por cable: de confianza" on; off, that device finds the
   portal and SSH closed, as on any network that is not home.
+- **The board does not pass traffic between its networks,** the house's
+  Wi-Fi, the wire, the USB cable and its own access point, with one
+  exception that is switched on at the board: Red, Equipo, "Compartir el
+  Wi-Fi" gives a device plugged into the bench network a way out through
+  the board's Wi-Fi (NAT). While it is on, that device reaches the
+  internet and the other devices of the house's network, as anything on
+  that Wi-Fi does. The firmware is built able to forward (it has to be,
+  for this), and a hook inside the network stack refuses every packet
+  that is not part of that sharing (`aos_ip4_canforward`). A restart
+  switches it off.
 - **Each connection is judged by the interface it came in by.** With the
   Wi-Fi on a trusted network and the wire on another, a request that comes
   in by the wire is the wire's, whatever the Wi-Fi is on, and the other way

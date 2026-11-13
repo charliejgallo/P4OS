@@ -341,7 +341,7 @@ bool aos_eth_neighbor(aos_eth_neighbor_t *out)
 bool aos_eth_bench(aos_eth_mode_t mode, const char *ip)
 {
     read_once();
-    if (mode == AOS_ETH_SERVER && (!ip || !ip[0])) ip = AOS_ETH_BENCH_IP;
+    if ((mode == AOS_ETH_SERVER || mode == AOS_ETH_SHARE) && (!ip || !ip[0])) ip = AOS_ETH_BENCH_IP;
     if (mode != AOS_ETH_CLIENT && (!ip || !ip[0])) return false;
     s_info.mode = mode;
     if (mode == AOS_ETH_CLIENT) {

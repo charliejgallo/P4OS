@@ -172,7 +172,7 @@ typedef struct {
     char c_ifs_sig[200];
     /* Equipo */
     lv_obj_t *f_link, *f_btn, *f_bar, *f_state, *f_list;
-    lv_obj_t *f_bench, *f_bench_btn;
+    lv_obj_t *f_bench, *f_bench_btn, *f_share_btn;
     lv_obj_t *f_srv_state, *f_srv_btn, *f_srv_kv[3], *f_srv_log;
     int32_t f_srv_w;
     uint32_t f_srv_seen;
@@ -2099,6 +2099,7 @@ static void bench_say(lv_obj_t *l, const aos_eth_info_t *i)
     char t[120];
     if (i->mode == AOS_ETH_STATIC) snprintf(t, sizeof t, _("La placa está en la red del equipo, como %s"), i->ip);
     else if (i->mode == AOS_ETH_SERVER) snprintf(t, sizeof t, _("Red de banco: la placa es %s y reparte direcciones"), i->ip);
+    else if (i->mode == AOS_ETH_SHARE) snprintf(t, sizeof t, _("Comparte el Wi-Fi: la placa es %s, reparte direcciones y da salida a internet"), i->ip);
     else snprintf(t, sizeof t, "%s", _("El cable es un cliente más de la red: lo normal"));
     say(l, t, i->mode == AOS_ETH_CLIENT ? AOS_C_DIM : AOS_C_ORANGE);
 }
@@ -2157,6 +2158,15 @@ static void bench_server_cb(lv_event_t *e)
     aos_eth_info_t i;
     aos_eth_info(&i);
     bench_set(i.mode == AOS_ETH_CLIENT ? AOS_ETH_SERVER : AOS_ETH_CLIENT, NULL);
+}
+
+static void bench_share_cb(lv_event_t *e)
+{
+    if (aos_hal_net_wifi_state() != AOS_NET_CONNECTED) {
+        aos_ui_toast(_("La placa no está en ningún Wi-Fi: no hay conexión que compartir"), 3000);
+        return;
+    }
+    bench_set(AOS_ETH_SHARE, NULL);
 }
 
 /* Is the wire on the same /24 as this address? */
@@ -2358,6 +2368,8 @@ static void find_refresh(bool now)
     bench_say(g->f_bench, &i);
     pill_set(g->f_bench_btn, i.mode == AOS_ETH_CLIENT ? AOS_SYM_LAN_PENDING : AOS_SYM_LAN_DISCONNECT,
              i.mode == AOS_ETH_CLIENT ? _("Repartir direcciones") : _("Volver a lo normal"), i.mode == AOS_ETH_CLIENT ? C_NET_D : AOS_C_CARD2);
+    if (i.mode == AOS_ETH_CLIENT) lv_obj_remove_flag(g->f_share_btn, LV_OBJ_FLAG_HIDDEN);     /* offered from the usual only */
+    else lv_obj_add_flag(g->f_share_btn, LV_OBJ_FLAG_HIDDEN);
     aos_eth_listen(true);               /* while this tab is up; it keeps what it heard through a link that comes and goes */
     bench_srv_refresh();
 
@@ -2416,6 +2428,9 @@ static void build_find(void)
     br = row(c, lw - 40, 80, 12);
     g->f_bench_btn = pill(br, AOS_SYM_LAN_PENDING, _("Repartir direcciones"), C_NET_D, bench_server_cb, NULL);
     caption(c, _("Para un equipo que espera que le den dirección: la placa se la da por DHCP. Mientras tanto el cable no es la salida de la placa, sigue el Wi-Fi. Tocá un equipo de la lista para ver más y para ponerte en su red."), lw - 40);
+    br = row(c, lw - 40, 80, 12);
+    g->f_share_btn = pill(br, AOS_SYM_WIFI, _("Compartir el Wi-Fi"), C_NET_D, bench_share_cb, NULL);
+    caption(c, _("Lo mismo, y además lo que enchufes sale a internet por el Wi-Fi de la placa: para un equipo sin Wi-Fi propio. Ese equipo llega también a los demás de tu red, como cualquiera que esté en tu Wi-Fi."), lw - 40);
     section(left, _("SERVICIOS DE BANCO"));
     c = vcard(left, lw, 20, 10);
     g->f_srv_state = caption(c, "", lw - 40);

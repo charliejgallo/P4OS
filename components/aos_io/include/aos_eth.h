@@ -115,13 +115,17 @@ bool aos_eth_parse_announce(const uint8_t *frame, size_t len, aos_eth_neighbor_t
  *                    at 192.168.1.64. The mask is 255.255.255.0.
  *   AOS_ETH_SERVER   the board is AOS_ETH_BENCH_IP and gives addresses out
  *                    by DHCP to whatever is plugged in.
+ *   AOS_ETH_SHARE    the same, and what is plugged in goes out to the
+ *                    internet by the board's Wi-Fi (NAT): a device with no
+ *                    Wi-Fi of its own gets the house's. It reaches the
+ *                    house's other devices too, as anything on that Wi-Fi.
  *
- * In the last two the wire is not the board's way out, the Wi-Fi goes on
+ * In all but the first the wire is not the board's way out, the Wi-Fi goes on
  * being it, and whoever comes in by it is judged by the wired network's
  * trust switch, off unless turned on at the board (aos_access.c). It is not
  * kept: after a restart the wire is a client again. Changing it starts the
  * driver again; false when it did not start. */
-typedef enum { AOS_ETH_CLIENT = 0, AOS_ETH_STATIC, AOS_ETH_SERVER } aos_eth_mode_t;
+typedef enum { AOS_ETH_CLIENT = 0, AOS_ETH_STATIC, AOS_ETH_SERVER, AOS_ETH_SHARE } aos_eth_mode_t;
 #define AOS_ETH_BENCH_IP "192.168.77.1"
 bool aos_eth_bench(aos_eth_mode_t mode, const char *ip);
 

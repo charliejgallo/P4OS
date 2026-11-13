@@ -286,6 +286,7 @@ static void watch_thread(void *arg);
 
 static void teardown(void)
 {
+    if (E.mode == AOS_ETH_SHARE || aos_hal_net_sharing()) aos_hal_net_share_off();     /* before its interface goes */
     if (E.eth) esp_eth_stop(E.eth);
     if (E.glue) esp_eth_del_netif_glue(E.glue);
     if (E.netif) esp_netif_destroy(E.netif);
@@ -370,7 +371,7 @@ static bool start(void)
     if (E.mode != AOS_ETH_CLIENT) {
         fixed.ip.addr = esp_ip4addr_aton(E.bench_ip);
         fixed.netmask.addr = esp_ip4addr_aton("255.255.255.0");
-        if (E.mode == AOS_ETH_SERVER) {
+        if (E.mode == AOS_ETH_SERVER || E.mode == AOS_ETH_SHARE) {
             /* as the Wi-Fi's own access point: up from the start, the server with it, itself as the gateway it offers */
             fixed.gw = fixed.ip;
             base.flags = (esp_netif_flags_t)(ESP_NETIF_DHCP_SERVER | ESP_NETIF_FLAG_AUTOUP);
@@ -398,6 +399,8 @@ static bool start(void)
     esp_eth_update_input_path(E.eth, eth_input, E.netif);       /* ours first, then the stack's (eth_input) */
     e = esp_eth_start(E.eth);
     if (e != ESP_OK) return fail("el W5500 no arrancó", e);
+    if (E.mode == AOS_ETH_SHARE && !aos_hal_net_share_on(E.netif))
+        aos_hal_log("eth", "the bench network is up, but sharing the way out did not start");
     E.promisc = false;
     if (E.listen) {                     /* a tool was listening when it stopped for an app */
         bool on = true;
@@ -598,7 +601,7 @@ void aos_eth_on_pause(aos_eth_notice_t cb) { E.notice = cb; }
 bool aos_eth_bench(aos_eth_mode_t mode, const char *ip)
 {
     unsigned a, b, c, d;
-    if (mode == AOS_ETH_SERVER && (!ip || !ip[0])) ip = AOS_ETH_BENCH_IP;
+    if ((mode == AOS_ETH_SERVER || mode == AOS_ETH_SHARE) && (!ip || !ip[0])) ip = AOS_ETH_BENCH_IP;
     if (mode != AOS_ETH_CLIENT && (!ip || sscanf(ip, "%u.%u.%u.%u", &a, &b, &c, &d) != 4 || a > 255 || b > 255 || c > 255 || d < 1 || d > 254))
         return false;
     take();
@@ -609,7 +612,8 @@ bool aos_eth_bench(aos_eth_mode_t mode, const char *ip)
     if (mode != AOS_ETH_CLIENT) snprintf(E.bench_ip, sizeof E.bench_ip, "%u.%u.%u.%u", a, b, c, d);
     else E.bench_ip[0] = 0;
     aos_hal_log("eth", mode == AOS_ETH_CLIENT ? "a client of the network again" : mode == AOS_ETH_SERVER
-                ? "the bench network: %s, giving addresses out" : "the bench network: %s, next to a device", E.bench_ip);
+                ? "the bench network: %s, giving addresses out" : mode == AOS_ETH_SHARE
+                ? "the bench network: %s, giving addresses out and the Wi-Fi's way out" : "the bench network: %s, next to a device", E.bench_ip);
     bool ok = !E.info.enabled || E.info.paused || start();
     xSemaphoreGive(E.lock);
     return ok;

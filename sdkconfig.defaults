@@ -241,6 +241,12 @@ CONFIG_SPIRAM_ALLOW_NOINIT_SEG_EXTERNAL_MEMORY=y
 CONFIG_ETH_USE_SPI_ETHERNET=y
 CONFIG_ETH_SPI_ETHERNET_W5500=y
 
+# Sharing the board's connection with a device on the bench network (Red,
+# Equipo): lwIP forwards and translates addresses. Nothing is forwarded
+# unless that is switched on: aos_lwip_hooks.h refuses every other packet.
+CONFIG_LWIP_IP_FORWARD=y
+CONFIG_LWIP_IPV4_NAPT=y
+
 # mDNS answers on the USB network too (aos_usb_net_p4.c): STA, AP, ETH are
 # predefined and take the default three
 CONFIG_MDNS_MAX_INTERFACES=4

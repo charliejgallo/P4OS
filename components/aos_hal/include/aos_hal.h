@@ -1563,6 +1563,15 @@ typedef struct {
     uint8_t mac[6];
 } aos_netif_t;
 int aos_hal_netif_list(aos_netif_t *out, int max);
+/* Sharing the board's way out with the network on one interface: what comes
+ * from that network goes out by whatever the board itself goes out by, its
+ * address translated (NAT), and its DHCP server offers the board's own DNS
+ * servers. 'netif' is the platform's handle of an interface that gives
+ * addresses out (an esp_netif_t). One at a time; off, the board forwards
+ * nothing between its networks. false: not on this platform, or it failed. */
+bool aos_hal_net_share_on(void *netif);
+void aos_hal_net_share_off(void);
+bool aos_hal_net_sharing(void);
 /* mDNS on the wire: quiet on a wired network that is not trusted, as
  * aos_hal_net_mdns_visible() does on a Wi-Fi that is not home. */
 void aos_hal_net_mdns_visible_wired(bool on);

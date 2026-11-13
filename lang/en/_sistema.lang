@@ -10365,3 +10365,15 @@ No hay tarjeta de la que dar archivos	There is no card to give files from
 
 #: firmware (Red, Equipo)
 El cable no tiene dirección	The wire has no address
+
+#: firmware (Red, Equipo)
+Comparte el Wi-Fi: la placa es %s, reparte direcciones y da salida a internet	Sharing the Wi-Fi: the board is %s, gives addresses out and a way out to the internet
+
+#: firmware (Red, Equipo)
+La placa no está en ningún Wi-Fi: no hay conexión que compartir	The board is on no Wi-Fi: there is no connection to share
+
+#: firmware (Red, Equipo)
+Compartir el Wi-Fi	Share the Wi-Fi
+
+#: firmware (Red, Equipo)
+Lo mismo, y además lo que enchufes sale a internet por el Wi-Fi de la placa: para un equipo sin Wi-Fi propio. Ese equipo llega también a los demás de tu red, como cualquiera que esté en tu Wi-Fi.	The same, and what you plug in also goes out to the internet by the board's Wi-Fi: for a device with no Wi-Fi of its own. That device reaches the others on your network too, as anything on your Wi-Fi does.

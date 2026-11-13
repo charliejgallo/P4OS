@@ -10365,3 +10365,15 @@ No hay tarjeta de la que dar archivos	Keine Karte vorhanden, von der Dateien gel
 
 #: firmware (Red, Equipo)
 El cable no tiene dirección	Das Kabel hat keine Adresse
+
+#: firmware (Red, Equipo)
+Comparte el Wi-Fi: la placa es %s, reparte direcciones y da salida a internet	Teilt das WLAN: Die Platine ist %s, vergibt Adressen und bietet einen Internetzugang
+
+#: firmware (Red, Equipo)
+La placa no está en ningún Wi-Fi: no hay conexión que compartir	Die Platine ist in keinem WLAN: keine Verbindung zum Teilen
+
+#: firmware (Red, Equipo)
+Compartir el Wi-Fi	WLAN teilen
+
+#: firmware (Red, Equipo)
+Lo mismo, y además lo que enchufes sale a internet por el Wi-Fi de la placa: para un equipo sin Wi-Fi propio. Ese equipo llega también a los demás de tu red, como cualquiera que esté en tu Wi-Fi.	Dasselbe, und zusätzlich geht das angeschlossene Gerät über das WLAN der Platine ins Internet: für ein Gerät ohne eigenes WLAN. Es erreicht auch die anderen Geräte in deinem Netz, wie alles in deinem WLAN.

@@ -542,7 +542,9 @@ page.
   way out, and a restart undoes them. "Prender los servicios" starts three
   small servers on the wire's address only: TFTP (the files of the card's
   `banco` folder, read only), NTP (the board's time) and syslog (the
-  device's log, its last lines on the screen).
+  device's log, its last lines on the screen). "Compartir el Wi-Fi" is
+  "Repartir direcciones" plus a way out to the internet through the
+  board's Wi-Fi (NAT), for a device with none of its own.
 
 `docs/plan/ETHERNET.md` (Spanish) has the phases, everything measured and
 what is next.

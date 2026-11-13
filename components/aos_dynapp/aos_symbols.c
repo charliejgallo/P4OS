@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3639 simbolos.
+ * Total: 3643 simbolos.
  */
 
 #include <stddef.h>
@@ -428,6 +428,9 @@ extern int aos_hal_net_rssi;
 extern int aos_hal_net_scan;
 extern int aos_hal_net_scan_ex;
 extern int aos_hal_net_set_credentials;
+extern int aos_hal_net_share_off;
+extern int aos_hal_net_share_on;
+extern int aos_hal_net_sharing;
 extern int aos_hal_net_ssid;
 extern int aos_hal_net_state;
 extern int aos_hal_net_sync_time;
@@ -952,6 +955,7 @@ extern int aos_io_uart_set_baud;
 extern int aos_io_uart_set_format;
 extern int aos_io_uart_write;
 extern int aos_io_validate;
+extern int aos_ip4_canforward;
 extern int aos_jpeg_probe_picture;
 extern int aos_keyboard_attach;
 extern int aos_keyboard_init;
@@ -4070,6 +4074,9 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_net_scan),
     ESP_ELFSYM_EXPORT(aos_hal_net_scan_ex),
     ESP_ELFSYM_EXPORT(aos_hal_net_set_credentials),
+    ESP_ELFSYM_EXPORT(aos_hal_net_share_off),
+    ESP_ELFSYM_EXPORT(aos_hal_net_share_on),
+    ESP_ELFSYM_EXPORT(aos_hal_net_sharing),
     ESP_ELFSYM_EXPORT(aos_hal_net_ssid),
     ESP_ELFSYM_EXPORT(aos_hal_net_state),
     ESP_ELFSYM_EXPORT(aos_hal_net_sync_time),
@@ -4594,6 +4601,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_uart_set_format),
     ESP_ELFSYM_EXPORT(aos_io_uart_write),
     ESP_ELFSYM_EXPORT(aos_io_validate),
+    ESP_ELFSYM_EXPORT(aos_ip4_canforward),
     ESP_ELFSYM_EXPORT(aos_jpeg_probe_picture),
     ESP_ELFSYM_EXPORT(aos_keyboard_attach),
     ESP_ELFSYM_EXPORT(aos_keyboard_init),

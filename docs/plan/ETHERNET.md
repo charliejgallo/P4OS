@@ -447,6 +447,32 @@ sello del cliente devuelto; tres líneas de syslog llegaron y se ven en la
 pantalla. **En la placa falta todo**: los puertos reales (69, 123, 514)
 atados a la dirección del cable, y un equipo de verdad pidiendo.
 
+**Compartir la conexión** (herramienta 4 del plan, la mitad: 2026-11-12).
+"Compartir el Wi-Fi" en la tarjeta Red de banco: la placa reparte
+direcciones en el cable como antes y además le da salida a internet a lo
+que se enchufe, por su Wi-Fi, con traducción de direcciones (NAT). Para un
+equipo sin Wi-Fi propio.
+
+- En el firmware: lwIP se compila con reenvío y NAT
+  (`CONFIG_LWIP_IP_FORWARD`, `CONFIG_LWIP_IPV4_NAPT`), que antes no tenía.
+  Dejado a su suerte, lwIP pasaría paquetes entre todas las redes de la
+  placa (el Wi-Fi de la casa, el cable, el USB, la red propia). **No lo
+  hace:** antes de reenviar nada lwIP le pregunta a P4OS
+  (`aos_ip4_canforward`, enganchado con `aos_lwip_hooks.h`), que dice que
+  no salvo que se esté compartiendo y el paquete venga de la red
+  compartida o sea una respuesta para ella. Con la función apagada la placa
+  no reenvía nada, como antes.
+- `aos_hal_net_share_on()` prende el NAT en la interfaz de la red
+  compartida y hace que su servidor DHCP ofrezca los DNS que usa la placa.
+- **Lo que hay que saber:** el equipo enchufado llega a internet y también
+  a los demás equipos de la red de la casa, como cualquiera que esté en ese
+  Wi-Fi. La pantalla lo dice.
+- **Falta la otra mitad:** que la red Wi-Fi propia de la placa dé salida
+  por el cable (un punto de acceso de emergencia).
+- **Sin probar en nada:** el simulador no tiene pila de red propia, así
+  que esto sólo se puede ver en la placa: que el equipo enchufado reciba
+  dirección y DNS, que navegue, y cuánta RAM cuestan las tablas del NAT.
+
 **Lo que sigue:** el escaneo de puertos desde el detalle, el fabricante por
 la MAC (`oui.txt` de la tarjeta), recibir archivos por TFTP (respaldos), y
 que los servicios puedan seguir con Red cerrada.
