@@ -56,9 +56,6 @@ typedef struct {
     int      mode;              /* aos_eth_mode_t: a client of the network, or the bench's */
     uint32_t rx_frames;         /* frames that came in since it started */
     uint32_t restarts;          /* times the watch found it dead and started it again, since the boot */
-    uint32_t cmds;              /* commands given to the chip (one a frame, in or out) since it started */
-    uint32_t cmds_waited;       /* of those, the ones it had not taken yet at the first look */
-    uint32_t cmd_looks_max;     /* the most looks one took */
 } aos_eth_info_t;
 
 /* Reads the preference and starts it if it is on. Once, at boot. */

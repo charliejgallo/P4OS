@@ -609,9 +609,37 @@ primera mirada y cuántas miradas llevó la peor (`cmds`, `cmds_waited`,
 **Compilado, sin instalar ni probar.** El sondeo quedó en 2 ms; si con
 esto el Wi-Fi sigue peor que al principio, vuelve a 10.
 
-**Lo que sigue de acá:** instalar, leer esos contadores, y repetir las dos
-medidas; y, en la placa auxiliar, llevar la pata INT del módulo a un GPIO,
-que hoy sale a una tira suelta.
+**Instalado, y los contadores dicen que tampoco era eso:** de 3579 órdenes
+al chip, ninguna estaba sin tomar a la primera mirada (`cmds_waited` 0, la
+peor llevó una sola). El driver nunca durmió esos 10 ms. Segunda
+explicación equivocada.
+
+**Lo que queda en pie, y lo que no.**
+
+- El ping de la placa a la puerta de enlace por el cable, con el sondeo en
+  10 ms, da 10 ms clavados: eso sí es el sondeo (el ping sale 200 ms
+  después de la respuesta anterior, o sea en fase con las preguntas al
+  chip, y la respuesta espera un período entero). No dice nada de la red.
+- "Recibir por el cable es lento" **no está establecido.** Las medidas de
+  velocidad se hicieron con la Mac por Wi-Fi: todo lo que mandó pasó
+  primero por su Wi-Fi, y esa noche los pings de la Mac a la placa iban de
+  5 a 140 ms. 1,5 Mbit/s por el cable y 3,1 por el Wi-Fi pueden ser, los
+  dos, el Wi-Fi de la Mac.
+- Si 2 ms es mejor o peor que 10 **no se pudo saber**: las corridas de
+  antes y después se hicieron en condiciones distintas (el Wi-Fi también
+  dio dos o tres veces peor en las de después), y tres muestras de 150
+  pings desde la Mac dieron medianas de 24,9, 20,9 y 6,6 ms sin que el
+  último cambio hiciera nada.
+
+**Cómo queda:** el código vuelve a lo conocido, sondeo cada 10 ms y sin la
+espera propia ni sus contadores, que no servían. **Lo que hace falta para
+decidirlo bien** es una computadora por cable del otro lado (el usuario va
+a comprar un adaptador USB): ahí se miden la latencia y la velocidad del
+cable sin Wi-Fi en el medio, con 10 y con 2 ms.
+
+**Lo que sigue de acá:** esas medidas con la computadora por cable; y, en
+la placa auxiliar, llevar la pata INT del módulo a un GPIO, que hoy sale a
+una tira suelta.
 
 **Falta de esta herramienta:** que la placa sea la que manda (cliente
 iperf hacia un servidor), y medir también de la placa hacia afuera.

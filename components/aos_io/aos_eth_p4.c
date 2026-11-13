@@ -42,11 +42,10 @@
 #include "lwip/ip4_addr.h"
 #include "lwip/netif.h"
 
-/* How often the chip is asked whether something came in: there is no interrupt pin. At 10 ms a
- * ping by the wire took 10 ms whatever the network, and receiving ran at 1.5 Mbit/s: between two
- * looks a sender puts more on the wire than the chip's 16 KB hold. Each look is one SPI transfer
- * of four bytes. */
-#define POLL_MS     2
+/* How often the chip is asked whether something came in: there is no interrupt pin. 2 ms was tried
+ * on 2026-11-12 and could not be told from this with a computer on Wi-Fi at the other end; the
+ * measure to decide it by is still owed (docs/plan/ETHERNET.md). */
+#define POLL_MS     10
 #define RX_STACK    4096
 #define FRAME_MAX   1600                /* an Ethernet frame and the chip's two-byte length in front */
 #define ROUTE_PRIO  150                 /* the Wi-Fi station has 100, the USB cable 5: the wire goes first */
@@ -188,28 +187,9 @@ static esp_err_t spi_read(void *ctx, uint32_t cmd, uint32_t addr, void *data, ui
     return spi_rw(ctx, cmd, addr, NULL, data, len);
 }
 
-/* A command to the chip (send this frame, I have read that one) is a write to socket 0's command
- * register, which the chip clears when it has taken it. ESP-IDF's driver looks once, and when the
- * register is not clear yet it sleeps ten milliseconds before it looks again. With one command a
- * frame that is every frame ten milliseconds late and, coming in one by one, a hundred frames a
- * second at most: what a ping by the wire and iperf measured on the board (10 ms, 1.5 Mbit/s).
- * So the wait is done here, a look every few microseconds, and the driver finds it clear. */
-#define CMD_LOOKS 64
-
 static esp_err_t spi_write(void *ctx, uint32_t cmd, uint32_t addr, const void *data, uint32_t len)
 {
-    esp_err_t e = spi_rw(ctx, cmd, addr, data, NULL, len);
-    if (e != ESP_OK || cmd != 0x0001 || addr != 0x0C || len != 1) return e;    /* Sn_CR of socket 0, written */
-    uint32_t looks = 0;
-    uint8_t left = 1;
-    while (looks < CMD_LOOKS && spi_rw(ctx, 0x0001, 0x08, NULL, &left, 1) == ESP_OK) {
-        looks++;
-        if (!left) break;
-    }
-    E.info.cmds++;
-    if (looks > 1) E.info.cmds_waited++;
-    if (looks > E.info.cmd_looks_max) E.info.cmd_looks_max = looks;
-    return e;
+    return spi_rw(ctx, cmd, addr, data, NULL, len);
 }
 
 /* ---- every frame that comes in, before the stack sees it ---- */
@@ -461,7 +441,6 @@ static bool start(void)
     }
 
     E.info.running = true;
-    E.info.cmds = E.info.cmds_waited = E.info.cmd_looks_max = 0;
     E.lost = false;
     E.sr_ok = -1;
     E.kick = NULL;
