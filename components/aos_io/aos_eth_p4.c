@@ -42,7 +42,11 @@
 #include "lwip/ip4_addr.h"
 #include "lwip/netif.h"
 
-#define POLL_MS     10
+/* How often the chip is asked whether something came in: there is no interrupt pin. At 10 ms a
+ * ping by the wire took 10 ms whatever the network, and receiving ran at 1.5 Mbit/s: between two
+ * looks a sender puts more on the wire than the chip's 16 KB hold. Each look is one SPI transfer
+ * of four bytes. */
+#define POLL_MS     2
 #define RX_STACK    4096
 #define FRAME_MAX   1600                /* an Ethernet frame and the chip's two-byte length in front */
 #define ROUTE_PRIO  150                 /* the Wi-Fi station has 100, the USB cable 5: the wire goes first */

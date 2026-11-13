@@ -573,9 +573,19 @@ placa de red por cable):
   cierra con los números. Bajar una página del portal por el cable había
   dado de 4 a 7 Mbit/s: mandar no tiene ese problema.
 
-**Lo que sigue de acá:** probar con el sondeo más corto (2 ms) y volver a
-medir las dos cosas; y, en la placa auxiliar, llevar la pata INT del módulo
-a un GPIO, que hoy sale a una tira suelta.
+**El sondeo a 2 ms, 2026-11-12 por la noche:** cambiado (`POLL_MS`) e
+instalado; el registro dice "polled every 2 ms", el vigilante lee el chip
+como antes y la RAM interna no se movió. Medido desde la Mac, que está por
+Wi-Fi, no se distingue: 150 pings a la dirección del cable dieron mediana
+24,9 ms antes y 20,9 después, con el mismo ruido del Wi-Fi de la Mac en los
+dos. Bajar un archivo de 892 KB del portal por el cable da 0,62 a
+0,68 MB/s, lo de antes: mandar no dependía del sondeo. **Falta lo que lo
+decide:** repetir "Comparar" en la placa (el ping del cable tendría que
+bajar de 10 ms a 2 o 3) y `iperf` hacia la dirección del cable.
+
+**Lo que sigue de acá:** según den esas dos medidas, dejar los 2 ms o
+volver; y, en la placa auxiliar, llevar la pata INT del módulo a un GPIO,
+que hoy sale a una tira suelta.
 
 **Falta de esta herramienta:** que la placa sea la que manda (cliente
 iperf hacia un servidor), y medir también de la placa hacia afuera.
