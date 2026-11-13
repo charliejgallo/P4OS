@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3661 simbolos.
+ * Total: 3666 simbolos.
  */
 
 #include <stddef.h>
@@ -414,6 +414,9 @@ extern int aos_hal_net_ap_ip;
 extern int aos_hal_net_ap_pass;
 extern int aos_hal_net_ap_pass_mode;
 extern int aos_hal_net_ap_set_config;
+extern int aos_hal_net_ap_share;
+extern int aos_hal_net_ap_share_set;
+extern int aos_hal_net_ap_sharing;
 extern int aos_hal_net_ap_ssid;
 extern int aos_hal_net_ap_start;
 extern int aos_hal_net_ap_stop;
@@ -3560,6 +3563,8 @@ extern int nt_init;
 extern int nt_ip_str;
 extern int nt_keepalive;
 extern int nt_lock;
+extern int nt_maker;
+extern int nt_maker_ask;
 extern int nt_mdns;
 extern int nt_mdns_start;
 extern int nt_mdns_type_index;
@@ -4078,6 +4083,9 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_net_ap_pass),
     ESP_ELFSYM_EXPORT(aos_hal_net_ap_pass_mode),
     ESP_ELFSYM_EXPORT(aos_hal_net_ap_set_config),
+    ESP_ELFSYM_EXPORT(aos_hal_net_ap_share),
+    ESP_ELFSYM_EXPORT(aos_hal_net_ap_share_set),
+    ESP_ELFSYM_EXPORT(aos_hal_net_ap_sharing),
     ESP_ELFSYM_EXPORT(aos_hal_net_ap_ssid),
     ESP_ELFSYM_EXPORT(aos_hal_net_ap_start),
     ESP_ELFSYM_EXPORT(aos_hal_net_ap_stop),
@@ -7224,6 +7232,8 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(nt_ip_str),
     ESP_ELFSYM_EXPORT(nt_keepalive),
     ESP_ELFSYM_EXPORT(nt_lock),
+    ESP_ELFSYM_EXPORT(nt_maker),
+    ESP_ELFSYM_EXPORT(nt_maker_ask),
     ESP_ELFSYM_EXPORT(nt_mdns),
     ESP_ELFSYM_EXPORT(nt_mdns_start),
     ESP_ELFSYM_EXPORT(nt_mdns_type_index),

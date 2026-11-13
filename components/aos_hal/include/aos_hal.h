@@ -1572,6 +1572,15 @@ int aos_hal_netif_list(aos_netif_t *out, int max);
 bool aos_hal_net_share_on(void *netif);
 void aos_hal_net_share_off(void);
 bool aos_hal_net_sharing(void);
+/* The same for the board's own Wi-Fi network (aos_hal_net_ap_start): whoever
+ * joins it goes out by where the board goes out, the wire or the Wi-Fi it is
+ * joined to. A switch that is kept ("ap_share"), off until someone turns it
+ * on, and applied while the access point is up. A network shared with
+ * aos_hal_net_share_on() goes first: there is one translation at a time, and
+ * the own network gets its turn back when that one ends. */
+void aos_hal_net_ap_share_set(bool on);
+bool aos_hal_net_ap_share(void);        /* the switch */
+bool aos_hal_net_ap_sharing(void);      /* doing it right now */
 /* mDNS on the wire: quiet on a wired network that is not trusted, as
  * aos_hal_net_mdns_visible() does on a Wi-Fi that is not home. */
 void aos_hal_net_mdns_visible_wired(bool on);

@@ -99,6 +99,7 @@ typedef struct {
     nt_compare_t compare;
     nt_speed_t speed;
     nt_watch_t watch;
+    nt_maker_t maker;
 } nt_state_t;
 
 static nt_state_t *T;
@@ -147,6 +148,7 @@ const nt_find_t  *nt_find(void)  { return &T->find; }
 const nt_bench_t *nt_bench(void) { return &T->bench; }
 const nt_compare_t *nt_compare(void) { return &T->compare; }
 const nt_speed_t *nt_speed(void) { return &T->speed; }
+const nt_maker_t *nt_maker(void) { return &T->maker; }
 
 void nt_ip_str(uint32_t ip, char *out, size_t n)
 {
@@ -2270,6 +2272,73 @@ bool nt_speed_start(void)
 }
 
 void nt_speed_stop(void) { s_speed_stop = true; }
+
+/* -------------------------------------------------------------------------- */
+/* Who made a network card                                                     */
+/* -------------------------------------------------------------------------- */
+
+static bool s_maker_run;
+
+static int hex_of(int c)
+{
+    return c >= '0' && c <= '9' ? c - '0' : c >= 'a' && c <= 'f' ? c - 'a' + 10 : c >= 'A' && c <= 'F' ? c - 'A' + 10 : -1;
+}
+
+static void maker_thread(void *arg)
+{
+    (void)arg;
+    uint8_t want[3];
+    nt_lock();
+    memcpy(want, T->maker.mac, 3);
+    nt_unlock();
+    char path[128], line[200], name[sizeof T->maker.name] = "";
+    snprintf(path, sizeof path, "%s/oui.txt", aos_hal_path_scans());
+    FILE *f = fopen(path, "r");
+    bool file = f != NULL;
+    while (f && fgets(line, sizeof line, f) && app_alive()) {
+        /* "AA-BB-CC" or "AA:BB:CC" at the start of the line, and nothing else that long does */
+        if (strlen(line) < 10 || (line[2] != '-' && line[2] != ':') || line[5] != line[2]) continue;
+        int b[6] = { hex_of(line[0]), hex_of(line[1]), hex_of(line[3]), hex_of(line[4]), hex_of(line[6]), hex_of(line[7]) };
+        if (b[0] < 0 || b[1] < 0 || b[2] < 0 || b[3] < 0 || b[4] < 0 || b[5] < 0) continue;
+        if ((b[0] << 4 | b[1]) != want[0] || (b[2] << 4 | b[3]) != want[1] || (b[4] << 4 | b[5]) != want[2]) continue;
+        char *p = line + 8, *hex = strstr(p, "(hex)");
+        if (hex) p = hex + 5;
+        while (*p == ' ' || *p == '\t') p++;
+        p[strcspn(p, "\r\n")] = 0;
+        snprintf(name, sizeof name, "%.*s", (int)sizeof name - 1, p);
+        break;
+    }
+    if (f) fclose(f);
+    nt_lock();
+    if (!memcmp(T->maker.mac, want, 3)) {
+        T->maker.file = file;
+        snprintf(T->maker.name, sizeof T->maker.name, "%s", name);
+        T->maker.state = NT_DONE;
+        T->maker.seq++;
+    }
+    s_maker_run = false;
+    nt_unlock();
+}
+
+void nt_maker_ask(const uint8_t *mac)
+{
+    nt_lock();
+    bool go = !s_maker_run && (T->maker.state == NT_IDLE || memcmp(T->maker.mac, mac, 3));
+    if (go) {
+        memcpy(T->maker.mac, mac, 3);
+        T->maker.name[0] = 0;
+        T->maker.state = NT_BUSY;
+        T->maker.seq++;
+        s_maker_run = true;
+    }
+    nt_unlock();
+    if (go && !aos_hal_thread_start("nt_maker", maker_thread, NULL, STACK, PRIO)) {
+        nt_lock();
+        s_maker_run = false;
+        T->maker.state = NT_IDLE;
+        nt_unlock();
+    }
+}
 
 /* -------------------------------------------------------------------------- */
 /* The lookout                                                                 */

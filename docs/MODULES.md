@@ -544,7 +544,17 @@ page.
   `banco` folder, read only), NTP (the board's time) and syslog (the
   device's log, its last lines on the screen). "Compartir el Wi-Fi" is
   "Repartir direcciones" plus a way out to the internet through the
-  board's Wi-Fi (NAT), for a device with none of its own.
+  board's Wi-Fi (NAT), for a device with none of its own. The device's
+  page also says who made its network card, looked up by the MAC in the
+  IEEE's register when it is on the card as `/redes/oui.txt` (the file the
+  portal's sweeps use), and scans its ports 1 to 1024, as Hosts does.
+- **The board's own Wi-Fi network going out by the wire** (not in a
+  release yet): Settings, Redes, Wi-Fi, "Compartir la salida" under the
+  access point. Whoever joins the board's network goes out by where the
+  board does, the wire or the house's Wi-Fi, through the same NAT
+  (`aos_hal_net_ap_share_set()`). Off until it is turned on at the board,
+  and kept. One translation at a time: while "Compartir el Wi-Fi" is on,
+  the own network waits.
 - **Looking at the traffic** (not in a release yet): Red, Cable, "Capturar
   a la tarjeta" keeps every frame that reaches the port in a pcap file in
   the card's `/redes` folder, for Wireshark, and says what a network

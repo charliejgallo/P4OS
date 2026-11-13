@@ -471,15 +471,57 @@ equipo sin Wi-Fi propio.
 - **Lo que hay que saber:** el equipo enchufado llega a internet y también
   a los demás equipos de la red de la casa, como cualquiera que esté en ese
   Wi-Fi. La pantalla lo dice.
-- **Falta la otra mitad:** que la red Wi-Fi propia de la placa dé salida
-  por el cable (un punto de acceso de emergencia).
 - **Sin probar en nada:** el simulador no tiene pila de red propia, así
   que esto sólo se puede ver en la placa: que el equipo enchufado reciba
   dirección y DNS, que navegue, y cuánta RAM cuestan las tablas del NAT.
 
-**Lo que sigue:** el escaneo de puertos desde el detalle, el fabricante por
-la MAC (`oui.txt` de la tarjeta), recibir archivos por TFTP (respaldos), y
-que los servicios puedan seguir con Red cerrada.
+**La otra mitad: la red propia sale por el cable** (2026-11-12). Ajustes,
+Redes, Wi-Fi, "Compartir la salida", debajo del punto de acceso. Los que se
+unen a la red Wi-Fi de la placa salen por donde sale la placa: el cable, o
+el Wi-Fi de la casa si está conectada. Un punto de acceso de emergencia
+donde hay un cable y no hay Wi-Fi.
+
+- Es el mismo NAT y la misma regla de reenvío, con la red propia como la
+  red compartida (`aos_hal_net_ap_share_set()`, preferencia `ap_share`).
+  Apagado hasta que alguien lo prende en la placa; no está en el portal; se
+  conserva al reiniciar, como el punto de acceso.
+- **Una traducción a la vez.** `aos_net_p4.c` decide a quién se comparte
+  (`share_apply`): primero la red que pidió alguien ("Compartir el Wi-Fi"
+  del banco), si no la red propia cuando está levantada y con el
+  interruptor puesto. Cuando lo del banco termina, la red propia recupera
+  su turno sola. Ajustes dice cuál de las tres cosas pasa: comparte, espera
+  al banco, o la placa no tiene por dónde salir.
+- El servidor DHCP de la red compartida ofrece el DNS de la salida, y se le
+  vuelve a decir cuando la salida aparece después (se enchufó el cable con
+  la red propia ya prendida). Sólo entonces: decírselo lo reinicia.
+- **Lo que hay que saber:** con esto prendido, la contraseña de la red
+  propia es lo único entre un extraño y las redes en las que está la placa.
+  La pantalla lo dice, y `docs/SECURITY.md` también.
+- **Sin probar en la placa:** nada de esto corrió en la placa todavía. En
+  el simulador sólo se ve el interruptor y lo que dice la pantalla. Falta:
+  que un teléfono unido a la red propia reciba DNS y navegue por el cable,
+  que siga andando al sacar y poner el cable, y el turno con "Compartir el
+  Wi-Fi".
+
+**El fabricante y los puertos, en el detalle de un equipo** (2026-11-12).
+
+- **Fabricante:** los tres primeros bytes de la MAC, buscados en el
+  registro de la IEEE si está en la tarjeta como `/redes/oui.txt`, el mismo
+  archivo que usan los barridos del portal (el `oui.txt` de la IEEE tal
+  cual, o líneas `AA:BB:CC<tab>Nombre`). Son megas de texto: lo lee un hilo
+  aparte (`nt_maker_ask`), una vez por prefijo. Sin el archivo, la fila
+  dice dónde ponerlo; una MAC privada (elegida por el equipo) no se busca.
+- **Puertos 1-1024:** el mismo escaneo de Hosts (`nt_ports_start`), sobre
+  la dirección que dijo el equipo. La placa tiene que poder llegarle: en la
+  misma red, o después de "Ponerme en su red".
+- Probado en el simulador con el equipo inventado (`P4_SIM_ETH=device`,
+  que ahora tiene una MAC del rango reservado para documentación): con el
+  archivo dice el fabricante, sin el archivo dice dónde ponerlo. El botón
+  de puertos no se apretó: escanearía una dirección de verdad. **En la
+  placa falta todo.**
+
+**Lo que sigue:** recibir archivos por TFTP (respaldos), y que los
+servicios puedan seguir con Red cerrada.
 
 ## Mirar el tráfico (Red, pestaña Cable, sección Tráfico)
 

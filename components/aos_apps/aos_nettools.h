@@ -309,6 +309,23 @@ void nt_watch_remove(int i);
  * Wake-on-LAN switched on, and be on a network the board is on. */
 bool nt_wake(int i);
 
+/* ---- who made a network card: the IEEE's register, from the card ---- */
+
+typedef struct {
+    int      state;             /* NT_BUSY while the file is read, NT_DONE with the answer */
+    uint8_t  mac[3];            /* the prefix asked for */
+    bool     file;              /* the register is on the card */
+    char     name[48];          /* the maker; "" not in the register */
+    uint32_t seq;
+} nt_maker_t;
+
+/* Looks a MAC's first three bytes up in /redes/oui.txt, the file the
+ * portal's sweeps use too: the IEEE's own oui.txt ("AA-BB-CC   (hex)   Name")
+ * or a line "AA:BB:CC<tab>Name" each. Megabytes of text, read in a thread of
+ * its own; asking again for the prefix already known reads nothing. */
+void nt_maker_ask(const uint8_t *mac);
+const nt_maker_t *nt_maker(void);       /* under nt_lock() */
+
 /* ---- mDNS ---- */
 
 #define NT_MAX_SVC 64

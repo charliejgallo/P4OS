@@ -780,6 +780,15 @@ __attribute__((weak)) void aos_hal_net_share_off(void)
 __attribute__((weak)) bool aos_hal_net_sharing(void)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) void aos_hal_net_ap_share_set(bool on)
+{ }
+
+__attribute__((weak)) bool aos_hal_net_ap_share(void)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
+__attribute__((weak)) bool aos_hal_net_ap_sharing(void)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) void aos_hal_net_mdns_visible_wired(bool on)
 { }
 

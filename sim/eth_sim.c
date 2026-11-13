@@ -217,7 +217,8 @@ static void stations_talk(uint32_t now)
     static uint8_t f[700];
     size_t n;
     if (e && !strcmp(e, "device")) {
-        static const uint8_t CAM[6] = { 0x02, 0xCA, 0x4D, 0x7C, 0x2A, 0x11 }, NONE[4] = { 0, 0, 0, 0 }, BCAST[4] = { 255, 255, 255, 255 };
+        /* a MAC of the range kept for documentation (RFC 7042): not a real maker's, and not a private one */
+        static const uint8_t CAM[6] = { 0x00, 0x00, 0x5E, 0x00, 0x53, 0x11 }, NONE[4] = { 0, 0, 0, 0 }, BCAST[4] = { 255, 255, 255, 255 };
         static const uint8_t IP[4] = { 192, 168, 1, 64 }, WSD[4] = { 239, 255, 255, 250 }, WSD_MAC[6] = { 0x01, 0x00, 0x5E, 0x7F, 0xFF, 0xFA };
         if (t >= 1500 && !(s_said & 1)) {       /* a DHCP discover: its name, what it runs, the address it would like */
             s_said |= 1;

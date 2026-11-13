@@ -239,6 +239,9 @@ static void start_services(void)
 }
 
 static esp_netif_t *s_ap_netif;
+static volatile bool s_ap_ready;        /* the access point's interface is up, its DHCP server too */
+static void *s_share_mx;                /* keeps the decisions of who is shared with apart (share_apply) */
+static void share_apply(void);
 
 static void on_event(void *arg, esp_event_base_t base, int32_t id, void *data)
 {
@@ -286,6 +289,7 @@ static void on_event(void *arg, esp_event_base_t base, int32_t id, void *data)
         xEventGroupSetBits(s_ev, EV_GOT_IP);
         ESP_LOGI(TAG, "%s: %s", s_ssid, s_ip);
         start_services();
+        share_apply();              /* a way out, and its name server, for whoever the board shares with */
     }
 }
 
@@ -366,6 +370,7 @@ static void net_task(void *arg)
 void aos_net_p4_start(void)
 {
     s_ev = xEventGroupCreate();
+    s_share_mx = aos_hal_mutex_create();
     const esp_timer_create_args_t ta = { .callback = retry_cb, .name = "wifi-retry" };
     esp_timer_create(&ta, &s_retry);
     xTaskCreateWithCaps(net_task, "net-up", 6144, NULL, 5, NULL, MALLOC_CAP_SPIRAM);   /* no flash in it */
@@ -417,7 +422,9 @@ static esp_err_t netif_walk(void *ctx)
 /* ---- sharing the way out ---- */
 
 static struct netif *volatile s_share_inner;   /* the shared network's interface; NULL: nothing is forwarded */
-static esp_netif_t *s_share_netif;
+static esp_netif_t *s_share_netif;              /* the one shared right now */
+static esp_netif_t *s_share_asked;              /* the one a caller asked for (aos_hal_net_share_on) */
+static uint32_t s_share_dns;                    /* the name server its DHCP server was last told to offer */
 
 /* lwIP asks before forwarding a packet (aos_lwip_hooks.h), in its own thread.
  * Only two kinds pass, and only while sharing: what comes in from the shared
@@ -436,36 +443,26 @@ int aos_ip4_canforward(struct pbuf *p, unsigned int dest)
     return 0;
 }
 
-bool aos_hal_net_share_on(void *netif)
+/* The shared network's DHCP server hands out the name server the board itself uses: without it a
+ * device given an address and a gateway still resolves nothing. Told again when the way out
+ * changes (the cable went in after the sharing started), and only then: telling it restarts the
+ * server. */
+static void share_dns(esp_netif_t *n)
 {
-    esp_netif_t *n = netif;
-    if (!n) return false;
-    if (s_share_netif) aos_hal_net_share_off();
-    /* its DHCP server hands out the name servers the board itself uses: without them a device
-     * given an address and a gateway still resolves nothing */
     esp_netif_dns_info_t dns = { 0 };
     esp_netif_t *out = esp_netif_get_default_netif();
     if (out && out != n) esp_netif_get_dns_info(out, ESP_NETIF_DNS_MAIN, &dns);
-    if (dns.ip.u_addr.ip4.addr) {
-        uint8_t offer = 2;                      /* OFFER_DNS, as the IDF's own router example sets it */
-        esp_netif_dhcps_stop(n);
-        esp_netif_dhcps_option(n, ESP_NETIF_OP_SET, ESP_NETIF_DOMAIN_NAME_SERVER, &offer, sizeof offer);
-        esp_netif_set_dns_info(n, ESP_NETIF_DNS_MAIN, &dns);
-        esp_netif_dhcps_start(n);
-    }
-    esp_err_t e = esp_netif_napt_enable(n);
-    if (e != ESP_OK) {
-        ESP_LOGW(TAG, "sharing: the address translation did not start (%s)", esp_err_to_name(e));
-        return false;
-    }
-    s_share_netif = n;
-    s_share_inner = esp_netif_get_netif_impl(n);
-    ESP_LOGI(TAG, "sharing the way out with the network on %s%s", esp_netif_get_ifkey(n),
-             dns.ip.u_addr.ip4.addr ? "" : " (no name server to offer: the board has none)");
-    return true;
+    uint32_t a = dns.ip.u_addr.ip4.addr;
+    if (!a || a == s_share_dns) return;
+    uint8_t offer = 2;                          /* OFFER_DNS, as the IDF's own router example sets it */
+    esp_netif_dhcps_stop(n);
+    esp_netif_dhcps_option(n, ESP_NETIF_OP_SET, ESP_NETIF_DOMAIN_NAME_SERVER, &offer, sizeof offer);
+    esp_netif_set_dns_info(n, ESP_NETIF_DNS_MAIN, &dns);
+    esp_netif_dhcps_start(n);
+    s_share_dns = a;
 }
 
-void aos_hal_net_share_off(void)
+static void share_stop(void)
 {
     if (!s_share_netif) return;
     s_share_inner = NULL;                       /* first: from here nothing is forwarded */
@@ -474,7 +471,78 @@ void aos_hal_net_share_off(void)
     ESP_LOGI(TAG, "sharing: off");
 }
 
+static bool share_start(esp_netif_t *n)
+{
+    s_share_dns = 0;
+    share_dns(n);
+    esp_err_t e = esp_netif_napt_enable(n);
+    if (e != ESP_OK) {
+        ESP_LOGW(TAG, "sharing: the address translation did not start (%s)", esp_err_to_name(e));
+        return false;
+    }
+    s_share_netif = n;
+    s_share_inner = esp_netif_get_netif_impl(n);
+    ESP_LOGI(TAG, "sharing the way out with the network on %s%s", esp_netif_get_ifkey(n),
+             s_share_dns ? "" : " (no name server to offer yet: the board has none)");
+    return true;
+}
+
+static bool ap_share_wanted(void)
+{
+    int32_t v = 0;
+    aos_hal_pref_get_i32("ap_share", &v);
+    return v != 0;
+}
+
+/* Who is shared with, decided again: the network a caller asked for (the bench's, on the wire)
+ * or else the board's own Wi-Fi network, when it is up and its switch is on. One at a time: the
+ * translation and the rule above know one inner network. Called whenever any of that changes,
+ * and when the way out gets its address, for the name server. */
+static void share_apply(void)
+{
+    if (s_share_mx) aos_hal_mutex_lock(s_share_mx);
+    esp_netif_t *want = s_share_asked ? s_share_asked : s_ap_ready && ap_share_wanted() ? s_ap_netif : NULL;
+    if (want != s_share_netif) {
+        share_stop();
+        if (want) share_start(want);
+    } else if (want) {
+        share_dns(want);
+    }
+    if (s_share_mx) aos_hal_mutex_unlock(s_share_mx);
+}
+
+bool aos_hal_net_share_on(void *netif)
+{
+    if (!netif) return false;
+    s_share_asked = netif;
+    share_apply();
+    if (s_share_netif == netif) return true;
+    s_share_asked = NULL;                       /* it did not start: the own network's turn again */
+    share_apply();
+    return false;
+}
+
+void aos_hal_net_share_off(void)
+{
+    if (!s_share_asked) return;
+    /* its interface may be about to go: stop before anything else looks at it */
+    if (s_share_mx) aos_hal_mutex_lock(s_share_mx);
+    if (s_share_netif == s_share_asked) share_stop();
+    s_share_asked = NULL;
+    if (s_share_mx) aos_hal_mutex_unlock(s_share_mx);
+    share_apply();
+}
+
 bool aos_hal_net_sharing(void) { return s_share_inner != NULL; }
+
+void aos_hal_net_ap_share_set(bool on)
+{
+    aos_hal_pref_set_i32("ap_share", on ? 1 : 0);
+    share_apply();
+}
+
+bool aos_hal_net_ap_share(void) { return ap_share_wanted(); }
+bool aos_hal_net_ap_sharing(void) { return s_share_inner != NULL && s_share_netif == s_ap_netif; }
 
 int aos_hal_netif_list(aos_netif_t *out, int max)
 {
@@ -721,6 +789,7 @@ void aos_hal_net_wired_set(bool up, const char *ip)
     if (up && !was) {
         ESP_LOGI(TAG, "the wire has %s: the network is there, Wi-Fi or not", s_wired_ip);
         start_services();           /* the time and the name, as when the Wi-Fi gets its address */
+        share_apply();              /* and a way out for the own network, when it shares */
     } else if (!up && was) {
         ESP_LOGI(TAG, "the wire is gone: the network is the Wi-Fi's again (%s)", s_state == AOS_NET_CONNECTED ? s_ip : "not connected");
     }
@@ -862,6 +931,11 @@ static void ap_task(void *arg)
             esp_timer_stop(s_retry);            /* see on_event: no looking while it is up */
             mdns_up();
             ESP_LOGI(TAG, "access point up: %s on channel %d -> http://192.168.4.1/", s_ap_ssid, ap.ap.channel);
+            /* its interface comes up a moment later, on the radio's event: sharing restarts its
+             * DHCP server, which has to be running first */
+            for (int i = 0; i < 40 && !esp_netif_is_netif_up(s_ap_netif); i++) vTaskDelay(pdMS_TO_TICKS(50));
+            s_ap_ready = true;
+            share_apply();
         } else {
             ESP_LOGE(TAG, "access point: %s (does the C6's firmware do SoftAP?)", esp_err_to_name(e));
             esp_wifi_set_mode(WIFI_MODE_STA);
@@ -869,6 +943,8 @@ static void ap_task(void *arg)
     } else {
         s_ap_on = false;
         s_ap_clients = 0;
+        s_ap_ready = false;
+        share_apply();              /* before its interface stops */
         esp_wifi_set_mode(WIFI_MODE_STA);
         ESP_LOGI(TAG, "access point down");
         if (s_want && s_state != AOS_NET_CONNECTED) { s_failures = 0; connect_now(); }

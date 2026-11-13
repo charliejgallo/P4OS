@@ -63,6 +63,16 @@ depends on where it came in (`components/aos_ui/aos_access.c`):
   for this), and a hook inside the network stack refuses every packet
   that is not part of that sharing (`aos_ip4_canforward`). A restart
   switches it off.
+- **The same, the other way round, for the board's own network.**
+  Settings, Redes, Wi-Fi, "Compartir la salida" lets whoever joins the
+  board's access point go out by where the board goes out, the wire or the
+  house's Wi-Fi. It is off until someone turns it on at the board, it is
+  not in the portal, and it stays on across restarts, as the access point
+  does. With it on, the access point's password is all that stands
+  between a stranger and the networks the board is on: they reach those
+  networks' devices as anything plugged in there does. The portal's own
+  rules do not change with it: a request from the access point is still
+  judged as one from the access point.
 - **Each connection is judged by the interface it came in by.** With the
   Wi-Fi on a trusted network and the wire on another, a request that comes
   in by the wire is the wire's, whatever the Wi-Fi is on, and the other way

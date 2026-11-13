@@ -10548,3 +10548,24 @@ Los mira cada diez segundos con un ping; con equipo:puerto, prueba ese puerto. P
 
 #: firmware (Red, Vigía)
 Simulador: no se mira ni se despierta a nadie; los estados son de ejemplo.	Simulator: Niemand wird geprüft oder geweckt; die Zustände sind Beispiele.
+
+#: firmware (Red, Equipo)
+no está en el registro	nicht im Register
+
+#: firmware (Red, Equipo)
+para verlo, poné oui.txt (el registro de la IEEE) en /redes de la tarjeta	dafür oui.txt (das Register der IEEE) in /redes auf der Karte ablegen
+
+#: firmware (Red, Equipo)
+Qué puertos tiene abiertos. La placa tiene que poder llegarle: en la misma red, o después de ponerse en la suya.	Welche Ports es offen hat. Das Board muss es erreichen können: im selben Netz, oder nachdem es sich in dessen Netz gestellt hat.
+
+#: firmware (Ajustes, Red propia)
+Compartir la salida	Internetzugang teilen
+
+#: firmware (Ajustes, Red propia)
+Compartir la salida: ahora no, porque el cable está compartiendo el Wi-Fi (Red, Cable). Una cosa a la vez.	Internetzugang teilen: jetzt nicht, weil das Kabel gerade das WLAN teilt (Netz, Kabel). Eins nach dem anderen.
+
+#: firmware (Ajustes, Red propia)
+Compartir la salida: los que se unen a esta red salen por donde sale la placa (el cable, o el Wi-Fi de casa) y llegan a los equipos de esa red. Dale la contraseña sólo a quien dejarías enchufarse ahí.	Internetzugang teilen: Wer diesem Netz beitritt, geht dort hinaus, wo das Board hinausgeht (Kabel oder Heim-WLAN), und erreicht die Geräte in jenem Netz. Das Passwort nur an Leute geben, die sich dort auch einstecken dürften.
+
+#: firmware (Ajustes, Red propia)
+Compartir la salida: la placa no tiene por dónde salir ahora. Enchufá el cable (Redes, Ethernet): con esta red prendida la placa no busca el Wi-Fi de casa.	Internetzugang teilen: Das Board hat gerade keinen Weg nach draußen. Kabel einstecken (Netze, Ethernet): Solange dieses Netz an ist, sucht das Board das Heim-WLAN nicht.

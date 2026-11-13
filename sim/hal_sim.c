@@ -2857,6 +2857,15 @@ bool aos_hal_net_ap_active(void)
 }
 const char *aos_hal_net_ap_ip(void)     { return "192.168.4.1"; }
 int aos_hal_net_ap_clients(void) { return s_net_ap ? 1 : 0; }
+/* The own network sharing the way out: the switch is kept as on the board, and nothing is forwarded. */
+void aos_hal_net_ap_share_set(bool on) { aos_hal_pref_set_i32("ap_share", on ? 1 : 0); }
+bool aos_hal_net_ap_share(void)
+{
+    int32_t v = 0;
+    aos_hal_pref_get_i32("ap_share", &v);
+    return v != 0;
+}
+bool aos_hal_net_ap_sharing(void) { return s_net_ap && aos_hal_net_ap_share(); }
 const char *aos_hal_net_coprocessor_fw(void) { return "sim"; }
 
 const char *aos_hal_net_ap_ssid(void)

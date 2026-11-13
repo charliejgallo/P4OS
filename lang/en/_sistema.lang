@@ -10548,3 +10548,24 @@ Los mira cada diez segundos con un ping; con equipo:puerto, prueba ese puerto. P
 
 #: firmware (Red, Vigía)
 Simulador: no se mira ni se despierta a nadie; los estados son de ejemplo.	Simulator: nobody is looked at or woken; the states are examples.
+
+#: firmware (Red, Equipo)
+no está en el registro	not in the register
+
+#: firmware (Red, Equipo)
+para verlo, poné oui.txt (el registro de la IEEE) en /redes de la tarjeta	to see it, put oui.txt (the IEEE's register) in /redes on the card
+
+#: firmware (Red, Equipo)
+Qué puertos tiene abiertos. La placa tiene que poder llegarle: en la misma red, o después de ponerse en la suya.	Which ports it has open. The board has to be able to reach it: on the same network, or after joining its network.
+
+#: firmware (Ajustes, Red propia)
+Compartir la salida	Share the way out
+
+#: firmware (Ajustes, Red propia)
+Compartir la salida: ahora no, porque el cable está compartiendo el Wi-Fi (Red, Cable). Una cosa a la vez.	Share the way out: not now, because the wire is sharing the Wi-Fi (Network, Cable). One thing at a time.
+
+#: firmware (Ajustes, Red propia)
+Compartir la salida: los que se unen a esta red salen por donde sale la placa (el cable, o el Wi-Fi de casa) y llegan a los equipos de esa red. Dale la contraseña sólo a quien dejarías enchufarse ahí.	Share the way out: whoever joins this network goes out by where the board does (the wire, or the home Wi-Fi) and reaches the devices on that network. Give the password only to someone you would let plug in there.
+
+#: firmware (Ajustes, Red propia)
+Compartir la salida: la placa no tiene por dónde salir ahora. Enchufá el cable (Redes, Ethernet): con esta red prendida la placa no busca el Wi-Fi de casa.	Share the way out: the board has no way out right now. Plug the cable in (Networks, Ethernet): with this network on, the board does not look for the home Wi-Fi.

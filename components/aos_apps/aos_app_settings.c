@@ -1050,7 +1050,9 @@ static int ap_key(void)
 {
     int32_t want = 0;
     aos_hal_pref_get_i32("ap_on", &want);
-    return (aos_hal_net_ap_active() ? 2 : 0) | (want ? 1 : 0) | aos_hal_net_ap_clients() << 2;
+    /* and whether its clients have a way out right now: the page's last note says so */
+    return (aos_hal_net_ap_active() ? 2 : 0) | (want ? 1 : 0) | (aos_hal_net_ap_sharing() ? 4 : 0)
+           | (aos_hal_net_state() == AOS_NET_CONNECTED ? 8 : 0) | aos_hal_net_ap_clients() << 4;
 }
 
 static void ap_sw_cb(lv_event_t *e)
@@ -1060,6 +1062,13 @@ static void ap_sw_cb(lv_event_t *e)
     } else {
         aos_hal_net_ap_stop();
     }
+}
+
+/* Whoever joins the own network goes out by where the board does. It opens the networks the
+ * board is on to them, so it is off until someone turns it on here, and only here. */
+static void ap_share_cb(lv_event_t *e)
+{
+    aos_hal_net_ap_share_set(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
 }
 
 static void ap_newpass_cb(lv_event_t *e)
@@ -1102,6 +1111,7 @@ static void build_ap(lv_obj_t *p)
     row(g, NULL, 0, _("Portal"), v, false, NULL, NULL);
     snprintf(v, sizeof v, "%d", aos_hal_net_ap_clients());
     row(g, NULL, 0, _("Conectados"), v, false, NULL, NULL);
+    row_switch(g, AOS_SYM_LAN_CONNECT, 0x30D158, _("Compartir la salida"), aos_hal_net_ap_share(), ap_share_cb);
     action_row(g, _("Cambiar la contraseña"), AOS_C_ACCENT, ap_newpass_cb);
     char es[70], ep[130], join[220], url[40];
     qr_escape(es, sizeof es, ssid);
@@ -1111,7 +1121,14 @@ static void build_ap(lv_obj_t *p)
     lv_obj_t *box = qr_strip(p);
     qr_box(box, join, _("1. Unite a la red de la placa con la cámara del teléfono."));
     qr_box(box, url, _("2. Después abrí el portal."));
-    note(p, _("Mientras está prendida, la placa deja de buscar la red de casa (si ya estaba conectada, sigue). El teléfono puede avisar que esta red no tiene internet: es así, quedate conectado igual."));
+    if (!aos_hal_net_ap_share())
+        note(p, _("Mientras está prendida, la placa deja de buscar la red de casa (si ya estaba conectada, sigue). El teléfono puede avisar que esta red no tiene internet: es así, quedate conectado igual."));
+    else if (!aos_hal_net_ap_sharing())
+        note(p, _("Compartir la salida: ahora no, porque el cable está compartiendo el Wi-Fi (Red, Cable). Una cosa a la vez."));
+    else if (aos_hal_net_state() == AOS_NET_CONNECTED)
+        note(p, _("Compartir la salida: los que se unen a esta red salen por donde sale la placa (el cable, o el Wi-Fi de casa) y llegan a los equipos de esa red. Dale la contraseña sólo a quien dejarías enchufarse ahí."));
+    else
+        note(p, _("Compartir la salida: la placa no tiene por dónde salir ahora. Enchufá el cable (Redes, Ethernet): con esta red prendida la placa no busca el Wi-Fi de casa."));
 }
 
 static void build_wifi(lv_obj_t *p)

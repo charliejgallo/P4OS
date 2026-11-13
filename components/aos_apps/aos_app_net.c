@@ -187,6 +187,9 @@ typedef struct {
     uint32_t f_tick, f_seen, f_sig;
     /* a station's detail */
     lv_obj_t *fd_title, *fd_kv[8], *fd_said, *fd_join, *fd_join_cap;
+    lv_obj_t *fd_pbtn, *fd_pbar, *fd_pstate, *fd_plist;
+    uint32_t fd_pseen;
+    int fd_pn;
     int32_t fd_w;
     char fd_ip[16], fd_name[40];
     /* Vigía */
@@ -2457,6 +2460,62 @@ static void fd_said_build(const aos_eth_station_t *st)
     }
 }
 
+static uint32_t ip_of(const char *t)
+{
+    unsigned a, b, c, d;
+    return sscanf(t, "%u.%u.%u.%u", &a, &b, &c, &d) == 4 && a < 256 && b < 256 && c < 256 && d < 256 ? a << 24 | b << 16 | c << 8 | d : 0;
+}
+
+static void fd_ports_cb(lv_event_t *e)
+{
+    uint32_t ip = ip_of(U.pg.fd_ip);
+    if (!ip) { aos_ui_toast(_("Todavía no se sabe su dirección"), 2500); return; }
+    nt_lock();
+    const nt_ports_t *r = nt_ports();
+    bool busy = r->state == NT_BUSY, mine = r->ip == ip;
+    nt_unlock();
+    if (busy && mine) nt_ports_stop();
+    else if (!busy) nt_ports_start(ip);
+    else aos_ui_toast(_("Ya hay otro escaneo de puertos en marcha"), 2000);
+    U.pg.fd_pseen = 0xFFFFFFFFu;
+}
+
+/* Its open ports, as the Hosts tab shows them: the same scan, of the address this station said. */
+static void fd_ports_refresh(void)
+{
+    page_t *g = &U.pg;
+    uint32_t ip = ip_of(g->fd_ip);
+    nt_ports_t r;
+    nt_lock();
+    const nt_ports_t *s = nt_ports();
+    if (s->seq == g->fd_pseen) { nt_unlock(); return; }
+    r = *s;
+    nt_unlock();
+    g->fd_pseen = r.seq;
+    bool mine = ip && r.ip == ip, busy = mine && r.state == NT_BUSY;
+    pill_set(g->fd_pbtn, busy ? AOS_SYM_STOP : AOS_SYM_MAGNIFY, busy ? _("Detener") : _("Puertos 1-1024"), busy ? AOS_C_RED : C_NET_D);
+    char t[160], a[24];
+    if (!mine || (r.state == NT_IDLE && !r.done)) {
+        say(g->fd_pstate, _("Qué puertos tiene abiertos. La placa tiene que poder llegarle: en la misma red, o después de ponerse en la suya."), AOS_C_DIM);
+        bar_set(g->fd_pbar, 0, 1);
+    } else {
+        fmt_elapsed(a, sizeof a, r.elapsed_ms);
+        if (busy) snprintf(t, sizeof t, _("%d/%d · %d abiertos · %s"), r.done, r.total, r.nopen, a);
+        else if (r.state == NT_FAILED) snprintf(t, sizeof t, "%s", aos_tr(r.err));
+        else if (r.state == NT_IDLE) snprintf(t, sizeof t, _("Detenido en %d/%d · %d abiertos"), r.done, r.total, r.nopen);
+        else snprintf(t, sizeof t, _("%d abiertos de %d, en %s%s"), r.nopen, r.total, a,
+                      !r.nopen && !r.closed ? _(" · no contestó nada: puede tener un firewall") : "");
+        say(g->fd_pstate, t, AOS_C_TEXT);
+        bar_set(g->fd_pbar, r.done, r.total);
+    }
+    int n = mine ? r.nopen : 0;
+    if (n != g->fd_pn) {
+        g->fd_pn = n;
+        lv_obj_clean(g->fd_plist);
+        for (int i = 0; i < n; i++) port_tag(g->fd_plist, r.open[i], true);
+    }
+}
+
 static void find_detail_refresh(bool now)
 {
     page_t *g = &U.pg;
@@ -2489,6 +2548,20 @@ static void find_detail_refresh(bool now)
     fmt_span(a, sizeof a, q->since_s);
     snprintf(t, sizeof t, _("%u tramas en %s"), (unsigned)q->frames, a);
     say(g->fd_kv[5], t, AOS_C_TEXT);
+    /* who made its network card: a private MAC was made up by the device, and is in no register */
+    if (q->mac[0] & 2) say(g->fd_kv[6], "-", AOS_C_DIM);
+    else {
+        nt_maker_ask(q->mac);
+        nt_lock();
+        nt_maker_t mk = *nt_maker();
+        nt_unlock();
+        bool mine = !memcmp(mk.mac, q->mac, 3);
+        if (!mine || mk.state == NT_BUSY) say(g->fd_kv[6], _("buscando…"), AOS_C_DIM);
+        else if (mk.name[0]) say(g->fd_kv[6], mk.name, AOS_C_TEXT);
+        else if (mk.file) say(g->fd_kv[6], _("no está en el registro"), AOS_C_DIM);
+        else say(g->fd_kv[6], _("para verlo, poné oui.txt (el registro de la IEEE) en /redes de la tarjeta"), AOS_C_DIM);
+    }
+    fd_ports_refresh();
 
     uint32_t sig = 2166136261u;
     const uint8_t *p = (const uint8_t *)q;
@@ -2528,8 +2601,9 @@ static void build_find_detail(void)
     aos_make_decorative(aos_label(back, aos_tr(TAB_NAME[TAB_FIND]), aos_font_body, C_NET));
     lv_obj_t *c = vcard(left, lw, 20, 10);
     g->fd_title = aos_label(c, "", aos_font_large, AOS_C_TEXT);
-    static const char *const KEYS[6] = { "MAC", N_("Nombre"), N_("Dice ser"), N_("Contestó al ARP"), N_("Se lo oyó"), N_("En total") };
-    for (int k = 0; k < 6; k++) g->fd_kv[k] = kv(c, lw - 40, aos_tr(KEYS[k]));
+    static const char *const KEYS[7] = { "MAC", N_("Nombre"), N_("Dice ser"), N_("Contestó al ARP"), N_("Se lo oyó"), N_("En total"),
+                                         N_("Fabricante") };
+    for (int k = 0; k < 7; k++) g->fd_kv[k] = kv(c, lw - 40, aos_tr(KEYS[k]));
     section(left, _("ACCIONES"));
     c = vcard(left, lw, 20, 12);
     lv_obj_t *br = row(c, lw - 40, 80, 12);
@@ -2537,7 +2611,13 @@ static void build_find_detail(void)
     g->fd_join = pill(br, AOS_SYM_LAN_CONNECT, _("Ponerme en su red"), C_NET_D, fd_join_cb, NULL);
     br = row(c, lw - 40, 80, 12);
     pill(br, AOS_SYM_EYE_OUTLINE, _("Vigilar"), C_NET_D, fd_watch_cb, NULL);
+    g->fd_pbtn = pill(br, AOS_SYM_MAGNIFY, _("Puertos 1-1024"), C_NET_D, fd_ports_cb, NULL);
     g->fd_join_cap = caption(c, "", lw - 40);
+    g->fd_pbar = progress(c, lw - 40);
+    g->fd_pstate = caption(c, "", lw - 40);
+    g->fd_plist = wrap_row(c, lw - 40, 8);
+    g->fd_pseen = 0xFFFFFFFFu;
+    g->fd_pn = -1;
     section(right, _("LO QUE DIJO"));
     c = vcard(right, rw, 20, 8);
     g->fd_said = box(c, rw - 40, LV_SIZE_CONTENT);
