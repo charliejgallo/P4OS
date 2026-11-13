@@ -33,6 +33,9 @@ the microSD, loaded as shared objects:
   two ports at once: pendrives, keyboards, mice, gamepads, webcams, sound
   cards, MIDI and serial devices.
 - **A Wi-Fi network of its own,** joined with a QR code.
+- **Ethernet, for a board that has the module:** a W5500 on the header,
+  and tools for a wired bench: a tester for a network port, finding a
+  device of unknown address, a capture for Wireshark.
 - **The workshop:** I2C, SPI, 1-Wire and GPIO on the 40-pin header, with
   112 kinds of sensor read by themselves (temperature, pressure, air
   quality, light, motion, current, distance...), addressable LED strips on
@@ -186,6 +189,15 @@ the 1200-baud touch.</em></p>
 32U4, and its old U-Boot (no sf, no crc32, a big-endian MIPS) read whole by
 the Programador, the same MD5 its Linux gives.</em></p>
 
+<p align="center">
+  <img src="docs/img/bench-w5500-cable.jpg" width="300" alt="The board with Network on its Cable tab: 100 Mbit/s full duplex, a lease of two hours, the gateway, a name and the internet answering in green, and the W5500 module wired to the header with a network cable in it. The network's addresses are blurred">
+  <img src="docs/img/bench-w5500.svg" width="420" alt="Wiring diagram: a W5500 Lite module on the header's spi.a, SCK, MOSI, MISO and CS on GPIO52, 50, 51 and 49, with 3V3 and GND">
+</p>
+
+<p align="center"><em>Ethernet: a W5500 Lite on the header with six loose
+wires, and Network's Cable tab telling what the port it is plugged into
+gives (the network's addresses are blurred).</em></p>
+
 ---
 
 ## What it does
@@ -332,9 +344,56 @@ Every day:
 - **Claude:** the usage of your own Claude plan, the numbers Claude Code's
   `/usage` shows. It is unofficial; see [CLAUDE-APP.md](docs/CLAUDE-APP.md).
 - **Monitor:** CPU per core, the tasks, memory, temperature and the network.
-- **Also built in:** MQTT, network tools (ping, a host and port scan with
-  every MAC and its maker, mDNS, Wi-Fi; each sweep is saved, and the portal
-  compares it with the one before) and Conway's Life.
+- **Also built in:** MQTT, Conway's Life, and Network, which has its own
+  section below.
+
+### Network, the tools for a network
+
+Red in Spanish. Seven tabs; the first four work over any network, the
+next two are for the wire ([Ethernet](#connected)), and the last for both.
+
+| Cable | The switch, the traffic | Device | One device | Lookout |
+|---|---|---|---|---|
+| <img src="docs/img/app-net-cable.png" width="150"> | <img src="docs/img/app-net-switch.png" width="150"> | <img src="docs/img/app-net-device.png" width="150"> | <img src="docs/img/app-net-detail.png" width="150"> | <img src="docs/img/app-net-lookout.png" width="150"> |
+
+- **Ping, Hosts, WiFi, mDNS:** latency and loss charted; a sweep of the
+  network with every MAC and its maker, and a port scan; the Wi-Fi
+  channels; the services announced. Each sweep is saved, and the portal
+  compares it with the one before.
+- **Cable** (since 0.27): a tester for the network port the board is
+  plugged into.
+  - What the port gives: speed and duplex, the address, the DHCP server
+    and its lease.
+  - "Test the way out": the gateway, a name, the internet, one after the
+    other.
+  - The switch: a managed one says its name, the port and the VLAN this
+    cable goes to (LLDP or CDP).
+  - "Compare": ten pings to the gateway by the wire and ten by the Wi-Fi,
+    side by side. "Measure the speed" counts what `iperf -c` sends from a
+    computer.
+  - "Capture to the card": every frame that reaches the port, in a pcap
+    file for Wireshark, and a warning for what a network should not have:
+    two DHCP servers, one address claimed twice, a broadcast storm.
+- **Device** (Equipo, since 0.27): for a device plugged straight into the
+  board, its address unknown.
+  - It listens: a device gives itself away as it starts (ARP, DHCP, mDNS,
+    NetBIOS, SSDP, WS-Discovery). A sweep by ARP of the networks devices
+    come set to finds the one that says nothing.
+  - A tap opens the device: everything it said, who made its network card
+    (with the IEEE's register on the card), a ping, a scan of its ports,
+    and "Get on its network", which gives the wire an address next to its
+    own.
+  - The bench network: the board gives addresses out by DHCP, serves
+    files by TFTP, the time by NTP and takes the device's syslog, on the
+    wire only. "Share the Wi-Fi" also gives the device a way out through
+    the board's Wi-Fi.
+- **Lookout** (Vigía, since 0.27): a list of the bench's devices, which
+  are on (a ping or a TCP port, every ten seconds while the tab is open),
+  and Wake-on-LAN for the ones that are off.
+
+What ran on the board and what did not is under
+[What was tested](#what-was-tested-and-what-not-yet);
+[docs/MODULES.md](docs/MODULES.md), "Ethernet", has each tool.
 
 ### The workshop
 
@@ -954,18 +1013,24 @@ own rules ([docs/SSH.md](docs/SSH.md)).
 | **Web portal** | at `p4os.local`: a file explorer, the firmware (updates, both slots, the last crash dump), the log (including the tail of the previous boot), and the network sweeps (each device with its MAC and maker, what changed since the last one, the Wi-Fi channels). The apps bring their own pages from the card, with no firmware: Notes, Radio, RF, Cameras, Recorder, Weather, Quotes, Maps, Lua, Python, CAS, Pixel Art, the 3D viewer and 3D Printers have one, and an app can stream live data to its page ([docs/PORTAL-PAGES.md](docs/PORTAL-PAGES.md)) |
 | **Updates over the air** | two slots: an update is written into the idle one and boots on trial. If the board restarts in the first 30 s, the bootloader goes back by itself. Settings, Update can go back on purpose |
 | **USB** | the OTG port is high speed (480 Mbit/s). **Keyboard and mouse:** keyboard, media keys, mouse, a gamepad, a MIDI keyboard, and a network over the cable (the portal at `192.168.7.1`, 6.7 MB/s). **Disk:** the microSD as a USB drive. The mode is kept across restarts. **Host:** devices on the 40-pin header (5 V from pin 1, data on pins 21/23, 25/27 or both at once, through P4OS's own copy of ESP-IDF's host library): pendrives at `/usb` (7.4 MB/s), keyboards that type into any text field, a mouse pointer, gamepads that play every game ([docs/GAMEPAD.md](docs/GAMEPAD.md)), webcams in Cameras, sound cards for all the board's sound and recording, USB serial ports in the Terminal (CH340, CP210x, FTDI, CDC-ACM), MIDI, and raw devices for apps that bring their own driver (an RTL-SDR in RF); a Raspberry Pi Pico is programmed by copying its `.uf2` ([docs/USB.md](docs/USB.md)) |
-| **Ethernet** | optional, off until switched on: a W5500 module on the header's SPI port (four wires and power, [the drawing](docs/img/bench-w5500.svg)). The board then goes out by the wire, with the Wi-Fi on or off, and the portal, updates and SSH answer there. Switched on in Settings, Redes, or in the portal. An app that needs the SPI port pauses it and it comes back by itself. A download ran at 0.5 to 0.9 MB/s ([docs/MODULES.md](docs/MODULES.md), "Ethernet") |
-| **Its own Wi-Fi** | an access point, `P4OS-XXXX`, next to the home network or alone. Two QR codes: one joins the phone, the other opens the portal at `192.168.4.1`. A phone downloaded from it at ~3 MB/s |
+| **Ethernet** | optional, off until switched on: a W5500 module on the header's SPI port (four wires and power, [the drawing](docs/img/bench-w5500.svg)). The board then goes out by the wire, with the Wi-Fi on or off, and the portal, updates and SSH answer there. Switched on in Settings, Redes, or in the portal. An app that needs the SPI port pauses it and it comes back by itself, and a watch starts the driver again if the chip goes dead. A download ran at 0.5 to 0.9 MB/s. [Network](#network-the-tools-for-a-network) has the tools for the wire ([docs/MODULES.md](docs/MODULES.md), "Ethernet") |
+| **Its own Wi-Fi** | an access point, `P4OS-XXXX`, next to the home network or alone. Two QR codes: one joins the phone, the other opens the portal at `192.168.4.1`. A phone downloaded from it at ~3 MB/s. Since 0.27, "Share the way out" lets whoever joins it go out by where the board does, the wire or the home Wi-Fi; off until switched on at the board ([docs/SECURITY.md](docs/SECURITY.md)) |
 | **Bluetooth** | through the C6. **The phone:** pairs from the iPhone's own Settings, Bluetooth; its notifications, battery and time come to the board, its music shows and is driven from the control centre and the lock screen, and a call can be answered or rejected on the board. **Keyboard mode:** the board is a Mac's or PC's keyboard, mouse and media keys at the same time; the Macro pad's keys and trackpad go over Bluetooth when there is no cable. [docs/BLUETOOTH.md](docs/BLUETOOTH.md) |
 | **The C6's firmware** | updated from the P4, with no cable: Settings, Update, or `tools/install_c6.sh`. It runs esp_hosted 3.0.9, the same as the P4, and going back to the factory firmware works the same way. [docs/C6.md](docs/C6.md) |
 | **Home** | Home Assistant over WebSocket, MQTT, Wi-Fi at 2.4 GHz through the C6 |
 
 ### Settings
 
-The pages are Wi-Fi (with the access point), Bluetooth, USB (each mode
+The pages are Networks (the way out, Wi-Fi with the access point,
+Ethernet), Bluetooth, USB (each mode
 explained), Web portal (trusted networks, the password), Display, Lock screen, Sound, Wallpaper, Expansion, Storage,
 Language, Date and time, Update, Diagnostics, About and Developer.
 
+- **Networks** (Redes): where the board goes out, by wire or by Wi-Fi, and
+  each connection with its state. Wi-Fi keeps the networks and the board's
+  own access point, with "Share the way out" since 0.27. Ethernet has its
+  switch, the link and the address, the SPI clock, and whether the wired
+  network is trusted by the portal.
 - **Lock screen:** when it locks, the code (none, 4 or 6 digits, changed or
   removed with the current one), what it shows, and the clock's size, place
   and colour.
@@ -983,9 +1048,9 @@ Language, Date and time, Update, Diagnostics, About and Developer.
   level, the drawing preferences with their factory values, and restarting
   into safe mode without the BOOT button.
 
-| Update | Diagnostics |
-|---|---|
-| <img src="docs/img/app-update.png" width="230"> | <img src="docs/img/app-diag.png" width="230"> |
+| Update | Diagnostics | Networks | Its own network |
+|---|---|---|---|
+| <img src="docs/img/app-update.png" width="170"> | <img src="docs/img/app-diag.png" width="170"> | <img src="docs/img/app-settings-networks.png" width="170"> | <img src="docs/img/app-settings-share.png" width="170"> |
 
 | Bluetooth | A notification with emoji |
 |---|---|
@@ -1103,7 +1168,24 @@ reads them.
   address on the ESP32, and Art-Net from a Mac through the board to the
   strip.
 
+- Ethernet with a W5500 module on loose wires: the link at 100 Mbit/s and
+  an address by DHCP in about a second, the portal over the wire with the
+  Wi-Fi off, the cable pulled and put back, Bus pausing it and it coming
+  back, and nights of 11 and 13 hours with the link never dropping.
+- Network's tools for the wire: the Cable tab's readings and its test of
+  the way out, the list of devices heard, one opened and pinged, a capture
+  of nine minutes (4540 frames, none lost) opened as a valid pcap, the
+  wire against the Wi-Fi (10 ms to the gateway against 26), and the
+  lookout.
+
 **Waiting for hardware on the bench:**
+
+- Ethernet with a computer on a cable (a USB adapter is on its way): the
+  bench network giving addresses out, TFTP, NTP and syslog asked by a
+  real device, "Share the Wi-Fi" and the own network's "Share the way
+  out" carrying traffic, a device's maker and port scan, and the wire's
+  real speed (so far measured from a computer on Wi-Fi). A managed switch,
+  for LLDP and CDP. A sensor sharing the SPI port with Ethernet.
 
 - More I2C and SPI chips: the RC522 RFID reader (its example is in Bus).
   The TCS34725's fix for a change of range, again on a tidy bench. The
@@ -1269,7 +1351,7 @@ Where something is a guess, it says so.
 | [BLUETOOTH.md](docs/BLUETOOTH.md) | the phone (ANCS), the keyboard mode (HID over GATT), the portal's API |
 | [C6.md](docs/C6.md) | the ESP32-C6's firmware: versions, updating it from the P4, throughput, recovery through J7 |
 | [EMOJI.md](docs/EMOJI.md) | the colour emoji pack and how a text gets them |
-| [MODULES.md](docs/MODULES.md) | the 40-pin header, `modules.txt`, I2C, SPI and GPIO from apps |
+| [MODULES.md](docs/MODULES.md) | the 40-pin header, `modules.txt`, I2C, SPI and GPIO from apps, Ethernet and the tools for the wire |
 | [apps/emulador/README.md](apps/emulador/README.md) | the emulator: the consoles, the card's folders, the modules, what was measured |
 | [apps/pinball/README.md](apps/pinball/README.md) | the pinball: the tables, the rules, adding a table, rendering and packing, what was measured |
 | [apps/canos/README.md](apps/canos/README.md) | Caños: the modes, the generator, the six liquids and how they are drawn, what was measured |
@@ -1325,9 +1407,9 @@ idioma de la tarjeta, la de la placa y la del portal web. Los documentos del pla
 
 | | |
 |---|---|
-| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 22 apps propias y 50 de la tarjeta (juegos, un pinball 3D de seis mesas, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR, Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN, tiras LED direccionables y RS485: Modbus (maestro, esclavo, monitor, perfiles de equipos y pasarela TCP), DMX con RDM y nodo Art-Net/sACN, y una consola de luces que también se maneja desde el celular |
-| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el emulador (GBA y Neo Geo a 60 cuadros, el táctil con varios dedos a la vez), el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, una termocupla MAX6675 y un DS18B20 registrados por Datalog en segundo plano, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante), BLE escuchando con el iPhone y la Mac conectados y leyendo un termómetro Xiaomi cifrado con su clave, dos cámaras IP (un timbre H.264 directo a la pantalla y una MJPEG), la grabación de pantalla en MP4 por el codificador H.264 del P4, SSH desde la Mac y hacia una Raspberry Pi, un bus CAN real con un ESP32, el teclado, copiar y pegar y el buscador, y RS485 con un ESP32 y dos módulos automáticos: Modbus en las dos direcciones, DMX con una tira de pixeles, RDM y Art-Net desde la Mac |
-| Qué falta | probar en la placa el RC522, RF con un sensor de 433 MHz y con tráfico real de AM y FM angosta, y encontrar por qué se cortó la red durante dos OTA |
+| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 22 apps propias y 50 de la tarjeta (juegos, un pinball 3D de seis mesas, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR (que puede compartir la salida de la placa), Ethernet optativo con un módulo W5500 y herramientas para la red por cable (probador de boca, encontrar un equipo de dirección desconocida, captura para Wireshark, vigía con Wake-on-LAN), Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN, tiras LED direccionables y RS485: Modbus (maestro, esclavo, monitor, perfiles de equipos y pasarela TCP), DMX con RDM y nodo Art-Net/sACN, y una consola de luces que también se maneja desde el celular |
+| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el emulador (GBA y Neo Geo a 60 cuadros, el táctil con varios dedos a la vez), el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, una termocupla MAX6675 y un DS18B20 registrados por Datalog en segundo plano, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante), BLE escuchando con el iPhone y la Mac conectados y leyendo un termómetro Xiaomi cifrado con su clave, dos cámaras IP (un timbre H.264 directo a la pantalla y una MJPEG), la grabación de pantalla en MP4 por el codificador H.264 del P4, SSH desde la Mac y hacia una Raspberry Pi, un bus CAN real con un ESP32, el teclado, copiar y pegar y el buscador, y RS485 con un ESP32 y dos módulos automáticos: Modbus en las dos direcciones, DMX con una tira de pixeles, RDM y Art-Net desde la Mac, y Ethernet con un módulo W5500 (enlace a 100 Mbit/s, noches enteras sin cortes, el probador de boca, la lista de equipos, una captura de nueve minutos sin pérdidas y el vigía) |
+| Qué falta | probar en la placa el RC522, RF con un sensor de 433 MHz y con tráfico real de AM y FM angosta, encontrar por qué se cortó la red durante dos OTA, y con una computadora por cable: la red de banco, sus servicios y compartir la conexión en los dos sentidos |
 | El conector de 40 pines | el dibujo de referencia de todos los pines, con los puertos, los pines con que arranca cada app y los sugeridos, está en [The 40-pin header](#the-40-pin-header); la carcasa impresa, en [case/](case) |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
 | Cómo se instala | la primera vez por el CH340; después `tools/ota.sh p4os.local` o el portal |

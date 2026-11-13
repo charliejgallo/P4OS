@@ -1,5 +1,78 @@
 # Changelog
 
+## 0.27.0 — 2026-11-13
+
+The tools for a wired network, in the Red app, and Ethernet looked after.
+
+- **Red gains three tabs**, seven in all. `docs/MODULES.md`, "Ethernet",
+  has each tool, and `docs/plan/ETHERNET.md` what was measured.
+  - **Cable**, a tester for the network port the board is plugged into:
+    speed and duplex, the address, the DHCP server and its lease; a test
+    of the way out (the gateway, a name, the internet); what a managed
+    switch says of itself (LLDP or CDP: its name, the port, the VLAN); the
+    board's interfaces.
+  - **Equipo**, for a device of unknown address plugged straight into the
+    board: it lists whoever talks on the wire with what they said as they
+    started (ARP, DHCP, mDNS, NetBIOS, SSDP, WS-Discovery), and a sweep by
+    ARP of the networks devices come set to finds the silent one. A tap
+    opens a device: everything it said, its maker by the MAC (with the
+    IEEE's `oui.txt` in the card's `/redes`), a ping, a scan of its ports,
+    and "Ponerme en su red", which gives the wire an address next to its
+    own.
+  - **Vigía**, a list of the bench's devices kept on the card: which are
+    on (a ping or a TCP port, every ten seconds while the tab is open) and
+    Wake-on-LAN for the ones whose MAC is known. Over the Wi-Fi too.
+- **The wire as a bench network** (Equipo): "Repartir direcciones" makes
+  the board a DHCP server for whatever is plugged in; "Prender los
+  servicios" starts TFTP (the card's `banco` folder, read only), NTP (the
+  board's time) and syslog (the device's log on the screen), on the wire's
+  address only; "Compartir el Wi-Fi" also gives the device a way out
+  through the board's Wi-Fi (NAT). A restart undoes them.
+- **The board's own Wi-Fi network can share the board's way out**:
+  Settings, Redes, Wi-Fi, "Compartir la salida". Whoever joins the access
+  point goes out by the wire, or by the house's Wi-Fi. Off until it is
+  turned on at the board, not in the portal, kept across restarts. With it
+  on, the access point's password is what stands between a stranger and
+  the networks the board is on (`docs/SECURITY.md`).
+- **The board forwards nothing between its networks unless one of those
+  two switches is on.** The firmware is now built able to forward and
+  translate addresses, and a hook in the network stack refuses every
+  packet that is not part of a sharing someone switched on.
+- **Looking at the traffic** (Cable): "Capturar a la tarjeta" keeps every
+  frame that reaches the port in a pcap file in `/redes`, for Wireshark,
+  and warns of two DHCP servers, an address claimed by two stations, or a
+  broadcast storm.
+- **The wire against the Wi-Fi** (Cable): "Comparar" pings the gateway ten
+  times by each; "Medir velocidad" counts what `iperf -c` (iperf 2) sends
+  from a computer, by the interface it came in by.
+- **Ethernet is watched.** Once, on the bench, the interface stayed up
+  with no traffic and let its address lapse until a restart. A watch now
+  reads the chip every few seconds and starts the driver again when the
+  chip has lost its settings, the address is gone with the link up, or
+  nothing has arrived in five minutes. It has not had to act since: a
+  night of eleven hours with the link up and no restart of the driver.
+- **The bench network is judged by the wire's trust switch**, whatever
+  address it has (`docs/SECURITY.md`).
+- **An empty 1-Wire bus no longer fills the log** with a warning a minute.
+- **The auxiliary board** (`hw/aux-board/`): the Ethernet module's place
+  checked on a printed plate, the three small headers moved out of the
+  crowded band, and a trial of the routing. Still a draft.
+- **In the simulator**: `P4_SIM_ETH=cdp` or `quiet` for the switch,
+  `device` for a camera on the wire, `storm` for a network gone wrong.
+
+Tried on the board: the Cable tab and its test of the way out; the list
+of devices, one opened and pinged; a capture of 8 min 53 s, 4540 frames
+and none lost, read back as a valid pcap; the wire against the Wi-Fi
+(10.2 ms to the gateway against 26.2); the lookout. Internal RAM free did
+not move in a day (193 KB at 13 h and at 24 h).
+
+Not tried on the board yet, for want of a computer on a cable: the bench
+network giving addresses out, its three services, both sharings carrying
+traffic, a device's maker and port scan, and the wire's own speed (the
+numbers so far were taken from a computer on Wi-Fi, so they are a floor).
+No managed switch was at hand for LLDP and CDP: they run against made-up
+frames in the simulator, and their readers are fuzzed.
+
 ## 0.26.0 — 2026-11-12
 
 Ethernet, for a board that has the module.
