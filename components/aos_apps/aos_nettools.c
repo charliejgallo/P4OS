@@ -29,6 +29,7 @@
  */
 #include "aos_nettools.h"
 #include "aos_eth.h"
+#include "aos_access.h"
 #include "aos_i18n.h"
 
 #include <stdio.h>
@@ -95,6 +96,8 @@ typedef struct {
     nt_cable_t cable;
     nt_find_t  find;
     nt_bench_t bench;
+    nt_compare_t compare;
+    nt_speed_t speed;
 } nt_state_t;
 
 static nt_state_t *T;
@@ -141,6 +144,8 @@ const nt_mdns_t  *nt_mdns(void)  { return &M; }
 const nt_cable_t *nt_cable(void) { return &T->cable; }
 const nt_find_t  *nt_find(void)  { return &T->find; }
 const nt_bench_t *nt_bench(void) { return &T->bench; }
+const nt_compare_t *nt_compare(void) { return &T->compare; }
+const nt_speed_t *nt_speed(void) { return &T->speed; }
 
 void nt_ip_str(uint32_t ip, char *out, size_t n)
 {
@@ -1984,6 +1989,286 @@ bool nt_bench_start(void)
 void nt_bench_stop(void) { s_bench_stop = true; }
 
 #undef B
+
+/* -------------------------------------------------------------------------- */
+/* Measuring a link: the wire against the Wi-Fi                                 */
+/* -------------------------------------------------------------------------- */
+
+#define CMP_PINGS 10
+
+static bool s_cmp_run;
+
+#ifdef ESP_PLATFORM
+/* Pings from an interface's own address: the stack routes by the source when a socket is bound
+ * to one (ESP-IDF's ip4_route_src_hook), so each side goes out by its own interface. */
+static void side_ping(nt_side_t *sd, int slot)
+{
+    uint32_t src = 0, dst = 0;
+    if (!ip_parse(sd->ip, &src) || !ip_parse(sd->gw, &dst)) return;
+    int fd = icmp_open();
+    if (fd < 0) return;
+    struct sockaddr_in a;
+    memset(&a, 0, sizeof a);
+    a.sin_family = AF_INET;
+    a.sin_addr.s_addr = htonl(src);
+    if (bind(fd, (struct sockaddr *)&a, sizeof a) < 0) { close(fd); return; }
+    uint16_t id = (uint16_t)rand();
+    float sum = 0;
+    for (int seq = 1; seq <= CMP_PINGS && app_alive(); seq++) {
+        int64_t start = now_us();
+        float ms = -1;
+        if (icmp_send(fd, dst, id, (uint16_t)seq)) {
+            while (ms < 0 && now_us() - start < 1000000) {
+                if (!wait_read(fd, 100)) continue;
+                uint32_t from;
+                uint16_t rid, rseq;
+                int ttl, r;
+                while ((r = icmp_recv(fd, &from, &rid, &rseq, &ttl)) == 1)
+                    if (from == dst && rid == id && rseq == seq) { ms = (float)(now_us() - start) / 1000.0f; break; }
+                if (r < 0) break;
+            }
+        }
+        sd->sent++;
+        if (ms >= 0) {
+            sum += ms;
+            if (!sd->got || ms < sd->min_ms) sd->min_ms = ms;
+            if (ms > sd->max_ms) sd->max_ms = ms;
+            sd->got++;
+            sd->avg_ms = sum / (float)sd->got;
+        }
+        nt_lock();
+        T->compare.side[slot] = *sd;
+        T->compare.seq++;
+        nt_unlock();
+        if (ms >= 0) aos_hal_sleep_ms(200);
+    }
+    close(fd);
+}
+#endif
+
+static void compare_thread(void *arg)
+{
+    (void)arg;
+    nt_compare_t c;
+    nt_lock();
+    c = T->compare;
+    nt_unlock();
+    for (int k = 0; k < c.n; k++) {
+#ifdef ESP_PLATFORM
+        side_ping(&c.side[k], k);
+#else
+        /* the simulator's interfaces are made up, and so is what they measure */
+        for (int q = 1; q <= CMP_PINGS; q++) {
+            aos_hal_sleep_ms(120);
+            nt_side_t *sd = &c.side[k];
+            bool wire = !strcmp(sd->kind, "ethernet"), lost = !wire && q == 7;
+            sd->sent = q;
+            if (!lost) sd->got++;
+            sd->min_ms = wire ? 0.42f : 3.1f;
+            sd->max_ms = wire ? 0.91f : 38.5f;
+            sd->avg_ms = wire ? 0.58f : 9.4f;
+            nt_lock();
+            T->compare.side[k] = *sd;
+            T->compare.seq++;
+            nt_unlock();
+        }
+#endif
+    }
+    nt_lock();
+    T->compare.state = NT_DONE;
+    T->compare.seq++;
+    s_cmp_run = false;
+    nt_unlock();
+}
+
+bool nt_compare_start(void)
+{
+    nt_keepalive();
+    aos_netif_t a[6];
+    int n = aos_hal_netif_list(a, 6);
+    nt_lock();
+    bool busy = s_cmp_run;
+    if (!busy) {
+        uint32_t seq = T->compare.seq + 1;
+        memset(&T->compare, 0, sizeof T->compare);
+        T->compare.seq = seq;
+        for (int pass = 0; pass < 2; pass++)            /* the wire first, then the Wi-Fi */
+            for (int k = 0; k < n; k++) {
+                if (strcmp(a[k].kind, pass ? "wifi" : "ethernet") || !a[k].up) continue;
+                nt_side_t *sd = &T->compare.side[T->compare.n++];
+                snprintf(sd->kind, sizeof sd->kind, "%s", a[k].kind);
+                snprintf(sd->ip, sizeof sd->ip, "%s", a[k].ip);
+                snprintf(sd->gw, sizeof sd->gw, "%s", a[k].gw);
+            }
+        if (T->compare.n) {
+            T->compare.state = NT_BUSY;
+            s_cmp_run = true;
+        } else {
+            T->compare.state = NT_FAILED;
+        }
+    }
+    bool go = !busy && s_cmp_run;
+    nt_unlock();
+    if (!go) return false;
+    if (!aos_hal_thread_start("nt_cmp", compare_thread, NULL, STACK, PRIO)) {
+        nt_lock();
+        s_cmp_run = false;
+        T->compare.state = NT_FAILED;
+        T->compare.seq++;
+        nt_unlock();
+        return false;
+    }
+    return true;
+}
+
+/* ---- the speed: a sink for iperf ---- */
+
+static bool s_speed_run, s_speed_stop;
+
+/* May a stream that came in on this socket stay? As the Flasher's bridge decides it: the address
+ * it reached the board at says which network it came by, and it stays only where the portal
+ * opens with no password. */
+static bool speed_open(int s, char *local, size_t n)
+{
+    struct sockaddr_in me;
+    socklen_t l = sizeof me;
+    local[0] = 0;
+    if (getsockname(s, (struct sockaddr *)&me, &l) == 0) inet_ntop(AF_INET, &me.sin_addr, local, (socklen_t)n);
+#ifdef ESP_PLATFORM
+    aos_zone_t z;
+    if (!strcmp(local, "192.168.7.1")) z = AOS_ZONE_CABLE;
+    else if (!strcmp(local, aos_hal_net_ap_ip())) z = AOS_ZONE_AP;
+    else z = aos_access_ip_trusted(local) ? AOS_ZONE_HOME : AOS_ZONE_AWAY;
+    return aos_access_need(z) == AOS_ACCESS_OPEN;
+#else
+    return true;
+#endif
+}
+
+static void speed_thread(void *arg)
+{
+    (void)arg;
+    static uint8_t buf[8192];           /* one of these threads at a time: s_speed_run */
+    int ls = socket(AF_INET, SOCK_STREAM, 0);
+    const char *why = NULL;
+    if (ls >= 0) {
+        int one = 1;
+        setsockopt(ls, SOL_SOCKET, SO_REUSEADDR, &one, sizeof one);
+        struct sockaddr_in a;
+        memset(&a, 0, sizeof a);
+        a.sin_family = AF_INET;
+        a.sin_port = htons(NT_SPEED_PORT);
+#ifndef ESP_PLATFORM
+        a.sin_addr.s_addr = htonl(0x7F000001u);     /* the simulator: on this machine only */
+#endif
+        if (bind(ls, (struct sockaddr *)&a, sizeof a) < 0 || listen(ls, 1) < 0) why = N_("No se pudo abrir el puerto 5001");
+        else set_nonblock(ls);
+    } else why = N_("No se pudo abrir el puerto 5001");
+    while (!why && !s_speed_stop && app_alive()) {
+        if (!wait_read(ls, 200)) continue;
+        struct sockaddr_in from;
+        socklen_t fl = sizeof from;
+        int c = accept(ls, (struct sockaddr *)&from, &fl);
+        if (c < 0) continue;
+        char local[16], peer[16] = "";
+        inet_ntop(AF_INET, &from.sin_addr, peer, sizeof peer);
+        if (!speed_open(c, local, sizeof local)) {
+            close(c);
+            nt_lock();
+            snprintf(T->speed.refused, sizeof T->speed.refused, "%s", peer);
+            T->speed.seq++;
+            nt_unlock();
+            continue;
+        }
+        /* by which interface: the wire's address, or another's */
+        aos_eth_info_t e;
+        aos_eth_info(&e);
+        bool wire = e.ip[0] && !strcmp(e.ip, local);
+        nt_speed_run_t run;
+        memset(&run, 0, sizeof run);
+        snprintf(run.kind, sizeof run.kind, "%s", wire ? "ethernet" : "wifi");
+        snprintf(run.local, sizeof run.local, "%s", local);
+        set_nonblock(c);
+        int64_t t0 = now_us(), mark = t0, last = t0;
+        uint64_t total = 0, since = 0;
+        nt_lock();
+        T->speed.busy = true;
+        snprintf(T->speed.now_kind, sizeof T->speed.now_kind, "%s", run.kind);
+        T->speed.seq++;
+        nt_unlock();
+        while (!s_speed_stop && app_alive()) {
+            int64_t t = now_us();
+            if (wait_read(c, 200)) {
+                ssize_t n = recv(c, buf, sizeof buf, 0);
+                if (n == 0) break;                          /* the sender is done */
+                if (n < 0) { if (errno == EAGAIN || errno == EWOULDBLOCK || errno == EINTR) continue; break; }
+                total += (uint64_t)n;
+                since += (uint64_t)n;
+                last = t;
+            } else if (t - last > 5000000) break;           /* five seconds of nothing */
+            if (t - mark >= 500000) {
+                nt_lock();
+                T->speed.now_mbps = (float)((double)since * 8.0 / ((double)(t - mark) / 1e6) / 1e6);
+                T->speed.seq++;
+                nt_unlock();
+                since = 0;
+                mark = t;
+            }
+            if (t - t0 > 120000000) break;                  /* two minutes is a measure, more is something else */
+        }
+        close(c);
+        double secs = (double)(last - t0) / 1e6;
+        run.secs = (uint32_t)(secs + 0.5);
+        run.kbytes = (uint32_t)(total / 1024);
+        run.mbps = secs > 0.05 ? (float)((double)total * 8.0 / secs / 1e6) : 0;
+        nt_lock();
+        T->speed.busy = false;
+        T->speed.now_mbps = 0;
+        if (total) T->speed.last[wire ? 0 : 1] = run;
+        T->speed.seq++;
+        nt_unlock();
+    }
+    if (ls >= 0) close(ls);
+    nt_lock();
+    T->speed.state = why ? NT_FAILED : NT_IDLE;
+    snprintf(T->speed.err, sizeof T->speed.err, "%s", why ? why : "");
+    T->speed.busy = false;
+    T->speed.seq++;
+    s_speed_run = false;
+    nt_unlock();
+}
+
+bool nt_speed_start(void)
+{
+    nt_keepalive();
+    nt_lock();
+    bool busy = s_speed_run;
+    if (!busy) {
+        nt_speed_run_t keep[2] = { T->speed.last[0], T->speed.last[1] };       /* what was measured stays on the screen */
+        uint32_t seq = T->speed.seq + 1;
+        memset(&T->speed, 0, sizeof T->speed);
+        T->speed.last[0] = keep[0];
+        T->speed.last[1] = keep[1];
+        T->speed.seq = seq;
+        T->speed.state = NT_BUSY;
+        s_speed_run = true;
+        s_speed_stop = false;
+    }
+    nt_unlock();
+    if (busy) return false;
+    if (!aos_hal_thread_start("nt_speed", speed_thread, NULL, STACK, PRIO)) {
+        nt_lock();
+        s_speed_run = false;
+        T->speed.state = NT_FAILED;
+        snprintf(T->speed.err, sizeof T->speed.err, "%s", N_("No hay memoria para empezar"));
+        T->speed.seq++;
+        nt_unlock();
+        return false;
+    }
+    return true;
+}
+
+void nt_speed_stop(void) { s_speed_stop = true; }
 
 bool nt_wifi_scan(void)
 {

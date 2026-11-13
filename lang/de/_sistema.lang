@@ -10440,3 +10440,57 @@ no hay tarjeta donde guardar	keine Karte zum Speichern vorhanden
 
 #: firmware (Red, Cable)
 no se pudo crear el archivo en la tarjeta	die Datei konnte auf der Karte nicht angelegt werden
+
+#: firmware (Red, Cable)
+Midiendo…	Messe…
+
+#: firmware (Red, Cable)
+Comparar	Vergleichen
+
+#: firmware (Red, Cable)
+esperando su turno…	wartet auf seinen Durchgang…
+
+#: firmware (Red, Cable)
+la puerta de enlace no respondió a %d pings	das Gateway hat auf %d Pings nicht geantwortet
+
+#: firmware (Red, Cable)
+%s ms (%s a %s), perdidos %d de %d	%s ms (%s bis %s), verloren %d von %d
+
+#: firmware (Red, Cable)
+Para compararlos hace falta que el cable y el Wi-Fi estén los dos arriba, cada uno con su dirección	Zum Vergleich müssen Kabel und WLAN beide aktiv sein, jedes mit seiner Adresse
+
+#: firmware (Red, Cable)
+Diez pings a la puerta de enlace por el cable y diez por el Wi-Fi, desde el mismo lugar	Zehn Pings zum Gateway über das Kabel und zehn über das WLAN, vom selben Ort
+
+#: firmware (Red, Cable)
+Dejar de medir	Messung beenden
+
+#: firmware (Red, Cable)
+Medir velocidad	Geschwindigkeit messen
+
+#: firmware (Red, Cable)
+Llegando por %s: %s Mbit/s	Eingang über %s: %s Mbit/s
+
+#: firmware (Red, Cable)
+Se rechazó a %s: no viene de una red donde el portal abre sin contraseña	%s wurde abgewiesen: nicht aus einem Netz, in dem das Portal ohne Passwort öffnet
+
+#: firmware (Red, Cable)
+Esperando en el puerto 5001. En la computadora, con iperf 2: iperf -c %s mide el cable, iperf -c %s el Wi-Fi	Warte auf Port 5001. Am Computer, mit iperf 2: iperf -c %s misst das Kabel, iperf -c %s das WLAN
+
+#: firmware (Red, Cable)
+Cuenta lo que una computadora le manda a la placa por cada conexión: la velocidad del camino entre las dos. La computadora usa iperf 2 (no iperf3)	Zählt, was ein Computer über jede Verbindung an die Platine sendet: die Geschwindigkeit des Wegs zwischen beiden. Der Computer nutzt iperf 2 (nicht iperf3)
+
+#: firmware (Red, Cable)
+%s Mbit/s: %s en %u s	%s Mbit/s: %s in %u s
+
+#: firmware (Red, Cable)
+CABLE CONTRA WI-FI	KABEL GEGEN WLAN
+
+#: firmware (Red, Cable)
+Por el cable	Über das Kabel
+
+#: firmware (Red, Cable)
+Por el Wi-Fi	Über das WLAN
+
+#: firmware (Red, Cable)
+No se pudo abrir el puerto 5001	Port 5001 konnte nicht geöffnet werden

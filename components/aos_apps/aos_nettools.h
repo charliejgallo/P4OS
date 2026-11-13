@@ -224,6 +224,56 @@ bool nt_bench_start(void);
 void nt_bench_stop(void);
 const nt_bench_t *nt_bench(void);       /* under nt_lock() */
 
+/* ---- measuring a link: the wire against the Wi-Fi ---- */
+
+typedef struct {
+    char  kind[12];             /* "ethernet" or "wifi" */
+    char  ip[16], gw[16];       /* the interface's address, and the gateway it pinged */
+    int   sent, got;
+    float avg_ms, min_ms, max_ms;
+} nt_side_t;
+
+typedef struct {
+    int       state;            /* NT_BUSY while it pings */
+    int       n;                /* sides measured or being measured: 0 to 2 */
+    nt_side_t side[2];
+    uint32_t  seq;
+} nt_compare_t;
+
+/* Ten pings to the gateway by each of the two, the wire and the Wi-Fi, each
+ * from that interface's own address so that it goes out by it. */
+bool nt_compare_start(void);
+const nt_compare_t *nt_compare(void);   /* under nt_lock() */
+
+#define NT_SPEED_PORT 5001              /* iperf's own */
+
+typedef struct {
+    char     kind[12];          /* the interface the stream came in by; "" none yet */
+    char     local[16];
+    float    mbps;
+    uint32_t kbytes;
+    uint32_t secs;
+} nt_speed_run_t;
+
+typedef struct {
+    int      state;             /* NT_BUSY while it listens */
+    char     err[64];
+    bool     busy;              /* a stream is coming in right now */
+    float    now_mbps;          /* over the last half second */
+    char     now_kind[12];
+    char     refused[16];       /* who was turned away: not from a network the portal is open to */
+    nt_speed_run_t last[2];     /* the last stream by the wire, and by anything else */
+    uint32_t seq;
+} nt_speed_t;
+
+/* Listens on TCP 5001 and counts what is sent to it: "iperf -c <address>"
+ * (iperf 2) from a computer measures the way from it to the board, and the
+ * address tells by which interface. A raw socket cannot log in, so it takes
+ * streams only where the portal opens without a password. */
+bool nt_speed_start(void);
+void nt_speed_stop(void);
+const nt_speed_t *nt_speed(void);       /* under nt_lock() */
+
 /* ---- mDNS ---- */
 
 #define NT_MAX_SVC 64

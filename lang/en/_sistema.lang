@@ -10440,3 +10440,57 @@ no hay tarjeta donde guardar	there is no card to keep it on
 
 #: firmware (Red, Cable)
 no se pudo crear el archivo en la tarjeta	the file could not be created on the card
+
+#: firmware (Red, Cable)
+Midiendo…	Measuring…
+
+#: firmware (Red, Cable)
+Comparar	Compare
+
+#: firmware (Red, Cable)
+esperando su turno…	waiting for its turn…
+
+#: firmware (Red, Cable)
+la puerta de enlace no respondió a %d pings	the gateway did not answer %d pings
+
+#: firmware (Red, Cable)
+%s ms (%s a %s), perdidos %d de %d	%s ms (%s to %s), lost %d of %d
+
+#: firmware (Red, Cable)
+Para compararlos hace falta que el cable y el Wi-Fi estén los dos arriba, cada uno con su dirección	To compare them the wire and the Wi-Fi must both be up, each with its address
+
+#: firmware (Red, Cable)
+Diez pings a la puerta de enlace por el cable y diez por el Wi-Fi, desde el mismo lugar	Ten pings to the gateway by the wire and ten by the Wi-Fi, from the same place
+
+#: firmware (Red, Cable)
+Dejar de medir	Stop measuring
+
+#: firmware (Red, Cable)
+Medir velocidad	Measure the speed
+
+#: firmware (Red, Cable)
+Llegando por %s: %s Mbit/s	Coming in by %s: %s Mbit/s
+
+#: firmware (Red, Cable)
+Se rechazó a %s: no viene de una red donde el portal abre sin contraseña	%s was turned away: it does not come from a network where the portal opens with no password
+
+#: firmware (Red, Cable)
+Esperando en el puerto 5001. En la computadora, con iperf 2: iperf -c %s mide el cable, iperf -c %s el Wi-Fi	Waiting on port 5001. On the computer, with iperf 2: iperf -c %s measures the wire, iperf -c %s the Wi-Fi
+
+#: firmware (Red, Cable)
+Cuenta lo que una computadora le manda a la placa por cada conexión: la velocidad del camino entre las dos. La computadora usa iperf 2 (no iperf3)	It counts what a computer sends to the board by each connection: the speed of the way between the two. The computer uses iperf 2 (not iperf3)
+
+#: firmware (Red, Cable)
+%s Mbit/s: %s en %u s	%s Mbit/s: %s in %u s
+
+#: firmware (Red, Cable)
+CABLE CONTRA WI-FI	WIRE AGAINST WI-FI
+
+#: firmware (Red, Cable)
+Por el cable	By the wire
+
+#: firmware (Red, Cable)
+Por el Wi-Fi	By the Wi-Fi
+
+#: firmware (Red, Cable)
+No se pudo abrir el puerto 5001	Port 5001 could not be opened

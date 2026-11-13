@@ -550,6 +550,12 @@ page.
   the card's `/redes` folder, for Wireshark, and says what a network
   should not have: two DHCP servers, an address claimed by two stations, a
   broadcast storm. In the simulator, `P4_SIM_ETH=storm` has all three.
+- **The wire against the Wi-Fi** (not in a release yet): Red, Cable.
+  "Comparar" pings the gateway ten times by each and shows them side by
+  side; "Medir velocidad" listens on TCP 5001 and counts what
+  `iperf -c <address>` (iperf 2) sends from a computer, by the interface
+  that address belongs to. It takes streams only from networks the portal
+  opens to with no password.
 
 `docs/plan/ETHERNET.md` (Spanish) has the phases, everything measured and
 what is next.

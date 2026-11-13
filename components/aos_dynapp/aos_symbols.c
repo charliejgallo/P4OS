@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3651 simbolos.
+ * Total: 3656 simbolos.
  */
 
 #include <stddef.h>
@@ -3550,6 +3550,8 @@ extern int nt_bench_stop;
 extern int nt_big_calloc;
 extern int nt_cable;
 extern int nt_cable_start;
+extern int nt_compare;
+extern int nt_compare_start;
 extern int nt_find;
 extern int nt_find_start;
 extern int nt_find_stop;
@@ -3571,6 +3573,9 @@ extern int nt_ports_stop;
 extern int nt_scan;
 extern int nt_scan_start;
 extern int nt_scan_stop;
+extern int nt_speed;
+extern int nt_speed_start;
+extern int nt_speed_stop;
 extern int nt_unlock;
 extern int nt_wifi;
 extern int nt_wifi_run;
@@ -7204,6 +7209,8 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(nt_big_calloc),
     ESP_ELFSYM_EXPORT(nt_cable),
     ESP_ELFSYM_EXPORT(nt_cable_start),
+    ESP_ELFSYM_EXPORT(nt_compare),
+    ESP_ELFSYM_EXPORT(nt_compare_start),
     ESP_ELFSYM_EXPORT(nt_find),
     ESP_ELFSYM_EXPORT(nt_find_start),
     ESP_ELFSYM_EXPORT(nt_find_stop),
@@ -7225,6 +7232,9 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(nt_scan),
     ESP_ELFSYM_EXPORT(nt_scan_start),
     ESP_ELFSYM_EXPORT(nt_scan_stop),
+    ESP_ELFSYM_EXPORT(nt_speed),
+    ESP_ELFSYM_EXPORT(nt_speed_start),
+    ESP_ELFSYM_EXPORT(nt_speed_stop),
     ESP_ELFSYM_EXPORT(nt_unlock),
     ESP_ELFSYM_EXPORT(nt_wifi),
     ESP_ELFSYM_EXPORT(nt_wifi_run),

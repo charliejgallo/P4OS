@@ -510,6 +510,38 @@ dos respuestas DHCP decodificadas). **En la placa falta todo**: cuántas
 tramas por segundo aguanta la tarjeta, y cuánto tarda el W5500 por SPI en
 perder tramas con una red cargada.
 
+## Medir un enlace: el cable contra el Wi-Fi (Red, pestaña Cable)
+
+La herramienta 7 del plan, 2026-11-12. Dos medidas, para decidir si un
+equipo necesita cable:
+
+- **Comparar:** diez pings a la puerta de enlace por el cable y diez por
+  el Wi-Fi, uno al lado del otro: media, mínimo, máximo y perdidos. Cada
+  tanda sale desde la dirección de su interfaz; con el socket atado a una
+  dirección, la pila de la IDF elige la interfaz por el origen
+  (`ip4_route_src_hook`), que es lo que hace que el del Wi-Fi no salga por
+  el cable aunque el cable sea la ruta por defecto. Es lo que faltaba de la
+  fase 4 ("elegir por cuál interfaz sale un socket"), resuelto sin API
+  nueva: atar el socket a la dirección de la interfaz.
+- **Medir velocidad:** la placa escucha en el puerto 5001 y cuenta lo que
+  le mandan. Desde una computadora, `iperf -c <dirección>` (iperf 2, no
+  iperf3) mide el camino de la computadora a la placa, y la dirección
+  elegida dice por cuál interfaz: la del cable o la del Wi-Fi. La pantalla
+  guarda la última medida de cada una.
+
+El receptor es un socket crudo que no puede pedir contraseña: toma una
+conexión sólo si llegó por una red donde el portal abre sin contraseña (la
+misma regla que el puente del Programador), y avisa a quién rechazó.
+
+En el simulador: la comparación es de ejemplo (no tiene interfaces de
+verdad); el receptor sí es de verdad, en 127.0.0.1, y midió lo mismo que
+vio el emisor. **En la placa falta todo**, y sobre todo lo que sólo ella
+dice: que el ping atado a la dirección del Wi-Fi salga de verdad por el
+Wi-Fi con el cable arriba.
+
+**Falta de esta herramienta:** que la placa sea la que manda (cliente
+iperf hacia un servidor), y medir también de la placa hacia afuera.
+
 ## Qué gana el taller con un cable de red
 
 Ordenadas por lo que más resuelve en un banco. Varias necesitan la fase 4.

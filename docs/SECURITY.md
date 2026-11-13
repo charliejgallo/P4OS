@@ -195,6 +195,10 @@ host key is Ed25519, kept in preferences like the HTTPS authority's.
   quantum computer. `docs/SSH.md` says how to quiet the warning.
 - **The card is readable by whoever holds it.** The cameras' passwords in
   `/cameras.txt`, for one, are in clear.
+- **Red's speed measure is a raw socket too** (TCP 5001, only while
+  "Medir velocidad" is on and Red is open): it follows the bridge's rule
+  below, a stream is kept only where the portal opens without a password,
+  and it only counts and throws away what it is sent.
 - **The Programador's bridge is a raw socket** (TCP 4000 and 4001, only
   while it is open, which is done on the board or from the portal): a
   socket cannot log in, so a connection is kept only where the portal

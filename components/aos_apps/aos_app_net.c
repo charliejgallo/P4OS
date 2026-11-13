@@ -167,6 +167,8 @@ typedef struct {
     lv_obj_t *c_btn, *c_t_gw, *c_t_dns, *c_t_far;
     lv_obj_t *c_ifs;
     lv_obj_t *c_cap_btn, *c_cap_state, *c_cap_kv[2], *c_cap_find;
+    lv_obj_t *c_cmp_btn, *c_cmp_note, *c_cmp_kv[2], *c_spd_btn, *c_spd_state, *c_spd_kv[2];
+    uint32_t c_cmp_seen, c_spd_seen;
     int32_t c_ifs_w, c_cap_w;
     uint32_t c_cap_sig;
     uint32_t c_tick, c_listen_ms, c_test_seen;
@@ -1870,6 +1872,85 @@ static void cable_test_cb(lv_event_t *e)
     U.pg.c_test_seen = 0xFFFFFFFFu;
 }
 
+static void cmp_btn_cb(lv_event_t *e)
+{
+    nt_compare_start();
+    U.pg.c_cmp_seen = 0xFFFFFFFFu;
+}
+
+static void spd_btn_cb(lv_event_t *e)
+{
+    nt_lock();
+    bool on = nt_speed()->state == NT_BUSY;
+    nt_unlock();
+    if (on) nt_speed_stop();
+    else nt_speed_start();
+    U.pg.c_spd_seen = 0xFFFFFFFFu;
+}
+
+/* The wire against the Wi-Fi: the pings side by side, and what a computer sends by each. */
+static void cable_measure_refresh(void)
+{
+    page_t *g = &U.pg;
+    char t[220], a[16], b[24], c[16];
+    nt_lock();
+    nt_compare_t m = *nt_compare();
+    nt_speed_t v = *nt_speed();
+    nt_unlock();
+    if (m.seq != g->c_cmp_seen) {
+        g->c_cmp_seen = m.seq;
+        bool busy = m.state == NT_BUSY;
+        pill_set(g->c_cmp_btn, AOS_SYM_PULSE, busy ? _("Midiendo…") : _("Comparar"), busy ? AOS_C_CARD2 : C_NET_D);
+        for (int k = 0; k < 2; k++) {
+            const nt_side_t *sd = &m.side[k];
+            if (k >= m.n) { say(g->c_cmp_kv[k], "-", AOS_C_DIM); continue; }
+            if (!sd->sent) snprintf(t, sizeof t, "%s", _("esperando su turno…"));
+            else if (!sd->got) snprintf(t, sizeof t, _("la puerta de enlace no respondió a %d pings"), sd->sent);
+            else {
+                fmt_ms(a, sizeof a, sd->avg_ms);
+                fmt_ms(b, sizeof b, sd->min_ms);
+                fmt_ms(c, sizeof c, sd->max_ms);
+                snprintf(t, sizeof t, _("%s ms (%s a %s), perdidos %d de %d"), a, b, c, sd->sent - sd->got, sd->sent);
+            }
+            say(g->c_cmp_kv[k], t, !sd->sent ? AOS_C_DIM : !sd->got ? C_BAD : sd->got < sd->sent ? AOS_C_ORANGE : C_GOOD);
+        }
+        say(g->c_cmp_note, m.state != NT_IDLE && m.n < 2
+            ? _("Para compararlos hace falta que el cable y el Wi-Fi estén los dos arriba, cada uno con su dirección")
+            : _("Diez pings a la puerta de enlace por el cable y diez por el Wi-Fi, desde el mismo lugar"), AOS_C_DIM);
+    }
+    if (v.seq != g->c_spd_seen) {
+        g->c_spd_seen = v.seq;
+        bool on = v.state == NT_BUSY;
+        pill_set(g->c_spd_btn, AOS_SYM_PULSE, on ? _("Dejar de medir") : _("Medir velocidad"), on ? AOS_C_CARD2 : C_NET_D);
+        if (on && v.busy) {
+            fmt_num(a, sizeof a, v.now_mbps, 1);
+            snprintf(t, sizeof t, _("Llegando por %s: %s Mbit/s"), kind_name(v.now_kind), a);
+            say(g->c_spd_state, t, C_GOOD);
+        } else if (on) {
+            aos_netif_t nf[6];
+            int n = aos_hal_netif_list(nf, 6);
+            const char *wire = "-", *wifi = "-";
+            for (int k = 0; k < n; k++) {
+                if (!strcmp(nf[k].kind, "ethernet") && nf[k].ip[0]) wire = nf[k].ip;
+                if (!strcmp(nf[k].kind, "wifi") && nf[k].ip[0]) wifi = nf[k].ip;
+            }
+            if (v.refused[0]) snprintf(t, sizeof t, _("Se rechazó a %s: no viene de una red donde el portal abre sin contraseña"), v.refused);
+            else snprintf(t, sizeof t, _("Esperando en el puerto 5001. En la computadora, con iperf 2: iperf -c %s mide el cable, iperf -c %s el Wi-Fi"), wire, wifi);
+            say(g->c_spd_state, t, v.refused[0] ? AOS_C_ORANGE : AOS_C_TEXT);
+        } else if (v.state == NT_FAILED && v.err[0]) say(g->c_spd_state, aos_tr(v.err), C_BAD);
+        else say(g->c_spd_state, _("Cuenta lo que una computadora le manda a la placa por cada conexión: la velocidad del camino entre las dos. La computadora usa iperf 2 (no iperf3)"), AOS_C_DIM);
+        for (int k = 0; k < 2; k++) {
+            const nt_speed_run_t *r = &v.last[k];
+            if (!r->kind[0]) { say(g->c_spd_kv[k], "-", AOS_C_DIM); continue; }
+            fmt_num(a, sizeof a, r->mbps, 1);
+            if (r->kbytes >= 1024) { fmt_num(c, sizeof c, r->kbytes / 1024.0, r->kbytes >= 102400 ? 0 : 1); snprintf(b, sizeof b, "%s MB", c); }
+            else snprintf(b, sizeof b, "%u KB", (unsigned)r->kbytes);
+            snprintf(t, sizeof t, _("%s Mbit/s: %s en %u s"), a, b, (unsigned)r->secs);
+            say(g->c_spd_kv[k], t, AOS_C_TEXT);
+        }
+    }
+}
+
 static void cap_btn_cb(lv_event_t *e)
 {
     aos_eth_capture_t c;
@@ -2076,6 +2157,7 @@ static void cable_refresh(bool now)
     }
     cable_ifs_build();
     cable_cap_refresh();
+    cable_measure_refresh();
 }
 
 static void build_cable(void)
@@ -2105,6 +2187,20 @@ static void build_cable(void)
     g->c_t_gw = kv(c, lw - 40, _("Puerta de enlace"));
     g->c_t_dns = kv(c, lw - 40, _("Nombres"));
     g->c_t_far = kv(c, lw - 40, "Internet");
+
+    section(left, _("CABLE CONTRA WI-FI"));
+    c = vcard(left, lw, 20, 10);
+    br = row(c, lw - 40, 80, 12);
+    g->c_cmp_btn = pill(br, AOS_SYM_PULSE, _("Comparar"), C_NET_D, cmp_btn_cb, NULL);
+    g->c_cmp_kv[0] = kv(c, lw - 40, "Ethernet");
+    g->c_cmp_kv[1] = kv(c, lw - 40, "Wi-Fi");
+    g->c_cmp_note = caption(c, "", lw - 40);
+    br = row(c, lw - 40, 80, 12);
+    g->c_spd_btn = pill(br, AOS_SYM_PULSE, _("Medir velocidad"), C_NET_D, spd_btn_cb, NULL);
+    g->c_spd_state = caption(c, "", lw - 40);
+    g->c_spd_kv[0] = kv(c, lw - 40, _("Por el cable"));
+    g->c_spd_kv[1] = kv(c, lw - 40, _("Por el Wi-Fi"));
+    g->c_cmp_seen = g->c_spd_seen = 0xFFFFFFFFu;
 
     section(right, "SWITCH");
     c = vcard(right, rw, 20, 10);
