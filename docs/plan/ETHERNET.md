@@ -583,8 +583,34 @@ dos. Bajar un archivo de 892 KB del portal por el cable da 0,62 a
 decide:** repetir "Comparar" en la placa (el ping del cable tendría que
 bajar de 10 ms a 2 o 3) y `iperf` hacia la dirección del cable.
 
-**Lo que sigue de acá:** según den esas dos medidas, dejar los 2 ms o
-volver; y, en la placa auxiliar, llevar la pata INT del módulo a un GPIO,
+**Las dio el usuario, dos veces, y fueron peores, no mejores:** por el
+cable 63,3 ms de media (de 10,1 a 150) y 38,6 (de 8,33 a 94,7); por el
+Wi-Fi 62,5 y 85,6; recibiendo por el cable 1,1 y 0,9 Mbit/s. **La
+explicación del sondeo estaba mal**, o no era lo principal: con el chip
+consultado cada 2 ms el mejor ping del cable siguió en 8 a 10 ms. Por qué
+empeoró todo, el Wi-Fi también, no se sabe.
+
+**Lo que se encontró leyendo el driver de la IDF.** Cada trama, entre o
+salga, termina con una orden al chip (un registro que el chip borra cuando
+la tomó). El driver escribe la orden, mira el registro una vez y, si
+todavía no está borrado, **duerme 10 ms** antes de volver a mirar
+(`w5500_send_command`). Si el chip tarda apenas más que una lectura SPI en
+tomar la orden de "ya leí esta trama", cada trama recibida llega 10 ms
+tarde y entran cien por segundo como mucho: un ping de 10 ms y 1,2 Mbit/s
+con tramas enteras, que es lo que se midió. Mandar no lo sufre igual: 4 a
+7 Mbit/s.
+
+**Lo que se hizo:** la espera se hace en nuestra capa SPI (`spi_write` en
+`aos_eth_p4.c`): después de escribir una orden mira el registro cada pocos
+microsegundos hasta que se borra, y el driver lo encuentra borrado.
+`/api/eth` dice cuántas órdenes hubo, cuántas no estaban tomadas a la
+primera mirada y cuántas miradas llevó la peor (`cmds`, `cmds_waited`,
+`cmd_looks_max`): si la hipótesis es cierta, casi todas esperaron.
+**Compilado, sin instalar ni probar.** El sondeo quedó en 2 ms; si con
+esto el Wi-Fi sigue peor que al principio, vuelve a 10.
+
+**Lo que sigue de acá:** instalar, leer esos contadores, y repetir las dos
+medidas; y, en la placa auxiliar, llevar la pata INT del módulo a un GPIO,
 que hoy sale a una tira suelta.
 
 **Falta de esta herramienta:** que la placa sea la que manda (cliente

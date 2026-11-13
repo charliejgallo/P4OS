@@ -37,6 +37,9 @@ static void send_state(aos_httpd_req_t *r, int status, bool ok)
     cJSON_AddNumberToObject(o, "links", i.links);
     cJSON_AddNumberToObject(o, "rx", i.rx_frames);
     cJSON_AddNumberToObject(o, "restarts", i.restarts);
+    cJSON_AddNumberToObject(o, "cmds", i.cmds);
+    cJSON_AddNumberToObject(o, "cmds_waited", i.cmds_waited);
+    cJSON_AddNumberToObject(o, "cmd_looks_max", i.cmd_looks_max);
     cJSON_AddStringToObject(o, "error", i.err);
     cJSON_AddBoolToObject(o, "paused", i.paused);
     cJSON_AddStringToObject(o, "paused_by", i.paused_by);
