@@ -10494,3 +10494,57 @@ Por el Wi-Fi	By the Wi-Fi
 
 #: firmware (Red, Cable)
 No se pudo abrir el puerto 5001	Port 5001 could not be opened
+
+#: firmware (Red, Vigía)
+Vigía	Lookout
+
+#: firmware (Red, Vigía)
+Vigilar	Watch it
+
+#: firmware (Red, Vigía)
+Ya está en la lista del vigía, o la lista está llena	It is on the lookout's list already, or the list is full
+
+#: firmware (Red, Vigía)
+Todavía no se sabe su dirección	Its address is not known yet
+
+#: firmware (Red, Vigía)
+Se mandó el paquete para despertarlo. Si tiene Wake-on-LAN, prende en unos segundos	The packet to wake it was sent. If it has Wake-on-LAN, it comes on in a few seconds
+
+#: firmware (Red, Vigía)
+No se pudo mandar: no se sabe su MAC, o no hay red	It could not be sent: its MAC is not known, or there is no network
+
+#: firmware (Red, Vigía)
+Dirección o nombre del equipo	The device's address or name
+
+#: firmware (Red, Vigía)
+La lista está vacía. Agregá un equipo por su dirección o su nombre, o desde Hosts o Equipo con el botón Vigilar.	The list is empty. Add a device by its address or its name, or from Hosts or Device with the Watch it button.
+
+#: firmware (Red, Vigía)
+mirando…	looking…
+
+#: firmware (Red, Vigía)
+prendido, %s ms	on, %s ms
+
+#: firmware (Red, Vigía)
+no responde	no answer
+
+#: firmware (Red, Vigía)
+no responde hace %s	no answer for %s
+
+#: firmware (Red, Vigía)
+Despertar	Wake it
+
+#: firmware (Red, Vigía)
+Quitar	Remove
+
+#: firmware (Red, Vigía)
+Los equipos del taller: cuáles están prendidos	The bench's devices: which are on
+
+#: firmware (Red, Vigía)
+Agregar un equipo	Add a device
+
+#: firmware (Red, Vigía)
+Los mira cada diez segundos con un ping; con equipo:puerto, prueba ese puerto. Para despertar uno hace falta su MAC, que se aprende sola la primera vez que se lo ve prendido en la misma red, y que el equipo tenga Wake-on-LAN habilitado.	It looks at them every ten seconds with a ping; with device:port, it tries that port. To wake one its MAC is needed, learnt by itself the first time the device is seen on in the same network, and the device must have Wake-on-LAN switched on.
+
+#: firmware (Red, Vigía)
+Simulador: no se mira ni se despierta a nadie; los estados son de ejemplo.	Simulator: nobody is looked at or woken; the states are examples.

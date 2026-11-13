@@ -274,6 +274,41 @@ bool nt_speed_start(void);
 void nt_speed_stop(void);
 const nt_speed_t *nt_speed(void);       /* under nt_lock() */
 
+/* ---- the lookout: the bench's devices, who is on, and waking them ---- */
+
+#define NT_WATCH_MAX 16
+
+typedef struct {
+    char     name[24];
+    char     host[40];          /* an address or a name */
+    char     mac[18];           /* "AA:BB:CC:DD:EE:FF", for waking it; "" not known yet */
+    uint16_t port;              /* 0: it is pinged; else that TCP port is tried */
+    int      up;                /* -1 not looked at yet, 0 no answer, 1 it answers */
+    float    ms;
+    uint32_t since_ms;          /* uptime when it changed to what it is */
+} nt_watched_t;
+
+typedef struct {
+    int          n;
+    nt_watched_t d[NT_WATCH_MAX];
+    uint32_t     rounds;        /* times the whole list was looked at */
+    uint32_t     seq;
+} nt_watch_t;
+
+/* The list is a text file in the card's folder of surveys, vigia.txt, a line
+ * a device: name, host, MAC and port between tabs. nt_watch_run() reads it
+ * the first time, and keeps the lookout looking, every ten seconds, for as
+ * long as it goes on being called. */
+void nt_watch_run(void);
+const nt_watch_t *nt_watch(void);       /* under nt_lock(), after nt_watch_run() */
+/* false: the list is full, or that host is on it already. mac may be "". */
+bool nt_watch_add(const char *name, const char *host, const char *mac, uint16_t port);
+void nt_watch_remove(int i);
+/* Wake-on-LAN: the "magic packet" with its MAC, to everyone on every network
+ * the board is on. false: its MAC is not known. The device has to have
+ * Wake-on-LAN switched on, and be on a network the board is on. */
+bool nt_wake(int i);
+
 /* ---- mDNS ---- */
 
 #define NT_MAX_SVC 64

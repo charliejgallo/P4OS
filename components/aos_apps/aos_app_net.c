@@ -1,7 +1,7 @@
 /*
  * P4OS - Red: the network tools of the bench, over aos_nettools.c.
  *
- * Six tabs:
+ * Seven tabs:
  *
  *   Ping    any host or address: a ping a second with the latency as bars,
  *           min/avg/max, loss and jitter, and what the name resolved to.
@@ -29,6 +29,9 @@
  *           SSDP, WS-Discovery), and a sweep by ARP of the networks
  *           devices come set to from the factory, which finds the ones
  *           that say nothing.
+ *   Vigía   the bench's own devices, kept in a list: which are on (a ping,
+ *           or a TCP port, every ten seconds) and since when, and waking
+ *           one that is off with Wake-on-LAN.
  *
  * Nothing here touches the network: the service's threads do, and the
  * screen reads what they leave from an lv_timer. Leaving the app stops them.
@@ -52,10 +55,10 @@
 #define C_NET_D   lv_color_hex(0x0369A1)
 #define C_KEYTOP  lv_color_hex(0xF2F2F7)
 
-enum { TAB_PING, TAB_HOSTS, TAB_WIFI, TAB_MDNS, TAB_CABLE, TAB_FIND, TAB_COUNT };
-static const char *const TAB_NAME[TAB_COUNT] = { "Ping", "Hosts", "WiFi", "mDNS", "Cable", N_("Equipo") };
+enum { TAB_PING, TAB_HOSTS, TAB_WIFI, TAB_MDNS, TAB_CABLE, TAB_FIND, TAB_WATCH, TAB_COUNT };
+static const char *const TAB_NAME[TAB_COUNT] = { "Ping", "Hosts", "WiFi", "mDNS", "Cable", N_("Equipo"), N_("Vigía") };
 static const char *const TAB_GLYPH[TAB_COUNT] = { AOS_SYM_PULSE, AOS_SYM_LAN_PENDING, AOS_SYM_WIFI, AOS_SYM_DNS,
-                                                  AOS_SYM_LAN_CONNECT, AOS_SYM_MAGNIFY };
+                                                  AOS_SYM_LAN_CONNECT, AOS_SYM_MAGNIFY, AOS_SYM_EYE_OUTLINE };
 
 #define C_GOOD    AOS_C_GREEN
 #define C_BAD     AOS_C_RED
@@ -185,7 +188,11 @@ typedef struct {
     /* a station's detail */
     lv_obj_t *fd_title, *fd_kv[8], *fd_said, *fd_join, *fd_join_cap;
     int32_t fd_w;
-    char fd_ip[16];
+    char fd_ip[16], fd_name[40];
+    /* Vigía */
+    lv_obj_t *v_list;
+    int32_t v_w;
+    uint32_t v_sig, v_tick;
 } page_t;
 
 AOS_BSS_PSRAM static struct {
@@ -907,6 +914,18 @@ static void detail_ports_cb(lv_event_t *e)
     U.pg.d_seen = 0xFFFFFFFFu;
 }
 
+static void watch_take(const char *name, const char *host, const char *mac);
+
+static void detail_watch_cb(lv_event_t *e)
+{
+    nt_host_t h;
+    if (!find_host(S.sel, &h)) return;
+    char ip[16], mac[18] = "";
+    nt_ip_str(h.ip, ip, sizeof ip);
+    if (h.has_mac) snprintf(mac, sizeof mac, "%02X:%02X:%02X:%02X:%02X:%02X", h.mac[0], h.mac[1], h.mac[2], h.mac[3], h.mac[4], h.mac[5]);
+    watch_take(h.name, ip, mac);
+}
+
 static void detail_ping_cb(lv_event_t *e)
 {
     char ip[16];
@@ -1144,6 +1163,8 @@ static void build_detail(lv_obj_t *parent, int32_t w)
     lv_obj_set_flex_align(br, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     pill(br, AOS_SYM_PULSE, "Ping", AOS_C_GREEN, detail_ping_cb, NULL);
     g->d_btn = pill(br, AOS_SYM_MAGNIFY, _("Puertos 1-1024"), C_NET_D, detail_ports_cb, NULL);
+    br = row(top, w - 48, 80, 12);
+    pill(br, AOS_SYM_EYE_OUTLINE, _("Vigilar"), C_NET_D, detail_watch_cb, NULL);
 
     if (h.nports) {
         section(parent, _("PUERTOS CONOCIDOS"));
@@ -2375,6 +2396,26 @@ static void fd_join_cb(lv_event_t *e)
     bench_set(AOS_ETH_STATIC, mine);
 }
 
+/* Onto the lookout's list, and over to it. */
+static void watch_take(const char *name, const char *host, const char *mac)
+{
+    nt_watch_run();
+    if (!nt_watch_add(name, host, mac, 0)) { aos_ui_toast(_("Ya está en la lista del vigía, o la lista está llena"), 2500); return; }
+    S.tab = TAB_WATCH;
+    settings_save();
+    build_page();
+}
+
+static void fd_watch_cb(lv_event_t *e)
+{
+    if (!U.pg.fd_ip[0]) { aos_ui_toast(_("Todavía no se sabe su dirección"), 2500); return; }
+    char mac[18], ip[16], name[40];
+    snprintf(mac, sizeof mac, "%02X:%02X:%02X:%02X:%02X:%02X", S.fsel[0], S.fsel[1], S.fsel[2], S.fsel[3], S.fsel[4], S.fsel[5]);
+    snprintf(ip, sizeof ip, "%s", U.pg.fd_ip);
+    snprintf(name, sizeof name, "%s", U.pg.fd_name);
+    watch_take(name, ip, mac);
+}
+
 static void fd_ping_cb(lv_event_t *e)
 {
     if (!U.pg.fd_ip[0]) return;
@@ -2434,6 +2475,7 @@ static void find_detail_refresh(bool now)
     }
     const aos_eth_station_t *q = &st[at];
     snprintf(g->fd_ip, sizeof g->fd_ip, "%s", q->ip);
+    snprintf(g->fd_name, sizeof g->fd_name, "%s", q->name);
     say(g->fd_title, q->ip[0] ? q->ip : _("sin dirección todavía"), q->ip[0] ? AOS_C_TEXT : AOS_C_DIM);
     snprintf(t, sizeof t, "%02X:%02X:%02X:%02X:%02X:%02X%s", q->mac[0], q->mac[1], q->mac[2], q->mac[3], q->mac[4], q->mac[5],
              (q->mac[0] & 2) ? _(" (privada: la eligió el equipo, no su fabricante)") : "");
@@ -2493,6 +2535,8 @@ static void build_find_detail(void)
     lv_obj_t *br = row(c, lw - 40, 80, 12);
     pill(br, AOS_SYM_PULSE, "Ping", C_NET_D, fd_ping_cb, NULL);
     g->fd_join = pill(br, AOS_SYM_LAN_CONNECT, _("Ponerme en su red"), C_NET_D, fd_join_cb, NULL);
+    br = row(c, lw - 40, 80, 12);
+    pill(br, AOS_SYM_EYE_OUTLINE, _("Vigilar"), C_NET_D, fd_watch_cb, NULL);
     g->fd_join_cap = caption(c, "", lw - 40);
     section(right, _("LO QUE DIJO"));
     c = vcard(right, rw, 20, 8);
@@ -2520,6 +2564,7 @@ static void find_list_build(const aos_eth_station_t *s, int n)
         lv_obj_set_style_bg_color(c, AOS_C_CARD2, LV_STATE_PRESSED);
         lv_obj_add_event_cb(c, find_open_cb, LV_EVENT_CLICKED, (void *)(intptr_t)i);
         lv_obj_t *head = box(c, w - 36, 44);
+        lv_obj_remove_flag(head, LV_OBJ_FLAG_CLICKABLE);        /* a tap on the address line is a tap on the card */
         lv_obj_align(aos_label(head, s[i].ip[0] ? s[i].ip : _("sin dirección todavía"), aos_font_body,
                                s[i].ip[0] ? AOS_C_TEXT : AOS_C_DIM), LV_ALIGN_LEFT_MID, 0, 0);
         if (s[i].answered) lv_obj_align(aos_label(head, _("contestó"), aos_font_caption, C_GOOD), LV_ALIGN_RIGHT_MID, 0, 0);
@@ -2606,6 +2651,16 @@ static void build_find(void)
     g->f_btn = pill(br, AOS_SYM_MAGNIFY, _("Buscar en redes de fábrica"), C_NET_D, find_btn_cb, NULL);
     g->f_bar = progress(c, lw - 40);
     g->f_state = caption(c, "", lw - 40);
+    /* who is on the wire: the right column in landscape; in portrait right here, above the bench's
+     * cards, which are for after a device was found */
+    section(right, _("EN ESTE CABLE"));
+    g->f_list = box(right, rw, LV_SIZE_CONTENT);
+    g->f_list_w = rw;
+    lv_obj_set_flex_flow(g->f_list, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(g->f_list, 10, 0);
+#ifdef AOS_SIM
+    caption(right, _("Simulador: los equipos son de ejemplo."), rw);
+#endif
     section(left, _("RED DE BANCO"));
     c = vcard(left, lw, 20, 12);
     g->f_bench = aos_label(c, "", aos_font_small, AOS_C_DIM);
@@ -2630,16 +2685,107 @@ static void build_find(void)
     lv_obj_set_style_pad_row(g->f_srv_log, 4, 0);
     g->f_srv_w = lw - 40;
     g->f_srv_seen = 0xFFFFFFFFu;
-    section(right, _("EN ESTE CABLE"));
-    g->f_list = box(right, rw, LV_SIZE_CONTENT);
-    g->f_list_w = rw;
-    lv_obj_set_flex_flow(g->f_list, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_style_pad_row(g->f_list, 10, 0);
-#ifdef AOS_SIM
-    caption(right, _("Simulador: los equipos son de ejemplo."), rw);
-#endif
     g->f_seen = 0xFFFFFFFFu;
     find_refresh(true);
+}
+
+/* -------------------------------------------------------------------------- */
+/* Vigía: the bench's devices, who is on, and waking them                      */
+/* -------------------------------------------------------------------------- */
+
+static void watch_wake_cb(lv_event_t *e)
+{
+    bool ok = nt_wake((int)(intptr_t)lv_event_get_user_data(e));
+    aos_ui_toast(ok ? _("Se mandó el paquete para despertarlo. Si tiene Wake-on-LAN, prende en unos segundos")
+                    : _("No se pudo mandar: no se sabe su MAC, o no hay red"), 3500);
+}
+
+static void watch_del_cb(lv_event_t *e)
+{
+    nt_watch_remove((int)(intptr_t)lv_event_get_user_data(e));
+    U.pg.v_sig = 0xFFFFFFFFu;
+}
+
+static void watch_add_done(const char *text)
+{
+    if (!text || !text[0]) return;
+    char host[40];
+    snprintf(host, sizeof host, "%s", text);
+    uint16_t port = 0;
+    char *colon = strrchr(host, ':');   /* "equipo:8080" tries that port instead of a ping */
+    if (colon && atoi(colon + 1) > 0) { port = (uint16_t)atoi(colon + 1); *colon = 0; }
+    if (!nt_watch_add(NULL, host, "", port)) aos_ui_toast(_("Ya está en la lista del vigía, o la lista está llena"), 2500);
+    build_page();
+}
+
+static void watch_add_cb(lv_event_t *e) { text_entry(_("Dirección o nombre del equipo"), "", watch_add_done); }
+
+static void watch_refresh(bool now)
+{
+    page_t *g = &U.pg;
+    if (!g->v_list) return;
+    nt_watch_run();
+    if (!now && ++g->v_tick % 4) return;
+    static nt_watch_t w;
+    nt_lock();
+    w = *nt_watch();
+    nt_unlock();
+    uint32_t sig = 2166136261u ^ (uint32_t)w.n, ms = (uint32_t)aos_hal_uptime_ms();
+    for (int i = 0; i < w.n; i++) {
+        const char *h = w.d[i].host;
+        while (*h) sig = (sig ^ (uint8_t)*h++) * 16777619u;
+        sig = (sig ^ (uint32_t)(w.d[i].up + 2) ^ (w.d[i].mac[0] ? 8u : 0) ^ ((ms - w.d[i].since_ms) / 60000u) << 4) * 16777619u;
+    }
+    if (sig == g->v_sig && !now) return;
+    g->v_sig = sig;
+    lv_obj_clean(g->v_list);
+    int32_t wd = g->v_w;
+    char t[120], a[24];
+    if (!w.n) {
+        caption(g->v_list, _("La lista está vacía. Agregá un equipo por su dirección o su nombre, o desde Hosts o Equipo con el botón Vigilar."), wd);
+        return;
+    }
+    for (int i = 0; i < w.n; i++) {
+        const nt_watched_t *d = &w.d[i];
+        lv_obj_t *c = vcard(g->v_list, wd, 18, 8);
+        lv_obj_t *head = box(c, wd - 36, 44);
+        lv_obj_align(aos_label(head, d->name, aos_font_body, AOS_C_TEXT), LV_ALIGN_LEFT_MID, 0, 0);
+        fmt_span(a, sizeof a, (ms - d->since_ms) / 1000);
+        if (d->up < 0) snprintf(t, sizeof t, "%s", _("mirando…"));
+        else if (d->up) { char m[16]; fmt_ms(m, sizeof m, d->ms); snprintf(t, sizeof t, _("prendido, %s ms"), m); }
+        else if (w.rounds < 2) snprintf(t, sizeof t, "%s", _("no responde"));
+        else snprintf(t, sizeof t, _("no responde hace %s"), a);
+        lv_obj_align(aos_label(head, t, aos_font_small, d->up < 0 ? AOS_C_DIM : d->up ? C_GOOD : C_BAD), LV_ALIGN_RIGHT_MID, 0, 0);
+        if (d->port) snprintf(t, sizeof t, "%s, %s %u%s%s", d->host, _("puerto"), d->port, d->mac[0] ? "   " : "", d->mac);
+        else snprintf(t, sizeof t, "%s%s%s", d->host, d->mac[0] ? "   " : "", d->mac);
+        caption(c, t, wd - 36);
+        lv_obj_t *br = row(c, wd - 36, 80, 12);
+        if (d->mac[0] && d->up != 1) pill(br, AOS_SYM_POWER, _("Despertar"), C_NET_D, watch_wake_cb, (void *)(intptr_t)i);
+        pill(br, AOS_SYM_DELETE, _("Quitar"), AOS_C_CARD2, watch_del_cb, (void *)(intptr_t)i);
+    }
+}
+
+static void build_watch(void)
+{
+    page_t *g = &U.pg;
+    lv_obj_t *left, *right;
+    int32_t lw, rw;
+    split(U.content, 480, &left, &right, &lw, &rw);
+    lv_obj_t *cap;
+    header(left, lw, aos_tr(TAB_NAME[TAB_WATCH]), &cap);
+    lv_label_set_text(cap, _("Los equipos del taller: cuáles están prendidos"));
+    lv_obj_t *c = vcard(left, lw, 20, 12);
+    lv_obj_t *br = row(c, lw - 40, 80, 12);
+    pill(br, AOS_SYM_PLUS, _("Agregar un equipo"), C_NET_D, watch_add_cb, NULL);
+    caption(c, _("Los mira cada diez segundos con un ping; con equipo:puerto, prueba ese puerto. Para despertar uno hace falta su MAC, que se aprende sola la primera vez que se lo ve prendido en la misma red, y que el equipo tenga Wake-on-LAN habilitado."), lw - 40);
+    g->v_list = box(right, rw, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(g->v_list, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(g->v_list, 10, 0);
+    g->v_w = rw;
+#ifdef AOS_SIM
+    caption(right, _("Simulador: no se mira ni se despierta a nadie; los estados son de ejemplo."), rw);
+#endif
+    watch_refresh(true);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -2662,6 +2808,7 @@ static void build_page(void)
     else if (S.tab == TAB_WIFI) build_wifi();
     else if (S.tab == TAB_CABLE) build_cable();
     else if (S.tab == TAB_FIND) build_find();
+    else if (S.tab == TAB_WATCH) build_watch();
     else build_mdns();
 }
 
@@ -2685,6 +2832,7 @@ static void timer_cb(lv_timer_t *t)
     else if (S.tab == TAB_WIFI) wifi_refresh();
     else if (S.tab == TAB_CABLE) cable_refresh(false);
     else if (S.tab == TAB_FIND) { if (S.fopen) find_detail_refresh(false); else find_refresh(false); }
+    else if (S.tab == TAB_WATCH) watch_refresh(false);
     else mdns_refresh();
 }
 

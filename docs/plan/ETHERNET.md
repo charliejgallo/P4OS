@@ -552,6 +552,39 @@ Wi-Fi con el cable arriba.
 **Falta de esta herramienta:** que la placa sea la que manda (cliente
 iperf hacia un servidor), y medir también de la placa hacia afuera.
 
+## El vigía y Wake-on-LAN (Red, pestaña Vigía)
+
+La herramienta 8 del plan, la última, 2026-11-12. Una lista de los equipos
+del taller, y de cada uno si está prendido. Anda con el cable o con el
+Wi-Fi solo.
+
+- **La lista** es un archivo de texto en la tarjeta, `/redes/vigia.txt`,
+  una línea por equipo: nombre, dirección o nombre de red, MAC y puerto,
+  separados por tabuladores. Hasta 16. Se edita desde la pantalla o a mano
+  desde el portal.
+- **Mirar:** cada diez segundos, mientras la pestaña está abierta, un ping
+  a cada uno (o un intento de conexión a un puerto TCP, si se lo agregó
+  como `equipo:puerto`): prendido con su tiempo, o sin respuesta y hace
+  cuánto.
+- **Agregar:** por su dirección o su nombre, o con el botón **Vigilar** del
+  detalle de un equipo en Hosts o en Equipo, que trae también su nombre y
+  su MAC.
+- **Despertar:** el paquete mágico de Wake-on-LAN (seis bytes FF y la MAC
+  dieciséis veces, UDP al puerto 9) a la difusión de cada red en la que
+  está la placa, tres veces. Hace falta la MAC, que se aprende sola de la
+  tabla ARP la primera vez que el equipo contesta en la misma red, y se
+  guarda en el archivo; y que el equipo tenga Wake-on-LAN habilitado.
+
+En el simulador: los estados son de ejemplo y no se manda nada a la red;
+probados la lista, quitar, el botón de despertar cuando hay MAC y el equipo
+no responde, y el alta desde Equipo, que dejó en el archivo el nombre, la
+dirección y la MAC de la cámara de ejemplo. **En la placa falta todo.**
+
+De paso, en la pestaña Equipo la lista de equipos quedaba en vertical
+debajo de las tarjetas de banco: ahora va arriba de ellas; y un toque en el
+renglón de la dirección de un equipo no lo abría (lo tapaba una caja): ya
+lo abre.
+
 ## Qué gana el taller con un cable de red
 
 Ordenadas por lo que más resuelve en un banco. Varias necesitan la fase 4.

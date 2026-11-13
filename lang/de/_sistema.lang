@@ -10494,3 +10494,57 @@ Por el Wi-Fi	Über das WLAN
 
 #: firmware (Red, Cable)
 No se pudo abrir el puerto 5001	Port 5001 konnte nicht geöffnet werden
+
+#: firmware (Red, Vigía)
+Vigía	Wache
+
+#: firmware (Red, Vigía)
+Vigilar	Beobachten
+
+#: firmware (Red, Vigía)
+Ya está en la lista del vigía, o la lista está llena	Schon in der Liste der Wache, oder die Liste ist voll
+
+#: firmware (Red, Vigía)
+Todavía no se sabe su dirección	Seine Adresse ist noch nicht bekannt
+
+#: firmware (Red, Vigía)
+Se mandó el paquete para despertarlo. Si tiene Wake-on-LAN, prende en unos segundos	Das Weckpaket wurde gesendet. Mit Wake-on-LAN startet es in wenigen Sekunden
+
+#: firmware (Red, Vigía)
+No se pudo mandar: no se sabe su MAC, o no hay red	Senden nicht möglich: MAC unbekannt oder kein Netz
+
+#: firmware (Red, Vigía)
+Dirección o nombre del equipo	Adresse oder Name des Geräts
+
+#: firmware (Red, Vigía)
+La lista está vacía. Agregá un equipo por su dirección o su nombre, o desde Hosts o Equipo con el botón Vigilar.	Die Liste ist leer. Ein Gerät per Adresse oder Name hinzufügen, oder aus Hosts oder Gerät mit der Taste Beobachten.
+
+#: firmware (Red, Vigía)
+mirando…	prüfe…
+
+#: firmware (Red, Vigía)
+prendido, %s ms	an, %s ms
+
+#: firmware (Red, Vigía)
+no responde	keine Antwort
+
+#: firmware (Red, Vigía)
+no responde hace %s	keine Antwort seit %s
+
+#: firmware (Red, Vigía)
+Despertar	Aufwecken
+
+#: firmware (Red, Vigía)
+Quitar	Entfernen
+
+#: firmware (Red, Vigía)
+Los equipos del taller: cuáles están prendidos	Die Geräte der Werkstatt: welche an sind
+
+#: firmware (Red, Vigía)
+Agregar un equipo	Gerät hinzufügen
+
+#: firmware (Red, Vigía)
+Los mira cada diez segundos con un ping; con equipo:puerto, prueba ese puerto. Para despertar uno hace falta su MAC, que se aprende sola la primera vez que se lo ve prendido en la misma red, y que el equipo tenga Wake-on-LAN habilitado.	Prüft sie alle zehn Sekunden per Ping; mit Gerät:Port wird dieser Port geprüft. Zum Aufwecken wird die MAC gebraucht, die beim ersten Mal von selbst gelernt wird, wenn das Gerät im selben Netz an ist, und Wake-on-LAN muss am Gerät aktiviert sein.
+
+#: firmware (Red, Vigía)
+Simulador: no se mira ni se despierta a nadie; los estados son de ejemplo.	Simulator: Niemand wird geprüft oder geweckt; die Zustände sind Beispiele.

@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3656 simbolos.
+ * Total: 3661 simbolos.
  */
 
 #include <stddef.h>
@@ -3577,6 +3577,11 @@ extern int nt_speed;
 extern int nt_speed_start;
 extern int nt_speed_stop;
 extern int nt_unlock;
+extern int nt_wake;
+extern int nt_watch;
+extern int nt_watch_add;
+extern int nt_watch_remove;
+extern int nt_watch_run;
 extern int nt_wifi;
 extern int nt_wifi_run;
 extern int nt_wifi_scan;
@@ -7236,6 +7241,11 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(nt_speed_start),
     ESP_ELFSYM_EXPORT(nt_speed_stop),
     ESP_ELFSYM_EXPORT(nt_unlock),
+    ESP_ELFSYM_EXPORT(nt_wake),
+    ESP_ELFSYM_EXPORT(nt_watch),
+    ESP_ELFSYM_EXPORT(nt_watch_add),
+    ESP_ELFSYM_EXPORT(nt_watch_remove),
+    ESP_ELFSYM_EXPORT(nt_watch_run),
     ESP_ELFSYM_EXPORT(nt_wifi),
     ESP_ELFSYM_EXPORT(nt_wifi_run),
     ESP_ELFSYM_EXPORT(nt_wifi_scan),

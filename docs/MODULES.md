@@ -556,6 +556,11 @@ page.
   `iperf -c <address>` (iperf 2) sends from a computer, by the interface
   that address belongs to. It takes streams only from networks the portal
   opens to with no password.
+- **The lookout** (not in a release yet): Red, Vigía. A list of the
+  bench's devices, kept in the card's `/redes/vigia.txt`, each looked at
+  every ten seconds (a ping, or a TCP port) while the tab is open, and
+  woken by Wake-on-LAN once its MAC is known. Needs no Ethernet: it works
+  over the Wi-Fi too.
 
 `docs/plan/ETHERNET.md` (Spanish) has the phases, everything measured and
 what is next.

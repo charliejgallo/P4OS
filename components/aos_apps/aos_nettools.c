@@ -98,6 +98,7 @@ typedef struct {
     nt_bench_t bench;
     nt_compare_t compare;
     nt_speed_t speed;
+    nt_watch_t watch;
 } nt_state_t;
 
 static nt_state_t *T;
@@ -2269,6 +2270,243 @@ bool nt_speed_start(void)
 }
 
 void nt_speed_stop(void) { s_speed_stop = true; }
+
+/* -------------------------------------------------------------------------- */
+/* The lookout                                                                 */
+/* -------------------------------------------------------------------------- */
+
+#define V (T->watch)
+#define WATCH_EVERY_MS 10000
+
+static bool s_watch_run, s_watch_loaded;
+static volatile uint32_t s_watch_alive_ms;
+
+static void watch_path(char *out, size_t n) { snprintf(out, n, "%s/vigia.txt", aos_hal_path_scans()); }
+
+/* Under nt_lock(). */
+static void watch_save(void)
+{
+    char path[128];
+    watch_path(path, sizeof path);
+    mkdir(aos_hal_path_scans(), 0777);
+    FILE *f = fopen(path, "w");
+    if (!f) return;
+    fprintf(f, "# Red, Vigia: nombre <tab> equipo <tab> MAC <tab> puerto (0: ping)\n");
+    for (int i = 0; i < V.n; i++) fprintf(f, "%s\t%s\t%s\t%u\n", V.d[i].name, V.d[i].host, V.d[i].mac, V.d[i].port);
+    fclose(f);
+}
+
+static void watch_load(void)
+{
+    if (s_watch_loaded) return;
+    s_watch_loaded = true;
+    char path[128], line[160];
+    watch_path(path, sizeof path);
+    FILE *f = fopen(path, "r");
+    if (!f) return;
+    nt_lock();
+    while (V.n < NT_WATCH_MAX && fgets(line, sizeof line, f)) {
+        if (line[0] == '#') continue;
+        char *field[4] = { line, NULL, NULL, NULL };
+        for (int k = 1; k < 4; k++) {
+            char *tab = field[k - 1] ? strchr(field[k - 1], '\t') : NULL;
+            if (tab) { *tab = 0; field[k] = tab + 1; }
+        }
+        for (int k = 0; k < 4; k++) if (field[k]) field[k][strcspn(field[k], "\r\n")] = 0;
+        if (!field[1] || !field[1][0]) continue;
+        nt_watched_t *d = &V.d[V.n++];
+        memset(d, 0, sizeof *d);
+        snprintf(d->name, sizeof d->name, "%.*s", (int)sizeof d->name - 1, field[0]);      /* cut to its field */
+        snprintf(d->host, sizeof d->host, "%.*s", (int)sizeof d->host - 1, field[1]);
+        if (field[2] && strlen(field[2]) == 17) snprintf(d->mac, sizeof d->mac, "%.17s", field[2]);
+        d->port = field[3] ? (uint16_t)atoi(field[3]) : 0;
+        d->up = -1;
+    }
+    V.seq++;
+    nt_unlock();
+    fclose(f);
+}
+
+const nt_watch_t *nt_watch(void) { return &V; }      /* read by nt_watch_run(), which comes first */
+
+#ifdef ESP_PLATFORM
+/* How long a TCP connect to a port takes to be answered, accepted or refused; < 0 nobody there. */
+static float port_ms(uint32_t ip, uint16_t port)
+{
+    int fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd < 0) return -1;
+    set_nonblock(fd);
+    struct sockaddr_in a;
+    memset(&a, 0, sizeof a);
+    a.sin_family = AF_INET;
+    a.sin_port = htons(port);
+    a.sin_addr.s_addr = htonl(ip);
+    int64_t t0 = now_us();
+    float ms = -1;
+    int r = connect(fd, (struct sockaddr *)&a, sizeof a);
+    if (r == 0) ms = 0.1f;
+    else if (errno == EINPROGRESS) {
+        fd_set wr;
+        FD_ZERO(&wr);
+        FD_SET(fd, &wr);
+        struct timeval tv = { .tv_sec = 1, .tv_usec = 0 };
+        if (select(fd + 1, NULL, &wr, NULL, &tv) > 0) {
+            int err = 0;
+            socklen_t l = sizeof err;
+            getsockopt(fd, SOL_SOCKET, SO_ERROR, &err, &l);
+            if (err == 0 || err == ECONNREFUSED) ms = (float)(now_us() - t0) / 1000.0f;     /* refused: it is there */
+        }
+    } else if (errno == ECONNREFUSED) ms = (float)(now_us() - t0) / 1000.0f;
+    close(fd);
+    return ms;
+}
+#endif
+
+static void watch_thread(void *arg)
+{
+    (void)arg;
+    while (app_alive() && (uint32_t)aos_hal_uptime_ms() - s_watch_alive_ms < 3000) {
+        for (int i = 0; app_alive(); i++) {
+            nt_watched_t d;
+            nt_lock();
+            bool more = i < V.n;
+            if (more) d = V.d[i];
+            nt_unlock();
+            if (!more) break;
+            uint32_t ip = 0;
+            float ms = -1;
+            char mac[18] = "";
+#ifdef ESP_PLATFORM
+            if (resolve(d.host, &ip)) ms = d.port ? port_ms(ip, d.port) : echo_best(ip, 2);
+            if (ms >= 0 && !d.mac[0]) {         /* it just answered: its MAC is in the stack's table, if it is a neighbour */
+                aos_arp_entry_t e[16];
+                int n = aos_hal_net_arp_table(e, 16);
+                for (int k = 0; k < n; k++)
+                    if (e[k].ip == ip) snprintf(mac, sizeof mac, "%02X:%02X:%02X:%02X:%02X:%02X", e[k].mac[0], e[k].mac[1],
+                                                e[k].mac[2], e[k].mac[3], e[k].mac[4], e[k].mac[5]);
+            }
+#else
+            /* the simulator looks at nothing: every other device of the list is on, and one comes and goes */
+            ip_parse(d.host, &ip);
+            aos_hal_sleep_ms(150);
+            bool on = (i % 2) == 0 || (i == 1 && (aos_hal_uptime_ms() / 20000) % 2);
+            ms = on ? 0.8f + (float)i * 1.7f : -1;
+            if (on && !d.mac[0]) snprintf(mac, sizeof mac, "02:10:00:00:00:%02X", (unsigned)(0x40 + i));
+#endif
+            nt_lock();
+            if (i < V.n && !strcmp(V.d[i].host, d.host)) {      /* still the same line: the list may have changed meanwhile */
+                nt_watched_t *x = &V.d[i];
+                int up = ms >= 0;
+                if (x->up != up) x->since_ms = (uint32_t)aos_hal_uptime_ms();
+                x->up = up;
+                x->ms = ms;
+                if (mac[0]) { snprintf(x->mac, sizeof x->mac, "%s", mac); watch_save(); }
+                V.seq++;
+            }
+            nt_unlock();
+        }
+        nt_lock();
+        V.rounds++;
+        V.seq++;
+        nt_unlock();
+        for (int w = 0; w < WATCH_EVERY_MS / 250 && app_alive() && (uint32_t)aos_hal_uptime_ms() - s_watch_alive_ms < 3000; w++)
+            aos_hal_sleep_ms(250);
+    }
+    nt_lock();
+    s_watch_run = false;
+    nt_unlock();
+}
+
+void nt_watch_run(void)
+{
+    watch_load();
+    s_watch_alive_ms = (uint32_t)aos_hal_uptime_ms();
+    nt_lock();
+    bool start = !s_watch_run;
+    if (start) s_watch_run = true;
+    nt_unlock();
+    if (start && !aos_hal_thread_start("nt_watch", watch_thread, NULL, STACK, PRIO)) {
+        nt_lock();
+        s_watch_run = false;
+        nt_unlock();
+    }
+}
+
+bool nt_watch_add(const char *name, const char *host, const char *mac, uint16_t port)
+{
+    watch_load();
+    if (!host || !host[0]) return false;
+    bool ok = false;
+    nt_lock();
+    bool have = false;
+    for (int i = 0; i < V.n; i++) have |= !strcmp(V.d[i].host, host);
+    if (!have && V.n < NT_WATCH_MAX) {
+        nt_watched_t *d = &V.d[V.n++];
+        memset(d, 0, sizeof *d);
+        snprintf(d->name, sizeof d->name, "%s", name && name[0] ? name : host);
+        snprintf(d->host, sizeof d->host, "%s", host);
+        if (mac && strlen(mac) == 17) snprintf(d->mac, sizeof d->mac, "%s", mac);
+        d->port = port;
+        d->up = -1;
+        for (char *c = d->name; *c; c++) if (*c == '\t') *c = ' ';      /* the file's own separator */
+        watch_save();
+        V.seq++;
+        ok = true;
+    }
+    nt_unlock();
+    return ok;
+}
+
+void nt_watch_remove(int i)
+{
+    nt_lock();
+    if (i >= 0 && i < V.n) {
+        memmove(&V.d[i], &V.d[i + 1], (size_t)(V.n - i - 1) * sizeof V.d[0]);
+        V.n--;
+        watch_save();
+        V.seq++;
+    }
+    nt_unlock();
+}
+
+bool nt_wake(int i)
+{
+    char mac[18] = "";
+    nt_lock();
+    if (i >= 0 && i < V.n) snprintf(mac, sizeof mac, "%s", V.d[i].mac);
+    nt_unlock();
+    unsigned m[6];
+    if (sscanf(mac, "%x:%x:%x:%x:%x:%x", &m[0], &m[1], &m[2], &m[3], &m[4], &m[5]) != 6) return false;
+    uint8_t pk[102];                    /* six bytes of FF, and the MAC sixteen times */
+    memset(pk, 0xFF, 6);
+    for (int k = 0; k < 16; k++) for (int b = 0; b < 6; b++) pk[6 + k * 6 + b] = (uint8_t)m[b];
+#ifdef ESP_PLATFORM
+    int fd = socket(AF_INET, SOCK_DGRAM, 0);
+    if (fd < 0) return false;
+    int one = 1;
+    setsockopt(fd, SOL_SOCKET, SO_BROADCAST, &one, sizeof one);
+    /* to every network the board is on: each one's own broadcast address goes out by its interface */
+    aos_netif_t a[6];
+    int n = aos_hal_netif_list(a, 6);
+    bool sent = false;
+    for (int k = 0; k < n; k++) {
+        uint32_t ip = 0, mask = 0;
+        if (!a[k].up || !ip_parse(a[k].ip, &ip) || !ip_parse(a[k].mask, &mask)) continue;
+        struct sockaddr_in to;
+        memset(&to, 0, sizeof to);
+        to.sin_family = AF_INET;
+        to.sin_port = htons(9);
+        to.sin_addr.s_addr = htonl(ip | ~mask);
+        for (int rep = 0; rep < 3; rep++) sent |= sendto(fd, pk, sizeof pk, 0, (struct sockaddr *)&to, sizeof to) == (ssize_t)sizeof pk;
+    }
+    close(fd);
+    return sent;
+#else
+    return true;                        /* the simulator sends nothing to the network of whoever runs it */
+#endif
+}
+
+#undef V
 
 bool nt_wifi_scan(void)
 {
