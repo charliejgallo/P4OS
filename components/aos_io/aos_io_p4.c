@@ -551,6 +551,11 @@ bool aos_io_be_ow_reset(aos_io_ow_t *b) { return onewire_bus_reset((onewire_bus_
 
 int aos_io_be_ow_search(aos_io_ow_t *b, uint64_t *roms, int max)
 {
+    /* An empty bus is the usual on a bench, and the library's search says so with a warning every
+     * time it is asked: once a minute from the sensors' service, 772 lines of the log in one night
+     * on the user's board. A reset of our own first: with no presence pulse there is nobody to
+     * search for, and nothing to say. */
+    if (onewire_bus_reset((onewire_bus_handle_t)b->be) == ESP_ERR_NOT_FOUND) return 0;
     onewire_device_iter_handle_t it = NULL;
     if (onewire_new_device_iter((onewire_bus_handle_t)b->be, &it) != ESP_OK) return -1;
     int n = 0;
