@@ -209,3 +209,13 @@ Falta saber, y el modelo no lo dice:
    el ruteador unió todo al primer intento. **Alimentación y masa no van
    finas** (pedido del usuario): 0,8 mm como mínimo hasta esas tiras y
    donde entre, 0,5 mm sólo en un paso que no dé para más.
+   **El ruteador, rehecho el 2026-11-13** porque dejaba pistas con caminos
+   raros (vueltas por los bordes de la placa, zigzags): ahora las redes no
+   se trazan una detrás de otra sino todas a la vez, cruzándose a un precio
+   que sube vuelta a vuelta hasta que ninguna cruza; los giros cuestan
+   (más el de 90° que el de 45°), y la masa queda para los planos, con
+   pistas sólo donde el relleno de KiCad deja pads aislados. En la casera:
+   67 vías contra 136 y 2,9 m de pista contra 3,6; el rodeo más largo bajó
+   de 94 mm a 56 (y ése es de 3,3 V, una red de 23 uniones). Tarda tres
+   minutos en vez de medio. El DRC de KiCad no marca nada más que los
+   cuatro avisos de serigrafía de los USB.

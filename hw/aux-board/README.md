@@ -111,44 +111,67 @@ next time `place.py` runs.** While parts are still moving, tracks go in
 the script; routing by hand starts once the placement is frozen, and from
 then on `place.py` is not run again.
 
-## A trial of the routing (2026-11-12)
+## A trial of the routing (2026-11-12, the router redone on 2026-11-13)
 
 `autoroute.py` routes the generated board by itself, to find where the
 placement is hard before anyone routes it for real. It runs under KiCad's
-Python in about half a minute and writes `trial-th.kicad_pcb` or
+Python in about three minutes and writes `trial-th.kicad_pcb` or
 `trial-smd.kicad_pcb`, which are not kept in git: open them in KiCad to
 look.
 
     <KiCad's python3> hw/aux-board/autoroute.py th
 
-<img src="trial-th.png" width="360" alt="The through-hole board routed by the trial router: front tracks in red, back tracks in blue, dense between the 2x20 header on the left and the pin headers in the middle, sparse at the top and on the right">
+<img src="trial-th.png" width="360" alt="The through-hole board routed by the trial router: front tracks in red, back tracks in blue, mostly straight runs and 45 degree corners, dense between the 2x20 header on the left and the pin headers in the middle, sparse at the top and on the right">
 
-It is a plain maze router on a 0.3175 mm grid that starts on the header's
-pin 1: 0.25 mm tracks, 0.8 mm for the supplies and for ground (0.5 mm,
-then 0.25 mm, where 0.8 finds no room; it says where), 0.6 mm vias,
-KiCad's default 0.2 mm clearance, ground last. A net with no way takes off the
-nets in its way and they are routed again after it. Its tracks pass
-KiCad's rules and are not pretty: **the trial boards are not for
-manufacture.**
+It is a maze router on a 0.3175 mm grid that starts on the header's
+pin 1: 0.25 mm tracks, 0.8 mm for the supplies (0.5 mm, then 0.25 mm,
+where 0.8 finds no room; it says where), 0.6 mm vias, KiCad's default
+0.2 mm clearance.
+
+- **The nets negotiate.** Routed one after another, each around the ones
+  before, the last nets went the long way round: tracks along the board's
+  edges, 94 mm over the direct way for one of them. Now every net is
+  first routed as if alone, crossing the others at a price. Then the ones
+  that cross are routed again, round after round, while that price goes
+  up and the nodes that were fought over stay dearer for everyone, until
+  nothing crosses (eighteen rounds on the through-hole board). Each net
+  gives way where it costs it least.
+- **A turn has a price**, a square corner more than a 45 degree one and a
+  hairpin most, so a track runs straight where it can, and it leaves a
+  pad by its middle.
+- **Ground is the planes' business.** No ground track is laid until the
+  planes are filled; then the router reads KiCad's fill, finds the groups
+  of ground pads it left apart from the rest, and joins only those.
+- Of the header's fan-out, the stubs the routing did not use are left out
+  of the trial board.
+
+Its tracks pass KiCad's rules: on the through-hole trial the check
+reports nothing but the four silkscreen warnings of the USB sockets, and
+nothing left to join. **The trial boards are still not for manufacture:**
+nobody has looked at them track by track.
 
 What it found:
 
 - **The board routes on two layers.** Every signal and supply net was
-  joined on both variants, with no clearance error. It took 136 vias (th)
-  and 196 (smd) and about 3.6 m of track, which a person will better by
-  far.
+  joined on both variants, with no clearance error: 67 vias and 2.9 m of
+  track on the through-hole board, 96 and 3.0 m on the SMD one, plus 10
+  and 19 vias to tie the ground's pieces. The first router took 136 and
+  196 vias and 3.6 m. The longest way round left is 3.3 V's, a net of
+  twenty-three joins, 56 mm over what it would take alone.
 - **The 2x20 header is the tight spot.** A pin of its outer row has one
   way out, the gap between two pins of the inner row, and a track of
   another net through that gap shuts it in. In every run, most of the
   connections the router could not make started on a pin of the header.
   The fan-out and the clear back underneath, both in `place.py` now, give
-  each pin its way out; even so the router needed its rip-up and several
-  settings to join everything.
+  each pin its way out; the first router still needed its rip-up and
+  several settings to join everything, and the one that negotiates joins
+  it all at its first.
 - **Ground does not take care of itself.** With tracks on both faces the
-  planes are cut into pieces: on the through-hole trial three ground pads
-  (on C11, J14 and R11) were reached by no plane and no track, and four on
-  the SMD one. The real routing has to keep the back mostly whole, or tie
-  the pieces with vias and short tracks.
+  planes are cut into pieces: the fill leaves five groups of ground pads
+  apart from the rest on the through-hole trial and eleven on the SMD
+  one, which the router then ties with short tracks and vias. A third of
+  the track is on the back (1.1 m). The real routing has to keep the back
+  more whole than that.
 - **The supplies fit at 0.8 mm almost everywhere.** On the through-hole
   board every stretch of 5 V, switched 5 V and the two USB sockets' 5 V
   went at 0.8 mm, and 3.3 V all but two (one of them to a pin of the
