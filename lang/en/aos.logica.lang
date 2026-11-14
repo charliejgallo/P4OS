@@ -1,0 +1,678 @@
+# amoledos-lang 1   es -> en
+# aos.logica.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/logica/main/la_dec.c:250
+UART: muestreo muy lento para la velocidad	UART: sampling too slow for this speed
+
+#: apps/logica/main/la_dec.c:250
+UART: no hay datos para medir la velocidad	UART: no data to measure the speed from
+
+#: apps/logica/main/la_dec.c:254
+#: apps/logica/main/la_dec.c:409
+ (adivinada)	 (guessed)
+
+#: apps/logica/main/la_dec.c:301
+DMX: hace falta muestrear a 1 MHz o más	DMX: needs sampling at 1 MHz or more
+
+#: apps/logica/main/la_dec.c:312
+#: apps/logica/main/la_dec.c:331
+%d canales: %s	%d channels: %s
+
+#: apps/logica/main/la_dec.c:349
+leer bobinas	read coils
+
+#: apps/logica/main/la_dec.c:350
+leer entradas	read inputs
+
+#: apps/logica/main/la_dec.c:351
+leer registros	read registers
+
+#: apps/logica/main/la_dec.c:352
+leer reg. de entrada	read input reg.
+
+#: apps/logica/main/la_dec.c:353
+escribir bobina	write coil
+
+#: apps/logica/main/la_dec.c:354
+escribir registro	write register
+
+#: apps/logica/main/la_dec.c:355
+escribir bobinas	write coils
+
+#: apps/logica/main/la_dec.c:356
+escribir registros	write registers
+
+#: apps/logica/main/la_dec.c:357
+leer/escribir registros	read/write registers
+
+#: apps/logica/main/la_dec.c:358
+función	function
+
+#: apps/logica/main/la_dec.c:366
+trama corta (%d bytes)	short frame (%d bytes)
+
+#: apps/logica/main/la_dec.c:371
+Esclavo %u	Slave %u
+
+#: apps/logica/main/la_dec.c:379
+: excepción %u	: exception %u
+
+#: apps/logica/main/la_dec.c:381
+#: apps/logica/main/la_dec.c:393
+: %u desde %u	: %u from %u
+
+#: apps/logica/main/la_dec.c:389
+: %u en %u	: %u at %u
+
+#: apps/logica/main/la_dec.c:391
+: %u desde %u, hecho	: %u from %u, done
+
+#: apps/logica/main/la_dec.c:395
+#: apps/logica/main/la_dec.c:898
+ (CRC mal)	 (bad CRC)
+
+#: apps/logica/main/la_dec.c:405
+Modbus: muestreo muy lento o sin datos	Modbus: sampling too slow, or no data
+
+#: apps/logica/main/la_dec.c:506
+ sin respuesta	 no answer
+
+#: apps/logica/main/la_dec.c:536
+SPI modo %d, %d bits%s	SPI mode %d, %d bits%s
+
+#: apps/logica/main/la_dec.c:537
+, LSB primero	, LSB first
+
+#: apps/logica/main/la_dec.c:561
+%d bits	%d bits
+
+#: apps/logica/main/la_dec.c:660
+Reset sin presencia	Reset, no presence
+
+#: apps/logica/main/la_dec.c:671
+ CRC mal	 bad CRC
+
+#: apps/logica/main/la_dec.c:684
+ · %.2f °C (DS18B20), CRC %s	 · %.2f °C (DS18B20), CRC %s
+
+#: apps/logica/main/la_dec.c:684
+mal	bad
+
+#: apps/logica/main/la_dec.c:698
+1-Wire: hace falta muestrear a 200 kHz o más	1-Wire: needs sampling at 200 kHz or more
+
+#: apps/logica/main/la_dec.c:725
+Presencia	Presence
+
+#: apps/logica/main/la_dec.c:729
+Nadie	Nobody
+
+#: apps/logica/main/la_dec.c:772
+CAN: muestreo muy lento para %u kbit/s	CAN: sampling too slow for %u kbit/s
+
+#: apps/logica/main/la_dec.c:841
+Error de relleno	Stuff error
+
+#: apps/logica/main/la_dec.c:842
+Trama rota (relleno)	Broken frame (stuffing)
+
+#: apps/logica/main/la_dec.c:899
+ sin ACK	 no ACK
+
+#: apps/logica/main/la_dec.c:912
+WS2812: hace falta muestrear a 4 MHz o más	WS2812: needs sampling at 4 MHz or more
+
+#: apps/logica/main/la_dec.c:927
+#: apps/logica/main/la_dec.c:950
+%d LEDs: %s	%d LEDs: %s
+
+#: apps/logica/main/la_dec.c:975
+Repetir	Repeat
+
+#: apps/logica/main/la_dec.c:976
+repetición	repeat
+
+#: apps/logica/main/la_dec.c:981
+Inicio	Start
+
+#: apps/logica/main/la_dec.c:1009
+trama NEC incompleta	incomplete NEC frame
+
+#: apps/logica/main/la_dec.c:1015
+NEC dirección %02X, comando %02X%s	NEC address %02X, command %02X%s
+
+#: apps/logica/main/la_dec.c:1015
+#: apps/logica/main/la_dec.c:1018
+ (no cierra)	 (does not check)
+
+#: apps/logica/main/la_dec.c:1017
+NEC extendido, dirección %04X, comando %02X%s	Extended NEC, address %04X, command %02X%s
+
+#: apps/logica/main/la_dec.c:1037
+Paralelo, %d bits con reloj	Parallel, %d bits with clock
+
+#: apps/logica/main/la_dec.c:1037
+Paralelo, %d bits	Parallel, %d bits
+
+#: apps/logica/main/la_dec.c:1081
+Paralelo	Parallel
+
+#: apps/logica/main/la_dec.c:1098
+Reloj	Clock
+
+#: apps/logica/main/la_dec.c:1156
+velocidad sola	speed guessed
+
+#: apps/logica/main/la_dec.c:1162
+SPI modo %d · %s	SPI mode %d · %s
+
+#: apps/logica/main/la_dec.c:1222
+faltan canales	channels missing
+
+#: apps/logica/main/la_demo.c:307
+Serie, I2C y SPI	Serial, I2C and SPI
+
+#: apps/logica/main/la_demo.c:307
+1-Wire, CAN, LEDs, IR, DMX y Modbus	1-Wire, CAN, LEDs, IR, DMX and Modbus
+
+#: apps/logica/main/la_demo.c:308
+Pulsos y un bus paralelo	Pulses and a parallel bus
+
+#: apps/logica/main/la_demo.c:413
+#: apps/logica/main/la_fx2.c:411
+#: apps/logica/main/la_sr.c:427
+#: apps/logica/main/la_sump.c:295
+No hay memoria para tantas muestras	Not enough memory for that many samples
+
+#: apps/logica/main/la_dev.c:68
+Demo (señales de prueba)	Demo (test signals)
+
+#: apps/logica/main/la_dev.c:69
+sin hardware: para aprender y probar los decodificadores	no hardware: to learn and to try the decoders
+
+#: apps/logica/main/la_dev.c:252
+No llegó ninguna muestra	No samples arrived
+
+#: apps/logica/main/la_dev.c:262
+%s muestras a %s: el analizador se frenó antes (el USB no dio abasto, probá una velocidad menor)	%s samples at %s: the analyser stopped early (USB could not keep up, try a lower rate)
+
+#: apps/logica/main/la_dev.c:265
+%s muestras a %s, CON HUECOS: el USB perdió %u bytes (probá una velocidad menor)	%s samples at %s, WITH GAPS: USB lost %u bytes (try a lower rate)
+
+#: apps/logica/main/la_dev.c:268
+%s muestras a %s, detenida antes del disparo	%s samples at %s, stopped before the trigger
+
+#: apps/logica/main/la_dev.c:270
+%s muestras a %s en %.1f s	%s samples at %s in %.1f s
+
+#: apps/logica/main/la_dev.c:287
+No hay memoria libre para capturar	No free memory to capture
+
+#: apps/logica/main/la_dev.c:297
+%u anotaciones, %u paquetes%s	%u annotations, %u packets%s
+
+#: apps/logica/main/la_dev.c:298
+ (no entró todo)	 (not all of it fitted)
+
+#: apps/logica/main/la_dev.c:337
+Abierta: %s muestras a %s	Opened: %s samples at %s
+
+#: apps/logica/main/la_dev.c:365
+Guardada: %s	Saved: %s
+
+#: apps/logica/main/la_dev.c:381
+#: apps/logica/main/la_ui.c:303
+SUMP: %s en %s	SUMP: %s on %s
+
+#: apps/logica/main/la_dev.c:384
+Ningún puerto serie USB contestó SUMP	No USB serial port answered SUMP
+
+#: apps/logica/main/la_fx2.c:153
+USB de 12 Mbit/s, hasta 1 MHz	12 Mbit/s USB, up to 1 MHz
+
+#: apps/logica/main/la_fx2.c:154
+fx2lafw cargado · %s	fx2lafw loaded · %s
+
+#: apps/logica/main/la_fx2.c:155
+se le carga fx2lafw · %s	fx2lafw will be loaded · %s
+
+#: apps/logica/main/la_fx2.c:156
+falta %.40s en la tarjeta	%.40s missing on the card
+
+#: apps/logica/main/la_fx2.c:218
+Falta %s en la carpeta logica/fx2lafw de la tarjeta	%s is missing in the card's logica/fx2lafw folder
+
+#: apps/logica/main/la_fx2.c:222
+No se pudo leer el firmware	Could not read the firmware
+
+#: apps/logica/main/la_fx2.c:228
+#: apps/logica/main/la_fx2.c:251
+El archivo del firmware no parece fx2lafw	The firmware file does not look like fx2lafw
+
+#: apps/logica/main/la_fx2.c:236
+#: apps/logica/main/la_sr.c:362
+#: apps/logica/main/la_sr.c:439
+No hay memoria	Not enough memory
+
+#: apps/logica/main/la_fx2.c:256
+#: apps/logica/main/la_fx2.c:370
+El analizador está ocupado o se desenchufó	The analyser is busy or was unplugged
+
+#: apps/logica/main/la_fx2.c:265
+El analizador no aceptó el firmware	The analyser did not take the firmware
+
+#: apps/logica/main/la_fx2.c:366
+El analizador no volvió después de cargarle fx2lafw	The analyser did not come back after loading fx2lafw
+
+#: apps/logica/main/la_fx2.c:374
+El analizador no contesta: desenchufalo y enchufalo otra vez	The analyser does not answer: unplug it and plug it in again
+
+#: apps/logica/main/la_fx2.c:378
+Esa versión de fx2lafw no es compatible (hace falta la 1.x)	That fx2lafw version is not supported (1.x needed)
+
+#: apps/logica/main/la_fx2.c:382
+No se pudo tomar el analizador	Could not claim the analyser
+
+#: apps/logica/main/la_fx2.c:402
+El analizador no puede muestrear a esa velocidad	The analyser cannot sample at that rate
+
+#: apps/logica/main/la_fx2.c:442
+#: apps/logica/main/la_fx2.c:501
+El analizador no arrancó	The analyser did not start
+
+#: apps/logica/main/la_fx2.c:483
+#: apps/logica/main/la_fx2.c:493
+Se desenchufó el analizador	The analyser was unplugged
+
+#: apps/logica/main/la_fx2.c:549
+El analizador se frenó antes del disparo: el USB no dio abasto. Probá una velocidad menor	The analyser stopped before the trigger: USB could not keep up. Try a lower rate
+
+#: apps/logica/main/la_fx2.c:550
+El analizador no manda muestras	The analyser sends no samples
+
+#: apps/logica/main/la_sr.c:99
+No hay captura para guardar	No capture to save
+
+#: apps/logica/main/la_sr.c:103
+#: apps/logica/main/la_sr.c:161
+No se pudo escribir en la tarjeta	Could not write to the card
+
+#: apps/logica/main/la_sr.c:158
+No se pudo escribir en la tarjeta (¿llena?)	Could not write to the card (full?)
+
+#: apps/logica/main/la_sr.c:358
+No se pudo abrir el archivo	Could not open the file
+
+#: apps/logica/main/la_sr.c:369
+No es una sesión de sigrok (.sr)	Not a sigrok session (.sr)
+
+#: apps/logica/main/la_sr.c:374
+#: apps/logica/main/la_sr.c:434
+#: apps/logica/main/la_sr.c:440
+No se pudo leer el archivo	Could not read the file
+
+#: apps/logica/main/la_sr.c:388
+La sesión no tiene canales lógicos	The session has no logic channels
+
+#: apps/logica/main/la_sr.c:412
+La sesión está vacía	The session is empty
+
+#: apps/logica/main/la_sr.c:417
+La captura no entra en la memoria	The capture does not fit in memory
+
+#: apps/logica/main/la_sr.c:477
+La sesión tiene %d canales: se ven los primeros 8	The session has %d channels: the first 8 are shown
+
+#: apps/logica/main/la_sump.c:161
+SUMP en %s · hasta %s, %s muestras	SUMP on %s · up to %s, %s samples
+
+#: apps/logica/main/la_sump.c:163
+SUMP en %s a %u · hasta %s, %s muestras	SUMP on %s at %u · up to %s, %s samples
+
+#: apps/logica/main/la_sump.c:238
+No se pudo abrir el puerto serie	Could not open the serial port
+
+#: apps/logica/main/la_sump.c:241
+El analizador SUMP no contesta	The SUMP analyser does not answer
+
+#: apps/logica/main/la_sump.c:315
+Detenida	Stopped
+
+#: apps/logica/main/la_sump.c:320
+Se cortó el puerto serie	The serial port went away
+
+#: apps/logica/main/la_sump.c:326
+El analizador dejó de mandar muestras	The analyser stopped sending samples
+
+#: apps/logica/main/la_ui.c:170
+Ocupada: se decodifica con la próxima captura	Busy: it will be decoded with the next capture
+
+#: apps/logica/main/la_ui.c:286
+Preguntando a los puertos serie USB...	Asking the USB serial ports...
+
+#: apps/logica/main/la_ui.c:306
+Nadie contestó SUMP en %s a %u	Nobody answered SUMP on %s at %u
+
+#: apps/logica/main/la_ui.c:321
+Analizador	Analyser
+
+#: apps/logica/main/la_ui.c:338
+Escena de la demo (pone sus decodificadores)	Demo scene (sets its decoders)
+
+#: apps/logica/main/la_ui.c:345
+Buscar SUMP en USB	Find SUMP on USB
+
+#: apps/logica/main/la_ui.c:350
+El host USB está apagado: prendelo en Ajustes, USB.	The USB host is off: turn it on in Settings, USB.
+
+#: apps/logica/main/la_ui.c:351
+Analizador USB de 24 MHz y 8 canales (Saleae Logic y sus clones, y las demás placas FX2): enchufalo al host USB de la placa (pines 25/27 para alta velocidad; 21/23 llega hasta 1 MHz). La primera vez hay que copiar el firmware libre fx2lafw de sigrok a la carpeta logica/fx2lafw de la tarjeta (fx2lafw-saleae-logic.fw), o subirlo desde la página Lógica del portal.	24 MHz 8-channel USB analyser (Saleae Logic and its clones, and the other FX2 boards): plug it into the board's USB host (pins 25/27 for high speed; 21/23 reaches 1 MHz). The first time, copy sigrok's open firmware fx2lafw to the card's logica/fx2lafw folder (fx2lafw-saleae-logic.fw), or upload it from the Logic page of the portal.
+
+#: apps/logica/main/la_ui.c:355
+SUMP: el firmware de la app para un ESP32-S3, C3 o C6 (carpeta firmware de la app), un Open Bench Logic Sniffer u otro compatible, por USB o por una UART del header. Sólo a 3,3 V.	SUMP: the app's firmware for an ESP32-S3, C3 or C6 (the app's firmware folder), an Open Bench Logic Sniffer or another compatible one, over USB or a header UART. 3.3 V only.
+
+#: apps/logica/main/la_ui.c:368
+Duración de la captura: %s	Capture length: %s
+
+#: apps/logica/main/la_ui.c:382
+Muestreo	Sampling
+
+#: apps/logica/main/la_ui.c:395
+Velocidad (al menos 4 veces la señal más rápida)	Rate (at least 4 times the fastest signal)
+
+#: apps/logica/main/la_ui.c:420
+Muestras (el analizador guarda hasta %s)	Samples (the analyser holds up to %s)
+
+#: apps/logica/main/la_ui.c:420
+Muestras (la memoria de la placa da hasta %s)	Samples (the board's memory allows up to %s)
+
+#: apps/logica/main/la_ui.c:430
+Antes del disparo	Before the trigger
+
+#: apps/logica/main/la_ui.c:432
+El FX2 manda todo en vivo: a 24 MHz son 24 MB/s por el USB. Si la captura sale con huecos, bajá la velocidad (12 MHz anda holgado).	The FX2 streams everything live: at 24 MHz that is 24 MB/s over USB. If the capture has gaps, lower the rate (12 MHz has room to spare).
+
+#: apps/logica/main/la_ui.c:455
+Sube	Rises
+
+#: apps/logica/main/la_ui.c:455
+Baja	Falls
+
+#: apps/logica/main/la_ui.c:455
+Cambia	Changes
+
+#: apps/logica/main/la_ui.c:467
+Disparo	Trigger
+
+#: apps/logica/main/la_ui.c:468
+La captura arranca cuando se cumplen todas las condiciones juntas. X: no importa. Un analizador SUMP que no sea el de la app sólo entiende niveles: Sube espera el 1 y Baja el 0.	The capture starts when all the conditions hold at once. X: don't care. A SUMP analyser other than the app's own understands levels only: Rises waits for 1 and Falls for 0.
+
+#: apps/logica/main/la_ui.c:485
+#: apps/logica/main/la_ui.c:1082
+Sin disparo	No trigger
+
+#: apps/logica/main/la_ui.c:517
+Nombre de D%d	Name of D%d
+
+#: apps/logica/main/la_ui.c:543
+#: apps/logica/main/la_ui.c:1263
+Canales	Channels
+
+#: apps/logica/main/la_ui.c:552
+Tocá un nombre para cambiarlo. Los nombres van con la captura cuando se guarda (PulseView los muestra).	Tap a name to change it. The names go with the capture when it is saved (PulseView shows them).
+
+#: apps/logica/main/la_ui.c:568
+Nombre	Name
+
+#: apps/logica/main/la_ui.c:569
+#: apps/logica/main/la_ui.c:894
+#: apps/logica/main/la_ui.c:1266
+Medir	Measure
+
+#: apps/logica/main/la_ui.c:570
+Se ve	Shown
+
+#: apps/logica/main/la_ui.c:574
+Disparo en este canal	Trigger on this channel
+
+#: apps/logica/main/la_ui.c:593
+Decodificadores	Decoders
+
+#: apps/logica/main/la_ui.c:608
+Tocá uno para elegir el protocolo, los canales y la velocidad. Se decodifica de nuevo al cerrar.	Tap one to choose the protocol, the channels and the speed. It decodes again when closed.
+
+#: apps/logica/main/la_ui.c:666
+Decodificador %d	Decoder %d
+
+#: apps/logica/main/la_ui.c:670
+Encendido	On
+
+#: apps/logica/main/la_ui.c:670
+Apagado	Off
+
+#: apps/logica/main/la_ui.c:674
+Protocolo	Protocol
+
+#: apps/logica/main/la_ui.c:685
+ (optativo)	 (optional)
+
+#: apps/logica/main/la_ui.c:693
+Sola	Auto
+
+#: apps/logica/main/la_ui.c:698
+Velocidad (Sola: la adivina)	Speed (Auto: guessed)
+
+#: apps/logica/main/la_ui.c:701
+Bits de datos	Data bits
+
+#: apps/logica/main/la_ui.c:703
+Ninguna	None
+
+#: apps/logica/main/la_ui.c:703
+Par	Even
+
+#: apps/logica/main/la_ui.c:703
+Impar	Odd
+
+#: apps/logica/main/la_ui.c:704
+Paridad	Parity
+
+#: apps/logica/main/la_ui.c:706
+Bits de parada	Stop bits
+
+#: apps/logica/main/la_ui.c:707
+Normal	Normal
+
+#: apps/logica/main/la_ui.c:707
+Invertida	Inverted
+
+#: apps/logica/main/la_ui.c:708
+Línea	Line
+
+#: apps/logica/main/la_ui.c:714
+Velocidad del bus	Bus speed
+
+#: apps/logica/main/la_ui.c:717
+Modo (CPOL y CPHA)	Mode (CPOL and CPHA)
+
+#: apps/logica/main/la_ui.c:723
+Bits por palabra	Bits per word
+
+#: apps/logica/main/la_ui.c:724
+MSB primero	MSB first
+
+#: apps/logica/main/la_ui.c:724
+LSB primero	LSB first
+
+#: apps/logica/main/la_ui.c:725
+Orden	Order
+
+#: apps/logica/main/la_ui.c:726
+Activo en 0	Active low
+
+#: apps/logica/main/la_ui.c:726
+Activo en 1	Active high
+
+#: apps/logica/main/la_ui.c:729
+0 (receptor)	0 (receiver)
+
+#: apps/logica/main/la_ui.c:729
+1 (LED)	1 (LED)
+
+#: apps/logica/main/la_ui.c:730
+Nivel con portadora	Level with carrier
+
+#: apps/logica/main/la_ui.c:733
+Hexa	Hex
+
+#: apps/logica/main/la_ui.c:733
+Decimal	Decimal
+
+#: apps/logica/main/la_ui.c:733
+Binario	Binary
+
+#: apps/logica/main/la_ui.c:734
+Valores en	Values in
+
+#: apps/logica/main/la_ui.c:737
+Medí del lado del transceptor (RX del controlador), nunca CANH/CANL directo: 3,3 V como mucho.	Measure on the transceiver's logic side (the controller's RX), never CANH/CANL directly: 3.3 V at most.
+
+#: apps/logica/main/la_ui.c:739
+En RS485 medí la salida RO del transceptor, no las líneas A/B.	On RS485 measure the transceiver's RO output, not the A/B lines.
+
+#: apps/logica/main/la_ui.c:778
+#: apps/logica/main/la_ui.c:1265
+Tabla	Table
+
+#: apps/logica/main/la_ui.c:780
+#: apps/logica/main/la_ui.c:1122
+Decodificando...	Decoding...
+
+#: apps/logica/main/la_ui.c:780
+No hay paquetes: prendé un decodificador (Decodificar) y capturá.	No packets: turn a decoder on (Decode) and capture.
+
+#: apps/logica/main/la_ui.c:786
+Todos	All
+
+#: apps/logica/main/la_ui.c:825
+Anteriores	Previous
+
+#: apps/logica/main/la_ui.c:827
+%u a %u de %u	%u to %u of %u
+
+#: apps/logica/main/la_ui.c:829
+Siguientes	Next
+
+#: apps/logica/main/la_ui.c:830
+Hubo más de lo que entra: el final de la captura no se decodificó.	There was more than fits: the end of the capture was not decoded.
+
+#: apps/logica/main/la_ui.c:850
+No hay captura	No capture
+
+#: apps/logica/main/la_ui.c:859
+Entre los cursores A y B	Between cursors A and B
+
+#: apps/logica/main/la_ui.c:859
+Lo que se ve en pantalla	What is on screen
+
+#: apps/logica/main/la_ui.c:861
+Tramo: %s, %u muestras\n	Span: %s, %u samples\n
+
+#: apps/logica/main/la_ui.c:862
+Flancos: %u de subida, %u de bajada\n	Edges: %u rising, %u falling\n
+
+#: apps/logica/main/la_ui.c:866
+Frecuencia: %s (período %s)\n	Frequency: %s (period %s)\n
+
+#: apps/logica/main/la_ui.c:867
+Ciclo de trabajo: %.1f %%\n	Duty cycle: %.1f %%\n
+
+#: apps/logica/main/la_ui.c:873
+En 1: mín %s, prom %s, máx %s\n	High: min %s, avg %s, max %s\n
+
+#: apps/logica/main/la_ui.c:879
+En 0: mín %s, prom %s, máx %s\n	Low: min %s, avg %s, max %s\n
+
+#: apps/logica/main/la_ui.c:881
+En 1 el %.1f %% del tramo	High %.1f %% of the span
+
+#: apps/logica/main/la_ui.c:901
+Canal	Channel
+
+#: apps/logica/main/la_ui.c:906
+Con los dos cursores puestos se mide entre ellos (tocá la señal para ponerlos, mantené apretado para sacarlos); si no, lo que está en pantalla.	With both cursors placed it measures between them (tap the signal to place them, hold to remove them); otherwise what is on screen.
+
+#: apps/logica/main/la_ui.c:920
+No hay tarjeta	No card
+
+#: apps/logica/main/la_ui.c:937
+Guardando...	Saving...
+
+#: apps/logica/main/la_ui.c:957
+Tocá otra vez para borrarla	Tap again to delete it
+
+#: apps/logica/main/la_ui.c:976
+#: apps/logica/main/la_ui.c:1267
+Archivos	Files
+
+#: apps/logica/main/la_ui.c:979
+No hay tarjeta.	No card.
+
+#: apps/logica/main/la_ui.c:982
+Guardar la captura	Save the capture
+
+#: apps/logica/main/la_ui.c:1025
+Todavía no hay capturas guardadas.	No saved captures yet.
+
+#: apps/logica/main/la_ui.c:1026
+Se guardan como sesiones de sigrok (.sr): PulseView las abre, y la placa abre las de PulseView. Con un decodificador encendido va también la tabla en .csv. Están en la carpeta logica de la tarjeta y en la página Lógica del portal.	They are saved as sigrok sessions (.sr): PulseView opens them, and the board opens PulseView's. With a decoder on, the table goes along as a .csv. They are in the card's logica folder and on the Logic page of the portal.
+
+#: apps/logica/main/la_ui.c:1063
+No se pudo arrancar la captura	Could not start the capture
+
+#: apps/logica/main/la_ui.c:1072
+sube	rises
+
+#: apps/logica/main/la_ui.c:1072
+baja	falls
+
+#: apps/logica/main/la_ui.c:1072
+cambia	changes
+
+#: apps/logica/main/la_ui.c:1111
+Detener	Stop
+
+#: apps/logica/main/la_ui.c:1111
+#: apps/logica/main/la_ui.c:1236
+Capturar	Capture
+
+#: apps/logica/main/la_ui.c:1119
+Conectando con el analizador...	Connecting to the analyser...
+
+#: apps/logica/main/la_ui.c:1120
+Esperando el disparo (%d %% del búfer lleno)...	Waiting for the trigger (buffer %d %% full)...
+
+#: apps/logica/main/la_ui.c:1121
+Capturando: %d %%	Capturing: %d %%
+
+#: apps/logica/main/la_ui.c:1123
+Archivo: %d %%	File: %d %%
+
+#: apps/logica/main/la_ui.c:1147
+ · A-B %s (%s)	 · A-B %s (%s)
+
+#: apps/logica/main/la_ui.c:1264
+Decodificar	Decode
+
+#: apps/logica/main/la_view.c:445
+Capturando...	Capturing...
+
+#: apps/logica/main/la_view.c:445
+Sin captura: elegí el analizador y tocá Capturar	No capture: choose the analyser and tap Capture
+
+#: apps/logica/main/la_view.c:590
+No hay memoria para la vista	Not enough memory for the view

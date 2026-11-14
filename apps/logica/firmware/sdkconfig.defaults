@@ -1,0 +1,10 @@
+# The link to the host carries SUMP and nothing else: no console, no logs
+# (the ROM still prints its boot banner; the host's reset sequence flushes it)
+CONFIG_ESP_CONSOLE_NONE=y
+CONFIG_LOG_DEFAULT_LEVEL_NONE=y
+CONFIG_BOOTLOADER_LOG_LEVEL_NONE=y
+# A capture runs with the interrupts off on its core, for as long as it
+# takes: no watchdogs to trip over it
+CONFIG_ESP_TASK_WDT_EN=n
+CONFIG_ESP_INT_WDT=n
+CONFIG_COMPILER_OPTIMIZATION_PERF=y
