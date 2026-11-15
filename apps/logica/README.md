@@ -52,6 +52,12 @@ the bus and comes back as "sigrok fx2lafw"). Until the dialog is answered
 it is not on the bus at all and the app waits up to 15 s for it. A box
 that was left half-started may stay off the bus until it is unplugged.
 
+<p align="center"><img src="../../docs/img/bench-logica-fx2.jpg" width="320" alt="The 24 MHz 8 channel analyser held on the board's back cover, plugged into the USB host socket, with its CH1 and ground wired to the 40-pin header"></p>
+
+The bench on 2026-11-14: the analyser on the board's back cover, plugged
+into the High-Speed host socket, its CH1 on GPIO34 (header pin 28) and its
+ground on the header, for the self test below.
+
 **Measured on the board** (2026-11-14, the user's clone on pins 25/27, a
 short cable): 1, 4, 8, 12, 16 and 24 MHz, six captures in a row, with no
 sample lost and no transfer error; 6 transfers of 16 KB in flight are
@@ -107,8 +113,11 @@ mode for 4 channels), a later version.
 cd apps/logica/firmware && idf.py set-target esp32s3 && idf.py build flash
 ```
 
-The board's Programador flashes it too (the `.bin` files of `build/`, on
-`usb0`). In Lógica: Analizador, "Buscar SUMP en USB". Inputs are 3.3 V
+The board's Programador flashes it too: copy the build folder (the one
+with `flasher_args.json`) to the card's `firmware/` folder, as
+`firmware/logica-esp32c3/`, and flash it on `usb0`. Its list shows 24
+entries at most (`AOS_FLASHER_SOURCES_MAX`): on a card that has more, a
+new folder may not show until an old one goes. In Lógica: Analizador, "Buscar SUMP en USB". Inputs are 3.3 V
 only and have no pull resistors.
 
 `tools/fake_sump.py` is a SUMP device on a pseudo-terminal, to try the
