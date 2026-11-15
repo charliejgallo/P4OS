@@ -260,7 +260,7 @@ static void dec_uart(dctx_t *x)
     bool lerr = false;
     const float gap = 20.0f * u.tb * (float)(2 + d->bits);
     while (uart_next(x->c, &u, &pos, &f)) {
-        if (line[0] && (float)(f.s0 - l1) > gap) {
+        if (line[0] && (float)(int32_t)(f.s0 - l1) > gap) {          /* the next start can come before the stop bit's end */
             pkt(x, l0, l1, lerr, "%s", line);
             line[0] = 0;
         }
@@ -417,7 +417,7 @@ static void dec_modbus(dctx_t *x)
     uint32_t pos = 0;
     uframe_t f;
     while (uart_next(x->c, &u, &pos, &f)) {
-        if (n && ((float)(f.s0 - s1[n - 1]) > gap || n == 256)) {
+        if (n && ((float)(int32_t)(f.s0 - s1[n - 1]) > gap || n == 256)) {
             mb_frame(x, b, s0, s1, n);
             n = 0;
         }
