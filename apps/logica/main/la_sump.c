@@ -255,12 +255,16 @@ const char *la_sump_capture(const la_dev_t *dev, const la_cfg_t *cfg, la_cap_t *
     if (d.max_samples && n > d.max_samples) n = d.max_samples;
     n &= ~3u;
     if (n < 4) n = 4;
-    const bool trig = la_trig_any(cfg->trig);
+    /* what the device can wait for: an edge that plain SUMP cannot say
+     * leaves no condition, and the capture is not a triggered one */
+    bool trig = false;
+    for (int ch = 0; ch < LA_NCH; ch++)
+        if (cfg->trig[ch] != LA_T_X && (cfg->trig[ch] != LA_T_EDGE || ours)) trig = true;
     uint32_t pre = trig ? (n * cfg->pre / 100) & ~3u : 0;
     uint32_t delay = n - pre;
     if (delay < 4) delay = 4;
 
-    uint8_t mask = 0, val = 0, rise = 0, fall = 0;
+    uint8_t mask = 0, val = 0, rise = 0, fall = 0, edge = 0;
     for (int ch = 0; ch < LA_NCH; ch++) {
         uint8_t b = (uint8_t)(1u << ch);
         switch (cfg->trig[ch]) {
@@ -269,13 +273,15 @@ const char *la_sump_capture(const la_dev_t *dev, const la_cfg_t *cfg, la_cap_t *
         /* plain SUMP has levels only: an edge waits for the level after it */
         case LA_T_RISE: if (ours) rise |= b; else { mask |= b; val |= b; } break;
         case LA_T_FALL: if (ours) fall |= b; else mask |= b; break;
+        /* either edge: the app's firmware 0.2 on; nothing plain SUMP can say */
+        case LA_T_EDGE: if (ours) edge |= b; break;
         default: break;
         }
     }
     put_long(u, 0xC0, mask);
     put_long(u, 0xC1, val);
     put_long(u, 0xC2, 0x08000000u);         /* stage 0, level 0, start */
-    if (ours) put_long(u, 0xF0, (uint32_t)rise | (uint32_t)fall << 8);
+    if (ours) put_long(u, 0xF0, (uint32_t)rise | (uint32_t)fall << 8 | (uint32_t)edge << 16);
     put_long(u, 0x80, div - 1);
     uint32_t rc = n / 4 - 1, dc = delay / 4 - 1;
     put_long(u, 0x81, (rc & 0xFFFF) | (dc & 0xFFFF) << 16);

@@ -57,6 +57,7 @@ void la_fmt_count(uint32_t v, char *out, size_t n)
     if (v >= 1000000 && v % 1000000 == 0) snprintf(out, n, "%uM", (unsigned)(v / 1000000));
     else if (v >= 1000000) snprintf(out, n, "%.1fM", (double)((float)v / 1e6f));
     else if (v >= 1000 && v % 1000 == 0) snprintf(out, n, "%uk", (unsigned)(v / 1000));
+    else if (v >= 10000) snprintf(out, n, "%.1fk", (double)((float)v / 1e3f));   /* 155648: "155.6k" */
     else snprintf(out, n, "%u", (unsigned)v);
 }
 

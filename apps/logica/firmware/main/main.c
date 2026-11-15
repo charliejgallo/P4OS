@@ -16,7 +16,7 @@
  * free after boot (some 300K samples on an S3, 200K on a C3).
  *
  * The trigger is SUMP's stage 0 (a mask and values on the levels) and,
- * from the P4OS app (command 0xF0), rising and falling edges too. Before
+ * from the P4OS app (command 0xF0), rising, falling and either edges too. Before
  * it fires, the loop fills a ring with the samples SUMP asks to keep from
  * before it; after, the rest. The samples go back newest first, as an OLS
  * sends them.
@@ -51,7 +51,7 @@
 #include "hal/uart_ll.h"
 #endif
 
-#define FW_VERSION "0.1"
+#define FW_VERSION "0.2"
 #define SUMP_CLOCK 100000000u
 #define NCH 8
 
@@ -81,7 +81,7 @@ static uint32_t s_max_rate;
 
 /* what the host set */
 static struct {
-    uint8_t mask, val, rise, fall;
+    uint8_t mask, val, rise, fall, edge;
     bool start;
     uint32_t div;
     uint32_t read, delay;               /* samples */
@@ -148,7 +148,7 @@ static IRAM_ATTR inline bool host_spoke(void)
 typedef struct {
     uint32_t period, rem, rate;         /* cycles per sample = period + rem/rate */
     uint32_t n, pre;
-    uint8_t lm, lv, rise, fall;
+    uint8_t lm, lv, rise, fall, edge;
     bool trig;
     uint32_t end;                       /* out: where the newest sample is, + 1 */
     bool aborted;
@@ -165,7 +165,7 @@ static IRAM_ATTR __attribute__((noinline)) void capture(cap_t *c)
     uint32_t t = esp_cpu_get_cycle_count() + period;
     c->aborted = false;
     if (c->trig) {
-        const uint8_t lm = c->lm, lv = c->lv, rise = c->rise, fall = c->fall;
+        const uint8_t lm = c->lm, lv = c->lv, rise = c->rise, fall = c->fall, edge = c->edge;
         const uint32_t pre = c->pre;
         for (;;) {
             while ((int32_t)(esp_cpu_get_cycle_count() - t) < 0) {}
@@ -179,7 +179,8 @@ static IRAM_ATTR __attribute__((noinline)) void capture(cap_t *c)
             buf[idx] = s;
             if (++idx == n) idx = 0;
             if (filled < pre) filled++;
-            else if ((s & lm) == lv && (rise & ~prev & s) == rise && (fall & prev & ~s) == fall) break;
+            else if ((s & lm) == lv && (rise & ~prev & s) == rise && (fall & prev & ~s) == fall &&
+                     (edge & (prev ^ s)) == edge) break;
             prev = s;
             if (!--check) {
                 check = 4096;
@@ -214,7 +215,7 @@ static IRAM_ATTR __attribute__((noinline)) uint32_t loop_cycles(void)
     uint32_t idx = 0, n = 1024, check = 4096;
     /* masks the compiler cannot see through, that never trigger */
     volatile uint8_t vm = 0, vv = 1, vz = 0;
-    uint8_t prev = RD(), lm = vm, lv = vv, rise = vz, fall = vz;
+    uint8_t prev = RD(), lm = vm, lv = vv, rise = vz, fall = vz, edge = vz;
     uint32_t t0 = esp_cpu_get_cycle_count(), t = t0;
     for (int i = 0; i < 4000; i++) {
         while ((int32_t)(esp_cpu_get_cycle_count() - t) < 0) {}
@@ -222,7 +223,7 @@ static IRAM_ATTR __attribute__((noinline)) uint32_t loop_cycles(void)
         uint8_t s = RD();
         buf[idx] = s;
         if (++idx == n) idx = 0;
-        if ((s & lm) == lv && (rise & ~prev & s) == rise && (fall & prev & ~s) == fall) break;
+        if ((s & lm) == lv && (rise & ~prev & s) == rise && (fall & prev & ~s) == fall && (edge & (prev ^ s)) == edge) break;
         prev = s;
         if (!--check) check = 4096;
     }
@@ -257,12 +258,13 @@ static void run(void)
     j.c.rem = s_cpu_hz % rate;
     j.c.rate = rate;
     j.c.n = n;
-    j.c.trig = S.start && (S.mask || S.rise || S.fall);
+    j.c.trig = S.start && (S.mask || S.rise || S.fall || S.edge);
     j.c.pre = j.c.trig ? n - (delay ? delay : 1) : 0;
     j.c.lm = S.mask;
     j.c.lv = S.val & S.mask;
     j.c.rise = S.rise;
     j.c.fall = S.fall;
+    j.c.edge = S.edge;
     j.waiter = xTaskGetCurrentTaskHandle();
     s_abort = false;
 #if TWO_CORES
@@ -345,9 +347,10 @@ static void long_cmd(uint8_t c, uint32_t v)
     case 0x82: S.flags = v; break;
     case 0x83: S.delay = (v + 1) * 4; break;
     case 0x84: S.read = (v + 1) * 4; break;
-    case 0xF0:                          /* P4OS: edges */
+    case 0xF0:                          /* P4OS: edges, rising, falling and either */
         S.rise = (uint8_t)v;
         S.fall = (uint8_t)(v >> 8);
+        S.edge = (uint8_t)(v >> 16);
         break;
     default: break;                     /* other stages, and what we do not know */
     }
