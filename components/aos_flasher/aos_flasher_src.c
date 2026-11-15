@@ -517,15 +517,85 @@ static void note_mtime(aos_flasher_source_t *s)
     s->mtime = m;
 }
 
-/* what a source is, in 32 bits: its date, size, version and files */
-static uint32_t source_mark(const aos_flasher_source_t *s)
+/* What a source holds, in 32 bits: the CRC-32 of its files' bytes, in
+ * order, with each one's offset. Only the content counts: the same build
+ * copied again is the same, a new one with the same name is not. Reading
+ * the files is slow for a list read every few seconds, so the result is
+ * kept per source with the date and size it was read at, and only the
+ * sources the history names are hashed at all. */
+static uint32_t s_crc_tab[256];
+
+static uint32_t crc32_add(uint32_t crc, const uint8_t *p, size_t n)
 {
-    uint32_t h = 2166136261u;
-    uint32_t v[3] = { s->mtime, s->total, (uint32_t)s->nfiles };
-    for (int i = 0; i < 3; i++)
-        for (int b = 0; b < 4; b++) h = (h ^ ((v[i] >> (8 * b)) & 0xFF)) * 16777619u;
-    for (const char *p = s->app_version; *p; p++) h = (h ^ (uint8_t)*p) * 16777619u;
-    return h ? h : 1;
+    if (!s_crc_tab[1])
+        for (uint32_t i = 0; i < 256; i++) {
+            uint32_t c = i;
+            for (int k = 0; k < 8; k++) c = c & 1 ? 0xEDB88320u ^ (c >> 1) : c >> 1;
+            s_crc_tab[i] = c;
+        }
+    while (n--) crc = s_crc_tab[(crc ^ *p++) & 0xFF] ^ (crc >> 8);
+    return crc;
+}
+
+static uint32_t content_hash(const aos_flasher_source_t *s)
+{
+    uint8_t *buf = malloc(8192);
+    if (!buf) return 0;
+    uint32_t crc = 0xFFFFFFFFu;
+    for (int i = 0; i < s->nfiles; i++) {
+        char p[320];
+        if (s->project) snprintf(p, sizeof p, "%.255s/%.63s", s->path, s->files[i].name);
+        else snprintf(p, sizeof p, "%.255s", s->path);
+        uint8_t off[4] = { (uint8_t)s->files[i].offset, (uint8_t)(s->files[i].offset >> 8),
+                           (uint8_t)(s->files[i].offset >> 16), (uint8_t)(s->files[i].offset >> 24) };
+        crc = crc32_add(crc, off, 4);
+        FILE *f = fopen(p, "rb");
+        if (!f) continue;
+        size_t got;
+        while ((got = fread(buf, 1, 8192, f)) > 0) crc = crc32_add(crc, buf, got);
+        fclose(f);
+    }
+    free(buf);
+    crc = ~crc;
+    return crc ? crc : 1;
+}
+
+typedef struct {
+    char path[256];
+    uint32_t mtime, total, hash;
+} hcache_t;
+#define HCACHE 24
+static hcache_t *s_hc;                  /* PSRAM-sized: 24 x 268 bytes, made once */
+static int s_hc_next;
+static void *s_hc_mx;
+
+/* force: read the files whatever the cache says (a flash that just ended) */
+static uint32_t source_hash(const aos_flasher_source_t *s, bool force)
+{
+    if (!s_hc_mx) s_hc_mx = aos_hal_mutex_create();
+    aos_hal_mutex_lock(s_hc_mx);
+    if (!s_hc) s_hc = calloc(HCACHE, sizeof *s_hc);
+    hcache_t *slot = NULL;
+    for (int i = 0; s_hc && i < HCACHE; i++)
+        if (!strcmp(s_hc[i].path, s->path)) slot = &s_hc[i];
+    if (slot && !force && slot->mtime == s->mtime && slot->total == s->total) {
+        uint32_t h = slot->hash;
+        aos_hal_mutex_unlock(s_hc_mx);
+        return h;
+    }
+    uint32_t h = content_hash(s);
+    if (s_hc) {
+        if (!slot) {
+            slot = &s_hc[s_hc_next];
+            s_hc_next = (s_hc_next + 1) % HCACHE;
+        }
+        snprintf(slot->path, sizeof slot->path, "%s", s->path);
+        slot->mtime = s->mtime;
+        slot->total = s->total;
+        slot->hash = h;
+    }
+    aos_hal_mutex_unlock(s_hc_mx);
+    return h;
 }
 
 #define FLASHED_FILE ".grabados.txt"
@@ -539,12 +609,13 @@ static bool flashed_path(char *out, size_t n)
     return true;
 }
 
-/* "<time> m:<mark> <path>" a line (before 2026-11-15 "<time> <path>"), the
- * newest last; a path's last line counts */
+/* "<time> h:<crc of the content> <path>" a line, the newest last; a
+ * path's last line counts. Older lines, "<time> <path>" and for a few hours
+ * of 2026-11-15 "<time> m:<mark of the dates> <path>", warn of nothing. */
 typedef struct {
     char path[256];
     uint32_t t;
-    uint32_t mark;              /* 0: not noted */
+    uint32_t mark;              /* the content's CRC; 0: not noted (an older line) */
 } flashed_t;
 
 static int flashed_read(flashed_t *out, int max)
@@ -559,8 +630,8 @@ static int flashed_read(flashed_t *out, int max)
         char *sp = strchr(line, ' ');
         if (!sp) continue;
         uint32_t mark = 0;
-        if (!strncmp(sp + 1, "m:", 2)) {
-            mark = (uint32_t)strtoul(sp + 3, NULL, 16);
+        if (!strncmp(sp + 1, "h:", 2) || !strncmp(sp + 1, "m:", 2)) {
+            if (sp[1] == 'h') mark = (uint32_t)strtoul(sp + 3, NULL, 16);
             sp = strchr(sp + 1, ' ');
             if (!sp) continue;
         }
@@ -596,7 +667,7 @@ void aos_flasher_note_flashed(const aos_flasher_source_t *src)
     uint32_t now = aos_hal_time_is_valid() ? (uint32_t)time(NULL) : 0;
     FILE *f = fopen(p, "a");
     if (!f) return;
-    fprintf(f, "%u m:%08x %s\n", (unsigned)now, (unsigned)source_mark(&s), s.path);
+    fprintf(f, "%u h:%08x %s\n", (unsigned)now, (unsigned)source_hash(&s, true), s.path);
     long size = ftell(f);
     fclose(f);
     /* now and then, one line per path */
@@ -607,7 +678,7 @@ void aos_flasher_note_flashed(const aos_flasher_source_t *src)
     f = fopen(p, "w");
     if (f) {
         for (int i = 0; i < n; i++)
-            if (h[i].mark) fprintf(f, "%u m:%08x %s\n", (unsigned)h[i].t, (unsigned)h[i].mark, h[i].path);
+            if (h[i].mark) fprintf(f, "%u h:%08x %s\n", (unsigned)h[i].t, (unsigned)h[i].mark, h[i].path);
             else fprintf(f, "%u %s\n", (unsigned)h[i].t, h[i].path);
         fclose(f);
     }
@@ -624,7 +695,7 @@ static void note_flashed(aos_flasher_source_t *src, int n)
             if (!strcmp(src[j].path, h[i].path)) {
                 src[j].flashed = h[i].t;
                 src[j].flashed_rank = (uint16_t)(i + 1);
-                src[j].changed = h[i].mark && h[i].mark != source_mark(&src[j]);
+                src[j].changed = h[i].mark && h[i].mark != source_hash(&src[j], false);
             }
     free(h);
 }
