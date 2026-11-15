@@ -51,7 +51,7 @@
 #include "hal/uart_ll.h"
 #endif
 
-#define FW_VERSION "0.2"
+#define FW_VERSION "0.3"
 #define SUMP_CLOCK 100000000u
 #define NCH 8
 
@@ -89,6 +89,8 @@ static struct {
 } S;
 
 static volatile bool s_abort;
+/* measuring the loop: blocks of 4096 samples left to run, 0 = a capture */
+static volatile uint32_t s_calib;
 
 /* ---- the link ---- */
 
@@ -184,6 +186,10 @@ static IRAM_ATTR __attribute__((noinline)) void capture(cap_t *c)
             prev = s;
             if (!--check) {
                 check = 4096;
+                if (s_calib && !--s_calib) {
+                    c->aborted = true;
+                    return;
+                }
                 if (host_spoke()) {
                     c->aborted = true;
                     return;
@@ -193,7 +199,12 @@ static IRAM_ATTR __attribute__((noinline)) void capture(cap_t *c)
             }
         }
     }
-    /* after the trigger (or with none), the rest */
+    /* after the trigger (or with none), the rest. Should the wait have
+     * fallen behind its pace, the pace starts again here rather than
+     * running to catch up: catching up takes samples closer together than
+     * their rate, and the first stretch after the trigger would be read
+     * out of time (seen on a C3: the first 15 characters of a UART line) */
+    if ((int32_t)(esp_cpu_get_cycle_count() - t) > (int32_t)period) t = esp_cpu_get_cycle_count() + period;
     for (uint32_t k = c->trig ? n - c->pre - 1 : n; k; k--) {
         while ((int32_t)(esp_cpu_get_cycle_count() - t) < 0) {}
         t += period;
@@ -208,26 +219,27 @@ static IRAM_ATTR __attribute__((noinline)) void capture(cap_t *c)
     c->end = idx;
 }
 
-/* the loop's own speed: the trigger loop's body, without the wait */
-static IRAM_ATTR __attribute__((noinline)) uint32_t loop_cycles(void)
+/* The loop's own speed: the capture itself, unpaced, waiting for a trigger
+ * that never comes and checking it on every sample (its slowest path), for
+ * 16384 samples. (A lighter copy of the loop measured 8.33 MHz on a C3 that
+ * the real one could not keep: it fell behind while waiting, and the start
+ * after the trigger came out of time.) */
+static uint32_t loop_cycles(void)
 {
-    volatile uint8_t *buf = s_buf;
-    uint32_t idx = 0, n = 1024, check = 4096;
-    /* masks the compiler cannot see through, that never trigger */
-    volatile uint8_t vm = 0, vv = 1, vz = 0;
-    uint8_t prev = RD(), lm = vm, lv = vv, rise = vz, fall = vz, edge = vz;
-    uint32_t t0 = esp_cpu_get_cycle_count(), t = t0;
-    for (int i = 0; i < 4000; i++) {
-        while ((int32_t)(esp_cpu_get_cycle_count() - t) < 0) {}
-        t += 1;
-        uint8_t s = RD();
-        buf[idx] = s;
-        if (++idx == n) idx = 0;
-        if ((s & lm) == lv && (rise & ~prev & s) == rise && (fall & prev & ~s) == fall && (edge & (prev ^ s)) == edge) break;
-        prev = s;
-        if (!--check) check = 4096;
-    }
-    return (esp_cpu_get_cycle_count() - t0) / 4000;
+    cap_t c = { 0 };
+    c.period = 1;
+    c.rate = 1;
+    c.n = 1024;
+    c.pre = 0;
+    c.trig = true;
+    c.lm = 0;
+    c.lv = 1;                   /* (s & 0) == 1: never */
+    s_calib = 4;
+    uint32_t t0 = esp_cpu_get_cycle_count();
+    capture(&c);
+    uint32_t dt = esp_cpu_get_cycle_count() - t0;
+    s_calib = 0;
+    return dt / (4 * 4096);
 }
 
 typedef struct {
@@ -379,7 +391,7 @@ void app_main(void)
     portDISABLE_INTERRUPTS();
     uint32_t cyc = loop_cycles();
     portENABLE_INTERRUPTS();
-    uint32_t top = s_cpu_hz / (cyc + 2);
+    uint32_t top = (uint32_t)((uint64_t)s_cpu_hz * 10 / ((uint64_t)cyc * 11));    /* 10 % to spare */
     uint32_t d = SUMP_CLOCK / top;
     if (d < 1) d = 1;
     while (SUMP_CLOCK / d > top) d++;
