@@ -1233,6 +1233,7 @@ void la_ui_build(lv_obj_t *root)
     U.trig_lbl = lv_obj_get_child(tb, 1);
     lv_label_set_long_mode(U.trig_lbl, LV_LABEL_LONG_MODE_DOTS);
     lv_obj_set_style_max_width(U.trig_lbl, U.land ? 200 : 130, 0);
+    lv_obj_set_height(U.trig_lbl, lv_font_get_line_height(aos_font_small));   /* one line, cut */
     U.rep_btn = btn(bar, AOS_SYM_RESTART, NULL, rep_cb, NULL);
     U.cap_btn = btn(bar, AOS_SYM_PLAY, _("Capturar"), cap_cb, NULL);
     U.cap_ico = lv_obj_get_child(U.cap_btn, 0);

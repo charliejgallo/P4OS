@@ -201,8 +201,14 @@ streams (4-6 of 16 KB, the USB host's rule: `docs/USB.md`, "Webcams").
   trigger fired by hand (CH1 let go of ground: one clean rising edge at
   the trigger, 25 % of the capture before it). Touching the wire by hand
   disturbed the box's USB (a failed transfer, and once a reset a second
-  later); the loop rode over both. **Not tested:** the decoders on real
-  buses, and the ESP32 firmware on a chip.
+  later); the loop rode over both. And real signals from the board's
+  header self test on GPIO34 (`POST /api/expansion/selftest?gpio=34`,
+  wired to CH1): its PWM measured at 998.1 Hz (the board says 998) with
+  the fade's high time growing evenly from 2 to 100 µs, the IR frame's
+  carrier at 37.995 kHz, 33 %, and its four CAN frames decoded exactly
+  (0x100-0x102 `CA FE 00 n`, 0x18FEF100 `01..08`, CRC good, no ACK as there
+  is no other node). **Not tested:** the other decoders on real buses, and
+  the ESP32 firmware on a chip.
 
 ## Licences
 
