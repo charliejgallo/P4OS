@@ -58,12 +58,13 @@ typedef struct {
     const char *fw;
 } fx2_prof_t;
 
-/* sigrok's list (libsigrok's fx2lafw driver), with the file each one takes */
+/* sigrok's list (libsigrok's fx2lafw driver), with the file each one takes;
+ * the names as the boxes say them, the same in every language */
 static const fx2_prof_t PROF[] = {
-    { 0x0925, 0x3881, "Logic 24 MHz 8 canales (Saleae)", "fx2lafw-saleae-logic.fw" },
+    { 0x0925, 0x3881, "Logic 24 MHz 8CH (Saleae)",       "fx2lafw-saleae-logic.fw" },
     { 0x04B4, 0x8613, "Cypress FX2LP",                   "fx2lafw-cypress-fx2.fw" },
-    { 0x1D50, 0x608C, "sigrok FX2 LA 8 canales",         "fx2lafw-sigrok-fx2-8ch.fw" },
-    { 0x1D50, 0x608D, "sigrok FX2 LA 16 canales",        "fx2lafw-sigrok-fx2-16ch.fw" },
+    { 0x1D50, 0x608C, "sigrok FX2 LA 8CH",               "fx2lafw-sigrok-fx2-8ch.fw" },
+    { 0x1D50, 0x608D, "sigrok FX2 LA 16CH",              "fx2lafw-sigrok-fx2-16ch.fw" },
     { 0x1D50, 0x608F, "usb-c-grok",                      "fx2lafw-usb-c-grok.fw" },
     { 0x08A9, 0x0014, "CWAV USBee AX",                   "fx2lafw-cwav-usbeeax.fw" },
     { 0x08A9, 0x0015, "CWAV USBee DX",                   "fx2lafw-cwav-usbeedx.fw" },
