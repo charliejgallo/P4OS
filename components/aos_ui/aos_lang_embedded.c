@@ -3300,6 +3300,7 @@ static const char blob_en__sistema_lang[] =
     "copiado\tcopied\n"
     "grabado\tflashed\n"
     "Lógica\tLogic\n"
+    "Versión nueva\tNew version\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -6592,6 +6593,7 @@ static const char blob_de__sistema_lang[] =
     "copiado\tkopiert\n"
     "grabado\tgeflasht\n"
     "Lógica\tLogik\n"
+    "Versión nueva\tNeue Version\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -6599,7 +6601,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3285, 0, files_en, 1 },
-    { "de", "Deutsch", 3285, 0, files_de, 1 },
+    { "en", "English", 3286, 0, files_en, 1 },
+    { "de", "Deutsch", 3286, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

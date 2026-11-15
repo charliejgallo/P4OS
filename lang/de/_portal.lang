@@ -2286,3 +2286,6 @@ Buscar por nombre	Nach Namen suchen
 
 #: components/aos_portal/web/app.js:729
 Leer la tarjeta otra vez	Karte neu lesen
+
+#: components/aos_portal/web/app.js:683
+versión nueva	neue Version

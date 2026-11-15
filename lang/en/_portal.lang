@@ -2286,3 +2286,6 @@ Buscar por nombre	Search by name
 
 #: components/aos_portal/web/app.js:729
 Leer la tarjeta otra vez	Read the card again
+
+#: components/aos_portal/web/app.js:683
+versión nueva	new version

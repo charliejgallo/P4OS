@@ -1053,6 +1053,9 @@ static void fill_sources(void)
             fmt_when(s->flashed, when, sizeof when);
             snprintf(ww, sizeof ww, "  ·  %s%s%s", _("grabado"), when[0] ? " " : "", when);
         }
+        /* written before, and changed on the card since: said first, where
+         * the width does not cut it */
+        if (s->changed) ww[0] = 0;
         if (s->project)
             snprintf(sub, sizeof sub, "%s  ·  %d %s  ·  %s%s%s%.31s", chip, s->nfiles, _("archivos"), sz, ww,
                      s->app_version[0] ? "  ·  " : "", s->app_version);
@@ -1061,8 +1064,13 @@ static void fill_sources(void)
         else
             snprintf(sub, sizeof sub, "%s  ·  0x%X  ·  %s%s%s%.31s", chip, (unsigned)s->files[0].offset, sz, ww,
                      s->app_version[0] ? "  ·  " : "", s->app_version);
+        if (s->changed) {
+            char tmp[176];
+            snprintf(tmp, sizeof tmp, "%s  ·  %.150s", _("Versión nueva"), sub);
+            snprintf(sub, sizeof sub, "%s", tmp);
+        }
         const char *mm = mismatch(s);
-        lv_obj_t *sl = aos_label(r, sub, aos_font_caption, mm[0] ? AOS_C_ORANGE : AOS_C_DIM);
+        lv_obj_t *sl = aos_label(r, sub, aos_font_caption, mm[0] || s->changed ? AOS_C_ORANGE : AOS_C_DIM);
         lv_obj_set_size(sl, w - 48 - 84 - 60, lv_font_get_line_height(aos_font_caption));
         lv_label_set_long_mode(sl, LV_LABEL_LONG_MODE_DOTS);
         lv_obj_align(sl, LV_ALIGN_LEFT_MID, 84, 22);

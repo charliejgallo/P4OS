@@ -679,7 +679,8 @@ async function pageProgramador() {
             h('div', { class: 'small ' + (other ? 'warn' : 'muted') }, (x.dump ? tr('Volcado') + ' · ' : '') + (x.chip ? (other ? tr('para %s', x.chip_label || x.chip.toUpperCase()) : (x.chip_label || x.chip.toUpperCase())) : tr('chip desconocido')) + ' · ' +
               (x.files.length === 1 ? tr('1 archivo') : tr('%s archivos', x.files.length)) + ' · ' + fmtBytes(x.total) +
               (flashSort === 'newest' && when(x.mtime) ? ' · ' + tr('copiado %s', when(x.mtime)) : '') +
-              (x.flashed_rank ? ' · ' + (when(x.flashed) ? tr('grabado %s', when(x.flashed)) : tr('ya grabado')) : '')),
+              (x.flashed_rank ? ' · ' + (when(x.flashed) ? tr('grabado %s', when(x.flashed)) : tr('ya grabado')) : ''),
+              x.changed ? h('span', { class: 'pill', style: 'margin-left:6px;background:var(--orange);color:#000' }, tr('versión nueva')) : null),
             on ? h('div', { class: 'small muted', style: 'font-family:ui-monospace,Menlo,monospace;margin-top:6px' },
               x.files.map(f => h('div', {}, f.offset + '  ' + f.name + '  (' + fmtBytes(f.size) + ')'))) : null));
       }) : all.length ? [h('div', { class: 'row muted' }, tr('Ninguno con "%s"', flashQuery))] : [h('div', { class: 'row muted' }, flashFam === 'swd' || flashFam === 'stm32' ? tr('No hay firmware en /firmware. Subí el .hex, .elf, .uf2 o .bin de tu firmware.') : flashFam === 'avr' ? tr('No hay firmware en /firmware. Subí el .hex de tu sketch (Sketch, Exportar binario compilado en el IDE de Arduino).')

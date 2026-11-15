@@ -26,7 +26,12 @@ paréntesis, con qué se probó en la placa; los detalles, en
   (`firmware/.grabados.txt`, una línea "hora ruta" por cada grabación que
   termina bien), y se busca por nombre, app, versión o chip, en la app y en
   el portal. El portal lee la tarjeta cada 5 s como mucho (o con ↻, o al
-  terminar una grabación), no en cada consulta.
+  terminar una grabación), no en cada consulta. Cada grabación anota además una huella de
+  lo grabado (fecha de sus archivos, tamaño, versión y cantidad de
+  archivos; `"hora m:<huella> ruta"`): si lo que hay en la tarjeta con ese
+  nombre cambió después, la lista dice **Versión nueva** (en naranja en la
+  placa, una etiqueta en el portal). Las líneas de antes de la huella no
+  avisan nada.
 - **Arduino AVR por su bootloader** (F3): STK500 v1/v2 y AVR109, desde un
   `.hex`; leer y borrar el programa. (Un Nano por USB y por el header, un
   Mega 2560 y una Pro Micro por USB.)

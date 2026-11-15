@@ -327,7 +327,7 @@ static void worker(void *arg)
         ok = true;
     bool cancelled = fl_cancel && !ok;
     if (D.f) fl_dump_close(false, false, NULL);     /* a family that left one open */
-    if (ok && J.job == AOS_FLASHER_JOB_FLASH) aos_flasher_note_flashed(J.src.path);
+    if (ok && J.job == AOS_FLASHER_JOB_FLASH) aos_flasher_note_flashed(&J.src);
     fl_lock();
     fl_st.ok = ok;
     if (ok) fl_st.percent = 100;

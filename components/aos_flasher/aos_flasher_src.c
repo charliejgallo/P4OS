@@ -517,6 +517,17 @@ static void note_mtime(aos_flasher_source_t *s)
     s->mtime = m;
 }
 
+/* what a source is, in 32 bits: its date, size, version and files */
+static uint32_t source_mark(const aos_flasher_source_t *s)
+{
+    uint32_t h = 2166136261u;
+    uint32_t v[3] = { s->mtime, s->total, (uint32_t)s->nfiles };
+    for (int i = 0; i < 3; i++)
+        for (int b = 0; b < 4; b++) h = (h ^ ((v[i] >> (8 * b)) & 0xFF)) * 16777619u;
+    for (const char *p = s->app_version; *p; p++) h = (h ^ (uint8_t)*p) * 16777619u;
+    return h ? h : 1;
+}
+
 #define FLASHED_FILE ".grabados.txt"
 #define FLASHED_KEEP 200
 
@@ -528,10 +539,12 @@ static bool flashed_path(char *out, size_t n)
     return true;
 }
 
-/* "<time> <path>" a line, the newest last; a path's last line counts */
+/* "<time> m:<mark> <path>" a line (before 2026-11-15 "<time> <path>"), the
+ * newest last; a path's last line counts */
 typedef struct {
     char path[256];
     uint32_t t;
+    uint32_t mark;              /* 0: not noted */
 } flashed_t;
 
 static int flashed_read(flashed_t *out, int max)
@@ -545,6 +558,12 @@ static int flashed_read(flashed_t *out, int max)
     while (fgets(line, sizeof line, f)) {
         char *sp = strchr(line, ' ');
         if (!sp) continue;
+        uint32_t mark = 0;
+        if (!strncmp(sp + 1, "m:", 2)) {
+            mark = (uint32_t)strtoul(sp + 3, NULL, 16);
+            sp = strchr(sp + 1, ' ');
+            if (!sp) continue;
+        }
         size_t l = strlen(sp + 1);
         while (l && (sp[l] == '\n' || sp[l] == '\r')) sp[l--] = 0;
         if (!sp[1]) continue;
@@ -560,6 +579,7 @@ static int flashed_read(flashed_t *out, int max)
             n--;
         }
         out[n].t = (uint32_t)strtoul(line, NULL, 10);
+        out[n].mark = mark;
         snprintf(out[n].path, sizeof out[n].path, "%s", sp + 1);
         n++;
     }
@@ -567,14 +587,16 @@ static int flashed_read(flashed_t *out, int max)
     return n;
 }
 
-void aos_flasher_note_flashed(const char *path)
+void aos_flasher_note_flashed(const aos_flasher_source_t *src)
 {
     char p[240];
-    if (!path || !*path || !flashed_path(p, sizeof p)) return;
+    if (!src || !src->path[0] || !flashed_path(p, sizeof p)) return;
+    aos_flasher_source_t s = *src;
+    note_mtime(&s);                 /* the job's copy may not have it */
     uint32_t now = aos_hal_time_is_valid() ? (uint32_t)time(NULL) : 0;
     FILE *f = fopen(p, "a");
     if (!f) return;
-    fprintf(f, "%u %s\n", (unsigned)now, path);
+    fprintf(f, "%u m:%08x %s\n", (unsigned)now, (unsigned)source_mark(&s), s.path);
     long size = ftell(f);
     fclose(f);
     /* now and then, one line per path */
@@ -584,7 +606,9 @@ void aos_flasher_note_flashed(const char *path)
     int n = flashed_read(h, FLASHED_KEEP);
     f = fopen(p, "w");
     if (f) {
-        for (int i = 0; i < n; i++) fprintf(f, "%u %s\n", (unsigned)h[i].t, h[i].path);
+        for (int i = 0; i < n; i++)
+            if (h[i].mark) fprintf(f, "%u m:%08x %s\n", (unsigned)h[i].t, (unsigned)h[i].mark, h[i].path);
+            else fprintf(f, "%u %s\n", (unsigned)h[i].t, h[i].path);
         fclose(f);
     }
     free(h);
@@ -600,6 +624,7 @@ static void note_flashed(aos_flasher_source_t *src, int n)
             if (!strcmp(src[j].path, h[i].path)) {
                 src[j].flashed = h[i].t;
                 src[j].flashed_rank = (uint16_t)(i + 1);
+                src[j].changed = h[i].mark && h[i].mark != source_mark(&src[j]);
             }
     free(h);
 }

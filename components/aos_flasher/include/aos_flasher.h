@@ -104,14 +104,18 @@ typedef struct {
     uint32_t mtime;
     uint32_t flashed;
     uint16_t flashed_rank;
+    /* written before, and what is on the card now is not what was written
+     * then (another date, size, version or set of files) */
+    bool     changed;
 } aos_flasher_source_t;
 
 /* How a list of sources is shown: by kind and name (projects, loose
  * files, dumps), the newest on the card first, the last written first. */
 typedef enum { AOS_FLASHER_SORT_NAME = 0, AOS_FLASHER_SORT_NEWEST, AOS_FLASHER_SORT_FLASHED, AOS_FLASHER_SORTS } aos_flasher_sort_t;
 void aos_flasher_sort(aos_flasher_source_t *src, int n, aos_flasher_sort_t by);
-/* Notes that 'path' was just written to a board (the job does it). */
-void aos_flasher_note_flashed(const char *path);
+/* Notes that 'src' was just written to a board (the job does it), with a
+ * mark of what it was, so a later list can tell it changed since. */
+void aos_flasher_note_flashed(const aos_flasher_source_t *src);
 
 /* Whether the list shows 'src' for a job of 'family': its own, or one that
  * does not say - except a .hex/.elf/.uf2 for the ESP family, which only

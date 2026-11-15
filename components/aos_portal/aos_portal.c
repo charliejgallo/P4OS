@@ -1214,6 +1214,7 @@ static void api_flash(aos_httpd_req_t *r)
         cJSON_AddNumberToObject(e, "mtime", src[i].mtime);
         cJSON_AddNumberToObject(e, "flashed", src[i].flashed);
         cJSON_AddNumberToObject(e, "flashed_rank", src[i].flashed_rank);
+        cJSON_AddBoolToObject(e, "changed", src[i].changed);
         cJSON *fs = cJSON_AddArrayToObject(e, "files");
         for (int k = 0; k < src[i].nfiles; k++) {
             cJSON *f = cJSON_CreateObject();

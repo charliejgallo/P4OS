@@ -10593,3 +10593,6 @@ grabado	geflasht
 
 #: apps/logica  (nombre de app)
 Lógica	Logik
+
+#: components/aos_apps/aos_app_flasher.c:1069
+Versión nueva	Neue Version
