@@ -55,6 +55,14 @@ const uint32_t *la_rates(const la_dev_t *d, int *n)
     }
     if (d && d->max_rate)
         while (k > 1 && r[k - 1] > d->max_rate) k--;
+    /* a SUMP device's own top (the app's firmware measures it: 8.33 MHz on
+     * a C3) goes last when the list does not have it */
+    if (d && d->drv == LA_DRV_SUMP && d->max_rate > r[k - 1] && d->max_rate < r[k < 15 ? k : 14] && k < 20) {
+        static uint32_t with_top[21];
+        memcpy(with_top, r, (size_t)k * sizeof r[0]);
+        with_top[k++] = d->max_rate;
+        r = with_top;
+    }
     *n = k;
     return r;
 }
@@ -245,7 +253,9 @@ static void capture_job(void *arg)
     case LA_DRV_SUMP: why = la_sump_capture(&d, &cfg, t); break;
     default: why = la_demo_capture(&cfg, t); break;
     }
-    if (d.drv == LA_DRV_FX2) la_rescan = true;  /* its address changes once fx2lafw is in */
+    /* an FX2's address changes once fx2lafw is in; a SUMP device said what
+     * it is when it was asked: the list shows it from now on */
+    if (d.drv == LA_DRV_FX2 || d.drv == LA_DRV_SUMP) la_rescan = true;
     bool ok = !why && t->n > 0;
     la_job_commit(t, ok);
     if (!ok) {

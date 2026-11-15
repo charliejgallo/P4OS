@@ -179,6 +179,16 @@ bool la_sump_probe(const char *port, uint32_t baud, la_dev_t *out)
     return ok;
 }
 
+/* what answered last, with what its metadata said, for the next listing */
+static void remember(const la_dev_t *d)
+{
+    aos_hal_pref_set_str("la_sport", d->port);
+    aos_hal_pref_set_i32("la_sbaud", (int32_t)d->baud);
+    aos_hal_pref_set_str("la_sname", d->name);
+    aos_hal_pref_set_i32("la_srate", (int32_t)d->max_rate);
+    aos_hal_pref_set_i32("la_smem", (int32_t)d->max_samples);
+}
+
 /* the USB serial ports, asked only when the user says so (talking to a
  * port sends bytes to whatever is there), plus the one that answered last
  * time, remembered without asking */
@@ -199,8 +209,7 @@ int la_sump_find(la_dev_t *out, int max, bool probe)
             char p[8];
             snprintf(p, sizeof p, "usb%d", i);
             if (la_sump_probe(p, 921600, &out[k])) {
-                aos_hal_pref_set_str(key_port, p);
-                aos_hal_pref_set_i32("la_sbaud", 921600);
+                remember(&out[k]);
                 k++;
             }
         }
@@ -218,15 +227,6 @@ int la_sump_find(la_dev_t *out, int max, bool probe)
         k++;
     }
     return k;
-}
-
-static void remember(const la_dev_t *d)
-{
-    aos_hal_pref_set_str("la_sport", d->port);
-    aos_hal_pref_set_i32("la_sbaud", (int32_t)d->baud);
-    aos_hal_pref_set_str("la_sname", d->name);
-    aos_hal_pref_set_i32("la_srate", (int32_t)d->max_rate);
-    aos_hal_pref_set_i32("la_smem", (int32_t)d->max_samples);
 }
 
 const char *la_sump_capture(const la_dev_t *dev, const la_cfg_t *cfg, la_cap_t *c)
