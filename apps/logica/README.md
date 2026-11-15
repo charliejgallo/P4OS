@@ -11,7 +11,7 @@ an analyser plugged into it.
 | Analyser | How it reaches the board | Rate | Depth |
 |---|---|---|---|
 | **"Logic Analyzer 24MHz 8CH"** boxes (a Cypress FX2LP, sold as Saleae Logic clones, `0925:3881`) and the other FX2 boards sigrok knows (`04b4:8613`, `1d50:608c/608d/608f`, the USBee family, the USB-LPS) | the USB host, through `aos_hal_usb_raw_*` | 20 kHz to 24 MHz on pins 25/27 (High Speed); up to 1 MHz on 21/23 (Full Speed) | the board's PSRAM: the box streams |
-| **The app's own firmware** for an ESP32-S3, C3 or C6 (`firmware/`) | its own USB (`usb0`) or a header UART | what its loop reaches, measured at boot: **8.33 MHz on a C3** (checked against a known signal) | the chip's internal RAM (155648 samples on a C3) |
+| **The app's own firmware** for an ESP32-S3, C3 or C6 (`firmware/`) | its own USB (`usb0`) or a header UART | what its capture loop reaches, measured at boot: **5 MHz on a C3** (firmware 0.3; checked against a known signal and a UART line) | the chip's internal RAM (155648 samples on a C3) |
 | Anything else that speaks **SUMP / Open Bench Logic Sniffer** | a USB serial port or a header UART | the device's | the device's |
 | **Demo**: three scenes made up in memory (serial, I2C, SPI, PWM; 1-Wire, CAN, WS2812, NEC, DMX512, Modbus RTU; pulses and a parallel bus), each with its decoders set | - | any | up to 8M samples |
 
@@ -35,11 +35,12 @@ What the app does with it (`main/la_fx2.c`, written anew from the
 protocol, not sigrok's code): vendor request 0xA0 holds the 8051 in reset
 (CPUCS, 0xE600), writes the image from address 0 and lets it run; the
 chip drops off the bus and comes back with the same ids, named "sigrok
-fx2lafw", at a new address, which the app waits for (up to 4 s). Then
-0xB0 asks the version (1.x), 0xB1 starts it (the 48 or 30 MHz clock and
-the delay between samples), and the samples come on bulk endpoint 0x82, a
-byte each, into a 2 MB ring of the host and from there straight into the
-capture. The trigger is found in software as the bytes come, with the
+fx2lafw", at a new address, which the app waits for (up to 15 s, as a
+Mac may ask its user first). Then 0xB0 asks the version (1.x), 0xB1
+starts it (the 48 or 30 MHz clock and the delay between samples), and the
+samples come on bulk endpoint 0x82, a byte each, into a ring of the host
+(2 MB from 8 MHz up, 1 MB below) and from there straight into the
+capture, never a sample past its end. The trigger is found in software as the bytes come, with the
 samples before it kept in a ring the size of the capture.
 
 The box's case says CH1..CH8; the app, like PulseView, calls them D0..D7
@@ -53,6 +54,8 @@ it is not on the bus at all and the app waits up to 15 s for it. A box
 that was left half-started may stay off the bus until it is unplugged.
 
 <p align="center"><img src="../../docs/img/bench-logica-fx2.jpg" width="320" alt="The 24 MHz 8 channel analyser held on the board's back cover, plugged into the USB host socket, with its CH1 and ground wired to the 40-pin header"></p>
+
+<p align="center"><img src="../../docs/img/app-logica-uart.png" width="240" alt="Lógica on the board: the FX2 at 4 MHz on uart.b TX, the trigger on D1 falling, the UART decoder showing H, o, l, a, P, 4, O, S"> <img src="../../docs/img/app-logica-table.png" width="240" alt="Lógica's table: three packets of the UART line, Hola P4OS! UART 115200 8N1 and the second line"></p>
 
 The bench on 2026-11-14: the analyser on the board's back cover, plugged
 into the High-Speed host socket, its CH1 on GPIO34 (header pin 28) and its
@@ -94,14 +97,20 @@ sigrok-cli use it too ("Openbench Logic Sniffer & SUMP compatibles"). On
 the S3 the capture runs on the second core and the first keeps the USB;
 on the C3/C6 a byte from the host stops a wait for a trigger.
 
-**How fast:** counted from the compiled code the loop looked like about 28
-instructions a sample, some 35-40 cycles, about 4 MHz on a C3; **the C3
-itself measured 8.33 MHz** and the measurement held against a known signal
-(below). An S3 at 240 MHz should go further; not tried yet. After the trigger, or with none, about 13 instructions
-(some 9 MHz on a C3), but the firmware says the slower loop's top as its
-maximum. None reaches 24 MHz: that is the FX2's, or would need a
-peripheral that samples by DMA (the S3's LCD_CAM, the C3's GPSPI in quad
-mode for 4 channels), a later version.
+**How fast:** at boot the firmware runs the capture loop itself, unpaced,
+on its slowest path (waiting for a trigger, checked on every sample), and
+offers that rate less 10 % as its top: **5 MHz on a C3** (firmware 0.3).
+Up to 0.2 it timed a lighter copy of the loop and said 8.33 MHz: a steady
+PWM read right, but the real loop fell behind its pace while it waited
+for the trigger and then ran to catch up, so the first 15 characters of a
+UART line came out of time (and the first period of a PWM long, 1061 µs
+of 1001). Should a wait fall behind anyway, the pace now starts again at
+the trigger instead of catching up. After the trigger the loop is lighter
+(some 13 instructions a sample), but the top is the slower path's. An S3
+at 240 MHz should go further; it builds, not tried yet. None reaches
+24 MHz: that is the FX2's, or would need a peripheral that samples by DMA
+(the S3's LCD_CAM, the C3's GPSPI in quad mode for 4 channels), a later
+version.
 
 | Chip | Channels 0-7 (default) |
 |---|---|
@@ -115,10 +124,12 @@ cd apps/logica/firmware && idf.py set-target esp32s3 && idf.py build flash
 
 The board's Programador flashes it too: copy the build folder (the one
 with `flasher_args.json`) to the card's `firmware/` folder, as
-`firmware/logica-esp32c3/`, and flash it on `usb0`. Its list shows 24
-entries at most (`AOS_FLASHER_SOURCES_MAX`): on a card that has more, a
-new folder may not show until an old one goes. In Lógica: Analizador, "Buscar SUMP en USB". Inputs are 3.3 V
-only and have no pull resistors.
+`firmware/logica-esp32c3/`, and flash it on `usb0`. Since 0.28 its list
+takes 160 entries, sorts by name, by the last added or by the last
+flashed, has a search, and says "versión nueva" when what is on the card
+is not what was last flashed under that name (by its content). In
+Lógica: Analizador, "Buscar SUMP en USB". Inputs are 3.3 V only and have
+no pull resistors.
 
 <p align="center"><img src="../../docs/img/bench-logica-c3.jpg" width="320" alt="An ESP32-C3 Super Mini with the app's firmware on the board's USB host, its GPIO0 wired to the header's GPIO34, and the board's screen showing the self test's PWM on D0 at 8.33 MHz"></p>
 
@@ -131,6 +142,13 @@ GPIO0, D0), the periods came out at 1001.59 µs = 998.41 Hz (the FX2 read
 rate is real. Its other inputs float (no pulls, so as not to load what is
 measured): an unconnected channel shows stray pulses. From 0.2 the trigger
 also takes "either edge" (a third mask in command 0xF0).
+
+**A real UART line** (2026-11-15, firmware 0.3 at 5 MHz, 155648 samples
+= 31 ms): the board's `uart.b` TX (header pin 12, GPIO3) on the C3's
+GPIO1 (D1), the trigger on D1 falling, the Terminal's channel sending two
+lines at 115200 8N1 with accents in UTF-8. All 107 characters decoded
+from the first one, no framing error, 86.80 µs each (86.81 at 115200).
+The same line on the FX2's CH2 at 4 MHz decoded the same.
 
 `tools/fake_sump.py` is a SUMP device on a pseudo-terminal, to try the
 driver in the simulator: `P4_SIM_UART_A=<its pty>`, then Analizador,
@@ -228,8 +246,15 @@ streams (4-6 of 16 KB, the USB host's rule: `docs/USB.md`, "Webcams").
   the fade's high time growing evenly from 2 to 100 µs, the IR frame's
   carrier at 37.995 kHz, 33 %, and its four CAN frames decoded exactly
   (0x100-0x102 `CA FE 00 n`, 0x18FEF100 `01..08`, CRC good, no ACK as there
-  is no other node). **Not tested:** the other decoders on real buses, and
-  the ESP32 firmware on a chip.
+  is no other node). And a real UART line (2026-11-15, above), on the FX2
+  and on the C3: two fixes came out of it. A character whose start bit
+  falls a sample before the end the decoder gives the last one's stop bit
+  stays in its packet (the gap was unsigned and wrapped; Modbus had the
+  same), and the FX2 no longer reads past the end of a capture (those
+  samples went round the ring onto the oldest ones kept, the start of
+  the line: 16320 flat samples, a whole transfer). The ESP32 firmware on a
+  C3: the self test's PWM and the UART line (above). **Not tested:** the
+  other decoders on real buses, the firmware on an S3 or a C6.
 
 ## Licences
 

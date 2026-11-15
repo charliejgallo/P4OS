@@ -899,6 +899,24 @@ second both ways, 512 slots, no bad packet, the BREAK measured as sent
 asked, 33-50 µs on the wire: the time until the UART's first start bit),
 which the standard allows.
 
+## A logic analyser (Lógica, 0.28)
+
+The Logic app (`apps/logica/README.md`) does not sample the header
+itself: an analyser plugged into the USB host does, a 24 MHz FX2 box or an
+ESP32 with the app's firmware. To look at the header's own signals, wire
+the analyser's channels to its pins and its ground to the header's ground;
+the inputs are 3.3 V. Two ways to try it with nothing else:
+
+- `POST /api/expansion/selftest?gpio=34` plays a PWM, an infrared frame and
+  CAN frames on GPIO34 (pin 28): measured at 998.1 Hz, the carrier at
+  37.995 kHz, the CAN frames decoded exactly.
+- `uart.b` TX (GPIO3, pin 12) from the Terminal or `/api/serial/send`: a
+  line at 115200 decoded whole, on the FX2 at 4 MHz and on an ESP32-C3 at
+  5 MHz. Open the port before arming, so the line idles high.
+
+Sampling with the P4 itself (PARLIO RX on 8 or 16 header pins into PSRAM)
+needs a firmware API that is not written; it is asked for.
+
 ## Not done yet
 
 - **Relays** (a Phase 6 extra): not in this round.

@@ -1513,6 +1513,43 @@ laberinto, pong, radar, walkie, remoto y sensores.
       patas.
 - [x] esp-serial-flasher contra un ESP32 de verdad (por USB: 2026-10-05 y
       2026-10-27, el reloj AmoledOS leído y grabado entero).
+- [x] **La lista de firmware de la tarjeta** (2026-11-14/15, 0.28.0): la
+      carpeta nueva que no aparecía con el tope de 24 ahora sale (160),
+      los tres órdenes y la búsqueda en la placa y en el portal, y
+      "versión nueva" después de regrabar el firmware de Lógica para el C3
+      con otro contenido; con el CRC del contenido (`h:83d184af` en
+      `.grabados.txt`, el mismo que da la computadora) dejó de avisar al
+      grabar lo mismo.
+
+**Lógica** (el analizador lógico, 0.28.0; `apps/logica/README.md`)
+- [x] **El FX2 clonado ("Logic Analyzer 24MHz 8CH")** en el host USB, pines
+      25/27 (2026-11-14): fx2lafw subido desde el portal, de 1 a 24 MHz,
+      seis capturas seguidas sin perder muestras; disparo por nivel y por
+      flanco (CH1 suelto de masa a mano). **Lo que costó:** preguntarle la
+      versión al chip sin fx2lafw colgaba el host (ahora en la placa se
+      mira el nombre USB); el endpoint quedaba frenado por el toggle de
+      datos (`CLEAR_FEATURE` después del claim); un dispositivo que volvió
+      al bus con el host andando no recibía transferencias hasta reiniciar
+      el host (la app lo hace sola si el analizador está solo; pedido al
+      firmware anotado).
+- [x] **La prueba del header en GPIO34** (`/api/expansion/selftest?gpio=34`)
+      leída con el FX2: PWM a 998,1 Hz, la portadora del infrarrojo a
+      37,995 kHz y las cuatro tramas CAN decodificadas exactas.
+- [x] **El firmware propio en un ESP32-C3 Super Mini** (2026-11-14/15),
+      grabado desde el Programador por `usb0`: la 0.2 decía 8,33 MHz y
+      leía bien un PWM fijo (998,41 Hz), pero desfasaba el arranque
+      después del disparo (los primeros 15 caracteres de una UART); la
+      0.3 mide su propio lazo de captura y dice 5 MHz.
+- [x] **Una UART real** (2026-11-15): `uart.b` TX (pin 12) a 115200 desde
+      `/api/serial/send`, dos líneas con acentos. Con el C3 a 5 MHz y con
+      el FX2 a 4 MHz: los 107 caracteres desde el primero, sin errores de
+      trama. Salieron dos arreglos: un carácter pegado al anterior ya no
+      corta el paquete, y el FX2 no lee más allá del final de la captura
+      (pisaba el arranque: 16320 muestras planas).
+- [ ] Los otros decodificadores en buses reales (I2C, SPI, 1-Wire, WS2812,
+      DMX, Modbus): andan con la demo y con señales armadas.
+- [ ] El firmware en un S3 o un C6 (compilan; el usuario va a comprar uno
+      para comparar velocidades).
 
 **Modbus y Banco**
 - [ ] La Riden por TTL: los 20 ms entre pedidos y las escrituras que rechaza en

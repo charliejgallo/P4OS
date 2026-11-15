@@ -506,6 +506,20 @@ needs a new app, not a new firmware. The RF app (`apps/rf/README.md`) puts
 libusb's API on top of this (`apps/rf/main/port/`), so a libusb driver
 moves over with its own sources nearly untouched.
 
+The Logic app (0.28, `apps/logica/README.md`) drives the 24 MHz FX2 boxes
+the same way: fx2lafw loaded into the chip's RAM by control transfers, then
+a stream from bulk endpoint 0x82, 6 transfers of 16 KB in flight, into a
+ring of 1 or 2 MB, up to 24 MHz with nothing dropped. What the host needed,
+measured with that box: a `CLEAR_FEATURE(ENDPOINT_HALT)` right after the
+claim (the chip keeps its data toggle across a restart of the board, and
+the new pipe's first packet failed); a halted pipe stays halted once
+nothing is in flight, so the app opens the device anew; and a device that
+dropped off the bus and came back with the host running had every bulk
+transfer refused until the host was started again, which the app does by
+itself when the box is the only device on it. Never send a vendor request
+the bare FX2 does not know: the host keeps it out and the device cannot be
+opened again until it is plugged anew.
+
 In the simulator the same functions run on the Mac's libusb
 (`sim/usb_raw_sim.c`) with `P4_SIM_USB=1`: an app then drives the real
 device plugged into the Mac. The Mac numbers its devices per bus, so the

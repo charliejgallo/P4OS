@@ -1,5 +1,67 @@
 # Changelog
 
+## 0.28.0 — 2026-11-15
+
+A logic analyser, and a Programador that keeps track of what it wrote.
+
+- **Lógica, a logic analyser, on the card** (`apps/logica/README.md`).
+  Eight channels, captures of millions of samples in PSRAM, a trigger on
+  levels and edges with the samples before it kept, and ten decoders:
+  UART, I2C, SPI, 1-Wire (the DS18B20's temperature and CRC), CAN (CRC
+  and stuffing checked), WS2812, NEC infrared, DMX512, Modbus RTU and a
+  parallel bus. A table of the packets, a channel measured between two
+  cursors, and sigrok sessions on the card, saved and opened (PulseView's
+  too). It keeps waiting for a trigger with another app in front. Its
+  portal page has the big view, edits the decoders and exports `.sr`,
+  VCD and CSV.
+  - **The "Logic Analyzer 24MHz 8CH" boxes** (a Cypress FX2 sold as a
+    Saleae Logic clone) and the other FX2 boards sigrok lists, on the USB
+    host through the raw API: the app loads them sigrok's fx2lafw (GPL,
+    not shipped: it goes on the card, and the portal's page unpacks the
+    `.tar.gz` as it comes) and streams up to 24 MHz into PSRAM.
+  - **Its own firmware for an ESP32-C3, S3 or C6** (`apps/logica/firmware`,
+    ESP-IDF): a SUMP device on the chip's USB, eight GPIOs read in one
+    instruction by a loop with the interrupts off. At boot it measures its
+    own capture loop and offers that rate less 10 %: 5 MHz on a C3, with
+    155648 samples. Firmware 0.3: up to 0.2 it timed a lighter copy of the
+    loop and claimed 8.33 MHz, and the start after a trigger came out of
+    time. A command of its own (0xF0) adds edge triggers to SUMP's levels.
+    PulseView and sigrok-cli use it as an Openbench Logic Sniffer.
+  - Any other SUMP device on USB serial or a header UART, and a demo with
+    three scenes of made-up signals, every decoder set.
+- **The Programador's list of firmware on the card holds 160**, not 24
+  (cut before it was sorted, a new folder could miss the list). It sorts
+  by name, by the last added to the card or by the last flashed (the app
+  remembers it; the portal's page too, in the browser), and searches by
+  name, app, version or chip. Each line says when it was flashed, or
+  copied.
+- **"Versión nueva"**: every flash that ends well notes a CRC-32 of what
+  was written (`firmware/.grabados.txt`), and a firmware on the card that
+  is not that, under the same name, says so in orange in the app and
+  with a tag on the portal's page. By content, so the same build copied
+  again warns of nothing.
+- **`/api/flash`** keeps its scan of the card for 5 s (`?scan=1` reads it
+  again), with each source's `mtime`, `flashed`, `flashed_rank` and
+  `changed`.
+- **The auxiliary board's trial router** routes every net as if alone and
+  then negotiates the crossings: through-hole 67 vias and 2.9 m of track
+  where there were 136 and 3.6 m, and no clearance error in KiCad's
+  check. Still a draft.
+
+Tried on the board, with the user's FX2 clone and an ESP32-C3 Super Mini:
+the FX2 at 1, 4, 8, 12, 16 and 24 MHz, six captures in a row with no
+sample lost; triggers on a level and on an edge; the header's self test
+on GPIO34 measured and decoded (its PWM at 998.1 Hz, an infrared carrier
+at 37.995 kHz, four CAN frames exactly); and a real UART line at 115200
+from the board's `uart.b`, all 107 characters decoded from the first, on
+the FX2 at 4 MHz and on the C3 at 5 MHz (its PWM at 998.41 Hz too). The
+C3 firmware flashed from the Programador on `usb0`, and the Programador's
+"versión nueva" seen after flashing it again. What the board's USB host
+needed for the box (a cleared endpoint after the claim, a fresh device on
+a halted pipe, the host started again once it came back) is in the app's
+README. Not tried yet: the other decoders on real buses, and the firmware
+on an S3 or a C6.
+
 ## 0.27.0 — 2026-11-13
 
 The tools for a wired network, in the Red app, and Ethernet looked after.

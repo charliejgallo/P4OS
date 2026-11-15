@@ -8,7 +8,7 @@ An iPhone-style operating system for the
 
 It has a home screen with pages, folders and a dock, a control centre and
 notifications, and a lock screen with an optional code, and it runs in
-portrait or landscape. There are twenty-three built-in apps and forty-six more on
+portrait or landscape. There are twenty-three built-in apps and more than fifty on
 the microSD, loaded as shared objects:
 
 - **Games:** twenty-four, among them Mila (a Sokoban with a black cat in
@@ -45,9 +45,10 @@ the microSD, loaded as shared objects:
   lighting console for a phone), a bench supply and scope, an EEPROM reader and writer, a PWM and
   servo generator with an analog level (and sixteen more servos on a
   PCA9685), a learning
-  infrared remote with SmartIR's codes, and a CAN bus analyser. Each one
-  was tried on the bench with real parts, wiring diagrams and photos
-  included.
+  infrared remote with SmartIR's codes, a CAN bus analyser, and a logic
+  analyser with ten protocol decoders for the 24 MHz USB boxes or an
+  ESP32 with its own firmware. Each one was tried on the bench with real
+  parts, wiring diagrams and photos included.
 - **A software radio:** an RTL-SDR stick on the USB host gives a live
   spectrum and waterfall, broadcast FM in stereo, AM for the airband and
   narrow FM for hams and PMR, and the 433/868 MHz remotes and weather
@@ -448,7 +449,10 @@ The whole header, pin by pin, is under [The hardware](#the-40-pin-header).
   BOOT0 and NRST on the same lines an ESP32 uses. And it lends its port to
   the computer: esptool over `rfc2217://p4os.local:4000`, avrdude over
   `net:p4os.local:4001`; or becomes its CMSIS-DAP debug probe on the OTG
-  connector, for OpenOCD, pyOCD and probe-rs.
+  connector, for OpenOCD, pyOCD and probe-rs. Its list of firmware on the
+  card (since 0.28) takes 160, sorted by name, by the last added or by the
+  last flashed, with a search, and says "versión nueva" when a folder or
+  file is not what was last flashed under that name, by its content.
 - **Modbus** (on the card since 0.25.0): a tester for Modbus RTU on RS485.
   A master (any function, once or live; find the units on a bus, and its
   speed and format, the format by the line's parity and framing errors),
@@ -575,6 +579,50 @@ and moving its address, and Art-Net from a Mac coming out as DMX.
 </p>
 <p align="center">
   <img src="docs/img/bench-rs485.svg" width="560" alt="Wiring: the P4 and an ESP32, each with an automatic RS485 module, on one twisted pair, and the strip on the ESP32">
+</p>
+
+### Lógica, a logic analyser
+
+Since 0.28, on the card. Eight channels, captures of millions of samples
+in PSRAM, a trigger on levels and edges, and ten decoders: UART, I2C,
+SPI, 1-Wire (with the DS18B20's temperature), CAN, WS2812, NEC infrared,
+DMX512, Modbus RTU and a parallel bus. A table of the packets, a
+measurement of a channel between two cursors (frequency, duty, the high
+and low times), and sigrok sessions (`.sr`) on the card that PulseView
+opens, and the other way round. Its portal page has the big view, the
+decoders and an export to `.sr`, VCD and CSV.
+
+It samples with what is plugged into the board's USB host:
+
+- **The "Logic Analyzer 24MHz 8CH" boxes** (a Cypress FX2, sold as Saleae
+  Logic clones) and the other FX2 boards sigrok knows: up to 24 MHz,
+  streamed into PSRAM. The app loads them sigrok's open firmware,
+  fx2lafw, which goes on the card (the portal's page takes the
+  `.tar.gz` as it comes).
+- **An ESP32-C3, S3 or C6 with the app's own firmware** (`apps/logica/firmware`),
+  flashed from the board's Programador, speaking SUMP over its USB:
+  5 MHz on a C3, measured by the firmware on its own capture loop.
+  PulseView and sigrok-cli use it too.
+- Anything else that speaks **SUMP**, on USB serial or a header UART, and a
+  **demo** with made-up signals for every decoder.
+
+| UART on the board (FX2) | Packets | Demo | Decoders | Measure |
+|---|---|---|---|---|
+| <img src="docs/img/app-logica-uart.png" width="150"> | <img src="docs/img/app-logica-table.png" width="150"> | <img src="docs/img/app-logica-demo.png" width="150"> | <img src="docs/img/app-logica-decoders.png" width="150"> | <img src="docs/img/app-logica-measure.png" width="150"> |
+
+<p align="center"><img src="docs/img/web-logica.jpg" width="600" alt="Lógica's page in the portal: the demo's eight channels and six decoders, 1-Wire bytes and a Modbus answer"></p>
+
+On the board, with the user's FX2 clone and an ESP32-C3 Super Mini: every
+FX2 rate up to 24 MHz with no sample lost; the header's self test on
+GPIO34 measured (its PWM at 998.1 Hz, an infrared carrier at 37.995 kHz,
+four CAN frames decoded exactly); and a real UART line at 115200 from the
+board's own `uart.b`, all 107 characters decoded from the first, on the
+FX2 at 4 MHz and on the C3 at 5 MHz. [apps/logica/README.md](apps/logica/README.md)
+has what was measured and what the board's USB host needed.
+
+<p align="center">
+  <img src="docs/img/bench-logica-fx2.jpg" width="300" alt="The 24 MHz 8 channel analyser on the board's back cover, plugged into the USB host, its CH1 and ground on the 40-pin header">
+  <img src="docs/img/bench-logica-c3.jpg" width="300" alt="An ESP32-C3 Super Mini with the app's firmware on the board's USB host, its GPIO0 wired to the header's GPIO34">
 </p>
 
 ### Datalog
@@ -1177,6 +1225,13 @@ reads them.
   of nine minutes (4540 frames, none lost) opened as a valid pcap, the
   wire against the Wi-Fi (10 ms to the gateway against 26), and the
   lookout.
+- Lógica (0.28) with a "24MHz 8CH" FX2 clone on the USB host: 1 to 24 MHz
+  with no sample lost, triggers on a level and on an edge, the header's
+  self test measured and decoded (PWM, infrared, CAN), and a real UART
+  line at 115200, every character from the first. The same line on an
+  ESP32-C3 with the app's firmware, flashed from the Programador.
+- The Programador's list (0.28): sorted three ways, searched, and a
+  "versión nueva" for a firmware rebuilt after its last flash.
 
 **Waiting for hardware on the bench:**
 
@@ -1357,6 +1412,7 @@ Where something is a guess, it says so.
 | [apps/canos/README.md](apps/canos/README.md) | Caños: the modes, the generator, the six liquids and how they are drawn, what was measured |
 | [apps/datalog/README.md](apps/datalog/README.md) | the data logger: a line's choices, the CSV, the alarms, logging in the background |
 | [apps/rf/README.md](apps/rf/README.md) | the software radio: receivers, the signal chain, what was measured, the decoders and their tests |
+| [apps/logica/README.md](apps/logica/README.md) | the logic analyser: the FX2 boxes and fx2lafw, the ESP32 firmware and its speed, the decoders, what was measured |
 | [PORTAL-PAGES.md](docs/PORTAL-PAGES.md) | an app's own page in the web portal, from the card, with no firmware |
 | [SECURITY.md](docs/SECURITY.md) | who may use the portal: trusted networks, the password, the token, and what is not covered |
 | [GAMEPAD.md](docs/GAMEPAD.md) | a USB gamepad in the games: the buttons, game by game, and `aos_pad.h` |
@@ -1407,8 +1463,8 @@ idioma de la tarjeta, la de la placa y la del portal web. Los documentos del pla
 
 | | |
 |---|---|
-| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 22 apps propias y 50 de la tarjeta (juegos, un pinball 3D de seis mesas, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR (que puede compartir la salida de la placa), Ethernet optativo con un módulo W5500 y herramientas para la red por cable (probador de boca, encontrar un equipo de dirección desconocida, captura para Wireshark, vigía con Wake-on-LAN), Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN, tiras LED direccionables y RS485: Modbus (maestro, esclavo, monitor, perfiles de equipos y pasarela TCP), DMX con RDM y nodo Art-Net/sACN, y una consola de luces que también se maneja desde el celular |
-| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el emulador (GBA y Neo Geo a 60 cuadros, el táctil con varios dedos a la vez), el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, una termocupla MAX6675 y un DS18B20 registrados por Datalog en segundo plano, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante), BLE escuchando con el iPhone y la Mac conectados y leyendo un termómetro Xiaomi cifrado con su clave, dos cámaras IP (un timbre H.264 directo a la pantalla y una MJPEG), la grabación de pantalla en MP4 por el codificador H.264 del P4, SSH desde la Mac y hacia una Raspberry Pi, un bus CAN real con un ESP32, el teclado, copiar y pegar y el buscador, y RS485 con un ESP32 y dos módulos automáticos: Modbus en las dos direcciones, DMX con una tira de pixeles, RDM y Art-Net desde la Mac, y Ethernet con un módulo W5500 (enlace a 100 Mbit/s, noches enteras sin cortes, el probador de boca, la lista de equipos, una captura de nueve minutos sin pérdidas y el vigía) |
+| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 22 apps propias y más de 50 de la tarjeta (juegos, un pinball 3D de seis mesas, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR (que puede compartir la salida de la placa), Ethernet optativo con un módulo W5500 y herramientas para la red por cable (probador de boca, encontrar un equipo de dirección desconocida, captura para Wireshark, vigía con Wake-on-LAN), Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN, tiras LED direccionables y RS485: Modbus (maestro, esclavo, monitor, perfiles de equipos y pasarela TCP), DMX con RDM y nodo Art-Net/sACN, y una consola de luces que también se maneja desde el celular; y un analizador lógico (Lógica) con diez decodificadores, para las cajitas USB de 24 MHz y 8 canales o un ESP32 con su firmware propio, que se graba desde el Programador |
+| Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el emulador (GBA y Neo Geo a 60 cuadros, el táctil con varios dedos a la vez), el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, una termocupla MAX6675 y un DS18B20 registrados por Datalog en segundo plano, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante), BLE escuchando con el iPhone y la Mac conectados y leyendo un termómetro Xiaomi cifrado con su clave, dos cámaras IP (un timbre H.264 directo a la pantalla y una MJPEG), la grabación de pantalla en MP4 por el codificador H.264 del P4, SSH desde la Mac y hacia una Raspberry Pi, un bus CAN real con un ESP32, el teclado, copiar y pegar y el buscador, y RS485 con un ESP32 y dos módulos automáticos: Modbus en las dos direcciones, DMX con una tira de pixeles, RDM y Art-Net desde la Mac, y Ethernet con un módulo W5500 (enlace a 100 Mbit/s, noches enteras sin cortes, el probador de boca, la lista de equipos, una captura de nueve minutos sin pérdidas y el vigía), y Lógica con un FX2 clonado y un ESP32-C3: hasta 24 MHz sin perder muestras, la prueba del header decodificada y una línea UART real leída entera |
 | Qué falta | probar en la placa el RC522, RF con un sensor de 433 MHz y con tráfico real de AM y FM angosta, encontrar por qué se cortó la red durante dos OTA, y con una computadora por cable: la red de banco, sus servicios y compartir la conexión en los dos sentidos |
 | El conector de 40 pines | el dibujo de referencia de todos los pines, con los puertos, los pines con que arranca cada app y los sugeridos, está en [The 40-pin header](#the-40-pin-header); la carcasa impresa, en [case/](case) |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
