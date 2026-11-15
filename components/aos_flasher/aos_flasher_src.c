@@ -44,6 +44,7 @@
 #include <string.h>
 #include <strings.h>
 #include <sys/stat.h>
+#include <time.h>
 
 /* -------------------------------------------------------------------------- */
 /* Chips                                                                       */
@@ -494,6 +495,115 @@ const char *aos_flasher_dir(void)
     return dir;
 }
 
+/* ---- when each source came, and when it was last written ---- */
+
+static uint32_t file_mtime(const char *p)
+{
+    struct stat st;
+    return stat(p, &st) == 0 && st.st_mtime > 0 ? (uint32_t)st.st_mtime : 0;
+}
+
+/* the newest of the source's own date and its files' */
+static void note_mtime(aos_flasher_source_t *s)
+{
+    uint32_t m = file_mtime(s->path);
+    if (s->project)
+        for (int i = 0; i < s->nfiles; i++) {
+            char p[320];
+            snprintf(p, sizeof p, "%.255s/%.63s", s->path, s->files[i].name);
+            uint32_t f = file_mtime(p);
+            if (f > m) m = f;
+        }
+    s->mtime = m;
+}
+
+#define FLASHED_FILE ".grabados.txt"
+#define FLASHED_KEEP 200
+
+static bool flashed_path(char *out, size_t n)
+{
+    const char *dir = aos_flasher_dir();
+    if (!dir) return false;
+    snprintf(out, n, "%.200s/" FLASHED_FILE, dir);
+    return true;
+}
+
+/* "<time> <path>" a line, the newest last; a path's last line counts */
+typedef struct {
+    char path[256];
+    uint32_t t;
+} flashed_t;
+
+static int flashed_read(flashed_t *out, int max)
+{
+    char p[240];
+    if (!flashed_path(p, sizeof p)) return 0;
+    FILE *f = fopen(p, "r");
+    if (!f) return 0;
+    char line[300];
+    int n = 0;
+    while (fgets(line, sizeof line, f)) {
+        char *sp = strchr(line, ' ');
+        if (!sp) continue;
+        size_t l = strlen(sp + 1);
+        while (l && (sp[l] == '\n' || sp[l] == '\r')) sp[l--] = 0;
+        if (!sp[1]) continue;
+        /* the same path again: it moves to the end */
+        for (int i = 0; i < n; i++)
+            if (!strcmp(out[i].path, sp + 1)) {
+                memmove(&out[i], &out[i + 1], (size_t)(n - i - 1) * sizeof *out);
+                n--;
+                break;
+            }
+        if (n == max) {
+            memmove(&out[0], &out[1], (size_t)(n - 1) * sizeof *out);
+            n--;
+        }
+        out[n].t = (uint32_t)strtoul(line, NULL, 10);
+        snprintf(out[n].path, sizeof out[n].path, "%s", sp + 1);
+        n++;
+    }
+    fclose(f);
+    return n;
+}
+
+void aos_flasher_note_flashed(const char *path)
+{
+    char p[240];
+    if (!path || !*path || !flashed_path(p, sizeof p)) return;
+    uint32_t now = aos_hal_time_is_valid() ? (uint32_t)time(NULL) : 0;
+    FILE *f = fopen(p, "a");
+    if (!f) return;
+    fprintf(f, "%u %s\n", (unsigned)now, path);
+    long size = ftell(f);
+    fclose(f);
+    /* now and then, one line per path */
+    if (size < 16 * 1024) return;
+    flashed_t *h = malloc(FLASHED_KEEP * sizeof *h);
+    if (!h) return;
+    int n = flashed_read(h, FLASHED_KEEP);
+    f = fopen(p, "w");
+    if (f) {
+        for (int i = 0; i < n; i++) fprintf(f, "%u %s\n", (unsigned)h[i].t, h[i].path);
+        fclose(f);
+    }
+    free(h);
+}
+
+static void note_flashed(aos_flasher_source_t *src, int n)
+{
+    flashed_t *h = malloc(FLASHED_KEEP * sizeof *h);
+    if (!h) return;
+    int k = flashed_read(h, FLASHED_KEEP);
+    for (int i = 0; i < k; i++)
+        for (int j = 0; j < n; j++)
+            if (!strcmp(src[j].path, h[i].path)) {
+                src[j].flashed = h[i].t;
+                src[j].flashed_rank = (uint16_t)(i + 1);
+            }
+    free(h);
+}
+
 /* Projects, then loose files, then the dumps, newest first (their names
  * end in the date) */
 static int by_kind_name(const void *a, const void *b)
@@ -542,6 +652,30 @@ int aos_flasher_scan(aos_flasher_source_t *out, int max)
         if (aos_flasher_source_load(p, &out[n], err, sizeof err)) n++;
     }
     if (d) closedir(d);
+    if (n == max) aos_hal_log("flasher", "the list holds %d: the rest of %s is not listed", max, dir);
+    for (int i = 0; i < n; i++) note_mtime(&out[i]);
+    note_flashed(out, n);
     qsort(out, (size_t)n, sizeof out[0], by_kind_name);
     return n;
+}
+
+static int by_newest(const void *a, const void *b)
+{
+    const aos_flasher_source_t *x = a, *y = b;
+    if (x->mtime != y->mtime) return x->mtime > y->mtime ? -1 : 1;
+    return by_kind_name(a, b);
+}
+
+static int by_flashed(const void *a, const void *b)
+{
+    const aos_flasher_source_t *x = a, *y = b;
+    if (x->flashed_rank != y->flashed_rank) return x->flashed_rank > y->flashed_rank ? -1 : 1;
+    return by_kind_name(a, b);
+}
+
+void aos_flasher_sort(aos_flasher_source_t *src, int n, aos_flasher_sort_t by)
+{
+    if (n < 2) return;
+    qsort(src, (size_t)n, sizeof src[0], by == AOS_FLASHER_SORT_NEWEST ? by_newest
+                                         : by == AOS_FLASHER_SORT_FLASHED ? by_flashed : by_kind_name);
 }

@@ -45,7 +45,9 @@ extern "C" {
 
 #define AOS_FLASHER_OWNER     "Programador"     /* the owner of the port's pins */
 #define AOS_FLASHER_FILES_MAX 8
-#define AOS_FLASHER_SOURCES_MAX 24
+/* what the list holds: ~1 KB each, in PSRAM (24 until 2026-11-14, when a
+ * bench card had more and the newest folder did not show) */
+#define AOS_FLASHER_SOURCES_MAX 160
 
 /* ---- families ---- */
 
@@ -95,7 +97,21 @@ typedef struct {
     aos_flasher_kind_t kind;    /* how the offsets were decided */
     bool     dump;              /* read off a board by the programmer (firmware/volcados) */
     int8_t   family;            /* the family it is for (an ESP image, a dump's .json), -1 not known */
+    /* when it came to the card: the newest date of its files (Unix time,
+     * 0 unknown); and when the programmer last wrote it to a board, from
+     * <sd>/firmware/.grabados.txt (time 0 unknown, rank 0 never; the
+     * higher the rank the more recent, whether the clock was set or not) */
+    uint32_t mtime;
+    uint32_t flashed;
+    uint16_t flashed_rank;
 } aos_flasher_source_t;
+
+/* How a list of sources is shown: by kind and name (projects, loose
+ * files, dumps), the newest on the card first, the last written first. */
+typedef enum { AOS_FLASHER_SORT_NAME = 0, AOS_FLASHER_SORT_NEWEST, AOS_FLASHER_SORT_FLASHED, AOS_FLASHER_SORTS } aos_flasher_sort_t;
+void aos_flasher_sort(aos_flasher_source_t *src, int n, aos_flasher_sort_t by);
+/* Notes that 'path' was just written to a board (the job does it). */
+void aos_flasher_note_flashed(const char *path);
 
 /* Whether the list shows 'src' for a job of 'family': its own, or one that
  * does not say - except a .hex/.elf/.uf2 for the ESP family, which only
@@ -108,8 +124,10 @@ bool aos_flasher_source_fits(const aos_flasher_source_t *src, int family);
 const char *aos_flasher_dir(void);
 /* <sd>/firmware/volcados, where the dumps go; NULL without a card. */
 const char *aos_flasher_dump_dir(void);
-/* What is in it, projects first, then loose .bin files, by name. Reads the
- * card: from a worker or on a user's tap, not every frame. */
+/* What is in it, projects first, then loose .bin files, by name (then
+ * aos_flasher_sort() for another order). Reads the card: from a worker or
+ * on a user's tap, not every frame. With more than max, the rest is left
+ * out and the log says how many. */
 int  aos_flasher_scan(aos_flasher_source_t *out, int max);
 /* One source by its path (a folder or a .bin). */
 bool aos_flasher_source_load(const char *path, aos_flasher_source_t *out, char *err, size_t err_len);

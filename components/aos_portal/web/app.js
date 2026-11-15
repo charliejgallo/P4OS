@@ -546,7 +546,18 @@ const JOB_DONE = { read: N_('Volcado guardado'), erase: N_('Flash borrada'), con
 /* "/sdcard/firmware/volcados/x.bin" -> "/firmware/volcados/x.bin", as the card's API names it */
 const cardPath = p => { const i = p.indexOf('/firmware/'); return i >= 0 ? p.slice(i) : p; };
 const dumpLink = (p, text) => h('a', { href: '/api/fs/get?attachment=1&path=' + encodeURIComponent(cardPath(p)) }, text);
-let flashT, flashSel = '', flashPort = 'uart.b', flashLog = 0, flashFam = 'esp';
+let flashT, flashSel = '', flashPort = 'uart.b', flashLog = 0, flashFam = 'esp', flashQuery = '', flashSeq = -1;
+/* the list's order, kept in this browser: by name, the newest on the card
+ * first, the last written to a board first */
+const FLASH_SORTS = [['name', N_('Por nombre')], ['newest', N_('Agregados recientes')], ['flashed', N_('Grabados recientes')]];
+let flashSort = (() => { try { return localStorage.getItem('p4os.flashSort') || 'name'; } catch { return 'name'; } })();
+const flashOrder = list => {
+  const q = flashQuery.trim().toLowerCase();
+  const out = q ? list.filter(x => [x.name, x.app, x.version, x.chip_label].some(v => (v || '').toLowerCase().includes(q))) : list.slice();
+  if (flashSort === 'newest') out.sort((a, b) => (b.mtime || 0) - (a.mtime || 0));
+  else if (flashSort === 'flashed') out.sort((a, b) => (b.flashed_rank || 0) - (a.flashed_rank || 0));
+  return out;   /* 'name': as the board sends them (projects, files, dumps, by name); sort() keeps ties in place */
+};
 const fmtMs = ms => { const s = Math.round(ms / 1000); return s < 60 ? s + ' s' : Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
 
 async function uploadFolder(files, bar) {
@@ -623,14 +634,18 @@ async function pageProgramador() {
   };
   const load = async force => {
     let st;
-    try { st = await api('flash'); } catch { return; }
+    try { st = await api('flash' + (force ? '?scan=1' : '')); } catch { return; }
+    /* a job that ended may have written one: read the list again */
+    if (flashSeq >= 0 && st.seq !== flashSeq && !force) { flashSeq = st.seq; return load(true); }
+    flashSeq = st.seq;
     last = st;
     if (!portSel.options.length || force) {
       put(portSel, st.ports.map(p => h('option', { value: p.name, selected: p.name === flashPort },
         p.name + (p.desc ? ' · ' + p.desc + ' · ' + tr('EN/BOOT por RTS/DTR') : p.lines ? ' · ' + tr('con EN/BOOT') : ' · ' + tr('sin EN/BOOT')) + (p.holder ? ' · ' + tr('lo tiene %s', p.holder) : ''))));
     }
     const c = st.family === flashFam ? st.chip : null;
-    const sources = st.sources.filter(x => !x.families || x.families.includes(flashFam));
+    const all = st.sources.filter(x => !x.families || x.families.includes(flashFam));
+    const sources = flashOrder(all);
     put(target,
       h('div', { class: 'row' }, h('div', { class: 'grow' }, tr('Tipo de placa')), famSel),
       row(tr('Placa'), c ? `${c.name} ${c.revision || ''}` : tr('sin detectar'), c ? '' : 'muted'),
@@ -650,10 +665,11 @@ async function pageProgramador() {
         h('button', { class: 'btn', disabled: st.busy, onclick: openConsole }, tr('Consola RTT')),
         h('button', { class: 'btn', disabled: st.busy, onclick: openProbe, title: 'openocd -f interface/cmsis-dap.cfg · pyocd · probe-rs' }, tr('Sonda para la computadora'))) : null);
     /* firmware on the card; redrawn only when it changes */
-    const sig = JSON.stringify(sources.map(x => x.path + x.total)) + flashSel + st.busy + flashFam;
+    const sig = JSON.stringify(sources.map(x => x.path + x.total + ':' + x.flashed_rank)) + flashSel + st.busy + flashFam + flashSort + flashQuery;
     if (sig !== lastSources || force) {
       lastSources = sig;
       if (!flashSel && sources.length) flashSel = sources[0].path;
+      const when = t => t > 1600000000 ? new Date(t * 1000).toLocaleString(undefined, { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
       put(srcs, sources.length ? sources.map(x => {
         const on = x.path === flashSel, other = c && x.chip && c.name.toLowerCase().replace(/-/g, '') !== x.chip.toLowerCase();
         return h('div', { class: 'row click' + (on ? ' sel' : ''), style: on ? 'background:var(--card2)' : '', onclick: () => { flashSel = x.path; load(true); } },
@@ -661,10 +677,12 @@ async function pageProgramador() {
           h('div', { class: 'grow' }, h('div', {}, x.name, x.version ? h('span', { class: 'muted small' }, '  ' + x.version) : null,
               x.dump ? h('span', { class: 'small', onclick: e => e.stopPropagation() }, '  ', dumpLink(x.path, tr('bajar'))) : null),
             h('div', { class: 'small ' + (other ? 'warn' : 'muted') }, (x.dump ? tr('Volcado') + ' · ' : '') + (x.chip ? (other ? tr('para %s', x.chip_label || x.chip.toUpperCase()) : (x.chip_label || x.chip.toUpperCase())) : tr('chip desconocido')) + ' · ' +
-              (x.files.length === 1 ? tr('1 archivo') : tr('%s archivos', x.files.length)) + ' · ' + fmtBytes(x.total)),
+              (x.files.length === 1 ? tr('1 archivo') : tr('%s archivos', x.files.length)) + ' · ' + fmtBytes(x.total) +
+              (flashSort === 'newest' && when(x.mtime) ? ' · ' + tr('copiado %s', when(x.mtime)) : '') +
+              (x.flashed_rank ? ' · ' + (when(x.flashed) ? tr('grabado %s', when(x.flashed)) : tr('ya grabado')) : '')),
             on ? h('div', { class: 'small muted', style: 'font-family:ui-monospace,Menlo,monospace;margin-top:6px' },
               x.files.map(f => h('div', {}, f.offset + '  ' + f.name + '  (' + fmtBytes(f.size) + ')'))) : null));
-      }) : [h('div', { class: 'row muted' }, flashFam === 'swd' || flashFam === 'stm32' ? tr('No hay firmware en /firmware. Subí el .hex, .elf, .uf2 o .bin de tu firmware.') : flashFam === 'avr' ? tr('No hay firmware en /firmware. Subí el .hex de tu sketch (Sketch, Exportar binario compilado en el IDE de Arduino).')
+      }) : all.length ? [h('div', { class: 'row muted' }, tr('Ninguno con "%s"', flashQuery))] : [h('div', { class: 'row muted' }, flashFam === 'swd' || flashFam === 'stm32' ? tr('No hay firmware en /firmware. Subí el .hex, .elf, .uf2 o .bin de tu firmware.') : flashFam === 'avr' ? tr('No hay firmware en /firmware. Subí el .hex de tu sketch (Sketch, Exportar binario compilado en el IDE de Arduino).')
         : tr('No hay firmware en /firmware. Subí una carpeta de build de ESP-IDF o un .bin.'))]);
     }
     /* the job */
@@ -702,7 +720,14 @@ async function pageProgramador() {
         h('p', { class: 'note' }, tr('Un Arduino: EN va a su RESET, y el TX de uno de 5 V llega al RX de la placa por un divisor (1 kΩ y 2 kΩ) o un adaptador de niveles. Por USB, nada.')),
         h('p', { class: 'note' }, tr('SWD: el TX del puerto es SWCLK, el RX es SWDIO y EN es NRST (opcional), con GND común.')),
         h('p', { class: 'note' }, tr('STM32 por serie: TX al PA10, RX al PA9, EN al NRST y BOOT al BOOT0.'))),
-      h('div', {}, h('h2', { style: 'margin-top:0' }, tr('Firmware en la tarjeta')), srcs,
+      h('div', {}, h('h2', { style: 'margin-top:0' }, tr('Firmware en la tarjeta')),
+        h('div', { class: 'btns', style: 'margin-bottom:8px' },
+          h('select', { onchange: e => { flashSort = e.target.value; try { localStorage.setItem('p4os.flashSort', flashSort); } catch { /* private window */ } load(); } },
+            FLASH_SORTS.map(([v, n]) => h('option', { value: v, selected: v === flashSort }, tr(n)))),
+          h('input', { type: 'search', placeholder: tr('Buscar por nombre'), value: flashQuery, style: 'flex:1;min-width:8em',
+            oninput: e => { flashQuery = e.target.value; load(); } }),
+          h('button', { class: 'btn', title: tr('Leer la tarjeta otra vez'), onclick: () => load(true) }, '↻')),
+        srcs,
         h('div', { class: 'btns', style: 'margin-top:12px' }, startBtn,
           h('button', { class: 'btn', onclick: () => pickDir.click() }, tr('Subir carpeta de build…')), pickDir,
           h('button', { class: 'btn', onclick: () => pickBin.click() }, tr('Subir un archivo…')), pickBin), bar)),

@@ -61,6 +61,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <strings.h>
+#include <time.h>
 
 #define APP_ID      "aos.flasher"
 #define C_TINT      lv_color_hex(0x8B5CF6)      /* the app's colour, from its icon */
@@ -105,6 +106,8 @@ static struct {
     aos_flasher_source_t *src;      /* what the card has (malloc'd once) */
     int nsrc;
     bool scanned;
+    int sort;                       /* aos_flasher_sort_t, pref fl_sort */
+    char query[48];                 /* the list's search, by name */
 } S;
 
 static struct {
@@ -116,7 +119,8 @@ static struct {
     lv_obj_t *chip_name, *chip_info, *detect_btn, *detect_lbl, *busy_row, *busy_lbl, *busy_btn;
     lv_obj_t *port_lbl, *baud_lbl, *baud_chip;
     /* sources */
-    lv_obj_t *list;
+    lv_obj_t *list, *sort_lbl, *find_ta, *find_kb;
+    int32_t list_w;
     /* job */
     lv_obj_t *arc, *pct, *mark, *ph_title, *ph_sub, *stat[3];
     lv_obj_t *file_state[AOS_FLASHER_FILES_MAX];
@@ -204,6 +208,7 @@ static void scan(void)
 {
     if (!S.src) S.src = calloc(AOS_FLASHER_SOURCES_MAX, sizeof *S.src);
     S.nsrc = S.src ? aos_flasher_scan(S.src, AOS_FLASHER_SOURCES_MAX) : 0;
+    aos_flasher_sort(S.src, S.nsrc, (aos_flasher_sort_t)S.sort);
     S.scanned = true;
     const aos_flasher_source_t *s = selected();
     if (!s || !aos_flasher_source_fits(s, S.fam)) S.sel[0] = 0;
@@ -862,6 +867,60 @@ static void source_title(const aos_flasher_source_t *s, char *out, size_t n)
     }
 }
 
+/* the search, against the name, the app, its version and the chip */
+static bool matches(const aos_flasher_source_t *s)
+{
+    if (!S.query[0]) return true;
+    const char *hay[4] = { s->name, s->app_name, s->app_version, s->chip[0] ? aos_flasher_chip_label(s->chip) : "" };
+    size_t ql = strlen(S.query);
+    for (int k = 0; k < 4; k++)
+        for (const char *p = hay[k]; *p; p++)
+            if (!strncasecmp(p, S.query, ql)) return true;
+    return false;
+}
+
+/* "14/11 21:57", from a Unix time; "" before the clock was ever set */
+static void fmt_when(uint32_t t, char *out, size_t n)
+{
+    out[0] = 0;
+    if (t < 1600000000u) return;
+    time_t tt = (time_t)t;
+    struct tm tm;
+    localtime_r(&tt, &tm);
+    snprintf(out, n, "%d/%d %02d:%02d", tm.tm_mday, tm.tm_mon + 1, tm.tm_hour, tm.tm_min);
+}
+
+static const char *const SORT_NAME[AOS_FLASHER_SORTS] = { N_("Por nombre"), N_("Agregados recientes"), N_("Grabados recientes") };
+
+static void fill_sources(void);
+
+static void sort_cb(lv_event_t *e)
+{
+    (void)e;
+    S.sort = (S.sort + 1) % AOS_FLASHER_SORTS;
+    aos_hal_pref_set_i32("fl_sort", S.sort);
+    aos_flasher_sort(S.src, S.nsrc, (aos_flasher_sort_t)S.sort);
+    if (U.sort_lbl) lv_label_set_text(U.sort_lbl, _(SORT_NAME[S.sort]));
+    fill_sources();
+}
+
+/* the search's keyboard over the bottom of the screen while it is in use */
+static void find_cb(lv_event_t *e)
+{
+    lv_event_code_t c = lv_event_get_code(e);
+    if (c == LV_EVENT_VALUE_CHANGED) {
+        snprintf(S.query, sizeof S.query, "%s", lv_textarea_get_text(U.find_ta));
+        fill_sources();
+    } else if (c == LV_EVENT_FOCUSED && U.find_kb) {
+        lv_keyboard_set_textarea(U.find_kb, U.find_ta);
+        lv_obj_remove_flag(U.find_kb, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_move_foreground(U.find_kb);
+    } else if ((c == LV_EVENT_DEFOCUSED || c == LV_EVENT_READY || c == LV_EVENT_CANCEL) && U.find_kb) {
+        lv_obj_add_flag(U.find_kb, LV_OBJ_FLAG_HIDDEN);
+        if (c != LV_EVENT_DEFOCUSED) lv_obj_remove_state(U.find_ta, LV_STATE_FOCUSED);
+    }
+}
+
 static void build_sources(lv_obj_t *parent, int32_t w)
 {
     lv_obj_t *head = box(parent, w, 56);
@@ -873,17 +932,69 @@ static void build_sources(lv_obj_t *parent, int32_t w)
     lv_obj_t *rg = aos_label(rb, AOS_SYM_RESTART, &aos_sym_28, C_TINT);
     lv_obj_align(rg, LV_ALIGN_RIGHT_MID, -12, 4);
     lv_obj_align(rb, LV_ALIGN_RIGHT_MID, 0, 0);
+    /* the order, a tap goes to the next one */
+    lv_obj_t *sb = box(head, 300, 56);
+    lv_obj_add_flag(sb, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_add_event_cb(sb, sort_cb, LV_EVENT_CLICKED, NULL);
+    lv_obj_align(sb, LV_ALIGN_RIGHT_MID, -72, 0);
+    U.sort_lbl = aos_label(sb, _(SORT_NAME[S.sort]), aos_font_caption, C_TINT);
+    lv_obj_align(U.sort_lbl, LV_ALIGN_BOTTOM_RIGHT, -8, -6);
+    aos_make_decorative(U.sort_lbl);
+
+    /* the search, once the list is long enough to want one */
+    U.find_ta = NULL;
+    if (S.nsrc > 6 || S.query[0]) {
+        U.find_ta = lv_textarea_create(parent);
+        lv_textarea_set_one_line(U.find_ta, true);
+        lv_textarea_set_max_length(U.find_ta, sizeof S.query - 1);
+        lv_textarea_set_placeholder_text(U.find_ta, _("Buscar por nombre"));
+        lv_textarea_set_text(U.find_ta, S.query);
+        lv_obj_set_size(U.find_ta, w, 72);
+        lv_obj_set_style_text_font(U.find_ta, aos_font_small, 0);
+        lv_obj_set_style_bg_color(U.find_ta, AOS_C_CARD, 0);
+        lv_obj_set_style_text_color(U.find_ta, AOS_C_TEXT, 0);
+        lv_obj_set_style_border_width(U.find_ta, 0, 0);
+        lv_obj_set_style_radius(U.find_ta, 36, 0);
+        lv_obj_set_style_pad_hor(U.find_ta, 28, 0);
+        lv_obj_set_style_pad_top(U.find_ta, 20, 0);
+        lv_obj_add_event_cb(U.find_ta, find_cb, LV_EVENT_ALL, NULL);
+        U.find_kb = lv_keyboard_create(U.root);
+        lv_obj_set_size(U.find_kb, U.W, U.land ? U.H / 2 : U.H / 3);
+        lv_obj_align(U.find_kb, LV_ALIGN_BOTTOM_MID, 0, 0);
+        aos_keyboard_style(U.find_kb, aos_font_small);
+        lv_obj_add_flag(U.find_kb, LV_OBJ_FLAG_HIDDEN);
+    }
 
     U.list = card(parent, w);
-    int shown = 0;
-    for (int i = 0; i < S.nsrc; i++) shown += aos_flasher_source_fits(&S.src[i], S.fam);
+    U.list_w = w;
+    fill_sources();
+}
+
+static void fill_sources(void)
+{
+    if (!U.list) return;
+    lv_obj_t *list = U.list;
+    int32_t w = U.list_w;
+    lv_obj_clean(list);
+    int shown = 0, fits = 0;
+    for (int i = 0; i < S.nsrc; i++)
+        if (aos_flasher_source_fits(&S.src[i], S.fam)) {
+            fits++;
+            shown += matches(&S.src[i]);
+        }
     if (!shown) {
-        lv_obj_set_style_pad_all(U.list, 32, 0);
-        lv_obj_set_style_pad_row(U.list, 14, 0);
-        lv_obj_set_flex_align(U.list, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-        aos_label(U.list, AOS_SYM_SD, &aos_sym_72, AOS_C_DIM);
-        aos_label(U.list, aos_flasher_dir() ? _("No hay firmware en /firmware") : _("No hay tarjeta"), aos_font_body, AOS_C_TEXT);
-        lv_obj_t *h = aos_label(U.list, S.fam == AOS_FLASHER_SWD || S.fam == AOS_FLASHER_STM32
+        lv_obj_set_style_pad_all(list, 32, 0);
+        lv_obj_set_style_pad_row(list, 14, 0);
+        lv_obj_set_flex_align(list, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+        if (fits) {
+            char b[96];
+            snprintf(b, sizeof b, _("Ninguno con \"%s\""), S.query);
+            aos_label(list, b, aos_font_body, AOS_C_DIM);
+            return;
+        }
+        aos_label(list, AOS_SYM_SD, &aos_sym_72, AOS_C_DIM);
+        aos_label(list, aos_flasher_dir() ? _("No hay firmware en /firmware") : _("No hay tarjeta"), aos_font_body, AOS_C_TEXT);
+        lv_obj_t *h = aos_label(list, S.fam == AOS_FLASHER_SWD || S.fam == AOS_FLASHER_STM32
                                     ? _("Copiá ahí el .hex, .elf, .uf2 o .bin de tu firmware (un .bin va al comienzo de la flash).")
                                     : S.fam == AOS_FLASHER_AVR
                                     ? _("Copiá ahí el .hex de tu sketch: en el IDE de Arduino, Sketch > Exportar binario compilado. El que no dice with_bootloader.")
@@ -894,16 +1005,19 @@ static void build_sources(lv_obj_t *parent, int32_t w)
         lv_obj_set_style_text_align(h, LV_TEXT_ALIGN_CENTER, 0);
         return;
     }
+    lv_obj_set_style_pad_all(list, 0, 0);
+    lv_obj_set_style_pad_row(list, 0, 0);
+    lv_obj_set_flex_align(list, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_START);
     int row = 0;
     for (int i = 0; i < S.nsrc; i++) {
         const aos_flasher_source_t *s = &S.src[i];
-        if (!aos_flasher_source_fits(s, S.fam)) continue;
+        if (!aos_flasher_source_fits(s, S.fam) || !matches(s)) continue;
         bool sel = !strcmp(S.sel, s->path);
         if (row++) {
-            lv_obj_t *hl = hairline(U.list);
+            lv_obj_t *hl = hairline(list);
             lv_obj_set_style_margin_left(hl, 108, 0);
         }
-        lv_obj_t *r = box(U.list, lv_pct(100), 112);
+        lv_obj_t *r = box(list, lv_pct(100), 112);
         lv_obj_set_style_pad_hor(r, 24, 0);
         lv_obj_add_flag(r, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_set_style_bg_color(r, AOS_C_CARD2, LV_STATE_PRESSED);
@@ -921,7 +1035,7 @@ static void build_sources(lv_obj_t *parent, int32_t w)
         lv_label_set_long_mode(n, LV_LABEL_LONG_MODE_DOTS);
         lv_obj_align(n, LV_ALIGN_LEFT_MID, 84, -18);
 
-        char sub[128], sz[16];
+        char sub[176], sz[16];
         fmt_size(sz, sizeof sz, s->total);
         const char *mm0 = mismatch(s);
         char chipbuf[32];
@@ -929,13 +1043,23 @@ static void build_sources(lv_obj_t *parent, int32_t w)
         else snprintf(chipbuf, sizeof chipbuf, "%s", s->chip[0] ? aos_flasher_chip_label(s->chip) : _("chip ?"));
         const char *chip = chipbuf;
         const char *ext = strrchr(s->name, '.');
+        /* when it was last written (or, in that order, when it came), before
+         * the version, which the width cuts first */
+        char when[24], ww[48] = "";
+        if (S.sort == AOS_FLASHER_SORT_NEWEST) {
+            fmt_when(s->mtime, when, sizeof when);
+            if (when[0]) snprintf(ww, sizeof ww, "  ·  %s %s", _("copiado"), when);
+        } else if (s->flashed_rank) {
+            fmt_when(s->flashed, when, sizeof when);
+            snprintf(ww, sizeof ww, "  ·  %s%s%s", _("grabado"), when[0] ? " " : "", when);
+        }
         if (s->project)
-            snprintf(sub, sizeof sub, "%s  ·  %d %s  ·  %s%s%s", chip, s->nfiles, _("archivos"), sz,
+            snprintf(sub, sizeof sub, "%s  ·  %d %s  ·  %s%s%s%.31s", chip, s->nfiles, _("archivos"), sz, ww,
                      s->app_version[0] ? "  ·  " : "", s->app_version);
         else if (s->kind == AOS_FLASHER_IMAGE)
-            snprintf(sub, sizeof sub, "%s  ·  %s  ·  %s", chip, ext ? ext + 1 : "", sz);
+            snprintf(sub, sizeof sub, "%s  ·  %s  ·  %s%s", chip, ext ? ext + 1 : "", sz, ww);
         else
-            snprintf(sub, sizeof sub, "%s  ·  0x%X  ·  %s%s%s", chip, (unsigned)s->files[0].offset, sz,
+            snprintf(sub, sizeof sub, "%s  ·  0x%X  ·  %s%s%s%.31s", chip, (unsigned)s->files[0].offset, sz, ww,
                      s->app_version[0] ? "  ·  " : "", s->app_version);
         const char *mm = mismatch(s);
         lv_obj_t *sl = aos_label(r, sub, aos_font_caption, mm[0] ? AOS_C_ORANGE : AOS_C_DIM);
@@ -949,7 +1073,7 @@ static void build_sources(lv_obj_t *parent, int32_t w)
         aos_make_decorative(n);
         aos_make_decorative(sl);
         aos_make_decorative(mk);
-        if (sel) file_lines(U.list, s);
+        if (sel) file_lines(list, s);
     }
 }
 
@@ -1425,6 +1549,7 @@ static void build(void)
 {
     lv_obj_clean(U.root);
     U.con_kb = U.con_ta = NULL;
+    U.find_kb = U.find_ta = U.sort_lbl = NULL;
     U.chip_name = U.chip_info = U.detect_btn = U.detect_lbl = U.busy_row = U.busy_lbl = U.busy_btn = NULL;
     U.port_lbl = U.baud_lbl = U.baud_chip = U.list = U.arc = U.log_col = U.actions = NULL;
     U.read_btn = U.erase_btn = NULL;
@@ -1524,6 +1649,9 @@ static void load_prefs(void)
     S.baud_i = 2;
     for (size_t i = 0; i < N_BAUDS; i++) if (BAUDS[i] == (uint32_t)b) S.baud_i = (int)i;
     aos_hal_pref_get_str("fl_sel", S.sel, sizeof S.sel);
+    int32_t so = 0;
+    aos_hal_pref_get_i32("fl_sort", &so);
+    S.sort = so >= 0 && so < AOS_FLASHER_SORTS ? (int)so : 0;
     int32_t f = AOS_FLASHER_ESP;
     aos_hal_pref_get_i32("fl_fam", &f);
     S.fam = f >= 0 && f < AOS_FLASHER_FAMILIES ? (int)f : AOS_FLASHER_ESP;

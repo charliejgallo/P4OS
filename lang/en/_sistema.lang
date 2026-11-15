@@ -10569,3 +10569,27 @@ Compartir la salida: los que se unen a esta red salen por donde sale la placa (e
 
 #: firmware (Ajustes, Red propia)
 Compartir la salida: la placa no tiene por dónde salir ahora. Enchufá el cable (Redes, Ethernet): con esta red prendida la placa no busca el Wi-Fi de casa.	Share the way out: the board has no way out right now. Plug the cable in (Networks, Ethernet): with this network on, the board does not look for the home Wi-Fi.
+
+#: components/aos_apps/aos_app_flasher.c:893
+Por nombre	By name
+
+#: components/aos_apps/aos_app_flasher.c:893
+Agregados recientes	Recently added
+
+#: components/aos_apps/aos_app_flasher.c:893
+Grabados recientes	Recently flashed
+
+#: components/aos_apps/aos_app_flasher.c:950
+Buscar por nombre	Search by name
+
+#: components/aos_apps/aos_app_flasher.c:991
+Ninguno con \"%s\"	None with \"%s\"
+
+#: components/aos_apps/aos_app_flasher.c:1051
+copiado	copied
+
+#: components/aos_apps/aos_app_flasher.c:1054
+grabado	flashed
+
+#: apps/logica  (nombre de app)
+Lógica	Logic
