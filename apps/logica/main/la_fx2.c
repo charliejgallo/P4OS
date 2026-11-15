@@ -404,6 +404,31 @@ static const char *fx2_connect(la_dev_t *d, aos_usb_raw_t **out)
     return NULL;
 }
 
+/* The board's host, after the box dropped off the bus and came back with
+ * the host running (and after fx2lafw is loaded, which is the same),
+ * failed every bulk transfer at once, on new pipes too, until the host
+ * itself was started again (2026-11-14; asked of the firmware). The app
+ * does that, once a capture, only when the box is all there is on the
+ * host: a pendrive would be unmounted under its user. */
+static bool host_alone(const la_dev_t *d)
+{
+    aos_usb_dev_t *l = malloc(16 * sizeof *l);
+    if (!l) return false;
+    int n = aos_hal_usb_devices(l, 16), mine = 0;
+    for (int i = 0; i < n; i++)
+        if (l[i].vid == d->vid && l[i].pid == d->pid) mine++;
+    free(l);
+    return n == mine;
+}
+
+static bool host_restart(void)
+{
+    aos_hal_log("logica", "fx2: the host refuses every transfer: starting it again");
+    if (!aos_hal_usb_host_set(false)) return false;
+    aos_hal_sleep_ms(1500);
+    return aos_hal_usb_host_set(true);
+}
+
 const char *la_fx2_capture(const la_dev_t *dev, const la_cfg_t *cfg, la_cap_t *c)
 {
     la_dev_t d = *dev;
@@ -451,7 +476,12 @@ const char *la_fx2_capture(const la_dev_t *dev, const la_cfg_t *cfg, la_cap_t *c
     int nx = 16;
 #else
     if (xfer > 16384) xfer = 16384;
-    int nx = rate >= 8000000 ? 6 : 4;
+    /* 6 x 16 KB of the board's internal RAM: 4 ms at 24 MHz, 24 ms at 4.
+     * Waiting a long time for a trigger at 4 MHz with 4 of them, the host
+     * looked away for longer every few minutes and fx2lafw stopped (the
+     * loop starts it again, but every time the samples before the trigger
+     * start over) */
+    int nx = 6;
 #endif
     /* the host's ring, PSRAM: 80 ms at 24 MB/s (la_max_samples leaves room
      * for it) */
@@ -472,8 +502,9 @@ const char *la_fx2_capture(const la_dev_t *dev, const la_cfg_t *cfg, la_cap_t *c
     uint64_t end = total;           /* stop once w reaches it */
     uint8_t prev = 0;
     uint32_t quiet_ms = 0, errs_seen = 0;
-    int restarts = 0;
-    bool stalled = false;
+    int restarts = 0, empty = 0;
+    bool stalled = false, host_done = false;
+    uint64_t w_at_start = 0;
     const char *why = NULL;
     /* nothing for this long and the stream is dead: four transfers' time,
      * at least 600 ms */
@@ -499,7 +530,10 @@ const char *la_fx2_capture(const la_dev_t *dev, const la_cfg_t *cfg, la_cap_t *c
              * the trigger a gap does not matter: start again from nothing.
              * After it, keep what came. */
             errs_seen = errs;
-            if ((trig && t_at >= 0) || restarts >= 20) {
+            empty = w == w_at_start ? empty + 1 : 0;
+            /* before the trigger it goes on for as long as data keeps
+             * coming between the restarts; 20 in a row with none is the end */
+            if ((trig && t_at >= 0) || empty >= 20 || (!trig && restarts >= 20)) {
                 if (gone) why = _("Se desenchufó el analizador");
                 else stalled = true;
                 break;
@@ -512,6 +546,14 @@ const char *la_fx2_capture(const la_dev_t *dev, const la_cfg_t *cfg, la_cap_t *c
             aos_hal_usb_raw_close(u);
             u = NULL;
             set_state(LA_ST_CONNECT, 0);
+            if (empty >= 3 && !host_done) {
+                host_done = true;
+                if (!host_alone(&d) || !host_restart()) {
+                    why = _("El host USB no le acepta transferencias al analizador: apagá y prendé el host (Ajustes, USB)");
+                    break;
+                }
+                was_gone = true;
+            }
             const char *rw = !was_gone || fx2_find_again(&d) ? fx2_connect(&d, &u) : _("Se desenchufó el analizador");
             if (rw) {
                 why = rw;
@@ -525,6 +567,7 @@ const char *la_fx2_capture(const la_dev_t *dev, const la_cfg_t *cfg, la_cap_t *c
             set_state(trig ? LA_ST_WAIT : LA_ST_CAPTURE, 0);
             aos_hal_usb_raw_stream_stats(u, NULL, NULL, &errs_seen);
             w = 0;
+            w_at_start = 0;
             idx = 0;
             t_at = -1;
             end = total;

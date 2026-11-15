@@ -71,6 +71,11 @@ the board taught (all in `main/la_fx2.c`):
 - **A halted pipe stays halted** once no transfer is in flight, so a
   restart opens the device anew (new pipes) instead of starting the stream
   again on it.
+- **A box that came back with the host running** (it dropped off the bus,
+  or fx2lafw was just loaded into it) got every bulk transfer refused at
+  once, on new pipes too, until the host was started again. The app does
+  that by itself, once a capture, when the box is the only device on the
+  host (a firmware request says why it should not have to).
 
 ### The app's firmware for an ESP32
 
@@ -192,9 +197,12 @@ streams (4-6 of 16 KB, the USB host's rule: `docs/USB.md`, "Webcams").
   bus and came back, and fx2lafw stops for good when its FIFO overflows;
   the driver starts it again before the trigger (and finds it again at
   its new address). **On the board** (the same day): every rate up to
-  24 MHz, level triggers, six captures in a row (above). **Not tested:**
-  an edge trigger fired by a real signal, the decoders on real buses, and
-  the ESP32 firmware on a chip.
+  24 MHz, level triggers, six captures in a row (above), and an edge
+  trigger fired by hand (CH1 let go of ground: one clean rising edge at
+  the trigger, 25 % of the capture before it). Touching the wire by hand
+  disturbed the box's USB (a failed transfer, and once a reset a second
+  later); the loop rode over both. **Not tested:** the decoders on real
+  buses, and the ESP32 firmware on a chip.
 
 ## Licences
 

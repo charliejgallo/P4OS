@@ -676,3 +676,6 @@ Sin captura: elegí el analizador y tocá Capturar	No capture: choose the analys
 
 #: apps/logica/main/la_view.c:590
 No hay memoria para la vista	Not enough memory for the view
+
+#: apps/logica/main/la_fx2.c
+El host USB no le acepta transferencias al analizador: apagá y prendé el host (Ajustes, USB)	The USB host refuses the analyser's transfers: turn the host off and on (Settings, USB)
