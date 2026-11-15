@@ -516,6 +516,12 @@ const char *la_fx2_capture(const la_dev_t *dev, const la_cfg_t *cfg, la_cap_t *c
     while ((trig && t_at < 0) || w < end) {
         if (LA.stop) break;
         uint32_t room = total - idx;
+        /* once the end is known, not a sample past it: the buffer is a
+         * ring, and those would land on the oldest ones kept, the ones
+         * before the trigger (a whole transfer of them, measured) */
+        if ((t_at >= 0 || !trig) && end - w < room) room = (uint32_t)(end - w);
+        /* before it, no more than fits after a trigger found in this read */
+        if (trig && t_at < 0 && total - pre < room) room = total - pre > 0 ? total - pre : 1;
         int got = aos_hal_usb_raw_stream_read(u, c->buf + idx, (int)(room > 65536 ? 65536 : room), 100);
         uint32_t errs = 0;
         bool gone = got == AOS_USB_RAW_GONE;
