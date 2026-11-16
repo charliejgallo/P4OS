@@ -601,7 +601,8 @@ It samples with what is plugged into the board's USB host:
   `.tar.gz` as it comes).
 - **An ESP32-C3, S3 or C6 with the app's own firmware** (`apps/logica/firmware`),
   flashed from the board's Programador, speaking SUMP over its USB:
-  5 MHz on a C3, measured by the firmware on its own capture loop.
+  5 MHz on a C3 or a C6, measured by the firmware on its own capture loop;
+  the C6 holds 401k samples, the C3 155k.
   PulseView and sigrok-cli use it too.
 - Anything else that speaks **SUMP**, on USB serial or a header UART, and a
   **demo** with made-up signals for every decoder.

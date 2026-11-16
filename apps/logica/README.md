@@ -11,7 +11,7 @@ an analyser plugged into it.
 | Analyser | How it reaches the board | Rate | Depth |
 |---|---|---|---|
 | **"Logic Analyzer 24MHz 8CH"** boxes (a Cypress FX2LP, sold as Saleae Logic clones, `0925:3881`) and the other FX2 boards sigrok knows (`04b4:8613`, `1d50:608c/608d/608f`, the USBee family, the USB-LPS) | the USB host, through `aos_hal_usb_raw_*` | 20 kHz to 24 MHz on pins 25/27 (High Speed); up to 1 MHz on 21/23 (Full Speed) | the board's PSRAM: the box streams |
-| **The app's own firmware** for an ESP32-S3, C3 or C6 (`firmware/`) | its own USB (`usb0`) or a header UART | what its capture loop reaches, measured at boot: **5 MHz on a C3** (firmware 0.3; checked against a known signal and a UART line) | the chip's internal RAM (155648 samples on a C3) |
+| **The app's own firmware** for an ESP32-S3, C3 or C6 (`firmware/`) | its own USB (`usb0`) or a header UART | what its capture loop reaches, measured at boot: **5 MHz on a C3 and on a C6** (firmware 0.3; checked against a known signal and a UART line) | the chip's internal RAM: 155648 samples on a C3, 401408 on a C6 |
 | Anything else that speaks **SUMP / Open Bench Logic Sniffer** | a USB serial port or a header UART | the device's | the device's |
 | **Demo**: three scenes made up in memory (serial, I2C, SPI, PWM; 1-Wire, CAN, WS2812, NEC, DMX512, Modbus RTU; pulses and a parallel bus), each with its decoders set | - | any | up to 8M samples |
 
@@ -150,6 +150,17 @@ lines at 115200 8N1 with accents in UTF-8. All 107 characters decoded
 from the first one, no framing error, 86.80 µs each (86.81 at 115200).
 The same line on the FX2's CH2 at 4 MHz decoded the same.
 
+**The C6 against the C3** (2026-11-16, an ESP32-C6 board with firmware
+0.3 flashed from the Programador, wired as the C3 was): the same top,
+5 MHz, as both run a RISC-V core at 160 MHz and the loop comes out at
+28-29 cycles a sample on each (the rate is rounded to SUMP's 100 MHz /
+20, so a cycle more or less does not show). What the C6 has is room:
+**401408 samples**, 80 ms at 5 MHz, against the C3's 155648 (31 ms). The
+self test's PWM read 998.38 Hz (1001.6 µs, one sample of jitter; the C3
+read 998.41), and three UART lines at 115200, 318 characters over 27 ms,
+decoded from the first with no framing error, which the C3 could not
+hold in one capture.
+
 `tools/fake_sump.py` is a SUMP device on a pseudo-terminal, to try the
 driver in the simulator: `P4_SIM_UART_A=<its pty>`, then Analizador,
 "uart.a 921600".
@@ -254,7 +265,7 @@ streams (4-6 of 16 KB, the USB host's rule: `docs/USB.md`, "Webcams").
   samples went round the ring onto the oldest ones kept, the start of
   the line: 16320 flat samples, a whole transfer). The ESP32 firmware on a
   C3: the self test's PWM and the UART line (above). **Not tested:** the
-  other decoders on real buses, the firmware on an S3 or a C6.
+  other decoders on real buses, the firmware on an S3.
 
 ## Licences
 

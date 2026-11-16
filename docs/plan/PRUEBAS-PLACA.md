@@ -1548,8 +1548,14 @@ laberinto, pong, radar, walkie, remoto y sensores.
       (pisaba el arranque: 16320 muestras planas).
 - [ ] Los otros decodificadores en buses reales (I2C, SPI, 1-Wire, WS2812,
       DMX, Modbus): andan con la demo y con señales armadas.
-- [ ] El firmware en un S3 o un C6 (compilan; el usuario va a comprar uno
-      para comparar velocidades).
+- [x] **El firmware en un C6** (2026-11-16), grabado desde el Programador
+      (`firmware/logica-esp32c6`): 5 MHz como el C3 (el mismo núcleo a
+      160 MHz; el lazo da 28-29 ciclos y la tasa se redondea a 100 MHz /
+      20), pero 401408 muestras contra 155648. PWM de la prueba a
+      998,38 Hz con una muestra de jitter, y tres líneas UART, 318
+      caracteres en 27 ms, sin errores.
+- [ ] El firmware en un S3 (compila; el que más promete, a 240 MHz y con
+      la captura en el segundo núcleo).
 
 **Modbus y Banco**
 - [ ] La Riden por TTL: los 20 ms entre pedidos y las escrituras que rechaza en
