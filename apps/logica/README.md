@@ -161,6 +161,8 @@ read 998.41), and three UART lines at 115200, 318 characters over 27 ms,
 decoded from the first with no framing error, which the C3 could not
 hold in one capture.
 
+<p align="center"><img src="../../docs/img/bench-logica-c6.jpg" width="320" alt="An ESP32-C6 board with the app's firmware on the board's USB host, wired to the header, and the board's screen showing 401.4k samples at 5 MHz: the self test's PWM on D0"></p>
+
 `tools/fake_sump.py` is a SUMP device on a pseudo-terminal, to try the
 driver in the simulator: `P4_SIM_UART_A=<its pty>`, then Analizador,
 "uart.a 921600".

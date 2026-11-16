@@ -624,6 +624,7 @@ has what was measured and what the board's USB host needed.
 <p align="center">
   <img src="docs/img/bench-logica-fx2.jpg" width="300" alt="The 24 MHz 8 channel analyser on the board's back cover, plugged into the USB host, its CH1 and ground on the 40-pin header">
   <img src="docs/img/bench-logica-c3.jpg" width="300" alt="An ESP32-C3 Super Mini with the app's firmware on the board's USB host, its GPIO0 wired to the header's GPIO34">
+  <img src="docs/img/bench-logica-c6.jpg" width="300" alt="An ESP32-C6 board with the app's firmware on the USB host: 401.4k samples at 5 MHz, the self test's PWM on D0">
 </p>
 
 ### Datalog
