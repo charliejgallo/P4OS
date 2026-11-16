@@ -14,7 +14,9 @@ same through-hole ones, soldered by hand afterwards.
 RS485 and CAN are not on the board: their transceivers are the modules of
 the bench (an automatic "RS485 to TTL" one, an SN65HVD230), each on a pin
 header in the module's own order. What is on the board reaches its GPIO
-through a jumper, so a pin can be given back. There is no second socket
+through a jumper, so a pin can be given back. GPIO48 goes, by a jumper on
+three pins, to the LED strip's terminal or to the SPI header as a second
+chip select. There is no second socket
 with the forty pins again: beside the header there are pins for 5 V, for
 3.3 V and for the three GPIO that no other connector carries.
 """
@@ -113,6 +115,12 @@ def bridge(ref, value, a, b, closed=True):
     return Part(ref, "Jumper:Jumper_2_Bridged" if closed else "Jumper:Jumper_2_Open", value, HDR % 2, {1: a, 2: b})
 
 
+def select(ref, value, one, common, other):
+    """Three pins and a jumper that sits on two of them: 'common' goes to 'one' (as drawn) or to
+    'other'. A pin header in both variants: it is there to be moved, which a solder bridge is not."""
+    return Part(ref, "Jumper:Jumper_3_Bridged12", value, HDR % 3, {1: one, 2: common, 3: other})
+
+
 def esd(ref, dm, dp, vbus):
     return Part(ref, "Power_Protection:USBLC6-2SC6", "USBLC6-2SC6", "Package_TO_SOT_SMD:SOT-23-6",
                 {"I/O1": dm, "I/O2": dp, "VBUS": vbus, "GND": "GND"})
@@ -193,10 +201,16 @@ def blocks(variant="th"):
     b.append(("CAN: an SN65HVD230 module on four pins (3V3 GND CTX CRX)", 205, 245, [
         (conn("J13", "CAN module", ["+3V3", "GND", "GPIO46", "GPIO47"]), 40, 45),
     ]))
-    b.append(("spi.a, AND GPIO46/47 WHEN NO CAN MODULE IS ON THEM", 435, 200, [
-        (Part("J14", "Connector_Generic:Conn_02x04_Odd_Even", "spi.a",
-              "Connector_PinHeader_2.54mm:PinHeader_2x04_P2.54mm_Vertical",
-              {1: "+3V3", 2: "GND", 3: "SPI_SCK", 4: "SPI_MOSI", 5: "SPI_MISO", 6: "SPI_CS", 7: "GPIO46", 8: "GPIO47"}), 40, 35),
+    # A second chip on spi.a needs a chip select of its own (the Ethernet module holds the port's,
+    # GPIO49). GPIO46 and 47 serve while no CAN module is on them; CS2 is GPIO48 when JP17 gives it
+    # to this header instead of to the strip's terminal. R20 keeps CS2 high, the chip on it not
+    # chosen, while the jumper is on the other side or the pin is not driven yet.
+    b.append(("spi.a: CS IS GPIO49; CS2 IS GPIO48 WHEN JP17 SAYS SO; GPIO46/47 WHEN NO CAN MODULE IS ON THEM", 435, 200, [
+        (Part("J14", "Connector_Generic:Conn_02x05_Odd_Even", "spi.a",
+              "Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical",
+              {1: "+3V3", 2: "GND", 3: "SPI_SCK", 4: "SPI_MOSI", 5: "SPI_MISO", 6: "SPI_CS", 7: "GPIO46", 8: "GPIO47",
+               9: "SPI_CS2", 10: "GND"}), 40, 35),
+        (R("R20", "10k", "+3V3", "SPI_CS2"), 85, 35),
     ]))
     # The "W5500 Lite" / "Mini W5500" (HW-884): 28.5 x 23.5 mm, six pins down each long side, 3.3 V
     # only, about 200 mA. Its pins as printed, RJ45 end first: left G G MO SCK CS INT, right GND V V
@@ -228,12 +242,13 @@ def blocks(variant="th"):
         (Part("D1", "Device:LED", "IR 940 nm", "LED_THT:LED_D5.0mm", {"K": "IR_K", "A": "IR_A"}), 120, 90),
         (R("R16", "47", "+5V_SW", "IR_A"), 143, 90),
     ]))
-    b.append(("1-WIRE ON GPIO34, A LED STRIP OR A SERVO ON GPIO48, THE HOLES", 25, 335, [
+    b.append(("1-WIRE ON GPIO34; GPIO48 TO A LED STRIP OR A SERVO, OR TO spi.a AS CS2 (JP17); THE HOLES", 25, 335, [
         (screw("J15", "1-Wire: 3V3 DQ GND", ["+3V3", "GPIO34", "GND"]), 30, 35),
         (R("R17", "4k7", "OW_PU", "GPIO34"), 60, 35),
         (bridge("JP15", "pull-up", "+3V3", "OW_PU"), 90, 35),
         (screw("J16", "strip: 5V DIN GND", ["+5V_SW", "LED_DATA", "GND"]), 140, 35),
-        (R("R18", "330", "GPIO48", "LED_DATA"), 170, 35),
+        (select("JP17", "GPIO48: strip | CS2", "GPIO48_STRIP", "GPIO48", "SPI_CS2"), 150, 75),
+        (R("R18", "330", "GPIO48_STRIP", "LED_DATA"), 170, 35),
         (CP("C9", "470u", "+5V_SW", "GND", big=True), 190, 35),
     ] + [(Part("H%d" % k, "Mechanical:MountingHole", "M2.5", "MountingHole:MountingHole_2.7mm_M2.5", {}), 230 + 20 * k, 35)
          for k in range(1, 5)]))

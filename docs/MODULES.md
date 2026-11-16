@@ -75,6 +75,7 @@ drawings on this page use:
 | A LED strip | 48 (39) | suggested in LED Strips | GND on pin 40, 5 V on pins 1 and 3 |
 | One PWM output, a servo | 48 (39), then 34 (28) | suggested | |
 | More PWM outputs | 46, 47 if CAN is not in use; or a PCA9685 on `i2c.ext` | suggested | |
+| A second chip on `spi.a` (the first, or Ethernet, has the port's CS, 49) | 48 (39); then 46, 47 if CAN is not in use | its `cs=` in `modules.txt`, or Bus's "Chip select" | the auxiliary board gives GPIO48 to the strip or to the SPI header by a jumper |
 
 GPIO34 is a strapping pin (the JTAG source). The chip looks at it at reset
 only if the JTAG_SEL_ENABLE eFuse was burnt, which it is not out of the

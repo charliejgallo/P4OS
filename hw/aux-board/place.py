@@ -63,7 +63,10 @@ AT = {
     # 5 V, 3.3 V and the GPIO nothing else carries: three headers above the 2x20, out of that band
     "J20": (14.0, 34.2, 0), "J21": (23.0, 34.2, 0), "J22": (32.0, 34.2, 0),
     # the ports, in the middle
-    "J14": (27, 47.5, 90), "JP16": (36.5, 47.5, 0),
+    "J14": (27.85, 47.5, 90), "JP16": (36.65, 47.5, 0),
+    # GPIO48's jumper at the top of the 2x20, level with its pin 39, which is GPIO48: the strip's
+    # side at its left end, CS2 at its right, towards J14. CS2's pull-up under the strip's resistor
+    "JP17": (16.6, 52.6, 90), "R20": (43.3, 54.3, 0),
     "J9": (23, 64.9, 0), "J13": (30.3, 63.6, 0), "J11": (37.6, 67.4, 0), "J12": (44.9, 64.9, 0),
     "R10": (27.5, 74, 0), "R11": (27.5, 77.5, 0), "JP9": (25, 81.5, 90),
     # ethernet: the module lies over ETH, its RJ45 past the right edge; two low parts go under it
@@ -91,13 +94,14 @@ PINS = {
     "J5": ["GND", "3V3", "SDA", "SCL"], "J6": ["GND", "3V3", "SDA", "SCL"], "J7": ["GND", "5V", "SDA", "SCL"],
     "J8": ["GND", "3V3", "SDA", "SCL"], "J9": ["3V3", "TX", "RX", "GND", "DE"], "J13": ["3V3", "GND", "CTX", "CRX"],
     "J11": ["GND", "3V3", "TX", "RX", "EN", "BOOT", "RX5V"], "J12": ["3V3", "DIO", "CLK", "RST", "GND"],
-    "J14": ["3V3", "GND", "SCK", "MOSI", "MISO", "CS", "46", "47"], "J15": ["3V3", "DQ", "GND"],
+    "J14": ["3V3", "GND", "SCK", "MOSI", "MISO", "CS", "46", "47", "CS2", "GND"], "J15": ["3V3", "DQ", "GND"],
+    "JP17": ["LED", "48", "CS2"],
     "J16": ["5V", "DIN", "GND"], "J17": ["G", "G", "MO", "SCK", "CS", "INT"],
     "J18": ["GND", "V", "V", "NC", "RST", "MI"], "J19": ["INT", "RST"],
     "J20": ["GND", "5V", "5V", "GND"], "J21": ["GND", "3V3", "3V3", "GND"], "J22": ["GND", "35", "38", "37"],
 }
 REF = {"D1": (37.2, 2.8), "Q2": (45.6, 74.6)}          # a reference that its part's own place would hide
-SIDE = {"J17": "S", "J18": "N", "J19": "N", "J15": "W", "J16": "W"}        # where the pin names go; else east
+SIDE = {"J17": "S", "J18": "N", "J19": "N", "J15": "W", "J16": "W", "JP17": "S"}        # where the pin names go; else east
 BRIDGE = {"JP1": "5V BYPASS", "JP2": "PULL-UPS", "JP3": "SDA", "JP4": "SCL", "JP9": "RX 5V", "JP13": "IR RX",
           "JP14": "IR LED", "JP15": "1W PULL-UP", "JP16": "ETH CS"}
 # free text: (text, x, y, degrees, size)

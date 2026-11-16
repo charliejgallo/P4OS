@@ -62,12 +62,12 @@ dibujar el esquemático: nada de esto se armó ni se midió.
 | `uart.a` / RS485 | 30, 31, 29 (22, 24, 20) | tira de 5: 3V3, TX, RX, GND, DE | El módulo RS485 automático se enchufa en los cuatro primeros; el quinto es DE, para un transceptor que lo pida o para usar el UART pelado |
 | `uart.b` + objetivo | 3, 4, 5, 2 (12, 14, 11, 8) | tira de 6: GND, 3V3, TX, RX, EN, BOOT | El cable del Programador y de la Terminal. Divisor con puente en RX para un objetivo de 5 V (el Nano) |
 | SWD | 3 = SWCLK, 4 = SWDIO, 5 = NRST | Cortex Debug 2×5 de 1,27 (o tira de 5) | Los mismos pines que `uart.b`: es otro conector, no otro puerto |
-| `spi.a` | 52, 50, 51, 49 (38, 34, 36, 32) | tira 2×4: 3V3, GND, SCK, MOSI, MISO, CS, y GPIO46 y 47 | Los dos últimos son los de CAN: libres como auxiliares cuando no hay módulo CAN puesto |
+| `spi.a` | 52, 50, 51, 49 (38, 34, 36, 32) | tira 2×5: 3V3, GND, SCK, MOSI, MISO, CS, GPIO46 y 47, CS2, GND | 46 y 47 son los de CAN: libres como auxiliares cuando no hay módulo CAN puesto. **CS2 es GPIO48 (39) por el jumper JP17** (pedido del usuario, 2026-11-15): tres pines arriba del header, con el jumper en `LED` GPIO48 va a la bornera de la tira como antes, en `CS2` va a esta tira, para un segundo chip en el puerto cuando Ethernet tiene el CS propio (un RC522: `cs=48`). 10 kΩ a 3V3 del lado de CS2, para que ese chip no quede elegido con el jumper del otro lado |
 | Ethernet | `spi.a` con su CS, 49 (32), por puente | dos zócalos de 6 para un módulo "W5500 Lite" (HW-884) | El módulo que consiguió el usuario: 28,5 × 23,5 mm, seis pines por lado (G G MO SCK CS INT / GND V V NC RST MI), sólo 3,3 V, unos 200 mA. Con el puente puesto es el chip de `spi.a`. INT y RST salen a una tira de 2: la interrupción no va a un GPIO (el driver puede sondear). **Falta el driver en el firmware** ([ETHERNET.md](ETHERNET.md)), las dos filas del módulo están a 20,32 mm, medido |
 | CAN | TX 46, RX 47 (35, 37) | tira de 4: 3V3, GND, CTX, CRX | Para un módulo SN65HVD230, que trae su bornera y su 120 Ω |
 | Infrarrojo | receptor 28 (16), LED 32 (31) | en la placa, hacia adelante | Receptor de 38 kHz a 3V3; LED por un NPN desde el 5 V conmutado |
 | 1-Wire | 34 (28) | bornera de 3: 3V3, dato, GND | 4,7 kΩ a 3V3 con puente. Es un pin de strapping (la fuente del JTAG), que el chip sólo mira si se quemó el eFuse JTAG_SEL_ENABLE; el pull-up elige lo que ya es el valor de fábrica |
-| Tira LED / servo | 48 (39) | bornera de 3: 5 V conmutado, dato, GND | 330 Ω en serie; lugar para un capacitor de 470 µF |
+| Tira LED / servo | 48 (39), con JP17 en `LED` | bornera de 3: 5 V conmutado, dato, GND | 330 Ω en serie; lugar para un capacitor de 470 µF. Con JP17 en `CS2` la bornera queda sin dato |
 
 Lo que no entra y por qué: PWM en cantidad va por un PCA9685 en `i2c.ext`
 (ya soportado), no por pines propios; el ADC no tiene API todavía
@@ -219,3 +219,10 @@ Falta saber, y el modelo no lo dice:
    de 94 mm a 56 (y ése es de 3,3 V, una red de 23 uniones). Tarda tres
    minutos en vez de medio. El DRC de KiCad no marca nada más que los
    cuatro avisos de serigrafía de los USB.
+   **Con el jumper de GPIO48 (JP17) y la tira SPI de 2×5, 2026-11-15:**
+   la casera pasa a 82 vías y 3,1 m, la de fábrica a 105 y 3,0 m. El
+   jumper está arriba del header, en la franja apretada, y dos pines de
+   masa de la tira SPI quedaban encerrados entre pistas: el ruteador ahora
+   corre las pistas que encierran un pad de masa. Sin uniones faltantes ni
+   errores de separación en ninguna de las dos; quedan avisos de alivios
+   térmicos con menos rayos de los pedidos (7 y 3 pads de masa).

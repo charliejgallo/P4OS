@@ -6,7 +6,7 @@
 	(paper "A2")
 	(title_block
 		(title "P4OS auxiliary board for the 40-pin header, through-hole")
-		(date "2026-11-11")
+		(date "2026-11-15")
 		(rev "0.1")
 		(company "P4OS")
 	)
@@ -4400,7 +4400,7 @@
 			)
 			(embedded_fonts no)
 		)
-		(symbol "Connector_Generic:Conn_02x04_Odd_Even"
+		(symbol "Connector_Generic:Conn_02x05_Odd_Even"
 			(pin_names
 				(offset 1.016)
 				(hide yes)
@@ -4411,7 +4411,7 @@
 			(in_pos_files yes)
 			(duplicate_pin_numbers_are_jumpers no)
 			(property "Reference" "J"
-				(at 1.27 5.08 0)
+				(at 1.27 7.62 0)
 				(show_name no)
 				(do_not_autoplace no)
 				(effects
@@ -4420,7 +4420,7 @@
 					)
 				)
 			)
-			(property "Value" "Conn_02x04_Odd_Even"
+			(property "Value" "Conn_02x05_Odd_Even"
 				(at 1.27 -7.62 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -4452,7 +4452,7 @@
 					)
 				)
 			)
-			(property "Description" "Generic connector, double row, 02x04, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"
+			(property "Description" "Generic connector, double row, 02x05, odd/even pin numbering scheme (row 1 odd numbers, row 2 even numbers), script generated (kicad-library-utils/schlib/autogen/connector/)"
 				(at 0 0 0)
 				(show_name no)
 				(do_not_autoplace no)
@@ -4485,9 +4485,9 @@
 					)
 				)
 			)
-			(symbol "Conn_02x04_Odd_Even_1_1"
+			(symbol "Conn_02x05_Odd_Even_1_1"
 				(rectangle
-					(start -1.27 3.81)
+					(start -1.27 6.35)
 					(end 3.81 -6.35)
 					(stroke
 						(width 0.254)
@@ -4495,6 +4495,17 @@
 					)
 					(fill
 						(type background)
+					)
+				)
+				(rectangle
+					(start -1.27 5.207)
+					(end 0 4.953)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
 					)
 				)
 				(rectangle
@@ -4533,6 +4544,17 @@
 				(rectangle
 					(start -1.27 -4.953)
 					(end 0 -5.207)
+					(stroke
+						(width 0.1524)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(rectangle
+					(start 3.81 5.207)
+					(end 2.54 4.953)
 					(stroke
 						(width 0.1524)
 						(type default)
@@ -4586,7 +4608,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 2.54 0)
+					(at -5.08 5.08 0)
 					(length 3.81)
 					(name "Pin_1"
 						(effects
@@ -4604,7 +4626,7 @@
 					)
 				)
 				(pin passive line
-					(at 7.62 2.54 180)
+					(at 7.62 5.08 180)
 					(length 3.81)
 					(name "Pin_2"
 						(effects
@@ -4622,7 +4644,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 0 0)
+					(at -5.08 2.54 0)
 					(length 3.81)
 					(name "Pin_3"
 						(effects
@@ -4640,7 +4662,7 @@
 					)
 				)
 				(pin passive line
-					(at 7.62 0 180)
+					(at 7.62 2.54 180)
 					(length 3.81)
 					(name "Pin_4"
 						(effects
@@ -4658,7 +4680,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 -2.54 0)
+					(at -5.08 0 0)
 					(length 3.81)
 					(name "Pin_5"
 						(effects
@@ -4676,7 +4698,7 @@
 					)
 				)
 				(pin passive line
-					(at 7.62 -2.54 180)
+					(at 7.62 0 180)
 					(length 3.81)
 					(name "Pin_6"
 						(effects
@@ -4694,7 +4716,7 @@
 					)
 				)
 				(pin passive line
-					(at -5.08 -5.08 0)
+					(at -5.08 -2.54 0)
 					(length 3.81)
 					(name "Pin_7"
 						(effects
@@ -4712,7 +4734,7 @@
 					)
 				)
 				(pin passive line
-					(at 7.62 -5.08 180)
+					(at 7.62 -2.54 180)
 					(length 3.81)
 					(name "Pin_8"
 						(effects
@@ -4722,6 +4744,42 @@
 						)
 					)
 					(number "8"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at -5.08 -5.08 0)
+					(length 3.81)
+					(name "Pin_9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "9"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 7.62 -5.08 180)
+					(length 3.81)
+					(name "Pin_10"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "10"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -6093,6 +6151,211 @@
 					(at -5.08 -2.54 0)
 					(length 3.81)
 					(name "Pin_3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "3"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+			)
+			(embedded_fonts no)
+		)
+		(symbol "Jumper:Jumper_3_Bridged12"
+			(pin_names
+				(offset 0)
+				(hide yes)
+			)
+			(exclude_from_sim no)
+			(in_bom no)
+			(on_board yes)
+			(in_pos_files yes)
+			(duplicate_pin_numbers_are_jumpers no)
+			(property "Reference" "JP"
+				(at -2.54 -2.54 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Value" "Jumper_3_Bridged12"
+				(at 0 2.794 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Footprint" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Datasheet" ""
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "Description" "Jumper, 3-pole, pins 1+2 closed/bridged"
+				(at 0 -11.43 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_keywords" "Jumper SPDT"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(property "ki_fp_filters" "Jumper* TestPoint*3Pads* TestPoint*Bridge*"
+				(at 0 0 0)
+				(show_name no)
+				(do_not_autoplace no)
+				(hide yes)
+				(effects
+					(font
+						(size 1.27 1.27)
+					)
+				)
+			)
+			(symbol "Jumper_3_Bridged12_0_0"
+				(circle
+					(center -2.032 0)
+					(radius 0.508)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 0 0)
+					(radius 0.508)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(circle
+					(center 2.032 0)
+					(radius 0.508)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "Jumper_3_Bridged12_0_1"
+				(arc
+					(start -2.032 0.508)
+					(mid -1.143 0.8155)
+					(end -0.254 0.508)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+				(polyline
+					(pts
+						(xy 0 -1.27)
+						(xy 0 -0.508)
+					)
+					(stroke
+						(width 0)
+						(type default)
+					)
+					(fill
+						(type none)
+					)
+				)
+			)
+			(symbol "Jumper_3_Bridged12_1_1"
+				(pin passive line
+					(at -5.08 0 0)
+					(length 2.54)
+					(name "A"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "1"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 0 -3.81 90)
+					(length 2.54)
+					(name "C"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+					(number "2"
+						(effects
+							(font
+								(size 1.27 1.27)
+							)
+						)
+					)
+				)
+				(pin passive line
+					(at 5.08 0 180)
+					(length 2.54)
+					(name "B"
 						(effects
 							(font
 								(size 1.27 1.27)
@@ -11311,7 +11574,7 @@
 		)
 		(uuid "a9fbbc79-089e-5195-b254-51dd2a001643")
 	)
-	(text "spi.a, AND GPIO46/47 WHEN NO CAN MODULE IS ON THEM"
+	(text "spi.a: CS IS GPIO49; CS2 IS GPIO48 WHEN JP17 SAYS SO; GPIO46/47 WHEN NO CAN MODULE IS ON THEM"
 		(exclude_from_sim no)
 		(at 435 200 0)
 		(effects
@@ -11320,10 +11583,10 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "b5d45de5-7a8b-577a-a171-2f81019e6b84")
+		(uuid "3893f9b0-76a0-525e-bd23-b20a0e3dc42e")
 	)
 	(symbol
-		(lib_id "Connector_Generic:Conn_02x04_Odd_Even")
+		(lib_id "Connector_Generic:Conn_02x05_Odd_Even")
 		(at 474.98 236.22 0)
 		(unit 1)
 		(exclude_from_sim no)
@@ -11332,7 +11595,7 @@
 		(dnp no)
 		(uuid "0cf31ec2-d021-5e7f-8aa4-c3b15e2f48a4")
 		(property "Reference" "J14"
-			(at 469.9 229.87 0)
+			(at 469.9 227.33 0)
 			(effects
 				(font
 					(size 1.27 1.27)
@@ -11349,7 +11612,7 @@
 				(justify left)
 			)
 		)
-		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x04_P2.54mm_Vertical"
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_2x05_P2.54mm_Vertical"
 			(at 474.98 236.22 0)
 			(hide yes)
 			(effects
@@ -11403,6 +11666,12 @@
 		(pin "8"
 			(uuid "869a48c3-3931-5c8a-ab00-f450d50bc9ba")
 		)
+		(pin "9"
+			(uuid "6f8f906d-ec69-5100-b408-9beca8798744")
+		)
+		(pin "10"
+			(uuid "d1ba097d-afef-57f1-a729-454a3661f7a5")
+		)
 		(instances
 			(project "aux-board-th"
 				(path "/0b368187-5759-54d4-bd95-40af371deb44"
@@ -11413,7 +11682,7 @@
 		)
 	)
 	(label "+3V3"
-		(at 469.9 233.68 180)
+		(at 469.9 231.14 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -11423,7 +11692,7 @@
 		(uuid "26dc561b-ff42-5fd2-acc8-1fe81ecb4f74")
 	)
 	(label "GND"
-		(at 482.6 233.68 0)
+		(at 482.6 231.14 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -11433,7 +11702,7 @@
 		(uuid "9607c472-8236-5742-988d-19e92f1168a1")
 	)
 	(label "SPI_SCK"
-		(at 469.9 236.22 180)
+		(at 469.9 233.68 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -11443,7 +11712,7 @@
 		(uuid "9fc4e49c-93b8-5f94-ac20-04b710b1bcd1")
 	)
 	(label "SPI_MOSI"
-		(at 482.6 236.22 0)
+		(at 482.6 233.68 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -11453,7 +11722,7 @@
 		(uuid "7b7c8b3a-2a69-526f-b6f8-f8555223e698")
 	)
 	(label "SPI_MISO"
-		(at 469.9 238.76 180)
+		(at 469.9 236.22 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -11463,7 +11732,7 @@
 		(uuid "11eb2104-1c95-5f55-a2ea-1562de94d1e3")
 	)
 	(label "SPI_CS"
-		(at 482.6 238.76 0)
+		(at 482.6 236.22 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -11473,7 +11742,7 @@
 		(uuid "806ed1d3-8f4e-58e9-bf50-c15db50bdd1a")
 	)
 	(label "GPIO46"
-		(at 469.9 241.3 180)
+		(at 469.9 238.76 180)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -11483,7 +11752,7 @@
 		(uuid "ce0f9dbe-53d1-5ef1-a231-2b96e31f5e1d")
 	)
 	(label "GPIO47"
-		(at 482.6 241.3 0)
+		(at 482.6 238.76 0)
 		(effects
 			(font
 				(size 1.27 1.27)
@@ -11491,6 +11760,118 @@
 			(justify left bottom)
 		)
 		(uuid "5b792c19-755a-503a-92dc-966349e1f190")
+	)
+	(label "SPI_CS2"
+		(at 469.9 241.3 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "6140232a-5049-5043-8444-ff6c93d622d2")
+	)
+	(label "GND"
+		(at 482.6 241.3 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "77e87c73-e02f-584c-99c8-a6ecf954e95b")
+	)
+	(symbol
+		(lib_id "Device:R")
+		(at 520.7 236.22 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "172b679c-3406-5f61-8408-3b3eb06a753d")
+		(property "Reference" "R20"
+			(at 523.24 234.95 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "10k"
+			(at 523.24 237.49 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Resistor_THT:R_Axial_DIN0207_L6.3mm_D2.5mm_P10.16mm_Horizontal"
+			(at 520.7 236.22 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Datasheet" ""
+			(at 520.7 236.22 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Description" ""
+			(at 520.7 236.22 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "51e2dedf-43ee-572a-80a3-8b6597e9e382")
+		)
+		(pin "2"
+			(uuid "422a41cf-2f5e-5636-b46f-98607dffb6e5")
+		)
+		(instances
+			(project "aux-board-th"
+				(path "/0b368187-5759-54d4-bd95-40af371deb44"
+					(reference "R20")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "+3V3"
+		(at 520.7 232.41 90)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "204ebef1-9b65-55ed-9085-a600dcadef15")
+	)
+	(label "SPI_CS2"
+		(at 520.7 240.03 270)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "ba0d83db-4176-52ee-ba06-4d00e28153ab")
 	)
 	(text "ETHERNET: a W5500 Lite module on two sockets, spi.a's chip select through JP16"
 		(exclude_from_sim no)
@@ -13202,7 +13583,7 @@
 		)
 		(uuid "0be9759e-3ce1-5fe9-a210-f65f8e2eb57c")
 	)
-	(text "1-WIRE ON GPIO34, A LED STRIP OR A SERVO ON GPIO48, THE HOLES"
+	(text "1-WIRE ON GPIO34; GPIO48 TO A LED STRIP OR A SERVO, OR TO spi.a AS CS2 (JP17); THE HOLES"
 		(exclude_from_sim no)
 		(at 25 335 0)
 		(effects
@@ -13211,7 +13592,7 @@
 			)
 			(justify left bottom)
 		)
-		(uuid "858d64cb-e640-54c1-90cb-1e37ac8e209e")
+		(uuid "0fb2297a-8c09-5ee4-907e-c04e2cbdc26e")
 	)
 	(symbol
 		(lib_id "Connector:Screw_Terminal_01x03")
@@ -13608,6 +13989,111 @@
 		(uuid "92ba6241-5801-5dcd-bc89-bf416a31d23d")
 	)
 	(symbol
+		(lib_id "Jumper:Jumper_3_Bridged12")
+		(at 175.26 408.94 0)
+		(unit 1)
+		(exclude_from_sim no)
+		(in_bom yes)
+		(on_board yes)
+		(dnp no)
+		(uuid "d14316e0-40c6-533f-bacb-11be67fc6f7b")
+		(property "Reference" "JP17"
+			(at 170.18 405.13 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Value" "GPIO48: strip | CS2"
+			(at 170.18 417.83 0)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Footprint" "Connector_PinHeader_2.54mm:PinHeader_1x03_P2.54mm_Vertical"
+			(at 175.26 408.94 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Datasheet" ""
+			(at 175.26 408.94 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(property "Description" ""
+			(at 175.26 408.94 0)
+			(hide yes)
+			(effects
+				(font
+					(size 1.27 1.27)
+				)
+				(justify left)
+			)
+		)
+		(pin "1"
+			(uuid "7eddc3b9-aa1e-596d-b8a9-21c41a53fad4")
+		)
+		(pin "2"
+			(uuid "4c77f8fd-9476-5790-bae1-5cfbfc58626a")
+		)
+		(pin "3"
+			(uuid "e9d56b9c-3749-519f-b2fe-e23383a32d71")
+		)
+		(instances
+			(project "aux-board-th"
+				(path "/0b368187-5759-54d4-bd95-40af371deb44"
+					(reference "JP17")
+					(unit 1)
+				)
+			)
+		)
+	)
+	(label "GPIO48_STRIP"
+		(at 170.18 408.94 180)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "f59f1d26-b9f9-5fe8-85f4-1cf3a61c5857")
+	)
+	(label "GPIO48"
+		(at 175.26 412.75 270)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify right bottom)
+		)
+		(uuid "1ec572c1-0ea6-545f-8991-2bb58585595e")
+	)
+	(label "SPI_CS2"
+		(at 180.34 408.94 0)
+		(effects
+			(font
+				(size 1.27 1.27)
+			)
+			(justify left bottom)
+		)
+		(uuid "d0c7148a-b766-54f5-a907-faeca634f745")
+	)
+	(symbol
 		(lib_id "Device:R")
 		(at 195.58 370.84000000000003 0)
 		(unit 1)
@@ -13679,7 +14165,7 @@
 			)
 		)
 	)
-	(label "GPIO48"
+	(label "GPIO48_STRIP"
 		(at 195.58 367.03 90)
 		(effects
 			(font

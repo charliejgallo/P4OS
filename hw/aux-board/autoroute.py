@@ -71,6 +71,7 @@ OFF = 2.0                       # leaving a pad one grid step off its middle
 # how many rounds before the nets still crossing are routed one after another.
 PRICE, GROWTH, MEMORY, ROUNDS = 1.0, 1.5, 0.5, 40
 SLACK = 10.0                    # a way round is told of when it is this many mm over the net's direct way
+VIAS = {}                       # net -> the nodes of its vias now: two holes of one net keep their distance too
 
 class Map:
     """Who may pass each node of each face, for a track whose half width is 'half'."""
@@ -351,6 +352,7 @@ def search(m, wide, net, sources, targets, through, novia, cross=None):
     moves = ([(di, dj, 1.5 if di and dj else (1.0 if di else ACROSS), a) for a, (di, dj) in enumerate(HEADINGS)],
              [(di, dj, BACK * (1.5 if di and dj else (1.0 if dj else ACROSS)), a) for a, (di, dj) in enumerate(HEADINGS)])
     END = -1
+    mine = VIAS.get(net)
     price, memory = cross if cross is not None else (0.0, None)
     best, parent, heap = {}, {}, []
     for (f, k), c in sources.items():
@@ -419,6 +421,9 @@ def search(m, wide, net, sources, targets, through, novia, cross=None):
             if k in through:
                 cost = 0.05 + price * n
             elif not novia[k]:
+                if mine and (k - 1 in mine or k + 1 in mine or k - nx in mine or k + nx in mine or k - nx - 1 in mine
+                             or k - nx + 1 in mine or k + nx - 1 in mine or k + nx + 1 in mine):
+                    continue            # its own via next door: the two holes would be too close
                 v0, v1 = held(wide, 0, k, net, cross), held(wide, 1, k, net, cross)
                 if v0 < 0 or v1 < 0:
                     continue
@@ -537,11 +542,11 @@ def route_net(b, maps, net, grouped, name, out, victims_too=False, cross=None):
                 out["plane"].append("%s.%s" % (a["ref"], a["pin"]))
             else:
                 out["failed"].append("%s: %s.%s" % (name, a["ref"], a["pin"]))
-                way = search(sig, wide, net, tree, targets, through, b["novia"], (CROSS, None)) if victims_too and targets else None
-                for f, k in way or []:
-                    o = sig.owner[f][k]
-                    if 0 <= o < 10000 and o != net:
-                        victims.add(o)
+            way = search(sig, wide, net, tree, targets, through, b["novia"], (CROSS, None)) if victims_too and targets else None
+            for f, k in way or []:
+                o = sig.owner[f][k]
+                if 0 <= o < 10000 and o != net:
+                    victims.add(o)
             continue
         key = "fat" if width >= FAT else ("wide" if width >= PWR else "sig")
         out["nodes"] += [(key, f, k) for f, k in path]
@@ -559,6 +564,7 @@ def route_net(b, maps, net, grouped, name, out, victims_too=False, cross=None):
                 if cur[3] not in through:
                     out["nodes"] += [("wide", 0, cur[3]), ("wide", 1, cur[3])]
                     out["vias"].append((name, cur[1], cur[2]))
+                    VIAS.setdefault(net, set()).add(cur[3])
                     lay_via(maps, net, cur[1], cur[2])
                 run = [cur]
             else:
@@ -591,6 +597,17 @@ def flush(maps, net, name, run, width, out):
 def unlay(maps, net):
     for m in maps.values():
         m.release(net)
+    VIAS.pop(net, None)
+
+
+def lay_out(maps, net, o):
+    """Lays a net's tracks and vias again, as they were."""
+    nx = maps["sig"].nx
+    for _, face, p, q, w in o["tracks"]:
+        lay_track(maps, net, face, p, q, w)
+    for _, x, y in o["vias"]:
+        lay_via(maps, net, x, y)
+        VIAS.setdefault(net, set()).add(int(round(y / G)) * nx + int(round(x / G)))
 
 
 def weigh(o):
@@ -625,6 +642,7 @@ def route(b, passes):
     maps = {key: m.copy() for key, m in base.items()}
     for m in maps.values():
         m.freeze()
+    VIAS.clear()
     t0 = time.time()
     # each net alone on the bare board: its direct way, to measure the others' against
     alone = {}
@@ -692,28 +710,96 @@ def route(b, passes):
             queue = [net] + sorted(victims, key=order.index) + [q for q in queue if q not in victims]
             continue
         done[net] = out
-    best = total()
-    say("in all, %d joins not made, %d nets routed one after another" % (len(best["failed"]), len(tries) + rips if rips else 0))
-    best["detours"] = sorted(((weigh(done[n]) - alone[n], names[n], weigh(done[n]), alone[n]) for n in order
-                              if n in alone and not done[n]["failed"] and weigh(done[n]) - alone[n] > SLACK), reverse=True)
+    say("in all, %d joins not made, %d nets routed one after another" % (len(total()["failed"]), len(tries) + rips if rips else 0))
+
+    def detours():
+        return sorted(((weigh(done[n]) - alone[n], names[n], weigh(done[n]), alone[n]) for n in order
+                       if n in alone and not done[n]["failed"] and weigh(done[n]) - alone[n] > SLACK), reverse=True)
+
+    grounds = []                        # what each call of ground() laid
 
     def ground(parts):
-        """Tracks that join the ground's parts, as ground_parts() found them, to the biggest one."""
+        """Tracks that join the ground's parts, as ground_parts() found them, to the biggest one. A
+        part that other nets' tracks shut in has those taken off, is joined, and they go round."""
         o = blank()
         where = {(p["ref"], p["pin"], round(p["x"] + b["ox"], 2), round(p["y"] + b["oy"], 2)): n
                  for n, p in enumerate(b["pads"]) if p["name"] in PLANES}
         sets = [[where[k] for k in sorted(part) if k in where] for part in parts]
         sets = [g for g in sets if g]
-        if len(sets) > 1:
-            gnd = b["pads"][sets[0][0]]["net"]
-            route_net(b, maps, gnd, [(g, []) for g in sets], names[gnd], o)
+        if len(sets) < 2:
+            return o
+        gnd = b["pads"][sets[0][0]]["net"]
+
+        def first(g):
+            return "%s.%s" % (b["pads"][g[0]]["ref"], b["pads"][g[0]]["pin"])
+        victims = route_net(b, maps, gnd, [(g, []) for g in sets], names[gnd], o, True)
+        victims = sorted((v for v in victims if v in done), key=order.index)
+        if o["plane"] and victims:
+            stuck = [g for g in sets if first(g) in o["plane"]]
+            joined = [n for g in sets if first(g) not in o["plane"] for n in g]
+            old = {v: done[v] for v in victims}
+            for v in victims:
+                unlay(maps, v)
+            o2, new = blank(), {}
+            route_net(b, maps, gnd, [(joined, [])] + [(g, []) for g in stuck], names[gnd], o2)
+            good = len(o2["plane"]) < len(o["plane"])
+            for v in victims if good else ():
+                new[v], _ = lay(v)
+                if new[v]["failed"]:
+                    good = False
+                    break
+            if good:
+                done.update(new)
+                for key in ("tracks", "vias", "thin", "nodes"):
+                    o[key] += o2[key]
+                o["plane"] = o2["plane"]
+                o["moved"] = [names[v] for v in victims]
+            else:                       # no better: everything back as it was
+                for v in new:
+                    unlay(maps, v)
+                unlay(maps, gnd)
+                for g in grounds + [o]:
+                    lay_out(maps, gnd, g)
+                for v in victims:
+                    lay_out(maps, v, old[v])
+        grounds.append(o)
         return o
-    return best, ground
+
+    def everything():
+        o = total()
+        for g in grounds:
+            for key in ("tracks", "vias", "thin"):
+                o[key] += g[key]
+        return o
+    return {"signals": total, "all": everything, "ground": ground, "detours": detours}
+
+
+def split(tracks, vias):
+    """The tracks, each cut where another of its net starts or ends on it: a join in the middle of
+    a stretch becomes three ends at one point, which is how KiCad likes to find it."""
+    ends = {}
+    for name, face, a, c, w in tracks:
+        ends.setdefault((name, face), set()).update((a, c))
+    for name, x, y in vias:
+        for face in (0, 1):
+            ends.setdefault((name, face), set()).add((x, y))
+    out = []
+    for name, face, a, c, w in tracks:
+        L = math.hypot(c[0] - a[0], c[1] - a[1])
+        on = seg_dist(a[0], a[1], c[0], c[1])
+        cuts = sorted({round(math.hypot(p[0] - a[0], p[1] - a[1]), 4): p for p in ends[(name, face)]
+                       if on(p[0], p[1]) < 0.005 and 0.01 < math.hypot(p[0] - a[0], p[1] - a[1]) < L - 0.01}.items())
+        last = a
+        for _, p in cuts:
+            out.append((name, face, last, p, w))
+            last = p
+        out.append((name, face, last, c, w))
+    return out
 
 
 def write(board, b, out, path):
     FromMM = pcbnew.FromMM
-    for name, face, a, c, w in out["tracks"]:
+    for name, face, a, c, w in split(out["tracks"], out["vias"]):
         t = pcbnew.PCB_TRACK(board)
         t.SetStart(pcbnew.VECTOR2I(FromMM(a[0] + b["ox"]), FromMM(a[1] + b["oy"])))
         t.SetEnd(pcbnew.VECTOR2I(FromMM(c[0] + b["ox"]), FromMM(c[1] + b["oy"])))
@@ -874,32 +960,45 @@ def main():
     b = read(board)
     print("routing %s: %d pads, %d tracks already there" % (os.path.basename(src), len(b["pads"]), len(b["tracks"])), flush=True)
     global VIA_COST, BACK
-    out = ground = None
+    state = found = None
     for VIA_COST, BACK in COSTS:
         print(" a via costs %g steps, the back %g:" % (VIA_COST, BACK), flush=True)
-        got, g = route(b, passes)
-        if out is None or (len(got["failed"]), len(got["vias"])) < (len(out["failed"]), len(out["vias"])):
-            out, ground = got, g
+        st = route(b, passes)
+        got = st["signals"]()
+        if found is None or (len(got["failed"]), len(got["vias"])) < found:
+            state, found = st, (len(got["failed"]), len(got["vias"]))
         if not got["failed"]:
             break
-    gone = prune(board, b, out)
-    write(board, b, out, dst)
+
+    def emit():
+        """The trial board, made again from the placed one with everything routed so far."""
+        fresh = pcbnew.LoadBoard(src)
+        seen = read(fresh)
+        o = state["all"]()
+        gone = prune(fresh, seen, o)
+        write(fresh, seen, o, dst)
+        return o, gone
+    out, gone = emit()
     print("wrote %s: %d tracks, %d vias%s" % (os.path.basename(dst), len(out["tracks"]), len(out["vias"]),
                                               "; %d of place.py's tracks went unused and were left out" % gone if gone else ""))
     # ground: the planes, filled, join nearly all of it; a track only for the pads they left out,
     # and again for the ones those tracks show to be on an island of their own
-    for _ in range(4):
+    for _ in range(5):
         kinds, where, loose, parts = drc(dst)
         if len(parts) < 2:
             break
-        g = ground(parts)
-        write(board, b, g, dst)
-        out["thin"] += g["thin"]
-        print("ground: the planes leave %d groups of pads apart from the rest (%s); %d tracks and %d vias to join them%s" % (
+        g = state["ground"](parts)
+        out, gone = emit()
+        print("ground: the planes leave %d groups of pads apart from the rest (%s); %d tracks and %d vias to join them%s%s" % (
             len(parts) - 1, "; ".join(", ".join(sorted("%s.%s" % k[:2] for k in part)) for part in parts[1:]),
-            len(g["tracks"]), len(g["vias"]), ", no way to %s" % ", ".join(g["plane"]) if g["plane"] else ""))
+            len(g["tracks"]), len(g["vias"]),
+            ", after taking %s out of the way" % ", ".join(g["moved"]) if g.get("moved") else "",
+            ", no way to %s" % ", ".join(g["plane"]) if g["plane"] else ""))
         if not g["tracks"]:
             break
+    kinds, where, loose, parts = drc(dst)
+    out["failed"] = state["signals"]()["failed"]
+    out["detours"] = state["detours"]()
     widths = {}
     for name, width, ends in out["thin"]:
         widths.setdefault(name, {}).setdefault(width, []).extend(ends)

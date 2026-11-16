@@ -32,6 +32,17 @@ and the SPI one; beside the 2x20 there are only two bulk capacitors, the
 5 V one next to its switch. The silkscreen names the header's forty pins
 beside their solder joints.
 
+**A second chip select for `spi.a`, by a jumper** (2026-11-15). The
+Ethernet module holds the port's own chip select, GPIO49, so a second
+chip on the same wires (an RC522, a thermocouple) needs another. JP17 is
+three pins at the top of the 2x20, GPIO48 in the middle: the jumper on
+`LED` gives it to the strip's terminal as before, on `CS2` to the SPI
+header, which grew to 2x5 for it (CS2 and one more ground). A 10 k
+resistor keeps CS2 high, its chip not chosen, while the jumper is on the
+other side. In `modules.txt` that chip is `cs=48`. It is a pin header in
+both variants: it is there to be moved. GPIO46 and 47, on the same
+header, serve as chip selects too while no CAN module is on them.
+
 **Supplies and ground are not to be routed thin:** 0.8 mm at least to the
 5 V and 3.3 V headers and wherever it fits, 0.5 mm only through a passage
 that takes no more. The ground planes join each ground pin by four spokes
@@ -134,30 +145,38 @@ where 0.8 finds no room; it says where), 0.6 mm vias, KiCad's default
   first routed as if alone, crossing the others at a price. Then the ones
   that cross are routed again, round after round, while that price goes
   up and the nodes that were fought over stay dearer for everyone, until
-  nothing crosses (eighteen rounds on the through-hole board). Each net
-  gives way where it costs it least.
+  nothing crosses. Each net gives way where it costs it least.
 - **A turn has a price**, a square corner more than a 45 degree one and a
   hairpin most, so a track runs straight where it can, and it leaves a
   pad by its middle.
 - **Ground is the planes' business.** No ground track is laid until the
   planes are filled; then the router reads KiCad's fill, finds the groups
-  of ground pads it left apart from the rest, and joins only those.
+  of ground pads it left apart from the rest, and joins only those. A
+  ground pad that other nets' tracks shut in has those taken off, is
+  joined, and they are routed again round it.
 - Of the header's fan-out, the stubs the routing did not use are left out
   of the trial board.
 
-Its tracks pass KiCad's rules: on the through-hole trial the check
-reports nothing but the four silkscreen warnings of the USB sockets, and
-nothing left to join. **The trial boards are still not for manufacture:**
+Its tracks pass KiCad's rules: on both trials the check finds no
+clearance error and nothing left to join. What it reports is the four
+silkscreen warnings of the USB sockets and, for seven ground pads of the
+through-hole board and three of the SMD one, a thermal relief with fewer
+spokes than asked. **The trial boards are still not for manufacture:**
 nobody has looked at them track by track.
 
 What it found:
 
 - **The board routes on two layers.** Every signal and supply net was
-  joined on both variants, with no clearance error: 67 vias and 2.9 m of
-  track on the through-hole board, 96 and 3.0 m on the SMD one, plus 10
-  and 19 vias to tie the ground's pieces. The first router took 136 and
-  196 vias and 3.6 m. The longest way round left is 3.3 V's, a net of
-  twenty-three joins, 56 mm over what it would take alone.
+  joined on both variants, with no clearance error: 82 vias and 3.1 m of
+  track on the through-hole board, 105 and 3.0 m on the SMD one, plus 9
+  and 27 vias to tie the ground's pieces. The first router took 136 and
+  196 vias and 3.6 m. The longest ways round left are the supplies', nets
+  of some twenty joins, about 50 mm over what each would take alone.
+- **GPIO48's jumper cost fifteen vias.** Before JP17 and the wider SPI
+  header (2026-11-15) the through-hole board took 67 vias and 2.9 m: the
+  jumper stands at the top of the header, in the band where the tracks
+  crowd, and two ground pins of the SPI header ended shut in until the
+  router learnt to clear them.
 - **The 2x20 header is the tight spot.** A pin of its outer row has one
   way out, the gap between two pins of the inner row, and a track of
   another net through that gap shuts it in. In every run, most of the
@@ -167,11 +186,11 @@ What it found:
   several settings to join everything, and the one that negotiates joins
   it all at its first.
 - **Ground does not take care of itself.** With tracks on both faces the
-  planes are cut into pieces: the fill leaves five groups of ground pads
-  apart from the rest on the through-hole trial and eleven on the SMD
-  one, which the router then ties with short tracks and vias. A third of
-  the track is on the back (1.1 m). The real routing has to keep the back
-  more whole than that.
+  planes are cut into pieces: the fill leaves six groups of ground pads
+  apart from the rest on the through-hole trial and seventeen on the SMD
+  one, which the router then ties with short tracks and vias. More than a
+  third of the track is on the back (1.2 m). The real routing has to keep
+  the back more whole than that.
 - **The supplies fit at 0.8 mm almost everywhere.** On the through-hole
   board every stretch of 5 V, switched 5 V and the two USB sockets' 5 V
   went at 0.8 mm, and 3.3 V all but two (one of them to a pin of the
@@ -196,8 +215,8 @@ python3 hw/aux-board/gen.py --check
 ```
 
 writes the schematic and asks KiCad (`kicad-cli`) for its ERC and its
-netlist, and compares each netlist with the list: 73 parts (th) or 75
-(smd), the same 54 nets, no violation, none different.
+netlist, and compares each netlist with the list: 75 parts (th) or 77
+(smd), the same 56 nets, no violation, none different.
 
 The schematic has no wires: each pin carries a label with its net's name,
 and pins with the same name are joined. Change the list and generate again
