@@ -109,6 +109,7 @@ Fps measured with the app's own log line in `/api/log`.
 |---|---|---|---|
 | Doom | – | 35 fps | 320×200 ×3 by the PPA into the free buffer, flipped |
 | Pinball 3D | 67–70 fps (the timer's 14 ms; the panel shows 60), 3–6 ms a frame; Casino Real 63–70 (it dipped to 38–45 in its video mode before the DMD redrew only what changes) | – | only the rectangles that changed, from the table's picture and depth; page flipping, the rest copied by the DMA (apps/pinball/README.md) |
+| Bastión | 62.5 fps (the worker's 16 ms), 3–4 ms a frame between waves, 8.4 ms with 43 aliens and nine towers firing (280 tiles) | – | only the 16 px tiles whose list of things changed, composed straight into the panel's free buffer on both cores, then a flip: nothing is copied (apps/bastion/README.md) |
 | Duke Nukem 3D | – | 30 fps (the game's rate) at 320×200 and 480×300 (uncapped 59 and ~34); 640×400 15–21 fps, 640×480 15–18 (all of core 0; clean since the panel fixes of 8b3dde5/fcde1e5) | Build engine to an 8-bit frame, palette to RGB565, PPA into the free buffer, flipped (apps/duke3d/README.md) |
 | Video | 640×360: 30 fps; 720×1280: 24 fps | 1280×720: 20 fps | JPEG engine + `blit_fit` |
 | Visor 3D | ~28 fps with ~16 000 triangles; 13–15 fps with ~100 000 | same | rasteriser on both cores, adaptive size |

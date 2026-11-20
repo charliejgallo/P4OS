@@ -143,9 +143,16 @@ the aliens its waves bring, and the sounds with one piece of music. The
 menus' pictures are freed before a battle loads, and the wallpaper's photo
 is let go while one runs. Internal RAM: none of its own.
 
-The log says every 5 s, here from the simulator on a Mac (so the times
-say nothing of the board, and `flip 0` is the canvas):
-`bastion: 46.3 fps, a frame 0.34 ms (sim 0.04, list 0.03, draw 0.27), 146 tiles, 78 things, 10 aliens, flip 0, 13257 KB held`.
+Measured on the board (2026-11-20, firmware v0.27.0-10, Cráter Selene sector 1, played
+through the portal's taps, page flipping): **62.4-62.6 frames a second**
+throughout, the worker's 16 ms; a frame's work is 3.0-3.9 ms between waves
+with the free pads breathing (140-270 tiles), 0.8 ms with a pad chosen
+(they stop: 0-6 tiles change), and 5.2-6.1 ms in a wave with 30-37
+aliens and eight towers firing (150-190 tiles, 110-140 things), of which
+the simulation takes 0.55 ms and the list 0.45. 9.1 MB of PSRAM held with
+the four towers of the start: the board had 17.4 MB free when the app
+opened and 8.2 MB during the battle, with 208 KB of internal RAM free. The log says every 5 s:
+`bastion: 62.5 fps, a frame 6.12 ms (sim 0.57, list 0.44, draw 5.11), 193 tiles, 142 things, 30 aliens, flip 1, 9100 KB held`.
 
 ## The numbers, and the bot that sets them
 
@@ -198,9 +205,8 @@ the laboratory's, `BS_OPEN=1` opens every sector.
 
 ## Pending
 
-- The board: the frame rate from the log (the tiles and the flip follow
-  Pinball's and Turbo's ways, but only the simulator has run this), the
-  memory beside other apps, the touch.
-- The sound has been checked by numbers and spectrograms only: nobody has
-  listened to it yet.
-- The difficulty is the bot's: real players will say where it is off.
+- The board: the first world ran well (above), and the user played it on
+  the board the same day: the sound and the difficulty are right. Still to
+  see are the late worlds' crowds and bosses, a battle with all fourteen
+  towers owned (13.3 MB in the simulator), the memory beside other apps
+  and the gamepad.

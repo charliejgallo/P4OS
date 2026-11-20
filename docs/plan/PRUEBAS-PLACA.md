@@ -616,6 +616,15 @@ Hecho entre el 2026-10-04 y el 2026-10-05 (0.9.0):
       ruleta. La primera versión se quedaba sin PSRAM (una paleta sin
       dibujar y después colgado): arreglado cargando sólo en PSRAM y
       liberando las tarjetas del carrusel antes de la mesa.
+- [x] Bastión (2026-11-20, `ff2fee1`, firmware v0.27.0-10): instalada con
+      `install_apps.sh` (35,9 MB entre el `.so` y sus doce packs, 2 min) y
+      registrada sin errores. El primer sector del primer mundo jugado
+      entero por los toques del portal (ocho oleadas, 312 bajas, tres
+      estrellas): **62,5 fps** fijos con page flipping, 3-4 ms de trabajo
+      por cuadro entre oleadas y 8,4 ms con 43 aliens y nueve torres
+      (280 mosaicos, 184 cosas en la lista); 9,1 MB de PSRAM con las cuatro
+      torres del comienzo, 8,2 MB libres durante la batalla y 208 KB de RAM
+      interna. La interfaz en inglés, el guardado y el paso de sector, bien.
 - [ ] Sin Wi-Fi después de un reinicio por software (visto otra vez el
       2026-10-06, 1 vez en ~140 reinicios seguidos): la interfaz anda, el
       C6 no levanta la red, y no lo arreglan ni apagar y prender el Wi-Fi
@@ -1780,6 +1789,18 @@ por el Registro del portal sin cable serie)
       bajaba a 38-45 con picos de 16 ms).
 - [ ] Jugar las seis mesas con joystick USB.
 - [ ] Ajustar la dificultad con jugadores de verdad (tiempo por bola, outlanes).
+
+**Bastión**
+- [x] Jugada por el usuario en la placa (2026-11-20): "el sonido anda bien,
+      la dificultad también" (los 37 efectos y los cinco temas son
+      sintetizados y hasta ahí sólo se habían revisado con números).
+- [ ] Jugarla con joystick USB.
+- [ ] Los mundos del final: oleadas de 50 por grupo, jefes, y una batalla
+      con las catorce torres desbloqueadas (13,3 MB en el simulador, contra
+      ~17 MB libres al abrir la app).
+- [ ] La dificultad de los mundos del final con un jugador de verdad: la
+      mide un bot (`apps/bastion/tools/harness.sh -c`) y los primeros
+      sectores ya se jugaron bien.
 
 ## Pendientes anotados en la placa
 

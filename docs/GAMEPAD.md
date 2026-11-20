@@ -32,6 +32,7 @@ by touch never sees it. Board games put a cursor on the board the same way.
 | 2043 | stick flies the ship (speed follows the lean), D-pad full speed · A fire (hold) · B or R barrel roll · START pause |
 | ARKANOS | D-pad or stick moves the paddle · A serves, and fires the laser while held · START pause |
 | Atasco | D-pad moves a frame · A takes the car, the D-pad slides it, A or B lets go · B (nothing held) or L undo · R restart · START levels |
+| Bastión | D-pad moves a frame from pad to pad · A picks the pad and goes into its panel (D-pad + A there, B back) · R calls the next wave, or changes the speed during one · L the powers · START pause · in the campaign L/R change world, in the laboratory its tab |
 | Blackjack | A deals / hits / next hand · B stands (and clears, refuses insurance) · L double · R split · START menu |
 | Buscaminas | D-pad moves a cursor · A digs (or chords) · B flags · START new board · L/R difficulty |
 | Burbujas | stick aims by speed, D-pad in fine steps (up = straight up) · A shoots · B swaps the bubble · START pause |

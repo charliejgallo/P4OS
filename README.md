@@ -11,10 +11,10 @@ notifications, and a lock screen with an optional code, and it runs in
 portrait or landscape. There are twenty-three built-in apps and more than fifty on
 the microSD, loaded as shared objects:
 
-- **Games:** twenty-four, among them Mila (a Sokoban with a black cat in
+- **Games:** twenty-five, among them Mila (a Sokoban with a black cat in
   Blender 3D), Monster Hop, a racing game, golf, a robot RPG, a 3D pinball
-  with six tables, a pipes game with six liquids, Doom at 35 fps and Duke
-  Nukem 3D; and an emulator of
+  with six tables, a tower defense over ten worlds, a pipes game with six
+  liquids, Doom at 35 fps and Duke Nukem 3D; and an emulator of
   fourteen consoles, the Game Boy Advance and the Neo Geo at full speed.
 - **Tools:** notes with task lists, a street map with offline zones,
   internet radio, IP cameras, video, a 3D viewer, a tuner, a drawing app,
@@ -895,6 +895,37 @@ ball waits.
   toys' frames), so the ball goes behind ramps and toys; a new table is a
   module and a pack, no new code. 60-70 fps on the board.
 
+### Bastión
+
+A tower defense, upright ([apps/bastion/README.md](apps/bastion/README.md)):
+a fort in space, waves of aliens on a road, and towers on the pads beside
+it. Ten worlds of three sectors each, the third with a boss.
+
+| The campaign | Selene Crater, on the board | Magma Sea | Nebula Rings | The laboratory |
+|---|---|---|---|---|
+| <img src="docs/img/app-bastion-campaign.jpg" width="125"> | <img src="docs/img/app-bastion-luna.jpg" width="125"> | <img src="docs/img/app-bastion-magma.jpg" width="125"> | <img src="docs/img/app-bastion-nebula.jpg" width="125"> | <img src="docs/img/app-bastion-lab.jpg" width="125"> |
+
+- **Fourteen towers of three tiers:** a rotary cannon, shells, a laser
+  that grows on its target, homing missiles, chain lightning, cold, fire,
+  a railgun through the whole line, a plasma mortar, a hangar of drones,
+  an EMP, a gravity well that throws them back, an amplifier for the
+  towers around it and a refinery that pays. Between waves nothing moves:
+  build, upgrade and sell at leisure, then call the next one.
+- **Twelve aliens and three bosses**, each asking for another answer:
+  armour, fliers that cut the road's corners, dividers, shields that come
+  back, healers, the cloaked, the ones that silence towers.
+- **What stays:** a battle pays cores, and the laboratory turns them into
+  new towers, each tower's mastery, eight technologies and three powers
+  (an orbital strike, a cryo bomb, a repair). Experience makes the rank.
+  A USB gamepad plays it all.
+- **How it is made:** everything is modelled by code in Blender and
+  rendered ahead, a picture with the depth of its pixels a world and
+  sheets of sprites for what stands on it, so an alien walks behind a
+  rock. The board draws again only the 16-pixel tiles whose content
+  changed, straight into the panel's free buffer, half on each core, and
+  flips: 62 fps on the board with forty aliens on the road. A bot plays
+  the whole campaign to set each sector's difficulty.
+
 ### Caños
 
 Join the plant's tank to its drain before the liquid runs
@@ -1411,6 +1442,7 @@ Where something is a guess, it says so.
 | [MODULES.md](docs/MODULES.md) | the 40-pin header, `modules.txt`, I2C, SPI and GPIO from apps, Ethernet and the tools for the wire |
 | [apps/emulador/README.md](apps/emulador/README.md) | the emulator: the consoles, the card's folders, the modules, what was measured |
 | [apps/pinball/README.md](apps/pinball/README.md) | the pinball: the tables, the rules, adding a table, rendering and packing, what was measured |
+| [apps/bastion/README.md](apps/bastion/README.md) | Bastión: the towers and the aliens, how a frame is composed, the Blender scripts, the bot that sets the difficulty, what was measured |
 | [apps/canos/README.md](apps/canos/README.md) | Caños: the modes, the generator, the six liquids and how they are drawn, what was measured |
 | [apps/datalog/README.md](apps/datalog/README.md) | the data logger: a line's choices, the CSV, the alarms, logging in the background |
 | [apps/rf/README.md](apps/rf/README.md) | the software radio: receivers, the signal chain, what was measured, the decoders and their tests |
