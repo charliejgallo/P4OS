@@ -23,7 +23,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
       R: ${{ github.repository }}
-      CARRIED_PACKS: monsterhop_p4.pak turbo_p4.pak golf_p4.pak mila_p4.pak mila_p4.pak.1 mila_p4.pak.2 infrarrojo_p4.pak pinball_zombis_p4.pak pinball_robots_p4.pak pinball_jungla_p4.pak pinball_circo_p4.pak pinball_casino_p4.pak pinball_piratas_p4.pak
+      CARRIED_PACKS: monsterhop_p4.pak turbo_p4.pak golf_p4.pak mila_p4.pak mila_p4.pak.1 mila_p4.pak.2 infrarrojo_p4.pak pinball_zombis_p4.pak pinball_robots_p4.pak pinball_jungla_p4.pak pinball_circo_p4.pak pinball_casino_p4.pak pinball_piratas_p4.pak bastion_p4.pak bastion_p4.pak.1 bastion_p4.pak.2 bastion_luna_p4.pak bastion_selva_p4.pak bastion_magma_p4.pak bastion_hielo_p4.pak bastion_orbita_p4.pak bastion_cristal_p4.pak bastion_cienaga_p4.pak bastion_nebula_p4.pak bastion_colmena_p4.pak bastion_nucleo_p4.pak
     steps:
       - name: copy
         run: |

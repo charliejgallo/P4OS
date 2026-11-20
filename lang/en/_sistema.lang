@@ -9835,6 +9835,9 @@ CAN	CAN
 #: apps/canos  (nombre de app)
 Caños	Pipes
 
+#: apps/bastion  (nombre de app)
+Bastión	Bastion
+
 #: apps/cartero  (nombre de app)
 Cartero	Cartero
 

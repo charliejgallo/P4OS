@@ -1,5 +1,59 @@
 # Changelog
 
+## 0.29.0 — 2026-11-20
+
+Bastión, a tower defense in 3D. The firmware is 0.28.0's: what is new is on
+the card.
+
+- **Bastión, on the card** (`apps/bastion/README.md`). A fort in space,
+  waves of aliens on a road and towers on the pads beside it, upright. Ten
+  worlds of three sectors each, the third with a boss; fourteen towers of
+  three tiers, upgraded and sold between waves; twelve aliens and three
+  bosses, each asking for another answer (armour, fliers, dividers,
+  shields that come back, the cloaked, the ones that silence towers).
+  - **Everything is modelled by code in Blender and rendered ahead**
+    (`apps/bastion/tools/blender`): a picture with the depth of its pixels
+    a world, sheets of sprites for what stands on it, so an alien walks
+    behind a rock. The board draws again only the 16-pixel tiles whose
+    content changed, straight into the panel's free buffer, half on each
+    core, and flips; sprites are kept as runs, so the transparent half of
+    a cell costs neither memory nor time.
+  - **What stays:** a battle pays cores, and the laboratory turns them
+    into new towers, each tower's mastery, eight technologies and three
+    powers (an orbital strike, a cryo bomb, a repair). Experience makes
+    the rank.
+  - **Three modes:** the campaign; Supervivencia, waves without end with
+    twice the fort's life, a goal with its prize every twenty, a record a
+    world, and leaving when it suits; Libre, any sector with everything
+    unlocked. The difficulty is the purse: more credits, or fewer.
+  - **A gallery** of cards unlocked as the player meets each alien, tower
+    and world: its portrait (the aliens walk), its numbers, a line about
+    it.
+  - **Its difficulty is measured, not guessed:** a bot plays the whole
+    campaign (`apps/bastion/tools/harness.sh`) and sets how tough each of
+    the thirty sectors is.
+  - A USB gamepad plays it all; English and German; the sound is
+    synthesised. Its art is in packs that are not in the repository:
+    `bastion_p4.pak` in three parts and one `bastion_<world>_p4.pak` a
+    world, 39 MB in all, in `/apps` beside `bastion.so`.
+- **Lógica's firmware on an ESP32-C6** (`apps/logica/README.md`), flashed
+  from the board's Programador and wired as the C3 was: 5 MHz too, and
+  401408 samples against the C3's 155648. The self test's PWM read
+  998.38 Hz, and three UART lines at 115200 decoded from the first
+  character.
+- **The auxiliary board: GPIO48 by a jumper** (`hw/aux-board`), to the
+  strip as before or to the SPI header as a second chip select, for a
+  second chip on the port the Ethernet module shares. Still a draft.
+
+Tried on the board: Bastión installed and played by the user, the first
+four worlds of the campaign with their bosses and 49 waves without end.
+62 frames a second with up to some forty aliens on the road (3-8 ms of
+work a frame), 27 with 121 of them and 810 things in the frame's list;
+9-10 MB of PSRAM in a battle; a save from the first build read and kept
+by the last. Not played there yet: the goals every twenty waves and
+leaving from the pause, the free mode, the easy and hard purses, the
+gamepad, and the worlds after the fourth.
+
 ## 0.28.0 — 2026-11-15
 
 A logic analyser, and a Programador that keeps track of what it wrote.
