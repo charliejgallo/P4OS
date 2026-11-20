@@ -1,0 +1,432 @@
+# amoledos-lang 1   es -> en
+# demo.bastion.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/bastion/main/bastion.c:364
+#: apps/bastion/main/bastion.c:388
+#: apps/bastion/main/bs_menu.c:325
+#: apps/bastion/main/bs_menu.c:374
+Efectos: sí	Effects: on
+
+#: apps/bastion/main/bastion.c:364
+#: apps/bastion/main/bastion.c:388
+#: apps/bastion/main/bs_menu.c:325
+#: apps/bastion/main/bs_menu.c:374
+Efectos: no	Effects: off
+
+#: apps/bastion/main/bastion.c:373
+#: apps/bastion/main/bastion.c:389
+#: apps/bastion/main/bs_menu.c:334
+#: apps/bastion/main/bs_menu.c:375
+Música: sí	Music: on
+
+#: apps/bastion/main/bastion.c:373
+#: apps/bastion/main/bastion.c:389
+#: apps/bastion/main/bs_menu.c:334
+#: apps/bastion/main/bs_menu.c:375
+Música: no	Music: off
+
+#: apps/bastion/main/bastion.c:381
+Pausa	Paused
+
+#: apps/bastion/main/bastion.c:384
+#: apps/bastion/main/bastion.c:656
+#: apps/bastion/main/bs_menu.c:412
+Sector	Sector
+
+#: apps/bastion/main/bastion.c:386
+Seguir	Resume
+
+#: apps/bastion/main/bastion.c:387
+Empezar de nuevo	Start over
+
+#: apps/bastion/main/bastion.c:390
+Salir al mapa	Back to the map
+
+#: apps/bastion/main/bastion.c:431
+¡Victoria!	Victory!
+
+#: apps/bastion/main/bastion.c:431
+El fuerte cayó	The fort has fallen
+
+#: apps/bastion/main/bastion.c:462
+Vida del fuerte: %d de %d	Fort's life: %d of %d
+
+#: apps/bastion/main/bastion.c:464
+Llegaste a la oleada %d de %d	You reached wave %d of %d
+
+#: apps/bastion/main/bastion.c:467
+Bajas: %d    Núcleos: +%d    Experiencia: +%d	Kills: %d    Cores: +%d    Experience: +%d
+
+#: apps/bastion/main/bastion.c:471
+¡Subiste al rango %d! Tus torres pegan un 1 %% más.	You rose to rank %d! Your towers hit 1 %% harder.
+
+#: apps/bastion/main/bastion.c:474
+Gastá los núcleos en el laboratorio y volvé más fuerte.	Spend the cores in the laboratory and come back stronger.
+
+#: apps/bastion/main/bastion.c:480
+Sector siguiente	Next sector
+
+#: apps/bastion/main/bastion.c:480
+Mundo siguiente	Next world
+
+#: apps/bastion/main/bastion.c:481
+#: apps/bastion/main/bastion.c:483
+Otra vez	Again
+
+#: apps/bastion/main/bastion.c:482
+#: apps/bastion/main/bs_menu.c:372
+#: apps/bastion/main/bs_menu.c:547
+#: apps/bastion/main/bs_menu.c:666
+Laboratorio	Laboratory
+
+#: apps/bastion/main/bastion.c:484
+Mapa	Map
+
+#: apps/bastion/main/bastion.c:591
+No hay memoria para la batalla: cerrá otras apps y probá de nuevo	Not enough memory for the battle: close other apps and try again
+
+#: apps/bastion/main/bastion.c:592
+No se pudo cargar el mundo	The world could not be loaded
+
+#: apps/bastion/main/bastion.c:659
+Desplegando defensas...	Deploying defences...
+
+#: apps/bastion/main/bs_data.c:17
+Ametralladora	Gatling
+
+#: apps/bastion/main/bs_data.c:17
+Barata y rápida. Floja contra las corazas.	Cheap and fast. Weak against armour.
+
+#: apps/bastion/main/bs_data.c:18
+Cañón	Cannon
+
+#: apps/bastion/main/bs_data.c:18
+Obuses que explotan. No llega a los que vuelan.	Shells that explode. Cannot reach fliers.
+
+#: apps/bastion/main/bs_data.c:19
+Láser	Laser
+
+#: apps/bastion/main/bs_data.c:19
+Un rayo que quema más cuanto más dura sobre el mismo.	A beam that burns more the longer it stays on one target.
+
+#: apps/bastion/main/bs_data.c:20
+Misiles	Missiles
+
+#: apps/bastion/main/bs_data.c:20
+Persiguen de lejos. Lo mejor contra los que vuelan.	They chase from afar. The best against fliers.
+
+#: apps/bastion/main/bs_data.c:21
+Tesla	Tesla
+
+#: apps/bastion/main/bs_data.c:21
+Un rayo que salta de uno a otro.	Lightning that jumps from one to the next.
+
+#: apps/bastion/main/bs_data.c:22
+Criogénica	Cryo
+
+#: apps/bastion/main/bs_data.c:22
+Frena a todos los que tiene cerca.	Slows everything near it.
+
+#: apps/bastion/main/bs_data.c:23
+Lanzallamas	Flamethrower
+
+#: apps/bastion/main/bs_data.c:23
+Un chorro corto que deja ardiendo a la fila entera.	A short jet that sets the whole line on fire.
+
+#: apps/bastion/main/bs_data.c:24
+Cañón de riel	Railgun
+
+#: apps/bastion/main/bs_data.c:24
+Atraviesa a todos los de la línea. Lento y carísimo.	Goes through everyone in the line. Slow and very dear.
+
+#: apps/bastion/main/bs_data.c:25
+Mortero de plasma	Plasma mortar
+
+#: apps/bastion/main/bs_data.c:25
+Explosiones enormes muy lejos. Ciego de cerca.	Huge blasts far away. Blind up close.
+
+#: apps/bastion/main/bs_data.c:26
+Hangar de drones	Drone hangar
+
+#: apps/bastion/main/bs_data.c:26
+Drones que salen a buscar a los que se escapan.	Drones that go after the ones getting away.
+
+#: apps/bastion/main/bs_data.c:27
+Pulso EMP	EMP pulse
+
+#: apps/bastion/main/bs_data.c:27
+Paraliza a los de alrededor y les apaga los escudos.	Stuns everything around it and puts out their shields.
+
+#: apps/bastion/main/bs_data.c:28
+Pozo de gravedad	Gravity well
+
+#: apps/bastion/main/bs_data.c:28
+Los frena y cada tanto los tira para atrás.	Slows them and now and then throws them back.
+
+#: apps/bastion/main/bs_data.c:29
+Amplificador	Amplifier
+
+#: apps/bastion/main/bs_data.c:29
+Las torres vecinas pegan más y ven a los espectros.	Nearby towers hit harder and see the spectres.
+
+#: apps/bastion/main/bs_data.c:30
+Refinería	Refinery
+
+#: apps/bastion/main/bs_data.c:30
+Da créditos al final de cada oleada.	Pays credits at the end of every wave.
+
+#: apps/bastion/main/bs_data.c:35
+Larva	Grub
+
+#: apps/bastion/main/bs_data.c:36
+Corredor	Runner
+
+#: apps/bastion/main/bs_data.c:37
+Ácaro	Mite
+
+#: apps/bastion/main/bs_data.c:38
+Coraza	Shell
+
+#: apps/bastion/main/bs_data.c:39
+Avispa	Wasp
+
+#: apps/bastion/main/bs_data.c:40
+#: apps/bastion/main/bs_data.c:50
+Divisor	Splitter
+
+#: apps/bastion/main/bs_data.c:41
+Escudero	Shielder
+
+#: apps/bastion/main/bs_data.c:42
+Sanador	Healer
+
+#: apps/bastion/main/bs_data.c:43
+Bruto	Brute
+
+#: apps/bastion/main/bs_data.c:44
+Espectro	Spectre
+
+#: apps/bastion/main/bs_data.c:45
+Saboteador	Jammer
+
+#: apps/bastion/main/bs_data.c:46
+Portador	Carrier
+
+#: apps/bastion/main/bs_data.c:47
+Reina	Queen
+
+#: apps/bastion/main/bs_data.c:48
+Titán	Titan
+
+#: apps/bastion/main/bs_data.c:49
+Mente	Overmind
+
+#: apps/bastion/main/bs_data.c:54
+Blindaje	Armour
+
+#: apps/bastion/main/bs_data.c:54
++3 de vida del fuerte por nivel	+3 fort life per level
+
+#: apps/bastion/main/bs_data.c:55
+Financiación	Funding
+
+#: apps/bastion/main/bs_data.c:55
++10 % de créditos al empezar	+10 % starting credits
+
+#: apps/bastion/main/bs_data.c:56
+Recompensas	Bounties
+
+#: apps/bastion/main/bs_data.c:56
++6 % de créditos por cada alien	+6 % credits per alien
+
+#: apps/bastion/main/bs_data.c:57
+Munición	Ammunition
+
+#: apps/bastion/main/bs_data.c:57
++5 % de daño de todas las torres	+5 % damage for every tower
+
+#: apps/bastion/main/bs_data.c:58
+Óptica	Optics
+
+#: apps/bastion/main/bs_data.c:58
++3 % de alcance de todas las torres	+3 % range for every tower
+
+#: apps/bastion/main/bs_data.c:59
+Reciclaje	Recycling
+
+#: apps/bastion/main/bs_data.c:59
++6 % al vender una torre	+6 % when selling a tower
+
+#: apps/bastion/main/bs_data.c:60
+Interés	Interest
+
+#: apps/bastion/main/bs_data.c:60
++2 % de lo ahorrado al terminar cada oleada	+2 % of your savings after every wave
+
+#: apps/bastion/main/bs_data.c:61
+Puntería	Marksmanship
+
+#: apps/bastion/main/bs_data.c:61
++4 % de golpes críticos, que pegan el doble	+4 % critical hits, which hit twice as hard
+
+#: apps/bastion/main/bs_data.c:65
+Ataque orbital	Orbital strike
+
+#: apps/bastion/main/bs_data.c:65
+Un rayo del cielo donde toques.	A beam from the sky where you tap.
+
+#: apps/bastion/main/bs_data.c:66
+Criobomba	Cryo bomb
+
+#: apps/bastion/main/bs_data.c:66
+Congela a todos unos segundos.	Freezes everyone for a few seconds.
+
+#: apps/bastion/main/bs_data.c:67
+Reparación	Repair
+
+#: apps/bastion/main/bs_data.c:67
+Le devuelve vida al fuerte.	Gives the fort some life back.
+
+#: apps/bastion/main/bs_hud.c:34
+Oleada	Wave
+
+#: apps/bastion/main/bs_hud.c:35
+¡OLEADA!	WAVE!
+
+#: apps/bastion/main/bs_hud.c:36
+#: apps/bastion/main/bs_menu.c:733
+Mejorar	Upgrade
+
+#: apps/bastion/main/bs_hud.c:37
+Vender	Sell
+
+#: apps/bastion/main/bs_hud.c:38
+#: apps/bastion/main/bs_menu.c:649
+Al máximo	Maxed out
+
+#: apps/bastion/main/bs_hud.c:39
+Al primero	First
+
+#: apps/bastion/main/bs_hud.c:40
+Al más fuerte	Strongest
+
+#: apps/bastion/main/bs_hud.c:41
+Al más débil	Weakest
+
+#: apps/bastion/main/bs_hud.c:42
+Al más cercano	Nearest
+
+#: apps/bastion/main/bs_hud.c:43
+Daño	Damage
+
+#: apps/bastion/main/bs_hud.c:44
+Alcance	Range
+
+#: apps/bastion/main/bs_hud.c:45
+Bajas	Kills
+
+#: apps/bastion/main/bs_hud.c:46
+Quedan	Left
+
+#: apps/bastion/main/bs_hud.c:47
+Tocá una plataforma para poner una torre	Tap a pad to place a tower
+
+#: apps/bastion/main/bs_hud.c:48
+Tocá de nuevo para construirla	Tap again to build it
+
+#: apps/bastion/main/bs_hud.c:49
+Tocá dónde cae el rayo (o el botón otra vez: apunta solo)	Tap where it lands (or the button again: it aims itself)
+
+#: apps/bastion/main/bs_hud.c:50
+Entre oleadas podés construir, mejorar y vender con calma	Between waves: build, upgrade and sell at your own pace
+
+#: apps/bastion/main/bs_hud.c:51
+No alcanzan los créditos	Not enough credits
+
+#: apps/bastion/main/bs_hud.c:52
+¡JEFE!	BOSS!
+
+#: apps/bastion/main/bs_hud.c:53
+Saboteada	Jammed
+
+#: apps/bastion/main/bs_hud.c:54
+por oleada	per wave
+
+#: apps/bastion/main/bs_hud.c:55
+por segundo	per second
+
+#: apps/bastion/main/bs_hud.c:56
+ÚLTIMA OLEADA	LAST WAVE
+
+#: apps/bastion/main/bs_hud.c:57
+aire	air
+
+#: apps/bastion/main/bs_hud.c:58
+tierra	ground
+
+#: apps/bastion/main/bs_hud.c:59
+amplificada	amplified
+
+#: apps/bastion/main/bs_hud.c:60
+Oleada final	Final wave
+
+#: apps/bastion/main/bs_menu.c:343
+El último fuerte entre ellos y nosotros	The last fort between them and us
+
+#: apps/bastion/main/bs_menu.c:348
+Falta bastion_p4.pak en la carpeta apps de la tarjeta.	bastion_p4.pak is missing from the card's apps folder.
+
+#: apps/bastion/main/bs_menu.c:349
+No hay ningún mundo (bastion_<mundo>_p4.pak) en la tarjeta.	There is no world (bastion_<world>_p4.pak) on the card.
+
+#: apps/bastion/main/bs_menu.c:357
+#: apps/bastion/main/bs_menu.c:671
+#: apps/bastion/main/bs_menu.c:673
+Rango	Rank
+
+#: apps/bastion/main/bs_menu.c:370
+Jugar	Play
+
+#: apps/bastion/main/bs_menu.c:387
+Ganá el sector anterior para abrir este	Win the sector before it to open this one
+
+#: apps/bastion/main/bs_menu.c:387
+Ganá el último sector del mundo anterior	Win the last sector of the world before
+
+#: apps/bastion/main/bs_menu.c:422
+Jefe	Boss
+
+#: apps/bastion/main/bs_menu.c:422
+Nuevo	New
+
+#: apps/bastion/main/bs_menu.c:462
+Campaña	Campaign
+
+#: apps/bastion/main/bs_menu.c:592
+Te faltan núcleos: se ganan en las batallas	Not enough cores: you win them in battle
+
+#: apps/bastion/main/bs_menu.c:685
+Torres	Towers
+
+#: apps/bastion/main/bs_menu.c:685
+Tecnología	Technology
+
+#: apps/bastion/main/bs_menu.c:685
+Poderes	Powers
+
+#: apps/bastion/main/bs_menu.c:706
++8 % de daño y -3 % de costo por nivel de maestría.	+8 % damage and -3 % cost per level of mastery.
+
+#: apps/bastion/main/bs_menu.c:708
+Maestría	Mastery
+
+#: apps/bastion/main/bs_menu.c:708
+#: apps/bastion/main/bs_menu.c:733
+Desbloquear	Unlock
+
+#: apps/bastion/main/bs_menu.c:723
+Investigar	Research
