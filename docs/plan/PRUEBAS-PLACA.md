@@ -1809,6 +1809,17 @@ por el Registro del portal sin cable serie)
       100 al caer, en vez de 250 sólo al final. Y una galería con una ficha
       por alien, torre y mundo, que se abre al conocerlos (retratos
       grandes renderizados aparte; el pack común pasa a 15,9 MB).
+- [ ] Supervivencia jugada por el usuario hasta la oleada 23 ("¿hay algún
+      punto que me permita salir ganando?"): de ahí, en el simulador, una
+      meta cada 20 oleadas (núcleos, créditos, un cuarto de la vida del
+      fuerte y una estrella de tres) y "Retirarse y cobrar" en la pausa;
+      antes, salir al mapa perdía el récord y los núcleos. Instalado. Esa
+      partida terminó en la oleada 49 (4758 bajas); del registro: con 121
+      aliens y 810 cosas en la lista, 27 fps (36 ms por cuadro, 31 de
+      dibujo). Hasta unos cuarenta aliens sostiene los 60. La experiencia
+      de una partida sin fin pasó a un tercio (esa dio 6379).
+- [ ] Bastión con multitudes: bajar el dibujo de una oleada de más de
+      100 aliens (27 fps medidos).
 - [ ] Jugarla con joystick USB.
 - [ ] Los mundos del final: oleadas de 50 por grupo, jefes, y una batalla
       con las catorce torres desbloqueadas (13,3 MB en el simulador, contra

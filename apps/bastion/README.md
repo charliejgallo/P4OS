@@ -58,8 +58,11 @@ nor the packs are in git.
   - **Campaña:** the thirty sectors in order, with stars.
   - **Supervivencia:** twice the fort's life and waves without end in any
     world the campaign has reached, each 7 % tougher than the last, more
-    of them and closer together, a boss every tenth. It ends when the fort
-    falls; each world keeps its record, and the waves held pay cores.
+    of them and closer together, a boss every tenth. Every twenty waves
+    is a goal: cores (20, 40, 60...), credits, a quarter of the fort's
+    life back, and one of the mode's three stars. It ends when the fort
+    falls or when the player retires from the pause's panel, which counts
+    the same; each world keeps its record, and the waves held pay cores.
   - **Libre:** any world and sector with every tower and power unlocked
     and three times the credits, to try things. It pays nothing and keeps
     nothing.
@@ -247,7 +250,8 @@ The same for a tower or an alien: its model in `towers.py` or `aliens.py`
 `BS_WORLD=<n>` and `BS_SECTOR=<k>` open that battle straight away
 (`BS_MODE=1` without end, `BS_MODE=2` free; `BS_DIFF=1` easy, `2` hard),
 `BS_ALL=1` owns every tower and power, `BS_CREDITS=<n>` starts a battle with
-that purse, `BS_SHORT=<n>` ends a sector after n waves, `BS_CORES=<n>` sets
+that purse, `BS_SHORT=<n>` ends a sector after n waves, `BS_MILE=<n>` puts a goal every
+n waves of the mode without end, `BS_CORES=<n>` sets
 the laboratory's, `BS_OPEN=1` opens every sector.
 
 ## Pending
@@ -258,7 +262,14 @@ the laboratory's, `BS_OPEN=1` opens every sector.
   (the free mode: 13.3 MB in the simulator), the memory beside other apps
   and the gamepad.
 - The modes without end and free, the difficulty, the bosses' pay and the
-  gallery have run in the simulator and under the bot; they are installed
-  on the board (2026-11-20) and not yet played there.
+  gallery are on the board (2026-11-20). The user held 49 waves without
+  end in the first world: the save of version 1 was brought up to date
+  there, and the record kept. The goals every twenty waves and retiring
+  are installed and not yet played on the board.
+- **Crowds:** in that run's last waves, with 121 aliens and 810 things in
+  the list, a frame took 35.9 ms (the list 1.3, the simulation 3.9 at
+  three times the speed, drawing 30.8 for 798 tiles): 27 fps. Up to some
+  forty aliens it holds its 60. The drawing of a crowd is what to look
+  at next.
 - The texts: 192 strings, all in English and German, checked against the
   HUD's buffers and the widths of what holds them (2026-11-20).

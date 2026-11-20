@@ -58,6 +58,8 @@ static const char *const STRINGS[STR_N] = {
     [STR_GROUND] = N_("tierra"),
     [STR_BOOST] = N_("amplificada"),
     [STR_FINAL] = N_("Oleada final"),
+    [STR_MILE] = N_("¡%d OLEADAS!"),
+    [STR_MILE_PAY] = N_("+%d núcleos   +%d créditos   +%d vidas"),
     [STR_HINT_AIR] = N_("Voladores: no les llegan Cañón, Lanzallamas, Riel ni Mortero"),
 };
 
@@ -430,7 +432,10 @@ static void top_bar(bs_gfx_t *gf, const bs_art_t *art, const bs_ui_t *ui, const 
     icon(gf, art, IC_WAVE, 392, 44, 255);
     int shown = g->wave + (g->state == BS_BUILD ? 0 : 1);
     if (shown > g->nwaves) shown = g->nwaves;
-    if (g->mode == BS_MODE_ENDLESS) snprintf(s, sizeof s, "%d", shown);
+    /* without end, the wave against the next goal */
+    if (g->mode == BS_MODE_ENDLESS && g->mile_step > 0)
+        snprintf(s, sizeof s, "%d/%d", shown, (g->wave / g->mile_step + 1) * g->mile_step);
+    else if (g->mode == BS_MODE_ENDLESS) snprintf(s, sizeof s, "%d", shown);
     else snprintf(s, sizeof s, "%d/%d", shown, g->nwaves);
     bs_text(gf, fm, 424, 30, s, C_WHITE, 0);
     const bs_btn_t *b = find(ui, ACT_SPEED, 0);
@@ -652,6 +657,16 @@ void bs_hud_draw(bs_gfx_t *gf, const bs_art_t *art, const bs_ui_t *ui, const bs_
             snprintf(s, sizeof s, "%s %d", ui->str[STR_WAVE], g->wave + 1);
             bs_text(gf, fl, BS_W / 2, 424, s, C_WHITE, BS_F_CENTER | BS_F_SHADOW);
         }
+    }
+    /* a goal of the mode without end, reached */
+    if (ui->mile_t > 0 && g->mode == BS_MODE_ENDLESS) {
+        char s[200];
+        int a = ui->mile_t > 0.5f ? 255 : (int)(ui->mile_t * 510.0f);
+        bs_rect(gf, 0, 540, BS_W, 130, 0x0000, a * 170 / 255, 0);
+        snprintf(s, sizeof s, ui->str[STR_MILE], g->miles * g->mile_step);
+        bs_text(gf, fl, BS_W / 2, 552, s, C_GOLD, BS_F_CENTER | BS_F_SHADOW);
+        snprintf(s, sizeof s, ui->str[STR_MILE_PAY], g->mile_cores, g->mile_credits, g->mile_lives);
+        bs_text(gf, fm, BS_W / 2, 612, s, C_WHITE, BS_F_CENTER | BS_F_SHADOW);
     }
     if (ui->pad_on && ui->focus >= 0 && ui->focus < ui->nbtn) {
         const bs_btn_t *b = &ui->btn[ui->focus];

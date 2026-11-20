@@ -159,6 +159,12 @@ static void battle_frame(bs_app_t *a)
         ui->seen_wave = g->wave;
         ui->banner_t = 1.8f;
     }
+    /* a goal's banner stays four seconds of the clock's, whatever the speed */
+    if (ui->mile_t > 0) ui->mile_t -= dt;
+    if (g->miles != ui->seen_miles) {
+        ui->seen_miles = g->miles;
+        ui->mile_t = 4.0f;
+    }
     uint32_t t1 = (uint32_t)aos_hal_uptime_us();
     frame_list(a);
     uint32_t t2 = (uint32_t)aos_hal_uptime_us();
@@ -373,6 +379,15 @@ static void ev_music(lv_event_t *e)
     lv_label_set_text(lv_obj_get_child(lv_event_get_target(e), 0), a->save.music ? _("Música: sí") : _("Música: no"));
 }
 
+/* the mode without end has no last wave: the player leaves when it suits,
+ * and what was held counts as if the fort had fallen there */
+static void ev_retire(lv_event_t *e)
+{
+    bs_app_t *a = (bs_app_t *)lv_event_get_user_data(e);
+    panel_close(a);
+    result_show(a);
+}
+
 static void pause_show(bs_app_t *a)
 {
     if (!a->loaded || a->panel) return;
@@ -389,7 +404,15 @@ static void pause_show(bs_app_t *a)
     bs_button(p, _("Empezar de nuevo"), acc, false, 460, 84, ev_restart, a);
     bs_button(p, a->save.sfx ? _("Efectos: sí") : _("Efectos: no"), acc, false, 460, 84, ev_sfx, a);
     bs_button(p, a->save.music ? _("Música: sí") : _("Música: no"), acc, false, 460, 84, ev_music, a);
-    bs_button(p, _("Salir al mapa"), acc, false, 460, 84, ev_map, a);
+    if (a->mode == BS_MODE_ENDLESS) {
+        char goal[120];
+        int step = a->game->mile_step > 0 ? a->game->mile_step : BS_MILE_STEP;
+        snprintf(goal, sizeof goal, _("Próxima meta: oleada %d"), (a->game->wave / step + 1) * step);
+        panel_label(p, goal, aos_font_small, 0xFFD23C);
+        bs_button(p, _("Retirarse y cobrar"), acc, false, 460, 84, ev_retire, a);
+    } else {
+        bs_button(p, _("Salir al mapa"), acc, false, 460, 84, ev_map, a);
+    }
     pad_menu_from(a, p);
 }
 
@@ -419,8 +442,9 @@ static void result_take(bs_app_t *a)
         return;
     }
     if (a->mode == BS_MODE_ENDLESS) {
+        /* the waves held, and what the goals reached paid */
         int held = g->wave;
-        a->res_cores = held * (2 + w) / 4 * pay / 100;
+        a->res_cores = (held * (2 + w) / 4 + g->cores_won) * pay / 100;
         if (held > a->save.best[w]) {
             a->save.best[w] = (uint16_t)(held > 65535 ? 65535 : held);
             a->res_record = true;
@@ -436,13 +460,18 @@ static void result_take(bs_app_t *a)
     } else {
         a->res_cores = g->wave / 2;
     }
+    /* a run without end kills thousands: a third of its experience, or
+     * two of them would be the whole of the ranks (the user's 49 waves
+     * were 6379, a campaign sector is some 500) */
+    if (a->mode == BS_MODE_ENDLESS) g->xp /= 3;
     a->save.cores += a->res_cores;
     a->save.xp += g->xp;
     a->save.kills += g->kills;
     a->save.seen |= g->seen;
     bs_save_store(&a->save);
     aos_hal_log("bastion", "%s sector %d mode %d purse %d %s: wave %d/%d, %d lives of %d, %d kills, +%d cores, +%d xp",
-                a->world.id, s + 1, a->mode, a->save.diff, g->state == BS_WON ? "won" : "lost", g->wave,
+                a->world.id, s + 1, a->mode, a->save.diff,
+                g->state == BS_WON ? "won" : g->state == BS_LOST ? "lost" : "left", g->wave,
                 a->mode == BS_MODE_ENDLESS ? 0 : g->nwaves, g->lives, g->max_lives, g->kills, a->res_cores, g->xp);
 }
 
@@ -459,7 +488,7 @@ static void result_show(bs_app_t *a)
     panel_label(p, endless ? _("Fin de la supervivencia") : won ? _("¡Victoria!") : _("El fuerte cayó"), aos_font_title,
                 won || endless ? 0xFFD23C : 0xFF5040);
     char line[160];
-    if (won) {
+    if (won || (endless && g->miles > 0)) {
         lv_obj_t *row = lv_obj_create(p);
         lv_obj_remove_style_all(row);
         lv_obj_set_size(row, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
@@ -488,7 +517,8 @@ static void result_show(bs_app_t *a)
                 lv_obj_set_style_text_color(st, C(k ? 0xFFD23C : 0x3A4050), 0);
             }
         }
-        snprintf(line, sizeof line, _("Vida del fuerte: %d de %d"), g->lives, g->max_lives);
+        if (endless) snprintf(line, sizeof line, _("Oleadas aguantadas: %d"), g->wave);
+        else snprintf(line, sizeof line, _("Vida del fuerte: %d de %d"), g->lives, g->max_lives);
     } else if (endless) {
         snprintf(line, sizeof line, _("Oleadas aguantadas: %d"), g->wave);
     } else {
@@ -630,6 +660,8 @@ static bool battle_load(bs_app_t *a, int wi, int sector)
     a->ui->speed = a->save.speed >= 1 && a->save.speed <= 3 ? a->save.speed : 1;
 #if defined(AOS_SIM) || defined(AOS_SIM_BUILTIN)
     if (getenv("BS_CREDITS")) a->game->credits = atoi(getenv("BS_CREDITS"));
+    /* BS_MILE=<n>: a goal every n waves of the mode without end (to see one) */
+    if (getenv("BS_MILE") && atoi(getenv("BS_MILE")) > 0 && a->game->mile_step) a->game->mile_step = atoi(getenv("BS_MILE"));
     /* BS_SHORT=<n>: the sector ends after n waves (to see a victory) */
     if (getenv("BS_SHORT") && atoi(getenv("BS_SHORT")) > 0 && atoi(getenv("BS_SHORT")) < a->game->nwaves)
         a->game->nwaves = atoi(getenv("BS_SHORT"));

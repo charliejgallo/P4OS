@@ -6,121 +6,128 @@
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
 #: apps/bastion/main/bastion.c:364
-#: apps/bastion/main/bastion.c:390
+#: apps/bastion/main/bastion.c:399
 #: apps/bastion/main/bs_menu.c:354
 #: apps/bastion/main/bs_menu.c:429
 Efectos: sí	Effects: on
 
 #: apps/bastion/main/bastion.c:364
-#: apps/bastion/main/bastion.c:390
+#: apps/bastion/main/bastion.c:399
 #: apps/bastion/main/bs_menu.c:354
 #: apps/bastion/main/bs_menu.c:429
 Efectos: no	Effects: off
 
 #: apps/bastion/main/bastion.c:373
-#: apps/bastion/main/bastion.c:391
+#: apps/bastion/main/bastion.c:400
 #: apps/bastion/main/bs_menu.c:363
 #: apps/bastion/main/bs_menu.c:430
 Música: sí	Music: on
 
 #: apps/bastion/main/bastion.c:373
-#: apps/bastion/main/bastion.c:391
+#: apps/bastion/main/bastion.c:400
 #: apps/bastion/main/bs_menu.c:363
 #: apps/bastion/main/bs_menu.c:430
 Música: no	Music: off
 
-#: apps/bastion/main/bastion.c:381
+#: apps/bastion/main/bastion.c:390
 Pausa	Paused
 
-#: apps/bastion/main/bastion.c:384
-#: apps/bastion/main/bastion.c:723
-#: apps/bastion/main/bs_menu.c:554
+#: apps/bastion/main/bastion.c:393
+#: apps/bastion/main/bastion.c:743
+#: apps/bastion/main/bs_menu.c:560
 Supervivencia	Survival
 
-#: apps/bastion/main/bastion.c:385
-#: apps/bastion/main/bastion.c:724
-#: apps/bastion/main/bs_menu.c:504
+#: apps/bastion/main/bastion.c:394
+#: apps/bastion/main/bastion.c:744
+#: apps/bastion/main/bs_menu.c:510
 Sector	Sector
 
-#: apps/bastion/main/bastion.c:386
-#: apps/bastion/main/bs_menu.c:510
-#: apps/bastion/main/bs_menu.c:554
+#: apps/bastion/main/bastion.c:395
+#: apps/bastion/main/bs_menu.c:516
+#: apps/bastion/main/bs_menu.c:560
 Libre	Free
 
-#: apps/bastion/main/bastion.c:388
+#: apps/bastion/main/bastion.c:397
 Seguir	Resume
 
-#: apps/bastion/main/bastion.c:389
+#: apps/bastion/main/bastion.c:398
 Empezar de nuevo	Start over
 
-#: apps/bastion/main/bastion.c:392
+#: apps/bastion/main/bastion.c:403
+Próxima meta: oleada %d	Next goal: wave %d
+
+#: apps/bastion/main/bastion.c:405
+Retirarse y cobrar	Retire and cash in
+
+#: apps/bastion/main/bastion.c:407
 Salir al mapa	Back to the map
 
-#: apps/bastion/main/bastion.c:459
+#: apps/bastion/main/bastion.c:476
 Fin de la supervivencia	Survival over
 
-#: apps/bastion/main/bastion.c:459
+#: apps/bastion/main/bastion.c:476
 ¡Victoria!	Victory!
 
-#: apps/bastion/main/bastion.c:459
+#: apps/bastion/main/bastion.c:476
 El fuerte cayó	The fort has fallen
 
-#: apps/bastion/main/bastion.c:491
-Vida del fuerte: %d de %d	Fort's life: %d of %d
-
-#: apps/bastion/main/bastion.c:493
+#: apps/bastion/main/bastion.c:508
+#: apps/bastion/main/bastion.c:511
 Oleadas aguantadas: %d	Waves held: %d
 
-#: apps/bastion/main/bastion.c:495
-Llegaste a la oleada %d de %d	You reached wave %d of %d
-
-#: apps/bastion/main/bastion.c:499
-¡Récord nuevo!	New record!
-
-#: apps/bastion/main/bastion.c:500
-Tu récord en este mundo: %d	Your record in this world: %d
-
-#: apps/bastion/main/bastion.c:504
-Bajas: %d	Kills: %d
-
-#: apps/bastion/main/bastion.c:506
-El modo libre no da núcleos ni experiencia.	Free mode gives no cores and no experience.
-
-#: apps/bastion/main/bastion.c:508
-Bajas: %d    Núcleos: +%d    Experiencia: +%d	Kills: %d    Cores: +%d    Experience: +%d
+#: apps/bastion/main/bastion.c:509
+Vida del fuerte: %d de %d	Fort's life: %d of %d
 
 #: apps/bastion/main/bastion.c:513
-¡Subiste al rango %d! Tus torres pegan un 1 %% más.	You rose to rank %d! Your towers hit 1 %% harder.
+Llegaste a la oleada %d de %d	You reached wave %d of %d
 
 #: apps/bastion/main/bastion.c:517
-Gastá los núcleos en el laboratorio y volvé más fuerte.	Spend the cores in the laboratory and come back stronger.
+¡Récord nuevo!	New record!
 
-#: apps/bastion/main/bastion.c:525
-Sector siguiente	Next sector
+#: apps/bastion/main/bastion.c:518
+Tu récord en este mundo: %d	Your record in this world: %d
 
-#: apps/bastion/main/bastion.c:525
-Mundo siguiente	Next world
+#: apps/bastion/main/bastion.c:522
+Bajas: %d	Kills: %d
+
+#: apps/bastion/main/bastion.c:524
+El modo libre no da núcleos ni experiencia.	Free mode gives no cores and no experience.
 
 #: apps/bastion/main/bastion.c:526
-#: apps/bastion/main/bastion.c:530
+Bajas: %d    Núcleos: +%d    Experiencia: +%d	Kills: %d    Cores: +%d    Experience: +%d
+
+#: apps/bastion/main/bastion.c:531
+¡Subiste al rango %d! Tus torres pegan un 1 %% más.	You rose to rank %d! Your towers hit 1 %% harder.
+
+#: apps/bastion/main/bastion.c:535
+Gastá los núcleos en el laboratorio y volvé más fuerte.	Spend the cores in the laboratory and come back stronger.
+
+#: apps/bastion/main/bastion.c:543
+Sector siguiente	Next sector
+
+#: apps/bastion/main/bastion.c:543
+Mundo siguiente	Next world
+
+#: apps/bastion/main/bastion.c:544
+#: apps/bastion/main/bastion.c:548
 #: apps/bastion/main/bs_menu.c:423
-#: apps/bastion/main/bs_menu.c:661
+#: apps/bastion/main/bs_menu.c:667
 Laboratorio	Laboratory
 
-#: apps/bastion/main/bastion.c:527
-#: apps/bastion/main/bastion.c:529
+#: apps/bastion/main/bastion.c:545
+#: apps/bastion/main/bastion.c:547
 Otra vez	Again
 
-#: apps/bastion/main/bastion.c:532
+#: apps/bastion/main/bastion.c:550
 Mapa	Map
 
-#: apps/bastion/main/bastion.c:657
+#: apps/bastion/main/bastion.c:677
 No hay memoria para la batalla: cerrá otras apps y probá de nuevo	Not enough memory for the battle: close other apps and try again
 
-#: apps/bastion/main/bastion.c:658
+#: apps/bastion/main/bastion.c:678
 No se pudo cargar el mundo	The world could not be loaded
 
-#: apps/bastion/main/bastion.c:727
+#: apps/bastion/main/bastion.c:747
 Desplegando defensas...	Deploying defences...
 
 #: apps/bastion/main/bs_data.c:17
@@ -370,8 +377,8 @@ Cerrar	Close
 
 #: apps/bastion/main/bs_gallery.c:176
 #: apps/bastion/main/bs_gallery.c:299
-#: apps/bastion/main/bs_menu.c:510
 #: apps/bastion/main/bs_menu.c:516
+#: apps/bastion/main/bs_menu.c:522
 Jefe	Boss
 
 #: apps/bastion/main/bs_gallery.c:176
@@ -431,7 +438,7 @@ sólo tierra	ground only
 no ataca	nothing
 
 #: apps/bastion/main/bs_gallery.c:265
-#: apps/bastion/main/bs_menu.c:823
+#: apps/bastion/main/bs_menu.c:829
 Maestría	Mastery
 
 #: apps/bastion/main/bs_gallery.c:266
@@ -456,7 +463,7 @@ Llegá a este mundo en la campaña	Reach this world in the campaign
 Aliens	Aliens
 
 #: apps/bastion/main/bs_gallery.c:395
-#: apps/bastion/main/bs_menu.c:800
+#: apps/bastion/main/bs_menu.c:806
 Torres	Towers
 
 #: apps/bastion/main/bs_gallery.c:395
@@ -473,14 +480,14 @@ Oleada	Wave
 ¡OLEADA!	WAVE!
 
 #: apps/bastion/main/bs_hud.c:36
-#: apps/bastion/main/bs_menu.c:848
+#: apps/bastion/main/bs_menu.c:854
 Mejorar	Upgrade
 
 #: apps/bastion/main/bs_hud.c:37
 Vender	Sell
 
 #: apps/bastion/main/bs_hud.c:38
-#: apps/bastion/main/bs_menu.c:764
+#: apps/bastion/main/bs_menu.c:770
 Al máximo	Maxed out
 
 #: apps/bastion/main/bs_hud.c:39
@@ -544,6 +551,12 @@ amplificada	amplified
 Oleada final	Final wave
 
 #: apps/bastion/main/bs_hud.c:61
+¡%d OLEADAS!	%d WAVES!
+
+#: apps/bastion/main/bs_hud.c:62
++%d núcleos   +%d créditos   +%d vidas	+%d cores   +%d credits   +%d lives
+
+#: apps/bastion/main/bs_hud.c:63
 Voladores: no les llegan Cañón, Lanzallamas, Riel ni Mortero	Fliers next: Cannon, Flamethrower, Rail, Mortar can't reach
 
 #: apps/bastion/main/bs_menu.c:369
@@ -565,8 +578,8 @@ Falta bastion_p4.pak en la carpeta apps de la tarjeta.	bastion_p4.pak is missing
 No hay ningún mundo (bastion_<mundo>_p4.pak) en la tarjeta.	There is no world (bastion_<world>_p4.pak) on the card.
 
 #: apps/bastion/main/bs_menu.c:405
-#: apps/bastion/main/bs_menu.c:786
-#: apps/bastion/main/bs_menu.c:788
+#: apps/bastion/main/bs_menu.c:792
+#: apps/bastion/main/bs_menu.c:794
 Rango	Rank
 
 #: apps/bastion/main/bs_menu.c:418
@@ -583,38 +596,38 @@ Ganá el sector anterior para abrir este	Win the sector before it to open this o
 Ganá el último sector del mundo anterior	Win the last sector of the world before
 
 #: apps/bastion/main/bs_menu.c:479
-El doble de vida y oleadas sin fin, cada vez más duras. ¿Hasta dónde llegás?	Twice the life and waves without end, tougher each time. How far can you get?
+El doble de vida y oleadas sin fin. Cada 20 hay premio, y te retirás cuando quieras.	Twice the life and waves without end. A prize every 20, and you retire when you like.
 
 #: apps/bastion/main/bs_menu.c:481
 Todas las torres y poderes, y el triple de créditos, para probar. No da núcleos.	Every tower and power, and three times the credits, to try things. No cores.
 
-#: apps/bastion/main/bs_menu.c:498
+#: apps/bastion/main/bs_menu.c:500
 Récord: %d oleadas	Record: %d waves
 
-#: apps/bastion/main/bs_menu.c:499
+#: apps/bastion/main/bs_menu.c:505
 Sin récord todavía	No record yet
 
-#: apps/bastion/main/bs_menu.c:516
+#: apps/bastion/main/bs_menu.c:522
 Nuevo	New
 
-#: apps/bastion/main/bs_menu.c:554
+#: apps/bastion/main/bs_menu.c:560
 Campaña	Campaign
 
-#: apps/bastion/main/bs_menu.c:707
+#: apps/bastion/main/bs_menu.c:713
 Te faltan núcleos: se ganan en las batallas	Not enough cores: you win them in battle
 
-#: apps/bastion/main/bs_menu.c:800
+#: apps/bastion/main/bs_menu.c:806
 Tecnología	Technology
 
-#: apps/bastion/main/bs_menu.c:800
+#: apps/bastion/main/bs_menu.c:806
 Poderes	Powers
 
-#: apps/bastion/main/bs_menu.c:821
+#: apps/bastion/main/bs_menu.c:827
 +8 % de daño y -3 % de costo por nivel de maestría.	+8 % damage and -3 % cost per level of mastery.
 
-#: apps/bastion/main/bs_menu.c:823
-#: apps/bastion/main/bs_menu.c:848
+#: apps/bastion/main/bs_menu.c:829
+#: apps/bastion/main/bs_menu.c:854
 Desbloquear	Unlock
 
-#: apps/bastion/main/bs_menu.c:838
+#: apps/bastion/main/bs_menu.c:844
 Investigar	Research

@@ -26,6 +26,7 @@
  * upgrades */
 #define BS_BOSS_PARTS   20
 #define BS_BOSS_PART    15
+#define BS_MILE_STEP    20      /* waves between two goals of the mode without end */
 
 enum { BS_BUILD, BS_WAVE, BS_WON, BS_LOST };
 /* the campaign's sectors; waves without end, to see how far one gets; and
@@ -135,6 +136,11 @@ typedef struct {
     int        nnext;
     float      k_reward;
     uint16_t   hp0;                 /* endless: the first wave's health, percent */
+    /* endless: a goal every mile_step waves. Reaching one pays cores (kept
+     * in cores_won until the battle ends), credits and some of the fort's
+     * life, and is a star of the three the mode gives */
+    int        mile_step, miles, mile_cores, mile_credits, mile_lives;
+    float      mile_t;              /* its banner, seconds left */
     uint32_t   roster;              /* endless: the aliens this world has */
     int        alive;
     float      freeze_t, shake, fort_flash, alarm_t;

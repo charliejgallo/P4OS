@@ -29,7 +29,7 @@ enum {
     STR_WAVE, STR_CALL, STR_UPGRADE, STR_SELL, STR_MAX, STR_FIRST, STR_STRONG, STR_WEAK, STR_NEAR, STR_DMG,
     STR_RANGE, STR_KILLS, STR_LEFT, STR_HINT_PAD, STR_HINT_BUILD, STR_HINT_AIM, STR_HINT_WAVE, STR_NO_CREDITS,
     STR_BOSS, STR_JAMMED, STR_PER_WAVE, STR_PER_SEC, STR_LAST, STR_AIR, STR_GROUND, STR_BOOST, STR_FINAL, STR_HINT_AIR,
-    STR_N
+    STR_MILE, STR_MILE_PAY, STR_N
 };
 
 typedef struct {
@@ -53,6 +53,8 @@ typedef struct {
     float    hint_t;
     int      seen_wave;         /* for the "wave N" banner                 */
     float    banner_t;
+    int      seen_miles;        /* and for a goal's, in the mode without end */
+    float    mile_t;
     /* the words, copied (see above) */
     char     str[STR_N][72];
     char     tw_name[TW_N][40], tw_desc[TW_N][96];

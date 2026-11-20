@@ -1219,6 +1219,22 @@ static void wave_done(bs_game_t *g)
     g->xp += 5 + (g->wave > 40 ? 40 : g->wave);
     if (g->wave < BS_WAVES) g->lives_at[g->wave] = (uint8_t)g->lives;
     g->wave++;
+    if (g->mode == BS_MODE_ENDLESS && g->mile_step > 0 && g->wave % g->mile_step == 0) {
+        /* a goal: the n-th pays n times the first */
+        g->miles = g->wave / g->mile_step;
+        g->mile_cores = 20 * g->miles + 2 * (g->w->order - 1);
+        g->mile_credits = 200 + 100 * g->miles;
+        g->mile_lives = g->max_lives / 4;
+        if (g->lives + g->mile_lives > g->max_lives) g->mile_lives = g->max_lives - g->lives;
+        g->cores_won += g->mile_cores;
+        g->credits += g->mile_credits;
+        g->lives += g->mile_lives;
+        g->stars = g->miles > 3 ? 3 : g->miles;
+        g->mile_t = 4.0f;
+        ring(g, g->w->fort_x, g->w->fort_y, 0.5f, 7.0f, 0.9f, 0xFFD23C);
+        burst(g, g->w->fort_x, g->w->fort_y, 2.5f, 50, 0xFFD23C, 260.0f, 4);
+        bs_game_sound(g, SND_STAR);
+    }
     if (g->mode != BS_MODE_ENDLESS && g->wave >= g->nwaves) {
         g->state = BS_WON;
         g->stars = g->lives * 5 >= g->max_lives * 4 ? 3 : (g->lives * 5 >= g->max_lives * 2 ? 2 : 1);
@@ -1425,6 +1441,7 @@ void bs_game_start(bs_game_t *g, const bs_world_t *w, int sector, const bs_kit_t
         g->max_lives = g->lives = 2 * g->max_lives;
         purse = (float)(w->credits[0] * (10 + kit->tech[TECH_FUNDS]) / 10) * START[diff] * 1.25f;
         g->nwaves = 1000000;
+        g->mile_step = BS_MILE_STEP;
         g->hp0 = 100;
         if (w->nwaves[0] > 0 && w->wave[0][0].n > 0) g->hp0 = w->group[w->wave[0][0].first].hp_pct;
         for (int s = 0; s < BS_SECTORS; s++) g->roster |= bs_world_aliens(w, s);
@@ -1448,6 +1465,7 @@ void bs_game_step(bs_game_t *g)
     if (g->shake > 0) g->shake -= dt;
     if (g->fort_flash > 0) g->fort_flash -= dt;
     if (g->freeze_t > 0) g->freeze_t -= dt;
+    if (g->mile_t > 0) g->mile_t -= dt;
     for (int i = 0; i < PW_N; i++) {
         if (g->power_cd[i] > 0 && g->state == BS_WAVE) g->power_cd[i] -= dt;
     }

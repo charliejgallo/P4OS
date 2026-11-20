@@ -476,7 +476,7 @@ static void map_theme(bs_app_t *a)
     lv_label_set_text(a->m_name, line);
     lv_obj_set_style_text_color(a->m_name, C(w->accent), 0);
     lv_label_set_text(a->m_desc, a->mode == BS_MODE_ENDLESS
-                                     ? _("El doble de vida y oleadas sin fin, cada vez más duras. ¿Hasta dónde llegás?")
+                                     ? _("El doble de vida y oleadas sin fin. Cada 20 hay premio, y te retirás cuando quieras.")
                                      : a->mode == BS_MODE_FREE
                                      ? _("Todas las torres y poderes, y el triple de créditos, para probar. No da núcleos.")
                                      : wdesc(w));
@@ -495,7 +495,13 @@ static void map_theme(bs_app_t *a)
             lv_label_set_text(l, _("Jugar"));
             int best = a->save.best[a->sel_world];
             if (!open) snprintf(line, sizeof line, LV_SYMBOL_CLOSE);
-            else if (best) snprintf(line, sizeof line, _("Récord: %d oleadas"), best);
+            else if (best) {
+                /* and a mark for each goal of twenty waves it passed, up to three */
+                int n = snprintf(line, sizeof line, _("Récord: %d oleadas"), best);
+                int marks = best / BS_MILE_STEP > 3 ? 3 : best / BS_MILE_STEP;
+                for (int q = 0; q < marks && n > 0 && n < (int)sizeof line - 8; q++)
+                    n += snprintf(line + n, sizeof line - (size_t)n, "%s" LV_SYMBOL_OK, q ? " " : "   ");
+            }
             else snprintf(line, sizeof line, "%s", _("Sin récord todavía"));
             lv_label_set_text(st, line);
             lv_obj_set_style_text_color(st, C(open ? (best ? 0xFFD23C : w->accent) : 0x707888), 0);
