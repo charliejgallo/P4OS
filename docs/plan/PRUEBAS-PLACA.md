@@ -1793,7 +1793,22 @@ por el Registro del portal sin cable serie)
 **Bastión**
 - [x] Jugada por el usuario en la placa (2026-11-20): "el sonido anda bien,
       la dificultad también" (los 37 efectos y los cinco temas son
-      sintetizados y hasta ahí sólo se habían revisado con números).
+      sintetizados y hasta ahí sólo se habían revisado con números). Ganó
+      los tres sectores del primer mundo con el fuerte intacto (el jefe
+      incluido) y el primero del segundo con 4 vidas de 20 ("con los
+      voladores se complicó bastante"). Del registro, unos 40 minutos de
+      juego: nunca menos de 60,9 fps, el cuadro más pesado 11,8 ms (38
+      aliens, 385 mosaicos), 9,8 MB de PSRAM, ningún error.
+- [ ] Lo que salió de esa partida, hecho en el simulador e instalado en la
+      placa el mismo día (el `.so` nuevo registró bien; falta jugarlo ahí): los modos Supervivencia (oleadas sin fin, récord por mundo)
+      y Libre (todo desbloqueado), la dificultad (más o menos créditos),
+      el aviso de voladores antes de la oleada, y la Selva 1 y 2 un 10 %
+      más livianas. El guardado pasa a la versión 2 leyendo el de la 1.
+      Y del tercer mundo ("el Titán fue muy difícil y no soltaba monedas"):
+      los jefes pagan 15 créditos por cada vigésimo de vida que pierden y
+      100 al caer, en vez de 250 sólo al final. Y una galería con una ficha
+      por alien, torre y mundo, que se abre al conocerlos (retratos
+      grandes renderizados aparte; el pack común pasa a 15,9 MB).
 - [ ] Jugarla con joystick USB.
 - [ ] Los mundos del final: oleadas de 50 por grupo, jefes, y una batalla
       con las catorce torres desbloqueadas (13,3 MB en el simulador, contra

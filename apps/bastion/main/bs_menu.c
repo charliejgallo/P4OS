@@ -23,7 +23,6 @@
 #define THUMB_H 534
 #define CARD_W  340
 
-enum { IMG_CORE, IMG_STAR, IMG_STAR_OFF, IMG_LOCK, IMG_FORT, IMG_TOWER0 };
 enum { TAB_TOWERS, TAB_TECH, TAB_POWERS, TAB_N };
 
 static void lab_build(bs_app_t *a);
@@ -182,6 +181,35 @@ void bs_cards_load(bs_app_t *a)
     aos_hal_log("bastion", "%d worlds on the card", k);
 }
 
+void bs_seen_from_progress(bs_app_t *a)
+{
+    if (a->save.seen) return;
+    uint32_t seen = 0;
+    for (int i = 0; i < a->ncard; i++) {
+        int won = 0;
+        for (int k = 0; k < BS_SECTORS; k++) won |= a->save.stars[i][k] != 0;
+        if (!won) continue;
+        bs_pak_t pak;
+        if (!bs_pak_open(&pak, a->card[i].path)) continue;
+        char *txt = (char *)bs_pak_get(&pak, "def", NULL);
+        bs_world_t *w = (bs_world_t *)bs_calloc(sizeof(bs_world_t));
+        if (txt && w && bs_world_parse(w, txt, false)) {
+            for (int k = 0; k < BS_SECTORS; k++) {
+                if (a->save.stars[i][k]) seen |= bs_world_aliens(w, k);
+            }
+        }
+        if (w) bs_world_free(w);
+        bs_free(w);
+        bs_free(txt);
+        bs_pak_close(&pak);
+    }
+    if (seen) {
+        a->save.seen = seen;
+        bs_save_store(&a->save);
+        aos_hal_log("bastion", "the gallery starts with the aliens of the sectors won: %08x", (unsigned)seen);
+    }
+}
+
 static void thumbs_load(bs_app_t *a)
 {
     for (int i = 0; i < a->ncard; i++) {
@@ -241,6 +269,7 @@ static void portraits_free(bs_app_t *a)
 void bs_menu_free(bs_app_t *a)
 {
     aos_pad_menu_clear(&a->menu);
+    bs_gallery_free(a);
     if (a->screen) lv_obj_delete(a->screen);
     a->screen = NULL;
     a->m_scroll = a->m_name = a->m_desc = a->m_cores = NULL;
@@ -334,6 +363,25 @@ static void ev_title_music(lv_event_t *e)
     lv_label_set_text(lv_obj_get_child(lv_event_get_target(e), 0), a->save.music ? _("Música: sí") : _("Música: no"));
 }
 
+static const char *diff_text(const bs_app_t *a)
+{
+    switch (a->save.diff) {
+    case BS_DIFF_EASY: return _("Dificultad: fácil (más créditos)");
+    case BS_DIFF_HARD: return _("Dificultad: difícil (menos créditos)");
+    default:           return _("Dificultad: normal");
+    }
+}
+
+static void ev_title_diff(lv_event_t *e)
+{
+    bs_app_t *a = (bs_app_t *)lv_event_get_user_data(e);
+    /* easy, normal, hard, round */
+    a->save.diff = a->save.diff == BS_DIFF_EASY ? BS_DIFF_NORMAL : a->save.diff == BS_DIFF_NORMAL ? BS_DIFF_HARD : BS_DIFF_EASY;
+    bs_save_store(&a->save);
+    bs_audio_play(SND_TAP, 230);
+    lv_label_set_text(lv_obj_get_child(lv_event_get_target(e), 0), diff_text(a));
+}
+
 static void title_build(bs_app_t *a)
 {
     lv_obj_t *s = screen_new(a, 0);
@@ -357,34 +405,62 @@ static void title_build(bs_app_t *a)
     snprintf(line, sizeof line, "%s %d   ·   %d/%d", _("Rango"), bs_rank_of(a->save.xp), bs_save_stars(&a->save),
              a->ncard * BS_SECTORS * 3);
     lv_obj_t *st = bs_label(s, line, aos_font_body, 0xFFD23C);
-    lv_obj_align(st, LV_ALIGN_TOP_MID, 0, 620);
+    lv_obj_align(st, LV_ALIGN_TOP_MID, 0, 600);
     lv_obj_t *col = plain(s);
     lv_obj_set_size(col, 520, LV_SIZE_CONTENT);
-    lv_obj_align(col, LV_ALIGN_BOTTOM_MID, 0, -60);
+    lv_obj_align(col, LV_ALIGN_BOTTOM_MID, 0, -36);
     lv_obj_set_flex_flow(col, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(col, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_row(col, 18, 0);
+    lv_obj_set_style_pad_row(col, 14, 0);
     lv_obj_set_style_pad_all(col, 12, 0);
     lv_obj_add_flag(col, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
-    lv_obj_t *items[4];
-    items[0] = bs_button(col, _("Jugar"), BS_ACCENT, true, 480, 110, ev_go, a);
+    lv_obj_t *items[6];
+    items[0] = bs_button(col, _("Jugar"), BS_ACCENT, true, 480, 104, ev_go, a);
     lv_obj_set_user_data(items[0], (void *)(intptr_t)ST_MAP);
-    items[1] = bs_button(col, _("Laboratorio"), BS_ACCENT, false, 480, 90, ev_go, a);
+    lv_obj_t *row = plain(col);
+    lv_obj_set_size(row, 480, 84);
+    lv_obj_add_flag(row, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
+    items[1] = bs_button(row, _("Laboratorio"), BS_ACCENT, false, 233, 84, ev_go, a);
     lv_obj_set_user_data(items[1], (void *)(intptr_t)ST_LAB);
-    items[2] = bs_button(col, a->save.sfx ? _("Efectos: sí") : _("Efectos: no"), BS_ACCENT, false, 480, 80, ev_title_sfx, a);
-    items[3] = bs_button(col, a->save.music ? _("Música: sí") : _("Música: no"), BS_ACCENT, false, 480, 80, ev_title_music, a);
-    aos_pad_menu_set(&a->menu, items, 4, 0);
+    items[2] = bs_button(row, _("Galería"), BS_ACCENT, false, 233, 84, ev_go, a);
+    lv_obj_set_user_data(items[2], (void *)(intptr_t)ST_GALLERY);
+    lv_obj_set_pos(items[2], 247, 0);
+    items[3] = bs_button(col, diff_text(a), BS_ACCENT, false, 480, 76, ev_title_diff, a);
+    items[4] = bs_button(col, a->save.sfx ? _("Efectos: sí") : _("Efectos: no"), BS_ACCENT, false, 480, 72, ev_title_sfx, a);
+    items[5] = bs_button(col, a->save.music ? _("Música: sí") : _("Música: no"), BS_ACCENT, false, 480, 72, ev_title_music, a);
+    aos_pad_menu_set(&a->menu, items, 6, 0);
 }
 
-/* ---- the campaign -------------------------------------------------------------------------------- */
+/* ---- the map: the campaign, the mode without end, the free mode ------------------------------------ */
+
+/* The campaign opens a sector when the one before is won; the mode without
+ * end takes any world the campaign has reached; the free mode takes them
+ * all. */
+static bool mode_open(const bs_app_t *a, int world, int sector)
+{
+    if (a->mode == BS_MODE_FREE) return world >= 0 && world < a->ncard;
+    if (a->mode == BS_MODE_ENDLESS) return bs_save_open(&a->save, world, 0);
+    return bs_save_open(&a->save, world, sector);
+}
+
+static void ev_mode(lv_event_t *e)
+{
+    bs_app_t *a = (bs_app_t *)lv_event_get_user_data(e);
+    a->mode = (int)(intptr_t)lv_obj_get_user_data(lv_event_get_target(e));
+    a->save.mode = (uint8_t)a->mode;
+    bs_save_store(&a->save);
+    bs_audio_play(SND_TAP, 230);
+    bs_menu_show(a, ST_MAP);
+}
 
 static void ev_sector(lv_event_t *e)
 {
     bs_app_t *a = (bs_app_t *)lv_event_get_user_data(e);
     int k = (int)(intptr_t)lv_obj_get_user_data(lv_event_get_target(e));
-    if (!bs_save_open(&a->save, a->sel_world, k)) {
+    if (!mode_open(a, a->sel_world, k)) {
         bs_audio_play(SND_DENY, 230);
-        aos_ui_toast(k ? _("Ganá el sector anterior para abrir este") : _("Ganá el último sector del mundo anterior"), 2500);
+        aos_ui_toast(a->mode == BS_MODE_ENDLESS ? _("Llegá a este mundo en la campaña para jugarlo acá")
+                     : k ? _("Ganá el sector anterior para abrir este") : _("Ganá el último sector del mundo anterior"), 2500);
         return;
     }
     bs_audio_play(SND_TAP, 230);
@@ -399,22 +475,40 @@ static void map_theme(bs_app_t *a)
     snprintf(line, sizeof line, "%d · %s", a->sel_world + 1, wname(w));
     lv_label_set_text(a->m_name, line);
     lv_obj_set_style_text_color(a->m_name, C(w->accent), 0);
-    lv_label_set_text(a->m_desc, wdesc(w));
+    lv_label_set_text(a->m_desc, a->mode == BS_MODE_ENDLESS
+                                     ? _("El doble de vida y oleadas sin fin, cada vez más duras. ¿Hasta dónde llegás?")
+                                     : a->mode == BS_MODE_FREE
+                                     ? _("Todas las torres y poderes, y el triple de créditos, para probar. No da núcleos.")
+                                     : wdesc(w));
     for (int k = 0; k < BS_SECTORS; k++) {
         lv_obj_t *b = a->m_sector[k];
         if (!b) continue;
-        bool open = bs_save_open(&a->save, a->sel_world, k);
+        bool open = mode_open(a, a->sel_world, k);
         int stars = a->save.stars[a->sel_world][k];
         lv_obj_set_style_border_color(b, C(open ? w->accent : 0x404858), 0);
         lv_obj_set_style_bg_color(b, C(open ? mixc(w->accent, 0x000000, 190) : 0x161A24), 0);
         lv_obj_set_style_bg_grad_color(b, C(0x0A0D14), 0);
         lv_obj_t *l = lv_obj_get_child(b, 0), *st = lv_obj_get_child(b, 1);
+        lv_obj_set_style_text_color(l, C(open ? 0xFFFFFF : 0x707888), 0);
+        if (a->mode == BS_MODE_ENDLESS) {
+            /* one button: play, with the record under it */
+            lv_label_set_text(l, _("Jugar"));
+            int best = a->save.best[a->sel_world];
+            if (!open) snprintf(line, sizeof line, LV_SYMBOL_CLOSE);
+            else if (best) snprintf(line, sizeof line, _("Récord: %d oleadas"), best);
+            else snprintf(line, sizeof line, "%s", _("Sin récord todavía"));
+            lv_label_set_text(st, line);
+            lv_obj_set_style_text_color(st, C(open ? (best ? 0xFFD23C : w->accent) : 0x707888), 0);
+            continue;
+        }
         snprintf(line, sizeof line, "%s %d", _("Sector"), k + 1);
         lv_label_set_text(l, line);
-        lv_obj_set_style_text_color(l, C(open ? 0xFFFFFF : 0x707888), 0);
         if (!open) {
             lv_label_set_text(st, LV_SYMBOL_CLOSE);
             lv_obj_set_style_text_color(st, C(0x707888), 0);
+        } else if (a->mode == BS_MODE_FREE) {
+            lv_label_set_text(st, k == BS_SECTORS - 1 ? _("Jefe") : _("Libre"));
+            lv_obj_set_style_text_color(st, C(w->accent), 0);
         } else {
             /* three marks: the ones won lit */
             lv_label_set_text(st, stars >= 3 ? LV_SYMBOL_OK " " LV_SYMBOL_OK " " LV_SYMBOL_OK
@@ -457,13 +551,25 @@ static void ev_card(lv_event_t *e)
 
 static void map_build(bs_app_t *a)
 {
+    static const char *const MODE[BS_MODE_N] = { N_("Campaña"), N_("Supervivencia"), N_("Libre") };
     lv_obj_t *s = screen_new(a, LV_OPA_60);
     thumbs_load(a);
-    header(a, s, _("Campaña"), ST_TITLE);
+    if (a->mode < 0 || a->mode >= BS_MODE_N) a->mode = BS_MODE_CAMPAIGN;
+    lv_obj_t *items[BS_MODE_N + BS_SECTORS + 2];
+    int n = 0;
+    header(a, s, _(MODE[a->mode]), ST_TITLE);
+    /* the three modes, as tabs */
+    for (int m = 0; m < BS_MODE_N; m++) {
+        lv_obj_t *b = bs_button(s, _(MODE[m]), BS_ACCENT, m == a->mode, 224, 58, ev_mode, a);
+        lv_obj_set_style_text_font(b, aos_font_small, 0);
+        lv_obj_set_pos(b, 16 + m * 232, 102);
+        lv_obj_set_user_data(b, (void *)(intptr_t)m);
+        items[n++] = b;
+    }
     lv_obj_t *sc = plain(s);
     a->m_scroll = sc;
     lv_obj_set_size(sc, 720, THUMB_H + 40);
-    lv_obj_set_pos(sc, 0, 116);
+    lv_obj_set_pos(sc, 0, 166);
     lv_obj_add_flag(sc, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_scroll_dir(sc, LV_DIR_HOR);
     lv_obj_set_scroll_snap_x(sc, LV_SCROLL_SNAP_CENTER);
@@ -476,7 +582,7 @@ static void map_build(bs_app_t *a)
     lv_obj_add_event_cb(sc, ev_map_scroll, LV_EVENT_SCROLL, a);
     for (int i = 0; i < a->ncard; i++) {
         bs_card_t *c = &a->card[i];
-        bool open = bs_save_open(&a->save, i, 0);
+        bool open = mode_open(a, i, 0);
         lv_obj_t *card = plain(sc);
         a->m_card[i] = card;
         lv_obj_set_size(card, CARD_W, THUMB_H + 20);
@@ -495,6 +601,7 @@ static void map_build(bs_app_t *a)
             lv_obj_center(im);
             lv_obj_remove_flag(im, LV_OBJ_FLAG_CLICKABLE);
         }
+        char t[40] = "";
         if (!open) {
             lv_obj_t *d = plain(card);
             lv_obj_set_size(d, lv_pct(100), lv_pct(100));
@@ -502,11 +609,14 @@ static void map_build(bs_app_t *a)
             lv_obj_set_style_bg_opa(d, LV_OPA_70, 0);
             lv_obj_t *lk = image(a, card, IMG_LOCK);
             if (lk) lv_obj_center(lk);
-        } else {
+        } else if (a->mode == BS_MODE_CAMPAIGN) {
             int stars = 0;
             for (int k = 0; k < BS_SECTORS; k++) stars += a->save.stars[i][k];
-            char t[24];
             snprintf(t, sizeof t, LV_SYMBOL_OK " %d/9", stars);
+        } else if (a->mode == BS_MODE_ENDLESS && a->save.best[i]) {
+            snprintf(t, sizeof t, LV_SYMBOL_UP " %d", (int)a->save.best[i]);
+        }
+        if (t[0]) {
             lv_obj_t *l = bs_label(card, t, aos_font_small, 0xFFD23C);
             lv_obj_set_style_bg_color(l, C(0x000000), 0);
             lv_obj_set_style_bg_opa(l, LV_OPA_60, 0);
@@ -516,19 +626,23 @@ static void map_build(bs_app_t *a)
             lv_obj_align(l, LV_ALIGN_TOP_RIGHT, -14, 14);
         }
     }
-    int y = 116 + THUMB_H + 52;
+    int y = 166 + THUMB_H + 44;
     a->m_name = bs_label(s, "", aos_font_title, 0xFFFFFF);
     lv_obj_align(a->m_name, LV_ALIGN_TOP_MID, 0, y);
     a->m_desc = bs_label(s, "", aos_font_small, 0xD0D6E4);
-    lv_obj_set_width(a->m_desc, 660);
+    lv_obj_set_width(a->m_desc, 670);
     lv_label_set_long_mode(a->m_desc, LV_LABEL_LONG_MODE_WRAP);
-    lv_obj_align(a->m_desc, LV_ALIGN_TOP_MID, 0, y + 50);
-    lv_obj_t *items[BS_SECTORS + 2];
+    lv_obj_align(a->m_desc, LV_ALIGN_TOP_MID, 0, y + 46);
+    /* three sectors, or one button for the mode without end */
+    int nb = a->mode == BS_MODE_ENDLESS ? 1 : BS_SECTORS;
+    int first_btn = n;
     for (int k = 0; k < BS_SECTORS; k++) {
+        a->m_sector[k] = NULL;
+        if (k >= nb) continue;
         lv_obj_t *b = lv_button_create(s);
         a->m_sector[k] = b;
-        lv_obj_set_size(b, 216, 150);
-        lv_obj_set_pos(b, 18 + k * 234, y + 130);
+        lv_obj_set_size(b, nb == 1 ? 684 : 216, 136);
+        lv_obj_set_pos(b, 18 + k * 234, y + 122);
         lv_obj_set_style_radius(b, 22, 0);
         lv_obj_set_style_border_width(b, 3, 0);
         lv_obj_set_style_bg_grad_dir(b, LV_GRAD_DIR_VER, 0);
@@ -536,20 +650,21 @@ static void map_build(bs_app_t *a)
         lv_obj_set_style_shadow_width(b, 0, 0);
         lv_obj_t *l = lv_label_create(b);
         lv_obj_set_style_text_font(l, aos_font_body, 0);
-        lv_obj_align(l, LV_ALIGN_TOP_MID, 0, 14);
+        lv_obj_align(l, LV_ALIGN_TOP_MID, 0, 12);
         lv_obj_t *st = lv_label_create(b);
         lv_obj_set_style_text_font(st, aos_font_body, 0);
-        lv_obj_align(st, LV_ALIGN_BOTTOM_MID, 0, -16);
+        lv_obj_align(st, LV_ALIGN_BOTTOM_MID, 0, -14);
         lv_obj_set_user_data(b, (void *)(intptr_t)k);
         lv_obj_add_event_cb(b, ev_sector, LV_EVENT_CLICKED, a);
-        items[k] = b;
+        items[n++] = b;
     }
-    lv_obj_t *lab = bs_button(s, _("Laboratorio"), BS_ACCENT, false, 420, 84, ev_go, a);
+    lv_obj_t *lab = bs_button(s, _("Laboratorio"), BS_ACCENT, false, 420, 78, ev_go, a);
     lv_obj_set_user_data(lab, (void *)(intptr_t)ST_LAB);
-    lv_obj_align(lab, LV_ALIGN_BOTTOM_MID, 0, -30);
-    items[BS_SECTORS] = lab;
-    /* where the player stands: the furthest world open */
-    if (a->sel_world < 0 || a->sel_world >= a->ncard || !bs_save_open(&a->save, a->sel_world, 0)) {
+    lv_obj_align(lab, LV_ALIGN_BOTTOM_MID, 0, -22);
+    items[n++] = lab;
+    /* where the player stands: the furthest world this mode opens that
+     * the campaign has reached */
+    if (a->sel_world < 0 || a->sel_world >= a->ncard || !mode_open(a, a->sel_world, 0)) {
         a->sel_world = 0;
         for (int i = 0; i < a->ncard; i++) {
             if (bs_save_open(&a->save, i, 0)) a->sel_world = i;
@@ -559,10 +674,10 @@ static void map_build(bs_app_t *a)
     lv_obj_update_layout(sc);
     if (a->m_card[a->sel_world]) lv_obj_scroll_to_view(a->m_card[a->sel_world], LV_ANIM_OFF);
     int first = 0;
-    for (int k = 0; k < BS_SECTORS; k++) {
-        if (bs_save_open(&a->save, a->sel_world, k)) first = k;
+    for (int k = 0; k < nb; k++) {
+        if (mode_open(a, a->sel_world, k) && a->mode == BS_MODE_CAMPAIGN) first = k;
     }
-    aos_pad_menu_set(&a->menu, items, BS_SECTORS + 1, first);
+    aos_pad_menu_set(&a->menu, items, n, first_btn + first);
 }
 
 /* ---- the laboratory ------------------------------------------------------------------------------ */
@@ -744,14 +859,19 @@ static void lab_build(bs_app_t *a)
 
 void bs_menu_show(bs_app_t *a, int state)
 {
-    if (state != ST_LAB) portraits_free(a);
-    if (state != ST_MAP) thumbs_free(a);
+    if (state != ST_LAB && state != ST_GALLERY) portraits_free(a);
+    if (state != ST_MAP && state != ST_GALLERY) thumbs_free(a);
+    if (state != ST_GALLERY) bs_gallery_free(a);
     a->state = state;
     lv_obj_set_style_bg_color(a->root, C(0x05070C), 0);
     if (a->art_ok) bs_audio_music(&a->art.pak, BS_MUSIC_MENU);
     switch (state) {
     case ST_MAP: map_build(a); break;
     case ST_LAB: lab_build(a); break;
+    case ST_GALLERY:
+        portraits_load(a);
+        bs_gallery_build(a);
+        break;
     default:
         a->state = ST_TITLE;
         title_build(a);
@@ -760,8 +880,17 @@ void bs_menu_show(bs_app_t *a, int state)
     aos_pad_reset(&a->pad, lv_tick_get());
 }
 
+lv_obj_t *bs_menu_screen(bs_app_t *a, int dim) { return screen_new(a, dim); }
+lv_obj_t *bs_menu_header(bs_app_t *a, lv_obj_t *s, const char *title, int back_to) { return header(a, s, title, back_to); }
+lv_obj_t *bs_menu_plain(lv_obj_t *parent) { return plain(parent); }
+void bs_thumbs_load(bs_app_t *a) { thumbs_load(a); }
+
 bool bs_menu_back(bs_app_t *a)
 {
+    if (a->state == ST_GALLERY) {
+        if (!bs_gallery_back(a)) bs_menu_show(a, ST_TITLE);
+        return true;
+    }
     if (a->state == ST_MAP) {
         bs_menu_show(a, ST_TITLE);
         return true;
@@ -776,6 +905,10 @@ bool bs_menu_back(bs_app_t *a)
 void bs_menu_pad(bs_app_t *a)
 {
     aos_pad_t *p = &a->pad;
+    if (a->state == ST_GALLERY) {
+        bs_gallery_pad(a);
+        return;
+    }
     if (aos_pad_pressed(p, AOS_PAD_B)) {
         if (bs_menu_back(a)) return;
     }
@@ -787,8 +920,8 @@ void bs_menu_pad(bs_app_t *a)
         }
         if (aos_pad_pressed(p, AOS_PAD_START)) {
             /* the furthest sector open of the world in front */
-            for (int k = BS_SECTORS - 1; k >= 0; k--) {
-                if (bs_save_open(&a->save, a->sel_world, k)) {
+            for (int k = a->mode == BS_MODE_ENDLESS ? 0 : BS_SECTORS - 1; k >= 0; k--) {
+                if (mode_open(a, a->sel_world, k)) {
                     bs_battle_start(a, a->sel_world, k);
                     return;
                 }

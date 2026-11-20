@@ -15,6 +15,11 @@ typedef struct {
     uint8_t  stars[BS_WORLDS_MAX][BS_SECTORS];
     uint8_t  owned[TW_N], mastery[TW_N], tech[TECH_N], power[PW_N];
     uint8_t  sfx, music, speed, spare;
+    /* since version 2: the mode without end's record a world (waves
+     * held), the difficulty and the mode last played */
+    uint16_t best[BS_WORLDS_MAX];
+    uint8_t  diff, mode, pad[2];
+    uint32_t seen;              /* the aliens met in battle (bits of AL_*): the gallery's cards */
     uint32_t check;
 } bs_save_t;
 

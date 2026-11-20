@@ -379,9 +379,11 @@ static void pause_show(bs_app_t *a)
     uint32_t acc = a->world.accent;
     lv_obj_t *p = panel_open(a, PN_PAUSE, 580);
     panel_label(p, _("Pausa"), aos_font_title, acc);
-    char line[96];
-    snprintf(line, sizeof line, "%s  ·  %s %d", a->world.name[bs_lang()][0] ? a->world.name[bs_lang()] : a->world.name[0],
-             _("Sector"), a->sel_sector + 1);
+    char line[200];
+    const char *wn = a->world.name[bs_lang()][0] ? a->world.name[bs_lang()] : a->world.name[0];
+    if (a->mode == BS_MODE_ENDLESS) snprintf(line, sizeof line, "%.40s  ·  %s", wn, _("Supervivencia"));
+    else snprintf(line, sizeof line, "%.40s  ·  %s %d%s%s", wn, _("Sector"), a->sel_sector + 1,
+                  a->mode == BS_MODE_FREE ? "  ·  " : "", a->mode == BS_MODE_FREE ? _("Libre") : "");
     panel_label(p, line, aos_font_small, 0xB0B8C8);
     bs_button(p, _("Seguir"), acc, true, 460, 96, ev_resume, a);
     bs_button(p, _("Empezar de nuevo"), acc, false, 460, 84, ev_restart, a);
@@ -391,21 +393,45 @@ static void pause_show(bs_app_t *a)
     pad_menu_from(a, p);
 }
 
-/* what a battle leaves: stars, cores for the laboratory, experience */
+/* what a battle leaves: stars, cores for the laboratory, experience.
+ * The harder purse pays more cores and the easier one fewer; the mode
+ * without end pays by the waves held and keeps the record; the free mode
+ * leaves nothing. */
 static void result_take(bs_app_t *a)
 {
     bs_game_t *g = a->game;
     int w = a->sel_world, s = a->sel_sector;
     int level = w * 3 + s;
+    static const int PAY[BS_DIFF_N] = { 100, 80, 130 };
+    int pay = PAY[a->save.diff < BS_DIFF_N ? a->save.diff : 0];
     a->res_rank = bs_rank_of(a->save.xp);
     a->res_new = 0;
-    if (g->state == BS_WON) {
+    a->res_cores = 0;
+    a->res_record = false;
+    if (a->mode == BS_MODE_FREE) {
+        /* what was seen is seen, in any mode */
+        if (g->seen & ~a->save.seen) {
+            a->save.seen |= g->seen;
+            bs_save_store(&a->save);
+        }
+        aos_hal_log("bastion", "%s sector %d, free mode: wave %d/%d, %d lives of %d, %d kills", a->world.id, s + 1, g->wave,
+                    g->nwaves, g->lives, g->max_lives, g->kills);
+        return;
+    }
+    if (a->mode == BS_MODE_ENDLESS) {
+        int held = g->wave;
+        a->res_cores = held * (2 + w) / 4 * pay / 100;
+        if (held > a->save.best[w]) {
+            a->save.best[w] = (uint16_t)(held > 65535 ? 65535 : held);
+            a->res_record = true;
+        }
+    } else if (g->state == BS_WON) {
         int old = a->save.stars[w][s];
         if (g->stars > old) {
             a->res_new = g->stars - old;
             a->save.stars[w][s] = (uint8_t)g->stars;
         }
-        a->res_cores = 4 + level / 2 + a->res_new * (6 + w);
+        a->res_cores = (4 + level / 2 + a->res_new * (6 + w)) * pay / 100;
         a->save.wins++;
     } else {
         a->res_cores = g->wave / 2;
@@ -413,10 +439,11 @@ static void result_take(bs_app_t *a)
     a->save.cores += a->res_cores;
     a->save.xp += g->xp;
     a->save.kills += g->kills;
+    a->save.seen |= g->seen;
     bs_save_store(&a->save);
-    aos_hal_log("bastion", "%s sector %d %s: wave %d/%d, %d lives of %d, %d kills, +%d cores, +%d xp", a->world.id, s + 1,
-                g->state == BS_WON ? "won" : "lost", g->wave, g->nwaves, g->lives, g->max_lives, g->kills, a->res_cores,
-                g->xp);
+    aos_hal_log("bastion", "%s sector %d mode %d purse %d %s: wave %d/%d, %d lives of %d, %d kills, +%d cores, +%d xp",
+                a->world.id, s + 1, a->mode, a->save.diff, g->state == BS_WON ? "won" : "lost", g->wave,
+                a->mode == BS_MODE_ENDLESS ? 0 : g->nwaves, g->lives, g->max_lives, g->kills, a->res_cores, g->xp);
 }
 
 static void result_show(bs_app_t *a)
@@ -426,10 +453,12 @@ static void result_show(bs_app_t *a)
     result_take(a);
     bs_game_t *g = a->game;
     bool won = g->state == BS_WON;
+    bool endless = a->mode == BS_MODE_ENDLESS, freem = a->mode == BS_MODE_FREE;
     uint32_t acc = a->world.accent;
     lv_obj_t *p = panel_open(a, PN_RESULT, 600);
-    panel_label(p, won ? _("¡Victoria!") : _("El fuerte cayó"), aos_font_title, won ? 0xFFD23C : 0xFF5040);
-    char line[120];
+    panel_label(p, endless ? _("Fin de la supervivencia") : won ? _("¡Victoria!") : _("El fuerte cayó"), aos_font_title,
+                won || endless ? 0xFFD23C : 0xFF5040);
+    char line[160];
     if (won) {
         lv_obj_t *row = lv_obj_create(p);
         lv_obj_remove_style_all(row);
@@ -460,27 +489,46 @@ static void result_show(bs_app_t *a)
             }
         }
         snprintf(line, sizeof line, _("Vida del fuerte: %d de %d"), g->lives, g->max_lives);
+    } else if (endless) {
+        snprintf(line, sizeof line, _("Oleadas aguantadas: %d"), g->wave);
     } else {
         snprintf(line, sizeof line, _("Llegaste a la oleada %d de %d"), g->wave + 1, g->nwaves);
     }
     panel_label(p, line, aos_font_body, 0xE0E4EC);
-    snprintf(line, sizeof line, _("Bajas: %d    Núcleos: +%d    Experiencia: +%d"), g->kills, a->res_cores, g->xp);
-    panel_label(p, line, aos_font_small, 0xB0B8C8);
+    if (endless) {
+        if (a->res_record) snprintf(line, sizeof line, "%s", _("¡Récord nuevo!"));
+        else snprintf(line, sizeof line, _("Tu récord en este mundo: %d"), (int)a->save.best[a->sel_world]);
+        panel_label(p, line, aos_font_body, a->res_record ? 0x60FF90 : 0xB0B8C8);
+    }
+    if (freem) {
+        snprintf(line, sizeof line, _("Bajas: %d"), g->kills);
+        panel_label(p, line, aos_font_small, 0xB0B8C8);
+        panel_label(p, _("El modo libre no da núcleos ni experiencia."), aos_font_small, 0xB0B8C8);
+    } else {
+        snprintf(line, sizeof line, _("Bajas: %d    Núcleos: +%d    Experiencia: +%d"), g->kills, a->res_cores, g->xp);
+        panel_label(p, line, aos_font_small, 0xB0B8C8);
+    }
     int rank = bs_rank_of(a->save.xp);
     if (rank > a->res_rank) {
         snprintf(line, sizeof line, _("¡Subiste al rango %d! Tus torres pegan un 1 %% más."), rank);
         panel_label(p, line, aos_font_small, 0x60FF90);
     }
-    if (!won) bs_label(p, _("Gastá los núcleos en el laboratorio y volvé más fuerte."), aos_font_small, 0xB0B8C8);
+    if (!won && !endless && !freem)
+        panel_label(p, _("Gastá los núcleos en el laboratorio y volvé más fuerte."), aos_font_small, 0xB0B8C8);
     int w = a->sel_world, s = a->sel_sector + 1;
     if (s >= BS_SECTORS) {
         s = 0;
         w++;
     }
-    if (won && w < a->ncard) bs_button(p, s ? _("Sector siguiente") : _("Mundo siguiente"), acc, true, 480, 96, ev_next, a);
-    else if (!won) bs_button(p, _("Otra vez"), acc, true, 480, 96, ev_restart, a);
-    bs_button(p, _("Laboratorio"), acc, won && w >= a->ncard, 480, 84, ev_lab, a);
-    if (won) bs_button(p, _("Otra vez"), acc, false, 480, 84, ev_restart, a);
+    bool campaign = a->mode == BS_MODE_CAMPAIGN;
+    if (campaign && won && w < a->ncard) {
+        bs_button(p, s ? _("Sector siguiente") : _("Mundo siguiente"), acc, true, 480, 96, ev_next, a);
+        bs_button(p, _("Laboratorio"), acc, false, 480, 84, ev_lab, a);
+        bs_button(p, _("Otra vez"), acc, false, 480, 84, ev_restart, a);
+    } else {
+        bs_button(p, _("Otra vez"), acc, true, 480, 96, ev_restart, a);
+        bs_button(p, _("Laboratorio"), acc, false, 480, 84, ev_lab, a);
+    }
     bs_button(p, _("Mapa"), acc, false, 480, 84, ev_map, a);
     pad_menu_from(a, p);
     bs_audio_pause(false);
@@ -494,6 +542,11 @@ void bs_battle_quit(bs_app_t *a)
     if (a->worker_on) {
         aos_hal_worker_stop();
         a->worker_on = false;
+    }
+    /* a battle left half way still showed its aliens: the gallery keeps them */
+    if (a->loaded && (a->game->seen & ~a->save.seen)) {
+        a->save.seen |= a->game->seen;
+        bs_save_store(&a->save);
     }
     aos_hal_display_refresh_request(0);
     aos_ui_wall_photo_spare(false);
@@ -547,13 +600,26 @@ static bool battle_load(bs_app_t *a, int wi, int sector)
     if (!a->fb) return false;
     bs_kit_t kit;
     bs_save_kit(&a->save, &kit);
+    kit.mode = (uint8_t)a->mode;
+    bool all = a->mode == BS_MODE_FREE;
 #if defined(AOS_SIM) || defined(AOS_SIM_BUILTIN)
-    if (getenv("BS_ALL")) {
-        memset(kit.owned, 1, sizeof kit.owned);
-        for (int i = 0; i < PW_N; i++) kit.power[i] = 1;
-    }
+    if (getenv("BS_ALL")) all = true;
 #endif
-    if (!bs_art_battle(&a->art, bs_world_aliens(&a->world, sector), kit.owned, a->world.hue) || a->wpak.fails) {
+    if (all) {
+        /* the free mode: every tower and power, whatever the laboratory has */
+        memset(kit.owned, 1, sizeof kit.owned);
+        for (int i = 0; i < PW_N; i++) {
+            if (!kit.power[i]) kit.power[i] = 1;
+        }
+    }
+    /* without end, any alien of the world may come, and its boss */
+    uint32_t aliens = bs_world_aliens(&a->world, sector);
+    if (a->mode == BS_MODE_ENDLESS) {
+        for (int k = 0; k < BS_SECTORS; k++) aliens |= bs_world_aliens(&a->world, k);
+        aliens |= 1u << a->world.boss;
+        if (a->world.boss == AL_QUEEN) aliens |= 1u << AL_GRUB;
+    }
+    if (!bs_art_battle(&a->art, aliens, kit.owned, a->world.hue) || a->wpak.fails) {
         a->no_memory = true;
         return false;
     }
@@ -634,8 +700,9 @@ static void load_cb(lv_timer_t *tm)
     a->state = ST_BATTLE;
     a->clock_reset = true;
     a->run = true;
-    aos_hal_log("bastion", "%s sector %d: %d waves, %d pads, %u KB held, depth %d", a->world.id, a->sel_sector + 1,
-                a->game->nwaves, a->world.npad, (unsigned)(bs_mem_used() / 1024), a->depth != NULL);
+    aos_hal_log("bastion", "%s sector %d, mode %d, purse %d: %d waves, %d pads, %u KB held, depth %d", a->world.id,
+                a->sel_sector + 1, a->mode, a->save.diff, a->mode == BS_MODE_ENDLESS ? 0 : a->game->nwaves, a->world.npad,
+                (unsigned)(bs_mem_used() / 1024), a->depth != NULL);
 }
 
 void bs_battle_start(bs_app_t *a, int world, int sector)
@@ -653,7 +720,8 @@ void bs_battle_start(bs_app_t *a, int world, int sector)
     lv_obj_t *l = bs_label(a->loading, w->name[bs_lang()][0] ? w->name[bs_lang()] : w->name[0], aos_font_title, w->accent);
     lv_obj_align(l, LV_ALIGN_CENTER, 0, -40);
     char line[48];
-    snprintf(line, sizeof line, "%s %d", _("Sector"), sector + 1);
+    if (a->mode == BS_MODE_ENDLESS) snprintf(line, sizeof line, "%s", _("Supervivencia"));
+    else snprintf(line, sizeof line, "%s %d", _("Sector"), sector + 1);
     l = bs_label(a->loading, line, aos_font_body, 0xE0E4EC);
     lv_obj_align(l, LV_ALIGN_CENTER, 0, 30);
     l = bs_label(a->loading, _("Desplegando defensas..."), aos_font_small, 0x8088A0);
@@ -738,6 +806,7 @@ static void *bastion_create(aos_app_t *self, lv_obj_t *root)
     lv_obj_set_style_bg_opa(root, LV_OPA_COVER, 0);
     lv_obj_remove_flag(root, LV_OBJ_FLAG_SCROLLABLE);
     bs_save_load(&a->save);
+    a->mode = a->save.mode;
 #if defined(AOS_SIM) || defined(AOS_SIM_BUILTIN)
     if (getenv("BS_CORES")) a->save.cores = atoi(getenv("BS_CORES"));
 #endif
@@ -748,11 +817,14 @@ static void *bastion_create(aos_app_t *self, lv_obj_t *root)
         bs_audio_set(a->save.sfx, a->save.music);
         bs_audio_open(&a->art.pak);
         bs_cards_load(a);
+        bs_seen_from_progress(a);
     }
     bs_menu_show(a, ST_TITLE);
     a->timer = lv_timer_create(timer_cb, FRAME_MS, a);
 #if defined(AOS_SIM) || defined(AOS_SIM_BUILTIN)
     /* BS_WORLD=<n> [BS_SECTOR=<k>] opens that battle straight away (scripts) */
+    if (getenv("BS_MODE")) a->mode = atoi(getenv("BS_MODE")) % BS_MODE_N;
+    if (getenv("BS_DIFF")) a->save.diff = (uint8_t)(atoi(getenv("BS_DIFF")) % BS_DIFF_N);
     if (getenv("BS_WORLD") && a->ncard) {
         bs_battle_start(a, atoi(getenv("BS_WORLD")) % a->ncard, getenv("BS_SECTOR") ? atoi(getenv("BS_SECTOR")) % 3 : 0);
     }

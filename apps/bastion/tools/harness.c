@@ -1,7 +1,10 @@
 /*
  * BASTION - a bot plays the whole campaign, to tune the numbers
  *
- *     tools/harness.sh [skill 0..1] [-v]
+ *     tools/harness.sh [skill 0..1] [-v] [-e] [-D 0|1|2]
+ *
+ * -e also plays the mode without end in every world, -D sets the purse
+ * (0 normal, 1 easy, 2 hard).
  *
  * It links the battle itself (main/bs_game.c, bs_world.c, bs_data.c) and
  * plays every sector of every world in order, as a player would: it puts
@@ -32,6 +35,7 @@ typedef struct {
 } save_t;
 
 static float skill = 0.85f;
+static int g_mode, g_diff;
 static int verbose;
 static uint32_t seed = 12345;
 
@@ -241,6 +245,8 @@ static void battle(bs_game_t *g, const bs_world_t *w, int sector, const save_t *
     memcpy(kit.tech, sv->tech, sizeof kit.tech);
     memcpy(kit.power, sv->power, sizeof kit.power);
     kit.rank = bs_rank_of(sv->xp);
+    kit.mode = (uint8_t)g_mode;
+    kit.diff = (uint8_t)g_diff;
     bs_game_start(g, w, sector, &kit);
     float wallet = 0;
     int steps = 0;
@@ -347,11 +353,13 @@ static float trial(bs_game_t *g, const bs_world_t *w, int sector, const save_t *
 int main(int argc, char **argv)
 {
     const char *dir = "build/defs";
-    int calibrate = 0;
+    int calibrate = 0, endless = 0;
     float target = 0.72f;
     for (int i = 1; i < argc; i++) {
         if (!strcmp(argv[i], "-v")) verbose = 1;
         else if (!strcmp(argv[i], "-c")) calibrate = 1;
+        else if (!strcmp(argv[i], "-e")) endless = 1;
+        else if (!strcmp(argv[i], "-D") && i + 1 < argc) g_diff = atoi(argv[++i]);
         else if (!strcmp(argv[i], "-t") && i + 1 < argc) target = strtof(argv[++i], NULL);
         else if (!strcmp(argv[i], "-d") && i + 1 < argc) dir = argv[++i];
         else skill = strtof(argv[i], NULL);
@@ -445,6 +453,19 @@ int main(int argc, char **argv)
         }
     }
     printf("%d battles for %d sectors, %d never won\n", total_tries, nw * BS_SECTORS, lost);
+    if (endless) {
+        /* the mode without end, with the laboratory the campaign left:
+         * how many waves the bot holds in each world */
+        g_mode = BS_MODE_ENDLESS;
+        printf("without end:");
+        for (int w = 0; w < nw; w++) {
+            seed = 99u + (uint32_t)w;
+            battle(&g, &world[w], 0, &sv);
+            printf(" %s %d (%d kills, %.0f min)", world[w].id, g.wave, g.kills, (double)(g.time / 60.0f));
+        }
+        printf("\n");
+        g_mode = BS_MODE_CAMPAIGN;
+    }
     if (calibrate) {
         /* the bot wastes nothing from its first battle; a person learns
          * the game over the first worlds, so those are eased */

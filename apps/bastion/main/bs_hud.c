@@ -36,10 +36,10 @@ static const char *const STRINGS[STR_N] = {
     [STR_UPGRADE] = N_("Mejorar"),
     [STR_SELL] = N_("Vender"),
     [STR_MAX] = N_("Al máximo"),
-    [STR_FIRST] = N_("Al primero"),
-    [STR_STRONG] = N_("Al más fuerte"),
-    [STR_WEAK] = N_("Al más débil"),
-    [STR_NEAR] = N_("Al más cercano"),
+    [STR_FIRST] = N_("Primero"),
+    [STR_STRONG] = N_("Más fuerte"),
+    [STR_WEAK] = N_("Más débil"),
+    [STR_NEAR] = N_("Más cercano"),
     [STR_DMG] = N_("Daño"),
     [STR_RANGE] = N_("Alcance"),
     [STR_KILLS] = N_("Bajas"),
@@ -58,6 +58,7 @@ static const char *const STRINGS[STR_N] = {
     [STR_GROUND] = N_("tierra"),
     [STR_BOOST] = N_("amplificada"),
     [STR_FINAL] = N_("Oleada final"),
+    [STR_HINT_AIR] = N_("Voladores: no les llegan Cañón, Lanzallamas, Riel ni Mortero"),
 };
 
 static void put(char *dst, size_t n, const char *src)
@@ -429,7 +430,8 @@ static void top_bar(bs_gfx_t *gf, const bs_art_t *art, const bs_ui_t *ui, const 
     icon(gf, art, IC_WAVE, 392, 44, 255);
     int shown = g->wave + (g->state == BS_BUILD ? 0 : 1);
     if (shown > g->nwaves) shown = g->nwaves;
-    snprintf(s, sizeof s, "%d/%d", shown, g->nwaves);
+    if (g->mode == BS_MODE_ENDLESS) snprintf(s, sizeof s, "%d", shown);
+    else snprintf(s, sizeof s, "%d/%d", shown, g->nwaves);
     bs_text(gf, fm, 424, 30, s, C_WHITE, 0);
     const bs_btn_t *b = find(ui, ACT_SPEED, 0);
     if (b) {
@@ -493,7 +495,8 @@ static void idle_panel(bs_gfx_t *gf, const bs_art_t *art, const bs_ui_t *ui, con
             shown++;
         }
     } else if (g->state == BS_WAVE) {
-        snprintf(s, sizeof s, "%s %d/%d", ui->str[STR_WAVE], g->wave + 1, g->nwaves);
+        if (g->mode == BS_MODE_ENDLESS) snprintf(s, sizeof s, "%s %d", ui->str[STR_WAVE], g->wave + 1);
+        else snprintf(s, sizeof s, "%s %d/%d", ui->str[STR_WAVE], g->wave + 1, g->nwaves);
         bs_text(gf, fl, 532, 1126, s, C_WHITE, BS_F_CENTER);
         int left = g->alive;
         for (int i = 0; i < g->nsp; i++) left += g->sp[i].left;
@@ -584,6 +587,14 @@ static void tower_panel(bs_gfx_t *gf, const bs_art_t *art, const bs_ui_t *ui, co
     }
 }
 
+static bool fliers_next(const bs_game_t *g)
+{
+    for (int i = 0; i < g->nnext; i++) {
+        if (BS_ALIEN[g->next[i].alien].fly) return true;
+    }
+    return false;
+}
+
 void bs_hud_draw(bs_gfx_t *gf, const bs_art_t *art, const bs_ui_t *ui, const bs_game_t *g)
 {
     const bs_font_t *fs = &art->font[FONT_S], *fm = &art->font[FONT_M], *fl = &art->font[FONT_L];
@@ -607,6 +618,10 @@ void bs_hud_draw(bs_gfx_t *gf, const bs_art_t *art, const bs_ui_t *ui, const bs_
         line2 = ui->hint;
     } else if (playing && g->state == BS_BUILD && g->built == 0 && ui->sel < 0) {
         line2 = ui->str[STR_HINT_PAD];
+    } else if (playing && g->state == BS_BUILD && ui->sel < 0 && fliers_next(g)) {
+        /* the ones in the air go past half the towers: say so before */
+        line2 = ui->str[STR_HINT_AIR];
+        lc = C_GOLD;
     } else if (playing && g->state == BS_BUILD && g->wave == 1 && g->sector == 0 && g->w->order == 1 && ui->sel < 0) {
         line2 = ui->str[STR_HINT_WAVE];
     }
@@ -619,14 +634,14 @@ void bs_hud_draw(bs_gfx_t *gf, const bs_art_t *art, const bs_ui_t *ui, const bs_
             if (bs_text_width(fm, line) + w + 40 < BS_W)
                 bs_text(gf, fs, BS_W - 14, BS_PANEL_Y - 56, ui->str[STR_HINT_BUILD], C_DIM, BS_F_RIGHT);
         } else {
-            bs_text(gf, fs, BS_W / 2, BS_PANEL_Y - 42, line2, C_WHITE, BS_F_CENTER);
+            bs_text(gf, fs, BS_W / 2, BS_PANEL_Y - 42, line2, lc, BS_F_CENTER);
         }
     }
     /* the wave's name across the field as it starts */
     if (ui->banner_t > 0 && g->state == BS_WAVE) {
         char s[120];
         bool boss = false;
-        for (int i = 0; i < g->nsp; i++) boss |= BS_ALIEN[g->w->group[g->sp[i].group].alien].boss != 0;
+        for (int i = 0; i < g->nsp; i++) boss |= BS_ALIEN[g->sp[i].alien].boss != 0;
         int a = ui->banner_t > 0.4f ? 255 : (int)(ui->banner_t * 637.0f);
         bs_rect(gf, 0, 400, BS_W, 96, 0x0000, a * 150 / 255, 0);
         if (boss) {

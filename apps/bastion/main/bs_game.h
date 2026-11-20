@@ -21,8 +21,19 @@
 #define BS_MAX_DRONES   5
 #define BS_MAX_SPAWN    12
 #define BS_BOLT_PTS     8
+/* a boss pays as it is worn down, not only when it falls: this much for
+ * each twentieth of its health, so the wave it fills alone still buys
+ * upgrades */
+#define BS_BOSS_PARTS   20
+#define BS_BOSS_PART    15
 
 enum { BS_BUILD, BS_WAVE, BS_WON, BS_LOST };
+/* the campaign's sectors; waves without end, to see how far one gets; and
+ * a sector with everything unlocked and a fat purse, to try things */
+enum { BS_MODE_CAMPAIGN, BS_MODE_ENDLESS, BS_MODE_FREE, BS_MODE_N };
+/* the difficulty is the purse: more credits or fewer (0 is the normal one,
+ * so a save from before the setting existed reads as normal) */
+enum { BS_DIFF_NORMAL, BS_DIFF_EASY, BS_DIFF_HARD, BS_DIFF_N };
 enum { TM_FIRST, TM_STRONG, TM_WEAK, TM_NEAR, TM_N };
 enum { SH_SHELL, SH_MISSILE, SH_MORTAR };
 enum { FX_TRACER, FX_BOLT, FX_RING, FX_BLAST, FX_RAIL, FX_STRIKE, FX_MARK };
@@ -37,7 +48,8 @@ enum {
 
 typedef struct {
     uint8_t  on, type, path, fly;
-    uint8_t  cloaked, seen, dir8, pad;
+    uint8_t  cloaked, seen, dir8;
+    uint8_t  paid;              /* a boss: the twentieths of its health already paid for */
     uint16_t id;
     float    hp, maxhp, shield, maxshield, shield_t;
     float    s, off, x, y, dx, dy;
@@ -93,9 +105,9 @@ typedef struct {
 } bs_float_t;
 
 typedef struct {
-    int   group;
-    int   left;
-    float t;
+    uint8_t alien, path;
+    int     left;
+    float   t, gap, hpk;
 } bs_spawn_t;
 
 /* what the laboratory gives a battle (bs_save.h makes one from the save) */
@@ -105,6 +117,7 @@ typedef struct {
     uint8_t tech[TECH_N];
     uint8_t power[PW_N];
     int     rank;
+    uint8_t mode, diff;         /* BS_MODE_*, BS_DIFF_* */
 } bs_kit_t;
 
 typedef struct {
@@ -117,6 +130,12 @@ typedef struct {
     int        wave, nwaves;        /* wave: the one being fought, or the next one */
     bs_spawn_t sp[BS_MAX_SPAWN];
     int        nsp;
+    int        mode;
+    bs_group_t next[BS_MAX_SPAWN];  /* the wave about to come */
+    int        nnext;
+    float      k_reward;
+    uint16_t   hp0;                 /* endless: the first wave's health, percent */
+    uint32_t   roster;              /* endless: the aliens this world has */
     int        alive;
     float      freeze_t, shake, fort_flash, alarm_t;
     float      power_cd[PW_N];
@@ -132,6 +151,7 @@ typedef struct {
     bs_float_t fl[BS_MAX_FLOATS];
 
     int        kills, earned, xp, leaked, built, stars, cores_won;
+    uint32_t   seen;                /* the aliens that came on screen (bits of AL_*) */
     uint16_t   leak_by[AL_N];       /* who got through, by kind */
     uint8_t    lives_at[BS_WAVES];  /* the fort's life after each wave */
     uint8_t    snd[24];

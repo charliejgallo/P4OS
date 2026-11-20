@@ -1,6 +1,6 @@
 idf_component_register(
     SRCS "bastion.c" "bs_menu.c" "bs_pak.c" "bs_gfx.c" "bs_art.c" "bs_world.c" "bs_data.c" "bs_game.c" "bs_scene.c"
-         "bs_hud.c" "bs_audio.c" "bs_save.c"
+         "bs_hud.c" "bs_audio.c" "bs_save.c" "bs_gallery.c"
     INCLUDE_DIRS "."
     REQUIRES lvgl
 )

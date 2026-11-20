@@ -918,6 +918,11 @@ it. Ten worlds of three sectors each, the third with a boss.
   new towers, each tower's mastery, eight technologies and three powers
   (an orbital strike, a cryo bomb, a repair). Experience makes the rank.
   A USB gamepad plays it all.
+- **Three modes:** the campaign; waves without end with twice the life, to
+  see how far one gets, a record a world; and a free mode with everything
+  unlocked. The difficulty is the purse: more credits, or fewer.
+- **A gallery** of cards, unlocked as the player meets each alien, tower
+  and world: its portrait (the aliens walk), its numbers, a line about it.
 - **How it is made:** everything is modelled by code in Blender and
   rendered ahead, a picture with the depth of its pixels a world and
   sheets of sprites for what stands on it, so an alien walks behind a

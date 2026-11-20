@@ -30,6 +30,8 @@ const bs_tower_def_t BS_TOWER[TW_N] = {
     { "bank",    N_("Refinería"),           N_("Da créditos al final de cada oleada."),                       0xFFD83A, 200,  75,  45.0f, 0.0f,  0.0f, 0.0f, 0, 0, 1, 0, 10 },
 };
 
+/* A boss's reward is what it pays when it falls; it has already paid
+ * BS_BOSS_PARTS x BS_BOSS_PART (300) on the way down (bs_game.c, hurt). */
 const bs_alien_def_t BS_ALIEN[AL_N] = {
     /* id         name               hp     speed armor rew lives fly boss xp radius alt  shield  color   */
     { "grub",     N_("Larva"),        42.0f, 1.20f, 0,   5,  1,   0, 0,  1, 0.45f, 0.0f,   0.0f, 0x6CFF4A },
@@ -44,9 +46,9 @@ const bs_alien_def_t BS_ALIEN[AL_N] = {
     { "phase",    N_("Espectro"),    105.0f, 1.50f, 0,  14,  1,   0, 0,  3, 0.45f, 0.0f,   0.0f, 0xC8B0FF },
     { "jammer",   N_("Saboteador"),  170.0f, 1.00f, 0,  18,  1,   0, 0,  4, 0.50f, 0.6f,   0.0f, 0xFF40C0 },
     { "carrier",  N_("Portador"),    760.0f, 0.80f, 2,  50,  3,   1, 0, 10, 1.00f, 2.2f,   0.0f, 0x30D0B0 },
-    { "queen",    N_("Reina"),      4600.0f, 0.45f, 4, 250, 10,   0, 1, 60, 1.60f, 0.0f,   0.0f, 0xB0FF40 },
-    { "titan",    N_("Titán"),      7200.0f, 0.40f, 10, 250, 10,  0, 1, 60, 1.60f, 0.0f,   0.0f, 0xFF5040 },
-    { "overmind", N_("Mente"),      5200.0f, 0.50f, 0, 250, 10,   0, 1, 60, 1.50f, 1.0f, 1500.0f, 0xB070FF },
+    { "queen",    N_("Reina"),      4600.0f, 0.45f, 4, 100, 10,   0, 1, 60, 1.60f, 0.0f,   0.0f, 0xB0FF40 },
+    { "titan",    N_("Titán"),      7200.0f, 0.40f, 10, 100, 10,  0, 1, 60, 1.60f, 0.0f,   0.0f, 0xFF5040 },
+    { "overmind", N_("Mente"),      5200.0f, 0.50f, 0, 100, 10,   0, 1, 60, 1.50f, 1.0f, 1500.0f, 0xB070FF },
     { "mini",     N_("Divisor"),      32.0f, 1.70f, 0,   3,  1,   0, 0,  1, 0.30f, 0.0f,   0.0f, 0xC060FF },
 };
 

@@ -20,11 +20,14 @@
 
 #include "lvgl.h"
 
-enum { ST_TITLE, ST_MAP, ST_LAB, ST_LOADING, ST_BATTLE };
+enum { ST_TITLE, ST_MAP, ST_LAB, ST_LOADING, ST_BATTLE, ST_GALLERY };
 enum { PN_NONE, PN_PAUSE, PN_RESULT };
 enum { IN_TAP, IN_PAD };
 
 #define BS_ACCENT 0x38D8FF
+
+/* the menus' pictures (bs_app_t.img): the first ones, then a portrait a tower */
+enum { IMG_CORE, IMG_STAR, IMG_STAR_OFF, IMG_LOCK, IMG_FORT, IMG_TOWER0 };
 
 typedef struct {
     char            path[160];
@@ -59,14 +62,25 @@ typedef struct {
     /* the menus */
     bs_card_t   card[BS_WORLDS_MAX];
     int         ncard, sel_world, sel_sector;
+    int         mode;           /* BS_MODE_*: what the map's buttons start */
     lv_obj_t   *screen;
     int         lab_tab, lab_back;
     uint8_t    *title_img;
     lv_image_dsc_t title_dsc;
     uint8_t    *img[40];        /* portraits and icons LVGL shows          */
     lv_image_dsc_t img_dsc[40];
-    lv_obj_t   *m_scroll, *m_name, *m_desc, *m_sector[BS_SECTORS], *m_cores;
+    lv_obj_t   *m_scroll, *m_name, *m_desc, *m_sector[BS_SECTORS], *m_cores, *m_mode;
     lv_obj_t   *m_card[BS_WORLDS_MAX];
+
+    /* the gallery (bs_gallery.c) */
+    int         gal_tab;
+    lv_obj_t   *gal_card, *gal_img;
+    uint8_t    *gal_frame[4];   /* the card's picture, or its loop's frames */
+    lv_image_dsc_t gal_dsc[4];
+    int         gal_n, gal_f;
+    uint32_t    gal_t;
+    uint8_t    *gal_thumb[AL_N];
+    lv_image_dsc_t gal_thumb_dsc[AL_N];
 
     /* the battle */
     bs_pak_t    wpak;
@@ -83,6 +97,7 @@ typedef struct {
     int         panel_kind;
     bool        over_seen, button_pause, no_memory, result_done;
     int         res_cores, res_new, res_rank;
+    bool        res_record;
 
     /* the battle's thread */
     void       *mx;
@@ -118,6 +133,20 @@ lv_obj_t *bs_button(lv_obj_t *parent, const char *text, uint32_t accent, bool pr
 lv_obj_t *bs_label(lv_obj_t *parent, const char *text, const lv_font_t *f, uint32_t col);
 uint8_t *bs_pak_image(bs_pak_t *pak, const char *name, lv_image_dsc_t *d);
 int  bs_lang(void);
+
+lv_obj_t *bs_menu_screen(bs_app_t *a, int dim);
+lv_obj_t *bs_menu_header(bs_app_t *a, lv_obj_t *s, const char *title, int back_to);
+lv_obj_t *bs_menu_plain(lv_obj_t *parent);
+void bs_thumbs_load(bs_app_t *a);
+/* the aliens of the sectors already won, for a save from before the
+ * gallery kept count */
+void bs_seen_from_progress(bs_app_t *a);
+
+/* bs_gallery.c */
+void bs_gallery_build(bs_app_t *a);
+void bs_gallery_free(bs_app_t *a);
+bool bs_gallery_back(bs_app_t *a);
+void bs_gallery_pad(bs_app_t *a);
 
 /* bastion.c */
 void bs_battle_start(bs_app_t *a, int world, int sector);

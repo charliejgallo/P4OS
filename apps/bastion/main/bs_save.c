@@ -11,14 +11,31 @@
 #include <string.h>
 
 #define MAGIC   0x56415342u     /* "BSAV" */
-#define VERSION 1
+#define VERSION 2
+
+/* version 1, as 0.28's first Bastión wrote it: the same fields up to
+ * 'spare', then the check. A save of that version is read and kept. */
+typedef struct {
+    uint32_t magic;
+    uint16_t version, size;
+    int32_t  cores, xp, kills, wins;
+    uint8_t  stars[BS_WORLDS_MAX][BS_SECTORS];
+    uint8_t  owned[TW_N], mastery[TW_N], tech[TECH_N], power[PW_N];
+    uint8_t  sfx, music, speed, spare;
+    uint32_t check;
+} save_v1_t;
+
+static uint32_t sum_of(const void *p, size_t n)
+{
+    const uint8_t *b = (const uint8_t *)p;
+    uint32_t h = 0x811C9DC5u;
+    for (size_t i = 0; i < n; i++) h = (h ^ b[i]) * 0x01000193u;
+    return h;
+}
 
 static uint32_t sum(const bs_save_t *s)
 {
-    const uint8_t *b = (const uint8_t *)s;
-    uint32_t h = 0x811C9DC5u;
-    for (size_t i = 0; i < offsetof(bs_save_t, check); i++) h = (h ^ b[i]) * 0x01000193u;
-    return h;
+    return sum_of(s, offsetof(bs_save_t, check));
 }
 
 static void path(char *p, size_t n, const char *ext)
@@ -46,10 +63,27 @@ void bs_save_load(bs_save_t *s)
     FILE *f = fopen(p, "rb");
     if (!f) return;
     bs_save_t t;
+    memset(&t, 0, sizeof t);
     size_t n = fread(&t, 1, sizeof t, f);
     fclose(f);
-    if (n == sizeof t && t.magic == MAGIC && t.version == VERSION && t.size == sizeof t && t.check == sum(&t)) {
+    bool ok = n == sizeof t && t.magic == MAGIC && t.version == VERSION && t.size == sizeof t && t.check == sum(&t);
+    if (!ok && n == sizeof(save_v1_t)) {
+        /* a version 1 save: its fields are this one's first ones */
+        save_v1_t o;
+        memcpy(&o, &t, sizeof o);
+        if (o.magic == MAGIC && o.version == 1 && o.size == sizeof o && o.check == sum_of(&o, offsetof(save_v1_t, check))) {
+            bs_save_reset(&t);
+            memcpy(&t.cores, &o.cores, offsetof(save_v1_t, check) - offsetof(save_v1_t, cores));
+            ok = true;
+            aos_hal_log("bastion", "a save of version 1 brought up to date");
+        }
+    }
+    if (ok) {
         *s = t;
+        s->version = VERSION;
+        s->size = (uint16_t)sizeof *s;
+        if (s->diff >= BS_DIFF_N) s->diff = BS_DIFF_NORMAL;
+        if (s->mode >= BS_MODE_N) s->mode = BS_MODE_CAMPAIGN;
         /* whatever the file says, the towers of the start are owned */
         for (int i = 0; i < TW_N; i++) {
             if (BS_TOWER[i].unlock == 0) s->owned[i] = 1;
@@ -90,6 +124,7 @@ void bs_save_kit(const bs_save_t *s, bs_kit_t *kit)
     memcpy(kit->tech, s->tech, sizeof kit->tech);
     memcpy(kit->power, s->power, sizeof kit->power);
     kit->rank = bs_rank_of(s->xp);
+    kit->diff = s->diff;
 }
 
 bool bs_save_open(const bs_save_t *s, int world, int sector)

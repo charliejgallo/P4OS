@@ -395,6 +395,45 @@ def sprite_bytes(im):
 # The common pack
 # ---------------------------------------------------------------------------
 
+def gallery(p):
+    """the cards' portraits (tools/blender/gallery.py): each alien's four
+    frames cut to the same box, so they play as a loop, and each tower at
+    its third tier. Without the renders, the game's own small ones."""
+    for aid in ALIENS:
+        if aid == 'mini':
+            continue
+        path = os.path.join(ASSETS, 'gallery', 'al_%s.png' % aid)
+        if FLAT or not os.path.exists(path):
+            if not FLAT:
+                warn('the gallery lacks %s: run tools/blender/gallery.py' % aid)
+            continue
+        im = Image.open(path).convert('RGBA')
+        w = im.width // 4
+        frames = [im.crop((i * w, 0, (i + 1) * w, im.height)) for i in range(4)]
+        # one box for the four: what any of them covers
+        boxes = [f.getbbox() for f in frames if f.getbbox()]
+        x0, y0 = min(b[0] for b in boxes), min(b[1] for b in boxes)
+        x1, y1 = max(b[2] for b in boxes), max(b[3] for b in boxes)
+        k = min(1.0, 260.0 / (x1 - x0), 240.0 / (y1 - y0))
+        for i, f in enumerate(frames):
+            c = f.crop((x0, y0, x1, y1))
+            if k < 1.0:
+                c = c.resize((max(1, int(c.width * k)), max(1, int(c.height * k))), Image.LANCZOS)
+            p.add('ga_%s%d' % (aid, i), PK_SPRITE, c.width, c.height, sprite_bytes(c))
+    for tid in TOWERS:
+        path = os.path.join(ASSETS, 'gallery', 'tw_%s.png' % tid)
+        if FLAT or not os.path.exists(path):
+            if not FLAT:
+                warn('the gallery lacks %s: run tools/blender/gallery.py' % tid)
+            continue
+        im = Image.open(path).convert('RGBA')
+        c = im.crop(im.getbbox())
+        k = min(1.0, 230.0 / c.width, 300.0 / c.height)
+        if k < 1.0:
+            c = c.resize((max(1, int(c.width * k)), max(1, int(c.height * k))), Image.LANCZOS)
+        p.add('gt_%s' % tid, PK_SPRITE, c.width, c.height, sprite_bytes(c))
+
+
 def title_picture():
     """the title screen: a world behind, the fort and some towers in front"""
     bgp = os.path.join(ASSETS, 'worlds', 'luna_bg.png')
@@ -494,6 +533,8 @@ def common():
         p.add(name, PK_SHEET, 0, 0, encode_frames(fr, c), len(fr))
         if name == 'fort':
             p.add('fort_big', PK_SPRITE, 320, 320, sprite_bytes(fit(Image.fromarray(fr[0][0]), 320)))
+    print('the gallery')
+    gallery(p)
     for n in ('core', 'star', 'star_off', 'lock', 'coin'):
         p.add('ic_' + n, PK_SPRITE, 56, 56, sprite_bytes(draw_icon(n)))
     t = title_picture()

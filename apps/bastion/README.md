@@ -15,7 +15,7 @@ only composes them, which is how a hundred aliens fit in a frame.
 # the art (Blender 3.3.1 on an M2: seconds a sheet, a minute or two a world)
 B=/Applications/Blender.app/Contents/MacOS/Blender
 cd apps/bastion/tools/blender
-$B -b -P towers.py && $B -b -P aliens.py && $B -b -P fort.py
+$B -b -P towers.py && $B -b -P aliens.py && $B -b -P fort.py && $B -b -P gallery.py
 $B -b -P worlds_a.py -- --samples 96 && $B -b -P worlds_b.py -- --samples 96
 cd ../../../..
 
@@ -34,8 +34,9 @@ tools/build_apps.sh bastion                      # apps/bastion/build/bastion.so
 ```
 
 On the card everything goes in `/apps`: `bastion.so`, `bastion_p4.pak` with
-its part (12.7 MB: towers, aliens, the fort, fonts, icons, sounds) and one
-`bastion_<world>_p4.pak` a world (1.6-2.7 MB each, 35 MB in all);
+its part (15.9 MB: towers, aliens, the fort, the gallery's portraits,
+fonts, icons, sounds) and one `bastion_<world>_p4.pak` a world (1.6-2.7 MB
+each, 39 MB in all);
 `tools/install_apps.sh` uploads them all. Neither the renders (`assets/`)
 nor the packs are in git.
 
@@ -53,6 +54,31 @@ nor the packs are in git.
   cryo bomb, the repair.
 - **On top:** the fort's life, the credits, the wave, the speed (x1, x2,
   x3) and the pause. The system's back and the BOOT button pause too.
+- **Three modes**, the tabs over the map of worlds:
+  - **Campaña:** the thirty sectors in order, with stars.
+  - **Supervivencia:** twice the fort's life and waves without end in any
+    world the campaign has reached, each 7 % tougher than the last, more
+    of them and closer together, a boss every tenth. It ends when the fort
+    falls; each world keeps its record, and the waves held pay cores.
+  - **Libre:** any world and sector with every tower and power unlocked
+    and three times the credits, to try things. It pays nothing and keeps
+    nothing.
+- **The difficulty** (the title's button: easy, normal, hard) is the
+  purse: a battle starts with 35 % more credits and each alien pays 25 %
+  more, or 15 % and 13 % less. The harder purse pays 30 % more cores, the
+  easier one 20 % fewer.
+- **Fliers:** when the next wave brings any, the line over the panel says
+  which towers cannot reach them.
+- **Bosses pay as they are worn down:** 15 credits for every twentieth of
+  their health lost and 100 when they fall, so the minutes a boss walks
+  alone still buy upgrades (the user's Titan paid nothing until it died,
+  and he could not upgrade against it).
+- **The gallery** (the title's button) has a card for every alien, tower
+  and world, locked until met: an alien's opens the first time it comes
+  on screen in any battle, a tower's when the laboratory unlocks it, a
+  world's when the campaign reaches it. A card has the thing's portrait
+  (an alien's walks), its numbers and a line about it; what is locked is
+  a dark shape with no name.
 - **Stars:** a sector won with four fifths of the fort's life is three
   stars, with two fifths two, otherwise one. A sector opens when the one
   before it is won; a world when the last sector of the one before is.
@@ -134,6 +160,12 @@ the bosses: Reina (lays larvae), Titán (stomps the towers silent), Mente
   pieces of music synthesised with numpy (nothing recorded), mu-law at
   16 kHz; twelve voices over the music on the streaming speaker.
 - **The save** (`main/bs_save.c`): `bastion.sav` in the data folder.
+  Version 2 since the modes (the records, the difficulty, the aliens
+  seen); a version 1 save is read and kept, and its gallery starts with
+  the aliens of the sectors already won.
+- **The gallery** (`main/bs_gallery.c`, `tools/blender/gallery.py`): the
+  same models rendered through the same camera with more pixels a metre,
+  packed as LVGL pictures and loaded a card at a time.
 
 Memory (PSRAM only: an allocation never falls back to internal RAM): a
 battle holds 9 MB with the four towers of the start and 13.3 MB with all
@@ -151,7 +183,11 @@ with the free pads breathing (140-270 tiles), 0.8 ms with a pad chosen
 aliens and eight towers firing (150-190 tiles, 110-140 things), of which
 the simulation takes 0.55 ms and the list 0.45. 9.1 MB of PSRAM held with
 the four towers of the start: the board had 17.4 MB free when the app
-opened and 8.2 MB during the battle, with 208 KB of internal RAM free. The log says every 5 s:
+opened and 8.2 MB during the battle, with 208 KB of internal RAM free.
+Then the user played the first world's three sectors (its boss too) and
+the second's first, some forty minutes: never under 60.9 fps, the
+heaviest frame 11.8 ms (38 aliens, 385 tiles, 247 things), 9.8 MB held,
+nothing wrong in the log. The log says every 5 s:
 `bastion: 62.5 fps, a frame 6.12 ms (sim 0.57, list 0.44, draw 5.11), 193 tiles, 142 things, 30 aliens, flip 1, 9100 KB held`.
 
 ## The numbers, and the bot that sets them
@@ -166,6 +202,7 @@ sector, measured:
 apps/bastion/tools/harness.sh 0.85          # a bot plays the campaign as it is
 apps/bastion/tools/harness.sh -c 0.85       # ... and measures the HP table to paste
 apps/bastion/tools/harness.sh -c 0.85 -v    # with what leaked and when, sector by sector
+apps/bastion/tools/harness.sh 0.85 -e -D 2  # the hard purse, and the mode without end too
 ```
 
 `tools/harness.c` links the battle itself and plays every sector in order
@@ -175,6 +212,15 @@ sector, for the health at which it keeps 72 % of the fort (`-t`), and the
 first twelve sectors are then eased, since a person learns the game there
 and the bot does not have to. After changing a tower, an alien, a layout
 or the waves' shape: measure again and paste the table.
+
+With the table as it is the bot wins all thirty sectors at the first try
+with the normal purse (84 stars of 90) and with the easy one (90), and
+with the hard one too but not always at the first (67 stars, one sector
+at the fifth try); without end it holds 30 to 49 waves, with the
+laboratory the campaign leaves. The second world's first two sectors were
+then eased 10 % by hand: the user won the whole first world with the fort
+untouched and kept 4 lives of 20 in the first sector of the second, where
+a wave of nothing but fliers comes.
 
 Things it found: a bot (or a player) that waits for a dear tower with one
 pad built loses; fliers flying a straight line to the fort crossed the map
@@ -198,15 +244,21 @@ The same for a tower or an alien: its model in `towers.py` or `aliens.py`
 
 ## Simulator switches
 
-`BS_WORLD=<n>` and `BS_SECTOR=<k>` open that battle straight away,
+`BS_WORLD=<n>` and `BS_SECTOR=<k>` open that battle straight away
+(`BS_MODE=1` without end, `BS_MODE=2` free; `BS_DIFF=1` easy, `2` hard),
 `BS_ALL=1` owns every tower and power, `BS_CREDITS=<n>` starts a battle with
 that purse, `BS_SHORT=<n>` ends a sector after n waves, `BS_CORES=<n>` sets
 the laboratory's, `BS_OPEN=1` opens every sector.
 
 ## Pending
 
-- The board: the first world ran well (above), and the user played it on
-  the board the same day: the sound and the difficulty are right. Still to
-  see are the late worlds' crowds and bosses, a battle with all fourteen
-  towers owned (13.3 MB in the simulator), the memory beside other apps
+- The board: the user played the first world and into the second (above):
+  the sound and the difficulty are right. Still to see are the late
+  worlds' crowds and bosses, a battle with all fourteen towers owned
+  (the free mode: 13.3 MB in the simulator), the memory beside other apps
   and the gamepad.
+- The modes without end and free, the difficulty, the bosses' pay and the
+  gallery have run in the simulator and under the bot; they are installed
+  on the board (2026-11-20) and not yet played there.
+- The texts: 192 strings, all in English and German, checked against the
+  HUD's buffers and the widths of what holds them (2026-11-20).

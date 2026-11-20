@@ -46,7 +46,10 @@ BOSSES = ['queen', 'titan', 'overmind']
 # base health: measured by the harness's bot (tools/harness.sh -c), which
 # plays the campaign in order with the laboratory a player would have by
 # then and looks for the health it only just holds. Paste its table here.
-HP = [404, 555, 598, 282, 307, 490, 336, 448, 539, 297, 230, 306, 223, 231, 341, 349, 511, 419, 360, 414, 551, 272, 295,
+# (By hand since: the second world's first two sectors 10 % down. The user
+# won the whole first world with the fort untouched and then kept 4 lives
+# of 20 in the first sector of the second, where the fliers first come.)
+HP = [404, 555, 598, 250, 285, 490, 336, 448, 539, 297, 230, 306, 223, 231, 341, 349, 511, 419, 360, 414, 551, 272, 295,
       326, 397, 468, 465, 286, 395, 261]
 import os
 # a boss's health against its sector's

@@ -209,7 +209,7 @@ static void alien_die(bs_game_t *g, int ai, int ti)
 {
     bs_alien_t *a = &g->al[ai];
     const bs_alien_def_t *d = &BS_ALIEN[a->type];
-    int reward = (int)((float)d->reward * g->k_bounty + 0.5f);
+    int reward = (int)((float)d->reward * g->k_bounty * g->k_reward + 0.5f);
     g->credits += reward;
     g->earned += reward;
     g->xp += d->xp;
@@ -278,6 +278,26 @@ static void hurt(bs_game_t *g, int ai, float dmg, bool dot, int ti)
     }
     a->hp -= dmg;
     if (!dot) a->flash_t = 0.09f;
+    if (d->boss && a->maxhp > 0) {
+        /* what it has lost so far, in twentieths: each one pays */
+        int due = (int)((1.0f - (a->hp > 0 ? a->hp : 0) / a->maxhp) * (float)BS_BOSS_PARTS);
+        if (due > BS_BOSS_PARTS) due = BS_BOSS_PARTS;
+        int n = 0;
+        while (a->paid < due) {
+            a->paid++;
+            n++;
+        }
+        if (n) {
+            int pay = (int)((float)(n * BS_BOSS_PART) * g->k_bounty * g->k_reward + 0.5f);
+            g->credits += pay;
+            g->earned += pay;
+            char t[14];
+            snprintf(t, sizeof t, "+%d", pay);
+            float_text(g, a->x, a->y + 1.6f, t, 0xFFE040);
+            burst(g, a->x, a->y, d->alt + 1.2f, 6, 0xFFD83A, 150.0f, 3);
+            bs_game_sound(g, SND_COIN);
+        }
+    }
     if (a->hp <= 0) alien_die(g, ai, ti);
 }
 
@@ -449,6 +469,7 @@ static void aliens_step(bs_game_t *g)
         a->s += v * dt;
         a->anim += dt * (0.5f + v * 2.6f) * (d->fly ? 2.0f : 1.0f) + (d->fly ? dt * 4.0f : 0.0f);
         alien_place(g, a);
+        if (!((g->seen >> a->type) & 1) && a->y < 38.6f && a->x > -9.6f && a->x < 9.6f) g->seen |= 1u << a->type;
         if (a->left <= (d->boss ? 1.6f : 0.4f)) leak(g, i);
     }
 }
@@ -1051,29 +1072,121 @@ static void shots_step(bs_game_t *g)
 
 /* ---- waves ---------------------------------------------------------------------------- */
 
+static uint32_t wrand(uint32_t *r)
+{
+    uint32_t x = *r;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    return *r = x;
+}
+
+/* A wave of the mode without end: made from the wave's number alone, so
+ * the button that calls it can show who comes. More of them each wave,
+ * closer together, tougher by 7 % a wave (twice at wave 10, fifteen times
+ * at wave 40: nobody holds for ever), a boss every tenth. */
+static void endless_plan(bs_game_t *g)
+{
+    /* what tools/bsworlds.py reckons each one is worth */
+    static const float COST[AL_N] = {
+        [AL_GRUB] = 1.0f, [AL_RUNNER] = 1.3f, [AL_SWARM] = 0.45f, [AL_SHELL] = 3.2f, [AL_WASP] = 1.8f,
+        [AL_SPLIT] = 3.0f, [AL_SHIELD] = 3.6f, [AL_HEALER] = 4.0f, [AL_BRUTE] = 9.0f, [AL_PHASE] = 3.4f,
+        [AL_JAMMER] = 5.0f, [AL_CARRIER] = 12.0f,
+    };
+    int w = g->wave;
+    uint32_t r = 0x9E3779B9u ^ (uint32_t)(g->w->order * 7919 + w * 104729 + 17);
+    for (int i = 0; i < 4; i++) wrand(&r);
+    float hp = (float)g->hp0 * powf(1.07f, (float)w);
+    if (hp > 60000.0f) hp = 60000.0f;
+    float budget = 10.0f * (1.0f + 0.45f * (float)w);
+    float tight = 1.0f - 0.02f * (float)w;
+    if (tight < 0.5f) tight = 0.5f;
+    int pool[AL_N], np = 0;
+    for (int a = 0; a < AL_N; a++) {
+        if ((g->roster >> a) & 1 && COST[a] > 0) pool[np++] = a;
+    }
+    /* the dear ones wait a few waves */
+    int allow = np;
+    if (w < 3 && allow > 3) allow = 3;
+    else if (w < 7 && allow > np - 2 && np > 4) allow = np - 2;
+    for (int i = allow - 1; i > 0; i--) {
+        int k = (int)(wrand(&r) % (uint32_t)(i + 1));
+        int t = pool[i];
+        pool[i] = pool[k];
+        pool[k] = t;
+    }
+    int kinds = w < 2 ? 1 : w < 6 ? 2 : w < 14 ? 3 : 4;
+    if (w % 3 == 2 && w % 10 != 9) kinds = 1;
+    if (kinds > allow) kinds = allow;
+    g->nnext = 0;
+    float delay = 0;
+    if (w % 10 == 9) {
+        bs_group_t *b = &g->next[g->nnext++];
+        b->alien = (uint8_t)g->w->boss;
+        b->count = (uint16_t)(1 + w / 30);
+        b->gap = 9.0f;
+        b->delay = 4.0f;
+        b->path = 0;
+        b->hp_pct = (uint16_t)(hp * 0.5f);
+        budget *= 0.6f;
+    }
+    for (int k = 0; k < kinds && g->nnext < BS_MAX_SPAWN - g->w->npath; k++) {
+        int a = pool[k];
+        int cnt = (int)(budget / (float)kinds / COST[a] + 0.5f);
+        if (cnt < 1) cnt = 1;
+        if (cnt > 50) cnt = 50;
+        float gap = a == AL_SWARM ? 0.30f : a == AL_RUNNER ? 0.6f : a == AL_GRUB ? 0.75f : a == AL_WASP ? 0.85f :
+                    COST[a] >= 9.0f ? 2.8f : 1.15f;
+        gap *= tight;
+        int np2 = g->w->npath;
+        int split = np2 > 1 && cnt >= 6 && w >= 3 ? np2 : 1;
+        for (int q = 0; q < split; q++) {
+            bs_group_t *gr = &g->next[g->nnext++];
+            gr->alien = (uint8_t)a;
+            gr->count = (uint16_t)(cnt / split + (q < cnt % split ? 1 : 0));
+            gr->gap = split > 1 ? gap * (float)split * 0.8f : gap;
+            gr->delay = delay + 0.3f * (float)q;
+            gr->path = (uint8_t)((w + k + q) % np2);
+            gr->hp_pct = (uint16_t)hp;
+        }
+        float span = (float)cnt * gap * 0.5f;
+        delay += (span > 7.0f ? 7.0f : span) + 1.0f;
+    }
+}
+
+/* works out the wave about to come into g->next */
+static void wave_plan(bs_game_t *g)
+{
+    g->nnext = 0;
+    if (g->mode == BS_MODE_ENDLESS) {
+        endless_plan(g);
+        return;
+    }
+    if (g->wave >= g->nwaves) return;
+    const bs_wave_t *wv = &g->w->wave[g->sector][g->wave];
+    for (int i = 0; i < wv->n && g->nnext < BS_MAX_SPAWN; i++) g->next[g->nnext++] = g->w->group[wv->first + i];
+}
+
 void bs_game_preview(const bs_game_t *g, int *counts)
 {
     memset(counts, 0, sizeof(int) * AL_N);
-    if (g->wave >= g->nwaves) return;
-    const bs_wave_t *wv = &g->w->wave[g->sector][g->wave];
-    for (int i = 0; i < wv->n; i++) {
-        const bs_group_t *gr = &g->w->group[wv->first + i];
-        counts[gr->alien] += gr->count;
-    }
+    for (int i = 0; i < g->nnext; i++) counts[g->next[i].alien] += g->next[i].count;
 }
 
 bool bs_game_call_wave(bs_game_t *g)
 {
-    if (g->state != BS_BUILD || g->wave >= g->nwaves) return false;
-    const bs_wave_t *wv = &g->w->wave[g->sector][g->wave];
+    if (g->state != BS_BUILD || !g->nnext) return false;
     g->nsp = 0;
     bool boss = false;
-    for (int i = 0; i < wv->n && g->nsp < BS_MAX_SPAWN; i++) {
-        const bs_group_t *gr = &g->w->group[wv->first + i];
+    for (int i = 0; i < g->nnext; i++) {
+        const bs_group_t *gr = &g->next[i];
         bs_spawn_t *sp = &g->sp[g->nsp++];
-        sp->group = wv->first + i;
+        sp->alien = gr->alien;
+        sp->path = gr->path;
         sp->left = gr->count;
         sp->t = gr->delay;
+        sp->gap = gr->gap;
+        sp->hpk = (float)gr->hp_pct / 100.0f;
         boss |= BS_ALIEN[gr->alien].boss != 0;
     }
     g->state = BS_WAVE;
@@ -1084,7 +1197,7 @@ bool bs_game_call_wave(bs_game_t *g)
 
 static void wave_done(bs_game_t *g)
 {
-    int bonus = 18 + 4 * g->wave;
+    int bonus = 18 + 4 * (g->wave > 30 ? 30 : g->wave);
     for (int i = 0; i < BS_PADS; i++) {
         bs_tower_t *t = &g->tw[i];
         if (!t->on || t->type != TW_BANK) continue;
@@ -1097,21 +1210,24 @@ static void wave_done(bs_game_t *g)
     }
     if (g->k_interest > 0) {
         int in = (int)((float)g->credits * g->k_interest);
-        if (in > 60 + 15 * g->wave) in = 60 + 15 * g->wave;
+        int cap = 60 + 15 * (g->wave > 30 ? 30 : g->wave);
+        if (in > cap) in = cap;
         bonus += in;
     }
     g->credits += bonus;
     g->earned += bonus;
-    g->xp += 5 + g->wave;
+    g->xp += 5 + (g->wave > 40 ? 40 : g->wave);
     if (g->wave < BS_WAVES) g->lives_at[g->wave] = (uint8_t)g->lives;
     g->wave++;
-    if (g->wave >= g->nwaves) {
+    if (g->mode != BS_MODE_ENDLESS && g->wave >= g->nwaves) {
         g->state = BS_WON;
         g->stars = g->lives * 5 >= g->max_lives * 4 ? 3 : (g->lives * 5 >= g->max_lives * 2 ? 2 : 1);
         g->xp += 30 + 10 * g->stars;
+        g->nnext = 0;
         bs_game_sound(g, SND_VICTORY);
     } else {
         g->state = BS_BUILD;
+        wave_plan(g);
         bs_game_sound(g, SND_WAVE_CLEAR);
         char txt[14];
         snprintf(txt, sizeof txt, "+%d", bonus);
@@ -1129,10 +1245,9 @@ static void spawn_step(bs_game_t *g)
         more = true;
         sp->t -= BS_DT;
         if (sp->t > 0) continue;
-        const bs_group_t *gr = &g->w->group[sp->group];
-        if (alien_spawn(g, gr->alien, gr->path, 0.0f, (float)gr->hp_pct / 100.0f) >= 0) {
+        if (alien_spawn(g, sp->alien, sp->path, 0.0f, sp->hpk) >= 0) {
             sp->left--;
-            sp->t += gr->gap * (0.85f + 0.3f * frand(g));
+            sp->t += sp->gap * (0.85f + 0.3f * frand(g));
         } else {
             sp->t = 0.3f;
         }
@@ -1295,11 +1410,31 @@ void bs_game_start(bs_game_t *g, const bs_world_t *w, int sector, const bs_kit_t
     g->k_sell = 0.60f + 0.06f * (float)kit->tech[TECH_SALVAGE];
     g->k_interest = 0.02f * (float)kit->tech[TECH_INTEREST];
     g->k_crit = 0.04f * (float)kit->tech[TECH_CRIT];
+    g->mode = kit->mode < BS_MODE_N ? kit->mode : BS_MODE_CAMPAIGN;
+    /* the difficulty is the purse: what a battle starts with and what each
+     * alien pays */
+    static const float START[BS_DIFF_N] = { 1.0f, 1.35f, 0.85f }, PAY[BS_DIFF_N] = { 1.0f, 1.25f, 0.87f };
+    int diff = kit->diff < BS_DIFF_N ? kit->diff : BS_DIFF_NORMAL;
+    g->k_reward = PAY[diff];
     g->max_lives = g->lives = 20 + 3 * kit->tech[TECH_ARMOR];
-    g->credits = w->credits[g->sector] * (10 + kit->tech[TECH_FUNDS]) / 10;
+    float purse = (float)(w->credits[g->sector] * (10 + kit->tech[TECH_FUNDS]) / 10) * START[diff];
     g->nwaves = w->nwaves[g->sector];
+    if (g->mode == BS_MODE_ENDLESS) {
+        /* twice the life, a little more to start with, and no last wave */
+        g->sector = 0;
+        g->max_lives = g->lives = 2 * g->max_lives;
+        purse = (float)(w->credits[0] * (10 + kit->tech[TECH_FUNDS]) / 10) * START[diff] * 1.25f;
+        g->nwaves = 1000000;
+        g->hp0 = 100;
+        if (w->nwaves[0] > 0 && w->wave[0][0].n > 0) g->hp0 = w->group[w->wave[0][0].first].hp_pct;
+        for (int s = 0; s < BS_SECTORS; s++) g->roster |= bs_world_aliens(w, s);
+    } else if (g->mode == BS_MODE_FREE) {
+        purse *= 3.0f;
+    }
+    g->credits = (int)(purse + 0.5f);
     g->state = BS_BUILD;
     for (int i = 0; i < BS_PADS; i++) g->tw[i].target = -1;
+    wave_plan(g);
 }
 
 void bs_game_step(bs_game_t *g)
