@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.30.0 — not released yet
+## 0.30.0 — 2026-11-21
 
 **The Store.** The biggest change since the first release: the board gets
 its apps by itself, and its own next firmware. Copying `apps.zip` to the
@@ -92,7 +92,7 @@ card is no longer the way to install anything ([docs/INSTALL.md](docs/INSTALL.md
   release for whoever fills a card by hand.
 
 Tests: `tests/fetch_host` (20 cases), `tests/store_host` (26) and
-`tests/store_fw_host` (69), the firmware's own service built for the Mac
+`tests/store_fw_host` (70), the firmware's own service built for the Mac
 against a server that behaves like GitHub's downloads.
 
 ## 0.29.0 — 2026-11-20

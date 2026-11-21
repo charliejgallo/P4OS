@@ -310,7 +310,7 @@ redirects and all. With developer mode on, the board adds
 `http://<this machine>:18392/prueba/apps/releases/latest/download/p4os-store.ndjson`.
 `tools/store_cli.py` is the same store in Python, to install from a
 catalogue onto a card or a simulator's folder: it is the reference the
-firmware's service is tested against (`tests/store_fw_host`, 69 cases).
+firmware's service is tested against (`tests/store_fw_host`, 70 cases).
 
 ## From a script
 
