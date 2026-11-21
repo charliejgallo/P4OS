@@ -23,6 +23,7 @@
  */
 #include "aos_ssh.h"
 #include "aos_ssh_int.h"
+#include "aos_ssh_sftp.h"
 #include "aos_access.h"
 #include "aos_hal.h"
 #include "aos_i18n.h"
@@ -98,6 +99,16 @@ typedef struct {
     int cols, rows;
     char term[32];
     sh_t *sh;
+    /* the "sftp" subsystem in the place of a shell (aos_ssh_sftp.c). The
+     * client's bytes wait in fx_in until the reply before them has gone
+     * out: the window is given back as they are looked at, not as they
+     * come, or a client that asks faster than it reads would fill the RAM. */
+    aos_sftpd_t *sftp;
+    uint8_t *fx_in;             /* WIN_SIZE: never more than the window */
+    size_t fx_in_len, fx_in_off;
+    const uint8_t *fx_out;      /* the reply being sent: the sftpd's own buffer */
+    size_t fx_out_len, fx_out_off;
+    bool fx_eof, fx_bad;
 } chan_t;
 
 typedef struct conn {
@@ -726,6 +737,16 @@ static sh_t *chan_shell(conn_t *c, chan_t *ch)
     return sh_new(&o);
 }
 
+/* A reply of the SFTP server, whole: it stays in the sftpd's buffer and is
+ * sent from there by pump_sftp(), as the client's window allows. */
+static void fx_reply(void *ctx, const uint8_t *data, size_t len)
+{
+    chan_t *ch = ctx;
+    ch->fx_out = data;
+    ch->fx_out_len = len;
+    ch->fx_out_off = 0;
+}
+
 static void on_channel_request(conn_t *c, const uint8_t *pay, size_t n)
 {
     rbuf_t r = { pay, n, 1, false };
@@ -775,7 +796,19 @@ static void on_channel_request(conn_t *c, const uint8_t *pay, size_t n)
     } else if (!strcmp(type, "subsystem")) {
         char sub[24];
         rb_cstr(&r, sub, sizeof sub);
-        aos_hal_log(TAG, "%s: subsystem \"%s\" refused (not yet)", c->from, sub);
+        const char *root = aos_hal_path_sd_root();
+        if (!r.bad && !strcmp(sub, "sftp") && !ch->started && root) {
+            ch->fx_in = big_calloc(WIN_SIZE);
+            ch->sftp = ch->fx_in ? aos_sftpd_new(root, false, fx_reply, ch) : NULL;
+            if (ch->sftp) {
+                ch->started = true;
+                ok = true;
+                aos_hal_log(TAG, "%s: sftp", c->from);
+            } else {
+                free(ch->fx_in);
+                ch->fx_in = NULL;
+            }
+        } else aos_hal_log(TAG, "%s: subsystem \"%s\" refused%s", c->from, sub, root ? "" : " (no card)");
     }
     if (want) chan_reply(c, ch, ok);
 }
@@ -793,6 +826,23 @@ static void on_channel_data(conn_t *c, const uint8_t *pay, size_t n, bool extend
         return;
     }
     ch->our_win -= (uint32_t)dl;
+    if (ch->sftp) {
+        /* kept until the replies before it are out; it fits: it is within
+         * the window, and the window is this buffer */
+        if (extended || ch->fx_bad) return;
+        if (ch->fx_in_off) {
+            memmove(ch->fx_in, ch->fx_in + ch->fx_in_off, ch->fx_in_len - ch->fx_in_off);
+            ch->fx_in_len -= ch->fx_in_off;
+            ch->fx_in_off = 0;
+        }
+        if (ch->fx_in_len + dl > WIN_SIZE) {
+            disconnect(c, DIS_PROTOCOL, "data past the window");
+            return;
+        }
+        memcpy(ch->fx_in + ch->fx_in_len, d, dl);
+        ch->fx_in_len += dl;
+        return;
+    }
     ch->consumed += (uint32_t)dl;
     if (!extended && ch->sh) sh_input(ch->sh, d, dl);
     if (ch->consumed >= WIN_SIZE / 2) {
@@ -809,6 +859,8 @@ static void chan_free(conn_t *c, chan_t *ch)
 {
     (void)c;
     if (ch->sh) sh_free(ch->sh);
+    if (ch->sftp) aos_sftpd_free(ch->sftp);
+    free(ch->fx_in);
     memset(ch, 0, sizeof *ch);
 }
 
@@ -823,6 +875,7 @@ static void on_channel_misc(conn_t *c, uint8_t type, const uint8_t *pay, size_t 
         ch->peer_win = w > 0xFFFFFFFFu ? 0xFFFFFFFFu : (uint32_t)w;
     } else if (type == MSG_CHANNEL_EOF) {
         if (ch->sh) sh_eof(ch->sh);
+        if (ch->sftp) ch->fx_eof = true;
     } else if (type == MSG_CHANNEL_CLOSE) {
         if (!ch->close_sent) {
             wbuf_t b = pk_begin(c, MSG_CHANNEL_CLOSE);
@@ -833,6 +886,67 @@ static void on_channel_misc(conn_t *c, uint8_t type, const uint8_t *pay, size_t 
     }
 }
 
+/* An SFTP channel's turn: the reply in hand goes out as the window allows,
+ * and only then is the next request looked at. A few requests a turn, so
+ * the connection's loop gets back to its socket. Whether it wants to run
+ * again at once. */
+static bool pump_sftp(conn_t *c, chan_t *ch)
+{
+    if (c->in_kex) return false;
+    for (int turn = 0; turn < 8 && !c->dead; turn++) {
+        while (ch->fx_out_off < ch->fx_out_len && ch->peer_win) {
+            uint32_t m = (uint32_t)(ch->fx_out_len - ch->fx_out_off);
+            if (m > ch->peer_win) m = ch->peer_win;
+            if (m > ch->peer_maxpkt) m = ch->peer_maxpkt;
+            if (m > DATA_CHUNK) m = DATA_CHUNK;
+            wbuf_t b = pk_begin(c, MSG_CHANNEL_DATA);
+            wb_u32(&b, ch->peer_id);
+            wb_string(&b, ch->fx_out + ch->fx_out_off, m);
+            if (!pk_send(c, &b)) return false;
+            ch->fx_out_off += m;
+            ch->peer_win -= m;
+        }
+        if (ch->fx_out_off < ch->fx_out_len) return false;      /* until the client opens its window */
+        ch->fx_out = NULL;
+        ch->fx_out_len = ch->fx_out_off = 0;
+
+        size_t have = ch->fx_in_len - ch->fx_in_off;
+        if (!have || ch->fx_bad) break;
+        bool bad = false;
+        size_t used = aos_sftpd_feed_one(ch->sftp, ch->fx_in + ch->fx_in_off, have, &bad);
+        ch->fx_in_off += used;
+        if (bad) ch->fx_bad = true;
+        ch->consumed += (uint32_t)used;
+        if (ch->consumed >= WIN_SIZE / 2) {
+            wbuf_t b = pk_begin(c, MSG_CHANNEL_WINDOW_ADJUST);
+            wb_u32(&b, ch->peer_id);
+            wb_u32(&b, ch->consumed);
+            pk_send(c, &b);
+            ch->our_win += ch->consumed;
+            ch->consumed = 0;
+        }
+    }
+    bool pending = ch->fx_out_off < ch->fx_out_len, more = ch->fx_in_off < ch->fx_in_len && !ch->fx_bad;
+    if ((ch->fx_bad || (ch->fx_eof && !more)) && !pending) {
+        if (ch->fx_bad) aos_hal_log(TAG, "%s: what came on the sftp channel is not SFTP: closed", c->from);
+        wbuf_t b = pk_begin(c, MSG_CHANNEL_REQUEST);
+        wb_u32(&b, ch->peer_id);
+        wb_cstr(&b, "exit-status");
+        wb_byte(&b, 0);
+        wb_u32(&b, ch->fx_bad ? 1 : 0);
+        pk_send(c, &b);
+        b = pk_begin(c, MSG_CHANNEL_EOF);
+        wb_u32(&b, ch->peer_id);
+        pk_send(c, &b);
+        b = pk_begin(c, MSG_CHANNEL_CLOSE);
+        wb_u32(&b, ch->peer_id);
+        pk_send(c, &b);
+        ch->close_sent = true;
+        return false;
+    }
+    return more || (pending && ch->peer_win);
+}
+
 /* Let each shell run and send what it wrote; when one has ended, its exit
  * status, EOF and CLOSE. Whether one of them wants to run again at once. */
 static bool pump(conn_t *c)
@@ -840,6 +954,7 @@ static bool pump(conn_t *c)
     bool busy = false;
     for (int i = 0; i < MAX_CH && !c->dead; i++) {
         chan_t *ch = &c->ch[i];
+        if (ch->used && ch->sftp && !ch->close_sent) { busy |= pump_sftp(c, ch); continue; }
         if (!ch->used || !ch->sh || ch->close_sent) continue;
         sh_set_blocked(ch->sh, c->in_kex || ch->peer_win == 0);
         int st = sh_poll(ch->sh);

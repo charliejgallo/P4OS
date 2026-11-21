@@ -94,9 +94,37 @@ certificates.
 - What the commands print is in the board's language (`_()`, packs in
   `lang/`); their names are the Unix ones.
 
-Not there yet: SFTP and `scp` (macOS's `scp` speaks SFTP), port forwarding,
-the agent, and editing files on the board. `cat > file` does not work: the
-shell has no redirection.
+Not there yet: port forwarding, the agent, and editing files on the board.
+`cat > file` does not work: the shell has no redirection.
+
+## Files: SFTP and scp
+
+Since 0.31 the same door gives the card's files to `sftp`, to `scp` (which
+speaks SFTP) and to a file manager's "connect to server":
+
+    sftp p4os.local
+    scp -r notes p4os.local:/notas/
+
+- **What a client sees** is the card: `/` is its root, and nothing above
+  it can be named (`/..` is `/`). Not the pendrives, which the shell
+  reaches as `/usb`.
+- **Who may:** whoever may open the console, by the same rules and keys.
+  There is no read-only kind of session: a client that is let in can
+  write, as the portal's Files page can.
+- **What it speaks:** version 3 of the protocol (OpenSSH's), with
+  `posix-rename@openssh.com`. Links are refused: FAT has none. Dates are
+  kept when the client asks (`scp -p`, `put -p`).
+- **Memory:** a session takes 196 KB of PSRAM (the channel's window, a
+  packet and a reply) and up to eight open files or folders; nothing in
+  internal RAM. Requests are answered one at a time and the window is
+  given back as they are looked at, so a client that asks faster than it
+  reads does not fill the RAM.
+- **Code:** `aos_ssh_sftp.c`, which knows nothing of SSH (bytes in,
+  replies out), and its channel in `aos_ssh.c` (`pump_sftp`).
+- **Tried** against OpenSSH 10.2's `sftp` and `scp` on macOS, in the
+  simulator: listing, a 3 MB download and a 1.2 MB upload byte for byte,
+  `scp -r` of a folder, rename, delete, and names that try to climb out
+  of the card. Not yet on the board.
 
 ## The protocol, as built
 
@@ -104,7 +132,7 @@ shell has no redirection.
 |---|---|
 | Transport (RFC 4253) | `curve25519-sha256` (RFC 8731), `ssh-ed25519` host key, `aes128-gcm@openssh.com` and `aes256-gcm@openssh.com` (the P4's AES engine) and `chacha20-poly1305@openssh.com` (software; what OpenSSH clients pick first, the client's order deciding), no compression. "Strict KEX" (`kex-strict-s-v00@openssh.com`, OpenSSH's answer to Terrapin, CVE-2023-48795) when the client offers it. The client may exchange keys again at any time (tested with `RekeyLimit=1M` during an 8 MB `cat`, and with each of the three ciphers at `RekeyLimit=200K`: ChaCha20's NEWKEYS is an 8-byte packet, under the 16 the first version took as the least). `server-sig-algs` (RFC 8308), so an RSA key signs with SHA-2 |
 | Authentication (RFC 4252) | `none` where the portal is open, `password` (the portal's, with its growing wait after three wrong ones), `publickey`. Six tries, two minutes to log in |
-| Connection (RFC 4254) | two `session` channels per connection; `pty-req`, `shell`, `exec`, `window-change`. Everything else is refused: `direct-tcpip`, `tcpip-forward`, `subsystem`, X11, the agent |
+| Connection (RFC 4254) | two `session` channels per connection; `pty-req`, `shell`, `exec`, `window-change`, and the `sftp` subsystem. Everything else is refused: `direct-tcpip`, `tcpip-forward`, other subsystems, X11, the agent |
 
 - **Code:** `aos_ssh.c` (listener, connection, transport, authentication,
   channels), `aos_ssh_crypto.c` (the algorithms), `aos_ssh_wire.c` (SSH's

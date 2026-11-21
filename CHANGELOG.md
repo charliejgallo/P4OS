@@ -31,6 +31,9 @@
   - On the board: a plain backup in half a second and a sealed one in
     four, with 427 preferences; a sealed one made and restored at the
     screen.
+- **SFTP and `scp` into the board** ([docs/SSH.md](docs/SSH.md)): the SSH
+  server gives the card's files to `sftp`, `scp` and a file manager, by
+  the console's rules and keys. `/` is the card and nothing above it.
 - **A preference longer than 127 characters was read as empty** when all of
   them were listed (`aos_hal_pref_foreach`): a certificate, a list of the
   Store's sources. Nothing used that list until the backups.
