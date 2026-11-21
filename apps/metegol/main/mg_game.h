@@ -151,6 +151,7 @@ typedef struct {
     float state_t;
     int   score[2];
     int   half;                 /* 0, 1 */
+    bool  swapped;              /* the teams changed ends at half time */
     float clock;                /* seconds played in this half */
     int   last_goal;            /* the side that scored */
     int   serve_side;           /* which wall the ball comes from: 0 far, 1 near */

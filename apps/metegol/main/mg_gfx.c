@@ -704,8 +704,20 @@ static void band(const mg_gfx_t *g, int ty, uint16_t *strip)
         mg_rect_t c = { (int16_t)(t0 * MG_TILE), (int16_t)y0, (int16_t)(tx * MG_TILE), (int16_t)(y0 + MG_TILE) };
         size_t bytes = (size_t)(c.x1 - c.x0) * 2;
         for (int y = c.y0; y < c.y1; y++) {
-            if (g->bg) memcpy(ROW(fb, y) + c.x0, g->bg + (size_t)y * MG_W + c.x0, bytes);
-            else memset(ROW(fb, y) + c.x0, 0, bytes);
+            if (!g->bg) {
+                memset(ROW(fb, y) + c.x0, 0, bytes);
+            } else if (!g->bg_dx && !g->bg_dy) {
+                memcpy(ROW(fb, y) + c.x0, g->bg + (size_t)y * MG_W + c.x0, bytes);
+            } else {
+                int sy = y - g->bg_dy;
+                sy = sy < 0 ? 0 : sy >= MG_H ? MG_H - 1 : sy;
+                const uint16_t *src = g->bg + (size_t)sy * MG_W;
+                uint16_t *dst = ROW(fb, y);
+                for (int x = c.x0; x < c.x1; x++) {
+                    int sx = x - g->bg_dx;
+                    dst[x] = src[sx < 0 ? 0 : sx >= MG_W ? MG_W - 1 : sx];
+                }
+            }
         }
         for (int i = 0; i < n; i++) {
             const mg_item_t *it = &g->item[ix[i]];
@@ -744,6 +756,9 @@ int mg_gfx_end(mg_gfx_t *g, uint16_t *fb, int out, uint32_t *shown, bool full)
             for (int tx = tx0; tx <= tx1; tx++) h[tx] = mix(h[tx], v);
             counts[ty]++;
         }
+    }
+    if (g->salt) {
+        for (int t = 0; t < MG_NT; t++) g->cur[t] = mix(g->cur[t], g->salt);
     }
     int at = 0;
     for (int ty = 0; ty < MG_TH; ty++) {

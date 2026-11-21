@@ -111,6 +111,8 @@ typedef struct {
 
 typedef struct {
     const uint16_t *bg;             /* MG_W x MG_H, or NULL (black)         */
+    int        bg_dx, bg_dy;        /* the picture shaken (a goal)          */
+    uint32_t   salt;                /* mixed into every tile's hash: a shake */
 
     mg_item_t *item;
     int        nitem;

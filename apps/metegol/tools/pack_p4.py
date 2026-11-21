@@ -236,8 +236,8 @@ def figures(p):
     d = os.path.join(ASSETS, 'figures')
     info = json.load(open(os.path.join(d, 'figures.json')))
     a = rgba(os.path.join(d, 'figures.png'))
-    part = np.round(np.asarray(Image.open(os.path.join(d, 'figures_part.png')).convert('RGB'))[..., 0] * 16 / 255).astype(
-        np.int32)
+    part = np.round(np.asarray(Image.open(os.path.join(d, 'figures_part.png')).convert('RGB'))[..., 0].astype(np.float32)
+                    * 16 / 255).astype(np.int32)
     uvw = np.asarray(Image.open(os.path.join(d, 'figures_uvw.png')).convert('RGB')).astype(np.int32)
     alpha = a[..., 3].astype(np.int32)
     # the parts and places come without antialiasing: an edge pixel the

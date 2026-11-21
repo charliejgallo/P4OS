@@ -489,6 +489,7 @@ static void hist_push(mg_game_t *g)
 
 static void halftime_swap(mg_game_t *g)
 {
+    g->swapped = !g->swapped;
     int t = g->score[0];
     g->score[0] = g->score[1];
     g->score[1] = t;
