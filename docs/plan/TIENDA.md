@@ -508,10 +508,19 @@ sus diez mundos, instalarla tocando el botón (la barra avanzando, después
 acostada, y la página del portal en un navegador con una app instalada.
 El firmware `rev1_3` compila: 7 010 944 bytes.
 
+**En la placa (2026-11-21):** firmware `v0.30.0-tienda.1-5-g38a94dd` por
+OTA, confirmado; 96 apps, la Tienda entre ellas; los idiomas subidos
+(`install_lang.sh en de`) y el inglés recargado. Como el catálogo oficial
+todavía no existe (la release publicada no lo trae), la placa quedó
+apuntando a uno de prueba servido desde la Mac con `fake_github.py`: las
+58 apps, todas `by_hand`. **Es provisorio:** al terminar las pruebas se
+vuelve a la dirección oficial (`POST /api/store/refresh {"url":""}`) y se
+apaga ese servidor.
+
 **Lo que falta de esta fase:**
 
-- **En la placa:** no está instalado. Ahí hay que ver el dedo, el
-  desplazamiento y la velocidad de armar la lista (58 íconos).
+- **Que el usuario la use en la placa:** el dedo, el desplazamiento y
+  la velocidad de armar la lista (58 íconos) sólo se ven ahí.
 - **El avance sobre el ícono del inicio** mientras una app se instala,
   como en el iPhone: pide que el inicio sepa mostrar una app que todavía
   no está registrada. No está hecho; hoy el avance se ve en la Tienda.
