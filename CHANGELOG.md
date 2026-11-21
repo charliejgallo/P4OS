@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.31.0 — not released yet
+
+- **Backups** ([docs/BACKUP.md](docs/BACKUP.md)). Settings → Backup, and a
+  Backup page in the portal: the preferences of the system and of the
+  apps, the list of the apps the Store installed with their extras, and
+  the card's `menu.txt` and `modules.txt`, in one file on the card.
+  - **Plain, or sealed.** Without a passphrase it leaves out what looks
+    like a credential; with one everything goes in, under AES-256-GCM with
+    a key from PBKDF2. The board asks for the passphrase twice.
+  - **A restore can be undone:** what there was is kept first in a backup
+    of its own. A wrong passphrase, or a backup of a newer P4OS, is
+    refused before anything is touched.
+  - **The apps come back from the Store:** after a restore the screen
+    offers to ask it for the ones the card lacks, with their extras.
+  - The portal downloads a backup to the computer and brings one back.
+- **A preference longer than 127 characters was read as empty** when all of
+  them were listed (`aos_hal_pref_foreach`): a certificate, a list of the
+  Store's sources. Nothing used that list until the backups.
+- **The CI builds the apps in six shares at once and none again from the
+  same sources** ([docs/BUILDING.md](docs/BUILDING.md), "The CI"): a whole
+  run takes 21 minutes, where it took 108.
+
 ## 0.30.0 — 2026-11-21
 
 **The Store.** The biggest change since the first release: the board gets

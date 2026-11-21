@@ -6,6 +6,55 @@ cada app) y no hay nada que las guarde. **Nada de esto está escrito
 todavía**: es el plan para encararlo después del merge de la 0.30.0 y de
 los dos primeros puntos del CI (`TIENDA.md`, "Después del merge").
 
+## Etapa 1, hecha en la Mac (2026-11-21)
+
+Escrita en la rama `respaldo`; **sin instalar en la placa todavía**. El
+documento para quien la usa es `docs/BACKUP.md`.
+
+- **El servicio** (`components/aos_backup`): arma el archivo, lo lee, lo
+  restaura. Un hilo propio hace el trabajo; las llamadas vuelven
+  enseguida.
+- **El archivo es un JSON, no un zip** (cambia D2): todo lo que lleva es
+  texto chico, y un objeto que se puede abrir y leer vale más que un
+  formato. No hizo falta un escritor de zip.
+- **Los dos modos** (D3), como estaban pensados. El cifrado es AES-256-GCM
+  con la clave derivada por PBKDF2-HMAC-SHA256, 40 000 vueltas (el número
+  viaja en el archivo). Cuánto tarda eso en la placa está **sin medir**.
+- **Qué es un secreto** se decide por el nombre de la preferencia:
+  `pass`, `pwd`, `psk`, `token`, `secret`, `apikey`, `cred`, `auth`, la
+  palabra `key` sola, y una lista (el código de bloqueo, los tokens de
+  Claude, las claves privadas del portal, la clave del servidor SSH).
+  Relevadas las del sistema (unas 110 con nombre fijo) y las 159 de las
+  apps; **las que se arman con un número o un nombre al vuelo no se
+  pudieron listar desde el código**: hay que mirarlas en la placa.
+- **Lo que es de esta placa** (D4) no entra ni se restaura: los contadores
+  de arranques, las marcas del volcado, el emparejamiento de Bluetooth,
+  las sesiones del portal, lo de la batería y los contadores del día.
+- **Restaurar** (D5): primero guarda lo que hay (`…-antes`, del mismo modo
+  y con la misma frase), después escribe. Una frase equivocada o un
+  respaldo de un P4OS más nuevo se rechazan antes de tocar nada. Una
+  preferencia que no está en el respaldo queda como estaba.
+- **Las apps**: el respaldo lleva la lista de los recibos de la Tienda con
+  sus extras; después de restaurar, Ajustes y el portal ofrecen pedírselas
+  a la Tienda. La cola de la Tienda pasó de 8 a 96 trabajos para eso.
+- **Ajustes → Respaldo** y la página **Respaldo** del portal (bajar el
+  archivo a la computadora, traer uno, restaurar, borrar).
+- **Un error que apareció al escribirlo:** `aos_hal_pref_foreach` leía
+  cada texto en 128 bytes, y uno más largo salía vacío (un certificado,
+  la lista de fuentes de la Tienda). Nada usaba esa función todavía.
+- **Probado:** `tests/backup_host`, 20 casos, con el servicio compilado
+  para la Mac. En el simulador: un respaldo simple y uno cifrado por la
+  API (el simple sin las dos credenciales de prueba, ninguno con su texto
+  a la vista), la página de Ajustes, restaurar con los dos toques, el
+  respaldo "de antes" que se arma solo, y la página del portal. Firmware
+  `rev1_3`: 7 092 560 bytes, 24 KB más.
+
+**Falta para darla por terminada** (lo que dice la tabla de etapas): en la
+placa, con la flash borrada, volver a los ajustes desde el archivo y que la
+Tienda ofrezca reinstalar. Y antes, más simple: un respaldo y una
+restauración en la placa como está, mirar qué claves quedaron afuera, y
+medir cuánto tarda el cifrado.
+
 ## Qué resuelve
 
 Hoy, si se borra la flash, se rompe la tarjeta o una actualización deja la
@@ -57,7 +106,8 @@ pasos para volver a tener la placa como estaba.
 | Los datos del usuario en la tarjeta | de KB a GB | por carpetas elegidas; las chicas por defecto |
 | Lo que se vuelve a bajar (apps, packs, emojis, idiomas) | 170 MB | **no se copia**: va la lista, y la Tienda reinstala |
 
-**D2. Un archivo, un formato.** `p4os-<nombre>-<fecha>.p4bak`: un zip sin
+**D2. Un archivo, un formato.** (En la etapa 1 quedó como un JSON: ver
+arriba.) `p4os-<nombre>-<fecha>.p4bak`: un zip sin
 compresión (el lector ya está en `aos_store.c`) con `backup.json` (versión
 del formato, de qué firmware y de qué placa salió, la fecha), `prefs.json`,
 `store.json` (apps instaladas con sus extras, y las fuentes), y los

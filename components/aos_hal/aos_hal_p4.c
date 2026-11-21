@@ -476,6 +476,7 @@ bool aos_hal_pref_erase(const char *key)
 
 /* The keys are listed first and visited afterwards, one read each, so that
  * visit() runs on the caller's stack and not on the flash helper's. */
+#define PREF_STR_MAX 4096
 int aos_hal_pref_foreach(aos_hal_pref_visit_t visit, void *ctx)
 {
     pref_op_t o = { .op = PREF_LIST, .cap = 2048 };     /* it was 256, and the board had 422 */
@@ -485,12 +486,18 @@ int aos_hal_pref_foreach(aos_hal_pref_visit_t visit, void *ctx)
         return 0;
     }
     int n = 0;
+    char *big = NULL;
     for (int i = 0; i < o.nkeys; i++) {
         const pref_key_t *k = &o.keys[i];
         if (k->str) {
-            char s[128] = "";
-            aos_hal_pref_get_str(k->key, s, sizeof s);
-            visit(k->key, true, 0, s, ctx);
+            /* as long as a string gets (NVS takes 4000 bytes): with the 128
+             * there were, a certificate or a list of addresses came out empty */
+            if (!big) big = heap_caps_malloc(PREF_STR_MAX, MALLOC_CAP_SPIRAM);
+            if (big) {
+                big[0] = 0;
+                aos_hal_pref_get_str(k->key, big, PREF_STR_MAX);
+                visit(k->key, true, 0, big, ctx);
+            }
         } else {
             int32_t v = 0;
             aos_hal_pref_get_i32(k->key, &v);
@@ -498,6 +505,7 @@ int aos_hal_pref_foreach(aos_hal_pref_visit_t visit, void *ctx)
         }
         n++;
     }
+    free(big);
     free(o.keys);
     return n;
 }

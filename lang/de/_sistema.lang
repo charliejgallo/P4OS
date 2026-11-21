@@ -10733,3 +10733,39 @@ No se pudo actualizar el sistema.	Das System konnte nicht aktualisiert werden.
 Está en la tarjeta	Ist auf der Karte
 Ya está en la tarjeta, copiado a mano. Obtenerlo lo revisa: si es el del catálogo no baja nada.	Ist bereits auf der Karte, von Hand kopiert. Beim Holen wird es geprüft: ist es das des Katalogs, wird nichts heruntergeladen.
 Ir a Ajustes, Actualización	Zu Einstellungen, Aktualisierung
+Respaldo	Sicherung
+restaurando…	stellt wieder her…
+respaldando…	sichert…
+restaurado: %d ajustes	wiederhergestellt: %d Einstellungen
+hecho	fertig
+ese respaldo no está	diese Sicherung ist nicht da
+no es un respaldo, o está dañado	keine Sicherung oder beschädigt
+esa no es su frase	das ist nicht ihre Passphrase
+es de un P4OS más nuevo	stammt von einem neueren P4OS
+no alcanzó la memoria	der Speicher hat nicht gereicht
+Ya hay un respaldo en curso	Es läuft bereits eine Sicherung
+No son la misma frase	Die Passphrasen stimmen nicht überein
+Una frase de seis letras o más	Eine Passphrase mit sechs oder mehr Zeichen
+La misma frase, otra vez	Dieselbe Passphrase noch einmal
+Respaldar	Sichern
+Una frase para cifrarlo	Eine Passphrase zum Verschlüsseln
+Tocá otra vez: pisa los ajustes de ahora	Noch einmal tippen: überschreibt die jetzigen Einstellungen
+La frase de este respaldo	Die Passphrase dieser Sicherung
+Restaurar	Wiederherstellen
+Reiniciando…	Neustart…
+Pedidas a la Tienda: %d	Beim Store angefordert: %d
+RESPALDAR	SICHERN
+Respaldar ahora	Jetzt sichern
+Respaldar todo, cifrado…	Alles sichern, verschlüsselt…
+Guarda en la tarjeta los ajustes de la placa y de sus apps, la lista de apps y el orden del inicio. Sin frase no lleva lo que parece una contraseña o una clave. Cifrado lleva todo, y sin su frase no se puede abrir.	Sichert auf der Karte die Einstellungen des Boards und seiner Apps, die App-Liste und die Anordnung des Startbildschirms. Ohne Passphrase fehlt, was wie ein Passwort oder Schlüssel aussieht. Verschlüsselt enthält sie alles und lässt sich ohne ihre Passphrase nicht öffnen.
+DESPUÉS DE RESTAURAR	NACH DEM WIEDERHERSTELLEN
+Pedir a la Tienda las %d apps que faltan	Die %d fehlenden Apps beim Store anfordern
+La mayoría de los ajustes vale recién después de reiniciar.	Die meisten Einstellungen gelten erst nach einem Neustart.
+EN LA TARJETA	AUF DER KARTE
+Todavía no hay ninguno	Noch keine vorhanden
+sin fecha	ohne Datum
+  ·  cifrado	  ·  verschlüsselt
+  ·  de antes de restaurar	  ·  von vor einer Wiederherstellung
+Tocar uno lo restaura: escribe sus ajustes sobre los de ahora, y lo que hay queda antes en un respaldo propio. Para guardarlo en una computadora o traer uno: el portal, Respaldo.	Antippen stellt sie wieder her: Ihre Einstellungen überschreiben die jetzigen, und das Vorhandene wird vorher in einer eigenen Sicherung abgelegt. Auf einem Computer aufbewahren oder eine holen: Portal, Sicherung.
+ya hay un respaldo en curso	es läuft bereits eine Sicherung
+falta name, o ya hay un respaldo en curso	name fehlt, oder es läuft bereits eine Sicherung

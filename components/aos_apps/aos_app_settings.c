@@ -40,11 +40,13 @@
 #include "aos_eth.h"
 #include "aos_flasher.h"
 #include "aos_store.h"
+#include "aos_backup.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
+#include <time.h>
 
 #if defined(AOS_SIM)
 static void *big_calloc(size_t n) { return calloc(1, n); }
@@ -58,13 +60,13 @@ static void *big_calloc(size_t n)
 #endif
 
 enum { PG_ROOT = 0, PG_WIFI, PG_DISPLAY, PG_SOUND, PG_WALL, PG_EXP, PG_LANG, PG_TIME, PG_ABOUT, PG_USB,
-       PG_STORAGE, PG_UPDATE, PG_DIAG, PG_LOCK, PG_BT, PG_DEV, PG_PORTAL, PG_NETS, PG_ETH, PG_COUNT };
+       PG_STORAGE, PG_UPDATE, PG_DIAG, PG_LOCK, PG_BT, PG_DEV, PG_PORTAL, PG_NETS, PG_ETH, PG_BACKUP, PG_COUNT };
 
 static const char *const PG_TITLE[PG_COUNT] = { N_("Ajustes"), N_("Wi-Fi"), N_("Pantalla"), N_("Sonido"), N_("Fondo"),
                                                 N_("Expansión"), N_("Idioma"), N_("Fecha y hora"), N_("Acerca de"),
                                                 "USB", N_("Almacenamiento"), N_("Actualización"), N_("Diagnóstico"),
                                                 N_("Pantalla de bloqueo"), "Bluetooth", N_("Desarrollador"),
-                                                N_("Portal web"), N_("Redes"), "Ethernet" };
+                                                N_("Portal web"), N_("Redes"), "Ethernet", N_("Respaldo") };
 
 static struct {
     lv_obj_t *root, *page, *kb, *ta, *overlay;
@@ -93,6 +95,8 @@ static struct {
     lv_obj_t *c6_state;             /* Update: the C6's firmware going in */
     lv_obj_t *fw_state;             /* Update: the firmware from GitHub, how far it is */
     uint32_t fw_shown;              /* and the state its rows were drawn with */
+    lv_obj_t *bk_state;             /* Backup: what the job in hand, or the last one, says */
+    uint32_t bk_shown;
     /* the page's own column, kept scrolled where it was when it is rebuilt */
     lv_obj_t *body;
     int body_pg;
@@ -893,6 +897,7 @@ static void build_root(lv_obj_t *p)
 
     g = group(p, NULL);
     row(g, AOS_SYM_DOWNLOAD, 0x34C759, _("Actualización"), aos_hal_firmware_version(), true, open_cb, (void *)PG_UPDATE);
+    row(g, AOS_SYM_DATABASE, 0x0A84FF, _("Respaldo"), NULL, true, open_cb, (void *)PG_BACKUP);
     row(g, AOS_SYM_PULSE, 0xFF453A, _("Diagnóstico"),
         aos_ui_safe_mode() ? _("modo seguro") : aos_hal_hang_restarts() ? _("hubo un cuelgue") : NULL, true, open_cb,
         (void *)PG_DIAG);
@@ -1923,6 +1928,167 @@ static void build_update(lv_obj_t *p)
     build_update_c6(p);
 }
 
+/* ---- Backup (components/aos_backup, docs/plan/RESPALDO.md) ---- */
+
+#define BK_SHOWN 6
+/* PSRAM: the list the page was drawn with, and a passphrase between its two
+ * sheets (docs/MEMORY.md). Nothing here is touched from an interrupt. */
+AOS_BSS_PSRAM static aos_backup_info_t s_bk[BK_SHOWN];
+static int s_bk_n;
+AOS_BSS_PSRAM static char s_bk_pass[64];
+AOS_BSS_PSRAM static char s_bk_name[AOS_BACKUP_NAME_MAX];
+
+static uint32_t bk_key(void)
+{
+    aos_backup_status_t st;
+    aos_backup_status(&st);
+    return st.jobs_done * 8u + (st.busy ? 1u : 0u) + (st.restart ? 2u : 0u) + (aos_hal_path_sd_root() ? 4u : 0u);
+}
+
+static void bk_refresh(void)
+{
+    if (!U.bk_state) return;
+    aos_backup_status_t st;
+    aos_backup_status(&st);
+    char v[160] = "";
+    if (st.busy) snprintf(v, sizeof v, "%s", !strcmp(st.job, "restore") ? _("restaurando…") : _("respaldando…"));
+    else if (!aos_hal_path_sd_root()) snprintf(v, sizeof v, "%s", _("no hay tarjeta"));
+    else if (!st.last_job[0]) v[0] = 0;
+    else if (st.last_ok && !strcmp(st.last_job, "restore")) snprintf(v, sizeof v, _("restaurado: %d ajustes"), st.written);
+    else if (st.last_ok) snprintf(v, sizeof v, "%s", _("hecho"));
+    else {
+        switch (st.last_kind) {
+        case AOS_BACKUP_E_CARD:       snprintf(v, sizeof v, "%s", _("no se pudo escribir en la tarjeta")); break;
+        case AOS_BACKUP_E_NOT_FOUND:  snprintf(v, sizeof v, "%s", _("ese respaldo no está")); break;
+        case AOS_BACKUP_E_NOT_ONE:    snprintf(v, sizeof v, "%s", _("no es un respaldo, o está dañado")); break;
+        case AOS_BACKUP_E_PASSPHRASE: snprintf(v, sizeof v, "%s", _("esa no es su frase")); break;
+        case AOS_BACKUP_E_NEWER:      snprintf(v, sizeof v, "%s", _("es de un P4OS más nuevo")); break;
+        case AOS_BACKUP_E_MEMORY:     snprintf(v, sizeof v, "%s", _("no alcanzó la memoria")); break;
+        default:                      snprintf(v, sizeof v, "%s", _("no se pudo")); break;
+        }
+    }
+    lv_label_set_text(U.bk_state, v);
+}
+
+static void bk_make_cb(lv_event_t *e)
+{
+    (void)e;
+    if (!aos_backup_make(NULL)) aos_ui_toast(_("Ya hay un respaldo en curso"), 2000);
+}
+
+/* A passphrase is typed twice: nobody can read a sealed backup back to
+ * check it, and a slip of the finger would lock it for good. */
+static void bk_pass2_done(const char *text)
+{
+    bool same = !strcmp(text, s_bk_pass);
+    if (!same) aos_ui_toast(_("No son la misma frase"), 2500);
+    else if (!aos_backup_make(s_bk_pass)) aos_ui_toast(_("Ya hay un respaldo en curso"), 2000);
+    memset(s_bk_pass, 0, sizeof s_bk_pass);
+}
+
+static void bk_pass1_done(const char *text)
+{
+    if (strlen(text) < 6) { aos_ui_toast(_("Una frase de seis letras o más"), 2500); return; }
+    snprintf(s_bk_pass, sizeof s_bk_pass, "%.63s", text);
+    s_kb_secret = true;
+    kb_open(_("La misma frase, otra vez"), "", 63, _("Respaldar"), bk_pass2_done);
+}
+
+static void bk_make_sealed_cb(lv_event_t *e)
+{
+    (void)e;
+    s_kb_secret = true;
+    kb_open(_("Una frase para cifrarlo"), "", 63, _("Seguir"), bk_pass1_done);
+}
+
+static void bk_unlock_done(const char *text)
+{
+    if (!aos_backup_restore(s_bk_name, text)) aos_ui_toast(_("Ya hay un respaldo en curso"), 2000);
+}
+
+static void bk_restore_cb(lv_event_t *e)
+{
+    int i = (int)(intptr_t)lv_obj_get_user_data(lv_event_get_current_target(e));
+    if (i < 0 || i >= s_bk_n) return;
+    if (!second_tap(e, _("Tocá otra vez: pisa los ajustes de ahora"))) return;
+    snprintf(s_bk_name, sizeof s_bk_name, "%s", s_bk[i].name);
+    if (s_bk[i].sealed) {
+        s_kb_secret = true;
+        kb_open(_("La frase de este respaldo"), "", 63, _("Restaurar"), bk_unlock_done);
+    } else if (!aos_backup_restore(s_bk_name, NULL)) aos_ui_toast(_("Ya hay un respaldo en curso"), 2000);
+}
+
+static void bk_restart_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez para reiniciar"))) return;
+    aos_ui_toast(_("Reiniciando…"), 2000);
+    lv_timer_t *t = lv_timer_create(reboot_cb, 1500, NULL);
+    lv_timer_set_repeat_count(t, 1);
+}
+
+/* The apps the restored backup lists and the card lacks: asked of the
+ * Tienda, each with the extras it had. */
+static void bk_apps_cb(lv_event_t *e)
+{
+    (void)e;
+    aos_backup_status_t st;
+    aos_backup_status(&st);
+    aos_backup_app_t *apps = big_calloc(sizeof *apps * 96);
+    int n = apps ? aos_backup_missing_apps(st.name, apps, 96) : 0, asked = 0;
+    for (int i = 0; i < n; i++) asked += aos_store_install(apps[i].file, apps[i].packs[0] ? apps[i].packs : "need");
+    free(apps);
+    char msg[80];
+    snprintf(msg, sizeof msg, _("Pedidas a la Tienda: %d"), asked);
+    aos_ui_toast(msg, 2500);
+    aos_ui_open("aos.store");
+}
+
+static void build_backup(lv_obj_t *p)
+{
+    aos_backup_status_t st;
+    aos_backup_status(&st);
+    U.bk_shown = bk_key();
+    bool card = aos_hal_path_sd_root() != NULL;
+
+    lv_obj_t *g = group(p, _("RESPALDAR"));
+    U.bk_state = lv_obj_get_user_data(row(g, NULL, 0, _("Estado"), "", false, NULL, NULL));
+    bk_refresh();
+    if (card && !st.busy) {
+        action_row(g, _("Respaldar ahora"), AOS_C_ACCENT, bk_make_cb);
+        action_row(g, _("Respaldar todo, cifrado…"), AOS_C_ACCENT, bk_make_sealed_cb);
+    }
+    note(p, _("Guarda en la tarjeta los ajustes de la placa y de sus apps, la lista de apps y el orden del inicio. Sin frase no lleva lo que parece una contraseña o una clave. Cifrado lleva todo, y sin su frase no se puede abrir."));
+
+    if (st.restart && !st.busy) {
+        g = group(p, _("DESPUÉS DE RESTAURAR"));
+        action_row(g, _("Reiniciar ahora"), AOS_C_ACCENT, bk_restart_cb);
+        aos_backup_app_t *apps = big_calloc(sizeof *apps * 96);
+        int n = apps ? aos_backup_missing_apps(st.name, apps, 96) : 0;
+        free(apps);
+        if (n > 0) {
+            static char label[72];
+            snprintf(label, sizeof label, _("Pedir a la Tienda las %d apps que faltan"), n);
+            action_row(g, label, AOS_C_ACCENT, bk_apps_cb);
+        }
+        note(p, _("La mayoría de los ajustes vale recién después de reiniciar."));
+    }
+
+    s_bk_n = card ? aos_backup_list(s_bk, BK_SHOWN) : 0;
+    g = group(p, _("EN LA TARJETA"));
+    if (!s_bk_n) row(g, NULL, 0, card ? _("Todavía no hay ninguno") : _("No hay tarjeta"), NULL, false, NULL, NULL);
+    for (int i = 0; i < s_bk_n && !st.busy; i++) {
+        char when[40] = "", label[96];
+        time_t t = (time_t)s_bk[i].made;
+        struct tm tm;
+        if (t && localtime_r(&t, &tm)) strftime(when, sizeof when, "%d/%m/%Y %H:%M", &tm);
+        snprintf(label, sizeof label, "%s%s%s", when[0] ? when : _("sin fecha"),
+                 s_bk[i].sealed ? _("  ·  cifrado") : "", s_bk[i].before ? _("  ·  de antes de restaurar") : "");
+        lv_obj_t *r = action_row(g, label, AOS_C_TEXT, bk_restore_cb);
+        lv_obj_set_user_data(r, (void *)(intptr_t)i);
+    }
+    note(p, _("Tocar uno lo restaura: escribe sus ajustes sobre los de ahora, y lo que hay queda antes en un respaldo propio. Para guardarlo en una computadora o traer uno: el portal, Respaldo."));
+}
+
 /* ---- Diagnostics ---- */
 
 static const char *reset_text(const char *k)
@@ -2906,6 +3072,7 @@ static void fill(lv_obj_t *col, int pg, bool back)
     case PG_BT: build_bt(col); break;
     case PG_STORAGE: build_storage(col); break;
     case PG_UPDATE: build_update(col); break;
+    case PG_BACKUP: build_backup(col); break;
     case PG_DIAG: build_diag(col); break;
     case PG_LOCK: build_lock(col); break;
     case PG_DEV: build_dev(col); break;
@@ -2934,6 +3101,7 @@ static void build(int pg)
     U.dg_temp = U.dg_cpu = U.dg_int = U.dg_psram = U.dg_up = NULL;
     U.c6_state = NULL;
     U.fw_state = NULL;
+    U.bk_state = NULL;
     U.armed = NULL;
     memset(U.usb_tick, 0, sizeof U.usb_tick);
     if (!U.land) {
@@ -3002,6 +3170,8 @@ static void timer_cb(lv_timer_t *t)
     if (U.c6_state) c6_refresh();
     if (pg == PG_UPDATE && U.fw_shown != fw_key() && !U.overlay && !U.armed) build(pg);   /* a version found, a download ended */
     if (U.fw_state) fw_refresh();
+    if (pg == PG_BACKUP && U.bk_shown != bk_key() && !U.overlay && !U.armed) build(pg);   /* a backup made, a restore ended */
+    if (U.bk_state) bk_refresh();
     if (U.armed && (uint32_t)aos_hal_uptime_ms() - U.armed_ms > 5000) disarm();
 }
 
@@ -3042,7 +3212,7 @@ static void settings_show(aos_app_t *self, void *inst)
     static const struct { const char *key; int pg; } K[] = {
         { "network", PG_NETS }, { "ethernet", PG_ETH }, { "wifi", PG_WIFI }, { "display", PG_DISPLAY }, { "sound", PG_SOUND }, { "wallpaper", PG_WALL },
         { "expansion", PG_EXP }, { "language", PG_LANG }, { "time", PG_TIME }, { "about", PG_ABOUT },
-        { "usb", PG_USB }, { "storage", PG_STORAGE }, { "update", PG_UPDATE }, { "diag", PG_DIAG },
+        { "usb", PG_USB }, { "storage", PG_STORAGE }, { "update", PG_UPDATE }, { "backup", PG_BACKUP }, { "diag", PG_DIAG },
         { "lock", PG_LOCK }, { "bluetooth", PG_BT }, { "developer", PG_DEV }, { "portal", PG_PORTAL },
     };
     for (size_t i = 0; i < sizeof K / sizeof K[0]; i++) {

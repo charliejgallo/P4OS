@@ -10733,3 +10733,39 @@ No se pudo actualizar el sistema.	The system could not be updated.
 Está en la tarjeta	It is on the card
 Ya está en la tarjeta, copiado a mano. Obtenerlo lo revisa: si es el del catálogo no baja nada.	It is on the card already, copied by hand. Getting it checks it: if it is the catalogue's, nothing is downloaded.
 Ir a Ajustes, Actualización	Go to Settings, Update
+Respaldo	Backup
+restaurando…	restoring…
+respaldando…	backing up…
+restaurado: %d ajustes	restored: %d settings
+hecho	done
+ese respaldo no está	that backup is not there
+no es un respaldo, o está dañado	it is not a backup, or it is damaged
+esa no es su frase	that is not its passphrase
+es de un P4OS más nuevo	it is from a newer P4OS
+no alcanzó la memoria	not enough memory
+Ya hay un respaldo en curso	A backup is already under way
+No son la misma frase	They are not the same passphrase
+Una frase de seis letras o más	A passphrase of six letters or more
+La misma frase, otra vez	The same passphrase, again
+Respaldar	Back up
+Una frase para cifrarlo	A passphrase to seal it
+Tocá otra vez: pisa los ajustes de ahora	Tap again: it overwrites the settings there are
+La frase de este respaldo	This backup's passphrase
+Restaurar	Restore
+Reiniciando…	Restarting…
+Pedidas a la Tienda: %d	Asked of the Store: %d
+RESPALDAR	BACK UP
+Respaldar ahora	Back up now
+Respaldar todo, cifrado…	Back up everything, sealed…
+Guarda en la tarjeta los ajustes de la placa y de sus apps, la lista de apps y el orden del inicio. Sin frase no lleva lo que parece una contraseña o una clave. Cifrado lleva todo, y sin su frase no se puede abrir.	It keeps on the card the settings of the board and of its apps, the list of apps and the order of the home screen. Without a passphrase it leaves out what looks like a password or a key. Sealed it carries everything, and without its passphrase it cannot be opened.
+DESPUÉS DE RESTAURAR	AFTER RESTORING
+Pedir a la Tienda las %d apps que faltan	Ask the Store for the %d apps that are missing
+La mayoría de los ajustes vale recién después de reiniciar.	Most settings take effect only after a restart.
+EN LA TARJETA	ON THE CARD
+Todavía no hay ninguno	There is none yet
+sin fecha	no date
+  ·  cifrado	  ·  sealed
+  ·  de antes de restaurar	  ·  from before a restore
+Tocar uno lo restaura: escribe sus ajustes sobre los de ahora, y lo que hay queda antes en un respaldo propio. Para guardarlo en una computadora o traer uno: el portal, Respaldo.	Tapping one restores it: it writes its settings over the ones there are, and what there is goes first into a backup of its own. To keep it on a computer or bring one: the portal, Backup.
+ya hay un respaldo en curso	a backup is already under way
+falta name, o ya hay un respaldo en curso	name is missing, or a backup is already under way

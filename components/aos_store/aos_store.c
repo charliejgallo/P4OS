@@ -82,7 +82,7 @@
 #define PATH_MAX_       160             /* a path of the card, from its root */
 #define FULL_MAX        224             /* with the mount point in front */
 #define BLOCK           (64 * 1024)
-#define QUEUE           8
+#define QUEUE           96              /* a backup's whole list of apps asked for at once (aos_backup.h) */
 #define STACK           (12 * 1024)
 
 /* ---- state ----------------------------------------------------------------- */

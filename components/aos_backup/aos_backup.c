@@ -400,7 +400,7 @@ int aos_backup_make_now(const char *passphrase, bool before, char *name_out, siz
     if (!spit(rel, text, strlen(text))) { fail(&e, AOS_BACKUP_E_CARD, "could not write %.80s", rel); goto out; }
     const char *base = strrchr(rel, '/');
     if (name_out) snprintf(name_out, name_len, "%s", base ? base + 1 : rel);
-    snprintf(e.why, sizeof e.why, "%s: %d preferences%s, %d apps, %u bytes", base ? base + 1 : rel, g.n,
+    snprintf(e.why, sizeof e.why, "%.60s: %d preferences%s, %d apps, %u bytes", base ? base + 1 : rel, g.n,
              sealed ? ", sealed" : "", cJSON_GetArraySize(apps), (unsigned)strlen(text));
 out:
     if (text) memset(text, 0, strlen(text));
@@ -561,7 +561,7 @@ int aos_backup_restore_now(const char *name, const char *passphrase, int *writte
         if (!cJSON_IsString(file) || (strcmp(file->string, "menu.txt") && strcmp(file->string, "modules.txt"))) continue;
         if (!spit(file->string, file->valuestring, strlen(file->valuestring))) aos_hal_log(TAG, "%s was not written back", file->string);
     }
-    snprintf(e.why, sizeof e.why, "%d preferences written from %.40s; what there was is in %.40s", n, name, kept);
+    snprintf(e.why, sizeof e.why, "%d preferences written; what there was is in %.60s", n, kept);
 out:
     if (plain) memset(plain, 0, strlen(plain));
     free(plain);

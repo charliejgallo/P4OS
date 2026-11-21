@@ -2368,3 +2368,37 @@ el catálogo no ofrece firmware para esta placa (%s)	der Katalog bietet keine Fi
 La placa lo baja de la última release publicada, lo verifica entero contra el tamaño y el SHA-256 del catálogo antes de escribir nada, y lo deja en la otra ranura. No se reinicia sola.	Das Board lädt sie aus dem letzten veröffentlichten Release, prüft sie vollständig gegen Größe und SHA-256 des Katalogs, bevor etwas geschrieben wird, und legt sie im anderen Slot ab. Es startet nicht von selbst neu.
 Bajar e instalar %s	%s herunterladen und installieren
 Desde GitHub	Von GitHub
+Respaldo	Sicherung
+No hay tarjeta, o no se pudo escribir en ella.	Keine Karte, oder sie konnte nicht beschrieben werden.
+Ese respaldo no está en la tarjeta.	Diese Sicherung ist nicht auf der Karte.
+El archivo no es un respaldo, o está dañado.	Die Datei ist keine Sicherung oder beschädigt.
+Está cifrado, y esa no es su frase.	Sie ist verschlüsselt, und das ist nicht ihre Passphrase.
+Lo hizo un P4OS más nuevo que este: actualizá primero.	Sie stammt von einem neueren P4OS: erst aktualisieren.
+Ya hay uno en curso.	Es läuft bereits eine.
+Este respaldo está cifrado. Su frase:	Diese Sicherung ist verschlüsselt. Ihre Passphrase:
+¿Restaurar el respaldo del %s? Escribe sus %s ajustes sobre los de ahora; lo que hay se guarda antes en un respaldo propio.	Die Sicherung vom %s wiederherstellen? Ihre %s Einstellungen überschreiben die jetzigen; das Vorhandene wird vorher in einer eigenen Sicherung abgelegt.
+cifrado	verschlüsselt
+sin credenciales	ohne Zugangsdaten
+de antes de restaurar	von vor einer Wiederherstellung
+%s ajustes · %s apps en su lista · %s · P4OS %s	%s Einstellungen · %s Apps in der Liste · %s · P4OS %s
+No lleva %s ajustes que parecen credenciales.	Es fehlen %s Einstellungen, die wie Zugangsdaten aussehen.
+Restaurar	Wiederherstellen
+¿Borrar este respaldo de la tarjeta?	Diese Sicherung von der Karte löschen?
+Frase para cifrarlo (opcional)	Passphrase zum Verschlüsseln (optional)
+El archivo tiene que llamarse algo.p4bak, sin espacios	Die Datei muss etwas.p4bak heißen, ohne Leerzeichen
+Subido: ahora se puede restaurar	Hochgeladen: kann jetzt wiederhergestellt werden
+Restaurando…	Stellt wieder her…
+Respaldando…	Sichert…
+Restaurado: %s ajustes escritos. La mayoría vale recién después de reiniciar.	Wiederhergestellt: %s Einstellungen geschrieben. Die meisten gelten erst nach einem Neustart.
+Hecho: %s	Fertig: %s
+Un respaldo guarda en un archivo de la tarjeta los ajustes de la placa y de sus apps, la lista de apps que instaló la Tienda y el orden del inicio. Las apps no se copian: la Tienda las vuelve a bajar de esa lista.	Eine Sicherung legt in einer Datei auf der Karte die Einstellungen des Boards und seiner Apps, die Liste der vom Store installierten Apps und die Anordnung des Startbildschirms ab. Die Apps werden nicht kopiert: Der Store lädt sie anhand dieser Liste erneut.
+Sin frase, el archivo se puede leer y no lleva lo que parece una credencial (contraseñas, tokens, claves). Con una frase lleva todo, cifrado: sin ella no hay forma de abrirlo.	Ohne Passphrase ist die Datei lesbar und enthält nichts, was wie Zugangsdaten aussieht (Passwörter, Tokens, Schlüssel). Mit Passphrase enthält sie alles, verschlüsselt: ohne sie lässt sie sich nicht öffnen.
+No hay tarjeta: no hay dónde guardarlo.	Keine Karte: kein Platz zum Ablegen.
+Respaldar ahora	Jetzt sichern
+Traer un respaldo…	Sicherung hochladen…
+Reiniciar la placa	Board neu starten
+Ese respaldo lista %s apps que no están en la tarjeta: %s	Diese Sicherung nennt %s Apps, die nicht auf der Karte sind: %s
+Pedidas a la Tienda: %s	Beim Store angefordert: %s
+Pedirle a la Tienda que las instale	Den Store bitten, sie zu installieren
+En la tarjeta	Auf der Karte
+Todavía no hay ninguno.	Noch keine vorhanden.

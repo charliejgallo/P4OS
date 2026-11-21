@@ -183,6 +183,7 @@ add_executable(p4os_sim
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_radio.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_live.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_store.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_backup.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_live.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_net.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_eth.c
@@ -220,6 +221,7 @@ add_executable(p4os_sim
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_tls.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_fetch.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_store/aos_store.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_backup/aos_backup.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_crypto.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_logring.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_radio.c
@@ -274,6 +276,7 @@ target_include_directories(p4os_sim PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_store/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_backup/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/monocypher/include
     ${SDL2_INCLUDE_DIRS}

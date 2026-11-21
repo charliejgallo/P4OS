@@ -44,7 +44,7 @@ its SHA-256 and not downloaded again.
 **Installing** downloads the package to a folder of its own, checks it,
 and only then moves its files into place and loads the app: its icon is on
 the home screen at once, with no restart. A bar on top shows how far it
-is, and up to eight jobs wait in line. A download that is cut goes on from
+is, and the jobs asked for meanwhile wait in line. A download that is cut goes on from
 where it was, also after the board restarted.
 
 **Updating.** The Store looks at the catalogue when it is opened, and the

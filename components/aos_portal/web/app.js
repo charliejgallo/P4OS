@@ -42,7 +42,7 @@ async function loadCatalog(file) {
 }
 /* the menu that index.html brings, translated where it stands */
 const NAV_NAMES = [N_('Pantalla'), N_('Inicio'), N_('Tienda'), N_('Wi-Fi'), N_('Red'), N_('Terminal'), N_('Programador'), N_('Banco'),
-  N_('Macro pad'), N_('Expansión'), N_('Archivos'), N_('Ajustes'), N_('Firmware'), N_('Registro')];
+  N_('Macro pad'), N_('Expansión'), N_('Archivos'), N_('Ajustes'), N_('Respaldo'), N_('Firmware'), N_('Registro')];
 async function setLang(code) {
   LANG = /^[a-z]{2,8}$/.test(code || '') ? code : 'es';
   LOCALE = { es: 'es-AR', en: 'en-US', de: 'de-DE' }[LANG] || LANG;
@@ -3319,7 +3319,111 @@ function pageTienda() {
   return () => { gone = true; clearTimeout(timer); };
 }
 
-const PAGES = { pantalla: pagePantalla, inicio: pageInicio, tienda: pageTienda, wifi: pageWifi, red: pageRed, ha: pageHa, terminal: pageTerminal, programador: pageProgramador, banco: pageBanco, claude: pageClaude, mqtt: pageMqtt, macropad: pageMacropad, expansion: pageExpansion, archivos: pageArchivos, ajustes: pageAjustes, firmware: pageFirmware, registro: pageRegistro };
+/* ---- Respaldo: what the board holds and cannot fetch again, in one file ---- */
+function pageRespaldo() {
+  let gone = false, timer = 0, st = null, missing = null, missingOf = '', seen = -1;
+  const top = h('div', { class: 'card pad' }), list = h('div', {}), msg = h('div', { class: 'note', style: 'margin-top:8px' });
+  const WHY = { card: N_('No hay tarjeta, o no se pudo escribir en ella.'), not_found: N_('Ese respaldo no está en la tarjeta.'),
+                not_one: N_('El archivo no es un respaldo, o está dañado.'), passphrase: N_('Está cifrado, y esa no es su frase.'),
+                newer: N_('Lo hizo un P4OS más nuevo que este: actualizá primero.'), memory: N_('No alcanzó la memoria.'),
+                busy: N_('Ya hay uno en curso.'), other: N_('Algo salió mal.') };
+  const when = b => b.made ? new Date(b.made * 1000).toLocaleString(LOCALE) : tr('sin fecha');
+  const act = async (what, body) => {
+    try { st = await post(what, body); draw(); poll(300); }
+    catch (e) { toast(e.message, true); }
+  };
+  async function restore(b) {
+    let pass = '';
+    if (b.sealed) {
+      pass = prompt(tr('Este respaldo está cifrado. Su frase:')) || '';
+      if (!pass) return;
+    }
+    if (!confirm(tr('¿Restaurar el respaldo del %s? Escribe sus %s ajustes sobre los de ahora; lo que hay se guarda antes en un respaldo propio.', when(b), b.prefs))) return;
+    missing = null;
+    act('backup/restore', { name: b.name, pass });
+  }
+  function card(b) {
+    return h('div', { class: 'card pad', style: 'margin-bottom:10px' },
+      h('div', { style: 'display:flex;gap:14px;align-items:flex-start' },
+        h('div', { class: 'grow' },
+          h('div', {}, h('b', {}, when(b)), ' ',
+            b.sealed ? h('span', { class: 'pill', style: 'color:var(--green)' }, tr('cifrado')) : h('span', { class: 'pill' }, tr('sin credenciales')),
+            b.before ? h('span', { class: 'pill', style: 'color:var(--orange)' }, tr('de antes de restaurar')) : null),
+          h('div', { class: 'small muted', style: 'margin:4px 0' },
+            tr('%s ajustes · %s apps en su lista · %s · P4OS %s', b.prefs, b.apps, fmtBytes(b.size), b.fw) + (b.board ? ' · ' + b.board : '')),
+          !b.sealed && b.left_out ? h('div', { class: 'small muted' }, tr('No lleva %s ajustes que parecen credenciales.', b.left_out)) : null,
+          h('div', { class: 'small mono muted', style: 'word-break:break-all' }, b.name)),
+        h('div', { class: 'btns', style: 'flex-direction:column;align-items:stretch' },
+          h('a', { class: 'btn', href: '/api/fs/get?path=' + encodeURIComponent('/backups/' + b.name) + '&attachment=1', download: b.name }, tr('Bajar')),
+          h('button', { class: 'btn', disabled: st.busy, onclick: () => restore(b) }, tr('Restaurar')),
+          h('button', { class: 'btn red', disabled: st.busy, onclick: () => { if (confirm(tr('¿Borrar este respaldo de la tarjeta?'))) act('backup/delete', { name: b.name }); } }, tr('Borrar')))));
+  }
+  function draw() {
+    if (gone || !st) return;
+    const pass = h('input', { type: 'password', placeholder: tr('Frase para cifrarlo (opcional)'), autocomplete: 'new-password', style: 'flex:1;min-width:200px' });
+    const up = h('input', { type: 'file', accept: '.p4bak', style: 'display:none', onchange: async e => {
+      const f = e.target.files[0];
+      if (!f) return;
+      if (!/^[A-Za-z0-9_.-]+\.p4bak$/.test(f.name)) { toast(tr('El archivo tiene que llamarse algo.p4bak, sin espacios'), true); return; }
+      try {
+        const r = await fetch('/api/fs/put?path=' + encodeURIComponent('/backups/' + f.name), { method: 'PUT', body: f });
+        if (!r.ok) throw new Error(r.statusText);
+        toast(tr('Subido: ahora se puede restaurar'));
+        await load(); draw();
+      } catch (x) { toast(x.message, true); }
+    } });
+    const restored = !st.busy && st.last_ok && st.last_job === 'restore';
+    msg.textContent = st.busy ? (st.job === 'restore' ? tr('Restaurando…') : tr('Respaldando…'))
+      : !st.last ? ''
+      : !st.last_ok ? tr(WHY[st.last_kind] || WHY.other) + ' (' + st.last + ')'
+      : restored ? tr('Restaurado: %s ajustes escritos. La mayoría vale recién después de reiniciar.', st.written)
+      : tr('Hecho: %s', st.last_name);
+    msg.style.color = !st.busy && st.last && !st.last_ok ? 'var(--orange)' : '';
+    put(top,
+      h('div', { class: 'note' }, tr('Un respaldo guarda en un archivo de la tarjeta los ajustes de la placa y de sus apps, la lista de apps que instaló la Tienda y el orden del inicio. Las apps no se copian: la Tienda las vuelve a bajar de esa lista.')),
+      h('div', { class: 'note', style: 'margin-top:6px' }, tr('Sin frase, el archivo se puede leer y no lleva lo que parece una credencial (contraseñas, tokens, claves). Con una frase lleva todo, cifrado: sin ella no hay forma de abrirlo.')),
+      !st.card ? h('div', { class: 'note', style: 'color:var(--orange);margin-top:6px' }, tr('No hay tarjeta: no hay dónde guardarlo.')) : null,
+      h('div', { class: 'btns', style: 'margin-top:10px' }, pass,
+        h('button', { class: 'btn pri', disabled: st.busy || !st.card, onclick: () => act('backup', { pass: pass.value }) }, tr('Respaldar ahora')),
+        h('button', { class: 'btn', disabled: st.busy || !st.card, onclick: () => up.click() }, tr('Traer un respaldo…')), up),
+      msg,
+      st.restart ? h('div', { class: 'btns', style: 'margin-top:8px' },
+        h('button', { class: 'btn pri', onclick: async () => { if (confirm(tr('¿Reiniciar la placa?'))) { await post('restart').catch(() => {}); toast(tr('Reiniciando…')); } } }, tr('Reiniciar la placa'))) : null,
+      missing && missing.length ? h('div', { style: 'margin-top:10px' },
+        h('div', { class: 'note' }, tr('Ese respaldo lista %s apps que no están en la tarjeta: %s', missing.length, missing.map(a => a.file).join(', '))),
+        h('div', { class: 'btns', style: 'margin-top:6px' },
+          h('button', { class: 'btn', onclick: async () => {
+            try { const r = await post('backup/apps', { name: missingOf }); toast(tr('Pedidas a la Tienda: %s', r.asked)); missing = null; draw(); }
+            catch (x) { toast(x.message, true); } } }, tr('Pedirle a la Tienda que las instale')))) : null);
+    put(list, h('h2', {}, tr('En la tarjeta')),
+      st.backups.length ? st.backups.map(card) : h('div', { class: 'card pad muted' }, tr('Todavía no hay ninguno.')));
+  }
+  async function load() {
+    st = await api('backup');
+    // the apps a restored backup lists and the card lacks: asked once it went in
+    if (!st.busy && st.last_ok && st.last_job === 'restore' && seen !== st.jobs_done) {
+      seen = st.jobs_done;
+      missingOf = st.last_name;
+      try { missing = (await api('backup/apps?name=' + encodeURIComponent(st.last_name))).apps; } catch { missing = null; }
+    }
+  }
+  function poll(ms) {
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      if (gone) return;
+      const was = st && st.busy;
+      try { await load(); } catch {}
+      if (was || (st && st.busy)) draw();
+      poll(st && st.busy ? 400 : 5000);
+    }, ms);
+  }
+  put(main, h('h1', {}, tr('Respaldo')), top, list);
+  load().then(draw).catch(e => put(top, tr('No se pudo leer: %s', e.message)));
+  poll(1000);
+  return () => { gone = true; clearTimeout(timer); };
+}
+
+const PAGES = { pantalla: pagePantalla, inicio: pageInicio, tienda: pageTienda, wifi: pageWifi, red: pageRed, ha: pageHa, terminal: pageTerminal, programador: pageProgramador, banco: pageBanco, claude: pageClaude, mqtt: pageMqtt, macropad: pageMacropad, expansion: pageExpansion, archivos: pageArchivos, ajustes: pageAjustes, respaldo: pageRespaldo, firmware: pageFirmware, registro: pageRegistro };
 
 /* ---- the apps' own pages (docs/PORTAL-PAGES.md) ----
  * An app brings its page in apps/<x>/web/<x>.js; tools/install_apps.sh puts

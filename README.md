@@ -1186,7 +1186,7 @@ own rules ([docs/SSH.md](docs/SSH.md)).
 The pages are Networks (the way out, Wi-Fi with the access point,
 Ethernet), Bluetooth, USB (each mode
 explained), Web portal (trusted networks, the password), Display, Lock screen, Sound, Wallpaper, Expansion, Storage,
-Language, Date and time, Update, Diagnostics, About and Developer.
+Language, Date and time, Update, Backup, Diagnostics, About and Developer.
 
 - **Networks** (Redes): where the board goes out, by wire or by Wi-Fi, and
   each connection with its state. Wi-Fi keeps the networks and the board's
@@ -1201,6 +1201,9 @@ Language, Date and time, Update, Diagnostics, About and Developer.
 - **Storage:** what fills the card by kind of file, and eject.
 - **Update:** the next version from GitHub, downloaded, checked and
   installed on a tap (since 0.30); both slots, and going back.
+- **Backup:** the preferences, the list of apps and the home screen's
+  order in one file on the card, plain or sealed with a passphrase, and
+  back ([docs/BACKUP.md](docs/BACKUP.md)).
 - **Diagnostics:** chip temperature, CPU, memory, the reset reason, safe mode,
   the hang watchdog's restarts, the C6's firmware, and the crash dump.
 - **About:** the portal's addresses, with a QR code for the phone.
@@ -1547,6 +1550,7 @@ Where something is a guess, it says so.
 | | |
 |---|---|
 | [INSTALL.md](docs/INSTALL.md) | a new board from nothing, updating from 0.2x, adding apps, the firmware from GitHub |
+| [BACKUP.md](docs/BACKUP.md) | backups: what one holds, plain and sealed, restoring, the file's format, the portal's calls |
 | [STORE.md](docs/STORE.md) | the Store: what it does and checks, other people's sources, a catalogue's format, the portal's calls, what was measured |
 | [BUILDING.md](docs/BUILDING.md) | building, flashing, OTA, crash dumps, the watchdogs, the CI and how a release is made |
 | [MEMORY.md](docs/MEMORY.md) | internal RAM vs PSRAM, the panel's three frame buffers, PSRAM bandwidth, the audit |

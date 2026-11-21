@@ -2368,3 +2368,37 @@ el catálogo no ofrece firmware para esta placa (%s)	the catalogue offers no fir
 La placa lo baja de la última release publicada, lo verifica entero contra el tamaño y el SHA-256 del catálogo antes de escribir nada, y lo deja en la otra ranura. No se reinicia sola.	The board downloads it from the latest published release, checks it whole against the size and the SHA-256 of the catalogue before writing anything, and leaves it in the other slot. It does not restart by itself.
 Bajar e instalar %s	Download and install %s
 Desde GitHub	From GitHub
+Respaldo	Backup
+No hay tarjeta, o no se pudo escribir en ella.	There is no card, or it could not be written.
+Ese respaldo no está en la tarjeta.	That backup is not on the card.
+El archivo no es un respaldo, o está dañado.	The file is not a backup, or it is damaged.
+Está cifrado, y esa no es su frase.	It is sealed, and that is not its passphrase.
+Lo hizo un P4OS más nuevo que este: actualizá primero.	A newer P4OS than this one made it: update first.
+Ya hay uno en curso.	One is already under way.
+Este respaldo está cifrado. Su frase:	This backup is sealed. Its passphrase:
+¿Restaurar el respaldo del %s? Escribe sus %s ajustes sobre los de ahora; lo que hay se guarda antes en un respaldo propio.	Restore the backup of %s? It writes its %s settings over the ones there are; what there is goes first into a backup of its own.
+cifrado	sealed
+sin credenciales	no credentials
+de antes de restaurar	from before a restore
+%s ajustes · %s apps en su lista · %s · P4OS %s	%s settings · %s apps in its list · %s · P4OS %s
+No lleva %s ajustes que parecen credenciales.	It leaves out %s settings that look like credentials.
+Restaurar	Restore
+¿Borrar este respaldo de la tarjeta?	Delete this backup from the card?
+Frase para cifrarlo (opcional)	A passphrase to seal it (optional)
+El archivo tiene que llamarse algo.p4bak, sin espacios	The file has to be named something.p4bak, with no spaces
+Subido: ahora se puede restaurar	Uploaded: it can be restored now
+Restaurando…	Restoring…
+Respaldando…	Backing up…
+Restaurado: %s ajustes escritos. La mayoría vale recién después de reiniciar.	Restored: %s settings written. Most take effect only after a restart.
+Hecho: %s	Done: %s
+Un respaldo guarda en un archivo de la tarjeta los ajustes de la placa y de sus apps, la lista de apps que instaló la Tienda y el orden del inicio. Las apps no se copian: la Tienda las vuelve a bajar de esa lista.	A backup keeps in a file on the card the settings of the board and of its apps, the list of apps the Store installed and the order of the home screen. The apps are not copied: the Store downloads them again from that list.
+Sin frase, el archivo se puede leer y no lleva lo que parece una credencial (contraseñas, tokens, claves). Con una frase lleva todo, cifrado: sin ella no hay forma de abrirlo.	Without a passphrase the file can be read and leaves out what looks like a credential (passwords, tokens, keys). With a passphrase it carries everything, sealed: without it there is no way to open it.
+No hay tarjeta: no hay dónde guardarlo.	There is no card: nowhere to keep it.
+Respaldar ahora	Back up now
+Traer un respaldo…	Bring a backup…
+Reiniciar la placa	Restart the board
+Ese respaldo lista %s apps que no están en la tarjeta: %s	That backup lists %s apps that are not on the card: %s
+Pedidas a la Tienda: %s	Asked of the Store: %s
+Pedirle a la Tienda que las instale	Ask the Store to install them
+En la tarjeta	On the card
+Todavía no hay ninguno.	There is none yet.

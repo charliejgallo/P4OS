@@ -71,6 +71,7 @@
 #include "aos_portal_radio.h"
 #include "aos_portal_live.h"
 #include "aos_portal_store.h"
+#include "aos_portal_backup.h"
 #include "aos_portal_net.h"
 #include "aos_portal_access.h"
 #ifdef ESP_PLATFORM
@@ -1725,6 +1726,7 @@ static void handler(aos_httpd_req_t *r)
     else if (aos_portal_radio(r, m, p)) {}
     else if (aos_portal_live(r, m, p)) {}
     else if (aos_portal_store(r, m, p)) {}
+    else if (aos_portal_backup(r, m, p)) {}
     else if (aos_portal_net(r, m, p)) {}
     else if (aos_portal_eth(r, m, p)) {}
     else if (aos_portal_claude(r, m, p)) {}
