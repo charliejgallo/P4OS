@@ -1230,9 +1230,14 @@ corrida, no por app), y que cada sesión valide en la Mac con
   `dependencies.lock` (el gestor de componentes los reescribe) ni al
   propio guion; y el registro dice qué tenía la caché de una app cuando
   la recompila. Probado en la Mac con una app: compilada, después copiada
-  byte a byte sin compilar, y recompilada al cambiarle una línea. **En el
-  CI falta verlo:** hacen falta dos corridas más (una que guarde con las
-  huellas buenas y otra que reutilice).
+  byte a byte sin compilar, y recompilada al cambiarle una línea.
+- **El propio CI lo comprueba desde entonces:** un trabajo `reuse`, después
+  de las tandas, hace una copia limpia del repo, trae la caché que esa
+  misma corrida acaba de guardar y pregunta si algo se compilaría de nuevo
+  (`tools/ci_apps.sh --check`). Si la huella de una app no sale igual dos
+  veces, falla esa corrida y no una posterior en silencio. CAS queda fuera
+  de la pregunta: su motor no está en git y es parte de su huella. No
+  corre en un tag, que no guarda caché propia.
 
 ## Roadmap
 

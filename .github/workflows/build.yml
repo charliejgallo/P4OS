@@ -156,6 +156,44 @@ jobs:
             apps/*/build/*.so
             apps/*/build/modules/*.so
 
+  # The cache has to work, or the shares build everything every time and
+  # nobody notices: a fresh checkout, the cache this run has just kept, and
+  # the question "would anything be built?". The first version kept every
+  # app under a hash taken after its build, and the next run found none.
+  # Not on a tag, which keeps no cache of its own.
+  reuse:
+    if: "!startsWith(github.ref, 'refs/tags/')"
+    needs: apps
+    runs-on: ubuntu-latest
+    container: espressif/idf:release-v5.5
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [0, 1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/cache/restore@v4
+        with:
+          path: .appcache
+          key: apps-${{ matrix.shard }}-of-6-${{ github.run_id }}
+          restore-keys: apps-${{ matrix.shard }}-of-6-
+      - name: nothing would be built again
+        shell: bash
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          . $IDF_PATH/export.sh
+          PROFILE=rev1_3 tools/ci_apps.sh --check ${{ matrix.shard }} 6 .appcache > /tmp/check.log 2>&1 || true
+          cat /tmp/check.log
+          # CAS's engine is not in git and is part of what CAS is made from:
+          # without it here CAS hashes to something else, so it does not count
+          again=""
+          for a in $(grep "^to build:" /tmp/check.log | sed 's/^to build://'); do
+            [ "$a" = cas ] || again="$again $a"
+          done
+          [ -z "$again" ] || { echo "::error::would be built again:$again"; exit 1; }
+
   # What goes on the card, from the apps the shares built: apps.zip, web.zip
   # and lang.zip for a card filled by hand, and what the Tienda reads.
   store:

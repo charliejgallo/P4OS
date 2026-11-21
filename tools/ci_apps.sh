@@ -5,6 +5,8 @@
 #
 #   tools/ci_apps.sh <shard> <shards> [<cache folder>]    build that share
 #   tools/ci_apps.sh --list <shard> <shards>              only say which apps
+#   tools/ci_apps.sh --check <shard> <shards> <cache folder>
+#                                    would anything be built? (1 when it would)
 #
 # The apps took 101 of the CI's 108 minutes (2026-11-21): sixty ESP-IDF
 # projects built one after another, each compiling LVGL and the IDF's
@@ -43,6 +45,11 @@ if [ "$1" = "--list" ]; then
     list "$2" "$3"
     exit 0
 fi
+# --check: a fresh checkout with the cache a run has just kept must find
+# every app there. The workflow asks this right after building, so a hash
+# that does not come out the same twice fails that run, and not a later one.
+check=""
+if [ "$1" = "--check" ]; then check=1; shift; fi
 shard=$1; shards=$2; cache=$3
 [ -n "$shards" ] || { echo "usage: $0 <shard> <shards> [<cache folder>]"; exit 2; }
 
@@ -112,6 +119,10 @@ if [ -z "$build" ]; then
     exit 0
 fi
 echo "to build:$build"
+if [ -n "$check" ]; then
+    echo "a run after this one would build these again: what they were kept under is not what they hash to now"
+    exit 1
+fi
 
 # build_apps.sh takes the LVGL configuration from the firmware's build
 # folder: its sdkconfig is enough, and making it is a minute, not a build
