@@ -2354,3 +2354,17 @@ Paquetes sueltos	Einzelne Pakete
 Copiadas a mano	Von Hand kopiert
 Paquete suelto	Einzelnes Paket
 Leer más	Mehr lesen
+La imagen no es la publicada: no se escribió nada.	Das Image ist nicht das veröffentlichte: nichts wurde geschrieben.
+No se pudo escribir la otra ranura.	Der andere Slot konnte nicht geschrieben werden.
+Ya es la versión que corre.	Diese Version läuft bereits.
+El catálogo no ofrece firmware para esta placa.	Der Katalog bietet keine Firmware für dieses Board.
+Escribiendo la otra ranura: %s de %s…	Schreibt den anderen Slot: %s von %s…
+Bajando %s: %s de %s…	Lädt %s herunter: %s von %s…
+%s está en la otra ranura. Arranca a prueba al reiniciar.	%s liegt im anderen Slot. Startet nach dem Neustart auf Probe.
+En GitHub	Auf GitHub
+el catálogo no ofrece firmware para esta placa (%s)	der Katalog bietet keine Firmware für dieses Board (%s)
+%s — %s, para %s	%s — %s, für %s
+%s: la placa está al día	%s: das Board ist aktuell
+La placa lo baja de la última release publicada, lo verifica entero contra el tamaño y el SHA-256 del catálogo antes de escribir nada, y lo deja en la otra ranura. No se reinicia sola.	Das Board lädt sie aus dem letzten veröffentlichten Release, prüft sie vollständig gegen Größe und SHA-256 des Katalogs, bevor etwas geschrieben wird, und legt sie im anderen Slot ab. Es startet nicht von selbst neu.
+Bajar e instalar %s	%s herunterladen und installieren
+Desde GitHub	Von GitHub

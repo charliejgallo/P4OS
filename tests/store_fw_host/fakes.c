@@ -13,6 +13,43 @@ const char *aos_hal_firmware_version(void)
     return v ? v : "v0.29.0";
 }
 
+/* The other slot: a file beside the card, <P4_CARD>.slot, written as the
+ * image arrives and kept only when it was closed. FAKE_OTA=full makes the
+ * slot refuse the image, as one too small would. */
+static FILE *s_slot;
+static char  s_ota_err[80];
+static void slot_path(char *out, size_t n, const char *tail) { snprintf(out, n, "%s.slot%s", getenv("P4_CARD"), tail); }
+bool aos_hal_ota_begin(size_t total_bytes)
+{
+    char p[512];
+    const char *how = getenv("FAKE_OTA");
+    s_ota_err[0] = 0;
+    if (how && !strcmp(how, "full")) { snprintf(s_ota_err, sizeof s_ota_err, "the image (%u B) does not fit the slot", (unsigned)total_bytes); return false; }
+    slot_path(p, sizeof p, ".part");
+    s_slot = fopen(p, "wb");
+    return s_slot != NULL;
+}
+bool aos_hal_ota_write(const void *data, size_t len) { return s_slot && fwrite(data, 1, len, s_slot) == len; }
+bool aos_hal_ota_end(void)
+{
+    char a[512], b[512];
+    if (!s_slot) return false;
+    fclose(s_slot);
+    s_slot = NULL;
+    slot_path(a, sizeof a, ".part");
+    slot_path(b, sizeof b, "");
+    return rename(a, b) == 0;
+}
+void aos_hal_ota_abort(void)
+{
+    char a[512];
+    if (s_slot) fclose(s_slot);
+    s_slot = NULL;
+    slot_path(a, sizeof a, ".part");
+    remove(a);
+}
+const char *aos_hal_ota_error(void) { return s_ota_err; }
+
 /* P4_CARD=<folder>: the card's root */
 const char *aos_hal_path_sd_root(void) { return getenv("P4_CARD"); }
 

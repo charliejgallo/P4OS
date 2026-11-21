@@ -39,6 +39,7 @@
 #include "aos_access.h"
 #include "aos_eth.h"
 #include "aos_flasher.h"
+#include "aos_store.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -90,6 +91,8 @@ static struct {
     int nets_shown;                 /* Redes and Ethernet: the state the page shows */
     lv_obj_t *dg_temp, *dg_cpu, *dg_int, *dg_psram, *dg_up;
     lv_obj_t *c6_state;             /* Update: the C6's firmware going in */
+    lv_obj_t *fw_state;             /* Update: the firmware from GitHub, how far it is */
+    uint32_t fw_shown;              /* and the state its rows were drawn with */
     /* the page's own column, kept scrolled where it was when it is rebuilt */
     lv_obj_t *body;
     int body_pg;
@@ -1793,10 +1796,108 @@ static void build_update_c6(lv_obj_t *p)
     note(p, _("El C6 la escribe en su otra ranura y la revisa antes de cambiar. Mientras tanto no hay Wi-Fi, y al terminar la placa se reinicia."));
 }
 
+/* The firmware the store's official catalogue offers for this board
+ * (aos_store.h): found, downloaded, checked and written to the other slot
+ * from here, and never without a tap. The restart is a tap too. */
+static uint32_t fw_key(void)
+{
+    aos_store_fw_t fw;
+    aos_store_status_t st;
+    bool offered = aos_store_fw(&fw);
+    aos_store_status(&st);
+    uint32_t k = st.jobs_done * 16u + (offered ? 1u : 0u) + (fw.newer ? 2u : 0u) + (fw.ready ? 4u : 0u) +
+                 (st.busy && !strcmp(st.job, "firmware") ? 8u : 0u);
+    for (const char *c = fw.ver; *c; c++) k = k * 31u + (uint8_t)*c;
+    return k;
+}
+
+static void fw_refresh(void)
+{
+    if (!U.fw_state) return;
+    aos_store_fw_t fw;
+    aos_store_status_t st;
+    aos_store_fw(&fw);
+    aos_store_status(&st);
+    char v[160] = "";
+    unsigned pct = st.total ? (unsigned)((uint64_t)st.got * 100 / st.total) : 0;
+    if (st.busy && !strcmp(st.job, "firmware")) {
+        if (!strcmp(st.step, "writing")) snprintf(v, sizeof v, _("escribiendo la otra ranura… %u %%"), pct);
+        else snprintf(v, sizeof v, _("bajando… %u %%"), pct);
+    } else if (fw.ready) snprintf(v, sizeof v, "%s", _("lista: arranca al reiniciar"));
+    else if (st.busy && !strcmp(st.job, "refresh")) snprintf(v, sizeof v, "%s", _("buscando…"));
+    else if (!strcmp(st.last_job, "firmware") && !st.last_ok) {
+        switch (st.last_kind) {
+        case AOS_STORE_E_NETWORK:    snprintf(v, sizeof v, "%s", _("no se pudo bajar: revisá la red")); break;
+        case AOS_STORE_E_NOT_THERE:  snprintf(v, sizeof v, "%s", _("no está en el servidor")); break;
+        case AOS_STORE_E_CLOCK:      snprintf(v, sizeof v, "%s", _("la placa todavía no tiene la hora de la red")); break;
+        case AOS_STORE_E_CARD:       snprintf(v, sizeof v, "%s", _("no se pudo escribir en la tarjeta")); break;
+        case AOS_STORE_E_PACKAGE:    snprintf(v, sizeof v, "%s", _("la imagen no es la publicada: no se escribió nada")); break;
+        case AOS_STORE_E_FLASH:      snprintf(v, sizeof v, "%s", _("no se pudo escribir la otra ranura")); break;
+        case AOS_STORE_E_CANCELLED:  snprintf(v, sizeof v, "%s", _("cancelada")); break;
+        case AOS_STORE_E_UP_TO_DATE: snprintf(v, sizeof v, "%s", _("ya es la que corre")); break;
+        default:                     snprintf(v, sizeof v, "%s", _("no se pudo")); break;
+        }
+    }
+    lv_label_set_text(U.fw_state, v);
+}
+
+static void fw_check_cb(lv_event_t *e)
+{
+    (void)e;
+    if (aos_hal_net_state() != AOS_NET_CONNECTED) { aos_ui_toast(_("Sin red"), 2000); return; }
+    aos_store_refresh();
+}
+
+static void fw_install_cb(lv_event_t *e)
+{
+    (void)e;
+    if (!aos_store_fw_install()) aos_ui_toast(_("Hay demasiadas cosas en cola"), 2500);
+}
+
+static void fw_cancel_cb(lv_event_t *e) { (void)e; aos_store_cancel(); }
+
+static void fw_restart_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez para reiniciar"))) return;
+    aos_ui_toast(_("Reiniciando con la versión nueva…"), 2000);
+    lv_timer_t *t = lv_timer_create(reboot_cb, 1500, NULL);
+    lv_timer_set_repeat_count(t, 1);
+}
+
+static void build_update_github(lv_obj_t *p)
+{
+    aos_store_fw_t fw;
+    aos_store_status_t st;
+    bool offered = aos_store_fw(&fw);
+    aos_store_status(&st);
+    bool mine = st.busy && !strcmp(st.job, "firmware");
+    U.fw_shown = fw_key();
+    lv_obj_t *g = group(p, _("DESDE GITHUB"));
+    char v[80];
+    static char label[64];
+    if (!offered) snprintf(v, sizeof v, "%s", st.apps ? _("ninguna para esta placa") : _("todavía sin catálogo"));
+    else if (!fw.newer) snprintf(v, sizeof v, "%s", _("ninguna: está al día"));
+    else snprintf(v, sizeof v, "%s  ·  %.1f MB", fw.ver, fw.size / 1e6);
+    row(g, NULL, 0, _("Versión nueva"), v, false, NULL, NULL);
+    U.fw_state = lv_obj_get_user_data(row(g, NULL, 0, _("Estado"), "", false, NULL, NULL));
+    fw_refresh();
+    if (fw.ready) action_row(g, _("Reiniciar ahora"), AOS_C_ACCENT, fw_restart_cb);
+    else if (mine) action_row(g, _("Cancelar"), AOS_C_RED, fw_cancel_cb);
+    else {
+        if (offered && fw.newer) {
+            snprintf(label, sizeof label, _("Bajar e instalar %s"), fw.ver);
+            action_row(g, label, AOS_C_ACCENT, fw_install_cb);
+        }
+        action_row(g, _("Buscar actualizaciones"), AOS_C_ACCENT, fw_check_cb);
+    }
+    note(p, _("La placa la baja de la última versión publicada, la revisa entera antes de escribir nada y la deja en la otra ranura. No se reinicia sola."));
+}
+
 static void build_update(lv_obj_t *p)
 {
     aos_ota_info_t o;
     bool ok = aos_hal_ota_info(&o);
+    build_update_github(p);
     lv_obj_t *g = group(p, _("LA QUE CORRE"));
     row(g, NULL, 0, _("Versión"), aos_hal_firmware_version(), false, NULL, NULL);
     if (ok && o.built[0]) row(g, NULL, 0, _("Compilada"), o.built, false, NULL, NULL);
@@ -1817,7 +1918,7 @@ static void build_update(lv_obj_t *p)
         if (strcmp(o.other_state, "invalid") && strcmp(o.other_state, "aborted"))
             action_row(g, _("Volver a esta versión"), AOS_C_ACCENT, rollback_cb);
     }
-    note(p, _("Las versiones nuevas llegan por el portal (Firmware) o con tools/ota.sh, y se escriben en la otra ranura. Arrancan a prueba: si la placa se reinicia antes de confirmarla, a los 30 s, vuelve sola a la anterior."));
+    note(p, _("Las versiones nuevas llegan desde GitHub, por el portal (Firmware) o con tools/ota.sh, y se escriben en la otra ranura. Arrancan a prueba: si la placa se reinicia antes de confirmarla, a los 30 s, vuelve sola a la anterior."));
 
     build_update_c6(p);
 }
@@ -2832,6 +2933,7 @@ static void build(int pg)
     U.usb_state = U.usb_dot = U.usb_root = U.host_state = U.host_dot = U.host_sw = NULL;
     U.dg_temp = U.dg_cpu = U.dg_int = U.dg_psram = U.dg_up = NULL;
     U.c6_state = NULL;
+    U.fw_state = NULL;
     U.armed = NULL;
     memset(U.usb_tick, 0, sizeof U.usb_tick);
     if (!U.land) {
@@ -2898,6 +3000,8 @@ static void timer_cb(lv_timer_t *t)
     static int ticks;
     if (U.dg_temp && ++ticks % 3 == 0) diag_refresh();
     if (U.c6_state) c6_refresh();
+    if (pg == PG_UPDATE && U.fw_shown != fw_key() && !U.overlay && !U.armed) build(pg);   /* a version found, a download ended */
+    if (U.fw_state) fw_refresh();
     if (U.armed && (uint32_t)aos_hal_uptime_ms() - U.armed_ms > 5000) disarm();
 }
 

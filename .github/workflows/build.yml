@@ -231,6 +231,18 @@ jobs:
             gh release download "$from" --repo "${{ github.repository }}" -p "$p" -D dist --skip-existing || echo "not in $from: $p"
           done
           ls -la dist
+      # The catalogue says which firmware this release brings, an image for
+      # each profile, so that a board can offer it in Settings (docs/plan/
+      # TIENDA.md). Here, where the images of the two profiles meet.
+      - uses: actions/checkout@v5
+        with:
+          path: src
+          sparse-checkout: tools
+      - name: the firmware in the catalogue
+        run: |
+          if [ -f dist/p4os-store.ndjson ]; then
+            python3 src/tools/gen_store.py fw --catalog dist/p4os-store.ndjson dist/p4os-rev*.bin
+          fi
       - name: release
         env:
           GH_TOKEN: ${{ github.token }}

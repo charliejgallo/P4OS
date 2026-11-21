@@ -916,12 +916,45 @@ async function pageFirmware() {
     }
     msg.textContent = tr('La placa no contestó en un minuto y medio: mirala.');
   }
+  // from GitHub: what the official catalogue of the store offers for this board
+  const gh = h('div', { class: 'card pad' }), ghBar = h('div', { class: 'prog', style: 'margin:12px 0 6px;display:none' }, h('div')), ghMsg = h('div', { class: 'note' });
+  let ghTimer = 0;
+  const FWWHY = { network: N_('No se pudo bajar: revisá la red.'), not_there: N_('No está en el servidor.'), clock: N_('La placa todavía no tiene la hora de la red.'),
+                  server: N_('No se pudo verificar el servidor.'), card: N_('No se pudo escribir en la tarjeta: ¿está llena?'),
+                  package: N_('La imagen no es la publicada: no se escribió nada.'), flash: N_('No se pudo escribir la otra ranura.'),
+                  up_to_date: N_('Ya es la versión que corre.'), not_listed: N_('El catálogo no ofrece firmware para esta placa.') };
+  async function ghDraw() {
+    if (!document.body.contains(gh)) return;
+    let s;
+    try { s = await api('store'); } catch { return; }
+    const f = s.fw || {}, mine = s.busy && s.job && s.job.what === 'firmware', j = s.job || {};
+    ghBar.style.display = mine ? '' : 'none';
+    ghBar.firstChild.style.width = mine && j.total ? (j.got * 100 / j.total).toFixed(1) + '%' : '0%';
+    ghMsg.textContent = mine ? (j.step === 'writing' ? tr('Escribiendo la otra ranura: %s de %s…', fmtBytes(j.got), fmtBytes(j.total))
+                                                     : tr('Bajando %s: %s de %s…', f.ver || '', fmtBytes(j.got), fmtBytes(j.total || f.size || 0)))
+      : f.ready ? tr('%s está en la otra ranura. Arranca a prueba al reiniciar.', f.ver)
+      : s.last && /^firmware/.test(s.last) && !s.last_ok && s.last_kind !== 'cancelled' ? tr(FWWHY[s.last_kind] || N_('Algo salió mal.')) + ' (' + s.last + ')' : '';
+    ghMsg.style.color = !mine && !f.ready && ghMsg.textContent ? 'var(--orange)' : '';
+    put(gh,
+      row(tr('En GitHub'), !f.ver ? tr('el catálogo no ofrece firmware para esta placa (%s)', f.profile || '?')
+        : f.newer ? tr('%s — %s, para %s', f.ver, fmtBytes(f.size), f.profile) : tr('%s: la placa está al día', f.ver), f.newer && !f.ready ? 'warn' : ''),
+      h('div', { class: 'note' }, tr('La placa lo baja de la última release publicada, lo verifica entero contra el tamaño y el SHA-256 del catálogo antes de escribir nada, y lo deja en la otra ranura. No se reinicia sola.')),
+      h('div', { class: 'btns', style: 'margin-top:10px' },
+        h('button', { class: 'btn', disabled: s.busy, onclick: async () => { await post('store/refresh', {}).catch(e => toast(e.message, true)); ghPoll(500); } }, tr('Buscar de nuevo')),
+        f.newer && !f.ready ? h('button', { class: 'btn pri', disabled: s.busy, onclick: async () => { await post('store/firmware', {}).catch(e => toast(e.message, true)); ghPoll(300); } }, tr('Bajar e instalar %s', f.ver)) : null,
+        mine ? h('button', { class: 'btn red', onclick: async () => { await post('store/cancel', {}).catch(() => {}); ghPoll(300); } }, tr('Cancelar')) : null,
+        f.ready ? h('button', { class: 'btn pri', onclick: () => restartInto() }, tr('Reiniciar con el firmware nuevo')) : null),
+      ghBar, ghMsg);
+    ghPoll(s.busy ? 700 : 5000);
+  }
+  function ghPoll(ms) { clearTimeout(ghTimer); ghTimer = setTimeout(ghDraw, ms); }
   const o = st.other || {};
   put(main, h('h1', {}, 'Firmware'),
     h('div', { class: 'card pad' },
       row(tr('Versión'), st.version), row(tr('Compilado'), (st.built || '') + ' ' + (st.time || '')), row('IDF', st.idf || ''), st.elf ? row('ELF', st.elf) : null,
       row(tr('Ranura'), st.running + (st.trial ? ' (' + tr('a prueba') + ')' : ''), st.trial ? 'warn' : ''),
       row(tr('La otra ranura'), o.slot ? o.slot + (o.version ? ' — ' + o.version + ', ' + (o.built || '') + (o.elf ? ', ELF ' + o.elf : '') + (o.state ? ' (' + o.state + ')' : '') : ' — ' + tr('vacía')) : '—')),
+    h('h2', {}, tr('Desde GitHub')), gh,
     h('h2', {}, tr('Actualizar por Wi-Fi')),
     h('div', { class: 'card pad' },
       h('div', { class: 'note' }, tr('Elegí build/rev1_3/p4os.bin. Se escribe en la otra ranura mientras sube; al reiniciar arranca a prueba y, si no llega a los 30 s, la placa vuelve sola al firmware de ahora. Desde la terminal: tools/ota.sh.')),
@@ -943,6 +976,7 @@ async function pageFirmware() {
           h('button', { class: 'btn red', onclick: async () => { if (!confirm(tr('¿Borrar el volcado?'))) return; await post('coredump/erase').catch(e => toast(e.message, true)); pageFirmware(); } }, tr('Borrar')),
           h('button', { class: 'btn', onclick: () => { location.hash = '#registro'; } }, tr('Ver el registro')))]
       : h('div', { class: 'note' }, tr('No hay: la placa no se colgó desde que se borró el último.'))));
+  ghDraw();
 }
 
 /* ---- Banco ---- */
@@ -3125,7 +3159,8 @@ function pageTienda() {
                 package: N_('El paquete no es el publicado, o está dañado.'), rules: N_('El paquete quiere escribir donde no le corresponde.'),
                 firmware: N_('Necesita un P4OS más nuevo.'), catalog: N_('El catálogo no se puede leer.'), source: N_('Esa fuente no se puede usar.'),
                 memory: N_('No alcanzó la memoria.'), not_listed: N_('No está en el catálogo.'), in_store: N_('Esa app es de la Tienda: se instala y se quita desde ahí.'),
-                not_store: N_('No la instaló la Tienda.'), other: N_('Algo salió mal.') };
+                not_store: N_('No la instaló la Tienda.'), flash: N_('No se pudo escribir la otra ranura.'),
+                up_to_date: N_('Ya es la versión que corre.'), other: N_('Algo salió mal.') };
   const STATE = { installed: N_('Instalada'), update: N_('Hay una versión nueva'), by_hand: N_('Copiada a mano'),
                   set_aside: N_('Apartada: hizo caer la placa al cargarse'), absent: '' };
   function card(e, a) {

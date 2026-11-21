@@ -36,6 +36,11 @@
  *   POST /api/store/adopt          a receipt for what was copied by hand and
  *                                  is the catalogue's
  *   POST /api/store/cancel
+ *   POST /api/store/firmware       the firmware the official catalogue offers for
+ *                                  this board: downloaded, checked and written to
+ *                                  the other slot ("fw" in the state says which,
+ *                                  and "ready" once it is a restart away); the
+ *                                  restart is /api/ota/restart, as after an upload
  *
  * Every POST queues its job and answers with the state at once: ask again
  * to follow it.
@@ -208,10 +213,23 @@ static void store_state(aos_httpd_req_t *r, int status, const char *error)
     cJSON_AddBoolToObject(o, "last_ok", st.last_ok);
     cJSON_AddStringToObject(o, "last", st.last);
     static const char *kinds[] = { "", "other", "network", "not_there", "clock", "server", "card", "package", "rules", "firmware",
-                                   "catalog", "source", "cancelled", "memory", "not_listed", "in_store", "not_store" };
+                                   "catalog", "source", "cancelled", "memory", "not_listed", "in_store", "not_store",
+                                   "flash", "up_to_date" };
     cJSON_AddStringToObject(o, "last_kind", kinds[st.last_kind >= 0 && st.last_kind < (int)(sizeof kinds / sizeof kinds[0]) ? st.last_kind : 1]);
     char asked[200];
     if (aos_store_proposal(asked, sizeof asked)) cJSON_AddStringToObject(o, "proposed", asked);
+    /* the system's firmware, as the official catalogue offers it for this board */
+    aos_store_fw_t fw;
+    bool offered = aos_store_fw(&fw);
+    cJSON *f = cJSON_AddObjectToObject(o, "fw");
+    cJSON_AddStringToObject(f, "running", aos_hal_firmware_version());
+    cJSON_AddStringToObject(f, "profile", fw.profile);
+    if (offered) {
+        cJSON_AddStringToObject(f, "ver", fw.ver);
+        cJSON_AddNumberToObject(f, "size", fw.size);
+        cJSON_AddBoolToObject(f, "newer", fw.newer);
+        cJSON_AddBoolToObject(f, "ready", fw.ready);
+    }
     cJSON *apps = cJSON_AddArrayToObject(o, "apps");
     aos_store_app_t a;
     for (int i = 0; aos_store_app(i, &a); i++) {
@@ -273,7 +291,7 @@ static bool store_api(aos_httpd_req_t *r, const char *p, bool get, bool post)
         return true;
     }
     if (!post || (strcmp(p, "/refresh") && strcmp(p, "/install") && strcmp(p, "/remove") && strcmp(p, "/adopt") &&
-                  strcmp(p, "/cancel") && strcmp(p, "/propose"))) return false;
+                  strcmp(p, "/cancel") && strcmp(p, "/propose") && strcmp(p, "/firmware"))) return false;
     char *body = aos_httpd_body_all(r, 2048);
     cJSON *j = body ? cJSON_Parse(body) : NULL;
     free(body);
@@ -292,6 +310,8 @@ static bool store_api(aos_httpd_req_t *r, const char *p, bool get, bool post)
         if (!url || !aos_store_propose(url)) fail = _("eso no es una dirección de fuente: usuario/repositorio, o https://...");
     } else if (!strcmp(p, "/adopt")) {
         if (!aos_store_adopt()) fail = _("la cola está llena");
+    } else if (!strcmp(p, "/firmware")) {
+        if (!aos_store_fw_install()) fail = _("la cola está llena");
     } else aos_store_cancel();
     store_state(r, fail ? 400 : 200, fail);
     cJSON_Delete(j);

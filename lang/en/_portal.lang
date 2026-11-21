@@ -2354,3 +2354,17 @@ Paquetes sueltos	Loose packages
 Copiadas a mano	Copied by hand
 Paquete suelto	Loose package
 Leer más	Read more
+La imagen no es la publicada: no se escribió nada.	The image is not the published one: nothing was written.
+No se pudo escribir la otra ranura.	The other slot could not be written.
+Ya es la versión que corre.	It is the version already running.
+El catálogo no ofrece firmware para esta placa.	The catalogue offers no firmware for this board.
+Escribiendo la otra ranura: %s de %s…	Writing the other slot: %s of %s…
+Bajando %s: %s de %s…	Downloading %s: %s of %s…
+%s está en la otra ranura. Arranca a prueba al reiniciar.	%s is in the other slot. It boots on trial after a restart.
+En GitHub	On GitHub
+el catálogo no ofrece firmware para esta placa (%s)	the catalogue offers no firmware for this board (%s)
+%s — %s, para %s	%s — %s, for %s
+%s: la placa está al día	%s: the board is up to date
+La placa lo baja de la última release publicada, lo verifica entero contra el tamaño y el SHA-256 del catálogo antes de escribir nada, y lo deja en la otra ranura. No se reinicia sola.	The board downloads it from the latest published release, checks it whole against the size and the SHA-256 of the catalogue before writing anything, and leaves it in the other slot. It does not restart by itself.
+Bajar e instalar %s	Download and install %s
+Desde GitHub	From GitHub

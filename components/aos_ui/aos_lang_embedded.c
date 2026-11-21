@@ -1887,7 +1887,7 @@ static const char blob_en__sistema_lang[] =
     "LA ANTERIOR\tTHE PREVIOUS ONE\n"
     "No se pudo leer la otra ranura\tCould not read the other slot\n"
     "Volver a esta versión\tGo back to this version\n"
-    "Las versiones nuevas llegan por el portal (Firmware) o con tools/ota.sh, y se escriben en la otra ranura. Arrancan a prueba: si la placa se reinicia antes de confirmarla, a los 30 s, vuelve sola a la anterior.\tNew versions arrive through the portal (Firmware) or tools/ota.sh, and are written to the other slot. They boot on trial: if the board restarts before confirming one, at 30 s, it goes back to the previous one by itself.\n"
+    "Las versiones nuevas llegan desde GitHub, por el portal (Firmware) o con tools/ota.sh, y se escriben en la otra ranura. Arrancan a prueba: si la placa se reinicia antes de confirmarla, a los 30 s, vuelve sola a la anterior.\tNew versions arrive from GitHub, through the portal (Firmware) or tools/ota.sh, and are written to the other slot. They boot on trial: if the board restarts before confirming one, at 30 s, it goes back to the previous one by itself.\n"
     "al encender\tat power-on\n"
     "por software\tby software\n"
     "por un error (pánico)\tby an error (panic)\n"
@@ -3407,6 +3407,32 @@ static const char blob_en__sistema_lang[] =
     "Cualquier origen\tAny origin\n"
     "Paquetes sueltos\tLoose packages\n"
     "Copiadas a mano\tCopied by hand\n"
+    "escribiendo la otra ranura… %u %%\twriting the other slot… %u %%\n"
+    "bajando… %u %%\tdownloading… %u %%\n"
+    "lista: arranca al reiniciar\tready: it runs after a restart\n"
+    "no se pudo bajar: revisá la red\tthe download failed: check the network\n"
+    "no está en el servidor\tit is not on the server\n"
+    "la placa todavía no tiene la hora de la red\tthe board does not have the network time yet\n"
+    "la imagen no es la publicada: no se escribió nada\tthe image is not the published one: nothing was written\n"
+    "no se pudo escribir la otra ranura\tthe other slot could not be written\n"
+    "cancelada\tcancelled\n"
+    "ya es la que corre\tit is the one already running\n"
+    "no se pudo\tit failed\n"
+    "Reiniciando con la versión nueva…\tRestarting into the new version…\n"
+    "DESDE GITHUB\tFROM GITHUB\n"
+    "ninguna para esta placa\tnone for this board\n"
+    "todavía sin catálogo\tno catalogue yet\n"
+    "ninguna: está al día\tnone: it is up to date\n"
+    "Reiniciar ahora\tRestart now\n"
+    "Bajar e instalar %s\tDownload and install %s\n"
+    "Buscar actualizaciones\tCheck for updates\n"
+    "La placa la baja de la última versión publicada, la revisa entera antes de escribir nada y la deja en la otra ranura. No se reinicia sola.\tThe board downloads it from the latest published release, checks it whole before writing anything and leaves it in the other slot. It does not restart by itself.\n"
+    "Actualizar el sistema\tUpdate the system\n"
+    "No se pudo escribir la otra ranura.\tThe other slot could not be written.\n"
+    "Ya es la versión que corre.\tIt is the version already running.\n"
+    "Escribiendo P4OS\tWriting P4OS\n"
+    "Bajando P4OS\tDownloading P4OS\n"
+    "No se pudo actualizar el sistema.\tThe system could not be updated.\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -5286,7 +5312,7 @@ static const char blob_de__sistema_lang[] =
     "LA ANTERIOR\tDIE VORHERIGE\n"
     "No se pudo leer la otra ranura\tDer andere Slot ließ sich nicht lesen\n"
     "Volver a esta versión\tZu dieser Version zurück\n"
-    "Las versiones nuevas llegan por el portal (Firmware) o con tools/ota.sh, y se escriben en la otra ranura. Arrancan a prueba: si la placa se reinicia antes de confirmarla, a los 30 s, vuelve sola a la anterior.\tNeue Versionen kommen über das Portal (Firmware) oder tools/ota.sh und werden in den anderen Slot geschrieben. Sie starten auf Probe: Startet die Platine vor der Bestätigung nach 30 s neu, kehrt sie von selbst zur vorherigen zurück.\n"
+    "Las versiones nuevas llegan desde GitHub, por el portal (Firmware) o con tools/ota.sh, y se escriben en la otra ranura. Arrancan a prueba: si la placa se reinicia antes de confirmarla, a los 30 s, vuelve sola a la anterior.\tNeue Versionen kommen von GitHub, über das Portal (Firmware) oder tools/ota.sh und werden in den anderen Slot geschrieben. Sie starten auf Probe: Startet die Platine vor der Bestätigung nach 30 s neu, kehrt sie von selbst zur vorherigen zurück.\n"
     "al encender\tbeim Einschalten\n"
     "por software\tper Software\n"
     "por un error (pánico)\tdurch Fehler (Panic)\n"
@@ -6806,6 +6832,32 @@ static const char blob_de__sistema_lang[] =
     "Cualquier origen\tJede Herkunft\n"
     "Paquetes sueltos\tEinzelne Pakete\n"
     "Copiadas a mano\tVon Hand kopiert\n"
+    "escribiendo la otra ranura… %u %%\tschreibt den anderen Slot… %u %%\n"
+    "bajando… %u %%\tlädt herunter… %u %%\n"
+    "lista: arranca al reiniciar\tbereit: startet nach dem Neustart\n"
+    "no se pudo bajar: revisá la red\tDownload fehlgeschlagen: Netzwerk prüfen\n"
+    "no está en el servidor\tnicht auf dem Server\n"
+    "la placa todavía no tiene la hora de la red\tdas Board hat noch keine Netzwerkzeit\n"
+    "la imagen no es la publicada: no se escribió nada\tdas Image ist nicht das veröffentlichte: nichts wurde geschrieben\n"
+    "no se pudo escribir la otra ranura\tder andere Slot konnte nicht geschrieben werden\n"
+    "cancelada\tabgebrochen\n"
+    "ya es la que corre\tläuft bereits\n"
+    "no se pudo\tfehlgeschlagen\n"
+    "Reiniciando con la versión nueva…\tNeustart mit der neuen Version…\n"
+    "DESDE GITHUB\tVON GITHUB\n"
+    "ninguna para esta placa\tkeine für dieses Board\n"
+    "todavía sin catálogo\tnoch kein Katalog\n"
+    "ninguna: está al día\tkeine: aktuell\n"
+    "Reiniciar ahora\tJetzt neu starten\n"
+    "Bajar e instalar %s\t%s herunterladen und installieren\n"
+    "Buscar actualizaciones\tNach Updates suchen\n"
+    "La placa la baja de la última versión publicada, la revisa entera antes de escribir nada y la deja en la otra ranura. No se reinicia sola.\tDas Board lädt sie aus dem letzten veröffentlichten Release, prüft sie vollständig, bevor etwas geschrieben wird, und legt sie im anderen Slot ab. Es startet nicht von selbst neu.\n"
+    "Actualizar el sistema\tSystem aktualisieren\n"
+    "No se pudo escribir la otra ranura.\tDer andere Slot konnte nicht geschrieben werden.\n"
+    "Ya es la versión que corre.\tDiese Version läuft bereits.\n"
+    "Escribiendo P4OS\tP4OS wird geschrieben\n"
+    "Bajando P4OS\tP4OS wird heruntergeladen\n"
+    "No se pudo actualizar el sistema.\tDas System konnte nicht aktualisiert werden.\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -6813,7 +6865,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3392, 0, files_en, 1 },
-    { "de", "Deutsch", 3392, 0, files_de, 1 },
+    { "en", "English", 3418, 0, files_en, 1 },
+    { "de", "Deutsch", 3418, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

@@ -394,6 +394,56 @@ check("a source proposed: kept, not added", "proposed 1 https://github.com/ana/a
       and "proposed 0" in o and len(sources(o)) == 1, o)
 jobs, apps, o = fw("s0", "propose=http://localhost:9/c.ndjson", dev=False)
 check("...and not an http one without developer mode", "proposed 0" in o, o)
+
+# ---- the system's own firmware, offered by the official catalogue
+imgs = {}
+for prof in ("rev1_3", "rev3_x"):
+    imgs[prof] = b"\xe9" + os.urandom(1500000 + len(prof))
+    open("rel/p4os-%s.bin" % prof, "wb").write(imgs[prof])
+shutil.copy("rel/p4os-store.ndjson", "rel/fw.ndjson")
+subprocess.run([sys.executable, P4 + "/tools/gen_store.py", "fw", "--catalog", "rel/fw.ndjson",
+                "rel/p4os-rev1_3.bin", "rel/p4os-rev3_x.bin"], capture_output=True, check=True)
+FWCAT = LATEST + "fw.ndjson"
+rel_ver = json.loads(open("rel/fw.ndjson").readline())["release"]
+def fwline(o):
+    return [l for l in o.splitlines() if l.startswith("fw ")][-1].split(" ")
+def slot(card):
+    return open(card + ".slot", "rb").read() if os.path.exists(card + ".slot") else None
+for card in ("w1", "w2", "w3", "w4", "w5"):
+    os.mkdir(card)
+jobs, apps, o = fw("w1", "refresh", "fw", cat=FWCAT)
+check("the catalogue offers a firmware for this board, newer than the one running",
+      fwline(o) == ["fw", "1", rel_ver, "rev1_3", "size=%d" % len(imgs["rev1_3"]), "newer=1", "ready=0"] and slot("w1") is None, o)
+jobs, apps, o = fw("w1", "refresh", "firmware", "fw", cat=FWCAT)
+check("asked for: downloaded, checked and written to the other slot", jobs[1][0] and "restart to run it" in jobs[1][1]
+      and slot("w1") == imgs["rev1_3"] and fwline(o)[-1] == "ready=1" and not os.path.exists("w1/apps/.store/tmp/firmware.bin"), o)
+jobs, apps, o = fw("w2", "refresh", "firmware", "fw", cat=FWCAT, env={"P4_PROFILE": "rev3_x"})
+check("each board gets the image of its own profile", jobs[1][0] and slot("w2") == imgs["rev3_x"] and fwline(o)[3] == "rev3_x", o)
+jobs, apps, o = fw("w3", "refresh", "firmware", "fw", cat=FWCAT, env={"P4_PROFILE": "rev9_9"})
+check("no image for this board: nothing offered, nothing written", not jobs[1][0] and jobs[1][1].endswith("kind=14")
+      and fwline(o)[1] == "0" and slot("w3") is None, o)
+newer = {}
+for running, want in ((rel_ver, "0"), (rel_ver + "-tienda.2", "1"), (rel_ver + "-tienda.2-5-gabc1234-dirty", "1"),
+                      (rel_ver + "-3-gabc1234", "0"), ("v99.0.0", "0"), ("v0.1.0-7-g1234567", "1")):
+    jobs, apps, o = fw("w3", "refresh", "fw", cat=FWCAT, env={"FAKE_FW": running})
+    newer[running] = fwline(o)[5] == "newer=" + want
+check("newer than its own test tags, not than a build made after it", all(newer.values()), newer)
+jobs, apps, o = fw("w3", "refresh", "firmware", cat=FWCAT, env={"FAKE_FW": rel_ver})
+check("the one running: not installed again", not jobs[1][0] and jobs[1][1].endswith("kind=18") and slot("w3") is None, o)
+head = json.loads(open("rel/fw.ndjson").readline())
+head["fw"]["images"]["rev1_3"]["sha256"] = hashlib.sha256(b"another image").hexdigest()
+open("rel/fwbad.ndjson", "w").write(json.dumps(head) + "\n" + "".join(open("rel/fw.ndjson").readlines()[1:]))
+jobs, apps, o = fw("w4", "refresh", "firmware", "fw", cat=LATEST + "fwbad.ndjson")
+check("an image that is not the one published: the flash is not touched", not jobs[1][0] and jobs[1][1].endswith("kind=7")
+      and slot("w4") is None and not os.path.exists("w4.slot.part") and fwline(o)[-1] == "ready=0", o)
+jobs, apps, o = fw("w4", "refresh", "firmware", cat=FWCAT, env={"FAKE_OTA": "full"})
+check("the slot refuses it: said as such", not jobs[1][0] and jobs[1][1].endswith("kind=17") and "does not fit" in jobs[1][1] and slot("w4") is None, o)
+# a source that is not the official one may say "fw" all it likes
+lines3 = open("rel3/p4os-store.ndjson").read().splitlines()
+h3 = json.loads(lines3[0]); h3["fw"] = json.loads(open("rel/fw.ndjson").readline())["fw"]
+open("rel3/p4os-store.ndjson", "w").write("\n".join([json.dumps(h3)] + lines3[1:]) + "\n")
+jobs, apps, o = fw("w5", "refresh", "look=" + THEIRS, "add=" + THEIRS, "refresh", "sources", "fw", "firmware")
+check("only the official source offers firmware", len(sources(o)) == 2 and fwline(o)[1] == "0" and not jobs[-1][0] and slot("w5") is None, o)
 sys.exit(1 if fails else 0)
 PY
 echo "all passed"

@@ -747,6 +747,12 @@ static void reinstall_cb(lv_event_t *e)
 }
 
 /* the extra's file name is the object's own text, kept in a hidden label */
+static void system_cb(lv_event_t *e)
+{
+    (void)e;
+    aos_ui_open_app_with("aos.settings", "update");
+}
+
 static void extra_cb(lv_event_t *e)
 {
     lv_obj_t *keep = lv_event_get_user_data(e);
@@ -961,6 +967,8 @@ static void build_detail(lv_obj_t *page)
     if (!it->st.fits) {
         snprintf(buf, sizeof buf, _("Necesita P4OS %s o más nuevo."), it->st.fw_min);
         note(body, AOS_SYM_ALERT_OUTLINE, AOS_C_ORANGE, buf);
+        /* where the system is updated from: Settings, Update */
+        pill(body, _("Actualizar el sistema"), false, system_cb, NULL);
     }
 
     char lt[200];
@@ -1290,6 +1298,8 @@ static const char *why_text(int kind)
     case AOS_STORE_E_NOT_LISTED: return _("No está en el catálogo.");
     case AOS_STORE_E_IN_STORE:   return _("Esa app es de la Tienda: se instala y se quita desde acá.");
     case AOS_STORE_E_NOT_STORE:  return _("No la instaló la Tienda.");
+    case AOS_STORE_E_FLASH:      return _("No se pudo escribir la otra ranura.");
+    case AOS_STORE_E_UP_TO_DATE: return _("Ya es la versión que corre.");
     default:                     return _("Algo salió mal.");
     }
 }
@@ -1306,6 +1316,7 @@ static void banner_update(const aos_store_status_t *st)
         for (int i = 0; i < S.n; i++)
             if (!strcmp(S.items[i].file, st->file)) who = S.items[i].name;
         const char *what = !strcmp(st->job, "refresh") ? _("Buscando el catálogo") :
+                           !strcmp(st->job, "firmware") ? (!strcmp(st->step, "writing") ? _("Escribiendo P4OS") : _("Bajando P4OS")) :
                            !strcmp(st->job, "remove")  ? _("Quitando") :
                            !strcmp(st->job, "adopt")   ? _("Revisando lo que hay en la tarjeta") :
                            !strncmp(st->step, "pack", 4) ? _("Bajando lo que necesita") :
@@ -1328,7 +1339,8 @@ static void banner_update(const aos_store_status_t *st)
                                                 !strcmp(j, "look")     ? _("No se pudo mirar esa fuente.") :
                                                 !strcmp(j, "add")      ? _("No se pudo agregar la fuente.") :
                                                 !strcmp(j, "unsource") ? _("No se pudo quitar la fuente.") :
-                                                !strcmp(j, "sideload") ? _("No se pudo instalar el paquete.") : _("No se pudo."));
+                                                !strcmp(j, "sideload") ? _("No se pudo instalar el paquete.") :
+                                                !strcmp(j, "firmware") ? _("No se pudo actualizar el sistema.") : _("No se pudo."));
         snprintf(buf, sizeof buf, "%s %s", what, why_text(st->last_kind));
         lv_obj_set_style_text_color(S.banner_text, AOS_C_ORANGE, 0);
         lv_obj_add_flag(S.bar, LV_OBJ_FLAG_HIDDEN);

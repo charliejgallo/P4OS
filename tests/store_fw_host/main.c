@@ -51,6 +51,12 @@ int main(int argc, char **argv)
                 printf("source %d %s apps=%d skipped=%d loaded=%d %s\n", k, sr.name[0] ? sr.name : "-", sr.apps, sr.skipped, sr.loaded, sr.url);
             continue;
         }
+        else if (!strcmp(a, "fw")) {
+            aos_store_fw_t fw;
+            bool have = aos_store_fw(&fw);
+            printf("fw %d %s %s size=%u newer=%d ready=%d\n", have, fw.ver[0] ? fw.ver : "-", fw.profile, (unsigned)fw.size, fw.newer, fw.ready);
+            continue;
+        }
         else if (!strcmp(a, "catalog")) {
             char *text = aos_store_catalog(NULL);
             printf("%s", text ? text : "");
@@ -87,6 +93,7 @@ int main(int argc, char **argv)
         }
         else if (!strcmp(a, "refresh")) queued = aos_store_refresh();
         else if (!strcmp(a, "adopt")) queued = aos_store_adopt();
+        else if (!strcmp(a, "firmware")) queued = aos_store_fw_install();
         else if (!strcmp(a, "remove")) queued = aos_store_remove(v ? v : "");
         else if (!strcmp(a, "install")) {
             char *packs = v ? strchr(v, ':') : NULL;

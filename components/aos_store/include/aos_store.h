@@ -83,11 +83,13 @@ typedef enum {
     AOS_STORE_E_NOT_LISTED, /* no catalogue lists it */
     AOS_STORE_E_IN_STORE,   /* a package handed in that is the store's own app */
     AOS_STORE_E_NOT_STORE,  /* not installed by the store: nothing to remove */
+    AOS_STORE_E_FLASH,      /* the firmware could not be written to the other slot */
+    AOS_STORE_E_UP_TO_DATE, /* the firmware offered is not newer than the one running */
 } aos_store_err_t;
 
 typedef struct {
     bool     busy;
-    char     job[12];       /* "refresh", "install", "remove", "adopt", or "" */
+    char     job[12];       /* "refresh", "install", "remove", "adopt", "firmware"..., or "" */
     char     file[32];      /* the package it is about */
     char     step[40];      /* "downloading", "checking", "packs", "installing"... */
     uint32_t got, total;    /* of the download in hand; total 0 until known */
@@ -180,6 +182,34 @@ bool aos_store_source_remove(int index, bool with_apps);
 bool aos_store_propose(const char *text);
 bool aos_store_proposal(char *out, size_t n);
 void aos_store_proposal_clear(void);
+
+/* --------------------------------------------------------------------------
+ * The system's own firmware (docs/plan/TIENDA.md, "El firmware desde GitHub")
+ *
+ * The OFFICIAL source's catalogue - the first one, and no other - may say
+ * which firmware its release brings, an image for each kind of board. When
+ * it is newer than the one running, a person can ask for it: it is
+ * downloaded to the card, checked whole against the size and the SHA-256
+ * the catalogue gives BEFORE anything is written, and then written to the
+ * other slot (aos_hal_ota_*). Nothing here restarts the board: whoever
+ * asked does, and the new image boots on trial like any other
+ * (aos_hal_ota_pending_verify). Never by itself: there is no call that
+ * installs without being asked.
+ * -------------------------------------------------------------------------- */
+typedef struct {
+    char     ver[28];       /* the release the catalogue offers for this board */
+    char     profile[12];   /* which kind of board this firmware is for: "rev1_3", "rev3_x" */
+    uint32_t size;
+    bool     newer;         /* than the one running */
+    bool     ready;         /* written to the other slot: it runs after a restart */
+} aos_store_fw_t;
+
+/* false, with 'out' cleared but for 'profile', when the catalogue offers no
+ * firmware for this board. */
+bool aos_store_fw(aos_store_fw_t *out);
+/* Queues the download and the writing; aos_store_status() says how far it
+ * is ("firmware": "downloading", then "writing"). */
+bool aos_store_fw_install(void);
 
 /* A package (.p4app) that is on the card or on a pendrive, by its path from
  * the card's root: installed by the same steps as one of a catalogue. It

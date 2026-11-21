@@ -2938,16 +2938,37 @@ const char *aos_hal_board_name(void)       { return "SDL simulator"; }
  * board leaves it, so the error path IS testable on the desktop -which is the
  * half of the flow worth rehearsing anyway-. */
 
+/* P4_SIM_OTA=<file>: a make-believe other slot, to rehearse the way that
+ * ends well too (Settings' update from GitHub): the image is written to
+ * that file and nothing else happens. */
+static FILE *s_ota_file;
+
 bool aos_hal_ota_begin(size_t total_bytes)
 {
-    (void)total_bytes;
+    const char *path = getenv("P4_SIM_OTA");
+    if (path && path[0]) {
+        if (s_ota_file) fclose(s_ota_file);
+        s_ota_file = fopen(path, "wb");
+        printf("[hal] ota: %u bytes into %s\n", (unsigned)total_bytes, path);
+        return s_ota_file != NULL;
+    }
     printf("[hal] ota: there is no flash in the simulator\n");
     return false;
 }
 
-bool aos_hal_ota_write(const void *data, size_t len) { (void)data; (void)len; return false; }
-bool aos_hal_ota_end(void)   { return false; }
-void aos_hal_ota_abort(void) { }
+bool aos_hal_ota_write(const void *data, size_t len) { return s_ota_file && fwrite(data, 1, len, s_ota_file) == len; }
+bool aos_hal_ota_end(void)
+{
+    if (!s_ota_file) return false;
+    fclose(s_ota_file);
+    s_ota_file = NULL;
+    return true;
+}
+void aos_hal_ota_abort(void)
+{
+    if (s_ota_file) fclose(s_ota_file);
+    s_ota_file = NULL;
+}
 
 const char *aos_hal_ota_error(void)
 {
@@ -3000,7 +3021,13 @@ int aos_hal_hang_restarts(void) { return getenv("P4_SIM_HANG") ? atoi(getenv("P4
 static char s_app_ctx[48];
 void aos_hal_app_context_set(const char *app_id) { snprintf(s_app_ctx, sizeof s_app_ctx, "%s", app_id ? app_id : ""); }
 const char *aos_hal_app_context(void) { return s_app_ctx[0] ? s_app_ctx : NULL; }
-const char *aos_hal_firmware_version(void) { return "sim"; }
+/* P4_SIM_FW=v0.29.0: a version to be older or newer than what the store's
+ * catalogue offers (Settings' update from GitHub). */
+const char *aos_hal_firmware_version(void)
+{
+    const char *v = getenv("P4_SIM_FW");
+    return v && v[0] ? v : "sim";
+}
 
 void aos_hal_log(const char *tag, const char *fmt, ...)
 {

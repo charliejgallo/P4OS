@@ -24,6 +24,15 @@ the catalogue that lists them.
         --missing-packs skip, an app whose needed pack is in no release is
         left out of the catalogue, with a warning, instead of failing.
 
+    tools/gen_store.py fw --catalog out/p4os-store.ndjson p4os-rev1_3.bin p4os-rev3_x.bin
+        Writes into the catalogue which firmware its release brings: the
+        size and the SHA-256 of each image, by the profile in its name
+        (p4os-<profile>.bin), as files of that same release. The board
+        offers it in Settings when it is newer than the one it runs. It is
+        a step of its own because the images of the two profiles are built
+        by different jobs: it runs where they meet, and needs nothing of the
+        tree but this file.
+
 A package, <file>.p4app, is a zip WITHOUT compression whose paths are the
 card's: apps/<file>.so, the modules the app loads itself in apps/<app>/, its
 portal pages in web/, its languages in lang/<code>/, and a p4app.json that
@@ -726,6 +735,33 @@ def cmd_packs(a):
     return 0
 
 
+def cmd_fw(a):
+    lines = open(a.catalog, encoding="utf-8").read().splitlines()
+    try:
+        head = json.loads(lines[0])
+    except (IndexError, ValueError):
+        raise Bad("%s: not a catalogue" % a.catalog)
+    if "source" not in head or not head.get("release"):
+        raise Bad("%s: its first line is not a source's" % a.catalog)
+    images = {}
+    for path in a.images:
+        m = re.fullmatch(r"p4os-([a-z0-9_]+)\.bin", os.path.basename(path))
+        if not m:
+            raise Bad("%s: an image is named p4os-<profile>.bin" % path)
+        data = open(path, "rb").read()
+        if len(data) < 1024 * 1024 or data[0] != 0xE9:
+            raise Bad("%s: not a firmware image" % path)
+        images[m.group(1)] = {"url": "%s/%s" % (head["release"], os.path.basename(path)), "size": len(data),
+                              "sha256": sha256(data)}
+    head["fw"] = {"ver": head["release"], "images": images}
+    lines[0] = json.dumps(head, ensure_ascii=False, separators=(",", ":"))
+    with open(a.catalog, "w", encoding="utf-8") as f:
+        f.write("\n".join(lines) + "\n")
+    print("the firmware of %s in the catalogue: %s" % (head["release"], ", ".join(
+        "%s (%.1f MB)" % (k, v["size"] / 1e6) for k, v in sorted(images.items()))))
+    return 0
+
+
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -748,6 +784,10 @@ def main():
     p.add_argument("--repo")
     p.add_argument("--fresh", action="store_true", help="forget what store/packs.json had")
     p.set_defaults(fn=cmd_packs)
+    f = sub.add_parser("fw")
+    f.add_argument("--catalog", required=True, help="the p4os-store.ndjson to write it into")
+    f.add_argument("images", nargs="+", help="p4os-<profile>.bin, as published in the release")
+    f.set_defaults(fn=cmd_fw)
     a = ap.parse_args()
     try:
         return a.fn(a)

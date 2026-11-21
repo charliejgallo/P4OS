@@ -199,6 +199,12 @@ host key is Ed25519, kept in preferences like the HTTPS authority's.
   firmware, and P4OS is meant to be open: anyone can build and load their
   own. What guards the firmware page is what guards the rest of the
   portal: the trusted networks, the password and HTTPS.
+  The update from GitHub (Settings, Update, since 0.30.0) installs only
+  what the official source's catalogue offers for this board, fetched over
+  HTTPS and checked whole against the size and the SHA-256 of that
+  catalogue before the flash is touched; another source cannot offer
+  firmware, and nothing is installed or restarted without a tap. It is as
+  trustworthy as the release it comes from, and no more.
 - **SSH has no post-quantum key exchange yet** (`mlkem768x25519-sha256`):
   OpenSSH 10.1 and later warn about it on every connection. Today's
   connections are safe; recorded ones would be readable to a future

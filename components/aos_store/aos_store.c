@@ -56,6 +56,7 @@
   static void dyn_unload(const char *so) { (void)so; }
   static bool dyn_load(const char *so) { (void)so; return true; }
 #else
+  #include "sdkconfig.h"
   #include "esp_heap_caps.h"
   #include "aos_dynapp.h"
   #include "aos_access.h"
@@ -92,7 +93,7 @@ typedef struct {
     char so_sha[65];
 } app_t;
 
-enum { J_REFRESH = 1, J_INSTALL, J_REMOVE, J_ADOPT, J_PROBE, J_ADD, J_UNSOURCE, J_SIDELOAD };
+enum { J_REFRESH = 1, J_INSTALL, J_REMOVE, J_ADOPT, J_PROBE, J_ADD, J_UNSOURCE, J_SIDELOAD, J_FIRMWARE };
 
 typedef struct {
     int  kind;
@@ -123,6 +124,9 @@ AOS_BSS_PSRAM static char    s_url[200];          /* the first source's address 
 static bool    s_dev;               /* developer mode: http:// and another first source */
 AOS_BSS_PSRAM static aos_store_probe_t s_probe;
 AOS_BSS_PSRAM static char    s_proposal[200];     /* a source the portal asked for: the board decides */
+/* the firmware the official catalogue offers for this board, "" in 'ver' when none */
+AOS_BSS_PSRAM static struct { char ver[28], url[200], sha[65]; uint32_t size; } s_fw;
+static bool    s_fw_ready;          /* written to the other slot in this run */
 AOS_BSS_PSRAM static job_t   s_queue[QUEUE];
 static int     s_qn;
 static bool    s_running, s_cancel;
@@ -297,6 +301,43 @@ static int32_t version_of(const char *v)
     int a = 0, b = 0, c = 0;
     if (sscanf(v, "%d.%d.%d", &a, &b, &c) < 2) return -1;
     return (a & 0xFF) << 16 | (b & 0xFF) << 8 | (c & 0xFF);
+}
+
+/* Which kind of board this firmware was built for: the name of its profile,
+ * which is also in the name of its image in a release (p4os-<profile>.bin).
+ * The two differ in the chip revision they start at. */
+static const char *fw_profile(void)
+{
+#ifdef AOS_SIM
+    const char *p = getenv("P4_PROFILE");
+    return p && p[0] ? p : "rev1_3";
+#elif defined(CONFIG_ESP32P4_REV_MIN_300)
+    return "rev3_x";
+#else
+    return "rev1_3";
+#endif
+}
+
+/* Whether the release 'offered' is newer than the firmware 'running', whose
+ * version is what git describe said when it was built: "v0.30.0" is the
+ * release itself, "v0.30.0-4-g1a2b3c4" (and "-dirty") is that release and
+ * some commits more, and "v0.30.0-tienda.2" is a test tag BEFORE it - so
+ * the release is newer than its own test tags, and not than a build made
+ * after it. */
+static bool fw_newer(const char *offered, const char *running)
+{
+    int32_t want = version_of(offered), have = version_of(running);
+    if (want < 0 || have < 0) return false;
+    if (want != have) return want > have;
+    const char *r = running;
+    while (*r && !isdigit((unsigned char)*r)) r++;
+    while (*r && (isdigit((unsigned char)*r) || *r == '.')) r++;
+    /* what follows x.y.z: nothing, "-N-g<hash>" of a later build, or a test tag's word */
+    if (r[0] != '-') return false;
+    const char *q = r + 1;
+    while (isdigit((unsigned char)*q)) q++;
+    bool later = q > r + 1 && q[0] == '-' && q[1] == 'g';
+    return !later;
 }
 
 static bool fw_fits(const char *fw_min)
@@ -578,6 +619,8 @@ static bool catalog_load(err_t *e)
     char *all = BIG_ALLOC(cap);
     src_t found[SRC_MAX];
     memset(found, 0, sizeof found);
+    __typeof__(s_fw) fw_found;
+    memset(&fw_found, 0, sizeof fw_found);
     int n = 0, loaded = 0;
     size_t w = 0;
     for (int i = 0; i < nsrc && apps && all; i++) {
@@ -595,6 +638,18 @@ static bool catalog_load(err_t *e)
                 snprintf(found[i].base, sizeof found[i].base, "%s", jstr(o, "base"));
                 snprintf(found[i].release, sizeof found[i].release, "%s", jstr(o, "release"));
                 found[i].loaded = head = keep = true;
+                if (i == 0) {
+                    /* the system's firmware: the official source's to offer, and nobody else's */
+                    const cJSON *fw = cJSON_GetObjectItem(o, "fw");
+                    const cJSON *im = cJSON_GetObjectItem(cJSON_GetObjectItem(fw, "images"), fw_profile());
+                    memset(&fw_found, 0, sizeof fw_found);
+                    if (im && jnum(im, "size") && strlen(jstr(im, "sha256")) == 64 && jstr(im, "url")[0]) {
+                        snprintf(fw_found.ver, sizeof fw_found.ver, "%s", jstr(fw, "ver"));
+                        snprintf(fw_found.url, sizeof fw_found.url, "%s", jstr(im, "url"));
+                        snprintf(fw_found.sha, sizeof fw_found.sha, "%s", jstr(im, "sha256"));
+                        fw_found.size = jnum(im, "size");
+                    }
+                }
                 loaded++;
             } else if (o && n < APPS_MAX && file_name_ok(jstr(o, "file"))) {
                 const char *file = jstr(o, "file"), *id = jstr(o, "id");
@@ -652,6 +707,7 @@ static bool catalog_load(err_t *e)
     }
     snprintf(s_st.release, sizeof s_st.release, "%s", s_src[0].release);
     snprintf(s_st.source, sizeof s_st.source, "%s", s_src[0].name);
+    s_fw = fw_found;
     s_st.apps = 0;
     for (int i = 0; i < n; i++) s_st.apps += apps[i].pub.src >= 0;
     s_shot_nbad = 0;
@@ -1438,12 +1494,81 @@ static bool source_remove(int index, bool apps, err_t *e)
     return true;
 }
 
+/* ---- the system's firmware ------------------------------------------------- */
+
+#define FW_FILE     DIR_TMP "/firmware.bin"
+#define FW_CHUNK    (64 * 1024)
+
+/* Downloads the image the official catalogue offers for this board, whole
+ * and checked, and only then writes it to the other slot. The board is not
+ * restarted here. */
+static bool firmware(err_t *e)
+{
+    __typeof__(s_fw) fw;
+    char base[200], url[420], f[FULL_MAX];
+    lock();
+    fw = s_fw;
+    snprintf(base, sizeof base, "%s", s_src[0].base);
+    unlock();
+    if (!fw.ver[0]) return fail(e, AOS_STORE_E_NOT_LISTED, "the catalogue offers no firmware for this board (%s)", fw_profile());
+    if (!fw_newer(fw.ver, aos_hal_firmware_version()))
+        return fail(e, AOS_STORE_E_UP_TO_DATE, "%.27s is not newer than %.40s, which is running", fw.ver, aos_hal_firmware_version());
+    lock();
+    snprintf(s_st.file, sizeof s_st.file, "%.27s", fw.ver);
+    unlock();
+    step("downloading");
+    make_dirs(FW_FILE);
+    url_of(url, sizeof url, base, fw.url);
+    /* aos_fetch holds it to the size and reads it back for its hash: what
+     * goes to the flash below is the image that was published, or nothing */
+    if (!download(url, FW_FILE, fw.sha, fw.size, 0, e)) return false;
+
+    step("writing");
+    uint8_t *buf = BIG_ALLOC(FW_CHUNK);
+    FILE *fp = buf ? fopen(full(f, FW_FILE), "rb") : NULL;
+    bool ok = false;
+    uint32_t done = 0;
+    if (!fp) fail(e, buf ? AOS_STORE_E_CARD : AOS_STORE_E_MEMORY, "the image cannot be read back from the card");
+    else if (!aos_hal_ota_begin(fw.size)) fail(e, AOS_STORE_E_FLASH, "%.120s", aos_hal_ota_error());
+    else {
+        lock();
+        s_st.got = 0;
+        s_st.total = fw.size;
+        unlock();
+        for (;;) {
+            size_t n = fread(buf, 1, FW_CHUNK, fp);
+            if (!n) break;
+            if (s_cancel) { fail(e, AOS_STORE_E_CANCELLED, "cancelled"); break; }
+            if (!aos_hal_ota_write(buf, n)) { fail(e, AOS_STORE_E_FLASH, "%.120s", aos_hal_ota_error()); break; }
+            done += (uint32_t)n;
+            lock();
+            s_st.got = done;
+            unlock();
+        }
+        if (e->why[0] || done != fw.size) {
+            if (!e->why[0]) fail(e, AOS_STORE_E_CARD, "the image read back short: %u of %u bytes", (unsigned)done, (unsigned)fw.size);
+            aos_hal_ota_abort();
+        } else if (!aos_hal_ota_end()) fail(e, AOS_STORE_E_FLASH, "%.120s", aos_hal_ota_error());
+        else ok = true;
+    }
+    if (fp) fclose(fp);
+    free(buf);
+    del(FW_FILE);
+    if (ok) {
+        lock();
+        s_fw_ready = true;
+        unlock();
+        snprintf(e->why, sizeof e->why, "%.27s is in the other slot: restart to run it", fw.ver);
+    }
+    return ok;
+}
+
 /* ---- the worker ------------------------------------------------------------ */
 
 static const char *job_name(int kind)
 {
-    static const char *names[] = { "", "refresh", "install", "remove", "adopt", "look", "add", "unsource", "sideload" };
-    return names[kind >= J_REFRESH && kind <= J_SIDELOAD ? kind : 0];
+    static const char *names[] = { "", "refresh", "install", "remove", "adopt", "look", "add", "unsource", "sideload", "firmware" };
+    return names[kind >= J_REFRESH && kind <= J_FIRMWARE ? kind : 0];
 }
 
 static void work(void *arg)
@@ -1482,6 +1607,7 @@ static void work(void *arg)
         else if (j.kind == J_INSTALL) ok = install(j.file, j.packs, false, &e);
         else if (j.kind == J_REMOVE) ok = uninstall(j.file, &e);
         else if (j.kind == J_ADOPT) ok = adopt_all(&e);
+        else if (j.kind == J_FIRMWARE) ok = firmware(&e);
 
         /* what is on the card changed: the apps no source lists are read again */
         if (j.kind == J_INSTALL || j.kind == J_REMOVE || j.kind == J_SIDELOAD || j.kind == J_ADOPT) {
@@ -1701,6 +1827,25 @@ bool aos_store_sideload(const char *card_path)
 
 bool aos_store_refresh(void) { return enqueue(J_REFRESH, NULL, NULL); }
 bool aos_store_adopt(void)   { return enqueue(J_ADOPT, NULL, NULL); }
+
+bool aos_store_fw(aos_store_fw_t *out)
+{
+    aos_store_init();
+    memset(out, 0, sizeof *out);
+    snprintf(out->profile, sizeof out->profile, "%s", fw_profile());
+    lock();
+    bool have = s_fw.ver[0] != 0;
+    if (have) {
+        snprintf(out->ver, sizeof out->ver, "%s", s_fw.ver);
+        out->size = s_fw.size;
+        out->ready = s_fw_ready;
+    }
+    unlock();
+    if (have) out->newer = fw_newer(out->ver, aos_hal_firmware_version());
+    return have;
+}
+
+bool aos_store_fw_install(void) { return enqueue(J_FIRMWARE, NULL, NULL); }
 
 bool aos_store_install(const char *file, const char *packs)
 {

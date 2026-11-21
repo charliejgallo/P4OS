@@ -966,8 +966,44 @@ sólo muestra las dos ranuras y deja volver a la anterior.
   a GitHub más el SHA-256 que el catálogo trae.
 - Queda para después: el firmware del C6 por el mismo camino.
 
-**Decisión propuesta: sí, con la imagen entera.** Es lo que vuelve útil
-el `fw_min` de las apps.
+**Hecho (2026-11-21), con la imagen entera.** Es lo que vuelve útil el
+`fw_min` de las apps.
+
+- **El catálogo:** `tools/gen_store.py fw --catalog <ndjson>
+  p4os-rev1_3.bin p4os-rev3_x.bin` escribe `"fw"` en la primera línea. Es
+  un paso aparte porque las imágenes de los dos perfiles las arman
+  trabajos distintos del CI: corre en el de la release, donde se juntan.
+- **El perfil** sale de la configuración con la que se compiló
+  (`CONFIG_ESP32P4_REV_MIN_300` es `rev3_x`), sin tocar el HAL.
+- **El servicio** (`aos_store_fw()`, `aos_store_fw_install()`): un trabajo
+  más de la cola, `firmware`. Baja a `apps/.store/tmp/firmware.bin`
+  (`aos_fetch` lo ata al tamaño y lo vuelve a leer para su hash), y recién
+  entonces lo pasa a la otra ranura de a 64 KB. Se puede cancelar en las
+  dos mitades. No reinicia.
+- **Qué es "más nueva":** la versión que corre es lo que dijo `git
+  describe`. `v0.30.0` es más nueva que `v0.30.0-tienda.2` (un tag de
+  prueba anterior a la release) y no que `v0.30.0-4-g1a2b3c4` (esa release
+  y commits encima).
+- **Ajustes → Actualización**, grupo "Desde GitHub": versión nueva, estado
+  (bajando… %, escribiendo… %, lista), "Bajar e instalar vX", "Cancelar",
+  "Buscar actualizaciones" y "Reiniciar ahora" (con segundo toque). La
+  página Firmware del portal tiene lo mismo, y la Tienda lleva ahí desde
+  una app que pide un P4OS más nuevo.
+- **Probado en la Mac:** `tests/store_fw_host`, 61 casos (9 del firmware:
+  la oferta, la imagen de cada perfil, un perfil sin imagen, qué es más
+  nuevo, la que ya corre, una imagen que no es la publicada sin tocar la
+  ranura, la ranura que la rechaza, y una fuente de terceros que dice
+  `"fw"` y no ofrece nada). En el simulador, con una ranura de mentira
+  (`P4_SIM_OTA=<archivo>`, `P4_SIM_FW=<versión>`): bajar 7 MB del
+  servidor de prueba, el avance, cancelar, y el archivo escrito es byte a
+  byte la imagen publicada. Firmware `rev1_3`: 7 062 096 bytes.
+- **Falta en la placa:** todo. La primera vez tiene que ir por OTA común
+  (el firmware que corre no sabe actualizarse solo); después, con el
+  catálogo de prueba ofreciendo una imagen, el camino entero: bajar,
+  escribir la ranura de verdad, reiniciar a prueba y confirmar. Medir el
+  tiempo y la RAM interna durante la escritura.
+- **Falta también:** que el CI lo arme de verdad (el paso nuevo del
+  trabajo `release` no corrió nunca), y el firmware del C6.
 
 ### 3. Más texto en la página de cada app
 

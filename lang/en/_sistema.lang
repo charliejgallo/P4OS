@@ -6189,7 +6189,7 @@ No se pudo leer la otra ranura	Could not read the other slot
 Volver a esta versión	Go back to this version
 
 #: components/aos_apps/aos_app_settings.c:1691
-Las versiones nuevas llegan por el portal (Firmware) o con tools/ota.sh, y se escriben en la otra ranura. Arrancan a prueba: si la placa se reinicia antes de confirmarla, a los 30 s, vuelve sola a la anterior.	New versions arrive through the portal (Firmware) or tools/ota.sh, and are written to the other slot. They boot on trial: if the board restarts before confirming one, at 30 s, it goes back to the previous one by itself.
+Las versiones nuevas llegan desde GitHub, por el portal (Firmware) o con tools/ota.sh, y se escriben en la otra ranura. Arrancan a prueba: si la placa se reinicia antes de confirmarla, a los 30 s, vuelve sola a la anterior.	New versions arrive from GitHub, through the portal (Firmware) or tools/ota.sh, and are written to the other slot. They boot on trial: if the board restarts before confirming one, at 30 s, it goes back to the previous one by itself.
 
 #: components/aos_apps/aos_app_settings.c:1701
 #: components/aos_apps/aos_app_sysmon.c:307
@@ -10704,3 +10704,29 @@ Instalada desde un paquete (.p4app): no está en ningún catálogo.	Installed fr
 Cualquier origen	Any origin
 Paquetes sueltos	Loose packages
 Copiadas a mano	Copied by hand
+escribiendo la otra ranura… %u %%	writing the other slot… %u %%
+bajando… %u %%	downloading… %u %%
+lista: arranca al reiniciar	ready: it runs after a restart
+no se pudo bajar: revisá la red	the download failed: check the network
+no está en el servidor	it is not on the server
+la placa todavía no tiene la hora de la red	the board does not have the network time yet
+la imagen no es la publicada: no se escribió nada	the image is not the published one: nothing was written
+no se pudo escribir la otra ranura	the other slot could not be written
+cancelada	cancelled
+ya es la que corre	it is the one already running
+no se pudo	it failed
+Reiniciando con la versión nueva…	Restarting into the new version…
+DESDE GITHUB	FROM GITHUB
+ninguna para esta placa	none for this board
+todavía sin catálogo	no catalogue yet
+ninguna: está al día	none: it is up to date
+Reiniciar ahora	Restart now
+Bajar e instalar %s	Download and install %s
+Buscar actualizaciones	Check for updates
+La placa la baja de la última versión publicada, la revisa entera antes de escribir nada y la deja en la otra ranura. No se reinicia sola.	The board downloads it from the latest published release, checks it whole before writing anything and leaves it in the other slot. It does not restart by itself.
+Actualizar el sistema	Update the system
+No se pudo escribir la otra ranura.	The other slot could not be written.
+Ya es la versión que corre.	It is the version already running.
+Escribiendo P4OS	Writing P4OS
+Bajando P4OS	Downloading P4OS
+No se pudo actualizar el sistema.	The system could not be updated.

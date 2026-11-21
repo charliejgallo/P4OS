@@ -6189,7 +6189,7 @@ No se pudo leer la otra ranura	Der andere Slot ließ sich nicht lesen
 Volver a esta versión	Zu dieser Version zurück
 
 #: components/aos_apps/aos_app_settings.c:1691
-Las versiones nuevas llegan por el portal (Firmware) o con tools/ota.sh, y se escriben en la otra ranura. Arrancan a prueba: si la placa se reinicia antes de confirmarla, a los 30 s, vuelve sola a la anterior.	Neue Versionen kommen über das Portal (Firmware) oder tools/ota.sh und werden in den anderen Slot geschrieben. Sie starten auf Probe: Startet die Platine vor der Bestätigung nach 30 s neu, kehrt sie von selbst zur vorherigen zurück.
+Las versiones nuevas llegan desde GitHub, por el portal (Firmware) o con tools/ota.sh, y se escriben en la otra ranura. Arrancan a prueba: si la placa se reinicia antes de confirmarla, a los 30 s, vuelve sola a la anterior.	Neue Versionen kommen von GitHub, über das Portal (Firmware) oder tools/ota.sh und werden in den anderen Slot geschrieben. Sie starten auf Probe: Startet die Platine vor der Bestätigung nach 30 s neu, kehrt sie von selbst zur vorherigen zurück.
 
 #: components/aos_apps/aos_app_settings.c:1701
 #: components/aos_apps/aos_app_sysmon.c:307
@@ -10704,3 +10704,29 @@ Instalada desde un paquete (.p4app): no está en ningún catálogo.	Aus einem Pa
 Cualquier origen	Jede Herkunft
 Paquetes sueltos	Einzelne Pakete
 Copiadas a mano	Von Hand kopiert
+escribiendo la otra ranura… %u %%	schreibt den anderen Slot… %u %%
+bajando… %u %%	lädt herunter… %u %%
+lista: arranca al reiniciar	bereit: startet nach dem Neustart
+no se pudo bajar: revisá la red	Download fehlgeschlagen: Netzwerk prüfen
+no está en el servidor	nicht auf dem Server
+la placa todavía no tiene la hora de la red	das Board hat noch keine Netzwerkzeit
+la imagen no es la publicada: no se escribió nada	das Image ist nicht das veröffentlichte: nichts wurde geschrieben
+no se pudo escribir la otra ranura	der andere Slot konnte nicht geschrieben werden
+cancelada	abgebrochen
+ya es la que corre	läuft bereits
+no se pudo	fehlgeschlagen
+Reiniciando con la versión nueva…	Neustart mit der neuen Version…
+DESDE GITHUB	VON GITHUB
+ninguna para esta placa	keine für dieses Board
+todavía sin catálogo	noch kein Katalog
+ninguna: está al día	keine: aktuell
+Reiniciar ahora	Jetzt neu starten
+Bajar e instalar %s	%s herunterladen und installieren
+Buscar actualizaciones	Nach Updates suchen
+La placa la baja de la última versión publicada, la revisa entera antes de escribir nada y la deja en la otra ranura. No se reinicia sola.	Das Board lädt sie aus dem letzten veröffentlichten Release, prüft sie vollständig, bevor etwas geschrieben wird, und legt sie im anderen Slot ab. Es startet nicht von selbst neu.
+Actualizar el sistema	System aktualisieren
+No se pudo escribir la otra ranura.	Der andere Slot konnte nicht geschrieben werden.
+Ya es la versión que corre.	Diese Version läuft bereits.
+Escribiendo P4OS	P4OS wird geschrieben
+Bajando P4OS	P4OS wird heruntergeladen
+No se pudo actualizar el sistema.	Das System konnte nicht aktualisiert werden.
