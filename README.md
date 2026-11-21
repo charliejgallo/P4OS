@@ -1361,9 +1361,10 @@ German); an app's page brings its own with the app.
   the pictures and descriptions of an app's page.
 - The firmware from the Store's catalogue (0.30): found in Settings,
   downloaded and checked (16 s for 7 MB), written to the other slot
-  (41 s), restarted into on trial and confirmed, twice in a row. From the
-  test server; from GitHub itself it waits for the first release that
-  carries it.
+  (41 s), restarted into on trial and confirmed, twice in a row, from a
+  test server; and from a pre-release on GitHub, over HTTPS: the catalogue
+  in 4 s, an app in 5 s, and the firmware downloaded, checked and written
+  in 64 s.
 - The parts of the system from the Store (0.30), on a card that already
   had them copied by hand: the two languages downloaded and replaced in
   3 s each, the 16 MB emoji pack recognised by its bytes with nothing

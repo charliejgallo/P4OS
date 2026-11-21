@@ -57,9 +57,14 @@ y un servidor de prueba en la Mac:
       "lista".
 - [x] Las partes del sistema: los dos idiomas, los emojis reconocidos sin
       bajar y el firmware del C6 reemplazado (usuario).
-- [ ] Contra una release **publicada** de GitHub: el catálogo con el
-      firmware y las partes del sistema, y actualizar el firmware desde
-      ahí por HTTPS.
+- [x] Contra una release **publicada** de GitHub (la pre-release
+      `v0.30.0-tienda.4`): el catálogo con el firmware y las partes del
+      sistema en 4,1 s, una app reinstalada en 4,6 s, y el firmware bajado
+      por HTTPS y escrito en la otra ranura en 64 s.
+- [ ] Reiniciar a ese firmware, el primero compilado por el CI que
+      arrancaría en la placa, y verlo confirmarse.
+- [ ] Las imágenes de las apps desde un catálogo del CI (los cuatro tags
+      de prueba salieron sin ellas; corregido para el próximo).
 - [ ] Cortar el Wi-Fi en medio de una bajada.
 - [ ] Confirmar que proponer una fuente desde el portal se recorrió en la
       placa (en el simulador sí).

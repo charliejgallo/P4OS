@@ -1095,6 +1095,40 @@ y el borrador de las notas de la release en
 `docs/internal/RELEASE-0.30.0.md` (no está en git). Las capturas nuevas
 son del simulador, en inglés.
 
+## Contra GitHub de verdad, antes del merge (2026-11-21)
+
+Los CI de los tags `v0.30.0-tienda.3` y `.4` terminaron bien, y con ellos
+corrió por primera vez el paso del trabajo `release` que escribe el
+firmware en el catálogo: los dos perfiles, 7 068 400 y 7 072 128 bytes. El
+catálogo del `.4` trae 58 apps, las cuatro partes del sistema (los idiomas
+como archivos de esa release; los emojis y el firmware del C6 apuntando a
+las releases que ya los tenían) y una descripción larga en cada línea.
+
+**Un defecto: salió sin imágenes**, como el `.1` y el `.2`. El `python3`
+del contenedor de la IDF no tiene `pip`, y el aviso llegaba después de la
+hora y media de las apps. Corregido: Pillow viene de `apt` (`python3-pil`)
+en el primer paso, donde además se comprueba, y el catálogo se arma con
+`/usr/bin/python3`. Visto en el mismo contenedor con un flujo de un solo
+uso: Pillow 10.2.0, tres imágenes de `docs/img` a 320×560 y 560×320.
+**Las imágenes en un catálogo del CI se ven recién en el próximo tag.**
+
+Publicado el `.4` como pre-release (no es "latest": `releases/latest`
+sigue en la 0.29.0, sin catálogo) y la placa apuntada a su catálogo, en
+modo desarrollo. Todo por HTTPS a GitHub:
+
+| | |
+|---|---|
+| El catálogo (180 KB, 62 líneas) | 4,1 s |
+| Reinstalar Simon, que estaba copiada a mano: el `.so` del CI en lugar del de la Mac, registrada | 4,6 s |
+| Las partes del sistema | las cuatro "instaladas": los idiomas del CI son byte a byte los que ya tenía |
+| El firmware, 7,07 MB: bajar y verificar | 21,7 s (0,33 MB/s; 1,3 s de conexión) |
+| El firmware: del pedido a "lista" | 64 s |
+| RAM interna libre, el mínimo mientras tanto | 206 143 bytes |
+
+La otra ranura quedó con `v0.30.0-tienda.4`, la imagen que armó el CI, en
+estado `new`. **El reinicio a esa imagen queda para el usuario**: es la
+primera vez que la placa arrancaría un firmware compilado por el CI.
+
 ## Después del merge: que una app nueva no cueste dos horas de CI
 
 Medido en el CI del tag `v0.30.0-tienda.2` (2026-11-21): de 108 minutos,
