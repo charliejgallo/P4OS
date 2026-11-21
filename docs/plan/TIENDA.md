@@ -1095,6 +1095,47 @@ y el borrador de las notas de la release en
 `docs/internal/RELEASE-0.30.0.md` (no está en git). Las capturas nuevas
 son del simulador, en inglés.
 
+## Después del merge: que una app nueva no cueste dos horas de CI
+
+Medido en el CI del tag `v0.30.0-tienda.2` (2026-11-21): de 108 minutos,
+**101 son compilar las 60 apps una tras otra**. El firmware `rev1_3` son
+4,8 minutos, el `rev3_x` 3,4, el del C6 2,1 y los packs medio. Cada app es
+un proyecto ESP-IDF propio que recompila LVGL y los componentes de la IDF
+enteros para sacar un `.so` de pocos KB: 1,7 minutos por app.
+
+Con la Tienda, sumar una app ya no debería obligar a recompilar todo. En
+orden, y **los dos primeros son la prioridad apenas esté el merge** (pedido
+del usuario, que quiere poner varios agentes a hacer apps):
+
+1. **Compilar sólo lo que cambió.** Una huella por app (sus fuentes, los
+   headers compartidos, `aos_symbols.c`, la configuración de LVGL, la
+   versión de la IDF); si es la de la release anterior, se reutiliza su
+   `.p4app` en vez de compilar. El catálogo ya trabaja así con los
+   paquetes (`--previous`): falta que el CI no compile para descubrirlo.
+   Un cambio en un header compartido recompila todo, como debe. Una
+   release con una app nueva: unos 10 minutos.
+2. **Repartir las apps entre varias máquinas.** Una matriz de tandas en el
+   trabajo de apps (GitHub da 20 trabajos a la vez en un repo público):
+   seis tandas, unos 17 minutos de reloj cuando hay que compilar todo.
+   Hay que juntar después los `.so` de las tandas para el paso que arma
+   el catálogo.
+3. **El kit** (el `p4os-sdk` de la fase 5): los headers, la configuración
+   y las opciones del compilador armados una vez, y cada app compilada con
+   eso en segundos, sin proyecto IDF. Es lo mismo que necesita un tercero
+   para publicar sin este repo.
+4. **Un catálogo que no viaje con el firmware.** Hoy cada catálogo es de
+   una release de firmware. El formato ya deja que cada paquete viva en
+   otra release, y cada app ya dice qué firmware mínimo pide: un flujo
+   aparte podría compilar sólo la app que entró, subir su paquete y
+   regenerar el catálogo, sin publicar firmware. El cuidado: esas apps se
+   compilan contra los headers del firmware **publicado**, no los de
+   `main`; el chequeo de símbolos ve una función nueva y no un cambio de
+   estructura, para eso está el número de ABI.
+
+Mientras tanto, sin cambiar nada: no sacar un tag por app (el costo es por
+corrida, no por app), y que cada sesión valide en la Mac con
+`tools/build_apps.sh <app>` y el simulador.
+
 ## Roadmap
 
 Cada fase termina con algo que se puede probar y con sus números anotados
