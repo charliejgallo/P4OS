@@ -8,6 +8,9 @@
   "3d"
  ],
  "shots": [
-  "app-visor3d.png"
+  "app-visor3d.png",
+  "app-visor3d-mila.png",
+  "app-visor3d-car.png",
+  "app-visor3d-planet.png"
  ]
 }

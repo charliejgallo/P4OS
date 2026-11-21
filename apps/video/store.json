@@ -5,6 +5,8 @@
   "en": "Plays MJPEG AVI videos from the card, full screen, with sound."
  },
  "shots": [
-  "app-video.png"
+  "app-video.png",
+  "app-video-play.png",
+  "land-video-mandelbrot.jpg"
  ]
 }

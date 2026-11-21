@@ -6,7 +6,8 @@
  },
  "shots": [
   "app-luces-scenes.png",
-  "app-luces-stage.png"
+  "app-luces-stage.png",
+  "app-luces-patch.png"
  ],
  "needs": [
   "header"

@@ -5,6 +5,8 @@
   "en": "A chromatic tuner on the board's microphone."
  },
  "shots": [
-  "app-tuner.png"
+  "app-tuner.png",
+  "app-tuner-d3.png",
+  "app-tuner-meter.png"
  ]
 }

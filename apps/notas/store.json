@@ -4,6 +4,11 @@
   "es": "Notas con estilos y listas de tareas.",
   "en": "Notes with styles, and task lists."
  },
+ "shots": [
+  "app-notas.png",
+  "app-notas-note.png",
+  "app-notas-list.png"
+ ],
  "packs": [
   {
    "file": "notas_p4.pak",

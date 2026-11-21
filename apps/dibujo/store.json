@@ -5,6 +5,8 @@
   "en": "Drawing and design by finger, mouse or joystick: up to eight layers the size of the screen."
  },
  "shots": [
-  "app-drawing.png"
+  "app-drawing.png",
+  "app-drawing-colour.png",
+  "app-drawing-brushes.png"
  ]
 }

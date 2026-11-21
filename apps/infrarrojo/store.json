@@ -5,7 +5,10 @@
   "en": "A learning remote: capture, keep and send infrared codes."
  },
  "shots": [
-  "app-infrared.png"
+  "app-infrared.png",
+  "app-infrared-learn.png",
+  "app-infrared-remote.png",
+  "app-infrared-wiring.png"
  ],
  "packs": [
   {

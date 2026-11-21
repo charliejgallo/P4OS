@@ -5,7 +5,10 @@
   "en": "A CAN bus analyser: watch, send and record frames, with a transceiver on the header."
  },
  "shots": [
-  "app-can.png"
+  "app-can.png",
+  "app-can-signals.png",
+  "app-can-obd.png",
+  "app-can-byid.png"
  ],
  "needs": [
   "header"

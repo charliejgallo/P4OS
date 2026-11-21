@@ -5,7 +5,9 @@
   "en": "A PWM output on a knob: frequency, duty, servos and patterns."
  },
  "shots": [
-  "app-pwm.png"
+  "app-pwm.png",
+  "app-pwm-servo.png",
+  "app-pwm-led.png"
  ],
  "needs": [
   "header"

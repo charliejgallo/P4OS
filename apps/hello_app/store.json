@@ -3,5 +3,10 @@
  "about": {
   "es": "La app de ejemplo: de dónde copiar para escribir la tuya, con su página del portal.",
   "en": "The example app: what to copy from to write your own, with its page in the portal."
- }
+ },
+ "shots": [
+  "app-hello.png",
+  "land-hello.png",
+  "web-hello.png"
+ ]
 }

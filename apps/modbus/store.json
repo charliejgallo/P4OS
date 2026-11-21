@@ -5,8 +5,9 @@
   "en": "A bench tool for Modbus RTU and TCP: read, write and poll registers."
  },
  "shots": [
+  "app-modbus.png",
   "app-modbus-traffic.png",
-  "app-modbus.png"
+  "app-modbus-monitor.png"
  ],
  "needs": [
   "header"

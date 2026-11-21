@@ -13,5 +13,10 @@
  "about": {
   "es": "Lua 5.4 en la tarjeta: cada script de la carpeta lua/ es una app más del inicio.",
   "en": "Lua 5.4 on the card: every script in the lua/ folder is one more app on the home screen."
- }
+ },
+ "shots": [
+  "app-lua.png",
+  "app-lua-pelotas.png",
+  "app-lua-pintar.png"
+ ]
 }

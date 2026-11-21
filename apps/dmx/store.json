@@ -6,7 +6,9 @@
  },
  "shots": [
   "app-dmx-analyzer.png",
-  "app-dmx-rdm.png"
+  "app-dmx-rdm.png",
+  "app-dmx-pixels.png",
+  "app-dmx-console.png"
  ],
  "needs": [
   "header"

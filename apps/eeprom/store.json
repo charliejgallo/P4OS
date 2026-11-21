@@ -5,7 +5,9 @@
   "en": "Reads, edits and writes 24xx, 25xx, 25Qxx and 93xx memories, with versions and checksums."
  },
  "shots": [
-  "app-eeprom.png"
+  "app-eeprom.png",
+  "app-eeprom-detect.png",
+  "app-eeprom-wiring.png"
  ],
  "needs": [
   "header"

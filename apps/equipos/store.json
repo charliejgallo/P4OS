@@ -5,7 +5,10 @@
   "en": "Panels for the bench's Modbus devices: supplies, loads and meters."
  },
  "shots": [
-  "app-equipos.png"
+  "app-equipos.png",
+  "app-equipos-riden.png",
+  "app-equipos-gateway.png",
+  "app-equipos-relays.png"
  ],
  "needs": [
   "header"
