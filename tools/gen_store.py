@@ -10,13 +10,19 @@ the catalogue that lists them.
     tools/gen_store.py build --release v0.31.0 --out out/store
                              [--previous p4os-store.ndjson] [--built <root>]
                              [--packs-dir <dir>]... [--only app,app]
+                             [--missing-apps skip] [--missing-packs skip]
         For every app with a store.json and a built .so: out/<file>.p4app and
         a line in out/p4os-store.ndjson.
 
     tools/gen_store.py packs --tag v0.28.0 [--repo owner/name]
-        Rewrites store/packs.json from that release's files on GitHub (their
-        sizes and SHA-256, which GitHub gives: nothing is downloaded). For the
-        art packs whose sources are not in this repository.
+        Brings store/packs.json up to date with that release's files on
+        GitHub (their sizes and SHA-256, which GitHub gives: nothing is
+        downloaded). For the art packs whose sources are not in this
+        repository: a pack has to be in a published release BEFORE the tag
+        whose catalogue names it, and a pack whose bytes did not change
+        stays pointing at the release it was already in. With
+        --missing-packs skip, an app whose needed pack is in no release is
+        left out of the catalogue, with a warning, instead of failing.
 
 A package, <file>.p4app, is a zip WITHOUT compression whose paths are the
 card's: apps/<file>.so, the modules the app loads itself in apps/<app>/, its
@@ -84,6 +90,11 @@ class Bad(Exception):
     pass
 
 
+def warn(text):
+    """Seen in the run's summary on GitHub, and plain anywhere else."""
+    print(("::warning::" if os.environ.get("GITHUB_ACTIONS") else "   ") + text)
+
+
 def read_json(path):
     try:
         with open(path, encoding="utf-8") as f:
@@ -135,7 +146,7 @@ def load_packs():
         return {}
     packs = read_json(path)
     for name, p in packs.items():
-        if (not re.fullmatch(r"v\d+\.\d+\.\d+", p.get("tag", "")) or not isinstance(p.get("size"), int)
+        if (not re.fullmatch(r"[A-Za-z0-9._-]+", p.get("tag", "")) or not isinstance(p.get("size"), int)
                 or not re.fullmatch(r"[0-9a-f]{64}", p.get("sha256", ""))):
             raise Bad("store/packs.json: %s needs tag, size and sha256" % name)
     return packs
@@ -459,7 +470,6 @@ def pack_entry(p, a, packs_json, where):
             break
     if not parts:
         if a.missing_packs == "skip":
-            print("   %s: pack %s is nowhere (store/packs.json, --packs-dir): left out" % (where, p["file"]))
             return None
         raise Bad("%s: pack %s is nowhere: build it and pass --packs-dir, or tools/gen_store.py packs" %
                   (where, p["file"]))
@@ -533,6 +543,22 @@ def cmd_build(a):
         if file in files_seen or entry["id"] in ids_seen:
             raise Bad("apps/%s: its file or id is also apps/%s's" % (app, files_seen.get(file) or ids_seen[entry["id"]]))
         files_seen[file] = ids_seen[entry["id"]] = app
+        packs, lacking = [], []
+        for p in m.get("packs", []):
+            e = pack_entry(p, a, packs_json, "apps/" + app)
+            if e:
+                packs.append(e)
+            else:
+                lacking.append(p)
+        if any(p["need"] for p in lacking):
+            # without it the app would install and not start: better not listed
+            warn("apps/%s is left out of the catalogue: its pack %s is in no release yet (tools/gen_store.py packs)"
+                 % (app, ", ".join(p["file"] for p in lacking if p["need"])))
+            continue
+        for p in lacking:
+            warn("apps/%s: its extra %s is in no release yet: not offered" % (app, p["file"]))
+        if packs:
+            entry["packs"] = packs
         old = previous.get(file)
         if old and old["pkg"]["sha256"] == entry["pkg"]["sha256"]:
             # the same package as the last release's: it stays where it is
@@ -543,15 +569,11 @@ def cmd_build(a):
             with open(os.path.join(a.out, file + ".p4app"), "wb") as f:
                 f.write(pkg)
             new += 1
-        packs = [pack_entry(p, a, packs_json, "apps/" + app) for p in m.get("packs", [])]
-        packs = [p for p in packs if p]
-        if packs:
-            entry["packs"] = packs
         lines.append(entry)
 
     head = {"schema": SCHEMA, "source": {k: a.source[k] for k in ("name", "by", "url", "about")},
             "cats": a.source["cats"], "release": a.release,
-            "base": "https://github.com/%s/releases/download/" % (a.repo or a.source["repo"])}
+            "base": a.base or "https://github.com/%s/releases/download/" % (a.repo or a.source["repo"])}
     lines.sort(key=lambda e: (e["cat"], e["name"]["es"].lower()))
     path = os.path.join(a.out, "p4os-store.ndjson")
     with open(path, "w", encoding="utf-8") as f:
@@ -604,6 +626,8 @@ def main():
     b.add_argument("--packs-dir", action="append", default=[], help="a folder with packs built for this release")
     b.add_argument("--only", help="just these apps (folders of apps/, comma separated)")
     b.add_argument("--repo", help="owner/name, when not store/source.json's")
+    b.add_argument("--base", help="where the releases' files are, when not GitHub (a test server): "
+                                  ".../releases/download/")
     b.add_argument("--missing-apps", choices=("fail", "skip"), default="fail")
     b.add_argument("--missing-packs", choices=("fail", "skip"), default="fail")
     b.set_defaults(fn=cmd_build)

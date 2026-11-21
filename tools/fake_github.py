@@ -12,7 +12,7 @@ the store can be built and measured without touching the network.
 Every file in --dir is an asset of the release <tag>, the latest one:
 
     /<owner>/<name>/releases/latest/download/<file>    302 to the next
-    /<owner>/<name>/releases/download/<tag>/<file>     302 to a signed address
+    /<owner>/<name>/releases/download/<any tag>/<file> 302 to a signed address
     on the second port (--port + 1), the "other host":
     /assets/<token>/<file>?sig=...                     the bytes, with Range
 
@@ -166,8 +166,9 @@ class Handler(BaseHTTPRequestHandler):
             if st.loop:
                 return self.redirect(self.origin(a.port, tls) + u.path)
             return self.redirect("%s%sdownload/%s/%s" % (self.origin(a.port, tls), base, a.tag, name))
-        if rest.startswith("download/%s/" % a.tag):
-            name = rest[len("download/%s/" % a.tag):]
+        if rest.startswith("download/") and rest.count("/") == 2:
+            # any tag has every file: a catalogue names packs of older releases
+            name = rest.split("/", 2)[2]
             if "/" in name or name.startswith(".") or not os.path.isfile(os.path.join(a.dir, name)):
                 return self.plain(404, "Not Found")
             token = secrets.token_hex(16)

@@ -10,7 +10,9 @@ quiera lo agrega en su placa, sabiendo lo que hace.
 placa en lo que no pide internet ni al usuario** (abajo, "Fase 0"): el
 chequeo de símbolos, instalar y quitar en caliente y la bajada a la
 tarjeta andan, también contra GitHub de verdad por TLS y con un reinicio a
-mitad de bajada. Falta un corte del Wi-Fi. La fase 1 está en curso. Se trabaja en la rama `tienda` (worktree
+mitad de bajada; falta un corte del Wi-Fi. **La fase 1 está hecha en la
+Mac** (catálogo, paquetes y el cliente de referencia); falta que su CI
+corra en GitHub. Se trabaja en la rama `tienda` (worktree
 `.claude/worktrees/tienda`, como se hizo con `ethernet`) y se mergea a
 `main` cuando esté probada en la placa. Este documento es el plan; lo que
 se vaya midiendo se anota acá, como en [ETHERNET.md](ETHERNET.md).
@@ -355,31 +357,101 @@ sólo cambia lo de esta fase):
 | Abrir una app recién puesta en caliente | es abrir una app en su pantalla | que arranque, y que una que estaba abierta se cierre bien al quitarla |
 | Reemplazar el archivo entre quitar y poner | falta un `.so` de otra versión | que corra el código nuevo |
 
-## Fase 1: en curso (2026-11-20)
+## Fase 1: catálogo y paquetes (hecha en la Mac, 2026-11-20)
 
-**Hecho:** `tools/gen_store.py` (`check`, `build`, `packs`), un
-`apps/<app>/store.json` para las 60 apps (58 publicadas; `pato` y
-`blittest` no), `store/source.json` (la fuente y las categorías) y
-`store/packs.json` (los 15 packs de la v0.28.0, con el tamaño y el sha-256
-que da GitHub). Con los `.so` ya compilados arma 58 paquetes (17 MB) y un
-catálogo de 52 KB, unos 930 bytes por app; dos corridas dan lo mismo byte
-a byte, y una release siguiente con `--previous` no reescribe ninguno.
+**Lo escrito:**
 
-**D4 cambió, con el riesgo 3 medido:** las compilaciones del CI son
-repetibles (de v0.27.0 a v0.28.0 los 57 `.so` salieron idénticos; de
-v0.26.0 a v0.27.0 cambiaron 47 sin tocar su código, por cuatro cabeceras
-del firmware). La identidad de una app es entonces el sha-256 de su
-paquete, y `ver` la release donde ese paquete apareció. `fw_min` sale de
-las tablas de símbolos de los tags, sin archivo nuevo que mantener.
+- **`tools/gen_store.py`**: `check` (los manifiestos como están en el
+  árbol, sin compilar nada), `build` (un `<app>.p4app` por app y
+  `p4os-store.ndjson`) y `packs` (pone `store/packs.json` al día con los
+  archivos de una release: tamaño y sha-256 los da GitHub, no se baja
+  nada).
+- **Un `apps/<app>/store.json` por app** (60; `pato` y `blittest` con
+  `"publish": false`), `store/source.json` (quién es la fuente y las
+  categorías, con sus nombres en es/en: la placa no las lleva escritas) y
+  `store/packs.json` (los 15 packs de la v0.28.0).
+- **`tools/store_cli.py`**, el cliente de referencia: `list`, `status`,
+  `install`, `adopt` y `remove` sobre una carpeta que hace de tarjeta
+  (`--card`) o sobre una placa o el simulador por el portal (`--board`).
+  Su cabecera dice, paso por paso, qué hace una instalación: es lo que
+  `aos_store.c` tiene que hacer en la fase 2.
+- **El CI** (`build.yml`): el job `packs` corre `gen_store.py check` en
+  segundos, y el paso `bundle` arma paquetes y catálogo con lo recién
+  compilado, contra el catálogo de la última release publicada.
 
-**Las descripciones de los `store.json` son un borrador** escrito desde
-los README: hay que leerlas, sobre todo las de las apps sin README. Qué
-pack es obligatorio en Bastión (el base y Luna) y en Pinball (Zombis) es
-una suposición: lo confirma la sesión de cada juego.
+**Lo que quedó decidido al escribirlo:**
 
-**Falta:** `tools/store_cli.py` (el cliente de referencia), publicar
-catálogo y paquetes desde el CI en una pre-release, y los packs de
-Bastión en `store/packs.json` cuando la 0.29.0 esté publicada.
+- **D4 cambió, con el riesgo 3 medido:** las compilaciones del CI son
+  repetibles (de v0.27.0 a v0.28.0 los 57 `.so` salieron idénticos; de
+  v0.26.0 a v0.27.0 cambiaron 47 sin tocar su código, por cuatro cabeceras
+  del firmware). La identidad de una app es el sha-256 de su paquete, que
+  se arma igual byte a byte desde los mismos archivos, y `ver` es la
+  release donde ese paquete apareció. Un paquete que no cambió no se
+  vuelve a subir: el catálogo sigue apuntando a la release donde está.
+  **Las releases viejas no se borran:** el catálogo las nombra.
+- **`fw_min` se calcula** de las tablas de símbolos de los tags
+  (`git show <tag>:components/aos_dynapp/aos_symbols.c`), sin archivo
+  nuevo que mantener. Todo lo anterior a la v0.29.0 cuenta como "siempre
+  estuvo".
+- **El ícono sale del `.so`**: el blob AIC se encuentra adentro y se lee
+  con el parser de `tools/aic.py` (40 apps); las que usan un ícono del
+  firmware llevan su número (16) y las que usan una letra o un símbolo de
+  la fuente, eso (`lua`, `camaras`).
+- **Un pack tiene que estar en una release publicada antes del tag** cuyo
+  catálogo lo nombra. Si un pack obligatorio no está en ninguna, la app
+  queda fuera del catálogo con un aviso en la corrida, en vez de
+  instalarse rota. Hoy le pasa a Bastión: cuando la 0.29.0 esté publicada,
+  `tools/gen_store.py packs --tag v0.29.0` y un commit.
+- **El recibo** (`apps/.store/<file>.json`): fuente, versión, el sha del
+  paquete, cada archivo y cada parte de cada pack con su hash, y
+  `"adopted": true` si la app estaba copiada a mano.
+- **Lo que un paquete puede escribir:** `apps/<file>.so`, módulos en
+  `apps/<carpeta>/*.so`, `web/*.js` y `lang/<código>/*.lang`. Nada más,
+  nada comprimido, nada que el recibo de otro paquete ya tenga.
+- **Un extra que la persona ya tenía sobrevive a la actualización** de su
+  app, y un pack que ya está en la tarjeta con el hash correcto no se baja
+  de nuevo.
+
+**Lo probado:**
+
+- `tests/store_host/run.sh` (26 casos, con apps de verdad y el GitHub
+  falso): tarjeta vacía, archivos idénticos a los compilados, recibos,
+  estado, un extra por nombre, una release siguiente en la que cambia una
+  sola app (un paquete escrito, cinco que quedan donde estaban), la
+  actualización, adoptar lo copiado a mano sin tocar lo que no coincide,
+  quitar, y doce rechazos: otro hash, otro tamaño, firmware más nuevo,
+  otro ABI, una ruta que sube con `..`, un archivo fuera de lugar, el
+  `.so` de otra app, un archivo que el `p4app.json` no lista, uno
+  cambiado después, un paquete comprimido, uno que dice ser otra app y un
+  archivo que es de otro paquete. En cada rechazo la tarjeta queda como
+  estaba.
+- **Una tarjeta vacía completa:** las 58 apps con todos sus packs, 352
+  archivos y 151,7 MB; los 124 `.so`, módulos, packs y páginas comparados
+  con los compilados, ninguno distinto. El catálogo pesa 52 KB, unos 930
+  bytes por app.
+- **Por el portal del simulador** (`--board`): tres apps con sus packs
+  instaladas, vistas al día y quitadas.
+- El paso del CI, corrido en seco en la Mac con sus mismos comandos: 57
+  apps, y Bastión afuera con su aviso.
+
+**Lo que falta de esta fase:**
+
+- **Que el CI corra de verdad.** El workflow cambió en la rama, pero sólo
+  corre con un push a `main`, un pull request o un tag `v*`: no se probó
+  en GitHub. La pre-release de la rama es un tag (por ejemplo
+  `v0.29.1-tienda.1`), que arma un borrador con todo; publicado como
+  pre-release no pasa a ser "latest". Lo decide el usuario.
+- **Leer las descripciones.** Las de los `store.json` son un borrador
+  escrito desde los README; las de las apps sin README, sin verificar.
+  Qué pack es obligatorio en Bastión (el base y Luna) y en Pinball
+  (Zombis) es una suposición: lo confirma la sesión de cada juego.
+- `store_cli.py --board` contra la placa de verdad, con el cambio en
+  caliente de la fase 0 (`/api/store/unload` y `/load`).
+
+**Para las sesiones de apps, cuando esto esté en `main`:** una app nueva
+trae su `store.json` (categoría y una o dos frases en es/en; los packs, lo
+que necesita y lo que pone el usuario, si hay); `tools/gen_store.py check`
+dice si está bien.
 
 **De la fase 0, el reinicio a mitad de bajada (hecho, 2026-11-20):** la
 primera vez, reiniciada a los 15 MB, la placa volvió con un `.part` de 0
@@ -400,7 +472,7 @@ firmware en la placa, lo sabe `PRUEBAS-PLACA.md`.
 | Fase | Qué | Dónde | Terminada cuando |
 |---|---|---|---|
 | **0. Medir** | `aos_fetch` (bajar a archivo, redirecciones, `Range`, sha-256) y `tools/fake_github.py`; el chequeo de símbolos sin cargar; instalar y quitar en caliente por una API de prueba | firmware, simulador | Los riesgos 1 y 2 tienen números de la placa; D6 y D11 confirmadas o cambiadas |
-| **1. Catálogo y paquetes** | `store.json` de las 60 apps, `tools/gen_store.py`, el `.p4app`, `store/packs.json`, `symbols.since`; el CI publica catálogo y paquetes en una **pre-release** de la rama. `tools/store_cli.py`: un cliente en Python que instala desde el catálogo al simulador o a la placa, y que es la especificación ejecutable | CI y herramientas, sin firmware | El catálogo valida, y una tarjeta vacía queda completa con `store_cli.py`; riesgo 3 medido |
+| **1. Catálogo y paquetes** | `store.json` de las 60 apps, `tools/gen_store.py`, el `.p4app`, `store/packs.json`; el CI publica catálogo y paquetes en una **pre-release** de la rama. `tools/store_cli.py`: un cliente en Python que instala desde el catálogo al simulador o a la placa, y que es la especificación ejecutable | CI y herramientas, sin firmware | El catálogo valida, y una tarjeta vacía queda completa con `store_cli.py`; riesgo 3 medido |
 | **2. El servicio** | `aos_store.c`: catálogo, compatibilidad, cola, verificar, instalar, quitar, recibos, adoptar lo copiado a mano, cuarentena; `/api/store` | firmware | Desde `curl` se instala, actualiza y quita una app en la placa contra la pre-release, sin tocar la pantalla; un `.so` roto a propósito termina apartado |
 | **3. La Tienda** | La app, el avance en los íconos del inicio, el número de actualizaciones, la página del portal | firmware, portal | El usuario arma una tarjeta vacía sólo desde la pantalla |
 | **4. Terceros** | Fuentes (agregar en la placa, el aviso, las reglas), fuente de desarrollo, soltar un `.p4app` en el portal o traerlo en un pendrive | firmware | Una fuente de prueba en otro repo instala una app; lo que debe rechazarse se rechaza (pisar lo oficial, rutas ajenas, firmware viejo) |

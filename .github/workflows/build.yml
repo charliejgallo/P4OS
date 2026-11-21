@@ -1,4 +1,5 @@
-# Builds the firmware for both chip profiles and every app against it, the
+# Builds the firmware for both chip profiles and every app against it (and
+# each app's package for the Tienda, with the catalogue that lists them), the
 # ESP32-C6's firmware (c6/, docs/C6.md), the colour emoji pack
 # (docs/EMOJI.md) and the Notes app's fonts, on each push and pull request. A tag v* also makes a
 # release with them.
@@ -129,6 +130,18 @@ jobs:
             (cd out && zip -qr apps.zip apps && rm -r apps)
             (cd out && zip -qr web.zip web && rm -r web)
             (cd out && zip -qr lang.zip lang && rm -r lang)
+            # The Tienda (docs/plan/TIENDA.md): one <app>.p4app per app and
+            # p4os-store.ndjson, the catalogue the board reads from the
+            # latest published release. A package that is byte for byte the
+            # one of that release is not made again: the catalogue goes on
+            # pointing at it there. An app whose art pack is in no release
+            # yet (store/packs.json) is left out, with a warning.
+            rel="$GITHUB_REF_NAME"
+            case "$GITHUB_REF" in refs/tags/v*) ;; *) rel="$(git describe --tags --abbrev=0)-dev" ;; esac
+            curl -fsSL -o prev.ndjson \
+                "https://github.com/$GITHUB_REPOSITORY/releases/latest/download/p4os-store.ndjson" || rm -f prev.ndjson
+            python3 tools/gen_store.py build --release "$rel" --out out --repo "$GITHUB_REPOSITORY" \
+                --previous prev.ndjson --missing-apps skip --missing-packs skip
           fi
       - uses: actions/upload-artifact@v5
         with:
@@ -169,6 +182,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '20'
+      # every apps/<app>/store.json, store/source.json and store/packs.json
+      # read as they are: a slip in one fails here, in seconds, and not after
+      # the apps' 45 minutes
+      - name: the Tienda's manifests
+        run: python3 tools/gen_store.py check
       - name: notas_p4.pak
         run: |
           npm install --global --silent lv_font_conv@1.5.3
