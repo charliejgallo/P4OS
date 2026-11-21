@@ -5,6 +5,8 @@
   "en": "Blackjack against the house: bet chips, hit, stand, double or split."
  },
  "shots": [
-  "app-blackjack.jpg"
+  "app-blackjack.jpg",
+  "app-blackjack-split.jpg",
+  "app-blackjack-21.jpg"
  ]
 }
