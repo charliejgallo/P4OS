@@ -473,9 +473,20 @@ Tienda. En la placa del usuario, casi todo es de compilaciones propias.
   `.../releases/download/v0.30.0-tienda.1/` (200 y 206), y
   `.../releases/latest/download/p4os-store.ndjson` sigue contestando 404:
   "latest" es la v0.29.0, así que ninguna placa la ve por su cuenta.
-- **Leerla desde la placa:** falta. Cambiar el catálogo oficial por otro
-  pide el modo desarrollo, que se prende sólo en la placa (Tienda,
-  Fuentes) y estaba apagado.
+- **Leída desde la placa (2026-11-21):** con el modo desarrollo prendido
+  por el usuario en la pantalla, la placa apuntada al catálogo de la
+  pre-release: lo refrescó desde GitHub en 4,9 s y quedó con los mismos
+  52 772 bytes que se bajan desde la Mac (mismo sha-256); 58 apps, todas
+  caben. Instalar `hello_app` desde ahí: 4,0 s, sin reiniciar, el recibo
+  con la fuente y la dirección de GitHub, la RAM interna 1,5 KB abajo en
+  el peor momento. **Es el camino completo, de GitHub a la pantalla.**
+- **Lo que adoptar reconocería en esta tarjeta:** 5 de los 58 `.so` son
+  los del CI (`cjump`, `dmx`, `flappy`, `hello_app`, `radio`); los otros
+  53 son compilaciones propias y quedarían como "copiada a mano". El
+  `hello_app` instalado era justo uno de los iguales: **reemplazar un
+  `.so` por uno distinto del CI y verlo correr** sigue sin probar.
+- La placa quedó otra vez en el catálogo de prueba de la Mac, que tiene
+  las imágenes (57 apps, 194).
 - **Leer las descripciones.** Las de los `store.json` son un borrador
   escrito desde los README; las de las apps sin README, sin verificar.
   Qué pack es obligatorio en Bastión (el base y Luna) y en Pinball
