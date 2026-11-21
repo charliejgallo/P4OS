@@ -48,3 +48,5 @@ hw/**/*.lck
 hw/**/trial-*.kicad_pcb
 hw/**/trial-*.kicad_pro
 hw/**/gerbers/
+# tools/ci_apps.sh: the apps it built, by the hash of their sources
+.appcache/

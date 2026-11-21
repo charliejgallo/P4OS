@@ -20,8 +20,8 @@ on:
     tags: ['v*']
   pull_request:
 
-# a new push to the same branch cancels the run still going: the apps take
-# ~45 minutes and only the last commit matters
+# a new push to the same branch cancels the run still going: only the last
+# commit matters
 concurrency:
   group: build-${{ github.ref }}
   cancel-in-progress: true
@@ -51,12 +51,7 @@ jobs:
           fetch-depth: 0
       - name: tools
         # m4 to curl: CAS's engine (GMP's configure wants m4 and a native cc)
-        # python3-pil: the Store's pictures (tools/gen_store.py). The
-        # container's own python3 has no pip, so it comes from apt, and it is
-        # checked here, in the first minute, and not after the apps are built
-        run: |
-          apt-get update && apt-get install -y --no-install-recommends zsh zip binutils m4 bzip2 xz-utils curl make gcc g++ libc6-dev perl python3-pil
-          /usr/bin/python3 -c "import PIL; print('Pillow', PIL.__version__)"
+        run: apt-get update && apt-get install -y --no-install-recommends zsh zip binutils m4 bzip2 xz-utils curl make gcc g++ libc6-dev perl
       - name: firmware
         shell: bash
         run: |
@@ -64,39 +59,6 @@ jobs:
           git describe --tags --always --dirty
           . $IDF_PATH/export.sh
           tools/build_fw.sh ${{ matrix.profile }}
-      # CAS's engine (apps/cas/engine): Giac and its runtime as PIC, not in
-      # git; built once (~150 MB of sources checked by SHA-256, 10-15 min)
-      # and kept in the cache while apps/cas/engine/ does not change
-      - name: CAS engine (cache)
-        if: matrix.profile == 'rev1_3'
-        id: cas-engine
-        uses: actions/cache@v4
-        with:
-          path: apps/cas/engine/lib
-          key: cas-engine-${{ hashFiles('apps/cas/engine/build_engine.sh', 'apps/cas/engine/*.cc', 'apps/cas/engine/*.c', 'apps/cas/engine/*.ld') }}
-      - name: CAS engine
-        if: matrix.profile == 'rev1_3' && steps.cas-engine.outputs.cache-hit != 'true'
-        continue-on-error: true
-        shell: bash
-        run: |
-          . $IDF_PATH/export.sh
-          CAS_WORK=/tmp/cas-work apps/cas/engine/build_engine.sh
-      # without its engine CAS cannot be built, and build_apps.sh would stop
-      # there: the release goes out without CAS, and says so
-      - name: CAS engine missing
-        if: matrix.profile == 'rev1_3'
-        shell: bash
-        run: |
-          if [ ! -f apps/cas/engine/lib/libcasengine.a ]; then
-            echo "::warning::CAS's engine did not build: this build leaves CAS out"
-            rm -rf apps/cas
-          fi
-      - name: apps
-        if: matrix.profile == 'rev1_3'
-        shell: bash
-        run: |
-          . $IDF_PATH/export.sh
-          PROFILE=rev1_3 tools/build_apps.sh
       - name: bundle
         shell: bash
         run: |
@@ -109,51 +71,156 @@ jobs:
           xz -T0 -6 -c build/$p/p4os.elf > out/p4os-$p.elf.xz
           (cd build/$p && zip -q ../../out/p4os-$p-full.zip p4os.bin bootloader/bootloader.bin \
               partition_table/partition-table.bin ota_data_initial.bin flash_args)
-          if [ "$p" = rev1_3 ]; then
-            mkdir -p out/apps && cp apps/*/build/*.so out/apps/
-            # the modules an app loads itself (aos_hal_module_open), in apps/<app>/
-            for m in apps/*/build/modules; do
-              [ -d "$m" ] || continue
-              a=$(basename $(dirname $(dirname $m)))
-              mkdir -p out/apps/$a && cp $m/*.so out/apps/$a/ 2>/dev/null || true
-            done
-            # the apps' own pages in the portal, for the card's /web (docs/PORTAL-PAGES.md)
-            mkdir -p out/web && cp apps/*/web/*.js out/web/
-            mkdir -p out/lang && cp -r lang/en lang/de out/lang/
-            for a in $NOT_IN_RELEASE; do
-              for so in apps/$a/build/*.so; do [ -e "$so" ] && rm -f "out/apps/$(basename "$so")"; done
-              rm -rf "out/apps/$a"
-              for js in apps/$a/web/*.js; do
-                [ -e "$js" ] || continue
-                rm -f "out/web/$(basename "$js")"
-                pg=$(basename "$js" .js); rm -f out/lang/en/web.$pg.lang out/lang/de/web.$pg.lang
-              done
-              id=$(grep -ho '\.id *= *"[^"]*"' apps/$a/main/*.c | head -1 | sed 's/.*"\(.*\)"/\1/')
-              [ -n "$id" ] && rm -f out/lang/en/$id.lang out/lang/de/$id.lang
-              echo "left out of the release: $a ($id)"
-            done
-            (cd out && zip -qr apps.zip apps && rm -r apps)
-            (cd out && zip -qr web.zip web && rm -r web)
-            (cd out && zip -qr lang.zip lang && rm -r lang)
-            # The Tienda (docs/plan/TIENDA.md): one <app>.p4app per app and
-            # p4os-store.ndjson, the catalogue the board reads from the
-            # latest published release. A package that is byte for byte the
-            # one of that release is not made again: the catalogue goes on
-            # pointing at it there. An app whose art pack is in no release
-            # yet (store/packs.json) is left out, with a warning.
-            rel="$GITHUB_REF_NAME"
-            case "$GITHUB_REF" in refs/tags/v*) ;; *) rel="$(git describe --tags --abbrev=0)-dev" ;; esac
-            curl -fsSL -o prev.ndjson \
-                "https://github.com/$GITHUB_REPOSITORY/releases/latest/download/p4os-store.ndjson" || rm -f prev.ndjson
-            # the apps' pictures are made at the store's size with Pillow,
-            # which the "tools" step installed for the system's python3 (the
-            # first two test tags went out without pictures: pip is not there)
-            /usr/bin/python3 tools/gen_store.py build --release "$rel" --out out --repo "$GITHUB_REPOSITORY" \
-                --previous prev.ndjson --missing-apps skip --missing-packs skip
-          fi
       - uses: actions/upload-artifact@v5
         with:
           name: p4os-${{ matrix.profile }}
+          path: out/*
+
+  # The apps of the card, in six shares at once, and none built again from
+  # the same sources (tools/ci_apps.sh): one after another they took 101 of
+  # the run's 108 minutes. Each share keeps what it built, by a hash of what
+  # an app is made from, for the next run on this branch or on any other.
+  apps:
+    runs-on: ubuntu-latest
+    container: espressif/idf:release-v5.5
+    strategy:
+      fail-fast: false
+      matrix:
+        # as many as tools/ci_apps.sh is told below, and as the cache's key says
+        shard: [0, 1, 2, 3, 4, 5]
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - name: tools
+        # m4 to curl: CAS's engine (GMP's configure wants m4 and a native cc)
+        run: apt-get update && apt-get install -y --no-install-recommends zsh zip binutils m4 bzip2 xz-utils curl make gcc g++ libc6-dev perl
+      - name: this share
+        id: share
+        shell: bash
+        run: |
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
+          tools/ci_apps.sh --list ${{ matrix.shard }} 6 | tr '\n' ' '; echo
+          if tools/ci_apps.sh --list ${{ matrix.shard }} 6 | grep -qx cas; then echo "cas=true" >> "$GITHUB_OUTPUT"; fi
+      # CAS's engine (apps/cas/engine): Giac and its runtime as PIC, not in
+      # git; built once (~150 MB of sources checked by SHA-256, 10-15 min)
+      # and kept in the cache while apps/cas/engine/ does not change
+      - name: CAS engine (cache)
+        if: steps.share.outputs.cas == 'true'
+        id: cas-engine
+        uses: actions/cache@v4
+        with:
+          path: apps/cas/engine/lib
+          key: cas-engine-${{ hashFiles('apps/cas/engine/build_engine.sh', 'apps/cas/engine/*.cc', 'apps/cas/engine/*.c', 'apps/cas/engine/*.ld') }}
+      - name: CAS engine
+        if: steps.share.outputs.cas == 'true' && steps.cas-engine.outputs.cache-hit != 'true'
+        continue-on-error: true
+        shell: bash
+        run: |
+          . $IDF_PATH/export.sh
+          CAS_WORK=/tmp/cas-work apps/cas/engine/build_engine.sh
+      # without its engine CAS cannot be built, and build_apps.sh would stop
+      # there: the release goes out without CAS, and says so
+      - name: CAS engine missing
+        if: steps.share.outputs.cas == 'true'
+        shell: bash
+        run: |
+          if [ ! -f apps/cas/engine/lib/libcasengine.a ]; then
+            echo "::warning::CAS's engine did not build: this build leaves CAS out"
+            rm -rf apps/cas
+          fi
+      - name: what was built before
+        uses: actions/cache/restore@v4
+        with:
+          path: .appcache
+          key: apps-${{ matrix.shard }}-of-6-${{ github.run_id }}
+          restore-keys: apps-${{ matrix.shard }}-of-6-
+      - name: apps
+        id: apps
+        shell: bash
+        run: |
+          . $IDF_PATH/export.sh
+          PROFILE=rev1_3 tools/ci_apps.sh ${{ matrix.shard }} 6 .appcache
+      # a tag's own cache is of use to nobody: the branches keep theirs, and
+      # a tag reads the default branch's
+      - name: keep what was built
+        if: always() && steps.apps.outputs.built == 'true' && !startsWith(github.ref, 'refs/tags/')
+        uses: actions/cache/save@v4
+        with:
+          path: .appcache
+          key: apps-${{ matrix.shard }}-of-6-${{ github.run_id }}
+      - uses: actions/upload-artifact@v5
+        with:
+          name: so-${{ matrix.shard }}
+          path: |
+            apps/*/build/*.so
+            apps/*/build/modules/*.so
+
+  # What goes on the card, from the apps the shares built: apps.zip, web.zip
+  # and lang.zip for a card filled by hand, and what the Tienda reads.
+  store:
+    needs: apps
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v5
+        with:
+          pattern: so-*
+          path: apps
+          merge-multiple: true
+      - name: bundle
+        shell: bash
+        run: |
+          pip install --quiet pillow
+          python3 -c "import PIL; print('Pillow', PIL.__version__)"
+          ls apps/*/build/*.so | wc -l
+          mkdir -p out
+          mkdir -p out/apps && cp apps/*/build/*.so out/apps/
+          # the modules an app loads itself (aos_hal_module_open), in apps/<app>/
+          for m in apps/*/build/modules; do
+            [ -d "$m" ] || continue
+            a=$(basename $(dirname $(dirname $m)))
+            mkdir -p out/apps/$a && cp $m/*.so out/apps/$a/ 2>/dev/null || true
+          done
+          # the apps' own pages in the portal, for the card's /web (docs/PORTAL-PAGES.md)
+          mkdir -p out/web && cp apps/*/web/*.js out/web/
+          mkdir -p out/lang && cp -r lang/en lang/de out/lang/
+          for a in $NOT_IN_RELEASE; do
+            for so in apps/$a/build/*.so; do [ -e "$so" ] && rm -f "out/apps/$(basename "$so")"; done
+            rm -rf "out/apps/$a"
+            for js in apps/$a/web/*.js; do
+              [ -e "$js" ] || continue
+              rm -f "out/web/$(basename "$js")"
+              pg=$(basename "$js" .js); rm -f out/lang/en/web.$pg.lang out/lang/de/web.$pg.lang
+            done
+            id=$(grep -ho '\.id *= *"[^"]*"' apps/$a/main/*.c | head -1 | sed 's/.*"\(.*\)"/\1/')
+            [ -n "$id" ] && rm -f out/lang/en/$id.lang out/lang/de/$id.lang
+            echo "left out of the release: $a ($id)"
+          done
+          (cd out && zip -qr apps.zip apps && rm -r apps)
+          (cd out && zip -qr web.zip web && rm -r web)
+          (cd out && zip -qr lang.zip lang && rm -r lang)
+          # The Tienda (docs/plan/TIENDA.md): one <app>.p4app per app and
+          # p4os-store.ndjson, the catalogue the board reads from the
+          # latest published release. A package that is byte for byte the
+          # one of that release is not made again: the catalogue goes on
+          # pointing at it there. An app whose art pack is in no release
+          # yet (store/packs.json) is left out, with a warning.
+          rel="$GITHUB_REF_NAME"
+          case "$GITHUB_REF" in refs/tags/v*) ;; *) rel="$(git describe --tags --abbrev=0)-dev" ;; esac
+          curl -fsSL -o prev.ndjson \
+              "https://github.com/$GITHUB_REPOSITORY/releases/latest/download/p4os-store.ndjson" || rm -f prev.ndjson
+          # the apps' pictures are made at the store's size with Pillow
+          python3 tools/gen_store.py build --release "$rel" --out out --repo "$GITHUB_REPOSITORY" \
+              --previous prev.ndjson --missing-apps skip --missing-packs skip
+      - uses: actions/upload-artifact@v5
+        with:
+          name: p4os-store
           path: out/*
 
   # The C6's image, which the P4 installs from the card's /firmware/c6.bin
@@ -216,13 +283,15 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: [firmware, c6, packs]
+    needs: [firmware, c6, packs, store]
     runs-on: ubuntu-latest
     permissions:
       contents: write
     steps:
       - uses: actions/download-artifact@v5
         with:
+          # not the shares' .so files (so-*): those are inside apps.zip
+          pattern: p4os-*
           path: dist
           merge-multiple: true
       - name: the packs of the latest published release
