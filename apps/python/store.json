@@ -1,0 +1,7 @@
+{
+ "cat": "programar",
+ "about": {
+  "es": "MicroPython con consola propia: cada programa de la carpeta python/apps es una app más.",
+  "en": "MicroPython with a console of its own: every program in python/apps is one more app."
+ }
+}

@@ -1,0 +1,53 @@
+{
+ "cat": "juegos",
+ "about": {
+  "es": "Pinball en 3D, visto desde atrás de las paletas, con seis mesas.",
+  "en": "Pinball in 3D, seen from behind the flippers, with six tables."
+ },
+ "packs": [
+  {
+   "file": "pinball_zombis_p4.pak",
+   "need": true
+  },
+  {
+   "file": "pinball_robots_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mesa: Robots",
+    "en": "Table: Robots"
+   }
+  },
+  {
+   "file": "pinball_jungla_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mesa: Jungla",
+    "en": "Table: Jungle"
+   }
+  },
+  {
+   "file": "pinball_circo_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mesa: Circo",
+    "en": "Table: Circus"
+   }
+  },
+  {
+   "file": "pinball_casino_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mesa: Casino Real",
+    "en": "Table: Casino Real"
+   }
+  },
+  {
+   "file": "pinball_piratas_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mesa: Piratas",
+    "en": "Table: Pirates"
+   }
+  }
+ ]
+}

@@ -1,0 +1,20 @@
+{
+ "cat": "taller",
+ "about": {
+  "es": "Control remoto que aprende: capturá, guardá y mandá códigos infrarrojos.",
+  "en": "A learning remote: capture, keep and send infrared codes."
+ },
+ "packs": [
+  {
+   "file": "infrarrojo_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Códigos de SmartIR",
+    "en": "SmartIR's codes"
+   }
+  }
+ ],
+ "needs": [
+  "header"
+ ]
+}

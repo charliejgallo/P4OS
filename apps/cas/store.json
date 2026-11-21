@@ -1,0 +1,8 @@
+{
+ "cat": "utiles",
+ "about": {
+  "es": "Álgebra simbólica con el motor Giac: derivar, integrar, resolver y graficar.",
+  "en": "Computer algebra on the Giac engine: differentiate, integrate, solve and plot."
+ },
+ "license": "GPL-3.0"
+}

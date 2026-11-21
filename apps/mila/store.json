@@ -1,0 +1,13 @@
+{
+ "cat": "juegos",
+ "about": {
+  "es": "Un Sokoban con una gatita negra: Mila empuja cada cosa de la casa a su lugar.",
+  "en": "A Sokoban with a black kitten: Mila pushes things around the house back to their place."
+ },
+ "packs": [
+  {
+   "file": "mila_p4.pak",
+   "need": true
+  }
+ ]
+}

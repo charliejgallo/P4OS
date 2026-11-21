@@ -1,0 +1,7 @@
+{
+ "cat": "medios",
+ "about": {
+  "es": "Reproduce videos MJPEG AVI de la tarjeta a pantalla completa, con sonido.",
+  "en": "Plays MJPEG AVI videos from the card, full screen, with sound."
+ }
+}

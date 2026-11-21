@@ -1,0 +1,61 @@
+{
+ "name": "P4OS",
+ "by": "Charlie Gallo",
+ "url": "https://github.com/charliejgallo/P4OS",
+ "repo": "charliejgallo/P4OS",
+ "about": {
+  "es": "Las apps y los juegos oficiales de P4OS.",
+  "en": "P4OS's own apps and games."
+ },
+ "cats": [
+  {
+   "id": "juegos",
+   "name": {
+    "es": "Juegos",
+    "en": "Games"
+   }
+  },
+  {
+   "id": "taller",
+   "name": {
+    "es": "Taller",
+    "en": "Workshop"
+   }
+  },
+  {
+   "id": "red",
+   "name": {
+    "es": "Red",
+    "en": "Network"
+   }
+  },
+  {
+   "id": "medios",
+   "name": {
+    "es": "Sonido e imagen",
+    "en": "Sound and picture"
+   }
+  },
+  {
+   "id": "crear",
+   "name": {
+    "es": "Crear",
+    "en": "Create"
+   }
+  },
+  {
+   "id": "utiles",
+   "name": {
+    "es": "Útiles",
+    "en": "Utilities"
+   }
+  },
+  {
+   "id": "programar",
+   "name": {
+    "es": "Programar",
+    "en": "Programming"
+   }
+  }
+ ]
+}

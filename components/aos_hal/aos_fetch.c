@@ -15,6 +15,8 @@
  *    takes directly (aos_hal_io_alloc). A try after a cut asks for the rest
  *    with Range; the bytes on the card are never thrown away unless the
  *    server says the file is another one.
+ *  - The .part is synced every megabyte, so what a restart or a power cut
+ *    leaves on the card is all but the last megabyte, not an empty file.
  *  - The hash is taken at the end, reading the file back: one more pass over
  *    the card (~14 MB/s on the board), and what is checked is what the card
  *    holds, not what went through memory on its way there.
@@ -63,6 +65,11 @@
 #define HEADERS_MS      15000
 /* the handshake's deepest point is ~4.4 KB (aos_tls.c); the rest is ours */
 #define STACK           8192
+/* The card learns how long the .part is only when the file is closed or
+ * synced: a board restarted 15 MB into a download came back to a .part of
+ * 0 bytes (measured, 2026-11-20). So it is synced every this many blocks,
+ * and a restart or a power cut costs at most the megabyte since. */
+#define SYNC_BLOCKS     16
 
 typedef struct {
     int      id;                /* 0 = free */
@@ -447,7 +454,7 @@ static int try_once(ctx_t *x)
         if (ck.on) fill = dechunk(&ck, x->buf, fill);
     } else fill = 0;
 
-    int result = T_AGAIN;
+    int result = T_AGAIN, unsynced = 0;
     bool eof = false, broken = false;
     uint64_t last = aos_hal_uptime_ms();
     for (;;) {
@@ -460,6 +467,10 @@ static int try_once(ctx_t *x)
             }
             x->have += (uint32_t)fill;
             fill = 0;
+            if (++unsynced >= SYNC_BLOCKS) {
+                fsync(fd);
+                unsynced = 0;
+            }
             lock();
             j->info.got = x->have;
             unlock();

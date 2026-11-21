@@ -1,0 +1,10 @@
+{
+ "cat": "taller",
+ "about": {
+  "es": "Consola de luces para equipos DMX512: escenas, grupos y fundidos.",
+  "en": "A lighting console for DMX512 fixtures: scenes, groups and fades."
+ },
+ "needs": [
+  "header"
+ ]
+}

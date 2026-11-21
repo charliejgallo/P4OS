@@ -1,0 +1,89 @@
+{
+ "cat": "juegos",
+ "about": {
+  "es": "Defensa de torres en 3D: un fuerte en el espacio, oleadas de alienígenas, catorce torres y diez mundos.",
+  "en": "A tower defense in 3D: a fort in space, waves of aliens, fourteen towers and ten worlds."
+ },
+ "packs": [
+  {
+   "file": "bastion_p4.pak",
+   "need": true
+  },
+  {
+   "file": "bastion_luna_p4.pak",
+   "need": true
+  },
+  {
+   "file": "bastion_selva_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mundo: Selva",
+    "en": "World: Jungle"
+   }
+  },
+  {
+   "file": "bastion_magma_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mundo: Magma",
+    "en": "World: Magma"
+   }
+  },
+  {
+   "file": "bastion_hielo_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mundo: Hielo",
+    "en": "World: Ice"
+   }
+  },
+  {
+   "file": "bastion_orbita_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mundo: Órbita",
+    "en": "World: Orbit"
+   }
+  },
+  {
+   "file": "bastion_cristal_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mundo: Cristal",
+    "en": "World: Crystal"
+   }
+  },
+  {
+   "file": "bastion_cienaga_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mundo: Ciénaga",
+    "en": "World: Swamp"
+   }
+  },
+  {
+   "file": "bastion_nebula_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mundo: Nébula",
+    "en": "World: Nebula"
+   }
+  },
+  {
+   "file": "bastion_colmena_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mundo: Colmena",
+    "en": "World: Hive"
+   }
+  },
+  {
+   "file": "bastion_nucleo_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mundo: Núcleo",
+    "en": "World: Core"
+   }
+  }
+ ]
+}

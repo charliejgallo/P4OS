@@ -1,0 +1,13 @@
+{
+ "cat": "crear",
+ "about": {
+  "es": "Notas con estilos y listas de tareas.",
+  "en": "Notes with styles, and task lists."
+ },
+ "packs": [
+  {
+   "file": "notas_p4.pak",
+   "need": true
+  }
+ ]
+}

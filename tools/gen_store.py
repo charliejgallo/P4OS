@@ -1,0 +1,624 @@
+#!/usr/bin/env python3
+"""
+Makes what the Tienda reads (docs/plan/TIENDA.md): one package per app and
+the catalogue that lists them.
+
+    tools/gen_store.py check
+        Every apps/<app>/store.json, store/source.json and store/packs.json
+        as they are in the tree: nothing built is needed. For the CI's lint.
+
+    tools/gen_store.py build --release v0.31.0 --out out/store
+                             [--previous p4os-store.ndjson] [--built <root>]
+                             [--packs-dir <dir>]... [--only app,app]
+        For every app with a store.json and a built .so: out/<file>.p4app and
+        a line in out/p4os-store.ndjson.
+
+    tools/gen_store.py packs --tag v0.28.0 [--repo owner/name]
+        Rewrites store/packs.json from that release's files on GitHub (their
+        sizes and SHA-256, which GitHub gives: nothing is downloaded). For the
+        art packs whose sources are not in this repository.
+
+A package, <file>.p4app, is a zip WITHOUT compression whose paths are the
+card's: apps/<file>.so, the modules the app loads itself in apps/<app>/, its
+portal pages in web/, its languages in lang/<code>/, and a p4app.json that
+says what it is. It is made the same from the same files, byte for byte
+(sorted, one fixed date), so its SHA-256 is its identity: the CI's builds are
+repeatable (measured over v0.26.0..v0.28.0, 2026-11-20), and a package that
+did not change keeps the version and the address it had in --previous
+instead of being uploaded again. "ver" is the release it first appeared in.
+
+What each app says of itself is in apps/<app>/store.json:
+
+    {
+      "cat": "juegos",                      one of store/source.json's
+      "about": {"es": "...", "en": "..."},  one or two sentences
+      "packs": [{"file": "x_p4.pak", "need": true},
+                {"file": "x_luna_p4.pak", "need": false,
+                 "name": {"es": "Mundo: Luna", "en": "World: Moon"}}],
+      "needs": ["usb-host"],                what a board may not have
+      "user_files": {"es": "...", "en": "..."},   what the person brings
+      "license": "Apache-2.0",              the default
+      "publish": false                      built and checked, not listed
+    }
+
+The id, the name, the colours and the icon come from the app's own code and
+its .so; "id", "name" and "colors" in store.json say them for a module that
+declares its apps while it runs (lua, python), and "glyph" the text or
+character its icon is when it has no drawing of its own.
+
+"fw_min" is worked out, not written: the newest release in which any symbol
+the .so needs first appeared, from the symbol tables of this repository's
+tags (git show <tag>:components/aos_dynapp/aos_symbols.c). A symbol in no
+tag yet is of the release being made. "fw_min" in store.json raises it by
+hand, for a change of behaviour that no symbol shows.
+
+The standard library and git only.
+"""
+import argparse
+import base64
+import glob
+import hashlib
+import io
+import json
+import os
+import re
+import struct
+import subprocess
+import sys
+import zipfile
+
+ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(ROOT, "tools"))
+
+SCHEMA = 1
+# Before this release there was no store to ask: every symbol it has counts
+# as always there.
+BASELINE = "v0.29.0"
+# What the loader's own table brings, outside aos_symbols.c (build_apps.sh)
+LOADER_BUILTIN = {"printf", "fprintf", "vfprintf"}
+ZIP_DATE = (2026, 1, 1, 0, 0, 0)
+LANGS_TEXT = ("es", "en")       # what a name or a description must have
+
+
+class Bad(Exception):
+    pass
+
+
+def read_json(path):
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except ValueError as e:
+        raise Bad("%s: %s" % (os.path.relpath(path, ROOT), e))
+
+
+def sha256(data):
+    return hashlib.sha256(data).hexdigest()
+
+
+def git(*args):
+    return subprocess.run(["git", "-C", ROOT] + list(args), capture_output=True, text=True).stdout
+
+
+def vkey(tag):
+    """v0.29.0 -> (0, 29, 0), to compare releases."""
+    return tuple(int(x) for x in re.findall(r"\d+", tag)[:3])
+
+
+# ---- the manifests ---------------------------------------------------------
+
+def text2(d, what, where):
+    if not isinstance(d, dict) or any(not isinstance(d.get(l), str) or not d[l].strip() for l in LANGS_TEXT):
+        raise Bad("%s: \"%s\" needs \"es\" and \"en\"" % (where, what))
+
+
+def load_source():
+    path = os.path.join(ROOT, "store", "source.json")
+    src = read_json(path)
+    for k in ("name", "by", "url", "repo"):
+        if not isinstance(src.get(k), str) or not src[k]:
+            raise Bad("store/source.json: \"%s\" is missing" % k)
+    text2(src.get("about"), "about", "store/source.json")
+    cats = src.get("cats")
+    if not isinstance(cats, list) or not cats:
+        raise Bad("store/source.json: \"cats\" is missing")
+    for c in cats:
+        if not re.fullmatch(r"[a-z]+", c.get("id", "")):
+            raise Bad("store/source.json: a category's id is lower-case letters")
+        text2(c.get("name"), "name", "store/source.json, category %s" % c.get("id"))
+    return src
+
+
+def load_packs():
+    path = os.path.join(ROOT, "store", "packs.json")
+    if not os.path.exists(path):
+        return {}
+    packs = read_json(path)
+    for name, p in packs.items():
+        if (not re.fullmatch(r"v\d+\.\d+\.\d+", p.get("tag", "")) or not isinstance(p.get("size"), int)
+                or not re.fullmatch(r"[0-9a-f]{64}", p.get("sha256", ""))):
+            raise Bad("store/packs.json: %s needs tag, size and sha256" % name)
+    return packs
+
+
+def app_dirs():
+    return sorted(d for d in glob.glob(os.path.join(ROOT, "apps", "*")) if os.path.isdir(os.path.join(d, "main")))
+
+
+def load_manifest(app_dir, cats):
+    """apps/<app>/store.json, checked; None when the app has none."""
+    app = os.path.basename(app_dir)
+    path = os.path.join(app_dir, "store.json")
+    where = "apps/%s/store.json" % app
+    if not os.path.exists(path):
+        return None
+    m = read_json(path)
+    known = {"cat", "about", "packs", "needs", "user_files", "license", "publish", "id", "name", "colors", "glyph",
+             "fw_min", "src"}
+    extra = set(m) - known
+    if extra:
+        raise Bad("%s: unknown %s" % (where, ", ".join(sorted(extra))))
+    if m.get("cat") not in cats:
+        raise Bad("%s: \"cat\" is one of %s" % (where, ", ".join(sorted(cats))))
+    text2(m.get("about"), "about", where)
+    for l in LANGS_TEXT:
+        if len(m["about"][l]) > 240:
+            raise Bad("%s: \"about\" in %s is %d characters, 240 at most" % (where, l, len(m["about"][l])))
+    if "name" in m:
+        text2(m["name"], "name", where)
+    if "user_files" in m:
+        text2(m["user_files"], "user_files", where)
+    if "fw_min" in m and not re.fullmatch(r"\d+\.\d+\.\d+", m["fw_min"]):
+        raise Bad("%s: \"fw_min\" is like 0.31.0" % where)
+    for p in m.get("packs", []):
+        if not re.fullmatch(r"[a-z0-9_]+\.pak", p.get("file", "")) or not isinstance(p.get("need"), bool):
+            raise Bad("%s: a pack needs \"file\" (x_p4.pak) and \"need\" (true or false)" % where)
+        if not p["need"]:
+            text2(p.get("name"), "name", "%s, pack %s" % (where, p["file"]))
+    return m
+
+
+# ---- what the app's code says ----------------------------------------------
+
+def icon_names():
+    """AOS_ICON_* -> its number, from the header the firmware is built with."""
+    text = open(os.path.join(ROOT, "components", "aos_ui", "include", "aos_app.h"), encoding="utf-8").read()
+    body = re.search(r"typedef enum \{\s*AOS_ICON_NONE = 0,(.*?)\} aos_icon_id_t;", text, re.S).group(1)
+    body = re.sub(r"/\*.*?\*/", "", body, flags=re.S)
+    names = ["AOS_ICON_NONE"] + re.findall(r"\b(AOS_ICON_[A-Z0-9_]+)\b", body)
+    return {n: i for i, n in enumerate(names)}
+
+
+def abi_version():
+    text = open(os.path.join(ROOT, "components", "aos_ui", "include", "aos_app.h"), encoding="utf-8").read()
+    return int(re.search(r"#define AOS_ABI_VERSION\s+(\d+)", text).group(1))
+
+
+def describe(app_dir):
+    """id, name, colours and built-in icon as the app's init sets them."""
+    out = {}
+    for path in sorted(glob.glob(os.path.join(app_dir, "main", "*.c"))):
+        text = open(path, encoding="utf-8", errors="replace").read()
+        m = re.search(r'desc\.id\s*=\s*"([a-z0-9]+\.[a-z0-9_]+)"', text) or \
+            re.search(r'^\s*\.id\s*=\s*"([a-z0-9]+\.[a-z0-9_]+)"', text, re.M)
+        if not m:
+            continue
+        near = text[max(0, m.start() - 400):m.end() + 900]
+        out["id"] = m.group(1)
+        n = re.search(r'\.name\s*=\s*(?:N_\(|_\()?"([^"]+)"', near)
+        if n:
+            out["name"] = n.group(1)
+        a = re.search(r"\.color_a\s*=\s*0x([0-9A-Fa-f]{6})", near)
+        b = re.search(r"\.color_b\s*=\s*0x([0-9A-Fa-f]{6})", near)
+        if a and b:
+            out["colors"] = [a.group(1).upper(), b.group(1).upper()]
+        v = re.search(r"\.icon_vec\s*=\s*(AOS_ICON_[A-Z0-9_]+)", near)
+        if v:
+            out["icon_vec"] = v.group(1)
+        g = re.search(r'\.icon\s*=\s*(?:"([^"]{1,8})"|([A-Z][A-Z0-9_]+))\s*;', near)
+        if g:
+            out["glyph"] = g.group(1) if g.group(1) is not None else glyph_of(g.group(2))
+        break
+    return out
+
+
+_GLYPHS = None
+
+
+def glyph_of(macro):
+    """AOS_SYM_CCTV or LV_SYMBOL_OK as the character it draws, or None."""
+    global _GLYPHS
+    if _GLYPHS is None:
+        _GLYPHS = {}
+        for path in (os.path.join(ROOT, "components", "aos_ui", "include", "aos_sys_glyphs.h"),
+                     os.path.join(ROOT, "managed_components", "lvgl__lvgl", "src", "font", "lv_symbol_def.h")):
+            if not os.path.exists(path):
+                continue
+            for name, lit in re.findall(r'#define\s+((?:AOS_SYM|LV_SYMBOL)_\w+)\s+"((?:\\x[0-9A-Fa-f]{2})+)"',
+                                        open(path, encoding="utf-8", errors="replace").read()):
+                try:
+                    _GLYPHS[name] = bytes(int(h, 16) for h in re.findall(r"\\x([0-9A-Fa-f]{2})", lit)).decode()
+                except UnicodeDecodeError:
+                    pass
+    return _GLYPHS.get(macro)
+
+
+def lang_lookup(code, lang_id, text):
+    """The translation of one string in lang/<code>/<id>.lang, or None."""
+    path = os.path.join(ROOT, "lang", code, lang_id + ".lang")
+    if not os.path.exists(path):
+        return None
+    for line in open(path, encoding="utf-8"):
+        if line.startswith("#"):
+            continue
+        es, tab, tr = line.rstrip("\n").partition("\t")
+        if tab and es == text and tr:
+            return tr
+    return None
+
+
+# ---- the .so ---------------------------------------------------------------
+
+def elf_symbols(data, where):
+    """(undefined globals, defined names) of a 32-bit RISC-V shared object."""
+    if data[:4] != b"\x7fELF" or data[4] != 1 or data[5] != 1:
+        raise Bad("%s: not a 32-bit little-endian ELF" % where)
+    machine, = struct.unpack_from("<H", data, 18)
+    flags, = struct.unpack_from("<I", data, 36)
+    if machine != 243:
+        raise Bad("%s: not for the ESP32-P4 (machine %d)" % (where, machine))
+    if flags & 0x6 != 0x2:
+        raise Bad("%s: not the firmware's float ABI (ilp32f)" % where)
+    shoff, = struct.unpack_from("<I", data, 32)
+    shentsize, shnum = struct.unpack_from("<HH", data, 46)
+    secs = [struct.unpack_from("<10I", data, shoff + i * shentsize) for i in range(shnum)]
+    dyn = next((s for s in secs if s[1] == 11), None)
+    if not dyn:
+        raise Bad("%s: no dynamic symbols" % where)
+    stroff, strsz = secs[dyn[6]][4], secs[dyn[6]][5]
+    strtab = data[stroff:stroff + strsz]
+    undef, defined = set(), set()
+    for i in range(1, dyn[5] // 16):
+        name, _value, _size, info, _other, shndx = struct.unpack_from("<IIIBBH", data, dyn[4] + i * 16)
+        s = strtab[name:strtab.index(b"\0", name)].decode()
+        if not s:
+            continue
+        if shndx:
+            defined.add(s)
+        elif info >> 4 == 1:
+            undef.add(s)
+    return undef, defined
+
+
+def find_icon(data):
+    """The app's AIC blob inside its .so, or None: the first "AIC" header
+    that reads as a whole icon (tools/aic.py's parser, the board's rules)."""
+    import aic
+    cap = 512                       # what the scan cache keeps (aos_dynapp.c)
+    old, aic.MAX_BYTES = aic.MAX_BYTES, cap
+    try:
+        at = data.find(b"AIC\x01")
+        while at >= 0:
+            window = data[at:at + cap]
+            try:
+                end = None
+                for off, name, _fields in aic.parse(window):
+                    if name == "END":
+                        end = off + 1
+                if end:
+                    return window[:end]
+            except aic.Bad:
+                pass
+            at = data.find(b"AIC\x01", at + 1)
+    finally:
+        aic.MAX_BYTES = old
+    return None
+
+
+class Since:
+    """In which release each symbol first appeared, from the tags' tables."""
+
+    def __init__(self, release):
+        self.release = release
+        self.first = {}
+        tags = [t for t in git("tag", "--list", "v*", "--sort=version:refname").split()
+                if re.fullmatch(r"v\d+\.\d+\.\d+", t) and vkey(t) >= vkey(BASELINE)]
+        for tag in tags:
+            if vkey(tag) >= vkey(release):
+                continue            # the one being made is read from the tree
+            text = git("show", "%s:components/aos_dynapp/aos_symbols.c" % tag)
+            for s in re.findall(r"ESP_ELFSYM_EXPORT\((\w+)\)", text):
+                self.first.setdefault(s, BASELINE if tag == BASELINE else tag)
+        tree = open(os.path.join(ROOT, "components", "aos_dynapp", "aos_symbols.c"), encoding="utf-8").read()
+        self.now = set(re.findall(r"ESP_ELFSYM_EXPORT\((\w+)\)", tree))
+        if not self.first:
+            # no tag to read (a shallow checkout): what is here is the baseline
+            self.first = {s: BASELINE for s in self.now}
+
+    def fw_min(self, undef, where):
+        need = BASELINE
+        for s in sorted(undef - LOADER_BUILTIN):
+            if s not in self.now:
+                raise Bad("%s needs %s, which the firmware does not lend (tools/gen_symbols.py)" % (where, s))
+            t = self.first.get(s, self.release)
+            if vkey(t) > vkey(need):
+                need = t
+        return need.lstrip("v")
+
+
+# ---- a package -------------------------------------------------------------
+
+def make_zip(files):
+    """{card path: bytes} -> the bytes of a stored zip, always the same."""
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_STORED) as z:
+        for path in sorted(files, key=lambda p: (p != "p4app.json", p)):
+            zi = zipfile.ZipInfo(path, ZIP_DATE)
+            zi.compress_type = zipfile.ZIP_STORED
+            zi.external_attr = 0o644 << 16
+            zi.create_system = 3
+            z.writestr(zi, files[path])
+    return buf.getvalue()
+
+
+def build_app(app_dir, m, a, since, icons, abi):
+    app = os.path.basename(app_dir)
+    built = os.path.join(a.built or ROOT, "apps", app, "build")
+    sos = sorted(glob.glob(os.path.join(built, "*.so")))
+    if len(sos) != 1:
+        raise Bad("apps/%s: %d .so in its build folder (tools/build_apps.sh %s)" % (app, len(sos), app))
+    file = os.path.basename(sos[0])[:-3]
+    so = open(sos[0], "rb").read()
+    undef, defined = elf_symbols(so, file + ".so")
+    if not {"aos_app_abi", "aos_app_init"} <= defined:
+        raise Bad("%s.so does not export aos_app_abi/aos_app_init" % file)
+
+    d = describe(app_dir)
+    app_id = m.get("id") or d.get("id")
+    if not app_id:
+        raise Bad("apps/%s: no id found in its code; say it in store.json" % app)
+    name = m.get("name")
+    if not name:
+        if "name" not in d:
+            raise Bad("apps/%s: no name found in its code; say it in store.json" % app)
+        name = {"es": d["name"]}
+        for code in sorted(os.listdir(os.path.join(ROOT, "lang"))):
+            if os.path.isdir(os.path.join(ROOT, "lang", code)) and code != "xx":
+                name[code] = lang_lookup(code, app_id, d["name"]) or d["name"]
+    colors = m.get("colors") or d.get("colors") or ["3A3A3C", "1C1C1E"]
+
+    files = {"apps/%s.so" % file: so}
+    fw_need = [since.fw_min(undef, file + ".so")]
+    for mod in sorted(glob.glob(os.path.join(built, "modules", "*.so"))):
+        data = open(mod, "rb").read()
+        mu, _ = elf_symbols(data, os.path.basename(mod))
+        fw_need.append(since.fw_min(mu, os.path.basename(mod)))
+        files["apps/%s/%s" % (app, os.path.basename(mod))] = data
+    pages = []
+    for page in sorted(glob.glob(os.path.join(app_dir, "web", "*.js")) + glob.glob(os.path.join(app_dir, "web", "*.mjs"))):
+        files["web/" + os.path.basename(page)] = open(page, "rb").read()
+        pages.append(os.path.splitext(os.path.basename(page))[0])
+    for code in sorted(os.listdir(os.path.join(ROOT, "lang"))):
+        for lang_id in [app_id] + ["web." + p for p in pages]:
+            path = os.path.join(ROOT, "lang", code, lang_id + ".lang")
+            if os.path.isfile(path):
+                files["lang/%s/%s.lang" % (code, lang_id)] = open(path, "rb").read()
+    if m.get("fw_min"):
+        fw_need.append(m["fw_min"])
+    fw_min = max(fw_need, key=vkey)
+
+    inside = {
+        "schema": SCHEMA, "file": file, "id": app_id, "name": name, "abi": abi, "fw_min": fw_min,
+        "files": [{"path": p, "size": len(files[p]), "sha256": sha256(files[p])} for p in sorted(files)],
+    }
+    files["p4app.json"] = (json.dumps(inside, ensure_ascii=False, indent=1) + "\n").encode()
+    pkg = make_zip(files)
+
+    entry = {
+        "id": app_id, "file": file, "name": name, "about": m["about"], "cat": m["cat"],
+        "ver": a.release, "abi": abi, "fw_min": fw_min,
+        "pkg": {"url": "%s/%s.p4app" % (a.release, file), "size": len(pkg), "sha256": sha256(pkg),
+                "so_sha256": sha256(so), "installed": sum(len(v) for k, v in files.items() if k != "p4app.json")},
+        "colors": colors,
+    }
+    icon = find_icon(so)
+    if icon:
+        entry["icon"] = base64.b64encode(icon).decode()
+    elif d.get("icon_vec") and icons.get(d["icon_vec"]):
+        entry["icon_vec"] = icons[d["icon_vec"]]
+    elif m.get("glyph") or d.get("glyph"):
+        # a character of the system's fonts over the colours, as the launcher draws it
+        entry["glyph"] = m.get("glyph") or d["glyph"]
+    for k in ("needs", "user_files"):
+        if m.get(k):
+            entry[k] = m[k]
+    entry["license"] = m.get("license", "Apache-2.0")
+    entry["src"] = m.get("src", "%s/tree/main/apps/%s" % (a.source["url"], app))
+    return file, pkg, entry
+
+
+def pack_entry(p, a, packs_json, where):
+    """One pack of an app, with its parts: from a file built here, or from
+    store/packs.json (a release that already has it)."""
+    parts = []
+    for i in range(100):
+        name = p["file"] + (".%d" % i if i else "")
+        local = next((os.path.join(d, name) for d in a.packs_dir if os.path.isfile(os.path.join(d, name))), None)
+        if local:
+            h = hashlib.sha256()
+            size = 0
+            with open(local, "rb") as f:
+                for block in iter(lambda: f.read(1 << 20), b""):
+                    h.update(block)
+                    size += len(block)
+            parts.append({"name": name, "url": "%s/%s" % (a.release, name), "size": size, "sha256": h.hexdigest()})
+        elif name in packs_json:
+            j = packs_json[name]
+            parts.append({"name": name, "url": "%s/%s" % (j["tag"], name), "size": j["size"], "sha256": j["sha256"]})
+        else:
+            break
+    if not parts:
+        if a.missing_packs == "skip":
+            print("   %s: pack %s is nowhere (store/packs.json, --packs-dir): left out" % (where, p["file"]))
+            return None
+        raise Bad("%s: pack %s is nowhere: build it and pass --packs-dir, or tools/gen_store.py packs" %
+                  (where, p["file"]))
+    out = {"file": p["file"], "need": p["need"], "size": sum(x["size"] for x in parts),
+           "parts": [{"url": x["url"], "size": x["size"], "sha256": x["sha256"]} for x in parts]}
+    if "name" in p:
+        out["name"] = p["name"]
+    return out
+
+
+# ---- the commands ----------------------------------------------------------
+
+def cmd_check(a):
+    src = load_source()
+    cats = {c["id"] for c in src["cats"]}
+    packs = load_packs()
+    seen, n, hidden, without = {}, 0, 0, []
+    for d in app_dirs():
+        app = os.path.basename(d)
+        m = load_manifest(d, cats)
+        if m is None:
+            without.append(app)
+            continue
+        n += 1
+        hidden += m.get("publish") is False
+        app_id = m.get("id") or describe(d).get("id")
+        if not app_id:
+            raise Bad("apps/%s: no id found in its code; say it in store.json" % app)
+        if app_id in seen:
+            raise Bad("apps/%s and apps/%s are both %s" % (seen[app_id], app, app_id))
+        seen[app_id] = app
+    print("%d apps with a store.json (%d not published), %d packs in store/packs.json" % (n, hidden, len(packs)))
+    if without:
+        print("without one, so not in the store: %s" % " ".join(without))
+    return 0
+
+
+def cmd_build(a):
+    if not re.fullmatch(r"v\d+\.\d+\.\d+(-[A-Za-z0-9.]+)?", a.release):
+        raise Bad("--release is a tag: v0.31.0")
+    a.source = load_source()
+    cats = {c["id"] for c in a.source["cats"]}
+    packs_json = load_packs()
+    previous = {}
+    if a.previous and os.path.exists(a.previous):
+        for line in open(a.previous, encoding="utf-8").read().splitlines()[1:]:
+            e = json.loads(line)
+            previous[e["file"]] = e
+    since = Since(a.release)
+    icons = icon_names()
+    abi = abi_version()
+    only = set(a.only.split(",")) if a.only else None
+    os.makedirs(a.out, exist_ok=True)
+
+    lines, kept, new = [], 0, 0
+    files_seen, ids_seen = {}, {}
+    for d in app_dirs():
+        app = os.path.basename(d)
+        if only and app not in only:
+            continue
+        m = load_manifest(d, cats)
+        if m is None or m.get("publish") is False:
+            continue
+        built = os.path.join(a.built or ROOT, "apps", app, "build")
+        if not glob.glob(os.path.join(built, "*.so")):
+            if a.missing_apps == "skip":
+                print("   apps/%s is not built: left out" % app)
+                continue
+            raise Bad("apps/%s is not built (tools/build_apps.sh %s)" % (app, app))
+        file, pkg, entry = build_app(d, m, a, since, icons, abi)
+        if file in files_seen or entry["id"] in ids_seen:
+            raise Bad("apps/%s: its file or id is also apps/%s's" % (app, files_seen.get(file) or ids_seen[entry["id"]]))
+        files_seen[file] = ids_seen[entry["id"]] = app
+        old = previous.get(file)
+        if old and old["pkg"]["sha256"] == entry["pkg"]["sha256"]:
+            # the same package as the last release's: it stays where it is
+            entry["ver"] = old["ver"]
+            entry["pkg"]["url"] = old["pkg"]["url"]
+            kept += 1
+        else:
+            with open(os.path.join(a.out, file + ".p4app"), "wb") as f:
+                f.write(pkg)
+            new += 1
+        packs = [pack_entry(p, a, packs_json, "apps/" + app) for p in m.get("packs", [])]
+        packs = [p for p in packs if p]
+        if packs:
+            entry["packs"] = packs
+        lines.append(entry)
+
+    head = {"schema": SCHEMA, "source": {k: a.source[k] for k in ("name", "by", "url", "about")},
+            "cats": a.source["cats"], "release": a.release,
+            "base": "https://github.com/%s/releases/download/" % (a.repo or a.source["repo"])}
+    lines.sort(key=lambda e: (e["cat"], e["name"]["es"].lower()))
+    path = os.path.join(a.out, "p4os-store.ndjson")
+    with open(path, "w", encoding="utf-8") as f:
+        for o in [head] + lines:
+            f.write(json.dumps(o, ensure_ascii=False, separators=(",", ":")) + "\n")
+    total = sum(e["pkg"]["size"] for e in lines)
+    print("%d apps in %s (%d bytes): %d packages written, %d as in the previous release; %.1f MB of packages, "
+          "%.1f MB of packs" % (len(lines), path, os.path.getsize(path), new, kept, total / 1e6,
+                                sum(p["size"] for e in lines for p in e.get("packs", [])) / 1e6))
+    return 0
+
+
+def cmd_packs(a):
+    src = load_source()
+    out = subprocess.run(["gh", "release", "view", a.tag, "--repo", a.repo or src["repo"], "--json", "assets"],
+                         capture_output=True, text=True)
+    if out.returncode != 0:
+        raise Bad("gh: %s" % out.stderr.strip())
+    packs = {} if a.fresh else load_packs()
+    n = 0
+    for asset in json.loads(out.stdout)["assets"]:
+        if not re.fullmatch(r"[a-z0-9_]+\.pak(\.\d+)?", asset["name"]):
+            continue
+        digest = asset.get("digest") or ""
+        if not digest.startswith("sha256:"):
+            raise Bad("%s has no SHA-256 on GitHub" % asset["name"])
+        new = {"tag": a.tag, "size": asset["size"], "sha256": digest[7:]}
+        old = packs.get(asset["name"])
+        # the same bytes in an older release: leave it pointing there
+        if not old or old["sha256"] != new["sha256"]:
+            packs[asset["name"]] = new
+            n += 1
+    path = os.path.join(ROOT, "store", "packs.json")
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(dict(sorted(packs.items())), f, indent=1)
+        f.write("\n")
+    print("%d packs in store/packs.json, %d new or changed in %s" % (len(packs), n, a.tag))
+    return 0
+
+
+def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    sub = ap.add_subparsers(dest="cmd", required=True)
+    sub.add_parser("check").set_defaults(fn=cmd_check)
+    b = sub.add_parser("build")
+    b.add_argument("--release", required=True, help="the tag being made: v0.31.0")
+    b.add_argument("--out", required=True)
+    b.add_argument("--previous", help="the last published catalogue, to keep what did not change")
+    b.add_argument("--built", help="where apps/<app>/build is, when not in this tree")
+    b.add_argument("--packs-dir", action="append", default=[], help="a folder with packs built for this release")
+    b.add_argument("--only", help="just these apps (folders of apps/, comma separated)")
+    b.add_argument("--repo", help="owner/name, when not store/source.json's")
+    b.add_argument("--missing-apps", choices=("fail", "skip"), default="fail")
+    b.add_argument("--missing-packs", choices=("fail", "skip"), default="fail")
+    b.set_defaults(fn=cmd_build)
+    p = sub.add_parser("packs")
+    p.add_argument("--tag", required=True)
+    p.add_argument("--repo")
+    p.add_argument("--fresh", action="store_true", help="forget what store/packs.json had")
+    p.set_defaults(fn=cmd_packs)
+    a = ap.parse_args()
+    try:
+        return a.fn(a)
+    except Bad as e:
+        print("gen_store: %s" % e, file=sys.stderr)
+        return 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

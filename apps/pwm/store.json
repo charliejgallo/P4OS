@@ -1,0 +1,10 @@
+{
+ "cat": "taller",
+ "about": {
+  "es": "Una salida PWM con perilla: frecuencia, ciclo, servos y patrones.",
+  "en": "A PWM output on a knob: frequency, duty, servos and patterns."
+ },
+ "needs": [
+  "header"
+ ]
+}

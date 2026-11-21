@@ -1,0 +1,12 @@
+{
+ "cat": "juegos",
+ "about": {
+  "es": "Consolas de otras épocas, del Atari 2600 al Neo Geo: catorce, cada una con su núcleo.",
+  "en": "Consoles of other times, from the Atari 2600 to the Neo Geo: fourteen, each with a core of its own."
+ },
+ "user_files": {
+  "es": "Los juegos no vienen con la app: poné los tuyos en la carpeta emulador/ de la tarjeta, o soltalos en su página del portal.",
+  "en": "The games do not come with the app: put yours in the card's emulador/ folder, or drop them on its page of the portal."
+ },
+ "license": "GPL-2.0"
+}

@@ -1,0 +1,8 @@
+{
+ "cat": "utiles",
+ "about": {
+  "es": "Pato goma: escribe en una computadora por USB lo que le dicta un guion.",
+  "en": "Rubber duck: types into a computer over USB what a script tells it."
+ },
+ "publish": false
+}

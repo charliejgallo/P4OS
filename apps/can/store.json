@@ -1,0 +1,10 @@
+{
+ "cat": "taller",
+ "about": {
+  "es": "Analizador de bus CAN: espiar, enviar y grabar tramas, con un transceptor en el header.",
+  "en": "A CAN bus analyser: watch, send and record frames, with a transceiver on the header."
+ },
+ "needs": [
+  "header"
+ ]
+}

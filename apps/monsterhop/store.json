@@ -1,0 +1,13 @@
+{
+ "cat": "juegos",
+ "about": {
+  "es": "Acción salto a salto sobre una grilla: Tommy cruza veinticuatro niveles llenos de monstruos.",
+  "en": "Hop-by-hop action on a grid: Tommy crosses twenty-four levels full of monsters."
+ },
+ "packs": [
+  {
+   "file": "monsterhop_p4.pak",
+   "need": true
+  }
+ ]
+}

@@ -1,0 +1,7 @@
+{
+ "cat": "red",
+ "about": {
+  "es": "Un cliente de APIs al estilo Postman: pedidos a mano, colecciones y la respuesta en detalle.",
+  "en": "An API client in the manner of Postman: requests by hand, collections and the response in detail."
+ }
+}

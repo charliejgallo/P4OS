@@ -356,6 +356,37 @@ sólo cambia lo de esta fase):
 | Abrir una app recién puesta en caliente | es abrir una app en su pantalla | que arranque, y que una que estaba abierta se cierre bien al quitarla |
 | Reemplazar el archivo entre quitar y poner | falta un `.so` de otra versión | que corra el código nuevo |
 
+## Fase 1: en curso (2026-11-20)
+
+**Hecho:** `tools/gen_store.py` (`check`, `build`, `packs`), un
+`apps/<app>/store.json` para las 60 apps (58 publicadas; `pato` y
+`blittest` no), `store/source.json` (la fuente y las categorías) y
+`store/packs.json` (los 15 packs de la v0.28.0, con el tamaño y el sha-256
+que da GitHub). Con los `.so` ya compilados arma 58 paquetes (17 MB) y un
+catálogo de 52 KB, unos 930 bytes por app; dos corridas dan lo mismo byte
+a byte, y una release siguiente con `--previous` no reescribe ninguno.
+
+**D4 cambió, con el riesgo 3 medido:** las compilaciones del CI son
+repetibles (de v0.27.0 a v0.28.0 los 57 `.so` salieron idénticos; de
+v0.26.0 a v0.27.0 cambiaron 47 sin tocar su código, por cuatro cabeceras
+del firmware). La identidad de una app es entonces el sha-256 de su
+paquete, y `ver` la release donde ese paquete apareció. `fw_min` sale de
+las tablas de símbolos de los tags, sin archivo nuevo que mantener.
+
+**Las descripciones de los `store.json` son un borrador** escrito desde
+los README: hay que leerlas, sobre todo las de las apps sin README. Qué
+pack es obligatorio en Bastión (el base y Luna) y en Pinball (Zombis) es
+una suposición: lo confirma la sesión de cada juego.
+
+**Falta:** `tools/store_cli.py` (el cliente de referencia), publicar
+catálogo y paquetes desde el CI en una pre-release, y los packs de
+Bastión en `store/packs.json` cuando la 0.29.0 esté publicada.
+
+**De la fase 0, pendiente:** reiniciada a los 15 MB de una bajada, la
+placa volvió con un `.part` de 0 bytes: la FAT anota el tamaño al cerrar
+o sincronizar. `aos_fetch` ahora sincroniza cada megabyte (en la rama,
+compilado); **falta instalarlo en la placa y repetir la prueba**.
+
 ## Roadmap
 
 Cada fase termina con algo que se puede probar y con sus números anotados

@@ -1,0 +1,10 @@
+{
+ "cat": "taller",
+ "about": {
+  "es": "Analizador lógico de ocho canales, con diez decodificadores de protocolo y sesiones de sigrok.",
+  "en": "An eight-channel logic analyser, with ten protocol decoders and sigrok sessions."
+ },
+ "needs": [
+  "usb-host"
+ ]
+}

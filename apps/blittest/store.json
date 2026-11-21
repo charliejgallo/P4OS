@@ -1,0 +1,8 @@
+{
+ "cat": "programar",
+ "about": {
+  "es": "Un banco de pruebas de dibujo, para medir la pantalla. No es para el uso de todos los días.",
+  "en": "A drawing bench, to measure the display. Not for everyday use."
+ },
+ "publish": false
+}

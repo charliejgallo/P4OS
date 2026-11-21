@@ -1,0 +1,77 @@
+{
+ "emoji.pak": {
+  "tag": "v0.28.0",
+  "size": 16203453,
+  "sha256": "9ccba6d53640e8ecaa04a1085aa66e962bcef2a3b31e36659b64ec5334449d09"
+ },
+ "golf_p4.pak": {
+  "tag": "v0.28.0",
+  "size": 3204802,
+  "sha256": "e1a6a245cd63fcaf54b102896a39f6ab036ebe5406f3cb1a024ec861fdff4121"
+ },
+ "infrarrojo_p4.pak": {
+  "tag": "v0.28.0",
+  "size": 8289618,
+  "sha256": "1da5fb3b4f682c4bab066033afe6770ad6573d4f88f9a35603004bc5e22a669c"
+ },
+ "mila_p4.pak": {
+  "tag": "v0.28.0",
+  "size": 7500000,
+  "sha256": "fd69a10a546c69950246fb8a8f44e2401166bef0a85abd3677b3e45877057b9f"
+ },
+ "mila_p4.pak.1": {
+  "tag": "v0.28.0",
+  "size": 7500000,
+  "sha256": "97b3a3d78ec6398b74cc4f8b80cbc9a8b9fc25230ecdb6df9deed53a97b2ee27"
+ },
+ "mila_p4.pak.2": {
+  "tag": "v0.28.0",
+  "size": 1914956,
+  "sha256": "4836679e5a84f75df730ec4f13e6df1b08c52ba82dc34be053bc4cc64c5450b6"
+ },
+ "monsterhop_p4.pak": {
+  "tag": "v0.28.0",
+  "size": 37202325,
+  "sha256": "5e8a743f01023b36f48d5c8b77787b666b5f2781a64e426ba470d174d2e1c8b6"
+ },
+ "notas_p4.pak": {
+  "tag": "v0.28.0",
+  "size": 821032,
+  "sha256": "40a9ac3c96cc27424f11bcece1034b1247d3763ab27b907cc2fed7f6af6c6816"
+ },
+ "pinball_casino_p4.pak": {
+  "tag": "v0.28.0",
+  "size": 3153062,
+  "sha256": "56d1c79e11a4ce7fc4c690719773c61b7d8a1534291bbf6fa9bd19b9f01f7db2"
+ },
+ "pinball_circo_p4.pak": {
+  "tag": "v0.28.0",
+  "size": 3593739,
+  "sha256": "828d8655e086153e38f19a178410d54f9c456707f03bc43712257475676e99f7"
+ },
+ "pinball_jungla_p4.pak": {
+  "tag": "v0.28.0",
+  "size": 3337996,
+  "sha256": "9486cf2f544b48819b55e68df56a0aceac117c8d1360b079367cc5af4ef67468"
+ },
+ "pinball_piratas_p4.pak": {
+  "tag": "v0.28.0",
+  "size": 3252489,
+  "sha256": "fd73f3822e682319effe580dff0a4def648878b4c4243ff43b2eb6d398414a3f"
+ },
+ "pinball_robots_p4.pak": {
+  "tag": "v0.28.0",
+  "size": 3134966,
+  "sha256": "3b3c6c90e4832bd7e7a6355eea8845cfc4ef24b3ee8dfde822e071b8dc2d84b9"
+ },
+ "pinball_zombis_p4.pak": {
+  "tag": "v0.28.0",
+  "size": 3092480,
+  "sha256": "2bcddba6fb38a64f4e46fb24d2a747a1d4b57d8449eae5406d3f179516fdeaaf"
+ },
+ "turbo_p4.pak": {
+  "tag": "v0.28.0",
+  "size": 9723991,
+  "sha256": "1d00b52352b5e0bf1b20d71e34fb7fdc7b97cf82c720159f327d4c41d1233f99"
+ }
+}

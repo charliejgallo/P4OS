@@ -1,0 +1,12 @@
+{
+ "cat": "juegos",
+ "about": {
+  "es": "Chocolate Doom en la placa, a 35 cuadros por segundo. Se juega acostado, con el dedo, teclado o joystick.",
+  "en": "Chocolate Doom on the board, at 35 frames a second. Played lying down, by touch, keyboard or joystick."
+ },
+ "user_files": {
+  "es": "El WAD del juego no viene con la app: copiá el tuyo (doom1.wad, el shareware, sirve) a la carpeta doom/ de la tarjeta.",
+  "en": "The game's WAD does not come with the app: copy yours (doom1.wad, the shareware, will do) to the card's doom/ folder."
+ },
+ "license": "GPL-2.0"
+}

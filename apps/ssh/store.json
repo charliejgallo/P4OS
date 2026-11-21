@@ -1,0 +1,7 @@
+{
+ "cat": "red",
+ "about": {
+  "es": "Cliente SSH: una terminal en la placa hacia cualquier computadora.",
+  "en": "An SSH client: a terminal on the board into any computer."
+ }
+}

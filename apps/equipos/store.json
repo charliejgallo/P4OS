@@ -1,0 +1,10 @@
+{
+ "cat": "taller",
+ "about": {
+  "es": "Paneles para los equipos Modbus del banco: fuentes, cargas y medidores.",
+  "en": "Panels for the bench's Modbus devices: supplies, loads and meters."
+ },
+ "needs": [
+  "header"
+ ]
+}
