@@ -12,8 +12,9 @@ chequeo de símbolos, instalar y quitar en caliente y la bajada a la
 tarjeta andan, también contra GitHub de verdad por TLS y con un reinicio a
 mitad de bajada; falta un corte del Wi-Fi. **La fase 1 está hecha**
 (catálogo, paquetes y el cliente de referencia; su CI corriendo con el tag
-`v0.30.0-tienda.1`). **De la fase 2, el servicio está escrito y probado en
-la Mac**; falta la placa y la cuarentena. Se trabaja en la rama `tienda` (worktree
+`v0.30.0-tienda.1`). **La fase 2 está escrita y probada, en la Mac y en la
+placa**; de ella falta ver la cuarentena actuar con un `.so` roto de
+verdad. Se trabaja en la rama `tienda` (worktree
 `.claude/worktrees/tienda`, como se hizo con `ethernet`) y se mergea a
 `main` cuando esté probada en la placa. Este documento es el plan; lo que
 se vaya midiendo se anota acá, como en [ETHERNET.md](ETHERNET.md).
@@ -462,7 +463,7 @@ trae su `store.json` (categoría y una o dos frases en es/en; los packs, lo
 que necesita y lo que pone el usuario, si hay); `tools/gen_store.py check`
 dice si está bien.
 
-## Fase 2: el servicio (escrito y probado en la Mac, 2026-11-21)
+## Fase 2: el servicio (escrito y probado, 2026-11-21)
 
 **Lo escrito:**
 
@@ -508,15 +509,50 @@ dice si está bien.
   por su id, con un mundo extra), leer el catálogo y quitarlas.
 - El firmware `rev1_3` compila sin avisos: 6 986 080 bytes (+23 KB).
 
+**La cuarentena (D10), escrita el 2026-11-21** (`aos_dynapp.c`,
+"Quarantine"): el cargador anota el nombre del `.so` que está abriendo en
+PSRAM que el arranque no borra, escrita al chip en el momento (un pánico
+no da otra oportunidad). Un arranque que sigue a una caída y encuentra un
+nombre ahí le cuenta una falta; **dos seguidas contra el mismo archivo** y
+lo renombra a `<archivo>.so.off` antes del escaneo, arranca sin él y lo
+avisa en pantalla. Dos y no una, porque la placa puede caerse por otra
+cosa mientras carga una app sana; una carga buena borra la cuenta. Cubre
+el escaneo y el abrir una app; no una app que se cae mientras corre (eso
+no es un bucle). El servicio la muestra como `set_aside` y reinstalarla es
+la vuelta. Además el servicio limpia `apps/.store/tmp` al iniciar.
+
+**Medido en la placa (2026-11-21)**, firmware `v0.30.0-tienda.1-2-ga3b4e8d`
+por OTA, contra el GitHub falso en la Mac:
+
+- El escaneo completo tras el firmware nuevo, con el registro de la
+  cuarentena activo: las 95 apps registradas, ninguna apartada.
+- **Refrescar:** 1,4 s; 58 apps, las 58 `by_hand` (nada tiene recibo
+  todavía) y todas caben en este firmware.
+- **Memoria:** con el catálogo cargado, 192 bytes menos de RAM interna y
+  140 KB menos de PSRAM. Durante los trabajos la interna bajó como mucho
+  1,6 KB.
+- **Instalar sobre lo que está, en caliente:** 1,8 s, `hello_app` sigue en
+  el inicio, 95 apps.
+- **Un paquete cuyo `.so` pide un símbolo que este firmware no tiene:**
+  rechazado en 0,5 s ("needs a newer P4OS: this one lacks
+  lv_label_creatX"), el `.so` instalado sin tocar, la app en el inicio y
+  `tmp` vacío. Es el segundo chequeo de D5, ya dentro del servicio.
+- **Quitar y volver a poner sin reiniciar:** 95 → 94 → 95 apps.
+- Al terminar: la dirección oficial otra vez (que hoy contesta 404: la
+  release publicada no tiene catálogo todavía), y el recibo y el catálogo
+  de prueba borrados de la tarjeta.
+
 **Lo que falta de esta fase:**
 
-- **Probarlo en la placa** (hay que instalarle este firmware): es donde
-  corren el chequeo de símbolos y el cambio en caliente dentro del
-  servicio, y donde se mide la RAM interna que piden cJSON y el hilo.
-- **La cuarentena (D10)**: no está escrita. Es lo que queda del criterio
-  de la fase ("un `.so` roto a propósito termina apartado") y toca el
-  arranque, así que va con su prueba en la placa.
-- Limpiar `apps/.store/tmp` al arrancar, y los `.part` viejos.
+- **La cuarentena en la placa.** La lógica está escrita y el estado
+  `set_aside` probado en la Mac, pero el camino de verdad (un `.so` que
+  tira la placa al cargarse, dos veces) son dos pánicos a propósito:
+  espera el sí del usuario.
+- Una app con pack grande bajado por el servicio en la placa (la bajada
+  sola ya se midió en la fase 0).
+- Adoptar todo lo que hay en la tarjeta: cambia 58 recibos y reescribe
+  páginas e idiomas que difieran; mejor contra el catálogo oficial, cuando
+  exista.
 
 **De la fase 0, el reinicio a mitad de bajada (hecho, 2026-11-20):** la
 primera vez, reiniciada a los 15 MB, la placa volvió con un `.part` de 0
