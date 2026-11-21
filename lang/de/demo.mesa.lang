@@ -1,0 +1,412 @@
+# amoledos-lang 1   es -> de
+# demo.mesa.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/mesa/main/g_ajedrez.c:38
+Jaque mate	Schachmatt
+
+#: apps/mesa/main/g_ajedrez.c:38
+Rey ahogado	Patt
+
+#: apps/mesa/main/g_ajedrez.c:38
+Triple repetición	Dreifache Wiederholung
+
+#: apps/mesa/main/g_ajedrez.c:38
+Cincuenta movimientos	50-Züge-Regel
+
+#: apps/mesa/main/g_ajedrez.c:39
+Material insuficiente	Ungenügendes Material
+
+#: apps/mesa/main/g_ajedrez.c:45
+#: apps/mesa/main/g_ajedrez.c:51
+#: apps/mesa/main/g_damas.c:59
+#: apps/mesa/main/g_damas.c:61
+Peón	Bauer
+
+#: apps/mesa/main/g_ajedrez.c:46
+#: apps/mesa/main/g_ajedrez.c:52
+Caballo	Springer
+
+#: apps/mesa/main/g_ajedrez.c:47
+#: apps/mesa/main/g_ajedrez.c:53
+Alfil	Läufer
+
+#: apps/mesa/main/g_ajedrez.c:48
+#: apps/mesa/main/g_ajedrez.c:54
+Torre	Turm
+
+#: apps/mesa/main/g_ajedrez.c:49
+#: apps/mesa/main/g_ajedrez.c:55
+#: apps/mesa/main/g_damas.c:60
+#: apps/mesa/main/g_damas.c:62
+Dama	Dame
+
+#: apps/mesa/main/g_ajedrez.c:50
+#: apps/mesa/main/g_ajedrez.c:56
+Rey	König
+
+#: apps/mesa/main/g_ajedrez.c:120
+#: apps/mesa/main/g_damas.c:96
+#: apps/mesa/main/g_reversi.c:58
+Negras	Schwarz
+
+#: apps/mesa/main/g_ajedrez.c:120
+#: apps/mesa/main/g_backgammon.c:88
+#: apps/mesa/main/g_damas.c:96
+#: apps/mesa/main/g_reversi.c:58
+Blancas	Weiß
+
+#: apps/mesa/main/g_ajedrez.c:164
+Jaque	Schach
+
+#: apps/mesa/main/g_ajedrez.c:325
+Ajedrez	Schach
+
+#: apps/mesa/main/g_ajedrez.c:326
+Reglas completas, reloj y planilla	Alle Regeln, Uhr und Partieformular
+
+#: apps/mesa/main/g_backgammon.c:57
+Sacó todas sus fichas	Alle Steine abgetragen
+
+#: apps/mesa/main/g_backgammon.c:57
+Gammon	Gammon
+
+#: apps/mesa/main/g_backgammon.c:57
+#: apps/mesa/main/g_backgammon.c:571
+Backgammon	Backgammon
+
+#: apps/mesa/main/g_backgammon.c:88
+Rojas	Rot
+
+#: apps/mesa/main/g_backgammon.c:572
+Carrera de quince fichas con dos dados	Ein Rennen mit fünfzehn Steinen und zwei Würfeln
+
+#: apps/mesa/main/g_cuatro.c:99
+#: apps/mesa/main/g_ludo.c:59
+Amarillo	Gelb
+
+#: apps/mesa/main/g_cuatro.c:99
+#: apps/mesa/main/g_ludo.c:59
+Rojo	Rot
+
+#: apps/mesa/main/g_cuatro.c:122
+El tablero está lleno	Das Brett ist voll
+
+#: apps/mesa/main/g_cuatro.c:122
+#: apps/mesa/main/g_cuatro.c:461
+Cuatro en línea	Vier gewinnt
+
+#: apps/mesa/main/g_cuatro.c:462
+Cuatro fichas en fila, a lo ancho, a lo alto o en diagonal	Vier Steine in einer Reihe, waagerecht, senkrecht oder diagonal
+
+#: apps/mesa/main/g_damas.c:56
+Sin jugadas	Keine Züge mehr
+
+#: apps/mesa/main/g_damas.c:56
+Cincuenta jugadas de damas	Fünfzig Damenzüge
+
+#: apps/mesa/main/g_damas.c:65
+De acá (8 × 8)	Hiesige (8 × 8)
+
+#: apps/mesa/main/g_damas.c:65
+Internacionales (10 × 10)	International (10 × 10)
+
+#: apps/mesa/main/g_damas.c:66
+#: apps/mesa/main/g_damas.c:67
+#: apps/mesa/main/mg_setup.c:418
+#: apps/mesa/main/mg_setup.c:419
+No	Nein
+
+#: apps/mesa/main/g_damas.c:66
+#: apps/mesa/main/g_damas.c:67
+#: apps/mesa/main/mg_setup.c:418
+#: apps/mesa/main/mg_setup.c:419
+Sí	Ja
+
+#: apps/mesa/main/g_damas.c:69
+Reglas	Regeln
+
+#: apps/mesa/main/g_damas.c:70
+Los peones comen para atrás	Steine schlagen rückwärts
+
+#: apps/mesa/main/g_damas.c:71
+Comer la mayor cantidad	Mehrheitsschlag
+
+#: apps/mesa/main/g_damas.c:562
+Damas	Dame
+
+#: apps/mesa/main/g_damas.c:563
+Las de acá y las internacionales	Hiesige und internationale Regeln
+
+#: apps/mesa/main/g_ludo.c:59
+Verde	Grün
+
+#: apps/mesa/main/g_ludo.c:59
+Azul	Blau
+
+#: apps/mesa/main/g_ludo.c:62
+#: apps/mesa/main/mg_setup.c:277
+Jugadores	Spieler
+
+#: apps/mesa/main/g_ludo.c:150
+Llevó sus cuatro fichas a casa	Alle vier Figuren im Ziel
+
+#: apps/mesa/main/g_ludo.c:445
+Ludo	Ludo
+
+#: apps/mesa/main/g_ludo.c:446
+De dos a cuatro, con dados	Zwei bis vier Spieler, mit Würfel
+
+#: apps/mesa/main/g_reversi.c:135
+No quedan jugadas	Keine Züge mehr
+
+#: apps/mesa/main/g_reversi.c:381
+Reversi	Reversi
+
+#: apps/mesa/main/g_reversi.c:382
+Encerrá las fichas del otro y dalas vuelta	Schließe die gegnerischen Steine ein und dreh sie um
+
+#: apps/mesa/main/mesa.c:48
+damas	Damen
+
+#: apps/mesa/main/mesa.c:48
+fichas	Steine
+
+#: apps/mesa/main/mesa.c:48
+en casa	im Ziel
+
+#: apps/mesa/main/mesa.c:48
+afuera	abgetragen
+
+#: apps/mesa/main/mesa.c:166
+No se pudo abrir la partida	Die Partie ließ sich nicht öffnen
+
+#: apps/mesa/main/mesa.c:266
+Juegos de mesa	Brettspiele
+
+#: apps/mesa/main/mesa.c:274
+Seguir la partida	Partie fortsetzen
+
+#: apps/mesa/main/mesa.c:287
+Reloj de ajedrez	Schachuhr
+
+#: apps/mesa/main/mesa.c:287
+Para una partida en un tablero de verdad	Für eine Partie auf einem echten Brett
+
+#: apps/mesa/main/mesa.c:288
+#: apps/mesa/main/mg_hud.c:738
+#: apps/mesa/main/mg_setup.c:404
+Ajustes	Einstellungen
+
+#: apps/mesa/main/mesa.c:290
+Falta el paquete de arte mesa_p4.pak: los juegos se ven con piezas de reemplazo.	Das Grafikpaket mesa_p4.pak fehlt: die Spiele zeigen Ersatzfiguren.
+
+#: apps/mesa/main/mg_hud.c:157
+#: apps/mesa/main/mg_setup.c:290
+Placa	Computer
+
+#: apps/mesa/main/mg_hud.c:238
+RDTAC	KDTLS
+
+#: apps/mesa/main/mg_hud.c:318
+Planilla	Partieformular
+
+#: apps/mesa/main/mg_hud.c:524
+Piensa...	Denkt nach...
+
+#: apps/mesa/main/mg_hud.c:555
+Tirá los dados	Würfle
+
+#: apps/mesa/main/mg_hud.c:701
+Guardada en	Gespeichert als
+
+#: apps/mesa/main/mg_hud.c:704
+No se pudo guardar	Speichern fehlgeschlagen
+
+#: apps/mesa/main/mg_hud.c:714
+No se pudo leer la partida	Die Partie ließ sich nicht lesen
+
+#: apps/mesa/main/mg_hud.c:721
+#: apps/mesa/main/mg_hud.c:736
+Abrir una partida	Partie öffnen
+
+#: apps/mesa/main/mg_hud.c:721
+No hay partidas guardadas en /sdcard/mesa/ajedrez	Keine gespeicherten Partien in /sdcard/mesa/ajedrez
+
+#: apps/mesa/main/mg_hud.c:723
+#: apps/mesa/main/mg_hud.c:802
+Cancelar	Abbrechen
+
+#: apps/mesa/main/mg_hud.c:731
+Seguir	Weiter
+
+#: apps/mesa/main/mg_hud.c:732
+Partida nueva	Neue Partie
+
+#: apps/mesa/main/mg_hud.c:733
+Abandonar	Aufgeben
+
+#: apps/mesa/main/mg_hud.c:735
+#: apps/mesa/main/mg_hud.c:773
+Guardar la partida	Partie speichern
+
+#: apps/mesa/main/mg_hud.c:739
+#: apps/mesa/main/mg_hud.c:774
+Salir al menú	Zurück zum Menü
+
+#: apps/mesa/main/mg_hud.c:753
+Se acabó el tiempo	Zeit abgelaufen
+
+#: apps/mesa/main/mg_hud.c:756
+Abandono	Aufgegeben
+
+#: apps/mesa/main/mg_hud.c:765
+Tablas	Remis
+
+#: apps/mesa/main/mg_hud.c:766
+¡Ganaste!	Gewonnen!
+
+#: apps/mesa/main/mg_hud.c:766
+Ganó la placa	Der Computer hat gewonnen
+
+#: apps/mesa/main/mg_hud.c:767
+Gana	Sieger
+
+#: apps/mesa/main/mg_hud.c:768
+Partida terminada	Partie beendet
+
+#: apps/mesa/main/mg_hud.c:771
+Revancha	Revanche
+
+#: apps/mesa/main/mg_hud.c:772
+Ver el tablero	Brett ansehen
+
+#: apps/mesa/main/mg_hud.c:795
+¿En qué se convierte?	Umwandeln in?
+
+#: apps/mesa/main/mg_play.c:305
+No hay jugada: pasa el turno	Kein Zug möglich: der Zug geht weiter
+
+#: apps/mesa/main/mg_play.c:349
+No hay memoria	Nicht genug Speicher
+
+#: apps/mesa/main/mg_play.c:453
+Esta es la que haría la placa	Diesen Zug würde der Computer spielen
+
+#: apps/mesa/main/mg_play.c:562
+Piensa la placa...	Der Computer denkt nach...
+
+#: apps/mesa/main/mg_play.c:699
+Pensando...	Denke nach...
+
+#: apps/mesa/main/mg_save.c:412
+jugadas	Züge
+
+#: apps/mesa/main/mg_setup.c:49
+Sin reloj	Ohne Uhr
+
+#: apps/mesa/main/mg_setup.c:50
+por jugada	pro Zug
+
+#: apps/mesa/main/mg_setup.c:277
+De a dos	Zu zweit
+
+#: apps/mesa/main/mg_setup.c:277
+Contra la placa	Gegen den Computer
+
+#: apps/mesa/main/mg_setup.c:280
+Jugás con	Du spielst
+
+#: apps/mesa/main/mg_setup.c:280
+Al azar	Zufällig
+
+#: apps/mesa/main/mg_setup.c:282
+#: apps/mesa/main/mg_setup.c:293
+Nivel de la placa	Stärke des Computers
+
+#: apps/mesa/main/mg_setup.c:285
+Cómo	Wie
+
+#: apps/mesa/main/mg_setup.c:285
+Pasando la placa	Brett weitergeben
+
+#: apps/mesa/main/mg_setup.c:285
+Cara a cara	Gegenüber
+
+#: apps/mesa/main/mg_setup.c:290
+Persona	Mensch
+
+#: apps/mesa/main/mg_setup.c:296
+Reloj	Uhr
+
+#: apps/mesa/main/mg_setup.c:297
+Incremento	Bonus
+
+#: apps/mesa/main/mg_setup.c:297
+Bronstein	Bronstein
+
+#: apps/mesa/main/mg_setup.c:297
+Fischer	Fischer
+
+#: apps/mesa/main/mg_setup.c:299
+Jugar	Spielen
+
+#: apps/mesa/main/mg_setup.c:303
+Volver	Zurück
+
+#: apps/mesa/main/mg_setup.c:360
+Madera	Holz
+
+#: apps/mesa/main/mg_setup.c:360
+Mármol	Marmor
+
+#: apps/mesa/main/mg_setup.c:360
+Vidrio	Glas
+
+#: apps/mesa/main/mg_setup.c:360
+Metal	Metall
+
+#: apps/mesa/main/mg_setup.c:410
+Piezas y tablero	Figuren und Brett
+
+#: apps/mesa/main/mg_setup.c:412
+Los juegos de mármol, vidrio y metal se bajan aparte desde la Tienda.	Die Sätze aus Marmor, Glas und Metall gibt es getrennt im Store.
+
+#: apps/mesa/main/mg_setup.c:417
+Vista	Ansicht
+
+#: apps/mesa/main/mg_setup.c:417
+Plana	Flach
+
+#: apps/mesa/main/mg_setup.c:417
+En 3D	3D
+
+#: apps/mesa/main/mg_setup.c:418
+Marcar las jugadas posibles	Mögliche Züge zeigen
+
+#: apps/mesa/main/mg_setup.c:419
+Coordenadas	Koordinaten
+
+#: apps/mesa/main/mg_setup.c:420
+Sonido	Ton
+
+#: apps/mesa/main/mg_setup.c:421
+Lentas	Langsam
+
+#: apps/mesa/main/mg_setup.c:421
+Normales	Normal
+
+#: apps/mesa/main/mg_setup.c:421
+Rápidas	Schnell
+
+#: apps/mesa/main/mg_setup.c:422
+Las piezas se mueven	Figuren bewegen sich
+
+#: apps/mesa/main/mg_setup.c:423
+Listo	Fertig
+
+#: apps/mesa/main/mg_setup.c:461
+Jugadas	Züge

@@ -24,6 +24,7 @@
 #define P (&mg->play)
 #define CARD_H 112
 #define BTN 84
+#define COL 240                 /* lying down: the side columns' width */
 
 static lv_color_t C(uint32_t rgb)
 {
@@ -148,7 +149,8 @@ static void card_build(int slot, int player, int x, int y, int w, bool turned)
     lv_obj_set_style_text_font(nm, aos_font_body, 0);
     lv_obj_set_style_text_color(nm, C(0xF4E8D4), 0);
     lv_label_set_long_mode(nm, LV_LABEL_LONG_MODE_DOTS);
-    lv_obj_set_width(nm, w - 80 - (P->clock.mode != CLK_NONE ? 150 : 0));
+    lv_obj_set_width(nm, w - 80 - (P->clock.mode != CLK_NONE ? 130 : 0));
+    lv_obj_set_height(nm, lv_font_get_line_height(aos_font_body));
     lv_obj_align(nm, LV_ALIGN_TOP_LEFT, 66, 16);
     char buf[96];
     if (P->human[player]) snprintf(buf, sizeof buf, "%s", _(side));
@@ -158,7 +160,8 @@ static void card_build(int slot, int player, int x, int y, int w, bool turned)
     lv_obj_set_style_text_font(in, aos_font_small, 0);
     lv_obj_set_style_text_color(in, C(0xB8A890), 0);
     lv_label_set_long_mode(in, LV_LABEL_LONG_MODE_DOTS);
-    lv_obj_set_width(in, w - 80 - (P->clock.mode != CLK_NONE ? 150 : 0));
+    lv_obj_set_width(in, w - 80 - (P->clock.mode != CLK_NONE ? 130 : 0));
+    lv_obj_set_height(in, lv_font_get_line_height(aos_font_small));
     lv_obj_align(in, LV_ALIGN_BOTTOM_LEFT, 66, -14);
     lv_label_set_text(in, "");
     lv_obj_t *ck = NULL;
@@ -199,9 +202,9 @@ static void bar_build(void)
         lv_obj_set_size(bar, W - 32, BTN + 16);
         lv_obj_set_pos(bar, 16, H - BTN - 28);
     } else {
-        lv_obj_set_size(bar, 270, 2 * BTN + 30);
+        lv_obj_set_size(bar, COL, 2 * BTN + 30);
         lv_obj_set_style_pad_row(bar, 16, 0);
-        lv_obj_set_pos(bar, W - 286, H - 2 * BTN - 46);
+        lv_obj_set_pos(bar, W - COL - 16, H - 2 * BTN - 46);
     }
     mg->bar = bar;
     mg->btn_menu = icon_btn(bar, AOS_SYM_DOTS_HORIZONTAL, ev_menu);
@@ -306,8 +309,8 @@ static void sheet_build(void)
         lv_obj_set_pos(s, 16, mg->H - BTN - 44 - 560);
         lv_obj_add_flag(s, LV_OBJ_FLAG_HIDDEN);
     } else {
-        lv_obj_set_size(s, 270, mg->H - 2 * BTN - 46 - 32);
-        lv_obj_set_pos(s, mg->W - 286, 16);
+        lv_obj_set_size(s, COL, mg->H - 2 * BTN - 46 - 32);
+        lv_obj_set_pos(s, mg->W - COL - 16, 16);
     }
     lv_obj_t *t = lv_label_create(s);
     lv_obj_set_style_text_font(t, aos_font_small, 0);
@@ -353,7 +356,7 @@ void mg_hud_coords(void)
     int nf = (int)bw, nr = (int)bh;
     for (int i = 0; i < nf + nr && mg->ncoord < 40; i++) {
         float u, v, x, y;
-        char t[4];
+        char t[16];
         if (i < nf) {
             u = (float)i + 0.5f;
             v = turned ? bh + 0.28f : -0.28f;
@@ -417,14 +420,14 @@ void mg_hud_build(void)
             card_build(0, P->bottom, 16, H - BTN - 44 - CARD_H, W - 32, false);
             if (top >= 0) card_build(1, top, 16, 16, W - 32, face_to_face());
         } else {
-            card_build(0, P->bottom, 16, H - 16 - CARD_H, 270, false);
-            if (top >= 0) card_build(1, top, 16, 16, 270, face_to_face());
+            card_build(0, P->bottom, 16, H - 16 - CARD_H, COL, false);
+            if (top >= 0) card_build(1, top, 16, 16, COL, face_to_face());
         }
     } else {
         /* one in each corner, the way round the board the players sit
          * (games of more than two put the first at the bottom left, then
          * the bottom right, the top right, the top left) */
-        int cw = mg->portrait ? (W - 48) / 2 : 270;
+        int cw = mg->portrait ? (W - 48) / 2 : COL;
         for (int p = 0; p < P->np && p < MESA_MAX_PLAYERS; p++) {
             bool right = p == 1 || p == 2, low = p == 0 || p == 1;
             int cx, cy;
@@ -432,7 +435,7 @@ void mg_hud_build(void)
                 cx = right ? W - 16 - cw : 16;
                 cy = low ? H - BTN - 44 - CARD_H : 16;
             } else {
-                cx = right ? W - 286 : 16;
+                cx = right ? W - COL - 16 : 16;
                 cy = low ? H - 16 - CARD_H : 16;
             }
             card_build(p < 2 ? p : 2, p, cx, cy, cw, false);
@@ -441,7 +444,7 @@ void mg_hud_build(void)
         }
     }
     bar_build();
-    if (P->np > 2 && !mg->portrait) lv_obj_set_pos(mg->bar, W - 286, H / 2 - BTN - 15);
+    if (P->np > 2 && !mg->portrait) lv_obj_set_pos(mg->bar, W - COL - 16, H / 2 - BTN - 15);
     sheet_build();
     lv_obj_t *st = lv_label_create(h);
     lv_obj_set_style_text_font(st, aos_font_body, 0);

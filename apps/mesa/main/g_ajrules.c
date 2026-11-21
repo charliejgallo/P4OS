@@ -484,8 +484,8 @@ void ch_san(ch_pos_t *p, uint32_t m, char *out)
     int ty = CH_TYPE(p->sq[f]);
     char *o = out;
     if (fl & CHM_CASTLE) {
-        strcpy(o, t > f ? "O-O" : "O-O-O");
-        o += strlen(o);
+        const char *c = t > f ? "O-O" : "O-O-O";
+        while (*c) *o++ = *c++;
     } else {
         if (ty != CH_P) {
             *o++ = " PNBRQK"[ty];

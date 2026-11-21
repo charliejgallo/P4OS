@@ -16,7 +16,9 @@ mg_slot_t mg_games[MG_GAMES_MAX];
 int        mg_ngames;
 
 #define MODS_MAX 8
+#if !defined(AOS_SIM) && !defined(AOS_SIM_BUILTIN)
 static aos_module_t *s_mod[MODS_MAX];
+#endif
 static int           s_nmod;
 
 const mg_slot_t *mg_game_find(const char *word)

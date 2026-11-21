@@ -180,7 +180,7 @@ bool mg_pgn_write(char *name_out, size_t nn)
     char dir[180];
     pgn_dir(dir, sizeof dir);
     mkdirs(dir);
-    char date[16] = "????.??.??", name[48];
+    char date[40] = "????.??.??", name[96];
     struct tm tm;
     memset(&tm, 0, sizeof tm);
     if (aos_hal_time_is_valid()) {
@@ -191,7 +191,7 @@ bool mg_pgn_write(char *name_out, size_t nn)
     } else {
         snprintf(name, sizeof name, "partida-%u.pgn", (unsigned)(mg_rand() % 100000));
     }
-    char path[240];
+    char path[300];
     snprintf(path, sizeof path, "%s/%s", dir, name);
     FILE *f = fopen(path, "w");
     if (!f) return false;
@@ -297,7 +297,7 @@ bool mg_pgn_read(const char *name)
     if (!s) return false;
     char dir[180], path[240];
     pgn_dir(dir, sizeof dir);
-    snprintf(path, sizeof path, "%s/%s", dir, name);
+    snprintf(path, sizeof path, "%.179s/%.40s", dir, name);
     FILE *f = fopen(path, "rb");
     if (!f) return false;
     fseek(f, 0, SEEK_END);

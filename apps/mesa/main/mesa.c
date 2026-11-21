@@ -43,6 +43,10 @@
 
 mg_app_t *mg;
 
+/* keys the games ask the host to translate (mesa_host_t.tr) and that no
+ * _() of the app names: here so the catalogue has them */
+static const char *const EXTRA_KEYS[] = { N_("damas"), N_("fichas"), N_("en casa"), N_("afuera") };
+
 static lv_color_t C(uint32_t rgb)
 {
     return lv_color_hex(rgb);
@@ -428,6 +432,7 @@ static void dev_switches(void)
 
 static void *mesa_create(aos_app_t *self, lv_obj_t *root)
 {
+    (void)EXTRA_KEYS;
     mg = (mg_app_t *)calloc(1, sizeof *mg);
     if (!mg) return NULL;
     mg->self = self;

@@ -213,10 +213,10 @@ void mg_view_layout(void)
     if (mg->portrait) {
         int per = (int)((v->W - 80) / (S * 0.5f));
         v->tray[0][0] = 40 + S * 0.3f;
-        v->tray[0][1] = bottom + S * 0.75f;
+        v->tray[0][1] = bottom + S * 0.95f;
         v->tray[0][2] = (float)per;
         v->tray[1][0] = 40 + S * 0.3f;
-        v->tray[1][1] = top - S * 0.25f;
+        v->tray[1][1] = top - S * 0.7f;
         v->tray[1][2] = (float)per;
     } else {
         /* both in the left column, between the players' cards */
