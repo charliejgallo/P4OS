@@ -6,8 +6,11 @@ packs de arte, su página del portal, sus idiomas y sus módulos. Con fuentes
 de terceros: cualquiera puede publicar un catálogo en su propio repo y quien
 quiera lo agrega en su placa, sabiendo lo que hace.
 
-**Estado (2026-11-20): fase 0 escrita y probada en la Mac; falta medirla en
-la placa** (abajo, "Fase 0"). Se trabaja en la rama `tienda` (worktree
+**Estado (2026-11-20): fase 0 escrita, probada en la Mac y medida en la
+placa en lo que no pide internet ni al usuario** (abajo, "Fase 0"): el
+chequeo de símbolos, instalar y quitar en caliente y la bajada a la
+tarjeta andan. Falta TLS contra GitHub de verdad, un corte del Wi-Fi y un
+reinicio a mitad de bajada. Se trabaja en la rama `tienda` (worktree
 `.claude/worktrees/tienda`, como se hizo con `ethernet`) y se mergea a
 `main` cuando esté probada en la placa. Este documento es el plan; lo que
 se vaya midiendo se anota acá, como en [ETHERNET.md](ETHERNET.md).
@@ -40,7 +43,7 @@ sale de archivos estáticos en releases de GitHub.
 | GitHub, visto el 2026-11-20 | `releases/latest/download/<archivo>` contesta 302 a `github.com/.../download/<tag>/...`, y ese otro 302 a `release-assets.githubusercontent.com`, que entrega con `Range` (206) aunque el pedido sea HTTP/1.0. Dos redirecciones, dos hosts, dos handshakes (1,6-1,8 s cada uno en la placa) |
 | Los certificados | `github.com` cuelga de USERTrust ECC y los de descarga de ISRG Root X1: los dos están en el bundle común que ya lleva el firmware. No hay que cambiar el bundle |
 | La API de GitHub | 60 pedidos por hora por IP sin token, y un JSON enorme por release. **No se usa** |
-| Bajada por Wi-Fi | ~1,2 MB/s medido (`/api/fs/get`): Monster Hop, medio minuto; todos los `.so`, 10 s |
+| Bajada por Wi-Fi | **~0,44 MB/s hacia la placa**, medido con `aos_fetch` (abajo): Monster Hop, un minuto y medio; todos los `.so`, 25 s. Los 1,2 MB/s de `/api/fs/get` son de la placa hacia afuera |
 | Compatibilidad | `AOS_ABI_VERSION` 100 fijo, pero la tabla de símbolos crece con cada firmware: un `.so` nuevo puede pedir un símbolo que un firmware viejo no tiene, y hoy eso falla recién al cargarlo |
 | Versiones | Las apps **no tienen versión**: el descriptor trae id, nombre, ícono, colores, banderas y orden |
 | El ícono | Un blob AIC de hasta 512 B dentro del `.so`: entra en el catálogo, así la Tienda dibuja el ícono sin bajar la app |
@@ -296,19 +299,50 @@ poner un tag.
 - El firmware `rev1_3` de la rama compila sin avisos: 6 963 184 bytes de
   los 8 323 072 de la ranura.
 
-**No probado todavía** (el simulador no carga `.so`): el chequeo de
-símbolos y el instalar y quitar en caliente corren sólo en la placa.
+**Medido en la placa (2026-11-20)**, con el firmware de la rama
+(`v0.29.0-2-g1d585ba`, por OTA, confirmado; contra lo que corría, `3b52992`,
+sólo cambia lo de esta fase):
 
-**Lo que falta, en la placa** (hay que instalarle el firmware de la rama):
+- **El chequeo de símbolos:** los 60 `.so` de la tarjeta (11,3 MB) dan
+  bien. 10 ms cada uno de mediana, 20 ms el más lento (`rf.so`), 634 ms los
+  60. Con copias adulteradas de `hello_app.so`: un símbolo renombrado lo
+  nombra (`lv_label_creatX`); algo que no es ELF, un ELF de otro chip, el
+  ABI sin float, el archivo cortado a la mitad y una tabla de secciones
+  fuera del archivo se rechazan, cada uno con su motivo.
+- **En caliente:** `hello_app.so` veinte vueltas, 195 ms quitar y 207 ms
+  poner, la PSRAM libre dentro de ±240 bytes y la RAM interna igual. Doom
+  veinte (303 ms poner), `python.so` diez con sus 8 apps (1,5 s quitar,
+  1,8 s poner), CAS seis (806 ms), Monster Hop diez (228 ms). 95 apps
+  registradas antes y después; tras las 66 vueltas la PSRAM libre quedó
+  812 bytes abajo de donde empezó. `menu.txt` no se toca: quitar y poner
+  no escribe el orden del inicio. **D6 queda confirmada** para el caso
+  simple.
+- **La bajada:** 37 202 325 bytes desde el GitHub falso en la Mac (http,
+  dos redirecciones, tres conexiones): 85,8 s, de los que 3,2 s son leer
+  el archivo de vuelta para el hash (11,6 MB/s) y 0,2 s conectar. **441
+  KB/s** mientras fluye. RAM interna: 888 bytes menos en el punto más
+  bajo. LVGL a 66 fps antes y durante (el inicio quieto); la carga de los
+  núcleos pasa de 17 % y 6 % a 26 % y 14 %. **D11 confirmada:** no cuesta
+  RAM interna.
+- **Cancelar y seguir:** cancelada a los 16 MB y pedida otra vez, siguió
+  desde el `.part`; el servidor mandó exactamente los 21 228 405 bytes que
+  faltaban y el hash dio bien.
+- **La velocidad es la del enlace, no la de este código:** el mismo
+  archivo subido por el portal (`PUT /api/fs/put`) entra a 391 KB/s. La
+  placa recibe a ~0,4 MB/s (ventana TCP de 23 040 bytes, el C6 por SDIO);
+  subir eso es un trabajo aparte del firmware, y a la Tienda le sirve: a
+  esta velocidad los 110 MB de packs son cuatro minutos.
 
-| Qué | Cómo | Qué se anota |
+**Lo que falta medir:**
+
+| Qué | Por qué no se hizo | Qué se anota |
 |---|---|---|
-| Bajada con la interfaz viva | `tools/fake_github.py --bind <la Mac>` y `tools/store_probe.py <placa> fetch ...` con un pack de 37 MB, usando la placa mientras baja | KB/s, RAM interna mínima, si la pantalla se traba |
-| Lo mismo contra GitHub de verdad | un archivo de la release (`lang.zip`, después un pack) a `/store-test/` | los dos handshakes, la velocidad real, que el bundle alcanza |
-| Un corte de la red | apagar y prender el Wi-Fi desde el centro de control a mitad de una bajada | que siga sola desde donde iba |
-| Un reinicio a mitad | reiniciar la placa bajando, y pedir lo mismo otra vez | que el `.part` sirva: viaja sólo el resto |
-| El chequeo de símbolos | `store_probe.py <placa> check <x>.so` sobre los 60 `.so` de la tarjeta | que todos den bien, y cuánto tarda |
-| En caliente | `store_probe.py <placa> hot hello_app.so`, después un juego pesado | PSRAM libre vuelta a vuelta, y que la app abra después |
+| TLS contra GitHub de verdad | es salir a internet desde la placa: espera el sí del usuario | los dos handshakes, la velocidad real, que el bundle alcanza |
+| Un corte de la red | hay que apagar y prender el Wi-Fi en la placa, a mano | que siga sola desde donde iba |
+| Un reinicio a mitad de bajada | reiniciar la placa pide el sí del usuario | que el `.part` sirva tras el arranque |
+| Usar la placa mientras baja | lo ve el usuario | si algo se traba con una app pesada al frente |
+| Abrir una app recién puesta en caliente | es abrir una app en su pantalla | que arranque, y que una que estaba abierta se cierre bien al quitarla |
+| Reemplazar el archivo entre quitar y poner | falta un `.so` de otra versión | que corra el código nuevo |
 
 ## Roadmap
 

@@ -32,10 +32,23 @@ For the fetch, against the make-believe GitHub on this machine:
 import argparse
 import json
 import os
+import socket
 import sys
 import time
 import urllib.error
 import urllib.request
+
+
+def ipv4(board):
+    """The board's address, looked up once: p4os.local answers no AAAA, and
+    urllib waits five seconds for one on every call (curl -4 is the same
+    story in the shell scripts)."""
+    host, _, port = board.partition(":")
+    try:
+        host = socket.gethostbyname(host)
+    except OSError:
+        pass
+    return host + (":" + port if port else "")
 
 
 def call(board, method, path, body=None, timeout=15):
@@ -134,6 +147,7 @@ def main():
     h.add_argument("--times", type=int, default=20)
     h.set_defaults(fn=hot)
     a = ap.parse_args()
+    a.board = ipv4(a.board)
     a.fn(a)
 
 
