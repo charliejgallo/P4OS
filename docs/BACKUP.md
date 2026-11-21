@@ -6,6 +6,8 @@ list of the apps the Store installed with their extras, and the two small
 files that say how the card is arranged (`menu.txt`, `modules.txt`). The
 apps themselves are not copied: the Store brings them back from that list.
 
+<img src="img/app-backup.png" width="240" alt="Settings, Backup: Back up now, Back up everything sealed, the switch of the copy a day and the passphrase for the automatic copies"> <img src="img/app-backup-drive.png" width="240" alt="Further down: the backups on the card, each with why it was made, and the pendrive's two actions">
+
 Since 0.31. `components/aos_backup`; the plan, with what comes next (a
 server of your own), is
 [docs/plan/RESPALDO.md](plan/RESPALDO.md), in Spanish.

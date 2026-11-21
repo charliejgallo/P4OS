@@ -1203,7 +1203,9 @@ Language, Date and time, Update, Backup, Diagnostics, About and Developer.
   installed on a tap (since 0.30); both slots, and going back.
 - **Backup:** the preferences, the list of apps and the home screen's
   order in one file on the card, plain or sealed with a passphrase, and
-  back ([docs/BACKUP.md](docs/BACKUP.md)).
+  back. A copy a day and one before each firmware by itself, the card's
+  data folders to a pendrive, and a new board that offers the backup on
+  its card ([docs/BACKUP.md](docs/BACKUP.md)).
 - **Diagnostics:** chip temperature, CPU, memory, the reset reason, safe mode,
   the hang watchdog's restarts, the C6's firmware, and the crash dump.
 - **About:** the portal's addresses, with a QR code for the phone.
