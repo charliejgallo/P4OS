@@ -455,6 +455,20 @@ static uintptr_t resolver(const char *name)
     return addr;
 }
 
+/* Where the next app goes: a slot an unload left free (an app taken off or
+ * replaced while the board runs, docs/plan/TIENDA.md), or the next new one.
+ * -1 when the table is full. At boot there are no holes, so the scan fills
+ * the table in order as it always did. */
+static int slot_free_at(void)
+{
+    for (int i = 0; i < s_count; i++) {
+        if (!s_apps[i].in_use) {
+            return i;
+        }
+    }
+    return s_count < MAX_DYNAPPS ? s_count : -1;
+}
+
 static dynapp_t *find_by_id(const char *id)
 {
     for (int i = 0; i < s_count; i++) {
@@ -849,11 +863,12 @@ static struct {
 static bool register_one(const char *filename, uint16_t index, const aos_app_desc_t *d,
                          const uint8_t *aic, size_t aic_len, bool *locked, int *in_batch)
 {
-    if (s_count >= MAX_DYNAPPS) {
+    int at = slot_free_at();
+    if (at < 0) {
         ESP_LOGE(TAG, "%s app %u does not fit: the limit is %d", filename, (unsigned)index, MAX_DYNAPPS);
         return false;
     }
-    dynapp_t *slot = &s_apps[s_count];
+    dynapp_t *slot = &s_apps[at];
     memset(slot, 0, sizeof(*slot));
     snprintf(slot->file, sizeof(slot->file), "%s", filename);
     snprintf(slot->id,   sizeof(slot->id),   "%s", d->id   ? d->id   : filename);
@@ -878,7 +893,7 @@ static bool register_one(const char *filename, uint16_t index, const aos_app_des
     if (aic && aic_len) aos_icon_set_ops(&stub, aic, aic_len);
 
     slot->in_use = true;
-    s_count++;
+    if (at == s_count) s_count++;
 
     int64_t t;
     if (!*locked) {
@@ -902,7 +917,7 @@ static bool register_one(const char *filename, uint16_t index, const aos_app_des
          * names the file, which is what tells you which .so to look at. */
         ESP_LOGE(TAG, "%s[%u] -> %s was refused by the launcher", filename, (unsigned)index, slot->id);
         slot->in_use = false;
-        s_count--;
+        if (at == s_count - 1) s_count--;
         return false;
     }
     ESP_LOGD(TAG, "registered %s[%u] -> %s (%s)", filename, (unsigned)index, slot->id, slot->name);
@@ -912,7 +927,7 @@ static bool register_one(const char *filename, uint16_t index, const aos_app_des
 static int register_apps(const char *filename, bool first_only, uint32_t *total)
 {
     *total = 0;
-    if (s_count >= MAX_DYNAPPS) {
+    if (slot_free_at() < 0) {
         ESP_LOGE(TAG, "%s does not fit: the limit is %d dynamic apps and there are "
                       "already %d. Raise MAX_DYNAPPS or take a .so off the card",
                  filename, MAX_DYNAPPS, s_count);
@@ -947,7 +962,7 @@ static int register_apps(const char *filename, bool first_only, uint32_t *total)
     int in_batch = 0;
 
     for (uint32_t i = from; i < to; i++) {
-        if (s_count >= MAX_DYNAPPS) {
+        if (slot_free_at() < 0) {
             ESP_LOGE(TAG, "%s app %u does not fit: the limit is %d",
                      filename, (unsigned)i, MAX_DYNAPPS);
             break;
@@ -982,6 +997,14 @@ bool aos_dynapp_load(const char *filename)
     if (!filename) {
         return false;
     }
+    /* after boot: a module arriving twice would be in the launcher twice */
+    for (int i = 0; i < s_count; i++) {
+        if (s_apps[i].in_use && strcmp(s_apps[i].file, filename) == 0) {
+            ESP_LOGW(TAG, "%s is already registered (%s): unload it first", filename, s_apps[i].id);
+            return false;
+        }
+    }
+    sym_index_build();
     /* One module arriving after boot: all of its apps, in the same two steps
      * as the scan. */
     uint32_t total = 0;
@@ -1088,6 +1111,184 @@ bool aos_dynapp_unload(const char *app_id)
     return ok;
 }
 
+
+int aos_dynapp_unload_file(const char *filename)
+{
+    if (!filename) {
+        return 0;
+    }
+    /* the ids first: unloading moves nothing in the table, but a module's
+     * apps are let go one by one and the last one takes the code with it */
+    int n = 0;
+    for (int i = 0; i < s_count; i++) {
+        if (s_apps[i].in_use && strcmp(s_apps[i].file, filename) == 0) {
+            char id[sizeof(s_apps[i].id)];
+            snprintf(id, sizeof(id), "%s", s_apps[i].id);
+            if (aos_dynapp_unload(id)) {
+                n++;
+            }
+        }
+    }
+    if (n) {
+        ESP_LOGI(TAG, "%s: %d app%s taken off | PSRAM: free %u KB, largest block %u KB", filename, n,
+                 n == 1 ? "" : "s", (unsigned)(heap_caps_get_free_size(MALLOC_CAP_SPIRAM) / 1024),
+                 (unsigned)(heap_caps_get_largest_free_block(MALLOC_CAP_SPIRAM) / 1024));
+    }
+    return n;
+}
+
+/* --------------------------------------------------------------------------
+ * Would this .so load here? (docs/plan/TIENDA.md, D5)
+ *
+ * An app built against a newer firmware may ask for a symbol this one does
+ * not export, and until now that was found out by dlopen() failing - after
+ * the file had replaced the one that worked. This reads the file's dynamic
+ * symbol table and asks the same resolver the loader asks, without loading
+ * anything and without running a line of the app's code, so a download can
+ * be refused while the old version is still in its place.
+ *
+ * The file may come from anywhere: every offset and size is checked against
+ * the file's length before it is used.
+ * -------------------------------------------------------------------------- */
+#define CHK_EM_RISCV        243
+#define CHK_SHT_DYNSYM      11
+#define CHK_FLOAT_ABI_MASK  0x0006u
+#define CHK_FLOAT_ABI_SINGLE 0x0002u    /* ilp32f, the firmware's */
+#define CHK_TABLE_MAX       (2u * 1024 * 1024)
+
+typedef struct {
+    uint8_t  ident[16];
+    uint16_t type, machine;
+    uint32_t version, entry, phoff, shoff, flags;
+    uint16_t ehsize, phentsize, phnum, shentsize, shnum, shstrndx;
+} chk_ehdr_t;
+
+typedef struct {
+    uint32_t name, type, flags, addr, offset, size, link, info, addralign, entsize;
+} chk_shdr_t;
+
+typedef struct {
+    uint32_t name, value, size;
+    uint8_t  info, other;
+    uint16_t shndx;
+} chk_sym_t;
+
+static void *chk_read(FILE *f, uint32_t off, uint32_t size, uint32_t flen)
+{
+    if (!size || size > CHK_TABLE_MAX || off > flen || size > flen - off) {
+        return NULL;
+    }
+    void *p = heap_caps_malloc(size + 1, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    if (p && (fseek(f, (long)off, SEEK_SET) != 0 || fread(p, 1, size, f) != size)) {
+        free(p);
+        p = NULL;
+    }
+    if (p) {
+        ((char *)p)[size] = 0;
+    }
+    return p;
+}
+
+int aos_dynapp_check(const char *path, char *missing, size_t missing_len)
+{
+    if (missing && missing_len) {
+        missing[0] = 0;
+    }
+    FILE *f = path ? fopen(path, "rb") : NULL;
+    if (!f) {
+        return -1;
+    }
+    int result = -1;
+    chk_shdr_t *sh = NULL;
+    chk_sym_t *syms = NULL;
+    char *str = NULL;
+    chk_ehdr_t eh;
+    fseek(f, 0, SEEK_END);
+    uint32_t flen = (uint32_t)ftell(f);
+    fseek(f, 0, SEEK_SET);
+
+    if (fread(&eh, 1, sizeof(eh), f) != sizeof(eh) || memcmp(eh.ident, "\177ELF", 4) != 0 ||
+        eh.ident[4] != 1 /* 32 bits */ || eh.ident[5] != 1 /* little endian */ || eh.machine != CHK_EM_RISCV) {
+        if (missing) snprintf(missing, missing_len, "not an ESP32-P4 module");
+        goto out;
+    }
+    if ((eh.flags & CHK_FLOAT_ABI_MASK) != CHK_FLOAT_ABI_SINGLE) {
+        if (missing) snprintf(missing, missing_len, "not built for this firmware's float ABI");
+        goto out;
+    }
+    if (eh.shentsize != sizeof(chk_shdr_t) || !eh.shnum || eh.shnum > 4096) {
+        if (missing) snprintf(missing, missing_len, "no section table");
+        goto out;
+    }
+    sh = chk_read(f, eh.shoff, (uint32_t)eh.shnum * sizeof(chk_shdr_t), flen);
+    if (!sh) {
+        if (missing) snprintf(missing, missing_len, "its section table is cut short");
+        goto out;
+    }
+    const chk_shdr_t *dyn = NULL;
+    for (int i = 0; i < eh.shnum && !dyn; i++) {
+        if (sh[i].type == CHK_SHT_DYNSYM) {
+            dyn = &sh[i];
+        }
+    }
+    if (!dyn || dyn->link >= eh.shnum || dyn->size < sizeof(chk_sym_t)) {
+        if (missing) snprintf(missing, missing_len, "no dynamic symbols");
+        goto out;
+    }
+    uint32_t nsym = dyn->size / sizeof(chk_sym_t);
+    uint32_t strsz = sh[dyn->link].size;
+    syms = chk_read(f, dyn->offset, nsym * sizeof(chk_sym_t), flen);
+    str  = chk_read(f, sh[dyn->link].offset, strsz, flen);
+    if (!syms || !str) {
+        if (missing) snprintf(missing, missing_len, "its symbol table is cut short");
+        goto out;
+    }
+
+    sym_index_build();
+    bool has_abi = false, has_init = false;
+    size_t w = 0;
+    result = 0;
+    for (uint32_t i = 1; i < nsym; i++) {
+        if (syms[i].name >= strsz) {
+            continue;
+        }
+        const char *name = str + syms[i].name;
+        if (!name[0]) {
+            continue;
+        }
+        if (syms[i].shndx != 0) {           /* defined here */
+            has_abi  = has_abi  || strcmp(name, "aos_app_abi") == 0;
+            has_init = has_init || strcmp(name, "aos_app_init") == 0;
+            continue;
+        }
+        if ((syms[i].info >> 4) != 1) {     /* only a GLOBAL one must be found; a WEAK one may stay empty */
+            continue;
+        }
+        if (resolver(name)) {
+            continue;
+        }
+        result++;
+        if (missing && w + 1 < missing_len) {
+            w += (size_t)snprintf(missing + w, missing_len - w, "%s%s", w ? " " : "", name);
+            if (w >= missing_len) {
+                w = missing_len - 1;
+            }
+        }
+    }
+    if (result == 0 && !(has_abi && has_init)) {
+        /* a module an app loads itself (aos_hal_module_open) has neither,
+         * and is fine: the caller knows which of the two it asked about */
+        result = -2;
+        if (missing) snprintf(missing, missing_len, "not an app: no aos_app_abi/aos_app_init");
+    }
+
+out:
+    free(sh);
+    free(syms);
+    free(str);
+    fclose(f);
+    return result;
+}
 
 /* Which modules are still loaded and how much executable memory they hold.
  *

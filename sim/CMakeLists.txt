@@ -182,6 +182,7 @@ add_executable(p4os_sim
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_bench.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_radio.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_live.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_store.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_live.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_net.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_eth.c
@@ -217,6 +218,7 @@ add_executable(p4os_sim
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_tcp.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_ws.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_tls.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_fetch.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_crypto.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_logring.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_radio.c

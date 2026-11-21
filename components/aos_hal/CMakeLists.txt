@@ -11,7 +11,7 @@ idf_component_register(
     SRCS "aos_hal_p4.c" "aos_hal_stubs.c" "aos_notif.c" "aos_device_name.c"
          "aos_net_p4.c" "aos_tcp.c" "aos_http.c" "aos_ws.c" "aos_logring.c" "aos_image_p4.c"
          "aos_audio_p4.c" "aos_audio.c" "aos_radio.c" "aos_aac_esp.c"
-         "aos_tls.c" "aos_crypto.c" "aos_nettools_p4.c"
+         "aos_tls.c" "aos_fetch.c" "aos_crypto.c" "aos_nettools_p4.c"
          "aos_stats.c" "aos_tasks_p4.c"
          "aos_jpeg_p4.c" "aos_h264.c"
          "aos_usb_p4.c" "aos_usb_net_p4.c" "aos_usb_hid_p4.c" "aos_usb_devs_p4.c" "aos_usb_midi_p4.c" "aos_usb_serial_p4.c" "aos_usb_uvc_p4.c" "aos_usb_uac_p4.c" "aos_usb_raw_p4.c" "aos_live.c" "aos_hid_keys.c"

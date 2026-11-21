@@ -6,10 +6,11 @@ packs de arte, su página del portal, sus idiomas y sus módulos. Con fuentes
 de terceros: cualquiera puede publicar un catálogo en su propio repo y quien
 quiera lo agrega en su placa, sabiendo lo que hace.
 
-**Estado (2026-11-20): diseño, sin código.** Se trabaja en la rama `tienda`
-(worktree `.claude/worktrees/tienda`, como se hizo con `ethernet`) y se
-mergea a `main` cuando esté probada en la placa. Este documento es el plan;
-lo que se vaya midiendo se anota acá, como en [ETHERNET.md](ETHERNET.md).
+**Estado (2026-11-20): fase 0 escrita y probada en la Mac; falta medirla en
+la placa** (abajo, "Fase 0"). Se trabaja en la rama `tienda` (worktree
+`.claude/worktrees/tienda`, como se hizo con `ethernet`) y se mergea a
+`main` cuando esté probada en la placa. Este documento es el plan; lo que
+se vaya midiendo se anota acá, como en [ETHERNET.md](ETHERNET.md).
 
 ## Qué resuelve
 
@@ -45,7 +46,7 @@ sale de archivos estáticos en releases de GitHub.
 | El ícono | Un blob AIC de hasta 512 B dentro del `.so`: entra en el catálogo, así la Tienda dibuja el ícono sin bajar la app |
 | La red de seguridad | Modo seguro (BOOT apretado: sin apps de la tarjeta), vigilante de cuelgues con volcado, sha-256 en el HAL (`aos_hal_sha256_*`), `.part` + renombrar al escribir |
 | Qué puede una app | Todo. Es código nativo dentro del firmware, sin protección de memoria (`docs/APPS-P4.md`). No hay permisos que mostrar ni que negar |
-| Descomprimir | No encontré un inflate en lo que el firmware usa hoy (a confirmar en la fase 0). Los paquetes van sin comprimir: son chicos y no lo necesitan |
+| Descomprimir | El firmware enlaza zlib (por libpng), así que un inflate hay; los paquetes van sin comprimir igual: son chicos, y así se leen sin tener el archivo entero en memoria |
 
 ## Decisiones
 
@@ -243,6 +244,71 @@ poner un tag.
    una instalación empezada) se limpia.
 7. **Lo que no se distribuye:** nada con copyright. Doom y Duke siguen
    como hoy, el motor sí y los datos los pone cada uno.
+
+## Fase 0: lo escrito, lo probado y lo que falta medir
+
+**Escrito (2026-11-20), en la rama:**
+
+- **`aos_fetch`** (`components/aos_hal/aos_fetch.c`, igual en la placa y en
+  el simulador, sobre `aos_tls.c`): un GET a un archivo de la tarjeta.
+  Sigue redirecciones entre hosts (nunca de https a http), escribe a
+  `<archivo>.part` en bloques de 64 KB desde un búfer que la tarjeta toma
+  directo, reanuda con `Range` lo que haya quedado, reintenta con espera
+  (hasta cinco veces seguidas sin un byte nuevo) **desde la dirección
+  original**, porque la firmada de GitHub vence, y al final lee el archivo
+  de vuelta para su sha-256: lo que se verifica es lo que quedó en la
+  tarjeta. Recién ahí le pone el nombre. Crea las carpetas que falten. Dos
+  a la vez como mucho. Todo en PSRAM, la pila también (8 KB).
+- **`aos_dynapp_check()`**: lee la tabla de símbolos dinámicos de un `.so`
+  y le pregunta al mismo resolvedor que usa el cargador, sin cargar nada
+  ni ejecutar una línea de la app. Dice cuántos símbolos faltan y cuáles,
+  y rechaza lo que no es RISC-V de 32 bits o no es `ilp32f`. Es el
+  segundo chequeo de D5.
+- **Instalar y quitar en caliente:** `aos_dynapp_unload_file()` (todas las
+  apps de un `.so`), `aos_dynapp_load()` ya no registra dos veces el mismo
+  archivo, y los lugares de la tabla que deja una app quitada se vuelven a
+  usar (antes se perdían: veinte vueltas la llenaban).
+- **Para medir, a mano:** `/api/store/fetch`, `/check`, `/load`, `/unload`
+  (`aos_portal_store.c`; el servicio de la fase 2 los reemplaza) y
+  `tools/store_probe.py`, que los maneja y saca los números.
+- **`tools/fake_github.py`**: las dos redirecciones, el segundo host, la
+  dirección firmada de ~1 KB, los 3 KB de cabeceras, `Range`, y lo que
+  sale mal a pedido (cortar a los N bytes, sin rangos, en chunks, 503,
+  firmas de un solo uso, un bucle, bajar de https a http, lento).
+
+**Probado en la Mac:**
+
+- `tests/fetch_host/run.sh`: 20 casos contra el GitHub falso, todos pasan.
+  La bajada entera con sus dos redirecciones; dos cortes con firmas de un
+  solo uso (nueve conexiones: cada reintento vuelve a la primera
+  dirección); cancelar y seguir (viaja sólo el resto, contado del lado del
+  servidor); un servidor sin rangos; chunks; un `.part` más largo que el
+  archivo y uno de otro archivo (lo rechaza el hash y el intento
+  siguiente sale limpio); tamaño distinto; 404 sin reintentos; 503 que
+  pasa; bucle de redirecciones; archivo vacío; carpetas nuevas; y por TLS
+  con una autoridad de prueba: todo https, la bajada a http rechazada,
+  un certificado de nadie (sin reintentos) y la placa sin hora (reintenta
+  y se rinde diciendo por qué).
+- Por el portal del simulador (`sim/build-tienda`, puerto propio): 5 MB con
+  dos cortes y firmas de un solo uso, idéntico al original; cancelado a
+  los 2 MB y terminado después con los 2,5 MB que ya estaban; un hash malo
+  no deja archivo.
+- El firmware `rev1_3` de la rama compila sin avisos: 6 963 184 bytes de
+  los 8 323 072 de la ranura.
+
+**No probado todavía** (el simulador no carga `.so`): el chequeo de
+símbolos y el instalar y quitar en caliente corren sólo en la placa.
+
+**Lo que falta, en la placa** (hay que instalarle el firmware de la rama):
+
+| Qué | Cómo | Qué se anota |
+|---|---|---|
+| Bajada con la interfaz viva | `tools/fake_github.py --bind <la Mac>` y `tools/store_probe.py <placa> fetch ...` con un pack de 37 MB, usando la placa mientras baja | KB/s, RAM interna mínima, si la pantalla se traba |
+| Lo mismo contra GitHub de verdad | un archivo de la release (`lang.zip`, después un pack) a `/store-test/` | los dos handshakes, la velocidad real, que el bundle alcanza |
+| Un corte de la red | apagar y prender el Wi-Fi desde el centro de control a mitad de una bajada | que siga sola desde donde iba |
+| Un reinicio a mitad | reiniciar la placa bajando, y pedir lo mismo otra vez | que el `.part` sirva: viaja sólo el resto |
+| El chequeo de símbolos | `store_probe.py <placa> check <x>.so` sobre los 60 `.so` de la tarjeta | que todos den bien, y cuánto tarda |
+| En caliente | `store_probe.py <placa> hot hello_app.so`, después un juego pesado | PSRAM libre vuelta a vuelta, y que la app abra después |
 
 ## Roadmap
 
