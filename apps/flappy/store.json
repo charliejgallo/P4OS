@@ -4,6 +4,10 @@
   "es": "Un pájaro, caños y un solo toque para aletear.",
   "en": "A bird, pipes and one tap to flap."
  },
+ "desc": {
+  "es": "Cada toque en cualquier parte de la pantalla hace aletear al pájaro, que sube un poco y vuelve a caer. Hay que pasarlo por el hueco entre los caños, que llegan desde la derecha a alturas distintas; cada caño que queda atrás suma un punto y suena un pitido. Tocar un caño o el piso termina la partida.\n\nEl récord queda guardado en la placa y la pantalla del final avisa cuando lo superás. Se juega con la placa parada. Con un joystick USB, A aletea, empieza y vuelve a jugar, y START pausa en pleno vuelo.",
+  "en": "Every tap anywhere on the screen makes the bird flap: it rises a little and falls again. Steer it through the gap between the pipes, which come in from the right at different heights; each pipe left behind is a point and a beep. Touching a pipe or the ground ends the game.\n\nThe best score is kept on the board, and the last screen says when you beat it. It plays upright. With a USB gamepad, A flaps, starts and plays again, and START pauses in mid-flight."
+ },
  "shots": [
   "app-flappy.png",
   "app-flappy-play.png",

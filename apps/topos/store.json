@@ -4,6 +4,10 @@
   "es": "Pegale a los topos antes de que se escondan; el de casco aguanta dos golpes.",
   "en": "Whack the moles before they duck; the one in a hard hat takes two."
  },
+ "desc": {
+  "es": "Los topos salen de los pozos del pasto y hay que tocarlos antes de que se vuelvan a meter. El toque cuenta apenas apoyás el dedo. El de casco necesita dos golpes, el primero le vuela el casco; el dorado vale mucho; la bomba no hay que tocarla. Golpear varios seguidos multiplica los puntos, y un toque en un pozo vacío corta la racha.\n\nHay tres modos: Clásico, de 60 segundos; Supervivencia, con tres vidas que se pierden con cada topo que escapa o cada bomba; y Frenesí, 30 segundos a fondo. La dificultad sube con el reloj o con el nivel: más topos a la vez, más cascos y más bombas. Cada modo guarda su récord.\n\nCon la placa parada el pasto tiene quince pozos y acostada, diez; girarla deja la partida en pausa. Con un joystick USB, la cruz mueve un marco sobre los pozos, A o B golpean y START pausa.",
+  "en": "Moles pop out of the holes in the lawn and you tap them before they duck back in. A tap counts the moment the finger lands. The one in a hard hat takes two hits, the first knocks the hat off; the golden one is worth a lot; the bomb must not be touched. Several in a row multiply the points, and a tap on an empty hole breaks the streak.\n\nThere are three modes: Classic, 60 seconds; Survival, with three lives lost to each mole that gets away or each bomb; and Frenzy, 30 seconds flat out. The difficulty climbs with the clock or the level: more moles at once, more hard hats and more bombs. Each mode keeps its best score.\n\nWith the board upright the lawn has fifteen holes, lying down ten; turning it leaves the game paused. With a USB gamepad the D-pad moves a frame over the holes, A or B whacks and START pauses."
+ },
  "shots": [
   "app-topos.png",
   "app-topos-classic.png",

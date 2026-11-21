@@ -4,6 +4,10 @@
   "es": "Repetí la secuencia de luces y sonidos, cada vez más larga.",
   "en": "Repeat the sequence of lights and sounds, longer each time."
  },
+ "desc": {
+  "es": "Cuatro botones de colores, verde, rojo, amarillo y azul, cada uno con su nota. Tocá el centro para empezar: la placa toca una secuencia, mirá y escuchá, y después repetila tocando los botones en el mismo orden. Cada acierto suma un paso y la secuencia va un poco más rápido; un error termina la partida y te dice en qué paso fallaste.\n\nDos tarjetas muestran el paso actual y el récord, que queda guardado en la placa. Se juega con la placa parada o acostada, y girarla no corta la partida. Con un joystick USB, las cuatro direcciones son los cuatro botones, en el sentido de las agujas del reloj desde el verde de arriba a la izquierda (arriba es verde), y A o START empiezan.",
+  "en": "Four coloured pads, green, red, yellow and blue, each with its own note. Tap the centre to start: the board plays a sequence, you watch and listen, then repeat it by tapping the pads in the same order. Each success adds a step and the sequence gets a little faster; a mistake ends the game and tells you which step you missed.\n\nTwo cards show the current step and the best, which is kept on the board. It plays with the board upright or lying down, and turning it does not stop the game. With a USB gamepad the four directions are the four pads, clockwise from the green one at the top left (up is green), and A or START starts."
+ },
  "shots": [
   "app-simon.png",
   "app-simon-sequence.png",
