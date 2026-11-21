@@ -79,9 +79,15 @@ COMMON=$(common)
 apps=$(list "$shard" "$shards")
 echo "share $shard of $shards: $(echo $apps | wc -w | tr -d ' ') apps; built against $COMMON"
 
+# Each app's hash is taken ONCE, here, from the tree as it was checked out:
+# building touches tracked files (the component manager rewrites an app's
+# dependencies.lock), and a hash taken afterwards is another one - the first
+# version of this kept every app under a name the next run never asked for.
+hashes=$(mktemp)
 build=""
 for a in $apps; do
     h=$(app_hash "$a")
+    echo "$a $h" >> "$hashes"
     kept="$cache/$a/$h"
     if [ -n "$cache" ] && ls "$kept"/*.so >/dev/null 2>&1; then
         mkdir -p "apps/$a/build"
@@ -116,7 +122,7 @@ rc=0
 for a in $build; do
     if tools/build_apps.sh "$a"; then
         [ -n "$cache" ] || continue
-        h=$(app_hash "$a")
+        h=$(awk -v a="$a" '$1 == a { print $2 }' "$hashes")
         # the workflow keeps the cache only when something new went into it
         [ -n "$GITHUB_OUTPUT" ] && echo "built=true" >> "$GITHUB_OUTPUT"
         # one copy an app: the one of these sources
