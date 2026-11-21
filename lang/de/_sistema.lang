@@ -10769,3 +10769,22 @@ sin fecha	ohne Datum
 Tocar uno lo restaura: escribe sus ajustes sobre los de ahora, y lo que hay queda antes en un respaldo propio. Para guardarlo en una computadora o traer uno: el portal, Respaldo.	Antippen stellt sie wieder her: Ihre Einstellungen überschreiben die jetzigen, und das Vorhandene wird vorher in einer eigenen Sicherung abgelegt. Auf einem Computer aufbewahren oder eine holen: Portal, Sicherung.
 ya hay un respaldo en curso	es läuft bereits eine Sicherung
 falta name, o ya hay un respaldo en curso	name fehlt, oder es läuft bereits eine Sicherung
+preparando la clave…	Schlüssel wird vorbereitet…
+Cifrar	Verschlüsseln
+Tocá otra vez: las copias vuelven a ir sin contraseñas	Nochmal tippen: die Kopien gehen wieder ohne Passwörter
+Una frase para las copias automáticas	Eine Passphrase für die automatischen Kopien
+COPIAS AUTOMÁTICAS	AUTOMATISCHE KOPIEN
+Una copia por día	Eine Kopie pro Tag
+Sacarles la frase	Passphrase entfernen
+Cifrarlas con una frase…	Mit einer Passphrase verschlüsseln…
+Si algo cambió, la placa guarda una copia por día en la tarjeta, y otra antes de instalar un firmware. Quedan las cinco últimas. Van cifradas con tu frase y llevan todo.	Wenn sich etwas geändert hat, legt das Board täglich eine Kopie auf der Karte ab, und eine weitere vor der Installation einer Firmware. Die letzten fünf bleiben. Sie sind mit deiner Passphrase verschlüsselt und enthalten alles.
+Si algo cambió, la placa guarda una copia por día en la tarjeta, y otra antes de instalar un firmware. Quedan las cinco últimas. Sin frase no llevan contraseñas; con una frase llevan todo, cifrado.	Wenn sich etwas geändert hat, legt das Board täglich eine Kopie auf der Karte ab, und eine weitere vor der Installation einer Firmware. Die letzten fünf bleiben. Ohne Passphrase enthalten sie keine Passwörter; mit einer enthalten sie alles, verschlüsselt.
+  ·  del día	  ·  vom Tag
+  ·  de antes de actualizar	  ·  von vor einem Update
+Hay un respaldo en la tarjeta	Auf der Karte liegt eine Sicherung
+Del %s, de «%.30s» con P4OS %.20s: %d ajustes y %d apps.	Vom %s, von „%.30s“ mit P4OS %.20s: %d Einstellungen und %d Apps.
+Está cifrado: pide su frase.	Sie ist verschlüsselt: die Passphrase wird verlangt.
+No lleva contraseñas: la de la Wi-Fi se escribe de nuevo.	Sie enthält keine Passwörter: das WLAN-Passwort wird neu eingegeben.
+Queda en Ajustes, Respaldo, con los demás que haya.	Sie bleibt unter Einstellungen, Sicherung, bei den anderen.
+Ahora no	Jetzt nicht
+Ver respaldos	Sicherungen ansehen

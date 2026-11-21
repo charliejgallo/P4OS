@@ -18,6 +18,14 @@
   - **The apps come back from the Store:** after a restore the screen
     offers to ask it for the ones the card lacks, with their extras.
   - The portal downloads a backup to the computer and brings one back.
+  - **Copies it makes by itself:** one a day when a preference changed,
+    and one before a firmware is installed; the card keeps the last five.
+    Plain until a passphrase is chosen for them at the board, sealed from
+    then on.
+  - **A new board with a backup on its card says so,** once, before
+    anything is set up by hand.
+  - `tools/backup.sh` keeps a backup, and chosen folders of the card, on a
+    computer.
   - On the board: a plain backup in half a second and a sealed one in
     four, with 427 preferences; a sealed one made and restored at the
     screen.

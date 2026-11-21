@@ -7,6 +7,11 @@
  *   list            the backups on the card, a line each
  *   missing=<name>  the apps it lists that the card does not have
  *   bg-make         through the module's thread, waited for
+ *   auto            the day's copy, when one is needed     fw   the one before a firmware
+ *   key=<passphrase>  seals the automatic copies from now on (key= takes it off)
+ *   offer           whether this board would be offered a backup, and which
+ *   offer-done      the person answered
+ *   bg-fw           the copy before a firmware, as the update calls it
  *
  * A job prints "ok|FAILED kind=<n> <a line>".
  */
@@ -35,11 +40,11 @@ int main(int argc, char **argv)
             int rc = aos_backup_restore_now(v ? v : "", pass, &written, why, sizeof why);
             printf("%s kind=%d written=%d %s\n", rc ? "FAILED" : "ok", rc, written, why);
         } else if (!strcmp(a, "list")) {
-            static aos_backup_info_t all[16];
-            int n = aos_backup_list(all, 16);
+            static aos_backup_info_t all[40];
+            int n = aos_backup_list(all, 40);
             for (int k = 0; k < n; k++)
-                printf("backup %s made=%u fw=%s sealed=%d before=%d prefs=%d left_out=%d apps=%d\n", all[k].name, (unsigned)all[k].made,
-                       all[k].fw, all[k].sealed, all[k].before, all[k].prefs, all[k].left_out, all[k].apps);
+                printf("backup %s made=%u fw=%s sealed=%d before=%d prefs=%d left_out=%d apps=%d why=%d\n", all[k].name, (unsigned)all[k].made,
+                       all[k].fw, all[k].sealed, all[k].before, all[k].prefs, all[k].left_out, all[k].apps, all[k].why);
         } else if (!strcmp(a, "missing")) {
             static aos_backup_app_t apps[32];
             int n = aos_backup_missing_apps(v ? v : "", apps, 32);
@@ -51,6 +56,24 @@ int main(int argc, char **argv)
             do { aos_hal_sleep_ms(20); aos_backup_status(&st); } while (st.busy);
             printf("%s kind=%d started=%d twice=%d %s\n", st.last_ok ? "ok" : "FAILED", st.last_kind, started, twice, st.last);
             if (st.last_ok) printf("made %s\n", st.name);
+        } else if (!strcmp(a, "auto") || !strcmp(a, "fw")) {
+            bool made = false;
+            int rc = aos_backup_auto_now(a[0] == 'f' ? AOS_BACKUP_BEFORE_FW : AOS_BACKUP_DAILY, &made, why, sizeof why);
+            printf("%s kind=%d made=%d day=%u %s\n", rc ? "FAILED" : "ok", rc, made, (unsigned)aos_backup_auto_day(), why);
+        } else if (!strcmp(a, "key")) {
+            bool ok = aos_backup_auto_passphrase_now(v);
+            printf("%s kind=%d sealed=%d\n", ok ? "ok" : "FAILED", ok ? 0 : 1, aos_backup_auto_sealed());
+        } else if (!strcmp(a, "offer")) {
+            aos_backup_info_t one;
+            bool yes = aos_backup_offer(&one);
+            printf("offer %d %s\n", yes, yes ? one.name : "");
+        } else if (!strcmp(a, "offer-done")) {
+            aos_backup_offer_done();
+        } else if (!strcmp(a, "bg-fw")) {
+            aos_backup_status_t st;
+            aos_backup_before_firmware();
+            aos_backup_status(&st);
+            printf("%s kind=%d busy=%d job=%s %s\n", st.last_ok ? "ok" : "FAILED", st.last_kind, st.busy, st.last_job, st.last);
         } else {
             fprintf(stderr, "what is %s?\n", a);
             return 2;

@@ -5,7 +5,11 @@
  *   GET  /api/backup            the state: whether a job is running, how the
  *                               last one ended, and the backups on the card,
  *                               the newest first ({name, made, fw, board,
- *                               sealed, before, prefs, left_out, apps, size})
+ *                               sealed, before, why, prefs, left_out, apps,
+ *                               size}; "why" is "", "restore", "daily" or
+ *                               "firmware"), and "auto": {on, sealed, day},
+ *                               the copies the board makes by itself, which
+ *                               are set at the board only
  *   POST /api/backup            {"pass": "..."}: makes one now. Without a
  *                               passphrase it is plain and leaves out what
  *                               looks like a credential; with one, everything
@@ -64,6 +68,12 @@ static void state(aos_httpd_req_t *r, int status, const char *error)
     cJSON_AddStringToObject(o, "last_name", st.name);
     cJSON_AddNumberToObject(o, "written", st.written);
     cJSON_AddBoolToObject(o, "restart", st.restart);
+    /* the copies the board makes by itself: read here, changed at the board */
+    static const char *whys[] = { "", "restore", "daily", "firmware" };
+    cJSON *au = cJSON_AddObjectToObject(o, "auto");
+    cJSON_AddBoolToObject(au, "on", aos_backup_auto_on());
+    cJSON_AddBoolToObject(au, "sealed", aos_backup_auto_sealed());
+    cJSON_AddNumberToObject(au, "day", aos_backup_auto_day());
     cJSON *list = cJSON_AddArrayToObject(o, "backups");
     aos_backup_info_t *all = malloc(sizeof *all * LIST_MAX);
     int n = all ? aos_backup_list(all, LIST_MAX) : 0;
@@ -78,6 +88,7 @@ static void state(aos_httpd_req_t *r, int status, const char *error)
         cJSON_AddNumberToObject(b, "prefs", all[i].prefs);
         cJSON_AddNumberToObject(b, "left_out", all[i].left_out);
         cJSON_AddNumberToObject(b, "apps", all[i].apps);
+        cJSON_AddStringToObject(b, "why", whys[all[i].why >= 0 && all[i].why < 4 ? all[i].why : 0]);
         cJSON_AddNumberToObject(b, "size", all[i].size);
         cJSON_AddItemToArray(list, b);
     }

@@ -2690,7 +2690,13 @@ bool aos_hal_scan_status(aos_scan_status_t *out)
 
 aos_net_state_t aos_hal_net_state(void) { return AOS_NET_CONNECTED; }
 void aos_hal_net_low_latency(bool on) { (void)on; }   /* the desktop has no power save */
-const char *aos_hal_net_ssid(void)      { return "simulator"; }
+/* P4_SIM_SSID=: a board that knows no network (a new one, for the backup's
+ * offer); P4_SIM_SSID=casa for another name. */
+const char *aos_hal_net_ssid(void)
+{
+    const char *v = getenv("P4_SIM_SSID");
+    return v ? v : "simulator";
+}
 int         aos_hal_net_rssi(void)      { return -54; }
 const char *aos_hal_net_ip(void)        { return "127.0.0.1"; }
 aos_net_state_t aos_hal_net_wifi_state(void) { return AOS_NET_CONNECTED; }

@@ -26,7 +26,7 @@ out=$(mktemp -d)
 PORT=${PORT:-18690}
 
 cc -O1 -g -Wall -Wextra -Werror -DAOS_SIM -DAOS_STORE_ABI=100 \
-   -I"$P4/components/aos_hal/include" -I"$P4/components/aos_hal" -I"$P4/components/aos_store/include" \
+   -I"$P4/components/aos_hal/include" -I"$P4/components/aos_hal" -I"$P4/components/aos_store/include" -I"$P4/components/aos_backup/include" \
    -I"$CJ" -I"$MB/include" -o "$out/t" main.c fakes.c \
    "$P4/components/aos_store/aos_store.c" "$P4/components/aos_hal/aos_fetch.c" "$P4/components/aos_hal/aos_tls.c" \
    "$P4/components/aos_hal/aos_crypto.c" "$CJ/cJSON.c" -L"$MB/lib" -lmbedtls -lmbedx509 -lmbedcrypto -lpthread

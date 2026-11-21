@@ -6,8 +6,10 @@ cada app) y no hay nada que las guarde.
 
 **Dónde está (2026-11-21):** la etapa 1 está escrita, probada en la placa
 y en `main`; sale con la 0.31.0, que espera a las apps nuevas de la
-Tienda. Las etapas 2 a 4 (la copia diaria, el pendrive, el servidor
-propio) no están empezadas.
+Tienda. La etapa 2 (las copias que hace sola) y el script de la
+computadora de la etapa 3 están escritos y probados en la Mac y el
+simulador, en la rama `respaldo-2`, **sin instalar en la placa**. Faltan
+el pendrive (etapa 3) y el servidor propio (etapa 4).
 
 ## Etapa 1, hecha en la Mac (2026-11-21)
 
@@ -115,6 +117,65 @@ cambie algo a la vista (el de hoy escribió lo mismo que había). Y la
 prueba de la tabla de etapas: con la flash borrada, volver a los ajustes
 desde el archivo y que la Tienda ofrezca reinstalar. Esa borra la placa:
 sólo cuando el usuario lo diga.
+
+## Etapa 2, hecha en la Mac (2026-11-21)
+
+Rama `respaldo-2`. Lo que cambió respecto del plan está dicho en cada
+punto.
+
+- **Una copia por día, si algo cambió.** El plan pedía un contador de
+  escrituras; quedó una **suma de las preferencias** (FNV-1a de cada una,
+  sumadas, sin las que son de esta placa): no toca el HAL, sobrevive a un
+  reinicio y no depende del orden en que la flash las lista. El tick del
+  sistema mira una vez por minuto, pasados dos del arranque; el trabajo lo
+  hace el hilo del módulo. Un día sin cambios queda anotado sin archivo.
+  Sin reloj no hay copia: el día se sabe por la fecha.
+- **Antes de un firmware,** con la misma condición: desde el portal
+  (`PUT /api/ota`, que es también `tools/ota.sh`) y desde Ajustes →
+  Actualización. Se hace y se espera antes de escribir la imagen; diez
+  segundos como mucho, y la actualización sigue igual si no se pudo. Con
+  la condición de "si cambió", diez instalaciones en una tarde de
+  desarrollo no empujan afuera las copias de los días.
+- **Quedan cinco** automáticas (las del día y las de antes de un firmware,
+  juntas) y cinco de antes de restaurar. Las hechas a mano no se tocan.
+- **Sin secretos mientras no haya frase** (la pregunta 3, como estaba
+  recomendado). Ajustes → Respaldo → "Cifrarlas con una frase…": se
+  escribe dos veces, en la placa. La placa **no guarda la frase**: guarda
+  la sal y la clave que dio PBKDF2 (`bk_auto_key`, que el filtro deja
+  afuera de un respaldo simple por su nombre), y cada copia lleva un IV
+  nuevo. Restaurar una pide la frase, como cualquier cifrado, también en
+  otra placa. Al poner la frase se hace enseguida la primera copia
+  cifrada.
+- **La oferta en una placa nueva:** un cartel sobre el inicio, a los seis
+  segundos de arrancar, una sola vez: de cuándo es el respaldo más nuevo
+  de la tarjeta, de qué placa y versión, cuánto lleva y si pide frase.
+  "Ver respaldos" abre Ajustes → Respaldo; "Ahora no" lo deja ahí.
+  **Qué es una placa nueva:** no conoce ninguna red Wi-Fi, nunca
+  contestó el cartel y nunca hizo un respaldo. No restaura sola: abre la
+  página, donde restaurar son dos toques.
+- **Un error que encontró la prueba:** el número que ordena los respaldos
+  de un mismo segundo se contaba por nombre, y uno borrado dejaba libre un
+  número que volvía como "el más nuevo". Ahora es uno más que el último
+  que haya, sea de la clase que sea.
+- **El portal** muestra si las copias automáticas están prendidas y
+  cifradas, y marca cada respaldo ("del día", "de antes de actualizar").
+  Prenderlas, apagarlas y la frase: sólo en la placa (D7).
+- **`tools/backup.sh`** (de la etapa 3, la parte que no pide firmware):
+  pide un respaldo, lo baja a una carpeta de la computadora y lo saca de
+  la tarjeta; con `FOLDERS` baja además carpetas de la tarjeta archivo por
+  archivo, sin repetir las que ya tiene. `SEALED=1` pregunta la frase.
+- **Probado:** `tests/backup_host`, 36 casos (16 nuevos). En el
+  simulador: la copia del día hecha sola a los dos minutos de arrancar;
+  la de antes de un firmware con una imagen de mentira (una vez, y
+  ninguna al repetir); la frase puesta desde Ajustes con el teclado y la
+  primera copia cifrada; el cartel de la placa nueva (`P4_SIM_SSID=`) y su
+  salto a Ajustes; `tools/backup.sh` con una carpeta, dos veces.
+  Firmware `rev1_3`: 7 103 376 bytes, 11 KB más que con la etapa 1.
+
+**Falta:** instalarlo en la placa y ver ahí la copia del día, la de antes
+de un firmware y cuánta RAM interna queda. Y la prueba que termina la
+etapa: `erase_flash`, grabar, y que la placa ofrezca el respaldo de la
+tarjeta. Esa borra la placa: sólo cuando el usuario lo diga.
 
 ## Qué resuelve
 

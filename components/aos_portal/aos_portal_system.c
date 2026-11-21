@@ -40,6 +40,7 @@
  * tools/ota.sh builds, uploads, restarts and checks that the slot changed.
  */
 #include "aos_portal_system.h"
+#include "aos_backup.h"
 #include "aos_i18n.h"
 #include "aos_hal.h"
 #include "aos_ui.h"
@@ -117,6 +118,9 @@ static void api_ota_put(aos_httpd_req_t *r)
 {
     long len = aos_httpd_body_len(r);
     if (len <= 0) { send_err(r, 400, _("falta Content-Length")); return; }
+    /* what the board holds, kept on the card first when it changed since
+     * the last copy (components/aos_backup): half a second */
+    aos_backup_before_firmware();
     if (!aos_hal_ota_begin((size_t)len)) { send_err(r, 409, aos_hal_ota_error()); return; }
     char *buf = malloc(CHUNK);
     if (!buf) { aos_hal_ota_abort(); send_err(r, 500, _("sin memoria")); return; }

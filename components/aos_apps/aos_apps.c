@@ -1,5 +1,6 @@
 #include "aos_apps.h"
 #include "aos_ui.h"
+#include "aos_backup.h"
 #include "aos_sensors.h"
 #include "aos_leds.h"
 
@@ -51,4 +52,5 @@ void aos_apps_service_tick(void)
     aos_sensors_autostart();        /* the sensors of modules.txt, read from boot */
     aos_leds_autostart();           /* a LED strip left on, back as it was */
     aos_app_store_service_tick();   /* the updates' count on the Tienda's icon */
+    aos_backup_tick();              /* the day's copy on the card, when it is due */
 }

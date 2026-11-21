@@ -105,3 +105,22 @@ int aos_hal_pref_foreach(aos_hal_pref_visit_t visit, void *ctx)
     for (int i = 0; i < s_np; i++) visit(s_p[i].key, s_p[i].type == 's', (int32_t)atoi(s_p[i].val), s_p[i].val, ctx);
     return s_np;
 }
+
+bool aos_hal_pref_erase(const char *key)
+{
+    prefs_load();
+    for (int i = 0; i < s_np; i++)
+        if (!strcmp(s_p[i].key, key)) {
+            free(s_p[i].val);
+            s_p[i] = s_p[--s_np];
+            return prefs_save();
+        }
+    return false;
+}
+
+/* FAKE_SSID=casa: the board knows a network */
+const char *aos_hal_net_ssid(void)
+{
+    const char *v = getenv("FAKE_SSID");
+    return v ? v : "";
+}

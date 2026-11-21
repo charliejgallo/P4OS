@@ -2402,3 +2402,8 @@ Pedidas a la Tienda: %s	Asked of the Store: %s
 Pedirle a la Tienda que las instale	Ask the Store to install them
 En la tarjeta	On the card
 Todavía no hay ninguno.	There is none yet.
+del día	the day's
+de antes de actualizar	from before an update
+Las copias automáticas están apagadas (Ajustes, Respaldo, en la placa).	The automatic copies are off (Settings, Backup, at the board).
+La placa guarda sola una copia por día si algo cambió, y otra antes de instalar un firmware: cifradas con la frase que se eligió en la placa. Quedan las cinco últimas.	The board keeps a copy a day by itself when something changed, and another before a firmware is installed: sealed with the passphrase chosen at the board. The last five stay.
+La placa guarda sola una copia por día si algo cambió, y otra antes de instalar un firmware: sin credenciales, hasta que se les elija una frase en Ajustes, Respaldo. Quedan las cinco últimas.	The board keeps a copy a day by itself when something changed, and another before a firmware is installed: without credentials, until a passphrase is chosen for them in Settings, Backup. The last five stay.

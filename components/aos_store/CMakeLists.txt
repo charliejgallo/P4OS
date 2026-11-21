@@ -4,5 +4,5 @@ idf_component_register(
     SRCS "aos_store.c"
     INCLUDE_DIRS "include"
     REQUIRES aos_hal
-    PRIV_REQUIRES aos_ui aos_dynapp json
+    PRIV_REQUIRES aos_ui aos_dynapp aos_backup json
 )

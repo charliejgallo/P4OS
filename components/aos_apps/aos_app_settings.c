@@ -1942,7 +1942,8 @@ static uint32_t bk_key(void)
 {
     aos_backup_status_t st;
     aos_backup_status(&st);
-    return st.jobs_done * 8u + (st.busy ? 1u : 0u) + (st.restart ? 2u : 0u) + (aos_hal_path_sd_root() ? 4u : 0u);
+    return st.jobs_done * 16u + (st.busy ? 1u : 0u) + (st.restart ? 2u : 0u) + (aos_hal_path_sd_root() ? 4u : 0u) +
+           (aos_backup_auto_sealed() ? 8u : 0u);
 }
 
 static void bk_refresh(void)
@@ -1951,7 +1952,8 @@ static void bk_refresh(void)
     aos_backup_status_t st;
     aos_backup_status(&st);
     char v[160] = "";
-    if (st.busy) snprintf(v, sizeof v, "%s", !strcmp(st.job, "restore") ? _("restaurando…") : _("respaldando…"));
+    if (st.busy) snprintf(v, sizeof v, "%s", !strcmp(st.job, "restore") ? _("restaurando…") :
+                                               !strcmp(st.job, "key") ? _("preparando la clave…") : _("respaldando…"));
     else if (!aos_hal_path_sd_root()) snprintf(v, sizeof v, "%s", _("no hay tarjeta"));
     else if (!st.last_job[0]) v[0] = 0;
     else if (st.last_ok && !strcmp(st.last_job, "restore")) snprintf(v, sizeof v, _("restaurado: %d ajustes"), st.written);
@@ -2026,6 +2028,41 @@ static void bk_restart_cb(lv_event_t *e)
     lv_timer_set_repeat_count(t, 1);
 }
 
+/* The copies the board makes by itself: one a day when something changed,
+ * and one before a firmware. A passphrase for them is typed twice here, at
+ * the board, and only its key is kept. */
+static void bk_auto_cb(lv_event_t *e)
+{
+    aos_backup_auto_set(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
+}
+
+static void bk_auto_pass2_done(const char *text)
+{
+    bool same = !strcmp(text, s_bk_pass);
+    if (!same) aos_ui_toast(_("No son la misma frase"), 2500);
+    else if (!aos_backup_auto_passphrase(s_bk_pass)) aos_ui_toast(_("Ya hay un respaldo en curso"), 2000);
+    memset(s_bk_pass, 0, sizeof s_bk_pass);
+}
+
+static void bk_auto_pass1_done(const char *text)
+{
+    if (strlen(text) < 6) { aos_ui_toast(_("Una frase de seis letras o más"), 2500); return; }
+    snprintf(s_bk_pass, sizeof s_bk_pass, "%.63s", text);
+    s_kb_secret = true;
+    kb_open(_("La misma frase, otra vez"), "", 63, _("Cifrar"), bk_auto_pass2_done);
+}
+
+static void bk_auto_seal_cb(lv_event_t *e)
+{
+    if (aos_backup_auto_sealed()) {
+        if (!second_tap(e, _("Tocá otra vez: las copias vuelven a ir sin contraseñas"))) return;
+        aos_backup_auto_passphrase(NULL);      /* the page is drawn again by its tick: bk_key() changed */
+        return;
+    }
+    s_kb_secret = true;
+    kb_open(_("Una frase para las copias automáticas"), "", 63, _("Seguir"), bk_auto_pass1_done);
+}
+
 /* The apps the restored backup lists and the card lacks: asked of the
  * Tienda, each with the extras it had. */
 static void bk_apps_cb(lv_event_t *e)
@@ -2073,6 +2110,14 @@ static void build_backup(lv_obj_t *p)
         note(p, _("La mayoría de los ajustes vale recién después de reiniciar."));
     }
 
+    g = group(p, _("COPIAS AUTOMÁTICAS"));
+    row_switch(g, NULL, 0, _("Una copia por día"), aos_backup_auto_on(), bk_auto_cb);
+    if (!st.busy)
+        action_row(g, aos_backup_auto_sealed() ? _("Sacarles la frase") : _("Cifrarlas con una frase…"), AOS_C_ACCENT, bk_auto_seal_cb);
+    note(p, aos_backup_auto_sealed()
+            ? _("Si algo cambió, la placa guarda una copia por día en la tarjeta, y otra antes de instalar un firmware. Quedan las cinco últimas. Van cifradas con tu frase y llevan todo.")
+            : _("Si algo cambió, la placa guarda una copia por día en la tarjeta, y otra antes de instalar un firmware. Quedan las cinco últimas. Sin frase no llevan contraseñas; con una frase llevan todo, cifrado."));
+
     s_bk_n = card ? aos_backup_list(s_bk, BK_SHOWN) : 0;
     g = group(p, _("EN LA TARJETA"));
     if (!s_bk_n) row(g, NULL, 0, card ? _("Todavía no hay ninguno") : _("No hay tarjeta"), NULL, false, NULL, NULL);
@@ -2081,8 +2126,10 @@ static void build_backup(lv_obj_t *p)
         time_t t = (time_t)s_bk[i].made;
         struct tm tm;
         if (t && localtime_r(&t, &tm)) strftime(when, sizeof when, "%d/%m/%Y %H:%M", &tm);
-        snprintf(label, sizeof label, "%s%s%s", when[0] ? when : _("sin fecha"),
-                 s_bk[i].sealed ? _("  ·  cifrado") : "", s_bk[i].before ? _("  ·  de antes de restaurar") : "");
+        snprintf(label, sizeof label, "%s%s%s", when[0] ? when : _("sin fecha"), s_bk[i].sealed ? _("  ·  cifrado") : "",
+                 s_bk[i].why == AOS_BACKUP_BEFORE_RESTORE ? _("  ·  de antes de restaurar") :
+                 s_bk[i].why == AOS_BACKUP_DAILY ? _("  ·  del día") :
+                 s_bk[i].why == AOS_BACKUP_BEFORE_FW ? _("  ·  de antes de actualizar") : "");
         lv_obj_t *r = action_row(g, label, AOS_C_TEXT, bk_restore_cb);
         lv_obj_set_user_data(r, (void *)(intptr_t)i);
     }

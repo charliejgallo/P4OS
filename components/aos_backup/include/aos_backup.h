@@ -1,5 +1,5 @@
 /*
- * P4OS - Backups (docs/plan/RESPALDO.md, stage 1).
+ * P4OS - Backups (docs/plan/RESPALDO.md, stages 1 and 2).
  *
  * What a board holds and cannot fetch again, in one file on the card
  * (/backups/<name>.p4bak): its preferences - the system's and the apps', the
@@ -46,6 +46,14 @@ extern "C" {
 #define AOS_BACKUP_EXT      ".p4bak"
 #define AOS_BACKUP_NAME_MAX 64
 
+/* Who asked for a backup. */
+typedef enum {
+    AOS_BACKUP_BY_HAND = 0,
+    AOS_BACKUP_BEFORE_RESTORE,      /* what there was, kept before a restore wrote over it */
+    AOS_BACKUP_DAILY,               /* the day's copy, made when something changed */
+    AOS_BACKUP_BEFORE_FW,           /* before a firmware was installed */
+} aos_backup_why_t;
+
 typedef struct {
     char     name[AOS_BACKUP_NAME_MAX];     /* the file's, without its folder */
     uint32_t made;          /* epoch seconds; 0 when the board had no time */
@@ -54,6 +62,7 @@ typedef struct {
     char     board[40];     /* the board's name then */
     bool     sealed;        /* it asks for its passphrase */
     bool     before;        /* made by itself, before a restore */
+    int      why;           /* aos_backup_why_t */
     int      prefs;         /* preferences in it */
     int      left_out;      /* credentials it does not carry (a plain one) */
     int      apps;          /* apps in its list */
@@ -75,7 +84,7 @@ typedef enum {
 
 typedef struct {
     bool     busy;
-    char     job[10];           /* "make" or "restore" */
+    char     job[10];           /* "make", "restore", "auto" or "key" */
     uint32_t jobs_done;         /* counts up */
     bool     last_ok;
     int      last_kind;         /* aos_backup_err_t */
@@ -109,10 +118,47 @@ typedef struct {
 } aos_backup_app_t;
 int  aos_backup_missing_apps(const char *name, aos_backup_app_t *out, int max);
 
+/* ---- the copies it makes by itself (stage 2) ----
+ *
+ * One a day on the card, when a preference changed since the last one, and
+ * one before a firmware is installed, on the same condition. The card keeps
+ * the last five of them, and the last five made before a restore. They are
+ * plain, without what looks like a credential, until the person sets a
+ * passphrase for them at the board; from then on they carry everything,
+ * sealed. The board keeps the key PBKDF2 gave and its salt, not the
+ * passphrase: a restore asks for it as for any sealed backup.
+ *
+ * A board without a clock makes none: a day is told by its date. */
+bool aos_backup_auto_on(void);                  /* on unless turned off */
+void aos_backup_auto_set(bool on);
+bool aos_backup_auto_sealed(void);
+/* Sets the passphrase of the automatic copies, in the background (PBKDF2
+ * takes seconds), and makes the first sealed one. NULL or "" takes it off. */
+bool aos_backup_auto_passphrase(const char *passphrase);
+uint32_t aos_backup_auto_day(void);             /* the last day looked at, as 20261121; 0 for never */
+
+/* From the system's tick, five times a second: cheap. Starts the day's copy
+ * when it is due. */
+void aos_backup_tick(void);
+
+/* Before a firmware is written: the copy, when something changed since the
+ * last one, made and waited for (half a second; never more than ten). */
+void aos_backup_before_firmware(void);
+
+/* A board that looks new (it knows no network and never answered this) with
+ * a backup on its card: the newest one, to offer. aos_backup_offer_done()
+ * when the person answered, whatever the answer. */
+bool aos_backup_offer(aos_backup_info_t *out);
+void aos_backup_offer_done(void);
+
 /* The same, without the thread: for the tests and for whoever is already in
  * one. 'why' gets a line for the log. They return an aos_backup_err_t. */
 int aos_backup_make_now(const char *passphrase, bool before, char *name_out, size_t name_len, char *why, size_t why_len);
 int aos_backup_restore_now(const char *name, const char *passphrase, int *written, char *why, size_t why_len);
+/* The automatic copy, now: 'reason' is AOS_BACKUP_DAILY or _BEFORE_FW;
+ * 'made' says whether one was needed. */
+int aos_backup_auto_now(int reason, bool *made, char *why, size_t why_len);
+bool aos_backup_auto_passphrase_now(const char *passphrase);
 
 #ifdef __cplusplus
 }

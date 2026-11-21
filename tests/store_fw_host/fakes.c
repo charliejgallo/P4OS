@@ -100,3 +100,8 @@ bool aos_hal_pref_set_i32(const char *key, int32_t value)
     snprintf(v, sizeof v, "%d", (int)value);
     return pref_set(key, v);
 }
+
+/* The copy of the preferences an update asks for first (components/aos_backup):
+ * counted here, made in tests/backup_host. */
+int g_backups_before_fw;
+void aos_backup_before_firmware(void) { g_backups_before_fw++; }

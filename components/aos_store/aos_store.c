@@ -27,6 +27,7 @@
  */
 #include "aos_store.h"
 #include "aos_fetch.h"
+#include "aos_backup.h"
 #include "aos_hal.h"
 #include "cJSON.h"
 
@@ -1689,7 +1690,7 @@ static bool firmware(err_t *e)
     bool ok = false;
     uint32_t done = 0;
     if (!fp) fail(e, buf ? AOS_STORE_E_CARD : AOS_STORE_E_MEMORY, "the image cannot be read back from the card");
-    else if (!aos_hal_ota_begin(fw.size)) fail(e, AOS_STORE_E_FLASH, "%.120s", aos_hal_ota_error());
+    else if (aos_backup_before_firmware(), !aos_hal_ota_begin(fw.size)) fail(e, AOS_STORE_E_FLASH, "%.120s", aos_hal_ota_error());
     else {
         lock();
         s_st.got = 0;

@@ -3472,6 +3472,25 @@ static const char blob_en__sistema_lang[] =
     "Tocar uno lo restaura: escribe sus ajustes sobre los de ahora, y lo que hay queda antes en un respaldo propio. Para guardarlo en una computadora o traer uno: el portal, Respaldo.\tTapping one restores it: it writes its settings over the ones there are, and what there is goes first into a backup of its own. To keep it on a computer or bring one: the portal, Backup.\n"
     "ya hay un respaldo en curso\ta backup is already under way\n"
     "falta name, o ya hay un respaldo en curso\tname is missing, or a backup is already under way\n"
+    "preparando la clave…\tpreparing the key…\n"
+    "Cifrar\tSeal\n"
+    "Tocá otra vez: las copias vuelven a ir sin contraseñas\tTap again: the copies go without passwords again\n"
+    "Una frase para las copias automáticas\tA passphrase for the automatic copies\n"
+    "COPIAS AUTOMÁTICAS\tAUTOMATIC COPIES\n"
+    "Una copia por día\tA copy a day\n"
+    "Sacarles la frase\tTake their passphrase off\n"
+    "Cifrarlas con una frase…\tSeal them with a passphrase…\n"
+    "Si algo cambió, la placa guarda una copia por día en la tarjeta, y otra antes de instalar un firmware. Quedan las cinco últimas. Van cifradas con tu frase y llevan todo.\tWhen something changed, the board keeps a copy a day on the card, and another before a firmware is installed. The last five stay. They are sealed with your passphrase and carry everything.\n"
+    "Si algo cambió, la placa guarda una copia por día en la tarjeta, y otra antes de instalar un firmware. Quedan las cinco últimas. Sin frase no llevan contraseñas; con una frase llevan todo, cifrado.\tWhen something changed, the board keeps a copy a day on the card, and another before a firmware is installed. The last five stay. Without a passphrase they carry no passwords; with one they carry everything, sealed.\n"
+    "  ·  del día\t  ·  the day's\n"
+    "  ·  de antes de actualizar\t  ·  from before an update\n"
+    "Hay un respaldo en la tarjeta\tThere is a backup on the card\n"
+    "Del %s, de «%.30s» con P4OS %.20s: %d ajustes y %d apps.\tFrom %s, of “%.30s” with P4OS %.20s: %d settings and %d apps.\n"
+    "Está cifrado: pide su frase.\tIt is sealed: it asks for its passphrase.\n"
+    "No lleva contraseñas: la de la Wi-Fi se escribe de nuevo.\tIt carries no passwords: the Wi-Fi's is typed again.\n"
+    "Queda en Ajustes, Respaldo, con los demás que haya.\tIt stays in Settings, Backup, with any others there are.\n"
+    "Ahora no\tNot now\n"
+    "Ver respaldos\tSee backups\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -6936,6 +6955,25 @@ static const char blob_de__sistema_lang[] =
     "Tocar uno lo restaura: escribe sus ajustes sobre los de ahora, y lo que hay queda antes en un respaldo propio. Para guardarlo en una computadora o traer uno: el portal, Respaldo.\tAntippen stellt sie wieder her: Ihre Einstellungen überschreiben die jetzigen, und das Vorhandene wird vorher in einer eigenen Sicherung abgelegt. Auf einem Computer aufbewahren oder eine holen: Portal, Sicherung.\n"
     "ya hay un respaldo en curso\tes läuft bereits eine Sicherung\n"
     "falta name, o ya hay un respaldo en curso\tname fehlt, oder es läuft bereits eine Sicherung\n"
+    "preparando la clave…\tSchlüssel wird vorbereitet…\n"
+    "Cifrar\tVerschlüsseln\n"
+    "Tocá otra vez: las copias vuelven a ir sin contraseñas\tNochmal tippen: die Kopien gehen wieder ohne Passwörter\n"
+    "Una frase para las copias automáticas\tEine Passphrase für die automatischen Kopien\n"
+    "COPIAS AUTOMÁTICAS\tAUTOMATISCHE KOPIEN\n"
+    "Una copia por día\tEine Kopie pro Tag\n"
+    "Sacarles la frase\tPassphrase entfernen\n"
+    "Cifrarlas con una frase…\tMit einer Passphrase verschlüsseln…\n"
+    "Si algo cambió, la placa guarda una copia por día en la tarjeta, y otra antes de instalar un firmware. Quedan las cinco últimas. Van cifradas con tu frase y llevan todo.\tWenn sich etwas geändert hat, legt das Board täglich eine Kopie auf der Karte ab, und eine weitere vor der Installation einer Firmware. Die letzten fünf bleiben. Sie sind mit deiner Passphrase verschlüsselt und enthalten alles.\n"
+    "Si algo cambió, la placa guarda una copia por día en la tarjeta, y otra antes de instalar un firmware. Quedan las cinco últimas. Sin frase no llevan contraseñas; con una frase llevan todo, cifrado.\tWenn sich etwas geändert hat, legt das Board täglich eine Kopie auf der Karte ab, und eine weitere vor der Installation einer Firmware. Die letzten fünf bleiben. Ohne Passphrase enthalten sie keine Passwörter; mit einer enthalten sie alles, verschlüsselt.\n"
+    "  ·  del día\t  ·  vom Tag\n"
+    "  ·  de antes de actualizar\t  ·  von vor einem Update\n"
+    "Hay un respaldo en la tarjeta\tAuf der Karte liegt eine Sicherung\n"
+    "Del %s, de «%.30s» con P4OS %.20s: %d ajustes y %d apps.\tVom %s, von „%.30s“ mit P4OS %.20s: %d Einstellungen und %d Apps.\n"
+    "Está cifrado: pide su frase.\tSie ist verschlüsselt: die Passphrase wird verlangt.\n"
+    "No lleva contraseñas: la de la Wi-Fi se escribe de nuevo.\tSie enthält keine Passwörter: das WLAN-Passwort wird neu eingegeben.\n"
+    "Queda en Ajustes, Respaldo, con los demás que haya.\tSie bleibt unter Einstellungen, Sicherung, bei den anderen.\n"
+    "Ahora no\tJetzt nicht\n"
+    "Ver respaldos\tSicherungen ansehen\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -6943,7 +6981,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3457, 0, files_en, 1 },
-    { "de", "Deutsch", 3457, 0, files_de, 1 },
+    { "en", "English", 3476, 0, files_en, 1 },
+    { "de", "Deutsch", 3476, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

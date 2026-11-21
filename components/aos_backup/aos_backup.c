@@ -58,6 +58,21 @@
 #define KDF_ITER    40000
 #define AAD         "p4bak1"
 #define STACK       (16 * 1024)
+#define SALT_LEN    16
+#define KEEP        5                   /* the automatic ones the card keeps, and the "before a restore" ones */
+#define PRUNE_MAX   64
+/* The automatic copies' preferences (stage 2): whether they are made
+ * ("bk_auto", on when absent), the key they are sealed under when the
+ * person chose a passphrase for them ("bk_auto_key": its salt and the key
+ * PBKDF2 gave, never the passphrase), the day of the last look ("bk_day",
+ * 20261121), what the preferences added up to at the last copy ("bk_sum")
+ * and whether this board has answered the offer of a new board or made a
+ * backup of its own ("bk_seen"). */
+#define K_AUTO      "bk_auto"
+#define K_AUTO_KEY  "bk_auto_key"
+#define K_DAY       "bk_day"
+#define K_SUM       "bk_sum"
+#define K_SEEN      "bk_seen"
 
 /* ---- which preferences ------------------------------------------------------ */
 
@@ -72,6 +87,7 @@ static bool key_of_this_board(const char *k)
         "bat_cap", "bat_min", "chg_cyc", "soc_n", "soc_sag",            /* a battery's history */
         "st_day", "st_today", "pomo_day", "pomo_done",                  /* today's counts */
         "lk_peer", "lk_lmk", "lk_pname",    /* the device it is linked with */
+        K_DAY, K_SUM, K_SEEN,               /* this module's own marks */
     };
     for (size_t i = 0; i < sizeof OWN / sizeof OWN[0]; i++)
         if (!strcmp(k, OWN[i])) return true;
@@ -237,25 +253,24 @@ static uint8_t *unb64(const char *text, size_t *len)
     return out;
 }
 
-/* The text under a passphrase: an object for "sealed", or NULL. */
-static cJSON *seal(const char *text, const char *pass)
+/* The text under a key that PBKDF2 gave from a passphrase and 'salt': an
+ * object for "sealed", or NULL. The automatic copies come here with the
+ * salt and the key the board keeps, and a new IV each time. */
+static cJSON *seal_with(const char *text, const uint8_t salt[SALT_LEN], const uint8_t key[32])
 {
     size_t len = strlen(text);
-    uint8_t salt[16], iv[12], tag[16], key[32];
+    uint8_t iv[12], tag[16];
     uint8_t *enc = BIG_ALLOC(len ? len : 1);
     cJSON *o = NULL;
     if (!enc) return NULL;
-    aos_hal_random(salt, sizeof salt);
     aos_hal_random(iv, sizeof iv);
-    kdf(pass, salt, sizeof salt, KDF_ITER, key);
     mbedtls_gcm_context g;
     mbedtls_gcm_init(&g);
     bool ok = mbedtls_gcm_setkey(&g, MBEDTLS_CIPHER_ID_AES, key, 256) == 0 &&
               mbedtls_gcm_crypt_and_tag(&g, MBEDTLS_GCM_ENCRYPT, len, iv, sizeof iv, (const unsigned char *)AAD, strlen(AAD),
                                         (const unsigned char *)text, enc, sizeof tag, tag) == 0;
     mbedtls_gcm_free(&g);
-    memset(key, 0, sizeof key);
-    char *s = b64(salt, sizeof salt), *i = b64(iv, sizeof iv), *t = b64(tag, sizeof tag), *d = ok ? b64(enc, len) : NULL;
+    char *s = b64(salt, SALT_LEN), *i = b64(iv, sizeof iv), *t = b64(tag, sizeof tag), *d = ok ? b64(enc, len) : NULL;
     if (ok && s && i && t && d) {
         o = cJSON_CreateObject();
         cJSON_AddStringToObject(o, "kdf", "pbkdf2-sha256");
@@ -267,6 +282,33 @@ static cJSON *seal(const char *text, const char *pass)
     }
     free(s); free(i); free(t); free(d); free(enc);
     return o;
+}
+
+/* The same under a passphrase, with a salt of its own. */
+static cJSON *seal(const char *text, const char *pass)
+{
+    uint8_t salt[SALT_LEN], key[32];
+    aos_hal_random(salt, sizeof salt);
+    kdf(pass, salt, sizeof salt, KDF_ITER, key);
+    cJSON *o = seal_with(text, salt, key);
+    memset(key, 0, sizeof key);
+    return o;
+}
+
+/* The salt and the key of the automatic copies, when the person set a
+ * passphrase for them. */
+static bool auto_key(uint8_t salt[SALT_LEN], uint8_t key[32])
+{
+    char text[96] = "";
+    size_t len = 0;
+    if (!aos_hal_pref_get_str(K_AUTO_KEY, text, sizeof text) || !text[0]) return false;
+    uint8_t *raw = unb64(text, &len);
+    bool ok = raw && len == SALT_LEN + 32;
+    if (ok) { memcpy(salt, raw, SALT_LEN); memcpy(key, raw + SALT_LEN, 32); }
+    if (raw) memset(raw, 0, len);
+    free(raw);
+    memset(text, 0, sizeof text);
+    return ok;
 }
 
 /* The text back, NUL-terminated, to free(); NULL when the passphrase is not
@@ -300,6 +342,30 @@ static char *unseal(const cJSON *sealed, const char *pass)
 /* ---- making one ------------------------------------------------------------- */
 
 typedef struct { cJSON *arr; bool secrets; int n, left_out; } gather_t;
+
+/* What the preferences add up to: a number that changes when any of them
+ * does, to know whether a day needs its copy. Not for anything else: FNV-1a
+ * of each one, added, so the order they are listed in does not matter (the
+ * flash moves them around). The ones of this board and moment are out, or
+ * a counter would make a copy every day. */
+static void sum_one(const char *key, bool is_str, int32_t v, const char *s, void *ctx)
+{
+    if (key_of_this_board(key)) return;
+    uint64_t h = 1469598103934665603ull;
+    char num[16];
+    if (!is_str) snprintf(num, sizeof num, "%d", (int)v);
+    const char *parts[] = { key, is_str ? "\x01s" : "\x01i", is_str ? (s ? s : "") : num };
+    for (int i = 0; i < 3; i++)
+        for (const unsigned char *c = (const unsigned char *)parts[i]; *c; c++) { h ^= *c; h *= 1099511628211ull; }
+    *(uint64_t *)ctx += h;
+}
+
+static void prefs_sum(char out[20])
+{
+    uint64_t sum = 0;
+    aos_hal_pref_foreach(sum_one, &sum);
+    snprintf(out, 20, "%016llx", (unsigned long long)sum);
+}
 
 static void gather(const char *key, bool is_str, int32_t v, const char *s, void *ctx)
 {
@@ -344,10 +410,19 @@ static cJSON *apps_list(void)
     return arr;
 }
 
-int aos_backup_make_now(const char *passphrase, bool before, char *name_out, size_t name_len, char *why, size_t why_len)
+/* Why a backup was made, in its name and in its file. */
+static const char *const WHY_TAIL[] = { "", "-antes", "-auto", "-fw" };
+static const char *const WHY_WORD[] = { "", "restore", "daily", "firmware" };
+
+static void prune(void);
+
+/* One backup. 'passphrase' seals it; without one, 'stored' (the automatic
+ * copies' salt and key) does; without either it is plain. */
+static int make(const char *passphrase, const uint8_t *stored, int reason, char *name_out, size_t name_len, char *why, size_t why_len)
 {
     err_t e = { "", 0 };
-    bool sealed = passphrase && passphrase[0];
+    bool sealed = (passphrase && passphrase[0]) || stored;
+    bool before = reason == AOS_BACKUP_BEFORE_RESTORE;
     char name[AOS_BACKUP_NAME_MAX], rel[160], f[FULL_MAX];
     cJSON *o = NULL;
     char *text = NULL;
@@ -361,13 +436,26 @@ int aos_backup_make_now(const char *passphrase, bool before, char *name_out, siz
         localtime_r(&now, &tm);
         strftime(name, sizeof name, "p4os-%Y%m%d-%H%M%S", &tm);
     } else snprintf(name, sizeof name, "p4os-sin-fecha");
+    /* Which one of that second (or of a board with no clock): one more than
+     * the last there is, whatever each was made for. The list is ordered by
+     * it among equals, and a number freed by a copy that was deleted must
+     * not come back as the newest. */
     int seq = 0;
-    for (; seq < 100; seq++) {
+    {
+        DIR *dir = opendir(full(f, AOS_BACKUP_DIR));
+        struct dirent *de;
+        size_t nl = strlen(name);
+        while (dir && (de = readdir(dir)) != NULL) {
+            const char *d = de->d_name, *ext = strrchr(d, '.'), *dash = strrchr(d, '-');
+            if (strncmp(d, name, nl) || (d[nl] != '-' && d[nl] != '.') || !ext) continue;
+            int n = 0;
+            if (dash && dash >= d + nl && ext - dash >= 2 && ext - dash <= 4 && isdigit((unsigned char)dash[1])) n = atoi(dash + 1);
+            if (n + 1 > seq) seq = n + 1;
+        }
+        if (dir) closedir(dir);
         char tail[24] = "";
         if (seq) snprintf(tail, sizeof tail, "-%d", seq);
-        snprintf(rel, sizeof rel, AOS_BACKUP_DIR "/%s%s%s" AOS_BACKUP_EXT, name, before ? "-antes" : "", tail);
-        struct stat st;
-        if (stat(full(f, rel), &st) != 0) break;
+        snprintf(rel, sizeof rel, AOS_BACKUP_DIR "/%s%s%s" AOS_BACKUP_EXT, name, WHY_TAIL[reason], tail);
     }
 
     o = cJSON_CreateObject();
@@ -376,15 +464,16 @@ int aos_backup_make_now(const char *passphrase, bool before, char *name_out, siz
     aos_hal_pref_foreach(gather, &g);
     cJSON_AddNumberToObject(o, "p4bak", FORMAT);
     cJSON_AddNumberToObject(o, "made", (double)now);
-    cJSON_AddNumberToObject(o, "seq", seq);        /* which one of that second, or of a board with no clock */
+    cJSON_AddNumberToObject(o, "seq", seq);
     cJSON_AddStringToObject(o, "fw", aos_hal_firmware_version());
     cJSON_AddStringToObject(o, "board", aos_hal_device_name());
     if (before) cJSON_AddTrueToObject(o, "before");
+    if (reason) cJSON_AddStringToObject(o, "why", WHY_WORD[reason]);
     cJSON_AddNumberToObject(o, "nprefs", g.n);
     cJSON_AddNumberToObject(o, "left_out", g.left_out);
     if (sealed) {
         char *plain = cJSON_PrintUnformatted(g.arr);
-        cJSON *s = plain ? seal(plain, passphrase) : NULL;
+        cJSON *s = !plain ? NULL : passphrase && passphrase[0] ? seal(plain, passphrase) : seal_with(plain, stored, stored + SALT_LEN);
         if (plain) memset(plain, 0, strlen(plain));
         free(plain);
         cJSON_Delete(g.arr);
@@ -408,12 +497,21 @@ int aos_backup_make_now(const char *passphrase, bool before, char *name_out, siz
     if (name_out) snprintf(name_out, name_len, "%s", base ? base + 1 : rel);
     snprintf(e.why, sizeof e.why, "%.60s: %d preferences%s, %d apps, %u bytes", base ? base + 1 : rel, g.n,
              sealed ? ", sealed" : "", cJSON_GetArraySize(apps), (unsigned)strlen(text));
+    /* a board that makes backups is not a new one: the offer is not for it */
+    int32_t seen = 0;
+    if (!aos_hal_pref_get_i32(K_SEEN, &seen) || !seen) aos_hal_pref_set_i32(K_SEEN, 1);
 out:
     if (text) memset(text, 0, strlen(text));
     free(text);
     cJSON_Delete(o);
     if (why) snprintf(why, why_len, "%s", e.why);
+    if (!e.kind && reason) prune();
     return e.kind;
+}
+
+int aos_backup_make_now(const char *passphrase, bool before, char *name_out, size_t name_len, char *why, size_t why_len)
+{
+    return make(passphrase, NULL, before ? AOS_BACKUP_BEFORE_RESTORE : AOS_BACKUP_BY_HAND, name_out, name_len, why, why_len);
 }
 
 /* ---- reading one ------------------------------------------------------------ */
@@ -448,6 +546,9 @@ static void info_of(const cJSON *o, const char *name, uint32_t size, aos_backup_
     snprintf(out->board, sizeof out->board, "%s", jstr(o, "board"));
     out->sealed = cJSON_IsObject(cJSON_GetObjectItem(o, "sealed"));
     out->before = cJSON_IsTrue(cJSON_GetObjectItem(o, "before"));
+    out->why = out->before ? AOS_BACKUP_BEFORE_RESTORE : AOS_BACKUP_BY_HAND;
+    for (int i = 2; i < (int)(sizeof WHY_WORD / sizeof WHY_WORD[0]); i++)
+        if (!strcmp(jstr(o, "why"), WHY_WORD[i])) out->why = i;
     out->prefs = (int)cJSON_GetNumberValue(cJSON_GetObjectItem(o, "nprefs"));
     out->left_out = (int)cJSON_GetNumberValue(cJSON_GetObjectItem(o, "left_out"));
     out->apps = cJSON_GetArraySize(cJSON_GetObjectItem(o, "apps"));
@@ -578,11 +679,121 @@ out:
     return e.kind;
 }
 
+/* ---- the ones it makes by itself -------------------------------------------- */
+
+/* The card keeps the last KEEP automatic copies (a day's and the ones made
+ * before a firmware, together) and the last KEEP made before a restore. The
+ * ones a person made are theirs to delete. */
+static void prune(void)
+{
+    aos_backup_info_t *all = BIG_ALLOC(sizeof *all * PRUNE_MAX);
+    int n = all ? aos_backup_list(all, PRUNE_MAX) : 0, autos = 0, befores = 0;
+    for (int i = 0; i < n; i++) {       /* the newest first */
+        bool is_auto = all[i].why == AOS_BACKUP_DAILY || all[i].why == AOS_BACKUP_BEFORE_FW;
+        bool is_before = all[i].why == AOS_BACKUP_BEFORE_RESTORE;
+        if ((is_auto && ++autos > KEEP) || (is_before && ++befores > KEEP)) {
+            aos_hal_log(TAG, "%s goes: the card keeps the last %d", all[i].name, KEEP);
+            aos_backup_delete(all[i].name);
+        }
+    }
+    free(all);
+}
+
+bool aos_backup_auto_on(void)
+{
+    int32_t on = 1;
+    return !aos_hal_pref_get_i32(K_AUTO, &on) || on != 0;
+}
+
+void aos_backup_auto_set(bool on) { aos_hal_pref_set_i32(K_AUTO, on ? 1 : 0); }
+
+bool aos_backup_auto_sealed(void)
+{
+    uint8_t salt[SALT_LEN], key[32];
+    bool ok = auto_key(salt, key);
+    memset(key, 0, sizeof key);
+    return ok;
+}
+
+bool aos_backup_auto_passphrase_now(const char *passphrase)
+{
+    if (!passphrase || !passphrase[0]) return aos_hal_pref_set_str(K_AUTO_KEY, "");
+    uint8_t raw[SALT_LEN + 32];
+    aos_hal_random(raw, SALT_LEN);
+    kdf(passphrase, raw, SALT_LEN, KDF_ITER, raw + SALT_LEN);
+    char *text = b64(raw, sizeof raw);
+    bool ok = text && aos_hal_pref_set_str(K_AUTO_KEY, text);
+    memset(raw, 0, sizeof raw);
+    if (text) memset(text, 0, strlen(text));
+    free(text);
+    return ok;
+}
+
+uint32_t aos_backup_auto_day(void)
+{
+    int32_t day = 0;
+    aos_hal_pref_get_i32(K_DAY, &day);
+    return (uint32_t)day;
+}
+
+static int32_t today(void)
+{
+    if (!aos_hal_time_is_valid()) return 0;
+    time_t now = time(NULL);
+    struct tm tm;
+    localtime_r(&now, &tm);
+    return (tm.tm_year + 1900) * 10000 + (tm.tm_mon + 1) * 100 + tm.tm_mday;
+}
+
+int aos_backup_auto_now(int reason, bool *made, char *why, size_t why_len)
+{
+    char sum[20], last[20] = "", name[AOS_BACKUP_NAME_MAX];
+    uint8_t stored[SALT_LEN + 32];
+    if (made) *made = false;
+    if (why && why_len) why[0] = 0;
+    if (!aos_backup_auto_on()) return AOS_BACKUP_E_NONE;
+    prefs_sum(sum);
+    aos_hal_pref_get_str(K_SUM, last, sizeof last);
+    int rc = AOS_BACKUP_E_NONE;
+    if (strcmp(sum, last)) {
+        bool sealed = auto_key(stored, stored + SALT_LEN);
+        rc = make(NULL, sealed ? stored : NULL, reason, name, sizeof name, why, why_len);
+        memset(stored, 0, sizeof stored);
+        if (rc == AOS_BACKUP_E_NONE) {
+            aos_hal_pref_set_str(K_SUM, sum);
+            if (made) *made = true;
+        }
+    } else if (why) snprintf(why, why_len, "nothing changed since the last copy");
+    /* a day is done when its copy is made or was not needed; a card that
+     * could not be written is asked again */
+    int32_t day = today();
+    if (rc == AOS_BACKUP_E_NONE && reason == AOS_BACKUP_DAILY && day) aos_hal_pref_set_i32(K_DAY, day);
+    return rc;
+}
+
+bool aos_backup_offer(aos_backup_info_t *out)
+{
+    int32_t seen = 0;
+    if (aos_hal_pref_get_i32(K_SEEN, &seen) && seen) return false;
+    if (!aos_hal_path_sd_root()) return false;
+    /* a board that knows a network was set up by somebody: not a new one */
+    if (aos_hal_net_ssid()[0]) { aos_hal_pref_set_i32(K_SEEN, 1); return false; }
+    aos_backup_info_t one;
+    if (aos_backup_list(&one, 1) < 1) return false;
+    if (out) *out = one;
+    return true;
+}
+
+void aos_backup_offer_done(void) { aos_hal_pref_set_i32(K_SEEN, 1); }
+
 /* ---- the thread ------------------------------------------------------------- */
+
+enum { JOB_MAKE, JOB_RESTORE, JOB_DAILY, JOB_FW, JOB_KEY };
+static const char *const JOB_NAME[] = { "make", "restore", "auto", "auto", "key" };
 
 static void *s_lock;
 static aos_backup_status_t s_st;
-static struct { bool restore; char name[AOS_BACKUP_NAME_MAX]; char pass[96]; } s_job;
+static struct { int kind; char name[AOS_BACKUP_NAME_MAX]; char pass[96]; } s_job;
 
 static void lock(void)
 {
@@ -595,34 +806,58 @@ static void work(void *arg)
 {
     (void)arg;
     char why[120] = "", name[AOS_BACKUP_NAME_MAX] = "";
-    int written = 0;
-    int kind = s_job.restore ? aos_backup_restore_now(s_job.name, s_job.pass, &written, why, sizeof why)
-                             : aos_backup_make_now(s_job.pass, false, name, sizeof name, why, sizeof why);
+    int written = 0, job = s_job.kind, kind = AOS_BACKUP_E_NONE;
+    bool quiet = false;
+    switch (job) {
+    case JOB_RESTORE: kind = aos_backup_restore_now(s_job.name, s_job.pass, &written, why, sizeof why); break;
+    case JOB_MAKE:    kind = aos_backup_make_now(s_job.pass, false, name, sizeof name, why, sizeof why); break;
+    case JOB_KEY:
+        kind = aos_backup_auto_passphrase_now(s_job.pass) ? AOS_BACKUP_E_NONE : AOS_BACKUP_E_OTHER;
+        snprintf(why, sizeof why, "%s", kind ? "the key could not be kept" : "the automatic copies are sealed from now on");
+        /* the first sealed copy now, not tomorrow: what the card has until
+         * then is the plain ones */
+        if (!kind) {
+            char w2[120];
+            bool made = false;
+            aos_hal_pref_set_str(K_SUM, "");
+            aos_backup_auto_now(AOS_BACKUP_DAILY, &made, w2, sizeof w2);
+            if (made) snprintf(why, sizeof why, "%s", w2);
+        }
+        break;
+    default: {
+        bool made = false;
+        kind = aos_backup_auto_now(job == JOB_FW ? AOS_BACKUP_BEFORE_FW : AOS_BACKUP_DAILY, &made, why, sizeof why);
+        quiet = !made && kind == AOS_BACKUP_E_NONE;      /* nothing to say: no copy was needed */
+        break;
+    }
+    }
     memset(s_job.pass, 0, sizeof s_job.pass);
-    aos_hal_log(TAG, "%s: %s", s_job.restore ? "restore" : "make", why);
+    aos_hal_log(TAG, "%s: %s", JOB_NAME[job], why);
     lock();
     s_st.busy = false;
-    s_st.jobs_done++;
-    s_st.last_ok = kind == AOS_BACKUP_E_NONE;
-    s_st.last_kind = kind;
-    snprintf(s_st.last_job, sizeof s_st.last_job, "%s", s_job.restore ? "restore" : "make");
-    snprintf(s_st.last, sizeof s_st.last, "%s", why);
-    snprintf(s_st.name, sizeof s_st.name, "%s", s_job.restore ? s_job.name : name);
-    s_st.written = written;
-    if (s_job.restore && kind == AOS_BACKUP_E_NONE) s_st.restart = true;
+    if (!quiet) {
+        s_st.jobs_done++;
+        s_st.last_ok = kind == AOS_BACKUP_E_NONE;
+        s_st.last_kind = kind;
+        snprintf(s_st.last_job, sizeof s_st.last_job, "%s", JOB_NAME[job]);
+        snprintf(s_st.last, sizeof s_st.last, "%s", why);
+        snprintf(s_st.name, sizeof s_st.name, "%s", job == JOB_RESTORE ? s_job.name : name);
+        s_st.written = written;
+        if (job == JOB_RESTORE && kind == AOS_BACKUP_E_NONE) s_st.restart = true;
+    }
     unlock();
 }
 
-static bool start(bool restore, const char *name, const char *pass)
+static bool start(int job, const char *name, const char *pass)
 {
     lock();
     bool ok = !s_st.busy;
     if (ok) {
-        s_job.restore = restore;
+        s_job.kind = job;
         snprintf(s_job.name, sizeof s_job.name, "%s", name ? name : "");
         snprintf(s_job.pass, sizeof s_job.pass, "%s", pass ? pass : "");
         s_st.busy = true;
-        snprintf(s_st.job, sizeof s_st.job, "%s", restore ? "restore" : "make");
+        snprintf(s_st.job, sizeof s_st.job, "%s", JOB_NAME[job]);
     }
     unlock();
     if (ok && !aos_hal_thread_start("aos_backup", work, NULL, STACK, 2)) {
@@ -634,11 +869,53 @@ static bool start(bool restore, const char *name, const char *pass)
     return ok;
 }
 
-bool aos_backup_make(const char *passphrase) { return start(false, NULL, passphrase); }
+bool aos_backup_make(const char *passphrase) { return start(JOB_MAKE, NULL, passphrase); }
 
 bool aos_backup_restore(const char *name, const char *passphrase)
 {
-    return name_ok(name) && start(true, name, passphrase);
+    return name_ok(name) && start(JOB_RESTORE, name, passphrase);
+}
+
+bool aos_backup_auto_passphrase(const char *passphrase)
+{
+    /* taking it off is one write; setting it is PBKDF2's four seconds */
+    if (!passphrase || !passphrase[0]) return aos_backup_auto_passphrase_now(NULL);
+    return start(JOB_KEY, NULL, passphrase);
+}
+
+static bool busy(void)
+{
+    lock();
+    bool b = s_st.busy;
+    unlock();
+    return b;
+}
+
+void aos_backup_before_firmware(void)
+{
+    if (!aos_backup_auto_on() || !aos_hal_path_sd_root()) return;
+    /* in this module's thread, which has the stack for it, and waited for:
+     * the image is not written until the copy is on the card. Half a
+     * second; ten at most, and then the update goes on without it. */
+    uint64_t until = aos_hal_uptime_ms() + 10000;
+    while (busy() && aos_hal_uptime_ms() < until) aos_hal_sleep_ms(50);
+    if (!start(JOB_FW, NULL, NULL)) return;
+    while (busy() && aos_hal_uptime_ms() < until) aos_hal_sleep_ms(50);
+}
+
+void aos_backup_tick(void)
+{
+    /* called five times a second: a look a minute, and not in the first two
+     * of a start, when the card and the clock may not be there yet */
+    static uint32_t calls, wait;
+    if (++calls % 300 || aos_hal_uptime_ms() < 120000) return;
+    if (wait) { wait--; return; }
+    int32_t day = today(), last = 0;
+    if (!day || !aos_backup_auto_on() || !aos_hal_path_sd_root()) return;
+    aos_hal_pref_get_i32(K_DAY, &last);
+    if (last == day) return;
+    if (aos_backup_offer(NULL)) return;         /* a new board with a backup to look at first */
+    if (start(JOB_DAILY, NULL, NULL)) wait = 60;        /* a card that fails is asked again in an hour */
 }
 
 void aos_backup_status(aos_backup_status_t *out)

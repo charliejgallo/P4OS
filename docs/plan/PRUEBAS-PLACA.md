@@ -97,6 +97,19 @@ El plan y lo medido, en `docs/plan/RESPALDO.md` ("En la placa"). Con
 - [ ] Con la flash borrada: volver desde el archivo y que la Tienda
       ofrezca reinstalar. Sólo cuando el usuario lo diga.
 
+### Respaldos, las copias solas (rama `respaldo-2`, sin instalar)
+
+- [ ] Instalar y dejar la placa dos minutos: la copia del día en
+      `/backups` (`…-auto.p4bak`), sin credenciales.
+- [ ] Al otro día, con algo cambiado: otra. Sin cambios: ninguna.
+- [ ] Instalar un firmware después de cambiar un ajuste: la copia
+      `…-fw.p4bak` antes de escribir.
+- [ ] Ajustes → Respaldo → "Cifrarlas con una frase…": la primera copia
+      cifrada enseguida, y cuánto tarda.
+- [ ] RAM interna libre con todo esto.
+- [ ] `erase_flash`, grabar, arrancar con la tarjeta: el cartel "Hay un
+      respaldo en la tarjeta". Sólo cuando el usuario lo diga.
+
 ### Pendientes, en resumen
 
 Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):

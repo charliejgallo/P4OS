@@ -47,6 +47,7 @@
 #include "aos_lock.h"
 #include "aos_pair_ui.h"
 #include "aos_sshkey_ui.h"
+#include "aos_backup_ui.h"
 #include "aos_hal.h"
 #include "aos_theme.h"
 #include "aos_i18n.h"
@@ -373,6 +374,7 @@ static void relayout_all(void)
     aos_lock_layout();
     aos_pair_ui_layout();
     aos_sshkey_ui_layout();
+    aos_backup_ui_layout();
     aos_wall_photo_relayout();
 }
 
@@ -1422,6 +1424,7 @@ void aos_ui_tick(void)
     aos_lock_tick();
     aos_pair_ui_tick();
     aos_sshkey_ui_tick();
+    aos_backup_ui_tick();           /* a new board with a backup on its card: asked once */
     aos_access_tick();              /* mDNS by the portal's rules; once a second inside */
     aos_hwkbd_tick();               /* a USB keyboard on the host types into the open keyboard */
     aos_hwmouse_tick();             /* and a USB mouse points */
@@ -1565,6 +1568,10 @@ static void ui_button_cb(aos_button_t button, aos_button_action_t action)
     }
     if (action == AOS_BUTTON_CLICK && aos_sshkey_ui_visible()) {
         if (aos_hal_lock(300)) { aos_sshkey_ui_cancel(); aos_hal_unlock(); }
+        return;
+    }
+    if (action == AOS_BUTTON_CLICK && aos_backup_ui_visible()) {
+        if (aos_hal_lock(300)) { aos_backup_ui_cancel(); aos_hal_unlock(); }
         return;
     }
     if (aos_lock_is_locked()) used = action != AOS_BUTTON_LONG;     /* locked: only the screenshot */

@@ -3348,7 +3348,9 @@ function pageRespaldo() {
         h('div', { class: 'grow' },
           h('div', {}, h('b', {}, when(b)), ' ',
             b.sealed ? h('span', { class: 'pill', style: 'color:var(--green)' }, tr('cifrado')) : h('span', { class: 'pill' }, tr('sin credenciales')),
-            b.before ? h('span', { class: 'pill', style: 'color:var(--orange)' }, tr('de antes de restaurar')) : null),
+            b.before ? h('span', { class: 'pill', style: 'color:var(--orange)' }, tr('de antes de restaurar')) : null,
+            b.why === 'daily' ? h('span', { class: 'pill' }, tr('del día')) : null,
+            b.why === 'firmware' ? h('span', { class: 'pill' }, tr('de antes de actualizar')) : null),
           h('div', { class: 'small muted', style: 'margin:4px 0' },
             tr('%s ajustes · %s apps en su lista · %s · P4OS %s', b.prefs, b.apps, fmtBytes(b.size), b.fw) + (b.board ? ' · ' + b.board : '')),
           !b.sealed && b.left_out ? h('div', { class: 'small muted' }, tr('No lleva %s ajustes que parecen credenciales.', b.left_out)) : null,
@@ -3382,6 +3384,9 @@ function pageRespaldo() {
     put(top,
       h('div', { class: 'note' }, tr('Un respaldo guarda en un archivo de la tarjeta los ajustes de la placa y de sus apps, la lista de apps que instaló la Tienda y el orden del inicio. Las apps no se copian: la Tienda las vuelve a bajar de esa lista.')),
       h('div', { class: 'note', style: 'margin-top:6px' }, tr('Sin frase, el archivo se puede leer y no lleva lo que parece una credencial (contraseñas, tokens, claves). Con una frase lleva todo, cifrado: sin ella no hay forma de abrirlo.')),
+      st.auto ? h('div', { class: 'note', style: 'margin-top:6px' }, !st.auto.on ? tr('Las copias automáticas están apagadas (Ajustes, Respaldo, en la placa).')
+        : st.auto.sealed ? tr('La placa guarda sola una copia por día si algo cambió, y otra antes de instalar un firmware: cifradas con la frase que se eligió en la placa. Quedan las cinco últimas.')
+        : tr('La placa guarda sola una copia por día si algo cambió, y otra antes de instalar un firmware: sin credenciales, hasta que se les elija una frase en Ajustes, Respaldo. Quedan las cinco últimas.')) : null,
       !st.card ? h('div', { class: 'note', style: 'color:var(--orange);margin-top:6px' }, tr('No hay tarjeta: no hay dónde guardarlo.')) : null,
       h('div', { class: 'btns', style: 'margin-top:10px' }, pass,
         h('button', { class: 'btn pri', disabled: st.busy || !st.card, onclick: () => act('backup', { pass: pass.value }) }, tr('Respaldar ahora')),
