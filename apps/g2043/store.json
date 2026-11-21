@@ -3,5 +3,8 @@
  "about": {
   "es": "2043, la batalla de Ceres: un juego de naves vertical, con barra de energía y formaciones enemigas.",
   "en": "2043, the battle of Ceres: a vertical shoot-'em-up, with an energy bar and enemy formations."
- }
+ },
+ "shots": [
+  "app-2043.png"
+ ]
 }

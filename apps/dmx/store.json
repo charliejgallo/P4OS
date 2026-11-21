@@ -4,6 +4,10 @@
   "es": "Herramienta de banco para DMX512: enviar, recibir y medir, por un puerto RS485.",
   "en": "A bench tool for DMX512: send, receive and measure, on an RS485 port."
  },
+ "shots": [
+  "app-dmx-analyzer.png",
+  "app-dmx-rdm.png"
+ ],
  "needs": [
   "header"
  ]

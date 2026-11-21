@@ -91,6 +91,15 @@ void aos_store_cancel(void);
 void aos_store_status(aos_store_status_t *out);
 int  aos_store_count(void);
 bool aos_store_app(int index, aos_store_app_t *out);
+/* A picture of an app's page, by its address in the catalogue ("shots": the
+ * "url" of one). They are kept on the card (apps/.store/shots) once
+ * downloaded, two at a time at most, apart from the queue of jobs.
+ *    1   it is on the card: 'path' has its full path, to decode
+ *    0   on its way; ask again
+ *   -1   it could not be had (no network, not there): not tried again until
+ *        the next refresh of the catalogue */
+int aos_store_shot(const char *url, char *path, size_t path_len);
+
 /* A copy of the catalogue's text (NDJSON: the source's line, then an app a
  * line), NUL-terminated, to free(); NULL when there is none yet. */
 char *aos_store_catalog(size_t *len);

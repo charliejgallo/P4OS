@@ -4,6 +4,11 @@
   "es": "Registra las lecturas de los sensores del header en un CSV, con horarios y alarmas.",
   "en": "Logs the readings of the header's sensors to a CSV, on a schedule, with alarms."
  },
+ "shots": [
+  "app-datalog-chart.png",
+  "app-datalog-form.png",
+  "app-datalog.png"
+ ],
  "needs": [
   "header"
  ]

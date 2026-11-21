@@ -4,6 +4,10 @@
   "es": "Herramienta de banco para Modbus RTU y TCP: leer, escribir y sondear registros.",
   "en": "A bench tool for Modbus RTU and TCP: read, write and poll registers."
  },
+ "shots": [
+  "app-modbus-traffic.png",
+  "app-modbus.png"
+ ],
  "needs": [
   "header"
  ]

@@ -3,5 +3,8 @@
  "about": {
   "es": "Sacá el auto rojo del estacionamiento moviendo los demás, en la menor cantidad de jugadas.",
   "en": "Get the red car out of the car park by sliding the others, in as few moves as you can."
- }
+ },
+ "shots": [
+  "app-atasco.png"
+ ]
 }

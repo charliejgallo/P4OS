@@ -41,6 +41,10 @@ What each app says of itself is in apps/<app>/store.json:
       "packs": [{"file": "x_p4.pak", "need": true},
                 {"file": "x_luna_p4.pak", "need": false,
                  "name": {"es": "Mundo: Luna", "en": "World: Moon"}}],
+      "shots": ["app-x.png", "land-x.jpg"], pictures of it, files of docs/img,
+                                            four at most: the store gets a
+                                            copy of each at its own size
+      "tags": ["3d"],                       what it is that the code does not say
       "needs": ["usb-host"],                what a board may not have
       "user_files": {"es": "...", "en": "..."},   what the person brings
       "license": "Apache-2.0",              the default
@@ -51,6 +55,18 @@ The id, the name, the colours and the icon come from the app's own code and
 its .so; "id", "name" and "colors" in store.json say them for a module that
 declares its apps while it runs (lua, python), and "glyph" the text or
 character its icon is when it has no drawing of its own.
+
+Worked out too, and shown on the app's page: "langs" (the languages its
+package brings, Spanish always) and "feat", a list of what it is and does -
+"packs" (art packs), "pad" (plays with a joystick), "portal" (a page of its
+own in the portal), "landscape" or "portrait" (it only lives one way), "net",
+"sound", "bt" - read from its code, plus the "tags" of store.json.
+
+A picture goes out as <file>-<n>-<hash>.jpg, a baseline JPEG no longer than
+SHOT_SIDE on its long side (the board's decoder takes no progressive ones):
+the same picture keeps its name, and so its address in --previous. Making
+them needs Pillow; without it the catalogue goes out with no pictures, and
+says so.
 
 "fw_min" is worked out, not written: the newest release in which any symbol
 the .so needs first appeared, from the symbol tables of this repository's
@@ -83,6 +99,16 @@ BASELINE = "v0.29.0"
 # What the loader's own table brings, outside aos_symbols.c (build_apps.sh)
 LOADER_BUILTIN = {"printf", "fprintf", "vfprintf"}
 ZIP_DATE = (2026, 1, 1, 0, 0, 0)
+SHOT_SIDE = 560                 # a picture's long side in the store, px
+SHOTS_MAX = 4
+TAGS = {"3d"}                   # what store.json may say in "tags"
+# what the code tells about an app: a word, and what gives it away
+FEATURES = (
+    ("pad",   r"aos_pad\.h|aos_hal_hid_gamepad"),
+    ("net",   r"aos_hal_http_|aos_hal_tcp_|aos_hal_ws_|aos_tls_"),
+    ("sound", r"aos_hal_spk_|aos_hal_beep|aos_hal_tone|aos_hal_player_|aos_hal_radio_"),
+    ("bt",    r"aos_hal_bt_|aos_hal_ble_"),
+)
 LANGS_TEXT = ("es", "en")       # what a name or a description must have
 
 
@@ -165,7 +191,7 @@ def load_manifest(app_dir, cats):
         return None
     m = read_json(path)
     known = {"cat", "about", "packs", "needs", "user_files", "license", "publish", "id", "name", "colors", "glyph",
-             "fw_min", "src"}
+             "fw_min", "src", "shots", "tags"}
     extra = set(m) - known
     if extra:
         raise Bad("%s: unknown %s" % (where, ", ".join(sorted(extra))))
@@ -181,6 +207,14 @@ def load_manifest(app_dir, cats):
         text2(m["user_files"], "user_files", where)
     if "fw_min" in m and not re.fullmatch(r"\d+\.\d+\.\d+", m["fw_min"]):
         raise Bad("%s: \"fw_min\" is like 0.31.0" % where)
+    shots = m.get("shots", [])
+    if not isinstance(shots, list) or len(shots) > SHOTS_MAX:
+        raise Bad("%s: \"shots\" is a list of %d pictures at most" % (where, SHOTS_MAX))
+    for f in shots:
+        if not re.fullmatch(r"[A-Za-z0-9_-]+\.(png|jpg)", f) or not os.path.isfile(os.path.join(ROOT, "docs", "img", f)):
+            raise Bad("%s: the picture %s is not in docs/img" % (where, f))
+    if set(m.get("tags", [])) - TAGS:
+        raise Bad("%s: \"tags\" may hold %s" % (where, ", ".join(sorted(TAGS))))
     for p in m.get("packs", []):
         if not re.fullmatch(r"[a-z0-9_]+\.pak", p.get("file", "")) or not isinstance(p.get("need"), bool):
             raise Bad("%s: a pack needs \"file\" (x_p4.pak) and \"need\" (true or false)" % where)
@@ -252,6 +286,37 @@ def glyph_of(macro):
                 except UnicodeDecodeError:
                     pass
     return _GLYPHS.get(macro)
+
+
+def features(app_dir):
+    """What the app's own code tells: the words of FEATURES it gives away,
+    and "landscape" or "portrait" when its descriptor asks for one only."""
+    text = ""
+    for path in sorted(glob.glob(os.path.join(app_dir, "main", "*.c")) + glob.glob(os.path.join(app_dir, "main", "*.h"))):
+        text += open(path, encoding="utf-8", errors="replace").read()
+    out = [name for name, what in FEATURES if re.search(what, text)]
+    flags = " ".join(re.findall(r"\.flags\s*=([^;]*);", text))
+    land, port = "AOS_APP_FLAG_LANDSCAPE" in flags, "AOS_APP_FLAG_PORTRAIT" in flags
+    if land != port:
+        out.append("landscape" if land else "portrait")
+    return out
+
+
+def make_shot(path):
+    """A picture of docs/img as the store shows it: (jpeg bytes, w, h), or
+    None without Pillow."""
+    try:
+        from PIL import Image
+    except ImportError:
+        return None
+    im = Image.open(path).convert("RGB")
+    w, h = im.size
+    k = SHOT_SIDE / max(w, h)
+    if k < 1:
+        im = im.resize((max(1, round(w * k)), max(1, round(h * k))), Image.LANCZOS)
+    buf = io.BytesIO()
+    im.save(buf, "JPEG", quality=82, optimize=True, progressive=False, subsampling="4:2:0")
+    return buf.getvalue(), im.size[0], im.size[1]
 
 
 def lang_lookup(code, lang_id, text):
@@ -443,6 +508,20 @@ def build_app(app_dir, m, a, since, icons, abi):
     for k in ("needs", "user_files"):
         if m.get(k):
             entry[k] = m[k]
+    entry["langs"] = ["es"] + sorted({p.split("/")[1] for p in files if p.startswith("lang/")})
+    feat = list(m.get("tags", [])) + (["packs"] if m.get("packs") else []) + features(app_dir) + (["portal"] if pages else [])
+    if feat:
+        entry["feat"] = feat
+    shots = []
+    for n, f in enumerate(m.get("shots", []), 1):
+        made = make_shot(os.path.join(ROOT, "docs", "img", f))
+        if made is None:
+            a.no_pillow = True
+            break
+        data, w, h = made
+        name = "%s-%d-%s.jpg" % (file, n, sha256(data)[:8])
+        shots.append({"name": name, "data": data, "w": w, "h": h})
+    entry["_shots"] = shots
     entry["license"] = m.get("license", "Apache-2.0")
     entry["src"] = m.get("src", "%s/tree/main/apps/%s" % (a.source["url"], app))
     return file, pkg, entry
@@ -519,6 +598,7 @@ def cmd_build(a):
             e = json.loads(line)
             previous[e["file"]] = e
     since = Since(a.release)
+    a.no_pillow = False
     icons = icon_names()
     abi = abi_version()
     only = set(a.only.split(",")) if a.only else None
@@ -560,6 +640,18 @@ def cmd_build(a):
         if packs:
             entry["packs"] = packs
         old = previous.get(file)
+        was = {u["url"].rsplit("/", 1)[-1]: u["url"] for u in (old or {}).get("shots", [])}
+        pics = []
+        for sh in entry.pop("_shots"):
+            if sh["name"] in was:
+                url = was[sh["name"]]           # the same picture: where it already is
+            else:
+                url = "%s/%s" % (a.release, sh["name"])
+                with open(os.path.join(a.out, sh["name"]), "wb") as f:
+                    f.write(sh["data"])
+            pics.append({"url": url, "w": sh["w"], "h": sh["h"]})
+        if pics:
+            entry["shots"] = pics
         if old and old["pkg"]["sha256"] == entry["pkg"]["sha256"]:
             # the same package as the last release's: it stays where it is
             entry["ver"] = old["ver"]
@@ -581,6 +673,8 @@ def cmd_build(a):
     with open(path, "w", encoding="utf-8") as f:
         for o in [head] + lines:
             f.write(json.dumps(o, ensure_ascii=False, separators=(",", ":")) + "\n")
+    if a.no_pillow:
+        warn("no Pillow here (pip install pillow): the catalogue goes out without pictures")
     total = sum(e["pkg"]["size"] for e in lines)
     print("%d apps in %s (%d bytes): %d packages written, %d as in the previous release; %.1f MB of packages, "
           "%.1f MB of packs" % (len(lines), path, os.path.getsize(path), new, kept, total / 1e6,

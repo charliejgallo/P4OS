@@ -4,6 +4,12 @@
   "es": "Duke Nukem 3D con el motor Build, por Chocolate Duke3D. Se juega acostado.",
   "en": "Duke Nukem 3D on the Build engine, through Chocolate Duke3D. Played lying down."
  },
+ "tags": [
+  "3d"
+ ],
+ "shots": [
+  "land-duke3d.jpg"
+ ],
  "user_files": {
   "es": "Los datos del juego no vienen con la app: copiá tu DUKE3D.GRP (el shareware 1.3D sirve) a la carpeta duke3d/ de la tarjeta.",
   "en": "The game's data does not come with the app: copy your DUKE3D.GRP (the 1.3D shareware will do) to the card's duke3d/ folder."

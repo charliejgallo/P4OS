@@ -3,5 +3,11 @@
  "about": {
   "es": "Escáner y analizador de Bluetooth LE: quién anda cerca, con qué señal y qué anuncia.",
   "en": "A Bluetooth LE scanner and analyser: who is around, how strong, and what they advertise."
- }
+ },
+ "shots": [
+  "app-ble-air.png",
+  "app-ble-hilink.png",
+  "app-ble-list.png",
+  "app-ble-mi-ask.png"
+ ]
 }

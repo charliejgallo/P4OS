@@ -3118,6 +3118,8 @@ function pageTienda() {
     try { st = await post('store/' + what, body); draw(); poll(400); }
     catch (e) { toast(e.message, true); }
   };
+  const FEAT = { '3d': '3D', packs: N_('Arte en packs'), pad: 'Joystick', landscape: N_('Acostada'), portrait: N_('De pie'),
+                 sound: N_('Sonido'), net: N_('Usa la red'), bt: 'Bluetooth', portal: N_('Página en el portal') };
   const STATE = { installed: N_('Instalada'), update: N_('Hay una versión nueva'), by_hand: N_('Copiada a mano'),
                   set_aside: N_('Apartada: hizo caer la placa al cargarse'), absent: '' };
   function card(e, a) {
@@ -3138,6 +3140,13 @@ function pageTienda() {
           h('div', { class: 'small muted', style: 'margin:4px 0' }, L(e.about)),
           h('div', { class: 'small muted' }, fmtBytes(e.pkg.installed || e.pkg.size) + (need ? ' + ' + fmtBytes(need) + ' ' + tr('de packs') : '') +
             (a.fits ? '' : ' · ' + tr('necesita P4OS %s', e.fw_min))),
+          h('div', { style: 'margin-top:6px;display:flex;gap:6px;flex-wrap:wrap' },
+            (e.feat || []).filter(f => FEAT[f]).map(f => h('span', { class: 'pill' }, tr(FEAT[f]))),
+            (e.langs || []).length > 1 ? h('span', { class: 'pill' }, e.langs.map(l => l.toUpperCase()).join(' · ')) : null),
+          (e.shots || []).length ? h('div', { style: 'margin-top:8px;display:flex;gap:8px;overflow-x:auto' },
+            e.shots.map(sh => { const u = /^https?:/.test(sh.url) ? sh.url : head.base + sh.url;
+              return h('a', { href: u, target: '_blank', rel: 'noopener' }, h('img', { src: u, loading: 'lazy', height: 150,
+                width: Math.round(150 * sh.w / sh.h), style: 'border-radius:8px;display:block' })); })) : null,
           e.user_files ? h('div', { class: 'small', style: 'color:var(--orange);margin-top:4px' }, L(e.user_files)) : null,
           extras.length ? h('details', { style: 'margin-top:6px' }, h('summary', { class: 'small' }, tr('%s extras', extras.length)), picks) : null),
         h('div', { class: 'btns', style: 'flex-direction:column;align-items:stretch' },

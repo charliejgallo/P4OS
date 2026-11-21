@@ -3346,6 +3346,12 @@ static const char blob_en__sistema_lang[] =
     "falta file, o la cola está llena\tfile is missing, or the queue is full\n"
     "GET\tGET\n"
     "falta file=<nombre>.so\tfile=<name>.so is missing\n"
+    "Arte en packs\tArt packs\n"
+    "Acostada\tLandscape\n"
+    "De pie\tPortrait\n"
+    "Usa la red\tUses the network\n"
+    "Página en el portal\tPage in the portal\n"
+    "Header de 40 pines\t40-pin header\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -6684,6 +6690,12 @@ static const char blob_de__sistema_lang[] =
     "falta file, o la cola está llena\tfile fehlt, oder die Warteschlange ist voll\n"
     "GET\tGET\n"
     "falta file=<nombre>.so\tfile=<name>.so fehlt\n"
+    "Arte en packs\tGrafik-Packs\n"
+    "Acostada\tQuerformat\n"
+    "De pie\tHochformat\n"
+    "Usa la red\tNutzt das Netz\n"
+    "Página en el portal\tSeite im Portal\n"
+    "Header de 40 pines\t40-polige Leiste\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -6691,7 +6703,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3331, 0, files_en, 1 },
-    { "de", "Deutsch", 3331, 0, files_de, 1 },
+    { "en", "English", 3337, 0, files_en, 1 },
+    { "de", "Deutsch", 3337, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

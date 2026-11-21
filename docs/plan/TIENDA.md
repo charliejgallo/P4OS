@@ -517,6 +517,39 @@ apuntando a uno de prueba servido desde la Mac con `fake_github.py`: las
 vuelve a la dirección oficial (`POST /api/store/refresh {"url":""}`) y se
 apaga ese servidor.
 
+**Imágenes y datos de cada app (2026-11-21, pedido del usuario tras verla
+en la placa):**
+
+- **Las capturas** salen de `docs/img`, que ya las tenía: cada
+  `store.json` nombra hasta cuatro (`"shots"`) y `gen_store.py` le arma a
+  la Tienda una copia a su medida, un JPEG de 560 px de lado mayor (el
+  decodificador de la placa no toma progresivos), con el hash en el nombre
+  para que una imagen que no cambió conserve su dirección. Hoy son 91
+  imágenes, 2,4 MB en total, ~26 KB cada una; el catálogo pasó a 60 KB.
+  Necesita Pillow; sin él el catálogo sale sin imágenes y lo avisa.
+- **Los datos extra** (`"feat"` y `"langs"`) los calcula el generador
+  leyendo el código de cada app: packs de arte, joystick, página en el
+  portal, si vive sólo de pie o acostada, red, sonido, Bluetooth, y los
+  idiomas que trae su paquete. Lo que el código no dice va en `"tags"` del
+  `store.json` (hoy, `3d`).
+- **En la página de la app:** una fila de etiquetas con su símbolo (3D,
+  Arte en packs, Joystick, De pie, Sonido, ES DE EN, USB, Header...) y,
+  debajo, las imágenes una al lado de la otra, que se deslizan. El
+  servicio baja cada una a `apps/.store/shots` una sola vez
+  (`aos_store_shot`), un hilo aparte la decodifica y la página la pone en
+  su marco cuando llega; se sueltan al salir de la página.
+- La página del portal muestra lo mismo: etiquetas y miniaturas.
+- Visto en el simulador, de pie y acostada.
+
+**Cobertura de imágenes, hoy:** de las 58 apps publicadas, 12 tienen tres
+o cuatro, 7 tienen dos, 31 una sola y 8 ninguna (Cámaras, Clima,
+Cotizaciones, Hola, Lua, Mila, Notas, Grabadora). **El usuario quiere tres
+o cuatro en todas:** son unas 110 capturas nuevas del simulador, en
+inglés como las demás, cada app en una pantalla que valga la pena. Es un
+trabajo de apps (no toca el firmware): las capturas van a `docs/img` y sus
+nombres a `"shots"` del `store.json`; `tools/gen_store.py check` dice si
+quedó bien.
+
 **Lo que falta de esta fase:**
 
 - **Que el usuario la use en la placa:** el dedo, el desplazamiento y

@@ -3,5 +3,8 @@
  "about": {
   "es": "Blackjack contra la casa: apostá fichas, pedí, plantate, doblá o separá.",
   "en": "Blackjack against the house: bet chips, hit, stand, double or split."
- }
+ },
+ "shots": [
+  "app-blackjack.jpg"
+ ]
 }

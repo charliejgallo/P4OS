@@ -3,5 +3,8 @@
  "about": {
   "es": "Radios de internet: dial, nueve teclas de memoria y la lista entera de emisoras.",
   "en": "Internet radio: a dial, nine preset keys and the whole list of stations."
- }
+ },
+ "shots": [
+  "app-radio.png"
+ ]
 }

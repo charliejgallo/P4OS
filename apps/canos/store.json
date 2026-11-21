@@ -3,5 +3,11 @@
  "about": {
   "es": "Uní el tanque con el desagüe antes de que corra el líquido: seis plantas, diez niveles cada una.",
   "en": "Join the tank to its drain before the liquid runs: six plants, ten levels each."
- }
+ },
+ "shots": [
+  "app-canos-acid.jpg",
+  "app-canos-lava.jpg",
+  "app-canos-leak.jpg",
+  "app-canos-menu.jpg"
+ ]
 }

@@ -4,6 +4,15 @@
   "es": "Pinball en 3D, visto desde atrás de las paletas, con seis mesas.",
   "en": "Pinball in 3D, seen from behind the flippers, with six tables."
  },
+ "tags": [
+  "3d"
+ ],
+ "shots": [
+  "app-pinball-carousel.jpg",
+  "app-pinball-casino.jpg",
+  "app-pinball-circo.jpg",
+  "app-pinball-piratas.jpg"
+ ],
  "packs": [
   {
    "file": "pinball_zombis_p4.pak",

@@ -3,5 +3,8 @@
  "about": {
   "es": "Combiná tres o más gemas en línea; las que caen encadenan más.",
   "en": "Match three or more jewels in a line; what falls chains more."
- }
+ },
+ "shots": [
+  "app-gemas.png"
+ ]
 }

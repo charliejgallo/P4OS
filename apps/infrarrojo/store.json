@@ -4,6 +4,9 @@
   "es": "Control remoto que aprende: capturá, guardá y mandá códigos infrarrojos.",
   "en": "A learning remote: capture, keep and send infrared codes."
  },
+ "shots": [
+  "app-infrared.png"
+ ],
  "packs": [
   {
    "file": "infrarrojo_p4.pak",

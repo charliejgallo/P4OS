@@ -106,6 +106,7 @@ static job_t   s_queue[QUEUE];
 static int     s_qn;
 static bool    s_running, s_cancel;
 static aos_store_status_t s_st;
+static int     s_shot_nbad;         /* pictures that could not be had (below) */
 
 static void lock(void)   { aos_hal_mutex_lock(s_lock); }
 static void unlock(void) { aos_hal_mutex_unlock(s_lock); }
@@ -461,6 +462,7 @@ static bool catalog_load(err_t *e)
     snprintf(s_st.release, sizeof s_st.release, "%s", rel);
     snprintf(s_st.source, sizeof s_st.source, "%s", name);
     s_st.apps = (uint32_t)n;
+    s_shot_nbad = 0;
     states();
     unlock();
     return true;
@@ -510,6 +512,61 @@ static bool download(const char *url, const char *rel, const char *sha, uint32_t
     if (in.state == AOS_FETCH_DONE) return true;
     if (in.state == AOS_FETCH_CANCELLED) return fail(e, "cancelled");
     return fail(e, "%.150s", in.why[0] ? in.why : "the download failed");
+}
+
+/* ---- the pictures of an app's page ----------------------------------------- */
+
+#define DIR_SHOTS   "apps/.store/shots"
+#define SHOTS_LIVE  2
+#define SHOTS_BAD   16
+
+static struct { char name[72]; int id; } s_shot[SHOTS_LIVE];
+static char s_shot_bad[SHOTS_BAD][72];
+
+int aos_store_shot(const char *url, char *path, size_t path_len)
+{
+    aos_store_init();
+    if (!url || !aos_hal_path_sd_root()) return -1;
+    const char *name = strrchr(url, '/');
+    name = name ? name + 1 : url;
+    if (!ends(name, ".jpg") || strlen(name) >= sizeof s_shot[0].name || !name_ok(name, strlen(name), "_-.") || name[0] == '.')
+        return -1;
+    char rel[PATH_MAX_], f[FULL_MAX], full_url[512];
+    snprintf(rel, sizeof rel, DIR_SHOTS "/%s", name);
+    full(f, rel);
+    int result = 0;
+    lock();
+    int slot = -1, free_slot = -1;
+    for (int i = 0; i < SHOTS_LIVE; i++) {
+        if (s_shot[i].id && !strcmp(s_shot[i].name, name)) slot = i;
+        if (!s_shot[i].id && free_slot < 0) free_slot = i;
+    }
+    if (slot >= 0) {
+        aos_fetch_info_t in;
+        bool known = aos_fetch_info(s_shot[slot].id, &in);
+        if (known && in.state == AOS_FETCH_BUSY) result = 0;
+        else {
+            result = known && in.state == AOS_FETCH_DONE ? 1 : -1;
+            aos_fetch_release(s_shot[slot].id);
+            s_shot[slot].id = 0;
+            if (result < 0 && s_shot_nbad < SHOTS_BAD) snprintf(s_shot_bad[s_shot_nbad++], sizeof s_shot_bad[0], "%s", name);
+        }
+    } else if (exists(rel, NULL)) result = 1;
+    else {
+        for (int i = 0; i < s_shot_nbad; i++)
+            if (!strcmp(s_shot_bad[i], name)) result = -1;
+        if (result == 0 && free_slot >= 0) {
+            url_of(full_url, sizeof full_url, url);
+            int id = aos_fetch_start(full_url, f, NULL, 0);
+            if (id > 0) {
+                s_shot[free_slot].id = id;
+                snprintf(s_shot[free_slot].name, sizeof s_shot[0].name, "%s", name);
+            }
+        }
+    }
+    unlock();
+    if (result == 1 && path) snprintf(path, path_len, "%s", f);
+    return result;
 }
 
 /* ---- a zip without compression --------------------------------------------- */

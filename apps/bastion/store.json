@@ -4,6 +4,15 @@
   "es": "Defensa de torres en 3D: un fuerte en el espacio, oleadas de alienígenas, catorce torres y diez mundos.",
   "en": "A tower defense in 3D: a fort in space, waves of aliens, fourteen towers and ten worlds."
  },
+ "tags": [
+  "3d"
+ ],
+ "shots": [
+  "app-bastion-campaign.jpg",
+  "app-bastion-lab.jpg",
+  "app-bastion-luna.jpg",
+  "app-bastion-magma.jpg"
+ ],
  "packs": [
   {
    "file": "bastion_p4.pak",

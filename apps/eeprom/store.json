@@ -4,6 +4,9 @@
   "es": "Lee, edita y graba memorias 24xx, 25xx, 25Qxx y 93xx, con versiones y checksums.",
   "en": "Reads, edits and writes 24xx, 25xx, 25Qxx and 93xx memories, with versions and checksums."
  },
+ "shots": [
+  "app-eeprom.png"
+ ],
  "needs": [
   "header"
  ]

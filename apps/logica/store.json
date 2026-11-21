@@ -4,6 +4,12 @@
   "es": "Analizador lógico de ocho canales, con diez decodificadores de protocolo y sesiones de sigrok.",
   "en": "An eight-channel logic analyser, with ten protocol decoders and sigrok sessions."
  },
+ "shots": [
+  "app-logica-decoders.png",
+  "app-logica-demo.png",
+  "app-logica-measure.png",
+  "app-logica-table.png"
+ ],
  "needs": [
   "usb-host"
  ]

@@ -4,6 +4,13 @@
   "es": "Golf en 3D: un golfista animado, la vista del hoyo y el golpe con el dedo.",
   "en": "Golf in 3D: an animated golfer, the hole's view and the swing by finger."
  },
+ "tags": [
+  "3d"
+ ],
+ "shots": [
+  "app-golf.jpg",
+  "land-golf.jpg"
+ ],
  "packs": [
   {
    "file": "golf_p4.pak",

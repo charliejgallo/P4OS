@@ -4,5 +4,11 @@
   "es": "Álgebra simbólica con el motor Giac: derivar, integrar, resolver y graficar.",
   "en": "Computer algebra on the Giac engine: differentiate, integrate, solve and plot."
  },
+ "shots": [
+  "app-cas-calc.png",
+  "app-cas-fin.png",
+  "app-cas-geo.png",
+  "app-cas-graph.png"
+ ],
  "license": "GPL-3.0"
 }

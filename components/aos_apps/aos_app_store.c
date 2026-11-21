@@ -13,6 +13,12 @@
  * colours, the icon's blob) and an app's page reads its own line again for
  * the rest. All of it in PSRAM, let go when the app closes.
  *
+ * An app's page also shows its pictures (the catalogue's "shots"): the
+ * service brings each to the card once, a thread decodes it - decoding is
+ * slow by LVGL's measure - and the page puts it in its frame when it is
+ * ready. And a row of what the app is and does (3D, art packs, joystick,
+ * languages...), which the catalogue worked out from its code.
+ *
  * A download goes on with the app closed: the service does not need this
  * screen. aos_app_store_service_tick() keeps the number of updates on the
  * home icon.
@@ -82,6 +88,118 @@ static struct {
 } S = { .sel = -1 };
 
 static void build(void);
+
+/* ---- the pictures of the page that is up ----------------------------------- */
+
+#define SHOTS_MAX 4
+enum { SH_WANTED = 0, SH_ON_CARD, SH_DECODING, SH_READY, SH_FAILED };
+
+typedef struct {
+    char           url[120];
+    int            w, h;            /* as the catalogue says: the frame's size */
+    int            state;
+    char           path[224];
+    uint16_t      *px;
+    lv_image_dsc_t dsc;
+    lv_obj_t      *frame;           /* on the page; NULL between builds */
+} shot_t;
+
+static struct {
+    char   owner[32];               /* whose pictures these are */
+    int    n;
+    shot_t s[SHOTS_MAX];
+} G;
+
+/* the one decode in flight: the thread fills it and raises 'done' */
+static struct {
+    volatile int busy, done;
+    int       idx;
+    uint32_t  gen;
+    char      path[224];
+    int       max_w, max_h, w, h;
+    uint16_t *px;
+} D;
+static uint32_t s_gen;              /* moves when the gallery is let go */
+
+static void gallery_free(void)
+{
+    s_gen++;
+    for (int i = 0; i < G.n; i++)
+        if (G.s[i].px) aos_hal_image_free(G.s[i].px);
+    memset(&G, 0, sizeof G);
+}
+
+static void decode_thread(void *arg)
+{
+    (void)arg;
+    D.px = aos_hal_image_decode(D.path, 0, 0, D.max_w, D.max_h, false, &D.w, &D.h, NULL, NULL);
+    D.done = 1;
+}
+
+static void shot_show(shot_t *sh)
+{
+    if (!sh->frame) return;
+    lv_obj_clean(sh->frame);
+    if (sh->state == SH_READY) {
+        lv_obj_t *img = lv_image_create(sh->frame);
+        lv_image_set_src(img, &sh->dsc);
+        lv_obj_center(img);
+    } else {
+        lv_obj_t *g = aos_label(sh->frame, sh->state == SH_FAILED ? AOS_SYM_IMAGE_BROKEN_VARIANT : AOS_SYM_IMAGE,
+                                &aos_sym_72, AOS_C_CARD2);
+        lv_obj_center(g);
+    }
+}
+
+/* From the app's tick: what arrived, what to ask for, what to decode next. */
+static void gallery_tick(void)
+{
+    if (D.done) {
+        shot_t *sh = D.gen == s_gen && D.idx < G.n ? &G.s[D.idx] : NULL;
+        if (sh && D.px) {
+            sh->px = D.px;
+            memset(&sh->dsc, 0, sizeof sh->dsc);
+            sh->dsc.header.magic = LV_IMAGE_HEADER_MAGIC;
+            sh->dsc.header.cf = LV_COLOR_FORMAT_RGB565;
+            sh->dsc.header.w = (uint32_t)D.w;
+            sh->dsc.header.h = (uint32_t)D.h;
+            sh->dsc.header.stride = (uint32_t)D.w * 2u;
+            sh->dsc.data_size = (uint32_t)D.w * (uint32_t)D.h * 2u;
+            sh->dsc.data = (const uint8_t *)D.px;
+            sh->state = SH_READY;
+            shot_show(sh);
+        } else {
+            if (D.px) aos_hal_image_free(D.px);     /* of a page that is gone */
+            if (sh) { sh->state = SH_FAILED; shot_show(sh); }
+        }
+        D.px = NULL;
+        D.done = 0;
+        D.busy = 0;
+    }
+    for (int i = 0; i < G.n; i++) {
+        shot_t *sh = &G.s[i];
+        if (sh->state == SH_WANTED) {
+            int r = aos_store_shot(sh->url, sh->path, sizeof sh->path);
+            if (r > 0) sh->state = SH_ON_CARD;
+            else if (r < 0) { sh->state = SH_FAILED; shot_show(sh); }
+        }
+        if (sh->state == SH_ON_CARD && !D.busy) {
+            D.busy = 1;
+            D.done = 0;
+            D.idx = i;
+            D.gen = s_gen;
+            D.max_w = sh->w;
+            D.max_h = sh->h;
+            snprintf(D.path, sizeof D.path, "%s", sh->path);
+            sh->state = SH_DECODING;
+            if (!aos_hal_thread_start("store_img", decode_thread, NULL, 8192, 2)) {
+                D.busy = 0;
+                sh->state = SH_FAILED;
+                shot_show(sh);
+            }
+        }
+    }
+}
 
 /* ---- small things ---------------------------------------------------------- */
 
@@ -535,6 +653,107 @@ static void note(lv_obj_t *parent, const char *glyph, lv_color_t color, const ch
     lv_label_set_long_mode(l, LV_LABEL_LONG_MODE_WRAP);
 }
 
+static void badge(lv_obj_t *parent, const char *glyph, const char *text)
+{
+    lv_obj_t *b = box(parent);
+    lv_obj_set_size(b, LV_SIZE_CONTENT, 52);
+    lv_obj_set_style_radius(b, 26, 0);
+    lv_obj_set_style_bg_color(b, AOS_C_CARD, 0);
+    lv_obj_set_style_bg_opa(b, LV_OPA_COVER, 0);
+    lv_obj_set_style_pad_hor(b, 18, 0);
+    lv_obj_set_style_pad_column(b, 10, 0);
+    lv_obj_set_flex_flow(b, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(b, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    aos_label(b, glyph, &aos_sym_28, AOS_C_ACCENT);
+    aos_label(b, text, aos_font_caption, AOS_C_TEXT);
+}
+
+/* What the app is and does, as the catalogue worked it out. */
+static void badges(lv_obj_t *parent, const cJSON *o)
+{
+    static const struct { const char *key, *glyph, *text; } F[] = {
+        { "3d",        AOS_SYM_ROTATE_3D_VARIANT,      "3D" },
+        { "packs",     AOS_SYM_PACKAGE_VARIANT,        N_("Arte en packs") },
+        { "pad",       AOS_SYM_GAMEPAD_VARIANT,        "Joystick" },
+        { "landscape", AOS_SYM_PHONE_ROTATE_LANDSCAPE, N_("Acostada") },
+        { "portrait",  AOS_SYM_PHONE_ROTATE_PORTRAIT,  N_("De pie") },
+        { "sound",     AOS_SYM_VOLUME_HIGH,            N_("Sonido") },
+        { "net",       AOS_SYM_WIFI,                   N_("Usa la red") },
+        { "bt",        AOS_SYM_BLUETOOTH,              "Bluetooth" },
+        { "portal",    AOS_SYM_WEB,                    N_("Página en el portal") },
+    };
+    lv_obj_t *r = box(parent);
+    lv_obj_set_size(r, lv_pct(100), LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(r, LV_FLEX_FLOW_ROW_WRAP);
+    lv_obj_set_style_pad_column(r, 10, 0);
+    lv_obj_set_style_pad_row(r, 10, 0);
+    const cJSON *f;
+    int n = 0;
+    for (size_t i = 0; i < sizeof F / sizeof F[0]; i++)
+        cJSON_ArrayForEach(f, cJSON_GetObjectItem(o, "feat"))
+            if (cJSON_IsString(f) && !strcmp(f->valuestring, F[i].key)) { badge(r, F[i].glyph, aos_tr(F[i].text)); n++; }
+    cJSON_ArrayForEach(f, cJSON_GetObjectItem(o, "needs")) {
+        if (!cJSON_IsString(f)) continue;
+        if (!strcmp(f->valuestring, "usb-host")) { badge(r, AOS_SYM_USB, "USB"); n++; }
+        else if (!strcmp(f->valuestring, "header")) { badge(r, AOS_SYM_EXPANSION_CARD, _("Header de 40 pines")); n++; }
+    }
+    /* the languages it speaks, when more than its own */
+    const cJSON *langs = cJSON_GetObjectItem(o, "langs");
+    if (cJSON_GetArraySize(langs) > 1) {
+        char buf[64] = "";
+        size_t w = 0;
+        cJSON_ArrayForEach(f, langs) {
+            if (!cJSON_IsString(f) || strlen(f->valuestring) < 2 || w + 8 >= sizeof buf) continue;
+            w += (size_t)snprintf(buf + w, sizeof buf - w, "%s%c%c", w ? "  " : "",
+                                  (char)(f->valuestring[0] & ~0x20), (char)(f->valuestring[1] & ~0x20));
+        }
+        badge(r, AOS_SYM_TRANSLATE, buf);
+        n++;
+    }
+    if (!n) lv_obj_delete(r);
+}
+
+/* Its pictures, side by side, each in a frame of its size until it arrives. */
+static void gallery(lv_obj_t *parent, const item_t *it, const cJSON *o)
+{
+    if (strcmp(G.owner, it->file)) {
+        gallery_free();
+        snprintf(G.owner, sizeof G.owner, "%s", it->file);
+        const cJSON *sh;
+        cJSON_ArrayForEach(sh, cJSON_GetObjectItem(o, "shots")) {
+            const char *url = cJSON_GetStringValue(cJSON_GetObjectItem(sh, "url"));
+            int w = (int)jnum(sh, "w"), h = (int)jnum(sh, "h");
+            if (!url || G.n >= SHOTS_MAX || w < 16 || h < 16 || w > 720 || h > 720) continue;
+            snprintf(G.s[G.n].url, sizeof G.s[0].url, "%s", url);
+            G.s[G.n].w = w;
+            G.s[G.n].h = h;
+            G.n++;
+        }
+    }
+    if (!G.n) return;
+    int tall = 0;
+    for (int i = 0; i < G.n; i++) tall = G.s[i].h > tall ? G.s[i].h : tall;
+    lv_obj_t *strip = box(parent);
+    lv_obj_set_size(strip, lv_pct(100), tall);
+    lv_obj_set_flex_flow(strip, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(strip, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_column(strip, 14, 0);
+    lv_obj_add_flag(strip, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_scroll_dir(strip, LV_DIR_HOR);
+    lv_obj_set_scrollbar_mode(strip, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_set_scroll_snap_x(strip, LV_SCROLL_SNAP_START);
+    for (int i = 0; i < G.n; i++) {
+        shot_t *sh = &G.s[i];
+        sh->frame = box(strip);
+        lv_obj_set_size(sh->frame, sh->w, sh->h);
+        lv_obj_set_style_radius(sh->frame, 22, 0);
+        lv_obj_set_style_clip_corner(sh->frame, true, 0);
+        lv_obj_set_style_bg_color(sh->frame, AOS_C_CARD, 0);
+        lv_obj_set_style_bg_opa(sh->frame, LV_OPA_COVER, 0);
+        shot_show(sh);
+    }
+}
+
 static void build_detail(lv_obj_t *page)
 {
     const item_t *it = &S.items[S.sel];
@@ -592,6 +811,9 @@ static void build_detail(lv_obj_t *page)
         lv_obj_set_style_text_color(lv_obj_get_child(rm, 0), AOS_C_RED, 0);
     }
 
+    badges(body, o);
+    gallery(body, it, o);
+
     /* what state it is in, when that is not obvious */
     if (it->st.state == AOS_STORE_SET_ASIDE)
         note(body, AOS_SYM_ALERT_OUTLINE, AOS_C_ORANGE,
@@ -617,14 +839,6 @@ static void build_detail(lv_obj_t *page)
     /* what the person brings: the store does not distribute it */
     const cJSON *uf = cJSON_GetObjectItem(o, "user_files");
     if (uf) note(body, AOS_SYM_ALERT_OUTLINE, AOS_C_YELLOW, pick(uf));
-    const cJSON *needs = cJSON_GetObjectItem(o, "needs"), *nd;
-    cJSON_ArrayForEach(nd, needs) {
-        const char *k = cJSON_GetStringValue(nd);
-        if (!k) continue;
-        note(body, AOS_SYM_CHIP, AOS_C_TEAL,
-             !strcmp(k, "usb-host") ? _("Usa un aparato enchufado al puerto USB de la placa.") :
-             !strcmp(k, "header")   ? _("Usa algo conectado al header de 40 pines.") : k);
-    }
 
     /* the extras, one at a time */
     const cJSON *p;
@@ -710,6 +924,8 @@ static void build(void)
     lv_obj_clean(S.root);
     S.list = S.banner = NULL;
     if (S.sel >= S.n) S.sel = -1;
+    for (int i = 0; i < G.n; i++) G.s[i].frame = NULL;
+    if (S.sel < 0 || strcmp(G.owner, S.items[S.sel].file)) gallery_free();
 
     lv_obj_t *page = aos_page(S.root);
     lv_obj_set_flex_flow(page, LV_FLEX_FLOW_COLUMN);
@@ -766,6 +982,12 @@ static void *create(aos_app_t *self, lv_obj_t *root)
     (void)self;
     S.root = root;
     S.list = NULL;
+    /* a picture that finished decoding after the app was closed */
+    if (D.done) {
+        if (D.px) aos_hal_image_free(D.px);
+        D.px = NULL;
+        D.done = D.busy = 0;
+    }
     load();
     aos_store_status_t st;
     aos_store_status(&st);
@@ -786,6 +1008,7 @@ static void destroy(aos_app_t *self, void *inst)
     if (self && self->root) lv_obj_clean(self->root);
     S.root = S.list = S.banner = NULL;
     S.asked = false;
+    gallery_free();
     unload();
 }
 
@@ -809,6 +1032,7 @@ static void tick(aos_app_t *self, void *inst)
 {
     (void)self; (void)inst;
     if (!S.root) return;
+    gallery_tick();
     aos_store_status_t st;
     aos_store_status(&st);
     bool changed = st.jobs_done != S.jobs_done || st.busy != S.busy || strcmp(st.file, S.job_file);

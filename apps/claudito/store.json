@@ -3,5 +3,8 @@
  "about": {
   "es": "Una mascota virtual para cuidar: darle de comer, jugar y dejarla dormir. Homenaje no oficial; no es un producto de Anthropic.",
   "en": "A virtual pet to look after: feed it, play with it, let it sleep. An unofficial homage; not an Anthropic product."
- }
+ },
+ "shots": [
+  "app-claudito.png"
+ ]
 }

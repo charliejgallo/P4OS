@@ -3,5 +3,8 @@
  "about": {
   "es": "Víboras de neón comen fruta de neón en una pantalla negra. Sin puntaje ni carteles.",
   "en": "Neon snakes eat neon fruit on a black screen. No score and no HUD."
- }
+ },
+ "shots": [
+  "app-neon.png"
+ ]
 }

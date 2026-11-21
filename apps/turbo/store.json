@@ -4,6 +4,13 @@
   "es": "Carreras de arcade: un superdeportivo rojo, tres carriles de tránsito y un reloj que no perdona.",
   "en": "An arcade racer: a red supercar, three lanes of traffic and a clock that does not forgive."
  },
+ "tags": [
+  "3d"
+ ],
+ "shots": [
+  "app-turbo.jpg",
+  "land-turbo.jpg"
+ ],
  "packs": [
   {
    "file": "turbo_p4.pak",

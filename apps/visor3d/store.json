@@ -3,5 +3,11 @@
  "about": {
   "es": "Girá, acercá y mové modelos 3D con los dedos.",
   "en": "Turn, zoom and move 3D models with your fingers."
- }
+ },
+ "tags": [
+  "3d"
+ ],
+ "shots": [
+  "app-visor3d.png"
+ ]
 }

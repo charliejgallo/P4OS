@@ -4,6 +4,9 @@
   "es": "Una salida PWM con perilla: frecuencia, ciclo, servos y patrones.",
   "en": "A PWM output on a knob: frequency, duty, servos and patterns."
  },
+ "shots": [
+  "app-pwm.png"
+ ],
  "needs": [
   "header"
  ]

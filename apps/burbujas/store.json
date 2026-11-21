@@ -3,5 +3,8 @@
  "about": {
   "es": "Disparo de burbujas: juntá tres o más del mismo color para que revienten.",
   "en": "A bubble shooter: three or more of a colour touching burst."
- }
+ },
+ "shots": [
+  "app-burbujas.png"
+ ]
 }
