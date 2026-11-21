@@ -1,11 +1,32 @@
 /*
- * P4OS - the Tienda's pieces, by hand (docs/plan/TIENDA.md, phase 0).
+ * P4OS - the Tienda in the portal (docs/plan/TIENDA.md).
  *
- * There is no store yet. These calls are for measuring its parts on the
- * board, one at a time, before anything is built on them: a download to the
- * card with the interface alive, whether a .so would load without loading
- * it, and putting an app in and taking it off while the board runs. The
- * store's service replaces them with its own API.
+ * The store's service (components/aos_store), as the page and the scripts
+ * see it:
+ *
+ *   GET  /api/store                its state: the job in hand and its
+ *                                  progress, how the last one ended, the
+ *                                  catalogue's source and release, and every
+ *                                  app: {file, id, ver, have, state, fits}
+ *                                  (state: absent, installed, update, by_hand)
+ *   GET  /api/store/catalog        the catalogue as it was downloaded
+ *                                  (NDJSON: the source, then an app a line):
+ *                                  names, descriptions, icons, packs
+ *   POST /api/store/refresh        downloads the catalogue again;
+ *                                  {"url": "..."} sets another address first
+ *                                  ("" goes back to the official one)
+ *   POST /api/store/install        {"file": "bastion", "packs": "need"}:
+ *                                  packs is need, all, none, or extras by
+ *                                  name ("a.pak,b.pak")
+ *   POST /api/store/remove         {"file": "bastion"}
+ *   POST /api/store/adopt          a receipt for what was copied by hand and
+ *                                  is the catalogue's
+ *   POST /api/store/cancel
+ *
+ * Every POST queues its job and answers with the state at once: ask again
+ * to follow it.
+ *
+ * And the pieces by hand, from phase 0, for measuring on the board:
  *
  *   GET  /api/store/fetch          the download: state, bytes, times, and the
  *                                  board's free memory as it goes
@@ -22,6 +43,7 @@
  * card and restarts the board already.
  */
 #include "aos_portal_store.h"
+#include "aos_store.h"
 #include "aos_fetch.h"
 #include "aos_hal.h"
 #include "aos_i18n.h"
@@ -134,11 +156,87 @@ static void fetch_start(aos_httpd_req_t *r)
     cJSON_Delete(j);
 }
 
+static void store_state(aos_httpd_req_t *r, int status, const char *error)
+{
+    static const char *states[] = { "absent", "installed", "update", "by_hand" };
+    aos_store_status_t st;
+    aos_store_status(&st);
+    cJSON *o = cJSON_CreateObject();
+    cJSON_AddBoolToObject(o, "ok", error == NULL);
+    if (error) cJSON_AddStringToObject(o, "error", error);
+    cJSON_AddStringToObject(o, "url", aos_store_url());
+    cJSON_AddStringToObject(o, "source", st.source);
+    cJSON_AddStringToObject(o, "release", st.release);
+    cJSON_AddBoolToObject(o, "busy", st.busy);
+    if (st.busy) {
+        cJSON *j = cJSON_AddObjectToObject(o, "job");
+        cJSON_AddStringToObject(j, "what", st.job);
+        cJSON_AddStringToObject(j, "file", st.file);
+        cJSON_AddStringToObject(j, "step", st.step);
+        cJSON_AddNumberToObject(j, "got", st.got);
+        cJSON_AddNumberToObject(j, "total", st.total);
+        cJSON_AddNumberToObject(j, "queued", st.queued);
+    }
+    cJSON_AddNumberToObject(o, "jobs_done", st.jobs_done);
+    cJSON_AddBoolToObject(o, "last_ok", st.last_ok);
+    cJSON_AddStringToObject(o, "last", st.last);
+    cJSON *apps = cJSON_AddArrayToObject(o, "apps");
+    aos_store_app_t a;
+    for (int i = 0; aos_store_app(i, &a); i++) {
+        cJSON *e = cJSON_CreateObject();
+        cJSON_AddStringToObject(e, "file", a.file);
+        cJSON_AddStringToObject(e, "id", a.id);
+        cJSON_AddStringToObject(e, "ver", a.ver);
+        cJSON_AddStringToObject(e, "have", a.have);
+        cJSON_AddStringToObject(e, "state", states[a.state & 3]);
+        cJSON_AddBoolToObject(e, "fits", a.fits);
+        cJSON_AddItemToArray(apps, e);
+    }
+    reply(r, status, o);
+}
+
+/* The store's own calls; false when 'p' is one of the pieces by hand. */
+static bool store_api(aos_httpd_req_t *r, const char *p, bool get, bool post)
+{
+    if (!p[0] && get) { store_state(r, 200, NULL); return true; }
+    if (!strcmp(p, "/catalog") && get) {
+        size_t len = 0;
+        char *text = aos_store_catalog(&len);
+        if (!text) error(r, 404, _("todavía no hay catálogo: POST /api/store/refresh"));
+        else if (aos_httpd_begin(r, 200, "application/x-ndjson; charset=utf-8", (long)len, NULL) && len) aos_httpd_write(r, text, len);
+        free(text);
+        return true;
+    }
+    if (!post || (strcmp(p, "/refresh") && strcmp(p, "/install") && strcmp(p, "/remove") && strcmp(p, "/adopt") &&
+                  strcmp(p, "/cancel"))) return false;
+    char *body = aos_httpd_body_all(r, 2048);
+    cJSON *j = body ? cJSON_Parse(body) : NULL;
+    free(body);
+    const char *file = cJSON_GetStringValue(cJSON_GetObjectItem(j, "file"));
+    const char *fail = NULL;
+    if (!strcmp(p, "/refresh")) {
+        const char *url = cJSON_GetStringValue(cJSON_GetObjectItem(j, "url"));
+        if (url && !aos_store_set_url(url)) fail = _("la dirección tiene que ser http(s)");
+        else if (!aos_store_refresh()) fail = _("la cola está llena");
+    } else if (!strcmp(p, "/install")) {
+        if (!file || !aos_store_install(file, cJSON_GetStringValue(cJSON_GetObjectItem(j, "packs")))) fail = _("falta file, o la cola está llena");
+    } else if (!strcmp(p, "/remove")) {
+        if (!file || !aos_store_remove(file)) fail = _("falta file, o la cola está llena");
+    } else if (!strcmp(p, "/adopt")) {
+        if (!aos_store_adopt()) fail = _("la cola está llena");
+    } else aos_store_cancel();
+    store_state(r, fail ? 400 : 200, fail);
+    cJSON_Delete(j);
+    return true;
+}
+
 bool aos_portal_store(aos_httpd_req_t *r, const char *m, const char *p)
 {
-    if (strncmp(p, "store/", 6)) return false;
-    p += 6;
+    if (strncmp(p, "store", 5) || (p[5] && p[5] != '/')) return false;
     bool get = !strcmp(m, "GET"), post = !strcmp(m, "POST");
+    if (store_api(r, p + 5, get, post)) return true;
+    if (!p[5]) { error(r, 405, _("GET")); return true; }
+    p += 6;
 
     if (!strcmp(p, "fetch") && get) fetch_status(r);
     else if (!strcmp(p, "fetch") && post) fetch_start(r);

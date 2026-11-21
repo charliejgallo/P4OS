@@ -10,9 +10,10 @@ quiera lo agrega en su placa, sabiendo lo que hace.
 placa en lo que no pide internet ni al usuario** (abajo, "Fase 0"): el
 chequeo de símbolos, instalar y quitar en caliente y la bajada a la
 tarjeta andan, también contra GitHub de verdad por TLS y con un reinicio a
-mitad de bajada; falta un corte del Wi-Fi. **La fase 1 está hecha en la
-Mac** (catálogo, paquetes y el cliente de referencia); falta que su CI
-corra en GitHub. Se trabaja en la rama `tienda` (worktree
+mitad de bajada; falta un corte del Wi-Fi. **La fase 1 está hecha**
+(catálogo, paquetes y el cliente de referencia; su CI corriendo con el tag
+`v0.30.0-tienda.1`). **De la fase 2, el servicio está escrito y probado en
+la Mac**; falta la placa y la cuarentena. Se trabaja en la rama `tienda` (worktree
 `.claude/worktrees/tienda`, como se hizo con `ethernet`) y se mergea a
 `main` cuando esté probada en la placa. Este documento es el plan; lo que
 se vaya midiendo se anota acá, como en [ETHERNET.md](ETHERNET.md).
@@ -434,24 +435,88 @@ sólo cambia lo de esta fase):
 - El paso del CI, corrido en seco en la Mac con sus mismos comandos: 57
   apps, y Bastión afuera con su aviso.
 
+**Después, el mismo día:** la 0.29.0 se publicó y los 13 packs de Bastión
+entraron a `store/packs.json` (58 apps en el catálogo). `store_cli.py
+--board` contra la placa de verdad, con dos apps chicas: vio las 60 como
+copiadas a mano, adoptó `dados` y `hello_app` (sus `.so` son byte a byte
+los del catálogo) y reinstaló `hello_app` con el cambio en caliente,
+"registrada, sin reiniciar". Los dos recibos de prueba se borraron.
+
+**La Tienda sale como 0.30.0** (decisión del usuario). Las pruebas de la
+rama llevan tags `v0.30.0-tienda.N`; `v0.30.0` queda para el merge.
+
 **Lo que falta de esta fase:**
 
-- **Que el CI corra de verdad.** El workflow cambió en la rama, pero sólo
-  corre con un push a `main`, un pull request o un tag `v*`: no se probó
-  en GitHub. La pre-release de la rama es un tag (por ejemplo
-  `v0.29.1-tienda.1`), que arma un borrador con todo; publicado como
-  pre-release no pasa a ser "latest". Lo decide el usuario.
+- **Ver terminar el CI.** El tag `v0.30.0-tienda.1` (2026-11-21) lanzó la
+  corrida: el job `packs`, con el chequeo de los manifiestos, pasó; el de
+  las apps, que arma paquetes y catálogo, seguía compilando al escribir
+  esto. Deja un borrador de release: publicado como pre-release no pasa a
+  ser "latest".
 - **Leer las descripciones.** Las de los `store.json` son un borrador
   escrito desde los README; las de las apps sin README, sin verificar.
   Qué pack es obligatorio en Bastión (el base y Luna) y en Pinball
   (Zombis) es una suposición: lo confirma la sesión de cada juego.
-- `store_cli.py --board` contra la placa de verdad, con el cambio en
-  caliente de la fase 0 (`/api/store/unload` y `/load`).
 
 **Para las sesiones de apps, cuando esto esté en `main`:** una app nueva
 trae su `store.json` (categoría y una o dos frases en es/en; los packs, lo
 que necesita y lo que pone el usuario, si hay); `tools/gen_store.py check`
 dice si está bien.
+
+## Fase 2: el servicio (escrito y probado en la Mac, 2026-11-21)
+
+**Lo escrito:**
+
+- **`components/aos_store`** (`aos_store.c`, igual en la placa y en el
+  simulador): el catálogo, instalar, actualizar, quitar, adoptar y los
+  recibos, en un hilo propio que hace un trabajo a la vez desde una cola
+  de ocho. No tiene pantalla. Hace los mismos pasos que `store_cli.py`,
+  con una diferencia a favor: **todo se verifica y se deja listo en
+  `apps/.store/tmp` antes de tocar nada instalado** (el paquete, cada
+  archivo con su hash, cada `.so` contra la tabla de símbolos con
+  `aos_dynapp_check`, y los packs), y recién entonces saca la app del
+  inicio, mueve los archivos a su lugar, escribe el recibo y la vuelve a
+  registrar. Un archivo que ya está en la tarjeta con los mismos bytes no
+  se reescribe.
+- **El catálogo en memoria es su texto** (52 KB en PSRAM) y una tabla
+  chica por app; una línea se pasa por cJSON cuando hace falta. Se guarda
+  en `apps/.store/catalog.ndjson`, así la Tienda abre con el último que
+  bajó. Uno que no se lee, o de un esquema que este firmware no conoce,
+  no reemplaza al que sí.
+- **Un lector de zip sin compresión** propio (el directorio al final, cada
+  entrada con sus desplazamientos revisados contra el tamaño del archivo).
+- **La API del portal** (`aos_portal_store.c`): `GET /api/store` (el
+  trabajo en curso y su avance, cómo terminó el último, y cada app con su
+  estado: `absent`, `installed`, `update`, `by_hand`), `GET
+  /api/store/catalog` (el NDJSON tal cual), y `POST` a `refresh`,
+  `install`, `remove`, `adopt` y `cancel`. La dirección del catálogo es
+  una preferencia (`store_url`), para probar; las fuentes son de la fase 4.
+
+**Lo probado:**
+
+- `tests/store_fw_host/run.sh`: 31 casos, el servicio en C compilado en la
+  Mac contra el GitHub falso **y contra `store_cli.py`**. El mismo
+  catálogo instalado por cada uno en su tarjeta deja los mismos archivos
+  byte a byte y los mismos recibos, y cada uno lee los recibos del otro.
+  Además: no bajar de nuevo un pack que ya está, un extra por nombre que
+  sobrevive a una actualización, adoptar (con su pack si está entero, sin
+  él si no, y sin tocar lo que no coincide), quitar, un firmware viejo
+  para el catálogo, quince paquetes que hay que rechazar dejando la
+  tarjeta como estaba (los de `store_cli.py` más un zip que no es zip,
+  uno cortado, una carpeta de más y un archivo entre los recibos), y dos
+  catálogos que no deben pisar al bueno.
+- **Por el portal del simulador:** refrescar, instalar tres apps (Bastión
+  por su id, con un mundo extra), leer el catálogo y quitarlas.
+- El firmware `rev1_3` compila sin avisos: 6 986 080 bytes (+23 KB).
+
+**Lo que falta de esta fase:**
+
+- **Probarlo en la placa** (hay que instalarle este firmware): es donde
+  corren el chequeo de símbolos y el cambio en caliente dentro del
+  servicio, y donde se mide la RAM interna que piden cJSON y el hilo.
+- **La cuarentena (D10)**: no está escrita. Es lo que queda del criterio
+  de la fase ("un `.so` roto a propósito termina apartado") y toca el
+  arranque, así que va con su prueba en la placa.
+- Limpiar `apps/.store/tmp` al arrancar, y los `.part` viejos.
 
 **De la fase 0, el reinicio a mitad de bajada (hecho, 2026-11-20):** la
 primera vez, reiniciada a los 15 MB, la placa volvió con un `.part` de 0
