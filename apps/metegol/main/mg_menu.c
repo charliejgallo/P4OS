@@ -221,7 +221,9 @@ static void ev_team(lv_event_t *e)
     int other = mg_teams_find(&a->teams, a->cfg.team[a->pick_slot ^ 1]);
     if (i == other) {
         /* the same team on both sides: swap them */
-        snprintf(a->cfg.team[a->pick_slot ^ 1], sizeof a->cfg.team[0], "%s", a->cfg.team[a->pick_slot]);
+        char keep[sizeof a->cfg.team[0]];
+        memcpy(keep, a->cfg.team[a->pick_slot], sizeof keep);
+        memcpy(a->cfg.team[a->pick_slot ^ 1], keep, sizeof keep);
     }
     snprintf(a->cfg.team[a->pick_slot], sizeof a->cfg.team[0], "%s", a->teams.t[i].id);
     a->pick_slot ^= 1;
