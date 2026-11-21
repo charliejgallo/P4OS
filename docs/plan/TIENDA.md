@@ -1141,6 +1141,25 @@ commits después, no es más nuevo que sí mismo. Con una release de verdad
 **Mergeado a `main` el 2026-11-21** (`2b554b8`, directo: `main` no se
 había movido).
 
+## La 0.30.0, publicada (2026-11-21)
+
+El CI del tag `v0.30.0` terminó bien y su borrador se revisó antes de
+publicar: 300 archivos, 58 paquetes, **199 imágenes** (las primeras que
+arma el CI), los dos firmwares, las cuatro partes del sistema; todo lo que
+el catálogo nombra está adjunto, y el firmware, un paquete y un idioma
+bajados del borrador tienen el hash que el catálogo dice. Publicada como
+la última release, con las notas (`docs/internal/RELEASE-0.30.0.md`).
+
+La placa, vuelta al catálogo oficial (`releases/latest`), lo leyó en
+4,8 s. El usuario quitó la fuente de prueba, apagó el modo desarrollo e
+**instaló la `v0.30.0` desde Ajustes → Actualización**: arrancó a prueba y
+se confirmó a los 32 s. Ya no se ofrece a sí misma (corre la que el
+catálogo trae). RAM interna libre: 212 047 bytes. Los dos servidores de
+prueba de la Mac están apagados.
+
+En GitHub quedan las releases de prueba `v0.30.0-tienda.1` a `.4` (dos
+pre-releases y dos borradores).
+
 ## Después del merge: que una app nueva no cueste dos horas de CI
 
 Medido en el CI del tag `v0.30.0-tienda.2` (2026-11-21): de 108 minutos,
@@ -1204,6 +1223,16 @@ corrida, no por app), y que cada sesión valide en la Mac con
   que se compiló en serie.
 - La caché de un tag no le sirve a nadie y no se guarda: un tag lee la de
   `main`. La de un PR es de ese PR.
+- **La segunda corrida recompiló todo** (20 minutos): la caché se
+  restauró bien, pero cada app estaba guardada bajo una huella tomada
+  *después* de compilar, cuando la compilación ya había tocado archivos
+  del árbol. Corregido: la huella se toma una vez, antes; no cuenta los
+  `dependencies.lock` (el gestor de componentes los reescribe) ni al
+  propio guion; y el registro dice qué tenía la caché de una app cuando
+  la recompila. Probado en la Mac con una app: compilada, después copiada
+  byte a byte sin compilar, y recompilada al cambiarle una línea. **En el
+  CI falta verlo:** hacen falta dos corridas más (una que guarde con las
+  huellas buenas y otra que reutilice).
 
 ## Roadmap
 
