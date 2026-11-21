@@ -428,6 +428,16 @@ for running, want in ((rel_ver, "0"), (rel_ver + "-tienda.2", "1"), (rel_ver + "
     jobs, apps, o = fw("w3", "refresh", "fw", cat=FWCAT, env={"FAKE_FW": running})
     newer[running] = fwline(o)[5] == "newer=" + want
 check("newer than its own test tags, not than a build made after it", all(newer.values()), newer)
+# a test catalogue offers a test tag: not to the board that runs it, or a build made after it
+head = json.loads(open("rel/fw.ndjson").readline())
+head["fw"]["ver"] = rel_ver + "-tienda.4"
+open("rel/fwtest.ndjson", "w").write(json.dumps(head) + "\n" + "".join(open("rel/fw.ndjson").readlines()[1:]))
+same = {}
+for running, want in ((rel_ver + "-tienda.4", "0"), (rel_ver + "-tienda.4-2-gabc1234-dirty", "0"), (rel_ver + "-tienda.3-2-g7f31098", "1"),
+                      (rel_ver + "-tienda.40", "1"), (rel_ver, "0")):
+    jobs, apps, o = fw("w3", "refresh", "fw", cat=LATEST + "fwtest.ndjson", env={"FAKE_FW": running})
+    same[running] = fwline(o)[5] == "newer=" + want
+check("a test tag is not newer than itself", all(same.values()), same)
 jobs, apps, o = fw("w3", "refresh", "firmware", cat=FWCAT, env={"FAKE_FW": rel_ver})
 check("the one running: not installed again", not jobs[1][0] and jobs[1][1].endswith("kind=18") and slot("w3") is None, o)
 head = json.loads(open("rel/fw.ndjson").readline())

@@ -1126,8 +1126,20 @@ modo desarrollo. Todo por HTTPS a GitHub:
 | RAM interna libre, el mínimo mientras tanto | 206 143 bytes |
 
 La otra ranura quedó con `v0.30.0-tienda.4`, la imagen que armó el CI, en
-estado `new`. **El reinicio a esa imagen queda para el usuario**: es la
-primera vez que la placa arrancaría un firmware compilado por el CI.
+estado `new`. El usuario la reinició desde Ajustes: **arrancó, a prueba, y
+se confirmó a los 32 s**. Es la primera vez que la placa corre un firmware
+compilado por el CI y traído por ella misma. RAM interna libre: 211 955
+bytes; las 97 apps registradas; los emojis cargados.
+
+Visto ahí mismo, y corregido: corriendo `v0.30.0-tienda.4`, la placa se
+ofrecía ese mismo tag como "versión nueva". La regla ("una release es más
+nueva que sus tags de prueba") trataba al tag que corre como uno de
+prueba anterior. Ahora el tag que corre, o una compilación hecha unos
+commits después, no es más nuevo que sí mismo. Con una release de verdad
+(`v0.30.0`) no pasaba. Un caso más en `tests/store_fw_host` (70).
+
+**Mergeado a `main` el 2026-11-21** (`2b554b8`, directo: `main` no se
+había movido).
 
 ## Después del merge: que una app nueva no cueste dos horas de CI
 

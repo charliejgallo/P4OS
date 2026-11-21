@@ -61,8 +61,8 @@ y un servidor de prueba en la Mac:
       `v0.30.0-tienda.4`): el catálogo con el firmware y las partes del
       sistema en 4,1 s, una app reinstalada en 4,6 s, y el firmware bajado
       por HTTPS y escrito en la otra ranura en 64 s.
-- [ ] Reiniciar a ese firmware, el primero compilado por el CI que
-      arrancaría en la placa, y verlo confirmarse.
+- [x] Reiniciar a ese firmware, el primero compilado por el CI que
+      arranca en la placa: a prueba, confirmado a los 32 s (usuario).
 - [ ] Las imágenes de las apps desde un catálogo del CI (los cuatro tags
       de prueba salieron sin ellas; corregido para el próximo).
 - [ ] Cortar el Wi-Fi en medio de una bajada.

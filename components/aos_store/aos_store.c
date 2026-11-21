@@ -324,12 +324,25 @@ static const char *fw_profile(void)
  * release itself, "v0.30.0-4-g1a2b3c4" (and "-dirty") is that release and
  * some commits more, and "v0.30.0-tienda.2" is a test tag BEFORE it - so
  * the release is newer than its own test tags, and not than a build made
- * after it. */
+ * after it. Between two test tags of one release there is no order to read
+ * from their names: one is "newer" than the other either way, which is what
+ * a test wants; only the tag that is running is not newer than itself. */
 static bool fw_newer(const char *offered, const char *running)
 {
     int32_t want = version_of(offered), have = version_of(running);
     if (want < 0 || have < 0) return false;
     if (want != have) return want > have;
+    /* the very tag that is running, or a build made some commits after it:
+     * a test catalogue offers a test tag, and the board that runs it must
+     * not be offered itself */
+    size_t ol = strlen(offered);
+    if (!strncmp(running, offered, ol)) {
+        const char *t = running + ol;
+        if (!t[0]) return false;
+        const char *q = t + 1;
+        while (isdigit((unsigned char)*q)) q++;
+        if (t[0] == '-' && q > t + 1 && q[0] == '-' && q[1] == 'g') return false;
+    }
     const char *r = running;
     while (*r && !isdigit((unsigned char)*r)) r++;
     while (*r && (isdigit((unsigned char)*r) || *r == '.')) r++;
