@@ -115,15 +115,17 @@ static char   *s_cat;               /* the catalogue's text */
 static size_t  s_cat_len;
 static app_t  *s_apps;
 static int     s_n;
-static src_t   s_src[SRC_MAX];
+/* The tables are PSRAM (docs/MEMORY.md): none is touched from an interrupt
+ * or with the flash's cache off, and together they are ~12 KB. */
+AOS_BSS_PSRAM static src_t   s_src[SRC_MAX];
 static int     s_nsrc = 1;
-static char    s_url[200];          /* the first source's address when not the official one */
+AOS_BSS_PSRAM static char    s_url[200];          /* the first source's address when not the official one */
 static bool    s_dev;               /* developer mode: http:// and another first source */
-static aos_store_probe_t s_probe;
-static job_t   s_queue[QUEUE];
+AOS_BSS_PSRAM static aos_store_probe_t s_probe;
+AOS_BSS_PSRAM static job_t   s_queue[QUEUE];
 static int     s_qn;
 static bool    s_running, s_cancel;
-static aos_store_status_t s_st;
+AOS_BSS_PSRAM static aos_store_status_t s_st;
 static int     s_shot_nbad;         /* pictures that could not be had (below) */
 
 static void lock(void)   { aos_hal_mutex_lock(s_lock); }
@@ -635,8 +637,8 @@ static bool download(const char *url, const char *rel, const char *sha, uint32_t
 #define SHOTS_LIVE  2
 #define SHOTS_BAD   16
 
-static struct { char name[72]; int id; } s_shot[SHOTS_LIVE];
-static char s_shot_bad[SHOTS_BAD][72];
+AOS_BSS_PSRAM static struct { char name[72]; int id; } s_shot[SHOTS_LIVE];
+AOS_BSS_PSRAM static char s_shot_bad[SHOTS_BAD][72];
 
 int aos_store_shot(const char *url, char *path, size_t path_len)
 {
@@ -1164,7 +1166,7 @@ static void sources_save(void)      /* with the lock held */
 
 static void sources_read(void)
 {
-    static char all[SRC_MAX * 201];
+    AOS_BSS_PSRAM static char all[SRC_MAX * 201];
     s_nsrc = 1;
     memset(s_src, 0, sizeof s_src);
     snprintf(s_src[0].url, sizeof s_src[0].url, "%s", aos_store_url());
@@ -1276,7 +1278,7 @@ static bool source_remove(int index, bool apps, err_t *e)
     int gone = 0;
     if (apps) {
         /* the names first: removing changes the folder being read */
-        static char names[64][32];
+        AOS_BSS_PSRAM static char names[64][32];
         int n = 0;
         DIR *dir = opendir(full(d, DIR_STORE));
         struct dirent *de;

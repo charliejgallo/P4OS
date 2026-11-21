@@ -74,7 +74,11 @@ typedef struct {
 
 typedef struct { char id[12], name[28]; } cat_t;
 
-static struct {
+/* PSRAM, like the gallery and the decoder's slot below: a few kilobytes
+ * that only this screen reads (docs/MEMORY.md). Memory placed there starts
+ * as zeros and takes no initial values, so 'sel' gets its "none" (-1) the
+ * first time the app is created. */
+AOS_BSS_PSRAM static struct {
     lv_obj_t *root, *status, *banner, *banner_text, *bar, *list;
     char     *cat;              /* the catalogue's text, while the app is open */
     item_t   *items;
@@ -94,7 +98,8 @@ static struct {
     bool      looking;          /* a source is being looked at */
     char      entry[200];       /* what was typed as a source's address */
     lv_obj_t *ta;
-} S = { .sel = -1 };
+    bool      started;          /* 'sel' was set to "none" once */
+} S;
 
 static void build(void);
 
@@ -113,14 +118,14 @@ typedef struct {
     lv_obj_t      *frame;           /* on the page; NULL between builds */
 } shot_t;
 
-static struct {
+AOS_BSS_PSRAM static struct {
     char   owner[32];               /* whose pictures these are */
     int    n;
     shot_t s[SHOTS_MAX];
 } G;
 
 /* the one decode in flight: the thread fills it and raises 'done' */
-static struct {
+AOS_BSS_PSRAM static struct {
     volatile int busy, done;
     int       idx;
     uint32_t  gen;
@@ -1232,6 +1237,10 @@ static void build(void)
 static void *create(aos_app_t *self, lv_obj_t *root)
 {
     (void)self;
+    if (!S.started) {
+        S.started = true;
+        S.sel = -1;
+    }
     S.root = root;
     S.list = NULL;
     /* a picture that finished decoding after the app was closed */
