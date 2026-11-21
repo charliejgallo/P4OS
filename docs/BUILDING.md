@@ -184,6 +184,59 @@ When a HAL function is added or removed, the apps' symbol table must follow:
     python3 tools/gen_symbols.py --build build/rev1_3
     tools/build_fw.sh rev1_3
 
+## The CI
+
+`.github/workflows/build.yml` runs on every push to `main`, on every tag
+`v*` and on every pull request. A new push to the same branch cancels the
+run still going.
+
+| Job | What it does | Time |
+|---|---|---|
+| `firmware` (rev1_3, rev3_x) | the firmware of each profile, its ELF and the full-flash bundle | 5-6 min each |
+| `apps` (six shares) | the apps of the card, dealt out to six jobs at once | up to 20 min when everything is built |
+| `reuse` (six) | checks that the cache works (below) | 1-2 min each |
+| `store` | `apps.zip`, `web.zip`, `lang.zip`, and what the Store reads: the catalogue, a package an app, the pictures | under a minute |
+| `c6` | the ESP32-C6's firmware | 3 min |
+| `packs` | the emoji and Notes packs, and `tools/gen_store.py check` | under a minute |
+| `release` (tags only) | writes the firmware into the catalogue and makes a **draft** release with everything | under a minute |
+
+**The apps are not built twice from the same sources.** They used to be
+built one after another, sixty ESP-IDF projects that each compile LVGL and
+the IDF's components again: 101 minutes of a run's 108 (2026-11-21).
+`tools/ci_apps.sh` deals them out to six jobs and keeps what each built
+under a hash of what an app is made from: its own files, every header of
+`components/`, the symbol table, the build's configuration, the IDF and
+the compiler. With the same hash the `.so` is copied back and not built.
+A whole run with everything to build takes 21 minutes, and its `.so` files
+are byte for byte the ones a serial build makes.
+
+- **What builds everything again:** a change in any header of
+  `components/`, in `aos_symbols.c`, in `sdkconfig.defaults*`, in
+  `apps/common.cmake` or in `tools/build_apps.sh`; a new IDF or compiler.
+  It is on the generous side on purpose: better twenty minutes lost than a
+  stale `.so` in a release.
+- **What builds one app:** a change under `apps/<app>/`.
+- **The cache is per branch.** A branch reads its own and `main`'s; a tag
+  reads `main`'s and keeps none; a pull request keeps its own.
+- **The `reuse` jobs** take a fresh checkout and the cache the run has just
+  kept, and ask `tools/ci_apps.sh --check` whether anything would be built
+  again. A hash that does not come out the same twice fails there, in the
+  run that broke it. (The first version hashed after building, when the
+  build had already touched the tree: every later run built everything,
+  and passed.) CAS is left out of the question: its engine is not in git.
+
+The same script runs on a Mac, with a folder for the cache:
+
+    tools/ci_apps.sh --list 0 6            # which apps are in the first share
+    tools/ci_apps.sh 0 6 /tmp/appcache     # build that share, or copy it back
+
+**A release.** A tag `vX.Y.Z` on `main` makes a draft with every file.
+Look at it, write the notes, publish. The board reads the catalogue of the
+latest **published** release, so a draft or a pre-release reaches nobody;
+a test tag (`v0.30.0-tienda.4`) can be published as a pre-release and read
+by a board in developer mode. An art pack has to be in a published release
+before the tag whose catalogue names it (`tools/gen_store.py packs`).
+
 ## Simulator
 
     cd sim && ./build/p4os_sim

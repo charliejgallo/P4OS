@@ -1483,8 +1483,10 @@ ffmpeg`) and LVGL 9.5.0 in `sim/lvgl`. The firmware build has to have
 run once first, because it fetches the components whose headers the
 simulator shares.
 
-Each push builds both firmware profiles, every app, the C6's firmware and
-the emoji and Notes packs on GitHub Actions. A release carries all of it
+Each push builds both firmware profiles, the apps, the C6's firmware and
+the emoji and Notes packs on GitHub Actions; the apps in six shares at
+once, and none again from the same sources
+([docs/BUILDING.md](docs/BUILDING.md), "The CI"). A release carries all of it
 with a full-flash bundle, and what the Store reads: the catalogue
 (`p4os-store.ndjson`), a package for each app (`<app>.p4app`) and their
 pictures. `apps.zip`, `web.zip` and `lang.zip` still go out for whoever
@@ -1546,7 +1548,7 @@ Where something is a guess, it says so.
 |---|---|
 | [INSTALL.md](docs/INSTALL.md) | a new board from nothing, updating from 0.2x, adding apps, the firmware from GitHub |
 | [STORE.md](docs/STORE.md) | the Store: what it does and checks, other people's sources, a catalogue's format, the portal's calls, what was measured |
-| [BUILDING.md](docs/BUILDING.md) | building, flashing, OTA, crash dumps, the watchdogs |
+| [BUILDING.md](docs/BUILDING.md) | building, flashing, OTA, crash dumps, the watchdogs, the CI and how a release is made |
 | [MEMORY.md](docs/MEMORY.md) | internal RAM vs PSRAM, the panel's three frame buffers, PSRAM bandwidth, the audit |
 | [APPS-P4.md](docs/APPS-P4.md) | writing `.so` apps, what one says of itself for the Store, drawing a frame, measured fps |
 | [USB.md](docs/USB.md) | the OTG port's modes, descriptors and measurements |

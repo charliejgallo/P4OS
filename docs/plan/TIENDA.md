@@ -1201,8 +1201,9 @@ Mientras tanto, sin cambiar nada: no sacar un tag por app (el costo es por
 corrida, no por app), y que cada sesión valide en la Mac con
 `tools/build_apps.sh <app>` y el simulador.
 
-**Los puntos 1 y 2, hechos el 2026-11-21** (`tools/ci_apps.sh` y el flujo
-`build.yml`, en el PR 1):
+**Los puntos 1 y 2, hechos y en `main` el 2026-11-21** (`tools/ci_apps.sh`
+y el flujo `build.yml`; PR 1, mergeado directo). Explicado para quien
+llega, en `docs/BUILDING.md`, "The CI":
 
 - Las apps se reparten en **seis tandas** que corren a la vez. Cada tanda
   guarda lo que compiló (`.appcache`, en la caché de GitHub) bajo una
@@ -1238,6 +1239,16 @@ corrida, no por app), y que cada sesión valide en la Mac con
   veces, falla esa corrida y no una posterior en silencio. CAS queda fuera
   de la pregunta: su motor no está en git y es parte de su huella. No
   corre en un tag, que no guarda caché propia.
+- **La corrida que lo probó** (la cuarta del PR): 21,3 minutos de reloj
+  con todo por compilar, la tanda más larga 19,6, y los seis chequeos
+  encontraron las 59 apps (todas menos CAS) sin compilar ninguna.
+- **Falta medir en `main`** lo que cuesta una subida que sólo agrega o
+  cambia una app. La primera corrida en `main` arma su propia caché (la
+  del PR no le sirve) y tarda los 21 minutos; de ahí en más debería
+  quedar en lo que tarda el firmware, 5 o 6.
+- **Sin hacer, y a mano si molesta:** una subida que sólo toca documentos
+  corre el CI entero. Se puede saltear con `paths-ignore`, cuidando que
+  `docs/img` no entre en la lista: de ahí salen las imágenes del catálogo.
 
 ## Roadmap
 
@@ -1259,6 +1270,26 @@ firmware en la placa, lo sabe `PRUEBAS-PLACA.md`.
 Fuera del plan por ahora: reseñas y estadísticas (piden servidor), apps
 pagas, y permisos por app (pedirían aislar el código, que es otro
 proyecto).
+
+**Dónde quedó (2026-11-21):**
+
+- **Fases 0 a 4, el merge y la release:** hechos. La 0.30.0 está
+  publicada y la placa del usuario la corre, instalada por ella misma.
+- **De la fase 6**, adelantado: el firmware del P4 desde GitHub y las
+  partes del sistema (idiomas, emojis, el firmware del C6 como archivo).
+  Falta: que el primer arranque con la tarjeta vacía ofrezca lo esencial,
+  e instalar el firmware del C6 sin pasar por Ajustes.
+- **De la fase 5**, hecho `docs/STORE.md`. Falta todo lo demás: el kit
+  para compilar una app sin este repo (que es también el punto 3 del CI),
+  el repo plantilla y el índice de la comunidad.
+- **Del CI:** los puntos 1 y 2. Faltan el kit (3) y el catálogo que no
+  viaja con el firmware (4).
+- **Sueltos:** el avance sobre el ícono del inicio mientras una app se
+  instala (fase 3); cortar el Wi-Fi en medio de una bajada, quitar una
+  fuente y quitar un paquete suelto en la placa (`PRUEBAS-PLACA.md`); los
+  símbolos de las partes del sistema en la página del portal; borrar las
+  releases de prueba `v0.30.0-tienda.1` a `.4` de GitHub.
+- **Lo que sigue por fuera de la Tienda:** `docs/plan/RESPALDO.md`.
 
 ## Preguntas abiertas
 
