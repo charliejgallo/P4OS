@@ -1,8 +1,8 @@
 {
  "cat": "taller",
  "about": {
-  "es": "Paneles para los equipos Modbus del banco: fuentes, cargas y medidores.",
-  "en": "Panels for the bench's Modbus devices: supplies, loads and meters."
+  "es": "Paneles para dos equipos Modbus, una fuente Riden RD60xx y un gateway DOMCOM: los equipos de prueba de Charlie.",
+  "en": "Panels for two Modbus devices, a Riden RD60xx power supply and a DOMCOM gateway: Charlie's test devices."
  },
  "desc": {
   "es": "Dos pestañas, cada una un panel para un equipo que habla Modbus. Riden es para una fuente Riden de la serie RD60xx por Modbus RTU: la salida en vivo y en grande (CV, CC, protecciones), las consignas de tensión y corriente, el tope que pone la entrada, los presets M1 a M9, la tensión de entrada, la temperatura, los Ah y Wh, el bloqueo del teclado y la potencia del último minuto. Cada valor que escribe lo vuelve a leer, porque la fuente rechaza en silencio lo que no le gusta, y la app lo dice.\n\nGateway es para un gateway DOMCOM por Modbus TCP: sus sensores, relés, módulos auxiliares, dimmers y sensores magnéticos.\n\nLa fuente se conecta por su puerto TTL a 115200 (3,3 V): TX, RX y GND a un puerto UART del header, que se elige en la app junto con la velocidad y la unidad. El gateway se alcanza por la red, con su dirección y su puerto. Dónde está la fuente es lo mismo que usa la Fuente de la app Banco: cambiarlo acá lo cambia allá también. Para cualquier otro equipo Modbus está la app Modbus, con sus perfiles.",

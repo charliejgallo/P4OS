@@ -1,8 +1,8 @@
 {
  "cat": "juegos",
  "about": {
-  "es": "Truco argentino contra la placa, con envido y flor.",
-  "en": "Argentine truco against the board, with envido and flor."
+  "es": "Truco argentino de a dos contra la placa, con envido y truco, sin flor.",
+  "en": "Two-handed Argentine truco against the board, with envido and truco, without flor."
  },
  "desc": {
   "es": "Truco de a dos contra la máquina, a 30 puntos, quince malas y quince buenas. Está todo el envido (envido, real envido y falta envido), todo el truco (truco, retruco y vale cuatro), el envido está primero e irse al mazo. Se juega sin flor, como se suele jugar de a dos. El tanteador es de fósforos, un cuadradito por cada cinco puntos, y la placa recuerda la partida y cuántas ganaste y perdiste.\n\nUn toque levanta una carta y otro la juega; tocar el paño la devuelve a la mano. Los cantos y las respuestas son botones sobre tus cartas. El botón redondo abre el menú: seguir, partida nueva o salir. Se juega con la placa parada o acostada. Con un joystick USB, la cruz recorre tus cartas y los cantos, A hace lo que un toque, B devuelve la carta levantada y START abre el menú.\n\nLa mesa queda en castellano aunque el sistema esté en otro idioma: los cantos son los nombres de las jugadas.",
