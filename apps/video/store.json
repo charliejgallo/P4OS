@@ -4,6 +4,10 @@
   "es": "Reproduce videos MJPEG AVI de la tarjeta a pantalla completa, con sonido.",
   "en": "Plays MJPEG AVI videos from the card, full screen, with sound."
  },
+ "desc": {
+  "es": "La lista muestra cada video de la carpeta videos de la tarjeta con su primer cuadro, la duración, el tamaño y los cuadros por segundo, y avisa Sin sonido cuando no tiene audio al lado. Tocá uno y se ve a pantalla completa, parado o acostado; si girás la pantalla, sigue en la nueva orientación. Un toque pausa y muestra la barra para arrastrar, el tiempo y los saltos de 10 segundos; otro toque sigue. Todo se maneja con el dedo.\n\nLos videos los trae la persona: un AVI con cuadros JPEG (MJPEG, JPEG baseline 4:2:0) y, al lado, un WAV de 16 bits o un MP3 con el mismo nombre para el sonido. El repo trae un script, convert.sh, que arma los dos con ffmpeg desde cualquier video, al tamaño de la pantalla o a la mitad.\n\nToma cualquier tamaño y cualquier cantidad de cuadros por segundo, conserva la forma con franjas negras y escala cada cuadro al mayor tamaño que entre. El motor JPEG del chip decodifica los cuadros, y el sonido marca el ritmo. Andan también los AVI de más de 1 GB.",
+  "en": "The list shows every video in the card's videos folder with its first frame, its length, its size and its frame rate, and says No sound when there is no audio beside it. Tap one and it plays full screen, upright or lying down; turn the screen and it goes on in the new orientation. A tap pauses and brings up the seek bar, the time and the 10-second skips; another tap plays on. It is all done by finger.\n\nThe videos are yours to bring: an AVI of JPEG frames (MJPEG, baseline 4:2:0 JPEG) and, beside it, a 16-bit WAV or an MP3 with the same name for the sound. The repo has a script, convert.sh, that makes both with ffmpeg from any video, at the screen's size or at half of it.\n\nIt takes any size and any frame rate, keeps the shape with black bars, and scales each frame to the biggest size that fits. The chip's JPEG engine decodes the frames, and the sound keeps the time. AVIs over 1 GB play too."
+ },
  "shots": [
   "app-video.png",
   "app-video-play.png",

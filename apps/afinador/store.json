@@ -4,6 +4,10 @@
   "es": "Afinador cromático con el micrófono de la placa.",
   "en": "A chromatic tuner on the board's microphone."
  },
+ "desc": {
+  "es": "Dos pantallas sobre el mismo micrófono, que se eligen arriba: Afinador y Sonómetro. Anda parada y acostada; acostada, cada pantalla se parte en dos paneles.\n\nEl Afinador escucha la nota que suena y la muestra grande, con una aguja sobre una escala de cents, la frecuencia en Hz y una indicación: afinada, subila o bajala. Abajo están las seis cuerdas de la guitarra en afinación estándar: tocá una para oír su nota por el parlante mientras el micrófono sigue escuchando. El botón Tono repite la última nota, y la referencia del La se corre entre 430 y 450 Hz con los botones de más y menos.\n\nEl Sonómetro mide el nivel en dB con ponderación A: una barra con el pico retenido, el mínimo, el máximo, el Leq y un gráfico de los últimos 60 segundos. Los dB son relativos hasta que lo calibres: compará contra un sonómetro de verdad y corregí el número de cal, que queda guardado. Si el micrófono satura, la app lo avisa, porque ahí la medida no vale.",
+  "en": "Two screens over the same microphone, chosen at the top: Tuner and Sound meter. It works upright and lying down; lying down, each screen splits into two panes.\n\nThe Tuner listens to the note being played and shows it large, with a needle over a cents scale, the frequency in Hz and a hint: in tune, tune it up or tune it down. Below are the six guitar strings in standard tuning: tap one to hear its note on the speaker while the microphone keeps listening. The Tone button plays the last note again, and the A reference moves between 430 and 450 Hz with the plus and minus buttons.\n\nThe Sound meter reads the level in A-weighted dB: a bar with peak hold, the minimum, the maximum, the Leq and a chart of the last 60 seconds. The figures are relative dB until you calibrate it: compare it against a real sound level meter and correct the cal number, which is kept. If the microphone clips, the app says so, since the reading is then invalid."
+ },
  "shots": [
   "app-tuner.png",
   "app-tuner-d3.png",

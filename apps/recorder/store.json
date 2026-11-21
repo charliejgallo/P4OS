@@ -4,6 +4,10 @@
   "es": "Grabadora de voz, con la forma de onda en vivo y la lista de grabaciones.",
   "en": "A voice recorder, with the live waveform and the list of recordings."
  },
+ "desc": {
+  "es": "Graba del micrófono de la placa a archivos WAV en la tarjeta. Tocá el botón rojo para grabar: aparecen el tiempo, la forma de onda de los últimos 8 segundos y cuánto lugar queda. Pausa deja de escribir pero mantiene el archivo abierto, así una charla con interrupciones queda en un solo WAV. La grabación sigue aunque salgas de la app.\n\nLa lista de Grabaciones está en la misma pantalla, abajo con la placa parada y al costado acostada, con la fecha, el tamaño y la duración de cada una. Tocá una para ver su onda entera: escuchala, tocá la onda para saltar a ese punto o corré 5 segundos para atrás y para adelante. Borrar pide un segundo toque.\n\nLos archivos son WAV sin comprimir, de 16 bits, que se abren en cualquier programa. La página Grabadora del portal lista lo que hay en la tarjeta y deja escuchar cada grabación en el navegador, bajarla o borrarla; la app ve los cambios sola. Hace falta una tarjeta en la placa.",
+  "en": "Records from the board's microphone to WAV files on the card. Tap the red button to record: the time shows, with the waveform of the last 8 seconds and how much room is left. Pause stops writing but keeps the file open, so a conversation with interruptions ends up as a single WAV. The recording goes on even if you leave the app.\n\nThe Recordings list is on the same screen, below the recorder upright and beside it lying down, with each one's date, size and length. Tap one to see its whole waveform: play it, tap the waveform to jump to that point, or skip 5 seconds back and forth. Delete asks for a second tap.\n\nThe files are uncompressed 16-bit WAV that open in anything. The Recorder page in the portal lists what is on the card and lets you play each recording in the browser, download it or delete it; the app notices the changes by itself. It needs a card in the board."
+ },
  "shots": [
   "app-recorder.png",
   "app-recorder-play.png",
