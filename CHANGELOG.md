@@ -80,13 +80,19 @@ card is no longer the way to install anything ([docs/INSTALL.md](docs/INSTALL.md
   in Python.
 - **Pictures for every app:** the 58 published apps have three or four
   captures in `docs/img`, and a long description each.
-- **Not in the Store yet:** the portal's own translations (`lang.zip`),
-  the colour emoji (`emoji.pak`) and the C6's firmware (`c6.bin`) are
-  still files to copy. `apps.zip`, `web.zip` and `lang.zip` go on being
-  attached to each release for whoever fills a card by hand.
+- **The parts of the system, in the Store too** (its System chip): the
+  web portal's translations and the system's, English and German; the
+  colour emoji; and the C6's firmware, which Settings then installs. Each
+  is a list of files of a release, checked and moved to where the system
+  reads it (`store/system.json`); only the official source can offer
+  them. A file already on the card with the catalogue's bytes is taken
+  over without a download, and a newer emoji pack waits beside the one in
+  use until the next start. With them a new board needs no file copied by
+  hand. `apps.zip`, `web.zip` and `lang.zip` go on being attached to each
+  release for whoever fills a card by hand.
 
 Tests: `tests/fetch_host` (20 cases), `tests/store_host` (26) and
-`tests/store_fw_host` (61), the firmware's own service built for the Mac
+`tests/store_fw_host` (69), the firmware's own service built for the Mac
 against a server that behaves like GitHub's downloads.
 
 ## 0.29.0 — 2026-11-20

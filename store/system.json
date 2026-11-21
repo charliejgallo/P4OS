@@ -1,0 +1,115 @@
+[
+ {
+  "file": "sys-lang-en",
+  "name": {
+   "es": "Inglés",
+   "en": "English"
+  },
+  "about": {
+   "es": "El sistema y el portal web en inglés.",
+   "en": "The system and the web portal in English."
+  },
+  "desc": {
+   "es": "Las pantallas del sistema ya vienen traducidas adentro del firmware. Este paquete trae además las traducciones del portal web, que sólo se leen de la tarjeta, y la última versión de las del sistema.\n\nEl idioma se elige en Ajustes, Idioma. Cada app trae sus propias traducciones.",
+   "en": "The system's screens come translated inside the firmware. This brings the web portal's translations as well, which are only read from the card, and the latest version of the system's.\n\nThe language is chosen in Settings, Language. Each app brings its own translations."
+  },
+  "glyph": "AOS_SYM_TRANSLATE",
+  "colors": [
+   "34C759",
+   "0B6B2B"
+  ],
+  "files": [
+   {
+    "path": "lang/en/_sistema.lang",
+    "from": "lang/en/_sistema.lang"
+   },
+   {
+    "path": "lang/en/_portal.lang",
+    "from": "lang/en/_portal.lang"
+   }
+  ]
+ },
+ {
+  "file": "sys-lang-de",
+  "name": {
+   "es": "Alemán",
+   "en": "German"
+  },
+  "about": {
+   "es": "El sistema y el portal web en alemán.",
+   "en": "The system and the web portal in German."
+  },
+  "desc": {
+   "es": "Las pantallas del sistema ya vienen traducidas adentro del firmware. Este paquete trae además las traducciones del portal web, que sólo se leen de la tarjeta, y la última versión de las del sistema.\n\nEl idioma se elige en Ajustes, Idioma. Cada app trae sus propias traducciones.",
+   "en": "The system's screens come translated inside the firmware. This brings the web portal's translations as well, which are only read from the card, and the latest version of the system's.\n\nThe language is chosen in Settings, Language. Each app brings its own translations."
+  },
+  "glyph": "AOS_SYM_TRANSLATE",
+  "colors": [
+   "FF9F0A",
+   "B25000"
+  ],
+  "files": [
+   {
+    "path": "lang/de/_sistema.lang",
+    "from": "lang/de/_sistema.lang"
+   },
+   {
+    "path": "lang/de/_portal.lang",
+    "from": "lang/de/_portal.lang"
+   }
+  ]
+ },
+ {
+  "file": "sys-emoji",
+  "name": {
+   "es": "Emojis en color",
+   "en": "Colour emoji"
+  },
+  "about": {
+   "es": "Todos los emojis de Unicode, en color, en las notificaciones del teléfono y en cualquier texto.",
+   "en": "Every emoji of Unicode, in colour, in the phone's notifications and in any text."
+  },
+  "desc": {
+   "es": "El juego Noto de Google: 4012 emojis con tonos de piel, banderas y secuencias, 15,5 MB. Sin este paquete la placa no tiene emojis en color.\n\nSe empiezan a ver después de reiniciar la placa.",
+   "en": "Google's Noto set: 4012 emoji with skin tones, flags and sequences, 15.5 MB. Without this pack the board has no colour emoji.\n\nThey show after the board is restarted."
+  },
+  "glyph": "AOS_SYM_PALETTE",
+  "colors": [
+   "FFD60A",
+   "C27C00"
+  ],
+  "license": "Apache-2.0 (Noto Emoji)",
+  "files": [
+   {
+    "path": "fonts/emoji.pak",
+    "asset": "emoji.pak"
+   }
+  ]
+ },
+ {
+  "file": "sys-c6",
+  "name": {
+   "es": "Firmware de la radio (C6)",
+   "en": "The radio's firmware (C6)"
+  },
+  "about": {
+   "es": "Un firmware más nuevo para el ESP32-C6, que hace el Wi-Fi y el Bluetooth. Se instala después desde Ajustes.",
+   "en": "A newer firmware for the ESP32-C6, which does the Wi-Fi and the Bluetooth. It is installed afterwards from Settings."
+  },
+  "desc": {
+   "es": "La placa sale de fábrica con un firmware más viejo en el C6, que anda. Este es el de la misma versión que usa el lado del P4 (esp_hosted 3.0.9). Bajarlo lo deja en la tarjeta y nada más.\n\nPara instalarlo: Ajustes, Actualización, Instalar en el C6. Mientras se manda no hay Wi-Fi, unos segundos, y al terminar la placa se reinicia.",
+   "en": "The board leaves the factory with an older firmware in the C6, which works. This one is the same version the P4's side runs (esp_hosted 3.0.9). Getting it leaves it on the card and nothing else.\n\nTo install it: Settings, Update, Install on the C6. While it is sent there is no Wi-Fi, for some seconds, and at the end the board restarts."
+  },
+  "glyph": "AOS_SYM_ROUTER_WIRELESS",
+  "colors": [
+   "0A84FF",
+   "0050A0"
+  ],
+  "files": [
+   {
+    "path": "firmware/c6.bin",
+    "asset": "c6.bin"
+   }
+  ]
+ }
+]

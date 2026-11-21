@@ -3433,6 +3433,9 @@ static const char blob_en__sistema_lang[] =
     "Escribiendo P4OS\tWriting P4OS\n"
     "Bajando P4OS\tDownloading P4OS\n"
     "No se pudo actualizar el sistema.\tThe system could not be updated.\n"
+    "Está en la tarjeta\tIt is on the card\n"
+    "Ya está en la tarjeta, copiado a mano. Obtenerlo lo revisa: si es el del catálogo no baja nada.\tIt is on the card already, copied by hand. Getting it checks it: if it is the catalogue's, nothing is downloaded.\n"
+    "Ir a Ajustes, Actualización\tGo to Settings, Update\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -6858,6 +6861,9 @@ static const char blob_de__sistema_lang[] =
     "Escribiendo P4OS\tP4OS wird geschrieben\n"
     "Bajando P4OS\tP4OS wird heruntergeladen\n"
     "No se pudo actualizar el sistema.\tDas System konnte nicht aktualisiert werden.\n"
+    "Está en la tarjeta\tIst auf der Karte\n"
+    "Ya está en la tarjeta, copiado a mano. Obtenerlo lo revisa: si es el del catálogo no baja nada.\tIst bereits auf der Karte, von Hand kopiert. Beim Holen wird es geprüft: ist es das des Katalogs, wird nichts heruntergeladen.\n"
+    "Ir a Ajustes, Actualización\tZu Einstellungen, Aktualisierung\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -6865,7 +6871,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3418, 0, files_en, 1 },
-    { "de", "Deutsch", 3418, 0, files_de, 1 },
+    { "en", "English", 3421, 0, files_en, 1 },
+    { "de", "Deutsch", 3421, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

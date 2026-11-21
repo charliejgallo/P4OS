@@ -56,6 +56,13 @@
     "es": "Programar",
     "en": "Programming"
    }
+  },
+  {
+   "id": "sistema",
+   "name": {
+    "es": "Sistema",
+    "en": "System"
+   }
   }
  ]
 }

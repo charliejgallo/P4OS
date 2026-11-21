@@ -62,8 +62,18 @@ bool aos_emoji_init(void)
     if (s_idx) return true;
     const char *root = aos_hal_path_sd_root();
     if (!root) return false;
-    char path[96];
+    char path[96], newer[104];
     snprintf(path, sizeof path, "%s/fonts/emoji.pak", root);
+    /* A newer pack the store left beside this one (aos_store.c, "System
+     * parts"): it could not take its place while this file was open, so it
+     * does now, before anything opens it. FAT's rename does not replace. */
+    snprintf(newer, sizeof newer, "%s.new", path);
+    FILE *n = fopen(newer, "rb");
+    if (n) {
+        fclose(n);
+        remove(path);
+        if (rename(newer, path) == 0) aos_hal_log("emoji", "the newer pack takes its place");
+    }
     FILE *f = fopen(path, "rb");
     if (!f) return false;
     uint8_t h[20];

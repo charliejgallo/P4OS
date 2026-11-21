@@ -1034,6 +1034,44 @@ tres columnas de puntos sueltos en el borde derecho, porque el
 decodificador no termina un bloque que queda cortado. El generador las
 saca ahora con los dos lados múltiplos de 16 (320×560, 560×320).
 
+### Las partes del sistema (2026-11-21)
+
+Lo que faltaba para que una placa nueva no necesite copiar nada a mano:
+las traducciones del portal (que sólo se leen de la tarjeta), los emojis
+en color y el firmware del C6. Era de la fase 6.
+
+- **No son paquetes.** Una parte del sistema es una línea del catálogo
+  con `"sys": true` y una lista de archivos: cada uno, un archivo de una
+  release con su tamaño y su SHA-256 y el lugar de la tarjeta adonde va.
+  Se bajan a `apps/.store/tmp`, se verifican y se mueven. El recibo es
+  esa lista.
+- **Sólo la fuente oficial**, y sólo a `lang/<código>/_*.lang`,
+  `fonts/*.pak` y `firmware/*.bin` (`sys_allowed()`). Una línea así en el
+  catálogo de terceros se saltea y se cuenta.
+- **`store/system.json`** las declara: `sys-lang-en`, `sys-lang-de`
+  (sus dos archivos salen del árbol y se publican con la release como
+  `lang-en-_sistema.lang`...), `sys-emoji` y `sys-c6` (archivos que una
+  release ya tiene, por `store/packs.json`; `gen_store.py packs` ahora
+  anota también `c6.bin`). Categoría nueva, "Sistema".
+- **Lo que ya está en la tarjeta no se baja:** copiado a mano aparece
+  como tal, y Obtener (o "Que las maneje la Tienda") lo hashea una vez y
+  le escribe el recibo si es el del catálogo.
+- **No se quitan desde la Tienda:** nada dice quién más los usa.
+- **`emoji.pak` está abierto mientras la placa corre** (`aos_emoji.c` lo
+  abre al arrancar) y FAT no reemplaza un archivo abierto: uno más nuevo
+  queda al lado como `emoji.pak.new` y `aos_emoji_init()` lo pone en su
+  lugar en el arranque siguiente, antes de abrirlo.
+- **El C6:** la Tienda sólo deja `firmware/c6.bin`; instalarlo sigue
+  siendo Ajustes → Actualización, y su página lleva ahí.
+- En la app: sin "Abrir" ni "Quitar"; una tilde cuando está. En el portal
+  lo mismo.
+- `tests/store_fw_host`: 69 casos (8 de esto: listadas, instaladas en su
+  lugar, no se quitan, tomadas por sus bytes sin bajar, el emoji nuevo
+  esperando al lado, una parte que escribiría en otro lado, una con otros
+  bytes, y una de terceros que no se ofrece). En el simulador: la solapa
+  Sistema con las cuatro, instalar el firmware del C6, la página de una.
+  Firmware `rev1_3`: 7 068 336 bytes. **Sin probar en la placa.**
+
 ### Los documentos públicos (2026-11-21)
 
 Para el merge: `docs/INSTALL.md` (una placa nueva desde cero, venir desde

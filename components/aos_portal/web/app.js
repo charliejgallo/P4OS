@@ -3171,7 +3171,7 @@ function pageTienda() {
     const picks = extras.map(p => h('label', { class: 'small', style: 'display:block;margin-top:4px' },
       h('input', { type: 'checkbox', value: p.file }), ' ', L(p.name), ' · ', fmtBytes(p.size)));
     const chosen = () => picks.map(l => l.firstChild).filter(i => i.checked).map(i => i.value).join(',') || 'need';
-    const verb = a.state === 'update' ? tr('Actualizar') : a.state === 'absent' ? tr('Instalar') : tr('Reinstalar');
+    const verb = a.state === 'update' ? tr('Actualizar') : a.state === 'absent' || (e.sys && a.state === 'by_hand') ? tr('Instalar') : tr('Reinstalar');
     // on the card and in no catalogue: a package handed in, or a .so copied by hand
     const local = a.src < 0;
     const about = !local ? L(e.about) : a.origin === 'hand' ? tr('Copiada a mano a la tarjeta: la Tienda no la maneja.')
@@ -3201,7 +3201,7 @@ function pageTienda() {
         h('div', { class: 'btns', style: 'flex-direction:column;align-items:stretch' },
           local ? null : h('button', { class: 'btn' + (a.state === 'update' || a.state === 'absent' ? ' pri' : ''), disabled: mine || !a.fits,
             onclick: () => act('install', { file: e.file, packs: chosen() }) }, mine ? '…' : verb),
-          on || a.state === 'set_aside' ? h('button', { class: 'btn red', disabled: mine,
+          (on || a.state === 'set_aside') && !e.sys ? h('button', { class: 'btn red', disabled: mine,
             onclick: () => { if (confirm(tr('¿Quitar %s de la placa? Lo que la app guardó queda en la tarjeta.', L(e.name)))) act('remove', { file: e.file }); } }, tr('Quitar')) : null,
           (a.state === 'installed' || a.state === 'by_hand') && e.id ? h('button', { class: 'btn', onclick: () => post('open?id=' + encodeURIComponent(e.id)).catch(x => toast(x.message, true)) }, tr('Abrir')) : null)));
   }

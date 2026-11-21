@@ -91,6 +91,7 @@ typedef struct {
     aos_store_app_t pub;
     char pkg_sha[65];
     char so_sha[65];
+    char sys_path[72];      /* a part of the system: the first of its files, to tell whether it is there */
 } app_t;
 
 enum { J_REFRESH = 1, J_INSTALL, J_REMOVE, J_ADOPT, J_PROBE, J_ADD, J_UNSOURCE, J_SIDELOAD, J_FIRMWARE };
@@ -388,6 +389,24 @@ static bool allowed(const char *path, const char *file)
     return false;
 }
 
+/* Where a part of the system may put a file - the official source's own
+ * (see "System parts" below): lang/<code>/_<name>.lang, the system's and
+ * the portal's translations; fonts/<name>.pak, the colour emoji; and
+ * firmware/<name>.bin, the radio's firmware, which Settings installs. */
+static bool sys_allowed(const char *path)
+{
+    if (strlen(path) >= sizeof(((app_t *)0)->sys_path) || strstr(path, "..") || strchr(path, '\\') || strstr(path, "//")) return false;
+    const char *a = strchr(path, '/');
+    if (!a) return false;
+    const char *b = strchr(a + 1, '/');
+    if (!strncmp(path, "lang/", 5))
+        return b && b - a - 1 == 2 && islower((unsigned char)a[1]) && islower((unsigned char)a[2]) && !strchr(b + 1, '/') &&
+               b[1] == '_' && ends(b + 1, ".lang") && name_ok(b + 1, strlen(b + 1), "_.");
+    if (!strncmp(path, "fonts/", 6)) return !b && ends(a + 1, ".pak") && name_ok(a + 1, strlen(a + 1), "_.") && a[1] != '.';
+    if (!strncmp(path, "firmware/", 9)) return !b && ends(a + 1, ".bin") && name_ok(a + 1, strlen(a + 1), "_.") && a[1] != '.';
+    return false;
+}
+
 static bool pack_name_ok(const char *s)
 {
     return ends(s, ".pak") && name_ok(s, strlen(s), "_.") && strlen(s) < 64 && s[0] != '.';
@@ -450,7 +469,7 @@ static void states(void)
         char so[PATH_MAX_], off[PATH_MAX_];
         snprintf(so, sizeof so, "apps/%s.so", a->pub.file);
         snprintf(off, sizeof off, "apps/%s.so.off", a->pub.file);
-        bool there = exists(so, NULL);
+        bool there = exists(a->pub.system ? a->sys_path : so, NULL);
         cJSON *r = receipt_read(a->pub.file);
         if (r) {
             snprintf(a->pub.have, sizeof a->pub.have, "%s", jstr(r, "ver"));
@@ -460,7 +479,7 @@ static void states(void)
             a->pub.state = there ? AOS_STORE_BY_HAND : AOS_STORE_ABSENT;
         }
         /* the loader set it aside: whatever the receipt says, it is not running */
-        if (!there && exists(off, NULL)) a->pub.state = AOS_STORE_SET_ASIDE;
+        if (!a->pub.system && !there && exists(off, NULL)) a->pub.state = AOS_STORE_SET_ASIDE;
     }
 }
 
@@ -659,16 +678,25 @@ static bool catalog_load(err_t *e)
                 if (theirs >= 0) {
                     found[i].skipped++;
                     aos_hal_log(TAG, "%s of %s is not offered: %s already lists it", file, found[i].name, found[theirs].name);
+                } else if (cJSON_IsTrue(cJSON_GetObjectItem(o, "sys")) &&
+                           (i != 0 || !sys_allowed(jstr(cJSON_GetArrayItem(cJSON_GetObjectItem(o, "files"), 0), "path")))) {
+                    /* parts of the system are the official source's to offer, and nobody else's */
+                    found[i].skipped++;
+                    aos_hal_log(TAG, "%s of %s is not offered: a part of the system is the official source's", file, found[i].name);
                 } else {
                     app_t *a = &apps[n++];
                     const cJSON *pkg = cJSON_GetObjectItem(o, "pkg");
+                    memset(a, 0, sizeof *a);
+                    a->pub.system = cJSON_IsTrue(cJSON_GetObjectItem(o, "sys"));
+                    if (a->pub.system)
+                        snprintf(a->sys_path, sizeof a->sys_path, "%s", jstr(cJSON_GetArrayItem(cJSON_GetObjectItem(o, "files"), 0), "path"));
                     snprintf(a->pub.file, sizeof a->pub.file, "%s", file);
                     snprintf(a->pub.id, sizeof a->pub.id, "%s", id);
                     snprintf(a->pub.ver, sizeof a->pub.ver, "%s", jstr(o, "ver"));
                     snprintf(a->pub.fw_min, sizeof a->pub.fw_min, "%s", jstr(o, "fw_min"));
                     snprintf(a->pkg_sha, sizeof a->pkg_sha, "%s", jstr(pkg, "sha256"));
                     snprintf(a->so_sha, sizeof a->so_sha, "%s", jstr(pkg, "so_sha256"));
-                    a->pub.fits = jnum(o, "abi") == AOS_STORE_ABI && fw_fits(a->pub.fw_min);
+                    a->pub.fits = (a->pub.system || jnum(o, "abi") == AOS_STORE_ABI) && fw_fits(a->pub.fw_min);
                     a->pub.src = i;
                     a->pub.line_off = (uint32_t)w;
                     a->pub.line_len = (uint32_t)(end - at);
@@ -1212,6 +1240,119 @@ out:
     return ok;
 }
 
+/* ---- System parts -----------------------------------------------------------
+ *
+ * What the system reads from the card and is not an app: its translations
+ * and the portal's (lang/<code>/_*.lang), the colour emoji (fonts/emoji.pak)
+ * and the radio's firmware (firmware/c6.bin, which Settings installs).
+ * The OFFICIAL source lists each as a line with "sys": true and its files,
+ * every one a file of a release with its size and SHA-256 and the place it
+ * goes to, which has to be one of sys_allowed()'s. There is no package:
+ * each file is downloaded, checked and moved into place, and the receipt
+ * is the list of them.
+ *
+ * A file that is on the card already with those bytes is not downloaded,
+ * so a card filled by hand is taken over by hashing it once. They are not
+ * removed from here: nothing lists what else may be using them.
+ *
+ * The emoji's pack is held open by the system from the start (aos_emoji.c),
+ * and FAT cannot replace a file that is open: a newer one goes beside it as
+ * <path>.new and takes its place at the next start, before it is opened.
+ * -------------------------------------------------------------------------- */
+#define SYS_FILES   8
+
+static bool install_system(cJSON *entry, app_t app, bool adopt, err_t *e)
+{
+    const char *file = app.pub.file;
+    const cJSON *files = cJSON_GetObjectItem(entry, "files"), *f;
+    char url[420], tmp[PATH_MAX_], dest[PATH_MAX_], sha[65];
+    bool staged[SYS_FILES] = { false }, ok = false, waits = false;
+    src_t from;
+    int n = cJSON_GetArraySize(files), i = 0;
+    cJSON *receipt = NULL;
+    lock();
+    from = s_src[0];
+    unlock();
+    if (!app.pub.fits) { fail(e, AOS_STORE_E_FIRMWARE, "%s needs P4OS %s or newer", file, app.pub.fw_min); goto out; }
+    if (n < 1 || n > SYS_FILES) { fail(e, AOS_STORE_E_CATALOG, "%s lists no files, or too many", file); goto out; }
+    cJSON_ArrayForEach(f, files)
+        if (!sys_allowed(jstr(f, "path")) || !jnum(f, "size") || strlen(jstr(f, "sha256")) != 64 || !jstr(f, "url")[0]) {
+            fail(e, AOS_STORE_E_RULES, "%s would write %.60s, where a part of the system may not", file, jstr(f, "path"));
+            goto out;
+        }
+    tmp_clean(true);
+    cJSON_ArrayForEach(f, files) {
+        const char *path = jstr(f, "path"), *want = jstr(f, "sha256");
+        uint32_t size = jnum(f, "size"), have = 0;
+        /* the bytes the card has already, in place or waiting for a restart, are not downloaded again */
+        snprintf(dest, sizeof dest, "%s.new", path);
+        bool here = (exists(dest, &have) && have == size && file_sha(dest, sha) && !strcmp(sha, want)) ||
+                    (!exists(dest, NULL) && exists(path, &have) && have == size && file_sha(path, sha) && !strcmp(sha, want));
+        if (!here) {
+            if (adopt) { fail(e, AOS_STORE_E_PACKAGE, "%s on the card is not the catalogue's", path); goto out; }
+            if (s_cancel) { fail(e, AOS_STORE_E_CANCELLED, "cancelled"); goto out; }
+            step("downloading");
+            snprintf(tmp, sizeof tmp, DIR_TMP "/%s.%d", file, i);
+            make_dirs(tmp);
+            url_of(url, sizeof url, from.base, jstr(f, "url"));
+            if (!download(url, tmp, want, size, 0, e)) goto out;
+            staged[i] = true;
+        }
+        i++;
+    }
+    step("installing");
+    i = 0;
+    cJSON_ArrayForEach(f, files) {
+        const char *path = jstr(f, "path");
+        if (staged[i]) {
+            snprintf(tmp, sizeof tmp, DIR_TMP "/%s.%d", file, i);
+            /* held open while the board runs: beside it, for the next start to swap */
+            bool held = !strncmp(path, "fonts/", 6) && exists(path, NULL);
+            snprintf(dest, sizeof dest, "%s%s", path, held ? ".new" : "");
+            if (!move(tmp, dest)) { fail(e, AOS_STORE_E_CARD, "could not put %.80s in place", dest); goto out; }
+            waits = waits || held;
+        }
+        i++;
+    }
+    receipt = cJSON_CreateObject();
+    cJSON_AddNumberToObject(receipt, "schema", SCHEMA);
+    cJSON_AddStringToObject(receipt, "file", file);
+    cJSON_AddTrueToObject(receipt, "sys");
+    cJSON_AddStringToObject(receipt, "id", app.pub.id);
+    cJSON_AddItemToObject(receipt, "name", cJSON_Duplicate(cJSON_GetObjectItem(entry, "name"), true));
+    cJSON_AddStringToObject(receipt, "ver", app.pub.ver);
+    cJSON_AddStringToObject(receipt, "pkg_sha256", app.pkg_sha);
+    cJSON *src = cJSON_AddObjectToObject(receipt, "source");
+    cJSON_AddStringToObject(src, "name", from.name);
+    cJSON_AddStringToObject(src, "url", from.home);
+    cJSON_AddStringToObject(src, "catalog", from.url);
+    cJSON_AddNumberToObject(receipt, "installed", aos_hal_time_is_valid() ? (double)time(NULL) : 0);
+    if (adopt) cJSON_AddTrueToObject(receipt, "adopted");
+    cJSON *rf = cJSON_AddArrayToObject(receipt, "files");
+    cJSON_ArrayForEach(f, files) {
+        cJSON *o = cJSON_CreateObject();
+        cJSON_AddStringToObject(o, "path", jstr(f, "path"));
+        cJSON_AddNumberToObject(o, "size", jnum(f, "size"));
+        cJSON_AddStringToObject(o, "sha256", jstr(f, "sha256"));
+        cJSON_AddItemToArray(rf, o);
+    }
+    cJSON_AddArrayToObject(receipt, "packs");
+    {
+        char *text = cJSON_Print(receipt);
+        snprintf(dest, sizeof dest, DIR_STORE "/%s.json", file);
+        bool wrote = text && spit(dest, text);
+        free(text);
+        if (!wrote) { fail(e, AOS_STORE_E_CARD, "could not write the receipt"); goto out; }
+    }
+    if (waits) snprintf(e->why, sizeof e->why, "done: it is used from the next start");
+    ok = true;
+out:
+    tmp_clean(!ok);
+    cJSON_Delete(entry);
+    cJSON_Delete(receipt);
+    return ok;
+}
+
 static bool install(const char *file, const char *packs_arg, bool adopt, err_t *e)
 {
     app_t app;
@@ -1222,6 +1363,7 @@ static bool install(const char *file, const char *packs_arg, bool adopt, err_t *
         entry = NULL;
     }
     if (!entry) return fail(e, AOS_STORE_E_NOT_LISTED, "%.40s is not in the catalogue", file);
+    if (app.pub.system) return install_system(entry, app, adopt, e);
     return install_core(entry, app, NULL, packs_arg, adopt, e);
 }
 
@@ -1290,6 +1432,10 @@ static bool uninstall(const char *file, err_t *e)
     if (!file_name_ok(file)) return fail(e, AOS_STORE_E_NOT_STORE, "not a package's name");
     cJSON *r = receipt_read(file);
     if (!r) return fail(e, AOS_STORE_E_NOT_STORE, "%.40s was not installed by the store: no receipt", file);
+    if (cJSON_IsTrue(cJSON_GetObjectItem(r, "sys"))) {
+        cJSON_Delete(r);
+        return fail(e, AOS_STORE_E_RULES, "%.40s is a part of the system: it is not removed from the store", file);
+    }
     char so[40], rel[PATH_MAX_];
     snprintf(so, sizeof so, "%s.so", file);
     dyn_unload(so);
@@ -1322,7 +1468,8 @@ static bool adopt_all(err_t *e)
         if (a.pub.state != AOS_STORE_BY_HAND || a.pub.src < 0) continue;
         char rel[PATH_MAX_], sha[65];
         snprintf(rel, sizeof rel, "apps/%s.so", a.pub.file);
-        if (!file_sha(rel, sha) || strcmp(sha, a.so_sha)) { left++; continue; }
+        /* a part of the system is its files: install_system() hashes them */
+        if (!a.pub.system && (!file_sha(rel, sha) || strcmp(sha, a.so_sha))) { left++; continue; }
         lock();
         snprintf(s_st.file, sizeof s_st.file, "%s", a.pub.file);
         unlock();

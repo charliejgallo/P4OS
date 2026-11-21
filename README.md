@@ -906,6 +906,9 @@ translations, updates it while it runs, and removes it.
   or the portal.
 - **The firmware too:** Settings → Update finds the next release, and
   installs it on a tap, on trial like any update.
+- **And what the system reads from the card:** the web portal's
+  translations, the colour emoji and the C6's firmware are under the
+  Store's System chip, one Get each.
 - **From a computer:** the portal's Store page does the same.
 
 [docs/STORE.md](docs/STORE.md) has the rest, and what was measured.
@@ -1218,7 +1221,8 @@ Language, Date and time, Update, Diagnostics, About and Developer.
 
 **Emoji.** Every emoji of Unicode, in colour, in any text the phone sends:
 Google's Noto set, 4012 of them with skin tones, flags and ZWJ sequences,
-from a pack on the card ([docs/EMOJI.md](docs/EMOJI.md)).
+from a pack on the card that the Store installs (System, Colour emoji;
+[docs/EMOJI.md](docs/EMOJI.md)).
 
 **Languages.** The interface is written in Spanish. English and German are
 complete. The system's texts travel twice: inside the firmware, so they
@@ -1230,8 +1234,8 @@ too cost 438 KB): in its package when the Store installs it, and in
 `lang.zip` for a card filled by hand. A pseudo-locale is used to
 test layouts. The web portal and the apps' pages follow the same language
 (since 0.15.1): their catalogs live only on the card and only the browser
-reads them. The portal's own still comes from `lang.zip`; an app's page
-brings its own with the app.
+reads them. The portal's own is one Get in the Store (System, English or
+German); an app's page brings its own with the app.
 
 ## What was tested, and what not yet
 
@@ -1388,11 +1392,11 @@ brings its own with the app.
 
 **Not done yet:**
 
-- **The Store:** the portal's own translations, the colour emoji and the
-  C6's firmware are still files to copy to the card; publishing an app
-  from outside this repository has no kit yet; and a download with the
-  Wi-Fi cut in the middle of it was not tried (a restart in the middle
-  was).
+- **The Store:** publishing an app from outside this repository has no
+  kit yet; a download with the Wi-Fi cut in the middle of it was not tried
+  (a restart in the middle was); and the parts of the system (the portal's
+  translations, the emoji, the C6's firmware) were installed from it in
+  the simulator and in the Mac's tests, not on the board yet.
 - **RF:** FSK signals, a CC1101 module on the header as a second receiver
   and transmitter, and ADS-B.
 - **ESP-NOW:** esp_hosted does not carry it (3.0.9 neither), so the two-device games of

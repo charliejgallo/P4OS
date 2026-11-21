@@ -186,12 +186,38 @@ under it: no network, not on the server, the board has no time yet (a
 secure connection cannot be checked without the date), the card is full,
 not the package that was published, it needs a newer P4OS.
 
+## The parts of the system
+
+Three things the system reads from the card are not apps, and used to be
+files to copy. They are in the Store's **System** chip:
+
+| | Where it goes | |
+|---|---|---|
+| **English**, **German** | `lang/<code>/_sistema.lang`, `_portal.lang` | The web portal in that language (it is only read from the card), and the latest translations of the system, which the firmware also carries |
+| **Colour emoji** | `fonts/emoji.pak` | 4012 emoji, 16 MB. They show after a restart |
+| **The radio's firmware (C6)** | `firmware/c6.bin` | Getting it only leaves the file there: Settings → Update → "Install on the C6" puts it in the C6 |
+
+A part of the system has no package. It is a list of files, each one a
+file of a release with its size and its SHA-256 and the place on the card
+it goes to; each is downloaded, checked and moved into place.
+
+- **Only the official source can offer them**, and only into those three
+  places. A line saying so in another catalogue is not read.
+- **What is on the card already is not downloaded again.** A file copied
+  by hand shows as such; **Get** hashes it once, and when it is the
+  catalogue's it only writes the receipt.
+- **They are not removed from the Store:** nothing says who else uses
+  them.
+- **The emoji pack is open while the board runs**, and FAT cannot replace
+  an open file. A newer pack is left beside it and takes its place at the
+  next start, before anything opens it.
+
+<p align="center">
+  <img src="img/app-store-system.png" width="230" alt="The Store's System chip: German, Colour emoji, The radio's firmware with a check mark, and English">
+</p>
+
 ## What it does not bring yet
 
-- **The web portal's own translations** (`lang.zip`, to `/lang`), the
-  **colour emoji** (`emoji.pak`, to `/fonts`) and the **C6's firmware**
-  (`c6.bin`, to `/firmware`) are still files to copy. The board's own
-  screens are translated without any of them.
 - **No reviews, counts or accounts:** there is no server behind it, only
   files in a release.
 - **Publishing from outside this repository** has no kit yet: building an
@@ -242,6 +268,9 @@ read from the official source only. Then a line for each app:
   both sides a multiple of 16 pixels.
 - A catalogue of a `schema` this firmware does not know is not read, and
   the one it had stays.
+- A part of the system is a line with `"sys": true`, no package, and its
+  files: `"files":[{"path":"fonts/emoji.pak","url":"v0.28.0/emoji.pak","size":16203453,"sha256":"…"}]`.
+  In this repository they are listed in `store/system.json`.
 
 **`<file>.p4app`**, the package: a zip **without compression** whose
 paths are the card's, plus a `p4app.json` that says what it is.
@@ -281,7 +310,7 @@ redirects and all. With developer mode on, the board adds
 `http://<this machine>:18392/prueba/apps/releases/latest/download/p4os-store.ndjson`.
 `tools/store_cli.py` is the same store in Python, to install from a
 catalogue onto a card or a simulator's folder: it is the reference the
-firmware's service is tested against (`tests/store_fw_host`, 61 cases).
+firmware's service is tested against (`tests/store_fw_host`, 69 cases).
 
 ## From a script
 

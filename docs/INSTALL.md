@@ -104,16 +104,21 @@ computer. Until you set a password, any device on a network the board
 trusts can use it: see [SECURITY.md](SECURITY.md) before leaving it on a
 network that is not yours.
 
-### 7. What the Store does not bring yet
+### 7. The parts of the system
 
-Three things are still files to copy, with the portal's **Files** page or
-with the card in a computer. None is needed to use the board.
+The Store's last chip, **System**, has what the system itself reads from
+the card and is not an app. None is needed to use the board; each is one
+**Get**.
 
-| File of the release | Goes to | What for |
-|---|---|---|
-| `lang.zip` (unpacked) | `/lang` | The **web portal** in English or German. The board's own screens do not need it |
-| `emoji.pak` | `/fonts` | Colour emoji in the phone's notifications ([EMOJI.md](EMOJI.md)) |
-| `c6.bin` | `/firmware` | A newer firmware for the radio, installed from Settings → Update. The factory one works ([C6.md](C6.md)) |
+| | What for |
+|---|---|
+| **English**, **German** | The **web portal** in that language, and the latest translations of the system. The board's own screens are translated without it |
+| **Colour emoji** | Every emoji, in colour, in the phone's notifications ([EMOJI.md](EMOJI.md)). 16 MB; they show after a restart |
+| **The radio's firmware (C6)** | A newer firmware for the ESP32-C6. Getting it leaves it on the card; **Settings → Update → Install on the C6** puts it in. The factory one works ([C6.md](C6.md)) |
+
+<p align="center">
+  <img src="img/app-store-system.png" width="260" alt="The Store's System chip: German, Colour emoji, The radio's firmware with a check mark, and English, each with Get">
+</p>
 
 ## Updating a board from 0.2x
 
@@ -140,8 +145,10 @@ the first step is the one you already know.
    **Settings → Update** (below). `apps.zip`, `web.zip` and `lang.zip` are
    still attached to each release for a while, for whoever installs by
    hand; an app installed from the Store brings its own portal page and
-   its own translations, so only the portal's own texts still come from
-   `lang.zip`.
+   its own translations, and the portal's own texts, the emoji and the
+   radio's firmware are under the Store's **System** chip. What is on the
+   card already (an `emoji.pak` copied long ago) is taken over the same
+   way, by its bytes.
 
 Coming from a version **before 0.20**, flashing the full image by cable
 once is recommended, as for a new board (step 2 above): the partition

@@ -444,6 +444,74 @@ h3 = json.loads(lines3[0]); h3["fw"] = json.loads(open("rel/fw.ndjson").readline
 open("rel3/p4os-store.ndjson", "w").write("\n".join([json.dumps(h3)] + lines3[1:]) + "\n")
 jobs, apps, o = fw("w5", "refresh", "look=" + THEIRS, "add=" + THEIRS, "refresh", "sources", "fw", "firmware")
 check("only the official source offers firmware", len(sources(o)) == 2 and fwline(o)[1] == "0" and not jobs[-1][0] and slot("w5") is None, o)
+
+# ---- parts of the system: files that go where the system reads them, the official source's only
+blobs = {"lang-en-_sistema.lang": b"Hola\tHello\n" * 400, "lang-en-_portal.lang": b"Tienda\tStore\n" * 300,
+         "emoji.pak": os.urandom(300000), "c6.bin": os.urandom(120000)}
+for name, data in blobs.items():
+    open("rel/" + name, "wb").write(data)
+def sys_line(file, files, name="Parte"):
+    fs = [{"path": p, "url": rel_ver + "/" + asset, "size": len(blobs[asset]), "sha256": hashlib.sha256(blobs[asset]).hexdigest()}
+          for p, asset in files]
+    digest = hashlib.sha256("".join("%s:%s\n" % (f["path"], f["sha256"]) for f in fs).encode()).hexdigest()
+    return {"file": file, "id": "", "sys": True, "name": {"es": name, "en": name}, "about": {"es": "x", "en": "x"}, "cat": "sistema",
+            "ver": rel_ver, "fw_min": "0.1.0", "pkg": {"size": sum(f["size"] for f in fs), "sha256": digest, "installed": 0}, "files": fs}
+official = open("rel/p4os-store.ndjson").read().splitlines()
+def catalogue(name, *lines):
+    open("rel/" + name, "w").write("\n".join(official + [json.dumps(l) for l in lines]) + "\n")
+    return LATEST + name
+LANG = sys_line("sys-lang-en", [("lang/en/_sistema.lang", "lang-en-_sistema.lang"), ("lang/en/_portal.lang", "lang-en-_portal.lang")])
+EMOJI = sys_line("sys-emoji", [("fonts/emoji.pak", "emoji.pak")])
+C6 = sys_line("sys-c6", [("firmware/c6.bin", "c6.bin")])
+SYSCAT = catalogue("sys.ndjson", LANG, EMOJI, C6)
+def card_file(card, rel):
+    return open(card + "/" + rel, "rb").read() if os.path.exists(card + "/" + rel) else None
+for card in ("y1", "y2", "y3", "y4"):
+    os.mkdir(card)
+jobs, apps, o = fw("y1", "refresh", "list", cat=SYSCAT)
+check("parts of the system are listed, as such", apps["sys-lang-en"] == ["absent", rel_ver, "-", "fits*"] and apps["sys-c6"][3] == "fits*"
+      and apps["dados"][3] == "fits", o)
+jobs, apps, o = fw("y1", "refresh", "install=sys-lang-en", "install=sys-c6", "list", cat=SYSCAT)
+r = receipt("y1", "sys-lang-en")
+check("installed: each file where the system reads it, and a receipt", jobs[1][0] and jobs[2][0]
+      and card_file("y1", "lang/en/_sistema.lang") == blobs["lang-en-_sistema.lang"]
+      and card_file("y1", "lang/en/_portal.lang") == blobs["lang-en-_portal.lang"]
+      and card_file("y1", "firmware/c6.bin") == blobs["c6.bin"] and r["sys"] is True and len(r["files"]) == 2
+      and apps["sys-lang-en"][0] == "installed" and apps["sys-emoji"][0] == "absent" and not os.listdir("y1/apps/.store/tmp"), o)
+jobs, apps, o = fw("y1", "remove=sys-lang-en", "list")
+check("not removed from the store", not jobs[0][0] and jobs[0][1].endswith("kind=8") and apps["sys-lang-en"][0] == "installed"
+      and card_file("y1", "lang/en/_portal.lang") is not None, o)
+# on the card already, copied by hand: taken over by its bytes, nothing downloaded
+os.makedirs("y2/fonts"); open("y2/fonts/emoji.pak", "wb").write(blobs["emoji.pak"])
+os.makedirs("y2/firmware"); open("y2/firmware/c6.bin", "wb").write(b"an older one, or anybody's")
+before = served()
+jobs, apps, o = fw("y2", "refresh", "list", "adopt", "list", cat=SYSCAT)
+check("copied by hand: taken over when it is the catalogue's, left when it is not", "sys-emoji by_hand" in o
+      and apps["sys-emoji"][0] == "installed" and receipt("y2", "sys-emoji").get("adopted") is True
+      and apps["sys-c6"][0] == "by_hand" and card_file("y2", "firmware/c6.bin") == b"an older one, or anybody's"
+      and served() - before < 200000, o)
+# a pack the system holds open is not replaced under it: the newer one waits beside it
+os.makedirs("y3/fonts"); open("y3/fonts/emoji.pak", "wb").write(b"last year's emoji")
+jobs, apps, o = fw("y3", "refresh", "install=sys-emoji", "list", cat=SYSCAT)
+check("a newer emoji pack waits beside the one in use", jobs[1][0] and "next start" in jobs[1][1]
+      and card_file("y3", "fonts/emoji.pak") == b"last year's emoji" and card_file("y3", "fonts/emoji.pak.new") == blobs["emoji.pak"]
+      and apps["sys-emoji"][0] == "installed", o)
+jobs, apps, o = fw("y3", "install=sys-emoji")
+check("...and asking again downloads nothing", jobs[0][0] and card_file("y3", "fonts/emoji.pak.new") == blobs["emoji.pak"], o)
+# what a part of the system may not do
+BAD1 = sys_line("sys-evil", [("apps/dados.so", "c6.bin")])
+BAD2 = sys_line("sys-two", [("firmware/c6.bin", "c6.bin"), ("../x.bin", "c6.bin")])
+BAD3 = json.loads(json.dumps(C6)); BAD3["file"] = "sys-wrong"; BAD3["files"][0]["sha256"] = hashlib.sha256(b"other").hexdigest()
+jobs, apps, o = fw("y4", "refresh", "install=sys-evil", "install=sys-two", "install=sys-wrong", "list", cat=catalogue("sysbad.ndjson", BAD1, BAD2, BAD3))
+check("a part that would write elsewhere is not offered, or refused whole", "sys-evil" not in apps and not jobs[1][0]
+      and not jobs[2][0] and jobs[2][1].endswith("kind=8") and not jobs[3][0] and jobs[3][1].endswith("kind=7")
+      and card_file("y4", "firmware/c6.bin") is None and card_file("y4", "apps/dados.so") is None, o)
+# and somebody else's source cannot bring one
+lines3 = open("rel3/p4os-store.ndjson").read().splitlines()
+open("rel3/p4os-store.ndjson", "w").write("\n".join(lines3 + [json.dumps(sys_line("sys-theirs", [("firmware/c6.bin", "c6.bin")]))]) + "\n")
+jobs, apps, o = fw("y4", "refresh", "look=" + THEIRS, "add=" + THEIRS, "list", "install=sys-theirs")
+check("only the official source offers parts of the system", "sys-theirs" not in apps and not jobs[-1][0]
+      and card_file("y4", "firmware/c6.bin") is None, o)
 sys.exit(1 if fails else 0)
 PY
 echo "all passed"

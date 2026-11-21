@@ -6,7 +6,8 @@
  *
  * A job prints "ok|FAILED <how it ended>"; "list" prints an app a line:
  * file state ver have fits, and after it "+" for an app of an added source,
- * "~" for one with a receipt that no source lists, "!" for a .so nobody lists.
+ * "~" for one with a receipt that no source lists, "!" for a .so nobody lists,
+ * "*" for a part of the system.
  */
 #include "aos_store.h"
 #include "aos_hal.h"
@@ -88,7 +89,7 @@ int main(int argc, char **argv)
             for (int k = 0; aos_store_app(k, &app); k++)
                 printf("%s %s %s %s %s%s\n", app.file, states[app.state], app.ver[0] ? app.ver : "-", app.have[0] ? app.have : "-",
                        app.fits ? "fits" : "no-fit",
-                       app.src > 0 ? "+" : app.origin == AOS_STORE_LOOSE ? "~" : app.origin == AOS_STORE_HAND ? "!" : "");
+                       app.system ? "*" : app.src > 0 ? "+" : app.origin == AOS_STORE_LOOSE ? "~" : app.origin == AOS_STORE_HAND ? "!" : "");
             continue;
         }
         else if (!strcmp(a, "refresh")) queued = aos_store_refresh();

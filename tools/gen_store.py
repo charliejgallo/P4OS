@@ -33,6 +33,16 @@ the catalogue that lists them.
         by different jobs: it runs where they meet, and needs nothing of the
         tree but this file.
 
+Parts of the system - what the system itself reads from the card and is not
+an app: its translations and the portal's, the colour emoji, the radio's
+firmware - are in store/system.json, and go into the catalogue as lines with
+"sys": true and no package: a list of files, each one a file of a release
+with its size and SHA-256 and the place on the card it goes to. A file "from"
+the tree (a language pack) is published with this release under a flat name
+(lang-en-_portal.lang); an "asset" (emoji.pak, c6.bin) is one a release
+already has, by store/packs.json. Only the official source's are read by the
+board, and only into lang/<code>/_*.lang, fonts/*.pak and firmware/*.bin.
+
 A package, <file>.p4app, is a zip WITHOUT compression whose paths are the
 card's: apps/<file>.so, the modules the app loads itself in apps/<app>/, its
 portal pages in web/, its languages in lang/<code>/, and a p4app.json that
@@ -189,6 +199,101 @@ def load_packs():
                 or not re.fullmatch(r"[0-9a-f]{64}", p.get("sha256", ""))):
             raise Bad("store/packs.json: %s needs tag, size and sha256" % name)
     return packs
+
+
+SYS_PATH = re.compile(r"lang/[a-z]{2}/_[a-z0-9_]+\.lang|fonts/[a-z0-9_]+\.pak|firmware/[a-z0-9_]+\.bin")
+SYS_FW_MIN = "0.30.0"           # the first firmware that knows what a part of the system is
+
+
+def version_key(tag):
+    """v0.29.0 as something to compare: (0, 29, 0)."""
+    return tuple(int(x) for x in re.findall(r"\d+", tag)[:3])
+
+
+def load_system(cats):
+    """store/system.json, checked: the parts of the system the store offers."""
+    path = os.path.join(ROOT, "store", "system.json")
+    if not os.path.exists(path):
+        return []
+    parts = read_json(path)
+    seen = set()
+    for p in parts:
+        where = "store/system.json, %s" % p.get("file")
+        if not re.fullmatch(r"sys-[a-z0-9-]{1,26}", p.get("file", "")) or p["file"] in seen:
+            raise Bad("store/system.json: \"file\" is sys-<name>, each one once (%s)" % p.get("file"))
+        seen.add(p["file"])
+        if "sistema" not in cats:
+            raise Bad("store/source.json has no category \"sistema\" for the parts of the system")
+        for k in ("name", "about", "desc"):
+            text2(p.get(k), k, where)
+        if len(p["about"]["es"]) > 240 or len(p["about"]["en"]) > 240 or max(len(p["desc"][l]) for l in LANGS_TEXT) > DESC_MAX:
+            raise Bad("%s: \"about\" is 240 characters at most and \"desc\" %d" % (where, DESC_MAX))
+        if not glyph_of(p.get("glyph", "")):
+            raise Bad("%s: \"glyph\" is the name of a symbol (AOS_SYM_...)" % where)
+        files = p.get("files") or []
+        if not 1 <= len(files) <= 8:
+            raise Bad("%s: one to eight files" % where)
+        for f in files:
+            if not SYS_PATH.fullmatch(f.get("path", "")):
+                raise Bad("%s: %s is not a place a part of the system may write" % (where, f.get("path")))
+            if ("from" in f) == ("asset" in f):
+                raise Bad("%s: %s comes \"from\" the tree or is an \"asset\" of a release, one of the two" % (where, f["path"]))
+            if "from" in f and not os.path.isfile(os.path.join(ROOT, f["from"])):
+                raise Bad("%s: %s is not in the tree" % (where, f["from"]))
+            if "asset" in f and not re.fullmatch(r"[a-z0-9_]+\.[a-z0-9]+", f["asset"]):
+                raise Bad("%s: an asset is a plain file name" % where)
+    return parts
+
+
+def system_entry(p, a, packs_json, old):
+    """A part of the system as a line of the catalogue; None, with a warning,
+    when one of its files is in no release yet. What it publishes itself is
+    written to a.out."""
+    files, tags, lacking = [], [], []
+    was = {f["path"]: f for f in (old or {}).get("files", [])}
+    for f in p["files"]:
+        if "from" in f:
+            data = open(os.path.join(ROOT, f["from"]), "rb").read()
+            digest, name = sha256(data), f["from"].replace("/", "-")
+            before = was.get(f["path"])
+            if before and before["sha256"] == digest:
+                url = before["url"]                 # the same bytes: where they already are
+            else:
+                url = "%s/%s" % (a.release, name)
+                with open(os.path.join(a.out, name), "wb") as out:
+                    out.write(data)
+                tags.append(a.release)
+            files.append({"path": f["path"], "url": url, "size": len(data), "sha256": digest})
+        else:
+            local = next((os.path.join(d, f["asset"]) for d in a.packs_dir if os.path.isfile(os.path.join(d, f["asset"]))), None)
+            if local:
+                data = open(local, "rb").read()
+                files.append({"path": f["path"], "url": "%s/%s" % (a.release, f["asset"]), "size": len(data), "sha256": sha256(data)})
+                tags.append(a.release)
+            elif f["asset"] in packs_json:
+                j = packs_json[f["asset"]]
+                files.append({"path": f["path"], "url": "%s/%s" % (j["tag"], f["asset"]), "size": j["size"], "sha256": j["sha256"]})
+                tags.append(j["tag"])
+            else:
+                lacking.append(f["asset"])
+    if lacking:
+        if a.missing_packs != "skip":
+            raise Bad("store/system.json, %s: %s is in no release (tools/gen_store.py packs)" % (p["file"], ", ".join(lacking)))
+        warn("%s is left out of the catalogue: %s is in no release yet (tools/gen_store.py packs)" % (p["file"], ", ".join(lacking)))
+        return None
+    # what it is, whole: the places and the bytes of its files
+    digest = sha256("".join("%s:%s\n" % (f["path"], f["sha256"]) for f in files).encode())
+    total = sum(f["size"] for f in files)
+    entry = {
+        "file": p["file"], "id": "", "sys": True, "name": p["name"], "about": p["about"], "desc": p["desc"], "cat": "sistema",
+        "ver": a.release if a.release in tags or not tags else max(tags, key=version_key),
+        "fw_min": SYS_FW_MIN, "pkg": {"size": total, "sha256": digest, "installed": total},
+        "colors": p.get("colors", ["3A3A3C", "1C1C1E"]), "glyph": glyph_of(p["glyph"]), "files": files,
+        "license": p.get("license", "Apache-2.0"),
+    }
+    if old and old.get("pkg", {}).get("sha256") == digest:
+        entry["ver"] = old["ver"]
+    return entry
 
 
 def app_dirs():
@@ -605,7 +710,9 @@ def cmd_check(a):
         if app_id in seen:
             raise Bad("apps/%s and apps/%s are both %s" % (seen[app_id], app, app_id))
         seen[app_id] = app
-    print("%d apps with a store.json (%d not published), %d packs in store/packs.json" % (n, hidden, len(packs)))
+    parts = load_system(cats)
+    print("%d apps with a store.json (%d not published), %d packs in store/packs.json, %d parts of the system" %
+          (n, hidden, len(packs), len(parts)))
     if without:
         print("without one, so not in the store: %s" % " ".join(without))
     return 0
@@ -688,6 +795,14 @@ def cmd_build(a):
             new += 1
         lines.append(entry)
 
+    # the parts of the system, with a whole catalogue: a few apps picked by
+    # hand (--only) are a test's
+    nsys = 0
+    for p in ([] if only else load_system(cats)):
+        entry = system_entry(p, a, packs_json, previous.get(p["file"]))
+        if entry:
+            lines.append(entry)
+            nsys += 1
     head = {"schema": SCHEMA, "source": {k: a.source[k] for k in ("name", "by", "url", "about")},
             "cats": a.source["cats"], "release": a.release,
             "base": a.base or "https://github.com/%s/releases/download/" % (a.repo or a.source["repo"])}
@@ -700,10 +815,10 @@ def cmd_build(a):
             f.write(json.dumps(o, ensure_ascii=False, separators=(",", ":")) + "\n")
     if a.no_pillow:
         warn("no Pillow here (pip install pillow): the catalogue goes out without pictures")
-    total = sum(e["pkg"]["size"] for e in lines)
+    total = sum(e["pkg"]["size"] for e in lines if not e.get("sys"))
     print("%d apps in %s (%d bytes): %d packages written, %d as in the previous release; %.1f MB of packages, "
-          "%.1f MB of packs" % (len(lines), path, os.path.getsize(path), new, kept, total / 1e6,
-                                sum(p["size"] for e in lines for p in e.get("packs", [])) / 1e6))
+          "%.1f MB of packs; %d parts of the system" % (len(lines) - nsys, path, os.path.getsize(path), new, kept, total / 1e6,
+                                sum(p["size"] for e in lines for p in e.get("packs", [])) / 1e6, nsys))
     return 0
 
 
@@ -714,9 +829,11 @@ def cmd_packs(a):
     if out.returncode != 0:
         raise Bad("gh: %s" % out.stderr.strip())
     packs = {} if a.fresh else load_packs()
+    # and what the parts of the system name: a firmware for the radio is no .pak
+    wanted = {f["asset"] for p in load_system({c["id"] for c in src["cats"]}) for f in p["files"] if "asset" in f}
     n = 0
     for asset in json.loads(out.stdout)["assets"]:
-        if not re.fullmatch(r"[a-z0-9_]+\.pak(\.\d+)?", asset["name"]):
+        if not re.fullmatch(r"[a-z0-9_]+\.pak(\.\d+)?", asset["name"]) and asset["name"] not in wanted:
             continue
         digest = asset.get("digest") or ""
         if not digest.startswith("sha256:"):

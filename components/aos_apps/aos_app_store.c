@@ -407,6 +407,9 @@ static const char *action_text(const item_t *it, char out[24])
         snprintf(out, 24, "...");
         return out;
     }
+    /* a part of the system is not opened: it is there, or it is fetched */
+    if (it->st.system && it->st.state == AOS_STORE_INSTALLED) return "";
+    if (it->st.system && it->st.state == AOS_STORE_BY_HAND) return _("Obtener");
     switch (it->st.state) {
     case AOS_STORE_INSTALLED:
     case AOS_STORE_BY_HAND:   return _("Abrir");
@@ -423,7 +426,8 @@ static void act(const item_t *it)
     aos_store_status_t st;
     aos_store_status(&st);
     if (st.busy && !strcmp(st.file, it->file)) return;
-    if (it->st.state == AOS_STORE_INSTALLED || it->st.state == AOS_STORE_BY_HAND) {
+    if (it->st.system && it->st.state == AOS_STORE_INSTALLED) return;
+    if (!it->st.system && (it->st.state == AOS_STORE_INSTALLED || it->st.state == AOS_STORE_BY_HAND)) {
         if (it->id[0]) aos_ui_open(it->id);
         return;
     }
@@ -618,7 +622,11 @@ static void row(lv_obj_t *parent, int i)
 
     /* a .so copied by hand that nobody lists has no id to open it by */
     char buf[24];
-    if (it->st.src >= 0 || it->id[0])
+    if (it->st.system && it->st.state == AOS_STORE_INSTALLED) {
+        /* a part of the system that is in place: nothing to do with it */
+        lv_obj_t *ok = aos_label(r, AOS_SYM_CHECK, &aos_sym_44, AOS_C_GREEN);
+        lv_obj_set_style_pad_right(ok, 24, 0);
+    } else if (it->st.src >= 0 || it->id[0])
         pill(r, action_text(it, buf), it->st.state == AOS_STORE_UPDATE, action_cb, (void *)(intptr_t)i);
 }
 
@@ -936,8 +944,13 @@ static void build_detail(lv_obj_t *page)
     lv_obj_set_style_pad_column(btns, 14, 0);
     lv_obj_set_style_pad_row(btns, 12, 0);
     char ab[24];
-    if (it->st.src >= 0 || it->id[0]) pill(btns, action_text(it, ab), true, action_cb, (void *)(intptr_t)S.sel);
-    if (it->st.state == AOS_STORE_INSTALLED || it->st.state == AOS_STORE_UPDATE || it->st.state == AOS_STORE_SET_ASIDE) {
+    if (it->st.system && it->st.state == AOS_STORE_INSTALLED) {
+        lv_obj_t *ok = aos_label(btns, _("Está en la tarjeta"), aos_font_small, AOS_C_GREEN);
+        (void)ok;
+    } else if (it->st.src >= 0 || it->id[0]) pill(btns, action_text(it, ab), true, action_cb, (void *)(intptr_t)S.sel);
+    /* a part of the system is not removed from here: nothing lists who else uses it */
+    if (!it->st.system &&
+        (it->st.state == AOS_STORE_INSTALLED || it->st.state == AOS_STORE_UPDATE || it->st.state == AOS_STORE_SET_ASIDE)) {
         lv_obj_t *rm = pill(btns, S.sure ? _("¿Seguro? Tocá otra vez") : _("Quitar"), false, remove_cb, NULL);
         lv_obj_set_style_text_color(lv_obj_get_child(rm, 0), AOS_C_RED, 0);
     }
@@ -956,6 +969,9 @@ static void build_detail(lv_obj_t *page)
     if (it->st.state == AOS_STORE_SET_ASIDE)
         note(body, AOS_SYM_ALERT_OUTLINE, AOS_C_ORANGE,
              _("Hizo caer la placa dos veces al cargarse y quedó apartada. Reinstalarla trae la versión del catálogo."));
+    else if (it->st.state == AOS_STORE_BY_HAND && it->st.system)
+        note(body, AOS_SYM_PACKAGE_VARIANT, AOS_C_DIM,
+             _("Ya está en la tarjeta, copiado a mano. Obtenerlo lo revisa: si es el del catálogo no baja nada."));
     else if (it->st.state == AOS_STORE_BY_HAND && it->st.src >= 0) {
         note(body, AOS_SYM_PACKAGE_VARIANT, AOS_C_DIM,
              _("Está en la tarjeta, copiada a mano: la Tienda no sabe qué versión es. Reinstalarla la deja al día."));
@@ -976,6 +992,10 @@ static void build_detail(lv_obj_t *page)
     lv_obj_set_width(about, lv_pct(100));
     lv_label_set_long_mode(about, LV_LABEL_LONG_MODE_WRAP);
     lv_obj_set_style_text_line_space(about, 6, 0);
+
+    /* the radio's firmware is only fetched here: Settings puts it in the C6 */
+    if (it->st.system && it->st.state == AOS_STORE_INSTALLED && !strcmp(it->file, "sys-c6"))
+        pill(body, _("Ir a Ajustes, Actualización"), false, system_cb, NULL);
 
     /* the long description, when its catalogue has one: a few paragraphs */
     const char *more = it->st.src < 0 ? "" : pick(cJSON_GetObjectItem(o, "desc"));
