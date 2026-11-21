@@ -5,6 +5,8 @@
   "en": "2043, the battle of Ceres: a vertical shoot-'em-up, with an energy bar and enemy formations."
  },
  "shots": [
-  "app-2043.png"
+  "app-2043.png",
+  "app-2043-level2.png",
+  "app-2043-boss.png"
  ]
 }

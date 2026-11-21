@@ -5,6 +5,8 @@
   "en": "Whack the moles before they duck; the one in a hard hat takes two."
  },
  "shots": [
-  "app-topos.png"
+  "app-topos.png",
+  "app-topos-classic.png",
+  "app-topos-frenzy.png"
  ]
 }

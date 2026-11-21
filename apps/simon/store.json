@@ -5,6 +5,8 @@
   "en": "Repeat the sequence of lights and sounds, longer each time."
  },
  "shots": [
-  "app-simon.png"
+  "app-simon.png",
+  "app-simon-sequence.png",
+  "app-simon-record.png"
  ]
 }

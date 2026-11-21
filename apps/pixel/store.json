@@ -5,6 +5,8 @@
   "en": "Pixel art with animation frames: twelve canvases of 8 to 64 cells, and 32 colours."
  },
  "shots": [
-  "app-pixel.png"
+  "app-pixel.png",
+  "app-pixel-editor.png",
+  "app-pixel-menu.png"
  ]
 }

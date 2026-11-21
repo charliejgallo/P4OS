@@ -5,6 +5,8 @@
   "en": "Get the red car out of the car park by sliding the others, in as few moves as you can."
  },
  "shots": [
-  "app-atasco.png"
+  "app-atasco.png",
+  "app-atasco-level8.png",
+  "app-atasco-level21.png"
  ]
 }

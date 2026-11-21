@@ -5,6 +5,9 @@
   "en": "Jump from platform to platform, higher each time. An unofficial homage; not an Anthropic product."
  },
  "shots": [
-  "app-cjump.png"
+  "app-cjump.png",
+  "app-cjump-play.png",
+  "app-cjump-space.png",
+  "app-cjump-shop.png"
  ]
 }

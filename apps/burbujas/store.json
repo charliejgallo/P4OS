@@ -5,6 +5,8 @@
   "en": "A bubble shooter: three or more of a colour touching burst."
  },
  "shots": [
-  "app-burbujas.png"
+  "app-burbujas.png",
+  "app-burbujas-classic.png",
+  "app-burbujas-levels.png"
  ]
 }

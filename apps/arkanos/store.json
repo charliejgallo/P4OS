@@ -5,6 +5,9 @@
   "en": "Brick breaking: twelve walls, falling capsules and a final boss."
  },
  "shots": [
-  "app-arkanos.png"
+  "app-arkanos.png",
+  "app-arkanos-n4.png",
+  "app-arkanos-n7.png",
+  "app-arkanos-n11.png"
  ]
 }

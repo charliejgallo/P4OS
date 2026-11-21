@@ -5,6 +5,8 @@
   "en": "Minesweeper as ever, in three sizes."
  },
  "shots": [
-  "app-mines.png"
+  "app-mines.png",
+  "app-mines-flags.png",
+  "app-mines-levels.png"
  ]
 }

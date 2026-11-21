@@ -5,6 +5,8 @@
   "en": "Argentine truco against the board, with envido and flor."
  },
  "shots": [
-  "app-truco.png"
+  "app-truco.png",
+  "app-truco-truco.png",
+  "app-truco-envido.png"
  ]
 }

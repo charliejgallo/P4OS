@@ -5,6 +5,9 @@
   "en": "A virtual pet to look after: feed it, play with it, let it sleep. An unofficial homage; not an Anthropic product."
  },
  "shots": [
-  "app-claudito.png"
+  "app-claudito.png",
+  "app-claudito-food.png",
+  "app-claudito-garden.png",
+  "app-claudito-night.png"
  ]
 }

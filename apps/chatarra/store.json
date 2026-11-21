@@ -5,6 +5,9 @@
   "en": "A turn-based robot RPG in an open world: build yours out of four interchangeable parts."
  },
  "shots": [
-  "app-chatarra.png"
+  "app-chatarra.png",
+  "app-chatarra-town.png",
+  "app-chatarra-battle.png",
+  "app-chatarra-menu.png"
  ]
 }

@@ -5,6 +5,8 @@
   "en": "Dice to roll, one to six of them, with a finger."
  },
  "shots": [
-  "app-dice.png"
+  "app-dice.png",
+  "app-dice-4d6.png",
+  "app-dice-3d10.png"
  ]
 }

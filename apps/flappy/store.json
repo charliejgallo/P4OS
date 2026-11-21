@@ -5,6 +5,8 @@
   "en": "A bird, pipes and one tap to flap."
  },
  "shots": [
-  "app-flappy.png"
+  "app-flappy.png",
+  "app-flappy-play.png",
+  "app-flappy-lost.png"
  ]
 }

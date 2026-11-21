@@ -5,6 +5,8 @@
   "en": "Neon snakes eat neon fruit on a black screen. No score and no HUD."
  },
  "shots": [
-  "app-neon.png"
+  "app-neon.png",
+  "app-neon-battle.png",
+  "app-neon-normal.png"
  ]
 }
