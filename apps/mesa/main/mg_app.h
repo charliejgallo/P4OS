@@ -207,8 +207,6 @@ typedef struct {
     bool coords;
     bool sound;
     int  speed;                 /* 0 slow, 1 normal, 2 fast                  */
-    bool dm_back;               /* draughts: men take backwards too          */
-    bool dm_most;               /* draughts: the capture that takes the most */
 } mg_prefs_t;
 
 typedef struct mg_app {

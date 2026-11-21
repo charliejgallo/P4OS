@@ -1,8 +1,9 @@
 /*
  * Juegos de mesa - the rules and the engines, checked on the Mac.
  *
- *   cc -O2 -I apps/mesa/main -o /tmp/mh apps/mesa/tools/harness.c apps/mesa/main/g_*.c
+ *   cc -O2 -I apps/mesa/main -o mh apps/mesa/tools/harness.c apps/mesa/main/g_*.c
  *   ./mh perft          chess move generation against the published counts
+ *   ./mh self [n] [lvl] every game n times to its end, random and the board
  *   ./mh think <fen> <ms>  what the engine plays
  *   ./mh match <a> <b> <games>   chess level a against level b
  */
@@ -82,10 +83,95 @@ static int think(const char *fen, int ms, int level_noise)
     return 0;
 }
 
+/* every game, played to its end many times: random moves and the board's
+ * weakest level, checking that a game always has a move or a roll and
+ * always ends */
+static uint32_t rs = 12345;
+static uint32_t rnd32(void)
+{
+    rs ^= rs << 13;
+    rs ^= rs >> 17;
+    rs ^= rs << 5;
+    return rs;
+}
+
+static int selfplay(const mesa_game_t *g, int games, int level)
+{
+    void *st = malloc(g->state_size);
+    static mesa_move_t ms[MESA_MAX_MOVES];
+    int results[6] = { 0 }, bad = 0;
+    long plies = 0;
+    uint32_t t0 = now_ms();
+    for (int k = 0; k < games; k++) {
+        uint8_t opts[4] = { 0 };
+        for (int i = 0; i < g->nopts; i++) opts[i] = k % 3 == 0 ? g->opts[i].def : (uint8_t)(rnd32() % 2);
+        g->init(st, opts, rnd32());
+        int n = 0;
+        while (g->turn(st) >= 0 && n < 3000) {
+            if (g->need_roll && g->need_roll(st) > 0) {
+                g->roll(st, rnd32());
+                continue;
+            }
+            int nm = g->moves(st, ms, MESA_MAX_MOVES);
+            if (nm <= 0) {
+                printf("%s: no move and no roll, turn %d\n", g->word, g->turn(st));
+                bad++;
+                break;
+            }
+            mesa_move_t m = ms[rnd32() % (uint32_t)nm];
+            if (level && g->ai_move && (rnd32() & 1)) {
+                mesa_ai_t ai;
+                memset(&ai, 0, sizeof ai);
+                ai.now_ms = now_ms;
+                ai.ms = 50;
+                ai.seed = rnd32();
+                if (!g->ai_move(st, level, &ai, &m)) m = ms[0];
+                bool ok = false;
+                for (int i = 0; i < nm; i++) ok |= ms[i].n == m.n && !memcmp(ms[i].step, m.step, m.n) && ms[i].tag == m.tag;
+                if (!ok) {
+                    printf("%s: the board's move is not legal\n", g->word);
+                    bad++;
+                    break;
+                }
+            }
+            mesa_piece_t ps[MESA_MAX_PIECES];
+            g->apply(st, &m);
+            int np = g->pieces(st, ps, MESA_MAX_PIECES);
+            for (int i = 0; i < np; i++) {
+                for (int j = i + 1; j < np; j++) {
+                    if (ps[i].id == ps[j].id) {
+                        printf("%s: id %d twice\n", g->word, ps[i].id);
+                        bad++;
+                    }
+                }
+            }
+            n++;
+        }
+        if (n >= 3000) {
+            printf("%s: did not end\n", g->word);
+            bad++;
+        }
+        const char *why;
+        int r = g->result(st, &why);
+        results[r == -2 ? 4 : r < 0 ? 5 : r]++;
+        plies += n;
+    }
+    printf("%-11s %d games, %ld plies, wins %d/%d/%d/%d, draws %d, open %d, %u ms, %d bad\n", g->word, games, plies,
+           results[0], results[1], results[2], results[3], results[4], results[5], now_ms() - t0, bad);
+    free(st);
+    return bad;
+}
+
 int main(int argc, char **argv)
 {
     ch_tables();
     if (argc >= 2 && !strcmp(argv[1], "perft")) return perft();
+    if (argc >= 2 && !strcmp(argv[1], "self")) {
+        const mesa_game_t *G[] = { &mesa_ajedrez, &mesa_damas, &mesa_reversi, &mesa_cuatro, &mesa_ludo, &mesa_backgammon };
+        int bad = 0, games = argc > 2 ? atoi(argv[2]) : 50, level = argc > 3 ? atoi(argv[3]) : 1;
+        for (int i = 0; i < 6; i++) bad += selfplay(G[i], games, level);
+        return bad;
+    }
     if (argc >= 4 && !strcmp(argv[1], "think")) return think(argv[2], atoi(argv[3]), argc > 4 ? atoi(argv[4]) : 0);
     fprintf(stderr, "harness perft | think <fen> <ms> [noise]\n");
     return 2;

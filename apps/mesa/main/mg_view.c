@@ -207,7 +207,7 @@ void mg_view_layout(void)
     mg_view_board_xy(bw, bh, 0, &x1, &y1);
     mg_view_board_xy(0, bh, 0, &xa, &ya);
     mg_view_board_xy(bw, 0, 0, &xb, &yb);
-    float left = fminf(fminf(x0, x1), fminf(xa, xb)), right = fmaxf(fmaxf(x0, x1), fmaxf(xa, xb));
+    float left = fminf(fminf(x0, x1), fminf(xa, xb));
     float top = fminf(fminf(y0, y1), fminf(ya, yb)), bottom = fmaxf(fmaxf(y0, y1), fmaxf(ya, yb));
     float S = v->geo.S;
     if (mg->portrait) {
@@ -315,8 +315,12 @@ void mg_view_sync(bool animate)
                     s->npath = P->g->path(P->st, last, p->id, s->path, (int)sizeof s->path);
                 }
                 if (s->npath > 0) {
+                    /* from a cell above, straight down (behind a standing
+                     * board's frame) */
                     mg_view_cell_xy(s->path[0], 0, &s->fx, &s->fy);
-                    s->arc = 0;
+                    s->fy -= S * 1.2f;
+                    s->npath = 0;
+                    s->arc = -1;
                 } else {
                     s->fx = tx;
                     s->fy = ty;

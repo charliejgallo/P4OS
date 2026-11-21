@@ -126,8 +126,6 @@ static void prefs_load(void)
     p->coords = true;
     p->sound = true;
     p->speed = 1;
-    p->dm_back = false;
-    p->dm_most = true;
     int32_t v;
     if (aos_hal_pref_get_i32("mg_prefs", &v)) {
         p->set = v & 3;
@@ -137,8 +135,6 @@ static void prefs_load(void)
         p->sound = (v >> 5) & 1;
         p->speed = (v >> 6) & 3;
         if (p->speed > 2) p->speed = 1;
-        p->dm_back = (v >> 8) & 1;
-        p->dm_most = (v >> 9) & 1;
     }
     if (p->set != SET_MADERA && !mg_art_have_set(p->set)) p->set = SET_MADERA;
 }
@@ -147,7 +143,7 @@ void mg_prefs_save(void)
 {
     const mg_prefs_t *p = &mg->prefs;
     int32_t v = (p->set & 3) | (p->flat << 2) | (p->hints << 3) | (p->coords << 4) | (p->sound << 5) |
-                ((p->speed & 3) << 6) | (p->dm_back << 8) | (p->dm_most << 9);
+                ((p->speed & 3) << 6);
     aos_hal_pref_set_i32("mg_prefs", v);
 }
 

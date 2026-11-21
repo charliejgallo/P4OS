@@ -252,7 +252,6 @@ void mg_hud_sheet_refresh(void)
     P->g->init(P->tmp, P->opts, P->seed);
     if (P->fen[0] && P->g->setup) P->g->setup(P->tmp, P->opts, P->fen);
     char line[64], a[24], b[24];
-    int ply = 0;
     int first = P->g->turn(P->tmp);
     a[0] = b[0] = 0;
     int moveno = 1;
@@ -282,7 +281,6 @@ void mg_hud_sheet_refresh(void)
             lv_label_set_text(r, line);
             a[0] = b[0] = 0;
         }
-        ply++;
     }
     if (a[0]) {
         snprintf(line, sizeof line, "%d.  %s", moveno, a);
@@ -425,10 +423,10 @@ void mg_hud_build(void)
     } else {
         /* one in each corner, the way round the board the players sit
          * (games of more than two put the first at the bottom left, then
-         * clockwise) */
+         * the bottom right, the top right, the top left) */
         int cw = mg->portrait ? (W - 48) / 2 : 270;
         for (int p = 0; p < P->np && p < MESA_MAX_PLAYERS; p++) {
-            bool right = p >= 2, low = p == 0 || p == 3;
+            bool right = p == 1 || p == 2, low = p == 0 || p == 1;
             int cx, cy;
             if (mg->portrait) {
                 cx = right ? W - 16 - cw : 16;

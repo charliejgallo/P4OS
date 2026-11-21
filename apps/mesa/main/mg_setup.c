@@ -245,7 +245,7 @@ static void ev_play(lv_event_t *e)
     snprintf(key, sizeof key, "mg_%.6s", g->prefix);
     int32_t packed = s_mode | (s_color << 1) | (s_level << 3) | (s_clock << 8) | (s_inc_kind << 13) | (s_new.two << 14) |
                      (s_new.opts[0] << 16) | (s_new.opts[1] << 20) | ((int32_t)s_people[1] << 24) |
-                     ((int32_t)s_people[2] << 25) | ((int32_t)s_people[3] << 26);
+                     ((int32_t)s_people[2] << 25) | ((int32_t)s_people[3] << 26) | ((int32_t)(s_new.opts[2] & 7) << 27);
     aos_hal_pref_set_i32(key, packed);
     sheet_close();
     if (mg->home) lv_obj_add_flag(mg->home, LV_OBJ_FLAG_HIDDEN);
@@ -339,6 +339,7 @@ void mg_setup_open(int gi)
         s_new.two = (v >> 14) & 1;
         if (g->nopts > 0) s_new.opts[0] = (uint8_t)((v >> 16) & 15);
         if (g->nopts > 1) s_new.opts[1] = (uint8_t)((v >> 20) & 15);
+        if (g->nopts > 2) s_new.opts[2] = (uint8_t)((v >> 27) & 7);
         s_people[1] = (uint8_t)((v >> 24) & 1);
         s_people[2] = (uint8_t)((v >> 25) & 1);
         s_people[3] = (uint8_t)((v >> 26) & 1);
@@ -381,8 +382,6 @@ static void ev_toggle(lv_event_t *e)
     case 2: p->coords = !p->coords; break;
     case 3: p->sound = !p->sound; break;
     case 4: p->speed = (p->speed + 1) % 3; break;
-    case 5: p->dm_back = !p->dm_back; break;
-    case 6: p->dm_most = !p->dm_most; break;
     default: break;
     }
     settings_build();
@@ -421,10 +420,6 @@ static void settings_build(void)
     row(col, _("Sonido"), p->sound ? _("Sí") : _("No"), ev_toggle, 3);
     static const char *const SP[3] = { N_("Lentas"), N_("Normales"), N_("Rápidas") };
     row(col, _("Las piezas se mueven"), _(SP[p->speed % 3]), ev_toggle, 4);
-    lv_obj_t *h = mg_label(col, _("Damas de acá"), aos_font_small, C(0xC8A878));
-    lv_obj_set_width(h, lv_pct(100));
-    row(col, _("Los peones comen para atrás"), p->dm_back ? _("Sí") : _("No"), ev_toggle, 5);
-    row(col, _("Hay que comer la mayor cantidad"), p->dm_most ? _("Sí") : _("No"), ev_toggle, 6);
     lv_obj_t *ok = mg_button(col, _("Listo"), ev_settings_done, NULL);
     lv_obj_set_width(ok, lv_pct(100));
     lv_obj_set_style_bg_color(ok, AOS_C_ACCENT, 0);
