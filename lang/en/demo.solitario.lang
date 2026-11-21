@@ -1,0 +1,507 @@
+# amoledos-lang 1   es -> en
+# demo.solitario.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/solitario/main/so_data.c:27
+Verde de siempre	Classic green
+
+#: apps/solitario/main/so_data.c:27
+Azul	Blue
+
+#: apps/solitario/main/so_data.c:27
+Rojo	Red
+
+#: apps/solitario/main/so_data.c:27
+Madera	Wood
+
+#: apps/solitario/main/so_data.c:28
+Cuero	Leather
+
+#: apps/solitario/main/so_data.c:28
+Noche	Night
+
+#: apps/solitario/main/so_data.c:28
+Océano	Ocean
+
+#: apps/solitario/main/so_data.c:28
+Damasco	Damask
+
+#: apps/solitario/main/so_data.c:32
+Clásico rojo	Classic red
+
+#: apps/solitario/main/so_data.c:32
+Clásico azul	Classic blue
+
+#: apps/solitario/main/so_data.c:32
+Art déco	Art deco
+
+#: apps/solitario/main/so_data.c:32
+Luna	Moon
+
+#: apps/solitario/main/so_data.c:33
+Olas	Waves
+
+#: apps/solitario/main/so_data.c:33
+Escocés	Tartan
+
+#: apps/solitario/main/so_data.c:33
+Arlequín	Harlequin
+
+#: apps/solitario/main/so_data.c:33
+Dorado	Gold
+
+#: apps/solitario/main/so_data.c:37
+Clásica	Classic
+
+#: apps/solitario/main/so_data.c:37
+Cuatro colores	Four colours
+
+#: apps/solitario/main/so_data.c:37
+Grande	Large
+
+#: apps/solitario/main/so_data.c:41
+Estándar	Standard
+
+#: apps/solitario/main/so_data.c:41
+Vegas	Vegas
+
+#: apps/solitario/main/so_data.c:41
+Vegas acumulativo	Cumulative Vegas
+
+#: apps/solitario/main/so_data.c:41
+Por tiempo	Timed
+
+#: apps/solitario/main/so_data.c:41
+Sin puntaje	No score
+
+#: apps/solitario/main/so_data.c:45
+Rebote	Bounce
+
+#: apps/solitario/main/so_data.c:45
+Fuegos artificiales	Fireworks
+
+#: apps/solitario/main/so_data.c:45
+Espiral	Spiral
+
+#: apps/solitario/main/so_data.c:45
+Al azar	Random
+
+#: apps/solitario/main/so_data.c:49
+Primera mano	First hand
+
+#: apps/solitario/main/so_data.c:49
+Ganá una mano.	Win a hand.
+
+#: apps/solitario/main/so_data.c:50
+De a tres	Three at a time
+
+#: apps/solitario/main/so_data.c:50
+Ganá Klondike de a 3.	Win Klondike drawing three.
+
+#: apps/solitario/main/so_data.c:51
+Tejedora	Weaver
+
+#: apps/solitario/main/so_data.c:51
+Ganá Spider de un palo.	Win one-suit Spider.
+
+#: apps/solitario/main/so_data.c:52
+Dos palos	Two suits
+
+#: apps/solitario/main/so_data.c:52
+Ganá Spider de dos palos.	Win two-suit Spider.
+
+#: apps/solitario/main/so_data.c:53
+Cuatro palos	Four suits
+
+#: apps/solitario/main/so_data.c:53
+Ganá Spider de cuatro palos.	Win four-suit Spider.
+
+#: apps/solitario/main/so_data.c:54
+Celdas libres	Free cells
+
+#: apps/solitario/main/so_data.c:54
+Ganá FreeCell.	Win FreeCell.
+
+#: apps/solitario/main/so_data.c:55
+Faraón	Pharaoh
+
+#: apps/solitario/main/so_data.c:55
+Ganá la Pirámide.	Win Pyramid.
+
+#: apps/solitario/main/so_data.c:56
+Tres cumbres	Three summits
+
+#: apps/solitario/main/so_data.c:56
+Ganá TriPeaks.	Win TriPeaks.
+
+#: apps/solitario/main/so_data.c:57
+Hoyo en uno	Hole in one
+
+#: apps/solitario/main/so_data.c:57
+Ganá Golf.	Win Golf.
+
+#: apps/solitario/main/so_data.c:58
+Al norte	Up north
+
+#: apps/solitario/main/so_data.c:58
+Ganá Yukon.	Win Yukon.
+
+#: apps/solitario/main/so_data.c:59
+Con la española	With the Spanish deck
+
+#: apps/solitario/main/so_data.c:59
+Ganá la Española.	Win Spanish.
+
+#: apps/solitario/main/so_data.c:60
+Todos los días	Every day
+
+#: apps/solitario/main/so_data.c:60
+Ganá una mano del día.	Win a daily hand.
+
+#: apps/solitario/main/so_data.c:61
+Racha de cinco	Streak of five
+
+#: apps/solitario/main/so_data.c:61
+Ganá cinco manos seguidas de un mismo juego.	Win five hands of one game in a row.
+
+#: apps/solitario/main/so_data.c:62
+Diez victorias	Ten wins
+
+#: apps/solitario/main/so_data.c:62
+Ganá diez manos en total.	Win ten hands in all.
+
+#: apps/solitario/main/so_data.c:63
+A pulmón	No help
+
+#: apps/solitario/main/so_data.c:63
+Ganá sin deshacer ni pedir pistas.	Win without undoing or asking for hints.
+
+#: apps/solitario/main/so_data.c:64
+Contrarreloj	Against the clock
+
+#: apps/solitario/main/so_data.c:64
+Ganá Klondike en menos de tres minutos.	Win Klondike in under three minutes.
+
+#: apps/solitario/main/so_data.c:65
+Casa ganadora	House wins
+
+#: apps/solitario/main/so_data.c:65
+Terminá una mano de Vegas con ganancia.	Finish a Vegas hand in profit.
+
+#: apps/solitario/main/so_game.c:14
+Klondike	Klondike
+
+#: apps/solitario/main/so_game.c:15
+Klondike de a 3	Klondike, draw 3
+
+#: apps/solitario/main/so_game.c:16
+Spider, 1 palo	Spider, 1 suit
+
+#: apps/solitario/main/so_game.c:17
+Spider, 2 palos	Spider, 2 suits
+
+#: apps/solitario/main/so_game.c:18
+Spider, 4 palos	Spider, 4 suits
+
+#: apps/solitario/main/so_game.c:19
+FreeCell	FreeCell
+
+#: apps/solitario/main/so_game.c:20
+Pirámide	Pyramid
+
+#: apps/solitario/main/so_game.c:21
+TriPeaks	TriPeaks
+
+#: apps/solitario/main/so_game.c:22
+Golf	Golf
+
+#: apps/solitario/main/so_game.c:23
+Yukon	Yukon
+
+#: apps/solitario/main/so_game.c:24
+Española	Spanish
+
+#: apps/solitario/main/so_ui.c:140
+#: apps/solitario/main/so_ui.c:170
+Nueva	New
+
+#: apps/solitario/main/so_ui.c:141
+#: apps/solitario/main/so_ui.c:171
+#: apps/solitario/main/so_ui.c:503
+#: apps/solitario/main/so_ui.c:904
+Deshacer	Undo
+
+#: apps/solitario/main/so_ui.c:142
+#: apps/solitario/main/so_ui.c:173
+Pista	Hint
+
+#: apps/solitario/main/so_ui.c:144
+#: apps/solitario/main/so_ui.c:175
+Completar	Finish
+
+#: apps/solitario/main/so_ui.c:155
+Menú	Menu
+
+#: apps/solitario/main/so_ui.c:215
+#: apps/solitario/main/so_ui.c:427
+Mano del día	Daily hand
+
+#: apps/solitario/main/so_ui.c:221
+#: apps/solitario/main/so_ui.c:852
+Tiempo	Time
+
+#: apps/solitario/main/so_ui.c:231
+#: apps/solitario/main/so_ui.c:233
+#: apps/solitario/main/so_ui.c:866
+Saldo	Balance
+
+#: apps/solitario/main/so_ui.c:235
+#: apps/solitario/main/so_ui.c:868
+Puntos	Score
+
+#: apps/solitario/main/so_ui.c:238
+#: apps/solitario/main/so_ui.c:853
+Movidas	Moves
+
+#: apps/solitario/main/so_ui.c:393
+La mano del día espera a que la placa tenga hora.	The daily hand waits until the board knows the time.
+
+#: apps/solitario/main/so_ui.c:411
+Solitario	Solitaire
+
+#: apps/solitario/main/so_ui.c:414
+Seguir	Resume
+
+#: apps/solitario/main/so_ui.c:415
+Nueva mano	New hand
+
+#: apps/solitario/main/so_ui.c:416
+Repetir esta mano	Replay this hand
+
+#: apps/solitario/main/so_ui.c:417
+#: apps/solitario/main/so_ui.c:464
+#: apps/solitario/main/so_ui.c:891
+#: apps/solitario/main/so_ui.c:907
+Elegir juego	Choose a game
+
+#: apps/solitario/main/so_ui.c:423
+ · ganada	 · won
+
+#: apps/solitario/main/so_ui.c:425
+Sin hora todavía	No clock yet
+
+#: apps/solitario/main/so_ui.c:429
+#: apps/solitario/main/so_ui.c:532
+Opciones	Options
+
+#: apps/solitario/main/so_ui.c:430
+#: apps/solitario/main/so_ui.c:660
+Apariencia	Appearance
+
+#: apps/solitario/main/so_ui.c:430
+Paños, dorsos y barajas	Felts, backs and decks
+
+#: apps/solitario/main/so_ui.c:431
+#: apps/solitario/main/so_ui.c:713
+Estadísticas	Statistics
+
+#: apps/solitario/main/so_ui.c:432
+#: apps/solitario/main/so_ui.c:774
+Logros	Achievements
+
+#: apps/solitario/main/so_ui.c:433
+Cómo se juega	How to play
+
+#: apps/solitario/main/so_ui.c:435
+Salir	Exit
+
+#: apps/solitario/main/so_ui.c:441
+Siete columnas, se da vuelta de a una	Seven columns, turn one at a time
+
+#: apps/solitario/main/so_ui.c:442
+Siete columnas, se da vuelta de a tres	Seven columns, turn three at a time
+
+#: apps/solitario/main/so_ui.c:443
+Dos mazos, todo de un palo	Two decks, all one suit
+
+#: apps/solitario/main/so_ui.c:444
+Dos mazos, picas y corazones	Two decks, spades and hearts
+
+#: apps/solitario/main/so_ui.c:445
+Dos mazos, los cuatro palos	Two decks, all four suits
+
+#: apps/solitario/main/so_ui.c:446
+Cuatro celdas libres, todo a la vista	Four free cells, everything in sight
+
+#: apps/solitario/main/so_ui.c:447
+Parejas que suman trece	Pairs that add up to thirteen
+
+#: apps/solitario/main/so_ui.c:448
+Tres picos, una más o una menos	Three peaks, one up or one down
+
+#: apps/solitario/main/so_ui.c:449
+Siete columnas, una más o una menos	Seven columns, one up or one down
+
+#: apps/solitario/main/so_ui.c:450
+Sin mazo: se mueve cualquier carta	No stock: any card can move
+
+#: apps/solitario/main/so_ui.c:451
+Klondike con la baraja de cuarenta	Klondike with the deck of forty
+
+#: apps/solitario/main/so_ui.c:492
+Tres vueltas	Three passes
+
+#: apps/solitario/main/so_ui.c:492
+Sin límite	No limit
+
+#: apps/solitario/main/so_ui.c:493
+#: apps/solitario/main/so_ui.c:494
+#: apps/solitario/main/so_ui.c:495
+#: apps/solitario/main/so_ui.c:496
+Sí	Yes
+
+#: apps/solitario/main/so_ui.c:493
+#: apps/solitario/main/so_ui.c:494
+#: apps/solitario/main/so_ui.c:495
+#: apps/solitario/main/so_ui.c:496
+No	No
+
+#: apps/solitario/main/so_ui.c:503
+Puntaje	Scoring
+
+#: apps/solitario/main/so_ui.c:503
+Vueltas al mazo	Passes through the stock
+
+#: apps/solitario/main/so_ui.c:503
+Pistas	Hints
+
+#: apps/solitario/main/so_ui.c:504
+Manos con solución	Solvable hands
+
+#: apps/solitario/main/so_ui.c:504
+Completar solo	Auto finish
+
+#: apps/solitario/main/so_ui.c:504
+Al ganar	On winning
+
+#: apps/solitario/main/so_ui.c:504
+Sonido	Sound
+
+#: apps/solitario/main/so_ui.c:550
+El puntaje y las vueltas al mazo valen desde la próxima mano. Vegas: cada mano cuesta una moneda por carta y cada carta que llega a la base paga cinco.	Scoring and passes through the stock apply from the next hand. Vegas: each hand costs one coin per card and each card that reaches a foundation pays five.
+
+#: apps/solitario/main/so_ui.c:662
+Paños	Felts
+
+#: apps/solitario/main/so_ui.c:662
+Dorsos	Backs
+
+#: apps/solitario/main/so_ui.c:662
+Barajas	Decks
+
+#: apps/solitario/main/so_ui.c:701
+La Española usa siempre la baraja de cuarenta.	Spanish always uses the deck of forty.
+
+#: apps/solitario/main/so_ui.c:730
+Jugadas	Played
+
+#: apps/solitario/main/so_ui.c:731
+#: apps/solitario/main/so_ui.c:875
+Ganadas	Won
+
+#: apps/solitario/main/so_ui.c:731
+#: apps/solitario/main/so_ui.c:875
+Racha	Streak
+
+#: apps/solitario/main/so_ui.c:741
+Mejor tiempo	Best time
+
+#: apps/solitario/main/so_ui.c:741
+Mejor puntaje	Best score
+
+#: apps/solitario/main/so_ui.c:747
+Saldo de Vegas	Vegas balance
+
+#: apps/solitario/main/so_ui.c:748
+Manos del día ganadas	Daily hands won
+
+#: apps/solitario/main/so_ui.c:752
+#: apps/solitario/main/so_ui.c:826
+Listo	Done
+
+#: apps/solitario/main/so_ui.c:761
+Paño	Felt
+
+#: apps/solitario/main/so_ui.c:762
+Dorso	Back
+
+#: apps/solitario/main/so_ui.c:763
+Baraja	Deck
+
+#: apps/solitario/main/so_ui.c:791
+Llevá las cuatro bases del as al rey, cada una de un palo. En las columnas se baja de a uno alternando rojo y negro, y una columna vacía sólo toma un rey. Tocá el mazo para dar vuelta una carta.	Build the four foundations from ace to king, one suit each. In the columns, build down one at a time alternating red and black; an empty column only takes a king. Tap the stock to turn over a card.
+
+#: apps/solitario/main/so_ui.c:793
+Como Klondike, pero el mazo se da vuelta de a tres cartas y sólo se juega la de arriba.	Like Klondike, but the stock turns over three cards at a time and only the top one plays.
+
+#: apps/solitario/main/so_ui.c:794
+Armá en las columnas escaleras del rey al as de un mismo palo: completas, se van solas. Se puede bajar sobre cualquier palo, pero sólo se mueve junto lo que es del mismo palo. El mazo reparte una carta en cada columna, si ninguna está vacía.	Build runs from king to ace of one suit in the columns: once complete, they leave on their own. You can build on any suit, but only cards of one suit move together. The stock deals a card to each column, if none is empty.
+
+#: apps/solitario/main/so_ui.c:797
+Spider con dos palos: picas y corazones.	Spider with two suits: spades and hearts.
+
+#: apps/solitario/main/so_ui.c:798
+Spider con los cuatro palos: el más difícil.	Spider with all four suits: the hardest.
+
+#: apps/solitario/main/so_ui.c:799
+Todas las cartas a la vista. Las cuatro celdas guardan una carta cada una. En las columnas se baja alternando colores; se mueven tantas cartas juntas como celdas y columnas libres alcancen.	Every card in sight. The four cells hold one card each. In the columns, build down alternating colours; you can move as many cards at once as the free cells and columns allow.
+
+#: apps/solitario/main/so_ui.c:801
+Sacá parejas de cartas libres que sumen trece (la J vale 11, la Q 12; el rey sale solo). Una carta está libre si no tiene nada encima. El mazo da vuelta de a una.	Remove pairs of free cards that add up to thirteen (J is 11, Q is 12; a king goes alone). A card is free when nothing lies on it. The stock turns one at a time.
+
+#: apps/solitario/main/so_ui.c:803
+Pasá a la pila de abajo cartas libres que sean una más o una menos que la de arriba (del rey se sigue al as). Despejá los tres picos. Si no hay jugada, tocá el mazo.	Move free cards to the pile below if they are one higher or one lower than its top card (king and ace connect). Clear the three peaks. If there is no play, tap the stock.
+
+#: apps/solitario/main/so_ui.c:805
+Pasá a la pila cartas de abajo de las columnas que sean una más o una menos que la de arriba, sin dar la vuelta del rey al as. Despejá las siete columnas.	Move the bottom cards of the columns to the pile if they are one higher or one lower than its top card, without going round from king to ace. Clear all seven columns.
+
+#: apps/solitario/main/so_ui.c:807
+Como Klondike, sin mazo: todo está repartido y se puede mover cualquier carta dada vuelta, con todo lo que tiene encima, sobre una de un número más y del otro color.	Like Klondike with no stock: everything is dealt, and any face-up card can move, with everything on it, onto a card one higher of the other colour.
+
+#: apps/solitario/main/so_ui.c:809
+Klondike con la baraja española de cuarenta: después del 7 viene la sota. En las columnas se alternan oros y copas con espadas y bastos, y una columna vacía sólo toma un rey.	Klondike with the Spanish deck of forty: after the 7 comes the jack (sota). The columns alternate coins and cups with swords and clubs, and an empty column only takes a king.
+
+#: apps/solitario/main/so_ui.c:820
+Arrastrá una carta o una pila, o tocala para que vaya sola al mejor lugar; dos toques la mandan a la base. Con joystick: la cruz recorre las pilas, A toma y suelta, B cancela, L deshace, R da una pista.	Drag a card or a pile, or tap it to send it to its best place; two taps send it to a foundation. With a gamepad: the D-pad walks the piles, A picks up and drops, B cancels, L undoes, R gives a hint.
+
+#: apps/solitario/main/so_ui.c:846
+#: apps/solitario/main/so_win.c:174
+¡Ganaste!	You won!
+
+#: apps/solitario/main/so_ui.c:852
+ · Mano del día	 · Daily hand
+
+#: apps/solitario/main/so_ui.c:890
+#: apps/solitario/main/so_ui.c:906
+Otra mano	Another hand
+
+#: apps/solitario/main/so_ui.c:896
+No quedan jugadas	No moves left
+
+#: apps/solitario/main/so_ui.c:899
+Esta mano ya no tiene movimientos.	This hand has no moves left.
+
+#: apps/solitario/main/solitario.c:156
+Para repartir no puede haber columnas vacías.	Columns can't be empty to deal.
+
+#: apps/solitario/main/solitario.c:331
+No hay jugadas.	No moves.
+
+#: apps/solitario/main/solitario.c:335
+Sólo queda el mazo.	Only the stock is left.
+
+#: apps/solitario/main/solitario.c:405
+Buscando una mano con solución...	Looking for a solvable hand...

@@ -1,0 +1,17 @@
+{
+ "cat": "juegos",
+ "about": {
+  "es": "Los solitarios de siempre: Klondike, Spider, FreeCell, Pirámide, TriPeaks, Golf, Yukon y uno con la baraja española, con manos que tienen solución y paños y dorsos para ganar.",
+  "en": "The classic solitaires: Klondike, Spider, FreeCell, Pyramid, TriPeaks, Golf, Yukon and one with the Spanish deck, with solvable hands and felts and backs to win."
+ },
+ "desc": {
+  "es": "Once juegos en uno: Klondike dando vuelta de a una o de a tres, Spider con uno, dos o cuatro palos, FreeCell, Pirámide, TriPeaks, Golf, Yukon y la Española, un Klondike con la baraja de cuarenta. Arrastrá una carta o una pila, tocala para que vaya sola al mejor lugar o dos veces para mandarla a la base; al final se completa sola.\n\nCada mano nueva puede tener solución garantizada: un resolvedor busca una que se pueda ganar mientras se barajan las cartas. Hay mano del día, pistas, deshacer, y puntaje estándar, Vegas, Vegas acumulativo, por tiempo o sin puntaje, con las vueltas al mazo limitadas o no. Las estadísticas se llevan por juego: partidas, ganadas, rachas, mejor tiempo y puntaje.\n\nAl ganar, las cartas saltan de las bases y rebotan dejando su estela, o estallan como fuegos artificiales, o salen en espiral. Los logros desbloquean paños (madera, cuero, noche, océano...), dorsos y una baraja de cuatro colores; la baraja grande, para ver bien, está desde el principio. Se juega de pie o acostada, y con un joystick USB: la cruz recorre las pilas, A toma y suelta, B cancela, L deshace y R da una pista.",
+  "en": "Eleven games in one: Klondike drawing one or three, Spider with one, two or four suits, FreeCell, Pyramid, TriPeaks, Golf, Yukon and Spanish, a Klondike with the deck of forty. Drag a card or a pile, tap it to send it to its best place or twice to send it to a foundation; at the end the hand finishes by itself.\n\nEvery new hand can be guaranteed solvable: a solver looks for one that can be won while the cards are shuffled. There is a daily hand, hints, undo, and standard, Vegas, cumulative Vegas, timed or no scoring, with passes through the stock limited or not. Statistics are kept per game: played, won, streaks, best time and score.\n\nWhen you win, the cards jump off the foundations and bounce leaving their trail, or burst like fireworks, or spin out in a spiral. Achievements unlock felts (wood, leather, night, ocean...), card backs and a four-colour deck; the large deck, easy to read, is there from the start. It plays upright or sideways, and with a USB gamepad: the D-pad walks the piles, A picks up and drops, B cancels, L undoes and R gives a hint."
+ },
+ "shots": [
+  "app-solitario.jpg",
+  "app-solitario-win.jpg",
+  "app-solitario-spider.jpg",
+  "land-solitario.jpg"
+ ]
+}
