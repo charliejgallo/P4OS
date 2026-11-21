@@ -1006,9 +1006,15 @@ sólo muestra las dos ranuras y deja volver a la anterior.
   estado `new`. La RAM interna libre bajó 1,5 KB mientras duró (208 151
   de 209 611). El catálogo con las descripciones largas pesa 185 KB y la
   placa lo refresca en 2,6 s por la red local.
-- **Falta en la placa:** el reinicio a esa ranura desde Ajustes (el toque
-  es del usuario) y verla confirmarse, y recorrer la pantalla: el avance,
-  cancelar.
+- **El usuario la recorrió en la pantalla (2026-11-21):** "Reiniciar
+  ahora" arrancó la ranura escrita, a prueba, y se confirmó a los 32 s.
+  Después el camino entero desde Ajustes → Actualización: bajar, ver la
+  escritura y reiniciar con los dos toques; otra vez arrancó y se
+  confirmó. Las dos ranuras quedaron con la misma versión, las dos
+  `valid`. Del registro de ese arranque: la imagen de 7 062 112 bytes bajó
+  en 16,0 s (0,44 MB/s, 0,6 s de ellos releyéndola para su hash), abrir
+  la otra ranura (el borrado) llevó 11,6 s y escribirla 29,1 s: 57 s del
+  toque a "lista". Durante el borrado el estado dice "escribiendo… 0 %".
 - **Falta también:** que el CI lo arme de verdad (el paso nuevo del
   trabajo `release` no corrió nunca), y el firmware del C6.
 
