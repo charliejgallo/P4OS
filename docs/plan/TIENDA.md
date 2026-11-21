@@ -9,8 +9,8 @@ quiera lo agrega en su placa, sabiendo lo que hace.
 **Estado (2026-11-20): fase 0 escrita, probada en la Mac y medida en la
 placa en lo que no pide internet ni al usuario** (abajo, "Fase 0"): el
 chequeo de símbolos, instalar y quitar en caliente y la bajada a la
-tarjeta andan. Falta TLS contra GitHub de verdad, un corte del Wi-Fi y un
-reinicio a mitad de bajada. Se trabaja en la rama `tienda` (worktree
+tarjeta andan, también contra GitHub de verdad por TLS. Falta un corte del
+Wi-Fi y un reinicio a mitad de bajada. Se trabaja en la rama `tienda` (worktree
 `.claude/worktrees/tienda`, como se hizo con `ethernet`) y se mergea a
 `main` cuando esté probada en la placa. Este documento es el plan; lo que
 se vaya midiendo se anota acá, como en [ETHERNET.md](ETHERNET.md).
@@ -333,11 +333,23 @@ sólo cambia lo de esta fase):
   subir eso es un trabajo aparte del firmware, y a la Tienda le sirve: a
   esta velocidad los 110 MB de packs son cuatro minutos.
 
+- **Contra GitHub de verdad** (la release v0.28.0, con el sí del usuario):
+  `lang.zip` (749 783 bytes) en 5,6 s, de los que 2,8 s son conectar: tres
+  conexiones TLS, dos a `github.com` y una a
+  `release-assets.githubusercontent.com`, las dos verificadas con el bundle
+  que el firmware ya lleva. Otra vez enseguida, 4,8 s y 2,4 s conectando.
+  `monsterhop_p4.pak` (37 202 325 bytes): **101,6 s, 379 KB/s** con TLS
+  (441 sin él, en la red de casa), 2,5 s conectando y 3,1 s el hash, sin
+  un reintento. RAM interna: 2 264 bytes menos en el punto más bajo. El
+  tamaño y el sha-256 de los dos coinciden con los que publica GitHub.
+- **De paso:** la API de GitHub da el sha-256 de cada archivo de una
+  release (`gh release view --json assets`, campo `digest`). Para la fase
+  1: `store/packs.json` puede armarse desde ahí, sin bajar los packs.
+
 **Lo que falta medir:**
 
 | Qué | Por qué no se hizo | Qué se anota |
 |---|---|---|
-| TLS contra GitHub de verdad | es salir a internet desde la placa: espera el sí del usuario | los dos handshakes, la velocidad real, que el bundle alcanza |
 | Un corte de la red | hay que apagar y prender el Wi-Fi en la placa, a mano | que siga sola desde donde iba |
 | Un reinicio a mitad de bajada | reiniciar la placa pide el sí del usuario | que el `.part` sirva tras el arranque |
 | Usar la placa mientras baja | lo ve el usuario | si algo se traba con una app pesada al frente |
