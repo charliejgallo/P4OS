@@ -370,7 +370,7 @@ def wood_grain(h, w, base, dark, seed, vertical=False, scale=1.0):
     n = noise(h, w, 90 * scale, 3, seed)
     yy, xx = np.mgrid[0:h, 0:w].astype(np.float32)
     a = xx if vertical else yy
-    rings = np.sin((a / (7 * scale) + n * 18)) * 0.5 + 0.5
+    rings = np.sin((a / (5 * scale) + n * 6)) * 0.5 + 0.5
     fine = noise(h, w, 4 * scale, 2, seed + 1)
     t = np.clip(rings ** 3 * 0.6 + fine * 0.3, 0, 1)
     return mixc(rgb(base)[None, None, :], rgb(dark)[None, None, :], t[..., None])
@@ -423,7 +423,7 @@ def bg_papiro():
                 x += wdt + r.u(8, 30)
     put(img, rgb(0x4A2E14), mask(BG, BG, script) * 0.28 * m)
     for _ in range(6):
-        add(img, rgb(-40), glow(BG, BG, r.u(100, 1180), r.u(100, 1180), r.u(40, 120)) * 0.6 * m)
+        put(img, img * 0.82, glow(BG, BG, r.u(100, 1180), r.u(100, 1180), r.u(40, 120)) * 0.7 * m)
     vignette(img, 0.4)
     return img
 
@@ -1071,21 +1071,29 @@ def seg_mask(d, size):
     return mask(size, size, draw, ss)
 
 
+# the digits of an LED board, 5 x 7
+DOTS = {
+    1: ['..#..', '.##..', '..#..', '..#..', '..#..', '..#..', '.###.'],
+    2: ['.###.', '#...#', '....#', '...#.', '..#..', '.#...', '#####'],
+    3: ['####.', '....#', '....#', '.###.', '....#', '....#', '####.'],
+    4: ['...#.', '..##.', '.#.#.', '#..#.', '#####', '...#.', '...#.'],
+    5: ['#####', '#....', '####.', '....#', '....#', '#...#', '.###.'],
+    6: ['..##.', '.#...', '#....', '####.', '#...#', '#...#', '.###.'],
+    7: ['#####', '....#', '...#.', '..#..', '.#...', '.#...', '.#...'],
+    8: ['.###.', '#...#', '#...#', '.###.', '#...#', '#...#', '.###.'],
+    9: ['.###.', '#...#', '#...#', '.####', '....#', '...#.', '.##..'],
+}
+
+
 def dot_mask(d, size):
-    """the digit as LED dots: Rubik sampled on a 5 x 7 grid"""
-    m = digit_mask(d, size, 0.86)
     out = np.zeros((size, size), np.float32)
     cols, rows = 5, 7
     cw, ch = size * 0.62 / cols, size * 0.84 / rows
     x0, y0 = (size - cw * cols) / 2, (size - ch * rows) / 2
     for r in range(rows):
         for c in range(cols):
-            cx, cy = x0 + (c + 0.5) * cw, y0 + (r + 0.5) * ch
-            v = m[int(np.clip(cy, 0, size - 1)), int(np.clip(cx, 0, size - 1))]
-            # look around a little: thin strokes still light their dot
-            v = max(v, m[int(np.clip(cy - ch / 4, 0, size - 1)), int(np.clip(cx, 0, size - 1))],
-                    m[int(np.clip(cy, 0, size - 1)), int(np.clip(cx + cw / 4, 0, size - 1))])
-            if v > 0.45:
+            if DOTS[d][r][c] == '#':
+                cx, cy = x0 + (c + 0.5) * cw, y0 + (r + 0.5) * ch
                 out = np.maximum(out, disc(size, size, cx, cy, min(cw, ch) * 0.42, 1.0))
     return out
 
@@ -1100,7 +1108,7 @@ def style_digit(key, d, size):
         m = seg_mask(d, size)
         g = blur(m, 3 * k)
         a = np.maximum(m, g * 0.9)
-        out[..., :3] = mixc(col * 0.6, rgb(0xE0FFD8), m[..., None] * 0.5)
+        out[..., :3] = mixc(col * 0.8, rgb(0xD8FFD0), m[..., None] * 0.75)
         out[..., 3] = a * 255
         return out
     if key == 'ciudad':
@@ -1111,12 +1119,12 @@ def style_digit(key, d, size):
         out[..., 3] = a * 255
         return out
     if key == 'neon':
-        m = digit_mask(d, size, 0.8)
-        inner = digit_mask(d, size, 0.8, weight=-int(3 * k))
+        m = digit_mask(d, size, 0.86)
+        inner = digit_mask(d, size, 0.86, weight=-int(6 * k))
         tube = np.clip(m - inner * 0.85, 0, 1)
         g = blur(tube, 3.5 * k)
-        a = np.clip(np.maximum(tube, g * 1.4), 0, 1)
-        out[..., :3] = mixc(col, rgb(0xFFE8FA), tube[..., None] * 0.6)
+        a = np.clip(np.maximum(tube, g * 1.8), 0, 1)
+        out[..., :3] = mixc(col, rgb(0xFFF0FC), np.clip(tube * 1.3, 0, 1)[..., None] * 0.7)
         out[..., 3] = a * 255
         return out
     if key in ('mar', 'espacio', 'embrujada'):
@@ -1152,11 +1160,11 @@ def style_digit(key, d, size):
     if key == 'metal':
         m = digit_mask(d, size, 0.8, weight=int(1 * k))
         yy = np.linspace(0, 1, size, dtype=np.float32)[:, None] * np.ones((1, size), np.float32)
-        chrome = np.interp(yy, [0, 0.45, 0.5, 1], [235, 150, 90, 200]).astype(np.float32)
+        chrome = np.interp(yy, [0, 0.45, 0.5, 1], [215, 120, 55, 150]).astype(np.float32)
         c = np.stack([chrome * 0.95, chrome * 0.98, chrome], -1)
         edge = np.clip(blur(m, 1.2 * k) * 2 - m, 0, 1)
-        ring = np.clip(digit_mask(d, size, 0.8, weight=int(2 * k)) - m, 0, 1)
-        out[..., :3] = c * m[..., None] + rgb(0x1C1F22) * ring[..., None]
+        ring = np.clip(digit_mask(d, size, 0.8, weight=int(3 * k)) - m, 0, 1)
+        out[..., :3] = c * m[..., None] + rgb(0x0E1012) * ring[..., None]
         a = np.clip(m + ring, 0, 1)
         out[..., :3] /= np.maximum(a, 1e-3)[..., None]
         out[..., 3] = a * 255

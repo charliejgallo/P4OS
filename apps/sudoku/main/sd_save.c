@@ -91,6 +91,7 @@ void sd_data_load(void)
         }
     }
     fclose(f);
+    sd_D.owned |= 1u << sd_D.theme;     /* the one in use is always yours */
 }
 
 void sd_data_save(void)

@@ -35,6 +35,9 @@
 
 #define SD_TAG "sudoku"
 
+/* LVGL's, exported to the apps but not in the headers they see (as Clima) */
+extern void lv_image_cache_drop(const void *src);
+
 /* ---- modes ---------------------------------------------------------------- */
 
 enum { SD_M_CLASSIC = 0, SD_M_MINI, SD_M_KILLER, SD_M_DIAG, SD_M_DAILY, SD_MODES };
@@ -226,6 +229,7 @@ typedef struct {
     lv_obj_t *canvas, *touch;
     uint16_t *buf;
     int       x, y, cell, px;       /* where, the cell, the side in pixels  */
+    int       stride;               /* the buffer's row, in pixels          */
     bool      dirty;
     uint8_t   dmask[SD_MAXC];       /* cells to redraw                       */
     const sd_step_t *hint;          /* highlighted while the hint shows     */

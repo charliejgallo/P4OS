@@ -1,0 +1,426 @@
+# amoledos-lang 1   es -> en
+# demo.sudoku.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/sudoku/main/sd_board.c:471
+Sin memoria	Out of memory
+
+#: apps/sudoku/main/sd_game.c:27
+#: apps/sudoku/main/sd_theme.c:32
+Clásico	Classic
+
+#: apps/sudoku/main/sd_game.c:27
+6×6	6×6
+
+#: apps/sudoku/main/sd_game.c:27
+Killer	Killer
+
+#: apps/sudoku/main/sd_game.c:27
+Diagonal	Diagonal
+
+#: apps/sudoku/main/sd_game.c:28
+#: apps/sudoku/main/sd_ui.c:320
+Desafío del día	Daily challenge
+
+#: apps/sudoku/main/sd_game.c:29
+Fácil	Easy
+
+#: apps/sudoku/main/sd_game.c:29
+Medio	Medium
+
+#: apps/sudoku/main/sd_game.c:29
+Difícil	Hard
+
+#: apps/sudoku/main/sd_game.c:29
+Experto	Expert
+
+#: apps/sudoku/main/sd_game.c:30
+Maestro	Master
+
+#: apps/sudoku/main/sd_game.c:144
+El tablero está lleno, pero hay errores	The board is full, but there are mistakes
+
+#: apps/sudoku/main/sd_game.c:391
+Última celda libre	Last free cell
+
+#: apps/sudoku/main/sd_game.c:392
+Único candidato	Single candidate
+
+#: apps/sudoku/main/sd_game.c:393
+Único lugar	Only place
+
+#: apps/sudoku/main/sd_game.c:394
+Combinaciones de la jaula	Cage combinations
+
+#: apps/sudoku/main/sd_game.c:395
+La regla del 45	The rule of 45
+
+#: apps/sudoku/main/sd_game.c:396
+#: apps/sudoku/main/sd_game.c:397
+Candidatos bloqueados	Locked candidates
+
+#: apps/sudoku/main/sd_game.c:398
+Par desnudo	Naked pair
+
+#: apps/sudoku/main/sd_game.c:399
+Par oculto	Hidden pair
+
+#: apps/sudoku/main/sd_game.c:400
+Trío desnudo	Naked triple
+
+#: apps/sudoku/main/sd_game.c:401
+Trío oculto	Hidden triple
+
+#: apps/sudoku/main/sd_game.c:402
+X-Wing	X-Wing
+
+#: apps/sudoku/main/sd_game.c:403
+Cuarteto desnudo	Naked quad
+
+#: apps/sudoku/main/sd_game.c:404
+Cuarteto oculto	Hidden quad
+
+#: apps/sudoku/main/sd_game.c:405
+Pez espada	Swordfish
+
+#: apps/sudoku/main/sd_game.c:406
+Ala XY	XY-Wing
+
+#: apps/sudoku/main/sd_game.c:407
+Ala XYZ	XYZ-Wing
+
+#: apps/sudoku/main/sd_game.c:408
+Cadena corta	Short chain
+
+#: apps/sudoku/main/sd_game.c:409
+Medusa	Jellyfish
+
+#: apps/sudoku/main/sd_game.c:410
+Cadena larga	Long chain
+
+#: apps/sudoku/main/sd_game.c:411
+#: apps/sudoku/main/sd_ui.c:670
+#: apps/sudoku/main/sd_ui.c:810
+Pista	Hint
+
+#: apps/sudoku/main/sd_game.c:412
+Un error	A mistake
+
+#: apps/sudoku/main/sd_game.c:419
+#: apps/sudoku/main/sd_game.c:421
+fila	row
+
+#: apps/sudoku/main/sd_game.c:422
+columna	column
+
+#: apps/sudoku/main/sd_game.c:423
+caja	box
+
+#: apps/sudoku/main/sd_game.c:424
+diagonal	diagonal
+
+#: apps/sudoku/main/sd_game.c:437
+ y 	 and 
+
+#: apps/sudoku/main/sd_game.c:450
+El %d de la celda marcada no va ahí. Aplicar lo borra.	The %d in the marked cell does not go there. Apply erases it.
+
+#: apps/sudoku/main/sd_game.c:453
+No hay un paso simple que explicar desde acá: la celda marcada es un %d.	There is no simple step to explain from here: the marked cell is a %d.
+
+#: apps/sudoku/main/sd_game.c:456
+Es la única celda vacía de su %s: le falta el %d.	It is the only empty cell in its %s: it is missing the %d.
+
+#: apps/sudoku/main/sd_game.c:459
+En esta celda sólo puede ir el %d: los demás números ya están en su fila, su columna o su caja.	Only the %d can go in this cell: the other numbers are already in its row, its column or its box.
+
+#: apps/sudoku/main/sd_game.c:464
+En esta %s el %d sólo puede ir acá.	In this %s the %d can only go here.
+
+#: apps/sudoku/main/sd_game.c:467
+Esta jaula suma %d: con lo que ya hay alrededor sólo le entran el %s. Lo demás sale.	This cage adds up to %d: with what is already around it, only %s fit. The rest goes.
+
+#: apps/sudoku/main/sd_game.c:472
+Toda %s suma 45. Las jaulas que caen enteras adentro dejan %d para la celda marcada: es un %d.	Every %s adds up to 45. The cages lying wholly inside it leave %d for the marked cell: it is a %d.
+
+#: apps/sudoku/main/sd_game.c:476
+Toda %s suma 45. Las jaulas que caen enteras adentro dejan %d para las celdas marcadas: sólo les entran el %s.	Every %s adds up to 45. The cages lying wholly inside it leave %d for the marked cells: only %s fit.
+
+#: apps/sudoku/main/sd_game.c:481
+En esta caja el %s sólo puede ir sobre una %s: sale del resto de esa %s.	In this box the %s can only go on one %s: it goes from the rest of that %s.
+
+#: apps/sudoku/main/sd_game.c:485
+En esta %s el %s sólo puede ir dentro de una caja: sale del resto de esa caja.	In this %s the %s can only go inside one box: it goes from the rest of that box.
+
+#: apps/sudoku/main/sd_game.c:490
+Las celdas marcadas sólo pueden ser %s, entre todas: esos números salen del resto de la %s.	Between them, the marked cells can only be %s: those numbers go from the rest of the %s.
+
+#: apps/sudoku/main/sd_game.c:497
+En esta %s el %s sólo pueden ir en las celdas marcadas: ahí sale todo lo demás.	In this %s the %s can only go in the marked cells: everything else goes from them.
+
+#: apps/sudoku/main/sd_game.c:505
+En %d filas el %s sólo puede ir en las mismas %d columnas: sale del resto de esas columnas.	In %d rows the %s can only go in the same %d columns: it goes from the rest of those columns.
+
+#: apps/sudoku/main/sd_game.c:509
+En %d columnas el %s sólo puede ir en las mismas %d filas: sale del resto de esas filas.	In %d columns the %s can only go in the same %d rows: it goes from the rest of those rows.
+
+#: apps/sudoku/main/sd_game.c:515
+La celda del medio tiene dos opciones y cada una obliga a una punta a ser %d. Una de las dos puntas lo es: el %d sale de las celdas que ven a las dos.	The middle cell has two options and each one forces an end to be %d. One of the two ends is: the %d goes from the cells that see both.
+
+#: apps/sudoku/main/sd_game.c:520
+Entre la celda del medio y sus dos puntas, alguna es %d: el %d sale de las celdas que ven a las tres.	Among the middle cell and its two ends, one is %d: the %d goes from the cells that see all three.
+
+#: apps/sudoku/main/sd_game.c:527
+Si la celda marcada no fuera %d, siguiendo la cadena terminaría siéndolo: es un %d.	If the marked cell were not %d, following the chain it would end up being one: it is a %d.
+
+#: apps/sudoku/main/sd_game.c:530
+Seguí la cadena: en cada línea llena, uno de los dos es cierto; en cada punteada, no pueden serlo los dos. Una de las dos puntas es cierta, así que lo tachado sale.	Follow the chain: on each solid line, one of the two is true; on each dashed one, they cannot both be. One of the two ends is true, so what is crossed out goes.
+
+#: apps/sudoku/main/sd_theme.c:37
+Campo	Countryside
+
+#: apps/sudoku/main/sd_theme.c:42
+Madera	Wood
+
+#: apps/sudoku/main/sd_theme.c:47
+Papiro	Papyrus
+
+#: apps/sudoku/main/sd_theme.c:52
+Playa	Beach
+
+#: apps/sudoku/main/sd_theme.c:57
+Nieve	Snow
+
+#: apps/sudoku/main/sd_theme.c:62
+Piedra	Stone
+
+#: apps/sudoku/main/sd_theme.c:67
+Bajo el mar	Under the sea
+
+#: apps/sudoku/main/sd_theme.c:72
+Ciudad	City
+
+#: apps/sudoku/main/sd_theme.c:77
+Metal	Metal
+
+#: apps/sudoku/main/sd_theme.c:82
+Jardín japonés	Japanese garden
+
+#: apps/sudoku/main/sd_theme.c:87
+Desierto	Desert
+
+#: apps/sudoku/main/sd_theme.c:92
+Neón	Neon
+
+#: apps/sudoku/main/sd_theme.c:97
+Espacio	Space
+
+#: apps/sudoku/main/sd_theme.c:102
+Casa embrujada	Haunted house
+
+#: apps/sudoku/main/sd_theme.c:107
+Aliens	Aliens
+
+#: apps/sudoku/main/sd_ui.c:245
+Todavía no hay hora: el desafío del día espera al reloj de la red	No time yet: the daily challenge waits for the network clock
+
+#: apps/sudoku/main/sd_ui.c:293
+Seguir la partida	Resume the game
+
+#: apps/sudoku/main/sd_ui.c:331
+Esperando la hora...	Waiting for the time...
+
+#: apps/sudoku/main/sd_ui.c:340
+Hecho en %s	Done in %s
+
+#: apps/sudoku/main/sd_ui.c:343
+Racha %u	Streak %u
+
+#: apps/sudoku/main/sd_ui.c:357
+#: apps/sudoku/main/sd_ui.c:907
+Temas	Themes
+
+#: apps/sudoku/main/sd_ui.c:357
+#: apps/sudoku/main/sd_ui.c:1073
+Estadísticas	Statistics
+
+#: apps/sudoku/main/sd_ui.c:357
+#: apps/sudoku/main/sd_ui.c:1172
+Ajustes	Settings
+
+#: apps/sudoku/main/sd_ui.c:374
+Partida nueva	New game
+
+#: apps/sudoku/main/sd_ui.c:407
+Mejor %s	Best %s
+
+#: apps/sudoku/main/sd_ui.c:514
+Notas: sí	Notes: on
+
+#: apps/sudoku/main/sd_ui.c:514
+#: apps/sudoku/main/sd_ui.c:809
+Notas: no	Notes: off
+
+#: apps/sudoku/main/sd_ui.c:599
+Aplicar	Apply
+
+#: apps/sudoku/main/sd_ui.c:601
+Cerrar	Close
+
+#: apps/sudoku/main/sd_ui.c:661
+Pausa	Paused
+
+#: apps/sudoku/main/sd_ui.c:670
+Seguir	Resume
+
+#: apps/sudoku/main/sd_ui.c:670
+#: apps/sudoku/main/sd_ui.c:809
+Deshacer	Undo
+
+#: apps/sudoku/main/sd_ui.c:670
+Reiniciar	Restart
+
+#: apps/sudoku/main/sd_ui.c:670
+#: apps/sudoku/main/sd_ui.c:751
+Menú	Menu
+
+#: apps/sudoku/main/sd_ui.c:692
+Preparando el tablero...	Preparing the board...
+
+#: apps/sudoku/main/sd_ui.c:694
+Buscando uno que pida justo esas técnicas	Looking for one that needs just those techniques
+
+#: apps/sudoku/main/sd_ui.c:716
+¡Resuelto!	Solved!
+
+#: apps/sudoku/main/sd_ui.c:719
+%s, récord	%s, a record
+
+#: apps/sudoku/main/sd_ui.c:723
+Base	Base
+
+#: apps/sudoku/main/sd_ui.c:723
+Sin pistas	No hints
+
+#: apps/sudoku/main/sd_ui.c:723
+Sin errores	No mistakes
+
+#: apps/sudoku/main/sd_ui.c:723
+A tiempo	On time
+
+#: apps/sudoku/main/sd_ui.c:724
+Sin ayudas	No help
+
+#: apps/sudoku/main/sd_ui.c:724
+Racha de días	Day streak
+
+#: apps/sudoku/main/sd_ui.c:743
+%u monedas	%u coins
+
+#: apps/sudoku/main/sd_ui.c:749
+Listo	Done
+
+#: apps/sudoku/main/sd_ui.c:749
+Otra igual	Another one
+
+#: apps/sudoku/main/sd_ui.c:809
+Rehacer	Redo
+
+#: apps/sudoku/main/sd_ui.c:809
+Borrar	Erase
+
+#: apps/sudoku/main/sd_ui.c:810
+Auto	Auto
+
+#: apps/sudoku/main/sd_ui.c:951
+En uso	In use
+
+#: apps/sudoku/main/sd_ui.c:952
+Tuyo	Yours
+
+#: apps/sudoku/main/sd_ui.c:979
+¡Es tuyo!	It is yours!
+
+#: apps/sudoku/main/sd_ui.c:1025
+Es el tema que estás usando.	It is the theme you are using.
+
+#: apps/sudoku/main/sd_ui.c:1026
+Ya es tuyo: ponelo cuando quieras.	It is already yours: put it on whenever you like.
+
+#: apps/sudoku/main/sd_ui.c:1027
+Gratis.	Free.
+
+#: apps/sudoku/main/sd_ui.c:1028
+Cuesta %u monedas. Tenés %u.	It costs %u coins. You have %u.
+
+#: apps/sudoku/main/sd_ui.c:1033
+El fondo, las celdas, los números, las notas y el sonido cambian con el tema.	The background, the cells, the numbers, the notes and the sound change with the theme.
+
+#: apps/sudoku/main/sd_ui.c:1043
+Volver	Back
+
+#: apps/sudoku/main/sd_ui.c:1046
+Usar este tema	Use this theme
+
+#: apps/sudoku/main/sd_ui.c:1049
+Comprar por %u	Buy for %u
+
+#: apps/sudoku/main/sd_ui.c:1056
+Te faltan %u monedas	You need %u more coins
+
+#: apps/sudoku/main/sd_ui.c:1096
+%u monedas ganadas en total	%u coins earned in all
+
+#: apps/sudoku/main/sd_ui.c:1098
+Racha: %u días seguidos (la mejor, %u)	Streak: %u days in a row (best, %u)
+
+#: apps/sudoku/main/sd_ui.c:1101
+Desafío del día: %u seguidos	Daily challenge: %u in a row
+
+#: apps/sudoku/main/sd_ui.c:1115
+Jugadas: %u · ganadas: %u	Played: %u · won: %u
+
+#: apps/sudoku/main/sd_ui.c:1122
+Mejor %s · promedio %s	Best %s · average %s
+
+#: apps/sudoku/main/sd_ui.c:1124
+Sin tiempos todavía	No times yet
+
+#: apps/sudoku/main/sd_ui.c:1173
+Marcar los errores	Show mistakes
+
+#: apps/sudoku/main/sd_ui.c:1173
+Resaltar los números iguales	Highlight equal numbers
+
+#: apps/sudoku/main/sd_ui.c:1174
+Resaltar fila, columna y caja	Highlight row, column and box
+
+#: apps/sudoku/main/sd_ui.c:1174
+Borrar las notas solas	Clear notes by themselves
+
+#: apps/sudoku/main/sd_ui.c:1175
+Sonido	Sound
+
+#: apps/sudoku/main/sd_ui.c:1175
+Fondo animado	Moving background
+
+#: apps/sudoku/main/sd_ui.c:1177
+Sin marcarlos, cada partida paga más	Without them, every game pays more
+
+#: apps/sudoku/main/sd_ui.c:1177
+Y las notas de ese número	And the notes of that number
+
+#: apps/sudoku/main/sd_ui.c:1177
+Las de la celda elegida	Those of the chosen cell
+
+#: apps/sudoku/main/sd_ui.c:1178
+Al poner un número, sale de las notas que lo ven	Placing a number removes it from the notes that see it
+
+#: apps/sudoku/main/sd_ui.c:1178
+Con el sonido de cada tema	With each theme's own sound
+
+#: apps/sudoku/main/sd_ui.c:1179
+Burbujas, fantasmas, nieve...: según el tema	Bubbles, ghosts, snow...: depending on the theme

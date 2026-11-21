@@ -194,12 +194,12 @@ static uint16_t hint_elims(int c)
 
 static void copy_texture(int c)
 {
-    int n = V.s->n, cell = sd_B.cell, px = sd_B.px;
+    int n = V.s->n, cell = sd_B.cell, px = sd_B.stride;
     int x0 = (c % n) * cell, y0 = (c / n) * cell;
     const sd_theme_t *t = sd_theme();
     uint16_t *dst = sd_B.buf;
     if (sd_A.tex && sd_A.theme == (int)(t - SD_THEME)) {
-        int off = (SD_TEX - px) / 2;
+        int off = (SD_TEX - sd_B.px) / 2;
         if (off < 0) off = 0;
         for (int y = 0; y < cell; y++) {
             int sy = off + y0 + y;
@@ -428,6 +428,7 @@ void sd_board_present(void)
     draw_chain(&layer);
     lv_canvas_finish_layer(sd_B.canvas, &layer);
     memset(sd_B.dmask, 0, sizeof sd_B.dmask);
+
 }
 
 static void touch_cb(lv_event_t *e)
@@ -462,7 +463,10 @@ void sd_board_create(lv_obj_t *parent, int x, int y, int max_px)
     sd_B.px = sd_B.cell * n;
     sd_B.x = x + (max_px - sd_B.px) / 2;
     sd_B.y = y + (max_px - sd_B.px) / 2;
-    sd_B.buf = (uint16_t *)sd_alloc((size_t)sd_B.px * sd_B.px * 2);
+    /* LVGL may want its rows aligned (the board's PPA does): the texture is
+     * copied into the buffer by rows, so the stride is LVGL's, not px * 2 */
+    sd_B.stride = (int)(lv_draw_buf_width_to_stride((uint32_t)sd_B.px, LV_COLOR_FORMAT_RGB565) / 2);
+    sd_B.buf = (uint16_t *)sd_alloc((size_t)sd_B.stride * sd_B.px * 2);
     if (!sd_B.buf) {
         sd_ui_toast(_("Sin memoria"));
         return;
@@ -471,6 +475,8 @@ void sd_board_create(lv_obj_t *parent, int x, int y, int max_px)
     lv_obj_set_style_radius(sd_B.canvas, 0, 0);
     lv_obj_remove_flag(sd_B.canvas, LV_OBJ_FLAG_CLICKABLE);
     lv_canvas_set_buffer(sd_B.canvas, sd_B.buf, sd_B.px, sd_B.px, LV_COLOR_FORMAT_RGB565);
+    /* the glyphs' descriptors are reused with other data: nothing stale */
+    lv_image_cache_drop(NULL);
     lv_obj_set_pos(sd_B.canvas, sd_B.x, sd_B.y);
     lv_obj_set_size(sd_B.canvas, sd_B.px, sd_B.px);
 

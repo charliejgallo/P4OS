@@ -66,7 +66,7 @@ const sd_theme_t SD_THEME[SD_THEMES] = {
       { SD_DECOR_FALL, SD_DECOR_WANDER }, { 3, 3 }, 4 },
     { "mar", N_("Bajo el mar"), 500,
       0x03263F, 0x062F4A, 0xE6FBFF, 0x8EC3D6, 0x2BD1C8, 200,
-      0x0C4A66, 0x2D7A96, 0xA6F0FF, 0xFFFFFF, 0xFFD27F, 0x9BD8E8, 0xFF6B6B, 0x2BD1C8, 0x10607F, 0x1C8FA0,
+      0x0C4A66, 0x2D7A96, 0xA6F0FF, 0xFFFFFF, 0xFFD27F, 0x9BD8E8, 0xFF6B6B, 0x2BD1C8, 0x2A8FB8, 0x1C8FA0,
       0xA6F0FF, 0xFFE066, 200, 150, 170,
       { SD_DECOR_RISE, SD_DECOR_CROSS, SD_DECOR_CROSS }, { 7, 2, 1 }, 5 },
     { "ciudad", N_("Ciudad"), 600,
@@ -354,6 +354,9 @@ bool sd_theme_poll(void)
         sd_A.spr_w[i] = in.sw[i];
         sd_A.spr_h[i] = in.sh[i];
     }
+    /* the descriptors are the same structs with new pixels: drop what LVGL
+     * may have cached of the old ones before they are freed */
+    lv_image_cache_drop(NULL);
     sd_ui_set_bg();
     sd_board_all();
     sd_board_present();

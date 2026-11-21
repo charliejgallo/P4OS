@@ -80,6 +80,14 @@ static uint32_t mix(uint32_t a, uint32_t b, int t)
     return (uint32_t)(r << 16 | g << 8 | bl);
 }
 
+/* text on the accent: dark on a light accent (a pale green, a sand), else white */
+static uint32_t on_accent(const sd_theme_t *t)
+{
+    uint32_t c = t->accent;
+    int y = (int)((c >> 16) & 255) * 299 + (int)((c >> 8) & 255) * 587 + (int)(c & 255) * 114;
+    return y > 150000 ? 0x14141A : 0xFFFFFF;
+}
+
 static lv_obj_t *card(lv_obj_t *parent, int x, int y, int w, int h)
 {
     const sd_theme_t *t = sd_theme();
@@ -290,7 +298,7 @@ static void build_menu(lv_obj_t *scr)
     if (sd_G.active) {
         lv_obj_t *c = button(scr, x0, y, colw, 112, t->accent, 255, menu_resume_cb, NULL);
         menu_add(c);
-        lv_obj_t *a = sd_label(c, _("Seguir la partida"), aos_font_body, 0xFFFFFF);
+        lv_obj_t *a = sd_label(c, _("Seguir la partida"), aos_font_body, on_accent(t));
         lv_obj_align(a, LV_ALIGN_TOP_LEFT, 24, 18);
         char buf[96], tm[16];
         sd_fmt_time(tm, sizeof tm, sd_game_seconds());
@@ -303,10 +311,10 @@ static void build_menu(lv_obj_t *scr)
         else
             snprintf(buf, sizeof buf, "%s  ·  %s  ·  %s  ·  %d%%", _(SD_MODE_NAME[sd_G.mode]),
                      _(SD_LEVEL_NAME[sd_G.level]), tm, filled * 100 / (sd_shape.ncells ? sd_shape.ncells : 81));
-        lv_obj_t *b = sd_label(c, buf, aos_font_small, 0xFFFFFF);
+        lv_obj_t *b = sd_label(c, buf, aos_font_small, on_accent(t));
         lv_obj_set_style_text_opa(b, 210, 0);
         lv_obj_align(b, LV_ALIGN_BOTTOM_LEFT, 24, -18);
-        lv_obj_t *p = sd_label(c, AOS_SYM_PLAY, &aos_sym_44, 0xFFFFFF);
+        lv_obj_t *p = sd_label(c, AOS_SYM_PLAY, &aos_sym_44, on_accent(t));
         lv_obj_align(p, LV_ALIGN_RIGHT_MID, -24, 0);
         y += 112 + 14;
     }
@@ -337,7 +345,7 @@ static void build_menu(lv_obj_t *scr)
         if (clock && sd_D.daily_done == ymd) {
             char tm[16];
             sd_fmt_time(tm, sizeof tm, sd_D.daily_time_s);
-            snprintf(rb, sizeof rb, "%s %s", AOS_SYM_CHECK, tm);
+            snprintf(rb, sizeof rb, _("Hecho en %s"), tm);
             right = rb;
         } else if (sd_D.daily_streak > 1) {
             snprintf(rb, sizeof rb, _("Racha %u"), (unsigned)sd_D.daily_streak);
@@ -380,7 +388,7 @@ static void build_menu(lv_obj_t *scr)
         lv_obj_t *b = button(scr, nx + v * (segw + 8), ny, segw, 76, on ? t->accent : t->card, on ? 255 : t->card_opa,
                              menu_variant_cb, (void *)(intptr_t)v);
         menu_add(b);
-        lv_obj_t *l = sd_label(b, _(SD_MODE_NAME[v]), aos_font_small, on ? 0xFFFFFF : t->text);
+        lv_obj_t *l = sd_label(b, _(SD_MODE_NAME[v]), aos_font_small, on ? on_accent(t) : t->text);
         lv_obj_center(l);
     }
     ny += 76 + 12;
@@ -490,17 +498,20 @@ void sd_ui_refresh_game(void)
         lv_obj_set_style_bg_opa(b, chosen ? 255 : t->card_opa, 0);
         lv_obj_t *num = lv_obj_get_child(b, 0);
         if (num) {
-            lv_obj_set_style_text_color(num, lv_color_hex(chosen ? 0xFFFFFF : t->text), 0);
+            lv_obj_set_style_text_color(num, lv_color_hex(chosen ? on_accent(t) : t->text), 0);
             lv_obj_set_style_text_opa(num, left <= 0 && !chosen ? 90 : 255, 0);
         }
         if (sd_U.pad_cnt[d]) {
             if (left > 0) {
                 snprintf(buf, sizeof buf, "%d", left);
+                lv_obj_set_style_text_font(sd_U.pad_cnt[d], aos_font_caption, 0);
                 lv_label_set_text(sd_U.pad_cnt[d], buf);
             } else {
+                /* the caption font has no symbols: the check is in the glyph font */
+                lv_obj_set_style_text_font(sd_U.pad_cnt[d], &aos_sym_28, 0);
                 lv_label_set_text(sd_U.pad_cnt[d], AOS_SYM_CHECK);
             }
-            lv_obj_set_style_text_color(sd_U.pad_cnt[d], lv_color_hex(chosen ? 0xFFFFFF : t->dim), 0);
+            lv_obj_set_style_text_color(sd_U.pad_cnt[d], lv_color_hex(chosen ? on_accent(t) : t->dim), 0);
         }
     }
     if (sd_U.btn_notes) {
@@ -546,7 +557,7 @@ static lv_obj_t *panel_open(int kind, bool over_board)
     const sd_theme_t *t = sd_theme();
     int x, y, w, h;
     panel_area(&x, &y, &w, &h, over_board);
-    lv_obj_t *p = sd_box(sd_U.scr, mix(t->card, 0x000000, 40), 250, AOS_UI_RADIUS);
+    lv_obj_t *p = sd_box(sd_U.scr, mix(t->card, 0x000000, 40), 255, AOS_UI_RADIUS);
     lv_obj_set_pos(p, x, y);
     lv_obj_set_size(p, w, h);
     lv_obj_add_flag(p, LV_OBJ_FLAG_CLICKABLE);
@@ -593,7 +604,7 @@ static void hint_show(void)
     lv_obj_set_pos(tx, 22, 74);
     int bh = 76, bw = (w - 3 * 18) / 2;
     lv_obj_t *a = button(p, 18, h - bh - 18, bw, bh, t->accent, 255, hint_apply_cb, NULL);
-    lv_obj_center(sd_label(a, _("Aplicar"), aos_font_body, 0xFFFFFF));
+    lv_obj_center(sd_label(a, _("Aplicar"), aos_font_body, on_accent(t)));
     lv_obj_t *c = button(p, 18 * 2 + bw, h - bh - 18, bw, bh, t->card, 255, panel_close_cb, NULL);
     lv_obj_center(sd_label(c, _("Cerrar"), aos_font_body, t->text));
     menu_add(a);
@@ -669,7 +680,7 @@ static void pause_show(void)
         lv_event_cb_t cb = i == 0 ? pause_resume_cb : i == 3 ? pause_restart_cb : i == 4 ? pause_menu_cb : pause_tool_cb;
         void *ud = (void *)(intptr_t)(i == 1 ? 5 : 0);
         lv_obj_t *b = button(p, (w - bw) / 2, y, bw, bh, i == 0 ? t->accent : mix(t->card, 0xFFFFFF, 26), 255, cb, ud);
-        lv_obj_center(sd_label(b, _(CAP[i]), aos_font_body, i == 0 ? 0xFFFFFF : t->text));
+        lv_obj_center(sd_label(b, _(CAP[i]), aos_font_body, i == 0 ? on_accent(t) : t->text));
         menu_add(b);
         y += bh + 12;
     }
@@ -743,7 +754,7 @@ void sd_ui_won(void)
 
     int bw = (w - 3 * 18) / 2;
     lv_obj_t *a = button(p, 18, h - bh - 18, bw, bh, t->accent, 255, won_again_cb, NULL);
-    lv_obj_center(sd_label(a, sd_G.mode == SD_M_DAILY ? _("Listo") : _("Otra igual"), aos_font_body, 0xFFFFFF));
+    lv_obj_center(sd_label(a, sd_G.mode == SD_M_DAILY ? _("Listo") : _("Otra igual"), aos_font_body, on_accent(t)));
     lv_obj_t *c = button(p, 2 * 18 + bw, h - bh - 18, bw, bh, t->card, 255, pause_menu_cb, NULL);
     lv_obj_center(sd_label(c, _("Menú"), aos_font_body, t->text));
     menu_add(a);
@@ -781,8 +792,14 @@ static void build_game(lv_obj_t *scr)
     char buf[80];
     if (sd_G.mode == SD_M_DAILY) snprintf(buf, sizeof buf, "%s", _(SD_MODE_NAME[SD_M_DAILY]));
     else snprintf(buf, sizeof buf, "%s · %s", _(SD_MODE_NAME[sd_G.mode]), _(SD_LEVEL_NAME[sd_G.level]));
-    sd_U.lbl_title = sd_label(scr, buf, aos_font_small, t->text);
-    lv_obj_set_pos(sd_U.lbl_title, hx + 80, top + 22);
+    /* on a pill: the picture behind may be as light as the text (a moon) */
+    lv_obj_t *pill = sd_box(scr, t->card, t->card_opa, 22);
+    lv_obj_set_pos(pill, hx + 74, top + 16);
+    lv_obj_set_height(pill, 44);
+    lv_obj_set_width(pill, LV_SIZE_CONTENT);
+    lv_obj_set_style_pad_hor(pill, 16, 0);
+    sd_U.lbl_title = sd_label(pill, buf, aos_font_small, t->text);
+    lv_obj_align(sd_U.lbl_title, LV_ALIGN_LEFT_MID, 0, 0);
     lv_obj_t *pb = button(scr, hx + hw - 64, top + 6, 64, 64, t->card, t->card_opa, pause_cb, NULL);
     lv_obj_set_style_radius(pb, 32, 0);
     lv_obj_center(sd_label(pb, AOS_SYM_PAUSE, &aos_sym_44, t->text));
@@ -1040,11 +1057,11 @@ static void build_preview(lv_obj_t *scr)
         lv_obj_center(sd_label(b, _("Volver"), aos_font_body, t->text));
     } else if (own || th->price == 0) {
         b = button(c, 24, chh - bh - 22, bw, bh, t->accent, 255, preview_buy_cb, NULL);
-        lv_obj_center(sd_label(b, _("Usar este tema"), aos_font_body, 0xFFFFFF));
+        lv_obj_center(sd_label(b, _("Usar este tema"), aos_font_body, on_accent(t)));
     } else if (sd_D.coins >= th->price) {
         b = button(c, 24, chh - bh - 22, bw, bh, t->accent, 255, preview_buy_cb, NULL);
         snprintf(buf, sizeof buf, _("Comprar por %u"), (unsigned)th->price);
-        lv_obj_t *l = sd_label(b, buf, aos_font_body, 0xFFFFFF);
+        lv_obj_t *l = sd_label(b, buf, aos_font_body, on_accent(t));
         lv_obj_align(l, LV_ALIGN_CENTER, 20, 0);
         lv_obj_t *g = glyph(b, GL_COIN, 34, 0);
         lv_obj_align_to(g, l, LV_ALIGN_OUT_LEFT_MID, -12, 0);
@@ -1109,16 +1126,16 @@ static void build_stats(lv_obj_t *scr)
             const sd_stat_t *s = &sd_D.st[m][l];
             int y = 66 + l * 78;
             if (m != SD_M_DAILY) lv_obj_set_pos(sd_label(c, _(SD_LEVEL_NAME[l]), aos_font_small, t->text), 24, y);
-            snprintf(buf, sizeof buf, _("%u jugadas, %u ganadas"), (unsigned)s->played, (unsigned)s->won);
+            snprintf(buf, sizeof buf, _("Jugadas: %u · ganadas: %u"), (unsigned)s->played, (unsigned)s->won);
             lv_obj_t *a = sd_label(c, buf, aos_font_small, t->dim);
             lv_obj_align(a, LV_ALIGN_TOP_RIGHT, -24, y);
             if (s->won) {
                 char b1[16], b2[16];
                 sd_fmt_time(b1, sizeof b1, s->best_s);
                 sd_fmt_time(b2, sizeof b2, s->sum_s / s->won);
-                snprintf(buf, sizeof buf, _("mejor %s, promedio %s"), b1, b2);
+                snprintf(buf, sizeof buf, _("Mejor %s · promedio %s"), b1, b2);
             } else {
-                snprintf(buf, sizeof buf, "%s", _("sin tiempos todavía"));
+                snprintf(buf, sizeof buf, "%s", _("Sin tiempos todavía"));
             }
             lv_obj_t *b = sd_label(c, buf, aos_font_caption, t->dim);
             lv_obj_align(b, LV_ALIGN_TOP_RIGHT, -24, y + 34);
