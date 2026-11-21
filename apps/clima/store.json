@@ -4,6 +4,10 @@
   "es": "El tiempo y el pronóstico del lugar que elijas.",
   "en": "The weather and the forecast for the place you choose."
  },
+ "desc": {
+  "es": "Muestra el tiempo de ahora con un dibujo grande del cielo, la temperatura, la sensación térmica, la humedad y el viento; abajo, las próximas 12 horas y los 7 días de la semana con la mínima, la máxima y la probabilidad de lluvia. Parada va en una columna; acostada, el presente y las horas a la izquierda y la semana a la derecha.\n\nEl lugar se elige con Buscar una ciudad: escribí el nombre y tocá el que es. Queda guardado, así la app abre sabiendo dónde está. El pronóstico se actualiza cada 15 minutos, y el último que llegó se guarda en la tarjeta para tener algo que mostrar mientras contesta la red o cuando no hay.\n\nLos datos son de Open-Meteo, un servicio de pronóstico gratis que no pide clave, así que necesita Wi-Fi. La página Clima del portal deja buscar el lugar con el teclado de la computadora y muestra el pronóstico; la app lo toma en unos segundos si está abierta, o la próxima vez que se abra.",
+  "en": "It shows the weather now with a large drawing of the sky, the temperature, what it feels like, the humidity and the wind; below, the next 12 hours and the 7 days of the week with the low, the high and the chance of rain. Upright it is one column; lying down, the present and the hours on the left and the week on the right.\n\nThe place is chosen with Search for a city: type the name and tap the right one. It is kept, so the app opens already knowing where it stands. The forecast refreshes every 15 minutes, and the last one that arrived is kept on the card, so there is something to show while the network answers, or when there is none.\n\nThe data come from Open-Meteo, a free forecast service that needs no key, so it needs Wi-Fi. The Weather page in the portal lets you search for the place with the computer's keyboard and shows the forecast; the app takes it within seconds if it is open, or the next time it opens."
+ },
  "shots": [
   "app-clima.png",
   "app-clima-snow.png",

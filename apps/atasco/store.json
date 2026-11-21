@@ -4,6 +4,10 @@
   "es": "Sacá el auto rojo del estacionamiento moviendo los demás, en la menor cantidad de jugadas.",
   "en": "Get the red car out of the car park by sliding the others, in as few moves as you can."
  },
+ "desc": {
+  "es": "Un rompecabezas de bloques deslizantes. El auto rojo tiene que salir por la derecha, pero el paso está lleno de autos y camiones que sólo se mueven a lo largo de su eje. Arrastrá cualquiera con el dedo; un deslizamiento entero cuenta como un movimiento. Deshacer vuelve atrás de a una jugada y otro botón empieza el nivel de nuevo.\n\nTrae 25 niveles de dificultad creciente, del de un solo auto a los de once. El menú muestra los 25 juntos: cada uno se abre al terminar el anterior, el progreso queda guardado y un botón lleva al que sigue. Se juega en vertical o en horizontal, y girar la pantalla no pierde el estacionamiento a medio resolver.\n\nCon un joystick USB, la cruz mueve un marco por las celdas, A toma el auto y la cruz lo desliza hasta que A o B lo suelta. B sin nada tomado deshace, R reinicia el nivel y START va a los niveles.",
+  "en": "A sliding block puzzle. The red car has to leave by the right, but the way is full of cars and lorries that only move along their own axis. Drag any of them with a finger; a whole slide counts as one move. Undo steps back one move at a time and another button starts the level over.\n\nThere are 25 levels of rising difficulty, from one with a single car to ones with eleven. The menu shows all 25 at once: each one opens when the one before is solved, progress is saved and a button takes you to the next. It plays upright or sideways, and turning the screen keeps a half-solved car park as it was.\n\nWith a USB gamepad, the D-pad moves a frame over the cells, A takes a car and the D-pad slides it until A or B lets go. B with nothing taken undoes, R restarts the level and START goes to the levels."
+ },
  "shots": [
   "app-atasco.png",
   "app-atasco-level8.png",

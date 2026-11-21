@@ -4,6 +4,10 @@
   "es": "Cotizaciones: dólar, euro y otras monedas.",
   "en": "Exchange rates: dollar, euro and other currencies."
  },
+ "desc": {
+  "es": "Las cotizaciones en pesos argentinos, una tarjeta por cada una con la venta grande y la compra al lado: el dólar en sus siete casas (Oficial, Blue, Bolsa (MEP), Contado c/liqui, Mayorista, Cripto y Tarjeta) y el euro, el real, el peso chileno y el peso uruguayo. Arriba dice de cuándo es el dato. Se actualiza cada cinco minutos, y al tocar la pantalla.\n\nMuestra el valor de ahora, sin flechas ni variaciones: el servicio no da el de ayer, y la app no lo inventa. Los datos son de DolarApi, un servicio de cotizaciones, así que necesita Wi-Fi; sin red dice sin conexión.\n\nCuáles se ven se elige en la página Cotizaciones del portal, en Qué muestra la placa, con los valores del día al lado. La placa las muestra siempre en el mismo orden, y si la app está abierta cambia sola en unos segundos.",
+  "en": "Exchange rates in Argentine pesos, one card each with the selling price large and the buying price beside it: the dollar in its seven houses (Official, Blue, Stock market (MEP), Cash settlement (CCL), Wholesale, Crypto and Card) and the euro, the Brazilian real, the Chilean peso and the Uruguayan peso. The top line says how old the figures are. They refresh every five minutes, and when you tap the screen.\n\nIt shows the value now, with no arrows or changes: the service does not give yesterday's, and the app does not make it up. The data come from DolarApi, an exchange rate service, so it needs Wi-Fi; with no network it says no connection.\n\nWhich ones are shown is chosen on the Currencies page in the portal, under What the board shows, with today's values beside them. The board always shows them in the same order, and if the app is open it changes by itself within seconds."
+ },
  "shots": [
   "app-cotiz.png",
   "app-cotiz-currencies.png",

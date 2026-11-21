@@ -4,6 +4,10 @@
   "es": "Pinball en 3D, visto desde atrás de las paletas, con seis mesas.",
   "en": "Pinball in 3D, seen from behind the flippers, with six tables."
  },
+ "desc": {
+  "es": "La mitad de abajo de la pantalla son las paletas: la izquierda a la izquierda, la derecha a la derecha, y las dos a la vez con dos dedos. Cuando la bola espera, el botón de lanzar aparece abajo a la derecha: un toque la lanza fuerte y mantenido elige la fuerza. Un deslizamiento rápido arriba sacude la mesa, pero si te pasás es TILT. Con un joystick USB, L o izquierda y R o derecha son las paletas, A lanza, arriba sacude y START pausa. Se juega con la placa parada.\n\nLas seis mesas comparten las reglas: carriles de arriba, bumpers, blancos, misiones, traba de bolas y multibola, bola extra y un modo final. Cada una tiene su arte, sus juguetes, su música y un minijuego en el visor de puntos: Noche de Zombis, Robots en Órbita, El Templo de la Jungla, El Gran Circo, Casino Real y La Isla Pirata. Se elige en un carrusel y guarda su propio récord.\n\nNoche de Zombis viene con la app; las otras cinco son paquetes opcionales que elegís en la Tienda.",
+  "en": "The lower half of the screen is the flippers: the left half the left one, the right half the right one, both at once with two fingers. When the ball waits, the launch button shows in the bottom right corner: a tap launches it hard, and held it chooses the strength. A quick swipe up top nudges the table, but overdo it and it is TILT. With a USB gamepad, L or left and R or right are the flippers, A launches, up nudges and START pauses. It plays with the board upright.\n\nThe six tables share the rules: top lanes, bumpers, targets, missions, ball lock and multiball, extra ball and a final mode. Each has its own art, toys, music and a video mode on the dot-matrix display: a graveyard at night, a space station, a jungle temple, a circus, a casino and a pirate island. They are picked in a carousel and each keeps its own high score.\n\nThe zombie table comes with the app; the other five are optional packs you choose in the Store."
+ },
  "tags": [
   "3d"
  ],

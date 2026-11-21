@@ -4,6 +4,10 @@
   "es": "Combiná tres o más gemas en línea; las que caen encadenan más.",
   "en": "Match three or more jewels in a line; what falls chains more."
  },
+ "desc": {
+  "es": "Dos gemas vecinas cambian de lugar, con un toque en cada una o arrastrando una hacia el costado. Lo que queda en línea de tres o más se rompe, lo de arriba cae y a veces forma otra línea sola. Si la jugada no arma nada, las gemas vuelven. Si no quedan jugadas, el tablero se mezcla solo, y tras seis segundos sin tocar nada el juego te marca una.\n\nCuatro en línea dejan una llama, que explota alrededor; una L o una T, una estrella, que limpia su fila y su columna; cinco en línea, un hipercubo, que cambiado por una gema se lleva todas las de ese color.\n\nHay dos modos: Sin apuro, sin reloj, y Contrarreloj, con una barra que baja sola y se llena rompiendo gemas. Fácil usa seis colores y Normal y Difícil siete; en Contrarreloj la barra baja más rápido según la dificultad y el nivel. Se juega con la placa parada o acostada. Con un joystick USB, la cruz mueve un marco amarillo, A toma una gema, una dirección la cambia y START pausa.",
+  "en": "Two neighbouring jewels swap places, with a tap on each or by dragging one sideways. Whatever is left in a line of three or more breaks, what is above falls, and sometimes that makes another line by itself. If the move forms nothing, the jewels go back. If no moves are left the board shuffles itself, and after six seconds without a touch the game shows you one.\n\nFour in a row leaves a flame, which blasts around it; an L or T shape, a star, which clears its row and its column; five in a row, a hypercube, which swapped with a jewel takes every jewel of that colour.\n\nThere are two modes: Relaxed, with no clock, and Time attack, with a bar that drains by itself and refills as jewels break. Easy uses six colours, Normal and Hard seven; in Time attack the bar drains faster with the difficulty and the level. It plays with the board upright or lying down. With a USB gamepad the D-pad moves a yellow frame, A takes a jewel, a direction swaps it and START pauses."
+ },
  "shots": [
   "app-gemas.png",
   "app-gemas-play.jpg",

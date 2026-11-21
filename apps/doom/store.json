@@ -1,8 +1,12 @@
 {
  "cat": "juegos",
  "about": {
-  "es": "Chocolate Doom en la placa, a 35 cuadros por segundo. Se juega acostado, con el dedo, teclado o joystick.",
-  "en": "Chocolate Doom on the board, at 35 frames a second. Played lying down, by touch, keyboard or joystick."
+  "es": "Chocolate Doom en la placa, a 35 cuadros por segundo. Se juega acostado, con el dedo o con joystick.",
+  "en": "Chocolate Doom on the board, at 35 frames a second. Played lying down, by touch or with a joystick."
+ },
+ "desc": {
+  "es": "Es Chocolate Doom, a través de doomgeneric, con la música OPL2 del juego sintetizada en la placa. La pantalla se pone en horizontal al abrirlo y se juega con los dos pulgares: en la franja izquierda aparece una palanca donde apoyás el dedo, analógica, y en la derecha están FIRE, USE, STRAFE, WEAPON y MAP; apretar la imagen también dispara. MENU abre el menú del juego, y mantenerlo dos segundos sale. Con un joystick USB, la palanca o la cruz caminan y giran, A dispara, B usa, L y R se corren de costado y juntos cambian el arma, y START es el menú.\n\nLos datos del juego no vienen con la app: copiá tu WAD a la carpeta doom de la tarjeta, con un lector o desde el explorador de archivos del portal. Se probó con el doom1.wad del shareware, el primer episodio, que se puede copiar y regalar. La app también busca los WAD de los juegos completos y los de Freedoom, pero con ellos no se probó.\n\nLas partidas guardadas y las opciones, como el volumen y la velocidad de giro, quedan en esa misma carpeta.",
+  "en": "This is Chocolate Doom, through doomgeneric, with the game's OPL2 music synthesised on the board. The screen turns to landscape when it opens and it is played with both thumbs: in the left band an analogue stick appears wherever your thumb lands, and the right band holds FIRE, USE, STRAFE, WEAPON and MAP; pressing the picture fires too. MENU opens the game's menu, and holding it for two seconds quits. With a USB gamepad, the stick or D-pad walks and turns, A fires, B uses, L and R sidestep and together change weapon, and START is the menu.\n\nThe game's data does not come with the app: copy your WAD to the card's doom folder, with a card reader or from the portal's file explorer. It was tested with the shareware doom1.wad, the first episode, which may be copied and given away. The app also looks for the full games' WADs and Freedoom's, but it has not been tried with them.\n\nSaved games and the options, such as the volume and the turning speed, stay in that same folder."
  },
  "tags": [
   "3d"

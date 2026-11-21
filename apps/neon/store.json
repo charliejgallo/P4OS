@@ -4,6 +4,10 @@
   "es": "Víboras de neón comen fruta de neón en una pantalla negra. Sin puntaje ni carteles.",
   "en": "Neon snakes eat neon fruit on a black screen. No score and no HUD."
  },
+ "desc": {
+  "es": "La víbora se maneja con el dedo en toda la pantalla: deslizá hacia donde quieras ir, alcanza con un toque corto y un mismo trazo puede doblar varias veces. También podés tocar al costado de la cabeza para doblar para ese lado. Con un joystick USB, la cruz o la palanca doblan y START pausa.\n\nEn NORMAL tu víbora está sola en la arena: cada fruta la alarga y la acelera un poco, y chocar contra una pared o contra su propia cola termina la partida. En COMBATE juegan seis víboras, la tuya y cinco de la placa, con mucha más fruta; la que choca deja chispas de su color para que otras se las coman y vuelve a los pocos segundos.\n\nLa arena ocupa toda la pantalla, con la placa parada o acostada, y girarla no corta la partida: vuelve en pausa. No hay puntaje ni carteles, sólo las víboras, la fruta y el borde.",
+  "en": "The snake is steered with a finger anywhere on the screen: swipe toward where you want to go, a short flick is enough and one stroke can turn several times. You can also tap beside the head to turn that way. With a USB gamepad the D-pad or the stick turns and START pauses.\n\nIn NORMAL your snake is alone in the arena: each fruit makes it longer and a little faster, and hitting a wall or its own tail ends the game. In BATTLE six snakes play, yours and five of the board's, with far more fruit; the one that crashes leaves sparks of its colour for the others to eat and comes back a few seconds later.\n\nThe arena fills the whole screen, with the board upright or lying down, and turning it does not end the game: it comes back paused. There is no score and no HUD, only the snakes, the fruit and the frame."
+ },
  "shots": [
   "app-neon.png",
   "app-neon-battle.png",

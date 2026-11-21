@@ -4,6 +4,10 @@
   "es": "Saltá de plataforma en plataforma, cada vez más alto. Homenaje no oficial; no es un producto de Anthropic.",
   "en": "Jump from platform to platform, higher each time. An unofficial homage; not an Anthropic product."
  },
+ "desc": {
+  "es": "El bichito de Claude Code sube rebotando solo; vos lo llevás de costado. Mantené apretado uno de los dos botones de abajo para caminar hacia ese lado, o arrastrá el dedo y va derecho a donde lo tenés. La pausa está en la píldora del sistema o en un toque sobre el marcador. Con un joystick USB, la cruz o la palanca lo mueven y START pausa.\n\nCuanto más alto, más cambia el cielo: el prado, el atardecer, la noche, el espacio y la aurora. Aparecen plataformas que se mueven, que se rompen al pisarlas o que se desvanecen después de un salto, resortes y cohetes que te suben de golpe, y bichos que revientan si les caés encima y te tiran si los tocás de costado.\n\nLas monedas que juntás, más un bono por la altura, se gastan en la Tienda del menú: dieciséis disfraces, tres de ellos ya puestos de entrada. Se guardan el récord en metros, las monedas y lo comprado. Se juega en vertical o en horizontal.",
+  "en": "The Claude Code critter climbs by bouncing on its own; you steer it sideways. Hold one of the two buttons at the bottom to walk that way, or drag a finger and it goes straight to where the finger is. Pause is the system's pause pill or a tap on the score strip. With a USB gamepad, the D-pad or stick moves it and START pauses.\n\nThe higher you go, the more the sky changes: the meadow, sunset, night, space and the aurora. Platforms start to move, to break when stepped on or to fade after one bounce, springs and rockets throw you up, and bugs burst if you land on them and knock you down if you touch them from the side.\n\nThe coins you pick up, plus a bonus for height, are spent in the menu's Shop: sixteen costumes, three of them free from the start. The best height in metres, the coins and what you bought are kept. It plays upright or sideways."
+ },
  "shots": [
   "app-cjump.png",
   "app-cjump-play.png",
