@@ -1,4 +1,69 @@
 {
+ "bastion_cienaga_p4.pak": {
+  "tag": "v0.29.0",
+  "size": 2633579,
+  "sha256": "6b1e402424fd612cba12f92c239029ec6d90452afe2a33aff964c0a088ceb84b"
+ },
+ "bastion_colmena_p4.pak": {
+  "tag": "v0.29.0",
+  "size": 2448100,
+  "sha256": "671740ce6d53f2d6424ecc320e8bfe1dcbe52e62820a0922e4a0eb4633c71d59"
+ },
+ "bastion_cristal_p4.pak": {
+  "tag": "v0.29.0",
+  "size": 2686417,
+  "sha256": "86cbe543b56218333b448e86c5c4214b8dc89861066f3d76ebf47e7ef3d85c44"
+ },
+ "bastion_hielo_p4.pak": {
+  "tag": "v0.29.0",
+  "size": 2225403,
+  "sha256": "11f0780a786b3ca36dec6fa7983d9b859c66a2958e30a1a172117e9d6bab3196"
+ },
+ "bastion_luna_p4.pak": {
+  "tag": "v0.29.0",
+  "size": 2485052,
+  "sha256": "45c4ff4c45c412831ec5e0223eb6ccf8c3ccd7b53a7384bc7738a23c567e2e23"
+ },
+ "bastion_magma_p4.pak": {
+  "tag": "v0.29.0",
+  "size": 2349540,
+  "sha256": "d083a484394c18fd3086404aeb36e5b895c414bb21f2cadcbb271a504a50c01d"
+ },
+ "bastion_nebula_p4.pak": {
+  "tag": "v0.29.0",
+  "size": 2150443,
+  "sha256": "a31a0688080ba56bd124400f5557f75c5b71a12caa5b8b3183ef9299be0d3ade"
+ },
+ "bastion_nucleo_p4.pak": {
+  "tag": "v0.29.0",
+  "size": 1959990,
+  "sha256": "075a1c7789eb2108d05e591b34970b2a456ca26b84bb7e5905b99ef64ed89694"
+ },
+ "bastion_orbita_p4.pak": {
+  "tag": "v0.29.0",
+  "size": 1615916,
+  "sha256": "2d3142d3d86953e649e96c9da0eeac81f915b7914a90c412e93dfd7bbae19fec"
+ },
+ "bastion_p4.pak": {
+  "tag": "v0.29.0",
+  "size": 7500000,
+  "sha256": "e18362722a802d69ab297c81bfe37dce6a4268b9bf5b2a3ebf13e3b7839984b6"
+ },
+ "bastion_p4.pak.1": {
+  "tag": "v0.29.0",
+  "size": 7500000,
+  "sha256": "d5ab8550d62b10ac5a65e846f3bae9163cfd10aa8994461fc8aa0f02e873c36d"
+ },
+ "bastion_p4.pak.2": {
+  "tag": "v0.29.0",
+  "size": 858105,
+  "sha256": "ef10680f43d7f429b115fceb17b6cb41256cbd604cbb3c524c9db1299769649f"
+ },
+ "bastion_selva_p4.pak": {
+  "tag": "v0.29.0",
+  "size": 2550488,
+  "sha256": "18b2fc8a9d393075842033535da107e18e6ac51c18da58943c8a416501434ea8"
+ },
  "emoji.pak": {
   "tag": "v0.28.0",
   "size": 16203453,
