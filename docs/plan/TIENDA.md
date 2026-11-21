@@ -1070,7 +1070,15 @@ en color y el firmware del C6. Era de la fase 6.
   esperando al lado, una parte que escribiría en otro lado, una con otros
   bytes, y una de terceros que no se ofrece). En el simulador: la solapa
   Sistema con las cuatro, instalar el firmware del C6, la página de una.
-  Firmware `rev1_3`: 7 068 336 bytes. **Sin probar en la placa.**
+  Firmware `rev1_3`: 7 068 336 bytes.
+- **En la placa (2026-11-21):** `v0.30.0-tienda.3-2-g7f31098` por OTA,
+  confirmado; RAM interna libre 209 623 bytes, sin cambio. La tarjeta ya
+  tenía los cuatro (idiomas, `emoji.pak`, `c6.bin`, copiados hace
+  tiempo): los vio a todos como copiados a mano. Los dos idiomas,
+  pedidos por la API, se instalaron desde el catálogo de prueba en 2,6 y
+  3,1 s (dos archivos cada uno, 0,46 MB) y el portal quedó sirviendo las
+  cadenas nuevas. **Faltan en la pantalla, con el usuario:** Obtener los
+  emojis y el firmware del C6, que si son los del catálogo no bajan nada.
 
 ### Los documentos públicos (2026-11-21)
 
