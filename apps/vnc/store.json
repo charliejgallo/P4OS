@@ -5,6 +5,8 @@
   "en": "A VNC viewer: a computer's screen on the board, by finger or USB mouse and keyboard."
  },
  "shots": [
-  "land-vnc.png"
+  "land-vnc.png",
+  "app-vnc-list.png",
+  "app-vnc-session.png"
  ]
 }

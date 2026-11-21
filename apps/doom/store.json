@@ -8,7 +8,9 @@
   "3d"
  ],
  "shots": [
-  "land-doom.jpg"
+  "land-doom.jpg",
+  "land-doom-fight.jpg",
+  "land-doom-room.jpg"
  ],
  "user_files": {
   "es": "El WAD del juego no viene con la app: copiá el tuyo (doom1.wad, el shareware, sirve) a la carpeta doom/ de la tarjeta.",

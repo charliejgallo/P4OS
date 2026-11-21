@@ -5,6 +5,9 @@
   "en": "An SSH client: a terminal on the board into any computer."
  },
  "shots": [
-  "app-ssh-htop.png"
+  "app-ssh-htop.png",
+  "app-ssh-list.png",
+  "app-ssh-hostkey.png",
+  "app-ssh-session.png"
  ]
 }

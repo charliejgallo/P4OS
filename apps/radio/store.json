@@ -5,6 +5,8 @@
   "en": "Internet radio: a dial, nine preset keys and the whole list of stations."
  },
  "shots": [
-  "app-radio.png"
+  "app-radio.png",
+  "app-radio-play.png",
+  "app-radio-info.png"
  ]
 }

@@ -3,5 +3,10 @@
  "about": {
   "es": "El tiempo y el pronóstico del lugar que elijas.",
   "en": "The weather and the forecast for the place you choose."
- }
+ },
+ "shots": [
+  "app-clima.png",
+  "app-clima-snow.png",
+  "app-clima-storm.png"
+ ]
 }
