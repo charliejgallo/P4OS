@@ -1182,6 +1182,29 @@ Mientras tanto, sin cambiar nada: no sacar un tag por app (el costo es por
 corrida, no por app), y que cada sesión valide en la Mac con
 `tools/build_apps.sh <app>` y el simulador.
 
+**Los puntos 1 y 2, hechos el 2026-11-21** (`tools/ci_apps.sh` y el flujo
+`build.yml`, en el PR 1):
+
+- Las apps se reparten en **seis tandas** que corren a la vez. Cada tanda
+  guarda lo que compiló (`.appcache`, en la caché de GitHub) bajo una
+  huella de lo que hace a una app: sus archivos, los headers y la tabla de
+  símbolos contra los que se compila, la configuración, la IDF y el
+  compilador. Con la misma huella el `.so` se copia y no se compila. Sólo
+  se guarda un `.so` que pasó los chequeos de `build_apps.sh`.
+- Un trabajo aparte, `store`, arma `apps.zip`, `web.zip`, `lang.zip`, el
+  catálogo, los paquetes y las imágenes con los `.so` de las tandas, en
+  una máquina común (ahí `pip install pillow` anda). Los trabajos de
+  firmware quedan con el firmware y nada más.
+- Una tanda que no tiene nada que compilar tampoco configura el firmware:
+  la huella sale de los archivos del árbol.
+- **Medido en la primera corrida del PR** (todo por compilar): 19 minutos
+  de reloj contra 108; la tanda más larga, 18,7; `store`, 20 segundos. El
+  catálogo salió con las 58 apps, las cuatro partes del sistema y las 199
+  imágenes, y **los 58 `.so` son byte a byte los de la release 0.30.0**,
+  que se compiló en serie.
+- La caché de un tag no le sirve a nadie y no se guarda: un tag lee la de
+  `main`. La de un PR es de ese PR.
+
 ## Roadmap
 
 Cada fase termina con algo que se puede probar y con sus números anotados
