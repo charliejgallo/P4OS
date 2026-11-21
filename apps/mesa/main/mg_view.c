@@ -479,7 +479,9 @@ static void draw_piece(const mg_piece_t *s, bool lifted)
     bool flat = mg->art.flat;
     /* the shadow on the table, smaller and fainter the higher it is */
     float hk = 1.0f / (1.0f + z / (S * 1.2f));
-    if (!upright()) {
+    /* from above a standing piece is drawn from the front: no shadow
+     * under it unless it is in the air */
+    if (!upright() && !(flat && (k->flags & MESA_KF_TALL) && z < 1)) {
         float rx = S * (k->flags & MESA_KF_FLAT ? 0.42f : 0.34f) * (0.6f + 0.4f * hk);
         float ry = flat ? rx : rx * (s_sin > 0.3f ? s_sin : 0.3f);
         float sx = s->x + (flat ? z * 0.25f : 0), sy = s->y + (flat ? z * 0.4f : S * 0.04f);

@@ -13,7 +13,7 @@ import mesa_common as mc  # noqa: E402
 
 S = 78.0
 SPR_W, SPR_H, SPR_AX, SPR_AY = 120, 150, 60, 124
-FLAT_S = 44.0
+FLAT_S = 52.0
 
 
 def profile(kind):
@@ -66,11 +66,11 @@ def make_piece(kind, m):
         head = [(-0.24, 0.20), (0.20, 0.20), (0.19, 0.34), (0.10, 0.48), (0.18, 0.56), (0.30, 0.64), (0.34, 0.72),
                 (0.30, 0.79), (0.18, 0.82), (0.08, 0.86), (0.04, 0.98), (-0.02, 0.94), (-0.06, 1.00), (-0.11, 0.90),
                 (-0.20, 0.78), (-0.26, 0.60), (-0.28, 0.40)]
-        h = mc.extrude('head', head, 0.30, m, bevel=0.06)
+        h = mc.extrude('head', head, 0.34, m, bevel=0.07)
         objs.append(h)
         for side in (-1, 1):
             e = mc.lathe('eye', [(0.0, -0.025), (0.025, 0.0), (0.0, 0.025)], mc.mat('eye', '#101010', 0.2), segs=12,
-                         loc=(0.13, side * 0.155, 0.74))
+                         loc=(0.13, side * 0.175, 0.74))
             objs.append(e)
     return objs
 
@@ -95,23 +95,23 @@ def pieces():
             if kind == 'n':
                 # frame 0 looks right (towards the board's middle from the left), 1 left; both a little towards us
                 def f0(r=root):
-                    r.rotation_euler = (0, 0, math.radians(-30))
+                    r.rotation_euler = (0, 0, math.radians(-12))
 
                 def f1(r=root):
-                    r.rotation_euler = (0, 0, math.radians(210))
+                    r.rotation_euler = (0, 0, math.radians(192))
                 mc.render_sprite(name, objs, S, mc.E3D, SPR_W, SPR_H, SPR_AX, SPR_AY, frames=[f0, f1])
             else:
                 mc.render_sprite(name, objs, S, mc.E3D, SPR_W, SPR_H, SPR_AX, SPR_AY)
             # the flat view's: from the front, smaller, centred on the cell
             if kind == 'n':
-                root.rotation_euler = (0, 0, math.radians(-90 if side == 'w' else 90))
+                root.rotation_euler = (0, 0, math.radians(0 if side == 'w' else 180))
             else:
                 root.rotation_euler = (0, 0, 0)
             mc.transparent(True)
-            mc.aim(80, 84, FLAT_S, 8.0, (0, 0, 0.0), 40, 78)
+            mc.aim(80, 96, FLAT_S, 8.0, (0, 0, 0.0), 40, 90)
             d = mc.out_dir()
             mc.render(os.path.join(d, name + '_f.png'))
-            mc.write_json(os.path.join(d, name + '_f.json'), dict(S=FLAT_S, E=8, w=80, h=84, ax=40, ay=42,
+            mc.write_json(os.path.join(d, name + '_f.json'), dict(S=FLAT_S, E=8, w=80, h=96, ax=40, ay=50,
                                                                      frames=[name + '_f.png']))
 
 

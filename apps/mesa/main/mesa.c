@@ -25,6 +25,10 @@
  *   MESA_LEVEL=<n>      ... the board's level
  *   MESA_FEN=<fen>      ... from that position (chess)
  *   MESA_MOVES=<n>      ... and the board plays n moves of both sides first
+ *   MESA_OPT=<n>        ... with its first option at n (draughts: 1 the 10 x 10)
+ *   MESA_TWO=1          ... two people passing the board (0 face to face)
+ *   MESA_CLOCK=<s>      ... with a clock of s seconds and 2 more a move
+ *   MESA_FLAT=1         the flat view
  */
 #include "mg_app.h"
 
@@ -212,8 +216,9 @@ static lv_obj_t *game_card(lv_obj_t *grid, int gi, int w)
     lv_obj_t *n = mg_label(c, _(g->name), aos_font_body, C(0xF4E8D4));
     lv_obj_align(n, LV_ALIGN_BOTTOM_LEFT, 18, -48);
     lv_obj_t *a = mg_label(c, _(g->about), aos_font_tiny, C(0xB8A890));
-    lv_obj_set_width(a, w - 30);
     lv_label_set_long_mode(a, LV_LABEL_LONG_MODE_DOTS);
+    lv_obj_set_width(a, w - 30);
+    lv_obj_set_height(a, lv_font_get_line_height(aos_font_tiny));
     lv_obj_align(a, LV_ALIGN_BOTTOM_LEFT, 18, -18);
     return c;
 }
@@ -358,6 +363,7 @@ static void timer_cb(lv_timer_t *t)
 static void dev_switches(void)
 {
 #if defined(AOS_SIM) || defined(AOS_SIM_BUILTIN)
+    if (getenv("MESA_FLAT")) mg->prefs.flat = atoi(getenv("MESA_FLAT")) != 0;
     const char *word = getenv("MESA_GAME");
     if (!word) return;
     const mg_slot_t *s = mg_game_find(word);
@@ -415,6 +421,7 @@ static void dev_switches(void)
         mg_hist_t h;
         memset(&h, 0, sizeof h);
         h.m = m;
+        h.clock[0] = h.clock[1] = p->clock.base_ms;
         p->g->apply(p->st, &m);
         p->hist[p->n++] = h;
         p->top = p->n;

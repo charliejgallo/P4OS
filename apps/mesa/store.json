@@ -1,0 +1,50 @@
+{
+ "cat": "juegos",
+ "about": {
+  "es": "Seis juegos de mesa en 3D: ajedrez, damas, reversi, cuatro en línea, ludo y backgammon, contra la placa o de a dos en la misma pantalla.",
+  "en": "Six board games in 3D: chess, draughts, reversi, four in a row, ludo and backgammon, against the computer or two at the same screen."
+ },
+ "desc": {
+  "es": "Ajedrez con todas sus reglas, ocho niveles de la placa, la planilla de jugadas, partidas que se guardan y se abren en PGN y reloj con incremento Fischer o Bronstein. Damas de acá en 8 × 8 con la dama que vuela, y las internacionales en 10 × 10. Reversi, cuatro en línea, ludo de dos a cuatro jugadores y backgammon con dados.\n\nSe juega contra la placa o de a dos: cara a cara, con la placa acostada entre los dos y los controles del de enfrente dados vuelta, o pasándola, y el tablero gira en cada turno. Tocá una pieza para levantarla y ver adónde puede ir, y otra vez para dejarla; se puede deshacer y rehacer, y la placa te puede sugerir una jugada. También trae un reloj de ajedrez suelto para una partida en un tablero de verdad.\n\nLos tableros y las piezas están modelados en 3D y se ven en perspectiva o en una vista plana desde arriba. Se juega de pie o acostada, con el dedo o con un joystick USB. Las piezas de madera vienen con la app; las de mármol, vidrio y metal son paquetes aparte.",
+  "en": "Chess with all its rules, eight computer levels, the score sheet, games saved and opened as PGN, and a clock with Fischer or Bronstein increments. Draughts our way on 8 × 8 with the flying king, and the international game on 10 × 10. Reversi, four in a row, ludo for two to four players and backgammon with dice.\n\nPlay against the computer or with two people: face to face, with the board lying between you and the far player's controls turned round, or passing it, and the board turns with each move. Tap a piece to lift it and see where it can go, and again to set it down; you can undo and redo, and the computer can suggest a move. There is also a standalone chess clock for a game on a real board.\n\nThe boards and pieces are modelled in 3D and shown in perspective or in a flat view from above. It plays upright or lying down, by touch or with a USB gamepad. The wooden set comes with the app; marble, glass and metal are separate packs."
+ },
+ "tags": [
+  "3d"
+ ],
+ "shots": [
+  "app-mesa.jpg",
+  "app-mesa-ludo.jpg",
+  "app-mesa-menu.jpg",
+  "land-mesa.jpg"
+ ],
+ "packs": [
+  {
+   "file": "mesa_p4.pak",
+   "need": true
+  },
+  {
+   "file": "mesa_marmol_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Piezas de mármol",
+    "en": "Marble set"
+   }
+  },
+  {
+   "file": "mesa_vidrio_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Piezas de vidrio",
+    "en": "Glass set"
+   }
+  },
+  {
+   "file": "mesa_metal_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Piezas de metal",
+    "en": "Metal set"
+   }
+  }
+ ]
+}

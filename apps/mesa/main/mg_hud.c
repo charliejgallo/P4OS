@@ -149,7 +149,8 @@ static void card_build(int slot, int player, int x, int y, int w, bool turned)
     lv_obj_set_style_text_font(nm, aos_font_body, 0);
     lv_obj_set_style_text_color(nm, C(0xF4E8D4), 0);
     lv_label_set_long_mode(nm, LV_LABEL_LONG_MODE_DOTS);
-    lv_obj_set_width(nm, w - 80 - (P->clock.mode != CLK_NONE ? 130 : 0));
+    bool narrow = w < 360;     /* lying down: the clock goes under the name */
+    lv_obj_set_width(nm, w - 80 - (P->clock.mode != CLK_NONE && !narrow ? 130 : 0));
     lv_obj_set_height(nm, lv_font_get_line_height(aos_font_body));
     lv_obj_align(nm, LV_ALIGN_TOP_LEFT, 66, 16);
     char buf[96];
@@ -167,9 +168,10 @@ static void card_build(int slot, int player, int x, int y, int w, bool turned)
     lv_obj_t *ck = NULL;
     if (P->clock.mode != CLK_NONE) {
         ck = lv_label_create(c);
-        lv_obj_set_style_text_font(ck, aos_font_title, 0);
+        lv_obj_set_style_text_font(ck, narrow ? aos_font_body : aos_font_title, 0);
         lv_obj_set_style_text_color(ck, C(0xF4E8D4), 0);
-        lv_obj_align(ck, LV_ALIGN_RIGHT_MID, -20, 0);
+        if (narrow) lv_obj_align(ck, LV_ALIGN_BOTTOM_RIGHT, -18, -12);
+        else lv_obj_align(ck, LV_ALIGN_RIGHT_MID, -20, 0);
         lv_label_set_text(ck, "");
     }
     if (slot < 2) {
