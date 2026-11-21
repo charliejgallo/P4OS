@@ -618,6 +618,20 @@ lo apunte otra vez.
 - **Los handoffs de apps** piden desde ahora la ficha y las capturas a
   cada app nueva (`docs/APPS-P4.md`, "In the store", y los internos).
 
+**Una fuente de prueba (2026-11-21):** `tools/store_sample.py` arma una
+segunda fuente inventada, "Tienda de prueba", para recorrer esto en la
+placa: genera cuatro apps chicas desde la plantilla, cada una con su id
+(`prueba.*`), las compila y deja su catálogo y sus paquetes como una
+release, para servir con `tools/fake_github.py --repo prueba/apps`. El
+catálogo lista tres: dos propias (Contador de prueba, con una imagen, y
+Colores de prueba) y una que se llama `dados.so` como la oficial, que la
+placa tiene que dejar afuera. La cuarta sale como paquete suelto
+(`suelta.p4app`, App suelta) para soltar en el portal o abrir desde
+Archivos. Probada con el servicio en la Mac contra los dos servidores: la
+fuente se mira y se agrega, queda con 2 apps y 1 salteada, instalar
+`dados` trae el oficial, y el paquete suelto se instala. **En la placa
+falta que el usuario la agregue.**
+
 **Lo que falta de esta fase:**
 
 - **Que el usuario la recorra en la placa:** el teclado, el aviso, y
