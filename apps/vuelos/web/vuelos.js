@@ -212,7 +212,7 @@ P.registerPage({
     function drawTable() {
       if (!last) return;
       const u = last.units === 1;
-      const COLS = [['f', tr('Vuelo')], ['r', tr('Matrícula')], ['t', tr('Tipo')], ['alt', tr('Altitud'), 1], ['gs', u ? 'km/h' : 'kt', 1], ['vr', tr('Vertical'), 1], ['trk', tr('Rumbo'), 1], ['sq', 'Squawk'], ['d', tr('Distancia'), 1]];
+      const COLS = [['f', tr('Vuelo')], ['r', tr('Matrícula')], ['t', tr('Tipo')], ['alt', tr('Altitud'), 1], ['gs', u ? 'km/h' : 'kt', 1], ['vr', tr('Vel. vertical'), 1], ['trk', tr('Rumbo'), 1], ['sq', 'Squawk'], ['d', tr('Distancia'), 1]];
       const rows = [...last.ac].sort((a, b) => {
         const va = a[sortKey], vb = b[sortKey];
         const c = typeof va === 'number' ? va - vb : String(va).localeCompare(String(vb));

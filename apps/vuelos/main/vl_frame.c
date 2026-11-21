@@ -754,7 +754,7 @@ static void card(app_t *a, vl_fb_t *fb, uint32_t now)
     vl_fmt_dist(a, ac->dist_km, dd, sizeof dd);
     static const char *const DIR[] = { N_("N"), N_("NE"), N_("E"), N_("SE"), N_("S"), N_("SO"), N_("O"), N_("NO") };
     snprintf(dist, sizeof dist, "%s %s", dd, _(DIR[(int)((ac->brg + 22.5f) / 45.0f) & 7]));
-    const char *lab[6] = { _("Altitud"), _("Velocidad"), _("Vertical"), _("Rumbo"), _("Squawk"), _("Distancia") };
+    const char *lab[6] = { _("Altitud"), _("Velocidad"), _("Vel. vertical"), _("Rumbo"), _("Squawk"), _("Distancia") };
     const char *val[6] = { alt, gs, vr, trk, sq, dist };
     int cols = L->land ? 2 : 3;
     int cw = (w - 56) / cols, rh = fs->line_h + a->fonts[Q_FULL][VL_FONT_L].line_h + 18;

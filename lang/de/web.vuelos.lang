@@ -1,0 +1,185 @@
+# amoledos-lang 1   es -> de
+# web.vuelos.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/vuelos/web/vuelos.js:52
+Sin cuenta. Un pedido por segundo como mucho y sólo para uso no comercial: la placa pregunta cada 5 s.	Ohne Konto. Höchstens eine Anfrage pro Sekunde und nur für nicht kommerzielle Nutzung: die Platine fragt alle 5 s.
+
+#: apps/vuelos/web/vuelos.js:53
+Datos abiertos (ODbL). Sin clave, 500 pedidos por día desde tu dirección: la placa los reparte en el día (uno cada 3 minutos). Con una clave, poné cuántos te da.	Offene Daten (ODbL). Ohne Schlüssel 500 Anfragen am Tag von deiner Adresse: die Platine verteilt sie über den Tag (eine alle 3 Minuten). Mit Schlüssel trag ein, wie viele er erlaubt.
+
+#: apps/vuelos/web/vuelos.js:54
+Para investigación y uso no comercial. Sin cuenta, 400 créditos por día (un pedido cada 4 minutos más o menos); con un cliente de la API de tu cuenta, 4000.	Für Forschung und nicht kommerzielle Nutzung. Ohne Konto 400 Credits am Tag (etwa eine Anfrage alle 4 Minuten); mit einem API-Client deines Kontos 4000.
+
+#: apps/vuelos/web/vuelos.js:55
+Receptor propio	Eigener Empfänger
+
+#: apps/vuelos/web/vuelos.js:55
+Un receptor ADS-B en tu red (readsb, dump1090, tar1090): la dirección de su aircraft.json. Cada 2 s.	Ein ADS-B-Empfänger in deinem Netz (readsb, dump1090, tar1090): die Adresse seiner aircraft.json. Alle 2 s.
+
+#: apps/vuelos/web/vuelos.js:85
+#: apps/vuelos/web/vuelos.js:267
+Vuelos	Flüge
+
+#: apps/vuelos/web/vuelos.js:91
+Cargando…	Lädt…
+
+#: apps/vuelos/web/vuelos.js:92
+Ciudad, pueblo o aeropuerto	Stadt, Ort oder Flughafen
+
+#: apps/vuelos/web/vuelos.js:96
+#: apps/vuelos/web/vuelos.js:240
+Abrí Vuelos en la placa para ver acá lo que ve.	Öffne Flüge auf der Platine, um hier zu sehen, was sie sieht.
+
+#: apps/vuelos/web/vuelos.js:122
+Sin nombre	Ohne Namen
+
+#: apps/vuelos/web/vuelos.js:123
+Todavía no hay un lugar elegido: la placa usa la ciudad de Clima.	Noch kein Ort gewählt: die Platine nimmt die Stadt von Wetter.
+
+#: apps/vuelos/web/vuelos.js:136
+Clave (opcional)	Schlüssel (optional)
+
+#: apps/vuelos/web/vuelos.js:137
+Pedidos por día que te da	Anfragen pro Tag
+
+#: apps/vuelos/web/vuelos.js:140
+Client ID (opcional)	Client-ID (optional)
+
+#: apps/vuelos/web/vuelos.js:141
+Client secret	Client-Secret
+
+#: apps/vuelos/web/vuelos.js:142
+Se crean en la página de tu cuenta de OpenSky. Quedan en la tarjeta de la placa, en /data/vuelos.txt.	Sie werden auf der Seite deines OpenSky-Kontos erstellt. Sie bleiben auf der Karte der Platine, in /data/vuelos.txt.
+
+#: apps/vuelos/web/vuelos.js:144
+Dirección del aircraft.json	Adresse der aircraft.json
+
+#: apps/vuelos/web/vuelos.js:159
+Guardado: la placa lo toma en unos segundos	Gespeichert: die Platine übernimmt es in ein paar Sekunden
+
+#: apps/vuelos/web/vuelos.js:160
+No se pudo guardar: %s	Speichern fehlgeschlagen: %s
+
+#: apps/vuelos/web/vuelos.js:177
+Clima no tiene un lugar elegido	Wetter hat keinen Ort gewählt
+
+#: apps/vuelos/web/vuelos.js:186
+Buscando…	Suche…
+
+#: apps/vuelos/web/vuelos.js:193
+Elegir	Wählen
+
+#: apps/vuelos/web/vuelos.js:193
+No se encontró ningún lugar con ese nombre.	Kein Ort mit diesem Namen gefunden.
+
+#: apps/vuelos/web/vuelos.js:194
+No se pudo buscar: %s	Suche fehlgeschlagen: %s
+
+#: apps/vuelos/web/vuelos.js:199
+en tierra	am Boden
+
+#: apps/vuelos/web/vuelos.js:215
+Vuelo	Flug
+
+#: apps/vuelos/web/vuelos.js:215
+Matrícula	Kennzeichen
+
+#: apps/vuelos/web/vuelos.js:215
+Tipo	Typ
+
+#: apps/vuelos/web/vuelos.js:215
+Altitud	Höhe
+
+#: apps/vuelos/web/vuelos.js:215
+Vel. vertical	Steigrate
+
+#: apps/vuelos/web/vuelos.js:215
+Rumbo	Kurs
+
+#: apps/vuelos/web/vuelos.js:215
+Distancia	Entfernung
+
+#: apps/vuelos/web/vuelos.js:222
+%s aviones · %s · %s	%s Flugzeuge · %s · %s
+
+#: apps/vuelos/web/vuelos.js:250
+Radio (km)	Umkreis (km)
+
+#: apps/vuelos/web/vuelos.js:251
+Unidades	Einheiten
+
+#: apps/vuelos/web/vuelos.js:251
+De aviación (ft, kt, NM)	Luftfahrt (ft, kt, NM)
+
+#: apps/vuelos/web/vuelos.js:251
+Métricas (m, km/h, km)	Metrisch (m, km/h, km)
+
+#: apps/vuelos/web/vuelos.js:252
+Estelas	Spuren
+
+#: apps/vuelos/web/vuelos.js:252
+No	Nein
+
+#: apps/vuelos/web/vuelos.js:254
+Nombres en el mapa	Namen auf der Karte
+
+#: apps/vuelos/web/vuelos.js:254
+Origen y destino (adsbdb)	Start und Ziel (adsbdb)
+
+#: apps/vuelos/web/vuelos.js:257
+Un avión pasa encima	Ein Flugzeug fliegt darüber
+
+#: apps/vuelos/web/vuelos.js:257
+Emergencias (7500, 7600, 7700)	Notfälle (7500, 7600, 7700)
+
+#: apps/vuelos/web/vuelos.js:258
+Militares	Militär
+
+#: apps/vuelos/web/vuelos.js:258
+Con sonido	Mit Ton
+
+#: apps/vuelos/web/vuelos.js:260
+"Encima" es a menos de (km)	"Darüber" heißt näher als (km)
+
+#: apps/vuelos/web/vuelos.js:261
+y por debajo de (ft)	und unter (ft)
+
+#: apps/vuelos/web/vuelos.js:268
+Lugar	Ort
+
+#: apps/vuelos/web/vuelos.js:270
+Buscar	Suchen
+
+#: apps/vuelos/web/vuelos.js:271
+Usar el lugar de Clima	Ort von Wetter verwenden
+
+#: apps/vuelos/web/vuelos.js:272
+La búsqueda es de Open-Meteo. En la placa, una pulsación larga sobre el mapa también elige el lugar.	Die Suche ist von Open-Meteo. Auf der Platine wählt auch langes Drücken auf die Karte den Ort.
+
+#: apps/vuelos/web/vuelos.js:274
+Fuente de los datos	Datenquelle
+
+#: apps/vuelos/web/vuelos.js:276
+Mapa y datos	Karte und Daten
+
+#: apps/vuelos/web/vuelos.js:278
+Avisos	Hinweise
+
+#: apps/vuelos/web/vuelos.js:280
+Los avisos salen mientras Vuelos está abierta en la placa.	Hinweise erscheinen, solange Flüge auf der Platine offen ist.
+
+#: apps/vuelos/web/vuelos.js:282
+Guardar	Speichern
+
+#: apps/vuelos/web/vuelos.js:283
+Abierta en la placa	Auf der Platine geöffnet
+
+#: apps/vuelos/web/vuelos.js:283
+Abrir Vuelos en la placa	Flüge auf der Platine öffnen
+
+#: apps/vuelos/web/vuelos.js:284
+Lo que ve la placa	Was die Platine sieht

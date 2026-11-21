@@ -37,11 +37,11 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import parse_qs, urlparse
 
 KT = 0.514444
-CITIES = [("MAD", "Madrid"), ("LIS", "Lisboa"), ("CDG", "París"), ("FCO", "Roma"), ("LHR", "Londres"),
-          ("BCN", "Barcelona"), ("EZE", "Buenos Aires"), ("BOG", "Bogotá"), ("AMS", "Ámsterdam"),
-          ("FRA", "Fráncfort"), ("MUC", "Múnich"), ("ZRH", "Zúrich"), ("ATH", "Atenas"), ("DUB", "Dublín"),
-          ("OPO", "Oporto"), ("SVQ", "Sevilla"), ("AGP", "Málaga"), ("PMI", "Palma"), ("TFN", "Tenerife"),
-          ("GRU", "San Pablo"), ("MEX", "Ciudad de México"), ("JFK", "Nueva York"), ("MIA", "Miami")]
+CITIES = [("MAD", "Madrid"), ("LIS", "Lisbon"), ("CDG", "Paris"), ("FCO", "Rome"), ("LHR", "London"),
+          ("BCN", "Barcelona"), ("EZE", "Buenos Aires"), ("BOG", "Bogota"), ("AMS", "Amsterdam"),
+          ("FRA", "Frankfurt am Main"), ("MUC", "Munich"), ("ZRH", "Zurich"), ("ATH", "Athens"), ("DUB", "Dublin"),
+          ("OPO", "Porto"), ("SVQ", "Seville"), ("AGP", "Malaga"), ("PMI", "Palma De Mallorca"), ("TFN", "Tenerife"),
+          ("GRU", "Sao Paulo"), ("MEX", "Mexico City"), ("JFK", "New York"), ("MIA", "Miami")]  # adsbdb's municipalities are English
 PREFIX = ["ZVA", "ZKN", "ZPR", "ZTL", "ZMA", "ZQE"]
 #                type   cat   kind      kt   alt range
 TYPES = [("A320", "A3", "jet", 440, (24000, 38000)), ("B738", "A3", "jet", 450, (26000, 39000)),
