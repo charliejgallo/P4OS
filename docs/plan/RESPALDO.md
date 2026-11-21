@@ -165,9 +165,13 @@ lo diga.
 
 ## Preguntas abiertas
 
-1. **¿SFTP o WebDAV primero?** Depende de qué tiene el usuario en su red.
-   Recomendado: SFTP, porque el cliente SSH ya está y sirve para cualquier
-   Linux.
+1. **¿SFTP o WebDAV primero?** Resuelto el 2026-11-21: **SFTP**. El
+   usuario tiene un NAS en su red que atiende por Samba y por SSH; el
+   cliente SSH ya está en el firmware (`components/aos_ssh`) y no hay
+   cliente SMB, que sería una pieza nueva y grande. WebDAV queda para
+   después, si alguien lo pide. La etapa 4 se prueba primero contra un
+   servidor SSH falso en la Mac; contra el NAS de verdad, sólo cuando el
+   usuario lo diga, con una cuenta y una carpeta que él arme para eso.
 2. **¿Las fotos, la música y los mapas entran?** Recomendado: no por
    defecto; suelen venir de una computadora y pesan gigas.
 3. **¿La copia diaria en la tarjeta lleva secretos?** La tarjeta se saca.
