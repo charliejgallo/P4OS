@@ -173,8 +173,14 @@ punto.
   salto a Ajustes; `tools/backup.sh` con una carpeta, dos veces.
   Firmware `rev1_3`: 7 103 376 bytes, 11 KB más que con la etapa 1.
 
-**Falta:** instalarlo en la placa y ver ahí la copia del día, la de antes
-de un firmware y cuánta RAM interna queda. Y la prueba que termina la
+**En la placa (2026-11-21, `v0.30.0-16-g021f337`, con las etapas 2 y
+3):** instalado por OTA con permiso. A los 126 s de arrancar hizo sola la
+copia del día: `…-auto.p4bak`, 418 preferencias, 9 afuera, 14 397 bytes.
+RAM interna libre después: 209,2 KB, la de siempre.
+
+**Falta:** la copia de antes de un firmware (la próxima instalación, si
+algo cambió), la frase de las copias automáticas puesta en la pantalla, y
+otro día. Y la prueba que termina la
 etapa: `erase_flash`, grabar, y que la placa ofrezca el respaldo de la
 tarjeta. Esa borra la placa: sólo cuando el usuario lo diga.
 
