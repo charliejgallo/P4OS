@@ -4,6 +4,10 @@
   "es": "Pixel art con cuadros de animación: doce lienzos de 8 a 64 celdas y 32 colores.",
   "en": "Pixel art with animation frames: twelve canvases of 8 to 64 cells, and 32 colours."
  },
+ "desc": {
+  "es": "La galería tiene doce lugares; uno vacío pide el tamaño del lienzo, de 8, 16, 32 o 64 celdas de lado. Se pinta con el dedo con lápiz, relleno y un cuentagotas que toma el color de una celda, eligiendo de una paleta de 32 colores que queda al alcance del pulgar. Dos dedos acercan y mueven la vista, y deshacer guarda los últimos 16 trazos.\n\nUn lienzo tiene hasta 16 cuadros: duplicá uno, mové unas celdas y la pila se reproduce como animación, con la velocidad que elijas. Sale a la tarjeta como un GIF que se repite, o un cuadro solo como PNG. Todo se guarda solo. La primera vez trae cinco ejemplos, entre ellos un atardecer con un gato negro sobre una roca y un gatito que camina.\n\nLa página Pixel Art del portal muestra los lienzos, los edita desde la computadora, baja el PNG y el GIF, y sube un archivo pix o una imagen para pasarla a la paleta. La app ve los cambios sola.",
+  "en": "The gallery has twelve slots; an empty one asks for the canvas size, 8, 16, 32 or 64 cells across. You paint by finger with a pencil, a fill and an eyedropper that takes a cell's colour, from a 32-colour palette within the thumb's reach. Two fingers zoom and move the view, and undo keeps the last 16 strokes.\n\nA canvas holds up to 16 frames: duplicate one, move a few cells and the stack plays back as an animation, at the speed you choose. It goes out to the card as a looping GIF, or a single frame as a PNG. Everything is saved on its own. The first time it brings five samples, among them a sunset with a black cat on a rock and a walking kitten.\n\nThe Pixel Art page in the portal shows the canvases, edits them from the computer, downloads the PNG and the GIF, and uploads a pix file or a picture to turn it into the palette. The app notices the changes by itself."
+ },
  "shots": [
   "app-pixel.png",
   "app-pixel-editor.png",
