@@ -34,6 +34,39 @@ se prueba.
   arranque anterior y el volcado del último cuelgue se leen desde el portal
   (`docs/BUILDING.md`).
 
+### La Tienda (0.30, 2026-11-20 y 21)
+
+El plan, con cada número, es `docs/plan/TIENDA.md`. En la placa, con el
+firmware de la rama `tienda` y contra una pre-release de prueba en GitHub
+y un servidor de prueba en la Mac:
+
+- [x] Bajar a archivo desde GitHub por TLS (0,38 MB/s), con sus dos
+      redirecciones; reiniciar en medio de una bajada y retomarla.
+- [x] El chequeo de símbolos sin cargar (10 ms) y sacar y poner el código
+      de una app en caliente (0,2 s).
+- [x] Un `.so` roto a propósito: apartado tras dos caídas.
+- [x] El servicio por la API: catálogo, instalar, actualizar, quitar.
+- [x] La app Tienda: la lista, la página de una app con sus imágenes y su
+      descripción, los extras (usuario).
+- [x] Una segunda fuente: proponerla desde el portal, mirarla, el aviso,
+      agregarla, su app con imagen, y la que se llama como una oficial,
+      afuera (usuario).
+- [x] Un `.p4app` desde Archivos, y verlo en la Tienda como paquete suelto;
+      los filtros por origen (usuario).
+- [x] El firmware desde el catálogo: por la API, y entero desde Ajustes →
+      Actualización con los dos reinicios (usuario). 57 s del toque a
+      "lista".
+- [x] Las partes del sistema: los dos idiomas, los emojis reconocidos sin
+      bajar y el firmware del C6 reemplazado (usuario).
+- [ ] Contra una release **publicada** de GitHub: el catálogo con el
+      firmware y las partes del sistema, y actualizar el firmware desde
+      ahí por HTTPS.
+- [ ] Cortar el Wi-Fi en medio de una bajada.
+- [ ] Quitar una fuente (con sus apps y sin ellas) y quitar un paquete
+      suelto.
+- [ ] Una fuente de terceros de verdad, en otro repositorio de GitHub.
+- [ ] Instalar el firmware del C6 que bajó la Tienda (Ajustes).
+
 ### Pendientes, en resumen
 
 Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):
