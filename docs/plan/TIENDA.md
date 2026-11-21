@@ -609,7 +609,14 @@ lo apunte otra vez.
   propuesta, el catálogo sin fin). En el simulador: el cartel traducido
   de un 404, la tarjeta de la propuesta y "Mirarla" hasta el fallo
   traducido de una fuente que no existe. El firmware `rev1_3` compila:
-  7 045 920 bytes. **Sin instalar en la placa todavía.**
+  7 045 920 bytes.
+- **En la placa (2026-11-21):** el firmware del tag `v0.30.0-tienda.2`
+  por OTA, confirmado, con los idiomas subidos. RAM interna libre a los
+  100 s: 209 811 bytes, lo mismo que antes de la tanda. Por la API: un
+  fallo dice su clase (`not_listed`) y una propuesta que no es una
+  dirección se rechaza con su texto traducido.
+- **Los handoffs de apps** piden desde ahora la ficha y las capturas a
+  cada app nueva (`docs/APPS-P4.md`, "In the store", y los internos).
 
 **Lo que falta de esta fase:**
 

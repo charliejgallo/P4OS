@@ -27,6 +27,61 @@ To install, copy `apps/*/build/*.so` into `/apps` on the card (the portal's
 `PUT /api/fs/put?path=/apps/<name>.so`, or the card in the computer) and
 restart: the card is scanned at boot.
 
+## In the store
+
+Since 0.30.0 the board has a store (the Tienda app, and the Store page of
+the portal) that lists the apps of a catalogue, downloads them and keeps
+them up to date. The CI makes the catalogue and one package per app from
+what is in the tree; an app is listed when it has a card of its own,
+`apps/<app>/store.json`, next to its `CMakeLists.txt`:
+
+```json
+{
+ "cat": "juegos",
+ "about": {
+  "es": "Una o dos oraciones: qué es y qué se hace con ella.",
+  "en": "One or two sentences: what it is and what you do with it."
+ },
+ "shots": ["app-myapp.png", "app-myapp-play.png", "land-myapp.png"]
+}
+```
+
+| Field | What it is |
+|---|---|
+| `cat` | One of the categories of `store/source.json`: `juegos`, `taller`, `red`, `medios`, `crear`, `utiles`, `programar` |
+| `about` | What the list and the app's page say, in `es` and `en`, 240 characters at most each |
+| `shots` | Three or four pictures of the app (four at most): names of files in `docs/img`. The store gets a copy of each at its own size, a JPEG 560 px on its long side |
+| `packs` | The app's art packs: `{"file": "x_p4.pak", "need": true}` for what it cannot start without, `"need": false` and a `"name"` in `es` and `en` for an extra the person chooses. A pack is not in the package: it is a file of a release, listed in `store/packs.json` |
+| `needs` | What a board may not have: `"header"` (the 40-pin header), `"usb-host"` |
+| `tags` | `["3d"]`: what the code does not say by itself |
+| `user_files` | In `es` and `en`: what the person has to bring for the app to be of use (ROMs, a WAD) |
+| `license` | When it is not Apache-2.0 |
+| `publish` | `false` for an app that is built and checked but not listed |
+
+The rest is read from the code and the `.so`, and not written: the id, the
+name, the colours and the icon; the languages its package brings; whether it
+plays with a joystick, uses the network, sound or Bluetooth, brings a page
+to the portal, or lives in one orientation only; and the oldest firmware
+that can run it, from the symbols the `.so` asks for.
+
+The pictures are taken in the simulator with the interface in English, at
+the screen's own size (720×1280, or 1280×720 lying down), and show the app
+in use: a game being played and a second level before its menu, a tool with
+believable data on its main screen. PNG for an interface, JPEG for painted
+or 3D scenes. By name: `app-<app>.png` for the main one, `app-<app>-<what>.png`,
+`land-<app>.png` lying down, `web-<app>.png` for its portal page. The first
+of the list is the one shown as a thumbnail.
+
+```
+python3 tools/gen_store.py check          # every store.json, as the CI checks them
+```
+
+The store installs an app on a card where it has never been, and updates it
+while the board is running, with no restart: the old `.so` is unloaded and
+the new one loaded in its place. So an app must give back everything it
+took when it is destroyed (threads, timers, open files, callbacks), and must
+not count on a restart to put its state in order.
+
 ## How the code runs
 
 - **Where:** in PSRAM, where the loader puts it
