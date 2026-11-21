@@ -38,6 +38,8 @@ What each app says of itself is in apps/<app>/store.json:
     {
       "cat": "juegos",                      one of store/source.json's
       "about": {"es": "...", "en": "..."},  one or two sentences
+      "desc": {"es": "...", "en": "..."},   a few paragraphs for its page, plain
+                                            text, a blank line between them
       "packs": [{"file": "x_p4.pak", "need": true},
                 {"file": "x_luna_p4.pak", "need": false,
                  "name": {"es": "Mundo: Luna", "en": "World: Moon"}}],
@@ -63,7 +65,8 @@ own in the portal), "landscape" or "portrait" (it only lives one way), "net",
 "sound", "bt" - read from its code, plus the "tags" of store.json.
 
 A picture goes out as <file>-<n>-<hash>.jpg, a baseline JPEG no longer than
-SHOT_SIDE on its long side (the board's decoder takes no progressive ones):
+SHOT_SIDE on its long side and with both sides a multiple of 16 (the board's
+decoder takes no progressive ones, and does not finish a block cut short):
 the same picture keeps its name, and so its address in --previous. Making
 them needs Pillow; without it the catalogue goes out with no pictures, and
 says so.
@@ -101,6 +104,7 @@ LOADER_BUILTIN = {"printf", "fprintf", "vfprintf"}
 ZIP_DATE = (2026, 1, 1, 0, 0, 0)
 SHOT_SIDE = 560                 # a picture's long side in the store, px
 SHOTS_MAX = 4
+DESC_MAX = 1200                 # an app's long description, characters in each language
 TAGS = {"3d"}                   # what store.json may say in "tags"
 # what the code tells about an app: a word, and what gives it away
 FEATURES = (
@@ -190,7 +194,7 @@ def load_manifest(app_dir, cats):
     if not os.path.exists(path):
         return None
     m = read_json(path)
-    known = {"cat", "about", "packs", "needs", "user_files", "license", "publish", "id", "name", "colors", "glyph",
+    known = {"cat", "about", "desc", "packs", "needs", "user_files", "license", "publish", "id", "name", "colors", "glyph",
              "fw_min", "src", "shots", "tags"}
     extra = set(m) - known
     if extra:
@@ -201,6 +205,11 @@ def load_manifest(app_dir, cats):
     for l in LANGS_TEXT:
         if len(m["about"][l]) > 240:
             raise Bad("%s: \"about\" in %s is %d characters, 240 at most" % (where, l, len(m["about"][l])))
+    if "desc" in m:
+        text2(m["desc"], "desc", where)
+        for l in LANGS_TEXT:
+            if len(m["desc"][l]) > DESC_MAX:
+                raise Bad("%s: \"desc\" in %s is %d characters, %d at most" % (where, l, len(m["desc"][l]), DESC_MAX))
     if "name" in m:
         text2(m["name"], "name", where)
     if "user_files" in m:
@@ -311,9 +320,14 @@ def make_shot(path):
         return None
     im = Image.open(path).convert("RGB")
     w, h = im.size
-    k = SHOT_SIDE / max(w, h)
-    if k < 1:
-        im = im.resize((max(1, round(w * k)), max(1, round(h * k))), Image.LANCZOS)
+    k = min(1.0, SHOT_SIDE / max(w, h))
+    # Both sides a multiple of 16, the size of a block of a 4:2:0 JPEG: the
+    # board's decoder leaves the columns of a block that is cut short as they
+    # come, and a picture 315 wide showed three of them as stray dots. It is a
+    # stretch of a few pixels at most, which nobody sees.
+    fit = (max(16, round(w * k / 16) * 16), max(16, round(h * k / 16) * 16))
+    if fit != (w, h):
+        im = im.resize(fit, Image.LANCZOS)
     buf = io.BytesIO()
     im.save(buf, "JPEG", quality=82, optimize=True, progressive=False, subsampling="4:2:0")
     return buf.getvalue(), im.size[0], im.size[1]
@@ -505,7 +519,9 @@ def build_app(app_dir, m, a, since, icons, abi):
     elif m.get("glyph") or d.get("glyph"):
         # a character of the system's fonts over the colours, as the launcher draws it
         entry["glyph"] = m.get("glyph") or d["glyph"]
-    for k in ("needs", "user_files"):
+    # "desc" is of the catalogue and not of the package: rewording it must not
+    # make a new package of an app whose bytes did not change
+    for k in ("needs", "user_files", "desc"):
         if m.get(k):
             entry[k] = m[k]
     entry["langs"] = ["es"] + sorted({p.split("/")[1] for p in files if p.startswith("lang/")})

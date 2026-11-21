@@ -3150,6 +3150,8 @@ function pageTienda() {
             a.origin === 'package' ? h('span', { class: 'pill', style: 'color:var(--orange)' }, tr('Paquete suelto')) : null, ' ',
             a.state !== 'absent' && a.origin !== 'package' ? h('span', { class: 'pill', style: a.state === 'update' || a.state === 'set_aside' ? 'color:var(--orange)' : '' }, tr(STATE[a.state])) : null),
           h('div', { class: 'small muted', style: 'margin:4px 0' }, about),
+          !local && L(e.desc) ? h('details', { style: 'margin:4px 0' }, h('summary', { class: 'small' }, tr('Leer más')),
+            L(e.desc).split(/\n\s*\n/).map(par => h('p', { class: 'small muted', style: 'margin:6px 0' }, par))) : null,
           h('div', { class: 'small muted' }, fmtBytes(e.pkg.installed || e.pkg.size) + (need ? ' + ' + fmtBytes(need) + ' ' + tr('de packs') : '') +
             (a.fits ? '' : ' · ' + tr('necesita P4OS %s', e.fw_min))),
           h('div', { style: 'margin-top:6px;display:flex;gap:6px;flex-wrap:wrap' },
@@ -3236,7 +3238,7 @@ function pageTienda() {
       if (filter === '+' && a.state === 'absent') return false;
       if (filter === '!' && a.state !== 'update') return false;
       if (filter && filter !== '+' && filter !== '!' && e.cat !== filter) return false;
-      return !text || (L(e.name) + ' ' + L(e.about) + ' ' + e.file).toLowerCase().includes(text);
+      return !text || (L(e.name) + ' ' + L(e.about) + ' ' + L(e.desc) + ' ' + e.file).toLowerCase().includes(text);
     });
     put(box, rows.length ? rows.map(e => card(e, by.get(e.file))) : h('div', { class: 'card pad muted' }, cat.length ? tr('Nada por acá') : tr('Todavía no hay catálogo: "Buscar de nuevo" lo trae.')));
   }

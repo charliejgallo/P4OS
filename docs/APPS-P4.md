@@ -50,6 +50,7 @@ what is in the tree; an app is listed when it has a card of its own,
 |---|---|
 | `cat` | One of the categories of `store/source.json`: `juegos`, `taller`, `red`, `medios`, `crear`, `utiles`, `programar` |
 | `about` | What the list and the app's page say, in `es` and `en`, 240 characters at most each |
+| `desc` | The long description under it on the app's page, in `es` and `en`: two to four paragraphs of plain text, a blank line between them, 1200 characters at most each. It goes in the catalogue and not in the package |
 | `shots` | Three or four pictures of the app (four at most): names of files in `docs/img`. The store gets a copy of each at its own size, a JPEG 560 px on its long side |
 | `packs` | The app's art packs: `{"file": "x_p4.pak", "need": true}` for what it cannot start without, `"need": false` and a `"name"` in `es` and `en` for an extra the person chooses. A pack is not in the package: it is a file of a release, listed in `store/packs.json` |
 | `needs` | What a board may not have: `"header"` (the 40-pin header), `"usb-host"` |

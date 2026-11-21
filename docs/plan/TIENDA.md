@@ -889,6 +889,102 @@ del megabyte), siguió desde ahí, el servidor mandó exactamente los
 22 522 261 que faltaban y el hash dio bien. Sincronizar no cuesta
 velocidad: dos bajadas enteras de 37 MB a 472 y 479 KB/s (441 antes).
 
+## Parches, el firmware desde GitHub y más texto (pensado el 2026-11-21)
+
+Tres pedidos del usuario antes del tag `v0.30.0-tienda.3`.
+
+### 1. Actualizar con parches, como en DOMCOM-Dimmer
+
+Allá un parche es un `esp_delta_ota` (detools + heatshrink): la placa lee
+la app que corre de su ranura, le aplica el parche y escribe el resultado
+en la otra, que se verifica como una imagen entera; el encabezado lleva el
+SHA-256 de la app de la que se hizo, y un parche de otro firmware se
+rechaza antes de escribir nada. Allá valía un mundo: por Zigbee, a 50
+bytes por bloque, una imagen de 680 KB tardaba una hora y un parche de
+11 KB, un minuto.
+
+**Medido acá** con los `.bin` publicados del perfil `rev1_3` (los que
+arma el CI), y detools 0.53:
+
+| De → a | Imagen entera | Parche heatshrink | Parche lzma |
+|---|---|---|---|
+| v0.28.0 → v0.29.0 (sólo cambió la versión) | 6,95 MB | 109 KB (1,6 %) | 1,2 KB |
+| v0.29.0 → v0.30.0-tienda.1 (el servicio de la Tienda) | 6,96 MB | 419 KB (6,0 %) | 202 KB (2,9 %) |
+| la imagen comprimida, sin parche | | gzip 3,90 MB (56 %) | xz 3,29 MB (47 %) |
+
+La placa baja de GitHub a ~0,38 MB/s: la imagen entera son unos 18 s, y
+después hay que escribir los 7 MB en la otra ranura de todos modos (la
+OTA por el portal, subida y escritura, tarda 35 s). Un parche ahorra esos
+~17 s de bajada y 6,5 MB de datos, de un minuto en total. A cambio: la
+librería en el firmware, un archivo de bases y un parche por cada versión
+anterior y por cada perfil en el CI, y una vuelta a la imagen entera cada
+vez que lo que corre no es exactamente una release (toda placa con un
+firmware compilado a mano). En el único camino donde un fallo importa.
+
+**Las apps:** los 58 paquetes pesan 17 MB entre todos; la mediana son
+104 KB y 53 están debajo de 500 KB: una app baja en uno o dos segundos.
+Un parche no ahorra nada que se note, y rompería la regla de que un
+paquete es su SHA-256. Los bytes están en los packs de arte (151 MB,
+Monster Hop solo son 37), que cambian poco y ya no se bajan de nuevo
+cuando no cambiaron (por parte y por hash).
+
+**Decisión propuesta: no ahora.** Ni para apps ni para firmware. El
+formato queda abierto: la entrada del firmware en el catálogo puede
+llevar más adelante `"patches": [{"from_sha256", "url", "size",
+"sha256"}]` sin cambiar de esquema, y una placa que no los entienda baja
+la imagen entera. Si un día importa (una red medida, un firmware mucho
+más grande), el orden sería: primero la imagen comprimida (la mitad de la
+bajada, sirve desde cualquier versión, sin bases), y recién después
+parches.
+
+### 2. El firmware desde GitHub, en Ajustes
+
+Estaba en la fase 6; se puede adelantar porque casi todo existe:
+`aos_fetch` (bajar a la tarjeta con reanudación, tamaño y SHA-256),
+`aos_hal_ota_begin/write/end` (la otra ranura), el arranque a prueba con
+vuelta atrás sola a los 30 s, y la página Ajustes → Actualización, que hoy
+sólo muestra las dos ranuras y deja volver a la anterior.
+
+- **El catálogo dice qué firmware hay**, en la línea de la fuente oficial:
+  `"fw": {"ver": "v0.31.0", "images": {"rev1_3": {"url":
+  "v0.31.0/p4os-rev1_3.bin", "size": ..., "sha256": "..."}, "rev3_x":
+  {...}}}`. Lo escribe `gen_store.py` con los `.bin` que el CI ya publica.
+  Como la placa lee el catálogo de la última release **publicada**, un
+  borrador o una pre-release no le ofrece firmware a nadie.
+- **Sólo de la fuente oficial** (la primera). Una fuente de terceros que
+  traiga `"fw"` se ignora.
+- **El firmware tiene que saber su perfil** (`rev1_3` o `rev3_x`): hoy no
+  lo lleva escrito. Una imagen de otro perfil no se ofrece.
+- **Pasos:** bajar a `apps/.store/tmp` (se reanuda si se corta), verificar
+  tamaño y SHA-256 **antes de tocar la flash**, escribir la otra ranura,
+  y pedir el reinicio. Arranca a prueba, como cualquier OTA.
+- **Siempre con un toque en la placa** (o en el portal, que ya puede subir
+  un firmware): nunca sola. Ajustes → Actualización muestra "Hay una
+  versión nueva: vX", el botón, el avance y "Reiniciar ahora". La Tienda
+  lleva ahí cuando una app dice "Necesita P4OS más nuevo".
+- Sin firma (decisión del usuario): la confianza es la del catálogo, HTTPS
+  a GitHub más el SHA-256 que el catálogo trae.
+- Queda para después: el firmware del C6 por el mismo camino.
+
+**Decisión propuesta: sí, con la imagen entera.** Es lo que vuelve útil
+el `fw_min` de las apps.
+
+### 3. Más texto en la página de cada app
+
+`"desc"` en `store.json`: unos párrafos en `es` y `en`, texto plano, una
+línea en blanco entre párrafos, 1200 caracteres como mucho por idioma. Va
+al catálogo y **no al paquete**, así cambiar una redacción no hace un
+paquete nuevo de una app que no cambió. La página de la app lo muestra
+debajo de la oración corta; el portal, en "Leer más", y su buscador
+también lo lee. Los textos de las 58 apps los escribe una sesión aparte,
+desde los README y el código. **Hecho el campo (2026-11-21); los textos,
+en curso.**
+
+De paso, visto en el simulador: las imágenes de pie (315×560) mostraban
+tres columnas de puntos sueltos en el borde derecho, porque el
+decodificador no termina un bloque que queda cortado. El generador las
+saca ahora con los dos lados múltiplos de 16 (320×560, 560×320).
+
 ## Roadmap
 
 Cada fase termina con algo que se puede probar y con sus números anotados

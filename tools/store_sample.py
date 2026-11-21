@@ -77,6 +77,20 @@ SAMPLES = (
                 "A loose package, in no catalogue.")),
 )
 
+# the long description of an app's page: a few paragraphs, a blank line between
+DESC = (
+    "%(name)s es una app de muestra de la Tienda de prueba, una fuente inventada para probar las fuentes de terceros. "
+    "No hace nada útil: está para ver cómo se lista, se instala, se actualiza y se quita una app que no es de P4OS.\n\n"
+    "Al abrirla muestra un título y un contador. Cada toque en la pantalla suma uno, cambia el color del fondo y hace "
+    "un sonido corto.\n\n"
+    "No usa la red ni la tarjeta, y no guarda nada.",
+    "%(name)s is a sample app from the test store, a made-up source to try third-party sources with. It does nothing "
+    "useful: it is there to see how an app that is not P4OS's is listed, installed, updated and removed.\n\n"
+    "When opened it shows a title and a counter. Every tap on the screen adds one, changes the background colour and "
+    "plays a short sound.\n\n"
+    "It uses neither the network nor the card, and keeps nothing.",
+)
+
 CODE = r'''/*
  * A sample app for a made-up source of the Tienda (tools/store_sample.py):
  * the template with another id, name and colours. Tapping counts, and goes
@@ -208,7 +222,8 @@ def lay_out(s):
     shutil.copy(os.path.join(tpl, "main", "idf_component.yml"), os.path.join(d, "main"))
     for f in ("sdkconfig.defaults", "dependencies.lock"):
         shutil.copy(os.path.join(tpl, f), d)
-    card = {"cat": "utiles", "about": {"es": s["about"][0], "en": s["about"][1]}}
+    card = {"cat": "utiles", "about": {"es": s["about"][0], "en": s["about"][1]},
+            "desc": {"es": DESC[0] % s, "en": DESC[1] % s}}
     if s["shots"]:
         card["shots"] = s["shots"]
     write(os.path.join(d, "store.json"), json.dumps(card, ensure_ascii=False, indent=1) + "\n")

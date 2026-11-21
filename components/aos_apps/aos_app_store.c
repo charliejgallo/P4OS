@@ -969,6 +969,15 @@ static void build_detail(lv_obj_t *page)
     lv_label_set_long_mode(about, LV_LABEL_LONG_MODE_WRAP);
     lv_obj_set_style_text_line_space(about, 6, 0);
 
+    /* the long description, when its catalogue has one: a few paragraphs */
+    const char *more = it->st.src < 0 ? "" : pick(cJSON_GetObjectItem(o, "desc"));
+    if (more[0]) {
+        lv_obj_t *d = aos_label(body, more, aos_font_small, AOS_C_DIM);
+        lv_obj_set_width(d, lv_pct(100));
+        lv_label_set_long_mode(d, LV_LABEL_LONG_MODE_WRAP);
+        lv_obj_set_style_text_line_space(d, 6, 0);
+    }
+
     /* what the person brings: the store does not distribute it */
     const cJSON *uf = cJSON_GetObjectItem(o, "user_files");
     if (uf) note(body, AOS_SYM_ALERT_OUTLINE, AOS_C_YELLOW, pick(uf));
