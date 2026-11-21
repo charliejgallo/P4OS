@@ -12,7 +12,9 @@
   "3d"
  ],
  "shots": [
-  "land-duke3d.jpg"
+  "land-duke3d.jpg",
+  "land-duke3d-fight.jpg",
+  "land-duke3d-power.jpg"
  ],
  "user_files": {
   "es": "Los datos del juego no vienen con la app: copiá tu DUKE3D.GRP (el shareware 1.3D sirve) a la carpeta duke3d/ de la tarjeta.",
