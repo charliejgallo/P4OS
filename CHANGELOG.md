@@ -1,5 +1,94 @@
 # Changelog
 
+## 0.30.0 — not released yet
+
+**The Store.** The biggest change since the first release: the board gets
+its apps by itself, and its own next firmware. Copying `apps.zip` to the
+card is no longer the way to install anything ([docs/INSTALL.md](docs/INSTALL.md),
+[docs/STORE.md](docs/STORE.md)).
+
+- **The Store (Tienda), a built-in app.** It reads a catalogue published
+  with each release (`p4os-store.ndjson`) and lists every app of the card:
+  58 today, by kind. An app's page has a description of a few paragraphs,
+  three or four pictures, tags worked out from its code (3D, art packs,
+  joystick, sound, the network, Bluetooth, a page in the portal, the
+  languages it speaks, what it needs on the header or the USB), and its
+  extras.
+  - **Get, Update, Remove, with no restart.** A package is downloaded to a
+    folder of its own, checked, and only then put in place and loaded; an
+    update takes the old code out and the new one in while the board runs
+    (0.2 s). What an app saved on the card stays through both.
+  - **Art in packs.** What a game cannot start without comes with it; the
+    rest are extras chosen one by one: the worlds of Bastión, the tables
+    of the pinball. A pack already on the card is recognised by its
+    SHA-256 and not downloaded again.
+  - **A number on its icon** when installed apps have a newer package.
+  - **The portal has it too:** a Store page with a search box, the
+    pictures, install, remove, and a `.p4app` handed in from the computer.
+- **What a package is** (`<app>.p4app`): a zip without compression whose
+  paths are the card's (the `.so`, the modules it loads itself, its page
+  in the portal, its translations), made the same from the same files,
+  byte for byte, so its SHA-256 is its identity. One that did not change
+  keeps its version and its address from release to release.
+- **Checked before it lands:** the size and the SHA-256 of the catalogue;
+  only the paths a package may write, and none that another package
+  owns; the app interface's number and the firmware it asks for; and
+  every function the `.so` calls against the firmware's table, without
+  loading it (10 ms). A refused package leaves the card as it was.
+- **Quarantine.** An app that makes the board fall twice in a row while it
+  loads is set aside (`<app>.so.off`): the board starts without it and the
+  Store says so. Tested with a `.so` broken on purpose.
+- **What was already on the card.** Apps copied by hand are listed as
+  such, and "Let the Store manage them" gives a receipt to each one that
+  is byte for byte the catalogue's, without touching it. A `.so` nobody
+  lists and a package handed in as a file are in the list too, and a
+  second row of chips filters by origin.
+- **Other people's sources.** Up to five catalogues beside the official
+  one: `user/repository` on GitHub or any `https://` address. Added at the
+  board only, after looking at who the source says it is and a warning
+  that an app runs with every permission of the system; the portal can
+  only propose one, for the board to accept. A source cannot replace what
+  another lists, so the official apps are nobody else's to change.
+  Removing a source keeps or removes its apps. And a single `.p4app`
+  installs from Files or from the portal.
+- **Developer mode** (a switch in Store → Sources): `http://` sources on a
+  trusted network, and another catalogue in the place of the official one
+  from the portal, for a test server.
+- **The firmware from GitHub, in Settings → Update.** The official
+  catalogue says which firmware its release brings, an image for each
+  board profile. The board downloads it to the card, checks it whole
+  against the size and the SHA-256 of the catalogue before the flash is
+  touched, writes it to the other slot and waits for a tap to restart,
+  on trial like any update. About a minute. The portal's Firmware page
+  has the same. Never by itself; only from the official source; not
+  signed, as before ([docs/SECURITY.md](docs/SECURITY.md)).
+- **Failures said in the board's language,** each with the line for the
+  log under it: no network, not on the server, no time yet, the card is
+  full, not the package that was published, it needs a newer P4OS.
+- **A downloader for files** (`aos_fetch`): one GET that follows
+  redirects from host to host, writes to the card, picks up after a cut
+  with a `Range` request (also after a restart: the file is synced every
+  megabyte), and checks size and SHA-256 at the end. 0.38 MB/s from
+  GitHub.
+- **For app writers:** `apps/<app>/store.json` says what the code does
+  not (kind, a short and a long description in Spanish and English, the
+  pictures, which packs are needed), and `tools/gen_store.py` makes the
+  packages and the catalogue from the tree; the CI attaches them to every
+  release ([docs/APPS-P4.md](docs/APPS-P4.md), "In the store").
+  `tools/store_sample.py` and `tools/fake_github.py` make and serve a
+  made-up source to test with, and `tools/store_cli.py` is the same store
+  in Python.
+- **Pictures for every app:** the 58 published apps have three or four
+  captures in `docs/img`, and a long description each.
+- **Not in the Store yet:** the portal's own translations (`lang.zip`),
+  the colour emoji (`emoji.pak`) and the C6's firmware (`c6.bin`) are
+  still files to copy. `apps.zip`, `web.zip` and `lang.zip` go on being
+  attached to each release for whoever fills a card by hand.
+
+Tests: `tests/fetch_host` (20 cases), `tests/store_host` (26) and
+`tests/store_fw_host` (61), the firmware's own service built for the Mac
+against a server that behaves like GitHub's downloads.
+
 ## 0.29.0 — 2026-11-20
 
 Bastión, a tower defense in 3D. The firmware is 0.28.0's: what is new is on

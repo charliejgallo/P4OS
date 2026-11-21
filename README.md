@@ -8,8 +8,14 @@ An iPhone-style operating system for the
 
 It has a home screen with pages, folders and a dock, a control centre and
 notifications, and a lock screen with an optional code, and it runs in
-portrait or landscape. There are twenty-three built-in apps and more than fifty on
-the microSD, loaded as shared objects:
+portrait or landscape. There are twenty-three built-in apps and, since
+0.30, a **Store** that installs more than fifty others on the microSD,
+loaded as shared objects:
+
+- **A store of its own:** the board lists, installs and updates its apps
+  from a catalogue published with each release, and fetches its own next
+  firmware. Other people's repositories can be added beside the official
+  one.
 
 - **Games:** twenty-five, among them Mila (a Sokoban with a black cat in
   Blender 3D), Monster Hop, a racing game, golf, a robot RPG, a 3D pinball
@@ -72,6 +78,40 @@ of the apps came from there, redrawn for a screen five times larger.
 
 <p align="center"><em>The captures come from the simulator, which draws the
 same pixels as the board.</em></p>
+
+## Getting started
+
+A new board needs a cable once, and nothing after that.
+
+1. **Flash it.** `esptool.py --chip esp32p4 chip_id` says which silicon the
+   board has; download `p4os-rev1_3-full.zip` (chip v1.x) or
+   `p4os-rev3_x-full.zip` (v3.x) from the
+   [latest release](https://github.com/charliejgallo/P4OS/releases/latest),
+   unpack it and, from inside the folder,
+   `esptool.py --chip esp32p4 -p <port> write_flash @flash_args`.
+2. **Put a microSD in**, formatted as FAT32. An empty one is fine.
+3. **Join the Wi-Fi** in Settings → Networks, and pick the language.
+4. **Open the Store** and get the apps you want. They install and open
+   with no restart; a game's art comes in packs, the extra ones chosen on
+   its page.
+5. **Later versions arrive by themselves:** the Store updates the apps,
+   and Settings → Update fetches the next firmware from GitHub, checks it
+   and installs it on a tap.
+
+| The Store | An app's page | Its description and extras | Settings, Update |
+|---|---|---|---|
+| <img src="docs/img/app-store.png" width="170"> | <img src="docs/img/app-store-app.jpg" width="170"> | <img src="docs/img/app-store-extras.jpg" width="170"> | <img src="docs/img/app-update.png" width="170"> |
+
+[docs/INSTALL.md](docs/INSTALL.md) is the whole of it, step by step: a new
+board from nothing, a board coming from 0.2x, and adding apps.
+[docs/STORE.md](docs/STORE.md) is the Store itself: what it checks, other
+people's sources and what adding one means, and what a catalogue is made
+of.
+
+**Coming from 0.2x?** Update the firmware once more the old way (the
+portal's Firmware page, with `p4os-<rev>.bin`). Nothing has to be copied to
+the card: the apps that are there go on working, and Store → Installed
+offers to take them over so they update from then on.
 
 <p align="center">
   <img src="docs/img/photo-modules-bme280.jpg" width="300" alt="The board reading a BME280 on the rear header, in Modules">
@@ -842,9 +882,42 @@ its module; Snes9x's and the Mega Drive's Z80 forbid commercial use
 ([THIRD-PARTY.md](THIRD-PARTY.md)). The screenshots are of free homebrew
 games in the simulator.
 
+### The Store
+
+The apps of the card are not copied by hand any more (since 0.30). The
+Store reads a catalogue published with each release, and from it the board
+installs an app, its art packs, its page in the portal and its
+translations, updates it while it runs, and removes it.
+
+- **A page for each app:** what it is in a few paragraphs, three or four
+  pictures, tags worked out from its code (3D, joystick, sound, the
+  network, the languages it speaks, what it needs on the header or the
+  USB), and its extras, pack by pack.
+- **Checked before it lands:** every package against the size and the
+  SHA-256 of the catalogue, where it may write, and whether this firmware
+  can run it, function by function, without loading it. An app that makes
+  the board fall while it loads is set aside at the next start.
+- **What was on the card stays:** apps copied by hand are listed as such
+  and taken over when they are the catalogue's; a build of your own is
+  left alone.
+- **Other sources:** somebody else's repository beside the official one,
+  added at the board after a warning that an app runs with every
+  permission of the system; and a single package, a `.p4app`, from Files
+  or the portal.
+- **The firmware too:** Settings → Update finds the next release, and
+  installs it on a tap, on trial like any update.
+- **From a computer:** the portal's Store page does the same.
+
+[docs/STORE.md](docs/STORE.md) has the rest, and what was measured.
+
+| By origin | An app from another source |
+|---|---|
+| <img src="docs/img/app-store-source.png" width="200"> | <img src="docs/img/app-store-third.jpg" width="200"> |
+
 ### Apps from the card
 
-These are `.so` files that the firmware loads at boot. Their code runs
+These are `.so` files that the Store puts in the card's `/apps` and the
+firmware loads: at boot, or the moment one is installed. Their code runs
 straight from PSRAM (on the P4, data and instructions share its addresses),
 and their art comes in packs.
 
@@ -1123,7 +1196,8 @@ Language, Date and time, Update, Diagnostics, About and Developer.
 - **Sound:** the volume, the system sounds and the keyboard click.
 - **Wallpaper:** the gradients, the photos and the accent colour.
 - **Storage:** what fills the card by kind of file, and eject.
-- **Update:** both slots, and going back.
+- **Update:** the next version from GitHub, downloaded, checked and
+  installed on a tap (since 0.30); both slots, and going back.
 - **Diagnostics:** chip temperature, CPU, memory, the reset reason, safe mode,
   the hang watchdog's restarts, the C6's firmware, and the crash dump.
 - **About:** the portal's addresses, with a QR code for the phone.
@@ -1151,11 +1225,13 @@ complete. The system's texts travel twice: inside the firmware, so they
 work with no card, and as packs on the card. The two are joined string by
 string with the card's first, so a fix copied to the card wins, and a card
 older than the firmware still gets the new screens translated. An app's
-texts travel only with the app, in `lang.zip` (since 0.20.2: carrying them
-in the firmware too cost 438 KB). A pseudo-locale is used to
+texts travel only with the app (since 0.20.2: carrying them in the firmware
+too cost 438 KB): in its package when the Store installs it, and in
+`lang.zip` for a card filled by hand. A pseudo-locale is used to
 test layouts. The web portal and the apps' pages follow the same language
 (since 0.15.1): their catalogs live only on the card and only the browser
-reads them.
+reads them. The portal's own still comes from `lang.zip`; an app's page
+brings its own with the app.
 
 ## What was tested, and what not yet
 
@@ -1271,6 +1347,20 @@ reads them.
 - The Programador's list (0.28): sorted three ways, searched, and a
   "versión nueva" for a firmware rebuilt after its last flash.
 
+- The Store (0.30), against a test release on GitHub and against a test
+  server on the local network: the catalogue of 58 apps read in a few
+  seconds, apps installed, updated and removed with no restart, a
+  download picked up after the board was restarted in the middle of it, a
+  `.so` broken on purpose set aside after two falls, a second source
+  added at the board and its apps beside the official ones (and the one
+  named like an official app left out), a loose package from Files, and
+  the pictures and descriptions of an app's page.
+- The firmware from the Store's catalogue (0.30): found in Settings,
+  downloaded and checked (16 s for 7 MB), written to the other slot
+  (41 s), restarted into on trial and confirmed, twice in a row. From the
+  test server; from GitHub itself it waits for the first release that
+  carries it.
+
 **Waiting for hardware on the bench:**
 
 - Ethernet with a computer on a cable (a USB adapter is on its way): the
@@ -1298,6 +1388,11 @@ reads them.
 
 **Not done yet:**
 
+- **The Store:** the portal's own translations, the colour emoji and the
+  C6's firmware are still files to copy to the card; publishing an app
+  from outside this repository has no kit yet; and a download with the
+  Wi-Fi cut in the middle of it was not tried (a restart in the middle
+  was).
 - **RF:** FSK signals, a CC1101 module on the header as a second receiver
   and transmitter, and ADS-B.
 - **ESP-NOW:** esp_hosted does not carry it (3.0.9 neither), so the two-device games of
@@ -1381,13 +1476,17 @@ run once first, because it fetches the components whose headers the
 simulator shares.
 
 Each push builds both firmware profiles, every app, the C6's firmware and
-the emoji and Notes packs on GitHub Actions. The releases carry all of it
-with a full-flash bundle, the apps' portal pages and the language packs;
-only the games' art packs are attached by hand.
+the emoji and Notes packs on GitHub Actions. A release carries all of it
+with a full-flash bundle, and what the Store reads: the catalogue
+(`p4os-store.ndjson`), a package for each app (`<app>.p4app`) and their
+pictures. `apps.zip`, `web.zip` and `lang.zip` still go out for whoever
+fills a card by hand. Only the games' art packs are attached by hand.
 
 ### The card
 
     /apps/        <app>.so and <app>_p4.pak (the art packs, Notes' fonts)
+    /apps/.store/ the Store's own: the catalogues, a receipt for each app
+                  it installed, downloads in hand, the pictures it showed
     /web/         <app>.js — the apps' own pages in the portal
     /lang/        en/, de/ — the language packs
     /fonts/       emoji.pak — the colour emoji
@@ -1437,9 +1536,11 @@ Where something is a guess, it says so.
 
 | | |
 |---|---|
+| [INSTALL.md](docs/INSTALL.md) | a new board from nothing, updating from 0.2x, adding apps, the firmware from GitHub |
+| [STORE.md](docs/STORE.md) | the Store: what it does and checks, other people's sources, a catalogue's format, the portal's calls, what was measured |
 | [BUILDING.md](docs/BUILDING.md) | building, flashing, OTA, crash dumps, the watchdogs |
 | [MEMORY.md](docs/MEMORY.md) | internal RAM vs PSRAM, the panel's three frame buffers, PSRAM bandwidth, the audit |
-| [APPS-P4.md](docs/APPS-P4.md) | writing and installing `.so` apps, drawing a frame, measured fps |
+| [APPS-P4.md](docs/APPS-P4.md) | writing `.so` apps, what one says of itself for the Store, drawing a frame, measured fps |
 | [USB.md](docs/USB.md) | the OTG port's modes, descriptors and measurements |
 | [BLUETOOTH.md](docs/BLUETOOTH.md) | the phone (ANCS), the keyboard mode (HID over GATT), the portal's API |
 | [C6.md](docs/C6.md) | the ESP32-C6's firmware: versions, updating it from the P4, throughput, recovery through J7 |
@@ -1507,4 +1608,5 @@ idioma de la tarjeta, la de la placa y la del portal web. Los documentos del pla
 | Qué falta | probar en la placa el RC522, RF con un sensor de 433 MHz y con tráfico real de AM y FM angosta, encontrar por qué se cortó la red durante dos OTA, y con una computadora por cable: la red de banco, sus servicios y compartir la conexión en los dos sentidos |
 | El conector de 40 pines | el dibujo de referencia de todos los pines, con los puertos, los pines con que arranca cada app y los sugeridos, está en [The 40-pin header](#the-40-pin-header); la carcasa impresa, en [case/](case) |
 | Cómo se compila | ESP-IDF 5.5, `tools/build_fw.sh rev1_3`, `tools/build_apps.sh` |
-| Cómo se instala | la primera vez por el CH340; después `tools/ota.sh p4os.local` o el portal |
+| Cómo se instala | la primera vez por el CH340, con la imagen completa de la release; se pone una microSD en FAT32 (puede estar vacía), se conecta al Wi-Fi y las apps se bajan desde la **Tienda** de la placa. Después las apps se actualizan desde la Tienda y el firmware desde Ajustes → Actualización, que lo baja de GitHub. Paso a paso, y cómo venir desde 0.2x: [docs/INSTALL.md](docs/INSTALL.md) |
+| La Tienda | desde la 0.30: lista, instala, actualiza y quita las apps desde un catálogo publicado con cada release, con sus packs de arte, su página del portal y sus idiomas; admite fuentes de terceros (se agregan sólo en la placa, con un aviso) y paquetes sueltos `.p4app`. [docs/STORE.md](docs/STORE.md) |

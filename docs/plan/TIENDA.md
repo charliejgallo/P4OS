@@ -1034,6 +1034,17 @@ tres columnas de puntos sueltos en el borde derecho, porque el
 decodificador no termina un bloque que queda cortado. El generador las
 saca ahora con los dos lados múltiplos de 16 (320×560, 560×320).
 
+### Los documentos públicos (2026-11-21)
+
+Para el merge: `docs/INSTALL.md` (una placa nueva desde cero, venir desde
+0.2x, sumar apps, el firmware desde GitHub), `docs/STORE.md` (qué hace y
+qué revisa la Tienda, las fuentes de terceros, el formato de un catálogo,
+las llamadas del portal, lo medido), el README con "Getting started" al
+principio y la sección "The Store", la entrada 0.30.0 del `CHANGELOG.md`,
+y el borrador de las notas de la release en
+`docs/internal/RELEASE-0.30.0.md` (no está en git). Las capturas nuevas
+son del simulador, en inglés.
+
 ## Roadmap
 
 Cada fase termina con algo que se puede probar y con sus números anotados
