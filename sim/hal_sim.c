@@ -2690,6 +2690,20 @@ bool aos_hal_scan_status(aos_scan_status_t *out)
 
 aos_net_state_t aos_hal_net_state(void) { return AOS_NET_CONNECTED; }
 void aos_hal_net_low_latency(bool on) { (void)on; }   /* the desktop has no power save */
+/* P4_SIM_PENDRIVE=1: a pendrive on the host, mounted at ./sim_usb (the folder is
+ * made if it is not there), for the backups' copy to a drive. */
+bool aos_hal_usb_host_info(aos_usb_host_info_t *out)
+{
+    memset(out, 0, sizeof *out);
+    if (!getenv("P4_SIM_PENDRIVE")) return false;
+    mkdir("sim_usb", 0775);
+    out->device = out->mounted = true;
+    out->bytes = 8ull << 30;
+    snprintf(out->product, sizeof out->product, "a folder of the Mac");
+    snprintf(out->path, sizeof out->path, "sim_usb");
+    return true;
+}
+
 /* P4_SIM_SSID=: a board that knows no network (a new one, for the backup's
  * offer); P4_SIM_SSID=casa for another name. */
 const char *aos_hal_net_ssid(void)

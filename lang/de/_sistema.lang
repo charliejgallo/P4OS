@@ -10788,3 +10788,15 @@ No lleva contraseñas: la de la Wi-Fi se escribe de nuevo.	Sie enthält keine Pa
 Queda en Ajustes, Respaldo, con los demás que haya.	Sie bleibt unter Einstellungen, Sicherung, bei den anderen.
 Ahora no	Jetzt nicht
 Ver respaldos	Sicherungen ansehen
+copiando: %u archivos, %u KB	kopiere: %u Dateien, %u KB
+copiados: %u archivos, %u KB	kopiert: %u Dateien, %u KB
+no hay pendrive, o no se pudo escribir en él	kein USB-Stick, oder er ließ sich nicht beschreiben
+Tocá otra vez: copia a la tarjeta lo que hay en el pendrive	Nochmal tippen: kopiert den Inhalt des USB-Sticks auf die Karte
+PENDRIVE	USB-STICK
+Detener la copia	Kopie anhalten
+Copiar al pendrive	Auf den USB-Stick kopieren
+Traer del pendrive	Vom USB-Stick holen
+Al pendrive van los respaldos y las carpetas elegidas de la tarjeta, en p4os-backup; lo que ya está no se copia de nuevo. Traer los pone en una tarjeta nueva, sin pisar un archivo más nuevo.	Auf den USB-Stick kommen die Sicherungen und die gewählten Ordner der Karte, in p4os-backup; was schon da ist, wird nicht erneut kopiert. Holen legt sie auf eine neue Karte, ohne eine neuere Datei zu ersetzen.
+CARPETAS QUE VAN AL PENDRIVE	ORDNER FÜR DEN USB-STICK
+Con un pendrive en el host USB (Ajustes, USB) aparece acá la copia de los respaldos y de las carpetas de la tarjeta.	Mit einem USB-Stick am USB-Host (Einstellungen, USB) erscheint hier die Kopie der Sicherungen und der Ordner der Karte.
+no hay un pendrive	kein USB-Stick

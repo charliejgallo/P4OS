@@ -31,10 +31,12 @@
 
 #include <ctype.h>
 #include <dirent.h>
+#include <errno.h>
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <strings.h>
 #include <sys/stat.h>
 #include <time.h>
 #include <unistd.h>
@@ -73,6 +75,13 @@
 #define K_DAY       "bk_day"
 #define K_SUM       "bk_sum"
 #define K_SEEN      "bk_seen"
+/* Stage 3, the pendrive: which folders of the card go with the backups
+ * ("bk_dirs": "notas=1,music=0", only the ones a person changed), and the
+ * folder they go to on the drive. */
+#define K_DIRS      "bk_dirs"
+#define DRIVE_DIR   "p4os-backup"
+#define COPY_CHUNK  (32 * 1024)
+#define COPY_DEPTH  8
 
 /* ---- which preferences ------------------------------------------------------ */
 
@@ -745,13 +754,15 @@ static int32_t today(void)
     return (tm.tm_year + 1900) * 10000 + (tm.tm_mon + 1) * 100 + tm.tm_mday;
 }
 
-int aos_backup_auto_now(int reason, bool *made, char *why, size_t why_len)
+/* The copy of what changed since the last one. 'asked' is a person asking
+ * for it (the pendrive): made whatever the switch says. */
+static int copy_if_changed(int reason, bool asked, bool *made, char *why, size_t why_len)
 {
     char sum[20], last[20] = "", name[AOS_BACKUP_NAME_MAX];
     uint8_t stored[SALT_LEN + 32];
     if (made) *made = false;
     if (why && why_len) why[0] = 0;
-    if (!aos_backup_auto_on()) return AOS_BACKUP_E_NONE;
+    if (!asked && !aos_backup_auto_on()) return AOS_BACKUP_E_NONE;
     prefs_sum(sum);
     aos_hal_pref_get_str(K_SUM, last, sizeof last);
     int rc = AOS_BACKUP_E_NONE;
@@ -771,6 +782,11 @@ int aos_backup_auto_now(int reason, bool *made, char *why, size_t why_len)
     return rc;
 }
 
+int aos_backup_auto_now(int reason, bool *made, char *why, size_t why_len)
+{
+    return copy_if_changed(reason, false, made, why, why_len);
+}
+
 bool aos_backup_offer(aos_backup_info_t *out)
 {
     int32_t seen = 0;
@@ -786,10 +802,229 @@ bool aos_backup_offer(aos_backup_info_t *out)
 
 void aos_backup_offer_done(void) { aos_hal_pref_set_i32(K_SEEN, 1); }
 
+/* ---- to a pendrive and back (stage 3) --------------------------------------- */
+
+/* What a backup does not carry is what the apps wrote on the card: notes,
+ * saved networks, scripts, scores. A pendrive on the USB host takes them
+ * file by file, beside the backups, and gives them back to a new card.
+ *
+ * Which folders: every folder at the card's root, but the ones the Tienda
+ * fetches again and this module's own. The big ones that come from a
+ * computer in the first place are off until a person turns them on. */
+static const char *const NOT_OURS[] = { "apps", "web", "lang", "fonts", "firmware", AOS_BACKUP_DIR, "System Volume Information" };
+static const char *const BIG[] = { "photos", "music", "videos", "maps", "recordings", "roms" };
+
+static bool in_list(const char *name, const char *const *list, size_t n)
+{
+    for (size_t i = 0; i < n; i++)
+        if (!strcasecmp(name, list[i])) return true;
+    return false;
+}
+
+/* What a person chose for a folder: 1, 0, or -1 for nothing said. */
+static int dir_choice(const char *dirs, const char *name)
+{
+    size_t nl = strlen(name);
+    for (const char *p = dirs; p && *p; ) {
+        const char *end = strchr(p, ',');
+        size_t len = end ? (size_t)(end - p) : strlen(p);
+        if (len == nl + 2 && !strncmp(p, name, nl) && p[nl] == '=') return p[nl + 1] == '1';
+        p = end ? end + 1 : p + len;
+    }
+    return -1;
+}
+
+int aos_backup_folders(aos_backup_folder_t *out, int max)
+{
+    char d[FULL_MAX], f[FULL_MAX + 80], *dirs = BIG_ALLOC(1024);
+    int n = 0;
+    if (!aos_hal_path_sd_root() || !dirs) { free(dirs); return 0; }
+    aos_hal_pref_get_str(K_DIRS, dirs, 1024);
+    DIR *dir = opendir(full(d, ""));
+    struct dirent *de;
+    while (dir && (de = readdir(dir)) != NULL && n < max) {
+        struct stat st;
+        if (de->d_name[0] == '.' || strlen(de->d_name) >= sizeof out[0].name || strchr(de->d_name, ',') || strchr(de->d_name, '=') ||
+            in_list(de->d_name, NOT_OURS, sizeof NOT_OURS / sizeof NOT_OURS[0])) continue;
+        snprintf(f, sizeof f, "%s/%s", d, de->d_name);
+        if (stat(f, &st) != 0 || !S_ISDIR(st.st_mode)) continue;
+        int said = dir_choice(dirs, de->d_name);
+        /* in the order of their names: the card lists them as they were made */
+        int at = n;
+        while (at > 0 && strcasecmp(out[at - 1].name, de->d_name) > 0) at--;
+        memmove(&out[at + 1], &out[at], sizeof *out * (size_t)(n - at));
+        snprintf(out[at].name, sizeof out[at].name, "%s", de->d_name);
+        out[at].on = said >= 0 ? said == 1 : !in_list(de->d_name, BIG, sizeof BIG / sizeof BIG[0]);
+        n++;
+    }
+    if (dir) closedir(dir);
+    free(dirs);
+    return n;
+}
+
+void aos_backup_folder_set(const char *name, bool on)
+{
+    char *dirs = BIG_ALLOC(1024), *next = BIG_ALLOC(1100);
+    size_t nl = strlen(name), o = 0;
+    if (dirs && next && nl && nl < 40 && !strchr(name, ',') && !strchr(name, '=')) {
+        aos_hal_pref_get_str(K_DIRS, dirs, 1024);
+        for (const char *p = dirs; *p; ) {      /* the others, as they were */
+            const char *end = strchr(p, ',');
+            size_t len = end ? (size_t)(end - p) : strlen(p);
+            bool this_one = len == nl + 2 && !strncmp(p, name, nl) && p[nl] == '=';
+            if (!this_one && len && o + len + 2 < 1000) { if (o) next[o++] = ','; memcpy(next + o, p, len); o += len; }
+            p = end ? end + 1 : p + len;
+        }
+        if (o + nl + 4 < 1000) o += (size_t)snprintf(next + o, 1100 - o, "%s%s=%d", o ? "," : "", name, on ? 1 : 0);
+        next[o] = 0;
+        aos_hal_pref_set_str(K_DIRS, next);
+    }
+    free(dirs); free(next);
+}
+
+static volatile bool s_cancel;
+static volatile uint32_t s_copy_files, s_copy_kb, s_copy_skipped;
+
+/* One file, unless the other side has it already or has a newer one: a
+ * file that was edited after the copy is never replaced by the copy. Of the
+ * same date (a board with no clock dates them all alike), the size says
+ * whether it is the same. It is written beside its name and renamed, so a
+ * drive pulled out in the middle leaves no half file under a good name. */
+static bool copy_file(const char *src, const char *dst, const struct stat *ss, uint8_t *buf)
+{
+    struct stat ds;
+    if (stat(dst, &ds) == 0 && (ds.st_mtime > ss->st_mtime || (ds.st_mtime == ss->st_mtime && ds.st_size == ss->st_size))) {
+        s_copy_skipped++;
+        return true;
+    }
+    char *tmp = BIG_ALLOC(strlen(dst) + 8);
+    if (!tmp) return false;
+    sprintf(tmp, "%s.p4t", dst);
+    FILE *in = fopen(src, "rb"), *out = in ? fopen(tmp, "wb") : NULL;
+    bool ok = in && out;
+    size_t got;
+    while (ok && !s_cancel && (got = fread(buf, 1, COPY_CHUNK, in)) > 0) {
+        ok = fwrite(buf, 1, got, out) == got;
+        s_copy_kb += (uint32_t)((got + 1023) / 1024);
+    }
+    if (in) { ok = ok && !ferror(in); fclose(in); }
+    if (out) ok = fclose(out) == 0 && ok;
+    ok = ok && !s_cancel;
+    if (ok) { remove(dst); ok = rename(tmp, dst) == 0; }
+    if (!ok) remove(tmp);
+    else s_copy_files++;
+    free(tmp);
+    return ok;
+}
+
+/* A folder and what is under it. Paths on the heap: this calls itself. */
+static bool copy_tree(const char *src, const char *dst, uint8_t *buf, int depth)
+{
+    DIR *dir = opendir(src);
+    if (!dir) return true;              /* not there: nothing to copy */
+    mkdir(dst, 0775);
+    size_t cap = strlen(src) + strlen(dst) + 2 * 260 + 4;
+    char *a = BIG_ALLOC(cap), *b = a ? a + cap / 2 : NULL;
+    bool ok = a != NULL;
+    struct dirent *de;
+    while (ok && !s_cancel && (de = readdir(dir)) != NULL) {
+        struct stat st;
+        size_t nl = strlen(de->d_name);
+        if (!strcmp(de->d_name, ".") || !strcmp(de->d_name, "..") || nl > 255) continue;
+        if (nl > 4 && !strcmp(de->d_name + nl - 4, ".p4t")) continue;      /* a copy that was cut */
+        snprintf(a, cap / 2, "%s/%s", src, de->d_name);
+        snprintf(b, cap / 2, "%s/%s", dst, de->d_name);
+        if (stat(a, &st) != 0) continue;
+        if (S_ISDIR(st.st_mode)) { if (depth < COPY_DEPTH) ok = copy_tree(a, b, buf, depth + 1); }
+        else ok = copy_file(a, b, &st, buf);
+    }
+    closedir(dir);
+    free(a);
+    return ok;
+}
+
+/* The pendrive there is: the first one mounted. */
+static bool drive_root(char out[FULL_MAX])
+{
+    aos_usb_host_info_t info;
+    if (!aos_hal_usb_host_info(&info) || !info.mounted || !info.path[0]) return false;
+    snprintf(out, FULL_MAX, "%s/" DRIVE_DIR, info.path);
+    return true;
+}
+
+bool aos_backup_drive(void)
+{
+    char root[FULL_MAX];
+    return drive_root(root);
+}
+
+int aos_backup_copy_now(bool to_drive, char *why, size_t why_len)
+{
+    err_t e = { "", 0 };
+    char root[FULL_MAX], card[FULL_MAX], *a = BIG_ALLOC(2 * 400), *b = a ? a + 400 : NULL;
+    uint8_t *buf = BIG_ALLOC(COPY_CHUNK);
+    aos_backup_folder_t *dirs = BIG_ALLOC(sizeof *dirs * AOS_BACKUP_FOLDERS_MAX);
+    s_cancel = false;
+    s_copy_files = s_copy_kb = s_copy_skipped = 0;
+    if (!a || !buf || !dirs) { fail(&e, AOS_BACKUP_E_MEMORY, "no memory"); goto out; }
+    if (!aos_hal_path_sd_root()) { fail(&e, AOS_BACKUP_E_CARD, "no card"); goto out; }
+    if (!drive_root(root)) { fail(&e, AOS_BACKUP_E_DRIVE, "no pendrive"); goto out; }
+    full(card, "");
+    bool ok = true;
+    if (to_drive) {
+        /* what the board holds now goes too: a copy when something changed
+         * since the last one, as the day's would be */
+        char w2[120];
+        copy_if_changed(AOS_BACKUP_DAILY, true, NULL, w2, sizeof w2);
+        if (mkdir(root, 0775) != 0 && errno != EEXIST) { fail(&e, AOS_BACKUP_E_DRIVE, "the pendrive cannot be written"); goto out; }
+        snprintf(a, 400, "%s/" AOS_BACKUP_DIR, card);
+        snprintf(b, 400, "%s/" AOS_BACKUP_DIR, root);
+        ok = copy_tree(a, b, buf, 0);
+        snprintf(b, 400, "%s/card", root);
+        mkdir(b, 0775);
+        int n = aos_backup_folders(dirs, AOS_BACKUP_FOLDERS_MAX);
+        for (int i = 0; ok && i < n; i++) {
+            if (!dirs[i].on) continue;
+            snprintf(a, 400, "%s/%s", card, dirs[i].name);
+            snprintf(b, 400, "%s/card/%s", root, dirs[i].name);
+            ok = copy_tree(a, b, buf, 0);
+        }
+    } else {
+        struct stat st;
+        if (stat(root, &st) != 0) { fail(&e, AOS_BACKUP_E_NOT_FOUND, "this pendrive has no copy of a board"); goto out; }
+        snprintf(a, 400, "%s/" AOS_BACKUP_DIR, root);
+        snprintf(b, 400, "%s/" AOS_BACKUP_DIR, card);
+        ok = copy_tree(a, b, buf, 0);
+        /* every folder the drive has, whatever is chosen here: a new card
+         * has nothing to choose from yet. Never the ones that are not data. */
+        snprintf(a, 400, "%s/card", root);
+        DIR *dir = opendir(a);
+        struct dirent *de;
+        while (ok && dir && (de = readdir(dir)) != NULL) {
+            if (de->d_name[0] == '.' || strlen(de->d_name) >= sizeof dirs[0].name ||
+                in_list(de->d_name, NOT_OURS, sizeof NOT_OURS / sizeof NOT_OURS[0])) continue;
+            snprintf(a, 400, "%s/card/%s", root, de->d_name);
+            snprintf(b, 400, "%s/%s", card, de->d_name);
+            if (stat(a, &st) == 0 && S_ISDIR(st.st_mode)) ok = copy_tree(a, b, buf, 0);
+        }
+        if (dir) closedir(dir);
+    }
+    if (s_cancel) fail(&e, AOS_BACKUP_E_OTHER, "stopped: %u files copied", (unsigned)s_copy_files);
+    else if (!ok) fail(&e, to_drive ? AOS_BACKUP_E_DRIVE : AOS_BACKUP_E_CARD, "a file could not be written, after %u (is it full?)", (unsigned)s_copy_files);
+    else snprintf(e.why, sizeof e.why, "%u files copied %s, %u KB; %u were there already", (unsigned)s_copy_files,
+                  to_drive ? "to the pendrive" : "to the card", (unsigned)s_copy_kb, (unsigned)s_copy_skipped);
+out:
+    free(a); free(buf); free(dirs);
+    if (why) snprintf(why, why_len, "%s", e.why);
+    return e.kind;
+}
+
+void aos_backup_cancel(void) { s_cancel = true; }
+
 /* ---- the thread ------------------------------------------------------------- */
 
-enum { JOB_MAKE, JOB_RESTORE, JOB_DAILY, JOB_FW, JOB_KEY };
-static const char *const JOB_NAME[] = { "make", "restore", "auto", "auto", "key" };
+enum { JOB_MAKE, JOB_RESTORE, JOB_DAILY, JOB_FW, JOB_KEY, JOB_TO_DRIVE, JOB_FROM_DRIVE };
+static const char *const JOB_NAME[] = { "make", "restore", "auto", "auto", "key", "to_drive", "from_drive" };
 
 static void *s_lock;
 static aos_backup_status_t s_st;
@@ -811,6 +1046,8 @@ static void work(void *arg)
     switch (job) {
     case JOB_RESTORE: kind = aos_backup_restore_now(s_job.name, s_job.pass, &written, why, sizeof why); break;
     case JOB_MAKE:    kind = aos_backup_make_now(s_job.pass, false, name, sizeof name, why, sizeof why); break;
+    case JOB_TO_DRIVE:
+    case JOB_FROM_DRIVE: kind = aos_backup_copy_now(job == JOB_TO_DRIVE, why, sizeof why); break;
     case JOB_KEY:
         kind = aos_backup_auto_passphrase_now(s_job.pass) ? AOS_BACKUP_E_NONE : AOS_BACKUP_E_OTHER;
         snprintf(why, sizeof why, "%s", kind ? "the key could not be kept" : "the automatic copies are sealed from now on");
@@ -843,6 +1080,8 @@ static void work(void *arg)
         snprintf(s_st.last, sizeof s_st.last, "%s", why);
         snprintf(s_st.name, sizeof s_st.name, "%s", job == JOB_RESTORE ? s_job.name : name);
         s_st.written = written;
+        s_st.files = s_copy_files;
+        s_st.kbytes = s_copy_kb;
         if (job == JOB_RESTORE && kind == AOS_BACKUP_E_NONE) s_st.restart = true;
     }
     unlock();
@@ -875,6 +1114,9 @@ bool aos_backup_restore(const char *name, const char *passphrase)
 {
     return name_ok(name) && start(JOB_RESTORE, name, passphrase);
 }
+
+bool aos_backup_to_drive(void) { return start(JOB_TO_DRIVE, NULL, NULL); }
+bool aos_backup_from_drive(void) { return start(JOB_FROM_DRIVE, NULL, NULL); }
 
 bool aos_backup_auto_passphrase(const char *passphrase)
 {
@@ -923,4 +1165,9 @@ void aos_backup_status(aos_backup_status_t *out)
     lock();
     *out = s_st;
     unlock();
+    /* a copy in hand: how far it is */
+    if (out->busy && (!strcmp(out->job, "to_drive") || !strcmp(out->job, "from_drive"))) {
+        out->files = s_copy_files;
+        out->kbytes = s_copy_kb;
+    }
 }

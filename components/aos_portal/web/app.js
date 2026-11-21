@@ -3326,7 +3326,7 @@ function pageRespaldo() {
   const WHY = { card: N_('No hay tarjeta, o no se pudo escribir en ella.'), not_found: N_('Ese respaldo no está en la tarjeta.'),
                 not_one: N_('El archivo no es un respaldo, o está dañado.'), passphrase: N_('Está cifrado, y esa no es su frase.'),
                 newer: N_('Lo hizo un P4OS más nuevo que este: actualizá primero.'), memory: N_('No alcanzó la memoria.'),
-                busy: N_('Ya hay uno en curso.'), other: N_('Algo salió mal.') };
+                busy: N_('Ya hay uno en curso.'), drive: N_('No hay pendrive, o no se pudo escribir en él.'), other: N_('Algo salió mal.') };
   const when = b => b.made ? new Date(b.made * 1000).toLocaleString(LOCALE) : tr('sin fecha');
   const act = async (what, body) => {
     try { st = await post(what, body); draw(); poll(300); }
@@ -3375,10 +3375,13 @@ function pageRespaldo() {
       } catch (x) { toast(x.message, true); }
     } });
     const restored = !st.busy && st.last_ok && st.last_job === 'restore';
-    msg.textContent = st.busy ? (st.job === 'restore' ? tr('Restaurando…') : tr('Respaldando…'))
+    const driveJob = j => j === 'to_drive' || j === 'from_drive';
+    msg.textContent = st.busy ? (driveJob(st.job) ? tr('Copiando: %s archivos, %s…', st.files, fmtBytes(st.kbytes * 1024))
+                                 : st.job === 'restore' ? tr('Restaurando…') : tr('Respaldando…'))
       : !st.last ? ''
       : !st.last_ok ? tr(WHY[st.last_kind] || WHY.other) + ' (' + st.last + ')'
       : restored ? tr('Restaurado: %s ajustes escritos. La mayoría vale recién después de reiniciar.', st.written)
+      : driveJob(st.last_job) ? tr('Copiados: %s archivos, %s.', st.files, fmtBytes(st.kbytes * 1024))
       : tr('Hecho: %s', st.last_name);
     msg.style.color = !st.busy && st.last && !st.last_ok ? 'var(--orange)' : '';
     put(top,
@@ -3390,7 +3393,9 @@ function pageRespaldo() {
       !st.card ? h('div', { class: 'note', style: 'color:var(--orange);margin-top:6px' }, tr('No hay tarjeta: no hay dónde guardarlo.')) : null,
       h('div', { class: 'btns', style: 'margin-top:10px' }, pass,
         h('button', { class: 'btn pri', disabled: st.busy || !st.card, onclick: () => act('backup', { pass: pass.value }) }, tr('Respaldar ahora')),
-        h('button', { class: 'btn', disabled: st.busy || !st.card, onclick: () => up.click() }, tr('Traer un respaldo…')), up),
+        h('button', { class: 'btn', disabled: st.busy || !st.card, onclick: () => up.click() }, tr('Traer un respaldo…')), up,
+        st.drive ? h('button', { class: 'btn', disabled: st.busy || !st.card, title: tr('Los respaldos y las carpetas elegidas en la placa, a p4os-backup en el pendrive.'),
+          onclick: () => act('backup/drive', {}) }, tr('Copiar al pendrive')) : null),
       msg,
       st.restart ? h('div', { class: 'btns', style: 'margin-top:8px' },
         h('button', { class: 'btn pri', onclick: async () => { if (confirm(tr('¿Reiniciar la placa?'))) { await post('restart').catch(() => {}); toast(tr('Reiniciando…')); } } }, tr('Reiniciar la placa'))) : null,

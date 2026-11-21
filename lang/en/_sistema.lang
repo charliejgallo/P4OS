@@ -10788,3 +10788,15 @@ No lleva contraseñas: la de la Wi-Fi se escribe de nuevo.	It carries no passwor
 Queda en Ajustes, Respaldo, con los demás que haya.	It stays in Settings, Backup, with any others there are.
 Ahora no	Not now
 Ver respaldos	See backups
+copiando: %u archivos, %u KB	copying: %u files, %u KB
+copiados: %u archivos, %u KB	copied: %u files, %u KB
+no hay pendrive, o no se pudo escribir en él	there is no pendrive, or it could not be written
+Tocá otra vez: copia a la tarjeta lo que hay en el pendrive	Tap again: it copies to the card what the pendrive has
+PENDRIVE	PENDRIVE
+Detener la copia	Stop the copy
+Copiar al pendrive	Copy to the pendrive
+Traer del pendrive	Bring from the pendrive
+Al pendrive van los respaldos y las carpetas elegidas de la tarjeta, en p4os-backup; lo que ya está no se copia de nuevo. Traer los pone en una tarjeta nueva, sin pisar un archivo más nuevo.	The backups and the chosen folders of the card go to the pendrive, in p4os-backup; what is already there is not copied again. Bringing puts them on a new card, without replacing a newer file.
+CARPETAS QUE VAN AL PENDRIVE	FOLDERS THAT GO TO THE PENDRIVE
+Con un pendrive en el host USB (Ajustes, USB) aparece acá la copia de los respaldos y de las carpetas de la tarjeta.	With a pendrive on the USB host (Settings, USB), the copy of the backups and of the card's folders shows up here.
+no hay un pendrive	there is no pendrive

@@ -124,3 +124,15 @@ const char *aos_hal_net_ssid(void)
     const char *v = getenv("FAKE_SSID");
     return v ? v : "";
 }
+
+/* P4_USB=u1: a pendrive, mounted at that folder (a short name: the HAL's
+ * path is "/usb") */
+bool aos_hal_usb_host_info(aos_usb_host_info_t *out)
+{
+    const char *v = getenv("P4_USB");
+    memset(out, 0, sizeof *out);
+    if (!v) return true;
+    out->device = out->mounted = true;
+    snprintf(out->path, sizeof out->path, "%s", v);
+    return true;
+}

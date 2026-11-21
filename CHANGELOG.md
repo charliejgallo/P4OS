@@ -24,6 +24,8 @@
     then on.
   - **A new board with a backup on its card says so,** once, before
     anything is set up by hand.
+  - **To a pendrive and back:** the backups and chosen folders of the
+    card, file by file, to a drive on the USB host; and onto a new card.
   - `tools/backup.sh` keeps a backup, and chosen folders of the card, on a
     computer.
   - On the board: a plain backup in half a second and a sealed one in

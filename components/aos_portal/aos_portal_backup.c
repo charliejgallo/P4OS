@@ -19,6 +19,12 @@
  *                               keeping those in a backup of their own. The
  *                               restart is the caller's (/api/restart)
  *   POST /api/backup/delete     {"name": "..."}
+ *   POST /api/backup/drive      the backups and the chosen folders of the
+ *                               card to the pendrive on the USB host, file
+ *                               by file ("drive" in the state says there is
+ *                               one; "files" and "kbytes", how far it is).
+ *                               The way back, onto the card, is asked for at
+ *                               the board
  *   GET  /api/backup/apps?name= the apps that backup lists and the card lacks
  *   POST /api/backup/apps       {"name": "..."}: asks the Tienda for them
  *
@@ -51,7 +57,7 @@ static void reply(aos_httpd_req_t *r, int status, cJSON *o)
 
 static void state(aos_httpd_req_t *r, int status, const char *error)
 {
-    static const char *kinds[] = { "", "other", "card", "not_found", "not_one", "passphrase", "newer", "memory", "busy" };
+    static const char *kinds[] = { "", "other", "card", "not_found", "not_one", "passphrase", "newer", "memory", "busy", "drive" };
     aos_backup_status_t st;
     aos_backup_status(&st);
     cJSON *o = cJSON_CreateObject();
@@ -68,6 +74,9 @@ static void state(aos_httpd_req_t *r, int status, const char *error)
     cJSON_AddStringToObject(o, "last_name", st.name);
     cJSON_AddNumberToObject(o, "written", st.written);
     cJSON_AddBoolToObject(o, "restart", st.restart);
+    cJSON_AddBoolToObject(o, "drive", aos_backup_drive());
+    cJSON_AddNumberToObject(o, "files", st.files);
+    cJSON_AddNumberToObject(o, "kbytes", st.kbytes);
     /* the copies the board makes by itself: read here, changed at the board */
     static const char *whys[] = { "", "restore", "daily", "firmware" };
     cJSON *au = cJSON_AddObjectToObject(o, "auto");
@@ -142,6 +151,9 @@ bool aos_portal_backup(aos_httpd_req_t *r, const char *m, const char *p)
         if (!aos_backup_make(pass)) fail = _("ya hay un respaldo en curso");
     } else if (!strcmp(p, "restore")) {
         if (!name || !aos_backup_restore(name, pass)) fail = _("falta name, o ya hay un respaldo en curso");
+    } else if (!strcmp(p, "drive")) {
+        if (!aos_backup_drive()) fail = _("no hay un pendrive");
+        else if (!aos_backup_to_drive()) fail = _("ya hay un respaldo en curso");
     } else if (!strcmp(p, "delete")) {
         if (!name || !aos_backup_delete(name)) fail = _("no se pudo borrar");
     } else if (!strcmp(p, "apps")) {

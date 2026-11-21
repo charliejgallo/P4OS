@@ -1937,13 +1937,15 @@ AOS_BSS_PSRAM static aos_backup_info_t s_bk[BK_SHOWN];
 static int s_bk_n;
 AOS_BSS_PSRAM static char s_bk_pass[64];
 AOS_BSS_PSRAM static char s_bk_name[AOS_BACKUP_NAME_MAX];
+AOS_BSS_PSRAM static aos_backup_folder_t s_bk_dirs[AOS_BACKUP_FOLDERS_MAX];
+static int s_bk_ndirs;
 
 static uint32_t bk_key(void)
 {
     aos_backup_status_t st;
     aos_backup_status(&st);
-    return st.jobs_done * 16u + (st.busy ? 1u : 0u) + (st.restart ? 2u : 0u) + (aos_hal_path_sd_root() ? 4u : 0u) +
-           (aos_backup_auto_sealed() ? 8u : 0u);
+    return st.jobs_done * 32u + (st.busy ? 1u : 0u) + (st.restart ? 2u : 0u) + (aos_hal_path_sd_root() ? 4u : 0u) +
+           (aos_backup_auto_sealed() ? 8u : 0u) + (aos_backup_drive() ? 16u : 0u);
 }
 
 static void bk_refresh(void)
@@ -1952,11 +1954,14 @@ static void bk_refresh(void)
     aos_backup_status_t st;
     aos_backup_status(&st);
     char v[160] = "";
-    if (st.busy) snprintf(v, sizeof v, "%s", !strcmp(st.job, "restore") ? _("restaurando…") :
-                                               !strcmp(st.job, "key") ? _("preparando la clave…") : _("respaldando…"));
+    bool drive_job = !strcmp(st.busy ? st.job : st.last_job, "to_drive") || !strcmp(st.busy ? st.job : st.last_job, "from_drive");
+    if (st.busy && drive_job) snprintf(v, sizeof v, _("copiando: %u archivos, %u KB"), (unsigned)st.files, (unsigned)st.kbytes);
+    else if (st.busy) snprintf(v, sizeof v, "%s", !strcmp(st.job, "restore") ? _("restaurando…") :
+                                                    !strcmp(st.job, "key") ? _("preparando la clave…") : _("respaldando…"));
     else if (!aos_hal_path_sd_root()) snprintf(v, sizeof v, "%s", _("no hay tarjeta"));
     else if (!st.last_job[0]) v[0] = 0;
     else if (st.last_ok && !strcmp(st.last_job, "restore")) snprintf(v, sizeof v, _("restaurado: %d ajustes"), st.written);
+    else if (st.last_ok && drive_job) snprintf(v, sizeof v, _("copiados: %u archivos, %u KB"), (unsigned)st.files, (unsigned)st.kbytes);
     else if (st.last_ok) snprintf(v, sizeof v, "%s", _("hecho"));
     else {
         switch (st.last_kind) {
@@ -1966,6 +1971,7 @@ static void bk_refresh(void)
         case AOS_BACKUP_E_PASSPHRASE: snprintf(v, sizeof v, "%s", _("esa no es su frase")); break;
         case AOS_BACKUP_E_NEWER:      snprintf(v, sizeof v, "%s", _("es de un P4OS más nuevo")); break;
         case AOS_BACKUP_E_MEMORY:     snprintf(v, sizeof v, "%s", _("no alcanzó la memoria")); break;
+        case AOS_BACKUP_E_DRIVE:      snprintf(v, sizeof v, "%s", _("no hay pendrive, o no se pudo escribir en él")); break;
         default:                      snprintf(v, sizeof v, "%s", _("no se pudo")); break;
         }
     }
@@ -2063,6 +2069,29 @@ static void bk_auto_seal_cb(lv_event_t *e)
     kb_open(_("Una frase para las copias automáticas"), "", 63, _("Seguir"), bk_auto_pass1_done);
 }
 
+/* A pendrive on the USB host: the backups and the chosen folders of the
+ * card to it, file by file, and back onto a new card. */
+static void bk_to_drive_cb(lv_event_t *e)
+{
+    (void)e;
+    if (!aos_backup_to_drive()) aos_ui_toast(_("Ya hay un respaldo en curso"), 2000);
+}
+
+static void bk_from_drive_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez: copia a la tarjeta lo que hay en el pendrive"))) return;
+    if (!aos_backup_from_drive()) aos_ui_toast(_("Ya hay un respaldo en curso"), 2000);
+}
+
+static void bk_stop_cb(lv_event_t *e) { (void)e; aos_backup_cancel(); }
+
+static void bk_dir_cb(lv_event_t *e)
+{
+    lv_obj_t *sw = lv_event_get_target(e);
+    int i = (int)(intptr_t)lv_obj_get_user_data(sw);
+    if (i >= 0 && i < s_bk_ndirs) aos_backup_folder_set(s_bk_dirs[i].name, lv_obj_has_state(sw, LV_STATE_CHECKED));
+}
+
 /* The apps the restored backup lists and the card lacks: asked of the
  * Tienda, each with the extras it had. */
 static void bk_apps_cb(lv_event_t *e)
@@ -2134,6 +2163,23 @@ static void build_backup(lv_obj_t *p)
         lv_obj_set_user_data(r, (void *)(intptr_t)i);
     }
     note(p, _("Tocar uno lo restaura: escribe sus ajustes sobre los de ahora, y lo que hay queda antes en un respaldo propio. Para guardarlo en una computadora o traer uno: el portal, Respaldo."));
+
+    if (card && aos_backup_drive()) {
+        bool copying = st.busy && (!strcmp(st.job, "to_drive") || !strcmp(st.job, "from_drive"));
+        g = group(p, _("PENDRIVE"));
+        if (copying) action_row(g, _("Detener la copia"), AOS_C_RED, bk_stop_cb);
+        else if (!st.busy) {
+            action_row(g, _("Copiar al pendrive"), AOS_C_ACCENT, bk_to_drive_cb);
+            action_row(g, _("Traer del pendrive"), AOS_C_ACCENT, bk_from_drive_cb);
+        }
+        note(p, _("Al pendrive van los respaldos y las carpetas elegidas de la tarjeta, en p4os-backup; lo que ya está no se copia de nuevo. Traer los pone en una tarjeta nueva, sin pisar un archivo más nuevo."));
+        s_bk_ndirs = st.busy ? 0 : aos_backup_folders(s_bk_dirs, AOS_BACKUP_FOLDERS_MAX);
+        if (s_bk_ndirs) g = group(p, _("CARPETAS QUE VAN AL PENDRIVE"));
+        for (int i = 0; i < s_bk_ndirs; i++) {
+            lv_obj_t *r = row_switch(g, NULL, 0, s_bk_dirs[i].name, s_bk_dirs[i].on, bk_dir_cb);
+            lv_obj_set_user_data(lv_obj_get_child(r, -1), (void *)(intptr_t)i);
+        }
+    } else note(p, _("Con un pendrive en el host USB (Ajustes, USB) aparece acá la copia de los respaldos y de las carpetas de la tarjeta."));
 }
 
 /* ---- Diagnostics ---- */

@@ -6,10 +6,11 @@ cada app) y no hay nada que las guarde.
 
 **Dónde está (2026-11-21):** la etapa 1 está escrita, probada en la placa
 y en `main`; sale con la 0.31.0, que espera a las apps nuevas de la
-Tienda. La etapa 2 (las copias que hace sola) y el script de la
-computadora de la etapa 3 están escritos y probados en la Mac y el
-simulador, en la rama `respaldo-2`, **sin instalar en la placa**. Faltan
-el pendrive (etapa 3) y el servidor propio (etapa 4).
+Tienda. Las etapas 2 (las copias que hace sola) y 3 (el pendrive y el
+script de la computadora) están escritas y probadas en la Mac y el
+simulador, en la rama `respaldo-2`, **sin instalar en la placa**. Falta el
+servidor propio (etapa 4), que tiene dos cosas para decidir antes: ver
+"Etapa 4, antes de empezar".
 
 ## Etapa 1, hecha en la Mac (2026-11-21)
 
@@ -176,6 +177,72 @@ punto.
 de un firmware y cuánta RAM interna queda. Y la prueba que termina la
 etapa: `erase_flash`, grabar, y que la placa ofrezca el respaldo de la
 tarjeta. Esa borra la placa: sólo cuando el usuario lo diga.
+
+## Etapa 3, hecha en la Mac (2026-11-21)
+
+Rama `respaldo-2`, sobre la etapa 2.
+
+- **Al pendrive, archivo por archivo:** `p4os-backup/backups` (los
+  respaldos) y `p4os-backup/card/<carpeta>` (las carpetas elegidas). Antes
+  hace un respaldo de ahora si algo cambió desde el último, con la misma
+  regla de las copias del día.
+- **Qué carpetas:** todas las de la raíz de la tarjeta menos las que la
+  Tienda vuelve a bajar y la de los respaldos. Las grandes que vienen de
+  una computadora (`photos`, `music`, `videos`, `maps`, `recordings`,
+  `roms`) quedan apagadas hasta que la persona las prenda (la pregunta 2,
+  como estaba recomendado). Lo elegido se guarda en `bk_dirs`, sólo lo que
+  se cambió.
+- **Cuándo se copia un archivo:** cuando el otro lado no lo tiene o lo
+  tiene más viejo. Uno más nuevo del otro lado no se pisa nunca; con la
+  misma fecha (una placa sin reloj los fecha a todos igual), decide el
+  tamaño. Se escribe con otro nombre y se renombra: un pendrive sacado en
+  el medio no deja medio archivo con nombre bueno.
+- **De vuelta:** los respaldos y todas las carpetas que haya en el
+  pendrive, a la tarjeta. Nunca a `/apps` ni a las otras que no son datos,
+  aunque el pendrive las traiga.
+- **Ajustes → Respaldo** suma "Pendrive" (copiar, traer con dos toques,
+  detener) y un interruptor por carpeta, sólo con un pendrive montado. El
+  portal suma "Copiar al pendrive"; traer se pide en la placa.
+- **Probado:** `tests/backup_host`, 46 casos (10 de esta etapa): la copia
+  entera, la segunda que no copia nada, un archivo cambiado y uno nuevo,
+  una carpeta sumada y otra sacada, la vuelta a una tarjeta nueva con su
+  restauración, un archivo más nuevo en la tarjeta que no se pisa, un
+  pendrive sin copia. En el simulador (`P4_SIM_PENDRIVE=1`, una carpeta que
+  hace de pendrive): la página de Ajustes y la copia pedida por el portal.
+  Firmware `rev1_3`: 7 112 496 bytes, 9 KB más que con la etapa 2.
+
+**Falta:** un pendrive de verdad en la placa: cuánto tarda con las
+carpetas del usuario, qué pasa al sacarlo en el medio, y la prueba que
+termina la etapa (una tarjeta nueva que queda con las notas y el inicio
+de la anterior).
+
+## Etapa 4, antes de empezar
+
+Leído del repo el 2026-11-21, y distinto de lo que decía la pregunta 1:
+
+- **El firmware tiene el servidor SSH, no el cliente.** El cliente está en
+  la app SSH (`apps/ssh/main/sc_conn.c`, 1150 líneas), que es de las de la
+  tarjeta. Para que el firmware suba un respaldo por SFTP, el transporte
+  del cliente tiene que vivir en el firmware: pasarlo a un componente
+  (`aos_sshc`) que usen el firmware y la app. Son símbolos nuevos para las
+  apps (la interfaz crece, no cambia), y la app SSH nueva pediría ese
+  firmware.
+- **SFTP no está en ningún lado:** ni el cliente lo habla ni el servidor
+  de la placa lo ofrece ("subsystem refused"). Hay que escribir el lado
+  cliente (abrir, escribir, cerrar, crear carpeta, renombrar, listar).
+- **No hay con qué probarlo todavía:** las pruebas van contra servidores
+  falsos de `tools/`, y un servidor SFTP falso en Python pide `paramiko`,
+  que no está en la Mac. Dos caminos: instalarlo en un entorno aparte
+  (hay que bajarlo), o escribir el lado servidor de SFTP en el SSH de la
+  placa y probar contra el simulador, que además deja entrar a la tarjeta
+  con `sftp` desde una computadora.
+- **La clave con que la placa entra al servidor:** la del cliente SSH
+  (`sshc_seed`), que ya puede estar autorizada en el servidor, u otra
+  propia de los respaldos.
+
+Mientras tanto, lo que la etapa 4 quiere resolver (una copia fuera de la
+casa, sin tocar nada) ya se puede con `tools/backup.sh` desde cron en
+cualquier computadora, el NAS incluido.
 
 ## Qué resuelve
 

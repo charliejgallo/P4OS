@@ -12,6 +12,10 @@
  *   offer           whether this board would be offered a backup, and which
  *   offer-done      the person answered
  *   bg-fw           the copy before a firmware, as the update calls it
+ *   folders         the card's data folders and whether each goes to a pendrive
+ *   folder=<name>:<0|1>   chooses one
+ *   to-drive        the backups and the chosen folders to the pendrive (P4_USB)
+ *   from-drive      and back
  *
  * A job prints "ok|FAILED kind=<n> <a line>".
  */
@@ -74,6 +78,18 @@ int main(int argc, char **argv)
             aos_backup_before_firmware();
             aos_backup_status(&st);
             printf("%s kind=%d busy=%d job=%s %s\n", st.last_ok ? "ok" : "FAILED", st.last_kind, st.busy, st.last_job, st.last);
+        } else if (!strcmp(a, "folders")) {
+            static aos_backup_folder_t all[AOS_BACKUP_FOLDERS_MAX];
+            int n = aos_backup_folders(all, AOS_BACKUP_FOLDERS_MAX);
+            printf("folders");
+            for (int k = 0; k < n; k++) printf(" %s=%d", all[k].name, all[k].on);
+            printf("\n");
+        } else if (!strcmp(a, "folder")) {
+            char *on = v ? strchr(v, ':') : NULL;
+            if (on) { *on++ = 0; aos_backup_folder_set(v, *on == '1'); }
+        } else if (!strcmp(a, "to-drive") || !strcmp(a, "from-drive")) {
+            int rc = aos_backup_copy_now(a[0] == 't', why, sizeof why);
+            printf("%s kind=%d %s\n", rc ? "FAILED" : "ok", rc, why);
         } else {
             fprintf(stderr, "what is %s?\n", a);
             return 2;

@@ -3491,6 +3491,18 @@ static const char blob_en__sistema_lang[] =
     "Queda en Ajustes, Respaldo, con los demás que haya.\tIt stays in Settings, Backup, with any others there are.\n"
     "Ahora no\tNot now\n"
     "Ver respaldos\tSee backups\n"
+    "copiando: %u archivos, %u KB\tcopying: %u files, %u KB\n"
+    "copiados: %u archivos, %u KB\tcopied: %u files, %u KB\n"
+    "no hay pendrive, o no se pudo escribir en él\tthere is no pendrive, or it could not be written\n"
+    "Tocá otra vez: copia a la tarjeta lo que hay en el pendrive\tTap again: it copies to the card what the pendrive has\n"
+    "PENDRIVE\tPENDRIVE\n"
+    "Detener la copia\tStop the copy\n"
+    "Copiar al pendrive\tCopy to the pendrive\n"
+    "Traer del pendrive\tBring from the pendrive\n"
+    "Al pendrive van los respaldos y las carpetas elegidas de la tarjeta, en p4os-backup; lo que ya está no se copia de nuevo. Traer los pone en una tarjeta nueva, sin pisar un archivo más nuevo.\tThe backups and the chosen folders of the card go to the pendrive, in p4os-backup; what is already there is not copied again. Bringing puts them on a new card, without replacing a newer file.\n"
+    "CARPETAS QUE VAN AL PENDRIVE\tFOLDERS THAT GO TO THE PENDRIVE\n"
+    "Con un pendrive en el host USB (Ajustes, USB) aparece acá la copia de los respaldos y de las carpetas de la tarjeta.\tWith a pendrive on the USB host (Settings, USB), the copy of the backups and of the card's folders shows up here.\n"
+    "no hay un pendrive\tthere is no pendrive\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -6974,6 +6986,18 @@ static const char blob_de__sistema_lang[] =
     "Queda en Ajustes, Respaldo, con los demás que haya.\tSie bleibt unter Einstellungen, Sicherung, bei den anderen.\n"
     "Ahora no\tJetzt nicht\n"
     "Ver respaldos\tSicherungen ansehen\n"
+    "copiando: %u archivos, %u KB\tkopiere: %u Dateien, %u KB\n"
+    "copiados: %u archivos, %u KB\tkopiert: %u Dateien, %u KB\n"
+    "no hay pendrive, o no se pudo escribir en él\tkein USB-Stick, oder er ließ sich nicht beschreiben\n"
+    "Tocá otra vez: copia a la tarjeta lo que hay en el pendrive\tNochmal tippen: kopiert den Inhalt des USB-Sticks auf die Karte\n"
+    "PENDRIVE\tUSB-STICK\n"
+    "Detener la copia\tKopie anhalten\n"
+    "Copiar al pendrive\tAuf den USB-Stick kopieren\n"
+    "Traer del pendrive\tVom USB-Stick holen\n"
+    "Al pendrive van los respaldos y las carpetas elegidas de la tarjeta, en p4os-backup; lo que ya está no se copia de nuevo. Traer los pone en una tarjeta nueva, sin pisar un archivo más nuevo.\tAuf den USB-Stick kommen die Sicherungen und die gewählten Ordner der Karte, in p4os-backup; was schon da ist, wird nicht erneut kopiert. Holen legt sie auf eine neue Karte, ohne eine neuere Datei zu ersetzen.\n"
+    "CARPETAS QUE VAN AL PENDRIVE\tORDNER FÜR DEN USB-STICK\n"
+    "Con un pendrive en el host USB (Ajustes, USB) aparece acá la copia de los respaldos y de las carpetas de la tarjeta.\tMit einem USB-Stick am USB-Host (Einstellungen, USB) erscheint hier die Kopie der Sicherungen und der Ordner der Karte.\n"
+    "no hay un pendrive\tkein USB-Stick\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -6981,7 +7005,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3476, 0, files_en, 1 },
-    { "de", "Deutsch", 3476, 0, files_de, 1 },
+    { "en", "English", 3488, 0, files_en, 1 },
+    { "de", "Deutsch", 3488, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

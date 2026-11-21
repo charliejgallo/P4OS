@@ -109,6 +109,11 @@ El plan y lo medido, en `docs/plan/RESPALDO.md` ("En la placa"). Con
 - [ ] RAM interna libre con todo esto.
 - [ ] `erase_flash`, grabar, arrancar con la tarjeta: el cartel "Hay un
       respaldo en la tarjeta". Sólo cuando el usuario lo diga.
+- [ ] Un pendrive en el host USB: Ajustes → Respaldo → "Copiar al
+      pendrive", cuánto tarda, y la segunda vez que no copia nada.
+- [ ] Sacar el pendrive en medio de una copia: sin archivos a medias.
+- [ ] "Traer del pendrive" en una tarjeta nueva, y restaurar el respaldo
+      que vino: las notas y el inicio de la anterior.
 
 ### Pendientes, en resumen
 

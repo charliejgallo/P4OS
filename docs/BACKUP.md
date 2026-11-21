@@ -7,7 +7,7 @@ files that say how the card is arranged (`menu.txt`, `modules.txt`). The
 apps themselves are not copied: the Store brings them back from that list.
 
 Since 0.31. `components/aos_backup`; the plan, with what comes next (a
-pendrive, a server of your own), is
+server of your own), is
 [docs/plan/RESPALDO.md](plan/RESPALDO.md), in Spanish.
 
 ## Making one
@@ -109,6 +109,29 @@ brings one back ("Bring a backup…"); it is also just a file under
 A passphrase typed in the portal travels as the portal's traffic does: in
 the clear unless HTTPS is on ([SECURITY.md](SECURITY.md)). It is not kept.
 
+### To a pendrive, and back
+
+With a pendrive on the USB host (Settings → USB → USB host), Settings →
+Backup gets a **Pendrive** section:
+
+- **Copy to the pendrive** puts in `p4os-backup/` on the drive the backups
+  (`backups/`) and the chosen folders of the card (`card/<folder>/`), file
+  by file. First it makes a backup of now, when something changed since the
+  last one. A file the drive already has is not copied again, so a second
+  run takes what changed.
+- **Which folders:** every folder at the card's root that holds data, with
+  a switch each. Not the ones the Store fetches again (`apps`, `web`,
+  `lang`, `fonts`, `firmware`). `photos`, `music`, `videos`, `maps`,
+  `recordings` and `roms` are off until you turn them on: they usually come
+  from a computer and weigh gigabytes.
+- **Bring from the pendrive** (two taps) is the way back: the backups and
+  every folder of the drive onto the card. A file the card has newer is
+  never replaced by the drive's older one. On a new card, a restore of the
+  backup that came is then what puts the board as it was.
+- A copy can be stopped; the file in hand is dropped, not left half
+  written. The portal's Backup page has **Copy to the pendrive** too; the
+  way back is asked for at the board.
+
 ### From a computer, by itself
 
 `tools/backup.sh` asks the board for a backup, downloads it and takes it
@@ -156,6 +179,7 @@ The file's name says the same: `-antes`, `-auto`, `-fw`.
 | `POST /api/backup` | `{"pass": "…"}`: makes one now; without `pass`, a plain one |
 | `POST /api/backup/restore` | `{"name": "…", "pass": "…"}` |
 | `POST /api/backup/delete` | `{"name": "…"}` |
+| `POST /api/backup/drive` | the backups and the chosen folders to the pendrive on the USB host; `drive`, `files` and `kbytes` in the state say whether there is one and how far the copy is |
 | `GET /api/backup/apps?name=` | the apps that backup lists and the card lacks |
 | `POST /api/backup/apps` | `{"name": "…"}`: asks the Store for them |
 | `GET /api/fs/get?path=/backups/<name>&attachment=1` | the file itself |
@@ -163,8 +187,9 @@ The file's name says the same: `-antes`, `-auto`, `-fw`.
 ## Tests
 
 `tests/backup_host/run.sh` builds the service for the Mac, with a folder
-for a card and a file for the preferences: 36 cases, among them a long
+for a card and a file for the preferences: 46 cases, among them a long
 value with its line breaks, a restore onto another board and its undoing,
 a wrong passphrase, a backup of a newer P4OS, the day's copy and the one
 before a firmware, the five the card keeps, a copy sealed under the kept
-key and opened on another board, and the offer to a new board.
+key and opened on another board, the offer to a new board, and the copy
+to a pendrive and back onto a new card.

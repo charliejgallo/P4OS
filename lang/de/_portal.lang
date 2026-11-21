@@ -2407,3 +2407,8 @@ de antes de actualizar	von vor einem Update
 Las copias automáticas están apagadas (Ajustes, Respaldo, en la placa).	Die automatischen Kopien sind aus (Einstellungen, Sicherung, am Board).
 La placa guarda sola una copia por día si algo cambió, y otra antes de instalar un firmware: cifradas con la frase que se eligió en la placa. Quedan las cinco últimas.	Das Board legt von selbst täglich eine Kopie ab, wenn sich etwas geändert hat, und eine weitere vor der Installation einer Firmware: verschlüsselt mit der am Board gewählten Passphrase. Die letzten fünf bleiben.
 La placa guarda sola una copia por día si algo cambió, y otra antes de instalar un firmware: sin credenciales, hasta que se les elija una frase en Ajustes, Respaldo. Quedan las cinco últimas.	Das Board legt von selbst täglich eine Kopie ab, wenn sich etwas geändert hat, und eine weitere vor der Installation einer Firmware: ohne Zugangsdaten, bis unter Einstellungen, Sicherung eine Passphrase gewählt wird. Die letzten fünf bleiben.
+No hay pendrive, o no se pudo escribir en él.	Kein USB-Stick, oder er ließ sich nicht beschreiben.
+Copiando: %s archivos, %s…	Kopiere: %s Dateien, %s…
+Copiados: %s archivos, %s.	Kopiert: %s Dateien, %s.
+Los respaldos y las carpetas elegidas en la placa, a p4os-backup en el pendrive.	Die Sicherungen und die am Board gewählten Ordner, nach p4os-backup auf dem USB-Stick.
+Copiar al pendrive	Auf den USB-Stick kopieren

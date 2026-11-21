@@ -249,6 +249,67 @@ check("no backup on the card: nothing to offer; nor the one this board just made
 open("p6", "w").close()
 jobs, made, o = run(None, "p6", "offer")
 check("no card: no offer", "offer 0" in o, o)
+
+# ---- to a pendrive and back (stage 3)
+def tree(root):
+    out = {}
+    for d, _, files in os.walk(root):
+        for f in files:
+            out[os.path.relpath(os.path.join(d, f), root)] = open(os.path.join(d, f), "rb").read()
+    return out
+c8 = card("c8")
+write_prefs("p8", dict(PLAIN))
+for d in ("notas/viajes", "redes", "music", "lang/en", "web", "photos", ".oculto"):
+    os.makedirs("c8/" + d)
+open("c8/notas/a.txt", "w").write("una nota\n")
+open("c8/notas/viajes/b.txt", "w").write("otra, más larga\n" * 4000)       # more than one chunk
+open("c8/redes/casa.csv", "w").write("ssid;canal\n")
+open("c8/music/tema.mp3", "wb").write(b"x" * 5000)
+open("c8/lang/en/_sistema.lang", "w").write("a\tb\n")
+open("c8/suelto.txt", "w").write("no es una carpeta\n")
+jobs, made, o = run("c8", "p8", "folders")
+check("the card's data folders: not the ones fetched again, the big ones off", "folders music=0 notas=1 photos=0 redes=1\n" in o, o)
+jobs, made, o = run("c8", "p8", "to-drive")
+check("no pendrive: said as such", not jobs[0][0] and "kind=9" in jobs[0][1], o)
+os.makedirs("u1")
+jobs, made, o = run("c8", "p8", "to-drive", env={"P4_USB": "u1"})
+t = tree("u1/p4os-backup")
+baks = [k for k in t if k.startswith("backups/")]
+check("to the pendrive: a backup of now and the chosen folders, whole", jobs[0][0] and len(baks) == 1 and "-auto" in baks[0]
+      and {k for k in t if k.startswith("card/")} == {"card/notas/a.txt", "card/notas/viajes/b.txt", "card/redes/casa.csv"}
+      and t["card/notas/viajes/b.txt"] == open("c8/notas/viajes/b.txt", "rb").read() and "4 files copied" in jobs[0][1], (o, sorted(t)))
+jobs, made, o = run("c8", "p8", "to-drive", env={"P4_USB": "u1"})
+check("again: nothing changed, nothing copied", jobs[0][0] and "0 files copied" in jobs[0][1] and "4 were there already" in jobs[0][1] and tree("u1/p4os-backup") == t, o)
+time.sleep(1.1)
+open("c8/notas/a.txt", "w").write("una nota, corregida\n")
+open("c8/notas/c.txt", "w").write("nueva\n")
+run("c8", "p8", "folder=music:1", "folder=redes:0")
+os.remove("u1/p4os-backup/card/redes/casa.csv")
+jobs, made, o = run("c8", "p8", "folders", "to-drive", env={"P4_USB": "u1"})
+t = tree("u1/p4os-backup")
+check("a file changed, one new, another folder chosen and one left: only those travel", "folders music=1 notas=1 photos=0 redes=0\n" in o
+      and t["card/notas/a.txt"] == b"una nota, corregida\n" and "card/notas/c.txt" in t and "card/music/tema.mp3" in t and "card/redes/casa.csv" not in t
+      and "4 files copied" in jobs[0][1] and not [k for k in t if k.endswith(".p4t")], (o, sorted(t)))      # the three, and a backup: the choice is a preference
+baks = sorted(k for k in t if k.startswith("backups/"))[-1:]
+
+# a new card and a new board: back from the pendrive, then a restore
+c9 = card("c9"); open("p9", "w").close()
+os.makedirs("u1/p4os-backup/card/apps"); open("u1/p4os-backup/card/apps/malo.so", "w").write("no")
+jobs, made, o = run("c9", "p9", "from-drive", "offer", env={"P4_USB": "u1"})
+t9 = tree("c9")
+check("back to a new card: the backups and the folders, and nothing into /apps", jobs[0][0] and t9.get("notas/a.txt") == b"una nota, corregida\n"
+      and "notas/viajes/b.txt" in t9 and "music/tema.mp3" in t9 and "apps/malo.so" not in t9 and ("backups/" + baks[0].split("/")[1]) in t9, (o, sorted(t9)))
+check("...and the new board is offered the backup that came", ("offer 1 " + baks[0].split("/")[1]) in o, o)
+jobs, made, o = run("c9", "p9", "restore=" + baks[0].split("/")[1])
+check("...which restores: the board as it was", jobs[0][0] and read_prefs("p9").get("tz") == "ART3", o)
+open("c9/notas/a.txt", "w").write("escrita en la tarjeta nueva\n")
+time.sleep(1.1); os.utime("c9/notas/a.txt")
+jobs, made, o = run("c9", "p9", "from-drive", env={"P4_USB": "u1"})
+check("a file the card has newer is not replaced by the pendrive's older one", jobs[0][0] and "0 files copied" in jobs[0][1]
+      and open("c9/notas/a.txt").read() == "escrita en la tarjeta nueva\n", o)
+os.makedirs("u2")
+jobs, made, o = run("c9", "p9", "from-drive", env={"P4_USB": "u2"})
+check("a pendrive with no copy of a board: said, nothing touched", not jobs[0][0] and "kind=3" in jobs[0][1], o)
 sys.exit(1 if fails else 0)
 PY
 echo "all passed"
