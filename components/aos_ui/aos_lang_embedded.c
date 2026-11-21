@@ -3372,6 +3372,35 @@ static const char blob_en__sistema_lang[] =
     "ruta inválida, o la cola está llena\tnot a valid path, or the queue is full\n"
     "no se pudo recibir el paquete\tthe package could not be received\n"
     "otro catálogo sólo en modo desarrollo, que se prende en la placa (Tienda, Fuentes)\tanother catalogue only in developer mode, which is turned on at the board (Store, Sources)\n"
+    "Copiá el paquete a la tarjeta primero\tCopy the package to the card first\n"
+    "La Tienda no pudo tomar el paquete\tThe Store could not take the package\n"
+    "La Tienda está instalando el paquete\tThe Store is installing the package\n"
+    "Desde el portal proponen esta fuente:\tThis source was proposed from the portal:\n"
+    "Mirarla\tLook at it\n"
+    "Descartar\tDismiss\n"
+    "No se pudo bajar: revisá la red y probá de nuevo.\tThe download failed: check the network and try again.\n"
+    "No está en el servidor.\tIt is not on the server.\n"
+    "La placa todavía no tiene la hora de la red: probá en un momento.\tThe board does not have the network time yet: try in a moment.\n"
+    "No se pudo verificar el servidor.\tThe server could not be verified.\n"
+    "El paquete no es el publicado, o está dañado.\tThe package is not the published one, or it is damaged.\n"
+    "El paquete quiere escribir donde no le corresponde.\tThe package wants to write where it may not.\n"
+    "Necesita un P4OS más nuevo.\tIt needs a newer P4OS.\n"
+    "El catálogo no se puede leer.\tThe catalogue cannot be read.\n"
+    "Esa fuente no se puede usar.\tThat source cannot be used.\n"
+    "No alcanzó la memoria.\tNot enough memory.\n"
+    "No está en el catálogo.\tIt is not in the catalogue.\n"
+    "Esa app es de la Tienda: se instala y se quita desde acá.\tThat app is the Store's: install and remove it from here.\n"
+    "No la instaló la Tienda.\tThe Store did not install it.\n"
+    "Algo salió mal.\tSomething went wrong.\n"
+    "No se pudo instalar %s.\t%s could not be installed.\n"
+    "No se pudo quitar %s.\t%s could not be removed.\n"
+    "No se pudo traer el catálogo.\tThe catalogue could not be fetched.\n"
+    "No se pudo mirar esa fuente.\tThat source could not be looked at.\n"
+    "No se pudo agregar la fuente.\tThe source could not be added.\n"
+    "No se pudo quitar la fuente.\tThe source could not be removed.\n"
+    "No se pudo instalar el paquete.\tThe package could not be installed.\n"
+    "No se pudo.\tIt failed.\n"
+    "eso no es una dirección de fuente: usuario/repositorio, o https://...\tthat is not a source's address: user/repository, or https://...\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -6736,6 +6765,35 @@ static const char blob_de__sistema_lang[] =
     "ruta inválida, o la cola está llena\tungültiger Pfad, oder die Warteschlange ist voll\n"
     "no se pudo recibir el paquete\tdas Paket konnte nicht empfangen werden\n"
     "otro catálogo sólo en modo desarrollo, que se prende en la placa (Tienda, Fuentes)\tein anderer Katalog nur im Entwicklermodus, der am Board eingeschaltet wird (Store, Quellen)\n"
+    "Copiá el paquete a la tarjeta primero\tKopier das Paket zuerst auf die Karte\n"
+    "La Tienda no pudo tomar el paquete\tDer Store konnte das Paket nicht annehmen\n"
+    "La Tienda está instalando el paquete\tDer Store installiert das Paket\n"
+    "Desde el portal proponen esta fuente:\tVom Portal wurde diese Quelle vorgeschlagen:\n"
+    "Mirarla\tAnsehen\n"
+    "Descartar\tVerwerfen\n"
+    "No se pudo bajar: revisá la red y probá de nuevo.\tDownload fehlgeschlagen: Netzwerk prüfen und erneut versuchen.\n"
+    "No está en el servidor.\tAuf dem Server nicht vorhanden.\n"
+    "La placa todavía no tiene la hora de la red: probá en un momento.\tDas Board hat noch keine Netzwerkzeit: gleich noch einmal versuchen.\n"
+    "No se pudo verificar el servidor.\tDer Server konnte nicht überprüft werden.\n"
+    "El paquete no es el publicado, o está dañado.\tDas Paket ist nicht das veröffentlichte oder beschädigt.\n"
+    "El paquete quiere escribir donde no le corresponde.\tDas Paket will dorthin schreiben, wo es nicht darf.\n"
+    "Necesita un P4OS más nuevo.\tBraucht ein neueres P4OS.\n"
+    "El catálogo no se puede leer.\tDer Katalog ist nicht lesbar.\n"
+    "Esa fuente no se puede usar.\tDiese Quelle kann nicht verwendet werden.\n"
+    "No alcanzó la memoria.\tDer Speicher hat nicht gereicht.\n"
+    "No está en el catálogo.\tNicht im Katalog.\n"
+    "Esa app es de la Tienda: se instala y se quita desde acá.\tDiese App gehört zum Store: hier installieren und entfernen.\n"
+    "No la instaló la Tienda.\tNicht vom Store installiert.\n"
+    "Algo salió mal.\tEtwas ist schiefgegangen.\n"
+    "No se pudo instalar %s.\t%s konnte nicht installiert werden.\n"
+    "No se pudo quitar %s.\t%s konnte nicht entfernt werden.\n"
+    "No se pudo traer el catálogo.\tDer Katalog konnte nicht geladen werden.\n"
+    "No se pudo mirar esa fuente.\tDiese Quelle konnte nicht angesehen werden.\n"
+    "No se pudo agregar la fuente.\tDie Quelle konnte nicht hinzugefügt werden.\n"
+    "No se pudo quitar la fuente.\tDie Quelle konnte nicht entfernt werden.\n"
+    "No se pudo instalar el paquete.\tDas Paket konnte nicht installiert werden.\n"
+    "No se pudo.\tFehlgeschlagen.\n"
+    "eso no es una dirección de fuente: usuario/repositorio, o https://...\tdas ist keine Quellenadresse: benutzer/repository oder https://...\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -6743,7 +6801,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3357, 0, files_en, 1 },
-    { "de", "Deutsch", 3357, 0, files_de, 1 },
+    { "en", "English", 3386, 0, files_en, 1 },
+    { "de", "Deutsch", 3386, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

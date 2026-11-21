@@ -2305,13 +2305,11 @@ Quitar	Entfernen
 Abrir	Öffnen
 En curso: %s %s (%s)	Läuft: %s %s (%s)
 Lo último: %s	Zuletzt: %s
-No se pudo: %s	Fehlgeschlagen: %s
 Fuente	Quelle
 todavía sin catálogo	noch kein Katalog
 Actualizaciones	Aktualisierungen
 Un recibo para las que son las del catálogo: no cambia ninguna app	Ein Beleg für die, die dem Katalog entsprechen: keine App wird verändert
 Que la Tienda maneje las %s copiadas a mano	Die %s von Hand kopierten vom Store verwalten lassen
-Las fuentes de apps se agregan sólo en la placa.	App-Quellen werden nur am Board hinzugefügt.
 Todo	Alles
 Instaladas	Installiert
 Buscar	Suchen
@@ -2328,3 +2326,23 @@ Fuente agregada	Hinzugefügte Quelle
 apps: %s	Apps: %s
 Un paquete que no está en ningún catálogo	Ein Paket, das in keinem Katalog steht
 Instalar un .p4app…	Ein .p4app installieren…
+No se pudo bajar: revisá la red.	Download fehlgeschlagen: Netzwerk prüfen.
+No está en el servidor.	Auf dem Server nicht vorhanden.
+La placa todavía no tiene la hora de la red.	Das Board hat noch keine Netzwerkzeit.
+No se pudo verificar el servidor.	Der Server konnte nicht überprüft werden.
+No se pudo escribir en la tarjeta: ¿está llena?	Schreiben auf die Karte fehlgeschlagen: ist sie voll?
+El paquete no es el publicado, o está dañado.	Das Paket ist nicht das veröffentlichte oder beschädigt.
+El paquete quiere escribir donde no le corresponde.	Das Paket will dorthin schreiben, wo es nicht darf.
+Necesita un P4OS más nuevo.	Braucht ein neueres P4OS.
+El catálogo no se puede leer.	Der Katalog ist nicht lesbar.
+Esa fuente no se puede usar.	Diese Quelle kann nicht verwendet werden.
+No alcanzó la memoria.	Der Speicher hat nicht gereicht.
+No está en el catálogo.	Nicht im Katalog.
+Esa app es de la Tienda: se instala y se quita desde ahí.	Diese App gehört zum Store: dort installieren und entfernen.
+No la instaló la Tienda.	Nicht vom Store installiert.
+Algo salió mal.	Etwas ist schiefgegangen.
+Cancelado.	Abgebrochen.
+Las fuentes de apps se agregan sólo en la placa. Desde acá se puede proponer una, para aceptarla en su pantalla:	App-Quellen werden nur am Board hinzugefügt. Von hier aus kann man eine vorschlagen, um sie auf dem Bildschirm anzunehmen:
+Propuesta, esperando en la placa (Tienda, Fuentes): %s	Vorgeschlagen, wartet am Board (Store, Quellen): %s
+Propuesta: ahora aceptala en la placa (Tienda, Fuentes)	Vorgeschlagen: jetzt am Board annehmen (Store, Quellen)
+Proponer	Vorschlagen

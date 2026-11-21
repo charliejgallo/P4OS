@@ -79,7 +79,7 @@ typedef struct { char id[12], name[28]; } cat_t;
  * as zeros and takes no initial values, so 'sel' gets its "none" (-1) the
  * first time the app is created. */
 AOS_BSS_PSRAM static struct {
-    lv_obj_t *root, *status, *banner, *banner_text, *bar, *list;
+    lv_obj_t *root, *status, *banner, *banner_text, *banner_detail, *bar, *list;
     char     *cat;              /* the catalogue's text, while the app is open */
     item_t   *items;
     int       n;
@@ -93,6 +93,7 @@ AOS_BSS_PSRAM static struct {
     bool      busy;
     char      job_file[32];
     bool      asked;            /* the catalogue was asked for on opening */
+    char      proposed[200];    /* the portal's proposal the screen was drawn with */
     int       view;             /* V_* */
     int       src_sure;         /* the source whose "Quitar" was tapped, 0 for none */
     bool      looking;          /* a source is being looked at */
@@ -567,7 +568,9 @@ static void build_list(lv_obj_t *page)
     }
     for (int i = 0; i < S.ncats; i++) chip(chips, S.cats[i].name, 1 + i);
     chip(chips, _("Instaladas"), F_INSTALLED);
-    chip(chips, _("Fuentes"), F_SOURCES);
+    /* a dot on it while the portal's proposal waits for an answer */
+    snprintf(buf, sizeof buf, "%s%s", _("Fuentes"), aos_store_proposal(NULL, 0) ? "  \xE2\x80\xA2" : "");
+    chip(chips, buf, F_SOURCES);
 
     S.list = box(page);
     lv_obj_set_width(S.list, lv_pct(100));
@@ -977,6 +980,19 @@ static void dev_cb(lv_event_t *e)
     aos_store_set_dev(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
 }
 
+static void proposal_cb(lv_event_t *e)
+{
+    bool look = lv_event_get_user_data(e) != NULL;
+    char url[200];
+    if (look && aos_store_proposal(url, sizeof url) && aos_store_probe(url)) {
+        snprintf(S.entry, sizeof S.entry, "%s", url);
+        S.view = V_ADD;
+        S.looking = true;
+    }
+    aos_store_proposal_clear();
+    build();
+}
+
 static void build_sources(lv_obj_t *page)
 {
     char buf[200];
@@ -1019,6 +1035,22 @@ static void build_sources(lv_obj_t *page)
             lv_obj_t *rm = pill(c, _("Quitar"), false, src_remove_cb, (void *)(intptr_t)(100 + i));
             lv_obj_set_style_text_color(lv_obj_get_child(rm, 0), AOS_C_RED, 0);
         }
+    }
+    char asked[200];
+    if (aos_store_proposal(asked, sizeof asked)) {
+        /* the portal can ask; who is at the board decides, with the warning */
+        lv_obj_t *c = card(body);
+        lv_obj_set_style_border_color(c, AOS_C_ACCENT, 0);
+        lv_obj_set_style_border_width(c, 2, 0);
+        para(c, _("Desde el portal proponen esta fuente:"), aos_font_small, AOS_C_TEXT);
+        para(c, asked, aos_font_tiny, AOS_C_DIM);
+        lv_obj_t *r = box(c);
+        lv_obj_set_size(r, lv_pct(100), LV_SIZE_CONTENT);
+        lv_obj_set_flex_flow(r, LV_FLEX_FLOW_ROW_WRAP);
+        lv_obj_set_style_pad_column(r, 12, 0);
+        lv_obj_set_style_pad_row(r, 12, 0);
+        pill(r, _("Mirarla"), true, proposal_cb, (void *)1);
+        pill(r, _("Descartar"), false, proposal_cb, NULL);
     }
     if (aos_store_sources() < AOS_STORE_SOURCES_MAX) pill(body, _("Agregar una fuente"), true, to_add_cb, NULL);
 
@@ -1135,10 +1167,32 @@ static void build_confirm(lv_obj_t *page)
 
 /* ---- the whole screen ------------------------------------------------------ */
 
+/* How a job failed, as a sentence. */
+static const char *why_text(int kind)
+{
+    switch (kind) {
+    case AOS_STORE_E_NETWORK:    return _("No se pudo bajar: revisá la red y probá de nuevo.");
+    case AOS_STORE_E_NOT_THERE:  return _("No está en el servidor.");
+    case AOS_STORE_E_CLOCK:      return _("La placa todavía no tiene la hora de la red: probá en un momento.");
+    case AOS_STORE_E_SERVER:     return _("No se pudo verificar el servidor.");
+    case AOS_STORE_E_CARD:       return _("No se pudo escribir en la tarjeta: ¿está llena?");
+    case AOS_STORE_E_PACKAGE:    return _("El paquete no es el publicado, o está dañado.");
+    case AOS_STORE_E_RULES:      return _("El paquete quiere escribir donde no le corresponde.");
+    case AOS_STORE_E_FIRMWARE:   return _("Necesita un P4OS más nuevo.");
+    case AOS_STORE_E_CATALOG:    return _("El catálogo no se puede leer.");
+    case AOS_STORE_E_SOURCE:     return _("Esa fuente no se puede usar.");
+    case AOS_STORE_E_MEMORY:     return _("No alcanzó la memoria.");
+    case AOS_STORE_E_NOT_LISTED: return _("No está en el catálogo.");
+    case AOS_STORE_E_IN_STORE:   return _("Esa app es de la Tienda: se instala y se quita desde acá.");
+    case AOS_STORE_E_NOT_STORE:  return _("No la instaló la Tienda.");
+    default:                     return _("Algo salió mal.");
+    }
+}
+
 static void banner_update(const aos_store_status_t *st)
 {
     if (!S.banner) return;
-    bool show = st->busy || (!st->last_ok && st->last[0] && st->jobs_done);
+    bool show = st->busy || (!st->last_ok && st->last[0] && st->jobs_done && st->last_kind != AOS_STORE_E_CANCELLED);
     if (!show) { lv_obj_add_flag(S.banner, LV_OBJ_FLAG_HIDDEN); return; }
     lv_obj_remove_flag(S.banner, LV_OBJ_FLAG_HIDDEN);
     char buf[200];
@@ -1156,10 +1210,28 @@ static void banner_update(const aos_store_status_t *st)
         lv_obj_set_style_text_color(S.banner_text, AOS_C_TEXT, 0);
         lv_obj_remove_flag(S.bar, LV_OBJ_FLAG_HIDDEN);
         lv_bar_set_value(S.bar, st->total ? (int32_t)((uint64_t)st->got * 100 / st->total) : 0, LV_ANIM_OFF);
+        if (S.banner_detail) lv_obj_add_flag(S.banner_detail, LV_OBJ_FLAG_HIDDEN);
     } else {
-        snprintf(buf, sizeof buf, "%s %.150s", _("No se pudo:"), st->last);
+        const char *who = st->last_file;
+        for (int i = 0; i < S.n; i++)
+            if (!strcmp(S.items[i].file, st->last_file) || !strcmp(S.items[i].id, st->last_file)) who = S.items[i].name;
+        char what[96];
+        const char *j = st->last_job;
+        if (!strcmp(j, "install")) snprintf(what, sizeof what, _("No se pudo instalar %s."), who);
+        else if (!strcmp(j, "remove")) snprintf(what, sizeof what, _("No se pudo quitar %s."), who);
+        else snprintf(what, sizeof what, "%s", !strcmp(j, "refresh")  ? _("No se pudo traer el catálogo.") :
+                                                !strcmp(j, "look")     ? _("No se pudo mirar esa fuente.") :
+                                                !strcmp(j, "add")      ? _("No se pudo agregar la fuente.") :
+                                                !strcmp(j, "unsource") ? _("No se pudo quitar la fuente.") :
+                                                !strcmp(j, "sideload") ? _("No se pudo instalar el paquete.") : _("No se pudo."));
+        snprintf(buf, sizeof buf, "%s %s", what, why_text(st->last_kind));
         lv_obj_set_style_text_color(S.banner_text, AOS_C_ORANGE, 0);
         lv_obj_add_flag(S.bar, LV_OBJ_FLAG_HIDDEN);
+        /* the log's own line, small: what to tell whoever can fix it */
+        if (S.banner_detail) {
+            lv_obj_remove_flag(S.banner_detail, LV_OBJ_FLAG_HIDDEN);
+            lv_label_set_text(S.banner_detail, st->last);
+        }
     }
     lv_label_set_text(S.banner_text, buf);
 }
@@ -1175,7 +1247,7 @@ static void build(void)
     last_sel = S.sel;
     last_filter = S.filter;
     lv_obj_clean(S.root);
-    S.list = S.banner = NULL;
+    S.list = S.banner = S.banner_detail = NULL;
     S.ta = NULL;
     if (S.sel >= S.n) S.sel = -1;
     for (int i = 0; i < G.n; i++) G.s[i].frame = NULL;
@@ -1211,6 +1283,9 @@ static void build(void)
     S.banner_text = aos_label(S.banner, "", aos_font_caption, AOS_C_TEXT);
     lv_obj_set_width(S.banner_text, lv_pct(100));
     lv_label_set_long_mode(S.banner_text, LV_LABEL_LONG_MODE_WRAP);
+    S.banner_detail = aos_label(S.banner, "", aos_font_tiny, AOS_C_DIM);
+    lv_obj_set_width(S.banner_detail, lv_pct(100));
+    lv_label_set_long_mode(S.banner_detail, LV_LABEL_LONG_MODE_WRAP);
     S.bar = lv_bar_create(S.banner);
     lv_obj_set_size(S.bar, lv_pct(100), 8);
     lv_obj_set_style_bg_color(S.bar, AOS_C_CARD2, 0);
@@ -1298,7 +1373,12 @@ static void tick(aos_app_t *self, void *inst)
     gallery_tick();
     aos_store_status_t st;
     aos_store_status(&st);
-    bool changed = st.jobs_done != S.jobs_done || st.busy != S.busy || strcmp(st.file, S.job_file);
+    /* the portal proposed a source, another one, or the proposal went away */
+    char proposed[200] = "";
+    aos_store_proposal(proposed, sizeof proposed);
+    bool changed = st.jobs_done != S.jobs_done || st.busy != S.busy || strcmp(st.file, S.job_file) ||
+                   (strcmp(proposed, S.proposed) && S.view != V_ADD);
+    if (S.view != V_ADD) snprintf(S.proposed, sizeof S.proposed, "%s", proposed);
     if (st.jobs_done != S.jobs_done) {
         /* something ended: a new catalogue, or other states for the same one */
         char *now = aos_store_catalog(NULL);

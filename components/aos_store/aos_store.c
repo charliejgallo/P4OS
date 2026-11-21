@@ -122,6 +122,7 @@ static int     s_nsrc = 1;
 AOS_BSS_PSRAM static char    s_url[200];          /* the first source's address when not the official one */
 static bool    s_dev;               /* developer mode: http:// and another first source */
 AOS_BSS_PSRAM static aos_store_probe_t s_probe;
+AOS_BSS_PSRAM static char    s_proposal[200];     /* a source the portal asked for: the board decides */
 AOS_BSS_PSRAM static job_t   s_queue[QUEUE];
 static int     s_qn;
 static bool    s_running, s_cancel;
@@ -133,12 +134,15 @@ static void unlock(void) { aos_hal_mutex_unlock(s_lock); }
 
 /* ---- small things ---------------------------------------------------------- */
 
-typedef struct { char why[160]; } err_t;
+/* How something failed: 'why' is a line for the log, in English as the log
+ * is; 'kind' is what the screen says, in the person's language. */
+typedef struct { char why[160]; int kind; } err_t;
 
-static bool fail(err_t *e, const char *fmt, ...) __attribute__((format(printf, 2, 3)));
-static bool fail(err_t *e, const char *fmt, ...)
+static bool fail(err_t *e, int kind, const char *fmt, ...) __attribute__((format(printf, 3, 4)));
+static bool fail(err_t *e, int kind, const char *fmt, ...)
 {
     va_list ap;
+    e->kind = kind;
     va_start(ap, fmt);
     vsnprintf(e->why, sizeof e->why, fmt, ap);
     va_end(ap);
@@ -439,7 +443,7 @@ static int catalog_check(const char *rel, char *source, err_t *e)
 {
     size_t len = 0;
     char *text = slurp(rel, CATALOG_MAX, &len);
-    if (!text) { fail(e, "no catalogue there, or one over %d KB", CATALOG_MAX / 1024); return -1; }
+    if (!text) { fail(e, AOS_STORE_E_CATALOG, "no catalogue there, or one over %d KB", CATALOG_MAX / 1024); return -1; }
     int n = -1;
     bool head = false, bad = false;
     for (size_t at = 0; at < len && !bad;) {
@@ -447,13 +451,13 @@ static int catalog_check(const char *rel, char *source, err_t *e)
         while (end < len && text[end] != '\n') end++;
         if (end > at) {
             cJSON *o = cJSON_ParseWithLength(text + at, end - at);
-            if (!cJSON_IsObject(o)) { fail(e, "the catalogue does not read at byte %u", (unsigned)at); bad = true; }
+            if (!cJSON_IsObject(o)) { fail(e, AOS_STORE_E_CATALOG, "the catalogue does not read at byte %u", (unsigned)at); bad = true; }
             else if (!head) {
                 head = true;
                 n = 0;
                 const cJSON *src = cJSON_GetObjectItem(o, "source");
-                if (jnum(o, "schema") != SCHEMA) { fail(e, "a catalogue of another schema: update P4OS to read it"); bad = true; }
-                else if (!jstr(src, "name")[0] || !jstr(o, "base")[0]) { fail(e, "a catalogue that does not say whose it is"); bad = true; }
+                if (jnum(o, "schema") != SCHEMA) { fail(e, AOS_STORE_E_CATALOG, "a catalogue of another schema: update P4OS to read it"); bad = true; }
+                else if (!jstr(src, "name")[0] || !jstr(o, "base")[0]) { fail(e, AOS_STORE_E_CATALOG, "a catalogue that does not say whose it is"); bad = true; }
                 else if (source) {
                     char *js = cJSON_PrintUnformatted(src);
                     snprintf(source, 900, "%s", js ? js : "{}");
@@ -465,7 +469,7 @@ static int catalog_check(const char *rel, char *source, err_t *e)
         at = end + 1;
     }
     free(text);
-    if (!bad && !head) { fail(e, "an empty catalogue"); bad = true; }
+    if (!bad && !head) { fail(e, AOS_STORE_E_CATALOG, "an empty catalogue"); bad = true; }
     return bad ? -1 : n;
 }
 
@@ -549,7 +553,7 @@ static bool catalog_load(err_t *e)
     if (!apps || !all || !loaded) {
         free(apps);
         free(all);
-        return fail(e, apps && all ? "no catalogue yet" : "no memory for the catalogue");
+        return fail(e, apps && all ? AOS_STORE_E_CATALOG : AOS_STORE_E_MEMORY, "%s", apps && all ? "no catalogue yet" : "no memory for the catalogue");
     }
     all[w] = 0;
 
@@ -600,25 +604,34 @@ static void url_of(char *out, size_t n, const char *base, const char *rel)
 static bool url_allowed(const char *url, err_t *e)
 {
     if (!strncmp(url, "https://", 8)) return true;
-    if (strncmp(url, "http://", 7)) return fail(e, "not an http(s) address");
-    if (!s_dev) return fail(e, "http:// is for developer mode (Tienda, Sources)");
-    if (!net_trusted()) return fail(e, "http:// only on a trusted network");
+    if (strncmp(url, "http://", 7)) return fail(e, AOS_STORE_E_SOURCE, "not an http(s) address");
+    if (!s_dev) return fail(e, AOS_STORE_E_SOURCE, "http:// is for developer mode (Tienda, Sources)");
+    if (!net_trusted()) return fail(e, AOS_STORE_E_SOURCE, "http:// only on a trusted network");
     return true;
 }
 
 /* ---- downloads ------------------------------------------------------------- */
 
-static bool download(const char *url, const char *rel, const char *sha, uint32_t size, err_t *e)
+/* 'cap' is for a file whose size nobody published - a catalogue: it stops
+ * the download as soon as the server announces more than that, or sends it,
+ * so a source cannot fill the card with one. 0 is no limit: a package and a
+ * pack come with their size, which aos_fetch holds them to. */
+static bool download(const char *url, const char *rel, const char *sha, uint32_t size, uint32_t cap, err_t *e)
 {
     char f[FULL_MAX];
     if (!url_allowed(url, e)) return false;
     int id = aos_fetch_start(url, full(f, rel), sha, size);
-    if (id <= 0) return fail(e, "could not start the download (%d)", id);
+    if (id <= 0) return fail(e, AOS_STORE_E_NETWORK, "could not start the download (%d)", id);
     aos_fetch_info_t in;
+    bool over = false;
     for (;;) {
         aos_hal_sleep_ms(100);
-        if (!aos_fetch_info(id, &in)) return fail(e, "the download went missing");
+        if (!aos_fetch_info(id, &in)) return fail(e, AOS_STORE_E_NETWORK, "the download went missing");
         if (in.state != AOS_FETCH_BUSY) break;
+        if (cap && (in.got > cap || in.total > cap) && !over) {
+            over = true;
+            aos_fetch_cancel(id);
+        }
         lock();
         s_st.got = in.got;
         s_st.total = in.total ? in.total : size;
@@ -626,9 +639,25 @@ static bool download(const char *url, const char *rel, const char *sha, uint32_t
         if (s_cancel) aos_fetch_cancel(id);
     }
     aos_fetch_release(id);
+    if (cap && (in.got > cap || in.total > cap)) over = true;   /* it all came between two looks */
+    if (over) {
+        /* what arrived is of no use to a later try */
+        char part[PATH_MAX_ + 8];
+        snprintf(part, sizeof part, "%s.part", rel);
+        del(part);
+        del(rel);
+        return fail(e, AOS_STORE_E_CATALOG, "it is over %u KB", (unsigned)(cap / 1024));
+    }
     if (in.state == AOS_FETCH_DONE) return true;
-    if (in.state == AOS_FETCH_CANCELLED) return fail(e, "cancelled");
-    return fail(e, "%.150s", in.why[0] ? in.why : "the download failed");
+    if (in.state == AOS_FETCH_CANCELLED) return fail(e, AOS_STORE_E_CANCELLED, "cancelled");
+    int kind = in.status == 404 || in.status == 410 ? AOS_STORE_E_NOT_THERE :
+               in.status == AOS_HTTP_ERR_SIN_HORA   ? AOS_STORE_E_CLOCK :
+               in.status == AOS_HTTP_ERR_TLS        ? AOS_STORE_E_SERVER :
+               in.status == AOS_FETCH_ERR_FILE      ? AOS_STORE_E_CARD :
+               in.status == AOS_FETCH_ERR_HASH || in.status == AOS_FETCH_ERR_SIZE ? AOS_STORE_E_PACKAGE : AOS_STORE_E_NETWORK;
+    /* the clock's failure hides behind the retries: its reason is in the text */
+    if (in.status == AOS_FETCH_ERR_GAVE_UP && strstr(in.why, "no valid time")) kind = AOS_STORE_E_CLOCK;
+    return fail(e, kind, "%.150s", in.why[0] ? in.why : "the download failed");
 }
 
 /* ---- the pictures of an app's page ----------------------------------------- */
@@ -636,6 +665,7 @@ static bool download(const char *url, const char *rel, const char *sha, uint32_t
 #define DIR_SHOTS   "apps/.store/shots"
 #define SHOTS_LIVE  2
 #define SHOTS_BAD   16
+#define SHOT_MAX    (512 * 1024)
 
 AOS_BSS_PSRAM static struct { char name[72]; int id; } s_shot[SHOTS_LIVE];
 AOS_BSS_PSRAM static char s_shot_bad[SHOTS_BAD][72];
@@ -661,10 +691,18 @@ int aos_store_shot(const char *url, char *path, size_t path_len)
     if (slot >= 0) {
         aos_fetch_info_t in;
         bool known = aos_fetch_info(s_shot[slot].id, &in);
-        if (known && in.state == AOS_FETCH_BUSY) result = 0;
+        /* a picture is a hundred KB: one that goes on and on is not kept */
+        bool over = known && (in.got > SHOT_MAX || in.total > SHOT_MAX);
+        if (known && in.state == AOS_FETCH_BUSY && !over) result = 0;
         else {
-            result = known && in.state == AOS_FETCH_DONE ? 1 : -1;
+            result = known && in.state == AOS_FETCH_DONE && !over ? 1 : -1;
             aos_fetch_release(s_shot[slot].id);
+            if (over) {
+                char part[PATH_MAX_ + 8];
+                snprintf(part, sizeof part, "%s.part", rel);
+                del(part);
+                del(rel);
+            }
             s_shot[slot].id = 0;
             if (result < 0 && s_shot_nbad < SHOTS_BAD) snprintf(s_shot_bad[s_shot_nbad++], sizeof s_shot_bad[0], "%s", name);
         }
@@ -704,7 +742,7 @@ static int zip_list(const char *rel, zent_t *ents, err_t *e)
 {
     char f[FULL_MAX];
     FILE *fp = fopen(full(f, rel), "rb");
-    if (!fp) { fail(e, "the package cannot be opened"); return -1; }
+    if (!fp) { fail(e, AOS_STORE_E_PACKAGE, "the package cannot be opened"); return -1; }
     int n = -1;
     uint8_t *cd = NULL;
     fseek(fp, 0, SEEK_END);
@@ -712,44 +750,44 @@ static int zip_list(const char *rel, zent_t *ents, err_t *e)
     uint8_t tail[1024];
     long tl = flen < (long)sizeof tail ? flen : (long)sizeof tail;
     if (tl < 22 || fseek(fp, flen - tl, SEEK_SET) != 0 || fread(tail, 1, (size_t)tl, fp) != (size_t)tl) {
-        fail(e, "not a package: too short");
+        fail(e, AOS_STORE_E_PACKAGE, "not a package: too short");
         goto out;
     }
     long at = tl - 22;
     while (at >= 0 && le32(tail + at) != 0x06054b50) at--;
-    if (at < 0) { fail(e, "not a package: no zip directory"); goto out; }
+    if (at < 0) { fail(e, AOS_STORE_E_PACKAGE, "not a package: no zip directory"); goto out; }
     uint32_t count = le16(tail + at + 10), cdsize = le32(tail + at + 12), cdoff = le32(tail + at + 16);
     if (count == 0 || count > ZIP_ENTRIES || cdsize > 64 * 1024 || cdoff > (uint32_t)flen || cdsize > (uint32_t)flen - cdoff) {
-        fail(e, "not a package: %u files in it, %d at most", (unsigned)count, ZIP_ENTRIES);
+        fail(e, AOS_STORE_E_PACKAGE, "not a package: %u files in it, %d at most", (unsigned)count, ZIP_ENTRIES);
         goto out;
     }
     cd = BIG_ALLOC(cdsize + 1);
     if (!cd || fseek(fp, (long)cdoff, SEEK_SET) != 0 || fread(cd, 1, cdsize, fp) != cdsize) {
-        fail(e, "the package's directory does not read");
+        fail(e, AOS_STORE_E_PACKAGE, "the package's directory does not read");
         goto out;
     }
     uint32_t p = 0;
     for (uint32_t i = 0; i < count; i++) {
-        if (p + 46 > cdsize || le32(cd + p) != 0x02014b50) { fail(e, "the package's directory is cut short"); goto out; }
+        if (p + 46 > cdsize || le32(cd + p) != 0x02014b50) { fail(e, AOS_STORE_E_PACKAGE, "the package's directory is cut short"); goto out; }
         uint16_t flags = le16(cd + p + 8), method = le16(cd + p + 10);
         uint32_t csize = le32(cd + p + 20), usize = le32(cd + p + 24), local = le32(cd + p + 42);
         uint16_t nl = le16(cd + p + 28), xl = le16(cd + p + 30), cl = le16(cd + p + 32);
-        if (p + 46 + nl > cdsize || nl == 0 || nl >= PATH_MAX_) { fail(e, "a name in the package is too long"); goto out; }
+        if (p + 46 + nl > cdsize || nl == 0 || nl >= PATH_MAX_) { fail(e, AOS_STORE_E_PACKAGE, "a name in the package is too long"); goto out; }
         zent_t *z = &ents[i];
         memcpy(z->name, cd + p + 46, nl);
         z->name[nl] = 0;
         if (method != 0 || csize != usize || (flags & 1)) {
-            fail(e, "%.80s is compressed: a package is a zip without compression", z->name);
+            fail(e, AOS_STORE_E_PACKAGE, "%.80s is compressed: a package is a zip without compression", z->name);
             goto out;
         }
         uint8_t lh[30];
         if (local > cdoff || fseek(fp, (long)local, SEEK_SET) != 0 || fread(lh, 1, 30, fp) != 30 || le32(lh) != 0x04034b50) {
-            fail(e, "%.80s is not where the package says", z->name);
+            fail(e, AOS_STORE_E_PACKAGE, "%.80s is not where the package says", z->name);
             goto out;
         }
         z->off = local + 30 + le16(lh + 26) + le16(lh + 28);
         z->size = usize;
-        if (z->off > cdoff || z->size > cdoff - z->off) { fail(e, "%.80s runs past the package's end", z->name); goto out; }
+        if (z->off > cdoff || z->size > cdoff - z->off) { fail(e, AOS_STORE_E_PACKAGE, "%.80s runs past the package's end", z->name); goto out; }
         p += 46u + nl + xl + cl;
     }
     n = (int)count;
@@ -817,9 +855,9 @@ static bool install_core(cJSON *entry, app_t app, const char *local, const char 
     int nents = 0, nparts = 0;
     bool ok = false;
 
-    if (!ents || !parts || !missing) { fail(e, "no memory"); goto out; }
-    if (jnum(entry, "abi") != AOS_STORE_ABI) { fail(e, "built for ABI %u; this firmware's is %d", (unsigned)jnum(entry, "abi"), AOS_STORE_ABI); goto out; }
-    if (!fw_fits(app.pub.fw_min)) { fail(e, "needs P4OS %s or newer", app.pub.fw_min); goto out; }
+    if (!ents || !parts || !missing) { fail(e, AOS_STORE_E_MEMORY, "no memory"); goto out; }
+    if (jnum(entry, "abi") != AOS_STORE_ABI) { fail(e, AOS_STORE_E_FIRMWARE, "built for ABI %u; this firmware's is %d", (unsigned)jnum(entry, "abi"), AOS_STORE_ABI); goto out; }
+    if (!fw_fits(app.pub.fw_min)) { fail(e, AOS_STORE_E_FIRMWARE, "needs P4OS %s or newer", app.pub.fw_min); goto out; }
 
     /* 2. the package */
     step("downloading");
@@ -828,10 +866,12 @@ static bool install_core(cJSON *entry, app_t app, const char *local, const char 
     make_dirs(tmp);
     if (local) {
         /* a copy: the file handed in is the person's */
-        if (!hash_range(local, 0, 0, true, tmp, sha)) { fail(e, "the package cannot be read"); goto out; }
+        if (!hash_range(local, 0, 0, true, tmp, sha)) { fail(e, AOS_STORE_E_PACKAGE, "the package cannot be read"); goto out; }
     } else {
         url_of(url, sizeof url, from.base, jstr(pkg, "url"));
-        if (!download(url, tmp, app.pkg_sha, jnum(pkg, "size"), e)) goto out;
+        /* its size is what stops a download that never ends */
+        if (!jnum(pkg, "size")) { fail(e, AOS_STORE_E_CATALOG, "the catalogue does not say the package's size"); goto out; }
+        if (!download(url, tmp, app.pkg_sha, jnum(pkg, "size"), 0, e)) goto out;
     }
 
     /* 3. opened, and every file out to tmp/ with its hash */
@@ -841,7 +881,7 @@ static bool install_core(cJSON *entry, app_t app, const char *local, const char 
     int mi = -1;
     for (int i = 0; i < nents; i++)
         if (!strcmp(ents[i].name, "p4app.json")) mi = i;
-    if (mi < 0 || ents[mi].size > JSON_MAX) { fail(e, "no p4app.json in the package"); goto out; }
+    if (mi < 0 || ents[mi].size > JSON_MAX) { fail(e, AOS_STORE_E_PACKAGE, "no p4app.json in the package"); goto out; }
     {
         char f[FULL_MAX];
         char *text = BIG_ALLOC(ents[mi].size + 1);
@@ -851,13 +891,13 @@ static bool install_core(cJSON *entry, app_t app, const char *local, const char 
         if (fp) fclose(fp);
         free(text);
     }
-    if (!inside) { fail(e, "p4app.json does not read"); goto out; }
+    if (!inside) { fail(e, AOS_STORE_E_PACKAGE, "p4app.json does not read"); goto out; }
     if (strcmp(jstr(inside, "file"), file) || strcmp(jstr(inside, "id"), app.pub.id) || jnum(inside, "abi") != AOS_STORE_ABI) {
-        fail(e, "the package says it is %.40s (%.40s), not what the catalogue lists", jstr(inside, "file"), jstr(inside, "id"));
+        fail(e, AOS_STORE_E_CATALOG, "the package says it is %.40s (%.40s), not what the catalogue lists", jstr(inside, "file"), jstr(inside, "id"));
         goto out;
     }
     const cJSON *files = cJSON_GetObjectItem(inside, "files"), *f;
-    if (cJSON_GetArraySize(files) != nents - 1) { fail(e, "the package's files are not the ones its p4app.json lists"); goto out; }
+    if (cJSON_GetArraySize(files) != nents - 1) { fail(e, AOS_STORE_E_PACKAGE, "the package's files are not the ones its p4app.json lists"); goto out; }
     bool has_so = false;
     int fi = 0;
     cJSON_ArrayForEach(f, files) {
@@ -865,14 +905,14 @@ static bool install_core(cJSON *entry, app_t app, const char *local, const char 
         int zi = -1;
         for (int i = 0; i < nents; i++)
             if (!strcmp(ents[i].name, path)) zi = i;
-        if (zi < 0) { fail(e, "the package's files are not the ones its p4app.json lists"); goto out; }
-        if (!allowed(path, file)) { fail(e, "a package may not write %.100s", path); goto out; }
-        if (owned_by_other(path, file, owner)) { fail(e, "%.90s belongs to %s, installed already", path, owner); goto out; }
+        if (zi < 0) { fail(e, AOS_STORE_E_PACKAGE, "the package's files are not the ones its p4app.json lists"); goto out; }
+        if (!allowed(path, file)) { fail(e, AOS_STORE_E_RULES, "a package may not write %.100s", path); goto out; }
+        if (owned_by_other(path, file, owner)) { fail(e, AOS_STORE_E_RULES, "%.90s belongs to %s, installed already", path, owner); goto out; }
         snprintf(tmp, sizeof tmp, DIR_TMP "/f%d", fi);
         snprintf(rel, sizeof rel, DIR_TMP "/%s.p4app", file);
         if (ents[zi].size != jnum(f, "size") || !hash_range(rel, ents[zi].off, ents[zi].size, false, tmp, sha) ||
             strcmp(sha, jstr(f, "sha256"))) {
-            fail(e, "%.100s is not what p4app.json says", path);
+            fail(e, AOS_STORE_E_PACKAGE, "%.100s is not what p4app.json says", path);
             goto out;
         }
         if (ends(path, ".so")) {
@@ -880,20 +920,20 @@ static bool install_core(cJSON *entry, app_t app, const char *local, const char 
             int miss = dyn_check(full(ff, tmp), missing, 1024);
             bool main_so = !strchr(path + 5, '/');
             has_so = has_so || main_so;
-            if (miss > 0) { fail(e, "needs a newer P4OS: this one lacks %.100s", missing); goto out; }
-            if (miss == -1 || (miss == -2 && main_so)) { fail(e, "%.60s: %.80s", path, missing); goto out; }
+            if (miss > 0) { fail(e, AOS_STORE_E_FIRMWARE, "needs a newer P4OS: this one lacks %.100s", missing); goto out; }
+            if (miss == -1 || (miss == -2 && main_so)) { fail(e, AOS_STORE_E_FIRMWARE, "%.60s: %.80s", path, missing); goto out; }
         }
         fi++;
-        if (s_cancel) { fail(e, "cancelled"); goto out; }
+        if (s_cancel) { fail(e, AOS_STORE_E_CANCELLED, "cancelled"); goto out; }
     }
-    if (!has_so) { fail(e, "the package has no apps/%s.so", file); goto out; }
+    if (!has_so) { fail(e, AOS_STORE_E_PACKAGE, "the package has no apps/%s.so", file); goto out; }
 
     /* 4. the packs */
     step("packs");
     const cJSON *p, *part;
     cJSON_ArrayForEach(p, cJSON_GetObjectItem(entry, "packs")) {
         const char *pf = jstr(p, "file");
-        if (!pack_name_ok(pf)) { fail(e, "a pack with a name that is not one"); goto out; }
+        if (!pack_name_ok(pf)) { fail(e, AOS_STORE_E_PACKAGE, "a pack with a name that is not one"); goto out; }
         bool had = false;
         const cJSON *op;
         cJSON_ArrayForEach(op, cJSON_GetObjectItem(old, "packs"))
@@ -905,7 +945,7 @@ static bool install_core(cJSON *entry, app_t app, const char *local, const char 
         int first = nparts, i = 0;
         bool all_here = true;
         cJSON_ArrayForEach(part, cJSON_GetObjectItem(p, "parts")) {
-            if (nparts >= PARTS_MAX) { fail(e, "too many pack parts"); goto out; }
+            if (nparts >= PARTS_MAX) { fail(e, AOS_STORE_E_MEMORY, "too many pack parts"); goto out; }
             part_t *t = &parts[nparts];
             if (i) snprintf(t->name, sizeof t->name, "%s.%d", pf, i);
             else snprintf(t->name, sizeof t->name, "%s", pf);
@@ -913,7 +953,7 @@ static bool install_core(cJSON *entry, app_t app, const char *local, const char 
             t->size = jnum(part, "size");
             t->staged = false;
             snprintf(rel, sizeof rel, "apps/%s", t->name);
-            if (owned_by_other(rel, file, owner)) { fail(e, "%.90s belongs to %s, installed already", rel, owner); goto out; }
+            if (owned_by_other(rel, file, owner)) { fail(e, AOS_STORE_E_RULES, "%.90s belongs to %s, installed already", rel, owner); goto out; }
             uint32_t have = 0;
             /* the bytes the card has already are not downloaded again */
             bool here = exists(rel, &have) && have == t->size && file_sha(rel, sha) && !strcmp(sha, t->sha);
@@ -925,7 +965,8 @@ static bool install_core(cJSON *entry, app_t app, const char *local, const char 
                     unlock();
                     snprintf(tmp, sizeof tmp, DIR_TMP "/%s", t->name);
                     url_of(url, sizeof url, from.base, jstr(part, "url"));
-                    if (!download(url, tmp, t->sha, t->size, e)) goto out;
+                    if (!t->size) { fail(e, AOS_STORE_E_CATALOG, "the catalogue does not say the size of %.60s", t->name); goto out; }
+                    if (!download(url, tmp, t->sha, t->size, 0, e)) goto out;
                     t->staged = true;
                 }
             }
@@ -947,13 +988,13 @@ static bool install_core(cJSON *entry, app_t app, const char *local, const char 
         snprintf(tmp, sizeof tmp, DIR_TMP "/f%d", fi++);
         /* the same bytes there already (an adoption, a reinstall): left alone */
         if (exists(path, NULL) && file_sha(path, sha) && !strcmp(sha, jstr(f, "sha256"))) continue;
-        if (!move(tmp, path)) { fail(e, "could not write %.100s (errno %d)", path, errno); goto out; }
+        if (!move(tmp, path)) { fail(e, AOS_STORE_E_CARD, "could not write %.100s (errno %d)", path, errno); goto out; }
     }
     for (int i = 0; i < nparts; i++) {
         if (!parts[i].staged) continue;
         snprintf(tmp, sizeof tmp, DIR_TMP "/%s", parts[i].name);
         snprintf(rel, sizeof rel, "apps/%s", parts[i].name);
-        if (!move(tmp, rel)) { fail(e, "could not write %.100s (errno %d)", rel, errno); goto out; }
+        if (!move(tmp, rel)) { fail(e, AOS_STORE_E_CARD, "could not write %.100s (errno %d)", rel, errno); goto out; }
     }
     /* what the old version had and this one does not */
     cJSON_ArrayForEach(f, cJSON_GetObjectItem(old, "files")) {
@@ -1009,7 +1050,7 @@ static bool install_core(cJSON *entry, app_t app, const char *local, const char 
         snprintf(rel, sizeof rel, DIR_STORE "/%s.json", file);
         bool wrote = text && spit(rel, text);
         free(text);
-        if (!wrote) { fail(e, "could not write the receipt"); goto out; }
+        if (!wrote) { fail(e, AOS_STORE_E_CARD, "could not write the receipt"); goto out; }
     }
     /* a copy the loader had set aside: this install is the way back */
     snprintf(rel, sizeof rel, "apps/%s.so.off", file);
@@ -1036,7 +1077,7 @@ static bool install(const char *file, const char *packs_arg, bool adopt, err_t *
 {
     app_t app;
     cJSON *entry = entry_of(file, &app);
-    if (!entry) return fail(e, "%.40s is not in the catalogue", file);
+    if (!entry) return fail(e, AOS_STORE_E_NOT_LISTED, "%.40s is not in the catalogue", file);
     return install_core(entry, app, NULL, packs_arg, adopt, e);
 }
 
@@ -1051,13 +1092,13 @@ static bool sideload(const char *rel, err_t *e)
     char f[FULL_MAX], owner[40] = "";
     bool ok = false;
     memset(&app, 0, sizeof app);
-    if (!ents) { fail(e, "no memory"); goto out; }
+    if (!ents) { fail(e, AOS_STORE_E_MEMORY, "no memory"); goto out; }
     step("checking");
     int n = zip_list(rel, ents, e), mi = -1;
     if (n < 0) goto out;
     for (int i = 0; i < n; i++)
         if (!strcmp(ents[i].name, "p4app.json")) mi = i;
-    if (mi < 0 || ents[mi].size > JSON_MAX) { fail(e, "no p4app.json in the package"); goto out; }
+    if (mi < 0 || ents[mi].size > JSON_MAX) { fail(e, AOS_STORE_E_PACKAGE, "no p4app.json in the package"); goto out; }
     {
         char *text = BIG_ALLOC(ents[mi].size + 1);
         FILE *fp = text ? fopen(full(f, rel), "rb") : NULL;
@@ -1066,7 +1107,7 @@ static bool sideload(const char *rel, err_t *e)
         if (fp) fclose(fp);
         free(text);
     }
-    if (!inside || !file_name_ok(jstr(inside, "file")) || !jstr(inside, "id")[0]) { fail(e, "p4app.json does not read"); goto out; }
+    if (!inside || !file_name_ok(jstr(inside, "file")) || !jstr(inside, "id")[0]) { fail(e, AOS_STORE_E_PACKAGE, "p4app.json does not read"); goto out; }
     snprintf(app.pub.file, sizeof app.pub.file, "%s", jstr(inside, "file"));
     snprintf(app.pub.id, sizeof app.pub.id, "%s", jstr(inside, "id"));
     snprintf(app.pub.ver, sizeof app.pub.ver, "local");
@@ -1077,13 +1118,13 @@ static bool sideload(const char *rel, err_t *e)
         if (!strcmp(s_apps[i].pub.file, app.pub.file) || !strcmp(s_apps[i].pub.id, app.pub.id))
             snprintf(owner, sizeof owner, "%s", s_src[s_apps[i].pub.src].name);
     unlock();
-    if (owner[0]) { fail(e, "%s is in the Tienda (%s): install it from there", app.pub.file, owner); goto out; }
+    if (owner[0]) { fail(e, AOS_STORE_E_IN_STORE, "%s is in the Tienda (%s): install it from there", app.pub.file, owner); goto out; }
     r = receipt_read(app.pub.file);
     if (r && jstr(cJSON_GetObjectItem(r, "source"), "catalog")[0]) {
-        fail(e, "%s was installed from %.40s: remove it first", app.pub.file, jstr(cJSON_GetObjectItem(r, "source"), "name"));
+        fail(e, AOS_STORE_E_IN_STORE, "%s was installed from %.40s: remove it first", app.pub.file, jstr(cJSON_GetObjectItem(r, "source"), "name"));
         goto out;
     }
-    if (!file_sha(rel, app.pkg_sha)) { fail(e, "the package cannot be read"); goto out; }
+    if (!file_sha(rel, app.pkg_sha)) { fail(e, AOS_STORE_E_PACKAGE, "the package cannot be read"); goto out; }
     entry = cJSON_CreateObject();
     cJSON_AddStringToObject(entry, "file", app.pub.file);
     cJSON_AddStringToObject(entry, "id", app.pub.id);
@@ -1102,9 +1143,9 @@ out:
 
 static bool uninstall(const char *file, err_t *e)
 {
-    if (!file_name_ok(file)) return fail(e, "not a package's name");
+    if (!file_name_ok(file)) return fail(e, AOS_STORE_E_NOT_STORE, "not a package's name");
     cJSON *r = receipt_read(file);
-    if (!r) return fail(e, "%.40s was not installed by the store: no receipt", file);
+    if (!r) return fail(e, AOS_STORE_E_NOT_STORE, "%.40s was not installed by the store: no receipt", file);
     char so[40], rel[PATH_MAX_];
     snprintf(so, sizeof so, "%s.so", file);
     dyn_unload(so);
@@ -1141,7 +1182,7 @@ static bool adopt_all(err_t *e)
         lock();
         snprintf(s_st.file, sizeof s_st.file, "%s", a.pub.file);
         unlock();
-        err_t one = { "" };
+        err_t one = { "", 0 };
         if (install(a.pub.file, "none", true, &one)) done++;
         else {
             left++;
@@ -1193,10 +1234,10 @@ static bool refresh_all(err_t *e)
         src_file(i, rel);
         step("downloading");
         make_dirs(rel);
-        err_t one = { "" };
+        err_t one = { "", 0 };
         /* to a name of its own first: a catalogue that does not read must
          * not take the place of the one that does */
-        bool ok = download(url, DIR_STORE "/catalog.new", NULL, 0, &one) &&
+        bool ok = download(url, DIR_STORE "/catalog.new", NULL, 0, CATALOG_MAX, &one) &&
                   catalog_check(DIR_STORE "/catalog.new", NULL, &one) >= 0 && move(DIR_STORE "/catalog.new", rel);
         del(DIR_STORE "/catalog.new");
         if (i == 0) {
@@ -1225,12 +1266,12 @@ static bool probe(const char *url, err_t *e)
     for (int i = 0; i < s_nsrc; i++) have = have || !strcmp(s_src[i].url, url);
     bool full_list = s_nsrc >= SRC_MAX;
     unlock();
-    if (have) return fail(e, "that source is there already");
-    if (full_list) return fail(e, "%d sources at most", SRC_MAX);
+    if (have) return fail(e, AOS_STORE_E_SOURCE, "that source is there already");
+    if (full_list) return fail(e, AOS_STORE_E_SOURCE, "%d sources at most", SRC_MAX);
     step("downloading");
     make_dirs(PROBE_FILE);
     del(PROBE_FILE);
-    if (!download(url, PROBE_FILE, NULL, 0, e)) return false;
+    if (!download(url, PROBE_FILE, NULL, 0, CATALOG_MAX, e)) return false;
     char source[900];
     int n = catalog_check(PROBE_FILE, source, e);
     if (n < 0) { del(PROBE_FILE); return false; }
@@ -1256,7 +1297,7 @@ static bool source_add(const char *url, err_t *e)
         memset(&s_probe, 0, sizeof s_probe);
     }
     unlock();
-    if (!ok) return fail(e, "look at the source first");
+    if (!ok) return fail(e, AOS_STORE_E_SOURCE, "look at the source first");
     move(PROBE_FILE, rel);
     err_t load;
     catalog_load(&load);
@@ -1274,7 +1315,7 @@ static bool source_remove(int index, bool apps, err_t *e)
         src_file(index, rel);
     }
     unlock();
-    if (!ok) return fail(e, "no such source (the official one stays)");
+    if (!ok) return fail(e, AOS_STORE_E_SOURCE, "no such source (the official one stays)");
     int gone = 0;
     if (apps) {
         /* the names first: removing changes the folder being read */
@@ -1342,9 +1383,9 @@ static void work(void *arg)
         s_st.step[0] = 0;
         unlock();
 
-        err_t e = { "" };
+        err_t e = { "", 0 };
         bool ok = false;
-        if (!aos_hal_path_sd_root()) fail(&e, "no card");
+        if (!aos_hal_path_sd_root()) fail(&e, AOS_STORE_E_CARD, "no card");
         else if (j.kind == J_REFRESH) ok = refresh_all(&e);
         else if (j.kind == J_PROBE) ok = probe(j.packs, &e);
         else if (j.kind == J_ADD) ok = source_add(j.packs, &e);
@@ -1358,6 +1399,9 @@ static void work(void *arg)
         states();
         s_st.jobs_done++;
         s_st.last_ok = ok;
+        s_st.last_kind = ok ? AOS_STORE_E_NONE : e.kind ? e.kind : AOS_STORE_E_OTHER;
+        snprintf(s_st.last_job, sizeof s_st.last_job, "%s", job_name(j.kind));
+        snprintf(s_st.last_file, sizeof s_st.last_file, "%s", j.file);
         if (ok && !e.why[0]) snprintf(s_st.last, sizeof s_st.last, "%s%s%s: done", job_name(j.kind), j.file[0] ? " " : "", j.file);
         else snprintf(s_st.last, sizeof s_st.last, "%s%s%s: %.110s", job_name(j.kind), j.file[0] ? " " : "", j.file, e.why);
         aos_hal_log(TAG, "%s", s_st.last);
@@ -1445,7 +1489,12 @@ void aos_store_set_dev(bool on)
     s_dev = on;
     unlock();
     aos_hal_pref_set_i32("store_dev", on ? 1 : 0);
-    if (!on) aos_store_set_url(NULL);       /* and back to the official catalogue */
+    /* off: back to the official catalogue. The test one stays remembered, and
+     * comes back with the mode: turning it on again is not typing it again */
+    lock();
+    if (!on || !aos_hal_pref_get_str("store_url", s_url, sizeof s_url)) s_url[0] = 0;
+    snprintf(s_src[0].url, sizeof s_src[0].url, "%.199s", aos_store_url());
+    unlock();
 }
 
 bool aos_store_source_url(const char *text, char *out, size_t n)
@@ -1493,6 +1542,36 @@ bool aos_store_source(int index, aos_store_source_t *out)
     }
     unlock();
     return ok;
+}
+
+bool aos_store_propose(const char *text)
+{
+    aos_store_init();
+    char url[200];
+    err_t e;
+    if (!aos_store_source_url(text, url, sizeof url) || !url_allowed(url, &e)) return false;
+    lock();
+    snprintf(s_proposal, sizeof s_proposal, "%s", url);
+    unlock();
+    return true;
+}
+
+bool aos_store_proposal(char *out, size_t n)
+{
+    aos_store_init();
+    lock();
+    bool have = s_proposal[0] != 0;
+    if (have && out) snprintf(out, n, "%s", s_proposal);
+    unlock();
+    return have;
+}
+
+void aos_store_proposal_clear(void)
+{
+    aos_store_init();
+    lock();
+    s_proposal[0] = 0;
+    unlock();
 }
 
 bool aos_store_probe(const char *url)

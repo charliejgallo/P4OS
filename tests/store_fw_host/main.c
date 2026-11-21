@@ -22,7 +22,7 @@ static void wait_done(uint32_t before)
         if (!st.busy && st.jobs_done != before) break;
         aos_hal_sleep_ms(5);
     }
-    printf("%s %s\n", st.last_ok ? "ok" : "FAILED", st.last);
+    printf("%s %s kind=%d\n", st.last_ok ? "ok" : "FAILED", st.last, st.last_kind);
 }
 
 int main(int argc, char **argv)
@@ -37,6 +37,13 @@ int main(int argc, char **argv)
         bool queued = true;
         if (!strcmp(a, "url")) { aos_store_set_url(v); continue; }
         else if (!strcmp(a, "dev")) { aos_store_set_dev(v && v[0] == '1'); continue; }
+        else if (!strcmp(a, "propose")) {
+            char url[200] = "";
+            bool took = aos_store_propose(v ? v : "");
+            aos_store_proposal(url, sizeof url);
+            printf("proposed %d %s\n", took, url);
+            continue;
+        }
         else if (!strcmp(a, "sources")) {
             aos_store_source_t sr;
             for (int k = 0; aos_store_source(k, &sr); k++)

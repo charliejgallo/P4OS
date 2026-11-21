@@ -53,6 +53,28 @@ typedef struct {
     uint32_t line_len;
 } aos_store_app_t;
 
+/* How a job failed, for the screen to say in the person's language; the
+ * text beside it (aos_store_status_t.last) is a line for the log. */
+typedef enum {
+    AOS_STORE_E_NONE = 0,
+    AOS_STORE_E_OTHER,
+    AOS_STORE_E_NETWORK,    /* could not download: no network, cut, a server's refusal */
+    AOS_STORE_E_NOT_THERE,  /* the server has no such file (404) */
+    AOS_STORE_E_CLOCK,      /* the board has no time yet: a certificate cannot be checked */
+    AOS_STORE_E_SERVER,     /* the server's certificate does not verify */
+    AOS_STORE_E_CARD,       /* could not write the card (full, gone) */
+    AOS_STORE_E_PACKAGE,    /* not a package, damaged, or not the one published */
+    AOS_STORE_E_RULES,      /* it would write where a package may not, or over another's */
+    AOS_STORE_E_FIRMWARE,   /* it needs a newer P4OS */
+    AOS_STORE_E_CATALOG,    /* the catalogue does not read, or is of a schema to come */
+    AOS_STORE_E_SOURCE,     /* that source cannot be used (http, there already, too many) */
+    AOS_STORE_E_CANCELLED,
+    AOS_STORE_E_MEMORY,
+    AOS_STORE_E_NOT_LISTED, /* no catalogue lists it */
+    AOS_STORE_E_IN_STORE,   /* a package handed in that is the store's own app */
+    AOS_STORE_E_NOT_STORE,  /* not installed by the store: nothing to remove */
+} aos_store_err_t;
+
 typedef struct {
     bool     busy;
     char     job[12];       /* "refresh", "install", "remove", "adopt", or "" */
@@ -62,7 +84,10 @@ typedef struct {
     int      queued;        /* jobs waiting behind it */
     uint32_t jobs_done;     /* counts up: something ended since the last look */
     bool     last_ok;
-    char     last[160];     /* how the last job ended, one line for a person */
+    char     last[160];     /* how the last job ended: a line for the log, in English */
+    int      last_kind;     /* aos_store_err_t: how it failed, for the screen */
+    char     last_job[12];  /* which job that was, and about which package */
+    char     last_file[32];
     char     release[28];   /* the catalogue's */
     char     source[40];
     uint32_t apps;          /* in the catalogue */
@@ -80,7 +105,8 @@ bool aos_store_set_url(const char *url);
 
 /* Developer mode: http:// addresses (on a trusted network only) and another
  * first source. Off unless someone turns it on AT THE BOARD: the portal has
- * no call for it. Turning it off goes back to the official catalogue. */
+ * no call for it. Turning it off goes back to the official catalogue; the
+ * test one that was set is remembered and comes back with the mode. */
 bool aos_store_dev(void);
 void aos_store_set_dev(bool on);
 
@@ -136,6 +162,14 @@ bool aos_store_source_add(const char *url);
 /* Takes a source off (never the first); with_apps removes what was
  * installed from it, else those apps stay and are no longer updated. */
 bool aos_store_source_remove(int index, bool with_apps);
+
+/* The portal cannot add a source, but it can ask: the address is kept (one
+ * at a time, until the next restart) for the Tienda to show at the board,
+ * where a person looks at it, reads the warning and decides. false when it
+ * is not an address a source may have. */
+bool aos_store_propose(const char *text);
+bool aos_store_proposal(char *out, size_t n);
+void aos_store_proposal_clear(void);
 
 /* A package (.p4app) that is on the card or on a pendrive, by its path from
  * the card's root: installed by the same steps as one of a catalogue. It

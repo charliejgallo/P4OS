@@ -48,6 +48,7 @@
 #include "aos_sys_glyphs.h"
 #include "aos_mono.h"
 #include "aos_app_image.h"
+#include "aos_store.h"
 
 #include <ctype.h>
 #include <dirent.h>
@@ -357,7 +358,7 @@ static int kind_of(const char *name)
         { "css", K_CODE }, { "js", K_CODE }, { "c", K_CODE }, { "h", K_CODE }, { "cpp", K_CODE },
         { "py", K_CODE }, { "lua", K_CODE }, { "sh", K_CODE }, { "m3u", K_CODE }, { "pls", K_CODE },
         { "bin", K_FW }, { "elf", K_FW }, { "hex", K_FW }, { "uf2", K_FW },
-        { "so", K_APP }, { "aic", K_ICON },
+        { "so", K_APP }, { "p4app", K_APP }, { "aic", K_ICON },
     };
     for (size_t i = 0; i < sizeof EXT / sizeof EXT[0]; i++)
         if (!strcasecmp(dot + 1, EXT[i].ext)) return EXT[i].kind;
@@ -3234,6 +3235,19 @@ static void free_paths(char **v, int n)
 static void open_file(const char *path, int kind)
 {
     const char *rel = rel_of(path);
+    /* an app's package: the Tienda installs it, by the same steps as one of
+     * its catalogue (docs/plan/TIENDA.md). From the card only: a pendrive's
+     * is copied over first. */
+    const char *dot = strrchr(path, '.');
+    if (dot && !strcasecmp(dot, ".p4app")) {
+        if (!rel) aos_ui_toast(_("Copiá el paquete a la tarjeta primero"), 2500);
+        else if (!aos_store_sideload(rel)) aos_ui_toast(_("La Tienda no pudo tomar el paquete"), 2500);
+        else {
+            aos_ui_toast(_("La Tienda está instalando el paquete"), 2500);
+            aos_ui_open("aos.store");
+        }
+        return;
+    }
     if (kind == K_IMAGE) { if (!aos_ui_open_app_with("aos.photos", path)) aos_ui_toast(_("No se pudo abrir Fotos"), 1600); return; }
     if (kind == K_AUDIO) { if (!aos_ui_open_app_with("aos.music", path)) aos_ui_toast(_("No se pudo abrir Música"), 1600); return; }
     if (kind == K_FW && rel && path_under(rel, "firmware")) {

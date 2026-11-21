@@ -3120,6 +3120,12 @@ function pageTienda() {
   };
   const FEAT = { '3d': '3D', packs: N_('Arte en packs'), pad: 'Joystick', landscape: N_('Acostada'), portrait: N_('De pie'),
                  sound: N_('Sonido'), net: N_('Usa la red'), bt: 'Bluetooth', portal: N_('Página en el portal') };
+  const WHY = { network: N_('No se pudo bajar: revisá la red.'), not_there: N_('No está en el servidor.'), clock: N_('La placa todavía no tiene la hora de la red.'),
+                server: N_('No se pudo verificar el servidor.'), card: N_('No se pudo escribir en la tarjeta: ¿está llena?'),
+                package: N_('El paquete no es el publicado, o está dañado.'), rules: N_('El paquete quiere escribir donde no le corresponde.'),
+                firmware: N_('Necesita un P4OS más nuevo.'), catalog: N_('El catálogo no se puede leer.'), source: N_('Esa fuente no se puede usar.'),
+                memory: N_('No alcanzó la memoria.'), not_listed: N_('No está en el catálogo.'), in_store: N_('Esa app es de la Tienda: se instala y se quita desde ahí.'),
+                not_store: N_('No la instaló la Tienda.'), other: N_('Algo salió mal.') };
   const STATE = { installed: N_('Instalada'), update: N_('Hay una versión nueva'), by_hand: N_('Copiada a mano'),
                   set_aside: N_('Apartada: hizo caer la placa al cargarse'), absent: '' };
   function card(e, a) {
@@ -3165,8 +3171,10 @@ function pageTienda() {
     bar.style.display = st.busy ? '' : 'none';
     bar.firstChild.style.width = st.busy && j.total ? (j.got * 100 / j.total).toFixed(1) + '%' : '0%';
     msg.textContent = st.busy ? tr('En curso: %s %s (%s)', j.what, j.file, j.step || '…') + (j.queued ? ' +' + j.queued : '')
-                              : st.last ? (st.last_ok ? tr('Lo último: %s', st.last) : tr('No se pudo: %s', st.last)) : '';
+                              : st.last ? (st.last_ok ? tr('Lo último: %s', st.last)
+                                  : st.last_kind === 'cancelled' ? tr('Cancelado.') : tr(WHY[st.last_kind] || WHY.other) + ' (' + st.last + ')') : '';
     msg.style.color = !st.busy && st.last && !st.last_ok ? 'var(--orange)' : '';
+    const ask = h('input', { type: 'text', placeholder: 'usuario/repositorio', style: 'flex:1;min-width:180px' });
     const side = h('input', { type: 'file', accept: '.p4app', style: 'display:none', onchange: async e => {
       const f = e.target.files[0];
       if (!f) return;
@@ -3190,7 +3198,10 @@ function pageTienda() {
         h('button', { class: 'btn', disabled: st.busy, title: tr('Un paquete que no está en ningún catálogo'), onclick: () => side.click() }, tr('Instalar un .p4app…')), side,
         st.busy ? h('button', { class: 'btn red', onclick: () => act('cancel', {}) }, tr('Cancelar')) : null),
       bar, msg,
-      h('div', { class: 'note', style: 'margin-top:8px' }, tr('Las fuentes de apps se agregan sólo en la placa.')));
+      h('div', { class: 'note', style: 'margin-top:8px' }, tr('Las fuentes de apps se agregan sólo en la placa. Desde acá se puede proponer una, para aceptarla en su pantalla:')),
+      st.proposed ? h('div', { class: 'small', style: 'color:var(--orange);margin-top:4px' }, tr('Propuesta, esperando en la placa (Tienda, Fuentes): %s', st.proposed)) : null,
+      h('div', { class: 'btns', style: 'margin-top:6px' }, ask,
+        h('button', { class: 'btn', onclick: async () => { if (!ask.value.trim()) return; try { st = await post('store/propose', { url: ask.value.trim() }); ask.value = ''; draw(); toast(tr('Propuesta: ahora aceptala en la placa (Tienda, Fuentes)')); } catch (x) { toast(x.message, true); } } }, tr('Proponer'))));
     const cats = (head && head.cats) || [];
     const sel = h('select', { onchange: e => { filter = e.target.value; draw(); } },
       h('option', { value: '' }, tr('Todo')), h('option', { value: '+', selected: filter === '+' }, tr('Instaladas')),

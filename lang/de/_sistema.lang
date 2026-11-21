@@ -10669,3 +10669,32 @@ Entiendo: agregarla	Verstanden: hinzufügen
 ruta inválida, o la cola está llena	ungültiger Pfad, oder die Warteschlange ist voll
 no se pudo recibir el paquete	das Paket konnte nicht empfangen werden
 otro catálogo sólo en modo desarrollo, que se prende en la placa (Tienda, Fuentes)	ein anderer Katalog nur im Entwicklermodus, der am Board eingeschaltet wird (Store, Quellen)
+Copiá el paquete a la tarjeta primero	Kopier das Paket zuerst auf die Karte
+La Tienda no pudo tomar el paquete	Der Store konnte das Paket nicht annehmen
+La Tienda está instalando el paquete	Der Store installiert das Paket
+Desde el portal proponen esta fuente:	Vom Portal wurde diese Quelle vorgeschlagen:
+Mirarla	Ansehen
+Descartar	Verwerfen
+No se pudo bajar: revisá la red y probá de nuevo.	Download fehlgeschlagen: Netzwerk prüfen und erneut versuchen.
+No está en el servidor.	Auf dem Server nicht vorhanden.
+La placa todavía no tiene la hora de la red: probá en un momento.	Das Board hat noch keine Netzwerkzeit: gleich noch einmal versuchen.
+No se pudo verificar el servidor.	Der Server konnte nicht überprüft werden.
+El paquete no es el publicado, o está dañado.	Das Paket ist nicht das veröffentlichte oder beschädigt.
+El paquete quiere escribir donde no le corresponde.	Das Paket will dorthin schreiben, wo es nicht darf.
+Necesita un P4OS más nuevo.	Braucht ein neueres P4OS.
+El catálogo no se puede leer.	Der Katalog ist nicht lesbar.
+Esa fuente no se puede usar.	Diese Quelle kann nicht verwendet werden.
+No alcanzó la memoria.	Der Speicher hat nicht gereicht.
+No está en el catálogo.	Nicht im Katalog.
+Esa app es de la Tienda: se instala y se quita desde acá.	Diese App gehört zum Store: hier installieren und entfernen.
+No la instaló la Tienda.	Nicht vom Store installiert.
+Algo salió mal.	Etwas ist schiefgegangen.
+No se pudo instalar %s.	%s konnte nicht installiert werden.
+No se pudo quitar %s.	%s konnte nicht entfernt werden.
+No se pudo traer el catálogo.	Der Katalog konnte nicht geladen werden.
+No se pudo mirar esa fuente.	Diese Quelle konnte nicht angesehen werden.
+No se pudo agregar la fuente.	Die Quelle konnte nicht hinzugefügt werden.
+No se pudo quitar la fuente.	Die Quelle konnte nicht entfernt werden.
+No se pudo instalar el paquete.	Das Paket konnte nicht installiert werden.
+No se pudo.	Fehlgeschlagen.
+eso no es una dirección de fuente: usuario/repositorio, o https://...	das ist keine Quellenadresse: benutzer/repository oder https://...

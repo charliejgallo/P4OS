@@ -579,17 +579,44 @@ apagado la primera fuente volvió a ser la oficial, como debe; el catálogo
 de prueba sigue cargado desde la tarjeta hasta que se prenda el modo y se
 lo apunte otra vez.
 
+**Segunda tanda (2026-11-21, en la Mac; va en `v0.30.0-tienda.2`):**
+
+- **Los fallos se dicen en el idioma de la persona.** Cada fallo del
+  servicio lleva ahora su *clase* (`aos_store_err_t`: red, no está en el
+  servidor, sin hora, certificado, tarjeta, paquete, reglas, firmware,
+  catálogo, fuente, cancelado, memoria...) al lado de la línea en inglés,
+  que queda para el registro. La app arma con la clase una frase
+  traducida ("No se pudo instalar Flappy. No está en el servidor.") y
+  muestra la línea del registro abajo, chica; el portal hace lo mismo
+  (`last_kind` en `/api/store`).
+- **El portal propone, la placa decide (D8).** `POST /api/store/propose`
+  guarda una dirección (una sola, hasta el próximo reinicio) y nada más:
+  no baja ni agrega nada. La pantalla Fuentes la muestra en una tarjeta
+  con "Mirarla" y "Descartar", y la solapa Fuentes lleva un punto
+  mientras espera; mirarla sigue el mismo camino que escribirla a mano,
+  aviso incluido. Sin modo desarrollo, una dirección `http://` ni se
+  guarda.
+- **Un `.p4app` se abre desde Archivos:** lo toma la Tienda (los mismos
+  pasos que uno soltado en el portal) y se abre su pantalla.
+- **El modo desarrollo recuerda el catálogo de prueba:** apagarlo vuelve
+  al oficial, prenderlo de nuevo trae el que estaba.
+- **Tope mientras baja.** Un catálogo se corta apenas el servidor anuncia
+  o manda más de 1 MB (antes se revisaba al terminar, con la tarjeta ya
+  escrita), y una foto, a los 512 KB. Los paquetes y los packs no lo
+  necesitan: vienen con su tamaño y `aos_fetch` los ata a él; un
+  catálogo que no lo diga no instala.
+- `tests/store_fw_host`: 48 casos (las clases de fallo una por una, la
+  propuesta, el catálogo sin fin). En el simulador: el cartel traducido
+  de un 404, la tarjeta de la propuesta y "Mirarla" hasta el fallo
+  traducido de una fuente que no existe. El firmware `rev1_3` compila:
+  7 045 920 bytes. **Sin instalar en la placa todavía.**
+
 **Lo que falta de esta fase:**
 
 - **Que el usuario la recorra en la placa:** el teclado, el aviso, y
   `aos_access_here_trusted` con una fuente http (el simulador no
-  distingue redes).
-- Que el portal pueda *proponer* una fuente para aceptarla en la pantalla
-  (D8): hoy se escribe en la placa.
-- Abrir un `.p4app` desde la app Archivos.
-- Traducir los mensajes del servicio que ve la persona.
-- Un tope al tamaño de un catálogo mientras baja (hoy se revisa al
-  terminar: 1 MB).
+  distingue redes); y de la segunda tanda, proponer una fuente desde el
+  portal y abrir un `.p4app` desde Archivos.
 
 ## Fase 3: la app y la página del portal (escritas, vistas en el simulador, 2026-11-21)
 

@@ -10669,3 +10669,32 @@ Entiendo: agregarla	I understand: add it
 ruta inválida, o la cola está llena	not a valid path, or the queue is full
 no se pudo recibir el paquete	the package could not be received
 otro catálogo sólo en modo desarrollo, que se prende en la placa (Tienda, Fuentes)	another catalogue only in developer mode, which is turned on at the board (Store, Sources)
+Copiá el paquete a la tarjeta primero	Copy the package to the card first
+La Tienda no pudo tomar el paquete	The Store could not take the package
+La Tienda está instalando el paquete	The Store is installing the package
+Desde el portal proponen esta fuente:	This source was proposed from the portal:
+Mirarla	Look at it
+Descartar	Dismiss
+No se pudo bajar: revisá la red y probá de nuevo.	The download failed: check the network and try again.
+No está en el servidor.	It is not on the server.
+La placa todavía no tiene la hora de la red: probá en un momento.	The board does not have the network time yet: try in a moment.
+No se pudo verificar el servidor.	The server could not be verified.
+El paquete no es el publicado, o está dañado.	The package is not the published one, or it is damaged.
+El paquete quiere escribir donde no le corresponde.	The package wants to write where it may not.
+Necesita un P4OS más nuevo.	It needs a newer P4OS.
+El catálogo no se puede leer.	The catalogue cannot be read.
+Esa fuente no se puede usar.	That source cannot be used.
+No alcanzó la memoria.	Not enough memory.
+No está en el catálogo.	It is not in the catalogue.
+Esa app es de la Tienda: se instala y se quita desde acá.	That app is the Store's: install and remove it from here.
+No la instaló la Tienda.	The Store did not install it.
+Algo salió mal.	Something went wrong.
+No se pudo instalar %s.	%s could not be installed.
+No se pudo quitar %s.	%s could not be removed.
+No se pudo traer el catálogo.	The catalogue could not be fetched.
+No se pudo mirar esa fuente.	That source could not be looked at.
+No se pudo agregar la fuente.	The source could not be added.
+No se pudo quitar la fuente.	The source could not be removed.
+No se pudo instalar el paquete.	The package could not be installed.
+No se pudo.	It failed.
+eso no es una dirección de fuente: usuario/repositorio, o https://...	that is not a source's address: user/repository, or https://...

@@ -70,7 +70,7 @@ def fw(card, *steps, cat=CAT, env=None, dev=True):
         w = line.split(" ")
         if w[0] in ("ok", "FAILED"):
             jobs.append((w[0] == "ok", line))
-        elif len(w) == 5 and w[0] not in ("source", "probed"):
+        elif len(w) == 5 and w[0] not in ("source", "probed", "proposed"):
             apps[w[0]] = w[1:]
     return jobs, apps, p.stdout + p.stderr
 
@@ -338,6 +338,42 @@ jobs, apps, o = fw("c", "look=" + THEIRS, "add=" + THEIRS, "unsource=1:1", "unso
 check("taken off with its apps; the official one stays", jobs[1][0] and jobs[2][0] and "with 1 of its apps" in jobs[2][1]
       and not os.path.exists("c/apps/tercero.so") and not os.path.exists("c/apps/.store/tercero.json")
       and len(sources(o)) == 1 and apps["dados"][0] == "installed" and os.path.exists("c/apps/suelto.so"), o)
+
+# how each failure is told to the screen: its kind, to say it in the person's language
+kinds = {}
+for card in ("k1", "k2", "k3"):
+    os.mkdir(card)
+jobs, apps, o = fw("k1", "refresh", "install=nothing", "remove=nothing", "sideload=nothing.p4app", "add=https://example.org/c.ndjson")
+kinds["not listed"] = jobs[1][1].endswith("kind=14"); kinds["not the store's"] = jobs[2][1].endswith("kind=16")
+kinds["no such package"] = jobs[3][1].endswith("kind=7"); kinds["a source not looked at"] = jobs[4][1].endswith("kind=11")
+jobs, apps, o = fw("k2", "refresh", "install=hello_app", cat=LATEST + "bad1.ndjson")
+kinds["not the bytes published"] = jobs[1][1].endswith("kind=7")
+jobs, apps, o = fw("k2", "refresh", "install=hello_app", cat=LATEST + "bad4.ndjson")
+kinds["a path it may not write"] = jobs[1][1].endswith("kind=8")
+jobs, apps, o = fw("k3", "refresh", "install=dados", cat=LATEST + "old.ndjson", env={"FAKE_FW": "v0.29.0"})
+kinds["a newer firmware's"] = jobs[1][1].endswith("kind=9")
+jobs, apps, o = fw("k3", "refresh", cat=LATEST + "nothing-here.ndjson")
+kinds["not on the server"] = jobs[0][1].endswith("kind=3")
+jobs, apps, o = fw("k3", "refresh", cat=LATEST + "broken.ndjson")
+kinds["a catalogue that does not read"] = jobs[0][1].endswith("kind=10")
+jobs, apps, o = fw("k3", "refresh", cat="http://localhost:1/x.ndjson")
+kinds["nobody answers"] = jobs[0][1].endswith("kind=2")
+check("each failure says its kind for the screen", all(kinds.values()), kinds)
+# a catalogue that never ends is dropped while it downloads, not once it filled the card
+with open("rel/endless.ndjson", "w") as f:
+    f.write(open("rel/p4os-store.ndjson").read())
+    f.write(" " * (3 * 1024 * 1024) + "\n")
+jobs, apps, o = fw("k3", "refresh", cat=LATEST + "endless.ndjson")
+check("a catalogue over the limit: stopped, nothing kept", not jobs[0][0] and "it is over 1024 KB" in jobs[0][1] and jobs[0][1].endswith("kind=10")
+      and not [n for n in os.listdir("k3/apps/.store") if "catalog.new" in n], o)
+os.remove("rel/endless.ndjson")
+
+# a source asked for from the portal: kept for the board to decide, never added
+jobs, apps, o = fw("k1", "propose=ana/apps", "propose=ftp://x", "sources")
+check("a source proposed: kept, not added", "proposed 1 https://github.com/ana/apps/releases/latest/download/p4os-store.ndjson" in o
+      and "proposed 0" in o and len(sources(o)) == 1, o)
+jobs, apps, o = fw("s0", "propose=http://localhost:9/c.ndjson", dev=False)
+check("...and not an http one without developer mode", "proposed 0" in o, o)
 sys.exit(1 if fails else 0)
 PY
 echo "all passed"

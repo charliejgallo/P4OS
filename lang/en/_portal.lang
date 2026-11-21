@@ -2305,13 +2305,11 @@ Quitar	Remove
 Abrir	Open
 En curso: %s %s (%s)	Running: %s %s (%s)
 Lo último: %s	Last: %s
-No se pudo: %s	It failed: %s
 Fuente	Source
 todavía sin catálogo	no catalogue yet
 Actualizaciones	Updates
 Un recibo para las que son las del catálogo: no cambia ninguna app	A receipt for the ones that are the catalogue's: it changes no app
 Que la Tienda maneje las %s copiadas a mano	Let the Store manage the %s copied by hand
-Las fuentes de apps se agregan sólo en la placa.	App sources are added on the board only.
 Todo	Everything
 Instaladas	Installed
 Buscar	Search
@@ -2328,3 +2326,23 @@ Fuente agregada	Added source
 apps: %s	apps: %s
 Un paquete que no está en ningún catálogo	A package that is in no catalogue
 Instalar un .p4app…	Install a .p4app…
+No se pudo bajar: revisá la red.	The download failed: check the network.
+No está en el servidor.	It is not on the server.
+La placa todavía no tiene la hora de la red.	The board does not have the network time yet.
+No se pudo verificar el servidor.	The server could not be verified.
+No se pudo escribir en la tarjeta: ¿está llena?	Could not write to the card: is it full?
+El paquete no es el publicado, o está dañado.	The package is not the published one, or it is damaged.
+El paquete quiere escribir donde no le corresponde.	The package wants to write where it may not.
+Necesita un P4OS más nuevo.	It needs a newer P4OS.
+El catálogo no se puede leer.	The catalogue cannot be read.
+Esa fuente no se puede usar.	That source cannot be used.
+No alcanzó la memoria.	Not enough memory.
+No está en el catálogo.	It is not in the catalogue.
+Esa app es de la Tienda: se instala y se quita desde ahí.	That app is the Store's: install and remove it from there.
+No la instaló la Tienda.	The Store did not install it.
+Algo salió mal.	Something went wrong.
+Cancelado.	Cancelled.
+Las fuentes de apps se agregan sólo en la placa. Desde acá se puede proponer una, para aceptarla en su pantalla:	App sources are added on the board only. From here you can propose one, to accept it on its screen:
+Propuesta, esperando en la placa (Tienda, Fuentes): %s	Proposed, waiting at the board (Store, Sources): %s
+Propuesta: ahora aceptala en la placa (Tienda, Fuentes)	Proposed: now accept it at the board (Store, Sources)
+Proponer	Propose

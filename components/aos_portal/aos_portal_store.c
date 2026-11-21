@@ -18,6 +18,10 @@
  *                                  {"url": "..."} puts another address in the
  *                                  official one's place first ("" goes back),
  *                                  in developer mode only
+ *   POST /api/store/propose        {"url": "user/repo"}: asks for a source.
+ *                                  It is not added: the Tienda shows it at
+ *                                  the board, where a person looks at it,
+ *                                  reads the warning and decides
  *   POST /api/store/sideload       the body is a package (.p4app): installed
  *                                  by the same steps; ?path=/x.p4app takes
  *                                  one that is on the card or a pendrive
@@ -203,6 +207,11 @@ static void store_state(aos_httpd_req_t *r, int status, const char *error)
     cJSON_AddNumberToObject(o, "jobs_done", st.jobs_done);
     cJSON_AddBoolToObject(o, "last_ok", st.last_ok);
     cJSON_AddStringToObject(o, "last", st.last);
+    static const char *kinds[] = { "", "other", "network", "not_there", "clock", "server", "card", "package", "rules", "firmware",
+                                   "catalog", "source", "cancelled", "memory", "not_listed", "in_store", "not_store" };
+    cJSON_AddStringToObject(o, "last_kind", kinds[st.last_kind >= 0 && st.last_kind < (int)(sizeof kinds / sizeof kinds[0]) ? st.last_kind : 1]);
+    char asked[200];
+    if (aos_store_proposal(asked, sizeof asked)) cJSON_AddStringToObject(o, "proposed", asked);
     cJSON *apps = cJSON_AddArrayToObject(o, "apps");
     aos_store_app_t a;
     for (int i = 0; aos_store_app(i, &a); i++) {
@@ -263,7 +272,7 @@ static bool store_api(aos_httpd_req_t *r, const char *p, bool get, bool post)
         return true;
     }
     if (!post || (strcmp(p, "/refresh") && strcmp(p, "/install") && strcmp(p, "/remove") && strcmp(p, "/adopt") &&
-                  strcmp(p, "/cancel"))) return false;
+                  strcmp(p, "/cancel") && strcmp(p, "/propose"))) return false;
     char *body = aos_httpd_body_all(r, 2048);
     cJSON *j = body ? cJSON_Parse(body) : NULL;
     free(body);
@@ -277,6 +286,9 @@ static bool store_api(aos_httpd_req_t *r, const char *p, bool get, bool post)
         if (!file || !aos_store_install(file, cJSON_GetStringValue(cJSON_GetObjectItem(j, "packs")))) fail = _("falta file, o la cola está llena");
     } else if (!strcmp(p, "/remove")) {
         if (!file || !aos_store_remove(file)) fail = _("falta file, o la cola está llena");
+    } else if (!strcmp(p, "/propose")) {
+        const char *url = cJSON_GetStringValue(cJSON_GetObjectItem(j, "url"));
+        if (!url || !aos_store_propose(url)) fail = _("eso no es una dirección de fuente: usuario/repositorio, o https://...");
     } else if (!strcmp(p, "/adopt")) {
         if (!aos_store_adopt()) fail = _("la cola está llena");
     } else aos_store_cancel();
