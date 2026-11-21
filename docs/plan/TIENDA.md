@@ -997,11 +997,18 @@ sólo muestra las dos ranuras y deja volver a la anterior.
   (`P4_SIM_OTA=<archivo>`, `P4_SIM_FW=<versión>`): bajar 7 MB del
   servidor de prueba, el avance, cancelar, y el archivo escrito es byte a
   byte la imagen publicada. Firmware `rev1_3`: 7 062 096 bytes.
-- **Falta en la placa:** todo. La primera vez tiene que ir por OTA común
-  (el firmware que corre no sabe actualizarse solo); después, con el
-  catálogo de prueba ofreciendo una imagen, el camino entero: bajar,
-  escribir la ranura de verdad, reiniciar a prueba y confirmar. Medir el
-  tiempo y la RAM interna durante la escritura.
+- **En la placa (2026-11-21):** el firmware `v0.30.0-tienda.2-16-g22d5eb7`
+  por OTA común (el que corría no sabía actualizarse solo). Con el
+  catálogo de prueba de la Mac ofreciendo `v0.30.0` (esa misma imagen,
+  7 062 112 bytes) la placa la vio como más nueva, y pedida por la API la
+  bajó y verificó en 27 s, la escribió en la otra ranura en 31 s (59 s en
+  total) y quedó "lista": la otra ranura pasó a tener esa versión, en
+  estado `new`. La RAM interna libre bajó 1,5 KB mientras duró (208 151
+  de 209 611). El catálogo con las descripciones largas pesa 185 KB y la
+  placa lo refresca en 2,6 s por la red local.
+- **Falta en la placa:** el reinicio a esa ranura desde Ajustes (el toque
+  es del usuario) y verla confirmarse, y recorrer la pantalla: el avance,
+  cancelar.
 - **Falta también:** que el CI lo arme de verdad (el paso nuevo del
   trabajo `release` no corrió nunca), y el firmware del C6.
 
