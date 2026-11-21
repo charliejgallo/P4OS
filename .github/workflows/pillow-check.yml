@@ -1,0 +1,24 @@
+# A one-off: does the container make the Store's pictures? Removed once it answered.
+name: pillow-check
+on:
+  push:
+    branches: [tienda]
+    paths: ['.github/workflows/pillow-check.yml']
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    container: espressif/idf:release-v5.5
+    steps:
+      - uses: actions/checkout@v5
+      - run: |
+          which -a python3 || true
+          apt-get update && apt-get install -y --no-install-recommends python3-pil
+          /usr/bin/python3 -c "import PIL; print('Pillow', PIL.__version__)"
+          /usr/bin/python3 - <<'PY'
+          import sys
+          sys.path.insert(0, "tools")
+          import gen_store
+          for f in ("app-store.png", "app-store-app.jpg", "land-hello.png"):
+              data, w, h = gen_store.make_shot("docs/img/" + f)
+              print(f, len(data), "bytes", w, "x", h)
+          PY

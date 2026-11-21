@@ -51,7 +51,12 @@ jobs:
           fetch-depth: 0
       - name: tools
         # m4 to curl: CAS's engine (GMP's configure wants m4 and a native cc)
-        run: apt-get update && apt-get install -y --no-install-recommends zsh zip binutils m4 bzip2 xz-utils curl make gcc g++ libc6-dev perl
+        # python3-pil: the Store's pictures (tools/gen_store.py). The
+        # container's own python3 has no pip, so it comes from apt, and it is
+        # checked here, in the first minute, and not after the apps are built
+        run: |
+          apt-get update && apt-get install -y --no-install-recommends zsh zip binutils m4 bzip2 xz-utils curl make gcc g++ libc6-dev perl python3-pil
+          /usr/bin/python3 -c "import PIL; print('Pillow', PIL.__version__)"
       - name: firmware
         shell: bash
         run: |
@@ -140,11 +145,10 @@ jobs:
             case "$GITHUB_REF" in refs/tags/v*) ;; *) rel="$(git describe --tags --abbrev=0)-dev" ;; esac
             curl -fsSL -o prev.ndjson \
                 "https://github.com/$GITHUB_REPOSITORY/releases/latest/download/p4os-store.ndjson" || rm -f prev.ndjson
-            # the apps' pictures are made at the store's size with Pillow;
-            # without it the catalogue still goes out, with no pictures
-            python3 -m pip install --quiet pillow 2>/dev/null || python3 -m pip install --quiet --break-system-packages pillow 2>/dev/null \
-                || echo "::warning::Pillow could not be installed: the catalogue goes out without pictures"
-            python3 tools/gen_store.py build --release "$rel" --out out --repo "$GITHUB_REPOSITORY" \
+            # the apps' pictures are made at the store's size with Pillow,
+            # which the "tools" step installed for the system's python3 (the
+            # first two test tags went out without pictures: pip is not there)
+            /usr/bin/python3 tools/gen_store.py build --release "$rel" --out out --repo "$GITHUB_REPOSITORY" \
                 --previous prev.ndjson --missing-apps skip --missing-packs skip
           fi
       - uses: actions/upload-artifact@v5
