@@ -3,5 +3,10 @@
  "about": {
   "es": "Cotizaciones: dólar, euro y otras monedas.",
   "en": "Exchange rates: dollar, euro and other currencies."
- }
+ },
+ "shots": [
+  "app-cotiz.png",
+  "app-cotiz-currencies.png",
+  "web-cotiz.png"
+ ]
 }
