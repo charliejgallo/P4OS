@@ -10822,3 +10822,9 @@ Una copia por semana	A copy a week
 Subir ahora	Send now
 A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos: hace falta la frase de las copias automáticas. La placa entra con su clave, sin contraseña: la línea para el authorized_keys del servidor está en el portal, Respaldo. Un servidor que muestre otra clave que la aceptada acá no recibe nada.	The sealed backups, and only those, go to a NAS or a computer with SSH: the automatic copies' passphrase is needed. The board logs in with its key, with no password: the line for the server's authorized_keys is in the portal, Backup. A server that shows another key than the one accepted here gets nothing.
 falta do: look o send	do is missing: look or send
+Tocá otra vez: los servidores que conocían la clave anterior dejan de dejarla entrar	Tap again: the servers that knew the old key stop letting it in
+Clave nueva: su línea está en el portal, Respaldo	New key: its line is in the portal, Backup
+LA CLAVE DE LA PLACA	THE BOARD'S KEY
+Hacer una clave nueva	Make a new key
+Es la clave con que la placa entra a otros equipos por SSH, desde acá y desde la app SSH. Una nueva reemplaza a la anterior, que deja de servir: hay que poner la línea nueva en cada servidor.	It is the key the board logs in to other machines with by SSH, from here and from the SSH app. A new one takes the place of the old, which stops working: the new line has to be put on every server.
+No se pudo	It could not be done

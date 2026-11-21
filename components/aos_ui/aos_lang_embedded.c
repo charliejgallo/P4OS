@@ -3525,6 +3525,12 @@ static const char blob_en__sistema_lang[] =
     "Subir ahora\tSend now\n"
     "A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos: hace falta la frase de las copias automáticas. La placa entra con su clave, sin contraseña: la línea para el authorized_keys del servidor está en el portal, Respaldo. Un servidor que muestre otra clave que la aceptada acá no recibe nada.\tThe sealed backups, and only those, go to a NAS or a computer with SSH: the automatic copies' passphrase is needed. The board logs in with its key, with no password: the line for the server's authorized_keys is in the portal, Backup. A server that shows another key than the one accepted here gets nothing.\n"
     "falta do: look o send\tdo is missing: look or send\n"
+    "Tocá otra vez: los servidores que conocían la clave anterior dejan de dejarla entrar\tTap again: the servers that knew the old key stop letting it in\n"
+    "Clave nueva: su línea está en el portal, Respaldo\tNew key: its line is in the portal, Backup\n"
+    "LA CLAVE DE LA PLACA\tTHE BOARD'S KEY\n"
+    "Hacer una clave nueva\tMake a new key\n"
+    "Es la clave con que la placa entra a otros equipos por SSH, desde acá y desde la app SSH. Una nueva reemplaza a la anterior, que deja de servir: hay que poner la línea nueva en cada servidor.\tIt is the key the board logs in to other machines with by SSH, from here and from the SSH app. A new one takes the place of the old, which stops working: the new line has to be put on every server.\n"
+    "No se pudo\tIt could not be done\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -7042,6 +7048,12 @@ static const char blob_de__sistema_lang[] =
     "Subir ahora\tJetzt senden\n"
     "A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos: hace falta la frase de las copias automáticas. La placa entra con su clave, sin contraseña: la línea para el authorized_keys del servidor está en el portal, Respaldo. Un servidor que muestre otra clave que la aceptada acá no recibe nada.\tAuf ein NAS oder einen Rechner mit SSH gehen die verschlüsselten Sicherungen, und nur diese: dazu braucht es die Passphrase der automatischen Kopien. Das Board meldet sich mit seinem Schlüssel an, ohne Passwort: die Zeile für die authorized_keys des Servers steht im Portal, Sicherung. Ein Server, der einen anderen Schlüssel zeigt als den hier angenommenen, bekommt nichts.\n"
     "falta do: look o send\tdo fehlt: look oder send\n"
+    "Tocá otra vez: los servidores que conocían la clave anterior dejan de dejarla entrar\tNochmal tippen: Server, die den alten Schlüssel kannten, lassen ihn nicht mehr herein\n"
+    "Clave nueva: su línea está en el portal, Respaldo\tNeuer Schlüssel: seine Zeile steht im Portal, Sicherung\n"
+    "LA CLAVE DE LA PLACA\tDER SCHLÜSSEL DES BOARDS\n"
+    "Hacer una clave nueva\tNeuen Schlüssel erzeugen\n"
+    "Es la clave con que la placa entra a otros equipos por SSH, desde acá y desde la app SSH. Una nueva reemplaza a la anterior, que deja de servir: hay que poner la línea nueva en cada servidor.\tMit diesem Schlüssel meldet sich das Board per SSH an anderen Rechnern an, von hier und aus der SSH-App. Ein neuer ersetzt den alten, der nicht mehr gilt: die neue Zeile muss auf jedem Server eingetragen werden.\n"
+    "No se pudo\tNicht möglich\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -7049,7 +7061,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3510, 0, files_en, 1 },
-    { "de", "Deutsch", 3510, 0, files_de, 1 },
+    { "en", "English", 3516, 0, files_en, 1 },
+    { "de", "Deutsch", 3516, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

@@ -18,6 +18,7 @@
  *   from-drive      and back
  *   srv=<host>:<port>:<user>:<folder>   the server the sealed copies go to
  *   srv-key         the board's line for the server's authorized_keys
+ *   srv-key-new     another key in the place of the board's
  *   look            who answers there: its key, and whether the board gets in
  *   trust           the key the last look saw is the server's from now on
  *   send            the sealed backups the server lacks, now
@@ -103,6 +104,8 @@ int main(int argc, char **argv)
             aos_backup_server_t sv;
             aos_backup_server_get(&sv);
             printf("server %s:%d %s %s on=%d pinned=%d fp=%s last=%u\n", sv.host, sv.port, sv.user, sv.dir, sv.on, sv.pinned, sv.fp, (unsigned)sv.last);
+        } else if (!strcmp(a, "srv-key-new")) {
+            printf("keynew %d\n", aos_backup_server_key_new());
         } else if (!strcmp(a, "srv-key")) {
             char line[200] = "";
             bool ok = aos_backup_server_key_line(line, sizeof line);

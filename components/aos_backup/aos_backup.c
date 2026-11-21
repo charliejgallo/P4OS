@@ -1071,6 +1071,18 @@ bool aos_backup_server_key_line(char *out, size_t n)
     return ok;
 }
 
+bool aos_backup_server_key_new(void)
+{
+    /* the old one is gone for good: whoever let it in lets nobody in now.
+     * The SSH app reads the same preference, and writes its
+     * id_ed25519.pub again the next time it shows the key. */
+    uint8_t seed[32];
+    if (!aos_hal_pref_set_str(K_SSH_SEED, "")) return false;
+    bool ok = board_seed(seed);
+    memset(seed, 0, sizeof seed);
+    return ok;
+}
+
 void aos_backup_server_get(aos_backup_server_t *out)
 {
     char *hk = BIG_ALLOC(HK_MAX);

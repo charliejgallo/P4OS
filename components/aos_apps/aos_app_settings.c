@@ -2161,6 +2161,13 @@ static void bk_srv_trust_cb(lv_event_t *e)
     s_bk_rev++;
 }
 
+static void bk_srv_key_new_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez: los servidores que conocían la clave anterior dejan de dejarla entrar"))) return;
+    aos_ui_toast(aos_backup_server_key_new() ? _("Clave nueva: su línea está en el portal, Respaldo") : _("No se pudo"), 3500);
+    s_bk_rev++;
+}
+
 static void bk_srv_on_cb(lv_event_t *e)
 {
     aos_backup_server_on(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
@@ -2288,6 +2295,10 @@ static void build_backup(lv_obj_t *p)
         if (!st.busy) action_row(g, _("Subir ahora"), AOS_C_ACCENT, bk_srv_send_cb);
     }
     note(p, _("A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos: hace falta la frase de las copias automáticas. La placa entra con su clave, sin contraseña: la línea para el authorized_keys del servidor está en el portal, Respaldo. Un servidor que muestre otra clave que la aceptada acá no recibe nada."));
+
+    g = group(p, _("LA CLAVE DE LA PLACA"));
+    action_row(g, _("Hacer una clave nueva"), AOS_C_RED, bk_srv_key_new_cb);
+    note(p, _("Es la clave con que la placa entra a otros equipos por SSH, desde acá y desde la app SSH. Una nueva reemplaza a la anterior, que deja de servir: hay que poner la línea nueva en cada servidor."));
 }
 
 /* ---- Diagnostics ---- */

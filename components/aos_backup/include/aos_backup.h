@@ -211,6 +211,10 @@ void aos_backup_server_get(aos_backup_server_t *out);
 void aos_backup_server_set(const char *host, int port, const char *user, const char *dir);
 void aos_backup_server_on(bool on);
 bool aos_backup_server_key_line(char *out, size_t n);       /* 160 bytes do */
+/* Another key for the board, in the place of the one it had: for a key that
+ * was seen by who should not. Every server that let the old one in has to
+ * be given the new line. It is the SSH app's key too. */
+bool aos_backup_server_key_new(void);
 /* Connects to see who answers, in the background: afterwards
  * aos_backup_server_seen() gives the key it showed and whether the board's
  * key was let in. aos_backup_server_trust() keeps that key. */

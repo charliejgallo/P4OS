@@ -278,7 +278,15 @@ en el portal; el servidor está sin elegir.
 `sshc_seed` de esta placa quedó a la vista en el registro de una sesión de
 trabajo el 2026-11-21 (un error de esa sesión, al revisar un respaldo).
 Esa clave hay que cambiarla por una nueva antes de ponerla en el
-`authorized_keys` de nadie.
+`authorized_keys` de nadie. Para eso, el mismo día: Ajustes → Respaldo →
+"Hacer una clave nueva" (dos toques), que reemplaza `sshc_seed`; probado
+en el simulador y en `tests/backup_host` (59 casos). Falta instalarlo.
+
+**El NAS del usuario, mirado desde la Mac (2026-11-21, con su permiso):**
+contesta por SSH (un OpenSSH) y ofrece clave pública o contraseña; ninguna
+clave de la Mac está autorizada para su usuario, así que la carpeta no se
+pudo ver. La contraseña no la escribe una sesión: el paso de autorizar una
+clave en el NAS es del usuario.
 
 **Falta:** SFTP hacia la placa con un cliente de verdad; y la
 copia a un servidor de verdad, que el plan pide probar **contra el NAS

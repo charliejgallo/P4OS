@@ -346,6 +346,11 @@ jobs, made, o = run("ca", "pa", "send", env={"P4_SRV_KEY": "bGEgY2xhdmU="})
 check("the server is not there: said as such", not jobs[0][0] and "kind=11" in jobs[0][1], o)
 jobs, made, o = run("ca", "pa", "srv=nas.example:22:respaldos:copias/p4", "send", env=E)
 check("its address changed: the key accepted is forgotten, and nothing goes until another look", "pinned=0" in o and not jobs[0][0] and "kind=10" in jobs[0][1], o)
+old_seed = read_prefs("pa").get("sshc_seed")
+jobs, made, o = run("ca", "pa", "srv-key", "srv-key-new", "srv-key", "srv-key", env=E)
+lines = [l for l in o.splitlines() if l.startswith("keyline 1 ")]
+check("a new key for the board: another line, kept, and the old one gone", "keynew 1" in o and len(lines) == 3 and lines[0] != lines[1]
+      and lines[1] == lines[2] and read_prefs("pa").get("sshc_seed") not in ("", None, old_seed), o)
 b = json.load(open("ca/backups/" + [n for n in on_card if n not in sealed_on_card][0]))
 keys = {p[1] for p in b["prefs"]}
 check("a plain backup carries where the server is, not the board's key", "bk_srv_host" not in keys or "sshc_seed" not in keys, sorted(k for k in keys if k.startswith(("bk_", "ssh"))))

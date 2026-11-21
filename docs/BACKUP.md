@@ -152,7 +152,9 @@ own (SFTP)**:
    line is in the portal's Backup page, with a button to copy it; it goes
    into `~/.ssh/authorized_keys` of that user on the server. It is the same
    key the SSH app uses, so a server that already knows the board needs
-   nothing.
+   nothing. **Make a new key**, at the bottom of the page (two taps),
+   puts another in its place, for a key that was seen by who should not:
+   the old one stops working, and the new line has to go to every server.
 3. **Try the connection.** The board shows the key the server answered
    with (`ED25519 SHA256:…`, as `ssh-keygen -lf` prints it on the server)
    and whether it was let in. **Accept this key** (two taps) keeps it: from
@@ -226,7 +228,7 @@ The file's name says the same: `-antes`, `-auto`, `-fw`.
 ## Tests
 
 `tests/backup_host/run.sh` builds the service for the Mac, with a folder
-for a card and a file for the preferences: 58 cases, among them a long
+for a card and a file for the preferences: 59 cases, among them a long
 value with its line breaks, a restore onto another board and its undoing,
 a wrong passphrase, a backup of a newer P4OS, the day's copy and the one
 before a firmware, the five the card keeps, a copy sealed under the kept

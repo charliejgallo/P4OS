@@ -10822,3 +10822,9 @@ Una copia por semana	Eine Kopie pro Woche
 Subir ahora	Jetzt senden
 A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos: hace falta la frase de las copias automáticas. La placa entra con su clave, sin contraseña: la línea para el authorized_keys del servidor está en el portal, Respaldo. Un servidor que muestre otra clave que la aceptada acá no recibe nada.	Auf ein NAS oder einen Rechner mit SSH gehen die verschlüsselten Sicherungen, und nur diese: dazu braucht es die Passphrase der automatischen Kopien. Das Board meldet sich mit seinem Schlüssel an, ohne Passwort: die Zeile für die authorized_keys des Servers steht im Portal, Sicherung. Ein Server, der einen anderen Schlüssel zeigt als den hier angenommenen, bekommt nichts.
 falta do: look o send	do fehlt: look oder send
+Tocá otra vez: los servidores que conocían la clave anterior dejan de dejarla entrar	Nochmal tippen: Server, die den alten Schlüssel kannten, lassen ihn nicht mehr herein
+Clave nueva: su línea está en el portal, Respaldo	Neuer Schlüssel: seine Zeile steht im Portal, Sicherung
+LA CLAVE DE LA PLACA	DER SCHLÜSSEL DES BOARDS
+Hacer una clave nueva	Neuen Schlüssel erzeugen
+Es la clave con que la placa entra a otros equipos por SSH, desde acá y desde la app SSH. Una nueva reemplaza a la anterior, que deja de servir: hay que poner la línea nueva en cada servidor.	Mit diesem Schlüssel meldet sich das Board per SSH an anderen Rechnern an, von hier und aus der SSH-App. Ein neuer ersetzt den alten, der nicht mehr gilt: die neue Zeile muss auf jedem Server eingetragen werden.
+No se pudo	Nicht möglich
