@@ -81,16 +81,20 @@ claves, no sus valores.
 - **Lo que deja:** el filtro por nombre falló en la primera prueba de
   verdad. Va a volver a fallar con una app que no siga la regla, y por eso
   la pantalla dice "lo que parezca" y `docs/BACKUP.md` dice de abrir el
-  archivo antes de sacarlo de la casa. El respaldo simple de esa prueba
-  quedó en la tarjeta con esa clave adentro: se reemplaza por uno nuevo
-  cuando la placa tenga el arreglo.
+  archivo antes de sacarlo de la casa.
+- **Con el arreglo instalado** (`v0.30.0-10-gcbd43ce`, el mismo día): un
+  respaldo simple nuevo, 0,5 s, 418 preferencias y 9 afuera, 14 383
+  bytes; ninguna de las nueve credenciales en el archivo, y lo que tiene
+  que viajar (el nombre de la Wi-Fi, los certificados, `key_snd`) sigue
+  ahí. El respaldo de la primera prueba, que llevaba la clave, se borró
+  de la tarjeta.
 - **Lo que viaja a la vista en un simple y es de la red de la casa:** el
   nombre de la Wi-Fi, las direcciones de los equipos que usan las apps
   (Home Assistant, Modbus, el escritorio remoto) y para qué dirección se
   hizo el certificado. No son credenciales; es para saber qué dice el
   archivo.
 
-**Falta para darla por terminada:** instalar el arreglo, y restaurar desde
+**Falta para darla por terminada:** restaurar desde
 la pantalla (Ajustes → Respaldo, los dos toques, reiniciar). Después, la
 prueba de la tabla de etapas: con la flash borrada, volver a los ajustes
 desde el archivo y que la Tienda ofrezca reinstalar. Esa borra la placa:

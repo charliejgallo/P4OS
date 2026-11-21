@@ -83,9 +83,9 @@ El plan y lo medido, en `docs/plan/RESPALDO.md` ("En la placa"). Con
       misma frase y no con otra. Borrado de la tarjeta.
 - [x] Las 8 que deja afuera el simple son credenciales. **Se le escapó
       una, `sshc_seed`** (la clave del cliente SSH): arreglado en el
-      código, falta instalarlo.
-- [ ] Instalar el arreglo y cambiar el respaldo simple que quedó en la
-      tarjeta por uno nuevo.
+      código.
+- [x] El arreglo instalado (`v0.30.0-10-gcbd43ce`): un simple nuevo con 9
+      afuera y ninguna credencial; el de la primera prueba, borrado.
 - [ ] Restaurar desde Ajustes → Respaldo (dos toques) y reiniciar.
 - [ ] Restaurar uno cifrado escribiendo la frase en la pantalla.
 - [ ] Con la flash borrada: volver desde el archivo y que la Tienda
