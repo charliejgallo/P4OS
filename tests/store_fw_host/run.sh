@@ -4,7 +4,10 @@
 # the same catalogue installed by each onto a card of its own must leave the
 # same files, and each must read the other's receipts. Then an update, an
 # extra pack kept through it, adopting what was copied by hand, removing, and
-# the packages the service has to refuse, with the card left as it was.
+# the packages the service has to refuse, with the card left as it was. And
+# sources: a second repository looked at, added, its apps offered beside the
+# official ones but never in their place, taken off with its apps or without
+# them; and a package handed in by itself.
 #
 #   tests/store_fw_host/run.sh         needs the apps built (tools/build_apps.sh)
 #   BUILT=<a tree with apps/*/build> tests/store_fw_host/run.sh
@@ -38,7 +41,11 @@ cp "$out"/r1/* "$out/rel/"
 for a in golf pinball mila; do for f in "$BUILT"/apps/$a/build/*_p4.pak*; do ln -s "$f" "$out/rel/$(basename "$f")"; done; done
 python3 "$P4/tools/fake_github.py" --dir "$out/rel" --port $PORT --quiet > "$out/fake.log" 2>&1 &
 FAKE=$!
-trap 'kill $FAKE 2>/dev/null; wait $FAKE 2>/dev/null; rm -rf "$out"' EXIT
+# somebody else's repository, on another port
+mkdir "$out/rel3"
+python3 "$P4/tools/fake_github.py" --dir "$out/rel3" --port $((PORT + 20)) --repo otra/gente --quiet > "$out/fake3.log" 2>&1 &
+FAKE3=$!
+trap 'rc=$?; kill $FAKE $FAKE3 2>/dev/null || true; wait $FAKE $FAKE3 2>/dev/null || true; rm -rf "$out"; exit $rc' EXIT
 for i in $(seq 50); do curl -s -o /dev/null "http://127.0.0.1:$PORT/_fake" && break; sleep 0.1; done
 
 cd "$out"
@@ -50,17 +57,20 @@ CAT = LATEST + "p4os-store.ndjson"
 ALL = ["hello_app", "dados", "emulador", "golf", "pinball", "mila"]
 fails = 0
 
-def fw(card, *steps, cat=CAT, env=None):
-    """The C service: a list of (ok, text) per job, and 'list' as a dict."""
-    e = dict(os.environ, P4_CARD=card)
+def fw(card, *steps, cat=CAT, env=None, dev=True):
+    """The C service: a list of (ok, text) per job, and 'list' as a dict.
+    The test's servers are http://, so it runs in developer mode unless told
+    not to; the board's preferences are a file beside the card."""
+    e = dict(os.environ, P4_CARD=card, P4_PREFS=card + ".prefs")
     e.update(env or {})
-    p = subprocess.run(["./t", "url=" + cat] + list(steps), capture_output=True, text=True, env=e, timeout=300)
+    first = ["dev=1", "url=" + cat] if dev else []
+    p = subprocess.run(["./t"] + first + list(steps), capture_output=True, text=True, env=e, timeout=300)
     jobs, apps = [], {}
     for line in p.stdout.splitlines():
         w = line.split(" ")
         if w[0] in ("ok", "FAILED"):
             jobs.append((w[0] == "ok", line))
-        elif len(w) == 5:
+        elif len(w) == 5 and w[0] not in ("source", "probed"):
             apps[w[0]] = w[1:]
     return jobs, apps, p.stdout + p.stderr
 
@@ -259,6 +269,75 @@ check("a catalogue that does not read: the old one stays", not jobs[0][0] and le
 open("rel/future.ndjson", "w").write(json.dumps(dict(head2, schema=2)) + "\n")
 jobs, apps, o = fw("c", "refresh", "list", cat=LATEST + "future.ndjson")
 check("a catalogue of a schema to come: says so, the old one stays", not jobs[0][0] and "update P4OS" in jobs[0][1] and len(apps) == 6, o)
+
+# ---- sources: somebody else's repository beside the official one
+PORT3 = int(PORT) + 20
+THEIRS = "http://localhost:%d/otra/gente/releases/latest/download/p4os-store.ndjson" % PORT3
+def package(file, app_id, name):
+    """hello_app's package made into another app's."""
+    def edit(f):
+        f["apps/%s.so" % file] = f.pop("apps/hello_app.so")
+        for k in [k for k in f if k.startswith(("lang/", "web/"))]:
+            del f[k]
+        m = json.loads(f["p4app.json"]); m.update(file=file, id=app_id, name={"es": name, "en": name}); f["p4app.json"] = json.dumps(m).encode()
+        relist(f)
+    return rezip(open("rel/hello_app.p4app", "rb").read(), edit)
+def entry(file, app_id, name, data):
+    e = json.loads(json.dumps(apps2["hello_app"]))
+    e.update(file=file, id=app_id, name={"es": name, "en": name}, ver="v1.0.0", cat="juegos")
+    e.pop("packs", None); e.pop("shots", None)
+    e["pkg"].update(url="v1.0.0/%s.p4app" % file, size=len(data), sha256=hashlib.sha256(data).hexdigest())
+    return e
+tercero = package("tercero", "x.tercero", "De Terceros")
+open("rel3/tercero.p4app", "wb").write(tercero)
+dados_falso = package("dados", "x.dados", "Dados de otro")
+open("rel3/dados.p4app", "wb").write(dados_falso)
+head3 = {"schema": 1, "source": {"name": "Otra Gente", "by": "Alguien", "url": "https://example.org/otra", "about": {"es": "Apps de otra gente", "en": "Other people's apps"}},
+         "cats": [], "release": "v1.0.0", "base": "http://localhost:%d/otra/gente/releases/download/" % PORT3}
+open("rel3/p4os-store.ndjson", "w").write("\n".join(json.dumps(x) for x in (head3, entry("tercero", "x.tercero", "De Terceros", tercero),
+                                                                             entry("dados", "x.dados", "Dados de otro", dados_falso))) + "\n")
+def sources(o):
+    return [l.split(" ") for l in o.splitlines() if l.startswith("source ")]
+
+os.mkdir("s0")
+jobs, apps, o = fw("s0", "look=" + THEIRS, dev=False)
+check("an http:// source without developer mode: refused", not jobs[0][0] and "developer mode" in jobs[0][1], o)
+jobs, apps, o = fw("c", "refresh", "add=" + THEIRS, "sources")
+check("adding a source nobody looked at: refused", jobs[0][0] and not jobs[1][0] and "look at the source first" in jobs[1][1] and len(sources(o)) == 1, o)
+jobs, apps, o = fw("c", "look=" + THEIRS, "probed", "add=" + THEIRS, "sources", "list")
+src = sources(o)
+check("looked at, then added: who it says it is", jobs[0][0] and jobs[1][0] and '"name":"Otra Gente"' in o and "probed 1 apps=2" in o, o)
+check("its apps beside the official ones, never in their place", len(src) == 2 and "source 1 Otra Gente apps=1 skipped=1 loaded=1" in o
+      and apps["tercero"][0] == "absent" and apps["tercero"][3].endswith("+") and apps["dados"][0] == "installed"
+      and not apps["dados"][3].endswith("+") and len(apps) == 7, o)
+jobs, apps, o = fw("c", "install=tercero", "install=dados", "sources", "list")
+r = receipt("c", "tercero")
+check("an app of that source: installed, its receipt says whose", jobs[0][0] and apps["tercero"][0] == "installed"
+      and r["source"]["name"] == "Otra Gente" and r["source"]["catalog"] == THEIRS and os.path.exists("c/apps/tercero.so")
+      and receipt("c", "dados")["source"]["name"] == "P4OS" and len(sources(o)) == 2, o)
+jobs, apps, o = fw("c", "refresh", "sources", "list")
+check("a refresh brings both catalogues", jobs[0][0] and len(sources(o)) == 2 and "tercero" in apps, o)
+
+# a package handed in: by itself, not in the place of the store's
+open("c/in.p4app", "wb").write(package("suelto", "x.suelto", "Suelto"))
+open("c/hello.p4app", "wb").write(open("rel/hello_app.p4app", "rb").read())
+open("c/otro.p4app", "wb").write(tercero)
+jobs, apps, o = fw("c", "sideload=in.p4app", "sideload=/hello.p4app", "sideload=otro.p4app", "sideload=../x.p4app")
+check("a package handed in: installed, the file left where it was", jobs[0][0] and os.path.exists("c/apps/suelto.so")
+      and receipt("c", "suelto")["source"] == {"name": "local", "url": "", "catalog": ""} and os.path.exists("c/in.p4app"), o)
+check("...but not an app the store offers", not jobs[1][0] and "is in the Tienda (P4OS)" in jobs[1][1]
+      and not jobs[2][0] and "is in the Tienda (Otra Gente)" in jobs[2][1] and "FAILED refused: sideload" in o, o)
+
+# the source taken off: without its apps, then with them
+jobs, apps, o = fw("c", "unsource=1:0", "sources", "list")
+check("a source taken off, its apps kept", jobs[0][0] and len(sources(o)) == 1 and "tercero" not in apps
+      and os.path.exists("c/apps/tercero.so") and os.path.exists("c/apps/.store/tercero.json"), o)
+jobs, apps, o = fw("c", "sideload=otro.p4app")
+check("a package over what a source installed: refused", not jobs[0][0] and "remove it first" in jobs[0][1], o)
+jobs, apps, o = fw("c", "look=" + THEIRS, "add=" + THEIRS, "unsource=1:1", "unsource=0:1", "sources", "list")
+check("taken off with its apps; the official one stays", jobs[1][0] and jobs[2][0] and "with 1 of its apps" in jobs[2][1]
+      and not os.path.exists("c/apps/tercero.so") and not os.path.exists("c/apps/.store/tercero.json")
+      and len(sources(o)) == 1 and apps["dados"][0] == "installed" and os.path.exists("c/apps/suelto.so"), o)
 sys.exit(1 if fails else 0)
 PY
 echo "all passed"

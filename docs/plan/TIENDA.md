@@ -13,8 +13,10 @@ tarjeta andan, también contra GitHub de verdad por TLS y con un reinicio a
 mitad de bajada; falta un corte del Wi-Fi. **La fase 1 está hecha**
 (catálogo, paquetes y el cliente de referencia; su CI corriendo con el tag
 `v0.30.0-tienda.1`). **La fase 2 está hecha y probada, en la Mac y en la
-placa**, cuarentena incluida. **De la fase 3, la app Tienda y la página del
-portal están escritas y vistas en el simulador**; falta la placa. Se trabaja en la rama `tienda` (worktree
+placa**, cuarentena incluida. **La fase 3 (la app Tienda y la página del
+portal) está en la placa y el usuario la vio andar**, con las imágenes de
+cada app; una sesión aparte saca las capturas que faltan. **La fase 4
+(fuentes de terceros) está escrita y probada en la Mac**; falta la placa. Se trabaja en la rama `tienda` (worktree
 `.claude/worktrees/tienda`, como se hizo con `ethernet`) y se mergea a
 `main` cuando esté probada en la placa. Este documento es el plan; lo que
 se vaya midiendo se anota acá, como en [ETHERNET.md](ETHERNET.md).
@@ -462,6 +464,89 @@ rama llevan tags `v0.30.0-tienda.N`; `v0.30.0` queda para el merge.
 trae su `store.json` (categoría y una o dos frases en es/en; los packs, lo
 que necesita y lo que pone el usuario, si hay); `tools/gen_store.py check`
 dice si está bien.
+
+## Fase 4: fuentes de terceros (escrita y probada en la Mac, 2026-11-21)
+
+**En el servicio** (`aos_store.c`):
+
+- **Varias fuentes, un catálogo.** La primera es la oficial; hasta cinco
+  más las agrega la persona. Cada una guarda su catálogo en la tarjeta
+  (`apps/.store/cat-<hash>.ndjson`) y al cargar se arma un solo texto: la
+  línea de cada fuente y, debajo, las apps que ofrece. La lista de fuentes
+  vive en las preferencias de la placa (`store_srcs`), no en la tarjeta.
+- **Lo oficial no se pisa.** Una app cuyo `file` o `id` ya lo lista una
+  fuente anterior queda afuera (se cuenta en `skipped` y va al registro),
+  y como la oficial es siempre la primera, nadie la reemplaza. Entre dos
+  de terceros gana la que se agregó antes.
+- **Mirar antes de agregar.** `aos_store_probe()` baja el catálogo a un
+  costado y devuelve quién dice ser la fuente y cuántas apps trae;
+  `aos_store_source_add()` sólo agrega **esa** dirección recién mirada.
+  Sin haber mirado, se niega.
+- **Quitar una fuente**, con sus apps o dejándolas (quedan instaladas y
+  ya no se actualizan). La oficial no se quita.
+- **`usuario/repo`** (o `github.com/usuario/repo`) se vuelve la dirección
+  del catálogo de su última release; una dirección `https://` vale tal
+  cual.
+- **`http://` sólo en modo desarrollo y en una red de confianza**
+  (`aos_access_here_trusted`), y se revisa en cada bajada, no sólo al
+  agregar: un catálogo https no puede mandar a bajar paquetes por http.
+  El modo desarrollo (`store_dev`) también es lo que deja cambiar el
+  catálogo oficial por uno de prueba. Se prende **sólo en la placa**.
+- **Paquetes sueltos** (`aos_store_sideload`): un `.p4app` de la tarjeta,
+  de un pendrive o soltado en el portal se instala por los mismos pasos,
+  con un recibo de fuente `local`. No puede ser una app que una fuente
+  ofrece ("está en la Tienda: instalala desde ahí") ni pisar una que una
+  fuente instaló ("quitala primero"). El archivo del usuario no se toca:
+  se trabaja sobre una copia.
+- Las llamadas `aos_store_*` quedaron fuera de la tabla de símbolos que
+  se les presta a las apps: agregar una fuente lo hace una persona.
+
+**En la app Tienda:** un filtro más, **Fuentes**, que abre su pantalla:
+cada fuente con su dirección, cuántas apps ofrece y cuántas quedaron
+afuera por estar en otra; "Quitar" (pregunta si con sus apps o sólo la
+fuente); "Agregar una fuente" (un campo y el teclado); y después de
+mirarla, **quién dice ser y el aviso**, que hay que aceptar ahí:
+
+> Las apps de esta fuente no las revisó nadie de P4OS. Una app corre con
+> todos los permisos del sistema: lee y escribe la tarjeta, ve las
+> contraseñas guardadas, usa la red y los pines. Agregá sólo fuentes de
+> gente en la que confiás.
+
+Una app de terceros lleva el nombre de su fuente en la lista, y en su
+página una nota: "De X, no de P4OS: nadie de P4OS la revisó". El
+interruptor de modo desarrollo está en esa misma pantalla (el plan decía
+Ajustes, Desarrollador; quedó acá, junto a lo que habilita).
+
+**En el portal:** el estado lista las fuentes y dice si el modo desarrollo
+está prendido; las apps de terceros llevan su etiqueta; y hay un botón
+para instalar un `.p4app`. **No hay** forma de agregar o quitar fuentes
+ni de prender el modo desarrollo desde ahí.
+
+**Lo probado:**
+
+- `tests/store_fw_host/run.sh`, ahora 44 casos: una fuente http sin modo
+  desarrollo se rechaza; agregar sin mirar se rechaza; mirada y agregada,
+  muestra quién dice ser; sus apps al lado de las oficiales y nunca en su
+  lugar (un `dados` ajeno queda afuera); instalar una app suya deja un
+  recibo que dice de quién es; las fuentes sobreviven a un reinicio; un
+  paquete suelto se instala y deja el archivo donde estaba; uno que es de
+  la Tienda, o que pisa lo que una fuente instaló, se rechaza; y quitar
+  la fuente con sus apps o sin ellas.
+- En el simulador, con dos servidores falsos: la pantalla Fuentes,
+  escribir con el teclado, mirar una fuente, el aviso, agregarla, y su
+  app listada al final con el nombre de la fuente.
+- El firmware `rev1_3` compila: 7 037 456 bytes.
+
+**Lo que falta de esta fase:**
+
+- **En la placa:** no está instalado. Ahí importa `aos_access_here_trusted`
+  (el simulador no distingue redes) y que el teclado se sienta bien.
+- Que el portal pueda *proponer* una fuente para aceptarla en la pantalla
+  (D8): hoy se escribe en la placa.
+- Abrir un `.p4app` desde la app Archivos.
+- Traducir los mensajes del servicio que ve la persona.
+- Un tope al tamaño de un catálogo mientras baja (hoy se revisa al
+  terminar: 1 MB).
 
 ## Fase 3: la app y la página del portal (escritas, vistas en el simulador, 2026-11-21)
 

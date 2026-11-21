@@ -52,7 +52,11 @@
 #define ICON_MAX    512
 
 /* the chips that are not categories */
-enum { F_ALL = 0, F_UPDATES = -1, F_INSTALLED = -2 };
+enum { F_ALL = 0, F_UPDATES = -1, F_INSTALLED = -2, F_SOURCES = -3 };
+
+/* which screen is up: the catalogue (the list, or an app's page), the
+ * sources, the address of one to add, and who that one says it is */
+enum { V_STORE = 0, V_SOURCES, V_ADD, V_CONFIRM };
 
 typedef struct {
     char     file[32], id[40], cat[12], ver[28];
@@ -85,6 +89,11 @@ static struct {
     bool      busy;
     char      job_file[32];
     bool      asked;            /* the catalogue was asked for on opening */
+    int       view;             /* V_* */
+    int       src_sure;         /* the source whose "Quitar" was tapped, 0 for none */
+    bool      looking;          /* a source is being looked at */
+    char      entry[200];       /* what was typed as a source's address */
+    lv_obj_t *ta;
 } S = { .sel = -1 };
 
 static void build(void);
@@ -95,7 +104,7 @@ static void build(void);
 enum { SH_WANTED = 0, SH_ON_CARD, SH_DECODING, SH_READY, SH_FAILED };
 
 typedef struct {
-    char           url[120];
+    char           url[320];
     int            w, h;            /* as the catalogue says: the frame's size */
     int            state;
     char           path[224];
@@ -277,13 +286,18 @@ static void load(void)
         size_t end = at;
         while (end < len && S.cat[end] != '\n') end++;
         cJSON *o = end > at ? cJSON_ParseWithLength(S.cat + at, end - at) : NULL;
-        if (o && !head) {
+        if (o && cJSON_GetObjectItem(o, "source")) {
+            /* a source's own line: the first is the official one */
+            if (!head) {
+                snprintf(S.source, sizeof S.source, "%s", jstr(cJSON_GetObjectItem(o, "source"), "name"));
+                snprintf(S.release, sizeof S.release, "%s", jstr(o, "release"));
+            }
             head = true;
-            snprintf(S.source, sizeof S.source, "%s", jstr(cJSON_GetObjectItem(o, "source"), "name"));
-            snprintf(S.release, sizeof S.release, "%s", jstr(o, "release"));
             const cJSON *c;
             cJSON_ArrayForEach(c, cJSON_GetObjectItem(o, "cats")) {
-                if (S.ncats >= CATS_MAX) break;
+                bool have = false;
+                for (int k = 0; k < S.ncats; k++) have = have || !strcmp(S.cats[k].id, jstr(c, "id"));
+                if (have || S.ncats >= CATS_MAX) continue;
                 snprintf(S.cats[S.ncats].id, sizeof S.cats[0].id, "%s", jstr(c, "id"));
                 snprintf(S.cats[S.ncats].name, sizeof S.cats[0].name, "%s", pick(cJSON_GetObjectItem(c, "name")));
                 S.ncats++;
@@ -448,7 +462,11 @@ static void action_cb(lv_event_t *e)
 
 static void chip_cb(lv_event_t *e)
 {
-    S.filter = (int)(intptr_t)lv_event_get_user_data(e);
+    int f = (int)(intptr_t)lv_event_get_user_data(e);
+    if (f == F_SOURCES) {
+        S.view = V_SOURCES;
+        S.src_sure = 0;
+    } else S.filter = f;
     build();
 }
 
@@ -511,7 +529,11 @@ static void row(lv_obj_t *parent, int i)
     lv_obj_set_width(name, lv_pct(100));
     lv_label_set_long_mode(name, LV_LABEL_LONG_MODE_DOTS);
     lv_obj_set_height(name, lv_font_get_line_height(aos_font_body));
-    lv_obj_t *about = aos_label(t, it->st.state == AOS_STORE_SET_ASIDE ? _("Quedó apartada: hizo caer la placa") : it->about,
+    char whose[300];
+    aos_store_source_t sr;
+    if (it->st.src > 0 && aos_store_source(it->st.src, &sr)) snprintf(whose, sizeof whose, "%s · %s", sr.name, it->about);
+    else snprintf(whose, sizeof whose, "%s", it->about);
+    lv_obj_t *about = aos_label(t, it->st.state == AOS_STORE_SET_ASIDE ? _("Quedó apartada: hizo caer la placa") : whose,
                                 aos_font_caption, it->st.state == AOS_STORE_SET_ASIDE ? AOS_C_ORANGE : AOS_C_DIM);
     lv_obj_set_width(about, lv_pct(100));
     lv_label_set_long_mode(about, LV_LABEL_LONG_MODE_DOTS);
@@ -540,6 +562,7 @@ static void build_list(lv_obj_t *page)
     }
     for (int i = 0; i < S.ncats; i++) chip(chips, S.cats[i].name, 1 + i);
     chip(chips, _("Instaladas"), F_INSTALLED);
+    chip(chips, _("Fuentes"), F_SOURCES);
 
     S.list = box(page);
     lv_obj_set_width(S.list, lv_pct(100));
@@ -724,7 +747,10 @@ static void gallery(lv_obj_t *parent, const item_t *it, const cJSON *o)
             const char *url = cJSON_GetStringValue(cJSON_GetObjectItem(sh, "url"));
             int w = (int)jnum(sh, "w"), h = (int)jnum(sh, "h");
             if (!url || G.n >= SHOTS_MAX || w < 16 || h < 16 || w > 720 || h > 720) continue;
-            snprintf(G.s[G.n].url, sizeof G.s[0].url, "%s", url);
+            aos_store_source_t from;
+            if (strncmp(url, "http", 4) && aos_store_source(it->st.src, &from))
+                snprintf(G.s[G.n].url, sizeof G.s[0].url, "%s%s", from.base, url);
+            else snprintf(G.s[G.n].url, sizeof G.s[0].url, "%s", url);
             G.s[G.n].w = w;
             G.s[G.n].h = h;
             G.n++;
@@ -813,6 +839,13 @@ static void build_detail(lv_obj_t *page)
 
     badges(body, o);
     gallery(body, it, o);
+    if (it->st.src > 0) {
+        aos_store_source_t from;
+        if (aos_store_source(it->st.src, &from)) {
+            snprintf(buf, sizeof buf, _("De %s, no de P4OS: nadie de P4OS la revisó."), from.name);
+            note(body, AOS_SYM_ALERT_OUTLINE, AOS_C_ORANGE, buf);
+        }
+    }
 
     /* what state it is in, when that is not obvious */
     if (it->st.state == AOS_STORE_SET_ASIDE)
@@ -881,6 +914,220 @@ static void build_detail(lv_obj_t *page)
     cJSON_Delete(o);
 }
 
+/* ---- sources --------------------------------------------------------------- */
+
+static lv_obj_t *back_row(lv_obj_t *page, const char *text, lv_event_cb_t cb)
+{
+    lv_obj_t *b = box(page);
+    lv_obj_set_size(b, LV_SIZE_CONTENT, 64);
+    lv_obj_set_flex_flow(b, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(b, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_set_ext_click_area(b, 16);
+    lv_obj_add_event_cb(b, cb, LV_EVENT_CLICKED, NULL);
+    aos_label(b, AOS_SYM_CHEVRON_LEFT, &aos_sym_44, AOS_C_ACCENT);
+    aos_label(b, text, aos_font_body, AOS_C_ACCENT);
+    return b;
+}
+
+static lv_obj_t *card(lv_obj_t *parent)
+{
+    lv_obj_t *c = box(parent);
+    lv_obj_set_size(c, lv_pct(100), LV_SIZE_CONTENT);
+    lv_obj_set_style_bg_color(c, AOS_C_CARD, 0);
+    lv_obj_set_style_bg_opa(c, LV_OPA_COVER, 0);
+    lv_obj_set_style_radius(c, AOS_UI_RADIUS, 0);
+    lv_obj_set_style_pad_all(c, 24, 0);
+    lv_obj_set_style_pad_row(c, 12, 0);
+    lv_obj_set_flex_flow(c, LV_FLEX_FLOW_COLUMN);
+    return c;
+}
+
+static lv_obj_t *para(lv_obj_t *parent, const char *text, const lv_font_t *font, lv_color_t color)
+{
+    lv_obj_t *l = aos_label(parent, text, font, color);
+    lv_obj_set_width(l, lv_pct(100));
+    lv_label_set_long_mode(l, LV_LABEL_LONG_MODE_WRAP);
+    return l;
+}
+
+static void to_store_cb(lv_event_t *e)   { (void)e; S.view = V_STORE; build(); }
+static void to_sources_cb(lv_event_t *e) { (void)e; S.view = V_SOURCES; S.src_sure = 0; S.looking = false; build(); }
+static void to_add_cb(lv_event_t *e)     { (void)e; S.view = V_ADD; S.looking = false; build(); }
+
+static void src_remove_cb(lv_event_t *e)
+{
+    int v = (int)(intptr_t)lv_event_get_user_data(e);
+    /* the first tap asks; the second says with its apps (2) or without (1) */
+    if (v >= 100) S.src_sure = v - 100;
+    else if (S.src_sure > 0) {
+        aos_store_source_remove(S.src_sure, v == 2);
+        S.src_sure = 0;
+    }
+    build();
+}
+
+static void dev_cb(lv_event_t *e)
+{
+    aos_store_set_dev(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
+}
+
+static void build_sources(lv_obj_t *page)
+{
+    char buf[200];
+    back_row(page, _("Tienda"), to_store_cb);
+    lv_obj_t *body = box(page);
+    lv_obj_set_width(body, lv_pct(100));
+    lv_obj_set_flex_grow(body, 1);
+    lv_obj_set_flex_flow(body, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(body, 18, 0);
+    lv_obj_set_style_pad_bottom(body, 48, 0);
+    lv_obj_add_flag(body, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_scroll_dir(body, LV_DIR_VER);
+    S.list = body;
+
+    aos_label(body, _("Fuentes"), aos_font_title, AOS_C_TEXT);
+    para(body, _("De dónde vienen las apps. La primera es la de P4OS; las demás las agregás vos, y sólo acá, en la placa."),
+         aos_font_caption, AOS_C_DIM);
+
+    aos_store_source_t sr;
+    for (int i = 0; aos_store_source(i, &sr); i++) {
+        lv_obj_t *c = card(body);
+        aos_label(c, sr.name[0] ? sr.name : _("Sin catálogo todavía"), aos_font_body, AOS_C_TEXT);
+        para(c, sr.url, aos_font_tiny, AOS_C_DIM);
+        if (sr.loaded) {
+            if (sr.skipped) snprintf(buf, sizeof buf, _("Apps: %d  ·  %s  ·  otras %d ya están en otra fuente y no se ofrecen"), sr.apps, sr.release, sr.skipped);
+            else snprintf(buf, sizeof buf, _("Apps: %d  ·  %s"), sr.apps, sr.release);
+            para(c, buf, aos_font_caption, AOS_C_DIM);
+        }
+        if (i == 0) para(c, _("La fuente oficial: no se quita."), aos_font_caption, AOS_C_GREEN);
+        else if (S.src_sure == i) {
+            lv_obj_t *r = box(c);
+            lv_obj_set_size(r, lv_pct(100), LV_SIZE_CONTENT);
+            lv_obj_set_flex_flow(r, LV_FLEX_FLOW_ROW_WRAP);
+            lv_obj_set_style_pad_column(r, 12, 0);
+            lv_obj_set_style_pad_row(r, 12, 0);
+            lv_obj_t *a = pill(r, _("Quitarla con sus apps"), false, src_remove_cb, (void *)(intptr_t)2);
+            lv_obj_set_style_text_color(lv_obj_get_child(a, 0), AOS_C_RED, 0);
+            pill(r, _("Sólo la fuente"), false, src_remove_cb, (void *)(intptr_t)1);
+        } else {
+            lv_obj_t *rm = pill(c, _("Quitar"), false, src_remove_cb, (void *)(intptr_t)(100 + i));
+            lv_obj_set_style_text_color(lv_obj_get_child(rm, 0), AOS_C_RED, 0);
+        }
+    }
+    if (aos_store_sources() < AOS_STORE_SOURCES_MAX) pill(body, _("Agregar una fuente"), true, to_add_cb, NULL);
+
+    lv_obj_t *dev = card(body);
+    lv_obj_t *r = box(dev);
+    lv_obj_set_size(r, lv_pct(100), LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(r, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(r, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    aos_label(r, _("Modo desarrollo"), aos_font_body, AOS_C_TEXT);
+    lv_obj_t *sw = lv_switch_create(r);
+    lv_obj_set_size(sw, 96, 56);
+    lv_obj_set_style_bg_color(sw, AOS_C_ACCENT, (lv_style_selector_t)LV_PART_INDICATOR | (lv_style_selector_t)LV_STATE_CHECKED);
+    if (aos_store_dev()) lv_obj_add_state(sw, LV_STATE_CHECKED);
+    lv_obj_add_event_cb(sw, dev_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    para(dev, _("Para quien escribe apps: acepta fuentes por http:// en una red de confianza, y deja cambiar el catálogo "
+                "oficial por uno de prueba desde el portal. Apagado, todo vuelve al catálogo oficial."), aos_font_caption, AOS_C_DIM);
+}
+
+static void look_cb(lv_event_t *e)
+{
+    (void)e;
+    char url[200];
+    if (S.ta) snprintf(S.entry, sizeof S.entry, "%s", lv_textarea_get_text(S.ta));
+    if (!aos_store_source_url(S.entry, url, sizeof url)) {
+        aos_ui_toast(_("Eso no es una dirección:\nusuario/repositorio, o https://..."), 3000);
+        return;
+    }
+    if (!aos_store_probe(url)) {
+        aos_ui_toast(_("Hay demasiadas cosas en cola"), 2500);
+        return;
+    }
+    S.looking = true;
+    build();
+}
+
+static void build_add(lv_obj_t *page)
+{
+    back_row(page, _("Fuentes"), to_sources_cb);
+    aos_label(page, _("Agregar una fuente"), aos_font_title, AOS_C_TEXT);
+    para(page, _("Escribí usuario/repositorio de GitHub, o la dirección https:// de un catálogo."), aos_font_caption, AOS_C_DIM);
+    S.ta = lv_textarea_create(page);
+    lv_obj_set_width(S.ta, lv_pct(100));
+    lv_textarea_set_one_line(S.ta, true);
+    lv_textarea_set_max_length(S.ta, sizeof S.entry - 1);
+    lv_textarea_set_placeholder_text(S.ta, "usuario/repositorio");
+    lv_textarea_set_text(S.ta, S.entry);
+    lv_obj_set_style_text_font(S.ta, aos_font_body, 0);
+    lv_obj_add_event_cb(S.ta, look_cb, LV_EVENT_READY, NULL);
+    lv_obj_t *go = pill(page, S.looking ? "..." : _("Buscar"), true, S.looking ? NULL : look_cb, NULL);
+    (void)go;
+    lv_obj_t *gap = box(page);
+    lv_obj_set_flex_grow(gap, 1);
+    lv_obj_t *kb = lv_keyboard_create(page);
+    lv_obj_set_width(kb, lv_pct(100));
+    aos_keyboard_style(kb, aos_font_body);
+    lv_keyboard_set_textarea(kb, S.ta);
+    lv_obj_add_event_cb(kb, look_cb, LV_EVENT_READY, NULL);
+}
+
+static void add_cb(lv_event_t *e)
+{
+    (void)e;
+    aos_store_probe_t pr;
+    aos_store_probe_result(&pr);
+    if (pr.ok) aos_store_source_add(pr.url);
+    S.entry[0] = 0;
+    S.view = V_SOURCES;
+    build();
+}
+
+static void build_confirm(lv_obj_t *page)
+{
+    char buf[200];
+    aos_store_probe_t pr;
+    aos_store_probe_result(&pr);
+    cJSON *src = cJSON_Parse(pr.source_json);
+    back_row(page, _("Fuentes"), to_sources_cb);
+    lv_obj_t *body = box(page);
+    lv_obj_set_width(body, lv_pct(100));
+    lv_obj_set_flex_grow(body, 1);
+    lv_obj_set_flex_flow(body, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(body, 18, 0);
+    lv_obj_set_style_pad_bottom(body, 48, 0);
+    lv_obj_add_flag(body, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_scroll_dir(body, LV_DIR_VER);
+    S.list = body;
+
+    /* who it says it is: its own words, nobody checked them */
+    lv_obj_t *c = card(body);
+    para(c, jstr(src, "name"), aos_font_title, AOS_C_TEXT);
+    snprintf(buf, sizeof buf, _("Dice ser de %s  ·  apps: %d"), jstr(src, "by")[0] ? jstr(src, "by") : "?", pr.apps);
+    para(c, buf, aos_font_caption, AOS_C_DIM);
+    if (pick(cJSON_GetObjectItem(src, "about"))[0]) para(c, pick(cJSON_GetObjectItem(src, "about")), aos_font_small, AOS_C_TEXT);
+    if (jstr(src, "url")[0]) para(c, jstr(src, "url"), aos_font_tiny, AOS_C_DIM);
+    para(c, pr.url, aos_font_tiny, AOS_C_DIM);
+
+    lv_obj_t *w = card(body);
+    lv_obj_set_style_border_color(w, AOS_C_ORANGE, 0);
+    lv_obj_set_style_border_width(w, 2, 0);
+    aos_label(w, AOS_SYM_ALERT_OUTLINE, &aos_sym_44, AOS_C_ORANGE);
+    para(w, _("Las apps de esta fuente no las revisó nadie de P4OS. Una app corre con todos los permisos del sistema: "
+              "lee y escribe la tarjeta, ve las contraseñas guardadas, usa la red y los pines. "
+              "Agregá sólo fuentes de gente en la que confiás."), aos_font_small, AOS_C_TEXT);
+
+    lv_obj_t *r = box(body);
+    lv_obj_set_size(r, lv_pct(100), LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(r, LV_FLEX_FLOW_ROW_WRAP);
+    lv_obj_set_style_pad_column(r, 14, 0);
+    lv_obj_set_style_pad_row(r, 12, 0);
+    pill(r, _("Entiendo: agregarla"), true, add_cb, NULL);
+    pill(r, _("Cancelar"), false, to_sources_cb, NULL);
+    cJSON_Delete(src);
+}
+
 /* ---- the whole screen ------------------------------------------------------ */
 
 static void banner_update(const aos_store_status_t *st)
@@ -917,12 +1164,14 @@ static void build(void)
     if (!S.root) return;
     int32_t scroll = S.list ? lv_obj_get_scroll_y(S.list) : 0;
     bool same_view = S.list != NULL;
-    static int last_sel = -2, last_filter = 99;
-    if (last_sel != S.sel || last_filter != S.filter) same_view = false;
+    static int last_sel = -2, last_filter = 99, last_view = -1;
+    if (last_sel != S.sel || last_filter != S.filter || last_view != S.view) same_view = false;
+    last_view = S.view;
     last_sel = S.sel;
     last_filter = S.filter;
     lv_obj_clean(S.root);
     S.list = S.banner = NULL;
+    S.ta = NULL;
     if (S.sel >= S.n) S.sel = -1;
     for (int i = 0; i < G.n; i++) G.s[i].frame = NULL;
     if (S.sel < 0 || strcmp(G.owner, S.items[S.sel].file)) gallery_free();
@@ -933,7 +1182,7 @@ static void build(void)
     lv_obj_set_style_pad_top(page, 12, 0);
     lv_obj_set_style_pad_row(page, 12, 0);
 
-    if (S.sel < 0) {
+    if (S.view == V_STORE && S.sel < 0) {
         lv_obj_t *head = box(page);
         lv_obj_set_size(head, lv_pct(100), LV_SIZE_CONTENT);
         lv_obj_set_flex_flow(head, LV_FLEX_FLOW_ROW);
@@ -963,7 +1212,10 @@ static void build(void)
     lv_obj_set_style_bg_color(S.bar, AOS_C_ACCENT, LV_PART_INDICATOR);
     lv_bar_set_range(S.bar, 0, 100);
 
-    if (S.sel >= 0) build_detail(page);
+    if (S.view == V_SOURCES) build_sources(page);
+    else if (S.view == V_ADD) build_add(page);
+    else if (S.view == V_CONFIRM) build_confirm(page);
+    else if (S.sel >= 0) build_detail(page);
     else build_list(page);
 
     aos_store_status_t st;
@@ -1015,6 +1267,8 @@ static void destroy(aos_app_t *self, void *inst)
 static bool back(aos_app_t *self, void *inst)
 {
     (void)self; (void)inst;
+    if (S.view == V_CONFIRM || S.view == V_ADD) { S.view = V_SOURCES; S.looking = false; build(); return true; }
+    if (S.view == V_SOURCES) { S.view = V_STORE; build(); return true; }
     if (S.sel >= 0) { S.sel = -1; build(); return true; }
     return false;
 }
@@ -1047,6 +1301,16 @@ static void tick(aos_app_t *self, void *inst)
     S.jobs_done = st.jobs_done;
     S.busy = st.busy;
     snprintf(S.job_file, sizeof S.job_file, "%s", st.file);
+    /* the look at a source ended: who it is and the warning, or back to the address */
+    if (S.view == V_ADD && S.looking && !st.busy) {
+        aos_store_probe_t pr;
+        aos_store_probe_result(&pr);
+        S.looking = false;
+        if (pr.ok) S.view = V_CONFIRM;
+        changed = true;
+    }
+    /* typing: a rebuild would take the text and the cursor away */
+    if (changed && S.view == V_ADD && S.ta) snprintf(S.entry, sizeof S.entry, "%s", lv_textarea_get_text(S.ta));
     if (changed) build();
     else banner_update(&st);
 }

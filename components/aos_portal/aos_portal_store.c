@@ -14,9 +14,17 @@
  *   GET  /api/store/catalog        the catalogue as it was downloaded
  *                                  (NDJSON: the source, then an app a line):
  *                                  names, descriptions, icons, packs
- *   POST /api/store/refresh        downloads the catalogue again;
- *                                  {"url": "..."} sets another address first
- *                                  ("" goes back to the official one)
+ *   POST /api/store/refresh        downloads every source's catalogue again;
+ *                                  {"url": "..."} puts another address in the
+ *                                  official one's place first ("" goes back),
+ *                                  in developer mode only
+ *   POST /api/store/sideload       the body is a package (.p4app): installed
+ *                                  by the same steps; ?path=/x.p4app takes
+ *                                  one that is on the card or a pendrive
+ *
+ * The state also lists the sources ({name, url, release, apps, skipped}) and
+ * says whether developer mode is on. Sources are added and taken off at the
+ * board only, and so is developer mode: none of that is here.
  *   POST /api/store/install        {"file": "bastion", "packs": "need"}:
  *                                  packs is need, all, none, or extras by
  *                                  name ("a.pak,b.pak")
@@ -54,6 +62,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/stat.h>
 
 #ifndef AOS_SIM
 #include "aos_dynapp.h"
@@ -167,6 +176,18 @@ static void store_state(aos_httpd_req_t *r, int status, const char *error)
     cJSON_AddBoolToObject(o, "ok", error == NULL);
     if (error) cJSON_AddStringToObject(o, "error", error);
     cJSON_AddStringToObject(o, "url", aos_store_url());
+    cJSON_AddBoolToObject(o, "dev", aos_store_dev());
+    cJSON *srcs = cJSON_AddArrayToObject(o, "sources");
+    aos_store_source_t sr;
+    for (int i = 0; aos_store_source(i, &sr); i++) {
+        cJSON *e = cJSON_CreateObject();
+        cJSON_AddStringToObject(e, "name", sr.name);
+        cJSON_AddStringToObject(e, "url", sr.url);
+        cJSON_AddStringToObject(e, "release", sr.release);
+        cJSON_AddNumberToObject(e, "apps", sr.apps);
+        cJSON_AddNumberToObject(e, "skipped", sr.skipped);
+        cJSON_AddItemToArray(srcs, e);
+    }
     cJSON_AddStringToObject(o, "source", st.source);
     cJSON_AddStringToObject(o, "release", st.release);
     cJSON_AddBoolToObject(o, "busy", st.busy);
@@ -192,6 +213,7 @@ static void store_state(aos_httpd_req_t *r, int status, const char *error)
         cJSON_AddStringToObject(e, "have", a.have);
         cJSON_AddStringToObject(e, "state", states[a.state <= AOS_STORE_SET_ASIDE ? a.state : 0]);
         cJSON_AddBoolToObject(e, "fits", a.fits);
+        cJSON_AddNumberToObject(e, "src", a.src);
         cJSON_AddItemToArray(apps, e);
     }
     reply(r, status, o);
@@ -209,6 +231,37 @@ static bool store_api(aos_httpd_req_t *r, const char *p, bool get, bool post)
         free(text);
         return true;
     }
+    if (post && !strcmp(p, "/sideload")) {
+        char path[160] = "";
+        const char *why = NULL, *root = aos_hal_path_sd_root();
+        if (!root) why = _("sin tarjeta");
+        else if (aos_httpd_query(r, "path", path, sizeof path) && path[0]) {
+            if (!aos_store_sideload(path)) why = _("ruta inválida, o la cola está llena");
+        } else {
+            /* the body to the card first: a package may be megabytes */
+            char full[260], dir[224];
+            snprintf(dir, sizeof dir, "%s/apps/.store", root);
+            mkdir(dir, 0755);
+            snprintf(dir, sizeof dir, "%s/apps/.store/in", root);
+            mkdir(dir, 0755);
+            snprintf(full, sizeof full, "%s/upload.p4app", dir);
+            FILE *f = fopen(full, "wb");
+            char *buf = malloc(16384);
+            long left = aos_httpd_body_len(r);
+            bool ok = f && buf && left > 0 && left <= 64L * 1024 * 1024;
+            while (ok && left > 0) {
+                int n = aos_httpd_body_read(r, buf, left > 16384 ? 16384 : (int)left);
+                if (n <= 0 || fwrite(buf, 1, (size_t)n, f) != (size_t)n) ok = false;
+                left -= n;
+            }
+            if (f) ok = fclose(f) == 0 && ok;
+            free(buf);
+            if (!ok) why = _("no se pudo recibir el paquete");
+            else if (!aos_store_sideload("apps/.store/in/upload.p4app")) why = _("la cola está llena");
+        }
+        store_state(r, why ? 400 : 200, why);
+        return true;
+    }
     if (!post || (strcmp(p, "/refresh") && strcmp(p, "/install") && strcmp(p, "/remove") && strcmp(p, "/adopt") &&
                   strcmp(p, "/cancel"))) return false;
     char *body = aos_httpd_body_all(r, 2048);
@@ -218,7 +271,7 @@ static bool store_api(aos_httpd_req_t *r, const char *p, bool get, bool post)
     const char *fail = NULL;
     if (!strcmp(p, "/refresh")) {
         const char *url = cJSON_GetStringValue(cJSON_GetObjectItem(j, "url"));
-        if (url && !aos_store_set_url(url)) fail = _("la dirección tiene que ser http(s)");
+        if (url && !aos_store_set_url(url)) fail = _("otro catálogo sólo en modo desarrollo, que se prende en la placa (Tienda, Fuentes)");
         else if (!aos_store_refresh()) fail = _("la cola está llena");
     } else if (!strcmp(p, "/install")) {
         if (!file || !aos_store_install(file, cJSON_GetStringValue(cJSON_GetObjectItem(j, "packs")))) fail = _("falta file, o la cola está llena");

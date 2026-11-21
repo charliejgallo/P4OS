@@ -42,7 +42,7 @@ cp "$out"/r1/* "$out/rel/"
 for a in golf pinball mila; do for f in "$BUILT"/apps/$a/build/*_p4.pak*; do ln -s "$f" "$out/rel/$(basename "$f")"; done; done
 python3 "$P4/tools/fake_github.py" --dir "$out/rel" --port $PORT --quiet > "$out/fake.log" 2>&1 &
 FAKE=$!
-trap 'kill $FAKE 2>/dev/null; wait $FAKE 2>/dev/null; rm -rf "$out"' EXIT
+trap 'rc=$?; kill $FAKE 2>/dev/null || true; wait $FAKE 2>/dev/null || true; rm -rf "$out"; exit $rc' EXIT
 for i in $(seq 50); do curl -s -o /dev/null "http://127.0.0.1:$PORT/_fake" && break; sleep 0.1; done
 
 cd "$out"

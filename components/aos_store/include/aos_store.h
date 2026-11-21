@@ -22,10 +22,13 @@ extern "C" {
 #endif
 
 /* The official catalogue: the latest PUBLISHED release's, so a draft reaches
- * nobody. Another address is a preference, "store_url" (a developer's, until
- * phase 4 brings sources). */
+ * nobody. In developer mode another address can take its place
+ * (aos_store_set_url): a test server, a pre-release. */
 #define AOS_STORE_URL_DEFAULT \
     "https://github.com/charliejgallo/P4OS/releases/latest/download/p4os-store.ndjson"
+
+/* The official source and the ones the person added. */
+#define AOS_STORE_SOURCES_MAX 6
 
 typedef enum {
     AOS_STORE_ABSENT = 0,   /* in the catalogue, not on the card */
@@ -45,6 +48,7 @@ typedef struct {
     char     fw_min[16];
     aos_store_state_t state;
     bool     fits;          /* this firmware can run it (ABI and fw_min) */
+    int      src;           /* which source lists it: 0 is the official one */
     uint32_t line_off;      /* its line in aos_store_catalog()'s text */
     uint32_t line_len;
 } aos_store_app_t;
@@ -68,11 +72,75 @@ typedef struct {
  * receipts. Called by itself by anything below; safe to call again. */
 void aos_store_init(void);
 
-/* The catalogue's address: the preference, or the default. */
+/* The first source's address: the official one, or a developer's. */
 const char *aos_store_url(void);
-/* Another address (https://, or http:// for a developer's own machine), or
- * NULL/"" to go back to the official one. Kept across restarts. */
+/* Another address in the official one's place, in developer mode only; NULL
+ * or "" goes back to the official one. Kept across restarts. */
 bool aos_store_set_url(const char *url);
+
+/* Developer mode: http:// addresses (on a trusted network only) and another
+ * first source. Off unless someone turns it on AT THE BOARD: the portal has
+ * no call for it. Turning it off goes back to the official catalogue. */
+bool aos_store_dev(void);
+void aos_store_set_dev(bool on);
+
+/* --------------------------------------------------------------------------
+ * Sources (docs/plan/TIENDA.md, "Fuentes de terceros")
+ *
+ * A source is the address of a catalogue. The official one is always the
+ * first; the person adds others, AT THE BOARD ONLY - these calls are for
+ * the Tienda app and are not in the portal - after reading who the source
+ * says it is and what adding it means: an app runs with every permission
+ * of the system, and nobody at P4OS looked at these.
+ *
+ * What a source may not do: list an app whose file or id another source
+ * before it already lists (the official one is first, so it cannot be
+ * replaced); such an app is left out, and counted in 'skipped'.
+ *
+ * The list is kept in the board's preferences, not on the card: a card from
+ * somewhere else brings no sources with it.
+ * -------------------------------------------------------------------------- */
+typedef struct {
+    char url[200];          /* its catalogue's address */
+    char name[40];          /* who it says it is; "" until its catalogue was read */
+    char home[160];         /* its own page */
+    char base[200];         /* where its files are: a "url" of its catalogue goes after this */
+    char release[28];
+    int  apps;              /* offered from it */
+    int  skipped;           /* left out: another source lists them */
+    bool loaded;
+} aos_store_source_t;
+
+int  aos_store_sources(void);
+bool aos_store_source(int index, aos_store_source_t *out);
+
+/* What a person typed as an address: "user/repo" (or github.com/user/repo)
+ * is that repository's latest release; an https:// address is itself. */
+bool aos_store_source_url(const char *text, char *out, size_t n);
+
+/* A look at a source before adding it: a job, like the rest. When it ends
+ * well aos_store_probe_result() has who the source says it is - its
+ * "source" object as JSON: name, by, url, about - and how many apps it
+ * lists. */
+typedef struct {
+    bool ok;
+    char url[200];
+    char source_json[900];
+    int  apps;
+} aos_store_probe_t;
+
+bool aos_store_probe(const char *url);
+void aos_store_probe_result(aos_store_probe_t *out);
+/* Adds the source just looked at, and only that one. */
+bool aos_store_source_add(const char *url);
+/* Takes a source off (never the first); with_apps removes what was
+ * installed from it, else those apps stay and are no longer updated. */
+bool aos_store_source_remove(int index, bool with_apps);
+
+/* A package (.p4app) that is on the card or on a pendrive, by its path from
+ * the card's root: installed by the same steps as one of a catalogue. It
+ * may not be an app that a source offers or installed. */
+bool aos_store_sideload(const char *card_path);
 
 /* Each queues a job and returns: false when the queue is full or the
  * arguments are no good. 'packs' is "need" (what the app cannot start
@@ -91,8 +159,8 @@ void aos_store_cancel(void);
 void aos_store_status(aos_store_status_t *out);
 int  aos_store_count(void);
 bool aos_store_app(int index, aos_store_app_t *out);
-/* A picture of an app's page, by its address in the catalogue ("shots": the
- * "url" of one). They are kept on the card (apps/.store/shots) once
+/* A picture of an app's page, by its whole address (its source's "base" and
+ * the "url" of one of its "shots"). They are kept on the card (apps/.store/shots) once
  * downloaded, two at a time at most, apart from the queue of jobs.
  *    1   it is on the card: 'path' has its full path, to decode
  *    0   on its way; ask again
@@ -100,8 +168,9 @@ bool aos_store_app(int index, aos_store_app_t *out);
  *        the next refresh of the catalogue */
 int aos_store_shot(const char *url, char *path, size_t path_len);
 
-/* A copy of the catalogue's text (NDJSON: the source's line, then an app a
- * line), NUL-terminated, to free(); NULL when there is none yet. */
+/* A copy of the catalogue's text, NUL-terminated, to free(); NULL when there
+ * is none yet. NDJSON: for each source in turn, its own line (the one with
+ * "source") and then a line for each app offered from it. */
 char *aos_store_catalog(size_t *len);
 
 #ifdef __cplusplus

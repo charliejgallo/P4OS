@@ -10649,3 +10649,23 @@ De pie	Hochformat
 Usa la red	Nutzt das Netz
 Página en el portal	Seite im Portal
 Header de 40 pines	40-polige Leiste
+Fuentes	Quellen
+De %s, no de P4OS: nadie de P4OS la revisó.	Von %s, nicht von P4OS: niemand bei P4OS hat sie geprüft.
+De dónde vienen las apps. La primera es la de P4OS; las demás las agregás vos, y sólo acá, en la placa.	Woher Apps kommen. Die erste ist die von P4OS; die anderen fügst du selbst hinzu, und nur hier am Board.
+Sin catálogo todavía	Noch kein Katalog
+Apps: %d  ·  %s  ·  otras %d ya están en otra fuente y no se ofrecen	Apps: %d  ·  %s  ·  %d weitere gibt es schon in einer anderen Quelle und werden nicht angeboten
+Apps: %d  ·  %s	Apps: %d  ·  %s
+La fuente oficial: no se quita.	Die offizielle Quelle: sie lässt sich nicht entfernen.
+Quitarla con sus apps	Mit ihren Apps entfernen
+Sólo la fuente	Nur die Quelle
+Agregar una fuente	Quelle hinzufügen
+Modo desarrollo	Entwicklermodus
+Para quien escribe apps: acepta fuentes por http:// en una red de confianza, y deja cambiar el catálogo oficial por uno de prueba desde el portal. Apagado, todo vuelve al catálogo oficial.	Für App-Entwickler: erlaubt http://-Quellen in einem vertrauten Netz und lässt das Portal den offiziellen Katalog durch einen Testkatalog ersetzen. Aus: alles zurück zum offiziellen Katalog.
+Eso no es una dirección:\nusuario/repositorio, o https://...	Das ist keine Adresse:\nbenutzer/repository oder https://...
+Escribí usuario/repositorio de GitHub, o la dirección https:// de un catálogo.	Gib benutzer/repository von GitHub ein, oder die https://-Adresse eines Katalogs.
+Dice ser de %s  ·  apps: %d	Gibt an, von %s zu sein  ·  Apps: %d
+Las apps de esta fuente no las revisó nadie de P4OS. Una app corre con todos los permisos del sistema: lee y escribe la tarjeta, ve las contraseñas guardadas, usa la red y los pines. Agregá sólo fuentes de gente en la que confiás.	Die Apps dieser Quelle hat niemand bei P4OS geprüft. Eine App läuft mit allen Rechten des Systems: sie liest und schreibt die Karte, sieht gespeicherte Passwörter, nutzt das Netz und die Pins. Füge nur Quellen von Leuten hinzu, denen du vertraust.
+Entiendo: agregarla	Verstanden: hinzufügen
+ruta inválida, o la cola está llena	ungültiger Pfad, oder die Warteschlange ist voll
+no se pudo recibir el paquete	das Paket konnte nicht empfangen werden
+otro catálogo sólo en modo desarrollo, que se prende en la placa (Tienda, Fuentes)	ein anderer Katalog nur im Entwicklermodus, der am Board eingeschaltet wird (Store, Quellen)

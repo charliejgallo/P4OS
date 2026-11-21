@@ -190,6 +190,8 @@ EXTRA_SYMBOLS = [
 # of the loader itself (exporting them breaks the resolution). aos_p4_ is
 # the HAL's own plumbing between its files (aos_p4_sd_card_open for disk
 # mode), not API for the apps.
+# aos_store_ is the Tienda's service: adding a source of apps is done at the
+# board, by a person who read the warning, never by an app.
 # aos_access_ is the portal's security (password, token, sessions, the
 # HTTPS keys): set on the board, in Settings, and nowhere else
 # (docs/SECURITY.md); aos_hwkbd_ and aos_hwmouse_ are the shell's side of the
@@ -201,7 +203,7 @@ EXTRA_SYMBOLS = [
 # the home's widget sheets (an app describes its widget with
 # aos_ui_describe_widget), and the compressed fonts' bitmap hook is reached
 # through the fonts themselves.
-EXCLUDE_PREFIXES = ("_", ".", "$", "__", "aos_p4_", "aos_access_", "aos_hwkbd_", "aos_hwmouse_",
+EXCLUDE_PREFIXES = ("_", ".", "$", "__", "aos_p4_", "aos_access_", "aos_store_", "aos_hwkbd_", "aos_hwmouse_",
                     "DRV_", "SENS_", "sens_", "si2c_", "aos_wall_photo_", "aos_screenrec_",
                     "aos_wedit_")
 EXCLUDE_EXACT = {"elf_find_sym", "elf_find_sym_default", "elf_set_symbol_resolver",

@@ -44,7 +44,7 @@ FAKE=$!
 python3 "$P4/tools/fake_github.py" --dir "$out/rel" --port $TPORT --quiet --tls "$out/srv.pem" "$out/srv.key" \
     > "$out/fake-tls.log" 2>&1 &
 FAKE_TLS=$!
-trap 'kill $FAKE $FAKE_TLS 2>/dev/null; wait $FAKE $FAKE_TLS 2>/dev/null; rm -rf "$out"' EXIT
+trap 'rc=$?; kill $FAKE $FAKE_TLS 2>/dev/null || true; wait $FAKE $FAKE_TLS 2>/dev/null || true; rm -rf "$out"; exit $rc' EXIT
 for i in $(seq 50); do curl -s -o /dev/null "http://127.0.0.1:$PORT/_fake" && break; sleep 0.1; done
 
 export P4_SIM_EXTRA_CA="$out/ca.pem"

@@ -3352,6 +3352,26 @@ static const char blob_en__sistema_lang[] =
     "Usa la red\tUses the network\n"
     "Página en el portal\tPage in the portal\n"
     "Header de 40 pines\t40-pin header\n"
+    "Fuentes\tSources\n"
+    "De %s, no de P4OS: nadie de P4OS la revisó.\tFrom %s, not from P4OS: nobody at P4OS looked at it.\n"
+    "De dónde vienen las apps. La primera es la de P4OS; las demás las agregás vos, y sólo acá, en la placa.\tWhere apps come from. The first is P4OS's own; the others you add yourself, and only here, on the board.\n"
+    "Sin catálogo todavía\tNo catalogue yet\n"
+    "Apps: %d  ·  %s  ·  otras %d ya están en otra fuente y no se ofrecen\tApps: %d  ·  %s  ·  %d more are in another source already and are not offered\n"
+    "Apps: %d  ·  %s\tApps: %d  ·  %s\n"
+    "La fuente oficial: no se quita.\tThe official source: it cannot be removed.\n"
+    "Quitarla con sus apps\tRemove it with its apps\n"
+    "Sólo la fuente\tOnly the source\n"
+    "Agregar una fuente\tAdd a source\n"
+    "Modo desarrollo\tDeveloper mode\n"
+    "Para quien escribe apps: acepta fuentes por http:// en una red de confianza, y deja cambiar el catálogo oficial por uno de prueba desde el portal. Apagado, todo vuelve al catálogo oficial.\tFor whoever writes apps: it takes http:// sources on a trusted network, and lets the portal put a test catalogue in the official one's place. Off, everything goes back to the official catalogue.\n"
+    "Eso no es una dirección:\\nusuario/repositorio, o https://...\tThat is not an address:\\nuser/repository, or https://...\n"
+    "Escribí usuario/repositorio de GitHub, o la dirección https:// de un catálogo.\tType a GitHub user/repository, or the https:// address of a catalogue.\n"
+    "Dice ser de %s  ·  apps: %d\tIt says it is by %s  ·  apps: %d\n"
+    "Las apps de esta fuente no las revisó nadie de P4OS. Una app corre con todos los permisos del sistema: lee y escribe la tarjeta, ve las contraseñas guardadas, usa la red y los pines. Agregá sólo fuentes de gente en la que confiás.\tNobody at P4OS looked at this source's apps. An app runs with every permission of the system: it reads and writes the card, sees the saved passwords, uses the network and the pins. Add only sources from people you trust.\n"
+    "Entiendo: agregarla\tI understand: add it\n"
+    "ruta inválida, o la cola está llena\tnot a valid path, or the queue is full\n"
+    "no se pudo recibir el paquete\tthe package could not be received\n"
+    "otro catálogo sólo en modo desarrollo, que se prende en la placa (Tienda, Fuentes)\tanother catalogue only in developer mode, which is turned on at the board (Store, Sources)\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -6696,6 +6716,26 @@ static const char blob_de__sistema_lang[] =
     "Usa la red\tNutzt das Netz\n"
     "Página en el portal\tSeite im Portal\n"
     "Header de 40 pines\t40-polige Leiste\n"
+    "Fuentes\tQuellen\n"
+    "De %s, no de P4OS: nadie de P4OS la revisó.\tVon %s, nicht von P4OS: niemand bei P4OS hat sie geprüft.\n"
+    "De dónde vienen las apps. La primera es la de P4OS; las demás las agregás vos, y sólo acá, en la placa.\tWoher Apps kommen. Die erste ist die von P4OS; die anderen fügst du selbst hinzu, und nur hier am Board.\n"
+    "Sin catálogo todavía\tNoch kein Katalog\n"
+    "Apps: %d  ·  %s  ·  otras %d ya están en otra fuente y no se ofrecen\tApps: %d  ·  %s  ·  %d weitere gibt es schon in einer anderen Quelle und werden nicht angeboten\n"
+    "Apps: %d  ·  %s\tApps: %d  ·  %s\n"
+    "La fuente oficial: no se quita.\tDie offizielle Quelle: sie lässt sich nicht entfernen.\n"
+    "Quitarla con sus apps\tMit ihren Apps entfernen\n"
+    "Sólo la fuente\tNur die Quelle\n"
+    "Agregar una fuente\tQuelle hinzufügen\n"
+    "Modo desarrollo\tEntwicklermodus\n"
+    "Para quien escribe apps: acepta fuentes por http:// en una red de confianza, y deja cambiar el catálogo oficial por uno de prueba desde el portal. Apagado, todo vuelve al catálogo oficial.\tFür App-Entwickler: erlaubt http://-Quellen in einem vertrauten Netz und lässt das Portal den offiziellen Katalog durch einen Testkatalog ersetzen. Aus: alles zurück zum offiziellen Katalog.\n"
+    "Eso no es una dirección:\\nusuario/repositorio, o https://...\tDas ist keine Adresse:\\nbenutzer/repository oder https://...\n"
+    "Escribí usuario/repositorio de GitHub, o la dirección https:// de un catálogo.\tGib benutzer/repository von GitHub ein, oder die https://-Adresse eines Katalogs.\n"
+    "Dice ser de %s  ·  apps: %d\tGibt an, von %s zu sein  ·  Apps: %d\n"
+    "Las apps de esta fuente no las revisó nadie de P4OS. Una app corre con todos los permisos del sistema: lee y escribe la tarjeta, ve las contraseñas guardadas, usa la red y los pines. Agregá sólo fuentes de gente en la que confiás.\tDie Apps dieser Quelle hat niemand bei P4OS geprüft. Eine App läuft mit allen Rechten des Systems: sie liest und schreibt die Karte, sieht gespeicherte Passwörter, nutzt das Netz und die Pins. Füge nur Quellen von Leuten hinzu, denen du vertraust.\n"
+    "Entiendo: agregarla\tVerstanden: hinzufügen\n"
+    "ruta inválida, o la cola está llena\tungültiger Pfad, oder die Warteschlange ist voll\n"
+    "no se pudo recibir el paquete\tdas Paket konnte nicht empfangen werden\n"
+    "otro catálogo sólo en modo desarrollo, que se prende en la placa (Tienda, Fuentes)\tein anderer Katalog nur im Entwicklermodus, der am Board eingeschaltet wird (Store, Quellen)\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -6703,7 +6743,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3337, 0, files_en, 1 },
-    { "de", "Deutsch", 3337, 0, files_de, 1 },
+    { "en", "English", 3357, 0, files_en, 1 },
+    { "de", "Deutsch", 3357, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

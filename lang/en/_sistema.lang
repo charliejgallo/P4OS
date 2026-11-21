@@ -10649,3 +10649,23 @@ De pie	Portrait
 Usa la red	Uses the network
 Página en el portal	Page in the portal
 Header de 40 pines	40-pin header
+Fuentes	Sources
+De %s, no de P4OS: nadie de P4OS la revisó.	From %s, not from P4OS: nobody at P4OS looked at it.
+De dónde vienen las apps. La primera es la de P4OS; las demás las agregás vos, y sólo acá, en la placa.	Where apps come from. The first is P4OS's own; the others you add yourself, and only here, on the board.
+Sin catálogo todavía	No catalogue yet
+Apps: %d  ·  %s  ·  otras %d ya están en otra fuente y no se ofrecen	Apps: %d  ·  %s  ·  %d more are in another source already and are not offered
+Apps: %d  ·  %s	Apps: %d  ·  %s
+La fuente oficial: no se quita.	The official source: it cannot be removed.
+Quitarla con sus apps	Remove it with its apps
+Sólo la fuente	Only the source
+Agregar una fuente	Add a source
+Modo desarrollo	Developer mode
+Para quien escribe apps: acepta fuentes por http:// en una red de confianza, y deja cambiar el catálogo oficial por uno de prueba desde el portal. Apagado, todo vuelve al catálogo oficial.	For whoever writes apps: it takes http:// sources on a trusted network, and lets the portal put a test catalogue in the official one's place. Off, everything goes back to the official catalogue.
+Eso no es una dirección:\nusuario/repositorio, o https://...	That is not an address:\nuser/repository, or https://...
+Escribí usuario/repositorio de GitHub, o la dirección https:// de un catálogo.	Type a GitHub user/repository, or the https:// address of a catalogue.
+Dice ser de %s  ·  apps: %d	It says it is by %s  ·  apps: %d
+Las apps de esta fuente no las revisó nadie de P4OS. Una app corre con todos los permisos del sistema: lee y escribe la tarjeta, ve las contraseñas guardadas, usa la red y los pines. Agregá sólo fuentes de gente en la que confiás.	Nobody at P4OS looked at this source's apps. An app runs with every permission of the system: it reads and writes the card, sees the saved passwords, uses the network and the pins. Add only sources from people you trust.
+Entiendo: agregarla	I understand: add it
+ruta inválida, o la cola está llena	not a valid path, or the queue is full
+no se pudo recibir el paquete	the package could not be received
+otro catálogo sólo en modo desarrollo, que se prende en la placa (Tienda, Fuentes)	another catalogue only in developer mode, which is turned on at the board (Store, Sources)

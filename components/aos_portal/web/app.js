@@ -3136,6 +3136,7 @@ function pageTienda() {
         h('img', { src: icon(e, 56), width: 56, height: 56, style: 'border-radius:13px;flex:none' }),
         h('div', { class: 'grow' },
           h('div', {}, h('b', {}, L(e.name)), ' ', h('span', { class: 'pill' }, e.ver), ' ',
+            a.src ? h('span', { class: 'pill', style: 'color:var(--orange)' }, ((st.sources || [])[a.src] || {}).name || tr('de terceros')) : null, ' ',
             a.state !== 'absent' ? h('span', { class: 'pill', style: a.state === 'update' || a.state === 'set_aside' ? 'color:var(--orange)' : '' }, tr(STATE[a.state])) : null),
           h('div', { class: 'small muted', style: 'margin:4px 0' }, L(e.about)),
           h('div', { class: 'small muted' }, fmtBytes(e.pkg.installed || e.pkg.size) + (need ? ' + ' + fmtBytes(need) + ' ' + tr('de packs') : '') +
@@ -3166,14 +3167,27 @@ function pageTienda() {
     msg.textContent = st.busy ? tr('En curso: %s %s (%s)', j.what, j.file, j.step || '…') + (j.queued ? ' +' + j.queued : '')
                               : st.last ? (st.last_ok ? tr('Lo último: %s', st.last) : tr('No se pudo: %s', st.last)) : '';
     msg.style.color = !st.busy && st.last && !st.last_ok ? 'var(--orange)' : '';
+    const side = h('input', { type: 'file', accept: '.p4app', style: 'display:none', onchange: async e => {
+      const f = e.target.files[0];
+      if (!f) return;
+      try {
+        const r = await fetch('/api/store/sideload', { method: 'POST', body: f });
+        const j = await r.json();
+        if (!r.ok) throw new Error(j.error || r.statusText);
+        st = j; draw(); poll(400);
+      } catch (x) { toast(x.message, true); }
+    } });
     put(top,
-      row(tr('Fuente'), st.source ? st.source + ' · ' + st.release : tr('todavía sin catálogo')),
+      (st.sources || []).length > 1
+        ? st.sources.map((sr, i) => row(i ? tr('Fuente agregada') : tr('Fuente'), (sr.name || sr.url) + (sr.release ? ' · ' + sr.release : '') + ' · ' + tr('apps: %s', sr.apps)))
+        : row(tr('Fuente'), st.source ? st.source + ' · ' + st.release : tr('todavía sin catálogo')),
       h('div', { class: 'small mono muted', style: 'word-break:break-all;margin:6px 0' }, st.url),
       ups ? row(tr('Actualizaciones'), String(ups), 'warn') : null,
       h('div', { class: 'btns', style: 'margin-top:10px' },
         h('button', { class: 'btn', disabled: st.busy, onclick: () => act('refresh', {}) }, tr('Buscar de nuevo')),
         hand ? h('button', { class: 'btn', disabled: st.busy, title: tr('Un recibo para las que son las del catálogo: no cambia ninguna app'),
                              onclick: () => act('adopt', {}) }, tr('Que la Tienda maneje las %s copiadas a mano', hand)) : null,
+        h('button', { class: 'btn', disabled: st.busy, title: tr('Un paquete que no está en ningún catálogo'), onclick: () => side.click() }, tr('Instalar un .p4app…')), side,
         st.busy ? h('button', { class: 'btn red', onclick: () => act('cancel', {}) }, tr('Cancelar')) : null),
       bar, msg,
       h('div', { class: 'note', style: 'margin-top:8px' }, tr('Las fuentes de apps se agregan sólo en la placa.')));
