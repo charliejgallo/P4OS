@@ -537,10 +537,21 @@ ni de prender el modo desarrollo desde ahí.
   app listada al final con el nombre de la fuente.
 - El firmware `rev1_3` compila: 7 037 456 bytes.
 
+**En la placa (2026-11-21):** firmware `v0.30.0-tienda.1-12-g9e506d9` por
+OTA, confirmado, con los idiomas subidos. La primera instalación de esta
+fase dejó 8 KB menos de RAM interna libre: las tablas nuevas del servicio
+y de la pantalla (fuentes, cola, estado, galería) eran estáticos comunes.
+Pasadas a PSRAM (`AOS_BSS_PSRAM`), la RAM interna libre a los 30 s quedó en
+209 707 bytes, 2 KB más que antes de la fase 3. Con el modo desarrollo
+apagado la primera fuente volvió a ser la oficial, como debe; el catálogo
+de prueba sigue cargado desde la tarjeta hasta que se prenda el modo y se
+lo apunte otra vez.
+
 **Lo que falta de esta fase:**
 
-- **En la placa:** no está instalado. Ahí importa `aos_access_here_trusted`
-  (el simulador no distingue redes) y que el teclado se sienta bien.
+- **Que el usuario la recorra en la placa:** el teclado, el aviso, y
+  `aos_access_here_trusted` con una fuente http (el simulador no
+  distingue redes).
 - Que el portal pueda *proponer* una fuente para aceptarla en la pantalla
   (D8): hoy se escribe en la placa.
 - Abrir un `.p4app` desde la app Archivos.
