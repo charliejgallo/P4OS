@@ -8,7 +8,9 @@
  *                                  progress, how the last one ended, the
  *                                  catalogue's source and release, and every
  *                                  app: {file, id, ver, have, state, fits}
- *                                  (state: absent, installed, update, by_hand)
+ *                                  (state: absent, installed, update, by_hand,
+ *                                  or set_aside: it made the board fall while
+ *                                  loading; installing it again is the way back)
  *   GET  /api/store/catalog        the catalogue as it was downloaded
  *                                  (NDJSON: the source, then an app a line):
  *                                  names, descriptions, icons, packs
@@ -158,7 +160,7 @@ static void fetch_start(aos_httpd_req_t *r)
 
 static void store_state(aos_httpd_req_t *r, int status, const char *error)
 {
-    static const char *states[] = { "absent", "installed", "update", "by_hand" };
+    static const char *states[] = { "absent", "installed", "update", "by_hand", "set_aside" };
     aos_store_status_t st;
     aos_store_status(&st);
     cJSON *o = cJSON_CreateObject();
@@ -188,7 +190,7 @@ static void store_state(aos_httpd_req_t *r, int status, const char *error)
         cJSON_AddStringToObject(e, "id", a.id);
         cJSON_AddStringToObject(e, "ver", a.ver);
         cJSON_AddStringToObject(e, "have", a.have);
-        cJSON_AddStringToObject(e, "state", states[a.state & 3]);
+        cJSON_AddStringToObject(e, "state", states[a.state <= AOS_STORE_SET_ASIDE ? a.state : 0]);
         cJSON_AddBoolToObject(e, "fits", a.fits);
         cJSON_AddItemToArray(apps, e);
     }

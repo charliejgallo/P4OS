@@ -32,6 +32,9 @@ typedef enum {
     AOS_STORE_INSTALLED,    /* the catalogue's package, by its receipt */
     AOS_STORE_UPDATE,       /* a receipt of another package: the catalogue's is newer */
     AOS_STORE_BY_HAND,      /* its .so is on the card with no receipt */
+    AOS_STORE_SET_ASIDE,    /* it made the board fall while loading: its .so is now
+                             * <file>.so.off (aos_dynapp.c, "Quarantine") and
+                             * installing it again is the way back */
 } aos_store_state_t;
 
 typedef struct {

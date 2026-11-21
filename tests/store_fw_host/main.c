@@ -27,7 +27,7 @@ static void wait_done(uint32_t before)
 
 int main(int argc, char **argv)
 {
-    static const char *states[] = { "absent", "installed", "update", "by_hand" };
+    static const char *states[] = { "absent", "installed", "update", "by_hand", "set_aside" };
     setvbuf(stdout, NULL, _IOLBF, 0);
     for (int i = 1; i < argc; i++) {
         char *a = argv[i], *v = strchr(a, '=');

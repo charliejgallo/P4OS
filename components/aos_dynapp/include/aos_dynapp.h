@@ -59,6 +59,12 @@ int aos_dynapp_unload_file(const char *filename);
  * The ABI number is inside the app's code and is checked when it loads. */
 int aos_dynapp_check(const char *path, char *missing, size_t missing_len);
 
+/* The module set aside at this start, or NULL: one that made the board fall
+ * twice in a row while it was loading is renamed to <file>.so.off before the
+ * scan, so the board comes up without it (aos_dynapp.c, "Quarantine").
+ * Installing it again puts a .so back; the .off is the store's to delete. */
+const char *aos_dynapp_set_aside(void);
+
 /* Whether the app with this id came from a .so on the card. The id does not
  * say it: twelve of the card's apps are "aos.something", like the built-in
  * ones, so only the table of loaded stubs knows. */

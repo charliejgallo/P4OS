@@ -381,16 +381,20 @@ static void states(void)
     for (int i = 0; i < s_n; i++) {
         app_t *a = &s_apps[i];
         a->pub.have[0] = 0;
+        char so[PATH_MAX_], off[PATH_MAX_];
+        snprintf(so, sizeof so, "apps/%s.so", a->pub.file);
+        snprintf(off, sizeof off, "apps/%s.so.off", a->pub.file);
+        bool there = exists(so, NULL);
         cJSON *r = receipt_read(a->pub.file);
         if (r) {
             snprintf(a->pub.have, sizeof a->pub.have, "%s", jstr(r, "ver"));
             a->pub.state = !strcmp(jstr(r, "pkg_sha256"), a->pkg_sha) ? AOS_STORE_INSTALLED : AOS_STORE_UPDATE;
             cJSON_Delete(r);
         } else {
-            char so[PATH_MAX_];
-            snprintf(so, sizeof so, "apps/%s.so", a->pub.file);
-            a->pub.state = exists(so, NULL) ? AOS_STORE_BY_HAND : AOS_STORE_ABSENT;
+            a->pub.state = there ? AOS_STORE_BY_HAND : AOS_STORE_ABSENT;
         }
+        /* the loader set it aside: whatever the receipt says, it is not running */
+        if (!there && exists(off, NULL)) a->pub.state = AOS_STORE_SET_ASIDE;
     }
 }
 
@@ -823,6 +827,9 @@ static bool install(const char *file, const char *packs_arg, bool adopt, err_t *
         free(text);
         if (!wrote) { fail(e, "could not write the receipt"); goto out; }
     }
+    /* a copy the loader had set aside: this install is the way back */
+    snprintf(rel, sizeof rel, "apps/%s.so.off", file);
+    del(rel);
     if (!adopt && !dyn_load(so_name)) {
         /* the files and the receipt are right: a restart registers it */
         aos_hal_log(TAG, "%s is installed and did not register now: at the next start", file);
@@ -858,6 +865,8 @@ static bool uninstall(const char *file, err_t *e)
             if (strstr(rel, ".pak") && !strstr(rel, "..") && !strchr(rel + 5, '/')) del(rel);
         }
     snprintf(rel, sizeof rel, DIR_STORE "/%s.json", file);
+    del(rel);
+    snprintf(rel, sizeof rel, "apps/%s.so.off", file);
     del(rel);
     cJSON_Delete(r);
     return true;
@@ -995,7 +1004,11 @@ void aos_store_init(void)
     s_inited = true;
     if (!aos_hal_pref_get_str("store_url", s_url, sizeof s_url)) s_url[0] = 0;
     err_t e;
-    if (aos_hal_path_sd_root() && !catalog_load(&e)) aos_hal_log(TAG, "%s", e.why);
+    if (!aos_hal_path_sd_root()) return;
+    /* what an install cut short by a restart left staged; a pack's .part
+     * stays, for the next try to go on from */
+    tmp_clean(true);
+    if (!catalog_load(&e)) aos_hal_log(TAG, "%s", e.why);
 }
 
 const char *aos_store_url(void)

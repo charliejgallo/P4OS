@@ -167,6 +167,16 @@ t = tree("c", True)
 check("remove: files, packs and receipt; the rest stays", jobs[0][0] and not jobs[1][0] and apps["mila"][0] == "absent"
       and not [x for x in t if "mila" in x] and "apps/golf_p4.pak" in t and len(before) - len(tree("c")) == 6, o)
 
+# 6b. set aside by the loader (it fell twice while loading): seen, and installing again is the way back
+os.rename("c/apps/dados.so", "c/apps/dados.so.off")
+open("c/apps/.store/tmp/f0", "w").write("left by an install that a restart cut")
+jobs, apps, o = fw("c", "list")
+check("set aside by the loader: the service says so", apps["dados"][0] == "set_aside"
+      and not os.path.exists("c/apps/.store/tmp/f0"), o)
+jobs, apps, o = fw("c", "install=dados", "list")
+check("...and installing it again puts it back", jobs[0][0] and apps["dados"][0] == "installed"
+      and os.path.exists("c/apps/dados.so") and not os.path.exists("c/apps/dados.so.off"), o)
+
 # 7. a firmware that is too old for the catalogue
 bad = dict(apps2["dados"]); bad["fw_min"] = "9.9.9"
 open("rel/old.ndjson", "w").write(json.dumps(head2) + "\n" + json.dumps(bad) + "\n")
