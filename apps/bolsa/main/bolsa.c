@@ -227,7 +227,8 @@ static void flush_quotes(void)
                 s += len;
                 if (*s == ',') s++;
             }
-            bs_net_queue(&j, false);
+            /* quotes before sparklines: the price is what the row is for */
+            bs_net_queue(&j, true);
         }
         s_want[p][0] = 0;
     }
@@ -238,6 +239,7 @@ void bs_item_quote_set(const char *sym, const bs_quote_t *q)
     bs_item_t *it = bs_item(sym);
     if (!it) return;
     it->q = *q;
+    if (!it->info.name[0] || it->info.kind == BS_K_STOCK) bs_sym_info(sym, &it->info);   /* a name learned now */
     it->q.fetched = bs_now();
     it->q.fetched_ms = now_ms() | 1;
     it->err = 0;
@@ -573,7 +575,10 @@ static void timer_cb(lv_timer_t *t)
             aos_hal_log("bolsa", "bolsa.txt changed: reloading");
             bs_cfg_load();
             bs_net_init();
-            for (int i = 0; i < s_nitems; i++) bs_sym_info(s_items[i]->sym, &s_items[i]->info);
+            for (int i = 0; i < s_nitems; i++) {
+                bs_sym_info(s_items[i]->sym, &s_items[i]->info);
+                bs_check_alerts(s_items[i]);     /* a new alert the price already crossed */
+            }
             if (!s_hidden) bs_go(bs_ui.view, bs_ui.view == BS_V_DETAIL ? bs_ui.sym : NULL);
         }
     }

@@ -46,13 +46,16 @@ static uint32_t now_ms(void) { return (uint32_t)aos_hal_uptime_ms(); }
 
 static int gap_ms(bs_prov_t p, int credits)
 {
+    /* against the fake server the plans' pace only slows the tests down */
+    const char *fake = getenv("BOLSA_FAKE");
+    int div = fake && fake[0] ? 10 : 1;
     switch (p) {
-    case BS_P_COINGECKO: return 13000;
-    case BS_P_TWELVE:    return 7600 * (credits < 1 ? 1 : credits);
-    case BS_P_ALPHA:     return 15000;
-    case BS_P_FINNHUB:   return 1100;
-    case BS_P_STOOQ:     return 1500;
-    default:             return 800;
+    case BS_P_COINGECKO: return 13000 / div;
+    case BS_P_TWELVE:    return 7600 * (credits < 1 ? 1 : credits) / div;
+    case BS_P_ALPHA:     return 15000 / div;
+    case BS_P_FINNHUB:   return 1100 / div;
+    case BS_P_STOOQ:     return 1500 / div;
+    default:             return 800 / div;
     }
 }
 
@@ -236,7 +239,7 @@ static void done(int p)
         err = BS_E_HTTP;
     } else if (j->kind == BS_J_QUOTES) {
         err = bs_prov_parse_quotes(j, body, len);
-        if (!err && bs_on_data) bs_on_data(j->sym, BS_D_QUOTE);
+        if (!err && bs_on_data) bs_on_data(NULL, BS_D_QUOTE);     /* every row of the batch */
     } else if (j->kind == BS_J_SEARCH) {
         int n = 0;
         err = bs_prov_parse_search(j, body, len, s_hits, (int)(sizeof s_hits / sizeof s_hits[0]), &n);

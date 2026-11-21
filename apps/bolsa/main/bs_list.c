@@ -321,7 +321,7 @@ void bs_list_build(void)
     lv_obj_add_flag(L.tabs, LV_OBJ_FLAG_CLICKABLE);
 
     int32_t list_y = tabs_y + 84;
-    int32_t foot_h = 74;
+    int32_t foot_h = 104;
     L.list = lv_obj_create(root);
     lv_obj_remove_style_all(L.list);
     lv_obj_set_size(L.list, W - 2 * pad, H - list_y - foot_h);
@@ -340,7 +340,7 @@ void bs_list_build(void)
     lv_obj_set_pos(L.status, pad, H - foot_h + 6);
     L.foot = bs_label(root, "", aos_font_tiny, AOS_C_DIM);
     lv_obj_set_width(L.foot, W - 2 * pad);
-    lv_label_set_long_mode(L.foot, LV_LABEL_LONG_MODE_DOTS);
+    lv_label_set_long_mode(L.foot, LV_LABEL_LONG_MODE_WRAP);
     lv_obj_set_style_text_align(L.foot, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_set_pos(L.foot, pad, H - foot_h + 38);
 
@@ -501,6 +501,7 @@ static void results_fill(void)
 {
     if (!L.results) return;
     lv_obj_clean(L.results);
+    lv_obj_update_layout(L.results);    /* the width is only known after a layout */
     int32_t w = lv_obj_get_width(L.results) - 4;
     int k = 0;
     const char *q = L.query;
@@ -593,6 +594,7 @@ static void search_open(void)
     char t[64];
     snprintf(t, sizeof t, _("Sumar a %s"), list_name(bs_cfg()->cur_list));
     lv_obj_t *body = bs_sheet(t, search_closed);
+    lv_obj_update_layout(body);
     int32_t w = lv_obj_get_width(body), h = lv_obj_get_height(body);
     L.query[0] = 0;
     L.n_net = 0;

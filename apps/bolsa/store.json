@@ -1,0 +1,17 @@
+{
+ "cat": "utiles",
+ "about": {
+  "es": "Acciones, índices, el dólar, monedas y cripto, con gráficos de línea, área o velas, listas propias y avisos de precio. Datos con demora; no es un consejo de inversión.",
+  "en": "Shares, indices, the dollar, currencies and crypto, with line, area or candle charts, your own lists and price alerts. Delayed data; not investment advice."
+ },
+ "desc": {
+  "es": "Listas de símbolos, cada uno con su precio, la variación del día en verde o rojo y un gráfico chiquito. Trae cinco listas (mías, Argentina, EE. UU., cripto e índices) que se reordenan, se editan y se suman buscando por nombre o símbolo.\n\nAl tocar uno se ve el gráfico grande en línea, área o velas, de un día a todo el histórico, con volumen, medias móviles de 20 y 50 y RSI. Un dedo sobre el gráfico lee la fecha y el valor; dos dedos dicen cuánto cambió entre dos fechas. Se pueden comparar hasta tres símbolos en porcentaje. Abajo, la apertura, el máximo, el mínimo, el cierre anterior, el volumen y el rango de 52 semanas. Acostada, el gráfico ocupa la pantalla.\n\nSin clave andan el dólar en sus casas, el euro, el real y otras monedas en pesos, el riesgo país (ArgentinaDatos) y la cripto (CoinGecko). Las acciones y los índices necesitan la clave gratis de un proveedor (Twelve Data, Stooq, Alpha Vantage o Finnhub), que se escribe en la página Bolsa del portal, junto con las listas y los avisos de precio. Guarda lo último en la tarjeta para abrir al instante y andar sin red.\n\nLos datos llegan con demora y siempre se muestra de qué fuente son. La app no da consejos de inversión.",
+  "en": "Lists of symbols, each with its price, the day's change in green or red and a small chart. It comes with five lists (mine, Argentina, US, crypto and indices) you can reorder, edit and add to by searching for a name or a symbol.\n\nTapping one shows the big chart as a line, an area or candles, from one day to the whole history, with volume, 20 and 50 moving averages and RSI. One finger on the chart reads the date and the value; two fingers tell the change between two dates. Up to three symbols can be compared in percent. Below, the open, high, low, previous close, volume and 52-week range. Lying down, the chart takes the whole screen.\n\nWith no key it shows the Argentine dollar's houses, the euro, the real and other currencies in pesos, the country risk (ArgentinaDatos) and crypto (CoinGecko). Shares and indices need a free key from a provider (Twelve Data, Stooq, Alpha Vantage or Finnhub), typed in on the Stocks page of the portal, along with the lists and the price alerts. It keeps the latest data on the card to open at once and work offline.\n\nThe data are delayed and the source is always shown. The app gives no investment advice."
+ },
+ "shots": [
+  "app-bolsa.png",
+  "app-bolsa-chart.png",
+  "land-bolsa.png",
+  "web-bolsa.png"
+ ]
+}

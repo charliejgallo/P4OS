@@ -565,8 +565,11 @@ static void draw_cb(lv_event_t *e)
             polyline(layer, c, ys, true, 0, BS_C_MA2, 2);
             lv_free(ys);
         }
-        label_at(layer, "MM20", aos_font_tiny, BS_C_MA1, c->px + 4, c->py, c->px + 80, c->py + 20, LV_TEXT_ALIGN_LEFT);
-        label_at(layer, "MM50", aos_font_tiny, BS_C_MA2, c->px + 72, c->py, c->px + 160, c->py + 20, LV_TEXT_ALIGN_LEFT);
+        char m1[16], m2[16];
+        snprintf(m1, sizeof m1, "%s20", _("MM"));
+        snprintf(m2, sizeof m2, "%s50", _("MM"));
+        label_at(layer, m1, aos_font_tiny, BS_C_MA1, c->px + 4, c->py, c->px + 80, c->py + 20, LV_TEXT_ALIGN_LEFT);
+        label_at(layer, m2, aos_font_tiny, BS_C_MA2, c->px + 72, c->py, c->px + 160, c->py + 20, LV_TEXT_ALIGN_LEFT);
     }
 
     /* the legend of the comparison */

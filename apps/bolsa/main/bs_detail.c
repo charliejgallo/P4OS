@@ -174,6 +174,7 @@ static int slice(const bs_series_t *s, int range, int *off)
 static void apply(void)
 {
     if (!D.chart) return;
+    tools_build();
     bs_cfg_t *c = bs_cfg();
     int range = c->range;
     bs_item_t *it = bs_item(D.info.sym);
@@ -318,6 +319,7 @@ static void cmp_pick(lv_event_t *e);
 static void cmp_sheet_fill(lv_obj_t *col)
 {
     lv_obj_clean(col);
+    lv_obj_update_layout(col);          /* the width is only known after a layout */
     int32_t w = lv_obj_get_width(col) - 4;
     bs_cfg_t *c = bs_cfg();
     lv_obj_t *h = bs_label(col, _("Elegí hasta dos para ver todo en % desde el comienzo del rango."), aos_font_small, AOS_C_DIM);
@@ -402,6 +404,7 @@ static void cmp_cb(lv_event_t *e)
     char t[64];
     snprintf(t, sizeof t, _("Comparar %s"), D.info.show);
     lv_obj_t *body = bs_sheet(t, cmp_closed);
+    lv_obj_update_layout(body);
     s_cmp_col = lv_obj_create(body);
     lv_obj_remove_style_all(s_cmp_col);
     lv_obj_set_size(s_cmp_col, lv_obj_get_width(body), lv_obj_get_height(body));
@@ -441,6 +444,7 @@ static void alert_list_fill(void)
     bs_cfg_t *c = bs_cfg();
     bs_info_t in;
     bs_sym_info(A.sym, &in);
+    lv_obj_update_layout(A.list);
     int32_t w = lv_obj_get_width(A.list);
     int n = 0;
     for (int i = bs_alert_find(A.sym, 0); i >= 0; i = bs_alert_find(A.sym, i + 1)) {
@@ -520,6 +524,7 @@ void bs_alert_sheet(const char *sym)
     char t[64];
     snprintf(t, sizeof t, _("Avisos de %s"), in.show);
     lv_obj_t *body = bs_sheet(t, alert_closed);
+    lv_obj_update_layout(body);
     int32_t w = lv_obj_get_width(body);
     bs_item_t *it = bs_item(sym);
     bs_quote_t q;
@@ -625,6 +630,7 @@ void bs_detail_build(const char *sym)
 {
     memset(&D, 0, offsetof(typeof(D), cmp));
     D.reading = false;
+    D.t_price[0] = D.t_chg[0] = D.t_when[0] = 0;     /* the labels are new */
     bs_item_t *it = bs_item(sym);
     if (it) D.info = it->info;
     else bs_sym_info(sym, &D.info);

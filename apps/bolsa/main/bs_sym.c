@@ -25,17 +25,17 @@ typedef struct {
 
 static const cat_t CAT[] = {
     /* Argentina, no key: ArgentinaDatos */
-    { "USD.OFICIAL", "Oficial",  N_("Dólar oficial"),          "ARS", "oficial",         BS_K_DOLAR },
-    { "USD.BLUE",    "Blue",     N_("Dólar blue"),             "ARS", "blue",            BS_K_DOLAR },
-    { "USD.MEP",     "MEP",      N_("Dólar MEP (bolsa)"),      "ARS", "bolsa",           BS_K_DOLAR },
-    { "USD.CCL",     "CCL",      N_("Dólar contado con liqui"),"ARS", "contadoconliqui", BS_K_DOLAR },
-    { "USD.CRIPTO",  "Cripto",   N_("Dólar cripto"),           "ARS", "cripto",          BS_K_DOLAR },
-    { "USD.MAYOR",   "Mayorista",N_("Dólar mayorista"),        "ARS", "mayorista",       BS_K_DOLAR },
+    { "USD.OFICIAL", N_("Oficial"),  N_("Dólar oficial"),          "ARS", "oficial",         BS_K_DOLAR },
+    { "USD.BLUE",    N_("Blue"),     N_("Dólar blue"),             "ARS", "blue",            BS_K_DOLAR },
+    { "USD.MEP",     N_("MEP"),      N_("Dólar MEP (bolsa)"),      "ARS", "bolsa",           BS_K_DOLAR },
+    { "USD.CCL",     N_("CCL"),      N_("Dólar contado con liqui"),"ARS", "contadoconliqui", BS_K_DOLAR },
+    { "USD.CRIPTO",  N_("Cripto"),   N_("Dólar cripto"),           "ARS", "cripto",          BS_K_DOLAR },
+    { "USD.MAYOR",   N_("Mayorista"),N_("Dólar mayorista"),        "ARS", "mayorista",       BS_K_DOLAR },
     { "EUR.ARS",     "EUR",      N_("Euro en pesos"),          "ARS", "eur",             BS_K_FX },
     { "BRL.ARS",     "BRL",      N_("Real en pesos"),          "ARS", "brl",             BS_K_FX },
     { "CLP.ARS",     "CLP",      N_("Peso chileno en pesos"),  "ARS", "clp",             BS_K_FX },
     { "UYU.ARS",     "UYU",      N_("Peso uruguayo en pesos"), "ARS", "uyu",             BS_K_FX },
-    { "RIESGO.AR",   "Riesgo",   N_("Riesgo país"),            "",    "",                BS_K_RISK },
+    { "RIESGO.AR",   N_("Riesgo"),   N_("Riesgo país"),            "",    "",                BS_K_RISK },
     /* Indices: a keyed provider */
     { "^MERV",  "MERV",  "Merval",      "ARS", "", BS_K_INDEX },
     { "^GSPC",  "SPX",   "S&P 500",     "USD", "", BS_K_INDEX },
@@ -63,7 +63,8 @@ static void from_cat(const cat_t *c, bs_info_t *out)
 {
     memset(out, 0, sizeof *out);
     bs_scpy(out->sym, sizeof out->sym, c->sym);
-    bs_scpy(out->show, sizeof out->show, c->show);
+    /* the dollar's houses and the country risk are words, and translated */
+    bs_scpy(out->show, sizeof out->show, c->kind == BS_K_DOLAR || c->kind == BS_K_RISK ? _(c->show) : c->show);
     /* the dollar's names are Spanish words and get translated */
     bs_scpy(out->name, sizeof out->name,
             c->kind == BS_K_DOLAR || c->kind == BS_K_FX || c->kind == BS_K_RISK ? _(c->name) : c->name);
@@ -154,7 +155,9 @@ static bs_prov_t pick(const bs_info_t *in, bool hist)
     if (hist) { ord = idx ? INDEX_H : STOCK_H; n = 3; }
     else if (idx) { ord = INDEX_Q; n = 3; }
     else { ord = STOCK_Q; n = 4; }
-    bs_prov_t pref = (bs_prov_t)bs_cfg()->prov;
+    /* the preference is for shares: indices are best where they are, and
+     * the free plans of the others mostly do not carry them */
+    bs_prov_t pref = idx ? BS_P_NONE : (bs_prov_t)bs_cfg()->prov;
     if (pref > BS_P_ARGDATOS && pref < BS_P_COUNT && keyed(pref))
         for (int i = 0; i < n; i++)
             if (ord[i] == pref) return pref;

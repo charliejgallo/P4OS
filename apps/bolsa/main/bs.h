@@ -33,6 +33,7 @@
 
 #include "aos_app.h"
 #include "aos_fonts.h"
+#include "aos_gesture.h"
 #include "aos_hal.h"
 #include "aos_i18n.h"
 #include "aos_sys_glyphs.h"

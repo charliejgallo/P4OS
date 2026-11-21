@@ -408,9 +408,12 @@ static void fmt_pos(float v, int dec, char *out, size_t n)
     }
     if (dec > 0 && w + 2 + (size_t)dec < n) {
         out[w++] = ds;
-        char fd[12];
-        snprintf(fd, sizeof fd, "%0*lu", dec, (unsigned long)f);
-        for (int i = 0; i < dec; i++) out[w++] = fd[i];
+        /* the decimals by hand: zero-padded, 'dec' digits */
+        for (int i = dec - 1; i >= 0; i--) {
+            out[w + (size_t)i] = (char)('0' + f % 10);
+            f /= 10;
+        }
+        w += (size_t)dec;
     }
     out[w] = 0;
 }
@@ -445,7 +448,11 @@ void bs_fmt_price(float v, const bs_info_t *in, char *out, size_t n)
 void bs_fmt_chg(float chg, const bs_info_t *in, char *out, size_t n)
 {
     char b[32];
-    bs_fmt_num(fabsf(chg), price_dec(chg, in), b, sizeof b);
+    /* a change is shown with the cents of a price, not with the four
+     * decimals a small number would get */
+    float a = fabsf(chg);
+    int dec = in && in->kind == BS_K_RISK ? 0 : a >= 100000 ? 0 : a >= 0.01f ? 2 : price_dec(chg, in);
+    bs_fmt_num(a, dec, b, sizeof b);
     snprintf(out, n, "%s%s", chg > 0 ? "+" : chg < 0 ? "-" : "", b);
 }
 
