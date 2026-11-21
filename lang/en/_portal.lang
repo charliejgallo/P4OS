@@ -2289,3 +2289,31 @@ Leer la tarjeta otra vez	Read the card again
 
 #: components/aos_portal/web/app.js:683
 versión nueva	new version
+Tienda	Store
+Instalada	Installed
+Hay una versión nueva	There is a new version
+Copiada a mano	Copied by hand
+Apartada: hizo caer la placa al cargarse	Set aside: it made the board crash while loading
+Actualizar	Update
+Instalar	Install
+Reinstalar	Reinstall
+de packs	of packs
+necesita P4OS %s	needs P4OS %s
+%s extras	%s extras
+¿Quitar %s de la placa? Lo que la app guardó queda en la tarjeta.	Remove %s from the board? What the app saved stays on the card.
+Quitar	Remove
+Abrir	Open
+En curso: %s %s (%s)	Running: %s %s (%s)
+Lo último: %s	Last: %s
+No se pudo: %s	It failed: %s
+Fuente	Source
+todavía sin catálogo	no catalogue yet
+Actualizaciones	Updates
+Un recibo para las que son las del catálogo: no cambia ninguna app	A receipt for the ones that are the catalogue's: it changes no app
+Que la Tienda maneje las %s copiadas a mano	Let the Store manage the %s copied by hand
+Las fuentes de apps se agregan sólo en la placa.	App sources are added on the board only.
+Todo	Everything
+Instaladas	Installed
+Buscar	Search
+Nada por acá	Nothing here
+Todavía no hay catálogo: "Buscar de nuevo" lo trae.	No catalogue yet: "Search again" fetches it.

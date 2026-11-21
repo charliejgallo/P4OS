@@ -10599,3 +10599,47 @@ Lógica	Logic
 
 #: components/aos_apps/aos_app_flasher.c:1069
 Versión nueva	New version
+Actualizar	Update
+Reinstalar	Reinstall
+Obtener	Get
+Necesita P4OS %s o más nuevo.\nActualizá el sistema primero.	It needs P4OS %s or newer.\nUpdate the system first.
+Hay demasiadas cosas en cola	Too many things are waiting already
+Quedó apartada: hizo caer la placa	Set aside: it made the board crash
+Actualizaciones	Updates
+Instaladas	Installed
+Buscando el catálogo...	Fetching the catalogue...
+No se pudo traer el catálogo	The catalogue could not be fetched
+Sin red: no hay catálogo todavía	No network: there is no catalogue yet
+Reintentar	Try again
+%d apps copiadas a mano	%d apps copied by hand
+La Tienda puede hacerse cargo de las que son las del catálogo, para avisarte cuando haya una versión nueva. No cambia ninguna app.	The Store can take over the ones that are the catalogue's, to tell you when there is a new version. It changes no app.
+Que las maneje la Tienda	Let the Store manage them
+Todo está al día	Everything is up to date
+Nada por acá todavía	Nothing here yet
+Tienda	Store
+¿Seguro? Tocá otra vez	Sure? Tap again
+Hizo caer la placa dos veces al cargarse y quedó apartada. Reinstalarla trae la versión del catálogo.	It made the board crash twice while loading and was set aside. Reinstalling it brings the catalogue's version.
+Está en la tarjeta, copiada a mano: la Tienda no sabe qué versión es. Reinstalarla la deja al día.	It is on the card, copied by hand: the Store does not know which version it is. Reinstalling it brings it up to date.
+Reinstalar desde la Tienda	Reinstall from the Store
+Tenés la %s. La del catálogo es la %s.	You have %s. The catalogue's is %s.
+Necesita P4OS %s o más nuevo.	It needs P4OS %s or newer.
+Usa un aparato enchufado al puerto USB de la placa.	It uses a device plugged into the board's USB port.
+Usa algo conectado al header de 40 pines.	It uses something wired to the 40-pin header.
+Extras	Extras
+Buscando el catálogo	Fetching the catalogue
+Quitando	Removing
+Revisando lo que hay en la tarjeta	Checking what is on the card
+Bajando lo que necesita	Downloading what is needed by
+Instalando	Installing
+Bajando	Downloading
+No se pudo:	It failed:
+%.40s hizo caer la placa dos veces al cargarse\ny quedó apartada. Instalala de nuevo desde la Tienda.	%.40s made the board crash twice while loading\nand was set aside. Install it again from the Store.
+faltan url y path	url and path are missing
+ya hay una bajada	a download is running already
+no se pudo empezar: ¿la dirección es http(s)?	it could not start: is the address http(s)?
+todavía no hay catálogo: POST /api/store/refresh	no catalogue yet: POST /api/store/refresh
+la dirección tiene que ser http(s)	the address has to be http(s)
+la cola está llena	the queue is full
+falta file, o la cola está llena	file is missing, or the queue is full
+GET	GET
+falta file=<nombre>.so	file=<name>.so is missing

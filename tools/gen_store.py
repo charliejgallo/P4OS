@@ -574,7 +574,9 @@ def cmd_build(a):
     head = {"schema": SCHEMA, "source": {k: a.source[k] for k in ("name", "by", "url", "about")},
             "cats": a.source["cats"], "release": a.release,
             "base": a.base or "https://github.com/%s/releases/download/" % (a.repo or a.source["repo"])}
-    lines.sort(key=lambda e: (e["cat"], e["name"]["es"].lower()))
+    # in the order the source lists its categories: what "everything" shows first
+    order = {c["id"]: i for i, c in enumerate(a.source["cats"])}
+    lines.sort(key=lambda e: (order[e["cat"]], e["name"]["es"].lower()))
     path = os.path.join(a.out, "p4os-store.ndjson")
     with open(path, "w", encoding="utf-8") as f:
         for o in [head] + lines:

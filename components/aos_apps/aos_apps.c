@@ -30,6 +30,7 @@ void aos_apps_register_builtin(void)
         aos_app_modules_get,
         aos_app_leds_get,
         aos_app_macropad_get,
+        aos_app_store_get,
     };
     for (size_t i = 0; i < sizeof getters / sizeof getters[0]; i++) {
         aos_app_t app;
@@ -49,4 +50,5 @@ void aos_apps_service_tick(void)
     aos_app_flasher_service_tick();
     aos_sensors_autostart();        /* the sensors of modules.txt, read from boot */
     aos_leds_autostart();           /* a LED strip left on, back as it was */
+    aos_app_store_service_tick();   /* the updates' count on the Tienda's icon */
 }

@@ -41,7 +41,7 @@ async function loadCatalog(file) {
   } catch {}
 }
 /* the menu that index.html brings, translated where it stands */
-const NAV_NAMES = [N_('Pantalla'), N_('Inicio'), N_('Wi-Fi'), N_('Red'), N_('Terminal'), N_('Programador'), N_('Banco'),
+const NAV_NAMES = [N_('Pantalla'), N_('Inicio'), N_('Tienda'), N_('Wi-Fi'), N_('Red'), N_('Terminal'), N_('Programador'), N_('Banco'),
   N_('Macro pad'), N_('Expansión'), N_('Archivos'), N_('Ajustes'), N_('Firmware'), N_('Registro')];
 async function setLang(code) {
   LANG = /^[a-z]{2,8}$/.test(code || '') ? code : 'es';
@@ -3089,7 +3089,139 @@ function pageRed() {
   return () => { gone = true; clearInterval(timer); };
 }
 
-const PAGES = { pantalla: pagePantalla, inicio: pageInicio, wifi: pageWifi, red: pageRed, ha: pageHa, terminal: pageTerminal, programador: pageProgramador, banco: pageBanco, claude: pageClaude, mqtt: pageMqtt, macropad: pageMacropad, expansion: pageExpansion, archivos: pageArchivos, ajustes: pageAjustes, firmware: pageFirmware, registro: pageRegistro };
+/* ---- Tienda (docs/plan/TIENDA.md): the store's service from the browser.
+ * GET /api/store is its state and GET /api/store/catalog the catalogue as it
+ * was downloaded, one app a line; every POST queues a job on the board and
+ * this asks again until it is done. Sources are added on the board only. */
+function pageTienda() {
+  let gone = false, timer = 0, st = null, cat = [], head = null, filter = '', text = '', jobs = -1;
+  const L = o => (o && (o[LANG] || (LANG === 'es' ? o.es : o.en) || o.es)) || '';
+  const top = h('div', { class: 'card pad' }), list = h('div', {});
+  const bar = h('div', { class: 'prog' }, h('div')), msg = h('div', { class: 'note' });
+  const icons = new Map();
+  function icon(e, S) {
+    const key = e.file + '@' + S;
+    if (icons.has(key)) return icons.get(key);
+    const dpr = Math.min(3, window.devicePixelRatio || 1), c = document.createElement('canvas');
+    c.width = c.height = Math.round(S * dpr);
+    const ctx = c.getContext('2d');
+    ctx.scale(dpr, dpr);
+    let bytes = null;
+    if (e.icon) try { bytes = Uint8Array.from(atob(e.icon), ch => ch.charCodeAt(0)); } catch {}
+    inDrawIcon(ctx, { id: e.id, name: L(e.name), color_a: (e.colors || [])[0], color_b: (e.colors || [])[1],
+                      text: e.glyph && /^[\x20-\x7e]+$/.test(e.glyph) ? e.glyph : '' }, bytes, S);
+    const url = c.toDataURL();
+    icons.set(key, url);
+    return url;
+  }
+  const act = async (what, body) => {
+    try { st = await post('store/' + what, body); draw(); poll(400); }
+    catch (e) { toast(e.message, true); }
+  };
+  const STATE = { installed: N_('Instalada'), update: N_('Hay una versión nueva'), by_hand: N_('Copiada a mano'),
+                  set_aside: N_('Apartada: hizo caer la placa al cargarse'), absent: '' };
+  function card(e, a) {
+    const packs = e.packs || [], need = packs.filter(p => p.need).reduce((n, p) => n + p.size, 0);
+    const mine = st.busy && st.job && st.job.file === e.file;
+    const on = a.state === 'installed' || a.state === 'update';
+    const extras = packs.filter(p => !p.need);
+    const picks = extras.map(p => h('label', { class: 'small', style: 'display:block;margin-top:4px' },
+      h('input', { type: 'checkbox', value: p.file }), ' ', L(p.name), ' · ', fmtBytes(p.size)));
+    const chosen = () => picks.map(l => l.firstChild).filter(i => i.checked).map(i => i.value).join(',') || 'need';
+    const verb = a.state === 'update' ? tr('Actualizar') : a.state === 'absent' ? tr('Instalar') : tr('Reinstalar');
+    return h('div', { class: 'card pad', style: 'margin-bottom:10px' },
+      h('div', { style: 'display:flex;gap:14px;align-items:flex-start' },
+        h('img', { src: icon(e, 56), width: 56, height: 56, style: 'border-radius:13px;flex:none' }),
+        h('div', { class: 'grow' },
+          h('div', {}, h('b', {}, L(e.name)), ' ', h('span', { class: 'pill' }, e.ver), ' ',
+            a.state !== 'absent' ? h('span', { class: 'pill', style: a.state === 'update' || a.state === 'set_aside' ? 'color:var(--orange)' : '' }, tr(STATE[a.state])) : null),
+          h('div', { class: 'small muted', style: 'margin:4px 0' }, L(e.about)),
+          h('div', { class: 'small muted' }, fmtBytes(e.pkg.installed || e.pkg.size) + (need ? ' + ' + fmtBytes(need) + ' ' + tr('de packs') : '') +
+            (a.fits ? '' : ' · ' + tr('necesita P4OS %s', e.fw_min))),
+          e.user_files ? h('div', { class: 'small', style: 'color:var(--orange);margin-top:4px' }, L(e.user_files)) : null,
+          extras.length ? h('details', { style: 'margin-top:6px' }, h('summary', { class: 'small' }, tr('%s extras', extras.length)), picks) : null),
+        h('div', { class: 'btns', style: 'flex-direction:column;align-items:stretch' },
+          h('button', { class: 'btn' + (a.state === 'update' || a.state === 'absent' ? ' pri' : ''), disabled: mine || !a.fits,
+            onclick: () => act('install', { file: e.file, packs: chosen() }) }, mine ? '…' : verb),
+          on || a.state === 'set_aside' ? h('button', { class: 'btn red', disabled: mine,
+            onclick: () => { if (confirm(tr('¿Quitar %s de la placa? Lo que la app guardó queda en la tarjeta.', L(e.name)))) act('remove', { file: e.file }); } }, tr('Quitar')) : null,
+          a.state === 'installed' || a.state === 'by_hand' ? h('button', { class: 'btn', onclick: () => post('open?id=' + encodeURIComponent(e.id)).catch(x => toast(x.message, true)) }, tr('Abrir')) : null)));
+  }
+  function draw() {
+    if (gone || !st) return;
+    const by = new Map(st.apps.map(a => [a.file, a]));
+    const ups = st.apps.filter(a => a.state === 'update').length, hand = st.apps.filter(a => a.state === 'by_hand').length;
+    const j = st.job;
+    bar.style.display = st.busy ? '' : 'none';
+    bar.firstChild.style.width = st.busy && j.total ? (j.got * 100 / j.total).toFixed(1) + '%' : '0%';
+    msg.textContent = st.busy ? tr('En curso: %s %s (%s)', j.what, j.file, j.step || '…') + (j.queued ? ' +' + j.queued : '')
+                              : st.last ? (st.last_ok ? tr('Lo último: %s', st.last) : tr('No se pudo: %s', st.last)) : '';
+    msg.style.color = !st.busy && st.last && !st.last_ok ? 'var(--orange)' : '';
+    put(top,
+      row(tr('Fuente'), st.source ? st.source + ' · ' + st.release : tr('todavía sin catálogo')),
+      h('div', { class: 'small mono muted', style: 'word-break:break-all;margin:6px 0' }, st.url),
+      ups ? row(tr('Actualizaciones'), String(ups), 'warn') : null,
+      h('div', { class: 'btns', style: 'margin-top:10px' },
+        h('button', { class: 'btn', disabled: st.busy, onclick: () => act('refresh', {}) }, tr('Buscar de nuevo')),
+        hand ? h('button', { class: 'btn', disabled: st.busy, title: tr('Un recibo para las que son las del catálogo: no cambia ninguna app'),
+                             onclick: () => act('adopt', {}) }, tr('Que la Tienda maneje las %s copiadas a mano', hand)) : null,
+        st.busy ? h('button', { class: 'btn red', onclick: () => act('cancel', {}) }, tr('Cancelar')) : null),
+      bar, msg,
+      h('div', { class: 'note', style: 'margin-top:8px' }, tr('Las fuentes de apps se agregan sólo en la placa.')));
+    const cats = (head && head.cats) || [];
+    const sel = h('select', { onchange: e => { filter = e.target.value; draw(); } },
+      h('option', { value: '' }, tr('Todo')), h('option', { value: '+', selected: filter === '+' }, tr('Instaladas')),
+      ups ? h('option', { value: '!', selected: filter === '!' }, tr('Actualizaciones')) : null,
+      cats.map(c => h('option', { value: c.id, selected: filter === c.id }, L(c.name))));
+    const q = h('input', { type: 'search', placeholder: tr('Buscar'), value: text, oninput: e => { text = e.target.value.toLowerCase(); drawList(by); } });
+    put(list, h('div', { class: 'btns', style: 'margin:14px 0 10px' }, sel, q), h('div', { id: 'tdl' }));
+    drawList(by);
+  }
+  function drawList(by) {
+    const box = $('#tdl', list);
+    if (!box) return;
+    const rows = cat.filter(e => by.has(e.file)).filter(e => {
+      const a = by.get(e.file);
+      if (filter === '+' && a.state === 'absent') return false;
+      if (filter === '!' && a.state !== 'update') return false;
+      if (filter && filter !== '+' && filter !== '!' && e.cat !== filter) return false;
+      return !text || (L(e.name) + ' ' + L(e.about) + ' ' + e.file).toLowerCase().includes(text);
+    });
+    put(box, rows.length ? rows.map(e => card(e, by.get(e.file))) : h('div', { class: 'card pad muted' }, cat.length ? tr('Nada por acá') : tr('Todavía no hay catálogo: "Buscar de nuevo" lo trae.')));
+  }
+  async function load() {
+    st = await api('store');
+    if (st.jobs_done !== jobs || !cat.length) {
+      jobs = st.jobs_done;
+      try {
+        const r = await fetch('/api/store/catalog');
+        const lines = r.ok ? (await r.text()).split('\n').filter(l => l.trim()).map(l => JSON.parse(l)) : [];
+        head = lines[0] || null;
+        cat = lines.slice(1);
+      } catch { cat = []; }
+      draw();
+    } else if (st.busy) {
+      bar.firstChild.style.width = st.job.total ? (st.job.got * 100 / st.job.total).toFixed(1) + '%' : '0%';
+      msg.textContent = tr('En curso: %s %s (%s)', st.job.what, st.job.file, st.job.step || '…') + (st.job.queued ? ' +' + st.job.queued : '');
+    }
+  }
+  function poll(ms) {
+    clearTimeout(timer);
+    timer = setTimeout(async () => {
+      if (gone) return;
+      const was = st && st.busy;
+      try { await load(); } catch {}
+      if (was && st && !st.busy) draw();
+      poll(st && st.busy ? 500 : 4000);
+    }, ms);
+  }
+  put(main, h('h1', {}, tr('Tienda')), top, list);
+  load().then(draw).catch(e => put(top, tr('No se pudo leer: %s', e.message)));
+  poll(1000);
+  return () => { gone = true; clearTimeout(timer); };
+}
+
+const PAGES = { pantalla: pagePantalla, inicio: pageInicio, tienda: pageTienda, wifi: pageWifi, red: pageRed, ha: pageHa, terminal: pageTerminal, programador: pageProgramador, banco: pageBanco, claude: pageClaude, mqtt: pageMqtt, macropad: pageMacropad, expansion: pageExpansion, archivos: pageArchivos, ajustes: pageAjustes, firmware: pageFirmware, registro: pageRegistro };
 
 /* ---- the apps' own pages (docs/PORTAL-PAGES.md) ----
  * An app brings its page in apps/<x>/web/<x>.js; tools/install_apps.sh puts

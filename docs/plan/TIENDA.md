@@ -13,7 +13,8 @@ tarjeta andan, también contra GitHub de verdad por TLS y con un reinicio a
 mitad de bajada; falta un corte del Wi-Fi. **La fase 1 está hecha**
 (catálogo, paquetes y el cliente de referencia; su CI corriendo con el tag
 `v0.30.0-tienda.1`). **La fase 2 está hecha y probada, en la Mac y en la
-placa**, cuarentena incluida. Sigue la fase 3: la app Tienda. Se trabaja en la rama `tienda` (worktree
+placa**, cuarentena incluida. **De la fase 3, la app Tienda y la página del
+portal están escritas y vistas en el simulador**; falta la placa. Se trabaja en la rama `tienda` (worktree
 `.claude/worktrees/tienda`, como se hizo con `ethernet`) y se mergea a
 `main` cuando esté probada en la placa. Este documento es el plan; lo que
 se vaya midiendo se anota acá, como en [ETHERNET.md](ETHERNET.md).
@@ -461,6 +462,63 @@ rama llevan tags `v0.30.0-tienda.N`; `v0.30.0` queda para el merge.
 trae su `store.json` (categoría y una o dos frases en es/en; los packs, lo
 que necesita y lo que pone el usuario, si hay); `tools/gen_store.py check`
 dice si está bien.
+
+## Fase 3: la app y la página del portal (escritas, vistas en el simulador, 2026-11-21)
+
+**La app Tienda** (`components/aos_apps/aos_app_store.c`, del firmware,
+id `aos.store`): es la cara del servicio y nada más. Dos pantallas:
+
+- **La lista:** el nombre de la fuente y su release, una fila de filtros
+  que se desliza (Todo, Actualizaciones con su número cuando hay, cada
+  categoría del catálogo, Instaladas) y una fila por app: su ícono (el
+  blob AIC que trae el catálogo, uno del firmware, o una letra), el
+  nombre, dos líneas de descripción y un botón que dice lo que toca:
+  Obtener, Actualizar, Abrir, Reinstalar, o "P4OS 0.31.0" cuando el
+  firmware no alcanza.
+- **La página de una app:** el ícono grande, categoría, versión y tamaño
+  (con los packs que necesita), el botón y "Quitar" (pide un segundo
+  toque), la descripción, lo que pone el usuario, lo que necesita del
+  hardware, y los **extras de a uno** (un mundo, una mesa), con un tilde
+  los que ya están en la tarjeta.
+- Arriba, mientras hay un trabajo, una tarjeta con lo que hace y su
+  barra; si el último falló, por qué. La bajada sigue con la app cerrada.
+- En Instaladas, si hay apps copiadas a mano, una tarjeta lo explica y
+  ofrece "Que las maneje la Tienda" (adoptar). No se adopta nada sin que
+  la persona lo pida.
+- Abrir la Tienda con red pide el catálogo (D12); sin red o sin catálogo,
+  lo dice y ofrece reintentar.
+- Con la app cerrada, `aos_app_store_service_tick()` mantiene el número
+  de actualizaciones sobre su ícono del inicio.
+- Lee cada línea del catálogo una vez a un registro chico en PSRAM y lo
+  suelta al cerrarse.
+
+**La página Tienda del portal** (`pageTienda` en `app.js`, entrada nueva
+del menú): la fuente y el catálogo, el trabajo en curso con su barra,
+buscar de nuevo, adoptar, cancelar, y la lista con filtro y búsqueda:
+instalar (eligiendo extras), actualizar, quitar y abrir en la placa.
+Dibuja los íconos con el mismo intérprete de AIC que la página Inicio.
+
+**Idiomas:** 44 textos nuevos del sistema y 28 del portal, traducidos al
+inglés y al alemán (`lang/en`, `lang/de`) y embebidos en el firmware.
+
+**Visto en el simulador** (capturas por su portal, contra el GitHub
+falso): la lista con sus 58 apps y sus íconos, la página de Bastión con
+sus diez mundos, instalarla tocando el botón (la barra avanzando, después
+"Abrir" y "Quitar"), un extra tocado y bajado, los filtros, la pantalla
+acostada, y la página del portal en un navegador con una app instalada.
+El firmware `rev1_3` compila: 7 010 944 bytes.
+
+**Lo que falta de esta fase:**
+
+- **En la placa:** no está instalado. Ahí hay que ver el dedo, el
+  desplazamiento y la velocidad de armar la lista (58 íconos).
+- **El avance sobre el ícono del inicio** mientras una app se instala,
+  como en el iPhone: pide que el inicio sepa mostrar una app que todavía
+  no está registrada. No está hecho; hoy el avance se ve en la Tienda.
+- Los mensajes de error del servicio están en inglés (van al registro):
+  la app los muestra tal cual. Falta traducir los que ve la persona.
+- Capturas (no hay; el catálogo las prevé en `shots`), y que el buscador
+  del sistema encuentre apps de la Tienda.
 
 ## Fase 2: el servicio (hecha, 2026-11-21)
 

@@ -2289,3 +2289,31 @@ Leer la tarjeta otra vez	Karte neu lesen
 
 #: components/aos_portal/web/app.js:683
 versión nueva	neue Version
+Tienda	Store
+Instalada	Installiert
+Hay una versión nueva	Es gibt eine neue Version
+Copiada a mano	Von Hand kopiert
+Apartada: hizo caer la placa al cargarse	Beiseitegelegt: brachte das Board beim Laden zum Absturz
+Actualizar	Aktualisieren
+Instalar	Installieren
+Reinstalar	Neu installieren
+de packs	an Packs
+necesita P4OS %s	braucht P4OS %s
+%s extras	%s Extras
+¿Quitar %s de la placa? Lo que la app guardó queda en la tarjeta.	%s vom Board entfernen? Was die App gespeichert hat, bleibt auf der Karte.
+Quitar	Entfernen
+Abrir	Öffnen
+En curso: %s %s (%s)	Läuft: %s %s (%s)
+Lo último: %s	Zuletzt: %s
+No se pudo: %s	Fehlgeschlagen: %s
+Fuente	Quelle
+todavía sin catálogo	noch kein Katalog
+Actualizaciones	Aktualisierungen
+Un recibo para las que son las del catálogo: no cambia ninguna app	Ein Beleg für die, die dem Katalog entsprechen: keine App wird verändert
+Que la Tienda maneje las %s copiadas a mano	Die %s von Hand kopierten vom Store verwalten lassen
+Las fuentes de apps se agregan sólo en la placa.	App-Quellen werden nur am Board hinzugefügt.
+Todo	Alles
+Instaladas	Installiert
+Buscar	Suchen
+Nada por acá	Hier ist nichts
+Todavía no hay catálogo: "Buscar de nuevo" lo trae.	Noch kein Katalog: "Erneut suchen" holt ihn.

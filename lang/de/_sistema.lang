@@ -10599,3 +10599,47 @@ Lógica	Logik
 
 #: components/aos_apps/aos_app_flasher.c:1069
 Versión nueva	Neue Version
+Actualizar	Aktualisieren
+Reinstalar	Neu installieren
+Obtener	Laden
+Necesita P4OS %s o más nuevo.\nActualizá el sistema primero.	Braucht P4OS %s oder neuer.\nAktualisiere zuerst das System.
+Hay demasiadas cosas en cola	Es wartet schon zu viel
+Quedó apartada: hizo caer la placa	Beiseitegelegt: brachte das Board zum Absturz
+Actualizaciones	Aktualisierungen
+Instaladas	Installiert
+Buscando el catálogo...	Katalog wird geholt...
+No se pudo traer el catálogo	Der Katalog konnte nicht geholt werden
+Sin red: no hay catálogo todavía	Kein Netz: noch kein Katalog
+Reintentar	Erneut versuchen
+%d apps copiadas a mano	%d Apps von Hand kopiert
+La Tienda puede hacerse cargo de las que son las del catálogo, para avisarte cuando haya una versión nueva. No cambia ninguna app.	Der Store kann die übernehmen, die dem Katalog entsprechen, und meldet neue Versionen. Keine App wird verändert.
+Que las maneje la Tienda	Vom Store verwalten lassen
+Todo está al día	Alles ist aktuell
+Nada por acá todavía	Hier ist noch nichts
+Tienda	Store
+¿Seguro? Tocá otra vez	Sicher? Nochmal tippen
+Hizo caer la placa dos veces al cargarse y quedó apartada. Reinstalarla trae la versión del catálogo.	Sie brachte das Board beim Laden zweimal zum Absturz und wurde beiseitegelegt. Neu installieren holt die Version des Katalogs.
+Está en la tarjeta, copiada a mano: la Tienda no sabe qué versión es. Reinstalarla la deja al día.	Sie liegt von Hand kopiert auf der Karte: der Store kennt ihre Version nicht. Neu installieren bringt sie auf den Stand.
+Reinstalar desde la Tienda	Aus dem Store neu installieren
+Tenés la %s. La del catálogo es la %s.	Du hast %s. Im Katalog ist %s.
+Necesita P4OS %s o más nuevo.	Braucht P4OS %s oder neuer.
+Usa un aparato enchufado al puerto USB de la placa.	Nutzt ein Gerät am USB-Anschluss des Boards.
+Usa algo conectado al header de 40 pines.	Nutzt etwas, das an der 40-poligen Leiste hängt.
+Extras	Extras
+Buscando el catálogo	Katalog wird geholt
+Quitando	Entferne
+Revisando lo que hay en la tarjeta	Prüfe, was auf der Karte liegt
+Bajando lo que necesita	Lade, was gebraucht wird von
+Instalando	Installiere
+Bajando	Lade
+No se pudo:	Fehlgeschlagen:
+%.40s hizo caer la placa dos veces al cargarse\ny quedó apartada. Instalala de nuevo desde la Tienda.	%.40s brachte das Board beim Laden zweimal zum Absturz\nund wurde beiseitegelegt. Installiere sie neu aus dem Store.
+faltan url y path	url und path fehlen
+ya hay una bajada	es läuft schon ein Download
+no se pudo empezar: ¿la dirección es http(s)?	konnte nicht starten: ist die Adresse http(s)?
+todavía no hay catálogo: POST /api/store/refresh	noch kein Katalog: POST /api/store/refresh
+la dirección tiene que ser http(s)	die Adresse muss http(s) sein
+la cola está llena	die Warteschlange ist voll
+falta file, o la cola está llena	file fehlt, oder die Warteschlange ist voll
+GET	GET
+falta file=<nombre>.so	file=<name>.so fehlt

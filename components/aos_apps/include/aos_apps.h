@@ -32,6 +32,8 @@ void aos_app_modules_get(aos_app_t *app);      /* the header, modules.txt, the s
 void aos_app_leds_get(aos_app_t *app);         /* Tiras LED: addressable strips, WLED's way */
 void aos_app_macropad_get(aos_app_t *app);     /* layout and runner in aos_macropad.h */
 void aos_app_flasher_get(aos_app_t *app);
+void aos_app_store_get(aos_app_t *app);        /* Tienda: the catalogue of apps (docs/plan/TIENDA.md) */
+void aos_app_store_service_tick(void);         /* the number of updates on its icon, with the app closed */
 void aos_ha_widget_register(void);
 
 /* Services that run without their app (alarms); from the main loop, 5 Hz. */
