@@ -24,6 +24,10 @@
     then on.
   - **A new board with a backup on its card says so,** once, before
     anything is set up by hand.
+  - **To a server of your own, by SFTP:** the sealed backups go once a
+    week to an SSH server you name (a NAS, a Raspberry), with the board's
+    key and no password; the server's key is accepted at the board, and
+    another one is refused.
   - **To a pendrive and back:** the backups and chosen folders of the
     card, file by file, to a drive on the USB host; and onto a new card.
   - `tools/backup.sh` keeps a backup, and chosen folders of the card, on a

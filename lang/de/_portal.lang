@@ -2412,3 +2412,24 @@ Copiando: %s archivos, %s…	Kopiere: %s Dateien, %s…
 Copiados: %s archivos, %s.	Kopiert: %s Dateien, %s.
 Los respaldos y las carpetas elegidas en la placa, a p4os-backup en el pendrive.	Die Sicherungen und die am Board gewählten Ordner, nach p4os-backup auf dem USB-Stick.
 Copiar al pendrive	Auf den USB-Stick kopieren
+Falta elegir el servidor, aceptar su clave o la frase de las copias automáticas: en la placa, Ajustes, Respaldo.	Es fehlt der Server, die Annahme seines Schlüssels oder die Passphrase der automatischen Kopien: am Board, Einstellungen, Sicherung.
+El servidor no contesta, o dijo que no.	Der Server antwortet nicht oder hat abgelehnt.
+El servidor muestra otra clave que la aceptada: no se mandó nada.	Der Server zeigt einen anderen Schlüssel als den angenommenen: nichts wurde gesendet.
+El servidor no deja entrar la clave de la placa: ¿está en su authorized_keys?	Der Server lässt den Schlüssel des Boards nicht herein: steht er in seiner authorized_keys?
+Conectando con el servidor…	Verbinde mit dem Server…
+El servidor: %s	Der Server: %s
+sin elegir	nicht gewählt
+Servidor propio (SFTP)	Eigener Server (SFTP)
+clave aceptada	Schlüssel angenommen
+falta aceptar su clave en la placa	sein Schlüssel muss noch am Board angenommen werden
+una copia por semana	eine Kopie pro Woche
+sólo a mano	nur von Hand
+La última prueba vio %s	Der letzte Test sah %s
+y todavía no deja entrar a la placa	und er lässt das Board noch nicht herein
+Última copia: %s	Letzte Kopie: %s
+A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos. El servidor, aceptar su clave y la copia semanal se eligen en la placa: Ajustes, Respaldo. La placa entra con su clave, sin contraseña: esta línea va en el ~/.ssh/authorized_keys del usuario del servidor.	Auf ein NAS oder einen Rechner mit SSH gehen die verschlüsselten Sicherungen, und nur diese. Der Server, die Annahme seines Schlüssels und die wöchentliche Kopie werden am Board gewählt: Einstellungen, Sicherung. Das Board meldet sich mit seinem Schlüssel an, ohne Passwort: diese Zeile gehört in die ~/.ssh/authorized_keys des Benutzers auf dem Server.
+Copiada	Kopiert
+No se pudo copiar: seleccioná la línea	Kopieren nicht möglich: Zeile markieren
+Copiar la clave de la placa	Schlüssel des Boards kopieren
+Probar la conexión	Verbindung testen
+Subir ahora	Jetzt senden

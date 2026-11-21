@@ -10800,3 +10800,25 @@ Al pendrive van los respaldos y las carpetas elegidas de la tarjeta, en p4os-bac
 CARPETAS QUE VAN AL PENDRIVE	FOLDERS THAT GO TO THE PENDRIVE
 Con un pendrive en el host USB (Ajustes, USB) aparece acá la copia de los respaldos y de las carpetas de la tarjeta.	With a pendrive on the USB host (Settings, USB), the copy of the backups and of the card's folders shows up here.
 no hay un pendrive	there is no pendrive
+conectando con el servidor…	connecting to the server…
+el servidor contestó y deja entrar a la placa	the server answered and lets the board in
+enviado al servidor	sent to the server
+falta el servidor, aceptar su clave o la frase de las copias	the server, its key's acceptance or the copies' passphrase is missing
+el servidor no contesta, o dijo que no	the server does not answer, or said no
+el servidor muestra otra clave: no se mandó nada	the server shows another key: nothing was sent
+el servidor no deja entrar la clave de la placa	the server does not let the board's key in
+Como usuario@servidor	As user@server
+usuario@servidor, o usuario@servidor:puerto	user@server, or user@server:port
+La carpeta del servidor	The server's folder
+Tocá otra vez si es la clave de tu servidor	Tap again if it is your server's key
+sin elegir	not chosen
+SERVIDOR PROPIO (SFTP)	A SERVER OF YOUR OWN (SFTP)
+Probar la conexión	Try the connection
+El servidor muestra %s	The server shows %s
+Aceptar esta clave	Accept this key
+Todavía no deja entrar a la placa: falta su clave en el authorized_keys del servidor. Está en el portal, Respaldo.	It does not let the board in yet: its key is missing from the server's authorized_keys. It is in the portal, Backup.
+Clave aceptada: %s	Key accepted: %s
+Una copia por semana	A copy a week
+Subir ahora	Send now
+A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos: hace falta la frase de las copias automáticas. La placa entra con su clave, sin contraseña: la línea para el authorized_keys del servidor está en el portal, Respaldo. Un servidor que muestre otra clave que la aceptada acá no recibe nada.	The sealed backups, and only those, go to a NAS or a computer with SSH: the automatic copies' passphrase is needed. The board logs in with its key, with no password: the line for the server's authorized_keys is in the portal, Backup. A server that shows another key than the one accepted here gets nothing.
+falta do: look o send	do is missing: look or send

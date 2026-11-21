@@ -1160,7 +1160,8 @@ colours where `htop` and `vim` run, and a keyboard with Esc, Tab, Ctrl,
 Alt, the arrows and F1-F12 (or a USB one). **The board's console:**
 `ssh p4os.local` opens a shell with the card's files, the log, the tasks
 and the memory (`free -m` maps the PSRAM's big blocks), under the portal's
-own rules ([docs/SSH.md](docs/SSH.md)).
+own rules, and since 0.31 `sftp` and `scp` reach the card's files through
+the same door ([docs/SSH.md](docs/SSH.md)).
 
 <p align="center">
   <img src="docs/img/app-ssh-htop.png" width="230" alt="htop on a Raspberry Pi 4, over SSH from the board">
@@ -1204,8 +1205,9 @@ Language, Date and time, Update, Backup, Diagnostics, About and Developer.
 - **Backup:** the preferences, the list of apps and the home screen's
   order in one file on the card, plain or sealed with a passphrase, and
   back. A copy a day and one before each firmware by itself, the card's
-  data folders to a pendrive, and a new board that offers the backup on
-  its card ([docs/BACKUP.md](docs/BACKUP.md)).
+  data folders to a pendrive, the sealed ones to a server of your own by
+  SFTP once a week, and a new board that offers the backup on its card
+  ([docs/BACKUP.md](docs/BACKUP.md)).
 - **Diagnostics:** chip temperature, CPU, memory, the reset reason, safe mode,
   the hang watchdog's restarts, the C6's firmware, and the crash dump.
 - **About:** the portal's addresses, with a QR code for the phone.
@@ -1552,7 +1554,7 @@ Where something is a guess, it says so.
 | | |
 |---|---|
 | [INSTALL.md](docs/INSTALL.md) | a new board from nothing, updating from 0.2x, adding apps, the firmware from GitHub |
-| [BACKUP.md](docs/BACKUP.md) | backups: what one holds, plain and sealed, restoring, the file's format, the portal's calls |
+| [BACKUP.md](docs/BACKUP.md) | backups: what one holds, plain and sealed, the copies the board makes by itself, a pendrive, a server by SFTP, restoring, the file's format, the portal's calls |
 | [STORE.md](docs/STORE.md) | the Store: what it does and checks, other people's sources, a catalogue's format, the portal's calls, what was measured |
 | [BUILDING.md](docs/BUILDING.md) | building, flashing, OTA, crash dumps, the watchdogs, the CI and how a release is made |
 | [MEMORY.md](docs/MEMORY.md) | internal RAM vs PSRAM, the panel's three frame buffers, PSRAM bandwidth, the audit |

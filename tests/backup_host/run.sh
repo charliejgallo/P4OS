@@ -5,7 +5,8 @@
 # backup it makes of what there was, a wrong passphrase, a backup of a newer
 # P4OS, the list of apps to ask the Tienda for, the copies it makes by
 # itself (a day's, before a firmware, the five it keeps, sealed under a kept
-# key) and the offer to a new board.
+# key), the offer to a new board, a pendrive, and a server by SFTP (a
+# make-believe one here: the real client is tried in tests/sshc_host).
 #
 #   tests/backup_host/run.sh        (brew: mbedtls; cJSON from ESP-IDF)
 set -e
@@ -17,7 +18,7 @@ out=$(mktemp -d)
 trap 'rc=$?; rm -rf "$out"; exit $rc' EXIT
 
 cc -O1 -g -Wall -Wextra -Werror -DAOS_SIM \
-   -I"$P4/components/aos_hal/include" -I"$P4/components/aos_hal" -I"$P4/components/aos_backup/include" \
+   -I"$P4/components/aos_hal/include" -I"$P4/components/aos_hal" -I"$P4/components/aos_backup/include" -I"$P4/components/aos_ssh/include" \
    -I"$CJ" -I"$MB/include" -o "$out/t" main.c fakes.c \
    "$P4/components/aos_backup/aos_backup.c" "$P4/components/aos_hal/aos_crypto.c" "$CJ/cJSON.c" \
    -L"$MB/lib" -lmbedcrypto -lpthread
@@ -310,6 +311,44 @@ check("a file the card has newer is not replaced by the pendrive's older one", j
 os.makedirs("u2")
 jobs, made, o = run("c9", "p9", "from-drive", env={"P4_USB": "u2"})
 check("a pendrive with no copy of a board: said, nothing touched", not jobs[0][0] and "kind=3" in jobs[0][1], o)
+
+# ---- to a server of the person's own (stage 4): what goes, and when it does not
+ca = card("ca")
+write_prefs("pa", dict(ALL))
+os.makedirs("srv")
+E = {"P4_SRV": "srv", "P4_SRV_KEY": "bGEgY2xhdmU="}
+jobs, made, o = run("ca", "pa", "make", "make=una frase", "send", env=E)
+check("no server set: nothing goes", not jobs[2][0] and "kind=10" in jobs[2][1] and os.listdir("srv") == [], o)
+jobs, made, o = run("ca", "pa", "srv=nas.example:2222:respaldos:copias/p4", "srv-key", "srv-key", "send", env=E)
+lines = [l for l in o.splitlines() if l.startswith("keyline 1 ssh-ed25519 ")]
+check("the server set; the board's key, the same line each time", "server nas.example:2222 respaldos copias/p4 on=0 pinned=0" in o
+      and len(lines) == 2 and lines[0] == lines[1] and "p4os@placa" in lines[0] and read_prefs("pa").get("sshc_seed"), o)
+check("...its key not accepted yet: nothing goes", not jobs[0][0] and "kind=10" in jobs[0][1] and os.listdir("srv") == [], o)
+jobs, made, o = run("ca", "pa", "look", env=dict(E, P4_SRV_DENY="1"))
+check("a look: the server's key shown, though it does not let the board in yet", not jobs[0][0] and "kind=13" in jobs[0][1] and "seen=1 in=0 fp=ED25519 SHA256:bGEgY2xhdmU=" in o, o)
+jobs, made, o = run("ca", "pa", "trust", "look", "trust", "send", env=E)
+check("accepted at the board after a look that got in", "trust 0 pinned=0" in o and "seen=1 in=1" in o and "trust 1 pinned=1 fp=ED25519 SHA256:bGEgY2xhdmU=" in o, o)
+check("...but no passphrase for the copies: nothing sealed to send, nothing goes", not jobs[1][0] and "kind=10" in jobs[1][1] and os.listdir("srv") == [], o)
+jobs, made, o = run("ca", "pa", "key=la de las copias", "send", env=E)
+up = sorted(os.listdir("srv/copias/p4/placa_de_prueba")) if os.path.isdir("srv/copias/p4/placa_de_prueba") else []
+on_card = sorted(os.listdir("ca/backups"))
+sealed_on_card = sorted(n for n in on_card if "sealed" in json.load(open("ca/backups/" + n)))
+check("with a passphrase: the sealed ones go, one of now among them, and no plain one", jobs[1][0] and "last=1" in jobs[1][1] and up == sealed_on_card
+      and len(up) == 2 and any("-auto" in n for n in up) and len(on_card) == 3
+      and all(open("srv/copias/p4/placa_de_prueba/" + n, "rb").read() == open("ca/backups/" + n, "rb").read() for n in up)
+      and "secreto123" not in "".join(open("srv/copias/p4/placa_de_prueba/" + n).read() for n in up), (o, up, on_card))
+jobs, made, o = run("ca", "pa", "send", env=E)
+check("again: they are there already", jobs[0][0] and "0 sealed backups sent" in jobs[0][1] and "2 were there already" in jobs[0][1], o)
+jobs, made, o = run("ca", "pa", "send", env=dict(E, P4_SRV_KEY="b3RyYSBjbGF2ZQ=="))
+check("another server where that one was: refused by its key, nothing sent", not jobs[0][0] and "kind=12" in jobs[0][1]
+      and sorted(os.listdir("srv/copias/p4/placa_de_prueba")) == up, o)
+jobs, made, o = run("ca", "pa", "send", env={"P4_SRV_KEY": "bGEgY2xhdmU="})
+check("the server is not there: said as such", not jobs[0][0] and "kind=11" in jobs[0][1], o)
+jobs, made, o = run("ca", "pa", "srv=nas.example:22:respaldos:copias/p4", "send", env=E)
+check("its address changed: the key accepted is forgotten, and nothing goes until another look", "pinned=0" in o and not jobs[0][0] and "kind=10" in jobs[0][1], o)
+b = json.load(open("ca/backups/" + [n for n in on_card if n not in sealed_on_card][0]))
+keys = {p[1] for p in b["prefs"]}
+check("a plain backup carries where the server is, not the board's key", "bk_srv_host" not in keys or "sshc_seed" not in keys, sorted(k for k in keys if k.startswith(("bk_", "ssh"))))
 sys.exit(1 if fails else 0)
 PY
 echo "all passed"

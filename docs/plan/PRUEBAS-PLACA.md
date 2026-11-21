@@ -115,6 +115,12 @@ Instalado el 2026-11-21, `v0.30.0-16-g021f337`.
 - [ ] Sacar el pendrive en medio de una copia: sin archivos a medias.
 - [ ] "Traer del pendrive" en una tarjeta nueva, y restaurar el respaldo
       que vino: las notas y el inicio de la anterior.
+- [ ] (etapa 4, sin instalar) `sftp p4os.local` y `scp` desde la Mac:
+      listar, bajar y subir un archivo grande, y cuánta RAM interna queda.
+- [ ] Ajustes → Respaldo → Servidor propio: la línea de la clave en el
+      portal, "Probar la conexión", "Aceptar esta clave", "Subir ahora".
+      Contra el NAS, con un usuario y una carpeta armados para eso, y
+      sólo cuando el usuario lo diga.
 
 ### Pendientes, en resumen
 

@@ -28,6 +28,7 @@
 
 #include "mbedtls/base64.h"
 #include "mbedtls/gcm.h"
+#include "aos_sshc.h"
 
 #include <ctype.h>
 #include <dirent.h>
@@ -79,6 +80,24 @@
  * ("bk_dirs": "notas=1,music=0", only the ones a person changed), and the
  * folder they go to on the drive. */
 #define K_DIRS      "bk_dirs"
+/* Stage 4, a server of the person's own, by SFTP: where ("bk_srv_host",
+ * "_port", "_user", "_dir"), the server's key as the person accepted it at
+ * the board ("bk_srv_hk": public, and what keeps another server from
+ * taking its place), whether a copy goes by itself once a week
+ * ("bk_srv_on") and when the last one went ("bk_srv_last"). The key the
+ * board logs in with is the SSH client's ("sshc_seed", apps/ssh): one
+ * identity for the board, authorised once on the server. */
+#define K_SRV_HOST  "bk_srv_host"
+#define K_SRV_PORT  "bk_srv_port"
+#define K_SRV_USER  "bk_srv_user"
+#define K_SRV_DIR   "bk_srv_dir"
+#define K_SRV_HK    "bk_srv_hk"
+#define K_SRV_ON    "bk_srv_on"
+#define K_SRV_LAST  "bk_srv_last"
+#define K_SSH_SEED  "sshc_seed"
+#define SRV_DIR_DEF "p4os-backups"
+#define SRV_EVERY_S (7 * 24 * 3600)
+#define HK_MAX      600
 #define DRIVE_DIR   "p4os-backup"
 #define COPY_CHUNK  (32 * 1024)
 #define COPY_DEPTH  8
@@ -96,7 +115,7 @@ static bool key_of_this_board(const char *k)
         "bat_cap", "bat_min", "chg_cyc", "soc_n", "soc_sag",            /* a battery's history */
         "st_day", "st_today", "pomo_day", "pomo_done",                  /* today's counts */
         "lk_peer", "lk_lmk", "lk_pname",    /* the device it is linked with */
-        K_DAY, K_SUM, K_SEEN,               /* this module's own marks */
+        K_DAY, K_SUM, K_SEEN, K_SRV_LAST,   /* this module's own marks */
     };
     for (size_t i = 0; i < sizeof OWN / sizeof OWN[0]; i++)
         if (!strcmp(k, OWN[i])) return true;
@@ -1021,10 +1040,187 @@ out:
 
 void aos_backup_cancel(void) { s_cancel = true; }
 
+/* ---- to a server of the person's own (stage 4) ------------------------------ */
+
+/* The key the board logs in with: the SSH client's, made the first time
+ * either of the two needs it. */
+static bool board_seed(uint8_t seed[32])
+{
+    char b64[64] = "";
+    size_t len = 0;
+    bool ok = aos_hal_pref_get_str(K_SSH_SEED, b64, sizeof b64) &&
+              mbedtls_base64_decode(seed, 32, &len, (const unsigned char *)b64, strlen(b64)) == 0 && len == 32;
+    if (!ok) {
+        aos_hal_random(seed, 32);
+        ok = mbedtls_base64_encode((unsigned char *)b64, sizeof b64, &len, seed, 32) == 0;
+        if (ok) { b64[len] = 0; ok = aos_hal_pref_set_str(K_SSH_SEED, b64); }
+        if (ok) aos_hal_log(TAG, "made the board's SSH key");
+    }
+    memset(b64, 0, sizeof b64);
+    return ok;
+}
+
+bool aos_backup_server_key_line(char *out, size_t n)
+{
+    uint8_t seed[32];
+    char who[64];
+    if (!board_seed(seed)) return false;
+    snprintf(who, sizeof who, "p4os@%.40s", aos_hal_device_name());
+    bool ok = aos_sshc_key_line(seed, who, out, n);
+    memset(seed, 0, sizeof seed);
+    return ok;
+}
+
+void aos_backup_server_get(aos_backup_server_t *out)
+{
+    char *hk = BIG_ALLOC(HK_MAX);
+    int32_t v = 0;
+    memset(out, 0, sizeof *out);
+    aos_hal_pref_get_str(K_SRV_HOST, out->host, sizeof out->host);
+    aos_hal_pref_get_str(K_SRV_USER, out->user, sizeof out->user);
+    if (!aos_hal_pref_get_str(K_SRV_DIR, out->dir, sizeof out->dir) || !out->dir[0]) snprintf(out->dir, sizeof out->dir, SRV_DIR_DEF);
+    out->port = aos_hal_pref_get_i32(K_SRV_PORT, &v) && v > 0 && v < 65536 ? v : 22;
+    v = 0;
+    out->on = aos_hal_pref_get_i32(K_SRV_ON, &v) && v != 0;
+    v = 0;
+    aos_hal_pref_get_i32(K_SRV_LAST, &v);
+    out->last = (uint32_t)v;
+    if (hk && aos_hal_pref_get_str(K_SRV_HK, hk, HK_MAX) && hk[0]) out->pinned = aos_sshc_fingerprint_of(hk, out->fp, sizeof out->fp);
+    free(hk);
+}
+
+void aos_backup_server_set(const char *host, int port, const char *user, const char *dir)
+{
+    aos_backup_server_t was;
+    aos_backup_server_get(&was);
+    if (port <= 0 || port > 65535) port = 22;
+    /* another server, another key: the one kept was the other's */
+    if (strcmp(was.host, host ? host : "") || was.port != port) aos_hal_pref_set_str(K_SRV_HK, "");
+    aos_hal_pref_set_str(K_SRV_HOST, host ? host : "");
+    aos_hal_pref_set_i32(K_SRV_PORT, port);
+    aos_hal_pref_set_str(K_SRV_USER, user ? user : "");
+    aos_hal_pref_set_str(K_SRV_DIR, dir && dir[0] ? dir : SRV_DIR_DEF);
+}
+
+void aos_backup_server_on(bool on) { aos_hal_pref_set_i32(K_SRV_ON, on ? 1 : 0); }
+
+static int kind_of_ssh(int err)
+{
+    return err == AOS_SSHC_OK ? AOS_BACKUP_E_NONE : err == AOS_SSHC_E_HOSTKEY ? AOS_BACKUP_E_HOSTKEY :
+           err == AOS_SSHC_E_AUTH ? AOS_BACKUP_E_LOGIN : err == AOS_SSHC_E_MEMORY ? AOS_BACKUP_E_MEMORY :
+           err == AOS_SSHC_E_LOCAL ? AOS_BACKUP_E_CARD : AOS_BACKUP_E_SERVER;
+}
+
+/* The key the last look saw, until the person accepts it or not. */
+static char *s_seen;
+AOS_BSS_PSRAM static char s_seen_fp[80];        /* PSRAM: read by the screen, never from an interrupt */
+static bool s_seen_in;
+
+int aos_backup_server_look_now(char *why, size_t why_len)
+{
+    aos_backup_server_t sv;
+    uint8_t seed[32];
+    int err = 0;
+    aos_backup_server_get(&sv);
+    if (!s_seen) s_seen = BIG_ALLOC(HK_MAX);
+    if (!s_seen) { snprintf(why, why_len, "no memory"); return AOS_BACKUP_E_MEMORY; }
+    s_seen[0] = 0; s_seen_fp[0] = 0; s_seen_in = false;
+    if (!sv.host[0] || !sv.user[0]) { snprintf(why, why_len, "no server set"); return AOS_BACKUP_E_SETUP; }
+    if (!board_seed(seed)) { snprintf(why, why_len, "the board's key could not be kept"); return AOS_BACKUP_E_OTHER; }
+    /* with no key kept: this is the look a person takes at whichever comes */
+    aos_sshc_opts_t o = { sv.host, sv.port, sv.user, seed, NULL, &s_cancel };
+    s_cancel = false;
+    aos_sshc_t *c = aos_sshc_open(&o, &err, why, why_len, s_seen);
+    memset(seed, 0, sizeof seed);
+    if (s_seen[0]) aos_sshc_fingerprint_of(s_seen, s_seen_fp, sizeof s_seen_fp);
+    if (c) {
+        s_seen_in = true;
+        snprintf(why, why_len, "%.60s shows %.70s, and lets the board in", sv.host, s_seen_fp);
+        aos_sshc_close(c);
+        return AOS_BACKUP_E_NONE;
+    }
+    return kind_of_ssh(err);
+}
+
+bool aos_backup_server_seen(char *fp, size_t n, bool *in)
+{
+    if (!s_seen || !s_seen[0]) return false;
+    if (fp) snprintf(fp, n, "%s", s_seen_fp);
+    if (in) *in = s_seen_in;
+    return true;
+}
+
+bool aos_backup_server_trust(void)
+{
+    if (!s_seen || !s_seen[0]) return false;
+    return aos_hal_pref_set_str(K_SRV_HK, s_seen);
+}
+
+int aos_backup_server_send_now(char *why, size_t why_len)
+{
+    err_t e = { "", 0 };
+    aos_backup_server_t sv;
+    uint8_t seed[32], stored[SALT_LEN + 32];
+    char *hk = BIG_ALLOC(HK_MAX), *a = BIG_ALLOC(2 * 400), *b = a ? a + 400 : NULL;
+    aos_backup_info_t *all = BIG_ALLOC(sizeof *all * PRUNE_MAX);
+    aos_sshc_t *c = NULL;
+    int err = 0, sent = 0, there = 0;
+    aos_backup_server_get(&sv);
+    if (!hk || !a || !all) { fail(&e, AOS_BACKUP_E_MEMORY, "no memory"); goto out; }
+    if (!aos_hal_path_sd_root()) { fail(&e, AOS_BACKUP_E_CARD, "no card"); goto out; }
+    if (!sv.host[0] || !sv.user[0]) { fail(&e, AOS_BACKUP_E_SETUP, "no server set"); goto out; }
+    if (!aos_hal_pref_get_str(K_SRV_HK, hk, HK_MAX) || !hk[0]) { fail(&e, AOS_BACKUP_E_SETUP, "the server's key was not accepted at the board yet"); goto out; }
+    /* nothing plain leaves the board: the copies that go are the sealed
+     * ones, and there are none until a passphrase was chosen for them */
+    bool sealed = auto_key(stored, stored + SALT_LEN);
+    memset(stored, 0, sizeof stored);
+    if (!sealed) { fail(&e, AOS_BACKUP_E_SETUP, "no passphrase for the automatic copies: nothing sealed to send"); goto out; }
+    char w2[120];
+    copy_if_changed(AOS_BACKUP_DAILY, true, NULL, w2, sizeof w2);
+
+    if (!board_seed(seed)) { fail(&e, AOS_BACKUP_E_OTHER, "the board's key could not be read"); goto out; }
+    aos_sshc_opts_t o = { sv.host, sv.port, sv.user, seed, hk, &s_cancel };
+    s_cancel = false;
+    c = aos_sshc_open(&o, &err, e.why, sizeof e.why, NULL);
+    memset(seed, 0, sizeof seed);
+    if (!c) { e.kind = kind_of_ssh(err); goto out; }
+
+    /* <folder>/<the board's name>: several boards can share a server */
+    char board[48];
+    snprintf(board, sizeof board, "%.40s", aos_hal_device_name());
+    for (char *p = board; *p; p++) if (!isalnum((unsigned char)*p) && *p != '-' && *p != '_') *p = '_';
+    snprintf(a, 400, "%s/%s", sv.dir, board[0] ? board : "p4os");
+    err = aos_sshc_sftp(c);
+    if (!err) err = aos_sshc_mkdirs(c, a);
+    int n = err ? 0 : aos_backup_list(all, PRUNE_MAX);
+    for (int i = n - 1; i >= 0 && !err; i--) {          /* the oldest first: a cut leaves the older ones whole */
+        bool is = false;
+        uint64_t size = 0;
+        if (!all[i].sealed) continue;
+        snprintf(a, 400, "%s/%s/%s", sv.dir, board[0] ? board : "p4os", all[i].name);
+        err = aos_sshc_stat(c, a, &is, &size);
+        if (err) break;
+        if (is && size == all[i].size) { there++; continue; }
+        char rel[160], f[FULL_MAX];
+        snprintf(rel, sizeof rel, AOS_BACKUP_DIR "/%s", all[i].name);
+        snprintf(b, 400, "%s", full(f, rel));
+        err = aos_sshc_put(c, b, a);
+        if (!err) sent++;
+    }
+    if (err) { fail(&e, kind_of_ssh(err), "%.110s", aos_sshc_why(c)); goto out; }
+    if (aos_hal_time_is_valid()) aos_hal_pref_set_i32(K_SRV_LAST, (int32_t)time(NULL));
+    snprintf(e.why, sizeof e.why, "%d sealed backups sent to %.50s; %d were there already", sent, sv.host, there);
+out:
+    aos_sshc_close(c);
+    free(hk); free(a); free(all);
+    if (why) snprintf(why, why_len, "%s", e.why);
+    return e.kind;
+}
+
 /* ---- the thread ------------------------------------------------------------- */
 
-enum { JOB_MAKE, JOB_RESTORE, JOB_DAILY, JOB_FW, JOB_KEY, JOB_TO_DRIVE, JOB_FROM_DRIVE };
-static const char *const JOB_NAME[] = { "make", "restore", "auto", "auto", "key", "to_drive", "from_drive" };
+enum { JOB_MAKE, JOB_RESTORE, JOB_DAILY, JOB_FW, JOB_KEY, JOB_TO_DRIVE, JOB_FROM_DRIVE, JOB_LOOK, JOB_SEND };
+static const char *const JOB_NAME[] = { "make", "restore", "auto", "auto", "key", "to_drive", "from_drive", "look", "send" };
 
 static void *s_lock;
 static aos_backup_status_t s_st;
@@ -1048,6 +1244,8 @@ static void work(void *arg)
     case JOB_MAKE:    kind = aos_backup_make_now(s_job.pass, false, name, sizeof name, why, sizeof why); break;
     case JOB_TO_DRIVE:
     case JOB_FROM_DRIVE: kind = aos_backup_copy_now(job == JOB_TO_DRIVE, why, sizeof why); break;
+    case JOB_LOOK:       kind = aos_backup_server_look_now(why, sizeof why); break;
+    case JOB_SEND:       kind = aos_backup_server_send_now(why, sizeof why); break;
     case JOB_KEY:
         kind = aos_backup_auto_passphrase_now(s_job.pass) ? AOS_BACKUP_E_NONE : AOS_BACKUP_E_OTHER;
         snprintf(why, sizeof why, "%s", kind ? "the key could not be kept" : "the automatic copies are sealed from now on");
@@ -1115,6 +1313,8 @@ bool aos_backup_restore(const char *name, const char *passphrase)
     return name_ok(name) && start(JOB_RESTORE, name, passphrase);
 }
 
+bool aos_backup_server_look(void) { return start(JOB_LOOK, NULL, NULL); }
+bool aos_backup_server_send(void) { return start(JOB_SEND, NULL, NULL); }
 bool aos_backup_to_drive(void) { return start(JOB_TO_DRIVE, NULL, NULL); }
 bool aos_backup_from_drive(void) { return start(JOB_FROM_DRIVE, NULL, NULL); }
 
@@ -1145,11 +1345,14 @@ void aos_backup_before_firmware(void)
     while (busy() && aos_hal_uptime_ms() < until) aos_hal_sleep_ms(50);
 }
 
+static void tick_server(void);
+
 void aos_backup_tick(void)
 {
     /* called five times a second: a look a minute, and not in the first two
      * of a start, when the card and the clock may not be there yet */
     static uint32_t calls, wait;
+    tick_server();
     if (++calls % 300 || aos_hal_uptime_ms() < 120000) return;
     if (wait) { wait--; return; }
     int32_t day = today(), last = 0;
@@ -1158,6 +1361,23 @@ void aos_backup_tick(void)
     if (last == day) return;
     if (aos_backup_offer(NULL)) return;         /* a new board with a backup to look at first */
     if (start(JOB_DAILY, NULL, NULL)) wait = 60;        /* a card that fails is asked again in an hour */
+}
+
+/* The week's copy to the server, when one is set, its key accepted, the
+ * copies sealed and the network up. Looked at once a minute, apart from the
+ * day's copy; a server that is not there is asked again in an hour. */
+static void tick_server(void)
+{
+    static uint32_t calls, wait;
+    if (++calls % 300 != 150 || aos_hal_uptime_ms() < 180000) return;
+    if (wait) { wait--; return; }
+    if (!aos_hal_time_is_valid() || !aos_hal_path_sd_root() || aos_hal_net_state() != AOS_NET_CONNECTED) return;
+    aos_backup_server_t sv;
+    aos_backup_server_get(&sv);
+    if (!sv.on || !sv.pinned || !sv.host[0] || !aos_backup_auto_sealed()) return;
+    uint32_t now = (uint32_t)time(NULL);
+    if (sv.last && now >= sv.last && now - sv.last < SRV_EVERY_S) return;
+    if (start(JOB_SEND, NULL, NULL)) wait = 60;
 }
 
 void aos_backup_status(aos_backup_status_t *out)

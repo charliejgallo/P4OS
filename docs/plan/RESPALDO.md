@@ -7,10 +7,10 @@ cada app) y no hay nada que las guarde.
 **Dónde está (2026-11-21):** la etapa 1 está escrita, probada en la placa
 y en `main`; sale con la 0.31.0, que espera a las apps nuevas de la
 Tienda. Las etapas 2 (las copias que hace sola) y 3 (el pendrive y el
-script de la computadora) están escritas y probadas en la Mac y el
-simulador, en la rama `respaldo-2`, **sin instalar en la placa**. Falta el
-servidor propio (etapa 4), que tiene dos cosas para decidir antes: ver
-"Etapa 4, antes de empezar".
+script de la computadora) están en la rama `respaldo-2` y **en la placa**
+(`v0.30.0-16-g021f337`). La etapa 4 (un servidor propio por SFTP) está
+escrita en la misma rama y probada en la Mac y el simulador, **sin
+instalar**. Nada de la rama está en `main`.
 
 ## Etapa 1, hecha en la Mac (2026-11-21)
 
@@ -222,33 +222,57 @@ carpetas del usuario, qué pasa al sacarlo en el medio, y la prueba que
 termina la etapa (una tarjeta nueva que queda con las notas y el inicio
 de la anterior).
 
-## Etapa 4, antes de empezar
+## Etapa 4, hecha en la Mac (2026-11-21)
 
-Leído del repo el 2026-11-21, y distinto de lo que decía la pregunta 1:
+Con las dos decisiones del usuario: el cliente SSH en el firmware, y el
+lado servidor de SFTP en el SSH de la placa para probar contra el
+simulador.
 
-- **El firmware tiene el servidor SSH, no el cliente.** El cliente está en
-  la app SSH (`apps/ssh/main/sc_conn.c`, 1150 líneas), que es de las de la
-  tarjeta. Para que el firmware suba un respaldo por SFTP, el transporte
-  del cliente tiene que vivir en el firmware: pasarlo a un componente
-  (`aos_sshc`) que usen el firmware y la app. Son símbolos nuevos para las
-  apps (la interfaz crece, no cambia), y la app SSH nueva pediría ese
-  firmware.
-- **SFTP no está en ningún lado:** ni el cliente lo habla ni el servidor
-  de la placa lo ofrece ("subsystem refused"). Hay que escribir el lado
-  cliente (abrir, escribir, cerrar, crear carpeta, renombrar, listar).
-- **No hay con qué probarlo todavía:** las pruebas van contra servidores
-  falsos de `tools/`, y un servidor SFTP falso en Python pide `paramiko`,
-  que no está en la Mac. Dos caminos: instalarlo en un entorno aparte
-  (hay que bajarlo), o escribir el lado servidor de SFTP en el SSH de la
-  placa y probar contra el simulador, que además deja entrar a la tarjeta
-  con `sftp` desde una computadora.
-- **La clave con que la placa entra al servidor:** la del cliente SSH
-  (`sshc_seed`), que ya puede estar autorizada en el servidor, u otra
-  propia de los respaldos.
+- **SFTP en el servidor SSH de la placa** (`aos_ssh_sftp.c`): `sftp`, `scp`
+  y un administrador de archivos llegan a la tarjeta con las reglas y las
+  claves de la consola. La raíz es la tarjeta y nada de arriba tiene
+  nombre. Sirve por sí mismo (`docs/SSH.md`), y es contra lo que se prueba
+  el cliente.
+- **Un cliente SSH en el firmware** (`aos_sshc.c`), escrito aparte del de
+  la app SSH y no compartido con ella: bloqueante, un canal, un pedido por
+  vez, 700 líneas. **Cambia lo conversado** ("pasar el cliente de la app a
+  un componente"): la app SSH quedó como estaba, con su transporte, y no
+  pide un firmware nuevo; lo que comparten es la clave de la placa
+  (`sshc_seed`). Unificarlos queda para cuando haga falta.
+- **Sólo lo cifrado sale de la placa** (D3): suben los respaldos cifrados
+  que el servidor no tiene, y no hay ninguno hasta que las copias
+  automáticas tienen frase. Los simples no suben nunca.
+- **Sin contraseñas:** la placa entra con su clave Ed25519. La línea para
+  el `authorized_keys` del servidor está en el portal, para copiarla.
+- **La clave del servidor se acepta en la placa** (D7): "Probar la
+  conexión" muestra la huella que contestó y si dejó entrar; "Aceptar esta
+  clave" (dos toques) la guarda. Después, un servidor con otra clave no
+  recibe ni el intento de entrar. Cambiar la dirección la olvida.
+- **Una vez por semana,** con la red arriba; si el servidor no está, se
+  vuelve a probar en una hora. Y "Subir ahora". En el servidor no se borra
+  nada (19 KB por semana).
+- **El portal** muestra dónde está, la huella aceptada, la última copia y
+  la clave de la placa; deja probar y subir, no elegir el servidor ni
+  aceptar su clave.
+- **Probado:** el servidor SFTP con el `sftp` y el `scp` de la Mac
+  (OpenSSH 10.2) contra el simulador: listar, bajar 3 MB y subir 1,2 MB
+  byte por byte, `scp -r`, renombrar, borrar, y nombres que intentan salir
+  de la tarjeta. El cliente en `tests/sshc_host` (10 casos, contra dos
+  simuladores: uno que deja entrar a su red y otro que pide clave): el
+  intercambio, la huella, tres archivos byte por byte, otro servidor en su
+  lugar rechazado por su clave. La lógica de qué sube en
+  `tests/backup_host` (58 casos, 12 de esta etapa). Y de punta a punta en
+  el simulador: una placa con la frase puesta por pantalla, la conexión
+  probada, la clave aceptada con dos toques, dos respaldos cifrados en el
+  servidor byte por byte, y el simple que no salió.
+  Firmware `rev1_3`: 7 150 416 bytes, 38 KB más que con la etapa 3.
 
-Mientras tanto, lo que la etapa 4 quiere resolver (una copia fuera de la
-casa, sin tocar nada) ya se puede con `tools/backup.sh` desde cron en
-cualquier computadora, el NAS incluido.
+**Falta:** instalarlo; SFTP hacia la placa con un cliente de verdad; y la
+copia a un servidor de verdad, que el plan pide probar **contra el NAS
+sólo cuando el usuario lo diga**, con un usuario y una carpeta que él arme
+para eso. Sin probar: un servidor OpenSSH (el de la prueba fue el de la
+placa), RSA o ECDSA como clave del servidor, y ChaCha20 del lado cliente
+(negocia AES-GCM primero).
 
 ## Qué resuelve
 

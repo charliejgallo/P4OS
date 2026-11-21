@@ -2412,3 +2412,24 @@ Copiando: %s archivos, %s…	Copying: %s files, %s…
 Copiados: %s archivos, %s.	Copied: %s files, %s.
 Los respaldos y las carpetas elegidas en la placa, a p4os-backup en el pendrive.	The backups and the folders chosen at the board, to p4os-backup on the pendrive.
 Copiar al pendrive	Copy to the pendrive
+Falta elegir el servidor, aceptar su clave o la frase de las copias automáticas: en la placa, Ajustes, Respaldo.	The server, its key's acceptance or the automatic copies' passphrase is missing: at the board, Settings, Backup.
+El servidor no contesta, o dijo que no.	The server does not answer, or said no.
+El servidor muestra otra clave que la aceptada: no se mandó nada.	The server shows another key than the one accepted: nothing was sent.
+El servidor no deja entrar la clave de la placa: ¿está en su authorized_keys?	The server does not let the board's key in: is it in its authorized_keys?
+Conectando con el servidor…	Connecting to the server…
+El servidor: %s	The server: %s
+sin elegir	not chosen
+Servidor propio (SFTP)	A server of your own (SFTP)
+clave aceptada	key accepted
+falta aceptar su clave en la placa	its key is yet to be accepted at the board
+una copia por semana	a copy a week
+sólo a mano	by hand only
+La última prueba vio %s	The last try saw %s
+y todavía no deja entrar a la placa	and it does not let the board in yet
+Última copia: %s	Last copy: %s
+A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos. El servidor, aceptar su clave y la copia semanal se eligen en la placa: Ajustes, Respaldo. La placa entra con su clave, sin contraseña: esta línea va en el ~/.ssh/authorized_keys del usuario del servidor.	The sealed backups, and only those, go to a NAS or a computer with SSH. The server, its key's acceptance and the weekly copy are chosen at the board: Settings, Backup. The board logs in with its key, with no password: this line goes into the ~/.ssh/authorized_keys of the server's user.
+Copiada	Copied
+No se pudo copiar: seleccioná la línea	It could not be copied: select the line
+Copiar la clave de la placa	Copy the board's key
+Probar la conexión	Try the connection
+Subir ahora	Send now

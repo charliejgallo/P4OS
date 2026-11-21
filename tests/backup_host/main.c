@@ -16,6 +16,11 @@
  *   folder=<name>:<0|1>   chooses one
  *   to-drive        the backups and the chosen folders to the pendrive (P4_USB)
  *   from-drive      and back
+ *   srv=<host>:<port>:<user>:<folder>   the server the sealed copies go to
+ *   srv-key         the board's line for the server's authorized_keys
+ *   look            who answers there: its key, and whether the board gets in
+ *   trust           the key the last look saw is the server's from now on
+ *   send            the sealed backups the server lacks, now
  *
  * A job prints "ok|FAILED kind=<n> <a line>".
  */
@@ -90,6 +95,34 @@ int main(int argc, char **argv)
         } else if (!strcmp(a, "to-drive") || !strcmp(a, "from-drive")) {
             int rc = aos_backup_copy_now(a[0] == 't', why, sizeof why);
             printf("%s kind=%d %s\n", rc ? "FAILED" : "ok", rc, why);
+        } else if (!strcmp(a, "srv")) {
+            char *port = v ? strchr(v, ':') : NULL, *user = port ? strchr(port + 1, ':') : NULL, *dir = user ? strchr(user + 1, ':') : NULL;
+            if (!dir) return 2;
+            *port++ = 0; *user++ = 0; *dir++ = 0;
+            aos_backup_server_set(v, atoi(port), user, dir);
+            aos_backup_server_t sv;
+            aos_backup_server_get(&sv);
+            printf("server %s:%d %s %s on=%d pinned=%d fp=%s last=%u\n", sv.host, sv.port, sv.user, sv.dir, sv.on, sv.pinned, sv.fp, (unsigned)sv.last);
+        } else if (!strcmp(a, "srv-key")) {
+            char line[200] = "";
+            bool ok = aos_backup_server_key_line(line, sizeof line);
+            printf("keyline %d %s\n", ok, line);
+        } else if (!strcmp(a, "look")) {
+            char fp[80] = "";
+            bool in = false;
+            int rc = aos_backup_server_look_now(why, sizeof why);
+            bool seen = aos_backup_server_seen(fp, sizeof fp, &in);
+            printf("%s kind=%d seen=%d in=%d fp=%s %s\n", rc ? "FAILED" : "ok", rc, seen, in, fp, why);
+        } else if (!strcmp(a, "trust")) {
+            aos_backup_server_t sv;
+            bool ok = aos_backup_server_trust();
+            aos_backup_server_get(&sv);
+            printf("trust %d pinned=%d fp=%s\n", ok, sv.pinned, sv.fp);
+        } else if (!strcmp(a, "send")) {
+            aos_backup_server_t sv;
+            int rc = aos_backup_server_send_now(why, sizeof why);
+            aos_backup_server_get(&sv);
+            printf("%s kind=%d last=%d %s\n", rc ? "FAILED" : "ok", rc, sv.last != 0, why);
         } else {
             fprintf(stderr, "what is %s?\n", a);
             return 2;

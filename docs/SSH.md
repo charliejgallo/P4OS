@@ -121,6 +121,12 @@ speaks SFTP) and to a file manager's "connect to server":
   reads does not fill the RAM.
 - **Code:** `aos_ssh_sftp.c`, which knows nothing of SSH (bytes in,
   replies out), and its channel in `aos_ssh.c` (`pump_sftp`).
+- **The other way round:** the firmware has an SSH and SFTP client of its
+  own (`aos_sshc.c`), for the backups' copy to a server
+  ([BACKUP.md](BACKUP.md)): the same transport from the other end, one
+  channel, one request at a time, the board's Ed25519 key and no
+  password. `tests/sshc_host/run.sh` runs it against this server in the
+  simulator.
 - **Tried** against OpenSSH 10.2's `sftp` and `scp` on macOS, in the
   simulator: listing, a 3 MB download and a 1.2 MB upload byte for byte,
   `scp -r` of a folder, rename, delete, and names that try to climb out

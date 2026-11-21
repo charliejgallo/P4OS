@@ -8,8 +8,7 @@ apps themselves are not copied: the Store brings them back from that list.
 
 <img src="img/app-backup.png" width="240" alt="Settings, Backup: Back up now, Back up everything sealed, the switch of the copy a day and the passphrase for the automatic copies"> <img src="img/app-backup-drive.png" width="240" alt="Further down: the backups on the card, each with why it was made, and the pendrive's two actions">
 
-Since 0.31. `components/aos_backup`; the plan, with what comes next (a
-server of your own), is
+Since 0.31. `components/aos_backup`; the plan is
 [docs/plan/RESPALDO.md](plan/RESPALDO.md), in Spanish.
 
 ## Making one
@@ -134,6 +133,43 @@ Backup gets a **Pendrive** section:
   written. The portal's Backup page has **Copy to the pendrive** too; the
   way back is asked for at the board.
 
+### To a server of your own, by SFTP
+
+A copy that leaves the house with nobody doing anything: once a week the
+board sends its sealed backups to an SSH server you name: a NAS, a
+Raspberry, any computer with `sshd`. **Only the sealed ones, ever**: there
+is nothing to send until the automatic copies have a passphrase (above).
+
+All of it is set at the board, in Settings → Backup → **A server of your
+own (SFTP)**:
+
+1. **Server:** `user@server`, or `user@server:port`. **Folder:**
+   `p4os-backups` unless you say otherwise, from that user's home. The
+   backups go to `<folder>/<the board's name>/`, so several boards can
+   share a server.
+2. **The board's key on the server.** The board logs in with a key, never
+   with a password: nothing is asked for and nothing is kept. Its public
+   line is in the portal's Backup page, with a button to copy it; it goes
+   into `~/.ssh/authorized_keys` of that user on the server. It is the same
+   key the SSH app uses, so a server that already knows the board needs
+   nothing.
+3. **Try the connection.** The board shows the key the server answered
+   with (`ED25519 SHA256:…`, as `ssh-keygen -lf` prints it on the server)
+   and whether it was let in. **Accept this key** (two taps) keeps it: from
+   then on a server that shows another key gets nothing, not even the
+   login.
+4. **A copy a week,** and **Send now**.
+
+What goes is every sealed backup on the card that the server does not have
+yet; first a copy of now, when something changed. A file goes up beside its
+name and is renamed over it when whole. Nothing is deleted on the server:
+at 19 KB a week it is a megabyte a year. Changing the server's address
+forgets the key that was accepted.
+
+On a server you can restrict that key to SFTP and to one folder, in its
+`authorized_keys` line or with a `Match User` block in `sshd_config`
+(`ForceCommand internal-sftp`, `ChrootDirectory`).
+
 ### From a computer, by itself
 
 `tools/backup.sh` asks the board for a backup, downloads it and takes it
@@ -181,6 +217,7 @@ The file's name says the same: `-antes`, `-auto`, `-fw`.
 | `POST /api/backup` | `{"pass": "…"}`: makes one now; without `pass`, a plain one |
 | `POST /api/backup/restore` | `{"name": "…", "pass": "…"}` |
 | `POST /api/backup/delete` | `{"name": "…"}` |
+| `POST /api/backup/server` | `{"do": "look"}`: who answers at the server set at the board; `{"do": "send"}`: the sealed backups it lacks, now. `server` in the state has where it is, the key accepted, the last copy and `key_line`, the board's public key |
 | `POST /api/backup/drive` | the backups and the chosen folders to the pendrive on the USB host; `drive`, `files` and `kbytes` in the state say whether there is one and how far the copy is |
 | `GET /api/backup/apps?name=` | the apps that backup lists and the card lacks |
 | `POST /api/backup/apps` | `{"name": "…"}`: asks the Store for them |
@@ -189,9 +226,11 @@ The file's name says the same: `-antes`, `-auto`, `-fw`.
 ## Tests
 
 `tests/backup_host/run.sh` builds the service for the Mac, with a folder
-for a card and a file for the preferences: 46 cases, among them a long
+for a card and a file for the preferences: 58 cases, among them a long
 value with its line breaks, a restore onto another board and its undoing,
 a wrong passphrase, a backup of a newer P4OS, the day's copy and the one
 before a firmware, the five the card keeps, a copy sealed under the kept
-key and opened on another board, the offer to a new board, and the copy
-to a pendrive and back onto a new card.
+key and opened on another board, the offer to a new board, the copy to a
+pendrive and back onto a new card, and what goes to a server and when
+nothing does (a make-believe server there). The SSH and SFTP client itself
+is `tests/sshc_host/run.sh`, against the simulator's own SFTP server.

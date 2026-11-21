@@ -25,6 +25,15 @@
  *                               one; "files" and "kbytes", how far it is).
  *                               The way back, onto the card, is asked for at
  *                               the board
+ *   POST /api/backup/server     {"do": "look"}: who answers at the server set at
+ *                               the board, its key and whether the board gets
+ *                               in ("server" in the state: host, port, user,
+ *                               dir, on, pinned, fp, last, seen, seen_in, and
+ *                               key_line, the board's public key for the
+ *                               server's authorized_keys). {"do": "send"}:
+ *                               the sealed backups the server lacks, now.
+ *                               The server, its key's acceptance and the
+ *                               week's switch are set at the board
  *   GET  /api/backup/apps?name= the apps that backup lists and the card lacks
  *   POST /api/backup/apps       {"name": "..."}: asks the Tienda for them
  *
@@ -57,7 +66,8 @@ static void reply(aos_httpd_req_t *r, int status, cJSON *o)
 
 static void state(aos_httpd_req_t *r, int status, const char *error)
 {
-    static const char *kinds[] = { "", "other", "card", "not_found", "not_one", "passphrase", "newer", "memory", "busy", "drive" };
+    static const char *kinds[] = { "", "other", "card", "not_found", "not_one", "passphrase", "newer", "memory", "busy", "drive",
+                                   "setup", "server", "hostkey", "login" };
     aos_backup_status_t st;
     aos_backup_status(&st);
     cJSON *o = cJSON_CreateObject();
@@ -83,6 +93,26 @@ static void state(aos_httpd_req_t *r, int status, const char *error)
     cJSON_AddBoolToObject(au, "on", aos_backup_auto_on());
     cJSON_AddBoolToObject(au, "sealed", aos_backup_auto_sealed());
     cJSON_AddNumberToObject(au, "day", aos_backup_auto_day());
+    /* the server the sealed copies go to: read here, set at the board. The
+     * board's key is its public half: what the server's authorized_keys takes */
+    aos_backup_server_t sv;
+    char line[200] = "", seen[80] = "";
+    bool in = false;
+    aos_backup_server_get(&sv);
+    cJSON *srv = cJSON_AddObjectToObject(o, "server");
+    cJSON_AddStringToObject(srv, "host", sv.host);
+    cJSON_AddNumberToObject(srv, "port", sv.port);
+    cJSON_AddStringToObject(srv, "user", sv.user);
+    cJSON_AddStringToObject(srv, "dir", sv.dir);
+    cJSON_AddBoolToObject(srv, "on", sv.on);
+    cJSON_AddBoolToObject(srv, "pinned", sv.pinned);
+    cJSON_AddStringToObject(srv, "fp", sv.fp);
+    cJSON_AddNumberToObject(srv, "last", sv.last);
+    if (aos_backup_server_seen(seen, sizeof seen, &in)) {
+        cJSON_AddStringToObject(srv, "seen", seen);
+        cJSON_AddBoolToObject(srv, "seen_in", in);
+    }
+    if (aos_backup_server_key_line(line, sizeof line)) cJSON_AddStringToObject(srv, "key_line", line);
     cJSON *list = cJSON_AddArrayToObject(o, "backups");
     aos_backup_info_t *all = malloc(sizeof *all * LIST_MAX);
     int n = all ? aos_backup_list(all, LIST_MAX) : 0;
@@ -151,6 +181,12 @@ bool aos_portal_backup(aos_httpd_req_t *r, const char *m, const char *p)
         if (!aos_backup_make(pass)) fail = _("ya hay un respaldo en curso");
     } else if (!strcmp(p, "restore")) {
         if (!name || !aos_backup_restore(name, pass)) fail = _("falta name, o ya hay un respaldo en curso");
+    } else if (!strcmp(p, "server")) {
+        /* a look, or the copy now; where the server is and its key are the board's to say */
+        const char *what = cJSON_GetStringValue(cJSON_GetObjectItem(j, "do"));
+        if (what && !strcmp(what, "look")) { if (!aos_backup_server_look()) fail = _("ya hay un respaldo en curso"); }
+        else if (what && !strcmp(what, "send")) { if (!aos_backup_server_send()) fail = _("ya hay un respaldo en curso"); }
+        else fail = _("falta do: look o send");
     } else if (!strcmp(p, "drive")) {
         if (!aos_backup_drive()) fail = _("no hay un pendrive");
         else if (!aos_backup_to_drive()) fail = _("ya hay un respaldo en curso");

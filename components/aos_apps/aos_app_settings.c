@@ -1939,13 +1939,14 @@ AOS_BSS_PSRAM static char s_bk_pass[64];
 AOS_BSS_PSRAM static char s_bk_name[AOS_BACKUP_NAME_MAX];
 AOS_BSS_PSRAM static aos_backup_folder_t s_bk_dirs[AOS_BACKUP_FOLDERS_MAX];
 static int s_bk_ndirs;
+static uint32_t s_bk_rev;       /* one more for what this page changes without a job: it is drawn again */
 
 static uint32_t bk_key(void)
 {
     aos_backup_status_t st;
     aos_backup_status(&st);
-    return st.jobs_done * 32u + (st.busy ? 1u : 0u) + (st.restart ? 2u : 0u) + (aos_hal_path_sd_root() ? 4u : 0u) +
-           (aos_backup_auto_sealed() ? 8u : 0u) + (aos_backup_drive() ? 16u : 0u);
+    return (st.jobs_done << 8) ^ (s_bk_rev << 20) ^ ((st.busy ? 1u : 0u) + (st.restart ? 2u : 0u) + (aos_hal_path_sd_root() ? 4u : 0u) +
+                                                       (aos_backup_auto_sealed() ? 8u : 0u) + (aos_backup_drive() ? 16u : 0u));
 }
 
 static void bk_refresh(void)
@@ -1955,13 +1956,18 @@ static void bk_refresh(void)
     aos_backup_status(&st);
     char v[160] = "";
     bool drive_job = !strcmp(st.busy ? st.job : st.last_job, "to_drive") || !strcmp(st.busy ? st.job : st.last_job, "from_drive");
-    if (st.busy && drive_job) snprintf(v, sizeof v, _("copiando: %u archivos, %u KB"), (unsigned)st.files, (unsigned)st.kbytes);
+    const char *lj = st.busy ? st.job : st.last_job;
+    bool look_job = !strcmp(lj, "look"), send_job = !strcmp(lj, "send");
+    if (st.busy && (look_job || send_job)) snprintf(v, sizeof v, "%s", _("conectando con el servidor…"));
+    else if (st.busy && drive_job) snprintf(v, sizeof v, _("copiando: %u archivos, %u KB"), (unsigned)st.files, (unsigned)st.kbytes);
     else if (st.busy) snprintf(v, sizeof v, "%s", !strcmp(st.job, "restore") ? _("restaurando…") :
                                                     !strcmp(st.job, "key") ? _("preparando la clave…") : _("respaldando…"));
     else if (!aos_hal_path_sd_root()) snprintf(v, sizeof v, "%s", _("no hay tarjeta"));
     else if (!st.last_job[0]) v[0] = 0;
     else if (st.last_ok && !strcmp(st.last_job, "restore")) snprintf(v, sizeof v, _("restaurado: %d ajustes"), st.written);
     else if (st.last_ok && drive_job) snprintf(v, sizeof v, _("copiados: %u archivos, %u KB"), (unsigned)st.files, (unsigned)st.kbytes);
+    else if (st.last_ok && look_job) snprintf(v, sizeof v, "%s", _("el servidor contestó y deja entrar a la placa"));
+    else if (st.last_ok && send_job) snprintf(v, sizeof v, "%s", _("enviado al servidor"));
     else if (st.last_ok) snprintf(v, sizeof v, "%s", _("hecho"));
     else {
         switch (st.last_kind) {
@@ -1972,6 +1978,10 @@ static void bk_refresh(void)
         case AOS_BACKUP_E_NEWER:      snprintf(v, sizeof v, "%s", _("es de un P4OS más nuevo")); break;
         case AOS_BACKUP_E_MEMORY:     snprintf(v, sizeof v, "%s", _("no alcanzó la memoria")); break;
         case AOS_BACKUP_E_DRIVE:      snprintf(v, sizeof v, "%s", _("no hay pendrive, o no se pudo escribir en él")); break;
+        case AOS_BACKUP_E_SETUP:      snprintf(v, sizeof v, "%s", _("falta el servidor, aceptar su clave o la frase de las copias")); break;
+        case AOS_BACKUP_E_SERVER:     snprintf(v, sizeof v, "%s", _("el servidor no contesta, o dijo que no")); break;
+        case AOS_BACKUP_E_HOSTKEY:    snprintf(v, sizeof v, "%s", _("el servidor muestra otra clave: no se mandó nada")); break;
+        case AOS_BACKUP_E_LOGIN:      snprintf(v, sizeof v, "%s", _("el servidor no deja entrar la clave de la placa")); break;
         default:                      snprintf(v, sizeof v, "%s", _("no se pudo")); break;
         }
     }
@@ -2092,6 +2102,76 @@ static void bk_dir_cb(lv_event_t *e)
     if (i >= 0 && i < s_bk_ndirs) aos_backup_folder_set(s_bk_dirs[i].name, lv_obj_has_state(sw, LV_STATE_CHECKED));
 }
 
+/* A server of the person's own, by SFTP: where it is, a look at who answers
+ * there, its key accepted here and nowhere else, and the week's copy. */
+static void bk_srv_target_done(const char *text)
+{
+    /* "user@server" or "user@server:port" */
+    char user[40] = "", host[96] = "";
+    int port = 22;
+    const char *at = strchr(text, '@');
+    if (!at || at == text || !at[1] || (size_t)(at - text) >= sizeof user) { aos_ui_toast(_("Como usuario@servidor"), 2500); return; }
+    memcpy(user, text, (size_t)(at - text));
+    snprintf(host, sizeof host, "%.95s", at + 1);
+    char *colon = strrchr(host, ':');
+    if (colon) { *colon = 0; port = atoi(colon + 1); }
+    aos_backup_server_t sv;
+    aos_backup_server_get(&sv);
+    aos_backup_server_set(host, port, user, sv.dir);
+    s_bk_rev++;
+}
+
+static void bk_srv_target_cb(lv_event_t *e)
+{
+    (void)e;
+    aos_backup_server_t sv;
+    char now[160] = "";
+    aos_backup_server_get(&sv);
+    if (sv.host[0] && sv.port != 22) snprintf(now, sizeof now, "%s@%s:%d", sv.user, sv.host, sv.port);
+    else if (sv.host[0]) snprintf(now, sizeof now, "%s@%s", sv.user, sv.host);
+    kb_open(_("usuario@servidor, o usuario@servidor:puerto"), now, 140, _("Guardar"), bk_srv_target_done);
+}
+
+static void bk_srv_dir_done(const char *text)
+{
+    aos_backup_server_t sv;
+    aos_backup_server_get(&sv);
+    aos_backup_server_set(sv.host, sv.port, sv.user, text);
+    s_bk_rev++;
+}
+
+static void bk_srv_dir_cb(lv_event_t *e)
+{
+    (void)e;
+    aos_backup_server_t sv;
+    aos_backup_server_get(&sv);
+    kb_open(_("La carpeta del servidor"), sv.dir, 90, _("Guardar"), bk_srv_dir_done);
+}
+
+static void bk_srv_look_cb(lv_event_t *e)
+{
+    (void)e;
+    if (!aos_backup_server_look()) aos_ui_toast(_("Ya hay un respaldo en curso"), 2000);
+}
+
+static void bk_srv_trust_cb(lv_event_t *e)
+{
+    if (!second_tap(e, _("Tocá otra vez si es la clave de tu servidor"))) return;
+    aos_backup_server_trust();
+    s_bk_rev++;
+}
+
+static void bk_srv_on_cb(lv_event_t *e)
+{
+    aos_backup_server_on(lv_obj_has_state(lv_event_get_target(e), LV_STATE_CHECKED));
+}
+
+static void bk_srv_send_cb(lv_event_t *e)
+{
+    (void)e;
+    if (!aos_backup_server_send()) aos_ui_toast(_("Ya hay un respaldo en curso"), 2000);
+}
+
 /* The apps the restored backup lists and the card lacks: asked of the
  * Tienda, each with the extras it had. */
 static void bk_apps_cb(lv_event_t *e)
@@ -2180,6 +2260,34 @@ static void build_backup(lv_obj_t *p)
             lv_obj_set_user_data(lv_obj_get_child(r, -1), (void *)(intptr_t)i);
         }
     } else note(p, _("Con un pendrive en el host USB (Ajustes, USB) aparece acá la copia de los respaldos y de las carpetas de la tarjeta."));
+
+    /* a server of the person's own */
+    aos_backup_server_t sv;
+    AOS_BSS_PSRAM static char target[160], seen_fp[80], line[200];      /* PSRAM: a page's texts (docs/MEMORY.md) */
+    bool seen_in = false;
+    aos_backup_server_get(&sv);
+    if (sv.host[0] && sv.port != 22) snprintf(target, sizeof target, "%s@%s:%d", sv.user, sv.host, sv.port);
+    else if (sv.host[0]) snprintf(target, sizeof target, "%s@%s", sv.user, sv.host);
+    else snprintf(target, sizeof target, "%s", _("sin elegir"));
+    g = group(p, _("SERVIDOR PROPIO (SFTP)"));
+    row(g, NULL, 0, _("Servidor"), target, true, bk_srv_target_cb, NULL);
+    row(g, NULL, 0, _("Carpeta"), sv.dir, true, bk_srv_dir_cb, NULL);
+    if (sv.host[0] && !st.busy) action_row(g, _("Probar la conexión"), AOS_C_ACCENT, bk_srv_look_cb);
+    bool seen = aos_backup_server_seen(seen_fp, sizeof seen_fp, &seen_in);
+    if (seen && (!sv.pinned || strcmp(seen_fp, sv.fp))) {
+        snprintf(line, sizeof line, _("El servidor muestra %s"), seen_fp);
+        note(p, line);
+        g = group(p, NULL);
+        action_row(g, _("Aceptar esta clave"), AOS_C_GREEN, bk_srv_trust_cb);
+        if (!seen_in) note(p, _("Todavía no deja entrar a la placa: falta su clave en el authorized_keys del servidor. Está en el portal, Respaldo."));
+    } else if (sv.pinned) {
+        snprintf(line, sizeof line, _("Clave aceptada: %s"), sv.fp);
+        note(p, line);
+        g = group(p, NULL);
+        row_switch(g, NULL, 0, _("Una copia por semana"), sv.on, bk_srv_on_cb);
+        if (!st.busy) action_row(g, _("Subir ahora"), AOS_C_ACCENT, bk_srv_send_cb);
+    }
+    note(p, _("A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos: hace falta la frase de las copias automáticas. La placa entra con su clave, sin contraseña: la línea para el authorized_keys del servidor está en el portal, Respaldo. Un servidor que muestre otra clave que la aceptada acá no recibe nada."));
 }
 
 /* ---- Diagnostics ---- */

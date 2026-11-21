@@ -3326,8 +3326,33 @@ function pageRespaldo() {
   const WHY = { card: N_('No hay tarjeta, o no se pudo escribir en ella.'), not_found: N_('Ese respaldo no está en la tarjeta.'),
                 not_one: N_('El archivo no es un respaldo, o está dañado.'), passphrase: N_('Está cifrado, y esa no es su frase.'),
                 newer: N_('Lo hizo un P4OS más nuevo que este: actualizá primero.'), memory: N_('No alcanzó la memoria.'),
-                busy: N_('Ya hay uno en curso.'), drive: N_('No hay pendrive, o no se pudo escribir en él.'), other: N_('Algo salió mal.') };
+                busy: N_('Ya hay uno en curso.'), drive: N_('No hay pendrive, o no se pudo escribir en él.'),
+                setup: N_('Falta elegir el servidor, aceptar su clave o la frase de las copias automáticas: en la placa, Ajustes, Respaldo.'),
+                server: N_('El servidor no contesta, o dijo que no.'), hostkey: N_('El servidor muestra otra clave que la aceptada: no se mandó nada.'),
+                login: N_('El servidor no deja entrar la clave de la placa: ¿está en su authorized_keys?'), other: N_('Algo salió mal.') };
   const when = b => b.made ? new Date(b.made * 1000).toLocaleString(LOCALE) : tr('sin fecha');
+  // the server the sealed copies go to (SFTP): set at the board, read here, with the board's key to copy
+  const srvCard = () => {
+    const s = st.server;
+    if (!s) return null;
+    const where = s.host ? s.user + '@' + s.host + (s.port !== 22 ? ':' + s.port : '') + ' · ' + s.dir : tr('sin elegir');
+    return h('div', { style: 'margin-top:18px' },
+      h('h3', {}, tr('Servidor propio (SFTP)')),
+      h('div', { class: 'card pad' },
+        h('div', {}, h('b', {}, where), ' ',
+          s.pinned ? h('span', { class: 'pill', style: 'color:var(--green)' }, tr('clave aceptada')) : s.host ? h('span', { class: 'pill', style: 'color:var(--orange)' }, tr('falta aceptar su clave en la placa')) : null,
+          s.pinned ? h('span', { class: 'pill' }, s.on ? tr('una copia por semana') : tr('sólo a mano')) : null),
+        s.pinned ? h('div', { class: 'small mono muted', style: 'margin-top:4px;word-break:break-all' }, s.fp) : null,
+        s.seen && s.seen !== s.fp ? h('div', { class: 'small', style: 'margin-top:4px;word-break:break-all' },
+          tr('La última prueba vio %s', s.seen) + (s.seen_in ? '' : ' · ' + tr('y todavía no deja entrar a la placa'))) : null,
+        s.last ? h('div', { class: 'small muted', style: 'margin-top:4px' }, tr('Última copia: %s', new Date(s.last * 1000).toLocaleString(LOCALE))) : null,
+        h('div', { class: 'note', style: 'margin-top:8px' }, tr('A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos. El servidor, aceptar su clave y la copia semanal se eligen en la placa: Ajustes, Respaldo. La placa entra con su clave, sin contraseña: esta línea va en el ~/.ssh/authorized_keys del usuario del servidor.')),
+        s.key_line ? h('div', { class: 'small mono', style: 'margin-top:6px;word-break:break-all;user-select:all' }, s.key_line) : null,
+        h('div', { class: 'btns', style: 'margin-top:8px' },
+          s.key_line ? h('button', { class: 'btn', onclick: () => navigator.clipboard.writeText(s.key_line).then(() => toast(tr('Copiada'))).catch(() => toast(tr('No se pudo copiar: seleccioná la línea'), true)) }, tr('Copiar la clave de la placa')) : null,
+          s.host ? h('button', { class: 'btn', disabled: st.busy, onclick: () => act('backup/server', { do: 'look' }) }, tr('Probar la conexión')) : null,
+          s.pinned ? h('button', { class: 'btn pri', disabled: st.busy, onclick: () => act('backup/server', { do: 'send' }) }, tr('Subir ahora')) : null)));
+  };
   const act = async (what, body) => {
     try { st = await post(what, body); draw(); poll(300); }
     catch (e) { toast(e.message, true); }
@@ -3376,12 +3401,15 @@ function pageRespaldo() {
     } });
     const restored = !st.busy && st.last_ok && st.last_job === 'restore';
     const driveJob = j => j === 'to_drive' || j === 'from_drive';
-    msg.textContent = st.busy ? (driveJob(st.job) ? tr('Copiando: %s archivos, %s…', st.files, fmtBytes(st.kbytes * 1024))
+    const srvJob = j => j === 'look' || j === 'send';
+    msg.textContent = st.busy ? (srvJob(st.job) ? tr('Conectando con el servidor…')
+                                 : driveJob(st.job) ? tr('Copiando: %s archivos, %s…', st.files, fmtBytes(st.kbytes * 1024))
                                  : st.job === 'restore' ? tr('Restaurando…') : tr('Respaldando…'))
       : !st.last ? ''
       : !st.last_ok ? tr(WHY[st.last_kind] || WHY.other) + ' (' + st.last + ')'
       : restored ? tr('Restaurado: %s ajustes escritos. La mayoría vale recién después de reiniciar.', st.written)
       : driveJob(st.last_job) ? tr('Copiados: %s archivos, %s.', st.files, fmtBytes(st.kbytes * 1024))
+      : srvJob(st.last_job) ? tr('El servidor: %s', st.last)
       : tr('Hecho: %s', st.last_name);
     msg.style.color = !st.busy && st.last && !st.last_ok ? 'var(--orange)' : '';
     put(top,
@@ -3406,7 +3434,8 @@ function pageRespaldo() {
             try { const r = await post('backup/apps', { name: missingOf }); toast(tr('Pedidas a la Tienda: %s', r.asked)); missing = null; draw(); }
             catch (x) { toast(x.message, true); } } }, tr('Pedirle a la Tienda que las instale')))) : null);
     put(list, h('h2', {}, tr('En la tarjeta')),
-      st.backups.length ? st.backups.map(card) : h('div', { class: 'card pad muted' }, tr('Todavía no hay ninguno.')));
+      st.backups.length ? st.backups.map(card) : h('div', { class: 'card pad muted' }, tr('Todavía no hay ninguno.')),
+      srvCard());
   }
   async function load() {
     st = await api('backup');

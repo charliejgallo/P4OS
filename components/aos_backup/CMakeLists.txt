@@ -4,5 +4,5 @@ idf_component_register(
     SRCS "aos_backup.c"
     INCLUDE_DIRS "include"
     REQUIRES aos_hal
-    PRIV_REQUIRES json mbedtls
+    PRIV_REQUIRES json mbedtls aos_ssh
 )

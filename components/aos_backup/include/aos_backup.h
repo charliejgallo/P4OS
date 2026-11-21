@@ -1,5 +1,5 @@
 /*
- * P4OS - Backups (docs/plan/RESPALDO.md, stages 1 to 3).
+ * P4OS - Backups (docs/plan/RESPALDO.md, stages 1 to 4).
  *
  * What a board holds and cannot fetch again, in one file on the card
  * (/backups/<name>.p4bak): its preferences - the system's and the apps', the
@@ -81,11 +81,15 @@ typedef enum {
     AOS_BACKUP_E_MEMORY,
     AOS_BACKUP_E_BUSY,
     AOS_BACKUP_E_DRIVE,         /* no pendrive, or it could not be written */
+    AOS_BACKUP_E_SETUP,         /* the server: not set, its key not accepted, or no passphrase for the copies */
+    AOS_BACKUP_E_SERVER,        /* the server: not there, not SSH, cut, or it said no to a file */
+    AOS_BACKUP_E_HOSTKEY,       /* the server shows another key than the one accepted */
+    AOS_BACKUP_E_LOGIN,         /* the server does not let the board's key in */
 } aos_backup_err_t;
 
 typedef struct {
     bool     busy;
-    char     job[12];           /* "make", "restore", "auto", "key", "to_drive" or "from_drive" */
+    char     job[12];           /* "make", "restore", "auto", "key", "to_drive", "from_drive", "look" or "send" */
     uint32_t jobs_done;         /* counts up */
     bool     last_ok;
     int      last_kind;         /* aos_backup_err_t */
@@ -178,6 +182,43 @@ bool aos_backup_to_drive(void);         /* in the background; aos_backup_status(
 bool aos_backup_from_drive(void);
 void aos_backup_cancel(void);           /* stops the copy in hand after the file it is on */
 
+/* ---- to a server of the person's own, by SFTP (stage 4) ----
+ *
+ * A copy that leaves the house without anybody doing anything: once a week,
+ * the sealed backups the server does not have go to
+ * <folder>/<the board's name>/ on an SSH server the person named: a NAS, a
+ * Raspberry, a computer. Only the sealed ones, ever, so there is nothing to
+ * send until a passphrase was chosen for the automatic copies.
+ *
+ * Set at the board only, in three steps: the server (host, port, user,
+ * folder); the board's key on the server (aos_backup_server_key_line(), one
+ * line for ~/.ssh/authorized_keys; no password is asked for or kept); and a
+ * look (aos_backup_server_look) that shows the server's key for the person
+ * to accept (aos_backup_server_trust). From then on a server that shows
+ * another key is refused before anything is sent. */
+typedef struct {
+    char     host[96];
+    int      port;
+    char     user[40];
+    char     dir[96];           /* "p4os-backups" unless said otherwise; relative is from the user's home */
+    bool     on;                /* a copy a week by itself */
+    bool     pinned;            /* the server's key was accepted */
+    char     fp[80];            /* that key: "ED25519 SHA256:..." */
+    uint32_t last;              /* when the last copy went; 0 for never */
+} aos_backup_server_t;
+void aos_backup_server_get(aos_backup_server_t *out);
+/* Changing the host or the port forgets the key that was accepted. */
+void aos_backup_server_set(const char *host, int port, const char *user, const char *dir);
+void aos_backup_server_on(bool on);
+bool aos_backup_server_key_line(char *out, size_t n);       /* 160 bytes do */
+/* Connects to see who answers, in the background: afterwards
+ * aos_backup_server_seen() gives the key it showed and whether the board's
+ * key was let in. aos_backup_server_trust() keeps that key. */
+bool aos_backup_server_look(void);
+bool aos_backup_server_seen(char *fp, size_t n, bool *in);
+bool aos_backup_server_trust(void);
+bool aos_backup_server_send(void);                          /* now, in the background */
+
 /* The same, without the thread: for the tests and for whoever is already in
  * one. 'why' gets a line for the log. They return an aos_backup_err_t. */
 int aos_backup_make_now(const char *passphrase, bool before, char *name_out, size_t name_len, char *why, size_t why_len);
@@ -187,6 +228,8 @@ int aos_backup_restore_now(const char *name, const char *passphrase, int *writte
 int aos_backup_auto_now(int reason, bool *made, char *why, size_t why_len);
 bool aos_backup_auto_passphrase_now(const char *passphrase);
 int aos_backup_copy_now(bool to_drive, char *why, size_t why_len);
+int aos_backup_server_look_now(char *why, size_t why_len);
+int aos_backup_server_send_now(char *why, size_t why_len);
 
 #ifdef __cplusplus
 }

@@ -10800,3 +10800,25 @@ Al pendrive van los respaldos y las carpetas elegidas de la tarjeta, en p4os-bac
 CARPETAS QUE VAN AL PENDRIVE	ORDNER FÜR DEN USB-STICK
 Con un pendrive en el host USB (Ajustes, USB) aparece acá la copia de los respaldos y de las carpetas de la tarjeta.	Mit einem USB-Stick am USB-Host (Einstellungen, USB) erscheint hier die Kopie der Sicherungen und der Ordner der Karte.
 no hay un pendrive	kein USB-Stick
+conectando con el servidor…	verbinde mit dem Server…
+el servidor contestó y deja entrar a la placa	der Server hat geantwortet und lässt das Board herein
+enviado al servidor	an den Server gesendet
+falta el servidor, aceptar su clave o la frase de las copias	es fehlt der Server, die Annahme seines Schlüssels oder die Passphrase der Kopien
+el servidor no contesta, o dijo que no	der Server antwortet nicht oder hat abgelehnt
+el servidor muestra otra clave: no se mandó nada	der Server zeigt einen anderen Schlüssel: nichts wurde gesendet
+el servidor no deja entrar la clave de la placa	der Server lässt den Schlüssel des Boards nicht herein
+Como usuario@servidor	Als benutzer@server
+usuario@servidor, o usuario@servidor:puerto	benutzer@server oder benutzer@server:port
+La carpeta del servidor	Der Ordner auf dem Server
+Tocá otra vez si es la clave de tu servidor	Nochmal tippen, wenn es der Schlüssel deines Servers ist
+sin elegir	nicht gewählt
+SERVIDOR PROPIO (SFTP)	EIGENER SERVER (SFTP)
+Probar la conexión	Verbindung testen
+El servidor muestra %s	Der Server zeigt %s
+Aceptar esta clave	Diesen Schlüssel annehmen
+Todavía no deja entrar a la placa: falta su clave en el authorized_keys del servidor. Está en el portal, Respaldo.	Er lässt das Board noch nicht herein: sein Schlüssel fehlt in der authorized_keys des Servers. Er steht im Portal, Sicherung.
+Clave aceptada: %s	Schlüssel angenommen: %s
+Una copia por semana	Eine Kopie pro Woche
+Subir ahora	Jetzt senden
+A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos: hace falta la frase de las copias automáticas. La placa entra con su clave, sin contraseña: la línea para el authorized_keys del servidor está en el portal, Respaldo. Un servidor que muestre otra clave que la aceptada acá no recibe nada.	Auf ein NAS oder einen Rechner mit SSH gehen die verschlüsselten Sicherungen, und nur diese: dazu braucht es die Passphrase der automatischen Kopien. Das Board meldet sich mit seinem Schlüssel an, ohne Passwort: die Zeile für die authorized_keys des Servers steht im Portal, Sicherung. Ein Server, der einen anderen Schlüssel zeigt als den hier angenommenen, bekommt nichts.
+falta do: look o send	do fehlt: look oder send

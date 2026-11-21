@@ -3503,6 +3503,28 @@ static const char blob_en__sistema_lang[] =
     "CARPETAS QUE VAN AL PENDRIVE\tFOLDERS THAT GO TO THE PENDRIVE\n"
     "Con un pendrive en el host USB (Ajustes, USB) aparece acá la copia de los respaldos y de las carpetas de la tarjeta.\tWith a pendrive on the USB host (Settings, USB), the copy of the backups and of the card's folders shows up here.\n"
     "no hay un pendrive\tthere is no pendrive\n"
+    "conectando con el servidor…\tconnecting to the server…\n"
+    "el servidor contestó y deja entrar a la placa\tthe server answered and lets the board in\n"
+    "enviado al servidor\tsent to the server\n"
+    "falta el servidor, aceptar su clave o la frase de las copias\tthe server, its key's acceptance or the copies' passphrase is missing\n"
+    "el servidor no contesta, o dijo que no\tthe server does not answer, or said no\n"
+    "el servidor muestra otra clave: no se mandó nada\tthe server shows another key: nothing was sent\n"
+    "el servidor no deja entrar la clave de la placa\tthe server does not let the board's key in\n"
+    "Como usuario@servidor\tAs user@server\n"
+    "usuario@servidor, o usuario@servidor:puerto\tuser@server, or user@server:port\n"
+    "La carpeta del servidor\tThe server's folder\n"
+    "Tocá otra vez si es la clave de tu servidor\tTap again if it is your server's key\n"
+    "sin elegir\tnot chosen\n"
+    "SERVIDOR PROPIO (SFTP)\tA SERVER OF YOUR OWN (SFTP)\n"
+    "Probar la conexión\tTry the connection\n"
+    "El servidor muestra %s\tThe server shows %s\n"
+    "Aceptar esta clave\tAccept this key\n"
+    "Todavía no deja entrar a la placa: falta su clave en el authorized_keys del servidor. Está en el portal, Respaldo.\tIt does not let the board in yet: its key is missing from the server's authorized_keys. It is in the portal, Backup.\n"
+    "Clave aceptada: %s\tKey accepted: %s\n"
+    "Una copia por semana\tA copy a week\n"
+    "Subir ahora\tSend now\n"
+    "A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos: hace falta la frase de las copias automáticas. La placa entra con su clave, sin contraseña: la línea para el authorized_keys del servidor está en el portal, Respaldo. Un servidor que muestre otra clave que la aceptada acá no recibe nada.\tThe sealed backups, and only those, go to a NAS or a computer with SSH: the automatic copies' passphrase is needed. The board logs in with its key, with no password: the line for the server's authorized_keys is in the portal, Backup. A server that shows another key than the one accepted here gets nothing.\n"
+    "falta do: look o send\tdo is missing: look or send\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -6998,6 +7020,28 @@ static const char blob_de__sistema_lang[] =
     "CARPETAS QUE VAN AL PENDRIVE\tORDNER FÜR DEN USB-STICK\n"
     "Con un pendrive en el host USB (Ajustes, USB) aparece acá la copia de los respaldos y de las carpetas de la tarjeta.\tMit einem USB-Stick am USB-Host (Einstellungen, USB) erscheint hier die Kopie der Sicherungen und der Ordner der Karte.\n"
     "no hay un pendrive\tkein USB-Stick\n"
+    "conectando con el servidor…\tverbinde mit dem Server…\n"
+    "el servidor contestó y deja entrar a la placa\tder Server hat geantwortet und lässt das Board herein\n"
+    "enviado al servidor\tan den Server gesendet\n"
+    "falta el servidor, aceptar su clave o la frase de las copias\tes fehlt der Server, die Annahme seines Schlüssels oder die Passphrase der Kopien\n"
+    "el servidor no contesta, o dijo que no\tder Server antwortet nicht oder hat abgelehnt\n"
+    "el servidor muestra otra clave: no se mandó nada\tder Server zeigt einen anderen Schlüssel: nichts wurde gesendet\n"
+    "el servidor no deja entrar la clave de la placa\tder Server lässt den Schlüssel des Boards nicht herein\n"
+    "Como usuario@servidor\tAls benutzer@server\n"
+    "usuario@servidor, o usuario@servidor:puerto\tbenutzer@server oder benutzer@server:port\n"
+    "La carpeta del servidor\tDer Ordner auf dem Server\n"
+    "Tocá otra vez si es la clave de tu servidor\tNochmal tippen, wenn es der Schlüssel deines Servers ist\n"
+    "sin elegir\tnicht gewählt\n"
+    "SERVIDOR PROPIO (SFTP)\tEIGENER SERVER (SFTP)\n"
+    "Probar la conexión\tVerbindung testen\n"
+    "El servidor muestra %s\tDer Server zeigt %s\n"
+    "Aceptar esta clave\tDiesen Schlüssel annehmen\n"
+    "Todavía no deja entrar a la placa: falta su clave en el authorized_keys del servidor. Está en el portal, Respaldo.\tEr lässt das Board noch nicht herein: sein Schlüssel fehlt in der authorized_keys des Servers. Er steht im Portal, Sicherung.\n"
+    "Clave aceptada: %s\tSchlüssel angenommen: %s\n"
+    "Una copia por semana\tEine Kopie pro Woche\n"
+    "Subir ahora\tJetzt senden\n"
+    "A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos: hace falta la frase de las copias automáticas. La placa entra con su clave, sin contraseña: la línea para el authorized_keys del servidor está en el portal, Respaldo. Un servidor que muestre otra clave que la aceptada acá no recibe nada.\tAuf ein NAS oder einen Rechner mit SSH gehen die verschlüsselten Sicherungen, und nur diese: dazu braucht es die Passphrase der automatischen Kopien. Das Board meldet sich mit seinem Schlüssel an, ohne Passwort: die Zeile für die authorized_keys des Servers steht im Portal, Sicherung. Ein Server, der einen anderen Schlüssel zeigt als den hier angenommenen, bekommt nichts.\n"
+    "falta do: look o send\tdo fehlt: look oder send\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -7005,7 +7049,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3488, 0, files_en, 1 },
-    { "de", "Deutsch", 3488, 0, files_de, 1 },
+    { "en", "English", 3510, 0, files_en, 1 },
+    { "de", "Deutsch", 3510, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

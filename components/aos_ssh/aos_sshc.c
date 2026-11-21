@@ -79,7 +79,7 @@ struct aos_sshc {
     volatile bool *cancel;
     char user[64];
     int err;
-    char why[140];
+    char why[220];
 
     uint8_t *in, *out, *pkt;
     size_t in_len, pkt_len;
@@ -236,7 +236,7 @@ static int next(aos_sshc_t *c, int timeout_ms)
             char why[100];
             rb_u32(&rb);
             rb_cstr(&rb, why, sizeof why);
-            fail(c, AOS_SSHC_E_IO, "the server closed: %.100s", why);
+            fail(c, AOS_SSHC_E_IO, "the server closed: %.80s", why);
             return -1;
         }
         case MSG_USERAUTH_BANNER:
@@ -468,7 +468,7 @@ static bool kex_with(aos_sshc_t *c, const char *kept)
         fingerprint(ks, ksn, c->fp);
         /* before anything of ours is sent: the key that was kept, or none */
         if (kept && kept[0] && strcmp(kept, shown)) {
-            fail(c, AOS_SSHC_E_HOSTKEY, "the server's key is not the one that was kept (now %.90s)", c->fp);
+            fail(c, AOS_SSHC_E_HOSTKEY, "the server's key is not the one that was kept (now %.80s)", c->fp);
             return false;
         }
     } else {
@@ -645,13 +645,13 @@ aos_sshc_t *aos_sshc_open(const aos_sshc_opts_t *o, int *err, char *why, size_t 
     if (!o->host || !o->host[0] || !c->user[0] || !o->seed) fail(c, AOS_SSHC_E_CONNECT, "no server, or no user, to connect to", NULL);
     else {
         c->fd = aos_hal_tcp_connect(o->host, port, CONNECT_MS);
-        if (c->fd <= 0) fail(c, AOS_SSHC_E_CONNECT, c->fd == AOS_TCP_ERR_DNS ? "%.90s was not found" : "%.90s does not answer", o->host);
+        if (c->fd <= 0) fail(c, AOS_SSHC_E_CONNECT, c->fd == AOS_TCP_ERR_DNS ? "%.80s was not found" : "%.80s does not answer", o->host);
     }
     if (!c->err) {
         char vc[40];
         snprintf(vc, sizeof vc, "%s\r\n", V_C);
         if (aos_hal_tcp_send(c->fd, vc, (int)strlen(vc), CONNECT_MS) != (int)strlen(vc) || !read_version(c))
-            fail(c, AOS_SSHC_E_PROTOCOL, "%.90s did not answer as an SSH server", o->host);
+            fail(c, AOS_SSHC_E_PROTOCOL, "%.80s did not answer as an SSH server", o->host);
     }
     if (!c->err && send_kexinit(c)) {
         int t = next(c, STEP_MS);
@@ -890,7 +890,7 @@ int aos_sshc_stat(aos_sshc_t *c, const char *path, bool *there, uint64_t *size)
     }
     int code = fx_status(c, t);
     if (code < 0) return c->err;
-    return code == FX_NO_SUCH_FILE ? AOS_SSHC_OK : fail(c, AOS_SSHC_E_REMOTE, "the server would not look at %.100s", path);
+    return code == FX_NO_SUCH_FILE ? AOS_SSHC_OK : fail(c, AOS_SSHC_E_REMOTE, "the server would not look at %.80s", path);
 }
 
 int aos_sshc_mkdirs(aos_sshc_t *c, const char *path)
@@ -914,7 +914,7 @@ int aos_sshc_mkdirs(aos_sshc_t *c, const char *path)
     if (c->err) return c->err;
     bool there = false;
     aos_sshc_stat(c, path, &there, NULL);
-    if (!c->err && !there) fail(c, AOS_SSHC_E_REMOTE, "the folder %.100s could not be made on the server", path);
+    if (!c->err && !there) fail(c, AOS_SSHC_E_REMOTE, "the folder %.80s could not be made on the server", path);
     return c->err;
 }
 
@@ -938,7 +938,7 @@ int aos_sshc_put(aos_sshc_t *c, const char *local, const char *remote)
     size_t hl = 0;
     bool opened = false;
     if (!tmp || !buf) fail(c, AOS_SSHC_E_MEMORY, "no memory", NULL);
-    else if (!in) fail(c, AOS_SSHC_E_LOCAL, "%.100s could not be read", local);
+    else if (!in) fail(c, AOS_SSHC_E_LOCAL, "%.80s could not be read", local);
     else {
         snprintf(tmp, rl + 8, "%s.part", remote);
         wbuf_t f = fx_begin(c, FXP_OPEN);
@@ -952,7 +952,7 @@ int aos_sshc_put(aos_sshc_t *c, const char *local, const char *remote)
             const uint8_t *h = rb_string(&r, &n);
             if (h && n && n <= sizeof handle) { memcpy(handle, h, n); hl = n; opened = true; }
         }
-        if (!opened && !c->err) fail(c, AOS_SSHC_E_REMOTE, "the server would not take %.100s (does the folder exist, can it be written?)", remote);
+        if (!opened && !c->err) fail(c, AOS_SSHC_E_REMOTE, "the server would not take %.80s (does the folder exist, can it be written?)", remote);
     }
     uint64_t off = 0;
     size_t got;
@@ -962,10 +962,10 @@ int aos_sshc_put(aos_sshc_t *c, const char *local, const char *remote)
         wb_u64(&f, off);
         wb_string(&f, buf, got);
         int code = fx_status(c, fx_call(c, &f));
-        if (code > 0) fail(c, AOS_SSHC_E_REMOTE, "the server stopped taking %.100s (is it full?)", remote);
+        if (code > 0) fail(c, AOS_SSHC_E_REMOTE, "the server stopped taking %.80s (is it full?)", remote);
         off += got;
     }
-    if (opened && !c->err && ferror(in)) fail(c, AOS_SSHC_E_LOCAL, "%.100s could not be read to its end", local);
+    if (opened && !c->err && ferror(in)) fail(c, AOS_SSHC_E_LOCAL, "%.80s could not be read to its end", local);
     if (opened) {
         /* closed whatever happened, when the connection still stands */
         int had = c->err;
@@ -973,7 +973,7 @@ int aos_sshc_put(aos_sshc_t *c, const char *local, const char *remote)
         wbuf_t f = fx_begin(c, FXP_CLOSE);
         wb_string(&f, handle, hl);
         int code = fx_status(c, fx_call(c, &f));
-        if (!had && code > 0) fail(c, AOS_SSHC_E_REMOTE, "the server could not finish %.100s", remote);
+        if (!had && code > 0) fail(c, AOS_SSHC_E_REMOTE, "the server could not finish %.80s", remote);
         if (had) {
             if (!c->err) aos_sshc_remove(c, tmp);
             c->err = had;
@@ -995,7 +995,7 @@ int aos_sshc_put(aos_sshc_t *c, const char *local, const char *remote)
             wb_cstr(&f, remote);
             code = fx_status(c, fx_call(c, &f));
         }
-        if (code > 0) fail(c, AOS_SSHC_E_REMOTE, "%.100s went up but could not be given its name", remote);
+        if (code > 0) fail(c, AOS_SSHC_E_REMOTE, "%.80s went up but could not be given its name", remote);
     }
     if (in) fclose(in);
     free(tmp);
