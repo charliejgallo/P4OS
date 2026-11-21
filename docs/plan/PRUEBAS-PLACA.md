@@ -48,9 +48,8 @@ y un servidor de prueba en la Mac:
 - [x] El servicio por la API: catálogo, instalar, actualizar, quitar.
 - [x] La app Tienda: la lista, la página de una app con sus imágenes y su
       descripción, los extras (usuario).
-- [x] Una segunda fuente: proponerla desde el portal, mirarla, el aviso,
-      agregarla, su app con imagen, y la que se llama como una oficial,
-      afuera (usuario).
+- [x] Una segunda fuente: mirarla, el aviso, agregarla, su app con
+      imagen, y la que se llama como una oficial, afuera (usuario).
 - [x] Un `.p4app` desde Archivos, y verlo en la Tienda como paquete suelto;
       los filtros por origen (usuario).
 - [x] El firmware desde el catálogo: por la API, y entero desde Ajustes →
@@ -62,6 +61,8 @@ y un servidor de prueba en la Mac:
       firmware y las partes del sistema, y actualizar el firmware desde
       ahí por HTTPS.
 - [ ] Cortar el Wi-Fi en medio de una bajada.
+- [ ] Confirmar que proponer una fuente desde el portal se recorrió en la
+      placa (en el simulador sí).
 - [ ] Quitar una fuente (con sus apps y sin ellas) y quitar un paquete
       suelto.
 - [ ] Una fuente de terceros de verdad, en otro repositorio de GitHub.
