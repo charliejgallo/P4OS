@@ -18,6 +18,9 @@
   - **The apps come back from the Store:** after a restore the screen
     offers to ask it for the ones the card lacks, with their extras.
   - The portal downloads a backup to the computer and brings one back.
+  - On the board: a plain backup in half a second and a sealed one in
+    four, with 427 preferences; a sealed one made and restored at the
+    screen.
 - **A preference longer than 127 characters was read as empty** when all of
   them were listed (`aos_hal_pref_foreach`): a certificate, a list of the
   Store's sources. Nothing used that list until the backups.

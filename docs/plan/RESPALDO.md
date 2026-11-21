@@ -2,13 +2,16 @@
 
 Pensado el 2026-11-21, con la Tienda a punto de entrar a `main`. Pedido del
 usuario: la placa junta cada vez más cosas (ajustes, cuentas, apps, datos de
-cada app) y no hay nada que las guarde. **Nada de esto está escrito
-todavía**: es el plan para encararlo después del merge de la 0.30.0 y de
-los dos primeros puntos del CI (`TIENDA.md`, "Después del merge").
+cada app) y no hay nada que las guarde.
+
+**Dónde está (2026-11-21):** la etapa 1 está escrita, probada en la placa
+y en `main`; sale con la 0.31.0, que espera a las apps nuevas de la
+Tienda. Las etapas 2 a 4 (la copia diaria, el pendrive, el servidor
+propio) no están empezadas.
 
 ## Etapa 1, hecha en la Mac (2026-11-21)
 
-Escrita en la rama `respaldo`. El documento para quien la usa es
+Escrita en la rama `respaldo`, que entró a `main` el mismo día. El documento para quien la usa es
 `docs/BACKUP.md`. Lo que dio en la placa está más abajo, en "En la placa".
 
 - **El servicio** (`components/aos_backup`): arma el archivo, lo lee, lo
@@ -102,6 +105,10 @@ claves, no sus valores.
   app para pedirle a la Tienda, porque la tarjeta las tenía todas. La
   placa siguió andando y quedó esperando el reinicio, que no hace sola.
   Visto por la API después; RAM interna libre, 209,2 KB.
+
+- **Después del reinicio:** la placa arrancó normal con lo restaurado: en
+  la red, con la hora, la Tienda leyendo su catálogo, 209,4 KB de RAM
+  interna libres y los tres respaldos en la tarjeta.
 
 **Falta para darla por terminada:** restaurar un respaldo simple y uno que
 cambie algo a la vista (el de hoy escribió lo mismo que había). Y la

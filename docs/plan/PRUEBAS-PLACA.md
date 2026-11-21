@@ -73,7 +73,7 @@ y un servidor de prueba en la Mac:
 - [ ] Una fuente de terceros de verdad, en otro repositorio de GitHub.
 - [ ] Instalar el firmware del C6 que bajó la Tienda (Ajustes).
 
-### Respaldos (rama `respaldo`, 2026-11-21)
+### Respaldos (0.31, 2026-11-21)
 
 El plan y lo medido, en `docs/plan/RESPALDO.md` ("En la placa"). Con
 `v0.30.0-9-g40b9b5e`, por la API del portal:
@@ -89,6 +89,8 @@ El plan y lo medido, en `docs/plan/RESPALDO.md` ("En la placa"). Con
 - [x] Un respaldo cifrado hecho y restaurado desde Ajustes → Respaldo,
       con la frase escrita en la pantalla: 427 preferencias escritas y el
       `…-antes` cifrado con la misma frase.
+- [x] Reiniciada después de restaurar: arrancó normal, en la red y con
+      la Tienda leyendo su catálogo.
 - [ ] Restaurar uno que cambie algo a la vista (cambiar un ajuste después
       del respaldo, restaurar, reiniciar y ver que volvió).
 - [ ] Restaurar uno simple, y deshacer una restauración con su `…-antes`.
