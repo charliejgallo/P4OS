@@ -104,7 +104,7 @@ claves, no sus valores.
   Visto por la API después; RAM interna libre, 209,2 KB.
 
 **Falta para darla por terminada:** restaurar un respaldo simple y uno que
-cambie algo a la vista (los dos de hoy escribieron lo mismo que había). Y la
+cambie algo a la vista (el de hoy escribió lo mismo que había). Y la
 prueba de la tabla de etapas: con la flash borrada, volver a los ajustes
 desde el archivo y que la Tienda ofrezca reinstalar. Esa borra la placa:
 sólo cuando el usuario lo diga.
