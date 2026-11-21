@@ -223,6 +223,7 @@ static void store_state(aos_httpd_req_t *r, int status, const char *error)
         cJSON_AddStringToObject(e, "state", states[a.state <= AOS_STORE_SET_ASIDE ? a.state : 0]);
         cJSON_AddBoolToObject(e, "fits", a.fits);
         cJSON_AddNumberToObject(e, "src", a.src);
+        cJSON_AddStringToObject(e, "origin", a.origin == AOS_STORE_LOOSE ? "package" : a.origin == AOS_STORE_HAND ? "hand" : "source");
         cJSON_AddItemToArray(apps, e);
     }
     reply(r, status, o);

@@ -53,6 +53,9 @@
 
 /* the chips that are not categories */
 enum { F_ALL = 0, F_UPDATES = -1, F_INSTALLED = -2, F_SOURCES = -3 };
+/* The second row of chips, by where an app comes from: any, what was handed
+ * in as a package, what was copied by hand, or 1 + a source's index. */
+enum { O_ALL = 0, O_LOOSE = -1, O_HAND = -2 };
 
 /* which screen is up: the catalogue (the list, or an app's page), the
  * sources, the address of one to add, and who that one says it is */
@@ -61,6 +64,7 @@ enum { V_STORE = 0, V_SOURCES, V_ADD, V_CONFIRM };
 typedef struct {
     char     file[32], id[40], cat[12], ver[28];
     char     name[40], about[244];
+    char     from[40];          /* of an app no source lists: the source it was installed from, now gone */
     uint32_t color_a, color_b;
     uint8_t  icon[ICON_MAX];
     uint16_t icon_len;
@@ -87,6 +91,7 @@ AOS_BSS_PSRAM static struct {
     int       ncats;
     char      source[40], release[28];
     int       filter;           /* F_*, or 1 + the category's index */
+    int       origin;           /* O_*, or 1 + the source's index */
     int       sel;              /* the app whose page is up, -1 for the list */
     bool      sure;             /* "Quitar" was tapped once */
     uint32_t  jobs_done;
@@ -317,6 +322,7 @@ static void load(void)
             snprintf(it->ver, sizeof it->ver, "%s", jstr(o, "ver"));
             snprintf(it->name, sizeof it->name, "%s", pick(cJSON_GetObjectItem(o, "name")));
             snprintf(it->about, sizeof it->about, "%s", pick(cJSON_GetObjectItem(o, "about")));
+            snprintf(it->from, sizeof it->from, "%s", jstr(o, "from"));
             const char *ca = cJSON_GetStringValue(cJSON_GetArrayItem(colors, 0));
             const char *cb = cJSON_GetStringValue(cJSON_GetArrayItem(colors, 1));
             it->color_a = ca ? (uint32_t)strtoul(ca, NULL, 16) : 0x3A3A3C;
@@ -354,8 +360,29 @@ static bool installed(const item_t *it)
     return it->st.state == AOS_STORE_INSTALLED || it->st.state == AOS_STORE_UPDATE || it->st.state == AOS_STORE_BY_HAND;
 }
 
+/* What there is to say of an app no source lists, where the others have
+ * their description. */
+static const char *loose_text(const item_t *it, char out[200])
+{
+    if (it->st.origin == AOS_STORE_HAND) return _("Copiada a mano a la tarjeta: la Tienda no la maneja.");
+    if (it->from[0]) {
+        snprintf(out, 200, _("Instalada de %s, que ya no está entre las fuentes."), it->from);
+        return out;
+    }
+    return _("Instalada desde un paquete (.p4app): no está en ningún catálogo.");
+}
+
+static bool of_origin(const item_t *it)
+{
+    if (S.origin == O_ALL) return true;
+    if (S.origin == O_LOOSE) return it->st.origin == AOS_STORE_LOOSE;
+    if (S.origin == O_HAND) return it->st.state == AOS_STORE_BY_HAND;
+    return it->st.src == S.origin - 1;
+}
+
 static bool shown(const item_t *it)
 {
+    if (!of_origin(it)) return false;
     if (S.filter == F_ALL) return true;
     if (S.filter == F_UPDATES) return it->st.state == AOS_STORE_UPDATE;
     if (S.filter == F_INSTALLED) return installed(it) || it->st.state == AOS_STORE_SET_ASIDE;
@@ -397,7 +424,7 @@ static void act(const item_t *it)
     aos_store_status(&st);
     if (st.busy && !strcmp(st.file, it->file)) return;
     if (it->st.state == AOS_STORE_INSTALLED || it->st.state == AOS_STORE_BY_HAND) {
-        aos_ui_open(it->id);
+        if (it->id[0]) aos_ui_open(it->id);
         return;
     }
     if (!it->st.fits) {
@@ -419,10 +446,28 @@ static lv_obj_t *box(lv_obj_t *parent)
     return o;
 }
 
+/* The app with this id among the ones the board has registered, or NULL. */
+static const aos_app_t *registered(const char *id)
+{
+    for (int i = 0; id[0] && i < aos_ui_app_count(); i++) {
+        const aos_app_t *a = aos_ui_app_at(i);
+        if (a && a->desc.id && !strcmp(a->desc.id, id)) return a;
+    }
+    return NULL;
+}
+
 static lv_obj_t *icon_of(lv_obj_t *parent, const item_t *it, int32_t size)
 {
+    /* no catalogue to say what an app nobody lists looks like: when it is
+     * loaded, the home screen's own icon of it */
+    const aos_app_t *own = it->st.src < 0 ? registered(it->id) : NULL;
+    if (own) {
+        lv_obj_t *ic = aos_icon_create(parent, &own->desc, size);
+        aos_make_decorative(ic);
+        return ic;
+    }
     aos_app_desc_t d = {
-        .id = it->id, .name = it->name, .icon = it->glyph[0] ? it->glyph : NULL,
+        .id = it->id, .name = it->name, .icon = it->glyph[0] ? it->glyph : it->st.src < 0 ? LV_SYMBOL_FILE : NULL,
         .icon_vec = (aos_icon_id_t)(it->icon_vec > 0 && it->icon_vec < AOS_ICON_COUNT ? it->icon_vec : AOS_ICON_NONE),
         .color_a = it->color_a, .color_b = it->color_b,
     };
@@ -490,24 +535,49 @@ static void adopt_cb(lv_event_t *e)
     build();
 }
 
-static void chip(lv_obj_t *parent, const char *text, int filter)
+static void origin_cb(lv_event_t *e)
 {
-    bool on = S.filter == filter;
+    S.origin = (int)(intptr_t)lv_event_get_user_data(e);
+    build();
+}
+
+/* A chip of the first row (a filter) or, smaller, of the second (an origin). */
+static void chip_of(lv_obj_t *parent, const char *text, bool on, bool small, lv_event_cb_t cb, int arg)
+{
     lv_obj_t *c = box(parent);
-    lv_obj_set_size(c, LV_SIZE_CONTENT, 60);
-    lv_obj_set_style_radius(c, 30, 0);
+    lv_obj_set_size(c, LV_SIZE_CONTENT, small ? 48 : 60);
+    lv_obj_set_style_radius(c, small ? 24 : 30, 0);
     lv_obj_set_style_bg_color(c, on ? AOS_C_ACCENT : AOS_C_CARD, 0);
     lv_obj_set_style_bg_opa(c, LV_OPA_COVER, 0);
-    lv_obj_set_style_pad_hor(c, 26, 0);
+    lv_obj_set_style_pad_hor(c, small ? 20 : 26, 0);
     lv_obj_add_flag(c, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_t *l = aos_label(c, text, aos_font_small, on ? AOS_C_TEXT : AOS_C_DIM);
+    lv_obj_set_ext_click_area(c, small ? 8 : 0);
+    lv_obj_t *l = aos_label(c, text, small ? aos_font_caption : aos_font_small, on ? AOS_C_TEXT : AOS_C_DIM);
     lv_obj_center(l);
-    lv_obj_add_event_cb(c, chip_cb, LV_EVENT_CLICKED, (void *)(intptr_t)filter);
+    lv_obj_add_event_cb(c, cb, LV_EVENT_CLICKED, (void *)(intptr_t)arg);
     /* the one chosen stays in sight when the row is longer than the screen */
     if (on) {
         lv_obj_update_layout(parent);
         lv_obj_scroll_to_view(c, LV_ANIM_OFF);
     }
+}
+
+static void chip(lv_obj_t *parent, const char *text, int filter)
+{
+    chip_of(parent, text, S.filter == filter, false, chip_cb, filter);
+}
+
+static lv_obj_t *chip_row(lv_obj_t *page, int32_t h)
+{
+    lv_obj_t *chips = box(page);
+    lv_obj_set_size(chips, lv_pct(100), h);
+    lv_obj_set_flex_flow(chips, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(chips, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_column(chips, 12, 0);
+    lv_obj_add_flag(chips, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_scroll_dir(chips, LV_DIR_HOR);
+    lv_obj_set_scrollbar_mode(chips, LV_SCROLLBAR_MODE_OFF);
+    return chips;
 }
 
 static void row(lv_obj_t *parent, int i)
@@ -535,9 +605,10 @@ static void row(lv_obj_t *parent, int i)
     lv_obj_set_width(name, lv_pct(100));
     lv_label_set_long_mode(name, LV_LABEL_LONG_MODE_DOTS);
     lv_obj_set_height(name, lv_font_get_line_height(aos_font_body));
-    char whose[300];
+    char whose[300], lt[200];
     aos_store_source_t sr;
     if (it->st.src > 0 && aos_store_source(it->st.src, &sr)) snprintf(whose, sizeof whose, "%s · %s", sr.name, it->about);
+    else if (it->st.src < 0) snprintf(whose, sizeof whose, "%s", loose_text(it, lt));
     else snprintf(whose, sizeof whose, "%s", it->about);
     lv_obj_t *about = aos_label(t, it->st.state == AOS_STORE_SET_ASIDE ? _("Quedó apartada: hizo caer la placa") : whose,
                                 aos_font_caption, it->st.state == AOS_STORE_SET_ASIDE ? AOS_C_ORANGE : AOS_C_DIM);
@@ -545,21 +616,16 @@ static void row(lv_obj_t *parent, int i)
     lv_label_set_long_mode(about, LV_LABEL_LONG_MODE_DOTS);
     lv_obj_set_height(about, lv_font_get_line_height(aos_font_caption) * 2);
 
+    /* a .so copied by hand that nobody lists has no id to open it by */
     char buf[24];
-    pill(r, action_text(it, buf), it->st.state == AOS_STORE_UPDATE, action_cb, (void *)(intptr_t)i);
+    if (it->st.src >= 0 || it->id[0])
+        pill(r, action_text(it, buf), it->st.state == AOS_STORE_UPDATE, action_cb, (void *)(intptr_t)i);
 }
 
 static void build_list(lv_obj_t *page)
 {
     char buf[64];
-    lv_obj_t *chips = box(page);
-    lv_obj_set_size(chips, lv_pct(100), 76);
-    lv_obj_set_flex_flow(chips, LV_FLEX_FLOW_ROW);
-    lv_obj_set_flex_align(chips, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    lv_obj_set_style_pad_column(chips, 12, 0);
-    lv_obj_add_flag(chips, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_set_scroll_dir(chips, LV_DIR_HOR);
-    lv_obj_set_scrollbar_mode(chips, LV_SCROLLBAR_MODE_OFF);
+    lv_obj_t *chips = chip_row(page, 76);
     chip(chips, _("Todo"), F_ALL);
     int ups = count_updates();
     if (ups) {
@@ -571,6 +637,26 @@ static void build_list(lv_obj_t *page)
     /* a dot on it while the portal's proposal waits for an answer */
     snprintf(buf, sizeof buf, "%s%s", _("Fuentes"), aos_store_proposal(NULL, 0) ? "  \xE2\x80\xA2" : "");
     chip(chips, buf, F_SOURCES);
+
+    /* where the apps come from, once there is more than the official source
+     * to tell apart: another source, a package handed in, a .so copied by hand */
+    int nsrc = aos_store_sources(), loose = 0, hand = 0;
+    for (int i = 0; i < S.n; i++) {
+        loose += S.items[i].st.origin == AOS_STORE_LOOSE;
+        hand += S.items[i].st.state == AOS_STORE_BY_HAND;
+    }
+    if ((S.origin > 0 && S.origin > nsrc) || (S.origin == O_LOOSE && !loose) || (S.origin == O_HAND && !hand)) S.origin = O_ALL;
+    if (nsrc > 1 || loose || hand) {
+        lv_obj_t *from = chip_row(page, 56);
+        chip_of(from, _("Cualquier origen"), S.origin == O_ALL, true, origin_cb, O_ALL);
+        for (int i = 0; i < nsrc; i++) {
+            aos_store_source_t sr;
+            if (!aos_store_source(i, &sr)) continue;
+            chip_of(from, sr.name[0] ? sr.name : _("Sin catálogo todavía"), S.origin == 1 + i, true, origin_cb, 1 + i);
+        }
+        if (loose) chip_of(from, _("Paquetes sueltos"), S.origin == O_LOOSE, true, origin_cb, O_LOOSE);
+        if (hand) chip_of(from, _("Copiadas a mano"), S.origin == O_HAND, true, origin_cb, O_HAND);
+    }
 
     S.list = box(page);
     lv_obj_set_width(S.list, lv_pct(100));
@@ -599,7 +685,7 @@ static void build_list(lv_obj_t *page)
         return;
     }
     int by_hand = 0, any = 0;
-    for (int i = 0; i < S.n; i++) by_hand += S.items[i].st.state == AOS_STORE_BY_HAND;
+    for (int i = 0; i < S.n; i++) by_hand += S.items[i].st.state == AOS_STORE_BY_HAND && S.items[i].st.src >= 0;
     if (S.filter == F_INSTALLED && by_hand) {
         /* what was copied to the card before there was a store */
         lv_obj_t *card = box(S.list);
@@ -829,7 +915,12 @@ static void build_detail(lv_obj_t *page)
     lv_obj_t *name = aos_label(t, it->name, aos_font_title, AOS_C_TEXT);
     lv_obj_set_width(name, lv_pct(100));
     lv_label_set_long_mode(name, LV_LABEL_LONG_MODE_WRAP);
-    snprintf(buf, sizeof buf, "%s  ·  %s  ·  %s", cat_name(it->cat), it->ver, size_text(it->size, sz));
+    if (it->st.src >= 0) snprintf(buf, sizeof buf, "%s  ·  %s  ·  %s", cat_name(it->cat), it->ver, size_text(it->size, sz));
+    else {
+        /* a package handed in has no version to speak of: its receipt says "local" */
+        bool ver = it->ver[0] && strcmp(it->ver, "local");
+        snprintf(buf, sizeof buf, "%s%s%s", ver ? it->ver : "", ver ? "  ·  " : "", size_text(it->size, sz));
+    }
     lv_obj_t *meta = aos_label(t, buf, aos_font_caption, AOS_C_DIM);
     lv_obj_set_width(meta, lv_pct(100));
     lv_label_set_long_mode(meta, LV_LABEL_LONG_MODE_WRAP);
@@ -839,7 +930,7 @@ static void build_detail(lv_obj_t *page)
     lv_obj_set_style_pad_column(btns, 14, 0);
     lv_obj_set_style_pad_row(btns, 12, 0);
     char ab[24];
-    pill(btns, action_text(it, ab), true, action_cb, (void *)(intptr_t)S.sel);
+    if (it->st.src >= 0 || it->id[0]) pill(btns, action_text(it, ab), true, action_cb, (void *)(intptr_t)S.sel);
     if (it->st.state == AOS_STORE_INSTALLED || it->st.state == AOS_STORE_UPDATE || it->st.state == AOS_STORE_SET_ASIDE) {
         lv_obj_t *rm = pill(btns, S.sure ? _("¿Seguro? Tocá otra vez") : _("Quitar"), false, remove_cb, NULL);
         lv_obj_set_style_text_color(lv_obj_get_child(rm, 0), AOS_C_RED, 0);
@@ -859,7 +950,7 @@ static void build_detail(lv_obj_t *page)
     if (it->st.state == AOS_STORE_SET_ASIDE)
         note(body, AOS_SYM_ALERT_OUTLINE, AOS_C_ORANGE,
              _("Hizo caer la placa dos veces al cargarse y quedó apartada. Reinstalarla trae la versión del catálogo."));
-    else if (it->st.state == AOS_STORE_BY_HAND) {
+    else if (it->st.state == AOS_STORE_BY_HAND && it->st.src >= 0) {
         note(body, AOS_SYM_PACKAGE_VARIANT, AOS_C_DIM,
              _("Está en la tarjeta, copiada a mano: la Tienda no sabe qué versión es. Reinstalarla la deja al día."));
         pill(body, _("Reinstalar desde la Tienda"), false, reinstall_cb, NULL);
@@ -872,7 +963,8 @@ static void build_detail(lv_obj_t *page)
         note(body, AOS_SYM_ALERT_OUTLINE, AOS_C_ORANGE, buf);
     }
 
-    lv_obj_t *about = aos_label(body, it->about, aos_font_body, AOS_C_TEXT);
+    char lt[200];
+    lv_obj_t *about = aos_label(body, it->st.src < 0 ? loose_text(it, lt) : it->about, aos_font_body, AOS_C_TEXT);
     lv_obj_set_width(about, lv_pct(100));
     lv_label_set_long_mode(about, LV_LABEL_LONG_MODE_WRAP);
     lv_obj_set_style_text_line_space(about, 6, 0);
@@ -914,7 +1006,11 @@ static void build_detail(lv_obj_t *page)
         }
     }
 
-    snprintf(buf, sizeof buf, "%s  ·  %s  ·  %s", S.source, jstr(o, "license"), it->file);
+    /* whose it is: its source, or nobody's */
+    aos_store_source_t whose;
+    if (it->st.src >= 0 && aos_store_source(it->st.src, &whose))
+        snprintf(buf, sizeof buf, "%s  ·  %s  ·  %s", whose.name, jstr(o, "license"), it->file);
+    else snprintf(buf, sizeof buf, "%s.so", it->file);
     lv_obj_t *foot = aos_label(body, buf, aos_font_tiny, AOS_C_DIM);
     lv_obj_set_width(foot, lv_pct(100));
     lv_label_set_long_mode(foot, LV_LABEL_LONG_MODE_WRAP);
@@ -1241,8 +1337,9 @@ static void build(void)
     if (!S.root) return;
     int32_t scroll = S.list ? lv_obj_get_scroll_y(S.list) : 0;
     bool same_view = S.list != NULL;
-    static int last_sel = -2, last_filter = 99, last_view = -1;
-    if (last_sel != S.sel || last_filter != S.filter || last_view != S.view) same_view = false;
+    static int last_sel = -2, last_filter = 99, last_view = -1, last_origin = 99;
+    if (last_sel != S.sel || last_filter != S.filter || last_view != S.view || last_origin != S.origin) same_view = false;
+    last_origin = S.origin;
     last_view = S.view;
     last_sel = S.sel;
     last_filter = S.filter;
@@ -1379,6 +1476,12 @@ static void tick(aos_app_t *self, void *inst)
     bool changed = st.jobs_done != S.jobs_done || st.busy != S.busy || strcmp(st.file, S.job_file) ||
                    (strcmp(proposed, S.proposed) && S.view != V_ADD);
     if (S.view != V_ADD) snprintf(S.proposed, sizeof S.proposed, "%s", proposed);
+    if (st.jobs_done != S.jobs_done && st.last_ok && !strcmp(st.last_job, "sideload") && S.view == V_STORE) {
+        /* a package handed in went in: the list of those, where it now is */
+        S.sel = -1;
+        S.filter = F_ALL;
+        S.origin = O_LOOSE;
+    }
     if (st.jobs_done != S.jobs_done) {
         /* something ended: a new catalogue, or other states for the same one */
         char *now = aos_store_catalog(NULL);

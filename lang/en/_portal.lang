@@ -2346,3 +2346,10 @@ Las fuentes de apps se agregan sólo en la placa. Desde acá se puede proponer u
 Propuesta, esperando en la placa (Tienda, Fuentes): %s	Proposed, waiting at the board (Store, Sources): %s
 Propuesta: ahora aceptala en la placa (Tienda, Fuentes)	Proposed: now accept it at the board (Store, Sources)
 Proponer	Propose
+Copiada a mano a la tarjeta: la Tienda no la maneja.	Copied to the card by hand: the Store does not manage it.
+Instalada de %s, que ya no está entre las fuentes.	Installed from %s, which is no longer among the sources.
+Instalada desde un paquete (.p4app): no está en ningún catálogo.	Installed from a package (.p4app): it is in no catalogue.
+Cualquier origen	Any origin
+Paquetes sueltos	Loose packages
+Copiadas a mano	Copied by hand
+Paquete suelto	Loose package

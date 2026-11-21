@@ -2346,3 +2346,10 @@ Las fuentes de apps se agregan sólo en la placa. Desde acá se puede proponer u
 Propuesta, esperando en la placa (Tienda, Fuentes): %s	Vorgeschlagen, wartet am Board (Store, Quellen): %s
 Propuesta: ahora aceptala en la placa (Tienda, Fuentes)	Vorgeschlagen: jetzt am Board annehmen (Store, Quellen)
 Proponer	Vorschlagen
+Copiada a mano a la tarjeta: la Tienda no la maneja.	Von Hand auf die Karte kopiert: der Store verwaltet sie nicht.
+Instalada de %s, que ya no está entre las fuentes.	Installiert von %s, das nicht mehr unter den Quellen ist.
+Instalada desde un paquete (.p4app): no está en ningún catálogo.	Aus einem Paket (.p4app) installiert: in keinem Katalog.
+Cualquier origen	Jede Herkunft
+Paquetes sueltos	Einzelne Pakete
+Copiadas a mano	Von Hand kopiert
+Paquete suelto	Einzelnes Paket

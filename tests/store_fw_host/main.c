@@ -5,7 +5,8 @@
  *                      remove=golf adopt list
  *
  * A job prints "ok|FAILED <how it ended>"; "list" prints an app a line:
- * file state ver have fits.
+ * file state ver have fits, and after it "+" for an app of an added source,
+ * "~" for one with a receipt that no source lists, "!" for a .so nobody lists.
  */
 #include "aos_store.h"
 #include "aos_hal.h"
@@ -50,6 +51,12 @@ int main(int argc, char **argv)
                 printf("source %d %s apps=%d skipped=%d loaded=%d %s\n", k, sr.name[0] ? sr.name : "-", sr.apps, sr.skipped, sr.loaded, sr.url);
             continue;
         }
+        else if (!strcmp(a, "catalog")) {
+            char *text = aos_store_catalog(NULL);
+            printf("%s", text ? text : "");
+            free(text);
+            continue;
+        }
         else if (!strcmp(a, "probed")) {
             aos_store_probe_t pr;
             aos_store_probe_result(&pr);
@@ -73,8 +80,9 @@ int main(int argc, char **argv)
         else if (!strcmp(a, "list")) {
             aos_store_app_t app;
             for (int k = 0; aos_store_app(k, &app); k++)
-                printf("%s %s %s %s %s%s\n", app.file, states[app.state], app.ver, app.have[0] ? app.have : "-", app.fits ? "fits" : "no-fit",
-                       app.src ? "+" : "");
+                printf("%s %s %s %s %s%s\n", app.file, states[app.state], app.ver[0] ? app.ver : "-", app.have[0] ? app.have : "-",
+                       app.fits ? "fits" : "no-fit",
+                       app.src > 0 ? "+" : app.origin == AOS_STORE_LOOSE ? "~" : app.origin == AOS_STORE_HAND ? "!" : "");
             continue;
         }
         else if (!strcmp(a, "refresh")) queued = aos_store_refresh();

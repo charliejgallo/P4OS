@@ -10698,3 +10698,9 @@ No se pudo quitar la fuente.	The source could not be removed.
 No se pudo instalar el paquete.	The package could not be installed.
 No se pudo.	It failed.
 eso no es una dirección de fuente: usuario/repositorio, o https://...	that is not a source's address: user/repository, or https://...
+Copiada a mano a la tarjeta: la Tienda no la maneja.	Copied to the card by hand: the Store does not manage it.
+Instalada de %s, que ya no está entre las fuentes.	Installed from %s, which is no longer among the sources.
+Instalada desde un paquete (.p4app): no está en ningún catálogo.	Installed from a package (.p4app): it is in no catalogue.
+Cualquier origen	Any origin
+Paquetes sueltos	Loose packages
+Copiadas a mano	Copied by hand

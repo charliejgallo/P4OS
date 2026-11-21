@@ -40,6 +40,15 @@ typedef enum {
                              * installing it again is the way back */
 } aos_store_state_t;
 
+/* Where what is on the card came from, as far as the store can tell. */
+typedef enum {
+    AOS_STORE_LISTED = 0,   /* a source lists it: 'src' says which */
+    AOS_STORE_LOOSE,        /* it has a receipt and no source lists it: a package
+                             * handed in (.p4app), or an app of a source taken off */
+    AOS_STORE_HAND,         /* a .so on the card that nobody lists and the store
+                             * did not install: copied by hand */
+} aos_store_origin_t;
+
 typedef struct {
     char     file[32];      /* the package: its .so's name without ".so" */
     char     id[40];        /* the app's */
@@ -48,7 +57,8 @@ typedef struct {
     char     fw_min[16];
     aos_store_state_t state;
     bool     fits;          /* this firmware can run it (ABI and fw_min) */
-    int      src;           /* which source lists it: 0 is the official one */
+    int      src;           /* which source lists it: 0 is the official one, -1 when none does */
+    aos_store_origin_t origin;
     uint32_t line_off;      /* its line in aos_store_catalog()'s text */
     uint32_t line_len;
 } aos_store_app_t;
@@ -204,7 +214,11 @@ int aos_store_shot(const char *url, char *path, size_t path_len);
 
 /* A copy of the catalogue's text, NUL-terminated, to free(); NULL when there
  * is none yet. NDJSON: for each source in turn, its own line (the one with
- * "source") and then a line for each app offered from it. */
+ * "source") and then a line for each app offered from it. After them, a
+ * line made here for each app on the card that no source lists, so that the
+ * list of what is installed is whole: "local" says which kind it is - "pkg"
+ * for one with a receipt (and "from", its source's name, when that source
+ * was taken off), "hand" for a .so the store knows nothing else about. */
 char *aos_store_catalog(size_t *len);
 
 #ifdef __cplusplus

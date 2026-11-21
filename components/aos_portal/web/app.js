@@ -3094,7 +3094,7 @@ function pageRed() {
  * was downloaded, one app a line; every POST queues a job on the board and
  * this asks again until it is done. Sources are added on the board only. */
 function pageTienda() {
-  let gone = false, timer = 0, st = null, cat = [], head = null, filter = '', text = '', jobs = -1;
+  let gone = false, timer = 0, st = null, cat = [], head = null, filter = '', from = '', text = '', jobs = -1;
   const L = o => (o && (o[LANG] || (LANG === 'es' ? o.es : o.en) || o.es)) || '';
   const top = h('div', { class: 'card pad' }), list = h('div', {});
   const bar = h('div', { class: 'prog' }, h('div')), msg = h('div', { class: 'note' });
@@ -3137,36 +3137,42 @@ function pageTienda() {
       h('input', { type: 'checkbox', value: p.file }), ' ', L(p.name), ' · ', fmtBytes(p.size)));
     const chosen = () => picks.map(l => l.firstChild).filter(i => i.checked).map(i => i.value).join(',') || 'need';
     const verb = a.state === 'update' ? tr('Actualizar') : a.state === 'absent' ? tr('Instalar') : tr('Reinstalar');
+    // on the card and in no catalogue: a package handed in, or a .so copied by hand
+    const local = a.src < 0;
+    const about = !local ? L(e.about) : a.origin === 'hand' ? tr('Copiada a mano a la tarjeta: la Tienda no la maneja.')
+      : e.from ? tr('Instalada de %s, que ya no está entre las fuentes.', e.from) : tr('Instalada desde un paquete (.p4app): no está en ningún catálogo.');
     return h('div', { class: 'card pad', style: 'margin-bottom:10px' },
       h('div', { style: 'display:flex;gap:14px;align-items:flex-start' },
         h('img', { src: icon(e, 56), width: 56, height: 56, style: 'border-radius:13px;flex:none' }),
         h('div', { class: 'grow' },
-          h('div', {}, h('b', {}, L(e.name)), ' ', h('span', { class: 'pill' }, e.ver), ' ',
-            a.src ? h('span', { class: 'pill', style: 'color:var(--orange)' }, ((st.sources || [])[a.src] || {}).name || tr('de terceros')) : null, ' ',
-            a.state !== 'absent' ? h('span', { class: 'pill', style: a.state === 'update' || a.state === 'set_aside' ? 'color:var(--orange)' : '' }, tr(STATE[a.state])) : null),
-          h('div', { class: 'small muted', style: 'margin:4px 0' }, L(e.about)),
+          h('div', {}, h('b', {}, L(e.name)), ' ', e.ver && e.ver !== 'local' ? h('span', { class: 'pill' }, e.ver) : null, ' ',
+            a.src > 0 ? h('span', { class: 'pill', style: 'color:var(--orange)' }, ((st.sources || [])[a.src] || {}).name || tr('de terceros')) : null,
+            a.origin === 'package' ? h('span', { class: 'pill', style: 'color:var(--orange)' }, tr('Paquete suelto')) : null, ' ',
+            a.state !== 'absent' && a.origin !== 'package' ? h('span', { class: 'pill', style: a.state === 'update' || a.state === 'set_aside' ? 'color:var(--orange)' : '' }, tr(STATE[a.state])) : null),
+          h('div', { class: 'small muted', style: 'margin:4px 0' }, about),
           h('div', { class: 'small muted' }, fmtBytes(e.pkg.installed || e.pkg.size) + (need ? ' + ' + fmtBytes(need) + ' ' + tr('de packs') : '') +
             (a.fits ? '' : ' · ' + tr('necesita P4OS %s', e.fw_min))),
           h('div', { style: 'margin-top:6px;display:flex;gap:6px;flex-wrap:wrap' },
             (e.feat || []).filter(f => FEAT[f]).map(f => h('span', { class: 'pill' }, tr(FEAT[f]))),
             (e.langs || []).length > 1 ? h('span', { class: 'pill' }, e.langs.map(l => l.toUpperCase()).join(' · ')) : null),
           (e.shots || []).length ? h('div', { style: 'margin-top:8px;display:flex;gap:8px;overflow-x:auto' },
-            e.shots.map(sh => { const u = /^https?:/.test(sh.url) ? sh.url : head.base + sh.url;
+            e.shots.map(sh => { const u = /^https?:/.test(sh.url) ? sh.url : (e._base || '') + sh.url;
               return h('a', { href: u, target: '_blank', rel: 'noopener' }, h('img', { src: u, loading: 'lazy', height: 150,
                 width: Math.round(150 * sh.w / sh.h), style: 'border-radius:8px;display:block' })); })) : null,
           e.user_files ? h('div', { class: 'small', style: 'color:var(--orange);margin-top:4px' }, L(e.user_files)) : null,
           extras.length ? h('details', { style: 'margin-top:6px' }, h('summary', { class: 'small' }, tr('%s extras', extras.length)), picks) : null),
         h('div', { class: 'btns', style: 'flex-direction:column;align-items:stretch' },
-          h('button', { class: 'btn' + (a.state === 'update' || a.state === 'absent' ? ' pri' : ''), disabled: mine || !a.fits,
+          local ? null : h('button', { class: 'btn' + (a.state === 'update' || a.state === 'absent' ? ' pri' : ''), disabled: mine || !a.fits,
             onclick: () => act('install', { file: e.file, packs: chosen() }) }, mine ? '…' : verb),
           on || a.state === 'set_aside' ? h('button', { class: 'btn red', disabled: mine,
             onclick: () => { if (confirm(tr('¿Quitar %s de la placa? Lo que la app guardó queda en la tarjeta.', L(e.name)))) act('remove', { file: e.file }); } }, tr('Quitar')) : null,
-          a.state === 'installed' || a.state === 'by_hand' ? h('button', { class: 'btn', onclick: () => post('open?id=' + encodeURIComponent(e.id)).catch(x => toast(x.message, true)) }, tr('Abrir')) : null)));
+          (a.state === 'installed' || a.state === 'by_hand') && e.id ? h('button', { class: 'btn', onclick: () => post('open?id=' + encodeURIComponent(e.id)).catch(x => toast(x.message, true)) }, tr('Abrir')) : null)));
   }
   function draw() {
     if (gone || !st) return;
     const by = new Map(st.apps.map(a => [a.file, a]));
-    const ups = st.apps.filter(a => a.state === 'update').length, hand = st.apps.filter(a => a.state === 'by_hand').length;
+    const ups = st.apps.filter(a => a.state === 'update').length, hand = st.apps.filter(a => a.state === 'by_hand').length,
+          ours = st.apps.filter(a => a.state === 'by_hand' && a.src >= 0).length;
     const j = st.job;
     bar.style.display = st.busy ? '' : 'none';
     bar.firstChild.style.width = st.busy && j.total ? (j.got * 100 / j.total).toFixed(1) + '%' : '0%';
@@ -3193,8 +3199,8 @@ function pageTienda() {
       ups ? row(tr('Actualizaciones'), String(ups), 'warn') : null,
       h('div', { class: 'btns', style: 'margin-top:10px' },
         h('button', { class: 'btn', disabled: st.busy, onclick: () => act('refresh', {}) }, tr('Buscar de nuevo')),
-        hand ? h('button', { class: 'btn', disabled: st.busy, title: tr('Un recibo para las que son las del catálogo: no cambia ninguna app'),
-                             onclick: () => act('adopt', {}) }, tr('Que la Tienda maneje las %s copiadas a mano', hand)) : null,
+        ours ? h('button', { class: 'btn', disabled: st.busy, title: tr('Un recibo para las que son las del catálogo: no cambia ninguna app'),
+                             onclick: () => act('adopt', {}) }, tr('Que la Tienda maneje las %s copiadas a mano', ours)) : null,
         h('button', { class: 'btn', disabled: st.busy, title: tr('Un paquete que no está en ningún catálogo'), onclick: () => side.click() }, tr('Instalar un .p4app…')), side,
         st.busy ? h('button', { class: 'btn red', onclick: () => act('cancel', {}) }, tr('Cancelar')) : null),
       bar, msg,
@@ -3203,12 +3209,20 @@ function pageTienda() {
       h('div', { class: 'btns', style: 'margin-top:6px' }, ask,
         h('button', { class: 'btn', onclick: async () => { if (!ask.value.trim()) return; try { st = await post('store/propose', { url: ask.value.trim() }); ask.value = ''; draw(); toast(tr('Propuesta: ahora aceptala en la placa (Tienda, Fuentes)')); } catch (x) { toast(x.message, true); } } }, tr('Proponer'))));
     const cats = (head && head.cats) || [];
+    // by where it comes from, once there is more than the official source to tell apart
+    const loose = st.apps.some(a => a.origin === 'package'), nsrc = (st.sources || []).length;
+    if ((from === 'p' && !loose) || (from === 'h' && !hand) || (/^\d+$/.test(from) && +from >= nsrc)) from = '';
+    const org = nsrc > 1 || loose || hand ? h('select', { onchange: e => { from = e.target.value; draw(); } },
+      h('option', { value: '' }, tr('Cualquier origen')),
+      (st.sources || []).map((sr, i) => h('option', { value: String(i), selected: from === String(i) }, sr.name || sr.url)),
+      loose ? h('option', { value: 'p', selected: from === 'p' }, tr('Paquetes sueltos')) : null,
+      hand ? h('option', { value: 'h', selected: from === 'h' }, tr('Copiadas a mano'))  : null) : null;
     const sel = h('select', { onchange: e => { filter = e.target.value; draw(); } },
       h('option', { value: '' }, tr('Todo')), h('option', { value: '+', selected: filter === '+' }, tr('Instaladas')),
       ups ? h('option', { value: '!', selected: filter === '!' }, tr('Actualizaciones')) : null,
       cats.map(c => h('option', { value: c.id, selected: filter === c.id }, L(c.name))));
     const q = h('input', { type: 'search', placeholder: tr('Buscar'), value: text, oninput: e => { text = e.target.value.toLowerCase(); drawList(by); } });
-    put(list, h('div', { class: 'btns', style: 'margin:14px 0 10px' }, sel, q), h('div', { id: 'tdl' }));
+    put(list, h('div', { class: 'btns', style: 'margin:14px 0 10px' }, sel, org, q), h('div', { id: 'tdl' }));
     drawList(by);
   }
   function drawList(by) {
@@ -3216,6 +3230,9 @@ function pageTienda() {
     if (!box) return;
     const rows = cat.filter(e => by.has(e.file)).filter(e => {
       const a = by.get(e.file);
+      if (from === 'p' && a.origin !== 'package') return false;
+      if (from === 'h' && a.state !== 'by_hand') return false;
+      if (/^\d+$/.test(from) && a.src !== +from) return false;
       if (filter === '+' && a.state === 'absent') return false;
       if (filter === '!' && a.state !== 'update') return false;
       if (filter && filter !== '+' && filter !== '!' && e.cat !== filter) return false;
@@ -3230,8 +3247,18 @@ function pageTienda() {
       try {
         const r = await fetch('/api/store/catalog');
         const lines = r.ok ? (await r.text()).split('\n').filter(l => l.trim()).map(l => JSON.parse(l)) : [];
-        head = lines[0] || null;
-        cat = lines.slice(1);
+        // a line with "source" opens a source: the apps after it are its own, and
+        // their pictures are under its base; the first one is the official source
+        head = null;
+        cat = [];
+        let base = '';
+        for (const l of lines) {
+          if (l.source) {
+            base = l.base || '';
+            if (!head) head = { ...l, cats: [...(l.cats || [])] };
+            else for (const c of l.cats || []) if (!head.cats.some(x => x.id === c.id)) head.cats.push(c);
+          } else if (l.file) cat.push({ ...l, _base: l.local ? '' : base });
+        }
       } catch { cat = []; }
       draw();
     } else if (st.busy) {

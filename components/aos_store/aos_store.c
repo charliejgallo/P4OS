@@ -473,6 +473,86 @@ static int catalog_check(const char *rel, char *source, err_t *e)
     return bad ? -1 : n;
 }
 
+/* What is on the card and no source lists, after the apps of the sources:
+ * first what has a receipt (a package handed in, or an app whose source was
+ * taken off), then every other .so of apps/. Each gets a line of its own in
+ * the text, made here, with the little that is known of it. Returns the new
+ * count. */
+#define LOOSE_MAX   64
+#define LOOSE_ROOM  (LOOSE_MAX * 512)
+
+static int loose_apps(app_t *apps, int n, char *all, size_t *w, size_t cap)
+{
+    char d[FULL_MAX], rel[PATH_MAX_];
+    int added = 0;
+    for (int pass = 0; pass < 2; pass++) {
+        const char *tail = pass ? ".so" : ".json";
+        DIR *dir = opendir(full(d, pass ? "apps" : DIR_STORE));
+        struct dirent *de;
+        while (dir && (de = readdir(dir)) != NULL && n < APPS_MAX && added < LOOSE_MAX) {
+            if (!ends(de->d_name, tail)) continue;
+            char file[32];
+            size_t len = strlen(de->d_name) - strlen(tail);
+            if (len >= sizeof file) continue;
+            memcpy(file, de->d_name, len);
+            file[len] = 0;
+            if (!file_name_ok(file)) continue;
+            bool known = false;
+            for (int k = 0; k < n && !known; k++) known = !strcmp(apps[k].pub.file, file);
+            if (known) continue;
+            cJSON *r = pass ? NULL : receipt_read(file);
+            if (!pass && !r) continue;
+            const cJSON *from = cJSON_GetObjectItem(r, "source"), *f;
+            uint32_t size = 0;
+            cJSON *o = cJSON_CreateObject(), *pkg = cJSON_CreateObject(), *name = NULL;
+            cJSON_AddStringToObject(o, "file", file);
+            if (r) {
+                cJSON_AddStringToObject(o, "id", jstr(r, "id"));
+                name = cJSON_Duplicate(cJSON_GetObjectItem(r, "name"), true);
+                cJSON_AddStringToObject(o, "ver", jstr(r, "ver"));
+                if (jstr(from, "catalog")[0]) cJSON_AddStringToObject(o, "from", jstr(from, "name"));
+                cJSON_ArrayForEach(f, cJSON_GetObjectItem(r, "files")) size += jnum(f, "size");
+            } else {
+                snprintf(rel, sizeof rel, "apps/%s.so", file);
+                exists(rel, &size);
+            }
+            if (!name) {
+                name = cJSON_CreateObject();
+                cJSON_AddStringToObject(name, "es", file);
+            }
+            cJSON_AddItemToObject(o, "name", name);
+            cJSON_AddStringToObject(o, "local", r ? "pkg" : "hand");
+            cJSON_AddNumberToObject(pkg, "installed", size);
+            cJSON_AddItemToObject(o, "pkg", pkg);
+            char *line = cJSON_PrintUnformatted(o);
+            size_t ll = line ? strlen(line) : 0;
+            if (ll && *w + ll + 2 < cap) {
+                app_t *a = &apps[n++];
+                memset(a, 0, sizeof *a);
+                snprintf(a->pub.file, sizeof a->pub.file, "%s", file);
+                snprintf(a->pub.id, sizeof a->pub.id, "%s", jstr(r, "id"));
+                snprintf(a->pub.ver, sizeof a->pub.ver, "%s", jstr(r, "ver"));
+                /* its own receipt's package: "installed", never "update" */
+                snprintf(a->pkg_sha, sizeof a->pkg_sha, "%s", jstr(r, "pkg_sha256"));
+                a->pub.fits = true;
+                a->pub.src = -1;
+                a->pub.origin = r ? AOS_STORE_LOOSE : AOS_STORE_HAND;
+                a->pub.line_off = (uint32_t)*w;
+                a->pub.line_len = (uint32_t)ll;
+                memcpy(all + *w, line, ll);
+                *w += ll;
+                all[(*w)++] = '\n';
+                added++;
+            }
+            free(line);
+            cJSON_Delete(o);
+            cJSON_Delete(r);
+        }
+        if (dir) closedir(dir);
+    }
+    return n;
+}
+
 /* Reads every source's catalogue from the card into one text: each source's
  * own first line, then the apps it lists that no source before it has. An
  * app's file and id are its own across sources - what the official source
@@ -494,7 +574,8 @@ static bool catalog_load(err_t *e)
         total += lens[i] + 2;
     }
     app_t *apps = BIG_ALLOC(sizeof(app_t) * APPS_MAX);
-    char *all = BIG_ALLOC(total + 1);
+    size_t cap = total + LOOSE_ROOM + 1;
+    char *all = BIG_ALLOC(cap);
     src_t found[SRC_MAX];
     memset(found, 0, sizeof found);
     int n = 0, loaded = 0;
@@ -550,6 +631,7 @@ static bool catalog_load(err_t *e)
         }
     }
     for (int i = 0; i < nsrc; i++) free(texts[i]);
+    if (apps && all && loaded) n = loose_apps(apps, n, all, &w, cap);
     if (!apps || !all || !loaded) {
         free(apps);
         free(all);
@@ -570,7 +652,8 @@ static bool catalog_load(err_t *e)
     }
     snprintf(s_st.release, sizeof s_st.release, "%s", s_src[0].release);
     snprintf(s_st.source, sizeof s_st.source, "%s", s_src[0].name);
-    s_st.apps = (uint32_t)n;
+    s_st.apps = 0;
+    for (int i = 0; i < n; i++) s_st.apps += apps[i].pub.src >= 0;
     s_shot_nbad = 0;
     states();
     unlock();
@@ -1077,6 +1160,11 @@ static bool install(const char *file, const char *packs_arg, bool adopt, err_t *
 {
     app_t app;
     cJSON *entry = entry_of(file, &app);
+    if (entry && app.pub.src < 0) {
+        /* on the card, and listed by nobody: there is nowhere to bring it from */
+        cJSON_Delete(entry);
+        entry = NULL;
+    }
     if (!entry) return fail(e, AOS_STORE_E_NOT_LISTED, "%.40s is not in the catalogue", file);
     return install_core(entry, app, NULL, packs_arg, adopt, e);
 }
@@ -1115,7 +1203,7 @@ static bool sideload(const char *rel, err_t *e)
     app.pub.src = -1;
     lock();
     for (int i = 0; i < s_n; i++)
-        if (!strcmp(s_apps[i].pub.file, app.pub.file) || !strcmp(s_apps[i].pub.id, app.pub.id))
+        if (s_apps[i].pub.src >= 0 && (!strcmp(s_apps[i].pub.file, app.pub.file) || !strcmp(s_apps[i].pub.id, app.pub.id)))
             snprintf(owner, sizeof owner, "%s", s_src[s_apps[i].pub.src].name);
     unlock();
     if (owner[0]) { fail(e, AOS_STORE_E_IN_STORE, "%s is in the Tienda (%s): install it from there", app.pub.file, owner); goto out; }
@@ -1175,7 +1263,7 @@ static bool adopt_all(err_t *e)
         if (more) a = s_apps[i];
         unlock();
         if (!more || s_cancel) break;
-        if (a.pub.state != AOS_STORE_BY_HAND) continue;
+        if (a.pub.state != AOS_STORE_BY_HAND || a.pub.src < 0) continue;
         char rel[PATH_MAX_], sha[65];
         snprintf(rel, sizeof rel, "apps/%s.so", a.pub.file);
         if (!file_sha(rel, sha) || strcmp(sha, a.so_sha)) { left++; continue; }
@@ -1395,6 +1483,11 @@ static void work(void *arg)
         else if (j.kind == J_REMOVE) ok = uninstall(j.file, &e);
         else if (j.kind == J_ADOPT) ok = adopt_all(&e);
 
+        /* what is on the card changed: the apps no source lists are read again */
+        if (j.kind == J_INSTALL || j.kind == J_REMOVE || j.kind == J_SIDELOAD || j.kind == J_ADOPT) {
+            err_t again = { "", 0 };
+            catalog_load(&again);
+        }
         lock();
         states();
         s_st.jobs_done++;

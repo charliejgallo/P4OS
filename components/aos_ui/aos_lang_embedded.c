@@ -3401,6 +3401,12 @@ static const char blob_en__sistema_lang[] =
     "No se pudo instalar el paquete.\tThe package could not be installed.\n"
     "No se pudo.\tIt failed.\n"
     "eso no es una dirección de fuente: usuario/repositorio, o https://...\tthat is not a source's address: user/repository, or https://...\n"
+    "Copiada a mano a la tarjeta: la Tienda no la maneja.\tCopied to the card by hand: the Store does not manage it.\n"
+    "Instalada de %s, que ya no está entre las fuentes.\tInstalled from %s, which is no longer among the sources.\n"
+    "Instalada desde un paquete (.p4app): no está en ningún catálogo.\tInstalled from a package (.p4app): it is in no catalogue.\n"
+    "Cualquier origen\tAny origin\n"
+    "Paquetes sueltos\tLoose packages\n"
+    "Copiadas a mano\tCopied by hand\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -6794,6 +6800,12 @@ static const char blob_de__sistema_lang[] =
     "No se pudo instalar el paquete.\tDas Paket konnte nicht installiert werden.\n"
     "No se pudo.\tFehlgeschlagen.\n"
     "eso no es una dirección de fuente: usuario/repositorio, o https://...\tdas ist keine Quellenadresse: benutzer/repository oder https://...\n"
+    "Copiada a mano a la tarjeta: la Tienda no la maneja.\tVon Hand auf die Karte kopiert: der Store verwaltet sie nicht.\n"
+    "Instalada de %s, que ya no está entre las fuentes.\tInstalliert von %s, das nicht mehr unter den Quellen ist.\n"
+    "Instalada desde un paquete (.p4app): no está en ningún catálogo.\tAus einem Paket (.p4app) installiert: in keinem Katalog.\n"
+    "Cualquier origen\tJede Herkunft\n"
+    "Paquetes sueltos\tEinzelne Pakete\n"
+    "Copiadas a mano\tVon Hand kopiert\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -6801,7 +6813,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3386, 0, files_en, 1 },
-    { "de", "Deutsch", 3386, 0, files_de, 1 },
+    { "en", "English", 3392, 0, files_en, 1 },
+    { "de", "Deutsch", 3392, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

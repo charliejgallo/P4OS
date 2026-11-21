@@ -23,7 +23,8 @@ What it makes:
                                          open from Files
 
 The catalogue lists three apps. Two are its own (Contador de prueba,
-Colores de prueba) and install beside the official ones. The third is
+Colores de prueba) and install beside the official ones; their pictures are
+the template's, which is what they are. The third is
 called dados.so, like the official Dados: the board must leave it out and
 say that the source has one app it does not offer. The loose package is a
 fourth app, App suelta.
@@ -59,19 +60,19 @@ SOURCE = {
 # what it says on its screen, where it ends up
 SAMPLES = (
     dict(dir="prueba_contador", file="prueba_contador", id="prueba.contador", name="Contador de prueba",
-         a=0x34C759, b=0x0B6B2B, title="Vengo de otra fuente", listed=True, shot="app-hello.png",
+         a=0x34C759, b=0x0B6B2B, title="Vengo de otra fuente", listed=True, shots=["app-hello.png", "land-hello.png", "web-hello.png"],
          about=("Una app de muestra de una fuente de terceros: cuenta los toques.",
                 "A sample app from a third-party source: it counts taps.")),
     dict(dir="prueba_colores", file="prueba_colores", id="prueba.colores", name="Colores de prueba",
-         a=0xFF9F0A, b=0xB23A00, title="Otra app de la misma fuente", listed=True, shot=None,
+         a=0xFF9F0A, b=0xB23A00, title="Otra app de la misma fuente", listed=True, shots=["land-hello.png", "app-hello.png"],
          about=("La segunda app de muestra: lo mismo, con otros colores.",
                 "The second sample app: the same, in other colours.")),
     dict(dir="prueba_dados", file="dados", id="prueba.dados", name="Dados de otro",
-         a=0xFF375F, b=0x8A0F2A, title="Si ves esto, algo anda mal", listed=True, shot=None,
+         a=0xFF375F, b=0x8A0F2A, title="Si ves esto, algo anda mal", listed=True, shots=[],
          about=("Se llama como los Dados oficiales: la placa no la tiene que ofrecer.",
                 "It is named like the official Dice: the board must not offer it.")),
     dict(dir="prueba_suelta", file="suelta", id="prueba.suelta", name="App suelta",
-         a=0xBF5AF2, b=0x5B1E87, title="Me instalaron de un archivo", listed=False, shot=None,
+         a=0xBF5AF2, b=0x5B1E87, title="Me instalaron de un archivo", listed=False, shots=[],
          about=("Un paquete suelto, que no está en ningún catálogo.",
                 "A loose package, in no catalogue.")),
 )
@@ -208,8 +209,8 @@ def lay_out(s):
     for f in ("sdkconfig.defaults", "dependencies.lock"):
         shutil.copy(os.path.join(tpl, f), d)
     card = {"cat": "utiles", "about": {"es": s["about"][0], "en": s["about"][1]}}
-    if s["shot"]:
-        card["shots"] = [s["shot"]]
+    if s["shots"]:
+        card["shots"] = s["shots"]
     write(os.path.join(d, "store.json"), json.dumps(card, ensure_ascii=False, indent=1) + "\n")
     return d
 

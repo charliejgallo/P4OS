@@ -10698,3 +10698,9 @@ No se pudo quitar la fuente.	Die Quelle konnte nicht entfernt werden.
 No se pudo instalar el paquete.	Das Paket konnte nicht installiert werden.
 No se pudo.	Fehlgeschlagen.
 eso no es una dirección de fuente: usuario/repositorio, o https://...	das ist keine Quellenadresse: benutzer/repository oder https://...
+Copiada a mano a la tarjeta: la Tienda no la maneja.	Von Hand auf die Karte kopiert: der Store verwaltet sie nicht.
+Instalada de %s, que ya no está entre las fuentes.	Installiert von %s, das nicht mehr unter den Quellen ist.
+Instalada desde un paquete (.p4app): no está en ningún catálogo.	Aus einem Paket (.p4app) installiert: in keinem Katalog.
+Cualquier origen	Jede Herkunft
+Paquetes sueltos	Einzelne Pakete
+Copiadas a mano	Von Hand kopiert

@@ -632,6 +632,47 @@ fuente se mira y se agrega, queda con 2 apps y 1 salteada, instalar
 `dados` trae el oficial, y el paquete suelto se instala. **En la placa
 falta que el usuario la agregue.**
 
+**El usuario la recorrió en la placa (2026-11-21)** con la fuente de
+prueba: proponerla desde el portal, mirarla, el aviso, agregarla, la app
+de terceros con su imagen, y el paquete suelto desde Archivos. Lo que
+encontró, y lo que cambió por eso:
+
+- **El paquete suelto se instalaba y no aparecía en la Tienda.** La lista
+  salía sólo de los catálogos. Ahora el servicio agrega, después de las
+  apps de las fuentes, **lo que está en la tarjeta y ninguna fuente
+  ofrece**: primero lo que tiene recibo (un `.p4app` entregado, o una app
+  de una fuente que se quitó dejando sus apps) y después cada `.so` de
+  `apps/` del que no sabe nada. Cada una lleva una línea propia en el
+  texto del catálogo (`"local": "pkg"` o `"hand"`, y `"from"` con la
+  fuente que ya no está), `src` -1 y un `origin`
+  (`AOS_STORE_LISTED/LOOSE/HAND`). Las sueltas se quitan como cualquier
+  otra; ninguna de las dos se puede "instalar" (no hay de dónde), ni
+  adoptar. Después de instalar, quitar, adoptar o tomar un paquete el
+  servicio vuelve a leer esa lista.
+- **Filtro por origen** (pedido): una segunda fila de chips, más chica,
+  que aparece cuando hay algo que distinguir (otra fuente, un paquete
+  suelto, algo copiado a mano): Cualquier origen, cada fuente por su
+  nombre, Paquetes sueltos, Copiadas a mano. Se combina con el filtro de
+  arriba. En el portal es un segundo desplegable. Al terminar de tomar un
+  paquete, la Tienda queda mostrando los paquetes sueltos.
+- En la página de una app sin fuente: el ícono es el del inicio si la app
+  está cargada, su texto dice de dónde salió, y el pie dice el archivo.
+  El pie de una app de terceros decía "P4OS": ahora dice su fuente.
+- **En el portal no se veía la imagen de una app de terceros:** la página
+  armaba todas las direcciones con la base de la primera fuente. Ahora
+  cada app usa la de la suya, y las categorías de todas las fuentes se
+  juntan.
+- `tests/store_fw_host`: 52 casos (lo suelto y lo copiado a mano listados
+  como lo que son, sus líneas en el catálogo, que no se instalan desde una
+  fuente, quitar). Visto en el simulador con las dos fuentes de prueba: la
+  fila de orígenes, cada filtro, la página de la app suelta; y en el
+  navegador, la miniatura de terceros cargada y el desplegable. Firmware
+  `rev1_3`: 7 051 520 bytes.
+- **En la placa (2026-11-21):** por OTA, confirmado. Su lista pasó de 60 a
+  63: la app suelta como paquete instalado, y `pato` y `blittest` (las
+  dos que no se publican) como copiadas a mano. RAM interna libre a los
+  70 s: 209 619 bytes, sin cambio.
+
 **Lo que falta de esta fase:**
 
 - **Que el usuario la recorra en la placa:** el teclado, el aviso, y

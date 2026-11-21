@@ -328,9 +328,29 @@ check("a package handed in: installed, the file left where it was", jobs[0][0] a
 check("...but not an app the store offers", not jobs[1][0] and "is in the Tienda (P4OS)" in jobs[1][1]
       and not jobs[2][0] and "is in the Tienda (Otra Gente)" in jobs[2][1] and "FAILED refused: sideload" in o, o)
 
+# what is on the card and no source lists is in the list too: by its receipt, or as a .so and no more
+shutil.copy("c/apps/suelto.so", "c/apps/a_mano.so")
+jobs, apps, o = fw("c", "list", "install=suelto", "install=a_mano", "adopt", "list")
+check("a package handed in and a .so copied by hand: listed, as what they are", apps["suelto"] == ["installed", "local", "local", "fits~"]
+      and apps["a_mano"] == ["by_hand", "-", "-", "fits!"] and apps["dados"][3] == "fits", o)
+check("...and neither can be brought from a source", not jobs[0][0] and jobs[0][1].endswith("kind=14") and not jobs[1][0]
+      and not os.path.exists("c/apps/.store/a_mano.json"), o)
+cat_text = subprocess.run(["./t", "dev=1", "url=" + CAT, "catalog"], capture_output=True, text=True,
+                          env=dict(os.environ, P4_CARD="c", P4_PREFS="c.prefs")).stdout
+local = {json.loads(l)["file"]: json.loads(l) for l in cat_text.splitlines() if l.startswith("{") and "\"local\"" in l}
+check("their lines in the catalogue's text", local.get("suelto", {}).get("local") == "pkg" and local["suelto"]["id"] == "x.suelto"
+      and local["suelto"]["name"]["es"] == "Suelto" and local.get("a_mano", {}).get("local") == "hand"
+      and local["a_mano"]["pkg"]["installed"] == os.path.getsize("c/apps/a_mano.so"), cat_text[-600:])
+jobs, apps, o = fw("c", "remove=suelto", "remove=a_mano", "list")
+check("the package handed in is removed like any other; the .so by hand is not the store's", jobs[0][0] and "suelto" not in apps
+      and not os.path.exists("c/apps/suelto.so") and not jobs[1][0] and apps["a_mano"][0] == "by_hand", o)
+os.remove("c/apps/a_mano.so")
+fw("c", "sideload=in.p4app")
+
 # the source taken off: without its apps, then with them
 jobs, apps, o = fw("c", "unsource=1:0", "sources", "list")
-check("a source taken off, its apps kept", jobs[0][0] and len(sources(o)) == 1 and "tercero" not in apps
+check("a source taken off, its apps kept: listed as nobody's now", jobs[0][0] and len(sources(o)) == 1
+      and apps["tercero"][0] == "installed" and apps["tercero"][3] == "fits~"
       and os.path.exists("c/apps/tercero.so") and os.path.exists("c/apps/.store/tercero.json"), o)
 jobs, apps, o = fw("c", "sideload=otro.p4app")
 check("a package over what a source installed: refused", not jobs[0][0] and "remove it first" in jobs[0][1], o)
