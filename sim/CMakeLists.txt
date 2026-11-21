@@ -202,6 +202,7 @@ add_executable(p4os_sim
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/aos_ssh_shell.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/aos_ssh_cmds.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/aos_ssh_sftp.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/aos_sshc.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/monocypher/monocypher.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/monocypher/monocypher-ed25519.c
     main.c
