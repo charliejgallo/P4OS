@@ -12,9 +12,8 @@ chequeo de símbolos, instalar y quitar en caliente y la bajada a la
 tarjeta andan, también contra GitHub de verdad por TLS y con un reinicio a
 mitad de bajada; falta un corte del Wi-Fi. **La fase 1 está hecha**
 (catálogo, paquetes y el cliente de referencia; su CI corriendo con el tag
-`v0.30.0-tienda.1`). **La fase 2 está escrita y probada, en la Mac y en la
-placa**; de ella falta ver la cuarentena actuar con un `.so` roto de
-verdad. Se trabaja en la rama `tienda` (worktree
+`v0.30.0-tienda.1`). **La fase 2 está hecha y probada, en la Mac y en la
+placa**, cuarentena incluida. Sigue la fase 3: la app Tienda. Se trabaja en la rama `tienda` (worktree
 `.claude/worktrees/tienda`, como se hizo con `ethernet`) y se mergea a
 `main` cuando esté probada en la placa. Este documento es el plan; lo que
 se vaya midiendo se anota acá, como en [ETHERNET.md](ETHERNET.md).
@@ -463,7 +462,7 @@ trae su `store.json` (categoría y una o dos frases en es/en; los packs, lo
 que necesita y lo que pone el usuario, si hay); `tools/gen_store.py check`
 dice si está bien.
 
-## Fase 2: el servicio (escrito y probado, 2026-11-21)
+## Fase 2: el servicio (hecha, 2026-11-21)
 
 **Lo escrito:**
 
@@ -542,12 +541,20 @@ por OTA, contra el GitHub falso en la Mac:
   release publicada no tiene catálogo todavía), y el recibo y el catálogo
   de prueba borrados de la tarjeta.
 
+**La cuarentena en la placa (2026-11-21, con el sí del usuario):** una
+copia de `hello_app.so` con la primera instrucción de `aos_app_abi`
+ilegal, subida como `zz_crash.so` (el chequeo de símbolos la da por
+buena: no ejecuta nada) y cargada en caliente. La placa se cayó ahí; en
+el arranque siguiente, "strike 1 of 2", el escaneo la abrió y se cayó
+otra vez; en el tercero, "strike 2 of 2" y "set aside as
+zz_crash.so.off", antes del escaneo. Volvió a contestar a los 17 s de la
+primera caída, con sus 95 apps y el firmware confirmado. El criterio de
+la fase 2 está cumplido. No se vio el aviso en pantalla (dura ocho
+segundos, a los doce del arranque): falta mirarlo. El archivo de prueba
+se borró y el volcado de la caída quedó marcado como leído.
+
 **Lo que falta de esta fase:**
 
-- **La cuarentena en la placa.** La lógica está escrita y el estado
-  `set_aside` probado en la Mac, pero el camino de verdad (un `.so` que
-  tira la placa al cargarse, dos veces) son dos pánicos a propósito:
-  espera el sí del usuario.
 - Una app con pack grande bajado por el servicio en la placa (la bajada
   sola ya se midió en la fase 0).
 - Adoptar todo lo que hay en la tarjeta: cambia 58 recibos y reescribe
