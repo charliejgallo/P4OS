@@ -448,12 +448,29 @@ los del catálogo) y reinstaló `hello_app` con el cambio en caliente,
 **La Tienda sale como 0.30.0** (decisión del usuario). Las pruebas de la
 rama llevan tags `v0.30.0-tienda.N`; `v0.30.0` queda para el merge.
 
+**El CI corrió (2026-11-21, tag `v0.30.0-tienda.1`, 1 h 50):** los cinco
+jobs pasaron y quedó un borrador de release con 97 archivos: los 58
+`.p4app` (17,0 MB) y `p4os-store.ndjson` (52,8 KB) entre ellos. Bajado y
+revisado: 58 apps, los 23 packs apuntando a las releases donde están (12 a
+la v0.28.0, 11 a la v0.29.0), y los paquetes con el tamaño y el sha-256 que
+dice el catálogo, sin comprimir. Ese tag es anterior a las imágenes: el
+catálogo del borrador no las trae. Para las próximas, el paso instala
+Pillow; si no puede, el catálogo sale sin imágenes y avisa.
+
+**Un dato que cambia lo de adoptar:** de los 58 `.so`, sólo 5 son byte a
+byte iguales a los compilados en la Mac. Las compilaciones son repetibles
+dentro del CI (medido entre releases), no entre el CI y una máquina de
+desarrollo. O sea: "adoptar lo que coincide" va a reconocer lo que alguien
+instaló desde una release, y no lo que se copió desde una compilación
+propia; eso queda como "copiada a mano" hasta reinstalarlo desde la
+Tienda. En la placa del usuario, casi todo es de compilaciones propias.
+
 **Lo que falta de esta fase:**
 
-- **Ver terminar el CI.** El tag `v0.30.0-tienda.1` (2026-11-21) lanzó la
-  corrida: el job `packs`, con el chequeo de los manifiestos, pasó; el de
-  las apps, que arma paquetes y catálogo, seguía compilando al escribir
-  esto. Deja un borrador de release: publicado como pre-release no pasa a
+- **Publicar el borrador como pre-release**, que lo decide el usuario: con
+  eso la placa puede leer un catálogo de verdad desde GitHub (en modo
+  desarrollo, apuntándola a
+  `.../releases/download/v0.30.0-tienda.1/p4os-store.ndjson`), sin pasar a
   ser "latest".
 - **Leer las descripciones.** Las de los `store.json` son un borrador
   escrito desde los README; las de las apps sin README, sin verificar.

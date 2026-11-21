@@ -140,6 +140,10 @@ jobs:
             case "$GITHUB_REF" in refs/tags/v*) ;; *) rel="$(git describe --tags --abbrev=0)-dev" ;; esac
             curl -fsSL -o prev.ndjson \
                 "https://github.com/$GITHUB_REPOSITORY/releases/latest/download/p4os-store.ndjson" || rm -f prev.ndjson
+            # the apps' pictures are made at the store's size with Pillow;
+            # without it the catalogue still goes out, with no pictures
+            python3 -m pip install --quiet pillow 2>/dev/null || python3 -m pip install --quiet --break-system-packages pillow 2>/dev/null \
+                || echo "::warning::Pillow could not be installed: the catalogue goes out without pictures"
             python3 tools/gen_store.py build --release "$rel" --out out --repo "$GITHUB_REPOSITORY" \
                 --previous prev.ndjson --missing-apps skip --missing-packs skip
           fi
