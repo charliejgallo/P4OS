@@ -80,20 +80,26 @@ static bool key_of_this_board(const char *k)
 
 /* Whether a preference looks like a credential, by its name: a plain backup
  * leaves these out. A best effort: an app can keep a secret under a name
- * this does not see, which is why the screens say "what looks like". */
+ * this does not see, which is why the screens say "what looks like". An app
+ * that wants to be sure names its secret with one of these words, or starts
+ * it with "sec_". The first plain backup made on the board (2026-11-21)
+ * carried the SSH client's private key, "sshc_seed": a name with none of
+ * them, found by looking at what the file had. */
 static bool key_is_secret(const char *k)
 {
-    static const char *const WORDS[] = { "pass", "pwd", "psk", "token", "secret", "apikey", "api_key", "cred", "auth" };
+    static const char *const WORDS[] = { "pass", "pwd", "psk", "token", "secret", "apikey", "api_key", "cred", "auth", "priv" };
     static const char *const WHOLE[] = {
         "lock_pin",                         /* the lock screen's code */
         "claude_at", "claude_rt",           /* an account's tokens */
         "pt_key", "pt_cak",                 /* the portal's private keys (its certificates are public) */
         "ssh_hk",                           /* the SSH server's host key */
+        "sshc_seed",                        /* and the SSH client's own private key */
     };
     char low[40];
     size_t n = 0;
     for (; k[n] && n < sizeof low - 1; n++) low[n] = (char)tolower((unsigned char)k[n]);
     low[n] = 0;
+    if (!strncmp(low, "sec_", 4)) return true;
     for (size_t i = 0; i < sizeof WORDS / sizeof WORDS[0]; i++)
         if (strstr(low, WORDS[i])) return true;
     for (size_t i = 0; i < sizeof WHOLE / sizeof WHOLE[0]; i++)

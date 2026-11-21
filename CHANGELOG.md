@@ -9,6 +9,9 @@
   - **Plain, or sealed.** Without a passphrase it leaves out what looks
     like a credential; with one everything goes in, under AES-256-GCM with
     a key from PBKDF2. The board asks for the passphrase twice.
+  - **A secret an app keeps** is left out of a plain backup by its
+    preference's name: one with `pass`, `token`, `secret`, `key` or `priv`,
+    or that starts with `sec_` ([docs/APPS-P4.md](docs/APPS-P4.md)).
   - **A restore can be undone:** what there was is kept first in a backup
     of its own. A wrong passphrase, or a backup of a newer P4OS, is
     refused before anything is touched.

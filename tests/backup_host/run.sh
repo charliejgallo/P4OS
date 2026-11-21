@@ -55,10 +55,11 @@ def read_prefs(path):
 
 PEM = "-----BEGIN CERTIFICATE-----\n" + "\n".join("MIIB" + "Ab3" * 20 for _ in range(22)) + "\n-----END CERTIFICATE-----\n"
 SECRET = {"wifi_pass": "secreto123", "ha_token": "t" * 183, "pt_key": PEM.replace("CERTIFICATE", "PRIVATE KEY"), "lock_pin": "1234",
-          "mqtt_pass": "x", "claude_at": "tok", "api_key": "k", "mb_key": "m", "ssh_hk": "host key"}
+          "mqtt_pass": "x", "claude_at": "tok", "api_key": "k", "mb_key": "m", "ssh_hk": "host key",
+          "sshc_seed": "c2VtaWxsYQ==", "sec_mine": "an app's own", "x_privkey": "p"}
 OWN = {"boot_bad": 3, "time_ok": 1, "bt_bond": 1, "pt_sess": "s", "lock_fails": 2}
 PLAIN = {"volume": 40, "tz": "ART3", "wifi_ssid": "casa", "pt_crt": PEM, "lock_on": 1, "store_srcs": "https://a.example/c\nhttps://b.example/c",
-         "key_snd": 1, "hotkeys": "x", "ssh_k0": "ssh-ed25519 AAAAC3Nz persona", "fs_fav": "/a,/b", "ee.chip": "24C32", "neg": -7}
+         "key_snd": 1, "hotkeys": "x", "ssh_k0": "ssh-ed25519 AAAAC3Nz persona", "px_seed": 7, "second": 2, "fs_fav": "/a,/b", "ee.chip": "24C32", "neg": -7}
 ALL = dict(PLAIN, **SECRET, **OWN)
 
 def card(name):

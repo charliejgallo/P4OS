@@ -234,6 +234,17 @@ Drawing 1.7 MB are closed; Radio 490 KB, Notes 343 KB, Music 156 KB, CAN
 154 KB and the small tools stay. The games have no KEEP, and Gems, Mila,
 Monster Hop and Turbo give all their PSRAM back when closed.
 
+### A secret in a preference
+
+A backup made without a passphrase leaves out the preferences that look
+like a credential, and it only has their names to go by
+([BACKUP.md](BACKUP.md)). So a password, a token or a private key an app
+saves with `aos_hal_pref_set_str` gets a name that says so: one with
+`pass`, `token`, `secret`, `key` (as a word of its own: `xx_key`) or
+`priv` in it, or one that starts with `sec_`. The SSH client's key was
+saved as `sshc_seed`, and the first plain backup made on a board carried
+it.
+
 ## Starting with the board
 
 An app with `AOS_APP_FLAG_BACKGROUND` can ask to start with the board,

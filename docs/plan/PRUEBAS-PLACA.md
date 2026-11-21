@@ -73,6 +73,24 @@ y un servidor de prueba en la Mac:
 - [ ] Una fuente de terceros de verdad, en otro repositorio de GitHub.
 - [ ] Instalar el firmware del C6 que bajó la Tienda (Ajustes).
 
+### Respaldos (rama `respaldo`, 2026-11-21)
+
+El plan y lo medido, en `docs/plan/RESPALDO.md` ("En la placa"). Con
+`v0.30.0-9-g40b9b5e`, por la API del portal:
+
+- [x] Un respaldo simple: 0,4 s, 419 preferencias y 8 afuera, 14 KB.
+- [x] Uno cifrado: 4 s, 427 preferencias, 19 KB; abierto en la Mac con la
+      misma frase y no con otra. Borrado de la tarjeta.
+- [x] Las 8 que deja afuera el simple son credenciales. **Se le escapó
+      una, `sshc_seed`** (la clave del cliente SSH): arreglado en el
+      código, falta instalarlo.
+- [ ] Instalar el arreglo y cambiar el respaldo simple que quedó en la
+      tarjeta por uno nuevo.
+- [ ] Restaurar desde Ajustes → Respaldo (dos toques) y reiniciar.
+- [ ] Restaurar uno cifrado escribiendo la frase en la pantalla.
+- [ ] Con la flash borrada: volver desde el archivo y que la Tienda
+      ofrezca reinstalar. Sólo cuando el usuario lo diga.
+
 ### Pendientes, en resumen
 
 Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):

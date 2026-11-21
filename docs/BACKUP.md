@@ -23,12 +23,21 @@ a day by itself, a pendrive, a server of your own), is
 
 - **What looks like a credential** is decided by the preference's name: a
   password, a token, a key, a code, the lock screen's, the portal's private
-  keys, the SSH server's. It is a best effort, and the screens say "what
-  looks like": an app can keep a secret under a name this does not see.
+  keys, the SSH server's and the SSH client's. It is a best effort, and the
+  screens say "what looks like": an app can keep a secret under a name this
+  does not see. An app that keeps one names it with `pass`, `token`,
+  `secret`, `key` or `priv`, or starts it with `sec_`
+  ([APPS-P4.md](APPS-P4.md)). Before trusting a plain backup with a card
+  that leaves the house, open it: it is text.
 - **A sealed backup** is AES-256-GCM under a key derived from the
   passphrase (PBKDF2-HMAC-SHA256, 40 000 rounds, the number is in the
   file). The board asks for the passphrase twice. There is no way around a
-  forgotten one.
+  forgotten one. What stays readable in it: when and by which version it
+  was made, the list of apps and the two files of the card. Every
+  preference is inside.
+- **How long:** on the author's board, with 427 preferences, a plain
+  backup takes under half a second and a sealed one about four (the
+  passphrase's 40 000 rounds). The files are 14 KB and 19 KB.
 - **In neither:** what belongs to this very board and moment: the counts of
   failed starts, the crash dump's marks, the Bluetooth pairing (its keys
   are not preferences: pair again), the portal's open sessions.

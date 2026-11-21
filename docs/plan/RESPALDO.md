@@ -8,8 +8,8 @@ los dos primeros puntos del CI (`TIENDA.md`, "Después del merge").
 
 ## Etapa 1, hecha en la Mac (2026-11-21)
 
-Escrita en la rama `respaldo`; **sin instalar en la placa todavía**. El
-documento para quien la usa es `docs/BACKUP.md`.
+Escrita en la rama `respaldo`. El documento para quien la usa es
+`docs/BACKUP.md`. Lo que dio en la placa está más abajo, en "En la placa".
 
 - **El servicio** (`components/aos_backup`): arma el archivo, lo lee, lo
   restaura. Un hilo propio hace el trabajo; las llamadas vuelven
@@ -49,11 +49,52 @@ documento para quien la usa es `docs/BACKUP.md`.
   respaldo "de antes" que se arma solo, y la página del portal. Firmware
   `rev1_3`: 7 092 560 bytes, 24 KB más.
 
-**Falta para darla por terminada** (lo que dice la tabla de etapas): en la
-placa, con la flash borrada, volver a los ajustes desde el archivo y que la
-Tienda ofrezca reinstalar. Y antes, más simple: un respaldo y una
-restauración en la placa como está, mirar qué claves quedaron afuera, y
-medir cuánto tarda el cifrado.
+## En la placa (2026-11-21)
+
+Instalado `v0.30.0-9-g40b9b5e` por OTA, con permiso. Los respaldos se
+hicieron por la API del portal; del archivo se miraron los nombres de las
+claves, no sus valores.
+
+- **Un respaldo simple: 0,4 s.** 419 preferencias (350 números, 69
+  textos), 8 afuera, las 7 apps de la Tienda, `menu.txt` y `modules.txt`:
+  14 447 bytes. Los dos certificados del portal, de 624 y 660 caracteres,
+  enteros (el arreglo de `aos_hal_pref_foreach`).
+- **Uno cifrado: 3,8 a 4,1 s,** casi todo las 40 000 vueltas de PBKDF2.
+  427 preferencias, 19 319 bytes. Abierto en la Mac con la misma frase
+  (AES-GCM de otra librería, no la del firmware): las 427 adentro; con
+  otra frase no abre. La frase fue una al azar que no se guardó, y el
+  archivo se borró de la tarjeta.
+- **RAM interna** mientras lo arma: 208,9 KB libres de mínima, contra
+  209,3 KB en reposo.
+- **Las 8 que el simple dejó afuera:** `wf_pass`, `ap_pass`, `ha_token`,
+  `pt_pass`, `pt_token`, `pt_key`, `pt_cak`, `ssh_hk`. Las que tenían que
+  ser.
+- **Una que se le escapó: `sshc_seed`,** la clave privada del cliente SSH
+  (la app SSH, una semilla Ed25519 en base64). Ninguna palabra del filtro
+  está en ese nombre. Apareció buscando en el archivo los textos con forma
+  de clave (base64 o hexadecimal, largos): los demás eran los dos
+  certificados, que son públicos, y lo último que eligió el Programador.
+  **Arreglado:** `sshc_seed` entra a la lista, se suma la palabra `priv`,
+  y lo que D3 dejaba anotado: una preferencia que empieza con `sec_` es un
+  secreto, para que una app lo pueda decir sin tocar el firmware. Con sus
+  casos en `tests/backup_host`.
+- **Lo que deja:** el filtro por nombre falló en la primera prueba de
+  verdad. Va a volver a fallar con una app que no siga la regla, y por eso
+  la pantalla dice "lo que parezca" y `docs/BACKUP.md` dice de abrir el
+  archivo antes de sacarlo de la casa. El respaldo simple de esa prueba
+  quedó en la tarjeta con esa clave adentro: se reemplaza por uno nuevo
+  cuando la placa tenga el arreglo.
+- **Lo que viaja a la vista en un simple y es de la red de la casa:** el
+  nombre de la Wi-Fi, las direcciones de los equipos que usan las apps
+  (Home Assistant, Modbus, el escritorio remoto) y para qué dirección se
+  hizo el certificado. No son credenciales; es para saber qué dice el
+  archivo.
+
+**Falta para darla por terminada:** instalar el arreglo, y restaurar desde
+la pantalla (Ajustes → Respaldo, los dos toques, reiniciar). Después, la
+prueba de la tabla de etapas: con la flash borrada, volver a los ajustes
+desde el archivo y que la Tienda ofrezca reinstalar. Esa borra la placa:
+sólo cuando el usuario lo diga.
 
 ## Qué resuelve
 
@@ -125,9 +166,9 @@ archivo, para poder retomarlas.
   bloqueo) y lo dice en la pantalla, porque es un filtro por nombre y una
   app puede guardar un secreto con otro nombre.
 
-Para cerrar ese agujero, una app que guarda un secreto lo declara (un
-prefijo de clave, `sec_`, o una llamada del HAL): se anota en el handoff de
-apps cuando esto exista.
+Para cerrar ese agujero, una app que guarda un secreto lo declara: el
+nombre de la preferencia empieza con `sec_` (hecho el 2026-11-21, y en el
+handoff de apps).
 
 **D4. Lo que es de esta placa no se restaura en otra:** los emparejamientos
 de Bluetooth (están en `nvs` y dependen de claves del otro lado: se vuelve
