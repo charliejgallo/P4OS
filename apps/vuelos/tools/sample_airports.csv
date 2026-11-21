@@ -1,0 +1,8 @@
+"id","ident","type","name","latitude_deg","longitude_deg","elevation_ft","continent","iso_country","iso_region","municipality","scheduled_service","icao_code","iata_code","gps_code","local_code","home_link","wikipedia_link","keywords"
+1,"LEMD","large_airport","Adolfo Suárez Madrid-Barajas",40.471926,-3.56264,1998,"EU","ES","ES-M","Madrid","yes","LEMD","MAD","LEMD","","","",""
+2,"LETO","medium_airport","Torrejón",40.496700,-3.445870,2026,"EU","ES","ES-M","Torrejón de Ardoz","no","LETO","TOJ","LETO","","","",""
+3,"LECU","small_airport","Madrid-Cuatro Vientos",40.370701,-3.785140,2269,"EU","ES","ES-M","Madrid","no","LECU","ECV","LECU","","","",""
+4,"LEGT","medium_airport","Getafe",40.294102,-3.723830,2031,"EU","ES","ES-M","Getafe","no","LEGT","","LEGT","","","",""
+6,"LEXJ","medium_airport","Santander",43.427101,-3.82001,16,"EU","ES","ES-CB","Santander","yes","LEXJ","SDR","LEXJ","","","",""
+7,"LEVD","medium_airport","Valladolid",41.7061,-4.85194,2776,"EU","ES","ES-CL","Valladolid","yes","LEVD","VLL","LEVD","","","",""
+8,"XXXX","closed","Cerrado",40.5,-3.6,0,"EU","ES","ES-M","","no","","","","","","",""
