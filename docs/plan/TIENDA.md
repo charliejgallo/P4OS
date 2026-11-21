@@ -467,11 +467,15 @@ Tienda. En la placa del usuario, casi todo es de compilaciones propias.
 
 **Lo que falta de esta fase:**
 
-- **Publicar el borrador como pre-release**, que lo decide el usuario: con
-  eso la placa puede leer un catálogo de verdad desde GitHub (en modo
-  desarrollo, apuntándola a
-  `.../releases/download/v0.30.0-tienda.1/p4os-store.ndjson`), sin pasar a
-  ser "latest".
+- **La pre-release está publicada (2026-11-21, con el sí del usuario):**
+  `v0.30.0-tienda.1`, marcada como pre-release y no como la última. Su
+  catálogo y sus paquetes se bajan sin cuenta desde
+  `.../releases/download/v0.30.0-tienda.1/` (200 y 206), y
+  `.../releases/latest/download/p4os-store.ndjson` sigue contestando 404:
+  "latest" es la v0.29.0, así que ninguna placa la ve por su cuenta.
+- **Leerla desde la placa:** falta. Cambiar el catálogo oficial por otro
+  pide el modo desarrollo, que se prende sólo en la placa (Tienda,
+  Fuentes) y estaba apagado.
 - **Leer las descripciones.** Las de los `store.json` son un borrador
   escrito desde los README; las de las apps sin README, sin verificar.
   Qué pack es obligatorio en Bastión (el base y Luna) y en Pinball
