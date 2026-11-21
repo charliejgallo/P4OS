@@ -1364,6 +1364,11 @@ German); an app's page brings its own with the app.
   (41 s), restarted into on trial and confirmed, twice in a row. From the
   test server; from GitHub itself it waits for the first release that
   carries it.
+- The parts of the system from the Store (0.30), on a card that already
+  had them copied by hand: the two languages downloaded and replaced in
+  3 s each, the 16 MB emoji pack recognised by its bytes with nothing
+  downloaded, and the C6's firmware, which was another build, replaced
+  by the release's.
 
 **Waiting for hardware on the bench:**
 
@@ -1393,10 +1398,8 @@ German); an app's page brings its own with the app.
 **Not done yet:**
 
 - **The Store:** publishing an app from outside this repository has no
-  kit yet; a download with the Wi-Fi cut in the middle of it was not tried
-  (a restart in the middle was); and the parts of the system (the portal's
-  translations, the emoji, the C6's firmware) were installed from it in
-  the simulator and in the Mac's tests, not on the board yet.
+  kit yet, and a download with the Wi-Fi cut in the middle of it was not
+  tried (a restart in the middle was).
 - **RF:** FSK signals, a CC1101 module on the header as a second receiver
   and transmitter, and ADS-B.
 - **ESP-NOW:** esp_hosted does not carry it (3.0.9 neither), so the two-device games of

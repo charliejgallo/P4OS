@@ -1077,8 +1077,12 @@ en color y el firmware del C6. Era de la fase 6.
   tiempo): los vio a todos como copiados a mano. Los dos idiomas,
   pedidos por la API, se instalaron desde el catálogo de prueba en 2,6 y
   3,1 s (dos archivos cada uno, 0,46 MB) y el portal quedó sirviendo las
-  cadenas nuevas. **Faltan en la pantalla, con el usuario:** Obtener los
-  emojis y el firmware del C6, que si son los del catálogo no bajan nada.
+  cadenas nuevas.
+- **El usuario, en la pantalla:** Obtener en los emojis no bajó nada (el
+  `emoji.pak` de la tarjeta era el del catálogo: lo hasheó y le escribió
+  el recibo) y en el firmware del C6 bajó 1,4 MB en 3,0 s y reemplazó el
+  de la tarjeta, que era de otra compilación. Las cuatro quedaron con su
+  tilde.
 
 ### Los documentos públicos (2026-11-21)
 
