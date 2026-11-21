@@ -4,6 +4,10 @@
   "es": "El buscaminas de siempre, en tres tamaños.",
   "en": "Minesweeper as ever, in three sizes."
  },
+ "desc": {
+  "es": "Un toque cava y un toque largo pone una bandera; con Bandera elegido abajo, el toque corto también pone banderas. Tocar un número que ya tiene todas sus banderas abre las celdas que lo rodean. La primera celda que cavás y sus vecinas nunca tienen minas.\n\nHay cinco tableros, de Fácil (8 por 11, 12 minas) a Maestro (16 por 22, 72 minas), y cada uno guarda su récord de tiempo. En horizontal el tablero gira con la pantalla y la partida sigue donde estaba; el reloj se para cuando dejás la app.\n\nCon un joystick USB, la cruz mueve un cursor por las celdas, A cava (o abre alrededor de un número), B pone la bandera, START reparte un tablero nuevo y L o R abren la dificultad.",
+  "en": "A tap digs and a long press plants a flag; with Flag chosen at the bottom, a tap flags too. Tapping a number that already has all its flags opens the cells around it. The first cell you dig and its neighbours never hold a mine.\n\nThere are five boards, from Easy (8 by 11, 12 mines) to Master (16 by 22, 72 mines), and each keeps its best time. Sideways, the board turns with the screen and the game goes on where it was; the clock stops while you are out of the app.\n\nWith a USB gamepad, the D-pad moves a cursor over the cells, A digs (or opens around a number), B flags, START deals a new board and L or R open the difficulty."
+ },
  "shots": [
   "app-mines.png",
   "app-mines-flags.png",

@@ -4,6 +4,10 @@
   "es": "Dados para tirar, de uno a seis, con el dedo.",
   "en": "Dice to roll, one to six of them, with a finger."
  },
+ "desc": {
+  "es": "Elegí el dado, de cuatro, seis, ocho, diez, doce o veinte caras, y cuántos tirar, de uno a seis. Se tira con el botón TIRAR, tocando los dados o con el botón físico de la placa. El de seis caras muestra los puntos y los demás el número; la cara más alta y el uno salen de otro color, y abajo de los dados está la suma.\n\nUna tira guarda las últimas seis tiradas. Los dados se agrandan cuando son pocos, y girar la pantalla no pierde la tirada ni el historial. Con un joystick USB, la cruz recorre los dados y los botones, A o START tiran, y L y R cambian el dado.",
+  "en": "Pick the die, with four, six, eight, ten, twelve or twenty faces, and how many to roll, one to six. Roll with the ROLL button, by tapping the dice or with the board's physical button. The six-sided die shows pips and the others the number; the highest face and the one come up in another colour, and the total sits under the dice.\n\nA strip keeps the last six rolls. The dice grow when there are few of them, and turning the screen keeps the roll and the history. With a USB gamepad, the D-pad walks the dice and the buttons, A or START rolls, and L and R change the die."
+ },
  "shots": [
   "app-dice.png",
   "app-dice-4d6.png",
