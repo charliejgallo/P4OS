@@ -103,7 +103,11 @@ of the map" chooses one, and "Weather's city" takes Clima's.
 
 Every large and medium airport and the small ones with a four-letter code
 (`--heliports` adds heliports with one). 48 bytes an airport, sorted by
-latitude; the app reads it whole into PSRAM. `tools/sample_airports.csv` is
+latitude; the app reads it whole into PSRAM. Made from the CSV of
+2026-11-21: 19 575 airports (1 174 large, 4 108 medium, 14 293 small),
+918 KB; with `--heliports`, 22 500 and 1 055 KB. The map tests the
+longitude before anything else, since a band of latitude goes round the
+world. `tools/sample_airports.csv` is
 a few rows around Madrid for the simulator's tests.
 
 ## The portal page

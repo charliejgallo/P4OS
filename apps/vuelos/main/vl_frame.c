@@ -468,6 +468,8 @@ static void airports(app_t *a, vl_fb_t *fb)
     vl_world_to_lonlat(a->view.cx - hw, a->view.cy + hh, &lon0, &lat0);     /* south-west */
     vl_world_to_lonlat(a->view.cx + hw, a->view.cy - hh, &lon1, &lat1);     /* north-east */
     int32_t la0 = (int32_t)(lat0 * 1e5f), la1 = (int32_t)(lat1 * 1e5f);
+    int32_t lo0 = (int32_t)(lon0 * 1e5f), lo1 = (int32_t)(lon1 * 1e5f);
+    bool wrap = lo0 > lo1;                  /* the screen crosses 180 degrees */
     /* the first at or above the south edge, by halving */
     int lo = 0, hi = a->nap;
     while (lo < hi) {
@@ -480,6 +482,9 @@ static void airports(app_t *a, vl_fb_t *fb)
         const vl_airport_t *ap = &a->ap[i];
         static const float MINZ[] = { 5.5f, 7.5f, 9.5f, 11.0f };
         if (z < MINZ[ap->kind & 3]) continue;
+        /* the pack holds the whole world: the latitude band is everything
+         * round the globe, so the longitude goes first, before any maths */
+        if (wrap ? ap->lon < lo0 && ap->lon > lo1 : ap->lon < lo0 || ap->lon > lo1) continue;
         uint32_t wx, wy;
         vl_lonlat_to_world((float)ap->lon / 1e5f, (float)ap->lat / 1e5f, &wx, &wy);
         float x, y;
