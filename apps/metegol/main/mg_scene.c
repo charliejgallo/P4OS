@@ -326,7 +326,7 @@ void mg_scene_draw(mg_app_t *a, float dt)
         if (u->touch_on[i]) mg_ring(g, u->touch_x[i], u->touch_y[i], 34, 34, 3, mg_rgb(0xFFFFFF), 70, 0);
     }
 
-    scoreboard(a, gm);
+    if (!u->hud_off) scoreboard(a, gm);
 
     /* the banners */
     const mg_font_t *fb = &art->f_big, *fs = &art->f_score;

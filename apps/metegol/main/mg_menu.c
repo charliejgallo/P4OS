@@ -366,9 +366,9 @@ static void setup(mg_app_t *a)
     /* the leagues */
     static const char *const LG[2] = { N_("Selecciones"), N_("Clubes") };
     for (int i = 0; i < 2; i++) {
-        lv_obj_t *b = mg_button(s, _(LG[i]), a->cfg.league == i, 210, 60, ev_league, a);
+        lv_obj_t *b = mg_button(s, _(LG[i]), a->cfg.league == i, 260, 60, ev_league, a);
         lv_obj_set_user_data(b, (void *)(intptr_t)i);
-        lv_obj_set_pos(b, 24 + i * 222, 100);
+        lv_obj_set_pos(b, 24 + i * 272, 100);
         a->m_tab[i] = b;
     }
     /* the grid of teams */
@@ -424,6 +424,8 @@ static void setup(mg_app_t *a)
     lv_obj_set_style_pad_column(row, 10, 0);
     a->m_format = mg_button(row, "", false, 170, 66, ev_format, a);
     a->m_value = mg_button(row, "", false, 290, 66, ev_value, a);
+    lv_obj_set_style_text_font(lv_obj_get_child(a->m_format, 0), aos_font_small, 0);
+    lv_obj_set_style_text_font(lv_obj_get_child(a->m_value, 0), aos_font_small, 0);
     mg_button(col, _("¡A jugar!"), true, 470, 92, ev_play, a);
     setup_refresh(a);
     pad_items(a, 0);

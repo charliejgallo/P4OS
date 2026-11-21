@@ -400,14 +400,14 @@ def common_scene(samples):
 
 def camera():
     cd = bpy.data.cameras.new('cam')
-    cd.lens = 20
+    cd.lens = float(C.arg('--lens', 22))
     cd.sensor_width = 36
     cd.clip_end = 3000
     cam = bpy.data.objects.new('cam', cd)
     C.sc.collection.objects.link(cam)
     C.sc.camera = cam
-    cam.location = (0, -50.0, 22.0)
-    cam.rotation_euler = (math.radians(77), 0, 0)
+    cam.location = (0, -float(C.arg('--back', 125)), float(C.arg('--up', 34)))
+    cam.rotation_euler = (math.radians(float(C.arg('--tilt', 84))), 0, 0)
     C.sc.render.resolution_x = 1280
     C.sc.render.resolution_y = 720
     return cam
@@ -577,8 +577,8 @@ def build(sid, rng):
             o = obj('tower', bm, red if k % 2 == 0 else white)
             o.location = (-260, 1100, 18 + k * 36)
         city(rng, 500, 1000, 140, night=False, hmax=50)
-    elif sid in ('avellaneda_rojo', 'avellaneda_celeste'):
-        rojo = sid == 'avellaneda_rojo'
+    elif sid in ('avella_rojo', 'avella_celeste'):
+        rojo = sid == 'avella_rojo'
         sky('050812', '1E2840', 1.0)
         ground(g)
         if rojo:
@@ -638,7 +638,7 @@ def render_stadium(sid, samples):
     json.dump(dict(x=0, y=0, w=1280, h=CROWD_H, frames=FRAMES, flashes=flashes), open(os.path.join(out, 'crowd.json'), 'w'))
 
 
-ALL = ['laboca', 'nunez', 'rio', 'madrid', 'munich', 'londres', 'mexico', 'tokio', 'avellaneda_rojo', 'avellaneda_celeste']
+ALL = ['laboca', 'nunez', 'rio', 'madrid', 'munich', 'londres', 'mexico', 'tokio', 'avella_rojo', 'avella_celeste']
 
 
 def main():

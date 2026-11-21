@@ -137,7 +137,7 @@ static void scan_pack(mg_art_t *a, const char *path)
 
 /* the order of tools/pack_p4.py, whatever order the card lists them in */
 static const char *const ORDER[] = { "laboca", "nunez", "rio", "madrid", "munich", "londres", "mexico", "tokio",
-                                     "avellaneda_rojo", "avellaneda_celeste" };
+                                     "avella_rojo", "avella_celeste" };
 
 static int rank(const char *id)
 {
@@ -203,7 +203,7 @@ void mg_art_stadium_free(mg_art_t *a)
 static bool part_sheet(mg_pak_t *p, const char *id, const char *what, mg_sheet_t *s, uint8_t **d)
 {
     char name[MG_NAME_LEN];
-    snprintf(name, sizeof name, "%.15s.%.6s", id, what);
+    snprintf(name, sizeof name, "%.16s.%.6s", id, what);
     const mg_entry_t *e;
     *d = (uint8_t *)mg_pak_get(p, name, &e);
     return *d && mg_sheet_bind(s, *d, e->rawlen);

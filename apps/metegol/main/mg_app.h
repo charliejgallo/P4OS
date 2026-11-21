@@ -53,6 +53,7 @@ typedef struct {
     bool  touch_on[5];
     int16_t touch_x[5], touch_y[5];
     bool  crowd_on, shake_on;
+    bool  hud_off;          /* the menus' still: no scoreboard */
     int   seen_goals;
     int   seen_state;
     /* the texts, in the scoreboard's language */

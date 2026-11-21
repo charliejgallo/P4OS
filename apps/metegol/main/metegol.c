@@ -189,11 +189,12 @@ static void perf(mg_app_t *a)
     if (!a->perf_t0) a->perf_t0 = now;
     if (now - a->perf_t0 < PERF_MS || !a->perf_frames) return;
     float s = (float)(now - a->perf_t0) / 1000.0f, n = (float)a->perf_frames;
-    aos_hal_log("metegol", "%.1f fps, a frame %.2f ms (sim %.2f, list %.2f, draw %.2f), %u tiles, %u things, flip %d, %u KB held",
+    aos_hal_log("metegol", "%.1f fps, a frame %.2f ms (sim %.2f, list %.2f, draw %.2f), %u tiles, %u things, flip %d, %u KB held, ball %d,%d state %d",
                 (double)(n / s), (double)((float)(a->perf_sim_us + a->perf_list_us + a->perf_draw_us) / 1000.0f / n),
                 (double)((float)a->perf_sim_us / 1000.0f / n), (double)((float)a->perf_list_us / 1000.0f / n),
                 (double)((float)a->perf_draw_us / 1000.0f / n), (unsigned)(a->perf_tiles / a->perf_frames),
-                (unsigned)(a->perf_items / a->perf_frames), a->flip_ok, (unsigned)(mg_mem_used() / 1024));
+                (unsigned)(a->perf_items / a->perf_frames), a->flip_ok, (unsigned)(mg_mem_used() / 1024),
+                (int)a->game->bx, (int)a->game->by, a->game->state);
     a->perf_frames = a->perf_tiles = a->perf_items = 0;
     a->perf_sim_us = a->perf_list_us = a->perf_draw_us = 0;
     a->perf_t0 = now;
@@ -295,6 +296,7 @@ static bool job_still(mg_app_t *a)
     g->by = 0;
     g->nsnd = 0;
     a->ui->crowd_on = true;
+    a->ui->hud_off = true;
     a->ui->hint_t = 0;
     mg_scene_strings(a);
     a->gfx.one_core = !a->worker_on;

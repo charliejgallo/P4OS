@@ -46,9 +46,9 @@ STADIUMS = [
     ('londres', ('Londres', 'London', 'London'), 'selecciones', 'F4F4F4'),
     ('mexico', ('Ciudad de México', 'Mexico City', 'Mexiko-Stadt'), 'selecciones', '2ECC71'),
     ('tokio', ('Tokio', 'Tokyo', 'Tokio'), 'selecciones', 'F7A8C4'),
-    ('avellaneda_rojo', ('Avellaneda - el rojo', 'Avellaneda - the red one', 'Avellaneda - das rote'), 'clubes',
+    ('avella_rojo', ('Avellaneda - el rojo', 'Avellaneda - the red one', 'Avellaneda - das rote'), 'clubes',
      'D7141A'),
-    ('avellaneda_celeste', ('Avellaneda - el celeste', 'Avellaneda - the sky-blue one',
+    ('avella_celeste', ('Avellaneda - el celeste', 'Avellaneda - the sky-blue one',
                             'Avellaneda - das himmelblaue'), 'clubes', '7FBCE8'),
 ]
 COMMON_STADIUMS = ['laboca', 'nunez']
