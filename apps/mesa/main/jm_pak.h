@@ -12,7 +12,7 @@
  *
  * A sheet (PK_SHEET) is every frame of one model, each cropped to what is
  * not transparent and kept as runs, so the transparent pixels cost neither
- * memory nor time (mg_gfx.h has the layout). A board is a JPEG (PK_JPEG,
+ * memory nor time (jm_gfx.h has the layout). A board is a JPEG (PK_JPEG,
  * decoded by the P4's engine) and its geometry a line of text (PK_TEXT).
  */
 #pragma once
@@ -33,34 +33,34 @@ enum {
     PK_JPEG = 8,        /* a JPEG file as is                                 */
 };
 
-#define MG_NAME_LEN 24
-#define MG_PARTS    8
+#define JM_NAME_LEN 24
+#define JM_PARTS    8
 
 typedef struct {
-    char     name[MG_NAME_LEN];
+    char     name[JM_NAME_LEN];
     uint8_t  type, flags;
     uint16_t w, h;
     int16_t  x, y;
     uint32_t off, clen, rawlen, extra;
-} mg_entry_t;
+} jm_entry_t;
 
 typedef struct {
-    FILE       *fp[MG_PARTS];
-    uint32_t    part_len[MG_PARTS];
+    FILE       *fp[JM_PARTS];
+    uint32_t    part_len[JM_PARTS];
     int         parts;
     int         n;
-    mg_entry_t *e;
+    jm_entry_t *e;
     int         fails;      /* entries that could not be read (no memory)   */
-} mg_pak_t;
+} jm_pak_t;
 
-bool mg_pak_open(mg_pak_t *p, const char *path);
-void mg_pak_close(mg_pak_t *p);
-const mg_entry_t *mg_pak_find(const mg_pak_t *p, const char *name);
-/* the entry unpacked into a new PSRAM buffer (mg_free), NULL on error */
-void *mg_pak_load(mg_pak_t *p, const mg_entry_t *e);
-void *mg_pak_get(mg_pak_t *p, const char *name, const mg_entry_t **out);
+bool jm_pak_open(jm_pak_t *p, const char *path);
+void jm_pak_close(jm_pak_t *p);
+const jm_entry_t *jm_pak_find(const jm_pak_t *p, const char *name);
+/* the entry unpacked into a new PSRAM buffer (jm_free), NULL on error */
+void *jm_pak_load(jm_pak_t *p, const jm_entry_t *e);
+void *jm_pak_get(jm_pak_t *p, const char *name, const jm_entry_t **out);
 
-void *mg_malloc(size_t n);          /* PSRAM, or nothing */
-void *mg_calloc(size_t n);
-void  mg_free(void *p);
-size_t mg_mem_used(void);           /* bytes handed out and not freed yet   */
+void *jm_malloc(size_t n);          /* PSRAM, or nothing */
+void *jm_calloc(size_t n);
+void  jm_free(void *p);
+size_t jm_mem_used(void);           /* bytes handed out and not freed yet   */

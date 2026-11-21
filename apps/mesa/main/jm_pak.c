@@ -1,7 +1,7 @@
 /*
- * Juegos de mesa - the packs (see mg_pak.h); Bastion's, renamed
+ * Juegos de mesa - the packs (see jm_pak.h); Bastion's, renamed
  */
-#include "mg_pak.h"
+#include "jm_pak.h"
 
 #include <stdlib.h>
 #include <string.h>
@@ -16,7 +16,7 @@
  * holds (the log's line, and the check before a world is loaded) */
 static size_t s_used;
 
-void *mg_malloc(size_t n)
+void *jm_malloc(size_t n)
 {
     size_t total = n + 16;
 #if !defined(AOS_SIM) && !defined(AOS_SIM_BUILTIN)
@@ -33,14 +33,14 @@ void *mg_malloc(size_t n)
     return (uint8_t *)b + 16;
 }
 
-void *mg_calloc(size_t n)
+void *jm_calloc(size_t n)
 {
-    void *p = mg_malloc(n);
+    void *p = jm_malloc(n);
     if (p) memset(p, 0, n);
     return p;
 }
 
-void mg_free(void *p)
+void jm_free(void *p)
 {
     if (!p) return;
     uint32_t *b = (uint32_t *)((uint8_t *)p - 16);
@@ -51,7 +51,7 @@ void mg_free(void *p)
     free(b);
 }
 
-size_t mg_mem_used(void)
+size_t jm_mem_used(void)
 {
     return s_used;
 }
@@ -59,11 +59,11 @@ size_t mg_mem_used(void)
 static uint16_t rd16(const uint8_t *b) { return (uint16_t)(b[0] | (b[1] << 8)); }
 static uint32_t rd32(const uint8_t *b) { return (uint32_t)b[0] | ((uint32_t)b[1] << 8) | ((uint32_t)b[2] << 16) | ((uint32_t)b[3] << 24); }
 
-bool mg_pak_open(mg_pak_t *p, const char *path)
+bool jm_pak_open(jm_pak_t *p, const char *path)
 {
     memset(p, 0, sizeof *p);
     char name[200];
-    for (int i = 0; i < MG_PARTS; i++) {
+    for (int i = 0; i < JM_PARTS; i++) {
         if (i == 0) snprintf(name, sizeof name, "%.180s", path);
         else snprintf(name, sizeof name, "%.180s.%d", path, i);
         FILE *f = fopen(name, "rb");
@@ -80,17 +80,17 @@ bool mg_pak_open(mg_pak_t *p, const char *path)
     if (fread(h, 1, 8, p->fp[0]) != 8 || memcmp(h, "BSPK", 4) || rd16(h + 4) != 1) goto fail;
     p->n = rd16(h + 6);
     if (p->n <= 0 || p->n > 4096) goto fail;
-    uint8_t *tab = (uint8_t *)mg_malloc((size_t)p->n * ENTRY_SIZE);
-    p->e = (mg_entry_t *)mg_calloc((size_t)p->n * sizeof(mg_entry_t));
+    uint8_t *tab = (uint8_t *)jm_malloc((size_t)p->n * ENTRY_SIZE);
+    p->e = (jm_entry_t *)jm_calloc((size_t)p->n * sizeof(jm_entry_t));
     if (!tab || !p->e || fread(tab, ENTRY_SIZE, (size_t)p->n, p->fp[0]) != (size_t)p->n) {
-        mg_free(tab);
+        jm_free(tab);
         goto fail;
     }
     for (int i = 0; i < p->n; i++) {
         const uint8_t *b = tab + i * ENTRY_SIZE;
-        mg_entry_t *e = &p->e[i];
-        memcpy(e->name, b, MG_NAME_LEN);
-        e->name[MG_NAME_LEN - 1] = 0;
+        jm_entry_t *e = &p->e[i];
+        memcpy(e->name, b, JM_NAME_LEN);
+        e->name[JM_NAME_LEN - 1] = 0;
         e->type = b[24];
         e->flags = b[25];
         e->w = rd16(b + 26);
@@ -102,23 +102,23 @@ bool mg_pak_open(mg_pak_t *p, const char *path)
         e->rawlen = rd32(b + 42);
         e->extra = rd32(b + 46);
     }
-    mg_free(tab);
+    jm_free(tab);
     return true;
 fail:
-    mg_pak_close(p);
+    jm_pak_close(p);
     return false;
 }
 
-void mg_pak_close(mg_pak_t *p)
+void jm_pak_close(jm_pak_t *p)
 {
-    for (int i = 0; i < MG_PARTS; i++) {
+    for (int i = 0; i < JM_PARTS; i++) {
         if (p->fp[i]) fclose(p->fp[i]);
     }
-    mg_free(p->e);
+    jm_free(p->e);
     memset(p, 0, sizeof *p);
 }
 
-const mg_entry_t *mg_pak_find(const mg_pak_t *p, const char *name)
+const jm_entry_t *jm_pak_find(const jm_pak_t *p, const char *name)
 {
     for (int i = 0; i < p->n; i++) {
         if (!strcmp(p->e[i].name, name)) return &p->e[i];
@@ -127,7 +127,7 @@ const mg_entry_t *mg_pak_find(const mg_pak_t *p, const char *name)
 }
 
 /* reads across the parts as if they were one file */
-static bool read_at(mg_pak_t *p, uint32_t off, uint8_t *dst, uint32_t len)
+static bool read_at(jm_pak_t *p, uint32_t off, uint8_t *dst, uint32_t len)
 {
     for (int i = 0; i < p->parts && len; i++) {
         if (off >= p->part_len[i]) {
@@ -189,10 +189,10 @@ static bool lz4_decode(const uint8_t *src, size_t slen, uint8_t *dst, size_t dle
     return o == dlen;
 }
 
-void *mg_pak_load(mg_pak_t *p, const mg_entry_t *e)
+void *jm_pak_load(jm_pak_t *p, const jm_entry_t *e)
 {
     if (!p->parts || !e) return NULL;
-    uint8_t *raw = (uint8_t *)mg_malloc(e->rawlen + 2);
+    uint8_t *raw = (uint8_t *)jm_malloc(e->rawlen + 2);
     if (!raw) {
         p->fails++;
         return NULL;
@@ -203,20 +203,20 @@ void *mg_pak_load(mg_pak_t *p, const mg_entry_t *e)
         if (!read_at(p, e->off, raw, e->rawlen)) goto fail;
         return raw;
     }
-    uint8_t *src = (uint8_t *)mg_malloc(e->clen);
+    uint8_t *src = (uint8_t *)jm_malloc(e->clen);
     if (!src) goto fail;
     bool ok = read_at(p, e->off, src, e->clen) && lz4_decode(src, e->clen, raw, e->rawlen);
-    mg_free(src);
+    jm_free(src);
     if (ok) return raw;
 fail:
-    mg_free(raw);
+    jm_free(raw);
     p->fails++;
     return NULL;
 }
 
-void *mg_pak_get(mg_pak_t *p, const char *name, const mg_entry_t **out)
+void *jm_pak_get(jm_pak_t *p, const char *name, const jm_entry_t **out)
 {
-    const mg_entry_t *e = mg_pak_find(p, name);
+    const jm_entry_t *e = jm_pak_find(p, name);
     if (out) *out = e;
-    return e ? mg_pak_load(p, e) : NULL;
+    return e ? jm_pak_load(p, e) : NULL;
 }

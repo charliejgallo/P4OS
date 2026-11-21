@@ -14,7 +14,7 @@ height h lands on the picture at
 
     x = cx + S (u - u0)        y = cy - S (sin(E) (v - v0) + cos(E) h)
 
-which is what the app (mg_view.c) computes: S pixels a unit, E the
+which is what the app (jm_view.c) computes: S pixels a unit, E the
 camera's height over the table (90 from above, 0 from the front), (u0, v0)
 the board's middle at the picture's (cx, cy). A piece is rendered alone
 with its foot at a known pixel (its anchor), so one sprite serves every

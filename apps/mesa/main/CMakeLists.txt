@@ -1,6 +1,6 @@
 idf_component_register(
-    SRCS "mesa.c" "mg_games.c" "mg_art.c" "mg_view.c" "mg_play.c" "mg_hud.c" "mg_setup.c" "mg_audio.c"
-         "mg_save.c" "mg_gfx.c" "mg_pak.c"
+    SRCS "mesa.c" "jm_games.c" "jm_art.c" "jm_view.c" "jm_play.c" "jm_hud.c" "jm_setup.c" "jm_audio.c"
+         "jm_save.c" "jm_gfx.c" "jm_pak.c"
          "g_ajedrez.c" "g_ajrules.c" "g_ajsearch.c" "g_damas.c" "g_reversi.c" "g_cuatro.c" "g_ludo.c"
          "g_backgammon.c"
     INCLUDE_DIRS "."

@@ -54,27 +54,27 @@ typedef struct {
     uint64_t key;
 } ch_undo_t;
 
-void     ch_tables(void);                  /* once, before anything else */
-void     ch_start(ch_pos_t *p);
-bool     ch_fen(ch_pos_t *p, const char *fen);
-void     ch_rekey(ch_pos_t *p);
-bool     ch_attacked(const ch_pos_t *p, int sq, int by);
-bool     ch_in_check(const ch_pos_t *p, int side);
+void     mch_tables(void);                  /* once, before anything else */
+void     mch_start(ch_pos_t *p);
+bool     mch_fen(ch_pos_t *p, const char *fen);
+void     mch_rekey(ch_pos_t *p);
+bool     mch_attacked(const ch_pos_t *p, int sq, int by);
+bool     mch_in_check(const ch_pos_t *p, int side);
 /* pseudo-legal moves; caps: only captures and promotions */
-int      ch_gen(const ch_pos_t *p, uint32_t *out, bool caps);
+int      mch_gen(const ch_pos_t *p, uint32_t *out, bool caps);
 /* legal ones */
-int      ch_legal(ch_pos_t *p, uint32_t *out);
+int      mch_legal(ch_pos_t *p, uint32_t *out);
 /* false (and nothing changed) if it leaves its own king in check */
-bool     ch_make(ch_pos_t *p, uint32_t m, ch_undo_t *u);
-void     ch_unmake(ch_pos_t *p, uint32_t m, const ch_undo_t *u);
-void     ch_null(ch_pos_t *p, ch_undo_t *u);
-void     ch_unnull(ch_pos_t *p, const ch_undo_t *u);
-int      ch_repeats(const ch_pos_t *p);    /* times this position was seen before */
-bool     ch_no_mating_material(const ch_pos_t *p);
+bool     mch_make(ch_pos_t *p, uint32_t m, ch_undo_t *u);
+void     mch_unmake(ch_pos_t *p, uint32_t m, const ch_undo_t *u);
+void     mch_null(ch_pos_t *p, ch_undo_t *u);
+void     mch_unnull(ch_pos_t *p, const ch_undo_t *u);
+int      mch_repeats(const ch_pos_t *p);    /* times this position was seen before */
+bool     mch_no_mating_material(const ch_pos_t *p);
 /* the move in SAN (with + or #), and back */
-void     ch_san(ch_pos_t *p, uint32_t m, char *out);
-uint32_t ch_parse_san(ch_pos_t *p, const char *s);
-uint64_t ch_perft(ch_pos_t *p, int depth);
+void     mch_san(ch_pos_t *p, uint32_t m, char *out);
+uint32_t mch_parse_san(ch_pos_t *p, const char *s);
+uint64_t mch_perft(ch_pos_t *p, int depth);
 
 /* the engine (g_ajsearch.c) */
 typedef struct {
@@ -89,7 +89,7 @@ typedef struct {
     int            score;
 } ch_think_t;
 
-bool     ch_search_init(void);             /* the table: false without memory */
-void     ch_search_free(void);
-uint32_t ch_think(ch_pos_t *p, ch_think_t *t);
-int      ch_eval(const ch_pos_t *p);
+bool     mch_search_init(void);             /* the table: false without memory */
+void     mch_search_free(void);
+uint32_t mch_think(ch_pos_t *p, ch_think_t *t);
+int      mch_eval(const ch_pos_t *p);

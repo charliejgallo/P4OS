@@ -16,7 +16,7 @@
  * whatever side they play; two people face to face keep the first player
  * at the bottom; passing the board turns it to whoever moves.
  */
-#include "mg_app.h"
+#include "jm_app.h"
 
 #include "aos_hal.h"
 #include "aos_i18n.h"
@@ -27,18 +27,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define P (&mg->play)
+#define P (&jm->play)
 #define AI_STACK (128 * 1024)
 
 static void begin_turn(void);
 
-bool mg_play_person_to_move(void)
+bool jm_play_person_to_move(void)
 {
     int t = P->g && P->st ? P->g->turn(P->st) : -1;
     return t >= 0 && P->human[t] && !P->over;
 }
 
-int mg_play_turn(void)
+int jm_play_turn(void)
 {
     return P->g && P->st && !P->over ? P->g->turn(P->st) : -1;
 }
@@ -52,7 +52,7 @@ static uint32_t ai_now(void)
 
 static void ai_fn(void *arg)
 {
-    mg_play_t *p = (mg_play_t *)arg;
+    jm_play_t *p = (jm_play_t *)arg;
     int t = p->g->turn(p->ai_st);
     int level = t >= 0 ? p->level[t] : 1;
     if (p->hint_busy) level = p->g->levels > 4 ? 5 : p->g->levels;
@@ -67,7 +67,7 @@ static bool ai_start(bool hint)
     memcpy(P->ai_st, P->st, P->g->state_size);
     memset(&P->ai, 0, sizeof P->ai);
     P->ai.now_ms = ai_now;
-    P->ai.seed = mg_rand();
+    P->ai.seed = jm_rand();
     /* with a clock, a part of what is left */
     int t = P->g->turn(P->st);
     if (P->clock.mode != CLK_NONE && t >= 0 && t < 2) {
@@ -81,7 +81,7 @@ static bool ai_start(bool hint)
     P->ai_done = false;
     P->ai_ok = false;
     P->ai_busy = true;
-    P->ai_t0 = mg_now();
+    P->ai_t0 = jm_now();
     P->ai_thread = true;
     if (!aos_hal_thread_start("mesa_ai", ai_fn, P, AI_STACK, 2)) {
         /* no thread: think here, briefly */
@@ -91,7 +91,7 @@ static bool ai_start(bool hint)
     return true;
 }
 
-void mg_play_ai_cancel(void)
+void jm_play_ai_cancel(void)
 {
     if (!P->ai_thread) return;
     P->ai.stop = true;
@@ -106,43 +106,43 @@ void mg_play_ai_cancel(void)
 
 static void clock_run(void)
 {
-    mg_clock_t *c = &P->clock;
+    jm_clock_t *c = &P->clock;
     if (c->mode == CLK_NONE) return;
-    int t = mg_play_turn();
+    int t = jm_play_turn();
     if (t != c->running) {
         c->running = t >= 0 && t < 2 ? t : -1;
         c->spent = 0;
-        c->last = mg_now();
+        c->last = jm_now();
     }
 }
 
 static void clock_count(void)
 {
-    mg_clock_t *c = &P->clock;
+    jm_clock_t *c = &P->clock;
     if (c->mode == CLK_NONE || c->running < 0 || P->over) return;
-    uint32_t now = mg_now();
+    uint32_t now = jm_now();
     int32_t d = (int32_t)(now - c->last);
     c->last = now;
     if (d <= 0) return;
     /* nothing counts while a panel is over the game */
-    if (mg->panel && mg->panel_kind != PANEL_CHOICE) return;
+    if (jm->panel && jm->panel_kind != PANEL_CHOICE) return;
     c->left[c->running] -= d;
     c->spent += d;
     if (c->left[c->running] <= 0) {
         c->left[c->running] = 0;
         c->flagged = c->running;
         P->over = true;
-        mg_play_ai_cancel();
-        mg_audio_play(SND_LOSE);
-        mg_hud_refresh();
-        mg_hud_end();
-        mg_save_game();
+        jm_play_ai_cancel();
+        jm_audio_play(SND_LOSE);
+        jm_hud_refresh();
+        jm_hud_end();
+        jm_save_game();
     }
 }
 
 static void clock_moved(int who)
 {
-    mg_clock_t *c = &P->clock;
+    jm_clock_t *c = &P->clock;
     if (c->mode == CLK_NONE || who < 0 || who > 1) return;
     if (c->mode == CLK_FISCHER) c->left[who] += c->inc_ms;
     else if (c->mode == CLK_BRONSTEIN) c->left[who] += c->spent < c->inc_ms ? c->spent : c->inc_ms;
@@ -158,11 +158,11 @@ static void fresh_position(void)
     if (P->fen[0] && P->g->setup) P->g->setup(P->st, P->opts, P->fen);
 }
 
-void mg_play_replay(int n)
+void jm_play_replay(int n)
 {
     fresh_position();
     for (int i = 0; i < n; i++) {
-        const mg_hist_t *h = &P->hist[i];
+        const jm_hist_t *h = &P->hist[i];
         if (h->roll) P->g->roll(P->st, h->rnd);
         else P->g->apply(P->st, &h->m);
     }
@@ -181,9 +181,9 @@ void mg_play_replay(int n)
     P->resigned = -1;
 }
 
-static void hist_push(const mg_hist_t *h)
+static void hist_push(const jm_hist_t *h)
 {
-    if (P->n >= MG_HIST_MAX) return;
+    if (P->n >= JM_HIST_MAX) return;
     P->hist[P->n] = *h;
     P->hist[P->n].clock[0] = P->clock.left[0];
     P->hist[P->n].clock[1] = P->clock.left[1];
@@ -195,14 +195,14 @@ static void after_change(bool animate)
 {
     P->sel = 0;
     P->nmoves = 0;
-    mg_view_sync(animate);
-    mg_hud_refresh();
-    mg_hud_sheet_refresh();
+    jm_view_sync(animate);
+    jm_hud_refresh();
+    jm_hud_sheet_refresh();
 }
 
 static int bottom_for_turn(void)
 {
-    int t = mg_play_turn();
+    int t = jm_play_turn();
     int people = 0, first = -1;
     for (int i = 0; i < P->np; i++) {
         if (P->human[i]) {
@@ -219,44 +219,44 @@ static int bottom_for_turn(void)
 static void apply(const mesa_move_t *m)
 {
     int who = P->g->turn(P->st);
-    mg_hist_t h;
+    jm_hist_t h;
     memset(&h, 0, sizeof h);
     h.m = *m;
     uint32_t ev = P->g->apply(P->st, m);
     clock_moved(who);
     hist_push(&h);
-    if (ev & MESA_EV_CAPTURE) mg_audio_play(SND_CAPTURE);
-    if (ev & MESA_EV_CHECK) mg_audio_play(SND_CHECK);
-    if (ev & MESA_EV_FLIP) mg_audio_play(SND_FLIP);
+    if (ev & MESA_EV_CAPTURE) jm_audio_play(SND_CAPTURE);
+    if (ev & MESA_EV_CHECK) jm_audio_play(SND_CHECK);
+    if (ev & MESA_EV_FLIP) jm_audio_play(SND_FLIP);
     after_change(true);
     P->over = P->g->turn(P->st) < 0;
-    mg_save_game();
+    jm_save_game();
     if (P->over) {
-        mg_play_ai_cancel();
+        jm_play_ai_cancel();
     }
 }
 
 static void roll_now(void)
 {
-    mg_hist_t h;
+    jm_hist_t h;
     memset(&h, 0, sizeof h);
     h.roll = 1;
-    h.rnd = mg_rand();
+    h.rnd = jm_rand();
     P->g->roll(P->st, h.rnd);
     hist_push(&h);
     P->rolling = false;
     after_change(true);
-    mg_save_game();
+    jm_save_game();
 }
 
-void mg_play_roll(void)
+void jm_play_roll(void)
 {
     if (P->over || P->rolling || !P->g->need_roll || P->g->need_roll(P->st) <= 0) return;
     P->rolling = true;
-    P->roll_t0 = mg_now();
-    for (int i = 0; i < 4; i++) P->roll_shown[i] = 1 + (int)(mg_rand() % 6);
-    mg_audio_play(SND_DICE);
-    mg_hud_refresh();
+    P->roll_t0 = jm_now();
+    for (int i = 0; i < 4; i++) P->roll_shown[i] = 1 + (int)(jm_rand() % 6);
+    jm_audio_play(SND_DICE);
+    jm_hud_refresh();
 }
 
 /* ---- whose turn it is ---------------------------------------------------------------------- */
@@ -277,75 +277,75 @@ static void begin_turn(void)
             int r = P->g->result(P->st, &why);
             int people = 0;
             for (int i = 0; i < P->np; i++) people += P->human[i] ? 1 : 0;
-            if (people == 1 && r >= 0) mg_audio_play(P->human[r] ? SND_WIN : SND_LOSE);
-            else mg_audio_play(SND_WIN);
-            mg_hud_end();
+            if (people == 1 && r >= 0) jm_audio_play(P->human[r] ? SND_WIN : SND_LOSE);
+            else jm_audio_play(SND_WIN);
+            jm_hud_end();
         }
         return;
     }
     int b = bottom_for_turn();
     if (b != P->bottom) {
         P->bottom = b;
-        mg_view_layout();
-        mg_hud_build();
+        jm_view_layout();
+        jm_hud_build();
     }
     clock_run();
     int t = P->g->turn(P->st);
     if (P->g->need_roll && P->g->need_roll(P->st) > 0) {
         /* a person rolls with the button or a tap; the board by itself */
-        if (!P->human[t]) P->wait_until = mg_now() + 450;
-        mg_hud_refresh();
+        if (!P->human[t]) P->wait_until = jm_now() + 450;
+        jm_hud_refresh();
         return;
     }
     P->nmoves = P->g->moves(P->st, P->moves, MESA_MAX_MOVES);
     if (P->nmoves == 1 && P->moves[0].n == 0) {
         /* nothing to do but pass */
         s_pass_wait = true;
-        P->wait_until = mg_now() + 1300;
-        mg_hud_status(_("No hay jugada: pasa el turno"), 1300);
+        P->wait_until = jm_now() + 1300;
+        jm_hud_status(_("No hay jugada: pasa el turno"), 1300);
         return;
     }
     if (!P->human[t]) {
         ai_start(false);
-        P->wait_until = mg_now() + 350;
+        P->wait_until = jm_now() + 350;
     }
-    mg_hud_refresh();
+    jm_hud_refresh();
 }
 
-void mg_play_relayout(void)
+void jm_play_relayout(void)
 {
-    mg_art_load(&mg->art, P->g, P->g->board(P->opts, &(float){ 0 }, &(float){ 0 }), mg->prefs.set, mg->prefs.flat,
-                mg->portrait);
-    mg_view_layout();
-    mg_hud_build();
+    jm_art_load(&jm->art, P->g, P->g->board(P->opts, &(float){ 0 }, &(float){ 0 }), jm->prefs.set, jm->prefs.flat,
+                jm->portrait);
+    jm_view_layout();
+    jm_hud_build();
 }
 
 /* ---- starting and stopping ------------------------------------------------------------------ */
 
-bool mg_play_start(const mg_new_t *n)
+bool jm_play_start(const jm_new_t *n)
 {
-    mg_play_stop(false);
-    if (n->gi < 0 || n->gi >= mg_ngames) return false;
-    const mesa_game_t *g = mg_games[n->gi].g;
-    mg_play_t *p = P;
+    jm_play_stop(false);
+    if (n->gi < 0 || n->gi >= jm_ngames) return false;
+    const mesa_game_t *g = jm_games[n->gi].g;
+    jm_play_t *p = P;
     memset(p, 0, sizeof *p);
     p->g = g;
     p->gi = n->gi;
     memcpy(p->opts, n->opts, sizeof p->opts);
-    p->seed = mg_rand();
+    p->seed = jm_rand();
     p->np = g->players(p->opts);
     if (p->np < 1) p->np = 1;
     if (p->np > MESA_MAX_PLAYERS) p->np = MESA_MAX_PLAYERS;
     memcpy(p->human, n->human, sizeof p->human);
     memcpy(p->level, n->level, sizeof p->level);
     p->two = n->two;
-    p->st = mg_calloc(g->state_size);
-    p->tmp = mg_calloc(g->state_size);
-    p->ai_st = mg_calloc(g->state_size);
-    p->hist = (mg_hist_t *)mg_calloc(sizeof(mg_hist_t) * MG_HIST_MAX);
-    p->moves = (mesa_move_t *)mg_calloc(sizeof(mesa_move_t) * MESA_MAX_MOVES);
+    p->st = jm_calloc(g->state_size);
+    p->tmp = jm_calloc(g->state_size);
+    p->ai_st = jm_calloc(g->state_size);
+    p->hist = (jm_hist_t *)jm_calloc(sizeof(jm_hist_t) * JM_HIST_MAX);
+    p->moves = (mesa_move_t *)jm_calloc(sizeof(mesa_move_t) * MESA_MAX_MOVES);
     if (!p->st || !p->tmp || !p->ai_st || !p->hist || !p->moves) {
-        mg_play_stop(false);
+        jm_play_stop(false);
         aos_ui_toast(_("No hay memoria"), 2000);
         return false;
     }
@@ -360,50 +360,50 @@ bool mg_play_start(const mg_new_t *n)
     fresh_position();
     if (p->fen[0] && !(g->setup && g->setup(p->st, p->opts, p->fen))) p->fen[0] = 0;
     p->bottom = bottom_for_turn();
-    mg->playing = true;
-    mg->screen = SCR_PLAY;
-    mg_play_relayout();
+    jm->playing = true;
+    jm->screen = SCR_PLAY;
+    jm_play_relayout();
     begin_turn();
     return true;
 }
 
-void mg_play_stop(bool keep)
+void jm_play_stop(bool keep)
 {
-    mg_play_t *p = P;
-    mg_play_ai_cancel();
-    if (keep && p->g && p->st) mg_save_game();
-    mg_hud_free();
-    mg_free(p->st);
-    mg_free(p->tmp);
-    mg_free(p->ai_st);
-    mg_free(p->hist);
-    mg_free(p->moves);
+    jm_play_t *p = P;
+    jm_play_ai_cancel();
+    if (keep && p->g && p->st) jm_save_game();
+    jm_hud_free();
+    jm_free(p->st);
+    jm_free(p->tmp);
+    jm_free(p->ai_st);
+    jm_free(p->hist);
+    jm_free(p->moves);
     bool thread = p->ai_thread && p->ai_busy;
     memset(p, 0, sizeof *p);
     p->ai_thread = thread;
-    mg->playing = false;
+    jm->playing = false;
 }
 
 /* ---- every frame ------------------------------------------------------------------------------- */
 
-void mg_play_tick(void)
+void jm_play_tick(void)
 {
-    if (!mg->playing || !P->g) return;
-    uint32_t now = mg_now();
+    if (!jm->playing || !P->g) return;
+    uint32_t now = jm_now();
     clock_count();
     if (P->over) return;
-    bool busy = mg_view_busy() || (int32_t)(now - mg->view.anim_until) < 0;
+    bool busy = jm_view_busy() || (int32_t)(now - jm->view.anim_until) < 0;
     if (P->rolling) {
         if (now - P->roll_t0 > 650) {
             roll_now();
             begin_turn();
         } else if ((now / 70) % 2 == 0) {
-            for (int i = 0; i < 4; i++) P->roll_shown[i] = 1 + (int)(mg_rand() % 6);
+            for (int i = 0; i < 4; i++) P->roll_shown[i] = 1 + (int)(jm_rand() % 6);
         }
         return;
     }
     if (busy || (int32_t)(now - P->wait_until) < 0) return;
-    if (mg->panel) return;
+    if (jm->panel) return;
     int t = P->g->turn(P->st);
     if (t < 0) {
         begin_turn();
@@ -418,7 +418,7 @@ void mg_play_tick(void)
     }
     if (!P->human[t]) {
         if (P->g->need_roll && P->g->need_roll(P->st) > 0) {
-            mg_play_roll();
+            jm_play_roll();
             return;
         }
         if (P->ai_done && !P->ai_busy && !P->hint_busy) {
@@ -430,7 +430,7 @@ void mg_play_tick(void)
                             P->ai.depth, (unsigned)(now - P->ai_t0));
                 apply(&m);
             } else if (P->nmoves > 0) {
-                mesa_move_t m = P->moves[mg_rand() % (uint32_t)P->nmoves];
+                mesa_move_t m = P->moves[jm_rand() % (uint32_t)P->nmoves];
                 apply(&m);
             }
             begin_turn();
@@ -450,7 +450,7 @@ void mg_play_tick(void)
         if (P->ai_ok && P->ai_move.n) {
             P->sel = P->ai_move.n > 1 ? P->ai_move.n - 1 : 1;
             memcpy(P->chosen, P->ai_move.step, (size_t)P->sel);
-            mg_hud_status(_("Esta es la que haría la placa"), 2500);
+            jm_hud_status(_("Esta es la que haría la placa"), 2500);
         }
     }
     if (!P->nmoves && !(P->g->need_roll && P->g->need_roll(P->st) > 0)) {
@@ -469,10 +469,10 @@ static bool prefix_ok(int k, int c)
     return false;
 }
 
-void mg_play_choose(const mesa_move_t *m)
+void jm_play_choose(const mesa_move_t *m)
 {
     mesa_move_t c = *m;
-    mg_hud_panel_close();
+    jm_hud_panel_close();
     apply(&c);
     begin_turn();
 }
@@ -499,7 +499,7 @@ static void complete(void)
         begin_turn();
         return;
     }
-    if (nd > 1) mg_hud_choice(done, nd);
+    if (nd > 1) jm_hud_choice(done, nd);
 }
 
 static void tap_cell(int plane, int piece)
@@ -507,12 +507,12 @@ static void tap_cell(int plane, int piece)
     if (P->sel == 0) {
         int c = piece != MESA_NO_CELL && prefix_ok(0, piece) ? piece : plane;
         if (c == MESA_NO_CELL || !prefix_ok(0, c)) {
-            if (plane != MESA_NO_CELL || piece != MESA_NO_CELL) mg_audio_play(SND_DENY);
+            if (plane != MESA_NO_CELL || piece != MESA_NO_CELL) jm_audio_play(SND_DENY);
             return;
         }
         P->chosen[0] = (uint8_t)c;
         P->sel = 1;
-        mg_audio_play(SND_TAP);
+        jm_audio_play(SND_TAP);
         complete();
         return;
     }
@@ -550,37 +550,37 @@ static void tap_cell(int plane, int piece)
     if (s != MESA_NO_CELL && prefix_ok(0, s)) {
         P->chosen[0] = (uint8_t)s;
         P->sel = 1;
-        mg_audio_play(SND_TAP);
+        jm_audio_play(SND_TAP);
         complete();
     }
 }
 
-void mg_play_tap(int x, int y)
+void jm_play_tap(int x, int y)
 {
-    if (!mg->playing || P->over || mg->panel) return;
-    if (!mg_play_person_to_move()) {
-        if (P->ai_busy) mg_hud_status(_("Piensa la placa..."), 1200);
+    if (!jm->playing || P->over || jm->panel) return;
+    if (!jm_play_person_to_move()) {
+        if (P->ai_busy) jm_hud_status(_("Piensa la placa..."), 1200);
         return;
     }
     if (P->rolling) return;
     if (P->g->need_roll && P->g->need_roll(P->st) > 0) {
-        mg_play_roll();
+        jm_play_roll();
         return;
     }
-    if (mg_view_busy() || s_pass_wait) return;
+    if (jm_view_busy() || s_pass_wait) return;
     if (!P->nmoves) P->nmoves = P->g->moves(P->st, P->moves, MESA_MAX_MOVES);
-    tap_cell(mg_view_hit(x, y), mg_view_hit_piece(x, y));
+    tap_cell(jm_view_hit(x, y), jm_view_hit_piece(x, y));
 }
 
 /* ---- the gamepad on the board ---------------------------------------------------------------------- */
 
-void mg_play_pad(void)
+void jm_play_pad(void)
 {
-    aos_pad_t *pad = &mg->pad;
-    mg_view_t *v = &mg->view;
-    if (aos_pad_pressed(pad, AOS_PAD_L)) mg_play_undo();
-    if (aos_pad_pressed(pad, AOS_PAD_R)) mg_play_redo();
-    if (!mg_play_person_to_move()) return;
+    aos_pad_t *pad = &jm->pad;
+    jm_view_t *v = &jm->view;
+    if (aos_pad_pressed(pad, AOS_PAD_L)) jm_play_undo();
+    if (aos_pad_pressed(pad, AOS_PAD_R)) jm_play_redo();
+    if (!jm_play_person_to_move()) return;
     uint32_t d = pad->repeat & AOS_PAD_DIRS;
     int ncell = P->g->cells ? P->g->cells(P->st) : 64;
     if (d && ncell > 0) {
@@ -589,7 +589,7 @@ void mg_play_pad(void)
             v->cursor = P->sel ? P->chosen[P->sel - 1] : (P->nmoves ? P->moves[0].step[0] : 0);
         } else {
             float cx, cy;
-            mg_view_cell_xy(v->cursor, 0, &cx, &cy);
+            jm_view_cell_xy(v->cursor, 0, &cx, &cy);
             float dx = d & AOS_PAD_LEFT ? -1.f : d & AOS_PAD_RIGHT ? 1.f : 0.f;
             float dy = d & AOS_PAD_UP ? -1.f : d & AOS_PAD_DOWN ? 1.f : 0.f;
             int best = -1;
@@ -597,7 +597,7 @@ void mg_play_pad(void)
             for (int c = 0; c < ncell; c++) {
                 if (c == v->cursor) continue;
                 float x, y;
-                mg_view_cell_xy(c, 0, &x, &y);
+                jm_view_cell_xy(c, 0, &x, &y);
                 float ex = x - cx, ey = y - cy;
                 float along = ex * dx + ey * dy;
                 if (along < 2) continue;
@@ -613,8 +613,8 @@ void mg_play_pad(void)
     }
     if (aos_pad_pressed(pad, AOS_PAD_A)) {
         if (P->g->need_roll && P->g->need_roll(P->st) > 0) {
-            mg_play_roll();
-        } else if (v->cursor >= 0 && !mg_view_busy()) {
+            jm_play_roll();
+        } else if (v->cursor >= 0 && !jm_view_busy()) {
             if (!P->nmoves) P->nmoves = P->g->moves(P->st, P->moves, MESA_MAX_MOVES);
             tap_cell(v->cursor, v->cursor);
         } else if (v->cursor < 0) {
@@ -629,73 +629,73 @@ void mg_play_pad(void)
 /* after n entries, is it a person's turn to choose a move (not to roll)? */
 static bool person_at(int n)
 {
-    mg_play_replay(n);
+    jm_play_replay(n);
     int t = P->g->turn(P->st);
     if (t < 0 || !P->human[t]) return false;
     return !(P->g->need_roll && P->g->need_roll(P->st) > 0);
 }
 
-bool mg_play_can_undo(void)
+bool jm_play_can_undo(void)
 {
-    return mg->playing && P->n > 0;
+    return jm->playing && P->n > 0;
 }
 
-bool mg_play_can_redo(void)
+bool jm_play_can_redo(void)
 {
-    return mg->playing && P->n < P->top;
+    return jm->playing && P->n < P->top;
 }
 
-void mg_play_undo(void)
+void jm_play_undo(void)
 {
-    if (!mg_play_can_undo() || P->rolling) return;
-    mg_play_ai_cancel();
+    if (!jm_play_can_undo() || P->rolling) return;
+    jm_play_ai_cancel();
     int n = P->n, top = P->top;
     /* back to the last time a person was to move; a roll stays rolled */
     int k = n - 1;
     while (k >= 0 && !person_at(k)) k--;
     if (k < 0) {
-        mg_play_replay(n);
+        jm_play_replay(n);
         P->top = top;
         begin_turn();
         return;
     }
-    mg_play_replay(k);
+    jm_play_replay(k);
     P->top = top;
     P->saved_result = false;
     after_change(true);
-    mg_save_game();
+    jm_save_game();
     begin_turn();
 }
 
-void mg_play_redo(void)
+void jm_play_redo(void)
 {
-    if (!mg_play_can_redo() || P->rolling) return;
-    mg_play_ai_cancel();
+    if (!jm_play_can_redo() || P->rolling) return;
+    jm_play_ai_cancel();
     int top = P->top, k = P->n + 1;
     while (k < top && !person_at(k)) k++;
-    mg_play_replay(k);
+    jm_play_replay(k);
     P->top = top;
     after_change(true);
-    mg_save_game();
+    jm_save_game();
     begin_turn();
 }
 
-void mg_play_resign(void)
+void jm_play_resign(void)
 {
-    if (!mg->playing || P->over) return;
+    if (!jm->playing || P->over) return;
     int t = P->g->turn(P->st);
     P->resigned = t;
     P->over = true;
-    mg_play_ai_cancel();
-    mg_save_game();
-    mg_hud_refresh();
-    mg_hud_end();
+    jm_play_ai_cancel();
+    jm_save_game();
+    jm_hud_refresh();
+    jm_hud_end();
 }
 
-void mg_play_hint(void)
+void jm_play_hint(void)
 {
-    if (!mg_play_person_to_move() || P->ai_busy) return;
+    if (!jm_play_person_to_move() || P->ai_busy) return;
     if (P->g->need_roll && P->g->need_roll(P->st) > 0) return;
-    mg_hud_status(_("Pensando..."), 3000);
+    jm_hud_status(_("Pensando..."), 3000);
     ai_start(true);
 }

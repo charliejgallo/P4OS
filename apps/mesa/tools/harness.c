@@ -50,13 +50,13 @@ static int perft(void)
     int bad = 0;
     for (size_t i = 0; i < sizeof T / sizeof T[0]; i++) {
         ch_pos_t p;
-        if (!ch_fen(&p, T[i].fen)) {
+        if (!mch_fen(&p, T[i].fen)) {
             printf("bad fen %zu\n", i);
             bad++;
             continue;
         }
         uint32_t t0 = now_ms();
-        uint64_t n = ch_perft(&p, T[i].d);
+        uint64_t n = mch_perft(&p, T[i].d);
         printf("%s perft %d = %llu (%s, %u ms)\n", i ? "pos" : "start", T[i].d, (unsigned long long)n,
                n == T[i].n ? "ok" : "WRONG", now_ms() - t0);
         if (n != T[i].n) bad++;
@@ -67,7 +67,7 @@ static int perft(void)
 static int think(const char *fen, int ms, int level_noise)
 {
     ch_pos_t p;
-    if (!ch_fen(&p, fen)) return 1;
+    if (!mch_fen(&p, fen)) return 1;
     volatile bool stop = false;
     ch_think_t t = { 0 };
     t.stop = &stop;
@@ -75,9 +75,9 @@ static int think(const char *fen, int ms, int level_noise)
     t.ms = (uint32_t)ms;
     t.noise = level_noise;
     t.seed = 1234;
-    uint32_t m = ch_think(&p, &t);
+    uint32_t m = mch_think(&p, &t);
     char san[16];
-    ch_san(&p, m, san);
+    mch_san(&p, m, san);
     printf("%s  depth %d score %d nodes %u (%u knps)\n", san, t.depth_done, t.score, t.nodes,
            t.nodes / (uint32_t)(ms ? ms : 1));
     return 0;
@@ -164,7 +164,7 @@ static int selfplay(const mesa_game_t *g, int games, int level)
 
 int main(int argc, char **argv)
 {
-    ch_tables();
+    mch_tables();
     if (argc >= 2 && !strcmp(argv[1], "perft")) return perft();
     if (argc >= 2 && !strcmp(argv[1], "self")) {
         const mesa_game_t *G[] = { &mesa_ajedrez, &mesa_damas, &mesa_reversi, &mesa_cuatro, &mesa_ludo, &mesa_backgammon };

@@ -34,7 +34,7 @@ static uint64_t xs(uint64_t *s)
     return *s = x;
 }
 
-void ch_tables(void)
+void mch_tables(void)
 {
     if (s_tables) return;
     uint64_t s = 0x9E3779B97F4A7C15ull;
@@ -59,7 +59,7 @@ static int mat_of(int type)
     return type == CH_N || type == CH_B ? 1 : type == CH_R ? 2 : type == CH_Q ? 4 : 0;
 }
 
-void ch_rekey(ch_pos_t *p)
+void mch_rekey(ch_pos_t *p)
 {
     uint64_t k = 0;
     p->mat[0] = p->mat[1] = 0;
@@ -79,14 +79,14 @@ void ch_rekey(ch_pos_t *p)
     p->hist[0] = k;
 }
 
-void ch_start(ch_pos_t *p)
+void mch_start(ch_pos_t *p)
 {
-    ch_fen(p, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    mch_fen(p, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
 }
 
-bool ch_fen(ch_pos_t *p, const char *fen)
+bool mch_fen(ch_pos_t *p, const char *fen)
 {
-    ch_tables();
+    mch_tables();
     ch_pos_t q;
     memset(&q, 0, sizeof q);
     q.ep = -1;
@@ -148,14 +148,14 @@ bool ch_fen(ch_pos_t *p, const char *fen)
         if (!(i & 0x88) && CH_TYPE(q.sq[i]) == CH_P && ((i >> 4) == 0 || (i >> 4) == 7)) return false;
     }
     if (kings[0] != 1 || kings[1] != 1) return false;
-    ch_rekey(&q);
+    mch_rekey(&q);
     /* the side that does not move may not be in check */
-    if (ch_in_check(&q, q.side ^ 1)) return false;
+    if (mch_in_check(&q, q.side ^ 1)) return false;
     *p = q;
     return true;
 }
 
-bool ch_attacked(const ch_pos_t *p, int sq, int by)
+bool mch_attacked(const ch_pos_t *p, int sq, int by)
 {
     const uint8_t *b = p->sq;
     /* pawns: a white pawn attacks up, so it sits below */
@@ -192,9 +192,9 @@ bool ch_attacked(const ch_pos_t *p, int sq, int by)
     return false;
 }
 
-bool ch_in_check(const ch_pos_t *p, int side)
+bool mch_in_check(const ch_pos_t *p, int side)
 {
-    return ch_attacked(p, p->king[side], side ^ 1);
+    return mch_attacked(p, p->king[side], side ^ 1);
 }
 
 static inline void add_promos(uint32_t *out, int *n, int f, int t, int fl)
@@ -205,7 +205,7 @@ static inline void add_promos(uint32_t *out, int *n, int f, int t, int fl)
     out[(*n)++] = CHMV(f, t, CH_B, fl | CHM_PROMO);
 }
 
-int ch_gen(const ch_pos_t *p, uint32_t *out, bool caps)
+int mch_gen(const ch_pos_t *p, uint32_t *out, bool caps)
 {
     const uint8_t *b = p->sq;
     int side = p->side, col = side ? CH_BLACK : 0, n = 0;
@@ -274,12 +274,12 @@ int ch_gen(const ch_pos_t *p, uint32_t *out, bool caps)
     if (!caps) {
         int e = side ? 0x74 : 0x04, o = side ^ 1;
         int ks = side ? CH_BK : CH_WK, qs = side ? CH_BQ : CH_WQ;
-        if ((p->castle & ks) && !b[e + 1] && !b[e + 2] && !ch_attacked(p, e, o) && !ch_attacked(p, e + 1, o) &&
-            !ch_attacked(p, e + 2, o)) {
+        if ((p->castle & ks) && !b[e + 1] && !b[e + 2] && !mch_attacked(p, e, o) && !mch_attacked(p, e + 1, o) &&
+            !mch_attacked(p, e + 2, o)) {
             out[n++] = CHMV(e, e + 2, 0, CHM_CASTLE);
         }
-        if ((p->castle & qs) && !b[e - 1] && !b[e - 2] && !b[e - 3] && !ch_attacked(p, e, o) &&
-            !ch_attacked(p, e - 1, o) && !ch_attacked(p, e - 2, o)) {
+        if ((p->castle & qs) && !b[e - 1] && !b[e - 2] && !b[e - 3] && !mch_attacked(p, e, o) &&
+            !mch_attacked(p, e - 1, o) && !mch_attacked(p, e - 2, o)) {
             out[n++] = CHMV(e, e - 2, 0, CHM_CASTLE);
         }
     }
@@ -301,7 +301,7 @@ static inline void take(ch_pos_t *p, int s)
     p->sq[s] = 0;
 }
 
-bool ch_make(ch_pos_t *p, uint32_t m, ch_undo_t *u)
+bool mch_make(ch_pos_t *p, uint32_t m, ch_undo_t *u)
 {
     int f = CHMV_FROM(m), t = CHMV_TO(m), fl = CHMV_FL(m), side = p->side;
     int pc = p->sq[f];
@@ -349,7 +349,7 @@ bool ch_make(ch_pos_t *p, uint32_t m, ch_undo_t *u)
     if (side) p->full++;
     p->side ^= 1;
     p->key ^= ZSIDE;
-    if (ch_attacked(p, p->king[side], side ^ 1)) {
+    if (mch_attacked(p, p->king[side], side ^ 1)) {
         undo_board(p, m, u);
         return false;
     }
@@ -396,13 +396,13 @@ static void undo_board(ch_pos_t *p, uint32_t m, const ch_undo_t *u)
     p->key = u->key;
 }
 
-void ch_unmake(ch_pos_t *p, uint32_t m, const ch_undo_t *u)
+void mch_unmake(ch_pos_t *p, uint32_t m, const ch_undo_t *u)
 {
     if (p->nh > 1) p->nh--;
     undo_board(p, m, u);
 }
 
-void ch_null(ch_pos_t *p, ch_undo_t *u)
+void mch_null(ch_pos_t *p, ch_undo_t *u)
 {
     u->ep = p->ep;
     u->key = p->key;
@@ -414,7 +414,7 @@ void ch_null(ch_pos_t *p, ch_undo_t *u)
     p->half = 0;    /* no repetition through a null move */
 }
 
-void ch_unnull(ch_pos_t *p, const ch_undo_t *u)
+void mch_unnull(ch_pos_t *p, const ch_undo_t *u)
 {
     p->side ^= 1;
     p->ep = u->ep;
@@ -422,7 +422,7 @@ void ch_unnull(ch_pos_t *p, const ch_undo_t *u)
     p->half = u->half;
 }
 
-int ch_repeats(const ch_pos_t *p)
+int mch_repeats(const ch_pos_t *p)
 {
     int n = 0;
     int lo = p->nh - 1 - p->half;
@@ -433,7 +433,7 @@ int ch_repeats(const ch_pos_t *p)
     return n;
 }
 
-bool ch_no_mating_material(const ch_pos_t *p)
+bool mch_no_mating_material(const ch_pos_t *p)
 {
     int minors[2] = { 0, 0 }, bish_col[2] = { -1, -1 };
     bool mixed = false;
@@ -458,14 +458,14 @@ bool ch_no_mating_material(const ch_pos_t *p)
     return !mixed;
 }
 
-int ch_legal(ch_pos_t *p, uint32_t *out)
+int mch_legal(ch_pos_t *p, uint32_t *out)
 {
     uint32_t tmp[256];
-    int n = ch_gen(p, tmp, false), k = 0;
+    int n = mch_gen(p, tmp, false), k = 0;
     for (int i = 0; i < n; i++) {
         ch_undo_t u;
-        if (ch_make(p, tmp[i], &u)) {
-            ch_unmake(p, tmp[i], &u);
+        if (mch_make(p, tmp[i], &u)) {
+            mch_unmake(p, tmp[i], &u);
             out[k++] = tmp[i];
         }
     }
@@ -478,7 +478,7 @@ static void sqname(int s, char *o)
     o[1] = (char)('1' + (s >> 4));
 }
 
-void ch_san(ch_pos_t *p, uint32_t m, char *out)
+void mch_san(ch_pos_t *p, uint32_t m, char *out)
 {
     int f = CHMV_FROM(m), t = CHMV_TO(m), fl = CHMV_FL(m);
     int ty = CH_TYPE(p->sq[f]);
@@ -490,7 +490,7 @@ void ch_san(ch_pos_t *p, uint32_t m, char *out)
         if (ty != CH_P) {
             *o++ = " PNBRQK"[ty];
             uint32_t l[256];
-            int n = ch_legal(p, l);
+            int n = mch_legal(p, l);
             bool other = false, same_file = false, same_rank = false;
             for (int i = 0; i < n; i++) {
                 int f2 = CHMV_FROM(l[i]);
@@ -519,12 +519,12 @@ void ch_san(ch_pos_t *p, uint32_t m, char *out)
         }
     }
     ch_undo_t u;
-    if (ch_make(p, m, &u)) {
-        if (ch_in_check(p, p->side)) {
+    if (mch_make(p, m, &u)) {
+        if (mch_in_check(p, p->side)) {
             uint32_t l[256];
-            *o++ = ch_legal(p, l) ? '+' : '#';
+            *o++ = mch_legal(p, l) ? '+' : '#';
         }
-        ch_unmake(p, m, &u);
+        mch_unmake(p, m, &u);
     }
     *o = 0;
 }
@@ -541,15 +541,15 @@ static void clean(const char *s, char *o, int n)
     o[k] = 0;
 }
 
-uint32_t ch_parse_san(ch_pos_t *p, const char *s)
+uint32_t mch_parse_san(ch_pos_t *p, const char *s)
 {
     char want[16], have[16], san[16];
     clean(s, want, sizeof want);
     if (!want[0]) return 0;
     uint32_t l[256];
-    int n = ch_legal(p, l);
+    int n = mch_legal(p, l);
     for (int i = 0; i < n; i++) {
-        ch_san(p, l[i], san);
+        mch_san(p, l[i], san);
         clean(san, have, sizeof have);
         if (!strcmp(want, have)) return l[i];
         /* "exd6e.p." and promotions written without '=' */
@@ -573,16 +573,16 @@ uint32_t ch_parse_san(ch_pos_t *p, const char *s)
     return 0;
 }
 
-uint64_t ch_perft(ch_pos_t *p, int depth)
+uint64_t mch_perft(ch_pos_t *p, int depth)
 {
     uint32_t l[256];
-    int n = ch_gen(p, l, false);
+    int n = mch_gen(p, l, false);
     uint64_t total = 0;
     for (int i = 0; i < n; i++) {
         ch_undo_t u;
-        if (!ch_make(p, l[i], &u)) continue;
-        total += depth <= 1 ? 1 : ch_perft(p, depth - 1);
-        ch_unmake(p, l[i], &u);
+        if (!mch_make(p, l[i], &u)) continue;
+        total += depth <= 1 ? 1 : mch_perft(p, depth - 1);
+        mch_unmake(p, l[i], &u);
     }
     return total;
 }

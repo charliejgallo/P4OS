@@ -89,15 +89,15 @@ packs are in git.
   `apps/mesa/<name>.so` on the card (`aos_hal_module_open`), exporting
   `mesa_module_abi()` (compared with `MESA_ABI`), `mesa_module_game(i)` and
   `mesa_module_host()`, with its art in `apps/mesa_<word>_p4.pak`. The app
-  scans them at start and adds them to the menu (`main/mg_games.c`). None
+  scans them at start and adds them to the menu (`main/jm_games.c`). None
   exists yet.
-- **The picture** (`main/mg_gfx.c`): Bastion's compositor, its size set
+- **The picture** (`main/jm_gfx.c`): Bastion's compositor, its size set
   at run time, drawing into an LVGL canvas that fills the screen: LVGL
   turns it with the screen and draws the cards and the buttons over it.
   Each 16 x 16 tile of the screen is hashed with what is drawn on it, and
   only the tiles that changed are drawn again and invalidated: a still
   board costs nothing.
-- **The view** (`main/mg_view.c`): the camera is orthographic and fixed
+- **The view** (`main/jm_view.c`): the camera is orthographic and fixed
   (55 degrees over the table, straight from above for the flat view, from
   the front for four in a row), so one sprite of a piece serves every
   cell, anchored at its foot. Pieces fly in arcs with a shadow under them
@@ -105,7 +105,7 @@ packs are in git.
   lands; a disc turned or a pawn promoted hops in place; a new disc falls.
   Lying down the board is the same picture; backgammon, wider than tall,
   has a picture turned a quarter for upright.
-- **The board thinks** on a thread of its own (`main/mg_play.c`), on a copy
+- **The board thinks** on a thread of its own (`main/jm_play.c`), on a copy
   of the position; undo, a new game or leaving stop it and wait for it.
 - **The packs** (`tools/pack_p4.py`): the boards as JPEG (the P4's engine
   decodes them), with their geometry as text; the pieces as sheets of runs

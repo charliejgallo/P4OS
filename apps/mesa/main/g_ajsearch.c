@@ -100,7 +100,7 @@ static void pst_init(void)
 static const int8_t KN[8] = { 33, 31, 18, 14, -33, -31, -18, -14 };
 static const int8_t DIRS[8] = { 17, 15, -15, -17, 16, -16, 1, -1 };
 
-int ch_eval(const ch_pos_t *p)
+int mch_eval(const ch_pos_t *p)
 {
     pst_init();
     int mg[2] = { 0, 0 }, eg[2] = { 0, 0 };
@@ -256,9 +256,9 @@ typedef struct {
     uint32_t    nodes;
 } sr_t;
 
-bool ch_search_init(void)
+bool mch_search_init(void)
 {
-    ch_tables();
+    mch_tables();
     pst_init();
     if (s_tt) return true;
     size_t n = sizeof(tt_t) << TT_BITS;
@@ -268,7 +268,7 @@ bool ch_search_init(void)
     return true;
 }
 
-void ch_search_free(void)
+void mch_search_free(void)
 {
     if (!s_tt) return;
     if (mesa_host && mesa_host->free) mesa_host->free(s_tt);
@@ -335,13 +335,13 @@ static int qsearch(sr_t *s, ch_pos_t *p, int alpha, int beta, int ply)
 {
     s->nodes++;
     if (timeout(s)) return 0;
-    int stand = ch_eval(p);
+    int stand = mch_eval(p);
     if (stand >= beta) return stand;
     if (stand > alpha) alpha = stand;
     if (ply >= MAX_PLY - 1) return stand;
     uint32_t ms[128];
     int sc[128];
-    int n = ch_gen(p, ms, true);
+    int n = mch_gen(p, ms, true);
     order(s, p, ms, sc, n, 0, MAX_PLY);
     for (int i = 0; i < n; i++) {
         uint32_t m = pick(ms, sc, n, i);
@@ -351,9 +351,9 @@ static int qsearch(sr_t *s, ch_pos_t *p, int alpha, int beta, int ply)
             if (stand + VAL_EG[victim] + 200 < alpha) continue;
         }
         ch_undo_t u;
-        if (!ch_make(p, m, &u)) continue;
+        if (!mch_make(p, m, &u)) continue;
         int v = -qsearch(s, p, -beta, -alpha, ply + 1);
-        ch_unmake(p, m, &u);
+        mch_unmake(p, m, &u);
         if (s->abort) return 0;
         if (v >= beta) return v;
         if (v > alpha) alpha = v;
@@ -365,19 +365,19 @@ static int search(sr_t *s, ch_pos_t *p, int depth, int alpha, int beta, int ply,
 {
     bool pv = beta - alpha > 1;
     if (ply > 0) {
-        if (p->half >= 100 || ch_repeats(p) >= 1 || ch_no_mating_material(p)) return 0;
+        if (p->half >= 100 || mch_repeats(p) >= 1 || mch_no_mating_material(p)) return 0;
         /* mates further than one already found cannot be better */
         int ma = -MATE + ply, mb = MATE - ply - 1;
         if (alpha < ma) alpha = ma;
         if (beta > mb) beta = mb;
         if (alpha >= beta) return alpha;
     }
-    bool check = ch_in_check(p, p->side);
+    bool check = mch_in_check(p, p->side);
     if (check) depth++;
     if (depth <= 0) return qsearch(s, p, alpha, beta, ply);
     s->nodes++;
     if (timeout(s)) return 0;
-    if (ply >= MAX_PLY - 1) return ch_eval(p);
+    if (ply >= MAX_PLY - 1) return mch_eval(p);
 
     tt_t *e = &s_tt[(uint32_t)p->key & ((1u << TT_BITS) - 1)];
     uint32_t chk = (uint32_t)(p->key >> 32);
@@ -394,29 +394,29 @@ static int search(sr_t *s, ch_pos_t *p, int depth, int alpha, int beta, int ply,
         }
     }
 
-    int stat = check ? -INF : ch_eval(p);
+    int stat = check ? -INF : mch_eval(p);
     /* futility at the frontier: a quiet position far below alpha */
     if (!pv && !check && depth <= 2 && stat - 120 * depth >= beta && beta < MATE_IN) return stat;
     if (null_ok && !pv && !check && depth >= 3 && stat >= beta && p->mat[p->side] > 0) {
         ch_undo_t u;
-        ch_null(p, &u);
+        mch_null(p, &u);
         int R = depth >= 7 ? 3 : 2;
         int v = -search(s, p, depth - 1 - R, -beta, -beta + 1, ply + 1, false);
-        ch_unnull(p, &u);
+        mch_unnull(p, &u);
         if (s->abort) return 0;
         if (v >= beta) return v >= MATE_IN ? beta : v;
     }
 
     uint32_t ms[256];
     int sc[256];
-    int n = ch_gen(p, ms, false);
+    int n = mch_gen(p, ms, false);
     order(s, p, ms, sc, n, ttm, ply);
     int best = -INF, legal = 0, a0 = alpha;
     uint32_t bestm = 0;
     for (int i = 0; i < n; i++) {
         uint32_t m = pick(ms, sc, n, i);
         ch_undo_t u;
-        if (!ch_make(p, m, &u)) continue;
+        if (!mch_make(p, m, &u)) continue;
         legal++;
         bool quiet = !(CHMV_FL(m) & (CHM_CAP | CHM_PROMO));
         int v;
@@ -424,7 +424,7 @@ static int search(sr_t *s, ch_pos_t *p, int depth, int alpha, int beta, int ply,
             v = -search(s, p, depth - 1, -beta, -alpha, ply + 1, true);
         } else {
             int red = 0;
-            if (quiet && !check && depth >= 3 && legal > 3 && !ch_in_check(p, p->side)) {
+            if (quiet && !check && depth >= 3 && legal > 3 && !mch_in_check(p, p->side)) {
                 red = legal > 8 ? 2 : 1;
                 if (pv) red--;
             }
@@ -432,7 +432,7 @@ static int search(sr_t *s, ch_pos_t *p, int depth, int alpha, int beta, int ply,
             if (v > alpha && red) v = -search(s, p, depth - 1, -alpha - 1, -alpha, ply + 1, true);
             if (v > alpha && v < beta) v = -search(s, p, depth - 1, -beta, -alpha, ply + 1, true);
         }
-        ch_unmake(p, m, &u);
+        mch_unmake(p, m, &u);
         if (s->abort) return 0;
         if (v > best) {
             best = v;
@@ -479,16 +479,16 @@ static uint32_t rnd(uint32_t *s)
     return *s = x;
 }
 
-uint32_t ch_think(ch_pos_t *p, ch_think_t *t)
+uint32_t mch_think(ch_pos_t *p, ch_think_t *t)
 {
-    ch_search_init();
+    mch_search_init();
     sr_t *s = (sr_t *)(mesa_host && mesa_host->alloc ? mesa_host->alloc(sizeof *s) : malloc(sizeof *s));
     if (!s) return 0;
     memset(s, 0, sizeof *s);
     s->t = t;
     if (t->now) t->t0 = t->now();
     uint32_t ms[256];
-    int nm = ch_legal(p, ms);
+    int nm = mch_legal(p, ms);
     if (!nm) {
         if (mesa_host && mesa_host->free) mesa_host->free(s);
         else free(s);
@@ -505,7 +505,7 @@ uint32_t ch_think(ch_pos_t *p, ch_think_t *t)
         int alpha = -INF, dbest = -1, dscore = -INF;
         for (int i = 0; i < nm; i++) {
             ch_undo_t u;
-            ch_make(p, ms[i], &u);
+            mch_make(p, ms[i], &u);
             int v;
             if (t->noise) {
                 /* every root move's exact value */
@@ -516,7 +516,7 @@ uint32_t ch_think(ch_pos_t *p, ch_think_t *t)
                 v = -search(s, p, d - 1, -alpha - 1, -alpha, 1, true);
                 if (v > alpha && !s->abort) v = -search(s, p, d - 1, -INF, -alpha, 1, true);
             }
-            ch_unmake(p, ms[i], &u);
+            mch_unmake(p, ms[i], &u);
             if (s->abort) break;
             score[i] = v;
             int k = v + (v > -MATE_IN && v < MATE_IN ? noise[i] : 0);

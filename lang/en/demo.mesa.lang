@@ -116,14 +116,14 @@ Internacionales (10 × 10)	International (10 × 10)
 
 #: apps/mesa/main/g_damas.c:66
 #: apps/mesa/main/g_damas.c:67
-#: apps/mesa/main/mg_setup.c:418
-#: apps/mesa/main/mg_setup.c:419
+#: apps/mesa/main/jm_setup.c:418
+#: apps/mesa/main/jm_setup.c:419
 No	No
 
 #: apps/mesa/main/g_damas.c:66
 #: apps/mesa/main/g_damas.c:67
-#: apps/mesa/main/mg_setup.c:418
-#: apps/mesa/main/mg_setup.c:419
+#: apps/mesa/main/jm_setup.c:418
+#: apps/mesa/main/jm_setup.c:419
 Sí	Yes
 
 #: apps/mesa/main/g_damas.c:69
@@ -148,7 +148,7 @@ Verde	Green
 Azul	Blue
 
 #: apps/mesa/main/g_ludo.c:62
-#: apps/mesa/main/mg_setup.c:277
+#: apps/mesa/main/jm_setup.c:277
 Jugadores	Players
 
 #: apps/mesa/main/g_ludo.c:150
@@ -169,244 +169,244 @@ Reversi	Reversi
 #: apps/mesa/main/g_reversi.c:382
 Encerrá las fichas del otro y dalas vuelta	Trap the other side's discs and turn them over
 
-#: apps/mesa/main/mesa.c:48
-damas	kings
-
-#: apps/mesa/main/mesa.c:48
-fichas	discs
-
-#: apps/mesa/main/mesa.c:48
-en casa	home
-
-#: apps/mesa/main/mesa.c:48
-afuera	off
-
-#: apps/mesa/main/mesa.c:166
-No se pudo abrir la partida	The game could not be opened
-
-#: apps/mesa/main/mesa.c:266
-Juegos de mesa	Board games
-
-#: apps/mesa/main/mesa.c:274
-Seguir la partida	Resume the game
-
-#: apps/mesa/main/mesa.c:287
-Reloj de ajedrez	Chess clock
-
-#: apps/mesa/main/mesa.c:287
-Para una partida en un tablero de verdad	For a game on a real board
-
-#: apps/mesa/main/mesa.c:288
-#: apps/mesa/main/mg_hud.c:738
-#: apps/mesa/main/mg_setup.c:404
-Ajustes	Settings
-
-#: apps/mesa/main/mesa.c:290
-Falta el paquete de arte mesa_p4.pak: los juegos se ven con piezas de reemplazo.	The art pack mesa_p4.pak is missing: the games show stand-in pieces.
-
-#: apps/mesa/main/mg_hud.c:157
-#: apps/mesa/main/mg_setup.c:290
+#: apps/mesa/main/jm_hud.c:158
+#: apps/mesa/main/jm_setup.c:290
 Placa	Computer
 
-#: apps/mesa/main/mg_hud.c:238
+#: apps/mesa/main/jm_hud.c:240
 RDTAC	KQRBN
 
-#: apps/mesa/main/mg_hud.c:318
+#: apps/mesa/main/jm_hud.c:320
 Planilla	Score sheet
 
-#: apps/mesa/main/mg_hud.c:524
+#: apps/mesa/main/jm_hud.c:526
 Piensa...	Thinking...
 
-#: apps/mesa/main/mg_hud.c:555
+#: apps/mesa/main/jm_hud.c:557
 Tirá los dados	Roll the dice
 
-#: apps/mesa/main/mg_hud.c:701
+#: apps/mesa/main/jm_hud.c:703
 Guardada en	Saved as
 
-#: apps/mesa/main/mg_hud.c:704
+#: apps/mesa/main/jm_hud.c:706
 No se pudo guardar	It could not be saved
 
-#: apps/mesa/main/mg_hud.c:714
+#: apps/mesa/main/jm_hud.c:716
 No se pudo leer la partida	The game could not be read
 
-#: apps/mesa/main/mg_hud.c:721
-#: apps/mesa/main/mg_hud.c:736
+#: apps/mesa/main/jm_hud.c:723
+#: apps/mesa/main/jm_hud.c:738
 Abrir una partida	Open a game
 
-#: apps/mesa/main/mg_hud.c:721
+#: apps/mesa/main/jm_hud.c:723
 No hay partidas guardadas en /sdcard/mesa/ajedrez	No games saved in /sdcard/mesa/ajedrez
 
-#: apps/mesa/main/mg_hud.c:723
-#: apps/mesa/main/mg_hud.c:802
+#: apps/mesa/main/jm_hud.c:725
+#: apps/mesa/main/jm_hud.c:804
 Cancelar	Cancel
 
-#: apps/mesa/main/mg_hud.c:731
+#: apps/mesa/main/jm_hud.c:733
 Seguir	Resume
 
-#: apps/mesa/main/mg_hud.c:732
+#: apps/mesa/main/jm_hud.c:734
 Partida nueva	New game
 
-#: apps/mesa/main/mg_hud.c:733
+#: apps/mesa/main/jm_hud.c:735
 Abandonar	Resign
 
-#: apps/mesa/main/mg_hud.c:735
-#: apps/mesa/main/mg_hud.c:773
+#: apps/mesa/main/jm_hud.c:737
+#: apps/mesa/main/jm_hud.c:775
 Guardar la partida	Save the game
 
-#: apps/mesa/main/mg_hud.c:739
-#: apps/mesa/main/mg_hud.c:774
+#: apps/mesa/main/jm_hud.c:740
+#: apps/mesa/main/jm_setup.c:404
+#: apps/mesa/main/mesa.c:293
+Ajustes	Settings
+
+#: apps/mesa/main/jm_hud.c:741
+#: apps/mesa/main/jm_hud.c:776
 Salir al menú	Back to the menu
 
-#: apps/mesa/main/mg_hud.c:753
+#: apps/mesa/main/jm_hud.c:755
 Se acabó el tiempo	Time is up
 
-#: apps/mesa/main/mg_hud.c:756
+#: apps/mesa/main/jm_hud.c:758
 Abandono	Resigned
 
-#: apps/mesa/main/mg_hud.c:765
+#: apps/mesa/main/jm_hud.c:767
 Tablas	Draw
 
-#: apps/mesa/main/mg_hud.c:766
+#: apps/mesa/main/jm_hud.c:768
 ¡Ganaste!	You won!
 
-#: apps/mesa/main/mg_hud.c:766
+#: apps/mesa/main/jm_hud.c:768
 Ganó la placa	The computer won
 
-#: apps/mesa/main/mg_hud.c:767
+#: apps/mesa/main/jm_hud.c:769
 Gana	Winner
 
-#: apps/mesa/main/mg_hud.c:768
+#: apps/mesa/main/jm_hud.c:770
 Partida terminada	Game over
 
-#: apps/mesa/main/mg_hud.c:771
+#: apps/mesa/main/jm_hud.c:773
 Revancha	Rematch
 
-#: apps/mesa/main/mg_hud.c:772
+#: apps/mesa/main/jm_hud.c:774
 Ver el tablero	See the board
 
-#: apps/mesa/main/mg_hud.c:795
+#: apps/mesa/main/jm_hud.c:797
 ¿En qué se convierte?	Promote to?
 
-#: apps/mesa/main/mg_play.c:305
+#: apps/mesa/main/jm_play.c:305
 No hay jugada: pasa el turno	No move: the turn passes
 
-#: apps/mesa/main/mg_play.c:349
+#: apps/mesa/main/jm_play.c:349
 No hay memoria	Not enough memory
 
-#: apps/mesa/main/mg_play.c:453
+#: apps/mesa/main/jm_play.c:453
 Esta es la que haría la placa	This is what the computer would play
 
-#: apps/mesa/main/mg_play.c:562
+#: apps/mesa/main/jm_play.c:562
 Piensa la placa...	The computer is thinking...
 
-#: apps/mesa/main/mg_play.c:699
+#: apps/mesa/main/jm_play.c:699
 Pensando...	Thinking...
 
-#: apps/mesa/main/mg_save.c:412
+#: apps/mesa/main/jm_save.c:412
 jugadas	moves
 
-#: apps/mesa/main/mg_setup.c:49
+#: apps/mesa/main/jm_setup.c:49
 Sin reloj	No clock
 
-#: apps/mesa/main/mg_setup.c:50
+#: apps/mesa/main/jm_setup.c:50
 por jugada	per move
 
-#: apps/mesa/main/mg_setup.c:277
+#: apps/mesa/main/jm_setup.c:277
 De a dos	Two players
 
-#: apps/mesa/main/mg_setup.c:277
+#: apps/mesa/main/jm_setup.c:277
 Contra la placa	Against the computer
 
-#: apps/mesa/main/mg_setup.c:280
+#: apps/mesa/main/jm_setup.c:280
 Jugás con	You play
 
-#: apps/mesa/main/mg_setup.c:280
+#: apps/mesa/main/jm_setup.c:280
 Al azar	Random
 
-#: apps/mesa/main/mg_setup.c:282
-#: apps/mesa/main/mg_setup.c:293
+#: apps/mesa/main/jm_setup.c:282
+#: apps/mesa/main/jm_setup.c:293
 Nivel de la placa	Computer level
 
-#: apps/mesa/main/mg_setup.c:285
+#: apps/mesa/main/jm_setup.c:285
 Cómo	How
 
-#: apps/mesa/main/mg_setup.c:285
+#: apps/mesa/main/jm_setup.c:285
 Pasando la placa	Passing the board
 
-#: apps/mesa/main/mg_setup.c:285
+#: apps/mesa/main/jm_setup.c:285
 Cara a cara	Face to face
 
-#: apps/mesa/main/mg_setup.c:290
+#: apps/mesa/main/jm_setup.c:290
 Persona	Person
 
-#: apps/mesa/main/mg_setup.c:296
+#: apps/mesa/main/jm_setup.c:296
 Reloj	Clock
 
-#: apps/mesa/main/mg_setup.c:297
+#: apps/mesa/main/jm_setup.c:297
 Incremento	Increment
 
-#: apps/mesa/main/mg_setup.c:297
+#: apps/mesa/main/jm_setup.c:297
 Bronstein	Bronstein
 
-#: apps/mesa/main/mg_setup.c:297
+#: apps/mesa/main/jm_setup.c:297
 Fischer	Fischer
 
-#: apps/mesa/main/mg_setup.c:299
+#: apps/mesa/main/jm_setup.c:299
 Jugar	Play
 
-#: apps/mesa/main/mg_setup.c:303
+#: apps/mesa/main/jm_setup.c:303
 Volver	Back
 
-#: apps/mesa/main/mg_setup.c:360
+#: apps/mesa/main/jm_setup.c:360
 Madera	Wood
 
-#: apps/mesa/main/mg_setup.c:360
+#: apps/mesa/main/jm_setup.c:360
 Mármol	Marble
 
-#: apps/mesa/main/mg_setup.c:360
+#: apps/mesa/main/jm_setup.c:360
 Vidrio	Glass
 
-#: apps/mesa/main/mg_setup.c:360
+#: apps/mesa/main/jm_setup.c:360
 Metal	Metal
 
-#: apps/mesa/main/mg_setup.c:410
+#: apps/mesa/main/jm_setup.c:410
 Piezas y tablero	Pieces and board
 
-#: apps/mesa/main/mg_setup.c:412
+#: apps/mesa/main/jm_setup.c:412
 Los juegos de mármol, vidrio y metal se bajan aparte desde la Tienda.	The marble, glass and metal sets are separate downloads from the Store.
 
-#: apps/mesa/main/mg_setup.c:417
+#: apps/mesa/main/jm_setup.c:417
 Vista	View
 
-#: apps/mesa/main/mg_setup.c:417
+#: apps/mesa/main/jm_setup.c:417
 Plana	Flat
 
-#: apps/mesa/main/mg_setup.c:417
+#: apps/mesa/main/jm_setup.c:417
 En 3D	3D
 
-#: apps/mesa/main/mg_setup.c:418
+#: apps/mesa/main/jm_setup.c:418
 Marcar las jugadas posibles	Show the possible moves
 
-#: apps/mesa/main/mg_setup.c:419
+#: apps/mesa/main/jm_setup.c:419
 Coordenadas	Coordinates
 
-#: apps/mesa/main/mg_setup.c:420
+#: apps/mesa/main/jm_setup.c:420
 Sonido	Sound
 
-#: apps/mesa/main/mg_setup.c:421
+#: apps/mesa/main/jm_setup.c:421
 Lentas	Slowly
 
-#: apps/mesa/main/mg_setup.c:421
+#: apps/mesa/main/jm_setup.c:421
 Normales	Normally
 
-#: apps/mesa/main/mg_setup.c:421
+#: apps/mesa/main/jm_setup.c:421
 Rápidas	Fast
 
-#: apps/mesa/main/mg_setup.c:422
+#: apps/mesa/main/jm_setup.c:422
 Las piezas se mueven	Pieces move
 
-#: apps/mesa/main/mg_setup.c:423
+#: apps/mesa/main/jm_setup.c:423
 Listo	Done
 
-#: apps/mesa/main/mg_setup.c:461
+#: apps/mesa/main/jm_setup.c:461
 Jugadas	Moves
+
+#: apps/mesa/main/mesa.c:52
+damas	kings
+
+#: apps/mesa/main/mesa.c:52
+fichas	discs
+
+#: apps/mesa/main/mesa.c:52
+en casa	home
+
+#: apps/mesa/main/mesa.c:52
+afuera	off
+
+#: apps/mesa/main/mesa.c:170
+No se pudo abrir la partida	The game could not be opened
+
+#: apps/mesa/main/mesa.c:271
+Juegos de mesa	Board games
+
+#: apps/mesa/main/mesa.c:279
+Seguir la partida	Resume the game
+
+#: apps/mesa/main/mesa.c:292
+Reloj de ajedrez	Chess clock
+
+#: apps/mesa/main/mesa.c:292
+Para una partida en un tablero de verdad	For a game on a real board
+
+#: apps/mesa/main/mesa.c:295
+Falta el paquete de arte mesa_p4.pak: los juegos se ven con piezas de reemplazo.	The art pack mesa_p4.pak is missing: the games show stand-in pieces.

@@ -225,7 +225,7 @@ typedef struct mesa_game {
     bool  (*setup)(void *st, const uint8_t *opts, const char *text);
 } mesa_game_t;
 
-/* The games that come with the app (mg_games.c). */
+/* The games that come with the app (jm_games.c). */
 extern const mesa_game_t mesa_ajedrez, mesa_damas, mesa_reversi, mesa_cuatro, mesa_ludo, mesa_backgammon;
 
 /* A module's two functions and its host. */

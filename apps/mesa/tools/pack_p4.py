@@ -8,7 +8,7 @@ Juegos de mesa - the packs, from what Blender rendered (../assets/<set>/):
 
 A board (B_bg, B_bgp, B_fl) goes as a JPEG, which the P4's engine decodes,
 with its geometry as a line of text (B_geo, B_geop, B_flgeo); a piece's
-frames as a sheet of runs (Bastion's format, ../main/mg_gfx.h) anchored at
+frames as a sheet of runs (Bastion's format, ../main/jm_gfx.h) anchored at
 its foot (the flat view's at its middle); the menu's pictures as RGB565.
 The sounds are made here (numpy), into the wooden pack only. Neither the
 renders nor the packs are in git.

@@ -9,7 +9,7 @@
  * buttons and the sheet in the right one. Face to face the far player's
  * card and buttons are turned half round, for whoever sits across.
  */
-#include "mg_app.h"
+#include "jm_app.h"
 
 #include "aos_fonts.h"
 #include "aos_hal.h"
@@ -21,7 +21,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#define P (&mg->play)
+#define P (&jm->play)
 #define CARD_H 112
 #define BTN 84
 #define COL 240                 /* lying down: the side columns' width */
@@ -67,37 +67,37 @@ static lv_obj_t *icon_btn(lv_obj_t *parent, const char *glyph, lv_event_cb_t cb)
 static void ev_menu(lv_event_t *e)
 {
     (void)e;
-    mg_hud_pause();
+    jm_hud_pause();
 }
 
 static void ev_undo(lv_event_t *e)
 {
     (void)e;
-    mg_play_undo();
+    jm_play_undo();
 }
 
 static void ev_redo(lv_event_t *e)
 {
     (void)e;
-    mg_play_redo();
+    jm_play_redo();
 }
 
 static void ev_hint(lv_event_t *e)
 {
     (void)e;
-    mg_play_hint();
+    jm_play_hint();
 }
 
 static void ev_roll(lv_event_t *e)
 {
     (void)e;
-    mg_play_roll();
+    jm_play_roll();
 }
 
 static void ev_sheet(lv_event_t *e)
 {
     (void)e;
-    mg_hud_sheet_toggle();
+    jm_hud_sheet_toggle();
 }
 
 static void ev_table(lv_event_t *e)
@@ -107,7 +107,7 @@ static void ev_table(lv_event_t *e)
     lv_point_t pt;
     lv_indev_get_point(in, &pt);
     (void)e;
-    mg_play_tap(pt.x, pt.y);
+    jm_play_tap(pt.x, pt.y);
 }
 
 /* ---- the cards ------------------------------------------------------------------------- */
@@ -129,7 +129,7 @@ static void turn_round(lv_obj_t *o)
 
 static void card_build(int slot, int player, int x, int y, int w, bool turned)
 {
-    lv_obj_t *c = lv_obj_create(mg->hud);
+    lv_obj_t *c = lv_obj_create(jm->hud);
     box_style(c, 0x140F0B, LV_OPA_70, 22);
     lv_obj_set_pos(c, x, y);
     lv_obj_set_size(c, w, CARD_H);
@@ -175,11 +175,11 @@ static void card_build(int slot, int player, int x, int y, int w, bool turned)
         lv_label_set_text(ck, "");
     }
     if (slot < 2) {
-        mg->card[slot] = c;
-        mg->card_name[slot] = nm;
-        mg->card_info[slot] = in;
-        mg->card_clock[slot] = ck;
-        mg->card_dot[slot] = dot;
+        jm->card[slot] = c;
+        jm->card_name[slot] = nm;
+        jm->card_info[slot] = in;
+        jm->card_clock[slot] = ck;
+        jm->card_dot[slot] = dot;
     }
     lv_obj_set_user_data(c, (void *)(intptr_t)player);
     if (turned) turn_round(c);
@@ -191,16 +191,16 @@ static lv_obj_t *s_cards4[MESA_MAX_PLAYERS];
 
 static void bar_build(void)
 {
-    int W = mg->W, H = mg->H;
+    int W = jm->W, H = jm->H;
     bool pgn = (P->g->flags & MESA_GF_PGN) != 0;
-    lv_obj_t *bar = lv_obj_create(mg->hud);
+    lv_obj_t *bar = lv_obj_create(jm->hud);
     lv_obj_remove_style_all(bar);
     lv_obj_remove_flag(bar, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_remove_flag(bar, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_flag(bar, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
-    lv_obj_set_flex_flow(bar, mg->portrait ? LV_FLEX_FLOW_ROW : LV_FLEX_FLOW_ROW_WRAP);
+    lv_obj_set_flex_flow(bar, jm->portrait ? LV_FLEX_FLOW_ROW : LV_FLEX_FLOW_ROW_WRAP);
     lv_obj_set_flex_align(bar, LV_FLEX_ALIGN_SPACE_EVENLY, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    if (mg->portrait) {
+    if (jm->portrait) {
         lv_obj_set_size(bar, W - 32, BTN + 16);
         lv_obj_set_pos(bar, 16, H - BTN - 28);
     } else {
@@ -208,26 +208,26 @@ static void bar_build(void)
         lv_obj_set_style_pad_row(bar, 16, 0);
         lv_obj_set_pos(bar, W - COL - 16, H - 2 * BTN - 46);
     }
-    mg->bar = bar;
-    mg->btn_menu = icon_btn(bar, AOS_SYM_DOTS_HORIZONTAL, ev_menu);
-    mg->btn_undo = icon_btn(bar, AOS_SYM_CHEVRON_LEFT, ev_undo);
-    mg->btn_redo = icon_btn(bar, AOS_SYM_CHEVRON_RIGHT, ev_redo);
-    mg->btn_hint = P->g->ai_move ? icon_btn(bar, AOS_SYM_LIGHTBULB_OUTLINE, ev_hint) : NULL;
-    mg->btn_roll = (P->g->flags & MESA_GF_DICE) ? icon_btn(bar, AOS_SYM_DICE_5, ev_roll) : NULL;
-    mg->btn_sheet = pgn && mg->portrait ? icon_btn(bar, AOS_SYM_FILE_DOCUMENT_OUTLINE, ev_sheet) : NULL;
-    mg->btn_menu2 = mg->btn_undo2 = NULL;
+    jm->bar = bar;
+    jm->btn_menu = icon_btn(bar, AOS_SYM_DOTS_HORIZONTAL, ev_menu);
+    jm->btn_undo = icon_btn(bar, AOS_SYM_CHEVRON_LEFT, ev_undo);
+    jm->btn_redo = icon_btn(bar, AOS_SYM_CHEVRON_RIGHT, ev_redo);
+    jm->btn_hint = P->g->ai_move ? icon_btn(bar, AOS_SYM_LIGHTBULB_OUTLINE, ev_hint) : NULL;
+    jm->btn_roll = (P->g->flags & MESA_GF_DICE) ? icon_btn(bar, AOS_SYM_DICE_5, ev_roll) : NULL;
+    jm->btn_sheet = pgn && jm->portrait ? icon_btn(bar, AOS_SYM_FILE_DOCUMENT_OUTLINE, ev_sheet) : NULL;
+    jm->btn_menu2 = jm->btn_undo2 = NULL;
     if (face_to_face()) {
         /* the far player's own menu and undo, turned */
-        lv_obj_t *b2 = lv_obj_create(mg->hud);
+        lv_obj_t *b2 = lv_obj_create(jm->hud);
         lv_obj_remove_style_all(b2);
         lv_obj_remove_flag(b2, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE);
         lv_obj_set_flex_flow(b2, LV_FLEX_FLOW_ROW);
         lv_obj_set_style_pad_column(b2, 20, 0);
         lv_obj_set_size(b2, 2 * BTN + 40, BTN + 10);
-        if (mg->portrait) lv_obj_set_pos(b2, 16, 16 + CARD_H + 10);
+        if (jm->portrait) lv_obj_set_pos(b2, 16, 16 + CARD_H + 10);
         else lv_obj_set_pos(b2, 16, 16 + CARD_H + 10);
-        mg->btn_menu2 = icon_btn(b2, AOS_SYM_DOTS_HORIZONTAL, ev_menu);
-        mg->btn_undo2 = icon_btn(b2, AOS_SYM_CHEVRON_LEFT, ev_undo);
+        jm->btn_menu2 = icon_btn(b2, AOS_SYM_DOTS_HORIZONTAL, ev_menu);
+        jm->btn_undo2 = icon_btn(b2, AOS_SYM_CHEVRON_LEFT, ev_undo);
         turn_round(b2);
     }
 }
@@ -248,10 +248,10 @@ static void localize(const char *san, char *out, size_t n)
     out[k] = 0;
 }
 
-void mg_hud_sheet_refresh(void)
+void jm_hud_sheet_refresh(void)
 {
-    if (!mg->sheet_list || !(P->g->flags & MESA_GF_PGN)) return;
-    lv_obj_t *l = mg->sheet_list;
+    if (!jm->sheet_list || !(P->g->flags & MESA_GF_PGN)) return;
+    lv_obj_t *l = jm->sheet_list;
     lv_obj_clean(l);
     /* the moves again, from the start, each written before it is made */
     P->g->init(P->tmp, P->opts, P->seed);
@@ -264,7 +264,7 @@ void mg_hud_sheet_refresh(void)
         snprintf(a, sizeof a, "...");
     }
     for (int i = 0; i < P->n; i++) {
-        const mg_hist_t *h = &P->hist[i];
+        const jm_hist_t *h = &P->hist[i];
         if (h->roll) {
             P->g->roll(P->tmp, h->rnd);
             continue;
@@ -300,19 +300,19 @@ void mg_hud_sheet_refresh(void)
 
 static void sheet_build(void)
 {
-    mg->sheet = mg->sheet_list = NULL;
+    jm->sheet = jm->sheet_list = NULL;
     if (!(P->g->flags & MESA_GF_PGN)) return;
-    lv_obj_t *s = lv_obj_create(mg->hud);
+    lv_obj_t *s = lv_obj_create(jm->hud);
     box_style(s, 0x140F0B, LV_OPA_80, 22);
     lv_obj_set_style_pad_all(s, 16, 0);
     lv_obj_remove_flag(s, LV_OBJ_FLAG_CLICKABLE);
-    if (mg->portrait) {
-        lv_obj_set_size(s, mg->W - 32, 560);
-        lv_obj_set_pos(s, 16, mg->H - BTN - 44 - 560);
+    if (jm->portrait) {
+        lv_obj_set_size(s, jm->W - 32, 560);
+        lv_obj_set_pos(s, 16, jm->H - BTN - 44 - 560);
         lv_obj_add_flag(s, LV_OBJ_FLAG_HIDDEN);
     } else {
-        lv_obj_set_size(s, COL, mg->H - 2 * BTN - 46 - 32);
-        lv_obj_set_pos(s, mg->W - COL - 16, 16);
+        lv_obj_set_size(s, COL, jm->H - 2 * BTN - 46 - 32);
+        lv_obj_set_pos(s, jm->W - COL - 16, 16);
     }
     lv_obj_t *t = lv_label_create(s);
     lv_obj_set_style_text_font(t, aos_font_small, 0);
@@ -327,36 +327,36 @@ static void sheet_build(void)
     lv_obj_set_style_pad_row(l, 6, 0);
     lv_obj_add_flag(l, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_scroll_dir(l, LV_DIR_VER);
-    mg->sheet = s;
-    mg->sheet_list = l;
-    mg_hud_sheet_refresh();
+    jm->sheet = s;
+    jm->sheet_list = l;
+    jm_hud_sheet_refresh();
 }
 
-void mg_hud_sheet_toggle(void)
+void jm_hud_sheet_toggle(void)
 {
-    if (!mg->sheet) return;
-    if (lv_obj_has_flag(mg->sheet, LV_OBJ_FLAG_HIDDEN)) {
-        lv_obj_remove_flag(mg->sheet, LV_OBJ_FLAG_HIDDEN);
-        mg_hud_sheet_refresh();
+    if (!jm->sheet) return;
+    if (lv_obj_has_flag(jm->sheet, LV_OBJ_FLAG_HIDDEN)) {
+        lv_obj_remove_flag(jm->sheet, LV_OBJ_FLAG_HIDDEN);
+        jm_hud_sheet_refresh();
     } else {
-        lv_obj_add_flag(mg->sheet, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(jm->sheet, LV_OBJ_FLAG_HIDDEN);
     }
 }
 
 /* ---- coordinates ------------------------------------------------------------------------------- */
 
-void mg_hud_coords(void)
+void jm_hud_coords(void)
 {
-    for (int i = 0; i < mg->ncoord; i++) {
-        if (mg->coord[i]) lv_obj_delete(mg->coord[i]);
-        mg->coord[i] = NULL;
+    for (int i = 0; i < jm->ncoord; i++) {
+        if (jm->coord[i]) lv_obj_delete(jm->coord[i]);
+        jm->coord[i] = NULL;
     }
-    mg->ncoord = 0;
-    if (!mg->prefs.coords || !(P->g->flags & MESA_GF_GRID) || !mg->hud) return;
-    float bw = mg->view.bw, bh = mg->view.bh;
-    bool turned = (mg->view.rot & 3) == 2;
+    jm->ncoord = 0;
+    if (!jm->prefs.coords || !(P->g->flags & MESA_GF_GRID) || !jm->hud) return;
+    float bw = jm->view.bw, bh = jm->view.bh;
+    bool turned = (jm->view.rot & 3) == 2;
     int nf = (int)bw, nr = (int)bh;
-    for (int i = 0; i < nf + nr && mg->ncoord < 40; i++) {
+    for (int i = 0; i < nf + nr && jm->ncoord < 40; i++) {
         float u, v, x, y;
         char t[16];
         if (i < nf) {
@@ -369,8 +369,8 @@ void mg_hud_coords(void)
             v = (float)r + 0.5f;
             snprintf(t, sizeof t, "%d", r + 1);
         }
-        mg_view_board_xy(u, v, 0, &x, &y);
-        lv_obj_t *l = lv_label_create(mg->hud);
+        jm_view_board_xy(u, v, 0, &x, &y);
+        lv_obj_t *l = lv_label_create(jm->hud);
         lv_obj_set_style_text_font(l, aos_font_tiny, 0);
         lv_obj_set_style_text_color(l, C(0xF4E8D4), 0);
         lv_obj_set_style_text_opa(l, LV_OPA_70, 0);
@@ -378,47 +378,47 @@ void mg_hud_coords(void)
         lv_obj_remove_flag(l, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_set_pos(l, (int)x - 5, (int)y - 10);
         lv_obj_move_to_index(l, 0);
-        mg->coord[mg->ncoord++] = l;
+        jm->coord[jm->ncoord++] = l;
     }
 }
 
 /* ---- building and refreshing --------------------------------------------------------------------- */
 
-void mg_hud_free(void)
+void jm_hud_free(void)
 {
-    mg_hud_panel_close();
-    if (mg->hud) lv_obj_delete(mg->hud);
-    mg->hud = NULL;
-    memset(mg->card, 0, sizeof mg->card);
-    memset(mg->card_name, 0, sizeof mg->card_name);
-    memset(mg->card_clock, 0, sizeof mg->card_clock);
-    memset(mg->card_info, 0, sizeof mg->card_info);
-    memset(mg->card_dot, 0, sizeof mg->card_dot);
+    jm_hud_panel_close();
+    if (jm->hud) lv_obj_delete(jm->hud);
+    jm->hud = NULL;
+    memset(jm->card, 0, sizeof jm->card);
+    memset(jm->card_name, 0, sizeof jm->card_name);
+    memset(jm->card_clock, 0, sizeof jm->card_clock);
+    memset(jm->card_info, 0, sizeof jm->card_info);
+    memset(jm->card_dot, 0, sizeof jm->card_dot);
     memset(s_cards4, 0, sizeof s_cards4);
-    mg->status = mg->bar = mg->sheet = mg->sheet_list = NULL;
-    mg->btn_undo = mg->btn_redo = mg->btn_menu = mg->btn_sheet = mg->btn_roll = mg->btn_hint = NULL;
-    mg->btn_menu2 = mg->btn_undo2 = NULL;
-    mg->ncoord = 0;
-    memset(mg->coord, 0, sizeof mg->coord);
-    aos_pad_menu_clear(&mg->menu);
+    jm->status = jm->bar = jm->sheet = jm->sheet_list = NULL;
+    jm->btn_undo = jm->btn_redo = jm->btn_menu = jm->btn_sheet = jm->btn_roll = jm->btn_hint = NULL;
+    jm->btn_menu2 = jm->btn_undo2 = NULL;
+    jm->ncoord = 0;
+    memset(jm->coord, 0, sizeof jm->coord);
+    aos_pad_menu_clear(&jm->menu);
 }
 
-void mg_hud_build(void)
+void jm_hud_build(void)
 {
-    mg_hud_free();
+    jm_hud_free();
     if (!P->g) return;
-    lv_obj_t *h = lv_obj_create(mg->root);
+    lv_obj_t *h = lv_obj_create(jm->root);
     lv_obj_remove_style_all(h);
-    lv_obj_set_size(h, mg->W, mg->H);
+    lv_obj_set_size(h, jm->W, jm->H);
     lv_obj_set_pos(h, 0, 0);
     lv_obj_remove_flag(h, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(h, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(h, ev_table, LV_EVENT_PRESSED, NULL);
-    mg->hud = h;
-    int W = mg->W, H = mg->H;
+    jm->hud = h;
+    int W = jm->W, H = jm->H;
     if (P->np <= 2) {
         int top = P->np == 2 ? 1 - P->bottom : -1;
-        if (mg->portrait) {
+        if (jm->portrait) {
             card_build(0, P->bottom, 16, H - BTN - 44 - CARD_H, W - 32, false);
             if (top >= 0) card_build(1, top, 16, 16, W - 32, face_to_face());
         } else {
@@ -429,11 +429,11 @@ void mg_hud_build(void)
         /* one in each corner, the way round the board the players sit
          * (games of more than two put the first at the bottom left, then
          * the bottom right, the top right, the top left) */
-        int cw = mg->portrait ? (W - 48) / 2 : COL;
+        int cw = jm->portrait ? (W - 48) / 2 : COL;
         for (int p = 0; p < P->np && p < MESA_MAX_PLAYERS; p++) {
             bool right = p == 1 || p == 2, low = p == 0 || p == 1;
             int cx, cy;
-            if (mg->portrait) {
+            if (jm->portrait) {
                 cx = right ? W - 16 - cw : 16;
                 cy = low ? H - BTN - 44 - CARD_H : 16;
             } else {
@@ -442,11 +442,11 @@ void mg_hud_build(void)
             }
             card_build(p < 2 ? p : 2, p, cx, cy, cw, false);
             s_cards4[p] = lv_obj_get_child(h, -1);
-            if (p < 2) mg->card[p] = s_cards4[p];
+            if (p < 2) jm->card[p] = s_cards4[p];
         }
     }
     bar_build();
-    if (P->np > 2 && !mg->portrait) lv_obj_set_pos(mg->bar, W - COL - 16, H / 2 - BTN - 15);
+    if (P->np > 2 && !jm->portrait) lv_obj_set_pos(jm->bar, W - COL - 16, H / 2 - BTN - 15);
     sheet_build();
     lv_obj_t *st = lv_label_create(h);
     lv_obj_set_style_text_font(st, aos_font_body, 0);
@@ -457,22 +457,22 @@ void mg_hud_build(void)
     lv_obj_set_style_pad_hor(st, 26, 0);
     lv_obj_set_style_pad_ver(st, 10, 0);
     lv_obj_remove_flag(st, LV_OBJ_FLAG_CLICKABLE);
-    if (mg->portrait) lv_obj_align(st, LV_ALIGN_TOP_MID, 0, 16 + CARD_H + 14);
+    if (jm->portrait) lv_obj_align(st, LV_ALIGN_TOP_MID, 0, 16 + CARD_H + 14);
     else lv_obj_align(st, LV_ALIGN_TOP_MID, 0, 14);
     lv_obj_add_flag(st, LV_OBJ_FLAG_HIDDEN);
-    mg->status = st;
-    mg_hud_coords();
-    mg_hud_refresh();
+    jm->status = st;
+    jm_hud_coords();
+    jm_hud_refresh();
 }
 
-void mg_hud_status(const char *text, uint32_t ms)
+void jm_hud_status(const char *text, uint32_t ms)
 {
-    if (!mg->status) return;
-    snprintf(mg->status_text, sizeof mg->status_text, "%s", text ? text : "");
-    lv_label_set_text(mg->status, mg->status_text);
-    if (text && *text) lv_obj_remove_flag(mg->status, LV_OBJ_FLAG_HIDDEN);
-    else lv_obj_add_flag(mg->status, LV_OBJ_FLAG_HIDDEN);
-    mg->status_until = ms ? mg_now() + ms : 0;
+    if (!jm->status) return;
+    snprintf(jm->status_text, sizeof jm->status_text, "%s", text ? text : "");
+    lv_label_set_text(jm->status, jm->status_text);
+    if (text && *text) lv_obj_remove_flag(jm->status, LV_OBJ_FLAG_HIDDEN);
+    else lv_obj_add_flag(jm->status, LV_OBJ_FLAG_HIDDEN);
+    jm->status_until = ms ? jm_now() + ms : 0;
 }
 
 static lv_obj_t *card_of(int player, lv_obj_t **name, lv_obj_t **info, lv_obj_t **clock)
@@ -486,34 +486,34 @@ static lv_obj_t *card_of(int player, lv_obj_t **name, lv_obj_t **info, lv_obj_t 
         return c;
     }
     for (int s = 0; s < 2; s++) {
-        if (mg->card[s] && (int)(intptr_t)lv_obj_get_user_data(mg->card[s]) == player) {
-            if (name) *name = mg->card_name[s];
-            if (info) *info = mg->card_info[s];
-            if (clock) *clock = mg->card_clock[s];
-            return mg->card[s];
+        if (jm->card[s] && (int)(intptr_t)lv_obj_get_user_data(jm->card[s]) == player) {
+            if (name) *name = jm->card_name[s];
+            if (info) *info = jm->card_info[s];
+            if (clock) *clock = jm->card_clock[s];
+            return jm->card[s];
         }
     }
     return NULL;
 }
 
-void mg_hud_clock(void)
+void jm_hud_clock(void)
 {
     if (P->clock.mode == CLK_NONE) return;
     for (int p = 0; p < 2; p++) {
         lv_obj_t *ck = NULL;
         if (!card_of(p, NULL, NULL, &ck) || !ck) continue;
         char b[16];
-        mg_clock_text(P->clock.left[p], b, sizeof b);
+        jm_clock_text(P->clock.left[p], b, sizeof b);
         lv_label_set_text(ck, b);
         bool low = P->clock.left[p] < 20000;
         lv_obj_set_style_text_color(ck, low ? C(0xFF6A50) : C(0xF4E8D4), 0);
     }
 }
 
-void mg_hud_refresh(void)
+void jm_hud_refresh(void)
 {
-    if (!mg->hud || !P->g) return;
-    int t = mg_play_turn();
+    if (!jm->hud || !P->g) return;
+    int t = jm_play_turn();
     for (int p = 0; p < P->np; p++) {
         lv_obj_t *info = NULL;
         lv_obj_t *c = card_of(p, NULL, &info, NULL);
@@ -531,57 +531,57 @@ void mg_hud_refresh(void)
         }
         if (info) lv_label_set_text(info, b);
     }
-    bool person = mg_play_person_to_move();
-    if (mg->btn_undo) {
-        if (mg_play_can_undo()) lv_obj_remove_state(mg->btn_undo, LV_STATE_DISABLED);
-        else lv_obj_add_state(mg->btn_undo, LV_STATE_DISABLED);
+    bool person = jm_play_person_to_move();
+    if (jm->btn_undo) {
+        if (jm_play_can_undo()) lv_obj_remove_state(jm->btn_undo, LV_STATE_DISABLED);
+        else lv_obj_add_state(jm->btn_undo, LV_STATE_DISABLED);
     }
-    if (mg->btn_redo) {
-        if (mg_play_can_redo()) lv_obj_remove_state(mg->btn_redo, LV_STATE_DISABLED);
-        else lv_obj_add_state(mg->btn_redo, LV_STATE_DISABLED);
+    if (jm->btn_redo) {
+        if (jm_play_can_redo()) lv_obj_remove_state(jm->btn_redo, LV_STATE_DISABLED);
+        else lv_obj_add_state(jm->btn_redo, LV_STATE_DISABLED);
     }
-    if (mg->btn_hint) {
-        if (person && !P->over) lv_obj_remove_state(mg->btn_hint, LV_STATE_DISABLED);
-        else lv_obj_add_state(mg->btn_hint, LV_STATE_DISABLED);
+    if (jm->btn_hint) {
+        if (person && !P->over) lv_obj_remove_state(jm->btn_hint, LV_STATE_DISABLED);
+        else lv_obj_add_state(jm->btn_hint, LV_STATE_DISABLED);
     }
-    if (mg->btn_roll) {
+    if (jm->btn_roll) {
         bool roll = person && P->g->need_roll && P->g->need_roll(P->st) > 0 && !P->rolling;
-        if (roll) lv_obj_remove_state(mg->btn_roll, LV_STATE_DISABLED);
-        else lv_obj_add_state(mg->btn_roll, LV_STATE_DISABLED);
-        lv_obj_set_style_bg_color(mg->btn_roll, roll ? AOS_C_ACCENT : C(0x1C1612), 0);
+        if (roll) lv_obj_remove_state(jm->btn_roll, LV_STATE_DISABLED);
+        else lv_obj_add_state(jm->btn_roll, LV_STATE_DISABLED);
+        lv_obj_set_style_bg_color(jm->btn_roll, roll ? AOS_C_ACCENT : C(0x1C1612), 0);
     }
     /* the line of status: the game's, else whose turn */
-    if (!mg->status_until || (int32_t)(mg_now() - mg->status_until) >= 0) {
+    if (!jm->status_until || (int32_t)(jm_now() - jm->status_until) >= 0) {
         const char *s = P->g->status ? P->g->status(P->st) : NULL;
-        if (!P->over && s) mg_hud_status(_(s), 0);
-        else if (!P->over && person && P->g->need_roll && P->g->need_roll(P->st) > 0) mg_hud_status(_("Tirá los dados"), 0);
-        else mg_hud_status(NULL, 0);
-        mg->status_until = 0;
+        if (!P->over && s) jm_hud_status(_(s), 0);
+        else if (!P->over && person && P->g->need_roll && P->g->need_roll(P->st) > 0) jm_hud_status(_("Tirá los dados"), 0);
+        else jm_hud_status(NULL, 0);
+        jm->status_until = 0;
     }
-    mg_hud_clock();
+    jm_hud_clock();
 }
 
 /* ---- panels -------------------------------------------------------------------------------------- */
 
-void mg_hud_panel_close(void)
+void jm_hud_panel_close(void)
 {
-    if (!mg->panel) return;
-    aos_pad_menu_clear(&mg->menu);
-    lv_obj_delete(mg->panel);
-    mg->panel = NULL;
-    mg->panel_kind = PANEL_NONE;
-    aos_pad_reset(&mg->pad, lv_tick_get());
-    if (P->clock.mode != CLK_NONE) P->clock.last = mg_now();
+    if (!jm->panel) return;
+    aos_pad_menu_clear(&jm->menu);
+    lv_obj_delete(jm->panel);
+    jm->panel = NULL;
+    jm->panel_kind = PANEL_NONE;
+    aos_pad_reset(&jm->pad, lv_tick_get());
+    if (P->clock.mode != CLK_NONE) P->clock.last = jm_now();
 }
 
 static lv_obj_t *s_pbox;
 
 static lv_obj_t *panel_box(int kind, const char *title, const char *sub)
 {
-    mg_hud_panel_close();
-    lv_obj_t *dim = lv_obj_create(mg->root);
+    jm_hud_panel_close();
+    lv_obj_t *dim = lv_obj_create(jm->root);
     box_style(dim, 0x000000, LV_OPA_50, 0);
-    lv_obj_set_size(dim, mg->W, mg->H);
+    lv_obj_set_size(dim, jm->W, jm->H);
     lv_obj_add_flag(dim, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_t *p = lv_obj_create(dim);
     box_style(p, 0x1A140F, LV_OPA_COVER, 32);
@@ -590,34 +590,34 @@ static lv_obj_t *panel_box(int kind, const char *title, const char *sub)
     lv_obj_set_style_border_opa(p, LV_OPA_50, 0);
     lv_obj_set_style_pad_all(p, 28, 0);
     lv_obj_set_style_pad_row(p, 16, 0);
-    lv_obj_set_width(p, mg->portrait ? mg->W - 120 : 520);
+    lv_obj_set_width(p, jm->portrait ? jm->W - 120 : 520);
     lv_obj_set_height(p, LV_SIZE_CONTENT);
-    lv_obj_set_style_max_height(p, mg->H - 60, 0);
+    lv_obj_set_style_max_height(p, jm->H - 60, 0);
     lv_obj_add_flag(p, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_set_flex_flow(p, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_flex_align(p, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
     lv_obj_center(p);
     if (title) {
-        lv_obj_t *t = mg_label(p, title, aos_font_title, C(0xF4E8D4));
+        lv_obj_t *t = jm_label(p, title, aos_font_title, C(0xF4E8D4));
         lv_obj_set_width(t, lv_pct(100));
         lv_label_set_long_mode(t, LV_LABEL_LONG_MODE_WRAP);
         lv_obj_set_style_text_align(t, LV_TEXT_ALIGN_CENTER, 0);
     }
     if (sub) {
-        lv_obj_t *t = mg_label(p, sub, aos_font_body, C(0xB8A890));
+        lv_obj_t *t = jm_label(p, sub, aos_font_body, C(0xB8A890));
         lv_obj_set_width(t, lv_pct(100));
         lv_label_set_long_mode(t, LV_LABEL_LONG_MODE_WRAP);
         lv_obj_set_style_text_align(t, LV_TEXT_ALIGN_CENTER, 0);
     }
-    mg->panel = dim;
-    mg->panel_kind = kind;
+    jm->panel = dim;
+    jm->panel_kind = kind;
     s_pbox = p;
     return p;
 }
 
 static lv_obj_t *panel_btn(lv_obj_t *p, const char *text, lv_event_cb_t cb, void *ud, bool primary)
 {
-    lv_obj_t *b = mg_button(p, text, cb, ud);
+    lv_obj_t *b = jm_button(p, text, cb, ud);
     lv_obj_set_width(b, lv_pct(100));
     if (primary) lv_obj_set_style_bg_color(b, AOS_C_ACCENT, 0);
     return b;
@@ -632,28 +632,28 @@ static void panel_pad(void)
         lv_obj_t *c = lv_obj_get_child(s_pbox, (int32_t)i);
         if (lv_obj_check_type(c, &lv_button_class)) items[n++] = c;
     }
-    aos_pad_menu_set(&mg->menu, items, n, 0);
-    aos_pad_reset(&mg->pad, lv_tick_get());
+    aos_pad_menu_set(&jm->menu, items, n, 0);
+    aos_pad_reset(&jm->pad, lv_tick_get());
 }
 
 static void ev_close(lv_event_t *e)
 {
     (void)e;
-    mg_hud_panel_close();
+    jm_hud_panel_close();
 }
 
 static void ev_new(lv_event_t *e)
 {
     (void)e;
     int gi = P->gi;
-    mg_hud_panel_close();
-    mg_setup_open(gi);
+    jm_hud_panel_close();
+    jm_setup_open(gi);
 }
 
 static void ev_again(lv_event_t *e)
 {
     (void)e;
-    mg_new_t n;
+    jm_new_t n;
     memset(&n, 0, sizeof n);
     n.gi = P->gi;
     memcpy(n.opts, P->opts, sizeof n.opts);
@@ -667,38 +667,38 @@ static void ev_again(lv_event_t *e)
     n.clock_mode = P->clock.mode;
     n.clock_base = P->clock.base_ms;
     n.clock_inc = P->clock.inc_ms;
-    mg_hud_panel_close();
-    mg_play_start(&n);
+    jm_hud_panel_close();
+    jm_play_start(&n);
 }
 
 static void ev_leave(lv_event_t *e)
 {
     (void)e;
-    mg_hud_panel_close();
-    mg_play_stop(true);
-    mg_home_show();
+    jm_hud_panel_close();
+    jm_play_stop(true);
+    jm_home_show();
 }
 
 static void ev_resign(lv_event_t *e)
 {
     (void)e;
-    mg_hud_panel_close();
-    mg_play_resign();
+    jm_hud_panel_close();
+    jm_play_resign();
 }
 
 static void ev_settings(lv_event_t *e)
 {
     (void)e;
-    mg_hud_panel_close();
-    mg_settings_open();
+    jm_hud_panel_close();
+    jm_settings_open();
 }
 
 static void ev_save_pgn(lv_event_t *e)
 {
     (void)e;
     char name[64];
-    mg_hud_panel_close();
-    if (mg_pgn_write(name, sizeof name)) {
+    jm_hud_panel_close();
+    if (jm_pgn_write(name, sizeof name)) {
         char b[120];
         snprintf(b, sizeof b, "%s %s", _("Guardada en"), name);
         aos_ui_toast(b, 2500);
@@ -712,23 +712,23 @@ static char s_files[24][40];
 static void ev_open_file(lv_event_t *e)
 {
     int i = (int)(intptr_t)lv_event_get_user_data(e);
-    mg_hud_panel_close();
-    if (!mg_pgn_read(s_files[i])) aos_ui_toast(_("No se pudo leer la partida"), 2000);
+    jm_hud_panel_close();
+    if (!jm_pgn_read(s_files[i])) aos_ui_toast(_("No se pudo leer la partida"), 2000);
 }
 
 static void ev_open_pgn(lv_event_t *e)
 {
     (void)e;
-    int n = mg_pgn_list(s_files, 24);
+    int n = jm_pgn_list(s_files, 24);
     lv_obj_t *p = panel_box(PANEL_FILES, _("Abrir una partida"), n ? NULL : _("No hay partidas guardadas en /sdcard/mesa/ajedrez"));
     for (int i = 0; i < n; i++) panel_btn(p, s_files[i], ev_open_file, (void *)(intptr_t)i, false);
     panel_btn(p, _("Cancelar"), ev_close, NULL, false);
     panel_pad();
 }
 
-void mg_hud_pause(void)
+void jm_hud_pause(void)
 {
-    if (!mg->playing) return;
+    if (!jm->playing) return;
     lv_obj_t *p = panel_box(PANEL_PAUSE, _(P->g->name), NULL);
     panel_btn(p, _("Seguir"), ev_close, NULL, true);
     panel_btn(p, _("Partida nueva"), ev_new, NULL, false);
@@ -739,13 +739,13 @@ void mg_hud_pause(void)
     }
     panel_btn(p, _("Ajustes"), ev_settings, NULL, false);
     panel_btn(p, _("Salir al menú"), ev_leave, NULL, false);
-    if (face_to_face() && P->bottom == 0 && mg_play_turn() == 1) turn_round(p);
+    if (face_to_face() && P->bottom == 0 && jm_play_turn() == 1) turn_round(p);
     panel_pad();
 }
 
-void mg_hud_end(void)
+void jm_hud_end(void)
 {
-    if (!mg->playing) return;
+    if (!jm->playing) return;
     const char *why = NULL;
     int r = P->g->result(P->st, &why);
     char title[96], sub[96];
@@ -782,17 +782,17 @@ static mesa_move_t s_choice[8];
 static void ev_choice(lv_event_t *e)
 {
     int i = (int)(intptr_t)lv_event_get_user_data(e);
-    mg_play_choose(&s_choice[i]);
+    jm_play_choose(&s_choice[i]);
 }
 
 static void ev_choice_cancel(lv_event_t *e)
 {
     (void)e;
-    mg_hud_panel_close();
+    jm_hud_panel_close();
     P->sel = 0;
 }
 
-void mg_hud_choice(const mesa_move_t *moves, int n)
+void jm_hud_choice(const mesa_move_t *moves, int n)
 {
     lv_obj_t *p = panel_box(PANEL_CHOICE, _("¿En qué se convierte?"), NULL);
     for (int i = 0; i < n && i < 8; i++) {
@@ -802,39 +802,39 @@ void mg_hud_choice(const mesa_move_t *moves, int n)
         panel_btn(p, nm, ev_choice, (void *)(intptr_t)i, i == 0);
     }
     panel_btn(p, _("Cancelar"), ev_choice_cancel, NULL, false);
-    if (face_to_face() && mg_play_turn() == 1 - P->bottom) turn_round(p);
+    if (face_to_face() && jm_play_turn() == 1 - P->bottom) turn_round(p);
     panel_pad();
 }
 
-bool mg_hud_back(void)
+bool jm_hud_back(void)
 {
-    if (mg->panel) {
-        if (mg->panel_kind == PANEL_CHOICE) P->sel = 0;
-        mg_hud_panel_close();
+    if (jm->panel) {
+        if (jm->panel_kind == PANEL_CHOICE) P->sel = 0;
+        jm_hud_panel_close();
         return true;
     }
-    if (mg->sheet && mg->portrait && !lv_obj_has_flag(mg->sheet, LV_OBJ_FLAG_HIDDEN)) {
-        lv_obj_add_flag(mg->sheet, LV_OBJ_FLAG_HIDDEN);
+    if (jm->sheet && jm->portrait && !lv_obj_has_flag(jm->sheet, LV_OBJ_FLAG_HIDDEN)) {
+        lv_obj_add_flag(jm->sheet, LV_OBJ_FLAG_HIDDEN);
         return true;
     }
-    mg_hud_pause();
+    jm_hud_pause();
     return true;
 }
 
-void mg_hud_pad(void)
+void jm_hud_pad(void)
 {
-    aos_pad_t *pad = &mg->pad;
-    if (mg->panel) {
-        if (aos_pad_pressed(pad, AOS_PAD_B) || (aos_pad_pressed(pad, AOS_PAD_START) && mg->panel_kind == PANEL_PAUSE)) {
-            mg_hud_back();
+    aos_pad_t *pad = &jm->pad;
+    if (jm->panel) {
+        if (aos_pad_pressed(pad, AOS_PAD_B) || (aos_pad_pressed(pad, AOS_PAD_START) && jm->panel_kind == PANEL_PAUSE)) {
+            jm_hud_back();
             return;
         }
-        aos_pad_menu_step(&mg->menu, pad);
+        aos_pad_menu_step(&jm->menu, pad);
         return;
     }
     if (aos_pad_pressed(pad, AOS_PAD_START)) {
-        mg_hud_pause();
+        jm_hud_pause();
         return;
     }
-    mg_play_pad();
+    jm_play_pad();
 }

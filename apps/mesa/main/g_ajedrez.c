@@ -76,24 +76,24 @@ static void ids_from_board(aj_t *g)
 static void judge(aj_t *g)
 {
     uint32_t l[256];
-    int n = ch_legal(&g->p, l);
+    int n = mch_legal(&g->p, l);
     g->result = -1;
     g->why = WHY_NONE;
     if (!n) {
-        if (ch_in_check(&g->p, g->p.side)) {
+        if (mch_in_check(&g->p, g->p.side)) {
             g->result = (int8_t)(g->p.side ^ 1);
             g->why = WHY_MATE;
         } else {
             g->result = -2;
             g->why = WHY_STALE;
         }
-    } else if (ch_repeats(&g->p) >= 2) {
+    } else if (mch_repeats(&g->p) >= 2) {
         g->result = -2;
         g->why = WHY_REP;
     } else if (g->p.half >= 100) {
         g->result = -2;
         g->why = WHY_FIFTY;
-    } else if (ch_no_mating_material(&g->p)) {
+    } else if (mch_no_mating_material(&g->p)) {
         g->result = -2;
         g->why = WHY_MATERIAL;
     }
@@ -126,8 +126,8 @@ static void aj_init(void *st, const uint8_t *opts, uint32_t seed)
     (void)seed;
     aj_t *g = (aj_t *)st;
     memset(g, 0, sizeof *g);
-    ch_tables();
-    ch_start(&g->p);
+    mch_tables();
+    mch_start(&g->p);
     ids_from_board(g);
 }
 
@@ -136,7 +136,7 @@ static bool aj_setup(void *st, const uint8_t *opts, const char *text)
     (void)opts;
     aj_t *g = (aj_t *)st;
     ch_pos_t p;
-    if (!ch_fen(&p, text)) return false;
+    if (!mch_fen(&p, text)) return false;
     memset(g, 0, sizeof *g);
     g->p = p;
     ids_from_board(g);
@@ -161,7 +161,7 @@ static const char *aj_status(const void *st)
 {
     const aj_t *g = (const aj_t *)st;
     if (g->result != -1) return WHY[g->why];
-    return ch_in_check(&g->p, g->p.side) ? N_("Jaque") : NULL;
+    return mch_in_check(&g->p, g->p.side) ? N_("Jaque") : NULL;
 }
 
 static void to_move(uint32_t m, mesa_move_t *o)
@@ -180,7 +180,7 @@ static int aj_moves(const void *st, mesa_move_t *out, int max)
     if (g->result != -1) return 0;
     uint32_t l[256];
     ch_pos_t p = g->p;
-    int n = ch_legal(&p, l);
+    int n = mch_legal(&p, l);
     if (n > max) n = max;
     for (int i = 0; i < n; i++) to_move(l[i], &out[i]);
     return n;
@@ -216,11 +216,11 @@ static uint32_t aj_apply(void *st, const mesa_move_t *mv)
         ev |= MESA_EV_PROMOTE;
     }
     ch_undo_t u;
-    if (!ch_make(&g->p, m, &u)) return 0;      /* never: the move came from aj_moves */
+    if (!mch_make(&g->p, m, &u)) return 0;      /* never: the move came from aj_moves */
     g->last_from = (uint8_t)f64;
     g->last_to = (uint8_t)t64;
     judge(g);
-    if (ch_in_check(&g->p, g->p.side)) ev |= MESA_EV_CHECK;
+    if (mch_in_check(&g->p, g->p.side)) ev |= MESA_EV_CHECK;
     if (g->result != -1) ev |= MESA_EV_END;
     return ev;
 }
@@ -237,7 +237,7 @@ static bool aj_notation(const void *st, const mesa_move_t *m, char *out, size_t 
     const aj_t *g = (const aj_t *)st;
     ch_pos_t p = g->p;
     char san[16];
-    ch_san(&p, m->data, san);
+    mch_san(&p, m->data, san);
     snprintf(out, n, "%s", san);
     return true;
 }
@@ -312,7 +312,7 @@ static bool aj_ai(const void *st, int level, mesa_ai_t *ai, mesa_move_t *out)
     /* the strongest levels too vary their first moves a little */
     if (!t.noise && p.full <= 4) t.noise = 6;
     t.seed = ai->seed;
-    uint32_t m = ch_think(&p, &t);
+    uint32_t m = mch_think(&p, &t);
     ai->nodes = t.nodes;
     ai->depth = t.depth_done;
     if (!m) return false;

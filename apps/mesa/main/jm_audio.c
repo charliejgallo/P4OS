@@ -6,7 +6,7 @@
  * streaming speaker, which is open only while something sounds. Pumped
  * from LVGL's timer. Bastion's mixer, smaller.
  */
-#include "mg_app.h"
+#include "jm_app.h"
 
 #include "aos_hal.h"
 
@@ -37,9 +37,9 @@ static struct {
     uint32_t idle_since;
 } A;
 
-void mg_audio_open(void)
+void jm_audio_open(void)
 {
-    mg_audio_close();
+    jm_audio_close();
     for (int i = 0; i < 256; i++) {
         int u = ~i & 0xFF;
         int t = ((u & 0x0F) << 3) + 0x84;
@@ -48,30 +48,30 @@ void mg_audio_open(void)
     }
     char p[160];
     snprintf(p, sizeof p, "%s/mesa_p4.pak", aos_hal_path_apps());
-    mg_pak_t pak;
-    if (!mg_pak_open(&pak, p)) return;
+    jm_pak_t pak;
+    if (!jm_pak_open(&pak, p)) return;
     for (int i = 0; i < SND_N; i++) {
-        char n[MG_NAME_LEN];
+        char n[JM_NAME_LEN];
         snprintf(n, sizeof n, "s_%s", NAMES[i]);
-        const mg_entry_t *e = mg_pak_find(&pak, n);
+        const jm_entry_t *e = jm_pak_find(&pak, n);
         if (!e || e->type != PK_PCM) continue;
-        A.snd[i] = (uint8_t *)mg_pak_load(&pak, e);
+        A.snd[i] = (uint8_t *)jm_pak_load(&pak, e);
         A.len[i] = A.snd[i] ? e->rawlen : 0;
     }
-    mg_pak_close(&pak);
+    jm_pak_close(&pak);
     A.loaded = true;
 }
 
-void mg_audio_close(void)
+void jm_audio_close(void)
 {
     if (A.open) aos_hal_spk_close();
-    for (int i = 0; i < SND_N; i++) mg_free(A.snd[i]);
+    for (int i = 0; i < SND_N; i++) jm_free(A.snd[i]);
     memset(&A, 0, sizeof A);
 }
 
-void mg_audio_play(int snd)
+void jm_audio_play(int snd)
 {
-    if (!mg || !mg->prefs.sound || snd < 0 || snd >= SND_N || !A.snd[snd]) return;
+    if (!jm || !jm->prefs.sound || snd < 0 || snd >= SND_N || !A.snd[snd]) return;
     if (!A.open) {
         A.open = aos_hal_spk_open(RATE);
         if (!A.open) return;
@@ -88,14 +88,14 @@ void mg_audio_play(int snd)
     A.idle_since = 0;
 }
 
-void mg_audio_pump(void)
+void jm_audio_pump(void)
 {
     if (!A.open) return;
     bool any = false;
     for (int i = 0; i < VOICES; i++) any |= A.v[i].data != NULL;
     if (!any) {
         /* the speaker goes back to the system a while after the last sound */
-        uint32_t now = mg_now();
+        uint32_t now = jm_now();
         if (!A.idle_since) A.idle_since = now;
         if (now - A.idle_since > 3000) {
             aos_hal_spk_close();

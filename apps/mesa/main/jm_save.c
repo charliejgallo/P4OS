@@ -9,7 +9,7 @@
  * moves in SAN as the game writes them. Reading one plays it from the
  * start (or its FEN), each move found among the legal ones by its text.
  */
-#include "mg_app.h"
+#include "jm_app.h"
 
 #include "aos_hal.h"
 #include "aos_i18n.h"
@@ -21,7 +21,7 @@
 #include <sys/stat.h>
 #include <time.h>
 
-#define P (&mg->play)
+#define P (&jm->play)
 #define MAGIC 0x3153474Du      /* "MGS1" */
 
 typedef struct {
@@ -43,18 +43,18 @@ static void save_path(char *out, size_t n)
     snprintf(out, n, "%s/mesa_partida.bin", aos_hal_path_data());
 }
 
-void mg_save_forget(void)
+void jm_save_forget(void)
 {
     char p[160];
     save_path(p, sizeof p);
     remove(p);
 }
 
-bool mg_save_game(void)
+bool jm_save_game(void)
 {
-    if (!mg->playing || !P->g) return false;
+    if (!jm->playing || !P->g) return false;
     if (P->over) {
-        mg_save_forget();
+        jm_save_forget();
         return true;
     }
     if (P->n == 0) {
@@ -64,7 +64,7 @@ bool mg_save_game(void)
     save_t h;
     memset(&h, 0, sizeof h);
     h.magic = MAGIC;
-    h.hist_size = (uint16_t)sizeof(mg_hist_t);
+    h.hist_size = (uint16_t)sizeof(jm_hist_t);
     h.move_size = (uint16_t)sizeof(mesa_move_t);
     snprintf(h.word, sizeof h.word, "%s", P->g->word);
     memcpy(h.opts, P->opts, sizeof h.opts);
@@ -88,7 +88,7 @@ bool mg_save_game(void)
     FILE *f = fopen(tmp, "wb");
     if (!f) return false;
     bool ok = fwrite(&h, sizeof h, 1, f) == 1 &&
-              fwrite(P->hist, sizeof(mg_hist_t), (size_t)P->top, f) == (size_t)P->top;
+              fwrite(P->hist, sizeof(jm_hist_t), (size_t)P->top, f) == (size_t)P->top;
     ok = fclose(f) == 0 && ok;
     if (!ok) {
         remove(tmp);
@@ -98,24 +98,24 @@ bool mg_save_game(void)
     return rename(tmp, p) == 0;
 }
 
-bool mg_save_load(mg_new_t *n, bool apply)
+bool jm_save_load(jm_new_t *n, bool apply)
 {
     char p[160];
     save_path(p, sizeof p);
     FILE *f = fopen(p, "rb");
     if (!f) return false;
     save_t h;
-    bool ok = fread(&h, sizeof h, 1, f) == 1 && h.magic == MAGIC && h.hist_size == sizeof(mg_hist_t) &&
-              h.move_size == sizeof(mesa_move_t) && h.n > 0 && h.n <= MG_HIST_MAX && h.top >= h.n &&
-              h.top <= MG_HIST_MAX;
+    bool ok = fread(&h, sizeof h, 1, f) == 1 && h.magic == MAGIC && h.hist_size == sizeof(jm_hist_t) &&
+              h.move_size == sizeof(mesa_move_t) && h.n > 0 && h.n <= JM_HIST_MAX && h.top >= h.n &&
+              h.top <= JM_HIST_MAX;
     h.word[sizeof h.word - 1] = 0;
-    const mg_slot_t *s = ok ? mg_game_find(h.word) : NULL;
+    const jm_slot_t *s = ok ? jm_game_find(h.word) : NULL;
     if (!s) {
         fclose(f);
         return false;
     }
     memset(n, 0, sizeof *n);
-    n->gi = (int)(s - mg_games);
+    n->gi = (int)(s - jm_games);
     memcpy(n->opts, h.opts, sizeof n->opts);
     memcpy(n->human, h.human, sizeof n->human);
     memcpy(n->level, h.level, sizeof n->level);
@@ -127,29 +127,29 @@ bool mg_save_load(mg_new_t *n, bool apply)
         fclose(f);
         return true;
     }
-    mg_hist_t *hist = (mg_hist_t *)mg_malloc(sizeof(mg_hist_t) * (size_t)h.top);
-    ok = hist && fread(hist, sizeof(mg_hist_t), (size_t)h.top, f) == (size_t)h.top;
+    jm_hist_t *hist = (jm_hist_t *)jm_malloc(sizeof(jm_hist_t) * (size_t)h.top);
+    ok = hist && fread(hist, sizeof(jm_hist_t), (size_t)h.top, f) == (size_t)h.top;
     fclose(f);
     h.fen[sizeof h.fen - 1] = 0;
     n->fen = h.fen[0] ? h.fen : NULL;
-    if (!ok || !mg_play_start(n)) {
-        mg_free(hist);
+    if (!ok || !jm_play_start(n)) {
+        jm_free(hist);
         return false;
     }
-    if (mg->home) lv_obj_add_flag(mg->home, LV_OBJ_FLAG_HIDDEN);
-    mg_play_ai_cancel();
+    if (jm->home) lv_obj_add_flag(jm->home, LV_OBJ_FLAG_HIDDEN);
+    jm_play_ai_cancel();
     P->seed = h.seed;
-    memcpy(P->hist, hist, sizeof(mg_hist_t) * (size_t)h.top);
-    mg_free(hist);
+    memcpy(P->hist, hist, sizeof(jm_hist_t) * (size_t)h.top);
+    jm_free(hist);
     P->top = h.top;
-    mg_play_replay(h.n);
+    jm_play_replay(h.n);
     P->top = h.top;
     if (P->clock.mode != CLK_NONE) {
         P->clock.left[0] = h.left[0];
         P->clock.left[1] = h.left[1];
     }
-    mg_play_relayout();
-    P->wait_until = mg_now() + 600;
+    jm_play_relayout();
+    P->wait_until = jm_now() + 600;
     return true;
 }
 
@@ -174,9 +174,9 @@ static void mkdirs(const char *path)
     mkdir(b, 0777);
 }
 
-bool mg_pgn_write(char *name_out, size_t nn)
+bool jm_pgn_write(char *name_out, size_t nn)
 {
-    if (!mg->playing || !(P->g->flags & MESA_GF_PGN)) return false;
+    if (!jm->playing || !(P->g->flags & MESA_GF_PGN)) return false;
     char dir[180];
     pgn_dir(dir, sizeof dir);
     mkdirs(dir);
@@ -189,7 +189,7 @@ bool mg_pgn_write(char *name_out, size_t nn)
         snprintf(name, sizeof name, "partida-%04d%02d%02d-%02d%02d.pgn", tm.tm_year + 1900, tm.tm_mon + 1,
                  tm.tm_mday, tm.tm_hour, tm.tm_min);
     } else {
-        snprintf(name, sizeof name, "partida-%u.pgn", (unsigned)(mg_rand() % 100000));
+        snprintf(name, sizeof name, "partida-%u.pgn", (unsigned)(jm_rand() % 100000));
     }
     char path[300];
     snprintf(path, sizeof path, "%s/%s", dir, name);
@@ -217,7 +217,7 @@ bool mg_pgn_write(char *name_out, size_t nn)
     int col = 0, moveno = 1;
     bool first = true;
     for (int i = 0; i < P->n; i++) {
-        const mg_hist_t *h = &P->hist[i];
+        const jm_hist_t *h = &P->hist[i];
         if (h->roll) continue;
         char san[24], tok[40];
         P->g->notation(P->tmp, &h->m, san, sizeof san);
@@ -267,7 +267,7 @@ static int name_cmp(const void *a, const void *b)
     return -strcmp((const char *)a, (const char *)b);
 }
 
-int mg_pgn_list(char names[][40], int max)
+int jm_pgn_list(char names[][40], int max)
 {
     char dir[180];
     pgn_dir(dir, sizeof dir);
@@ -291,9 +291,9 @@ static bool tag(const char *text, const char *name, char *out, size_t n)
     return true;
 }
 
-bool mg_pgn_read(const char *name)
+bool jm_pgn_read(const char *name)
 {
-    const mg_slot_t *s = mg_game_find("ajedrez");
+    const jm_slot_t *s = jm_game_find("ajedrez");
     if (!s) return false;
     char dir[180], path[240];
     pgn_dir(dir, sizeof dir);
@@ -307,7 +307,7 @@ bool mg_pgn_read(const char *name)
         fclose(f);
         return false;
     }
-    char *text = (char *)mg_malloc((size_t)len + 1);
+    char *text = (char *)jm_malloc((size_t)len + 1);
     if (!text) {
         fclose(f);
         return false;
@@ -318,18 +318,18 @@ bool mg_pgn_read(const char *name)
     char fen[100] = "";
     tag(text, "FEN", fen, sizeof fen);
     /* two people at the board: whoever reads a game goes on as they like */
-    mg_new_t n;
+    jm_new_t n;
     memset(&n, 0, sizeof n);
-    n.gi = (int)(s - mg_games);
+    n.gi = (int)(s - jm_games);
     n.human[0] = n.human[1] = 1;
     n.level[0] = n.level[1] = 3;
     n.two = TWO_FACE;
     n.fen = fen[0] ? fen : NULL;
-    if (!mg_play_start(&n)) {
-        mg_free(text);
+    if (!jm_play_start(&n)) {
+        jm_free(text);
         return false;
     }
-    mg_play_ai_cancel();
+    jm_play_ai_cancel();
     /* the moves: skip the tags, comments, variations, numbers and results */
     const char *q = text;
     int depth_var = 0, played = 0;
@@ -392,11 +392,11 @@ bool mg_pgn_read(const char *name)
             }
             have[h] = 0;
             if (!strcmp(have, want)) {
-                mg_hist_t e;
+                jm_hist_t e;
                 memset(&e, 0, sizeof e);
                 e.m = ms[i];
                 P->g->apply(P->st, &ms[i]);
-                if (P->n < MG_HIST_MAX) P->hist[P->n++] = e;
+                if (P->n < JM_HIST_MAX) P->hist[P->n++] = e;
                 P->top = P->n;
                 found = true;
                 played++;
@@ -404,12 +404,12 @@ bool mg_pgn_read(const char *name)
         }
         if (!found) break;
     }
-    mg_free(text);
-    mg_play_replay(P->n);
+    jm_free(text);
+    jm_play_replay(P->n);
     P->top = P->n;
-    mg_play_relayout();
+    jm_play_relayout();
     char b[80];
     snprintf(b, sizeof b, "%s: %d %s", name, played, _("jugadas"));
-    mg_hud_status(b, 2500);
+    jm_hud_status(b, 2500);
     return true;
 }

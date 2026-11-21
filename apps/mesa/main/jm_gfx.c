@@ -1,5 +1,5 @@
 /*
- * Juegos de mesa - the picture (see mg_gfx.h): Bastion's compositor, with
+ * Juegos de mesa - the picture (see jm_gfx.h): Bastion's compositor, with
  * the screen's size a field, one core (it runs on LVGL's thread), no depth
  * and no text, and a filled quadrilateral for a cell seen in perspective.
  */
@@ -7,9 +7,9 @@
 #pragma GCC optimize("O2")
 #endif
 
-#include "mg_gfx.h"
+#include "jm_gfx.h"
 
-#include "mg_pak.h"
+#include "jm_pak.h"
 
 #include <math.h>
 #include <string.h>
@@ -36,16 +36,16 @@ static inline uint16_t add_sat(uint16_t bg, uint32_t add_e)
 
 /* ---- set up --------------------------------------------------------------------- */
 
-bool mg_gfx_init(mg_gfx_t *g)
+bool jm_gfx_init(jm_gfx_t *g)
 {
     memset(g, 0, sizeof *g);
-    g->item = (mg_item_t *)mg_malloc(sizeof(mg_item_t) * MG_MAX_ITEMS);
-    g->cur = (uint32_t *)mg_malloc(sizeof(uint32_t) * MG_MAX_TILES);
-    g->need = (uint8_t *)mg_malloc(MG_MAX_TILES);
-    g->band_cap = MG_MAX_ITEMS * 10;
-    g->band_ix = (uint16_t *)mg_malloc(sizeof(uint16_t) * (size_t)g->band_cap);
+    g->item = (jm_item_t *)jm_malloc(sizeof(jm_item_t) * JM_MAX_ITEMS);
+    g->cur = (uint32_t *)jm_malloc(sizeof(uint32_t) * JM_MAX_TILES);
+    g->need = (uint8_t *)jm_malloc(JM_MAX_TILES);
+    g->band_cap = JM_MAX_ITEMS * 10;
+    g->band_ix = (uint16_t *)jm_malloc(sizeof(uint16_t) * (size_t)g->band_cap);
     if (!g->item || !g->cur || !g->need || !g->band_ix) {
-        mg_gfx_free(g);
+        jm_gfx_free(g);
         return false;
     }
     for (int y = 0; y < 64; y++) {
@@ -61,46 +61,46 @@ bool mg_gfx_init(mg_gfx_t *g)
         float v = 1.0f - (float)i / 16.0f;
         g->prof[i] = (uint8_t)(v * v * 255.0f);
     }
-    mg_gfx_size(g, 720, 1280, NULL);
+    jm_gfx_size(g, 720, 1280, NULL);
     return true;
 }
 
-void mg_gfx_free(mg_gfx_t *g)
+void jm_gfx_free(jm_gfx_t *g)
 {
-    mg_free(g->item);
-    mg_free(g->cur);
-    mg_free(g->need);
-    mg_free(g->band_ix);
+    jm_free(g->item);
+    jm_free(g->cur);
+    jm_free(g->need);
+    jm_free(g->band_ix);
     memset(g, 0, sizeof *g);
 }
 
-void mg_gfx_size(mg_gfx_t *g, int w, int h, const uint16_t *bg)
+void jm_gfx_size(jm_gfx_t *g, int w, int h, const uint16_t *bg)
 {
     g->w = w;
     g->h = h;
-    g->tw = (w + MG_TILE - 1) / MG_TILE;
-    g->th = (h + MG_TILE - 1) / MG_TILE;
-    if (g->tw * g->th > MG_MAX_TILES) g->th = MG_MAX_TILES / g->tw;
-    if (g->th > MG_MAX_TH) g->th = MG_MAX_TH;
+    g->tw = (w + JM_TILE - 1) / JM_TILE;
+    g->th = (h + JM_TILE - 1) / JM_TILE;
+    if (g->tw * g->th > JM_MAX_TILES) g->th = JM_MAX_TILES / g->tw;
+    if (g->th > JM_MAX_TH) g->th = JM_MAX_TH;
     g->nt = g->tw * g->th;
     g->bg = bg;
 }
 
-bool mg_sheet_bind(mg_sheet_t *s, uint8_t *data, size_t len)
+bool jm_sheet_bind(jm_sheet_t *s, uint8_t *data, size_t len)
 {
     memset(s, 0, sizeof *s);
     if (!data || len < 8 || memcmp(data, "BSSH", 4)) return false;
     s->data = data;
     s->nframes = data[4] | (data[5] << 8);
     s->cols = data[6] | (data[7] << 8);
-    s->fr = (const mg_frame_t *)(data + 8);
+    s->fr = (const jm_frame_t *)(data + 8);
     if (s->cols <= 0) s->cols = 1;
-    return s->nframes > 0 && 8 + (size_t)s->nframes * sizeof(mg_frame_t) <= len;
+    return s->nframes > 0 && 8 + (size_t)s->nframes * sizeof(jm_frame_t) <= len;
 }
 
 /* ---- the frame's list ---------------------------------------------------------------- */
 
-void mg_gfx_begin(mg_gfx_t *g)
+void jm_gfx_begin(jm_gfx_t *g)
 {
     g->nitem = 0;
     g->overflow = false;
@@ -114,18 +114,18 @@ static uint32_t mix(uint32_t h, uint32_t v)
     return h;
 }
 
-static mg_item_t *push(mg_gfx_t *g, int kind, int x0, int y0, int x1, int y1)
+static jm_item_t *push(jm_gfx_t *g, int kind, int x0, int y0, int x1, int y1)
 {
     if (x0 < 0) x0 = 0;
     if (y0 < 0) y0 = 0;
     if (x1 > g->w) x1 = g->w;
     if (y1 > g->h) y1 = g->h;
     if (x1 <= x0 || y1 <= y0) return NULL;
-    if (g->nitem >= MG_MAX_ITEMS) {
+    if (g->nitem >= JM_MAX_ITEMS) {
         g->overflow = true;
         return NULL;
     }
-    mg_item_t *it = &g->item[g->nitem++];
+    jm_item_t *it = &g->item[g->nitem++];
     memset(it, 0, sizeof *it);
     it->kind = (uint8_t)kind;
     it->x0 = (int16_t)x0;
@@ -135,7 +135,7 @@ static mg_item_t *push(mg_gfx_t *g, int kind, int x0, int y0, int x1, int y1)
     return it;
 }
 
-static void seal(mg_item_t *it, uint32_t extra)
+static void seal(jm_item_t *it, uint32_t extra)
 {
     uint32_t h = 0x811C9DC5u;
     h = mix(h, (uint32_t)it->kind | ((uint32_t)it->flags << 8) | ((uint32_t)it->a << 16) | ((uint32_t)it->aux << 24));
@@ -147,14 +147,14 @@ static void seal(mg_item_t *it, uint32_t extra)
     it->hash = h ? h : 1;
 }
 
-void mg_spr(mg_gfx_t *g, const mg_sheet_t *s, int frame, int x, int y, int flags, int alpha)
+void jm_spr(jm_gfx_t *g, const jm_sheet_t *s, int frame, int x, int y, int flags, int alpha)
 {
     if (!s || !s->data || alpha <= 0) return;
     if (frame < 0) frame = 0;
     if (frame >= s->nframes) frame %= s->nframes;
-    const mg_frame_t *fr = &s->fr[frame];
+    const jm_frame_t *fr = &s->fr[frame];
     if (!fr->w || !fr->h) return;
-    mg_item_t *it = push(g, IT_SPR, x + fr->ox, y + fr->oy, x + fr->ox + fr->w, y + fr->oy + fr->h);
+    jm_item_t *it = push(g, IT_SPR, x + fr->ox, y + fr->oy, x + fr->ox + fr->w, y + fr->oy + fr->h);
     if (!it) return;
     it->flags = (uint8_t)flags;
     it->a = (uint8_t)(alpha > 255 ? 255 : alpha);
@@ -169,10 +169,10 @@ void mg_spr(mg_gfx_t *g, const mg_sheet_t *s, int frame, int x, int y, int flags
     seal(it, (uint32_t)(uintptr_t)(s->data + fr->off) ^ ((uint32_t)fr->off * 2654435761u));
 }
 
-void mg_glow(mg_gfx_t *g, int x, int y, int r, uint16_t color, int k)
+void jm_glow(jm_gfx_t *g, int x, int y, int r, uint16_t color, int k)
 {
     if (r < 1 || k <= 0) return;
-    mg_item_t *it = push(g, IT_GLOW, x - r, y - r, x + r, y + r);
+    jm_item_t *it = push(g, IT_GLOW, x - r, y - r, x + r, y + r);
     if (!it) return;
     it->x = (int16_t)x;
     it->y = (int16_t)y;
@@ -182,10 +182,10 @@ void mg_glow(mg_gfx_t *g, int x, int y, int r, uint16_t color, int k)
     seal(it, 0);
 }
 
-void mg_shadow(mg_gfx_t *g, int x, int y, int rx, int ry, int a)
+void jm_shadow(jm_gfx_t *g, int x, int y, int rx, int ry, int a)
 {
     if (rx < 2 || ry < 1 || a <= 0) return;
-    mg_item_t *it = push(g, IT_SHADOW, x - rx, y - ry, x + rx, y + ry);
+    jm_item_t *it = push(g, IT_SHADOW, x - rx, y - ry, x + rx, y + ry);
     if (!it) return;
     it->x = (int16_t)x;
     it->y = (int16_t)y;
@@ -195,10 +195,10 @@ void mg_shadow(mg_gfx_t *g, int x, int y, int rx, int ry, int a)
     seal(it, 0);
 }
 
-void mg_rect(mg_gfx_t *g, int x, int y, int w, int h, uint16_t color, int a, int radius)
+void jm_rect(jm_gfx_t *g, int x, int y, int w, int h, uint16_t color, int a, int radius)
 {
     if (a <= 0) return;
-    mg_item_t *it = push(g, IT_RECT, x, y, x + w, y + h);
+    jm_item_t *it = push(g, IT_RECT, x, y, x + w, y + h);
     if (!it) return;
     it->x = (int16_t)x;
     it->y = (int16_t)y;
@@ -210,7 +210,7 @@ void mg_rect(mg_gfx_t *g, int x, int y, int w, int h, uint16_t color, int a, int
     seal(it, 0);
 }
 
-void mg_quad(mg_gfx_t *g, const int16_t *xy, uint16_t color, int a)
+void jm_quad(jm_gfx_t *g, const int16_t *xy, uint16_t color, int a)
 {
     if (a <= 0) return;
     int x0 = xy[0], x1 = xy[0], y0 = xy[1], y1 = xy[1];
@@ -220,7 +220,7 @@ void mg_quad(mg_gfx_t *g, const int16_t *xy, uint16_t color, int a)
         if (xy[2 * i + 1] < y0) y0 = xy[2 * i + 1];
         if (xy[2 * i + 1] > y1) y1 = xy[2 * i + 1];
     }
-    mg_item_t *it = push(g, IT_QUAD, x0, y0, x1 + 1, y1 + 1);
+    jm_item_t *it = push(g, IT_QUAD, x0, y0, x1 + 1, y1 + 1);
     if (!it) return;
     it->color = color;
     it->a = (uint8_t)(a > 255 ? 255 : a);
@@ -236,14 +236,14 @@ void mg_quad(mg_gfx_t *g, const int16_t *xy, uint16_t color, int a)
     seal(it, (uint32_t)(uint16_t)xy[7] | ((uint32_t)(uint16_t)xy[6] << 16));
 }
 
-void mg_beam(mg_gfx_t *g, int x0, int y0, int x1, int y1, int halfw, uint16_t color, int k)
+void jm_beam(jm_gfx_t *g, int x0, int y0, int x1, int y1, int halfw, uint16_t color, int k)
 {
     if (halfw < 1 || k <= 0) return;
     int ax = x0 < x1 ? x0 : x1, bx = x0 < x1 ? x1 : x0;
     int ay = y0 < y1 ? y0 : y1, by = y0 < y1 ? y1 : y0;
     int dx = bx - ax, dy = by - ay;
     int pad = halfw + (dx > dy ? (dy * halfw) / (dx ? dx : 1) : (dx * halfw) / (dy ? dy : 1)) + 1;
-    mg_item_t *it = push(g, IT_BEAM, ax - pad, ay - pad, bx + pad + 1, by + pad + 1);
+    jm_item_t *it = push(g, IT_BEAM, ax - pad, ay - pad, bx + pad + 1, by + pad + 1);
     if (!it) return;
     it->x = (int16_t)x0;
     it->y = (int16_t)y0;
@@ -255,10 +255,10 @@ void mg_beam(mg_gfx_t *g, int x0, int y0, int x1, int y1, int halfw, uint16_t co
     seal(it, 0);
 }
 
-void mg_ring(mg_gfx_t *g, int cx, int cy, int rx, int ry, int thick, uint16_t color, int k, int flags)
+void jm_ring(jm_gfx_t *g, int cx, int cy, int rx, int ry, int thick, uint16_t color, int k, int flags)
 {
     if (rx < 2 || ry < 2 || k <= 0) return;
-    mg_item_t *it = push(g, IT_RING, cx - rx, cy - ry, cx + rx + 1, cy + ry + 1);
+    jm_item_t *it = push(g, IT_RING, cx - rx, cy - ry, cx + rx + 1, cy + ry + 1);
     if (!it) return;
     it->x = (int16_t)cx;
     it->y = (int16_t)cy;
@@ -271,10 +271,10 @@ void mg_ring(mg_gfx_t *g, int cx, int cy, int rx, int ry, int thick, uint16_t co
     seal(it, 0);
 }
 
-void mg_disc(mg_gfx_t *g, int cx, int cy, int rx, int ry, uint16_t color, int a)
+void jm_disc(jm_gfx_t *g, int cx, int cy, int rx, int ry, uint16_t color, int a)
 {
     if (rx < 1 || ry < 1 || a <= 0) return;
-    mg_item_t *it = push(g, IT_DISC, cx - rx, cy - ry, cx + rx + 1, cy + ry + 1);
+    jm_item_t *it = push(g, IT_DISC, cx - rx, cy - ry, cx + rx + 1, cy + ry + 1);
     if (!it) return;
     it->x = (int16_t)cx;
     it->y = (int16_t)cy;
@@ -287,17 +287,17 @@ void mg_disc(mg_gfx_t *g, int cx, int cy, int rx, int ry, uint16_t color, int a)
 
 /* ---- drawing one thing, clipped --------------------------------------------------------- */
 
-static void draw_spr(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, const mg_rect_t *c)
+static void draw_spr(const jm_gfx_t *g, uint16_t *fb, const jm_item_t *it, const jm_rect_t *c)
 {
-    const mg_sheet_t *s = (const mg_sheet_t *)it->p;
-    const mg_frame_t *fr = &s->fr[it->p3];
+    const jm_sheet_t *s = (const jm_sheet_t *)it->p;
+    const jm_frame_t *fr = &s->fr[it->p3];
     const uint32_t *row = (const uint32_t *)(s->data + fr->off);
     int W = g->w;
     int ya = it->y < c->y0 ? c->y0 : it->y;
     int yb = it->y + fr->h > c->y1 ? c->y1 : it->y + fr->h;
     int ga = it->a >> 3;
-    bool solid = it->a >= 250 && !(it->flags & MG_F_FLASH);
-    bool flash = (it->flags & MG_F_FLASH) != 0;
+    bool solid = it->a >= 250 && !(it->flags & JM_F_FLASH);
+    bool flash = (it->flags & JM_F_FLASH) != 0;
     for (int y = ya; y < yb; y++) {
         const uint16_t *op = (const uint16_t *)(s->data + row[y - it->y]);
         uint16_t *dst = fb + (size_t)y * W;
@@ -343,7 +343,7 @@ static void draw_spr(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, const
     }
 }
 
-static void draw_glow(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, const mg_rect_t *c)
+static void draw_glow(const jm_gfx_t *g, uint16_t *fb, const jm_item_t *it, const jm_rect_t *c)
 {
     int r = it->p0, W = g->w;
     int xa = it->x0 < c->x0 ? c->x0 : it->x0, xb = it->x1 > c->x1 ? c->x1 : it->x1;
@@ -362,7 +362,7 @@ static void draw_glow(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, cons
     }
 }
 
-static void draw_shadow(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, const mg_rect_t *c)
+static void draw_shadow(const jm_gfx_t *g, uint16_t *fb, const jm_item_t *it, const jm_rect_t *c)
 {
     int rx = it->p0, ry = it->p1, W = g->w;
     int ya = it->y0 < c->y0 ? c->y0 : it->y0, yb = it->y1 > c->y1 ? c->y1 : it->y1;
@@ -388,7 +388,7 @@ static void draw_shadow(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, co
     }
 }
 
-static void draw_rect(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, const mg_rect_t *c)
+static void draw_rect(const jm_gfx_t *g, uint16_t *fb, const jm_item_t *it, const jm_rect_t *c)
 {
     int w = it->p0, h = it->p1, rad = it->p2, W = g->w;
     int ya = it->y < c->y0 ? c->y0 : it->y, yb = it->y + h > c->y1 ? c->y1 : it->y + h;
@@ -411,7 +411,7 @@ static void draw_rect(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, cons
     }
 }
 
-static void draw_quad(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, const mg_rect_t *c)
+static void draw_quad(const jm_gfx_t *g, uint16_t *fb, const jm_item_t *it, const jm_rect_t *c)
 {
     float px[4] = { it->x, it->p0, it->p2, (float)(int16_t)it->z };
     float py[4] = { it->y, it->p1, it->p3, (float)(int16_t)(uint16_t)(uintptr_t)it->p };
@@ -438,7 +438,7 @@ static void draw_quad(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, cons
     }
 }
 
-static void draw_beam(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, const mg_rect_t *c)
+static void draw_beam(const jm_gfx_t *g, uint16_t *fb, const jm_item_t *it, const jm_rect_t *c)
 {
     int x0 = it->x, y0 = it->y, x1 = it->p0, y1 = it->p1, hw = it->p2, W = g->w;
     int dx = x1 - x0, dy = y1 - y0;
@@ -494,7 +494,7 @@ static void draw_beam(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, cons
     }
 }
 
-static inline void span(uint16_t *dst, int xa, int xb, const mg_rect_t *c, uint32_t ce, uint32_t a5, bool add, uint16_t color)
+static inline void span(uint16_t *dst, int xa, int xb, const jm_rect_t *c, uint32_t ce, uint32_t a5, bool add, uint16_t color)
 {
     if (xa < c->x0) xa = c->x0;
     if (xb > c->x1) xb = c->x1;
@@ -508,13 +508,13 @@ static inline void span(uint16_t *dst, int xa, int xb, const mg_rect_t *c, uint3
     }
 }
 
-static void draw_ring(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, const mg_rect_t *c, bool fill)
+static void draw_ring(const jm_gfx_t *g, uint16_t *fb, const jm_item_t *it, const jm_rect_t *c, bool fill)
 {
     int rx = it->p0, ry = it->p1, th = it->p2, W = g->w;
     int ya = it->y0 < c->y0 ? c->y0 : it->y0, yb = it->y1 > c->y1 ? c->y1 : it->y1;
     uint32_t ce = EXP(it->color);
     uint32_t a5 = (uint32_t)(it->a + 4) >> 3;
-    bool add = (it->flags & MG_F_ADD) != 0;
+    bool add = (it->flags & JM_F_ADD) != 0;
     int rxi = rx - th, ryi = ry - (th * ry + rx / 2) / rx;
     if (ryi < 1) ryi = 1;
     for (int y = ya; y < yb; y++) {
@@ -542,7 +542,7 @@ static void draw_ring(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, cons
     }
 }
 
-static void draw_item(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, const mg_rect_t *c)
+static void draw_item(const jm_gfx_t *g, uint16_t *fb, const jm_item_t *it, const jm_rect_t *c)
 {
     switch (it->kind) {
     case IT_SPR:    draw_spr(g, fb, it, c); break;
@@ -559,16 +559,16 @@ static void draw_item(const mg_gfx_t *g, uint16_t *fb, const mg_item_t *it, cons
 
 /* ---- the frame ------------------------------------------------------------------------- */
 
-int mg_gfx_end(mg_gfx_t *g, uint16_t *fb, uint32_t *shown, bool full)
+int jm_gfx_end(jm_gfx_t *g, uint16_t *fb, uint32_t *shown, bool full)
 {
     int TW = g->tw, TH = g->th, W = g->w;
     memset(g->cur, 0, sizeof(uint32_t) * (size_t)g->nt);
-    int counts[MG_MAX_TH];
+    int counts[JM_MAX_TH];
     memset(counts, 0, sizeof counts);
     for (int i = 0; i < g->nitem; i++) {
-        const mg_item_t *it = &g->item[i];
-        int tx0 = it->x0 / MG_TILE, tx1 = (it->x1 - 1) / MG_TILE;
-        int ty0 = it->y0 / MG_TILE, ty1 = (it->y1 - 1) / MG_TILE;
+        const jm_item_t *it = &g->item[i];
+        int tx0 = it->x0 / JM_TILE, tx1 = (it->x1 - 1) / JM_TILE;
+        int ty0 = it->y0 / JM_TILE, ty1 = (it->y1 - 1) / JM_TILE;
         if (ty1 >= TH) ty1 = TH - 1;
         if (tx1 >= TW) tx1 = TW - 1;
         for (int ty = ty0; ty <= ty1; ty++) {
@@ -584,11 +584,11 @@ int mg_gfx_end(mg_gfx_t *g, uint16_t *fb, uint32_t *shown, bool full)
     }
     g->band_at[TH] = at;
     if (at > g->band_cap) return 0;
-    int fill[MG_MAX_TH];
+    int fill[JM_MAX_TH];
     memcpy(fill, g->band_at, sizeof(int) * (size_t)TH);
     for (int i = 0; i < g->nitem; i++) {
-        const mg_item_t *it = &g->item[i];
-        int ty0 = it->y0 / MG_TILE, ty1 = (it->y1 - 1) / MG_TILE;
+        const jm_item_t *it = &g->item[i];
+        int ty0 = it->y0 / JM_TILE, ty1 = (it->y1 - 1) / JM_TILE;
         if (ty1 >= TH) ty1 = TH - 1;
         for (int ty = ty0; ty <= ty1; ty++) g->band_ix[fill[ty]++] = (uint16_t)i;
     }
@@ -611,10 +611,10 @@ int mg_gfx_end(mg_gfx_t *g, uint16_t *fb, uint32_t *shown, bool full)
         g->dirty.x0 = g->dirty.x1 = g->dirty.y0 = g->dirty.y1 = 0;
         return 0;
     }
-    g->dirty.x0 = (int16_t)(x0 * MG_TILE);
-    g->dirty.x1 = (int16_t)((x1 + 1) * MG_TILE > g->w ? g->w : (x1 + 1) * MG_TILE);
-    g->dirty.y0 = (int16_t)(y0 * MG_TILE);
-    g->dirty.y1 = (int16_t)((y1 + 1) * MG_TILE > g->h ? g->h : (y1 + 1) * MG_TILE);
+    g->dirty.x0 = (int16_t)(x0 * JM_TILE);
+    g->dirty.x1 = (int16_t)((x1 + 1) * JM_TILE > g->w ? g->w : (x1 + 1) * JM_TILE);
+    g->dirty.y0 = (int16_t)(y0 * JM_TILE);
+    g->dirty.y1 = (int16_t)((y1 + 1) * JM_TILE > g->h ? g->h : (y1 + 1) * JM_TILE);
     for (int ty = y0; ty <= y1; ty++) {
         const uint8_t *need = g->need + ty * TW;
         const uint16_t *ix = g->band_ix + g->band_at[ty];
@@ -626,16 +626,16 @@ int mg_gfx_end(mg_gfx_t *g, uint16_t *fb, uint32_t *shown, bool full)
             }
             int t0 = tx;
             while (tx < TW && need[tx]) tx++;
-            mg_rect_t c = { (int16_t)(t0 * MG_TILE), (int16_t)(ty * MG_TILE),
-                            (int16_t)(tx * MG_TILE > g->w ? g->w : tx * MG_TILE),
-                            (int16_t)((ty + 1) * MG_TILE > g->h ? g->h : (ty + 1) * MG_TILE) };
+            jm_rect_t c = { (int16_t)(t0 * JM_TILE), (int16_t)(ty * JM_TILE),
+                            (int16_t)(tx * JM_TILE > g->w ? g->w : tx * JM_TILE),
+                            (int16_t)((ty + 1) * JM_TILE > g->h ? g->h : (ty + 1) * JM_TILE) };
             size_t bytes = (size_t)(c.x1 - c.x0) * 2;
             for (int y = c.y0; y < c.y1; y++) {
                 if (g->bg) memcpy(fb + (size_t)y * W + c.x0, g->bg + (size_t)y * W + c.x0, bytes);
                 else memset(fb + (size_t)y * W + c.x0, 0, bytes);
             }
             for (int i = 0; i < n; i++) {
-                const mg_item_t *it = &g->item[ix[i]];
+                const jm_item_t *it = &g->item[ix[i]];
                 if (it->x1 <= c.x0 || it->x0 >= c.x1) continue;
                 draw_item(g, fb, it, &c);
             }
