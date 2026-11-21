@@ -9,8 +9,9 @@ y en `main`; sale con la 0.31.0, que espera a las apps nuevas de la
 Tienda. Las etapas 2 (las copias que hace sola) y 3 (el pendrive y el
 script de la computadora) están en la rama `respaldo-2` y **en la placa**
 (`v0.30.0-16-g021f337`). La etapa 4 (un servidor propio por SFTP) está
-escrita en la misma rama y probada en la Mac y el simulador, **sin
-instalar**. Nada de la rama está en `main`.
+en la misma rama, probada en la Mac y el simulador, e **instalada**
+(`v0.30.0-21-gd2bc7d3`) sin probar todavía ahí contra ningún servidor.
+Nada de la rama está en `main`.
 
 ## Etapa 1, hecha en la Mac (2026-11-21)
 
@@ -267,7 +268,19 @@ simulador.
   servidor byte por byte, y el simple que no salió.
   Firmware `rev1_3`: 7 150 416 bytes, 38 KB más que con la etapa 3.
 
-**Falta:** instalarlo; SFTP hacia la placa con un cliente de verdad; y la
+**En la placa (2026-11-21, `v0.30.0-21-gd2bc7d3`):** instalado por OTA
+con permiso, confirmado. RAM interna libre: 209,1 KB, la de siempre. La
+instalación no dejó copia "de antes de actualizar", y está bien: nada
+había cambiado desde la copia del día. La placa ya tiene su línea de clave
+en el portal; el servidor está sin elegir.
+
+**Antes de autorizar la clave de la placa en un servidor:** el valor de
+`sshc_seed` de esta placa quedó a la vista en el registro de una sesión de
+trabajo el 2026-11-21 (un error de esa sesión, al revisar un respaldo).
+Esa clave hay que cambiarla por una nueva antes de ponerla en el
+`authorized_keys` de nadie.
+
+**Falta:** SFTP hacia la placa con un cliente de verdad; y la
 copia a un servidor de verdad, que el plan pide probar **contra el NAS
 sólo cuando el usuario lo diga**, con un usuario y una carpeta que él arme
 para eso. Sin probar: un servidor OpenSSH (el de la prueba fue el de la

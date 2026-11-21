@@ -115,7 +115,11 @@ Instalado el 2026-11-21, `v0.30.0-16-g021f337`.
 - [ ] Sacar el pendrive en medio de una copia: sin archivos a medias.
 - [ ] "Traer del pendrive" en una tarjeta nueva, y restaurar el respaldo
       que vino: las notas y el inicio de la anterior.
-- [ ] (etapa 4, sin instalar) `sftp p4os.local` y `scp` desde la Mac:
+- [x] La etapa 4 instalada (`v0.30.0-21-gd2bc7d3`): confirmada, 209,1 KB
+      de RAM interna libres, la línea de la clave en el portal.
+- [ ] Cambiar la clave SSH de la placa por una nueva antes de autorizarla
+      en un servidor (la de ahora quedó a la vista en una sesión).
+- [ ] `sftp p4os.local` y `scp` desde la Mac:
       listar, bajar y subir un archivo grande, y cuánta RAM interna queda.
 - [ ] Ajustes → Respaldo → Servidor propio: la línea de la clave en el
       portal, "Probar la conexión", "Aceptar esta clave", "Subir ahora".
