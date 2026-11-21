@@ -509,7 +509,8 @@ acostada, y la página del portal en un navegador con una app instalada.
 El firmware `rev1_3` compila: 7 010 944 bytes.
 
 **En la placa (2026-11-21):** firmware `v0.30.0-tienda.1-5-g38a94dd` por
-OTA, confirmado; 96 apps, la Tienda entre ellas; los idiomas subidos
+OTA (y después `v0.30.0-tienda.1-7-g8d94f7f`, con las imágenes y los datos
+de cada app), confirmado; 96 apps, la Tienda entre ellas; los idiomas subidos
 (`install_lang.sh en de`) y el inglés recargado. Como el catálogo oficial
 todavía no existe (la release publicada no lo trae), la placa quedó
 apuntando a uno de prueba servido desde la Mac con `fake_github.py`: las
