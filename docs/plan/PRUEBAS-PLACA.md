@@ -86,8 +86,12 @@ El plan y lo medido, en `docs/plan/RESPALDO.md` ("En la placa"). Con
       código.
 - [x] El arreglo instalado (`v0.30.0-10-gcbd43ce`): un simple nuevo con 9
       afuera y ninguna credencial; el de la primera prueba, borrado.
-- [ ] Restaurar desde Ajustes → Respaldo (dos toques) y reiniciar.
-- [ ] Restaurar uno cifrado escribiendo la frase en la pantalla.
+- [x] Un respaldo cifrado hecho y restaurado desde Ajustes → Respaldo,
+      con la frase escrita en la pantalla: 427 preferencias escritas y el
+      `…-antes` cifrado con la misma frase.
+- [ ] Restaurar uno que cambie algo a la vista (cambiar un ajuste después
+      del respaldo, restaurar, reiniciar y ver que volvió).
+- [ ] Restaurar uno simple, y deshacer una restauración con su `…-antes`.
 - [ ] Con la flash borrada: volver desde el archivo y que la Tienda
       ofrezca reinstalar. Sólo cuando el usuario lo diga.
 

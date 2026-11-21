@@ -94,8 +94,17 @@ claves, no sus valores.
   hizo el certificado. No son credenciales; es para saber qué dice el
   archivo.
 
-**Falta para darla por terminada:** restaurar desde
-la pantalla (Ajustes → Respaldo, los dos toques, reiniciar). Después, la
+- **Restaurado desde la pantalla, por el usuario** (el mismo día): un
+  respaldo cifrado hecho en Ajustes → Respaldo con la frase escrita dos
+  veces, y restaurado medio minuto después con la frase y los dos toques.
+  427 preferencias escritas; lo que había quedó antes en un
+  `…-antes.p4bak`, cifrado con la misma frase (19 334 bytes); ninguna
+  app para pedirle a la Tienda, porque la tarjeta las tenía todas. La
+  placa siguió andando y quedó esperando el reinicio, que no hace sola.
+  Visto por la API después; RAM interna libre, 209,2 KB.
+
+**Falta para darla por terminada:** restaurar un respaldo simple y uno que
+cambie algo a la vista (los dos de hoy escribieron lo mismo que había). Y la
 prueba de la tabla de etapas: con la flash borrada, volver a los ajustes
 desde el archivo y que la Tienda ofrezca reinstalar. Esa borra la placa:
 sólo cuando el usuario lo diga.
