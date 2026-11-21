@@ -4,6 +4,10 @@
   "es": "La app de ejemplo: de dónde copiar para escribir la tuya, con su página del portal.",
   "en": "The example app: what to copy from to write your own, with its page in the portal."
  },
+ "desc": {
+  "es": "En la placa es una pantalla que dice Hola desde un .so y un número que suma uno, con un pitido, cada vez que la tocás. No hace más: está para mostrar lo mínimo que lleva una app que se instala en la tarjeta.\n\nEs el punto de partida para escribir la tuya. Su código, en la carpeta apps/hello_app del repositorio, tiene lo que se copia: el arranque de la app, sus textos traducibles, la pantalla armada con LVGL y un ícono propio dibujado dentro del mismo archivo, sin tocar el firmware.\n\nTrae también su página del portal, la plantilla de las páginas de las apps: muestra hace cuánto está prendida la placa, lee y guarda un archivo de texto de la tarjeta y abre la app en la placa con un botón.",
+  "en": "On the board it is a screen that says Hello from a .so and a number that goes up by one, with a beep, every time you tap it. That is all: it is there to show the least an app installed on the card needs.\n\nIt is the starting point for writing your own. Its code, in the apps/hello_app folder of the repository, has what gets copied: the app's start-up, its translatable texts, the screen built with LVGL and an icon of its own drawn inside the same file, without touching the firmware.\n\nIt also brings its page in the portal, the template for apps' pages: it shows how long the board has been up, reads and saves a text file on the card, and opens the app on the board with a button."
+ },
  "shots": [
   "app-hello.png",
   "land-hello.png",
