@@ -9,8 +9,8 @@ quiera lo agrega en su placa, sabiendo lo que hace.
 **Estado (2026-11-20): fase 0 escrita, probada en la Mac y medida en la
 placa en lo que no pide internet ni al usuario** (abajo, "Fase 0"): el
 chequeo de símbolos, instalar y quitar en caliente y la bajada a la
-tarjeta andan, también contra GitHub de verdad por TLS. Falta un corte del
-Wi-Fi y un reinicio a mitad de bajada. Se trabaja en la rama `tienda` (worktree
+tarjeta andan, también contra GitHub de verdad por TLS y con un reinicio a
+mitad de bajada. Falta un corte del Wi-Fi. La fase 1 está en curso. Se trabaja en la rama `tienda` (worktree
 `.claude/worktrees/tienda`, como se hizo con `ethernet`) y se mergea a
 `main` cuando esté probada en la placa. Este documento es el plan; lo que
 se vaya midiendo se anota acá, como en [ETHERNET.md](ETHERNET.md).
@@ -351,7 +351,6 @@ sólo cambia lo de esta fase):
 | Qué | Por qué no se hizo | Qué se anota |
 |---|---|---|
 | Un corte de la red | hay que apagar y prender el Wi-Fi en la placa, a mano | que siga sola desde donde iba |
-| Un reinicio a mitad de bajada | reiniciar la placa pide el sí del usuario | que el `.part` sirva tras el arranque |
 | Usar la placa mientras baja | lo ve el usuario | si algo se traba con una app pesada al frente |
 | Abrir una app recién puesta en caliente | es abrir una app en su pantalla | que arranque, y que una que estaba abierta se cierre bien al quitarla |
 | Reemplazar el archivo entre quitar y poner | falta un `.so` de otra versión | que corra el código nuevo |
@@ -382,10 +381,15 @@ una suposición: lo confirma la sesión de cada juego.
 catálogo y paquetes desde el CI en una pre-release, y los packs de
 Bastión en `store/packs.json` cuando la 0.29.0 esté publicada.
 
-**De la fase 0, pendiente:** reiniciada a los 15 MB de una bajada, la
-placa volvió con un `.part` de 0 bytes: la FAT anota el tamaño al cerrar
-o sincronizar. `aos_fetch` ahora sincroniza cada megabyte (en la rama,
-compilado); **falta instalarlo en la placa y repetir la prueba**.
+**De la fase 0, el reinicio a mitad de bajada (hecho, 2026-11-20):** la
+primera vez, reiniciada a los 15 MB, la placa volvió con un `.part` de 0
+bytes y bajó todo de nuevo: la FAT anota el tamaño al cerrar o
+sincronizar. `aos_fetch` ahora sincroniza cada megabyte. Con ese firmware
+(`v0.29.0-5-gefef5a5`) y la misma prueba: reiniciada a los 15 138 816
+bytes, volvió con 14 680 064 en la tarjeta (se perdieron 458 752, menos
+del megabyte), siguió desde ahí, el servidor mandó exactamente los
+22 522 261 que faltaban y el hash dio bien. Sincronizar no cuesta
+velocidad: dos bajadas enteras de 37 MB a 472 y 479 KB/s (441 antes).
 
 ## Roadmap
 
