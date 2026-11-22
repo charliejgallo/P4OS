@@ -2433,3 +2433,4 @@ No se pudo copiar: seleccioná la línea	Kopieren nicht möglich: Zeile markiere
 Copiar la clave de la placa	Schlüssel des Boards kopieren
 Probar la conexión	Verbindung testen
 Subir ahora	Jetzt senden
+Falta elegir una frase para las copias automáticas, en la placa (Ajustes, Respaldo, «Cifrarlas con una frase…»): hasta entonces no sube nada.	Am Board muss noch eine Passphrase für die automatischen Kopien gewählt werden (Einstellungen, Sicherung, „Mit einer Passphrase verschlüsseln…“): bis dahin wird nichts gesendet.

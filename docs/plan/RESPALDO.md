@@ -297,15 +297,33 @@ Lo que hubo en el camino: `ssh-copy-id` no sirvió (el NAS corta en su
 prueba con la clave; entrando sólo con contraseña anduvo); la carpeta
 personal del usuario no era suya y `~/.ssh` hubo que crearla con `sudo`; y
 la carpeta de los respaldos, creada desde el NAS, es de root y el usuario
-no la puede escribir: falta un `chown`. Con la clave de la Mac ya se ve la
-carpeta, vacía. Falta: ese `chown`, y la prueba desde la placa.
+no la puede escribir: hizo falta un `chown`.
 
-**Falta:** SFTP hacia la placa con un cliente de verdad; y la
-copia a un servidor de verdad, que el plan pide probar **contra el NAS
-sólo cuando el usuario lo diga**, con un usuario y una carpeta que él arme
-para eso. Sin probar: un servidor OpenSSH (el de la prueba fue el de la
-placa), RSA o ECDSA como clave del servidor, y ChaCha20 del lado cliente
-(negocia AES-GCM primero).
+**La primera copia a un servidor de verdad** (2026-11-21, la placa con
+`v0.30.0-23-g2cb14b8`, un NAS con OpenSSH 10.2): desde Ajustes, el
+servidor y la carpeta cargados por pantalla, "Probar la conexión" (la
+huella del NAS, y la placa adentro con su clave nueva, limitada a SFTP),
+"Aceptar esta clave", la frase de las copias, y "Subir ahora": **los tres
+respaldos cifrados de la tarjeta en el NAS, byte por byte** (SHA-256 de
+cada uno, leído en el NAS y en la placa), en `<carpeta>/<nombre de la
+placa>/`; los dos simples no salieron; ningún archivo a medias. La copia
+semanal quedó prendida. RAM interna libre después: 209,0 KB. Es también
+la primera vez que el cliente del firmware habla con un OpenSSH.
+
+**Lo que dijo el usuario al probarlo:** antes de poner la frase tocó
+"Subir ahora" varias veces "y no pasaba nada": el motivo salía en la fila
+Estado, que está dos pantallas más arriba. Arreglado el mismo día: un
+aviso en naranja al lado del botón mientras falte la frase, un mensaje al
+tocarlo, y un mensaje con cómo terminó cada trabajo del servidor o del
+pendrive. Y dos errores que aparecieron al probar eso en el simulador: el
+archivo de preferencias del simulador se pisaba con dos hilos escribiendo
+a la vez, y en el firmware dos hilos que no encontraban la clave de la
+placa hacían una cada uno (el portal muestra su línea mientras un trabajo
+entra al servidor): ahora la hace uno solo.
+
+**Falta:** SFTP hacia la placa con un cliente de verdad, y ver la copia
+semanal salir sola. Sin probar: RSA o ECDSA como clave del servidor, y
+ChaCha20 del lado cliente (negocia AES-GCM primero).
 
 ## Qué resuelve
 

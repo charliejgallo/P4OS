@@ -3531,6 +3531,9 @@ static const char blob_en__sistema_lang[] =
     "Hacer una clave nueva\tMake a new key\n"
     "Es la clave con que la placa entra a otros equipos por SSH, desde acá y desde la app SSH. Una nueva reemplaza a la anterior, que deja de servir: hay que poner la línea nueva en cada servidor.\tIt is the key the board logs in to other machines with by SSH, from here and from the SSH app. A new one takes the place of the old, which stops working: the new line has to be put on every server.\n"
     "No se pudo\tIt could not be done\n"
+    "Primero elegí una frase para las copias: más arriba, «Cifrarlas con una frase…». Sin frase no sube nada.\tFirst choose a passphrase for the copies: further up, “Seal them with a passphrase…”. Without one nothing is sent.\n"
+    "Conectando con el servidor…\tConnecting to the server…\n"
+    "Falta la frase de las copias automáticas (más arriba, «Cifrarlas con una frase…»): hasta que la elijas no sube nada.\tThe automatic copies' passphrase is missing (further up, “Seal them with a passphrase…”): until you choose one nothing is sent.\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -7054,6 +7057,9 @@ static const char blob_de__sistema_lang[] =
     "Hacer una clave nueva\tNeuen Schlüssel erzeugen\n"
     "Es la clave con que la placa entra a otros equipos por SSH, desde acá y desde la app SSH. Una nueva reemplaza a la anterior, que deja de servir: hay que poner la línea nueva en cada servidor.\tMit diesem Schlüssel meldet sich das Board per SSH an anderen Rechnern an, von hier und aus der SSH-App. Ein neuer ersetzt den alten, der nicht mehr gilt: die neue Zeile muss auf jedem Server eingetragen werden.\n"
     "No se pudo\tNicht möglich\n"
+    "Primero elegí una frase para las copias: más arriba, «Cifrarlas con una frase…». Sin frase no sube nada.\tWähle zuerst eine Passphrase für die Kopien: weiter oben, „Mit einer Passphrase verschlüsseln…“. Ohne sie wird nichts gesendet.\n"
+    "Conectando con el servidor…\tVerbinde mit dem Server…\n"
+    "Falta la frase de las copias automáticas (más arriba, «Cifrarlas con una frase…»): hasta que la elijas no sube nada.\tDie Passphrase der automatischen Kopien fehlt (weiter oben, „Mit einer Passphrase verschlüsseln…“): bis du eine wählst, wird nichts gesendet.\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -7061,7 +7067,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3516, 0, files_en, 1 },
-    { "de", "Deutsch", 3516, 0, files_de, 1 },
+    { "en", "English", 3519, 0, files_en, 1 },
+    { "de", "Deutsch", 3519, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

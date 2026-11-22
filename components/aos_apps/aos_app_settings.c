@@ -1949,43 +1949,71 @@ static uint32_t bk_key(void)
                                                        (aos_backup_auto_sealed() ? 8u : 0u) + (aos_backup_drive() ? 16u : 0u));
 }
 
+/* What the job in hand, or the last one, says: for the Status row at the
+ * top of the page, and for the toast that says how a job of the bottom of
+ * the page ended, where that row is out of sight. */
+static void bk_status_text(const aos_backup_status_t *stp, char *v, size_t vn)
+{
+    aos_backup_status_t st = *stp;
+    v[0] = 0;
+    bool drive_job = !strcmp(st.busy ? st.job : st.last_job, "to_drive") || !strcmp(st.busy ? st.job : st.last_job, "from_drive");
+    const char *lj = st.busy ? st.job : st.last_job;
+    bool look_job = !strcmp(lj, "look"), send_job = !strcmp(lj, "send");
+    if (st.busy && (look_job || send_job)) snprintf(v, vn, "%s", _("conectando con el servidor…"));
+    else if (st.busy && drive_job) snprintf(v, vn, _("copiando: %u archivos, %u KB"), (unsigned)st.files, (unsigned)st.kbytes);
+    else if (st.busy) snprintf(v, vn, "%s", !strcmp(st.job, "restore") ? _("restaurando…") :
+                                                    !strcmp(st.job, "key") ? _("preparando la clave…") : _("respaldando…"));
+    else if (!aos_hal_path_sd_root()) snprintf(v, vn, "%s", _("no hay tarjeta"));
+    else if (!st.last_job[0]) v[0] = 0;
+    else if (st.last_ok && !strcmp(st.last_job, "restore")) snprintf(v, vn, _("restaurado: %d ajustes"), st.written);
+    else if (st.last_ok && drive_job) snprintf(v, vn, _("copiados: %u archivos, %u KB"), (unsigned)st.files, (unsigned)st.kbytes);
+    else if (st.last_ok && look_job) snprintf(v, vn, "%s", _("el servidor contestó y deja entrar a la placa"));
+    else if (st.last_ok && send_job) snprintf(v, vn, "%s", _("enviado al servidor"));
+    else if (st.last_ok) snprintf(v, vn, "%s", _("hecho"));
+    else {
+        switch (st.last_kind) {
+        case AOS_BACKUP_E_CARD:       snprintf(v, vn, "%s", _("no se pudo escribir en la tarjeta")); break;
+        case AOS_BACKUP_E_NOT_FOUND:  snprintf(v, vn, "%s", _("ese respaldo no está")); break;
+        case AOS_BACKUP_E_NOT_ONE:    snprintf(v, vn, "%s", _("no es un respaldo, o está dañado")); break;
+        case AOS_BACKUP_E_PASSPHRASE: snprintf(v, vn, "%s", _("esa no es su frase")); break;
+        case AOS_BACKUP_E_NEWER:      snprintf(v, vn, "%s", _("es de un P4OS más nuevo")); break;
+        case AOS_BACKUP_E_MEMORY:     snprintf(v, vn, "%s", _("no alcanzó la memoria")); break;
+        case AOS_BACKUP_E_DRIVE:      snprintf(v, vn, "%s", _("no hay pendrive, o no se pudo escribir en él")); break;
+        case AOS_BACKUP_E_SETUP:      snprintf(v, vn, "%s", _("falta el servidor, aceptar su clave o la frase de las copias")); break;
+        case AOS_BACKUP_E_SERVER:     snprintf(v, vn, "%s", _("el servidor no contesta, o dijo que no")); break;
+        case AOS_BACKUP_E_HOSTKEY:    snprintf(v, vn, "%s", _("el servidor muestra otra clave: no se mandó nada")); break;
+        case AOS_BACKUP_E_LOGIN:      snprintf(v, vn, "%s", _("el servidor no deja entrar la clave de la placa")); break;
+        default:                      snprintf(v, vn, "%s", _("no se pudo")); break;
+        }
+    }
+}
+
 static void bk_refresh(void)
 {
     if (!U.bk_state) return;
     aos_backup_status_t st;
+    char v[160];
     aos_backup_status(&st);
-    char v[160] = "";
-    bool drive_job = !strcmp(st.busy ? st.job : st.last_job, "to_drive") || !strcmp(st.busy ? st.job : st.last_job, "from_drive");
-    const char *lj = st.busy ? st.job : st.last_job;
-    bool look_job = !strcmp(lj, "look"), send_job = !strcmp(lj, "send");
-    if (st.busy && (look_job || send_job)) snprintf(v, sizeof v, "%s", _("conectando con el servidor…"));
-    else if (st.busy && drive_job) snprintf(v, sizeof v, _("copiando: %u archivos, %u KB"), (unsigned)st.files, (unsigned)st.kbytes);
-    else if (st.busy) snprintf(v, sizeof v, "%s", !strcmp(st.job, "restore") ? _("restaurando…") :
-                                                    !strcmp(st.job, "key") ? _("preparando la clave…") : _("respaldando…"));
-    else if (!aos_hal_path_sd_root()) snprintf(v, sizeof v, "%s", _("no hay tarjeta"));
-    else if (!st.last_job[0]) v[0] = 0;
-    else if (st.last_ok && !strcmp(st.last_job, "restore")) snprintf(v, sizeof v, _("restaurado: %d ajustes"), st.written);
-    else if (st.last_ok && drive_job) snprintf(v, sizeof v, _("copiados: %u archivos, %u KB"), (unsigned)st.files, (unsigned)st.kbytes);
-    else if (st.last_ok && look_job) snprintf(v, sizeof v, "%s", _("el servidor contestó y deja entrar a la placa"));
-    else if (st.last_ok && send_job) snprintf(v, sizeof v, "%s", _("enviado al servidor"));
-    else if (st.last_ok) snprintf(v, sizeof v, "%s", _("hecho"));
-    else {
-        switch (st.last_kind) {
-        case AOS_BACKUP_E_CARD:       snprintf(v, sizeof v, "%s", _("no se pudo escribir en la tarjeta")); break;
-        case AOS_BACKUP_E_NOT_FOUND:  snprintf(v, sizeof v, "%s", _("ese respaldo no está")); break;
-        case AOS_BACKUP_E_NOT_ONE:    snprintf(v, sizeof v, "%s", _("no es un respaldo, o está dañado")); break;
-        case AOS_BACKUP_E_PASSPHRASE: snprintf(v, sizeof v, "%s", _("esa no es su frase")); break;
-        case AOS_BACKUP_E_NEWER:      snprintf(v, sizeof v, "%s", _("es de un P4OS más nuevo")); break;
-        case AOS_BACKUP_E_MEMORY:     snprintf(v, sizeof v, "%s", _("no alcanzó la memoria")); break;
-        case AOS_BACKUP_E_DRIVE:      snprintf(v, sizeof v, "%s", _("no hay pendrive, o no se pudo escribir en él")); break;
-        case AOS_BACKUP_E_SETUP:      snprintf(v, sizeof v, "%s", _("falta el servidor, aceptar su clave o la frase de las copias")); break;
-        case AOS_BACKUP_E_SERVER:     snprintf(v, sizeof v, "%s", _("el servidor no contesta, o dijo que no")); break;
-        case AOS_BACKUP_E_HOSTKEY:    snprintf(v, sizeof v, "%s", _("el servidor muestra otra clave: no se mandó nada")); break;
-        case AOS_BACKUP_E_LOGIN:      snprintf(v, sizeof v, "%s", _("el servidor no deja entrar la clave de la placa")); break;
-        default:                      snprintf(v, sizeof v, "%s", _("no se pudo")); break;
-        }
-    }
+    bk_status_text(&st, v, sizeof v);
     lv_label_set_text(U.bk_state, v);
+}
+
+/* The pendrive's and the server's rows are a screen or two below the Status
+ * row: when one of their jobs ends, a toast says how. Not for the ones the
+ * page was opened after. */
+static uint32_t s_bk_told = UINT32_MAX;
+static void bk_tell(bool on_page)
+{
+    aos_backup_status_t st;
+    if (!on_page) { s_bk_told = UINT32_MAX; return; }
+    aos_backup_status(&st);
+    if (s_bk_told == UINT32_MAX) { s_bk_told = st.jobs_done; return; }
+    if (st.jobs_done == s_bk_told) return;
+    s_bk_told = st.jobs_done;
+    if (strcmp(st.last_job, "look") && strcmp(st.last_job, "send") && strcmp(st.last_job, "to_drive") && strcmp(st.last_job, "from_drive")) return;
+    char v[160];
+    bk_status_text(&st, v, sizeof v);
+    if (v[0]) aos_ui_toast(v, 4000);
 }
 
 static void bk_make_cb(lv_event_t *e)
@@ -2152,6 +2180,7 @@ static void bk_srv_look_cb(lv_event_t *e)
 {
     (void)e;
     if (!aos_backup_server_look()) aos_ui_toast(_("Ya hay un respaldo en curso"), 2000);
+    else aos_ui_toast(_("Conectando con el servidor…"), 2000);
 }
 
 static void bk_srv_trust_cb(lv_event_t *e)
@@ -2176,7 +2205,14 @@ static void bk_srv_on_cb(lv_event_t *e)
 static void bk_srv_send_cb(lv_event_t *e)
 {
     (void)e;
+    /* only sealed backups leave the board, and there are none without a
+     * passphrase: said here, before a job that could only say no */
+    if (!aos_backup_auto_sealed()) {
+        aos_ui_toast(_("Primero elegí una frase para las copias: más arriba, «Cifrarlas con una frase…». Sin frase no sube nada."), 5000);
+        return;
+    }
     if (!aos_backup_server_send()) aos_ui_toast(_("Ya hay un respaldo en curso"), 2000);
+    else aos_ui_toast(_("Conectando con el servidor…"), 2000);
 }
 
 /* The apps the restored backup lists and the card lacks: asked of the
@@ -2293,6 +2329,12 @@ static void build_backup(lv_obj_t *p)
         g = group(p, NULL);
         row_switch(g, NULL, 0, _("Una copia por semana"), sv.on, bk_srv_on_cb);
         if (!st.busy) action_row(g, _("Subir ahora"), AOS_C_ACCENT, bk_srv_send_cb);
+        if (!aos_backup_auto_sealed()) {
+            lv_obj_t *w = aos_label(p, _("Falta la frase de las copias automáticas (más arriba, «Cifrarlas con una frase…»): hasta que la elijas no sube nada."), aos_font_caption, AOS_C_ORANGE);
+            lv_obj_set_width(w, lv_pct(100));
+            lv_label_set_long_mode(w, LV_LABEL_LONG_MODE_WRAP);
+            lv_obj_set_style_pad_hor(w, 24, 0);
+        }
     }
     note(p, _("A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos: hace falta la frase de las copias automáticas. La placa entra con su clave, sin contraseña: la línea para el authorized_keys del servidor está en el portal, Respaldo. Un servidor que muestre otra clave que la aceptada acá no recibe nada."));
 
@@ -3382,6 +3424,7 @@ static void timer_cb(lv_timer_t *t)
     if (U.c6_state) c6_refresh();
     if (pg == PG_UPDATE && U.fw_shown != fw_key() && !U.overlay && !U.armed) build(pg);   /* a version found, a download ended */
     if (U.fw_state) fw_refresh();
+    bk_tell(pg == PG_BACKUP);
     if (pg == PG_BACKUP && U.bk_shown != bk_key() && !U.overlay && !U.armed) build(pg);   /* a backup made, a restore ended */
     if (U.bk_state) bk_refresh();
     if (U.armed && (uint32_t)aos_hal_uptime_ms() - U.armed_ms > 5000) disarm();

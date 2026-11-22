@@ -743,7 +743,15 @@ bool aos_hal_sd_usage(uint64_t *total_bytes, uint64_t *free_bytes)
  * -------------------------------------------------------------------------- */
 #define PREF_LINE 2048
 
-static bool pref_lookup(const char *key, char *out, size_t out_len)
+/* One at a time: the file is read whole and written whole, into a buffer
+ * that is static, and the portal's threads and a module's own write while
+ * the screen does. Two at once left the file with one writer's key and
+ * little else (seen 2026-11-21: a look at a server and a GET of the portal
+ * both making the board's SSH key). */
+#include <pthread.h>
+static pthread_mutex_t s_prefs_mx = PTHREAD_MUTEX_INITIALIZER;
+
+static bool pref_lookup_(const char *key, char *out, size_t out_len)
 {
     FILE *file = fopen(PREFS_FILE, "r");
     if (!file) {
@@ -766,12 +774,20 @@ static bool pref_lookup(const char *key, char *out, size_t out_len)
     return found;
 }
 
+static bool pref_lookup(const char *key, char *out, size_t out_len)
+{
+    pthread_mutex_lock(&s_prefs_mx);
+    bool ok = pref_lookup_(key, out, out_len);
+    pthread_mutex_unlock(&s_prefs_mx);
+    return ok;
+}
+
 /* Enough lines for every app at once: Monster Hop alone keeps ~60 keys, and
  * with 64 lines the file was cut short on every save, silently dropping the
  * other apps' keys (the language among them). */
 #define PREFS_MAX_LINES 512
 
-static bool pref_store(const char *key, const char *value)
+static bool pref_store_(const char *key, const char *value)
 {
     static char lines[PREFS_MAX_LINES][PREF_LINE];
     int count = 0;
@@ -800,6 +816,14 @@ static bool pref_store(const char *key, const char *value)
     }
     fclose(file);
     return true;
+}
+
+static bool pref_store(const char *key, const char *value)
+{
+    pthread_mutex_lock(&s_prefs_mx);
+    bool ok = pref_store_(key, value);
+    pthread_mutex_unlock(&s_prefs_mx);
+    return ok;
 }
 
 /* The simulator's file keeps no types: a value that reads whole as a number

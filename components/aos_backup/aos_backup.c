@@ -1043,11 +1043,18 @@ void aos_backup_cancel(void) { s_cancel = true; }
 /* ---- to a server of the person's own (stage 4) ------------------------------ */
 
 /* The key the board logs in with: the SSH client's, made the first time
- * either of the two needs it. */
+ * either of the two needs it. One at a time: the portal's thread asks for
+ * its line while a job of this module logs in, and two that found none
+ * would each make one, the first to be written over by the second after
+ * its line was shown. */
+static void lock(void);
+static void unlock(void);
+
 static bool board_seed(uint8_t seed[32])
 {
     char b64[64] = "";
     size_t len = 0;
+    lock();
     bool ok = aos_hal_pref_get_str(K_SSH_SEED, b64, sizeof b64) &&
               mbedtls_base64_decode(seed, 32, &len, (const unsigned char *)b64, strlen(b64)) == 0 && len == 32;
     if (!ok) {
@@ -1056,6 +1063,7 @@ static bool board_seed(uint8_t seed[32])
         if (ok) { b64[len] = 0; ok = aos_hal_pref_set_str(K_SSH_SEED, b64); }
         if (ok) aos_hal_log(TAG, "made the board's SSH key");
     }
+    unlock();
     memset(b64, 0, sizeof b64);
     return ok;
 }
@@ -1077,7 +1085,10 @@ bool aos_backup_server_key_new(void)
      * The SSH app reads the same preference, and writes its
      * id_ed25519.pub again the next time it shows the key. */
     uint8_t seed[32];
-    if (!aos_hal_pref_set_str(K_SSH_SEED, "")) return false;
+    lock();
+    bool gone = aos_hal_pref_set_str(K_SSH_SEED, "");
+    unlock();
+    if (!gone) return false;
     bool ok = board_seed(seed);
     memset(seed, 0, sizeof seed);
     return ok;

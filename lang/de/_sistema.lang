@@ -10828,3 +10828,6 @@ LA CLAVE DE LA PLACA	DER SCHLÜSSEL DES BOARDS
 Hacer una clave nueva	Neuen Schlüssel erzeugen
 Es la clave con que la placa entra a otros equipos por SSH, desde acá y desde la app SSH. Una nueva reemplaza a la anterior, que deja de servir: hay que poner la línea nueva en cada servidor.	Mit diesem Schlüssel meldet sich das Board per SSH an anderen Rechnern an, von hier und aus der SSH-App. Ein neuer ersetzt den alten, der nicht mehr gilt: die neue Zeile muss auf jedem Server eingetragen werden.
 No se pudo	Nicht möglich
+Primero elegí una frase para las copias: más arriba, «Cifrarlas con una frase…». Sin frase no sube nada.	Wähle zuerst eine Passphrase für die Kopien: weiter oben, „Mit einer Passphrase verschlüsseln…“. Ohne sie wird nichts gesendet.
+Conectando con el servidor…	Verbinde mit dem Server…
+Falta la frase de las copias automáticas (más arriba, «Cifrarlas con una frase…»): hasta que la elijas no sube nada.	Die Passphrase der automatischen Kopien fehlt (weiter oben, „Mit einer Passphrase verschlüsseln…“): bis du eine wählst, wird nichts gesendet.

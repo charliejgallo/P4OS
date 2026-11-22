@@ -160,13 +160,18 @@ own (SFTP)**:
    and whether it was let in. **Accept this key** (two taps) keeps it: from
    then on a server that shows another key gets nothing, not even the
    login.
-4. **A copy a week,** and **Send now**.
+4. **A copy a week,** and **Send now**. While the automatic copies have
+   no passphrase the page says so beside the button, and so does a tap on
+   it: nothing would go.
 
 What goes is every sealed backup on the card that the server does not have
 yet; first a copy of now, when something changed. A file goes up beside its
 name and is renamed over it when whole. Nothing is deleted on the server:
 at 19 KB a week it is a megabyte a year. Changing the server's address
 forgets the key that was accepted.
+
+Tried against a NAS running OpenSSH 10.2: the three sealed backups of the
+card arrived byte for byte, with the board's key limited to SFTP.
 
 On a server you can restrict that key to SFTP: put
 `restrict,command="internal-sftp" ` before the line in `authorized_keys`,

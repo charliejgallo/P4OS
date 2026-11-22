@@ -10828,3 +10828,6 @@ LA CLAVE DE LA PLACA	THE BOARD'S KEY
 Hacer una clave nueva	Make a new key
 Es la clave con que la placa entra a otros equipos por SSH, desde acá y desde la app SSH. Una nueva reemplaza a la anterior, que deja de servir: hay que poner la línea nueva en cada servidor.	It is the key the board logs in to other machines with by SSH, from here and from the SSH app. A new one takes the place of the old, which stops working: the new line has to be put on every server.
 No se pudo	It could not be done
+Primero elegí una frase para las copias: más arriba, «Cifrarlas con una frase…». Sin frase no sube nada.	First choose a passphrase for the copies: further up, “Seal them with a passphrase…”. Without one nothing is sent.
+Conectando con el servidor…	Connecting to the server…
+Falta la frase de las copias automáticas (más arriba, «Cifrarlas con una frase…»): hasta que la elijas no sube nada.	The automatic copies' passphrase is missing (further up, “Seal them with a passphrase…”): until you choose one nothing is sent.

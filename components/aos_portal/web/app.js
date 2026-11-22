@@ -3346,12 +3346,14 @@ function pageRespaldo() {
         s.seen && s.seen !== s.fp ? h('div', { class: 'small', style: 'margin-top:4px;word-break:break-all' },
           tr('La última prueba vio %s', s.seen) + (s.seen_in ? '' : ' · ' + tr('y todavía no deja entrar a la placa'))) : null,
         s.last ? h('div', { class: 'small muted', style: 'margin-top:4px' }, tr('Última copia: %s', new Date(s.last * 1000).toLocaleString(LOCALE))) : null,
+        s.host && st.auto && !st.auto.sealed ? h('div', { class: 'note', style: 'color:var(--orange);margin-top:6px' },
+          tr('Falta elegir una frase para las copias automáticas, en la placa (Ajustes, Respaldo, «Cifrarlas con una frase…»): hasta entonces no sube nada.')) : null,
         h('div', { class: 'note', style: 'margin-top:8px' }, tr('A un NAS o una computadora con SSH van los respaldos cifrados, y sólo esos. El servidor, aceptar su clave y la copia semanal se eligen en la placa: Ajustes, Respaldo. La placa entra con su clave, sin contraseña: esta línea va en el ~/.ssh/authorized_keys del usuario del servidor.')),
         s.key_line ? h('div', { class: 'small mono', style: 'margin-top:6px;word-break:break-all;user-select:all' }, s.key_line) : null,
         h('div', { class: 'btns', style: 'margin-top:8px' },
           s.key_line ? h('button', { class: 'btn', onclick: () => navigator.clipboard.writeText(s.key_line).then(() => toast(tr('Copiada'))).catch(() => toast(tr('No se pudo copiar: seleccioná la línea'), true)) }, tr('Copiar la clave de la placa')) : null,
           s.host ? h('button', { class: 'btn', disabled: st.busy, onclick: () => act('backup/server', { do: 'look' }) }, tr('Probar la conexión')) : null,
-          s.pinned ? h('button', { class: 'btn pri', disabled: st.busy, onclick: () => act('backup/server', { do: 'send' }) }, tr('Subir ahora')) : null)));
+          s.pinned ? h('button', { class: 'btn pri', disabled: st.busy || !(st.auto && st.auto.sealed), onclick: () => act('backup/server', { do: 'send' }) }, tr('Subir ahora')) : null)));
   };
   const act = async (what, body) => {
     try { st = await post(what, body); draw(); poll(300); }

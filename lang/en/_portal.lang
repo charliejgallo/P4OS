@@ -2433,3 +2433,4 @@ No se pudo copiar: seleccioná la línea	It could not be copied: select the line
 Copiar la clave de la placa	Copy the board's key
 Probar la conexión	Try the connection
 Subir ahora	Send now
+Falta elegir una frase para las copias automáticas, en la placa (Ajustes, Respaldo, «Cifrarlas con una frase…»): hasta entonces no sube nada.	A passphrase for the automatic copies is yet to be chosen, at the board (Settings, Backup, “Seal them with a passphrase…”): until then nothing is sent.

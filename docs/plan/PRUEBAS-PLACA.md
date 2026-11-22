@@ -118,15 +118,17 @@ Instalado el 2026-11-21, `v0.30.0-16-g021f337`.
 - [x] La etapa 4 instalada (`v0.30.0-21-gd2bc7d3`): confirmada, 209,1 KB
       de RAM interna libres, la línea de la clave en el portal.
 - [x] "Hacer una clave nueva" instalado (`v0.30.0-23-g2cb14b8`).
-- [ ] Tocarlo en la placa (Ajustes → Respaldo, al final, dos toques) antes
-      de autorizar la clave en un servidor: la de ahora quedó a la vista
-      en una sesión.
+- [x] Tocado en la placa: la clave cambió (se ve en el portal) y es la
+      que quedó autorizada en el NAS.
 - [ ] `sftp p4os.local` y `scp` desde la Mac:
       listar, bajar y subir un archivo grande, y cuánta RAM interna queda.
-- [ ] Ajustes → Respaldo → Servidor propio: la línea de la clave en el
-      portal, "Probar la conexión", "Aceptar esta clave", "Subir ahora".
-      Contra el NAS, con un usuario y una carpeta armados para eso, y
-      sólo cuando el usuario lo diga.
+- [x] Ajustes → Respaldo → Servidor propio, contra el NAS del usuario
+      (con su permiso, un usuario y una carpeta armados para eso): la
+      clave nueva de la placa, "Probar la conexión", "Aceptar esta clave",
+      la frase, "Subir ahora": tres respaldos cifrados byte por byte.
+- [ ] Instalar el aviso de "falta la frase" y ver el mensaje al tocar
+      "Subir ahora" sin frase (hay que sacarle la frase para verlo).
+- [ ] La copia semanal, sola, a la semana.
 
 ### Pendientes, en resumen
 
