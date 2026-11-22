@@ -10,7 +10,8 @@ Tienda. Las etapas 2 (las copias que hace sola) y 3 (el pendrive y el
 script de la computadora) están en la rama `respaldo-2` y **en la placa**
 (`v0.30.0-16-g021f337`). La etapa 4 (un servidor propio por SFTP) está
 en la misma rama, probada en la Mac y el simulador, e **instalada**
-(`v0.30.0-23-g2cb14b8`) sin probar todavía ahí contra ningún servidor.
+(`v0.30.0-26-gac10384`), con la primera copia a un servidor de verdad
+hecha.
 Nada de la rama está en `main`.
 
 ## Etapa 1, hecha en la Mac (2026-11-21)
@@ -319,7 +320,9 @@ pendrive. Y dos errores que aparecieron al probar eso en el simulador: el
 archivo de preferencias del simulador se pisaba con dos hilos escribiendo
 a la vez, y en el firmware dos hilos que no encontraban la clave de la
 placa hacían una cada uno (el portal muestra su línea mientras un trabajo
-entra al servidor): ahora la hace uno solo.
+entra al servidor): ahora la hace uno solo. Instalado el mismo día
+(`v0.30.0-26-gac10384`, confirmado, 209,1 KB de RAM interna libres, con
+el servidor, su clave y la copia semanal como estaban).
 
 **Falta:** SFTP hacia la placa con un cliente de verdad, y ver la copia
 semanal salir sola. Sin probar: RSA o ECDSA como clave del servidor, y

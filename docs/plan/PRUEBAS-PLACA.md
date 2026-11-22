@@ -126,8 +126,12 @@ Instalado el 2026-11-21, `v0.30.0-16-g021f337`.
       (con su permiso, un usuario y una carpeta armados para eso): la
       clave nueva de la placa, "Probar la conexión", "Aceptar esta clave",
       la frase, "Subir ahora": tres respaldos cifrados byte por byte.
-- [ ] Instalar el aviso de "falta la frase" y ver el mensaje al tocar
-      "Subir ahora" sin frase (hay que sacarle la frase para verlo).
+- [x] El aviso de "falta la frase" instalado (`v0.30.0-26-gac10384`).
+- [ ] Verlo: con la frase puesta no aparece; "Probar la conexión" y
+      "Subir ahora" tienen que decir abajo cómo terminaron.
+- [ ] La copia de antes de un firmware: en cuatro instalaciones no hubo
+      ninguna, cada vez sin cambios desde la copia del día. Falta verla
+      una vez, cambiando un ajuste antes de instalar.
 - [ ] La copia semanal, sola, a la semana.
 
 ### Pendientes, en resumen
