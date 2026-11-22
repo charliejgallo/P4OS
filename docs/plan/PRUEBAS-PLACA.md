@@ -134,10 +134,27 @@ Instalado el 2026-11-21, `v0.30.0-16-g021f337`.
       una vez, cambiando un ajuste antes de instalar.
 - [ ] La copia semanal, sola, a la semana.
 
-### Las apps nuevas de noviembre (2026-11-21, para la próxima release)
+### La 0.31.0 desde la placa (publicada el 2026-11-22)
 
-Seis apps de tarjeta en `main` desde el 2026-11-21, sin publicar todavía:
-Sudoku, Solitario, Bolsa, Vuelos, Juegos de mesa y Metegol (los pedidos
+La placa corre `v0.30.0-26-gac10384` y su catálogo guardado todavía es el
+de la 0.30.0: se pone al día al abrir la Tienda o Ajustes → Actualización.
+
+- [ ] Ajustes → Actualización → Desde GitHub: ofrece la 0.31.0, la baja,
+      la verifica, la escribe y arranca en ella. **La primera vez que una
+      placa baja sola una release nueva.**
+- [ ] Antes de instalarla, cambiar un ajuste cualquiera: tiene que quedar
+      una copia "de antes de actualizar" en Ajustes → Respaldo.
+- [ ] Tienda → Actualizaciones: los idiomas del sistema (cambiaron), y
+      ninguna app de las 58 de antes.
+- [ ] Tienda: Sudoku, Solitario, Bolsa, Vuelos y Juegos de mesa con
+      "Obtener", cada una con su pack; abrirlas una vez.
+- [ ] Metegol figura "copiada a mano" (se instaló con `install_apps.sh`):
+      reinstalarla desde su página para que la Tienda la maneje.
+
+### Las apps nuevas de noviembre (2026-11-21, publicadas en la 0.31.0)
+
+Seis apps de tarjeta en `main` desde el 2026-11-21 y en la Tienda desde la
+0.31.0: Sudoku, Solitario, Bolsa, Vuelos, Juegos de mesa y Metegol (los pedidos
 en `docs/internal/PEDIDOS-APPS-2026-11.md`). Estudio queda en su rama
 hasta que el firmware baje la latencia del parlante.
 

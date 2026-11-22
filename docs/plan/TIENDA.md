@@ -1294,9 +1294,27 @@ proyecto).
   sola, el pendrive, y un servidor propio por SFTP) están en `main` desde
   el 2026-11-21, para la 0.31.0, junto con SFTP hacia la placa
   (`docs/SSH.md`).
-- **La 0.31.0 espera** a que terminen las sesiones que arman apps nuevas
-  para la Tienda (pedido del usuario, 2026-11-21): hasta entonces no hay
-  tag.
+- **La 0.31.0 salió el 2026-11-22** (tag `v0.31.0` en `fcd36ab`), sin
+  Estudio: seis apps nuevas, los respaldos y SFTP. Es la primera release
+  que una placa en 0.30.0 baja sola. Cómo se armó:
+  - Los 15 packs de arte nuevos (26 MB) se subieron a la release
+    publicada `v0.30.0`, que es donde el catálogo los nombra, y recién
+    después se anotaron en `store/packs.json` con
+    `tools/gen_store.py packs --tag v0.30.0`, que lee de GitHub el tamaño
+    y el SHA-256 de cada uno: dieron los de los archivos de la Mac.
+  - **Ojo con ese comando:** además de los `.pak` mira `c6.bin`, que el CI
+    compila de nuevo en cada release y no da los mismos bytes. Lo quiso
+    pasar de `v0.29.0` a `v0.30.0`, y eso le habría ofrecido a cada placa
+    una "actualización" de la radio que no es tal. Se dejó como estaba;
+    mirar el diff de `packs.json` antes de subirlo.
+  - Los packs nuevos entraron a `CARRIED_PACKS` (los dos workflows), para
+    que cada release los lleve a la siguiente.
+  - El CI de `main` con la caché: 8 minutos (las apps, un minuto por
+    tanda). Su catálogo se bajó y se miró antes del tag: 64 apps.
+  - Del borrador se comprobó, antes de publicar, que los 335 archivos que
+    nombra el catálogo existen con su tamaño y su SHA-256 (34 en esta
+    release, el resto en las tres anteriores), y que las dos imágenes
+    dicen `v0.31.0`. Publicado, `releases/latest` sirve ese catálogo.
 
 ## Preguntas abiertas
 

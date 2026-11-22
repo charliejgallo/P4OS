@@ -5,8 +5,8 @@ usuario: la placa junta cada vez más cosas (ajustes, cuentas, apps, datos de
 cada app) y no hay nada que las guarde.
 
 **Dónde está (2026-11-21):** las cuatro etapas están escritas, en `main`
-y en la placa (`v0.30.0-26-gac10384`); salen con la 0.31.0, que espera a
-las apps nuevas de la Tienda. Cada una tiene abajo lo que se hizo y lo que
+y en la placa (`v0.30.0-26-gac10384`); salieron con la 0.31.0, el
+2026-11-22. Cada una tiene abajo lo que se hizo y lo que
 dio en la placa.
 
 **Lo que falta ver en la placa** (la lista está en `PRUEBAS-PLACA.md`):
