@@ -159,12 +159,20 @@ de la 0.30.0: se pone al día al abrir la Tienda o Ajustes → Actualización.
       "Obtener", cada una con su pack; abrirlas una vez.
 - [ ] Metegol figura "copiada a mano" (se instaló con `install_apps.sh`):
       reinstalarla desde su página para que la Tienda la maneje.
-- [ ] **"Que las maneje la Tienda" sólo tomó tres o cuatro** (2026-11-22,
-      dicho por el usuario): es lo esperado, las demás son compilaciones
-      de la Mac y no los bytes del catálogo. Para no ir una por una:
-      "Reemplazarlas por las de la Tienda" (rama `tienda-reemplazar`, sin
-      instalar): probarlo con las ~35 que quedan, mirar cuánto tarda y
-      que los packs grandes (Bastión, el pinball) no se bajen de nuevo.
+- [x] **"Que las maneje la Tienda" sólo tomó tres o cuatro** (2026-11-22,
+      dicho por el usuario): es lo esperado, las demás eran compilaciones
+      de la Mac y no los bytes del catálogo. **"Reemplazarlas por las de
+      la Tienda"** (`v0.31.0-3-gc47efcd`, pedido por el portal con su
+      permiso): **las 39 reemplazadas en 265 s, ninguna falló**, 6,8 s por
+      app en promedio (CAS 24 s, el emulador 18, Python 16; las demás,
+      menos de 10). Ningún pack bajado: la tarjeta quedó con 1,4 MB menos
+      libres, y los recibos tomaron como propios los extras que estaban
+      (las seis mesas del pinball, los once mundos de Bastión, los nueve
+      estadios de Metegol). RAM interna: 205,7 KB de mínima mientras
+      corría, 208,7 después. Quedan dos copiadas a mano, las que ningún
+      catálogo lista. De 23 instaladas por la Tienda a 62.
+- [ ] Abrir algunas de las reemplazadas y ver que lo guardado sigue
+      (puntajes, proyectos, notas).
 
 ### Las apps nuevas de noviembre (2026-11-21, publicadas en la 0.31.0)
 

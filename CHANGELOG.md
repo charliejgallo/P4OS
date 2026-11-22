@@ -9,7 +9,8 @@
   now, **Replace them with the Store's** (two taps; in the portal too)
   installs the catalogue's over each one, in one job. What the apps saved
   stays, their packs are not downloaded again, and the extras a person had
-  copied are kept as the app's when they are the catalogue's.
+  copied are kept as the app's when they are the catalogue's. On the
+  board: 39 apps in four and a half minutes, with no pack downloaded.
 
 ## 0.31.0 — 2026-11-22
 
