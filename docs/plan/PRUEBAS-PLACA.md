@@ -288,11 +288,15 @@ En `main` desde el 2026-11-22, sin publicar; sólo probadas en el simulador.
       del portal, y en línea contra `fake_translate.py`. Que la Tienda
       ofrezca cada pack por separado se ve recién con los packs
       publicados.
-- [ ] **Lo del firmware de la tarde del 2026-11-22** (rama `fw-032`, sin
-      instalar): la radio pidiendo en HTTP/1.1 (escuchar dos o tres
-      emisoras de las de siempre); la Tienda bajando con HTTP/1.1 (una
-      app cualquiera); Estudio mandando todo a una computadora por el
-      puerto OTG (un programa que muestre los canales y el reloj); y el
+- [x] **El firmware de la 0.32.0 en la placa** (2026-11-22,
+      `v0.31.0-49-ge594fae`, el de `main`): la radio con HTTP/1.1 (tres
+      emisoras guardadas, las tres suenan); la Tienda bajando el catálogo
+      con HTTP/1.1; **Archivos abre un docx en Oficina** con un toque; y
+      el aviso de memoria al cerrar un juego dice ahora "its PSRAM is
+      back" (Hockey: 13 884 KB libres, 13 938 al abrir), donde antes
+      decía que 1,9 MB no volvían.
+- [ ] De ese firmware queda: Estudio mandando todo a una computadora por
+      el puerto OTG (un programa que muestre los canales y el reloj), y el
       chip "Nuevas", que se ve recién con el catálogo de la 0.32.0.
 - [x] **Hockey de mesa en la placa** (2026-11-22, `v0.31.0-34-g2c58fc4`,
       la app y sus tres mesas subidas a mano): **61 fps**, 1,0 a 1,3 ms
