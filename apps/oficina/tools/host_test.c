@@ -68,7 +68,7 @@ static void docdump(of_doc_t *d)
         for (int k = 0; k < p->len; k++) {
             if (k + 2 < p->len && !memcmp(p->txt + k, OF_OBJ_CHAR, 3)) {
                 of_obj_t *o = of_para_obj_at(d, p, k);
-                static const char *const K[] = { "hid", "img", "mark", "txt", "brk" };
+                static const char *const K[] = { "hid", "img", "mark", "txt", "brk", "note" };
                 printf("<%s%s%s>", o ? K[o->kind] : "?", o && o->text ? ":" : "", o && o->text ? o->text : "");
                 k += 2;
                 continue;

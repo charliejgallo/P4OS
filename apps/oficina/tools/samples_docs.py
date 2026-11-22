@@ -31,6 +31,29 @@ def png(rgb, w=48, h=32):
         chunk(b'IDAT', zlib.compress(raw)) + chunk(b'IEND', b'')
 
 
+def landscape(w=240, h=160):
+    """a drawn picture: sky, sun, two hills (no photo of anyone's)"""
+    rows = []
+    for y in range(h):
+        row = bytearray()
+        for x in range(w):
+            r, g, b = 90 + y // 2, 150 + y // 3, 230
+            if (x - 180) ** 2 + (y - 40) ** 2 < 22 ** 2:
+                r, g, b = 255, 214, 90
+            if y > 110 - 30 * ((x / w) ** 2) and y > 95 + 25 * abs((x - 70) / 120):
+                r, g, b = 60, 150 + (y % 7) * 3, 70
+            if y > 130 + 8 * ((x - 150) / 150) ** 2:
+                r, g, b = 40, 120, 55
+            row += bytes((r, g, b))
+        rows.append(b'\x00' + bytes(row))
+
+    def chunk(t, d):
+        c = struct.pack('>I', len(d)) + t + d
+        return c + struct.pack('>I', zlib.crc32(t + d) & 0xFFFFFFFF)
+    return b'\x89PNG\r\n\x1a\n' + chunk(b'IHDR', struct.pack('>IIBBBBB', w, h, 8, 2, 0, 0, 0)) + \
+        chunk(b'IDAT', zlib.compress(b''.join(rows))) + chunk(b'IEND', b'')
+
+
 def esc(s):
     return s.replace('&', '&amp;').replace('<', '&lt;').replace('>', '&gt;').replace('"', '&quot;')
 
@@ -179,7 +202,7 @@ def docx(path, t):
     write_zip(path, [('[Content_Types].xml', ct), ('_rels/.rels', top), ('docProps/core.xml', core), ('word/document.xml', document),
                      ('word/_rels/document.xml.rels', rels), ('word/styles.xml', styles), ('word/numbering.xml', numbering),
                      ('word/settings.xml', settings), ('word/footnotes.xml', footnotes), ('word/comments.xml', comments),
-                     ('word/header1.xml', header), ('word/footer1.xml', footer), ('word/media/image1.png', png((40, 120, 200)))],
+                     ('word/header1.xml', header), ('word/footer1.xml', footer), ('word/media/image1.png', landscape())],
               stored=('word/media/image1.png',))
 
 
@@ -263,7 +286,7 @@ def odt(path, t):
                 '<manifest:file-entry manifest:full-path="Pictures/foto.png" manifest:media-type="image/png"/>'
                 '</manifest:manifest>')
     write_zip(path, [('mimetype', 'application/vnd.oasis.opendocument.text'), ('content.xml', content), ('styles.xml', styles),
-                     ('meta.xml', meta), ('Pictures/foto.png', png((200, 80, 40))), ('META-INF/manifest.xml', manifest)],
+                     ('meta.xml', meta), ('Pictures/foto.png', landscape()), ('META-INF/manifest.xml', manifest)],
               stored=('mimetype', 'Pictures/foto.png'))
 
 
@@ -275,7 +298,7 @@ ES = {
     'bullets': ['Ordenar las herramientas', 'Pintar la puerta', 'Arreglar la mesa'], 'sub': ['Lijar', 'Barnizar'],
     'h2': 'Pasos para la semana que viene', 'steps': ['Comprar tornillos', 'Medir dos veces', 'Cortar una vez'],
     'table': [['Material', 'Cantidad', 'Precio'], ['Tornillos M4', '100', '$ 2.500'], ['Barniz 1 l', '2', '$ 18.000']],
-    'pic': 'Una foto: ', 'page': 'Página ', 'commented': 'texto con un comentario', 'comment': 'Revisar esto.',
+    'pic': 'Una foto: ', 'page': 'Página ', 'commented': ' texto con un comentario', 'comment': 'Revisar esto.',
     'sect': 'Fin de la primera sección.', 'track1': 'Un párrafo con ', 'track2': 'texto insertado con control de cambios',
     'track3': ' y texto borrado', 'end': 'Último párrafo, con ñ, acentos y «comillas».',
     'header': 'Taller - noviembre', 'footer': 'Hoja de prueba',
@@ -288,7 +311,7 @@ EN = {
     'bullets': ['Sort out the tools', 'Paint the door', 'Fix the table'], 'sub': ['Sand it', 'Varnish it'],
     'h2': 'Steps for next week', 'steps': ['Buy screws', 'Measure twice', 'Cut once'],
     'table': [['Material', 'Quantity', 'Price'], ['M4 screws', '100', '$ 25.00'], ['Varnish 1 l', '2', '$ 18.00']],
-    'pic': 'A picture: ', 'page': 'Page ', 'commented': 'text with a comment', 'comment': 'Check this.',
+    'pic': 'A picture: ', 'page': 'Page ', 'commented': ' text with a comment', 'comment': 'Check this.',
     'sect': 'End of the first section.', 'track1': 'A paragraph with ', 'track2': 'text inserted with track changes',
     'track3': ' and deleted text', 'end': 'Last paragraph, with “quotes” and an accent: café.',
     'header': 'Workshop - November', 'footer': 'Test sheet',

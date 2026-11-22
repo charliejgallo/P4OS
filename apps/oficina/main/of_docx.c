@@ -347,7 +347,7 @@ static void parse_run(rd_t *R, of_xml_t *X, of_para_t *p, int link)
     }
     size_t r1 = Y.end;
     if (!simple || vanish) {
-        int kind = has_drawing ? OF_OBJ_IMAGE : has_note ? OF_OBJ_TEXT : has_br_page ? OF_OBJ_BREAK
+        int kind = has_drawing ? OF_OBJ_IMAGE : has_note ? OF_OBJ_NOTE : has_br_page ? OF_OBJ_BREAK
                  : sym[0] ? OF_OBJ_TEXT : OF_OBJ_HIDDEN;
         (void)has_fld;
         int o = of_doc_add_obj(d, kind, X->src + r0, r1 - r0);
@@ -594,10 +594,10 @@ of_doc_t *of_docx_load(const char *path, char *err, size_t errlen)
     char main_part[200] = "word/document.xml";
     for (int i = 0; i < ntop; i++)
         if (ends_with(top[i].type, "/officeDocument"))
-            snprintf(main_part, sizeof main_part, "%s", top[i].target[0] == '/' ? top[i].target + 1 : top[i].target);
+            snprintf(main_part, sizeof main_part, "%.199s", top[i].target[0] == '/' ? top[i].target + 1 : top[i].target);
     of_free(top);
     d->part = of_strdup(main_part);
-    snprintf(R.dir, sizeof R.dir, "%s", main_part);
+    snprintf(R.dir, sizeof R.dir, "%.63s", main_part);
     char *sl = strrchr(R.dir, '/');
     if (sl) sl[1] = 0;
     else R.dir[0] = 0;
@@ -1101,7 +1101,7 @@ static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
             if (a + 2 < p->len && !memcmp(p->txt + a, OF_OBJ_CHAR, 3)) {
                 int ob = k < p->nobj ? p->obj[k] : -1;
                 k++;
-                if (ob >= 0 && d->obj[ob].kind == OF_OBJ_TEXT && d->obj[ob].text) {
+                if (ob >= 0 && (d->obj[ob].kind == OF_OBJ_TEXT || d->obj[ob].kind == OF_OBJ_NOTE) && d->obj[ob].text) {
                     of_sb_puts(&o, "<w:r>");
                     w_text(&o, d->obj[ob].text, (int)strlen(d->obj[ob].text));
                     of_sb_puts(&o, "</w:r>");

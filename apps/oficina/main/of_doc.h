@@ -50,7 +50,7 @@ typedef struct {
 } of_rstyle_t;
 
 /* an object kept as it was */
-enum { OF_OBJ_HIDDEN = 0, OF_OBJ_IMAGE, OF_OBJ_MARK, OF_OBJ_TEXT, OF_OBJ_BREAK };
+enum { OF_OBJ_HIDDEN = 0, OF_OBJ_IMAGE, OF_OBJ_MARK, OF_OBJ_TEXT, OF_OBJ_BREAK, OF_OBJ_NOTE };   /* TEXT: a field's text; NOTE: a footnote's number */
 
 typedef struct {
     uint8_t  kind;              /* OF_OBJ_* */
@@ -111,7 +111,7 @@ typedef struct {
     int32_t colw[64];           /* points */
 } of_table_t;
 
-typedef struct {
+typedef struct of_doc_s {
     int         fmt;            /* OF_DOC_* */
     of_para_t  *p;
     int         np, pcap;

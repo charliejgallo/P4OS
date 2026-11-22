@@ -1,17 +1,23 @@
 {
  "cat": "crear",
  "about": {
-  "es": "Planillas y textos en la placa: abre y edita xlsx, ods y csv con fórmulas, y archivos de texto, código y registros, sin romper lo que no entiende.",
-  "en": "Spreadsheets and texts on the board: opens and edits xlsx, ods and csv with formulas, and text, code and log files, without breaking what it does not understand."
+  "es": "Documentos, planillas y textos en la placa: abre y edita docx, odt, xlsx, ods y csv, y archivos de texto, código y registros, sin romper lo que no entiende.",
+  "en": "Documents, spreadsheets and texts on the board: opens and edits docx, odt, xlsx, ods and csv, and text, code and log files, without breaking what it does not understand."
  },
  "desc": {
-  "es": "Abre las planillas de Excel (xlsx), de LibreOffice (ods) y los csv, con todas sus hojas, las filas y columnas inmovilizadas, celdas combinadas, colores y formatos de número. Se editan celdas y fórmulas (suma, promedio, mínimo, máximo, contar, si, buscarv, redondear, fechas: más de sesenta, también en castellano), se ordena, se filtra, se cambia el ancho de las columnas y el formato de los números, con deshacer y rehacer. Acostada entran más columnas, y dos dedos acercan o alejan.\n\nAl guardar sólo se reescribe lo que cambió: el resto del archivo, con sus gráficos, comentarios, imágenes y macros, queda tal cual, y lo que la app no calcula lo recalcula el programa de la computadora al abrirlo. Una planilla también se guarda como copia en otro formato: de csv a xlsx, de xlsx a ods.\n\nEl editor de texto abre archivos grandes, con números de línea, colores para el código, json, xml, markdown y registros, buscar y reemplazar, y conserva la codificación y los finales de línea. Anda con un teclado USB o Bluetooth y sus atajos. Los documentos se suben y se bajan desde la página Oficina del portal. Documentos de Word, PDF y presentaciones llegan en las próximas versiones.",
-  "en": "Opens Excel (xlsx) and LibreOffice (ods) spreadsheets and csv files from the card, with all their sheets, frozen rows and columns, merged cells, colours and number formats. Edit cells and formulas (sum, average, min, max, count, if, vlookup, round, dates: over sixty, in Spanish and German too), sort, filter, change column widths and number formats, with undo and redo. Turned sideways more columns fit, and two fingers zoom.\n\nSaving rewrites only what changed: the rest of the file, with its charts, comments, pictures and macros, stays as it was, and what the app does not calculate is recalculated by the computer's program when it opens it. A spreadsheet can also be saved as a copy in another format: csv to xlsx, xlsx to ods.\n\nThe text editor opens big files, with line numbers, colours for code, json, xml, markdown and logs, find and replace, and it keeps the encoding and line endings. It works with a USB or Bluetooth keyboard and its shortcuts. Documents are uploaded and downloaded from the Office page of the portal. Word documents, PDF and presentations come in later versions."
+  "es": "Abre los documentos de Word (docx) y de LibreOffice (odt) con sus títulos, negritas, cursivas, colores, listas, tablas, imágenes y notas al pie, y se editan: el texto, el formato, el estilo y la alineación de los párrafos. Las planillas de Excel (xlsx), de LibreOffice (ods) y los csv se ven con sus hojas, filas inmovilizadas y formatos, y se editan celdas y fórmulas (más de sesenta, también en castellano), se ordena y se filtra.\n\nAl guardar sólo se reescribe lo que cambió: el resto del archivo, con sus gráficos, comentarios, imágenes, encabezados y macros, queda tal cual. Lo que la app no sabe editar, como el control de cambios, se ve y se guarda como estaba. Hay copias en otro formato: de docx a odt, de csv a xlsx.\n\nEl editor de texto abre archivos grandes, con números de línea y colores para código, json, xml, markdown y registros. Anda con teclado USB o Bluetooth, deshacer, zoom con dos dedos y acostada. Los documentos se suben y bajan desde la página Oficina del portal. PDF y presentaciones llegan después.",
+  "en": "Opens Word (docx) and LibreOffice (odt) documents with their headings, bold, italics, colours, lists, tables, pictures and footnotes, and edits them: the text, its formatting, and each paragraph's style and alignment. Excel (xlsx) and LibreOffice (ods) spreadsheets and csv files show with their sheets, frozen rows and formats, and you edit cells and formulas (over sixty, in Spanish and German too), sort and filter.\n\nSaving rewrites only what changed: the rest of the file, with its charts, comments, pictures, headers and macros, stays as it was. What the app cannot edit, like tracked changes, shows and is saved as it was. Copies go to other formats: docx to odt, csv to xlsx.\n\nThe text editor opens big files, with line numbers and colours for code, json, xml, markdown and logs. It works with a USB or Bluetooth keyboard, undo, two-finger zoom and sideways. Documents are uploaded and downloaded from the Office page of the portal. PDF and presentations come later."
  },
  "shots": [
   "app-oficina.png",
-  "app-oficina-formula.png",
-  "land-oficina.png",
-  "app-oficina-text.png"
+  "app-oficina-edit.png",
+  "app-oficina-sheet.png",
+  "land-oficina.png"
+ ],
+ "packs": [
+  {
+   "file": "oficina_p4.pak",
+   "need": true
+  }
  ]
 }

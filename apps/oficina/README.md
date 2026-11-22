@@ -247,31 +247,111 @@ spreadsheet program does, and the app read them back):
   currencies keeping their formats;
 - sorting a block with formulas; saving from the app in the simulator.
 
-### Build and install
+### Phase 2: documents (done, 2026-11-22)
+
+**The model** (`of_doc.h`, `of_doc.c`): the paragraphs in reading order,
+those of the body and those of table cells alike (each says its cell), each
+UTF-8 text with a run style per byte (as Notes' blocks) and what it is: a
+heading level, a list (bullet or number, level), its alignment. What the app
+does not model travels inside a paragraph as an object, a U+FFFC with the
+original XML: pictures (shown), footnote references (their number, raised),
+fields (their text), bookmarks, comment marks, page breaks. A paragraph with
+something the app cannot keep while editing (tracked changes, content
+controls, math, a nested table, an index) is shown with a mark at its side
+and locked.
+
+**Reading** (`of_docx.c`, `of_odt.c`): docx through its relationships, with
+styles.xml (paragraph and character styles and their parents, headings by
+name or outline level, the default size) and numbering.xml; odt with its
+automatic and named styles, list styles and nested lists, spans within spans,
+`text:s`, frames, notes and fields; flat `.fodt` too.
+
+**Saving into the same file** rewrites only the edited paragraphs, spliced
+into the original `word/document.xml` or `content.xml`; every other part of
+the package goes out with its compressed bytes:
+
+- docx: an edited paragraph keeps its `<w:p>` attributes (a new one drops the
+  `w14` ids, which must be unique) and its `<w:pPr>`; each run its original
+  `<w:rPr>`, or that one with only the changed properties replaced, the
+  children put back in the order the schema wants (Word refuses them out of
+  order). A section break (`sectPr` in a paragraph) moves with the paragraph
+  that keeps the section's end;
+- odt: an edited paragraph's text goes inside its original spans, and what
+  the person changed in one more span with an automatic style that says only
+  that (`OF_T1`...), added to `office:automatic-styles`; a list item that is
+  one paragraph is part of it, so a split one makes a new item and a merged
+  one takes its item along.
+
+Saving into the other format (docx to odt and back) or to plain text builds a
+new package from the model: headings, lists, tables, bold, italic, colours;
+pictures and what the app does not understand stay in the original.
+
+**The screen** (`of_docview.c`): the page laid out by the app, the runs in
+their size and style with the pack's Inter (`of_fonts.c`, from Notes:
+regular, bold, italic and bold italic in five sizes; without the pack, bold
+is drawn twice and italic upright), lines on a common baseline, headings,
+bullets and numbers, alignment, tables with their grid and column widths,
+pictures decoded by the HAL the first time they are in sight (a stored one
+straight from the document, a deflated one through a temporary file) and
+scaled to their box, footnote numbers raised, highlights, underline and
+strikethrough, links in blue. A paragraph's lines are kept until it changes.
+
+Editing: a tap places the caret and brings the keyboard, a double tap
+selects a word, a long press and a drag select; typing, Enter (a new
+paragraph like this one; after a heading, body text), Backspace and Delete
+joining paragraphs within the body or a cell; the bar over the keyboard
+(bold, italic, underline, strikethrough, for the selection or for what is
+typed next; the paragraph style: body text and three headings; the
+alignment); undo and redo (copies of the paragraphs an edit touched); copy
+and paste as text (a line per paragraph); find; bigger and smaller text and
+two fingers; information (paragraphs, words, characters); save a copy as
+docx, odt or txt. A USB or Bluetooth keyboard: arrows with Shift, Home, End,
+Delete, Tab, Ctrl+B/I/U/Z/Y/C/X/V/A/S/F/G. Lying down the page is a column
+in the middle.
+
+### Checking phase 2
 
 ```
-tools/build_apps.sh oficina                      # oficina.so, 200 KB, 189 symbols
-tools/install_apps.sh p4os.local oficina         # the .so and the page; restarts the board
+python3 apps/oficina/tools/make_samples.py /tmp/docs        # informe.docx, carta.odt (and --en)
+/tmp/host_test docdump /tmp/docs/informe.docx
+/tmp/host_test docedit /tmp/docs/informe.docx /tmp/out.docx 'ins:1:-1: más' 'bold:24:0:6' 'split:5:6' 'merge:22' 'head:25:2' 'align:0:1'
+python3 apps/oficina/tools/check_saved.py /tmp/docs/informe.docx /tmp/out.docx
+textutil -convert txt -stdout /tmp/out.docx                  # macOS reads it as Word would
+```
+
+Checked on 2026-11-22 with the invented `informe.docx` and `carta.odt`
+(styles, numbering, a table, a picture, a footnote, a field, a bookmark, a
+comment, a hyperlink, a section break, header and footer, `w14` ids, one
+paragraph with tracked changes): editing text, bold and italic, splitting and
+joining paragraphs (lists included), headings and alignment changed only the
+main part; the other parts identical; the locked paragraph byte for byte;
+macOS's `textutil` reads every saved file; docx to odt, odt to docx and to
+text. In the simulator: typing, bold for the next letters, saving from the
+"unsaved changes" sheet.
+
+### Build, install, pack
+
+```
+tools/build_apps.sh oficina                      # oficina.so, 268 KB, 202 symbols
+python3 apps/oficina/tools/pack_fonts.py         # build/oficina_p4.pak, 877 KB (--sim: a copy in sim/sim_fs/apps)
+tools/install_apps.sh p4os.local oficina         # the .so, the pack and the page; restarts the board
 tools/install_lang.sh p4os.local en              # and de
 ```
 
-No pack: the app uses the firmware's Inter and mono fonts (bold is drawn
-twice a pixel apart).
+`oficina_p4.pak` is needed (`"need": true`): Inter 4.1 (SIL OFL 1.1), four
+styles in 20, 24, 28, 36 and 48 px, made with lv_font_conv.
 
-### Next: phase 2, documents
+### Next: phase 3, the cheap readers
 
-`.docx` and `.odt` with the block model of Notas' editor
-(`apps/notas/main/nt_doc.c`, `nt_editor.c`): read `document.xml` /
-`content.xml` into paragraphs and runs, each keeping the bytes of its
-original properties (`w:rPr`, the ODF automatic style); show headings, bold,
-italic, underline, colours, lists, tables and pictures (JPEG/PNG through
-`aos_hal_image_decode`, a stored entry by its offset); edit text and the
-common formatting; save by rewriting only the edited paragraphs. The ZIP
-writer, the XML tokenizer, the deflate and the shell are ready for it. The
-bold and italic fonts then come in a pack, as in Notas.
+On top of the document model and screen: RTF, HTML (reader mode), EPUB
+(ZIP + spine + the HTML reader), FB2, Markdown rendered (md4c), EML; vCard
+and iCalendar as cards and days; ZIP and TAR to look inside and open an
+entry; the tree of JSON, XML, YAML and TOML; the preview picture of Apple's
+Pages, Numbers and Keynote files. Each reads into `of_doc_t` and shows on
+the same screen, read only, with "save a copy as docx or odt".
 
-Smaller things left in phase 1: renaming sheets of an xlsx, adding and
-deleting sheets, inserting and deleting rows and columns (they need every
-reference of the book moved), number formats in an existing ODS, and the
-board's own measurements (recalculating a sheet of ten thousand cells, the
-time to draw a frame of the grid).
+Left over from phases 1 and 2: renaming, adding and deleting sheets of an
+xlsx; inserting and deleting rows and columns; number formats in an existing
+ods; creating lists in a document (they need numbering definitions); tables
+added or resized in a document; pictures carried into a converted copy; the
+board's own measurements (laying out a long document, drawing a frame).

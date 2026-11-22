@@ -27,6 +27,10 @@ void ofu_theme_set(bool dark);
 enum { OF_SZ_M = 0, OF_SZ_S, OF_SZ_L, OF_SZ_XL, OF_SZ_XS };   /* 28 24 36 48 20 px */
 #define OF_ST_BOLD 1
 const lv_font_t *ofu_font(int style, int size);
+/* the documents' fonts (of_fonts.c): style bit 0 bold, bit 1 italic */
+const lv_font_t *ofd_font(int style, int px, bool *faux, bool *slant);
+bool ofd_fonts_have_pack(void);
+void ofd_fonts_free(void);
 
 /* -------------------------------------------------------------------------- */
 /* Widgets (of_ui.c)                                                           */
@@ -136,6 +140,15 @@ bool of_sheet_back(void);               /* true: handled (a panel closed, a ques
 void of_sheet_tick(void);
 bool of_sheet_save(void);
 bool of_sheet_save_recovery(void);
+
+/* of_docview.c */
+struct of_doc_s;
+bool of_docv_open(lv_obj_t *parent, const char *path, struct of_doc_s *d);
+void of_docv_close(void);
+bool of_docv_modified(void);
+bool of_docv_back(void);
+bool of_docv_save(void);
+bool of_docv_save_recovery(void);
 
 /* of_textview.c */
 bool of_textv_open(lv_obj_t *parent, const char *path);

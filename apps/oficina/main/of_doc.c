@@ -456,7 +456,7 @@ char *of_doc_plain(const of_doc_t *d)
         for (int k = 0; k < p->len; k++) {
             if (k + 2 < p->len && !memcmp(p->txt + k, OF_OBJ_CHAR, 3)) {
                 of_obj_t *o = of_para_obj_at(d, p, k);
-                if (o && o->kind == OF_OBJ_TEXT && o->text) of_sb_puts(&sb, o->text);
+                if (o && (o->kind == OF_OBJ_TEXT || o->kind == OF_OBJ_NOTE) && o->text) of_sb_puts(&sb, o->text);
                 k += 2;
                 continue;
             }

@@ -61,7 +61,7 @@ Abiertos hace poco en la placa	Recently opened on the board
 Nombre de la carpeta nueva	Name of the new folder
 
 #: apps/oficina/web/oficina.js:201
-Los documentos de la tarjeta. La app Oficina abre y edita planillas (xlsx, ods, csv) y textos; los demás formatos llegan en las próximas versiones.	The documents on the card. The Office app opens and edits spreadsheets (xlsx, ods, csv) and texts; the other formats come in later versions.
+Los documentos de la tarjeta. La app Oficina abre y edita documentos (docx, odt), planillas (xlsx, ods, csv) y textos; los demás formatos llegan en las próximas versiones.	The documents on the card. The Office app opens and edits documents (docx, odt), spreadsheets (xlsx, ods, csv) and texts; the other formats come in later versions.
 
 #: apps/oficina/web/oficina.js:203
 Documentos	Documents

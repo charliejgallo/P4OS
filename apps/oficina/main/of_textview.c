@@ -1330,6 +1330,7 @@ bool of_textv_open(lv_obj_t *parent, const char *path)
     lv_obj_align(bk, LV_ALIGN_LEFT_MID, 4, 0);
     T.title = ofu_text(T.top, "", ofu_font(OF_ST_BOLD, OF_SZ_M), OFT.text);
     lv_label_set_long_mode(T.title, LV_LABEL_LONG_MODE_DOTS);
+    lv_obj_set_height(T.title, ofu_font(OF_ST_BOLD, OF_SZ_M)->line_height);
     lv_obj_align(T.title, LV_ALIGN_LEFT_MID, 92, 0);
     lv_obj_t *mo = ofu_icon_btn(T.top, OF_IC_MORE, 84, more_cb, NULL);
     lv_obj_align(mo, LV_ALIGN_RIGHT_MID, -4, 0);

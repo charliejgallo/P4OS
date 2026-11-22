@@ -13,6 +13,7 @@
  * a card pulled out midway leaves the old one.
  */
 #include "of_ui.h"
+#include "of_doc.h"
 #include "aos_app.h"
 #include "aos_fonts.h"
 #include "aos_hal.h"
@@ -54,7 +55,7 @@ typedef struct {
     uint32_t size, mtime;
 } fent_t;
 
-enum { SCR_HOME = 0, SCR_SHEET, SCR_TEXT };
+enum { SCR_HOME = 0, SCR_SHEET, SCR_TEXT, SCR_DOC };
 enum { TAB_RECENT = 0, TAB_FILES };
 
 static struct {
@@ -192,7 +193,7 @@ static void recent_remove(const char *path)
 /* Kinds of file                                                               */
 /* -------------------------------------------------------------------------- */
 
-enum { K_NONE = 0, K_TEXT, K_SHEET, K_LATER, K_BINARY };
+enum { K_NONE = 0, K_TEXT, K_SHEET, K_LATER, K_BINARY, K_DOC };
 
 static const char *const TEXT_EXT[] = {
     "txt", "md", "markdown", "log", "ini", "conf", "cfg", "json", "xml", "yaml", "yml", "toml", "c", "h",
@@ -200,7 +201,7 @@ static const char *const TEXT_EXT[] = {
     "sql", "srt", "vtt", "tex", "bib", "properties", "gitignore", "diff", "patch", "svg", "kml", "gpx",
     "vcf", "ics", "nfo", "rst", "org", "env", "bat", "ps1", "cmake", "mk", "s", "asm", "pas", "bas" };
 static const char *const LATER_EXT[] = {
-    "docx", "dotx", "docm", "odt", "fodt", "ott", "rtf", "doc", "pdf", "pptx", "ppsx", "potx", "odp", "ppt",
+    "rtf", "doc", "pdf", "pptx", "ppsx", "potx", "odp", "ppt",
     "xls", "epub", "fb2", "pages", "numbers", "key", "zip", "tar", "gz", "tgz", "eml", "mht", "cbz" };
 
 static int kind_of(const char *path, bool dir)
@@ -208,6 +209,7 @@ static int kind_of(const char *path, bool dir)
     if (dir) return K_NONE;
     const char *e = of_ext(path);
     if (of_is_sheet_ext(e) || !strcmp(e, "fods")) return K_SHEET;
+    if (of_is_doc_ext(e)) return K_DOC;
     for (size_t i = 0; i < sizeof TEXT_EXT / sizeof TEXT_EXT[0]; i++)
         if (!strcmp(e, TEXT_EXT[i])) return K_TEXT;
     for (size_t i = 0; i < sizeof LATER_EXT / sizeof LATER_EXT[0]; i++)
@@ -252,6 +254,7 @@ static void clear_screen(void)
     ofu_sheet_forget();
     if (A.scr == SCR_SHEET) of_sheet_close_view();
     else if (A.scr == SCR_TEXT) of_textv_close();
+    else if (A.scr == SCR_DOC) of_docv_close();
     ofu_kb_attach(NULL);
     lv_obj_clean(A.root);
     A.screen = NULL;
@@ -288,7 +291,24 @@ void of_app_open(const char *path)
     }
     char p[300];
     snprintf(p, sizeof p, "%s", path);
-    if (k == K_SHEET) {
+    if (k == K_DOC) {
+        char err[64] = "";
+        of_doc_t *d = of_doc_load(p, err, sizeof err);
+        if (!d) {
+            of_app_toast(!strcmp(err, "encrypted") ? _("El archivo tiene contraseña: la app no lo puede abrir")
+                                                   : _("No se pudo leer el documento"));
+            return;
+        }
+        clear_screen();
+        A.scr = SCR_DOC;
+        snprintf(A.doc, sizeof A.doc, "%s", p);
+        doc_flags(true);
+        lv_obj_set_style_bg_color(A.root, OFT.bg, 0);
+        if (!of_docv_open(A.root, p, d)) {
+            of_app_home();
+            return;
+        }
+    } else if (k == K_SHEET) {
         char err[64] = "";
         of_book_t *b = of_book_load(p, err, sizeof err);
         if (!b) {
@@ -654,12 +674,12 @@ static lv_obj_t *file_row(lv_obj_t *list, int32_t w, const char *path, const cha
 /* New documents                                                               */
 /* -------------------------------------------------------------------------- */
 
-static int s_new_kind;              /* 0 xlsx, 1 ods, 2 csv, 3 txt, 4 md */
+static int s_new_kind;              /* 0 docx, 1 odt, 2 xlsx, 3 ods, 4 csv, 5 txt, 6 md */
 
 static void new_done(const char *text, void *ud)
 {
     (void)ud;
-    static const char *const EXT[] = { "xlsx", "ods", "csv", "txt", "md" };
+    static const char *const EXT[] = { "docx", "odt", "xlsx", "ods", "csv", "txt", "md" };
     if (!text[0] || strchr(text, '/')) return;
     char p[320];
     const char *dir = A.tab == TAB_FILES ? A.dir : of_docs_dir();
@@ -668,8 +688,10 @@ static void new_done(const char *text, void *ud)
     if (of_file_exists(p)) { of_app_toast(_("Ya hay un archivo con ese nombre")); return; }
     char err[64];
     bool ok;
-    if (s_new_kind <= 2) {
-        int fmt = s_new_kind == 0 ? OF_FMT_XLSX : s_new_kind == 1 ? OF_FMT_ODS : OF_FMT_CSV;
+    if (s_new_kind <= 1) {
+        ok = of_doc_new_file(s_new_kind == 0 ? OF_DOC_DOCX : OF_DOC_ODT, p, NULL);
+    } else if (s_new_kind <= 4) {
+        int fmt = s_new_kind == 2 ? OF_FMT_XLSX : s_new_kind == 3 ? OF_FMT_ODS : OF_FMT_CSV;
         of_book_t *b = of_book_new(fmt);
         ok = b && of_book_add_sheet(b, _("Hoja1"));
         ok = ok && of_book_save(b, fmt, 0, p, err, sizeof err);
@@ -685,21 +707,24 @@ static void new_pick(int i, void *ud)
 {
     (void)ud;
     s_new_kind = i;
-    ofu_prompt(i <= 2 ? _("Nombre de la planilla") : _("Nombre del documento"), i <= 2 ? _("Planilla") : _("Documento"),
+    bool sheet = i >= 2 && i <= 4;
+    ofu_prompt(sheet ? _("Nombre de la planilla") : _("Nombre del documento"), sheet ? _("Planilla") : _("Documento"),
                _("Crear"), new_done, NULL);
 }
 
 static void new_cb(lv_event_t *e)
 {
     (void)e;
-    ofu_item_t items[5] = {
+    ofu_item_t items[7] = {
+        { _("Documento de Word (.docx)"), OF_IC_DOC, false, false },
+        { _("Documento de OpenDocument (.odt)"), OF_IC_DOC, false, false },
         { _("Planilla de Excel (.xlsx)"), OF_IC_SHEET, false, false },
         { _("Planilla de OpenDocument (.ods)"), OF_IC_SHEET, false, false },
         { _("Datos separados por comas (.csv)"), OF_IC_SHEET, false, false },
         { _("Texto (.txt)"), OF_IC_DOC, false, false },
         { _("Markdown (.md)"), OF_IC_DOC, false, false },
     };
-    ofu_sheet(_("Nuevo"), items, 5, new_pick, NULL);
+    ofu_sheet(_("Nuevo"), items, 7, new_pick, NULL);
 }
 
 static void more_pick(int i, void *ud)
@@ -903,6 +928,7 @@ static void of_destroy(aos_app_t *self, void *inst)
      * changes goes to a copy beside it, "(sin guardar)", never over it */
     if (A.scr == SCR_SHEET && of_sheet_modified()) of_sheet_save_recovery();
     if (A.scr == SCR_TEXT && of_textv_modified()) of_textv_save_recovery();
+    if (A.scr == SCR_DOC && of_docv_modified()) of_docv_save_recovery();
     clear_screen();
     doc_flags(false);
     for (int i = 0; i < A.nrecent; i++) of_free(A.recent[i]);
@@ -935,7 +961,7 @@ static void leave_pick(int i, void *ud)
 {
     (void)ud;
     if (i == 0) {
-        bool ok = A.scr == SCR_SHEET ? of_sheet_save() : of_textv_save();
+        bool ok = A.scr == SCR_SHEET ? of_sheet_save() : A.scr == SCR_DOC ? of_docv_save() : of_textv_save();
         if (!ok) return;
     }
     if (i <= 1) of_app_home();
@@ -943,7 +969,7 @@ static void leave_pick(int i, void *ud)
 
 void of_app_back_from_doc(void)
 {
-    bool mod = A.scr == SCR_SHEET ? of_sheet_modified() : of_textv_modified();
+    bool mod = A.scr == SCR_SHEET ? of_sheet_modified() : A.scr == SCR_DOC ? of_docv_modified() : of_textv_modified();
     if (!mod) { of_app_home(); return; }
     ofu_item_t items[2] = {
         { _("Guardar"), OF_IC_SAVE, false, false },
@@ -958,8 +984,8 @@ static bool of_back(aos_app_t *self, void *inst)
     (void)inst;
     if (A.pr_overlay) { pr_close(); return true; }
     if (ofu_sheet_open()) { ofu_sheet_close(); return true; }
-    if (A.scr == SCR_SHEET || A.scr == SCR_TEXT) {
-        if (A.scr == SCR_SHEET ? of_sheet_back() : of_textv_back()) return true;
+    if (A.scr == SCR_SHEET || A.scr == SCR_TEXT || A.scr == SCR_DOC) {
+        if (A.scr == SCR_SHEET ? of_sheet_back() : A.scr == SCR_DOC ? of_docv_back() : of_textv_back()) return true;
         of_app_back_from_doc();
         return true;
     }
@@ -1003,6 +1029,12 @@ static bool of_resize(aos_app_t *self, void *inst, lv_obj_t *root)
         lv_obj_clean(root);
         A.pr_overlay = NULL;
         of_textv_open(root, NULL);
+    } else if (A.scr == SCR_DOC) {
+        ofu_sheet_forget();
+        pr_close();
+        lv_obj_clean(root);
+        A.pr_overlay = NULL;
+        of_docv_open(root, p, NULL);
     }
     return true;
 }

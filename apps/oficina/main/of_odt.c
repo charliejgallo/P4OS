@@ -383,7 +383,7 @@ static void parse_p(rd_t *R, of_xml_t *X, int cell, bool locked, int list_ix, in
                 if (!target) kind = OF_OBJ_HIDDEN;
                 of_xml_skip(X);
             } else if (of_xml_is(X, "text:note")) {
-                kind = OF_OBJ_TEXT;
+                kind = OF_OBJ_NOTE;
                 char n[12];
                 snprintf(n, sizeof n, "%d", ++R->footnote);
                 text = of_strdup(n);
@@ -941,7 +941,7 @@ static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
             if (a + 2 < p->len && !memcmp(p->txt + a, OF_OBJ_CHAR, 3)) {
                 int ob = k < p->nobj ? p->obj[k] : -1;
                 k++;
-                if (ob >= 0 && d->obj[ob].kind == OF_OBJ_TEXT && d->obj[ob].text) w_text(&o, d->obj[ob].text, (int)strlen(d->obj[ob].text), false);
+                if (ob >= 0 && (d->obj[ob].kind == OF_OBJ_TEXT || d->obj[ob].kind == OF_OBJ_NOTE) && d->obj[ob].text) w_text(&o, d->obj[ob].text, (int)strlen(d->obj[ob].text), false);
                 a += 3;
                 continue;
             }
