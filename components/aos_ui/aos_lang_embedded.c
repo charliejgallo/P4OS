@@ -3534,6 +3534,12 @@ static const char blob_en__sistema_lang[] =
     "Primero elegí una frase para las copias: más arriba, «Cifrarlas con una frase…». Sin frase no sube nada.\tFirst choose a passphrase for the copies: further up, “Seal them with a passphrase…”. Without one nothing is sent.\n"
     "Conectando con el servidor…\tConnecting to the server…\n"
     "Falta la frase de las copias automáticas (más arriba, «Cifrarlas con una frase…»): hasta que la elijas no sube nada.\tThe automatic copies' passphrase is missing (further up, “Seal them with a passphrase…”): until you choose one nothing is sent.\n"
+    "Sudoku\tSudoku\n"
+    "Solitario\tSolitaire\n"
+    "Bolsa\tStocks\n"
+    "Vuelos\tFlights\n"
+    "Juegos de mesa\tBoard games\n"
+    "Metegol\tTable Football\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -7060,6 +7066,12 @@ static const char blob_de__sistema_lang[] =
     "Primero elegí una frase para las copias: más arriba, «Cifrarlas con una frase…». Sin frase no sube nada.\tWähle zuerst eine Passphrase für die Kopien: weiter oben, „Mit einer Passphrase verschlüsseln…“. Ohne sie wird nichts gesendet.\n"
     "Conectando con el servidor…\tVerbinde mit dem Server…\n"
     "Falta la frase de las copias automáticas (más arriba, «Cifrarlas con una frase…»): hasta que la elijas no sube nada.\tDie Passphrase der automatischen Kopien fehlt (weiter oben, „Mit einer Passphrase verschlüsseln…“): bis du eine wählst, wird nichts gesendet.\n"
+    "Sudoku\tSudoku\n"
+    "Solitario\tSolitär\n"
+    "Bolsa\tBörse\n"
+    "Vuelos\tFlüge\n"
+    "Juegos de mesa\tBrettspiele\n"
+    "Metegol\tTischfußball\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -7067,7 +7079,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3519, 0, files_en, 1 },
-    { "de", "Deutsch", 3519, 0, files_de, 1 },
+    { "en", "English", 3525, 0, files_en, 1 },
+    { "de", "Deutsch", 3525, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

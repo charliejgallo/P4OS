@@ -1,6 +1,10 @@
 # Changelog
 
-## 0.31.0 — not released yet
+## 0.31.0 — 2026-11-22
+
+The first release a board fetches for itself: Store → Updates for the
+apps, Settings → Update for the firmware. Six new apps, backups, and files
+by SFTP.
 
 - **Six new apps in the Store**, from the card (no firmware needed):
   - **Metegol** (Table Football): table football in 3D, lying down, one
