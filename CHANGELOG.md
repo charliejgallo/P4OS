@@ -2,7 +2,8 @@
 
 ## 0.32.0 — not released yet
 
-- **Three new apps in the Store**, from the card (no firmware needed):
+- **Four new apps in the Store**, from the card (Studio needs this
+  firmware; the other three, none):
   - **Hockey de mesa** (Air Hockey): air hockey in 3D, upright, against the
     board at four levels or two at once, a finger each in their half; the
     puck's path is swept, so a fast mallet never lets it through. The bar
@@ -18,6 +19,12 @@
     the app does not understand; and a text editor for big files, code and
     logs.
 
+  - **Estudio** (Studio): a synthesizer of three parts (two oscillators and
+    a filter, or two-operator FM), a drum machine of eight tracks and a
+    sequencer with a piano roll, played with several fingers; patterns
+    chained into a song, MIDI in and out, WAV and MIDI export. Played by
+    the user on the board, on the output for playing live (below): it
+    feels right.
 - **A stream for playing live** ([docs/APPS-P4.md](docs/APPS-P4.md)): an
   app's sound went through 40 ms of buffers after its own queue, fine for
   music and too much for an instrument. `aos_hal_spk_open_low()` makes the

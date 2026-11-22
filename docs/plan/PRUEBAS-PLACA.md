@@ -225,9 +225,10 @@ de la 0.30.0: se pone al día al abrir la Tienda o Ajustes → Actualización.
       ninguna por obtener. **El circuito completo de una app nueva**
       (rama, `main`, CI, pack en una release, catálogo, tag, la placa que
       la baja) **quedó cerrado con estas seis.**
-- [ ] Abrir cada una de las cinco (sólo se habían probado en el
-      simulador): en Juegos de mesa, los fps del 3D y el tiempo del motor
-      de ajedrez; Bolsa y Vuelos contra los servicios de verdad.
+- [x] Solitario y Juegos de mesa, jugadas por el usuario (más abajo, en
+      "Las apps nuevas de noviembre").
+- [ ] Sudoku, Bolsa y Vuelos, sin abrir todavía en la placa; Bolsa y
+      Vuelos contra los servicios de verdad.
 - [x] **"Que las maneje la Tienda" sólo tomó tres o cuatro** (2026-11-22,
       dicho por el usuario): es lo esperado, las demás eran compilaciones
       de la Mac y no los bytes del catálogo. **"Reemplazarlas por las de
@@ -264,8 +265,9 @@ En `main` desde el 2026-11-22, sin publicar; sólo probadas en el simulador.
 
 Seis apps de tarjeta en `main` desde el 2026-11-21 y en la Tienda desde la
 0.31.0: Sudoku, Solitario, Bolsa, Vuelos, Juegos de mesa y Metegol (los pedidos
-en `docs/internal/PEDIDOS-APPS-2026-11.md`). Estudio queda en su rama
-hasta que el firmware baje la latencia del parlante.
+en `docs/internal/PEDIDOS-APPS-2026-11.md`). Estudio esperó a que el
+firmware bajara la latencia del parlante y entró a `main` el 2026-11-22,
+para la release siguiente.
 
 - [x] **Metegol en la placa** (`bca146d`, instalada con `install_apps.sh`):
       Independiente contra Racing en Avellaneda, uno contra la placa en
@@ -278,11 +280,14 @@ hasta que el firmware baje la latencia del parlante.
       PSRAM, con el asignador de la app en 0 KB (pedido en
       `HANDOFF-NUEVAS-APPS.md`): ver si se acumula al abrirla y cerrarla.
 - [ ] Metegol de a dos en la misma pantalla, y con joystick.
-- [ ] Sudoku, Solitario, Bolsa, Vuelos y Juegos de mesa: sólo probadas en
-      el simulador. Instalarlas desde la Tienda cuando salga la release
-      (en limpio, con sus packs) y abrirlas una vez cada una; en Juegos de
-      mesa, medir los fps del 3D y el tiempo del motor de ajedrez en el
-      nivel más alto.
+- [x] **Jugadas en la placa por el usuario** (2026-11-22, instaladas
+      desde la Tienda): **Solitario**, una partida entera; **Juegos de
+      mesa**, el cuatro en línea y una partida rápida de ajedrez. Sin
+      caídas ni cuadros tardíos en lo que mostró la placa después.
+- [ ] Sudoku, Bolsa y Vuelos: abrirlas en la placa (instaladas, sin
+      probar). En Juegos de mesa, medir los fps del 3D y el tiempo del
+      motor de ajedrez en el nivel más alto; las damas, el reversi, el
+      ludo y el backgammon.
 - [ ] Bolsa y Vuelos contra los servicios de verdad (en el simulador, sólo
       contra sus servidores falsos).
 

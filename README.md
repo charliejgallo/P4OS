@@ -970,9 +970,9 @@ and their art comes in packs.
   its altitude, from airplanes.live, adsb.lol, the OpenSky Network or an
   ADS-B receiver of your own; the airports come from OurAirports.
 
-| Air Hockey | Translator | Office |
-|---|---|---|
-| <img src="docs/img/app-hockey-neon.jpg" width="125"> | <img src="docs/img/app-traductor.png" width="125"> | <img src="docs/img/app-oficina.png" width="125"> |
+| Air Hockey | Translator | Office | Studio |
+|---|---|---|---|
+| <img src="docs/img/app-hockey-neon.jpg" width="125"> | <img src="docs/img/app-traductor.png" width="125"> | <img src="docs/img/app-oficina.png" width="125"> | <img src="docs/img/app-estudio.png" width="125"> |
 
 - **Air Hockey** ([apps/hockey/README.md](apps/hockey/README.md)): upright,
   against the board at four levels or two at once, a finger each in their
@@ -987,6 +987,12 @@ and their art comes in packs.
   phase: xlsx, ods and csv spreadsheets with formulas, saved without
   touching what the app does not understand, and a text editor for big
   files, code and logs. Documents, PDF and slides are its next phases.
+- **Studio** ([apps/estudio/README.md](apps/estudio/README.md)): a
+  synthesizer of three parts, a drum machine and a sequencer, played with
+  several fingers on a keyboard, a grid locked to a scale or eight pads;
+  patterns chained into a song, MIDI in and out, and WAV and MIDI export.
+  It plays on the board's output for playing live: 14 to 18 ms from a key
+  to the speaker.
 
 Doom is doomgeneric, with OPL2 music, and Duke Nukem 3D is Chocolate Duke3D,
 with the Sound Blaster's FM music; both on the board, from the shareware
