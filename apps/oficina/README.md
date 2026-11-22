@@ -17,7 +17,9 @@ never break a file. Two rules hold for every format:
   identical, the values written where they belong). Never with anyone's
   documents.
 
-This file is the plan, by phases, and then what is built.
+This file is the plan, by phases, and then what is built. How to try all
+of it on the board before a release, with every test file:
+[PRUEBAS-PLACA.md](PRUEBAS-PLACA.md).
 
 ---
 
@@ -337,6 +339,7 @@ tools/build_apps.sh oficina                      # oficina.so, 544 KB, 230 symbo
 python3 apps/oficina/tools/pack_fonts.py         # build/oficina_p4.pak, 877 KB (--sim: a copy in sim/sim_fs/apps)
 tools/install_apps.sh p4os.local oficina         # the .so, the pack and the page; restarts the board
 tools/install_lang.sh p4os.local en              # and de
+sh apps/oficina/tools/samples_all.sh /tmp/docs   # every invented test file of the seven phases (55)
 ```
 
 `oficina_p4.pak` is needed (`"need": true`): Inter 4.1 (SIL OFL 1.1), four

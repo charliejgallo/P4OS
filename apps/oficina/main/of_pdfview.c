@@ -204,8 +204,12 @@ static void worker_fn(void *arg)
         if (V.state != 1) { aos_hal_sleep_ms(12); continue; }
         V.state = 2;
         int w = V.job.w, h = V.job.h;
+        uint32_t t0 = aos_hal_uptime_ms();
         uint16_t *px = of_alloc((size_t)w * (size_t)h * 2);
         bool ok = px && !V.cancel && of_pdfr_draw(V.R, V.job.page, V.job.scale, V.job.ox, V.job.oy, px, w, h, &V.cancel);
+        /* the measure, for the log: tools/plog.sh */
+        aos_hal_log("oficina", "pdf page %d %dx%d at %.2f: %u ms%s", V.job.page + 1, w, h, (double)V.job.scale,
+                    (unsigned)(aos_hal_uptime_ms() - t0), !px ? " (no memory)" : V.cancel ? " (stopped)" : ok ? "" : " (failed)");
         V.job_px = px;
         V.job_ok = ok && !V.cancel;
         V.state = 3;
