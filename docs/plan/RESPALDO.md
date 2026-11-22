@@ -10,7 +10,7 @@ Tienda. Las etapas 2 (las copias que hace sola) y 3 (el pendrive y el
 script de la computadora) están en la rama `respaldo-2` y **en la placa**
 (`v0.30.0-16-g021f337`). La etapa 4 (un servidor propio por SFTP) está
 en la misma rama, probada en la Mac y el simulador, e **instalada**
-(`v0.30.0-21-gd2bc7d3`) sin probar todavía ahí contra ningún servidor.
+(`v0.30.0-23-g2cb14b8`) sin probar todavía ahí contra ningún servidor.
 Nada de la rama está en `main`.
 
 ## Etapa 1, hecha en la Mac (2026-11-21)
@@ -280,7 +280,9 @@ trabajo el 2026-11-21 (un error de esa sesión, al revisar un respaldo).
 Esa clave hay que cambiarla por una nueva antes de ponerla en el
 `authorized_keys` de nadie. Para eso, el mismo día: Ajustes → Respaldo →
 "Hacer una clave nueva" (dos toques), que reemplaza `sshc_seed`; probado
-en el simulador y en `tests/backup_host` (59 casos). Falta instalarlo.
+en el simulador y en `tests/backup_host` (59 casos). Instalado el mismo
+día (`v0.30.0-23-g2cb14b8`, confirmado, 209,1 KB de RAM interna libres);
+falta que el usuario lo toque en la placa.
 
 **El NAS del usuario, mirado desde la Mac (2026-11-21, con su permiso):**
 contesta por SSH (un OpenSSH) y ofrece clave pública o contraseña; ninguna

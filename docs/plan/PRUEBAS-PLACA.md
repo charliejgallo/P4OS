@@ -117,9 +117,10 @@ Instalado el 2026-11-21, `v0.30.0-16-g021f337`.
       que vino: las notas y el inicio de la anterior.
 - [x] La etapa 4 instalada (`v0.30.0-21-gd2bc7d3`): confirmada, 209,1 KB
       de RAM interna libres, la línea de la clave en el portal.
-- [ ] Instalar "Hacer una clave nueva" y cambiar con ella la clave SSH de
-      la placa antes de autorizarla en un servidor (la de ahora quedó a la
-      vista en una sesión).
+- [x] "Hacer una clave nueva" instalado (`v0.30.0-23-g2cb14b8`).
+- [ ] Tocarlo en la placa (Ajustes → Respaldo, al final, dos toques) antes
+      de autorizar la clave en un servidor: la de ahora quedó a la vista
+      en una sesión.
 - [ ] `sftp p4os.local` y `scp` desde la Mac:
       listar, bajar y subir un archivo grande, y cuánta RAM interna queda.
 - [ ] Ajustes → Respaldo → Servidor propio: la línea de la clave en el
