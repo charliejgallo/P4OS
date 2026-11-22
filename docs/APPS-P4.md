@@ -280,6 +280,32 @@ and answers with the latency and the gaps: to try a board, or a queue
 size, without the app. In the simulator the stream sounds through SDL and
 `queued()` counts for real.
 
+### What an app asks the network for, and the PSRAM left
+
+`aos_hal_http_get(url, max_bytes)` names a ceiling for the answer. Up to
+0.31.0 the firmware set the whole ceiling aside, in one piece of PSRAM,
+before the request went out, and returned -3 when that piece was not
+there. Vuelos named 1.5 MB for a reading of 30 KB: with its own buffers
+taken the board had 1.7 MB free and no piece that long, so no request ever
+started, and the app only went on saying "Looking for aircraft" (the
+board, 2026-11-22; the simulator's `malloc()` never says no). Since 0.32.0
+the buffer starts at 16 KB and doubles with what arrives, and the ceiling
+is only where a body is cut.
+
+- **An app that is to run on 0.31.0** names a ceiling near what it expects
+  and asks again with half when the answer is -3 (`vl_feed.c`, `vl_feed_pump`).
+- **Any app says why** when a request does not start or does not come
+  back: a line in the log, and something on the screen that is not the
+  same text as "still waiting".
+- **Count what is left after your own buffers.** The board has 14 to 16 MB
+  of PSRAM free with no app open; an app that takes 12 of them leaves the
+  network, the decoders and the system the rest, in pieces.
+- **In the simulator:** `P4_SIM_HTTP_ROOM=<bytes>` is the largest piece of
+  memory there is for an answer, and with `P4_SIM_HTTP_WHOLE=1` the whole
+  ceiling is asked of it at once, as 0.31.0 does. `P4_SIM_HTTP_LOCAL=1`
+  lets no request out of the computer, for a test that must only reach a
+  `tools/fake_*.py`.
+
 ## Starting with the board
 
 An app with `AOS_APP_FLAG_BACKGROUND` can ask to start with the board,

@@ -57,6 +57,11 @@
  *  - A full handshake is 1.6-1.8 s and a resumed one 0.6. That is why there is
  *    a session cache: without it the Remoto app would pay 1.6 s on every
  *    refresh.
+ *  - The body's buffer grows with what arrives (2026-11-22). It used to be
+ *    the whole ceiling the app named, set aside in one piece before the
+ *    request went out: Vuelos named 1.5 MB for a reading that is 30 KB, the
+ *    board had 1.7 MB of PSRAM left and no piece that long, and no request
+ *    ever started. The ceiling is now only where a body is cut.
  *  - With no valid time the certificate cannot be verified. That is checked
  *    BEFORE spending the handshake, and afterwards the BADCERT_FUTURE bit is
  *    translated, which is the only thing distinguishing "the board is in the
@@ -99,6 +104,7 @@
  * dropped to 1. */
 #define HTTP_SLOTS      3       /* weather + geocoding + one spare */
 #define HTTP_TIMEOUT_S  10
+#define HTTP_FIRST      (16 * 1024)     /* the body's buffer to begin with; it doubles */
 #define TAG             "http"
 
 typedef struct {
@@ -107,7 +113,8 @@ typedef struct {
     int              status;
     char            *body;      /* response */
     int              len;
-    int              max;
+    int              max;       /* the ceiling the app named */
+    int              cap;       /* what the buffer holds now: it grows up to max */
     bool             abandoned; /* the app called release while it was still running */
     bool             tls;       /* the URL was https:// */
     char             host[96];
@@ -182,6 +189,42 @@ static int conn_recv(conn_t *c, char *buf, int max)
             return -1;
         }
     }
+}
+
+/* The body's buffer, in PSRAM: nothing here needs internal RAM, and a body
+ * may be a megabyte. In the simulator P4_SIM_HTTP_ROOM=<bytes> is the
+ * largest piece of memory there is, as on a board whose PSRAM an app has
+ * filled. */
+static char *body_alloc(char *old, int n)
+{
+#ifdef AOS_SIM
+    const char *room = getenv("P4_SIM_HTTP_ROOM");
+    if (room && room[0] && n > atoi(room)) {
+        return NULL;
+    }
+    return realloc(old, (size_t)n);
+#else
+    char *p = heap_caps_realloc(old, (size_t)n, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
+    if (!p && !old) {
+        p = malloc((size_t)n);          /* a board with no PSRAM left and a small body */
+    }
+    return p;
+#endif
+}
+
+/* Room for more of the body: twice what there is, up to the ceiling. Only
+ * the request's own task calls it, while the state is BUSY and nobody else
+ * looks at the buffer. false without the memory; what there was is kept. */
+static bool body_grow(slot_t *s)
+{
+    int want = s->cap > s->max / 2 ? s->max : s->cap * 2;
+    char *p = body_alloc(s->body, want);
+    if (!p) {
+        return false;
+    }
+    s->body = p;
+    s->cap  = want;
+    return true;
 }
 
 static void slot_free(slot_t *s)     /* with the lock held */
@@ -298,7 +341,14 @@ static void http_work(slot_t *s)
      * body is moved to the front. A GET of this size does not justify two. */
     int got = 0;
     for (;;) {
-        int r = conn_recv(&c, s->body + got, s->max - 1 - got);
+        if (got >= s->cap - 1 && s->cap < s->max && !body_grow(s)) {
+            aos_hal_log(TAG, "%s: no memory for more than %d KB of the answer (its ceiling is %d KB)", s->host,
+                        s->cap / 1024, s->max / 1024);
+            status = AOS_HTTP_ERR_MEM;
+            conn_close(&c);
+            goto done;
+        }
+        int r = conn_recv(&c, s->body + got, s->cap - 1 - got);
         if (r < 0) {
             if (got == 0) {
                 status = AOS_HTTP_ERR_RECV;
@@ -428,6 +478,22 @@ int aos_hal_http_request(const char *method, const char *url,
         return -1;
     }
 
+#ifdef AOS_SIM
+    /* Two things the Mac does not do by itself. P4_SIM_HTTP_WHOLE=1, with
+     * P4_SIM_HTTP_ROOM (body_alloc), is the firmware up to 0.31.0, which set
+     * the whole ceiling aside before asking: for an app that has to run
+     * there too. P4_SIM_HTTP_LOCAL=1 lets nothing out of this computer, for
+     * a test that must not reach a real service by mistake (its requests
+     * fail as with no route). */
+    const char *room = getenv("P4_SIM_HTTP_ROOM"), *whole = getenv("P4_SIM_HTTP_WHOLE");
+    if (whole && whole[0] == '1' && room && room[0] && max_bytes > atoi(room)) {
+        return -3;
+    }
+    const char *local = getenv("P4_SIM_HTTP_LOCAL");
+    bool refuse = local && local[0] == '1' && !(hlen == 9 && !strncmp(h, "127.0.0.1", 9)) &&
+                  !(hlen == 9 && !strncmp(h, "localhost", 9));
+#endif
+
     LOCK(s_lock);
     slot_t *s = NULL;
     for (int i = 0; i < HTTP_SLOTS; i++) {
@@ -444,6 +510,14 @@ int aos_hal_http_request(const char *method, const char *url,
     memset(s, 0, sizeof(*s));
     memcpy(s->host, h, hlen);
     s->host[hlen] = 0;
+#ifdef AOS_SIM
+    if (refuse) {
+        /* port 9 of this computer: nobody listens there */
+        snprintf(s->host, sizeof(s->host), "127.0.0.1");
+        tls = false;
+        colon = ":9";
+    }
+#endif
     s->tls  = tls;
     s->port = colon ? atoi(colon + 1) : (tls ? 443 : 80);
     snprintf(s->path, sizeof(s->path), "%s", slash ? slash : "/");
@@ -475,16 +549,9 @@ int aos_hal_http_request(const char *method, const char *url,
         memcpy(s->req_body, body, (size_t)s->req_len + 1);
     }
 
-#ifdef AOS_SIM
-    s->body = malloc(max_bytes);
-#else
-    /* To PSRAM: it is a few kilobytes that have no reason to come out of
-     * internal RAM. */
-    s->body = heap_caps_malloc(max_bytes, MALLOC_CAP_SPIRAM | MALLOC_CAP_8BIT);
-    if (!s->body) {
-        s->body = malloc(max_bytes);
-    }
-#endif
+    /* A first piece; http_work() asks for more as the body comes. */
+    s->cap  = max_bytes < HTTP_FIRST ? max_bytes : HTTP_FIRST;
+    s->body = body_alloc(NULL, s->cap);
     if (!s->body) {
         slot_free(s);
         UNLOCK(s_lock);

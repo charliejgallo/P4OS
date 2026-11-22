@@ -42,6 +42,21 @@
   stays, their packs are not downloaded again, and the extras a person had
   copied are kept as the app's when they are the catalogue's. On the
   board: 39 apps in four and a half minutes, with no pack downloaded.
+- **Vuelos found no aircraft on the board.** It named 1.5 MB for each
+  reading's answer and 1.1 MB for each map tile, the firmware set that
+  aside in one piece before asking, and with the app's own buffers the
+  board never had such a piece: no request started, and the app went on
+  saying "Looking for aircraft" whichever source was chosen. It had only
+  been tried in the simulator. Two fixes:
+  - **The app** (from the Store, on 0.31.0 too) names a ceiling by the
+    radius, asks with less when the memory is not there, and says why
+    there are no aircraft: out of memory, no answer, or access refused by
+    that source.
+  - **The firmware's HTTP client** grows an answer's buffer with what
+    arrives (16 KB, doubling) instead of taking the whole ceiling first,
+    for every app ([docs/APPS-P4.md](docs/APPS-P4.md)). The simulator can
+    now be told how little memory there is (`P4_SIM_HTTP_ROOM`) and to
+    let no request out of the computer (`P4_SIM_HTTP_LOCAL`).
 
 ## 0.31.0 — 2026-11-22
 

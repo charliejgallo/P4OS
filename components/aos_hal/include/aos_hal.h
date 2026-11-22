@@ -1812,8 +1812,12 @@ typedef enum {
 
 /* Fires the GET and returns straight away. Returns an identifier > 0, or < 0
  * if there is no network, no free slots or the URL is no good (neither http://
- * nor https://). max_bytes is the ceiling of the body that is kept (allocated
- * in PSRAM). */
+ * nor https://). max_bytes is the ceiling of the body that is kept: one longer
+ * is cut there. The buffer is in PSRAM and grows with what arrives, so a
+ * generous ceiling costs nothing by itself; up to 0.31.0 the whole of it was
+ * set aside, in one piece, before asking (-3 when it was not there), and an
+ * app that is to run on that firmware names a ceiling near what it expects.
+ * A body that outgrows the memory there is fails with AOS_HTTP_ERR_MEM. */
 int aos_hal_http_get(const char *url, int max_bytes);
 
 /* --------------------------------------------------------------------------
