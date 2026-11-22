@@ -288,6 +288,12 @@ En `main` desde el 2026-11-22, sin publicar; sólo probadas en el simulador.
       del portal, y en línea contra `fake_translate.py`. Que la Tienda
       ofrezca cada pack por separado se ve recién con los packs
       publicados.
+- [ ] **Lo del firmware de la tarde del 2026-11-22** (rama `fw-032`, sin
+      instalar): la radio pidiendo en HTTP/1.1 (escuchar dos o tres
+      emisoras de las de siempre); la Tienda bajando con HTTP/1.1 (una
+      app cualquiera); Estudio mandando todo a una computadora por el
+      puerto OTG (un programa que muestre los canales y el reloj); y el
+      chip "Nuevas", que se ve recién con el catálogo de la 0.32.0.
 - [ ] Hockey de mesa: los fps del registro, y los dos dedos a la vez a
       mano (el portal toca de a uno). Ajustar los niveles con el usuario,
       como Metegol.
