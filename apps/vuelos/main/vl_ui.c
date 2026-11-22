@@ -238,8 +238,19 @@ static void list_fill(app_t *a)
     s_sort_app = a;
     qsort(idx, (size_t)n, sizeof idx[0], a->list_by_alt ? by_alt : by_dist);
     if (!n) {
-        lv_obj_t *t = aos_label(l, a->feed_ok_ms ? _("No hay aviones en el radio elegido.") : _("Buscando aviones..."),
-                                aos_font_body, AOS_C_DIM);
+        /* with no reading yet, what the bar says: looking, or why not. The
+         * source goes with a refusal, which is that source's and not the
+         * board's: another one may answer. */
+        char why[96], line[160];
+        uint32_t rgb;
+        vl_status_text(a, why, sizeof why, &rgb);
+        int e = a->feed_err;
+        if (e == 401 || e == 403 || e == 429 || e == AOS_HTTP_ERR_RECV)
+            snprintf(line, sizeof line, "%s (%s)", why, vl_src_name(a->conf.src));
+        else
+            snprintf(line, sizeof line, "%s", why);
+        lv_obj_t *t = aos_label(l, a->feed_ok_ms ? _("No hay aviones en el radio elegido.") : line, aos_font_body,
+                                AOS_C_DIM);
         lv_obj_set_width(t, w);
         lv_label_set_long_mode(t, LV_LABEL_LONG_MODE_WRAP);
         lv_obj_set_style_text_align(t, LV_TEXT_ALIGN_CENTER, 0);

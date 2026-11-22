@@ -787,7 +787,7 @@ static void card(app_t *a, vl_fb_t *fb, uint32_t now)
  * The bar, the buttons, the scale
  * ------------------------------------------------------------------------- */
 
-static void status_text(app_t *a, char *out, size_t n, uint32_t *rgb)
+void vl_status_text(app_t *a, char *out, size_t n, uint32_t *rgb)
 {
     uint32_t now = (uint32_t)aos_hal_uptime_ms();
     *rgb = INK;
@@ -804,6 +804,8 @@ static void status_text(app_t *a, char *out, size_t n, uint32_t *rgb)
         else if (e == AOS_HTTP_ERR_SIN_HORA) snprintf(out, n, "%s", _("Esperando la hora"));
         else if (e == -200) snprintf(out, n, "%s", _("Respuesta inesperada"));
         else if (e == 401 || e == 403) snprintf(out, n, "%s", _("Acceso rechazado"));
+        else if (e == AOS_HTTP_ERR_MEM) snprintf(out, n, "%s", _("Sin memoria"));
+        else if (e == AOS_HTTP_ERR_RECV) snprintf(out, n, "%s", _("Sin respuesta"));
         else snprintf(out, n, _("Error %d"), e);
         *rgb = 0xFFD27A;
     } else if (!a->feed_ok_ms) {
@@ -830,7 +832,7 @@ static void draw_bar(app_t *a, vl_fb_t *fb)
     if (fm->ok) {
         char st[96], t[96];
         uint32_t rgb;
-        status_text(a, st, sizeof st, &rgb);
+        vl_status_text(a, st, sizeof st, &rgb);
         fit(fm, st, L->px1 - L->px0 - 96, t, sizeof t);
         vl_text(fb, fm, L->px0 + 70, (L->py0 + L->py1 - fm->line_h) / 2, t, rgb, CARD, false);
     }

@@ -134,6 +134,9 @@ Respuesta inesperada	Unerwartete Antwort
 #: apps/vuelos/main/vl_frame.c:801
 Acceso rechazado	Zugriff verweigert
 
+#: apps/vuelos/main/vl_frame.c:808
+Sin respuesta	Keine Antwort
+
 #: apps/vuelos/main/vl_frame.c:802
 Error %d	Fehler %d
 

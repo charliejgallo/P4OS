@@ -162,6 +162,32 @@ Development switches (simulator; the board's `getenv()` is NULL):
 - `vl_conf.c`, `vl_air.c`, `vl_ui.c`: the settings file, the airports, the
   list and settings panels.
 
+## Memory on the board
+
+The map's four buffers (two whole and two at half size, bigger than the
+screen), the frame, the airports and the tiles kept decoded come to about
+12 MB of PSRAM, and the board opens the app with about 14 free: under 2 MB
+are left, in pieces. Up to firmware 0.31.0 a request's whole ceiling is set
+aside in one piece before it goes out, and the first build named 1.5 MB
+for a reading and 1.1 MB for a tile: neither was ever there, no request
+started, and the app said "Buscando aviones..." for ever (the board,
+2026-11-22: it had only been tried in the simulator, whose memory does not
+run out).
+
+- A reading's ceiling goes by the radius (256 KB up to 60 NM, 512 KB up to
+  130, 768 KB beyond; an aircraft is about a kilobyte), and a tile's is
+  1.1 MB; when the firmware says there is no such piece the app asks with
+  half, down to 48 KB for a reading and 256 KB for a tile. Since firmware
+  0.32.0 the buffer grows with what arrives and the ceiling costs nothing.
+- A request that does not start, or that is not answered in 30 s, is a
+  line in the log and a line on the bar and in the list ("Sin memoria",
+  "Sin respuesta", "Acceso rechazado" with the source's name), not the
+  same text as waiting.
+
+Tried in the simulator with `P4_SIM_HTTP_ROOM` and `P4_SIM_HTTP_WHOLE=1`
+(`docs/APPS-P4.md`): 24 aircraft with pieces of 100 KB, "Sin memoria" with
+pieces of 30 KB.
+
 ## Later: a receiver on the board (RTL-SDR)
 
 Decoding ADS-B on the P4 itself with an RTL-SDR on the USB host is a phase

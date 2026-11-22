@@ -44,7 +44,18 @@
 #include <time.h>
 
 #define PI_F        3.14159265f
-#define FEED_MAX    (1500 * 1024)       /* 250 NM around a hub is ~600 aircraft */
+/* The ceiling of a reading. The HAL sets the whole ceiling aside, in one
+ * piece, before it asks; with the app's own buffers the board had 1.7 MB of
+ * PSRAM left and never one piece of the 1.5 MB this used to be, so no
+ * request ever left and nothing said so (the board, 2026-11-22). An aircraft
+ * is about a kilobyte in readsb's JSON, and only the nearest VL_MAX_AC are
+ * kept: the ceiling goes by the radius, and vl_feed_pump() asks for less when
+ * even that is not there. A reading that does not fit is cut and its last
+ * aircraft are lost, which feed_parse() takes. */
+#define FEED_MAX_NEAR   (256 * 1024)    /* up to 60 NM */
+#define FEED_MAX_MID    (512 * 1024)    /* up to 130 NM */
+#define FEED_MAX_FAR    (768 * 1024)    /* 250 NM around a hub is ~600 aircraft */
+#define FEED_MAX_LEAST  (48 * 1024)
 #define MAX_RECS    700
 #define KT_MS       0.514444f
 #define NM_KM       1.852f
@@ -681,7 +692,15 @@ static bool os_token_pump(app_t *a, uint32_t now)
     return false;
 }
 
-static int feed_ask(app_t *a)
+static int feed_max(const app_t *a)
+{
+    float nm = (float)a->conf.radius_km / NM_KM;
+    return nm <= 60 ? FEED_MAX_NEAR : nm <= 130 ? FEED_MAX_MID : FEED_MAX_FAR;
+}
+
+/* The request's id, or what aos_hal_http_request() said instead: -2 with
+ * every slot taken, -3 without the memory for 'max'. */
+static int feed_ask(app_t *a, int max)
 {
     const vl_conf_t *c = &a->conf;
     char url[240];
@@ -691,14 +710,14 @@ static int feed_ask(app_t *a)
     case SRC_AIRPLANES:
         snprintf(url, sizeof url, "%s/v2/point/%.4f/%.4f/%d", host("https://api.airplanes.live"), (double)c->lat,
                  (double)c->lon, nm);
-        return aos_hal_http_get(url, FEED_MAX);
+        return aos_hal_http_get(url, max);
     case SRC_ADSBLOL: {
         snprintf(url, sizeof url, "%s/v2/lat/%.4f/lon/%.4f/dist/%d", host("https://api.adsb.lol"), (double)c->lat,
                  (double)c->lon, nm);
-        if (!c->lol_key[0]) return aos_hal_http_get(url, FEED_MAX);
+        if (!c->lol_key[0]) return aos_hal_http_get(url, max);
         char hdr[120];
         snprintf(hdr, sizeof hdr, "x-api-key: %.80s\r\n", c->lol_key);
-        return aos_hal_http_request("GET", url, hdr, NULL, NULL, FEED_MAX);
+        return aos_hal_http_request("GET", url, hdr, NULL, NULL, max);
     }
     case SRC_OPENSKY: {
         float dlat = (float)c->radius_km / 110.57f;
@@ -707,18 +726,18 @@ static int feed_ask(app_t *a)
         snprintf(url, sizeof url, "%s/api/states/all?lamin=%.3f&lomin=%.3f&lamax=%.3f&lomax=%.3f&extended=1",
                  host("https://opensky-network.org"), (double)(c->lat - dlat), (double)(c->lon - dlon),
                  (double)(c->lat + dlat), (double)(c->lon + dlon));
-        if (!a->os_token[0]) return aos_hal_http_get(url, FEED_MAX);
+        if (!a->os_token[0]) return aos_hal_http_get(url, max);
         size_t hn = strlen(a->os_token) + 40;
         char *hdr = (char *)malloc(hn);
         if (!hdr) return -1;
         snprintf(hdr, hn, "Authorization: Bearer %s\r\n", a->os_token);
-        int id = aos_hal_http_request("GET", url, hdr, NULL, NULL, FEED_MAX);
+        int id = aos_hal_http_request("GET", url, hdr, NULL, NULL, max);
         free(hdr);
         return id;
     }
     case SRC_LOCAL:
         if (!c->url[0]) return -1;
-        return aos_hal_http_get(c->url, FEED_MAX);
+        return aos_hal_http_get(c->url, max);
     default: return -1;
     }
 }
@@ -1120,10 +1139,12 @@ void vl_feed_pump(app_t *a, uint32_t now)
         aos_http_state_t hs = aos_hal_http_state(a->feed_id);
         if (hs == AOS_HTTP_BUSY) {
             if (now - a->feed_t0 > 30000) {
+                aos_hal_log("vuelos", "%s: no answer in 30 s", vl_src_name(a->feed_src));
                 aos_hal_http_release(a->feed_id);
                 a->feed_id = 0;
                 a->feed_err = AOS_HTTP_ERR_RECV;
                 a->feed_next = now + 5000;
+                a->overlay_dirty = true;
             }
             return;
         }
@@ -1180,9 +1201,21 @@ void vl_feed_pump(app_t *a, uint32_t now)
             return;
         }
     }
-    int id = feed_ask(a);
+    /* less when the whole ceiling is not there in one piece */
+    int max = feed_max(a), id;
+    while ((id = feed_ask(a, max)) == -3 && max / 2 >= FEED_MAX_LEAST) max /= 2;
     if (id <= 0) {
-        a->feed_next = now + 2000;
+        /* -2 is the three slots taken, which passes; the rest is said, once */
+        int err = id == -3 ? AOS_HTTP_ERR_MEM : id == -2 ? 0 : AOS_HTTP_ERR_CONNECT;
+        if (err && err != a->feed_err) {
+            uint32_t psram = 0;
+            aos_hal_heap_info(NULL, &psram);
+            aos_hal_log("vuelos", "%s: the request did not start (%d), %u KB of PSRAM free", vl_src_name(a->conf.src),
+                        id, (unsigned)(psram / 1024));
+            a->feed_err = err;
+            a->overlay_dirty = true;
+        }
+        a->feed_next = now + (err ? 5000 : 2000);
         return;
     }
     day_count(a);

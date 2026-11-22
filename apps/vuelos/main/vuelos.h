@@ -62,6 +62,7 @@ typedef struct {
     int          id;
     vl_key_t     k;
     bool         empty;
+    int          max;           /* the ceiling it was asked with */
     uint32_t     t0;
 } net_t;
 
@@ -302,6 +303,7 @@ typedef struct {
     uint32_t    feed_next;          /* uptime of the next request */
     uint32_t    feed_ok_ms;         /* the last good reading */
     int         feed_err;           /* 0, an HTTP code or AOS_HTTP_ERR_* */
+    bool        tile_nomem;         /* the last tile could not be asked for: said once */
     int         feed_count;         /* aircraft in the last reading */
     uint32_t    feed_bytes;
     bool        feed_parse_err;
@@ -346,6 +348,8 @@ void vl_to_screen(const app_t *a, uint32_t x, uint32_t y, float *sx, float *sy);
 /* vl_frame.c */
 void vl_layout(app_t *a);
 void vl_frame_push(app_t *a);
+/* the bar's line: how many aircraft and from where, or why there are none */
+void vl_status_text(app_t *a, char *out, size_t n, uint32_t *rgb);
 bool vl_frame_sync(app_t *a, uint32_t now);
 int  vl_frame_reserve(const app_t *a, const back_t *b, int16_t (*out)[4], int max);
 bool vl_hit_disc(const disc_t *d, float x, float y);

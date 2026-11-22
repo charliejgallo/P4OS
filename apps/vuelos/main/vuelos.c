@@ -45,7 +45,13 @@
 #define EDGE        16
 #define RAM_BUDGET_MAX  (8u * 1024u * 1024u)
 #define RAM_BUDGET_MIN  (2u * 1024u * 1024u)
+/* A tile's ceiling: the densest z14 seen was 0.5 MB. The HAL sets the
+ * whole of it aside in one piece before it asks, and with this app's
+ * buffers the board seldom has a megabyte in one piece: net_pump() asks
+ * with half and with a quarter when it does not (most tiles are under
+ * 200 KB), and a tile that does not fit its ceiling is "too big". */
 #define HTTP_MAX    (1100 * 1024)
+#define HTTP_MAX_LEAST (256 * 1024)
 #define TILEJSON    "https://tiles.openfreemap.org/planet"
 #define PICK_R      56                  /* px around an aircraft that pick it */
 
@@ -281,7 +287,7 @@ static void net_pump(app_t *a)
         if (hs == AOS_HTTP_BUSY) continue;
         int code = aos_hal_http_status(q->id);
         int len = aos_hal_http_len(q->id);
-        bool whole = hs == AOS_HTTP_DONE && len < HTTP_MAX - 1 &&
+        bool whole = hs == AOS_HTTP_DONE && len < q->max - 1 &&
                      (len == 0 || vl_mvt_complete((const uint8_t *)aos_hal_http_body(q->id), len));
         if (whole) {
             q->empty = code == 204 || len == 0;
@@ -291,11 +297,14 @@ static void net_pump(app_t *a)
             q->empty = true;
             q->state = Q_READY;
         } else {
-            bool big = hs == AOS_HTTP_DONE && len >= HTTP_MAX - 1;
+            /* too big for a ceiling that was cut for want of memory: again
+             * soon, when there may be more */
+            bool big = hs == AOS_HTTP_DONE && len >= q->max - 1;
             aos_hal_log("vuelos", "tile %d/%u/%u: %s %d", q->k.z, (unsigned)q->k.x, (unsigned)q->k.y,
-                        big ? "too big" : hs == AOS_HTTP_DONE ? "cut short" : "failed", code);
+                        big ? "too big" : hs == AOS_HTTP_DONE ? "cut short" : "failed", big ? q->max / 1024 : code);
             a->last_err = hs == AOS_HTTP_DONE ? -100 : code;
-            failed_add(a, &q->k, now + (big ? 600000 : code == AOS_HTTP_ERR_SIN_HORA ? 3000 : 6000));
+            failed_add(a, &q->k, now + (big ? (q->max < HTTP_MAX ? 60000 : 600000)
+                                            : code == AOS_HTTP_ERR_SIN_HORA ? 3000 : 6000));
             aos_hal_http_release(q->id);
             q->id = 0;
             q->state = Q_FREE;
@@ -351,10 +360,22 @@ static void net_pump(app_t *a)
         if (slot < 0) break;
         char url[256];
         if (!tile_url(a, &k, url, sizeof url)) continue;
-        int id = aos_hal_http_get(url, HTTP_MAX);
-        if (id <= 0) break;
+        int max = HTTP_MAX, id;
+        while ((id = aos_hal_http_get(url, max)) == -3 && max / 2 >= HTTP_MAX_LEAST) max /= 2;
+        if (id <= 0) {
+            if (id == -3 && !a->tile_nomem) {
+                uint32_t psram = 0;
+                aos_hal_heap_info(NULL, &psram);
+                aos_hal_log("vuelos", "tile %d/%u/%u: no memory to ask for it, %u KB of PSRAM free", k.z,
+                            (unsigned)k.x, (unsigned)k.y, (unsigned)(psram / 1024));
+            }
+            a->tile_nomem = id == -3;
+            break;
+        }
+        a->tile_nomem = false;
         a->q[slot].id = id;
         a->q[slot].k = k;
+        a->q[slot].max = max;
         a->q[slot].empty = false;
         a->q[slot].t0 = now;
         a->q[slot].state = Q_FLIGHT;
