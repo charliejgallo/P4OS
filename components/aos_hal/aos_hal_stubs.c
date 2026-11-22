@@ -435,6 +435,15 @@ __attribute__((weak)) bool aos_hal_spk_open(uint32_t sample_rate)
 __attribute__((weak)) int aos_hal_spk_write(const int16_t *pcm, int n)
 { int v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) bool aos_hal_spk_open_low(uint32_t sample_rate)
+{ return aos_hal_spk_open(sample_rate); }
+
+__attribute__((weak)) int aos_hal_spk_latency_ms(void)
+{ return 0; }
+
+__attribute__((weak)) int aos_hal_spk_dry(void)
+{ return 0; }
+
 __attribute__((weak)) int aos_hal_spk_queued(void)
 { int v; memset(&v, 0, sizeof v); return v; }
 

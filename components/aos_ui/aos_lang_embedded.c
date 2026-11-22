@@ -3547,6 +3547,7 @@ static const char blob_en__sistema_lang[] =
     "Hockey de mesa\tAir Hockey\n"
     "Traductor\tTranslator\n"
     "Oficina\tOffice\n"
+    "Estudio\tStudio\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -7086,6 +7087,7 @@ static const char blob_de__sistema_lang[] =
     "Hockey de mesa\tAirhockey\n"
     "Traductor\tÜbersetzer\n"
     "Oficina\tBüro\n"
+    "Estudio\tStudio\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -7093,7 +7095,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3532, 0, files_en, 1 },
-    { "de", "Deutsch", 3532, 0, files_de, 1 },
+    { "en", "English", 3533, 0, files_en, 1 },
+    { "de", "Deutsch", 3533, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

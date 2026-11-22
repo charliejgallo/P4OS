@@ -245,6 +245,37 @@ saves with `aos_hal_pref_set_str` gets a name that says so: one with
 saved as `sshc_seed`, and the first plain backup made on a board carried
 it.
 
+### Sound an app makes itself, and playing live
+
+`aos_hal_spk_open(rate)`, `aos_hal_spk_write()` and `aos_hal_spk_queued()`
+are a mono 16-bit stream into the mixer: the app writes ahead and keeps
+something queued. From a sample to the speaker there are 40 ms after the
+app's own queue (a 10 ms block of the mixer and a 30 ms buffer in the I2S
+driver), which is what makes music safe and is too much for an instrument.
+
+For an app that is played, **`aos_hal_spk_open_low(rate)`** (since 0.32):
+while that stream is open the board makes its output again with a short
+buffer, and there are 10 ms after the app's queue, which can be 4 ms.
+
+- **It has a price:** 6 ms of the output not running are a click, where
+  the usual output forgives 20. Use it for an instrument, not for a game's
+  effects.
+- **Opening and closing it are a moment of silence** (the output is taken
+  down and made again, and the amplifier cycles).
+- **It is not always given:** with music mixed under the app, or while the
+  microphone records, the stream opens the usual way. `aos_hal_spk_latency_ms()`
+  says which one there is now.
+- **`aos_hal_spk_dry()`** counts the mixer's blocks that found the app's
+  ring short since the app first wrote: each is a gap that is heard. Size
+  the queue by that number, on the board.
+- Write from a thread of the app's own, a millisecond's worth at a time,
+  sleeping 1 ms while the queue holds what it should.
+
+`GET /api/spk?low=1&ms=3000&queue=4` plays a tone that way from the portal
+and answers with the latency and the gaps: to try a board, or a queue
+size, without the app. In the simulator the stream sounds through SDL and
+`queued()` counts for real.
+
 ## Starting with the board
 
 An app with `AOS_APP_FLAG_BACKGROUND` can ask to start with the board,

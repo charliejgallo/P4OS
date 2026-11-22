@@ -20,8 +20,9 @@
  *   ES7210  four-channel ADC, two microphones wired (MIC1, MIC2: the BSP's
  *           mic_selected = 0 means both). I2C 0x40 (0x80 in the 8-bit form).
  *           Not TDM with two mics: MIC1 is the left slot, MIC2 the right.
- *   One I2S port (I2S1: MCLK 13, BCLK 12, WS 10, DOUT 9, DIN 11), created by
- *           bsp_audio_init() as a TX + RX pair. Full duplex: IDF makes the
+ *   One I2S port (I2S1: MCLK 13, BCLK 12, WS 10, DOUT 9, DIN 11), created
+ *           here (bus_build(), as the BSP's bsp_audio_init() did until
+ *           2026-11-22) as a TX + RX pair. Full duplex: IDF makes the
  *           RX channel a slave of the TX one (BCLK/WS looped back inside
  *           the chip), so the microphones only have a clock while TX runs.
  *   I2C     the BSP's shared bus (bsp_i2c_init), the GT911's too. The
@@ -111,8 +112,8 @@
  * and its resampled copy (~32 KB), the app's stream ring (1 s at its rate),
  * the capture ring (2 s at up to 48 kHz, 192 KB, never freed), the app's
  * microphone ring (1 s), the resamplers' tables (8-64 KB), the mixer's
- * blocks. Internal: the stacks above and the I2S DMA descriptors the BSP
- * allocates (2 x 6 x 960 B).
+ * blocks. Internal: the stacks above and the I2S driver's DMA buffers
+ * (2 x 6 x 960 B; 2 x 4 x 384 B on the bus for playing live).
  *
  * ---- What changed in behaviour, against the watch --------------------------
  *
@@ -184,6 +185,8 @@
 #include "esp_random.h"
 #include "esp_timer.h"
 #include "esp_codec_dev.h"
+#include "esp_codec_dev_defaults.h"
+#include "driver/i2s_std.h"
 #include "bsp/esp-bsp.h"
 
 static const char *TAG = "audio";
@@ -196,6 +199,45 @@ static const char *TAG = "audio";
 #define BUS_BLOCK_MS    10
 #define BUS_BLOCK       (BUS_RATE * BUS_BLOCK_MS / 1000)    /* 480 frames */
 
+/* ---- The bus for playing live (2026-11-22, asked for by Estudio) -----------
+ *
+ * From a sample an app writes to the speaker there are three waits: what the
+ * app keeps queued so the mixer never finds its ring dry (one mixer block at
+ * least), the mixer's block (it has just started one: up to 10 ms), and the
+ * I2S driver's DMA ring. The ring is the big one and it cannot be made to
+ * hold less than it is: the driver hands i2s_channel_write() the buffer the
+ * DMA has just finished, which is played again after all the others, so
+ * what is written comes out a whole ring later. With the BSP's channel
+ * (I2S_CHANNEL_DEFAULT_CONFIG: 6 descriptors of 240 frames) that is 25 to
+ * 30 ms, and 50 to 70 from a key to the speaker. Fine for music, which is
+ * what that depth is for: 20 ms of the output task not running are not
+ * heard. Not for an instrument.
+ *
+ * So there are two buses. The usual one, as it always was. And one for an
+ * app that opens its stream with aos_hal_spk_open_low(): the I2S channel
+ * made again with a ring of 4 x 96 frames (8 ms) and the mixer in blocks of
+ * 96 frames (2 ms): 10 ms after the app's queue, which can be 4 ms now.
+ * The price is the margin: 6 ms of the output task not running are a click,
+ * so nothing else gets this bus, and a capture takes it away (its task reads
+ * 10 ms at a time and would lose samples to a ring that short).
+ *
+ * The DMA's size is fixed when the channel is made (i2s_new_channel), and
+ * the BSP makes it with the default and keeps the handles to itself. So the
+ * channel and the two codec devices are made here, as the BSP made them
+ * (esp32_p4_wifi6_touch_lcd_5.c, bsp_audio_init and the two
+ * bsp_audio_codec_*_init), and bus_switch() can take them down and make
+ * them again: the speaker closed, the devices and the data interface
+ * deleted, the channel pair deleted and made anew, the devices on it. The
+ * chips' own drivers (ES8311, ES7210) are made once and kept. It is done by
+ * the output task, between two blocks, with no capture running: tens of
+ * milliseconds of silence when the app opens its stream and when it closes
+ * it, and the amplifier's cycle. */
+#define DMA_DESCS       6           /* I2S_CHANNEL_DEFAULT_CONFIG's own: 30 ms */
+#define DMA_FRAMES      240
+#define LOW_DESCS       4           /* for playing live: 8 ms */
+#define LOW_FRAMES      96
+#define LOW_BLOCK       96          /* and the mixer in blocks of 2 ms */
+
 #define OUT_WARMUP_MS   60          /* silence before the first sound: the amp settles */
 #define OUT_IDLE_MS     5000        /* nothing to play this long: the amp goes off */
 
@@ -206,6 +248,13 @@ static const char *TAG = "audio";
 
 static esp_codec_dev_handle_t s_speaker;       /* ES8311 */
 static esp_codec_dev_handle_t s_mic;           /* ES7210 */
+static i2s_chan_handle_t s_i2s_tx, s_i2s_rx;   /* the pair: one clock for both ways */
+static const audio_codec_data_if_t *s_data_if;
+static const audio_codec_if_t *s_es8311, *s_es7210;    /* the chips' drivers: made once */
+static volatile bool s_low_want;               /* the app's stream was opened for playing live */
+static volatile bool s_low_on;                 /* the bus is the short one now (the output task's to change) */
+static uint32_t      s_low_switches;           /* for the log */
+static TaskHandle_t  s_ain_task;               /* a capture's reader of the ES7210 (further down) */
 static volatile int  s_hw_state;               /* 0 coming up, 1 up, -1 failed */
 static TaskHandle_t  s_aout_task;
 static volatile bool s_out_open;               /* the speaker device is open (amp on) */
@@ -782,7 +831,7 @@ static void music_idle(void)
 /* The music of one block, taken from the ring into 'mus'; how many samples.
  * The watch's player_out_task, minus the codec: that is the output task's
  * now. */
-static int music_take(int16_t *mus)
+static int music_take(int16_t *mus, int want)
 {
     if (!s_music_on) {
         return 0;
@@ -833,9 +882,9 @@ static int music_take(int16_t *mus)
     }
 
     int got = 0;
-    while (got < BUS_BLOCK) {
+    while (got < want) {
         /* the title changes on the sample: the block is split at the boundary */
-        uint32_t n = player_boundary((uint32_t)(BUS_BLOCK - got));
+        uint32_t n = player_boundary((uint32_t)(want - got));
         uint32_t u = ring_used();
         if (n > u) {
             n = u;
@@ -856,12 +905,13 @@ static int music_take(int16_t *mus)
     return got;
 }
 
-/* One block of music into 'mus', the rest of it silence. */
-static int music_block(int16_t *mus)
+/* One block of music into 'mus' ('want' frames, BUS_BLOCK at most), the
+ * rest of it silence. */
+static int music_block(int16_t *mus, int want)
 {
-    int got = music_take(mus);
-    if (got < BUS_BLOCK) {
-        memset(mus + got, 0, (size_t)(BUS_BLOCK - got) * sizeof(int16_t));
+    int got = music_take(mus, want);
+    if (got < want) {
+        memset(mus + got, 0, (size_t)(want - got) * sizeof(int16_t));
     }
     return got;
 }
@@ -2050,6 +2100,8 @@ static bool              s_spk_mixed;           /* ...over the music, which did 
 static int16_t          *s_spk_ring;            /* one second at the app's rate, PSRAM */
 static uint32_t          s_spk_ring_n;
 static volatile uint32_t s_spk_head, s_spk_tail;
+static volatile uint32_t s_spk_dry;             /* blocks the mixer found short, since the app first wrote */
+static volatile bool     s_spk_fed;
 static uint32_t          s_spk_rate;
 static rs_t              s_spk_rs;              /* the app's rate -> BUS_RATE */
 
@@ -2116,10 +2168,27 @@ static bool spk_prepare(uint32_t rate)
     rs_reset(&s_spk_rs);
     s_spk_rate = rate;
     s_spk_head = s_spk_tail = 0;
+    s_spk_dry = 0;
+    s_spk_fed = false;
     return true;
 }
 
-bool aos_hal_spk_open(uint32_t sample_rate)
+static bool spk_open(uint32_t sample_rate, bool low);
+
+bool aos_hal_spk_open(uint32_t sample_rate) { return spk_open(sample_rate, false); }
+bool aos_hal_spk_open_low(uint32_t sample_rate) { return spk_open(sample_rate, true); }
+
+/* What is between a sample the mixer takes from the app's ring and the
+ * speaker, at most: the mixer's block and the I2S ring. Of the bus there is
+ * now: after aos_hal_spk_open_low() it takes the output task a moment to
+ * change it (and it does not, while a capture runs). */
+int aos_hal_spk_latency_ms(void)
+{
+    return s_low_on ? (LOW_BLOCK + LOW_DESCS * LOW_FRAMES) * 1000 / BUS_RATE
+                    : (BUS_BLOCK + DMA_DESCS * DMA_FRAMES) * 1000 / BUS_RATE;
+}
+
+static bool spk_open(uint32_t sample_rate, bool low)
 {
     if (s_spk_open) {
         return true;
@@ -2143,6 +2212,9 @@ bool aos_hal_spk_open(uint32_t sample_rate)
     bool ok = spk_prepare(rate);
     if (ok) {
         s_spk_mixed = mixed;
+        /* over the music the usual bus stays: the short one is for an app
+         * that has the speaker to itself */
+        s_low_want = low && !mixed;
         s_spk_open = true;
     }
     xSemaphoreGive(s_spk_lock);
@@ -2173,8 +2245,11 @@ int aos_hal_spk_write(const int16_t *pcm, int n)
     }
     RING_FENCE();
     s_spk_head = head + (uint32_t)n;
+    s_spk_fed = true;
     return n;
 }
+
+int aos_hal_spk_dry(void) { return (int)s_spk_dry; }
 
 int aos_hal_spk_queued(void)
 {
@@ -2195,6 +2270,7 @@ void aos_hal_spk_close(void)
     bool mixed = s_spk_mixed;
     s_spk_open = false;                 /* the mix stops reading it; what was queued is dropped */
     s_spk_mixed = false;
+    s_low_want = false;                 /* the output task puts the usual bus back */
     xSemaphoreGive(s_spk_lock);
     if (!mixed) {
         player_yield_to_app(false);     /* the music comes back */
@@ -2243,10 +2319,16 @@ static void out_close(void)
     ESP_LOGD(TAG, "speaker closed (amp cycle %lu)", (unsigned long)s_out_opens);
 }
 
-/* The codecs, through the BSP: one I2S pair at the bus format, the ES8311 on
- * it for output and the ES7210 for input. */
-static void audio_hw_init(void)
+/* The I2S pair with a DMA ring of 'descs' buffers of 'frames', the data
+ * interface on it and the two codec devices on that: what the BSP's
+ * bsp_audio_init() and bsp_audio_codec_*_init() do, with the ring's size
+ * ours to say (the header of this file, "The bus for playing live"). */
+static bool bus_build(int descs, int frames)
 {
+    i2s_chan_config_t chan = I2S_CHANNEL_DEFAULT_CONFIG(CONFIG_BSP_I2S_NUM, I2S_ROLE_MASTER);
+    chan.auto_clear = true;             /* what was played is not played again when nothing new came */
+    chan.dma_desc_num = (uint32_t)descs;
+    chan.dma_frame_num = (uint32_t)frames;
     i2s_std_config_t cfg = {
         .clk_cfg  = I2S_STD_CLK_DEFAULT_CONFIG(BUS_RATE),
         .slot_cfg = I2S_STD_PHILIPS_SLOT_DEFAULT_CONFIG(I2S_DATA_BIT_WIDTH_16BIT, I2S_SLOT_MODE_STEREO),
@@ -2259,12 +2341,57 @@ static void audio_hw_init(void)
             .invert_flags = { .mclk_inv = false, .bclk_inv = false, .ws_inv = false },
         },
     };
-    esp_err_t e = bsp_audio_init(&cfg);
-    if (e == ESP_OK) {
-        s_speaker = bsp_audio_codec_speaker_init();
-        s_mic     = bsp_audio_codec_microphone_init();
+    esp_err_t e = i2s_new_channel(&chan, &s_i2s_tx, &s_i2s_rx);
+    if (e == ESP_OK) e = i2s_channel_init_std_mode(s_i2s_tx, &cfg);
+    if (e == ESP_OK) e = i2s_channel_enable(s_i2s_tx);
+    if (e == ESP_OK) e = i2s_channel_init_std_mode(s_i2s_rx, &cfg);
+    if (e == ESP_OK) e = i2s_channel_enable(s_i2s_rx);
+    if (e != ESP_OK) {
+        ESP_LOGE(TAG, "I2S with a ring of %d x %d: %s", descs, frames, esp_err_to_name(e));
+        if (s_i2s_tx) { i2s_channel_disable(s_i2s_tx); i2s_del_channel(s_i2s_tx); }
+        if (s_i2s_rx) { i2s_channel_disable(s_i2s_rx); i2s_del_channel(s_i2s_rx); }
+        s_i2s_tx = s_i2s_rx = NULL;
+        return false;
     }
-    if (s_speaker) {
+    audio_codec_i2s_cfg_t ic = { .port = CONFIG_BSP_I2S_NUM, .rx_handle = s_i2s_rx, .tx_handle = s_i2s_tx };
+    s_data_if = audio_codec_new_i2s_data(&ic);
+
+    /* the chips, once: their drivers hold the I2C address and the
+     * amplifier's pin, and nothing of the I2S */
+    if (!s_es8311) {
+        audio_codec_i2c_cfg_t i2c = { .port = BSP_I2C_NUM, .addr = ES8311_CODEC_DEFAULT_ADDR, .bus_handle = bsp_i2c_get_handle() };
+        const audio_codec_ctrl_if_t *ctrl = audio_codec_new_i2c_ctrl(&i2c);
+        es8311_codec_cfg_t c = {
+            .ctrl_if = ctrl,
+            .gpio_if = audio_codec_new_gpio(),
+            .codec_mode = ESP_CODEC_DEV_WORK_MODE_DAC,
+            .pa_pin = BSP_POWER_AMP_IO,
+            .pa_reverted = false,
+            .master_mode = false,
+            .use_mclk = true,
+            .digital_mic = false,
+            .invert_mclk = false,
+            .invert_sclk = false,
+            .hw_gain = { .pa_voltage = 5.0, .codec_dac_voltage = 3.3 },
+        };
+        s_es8311 = ctrl ? es8311_codec_new(&c) : NULL;
+    }
+    if (!s_es7210) {
+        audio_codec_i2c_cfg_t i2c = { .port = BSP_I2C_NUM, .addr = ES7210_CODEC_DEFAULT_ADDR, .bus_handle = bsp_i2c_get_handle() };
+        const audio_codec_ctrl_if_t *ctrl = audio_codec_new_i2c_ctrl(&i2c);
+        es7210_codec_cfg_t c = { .ctrl_if = ctrl };
+        s_es7210 = ctrl ? es7210_codec_new(&c) : NULL;
+    }
+    esp_codec_dev_handle_t spk = NULL, mic = NULL;
+    if (s_data_if && s_es8311) {
+        esp_codec_dev_cfg_t d = { .dev_type = ESP_CODEC_DEV_TYPE_OUT, .codec_if = s_es8311, .data_if = s_data_if };
+        spk = esp_codec_dev_new(&d);
+    }
+    if (s_data_if && s_es7210) {
+        esp_codec_dev_cfg_t d = { .dev_type = ESP_CODEC_DEV_TYPE_IN, .codec_if = s_es7210, .data_if = s_data_if };
+        mic = esp_codec_dev_new(&d);
+    }
+    if (spk) {
         /* esp_codec_dev's own curve is a straight line in dB from -50 at 0
          * to 0 at 100: half way was -25 dB, and on the board the bottom half
          * of the slider was barely heard (2026-09-29). -10 dB sounds about
@@ -2277,10 +2404,66 @@ static void audio_hw_init(void)
             { .vol = 100, .db_value = 0.0f },
         };
         esp_codec_dev_vol_curve_t curve = { .vol_map = points, .count = sizeof points / sizeof points[0] };
-        esp_codec_dev_set_vol_curve(s_speaker, &curve);
+        esp_codec_dev_set_vol_curve(spk, &curve);
     }
+    /* the other tasks only ask whether these are there; nobody but the
+     * output task (the speaker) and a capture's (the microphone, and there
+     * is none while this runs) uses them */
+    s_speaker = spk;
+    s_mic = mic;
+    return spk != NULL;
+}
+
+/* The devices, the data interface and the channel pair taken down, the
+ * chips' drivers kept. The handles keep their old value until bus_build()
+ * gives them a new one: see there who looks at them. */
+static void bus_drop(void)
+{
+    if (s_speaker) esp_codec_dev_delete(s_speaker);    /* closes it first: the amplifier off */
+    if (s_mic) esp_codec_dev_delete(s_mic);
+    if (s_data_if) audio_codec_delete_data_if(s_data_if);
+    s_data_if = NULL;
+    /* enabled or not, by what the devices left: a channel is deleted disabled */
+    if (s_i2s_tx) { i2s_channel_disable(s_i2s_tx); i2s_del_channel(s_i2s_tx); }
+    if (s_i2s_rx) { i2s_channel_disable(s_i2s_rx); i2s_del_channel(s_i2s_rx); }
+    s_i2s_tx = s_i2s_rx = NULL;
+}
+
+/* From one bus to the other, by the output task with the speaker closed
+ * and no capture running. If the short one cannot be made the usual one
+ * is, and the app plays on it. */
+static void bus_switch(bool low)
+{
+    int64_t t0 = esp_timer_get_time();
+    bus_drop();
+    bool ok = bus_build(low ? LOW_DESCS : DMA_DESCS, low ? LOW_FRAMES : DMA_FRAMES);
+    if (!ok && low) {
+        bus_drop();
+        low = false;
+        ok = bus_build(DMA_DESCS, DMA_FRAMES);
+    }
+    s_low_on = ok && low;
+    s_low_switches++;
+    if (!ok) {
+        s_speaker = NULL;
+        s_mic = NULL;
+        ESP_LOGE(TAG, "the audio bus could not be made again: no sound until a restart");
+    } else {
+        ESP_LOGI(TAG, "bus: %s (ring %d x %d frames, mixer %d), made in %d ms, switch %lu",
+                 s_low_on ? "for playing live" : "the usual one", s_low_on ? LOW_DESCS : DMA_DESCS,
+                 s_low_on ? LOW_FRAMES : DMA_FRAMES, s_low_on ? LOW_BLOCK : BUS_BLOCK,
+                 (int)((esp_timer_get_time() - t0) / 1000), (unsigned long)s_low_switches);
+    }
+}
+
+/* The codecs: one I2S pair at the bus format, the ES8311 on it for output
+ * and the ES7210 for input. Made here and not by the BSP's bsp_audio_init():
+ * see bus_build(). */
+static void audio_hw_init(void)
+{
+    bool ok = bus_build(DMA_DESCS, DMA_FRAMES);
     ESP_LOGI(TAG, "I2S %s, ES8311 %s, ES7210 %s; bus %d Hz 16-bit stereo, volume %d",
-             esp_err_to_name(e), s_speaker ? "ok" : "MISSING", s_mic ? "ok" : "MISSING",
+             ok || s_i2s_tx ? "ok" : "FAILED", s_speaker ? "ok" : "MISSING", s_mic ? "ok" : "MISSING",
              BUS_RATE, s_volume);
     s_hw_state = (s_speaker || s_mic) ? 1 : -1;
 }
@@ -2312,11 +2495,30 @@ static void aout_task(void *arg)
     }
 
     int open_vol = -1;
-    uint32_t idle_ms = 0;
+    uint32_t idle_frames = 0;       /* what went by with nothing to play, in frames: the block's size changes */
     int usb_muted = -1;             /* the speaker muted for a USB card; -1 not known (just opened) */
 
     for (;;) {
         bool for_mic = s_out_for_mic;
+        /* The bus for playing live: wanted while an app's stream is open
+         * that way and no capture holds or asks for the clock. Changed
+         * here, between two blocks; a capture waits for the acknowledgement
+         * below before it touches the microphone, and by then the bus is
+         * the usual one. */
+        bool low = s_low_want && s_spk_open && !for_mic && !s_ain_task && s_mic_users == 0;
+        if (low != s_low_on) {
+            if (s_out_open) {
+                out_close();
+            }
+            bus_switch(low);
+            if (!s_speaker) {
+                s_aout_task = NULL;
+                vTaskDelete(NULL);
+                return;
+            }
+            idle_frames = 0;
+        }
+        const int blk = s_low_on ? LOW_BLOCK : BUS_BLOCK;
         if (!s_out_open) {
             s_out_mic_ack = false;
             music_idle();
@@ -2339,7 +2541,7 @@ static void aout_task(void *arg)
                 continue;
             }
             open_vol = s_volume;
-            idle_ms = 0;
+            idle_frames = 0;
             usb_muted = -1;
         }
         if (open_vol != s_volume) {         /* the slider is heard at once */
@@ -2347,11 +2549,14 @@ static void aout_task(void *arg)
             esp_codec_dev_set_out_vol(s_speaker, open_vol);
         }
 
-        int nm = music_block(mus);
-        int na = spk_block(app, BUS_BLOCK);
-        int nt = tone_block(ton, BUS_BLOCK);
+        int nm = music_block(mus, blk);
+        int na = spk_block(app, blk);
+        if (s_spk_open && s_spk_fed && na < blk) {
+            s_spk_dry++;                /* the app's ring ran short: a gap in what it plays */
+        }
+        int nt = tone_block(ton, blk);
         int32_t gain = (nm && s_spk_open) ? MIX_MUSIC_GAIN_Q8 : 256;
-        for (int i = 0; i < BUS_BLOCK; i++) {
+        for (int i = 0; i < blk; i++) {
             int16_t v = sat16(((mus[i] * gain) >> 8) + app[i] + ton[i]);
             stereo[2 * i] = v;
             stereo[2 * i + 1] = v;
@@ -2364,8 +2569,8 @@ static void aout_task(void *arg)
             esp_codec_dev_set_out_mute(s_speaker, usb);
             usb_muted = usb;
         }
-        if (usb) aos_p4_usb_audio_write(stereo, BUS_BLOCK, s_volume);
-        if (esp_codec_dev_write(s_speaker, stereo, BUS_BLOCK * 2 * (int)sizeof(int16_t)) !=
+        if (usb) aos_p4_usb_audio_write(stereo, blk, s_volume);
+        if (esp_codec_dev_write(s_speaker, stereo, blk * 2 * (int)sizeof(int16_t)) !=
             ESP_CODEC_DEV_OK) {
             ESP_LOGW(TAG, "speaker: write failed, reopening");
             out_close();
@@ -2377,12 +2582,12 @@ static void aout_task(void *arg)
          * this very iteration will not count towards the idle close. */
         s_out_mic_ack = for_mic;
         bool busy = nm || na || nt || s_spk_open || for_mic || tone_pending();
-        idle_ms = busy ? 0 : idle_ms + BUS_BLOCK_MS;
-        if (idle_ms >= OUT_IDLE_MS) {
+        idle_frames = busy ? 0 : idle_frames + (uint32_t)blk;
+        if (idle_frames >= (uint32_t)OUT_IDLE_MS * (BUS_RATE / 1000)) {
             /* Nothing for five seconds and no capture (closing under one is
              * harmless, reopening under one is not: the header). */
             out_close();
-            idle_ms = 0;
+            idle_frames = 0;
         }
     }
 }

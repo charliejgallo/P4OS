@@ -18,6 +18,14 @@
     the app does not understand; and a text editor for big files, code and
     logs.
 
+- **A stream for playing live** ([docs/APPS-P4.md](docs/APPS-P4.md)): an
+  app's sound went through 40 ms of buffers after its own queue, fine for
+  music and too much for an instrument. `aos_hal_spk_open_low()` makes the
+  board's output again with a short buffer while the stream is open: 10 ms.
+  The board's audio channel is made by the firmware now and not by the
+  BSP, which is what lets its buffer change. With `aos_hal_spk_dry()` to
+  count the gaps, and `GET /api/spk` to try it. In the simulator, what an
+  app plays is heard.
 - **The Store replaces every app copied by hand in one go.** "Let the
   Store manage them" only takes the apps whose file is byte for byte the
   catalogue's; a card filled from a build made at home was left with most

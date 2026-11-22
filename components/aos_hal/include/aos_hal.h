@@ -842,6 +842,22 @@ int  aos_hal_mic_level(void);
 bool aos_hal_spk_open(uint32_t sample_rate);        /* mono, 16-bit */
 int  aos_hal_spk_write(const int16_t *pcm, int n);  /* samples accepted */
 int  aos_hal_spk_queued(void);
+/* The same stream, for an app that is played: an instrument, a drum pad.
+ * P4OS: the output is rebuilt with a short buffer while it is open (10 ms
+ * from the app's queue to the speaker, where the usual one is 40), at the
+ * cost of the margin that makes music safe: 6 ms of the output not running
+ * are a click. So it is for an app that has the speaker to itself; with
+ * music mixed under it, or while the microphone records, the stream opens
+ * the usual way. Opening and closing it are tens of milliseconds of silence.
+ * aos_hal_spk_latency_ms() says which one there is now: what is between a
+ * sample the mixer takes and the speaker, at most, without the app's own
+ * queue. Keep a queue of two of the mixer's blocks (4 ms) or more. */
+bool aos_hal_spk_open_low(uint32_t sample_rate);
+int  aos_hal_spk_latency_ms(void);
+/* How many of the mixer's blocks found the app's ring short since the app
+ * first wrote to this stream: each one is a gap that is heard. For an app
+ * to size its queue by what happens and not by guessing. */
+int  aos_hal_spk_dry(void);
 bool aos_hal_spk_is_open(void);
 void aos_hal_spk_close(void);
 

@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3666 simbolos.
+ * Total: 3679 simbolos.
  */
 
 #include <stddef.h>
@@ -83,6 +83,8 @@ extern int aos_app_photos_get;
 extern int aos_app_serial_get;
 extern int aos_app_settings_get;
 extern int aos_app_soon_register;
+extern int aos_app_store_get;
+extern int aos_app_store_service_tick;
 extern int aos_app_sysmon_get;
 extern int aos_apps_register_builtin;
 extern int aos_apps_service_tick;
@@ -102,6 +104,10 @@ extern int aos_audio_p4_up;
 extern int aos_audio_p4_worker_core;
 extern int aos_audio_read;
 extern int aos_audio_seek;
+extern int aos_backup_ui_cancel;
+extern int aos_backup_ui_layout;
+extern int aos_backup_ui_tick;
+extern int aos_backup_ui_visible;
 extern int aos_banner_create;
 extern int aos_banner_layout;
 extern int aos_banner_tick;
@@ -153,6 +159,10 @@ extern int aos_eth_watch_get;
 extern int aos_eth_watch_note;
 extern int aos_eth_watch_reset;
 extern int aos_eth_yield;
+extern int aos_fetch_cancel;
+extern int aos_fetch_info;
+extern int aos_fetch_release;
+extern int aos_fetch_start;
 extern int aos_flash_call;
 extern int aos_flashop_init;
 extern int aos_folder_font;
@@ -595,8 +605,11 @@ extern int aos_hal_sleep;
 extern int aos_hal_sleep_hold;
 extern int aos_hal_sleep_ms;
 extern int aos_hal_spk_close;
+extern int aos_hal_spk_dry;
 extern int aos_hal_spk_is_open;
+extern int aos_hal_spk_latency_ms;
 extern int aos_hal_spk_open;
+extern int aos_hal_spk_open_low;
 extern int aos_hal_spk_queued;
 extern int aos_hal_spk_write;
 extern int aos_hal_steps_get;
@@ -3752,6 +3765,8 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_app_serial_get),
     ESP_ELFSYM_EXPORT(aos_app_settings_get),
     ESP_ELFSYM_EXPORT(aos_app_soon_register),
+    ESP_ELFSYM_EXPORT(aos_app_store_get),
+    ESP_ELFSYM_EXPORT(aos_app_store_service_tick),
     ESP_ELFSYM_EXPORT(aos_app_sysmon_get),
     ESP_ELFSYM_EXPORT(aos_apps_register_builtin),
     ESP_ELFSYM_EXPORT(aos_apps_service_tick),
@@ -3771,6 +3786,10 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_audio_p4_worker_core),
     ESP_ELFSYM_EXPORT(aos_audio_read),
     ESP_ELFSYM_EXPORT(aos_audio_seek),
+    ESP_ELFSYM_EXPORT(aos_backup_ui_cancel),
+    ESP_ELFSYM_EXPORT(aos_backup_ui_layout),
+    ESP_ELFSYM_EXPORT(aos_backup_ui_tick),
+    ESP_ELFSYM_EXPORT(aos_backup_ui_visible),
     ESP_ELFSYM_EXPORT(aos_banner_create),
     ESP_ELFSYM_EXPORT(aos_banner_layout),
     ESP_ELFSYM_EXPORT(aos_banner_tick),
@@ -3822,6 +3841,10 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_eth_watch_note),
     ESP_ELFSYM_EXPORT(aos_eth_watch_reset),
     ESP_ELFSYM_EXPORT(aos_eth_yield),
+    ESP_ELFSYM_EXPORT(aos_fetch_cancel),
+    ESP_ELFSYM_EXPORT(aos_fetch_info),
+    ESP_ELFSYM_EXPORT(aos_fetch_release),
+    ESP_ELFSYM_EXPORT(aos_fetch_start),
     ESP_ELFSYM_EXPORT(aos_flash_call),
     ESP_ELFSYM_EXPORT(aos_flashop_init),
     ESP_ELFSYM_EXPORT(aos_folder_font),
@@ -4264,8 +4287,11 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_sleep_hold),
     ESP_ELFSYM_EXPORT(aos_hal_sleep_ms),
     ESP_ELFSYM_EXPORT(aos_hal_spk_close),
+    ESP_ELFSYM_EXPORT(aos_hal_spk_dry),
     ESP_ELFSYM_EXPORT(aos_hal_spk_is_open),
+    ESP_ELFSYM_EXPORT(aos_hal_spk_latency_ms),
     ESP_ELFSYM_EXPORT(aos_hal_spk_open),
+    ESP_ELFSYM_EXPORT(aos_hal_spk_open_low),
     ESP_ELFSYM_EXPORT(aos_hal_spk_queued),
     ESP_ELFSYM_EXPORT(aos_hal_spk_write),
     ESP_ELFSYM_EXPORT(aos_hal_steps_get),

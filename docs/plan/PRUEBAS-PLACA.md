@@ -134,6 +134,31 @@ Instalado el 2026-11-21, `v0.30.0-16-g021f337`.
       una vez, cambiando un ajuste antes de instalar.
 - [ ] La copia semanal, sola, a la semana.
 
+### El audio para tocar en vivo (rama `audio-estudio`, sin instalar)
+
+Pedido de Estudio. El firmware arma ahora el canal I2S y los dos códecs
+(antes lo hacía el BSP), y eso toca **todo lo que suena**: lo primero es
+ver que nada cambió.
+
+- [ ] Recién instalado: un pitido, una canción de Música, la radio, un
+      juego con sonido, la Grabadora (grabar y escuchar), el afinador.
+      Todo como antes, sin ruidos nuevos al abrir o cerrar.
+- [ ] `GET /api/spk?low=0&ms=3000`: un tono por el camino de siempre;
+      `latency_ms` 40, `dry` 0.
+- [ ] `GET /api/spk?low=1&ms=3000&queue=4`: el mismo tono por el bus
+      corto; `latency_ms` 10, y cuántos `dry`. En el registro, cuánto
+      tardó en rehacerse la salida ("bus: for playing live ... made in N
+      ms") y en volver.
+- [ ] El mismo con `queue=2`, `8` y con Wi-Fi ocupado (una bajada de la
+      Tienda): cuántos cortes, para elegir el valor que usa Estudio.
+- [ ] Con Música sonando y "Mezclar música y apps": el tono sale por el
+      camino de siempre (`latency_ms` 40) y la música no se corta.
+- [ ] Empezar a grabar con el bus corto abierto: la grabación sale entera
+      y el bus vuelve al de siempre.
+- [ ] La latencia de verdad, de una tecla al parlante: con un micrófono
+      aparte o un osciloscopio. La placa no la puede medir sola: sus
+      micrófonos sacan el bus corto.
+
 ### La 0.31.0 desde la placa (publicada el 2026-11-22)
 
 La placa corre `v0.30.0-26-gac10384` y su catálogo guardado todavía es el

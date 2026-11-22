@@ -3460,13 +3460,67 @@ uint32_t aos_hal_link_rejoin_ms(void) { return 0; }
 
 int aos_hal_lvgl_core(void) { return -1; }
 
-/* The streaming speaker: the simulator swallows the samples. */
-static bool s_spk_open_sim;
-bool aos_hal_spk_open(uint32_t sample_rate) { (void)sample_rate; s_spk_open_sim = true; return true; }
-int  aos_hal_spk_write(const int16_t *pcm, int n) { (void)pcm; return s_spk_open_sim ? n : 0; }
-int  aos_hal_spk_queued(void) { return 0; }
+/* The streaming speaker: a sound device of SDL's in queue mode, at the rate
+ * the app asked for, so that what an app plays is heard here too and
+ * queued() behaves as the board's ring does (one second at most, and what
+ * is waiting counted for real). Until 2026-11-22 the samples were swallowed
+ * and queued() said 0: Golf and Chatarra were silent in the simulator, and
+ * Estudio opened SDL by itself to be tried at all. With no sound device
+ * (SDL_AUDIODRIVER=dummy, a machine without one) the samples are taken and
+ * dropped, as before. */
+static bool s_spk_open_sim, s_spk_low_sim;
+static SDL_AudioDeviceID s_spk_dev;
+static uint32_t s_spk_rate_sim;
+
+bool aos_hal_spk_open(uint32_t sample_rate)
+{
+    if (s_spk_open_sim) return true;
+    SDL_AudioSpec want = {0};
+    s_spk_rate_sim = sample_rate ? sample_rate : 16000;
+    want.freq = (int)s_spk_rate_sim;
+    want.format = AUDIO_S16SYS;
+    want.channels = 1;
+    want.samples = 256;
+    s_spk_dev = SDL_OpenAudioDevice(NULL, 0, &want, NULL, 0);
+    if (s_spk_dev) SDL_PauseAudioDevice(s_spk_dev, 0);
+    s_spk_open_sim = true;
+    return true;
+}
+
+/* The board makes its output again with a short buffer; here it is the same
+ * device, and the number says which the app asked for. */
+bool aos_hal_spk_open_low(uint32_t sample_rate)
+{
+    bool ok = aos_hal_spk_open(sample_rate);
+    s_spk_low_sim = ok;
+    return ok;
+}
+int aos_hal_spk_latency_ms(void) { return s_spk_low_sim ? 10 : 40; }
+int aos_hal_spk_dry(void) { return 0; }
+
+int aos_hal_spk_queued(void)
+{
+    return s_spk_open_sim && s_spk_dev ? (int)(SDL_GetQueuedAudioSize(s_spk_dev) / 2) : 0;
+}
+
+int aos_hal_spk_write(const int16_t *pcm, int n)
+{
+    if (!s_spk_open_sim || !pcm || n <= 0) return 0;
+    if (!s_spk_dev) return n;
+    int room = (int)s_spk_rate_sim - aos_hal_spk_queued();
+    if (n > room) n = room;
+    if (n > 0) SDL_QueueAudio(s_spk_dev, pcm, (Uint32)n * 2);
+    return n > 0 ? n : 0;
+}
+
 bool aos_hal_spk_is_open(void) { return s_spk_open_sim; }
-void aos_hal_spk_close(void) { s_spk_open_sim = false; }
+
+void aos_hal_spk_close(void)
+{
+    if (s_spk_dev) SDL_CloseAudioDevice(s_spk_dev);
+    s_spk_dev = 0;
+    s_spk_open_sim = s_spk_low_sim = false;
+}
 
 /* FTM needs a radio: the simulator has none. */
 bool aos_hal_ftm_supported(void) { return false; }
