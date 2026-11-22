@@ -31,6 +31,7 @@ BUILD = os.path.join(APP, 'build')
 LZ4 = os.path.join(BUILD, 'lz4blk')
 FONT = os.path.join(TOOLS, 'fonts', 'Rubik-Medium.ttf')
 PART = 7_500_000
+CROWD_STRIPS = 8         # the crowd's band in strips that move one at a time
 SHADE_K = 0.66          # the render's grey to a figure's shade (160: the colour as it is)
 
 PK_TEXT, PK_RGB565, PK_SPRITE, _, PK_SHEET, PK_JPEG, PK_PCM, PK_FONT, PK_FIGS = range(9)
@@ -378,11 +379,16 @@ def stadium(p, sid, names, league, accent):
     crowd = ''
     if os.path.exists(cj):
         ci = json.load(open(cj))
+        # in strips across the stands, each with its frames (strip * frames + k):
+        # the app moves them one at a time, so a change redraws an eighth
+        imgs = [rgba(os.path.join(d, 'crowd%d.png' % k)) for k in range(ci['frames'])]
         frames = []
-        for k in range(ci['frames']):
-            f = rgba(os.path.join(d, 'crowd%d.png' % k))
-            frames.append((f, -ci['x'], -ci['y']))
-        p.add(sid + '.crowd', PK_SHEET, ci['w'], ci['h'], encode_frames(frames, len(frames)), extra=len(frames))
+        sw = ci['w'] // CROWD_STRIPS
+        for st in range(CROWD_STRIPS):
+            for k in range(ci['frames']):
+                frames.append((imgs[k][:, st * sw:(st + 1) * sw], -(ci['x'] + st * sw), -ci['y']))
+        p.add(sid + '.crowd', PK_SHEET, ci['w'], ci['h'], encode_frames(frames, ci['frames']), extra=len(frames),
+              x=CROWD_STRIPS)
         crowd = 'crowd = %d,%d,%d,%d,%d\n' % (ci['x'], ci['y'], ci['w'], ci['h'], ci['frames'])
         for (fx, fy) in ci.get('flashes', []):
             crowd += 'flash = %d,%d\n' % (fx, fy)

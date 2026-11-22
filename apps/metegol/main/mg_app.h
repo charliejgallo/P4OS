@@ -37,15 +37,15 @@ typedef struct {
 } mg_cfg_t;
 
 /* what a frame shows besides the table (the worker's) */
-#define MG_CONFETTI 110
+#define MG_CONFETTI 60
 typedef struct {
     float t;
     float shake_t;
     float banner_t;
     int   banner;           /* 0 none, 1 goal, 2 half time, 3 full time, 4 kick off */
     int   banner_team;
-    float crowd_acc;
-    int   crowd_f;
+    float crowd_acc[8];
+    int   crowd_f[8];
     float conf_x[MG_CONFETTI], conf_y[MG_CONFETTI], conf_vx[MG_CONFETTI], conf_vy[MG_CONFETTI];
     uint16_t conf_c[MG_CONFETTI];
     int   nconf;

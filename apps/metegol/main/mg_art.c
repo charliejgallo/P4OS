@@ -196,6 +196,7 @@ void mg_art_stadium_free(mg_art_t *a)
     memset(&a->far, 0, sizeof a->far);
     memset(&a->crowd, 0, sizeof a->crowd);
     a->crowd_n = 0;
+    a->crowd_strips = 0;
     a->nflash = 0;
     a->cur_st = -1;
 }
@@ -238,7 +239,13 @@ bool mg_art_stadium(mg_art_t *a, int st)
     }
     ok = ok && part_sheet(&p, s->id, "near", &a->near, &a->near_d);
     ok = ok && part_sheet(&p, s->id, "far", &a->far, &a->far_d);
-    if (ok && part_sheet(&p, s->id, "crowd", &a->crowd, &a->crowd_d)) a->crowd_n = a->crowd.nframes;
+    if (ok && part_sheet(&p, s->id, "crowd", &a->crowd, &a->crowd_d)) {
+        /* the strips are in the entry's x (pack_p4.py), the frames a strip in its cols */
+        snprintf(name, sizeof name, "%.16s.crowd", s->id);
+        const mg_entry_t *ce = mg_pak_find(&p, name);
+        a->crowd_strips = ce && ce->x > 0 ? ce->x : 1;
+        a->crowd_n = a->crowd.nframes / a->crowd_strips;
+    }
     /* the crowd's flashes */
     snprintf(name, sizeof name, "%.19s.def", s->id);
     char *txt = (char *)mg_pak_get(&p, name, NULL);

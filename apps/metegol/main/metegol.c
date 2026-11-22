@@ -62,7 +62,9 @@ static void cfg_defaults(mg_cfg_t *c)
 {
     memset(c, 0, sizeof *c);
     c->diff = MG_NORMAL;
-    c->sfx = c->music = c->crowd = c->shake = 1;
+    c->sfx = c->music = c->crowd = 1;
+    /* the shake redraws the whole screen for a moment: off unless asked for */
+    c->shake = 0;
     c->speed = 1;
     c->league = MG_LEAGUE_CLUB;
     c->format = FMT_TIME;

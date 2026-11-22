@@ -104,7 +104,10 @@ void mg_ai_hand(mg_game_t *g, int side, mg_hand_t *h)
                 }
             }
         }
-        h->target[k] = clampf(want, r->lo, r->hi);
+        /* a hand does not chase millimetres: small corrections wait (and the
+         * figures that stay put cost the screen nothing) */
+        want = clampf(want, r->lo, r->hi);
+        h->target[k] = fabsf(want - r->tgt_off) < 6.0f ? r->tgt_off : want;
 
         /* a ball from behind going forward: its own shot, let it through */
         float real_rel = (g->bx - r->x) * dir;

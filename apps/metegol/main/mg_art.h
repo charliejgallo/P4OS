@@ -51,6 +51,7 @@ typedef struct {
     mg_sheet_t near, far, crowd;
     uint8_t  *near_d, *far_d, *crowd_d;
     int       crowd_x, crowd_y, crowd_n;
+    int       crowd_strips;     /* the band in strips, crowd_n frames each */
     int       nflash;
     int16_t   flash[MG_FLASH_MAX][2];
     /* the two teams, each as it looks from either end (the mirror) */

@@ -211,7 +211,7 @@ void mg_scene_draw(mg_app_t *a, float dt)
             u->banner = 1;
             u->banner_t = 2.2f;
             u->banner_team = mg_team_of_side(a, gm->last_goal);
-            if (u->shake_on) u->shake_t = 0.45f;
+            if (u->shake_on) u->shake_t = 0.3f;
             confetti_start(a, u->banner_team);
         }
     }
@@ -232,16 +232,23 @@ void mg_scene_draw(mg_app_t *a, float dt)
     /* the crowd: faster when the ball nears a goal, wild after one */
     float excite = gm->near_goal;
     if (gm->state == MG_ST_GOAL || (u->banner == 1)) excite = 2.0f;
-    u->crowd_acc += dt * (2.0f + 7.0f * excite);
-    if (u->crowd_acc >= 1.0f) {
-        u->crowd_acc -= floorf(u->crowd_acc);
-        if (art->crowd_n > 1) u->crowd_f = (u->crowd_f + 1) % art->crowd_n;
+    /* each strip of the stands at its own pace: a change redraws only that
+     * strip, and never more than a few a second (the board measured a whole
+     * band 16 times a second at 25 fps) */
+    int ns = art->crowd_strips > 0 && art->crowd_strips <= 8 ? art->crowd_strips : 1;
+    for (int s = 0; s < ns; s++) {
+        float rate = (0.8f + 3.2f * (excite > 1.0f ? 1.0f : excite)) * (0.8f + 0.06f * (float)((s * 5) % 8));
+        u->crowd_acc[s] += dt * rate;
+        if (u->crowd_acc[s] >= 1.0f) {
+            u->crowd_acc[s] -= floorf(u->crowd_acc[s]);
+            if (art->crowd_n > 1) u->crowd_f[s] = (u->crowd_f[s] + 1) % art->crowd_n;
+        }
     }
 
     mg_gfx_begin(g);
     int dx = 0, dy = 0;
     if (u->shake_t > 0) {
-        float k = u->shake_t / 0.45f;
+        float k = u->shake_t / 0.3f;
         dx = iround(sinf(u->t * 71.0f) * 7.0f * k);
         dy = iround(cosf(u->t * 53.0f) * 5.0f * k);
     }
@@ -249,7 +256,9 @@ void mg_scene_draw(mg_app_t *a, float dt)
     g->bg_dx = dx;
     g->bg_dy = dy;
 
-    if (u->crowd_on && art->crowd_n) mg_spr(g, &art->crowd, u->crowd_f, dx, dy, 0, 255);
+    if (u->crowd_on && art->crowd_n) {
+        for (int s = 0; s < ns; s++) mg_spr(g, &art->crowd, s * art->crowd_n + u->crowd_f[s], dx, dy, 0, 255);
+    }
     if (u->crowd_on && u->banner == 1) {
         /* the stands' flashes */
         for (int i = 0; i < art->nflash; i++) {
