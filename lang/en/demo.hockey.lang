@@ -1,0 +1,195 @@
+# amoledos-lang 1   es -> en
+# demo.hockey.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/hockey/main/hk_menu.c:181
+Hockey de mesa	Air Hockey
+
+#: apps/hockey/main/hk_menu.c:183
+Air hockey en 3D	3D air hockey
+
+#: apps/hockey/main/hk_menu.c:186
+#: apps/hockey/main/hk_menu.c:278
+Contra la placa	Against the board
+
+#: apps/hockey/main/hk_menu.c:187
+#: apps/hockey/main/hk_menu.c:278
+Dos jugadores	Two players
+
+#: apps/hockey/main/hk_menu.c:188
+#: apps/hockey/main/hk_menu.c:360
+Ajustes	Settings
+
+#: apps/hockey/main/hk_menu.c:190
+Falta el paquete del juego: bajalo de la Tienda	The game's pack is missing: get it from the Store
+
+#: apps/hockey/main/hk_menu.c:253
+#: apps/hockey/main/hk_menu.c:326
+fácil	easy
+
+#: apps/hockey/main/hk_menu.c:253
+#: apps/hockey/main/hk_menu.c:326
+#: apps/hockey/main/hk_menu.c:328
+normal	medium
+
+#: apps/hockey/main/hk_menu.c:253
+#: apps/hockey/main/hk_menu.c:326
+difícil	hard
+
+#: apps/hockey/main/hk_menu.c:253
+#: apps/hockey/main/hk_menu.c:326
+crack	ace
+
+#: apps/hockey/main/hk_menu.c:262
+Mesa: %s	Table: %s
+
+#: apps/hockey/main/hk_menu.c:266
+Por tiempo	By time
+
+#: apps/hockey/main/hk_menu.c:266
+A goles	To goals
+
+#: apps/hockey/main/hk_menu.c:267
+%d minutos	%d minutes
+
+#: apps/hockey/main/hk_menu.c:268
+El primero a %d	First to %d
+
+#: apps/hockey/main/hk_menu.c:283
+Más mesas: bajalas de la Tienda	More tables: get them from the Store
+
+#: apps/hockey/main/hk_menu.c:295
+La placa juega en	The board plays at
+
+#: apps/hockey/main/hk_menu.c:306
+Cada uno juega con un dedo en su mitad	Each one plays with a finger in their half
+
+#: apps/hockey/main/hk_menu.c:311
+¡A jugar!	Play!
+
+#: apps/hockey/main/hk_menu.c:326
+Dificultad	Difficulty
+
+#: apps/hockey/main/hk_menu.c:327
+Paleta	Mallet
+
+#: apps/hockey/main/hk_menu.c:327
+chica	small
+
+#: apps/hockey/main/hk_menu.c:327
+mediana	medium
+
+#: apps/hockey/main/hk_menu.c:327
+grande	large
+
+#: apps/hockey/main/hk_menu.c:328
+Disco	Puck
+
+#: apps/hockey/main/hk_menu.c:328
+lento	slow
+
+#: apps/hockey/main/hk_menu.c:328
+rápido	fast
+
+#: apps/hockey/main/hk_menu.c:329
+Sonido	Sound
+
+#: apps/hockey/main/hk_menu.c:329
+#: apps/hockey/main/hk_menu.c:330
+no	off
+
+#: apps/hockey/main/hk_menu.c:329
+#: apps/hockey/main/hk_menu.c:330
+sí	on
+
+#: apps/hockey/main/hk_menu.c:330
+Ruido del aire	The air's hum
+
+#: apps/hockey/main/hk_scene.c:47
+¡GOL!	GOAL!
+
+#: apps/hockey/main/hk_scene.c:48
+REPETICIÓN	REPLAY
+
+#: apps/hockey/main/hk_scene.c:49
+FINAL	GAME OVER
+
+#: apps/hockey/main/hk_scene.c:50
+GOL DE ORO	GOLDEN GOAL
+
+#: apps/hockey/main/hk_scene.c:51
+Mové la paleta con el dedo	Move the mallet with your finger
+
+#: apps/hockey/main/hk_scene.c:52
+Jugador 1	Player 1
+
+#: apps/hockey/main/hk_scene.c:52
+Vos	You
+
+#: apps/hockey/main/hk_scene.c:53
+Jugador 2	Player 2
+
+#: apps/hockey/main/hk_scene.c:53
+La placa	The board
+
+#: apps/hockey/main/hk_scene.c:54
+GANÓ EL JUGADOR 1	PLAYER 1 WINS
+
+#: apps/hockey/main/hk_scene.c:54
+¡GANASTE!	YOU WIN!
+
+#: apps/hockey/main/hk_scene.c:55
+GANÓ EL JUGADOR 2	PLAYER 2 WINS
+
+#: apps/hockey/main/hk_scene.c:55
+GANÓ LA PLACA	THE BOARD WINS
+
+#: apps/hockey/main/hockey.c:448
+#: apps/hockey/main/hockey.c:469
+Sonido: sí	Sound: on
+
+#: apps/hockey/main/hockey.c:448
+#: apps/hockey/main/hockey.c:469
+Sonido: no	Sound: off
+
+#: apps/hockey/main/hockey.c:461
+Pausa	Pause
+
+#: apps/hockey/main/hockey.c:467
+Seguir	Resume
+
+#: apps/hockey/main/hockey.c:468
+Empezar de nuevo	Start again
+
+#: apps/hockey/main/hockey.c:470
+Salir al menú	Back to the menu
+
+#: apps/hockey/main/hockey.c:482
+Empate	A draw
+
+#: apps/hockey/main/hockey.c:483
+¡Ganaste!	You win!
+
+#: apps/hockey/main/hockey.c:483
+Ganó la placa	The board wins
+
+#: apps/hockey/main/hockey.c:484
+¡Ganó el jugador 1!	Player 1 wins!
+
+#: apps/hockey/main/hockey.c:484
+¡Ganó el jugador 2!	Player 2 wins!
+
+#: apps/hockey/main/hockey.c:490
+Revancha	Rematch
+
+#: apps/hockey/main/hockey.c:491
+Menú	Menu
+
+#: apps/hockey/main/hockey.c:588
+Prendiendo el aire...	Turning the air on...
+
+#: apps/hockey/main/hockey.c:658
+No se pudo cargar la mesa	The table could not be loaded

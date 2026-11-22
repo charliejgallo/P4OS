@@ -44,6 +44,7 @@ by touch never sees it. Board games put a cursor on the board the same way.
 | Flappy | A flaps, starts and retries · START pause |
 | Gemas | D-pad moves a frame · A picks a jewel, a direction swaps it · START pause |
 | Golf | stick turns the line by speed, D-pad by 0.25° · L/R club · A is every tap of the swing and the putt · B from the 3D view back to the map · up/down move the putt's marker · START pause |
+| Hockey de mesa | D-pad or stick pushes the mallet · A held pushes it fast (a shot) · B takes it back to the goal · START pause; a second gamepad plays player 2, with its directions turned (they sit at the other end) · against the board both gamepads play player 1 · menus: D-pad and A, B back, START plays |
 | Juegos de mesa | D-pad moves a frame from cell to cell · A takes a piece and sets it down (and rolls the dice) · B puts it back · L/R undo/redo · START the menu; in the sheets and panels the D-pad and A, B back |
 | Lua (Atrapa) | D-pad or stick steers the basket · A or START plays · START pause; in the app, the D-pad goes down the scripts and A opens one |
 | Metegol | D-pad or stick moves the rods · A kicks · B raises the figures · L/R choose the rod when they go one at a time · START pause; a second gamepad plays player 2 · menus: D-pad and A, B back, START plays |

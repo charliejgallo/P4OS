@@ -75,7 +75,7 @@ is not a problem, and the Store does not touch it without being asked.
   (two taps), does it for all of them in one job: the catalogue's package
   over each, what the apps saved left alone, the packs the card has not
   downloaded again, and the extras that were copied with them kept as
-  theirs when they are the catalogue's (since 0.31.1).
+  theirs when they are the catalogue's (since 0.32.0).
 - A `.so` that no catalogue lists (a build of your own, an app that is not
   published) is listed too, by its file's name, as copied by hand. The
   Store knows nothing else about it and offers nothing to do with it.

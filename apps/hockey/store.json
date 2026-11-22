@@ -1,0 +1,42 @@
+{
+ "cat": "juegos",
+ "about": {
+  "es": "Un hockey de mesa en 3D, de pie: uno contra la placa o dos en la misma pantalla, cada uno con un dedo en su mitad, con tres mesas para elegir.",
+  "en": "Table air hockey in 3D, upright: one against the board or two on the same screen, each with a finger in their half, and three tables to choose from."
+ },
+ "desc": {
+  "es": "La paleta sigue al dedo, tan rápido como se mueve una paleta y sin pasar la línea del medio. El disco flota sobre el aire, casi no frena, rebota en las bandas y sale con la velocidad del golpe. Contra la placa se juega con un dedo; de a dos, cada jugador pone el suyo en su mitad y juegan a la vez. También se juega con joystick USB, uno por jugador: la cruz o la palanca mueven la paleta, A la empuja fuerte, B la vuelve al arco y START pausa.\n\nLa placa juega en cuatro niveles, de fácil a crack. Los partidos son al primero que llega a 3, 5, 7 o 10 goles, o por tiempo, de uno a diez minutos, con gol de oro si terminan empatados. Cada gol trae su repetición, y el disco lo saca el que lo recibió. En Ajustes se elige el tamaño de la paleta, la velocidad del disco y si suena el aire.\n\nLa mesa clásica de bar viene con el juego; la de neón, con la estela del disco, y la pista de hielo son paquetes aparte que la Tienda baja si los elegís.",
+  "en": "The mallet follows your finger, as fast as a mallet moves and never past the centre line. The puck floats on air, hardly slows down, bounces off the rails and leaves with the speed of the hit. Against the board you play with one finger; with two players each one puts theirs in their own half and both play at once. It also plays with USB gamepads, one a player: the D-pad or the stick moves the mallet, A pushes it hard, B takes it back to the goal and START pauses.\n\nThe board plays at four levels, from easy to ace. Matches go to the first to reach 3, 5, 7 or 10 goals, or by time, from one to ten minutes, with a golden goal if they end level. Every goal comes with its replay, and the side that took it serves. Settings choose the mallet's size, the puck's speed and whether the air hums.\n\nThe classic bar table comes with the game; the neon one, where the puck leaves a trail, and the ice rink are separate packs the Store downloads if you pick them."
+ },
+ "tags": [
+  "3d"
+ ],
+ "shots": [
+  "app-hockey.jpg",
+  "app-hockey-neon.jpg",
+  "app-hockey-hielo.jpg",
+  "app-hockey-menu.jpg"
+ ],
+ "packs": [
+  {
+   "file": "hockey_p4.pak",
+   "need": true
+  },
+  {
+   "file": "hockey_neon_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mesa: Neón",
+    "en": "Table: Neon"
+   }
+  },
+  {
+   "file": "hockey_hielo_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Mesa: Hielo",
+    "en": "Table: Ice rink"
+   }
+  }
+ ]
+}

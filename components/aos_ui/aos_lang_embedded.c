@@ -3544,6 +3544,9 @@ static const char blob_en__sistema_lang[] =
     "Tocá otra vez: reemplaza %d apps\tTap again: it replaces %d apps\n"
     "Reemplazarlas por las de la Tienda\tReplace them with the Store's\n"
     "Reemplazando\tReplacing\n"
+    "Hockey de mesa\tAir Hockey\n"
+    "Traductor\tTranslator\n"
+    "Oficina\tOffice\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -7080,6 +7083,9 @@ static const char blob_de__sistema_lang[] =
     "Tocá otra vez: reemplaza %d apps\tNochmal tippen: ersetzt %d Apps\n"
     "Reemplazarlas por las de la Tienda\tDurch die aus dem Store ersetzen\n"
     "Reemplazando\tErsetze\n"
+    "Hockey de mesa\tAirhockey\n"
+    "Traductor\tÜbersetzer\n"
+    "Oficina\tBüro\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -7087,7 +7093,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3529, 0, files_en, 1 },
-    { "de", "Deutsch", 3529, 0, files_de, 1 },
+    { "en", "English", 3532, 0, files_en, 1 },
+    { "de", "Deutsch", 3532, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

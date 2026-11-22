@@ -1,0 +1,17 @@
+{
+ "cat": "crear",
+ "about": {
+  "es": "Planillas y textos en la placa: abre y edita xlsx, ods y csv con fórmulas, y archivos de texto, código y registros, sin romper lo que no entiende.",
+  "en": "Spreadsheets and texts on the board: opens and edits xlsx, ods and csv with formulas, and text, code and log files, without breaking what it does not understand."
+ },
+ "desc": {
+  "es": "Abre las planillas de Excel (xlsx), de LibreOffice (ods) y los csv, con todas sus hojas, las filas y columnas inmovilizadas, celdas combinadas, colores y formatos de número. Se editan celdas y fórmulas (suma, promedio, mínimo, máximo, contar, si, buscarv, redondear, fechas: más de sesenta, también en castellano), se ordena, se filtra, se cambia el ancho de las columnas y el formato de los números, con deshacer y rehacer. Acostada entran más columnas, y dos dedos acercan o alejan.\n\nAl guardar sólo se reescribe lo que cambió: el resto del archivo, con sus gráficos, comentarios, imágenes y macros, queda tal cual, y lo que la app no calcula lo recalcula el programa de la computadora al abrirlo. Una planilla también se guarda como copia en otro formato: de csv a xlsx, de xlsx a ods.\n\nEl editor de texto abre archivos grandes, con números de línea, colores para el código, json, xml, markdown y registros, buscar y reemplazar, y conserva la codificación y los finales de línea. Anda con un teclado USB o Bluetooth y sus atajos. Los documentos se suben y se bajan desde la página Oficina del portal.",
+  "en": "Opens Excel (xlsx) and LibreOffice (ods) spreadsheets and csv files from the card, with all their sheets, frozen rows and columns, merged cells, colours and number formats. Edit cells and formulas (sum, average, min, max, count, if, vlookup, round, dates: over sixty, in Spanish and German too), sort, filter, change column widths and number formats, with undo and redo. Turned sideways more columns fit, and two fingers zoom.\n\nSaving rewrites only what changed: the rest of the file, with its charts, comments, pictures and macros, stays as it was, and what the app does not calculate is recalculated by the computer's program when it opens it. A spreadsheet can also be saved as a copy in another format: csv to xlsx, xlsx to ods.\n\nThe text editor opens big files, with line numbers, colours for code, json, xml, markdown and logs, find and replace, and it keeps the encoding and line endings. It works with a USB or Bluetooth keyboard and its shortcuts. Documents are uploaded and downloaded from the Office page of the portal."
+ },
+ "shots": [
+  "app-oficina.png",
+  "app-oficina-formula.png",
+  "land-oficina.png",
+  "app-oficina-text.png"
+ ]
+}

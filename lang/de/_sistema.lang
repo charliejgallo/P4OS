@@ -10853,3 +10853,12 @@ Las que quedan no son iguales a las del catálogo (otra compilación, o una vers
 Tocá otra vez: reemplaza %d apps	Nochmal tippen: ersetzt %d Apps
 Reemplazarlas por las de la Tienda	Durch die aus dem Store ersetzen
 Reemplazando	Ersetze
+
+#: apps/hockey  (nombre de app)
+Hockey de mesa	Airhockey
+
+#: apps/traductor  (nombre de app)
+Traductor	Übersetzer
+
+#: apps/oficina  (nombre de app)
+Oficina	Büro

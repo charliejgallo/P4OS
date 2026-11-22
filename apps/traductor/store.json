@@ -1,0 +1,24 @@
+{
+ "cat": "utiles",
+ "about": {
+  "es": "Traduce texto sin red, en la placa, con paquetes de idioma que se bajan aparte: español, inglés, portugués, italiano, francés y alemán. Con red, también MyMemory o tu propio servidor.",
+  "en": "Translates text offline, on the board, with language packs downloaded separately: Spanish, English, Portuguese, Italian, French and German. Online, also MyMemory or your own server."
+ },
+ "desc": {
+  "es": "Arriba se eligen los dos idiomas y se intercambian con un toque; el texto se escribe con el teclado de la pantalla o con uno USB o Bluetooth. La traducción aparece abajo con el motor que la hizo, y se copia, se marca como favorita o se usa como texto nuevo para seguir en el otro sentido. Lo traducido queda en el historial, y los favoritos aparte.\n\nSin red traduce con modelos neuronales chicos que corren en la placa misma: cada paquete de idioma trae las dos direcciones de un par con el inglés y sus diccionarios, y tarda unos segundos por oración. Entre dos idiomas que no son el inglés pasa por el inglés. Para una palabra sola muestra además lo que dice el diccionario: sus sentidos y sus traducciones.\n\nCon red puede usar MyMemory, gratis y sin cuenta (5000 caracteres por día, diez veces más con un correo), o un LibreTranslate propio en tu red. La dirección del servidor, su clave y el correo se escriben en la página Traductor del portal, que también muestra y exporta el historial. Lo que se traduce sin red no sale de la tarjeta.",
+  "en": "Choose the two languages at the top and swap them with a tap; type the text with the on-screen keyboard or a USB or Bluetooth one. The translation appears below with the engine that made it, and can be copied, starred or used as the new text to go on the other way. What you translate stays in the history, with the favourites apart.\n\nOffline it translates with small neural models that run on the board itself: each language pack brings both directions of a pair with English and their dictionaries, and takes a few seconds a sentence. Between two languages that are not English it goes through English. For a single word it also shows what the dictionary says: its senses and translations.\n\nOnline it can use MyMemory, free and with no account (5,000 characters a day, ten times more with an e-mail), or your own LibreTranslate on your network. The server's address, its key and the e-mail are typed on the Translator page of the portal, which also shows and exports the history. What is translated offline never leaves the card."
+ },
+ "shots": [
+  "app-traductor.png",
+  "app-traductor-dict.png",
+  "app-traductor-langs.png",
+  "land-traductor.png"
+ ],
+ "packs": [
+  {"file": "traductor_es_en_p4.pak", "need": false, "name": {"es": "Idiomas: español e inglés", "en": "Languages: Spanish and English"}},
+  {"file": "traductor_pt_en_p4.pak", "need": false, "name": {"es": "Idiomas: portugués e inglés", "en": "Languages: Portuguese and English"}},
+  {"file": "traductor_it_en_p4.pak", "need": false, "name": {"es": "Idiomas: italiano e inglés", "en": "Languages: Italian and English"}},
+  {"file": "traductor_fr_en_p4.pak", "need": false, "name": {"es": "Idiomas: francés e inglés", "en": "Languages: French and English"}},
+  {"file": "traductor_de_en_p4.pak", "need": false, "name": {"es": "Idiomas: alemán e inglés", "en": "Languages: German and English"}}
+ ]
+}

@@ -65,6 +65,7 @@ hardware has to replace them.
 | musl's double-precision maths (`lib/libm_dbl`), **re1.5** (Russ Cox, Paul Sokolovsky), **uzlib** (Jørgen Ibsen, Paul Sokolovsky), **crypto-algorithms** SHA-256 (Brad Conte) | **vendored** with MicroPython, `apps/python/main/upy/lib/` | MIT; BSD-3-Clause; Zlib; public domain | as MicroPython carries them |
 | **requests 1.1.1** and **mip 0.5.0** of **micropython-lib** (`90028be`) | **vendored** and frozen into `python.so`, `apps/python/frozen/` | MIT | one change in `requests` (reading a body whole), marked `P4OS:`; `apps/python/frozen/VENDOR.md` |
 | compact AES (forward cipher), after **tiny-AES-c** (kokke) | **vendored**, `apps/rf/main/aes.c` | public domain (the Unlicense) | the standard AES S-box and schedule, generalised to a runtime key size, for `rf_mesh.c`'s AES-CTR (reading a Meshtastic channel the user has the key to) |
+| **miniz**'s tinfl (Rich Geldreich), renamed `of_tinfl_decompress` | **vendored**, `apps/oficina/third/` | MIT | the same copy the Emulador and VNC carry, for reading `.xlsx` and `.ods`; the notice stays in the file |
 
 The firmware that loads `doom.so`, `duke3d.so`, `emulador.so`, `rf.so` and `cas.so` stays MIT.
 The GPL applies to the Doom, Duke Nukem 3D, Emulador, RF and CAS apps and to any simulator build
@@ -92,7 +93,7 @@ The LED Strips app's Fire effect follows Mark Kriegsman's Fire2012 algorithm
 ## Data and services
 
 Every 3D model, art pack, sprite, tune and translation in this project is
-the author's own. The packs are rendered from the Blender scripts in
+the author's own, except the data below. The packs are rendered from the Blender scripts in
 `apps/*/tools/blender/` and are not in git. No map tiles, sounds or pictures
 from anyone else are tracked.
 
@@ -100,6 +101,15 @@ from anyone else are tracked.
   standard atomic weights; configurations, electronegativities, states,
   temperatures and densities from PubChem's periodic table (NIH, public
   domain). `apps/cas/tools/gen_elements.py` writes it.
+
+- **Traductor's language packs** (optional, downloaded by the Store, not in
+  git): Mozilla's translation models from Firefox Translations
+  (github.com/mozilla/translations), **MPL-2.0**, the weights unchanged in
+  another file format; and WikDict's dictionaries (wikdict.com, from
+  Wiktionary through DBnary), **CC BY-SA 4.0**, trimmed. Each pack carries
+  its own `license` entry with the notices.
+- **Vuelos' airports** (`vuelos_p4.pak`): OurAirports' `airports.csv`,
+  public domain.
 
 What the board fetches at runtime:
 
@@ -112,6 +122,14 @@ What the board fetches at runtime:
 - **Radio:** the stations' own streams. Search goes to radio-browser.info, and
   covers come from the iTunes Search API. Streams and logos belong to their
   stations.
+- **Aircraft (Vuelos):** airplanes.live, adsb.lol or the OpenSky Network,
+  as the person chooses, each within its request limits, or an ADS-B
+  receiver of their own; routes, when known, from the same source.
+- **Quotes (Bolsa):** ArgentinaDatos, CoinGecko and dolarapi.com without a
+  key; Twelve Data, Stooq, Alpha Vantage or Finnhub with the person's own
+  key. The source is shown with the data.
+- **Translation online (Traductor):** MyMemory, or a LibreTranslate server
+  of the person's own.
 
 ## The case
 

@@ -1,6 +1,22 @@
 # Changelog
 
-## 0.31.1 — not released yet
+## 0.32.0 — not released yet
+
+- **Three new apps in the Store**, from the card (no firmware needed):
+  - **Hockey de mesa** (Air Hockey): air hockey in 3D, upright, against the
+    board at four levels or two at once, a finger each in their half; the
+    puck's path is swept, so a fast mallet never lets it through. The bar
+    table comes with it; neon and ice are optional packs.
+  - **Traductor** (Translator): translates text **with no network**, on the
+    board, with optional language packs (Spanish, Portuguese, Italian,
+    French and German, each paired with English, ~45-60 MB each): small
+    neural models from Firefox Translations run by the app's own engine,
+    and a dictionary for single words. Online, MyMemory or a
+    LibreTranslate of your own.
+  - **Oficina** (Office), first phase: spreadsheets (xlsx, ods, csv) with
+    over sixty formulas, sorting and filters, saved without touching what
+    the app does not understand; and a text editor for big files, code and
+    logs.
 
 - **The Store replaces every app copied by hand in one go.** "Let the
   Store manage them" only takes the apps whose file is byte for byte the

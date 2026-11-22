@@ -10853,3 +10853,12 @@ Las que quedan no son iguales a las del catálogo (otra compilación, o una vers
 Tocá otra vez: reemplaza %d apps	Tap again: it replaces %d apps
 Reemplazarlas por las de la Tienda	Replace them with the Store's
 Reemplazando	Replacing
+
+#: apps/hockey  (nombre de app)
+Hockey de mesa	Air Hockey
+
+#: apps/traductor  (nombre de app)
+Traductor	Translator
+
+#: apps/oficina  (nombre de app)
+Oficina	Office

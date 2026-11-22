@@ -1,0 +1,195 @@
+# amoledos-lang 1   es -> de
+# demo.hockey.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/hockey/main/hk_menu.c:181
+Hockey de mesa	Airhockey
+
+#: apps/hockey/main/hk_menu.c:183
+Air hockey en 3D	Airhockey in 3D
+
+#: apps/hockey/main/hk_menu.c:186
+#: apps/hockey/main/hk_menu.c:278
+Contra la placa	Gegen das Board
+
+#: apps/hockey/main/hk_menu.c:187
+#: apps/hockey/main/hk_menu.c:278
+Dos jugadores	Zwei Spieler
+
+#: apps/hockey/main/hk_menu.c:188
+#: apps/hockey/main/hk_menu.c:360
+Ajustes	Einstellungen
+
+#: apps/hockey/main/hk_menu.c:190
+Falta el paquete del juego: bajalo de la Tienda	Das Spielpaket fehlt: lade es im Store
+
+#: apps/hockey/main/hk_menu.c:253
+#: apps/hockey/main/hk_menu.c:326
+fácil	leicht
+
+#: apps/hockey/main/hk_menu.c:253
+#: apps/hockey/main/hk_menu.c:326
+#: apps/hockey/main/hk_menu.c:328
+normal	mittel
+
+#: apps/hockey/main/hk_menu.c:253
+#: apps/hockey/main/hk_menu.c:326
+difícil	schwer
+
+#: apps/hockey/main/hk_menu.c:253
+#: apps/hockey/main/hk_menu.c:326
+crack	Profi
+
+#: apps/hockey/main/hk_menu.c:262
+Mesa: %s	Tisch: %s
+
+#: apps/hockey/main/hk_menu.c:266
+Por tiempo	Nach Zeit
+
+#: apps/hockey/main/hk_menu.c:266
+A goles	Auf Tore
+
+#: apps/hockey/main/hk_menu.c:267
+%d minutos	%d Minuten
+
+#: apps/hockey/main/hk_menu.c:268
+El primero a %d	Wer zuerst %d hat
+
+#: apps/hockey/main/hk_menu.c:283
+Más mesas: bajalas de la Tienda	Mehr Tische: lade sie im Store
+
+#: apps/hockey/main/hk_menu.c:295
+La placa juega en	Das Board spielt
+
+#: apps/hockey/main/hk_menu.c:306
+Cada uno juega con un dedo en su mitad	Jeder spielt mit einem Finger in seiner Hälfte
+
+#: apps/hockey/main/hk_menu.c:311
+¡A jugar!	Los!
+
+#: apps/hockey/main/hk_menu.c:326
+Dificultad	Schwierigkeit
+
+#: apps/hockey/main/hk_menu.c:327
+Paleta	Schläger
+
+#: apps/hockey/main/hk_menu.c:327
+chica	klein
+
+#: apps/hockey/main/hk_menu.c:327
+mediana	mittel
+
+#: apps/hockey/main/hk_menu.c:327
+grande	groß
+
+#: apps/hockey/main/hk_menu.c:328
+Disco	Puck
+
+#: apps/hockey/main/hk_menu.c:328
+lento	langsam
+
+#: apps/hockey/main/hk_menu.c:328
+rápido	schnell
+
+#: apps/hockey/main/hk_menu.c:329
+Sonido	Ton
+
+#: apps/hockey/main/hk_menu.c:329
+#: apps/hockey/main/hk_menu.c:330
+no	aus
+
+#: apps/hockey/main/hk_menu.c:329
+#: apps/hockey/main/hk_menu.c:330
+sí	an
+
+#: apps/hockey/main/hk_menu.c:330
+Ruido del aire	Luftgeräusch
+
+#: apps/hockey/main/hk_scene.c:47
+¡GOL!	TOR!
+
+#: apps/hockey/main/hk_scene.c:48
+REPETICIÓN	WIEDERHOLUNG
+
+#: apps/hockey/main/hk_scene.c:49
+FINAL	SPIELENDE
+
+#: apps/hockey/main/hk_scene.c:50
+GOL DE ORO	GOLDEN GOAL
+
+#: apps/hockey/main/hk_scene.c:51
+Mové la paleta con el dedo	Bewege den Schläger mit dem Finger
+
+#: apps/hockey/main/hk_scene.c:52
+Jugador 1	Spieler 1
+
+#: apps/hockey/main/hk_scene.c:52
+Vos	Du
+
+#: apps/hockey/main/hk_scene.c:53
+Jugador 2	Spieler 2
+
+#: apps/hockey/main/hk_scene.c:53
+La placa	Das Board
+
+#: apps/hockey/main/hk_scene.c:54
+GANÓ EL JUGADOR 1	SPIELER 1 GEWINNT
+
+#: apps/hockey/main/hk_scene.c:54
+¡GANASTE!	GEWONNEN!
+
+#: apps/hockey/main/hk_scene.c:55
+GANÓ EL JUGADOR 2	SPIELER 2 GEWINNT
+
+#: apps/hockey/main/hk_scene.c:55
+GANÓ LA PLACA	DAS BOARD GEWINNT
+
+#: apps/hockey/main/hockey.c:448
+#: apps/hockey/main/hockey.c:469
+Sonido: sí	Ton: an
+
+#: apps/hockey/main/hockey.c:448
+#: apps/hockey/main/hockey.c:469
+Sonido: no	Ton: aus
+
+#: apps/hockey/main/hockey.c:461
+Pausa	Pause
+
+#: apps/hockey/main/hockey.c:467
+Seguir	Weiter
+
+#: apps/hockey/main/hockey.c:468
+Empezar de nuevo	Neu starten
+
+#: apps/hockey/main/hockey.c:470
+Salir al menú	Zurück zum Menü
+
+#: apps/hockey/main/hockey.c:482
+Empate	Unentschieden
+
+#: apps/hockey/main/hockey.c:483
+¡Ganaste!	Gewonnen!
+
+#: apps/hockey/main/hockey.c:483
+Ganó la placa	Das Board gewinnt
+
+#: apps/hockey/main/hockey.c:484
+¡Ganó el jugador 1!	Spieler 1 gewinnt!
+
+#: apps/hockey/main/hockey.c:484
+¡Ganó el jugador 2!	Spieler 2 gewinnt!
+
+#: apps/hockey/main/hockey.c:490
+Revancha	Revanche
+
+#: apps/hockey/main/hockey.c:491
+Menú	Menü
+
+#: apps/hockey/main/hockey.c:588
+Prendiendo el aire...	Die Luft geht an...
+
+#: apps/hockey/main/hockey.c:658
+No se pudo cargar la mesa	Der Tisch ließ sich nicht laden

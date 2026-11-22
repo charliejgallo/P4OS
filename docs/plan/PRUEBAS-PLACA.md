@@ -174,6 +174,23 @@ de la 0.30.0: se pone al día al abrir la Tienda o Ajustes → Actualización.
 - [ ] Abrir algunas de las reemplazadas y ver que lo guardado sigue
       (puntajes, proyectos, notas).
 
+### Hockey de mesa, Traductor y Oficina (2026-11-22, para la 0.32.0)
+
+En `main` desde el 2026-11-22, sin publicar; sólo probadas en el simulador.
+
+- [ ] **Traductor: medir el motor sin red en la placa**, con el usuario y
+      la sesión de firmware: el plan paso a paso, con los `curl` para pegar
+      texto y tocar Traducir, en `docs/internal/PRUEBA-TRADUCTOR-PLACA.md`.
+      Lo de hoy es estimado desde la Mac: 0,4-0,7 s una oración corta y
+      ~1,8 s una larga con los dos núcleos, más ~1,3 s la primera vez;
+      11,3 MB de PSRAM por dirección. El pack es-en (46,6 MB) y el pt-en
+      están armados en el worktree `app-traductor-3acfc4`.
+- [ ] Hockey de mesa: los fps del registro, y los dos dedos a la vez a
+      mano (el portal toca de a uno). Ajustar los niveles con el usuario,
+      como Metegol.
+- [ ] Oficina: abrir y guardar un xlsx y un ods en la placa y volver a
+      abrirlos en la computadora; los tiempos de abrir una planilla grande.
+
 ### Las apps nuevas de noviembre (2026-11-21, publicadas en la 0.31.0)
 
 Seis apps de tarjeta en `main` desde el 2026-11-21 y en la Tienda desde la
