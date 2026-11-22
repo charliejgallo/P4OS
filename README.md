@@ -983,10 +983,13 @@ and their art comes in packs.
   Portuguese, Italian, French and German, each with English), plus a
   dictionary for single words; online, MyMemory or a LibreTranslate of
   your own.
-- **Office** ([apps/oficina/README.md](apps/oficina/README.md)), first
-  phase: xlsx, ods and csv spreadsheets with formulas, saved without
-  touching what the app does not understand, and a text editor for big
-  files, code and logs. Documents, PDF and slides are its next phases.
+- **Office** ([apps/oficina/README.md](apps/oficina/README.md)): edits
+  docx and odt documents, xlsx, ods and csv spreadsheets with formulas, and
+  texts, code and logs of any size, saving without touching what it does
+  not understand; reads PDF (as text set to the screen, or its pages drawn
+  as they print), pptx and odp slides with a presenting mode, the Office
+  97-2003 binaries, RTF, EPUB, mail and more, and walks ZIP and TAR as
+  folders; writes PDF. The Files app opens documents in it.
 - **Studio** ([apps/estudio/README.md](apps/estudio/README.md)): a
   synthesizer of three parts, a drum machine and a sequencer, played with
   several fingers on a keyboard, a grid locked to a scale or eight pads;

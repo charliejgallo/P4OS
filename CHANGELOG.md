@@ -1,6 +1,11 @@
 # Changelog
 
-## 0.32.0 — not released yet
+## 0.32.0 — 2026-11-22
+
+Four new apps: an office suite, a translator with no network, a studio to
+play live and air hockey. A board on 0.31.0 takes the firmware first
+(Settings → Update), then the apps (Store → Updates): Estudio and Vuelos
+with adsb.lol need this firmware.
 
 - **Four new apps in the Store**, from the card (Studio needs this
   firmware; the other three, none):
@@ -31,7 +36,8 @@
       Pages, Numbers and Keynote; walks ZIP, CBZ, TAR and GZ as folders.
     - **Writes PDF** from a document, a sheet or a text.
     - On the board: its 55 sample files open, a PDF page is drawn in 66 to
-      515 ms, and 9.5 to 14 MB of PSRAM stay free with a document open.
+      515 ms, and 9.5 to 14 MB of PSRAM stay free with a document open;
+      tried by hand by the user after that, and found right.
 
   - **Estudio** (Studio): a synthesizer of three parts (two oscillators and
     a filter, or two-operator FM), a drum machine of eight tracks and a

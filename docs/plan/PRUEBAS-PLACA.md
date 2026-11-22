@@ -322,10 +322,13 @@ En `main` desde el 2026-11-22, sin publicar; sólo probadas en el simulador.
       entre 9,5 y 14 MB de PSRAM libres según el documento. Un docx
       guardado como PDF en la placa se abre bien en la Mac. El detalle, en
       `apps/oficina/PRUEBAS-PLACA.md`, sección 0.
-- [ ] Oficina, lo que queda a mano: desplazar y hacer zoom en las páginas
-      de PDF, presentar diapositivas, el pellizco, editar y guardar una
-      planilla y un documento y abrirlos en la computadora, el teclado
-      físico. El portal no llega a los gestos ni a los campos de la app.
+- [x] **Oficina, a mano** (2026-11-22, el usuario, con
+      `v0.31.0-49-ge594fae`): la probó en la pantalla después de la pasada
+      del portal y dijo "todo ok". No detalló qué recorrió; lo que el
+      portal no alcanzaba era desplazar y hacer zoom en las páginas de PDF,
+      presentar diapositivas, el pellizco, y editar y guardar.
+- [ ] Oficina, sin confirmar una por una: abrir en la computadora una
+      planilla y un documento guardados en la placa, y el teclado físico.
 
 ### Las apps nuevas de noviembre (2026-11-21, publicadas en la 0.31.0)
 
