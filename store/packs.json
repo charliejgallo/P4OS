@@ -84,6 +84,71 @@
   "size": 8289618,
   "sha256": "1da5fb3b4f682c4bab066033afe6770ad6573d4f88f9a35603004bc5e22a669c"
  },
+ "mesa_marmol_p4.pak": {
+  "tag": "v0.30.0",
+  "size": 2490003,
+  "sha256": "4807d5dc5959b0673654bba4d4907caacaab7b494ed2c9e10ae59ae175c3a951"
+ },
+ "mesa_metal_p4.pak": {
+  "tag": "v0.30.0",
+  "size": 1067297,
+  "sha256": "3fe58420341db89034ea4dd1bec9501529469c313aad47ec0e661977b924bf33"
+ },
+ "mesa_p4.pak": {
+  "tag": "v0.30.0",
+  "size": 3328060,
+  "sha256": "889d97fbff423a91dccafc3edb6d408d7aed17c26ac123beab04a9db498d2523"
+ },
+ "mesa_vidrio_p4.pak": {
+  "tag": "v0.30.0",
+  "size": 1138497,
+  "sha256": "ff8a92d9a6e90c47729d521c0c3a2111afc76a74c96f2770cf8497ea51290c2e"
+ },
+ "metegol_avella_celeste_p4.pak": {
+  "tag": "v0.30.0",
+  "size": 1424999,
+  "sha256": "cb726771b5a24494d2a151c08012eb898ac8c3d50bae2622de7abb21a9a978bb"
+ },
+ "metegol_avella_rojo_p4.pak": {
+  "tag": "v0.30.0",
+  "size": 1203851,
+  "sha256": "048fef2b4d2281b5553547d775eb9eb3dfe72511e515d8a1155750a9b3fb5ed7"
+ },
+ "metegol_londres_p4.pak": {
+  "tag": "v0.30.0",
+  "size": 1411838,
+  "sha256": "2364f63f1acc9e3b42d77d9b692fd803a97051b65ec4a4b9a37d0dd394ccc146"
+ },
+ "metegol_madrid_p4.pak": {
+  "tag": "v0.30.0",
+  "size": 1271156,
+  "sha256": "7d3ae4b7041adc2577425114d77bb38d4d445f8d63a579143496cec19fe8f792"
+ },
+ "metegol_mexico_p4.pak": {
+  "tag": "v0.30.0",
+  "size": 1459991,
+  "sha256": "a2cbca86f8e1f582b954ad65919d777879e72e9c3e73b45fe31db2ae0b5d158f"
+ },
+ "metegol_munich_p4.pak": {
+  "tag": "v0.30.0",
+  "size": 1054178,
+  "sha256": "2f4a72b7cec947d8da6578be092d1c045c3f6715376e88d110036ea77dba57f2"
+ },
+ "metegol_p4.pak": {
+  "tag": "v0.30.0",
+  "size": 4129018,
+  "sha256": "625b45c31b238b4b83c7545e0457524e3ceb485421c72733e51ff0c706162e66"
+ },
+ "metegol_rio_p4.pak": {
+  "tag": "v0.30.0",
+  "size": 1383754,
+  "sha256": "e0d6d3a5267a946e9d155193170c965810c5661ca067978b4621d9c780409513"
+ },
+ "metegol_tokio_p4.pak": {
+  "tag": "v0.30.0",
+  "size": 1230143,
+  "sha256": "aaa9dd3c0ab5b52f8b501f63d858a1029ae29579d4dd012415909a5e56ef695d"
+ },
  "mila_p4.pak": {
   "tag": "v0.28.0",
   "size": 7500000,
@@ -139,9 +204,19 @@
   "size": 3092480,
   "sha256": "2bcddba6fb38a64f4e46fb24d2a747a1d4b57d8449eae5406d3f179516fdeaaf"
  },
+ "sudoku_p4.pak": {
+  "tag": "v0.30.0",
+  "size": 3532955,
+  "sha256": "d001b9e54fb1d1c6dabcdfb6738401ddcd0dad5d74f2ffb8735f96c92a797a01"
+ },
  "turbo_p4.pak": {
   "tag": "v0.28.0",
   "size": 9723991,
   "sha256": "1d00b52352b5e0bf1b20d71e34fb7fdc7b97cf82c720159f327d4c41d1233f99"
+ },
+ "vuelos_p4.pak": {
+  "tag": "v0.30.0",
+  "size": 939608,
+  "sha256": "dab41cb483efab156f2b01910f59df9437e85a02bb6836a9155e6f4c7005f000"
  }
 }
