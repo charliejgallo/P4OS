@@ -311,8 +311,17 @@ En `main` desde el 2026-11-22, sin publicar; sólo probadas en el simulador.
       comparaba sin contar las fotos del fondo: corregido, sin instalar.
 - [ ] Hockey de mesa, lo que queda: los dos dedos a la vez a mano, las
       otras dos mesas, y ajustar los niveles con el usuario, como Metegol.
-- [ ] Oficina: abrir y guardar un xlsx y un ods en la placa y volver a
-      abrirlos en la computadora; los tiempos de abrir una planilla grande.
+- [x] **Oficina, las siete fases, primera pasada en la placa**
+      (2026-11-22, `v0.31.0-35-g5e95c18`, desde el portal): los 55
+      archivos de ejemplo abren, sin caídas ni falta de memoria. Las
+      páginas de PDF dibujadas tardan 66 a 515 ms cada una y la app deja
+      entre 9,5 y 14 MB de PSRAM libres según el documento. Un docx
+      guardado como PDF en la placa se abre bien en la Mac. El detalle, en
+      `apps/oficina/PRUEBAS-PLACA.md`, sección 0.
+- [ ] Oficina, lo que queda a mano: desplazar y hacer zoom en las páginas
+      de PDF, presentar diapositivas, el pellizco, editar y guardar una
+      planilla y un documento y abrirlos en la computadora, el teclado
+      físico. El portal no llega a los gestos ni a los campos de la app.
 
 ### Las apps nuevas de noviembre (2026-11-21, publicadas en la 0.31.0)
 

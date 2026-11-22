@@ -8,6 +8,54 @@ qué probar fase por fase, qué medir y qué falta del lado del firmware para
 publicarla. El detalle técnico de cada fase está en el
 [README](README.md) (secciones "Phase N" y "Checking phase N").
 
+## 0. Resultado de la primera pasada en la placa (2026-11-22)
+
+Hecha por la sesión de firmware con el firmware `v0.31.0-35-g5e95c18`, la
+rama mergeada con `main` (`oficina-032`), el pack de fuentes y los 55
+archivos de `samples_all.sh`, todo manejado desde el portal.
+
+- **Los 55 archivos abren.** Ninguna caída, ningún "no memory", ningún
+  reinicio en 21 minutos de uso. Cada uno se miró en una captura: las
+  planillas con sus formatos, los documentos con tabla, imagen (decodificada
+  por el HAL) y nota al pie, los lectores de la fase 3, los comprimidos
+  como carpetas (también con subcarpetas), los PDF como texto, las
+  presentaciones y los binarios de Office 97-2003.
+- **PDF cifrados:** RC4 abre solo; AES-128 y AES-256 con su contraseña
+  tecleada en el teclado de la app; una equivocada dice "That is not the
+  password" y vuelve a la lista.
+- **Páginas de PDF dibujadas (fase 7):** `clasico.pdf` 128 y 146 ms por
+  página (688×974), `cairo.pdf` 66, `quartz.pdf` 98, `fuentes.pdf` 166,
+  `imagenes.pdf` 166, `dibujo.pdf` 278, `escaneo.pdf` 515 ms. En la Mac
+  eran 3 a 50. Se ven como en el simulador.
+- **Memoria:** el inicio tiene 15 014 KB de PSRAM libres; con la app
+  abierta 14 080; con `registro.log` (4 MB) 9 497; con páginas dibujadas
+  entre 10 702 y 12 896. Vuelve después de cada documento. La RAM interna
+  no se mueve (203 KB), salvo acostada (179). Al salir el sistema la deja
+  en segundo plano: retiene 905 KB (las fuentes).
+- **PDF escrito por la placa:** `informe.docx` guardado como PDF y bajado a
+  la Mac: una página, con títulos, colores, lista, tabla, imagen y nota al
+  pie.
+- **Acostada:** la lista se reacomoda y vuelve.
+
+Lo que el portal no pudo manejar, y queda para la mano:
+
+- **Todo lo que es gesto:** desplazar y hacer zoom en las páginas de PDF,
+  el doble toque, tocar una diapositiva para presentar, el pellizco. La app
+  los lee por `aos_gesture_attach`, que toma los dedos del panel y no ve
+  los toques del portal (le pasa también a Mapas).
+- **Pegar texto desde el portal** (`POST /api/clip` con `paste`) no llega a
+  los campos de la app, que usa el teclado y los diálogos de Notas: el
+  texto se tecleó tocando las teclas.
+- Editar y guardar (celdas, párrafos), ordenar y filtrar, Buscar, el
+  índice, "Ver como árbol", extraer de un comprimido, las otras copias
+  (odt, docx, txt), el "+" de archivos nuevos, el teclado físico, la copia
+  "(sin guardar)" al ser cerrada por el sistema, andar sin el pack, y la
+  vista de páginas con el worker ocupado por otra app.
+
+Una cosa a mirar: en `fuentes.pdf` la segunda línea (TrueType simbólica,
+cmap 3,0) sale "Canon guiro, 123 anos", sin tildes; las otras seis las
+traen. No se comparó con la Mac.
+
 ## 1. Qué hay
 
 Rama `claude/app-oficina-564612`, sin push ni tag:
