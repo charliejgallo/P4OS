@@ -114,8 +114,21 @@ void mg_ai_hand(mg_game_t *g, int side, mg_hand_t *h)
         if (real_rel < -30.0f && g->vx * dir > 700.0f && g->last_touch == side) h->raise_mask |= (uint8_t)(1u << k);
     }
 
-    /* a kick: the rod with the ball in front of one of its feet */
-    if (ai->think > 0 || g->state != MG_ST_PLAY) return;
+    /* a kick: the rod with the ball in front of one of its feet, once it
+     * has been there long enough for this hand to notice */
+    if (ai->think > 0 || g->state != MG_ST_PLAY) {
+        ai->reach_t = 0;
+        return;
+    }
+    bool any = false;
+    for (int k = 0; k < MG_SIDE_RODS && !any; k++) {
+        const mg_rod_t *r = &g->rod[mg_rod_ix(side, k)];
+        float rel = (g->bx - r->x) * dir;
+        float fy = r->base[mg_nearest_fig(r, g->by)] + r->off;
+        if (rel > -78.0f && rel < 80.0f && fabsf(g->by - fy) < MG_FOOT_HALF + MG_BALL_R + 4.0f) any = true;
+    }
+    ai->reach_t = any ? ai->reach_t + MG_DT : 0;
+    if (ai->reach_t < c->delay) return;
     for (int k = 0; k < MG_SIDE_RODS; k++) {
         mg_rod_t *r = &g->rod[mg_rod_ix(side, k)];
         if (r->kick || (h->raise_mask & (1u << k))) continue;
@@ -138,7 +151,7 @@ void mg_ai_hand(mg_game_t *g, int side, mg_hand_t *h)
         ai->plan_rod = -1;
         if (frnd(&ai->rnd) < c->miss) {
             /* a late or early swing */
-            ai->think = 0.25f;
+            ai->think = c->cool + 0.1f;
             h->kick_rod = k;
             h->kick_power = c->power * 0.6f;
             h->kick_slide = (frnd(&ai->rnd) - 0.5f) * 800.0f;
@@ -155,7 +168,7 @@ void mg_ai_hand(mg_game_t *g, int side, mg_hand_t *h)
         h->kick_power = c->power * (0.85f + 0.15f * frnd(&ai->rnd));
         h->kick_slide = clampf(slide, -1800.0f, 1800.0f);
         h->kick_spin = (frnd(&ai->rnd) - 0.5f) * 0.6f * c->aim;
-        ai->think = 0.18f;
+        ai->think = c->cool;
         return;
     }
 }

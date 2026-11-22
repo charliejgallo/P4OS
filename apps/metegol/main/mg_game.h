@@ -110,6 +110,8 @@ typedef struct {
     float aim;          /* 0..1: how well it aims (pull shots) */
     float miss;         /* chance of a kick at the wrong moment */
     float wait;         /* seconds it lets a ball sit before it plays it */
+    float delay;        /* seconds a ball must be at a foot before it kicks */
+    float cool;         /* seconds after a kick before the next */
 } mg_ai_cfg_t;
 
 #define MG_HIST 96      /* the ball's last positions, for the computer's lag */
@@ -121,6 +123,7 @@ typedef struct {
     uint32_t rnd;
     float aim_y;
     int   plan_rod;
+    float reach_t;      /* how long the ball has been at one of its feet */
 } mg_ai_t;
 
 /* one frame of the replay: 60 a second */

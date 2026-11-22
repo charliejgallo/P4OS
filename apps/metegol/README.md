@@ -114,12 +114,21 @@ eight, optional (1.1 to 1.5 MB each). Neither the renders (`assets/`) nor the pa
 apps/metegol/tools/harness.sh                  # every level against every other
 apps/metegol/tools/harness.sh -a 0 -b 3 -n 50  # easy against ace
 apps/metegol/tools/harness.sh -g 5 -v          # to five goals, a line a match
+apps/metegol/tools/harness.sh -p               # a person on a phone against each level
 ```
 
 It prints, per pairing, the wins, the goals a match, the kicks, the balls
 that sat still for three seconds and the ones served again, and the
 fastest ball. The levels come out in order (ace beats everyone, easy
-loses to everyone).
+loses to everyone). With `-p` the other side is a person on a phone, as
+near as a few lines get: one finger moves every rod, so only the rod nearest
+the ball is aimed, a quarter of a second late and a little off, and a tap
+kicks it with no aim. The levels are tuned against it, two halves of three
+minutes: the person beats easy (5.8-3.8, 9 of 12), is even with normal
+(3.7-4.1), loses to hard (3.2-8.3) and to ace (1.2-13.2). The first levels
+scored a goal every ten seconds on the user at normal: what tamed them is a
+delay before a ball at a foot is kicked, a rest after each kick, and less
+power and aim.
 
 Measured on the board (2026-11-21, Independiente v Racing in Avellaneda,
 one against the board on normal, page flipping): **60-61 frames a second

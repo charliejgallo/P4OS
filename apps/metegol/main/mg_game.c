@@ -53,12 +53,15 @@ static void snd(mg_game_t *g, int s, float vol)
 
 void mg_ai_config(mg_ai_cfg_t *c, int diff)
 {
+    /* tuned with tools/harness.sh -p against a person on a phone (one
+     * finger for every rod, a quarter of a second late): easy loses to them,
+     * normal is about even, hard wins, ace wins big */
     static const mg_ai_cfg_t T[MG_DIFF_N] = {
-        /* diff  react  err    speed   power aim   miss   wait */
-        { MG_EASY,   0.32f, 48.0f, 620.0f,  0.55f, 0.0f, 0.30f, 0.9f },
-        { MG_NORMAL, 0.15f, 18.0f, 1200.0f, 0.72f, 0.3f, 0.12f, 0.5f },
-        { MG_HARD,   0.10f, 10.0f, 1600.0f, 0.86f, 0.6f, 0.05f, 0.3f },
-        { MG_CRACK,  0.05f, 5.0f,  2200.0f, 1.00f, 0.9f, 0.01f, 0.15f },
+        /* diff      react  err    speed   power aim   miss   wait  delay  cool */
+        { MG_EASY,   0.36f, 55.0f, 520.0f,  0.38f, 0.0f, 0.45f, 0.9f, 0.40f, 0.70f },
+        { MG_NORMAL, 0.24f, 34.0f, 800.0f,  0.52f, 0.1f, 0.25f, 0.6f, 0.22f, 0.45f },
+        { MG_HARD,   0.14f, 18.0f, 1200.0f, 0.72f, 0.4f, 0.10f, 0.4f, 0.10f, 0.25f },
+        { MG_CRACK,  0.09f, 11.0f, 1600.0f, 0.82f, 0.6f, 0.05f, 0.3f, 0.07f, 0.22f },
     };
     *c = T[diff < 0 ? 0 : diff >= MG_DIFF_N ? MG_DIFF_N - 1 : diff];
 }
