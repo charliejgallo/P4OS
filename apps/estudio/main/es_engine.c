@@ -734,10 +734,26 @@ static void engine_block(es_engine_t *e, float *out)
 
 /* ---- the thread ---- */
 
+/* Whether the board gave the output for playing live (aos_hal_spk_open_low,
+ * since P4OS 0.32): the mixer then takes 96 samples at a time and not 480,
+ * and there are 10 ms after this queue where there were 40. Asked each
+ * time: the board changes its output a moment after the stream opens, and
+ * takes it back while something records. */
+static bool out_low(void)
+{
+#if defined(AOS_SIM)
+    return false;
+#else
+    return aos_hal_spk_latency_ms() <= 12;
+#endif
+}
+
 static int lat_samples(int level)
 {
-    static const int L[3] = { 480 + 96, 480 + 480, 480 + 960 };
-    return L[level < 0 ? 0 : level > 2 ? 2 : level];
+    static const int L[3]   = { 480 + 96, 480 + 480, 480 + 960 };     /* 12, 20 and 30 ms: a 10 ms mixer block and some */
+    static const int LOW[3] = { 96 + 96, 96 + 288, 96 + 864 };        /* 4, 8 and 20 ms: a 2 ms block and some */
+    level = level < 0 ? 0 : level > 2 ? 2 : level;
+    return out_low() ? LOW[level] : L[level];
 }
 
 int es_latency_ms(int level)
@@ -783,7 +799,13 @@ static void audio_main(void *arg)
             e->stats.blk_us_max = (float)us_max;
             e->stats.load_pct = 100.0f * e->stats.blk_us_avg / blk_us;
             e->stats.peak = peak;
+#if defined(AOS_SIM)
             e->stats.underruns = e->underruns;
+#else
+            /* the board's own count: this ring found short by the mixer,
+             * and the output itself late */
+            e->stats.underruns = (uint32_t)aos_hal_spk_dry();
+#endif
             e->stats.queued = q;
             blocks = us_sum = us_max = 0;
             peak = 0.0f;
@@ -1087,7 +1109,7 @@ void es_out_close(void)
     s_dev = 0;
 }
 #else
-bool es_out_open(void)                          { return aos_hal_spk_open(ES_SR); }
+bool es_out_open(void)                          { return aos_hal_spk_open_low(ES_SR); }
 int  es_out_write(const int16_t *pcm, int n)    { return aos_hal_spk_write(pcm, n); }
 int  es_out_queued(void)                        { return aos_hal_spk_queued(); }
 void es_out_close(void)                         { aos_hal_spk_close(); }

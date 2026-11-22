@@ -37,12 +37,17 @@ On the card: `estudio/*.json` (projects), `estudio/muestras/*.wav`,
   exact to one block on the Mac, `136.0 / 83.3 ms` for `135.8 / 83.2`).
 - **The thread** (`aos_hal_thread_start`, priority 6, core 0, its stack in
   PSRAM) keeps the speaker's ring at a target and sleeps 1 ms when it is
-  full. The mixer takes 480 samples (10 ms) at a time, so the targets are
-  480 + 96, 480 + 480 and 480 + 960 samples: Baja 12 ms, Normal 20 ms,
-  Segura 30 ms. On the board the I2S DMA adds 6 × 240 frames = 30 ms and the
-  mixer up to 10 ms more: **50-70 ms from a key to the speaker**, measured
-  from the code, not with a microphone. That is the HAL, not the engine
-  (the request is in `HANDOFF-NUEVAS-APPS.md`).
+  full. Since P4OS 0.32 it opens the speaker with `aos_hal_spk_open_low()`:
+  the board makes its output again with a short buffer, the mixer takes 96
+  samples (2 ms) at a time, and the targets are 96 + 96, 96 + 288 and
+  96 + 864 samples: Baja 4 ms, Normal 8 ms, Segura 20 ms, with 10 ms of
+  output after them. **14 to 18 ms from a key to the speaker** in Baja and
+  Normal, from the code and not with a microphone; before, with the usual
+  output (a 10 ms mixer block and 30 ms of I2S DMA), it was 50 to 70. When
+  the board does not give that output (something records, or the music is
+  mixed under the app) the targets are the old ones: 12, 20 and 30 ms. The
+  count of gaps the Song screen shows is the board's own
+  (`aos_hal_spk_dry()`).
 - **Memory:** everything in PSRAM, nothing internal. The delay line (2 s,
   375 KB) and the reverb (~35 KB) are walked in order, which the cache
   keeps up with; the voices and the project are small. The user's samples

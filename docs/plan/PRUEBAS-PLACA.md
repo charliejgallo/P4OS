@@ -134,7 +134,7 @@ Instalado el 2026-11-21, `v0.30.0-16-g021f337`.
       una vez, cambiando un ajuste antes de instalar.
 - [ ] La copia semanal, sola, a la semana.
 
-### El audio para tocar en vivo (rama `audio-estudio`, 2026-11-22)
+### El audio para tocar en vivo (en `main`, 2026-11-22)
 
 Pedido de Estudio. El firmware arma ahora el canal I2S y los dos códecs
 (antes lo hacía el BSP), y eso toca **todo lo que suena**. Instalado con
@@ -161,9 +161,15 @@ permiso (`v0.31.0-16-g66168c5`), probado por el portal:
       (el canal corre unos milisegundos antes de que haya qué escribir),
       no cortes mientras suena. La cuenta que ve la app ya no los incluye
       (arranca cuando el anillo volvió a llenarse): compila, sin instalar.
-- [ ] Con el oído, que nada cambió: un pitido, una canción de Música, la
-      radio, un juego con sonido, la Grabadora (grabar y escuchar), el
-      afinador. Sin ruidos nuevos al abrir o cerrar.
+- [x] Con el oído, por el usuario (2026-11-22): la música suena bien, la
+      radio también, y la Grabadora grabó un audio de prueba que se
+      escucha bien. Con eso entró a `main` (`420af9a`).
+- [ ] **Estudio en la placa, con el bus corto:** instalada a mano el
+      2026-11-22 (rama `estudio-baja-latencia`: su rama sobre `main` y
+      tres cambios en `es_engine.c` para abrir con `aos_hal_spk_open_low`).
+      Tocar el teclado y los pads: si la demora se siente; en Canción →
+      Audio, las faltas con Baja (4 ms), Normal (8) y Segura (20); que al
+      abrir y cerrar la app no haga un ruido feo.
 - [ ] Con Música sonando y "Mezclar música y apps": el tono sale por el
       camino de siempre (`latency_ms` 40) y la música no se corta.
 - [ ] Empezar a grabar con el bus corto abierto: la grabación sale entera
