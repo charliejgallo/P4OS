@@ -119,16 +119,29 @@ apps/metegol/tools/harness.sh -g 5 -v          # to five goals, a line a match
 It prints, per pairing, the wins, the goals a match, the kicks, the balls
 that sat still for three seconds and the ones served again, and the
 fastest ball. The levels come out in order (ace beats everyone, easy
-loses to everyone). The log says every 5 s on the board:
-`metegol: 60.0 fps, a frame 4.1 ms (sim 0.3, list 0.2, draw 3.6), 300 tiles, 160 things, flip 1, 11000 KB held`.
+loses to everyone).
 
-Simulator switches: `MG_PLAY=1` starts a match at once, `MG_TEAMS=boca,river`,
+Measured on the board (2026-11-21, Independiente v Racing in Avellaneda,
+one against the board on normal, page flipping): **60-61 frames a second
+while playing**, a frame 6-11 ms (220-425 tiles, 110 things); 38-47 during
+a goal and its replay, when everything moves. 12.8 MB of PSRAM held with a
+stadium loaded; when the app closes the log says what its own allocator
+still holds (0 KB). The first build ran at 35-52 and 19 in the replay:
+the crowd's whole band was redrawn up to 16 times a second, and the
+board's rods twitched after every millimetre of their error; the crowd
+now moves in eight strips one at a time and the board's hand waits for
+6 mm. The log says every 5 s:
+`metegol: 61.2 fps, a frame 6.19 ms (sim 0.20, list 0.23, draw 5.76), 219 tiles, 109 things, flip 1, 12803 KB held, ball 49,-16 state 1`.
+
+Simulator switches: `MG_PLAY=1` starts a match at once, `MG_DEMO=1` lets the board play both sides, `MG_TEAMS=boca,river`,
 `MG_STADIUM=<id>`, `MG_MODE=1` two players, `MG_DIFF=<0..3>`.
 
 ## Pending
 
-- The board: the fps with the 22 figures and the crowd, the memory with a
-  stadium loaded (11 MB in the simulator).
+- The system says 3.9 MB of PSRAM do not come back when the app closes,
+  though the app's own allocator holds nothing then: outside the app
+  (LVGL or the landscape screen), asked of the firmware.
+- The goals and the replay (38-47 fps): everything moves at once there.
 - After this: a cup (8 or 16) and a league of the twelve clubs against
   the board, with the table and the fixture saved. Table hockey (#10) is
   almost done with this engine.
