@@ -16,6 +16,8 @@
  */
 #include "es.h"
 
+#include "aos_i18n.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -58,15 +60,15 @@ const es_sample_t *es_bank_load(const char *name, char *err, size_t errn)
 {
     const es_sample_t *have = es_bank_find(name);
     if (have) return have;
-    if (s_bank_n >= ES_BANK) { set_err(err, errn, "demasiadas muestras"); return NULL; }
+    if (s_bank_n >= ES_BANK) { set_err(err, errn, N_("demasiadas muestras")); return NULL; }
     char path[320];
     es_path(path, sizeof path, "muestras", name);
     FILE *f = fopen(path, "rb");
-    if (!f) { set_err(err, errn, "no se pudo abrir"); return NULL; }
+    if (!f) { set_err(err, errn, N_("no se pudo abrir")); return NULL; }
     uint8_t h[12];
     if (fread(h, 1, 12, f) != 12 || memcmp(h, "RIFF", 4) || memcmp(h + 8, "WAVE", 4)) {
         fclose(f);
-        set_err(err, errn, "no es un WAV");
+        set_err(err, errn, N_("no es un WAV"));
         return NULL;
     }
     int fmt = 0, ch = 0, bits = 0;
@@ -96,21 +98,21 @@ const es_sample_t *es_bank_load(const char *name, char *err, size_t errn)
     bool okfmt = (fmt == 1 && (bits == 8 || bits == 16 || bits == 24 || bits == 32)) || (fmt == 3 && bits == 32);
     if (!data_at || !okfmt || ch < 1 || ch > 8 || rate < 4000 || rate > 192000) {
         fclose(f);
-        set_err(err, errn, "formato de WAV que no se lee (PCM o float)");
+        set_err(err, errn, N_("formato de WAV que no se lee (PCM o float)"));
         return NULL;
     }
     int bps = bits / 8, frame = bps * ch;
     uint32_t frames = data_len / (uint32_t)frame;
     uint32_t cap = rate * ES_SAMPLE_SEC;
     if (frames > cap) frames = cap;
-    if (frames < 2) { fclose(f); set_err(err, errn, "está vacío"); return NULL; }
+    if (frames < 2) { fclose(f); set_err(err, errn, N_("está vacío")); return NULL; }
     uint32_t bytes = (frames + 1) * 2;
-    if (s_bank_bytes + bytes > ES_BANK_MAX) { fclose(f); set_err(err, errn, "no hay más lugar para muestras"); return NULL; }
+    if (s_bank_bytes + bytes > ES_BANK_MAX) { fclose(f); set_err(err, errn, N_("no hay más lugar para muestras")); return NULL; }
     int16_t *out = es_alloc(bytes);
-    if (!out) { fclose(f); set_err(err, errn, "sin memoria"); return NULL; }
+    if (!out) { fclose(f); set_err(err, errn, N_("sin memoria")); return NULL; }
     fseek(f, data_at, SEEK_SET);
     uint8_t *buf = es_alloc(4096);
-    if (!buf) { es_free(out); fclose(f); set_err(err, errn, "sin memoria"); return NULL; }
+    if (!buf) { es_free(out); fclose(f); set_err(err, errn, N_("sin memoria")); return NULL; }
     uint32_t done = 0;
     int per = 4096 / frame;
     while (done < frames) {
@@ -138,7 +140,7 @@ const es_sample_t *es_bank_load(const char *name, char *err, size_t errn)
     }
     es_free(buf);
     fclose(f);
-    if (done < 2) { es_free(out); set_err(err, errn, "está vacío"); return NULL; }
+    if (done < 2) { es_free(out); set_err(err, errn, N_("está vacío")); return NULL; }
     out[done] = out[done - 1];
     es_sample_t *s = &s_bank[s_bank_n];
     snprintf(s->name, sizeof s->name, "%s", name);

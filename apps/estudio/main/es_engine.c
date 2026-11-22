@@ -478,7 +478,7 @@ static int rec_step_now(es_engine_t *e, bool *ahead)
 
 static void rec_on(es_engine_t *e, int part, int note, int vel)
 {
-    if (!e->rec || !e->playing || e->pos < 0.0f) return;
+    if (!e->rec || !e->playing || e->countin) return;
     bool ahead;
     int st = rec_step_now(e, &ahead);
     if (ahead) skip_add(e, part, note);
@@ -581,7 +581,7 @@ static void arp_play(es_engine_t *e, float rate)
     int32_t off = (int32_t)(rate * sps(e) * 0.5f);
     voice_on(e, part, seq[k], (float)vel[k] * (1.0f / 127.0f), off);
     mout_note(e, part, seq[k], vel[k], off, SRC_LIVE);
-    if (e->rec && e->playing && e->pos >= 0.0f) {
+    if (e->rec && e->playing && !e->countin) {
         bool ahead;
         int st = rec_step_now(e, &ahead);
         if (ahead) skip_add(e, part, seq[k]);
@@ -593,10 +593,10 @@ static void arp_play(es_engine_t *e, float rate)
 
 static void arp_block(es_engine_t *e, float adv)
 {
-    if (e->playing) e->arp_clock = e->abs_pos + (e->pos < 0.0f ? e->pos : 0.0f);
+    if (e->playing) e->arp_clock = e->countin ? e->pos : e->abs_pos;
     else e->arp_clock += adv;
     if (!e->p->arp_on || !e->arp_n) return;
-    if (e->playing && e->pos < 0.0f) return;     /* not in the count-in */
+    if (e->playing && e->countin) return;        /* not in the count-in */
     float rate = arp_rate(e->p->arp_rate);
     if (e->arp_clock + 1e-4f >= e->arp_next) {
         float k = floorf((e->arp_clock + 1e-4f) / rate) + 1.0f;
@@ -636,7 +636,7 @@ static void drum_in(es_engine_t *e, int track, int vel, int src)
     if (track < 0 || track >= ES_DRUMS) return;
     es_drum_hit(e, track, (float)vel * (1.0f / 127.0f));
     mout_note(e, 3, es_drum_gm(e->p->dt[track].src), vel, ES_SR / 50, src);
-    if (e->rec && e->playing && e->pos >= 0.0f) {
+    if (e->rec && e->playing && !e->countin) {
         bool ahead;
         int st = rec_step_now(e, &ahead);
         if (ahead) skip_add(e, 3, track);
@@ -696,7 +696,7 @@ static void engine_block(es_engine_t *e, float *out)
     float adv = p->bpm * (4.0f / 60.0f) / (float)ES_SR * ES_BLK;
     arp_block(e, adv);
     if (e->playing) {
-        if (e->pos < 0.0f) {
+        if (e->countin) {
             /* the count-in: one bar of the metronome before it records */
             int beats = p->beats ? p->beats : 4;
             float start = -4.0f * (float)beats;
@@ -705,10 +705,16 @@ static void engine_block(es_engine_t *e, float *out)
                 e->cin_next += 4.0f;
             }
             e->pos += adv;
-            if (e->pos >= 0.0f) { e->pos = 0.0f; e->countin = 0; }
+            if (e->pos >= 0.0f) e->countin = 0;
         } else {
+            /* the pattern comes round when its time is up, not as soon as
+             * its last step played: until then a key still lands in it */
             for (int guard = 0; guard < 8 * ES_STEPS; guard++) {
-                if (e->next_step >= pat_len(e)) { pattern_end(e); continue; }
+                if (e->next_step >= pat_len(e)) {
+                    if (e->pos < (float)pat_len(e)) break;
+                    pattern_end(e);
+                    continue;
+                }
                 if (step_t(e, e->next_step) > e->pos) break;
                 fire(e, e->next_step);
                 e->next_step++;
@@ -1087,6 +1093,7 @@ int  es_out_queued(void)                        { return aos_hal_spk_queued(); }
 void es_out_close(void)                         { aos_hal_spk_close(); }
 #endif
 
+/* the engine's block from outside, for the tests on the Mac (scratch harness) */
 #if defined(ES_TEST)
 void es_engine_test_block(es_engine_t *e, float *out) { engine_block(e, out); }
 #endif

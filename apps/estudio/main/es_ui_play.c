@@ -257,6 +257,17 @@ static void text(lv_layer_t *layer, const lv_area_t *r, const char *s, const lv_
     lv_draw_label(layer, &d, &a);
 }
 
+/* 'a' over 'b', t of 256 */
+static uint32_t blend(uint32_t a, uint32_t b, int t)
+{
+    uint32_t r = 0;
+    for (int sh = 0; sh < 24; sh += 8) {
+        int ca = (int)(a >> sh & 255), cb = (int)(b >> sh & 255);
+        r |= (uint32_t)((ca * t + cb * (256 - t)) >> 8) << sh;
+    }
+    return r;
+}
+
 static void surf_draw(lv_event_t *e)
 {
     lv_layer_t *layer = lv_event_get_layer(e);
@@ -273,9 +284,9 @@ static void surf_draw(lv_event_t *e)
         if (U->play_mode == PM_KEYS) {
             bool down = P.held[k->id] != 0, seq = P.seq[k->id] != 0;
             if (k->black) {
-                rect(layer, &r, down ? pc : seq ? 0x3A4A66 : 0x15151A, LV_OPA_COVER, 6);
+                rect(layer, &r, down ? pc : seq ? blend(pc, 0x15151A, 110) : 0x15151A, LV_OPA_COVER, 6);
             } else {
-                rect(layer, &r, down ? pc : seq ? 0xB8CCF0 : 0xEDEDF2, LV_OPA_COVER, 8);
+                rect(layer, &r, down ? pc : seq ? blend(pc, 0xEDEDF2, 80) : 0xEDEDF2, LV_OPA_COVER, 8);
                 if (k->id % 12 == 0) {
                     snprintf(buf, sizeof buf, "C%d", k->id / 12 - 1);
                     text(layer, &r, buf, aos_font_caption, down ? 0xFFFFFF : 0x6E6E78);

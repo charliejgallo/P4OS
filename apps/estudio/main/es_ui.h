@@ -94,6 +94,7 @@ typedef struct {
     int      ntap;
     uint32_t log_ms;
     uint32_t load_test_until;
+    float    load_test_mono[ES_PARTS];   /* the parts' mono switch, put back after the test */
 
     lv_obj_t *sheet;
     es_pat_t *clip;

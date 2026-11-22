@@ -240,7 +240,7 @@ static void d_draw(lv_event_t *e)
     int play = es_play_step(U->e);
     bool here = es_play_pat(U->e) == U->pat && play >= 0;
     uint32_t now = (uint32_t)aos_hal_uptime_ms();
-    char buf[8];
+    char buf[16];
     for (int tr = 0; tr < ES_DRUMS; tr++) {
         uint32_t tc = ui_drum_color(tr);
         bool sel = tr == U->track, mute = U->p->dt[tr].mute;
@@ -590,7 +590,7 @@ static void r_draw(lv_event_t *e)
     es_pat_t *t = &U->p->pat[U->pat];
     int len = t->len, base = U->page * 16, low = r_low();
     uint32_t pc = ui_part_color(U->part);
-    char buf[8];
+    char buf[16];
     /* the rows, the black keys darker, and the keys on the left */
     for (int r = 0; r < R.rows; r++) {
         int note = low + r;
@@ -836,6 +836,7 @@ void es_view_roll(lv_obj_t *body)
 {
     int32_t W = lv_obj_get_width(body), H = lv_obj_get_height(body);
     lv_obj_t *hdr = header(body, W);
+    if (!U->land) ui_box(hdr, lv_pct(100), 0);     /* standing up the parts start a line */
     for (int i = 0; i < ES_PARTS; i++) {
         char b[4];
         snprintf(b, sizeof b, "%d", i + 1);

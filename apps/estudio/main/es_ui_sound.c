@@ -186,7 +186,7 @@ static void presets_cb(lv_event_t *e)
             const char *nm = de->d_name;
             size_t l = strlen(nm);
             if (nm[0] == '.' || l < 6 || strcasecmp(nm + l - 5, ".json") || l >= sizeof s_files[0]) continue;
-            snprintf(s_files[n], sizeof s_files[n], "%s", nm);
+            snprintf(s_files[n], sizeof s_files[n], "%.47s", nm);
             char label[ES_NAME + 8];
             snprintf(label, sizeof label, "%.*s", (int)(l - 5), nm);
             lv_obj_t *b = ui_btn(g2, label, aos_font_caption, bw, 58, NULL, NULL);

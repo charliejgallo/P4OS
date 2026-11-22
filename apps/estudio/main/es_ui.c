@@ -770,6 +770,7 @@ static void ui_timer(lv_timer_t *t)
     if (U->load_test_until && (int32_t)((uint32_t)aos_hal_uptime_ms() - U->load_test_until) >= 0) {
         U->load_test_until = 0;
         es_cmd(U->e, EC_PANIC, 0, 0, 0, 0);
+        for (int i = 0; i < ES_PARTS; i++) U->p->part[i].p[P_MONO] = U->load_test_mono[i];
     }
 }
 
@@ -814,6 +815,9 @@ void es_ui_log_stats(void)
 void es_ui_load_test(void)
 {
     es_proj_t *p = U->p;
+    if (U->load_test_until) return;
+    /* every part polyphonic for the test, or a mono one would keep voices idle */
+    for (int i = 0; i < ES_PARTS; i++) { U->load_test_mono[i] = p->part[i].p[P_MONO]; p->part[i].p[P_MONO] = 0; }
     for (int c = 0; c < ES_CH; c++) { p->ch[c].dly = es_clampf(p->ch[c].dly, 0.3f, 1); p->ch[c].rev = es_clampf(p->ch[c].rev, 0.3f, 1); }
     for (int i = 0; i < ES_VOICES; i++) es_cmd(U->e, EC_AUDITION, i % ES_PARTS, 48 + i * 4, 100, 5000);
     for (int t = 0; t < ES_DRUMS; t++) es_cmd(U->e, EC_DRUM, t, 100, 0, 0);

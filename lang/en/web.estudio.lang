@@ -1,0 +1,82 @@
+# amoledos-lang 1   es -> en
+# web.estudio.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/estudio/web/estudio.js:65
+#: apps/estudio/web/estudio.js:169
+Estudio	Studio
+
+#: apps/estudio/web/estudio.js:78
+¿Borrar %s? No se puede deshacer.	Delete %s? This cannot be undone.
+
+#: apps/estudio/web/estudio.js:79
+Borrado	Deleted
+
+#: apps/estudio/web/estudio.js:96
+Bajar	Download
+
+#: apps/estudio/web/estudio.js:97
+Borrar	Clear
+
+#: apps/estudio/web/estudio.js:127
+%s no es un archivo que el Estudio lea	%s is not a file Studio can read
+
+#: apps/estudio/web/estudio.js:130
+Subido	Uploaded
+
+#: apps/estudio/web/estudio.js:130
+Subidos	Uploaded
+
+#: apps/estudio/web/estudio.js:156
+Subir proyectos	Upload projects
+
+#: apps/estudio/web/estudio.js:156
+Todavía no hay proyectos: el Estudio guarda el suyo solo.	No projects yet: Studio saves its own by itself.
+
+#: apps/estudio/web/estudio.js:157
+En la placa se abren desde Canción → Abrir. Un proyecto lleva sus patrones, la canción, los sonidos y la mezcla; las muestras que use van aparte, en Muestras.	On the board they open from Song → Open. A project carries its patterns, the song, the sounds and the mix; the samples it uses go apart, in Samples.
+
+#: apps/estudio/web/estudio.js:160
+Subir muestras WAV	Upload WAV samples
+
+#: apps/estudio/web/estudio.js:160
+No hay muestras. Subí WAV tuyos para tocarlos en la batería.	No samples. Upload WAVs of your own to play them on the drums.
+
+#: apps/estudio/web/estudio.js:161
+WAV PCM de 8, 16, 24 o 32 bits o en coma flotante, mono o estéreo, de cualquier frecuencia; se usan hasta 12 segundos de cada uno. En la placa: Ritmo → el sonido de la pista.	PCM WAV of 8, 16, 24 or 32 bits or floating point, mono or stereo, at any rate; up to 12 seconds of each are used. On the board: Drums → the track's sound.
+
+#: apps/estudio/web/estudio.js:163
+Nada exportado todavía. Se exporta desde Canción → Exportar, en WAV o en MIDI.	Nothing exported yet. Export from Song → Export, as WAV or MIDI.
+
+#: apps/estudio/web/estudio.js:166
+Subir sonidos	Upload sounds
+
+#: apps/estudio/web/estudio.js:166
+Ninguno todavía. En la placa: Sonido → Guardar este sonido como…	None yet. On the board: Sound → Save this sound as…
+
+#: apps/estudio/web/estudio.js:171
+Lo que el Estudio guarda en la tarjeta: los proyectos, tus muestras, lo exportado y tus sonidos del sintetizador.	What Studio keeps on the card: the projects, your samples, what was exported and your synth sounds.
+
+#: apps/estudio/web/estudio.js:173
+Abierto en la placa	Opened on the board
+
+#: apps/estudio/web/estudio.js:173
+Abrir el Estudio en la placa	Open Studio on the board
+
+#: apps/estudio/web/estudio.js:174
+Actualizar	Refresh
+
+#: apps/estudio/web/estudio.js:175
+Proyectos	Projects
+
+#: apps/estudio/web/estudio.js:176
+Muestras	Samples
+
+#: apps/estudio/web/estudio.js:177
+Exportado	Exported
+
+#: apps/estudio/web/estudio.js:178
+Mis sonidos	My sounds
