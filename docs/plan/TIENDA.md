@@ -1296,7 +1296,9 @@ proyecto).
   (`docs/SSH.md`).
 - **La 0.31.0 salió el 2026-11-22** (tag `v0.31.0` en `fcd36ab`), sin
   Estudio: seis apps nuevas, los respaldos y SFTP. Es la primera release
-  que una placa en 0.30.0 baja sola. Cómo se armó:
+  que una placa baja sola, **y la placa del usuario la bajó ese mismo
+  día** desde Ajustes: 27 s de bajada, escrita, arrancada a prueba y
+  confirmada (`PRUEBAS-PLACA.md`). Cómo se armó:
   - Los 15 packs de arte nuevos (26 MB) se subieron a la release
     publicada `v0.30.0`, que es donde el catálogo los nombra, y recién
     después se anotaron en `store/packs.json` con

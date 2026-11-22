@@ -139,13 +139,22 @@ Instalado el 2026-11-21, `v0.30.0-16-g021f337`.
 La placa corre `v0.30.0-26-gac10384` y su catálogo guardado todavía es el
 de la 0.30.0: se pone al día al abrir la Tienda o Ajustes → Actualización.
 
-- [ ] Ajustes → Actualización → Desde GitHub: ofrece la 0.31.0, la baja,
-      la verifica, la escribe y arranca en ella. **La primera vez que una
-      placa baja sola una release nueva.**
-- [ ] Antes de instalarla, cambiar un ajuste cualquiera: tiene que quedar
-      una copia "de antes de actualizar" en Ajustes → Respaldo.
-- [ ] Tienda → Actualizaciones: los idiomas del sistema (cambiaron), y
-      ninguna app de las 58 de antes.
+- [x] Ajustes → Actualización → Desde GitHub, por el usuario
+      (2026-11-22): ofreció la 0.31.0, la bajó (7 155 008 bytes en 27 s,
+      1,5 s de conexión y 0,6 s de verificación), la escribió en la otra
+      ranura, arrancó a prueba y quedó confirmada a los 30 s. **La primera
+      vez que una placa baja sola una release nueva**, y la primera imagen
+      de esta release que corre en una placa. RAM interna libre: 211,3 KB
+      (2 KB más que con la compilación de la Mac). La ranura anterior
+      conserva `v0.30.0-26-gac10384`.
+- [ ] La copia "de antes de actualizar": el paso corrió (el registro dice
+      `backup: auto: nothing changed since the last copy`, justo antes de
+      `ota: writing`) y no hizo copia porque nada había cambiado. Falta
+      verla una vez con un ajuste cambiado antes de instalar.
+- [x] Tienda con el catálogo de la 0.31.0: de actualizaciones, sólo los
+      dos idiomas del sistema, y ninguna app de las 58 de antes; las cinco
+      apps nuevas para obtener y Metegol como copiada a mano.
+- [ ] Instalar esas dos actualizaciones de idioma desde la Tienda.
 - [ ] Tienda: Sudoku, Solitario, Bolsa, Vuelos y Juegos de mesa con
       "Obtener", cada una con su pack; abrirlas una vez.
 - [ ] Metegol figura "copiada a mano" (se instaló con `install_apps.sh`):
