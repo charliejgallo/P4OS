@@ -128,7 +128,15 @@ and the slow and the fast puck.
 
 The log says every 5 s:
 `hockey: 52.0 fps, a frame 0.06 ms (sim 0.00, list 0.00, draw 0.06), 82 tiles, 16 things, flip 0, 4861 KB held, puck 63,177 state 1`
-(the simulator; the board is still to be measured). About 4.9 MB of PSRAM
+(the simulator). **On the board** (2026-11-22, rev 1.3,
+`v0.31.0-35-g5e95c18`): **62 fps** through a whole match against the
+board at medium, 2.7 to 7.1 ms a frame with the puck in play (drawing is
+all of it; the simulation 0.07 ms) and 1.0 to 1.3 ms waiting for a
+serve. The match was played from the portal, one finger dragged at
+random for 78 s: the board won 7 to 1, with 39 hard shots. The memory was
+all back at the home screen afterwards (15 009 KB free before, 14 945
+after). Two fingers at once, the other tables and the levels against a
+person are still to be tried by hand. About 4.9 MB of PSRAM
 held with a table loaded; when the app closes the log says what its own
 allocator still holds (it must be 0 KB).
 

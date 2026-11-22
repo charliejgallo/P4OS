@@ -302,10 +302,15 @@ En `main` desde el 2026-11-22, sin publicar; sólo probadas en el simulador.
       (`aos_touch_points_n`). Arreglado en el firmware el mismo día
       (`aos_ui_injected_point`); en el simulador el portal ya mueve la
       paleta y hay goles.
-- [ ] Hockey de mesa, lo que queda: un partido entero (con el firmware
-      que deja jugar desde el portal, o a mano), los fps con el disco en
-      juego, los dos dedos a la vez a mano, y ajustar los niveles con el
-      usuario, como Metegol.
+- [x] **Hockey de mesa, un partido entero desde el portal** (2026-11-22,
+      `v0.31.0-35-g5e95c18`): 62 fps todo el partido, 2,7 a 7,1 ms por
+      cuadro con el disco en juego; la placa ganó 7 a 1 en nivel medio
+      contra un dedo arrastrado al azar, en 78 s. El usuario lo miró: "se
+      ve bien". La memoria volvió toda (15 009 KB libres antes, 14 945
+      después); el aviso de "1881 KB no volvieron" era del firmware, que
+      comparaba sin contar las fotos del fondo: corregido, sin instalar.
+- [ ] Hockey de mesa, lo que queda: los dos dedos a la vez a mano, las
+      otras dos mesas, y ajustar los niveles con el usuario, como Metegol.
 - [ ] Oficina: abrir y guardar un xlsx y un ods en la placa y volver a
       abrirlos en la computadora; los tiempos de abrir una planilla grande.
 

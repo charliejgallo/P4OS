@@ -177,6 +177,7 @@ Fps measured with the app's own log line in `/api/log`.
 | Claudito | idle ~3 % of a core | | retro canvas, changed rows only |
 | Lua (cubes) | 34 fps with 24 cubes | | full-screen present |
 | Neon Snakes | 23 fps in combat | | |
+| Hockey de mesa | 62 fps through a match, 2.7–7.1 ms a frame with the puck in play, 1.0–1.3 waiting for a serve; 4.9 MB of PSRAM | – | sprites rendered beforehand, composed by tiles into the panel's free buffer and flipped (apps/hockey/README.md) |
 | Traductor | no network: 1.1 s a short sentence, 4.3 s one of thirty words, 1.5 s more to load the model | same | a small neural model's matrices in float on both cores (1.53x of one); 9 cycles a multiply-add with the weights in PSRAM; 1.7 MB of PSRAM left with a model loaded (apps/traductor/README.md) |
 
 To deploy: `tools/install_apps.sh p4os.local [app…]`. It uploads

@@ -7,7 +7,8 @@
   - **Hockey de mesa** (Air Hockey): air hockey in 3D, upright, against the
     board at four levels or two at once, a finger each in their half; the
     puck's path is swept, so a fast mallet never lets it through. The bar
-    table comes with it; neon and ice are optional packs.
+    table comes with it; neon and ice are optional packs. 62 fps on the
+    board through a whole match.
   - **Traductor** (Translator): translates text **with no network**, on the
     board, with optional language packs (Spanish, Portuguese, Italian,
     French and German, each paired with English, ~45-60 MB each): small
@@ -55,6 +56,11 @@
   that read the panel's fingers themselves: Air Hockey's mallet, Table
   Football's rods, Studio's keys stayed still. With no finger on the
   panel, the one the portal holds down is now theirs too, one at a time.
+- **A game no longer "keeps" the wallpaper's memory.** When a full-screen
+  app closed, the log said 1.9 MB of PSRAM had not come back: it compared
+  with a reading taken after the wallpaper's photos were let go for the
+  app, once they were back. What the photos lend is taken off now, so the
+  line means what it says.
 - **"New" in the Store.** A chip beside the kinds of app, on the board
   and in the portal's page, with the apps of the newest release that
   brought any; in the whole list they say "New" until installed. The
