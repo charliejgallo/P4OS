@@ -1470,3 +1470,25 @@ bool aos_hal_usb_midi_bend(int value)
     v = v < 0 ? 0 : v > 16383 ? 16383 : v;
     return midi3(0xE0, (uint8_t)(v & 0x7F), (uint8_t)(v >> 7));
 }
+
+/* How many bytes a message of this status has, 0 when it is not one that
+ * goes by itself (a data byte, a system exclusive, an undefined status). */
+static int midi_len(int status)
+{
+    if (status < 0x80 || status > 0xFF) return 0;
+    if (status < 0xF0) return (status & 0xF0) == 0xC0 || (status & 0xF0) == 0xD0 ? 2 : 3;
+    switch (status) {
+    case 0xF1: case 0xF3: return 2;
+    case 0xF2: return 3;
+    case 0xF6: case 0xF8: case 0xFA: case 0xFB: case 0xFC: case 0xFE: case 0xFF: return 1;
+    default: return 0;
+    }
+}
+
+bool aos_hal_usb_midi_send(int status, int d1, int d2)
+{
+    int n = midi_len(status);
+    if (!n || !aos_hal_usb_midi_ready()) return false;
+    uint8_t msg[3] = { (uint8_t)status, (uint8_t)(d1 & 0x7F), (uint8_t)(d2 & 0x7F) };
+    return tud_midi_stream_write(0, msg, (uint32_t)n) == (uint32_t)n;
+}

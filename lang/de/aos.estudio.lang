@@ -482,6 +482,9 @@ A la compu: parte %d	Zum Computer: Spur %d
 #: apps/estudio/main/es_ui_song.c:310
 A la compu: batería	Zum Computer: Drums
 
+#: apps/estudio/main/es_ui_song.c
+A la compu: todo	Zum Computer: alles
+
 #: apps/estudio/main/es_ui_song.c:348
 Ningún aparato MIDI en el USB.	Kein MIDI-Gerät am USB.
 
@@ -555,7 +558,7 @@ Salida	Ausgang
 Reloj	Clock
 
 #: apps/estudio/main/es_ui_song.c:492
-Entra por el canal 1 la parte elegida, por el 2 al 4 las partes 1 a 3 y por el 10 la batería. Al aparato salen las partes por 1 a 3, la batería por 10 y el reloj; a la compu, una pista por el canal 1.	Eingang: Kanal 1 spielt die gewählte Spur, 2 bis 4 die Spuren 1 bis 3 und 10 die Drums. Zum Gerät gehen die Spuren auf 1 bis 3, die Drums auf 10 und die Clock; zum Computer eine Spur auf Kanal 1.
+Entra por el canal 1 la parte elegida, por el 2 al 4 las partes 1 a 3 y por el 10 la batería. Al aparato salen las partes por 1 a 3, la batería por 10 y el reloj; a la compu, lo mismo, o una sola pista por el canal 1.	Eingang: Kanal 1 spielt die gewählte Spur, 2 bis 4 die Spuren 1 bis 3 und 10 die Drums. Zum Gerät gehen die Spuren auf 1 bis 3, die Drums auf 10 und die Clock; zum Computer dasselbe, oder eine einzelne Spur auf Kanal 1.
 
 #: apps/estudio/main/es_ui_song.c:494
 Audio	Audio

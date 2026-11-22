@@ -215,7 +215,10 @@ typedef struct { uint8_t type, a, b, c; float f; } es_cmd_t;
 enum { EV_REC_ON, EV_REC_OFF, EV_REC_DRUM };
 typedef struct { uint8_t type, pat, a, b, c, step; } es_ev_t;
 
-typedef struct { uint8_t st, d1, d2, dest; } es_mout_t;   /* dest: bit0 computer, bit1 device */
+/* dest: bit0 the computer, one track's notes on channel 1; bit1 the device
+ * on the host; bit2 the computer, the message as it is */
+typedef struct { uint8_t st, d1, d2, dest; } es_mout_t;
+#define ES_PC_ALL (ES_PARTS + 1)    /* es_set_mout's pc_track: everything, each on its channel, and the clock */
 
 typedef struct es_engine es_engine_t;
 
@@ -256,7 +259,7 @@ void es_set_live_part(es_engine_t *e, int part);
 void es_set_latency(es_engine_t *e, int level);   /* 0 low, 1 normal, 2 safe */
 int  es_latency_ms(int level);
 void es_set_voices(es_engine_t *e, int n);
-void es_set_mout(es_engine_t *e, int dest_mask, bool clock, int pc_track);  /* pc_track 0..2 parts, 3 drums */
+void es_set_mout(es_engine_t *e, int dest_mask, bool clock, int pc_track);  /* pc_track 0..2 parts, 3 drums, ES_PC_ALL */
 void es_drop_sample_refs(es_engine_t *e);
 int  es_live_part(const es_engine_t *e);
 

@@ -993,6 +993,9 @@ __attribute__((weak)) bool aos_hal_usb_midi_cc(int control, int value)
 __attribute__((weak)) bool aos_hal_usb_midi_bend(int value)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) bool aos_hal_usb_midi_send(int status, int d1, int d2)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) bool aos_hal_usb_card_away(void)
 { bool v; memset(&v, 0, sizeof v); return v; }
 

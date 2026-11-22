@@ -307,13 +307,14 @@ static void pc_paint(lv_obj_t *b)
 {
     char t[48];
     if (U->mo_pc < ES_PARTS) snprintf(t, sizeof t, _("A la compu: parte %d"), U->mo_pc + 1);
-    else snprintf(t, sizeof t, "%s", _("A la compu: batería"));
+    else if (U->mo_pc == ES_PARTS) snprintf(t, sizeof t, "%s", _("A la compu: batería"));
+    else snprintf(t, sizeof t, "%s", _("A la compu: todo"));
     ui_btn_text(b, t);
 }
 
 static void pc_cb(lv_event_t *e)
 {
-    U->mo_pc = (U->mo_pc + 1) % (ES_PARTS + 1);
+    U->mo_pc = (U->mo_pc + 1) % (ES_PC_ALL + 1);
     pc_paint(lv_event_get_target_obj(e));
     es_ui_apply_settings();
 }
@@ -489,7 +490,7 @@ void es_view_song(lv_obj_t *body)
     ui_btn_on(cb, U->mo_clock, aos_theme_accent_rgb());
     lv_obj_t *pcb = ui_btn(r, "", aos_font_caption, (iw - 8) * 2 / 3, 54, pc_cb, NULL);
     pc_paint(pcb);
-    wrap_label(k, _("Entra por el canal 1 la parte elegida, por el 2 al 4 las partes 1 a 3 y por el 10 la batería. Al aparato salen las partes por 1 a 3, la batería por 10 y el reloj; a la compu, una pista por el canal 1."), iw);
+    wrap_label(k, _("Entra por el canal 1 la parte elegida, por el 2 al 4 las partes 1 a 3 y por el 10 la batería. Al aparato salen las partes por 1 a 3, la batería por 10 y el reloj; a la compu, lo mismo, o una sola pista por el canal 1."), iw);
 
     k = ui_card(right, _("Audio"), cw);
     static const char *LAT[3];

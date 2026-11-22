@@ -44,6 +44,12 @@
   stays, their packs are not downloaded again, and the extras a person had
   copied are kept as the app's when they are the catalogue's. On the
   board: 39 apps in four and a half minutes, with no pack downloaded.
+- **Any MIDI message to the computer** (`aos_hal_usb_midi_send`): the
+  board as a MIDI device could send notes, controllers and bends on
+  channel 1 and nothing else. Now any channel message and the clock,
+  Start and Stop. Estudio sends the computer what it sends a device on
+  the host: its parts on channels 1 to 3, the drums on 10 and the clock;
+  one track on channel 1 is still there to choose.
 - **"New" in the Store.** A chip beside the kinds of app, on the board
   and in the portal's page, with the apps of the newest release that
   brought any; in the whole list they say "New" until installed. The

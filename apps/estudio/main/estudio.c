@@ -70,7 +70,13 @@ static void *es_create(aos_app_t *self, lv_obj_t *root)
     U->export_loops = 4;
     U->latency = aos_hal_pref_get_i32("es_lat", &v) ? (int)v : 1;
     U->voices = aos_hal_pref_get_i32("es_voices", &v) ? (int)v : 8;
-    if (aos_hal_pref_get_i32("es_mout", &v)) { U->mo_dest = v & 3; U->mo_clock = (v & 16) != 0; U->mo_pc = (v >> 8) & 3; }
+    U->mo_pc = ES_PC_ALL;
+    if (aos_hal_pref_get_i32("es_mout", &v)) {
+        U->mo_dest = v & 3;
+        U->mo_clock = (v & 16) != 0;
+        U->mo_pc = (v >> 8) & 7;
+        if (U->mo_pc > ES_PC_ALL) U->mo_pc = ES_PC_ALL;
+    }
     if (aos_hal_pref_get_i32("es_pmode", &v)) U->play_mode = (int)v % 3;
     if (aos_hal_pref_get_i32("es_scale", &v)) { U->scale = (int)(v & 0xFF) % 6; U->key_root = (int)(v >> 8) % 12; }
     for (int i = 0; i < ES_PARTS; i++) U->roll_low[i] = i == 0 ? 28 : 48;

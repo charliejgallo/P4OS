@@ -80,7 +80,7 @@ struct es_engine {
     volatile uint32_t mo_h, mo_t;
     int           mo_dest;      /* bit0 computer, bit1 the device on the host */
     bool          mo_clock;
-    int           mo_pc_track;  /* what goes to the computer (it only has channel 1) */
+    int           mo_pc_track;  /* what goes to the computer: one track on channel 1, or ES_PC_ALL */
 
     /* the transport */
     volatile uint8_t playing, rec, countin;

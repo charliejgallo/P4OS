@@ -11,8 +11,8 @@
  * Out: what the audio thread queues - the notes as they are played or
  * sequenced, and the clock (24 a quarter) with Start and Stop - to a device
  * on the host (aos_hal_midi_send, every channel) and to the computer on the
- * OTG port (aos_hal_usb_midi_note: one track, channel 1, notes only; the
- * firmware has no way yet to send it a clock).
+ * OTG port: the same, with aos_hal_usb_midi_send (P4OS 0.32), or one track's
+ * notes on channel 1 for a program that listens to one channel.
  *
  * The thread reads and sends every millisecond. The audio thread never
  * calls the HAL's MIDI itself: those calls may wait on USB.
@@ -74,6 +74,7 @@ static void send(const es_mout_t *o)
         aos_midi_msg_t m = { o->st, o->d1, o->d2, 0 };
         aos_hal_midi_send(&m);
     }
+    if (o->dest & 4) aos_hal_usb_midi_send(o->st, o->d1, o->d2);
     if (o->dest & 1) {
         uint8_t st = o->st & 0xF0;
         if (st == 0x90) aos_hal_usb_midi_note(o->d1, o->d2, true);

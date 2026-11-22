@@ -2037,6 +2037,13 @@ bool aos_hal_usb_midi_ready(void);          /* KEYS mode and the computer took t
 bool aos_hal_usb_midi_note(int note, int velocity, bool on);   /* 0..127; channel 1 */
 bool aos_hal_usb_midi_cc(int control, int value);              /* 0..127 */
 bool aos_hal_usb_midi_bend(int value);                         /* -8192..8191 */
+/* Any MIDI message but a system exclusive, as it is: a channel message on
+ * any channel (0x80..0xEF) or a system one (0xF1..0xF3, 0xF6, the clock
+ * 0xF8, Start 0xFA, Continue 0xFB, Stop 0xFC, 0xFE, 0xFF). d1 and d2 are
+ * taken as the message needs them (none for the clock). false when the
+ * computer is not there, or for a status that is not a message's. Since
+ * 0.32.0: what Estudio sends the computer its parts, drums and clock with. */
+bool aos_hal_usb_midi_send(int status, int d1, int d2);
 bool aos_hal_usb_card_away(void);       /* DISK mode and the computer holds the card */
 
 /* ---- USB, P4OS additions (the Macro pad; aos_usb_p4.c, sim/usb_sim.c) ----

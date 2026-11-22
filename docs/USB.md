@@ -91,6 +91,10 @@ Three things the first plug-in taught:
   SET_CONFIGURATION got a stall. The pad only sends, so the port has one
   IN endpoint (`MIDI_OUT_DESCRIPTOR`). `tud_midi_mounted()` wants both
   directions, so readiness is the keyboard's.
+  What an app sends: `aos_hal_usb_midi_note` / `_cc` / `_bend` on channel
+  1 (the Macro pad's piano), and since 0.32.0 `aos_hal_usb_midi_send(status,
+  d1, d2)` for any message that is not a system exclusive: any channel, and
+  the clock, Start and Stop (Estudio's parts, drums and clock).
 - **The gamepad on its own interface.** As a fourth report of the keyboard,
   macOS saw a keyboard with a gamepad inside: nothing listed it, and opening
   a keyboard needs the Input Monitoring permission. Alone it is a plain

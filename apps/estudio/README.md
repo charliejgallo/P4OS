@@ -76,9 +76,12 @@ In (a keyboard on the USB host): channel 1 plays the part chosen on the
 screen, 2 to 4 the parts 1 to 3, 10 the drums (GM notes to the track with
 that sound); bend ±2, CC 1 modulation, 64 sustain, 74 cutoff, 71 resonance,
 Start and Stop. Out: to a device on the host, the parts on channels 1-3,
-the drums on 10 and the clock (24 a quarter, Start, Stop); to the computer,
-one chosen track on channel 1 and no clock (`aos_hal_usb_midi_note` is
-all there is).
+the drums on 10 and the clock (24 a quarter, Start, Stop); to the computer
+on the OTG port, the same (`aos_hal_usb_midi_send`, P4OS 0.32), or one
+chosen track's notes on channel 1 for a program that listens to one
+channel: Canción → MIDI → "A la compu: todo / parte N / batería". In the
+simulator the HAL prints what it is handed: a pattern played gives
+`90`, `91`, `92` and `99` notes with `FA` and `FC` around them.
 
 ## Not done
 

@@ -162,16 +162,27 @@ bool es_mout_take(es_engine_t *e, es_mout_t *out)
     return true;
 }
 
+/* where the clock, Start and Stop go: the device on the host, and the
+ * computer when it gets everything */
+static uint8_t clock_dest(const es_engine_t *e)
+{
+    return (uint8_t)((e->mo_dest & 2) | ((e->mo_dest & 1) && e->mo_pc_track == ES_PC_ALL ? 4 : 0));
+}
+
 /* a note out: to the device on the host on the track's channel, and to the
- * computer if it is the track the computer gets (it only has channel 1).
- * 'len' in samples (< 0: the note-off comes on its own) */
+ * computer the same way when it gets everything, or on channel 1 if it is
+ * the one track it gets. 'len' in samples (< 0: the note-off comes on its
+ * own) */
 static void mout_note(es_engine_t *e, int track, int note, int vel, int32_t len, int src)
 {
     if (!e->mo_dest) return;
     uint8_t ch = track < ES_PARTS ? (uint8_t)track : 9;
     uint8_t dest = 0;
     if (e->mo_dest & 2) dest |= 2;
-    if ((e->mo_dest & 1) && track == e->mo_pc_track && src != SRC_MIDI) dest |= 1;
+    if ((e->mo_dest & 1) && src != SRC_MIDI) {
+        if (e->mo_pc_track == ES_PC_ALL) dest |= 4;
+        else if (track == e->mo_pc_track) dest |= 1;
+    }
     if (!dest) return;
     if (vel > 0) {
         mout(e, (uint8_t)(0x90 | ch), (uint8_t)note, (uint8_t)(vel > 127 ? 127 : vel), dest);
@@ -447,7 +458,7 @@ static void play(es_engine_t *e)
     e->arp_next = 0.0f;
     e->arp_clock = e->pos;
     e->playing = 1;
-    if (e->mo_clock) mout(e, 0xFA, 0, 0, e->mo_dest & 2);
+    if (e->mo_clock && clock_dest(e)) mout(e, 0xFA, 0, 0, clock_dest(e));
 }
 
 static void stop(es_engine_t *e)
@@ -459,7 +470,7 @@ static void stop(es_engine_t *e)
     for (int i = 0; i < ES_VOICES; i++)
         if (e->v[i].on && e->v[i].off_in >= 0) { e->v[i].gate = 0; e->v[i].off_in = -1; }
     moff_block(e, true);
-    if (e->mo_clock) mout(e, 0xFC, 0, 0, e->mo_dest & 2);
+    if (e->mo_clock && clock_dest(e)) mout(e, 0xFC, 0, 0, clock_dest(e));
     for (int p = 0; p < ES_PARTS; p++)
         for (int n = 0; n < 128; n++) e->rec_start[p][n] = -1;
 }
@@ -719,9 +730,9 @@ static void engine_block(es_engine_t *e, float *out)
                 fire(e, e->next_step);
                 e->next_step++;
             }
-            if (e->mo_clock && (e->mo_dest & 2))
+            if (e->mo_clock && clock_dest(e))
                 while (e->clk_next <= e->abs_pos) {
-                    mout(e, 0xF8, 0, 0, 2);
+                    mout(e, 0xF8, 0, 0, clock_dest(e));
                     e->clk_next += 1.0f / 6.0f;
                 }
             e->pos += adv;

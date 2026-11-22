@@ -713,6 +713,12 @@ bool aos_hal_usb_midi_ready(void) { return aos_hal_usb_keys_ready(); }
 bool aos_hal_usb_midi_note(int note, int velocity, bool on) { if (!aos_hal_usb_keys_ready()) return false; printf("[hal] midi note %d %s vel %d\n", note, on ? "on" : "off", velocity); return true; }
 bool aos_hal_usb_midi_cc(int control, int value) { if (!aos_hal_usb_keys_ready()) return false; printf("[hal] midi cc %d %d\n", control, value); return true; }
 bool aos_hal_usb_midi_bend(int value) { if (!aos_hal_usb_keys_ready()) return false; printf("[hal] midi bend %d\n", value); return true; }
+bool aos_hal_usb_midi_send(int status, int d1, int d2)
+{
+    if (!aos_hal_usb_keys_ready() || status < 0x80 || status > 0xFF || status == 0xF0 || status == 0xF7) return false;
+    if (status != 0xF8) printf("[hal] midi send %02X %d %d\n", status, d1, d2);    /* the clock is 24 a quarter: not printed */
+    return true;
+}
 bool aos_hal_usb_card_away(void) { return s_usb_mode == AOS_HAL_USB_DISK; }
 /* a pretend computer; the probe's is a real client on its TCP port */
 bool aos_hal_usb_connected(void) { return s_usb_mode == AOS_HAL_USB_PROBE ? aos_hal_sim_probe_client() : s_usb_mode != AOS_HAL_USB_CONSOLE; }
