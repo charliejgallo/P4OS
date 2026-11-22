@@ -154,6 +154,45 @@ def ods_cells(z):
     return out
 
 
+WN = '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}'
+
+
+def docx_paras(z):
+    root = ET.fromstring(z.read('word/document.xml'))
+    out = []
+    for para in root.iter(WN + 'p'):
+        txt = ''
+        for el in para.iter():
+            if el.tag == WN + 't' and el.text:
+                txt += el.text
+            elif el.tag == WN + 'tab':
+                txt += '\t'
+        out.append(txt)
+    return out
+
+
+def odt_paras(z):
+    root = ET.fromstring(z.read('content.xml'))
+    body = root.find(O + 'body')
+    out = []
+    for para in body.iter():
+        if para.tag in (TX + 'p', TX + 'h'):
+            # its own text, without that of notes and comments inside it
+            def text(e):
+                t = e.text or '' if e.tag not in (TX + 'note', O + 'annotation') else ''
+                for c in e:
+                    if c.tag == TX + 's':
+                        t += ' ' * int(c.get(TX + 'c', '1'))
+                    elif c.tag == TX + 'tab':
+                        t += '\t'
+                    elif c.tag not in (TX + 'note', O + 'annotation', TX + 'p'):
+                        t += text(c)
+                    t += c.tail or ''
+                return t
+            out.append(text(para))
+    return out
+
+
 def main():
     if len(sys.argv) < 3:
         print(__doc__)
@@ -172,7 +211,14 @@ def main():
                 print(f'  kept:    {n}')
             else:
                 print(f'  changed: {n}')
-    cells = xlsx_cells(z) if 'xl/workbook.xml' in z.namelist() else ods_cells(z)
+    names = z.namelist()
+    if 'word/document.xml' in names or ('content.xml' in names and b'office:text' in z.read('content.xml')):
+        paras = docx_paras(z) if 'word/document.xml' in names else odt_paras(z)
+        for i, t in enumerate(paras):
+            if not wanted or str(i) in wanted:
+                print(f'  {i:3d} {t}')
+        sys.exit(1 if faults else 0)
+    cells = xlsx_cells(z) if 'xl/workbook.xml' in names else ods_cells(z)
     first = next(iter(cells))
     for w in wanted:
         sheet, ref = (w.split('!', 1) if '!' in w else (first, w))

@@ -13,6 +13,7 @@
  * tools/test_formats.sh runs it over the samples and checks what it saved.
  */
 #include "of.h"
+#include "of_doc.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,6 +58,30 @@ static bool apply(of_book_t *b, const char *arg)
     return true;
 }
 
+static void docdump(of_doc_t *d)
+{
+    for (int i = 0; i < d->np; i++) {
+        of_para_t *p = &d->p[i];
+        printf("%3d %s%s%s c%-2d ", i, p->heading ? "H" : " ", p->heading ? (char[2]){ (char)('0' + p->heading), 0 } : " ",
+               p->locked ? "L" : " ", p->cell);
+        if (p->label[0]) printf("%s ", p->label);
+        for (int k = 0; k < p->len; k++) {
+            if (k + 2 < p->len && !memcmp(p->txt + k, OF_OBJ_CHAR, 3)) {
+                of_obj_t *o = of_para_obj_at(d, p, k);
+                static const char *const K[] = { "hid", "img", "mark", "txt", "brk" };
+                printf("<%s%s%s>", o ? K[o->kind] : "?", o && o->text ? ":" : "", o && o->text ? o->text : "");
+                k += 2;
+                continue;
+            }
+            of_rstyle_t e;
+            of_doc_effective(d, p, p->at[k], &e);
+            if (k == 0 || p->at[k] != p->at[k - 1]) printf("%s%s%s", e.b == OF_TRI_ON ? "*" : "", e.i == OF_TRI_ON ? "/" : "", e.link >= 0 ? "_" : "");
+            putchar(p->txt[k]);
+        }
+        printf("\n");
+    }
+}
+
 int main(int argc, char **argv)
 {
     of_locale_set(true);
@@ -72,6 +97,46 @@ int main(int argc, char **argv)
         of_book_recalc(b);
         dump(b);
         of_book_free(b);
+        return 0;
+    }
+    if (argc >= 3 && !strcmp(argv[1], "docdump")) {
+        of_doc_t *d = of_doc_load(argv[2], err, sizeof err);
+        if (!d) { printf("load failed: %s\n", err); return 1; }
+        docdump(d);
+        of_doc_free(d);
+        return 0;
+    }
+    if (argc >= 4 && !strcmp(argv[1], "docedit")) {
+        of_doc_t *d = of_doc_load(argv[2], err, sizeof err);
+        if (!d) { printf("load failed: %s\n", err); return 1; }
+        for (int i = 4; i < argc; i++) {
+            char op[16];
+            int a = 0, b = 0, c = 0, n = 0;
+            if (sscanf(argv[i], "%15[a-z]:%d:%d%n", op, &a, &b, &n) >= 2) {
+                const char *rest = argv[i] + n;
+                if (!strcmp(op, "ins")) of_para_insert(d, a, b < 0 ? d->p[a].len : b, rest + 1, (int)strlen(rest + 1), d->p[a].len ? d->p[a].at[d->p[a].len - 1] : 0);
+                else if (!strcmp(op, "del")) { sscanf(rest, ":%d", &c); of_para_delete(d, a, b, c); }
+                else if (!strcmp(op, "split")) of_doc_split(d, a, b);
+                else if (!strcmp(op, "merge")) printf("merge %d: %s\n", a, of_doc_merge(d, a) ? "ok" : "refused");
+                else if (!strcmp(op, "bold") || !strcmp(op, "italic")) {
+                    sscanf(rest, ":%d", &c);
+                    of_rstyle_t v = { .b = OF_TRI_ON, .i = OF_TRI_ON };
+                    of_para_restyle(d, a, b, c, op[0] == 'b' ? OF_RS_B : OF_RS_I, &v);
+                } else if (!strcmp(op, "head")) { d->p[a].heading = (uint8_t)b; d->p[a].pmask |= OF_PP_STYLE; d->p[a].dirty = true; }
+                else if (!strcmp(op, "align")) { d->p[a].align = (uint8_t)b; d->p[a].pmask |= OF_PP_ALIGN; d->p[a].dirty = true; }
+                else printf("bad op %s\n", argv[i]);
+            }
+        }
+        const char *e = of_ext(argv[3]);
+        int fmt = !strcmp(e, "odt") ? OF_DOC_ODT : !strcmp(e, "txt") ? OF_DOC_TEXT : OF_DOC_DOCX;
+        if (!of_doc_save(d, fmt, argv[3], err, sizeof err)) { printf("save failed: %s\n", err); return 1; }
+        of_doc_free(d);
+        if (fmt == OF_DOC_TEXT) return 0;
+        d = of_doc_load(argv[3], err, sizeof err);
+        if (!d) { printf("reload failed: %s\n", err); return 1; }
+        printf("-- read back\n");
+        docdump(d);
+        of_doc_free(d);
         return 0;
     }
     if (argc >= 3 && !strcmp(argv[1], "dump")) {
