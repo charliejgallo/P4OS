@@ -1,0 +1,277 @@
+# amoledos-lang 1   es -> en
+# aos.vuelos.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/vuelos/main/vl_feed.c:494
+en tierra	on the ground
+
+#: apps/vuelos/main/vl_feed.c:861
+emergencia	emergency
+
+#: apps/vuelos/main/vl_feed.c:861
+falla de radio	radio failure
+
+#: apps/vuelos/main/vl_feed.c:861
+interferencia ilícita	unlawful interference
+
+#: apps/vuelos/main/vl_feed.c:862
+Atención	Alert
+
+#: apps/vuelos/main/vl_feed.c:864
+Pasa encima	Overhead
+
+#: apps/vuelos/main/vl_feed.c:866
+Militar	Military
+
+#: apps/vuelos/main/vl_frame.c:649
+de fuselaje ancho	wide-body
+
+#: apps/vuelos/main/vl_frame.c:650
+regional	regional
+
+#: apps/vuelos/main/vl_frame.c:651
+liviano	light aircraft
+
+#: apps/vuelos/main/vl_frame.c:652
+helicóptero	helicopter
+
+#: apps/vuelos/main/vl_frame.c:653
+planeador	glider
+
+#: apps/vuelos/main/vl_frame.c:654
+globo	balloon
+
+#: apps/vuelos/main/vl_frame.c:655
+dron	drone
+
+#: apps/vuelos/main/vl_frame.c:656
+vehículo	vehicle
+
+#: apps/vuelos/main/vl_frame.c:657
+de línea	airliner
+
+#: apps/vuelos/main/vl_frame.c:738
+Buscando la ruta...	Looking up the route...
+
+#: apps/vuelos/main/vl_frame.c:740
+Ruta desconocida	Route unknown
+
+#: apps/vuelos/main/vl_frame.c:755
+N	N
+
+#: apps/vuelos/main/vl_frame.c:755
+NE	NE
+
+#: apps/vuelos/main/vl_frame.c:755
+E	E
+
+#: apps/vuelos/main/vl_frame.c:755
+SE	SE
+
+#: apps/vuelos/main/vl_frame.c:755
+S	S
+
+#: apps/vuelos/main/vl_frame.c:755
+SO	SW
+
+#: apps/vuelos/main/vl_frame.c:755
+O	W
+
+#: apps/vuelos/main/vl_frame.c:755
+NO	NW
+
+#: apps/vuelos/main/vl_frame.c:757
+Altitud	Altitude
+
+#: apps/vuelos/main/vl_frame.c:757
+Velocidad	Speed
+
+#: apps/vuelos/main/vl_frame.c:757
+Vel. vertical	Vertical rate
+
+#: apps/vuelos/main/vl_frame.c:757
+Rumbo	Track
+
+#: apps/vuelos/main/vl_frame.c:757
+Squawk	Squawk
+
+#: apps/vuelos/main/vl_frame.c:757
+Distancia	Distance
+
+#: apps/vuelos/main/vl_frame.c:771
+Squawk de emergencia	Emergency squawk
+
+#: apps/vuelos/main/vl_frame.c:771
+Squawk de falla de radio	Radio failure squawk
+
+#: apps/vuelos/main/vl_frame.c:772
+Squawk de interferencia ilícita	Unlawful interference squawk
+
+#: apps/vuelos/main/vl_frame.c:775
+visto hace %u s · %06X%s	seen %u s ago · %06X%s
+
+#: apps/vuelos/main/vl_frame.c:776
+ · militar	 · military
+
+#: apps/vuelos/main/vl_frame.c:792
+Sin conexión	No connection
+
+#: apps/vuelos/main/vl_frame.c:795
+Falta la dirección del receptor	The receiver's address is missing
+
+#: apps/vuelos/main/vl_frame.c:798
+Cupo de pedidos agotado	Request quota used up
+
+#: apps/vuelos/main/vl_frame.c:799
+Esperando la hora	Waiting for the time
+
+#: apps/vuelos/main/vl_frame.c:800
+Respuesta inesperada	Unexpected answer
+
+#: apps/vuelos/main/vl_frame.c:801
+Acceso rechazado	Access refused
+
+#: apps/vuelos/main/vl_frame.c:802
+Error %d	Error %d
+
+#: apps/vuelos/main/vl_frame.c:805
+#: apps/vuelos/main/vl_ui.c:241
+Buscando aviones...	Looking for aircraft...
+
+#: apps/vuelos/main/vl_frame.c:810
+1 avión	1 aircraft
+
+#: apps/vuelos/main/vl_frame.c:811
+%d aviones	%d aircraft
+
+#: apps/vuelos/main/vl_ui.c:241
+No hay aviones en el radio elegido.	No aircraft within the chosen radius.
+
+#: apps/vuelos/main/vl_ui.c:277
+#: apps/vuelos/main/vl_ui.c:301
+Por altitud	By altitude
+
+#: apps/vuelos/main/vl_ui.c:277
+#: apps/vuelos/main/vl_ui.c:301
+Por distancia	By distance
+
+#: apps/vuelos/main/vl_ui.c:287
+Aviones	Aircraft
+
+#: apps/vuelos/main/vl_ui.c:322
+sí	yes
+
+#: apps/vuelos/main/vl_ui.c:322
+#: apps/vuelos/main/vl_ui.c:334
+no	no
+
+#: apps/vuelos/main/vl_ui.c:330
+receptor propio	own receiver
+
+#: apps/vuelos/main/vl_ui.c:336
+métricas	metric
+
+#: apps/vuelos/main/vl_ui.c:336
+de aviación	aviation
+
+#: apps/vuelos/main/vl_ui.c:351
+Cada 5 s. Uso no comercial.	Every 5 s. Non-commercial use.
+
+#: apps/vuelos/main/vl_ui.c:353
+Cada %d s: %d pedidos por día.	Every %d s: %d requests a day.
+
+#: apps/vuelos/main/vl_ui.c:356
+Cada %d s, con tu cliente de la API.	Every %d s, with your API client.
+
+#: apps/vuelos/main/vl_ui.c:356
+Cada %d s, sin cuenta.	Every %d s, with no account.
+
+#: apps/vuelos/main/vl_ui.c:359
+La dirección se escribe en la página del portal.	The address is typed in the portal page.
+
+#: apps/vuelos/main/vl_ui.c:442
+Fuente	Source
+
+#: apps/vuelos/main/vl_ui.c:443
+Radio	Radius
+
+#: apps/vuelos/main/vl_ui.c:444
+Estelas	Trails
+
+#: apps/vuelos/main/vl_ui.c:445
+Unidades	Units
+
+#: apps/vuelos/main/vl_ui.c:446
+Nombres en el mapa	Names on the map
+
+#: apps/vuelos/main/vl_ui.c:447
+Origen y destino	Origin and destination
+
+#: apps/vuelos/main/vl_ui.c:448
+Un avión pasa encima	An aircraft passes overhead
+
+#: apps/vuelos/main/vl_ui.c:449
+Emergencias	Emergencies
+
+#: apps/vuelos/main/vl_ui.c:450
+Militares	Military
+
+#: apps/vuelos/main/vl_ui.c:451
+Sonido de los avisos	Alert sound
+
+#: apps/vuelos/main/vl_ui.c:453
+Datos	Data
+
+#: apps/vuelos/main/vl_ui.c:455
+Mapa	Map
+
+#: apps/vuelos/main/vl_ui.c:456
+Avisos	Alerts
+
+#: apps/vuelos/main/vl_ui.c:463
+A menos de %s y %d ft	Within %s and below %d ft
+
+#: apps/vuelos/main/vl_ui.c:466
+Según adsbdb, por el número de vuelo	From adsbdb, by flight number
+
+#: apps/vuelos/main/vl_ui.c:467
+Squawk 7500, 7600 o 7700	Squawk 7500, 7600 or 7700
+
+#: apps/vuelos/main/vl_ui.c:468
+Si la fuente lo dice	When the source says so
+
+#: apps/vuelos/main/vl_ui.c:472
+Lugar	Place
+
+#: apps/vuelos/main/vl_ui.c:474
+Lugar elegido	Chosen place
+
+#: apps/vuelos/main/vl_ui.c:475
+Usar el centro del mapa	Use the centre of the map
+
+#: apps/vuelos/main/vl_ui.c:480
+Ciudad de Clima	Weather's city
+
+#: apps/vuelos/main/vl_ui.c:486
+Una pulsación larga en el mapa también elige el lugar. La dirección del receptor, las claves de los servicios y un lugar por su nombre se escriben en la página Vuelos del portal.	A long press on the map also chooses the place. The receiver's address, the services' keys and a place by its name are typed in the portal's Flights page.
+
+#: apps/vuelos/main/vl_ui.c:487
+Mapa: OpenFreeMap, OpenMapTiles, OpenStreetMap. Aeropuertos: OurAirports.	Map: OpenFreeMap, OpenMapTiles, OpenStreetMap. Airports: OurAirports.
+
+#: apps/vuelos/main/vl_ui.c:488
+Última lectura:	Last reading:
+
+#: apps/vuelos/main/vl_ui.c:488
+aeropuertos en la tarjeta	airports on the card
+
+#: apps/vuelos/main/vl_ui.c:503
+Ajustes	Settings
+
+#: apps/vuelos/main/vuelos.c:763
+El lugar pasa a	The place is now
+
+#: apps/vuelos/main/vuelos.c:833
+Sin memoria	Out of memory

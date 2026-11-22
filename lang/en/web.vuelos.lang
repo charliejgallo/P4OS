@@ -1,0 +1,185 @@
+# amoledos-lang 1   es -> en
+# web.vuelos.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/vuelos/web/vuelos.js:52
+Sin cuenta. Un pedido por segundo como mucho y sólo para uso no comercial: la placa pregunta cada 5 s.	No account. One request a second at most, and for non-commercial use only: the board asks every 5 s.
+
+#: apps/vuelos/web/vuelos.js:53
+Datos abiertos (ODbL). Sin clave, 500 pedidos por día desde tu dirección: la placa los reparte en el día (uno cada 3 minutos). Con una clave, poné cuántos te da.	Open data (ODbL). With no key, 500 requests a day from your address: the board spreads them over the day (one every 3 minutes). With a key, enter how many it gives you.
+
+#: apps/vuelos/web/vuelos.js:54
+Para investigación y uso no comercial. Sin cuenta, 400 créditos por día (un pedido cada 4 minutos más o menos); con un cliente de la API de tu cuenta, 4000.	For research and non-commercial use. With no account, 400 credits a day (a request about every 4 minutes); with an API client of your account, 4000.
+
+#: apps/vuelos/web/vuelos.js:55
+Receptor propio	Own receiver
+
+#: apps/vuelos/web/vuelos.js:55
+Un receptor ADS-B en tu red (readsb, dump1090, tar1090): la dirección de su aircraft.json. Cada 2 s.	An ADS-B receiver on your network (readsb, dump1090, tar1090): the address of its aircraft.json. Every 2 s.
+
+#: apps/vuelos/web/vuelos.js:85
+#: apps/vuelos/web/vuelos.js:267
+Vuelos	Flights
+
+#: apps/vuelos/web/vuelos.js:91
+Cargando…	Loading…
+
+#: apps/vuelos/web/vuelos.js:92
+Ciudad, pueblo o aeropuerto	City, town or airport
+
+#: apps/vuelos/web/vuelos.js:96
+#: apps/vuelos/web/vuelos.js:240
+Abrí Vuelos en la placa para ver acá lo que ve.	Open Flights on the board to see here what it sees.
+
+#: apps/vuelos/web/vuelos.js:122
+Sin nombre	No name
+
+#: apps/vuelos/web/vuelos.js:123
+Todavía no hay un lugar elegido: la placa usa la ciudad de Clima.	No place chosen yet: the board uses Weather's city.
+
+#: apps/vuelos/web/vuelos.js:136
+Clave (opcional)	Key (optional)
+
+#: apps/vuelos/web/vuelos.js:137
+Pedidos por día que te da	Requests a day it gives you
+
+#: apps/vuelos/web/vuelos.js:140
+Client ID (opcional)	Client ID (optional)
+
+#: apps/vuelos/web/vuelos.js:141
+Client secret	Client secret
+
+#: apps/vuelos/web/vuelos.js:142
+Se crean en la página de tu cuenta de OpenSky. Quedan en la tarjeta de la placa, en /data/vuelos.txt.	They are made on your OpenSky account page. They stay on the board's card, in /data/vuelos.txt.
+
+#: apps/vuelos/web/vuelos.js:144
+Dirección del aircraft.json	Address of aircraft.json
+
+#: apps/vuelos/web/vuelos.js:159
+Guardado: la placa lo toma en unos segundos	Saved: the board takes it in a few seconds
+
+#: apps/vuelos/web/vuelos.js:160
+No se pudo guardar: %s	Could not save: %s
+
+#: apps/vuelos/web/vuelos.js:177
+Clima no tiene un lugar elegido	Weather has no place chosen
+
+#: apps/vuelos/web/vuelos.js:186
+Buscando…	Searching…
+
+#: apps/vuelos/web/vuelos.js:193
+Elegir	Choose
+
+#: apps/vuelos/web/vuelos.js:193
+No se encontró ningún lugar con ese nombre.	No place with that name was found.
+
+#: apps/vuelos/web/vuelos.js:194
+No se pudo buscar: %s	Could not search: %s
+
+#: apps/vuelos/web/vuelos.js:199
+en tierra	on the ground
+
+#: apps/vuelos/web/vuelos.js:215
+Vuelo	Flight
+
+#: apps/vuelos/web/vuelos.js:215
+Matrícula	Registration
+
+#: apps/vuelos/web/vuelos.js:215
+Tipo	Type
+
+#: apps/vuelos/web/vuelos.js:215
+Altitud	Altitude
+
+#: apps/vuelos/web/vuelos.js:215
+Vel. vertical	Vertical rate
+
+#: apps/vuelos/web/vuelos.js:215
+Rumbo	Track
+
+#: apps/vuelos/web/vuelos.js:215
+Distancia	Distance
+
+#: apps/vuelos/web/vuelos.js:222
+%s aviones · %s · %s	%s aircraft · %s · %s
+
+#: apps/vuelos/web/vuelos.js:250
+Radio (km)	Radius (km)
+
+#: apps/vuelos/web/vuelos.js:251
+Unidades	Units
+
+#: apps/vuelos/web/vuelos.js:251
+De aviación (ft, kt, NM)	Aviation (ft, kt, NM)
+
+#: apps/vuelos/web/vuelos.js:251
+Métricas (m, km/h, km)	Metric (m, km/h, km)
+
+#: apps/vuelos/web/vuelos.js:252
+Estelas	Trails
+
+#: apps/vuelos/web/vuelos.js:252
+No	No
+
+#: apps/vuelos/web/vuelos.js:254
+Nombres en el mapa	Names on the map
+
+#: apps/vuelos/web/vuelos.js:254
+Origen y destino (adsbdb)	Origin and destination (adsbdb)
+
+#: apps/vuelos/web/vuelos.js:257
+Un avión pasa encima	An aircraft passes overhead
+
+#: apps/vuelos/web/vuelos.js:257
+Emergencias (7500, 7600, 7700)	Emergencies (7500, 7600, 7700)
+
+#: apps/vuelos/web/vuelos.js:258
+Militares	Military
+
+#: apps/vuelos/web/vuelos.js:258
+Con sonido	With sound
+
+#: apps/vuelos/web/vuelos.js:260
+"Encima" es a menos de (km)	"Overhead" is within (km)
+
+#: apps/vuelos/web/vuelos.js:261
+y por debajo de (ft)	and below (ft)
+
+#: apps/vuelos/web/vuelos.js:268
+Lugar	Place
+
+#: apps/vuelos/web/vuelos.js:270
+Buscar	Search
+
+#: apps/vuelos/web/vuelos.js:271
+Usar el lugar de Clima	Use Weather's place
+
+#: apps/vuelos/web/vuelos.js:272
+La búsqueda es de Open-Meteo. En la placa, una pulsación larga sobre el mapa también elige el lugar.	The search is Open-Meteo's. On the board, a long press on the map also chooses the place.
+
+#: apps/vuelos/web/vuelos.js:274
+Fuente de los datos	Data source
+
+#: apps/vuelos/web/vuelos.js:276
+Mapa y datos	Map and data
+
+#: apps/vuelos/web/vuelos.js:278
+Avisos	Alerts
+
+#: apps/vuelos/web/vuelos.js:280
+Los avisos salen mientras Vuelos está abierta en la placa.	Alerts show while Flights is open on the board.
+
+#: apps/vuelos/web/vuelos.js:282
+Guardar	Save
+
+#: apps/vuelos/web/vuelos.js:283
+Abierta en la placa	Opened on the board
+
+#: apps/vuelos/web/vuelos.js:283
+Abrir Vuelos en la placa	Open Flights on the board
+
+#: apps/vuelos/web/vuelos.js:284
+Lo que ve la placa	What the board sees

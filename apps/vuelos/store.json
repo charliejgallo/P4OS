@@ -1,0 +1,23 @@
+{
+ "cat": "red",
+ "about": {
+  "es": "Un radar de vuelos: el mapa alrededor de tu lugar y los aviones que pasan, en vivo, con su altura, velocidad y ruta.",
+  "en": "A flight radar: the map around your place and the aircraft passing by, live, with their altitude, speed and route."
+ },
+ "desc": {
+  "es": "Elegís un lugar y la placa muestra los aviones que vuelan cerca, sobre un mapa oscuro con anillos de distancia y los aeropuertos de la zona. Cada avión tiene la forma de lo que es (de línea, regional, liviano, helicóptero, planeador o globo), va girado según su rumbo, lleva un color según su altura y deja una estela de los últimos minutos. Entre una lectura y la siguiente se sigue moviendo suave, sin saltos.\n\nTocar un avión abre su ficha: vuelo, matrícula, tipo, altitud, velocidad, velocidad vertical, rumbo, squawk, distancia, y el origen y el destino cuando se conocen; un botón hace que el mapa lo siga. La lista los ordena por distancia o por altitud, y hay avisos opcionales cuando uno pasa encima, cuando alguno marca un squawk de emergencia o cuando es militar.\n\nLos datos salen de un servicio gratuito (airplanes.live, adsb.lol u OpenSky Network, cada uno con su límite de pedidos, que la app respeta) o de un receptor ADS-B propio en tu red. En la página Vuelos del portal se busca el lugar por su nombre, se elige la fuente, se escriben la dirección del receptor o las claves de los servicios, y se ve una tabla de lo que la placa está viendo. Anda parada y acostada, y con joystick.",
+  "en": "You choose a place and the board shows the aircraft flying nearby, on a dark map with distance rings and the area's airports. Each aircraft has the shape of what it is (airliner, regional, light aircraft, helicopter, glider or balloon), is turned by its track, is coloured by its altitude and leaves a trail of the last minutes. Between one reading and the next it keeps moving smoothly, with no jumps.\n\nTapping an aircraft opens its card: flight, registration, type, altitude, speed, vertical rate, track, squawk, distance, and the origin and destination when they are known; a button makes the map follow it. The list sorts them by distance or by altitude, and there are optional alerts when one passes overhead, when one squawks an emergency or when it is military.\n\nThe data come from a free service (airplanes.live, adsb.lol or the OpenSky Network, each with its own request limit, which the app keeps to) or from an ADS-B receiver of your own on your network. In the portal's Flights page you search the place by name, choose the source, type the receiver's address or the services' keys, and see a table of what the board is seeing. It works upright and lying down, and with a gamepad."
+ },
+ "shots": [
+  "app-vuelos.jpg",
+  "app-vuelos-card.jpg",
+  "land-vuelos.jpg",
+  "app-vuelos-list.png"
+ ],
+ "packs": [
+  {
+   "file": "vuelos_p4.pak",
+   "need": true
+  }
+ ]
+}
