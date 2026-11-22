@@ -154,11 +154,22 @@ de la 0.30.0: se pone al día al abrir la Tienda o Ajustes → Actualización.
 - [x] Tienda con el catálogo de la 0.31.0: de actualizaciones, sólo los
       dos idiomas del sistema, y ninguna app de las 58 de antes; las cinco
       apps nuevas para obtener y Metegol como copiada a mano.
-- [ ] Instalar esas dos actualizaciones de idioma desde la Tienda.
-- [ ] Tienda: Sudoku, Solitario, Bolsa, Vuelos y Juegos de mesa con
-      "Obtener", cada una con su pack; abrirlas una vez.
-- [ ] Metegol figura "copiada a mano" (se instaló con `install_apps.sh`):
-      reinstalarla desde su página para que la Tienda la maneje.
+- [x] Las dos actualizaciones de idioma, instaladas desde la Tienda por
+      el usuario (2026-11-22).
+- [x] **Sudoku, Solitario, Bolsa, Vuelos y Juegos de mesa, obtenidas
+      desde la Tienda por el usuario** (2026-11-22), y Metegol
+      reemplazada por la del catálogo. Revisado después por el portal:
+      las seis en la 0.31.0, con cada archivo como dice su recibo y cada
+      pack con el tamaño y el SHA-256 del catálogo publicado (23,7 MB
+      leídos de la tarjeta), los packs que necesitan en su lugar,
+      registradas en el inicio, y sin una línea de problema en el
+      registro. La Tienda: 69 instaladas, ninguna para actualizar,
+      ninguna por obtener. **El circuito completo de una app nueva**
+      (rama, `main`, CI, pack en una release, catálogo, tag, la placa que
+      la baja) **quedó cerrado con estas seis.**
+- [ ] Abrir cada una de las cinco (sólo se habían probado en el
+      simulador): en Juegos de mesa, los fps del 3D y el tiempo del motor
+      de ajedrez; Bolsa y Vuelos contra los servicios de verdad.
 - [x] **"Que las maneje la Tienda" sólo tomó tres o cuatro** (2026-11-22,
       dicho por el usuario): es lo esperado, las demás eran compilaciones
       de la Mac y no los bytes del catálogo. **"Reemplazarlas por las de

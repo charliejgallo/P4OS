@@ -1284,6 +1284,11 @@ proyecto).
   el repo plantilla y el índice de la comunidad.
 - **Del CI:** los puntos 1 y 2. Faltan el kit (3) y el catálogo que no
   viaja con el firmware (4).
+- **Pedido del usuario (2026-11-22): una categoría "Nuevas"** en la
+  Tienda, para ver de un vistazo lo que entró con la última release. El
+  catálogo ya dice en qué release apareció cada paquete (`ver`): alcanza
+  con un chip que filtre por la release del catálogo, sin tocar las
+  fichas. Sin empezar.
 - **Sueltos:** el avance sobre el ícono del inicio mientras una app se
   instala (fase 3); cortar el Wi-Fi en medio de una bajada, quitar una
   fuente y quitar un paquete suelto en la placa (`PRUEBAS-PLACA.md`); los
@@ -1298,7 +1303,8 @@ proyecto).
   Estudio: seis apps nuevas, los respaldos y SFTP. Es la primera release
   que una placa baja sola, **y la placa del usuario la bajó ese mismo
   día** desde Ajustes: 27 s de bajada, escrita, arrancada a prueba y
-  confirmada (`PRUEBAS-PLACA.md`). Cómo se armó:
+  confirmada; y **las seis apps nuevas se instalaron desde la Tienda**,
+  byte por byte las publicadas (`PRUEBAS-PLACA.md`). Cómo se armó:
   - Los 15 packs de arte nuevos (26 MB) se subieron a la release
     publicada `v0.30.0`, que es donde el catálogo los nombra, y recién
     después se anotaron en `store/packs.json` con
