@@ -83,6 +83,7 @@ The LED Strips app's Fire effect follows Mark Kriegsman's Fire2012 algorithm
 | What | Where | Licence | Notes |
 |---|---|---|---|
 | **Inter 4.1** (Medium, SemiBold) | converted to LVGL bitmaps in `components/aos_fonts/aos_inter_*.c` by `tools/gen_fonts.py` | SIL OFL 1.1 | [OFL-1.1-Inter.txt](LICENSES/OFL-1.1-Inter.txt) |
+| **Inter 4.1** (Regular, Bold, Italic, Bold Italic) | the card's `notas_p4.pak` and `oficina_p4.pak`, the fonts Notes and Office write documents with; built by `apps/notas/tools/pack_fonts.py` and `apps/oficina/tools/pack_fonts.py`, not in git, they go out with the release | SIL OFL 1.1 | [OFL-1.1-Inter.txt](LICENSES/OFL-1.1-Inter.txt) |
 | Font Awesome 5 Free glyphs (LVGL's symbols) | merged into the Inter files, from LVGL's `built_in_font` | fonts under SIL OFL 1.1 | [FontAwesome5-Free.txt](LICENSES/FontAwesome5-Free.txt) |
 | **Rubik Medium** (Google Fonts) | `apps/mila/tools/blender/fonts/`, the casita's name plate in Mila's art pack | SIL OFL 1.1 | its `OFL.txt` is next to it |
 | **JetBrains Mono 2.304** | `components/aos_fonts/aos_mono_*.c` (`tools/gen_mono_font.py`) | SIL OFL 1.1 | [OFL-1.1-JetBrainsMono.txt](LICENSES/OFL-1.1-JetBrainsMono.txt) |
