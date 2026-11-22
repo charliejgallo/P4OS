@@ -91,7 +91,7 @@ typedef enum {
 
 typedef struct {
     bool     busy;
-    char     job[12];       /* "refresh", "install", "remove", "adopt", "firmware"..., or "" */
+    char     job[12];       /* "refresh", "install", "remove", "adopt", "replace", "firmware"..., or "" */
     char     file[32];      /* the package it is about */
     char     step[40];      /* "downloading", "checking", "packs", "installing"... */
     uint32_t got, total;    /* of the download in hand; total 0 until known */
@@ -227,6 +227,10 @@ bool aos_store_install(const char *file, const char *packs);
 bool aos_store_remove(const char *file);
 /* A receipt for every app copied by hand whose .so is the catalogue's. */
 bool aos_store_adopt(void);
+/* The ones that are not: every app copied by hand that a source lists is
+ * installed over from that source, one after another, in one job. What they
+ * saved and the packs the card already has stay. */
+bool aos_store_replace_by_hand(void);
 
 /* Stops the job in hand at its next step and drops the queue. What was
  * downloaded stays for the next try. */

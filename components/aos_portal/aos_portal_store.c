@@ -33,6 +33,9 @@
  *                                  packs is need, all, none, or extras by
  *                                  name ("a.pak,b.pak")
  *   POST /api/store/remove         {"file": "bastion"}
+ *   POST /api/store/replace        every app copied by hand that is NOT the
+ *                                  catalogue's, installed over from its
+ *                                  source, in one job
  *   POST /api/store/adopt          a receipt for what was copied by hand and
  *                                  is the catalogue's
  *   POST /api/store/cancel
@@ -291,7 +294,7 @@ static bool store_api(aos_httpd_req_t *r, const char *p, bool get, bool post)
         store_state(r, why ? 400 : 200, why);
         return true;
     }
-    if (!post || (strcmp(p, "/refresh") && strcmp(p, "/install") && strcmp(p, "/remove") && strcmp(p, "/adopt") &&
+    if (!post || (strcmp(p, "/refresh") && strcmp(p, "/install") && strcmp(p, "/remove") && strcmp(p, "/adopt") && strcmp(p, "/replace") &&
                   strcmp(p, "/cancel") && strcmp(p, "/propose") && strcmp(p, "/firmware"))) return false;
     char *body = aos_httpd_body_all(r, 2048);
     cJSON *j = body ? cJSON_Parse(body) : NULL;
@@ -311,6 +314,8 @@ static bool store_api(aos_httpd_req_t *r, const char *p, bool get, bool post)
         if (!url || !aos_store_propose(url)) fail = _("eso no es una dirección de fuente: usuario/repositorio, o https://...");
     } else if (!strcmp(p, "/adopt")) {
         if (!aos_store_adopt()) fail = _("la cola está llena");
+    } else if (!strcmp(p, "/replace")) {
+        if (!aos_store_replace_by_hand()) fail = _("la cola está llena");
     } else if (!strcmp(p, "/firmware")) {
         if (!aos_store_fw_install()) fail = _("la cola está llena");
     } else aos_store_cancel();

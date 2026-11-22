@@ -2434,3 +2434,6 @@ Copiar la clave de la placa	Copy the board's key
 Probar la conexión	Try the connection
 Subir ahora	Send now
 Falta elegir una frase para las copias automáticas, en la placa (Ajustes, Respaldo, «Cifrarlas con una frase…»): hasta entonces no sube nada.	A passphrase for the automatic copies is yet to be chosen, at the board (Settings, Backup, “Seal them with a passphrase…”): until then nothing is sent.
+Las que no son iguales a las del catálogo: baja la de la Tienda para cada una. Lo que guardaron y sus packs quedan.	The ones that are not the same as the catalogue's: it downloads the Store's for each one. What they saved and their packs stay.
+¿Reemplazar las %s apps copiadas a mano por las de la Tienda?	Replace the %s apps copied by hand with the Store's?
+Reemplazarlas por las de la Tienda	Replace them with the Store's

@@ -69,8 +69,13 @@ is not a problem, and the Store does not touch it without being asked.
 - An app of the catalogue whose `.so` is on the card with no receipt shows
   as **Copied by hand**. "Let the Store manage them", on top of
   **Installed**, writes a receipt for each one whose file is byte for byte
-  the catalogue's; the app is not changed. One that differs stays as it
-  is until it is reinstalled from its page.
+  the catalogue's; the app is not changed. One that differs (a build of
+  your own, an older version) stays as it is until it is reinstalled from
+  its page, or until **Replace them with the Store's**, under that button
+  (two taps), does it for all of them in one job: the catalogue's package
+  over each, what the apps saved left alone, the packs the card has not
+  downloaded again, and the extras that were copied with them kept as
+  theirs when they are the catalogue's (since 0.31.1).
 - A `.so` that no catalogue lists (a build of your own, an app that is not
   published) is listed too, by its file's name, as copied by hand. The
   Store knows nothing else about it and offers nothing to do with it.
@@ -324,6 +329,7 @@ The portal's calls, under the rules of [SECURITY.md](SECURITY.md):
 | `POST /api/store/install` | `{"file":"bastion","packs":"need"}`; packs is `need`, `all`, `none`, or extras by name |
 | `POST /api/store/remove` | `{"file":"bastion"}` |
 | `POST /api/store/adopt` | a receipt for what was copied by hand and is the catalogue's |
+| `POST /api/store/replace` | every app copied by hand that is not the catalogue's, installed over from its source, in one job |
 | `POST /api/store/sideload` | the body is a `.p4app`; or `?path=/x.p4app` for one on the card |
 | `POST /api/store/propose` | `{"url":"user/repository"}`: left for the board to accept |
 | `POST /api/store/firmware` | download the offered firmware and write it to the other slot; `POST /api/ota/restart` runs it |

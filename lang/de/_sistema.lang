@@ -10849,3 +10849,7 @@ Juegos de mesa	Brettspiele
 
 #: apps/metegol  (nombre de app)
 Metegol	Tischfußball
+Las que quedan no son iguales a las del catálogo (otra compilación, o una versión vieja). Reemplazarlas baja la de la Tienda para cada una; lo que guardaron y sus packs quedan.	Die übrigen sind nicht dieselben wie im Katalog (ein anderer Build oder eine alte Version). Ersetzen lädt für jede die Version aus dem Store; was sie gespeichert haben und ihre Pakete bleiben.
+Tocá otra vez: reemplaza %d apps	Nochmal tippen: ersetzt %d Apps
+Reemplazarlas por las de la Tienda	Durch die aus dem Store ersetzen
+Reemplazando	Ersetze

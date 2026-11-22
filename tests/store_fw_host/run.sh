@@ -170,6 +170,27 @@ check("adopt: a receipt for the catalogue's, the pack with it", jobs[0][0] and "
       and receipt("c2", "mila")["packs"] == [] and os.path.exists("c2/lang/en/demo.golf.lang")
       and open("c2/apps/dados.so", "rb").read() == b"an older build", o)
 
+# 5b. the ones that are not the catalogue's: all installed over, in one job
+open("c2/apps/pinball.so", "wb").write(b"a build made at home")
+shutil.copy(BUILT + "/apps/pinball/build/pinball_zombis_p4.pak", "c2/apps/pinball_zombis_p4.pak")
+shutil.copy(BUILT + "/apps/pinball/build/pinball_circo_p4.pak", "c2/apps/pinball_circo_p4.pak")       # an extra, the catalogue's
+open("c2/apps/pinball_casino_p4.pak", "wb").write(b"an extra that is not the catalogue's")
+os.makedirs("c2/data/pinball"); open("c2/data/pinball/puntajes.txt", "w").write("12345\n")
+b = served()
+golf_before = receipt("c2", "golf")
+jobs, apps, o = fw("c2", "replace", "list")
+got = served() - b
+check("replace: every app copied by hand that was not the catalogue's, in one job", jobs[0][0] and "2 replaced by the catalogue's, 0 left" in jobs[0][1]
+      and apps["dados"][0] == "installed" and apps["pinball"][0] == "installed"
+      and open("c2/apps/dados.so", "rb").read() == open(BUILT + "/apps/dados/build/dados.so", "rb").read()
+      and open("c2/apps/pinball.so", "rb").read()[:4] == b"\x7fELF" and receipt("c2", "pinball").get("adopted") is not True, o)
+check("...its packs on the card not downloaded again, the extra that was whole kept as its own", got < 600_000
+      and [p["file"] for p in receipt("c2", "pinball")["packs"]] == ["pinball_zombis_p4.pak", "pinball_circo_p4.pak"], (got, receipt("c2", "pinball").get("packs")))
+check("...what is not the catalogue's left as it was, and what the app saved", open("c2/apps/pinball_casino_p4.pak", "rb").read() == b"an extra that is not the catalogue's"
+      and open("c2/data/pinball/puntajes.txt").read() == "12345\n" and receipt("c2", "golf") == golf_before, o)
+jobs, apps, o = fw("c2", "replace")
+check("...again: none left to replace", jobs[0][0] and "0 replaced" in jobs[0][1], o)
+
 # 6. remove
 before = tree("c")
 jobs, apps, o = fw("c", "remove=mila", "remove=nothing", "list")

@@ -95,7 +95,7 @@ typedef struct {
     char sys_path[72];      /* a part of the system: the first of its files, to tell whether it is there */
 } app_t;
 
-enum { J_REFRESH = 1, J_INSTALL, J_REMOVE, J_ADOPT, J_PROBE, J_ADD, J_UNSOURCE, J_SIDELOAD, J_FIRMWARE };
+enum { J_REFRESH = 1, J_INSTALL, J_REMOVE, J_ADOPT, J_PROBE, J_ADD, J_UNSOURCE, J_SIDELOAD, J_FIRMWARE, J_REPLACE };
 
 typedef struct {
     int  kind;
@@ -1122,7 +1122,13 @@ static bool install_core(cJSON *entry, app_t app, const char *local, const char 
         bool need = cJSON_IsTrue(cJSON_GetObjectItem(p, "need"));
         const char *choice = packs_arg && packs_arg[0] ? packs_arg : "need";
         bool want = had || !strcmp(choice, "all") || (strcmp(choice, "none") && (need || listed(choice, pf)));
-        if (!want && !adopt) continue;
+        /* An app that had no receipt (copied by hand) and is being installed
+         * over: an extra nobody asked for is still the app's when the card
+         * has all of it already, as the catalogue's bytes. Nothing is
+         * downloaded for it; without this the extras a person copied would
+         * be left on the card as nobody's, offered again with "Get". */
+        bool if_here = adopt || (!want && !old);
+        if (!want && !if_here) continue;
         int first = nparts, i = 0;
         bool all_here = true;
         cJSON_ArrayForEach(part, cJSON_GetObjectItem(p, "parts")) {
@@ -1140,7 +1146,7 @@ static bool install_core(cJSON *entry, app_t app, const char *local, const char 
             bool here = exists(rel, &have) && have == t->size && file_sha(rel, sha) && !strcmp(sha, t->sha);
             if (!here) {
                 all_here = false;
-                if (!adopt) {
+                if (!if_here) {
                     lock();
                     snprintf(s_st.step, sizeof s_st.step, "pack %.30s", t->name);
                     unlock();
@@ -1154,8 +1160,9 @@ static bool install_core(cJSON *entry, app_t app, const char *local, const char 
             nparts++;
             i++;
         }
-        /* adopting: a pack counts as the app's only when all of it is there */
-        if (adopt && !all_here) nparts = first;
+        /* adopting, or an extra found on the card: a pack counts as the
+         * app's only when all of it is there */
+        if (if_here && !all_here) nparts = first;
     }
 
     /* 5. from here on the card changes */
@@ -1469,6 +1476,41 @@ static bool uninstall(const char *file, err_t *e)
     return true;
 }
 
+/* The apps copied by hand that a source lists and that are NOT the
+ * catalogue's bytes (adopt_all() takes the ones that are): each installed
+ * over from its source, one after another, so that the Tienda knows what
+ * they are from then on. What an app saved stays, and so do its packs: the
+ * ones the card has as the catalogue's are not downloaded again. One that
+ * fails (no network, a newer P4OS needed) is left as it was and the rest
+ * go on; three in a row with no network end it. */
+static bool replace_all(err_t *e)
+{
+    int done = 0, failed = 0, net = 0;
+    for (int i = 0;; i++) {
+        app_t a;
+        lock();
+        bool more = i < s_n;
+        if (more) a = s_apps[i];
+        unlock();
+        if (!more || s_cancel || net >= 3) break;
+        if (a.pub.state != AOS_STORE_BY_HAND || a.pub.src < 0 || a.pub.system || !a.pub.fits) continue;
+        lock();
+        snprintf(s_st.file, sizeof s_st.file, "%s", a.pub.file);
+        unlock();
+        err_t one = { "", 0 };
+        if (install(a.pub.file, NULL, false, &one)) { done++; net = 0; }
+        else {
+            failed++;
+            net = one.kind == AOS_STORE_E_NETWORK ? net + 1 : 0;
+            aos_hal_log(TAG, "%s not replaced: %s", a.pub.file, one.why);
+        }
+    }
+    snprintf(e->why, sizeof e->why, "%d replaced by the catalogue's, %d left as they were%s", done, failed,
+             net >= 3 ? " (no network: stopped)" : "");
+    if (net >= 3) e->kind = AOS_STORE_E_NETWORK;
+    return net < 3;
+}
+
 static bool adopt_all(err_t *e)
 {
     int done = 0, left = 0;
@@ -1728,7 +1770,7 @@ static bool firmware(err_t *e)
 
 static const char *job_name(int kind)
 {
-    static const char *names[] = { "", "refresh", "install", "remove", "adopt", "look", "add", "unsource", "sideload", "firmware" };
+    static const char *names[] = { "", "refresh", "install", "remove", "adopt", "look", "add", "unsource", "sideload", "firmware", "replace" };
     return names[kind >= J_REFRESH && kind <= J_FIRMWARE ? kind : 0];
 }
 
@@ -1768,10 +1810,11 @@ static void work(void *arg)
         else if (j.kind == J_INSTALL) ok = install(j.file, j.packs, false, &e);
         else if (j.kind == J_REMOVE) ok = uninstall(j.file, &e);
         else if (j.kind == J_ADOPT) ok = adopt_all(&e);
+        else if (j.kind == J_REPLACE) ok = replace_all(&e);
         else if (j.kind == J_FIRMWARE) ok = firmware(&e);
 
         /* what is on the card changed: the apps no source lists are read again */
-        if (j.kind == J_INSTALL || j.kind == J_REMOVE || j.kind == J_SIDELOAD || j.kind == J_ADOPT) {
+        if (j.kind == J_INSTALL || j.kind == J_REMOVE || j.kind == J_SIDELOAD || j.kind == J_ADOPT || j.kind == J_REPLACE) {
             err_t again = { "", 0 };
             catalog_load(&again);
         }
@@ -1988,6 +2031,7 @@ bool aos_store_sideload(const char *card_path)
 
 bool aos_store_refresh(void) { return enqueue(J_REFRESH, NULL, NULL); }
 bool aos_store_adopt(void)   { return enqueue(J_ADOPT, NULL, NULL); }
+bool aos_store_replace_by_hand(void) { return enqueue(J_REPLACE, NULL, NULL); }
 
 bool aos_store_fw(aos_store_fw_t *out)
 {

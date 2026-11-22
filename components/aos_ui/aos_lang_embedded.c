@@ -3540,6 +3540,10 @@ static const char blob_en__sistema_lang[] =
     "Vuelos\tFlights\n"
     "Juegos de mesa\tBoard games\n"
     "Metegol\tTable Football\n"
+    "Las que quedan no son iguales a las del catálogo (otra compilación, o una versión vieja). Reemplazarlas baja la de la Tienda para cada una; lo que guardaron y sus packs quedan.\tThe ones that stay are not the same as the catalogue's (another build, or an old version). Replacing them downloads the Store's for each one; what they saved and their packs stay.\n"
+    "Tocá otra vez: reemplaza %d apps\tTap again: it replaces %d apps\n"
+    "Reemplazarlas por las de la Tienda\tReplace them with the Store's\n"
+    "Reemplazando\tReplacing\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -7072,6 +7076,10 @@ static const char blob_de__sistema_lang[] =
     "Vuelos\tFlüge\n"
     "Juegos de mesa\tBrettspiele\n"
     "Metegol\tTischfußball\n"
+    "Las que quedan no son iguales a las del catálogo (otra compilación, o una versión vieja). Reemplazarlas baja la de la Tienda para cada una; lo que guardaron y sus packs quedan.\tDie übrigen sind nicht dieselben wie im Katalog (ein anderer Build oder eine alte Version). Ersetzen lädt für jede die Version aus dem Store; was sie gespeichert haben und ihre Pakete bleiben.\n"
+    "Tocá otra vez: reemplaza %d apps\tNochmal tippen: ersetzt %d Apps\n"
+    "Reemplazarlas por las de la Tienda\tDurch die aus dem Store ersetzen\n"
+    "Reemplazando\tErsetze\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -7079,7 +7087,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3525, 0, files_en, 1 },
-    { "de", "Deutsch", 3525, 0, files_de, 1 },
+    { "en", "English", 3529, 0, files_en, 1 },
+    { "de", "Deutsch", 3529, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

@@ -150,6 +150,12 @@ de la 0.30.0: se pone al día al abrir la Tienda o Ajustes → Actualización.
       "Obtener", cada una con su pack; abrirlas una vez.
 - [ ] Metegol figura "copiada a mano" (se instaló con `install_apps.sh`):
       reinstalarla desde su página para que la Tienda la maneje.
+- [ ] **"Que las maneje la Tienda" sólo tomó tres o cuatro** (2026-11-22,
+      dicho por el usuario): es lo esperado, las demás son compilaciones
+      de la Mac y no los bytes del catálogo. Para no ir una por una:
+      "Reemplazarlas por las de la Tienda" (rama `tienda-reemplazar`, sin
+      instalar): probarlo con las ~35 que quedan, mirar cuánto tarda y
+      que los packs grandes (Bastión, el pinball) no se bajen de nuevo.
 
 ### Las apps nuevas de noviembre (2026-11-21, publicadas en la 0.31.0)
 

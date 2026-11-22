@@ -539,6 +539,26 @@ static void adopt_cb(lv_event_t *e)
     build();
 }
 
+/* Every app copied by hand that is not the catalogue's, installed over from
+ * the Tienda in one job. It replaces code, so it asks twice: the first tap
+ * turns the button into the question, for a few seconds. */
+static uint32_t s_replace_armed;
+static bool replace_armed(void)
+{
+    return s_replace_armed && (uint32_t)aos_hal_uptime_ms() - s_replace_armed < 6000;
+}
+
+static void replace_cb(lv_event_t *e)
+{
+    (void)e;
+    if (!replace_armed()) s_replace_armed = (uint32_t)aos_hal_uptime_ms() | 1u;
+    else {
+        s_replace_armed = 0;
+        aos_store_replace_by_hand();
+    }
+    build();
+}
+
 static void origin_cb(lv_event_t *e)
 {
     S.origin = (int)(intptr_t)lv_event_get_user_data(e);
@@ -711,6 +731,16 @@ static void build_list(lv_obj_t *page)
         lv_obj_set_width(l, lv_pct(100));
         lv_label_set_long_mode(l, LV_LABEL_LONG_MODE_WRAP);
         pill(card, _("Que las maneje la Tienda"), true, adopt_cb, NULL);
+        /* the ones that stay after that are other builds than the catalogue's */
+        l = aos_label(card, _("Las que quedan no son iguales a las del catálogo (otra compilación, o una versión vieja). "
+                              "Reemplazarlas baja la de la Tienda para cada una; lo que guardaron y sus packs quedan."),
+                      aos_font_caption, AOS_C_DIM);
+        lv_obj_set_width(l, lv_pct(100));
+        lv_label_set_long_mode(l, LV_LABEL_LONG_MODE_WRAP);
+        if (replace_armed()) {
+            snprintf(buf, sizeof buf, _("Tocá otra vez: reemplaza %d apps"), by_hand);
+            pill(card, buf, true, replace_cb, NULL);
+        } else pill(card, _("Reemplazarlas por las de la Tienda"), false, replace_cb, NULL);
     }
     for (int i = 0; i < S.n; i++) {
         if (!shown(&S.items[i])) continue;
@@ -1339,6 +1369,7 @@ static void banner_update(const aos_store_status_t *st)
                            !strcmp(st->job, "firmware") ? (!strcmp(st->step, "writing") ? _("Escribiendo P4OS") : _("Bajando P4OS")) :
                            !strcmp(st->job, "remove")  ? _("Quitando") :
                            !strcmp(st->job, "adopt")   ? _("Revisando lo que hay en la tarjeta") :
+                           !strcmp(st->job, "replace") ? _("Reemplazando") :
                            !strncmp(st->step, "pack", 4) ? _("Bajando lo que necesita") :
                            !strcmp(st->step, "installing") ? _("Instalando") : _("Bajando");
         if (st->queued) snprintf(buf, sizeof buf, "%s %s  ·  +%d", what, who, st->queued);

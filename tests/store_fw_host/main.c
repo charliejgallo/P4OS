@@ -94,6 +94,7 @@ int main(int argc, char **argv)
         }
         else if (!strcmp(a, "refresh")) queued = aos_store_refresh();
         else if (!strcmp(a, "adopt")) queued = aos_store_adopt();
+        else if (!strcmp(a, "replace")) queued = aos_store_replace_by_hand();
         else if (!strcmp(a, "firmware")) queued = aos_store_fw_install();
         else if (!strcmp(a, "remove")) queued = aos_store_remove(v ? v : "");
         else if (!strcmp(a, "install")) {

@@ -3238,6 +3238,8 @@ function pageTienda() {
         h('button', { class: 'btn', disabled: st.busy, onclick: () => act('refresh', {}) }, tr('Buscar de nuevo')),
         ours ? h('button', { class: 'btn', disabled: st.busy, title: tr('Un recibo para las que son las del catálogo: no cambia ninguna app'),
                              onclick: () => act('adopt', {}) }, tr('Que la Tienda maneje las %s copiadas a mano', ours)) : null,
+        ours ? h('button', { class: 'btn', disabled: st.busy, title: tr('Las que no son iguales a las del catálogo: baja la de la Tienda para cada una. Lo que guardaron y sus packs quedan.'),
+                             onclick: () => { if (confirm(tr('¿Reemplazar las %s apps copiadas a mano por las de la Tienda?', ours))) act('replace', {}); } }, tr('Reemplazarlas por las de la Tienda')) : null,
         h('button', { class: 'btn', disabled: st.busy, title: tr('Un paquete que no está en ningún catálogo'), onclick: () => side.click() }, tr('Instalar un .p4app…')), side,
         st.busy ? h('button', { class: 'btn red', onclick: () => act('cancel', {}) }, tr('Cancelar')) : null),
       bar, msg,

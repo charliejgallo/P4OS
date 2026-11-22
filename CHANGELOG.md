@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.31.1 — not released yet
+
+- **The Store replaces every app copied by hand in one go.** "Let the
+  Store manage them" only takes the apps whose file is byte for byte the
+  catalogue's; a card filled from a build made at home was left with most
+  of its apps as "copied by hand", to be reinstalled one by one. Beside it
+  now, **Replace them with the Store's** (two taps; in the portal too)
+  installs the catalogue's over each one, in one job. What the apps saved
+  stays, their packs are not downloaded again, and the extras a person had
+  copied are kept as the app's when they are the catalogue's.
+
 ## 0.31.0 — 2026-11-22
 
 The first release a board fetches for itself: Store → Updates for the
