@@ -86,6 +86,8 @@ typedef struct {
     char email[96];             /* MyMemory's raised limit                   */
     char mm_url[128];           /* MyMemory's base, to test against the fake */
     bool hist_off;              /* the page can turn the history off         */
+    bool nmt_int8;              /* "nmt int8": int8 activations (to measure) */
+    bool nmt_one_core;          /* "nmt one-core": no split (to measure)     */
 } td_cfg_t;
 
 td_cfg_t *td_cfg(void);

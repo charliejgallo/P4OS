@@ -170,6 +170,14 @@ static void spanish_marks(char *s, size_t cap)
     }
 }
 
+/* what traductor.txt says about the model, for each translation */
+static void model_opts(td_nmt_t *m)
+{
+    if (!m) return;
+    td_nmt_set_int8(m, td_cfg()->nmt_int8);
+    td_nmt_set_par(m, td_cfg()->nmt_one_core ? NULL : par_two, NULL);
+}
+
 static void local_worker(void *arg)
 {
     (void)arg;
@@ -179,24 +187,28 @@ static void local_worker(void *arg)
     bool ok = false;
     if (s_res.pivot) {
         td_nmt_t *m = model_get(s_res.src, "en", &err);
+        model_opts(m);
         s_stage = STG_PIVOT;
         if (m && td_nmt_translate(m, s_text, s_tmp, TD_OUT_MAX, &st)) {
             td_nmt_t *m2 = model_get("en", s_res.dst, &err);
+            model_opts(m2);
             s_stage = STG_PIVOT;
             ok = m2 && td_nmt_translate(m2, s_tmp, s_out, TD_OUT_MAX, &st);
         }
     } else {
         td_nmt_t *m = model_get(s_res.src, s_res.dst, &err);
+        model_opts(m);
         s_stage = STG_RUN;
         ok = m && td_nmt_translate(m, s_text, s_out, TD_OUT_MAX, &st);
     }
     if (ok) {
         if (!strcmp(s_res.dst, "es")) spanish_marks(s_out, TD_OUT_MAX);
         s_res.err = TD_OK;
-        aos_hal_log("traductor", "local %s>%s%s: %lu pieces in, %lu out, %lu M multiply-adds, encoder %lu ms, decoder %lu ms",
+        aos_hal_log("traductor", "local %s>%s%s: %lu pieces in, %lu out, %lu M multiply-adds, encoder %lu ms, decoder %lu ms, all %lu ms (%s, %s)",
                     s_res.src, s_res.dst, s_res.pivot ? " via en" : "", (unsigned long)st.src_tokens,
                     (unsigned long)st.out_tokens, (unsigned long)st.macs_m, (unsigned long)st.ms_enc,
-                    (unsigned long)st.ms_dec);
+                    (unsigned long)st.ms_dec, (unsigned long)(td_now_ms() - s_t0),
+                    td_cfg()->nmt_int8 ? "int8" : "float", td_cfg()->nmt_one_core ? "one core" : "two cores");
     } else {
         s_res.err = s_cancel ? TD_ERR_CANCEL : (err && !strcmp(err, "no memory")) ? TD_ERR_MEM : TD_ERR_NO_ROUTE;
         if (err) td_scpy(s_res.msg, sizeof s_res.msg, err);

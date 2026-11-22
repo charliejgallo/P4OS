@@ -237,6 +237,11 @@ The simulator's times are the Mac's (0.1 s); on the board see above.
 
 - **Measured on the board** (needs the user's go-ahead): the times above,
   PSRAM and card included, and whether int8 activations beat float there.
+  For that, `nmt int8`, `nmt one-core` or both in `traductor.txt` (not on
+  the page); each translation logs its pieces, multiply-adds, encoder,
+  decoder and total time and which of the two it used:
+  `local es>en: 17 pieces in, 19 out, 156 M multiply-adds, encoder .. ms,
+  decoder .. ms, all .. ms (float, two cores)`.
 - **The SIMD:** the P4's int8 multiply-accumulate (16 a cycle) through
   inline assembly or esp-nn would bring a long sentence well under a second.
 - **Voice** (next phase): the mic (`aos_hal_mic_*`) records and a Whisper

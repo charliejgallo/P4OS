@@ -11,6 +11,7 @@
  *                                   with one, 5 000 without
  *   mymemory <base url>             to test against tools/fake_translate.py
  *   history off                     keep no history
+ *   nmt int8 one-core               to measure: int8 activations, one core
  *
  * The key lives only here, on the card, where the user typed it on the
  * page: never in the code. The app looks at the file's date in its timer
@@ -100,6 +101,10 @@ void td_cfg_load(void)
             while (l && s_cfg.mm_url[l - 1] == '/') s_cfg.mm_url[--l] = 0;
         } else if (!strcmp(line, "history")) {
             s_cfg.hist_off = !strcmp(v, "off");
+        } else if (!strcmp(line, "nmt")) {
+            /* for measuring on the board; the page does not show them */
+            if (strstr(v, "int8")) s_cfg.nmt_int8 = true;
+            if (strstr(v, "one-core")) s_cfg.nmt_one_core = true;
         }
     }
     fclose(f);
@@ -118,6 +123,8 @@ void td_cfg_save(void)
     if (s_cfg.email[0]) fprintf(f, "email %s\n", s_cfg.email);
     if (strcmp(s_cfg.mm_url, MM_DEFAULT)) fprintf(f, "mymemory %s\n", s_cfg.mm_url);
     if (s_cfg.hist_off) fputs("history off\n", f);
+    if (s_cfg.nmt_int8 || s_cfg.nmt_one_core)
+        fprintf(f, "nmt%s%s\n", s_cfg.nmt_int8 ? " int8" : "", s_cfg.nmt_one_core ? " one-core" : "");
     fclose(f);
     remove(p);
     rename(tmp, p);

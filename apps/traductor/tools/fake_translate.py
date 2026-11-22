@@ -25,6 +25,7 @@ Errors on purpose (in the text sent):
     --quota N     MyMemory's daily characters (5000; with de=, ten times more)
     --key K       LibreTranslate wants api_key K: none or another is a 400/403
     --port P      8790
+    --host H      127.0.0.1; 0.0.0.0 to reach it from the board on the LAN
 
 GET /_stats says how many requests and characters came; GET /_reset zeroes
 them (the quota too).
@@ -249,11 +250,12 @@ def main():
     global ARGS
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('--port', type=int, default=8790)
+    ap.add_argument('--host', default='127.0.0.1')
     ap.add_argument('--quota', type=int, default=5000)
     ap.add_argument('--key', default='')
     ARGS = ap.parse_args()
-    srv = ThreadingHTTPServer(('127.0.0.1', ARGS.port), H)
-    print('[fake_translate] on http://127.0.0.1:%d (MyMemory /get, LibreTranslate /translate)' % ARGS.port)
+    srv = ThreadingHTTPServer((ARGS.host, ARGS.port), H)
+    print('[fake_translate] on http://%s:%d (MyMemory /get, LibreTranslate /translate)' % (ARGS.host, ARGS.port))
     srv.serve_forever()
 
 
