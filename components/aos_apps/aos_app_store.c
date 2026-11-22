@@ -644,11 +644,12 @@ static void row(lv_obj_t *parent, int i)
     else if (it->st.src < 0) snprintf(whose, sizeof whose, "%s", loose_text(it, lt));
     else snprintf(whose, sizeof whose, "%s", it->about);
     /* a new one says so before what it is, except under "New", where all are */
+    const char *line = whose;
     if (it->st.fresh && S.filter != F_NEW && !installed(it)) {
         snprintf(fresh, sizeof fresh, "%s · %s", _("Nueva"), whose);
-        snprintf(whose, sizeof whose, "%s", fresh);
+        line = fresh;
     }
-    lv_obj_t *about = aos_label(t, it->st.state == AOS_STORE_SET_ASIDE ? _("Quedó apartada: hizo caer la placa") : whose,
+    lv_obj_t *about = aos_label(t, it->st.state == AOS_STORE_SET_ASIDE ? _("Quedó apartada: hizo caer la placa") : line,
                                 aos_font_caption, it->st.state == AOS_STORE_SET_ASIDE ? AOS_C_ORANGE : AOS_C_DIM);
     lv_obj_set_width(about, lv_pct(100));
     lv_label_set_long_mode(about, LV_LABEL_LONG_MODE_DOTS);
