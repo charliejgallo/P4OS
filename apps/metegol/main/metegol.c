@@ -834,6 +834,8 @@ static void metegol_destroy(aos_app_t *self, void *inst)
     mg_free(a->game);
     mg_free(a->ui);
     mg_free(a);
+    /* what the app's own allocator still holds: 0 unless something leaked */
+    aos_hal_log("metegol", "closed, %u KB of its own still held", (unsigned)(mg_mem_used() / 1024));
 }
 
 static void metegol_show(aos_app_t *self, void *inst)
