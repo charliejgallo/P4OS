@@ -1,0 +1,23 @@
+{
+ "cat": "juegos",
+ "about": {
+  "es": "Sudoku en cinco niveles medidos por las técnicas que piden, más 6×6, Killer, Diagonal y el desafío del día. Las monedas que ganás compran temas.",
+  "en": "Sudoku in five levels measured by the techniques they need, plus 6×6, Killer, Diagonal and the daily challenge. The coins you earn buy themes."
+ },
+ "desc": {
+  "es": "Cada tablero tiene una sola solución, y su nivel sale de las técnicas que hacen falta para resolverlo, no de cuántos números trae: Fácil se resuelve con candidatos únicos, Medio pide pares y candidatos bloqueados, Difícil tríos, X-Wing y alas, Experto cadenas cortas y Maestro cadenas largas. Además hay 6×6 para empezar, Killer con jaulas que suman y Diagonal, y un desafío del día que es el mismo tablero para todos.\n\nTocás una celda y después un número, o anotás candidatos con las notas, a mano o todas juntas. Deshacer y rehacer no tienen fondo, la pausa tapa el tablero y la partida se guarda sola. La pista no te da el número: te muestra la técnica que sirve en ese momento, marca las celdas y explica por qué.\n\nTerminar paga monedas, y más sin pistas, sin errores, sin ayudas y por días seguidos. Con ellas comprás temas en la tienda del juego: quince además del clásico, cada uno con su fondo que se mueve, sus celdas, sus números y su sonido, y una vista previa antes de comprar. Hay estadísticas por modo.\n\nSe juega parada o acostada, con un joystick USB (la cruz recorre las celdas, A pone el número elegido, L y R lo cambian, B lo anota y START pausa) o con un teclado.",
+  "en": "Every board has a single solution, and its level comes from the techniques it takes to solve it, not from how many numbers it gives: Easy falls to single candidates, Medium needs pairs and locked candidates, Hard triples, X-Wing and wings, Expert short chains and Master long ones. There is also 6×6 to start with, Killer with cages that add up and Diagonal, and a daily challenge that is the same board for everybody.\n\nTap a cell and then a number, or note candidates down, by hand or all at once. Undo and redo go back as far as you like, the pause covers the board and the game saves itself. A hint does not give the number away: it shows the technique that works right then, marks the cells and explains why.\n\nFinishing pays coins, and more without hints, mistakes or help, and for days in a row. They buy themes in the game's own shop: fifteen besides the classic one, each with its moving background, its cells, its numbers and its sound, and a preview before you buy. There are statistics by mode.\n\nIt plays upright or lying down, with a USB gamepad (the D-pad walks the cells, A places the chosen number, L and R change it, B notes it down and START pauses) or with a keyboard."
+ },
+ "shots": [
+  "app-sudoku.jpg",
+  "app-sudoku-killer.jpg",
+  "app-sudoku-themes.jpg",
+  "land-sudoku.jpg"
+ ],
+ "packs": [
+  {
+   "file": "sudoku_p4.pak",
+   "need": true
+  }
+ ]
+}
