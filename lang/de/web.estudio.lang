@@ -1,0 +1,82 @@
+# amoledos-lang 1   es -> de
+# web.estudio.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/estudio/web/estudio.js:65
+#: apps/estudio/web/estudio.js:169
+Estudio	Studio
+
+#: apps/estudio/web/estudio.js:78
+¿Borrar %s? No se puede deshacer.	%s löschen? Das lässt sich nicht rückgängig machen.
+
+#: apps/estudio/web/estudio.js:79
+Borrado	Gelöscht
+
+#: apps/estudio/web/estudio.js:96
+Bajar	Herunterladen
+
+#: apps/estudio/web/estudio.js:97
+Borrar	Löschen
+
+#: apps/estudio/web/estudio.js:127
+%s no es un archivo que el Estudio lea	%s ist keine Datei, die Studio lesen kann
+
+#: apps/estudio/web/estudio.js:130
+Subido	Hochgeladen
+
+#: apps/estudio/web/estudio.js:130
+Subidos	Hochgeladen
+
+#: apps/estudio/web/estudio.js:156
+Subir proyectos	Projekte hochladen
+
+#: apps/estudio/web/estudio.js:156
+Todavía no hay proyectos: el Estudio guarda el suyo solo.	Noch keine Projekte: Studio speichert seines von selbst.
+
+#: apps/estudio/web/estudio.js:157
+En la placa se abren desde Canción → Abrir. Un proyecto lleva sus patrones, la canción, los sonidos y la mezcla; las muestras que use van aparte, en Muestras.	Auf der Platine öffnet man sie unter Song → Öffnen. Ein Projekt enthält seine Patterns, den Song, die Klänge und den Mix; die verwendeten Samples liegen extra, unter Samples.
+
+#: apps/estudio/web/estudio.js:160
+Subir muestras WAV	WAV-Samples hochladen
+
+#: apps/estudio/web/estudio.js:160
+No hay muestras. Subí WAV tuyos para tocarlos en la batería.	Keine Samples. Lade eigene WAVs hoch, um sie auf den Drums zu spielen.
+
+#: apps/estudio/web/estudio.js:161
+WAV PCM de 8, 16, 24 o 32 bits o en coma flotante, mono o estéreo, de cualquier frecuencia; se usan hasta 12 segundos de cada uno. En la placa: Ritmo → el sonido de la pista.	PCM-WAV mit 8, 16, 24 oder 32 Bit oder Gleitkomma, mono oder stereo, mit jeder Abtastrate; von jedem werden bis zu 12 Sekunden verwendet. Auf der Platine: Drums → Klang der Spur.
+
+#: apps/estudio/web/estudio.js:163
+Nada exportado todavía. Se exporta desde Canción → Exportar, en WAV o en MIDI.	Noch nichts exportiert. Exportiert wird unter Song → Exportieren, als WAV oder MIDI.
+
+#: apps/estudio/web/estudio.js:166
+Subir sonidos	Klänge hochladen
+
+#: apps/estudio/web/estudio.js:166
+Ninguno todavía. En la placa: Sonido → Guardar este sonido como…	Noch keine. Auf der Platine: Klang → Diesen Klang speichern als…
+
+#: apps/estudio/web/estudio.js:171
+Lo que el Estudio guarda en la tarjeta: los proyectos, tus muestras, lo exportado y tus sonidos del sintetizador.	Was Studio auf der Karte ablegt: die Projekte, deine Samples, die Exporte und deine Synth-Klänge.
+
+#: apps/estudio/web/estudio.js:173
+Abierto en la placa	Auf der Platine geöffnet
+
+#: apps/estudio/web/estudio.js:173
+Abrir el Estudio en la placa	Studio auf der Platine öffnen
+
+#: apps/estudio/web/estudio.js:174
+Actualizar	Aktualisieren
+
+#: apps/estudio/web/estudio.js:175
+Proyectos	Projekte
+
+#: apps/estudio/web/estudio.js:176
+Muestras	Samples
+
+#: apps/estudio/web/estudio.js:177
+Exportado	Exportiert
+
+#: apps/estudio/web/estudio.js:178
+Mis sonidos	Meine Klänge

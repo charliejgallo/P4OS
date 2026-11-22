@@ -1,0 +1,685 @@
+# amoledos-lang 1   es -> de
+# aos.estudio.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/estudio/main/es_file.c:63
+demasiadas muestras	zu viele Samples
+
+#: apps/estudio/main/es_file.c:67
+no se pudo abrir	ließ sich nicht öffnen
+
+#: apps/estudio/main/es_file.c:71
+no es un WAV	kein WAV
+
+#: apps/estudio/main/es_file.c:101
+formato de WAV que no se lee (PCM o float)	ein WAV-Format, das nicht lesbar ist (PCM oder Float)
+
+#: apps/estudio/main/es_file.c:108
+#: apps/estudio/main/es_file.c:143
+está vacío	ist leer
+
+#: apps/estudio/main/es_file.c:110
+no hay más lugar para muestras	kein Platz mehr für Samples
+
+#: apps/estudio/main/es_file.c:112
+#: apps/estudio/main/es_file.c:115
+sin memoria	kein Speicher
+
+#: apps/estudio/main/es_patch.c:18
+Sustractivo	Subtraktiv
+
+#: apps/estudio/main/es_patch.c:18
+FM	FM
+
+#: apps/estudio/main/es_patch.c:19
+#: apps/estudio/main/es_patch.c:20
+Seno	Sinus
+
+#: apps/estudio/main/es_patch.c:19
+#: apps/estudio/main/es_patch.c:20
+Triáng.	Dreieck
+
+#: apps/estudio/main/es_patch.c:19
+#: apps/estudio/main/es_patch.c:20
+Sierra	Säge
+
+#: apps/estudio/main/es_patch.c:19
+#: apps/estudio/main/es_patch.c:20
+Cuadr.	Rechteck
+
+#: apps/estudio/main/es_patch.c:19
+#: apps/estudio/main/es_patch.c:34
+Ruido	Rauschen
+
+#: apps/estudio/main/es_patch.c:20
+Azar	Zufall
+
+#: apps/estudio/main/es_patch.c:22
+Altura	Tonhöhe
+
+#: apps/estudio/main/es_patch.c:22
+#: apps/estudio/main/es_ui_sound.c:271
+#: apps/estudio/main/es_ui_sound.c:391
+Filtro	Filter
+
+#: apps/estudio/main/es_patch.c:22
+#: apps/estudio/main/es_patch.c:59
+#: apps/estudio/main/es_ui_sound.c:371
+#: apps/estudio/main/es_ui_sound.c:396
+Volumen	Lautstärke
+
+#: apps/estudio/main/es_patch.c:22
+Ancho	Breite
+
+#: apps/estudio/main/es_patch.c:23
+Poli	Poly
+
+#: apps/estudio/main/es_patch.c:23
+Mono	Mono
+
+#: apps/estudio/main/es_patch.c:26
+Motor	Klangerzeugung
+
+#: apps/estudio/main/es_patch.c:27
+#: apps/estudio/main/es_patch.c:30
+#: apps/estudio/main/es_patch.c:49
+Onda	Welle
+
+#: apps/estudio/main/es_patch.c:28
+Octava	Oktave
+
+#: apps/estudio/main/es_patch.c:29
+Ancho del pulso	Pulsbreite
+
+#: apps/estudio/main/es_patch.c:31
+Semitonos	Halbtöne
+
+#: apps/estudio/main/es_patch.c:32
+Fino	Fein
+
+#: apps/estudio/main/es_patch.c:33
+#: apps/estudio/main/es_ui_seq.c:486
+#: apps/estudio/main/es_ui_sound.c:385
+#: apps/estudio/main/es_ui_sound.c:389
+Nivel	Pegel
+
+#: apps/estudio/main/es_patch.c:35
+Tipo	Typ
+
+#: apps/estudio/main/es_patch.c:36
+Corte	Cutoff
+
+#: apps/estudio/main/es_patch.c:37
+#: apps/estudio/main/es_ui_sound.c:395
+Resonancia	Resonanz
+
+#: apps/estudio/main/es_patch.c:38
+Envolvente	Hüllkurve
+
+#: apps/estudio/main/es_patch.c:39
+Seguir la nota	Key-Tracking
+
+#: apps/estudio/main/es_patch.c:40
+Por velocidad	Nach Anschlag
+
+#: apps/estudio/main/es_patch.c:41
+#: apps/estudio/main/es_patch.c:45
+Ataque	Attack
+
+#: apps/estudio/main/es_patch.c:42
+#: apps/estudio/main/es_patch.c:46
+#: apps/estudio/main/es_ui_seq.c:485
+Caída	Decay
+
+#: apps/estudio/main/es_patch.c:43
+#: apps/estudio/main/es_patch.c:47
+Sostén	Sustain
+
+#: apps/estudio/main/es_patch.c:44
+#: apps/estudio/main/es_patch.c:48
+Relajación	Release
+
+#: apps/estudio/main/es_patch.c:50
+#: apps/estudio/main/es_patch.c:60
+#: apps/estudio/main/es_ui_seq.c:519
+#: apps/estudio/main/es_ui_seq.c:846
+Velocidad	Anschlag
+
+#: apps/estudio/main/es_patch.c:51
+Destino	Ziel
+
+#: apps/estudio/main/es_patch.c:52
+Profundidad	Tiefe
+
+#: apps/estudio/main/es_patch.c:53
+Glide	Glide
+
+#: apps/estudio/main/es_patch.c:54
+Voces	Stimmen
+
+#: apps/estudio/main/es_patch.c:55
+Relación	Verhältnis
+
+#: apps/estudio/main/es_patch.c:56
+Índice	Index
+
+#: apps/estudio/main/es_patch.c:57
+Índice por env. 2	Index durch Hüllk. 2
+
+#: apps/estudio/main/es_patch.c:58
+Realimentación	Rückkopplung
+
+#: apps/estudio/main/es_patch.c:64
+Bombo	Bassdrum
+
+#: apps/estudio/main/es_patch.c:64
+Bombo largo	Lange Bassdrum
+
+#: apps/estudio/main/es_patch.c:64
+Redoblante	Snare
+
+#: apps/estudio/main/es_patch.c:64
+Aplauso	Klatschen
+
+#: apps/estudio/main/es_patch.c:64
+Hi-hat cerrado	Geschl. Hi-Hat
+
+#: apps/estudio/main/es_patch.c:65
+Hi-hat abierto	Offene Hi-Hat
+
+#: apps/estudio/main/es_patch.c:65
+Tom grave	Tiefes Tom
+
+#: apps/estudio/main/es_patch.c:65
+Tom agudo	Hohes Tom
+
+#: apps/estudio/main/es_patch.c:65
+Platillo	Becken
+
+#: apps/estudio/main/es_patch.c:65
+Cencerro	Kuhglocke
+
+#: apps/estudio/main/es_patch.c:66
+Clave	Claves
+
+#: apps/estudio/main/es_patch.c:66
+Aro	Rimshot
+
+#: apps/estudio/main/es_patch.c:66
+Shaker	Shaker
+
+#: apps/estudio/main/es_patch.c:153
+Básico	Einfach
+
+#: apps/estudio/main/es_patch.c:154
+Bajo redondo	Runder Bass
+
+#: apps/estudio/main/es_patch.c:160
+Bajo ácido	Acid-Bass
+
+#: apps/estudio/main/es_patch.c:165
+Lead sierra	Sägezahn-Lead
+
+#: apps/estudio/main/es_patch.c:169
+Lead cuadrado	Rechteck-Lead
+
+#: apps/estudio/main/es_patch.c:174
+Pad cálido	Warmes Pad
+
+#: apps/estudio/main/es_patch.c:179
+Cuerdas	Streicher
+
+#: apps/estudio/main/es_patch.c:183
+Pluck	Pluck
+
+#: apps/estudio/main/es_patch.c:187
+Órgano	Orgel
+
+#: apps/estudio/main/es_patch.c:192
+Bronces	Bläser
+
+#: apps/estudio/main/es_patch.c:196
+Sub grave	Sub-Bass
+
+#: apps/estudio/main/es_patch.c:200
+Campana FM	FM-Glocke
+
+#: apps/estudio/main/es_patch.c:204
+Piano eléctrico	E-Piano
+
+#: apps/estudio/main/es_patch.c:209
+Bajo FM	FM-Bass
+
+#: apps/estudio/main/es_ui.c:33
+BOM	BD
+
+#: apps/estudio/main/es_ui.c:33
+808	808
+
+#: apps/estudio/main/es_ui.c:33
+RED	SN
+
+#: apps/estudio/main/es_ui.c:33
+APL	CLP
+
+#: apps/estudio/main/es_ui.c:33
+HHC	HHG
+
+#: apps/estudio/main/es_ui.c:33
+HHA	HHO
+
+#: apps/estudio/main/es_ui.c:33
+TG	TT
+
+#: apps/estudio/main/es_ui.c:33
+TA	HT
+
+#: apps/estudio/main/es_ui.c:34
+PLA	BCK
+
+#: apps/estudio/main/es_ui.c:34
+CEN	KUH
+
+#: apps/estudio/main/es_ui.c:34
+CLV	CLV
+
+#: apps/estudio/main/es_ui.c:34
+ARO	RIM
+
+#: apps/estudio/main/es_ui.c:34
+SHK	SHK
+
+#: apps/estudio/main/es_ui.c:178
+abierto	offen
+
+#: apps/estudio/main/es_ui.c:397
+Listo	Fertig
+
+#: apps/estudio/main/es_ui.c:419
+¿Seguro?	Sicher?
+
+#: apps/estudio/main/es_ui.c:489
+#: apps/estudio/main/es_ui_song.c:457
+Proyecto	Projekt
+
+#: apps/estudio/main/es_ui.c:615
+Tocar	Spielen
+
+#: apps/estudio/main/es_ui.c:615
+Ritmo	Drums
+
+#: apps/estudio/main/es_ui.c:615
+Notas	Noten
+
+#: apps/estudio/main/es_ui.c:615
+Sonido	Klang
+
+#: apps/estudio/main/es_ui.c:616
+Mezcla	Mixer
+
+#: apps/estudio/main/es_ui.c:616
+#: apps/estudio/main/es_ui_song.c:442
+Canción	Song
+
+#: apps/estudio/main/es_ui.c:823
+Prueba de carga: cinco segundos, el resultado va al registro	Lasttest: fünf Sekunden, das Ergebnis steht im Protokoll
+
+#: apps/estudio/main/es_ui_play.c:34
+Mayor	Dur
+
+#: apps/estudio/main/es_ui_play.c:34
+Menor	Moll
+
+#: apps/estudio/main/es_ui_play.c:34
+Pentatónica	Pentatonik
+
+#: apps/estudio/main/es_ui_play.c:35
+Pentat. menor	Moll-Pentat.
+
+#: apps/estudio/main/es_ui_play.c:35
+Blues	Blues
+
+#: apps/estudio/main/es_ui_play.c:35
+Dórica	Dorisch
+
+#: apps/estudio/main/es_ui_play.c:39
+Arriba	Auf
+
+#: apps/estudio/main/es_ui_play.c:39
+Abajo	Ab
+
+#: apps/estudio/main/es_ui_play.c:39
+Ida y vuelta	Auf und ab
+
+#: apps/estudio/main/es_ui_play.c:40
+Al azar	Zufällig
+
+#: apps/estudio/main/es_ui_play.c:40
+Como se toca	Wie gespielt
+
+#: apps/estudio/main/es_ui_play.c:473
+Teclado	Tasten
+
+#: apps/estudio/main/es_ui_play.c:473
+Grilla	Raster
+
+#: apps/estudio/main/es_ui_play.c:473
+Pads	Pads
+
+#: apps/estudio/main/es_ui_play.c:479
+Suave	Leise
+
+#: apps/estudio/main/es_ui_play.c:479
+Medio	Mittel
+
+#: apps/estudio/main/es_ui_play.c:479
+Fuerte	Laut
+
+#: apps/estudio/main/es_ui_play.c:482
+Arpegio	Arpeggio
+
+#: apps/estudio/main/es_ui_play.c:486
+Sostener	Halten
+
+#: apps/estudio/main/es_ui_seq.c:423
+Sonido de la pista	Klang der Spur
+
+#: apps/estudio/main/es_ui_seq.c:431
+Muestras de la tarjeta (estudio/muestras)	Samples auf der Karte (estudio/muestras)
+
+#: apps/estudio/main/es_ui_seq.c:450
+No hay WAV todavía. Se suben desde la página del Estudio en el portal.	Noch keine WAVs. Sie werden über die Studio-Seite im Portal hochgeladen.
+
+#: apps/estudio/main/es_ui_seq.c:482
+#: apps/estudio/main/es_ui_sound.c:375
+Silenciar	Stumm
+
+#: apps/estudio/main/es_ui_seq.c:484
+Afinación	Stimmung
+
+#: apps/estudio/main/es_ui_seq.c:487
+Swing	Swing
+
+#: apps/estudio/main/es_ui_seq.c:519
+Pasos	Schritte
+
+#: apps/estudio/main/es_ui_seq.c:519
+#: apps/estudio/main/es_ui_seq.c:846
+Probab.	Wahrsch.
+
+#: apps/estudio/main/es_ui_seq.c:658
+Prob.	Wahr.
+
+#: apps/estudio/main/es_ui_seq.c:658
+Vel.	Anschl.
+
+#: apps/estudio/main/es_ui_seq.c:724
+Esta parte ya tiene todas las notas que entran	Diese Spur hat schon so viele Noten, wie hineinpassen
+
+#: apps/estudio/main/es_ui_seq.c:806
+Borrar las notas de la parte %d en el patrón %c.	Die Noten von Spur %d in Pattern %c löschen.
+
+#: apps/estudio/main/es_ui_seq.c:807
+#: apps/estudio/main/es_ui_song.c:79
+#: apps/estudio/main/es_ui_song.c:206
+#: apps/estudio/main/es_ui_song.c:440
+Borrar	Löschen
+
+#: apps/estudio/main/es_ui_song.c:54
+Patrón %c copiado	Pattern %c kopiert
+
+#: apps/estudio/main/es_ui_song.c:61
+Primero copiá un patrón	Erst ein Pattern kopieren
+
+#: apps/estudio/main/es_ui_song.c:78
+Borrar todo el patrón %c.	Das ganze Pattern %c löschen.
+
+#: apps/estudio/main/es_ui_song.c:114
+Vacía: agregá patrones abajo.	Leer: unten Patterns hinzufügen.
+
+#: apps/estudio/main/es_ui_song.c:153
+Proyecto nuevo	Neues Projekt
+
+#: apps/estudio/main/es_ui_song.c:173
+Guardado	Gespeichert
+
+#: apps/estudio/main/es_ui_song.c:179
+Nombre del proyecto	Projektname
+
+#: apps/estudio/main/es_ui_song.c:189
+No se pudo abrir	Ließ sich nicht öffnen
+
+#: apps/estudio/main/es_ui_song.c:198
+Borrado	Gelöscht
+
+#: apps/estudio/main/es_ui_song.c:205
+Borrar %s de la tarjeta. No se puede deshacer.	%s von der Karte löschen. Das lässt sich nicht rückgängig machen.
+
+#: apps/estudio/main/es_ui_song.c:213
+Abrir un proyecto	Projekt öffnen
+
+#: apps/estudio/main/es_ui_song.c:239
+No hay proyectos en la tarjeta.	Keine Projekte auf der Karte.
+
+#: apps/estudio/main/es_ui_song.c:253
+%d vueltas	%d Mal
+
+#: apps/estudio/main/es_ui_song.c:269
+No se pudo empezar a exportar	Export konnte nicht starten
+
+#: apps/estudio/main/es_ui_song.c:284
+Listo: estudio/export/%s	Fertig: estudio/export/%s
+
+#: apps/estudio/main/es_ui_song.c:285
+No se pudo exportar el MIDI	MIDI-Export fehlgeschlagen
+
+#: apps/estudio/main/es_ui_song.c:309
+A la compu: parte %d	Zum Computer: Spur %d
+
+#: apps/estudio/main/es_ui_song.c:310
+A la compu: batería	Zum Computer: Drums
+
+#: apps/estudio/main/es_ui_song.c:348
+Ningún aparato MIDI en el USB.	Kein MIDI-Gerät am USB.
+
+#: apps/estudio/main/es_ui_song.c:350
+Entrada:	Eingang:
+
+#: apps/estudio/main/es_ui_song.c:367
+Listo: estudio/export/%s.wav	Fertig: estudio/export/%s.wav
+
+#: apps/estudio/main/es_ui_song.c:368
+La exportación no terminó	Der Export wurde nicht fertig
+
+#: apps/estudio/main/es_ui_song.c:373
+Exportando… %d %% (tocá WAV para cortar)	Exportiere… %d %% (WAV tippen zum Abbrechen)
+
+#: apps/estudio/main/es_ui_song.c:387
+Bloque de %d muestras (%d us): promedio %d us, pico %d us, %d %% del tiempo. Voces: %d. Faltas: %u. Cola: %d muestras.	Block von %d Samples (%d us): Mittel %d us, Spitze %d us, %d %% der Zeit. Stimmen: %d. Aussetzer: %u. Warteschlange: %d Samples.
+
+#: apps/estudio/main/es_ui_song.c:428
+Patrones	Patterns
+
+#: apps/estudio/main/es_ui_song.c:438
+Copiar	Kopieren
+
+#: apps/estudio/main/es_ui_song.c:439
+Pegar	Einfügen
+
+#: apps/estudio/main/es_ui_song.c:444
+Un patrón	Ein Pattern
+
+#: apps/estudio/main/es_ui_song.c:444
+La canción	Der Song
+
+#: apps/estudio/main/es_ui_song.c:448
+Tocá un casillero para cambiarle el patrón; mantenelo apretado para sacarlo.	Ein Feld antippen wechselt sein Pattern; gedrückt halten entfernt es.
+
+#: apps/estudio/main/es_ui_song.c:463
+Nuevo	Neu
+
+#: apps/estudio/main/es_ui_song.c:464
+Abrir…	Öffnen…
+
+#: apps/estudio/main/es_ui_song.c:465
+Guardar como…	Speichern als…
+
+#: apps/estudio/main/es_ui_song.c:466
+Se guarda solo en estudio/ de la tarjeta.	Wird von selbst in estudio/ auf der Karte gespeichert.
+
+#: apps/estudio/main/es_ui_song.c:468
+Exportar	Exportieren
+
+#: apps/estudio/main/es_ui_song.c:469
+Con La canción, la cadena entera; con Un patrón, el patrón elegido las vueltas que digas.	Mit Der Song die ganze Kette; mit Ein Pattern das gewählte Pattern so oft wie eingestellt.
+
+#: apps/estudio/main/es_ui_song.c:484
+Sin salida	Kein Ausgang
+
+#: apps/estudio/main/es_ui_song.c:484
+Compu	Computer
+
+#: apps/estudio/main/es_ui_song.c:484
+Aparato	Gerät
+
+#: apps/estudio/main/es_ui_song.c:484
+Las dos	Beide
+
+#: apps/estudio/main/es_ui_song.c:485
+Salida	Ausgang
+
+#: apps/estudio/main/es_ui_song.c:488
+Reloj	Clock
+
+#: apps/estudio/main/es_ui_song.c:492
+Entra por el canal 1 la parte elegida, por el 2 al 4 las partes 1 a 3 y por el 10 la batería. Al aparato salen las partes por 1 a 3, la batería por 10 y el reloj; a la compu, una pista por el canal 1.	Eingang: Kanal 1 spielt die gewählte Spur, 2 bis 4 die Spuren 1 bis 3 und 10 die Drums. Zum Gerät gehen die Spuren auf 1 bis 3, die Drums auf 10 und die Clock; zum Computer eine Spur auf Kanal 1.
+
+#: apps/estudio/main/es_ui_song.c:494
+Audio	Audio
+
+#: apps/estudio/main/es_ui_song.c:497
+Baja	Niedrig
+
+#: apps/estudio/main/es_ui_song.c:497
+Normal	Normal
+
+#: apps/estudio/main/es_ui_song.c:497
+Segura	Sicher
+
+#: apps/estudio/main/es_ui_song.c:502
+Latencia (lo que espera en la cola)	Latenz (was in der Warteschlange wartet)
+
+#: apps/estudio/main/es_ui_song.c:505
+Voces del sintetizador	Synth-Stimmen
+
+#: apps/estudio/main/es_ui_song.c:507
+Prueba de carga	Lasttest
+
+#: apps/estudio/main/es_ui_sound.c:95
+Envolvente 2: filtro y FM	Hüllkurve 2: Filter und FM
+
+#: apps/estudio/main/es_ui_sound.c:95
+Envolvente 1: volumen	Hüllkurve 1: Lautstärke
+
+#: apps/estudio/main/es_ui_sound.c:130
+No se pudo leer ese sonido	Dieser Klang ließ sich nicht lesen
+
+#: apps/estudio/main/es_ui_sound.c:149
+Sonido guardado	Klang gespeichert
+
+#: apps/estudio/main/es_ui_sound.c:150
+No se pudo guardar	Speichern fehlgeschlagen
+
+#: apps/estudio/main/es_ui_sound.c:158
+Nombre del sonido	Name des Klangs
+
+#: apps/estudio/main/es_ui_sound.c:167
+Sonidos	Klänge
+
+#: apps/estudio/main/es_ui_sound.c:169
+Guardar este sonido como…	Diesen Klang speichern als…
+
+#: apps/estudio/main/es_ui_sound.c:172
+De fábrica	Werkseitig
+
+#: apps/estudio/main/es_ui_sound.c:177
+Míos (estudio/presets)	Meine (estudio/presets)
+
+#: apps/estudio/main/es_ui_sound.c:199
+Todavía ninguno.	Noch keine.
+
+#: apps/estudio/main/es_ui_sound.c:251
+Probar	Anhören
+
+#: apps/estudio/main/es_ui_sound.c:260
+FM de dos operadores	FM mit zwei Operatoren
+
+#: apps/estudio/main/es_ui_sound.c:264
+Oscilador 1	Oszillator 1
+
+#: apps/estudio/main/es_ui_sound.c:267
+Oscilador 2	Oszillator 2
+
+#: apps/estudio/main/es_ui_sound.c:279
+Voz	Stimme
+
+#: apps/estudio/main/es_ui_sound.c:302
+División	Teilung
+
+#: apps/estudio/main/es_ui_sound.c:347
+Audio: %d %% del tiempo · %d voces · faltas %u	Audio: %d %% der Zeit · %d Stimmen · Aussetzer %u
+
+#: apps/estudio/main/es_ui_sound.c:365
+Batería	Drums
+
+#: apps/estudio/main/es_ui_sound.c:372
+Distorsión	Verzerrung
+
+#: apps/estudio/main/es_ui_sound.c:373
+Al delay	Zum Delay
+
+#: apps/estudio/main/es_ui_sound.c:374
+A la reverb	Zum Hall
+
+#: apps/estudio/main/es_ui_sound.c:380
+Delay	Delay
+
+#: apps/estudio/main/es_ui_sound.c:383
+Repeticiones	Wiederholungen
+
+#: apps/estudio/main/es_ui_sound.c:384
+Brillo	Helligkeit
+
+#: apps/estudio/main/es_ui_sound.c:386
+Reverb	Hall
+
+#: apps/estudio/main/es_ui_sound.c:387
+Tamaño	Größe
+
+#: apps/estudio/main/es_ui_sound.c:388
+Apagado	Dämpfung
+
+#: apps/estudio/main/es_ui_sound.c:390
+Máster	Master
+
+#: apps/estudio/main/es_ui_sound.c:392
+A la izquierda corta los agudos; a la derecha, los graves.	Links werden die Höhen beschnitten, rechts die Tiefen.
+
+#: apps/estudio/main/es_ui_sound.c:397
+#: apps/estudio/main/es_ui_sound.c:398
+Metrónomo	Metronom
+
+#: apps/estudio/main/es_ui_sound.c:403
+Compás	Takt
+
+#: apps/estudio/main/es_ui_sound.c:405
+Cuenta un compás antes de grabar.	Zählt vor der Aufnahme einen Takt ein.
+
+#: apps/estudio/main/estudio.c:47
+El parlante está ocupado	Der Lautsprecher ist belegt
+
+#: apps/estudio/main/estudio.c:87
+Primer proyecto	Erstes Projekt

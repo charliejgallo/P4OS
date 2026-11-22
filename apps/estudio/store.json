@@ -1,0 +1,17 @@
+{
+ "cat": "medios",
+ "about": {
+  "es": "Un sintetizador con caja de ritmos y secuenciador: tocá con varios dedos, armá patrones y encadenalos en una canción.",
+  "en": "A synthesizer with a drum machine and a sequencer: play with several fingers, build patterns and chain them into a song."
+ },
+ "desc": {
+  "es": "Acostada, un teclado de dos octavas que toca acordes con varios dedos, una grilla con escala fija para que ninguna nota desentone, un arpegiador y ocho pads de batería. El sintetizador tiene tres partes de hasta ocho voces: dos osciladores, filtro con resonancia, dos envolventes, LFO y glide, o un FM de dos operadores, con 14 sonidos de fábrica y los tuyos.\n\nLa caja de ritmos tiene ocho pistas con sonidos sintetizados (bombo, redoblante, aplauso, hi-hats, toms, platillo, cencerro y más) o tus propias muestras WAV. De pie se ve la grilla de pasos: patrones de 16 a 64 pasos con velocidad y probabilidad en cada uno, swing, y un piano roll para las tres partes. Grabá en vivo sobre el patrón con un compás de cuenta, y encadená los patrones A a H en una canción.\n\nTempo de 40 a 240 con tocar el tempo, metrónomo, delay al compás, reverb, distorsión y un filtro en el máster. Exporta la canción a WAV y a MIDI, y guarda los proyectos en la tarjeta. Un teclado MIDI por USB toca las partes, y la placa puede mandar las notas y el reloj a otro equipo. La página del portal sube y baja proyectos, muestras y sonidos, y deja escuchar lo exportado.",
+  "en": "Lying down, a two-octave keyboard that plays chords with several fingers, a grid locked to a scale so no note sounds wrong, an arpeggiator and eight drum pads. The synth has three parts of up to eight voices: two oscillators, a resonant filter, two envelopes, an LFO and glide, or two-operator FM, with 14 factory sounds and your own.\n\nThe drum machine has eight tracks of synthesized sounds (kick, snare, clap, hi-hats, toms, cymbal, cowbell and more) or your own WAV samples. Upright it shows the step grid: patterns of 16 to 64 steps with velocity and chance on each one, swing, and a piano roll for the three parts. Record live over the pattern after a bar of count-in, and chain patterns A to H into a song.\n\nTempo from 40 to 240 with tap tempo, a metronome, a delay in time, reverb, distortion and a master filter. It exports the song to WAV and MIDI and keeps the projects on the card. A USB MIDI keyboard plays the parts, and the board can send the notes and the clock to other gear. The portal page uploads and downloads projects, samples and sounds, and plays what was exported."
+ },
+ "shots": [
+  "land-estudio.png",
+  "app-estudio.png",
+  "app-estudio-roll.png",
+  "app-estudio-synth.png"
+ ]
+}
