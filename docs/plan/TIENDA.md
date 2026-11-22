@@ -1306,6 +1306,17 @@ proyecto).
   como estaba). Los de Hockey y Oficina entraron a `CARRIED_PACKS`; **los
   de idioma no se copian de release en release** (serían 245 MB más cada
   vez): quedan en `v0.31.0`, que por eso no hay que borrar.
+- **La 0.32.0 salió el 2026-11-22** (tag `v0.32.0` en `b9192b5`), con
+  Oficina, Traductor, Estudio y Hockey. Orden: packs a la última
+  publicada, `store/packs.json`, `main` y su CI, tag, CI del tag (borrador
+  con 83 archivos, 241 MB), notas, revisar, publicar. La revisión del
+  borrador: los 398 archivos que nombra el catálogo, cada uno buscado en
+  la release que dice (27 en `v0.32.0`, 70 en `v0.31.0`, 272 en `v0.30.0`,
+  14 en `v0.29.0`, 15 en `v0.28.0`) con su tamaño, y 159 también por
+  SHA-256. Publicada, la placa del usuario (en `v0.31.0-49-ge594fae`) ve:
+  el firmware 0.32.0 para bajar, las cuatro apps en "Nuevas", y tres
+  actualizaciones (Vuelos y los dos idiomas del sistema); Estudio le
+  pide el firmware nuevo.
 - **Sueltos:** el avance sobre el ícono del inicio mientras una app se
   instala (fase 3); cortar el Wi-Fi en medio de una bajada, quitar una
   fuente y quitar un paquete suelto en la placa (`PRUEBAS-PLACA.md`); los

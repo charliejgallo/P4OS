@@ -259,6 +259,18 @@ de la 0.30.0: se pone al día al abrir la Tienda o Ajustes → Actualización.
 - [ ] Abrir algunas de las reemplazadas y ver que lo guardado sigue
       (puntajes, proyectos, notas).
 
+### La 0.32.0 desde la placa (publicada el 2026-11-22)
+
+- [x] Publicada, la Tienda de la placa (con `v0.31.0-49-ge594fae`) la ve
+      al refrescar: firmware 0.32.0 para bajar, cuatro apps nuevas, tres
+      actualizaciones (Vuelos, y los idiomas inglés y alemán del
+      sistema), y Estudio pidiendo el firmware nuevo.
+- [ ] Actualizar el firmware desde Ajustes y las apps desde la Tienda.
+- [ ] El chip "Nuevas" en la pantalla; un idioma del Traductor bajado
+      solo, sin los otros; Vuelos sin "Actualizar" después de
+      actualizarla; Hockey, Traductor, Oficina y Estudio, que están
+      copiadas a mano, pasadas a la Tienda con "Reemplazarlas".
+
 ### Hockey de mesa, Traductor y Oficina (2026-11-22, para la 0.32.0)
 
 En `main` desde el 2026-11-22, sin publicar; sólo probadas en el simulador.
