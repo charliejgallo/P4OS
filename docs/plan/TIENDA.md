@@ -1297,6 +1297,15 @@ proyecto).
   Traductor, Oficina y Estudio. Probado en el simulador con un catálogo
   de prueba y en `tests/store_host` y `tests/store_fw_host`; en la placa
   se ve recién con el catálogo de la 0.32.0.
+- **Los packs de la 0.32.0, publicados el 2026-11-22** en la release
+  `v0.31.0` (la última publicada), desde la Mac: 41 archivos, 256 MB,
+  cada uno comparado después con el local por tamaño y SHA-256. Son los
+  cinco de idioma del Traductor (37 partes, opcionales), los tres de
+  Hockey y el de fuentes de Oficina. `gen_store.py packs --tag v0.31.0`
+  los sumó a `store/packs.json` (y volvió a mover `c6.bin`, que se dejó
+  como estaba). Los de Hockey y Oficina entraron a `CARRIED_PACKS`; **los
+  de idioma no se copian de release en release** (serían 245 MB más cada
+  vez): quedan en `v0.31.0`, que por eso no hay que borrar.
 - **Sueltos:** el avance sobre el ícono del inicio mientras una app se
   instala (fase 3); cortar el Wi-Fi en medio de una bajada, quitar una
   fuente y quitar un paquete suelto en la placa (`PRUEBAS-PLACA.md`); los

@@ -79,6 +79,21 @@
   "size": 3204802,
   "sha256": "e1a6a245cd63fcaf54b102896a39f6ab036ebe5406f3cb1a024ec861fdff4121"
  },
+ "hockey_hielo_p4.pak": {
+  "tag": "v0.31.0",
+  "size": 264420,
+  "sha256": "dd3781a05fb8ea1e3e2d29b4ca8564049a3c43b4d20538c1b03c6bb7234ca24d"
+ },
+ "hockey_neon_p4.pak": {
+  "tag": "v0.31.0",
+  "size": 237789,
+  "sha256": "0eaf3e6b5f885b743095394dc2f014f2f12df5588b91c162afb28194e81f7809"
+ },
+ "hockey_p4.pak": {
+  "tag": "v0.31.0",
+  "size": 526980,
+  "sha256": "9381580eaa3a1519371e72a29f36097340ec4078f22aad760073d8c9b1263292"
+ },
  "infrarrojo_p4.pak": {
   "tag": "v0.28.0",
   "size": 8289618,
@@ -174,6 +189,11 @@
   "size": 821032,
   "sha256": "40a9ac3c96cc27424f11bcece1034b1247d3763ab27b907cc2fed7f6af6c6816"
  },
+ "oficina_p4.pak": {
+  "tag": "v0.31.0",
+  "size": 898480,
+  "sha256": "729930cc436de0e95a4cc31648607d15a67921a5345bf3963454381229d0cecb"
+ },
  "pinball_casino_p4.pak": {
   "tag": "v0.28.0",
   "size": 3153062,
@@ -208,6 +228,191 @@
   "tag": "v0.30.0",
   "size": 3532955,
   "sha256": "d001b9e54fb1d1c6dabcdfb6738401ddcd0dad5d74f2ffb8735f96c92a797a01"
+ },
+ "traductor_de_en_p4.pak": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "41854be98f277f6aeb23490e883269b96616b7367d5ef0459f7fe7def20d360e"
+ },
+ "traductor_de_en_p4.pak.1": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "bbf5df219cb6198acc2aceea6a8473a0eca6305e28be4f8319a5dc4d394fb218"
+ },
+ "traductor_de_en_p4.pak.2": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "95e4d28b36ca825187e9789b6f86183ec7c76bdeda7d2ca522e65c7f5b7e56e5"
+ },
+ "traductor_de_en_p4.pak.3": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "9841dca619863923ecc5a4f33a5aa57bb3a3773a9ab63224e317635f51c182b0"
+ },
+ "traductor_de_en_p4.pak.4": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "ce2b8b506ba6dbcdc4482f03a3177577486a54fae8adf27155d07a28960d36c3"
+ },
+ "traductor_de_en_p4.pak.5": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "4f8bb475319473ebddb9268e4c168bab54f69a6d8ecc288ff39c0b8f38e717d9"
+ },
+ "traductor_de_en_p4.pak.6": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "dabb1e45c2e060ea5d46d75dbdca02235cd30ce69cdca15fe5b625a23f44e159"
+ },
+ "traductor_de_en_p4.pak.7": {
+  "tag": "v0.31.0",
+  "size": 4104608,
+  "sha256": "959d21476301ba9fe91fb5913b3e0026ff862eb5fb4ffd2fd42ab093099b3c96"
+ },
+ "traductor_es_en_p4.pak": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "91ed3ab64a44d93ec2132749df5c2897a04c81fed8e52786932843ca344415d6"
+ },
+ "traductor_es_en_p4.pak.1": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "42d09185ee5a90d190a86ae1c613dd1e55da8f718e6dccf3c9fcf40256b72e85"
+ },
+ "traductor_es_en_p4.pak.2": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "4dabd9bce47fdc31bfa7ab17c1fd090999daef5950cb85a5a5236303f2cbff08"
+ },
+ "traductor_es_en_p4.pak.3": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "52d65ebc8f71c0e651a4b1a315e42716a5508f7b0d0a5b93f1844e129e27c009"
+ },
+ "traductor_es_en_p4.pak.4": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "36612046eaf7f234d0b27d61d6ae2a5117d6c78b800fe35e9173c7c609d41216"
+ },
+ "traductor_es_en_p4.pak.5": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "f5da45c33cbd4b4c02c59326fb7d23946113557bbdc11ca3b8d85c465b605004"
+ },
+ "traductor_es_en_p4.pak.6": {
+  "tag": "v0.31.0",
+  "size": 1593296,
+  "sha256": "af86a4573c2fafd900458d88a224aea127a501b670836c088e8e295282000ad9"
+ },
+ "traductor_fr_en_p4.pak": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "d946427ac4323eb467a62678da418fa22dd6a2ab08b6d99c5a2d467b6e70a3b5"
+ },
+ "traductor_fr_en_p4.pak.1": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "bfdc34b381485168c0f36937294c57d329facc30915c6e51230fdb604ff9339f"
+ },
+ "traductor_fr_en_p4.pak.2": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "7ef57e9f59b3ead7244e9c4184eebbcb42c428bd7579a5080a4cd29a5740a9ab"
+ },
+ "traductor_fr_en_p4.pak.3": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "e4c2dd4b1331f8f091a91fe95d0a08c71c3b15c3f26dc07cd376378b25ad6a69"
+ },
+ "traductor_fr_en_p4.pak.4": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "6bc36de4c842a90f5a17efff32e2e10c106911fbd26c7e994bc602839c4f308b"
+ },
+ "traductor_fr_en_p4.pak.5": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "977c93646281007930f7fdc1c9e640a6474f7d8532ff68cdc38adceb53e0cdfe"
+ },
+ "traductor_fr_en_p4.pak.6": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "a3af33331cb9c963f9bdd7f0faeb8ad5acbf0121195acd606d6e5d5894148aed"
+ },
+ "traductor_fr_en_p4.pak.7": {
+  "tag": "v0.31.0",
+  "size": 7237280,
+  "sha256": "198ca9c2652d04c2e0c91c5b1c9d5652ffff9336e36bd576b90c4c2fc4d1a6f7"
+ },
+ "traductor_it_en_p4.pak": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "c4064c20fd5c111ab1ffcce2f2794c718be8bc32bae67ef5460d0898e37ba0f0"
+ },
+ "traductor_it_en_p4.pak.1": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "8cfe9f2d44a12d54e208267a1c9c9eb334edda2434b59b22a3ac2c656306e5f2"
+ },
+ "traductor_it_en_p4.pak.2": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "96f0c7e10f5eb40814bad77951441d26e106a665e61ad177eff76b186e7ea93e"
+ },
+ "traductor_it_en_p4.pak.3": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "64caa1f758635469a73c6d3d49a593b8fb85018d4944c9151e69a18f7cc1bcb3"
+ },
+ "traductor_it_en_p4.pak.4": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "f134e992d79d9ecf6c679aad9e31417079f93d8fb9f9e2cfdcb6028b128720cb"
+ },
+ "traductor_it_en_p4.pak.5": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "b70164bc0c23b12af8f4b5a17dc4488e1c2e520c76d98cff02610af1a55fe05a"
+ },
+ "traductor_it_en_p4.pak.6": {
+  "tag": "v0.31.0",
+  "size": 1512928,
+  "sha256": "30844360837a61cd7f87160bf1326830cae9cc09c700d57be8495387b0506546"
+ },
+ "traductor_pt_en_p4.pak": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "3e31bd179401bdf294a77be131124f81c3804d2f07c1480014aa800965c44f09"
+ },
+ "traductor_pt_en_p4.pak.1": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "9916e990b9f803ba60e96bbe641e35a0d283d0a69b7e277a74190688c37cba95"
+ },
+ "traductor_pt_en_p4.pak.2": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "6115983fe1e596455729f13bc52809aa980e074d1f461f49667c15c004ba87da"
+ },
+ "traductor_pt_en_p4.pak.3": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "12713806dd14de85ed1395e949aeae43dbc2f11ac7173c18f7a55fc3c8288115"
+ },
+ "traductor_pt_en_p4.pak.4": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "7d9e017e7bf3a53d924f503c313fc03cc5dc5f28fd137d892b19233c6f0d2521"
+ },
+ "traductor_pt_en_p4.pak.5": {
+  "tag": "v0.31.0",
+  "size": 7500000,
+  "sha256": "210810241f51a0322ee7a38deb96dada49fc2da934de502d4a32e0d70007b7ed"
+ },
+ "traductor_pt_en_p4.pak.6": {
+  "tag": "v0.31.0",
+  "size": 330832,
+  "sha256": "f4c1335cde8409b3b6bdcd419c980840550885d69243044352826d9350425e16"
  },
  "turbo_p4.pak": {
   "tag": "v0.28.0",
