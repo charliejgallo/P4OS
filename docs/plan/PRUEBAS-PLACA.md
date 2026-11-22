@@ -294,9 +294,18 @@ En `main` desde el 2026-11-22, sin publicar; sólo probadas en el simulador.
       app cualquiera); Estudio mandando todo a una computadora por el
       puerto OTG (un programa que muestre los canales y el reloj); y el
       chip "Nuevas", que se ve recién con el catálogo de la 0.32.0.
-- [ ] Hockey de mesa: los fps del registro, y los dos dedos a la vez a
-      mano (el portal toca de a uno). Ajustar los niveles con el usuario,
-      como Metegol.
+- [x] **Hockey de mesa en la placa** (2026-11-22, `v0.31.0-34-g2c58fc4`,
+      la app y sus tres mesas subidas a mano): **61 fps**, 1,0 a 1,3 ms
+      por cuadro (dibujar 1,0), 4,9 MB de PSRAM, en la mesa del bar
+      esperando el saque. El partido no se pudo jugar desde el portal:
+      sus toques no llegaban a las apps que leen los dedos del panel
+      (`aos_touch_points_n`). Arreglado en el firmware el mismo día
+      (`aos_ui_injected_point`); en el simulador el portal ya mueve la
+      paleta y hay goles.
+- [ ] Hockey de mesa, lo que queda: un partido entero (con el firmware
+      que deja jugar desde el portal, o a mano), los fps con el disco en
+      juego, los dos dedos a la vez a mano, y ajustar los niveles con el
+      usuario, como Metegol.
 - [ ] Oficina: abrir y guardar un xlsx y un ods en la placa y volver a
       abrirlos en la computadora; los tiempos de abrir una planilla grande.
 

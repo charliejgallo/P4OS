@@ -359,6 +359,11 @@ void aos_ui_inject_tap(int x, int y, int hold_ms);
 void aos_ui_inject_drag(int x, int y, int x2, int y2, int hold_ms);
 /* The same, with the finger resting rest_ms at the end before lifting. */
 void aos_ui_inject_drag_rest(int x, int y, int x2, int y2, int hold_ms, int rest_ms);
+/* The finger the portal (or a script) is holding down right now, in screen
+ * pixels; false when there is none. aos_touch_points() hands it to the apps
+ * that read the panel's fingers themselves, as their one finger, so a game
+ * can be played from the portal too (one finger: the portal has no more). */
+bool aos_ui_injected_point(int *x, int *y);
 void aos_ui_touch_stats(uint32_t *reads, uint32_t *presses);
 
 /* ---- kept from AmoledOS so that ported code compiles; no effect here ---- */

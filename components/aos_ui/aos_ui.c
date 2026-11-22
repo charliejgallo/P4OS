@@ -1111,10 +1111,24 @@ static void gesture_end(void)
     }
 }
 
+/* The injected finger as it is right now, for the apps that read the
+ * panel's fingers themselves (aos_touch_points): see aos_ui_injected_point. */
+static volatile bool s_inj_down;
+static volatile int  s_inj_px, s_inj_py;
+
+bool aos_ui_injected_point(int *x, int *y)
+{
+    if (!s_inj_down) return false;
+    if (x) *x = s_inj_px;
+    if (y) *y = s_inj_py;
+    return true;
+}
+
 static void read_wrap(lv_indev_t *indev, lv_indev_data_t *d)
 {
     s_orig_read(indev, d);
 
+    bool inj = s_inj.active;
     if (s_inj.active) {
         if (!s_inj.started) { s_inj.started = true; s_inj.start = lv_tick_get(); }
         uint32_t el = lv_tick_elaps(s_inj.start);
@@ -1134,7 +1148,10 @@ static void read_wrap(lv_indev_t *indev, lv_indev_data_t *d)
             d->point.y = s_inj.drag ? s_inj.y2 : s_inj.y;
             s_inj.active = false;
         }
+        s_inj_px = d->point.x;
+        s_inj_py = d->point.y;
     }
+    s_inj_down = inj && d->state == LV_INDEV_STATE_PRESSED;
 
     s_reads++;
     bool pressed = d->state == LV_INDEV_STATE_PRESSED;

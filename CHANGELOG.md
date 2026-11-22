@@ -50,6 +50,11 @@
   Start and Stop. Estudio sends the computer what it sends a device on
   the host: its parts on channels 1 to 3, the drums on 10 and the clock;
   one track on channel 1 is still there to choose.
+- **A game played from the portal.** The portal's touches (the Screen
+  page, `POST /api/touch`) reached buttons and lists, and not the apps
+  that read the panel's fingers themselves: Air Hockey's mallet, Table
+  Football's rods, Studio's keys stayed still. With no finger on the
+  panel, the one the portal holds down is now theirs too, one at a time.
 - **"New" in the Store.** A chip beside the kinds of app, on the board
   and in the portal's page, with the apps of the newest release that
   brought any; in the whole list they say "New" until installed. The

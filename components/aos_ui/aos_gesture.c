@@ -682,6 +682,27 @@ static void tracks_poll(void)
     }
 }
 
+/* With no finger on the panel, the one the portal holds down
+ * (aos_ui_injected_point) is the first: a game that reads the fingers
+ * itself is played from the portal as its buttons are, one finger at a
+ * time. A real finger takes its place at once. */
+static int injected_point(aos_touch_point_t *out, int n)
+{
+    static bool was;
+    static uint8_t id = 200;
+    static uint32_t t_down;
+    int x, y;
+    bool down = n == 0 && aos_ui_injected_point(&x, &y);
+    if (down && !was) {
+        id = (uint8_t)(id >= 250 ? 200 : id + 1);
+        t_down = (uint32_t)aos_hal_uptime_ms();
+    }
+    was = down;
+    if (!down) return n;
+    out[0] = (aos_touch_point_t){ .down = true, .id = id, .x = (float)x, .y = (float)y, .t_down = t_down };
+    return 1;
+}
+
 int aos_touch_points(aos_touch_point_t out[2])
 {
     tracks_poll();
@@ -690,7 +711,7 @@ int aos_touch_points(aos_touch_point_t out[2])
         out[t] = s_tracks[t].p;
         if (out[t].down) n++;
     }
-    return n;
+    return injected_point(out, n);
 }
 
 int aos_touch_points_n(aos_touch_point_t *out, int max)
@@ -702,7 +723,7 @@ int aos_touch_points_n(aos_touch_point_t *out, int max)
         out[t] = s_tracks[t].p;
         if (out[t].down) n++;
     }
-    return n;
+    return max > 0 ? injected_point(out, n) : n;
 }
 
 bool aos_gesture_multitouch(void)
