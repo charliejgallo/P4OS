@@ -634,6 +634,6 @@ void of_numfmt_info(const char *code, of_nfinfo_t *o)
             if (k < sizeof tmp - 1) tmp[k++] = c;
         }
         tmp[k] = 0;
-        snprintf(part ? o->suffix : o->prefix, 16, "%s", tmp);
+        snprintf(part ? o->suffix : o->prefix, 16, "%.15s", tmp);
     }
 }

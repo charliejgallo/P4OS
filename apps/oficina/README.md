@@ -141,6 +141,137 @@ The point of the models is that converting comes almost free:
 
 ## 2. What is built
 
-### Phase 1: text and spreadsheets
+### Phase 1: text and spreadsheets (done, 2026-11-22)
 
-(Filled in as it is built.)
+**The shell** (`oficina.c`): Recent and Files, any folder of the card
+(`/sdcard/documentos` by default, made on first use), a long press on a file
+to rename, duplicate, delete it or take it off the recent list, "+" for a new
+xlsx, ods, csv, txt or md, dark or light background. Leaving a document with
+changes asks to save them; if the system closes the app meanwhile (the fifth
+app opened), they go to a copy beside the file, "<name> (sin guardar)".
+Formats of later phases say so instead of opening.
+
+**Spreadsheets** (`of_sheetview.c` over the formats core):
+
+- the grid, drawn by the app: frozen panes as the file has them, merged
+  cells, the file's fills, font colours, bold, underline, alignment, column
+  widths and row heights, text that runs over empty cells, `###` for a number
+  that does not fit, negative numbers in red where the format says `[Red]`;
+- one finger scrolls with momentum, a tap selects, a second tap or a double
+  tap edits, a long press and a drag select a range, a tap on a letter or a
+  number selects the column or the row, dragging a letter's edge resizes the
+  column, two fingers zoom (six steps, remembered);
+- the formula bar: the cell's name (tap: go to a cell) and its content as
+  typed (`15%`, `01/12/2026`, `=SUM(D2:D9)`); while a formula is typed, a
+  tapped cell or a dragged range goes in as its reference; a number cell
+  opens the keyboard on its numbers' page;
+- the selection's sum and average under the grid; sheets as tabs;
+- the menu: save, save a copy as xlsx/ods/csv, number format (twelve, with
+  an example each), sort ascending or descending (the block around the cell,
+  its first row taken as titles), filter by the selected value, fit column
+  width, freeze panes, copy/cut/paste (tab-separated, formulas move with the
+  cells when pasted from the app), clear, go to a cell, find, the list of
+  functions, rename a sheet (not yet for xlsx);
+- undo and redo (200 steps), a USB or Bluetooth keyboard: arrows and Shift,
+  Enter/Tab move after typing, typing replaces the cell, Delete clears, Esc,
+  Ctrl+Z/Y/C/X/V/S/F/A, Ctrl+arrows to the data's edge;
+- landscape: the same, with thinner bars.
+
+**Formulas** (`of_formula.c`): 63 functions (SUM, AVERAGE, MIN, MAX,
+COUNT, COUNTA, COUNTBLANK, PRODUCT, MEDIAN, SUMIF, COUNTIF, AVERAGEIF,
+SUMPRODUCT, ROUND, ROUNDUP, ROUNDDOWN, TRUNC, INT, ABS, SIGN, MOD, POWER,
+SQRT, PI, IF, AND, OR, NOT, IFERROR, IFNA, ISBLANK, ISNUMBER, ISTEXT, ISERROR,
+ISNA, CONCATENATE, CONCAT, LEN, LEFT, RIGHT, MID, UPPER, LOWER, TRIM, REPT,
+SUBSTITUTE, FIND, SEARCH, VALUE, TEXT, VLOOKUP, HLOOKUP, INDEX, MATCH, TODAY,
+NOW, DATE, YEAR, MONTH, DAY, WEEKDAY, TRUE, FALSE), with their Spanish and
+German names accepted when typed (SUMA, BUSCARV, SUMME, SVERWEIS...), `;` as
+the separator with the decimal comma, references across sheets, whole columns
+and rows, shared formulas expanded. A formula with a function the app does
+not have shows and keeps the value the file cached. Recalculation uses an
+explicit stack, not recursion (a chain of thousands of rows would overflow
+the LVGL task's stack); a cycle shows `#CIRC!`.
+
+**Number formats** (`of_numfmt.c`): Excel's format codes (sections, literals,
+`[$€-...]`, grouping, scaling, percent, scientific, dates and times with
+month and day names in Spanish or English) and ODF's data styles translated
+to them; the decimal mark follows the interface language.
+
+**The formats** (in `of.h`, built also on the Mac by `tools/host_test.c`):
+
+| File | What it does when saving into the same format |
+|---|---|
+| `of_xlsx.c` | every part copied with its compressed bytes; the changed sheets rewritten inside `<sheetData>` only, untouched rows and cells byte for byte, new strings inline; `<cols>` and `<dimension>` brought up to date; `styles.xml` only when a format was chosen (the new `xf` a copy of the cell's old one); `calcChain.xml` dropped with its two mentions and `fullCalcOnLoad` set |
+| `of_ods.c` | only `content.xml`, walked again: unchanged tables as they were, runs of repeated rows and cells split only where a cell changed, a rewritten cell keeping its style, spans and comment |
+| `of_csv.c` | the separator, quoting, encoding (UTF-8, BOM, Windows-1252), line ends, and each untouched field as the file wrote it (`350.000,00`, `VERDADERO`) |
+| `of_text.c` | UTF-8 with or without BOM, UTF-16 with BOM, Windows-1252; LF, CRLF, CR; the final line end |
+
+Saving into another format builds a new package: one cell format per number
+format in use (xlsx), one data style per number format (ods).
+
+**Text** (`of_textview.c`): a gap buffer with a line index, drawn by the app
+(only the lines in sight), so a 4 MB log scrolls lightly; line numbers,
+wrapping (off for code and logs, and past 2 MB), Inter or mono, pinch zoom,
+colours for C-like languages, Python and shell, JSON, XML/HTML/SVG, INI and
+TOML, YAML, Markdown and logs (levels in colour), selection, undo, find and
+replace, go to line, the encoding and line ends switchable from the menu.
+
+**The portal** (`web/oficina.js`): the documents folder and its subfolders,
+upload by picking or dropping with progress, download, delete, new folder, a
+quick look at a CSV as a table or at a text file, the documents opened last.
+
+### Checking it
+
+```
+cc -DOF_HOST -I apps/oficina/main apps/oficina/tools/host_test.c \
+   apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text}.c -o /tmp/host_test
+python3 apps/oficina/tools/make_samples.py /tmp/docs            # or --en for the English set
+/tmp/host_test edit /tmp/docs/ventas.xlsx /tmp/out.xlsx 'B2=5000' 'Resumen!B2=7'
+python3 apps/oficina/tools/check_saved.py /tmp/docs/ventas.xlsx /tmp/out.xlsx B2 D2 D11
+```
+
+What was checked on 2026-11-22 (there is no LibreOffice on this Mac: the
+saved files were checked with `check_saved.py`, which reads them the way a
+spreadsheet program does, and the app read them back):
+
+- XLSX edited (a value, a formula, a member of a shared formula group, a new
+  string with `&` and `<`, another sheet): comments, drawing, picture,
+  theme, styles, shared strings, docProps and the untouched rows identical;
+  the dependent formulas recalculated across sheets; array formula and
+  unknown function kept with their cached values;
+- ODS edited inside repeated rows and cells, a cell with a comment and
+  `<text:s/>`, a new cell far down, the other sheet: only `content.xml`
+  changed, `mimetype` first and stored;
+- CSV in Windows-1252 with `;`, CRLF, quotes and `VERDADERO`: identical but
+  the edited lines;
+- conversions csv→xlsx, xlsx→ods, ods→xlsx, with dates, percentages and
+  currencies keeping their formats;
+- sorting a block with formulas; saving from the app in the simulator.
+
+### Build and install
+
+```
+tools/build_apps.sh oficina                      # oficina.so, 200 KB, 189 symbols
+tools/install_apps.sh p4os.local oficina         # the .so and the page; restarts the board
+tools/install_lang.sh p4os.local en              # and de
+```
+
+No pack: the app uses the firmware's Inter and mono fonts (bold is drawn
+twice a pixel apart).
+
+### Next: phase 2, documents
+
+`.docx` and `.odt` with the block model of Notas' editor
+(`apps/notas/main/nt_doc.c`, `nt_editor.c`): read `document.xml` /
+`content.xml` into paragraphs and runs, each keeping the bytes of its
+original properties (`w:rPr`, the ODF automatic style); show headings, bold,
+italic, underline, colours, lists, tables and pictures (JPEG/PNG through
+`aos_hal_image_decode`, a stored entry by its offset); edit text and the
+common formatting; save by rewriting only the edited paragraphs. The ZIP
+writer, the XML tokenizer, the deflate and the shell are ready for it. The
+bold and italic fonts then come in a pack, as in Notas.
+
+Smaller things left in phase 1: renaming sheets of an xlsx, adding and
+deleting sheets, inserting and deleting rows and columns (they need every
+reference of the book moved), number formats in an existing ODS, and the
+board's own measurements (recalculating a sheet of ten thousand cells, the
+time to draw a frame of the grid).

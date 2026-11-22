@@ -348,6 +348,9 @@ int        of_formula_result_hint(const of_node_t *n);
 void       of_formula_write(const of_node_t *n, const of_book_t *b, of_sb_t *out);
 /* The same formula moved by (dr, dc): relative references shift. */
 char      *of_formula_shift(const char *src, const of_book_t *b, int sheet_ix, int dr, int dc);
+/* The functions the app has, for the help: their names in lang (0 en, 1 es, 2 de). */
+int         of_formula_fn_count(void);
+const char *of_formula_fn_name(int i, int lang);
 /* Every formula of the book again. */
 void       of_book_recalc(of_book_t *b);
 /* Excel serial date for today, or 0 without a clock. */

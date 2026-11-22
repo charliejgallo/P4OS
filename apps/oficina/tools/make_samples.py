@@ -4,6 +4,8 @@ P4OS - Office: test documents, invented, written by hand.
 
     python3 apps/oficina/tools/make_samples.py <dir>
 
+    python3 apps/oficina/tools/make_samples.py --en <dir>   (the store's screenshots)
+
 Writes into <dir> (sim/sim_fs/documentos for the simulator) spreadsheets and
 texts with everything the app must keep when it saves, whether or not it
 understands it: styles, merged cells, frozen panes, comments, a drawing with
@@ -53,12 +55,23 @@ def esc(s):
 # XLSX: ventas.xlsx
 # ---------------------------------------------------------------------------
 
+EN = False      # --en: the same spreadsheet in English, for the store's screenshots
+
+
+def w(es, en):
+    return en if EN else es
+
+
 def xlsx_ventas(path):
-    products = [('Yerba 1 kg', 4200, 12), ('Alfajores x12', 6300, 8), ('Dulce de leche', 2850, 20),
-                ('Mate de calabaza', 15400, 3), ('Bombilla', 5100, 6), ('Termo 1 l', 38900, 2),
-                ('Galletitas', 1450, 30), ('Facturas x6', 3900, 10)]
-    sst = ['Producto', 'Precio', 'Cantidad', 'Total', 'IVA', 'Fecha', 'Total general',
-           'Promedio', 'Máximo', 'Hoja con ñ y acentos: áéíóú']
+    global SALES, SUMMARY
+    SALES, SUMMARY = w('Ventas', 'Sales'), w('Resumen', 'Summary')
+    products = [(w('Yerba 1 kg', 'Coffee beans 1 kg'), 4200, 12), (w('Alfajores x12', 'Shortbread x12'), 6300, 8),
+                (w('Dulce de leche', 'Honey jar'), 2850, 20), (w('Mate de calabaza', 'Ceramic mug'), 15400, 3),
+                (w('Bombilla', 'Tea strainer'), 5100, 6), (w('Termo 1 l', 'Flask 1 l'), 38900, 2),
+                (w('Galletitas', 'Biscuits'), 1450, 30), (w('Facturas x6', 'Croissants x6'), 3900, 10)]
+    sst = [w('Producto', 'Product'), w('Precio', 'Price'), w('Cantidad', 'Quantity'), 'Total', w('IVA', 'VAT'),
+           w('Fecha', 'Date'), w('Total general', 'Grand total'), w('Promedio', 'Average'), w('Máximo', 'Maximum'),
+           w('Hoja con ñ y acentos: áéíóú', 'Summary of the month')]
     for p, _, _ in products:
         sst.append(p)
 
@@ -68,7 +81,7 @@ def xlsx_ventas(path):
     rows = []
     # header, bold with a fill (style 1)
     rows.append('<row r="1" spans="1:6" ht="20" customHeight="1">' + ''.join(
-        f'<c r="{c}1" s="1" t="s"><v>{si(t)}</v></c>' for c, t in zip('ABCDEF', ['Producto', 'Precio', 'Cantidad', 'Total', 'IVA', 'Fecha'])) + '</row>')
+        f'<c r="{c}1" s="1" t="s"><v>{i}</v></c>' for i, c in enumerate('ABCDEF')) + '</row>')
     for i, (p, price, qty) in enumerate(products):
         r = i + 2
         total = price * qty
@@ -79,23 +92,23 @@ def xlsx_ventas(path):
                     f'<c r="E{r}" s="3"><f>D{r}*0.21</f><v>{total * 0.21}</v></c>'
                     f'<c r="F{r}" s="4"><v>{46300 + i * 7}</v></c></row>')
     grand = sum(p * q for _, p, q in products)
-    rows.append(f'<row r="11"><c r="A11" s="1" t="s"><v>{si("Total general")}</v></c>'
+    rows.append(f'<row r="11"><c r="A11" s="1" t="s"><v>6</v></c>'
                 f'<c r="D11" s="5"><f>SUM(D2:D9)</f><v>{grand}</v></c>'
                 f'<c r="E11" s="3"><f>SUM(E2:E9)</f><v>{grand * 0.21}</v></c></row>')
-    rows.append(f'<row r="12"><c r="A12" t="s"><v>{si("Promedio")}</v></c>'
+    rows.append(f'<row r="12"><c r="A12" t="s"><v>7</v></c>'
                 f'<c r="D12" s="2"><f>AVERAGE(D2:D9)</f><v>{grand / 8}</v></c>'
                 # a function the app does not have: its value must stay
                 f'<c r="E12"><f>_xlfn.STDEV.S(D2:D9)</f><v>34567.89</v></c></row>')
-    rows.append(f'<row r="13"><c r="A13" t="s"><v>{si("Máximo")}</v></c>'
+    rows.append(f'<row r="13"><c r="A13" t="s"><v>8</v></c>'
                 f'<c r="D13" s="2"><f>MAX(D2:D9)</f><v>{max(p * q for _, p, q in products)}</v></c>'
                 f'<c r="E13" t="b"><f>D13&gt;50000</f><v>1</v></c>'
                 f'<c r="F13" t="e"><f>1/0</f><v>#DIV/0!</v></c></row>')
     # an array formula, an inline string with rich runs, a lookup into the other sheet
-    rows.append('<row r="15"><c r="A15" t="inlineStr"><is><r><rPr><b/></rPr><t>Buscar:</t></r><r><t xml:space="preserve"> Bombilla</t></r></is></c>'
-                '<c r="B15"><f>VLOOKUP("Bombilla",A2:D9,4,FALSE)</f><v>30600</v></c>'
+    rows.append('<row r="15"><c r="A15" t="inlineStr"><is><r><rPr><b/></rPr><t>' + w('Buscar:', 'Look up:') + '</t></r><r><t xml:space="preserve"> ' + products[4][0] + '</t></r></is></c>'
+                '<c r="B15"><f>VLOOKUP("' + products[4][0] + '",A2:D9,4,FALSE)</f><v>30600</v></c>'
                 '<c r="C15"><f t="array" ref="C15">SUM(B2:B9*C2:C9)</f><v>' + str(grand) + '</v></c>'
-                '<c r="D15" t="str"><f>CONCATENATE(A2," y ",A3)</f><v>Yerba 1 kg y Alfajores x12</v></c>'
-                '<c r="E15"><f>Resumen!B2*2</f><v>2</v></c>'
+                '<c r="D15" t="str"><f>CONCATENATE(A2," ' + w('y', 'and') + ' ",A3)</f><v>' + products[0][0] + w(' y ', ' and ') + products[1][0] + '</v></c>'
+                '<c r="E15"><f>' + SUMMARY + '!B2*2</f><v>2</v></c>'
                 '<c r="F15"><f>ROUND(B2/3,2)</f><v>1400</v></c></row>')
     sheet1 = (HEAD + f'<worksheet {X_NS} xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" '
               'xmlns:x14ac="http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac" mc:Ignorable="x14ac">'
@@ -116,10 +129,10 @@ def xlsx_ventas(path):
               '<x14:conditionalFormattings/></ext></extLst></worksheet>')
     sheet2 = (HEAD + f'<worksheet {X_NS}><dimension ref="A1:B4"/><sheetViews><sheetView workbookViewId="0"/></sheetViews>'
               '<sheetFormatPr defaultRowHeight="15"/><sheetData>'
-              '<row r="1"><c r="A1" t="s"><v>' + str(si('Hoja con ñ y acentos: áéíóú')) + '</v></c></row>'
-              '<row r="2"><c r="A2" t="inlineStr"><is><t>Uno</t></is></c><c r="B2"><v>1</v></c></row>'
-              '<row r="3"><c r="A3" t="inlineStr"><is><t>Ventas</t></is></c><c r="B3"><f>Ventas!D11</f><v>' + str(grand) + '</v></c></row>'
-              '<row r="4"><c r="A4" t="inlineStr"><is><t>Doble</t></is></c><c r="B4"><f>B3*2</f><v>' + str(grand * 2) + '</v></c></row>'
+              '<row r="1"><c r="A1" t="s"><v>' + '9' + '</v></c></row>'
+              '<row r="2"><c r="A2" t="inlineStr"><is><t>' + w('Uno', 'One') + '</t></is></c><c r="B2"><v>1</v></c></row>'
+              '<row r="3"><c r="A3" t="inlineStr"><is><t>' + w('Ventas', 'Sales') + '</t></is></c><c r="B3"><f>' + SALES + '!D11</f><v>' + str(grand) + '</v></c></row>'
+              '<row r="4"><c r="A4" t="inlineStr"><is><t>' + w('Doble', 'Double') + '</t></is></c><c r="B4"><f>B3*2</f><v>' + str(grand * 2) + '</v></c></row>'
               '</sheetData><pageMargins left="0.7" right="0.7" top="0.75" bottom="0.75" header="0.3" footer="0.3"/></worksheet>')
     sst_xml = HEAD + f'<sst {X_NS.split(" ")[0]} count="{len(sst) + 20}" uniqueCount="{len(sst)}">' + ''.join(
         f'<si><t>{esc(s)}</t></si>' for s in sst) + '</sst>'
@@ -143,8 +156,8 @@ def xlsx_ventas(path):
               '<dxfs count="0"/><tableStyles count="0" defaultTableStyle="TableStyleMedium2" defaultPivotStyle="PivotStyleLight16"/></styleSheet>')
     workbook = (HEAD + f'<workbook {X_NS}><fileVersion appName="xl" lastEdited="7" lowestEdited="7" rupBuild="27425"/>'
                 '<workbookPr defaultThemeVersion="164011"/><bookViews><workbookView xWindow="0" yWindow="0" windowWidth="28800" windowHeight="12300"/></bookViews>'
-                '<sheets><sheet name="Ventas" sheetId="1" r:id="rId1"/><sheet name="Resumen" sheetId="2" r:id="rId2"/></sheets>'
-                '<definedNames><definedName name="Precios">Ventas!$B$2:$B$9</definedName></definedNames>'
+                '<sheets><sheet name="' + SALES + '" sheetId="1" r:id="rId1"/><sheet name="' + SUMMARY + '" sheetId="2" r:id="rId2"/></sheets>'
+                '<definedNames><definedName name="Precios">' + SALES + '!$B$2:$B$9</definedName></definedNames>'
                 '<calcPr calcId="171027"/></workbook>')
     wb_rels = (HEAD + '<Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'
                '<Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet" Target="worksheets/sheet1.xml"/>'
@@ -358,9 +371,34 @@ def texts(d):
         f.write('Texto en Latin-1: año, pingüino, café.\n'.encode('latin-1'))
 
 
+def texts_en(d):
+    with open(os.path.join(d, 'notes.md'), 'w', encoding='utf-8') as f:
+        f.write('# Workshop notes\n\nThings to bring on **Saturday**:\n\n- the long ruler\n- two clamps\n'
+                '- `M4` screws, *not* the M3 ones\n\n> Measure twice, cut once.\n\n## Paint\n\n'
+                'One coat of primer, then [the blue one](https://example.com).\n')
+    with open(os.path.join(d, 'stock.py'), 'w', encoding='utf-8') as f:
+        f.write('# Stock levels from the sales sheet\nimport csv\n\nLOW = 5  # reorder below this\n\n\n'
+                'def low_items(path):\n    """The products to order again."""\n    with open(path, newline="") as f:\n'
+                '        for row in csv.DictReader(f):\n            if int(row["quantity"]) < LOW:\n'
+                '                yield row["product"], int(row["quantity"])\n\n\n'
+                'for name, n in low_items("sales.csv"):\n    print(f"{name}: only {n} left")\n')
+    with open(os.path.join(d, 'settings.json'), 'w', encoding='utf-8') as f:
+        f.write('{\n  "name": "Workshop",\n  "version": 3,\n  "enabled": true,\n  "limits": [1.5, 2.25, -30000]\n}\n')
+    with open(os.path.join(d, 'temperatures.csv'), 'w', encoding='utf-8') as f:
+        f.write('city,jan,feb,mar,apr\nLisbon,15.0,16.2,18.5,19.8\nOslo,-2.3,-2.0,1.6,6.3\nCairo,19.1,20.8,23.7,27.6\n')
+
+
 def main():
-    d = sys.argv[1] if len(sys.argv) > 1 else 'sim/sim_fs/documentos'
+    global EN
+    args = [a for a in sys.argv[1:] if a != '--en']
+    EN = '--en' in sys.argv
+    d = args[0] if args else 'sim/sim_fs/documentos'
     os.makedirs(d, exist_ok=True)
+    if EN:
+        xlsx_ventas(os.path.join(d, 'sales.xlsx'))
+        texts_en(d)
+        print('samples (English) in', d)
+        return
     xlsx_ventas(os.path.join(d, 'ventas.xlsx'))
     ods_presupuesto(os.path.join(d, 'presupuesto.ods'))
     texts(d)
