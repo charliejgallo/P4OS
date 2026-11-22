@@ -17,10 +17,21 @@
     LibreTranslate of your own. On the board: a second for a short
     sentence, 4.3 s for one of thirty words, 1.5 s more the first time;
     all its memory back when it closes.
-  - **Oficina** (Office), first phase: spreadsheets (xlsx, ods, csv) with
-    over sixty formulas, sorting and filters, saved without touching what
-    the app does not understand; and a text editor for big files, code and
-    logs.
+  - **Oficina** (Office): documents, spreadsheets, presentations and
+    texts on the board.
+    - **Edits** docx and odt (headings, formatting, lists, tables,
+      pictures, footnotes), xlsx, ods and csv (over sixty formulas,
+      sorting, filters), and texts, code and logs of any size. Saving
+      rewrites only what was touched: what the app does not understand
+      stays byte for byte.
+    - **Reads** PDF (as text set to the screen, or its pages drawn as they
+      print, with RC4 and AES encryption), pptx and odp with a full-screen
+      presenting mode, the Office 97-2003 binaries (doc, xls, ppt), RTF,
+      HTML, EPUB, FB2, mail, Markdown, vCard, iCalendar, and the text of
+      Pages, Numbers and Keynote; walks ZIP, CBZ, TAR and GZ as folders.
+    - **Writes PDF** from a document, a sheet or a text.
+    - On the board: its 55 sample files open, a PDF page is drawn in 66 to
+      515 ms, and 9.5 to 14 MB of PSRAM stay free with a document open.
 
   - **Estudio** (Studio): a synthesizer of three parts (two oscillators and
     a filter, or two-operator FM), a drum machine of eight tracks and a
@@ -51,6 +62,12 @@
   Start and Stop. Estudio sends the computer what it sends a device on
   the host: its parts on channels 1 to 3, the drums on 10 and the clock;
   one track on channel 1 is still there to choose.
+- **Files opens documents in Office.** With Office on the card, a tap on
+  a docx, odt, xlsx, ods, pptx, odp, doc, xls, ppt, pdf, rtf, epub and the
+  rest of what it reads opens it there, and so does a ZIP, a TAR or a GZ;
+  a text, a table or a data file keeps Files' own quick view on a tap and
+  gets "Open in Office" in its menu, to edit it. Without Office those
+  files are what they were, bytes, with a word on where the app is.
 - **A game played from the portal.** The portal's touches (the Screen
   page, `POST /api/touch`) reached buttons and lists, and not the apps
   that read the panel's fingers themselves: Air Hockey's mallet, Table

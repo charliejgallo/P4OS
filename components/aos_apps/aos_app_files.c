@@ -329,7 +329,7 @@ static void fmt_date(char *out, size_t n, uint32_t t, bool full)
 /* Kinds of file                                                               */
 /* -------------------------------------------------------------------------- */
 
-enum { K_DIR, K_IMAGE, K_AUDIO, K_TEXT, K_CSV, K_CODE, K_FW, K_APP, K_ICON, K_OTHER, K_COUNT };
+enum { K_DIR, K_IMAGE, K_AUDIO, K_TEXT, K_CSV, K_CODE, K_FW, K_APP, K_ICON, K_DOC, K_OTHER, K_COUNT };
 
 static const struct { const char *glyph; uint32_t color; const char *name; } KIND[K_COUNT] = {
     [K_DIR]   = { AOS_SYM_FOLDER,                0x60A5FA, N_("Carpeta") },
@@ -341,8 +341,14 @@ static const struct { const char *glyph; uint32_t color; const char *name; } KIN
     [K_FW]    = { AOS_SYM_CHIP,                  0xA78BFA, N_("Firmware") },
     [K_APP]   = { AOS_SYM_PACKAGE_VARIANT,       0xFF9F0A, N_("App de P4OS") },
     [K_ICON]  = { AOS_SYM_PALETTE,               0x40C8E0, N_("Ícono de app") },
+    [K_DOC]   = { AOS_SYM_FILE_DOCUMENT_OUTLINE, 0x0A84FF, N_("Documento") },
     [K_OTHER] = { AOS_SYM_FILE_OUTLINE,          0x8E8E93, N_("Archivo") },
 };
+
+/* The Office app (apps/oficina), when it is on the card: it opens what this
+ * app has no viewer for (K_DOC), and edits what the viewer only shows. */
+#define OFFICE_ID "aos.oficina"
+static bool has_office(void) { return aos_ui_app_find(OFFICE_ID) != NULL; }
 
 static int kind_of(const char *name)
 {
@@ -359,6 +365,14 @@ static int kind_of(const char *name)
         { "py", K_CODE }, { "lua", K_CODE }, { "sh", K_CODE }, { "m3u", K_CODE }, { "pls", K_CODE },
         { "bin", K_FW }, { "elf", K_FW }, { "hex", K_FW }, { "uf2", K_FW },
         { "so", K_APP }, { "p4app", K_APP }, { "aic", K_ICON },
+        /* what only Office reads: documents, sheets, slides, books, mail,
+         * cards, and the archives it walks as folders */
+        { "docx", K_DOC }, { "odt", K_DOC }, { "doc", K_DOC }, { "rtf", K_DOC }, { "pages", K_DOC },
+        { "xlsx", K_DOC }, { "xlsm", K_DOC }, { "ods", K_DOC }, { "xls", K_DOC }, { "numbers", K_DOC },
+        { "pptx", K_DOC }, { "odp", K_DOC }, { "ppt", K_DOC }, { "key", K_DOC },
+        { "pdf", K_DOC }, { "epub", K_DOC }, { "fb2", K_DOC }, { "eml", K_DOC }, { "mht", K_DOC },
+        { "vcf", K_DOC }, { "ics", K_DOC },
+        { "zip", K_DOC }, { "cbz", K_DOC }, { "tar", K_DOC }, { "tgz", K_DOC }, { "gz", K_DOC },
     };
     for (size_t i = 0; i < sizeof EXT / sizeof EXT[0]; i++)
         if (!strcasecmp(dot + 1, EXT[i].ext)) return EXT[i].kind;
@@ -3254,10 +3268,16 @@ static void open_file(const char *path, int kind)
         if (!aos_ui_open_app_with("aos.flasher", path)) aos_ui_toast(_("No se pudo abrir el Programador"), 1600);
         return;
     }
+    if (kind == K_DOC) {
+        /* without Office it is bytes, as before, and a word on where the app is */
+        if (!has_office()) aos_ui_toast(_("Oficina lo abre: está en la Tienda"), 2500);
+        else if (aos_ui_open_app_with(OFFICE_ID, path)) return;
+        else aos_ui_toast(_("No se pudo abrir Oficina"), 1600);
+    }
     /* A firmware image elsewhere is just bytes: the viewer, in hex (or as
      * text, an Intel .hex). It used to open the information sheet. */
     if (kind == K_APP || kind == K_ICON) { info_open(); return; }
-    viewer_open(path, kind);
+    viewer_open(path, kind == K_DOC ? K_OTHER : kind);
 }
 
 static void open_entry(int ei)
@@ -3298,6 +3318,14 @@ static void act_as_text(void)
 {
     char p[PATH_LEN];
     if (ctx_path(p, sizeof p)) viewer_open(p, K_TEXT);
+    U.ctx = -1;
+}
+
+static void act_office(void)
+{
+    char p[PATH_LEN];
+    if (ctx_path(p, sizeof p) && !aos_ui_open_app_with(OFFICE_ID, p))
+        aos_ui_toast(_("No se pudo abrir Oficina"), 1600);
     U.ctx = -1;
 }
 
@@ -3607,14 +3635,19 @@ static void ctx_menu(int ei)
     scpy(s_ctx, sizeof s_ctx, p);
     const char *rel = rel_of(p);
     bool dir = e->flags & EF_DIR;
-    act_t a[14];
+    act_t a[15];
     int n = 0;
     const char *open = _("Abrir");
     if (e->kind == K_IMAGE) open = _("Abrir en Fotos");
     else if (e->kind == K_AUDIO) open = _("Reproducir en Música");
     else if (e->kind == K_FW && rel && path_under(rel, "firmware")) open = _("Abrir en el Programador");
     else if (kind_is_text(e->kind)) open = _("Ver");
-    if (dir || e->kind != K_OTHER) a[n++] = (act_t){ dir ? AOS_SYM_FOLDER_OPEN : AOS_SYM_CHEVRON_RIGHT, open, AOS_C_TEXT, act_open };
+    else if (e->kind == K_DOC) open = _("Abrir en Oficina");
+    bool office = !dir && has_office();
+    if (dir || (e->kind != K_OTHER && (e->kind != K_DOC || office)))
+        a[n++] = (act_t){ dir ? AOS_SYM_FOLDER_OPEN : AOS_SYM_CHEVRON_RIGHT, open, AOS_C_TEXT, act_open };
+    /* a text, a table or a data file: this app shows it, Office edits it */
+    if (office && kind_is_text(e->kind)) a[n++] = (act_t){ AOS_SYM_PENCIL, _("Abrir en Oficina"), AOS_C_TEXT, act_office };
     if (!dir && !kind_is_text(e->kind)) a[n++] = (act_t){ AOS_SYM_FILE_DOCUMENT_OUTLINE, _("Ver el contenido"), AOS_C_TEXT, act_as_text };
     if (dir && rel && path_under(rel, "firmware") && rel_depth(rel) == 2)
         a[n++] = (act_t){ AOS_SYM_CHIP, _("Abrir en el Programador"), AOS_C_TEXT, act_flasher };

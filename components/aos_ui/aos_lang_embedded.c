@@ -3549,6 +3549,10 @@ static const char blob_en__sistema_lang[] =
     "Oficina\tOffice\n"
     "Estudio\tStudio\n"
     "Nuevas\tNew\n"
+    "Documento\tDocument\n"
+    "Abrir en Oficina\tOpen in Office\n"
+    "No se pudo abrir Oficina\tCould not open Office\n"
+    "Oficina lo abre: está en la Tienda\tOffice opens it: it is in the Store\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -7090,6 +7094,10 @@ static const char blob_de__sistema_lang[] =
     "Oficina\tBüro\n"
     "Estudio\tStudio\n"
     "Nuevas\tNeu\n"
+    "Documento\tDokument\n"
+    "Abrir en Oficina\tIn Büro öffnen\n"
+    "No se pudo abrir Oficina\tBüro ließ sich nicht öffnen\n"
+    "Oficina lo abre: está en la Tienda\tBüro öffnet es: im Store erhältlich\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -7097,7 +7105,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3534, 0, files_en, 1 },
-    { "de", "Deutsch", 3534, 0, files_de, 1 },
+    { "en", "English", 3538, 0, files_en, 1 },
+    { "de", "Deutsch", 3538, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

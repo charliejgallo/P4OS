@@ -10868,3 +10868,9 @@ Estudio	Studio
 
 #: components/aos_apps/aos_app_store.c  (the Store's filter: the apps of the newest release)
 Nuevas	New
+
+#: components/aos_apps/aos_app_files.c  (documents open in the Office app)
+Documento	Document
+Abrir en Oficina	Open in Office
+No se pudo abrir Oficina	Could not open Office
+Oficina lo abre: está en la Tienda	Office opens it: it is in the Store
