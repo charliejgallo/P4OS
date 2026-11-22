@@ -16,6 +16,8 @@
  * The file keeps its encoding and line ends; the menu changes them.
  */
 #include "of_ui.h"
+#include "of_pdf.h"
+#include "of_doc.h"
 #include "aos_fonts.h"
 #include "aos_mono.h"
 #include "aos_gesture.h"
@@ -1176,10 +1178,32 @@ static void goto_done(const char *text, void *ud)
     refresh();
 }
 
+static int s_tmenu[14];
+
+static void pdf_done(const char *text, void *ud)
+{
+    (void)ud;
+    if (!text[0] || strchr(text, '/')) return;
+    char dir[300];
+    snprintf(dir, sizeof dir, "%s", T.path);
+    char *sl = strrchr(dir, '/');
+    if (sl) *sl = 0;
+    char p[320];
+    bool has = !strcasecmp(of_ext(text), "pdf");
+    snprintf(p, sizeof p, "%.200s/%.100s%s", dir, text, has ? "" : ".pdf");
+    if (of_file_exists(p)) { of_app_toast(_("Ya hay un archivo con ese nombre")); return; }
+    size_t n = of_text_len(&T.t);
+    char *all = of_text_range(&T.t, 0, n);
+    char err[64];
+    bool ok = all && of_pdf_write_text(all, n, p, of_basename(T.path), err, sizeof err);
+    of_free(all);
+    of_app_toast(ok ? _("Guardado como PDF") : _("No se pudo guardar"));
+}
+
 static void menu_pick(int i, void *ud)
 {
     (void)ud;
-    switch (i) {
+    switch (i >= 0 && i < 14 ? s_tmenu[i] : -1) {
     case 0: of_textv_save(); break;
     case 1: find_toggle(); break;
     case 2:
@@ -1207,6 +1231,21 @@ static void menu_pick(int i, void *ud)
     case 9: T.anchor = 0; T.caret = of_text_len(&T.t); refresh(); break;
     case 10: copy(false); break;
     case 11: paste(); break;
+    case 13: {
+        char base[128];
+        snprintf(base, sizeof base, "%s", of_basename(T.path));
+        char *dot = strrchr(base, '.');
+        if (dot && dot != base) *dot = 0;
+        ofu_prompt(_("Exportar a PDF"), base, _("Guardar"), pdf_done, NULL);
+        break;
+    }
+    case 12: {
+        if (T.modified) { of_app_toast(_("Guardá los cambios primero")); break; }
+        char p[300];
+        snprintf(p, sizeof p, "%s", T.path);
+        of_app_open_as(p, OF_OPEN_VIEW);
+        break;
+    }
     }
 }
 
@@ -1217,7 +1256,7 @@ static void menu_open(void)
     snprintf(enc, sizeof enc, _("Codificación: %s"), ENC[T.t.enc & 3]);
     snprintf(eol, sizeof eol, _("Fin de línea: %s"), T.t.eol == OT_EOL_CRLF ? "CRLF" : T.t.eol == OT_EOL_CR ? "CR" : "LF");
     snprintf(info, sizeof info, _("%d líneas"), T.t.nlines);
-    ofu_item_t items[12] = {
+    ofu_item_t all[14] = {
         { _("Guardar"), OF_IC_SAVE, false, false },
         { _("Buscar"), OF_IC_SEARCH, false, false },
         { _("Buscar y reemplazar"), OF_IC_SEARCH, false, false },
@@ -1230,8 +1269,19 @@ static void menu_open(void)
         { _("Seleccionar todo"), OF_IC_CHECKBOX, false, false },
         { _("Copiar"), OF_IC_COPY, false, false },
         { _("Pegar"), OF_IC_COPY, false, false },
+        { of_is_tree_ext(of_ext(T.path)) ? _("Ver como árbol") : _("Ver con formato"), OF_IC_DOC, false, false },
+        { _("Exportar a PDF..."), OF_IC_DOC, false, false },
     };
-    ofu_sheet(info, items, 12, menu_pick, NULL);
+    /* "Ver con formato" second, after Guardar, when the file has a view */
+    ofu_item_t items[14];
+    int n = 0;
+    for (int k = 0; k < 14; k++) {
+        int id = k == 0 ? 0 : k == 1 ? 12 : k == 13 ? 13 : k - 1;
+        if (id == 12 && !of_app_can_view(T.path)) continue;
+        s_tmenu[n] = id;
+        items[n++] = all[id];
+    }
+    ofu_sheet(info, items, n, menu_pick, NULL);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1330,6 +1380,7 @@ bool of_textv_open(lv_obj_t *parent, const char *path)
     lv_obj_align(bk, LV_ALIGN_LEFT_MID, 4, 0);
     T.title = ofu_text(T.top, "", ofu_font(OF_ST_BOLD, OF_SZ_M), OFT.text);
     lv_label_set_long_mode(T.title, LV_LABEL_LONG_MODE_DOTS);
+    lv_obj_set_height(T.title, ofu_font(OF_ST_BOLD, OF_SZ_M)->line_height);
     lv_obj_align(T.title, LV_ALIGN_LEFT_MID, 92, 0);
     lv_obj_t *mo = ofu_icon_btn(T.top, OF_IC_MORE, 84, more_cb, NULL);
     lv_obj_align(mo, LV_ALIGN_RIGHT_MID, -4, 0);

@@ -27,6 +27,10 @@ void ofu_theme_set(bool dark);
 enum { OF_SZ_M = 0, OF_SZ_S, OF_SZ_L, OF_SZ_XL, OF_SZ_XS };   /* 28 24 36 48 20 px */
 #define OF_ST_BOLD 1
 const lv_font_t *ofu_font(int style, int size);
+/* the documents' fonts (of_fonts.c): style bit 0 bold, bit 1 italic */
+const lv_font_t *ofd_font(int style, int px, bool *faux, bool *slant);
+bool ofd_fonts_have_pack(void);
+void ofd_fonts_free(void);
 
 /* -------------------------------------------------------------------------- */
 /* Widgets (of_ui.c)                                                           */
@@ -123,10 +127,15 @@ void      ofu_kb_attach_textarea(lv_obj_t *ta, void (*done)(lv_obj_t *ta));
 const char *of_docs_dir(void);          /* /sdcard/documentos */
 void of_app_home(void);                 /* back to the files */
 void of_app_open(const char *path);
+enum { OF_OPEN_AUTO = 0, OF_OPEN_TEXT, OF_OPEN_VIEW };
+void of_app_open_as(const char *path, int how);   /* TEXT: in the text editor; VIEW: read and shown (md, html, the tree of a json) */
+bool of_app_can_text(const char *path);         /* a text format: "Editar como texto" */
+bool of_app_can_view(const char *path);         /* "Ver con formato", "Ver como árbol" */
 void of_recent_add(const char *path);
 void of_app_toast(const char *msg);
 bool of_app_landscape(void);
 void of_app_back_from_doc(void);      /* the back button of a document: asks if it has changes */
+void of_app_pdf_mode(const char *path, bool pages);   /* a PDF's pages drawn, or its text reflowed (kept for the next) */
 
 /* of_sheetview.c */
 bool of_sheet_open(lv_obj_t *parent, const char *path, of_book_t *b);
@@ -136,6 +145,25 @@ bool of_sheet_back(void);               /* true: handled (a panel closed, a ques
 void of_sheet_tick(void);
 bool of_sheet_save(void);
 bool of_sheet_save_recovery(void);
+
+/* of_docview.c */
+struct of_doc_s;
+bool of_docv_open(lv_obj_t *parent, const char *path, struct of_doc_s *d);
+void of_docv_close(void);
+bool of_docv_modified(void);
+bool of_docv_back(void);
+bool of_docv_save(void);
+bool of_docv_save_recovery(void);
+
+/* of_slideview.c */
+struct of_deck_s;
+bool of_slidev_open(lv_obj_t *parent, const char *path, struct of_deck_s *dk);
+void of_slidev_close(void);
+bool of_slidev_back(void);                  /* true: it left the presentation */
+
+/* of_pdfview.c: path NULL lays the open one out again; err as of_pdfr_open's, or "worker" */
+bool of_pdfv_open(lv_obj_t *parent, const char *path, const char *password, char *err, size_t errlen);
+void of_pdfv_close(void);
 
 /* of_textview.c */
 bool of_textv_open(lv_obj_t *parent, const char *path);

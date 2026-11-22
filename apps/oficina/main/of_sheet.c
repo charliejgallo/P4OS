@@ -788,6 +788,7 @@ int of_fmt_from_ext(const char *ext)
     if (!strcmp(ext, "xlsx") || !strcmp(ext, "xlsm") || !strcmp(ext, "xltx") || !strcmp(ext, "xltm"))
         return OF_FMT_XLSX;
     if (!strcmp(ext, "ods") || !strcmp(ext, "ots")) return OF_FMT_ODS;
+    if (!strcmp(ext, "xls") || !strcmp(ext, "xlt")) return OF_FMT_XLS;
     return OF_FMT_NONE;
 }
 
@@ -804,6 +805,11 @@ of_book_t *of_book_load(const char *path, char *err, size_t errlen)
     case OF_FMT_CSV: case OF_FMT_TSV: b = of_csv_load(path, err, errlen); break;
     case OF_FMT_XLSX: b = of_xlsx_load(path, err, errlen); break;
     case OF_FMT_ODS: b = of_ods_load(path, err, errlen); break;
+    case OF_FMT_XLS: {
+        extern of_book_t *of_xls_load(const char *path, char *err, size_t errlen);
+        b = of_xls_load(path, err, errlen);
+        break;
+    }
     default: snprintf(err, errlen, "?"); return NULL;
     }
     if (b) of_book_recalc(b);

@@ -61,7 +61,7 @@ Abiertos hace poco en la placa	Zuletzt auf dem Board geöffnet
 Nombre de la carpeta nueva	Name des neuen Ordners
 
 #: apps/oficina/web/oficina.js:201
-Los documentos de la tarjeta. La app Oficina abre y edita planillas (xlsx, ods, csv) y textos; los demás formatos llegan en las próximas versiones.	Die Dokumente auf der Karte. Die App Büro öffnet und bearbeitet Tabellen (xlsx, ods, csv) und Texte; die anderen Formate kommen in späteren Versionen.
+Los documentos de la tarjeta. La app Oficina abre y edita documentos (docx, odt), planillas (xlsx, ods, csv) y textos; los demás formatos llegan en las próximas versiones.	Die Dokumente auf der Karte. Die App Büro öffnet und bearbeitet Dokumente (docx, odt), Tabellen (xlsx, ods, csv) und Texte; die anderen Formate kommen in späteren Versionen.
 
 #: apps/oficina/web/oficina.js:203
 Documentos	Dokumente

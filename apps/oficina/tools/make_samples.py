@@ -394,11 +394,16 @@ def main():
     EN = '--en' in sys.argv
     d = args[0] if args else 'sim/sim_fs/documentos'
     os.makedirs(d, exist_ok=True)
+    import samples_docs as sd
     if EN:
+        sd.docx(os.path.join(d, 'report.docx'), sd.EN)
+        sd.odt(os.path.join(d, 'letter.odt'), sd.EN)
         xlsx_ventas(os.path.join(d, 'sales.xlsx'))
         texts_en(d)
         print('samples (English) in', d)
         return
+    sd.docx(os.path.join(d, 'informe.docx'), sd.ES)
+    sd.odt(os.path.join(d, 'carta.odt'), sd.ES)
     xlsx_ventas(os.path.join(d, 'ventas.xlsx'))
     ods_presupuesto(os.path.join(d, 'presupuesto.ods'))
     texts(d)

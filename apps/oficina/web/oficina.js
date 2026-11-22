@@ -198,7 +198,7 @@ P.registerPage({
     put(main,
       h('h1', {}, tr('Oficina')),
       h('div', { class: 'card' },
-        h('p', { class: 'note' }, tr('Los documentos de la tarjeta. La app Oficina abre y edita planillas (xlsx, ods, csv) y textos; los demás formatos llegan en las próximas versiones.')),
+        h('p', { class: 'note' }, tr('Los documentos de la tarjeta. La app Oficina abre y edita documentos (docx, odt), planillas (xlsx, ods, csv) y textos; los demás formatos llegan en las próximas versiones.')),
         h('div', { class: 'ofbar' }, h('div', { class: 'grow ofpath' }, path),
           h('button', { class: 'btn', onclick: () => { dir = HOME; load(); } }, tr('Documentos')),
           h('button', { class: 'btn', onclick: mkdir }, tr('Carpeta nueva')),

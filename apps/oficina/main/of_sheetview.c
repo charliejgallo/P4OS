@@ -18,6 +18,7 @@
  * the cell, F2 edits it, Delete clears, Ctrl+Z / Y / C / X / V / S / F.
  */
 #include "of_ui.h"
+#include "of_pdf.h"
 #include "aos_app.h"
 #include "aos_fonts.h"
 #include "aos_gesture.h"
@@ -1598,6 +1599,7 @@ static void find_open(void)
 
 /* save as */
 static int s_as_fmt;
+#define AS_PDF 99
 
 static void save_as_done(const char *text, void *ud)
 {
@@ -1609,10 +1611,17 @@ static void save_as_done(const char *text, void *ud)
     char *sl = strrchr(dir, '/');
     if (sl) *sl = 0;
     char p[320];
-    bool has = !strcasecmp(of_ext(text), EXT[s_as_fmt]);
-    snprintf(p, sizeof p, "%.200s/%.100s%s%s", dir, text, has ? "" : ".", has ? "" : EXT[s_as_fmt]);
+    const char *ext = s_as_fmt == AS_PDF ? "pdf" : EXT[s_as_fmt];
+    bool has = !strcasecmp(of_ext(text), ext);
+    snprintf(p, sizeof p, "%.200s/%.100s%s%s", dir, text, has ? "" : ".", has ? "" : ext);
     if (of_file_exists(p)) { of_app_toast(_("Ya hay un archivo con ese nombre")); return; }
     char err[64];
+    if (s_as_fmt == AS_PDF) {
+        /* every sheet, as tables on A4 */
+        if (!of_pdf_write_book(V.b, -1, p, of_basename(V.path), err, sizeof err)) { of_app_toast(_("No se pudo guardar")); return; }
+        of_app_toast(_("Guardado como PDF"));
+        return;
+    }
     if (!of_book_save(V.b, s_as_fmt, V.si, p, err, sizeof err)) { of_app_toast(_("No se pudo guardar")); return; }
     int lose = of_book_save_losses(V.b, s_as_fmt);
     of_recent_add(p);
@@ -1625,7 +1634,7 @@ static void save_as_done(const char *text, void *ud)
 static void save_as_pick(int i, void *ud)
 {
     (void)ud;
-    static const int FMTS[] = { OF_FMT_XLSX, OF_FMT_ODS, OF_FMT_CSV };
+    static const int FMTS[] = { OF_FMT_XLSX, OF_FMT_ODS, OF_FMT_CSV, AS_PDF };
     s_as_fmt = FMTS[i];
     char base[128];
     snprintf(base, sizeof base, "%s", of_basename(V.path));
@@ -1636,12 +1645,13 @@ static void save_as_pick(int i, void *ud)
 
 static void save_as_open(void)
 {
-    ofu_item_t items[3] = {
+    ofu_item_t items[4] = {
         { _("Planilla de Excel (.xlsx)"), OF_IC_SHEET, false, V.b->fmt == OF_FMT_XLSX },
         { _("Planilla de OpenDocument (.ods)"), OF_IC_SHEET, false, V.b->fmt == OF_FMT_ODS },
         { _("Datos separados por comas (.csv)"), OF_IC_DOC, false, V.b->fmt == OF_FMT_CSV },
+        { _("PDF para imprimir o mandar (.pdf)"), OF_IC_DOC, false, false },
     };
-    ofu_sheet(_("Guardar una copia como"), items, 3, save_as_pick, NULL);
+    ofu_sheet(_("Guardar una copia como"), items, 4, save_as_pick, NULL);
 }
 
 static void help_open(void)
@@ -1739,9 +1749,17 @@ static void menu_open(void)
 /* Saving                                                                      */
 /* -------------------------------------------------------------------------- */
 
+static void save_as_open(void);
+
 bool of_sheet_save(void)
 {
     if (V.editing) edit_commit(0, 0);
+    if (V.b->fmt == OF_FMT_XLS) {
+        /* the old binary is read, not written: a copy */
+        of_app_toast(_("Un .xls no se puede guardar: se guarda una copia como xlsx u ods"));
+        save_as_open();
+        return false;
+    }
     char err[64] = "";
     int fmt = V.b->fmt;
     if (fmt == OF_FMT_NONE) fmt = of_fmt_from_ext(of_ext(V.path));
@@ -1766,8 +1784,9 @@ bool of_sheet_save_recovery(void)
     char p[340], err[64];
     const char *e = of_ext(V.path);
     int bl = (int)strlen(V.path) - (e[0] ? (int)strlen(e) + 1 : 0);
-    snprintf(p, sizeof p, "%.*s (sin guardar).%s", bl > 280 ? 280 : bl, V.path, e[0] ? e : "xlsx");
-    int fmt = V.b->fmt ? V.b->fmt : of_fmt_from_ext(e);
+    bool xls = V.b->fmt == OF_FMT_XLS;
+    snprintf(p, sizeof p, "%.*s (sin guardar).%s", bl > 280 ? 280 : bl, V.path, xls ? "xlsx" : e[0] ? e : "xlsx");
+    int fmt = xls ? OF_FMT_XLSX : V.b->fmt ? V.b->fmt : of_fmt_from_ext(e);
     return of_book_save(V.b, fmt, V.si, p, err, sizeof err);
 }
 
