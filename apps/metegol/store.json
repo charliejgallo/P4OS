@@ -1,0 +1,90 @@
+{
+ "cat": "juegos",
+ "about": {
+  "es": "Un metegol en 3D, acostado: uno contra la placa o dos en la misma pantalla, con dieciséis selecciones, doce clubes del fútbol argentino y diez estadios.",
+  "en": "Table football in 3D, lying down: one against the board or two on the same screen, with sixteen national teams, twelve clubs of Argentine football and ten stadiums."
+ },
+ "desc": {
+  "es": "Cada jugador es dueño de la mitad de la pantalla de su arco. Deslizá el dedo para mover las varillas, tocá para patear con la que tiene la pelota más cerca, mantené apretado para levantar los muñecos, y un toque corto hacia el otro arco es un remate con efecto. También se juega con joystick USB, uno por jugador: la cruz mueve, A patea, B levanta y START pausa.\n\nLas varillas son las de siempre, arquero, dos defensores, cinco volantes y tres delanteros, cada una con sus topes. La placa juega en cuatro niveles, de fácil a crack. Los partidos son por tiempo, dos tiempos de uno a diez minutos, o al primero que llega a 3, 5, 7 o 10 goles, y cada gol trae su repetición.\n\nHay dieciséis selecciones con su bandera y doce clubes del fútbol argentino con sus colores, cada uno con el diseño de su camiseta. Desde la página del portal se pueden cambiar los nombres y los colores. El juego trae dos estadios; los otros ocho son paquetes aparte que la Tienda baja si los elegís.",
+  "en": "Each player owns the half of the screen with their goal. Slide a finger to move the rods, tap to kick with the one nearest the ball, hold to raise the figures, and a short flick towards the other goal is a shot with spin. It also plays with USB gamepads, one a player: the D-pad moves, A kicks, B raises and START pauses.\n\nThe rods are the usual ones, a keeper, two defenders, five midfielders and three forwards, each with its stops. The board plays at four levels, from easy to ace. Matches go by time, two halves of one to ten minutes, or to the first to reach 3, 5, 7 or 10 goals, and every goal comes with its replay.\n\nThere are sixteen national teams with their flags and twelve clubs of Argentine football in their colours, each with the design of its shirt. The portal's page changes their names and colours. The game comes with two stadiums; the other eight are separate packs the Store downloads if you pick them."
+ },
+ "tags": [
+  "3d"
+ ],
+ "shots": [
+  "app-metegol.jpg",
+  "app-metegol-gol.jpg",
+  "app-metegol-equipos.jpg",
+  "app-metegol-tokio.jpg"
+ ],
+ "packs": [
+  {
+   "file": "metegol_p4.pak",
+   "need": true
+  },
+  {
+   "file": "metegol_rio_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Estadio: Río de Janeiro",
+    "en": "Stadium: Rio de Janeiro"
+   }
+  },
+  {
+   "file": "metegol_madrid_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Estadio: Madrid",
+    "en": "Stadium: Madrid"
+   }
+  },
+  {
+   "file": "metegol_munich_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Estadio: Múnich",
+    "en": "Stadium: Munich"
+   }
+  },
+  {
+   "file": "metegol_londres_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Estadio: Londres",
+    "en": "Stadium: London"
+   }
+  },
+  {
+   "file": "metegol_mexico_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Estadio: Ciudad de México",
+    "en": "Stadium: Mexico City"
+   }
+  },
+  {
+   "file": "metegol_tokio_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Estadio: Tokio",
+    "en": "Stadium: Tokyo"
+   }
+  },
+  {
+   "file": "metegol_avella_rojo_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Estadio: Avellaneda, el rojo",
+    "en": "Stadium: Avellaneda, the red one"
+   }
+  },
+  {
+   "file": "metegol_avella_celeste_p4.pak",
+   "need": false,
+   "name": {
+    "es": "Estadio: Avellaneda, el celeste",
+    "en": "Stadium: Avellaneda, the sky-blue one"
+   }
+  }
+ ]
+}
