@@ -3,9 +3,11 @@
  *
  * How it goes, and why:
  *
- *  - HTTP/1.0 and "Connection: close", as aos_http.c: the body ends where the
- *    connection does and nothing has to be taken apart. A server that sends
- *    chunks anyway (some do, to a 1.0 request) is undone as it arrives.
+ *  - HTTP/1.1 and "Connection: close", as aos_http.c since 2026-11-22: there
+ *    are servers that refuse HTTP/1.0 outright (adsb.lol answers 426), and a
+ *    source of the Tienda may be anybody's. The body ends at its
+ *    Content-Length, at its last chunk (undone as it arrives) or where the
+ *    connection does.
  *  - Redirects are followed across hosts. GitHub's release downloads are two:
  *    /releases/latest/download/x -> /releases/download/<tag>/x -> a signed
  *    address on another host (seen 2026-11-20). That last address expires,
@@ -338,7 +340,7 @@ static int try_once(ctx_t *x)
         else snprintf(hostport, sizeof hostport, "%s:%d", u.host, u.port);
         /* nothing that names the board: the system and its version */
         int n = snprintf(x->hdr, HDR_MAX,
-                         "GET %s HTTP/1.0\r\n"
+                         "GET %s HTTP/1.1\r\n"
                          "Host: %s\r\n"
                          "User-Agent: P4OS/%s\r\n"
                          "Accept: */*\r\n"

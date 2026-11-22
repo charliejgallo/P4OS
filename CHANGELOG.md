@@ -66,6 +66,10 @@
     now, takes chunked bodies apart as before, and knows an answer is whole
     by its Content-Length or its last chunk, without waiting for a server
     that does not close.
+  - **The Store's downloader and the radio ask in HTTP/1.1 too.** Both
+    already took chunked answers apart; a source of the Store or a station
+    that refuses HTTP/1.0 no longer fails. `tools/fake_radio.py` is a
+    station for the simulator that can refuse 1.0 and answer in chunks.
   - **airplanes.live refusing is not the end.** It answers 403 to some
     networks whatever is asked; Vuelos then asks adsb.lol in its place, at
     adsb.lol's pace, and the bar names the source in use.

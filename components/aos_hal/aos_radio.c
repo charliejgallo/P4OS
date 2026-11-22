@@ -13,8 +13,9 @@
  *    stream. An HLS playlist (.m3u8 with #EXT-X-...) is segments of AAC, not
  *    a stream, and is refused with that reason.
  *  - The audio, answered as "HTTP/1.0 200 OK" (Icecast), "HTTP/1.1 200 OK"
- *    or "ICY 200 OK" (Shoutcast 1). HTTP/1.0 is asked for, so none of them
- *    should send it chunked; one that does anyway is taken apart here.
+ *    or "ICY 200 OK" (Shoutcast 1). HTTP/1.1 is asked for since 2026-11-22
+ *    (a server may refuse 1.0 outright, as adsb.lol does to aos_http.c);
+ *    one that answers in chunks is taken apart here.
  *  - With "Icy-MetaData: 1" in the request, the server says icy-metaint:
  *    every that many bytes of audio comes one length byte (x16) and that
  *    many bytes of "StreamTitle='Artist - Title';". They are taken out
@@ -704,7 +705,7 @@ static int http_begin(radio_ctx_t *c, char *url, size_t url_cap, bool icy, http_
     }
     char *req = (char *)buf;
     int n = snprintf(req, RECV_CHUNK,
-                     "GET %s HTTP/1.0\r\n"
+                     "GET %s HTTP/1.1\r\n"
                      "Host: %s\r\n"
                      "User-Agent: AmoledOS/1.0\r\n"
                      "Accept: */*\r\n"
