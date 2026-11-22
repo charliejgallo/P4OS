@@ -15,6 +15,7 @@
 #include "of_ui.h"
 #include "of_doc.h"
 #include "of_arc.h"
+#include "of_slides.h"
 #include "aos_app.h"
 #include "aos_fonts.h"
 #include "aos_hal.h"
@@ -56,7 +57,7 @@ typedef struct {
     uint32_t size, mtime;
 } fent_t;
 
-enum { SCR_HOME = 0, SCR_SHEET, SCR_TEXT, SCR_DOC };
+enum { SCR_HOME = 0, SCR_SHEET, SCR_TEXT, SCR_DOC, SCR_SLIDES };
 enum { TAB_RECENT = 0, TAB_FILES };
 
 static struct {
@@ -196,7 +197,7 @@ static void recent_remove(const char *path)
 /* Kinds of file                                                               */
 /* -------------------------------------------------------------------------- */
 
-enum { K_NONE = 0, K_TEXT, K_SHEET, K_LATER, K_BINARY, K_DOC, K_READ, K_ARC };
+enum { K_NONE = 0, K_TEXT, K_SHEET, K_LATER, K_BINARY, K_DOC, K_READ, K_ARC, K_DECK };
 
 static const char *const TEXT_EXT[] = {
     "txt", "md", "markdown", "log", "ini", "conf", "cfg", "json", "xml", "yaml", "yml", "toml", "c", "h",
@@ -204,7 +205,7 @@ static const char *const TEXT_EXT[] = {
     "sql", "srt", "vtt", "tex", "bib", "properties", "gitignore", "diff", "patch", "svg", "kml", "gpx",
     "vcf", "ics", "eml", "nfo", "rst", "org", "env", "bat", "ps1", "cmake", "mk", "s", "asm", "pas", "bas" };
 static const char *const LATER_EXT[] = {
-    "doc", "pptx", "ppsx", "potx", "odp", "ppt", "xls" };
+    "doc", "ppt", "xls" };
 
 static int kind_of(const char *path, bool dir)
 {
@@ -213,6 +214,7 @@ static int kind_of(const char *path, bool dir)
     if (dir) return of_reader_for(e) == OF_RD_IWORK ? K_READ : K_NONE;
     if (of_is_sheet_ext(e) || !strcmp(e, "fods")) return K_SHEET;
     if (of_is_doc_ext(e)) return K_DOC;
+    if (of_is_deck_ext(e)) return K_DECK;
     if (of_reader_for(e)) return K_READ;
     if (of_is_arc_ext(e)) return K_ARC;
     for (size_t i = 0; i < sizeof TEXT_EXT / sizeof TEXT_EXT[0]; i++)
@@ -243,7 +245,7 @@ static void badge_of(const char *name, bool dir, lv_color_t *c, char *txt)
     if (of_is_sheet_ext(e) || !strcmp(e, "fods") || !strcmp(e, "xls") || !strcmp(e, "numbers")) rgb = 0x1E8E3E;
     else if (!strcmp(e, "docx") || !strcmp(e, "doc") || !strcmp(e, "odt") || !strcmp(e, "rtf") || !strcmp(e, "pages")) rgb = 0x2B6CD8;
     else if (!strcmp(e, "pdf")) rgb = 0xD93025;
-    else if (!strcmp(e, "pptx") || !strcmp(e, "odp") || !strcmp(e, "ppt") || !strcmp(e, "key")) rgb = 0xE8710A;
+    else if (!strcmp(e, "pptx") || !strcmp(e, "ppsx") || !strcmp(e, "potx") || !strcmp(e, "odp") || !strcmp(e, "ppt") || !strcmp(e, "key")) rgb = 0xE8710A;
     else if (!strcmp(e, "md") || !strcmp(e, "txt")) rgb = 0x6E6E73;
     else if (!strcmp(e, "epub") || !strcmp(e, "fb2") || !strcmp(e, "cbz")) rgb = 0xA0522D;
     else if (!strcmp(e, "zip") || !strcmp(e, "tar") || !strcmp(e, "gz") || !strcmp(e, "tgz")) rgb = 0xB8860B;
@@ -266,6 +268,7 @@ static void clear_screen(void)
     if (A.scr == SCR_SHEET) of_sheet_close_view();
     else if (A.scr == SCR_TEXT) of_textv_close();
     else if (A.scr == SCR_DOC) of_docv_close();
+    else if (A.scr == SCR_SLIDES) of_slidev_close();
     ofu_kb_attach(NULL);
     lv_obj_clean(A.root);
     A.screen = NULL;
@@ -377,7 +380,22 @@ void of_app_open_as(const char *path, int how)
     }
     char p[300];
     snprintf(p, sizeof p, "%s", path);
-    if (k == K_DOC || k == K_READ) {
+    if (k == K_DECK) {
+        char err[64] = "";
+        of_tr = of_tr_app;
+        of_deck_t *dk = of_deck_load(p, err, sizeof err);
+        if (!dk) {
+            of_app_toast(!strcmp(err, "encrypted") ? _("El archivo tiene contraseña: la app no lo puede abrir")
+                                                   : _("No se pudo leer la presentación"));
+            return;
+        }
+        clear_screen();
+        A.scr = SCR_SLIDES;
+        snprintf(A.doc, sizeof A.doc, "%s", p);
+        doc_flags(true);
+        lv_obj_set_style_bg_color(A.root, OFT.bg, 0);
+        if (!of_slidev_open(A.root, p, dk)) { of_app_home(); return; }
+    } else if (k == K_DOC || k == K_READ) {
         char err[64] = "";
         of_tr = of_tr_app;
         of_doc_t *d = k == K_DOC ? of_doc_load(p, err, sizeof err) : of_read_any(p, err, sizeof err);
@@ -1254,6 +1272,10 @@ static bool of_back(aos_app_t *self, void *inst)
     (void)inst;
     if (A.pr_overlay) { pr_close(); return true; }
     if (ofu_sheet_open()) { ofu_sheet_close(); return true; }
+    if (A.scr == SCR_SLIDES) {
+        if (!of_slidev_back()) of_app_home();
+        return true;
+    }
     if (A.scr == SCR_SHEET || A.scr == SCR_TEXT || A.scr == SCR_DOC) {
         if (A.scr == SCR_SHEET ? of_sheet_back() : A.scr == SCR_DOC ? of_docv_back() : of_textv_back()) return true;
         of_app_back_from_doc();
@@ -1305,6 +1327,12 @@ static bool of_resize(aos_app_t *self, void *inst, lv_obj_t *root)
         lv_obj_clean(root);
         A.pr_overlay = NULL;
         of_docv_open(root, p, NULL);
+    } else if (A.scr == SCR_SLIDES) {
+        ofu_sheet_forget();
+        pr_close();
+        lv_obj_clean(root);
+        A.pr_overlay = NULL;
+        of_slidev_open(root, p, NULL);
     }
     return true;
 }

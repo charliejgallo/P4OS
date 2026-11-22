@@ -15,6 +15,9 @@
  */
 #include "of_doc.h"
 #include "of_pdf.h"
+#include "of_slides.h"
+
+#include <math.h>
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -165,14 +168,16 @@ static void str_utf16(of_sb_t *o, const char *s)
 static void page_end(pw_t *W)
 {
     if (!W->page_open) return;
-    /* the page number */
+    /* the page number (not on slides) */
     char num[16];
+    if (W->pageno > 0) {
     int nl = snprintf(num, sizeof num, "%d", W->pageno);
     float w = 0;
     for (int i = 0; i < nl; i++) w += of_pdf_helv[num[i] - 32] * 9 / 1000.0f;
     of_sb_printf(&W->page, "BT /F1 9 Tf 0.5 g %.2f %.2f Td ", (W->pw - w) / 2, W->bottom / 2 - 3);
     str_lit(&W->page, (const uint8_t *)num, (size_t)nl);
     of_sb_puts(&W->page, " Tj ET\n");
+    }
     int content = new_obj(W);
     put_stream(W, content, NULL, W->page.s ? W->page.s : "", W->page.n, true);
     int page = new_obj(W);
@@ -249,13 +254,9 @@ static uint8_t *png_unfilter(uint8_t *d, size_t n, int w, int h, int bpp, size_t
 }
 
 /* The picture as an XObject (written once); its pixel size. 0: cannot. */
-static int picture_obj(pw_t *W, int obj, int *pw, int *ph)
+/* a picture's bytes (JPEG or PNG) as an XObject; 0: cannot */
+static int picture_data(pw_t *W, const uint8_t *b, size_t n, const char *ext, int *pw, int *ph)
 {
-    for (int i = 0; i < W->npics; i++)
-        if (W->pics[i].obj == obj) return W->pics[i].img;
-    size_t n;
-    const char *ext = NULL;
-    uint8_t *b = of_doc_obj_bytes(W->d, &W->d->obj[obj], &n, &ext);
     int img = 0, w = 0, h = 0;
     if (b && ext && !strcmp(ext, "jpeg")) {
         int comps = 3;
@@ -348,16 +349,32 @@ static int picture_obj(pw_t *W, int obj, int *pw, int *ph)
         of_sb_free(&idat);
         of_sb_free(&plte);
     }
-    of_free(b);
+    *pw = w;
+    *ph = h;
+    return img;
+}
+
+static void pics_remember(pw_t *W, int key, int img)
+{
     void *np = of_realloc(W->pics, (size_t)(W->npics + 1) * sizeof *W->pics);
     if (np) {
         W->pics = np;
-        W->pics[W->npics].obj = obj;
+        W->pics[W->npics].obj = key;
         W->pics[W->npics].img = img;
         W->npics++;
     }
-    *pw = w;
-    *ph = h;
+}
+
+static int picture_obj(pw_t *W, int obj, int *pw, int *ph)
+{
+    for (int i = 0; i < W->npics; i++)
+        if (W->pics[i].obj == obj) return W->pics[i].img;
+    size_t n;
+    const char *ext = NULL;
+    uint8_t *b = of_doc_obj_bytes(W->d, &W->d->obj[obj], &n, &ext);
+    int img = b ? picture_data(W, b, n, ext, pw, ph) : 0;
+    of_free(b);
+    pics_remember(W, obj, img);
     return img;
 }
 
@@ -998,5 +1015,305 @@ bool of_pdf_write_text(const char *s, size_t n, const char *path, const char *ti
     }
     bool ok = of_pdf_write_doc(d, path, title, false, true, err, errlen);
     of_doc_free(d);
+    return ok;
+}
+
+/* -------------------------------------------------------------------------- */
+/* A presentation: every slide a page of its size                              */
+/* -------------------------------------------------------------------------- */
+
+/* a slide's paragraph as atoms, laid out at width w */
+static void lay_slpara(pw_t *W, const sl_para_t *p, float width, lay_t *L)
+{
+    memset(L, 0, sizeof *L);
+    for (int k = 0; k < p->nr; k++) {
+        const sl_run_t *r = &p->r[k];
+        look_t lk;
+        memset(&lk, 0, sizeof lk);
+        lk.font = (uint8_t)(r->b && r->i ? F_BOLDIT : r->b ? F_BOLD : r->i ? F_IT : F_REG);
+        lk.size = r->size > 1 ? r->size : 18;
+        if (r->sup) { lk.rise = r->sup == 1 ? lk.size * 0.33f : -lk.size * 0.15f; lk.size *= 0.65f; }
+        lk.color = r->color;
+        lk.u = r->u;
+        lk.s = r->s;
+        lk.link = -1;
+        const char *t = r->t ? r->t : "";
+        bool space = false;
+        while (*t) {
+            if (*t == ' ' || *t == '\t') { space = true; t++; continue; }
+            if (*t == '\n' || *t == '\v') {
+                atom_t *a = add_atom(L);
+                if (a) a->kind = 2;
+                space = false;
+                t++;
+                continue;
+            }
+            atom_t *a = add_atom(L);
+            if (!a) return;
+            a->lk = lk;
+            a->space = space || (L->nat > 1 && k > 0 && t == r->t && L->at[L->nat - 2].kind == 0 && p->r[k - 1].t &&
+                                 p->r[k - 1].t[0] && p->r[k - 1].t[strlen(p->r[k - 1].t) - 1] == ' ');
+            space = false;
+            a->t0 = (int)L->txt.n;
+            while (*t && *t != ' ' && *t != '\t' && *t != '\n' && *t != '\v') {
+                int l;
+                uint32_t cp = of_utf8_get(t, &l);
+                t += l;
+                of_sb_putc(&L->txt, (char)to_ansi(cp));
+            }
+            a->tn = (int)L->txt.n - a->t0;
+            a->w = text_w(W, &a->lk, L->txt.s + a->t0, a->tn);
+        }
+    }
+    /* lines, as lay_para does */
+    int start = 0;
+    while (start < L->nat || !L->nln) {
+        line_t2 ln = { start, 0, 0, 0, 0, 0, false };
+        float x = 0;
+        int i = start;
+        for (; i < L->nat; i++) {
+            atom_t *a = &L->at[i];
+            if (a->kind == 2) { i++; break; }
+            float sp = a->space && i > start ? a->lk.size * 0.278f : 0;
+            if (i > start && x + sp + a->w > width) break;
+            a->x = x + sp;
+            x = a->x + a->w;
+            float asc = a->lk.size * 0.8f + (a->lk.rise > 0 ? a->lk.rise : 0), desc = a->lk.size * 0.22f;
+            if (asc > ln.asc) ln.asc = asc;
+            if (desc > ln.desc) ln.desc = desc;
+        }
+        ln.an = i - start;
+        ln.w = x;
+        if (!ln.asc) { ln.asc = p->empty_size * 0.8f; ln.desc = p->empty_size * 0.22f; }
+        ln.h = (ln.asc + ln.desc) * 1.15f * (p->line > 0.3f ? p->line : 1);
+        ln.last = i >= L->nat;
+        line_t2 *nl = of_realloc(L->ln, (size_t)(L->nln + 1) * sizeof *nl);
+        if (!nl) break;
+        L->ln = nl;
+        L->ln[L->nln++] = ln;
+        if (i == start) i++;
+        start = i;
+        if (start >= L->nat) break;
+    }
+}
+
+static const char *num_label(const sl_para_t *p, char *buf, size_t len)
+{
+    if (p->bullet[0]) return p->bullet;
+    if (!p->autonum) return "";
+    int n = p->number > 0 ? p->number : 1;
+    switch (p->autonum) {
+    case 2: snprintf(buf, len, "%c.", 'a' + (n - 1) % 26); break;
+    case 3: snprintf(buf, len, "%c.", 'A' + (n - 1) % 26); break;
+    case 4: case 5: {
+        static const char *const R[] = { "i", "ii", "iii", "iv", "v", "vi", "vii", "viii", "ix", "x", "xi", "xii" };
+        snprintf(buf, len, "%s.", R[(n - 1) % 12]);
+        if (p->autonum == 5) for (char *q = buf; *q; q++) if (*q >= 'a' && *q <= 'z') *q = (char)(*q - 32);
+        break;
+    }
+    case 6: snprintf(buf, len, "%d)", n); break;
+    default: snprintf(buf, len, "%d.", n); break;
+    }
+    return buf;
+}
+
+/* a text body inside the box (x, y, w, h), from the top: its height, drawn when draw */
+static float slide_text(pw_t *W, const sl_text_t *t, float x, float y, float w, float h, bool draw)
+{
+    float inner = w - t->l - t->r;
+    if (inner < 4) inner = 4;
+    /* measured first, for the vertical anchor */
+    float total = 0;
+    for (int i = 0; i < t->np; i++) {
+        const sl_para_t *p = &t->p[i];
+        lay_t L;
+        float tw = inner - p->margin;
+        lay_slpara(W, p, tw > 8 ? tw : 8, &L);
+        total += (i ? p->before : 0) + lines_height(&L) + p->after;
+        lay_free(&L);
+    }
+    if (!draw) return total + t->t + t->b;
+    float top = y + t->t;
+    float room = h - t->t - t->b;
+    if (t->anchor == 1) top += (room - total) / 2;
+    else if (t->anchor == 2) top += room - total;
+    W->y = top;
+    for (int i = 0; i < t->np; i++) {
+        const sl_para_t *p = &t->p[i];
+        if (i) W->y += p->before;
+        lay_t L;
+        float tw = inner - p->margin;
+        lay_slpara(W, p, tw > 8 ? tw : 8, &L);
+        char nb[16];
+        const char *lab = num_label(p, nb, sizeof nb);
+        if (lab[0] && L.nln) {
+            /* the bullet at margin + indent, in the first run's colour */
+            uint8_t lb[16];
+            int n = 0;
+            for (const char *s = lab; *s && n < 15;) {
+                int l;
+                uint32_t cp = of_utf8_get(s, &l);
+                s += l;
+                lb[n++] = to_ansi(cp == 0x25E6 || cp == 0x25AA || cp == 0x2013 ? 0x2022 : cp);
+            }
+            float sz = p->nr ? p->r[0].size : p->empty_size;
+            float bx = x + t->l + p->margin + p->indent;
+            if (bx < x + t->l) bx = x + t->l;
+            of_sb_puts(&W->page, "BT ");
+            color_cmd(&W->page, p->bullet_color, "rg");
+            of_sb_printf(&W->page, "/F1 %.2f Tf %.2f %.2f Td ", sz, bx, W->ph - (W->y + L.ln[0].asc));
+            str_lit(&W->page, lb, (size_t)n);
+            of_sb_puts(&W->page, " Tj ET 0 g\n");
+        }
+        float tx = x + t->l + p->margin;
+        /* no bullet: the first line starts at the indent */
+        if (!lab[0] && p->indent > 0) tx += 0;
+        draw_lines(W, &L, tx, inner - p->margin, p->align, false);
+        W->y += p->after;
+        lay_free(&L);
+    }
+    return total;
+}
+
+static void geom_path(of_sb_t *o, int g, float x, float y, float w, float h)
+{
+    /* y is the bottom in PDF space */
+    switch (g) {
+    case SG_ELLIPSE: {
+        float k = 0.5523f, cx = x + w / 2, cy = y + h / 2, rx = w / 2, ry = h / 2;
+        of_sb_printf(o, "%.2f %.2f m %.2f %.2f %.2f %.2f %.2f %.2f c %.2f %.2f %.2f %.2f %.2f %.2f c "
+                        "%.2f %.2f %.2f %.2f %.2f %.2f c %.2f %.2f %.2f %.2f %.2f %.2f c h ",
+                     cx + rx, cy, cx + rx, cy + ry * k, cx + rx * k, cy + ry, cx, cy + ry,
+                     cx - rx * k, cy + ry, cx - rx, cy + ry * k, cx - rx, cy,
+                     cx - rx, cy - ry * k, cx - rx * k, cy - ry, cx, cy - ry,
+                     cx + rx * k, cy - ry, cx + rx, cy - ry * k, cx + rx, cy);
+        break;
+    }
+    case SG_ROUND: {
+        float r = (w < h ? w : h) * 0.16f, k = r * 0.4477f;
+        of_sb_printf(o, "%.2f %.2f m %.2f %.2f l %.2f %.2f %.2f %.2f %.2f %.2f c %.2f %.2f l %.2f %.2f %.2f %.2f %.2f %.2f c "
+                        "%.2f %.2f l %.2f %.2f %.2f %.2f %.2f %.2f c %.2f %.2f l %.2f %.2f %.2f %.2f %.2f %.2f c h ",
+                     x + r, y, x + w - r, y, x + w - k, y, x + w, y + k, x + w, y + r, x + w, y + h - r, x + w, y + h - k, x + w - k, y + h,
+                     x + w - r, y + h, x + r, y + h, x + k, y + h, x, y + h - k, x, y + h - r, x, y + r, x, y + k, x + k, y, x + r, y);
+        break;
+    }
+    case SG_TRIANGLE: of_sb_printf(o, "%.2f %.2f m %.2f %.2f l %.2f %.2f l h ", x, y, x + w, y, x + w / 2, y + h); break;
+    case SG_DIAMOND: of_sb_printf(o, "%.2f %.2f m %.2f %.2f l %.2f %.2f l %.2f %.2f l h ", x + w / 2, y, x + w, y + h / 2, x + w / 2, y + h, x, y + h / 2); break;
+    case SG_ARROW: {
+        float hd = w * 0.3f;
+        of_sb_printf(o, "%.2f %.2f m %.2f %.2f l %.2f %.2f l %.2f %.2f l %.2f %.2f l %.2f %.2f l %.2f %.2f l h ",
+                     x, y + h * 0.25f, x + w - hd, y + h * 0.25f, x + w - hd, y, x + w, y + h / 2, x + w - hd, y + h, x + w - hd, y + h * 0.75f, x, y + h * 0.75f);
+        break;
+    }
+    default: of_sb_printf(o, "%.2f %.2f %.2f %.2f re ", x, y, w, h); break;
+    }
+}
+
+static int deck_picture(pw_t *W, const of_deck_t *dk, const char *name)
+{
+    int key = -(int)(of_crc32(0, name, strlen(name)) & 0x3FFFFFFF) - 1;
+    for (int i = 0; i < W->npics; i++) if (W->pics[i].obj == key) return W->pics[i].img;
+    size_t n;
+    uint8_t *b = of_deck_part(dk, name, &n);
+    const char *ext = NULL;
+    if (b && n > 4) ext = !memcmp(b, "\x89PNG", 4) ? "png" : b[0] == 0xFF && b[1] == 0xD8 ? "jpeg" : NULL;
+    int pw = 0, ph = 0;
+    int img = b && ext ? picture_data(W, b, n, ext, &pw, &ph) : 0;
+    of_free(b);
+    pics_remember(W, key, img);
+    return img;
+}
+
+bool of_pdf_write_deck(const of_deck_t *dk, const char *path, const char *title, bool notes, char *err, size_t errlen)
+{
+    pw_t W;
+    pw_init(&W, NULL, false, false);
+    W.pw = dk->w;
+    W.ph = dk->h;
+    W.top = W.bottom = 0;
+    (void)notes;
+    for (int i = 0; i < dk->ns; i++) {
+        const sl_slide_t *s = &dk->s[i];
+        page_begin(&W);
+        W.pageno = 0;       /* slides carry their own numbers, if any */
+        if (s->bg) { color_cmd(&W.page, s->bg, "rg"); of_sb_printf(&W.page, "0 0 %.2f %.2f re f\n", W.pw, W.ph); }
+        if (s->bg_pic) {
+            int img = deck_picture(&W, dk, s->bg_pic);
+            if (img > 0) of_sb_printf(&W.page, "q %.2f 0 0 %.2f 0 0 cm /Im%d Do Q\n", W.pw, W.ph, img);
+        }
+        for (int k = 0; k < s->nsh; k++) {
+            const sl_shape_t *sh = &s->sh[k];
+            float bx = sh->x, by = W.ph - (sh->y + sh->h);     /* the bottom, in PDF space */
+            of_sb_puts(&W.page, "q ");
+            if (sh->rot) {
+                float a = -sh->rot * 3.14159265f / 180, c = cosf(a), sn = sinf(a);
+                float cx = bx + sh->w / 2, cy = by + sh->h / 2;
+                of_sb_printf(&W.page, "%.4f %.4f %.4f %.4f %.2f %.2f cm ", c, sn, -sn, c, cx - c * cx + sn * cy, cy - sn * cx - c * cy);
+            }
+            if (sh->kind == SL_LINE) {
+                color_cmd(&W.page, sh->line ? sh->line : 0x1000000, "RG");
+                float x1 = bx, y1 = by + sh->h, x2 = bx + sh->w, y2 = by;
+                if (sh->flip_h) { float t = x1; x1 = x2; x2 = t; }
+                if (sh->flip_v) { float t = y1; y1 = y2; y2 = t; }
+                of_sb_printf(&W.page, "%.2f w %.2f %.2f m %.2f %.2f l S Q\n", sh->line_w > 0 ? sh->line_w : 1, x1, y1, x2, y2);
+                continue;
+            }
+            if (sh->kind == SL_PIC && sh->pic) {
+                int img = deck_picture(&W, dk, sh->pic);
+                if (img > 0) of_sb_printf(&W.page, "%.2f 0 0 %.2f %.2f %.2f cm /Im%d Do ", sh->w, sh->h, bx, by, img);
+                of_sb_puts(&W.page, "Q\n");
+                continue;
+            }
+            if (sh->kind == SL_TABLE) {
+                float tw = 0, rh_total = 0;
+                for (int c = 0; c < sh->cols; c++) tw += sh->colw ? sh->colw[c] : 0;
+                float sc = tw > 0 ? sh->w / tw : 1;
+                float *rh = of_alloc((size_t)(sh->rows + 1) * sizeof(float));
+                for (int r = 0; rh && r < sh->rows; r++) {
+                    rh[r] = sh->rowh ? sh->rowh[r] : 20;
+                    for (int c = 0; c < sh->ncells; c++) {
+                        const sl_cell_t *cl = &sh->cells[c];
+                        if (cl->row != r || cl->hidden) continue;
+                        float cw = 0;
+                        for (int q = 0; q < cl->cspan && cl->col + q < sh->cols; q++) cw += sh->colw[cl->col + q] * sc;
+                        float th = slide_text(&W, &cl->tx, 0, 0, cw, 0, false);
+                        if (th > rh[r]) rh[r] = th;
+                    }
+                    rh_total += rh[r];
+                }
+                float ry = sh->y;
+                for (int r = 0; rh && r < sh->rows; r++) {
+                    for (int c = 0; c < sh->ncells; c++) {
+                        const sl_cell_t *cl = &sh->cells[c];
+                        if (cl->row != r || cl->hidden) continue;
+                        float cx = sh->x, cw = 0;
+                        for (int q = 0; q < cl->col && q < sh->cols; q++) cx += sh->colw[q] * sc;
+                        for (int q = 0; q < cl->cspan && cl->col + q < sh->cols; q++) cw += sh->colw[cl->col + q] * sc;
+                        if (cl->fill) { color_cmd(&W.page, cl->fill, "rg"); of_sb_printf(&W.page, "%.2f %.2f %.2f %.2f re f ", cx, W.ph - (ry + rh[r]), cw, rh[r]); }
+                        of_sb_printf(&W.page, "0.6 G 0.5 w %.2f %.2f %.2f %.2f re S\n", cx, W.ph - (ry + rh[r]), cw, rh[r]);
+                        slide_text(&W, &cl->tx, cx, ry, cw, rh[r], true);
+                    }
+                    ry += rh[r];
+                }
+                of_free(rh);
+                (void)rh_total;
+                of_sb_puts(&W.page, "Q\n");
+                continue;
+            }
+            /* a shape: fill, outline, text */
+            if (sh->fill || sh->line) {
+                geom_path(&W.page, sh->geom ? sh->geom : SG_RECT, bx, by, sh->w, sh->h);
+                if (sh->fill) color_cmd(&W.page, sh->fill, "rg");
+                if (sh->line) { color_cmd(&W.page, sh->line, "RG"); of_sb_printf(&W.page, "%.2f w ", sh->line_w > 0 ? sh->line_w : 0.75f); }
+                of_sb_puts(&W.page, sh->fill && sh->line ? "B\n" : sh->fill ? "f\n" : "S\n");
+            }
+            if (sh->tx.np) slide_text(&W, &sh->tx, sh->x, sh->y, sh->w, sh->h, true);
+            of_sb_puts(&W.page, "Q\n");
+        }
+    }
+    /* no page numbers on slides: page_end writes one, so it is told the number is 0 */
+    bool ok = finish(&W, path, title);
+    pw_free(&W);
+    if (!ok) snprintf(err, errlen, "write");
     return ok;
 }

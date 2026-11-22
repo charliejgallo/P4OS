@@ -60,8 +60,8 @@ Alineación	Alignment
 
 #: apps/oficina/main/of_docview.c:1577
 #: apps/oficina/main/of_sheetview.c:1617
+#: apps/oficina/main/of_slideview.c:704
 #: apps/oficina/main/of_textview.c:1194
-#: apps/oficina/main/oficina.c:752
 Ya hay un archivo con ese nombre	There is already a file with that name
 
 #: apps/oficina/main/of_docview.c:1584
@@ -72,6 +72,7 @@ No se pudo guardar	It could not be saved
 
 #: apps/oficina/main/of_docview.c:1585
 #: apps/oficina/main/of_sheetview.c:1622
+#: apps/oficina/main/of_slideview.c:720
 #: apps/oficina/main/of_textview.c:1200
 Guardado como PDF	Saved as PDF
 
@@ -106,6 +107,7 @@ Guardar	Save
 Algunos párrafos (marcados al costado) tienen control de cambios u otros objetos: se ven, y se guardan como estaban.	Some paragraphs (marked at the side) have tracked changes or other objects: they show, and they are saved as they were.
 
 #: apps/oficina/main/of_docview.c:1627
+#: apps/oficina/main/of_slideview.c:751
 Listo	Done
 
 #: apps/oficina/main/of_docview.c:1653
@@ -116,15 +118,15 @@ El documento no tiene títulos	The document has no headings
 Índice	Contents
 
 #: apps/oficina/main/of_docview.c:1697
-#: apps/oficina/main/oficina.c:917
+#: apps/oficina/main/oficina.c:935
 Documento de Word (.docx)	Word document (.docx)
 
 #: apps/oficina/main/of_docview.c:1698
-#: apps/oficina/main/oficina.c:918
+#: apps/oficina/main/oficina.c:936
 Documento de OpenDocument (.odt)	OpenDocument document (.odt)
 
 #: apps/oficina/main/of_docview.c:1699
-#: apps/oficina/main/oficina.c:922
+#: apps/oficina/main/oficina.c:940
 Texto (.txt)	Text (.txt)
 
 #: apps/oficina/main/of_docview.c:1700
@@ -133,6 +135,7 @@ PDF para imprimir o mandar (.pdf)	PDF to print or send (.pdf)
 
 #: apps/oficina/main/of_docview.c:1730
 #: apps/oficina/main/of_sheetview.c:1728
+#: apps/oficina/main/of_slideview.c:794
 Guardar una copia como...	Save a copy as...
 
 #: apps/oficina/main/of_docview.c:1732
@@ -163,6 +166,7 @@ Pegar	Paste
 Editar como texto	Edit as text
 
 #: apps/oficina/main/of_docview.c:1739
+#: apps/oficina/main/of_slideview.c:795
 Información	Information
 
 #: apps/oficina/main/of_docview.c:1853
@@ -196,6 +200,10 @@ La vista previa que guarda el archivo. El contenido se edita en Pages, Numbers o
 #: apps/oficina/main/of_import.c:1286
 Este archivo no trae una vista previa.	This file carries no preview.
 
+#: apps/oficina/main/of_odp.c:504
+#: apps/oficina/main/of_pptx.c:871
+Objeto	Object
+
 #: apps/oficina/main/of_pdftext.c:1740
 %d páginas. El PDF no tiene texto: son imágenes (escaneado)	%d pages. The PDF has no text: it is pictures (scanned)
 
@@ -210,6 +218,12 @@ Este archivo no trae una vista previa.	This file carries no preview.
 
 #: apps/oficina/main/of_pdftext.c:1749
 Este PDF no tiene texto que la app pueda leer (puede ser una imagen escaneada en un formato que la app no muestra).	This PDF has no text the app can read (it may be a scanned picture in a format the app does not show).
+
+#: apps/oficina/main/of_pptx.c:871
+Gráfico	Chart
+
+#: apps/oficina/main/of_pptx.c:871
+Diagrama (SmartArt)	Diagram (SmartArt)
 
 #: apps/oficina/main/of_sheetview.c:653
 Esa celda es parte de una fórmula matricial: se cambia en la computadora	That cell is part of an array formula: change it on the computer
@@ -307,15 +321,15 @@ Guardado. El CSV tiene sólo la hoja que se veía	Saved. The CSV has only the sh
 Guardado. En el CSV las fórmulas quedaron como valores	Saved. In the CSV, formulas became values
 
 #: apps/oficina/main/of_sheetview.c:1649
-#: apps/oficina/main/oficina.c:919
+#: apps/oficina/main/oficina.c:937
 Planilla de Excel (.xlsx)	Excel spreadsheet (.xlsx)
 
 #: apps/oficina/main/of_sheetview.c:1650
-#: apps/oficina/main/oficina.c:920
+#: apps/oficina/main/oficina.c:938
 Planilla de OpenDocument (.ods)	OpenDocument spreadsheet (.ods)
 
 #: apps/oficina/main/of_sheetview.c:1651
-#: apps/oficina/main/oficina.c:921
+#: apps/oficina/main/oficina.c:939
 Datos separados por comas (.csv)	Comma-separated values (.csv)
 
 #: apps/oficina/main/of_sheetview.c:1667
@@ -333,6 +347,7 @@ Ir a la celda	Go to cell
 
 #: apps/oficina/main/of_sheetview.c:1711
 #: apps/oficina/main/of_sheetview.c:1808
+#: apps/oficina/main/of_slideview.c:773
 #: apps/oficina/main/of_textview.c:1214
 Ir	Go
 
@@ -340,7 +355,7 @@ Ir	Go
 Nombre de la hoja	Sheet name
 
 #: apps/oficina/main/of_sheetview.c:1717
-#: apps/oficina/main/oficina.c:795
+#: apps/oficina/main/oficina.c:813
 Cambiar	Change
 
 #: apps/oficina/main/of_sheetview.c:1729
@@ -387,6 +402,54 @@ Guardado. Hay fórmulas que la app no calcula: el programa de la computadora las
 
 #: apps/oficina/main/of_sheetview.c:1890
 Hay fórmulas con funciones que la app no tiene: se ve el valor que trae el archivo	Some formulas use functions the app does not have: they show the value the file brought
+
+#: apps/oficina/main/of_slides.c:215
+Diapositiva	Slide
+
+#: apps/oficina/main/of_slides.c:284
+Notas: 	Notes: 
+
+#: apps/oficina/main/of_slideview.c:576
+  ·  oculta	  ·  hidden
+
+#: apps/oficina/main/of_slideview.c:648
+Es la última	This is the last one
+
+#: apps/oficina/main/of_slideview.c:648
+Es la primera	This is the first one
+
+#: apps/oficina/main/of_slideview.c:720
+Guardado: el texto de las diapositivas y sus notas	Saved: the slides' text and their notes
+
+#: apps/oficina/main/of_slideview.c:738
+No hay una diapositiva con ese número	There is no slide with that number
+
+#: apps/oficina/main/of_slideview.c:749
+%d diapositivas (%d ocultas, %d con notas), de %.1f × %.1f cm. Se ven y se presentan; para editarlas hace falta PowerPoint o Impress.	%d slides (%d hidden, %d with notes), %.1f × %.1f cm. They can be viewed and presented; editing them needs PowerPoint or Impress.
+
+#: apps/oficina/main/of_slideview.c:773
+Ir a la diapositiva	Go to slide
+
+#: apps/oficina/main/of_slideview.c:776
+PDF, una página por diapositiva (.pdf)	PDF, a page per slide (.pdf)
+
+#: apps/oficina/main/of_slideview.c:777
+El texto, como documento de Word (.docx)	The text, as a Word document (.docx)
+
+#: apps/oficina/main/of_slideview.c:778
+El texto, como OpenDocument (.odt)	The text, as OpenDocument (.odt)
+
+#: apps/oficina/main/of_slideview.c:779
+El texto (.txt)	The text (.txt)
+
+#: apps/oficina/main/of_slideview.c:791
+Presentar	Present
+
+#: apps/oficina/main/of_slideview.c:792
+Notas del orador	Speaker notes
+
+#: apps/oficina/main/of_slideview.c:793
+Ir a la diapositiva...	Go to slide...
 
 #: apps/oficina/main/of_text2.c:716
 Celular	Mobile
@@ -581,165 +644,169 @@ Ver con formato	View formatted
 Exportar a PDF...	Export to PDF...
 
 #: apps/oficina/main/of_ui.c:672
-#: apps/oficina/main/oficina.c:533
+#: apps/oficina/main/oficina.c:551
 Cancelar	Cancel
 
-#: apps/oficina/main/oficina.c:319
+#: apps/oficina/main/oficina.c:322
 El archivo comprimido es muy grande para abrirlo acá (más de 64 MB)	The archive is too big to open here (over 64 MB)
 
-#: apps/oficina/main/oficina.c:320
+#: apps/oficina/main/oficina.c:323
 No se pudo leer el archivo comprimido	The archive could not be read
 
-#: apps/oficina/main/oficina.c:351
+#: apps/oficina/main/oficina.c:354
 La contraseña no es esa	That is not the password
 
-#: apps/oficina/main/oficina.c:351
-#: apps/oficina/main/oficina.c:396
+#: apps/oficina/main/oficina.c:354
+#: apps/oficina/main/oficina.c:414
 No se pudo leer el documento	The document could not be read
 
-#: apps/oficina/main/oficina.c:361
+#: apps/oficina/main/oficina.c:364
 Ese archivo ya no está	That file is gone
 
-#: apps/oficina/main/oficina.c:371
+#: apps/oficina/main/oficina.c:374
 Este formato todavía no se abre: llega en una próxima versión	This format does not open yet: it comes in a later version
 
-#: apps/oficina/main/oficina.c:375
+#: apps/oficina/main/oficina.c:378
 No es un documento que la app conozca	It is not a document the app knows
 
-#: apps/oficina/main/oficina.c:387
-Este PDF tiene contraseña	This PDF has a password
-
-#: apps/oficina/main/oficina.c:387
-#: apps/oficina/main/oficina.c:815
-#: apps/oficina/main/oficina.c:825
-Abrir	Open
-
-#: apps/oficina/main/oficina.c:391
-El PDF está cifrado de una forma que la app no conoce	The PDF is encrypted in a way the app does not know
-
-#: apps/oficina/main/oficina.c:395
-#: apps/oficina/main/oficina.c:404
+#: apps/oficina/main/oficina.c:388
+#: apps/oficina/main/oficina.c:413
+#: apps/oficina/main/oficina.c:422
 El archivo tiene contraseña: la app no lo puede abrir	The file has a password: the app cannot open it
 
+#: apps/oficina/main/oficina.c:389
+No se pudo leer la presentación	The presentation could not be read
+
 #: apps/oficina/main/oficina.c:405
+Este PDF tiene contraseña	This PDF has a password
+
+#: apps/oficina/main/oficina.c:405
+#: apps/oficina/main/oficina.c:833
+#: apps/oficina/main/oficina.c:843
+Abrir	Open
+
+#: apps/oficina/main/oficina.c:409
+El PDF está cifrado de una forma que la app no conoce	The PDF is encrypted in a way the app does not know
+
+#: apps/oficina/main/oficina.c:423
 No se pudo leer la planilla	The spreadsheet could not be read
 
-#: apps/oficina/main/oficina.c:424
-#: apps/oficina/main/oficina.c:771
+#: apps/oficina/main/oficina.c:442
+#: apps/oficina/main/oficina.c:789
 No se pudo leer el archivo	The file could not be read
 
-#: apps/oficina/main/oficina.c:429
+#: apps/oficina/main/oficina.c:447
 Es una copia sacada del archivo comprimido: para quedártela, extraela con una pulsación larga	This is a copy taken out of the archive: to keep it, extract it with a long press
 
-#: apps/oficina/main/oficina.c:660
+#: apps/oficina/main/oficina.c:678
 Ese archivo tiene contraseña: la app no lo puede sacar	That file has a password: the app cannot take it out
 
-#: apps/oficina/main/oficina.c:660
-#: apps/oficina/main/oficina.c:683
+#: apps/oficina/main/oficina.c:678
+#: apps/oficina/main/oficina.c:701
 No se pudo sacar el archivo	The file could not be taken out
 
-#: apps/oficina/main/oficina.c:685
+#: apps/oficina/main/oficina.c:703
 Extraído en la carpeta: %s	Extracted to the folder: %s
 
-#: apps/oficina/main/oficina.c:709
+#: apps/oficina/main/oficina.c:727
 Se extrajeron %d archivos en «%s»; %d no se pudieron	%d files extracted to “%s”; %d could not be
 
-#: apps/oficina/main/oficina.c:710
+#: apps/oficina/main/oficina.c:728
 Se extrajeron %d archivos en «%s»	%d files extracted to “%s”
 
-#: apps/oficina/main/oficina.c:753
+#: apps/oficina/main/oficina.c:771
 No se pudo cambiar el nombre	It could not be renamed
 
-#: apps/oficina/main/oficina.c:762
+#: apps/oficina/main/oficina.c:780
 No se pudo borrar	It could not be deleted
 
-#: apps/oficina/main/oficina.c:780
+#: apps/oficina/main/oficina.c:798
 No se pudo copiar	It could not be copied
 
-#: apps/oficina/main/oficina.c:795
+#: apps/oficina/main/oficina.c:813
 Nuevo nombre	New name
 
-#: apps/oficina/main/oficina.c:801
+#: apps/oficina/main/oficina.c:819
 ¿Borrar «%s»?	Delete “%s”?
 
-#: apps/oficina/main/oficina.c:802
+#: apps/oficina/main/oficina.c:820
 No se puede deshacer.	This cannot be undone.
 
-#: apps/oficina/main/oficina.c:802
-#: apps/oficina/main/oficina.c:828
+#: apps/oficina/main/oficina.c:820
+#: apps/oficina/main/oficina.c:846
 Borrar	Delete
 
-#: apps/oficina/main/oficina.c:816
+#: apps/oficina/main/oficina.c:834
 Extraer en esta carpeta	Extract to this folder
 
-#: apps/oficina/main/oficina.c:826
+#: apps/oficina/main/oficina.c:844
 Cambiar el nombre	Rename
 
-#: apps/oficina/main/oficina.c:827
+#: apps/oficina/main/oficina.c:845
 Duplicar	Duplicate
 
-#: apps/oficina/main/oficina.c:829
+#: apps/oficina/main/oficina.c:847
 Sacar de recientes	Remove from recent
 
-#: apps/oficina/main/oficina.c:894
+#: apps/oficina/main/oficina.c:912
 Hoja1	Sheet1
 
-#: apps/oficina/main/oficina.c:900
+#: apps/oficina/main/oficina.c:918
 No se pudo crear el archivo	The file could not be created
 
-#: apps/oficina/main/oficina.c:909
+#: apps/oficina/main/oficina.c:927
 Nombre de la planilla	Spreadsheet name
 
-#: apps/oficina/main/oficina.c:909
+#: apps/oficina/main/oficina.c:927
 Nombre del documento	Document name
 
-#: apps/oficina/main/oficina.c:909
+#: apps/oficina/main/oficina.c:927
 Planilla	Spreadsheet
 
-#: apps/oficina/main/oficina.c:909
+#: apps/oficina/main/oficina.c:927
 Documento	Document
 
-#: apps/oficina/main/oficina.c:910
+#: apps/oficina/main/oficina.c:928
 Crear	Create
 
-#: apps/oficina/main/oficina.c:923
+#: apps/oficina/main/oficina.c:941
 Markdown (.md)	Markdown (.md)
 
-#: apps/oficina/main/oficina.c:925
+#: apps/oficina/main/oficina.c:943
 Nuevo	New
 
-#: apps/oficina/main/oficina.c:949
+#: apps/oficina/main/oficina.c:967
 Fondo claro	Light background
 
-#: apps/oficina/main/oficina.c:949
+#: apps/oficina/main/oficina.c:967
 Fondo oscuro	Dark background
 
-#: apps/oficina/main/oficina.c:950
+#: apps/oficina/main/oficina.c:968
 Ir a la carpeta de documentos	Go to the documents folder
 
-#: apps/oficina/main/oficina.c:951
+#: apps/oficina/main/oficina.c:969
 Extraer todo en una carpeta	Extract all to a folder
 
-#: apps/oficina/main/oficina.c:1040
+#: apps/oficina/main/oficina.c:1058
 con contraseña	with a password
 
-#: apps/oficina/main/oficina.c:1064
+#: apps/oficina/main/oficina.c:1082
 Oficina	Office
 
-#: apps/oficina/main/oficina.c:1078
+#: apps/oficina/main/oficina.c:1096
 Recientes	Recent
 
-#: apps/oficina/main/oficina.c:1079
+#: apps/oficina/main/oficina.c:1097
 Archivos	Files
 
-#: apps/oficina/main/oficina.c:1150
+#: apps/oficina/main/oficina.c:1168
 Todavía no abriste ningún documento. En Archivos están los de la tarjeta, y con + se empieza uno nuevo.	You have not opened any document yet. Files has the ones on the card, and + starts a new one.
 
-#: apps/oficina/main/oficina.c:1151
+#: apps/oficina/main/oficina.c:1169
 No hay archivos en esta carpeta. Se suben desde la página Oficina del portal, o con + se crea uno.	There are no files in this folder. Upload them from the Office page of the portal, or create one with +.
 
-#: apps/oficina/main/oficina.c:1246
+#: apps/oficina/main/oficina.c:1264
 Salir sin guardar	Leave without saving
 
-#: apps/oficina/main/oficina.c:1248
+#: apps/oficina/main/oficina.c:1266
 Hay cambios sin guardar	There are unsaved changes

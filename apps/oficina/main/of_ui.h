@@ -154,6 +154,12 @@ bool of_docv_back(void);
 bool of_docv_save(void);
 bool of_docv_save_recovery(void);
 
+/* of_slideview.c */
+struct of_deck_s;
+bool of_slidev_open(lv_obj_t *parent, const char *path, struct of_deck_s *dk);
+void of_slidev_close(void);
+bool of_slidev_back(void);                  /* true: it left the presentation */
+
 /* of_textview.c */
 bool of_textv_open(lv_obj_t *parent, const char *path);
 void of_textv_close(void);

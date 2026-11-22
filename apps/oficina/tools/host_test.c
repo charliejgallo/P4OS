@@ -2,7 +2,7 @@
  * P4OS - Office: the formats on the Mac, without LVGL.
  *
  *     cc -DOF_HOST -I apps/oficina/main apps/oficina/tools/host_test.c \
- *        apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive,crypt,pdf,pdftext,pdfw}.c -o host_test
+ *        apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive,crypt,pdf,pdftext,pdfw,slides,pptx,odp}.c -o host_test
  *     ./host_test dump  book.xlsx                      the cells, shown and as typed
  *     ./host_test edit  book.xlsx out.xlsx 'A1=12' 'Resumen!B2==A1*2' ...
  *     ./host_test conv  book.csv out.xlsx              save in another format
@@ -12,6 +12,7 @@
  *     ./host_test read  file.rtf [copy.docx|.odt|.txt]  a reader's document (phase 3), and a copy
  *     ./host_test arc   archive.zip [dir]              an archive's entries, extracted to dir
  *     ./host_test pdf   file.docx|xlsx|md|txt out.pdf  written as PDF (phase 4); "read out.pdf" reads one
+ *     ./host_test deck  slides.pptx|odp [out.pdf|docx|odt|txt]   a presentation's shapes (phase 5), and a copy
  *                       (OF_PDF_PW=... for a password)
  *
  * tools/test_formats.sh runs it over the samples and checks what it saved.
@@ -20,6 +21,7 @@
 #include "of_doc.h"
 #include "of_arc.h"
 #include "of_pdf.h"
+#include "of_slides.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -133,6 +135,52 @@ int main(int argc, char **argv)
             }
         }
         of_arc_free(a);
+        return 0;
+    }
+    if (argc >= 3 && !strcmp(argv[1], "deck")) {
+        /* a presentation: every shape with its place, fill and text */
+        of_deck_t *dk = of_deck_load(argv[2], err, sizeof err);
+        if (!dk) { printf("load failed: %s\n", err); return 1; }
+        printf("== %s %.0fx%.0f pt, %d slides\n", dk->kind, dk->w, dk->h, dk->ns);
+        for (int i = 0; i < dk->ns; i++) {
+            sl_slide_t *s = &dk->s[i];
+            printf("-- slide %d%s bg %06X title \"%s\"%s\n", i + 1, s->hidden ? " (hidden)" : "", (unsigned)(s->bg & 0xFFFFFF), s->title ? s->title : "", s->bg_pic ? " bgpic" : "");
+            for (int k = 0; k < s->nsh; k++) {
+                sl_shape_t *sh = &s->sh[k];
+                static const char *const KN[] = { "text", "pic", "table", "line" };
+                printf("  %s%s g%d [%.0f %.0f %.0f %.0f]%s fill %06X line %06X/%.1f%s%s\n", sh->placeholder ? "" : "(m)", KN[sh->kind], sh->geom,
+                       sh->x, sh->y, sh->w, sh->h, sh->rot ? " rot" : "", (unsigned)(sh->fill & 0xFFFFFF), (unsigned)(sh->line & 0xFFFFFF), sh->line_w,
+                       sh->pic ? " pic=" : "", sh->pic ? sh->pic : "");
+                for (int pi = 0; pi < sh->tx.np; pi++) {
+                    sl_para_t *p = &sh->tx.p[pi];
+                    printf("     L%d a%d m%.0f i%.0f %s%s", p->level, p->align, p->margin, p->indent, p->bullet, p->autonum ? "#" : "");
+                    if (p->autonum) printf("%d", p->number);
+                    for (int r = 0; r < p->nr; r++)
+                        printf(" [%.0f%s%s %06X] %s", p->r[r].size, p->r[r].b ? "b" : "", p->r[r].i ? "i" : "", (unsigned)(p->r[r].color & 0xFFFFFF), p->r[r].t);
+                    printf("\n");
+                }
+                for (int c = 0; c < sh->ncells; c++) {
+                    sl_cell_t *cl = &sh->cells[c];
+                    printf("     cell r%d c%d%s fill %06X:", cl->row, cl->col, cl->hidden ? " (hidden)" : "", (unsigned)(cl->fill & 0xFFFFFF));
+                    for (int pi = 0; pi < cl->tx.np; pi++) for (int r = 0; r < cl->tx.p[pi].nr; r++) printf(" %s", cl->tx.p[pi].r[r].t);
+                    printf("\n");
+                }
+            }
+            if (s->notes) printf("  notes: %s\n", s->notes);
+        }
+        if (argc >= 4) {
+            const char *e = of_ext(argv[3]);
+            bool ok;
+            if (!strcmp(e, "pdf")) ok = of_pdf_write_deck(dk, argv[3], of_basename(argv[2]), false, err, sizeof err);
+            else {
+                of_doc_t *d = of_deck_to_doc(dk, true);
+                ok = d && of_doc_save(d, !strcmp(e, "odt") ? OF_DOC_ODT : !strcmp(e, "txt") ? OF_DOC_TEXT : OF_DOC_DOCX, argv[3], err, sizeof err);
+                if (d && getenv("OF_DUMP")) docdump(d);
+                of_doc_free(d);
+            }
+            printf("%s %s\n", ok ? "wrote" : "failed", argv[3]);
+        }
+        of_deck_free(dk);
         return 0;
     }
     if (argc >= 4 && !strcmp(argv[1], "pdf")) {

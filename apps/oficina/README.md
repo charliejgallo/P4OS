@@ -332,7 +332,7 @@ text. In the simulator: typing, bold for the next letters, saving from the
 ### Build, install, pack
 
 ```
-tools/build_apps.sh oficina                      # oficina.so, 396 KB, 205 symbols
+tools/build_apps.sh oficina                      # oficina.so, 448 KB, 210 symbols
 python3 apps/oficina/tools/pack_fonts.py         # build/oficina_p4.pak, 877 KB (--sim: a copy in sim/sim_fs/apps)
 tools/install_apps.sh p4os.local oficina         # the .so, the pack and the page; restarts the board
 tools/install_lang.sh p4os.local en              # and de
@@ -379,7 +379,7 @@ calendars) or "Ver como árbol" (data files); from a read-only document,
 
 ```
 cc -DOF_HOST -I apps/oficina/main apps/oficina/tools/host_test.c \
-   apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive,crypt,pdf,pdftext,pdfw}.c -o /tmp/host_test
+   apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive,crypt,pdf,pdftext,pdfw,slides,pptx,odp}.c -o /tmp/host_test
 python3 apps/oficina/tools/samples_read.py /tmp/r                # (and --en) every reader's sample, invented
 /tmp/host_test read /tmp/r/receta.rtf                            # the paragraphs read, with styles, links, pictures
 /tmp/host_test read /tmp/r/cuentos.epub /tmp/out.odt             # and a copy saved
@@ -465,11 +465,79 @@ with headings, lists, tables, pictures and indents; `sips` drew them to
 check the pages. In the simulator: reading, the password asked, a copy as
 PDF from a docx. Phases 1 to 3 checked again.
 
-### Next: phase 5, slides
+### Phase 5: presentations (done, 2026-11-22)
 
-`.pptx` and `.odp`: each slide with its boxes of text and pictures at their
-place (layouts and masters for the positions), the speaker notes; read only,
-then editing a box's text.
+`.pptx`, `.ppsx`, `.potx`, `.pptm` and `.odp`, `.otp` read into a deck
+(`of_slides.c`, `of_pptx.c`, `of_odp.c`; a small XML tree in `of_slides.c`
+for walking up and down) where every shape is resolved when read: its
+place and size in points, fill and outline as colours, its text with each
+run's size, weight and colour worked out. The view draws that, nothing
+left to inherit.
+
+- PowerPoint: slide size and order from `presentation.xml`; each slide's
+  layout and master and the master's theme; placeholders placed by the
+  layout's or the master's (matched by idx, then by type); text styles by
+  level from the paragraph, the shape's list style, the placeholders' list
+  styles, the master's title, body or other style and the default text
+  style; theme colours through the master's colour map with `lumMod`,
+  `lumOff`, `tint` and `shade`; shape fills, outlines and font colours from
+  the theme's style references; `normAutofit` font scale; bullets
+  (characters, Wingdings and Symbol as bullets, auto-numbers), margins and
+  indents, spacing; groups flattened with their child offsets; tables with
+  spans, merges, cell fills and the table style's first row and bands
+  roughly; pictures and picture fills; connectors as lines; charts,
+  SmartArt and objects as labelled boxes; backgrounds (solid, gradient's
+  first colour, picture, theme reference) from the slide, the layout or the
+  master; the master's and layout's own shapes under the slide's unless
+  `showMasterSp="0"`; hidden slides; hyperlinks; speaker notes.
+- Impress: the pages and their master pages (size from the page layout,
+  the master's shapes drawn under, its placeholders only frames); frames,
+  rectangles, ellipses, custom shapes by type, lines, groups, pictures,
+  tables; presentation styles by class and outline level, paragraph and
+  span styles with their parents; list styles' bullets, numbers and
+  indents; graphic styles' fills, strokes, padding and vertical alignment;
+  the drawing page's background; speaker notes; hidden pages.
+- The screen (`of_slideview.c`): the slides one under another at the
+  screen's width (lying down, as tall as fits), numbered, hidden ones
+  dimmed; speaker notes under each when asked; a tap on a slide presents
+  from it, alone on black (a tap on the right or a swipe left for the
+  next, on the left for the one before, back to leave; hidden slides
+  skipped; turning the board keeps the slide). Pictures decoded at their
+  box's size when they come into sight and let go when far.
+- Copies: PDF, a page of the slide's size for each slide, drawn as on the
+  screen (fills and outlines, ellipses, rounded boxes, triangles,
+  diamonds, arrows, lines, pictures, tables, text in its box with its
+  anchor, bullets and numbers); and the deck's text as docx, odt or txt (a
+  heading per slide, its boxes in reading order, tables, pictures, notes).
+
+Read only: editing a box's text is not done (it would splice the slide
+part as phase 2 does with documents; left for later).
+
+### Checking phase 5
+
+```
+python3 apps/oficina/tools/samples_slides.py /tmp/sl              # charla.pptx, charla.odp (and --en)
+/tmp/host_test deck /tmp/sl/charla.pptx                          # every shape: place, fill, text runs
+/tmp/host_test deck /tmp/sl/charla.odp /tmp/charla.pdf           # and a copy: .pdf, .docx, .odt, .txt
+```
+
+Checked on 2026-11-22 with the invented decks (Spanish and English), under
+AddressSanitizer: both read with layouts, master band, theme colours, three
+levels of bullets, a picture with a caption and a link, theme-styled
+shapes, a connector, a group with child offsets, a table, a hidden chart
+slide, a slide background, notes; PDF, docx, odt and txt copies (macOS's
+PDFKit and `textutil` read them; the pages drawn by PDFKit look like the
+slides); macOS's Quick Look renders the pptx's first slide with the same
+background colour the app works out. In the simulator: the column of slides
+for both, presenting and stepping, turned sideways, notes, a PDF copy.
+
+### Next: phase 6, the old binaries
+
+`.doc`, `.xls` and `.ppt`: one CFB (OLE2) reader for the three; the text of
+Word 97-2003 (the piece table), the values of Excel 97-2003 (BIFF8 records,
+shared strings, numbers, formulas' cached results), the text of PowerPoint
+97-2003 slides; read only, with "save a copy as" docx, xlsx or PDF. Then
+the text inside Pages and Numbers (IWA: Snappy and protobuf).
 
 Left over from phase 4: PDF links and the outline (bookmarks) are not used
 yet (the contents come from the headings found); text in other scripts
