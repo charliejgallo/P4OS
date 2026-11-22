@@ -1,0 +1,277 @@
+# Oficina (Office)
+
+Reading and editing office documents on the board. Id `aos.oficina`.
+
+Not a LibreOffice: read almost everything well, edit the common things, and
+never break a file. Two rules hold for every format:
+
+- **What the app does not understand is kept as it was when saving.** A
+  document is a package of parts (or a file of blocks); the app rewrites only
+  the part it edited, and inside that part only the elements it edited. The
+  rest goes out byte for byte. When something cannot be kept (a CSV cannot
+  hold a formula, an edited `.doc` is not possible), the app says so before
+  saving, never after.
+- **Tested with files made for the test**, by `tools/make_samples.py`, and
+  checked after saving by `tools/check_saved.py` (well-formed XML in every
+  part, every relationship pointing at a part that exists, untouched parts
+  identical, the values written where they belong). Never with anyone's
+  documents.
+
+This file is the plan, by phases, and then what is built.
+
+---
+
+## 1. The formats
+
+What is worth reading and what is worth editing, beyond the ones asked for,
+with what the app would do with each one and the code it takes. "Own" means
+written for the app; the line counts are estimates.
+
+### What the system already has
+
+| What | Where | Use here |
+|---|---|---|
+| Inflate | miniz's `tinfl` (MIT), `apps/emulador/third/` | every ZIP-based format, gzip, PDF's FlateDecode |
+| ZIP reading | `apps/emulador/main/em_zip.c` (central directory, stored and deflated) | the pattern for `of_zip.c`, which also writes |
+| Deflate | `apps/dibujo/main/dib_png.c` (LZ77 with hash chains, fixed Huffman codes) | writing the parts the app rewrites |
+| A rich-text editor | `apps/notas/main/nt_editor.c`, `nt_doc.c` (blocks, one style word per byte, undo, clipboard) | the base of the document editor (phase 2) |
+| A Spanish keyboard of its own | `apps/notas/main/nt_kb.c` | the text editor's keyboard |
+| JPEG, PNG and BMP | `aos_hal_image_decode` (path, offset, size), and the hardware JPEG (`aos_hal_jpeg_*`) | pictures inside documents: a stored ZIP entry is decoded in place by its offset, a deflated one is inflated to the cache first |
+| Fonts | Inter Medium 14 to 64 px, `aos_mono_18/22` | the interface and the text; bold and italic for documents come in the app's pack, as Notas does |
+| Modules | `aos_hal_module_open/_sym/_close` | the big or separately licensed parts (below) |
+
+There is no FreeType in the firmware: a page drawn with its own fonts needs
+`stb_truetype` in the app (phase 7).
+
+### Libraries considered
+
+| Library | Licence | Size | For | Verdict |
+|---|---|---|---|---|
+| miniz `tinfl` | MIT | 700 lines | inflate | **in**, the Emulador's copy, prefixed |
+| Dibujo's deflate | MIT (P4OS) | 150 lines | deflate | **in**, prefixed |
+| yxml | MIT | 1 000 lines | XML | not needed: the app needs byte offsets of every element to splice, so its own pull tokenizer (300 lines) is simpler |
+| md4c | MIT | 6 500 lines | Markdown to blocks | **phase 3**, for the rendered view (CommonMark and GitHub tables) |
+| stb_truetype | MIT or public domain | 5 000 lines | TrueType and OpenType-CFF glyphs | **phase 7**, PDF pages drawn with their own fonts |
+| nanosvg + nanosvgrast | zlib | 3 000 lines | SVG pictures, and an anti-aliased path filler | **phase 7**: SVG in documents, and PDF's paths |
+| pdfio (Michael Sweet) | Apache-2.0 | 10 000 lines, needs zlib | PDF objects, xref, encryption | considered for phase 4; an own parser of objects and xref streams (1 500 lines) is about the same size once zlib is shimmed. Decide when phase 4 starts |
+| MuPDF | AGPL-3.0 | several MB | PDF, EPUB, XPS | no: too big for the card's RAM budget and its licence would make the whole app AGPL |
+| libxls | BSD-2 | 3 000 lines | `.xls` | an own BIFF8 reader is the same size and shares the CFB reader with `.doc` |
+| antiword, wvWare | GPL-2.0 | big | `.doc` | no: an own piece-table reader is 400 lines |
+| xz-embedded | 0BSD | 3 000 lines | `.xz` | maybe, for `.tar.xz`; low demand |
+| LZMA SDK | public domain | big | `.7z` | no, unless asked |
+| libyaml, tomlc99 | MIT | 10 000, 2 500 lines | YAML and TOML trees | no: a tree view needs only the indentation and the keys; own reading (500 lines for both) |
+| gifdec | public domain | 600 lines | GIF pictures in HTML and EPUB | maybe, phase 3 |
+
+Nothing in the plan is GPL. The only thing big enough for a module is the
+PDF page renderer (phase 7): `oficina_pdf.so` on the card, loaded when a page
+is drawn, so the app stays small for everyone who only opens spreadsheets.
+
+### Format by format
+
+| Format | Read | Edit | Convert | Code | Phase |
+|---|---|---|---|---|---|
+| `.txt`, `.log`, `.ini`, `.conf`, `.cfg` | yes | yes | to `.docx`/`.odt` (2) | own editor; UTF-8, UTF-16 with BOM, Latin-1 / Windows-1252; LF, CRLF, CR kept | 1 |
+| Big logs (MB) | yes, without loading them | no | | the file indexed by lines in a background pass and read a window at a time; follow mode (`tail -f`) | 1 |
+| Source code (`.c`, `.h`, `.py`, `.js`, `.lua`, `.sh`, `.css`...) | highlighted | yes | | own lexer table per language family (C-like, Python, shell, Lua, CSS): 400 lines | 1 |
+| `.json` | highlighted, tree | yes (text) | | own tokenizer; tree view in phase 3 | 1 / 3 |
+| `.xml`, `.html` source, `.svg` source | highlighted, tree | yes (text) | | the app's XML tokenizer | 1 / 3 |
+| `.yaml`, `.toml` | highlighted, tree | yes (text) | | own | 1 / 3 |
+| `.md` | source highlighted; rendered view | yes (source) | to `.html`, `.docx` | md4c for the view | 1 / 3 |
+| `.csv`, `.tsv` | grid | yes | to `.xlsx`, `.ods` | own; delimiter, quoting, encoding and decimal comma detected, and kept when saving | 1 |
+| `.xlsx`, `.xlsm`, `.xltx` | grid, every sheet | values, formulas, number formats, column widths, sort | to `.ods`, `.csv`, PDF (4) | own: sheets, shared strings, styles' number formats, shared formulas, merged cells, frozen panes. Saving rewrites the edited sheets' `sheetData` (and `cols`), adds number formats to `styles.xml` only when one was chosen, drops `calcChain.xml` when formulas changed and asks the reader to recalculate. Macros (`vbaProject.bin`) travel untouched | 1 |
+| `.ods`, `.fods` | grid | as `.xlsx` | to `.xlsx`, `.csv` | own: `content.xml`, repeated rows and cells split only where edited, `of:` formulas translated both ways | 1 |
+| `.docx`, `.dotx` | paragraphs, headings, bold, italic, underline, colours, lists, tables, pictures | text and its common formatting, table cells | to `.odt`, PDF (4), `.txt`, `.md` | own: `document.xml` read into blocks and runs, each run keeping its original `rPr` bytes; saving rewrites only the edited paragraphs | 2 |
+| `.odt`, `.fodt` | as `.docx` | as `.docx` | to `.docx`, PDF | own, the same model; automatic styles resolved to the same attributes | 2 |
+| `.rtf` | yes | no (save as `.docx`/`.odt`) | to `.docx` | own: control words, groups, fonts, colours, `\uN`, pictures in `\pict` (PNG/JPEG): 600 lines | 3 |
+| `.html`, `.htm` | rendered as a document | no (source yes) | to `.docx` | own HTML reader into the phase 2 blocks (reader mode: headings, paragraphs, lists, tables, pictures; no CSS layout) | 3 |
+| `.epub` | chapters, contents, pictures, the page kept | no | | ZIP + OPF spine + nav/NCX + the HTML reader | 3 |
+| `.fb2` | yes | no | | XML, the same blocks | 3 |
+| `.eml`, `.mht` | headers, text or HTML part, attachments listed and saved | no | | own MIME (quoted-printable, base64, charsets) | 3 |
+| `.vcf` (vCard 2.1-4.0) | contacts as cards | yes (fields) | to `.csv` | own: folding, escapes, `QUOTED-PRINTABLE`, the photo (base64 JPEG) | 3 |
+| `.ics` (iCalendar) | events by day, with time zones as written | basic (title, time, place) | | own: VEVENT, VTODO, RRULE shown as text | 3 |
+| `.zip`, `.cbz`, `.jar` | the list, open an entry with the app that takes it, extract | no | | `of_zip.c` | 3 |
+| `.tar`, `.tar.gz`, `.tgz`, `.gz` | list, open, extract | no | | own (ustar, GNU long names, pax) + tinfl | 3 |
+| Apple Pages, Numbers, Keynote | the preview picture they carry; text of Pages and Numbers' cells as a second step | no | | the file is a ZIP (or a folder on the card) with `preview.jpg` (or `QuickLook/Thumbnail.jpg`, `QuickLook/Preview.pdf` in the old ones): showing it is nearly free. The content is `Index/*.iwa`: Snappy-framed protobuf, no schema needed to pull the strings out (own Snappy, 150 lines, and a protobuf walk) | 3 / 6 |
+| `.pdf` | text reflowed to the screen first; the pages drawn later | no | to `.txt` | own: objects, xref tables and streams, object streams, Flate, `ToUnicode`, the standard encodings; RC4/AES only if pdfio is taken | 4, 7 |
+| PDF writing | | | from documents and sheets | own, small: the 14 standard fonts need no embedding (WinAnsi covers Spanish and German), their widths in a table; JPEG pictures go in as they are (DCTDecode) | 4 |
+| `.pptx`, `.odp`, `.ppsx` | each slide: its boxes of text and pictures at their place, the notes | text of a box (phase 6, later) | to PDF | own: slide XML, layout and master placeholders for position | 5 |
+| `.doc` (Word 97-2003) | text, paragraphs, bold/italic if cheap | no (save as `.docx`) | to `.docx` | own: CFB container (300 lines), the piece table and the character runs (500) | 6 |
+| `.xls` (Excel 97-2003) | values and cached formula results, every sheet | no (save as `.xlsx`) | to `.xlsx` | own: CFB + BIFF8 (SST, LABELSST, NUMBER, RK, MULRK, FORMULA, BOUNDSHEET, XF, FORMAT): 700 lines | 6 |
+| `.ppt` | text of each slide | no | | CFB + the PowerPoint records' text atoms | 6 |
+| Pictures inside documents | JPEG, PNG, BMP (HAL); GIF (gifdec); SVG (nanosvg, 7); EMF/WMF as a placeholder with their size | | | | 2, 3, 7 |
+| Password-protected Office files | detected (CFB with `EncryptedPackage`) and said | | | | 1 |
+| `.xlsb`, `.numbers` cells, `.key` slides, `.xps`, `.sqlite` | later, if asked | | | | - |
+
+### Converting
+
+The point of the models is that converting comes almost free:
+
+- **Spreadsheets:** one model (`of_sheet.c`) and three writers, so `.csv`
+  to `.xlsx`, `.xlsx` to `.ods` and back are "Save as". A CSV saved from a
+  sheet with formulas keeps the values and the app says so.
+- **Documents (2):** one block model and two writers (`.docx`, `.odt`),
+  plus plain text and Markdown. RTF, HTML, `.doc` and Markdown read into the
+  same blocks and can be saved as `.docx`/`.odt`.
+- **PDF (4):** a small writer with the standard fonts lays out documents and
+  sheets; a document with pictures takes its JPEGs as they are.
+
+### Order, by what pays most
+
+1. **Text and spreadsheets** - the base everything else uses: the shell
+   (files, recent, new), the ZIP reader and writer, the XML tokenizer, the
+   text editor and the grid with formulas, CSV, XLSX and ODS. Source
+   highlighting and big logs come with the text editor because they are
+   cheap there.
+2. **Documents**: `.docx` and `.odt`, with Notas' editor as the base. The
+   block model, the renderer and the two writers.
+3. **The cheap readers on top of phase 2**: RTF, HTML, EPUB, FB2, Markdown
+   rendered, EML; vCard and iCalendar; ZIP and TAR; the JSON/XML/YAML/TOML
+   tree; the preview of Apple's files.
+4. **PDF text** (reflowed) and **PDF writing** (export).
+5. **Slides**: `.pptx` and `.odp`.
+6. **The old binaries**: `.doc`, `.xls`, `.ppt` (one CFB reader for the
+   three); the text inside Pages and Numbers.
+7. **PDF pages drawn** with their own fonts and paths, as the module
+   `oficina_pdf.so` (stb_truetype, nanosvgrast, the hardware JPEG). This is
+   the expensive one: embedded TrueType and CFF fonts are fine with
+   stb_truetype, Type 1 fonts need a charstring decoder of their own (600
+   lines), and the 14 standard fonts need substitutes in the pack.
+
+---
+
+## 2. What is built
+
+### Phase 1: text and spreadsheets (done, 2026-11-22)
+
+**The shell** (`oficina.c`): Recent and Files, any folder of the card
+(`/sdcard/documentos` by default, made on first use), a long press on a file
+to rename, duplicate, delete it or take it off the recent list, "+" for a new
+xlsx, ods, csv, txt or md, dark or light background. Leaving a document with
+changes asks to save them; if the system closes the app meanwhile (the fifth
+app opened), they go to a copy beside the file, "<name> (sin guardar)".
+Formats of later phases say so instead of opening.
+
+**Spreadsheets** (`of_sheetview.c` over the formats core):
+
+- the grid, drawn by the app: frozen panes as the file has them, merged
+  cells, the file's fills, font colours, bold, underline, alignment, column
+  widths and row heights, text that runs over empty cells, `###` for a number
+  that does not fit, negative numbers in red where the format says `[Red]`;
+- one finger scrolls with momentum, a tap selects, a second tap or a double
+  tap edits, a long press and a drag select a range, a tap on a letter or a
+  number selects the column or the row, dragging a letter's edge resizes the
+  column, two fingers zoom (six steps, remembered);
+- the formula bar: the cell's name (tap: go to a cell) and its content as
+  typed (`15%`, `01/12/2026`, `=SUM(D2:D9)`); while a formula is typed, a
+  tapped cell or a dragged range goes in as its reference; a number cell
+  opens the keyboard on its numbers' page;
+- the selection's sum and average under the grid; sheets as tabs;
+- the menu: save, save a copy as xlsx/ods/csv, number format (twelve, with
+  an example each), sort ascending or descending (the block around the cell,
+  its first row taken as titles), filter by the selected value, fit column
+  width, freeze panes, copy/cut/paste (tab-separated, formulas move with the
+  cells when pasted from the app), clear, go to a cell, find, the list of
+  functions, rename a sheet (not yet for xlsx);
+- undo and redo (200 steps), a USB or Bluetooth keyboard: arrows and Shift,
+  Enter/Tab move after typing, typing replaces the cell, Delete clears, Esc,
+  Ctrl+Z/Y/C/X/V/S/F/A, Ctrl+arrows to the data's edge;
+- landscape: the same, with thinner bars.
+
+**Formulas** (`of_formula.c`): 63 functions (SUM, AVERAGE, MIN, MAX,
+COUNT, COUNTA, COUNTBLANK, PRODUCT, MEDIAN, SUMIF, COUNTIF, AVERAGEIF,
+SUMPRODUCT, ROUND, ROUNDUP, ROUNDDOWN, TRUNC, INT, ABS, SIGN, MOD, POWER,
+SQRT, PI, IF, AND, OR, NOT, IFERROR, IFNA, ISBLANK, ISNUMBER, ISTEXT, ISERROR,
+ISNA, CONCATENATE, CONCAT, LEN, LEFT, RIGHT, MID, UPPER, LOWER, TRIM, REPT,
+SUBSTITUTE, FIND, SEARCH, VALUE, TEXT, VLOOKUP, HLOOKUP, INDEX, MATCH, TODAY,
+NOW, DATE, YEAR, MONTH, DAY, WEEKDAY, TRUE, FALSE), with their Spanish and
+German names accepted when typed (SUMA, BUSCARV, SUMME, SVERWEIS...), `;` as
+the separator with the decimal comma, references across sheets, whole columns
+and rows, shared formulas expanded. A formula with a function the app does
+not have shows and keeps the value the file cached. Recalculation uses an
+explicit stack, not recursion (a chain of thousands of rows would overflow
+the LVGL task's stack); a cycle shows `#CIRC!`.
+
+**Number formats** (`of_numfmt.c`): Excel's format codes (sections, literals,
+`[$€-...]`, grouping, scaling, percent, scientific, dates and times with
+month and day names in Spanish or English) and ODF's data styles translated
+to them; the decimal mark follows the interface language.
+
+**The formats** (in `of.h`, built also on the Mac by `tools/host_test.c`):
+
+| File | What it does when saving into the same format |
+|---|---|
+| `of_xlsx.c` | every part copied with its compressed bytes; the changed sheets rewritten inside `<sheetData>` only, untouched rows and cells byte for byte, new strings inline; `<cols>` and `<dimension>` brought up to date; `styles.xml` only when a format was chosen (the new `xf` a copy of the cell's old one); `calcChain.xml` dropped with its two mentions and `fullCalcOnLoad` set |
+| `of_ods.c` | only `content.xml`, walked again: unchanged tables as they were, runs of repeated rows and cells split only where a cell changed, a rewritten cell keeping its style, spans and comment |
+| `of_csv.c` | the separator, quoting, encoding (UTF-8, BOM, Windows-1252), line ends, and each untouched field as the file wrote it (`350.000,00`, `VERDADERO`) |
+| `of_text.c` | UTF-8 with or without BOM, UTF-16 with BOM, Windows-1252; LF, CRLF, CR; the final line end |
+
+Saving into another format builds a new package: one cell format per number
+format in use (xlsx), one data style per number format (ods).
+
+**Text** (`of_textview.c`): a gap buffer with a line index, drawn by the app
+(only the lines in sight), so a 4 MB log scrolls lightly; line numbers,
+wrapping (off for code and logs, and past 2 MB), Inter or mono, pinch zoom,
+colours for C-like languages, Python and shell, JSON, XML/HTML/SVG, INI and
+TOML, YAML, Markdown and logs (levels in colour), selection, undo, find and
+replace, go to line, the encoding and line ends switchable from the menu.
+
+**The portal** (`web/oficina.js`): the documents folder and its subfolders,
+upload by picking or dropping with progress, download, delete, new folder, a
+quick look at a CSV as a table or at a text file, the documents opened last.
+
+### Checking it
+
+```
+cc -DOF_HOST -I apps/oficina/main apps/oficina/tools/host_test.c \
+   apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text}.c -o /tmp/host_test
+python3 apps/oficina/tools/make_samples.py /tmp/docs            # or --en for the English set
+/tmp/host_test edit /tmp/docs/ventas.xlsx /tmp/out.xlsx 'B2=5000' 'Resumen!B2=7'
+python3 apps/oficina/tools/check_saved.py /tmp/docs/ventas.xlsx /tmp/out.xlsx B2 D2 D11
+```
+
+What was checked on 2026-11-22 (there is no LibreOffice on this Mac: the
+saved files were checked with `check_saved.py`, which reads them the way a
+spreadsheet program does, and the app read them back):
+
+- XLSX edited (a value, a formula, a member of a shared formula group, a new
+  string with `&` and `<`, another sheet): comments, drawing, picture,
+  theme, styles, shared strings, docProps and the untouched rows identical;
+  the dependent formulas recalculated across sheets; array formula and
+  unknown function kept with their cached values;
+- ODS edited inside repeated rows and cells, a cell with a comment and
+  `<text:s/>`, a new cell far down, the other sheet: only `content.xml`
+  changed, `mimetype` first and stored;
+- CSV in Windows-1252 with `;`, CRLF, quotes and `VERDADERO`: identical but
+  the edited lines;
+- conversions csv→xlsx, xlsx→ods, ods→xlsx, with dates, percentages and
+  currencies keeping their formats;
+- sorting a block with formulas; saving from the app in the simulator.
+
+### Build and install
+
+```
+tools/build_apps.sh oficina                      # oficina.so, 200 KB, 189 symbols
+tools/install_apps.sh p4os.local oficina         # the .so and the page; restarts the board
+tools/install_lang.sh p4os.local en              # and de
+```
+
+No pack: the app uses the firmware's Inter and mono fonts (bold is drawn
+twice a pixel apart).
+
+### Next: phase 2, documents
+
+`.docx` and `.odt` with the block model of Notas' editor
+(`apps/notas/main/nt_doc.c`, `nt_editor.c`): read `document.xml` /
+`content.xml` into paragraphs and runs, each keeping the bytes of its
+original properties (`w:rPr`, the ODF automatic style); show headings, bold,
+italic, underline, colours, lists, tables and pictures (JPEG/PNG through
+`aos_hal_image_decode`, a stored entry by its offset); edit text and the
+common formatting; save by rewriting only the edited paragraphs. The ZIP
+writer, the XML tokenizer, the deflate and the shell are ready for it. The
+bold and italic fonts then come in a pack, as in Notas.
+
+Smaller things left in phase 1: renaming sheets of an xlsx, adding and
+deleting sheets, inserting and deleting rows and columns (they need every
+reference of the book moved), number formats in an existing ODS, and the
+board's own measurements (recalculating a sheet of ten thousand cells, the
+time to draw a frame of the grid).

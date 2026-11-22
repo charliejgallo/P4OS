@@ -1,0 +1,404 @@
+# amoledos-lang 1   es -> de
+# aos.oficina.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/oficina/main/of_sheetview.c:652
+Esa celda es parte de una fórmula matricial: se cambia en la computadora	Diese Zelle gehört zu einer Matrixformel: am Computer ändern
+
+#: apps/oficina/main/of_sheetview.c:703
+#: apps/oficina/main/of_textview.c:800
+Es demasiado para copiar de una vez	Das ist zu viel auf einmal zum Kopieren
+
+#: apps/oficina/main/of_sheetview.c:726
+Cortado	Ausgeschnitten
+
+#: apps/oficina/main/of_sheetview.c:726
+Copiado	Kopiert
+
+#: apps/oficina/main/of_sheetview.c:735
+No hay nada para pegar	Nichts zum Einfügen
+
+#: apps/oficina/main/of_sheetview.c:833
+Suma %s  ·  Prom. %s	Summe %s  ·  Mittel %s
+
+#: apps/oficina/main/of_sheetview.c:834
+%ld celdas	%ld Zellen
+
+#: apps/oficina/main/of_sheetview.c:968
+La fórmula tiene un error	Die Formel enthält einen Fehler
+
+#: apps/oficina/main/of_sheetview.c:972
+La fórmula usa una función que la app no tiene	Die Formel nutzt eine Funktion, die die App nicht kennt
+
+#: apps/oficina/main/of_sheetview.c:1344
+Un CSV no guarda formatos: guardalo como .xlsx o .ods	Eine CSV speichert keine Formate: als .xlsx oder .ods speichern
+
+#: apps/oficina/main/of_sheetview.c:1348
+En los .ods los formatos se cambian en la computadora por ahora	In .ods-Dateien werden Formate vorerst am Computer geändert
+
+#: apps/oficina/main/of_sheetview.c:1383
+General	Standard
+
+#: apps/oficina/main/of_sheetview.c:1383
+Entero	Ganzzahl
+
+#: apps/oficina/main/of_sheetview.c:1383
+Entero con miles	Ganzzahl mit Tausendern
+
+#: apps/oficina/main/of_sheetview.c:1383
+Dos decimales	Zwei Dezimalstellen
+
+#: apps/oficina/main/of_sheetview.c:1384
+Miles y dos decimales	Tausender und zwei Dezimalstellen
+
+#: apps/oficina/main/of_sheetview.c:1384
+Moneda	Währung
+
+#: apps/oficina/main/of_sheetview.c:1384
+Porcentaje	Prozent
+
+#: apps/oficina/main/of_sheetview.c:1385
+Porcentaje con decimales	Prozent mit Dezimalstellen
+
+#: apps/oficina/main/of_sheetview.c:1385
+Fecha	Datum
+
+#: apps/oficina/main/of_sheetview.c:1385
+Fecha y hora	Datum und Uhrzeit
+
+#: apps/oficina/main/of_sheetview.c:1385
+Hora	Uhrzeit
+
+#: apps/oficina/main/of_sheetview.c:1386
+Texto	Text
+
+#: apps/oficina/main/of_sheetview.c:1398
+Formato de número	Zahlenformat
+
+#: apps/oficina/main/of_sheetview.c:1420
+Es demasiado para ordenar en la placa	Das ist zu viel zum Sortieren auf dem Board
+
+#: apps/oficina/main/of_sheetview.c:1484
+Filtro: «%.40s» (%d filas escondidas)	Filter: „%.40s“ (%d Zeilen ausgeblendet)
+
+#: apps/oficina/main/of_sheetview.c:1524
+Inmovilizar se ve en la placa; en el archivo queda como estaba	Fixieren gilt auf dem Board; die Datei bleibt, wie sie war
+
+#: apps/oficina/main/of_sheetview.c:1545
+Esa no es una celda (por ejemplo, B12)	Das ist keine Zelle (zum Beispiel B12)
+
+#: apps/oficina/main/of_sheetview.c:1582
+No está en esta hoja	Nicht in diesem Blatt
+
+#: apps/oficina/main/of_sheetview.c:1594
+Buscar en la hoja	Im Blatt suchen
+
+#: apps/oficina/main/of_sheetview.c:1594
+#: apps/oficina/main/of_textview.c:1122
+#: apps/oficina/main/of_textview.c:1222
+Buscar	Suchen
+
+#: apps/oficina/main/of_sheetview.c:1612
+#: apps/oficina/main/oficina.c:545
+#: apps/oficina/main/oficina.c:668
+Ya hay un archivo con ese nombre	Es gibt schon eine Datei mit diesem Namen
+
+#: apps/oficina/main/of_sheetview.c:1614
+#: apps/oficina/main/of_sheetview.c:1747
+#: apps/oficina/main/of_textview.c:1360
+No se pudo guardar	Speichern fehlgeschlagen
+
+#: apps/oficina/main/of_sheetview.c:1617
+Guardado. El CSV tiene sólo la hoja que se veía	Gespeichert. Die CSV enthält nur das angezeigte Blatt
+
+#: apps/oficina/main/of_sheetview.c:1618
+#: apps/oficina/main/of_sheetview.c:1752
+Guardado. En el CSV las fórmulas quedaron como valores	Gespeichert. In der CSV sind Formeln jetzt Werte
+
+#: apps/oficina/main/of_sheetview.c:1619
+#: apps/oficina/main/of_sheetview.c:1754
+#: apps/oficina/main/of_textview.c:1364
+Guardado	Gespeichert
+
+#: apps/oficina/main/of_sheetview.c:1632
+#: apps/oficina/main/of_sheetview.c:1642
+Guardar una copia como	Kopie speichern als
+
+#: apps/oficina/main/of_sheetview.c:1632
+#: apps/oficina/main/of_sheetview.c:1715
+#: apps/oficina/main/of_textview.c:1221
+#: apps/oficina/main/oficina.c:949
+Guardar	Speichern
+
+#: apps/oficina/main/of_sheetview.c:1638
+#: apps/oficina/main/oficina.c:696
+Planilla de Excel (.xlsx)	Excel-Tabelle (.xlsx)
+
+#: apps/oficina/main/of_sheetview.c:1639
+#: apps/oficina/main/oficina.c:697
+Planilla de OpenDocument (.ods)	OpenDocument-Tabelle (.ods)
+
+#: apps/oficina/main/of_sheetview.c:1640
+#: apps/oficina/main/oficina.c:698
+Datos separados por comas (.csv)	Kommagetrennte Werte (.csv)
+
+#: apps/oficina/main/of_sheetview.c:1655
+Fórmulas que la app calcula	Formeln, die die App berechnet
+
+#: apps/oficina/main/of_sheetview.c:1660
+Se escriben con = adelante, y con ; o , entre los argumentos. En el archivo quedan con los nombres en inglés, como los guarda Excel. Las que la app no tiene conservan el valor que traía el archivo.	Mit = am Anfang eingeben, mit ; oder , zwischen den Argumenten. In der Datei stehen die englischen Namen, wie Excel sie speichert. Formeln, die die App nicht kennt, behalten den Wert aus der Datei.
+
+#: apps/oficina/main/of_sheetview.c:1673
+Cambiar el nombre de una hoja de un .xlsx todavía no se puede	Blätter einer .xlsx umbenennen geht noch nicht
+
+#: apps/oficina/main/of_sheetview.c:1699
+#: apps/oficina/main/of_sheetview.c:1796
+Ir a la celda	Gehe zu Zelle
+
+#: apps/oficina/main/of_sheetview.c:1699
+#: apps/oficina/main/of_sheetview.c:1796
+#: apps/oficina/main/of_textview.c:1190
+Ir	Los
+
+#: apps/oficina/main/of_sheetview.c:1705
+Nombre de la hoja	Blattname
+
+#: apps/oficina/main/of_sheetview.c:1705
+#: apps/oficina/main/oficina.c:588
+Cambiar	Ändern
+
+#: apps/oficina/main/of_sheetview.c:1716
+Guardar una copia como...	Kopie speichern als...
+
+#: apps/oficina/main/of_sheetview.c:1717
+Formato de número...	Zahlenformat...
+
+#: apps/oficina/main/of_sheetview.c:1718
+Ordenar de menor a mayor	Aufsteigend sortieren
+
+#: apps/oficina/main/of_sheetview.c:1719
+Ordenar de mayor a menor	Absteigend sortieren
+
+#: apps/oficina/main/of_sheetview.c:1720
+Sacar el filtro	Filter entfernen
+
+#: apps/oficina/main/of_sheetview.c:1720
+Filtrar por este valor	Nach diesem Wert filtern
+
+#: apps/oficina/main/of_sheetview.c:1721
+Ancho de columna justo	Spaltenbreite anpassen
+
+#: apps/oficina/main/of_sheetview.c:1722
+Liberar filas y columnas	Fixierung aufheben
+
+#: apps/oficina/main/of_sheetview.c:1722
+Inmovilizar hasta acá	Bis hier fixieren
+
+#: apps/oficina/main/of_sheetview.c:1724
+#: apps/oficina/main/of_textview.c:1231
+Copiar	Kopieren
+
+#: apps/oficina/main/of_sheetview.c:1725
+Cortar	Ausschneiden
+
+#: apps/oficina/main/of_sheetview.c:1726
+#: apps/oficina/main/of_textview.c:1232
+Pegar	Einfügen
+
+#: apps/oficina/main/of_sheetview.c:1727
+Borrar el contenido	Inhalt löschen
+
+#: apps/oficina/main/of_sheetview.c:1728
+Ir a la celda...	Gehe zu Zelle...
+
+#: apps/oficina/main/of_sheetview.c:1729
+Buscar...	Suchen...
+
+#: apps/oficina/main/of_sheetview.c:1730
+Fórmulas que calcula	Berechnete Formeln
+
+#: apps/oficina/main/of_sheetview.c:1731
+Cambiar el nombre de la hoja	Blatt umbenennen
+
+#: apps/oficina/main/of_sheetview.c:1753
+Guardado. Hay fórmulas que la app no calcula: el programa de la computadora las recalcula al abrir	Gespeichert. Manche Formeln berechnet die App nicht: das Programm am Computer berechnet sie beim Öffnen neu
+
+#: apps/oficina/main/of_sheetview.c:1878
+Hay fórmulas con funciones que la app no tiene: se ve el valor que trae el archivo	Manche Formeln nutzen Funktionen, die die App nicht kennt: angezeigt wird der Wert aus der Datei
+
+#: apps/oficina/main/of_textview.c:1040
+No está	Nicht gefunden
+
+#: apps/oficina/main/of_textview.c:1073
+%d reemplazos	%d ersetzt
+
+#: apps/oficina/main/of_textview.c:1132
+Reemplazar por	Ersetzen durch
+
+#: apps/oficina/main/of_textview.c:1134
+Este	Diesen
+
+#: apps/oficina/main/of_textview.c:1136
+Todos	Alle
+
+#: apps/oficina/main/of_textview.c:1190
+Ir a la línea	Gehe zu Zeile
+
+#: apps/oficina/main/of_textview.c:1198
+Se va a guardar en UTF-8	Wird in UTF-8 gespeichert
+
+#: apps/oficina/main/of_textview.c:1198
+Se va a guardar en Latin-1 (Windows-1252)	Wird in Latin-1 (Windows-1252) gespeichert
+
+#: apps/oficina/main/of_textview.c:1204
+Finales de línea de Windows (CRLF)	Windows-Zeilenenden (CRLF)
+
+#: apps/oficina/main/of_textview.c:1204
+Finales de línea de Unix y Mac (LF)	Unix- und Mac-Zeilenenden (LF)
+
+#: apps/oficina/main/of_textview.c:1217
+Codificación: %s	Kodierung: %s
+
+#: apps/oficina/main/of_textview.c:1218
+Fin de línea: %s	Zeilenende: %s
+
+#: apps/oficina/main/of_textview.c:1219
+%d líneas	%d Zeilen
+
+#: apps/oficina/main/of_textview.c:1223
+Buscar y reemplazar	Suchen und ersetzen
+
+#: apps/oficina/main/of_textview.c:1224
+Ir a la línea...	Gehe zu Zeile...
+
+#: apps/oficina/main/of_textview.c:1225
+Ajustar las líneas	Zeilen umbrechen
+
+#: apps/oficina/main/of_textview.c:1226
+Números de línea	Zeilennummern
+
+#: apps/oficina/main/of_textview.c:1227
+Letra de ancho fijo	Schrift mit fester Breite
+
+#: apps/oficina/main/of_textview.c:1230
+Seleccionar todo	Alles auswählen
+
+#: apps/oficina/main/of_ui.c:672
+#: apps/oficina/main/oficina.c:406
+Cancelar	Abbrechen
+
+#: apps/oficina/main/oficina.c:275
+Ese archivo ya no está	Diese Datei gibt es nicht mehr
+
+#: apps/oficina/main/oficina.c:282
+Este formato todavía no se abre: llega en una próxima versión	Dieses Format öffnet sich noch nicht: es kommt in einer späteren Version
+
+#: apps/oficina/main/oficina.c:286
+No es un documento que la app conozca	Kein Dokument, das die App kennt
+
+#: apps/oficina/main/oficina.c:295
+El archivo tiene contraseña: la app no lo puede abrir	Die Datei hat ein Passwort: die App kann sie nicht öffnen
+
+#: apps/oficina/main/oficina.c:296
+No se pudo leer la planilla	Die Tabelle konnte nicht gelesen werden
+
+#: apps/oficina/main/oficina.c:315
+#: apps/oficina/main/oficina.c:564
+No se pudo leer el archivo	Die Datei konnte nicht gelesen werden
+
+#: apps/oficina/main/oficina.c:546
+No se pudo cambiar el nombre	Umbenennen fehlgeschlagen
+
+#: apps/oficina/main/oficina.c:555
+No se pudo borrar	Löschen fehlgeschlagen
+
+#: apps/oficina/main/oficina.c:573
+No se pudo copiar	Kopieren fehlgeschlagen
+
+#: apps/oficina/main/oficina.c:588
+Nuevo nombre	Neuer Name
+
+#: apps/oficina/main/oficina.c:594
+¿Borrar «%s»?	„%s“ löschen?
+
+#: apps/oficina/main/oficina.c:595
+No se puede deshacer.	Das lässt sich nicht rückgängig machen.
+
+#: apps/oficina/main/oficina.c:595
+#: apps/oficina/main/oficina.c:611
+Borrar	Löschen
+
+#: apps/oficina/main/oficina.c:608
+Abrir	Öffnen
+
+#: apps/oficina/main/oficina.c:609
+Cambiar el nombre	Umbenennen
+
+#: apps/oficina/main/oficina.c:610
+Duplicar	Duplizieren
+
+#: apps/oficina/main/oficina.c:612
+Sacar de recientes	Aus Zuletzt entfernen
+
+#: apps/oficina/main/oficina.c:674
+Hoja1	Tabelle1
+
+#: apps/oficina/main/oficina.c:680
+No se pudo crear el archivo	Die Datei konnte nicht erstellt werden
+
+#: apps/oficina/main/oficina.c:688
+Nombre de la planilla	Name der Tabelle
+
+#: apps/oficina/main/oficina.c:688
+Nombre del documento	Name des Dokuments
+
+#: apps/oficina/main/oficina.c:688
+Planilla	Tabelle
+
+#: apps/oficina/main/oficina.c:688
+Documento	Dokument
+
+#: apps/oficina/main/oficina.c:689
+Crear	Erstellen
+
+#: apps/oficina/main/oficina.c:699
+Texto (.txt)	Text (.txt)
+
+#: apps/oficina/main/oficina.c:700
+Markdown (.md)	Markdown (.md)
+
+#: apps/oficina/main/oficina.c:702
+Nuevo	Neu
+
+#: apps/oficina/main/oficina.c:722
+Fondo claro	Heller Hintergrund
+
+#: apps/oficina/main/oficina.c:722
+Fondo oscuro	Dunkler Hintergrund
+
+#: apps/oficina/main/oficina.c:723
+Ir a la carpeta de documentos	Zum Dokumentenordner
+
+#: apps/oficina/main/oficina.c:773
+Oficina	Büro
+
+#: apps/oficina/main/oficina.c:787
+Recientes	Zuletzt
+
+#: apps/oficina/main/oficina.c:788
+Archivos	Dateien
+
+#: apps/oficina/main/oficina.c:856
+Todavía no abriste ningún documento. En Archivos están los de la tarjeta, y con + se empieza uno nuevo.	Du hast noch kein Dokument geöffnet. Unter Dateien sind die der Karte, und + beginnt ein neues.
+
+#: apps/oficina/main/oficina.c:857
+No hay archivos en esta carpeta. Se suben desde la página Oficina del portal, o con + se crea uno.	In diesem Ordner sind keine Dateien. Sie werden über die Seite Büro im Portal hochgeladen, oder + erstellt eine.
+
+#: apps/oficina/main/oficina.c:950
+Salir sin guardar	Ohne Speichern verlassen
+
+#: apps/oficina/main/oficina.c:952
+Hay cambios sin guardar	Es gibt ungespeicherte Änderungen
