@@ -29,6 +29,7 @@
  *   MESA_TWO=1          ... two people passing the board (0 face to face)
  *   MESA_CLOCK=<s>      ... with a clock of s seconds and 2 more a move
  *   MESA_FLAT=1         the flat view
+ *   MESA_SET=<n>        the set: 1 marble, 2 glass, 3 metal
  */
 #include "jm_app.h"
 
@@ -364,6 +365,7 @@ static void dev_switches(void)
 {
 #if defined(AOS_SIM) || defined(AOS_SIM_BUILTIN)
     if (getenv("MESA_FLAT")) jm->prefs.flat = atoi(getenv("MESA_FLAT")) != 0;
+    if (getenv("MESA_SET")) jm->prefs.set = atoi(getenv("MESA_SET")) & 3;
     const char *word = getenv("MESA_GAME");
     if (!word) return;
     const jm_slot_t *s = jm_game_find(word);

@@ -279,25 +279,47 @@ def wood(name, c0, c1, scale=2.0, rough=0.35, clear=0.4, ring=8.0, along='X', se
 
 
 def marble(name, c0, c1, scale=1.5, rough=0.12):
-    """marble: veins from a squeezed noise"""
+    """marble: an even stone (c0, a little mottled) crossed by thin veins of c1"""
     if name in MATS:
         return MATS[name]
     m, nt, b = _principled(name)
     tc = nt.nodes.new('ShaderNodeTexCoord')
-    nz = nt.nodes.new('ShaderNodeTexNoise')
-    nz.inputs['Scale'].default_value = scale
-    nz.inputs['Detail'].default_value = 8.0
-    nz.inputs['Distortion'].default_value = 4.0
-    nt.links.new(tc.outputs['Object'], nz.inputs['Vector'])
+    warp = nt.nodes.new('ShaderNodeTexNoise')
+    warp.inputs['Scale'].default_value = scale * 0.8
+    warp.inputs['Detail'].default_value = 3.0
+    nt.links.new(tc.outputs['Object'], warp.inputs['Vector'])
+    mix = nt.nodes.new('ShaderNodeMixRGB')
+    mix.blend_type = 'LINEAR_LIGHT'
+    mix.inputs['Fac'].default_value = 0.25
+    nt.links.new(tc.outputs['Object'], mix.inputs['Color1'])
+    nt.links.new(warp.outputs['Color'], mix.inputs['Color2'])
+    vein = nt.nodes.new('ShaderNodeTexNoise')
+    vein.inputs['Scale'].default_value = scale
+    vein.inputs['Detail'].default_value = 10.0
+    vein.inputs['Distortion'].default_value = 0.6
+    nt.links.new(mix.outputs['Color'], vein.inputs['Vector'])
     ramp = nt.nodes.new('ShaderNodeValToRGB')
-    ramp.color_ramp.elements[0].position = 0.45
-    ramp.color_ramp.elements[1].position = 0.55
-    ramp.color_ramp.elements[0].color = lin(c0)
-    ramp.color_ramp.elements[1].color = lin(c1)
-    nt.links.new(nz.outputs['Fac'], ramp.inputs['Fac'])
-    nt.links.new(ramp.outputs['Color'], b.inputs['Base Color'])
+    cr = ramp.color_ramp
+    cr.elements[0].position = 0.488
+    cr.elements[0].color = lin(c0)
+    cr.elements[1].position = 0.512
+    cr.elements[1].color = lin(c0)
+    e = cr.elements.new(0.500)
+    e.color = lin(c1)
+    nt.links.new(vein.outputs['Fac'], ramp.inputs['Fac'])
+    # a soft mottle over the stone
+    mot = nt.nodes.new('ShaderNodeTexNoise')
+    mot.inputs['Scale'].default_value = scale * 4
+    nt.links.new(tc.outputs['Object'], mot.inputs['Vector'])
+    mm = nt.nodes.new('ShaderNodeMixRGB')
+    mm.blend_type = 'MULTIPLY'
+    mm.inputs['Fac'].default_value = 0.12
+    nt.links.new(ramp.outputs['Color'], mm.inputs['Color1'])
+    nt.links.new(mot.outputs['Color'], mm.inputs['Color2'])
+    nt.links.new(mm.outputs['Color'], b.inputs['Base Color'])
     b.inputs['Roughness'].default_value = rough
     b.inputs['Specular'].default_value = 0.6
+    b.inputs['Clearcoat'].default_value = 0.3
     MATS[name] = m
     return m
 
@@ -361,7 +383,7 @@ def table():
     """the table under the board: a big plane of dark wood (or cloth)"""
     s = set_name()
     if s == 'marmol':
-        m = marble('table', '#2e2a26', '#54483e', 0.6, rough=0.3)
+        m = marble('table', '#3a3632', '#6a625a', 0.35, rough=0.3)
     elif s == 'vidrio':
         m = mat('table', '#10161c', rough=0.5)
     elif s == 'metal':

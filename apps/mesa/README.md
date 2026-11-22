@@ -34,7 +34,7 @@ tools/build_apps.sh mesa                              # apps/mesa/build/mesa.so
 On the card: `mesa.so` and `mesa_p4.pak` (3.4 MB: every game in wood, the
 dice, the menu's pictures, the sounds) in `/apps`; the marble, glass and
 metal sets are `mesa_marmol_p4.pak`, `mesa_vidrio_p4.pak` and
-`mesa_metal_p4.pak` (optional). Neither the renders (`assets/`) nor the
+`mesa_metal_p4.pak` (optional: 2.5, 1.1 and 1.1 MB). Neither the renders (`assets/`) nor the
 packs are in git.
 
 ## Playing
