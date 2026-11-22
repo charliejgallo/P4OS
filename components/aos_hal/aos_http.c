@@ -14,11 +14,15 @@
  * of their own (Home Assistant's REST API). It is the same path: the GET is a
  * POST with no body and no extra headers, not a separate function.
  *
- * HTTP/1.0 is requested on purpose. With 1.1 the server answers with
- * Transfer-Encoding chunked (measured against open-meteo) and it has to be
- * taken apart; with 1.0 it closes the connection on finishing and reading to
- * EOF is enough. Chunked and Content-Length are supported anyway, in case some
- * server uses them.
+ * HTTP/1.1 with "Connection: close" since 2026-11-22. It used to ask in
+ * HTTP/1.0, so that the server closed on finishing and reading to EOF was
+ * enough, with no chunks to take apart. adsb.lol answers 426 (Upgrade
+ * Required) to a 1.0 request and 200 to the same one in 1.1 (Vuelos on the
+ * board, and curl with --http1.0 and --http1.1), and it will not be the only
+ * one. "Connection: close" keeps the reading to EOF; the body is also known to
+ * be whole by its Content-Length, or by the last chunk when it comes chunked
+ * (open-meteo's does), so a server that keeps the connection open anyway does
+ * not cost the ten seconds of a timeout.
  *
  * --- TLS (2026-09-03) ------------------------------------------------------
  *
@@ -268,6 +272,53 @@ static int dechunk(char *body, int len)
     return w;
 }
 
+/* A header's value in the block of headers [h, end), or NULL: 'name' in
+ * lower case with its colon, at the start of a line. */
+static const char *header_find(const char *h, const char *end, const char *name)
+{
+    size_t n = strlen(name);
+    for (const char *p = h; p + n < end; p++) {
+        if (p[0] != '\n') {
+            continue;
+        }
+        size_t i = 0;
+        while (i < n && (p[1 + i] | 0x20) == name[i]) i++;      /* letters fold; ':' and '-' are themselves */
+        if (i == n) {
+            p += 1 + n;
+            while (p < end && (*p == ' ' || *p == '\t')) p++;
+            return p;
+        }
+    }
+    return NULL;
+}
+
+/* Whether the answer in buf[0..got) (NUL after it) is all there, so that
+ * the reading can stop without waiting for the server to close: by its
+ * Content-Length, or by the last chunk of a chunked body. '*head' keeps the
+ * headers' length between calls, 0 until they are whole. An answer that says
+ * neither is whole when the connection closes, as before. */
+static bool body_whole(const char *buf, int got, int *head)
+{
+    if (!*head) {
+        const char *sep = strstr(buf, "\r\n\r\n");
+        if (!sep) {
+            return false;
+        }
+        *head = (int)(sep - buf) + 4;
+    }
+    const char *end = buf + *head;
+    const char *te = header_find(buf, end, "transfer-encoding:");
+    if (te && (te[0] | 0x20) == 'c') {                          /* chunked: "0\r\n", any trailers, "\r\n" */
+        return got - *head >= 5 && !memcmp(buf + got - 5, "0\r\n\r\n", 5) &&
+               (got - *head == 5 || buf[got - 6] == '\n');
+    }
+    const char *cl = header_find(buf, end, "content-length:");
+    if (cl && *cl >= '0' && *cl <= '9') {
+        return got - *head >= atoi(cl);
+    }
+    return false;
+}
+
 /* The real work. Runs in the background thread. */
 static void http_work(slot_t *s)
 {
@@ -294,10 +345,11 @@ static void http_work(slot_t *s)
     }
 
     int n = snprintf(req, cap,
-                     "%s %s HTTP/1.0\r\n"
+                     "%s %s HTTP/1.1\r\n"
                      "Host: %s\r\n"
                      "User-Agent: AmoledOS/1.0\r\n"
-                     "Accept: application/json\r\n",
+                     "Accept: application/json\r\n"
+                     "Connection: close\r\n",
                      s->method, s->path, s->host);
     if (hlen) {
         n += snprintf(req + n, cap - n, "%s", s->hdrs);
@@ -339,7 +391,7 @@ static void http_work(slot_t *s)
 
     /* Everything (headers included) is read into the same buffer and then the
      * body is moved to the front. A GET of this size does not justify two. */
-    int got = 0;
+    int got = 0, head = 0;
     for (;;) {
         if (got >= s->cap - 1 && s->cap < s->max && !body_grow(s)) {
             aos_hal_log(TAG, "%s: no memory for more than %d KB of the answer (its ceiling is %d KB)", s->host,
@@ -364,6 +416,10 @@ static void http_work(slot_t *s)
         if (got >= s->max - 1) {
             break;                       /* the ceiling the app asked for */
         }
+        s->body[got] = 0;
+        if (body_whole(s->body, got, &head)) {
+            break;                       /* all of it, whether or not the server closes */
+        }
     }
     conn_close(&c);
     s->body[got] = 0;
@@ -380,7 +436,8 @@ static void http_work(slot_t *s)
         goto done;
     }
     *sep = 0;
-    bool chunked = (strstr(s->body, "chunked") != NULL);
+    const char *te = header_find(s->body, sep, "transfer-encoding:");
+    bool chunked = te && (te[0] | 0x20) == 'c';
     char *body = sep + 4;
     blen = got - (int)(body - s->body);
     memmove(s->body, body, blen);

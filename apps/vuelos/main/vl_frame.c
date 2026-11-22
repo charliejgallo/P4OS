@@ -816,7 +816,7 @@ void vl_status_text(app_t *a, char *out, size_t n, uint32_t *rgb)
         char cnt[32];
         if (a->feed_count == 1) snprintf(cnt, sizeof cnt, "%s", _("1 avión"));
         else snprintf(cnt, sizeof cnt, _("%d aviones"), a->feed_count);
-        snprintf(out, n, "%s · %s · %u s", cnt, vl_src_name(a->conf.src), (unsigned)ago);
+        snprintf(out, n, "%s · %s · %u s", cnt, vl_src_name(vl_src_now(a)), (unsigned)ago);
         if (e) *rgb = 0xFFD27A;
     }
 }
@@ -898,7 +898,7 @@ static void draw_bar(app_t *a, vl_fb_t *fb)
     }
     /* the attribution the licences ask for */
     char attr[96];
-    snprintf(attr, sizeof attr, "© OpenStreetMap © OpenFreeMap · %s", vl_src_name(a->conf.src));
+    snprintf(attr, sizeof attr, "© OpenStreetMap © OpenFreeMap · %s", vl_src_name(vl_src_now(a)));
     int aw = vl_text_width(fs, attr);
     int ax = L->land && a->sel >= 0 ? L->card_x + L->card_w + 24 : (a->sw - aw) / 2;
     vl_text(fb, fs, ax, L->attr_y, attr, 0x8A919E, VL_BG, true);

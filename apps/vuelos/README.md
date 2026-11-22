@@ -188,6 +188,22 @@ Tried in the simulator with `P4_SIM_HTTP_ROOM` and `P4_SIM_HTTP_WHOLE=1`
 (`docs/APPS-P4.md`): 24 aircraft with pieces of 100 KB, "Sin memoria" with
 pieces of 30 KB.
 
+## What the services answered from the board (2026-11-22)
+
+- **adsb.lol refuses HTTP/1.0:** 426, Upgrade Required, and 200 to the
+  same request in HTTP/1.1. The firmware's client spoke 1.0 up to 0.31.0,
+  so adsb.lol needs firmware 0.32.0; on 0.31.0 the bar says "Error 426".
+- **airplanes.live answers 403** to the author's network whatever is
+  asked, with a page that says to write to them; it may answer others. It
+  stays the default, since it is the one that allows a reading every 5 s,
+  and when it refuses before giving a single reading the app asks adsb.lol
+  in its place (`vl_src_now()`), at adsb.lol's pace, until the source is
+  chosen again. The bar and the attribution name the source in use.
+
+`fake_adsb.py` does both: 426 to adsb.lol in HTTP/1.0 always, and 403 from
+airplanes.live with `--refuse-airplanes`; `--chunked` and `--keep` answer
+in chunks and never close, for the client's sake.
+
 ## Later: a receiver on the board (RTL-SDR)
 
 Decoding ADS-B on the P4 itself with an RTL-SDR on the USB host is a phase

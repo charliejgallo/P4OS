@@ -57,6 +57,21 @@
     for every app ([docs/APPS-P4.md](docs/APPS-P4.md)). The simulator can
     now be told how little memory there is (`P4_SIM_HTTP_ROOM`) and to
     let no request out of the computer (`P4_SIM_HTTP_LOCAL`).
+  - **The HTTP client asks in HTTP/1.1.** With the memory fixed the
+    board's first request to adsb.lol came back 426, Upgrade Required: it
+    refuses HTTP/1.0, which is what the client had always spoken so that a
+    body ended where the connection closed. It sends "Connection: close"
+    now, takes chunked bodies apart as before, and knows an answer is whole
+    by its Content-Length or its last chunk, without waiting for a server
+    that does not close.
+  - **airplanes.live refusing is not the end.** It answers 403 to some
+    networks whatever is asked; Vuelos then asks adsb.lol in its place, at
+    adsb.lol's pace, and the bar names the source in use.
+- **An app updated from the Store, for the first time.** With developer
+  mode on and a test catalogue served from a computer (the published one
+  with Vuelos' line changed), the board offered one update, fetched the
+  package in 0.6 s and had it installed and loaded in 6 s; the file on the
+  card is the built one byte for byte.
 
 ## 0.31.0 — 2026-11-22
 

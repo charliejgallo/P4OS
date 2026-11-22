@@ -300,6 +300,9 @@ is only where a body is cut.
 - **Count what is left after your own buffers.** The board has 14 to 16 MB
   of PSRAM free with no app open; an app that takes 12 of them leaves the
   network, the decoders and the system the rest, in pieces.
+- **The requests go in HTTP/1.1 with "Connection: close"** since 0.32.0
+  (HTTP/1.0 before, which adsb.lol answers with 426). An app sees no
+  difference: chunked bodies are taken apart for it, as they were.
 - **In the simulator:** `P4_SIM_HTTP_ROOM=<bytes>` is the largest piece of
   memory there is for an answer, and with `P4_SIM_HTTP_WHOLE=1` the whole
   ceiling is asked of it at once, as 0.31.0 does. `P4_SIM_HTTP_LOCAL=1`

@@ -22,8 +22,8 @@ Run it, then point the simulator at it:
 
 Everything here is invented: the callsigns, the registrations and the
 routes. It logs every request with the time since the last one of the same
-service, and answers 429 to airplanes.live faster than one a second, as the
-real one would.
+service, answers 429 to airplanes.live faster than one a second, and 426 to
+adsb.lol asked in HTTP/1.0, as the real ones do.
 """
 import argparse
 import json
@@ -188,6 +188,10 @@ def opensky(a, la, lo, trk, alt, vr, now):
 
 
 class Handler(BaseHTTPRequestHandler):
+    protocol_version = "HTTP/1.1"
+    chunked = False
+    keep = False
+    refuse = False
     sky = None
     last = {}
     token = None
@@ -211,9 +215,22 @@ class Handler(BaseHTTPRequestHandler):
             body = body.encode()
         self.send_response(code)
         self.send_header("Content-Type", ctype)
-        self.send_header("Content-Length", str(len(body)))
-        self.end_headers()
-        self.wfile.write(body)
+        if Handler.chunked and self.request_version != "HTTP/1.0":
+            # in pieces of an odd size, as a server that does not know the length yet
+            self.send_header("Transfer-Encoding", "chunked")
+            self.end_headers()
+            for i in range(0, len(body), 1777):
+                piece = body[i:i + 1777]
+                self.wfile.write(b"%x\r\n" % len(piece) + piece + b"\r\n")
+            self.wfile.write(b"0\r\n\r\n")
+        else:
+            self.send_header("Content-Length", str(len(body)))
+            self.end_headers()
+            self.wfile.write(body)
+        if Handler.keep:
+            # a server that does not close, whatever "Connection: close" asked
+            self.wfile.flush()
+            self.close_connection = False
 
     def do_POST(self):
         u = urlparse(self.path)
@@ -235,6 +252,9 @@ class Handler(BaseHTTPRequestHandler):
         m = re.match(r"^/v2/point/(-?[\d.]+)/(-?[\d.]+)/(\d+)$", p)
         if m:
             gap = self.note("airplanes.live", p)
+            if Handler.refuse:
+                # what it answers to some networks, whatever is asked (2026-11-22)
+                return self.send(403, "Please contact us", "text/plain")
             if gap is not None and gap < 1.0:
                 return self.send(429, {"msg": "rate limited"})
             lat, lon, nm = float(m[1]), float(m[2]), min(250, int(m[3]))
@@ -244,7 +264,10 @@ class Handler(BaseHTTPRequestHandler):
         m = re.match(r"^/v2/lat/(-?[\d.]+)/lon/(-?[\d.]+)/dist/(\d+)/?$", p)
         if m:
             key = self.headers.get("x-api-key")
-            self.note("adsb.lol", p + (" with a key" if key else ""))
+            self.note("adsb.lol", p + (" with a key" if key else "") + " " + self.request_version)
+            if self.request_version == "HTTP/1.0":
+                # the real one, 2026-11-22: 426 and these sixteen bytes
+                return self.send(426, "Upgrade Required", "text/plain")
             lat, lon, nm = float(m[1]), float(m[2]), min(250, int(m[3]))
             ac = [v2(*x) for x in self.sky.near(lat, lon, nm * 1.852)]
             return self.send(200, {"ac": ac, "msg": "No error", "now": int(now * 1000), "total": len(ac),
@@ -298,8 +321,12 @@ def main():
     ap.add_argument("--radius", type=float, default=160, help="km the traffic spreads over")
     ap.add_argument("--seed", type=int, default=7)
     ap.add_argument("--emergency", action="store_true", help="one of them squawks 7700")
+    ap.add_argument("--refuse-airplanes", action="store_true", help="airplanes.live answers 403 to everything")
+    ap.add_argument("--chunked", action="store_true", help="answer HTTP/1.1 requests in chunks, with no Content-Length")
+    ap.add_argument("--keep", action="store_true", help="never close a connection: the client has to know the answer is whole")
     a = ap.parse_args()
     Handler.sky = Sky(a.lat, a.lon, a.count, a.radius, a.seed, a.emergency)
+    Handler.chunked, Handler.keep, Handler.refuse = a.chunked, a.keep, a.refuse_airplanes
     srv = ThreadingHTTPServer(("127.0.0.1", a.port), Handler)
     print(f"fake ADS-B on http://127.0.0.1:{a.port}: {len(Handler.sky.ac)} aircraft around {a.lat}, {a.lon}",
           flush=True)

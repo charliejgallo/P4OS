@@ -246,7 +246,7 @@ static void list_fill(app_t *a)
         vl_status_text(a, why, sizeof why, &rgb);
         int e = a->feed_err;
         if (e == 401 || e == 403 || e == 429 || e == AOS_HTTP_ERR_RECV)
-            snprintf(line, sizeof line, "%s (%s)", why, vl_src_name(a->conf.src));
+            snprintf(line, sizeof line, "%s (%s)", why, vl_src_name(vl_src_now(a)));
         else
             snprintf(line, sizeof line, "%s", why);
         lv_obj_t *t = aos_label(l, a->feed_ok_ms ? _("No hay aviones en el radio elegido.") : line, aos_font_body,

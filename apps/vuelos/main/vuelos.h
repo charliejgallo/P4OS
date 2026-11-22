@@ -304,6 +304,7 @@ typedef struct {
     uint32_t    feed_ok_ms;         /* the last good reading */
     int         feed_err;           /* 0, an HTTP code or AOS_HTTP_ERR_* */
     bool        tile_nomem;         /* the last tile could not be asked for: said once */
+    bool        src_alt;            /* airplanes.live refused: adsb.lol in its place, until the source is chosen again */
     int         feed_count;         /* aircraft in the last reading */
     uint32_t    feed_bytes;
     bool        feed_parse_err;
@@ -350,6 +351,8 @@ void vl_layout(app_t *a);
 void vl_frame_push(app_t *a);
 /* the bar's line: how many aircraft and from where, or why there are none */
 void vl_status_text(app_t *a, char *out, size_t n, uint32_t *rgb);
+/* the source being asked: the chosen one, or the one standing in for it */
+int  vl_src_now(const app_t *a);
 bool vl_frame_sync(app_t *a, uint32_t now);
 int  vl_frame_reserve(const app_t *a, const back_t *b, int16_t (*out)[4], int max);
 bool vl_hit_disc(const disc_t *d, float x, float y);

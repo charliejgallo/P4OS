@@ -73,6 +73,17 @@ static const char *host(const char *real)
     return f && f[0] ? f : real;
 }
 
+/* airplanes.live answers 403 to some networks, whatever is asked (the
+ * author's, 2026-11-22: a page that says to write to them). It is the
+ * default and the one that allows a reading every 5 s, so it stays the
+ * default, and when it refuses before giving a single reading adsb.lol
+ * stands in for it, with adsb.lol's own pace. Choosing a source again
+ * (vl_feed_restart) tries the chosen one anew. */
+int vl_src_now(const app_t *a)
+{
+    return a->src_alt && a->conf.src == SRC_AIRPLANES ? SRC_ADSBLOL : a->conf.src;
+}
+
 /* ---------------------------------------------------------------------------
  * A small JSON scanner: enough to walk an object's keys and an array's
  * values without building anything.
@@ -574,14 +585,14 @@ static int os_credits(const app_t *a)
 
 static int day_budget(const app_t *a)
 {
-    if (a->conf.src == SRC_ADSBLOL) return a->conf.lol_day;
-    if (a->conf.src == SRC_OPENSKY) return a->conf.os_id[0] && a->conf.os_secret[0] ? 4000 : 400;
+    if (vl_src_now(a) == SRC_ADSBLOL) return a->conf.lol_day;
+    if (vl_src_now(a) == SRC_OPENSKY) return a->conf.os_id[0] && a->conf.os_secret[0] ? 4000 : 400;
     return 0;
 }
 
 int vl_feed_interval_s(const app_t *a)
 {
-    switch (a->conf.src) {
+    switch (vl_src_now(a)) {
     case SRC_AIRPLANES: return 5;
     case SRC_LOCAL: return 2;
     case SRC_ADSBLOL: {
@@ -706,7 +717,7 @@ static int feed_ask(app_t *a, int max)
     char url[240];
     int nm = (int)ceilf((float)c->radius_km / NM_KM);
     if (nm > 250) nm = 250;
-    switch (c->src) {
+    switch (vl_src_now(a)) {
     case SRC_AIRPLANES:
         snprintf(url, sizeof url, "%s/v2/point/%.4f/%.4f/%d", host("https://api.airplanes.live"), (double)c->lat,
                  (double)c->lon, nm);
@@ -982,7 +993,7 @@ static void live_put(app_t *a)
     char f[24], r[24], t[16], nm[56];
     js_str(nm, sizeof nm, a->conf.name);
     o += (size_t)snprintf(b + o, cap - o, "{\"src\":\"%s\",\"place\":%s,\"units\":%d,\"n\":%d,\"ac\":[",
-                          vl_src_name(a->conf.src), nm, a->conf.units, a->feed_count);
+                          vl_src_name(vl_src_now(a)), nm, a->conf.units, a->feed_count);
     bool first = true;
     for (int i = 0; i < a->nac && o + 400 < cap; i++) {
         const vl_ac_t *ac = &a->ac[i];
@@ -1106,6 +1117,7 @@ void vl_feed_restart(app_t *a)
     a->feed_count = 0;
     a->feed_ok_ms = 0;
     a->feed_err = 0;
+    a->src_alt = false;
     a->feed_next = (uint32_t)aos_hal_uptime_ms();
     a->overlay_dirty = true;
 }
@@ -1173,6 +1185,12 @@ void vl_feed_pump(app_t *a, uint32_t now)
             uint32_t back = code == 429 ? 600000u : code == 401 || code == 403 ? 120000u
                           : code == AOS_HTTP_ERR_SIN_HORA ? 3000u : (uint32_t)iv * 1000u + 10000u;
             if (code == 401) a->os_token[0] = 0;
+            if ((code == 401 || code == 403) && a->feed_src == SRC_AIRPLANES && !a->feed_ok_ms && !a->src_alt) {
+                aos_hal_log("vuelos", "airplanes.live refuses this network: adsb.lol in its place");
+                a->src_alt = true;
+                a->feed_err = 0;
+                back = 500;
+            }
             a->feed_next = now + back;
         }
         aos_hal_http_release(a->feed_id);
@@ -1210,7 +1228,7 @@ void vl_feed_pump(app_t *a, uint32_t now)
         if (err && err != a->feed_err) {
             uint32_t psram = 0;
             aos_hal_heap_info(NULL, &psram);
-            aos_hal_log("vuelos", "%s: the request did not start (%d), %u KB of PSRAM free", vl_src_name(a->conf.src),
+            aos_hal_log("vuelos", "%s: the request did not start (%d), %u KB of PSRAM free", vl_src_name(vl_src_now(a)),
                         id, (unsigned)(psram / 1024));
             a->feed_err = err;
             a->overlay_dirty = true;
@@ -1220,6 +1238,6 @@ void vl_feed_pump(app_t *a, uint32_t now)
     }
     day_count(a);
     a->feed_id = id;
-    a->feed_src = a->conf.src;
+    a->feed_src = vl_src_now(a);
     a->feed_t0 = now;
 }
