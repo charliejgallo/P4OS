@@ -132,9 +132,19 @@ differ by under 1 %):
   "Si llueve el sábado, la fiesta de cumpleaños de mi hermana se celebrará
   en el salón del club y no en el parque."
 
+- **Through English** (es -> pt, with the pt <-> en pack beside the
+  es <-> en one): the two legs' sum, plus both models loaded every time,
+  since only one fits: `esen` 1.64 s, then `enpt` 1.52 s, on each
+  translation and not only the first. "El gato duerme." 5.3 s (110 M,
+  2.1 s of it computing), the market sentence 7.9 s (289 M), the long one
+  11.2 s (481 M, 8.0 s computing), the same the second time. "Se chover no
+  sábado, a festa de aniversário da minha irmã é realizada no clube e não
+  no parque." The list of languages says it: "Pasando por el inglés, tarda
+  el doble". All the memory back on closing here too.
+
 So: **a second for a short sentence, four for a long one, plus a second
-and a half the first time**. Through English (pt <-> es) it is the sum of
-the two, and each model is loaded in turn: not measured. `--int8`
+and a half the first time; through English, five to eleven seconds, three
+of them loading**. `--int8`
 (activations quantized with Marian's own multipliers, as Firefox runs
 them) gives the same translations and is the way to the core's SIMD (16
 int8 multiply-adds an instruction): that, and keeping the hot rows of the

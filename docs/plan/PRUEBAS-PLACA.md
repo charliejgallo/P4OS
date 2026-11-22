@@ -272,10 +272,22 @@ En `main` desde el 2026-11-22, sin publicar; sólo probadas en el simulador.
       quedan 1,7 MB de PSRAM (una dirección por vez; el portal no puede
       capturar la pantalla); al cerrar vuelve toda. Los números y el por
       qué, en `apps/traductor/README.md`.
-- [ ] Traductor, lo que queda: pasar por el inglés (es a pt, con el pack
-      pt-en, que no se subió), el diccionario de una palabra, la página
-      del portal, y en línea contra `fake_translate.py`. Los packs it, fr
-      y de sin armar; ninguno publicado.
+- [x] **Traductor, pasando por el inglés** (2026-11-22): español a
+      portugués con el pack pt-en subido a la tarjeta (queda ahí). La
+      oración larga 11,2 s, la del mercado 7,9 s, la corta 5,3 s; 3,2 s de
+      cada una son cargar los dos modelos, que se cargan en cada
+      traducción porque en la PSRAM entra uno solo. Traduce bien. La
+      memoria vuelve toda al cerrar.
+- [x] **Los cinco packs de idioma, armados** (2026-11-22) en
+      `apps/traductor/build/` del worktree `tienda`, fuera de git: es 46,6
+      MB, pt 45,3, it 46,5, fr 59,7 y de 56,6 (254,8 MB, 37 partes).
+      Probados en la Mac con el motor de la app (`bench_nmt.sh`), una
+      oración en cada dirección de cada uno. **Sin publicar:** van a una
+      release antes del tag que los nombre, cuando toque la 0.32.0.
+- [ ] Traductor, lo que queda: el diccionario de una palabra, la página
+      del portal, y en línea contra `fake_translate.py`. Que la Tienda
+      ofrezca cada pack por separado se ve recién con los packs
+      publicados.
 - [ ] Hockey de mesa: los fps del registro, y los dos dedos a la vez a
       mano (el portal toca de a uno). Ajustar los niveles con el usuario,
       como Metegol.
