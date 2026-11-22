@@ -10849,3 +10849,12 @@ Juegos de mesa	Board games
 
 #: apps/metegol  (nombre de app)
 Metegol	Table Football
+
+#: apps/hockey  (nombre de app)
+Hockey de mesa	Air Hockey
+
+#: apps/traductor  (nombre de app)
+Traductor	Translator
+
+#: apps/oficina  (nombre de app)
+Oficina	Office

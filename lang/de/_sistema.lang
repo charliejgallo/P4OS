@@ -10849,3 +10849,12 @@ Juegos de mesa	Brettspiele
 
 #: apps/metegol  (nombre de app)
 Metegol	Tischfußball
+
+#: apps/hockey  (nombre de app)
+Hockey de mesa	Airhockey
+
+#: apps/traductor  (nombre de app)
+Traductor	Übersetzer
+
+#: apps/oficina  (nombre de app)
+Oficina	Büro
