@@ -227,8 +227,23 @@ de la 0.30.0: se pone al día al abrir la Tienda o Ajustes → Actualización.
       la baja) **quedó cerrado con estas seis.**
 - [x] Solitario y Juegos de mesa, jugadas por el usuario (más abajo, en
       "Las apps nuevas de noviembre").
-- [ ] Sudoku, Bolsa y Vuelos, sin abrir todavía en la placa; Bolsa y
-      Vuelos contra los servicios de verdad.
+- [x] **Vuelos en la placa, contra adsb.lol** (2026-11-22): no traía
+      aviones con ninguna fuente. Tres causas, una detrás de otra: pedía
+      1,5 MB de un solo bloque para cada respuesta y con sus propios
+      buffers a la placa le quedan 1,7 MB (ningún pedido salía, y no lo
+      decía); adsb.lol contesta 426 a HTTP/1.0, que era lo que hablaba el
+      cliente del firmware; y airplanes.live contesta 403 a esta red. Con
+      el firmware `v0.31.0-27-g2745195` y la app nueva: 11 aviones, los
+      mismos 11 que da el servicio pedido desde la Mac 48 s después.
+- [x] **Una app actualizada por la Tienda** (2026-11-22): Vuelos, dos
+      veces, desde un catálogo de prueba servido de la Mac con el modo
+      desarrollo. 0,6 s de descarga, instalada y cargada en 6 s, byte por
+      byte. De vuelta en el catálogo oficial, Vuelos queda con
+      "Actualizar" (que sería volver a la publicada) hasta la 0.32.0.
+- [ ] Vuelos: el paso solo de airplanes.live a adsb.lol, en la placa
+      (visto en el simulador).
+- [ ] Sudoku y Bolsa, sin abrir todavía en la placa; Bolsa contra los
+      servicios de verdad.
 - [x] **"Que las maneje la Tienda" sólo tomó tres o cuatro** (2026-11-22,
       dicho por el usuario): es lo esperado, las demás eran compilaciones
       de la Mac y no los bytes del catálogo. **"Reemplazarlas por las de
@@ -248,13 +263,19 @@ de la 0.30.0: se pone al día al abrir la Tienda o Ajustes → Actualización.
 
 En `main` desde el 2026-11-22, sin publicar; sólo probadas en el simulador.
 
-- [ ] **Traductor: medir el motor sin red en la placa**, con el usuario y
-      la sesión de firmware: el plan paso a paso, con los `curl` para pegar
-      texto y tocar Traducir, en `docs/internal/PRUEBA-TRADUCTOR-PLACA.md`.
-      Lo de hoy es estimado desde la Mac: 0,4-0,7 s una oración corta y
-      ~1,8 s una larga con los dos núcleos, más ~1,3 s la primera vez;
-      11,3 MB de PSRAM por dirección. El pack es-en (46,6 MB) y el pt-en
-      están armados en el worktree `app-traductor-3acfc4`.
+- [x] **Traductor: el motor sin red, medido en la placa** (2026-11-22,
+      `v0.31.0-27-g2745195`, manejada desde el portal). **1,1 s una
+      oración corta, 4,3 s una de treinta palabras** con los dos núcleos
+      (lo estimado era 0,4 y 1,8), más 1,5 s la primera vez por cargar el
+      modelo. Un núcleo, 6,6 s: los dos rinden 1,53x. int8 es más lento
+      que float (5,0 s). Inglés a español, 4,2 s. Con un modelo cargado
+      quedan 1,7 MB de PSRAM (una dirección por vez; el portal no puede
+      capturar la pantalla); al cerrar vuelve toda. Los números y el por
+      qué, en `apps/traductor/README.md`.
+- [ ] Traductor, lo que queda: pasar por el inglés (es a pt, con el pack
+      pt-en, que no se subió), el diccionario de una palabra, la página
+      del portal, y en línea contra `fake_translate.py`. Los packs it, fr
+      y de sin armar; ninguno publicado.
 - [ ] Hockey de mesa: los fps del registro, y los dos dedos a la vez a
       mano (el portal toca de a uno). Ajustar los niveles con el usuario,
       como Metegol.

@@ -13,7 +13,9 @@
     French and German, each paired with English, ~45-60 MB each): small
     neural models from Firefox Translations run by the app's own engine,
     and a dictionary for single words. Online, MyMemory or a
-    LibreTranslate of your own.
+    LibreTranslate of your own. On the board: a second for a short
+    sentence, 4.3 s for one of thirty words, 1.5 s more the first time;
+    all its memory back when it closes.
   - **Oficina** (Office), first phase: spreadsheets (xlsx, ods, csv) with
     over sixty formulas, sorting and filters, saved without touching what
     the app does not understand; and a text editor for big files, code and

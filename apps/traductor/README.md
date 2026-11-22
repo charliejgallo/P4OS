@@ -88,32 +88,57 @@ both directions and WikDict's dictionaries.
 -fno-slp-vectorize`. It counts every multiply-add. Apple M2, es -> en,
 embedding table read from the pack (`--card`), best of 3:
 
-| Sentence | Pieces in / out | Shortlist | Multiply-adds | Mac | **P4, 1 core** | **P4, 2 cores** |
+| Sentence | Pieces in / out | Shortlist | Multiply-adds | Mac | P4, 2 cores, estimated | **P4, 2 cores, measured** |
 |---|---|---|---|---|---|---|
-| El gato duerme. | 7 / 5 | 298 | 58 M | 45 ms | 0.81 s | 0.40 s |
-| ¿Dónde está la estación de tren más cercana? | 12 / 7 | 416 | 96 M | 45 ms | 1.33 s | 0.67 s |
-| Mañana vamos a ir al mercado a comprar frutas y verduras. | 17 / 19 | 574 | 156 M | 91 ms | 2.17 s | 1.08 s |
-| Si llueve el sábado, la fiesta de cumpleaños de mi hermana se hace en el salón del club y no en el parque. | 30 / 26 | 801 | 258 M | 143 ms | 3.58 s | 1.79 s |
+| El gato duerme. | 7 / 5 | 298 | 58 M | 45 ms | 0.40 s | **1.13 s** |
+| ¿Dónde está la estación de tren más cercana? | 12 / 7 | 416 | 96 M | 45 ms | 0.67 s | **1.52 s** |
+| Mañana vamos a ir al mercado a comprar frutas y verduras. | 17 / 19 | 574 | 156 M | 91 ms | 1.08 s | **2.71 s** |
+| Si llueve el sábado, la fiesta de cumpleaños de mi hermana se hace en el salón del club y no en el parque. | 30 / 26 | 801 | 258 M | 143 ms | 1.79 s | **4.34 s** |
 
 en -> es gives the same counts (65, 76, 138, 256 M for the same four in
-English). The P4 columns are the multiply-adds at the 5 cycles a float
-multiply-add costs there (measured by esp-dsp's benchmarks and the RF app),
-360 MHz; two cores is half, since every matrix is split by its outputs
-(`aos_hal_worker_split`, 1.75x measured with Visor 3D). Not in those
-columns, and to be measured on the board:
+English). The estimate was the multiply-adds at the 5 cycles a float
+multiply-add costs on the P4 (esp-dsp's benchmarks and the RF app), 360 MHz,
+halved for two cores.
 
-- **PSRAM:** a decoder step reads its 2.4 MB of weights plus the
-  shortlist's rows; 26 steps are ~65 MB, 0.2-0.5 s at 150-300 MB/s. The
-  encoder reads its 6.3 MB once (tokens go four at a time over each row).
-- **The card:** the shortlist's embedding rows (800 x 256 bytes for the long
-  sentence), read in order, and loading the model once: 11.3 MB at the
-  ~9 MB/s the card gives, ~1.3 s, then it stays in memory.
+**On the board** (2026-11-22, rev 1.3, firmware `v0.31.0-27-g2745195`, the
+es <-> en pack on the card, each sentence twice from the portal's clipboard
+and the app's own buttons; the second time is in the table, and the two
+differ by under 1 %):
 
-So: **under a second for a short sentence, about 2-2.5 s for a long one,
-plus ~1.3 s the first time**. Through English (pt <-> es) it is the sum of
-the two. `--int8` (activations quantized with Marian's own multipliers, as
-Firefox runs them) gives the same translations; on the P4 it is the way to
-the core's SIMD (16 int8 multiply-adds an instruction, not used yet).
+- **2.4 to 2.8 times the estimate.** The long sentence on one core takes
+  6.63 s: 26 ns a multiply-add, 9 cycles and not 5. The weights are 9 MB in
+  PSRAM and every matrix is walked whole for every token; the 5 cycles were
+  measured on data that fits the cache.
+- **Two cores give 1.53x** (6.63 s to 4.34 s), not the 1.75x of Visor 3D:
+  both cores read the same PSRAM. The encoder gains more (3.93 s to 2.38 s)
+  than the decoder (2.69 s to 1.96 s), whose steps are short.
+- **int8 is slower, not faster:** 5.03 s on two cores and 7.94 s on one for
+  the same sentence and the same translation. In plain C the quantized
+  path only adds work; it is worth it only with the core's SIMD, which is
+  not written. Float on two cores stays the default.
+- **Loading a model:** 1.55 s for es -> en (11 064 KB) and 1.47 s for
+  en -> es (10 813 KB), against the 1.3 s estimated. The first translation
+  after opening the app is that much longer: 2.69 s for the short sentence.
+- **en -> es:** 4.23 s for the long sentence in English (252 M), 1.03 s for
+  "The cat sleeps." (54 M).
+- **Memory:** the board opened the app with 14 273 KB of PSRAM free and had
+  1 704 KB left with es -> en loaded (1 898 KB with en -> es): one
+  direction at a time, the other is loaded when the languages are swapped.
+  Closed, the app gave all of it back (14 268 KB), and the internal RAM did
+  not move (205 KB). With a model loaded the portal cannot take a picture
+  of the screen: the capture needs 1.8 MB.
+- The translations are the Mac's: "If it rains on Saturday, my sister's
+  birthday party is held in the clubroom and not in the park."; back,
+  "Si llueve el sábado, la fiesta de cumpleaños de mi hermana se celebrará
+  en el salón del club y no en el parque."
+
+So: **a second for a short sentence, four for a long one, plus a second
+and a half the first time**. Through English (pt <-> es) it is the sum of
+the two, and each model is loaded in turn: not measured. `--int8`
+(activations quantized with Marian's own multipliers, as Firefox runs
+them) gives the same translations and is the way to the core's SIMD (16
+int8 multiply-adds an instruction): that, and keeping the hot rows of the
+decoder out of PSRAM's way, is where the time is.
 
 Memory: 11.3 MB a direction (model 8.9, shortlist 1.8 as 16-bit ids,
 vocabulary, the 32 000-byte candidate mask), 19.5 MB with the embedding
