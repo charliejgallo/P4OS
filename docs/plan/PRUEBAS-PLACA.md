@@ -152,11 +152,15 @@ permiso (`v0.31.0-16-g66168c5`), probado por el portal:
       total, por lo que tardó cada prueba.
 - [x] Con la tarjeta y el Wi-Fi ocupados (15 MB leídos por el portal
       mientras sonaba): cola de 4 ms y de 2 ms, ni un bloque corto en 4 s.
-- [ ] **Lo que eso no dice:** el contador de esas pruebas mira la cola de
-      la app, no si la salida misma se atrasó. Para eso se sumó la cuenta
-      del driver I2S (sus buffers que salieron sin nada detrás), que
-      `aos_hal_spk_dry()` ahora incluye: compila, falta instalarla y
-      repetir las pruebas.
+- [x] **Con la cuenta del driver I2S sumada** (sus buffers que salieron
+      sin nada detrás: la salida misma atrasada), `v0.31.0-17-gabd0a8c`:
+      por el camino de siempre, 0 en 9 s. Por el corto, **5, siempre 5**:
+      con 0,5 s de tono, con 1, con 4 y con 9, con cola de 2, 4 u 8 ms,
+      con la placa libre o con la tarjeta y el Wi-Fi ocupados. No crece
+      con el tiempo: son del momento en que la salida se rehace al abrir
+      (el canal corre unos milisegundos antes de que haya qué escribir),
+      no cortes mientras suena. La cuenta que ve la app ya no los incluye
+      (arranca cuando el anillo volvió a llenarse): compila, sin instalar.
 - [ ] Con el oído, que nada cambió: un pitido, una canción de Música, la
       radio, un juego con sonido, la Grabadora (grabar y escuchar), el
       afinador. Sin ruidos nuevos al abrir o cerrar.

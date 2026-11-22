@@ -2524,6 +2524,7 @@ static void aout_task(void *arg)
     }
 
     int open_vol = -1;
+    int settle = 0;                 /* blocks to write before the driver's count of late buffers means anything */
     uint32_t idle_frames = 0;       /* what went by with nothing to play, in frames: the block's size changes */
     int usb_muted = -1;             /* the speaker muted for a USB card; -1 not known (just opened) */
 
@@ -2572,6 +2573,11 @@ static void aout_task(void *arg)
             open_vol = s_volume;
             idle_frames = 0;
             usb_muted = -1;
+            /* The channel ran with nothing written while it was made and
+             * opened: the driver counted every buffer of that (five, on the
+             * board, each time the short bus is made). Not gaps in what an
+             * app plays: its count starts once the ring is full again. */
+            settle = (s_low_on ? LOW_DESCS : DMA_DESCS) + 2;
         }
         if (open_vol != s_volume) {         /* the slider is heard at once */
             open_vol = s_volume;
@@ -2605,6 +2611,10 @@ static void aout_task(void *arg)
             out_close();
             vTaskDelay(pdMS_TO_TICKS(20));
             continue;
+        }
+
+        if (settle && --settle == 0) {
+            s_spk_late0 = s_out_late;
         }
 
         /* 'for_mic' was read before this block: acknowledging it here means
