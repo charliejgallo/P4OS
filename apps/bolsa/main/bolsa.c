@@ -376,7 +376,7 @@ lv_obj_t *bs_box(lv_obj_t *parent, int32_t w, int32_t h)
     return o;
 }
 
-lv_obj_t *bs_label(lv_obj_t *parent, const char *txt, const lv_font_t *f, lv_color_t col)
+lv_obj_t *bo_label(lv_obj_t *parent, const char *txt, const lv_font_t *f, lv_color_t col)
 {
     lv_obj_t *l = lv_label_create(parent);
     lv_label_set_text(l, txt ? txt : "");
@@ -396,7 +396,7 @@ lv_obj_t *bs_round_btn(lv_obj_t *parent, const char *glyph, int32_t size, lv_col
     lv_obj_set_style_bg_opa(b, LV_OPA_COVER, 0);
     lv_obj_set_style_bg_opa(b, LV_OPA_70, LV_STATE_PRESSED);
     lv_obj_remove_flag(b, LV_OBJ_FLAG_SCROLLABLE);
-    lv_obj_t *l = bs_label(b, glyph, &aos_sym_28, AOS_C_TEXT);
+    lv_obj_t *l = bo_label(b, glyph, &aos_sym_28, AOS_C_TEXT);
     lv_obj_center(l);
     if (cb) lv_obj_add_event_cb(b, cb, LV_EVENT_CLICKED, ud);
     return b;
@@ -414,7 +414,7 @@ lv_obj_t *bs_chip(lv_obj_t *parent, const char *txt, bool on, lv_event_cb_t cb, 
     lv_obj_set_style_bg_opa(b, LV_OPA_70, LV_STATE_PRESSED);
     lv_obj_remove_flag(b, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(b, LV_OBJ_FLAG_SCROLL_ON_FOCUS);
-    lv_obj_t *l = bs_label(b, txt, aos_font_small, on ? AOS_C_BG : AOS_C_TEXT);
+    lv_obj_t *l = bo_label(b, txt, aos_font_small, on ? AOS_C_BG : AOS_C_TEXT);
     lv_obj_center(l);
     if (cb) lv_obj_add_event_cb(b, cb, LV_EVENT_CLICKED, ud);
     return b;
@@ -445,7 +445,7 @@ lv_obj_t *bs_sheet(const char *title, lv_event_cb_t on_close)
     lv_obj_set_style_bg_opa(s_sheet, LV_OPA_COVER, 0);
     lv_obj_remove_flag(s_sheet, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_add_flag(s_sheet, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_t *t = bs_label(s_sheet, title, aos_font_title, AOS_C_TEXT);
+    lv_obj_t *t = bo_label(s_sheet, title, aos_font_title, AOS_C_TEXT);
     lv_obj_set_pos(t, AOS_UI_PAD + 4, 18);
     lv_obj_set_width(t, bs_ui.W - 2 * AOS_UI_PAD - 100);
     lv_label_set_long_mode(t, LV_LABEL_LONG_MODE_DOTS);

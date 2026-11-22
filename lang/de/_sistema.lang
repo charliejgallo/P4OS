@@ -10831,3 +10831,21 @@ No se pudo	Nicht möglich
 Primero elegí una frase para las copias: más arriba, «Cifrarlas con una frase…». Sin frase no sube nada.	Wähle zuerst eine Passphrase für die Kopien: weiter oben, „Mit einer Passphrase verschlüsseln…“. Ohne sie wird nichts gesendet.
 Conectando con el servidor…	Verbinde mit dem Server…
 Falta la frase de las copias automáticas (más arriba, «Cifrarlas con una frase…»): hasta que la elijas no sube nada.	Die Passphrase der automatischen Kopien fehlt (weiter oben, „Mit einer Passphrase verschlüsseln…“): bis du eine wählst, wird nichts gesendet.
+
+#: apps/sudoku  (nombre de app)
+Sudoku	Sudoku
+
+#: apps/solitario  (nombre de app)
+Solitario	Solitär
+
+#: apps/bolsa  (nombre de app)
+Bolsa	Börse
+
+#: apps/vuelos  (nombre de app)
+Vuelos	Flüge
+
+#: apps/mesa  (nombre de app)
+Juegos de mesa	Brettspiele
+
+#: apps/metegol  (nombre de app)
+Metegol	Tischfußball

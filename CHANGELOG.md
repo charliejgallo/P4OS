@@ -2,6 +2,29 @@
 
 ## 0.31.0 — not released yet
 
+- **Six new apps in the Store**, from the card (no firmware needed):
+  - **Metegol** (Table Football): table football in 3D, lying down, one
+    against the board or two on one screen, half the screen each; sixteen
+    national teams and twelve Argentine clubs in their colours, with no
+    crests; ten stadiums, eight of them optional packs; by time or to N
+    goals, with the goal's replay. 60 fps on the board, and the board's
+    levels tuned against a person after the user played it.
+  - **Juegos de mesa** (Board games): chess (eight levels, PGN, a clock),
+    draughts (ours and the international game), reversi, four in a row,
+    ludo and backgammon, in 3D, against the board or face to face; the
+    marble, glass and metal sets are optional packs.
+  - **Sudoku**: levels set by the techniques a board needs, notes, hints
+    that explain, 6×6, Killer, Diagonal and the daily challenge; coins buy
+    fifteen themes.
+  - **Solitario** (Solitaire): Klondike, Spider, FreeCell, Pyramid,
+    TriPeaks, Golf, Yukon and one with the Spanish deck, solvable deals,
+    Vegas scoring, felts and backs won with achievements, and three ways
+    to celebrate a win.
+  - **Bolsa** (Stocks): shares, indices, the dollar, currencies and
+    crypto, with line, area and candle charts, lists and price alerts.
+  - **Vuelos** (Flights): the aircraft around a place, live on the map,
+    from a free ADS-B service or a receiver of your own, with the area's
+    airports.
 - **Backups** ([docs/BACKUP.md](docs/BACKUP.md)). Settings → Backup, and a
   Backup page in the portal: the preferences of the system and of the
   apps, the list of the apps the Store installed with their extras, and

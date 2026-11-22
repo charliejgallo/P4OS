@@ -34,8 +34,8 @@ by touch never sees it. Board games put a cursor on the board the same way.
 | Atasco | D-pad moves a frame · A takes the car, the D-pad slides it, A or B lets go · B (nothing held) or L undo · R restart · START levels |
 | Bastión | D-pad moves a frame from pad to pad · A picks the pad and goes into its panel (D-pad + A there, B back) · R calls the next wave, or changes the speed during one · L the powers · START pause · in the campaign L/R change world, in the laboratory its tab |
 | Blackjack | A deals / hits / next hand · B stands (and clears, refuses insurance) · L double · R split · START menu |
-| Buscaminas | D-pad moves a cursor · A digs (or chords) · B flags · START new board · L/R difficulty |
 | Burbujas | stick aims by speed, D-pad in fine steps (up = straight up) · A shoots · B swaps the bubble · START pause |
+| Buscaminas | D-pad moves a cursor · A digs (or chords) · B flags · START new board · L/R difficulty |
 | Chatarra | D-pad walks a cell at a time · A talks, opens, fights or uses what is in front · START menu · L/R zoom · in every menu and fight, D-pad + A, B back; on the scrap belt a claw (A grabs, B ends) |
 | Claude Jump | D-pad or stick walks · START pause · L/R costumes in the shop |
 | Claudito | left/right go along the action bar, A presses · with the sponge or the hand, the D-pad moves it and A held is the finger · B strokes it (or wakes it) |
@@ -44,15 +44,20 @@ by touch never sees it. Board games put a cursor on the board the same way.
 | Flappy | A flaps, starts and retries · START pause |
 | Gemas | D-pad moves a frame · A picks a jewel, a direction swaps it · START pause |
 | Golf | stick turns the line by speed, D-pad by 0.25° · L/R club · A is every tap of the swing and the putt · B from the 3D view back to the map · up/down move the putt's marker · START pause |
+| Juegos de mesa | D-pad moves a frame from cell to cell · A takes a piece and sets it down (and rolls the dice) · B puts it back · L/R undo/redo · START the menu; in the sheets and panels the D-pad and A, B back |
 | Lua (Atrapa) | D-pad or stick steers the basket · A or START plays · START pause; in the app, the D-pad goes down the scripts and A opens one |
+| Metegol | D-pad or stick moves the rods · A kicks · B raises the figures · L/R choose the rod when they go one at a time · START pause; a second gamepad plays player 2 · menus: D-pad and A, B back, START plays |
 | Mila | D-pad a step at a time · B undo · R restart · L held shows the whole level · START pause · at home B pets her, R a toy, L the present |
 | Monster Hop | D-pad hops (held, it keeps hopping) · A action · START pause, Play on the title · L/R tabs and zones |
 | Neon Snakes | D-pad or stick turns · START pause |
 | Pinball 3D | L or left the left flippers, R or right the right ones · A launches (held, it charges) · up nudges · START pause · in the carousel left/right pick a table, A or START plays, up the settings |
 | Simon | the four directions are the four pads, clockwise from the top left (up green) · A or START starts |
+| Solitario | D-pad walks the piles (up/down in a column choose how many cards) · A picks up and drops (on the same pile, to its best place) · B cancels · L undo · R hint · START menu; in the panels D-pad + A, B back |
+| Sudoku | D-pad walks the cells · A places the chosen number · B notes it · L/R change the number · START pause (with hint, undo, restart and menu); menus and shop D-pad + A, B back |
 | Topos | D-pad moves a frame over the holes · A or B whacks · START pause |
 | Truco | D-pad over your cards and the calls · A lifts and plays a card, answers · B puts a lifted card back · START menu |
 | Turbo | stick is an analog wheel (D-pad the arrows) · A gas · B brake · START pause · L/R car in the garage |
+| Vuelos (not a game) | D-pad or stick moves the map · L/R zoom out/in · A picks the aircraft nearest the centre, the next one at every press · B lets it go · START the list; in the panels B or START goes back |
 
 Two-board games (Neon Snakes, Monster Hop's race, Mila's visits, Truco,
 Golf) take the pad on each board for its own player.

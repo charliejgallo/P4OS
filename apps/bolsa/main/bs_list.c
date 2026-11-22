@@ -156,11 +156,11 @@ static void row_build(lv_obj_t *parent, int i, const char *sym, int32_t w)
     int32_t right = L.editing ? 236 : 196;
     int32_t spark_w = w > 640 ? 150 : 110;
     int32_t left_w = w - 24 - right - spark_w - 24 - 12;
-    r->show = bs_label(r->row, it ? it->info.show : sym, aos_font_body, AOS_C_TEXT);
+    r->show = bo_label(r->row, it ? it->info.show : sym, aos_font_body, AOS_C_TEXT);
     lv_obj_set_width(r->show, left_w);
     lv_label_set_long_mode(r->show, LV_LABEL_LONG_MODE_DOTS);
     lv_obj_set_pos(r->show, 24, 20);
-    r->name = bs_label(r->row, "", aos_font_caption, AOS_C_DIM);
+    r->name = bo_label(r->row, "", aos_font_caption, AOS_C_DIM);
     lv_obj_set_width(r->name, left_w);
     lv_label_set_long_mode(r->name, LV_LABEL_LONG_MODE_DOTS);
     lv_obj_set_pos(r->name, 24, 70);
@@ -170,7 +170,7 @@ static void row_build(lv_obj_t *parent, int i, const char *sym, int32_t w)
     if (!L.editing) {
         r->spark = bs_spark_create(r->row, spark_w, 72);
         lv_obj_set_pos(r->spark, 24 + left_w + 12, (ROW_H - 72) / 2);
-        r->price = bs_label(r->row, "--", aos_font_body, AOS_C_TEXT);
+        r->price = bo_label(r->row, "--", aos_font_body, AOS_C_TEXT);
         lv_obj_set_width(r->price, right);
         lv_obj_set_style_text_align(r->price, LV_TEXT_ALIGN_RIGHT, 0);
         lv_obj_align(r->price, LV_ALIGN_TOP_RIGHT, -20, 14);
@@ -186,7 +186,7 @@ static void row_build(lv_obj_t *parent, int i, const char *sym, int32_t w)
         lv_obj_add_flag(r->pill, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_set_ext_click_area(r->pill, 10);
         lv_obj_add_event_cb(r->pill, pill_click, LV_EVENT_CLICKED, NULL);
-        r->pill_l = bs_label(r->pill, "", aos_font_small, AOS_C_TEXT);
+        r->pill_l = bo_label(r->pill, "", aos_font_small, AOS_C_TEXT);
         lv_obj_align(r->pill_l, LV_ALIGN_RIGHT_MID, -12, 0);
         aos_make_decorative(r->pill_l);
     } else {
@@ -238,7 +238,7 @@ static void build_rows(void)
         lv_obj_set_style_bg_opa(b, LV_OPA_COVER, LV_STATE_PRESSED);
         lv_obj_add_flag(b, LV_OBJ_FLAG_CLICKABLE);
         lv_obj_add_event_cb(b, add_row_cb, LV_EVENT_CLICKED, NULL);
-        lv_obj_t *t = bs_label(b, l->n ? _("Sumar un símbolo") : _("Lista vacía: tocá para sumar un símbolo"),
+        lv_obj_t *t = bo_label(b, l->n ? _("Sumar un símbolo") : _("Lista vacía: tocá para sumar un símbolo"),
                                aos_font_small, AOS_C_DIM);
         lv_obj_center(t);
     }
@@ -298,7 +298,7 @@ void bs_list_build(void)
     int32_t W = bs_ui.W, H = bs_ui.H, pad = AOS_UI_PAD;
     int32_t top = bs_ui.land ? 8 : 12;
 
-    lv_obj_t *t = bs_label(root, _("Bolsa"), aos_font_title, AOS_C_TEXT);
+    lv_obj_t *t = bo_label(root, _("Bolsa"), aos_font_title, AOS_C_TEXT);
     lv_obj_set_pos(t, pad + 4, top + 14);
 
     lv_obj_t *plus = bs_round_btn(root, AOS_SYM_PLUS, 76, AOS_C_CARD2, plus_cb, NULL);
@@ -333,12 +333,12 @@ void bs_list_build(void)
     lv_obj_set_scroll_dir(L.list, LV_DIR_VER);
     lv_obj_add_flag(L.list, LV_OBJ_FLAG_CLICKABLE);     /* scrolls with the finger */
 
-    L.status = bs_label(root, "", aos_font_caption, AOS_C_DIM);
+    L.status = bo_label(root, "", aos_font_caption, AOS_C_DIM);
     lv_obj_set_width(L.status, W - 2 * pad);
     lv_label_set_long_mode(L.status, LV_LABEL_LONG_MODE_DOTS);
     lv_obj_set_style_text_align(L.status, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_set_pos(L.status, pad, H - foot_h + 6);
-    L.foot = bs_label(root, "", aos_font_tiny, AOS_C_DIM);
+    L.foot = bo_label(root, "", aos_font_tiny, AOS_C_DIM);
     lv_obj_set_width(L.foot, W - 2 * pad);
     lv_label_set_long_mode(L.foot, LV_LABEL_LONG_MODE_WRAP);
     lv_obj_set_style_text_align(L.foot, LV_TEXT_ALIGN_CENTER, 0);
@@ -463,16 +463,16 @@ static void result_row(int k, const bs_hit_t *h, int32_t w)
     bs_info_t in;
     bs_sym_info(h->sym, &in);
     const char *show = !strncmp(h->sym, "cg:", 3) && h->where[0] ? h->where : in.show;
-    lv_obj_t *a = bs_label(r, show, aos_font_body, AOS_C_TEXT);
+    lv_obj_t *a = bo_label(r, show, aos_font_body, AOS_C_TEXT);
     lv_obj_set_pos(a, 20, 12);
     lv_obj_set_width(a, 220);
     lv_label_set_long_mode(a, LV_LABEL_LONG_MODE_DOTS);
-    lv_obj_t *b = bs_label(r, h->name, aos_font_caption, AOS_C_DIM);
+    lv_obj_t *b = bo_label(r, h->name, aos_font_caption, AOS_C_DIM);
     lv_obj_set_pos(b, 20, 54);
     lv_obj_set_width(b, w - 40);
     lv_label_set_long_mode(b, LV_LABEL_LONG_MODE_DOTS);
     if (h->where[0] && strncmp(h->sym, "cg:", 3)) {
-        lv_obj_t *c = bs_label(r, h->where, aos_font_caption, AOS_C_DIM);
+        lv_obj_t *c = bo_label(r, h->where, aos_font_caption, AOS_C_DIM);
         lv_obj_align(c, LV_ALIGN_TOP_RIGHT, -20, 18);
     }
     aos_make_decorative(a);
@@ -530,7 +530,7 @@ static void results_fill(void)
         /* the name of this one is not learned: it is not a name */
         s_shown[k - 1].name[0] = 0;
     }
-    lv_obj_t *hint = bs_label(L.results, "", aos_font_caption, AOS_C_DIM);
+    lv_obj_t *hint = bo_label(L.results, "", aos_font_caption, AOS_C_DIM);
     lv_obj_set_width(hint, w);
     lv_label_set_long_mode(hint, LV_LABEL_LONG_MODE_WRAP);
     bs_prov_t sp = BS_P_NONE;

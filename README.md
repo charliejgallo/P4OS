@@ -9,7 +9,7 @@ An iPhone-style operating system for the
 It has a home screen with pages, folders and a dock, a control centre and
 notifications, and a lock screen with an optional code, and it runs in
 portrait or landscape. There are twenty-three built-in apps and, since
-0.30, a **Store** that installs more than fifty others on the microSD,
+0.30, a **Store** that installs more than sixty others on the microSD,
 loaded as shared objects:
 
 - **A store of its own:** the board lists, installs and updates its apps
@@ -940,6 +940,36 @@ and their art comes in packs.
 |---|---|---|---|
 | <img src="docs/img/app-flappy.png" width="125"> | <img src="docs/img/app-dice.png" width="125"> | <img src="docs/img/land-doom.jpg" width="250"> | <img src="docs/img/land-duke3d.jpg" width="250"> |
 
+| Board games | Sudoku | Solitaire | Stocks | Flights |
+|---|---|---|---|---|
+| <img src="docs/img/app-mesa.jpg" width="125"> | <img src="docs/img/app-sudoku.jpg" width="125"> | <img src="docs/img/app-solitario-win.jpg" width="125"> | <img src="docs/img/app-bolsa-chart.png" width="125"> | <img src="docs/img/app-vuelos.jpg" width="125"> |
+
+- **Board games** ([apps/mesa/README.md](apps/mesa/README.md)): chess with
+  eight levels, PGN and a clock, draughts (ours on 8×8 with the flying
+  king, and the international game), reversi, four in a row, ludo for two
+  to four and backgammon, against the board or face to face with the board
+  lying between two players. The sets are modelled in Blender; wood comes
+  with the app, marble, glass and metal are optional packs, and a game can
+  be added later as a module and a pack.
+- **Sudoku** ([apps/sudoku/README.md](apps/sudoku/README.md)): each level
+  is the hardest technique a board asks for, not how many numbers it
+  gives; hints show the technique instead of the number. 6×6, Killer,
+  Diagonal and a daily challenge; finishing pays coins that buy themes.
+- **Solitaire** ([apps/solitario/README.md](apps/solitario/README.md)):
+  Klondike, Spider, FreeCell, Pyramid, TriPeaks, Golf, Yukon and Klondike
+  with the Spanish deck; a solver keeps every deal winnable if you want,
+  standard and Vegas scoring, felts and backs won with achievements, and
+  the cards bounce off the foundations at the end.
+- **Stocks** ([apps/bolsa/README.md](apps/bolsa/README.md)): lists of
+  shares, indices, currencies and crypto, and line, area or candle charts
+  with volume, moving averages and RSI; the Argentine dollar and country
+  risk without a key, shares with a free key typed in the portal. Delayed
+  data, and no advice.
+- **Flights** ([apps/vuelos/README.md](apps/vuelos/README.md)): the aircraft
+  around a place on Mapas' map, each turned by its track and coloured by
+  its altitude, from airplanes.live, adsb.lol, the OpenSky Network or an
+  ADS-B receiver of your own; the airports come from OurAirports.
+
 Doom is doomgeneric, with OPL2 music, and Duke Nukem 3D is Chocolate Duke3D,
 with the Sound Blaster's FM music; both on the board, from the shareware
 episodes. Doom needs a WAD of your own and Duke a GRP (the shareware one
@@ -1006,6 +1036,29 @@ it. Ten worlds of three sectors each, the third with a boss.
   changed, straight into the panel's free buffer, half on each core, and
   flips: 62 fps on the board with forty aliens on the road. A bot plays
   the whole campaign to set each sector's difficulty.
+
+### Metegol
+
+Table football in 3D, lying down ([apps/metegol/README.md](apps/metegol/README.md)):
+one against the board, or two on the same screen, each the owner of the
+half with their goal. A finger slides the rods, a tap kicks with the one
+nearest the ball, holding raises the figures.
+
+| A match in Buenos Aires | The goal | Choosing the teams | Tokyo |
+|---|---|---|---|
+| <img src="docs/img/app-metegol.jpg" width="250"> | <img src="docs/img/app-metegol-gol.jpg" width="250"> | <img src="docs/img/app-metegol-equipos.jpg" width="250"> | <img src="docs/img/app-metegol-tokio.jpg" width="250"> |
+
+- **Teams:** sixteen national teams with their flags, and twelve clubs of
+  Argentine football in their colours and shirt designs, with no crests;
+  names and colours are changed in the portal.
+- **Ten stadiums,** each known by its building and its city; two come with
+  the game and eight are optional packs.
+- **Matches** by time, two halves of one to ten minutes, or to the first to
+  3, 5, 7 or 10 goals, and every goal has its replay. The board plays at
+  four levels, tuned against a person playing it on the board itself.
+- **How it is made:** the table, the figures and the stadiums are modelled
+  by code in Blender; the figures are rendered once and coloured by the
+  app for each team. The physics runs at 240 Hz; 60 fps on the board.
 
 ### Caños
 
@@ -1591,8 +1644,11 @@ unofficial), and Home Assistant is its owners'. The consoles the Emulador
 plays are their makers' (Nintendo, Sega, SNK, NEC, Atari, Coleco), and the
 app is not affiliated with any of them. 3D Pinball Space Cadet is
 Microsoft's, and the machines the Pinball 3D tables take ideas from are
-their makers'; its tables, art and sounds are all its own. The other
-products named in the apps belong to their owners too.
+their makers'; its tables, art and sounds are all its own. The football
+clubs and national teams named in Metegol are their own; the app uses their
+names and colours only, with no crests, and is not affiliated with or
+endorsed by any of them, their leagues or federations. The other products
+named in the apps belong to their owners too.
 
 Python® is a registered trademark of the Python Software Foundation; the
 Python app uses the name to say what it runs, and is not affiliated with or
@@ -1621,7 +1677,7 @@ idioma de la tarjeta, la de la placa y la del portal web. Los documentos del pla
 
 | | |
 |---|---|
-| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 22 apps propias y más de 50 de la tarjeta (juegos, un pinball 3D de seis mesas, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR (que puede compartir la salida de la placa), Ethernet optativo con un módulo W5500 y herramientas para la red por cable (probador de boca, encontrar un equipo de dirección desconocida, captura para Wireshark, vigía con Wake-on-LAN), Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN, tiras LED direccionables y RS485: Modbus (maestro, esclavo, monitor, perfiles de equipos y pasarela TCP), DMX con RDM y nodo Art-Net/sACN, y una consola de luces que también se maneja desde el celular; y un analizador lógico (Lógica) con diez decodificadores, para las cajitas USB de 24 MHz y 8 canales o un ESP32 con su firmware propio, que se graba desde el Programador |
+| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 22 apps propias y más de 60 de la tarjeta (juegos, un pinball 3D de seis mesas, un metegol 3D de uno o dos jugadores, juegos de mesa en 3D (ajedrez, damas, ludo, backgammon...), sudoku, solitarios, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE, la bolsa con gráficos de velas, un radar de vuelos), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR (que puede compartir la salida de la placa), Ethernet optativo con un módulo W5500 y herramientas para la red por cable (probador de boca, encontrar un equipo de dirección desconocida, captura para Wireshark, vigía con Wake-on-LAN), Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN, tiras LED direccionables y RS485: Modbus (maestro, esclavo, monitor, perfiles de equipos y pasarela TCP), DMX con RDM y nodo Art-Net/sACN, y una consola de luces que también se maneja desde el celular; y un analizador lógico (Lógica) con diez decodificadores, para las cajitas USB de 24 MHz y 8 canales o un ESP32 con su firmware propio, que se graba desde el Programador |
 | Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el emulador (GBA y Neo Geo a 60 cuadros, el táctil con varios dedos a la vez), el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, una termocupla MAX6675 y un DS18B20 registrados por Datalog en segundo plano, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante), BLE escuchando con el iPhone y la Mac conectados y leyendo un termómetro Xiaomi cifrado con su clave, dos cámaras IP (un timbre H.264 directo a la pantalla y una MJPEG), la grabación de pantalla en MP4 por el codificador H.264 del P4, SSH desde la Mac y hacia una Raspberry Pi, un bus CAN real con un ESP32, el teclado, copiar y pegar y el buscador, y RS485 con un ESP32 y dos módulos automáticos: Modbus en las dos direcciones, DMX con una tira de pixeles, RDM y Art-Net desde la Mac, y Ethernet con un módulo W5500 (enlace a 100 Mbit/s, noches enteras sin cortes, el probador de boca, la lista de equipos, una captura de nueve minutos sin pérdidas y el vigía), y Lógica con un FX2 clonado y un ESP32-C3: hasta 24 MHz sin perder muestras, la prueba del header decodificada y una línea UART real leída entera |
 | Qué falta | probar en la placa el RC522, RF con un sensor de 433 MHz y con tráfico real de AM y FM angosta, encontrar por qué se cortó la red durante dos OTA, y con una computadora por cable: la red de banco, sus servicios y compartir la conexión en los dos sentidos |
 | El conector de 40 pines | el dibujo de referencia de todos los pines, con los puertos, los pines con que arranca cada app y los sugeridos, está en [The 40-pin header](#the-40-pin-header); la carcasa impresa, en [case/](case) |

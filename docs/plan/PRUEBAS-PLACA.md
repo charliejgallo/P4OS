@@ -134,6 +134,32 @@ Instalado el 2026-11-21, `v0.30.0-16-g021f337`.
       una vez, cambiando un ajuste antes de instalar.
 - [ ] La copia semanal, sola, a la semana.
 
+### Las apps nuevas de noviembre (2026-11-21, para la próxima release)
+
+Seis apps de tarjeta en `main` desde el 2026-11-21, sin publicar todavía:
+Sudoku, Solitario, Bolsa, Vuelos, Juegos de mesa y Metegol (los pedidos
+en `docs/internal/PEDIDOS-APPS-2026-11.md`). Estudio queda en su rama
+hasta que el firmware baje la latencia del parlante.
+
+- [x] **Metegol en la placa** (`bca146d`, instalada con `install_apps.sh`):
+      Independiente contra Racing en Avellaneda, uno contra la placa en
+      normal, **60-61 fps** jugando (6-11 ms por cuadro), 38-47 en el gol y
+      su repetición; 12,8 MB de PSRAM con un estadio. La primera versión le
+      metía un gol cada diez segundos en normal; con la placa más lenta
+      (una demora antes de patear, un descanso después de cada patada,
+      menos fuerza y puntería) **el usuario la jugó: "se siente bien"**.
+- [ ] Metegol: al cerrarla el sistema dice que no volvieron ~3,9 MB de
+      PSRAM, con el asignador de la app en 0 KB (pedido en
+      `HANDOFF-NUEVAS-APPS.md`): ver si se acumula al abrirla y cerrarla.
+- [ ] Metegol de a dos en la misma pantalla, y con joystick.
+- [ ] Sudoku, Solitario, Bolsa, Vuelos y Juegos de mesa: sólo probadas en
+      el simulador. Instalarlas desde la Tienda cuando salga la release
+      (en limpio, con sus packs) y abrirlas una vez cada una; en Juegos de
+      mesa, medir los fps del 3D y el tiempo del motor de ajedrez en el
+      nivel más alto.
+- [ ] Bolsa y Vuelos contra los servicios de verdad (en el simulador, sólo
+      contra sus servidores falsos).
+
 ### Pendientes, en resumen
 
 Sin probar en la placa (2026-10-07, firmware `2611062` en adelante):

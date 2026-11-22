@@ -10831,3 +10831,21 @@ No se pudo	It could not be done
 Primero elegí una frase para las copias: más arriba, «Cifrarlas con una frase…». Sin frase no sube nada.	First choose a passphrase for the copies: further up, “Seal them with a passphrase…”. Without one nothing is sent.
 Conectando con el servidor…	Connecting to the server…
 Falta la frase de las copias automáticas (más arriba, «Cifrarlas con una frase…»): hasta que la elijas no sube nada.	The automatic copies' passphrase is missing (further up, “Seal them with a passphrase…”): until you choose one nothing is sent.
+
+#: apps/sudoku  (nombre de app)
+Sudoku	Sudoku
+
+#: apps/solitario  (nombre de app)
+Solitario	Solitaire
+
+#: apps/bolsa  (nombre de app)
+Bolsa	Stocks
+
+#: apps/vuelos  (nombre de app)
+Vuelos	Flights
+
+#: apps/mesa  (nombre de app)
+Juegos de mesa	Board games
+
+#: apps/metegol  (nombre de app)
+Metegol	Table Football

@@ -65,7 +65,7 @@ if(NOT DEFINED P4OS_SIM_APPS)
     set(P4OS_SIM_APPS hello_app cotiz clima burbujas simon dados flappy gemas buscaminas atasco radio recorder afinador
         arkanos topos cjump g2043 claudito camaras pixel neon blackjack truco lua video doom chatarra
         visor3d mapas monsterhop turbo mila golf notas eeprom dibujo pwm infrarrojo can vnc rf datalog
-        impresoras cartero ssh)
+        impresoras cartero ssh sudoku solitario bolsa vuelos mesa metegol)
 endif()
 set(AOS_DYNAPP_SRC "")
 foreach(a ${P4OS_SIM_APPS})

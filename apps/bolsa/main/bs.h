@@ -397,7 +397,7 @@ void bs_footer_text(char *out, size_t n, const bs_info_t *only);
 
 /* Small widgets shared by the screens */
 lv_obj_t *bs_box(lv_obj_t *parent, int32_t w, int32_t h);
-lv_obj_t *bs_label(lv_obj_t *parent, const char *txt, const lv_font_t *f, lv_color_t col);
+lv_obj_t *bo_label(lv_obj_t *parent, const char *txt, const lv_font_t *f, lv_color_t col);
 lv_obj_t *bs_round_btn(lv_obj_t *parent, const char *glyph, int32_t size, lv_color_t bg,
                        lv_event_cb_t cb, void *ud);
 lv_obj_t *bs_chip(lv_obj_t *parent, const char *txt, bool on, lv_event_cb_t cb, void *ud);
