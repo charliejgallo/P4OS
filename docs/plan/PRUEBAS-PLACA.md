@@ -134,30 +134,48 @@ Instalado el 2026-11-21, `v0.30.0-16-g021f337`.
       una vez, cambiando un ajuste antes de instalar.
 - [ ] La copia semanal, sola, a la semana.
 
-### El audio para tocar en vivo (rama `audio-estudio`, sin instalar)
+### El audio para tocar en vivo (rama `audio-estudio`, 2026-11-22)
 
 Pedido de Estudio. El firmware arma ahora el canal I2S y los dos códecs
-(antes lo hacía el BSP), y eso toca **todo lo que suena**: lo primero es
-ver que nada cambió.
+(antes lo hacía el BSP), y eso toca **todo lo que suena**. Instalado con
+permiso (`v0.31.0-16-g66168c5`), probado por el portal:
 
-- [ ] Recién instalado: un pitido, una canción de Música, la radio, un
-      juego con sonido, la Grabadora (grabar y escuchar), el afinador.
-      Todo como antes, sin ruidos nuevos al abrir o cerrar.
-- [ ] `GET /api/spk?low=0&ms=3000`: un tono por el camino de siempre;
-      `latency_ms` 40, `dry` 0.
-- [ ] `GET /api/spk?low=1&ms=3000&queue=4`: el mismo tono por el bus
-      corto; `latency_ms` 10, y cuántos `dry`. En el registro, cuánto
-      tardó en rehacerse la salida ("bus: for playing live ... made in N
-      ms") y en volver.
-- [ ] El mismo con `queue=2`, `8` y con Wi-Fi ocupado (una bajada de la
-      Tienda): cuántos cortes, para elegir el valor que usa Estudio.
+- [x] El audio arranca como antes: "I2S ok, ES8311 ok, ES7210 ok" en el
+      registro, los dos micrófonos habilitados. RAM interna libre: 209,1
+      KB, la de siempre.
+- [x] `GET /api/spk?low=0`: el tono por el camino de siempre, 40 ms, sin
+      un corte.
+- [x] `GET /api/spk?low=1&queue=4`: el mismo por el bus corto: **10 ms**,
+      sin un corte en 3 s. Con cola de 2 ms, tampoco; con 1 ms (menos de
+      un bloque del mezclador), todos los bloques cortos, como tiene que
+      ser. Rehacer la salida al abrir y al cerrar: unos 60 a 90 ms en
+      total, por lo que tardó cada prueba.
+- [x] Con la tarjeta y el Wi-Fi ocupados (15 MB leídos por el portal
+      mientras sonaba): cola de 4 ms y de 2 ms, ni un bloque corto en 4 s.
+- [ ] **Lo que eso no dice:** el contador de esas pruebas mira la cola de
+      la app, no si la salida misma se atrasó. Para eso se sumó la cuenta
+      del driver I2S (sus buffers que salieron sin nada detrás), que
+      `aos_hal_spk_dry()` ahora incluye: compila, falta instalarla y
+      repetir las pruebas.
+- [ ] Con el oído, que nada cambió: un pitido, una canción de Música, la
+      radio, un juego con sonido, la Grabadora (grabar y escuchar), el
+      afinador. Sin ruidos nuevos al abrir o cerrar.
 - [ ] Con Música sonando y "Mezclar música y apps": el tono sale por el
       camino de siempre (`latency_ms` 40) y la música no se corta.
 - [ ] Empezar a grabar con el bus corto abierto: la grabación sale entera
       y el bus vuelve al de siempre.
 - [ ] La latencia de verdad, de una tecla al parlante: con un micrófono
       aparte o un osciloscopio. La placa no la puede medir sola: sus
-      micrófonos sacan el bus corto.
+      micrófonos sacan el bus corto. Por el código: 10 ms más la cola de
+      la app (2 a 4 ms), donde había 50 a 70.
+
+### Solitario, una partida entera en la placa (2026-11-22)
+
+Jugada por el usuario con `v0.31.0-3-gc47efcd`, la app instalada desde la
+Tienda. Mirado después por el portal: ninguna caída; la pantalla sin un
+cuadro tardío ni un corte en 242 000 cuadros (17,7 ms el mayor intervalo);
+`/data/solitario.dat` guardado (376 bytes). RAM interna libre con la app
+abierta: 204 KB.
 
 ### La 0.31.0 desde la placa (publicada el 2026-11-22)
 

@@ -254,6 +254,12 @@ static const audio_codec_if_t *s_es8311, *s_es7210;    /* the chips' drivers: ma
 static volatile bool s_low_want;               /* the app's stream was opened for playing live */
 static volatile bool s_low_on;                 /* the bus is the short one now (the output task's to change) */
 static uint32_t      s_low_switches;           /* for the log */
+/* DMA buffers the output finished with nothing new written behind them: the
+ * output task was late, and what is heard is a gap (auto_clear plays
+ * silence). Counted in the driver's interrupt. While the speaker's device
+ * is closed the channel does not run and this does not move. */
+static volatile uint32_t s_out_late;
+static volatile uint32_t s_spk_late0;          /* its value when the app's stream opened */
 static TaskHandle_t  s_ain_task;               /* a capture's reader of the ES7210 (further down) */
 static volatile int  s_hw_state;               /* 0 coming up, 1 up, -1 failed */
 static TaskHandle_t  s_aout_task;
@@ -2170,6 +2176,7 @@ static bool spk_prepare(uint32_t rate)
     s_spk_head = s_spk_tail = 0;
     s_spk_dry = 0;
     s_spk_fed = false;
+    s_spk_late0 = s_out_late;
     return true;
 }
 
@@ -2245,11 +2252,19 @@ int aos_hal_spk_write(const int16_t *pcm, int n)
     }
     RING_FENCE();
     s_spk_head = head + (uint32_t)n;
-    s_spk_fed = true;
+    if (!s_spk_fed) {
+        s_spk_late0 = s_out_late;       /* from the first sample: what came before was the bus being made */
+        s_spk_fed = true;
+    }
     return n;
 }
 
-int aos_hal_spk_dry(void) { return (int)s_spk_dry; }
+/* The gaps that were heard: the app's ring short when the mixer came for
+ * it, and the output itself late (the driver's count, since this stream
+ * was opened; the change of bus at its start is not the app's and is left
+ * out by taking the count again once the app writes). */
+int aos_hal_spk_dry(void) { return (int)(s_spk_dry + (s_out_late - s_spk_late0)); }
+int aos_p4_spk_late(void) { return (int)(s_out_late - s_spk_late0); }
 
 int aos_hal_spk_queued(void)
 {
@@ -2319,6 +2334,15 @@ static void out_close(void)
     ESP_LOGD(TAG, "speaker closed (amp cycle %lu)", (unsigned long)s_out_opens);
 }
 
+/* The I2S driver's word that a buffer went out with nothing behind it. In
+ * its interrupt: a count and nothing else. */
+static bool IRAM_ATTR out_late_cb(i2s_chan_handle_t handle, i2s_event_data_t *event, void *ctx)
+{
+    (void)handle; (void)event; (void)ctx;
+    s_out_late++;
+    return false;
+}
+
 /* The I2S pair with a DMA ring of 'descs' buffers of 'frames', the data
  * interface on it and the two codec devices on that: what the BSP's
  * bsp_audio_init() and bsp_audio_codec_*_init() do, with the ring's size
@@ -2342,6 +2366,11 @@ static bool bus_build(int descs, int frames)
         },
     };
     esp_err_t e = i2s_new_channel(&chan, &s_i2s_tx, &s_i2s_rx);
+    if (e == ESP_OK) {
+        /* before the channel is enabled: the driver takes callbacks only then */
+        i2s_event_callbacks_t cbs = { .on_send_q_ovf = out_late_cb };
+        i2s_channel_register_event_callback(s_i2s_tx, &cbs, NULL);
+    }
     if (e == ESP_OK) e = i2s_channel_init_std_mode(s_i2s_tx, &cfg);
     if (e == ESP_OK) e = i2s_channel_enable(s_i2s_tx);
     if (e == ESP_OK) e = i2s_channel_init_std_mode(s_i2s_rx, &cfg);

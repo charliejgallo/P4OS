@@ -265,9 +265,12 @@ buffer, and there are 10 ms after the app's queue, which can be 4 ms.
 - **It is not always given:** with music mixed under the app, or while the
   microphone records, the stream opens the usual way. `aos_hal_spk_latency_ms()`
   says which one there is now.
-- **`aos_hal_spk_dry()`** counts the mixer's blocks that found the app's
-  ring short since the app first wrote: each is a gap that is heard. Size
-  the queue by that number, on the board.
+- **`aos_hal_spk_dry()`** counts the gaps that were heard since the app
+  first wrote: the mixer's blocks that found the app's ring short, and the
+  buffers the output sent with nothing behind them (the output itself
+  late). Size the queue by that number, on the board. Measured there: a
+  queue of 2 ms and of 4 ms never ran short in 4 s, with the card and the
+  Wi-Fi busy; 1 ms, less than a block of the mixer, always does.
 - Write from a thread of the app's own, a millisecond's worth at a time,
   sleeping 1 ms while the queue holds what it should.
 
