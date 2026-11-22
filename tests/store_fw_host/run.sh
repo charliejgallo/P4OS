@@ -543,6 +543,25 @@ open("rel3/p4os-store.ndjson", "w").write("\n".join(lines3 + [json.dumps(sys_lin
 jobs, apps, o = fw("y4", "refresh", "look=" + THEIRS, "add=" + THEIRS, "list", "install=sys-theirs")
 check("only the official source offers parts of the system", "sys-theirs" not in apps and not jobs[-1][0]
       and card_file("y4", "firmware/c6.bin") is None, o)
+# "New": the apps first listed in the newest release that brought any
+def fresh(o):
+    l = [x for x in o.splitlines() if x.startswith("fresh ")]
+    return sorted(x for x in l[-1].split(" ")[1].split(",") if x) if l else None
+def with_first(name, news, firsts, sysline=None):
+    ls = [json.loads(x) for x in official]
+    if news: ls[0]["news"] = news
+    for e in ls[1:]:
+        if e["file"] in firsts: e["first"] = firsts[e["file"]]
+    if sysline: sysline = dict(sysline, first=news); ls.append(sysline)
+    open("rel/" + name, "w").write("\n".join(json.dumps(x) for x in ls) + "\n")
+    return LATEST + name
+os.mkdir("n1")
+jobs, apps, o = fw("n1", "refresh", "fresh", cat=with_first("new1.ndjson", "v9.1.0", {"dados": "v9.1.0", "mila": "v9.1.0", "golf": "v9.0.0"}, LANG))
+check("new: the apps of the newest release that brought any", jobs[0][0] and fresh(o) == ["dados", "mila"], o)
+jobs, apps, o = fw("n1", "refresh", "fresh", cat=with_first("new2.ndjson", "", {"dados": "v9.1.0"}))
+check("...none when the catalogue names no such release", jobs[0][0] and fresh(o) == [], o)
+jobs, apps, o = fw("n1", "refresh", "fresh")
+check("...nor with a catalogue from before there was one", jobs[0][0] and fresh(o) == [], o)
 sys.exit(1 if fails else 0)
 PY
 echo "all passed"

@@ -10865,3 +10865,6 @@ Oficina	Büro
 
 #: apps/estudio  (nombre de app)
 Estudio	Studio
+
+#: components/aos_apps/aos_app_store.c  (the Store's filter: the apps of the newest release)
+Nuevas	Neu

@@ -1285,10 +1285,18 @@ proyecto).
 - **Del CI:** los puntos 1 y 2. Faltan el kit (3) y el catálogo que no
   viaja con el firmware (4).
 - **Pedido del usuario (2026-11-22): una categoría "Nuevas"** en la
-  Tienda, para ver de un vistazo lo que entró con la última release. El
-  catálogo ya dice en qué release apareció cada paquete (`ver`): alcanza
-  con un chip que filtre por la release del catálogo, sin tocar las
-  fichas. Sin empezar.
+  Tienda, para ver de un vistazo lo que entró con la última release.
+  **Hecho el mismo día**, en el firmware de la 0.32.0. `ver` no servía:
+  es la release del paquete, y cambia con cada actualización de la app.
+  El catálogo lleva ahora `first` en cada app (la release en que se la
+  listó por primera vez, que `gen_store.py` arrastra de `--previous`) y
+  `news` en la cabecera (la más nueva de esas): son nuevas las apps de
+  esa release, hasta que otra traiga apps. El chip está después de
+  "Actualizaciones", en la placa y en el portal. Con el catálogo de la
+  0.31.0 como anterior, las nuevas de la 0.32.0 van a ser Hockey,
+  Traductor, Oficina y Estudio. Probado en el simulador con un catálogo
+  de prueba y en `tests/store_host` y `tests/store_fw_host`; en la placa
+  se ve recién con el catálogo de la 0.32.0.
 - **Sueltos:** el avance sobre el ícono del inicio mientras una app se
   instala (fase 3); cortar el Wi-Fi en medio de una bajada, quitar una
   fuente y quitar un paquete suelto en la placa (`PRUEBAS-PLACA.md`); los

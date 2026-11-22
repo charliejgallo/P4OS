@@ -51,6 +51,9 @@ says what it is. It is made the same from the same files, byte for byte
 repeatable (measured over v0.26.0..v0.28.0, 2026-11-20), and a package that
 did not change keeps the version and the address it had in --previous
 instead of being uploaded again. "ver" is the release it first appeared in.
+"first" is the release the app itself was first listed in, kept from
+--previous, and the catalogue's "news" the newest of them: the store shows
+as new the apps of that release.
 
 What each app says of itself is in apps/<app>/store.json:
 
@@ -784,6 +787,14 @@ def cmd_build(a):
             pics.append({"url": url, "w": sh["w"], "h": sh["h"]})
         if pics:
             entry["shots"] = pics
+        # the release it was first listed in, for the store's "New": what
+        # --previous says, or this one for an app --previous does not have.
+        # Without a previous catalogue nothing is new: it is a first one, or
+        # a test's.
+        if old and old.get("first"):
+            entry["first"] = old["first"]
+        elif previous and not old:
+            entry["first"] = a.release
         if old and old["pkg"]["sha256"] == entry["pkg"]["sha256"]:
             # the same package as the last release's: it stays where it is
             entry["ver"] = old["ver"]
@@ -806,6 +817,11 @@ def cmd_build(a):
     head = {"schema": SCHEMA, "source": {k: a.source[k] for k in ("name", "by", "url", "about")},
             "cats": a.source["cats"], "release": a.release,
             "base": a.base or "https://github.com/%s/releases/download/" % (a.repo or a.source["repo"])}
+    # the newest release that brought an app: the ones first listed in it
+    # are the "New" ones, until a later release brings others
+    firsts = [e["first"] for e in lines if e.get("first")]
+    if firsts:
+        head["news"] = max(firsts, key=vkey)
     # in the order the source lists its categories: what "everything" shows first
     order = {c["id"]: i for i, c in enumerate(a.source["cats"])}
     lines.sort(key=lambda e: (order[e["cat"]], e["name"]["es"].lower()))

@@ -92,6 +92,14 @@ int main(int argc, char **argv)
                        app.system ? "*" : app.src > 0 ? "+" : app.origin == AOS_STORE_LOOSE ? "~" : app.origin == AOS_STORE_HAND ? "!" : "");
             continue;
         }
+        else if (!strcmp(a, "fresh")) {         /* the apps the store shows as new, one line */
+            aos_store_app_t app;
+            printf("fresh ");
+            for (int k = 0, n = 0; aos_store_app(k, &app); k++)
+                if (app.fresh) printf("%s%s", n++ ? "," : "", app.file);
+            printf("\n");
+            continue;
+        }
         else if (!strcmp(a, "refresh")) queued = aos_store_refresh();
         else if (!strcmp(a, "adopt")) queued = aos_store_adopt();
         else if (!strcmp(a, "replace")) queued = aos_store_replace_by_hand();

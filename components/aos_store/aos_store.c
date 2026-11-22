@@ -658,6 +658,7 @@ static bool catalog_load(err_t *e)
     size_t w = 0;
     for (int i = 0; i < nsrc && apps && all; i++) {
         bool head = false;
+        char news[28] = "";         /* this source's newest release with apps of its own */
         for (size_t at = 0; texts[i] && at < lens[i];) {
             size_t end = at;
             while (end < lens[i] && texts[i][end] != '\n') end++;
@@ -670,6 +671,7 @@ static bool catalog_load(err_t *e)
                 snprintf(found[i].home, sizeof found[i].home, "%s", jstr(src, "url"));
                 snprintf(found[i].base, sizeof found[i].base, "%s", jstr(o, "base"));
                 snprintf(found[i].release, sizeof found[i].release, "%s", jstr(o, "release"));
+                snprintf(news, sizeof news, "%s", jstr(o, "news"));
                 found[i].loaded = head = keep = true;
                 if (i == 0) {
                     /* the system's firmware: the official source's to offer, and nobody else's */
@@ -712,6 +714,7 @@ static bool catalog_load(err_t *e)
                     snprintf(a->so_sha, sizeof a->so_sha, "%s", jstr(pkg, "so_sha256"));
                     a->pub.fits = (a->pub.system || jnum(o, "abi") == AOS_STORE_ABI) && fw_fits(a->pub.fw_min);
                     a->pub.src = i;
+                    a->pub.fresh = news[0] && !a->pub.system && !strcmp(jstr(o, "first"), news);
                     a->pub.line_off = (uint32_t)w;
                     a->pub.line_len = (uint32_t)(end - at);
                     found[i].apps++;

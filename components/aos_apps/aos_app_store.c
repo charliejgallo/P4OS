@@ -52,7 +52,7 @@
 #define ICON_MAX    512
 
 /* the chips that are not categories */
-enum { F_ALL = 0, F_UPDATES = -1, F_INSTALLED = -2, F_SOURCES = -3 };
+enum { F_ALL = 0, F_UPDATES = -1, F_INSTALLED = -2, F_SOURCES = -3, F_NEW = -4 };
 /* The second row of chips, by where an app comes from: any, what was handed
  * in as a package, what was copied by hand, or 1 + a source's index. */
 enum { O_ALL = 0, O_LOOSE = -1, O_HAND = -2 };
@@ -385,6 +385,7 @@ static bool shown(const item_t *it)
     if (!of_origin(it)) return false;
     if (S.filter == F_ALL) return true;
     if (S.filter == F_UPDATES) return it->st.state == AOS_STORE_UPDATE;
+    if (S.filter == F_NEW) return it->st.fresh;
     if (S.filter == F_INSTALLED) return installed(it) || it->st.state == AOS_STORE_SET_ASIDE;
     return S.filter - 1 < S.ncats && !strcmp(it->cat, S.cats[S.filter - 1].id);
 }
@@ -393,6 +394,14 @@ static int count_updates(void)
 {
     int n = 0;
     for (int i = 0; i < S.n; i++) n += S.items[i].st.state == AOS_STORE_UPDATE;
+    return n;
+}
+
+/* The apps of the newest release that brought any (aos_store.h, 'fresh'). */
+static int count_new(void)
+{
+    int n = 0;
+    for (int i = 0; i < S.n; i++) n += S.items[i].st.fresh;
     return n;
 }
 
@@ -629,11 +638,16 @@ static void row(lv_obj_t *parent, int i)
     lv_obj_set_width(name, lv_pct(100));
     lv_label_set_long_mode(name, LV_LABEL_LONG_MODE_DOTS);
     lv_obj_set_height(name, lv_font_get_line_height(aos_font_body));
-    char whose[300], lt[200];
+    char whose[300], lt[200], fresh[340];
     aos_store_source_t sr;
     if (it->st.src > 0 && aos_store_source(it->st.src, &sr)) snprintf(whose, sizeof whose, "%s · %s", sr.name, it->about);
     else if (it->st.src < 0) snprintf(whose, sizeof whose, "%s", loose_text(it, lt));
     else snprintf(whose, sizeof whose, "%s", it->about);
+    /* a new one says so before what it is, except under "New", where all are */
+    if (it->st.fresh && S.filter != F_NEW && !installed(it)) {
+        snprintf(fresh, sizeof fresh, "%s · %s", _("Nueva"), whose);
+        snprintf(whose, sizeof whose, "%s", fresh);
+    }
     lv_obj_t *about = aos_label(t, it->st.state == AOS_STORE_SET_ASIDE ? _("Quedó apartada: hizo caer la placa") : whose,
                                 aos_font_caption, it->st.state == AOS_STORE_SET_ASIDE ? AOS_C_ORANGE : AOS_C_DIM);
     lv_obj_set_width(about, lv_pct(100));
@@ -653,6 +667,7 @@ static void row(lv_obj_t *parent, int i)
 static void build_list(lv_obj_t *page)
 {
     char buf[64];
+    if (S.filter == F_NEW && !count_new()) S.filter = F_ALL;
     lv_obj_t *chips = chip_row(page, 76);
     chip(chips, _("Todo"), F_ALL);
     int ups = count_updates();
@@ -660,6 +675,9 @@ static void build_list(lv_obj_t *page)
         snprintf(buf, sizeof buf, "%s  %d", _("Actualizaciones"), ups);
         chip(chips, buf, F_UPDATES);
     }
+    /* "New" before the categories, while a source has apps that are (a
+     * catalogue that no longer has any took the filter with it, above) */
+    if (count_new()) chip(chips, _("Nuevas"), F_NEW);
     for (int i = 0; i < S.ncats; i++) chip(chips, S.cats[i].name, 1 + i);
     chip(chips, _("Instaladas"), F_INSTALLED);
     /* a dot on it while the portal's proposal waits for an answer */

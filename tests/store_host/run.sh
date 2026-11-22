@@ -215,6 +215,23 @@ def owned(card):
     open(card + "/web/hello.js", "w").write("theirs")
     json.dump({"file": "other", "id": "x.other", "files": [{"path": "web/hello.js"}], "packs": []}, open(card + "/apps/.store/other.json", "w"))
 bad_case("a file that is another package's", pre=owned, expect="belongs to other")
+# "first" and "news": the release an app was first listed in, kept from --previous
+def gen(release, out, previous, only):
+    return subprocess.run([sys.executable, P4 + "/tools/gen_store.py", "build", "--release", release, "--out", out, "--built", BUILT,
+                           "--only", only, "--base", head["base"], "--previous", previous] + dirs, capture_output=True, text=True)
+five = "dados,emulador,golf,pinball,mila"
+p0 = subprocess.run([sys.executable, P4 + "/tools/gen_store.py", "build", "--release", "v8.0.0", "--out", "n0", "--built", BUILT,
+                     "--only", five, "--base", head["base"]] + dirs, capture_output=True, text=True)
+h0, a0 = lines("n0/p4os-store.ndjson")
+check("a first catalogue: nothing is new", p0.returncode == 0 and "news" not in h0 and not any("first" in e for e in a0.values()), p0.stdout + p0.stderr)
+p1 = gen("v8.1.0", "n1", "n0/p4os-store.ndjson", five + ",hello_app")
+h1, a1 = lines("n1/p4os-store.ndjson")
+check("an app the previous one did not list: first seen now", p1.returncode == 0 and h1.get("news") == "v8.1.0"
+      and a1["hello_app"]["first"] == "v8.1.0" and sum("first" in e for e in a1.values()) == 1, p1.stdout + p1.stderr)
+p2 = gen("v8.2.0", "n2", "n1/p4os-store.ndjson", five + ",hello_app")
+h2, a2 = lines("n2/p4os-store.ndjson")
+check("the next release, with no new app: it is still the new one", p2.returncode == 0 and h2.get("news") == "v8.1.0"
+      and a2["hello_app"]["first"] == "v8.1.0" and sum("first" in e for e in a2.values()) == 1, p2.stdout + p2.stderr)
 sys.exit(1 if fails else 0)
 PY
 echo "all passed"

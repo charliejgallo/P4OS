@@ -3248,6 +3248,9 @@ function pageTienda() {
       h('div', { class: 'btns', style: 'margin-top:6px' }, ask,
         h('button', { class: 'btn', onclick: async () => { if (!ask.value.trim()) return; try { st = await post('store/propose', { url: ask.value.trim() }); ask.value = ''; draw(); toast(tr('Propuesta: ahora aceptala en la placa (Tienda, Fuentes)')); } catch (x) { toast(x.message, true); } } }, tr('Proponer'))));
     const cats = (head && head.cats) || [];
+    // the apps of the newest release that brought any
+    const fresh = st.apps.some(a => a.new);
+    if (filter === '*' && !fresh) filter = '';
     // by where it comes from, once there is more than the official source to tell apart
     const loose = st.apps.some(a => a.origin === 'package'), nsrc = (st.sources || []).length;
     if ((from === 'p' && !loose) || (from === 'h' && !hand) || (/^\d+$/.test(from) && +from >= nsrc)) from = '';
@@ -3259,6 +3262,7 @@ function pageTienda() {
     const sel = h('select', { onchange: e => { filter = e.target.value; draw(); } },
       h('option', { value: '' }, tr('Todo')), h('option', { value: '+', selected: filter === '+' }, tr('Instaladas')),
       ups ? h('option', { value: '!', selected: filter === '!' }, tr('Actualizaciones')) : null,
+      fresh ? h('option', { value: '*', selected: filter === '*' }, tr('Nuevas')) : null,
       cats.map(c => h('option', { value: c.id, selected: filter === c.id }, L(c.name))));
     const q = h('input', { type: 'search', placeholder: tr('Buscar'), value: text, oninput: e => { text = e.target.value.toLowerCase(); drawList(by); } });
     put(list, h('div', { class: 'btns', style: 'margin:14px 0 10px' }, sel, org, q), h('div', { id: 'tdl' }));
@@ -3274,7 +3278,8 @@ function pageTienda() {
       if (/^\d+$/.test(from) && a.src !== +from) return false;
       if (filter === '+' && a.state === 'absent') return false;
       if (filter === '!' && a.state !== 'update') return false;
-      if (filter && filter !== '+' && filter !== '!' && e.cat !== filter) return false;
+      if (filter === '*' && !a.new) return false;
+      if (filter && filter !== '+' && filter !== '!' && filter !== '*' && e.cat !== filter) return false;
       return !text || (L(e.name) + ' ' + L(e.about) + ' ' + L(e.desc) + ' ' + e.file).toLowerCase().includes(text);
     });
     put(box, rows.length ? rows.map(e => card(e, by.get(e.file))) : h('div', { class: 'card pad muted' }, cat.length ? tr('Nada por acá') : tr('Todavía no hay catálogo: "Buscar de nuevo" lo trae.')));

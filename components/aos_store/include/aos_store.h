@@ -59,6 +59,8 @@ typedef struct {
     bool     fits;          /* this firmware can run it (ABI and fw_min) */
     int      src;           /* which source lists it: 0 is the official one, -1 when none does */
     aos_store_origin_t origin;
+    bool     fresh;         /* new in its source: first listed in the newest release that
+                             * brought apps (the catalogue's "news" and the app's "first") */
     bool     system;        /* a part of the system and not an app: files that go where
                              * the system reads them (aos_store.c, "System parts") */
     uint32_t line_off;      /* its line in aos_store_catalog()'s text */

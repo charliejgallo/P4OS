@@ -22,8 +22,17 @@ is made of.
 **The list.** One row an app: its icon, a line about it, and a button that
 says what would happen: **Get**, **Update**, **Open**. The chips on top
 are the kinds of app (Games, Workshop, Network, Sound and picture, Create,
-Utilities, Programming), **Updates** when there are any, **Installed**,
-and **Sources**.
+Utilities, Programming), **Updates** when there are any, **New**,
+**Installed**, and **Sources**.
+
+**New** are the apps of the newest release that brought any: they stay
+there until a later release brings others, and in the whole list each says
+"New" before its line until it is installed. The portal's Store page has
+the same filter.
+
+<p>
+  <img src="img/app-store-new.png" width="230" alt="The Store's New chip: Board games, Table Football, Solitaire, Sudoku, Flights and Stocks, each with Get">
+</p>
 
 **An app's page.** Its size (with the packs it cannot start without), its
 version, and a row of tags worked out from its code: 3D, Art packs,
@@ -245,7 +254,13 @@ a line. The first is the source's own:
 ```
 
 `base` is where every other address of the catalogue starts from. `fw` is
-read from the official source only. Then a line for each app:
+read from the official source only. `"news":"v0.32.0"`, when it is there,
+is the newest release that brought an app: the apps whose line says
+`"first":"v0.32.0"` are the store's **New** ones. `tools/gen_store.py`
+writes both from `--previous`: an app the previous catalogue did not list
+is first seen in the release being made, and keeps that from then on. A
+first catalogue, with no previous one, has nothing new. Then a line for
+each app:
 
 ```json
 {"id":"demo.bastion","file":"bastion","name":{"es":"Bastión","en":"Bastión"},

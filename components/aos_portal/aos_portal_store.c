@@ -7,7 +7,9 @@
  *   GET  /api/store                its state: the job in hand and its
  *                                  progress, how the last one ended, the
  *                                  catalogue's source and release, and every
- *                                  app: {file, id, ver, have, state, fits}
+ *                                  app: {file, id, ver, have, state, fits,
+ *                                  and "new" when it is of the newest
+ *                                  release that brought apps}
  *                                  (state: absent, installed, update, by_hand,
  *                                  or set_aside: it made the board fall while
  *                                  loading; installing it again is the way back)
@@ -246,6 +248,7 @@ static void store_state(aos_httpd_req_t *r, int status, const char *error)
         cJSON_AddNumberToObject(e, "src", a.src);
         cJSON_AddStringToObject(e, "origin", a.origin == AOS_STORE_LOOSE ? "package" : a.origin == AOS_STORE_HAND ? "hand" : "source");
         if (a.system) cJSON_AddTrueToObject(e, "system");
+        if (a.fresh) cJSON_AddTrueToObject(e, "new");
         cJSON_AddItemToArray(apps, e);
     }
     reply(r, status, o);

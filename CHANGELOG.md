@@ -44,6 +44,12 @@
   stays, their packs are not downloaded again, and the extras a person had
   copied are kept as the app's when they are the catalogue's. On the
   board: 39 apps in four and a half minutes, with no pack downloaded.
+- **"New" in the Store.** A chip beside the kinds of app, on the board
+  and in the portal's page, with the apps of the newest release that
+  brought any; in the whole list they say "New" until installed. The
+  catalogue says in which release each app was first listed
+  ([docs/STORE.md](docs/STORE.md)); a firmware from before reads it as it
+  always did.
 - **Vuelos found no aircraft on the board.** It named 1.5 MB for each
   reading's answer and 1.1 MB for each map tile, the firmware set that
   aside in one piece before asking, and with the app's own buffers the
