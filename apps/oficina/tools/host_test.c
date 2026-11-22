@@ -2,7 +2,7 @@
  * P4OS - Office: the formats on the Mac, without LVGL.
  *
  *     cc -DOF_HOST -I apps/oficina/main apps/oficina/tools/host_test.c \
- *        apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive,crypt,pdf,pdftext,pdfw,slides,pptx,odp}.c -o host_test
+ *        apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive,crypt,pdf,pdftext,pdfw,slides,pptx,odp,cfb,doc97,xls,ppt,iwa}.c -o host_test
  *     ./host_test dump  book.xlsx                      the cells, shown and as typed
  *     ./host_test edit  book.xlsx out.xlsx 'A1=12' 'Resumen!B2==A1*2' ...
  *     ./host_test conv  book.csv out.xlsx              save in another format
@@ -22,6 +22,7 @@
 #include "of_arc.h"
 #include "of_pdf.h"
 #include "of_slides.h"
+#include "of_cfb.h"
 
 #include <stdio.h>
 #include <stdlib.h>

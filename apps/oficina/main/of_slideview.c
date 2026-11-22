@@ -146,6 +146,23 @@ static void pic_decode(spic_t *p)
 {
     const sl_slide_t *s = &V.dk->s[p->s];
     const char *name = p->k < 0 ? s->bg_pic : s->sh[p->k].pic;
+    int ow0 = 0, oh0 = 0;
+    if (name && V.dk->pic_files) {
+        /* a file of the card (a .ppt's pictures, in the cache) */
+        p->px = aos_hal_image_decode(name, 0, 0, p->want_w, p->want_h, true, &ow0, &oh0, NULL, NULL);
+        if (!p->px) { p->failed = true; return; }
+        p->w = ow0;
+        p->h = oh0;
+        memset(&p->dsc, 0, sizeof p->dsc);
+        p->dsc.header.magic = LV_IMAGE_HEADER_MAGIC;
+        p->dsc.header.cf = LV_COLOR_FORMAT_RGB565;
+        p->dsc.header.w = (uint32_t)ow0;
+        p->dsc.header.h = (uint32_t)oh0;
+        p->dsc.header.stride = (uint32_t)ow0 * 2;
+        p->dsc.data = (const uint8_t *)p->px;
+        p->dsc.data_size = (uint32_t)(ow0 * oh0 * 2);
+        return;
+    }
     int i = name ? of_zip_find(&V.dk->zip, name) : -1;
     if (i < 0) { p->failed = true; return; }
     const of_zentry_t *e = &V.dk->zip.e[i];

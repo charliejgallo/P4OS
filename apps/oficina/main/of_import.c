@@ -1305,6 +1305,37 @@ of_doc_t *of_iwork_load(const char *path, char *err, size_t errlen)
         of_bld_para(&b);
         of_bld_image(&b, target, file, pw, ph);
     }
+    /* the text inside, after the picture */
+    {
+        extern bool of_iwork_text(of_bld_t *b, const of_zip_t *z, const char *folder, const char *ext);
+        of_doc_t *tmp = of_doc_new(OF_DOC_RO);
+        of_bld_t tb;
+        of_bld_init(&tb, tmp);
+        bool dir = stat(path, &st) == 0 && S_ISDIR(st.st_mode);
+        if (tmp && of_iwork_text(&tb, dir ? NULL : &d->zip, dir ? path : NULL, of_ext(path))) {
+            b.align = 0;
+            b.heading = 2;
+            b.cur = -1;
+            of_bld_para(&b);
+            const char *h = !strcmp(of_ext(path), "numbers") ? _("Los textos de sus tablas") : _("Su texto");
+            of_bld_text(&b, h, strlen(h));
+            b.heading = 0;
+            b.cur = -1;
+            /* the paragraphs found, copied into this document */
+            for (int i = 0; i < tmp->np; i++) {
+                of_para_t *q = &tmp->p[i];
+                if (!q->len) continue;
+                b.heading = q->heading;
+                b.list = q->list;
+                b.cur = -1;
+                of_bld_para(&b);
+                of_bld_text(&b, q->txt, (size_t)q->len);
+            }
+            b.heading = 0;
+            b.list = 0;
+        }
+        of_doc_free(tmp);
+    }
     of_bld_done(&b);
     snprintf(d->kind, sizeof d->kind, "iWork");
     return d;

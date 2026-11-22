@@ -91,7 +91,8 @@ typedef struct of_deck_s {
     uint8_t    *file;
     size_t      len;
     of_zip_t    zip;
-    char        kind[8];        /* "PPTX", "ODP" */
+    char        kind[8];        /* "PPTX", "ODP", "PPT" */
+    bool        pic_files;      /* pictures are files of the card (a .ppt's, in the cache), not parts */
 } of_deck_t;
 
 of_deck_t *of_deck_load(const char *path, char *err, size_t errlen);

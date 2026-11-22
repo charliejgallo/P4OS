@@ -1749,9 +1749,17 @@ static void menu_open(void)
 /* Saving                                                                      */
 /* -------------------------------------------------------------------------- */
 
+static void save_as_open(void);
+
 bool of_sheet_save(void)
 {
     if (V.editing) edit_commit(0, 0);
+    if (V.b->fmt == OF_FMT_XLS) {
+        /* the old binary is read, not written: a copy */
+        of_app_toast(_("Un .xls no se puede guardar: se guarda una copia como xlsx u ods"));
+        save_as_open();
+        return false;
+    }
     char err[64] = "";
     int fmt = V.b->fmt;
     if (fmt == OF_FMT_NONE) fmt = of_fmt_from_ext(of_ext(V.path));
@@ -1776,8 +1784,9 @@ bool of_sheet_save_recovery(void)
     char p[340], err[64];
     const char *e = of_ext(V.path);
     int bl = (int)strlen(V.path) - (e[0] ? (int)strlen(e) + 1 : 0);
-    snprintf(p, sizeof p, "%.*s (sin guardar).%s", bl > 280 ? 280 : bl, V.path, e[0] ? e : "xlsx");
-    int fmt = V.b->fmt ? V.b->fmt : of_fmt_from_ext(e);
+    bool xls = V.b->fmt == OF_FMT_XLS;
+    snprintf(p, sizeof p, "%.*s (sin guardar).%s", bl > 280 ? 280 : bl, V.path, xls ? "xlsx" : e[0] ? e : "xlsx");
+    int fmt = xls ? OF_FMT_XLSX : V.b->fmt ? V.b->fmt : of_fmt_from_ext(e);
     return of_book_save(V.b, fmt, V.si, p, err, sizeof err);
 }
 

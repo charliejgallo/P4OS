@@ -332,7 +332,7 @@ text. In the simulator: typing, bold for the next letters, saving from the
 ### Build, install, pack
 
 ```
-tools/build_apps.sh oficina                      # oficina.so, 448 KB, 210 symbols
+tools/build_apps.sh oficina                      # oficina.so, 472 KB, 211 symbols
 python3 apps/oficina/tools/pack_fonts.py         # build/oficina_p4.pak, 877 KB (--sim: a copy in sim/sim_fs/apps)
 tools/install_apps.sh p4os.local oficina         # the .so, the pack and the page; restarts the board
 tools/install_lang.sh p4os.local en              # and de
@@ -379,7 +379,7 @@ calendars) or "Ver como árbol" (data files); from a read-only document,
 
 ```
 cc -DOF_HOST -I apps/oficina/main apps/oficina/tools/host_test.c \
-   apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive,crypt,pdf,pdftext,pdfw,slides,pptx,odp}.c -o /tmp/host_test
+   apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive,crypt,pdf,pdftext,pdfw,slides,pptx,odp,cfb,doc97,xls,ppt,iwa}.c -o /tmp/host_test
 python3 apps/oficina/tools/samples_read.py /tmp/r                # (and --en) every reader's sample, invented
 /tmp/host_test read /tmp/r/receta.rtf                            # the paragraphs read, with styles, links, pictures
 /tmp/host_test read /tmp/r/cuentos.epub /tmp/out.odt             # and a copy saved
@@ -531,13 +531,74 @@ slides); macOS's Quick Look renders the pptx's first slide with the same
 background colour the app works out. In the simulator: the column of slides
 for both, presenting and stepping, turned sideways, notes, a PDF copy.
 
-### Next: phase 6, the old binaries
+### Phase 6: the old binaries, and iWork's text (done, 2026-11-22)
 
-`.doc`, `.xls` and `.ppt`: one CFB (OLE2) reader for the three; the text of
-Word 97-2003 (the piece table), the values of Excel 97-2003 (BIFF8 records,
-shared strings, numbers, formulas' cached results), the text of PowerPoint
-97-2003 slides; read only, with "save a copy as" docx, xlsx or PDF. Then
-the text inside Pages and Numbers (IWA: Snappy and protobuf).
+One compound file (OLE2) reader (`of_cfb.c`: 512 and 4096-byte sectors,
+the FAT through the DIFAT chain, the directory, the mini stream; every
+chain walked with a step limit) under three readers. Office 95 and older,
+and encrypted files, are said so.
+
+- Word 97-2003 (`.doc`, `.dot`; `of_doc97.c`): the piece table (8-bit
+  Windows-1252 and UTF-16 pieces), character and paragraph properties
+  from the FKP pages and their sprms (bold, italics, underline,
+  strikethrough, colour by index or RGB, size, super- and subscript,
+  hidden text; alignment, table cells and rows, list items, outline
+  levels), headings by the style sheet's built-in identifiers (any
+  language), or by size when the writer kept no styles; fields show their
+  result (HYPERLINK as a link); footnotes at the end. Read only, saved as
+  a copy (docx, odt, txt, pdf).
+- Excel 97-2003 (`.xls`; `of_xls.c`): BIFF8. Shared strings (CONTINUE
+  records and their repeated width flag), number formats, fonts, cell
+  formats with the palette (bold, italics, underline, colour, solid fill,
+  alignment), 1904 dates, hidden sheets; numbers, RK, MULRK, strings,
+  booleans, errors, formulas' last results (not the formulas), column
+  widths, row heights, hidden rows and columns, merged cells, frozen
+  panes. Opens in the grid and is edited like any book; "Guardar" offers a
+  copy as xlsx or ods (or csv, pdf).
+- PowerPoint 97-2003 (`.ppt`, `.pps`; `of_ppt.c`): the current user, the
+  chain of edits and their persist directories (slides in their real
+  order), the slide size, and each slide's drawing: anchors, groups and
+  their coordinates, shape types, fill and line colours, pictures from the
+  BLIP store (JPEG, PNG, DIB as BMP) written to the cache, text of the
+  shapes or of the slide list with paragraph runs (level, bullet,
+  alignment) and character runs (bold, italics, underline, size, colour),
+  hidden slides, speaker notes. Shown on the slides screen of phase 5.
+- Pages, Numbers and Keynote (`of_iwa.c`): their text under the preview
+  picture. IWA is Snappy-compressed protobuf; no schema is needed:
+  every archive says its messages' types and lengths; text storages (type
+  2001) keep their text in field 3 and tables' string lists (6005) their
+  strings in their entries. Pages: the document's text; Keynote: each
+  slide file's (in the package's order, not the show's); Numbers: the
+  strings of its tables, as a list. Formatting and places are not read.
+
+### Checking phase 6
+
+```
+textutil -convert doc -output /tmp/old/receta.doc /tmp/r/receta.rtf   # macOS writes Word 97
+python3 apps/oficina/tools/samples_old.py /tmp/old                   # cuentas.xls, charla.ppt, folleto.pages... (and --en)
+/tmp/host_test docdump /tmp/old/receta.doc
+/tmp/host_test dump /tmp/old/cuentas.xls
+/tmp/host_test deck /tmp/old/charla.ppt /tmp/charla.pdf
+/tmp/host_test read /tmp/old/folleto.pages
+```
+
+Checked on 2026-11-22: three `.doc` written by macOS's `textutil` (from the
+RTF, HTML and docx samples: formatting, lists, tables, a link, a title);
+the invented `.xls` (two sheets, one hidden; a string across a CONTINUE;
+dates, currency, percent; formulas' results; merged cells; frozen rows), a
+copy of it saved as xlsx; the invented `.ppt` (slide list and drawings,
+groups, a picture, notes, a hidden slide); invented Pages, Numbers and
+Keynote packages. Under AddressSanitizer with phases 1 to 5 again; in the
+simulator, the four kinds opened. The `.xls` and `.ppt` samples are hand
+made (no tool on the Mac writes them), so a file from real Office may
+show what they do not cover.
+
+### Next: phase 7, PDF pages drawn
+
+The pages as they are, next to the reflowed text: paths, fills and strokes,
+images, and text in the PDF's own fonts (TrueType and CFF rasterised with
+stb_truetype; the standard 14 with the pack's letters), as the module
+`oficina_pdf.so`.
 
 Left over from phase 4: PDF links and the outline (bookmarks) are not used
 yet (the contents come from the headings found); text in other scripts

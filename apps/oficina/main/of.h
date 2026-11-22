@@ -254,7 +254,7 @@ typedef struct {
     uint32_t from;              /* an added one: the xf it was made from */
 } of_xf_t;
 
-enum { OF_FMT_NONE = 0, OF_FMT_CSV, OF_FMT_TSV, OF_FMT_XLSX, OF_FMT_ODS };
+enum { OF_FMT_NONE = 0, OF_FMT_CSV, OF_FMT_TSV, OF_FMT_XLSX, OF_FMT_ODS, OF_FMT_XLS };   /* XLS: read only, saved as a copy */
 
 typedef struct of_book of_book_t;
 

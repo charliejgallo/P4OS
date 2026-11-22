@@ -496,13 +496,19 @@ of_para_t *of_para_clone(const of_para_t *s)
 bool of_is_doc_ext(const char *e)
 {
     return !strcmp(e, "docx") || !strcmp(e, "docm") || !strcmp(e, "dotx") || !strcmp(e, "odt") || !strcmp(e, "ott") ||
-           !strcmp(e, "fodt");
+           !strcmp(e, "fodt") || !strcmp(e, "doc") || !strcmp(e, "dot");
 }
 
 of_doc_t *of_doc_load(const char *path, char *err, size_t errlen)
 {
     const char *e = of_ext(path);
     of_doc_t *d = NULL;
+    if (!strcmp(e, "doc") || !strcmp(e, "dot")) {
+        extern of_doc_t *of_doc97_load(const char *path, char *err, size_t errlen);
+        d = of_doc97_load(path, err, errlen);
+        if (d) of_doc_number(d);
+        return d;
+    }
     if (!strcmp(e, "odt") || !strcmp(e, "ott") || !strcmp(e, "fodt")) d = of_odt_load(path, err, errlen);
     else d = of_docx_load(path, err, errlen);
     if (d) of_doc_number(d);

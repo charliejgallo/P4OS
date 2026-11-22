@@ -105,17 +105,24 @@ void of_deck_free(of_deck_t *dk)
 
 bool of_is_deck_ext(const char *e)
 {
-    return !strcmp(e, "pptx") || !strcmp(e, "ppsx") || !strcmp(e, "potx") || !strcmp(e, "pptm") || !strcmp(e, "odp") || !strcmp(e, "otp");
+    return !strcmp(e, "pptx") || !strcmp(e, "ppsx") || !strcmp(e, "potx") || !strcmp(e, "pptm") || !strcmp(e, "odp") || !strcmp(e, "otp") ||
+           !strcmp(e, "ppt") || !strcmp(e, "pps") || !strcmp(e, "pot");
 }
 
 uint8_t *of_deck_part(const of_deck_t *dk, const char *name, size_t *len)
 {
+    if (dk->pic_files) return of_file_read(name, len, 32u * 1024 * 1024);
     int i = of_zip_find(&dk->zip, name);
     return i < 0 ? NULL : of_zip_read(&dk->zip, i, len);
 }
 
 of_deck_t *of_deck_load(const char *path, char *err, size_t errlen)
 {
+    const char *x = of_ext(path);
+    if (!strcmp(x, "ppt") || !strcmp(x, "pps") || !strcmp(x, "pot")) {
+        extern struct of_deck_s *of_ppt_load(const char *path, char *err, size_t errlen);
+        return of_ppt_load(path, err, errlen);
+    }
     of_deck_t *dk = of_alloc(sizeof *dk);
     if (!dk) { snprintf(err, errlen, "memory"); return NULL; }
     size_t n;
@@ -238,7 +245,7 @@ struct of_doc_s *of_deck_to_doc(const of_deck_t *dk, bool notes)
                 of_bld_para(&b);
                 float w = sh->w, hh = sh->h;
                 if (w > 400) { hh = hh * 400 / w; w = 400; }
-                of_bld_image(&b, sh->pic, false, (int)w, (int)hh);
+                of_bld_image(&b, sh->pic, dk->pic_files, (int)w, (int)hh);
                 b.align = 0;
                 b.cur = -1;
             } else if (sh->kind == SL_TABLE && sh->cells) {
@@ -299,7 +306,7 @@ struct of_doc_s *of_deck_to_doc(const of_deck_t *dk, bool notes)
     }
     of_bld_done(&b);
     /* the pictures are parts of the deck's package: the document carries it */
-    d->file = of_alloc(dk->len + 1);
+    d->file = dk->len ? of_alloc(dk->len + 1) : NULL;
     if (d->file) {
         memcpy(d->file, dk->file, dk->len);
         d->file_len = dk->len;

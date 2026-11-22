@@ -205,7 +205,7 @@ static const char *const TEXT_EXT[] = {
     "sql", "srt", "vtt", "tex", "bib", "properties", "gitignore", "diff", "patch", "svg", "kml", "gpx",
     "vcf", "ics", "eml", "nfo", "rst", "org", "env", "bat", "ps1", "cmake", "mk", "s", "asm", "pas", "bas" };
 static const char *const LATER_EXT[] = {
-    "doc", "ppt", "xls" };
+    "wps", "wpd", "123", "wk1" };
 
 static int kind_of(const char *path, bool dir)
 {
@@ -351,7 +351,7 @@ static void pw_done(const char *text, void *ud)
     char err[32] = "";
     of_doc_t *d = of_pdf_load(s_pw_path, text, err, sizeof err);
     if (!d) {
-        of_app_toast(!strcmp(err, "password") ? _("La contraseña no es esa") : _("No se pudo leer el documento"));
+        of_app_toast(!strcmp(err, "password") ? _("La contraseña no es esa") : !strcmp(err, "old") ? _("Es del formato de Office 95 o anterior: la app no lo lee") : _("No se pudo leer el documento"));
         return;
     }
     show_doc(s_pw_path, d);
@@ -386,7 +386,7 @@ void of_app_open_as(const char *path, int how)
         of_deck_t *dk = of_deck_load(p, err, sizeof err);
         if (!dk) {
             of_app_toast(!strcmp(err, "encrypted") ? _("El archivo tiene contraseña: la app no lo puede abrir")
-                                                   : _("No se pudo leer la presentación"));
+                                                   : !strcmp(err, "old") ? _("Es del formato de Office 95 o anterior: la app no lo lee") : _("No se pudo leer la presentación"));
             return;
         }
         clear_screen();
@@ -411,7 +411,7 @@ void of_app_open_as(const char *path, int how)
         }
         if (!d) {
             of_app_toast(!strcmp(err, "encrypted") ? _("El archivo tiene contraseña: la app no lo puede abrir")
-                                                   : _("No se pudo leer el documento"));
+                                                   : !strcmp(err, "old") ? _("Es del formato de Office 95 o anterior: la app no lo lee") : _("No se pudo leer el documento"));
             return;
         }
         if (!show_doc(p, d)) return;
@@ -420,7 +420,7 @@ void of_app_open_as(const char *path, int how)
         of_book_t *b = of_book_load(p, err, sizeof err);
         if (!b) {
             of_app_toast(!strcmp(err, "encrypted") ? _("El archivo tiene contraseña: la app no lo puede abrir")
-                                                   : _("No se pudo leer la planilla"));
+                                                   : !strcmp(err, "old") ? _("Es del formato de Office 95 o anterior: la app no lo lee") : _("No se pudo leer la planilla"));
             return;
         }
         clear_screen();
