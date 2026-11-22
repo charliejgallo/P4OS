@@ -164,12 +164,17 @@ permiso (`v0.31.0-16-g66168c5`), probado por el portal:
 - [x] Con el oído, por el usuario (2026-11-22): la música suena bien, la
       radio también, y la Grabadora grabó un audio de prueba que se
       escucha bien. Con eso entró a `main` (`420af9a`).
-- [ ] **Estudio en la placa, con el bus corto:** instalada a mano el
+- [x] **Estudio en la placa, con el bus corto:** instalada a mano el
       2026-11-22 (rama `estudio-baja-latencia`: su rama sobre `main` y
       tres cambios en `es_engine.c` para abrir con `aos_hal_spk_open_low`).
-      Tocar el teclado y los pads: si la demora se siente; en Canción →
-      Audio, las faltas con Baja (4 ms), Normal (8) y Segura (20); que al
-      abrir y cerrar la app no haga un ruido feo.
+      **Tocada por el usuario: "se siente bien".** Mirado después por el
+      portal, con la app abierta: ninguna caída, la pantalla sin un cuadro
+      tardío (17,4 ms el mayor intervalo), RAM interna libre 214 KB
+      (154 KB de mínima desde el arranque), y el hilo de audio de la app
+      con un cuarto de un núcleo.
+- [ ] Estudio: las faltas que muestra Canción → Audio con Baja (4 ms),
+      Normal (8) y Segura (20) tocando de verdad, y si hace ruido al
+      abrir y cerrar.
 - [ ] Con Música sonando y "Mezclar música y apps": el tono sale por el
       camino de siempre (`latency_ms` 40) y la música no se corta.
 - [ ] Empezar a grabar con el bus corto abierto: la grabación sale entera
