@@ -41,7 +41,7 @@ written for the app; the line counts are estimates.
 | Modules | `aos_hal_module_open/_sym/_close` | the big or separately licensed parts (below) |
 
 There is no FreeType in the firmware: a page drawn with its own fonts needs
-`stb_truetype` in the app (phase 7).
+a font reader in the app (phase 7 wrote its own: `of_pdffont.c`).
 
 ### Libraries considered
 
@@ -51,8 +51,8 @@ There is no FreeType in the firmware: a page drawn with its own fonts needs
 | Dibujo's deflate | MIT (P4OS) | 150 lines | deflate | **in**, prefixed |
 | yxml | MIT | 1 000 lines | XML | not needed: the app needs byte offsets of every element to splice, so its own pull tokenizer (300 lines) is simpler |
 | md4c | MIT | 6 500 lines | Markdown to blocks | **phase 3**, for the rendered view (CommonMark and GitHub tables) |
-| stb_truetype | MIT or public domain | 5 000 lines | TrueType and OpenType-CFF glyphs | **phase 7**, PDF pages drawn with their own fonts |
-| nanosvg + nanosvgrast | zlib | 3 000 lines | SVG pictures, and an anti-aliased path filler | **phase 7**: SVG in documents, and PDF's paths |
+| stb_truetype | MIT or public domain | 5 000 lines | TrueType and OpenType-CFF glyphs | not taken in phase 7: it says itself it does no range checking ("do not use this on untrusted font files"), and a PDF's fonts are exactly that; it has no Type 1 either. Own reader, every offset checked (`of_pdffont.c`, 1 300 lines) |
+| nanosvg + nanosvgrast | zlib | 3 000 lines | SVG pictures, and an anti-aliased path filler | not taken for PDF's paths: PDF needs both winding rules, clipping and strokes with dashes, so the filler is own (`of_pdfdraw.c`); SVG in documents, later |
 | pdfio (Michael Sweet) | Apache-2.0 | 10 000 lines, needs zlib | PDF objects, xref, encryption | not taken: the own parser (of_pdf.c, 1 000 lines) with miniz's inflate already here, and own MD5, RC4, AES and SHA-2 (of_crypt.c, 400 lines) |
 | MuPDF | AGPL-3.0 | several MB | PDF, EPUB, XPS | no: too big for the card's RAM budget and its licence would make the whole app AGPL |
 | libxls | BSD-2 | 3 000 lines | `.xls` | an own BIFF8 reader is the same size and shares the CFB reader with `.doc` |
@@ -62,9 +62,12 @@ There is no FreeType in the firmware: a page drawn with its own fonts needs
 | libyaml, tomlc99 | MIT | 10 000, 2 500 lines | YAML and TOML trees | no: a tree view needs only the indentation and the keys; own reading (500 lines for both) |
 | gifdec | public domain | 600 lines | GIF pictures in HTML and EPUB | maybe, phase 3 |
 
-Nothing in the plan is GPL. The only thing big enough for a module is the
-PDF page renderer (phase 7): `oficina_pdf.so` on the card, loaded when a page
-is drawn, so the app stays small for everyone who only opens spreadsheets.
+Nothing in the plan is GPL. The plan had the PDF page renderer (phase 7) as
+a module, `oficina_pdf.so`, loaded when a page is drawn. It went into the
+app instead: a module sees only the firmware's symbols, and the renderer
+leans on the app's PDF parser, decryption, inflate and font tables, so a
+module would carry a second copy of all of it (about twice its size); in
+the app it is 72 KB.
 
 ### Format by format
 
@@ -131,11 +134,9 @@ The point of the models is that converting comes almost free:
 5. **Slides**: `.pptx` and `.odp`.
 6. **The old binaries**: `.doc`, `.xls`, `.ppt` (one CFB reader for the
    three); the text inside Pages and Numbers.
-7. **PDF pages drawn** with their own fonts and paths, as the module
-   `oficina_pdf.so` (stb_truetype, nanosvgrast, the hardware JPEG). This is
-   the expensive one: embedded TrueType and CFF fonts are fine with
-   stb_truetype, Type 1 fonts need a charstring decoder of their own (600
-   lines), and the 14 standard fonts need substitutes in the pack.
+7. **PDF pages drawn** with their own fonts and paths (done: own font
+   reader for TrueType, CFF and Type 1, own filler, the system's JPEG; the
+   fonts a file names and does not carry, with the firmware's Inter).
 
 ---
 
@@ -332,7 +333,7 @@ text. In the simulator: typing, bold for the next letters, saving from the
 ### Build, install, pack
 
 ```
-tools/build_apps.sh oficina                      # oficina.so, 472 KB, 211 symbols
+tools/build_apps.sh oficina                      # oficina.so, 544 KB, 230 symbols
 python3 apps/oficina/tools/pack_fonts.py         # build/oficina_p4.pak, 877 KB (--sim: a copy in sim/sim_fs/apps)
 tools/install_apps.sh p4os.local oficina         # the .so, the pack and the page; restarts the board
 tools/install_lang.sh p4os.local en              # and de
@@ -593,12 +594,93 @@ simulator, the four kinds opened. The `.xls` and `.ppt` samples are hand
 made (no tool on the Mac writes them), so a file from real Office may
 show what they do not cover.
 
-### Next: phase 7, PDF pages drawn
+### Phase 7: PDF pages drawn (done, 2026-11-22)
 
-The pages as they are, next to the reflowed text: paths, fills and strokes,
-images, and text in the PDF's own fonts (TrueType and CFF rasterised with
-stb_truetype; the standard 14 with the pack's letters), as the module
-`oficina_pdf.so`.
+![A PDF's pages as printed](../../docs/img/app-oficina-pdf.png)
+
+The pages as they are printed, beside the reflowed text. A PDF opens the
+way the last one was seen: "Ver las páginas como se imprimen" in the
+reflowed text's menu, "Ver el texto acomodado" in the pages' menu.
+
+- **The screen** (`of_pdfview.c`): the pages in a column at the screen's
+  width, lying down too; a drag scrolls with momentum, two fingers or a
+  double tap zoom up to four times, the page's number shows while it
+  moves, the menu goes to a page, back to the width, and says the size.
+  The pages are drawn in the system's worker (`aos_hal_worker_start`),
+  never in LVGL's task: the whole page while it is 2.6 million pixels or
+  less, else the part in sight and half a screen around; four pictures
+  are kept (the pages around the one in sight are drawn ahead), and while
+  a new zoom is drawn the picture there is shows scaled.
+- **The painter** (`of_pdfdraw.c`, no LVGL): the content stream with its
+  graphics state; paths flattened and filled with anti-aliasing (five rows
+  of samples a pixel, each crossed exactly; rectangles exactly; rules
+  never thinner than a pixel), nonzero and even-odd; strokes as polygons
+  with caps, joins, miter limit and dashes; clipping by rectangles and by
+  any path (a coverage mask); alpha from ExtGState. Colour: Gray, RGB,
+  CMYK, ICCBased by its components, CalGray/CalRGB, Lab, Indexed,
+  Separation and DeviceN through their functions (types 0, 2, 3 and 4, a
+  small PostScript calculator). Shadings axial, radial and
+  function-based, by `sh` and as patterns; tiling patterns, coloured and
+  uncoloured (the cell drawn once at the size it shows). Pictures: samples
+  of 1 to 16 bits in any colour space, Decode arrays, JPEG through the
+  system's decoder (straight from the file when it is there as it is),
+  stencil masks in the fill colour, soft masks, /Mask images and colour
+  keys, inline pictures, shrunk while read to what they cover; enlarged a
+  little, smoothed, a lot (icons, dots), as squares. Text in its render
+  modes (fill, stroke, both, invisible), with rise, scaling and turned;
+  Type 3 fonts run their glyphs' streams; form XObjects with their boxes;
+  annotations' appearances (with their states). A picture the app cannot
+  read (JPEG 2000, JBIG2, fax) is a grey box.
+- **The fonts** (`of_pdffont.c`): TrueType (simple and composite glyphs,
+  cmaps 0, 4, 6 and 12; symbolic fonts through (3,0) at F0xx, CID fonts
+  through CIDToGIDMap), CFF bare, CID-keyed (FDArray, FDSelect) or inside
+  OpenType (Type 2 charstrings: subroutines, hints skipped, flex, seac as
+  an accent), Type 1 (PFB or not, binary or hex eexec, Subrs,
+  CharStrings, flex through the othersubrs, seac). Codes to glyphs as the
+  format says: /Differences' names, the named encodings by Unicode, the
+  font's own encoding, the ToUnicode text last; embedded Encoding CMaps
+  (cidrange, cidchar). Glyphs are cached by size and quarter pixel. Every
+  offset read from a font is checked against its length. The fonts a file
+  names and does not carry (the standard 14, and any other) are drawn
+  with the firmware's Inter, taken out of LVGL's fonts on LVGL's side when
+  the screen opens, squeezed to the widths the file gives, a pixel bolder
+  for bold, slanted for italics.
+
+The reader of phase 4 got two fixes on the way: a damaged file that made
+the reader rebuild its table freed objects still in use (now kept until
+the file closes), and numbers out of range from a file became integers
+without a check.
+
+### Checking phase 7
+
+```
+python3 apps/oficina/tools/samples_draw.py /tmp/dr    # dibujo.pdf, imagenes.pdf, fuentes.pdf (fontTools; Pillow for the JPEG)
+/tmp/host_test render /tmp/dr/fuentes.pdf 1 1.2 /tmp/fuentes.png       # a page to PNG; compare with PDFKit's
+OF_PLAIN=1 python3 apps/oficina/tools/samples_draw.py /tmp/fz          # streams not compressed: to change bytes in them
+```
+
+Checked on 2026-11-22: the three new samples and every PDF of phases 4 to
+6 (the invented ones, the ones from cupsfilter, pango-view, rsvg-convert
+and tesseract, and the app's own exports) drawn on the Mac and compared
+with PDFKit's drawing of them (fuentes.pdf comes out better than PDFKit
+where a glyph is missing from the font); 1 310 pages under
+AddressSanitizer, and 600 copies of the samples with bytes changed in
+their streams (fonts, contents, pictures), drawn and read, without a
+fault. In the simulator: a PDF switched to pages and back, one opening in
+pages the next time, scrolling three pages, a double tap and a pinch,
+lying down. On the Mac a full page takes 10 to 50 ms; on the board it is
+not measured yet.
+
+### Left over
+
+From phase 7: mesh shadings (types 4 to 7) are not drawn, nor soft masks
+of groups, blend modes or knockout groups (painted as normal); hidden
+layers (optional content) are drawn; text modes that clip (4 to 7) do not
+clip; JPEG 2000, JBIG2 and fax pictures are grey boxes, and a CMYK JPEG
+is what the system's decoder makes of it; the fonts a file does not carry
+are all Inter (no serif, no monospaced); in the pages, links are not
+followed and the text cannot be selected or searched (the reflowed view
+does that); the board's speed is not measured.
 
 Left over from phase 4: PDF links and the outline (bookmarks) are not used
 yet (the contents come from the headings found); text in other scripts

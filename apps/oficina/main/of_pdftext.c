@@ -16,6 +16,7 @@
  */
 #include "of_doc.h"
 #include "of_pdf.h"
+#include "of_pdfi.h"
 
 #include <math.h>
 
@@ -30,9 +31,10 @@
 
 #define MAX_PAGES   2000
 #define MAX_PICS    400
-#define FL_BOLD     1
-#define FL_ITALIC   2
-#define FL_MONO     4
+
+/* a number from the file as an integer, never out of range */
+static inline int pvi(const pv_t *v, double def) { double d = pv_num(v, def); return d > -1.0e9 && d < 1.0e9 ? (int)d : 0; }
+static inline int di(double d) { return d > -1.0e9 && d < 1.0e9 ? (int)d : 0; }
 
 extern const char *(*of_tr)(const char *es);
 #define _(s) (of_tr ? of_tr(s) : (s))
@@ -138,7 +140,7 @@ static const struct { const char *n; uint16_t cp; } ACC[] = {
     { "Ocircumflex", 0xD4 }, { "Otilde", 0xD5 }, { "Odieresis", 0xD6 }, { "Ugrave", 0xD9 }, { "Uacute", 0xDA },
     { "Ucircumflex", 0xDB }, { "Udieresis", 0xDC }, { "Yacute", 0xDD } };
 
-static uint32_t glyph_cp(const char *n)
+uint32_t of_pdf_glyph_cp(const char *n)
 {
     if (!n[0]) return 0;
     if (!n[1] && ((n[0] >= 'a' && n[0] <= 'z') || (n[0] >= 'A' && n[0] <= 'Z'))) return (uint8_t)n[0];
@@ -160,7 +162,7 @@ static uint32_t glyph_cp(const char *n)
         char b[32];
         memcpy(b, n, (size_t)(dot - n));
         b[dot - n] = 0;
-        return glyph_cp(b);
+        return of_pdf_glyph_cp(b);
     }
     return 0;
 }
@@ -168,30 +170,6 @@ static uint32_t glyph_cp(const char *n)
 /* -------------------------------------------------------------------------- */
 /* Fonts                                                                       */
 /* -------------------------------------------------------------------------- */
-
-typedef struct { uint32_t code; char u[16]; } tuc_t;
-typedef struct { uint32_t lo, hi, cp; } tur_t;
-typedef struct { uint32_t lo, hi; float w; } cw_t;
-
-typedef struct {
-    int      key;               /* the font dictionary's object, or its address */
-    bool     type0, type3, ucs2;
-    struct { uint8_t len; uint32_t lo, hi; } cs[8];
-    int      ncs;
-    tuc_t   *uc;
-    int      nuc;
-    tur_t   *ur;
-    int      nur;
-    uint32_t enc[256];
-    float    w[256];
-    bool     has_w;
-    cw_t    *cw;
-    int      ncw;
-    float    dw;
-    const int16_t *std;
-    uint8_t  flags;
-    double   fm_a, fm_d;        /* Type 3: its matrix */
-} font_t;
 
 static void put_utf8(char *o, size_t cap, const uint32_t *cp, int n)
 {
@@ -278,7 +256,7 @@ static void parse_cmap(pdf_t *P, font_t *F, const uint8_t *d, size_t n)
                 uint32_t cp[8];
                 int k = 0;
                 if (v[1].t == PV_STR) k = utf16((const uint8_t *)v[1].s.s, v[1].s.n, cp, 8);
-                else if (v[1].t == PV_NAME && (cp[0] = glyph_cp(v[1].s.s))) k = 1;
+                else if (v[1].t == PV_NAME && (cp[0] = of_pdf_glyph_cp(v[1].s.s))) k = 1;
                 if (k) add_uc(F, bytes_code(&v[0]), cp, k);
             } else if (mode == 3 && v[0].t == PV_STR && v[1].t == PV_STR) {
                 uint32_t lo = bytes_code(&v[0]), hi = bytes_code(&v[1]);
@@ -354,7 +332,7 @@ static void font_flags(font_t *F, const char *base, const pv_t *desc, pdf_t *P)
         else F->std = F->flags & FL_BOLD ? of_pdf_helvb : of_pdf_helv;
     }
     if (desc) {
-        int fl = (int)pv_num(pdf_get(P, desc, "Flags"), 0);
+        int fl = pvi(pdf_get(P, desc, "Flags"), 0);
         if (fl & 64) F->flags |= FL_ITALIC;
         if (fl & 1) F->flags |= FL_MONO;
         if (fl & 262144) F->flags |= FL_BOLD;
@@ -363,27 +341,25 @@ static void font_flags(font_t *F, const char *base, const pv_t *desc, pdf_t *P)
     }
 }
 
-typedef struct {
-    font_t  *f;
-    int      n, cap;
-} fonts_t;
-
-static font_t *font_load(pdf_t *P, fonts_t *FS, const pv_t *ref)
+font_t *of_pdff_load(pdf_t *P, fonts_t *FS, const pv_t *ref)
 {
     const pv_t *fd = pdf_res(P, ref);
     if (!fd || fd->t != PV_DICT) return NULL;
     int key = ref && ref->t == PV_REF ? ref->ref.num : -(int)((uintptr_t)fd & 0x7FFFFFF);
-    for (int i = 0; i < FS->n; i++) if (FS->f[i].key == key) return &FS->f[i];
+    for (int i = 0; i < FS->n; i++) if (FS->f[i]->key == key) return FS->f[i];
     if (FS->n == FS->cap) {
         int nc = FS->cap ? FS->cap * 2 : 16;
-        font_t *n = of_realloc(FS->f, (size_t)nc * sizeof *n);
+        font_t **n = of_realloc(FS->f, (size_t)nc * sizeof *n);
         if (!n) return NULL;
         FS->f = n;
         FS->cap = nc;
     }
-    font_t *F = &FS->f[FS->n++];
-    memset(F, 0, sizeof *F);
+    /* each font apart: the states keep pointers to them */
+    font_t *F = of_alloc(sizeof *F);
+    if (!F) return NULL;
+    FS->f[FS->n++] = F;
     F->key = key;
+    F->dict = fd;
     F->fm_a = F->fm_d = 0.001;
     const pv_t *sub = pdf_get(P, fd, "Subtype");
     F->type0 = pv_is_name(sub, "Type0");
@@ -432,7 +408,7 @@ static font_t *font_load(pdf_t *P, fonts_t *FS, const pv_t *ref)
     }
     if (!F->type0) {
         /* the encoding: a base, then the differences */
-        int fl = desc && desc->t == PV_DICT ? (int)pv_num(pdf_get(P, desc, "Flags"), 0) : 0;
+        int fl = desc && desc->t == PV_DICT ? pvi(pdf_get(P, desc, "Flags"), 0) : 0;
         bool symbolic = (fl & 4) && !(fl & 32);
         const pv_t *enc = pdf_get(P, fd, "Encoding");
         const char *bn = enc && enc->t == PV_NAME ? enc->s.s : NULL;
@@ -440,6 +416,8 @@ static font_t *font_load(pdf_t *P, fonts_t *FS, const pv_t *ref)
             const pv_t *be = pdf_get(P, enc, "BaseEncoding");
             if (be && be->t == PV_NAME) bn = be->s.s;
         }
+        F->symbolic = (fl & 4) != 0;
+        F->base_named = bn != NULL;
         if (!bn) bn = pv_is_name(sub, "TrueType") || symbolic ? "WinAnsiEncoding" : "StandardEncoding";
         base_encoding(F, bn);
         if (base && base->t == PV_NAME && (strstr(base->s.s, "Symbol") || strstr(base->s.s, "Dingbats"))) {
@@ -454,13 +432,13 @@ static font_t *font_load(pdf_t *P, fonts_t *FS, const pv_t *ref)
             const pv_t *x = &dif->a.v[i];
             if (x->t == PV_INT) code = (int)x->i;
             else if (x->t == PV_NAME) {
-                if (code >= 0 && code < 256) F->enc[code] = glyph_cp(x->s.s);
+                if (code >= 0 && code < 256) { F->enc[code] = of_pdf_glyph_cp(x->s.s); F->names[code] = x->s.s; }
                 code++;
             }
         }
         /* widths */
         const pv_t *W = pdf_get(P, fd, "Widths");
-        int first = (int)pv_num(pdf_get(P, fd, "FirstChar"), 0);
+        int first = pvi(pdf_get(P, fd, "FirstChar"), 0);
         if (W && W->t == PV_ARR) {
             F->has_w = true;
             float miss = (float)pv_num(desc && desc->t == PV_DICT ? pdf_get(P, desc, "MissingWidth") : NULL, 0);
@@ -479,15 +457,15 @@ static font_t *font_load(pdf_t *P, fonts_t *FS, const pv_t *ref)
     return F;
 }
 
-static void fonts_free(fonts_t *FS)
+void of_pdff_free(fonts_t *FS)
 {
-    for (int i = 0; i < FS->n; i++) { of_free(FS->f[i].uc); of_free(FS->f[i].ur); of_free(FS->f[i].cw); }
+    for (int i = 0; i < FS->n; i++) { of_free(FS->f[i]->uc); of_free(FS->f[i]->ur); of_free(FS->f[i]->cw); of_free(FS->f[i]); }
     of_free(FS->f);
     memset(FS, 0, sizeof *FS);
 }
 
 /* the next code of a string: its value and length */
-static uint32_t next_code(const font_t *F, const uint8_t *s, int n, int *i)
+uint32_t of_pdff_next(const font_t *F, const uint8_t *s, int n, int *i)
 {
     if (!F->type0) return s[(*i)++];
     if (F->ncs) {
@@ -504,7 +482,7 @@ static uint32_t next_code(const font_t *F, const uint8_t *s, int n, int *i)
     return c;
 }
 
-static const char *code_text(const font_t *F, uint32_t code, char *buf)
+const char *of_pdff_text(const font_t *F, uint32_t code, char *buf)
 {
     if (F->nuc) {
         int lo = 0, hi = F->nuc - 1;
@@ -529,7 +507,7 @@ static const char *code_text(const font_t *F, uint32_t code, char *buf)
     return buf;
 }
 
-static float code_width(const font_t *F, uint32_t code, const char *txt)
+float of_pdff_width(const font_t *F, uint32_t code, const char *txt)
 {
     if (F->type0) {
         for (int i = 0; i < F->ncw; i++) if (code >= F->cw[i].lo && code <= F->cw[i].hi) return F->cw[i].w;
@@ -702,10 +680,10 @@ static void show(ctx_t *C, const pv_t *str)
     double th = g->th;
     for (int i = 0; i < n;) {
         bool one = !F->type0;
-        uint32_t code = next_code(F, s, n, &i);
+        uint32_t code = of_pdff_next(F, s, n, &i);
         char buf[16];
-        const char *t = code_text(F, code, buf);
-        float w = code_width(F, code, t);
+        const char *t = of_pdff_text(F, code, buf);
+        float w = of_pdff_width(F, code, t);
         double w0 = F->type3 ? w * F->fm_a : w / 1000.0;
         mtx_t M = mul(C->tm, g->ctm);
         double scale = F->type3 ? F->fm_d / 0.001 : 1;
@@ -778,7 +756,7 @@ static bool pic_file(ctx_t *C, const pv_t *im, int num, char *out, size_t len)
     pdf_t *P = C->P;
     out[0] = 0;
     const pv_t *mask = pdf_get(P, im, "ImageMask");
-    int w = (int)pv_num(pdf_get(P, im, "Width"), 0), h = (int)pv_num(pdf_get(P, im, "Height"), 0);
+    int w = pvi(pdf_get(P, im, "Width"), 0), h = pvi(pdf_get(P, im, "Height"), 0);
     bool ok = false;
     if (!(mask && mask->t == PV_BOOL && mask->b) && w > 0 && h > 0 && (int64_t)w * h <= 8000000) {
         const char *imf = NULL;
@@ -797,7 +775,7 @@ static bool pic_file(ctx_t *C, const pv_t *im, int num, char *out, size_t len)
         } else if (d && !imf) {
             /* raw samples: grey or RGB rows, 8 bits */
             const pv_t *cs = pdf_get(P, im, "ColorSpace");
-            int bpc = (int)pv_num(pdf_get(P, im, "BitsPerComponent"), 8);
+            int bpc = pvi(pdf_get(P, im, "BitsPerComponent"), 8);
             int comps = 0;
             const uint8_t *lut = NULL;
             int lut_comps = 0, hival = 0;
@@ -807,15 +785,15 @@ static bool pic_file(ctx_t *C, const pv_t *im, int num, char *out, size_t len)
             else if (pv_is_name(cs, "DeviceCMYK") || pv_is_name(cs, "CMYK")) comps = 4;
             else if (cs && cs->t == PV_ARR && cs->a.n >= 1) {
                 const pv_t *k = pdf_res(P, &cs->a.v[0]);
-                if (pv_is_name(k, "ICCBased") && cs->a.n >= 2) comps = (int)pv_num(pdf_get(P, pdf_res(P, &cs->a.v[1]), "N"), 3);
+                if (pv_is_name(k, "ICCBased") && cs->a.n >= 2) comps = pvi(pdf_get(P, pdf_res(P, &cs->a.v[1]), "N"), 3);
                 else if (pv_is_name(k, "CalRGB")) comps = 3;
                 else if (pv_is_name(k, "CalGray")) comps = 1;
                 else if ((pv_is_name(k, "Indexed") || pv_is_name(k, "I")) && cs->a.n >= 4) {
                     const pv_t *bs = pdf_res(P, &cs->a.v[1]);
                     lut_comps = pv_is_name(bs, "DeviceGray") ? 1 : pv_is_name(bs, "DeviceCMYK") ? 4 : 3;
                     if (bs && bs->t == PV_ARR && bs->a.n >= 2 && pv_is_name(pdf_res(P, &bs->a.v[0]), "ICCBased"))
-                        lut_comps = (int)pv_num(pdf_get(P, pdf_res(P, &bs->a.v[1]), "N"), 3);
-                    hival = (int)pv_num(pdf_res(P, &cs->a.v[2]), 255);
+                        lut_comps = pvi(pdf_get(P, pdf_res(P, &bs->a.v[1]), "N"), 3);
+                    hival = pvi(pdf_res(P, &cs->a.v[2]), 255);
                     const pv_t *lt = pdf_res(P, &cs->a.v[3]);
                     if (lt && lt->t == PV_STR) lut = (const uint8_t *)lt->s.s;
                     else if (lt && lt->t == PV_STREAM) {
@@ -923,7 +901,7 @@ static void run(ctx_t *C, const uint8_t *d, size_t n, const pv_t *res);
 
 static uint32_t rgb(double r, double g, double b)
 {
-    int R = (int)(r * 255 + 0.5), G = (int)(g * 255 + 0.5), B = (int)(b * 255 + 0.5);
+    int R = di(r * 255 + 0.5), G = di(g * 255 + 0.5), B = di(b * 255 + 0.5);
     if (R < 0) R = 0;
     if (G < 0) G = 0;
     if (B < 0) B = 0;
@@ -1014,7 +992,7 @@ static void run(ctx_t *C, const uint8_t *d, size_t n, const pv_t *res)
             case 'f':
                 if (nop >= 2 && op[nop - 2].t == PV_NAME) {
                     const pv_t *fonts = pdf_get(C->P, res, "Font");
-                    g->font = font_load(C->P, &C->fonts, pv_get(fonts, op[nop - 2].s.s));
+                    g->font = of_pdff_load(C->P, &C->fonts, pv_get(fonts, op[nop - 2].s.s));
                     g->fs = pv_num(&op[nop - 1], 12);
                 }
                 break;
@@ -1022,7 +1000,7 @@ static void run(ctx_t *C, const uint8_t *d, size_t n, const pv_t *res)
             case 'w': g->tw = a0; break;
             case 'z': g->th = a0 / 100.0; break;
             case 'L': g->tl = a0; break;
-            case 'r': g->tr = (int)a0; break;
+            case 'r': g->tr = di(a0); break;
             case 's': g->ts = a0; break;
             case 'd': case 'D':
                 if (o[1] == 'D') g->tl = -a1;
@@ -1293,8 +1271,6 @@ static void segments(page_t *pg)
 /* Pages of the document                                                       */
 /* -------------------------------------------------------------------------- */
 
-typedef struct { const pv_t *page; const pv_t *res; double box[4]; int rot; } pref_t;
-
 static void walk(pdf_t *P, const pv_t *node, const pv_t *res, const double *box, int rot, int depth, pref_t **out, int *n)
 {
     if (!node || node->t != PV_DICT || depth > 32 || *n >= MAX_PAGES) return;
@@ -1306,7 +1282,7 @@ static void walk(pdf_t *P, const pv_t *node, const pv_t *res, const double *box,
     if (mb && mb->t == PV_ARR && mb->a.n == 4)
         for (int i = 0; i < 4; i++) b[i] = pv_num(pdf_res(P, &mb->a.v[i]), b[i]);
     const pv_t *ro = pdf_get(P, node, "Rotate");
-    if (ro) rot = ((int)pv_num(ro, 0) % 360 + 360) % 360;
+    if (ro) rot = (pvi(ro, 0) % 360 + 360) % 360;
     const pv_t *kids = pdf_get(P, node, "Kids");
     if (kids && kids->t == PV_ARR) {
         for (int i = 0; i < kids->a.n; i++) walk(P, pdf_res(P, &kids->a.v[i]), res, b, rot, depth + 1, out, n);
@@ -1322,6 +1298,23 @@ static void walk(pdf_t *P, const pv_t *node, const pv_t *res, const double *box,
     memcpy(nn[*n].box, b, sizeof b);
     nn[*n].rot = rot;
     (*n)++;
+}
+
+int of_pdf_pages(pdf_t *P, pref_t **out)
+{
+    const pv_t *pages = pdf_get(P, P->catalog, "Pages");
+    int n = 0;
+    double box[4] = { 0, 0, 612, 792 };
+    *out = NULL;
+    walk(P, pages, NULL, box, 0, 0, out, &n);
+    if (!n) {
+        /* no page tree: every /Type /Page object, in file order */
+        for (int i = 1; i < P->nx && n < MAX_PAGES; i++) {
+            pv_t *o = pdf_obj(P, i);
+            if (o && o->t == PV_DICT && pv_is_name(pdf_get(P, o, "Type"), "Page")) walk(P, o, NULL, box, 0, 0, out, &n);
+        }
+    }
+    return n;
 }
 
 static void page_free(page_t *pg);
@@ -1522,18 +1515,8 @@ of_doc_t *of_pdf_load(const char *path, const char *password, char *err, size_t 
 {
     pdf_t *P = pdf_open(path, password, err, errlen);
     if (!P) return NULL;
-    const pv_t *pages = pdf_get(P, P->catalog, "Pages");
     pref_t *pr = NULL;
-    int npr = 0;
-    double box[4] = { 0, 0, 612, 792 };
-    walk(P, pages, NULL, box, 0, 0, &pr, &npr);
-    if (!npr) {
-        /* no page tree: every /Type /Page object, in file order */
-        for (int i = 1; i < P->nx && npr < MAX_PAGES; i++) {
-            pv_t *o = pdf_obj(P, i);
-            if (o && o->t == PV_DICT && pv_is_name(pdf_get(P, o, "Type"), "Page")) walk(P, o, NULL, box, 0, 0, &pr, &npr);
-        }
-    }
+    int npr = of_pdf_pages(P, &pr);
     if (!npr) { pdf_close(P); snprintf(err, errlen, "damaged"); return NULL; }
     ctx_t *C = of_alloc(sizeof *C);
     page_t *pgs = of_alloc((size_t)npr * sizeof *pgs);
@@ -1750,7 +1733,7 @@ of_doc_t *of_pdf_load(const char *path, const char *password, char *err, size_t 
         of_bld_text(&b, m, strlen(m));
         of_bld_done(&b);
     }
-    fonts_free(&C->fonts);
+    of_pdff_free(&C->fonts);
     of_free(C);
     of_free(pgs);
     of_free(pr);

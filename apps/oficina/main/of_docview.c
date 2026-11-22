@@ -1684,7 +1684,7 @@ static void toc_open(void)
     of_free(lab);
 }
 
-enum { M_SAVE, M_SAVE_AS, M_TOC, M_FIND, M_BIGGER, M_SMALLER, M_ALL, M_COPY, M_PASTE, M_AS_TEXT, M_INFO };
+enum { M_SAVE, M_SAVE_AS, M_TOC, M_FIND, M_BIGGER, M_SMALLER, M_ALL, M_COPY, M_PASTE, M_AS_TEXT, M_INFO, M_PAGES };
 static int s_menu[12];
 
 static void menu_pick(int i, void *ud)
@@ -1717,6 +1717,12 @@ static void menu_pick(int i, void *ud)
         break;
     }
     case M_INFO: info_open(); break;
+    case M_PAGES: {
+        char p[300];
+        snprintf(p, sizeof p, "%s", D.path);
+        of_app_pdf_mode(p, true);
+        break;
+    }
     }
 }
 
@@ -1726,6 +1732,7 @@ static void menu_open(void)
     int n = 0;
     bool ro = D.d->readonly;
 #define ADD(id, label, icon) do { s_menu[n] = (id); items[n++] = (ofu_item_t){ (label), (icon), false, false }; } while (0)
+    if (!strcmp(D.d->kind, "PDF")) ADD(M_PAGES, _("Ver las páginas como se imprimen"), OF_IC_DOC);
     if (!ro) ADD(M_SAVE, _("Guardar"), OF_IC_SAVE);
     ADD(M_SAVE_AS, _("Guardar una copia como..."), OF_IC_COPY);
     ADD(M_TOC, _("Índice"), OF_IC_LIST);

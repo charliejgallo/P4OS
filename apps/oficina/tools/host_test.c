@@ -2,7 +2,7 @@
  * P4OS - Office: the formats on the Mac, without LVGL.
  *
  *     cc -DOF_HOST -I apps/oficina/main apps/oficina/tools/host_test.c \
- *        apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive,crypt,pdf,pdftext,pdfw,slides,pptx,odp,cfb,doc97,xls,ppt,iwa}.c -o host_test
+ *        apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive,crypt,pdf,pdftext,pdfw,slides,pptx,odp,cfb,doc97,xls,ppt,iwa,pdffont,pdfdraw}.c -o host_test
  *     ./host_test dump  book.xlsx                      the cells, shown and as typed
  *     ./host_test edit  book.xlsx out.xlsx 'A1=12' 'Resumen!B2==A1*2' ...
  *     ./host_test conv  book.csv out.xlsx              save in another format
@@ -14,6 +14,8 @@
  *     ./host_test pdf   file.docx|xlsx|md|txt out.pdf  written as PDF (phase 4); "read out.pdf" reads one
  *     ./host_test deck  slides.pptx|odp [out.pdf|docx|odt|txt]   a presentation's shapes (phase 5), and a copy
  *                       (OF_PDF_PW=... for a password)
+ *     ./host_test render file.pdf page scale out.png  a page drawn (phase 7; page from 1, scale in pixels a point);
+ *                       pictures through sips, the fonts a file lacks from the Mac's Arial, Times and Courier
  *
  * tools/test_formats.sh runs it over the samples and checks what it saved.
  */
@@ -23,10 +25,141 @@
 #include "of_pdf.h"
 #include "of_slides.h"
 #include "of_cfb.h"
+#include "of_pdfd.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+/* -------------------------------------------------------------------------- */
+/* What the board's system gives, on the Mac                                  */
+/* -------------------------------------------------------------------------- */
+
+/* pictures: sips makes a BMP, read and fitted here */
+uint16_t *aos_hal_image_decode(const char *path, uint32_t offset, uint32_t size, int max_w, int max_h, bool fill,
+                               int *out_w, int *out_h, int *src_w, int *src_h)
+{
+    char in[64] = "/tmp/of_host_in.jpg", cmd[600];
+    if (size) {
+        FILE *f = fopen(path, "rb");
+        if (!f) return NULL;
+        uint8_t *b = malloc(size);
+        fseek(f, (long)offset, SEEK_SET);
+        size_t got = fread(b, 1, size, f);
+        fclose(f);
+        f = fopen(in, "wb");
+        fwrite(b, 1, got, f);
+        fclose(f);
+        free(b);
+    } else {
+        snprintf(in, sizeof in, "%.60s", path);
+        if (strlen(path) >= 60) return NULL;
+    }
+    snprintf(cmd, sizeof cmd, "sips -s format bmp '%s' --out /tmp/of_host_out.bmp >/dev/null 2>&1", in);
+    if (system(cmd)) return NULL;
+    size_t n;
+    uint8_t *b = of_file_read("/tmp/of_host_out.bmp", &n, 200u << 20);
+    if (!b || n < 54 || b[0] != 'B') { of_free(b); return NULL; }
+    int off = b[10] | b[11] << 8 | b[12] << 16 | b[13] << 24, w = b[18] | b[19] << 8 | b[20] << 16 | b[21] << 24;
+    int h = (int)((uint32_t)b[22] | (uint32_t)b[23] << 8 | (uint32_t)b[24] << 16 | (uint32_t)b[25] << 24), bpp = b[28] | b[29] << 8;
+    bool down = h > 0;
+    if (h < 0) h = -h;
+    int stride = ((w * bpp / 8) + 3) & ~3;
+    if (src_w) *src_w = w;
+    if (src_h) *src_h = h;
+    float k = 1;
+    if (!fill) { k = (float)max_w / w < (float)max_h / h ? (float)max_w / w : (float)max_h / h; if (k > 1) k = 1; }
+    int ow = (int)(w * k + 0.5f), oh = (int)(h * k + 0.5f);
+    if (ow < 1) ow = 1;
+    if (oh < 1) oh = 1;
+    uint16_t *px = malloc((size_t)ow * oh * 2);
+    for (int y = 0; y < oh; y++)
+        for (int x = 0; x < ow; x++) {
+            int sx = x * w / ow, sy = y * h / oh;
+            int row = down ? h - 1 - sy : sy;
+            const uint8_t *p = b + off + (size_t)row * stride + (size_t)sx * (bpp / 8);
+            px[y * ow + x] = (uint16_t)((p[2] >> 3) << 11 | (p[1] >> 2) << 5 | p[0] >> 3);
+        }
+    of_free(b);
+    *out_w = ow;
+    *out_h = oh;
+    return px;
+}
+
+void aos_hal_image_free(void *px) { free(px); }
+
+static of_fprog_t s_fb[6];
+static bool s_fb_tried;
+static uint8_t *s_fb_bm;
+
+static bool host_fallback(uint32_t cp, float px, uint8_t flags, of_fbglyph_t *out)
+{
+    static const char *const FILES[6] = { "Arial.ttf", "Arial Bold.ttf", "Times New Roman.ttf", "Times New Roman Bold.ttf", "Courier New.ttf", "Courier New Bold.ttf" };
+    if (!s_fb_tried) {
+        s_fb_tried = true;
+        for (int i = 0; i < 6; i++) {
+            char p[200];
+            snprintf(p, sizeof p, "/System/Library/Fonts/Supplemental/%s", FILES[i]);
+            size_t n;
+            uint8_t *d = of_file_read(p, &n, 64u << 20);
+            if (d) of_fprog_load(&s_fb[i], d, n, 2);
+        }
+    }
+    int k = (flags & 4 ? 4 : flags & 8 ? 2 : 0) + (flags & 1 ? 1 : 0);
+    of_fprog_t *F = &s_fb[k];
+    if (!F->kind) return false;
+    int gid = of_fprog_by_uni(F, cp);
+    if (gid <= 0) return false;
+    free(s_fb_bm);
+    int w, h, l, t;
+    s_fb_bm = of_pdf_glyph_a8(F, gid, px, &w, &h, &l, &t);
+    if (!s_fb_bm) return false;
+    *out = (of_fbglyph_t){ s_fb_bm, w, h, l, t, px, of_fprog_advance(F, gid) * px };
+    return true;
+}
+
+static bool png_rgb565(const char *path, const uint16_t *px, int w, int h)
+{
+    size_t row = (size_t)w * 3;
+    uint8_t *raw = malloc((row + 1) * (size_t)h);
+    for (int y = 0; y < h; y++) {
+        raw[y * (row + 1)] = 0;
+        for (int x = 0; x < w; x++) {
+            uint16_t v = px[y * w + x];
+            uint8_t *o = raw + y * (row + 1) + 1 + x * 3;
+            o[0] = (uint8_t)((v >> 11) << 3 | (v >> 13));
+            o[1] = (uint8_t)(((v >> 5) & 63) << 2 | ((v >> 9) & 3));
+            o[2] = (uint8_t)((v & 31) << 3 | ((v >> 2) & 7));
+        }
+    }
+    of_sb_t z = { 0 }, o = { 0 };
+    of_sb_put(&z, "\x78\x01", 2);
+    of_deflate(raw, (row + 1) * (size_t)h, &z);
+    uint32_t a = 1, b = 0;
+    for (size_t i = 0; i < (row + 1) * (size_t)h; i++) { a = (a + raw[i]) % 65521; b = (b + a) % 65521; }
+    uint32_t ad = b << 16 | a;
+    char be[4] = { (char)(ad >> 24), (char)(ad >> 16), (char)(ad >> 8), (char)ad };
+    of_sb_put(&z, be, 4);
+    free(raw);
+    of_sb_put(&o, "\x89PNG\r\n\x1a\n", 8);
+    uint8_t ih[13] = { (uint8_t)(w >> 24), (uint8_t)(w >> 16), (uint8_t)(w >> 8), (uint8_t)w, (uint8_t)(h >> 24), (uint8_t)(h >> 16),
+                       (uint8_t)(h >> 8), (uint8_t)h, 8, 2, 0, 0, 0 };
+    struct { const char *t; const uint8_t *d; size_t n; } C[3] = { { "IHDR", ih, 13 }, { "IDAT", (const uint8_t *)z.s, z.n }, { "IEND", NULL, 0 } };
+    for (int i = 0; i < 3; i++) {
+        char ln[4] = { (char)(C[i].n >> 24), (char)(C[i].n >> 16), (char)(C[i].n >> 8), (char)C[i].n };
+        of_sb_put(&o, ln, 4);
+        size_t at = o.n;
+        of_sb_put(&o, C[i].t, 4);
+        if (C[i].n) of_sb_put(&o, (const char *)C[i].d, C[i].n);
+        uint32_t crc = of_crc32(0, o.s + at, o.n - at);
+        char cb[4] = { (char)(crc >> 24), (char)(crc >> 16), (char)(crc >> 8), (char)crc };
+        of_sb_put(&o, cb, 4);
+    }
+    bool ok = of_file_write(path, o.s, o.n);
+    of_sb_free(&z);
+    of_sb_free(&o);
+    return ok;
+}
 
 static void dump(of_book_t *b)
 {
@@ -104,6 +237,24 @@ int main(int argc, char **argv)
     of_locale_set(true);
     if (getenv("OF_EN")) of_locale_set(false);
     char err[128] = "";
+    if (argc >= 6 && !strcmp(argv[1], "render")) {
+        of_pdfr_fallback(host_fallback);
+        of_pdfr_t *R = of_pdfr_open(argv[2], getenv("OF_PDF_PW"), err, sizeof err);
+        if (!R) { printf("open failed %s\n", err); return 1; }
+        int pg = atoi(argv[3]) - 1;
+        float sc = (float)atof(argv[4]), w, h;
+        of_pdfr_size(R, pg, &w, &h);
+        int W = (int)(w * sc + 0.5f), H = (int)(h * sc + 0.5f);
+        uint16_t *px = malloc((size_t)W * H * 2);
+        bool ok = of_pdfr_draw(R, pg, sc, 0, 0, px, W, H, NULL);
+        printf("pages %d, page %d: %.0fx%.0f pt -> %dx%d %s\n", of_pdfr_count(R), pg + 1, w, h, W, H, ok ? "ok" : "stopped");
+        png_rgb565(argv[5], px, W, H);
+        free(px);
+        of_pdfr_close(R);
+        for (int i = 0; i < 6; i++) of_fprog_free(&s_fb[i]);
+        free(s_fb_bm);
+        return 0;
+    }
     if (argc >= 3 && !strcmp(argv[1], "fx")) {
         of_book_t *b = of_book_new(OF_FMT_XLSX);
         of_book_add_sheet(b, "Hoja1");

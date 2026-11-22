@@ -24,6 +24,9 @@
 /* Values                                                                      */
 /* -------------------------------------------------------------------------- */
 
+/* a number from the file as an integer, never out of range */
+static inline int pvi(const pv_t *v, double def) { double d = pv_num(v, def); return d > -1.0e9 && d < 1.0e9 ? (int)d : 0; }
+
 void pv_free(pv_t *v)
 {
     if (!v) return;
@@ -323,11 +326,11 @@ bool pv_parse(pdf_t *P, lx_t *L, pv_t *out)
 
 static uint8_t *unpredict(uint8_t *d, size_t *n, const pv_t *parms)
 {
-    int pred = (int)pv_num(pv_get(parms, "Predictor"), 1);
+    int pred = pvi(pv_get(parms, "Predictor"), 1);
     if (pred < 2) return d;
-    int colors = (int)pv_num(pv_get(parms, "Colors"), 1);
-    int bpc = (int)pv_num(pv_get(parms, "BitsPerComponent"), 8);
-    int cols = (int)pv_num(pv_get(parms, "Columns"), 1);
+    int colors = pvi(pv_get(parms, "Colors"), 1);
+    int bpc = pvi(pv_get(parms, "BitsPerComponent"), 8);
+    int cols = pvi(pv_get(parms, "Columns"), 1);
     if (colors < 1 || colors > 32 || bpc < 1 || bpc > 16 || cols < 1 || cols > 1000000) return d;
     size_t bpp = (size_t)((colors * bpc + 7) / 8);
     size_t row = (size_t)(colors * bpc * cols + 7) / 8;
@@ -588,8 +591,8 @@ static int crypt_init(pdf_t *P, const char *password)
     const pv_t *E = pdf_res(P, er);
     if (!E || E->t != PV_DICT) return 0;
     if (!pv_is_name(pdf_res(P, pv_get(E, "Filter")), "Standard")) return -2;
-    int V = (int)pv_num(pdf_res(P, pv_get(E, "V")), 0);
-    int R = (int)pv_num(pdf_res(P, pv_get(E, "R")), 2);
+    int V = pvi(pdf_res(P, pv_get(E, "V")), 0);
+    int R = pvi(pdf_res(P, pv_get(E, "R")), 2);
     const pv_t *O = str_of(P, E, "O"), *U = str_of(P, E, "U");
     if (!O || !U || O->s.n < 32 || U->s.n < 32) return -2;
     int32_t perm = (int32_t)pv_num(pdf_res(P, pv_get(E, "P")), 0);
@@ -601,7 +604,7 @@ static int crypt_init(pdf_t *P, const char *password)
     if (ida && ida->t == PV_ARR && ida->a.n && ida->a.v[0].t == PV_STR) { id = (const uint8_t *)ida->a.v[0].s.s; idn = ida->a.v[0].s.n; }
     /* the method: V 1-2 RC4; V 4-5 by crypt filter */
     P->crypt = 1;
-    int bits = (int)pv_num(pdf_res(P, pv_get(E, "Length")), 40);
+    int bits = pvi(pdf_res(P, pv_get(E, "Length")), 40);
     if (V >= 4) {
         const pv_t *cf = pdf_res(P, pv_get(E, "CF"));
         const pv_t *stmf = pdf_res(P, pv_get(E, "StmF")), *strf = pdf_res(P, pv_get(E, "StrF"));
@@ -806,8 +809,8 @@ static pv_t *load_from_objstm(pdf_t *P, int num, int stm, int idx)
         P->os[slot].num = stm;
         P->os[slot].data = d;
         P->os[slot].len = n;
-        int cnt = (int)pv_num(pdf_res(P, pv_get(s, "N")), 0);
-        int first = (int)pv_num(pdf_res(P, pv_get(s, "First")), 0);
+        int cnt = pvi(pdf_res(P, pv_get(s, "N")), 0);
+        int first = pvi(pdf_res(P, pv_get(s, "First")), 0);
         if (cnt < 0 || cnt > 1000000) cnt = 0;
         P->os[slot].first = first;
         P->os[slot].n = cnt;
@@ -816,8 +819,8 @@ static pv_t *load_from_objstm(pdf_t *P, int num, int stm, int idx)
         for (int i = 0; i < cnt && P->os[slot].offs; i++) {
             pv_t a, b;
             if (!pv_parse(NULL, &L, &a) || !pv_parse(NULL, &L, &b)) break;
-            P->os[slot].offs[i * 2] = (int)pv_num(&a, -1);
-            P->os[slot].offs[i * 2 + 1] = (int)pv_num(&b, 0);
+            P->os[slot].offs[i * 2] = pvi(&a, -1);
+            P->os[slot].offs[i * 2 + 1] = pvi(&b, 0);
         }
     }
     struct pdf_os *o = &P->os[slot];
@@ -883,6 +886,12 @@ uint8_t *pdf_stream(pdf_t *P, const pv_t *s, int num, size_t *out_n, const char 
     const pv_t *f = pdf_res(P, pv_get(s, "Filter"));
     const pv_t *parms = pdf_res(P, pv_get(s, "DecodeParms"));
     if (!parms) parms = pdf_res(P, pv_get(s, "DP"));
+    return pdf_decode(P, d, n, f, parms, out_n, image_filter);
+}
+
+uint8_t *pdf_decode(pdf_t *P, uint8_t *d, size_t n, const pv_t *f, const pv_t *parms, size_t *out_n, const char **image_filter)
+{
+    if (image_filter) *image_filter = NULL;
     int nf = !f ? 0 : f->t == PV_ARR ? f->a.n : 1;
     for (int i = 0; i < nf; i++) {
         const pv_t *fi = f->t == PV_ARR ? pdf_res(P, &f->a.v[i]) : f;
@@ -898,7 +907,7 @@ uint8_t *pdf_stream(pdf_t *P, const pv_t *s, int num, size_t *out_n, const char 
             if (!o) o = of_alloc(1);
             if (o) o = unpredict(o, &on, pi);
         } else if (!strcmp(fn, "LZWDecode") || !strcmp(fn, "LZW")) {
-            o = lzw(d, n, &on, (int)pv_num(pv_get(pi, "EarlyChange"), 1));
+            o = lzw(d, n, &on, pvi(pv_get(pi, "EarlyChange"), 1));
             if (o) o = unpredict(o, &on, pi);
         } else if (!strcmp(fn, "ASCII85Decode") || !strcmp(fn, "A85")) {
             o = a85(d, n, &on);
@@ -910,7 +919,7 @@ uint8_t *pdf_stream(pdf_t *P, const pv_t *s, int num, size_t *out_n, const char 
             continue;
         } else {
             /* DCT, JPX, CCITT, JBIG2: the picture's own coding, left for the caller */
-            if (image_filter) *image_filter = fn;
+            if (image_filter) *image_filter = !strcmp(fn, "DCT") ? "DCTDecode" : !strcmp(fn, "CCF") ? "CCITTFaxDecode" : fn;
             break;
         }
         of_free(d);
@@ -1017,15 +1026,15 @@ static bool read_xref(pdf_t *P, size_t off, int depth)
     const pv_t *W = pv_get(&s, "W");
     int w[3] = { 0, 0, 0 };
     if (W && W->t == PV_ARR && W->a.n >= 3)
-        for (int i = 0; i < 3; i++) w[i] = (int)pv_num(&W->a.v[i], 0);
+        for (int i = 0; i < 3; i++) w[i] = pvi(&W->a.v[i], 0);
     int rowlen = w[0] + w[1] + w[2];
     const pv_t *ix = pv_get(&s, "Index");
-    int size = (int)pv_num(pv_get(&s, "Size"), 0);
+    int size = pvi(pv_get(&s, "Size"), 0);
     size_t pos = 0;
     int ranges = ix && ix->t == PV_ARR ? ix->a.n / 2 : 1;
     for (int r = 0; d && rowlen > 0 && rowlen < 32 && r < ranges; r++) {
-        int start = ix && ix->t == PV_ARR ? (int)pv_num(&ix->a.v[r * 2], 0) : 0;
-        int cnt = ix && ix->t == PV_ARR ? (int)pv_num(&ix->a.v[r * 2 + 1], 0) : size;
+        int start = ix && ix->t == PV_ARR ? pvi(&ix->a.v[r * 2], 0) : 0;
+        int cnt = ix && ix->t == PV_ARR ? pvi(&ix->a.v[r * 2 + 1], 0) : size;
         for (int i = 0; i < cnt && pos + (size_t)rowlen <= n; i++) {
             uint64_t f[3] = { 0, 0, 0 };
             for (int k = 0; k < 3; k++)
@@ -1066,8 +1075,12 @@ static void rebuild(pdf_t *P)
         P->x[num].off = (uint32_t)p;
         P->x[num].gen = (uint16_t)gen;
         P->x[num].set = 1;
-        /* drop what was cached from the old table for this number */
-        if (P->cache[num]) { pv_free(P->cache[num]); of_free(P->cache[num]); P->cache[num] = NULL; }
+        /* what was cached from the old table for this number: read again, the old
+         * one kept until the end (pages and fonts may still point into it) */
+        if (P->cache[num]) {
+            pv_t **d = of_realloc(P->dead, (size_t)(P->ndead + 1) * sizeof *d);
+            if (d) { P->dead = d; P->dead[P->ndead++] = P->cache[num]; P->cache[num] = NULL; }
+        }
         p = q + 2;
     }
     /* objects inside object streams: the streams say which */
@@ -1077,12 +1090,12 @@ static void rebuild(pdf_t *P)
         if (!s || s->t != PV_STREAM || !pv_is_name(pdf_res(P, pv_get(s, "Type")), "ObjStm")) continue;
         size_t n;
         uint8_t *d = pdf_stream(P, s, i, &n, NULL);
-        int cnt = (int)pv_num(pdf_res(P, pv_get(s, "N")), 0);
+        int cnt = pvi(pdf_res(P, pv_get(s, "N")), 0);
         lx_t L = { d, n, 0 };
         for (int k = 0; d && k < cnt && k < 100000; k++) {
             pv_t a, b;
             if (!pv_parse(NULL, &L, &a) || !pv_parse(NULL, &L, &b)) break;
-            int on = (int)pv_num(&a, -1);
+            int on = pvi(&a, -1);
             if (on > 0 && grow_x(P, on + 1) && P->x[on].type != 1) { P->x[on].type = 2; P->x[on].off = (uint32_t)i; P->x[on].gen = (uint16_t)k; }
         }
         of_free(d);
@@ -1152,6 +1165,8 @@ void pdf_close(pdf_t *P)
     for (int i = 0; i < P->nx; i++)
         if (P->cache[i]) { pv_free(P->cache[i]); of_free(P->cache[i]); }
     for (int i = 0; i < 4; i++) { of_free(P->os[i].data); of_free(P->os[i].offs); }
+    for (int i = 0; i < P->ndead; i++) { pv_free(P->dead[i]); of_free(P->dead[i]); }
+    of_free(P->dead);
     of_free(P->cache);
     of_free(P->loading);
     of_free(P->x);

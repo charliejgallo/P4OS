@@ -6,7 +6,7 @@ idf_component_register(
          "of_import.c" "of_rtf.c" "of_text2.c" "of_archive.c"
          "of_crypt.c" "of_pdf.c" "of_pdftext.c" "of_pdfw.c"
          "of_slides.c" "of_pptx.c" "of_odp.c" "of_slideview.c"
-         "of_cfb.c" "of_doc97.c" "of_xls.c" "of_ppt.c" "of_iwa.c"
+         "of_cfb.c" "of_doc97.c" "of_xls.c" "of_ppt.c" "of_iwa.c" "of_pdffont.c" "of_pdfdraw.c" "of_pdfview.c"
     INCLUDE_DIRS "."
     REQUIRES lvgl
 )

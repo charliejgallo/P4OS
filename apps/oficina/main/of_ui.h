@@ -135,6 +135,7 @@ void of_recent_add(const char *path);
 void of_app_toast(const char *msg);
 bool of_app_landscape(void);
 void of_app_back_from_doc(void);      /* the back button of a document: asks if it has changes */
+void of_app_pdf_mode(const char *path, bool pages);   /* a PDF's pages drawn, or its text reflowed (kept for the next) */
 
 /* of_sheetview.c */
 bool of_sheet_open(lv_obj_t *parent, const char *path, of_book_t *b);
@@ -159,6 +160,10 @@ struct of_deck_s;
 bool of_slidev_open(lv_obj_t *parent, const char *path, struct of_deck_s *dk);
 void of_slidev_close(void);
 bool of_slidev_back(void);                  /* true: it left the presentation */
+
+/* of_pdfview.c: path NULL lays the open one out again; err as of_pdfr_open's, or "worker" */
+bool of_pdfv_open(lv_obj_t *parent, const char *path, const char *password, char *err, size_t errlen);
+void of_pdfv_close(void);
 
 /* of_textview.c */
 bool of_textv_open(lv_obj_t *parent, const char *path);

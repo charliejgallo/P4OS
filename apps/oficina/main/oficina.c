@@ -57,7 +57,7 @@ typedef struct {
     uint32_t size, mtime;
 } fent_t;
 
-enum { SCR_HOME = 0, SCR_SHEET, SCR_TEXT, SCR_DOC, SCR_SLIDES };
+enum { SCR_HOME = 0, SCR_SHEET, SCR_TEXT, SCR_DOC, SCR_SLIDES, SCR_PDF };
 enum { TAB_RECENT = 0, TAB_FILES };
 
 static struct {
@@ -269,6 +269,7 @@ static void clear_screen(void)
     else if (A.scr == SCR_TEXT) of_textv_close();
     else if (A.scr == SCR_DOC) of_docv_close();
     else if (A.scr == SCR_SLIDES) of_slidev_close();
+    else if (A.scr == SCR_PDF) of_pdfv_close();
     ofu_kb_attach(NULL);
     lv_obj_clean(A.root);
     A.screen = NULL;
@@ -342,19 +343,64 @@ void of_app_open(const char *path)
 }
 
 static char s_pw_path[300];
+static char s_pw[64];               /* the password that opened s_pw_path */
+static bool s_pw_pages;
 
 static bool show_doc(const char *p, of_doc_t *d);
+static bool show_pages(const char *p, const char *pw, char *err, size_t errlen);
+
+static bool pdf_pages_pref(void)
+{
+    int32_t v = 0;
+    aos_hal_pref_get_i32("of_pdfpg", &v);
+    return v != 0;
+}
 
 static void pw_done(const char *text, void *ud)
 {
     (void)ud;
     char err[32] = "";
+    if (s_pw_pages) {
+        if (show_pages(s_pw_path, text, err, sizeof err)) { snprintf(s_pw, sizeof s_pw, "%s", text); return; }
+        if (strcmp(err, "password")) {
+            of_app_toast(_("No se pudo leer el documento"));
+            return;
+        }
+        of_app_toast(_("La contraseña no es esa"));
+        return;
+    }
     of_doc_t *d = of_pdf_load(s_pw_path, text, err, sizeof err);
     if (!d) {
         of_app_toast(!strcmp(err, "password") ? _("La contraseña no es esa") : !strcmp(err, "old") ? _("Es del formato de Office 95 o anterior: la app no lo lee") : _("No se pudo leer el documento"));
         return;
     }
+    snprintf(s_pw, sizeof s_pw, "%s", text);
     show_doc(s_pw_path, d);
+}
+
+/* A PDF's pages as printed, or its text reflowed; the choice is kept for the next ones. */
+void of_app_pdf_mode(const char *path, bool pages)
+{
+    char p[300];
+    snprintf(p, sizeof p, "%s", path);
+    aos_hal_pref_set_i32("of_pdfpg", pages);
+    const char *pw = !strcmp(p, s_pw_path) ? s_pw : NULL;
+    char err[32] = "";
+    if (pages) {
+        if (show_pages(p, pw, err, sizeof err)) return;
+        if (!strcmp(err, "password")) {
+            snprintf(s_pw_path, sizeof s_pw_path, "%s", p);
+            s_pw_pages = true;
+            ofu_prompt(_("Este PDF tiene contraseña"), "", _("Abrir"), pw_done, NULL);
+            return;
+        }
+        of_app_toast(!strcmp(err, "worker") ? _("Otra app está usando el dibujo en segundo plano: cerrala y probá de nuevo") : _("No se pudo leer el documento"));
+        return;
+    }
+    of_tr = of_tr_app;
+    of_doc_t *d = of_pdf_load(p, pw, err, sizeof err);
+    if (!d) { of_app_toast(_("No se pudo leer el documento")); return; }
+    show_doc(p, d);
 }
 
 void of_app_open_as(const char *path, int how)
@@ -395,6 +441,20 @@ void of_app_open_as(const char *path, int how)
         doc_flags(true);
         lv_obj_set_style_bg_color(A.root, OFT.bg, 0);
         if (!of_slidev_open(A.root, p, dk)) { of_app_home(); return; }
+    } else if ((k == K_DOC || k == K_READ) && !strcmp(of_ext(p), "pdf") && pdf_pages_pref()) {
+        char err[64] = "";
+        if (!show_pages(p, NULL, err, sizeof err)) {
+            if (!strcmp(err, "password")) {
+                snprintf(s_pw_path, sizeof s_pw_path, "%s", p);
+                s_pw_pages = true;
+                ofu_prompt(_("Este PDF tiene contraseña"), "", _("Abrir"), pw_done, NULL);
+            } else {
+                of_app_toast(!strcmp(err, "encrypted") ? _("El PDF está cifrado de una forma que la app no conoce")
+                                                       : !strcmp(err, "worker") ? _("Otra app está usando el dibujo en segundo plano: cerrala y probá de nuevo")
+                                                                                : _("No se pudo leer el documento"));
+            }
+        }
+        return;
     } else if (k == K_DOC || k == K_READ) {
         char err[64] = "";
         of_tr = of_tr_app;
@@ -402,6 +462,7 @@ void of_app_open_as(const char *path, int how)
         if (!d && !strcmp(err, "password")) {
             /* a PDF with a password: asked, and opened with it */
             snprintf(s_pw_path, sizeof s_pw_path, "%s", p);
+            s_pw_pages = false;
             ofu_prompt(_("Este PDF tiene contraseña"), "", _("Abrir"), pw_done, NULL);
             return;
         }
@@ -458,6 +519,23 @@ static bool show_doc(const char *p, of_doc_t *d)
     doc_flags(true);
     lv_obj_set_style_bg_color(A.root, OFT.bg, 0);
     if (!of_docv_open(A.root, path, d)) {
+        of_app_home();
+        return false;
+    }
+    if (!in_cache(path)) of_recent_add(path);
+    return true;
+}
+
+static bool show_pages(const char *p, const char *pw, char *err, size_t errlen)
+{
+    char path[300];
+    snprintf(path, sizeof path, "%s", p);
+    clear_screen();
+    A.scr = SCR_PDF;
+    snprintf(A.doc, sizeof A.doc, "%s", path);
+    doc_flags(true);
+    lv_obj_set_style_bg_color(A.root, OFT.bg, 0);
+    if (!of_pdfv_open(A.root, path, pw, err, errlen)) {
         of_app_home();
         return false;
     }
@@ -1276,6 +1354,10 @@ static bool of_back(aos_app_t *self, void *inst)
         if (!of_slidev_back()) of_app_home();
         return true;
     }
+    if (A.scr == SCR_PDF) {
+        of_app_home();
+        return true;
+    }
     if (A.scr == SCR_SHEET || A.scr == SCR_TEXT || A.scr == SCR_DOC) {
         if (A.scr == SCR_SHEET ? of_sheet_back() : A.scr == SCR_DOC ? of_docv_back() : of_textv_back()) return true;
         of_app_back_from_doc();
@@ -1333,6 +1415,12 @@ static bool of_resize(aos_app_t *self, void *inst, lv_obj_t *root)
         lv_obj_clean(root);
         A.pr_overlay = NULL;
         of_slidev_open(root, p, NULL);
+    } else if (A.scr == SCR_PDF) {
+        ofu_sheet_forget();
+        pr_close();
+        lv_obj_clean(root);
+        A.pr_overlay = NULL;
+        of_pdfv_open(root, NULL, NULL, NULL, 0);
     }
     return true;
 }

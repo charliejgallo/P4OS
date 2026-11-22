@@ -69,7 +69,7 @@ Ya hay un archivo con ese nombre	Es gibt schon eine Datei mit diesem Namen
 
 #: apps/oficina/main/of_docview.c:1584
 #: apps/oficina/main/of_docview.c:1588
-#: apps/oficina/main/of_docview.c:1753
+#: apps/oficina/main/of_docview.c:1760
 #: apps/oficina/main/of_sheetview.c:1621
 No se pudo guardar	Speichern fehlgeschlagen
 
@@ -80,7 +80,7 @@ No se pudo guardar	Speichern fehlgeschlagen
 Guardado como PDF	Als PDF gespeichert
 
 #: apps/oficina/main/of_docview.c:1590
-#: apps/oficina/main/of_docview.c:1757
+#: apps/oficina/main/of_docview.c:1764
 #: apps/oficina/main/of_sheetview.c:1630
 #: apps/oficina/main/of_sheetview.c:1774
 Guardado	Gespeichert
@@ -95,7 +95,7 @@ Guardado. En la copia no va lo que la app no entiende	Gespeichert. Was die App n
 Guardar una copia como	Kopie speichern als
 
 #: apps/oficina/main/of_docview.c:1605
-#: apps/oficina/main/of_docview.c:1729
+#: apps/oficina/main/of_docview.c:1736
 #: apps/oficina/main/of_sheetview.c:1643
 #: apps/oficina/main/of_sheetview.c:1727
 Guardar	Speichern
@@ -110,6 +110,7 @@ Guardar	Speichern
 Algunos párrafos (marcados al costado) tienen control de cambios u otros objetos: se ven, y se guardan como estaban.	Manche Absätze (seitlich markiert) haben Änderungsverfolgung oder andere Objekte: sie werden angezeigt und so gespeichert, wie sie waren.
 
 #: apps/oficina/main/of_docview.c:1627
+#: apps/oficina/main/of_pdfview.c:600
 #: apps/oficina/main/of_slideview.c:768
 Listo	Fertig
 
@@ -117,68 +118,72 @@ Listo	Fertig
 El documento no tiene títulos	Das Dokument hat keine Überschriften
 
 #: apps/oficina/main/of_docview.c:1681
-#: apps/oficina/main/of_docview.c:1731
+#: apps/oficina/main/of_docview.c:1738
 Índice	Inhalt
 
 #: apps/oficina/main/of_docview.c:1697
-#: apps/oficina/main/oficina.c:935
+#: apps/oficina/main/oficina.c:1013
 Documento de Word (.docx)	Word-Dokument (.docx)
 
 #: apps/oficina/main/of_docview.c:1698
-#: apps/oficina/main/oficina.c:936
+#: apps/oficina/main/oficina.c:1014
 Documento de OpenDocument (.odt)	OpenDocument-Dokument (.odt)
 
 #: apps/oficina/main/of_docview.c:1699
-#: apps/oficina/main/oficina.c:940
+#: apps/oficina/main/oficina.c:1018
 Texto (.txt)	Text (.txt)
 
 #: apps/oficina/main/of_docview.c:1700
 #: apps/oficina/main/of_sheetview.c:1652
 PDF para imprimir o mandar (.pdf)	PDF zum Drucken oder Versenden (.pdf)
 
-#: apps/oficina/main/of_docview.c:1730
+#: apps/oficina/main/of_docview.c:1735
+Ver las páginas como se imprimen	Die Seiten wie gedruckt ansehen
+
+#: apps/oficina/main/of_docview.c:1737
 #: apps/oficina/main/of_sheetview.c:1728
 #: apps/oficina/main/of_slideview.c:811
 Guardar una copia como...	Kopie speichern als...
 
-#: apps/oficina/main/of_docview.c:1732
+#: apps/oficina/main/of_docview.c:1739
 #: apps/oficina/main/of_sheetview.c:1741
 Buscar...	Suchen...
 
-#: apps/oficina/main/of_docview.c:1733
+#: apps/oficina/main/of_docview.c:1740
 Letra más grande	Größere Schrift
 
-#: apps/oficina/main/of_docview.c:1734
+#: apps/oficina/main/of_docview.c:1741
 Letra más chica	Kleinere Schrift
 
-#: apps/oficina/main/of_docview.c:1735
+#: apps/oficina/main/of_docview.c:1742
 #: apps/oficina/main/of_textview.c:1269
 Seleccionar todo	Alles auswählen
 
-#: apps/oficina/main/of_docview.c:1736
+#: apps/oficina/main/of_docview.c:1743
 #: apps/oficina/main/of_sheetview.c:1736
 #: apps/oficina/main/of_textview.c:1270
 Copiar	Kopieren
 
-#: apps/oficina/main/of_docview.c:1737
+#: apps/oficina/main/of_docview.c:1744
 #: apps/oficina/main/of_sheetview.c:1738
 #: apps/oficina/main/of_textview.c:1271
 Pegar	Einfügen
 
-#: apps/oficina/main/of_docview.c:1738
+#: apps/oficina/main/of_docview.c:1745
 Editar como texto	Als Text bearbeiten
 
-#: apps/oficina/main/of_docview.c:1739
+#: apps/oficina/main/of_docview.c:1746
+#: apps/oficina/main/of_pdfview.c:627
 #: apps/oficina/main/of_slideview.c:812
 Información	Informationen
 
-#: apps/oficina/main/of_docview.c:1853
+#: apps/oficina/main/of_docview.c:1860
 Estilo	Format
 
-#: apps/oficina/main/of_docview.c:1854
+#: apps/oficina/main/of_docview.c:1861
 Alinear	Ausrichten
 
-#: apps/oficina/main/of_docview.c:1907
+#: apps/oficina/main/of_docview.c:1914
 Algunos párrafos tienen control de cambios u objetos que no se editan acá: se ven y se guardan como están	Manche Absätze haben Änderungsverfolgung oder Objekte, die hier nicht bearbeitet werden: sie werden angezeigt und bleiben, wie sie sind
 
 #: apps/oficina/main/of_import.c:1073
@@ -217,20 +222,50 @@ Diapositiva	Folie
 #: apps/oficina/main/of_pptx.c:871
 Objeto	Objekt
 
-#: apps/oficina/main/of_pdftext.c:1740
+#: apps/oficina/main/of_pdftext.c:1723
 %d páginas. El PDF no tiene texto: son imágenes (escaneado)	%d Seiten. Das PDF hat keinen Text: es sind Bilder (gescannt)
 
-#: apps/oficina/main/of_pdftext.c:1741
+#: apps/oficina/main/of_pdftext.c:1724
 %d páginas. El PDF no tiene texto que se pueda leer	%d Seiten. Das PDF hat keinen lesbaren Text
 
-#: apps/oficina/main/of_pdftext.c:1742
+#: apps/oficina/main/of_pdftext.c:1725
 %d páginas. Parte del texto no se puede leer: sus letras no dicen qué son	%d Seiten. Ein Teil des Textes ist nicht lesbar: seine Zeichen sagen nicht, was sie sind
 
-#: apps/oficina/main/of_pdftext.c:1743
+#: apps/oficina/main/of_pdftext.c:1726
 %d páginas	%d Seiten
 
-#: apps/oficina/main/of_pdftext.c:1749
+#: apps/oficina/main/of_pdftext.c:1732
 Este PDF no tiene texto que la app pueda leer (puede ser una imagen escaneada en un formato que la app no muestra).	Dieses PDF hat keinen Text, den die App lesen kann (vielleicht ein gescanntes Bild in einem Format, das die App nicht zeigt).
+
+#: apps/oficina/main/of_pdfview.c:344
+Falta memoria para dibujar la página	Nicht genug Speicher, um die Seite zu zeichnen
+
+#: apps/oficina/main/of_pdfview.c:590
+No hay una página con ese número	Es gibt keine Seite mit dieser Nummer
+
+#: apps/oficina/main/of_pdfview.c:598
+%d páginas; esta, de %.1f × %.1f cm. La app dibuja las páginas con las letras que trae el archivo; las que nombra y no trae, con las suyas.	%d Seiten; diese ist %.1f × %.1f cm groß. Die App zeichnet die Seiten mit den Schriften, die die Datei mitbringt; die, die sie nennt und nicht mitbringt, mit ihren eigenen.
+
+#: apps/oficina/main/of_pdfview.c:613
+Ir a la página	Gehe zu Seite
+
+#: apps/oficina/main/of_pdfview.c:613
+#: apps/oficina/main/of_sheetview.c:1711
+#: apps/oficina/main/of_sheetview.c:1817
+#: apps/oficina/main/of_slideview.c:790
+Ir	Los
+
+#: apps/oficina/main/of_pdfview.c:623
+Ver el texto acomodado	Den Text umbrochen ansehen
+
+#: apps/oficina/main/of_pdfview.c:624
+Ir a la página...	Gehe zu Seite...
+
+#: apps/oficina/main/of_pdfview.c:625
+Ajustar al ancho	An Breite anpassen
+
+#: apps/oficina/main/of_pdfview.c:626
+Más grande	Größer
 
 #: apps/oficina/main/of_pptx.c:871
 Gráfico	Diagramm
@@ -334,15 +369,15 @@ Guardado. El CSV tiene sólo la hoja que se veía	Gespeichert. Die CSV enthält 
 Guardado. En el CSV las fórmulas quedaron como valores	Gespeichert. In der CSV sind Formeln jetzt Werte
 
 #: apps/oficina/main/of_sheetview.c:1649
-#: apps/oficina/main/oficina.c:937
+#: apps/oficina/main/oficina.c:1015
 Planilla de Excel (.xlsx)	Excel-Tabelle (.xlsx)
 
 #: apps/oficina/main/of_sheetview.c:1650
-#: apps/oficina/main/oficina.c:938
+#: apps/oficina/main/oficina.c:1016
 Planilla de OpenDocument (.ods)	OpenDocument-Tabelle (.ods)
 
 #: apps/oficina/main/of_sheetview.c:1651
-#: apps/oficina/main/oficina.c:939
+#: apps/oficina/main/oficina.c:1017
 Datos separados por comas (.csv)	Kommagetrennte Werte (.csv)
 
 #: apps/oficina/main/of_sheetview.c:1667
@@ -358,17 +393,11 @@ Cambiar el nombre de una hoja de un .xlsx todavía no se puede	Blätter einer .x
 #: apps/oficina/main/of_sheetview.c:1817
 Ir a la celda	Gehe zu Zelle
 
-#: apps/oficina/main/of_sheetview.c:1711
-#: apps/oficina/main/of_sheetview.c:1817
-#: apps/oficina/main/of_slideview.c:790
-#: apps/oficina/main/of_textview.c:1214
-Ir	Los
-
 #: apps/oficina/main/of_sheetview.c:1717
 Nombre de la hoja	Blattname
 
 #: apps/oficina/main/of_sheetview.c:1717
-#: apps/oficina/main/oficina.c:813
+#: apps/oficina/main/oficina.c:891
 Cambiar	Ändern
 
 #: apps/oficina/main/of_sheetview.c:1729
@@ -657,175 +686,186 @@ Ver con formato	Formatiert anzeigen
 Exportar a PDF...	Als PDF exportieren...
 
 #: apps/oficina/main/of_ui.c:672
-#: apps/oficina/main/oficina.c:551
+#: apps/oficina/main/oficina.c:629
 Cancelar	Abbrechen
 
-#: apps/oficina/main/oficina.c:322
+#: apps/oficina/main/oficina.c:323
 El archivo comprimido es muy grande para abrirlo acá (más de 64 MB)	Das Archiv ist zu groß, um es hier zu öffnen (über 64 MB)
 
-#: apps/oficina/main/oficina.c:323
+#: apps/oficina/main/oficina.c:324
 No se pudo leer el archivo comprimido	Das Archiv konnte nicht gelesen werden
 
-#: apps/oficina/main/oficina.c:354
-La contraseña no es esa	Das ist nicht das Passwort
-
-#: apps/oficina/main/oficina.c:354
-#: apps/oficina/main/oficina.c:389
-#: apps/oficina/main/oficina.c:414
-#: apps/oficina/main/oficina.c:423
-Es del formato de Office 95 o anterior: la app no lo lee	Es ist im Format von Office 95 oder älter: die App liest es nicht
-
-#: apps/oficina/main/oficina.c:354
-#: apps/oficina/main/oficina.c:414
+#: apps/oficina/main/oficina.c:366
+#: apps/oficina/main/oficina.c:374
+#: apps/oficina/main/oficina.c:397
+#: apps/oficina/main/oficina.c:402
 No se pudo leer el documento	Das Dokument konnte nicht gelesen werden
 
-#: apps/oficina/main/oficina.c:364
-Ese archivo ya no está	Diese Datei gibt es nicht mehr
+#: apps/oficina/main/oficina.c:369
+#: apps/oficina/main/oficina.c:374
+La contraseña no es esa	Das ist nicht das Passwort
 
 #: apps/oficina/main/oficina.c:374
-Este formato todavía no se abre: llega en una próxima versión	Dieses Format öffnet sich noch nicht: es kommt in einer späteren Version
+#: apps/oficina/main/oficina.c:435
+#: apps/oficina/main/oficina.c:475
+#: apps/oficina/main/oficina.c:484
+Es del formato de Office 95 o anterior: la app no lo lee	Es ist im Format von Office 95 oder älter: die App liest es nicht
 
-#: apps/oficina/main/oficina.c:378
-No es un documento que la app conozca	Kein Dokument, das die App kennt
-
-#: apps/oficina/main/oficina.c:388
-#: apps/oficina/main/oficina.c:413
-#: apps/oficina/main/oficina.c:422
-El archivo tiene contraseña: la app no lo puede abrir	Die Datei hat ein Passwort: die App kann sie nicht öffnen
-
-#: apps/oficina/main/oficina.c:389
-No se pudo leer la presentación	Die Präsentation konnte nicht gelesen werden
-
-#: apps/oficina/main/oficina.c:405
+#: apps/oficina/main/oficina.c:394
+#: apps/oficina/main/oficina.c:450
+#: apps/oficina/main/oficina.c:466
 Este PDF tiene contraseña	Dieses PDF hat ein Passwort
 
-#: apps/oficina/main/oficina.c:405
-#: apps/oficina/main/oficina.c:833
-#: apps/oficina/main/oficina.c:843
+#: apps/oficina/main/oficina.c:394
+#: apps/oficina/main/oficina.c:450
+#: apps/oficina/main/oficina.c:466
+#: apps/oficina/main/oficina.c:911
 Abrir	Öffnen
 
-#: apps/oficina/main/oficina.c:409
+#: apps/oficina/main/oficina.c:397
+#: apps/oficina/main/oficina.c:453
+Otra app está usando el dibujo en segundo plano: cerrala y probá de nuevo	Eine andere App benutzt das Zeichnen im Hintergrund: schließe sie und versuche es noch einmal
+
+#: apps/oficina/main/oficina.c:410
+Ese archivo ya no está	Diese Datei gibt es nicht mehr
+
+#: apps/oficina/main/oficina.c:420
+Este formato todavía no se abre: llega en una próxima versión	Dieses Format öffnet sich noch nicht: es kommt in einer späteren Version
+
+#: apps/oficina/main/oficina.c:424
+No es un documento que la app conozca	Kein Dokument, das die App kennt
+
+#: apps/oficina/main/oficina.c:434
+#: apps/oficina/main/oficina.c:474
+#: apps/oficina/main/oficina.c:483
+El archivo tiene contraseña: la app no lo puede abrir	Die Datei hat ein Passwort: die App kann sie nicht öffnen
+
+#: apps/oficina/main/oficina.c:435
+No se pudo leer la presentación	Die Präsentation konnte nicht gelesen werden
+
+#: apps/oficina/main/oficina.c:452
+#: apps/oficina/main/oficina.c:470
 El PDF está cifrado de una forma que la app no conoce	Das PDF ist auf eine Weise verschlüsselt, die die App nicht kennt
 
-#: apps/oficina/main/oficina.c:423
+#: apps/oficina/main/oficina.c:484
 No se pudo leer la planilla	Die Tabelle konnte nicht gelesen werden
 
-#: apps/oficina/main/oficina.c:442
-#: apps/oficina/main/oficina.c:789
+#: apps/oficina/main/oficina.c:503
+#: apps/oficina/main/oficina.c:867
 No se pudo leer el archivo	Die Datei konnte nicht gelesen werden
 
-#: apps/oficina/main/oficina.c:447
+#: apps/oficina/main/oficina.c:508
 Es una copia sacada del archivo comprimido: para quedártela, extraela con una pulsación larga	Das ist eine Kopie aus dem Archiv: zum Behalten mit langem Druck entpacken
 
-#: apps/oficina/main/oficina.c:678
+#: apps/oficina/main/oficina.c:756
 Ese archivo tiene contraseña: la app no lo puede sacar	Diese Datei hat ein Passwort: die App kann sie nicht entpacken
 
-#: apps/oficina/main/oficina.c:678
-#: apps/oficina/main/oficina.c:701
+#: apps/oficina/main/oficina.c:756
+#: apps/oficina/main/oficina.c:779
 No se pudo sacar el archivo	Die Datei konnte nicht entpackt werden
 
-#: apps/oficina/main/oficina.c:703
+#: apps/oficina/main/oficina.c:781
 Extraído en la carpeta: %s	In den Ordner entpackt: %s
 
-#: apps/oficina/main/oficina.c:727
+#: apps/oficina/main/oficina.c:805
 Se extrajeron %d archivos en «%s»; %d no se pudieron	%d Dateien nach „%s“ entpackt; %d gingen nicht
 
-#: apps/oficina/main/oficina.c:728
+#: apps/oficina/main/oficina.c:806
 Se extrajeron %d archivos en «%s»	%d Dateien nach „%s“ entpackt
 
-#: apps/oficina/main/oficina.c:771
+#: apps/oficina/main/oficina.c:849
 No se pudo cambiar el nombre	Umbenennen fehlgeschlagen
 
-#: apps/oficina/main/oficina.c:780
+#: apps/oficina/main/oficina.c:858
 No se pudo borrar	Löschen fehlgeschlagen
 
-#: apps/oficina/main/oficina.c:798
+#: apps/oficina/main/oficina.c:876
 No se pudo copiar	Kopieren fehlgeschlagen
 
-#: apps/oficina/main/oficina.c:813
+#: apps/oficina/main/oficina.c:891
 Nuevo nombre	Neuer Name
 
-#: apps/oficina/main/oficina.c:819
+#: apps/oficina/main/oficina.c:897
 ¿Borrar «%s»?	„%s“ löschen?
 
-#: apps/oficina/main/oficina.c:820
+#: apps/oficina/main/oficina.c:898
 No se puede deshacer.	Das lässt sich nicht rückgängig machen.
 
-#: apps/oficina/main/oficina.c:820
-#: apps/oficina/main/oficina.c:846
+#: apps/oficina/main/oficina.c:898
+#: apps/oficina/main/oficina.c:924
 Borrar	Löschen
 
-#: apps/oficina/main/oficina.c:834
+#: apps/oficina/main/oficina.c:912
 Extraer en esta carpeta	In diesen Ordner entpacken
 
-#: apps/oficina/main/oficina.c:844
+#: apps/oficina/main/oficina.c:922
 Cambiar el nombre	Umbenennen
 
-#: apps/oficina/main/oficina.c:845
+#: apps/oficina/main/oficina.c:923
 Duplicar	Duplizieren
 
-#: apps/oficina/main/oficina.c:847
+#: apps/oficina/main/oficina.c:925
 Sacar de recientes	Aus Zuletzt entfernen
 
-#: apps/oficina/main/oficina.c:912
+#: apps/oficina/main/oficina.c:990
 Hoja1	Tabelle1
 
-#: apps/oficina/main/oficina.c:918
+#: apps/oficina/main/oficina.c:996
 No se pudo crear el archivo	Die Datei konnte nicht erstellt werden
 
-#: apps/oficina/main/oficina.c:927
+#: apps/oficina/main/oficina.c:1005
 Nombre de la planilla	Name der Tabelle
 
-#: apps/oficina/main/oficina.c:927
+#: apps/oficina/main/oficina.c:1005
 Nombre del documento	Name des Dokuments
 
-#: apps/oficina/main/oficina.c:927
+#: apps/oficina/main/oficina.c:1005
 Planilla	Tabelle
 
-#: apps/oficina/main/oficina.c:927
+#: apps/oficina/main/oficina.c:1005
 Documento	Dokument
 
-#: apps/oficina/main/oficina.c:928
+#: apps/oficina/main/oficina.c:1006
 Crear	Erstellen
 
-#: apps/oficina/main/oficina.c:941
+#: apps/oficina/main/oficina.c:1019
 Markdown (.md)	Markdown (.md)
 
-#: apps/oficina/main/oficina.c:943
+#: apps/oficina/main/oficina.c:1021
 Nuevo	Neu
 
-#: apps/oficina/main/oficina.c:967
+#: apps/oficina/main/oficina.c:1045
 Fondo claro	Heller Hintergrund
 
-#: apps/oficina/main/oficina.c:967
+#: apps/oficina/main/oficina.c:1045
 Fondo oscuro	Dunkler Hintergrund
 
-#: apps/oficina/main/oficina.c:968
+#: apps/oficina/main/oficina.c:1046
 Ir a la carpeta de documentos	Zum Dokumentenordner
 
-#: apps/oficina/main/oficina.c:969
+#: apps/oficina/main/oficina.c:1047
 Extraer todo en una carpeta	Alles in einen Ordner entpacken
 
-#: apps/oficina/main/oficina.c:1058
+#: apps/oficina/main/oficina.c:1136
 con contraseña	mit Passwort
 
-#: apps/oficina/main/oficina.c:1082
+#: apps/oficina/main/oficina.c:1160
 Oficina	Büro
 
-#: apps/oficina/main/oficina.c:1096
+#: apps/oficina/main/oficina.c:1174
 Recientes	Zuletzt
 
-#: apps/oficina/main/oficina.c:1097
+#: apps/oficina/main/oficina.c:1175
 Archivos	Dateien
 
-#: apps/oficina/main/oficina.c:1168
+#: apps/oficina/main/oficina.c:1246
 Todavía no abriste ningún documento. En Archivos están los de la tarjeta, y con + se empieza uno nuevo.	Du hast noch kein Dokument geöffnet. Unter Dateien sind die der Karte, und + beginnt ein neues.
 
-#: apps/oficina/main/oficina.c:1169
+#: apps/oficina/main/oficina.c:1247
 No hay archivos en esta carpeta. Se suben desde la página Oficina del portal, o con + se crea uno.	In diesem Ordner sind keine Dateien. Sie werden über die Seite Büro im Portal hochgeladen, oder + erstellt eine.
 
-#: apps/oficina/main/oficina.c:1264
+#: apps/oficina/main/oficina.c:1342
 Salir sin guardar	Ohne Speichern verlassen
 
-#: apps/oficina/main/oficina.c:1266
+#: apps/oficina/main/oficina.c:1344
 Hay cambios sin guardar	Es gibt ungespeicherte Änderungen

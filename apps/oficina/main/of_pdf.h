@@ -50,6 +50,8 @@ typedef struct pdf_s {
     bool       no_streams, no_strings;
     struct pdf_os { int num; uint8_t *data; size_t len; int first, n; int *offs; } os[4];
     int        os_next;
+    pv_t     **dead;            /* objects the rebuild replaced, freed at the end */
+    int        ndead;
 } pdf_t;
 
 /* err: "read", "format", "damaged", "password" (wrong or needed), "encrypted" (a handler the app lacks) */
@@ -60,6 +62,8 @@ const pv_t *pdf_res(pdf_t *P, const pv_t *v);                  /* a reference fo
 const pv_t *pdf_get(pdf_t *P, const pv_t *dict, const char *key);
 /* A stream's data, decrypted and decoded; *image_filter: the picture coding left (DCTDecode...). */
 uint8_t    *pdf_stream(pdf_t *P, const pv_t *s, int num, size_t *n, const char **image_filter);
+/* The same for data of its own (an inline picture): d is taken (freed or returned). */
+uint8_t    *pdf_decode(pdf_t *P, uint8_t *d, size_t n, const pv_t *filter, const pv_t *parms, size_t *out_n, const char **image_filter);
 
 void   lx_ws(lx_t *L);
 bool   pv_parse(pdf_t *P, lx_t *L, pv_t *out);                 /* P NULL: no "n g R" */
@@ -71,6 +75,25 @@ bool   pv_is_name(const pv_t *v, const char *name);
 /* the standard fonts' widths of ASCII 32-126 (of_pdftext.c), and any code point's */
 extern const int16_t of_pdf_helv[95], of_pdf_helvb[95], of_pdf_times[95];
 int of_pdf_width(const int16_t *table, uint32_t cp);
+
+/* drawing the pages (of_pdfdraw.c) */
+typedef struct of_pdfr of_pdfr_t;
+of_pdfr_t *of_pdfr_open(const char *path, const char *password, char *err, size_t errlen);
+void       of_pdfr_close(of_pdfr_t *R);
+int        of_pdfr_count(const of_pdfr_t *R);
+void       of_pdfr_size(const of_pdfr_t *R, int page, float *w, float *h);     /* points, turned as shown */
+/* Page 'page' at 'scale' pixels a point: the part from (ox, oy), w x h, into px
+ * (RGB565, LVGL's order). *cancel, set from elsewhere, stops it (false back). */
+bool       of_pdfr_draw(of_pdfr_t *R, int page, float scale, int ox, int oy, uint16_t *px, int w, int h, volatile bool *cancel);
+
+/* The glyphs of fonts the file names and does not carry: an 8-bit coverage
+ * bitmap drawn at px pixels an em, its top-left at (left, top) from the
+ * origin (top up), adv its advance in its pixels (0: unknown). flags: 1
+ * bold, 2 italic, 4 monospaced, 8 serif. Called from the drawing's thread;
+ * the bitmap must last until the next call. */
+typedef struct { const uint8_t *a8; int w, h, left, top; float px, adv; } of_fbglyph_t;
+typedef bool (*of_pdf_fallback_fn)(uint32_t cp, float px, uint8_t flags, of_fbglyph_t *out);
+void of_pdfr_fallback(of_pdf_fallback_fn fn);
 
 /* writing (of_pdfw.c) */
 struct of_doc_s;
