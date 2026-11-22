@@ -1157,8 +1157,9 @@ se confirmó a los 32 s. Ya no se ofrece a sí misma (corre la que el
 catálogo trae). RAM interna libre: 212 047 bytes. Los dos servidores de
 prueba de la Mac están apagados.
 
-En GitHub quedan las releases de prueba `v0.30.0-tienda.1` a `.4` (dos
-pre-releases y dos borradores).
+Las releases de prueba `v0.30.0-tienda.1` a `.4` (dos pre-releases y dos
+borradores) y sus tags se borraron el 2026-11-22, después de la 0.32.0:
+el catálogo publicado no nombraba ningún archivo de ellas.
 
 ## Después del merge: que una app nueva no cueste dos horas de CI
 

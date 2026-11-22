@@ -5,6 +5,93 @@ simulador, contra servidores falsos en la Mac. Este archivo junta, en un solo
 lugar, lo que **sólo la placa puede confirmar**, para ir tachando a medida que
 se prueba.
 
+## Pendientes al 2026-11-22, después de la 0.32.0
+
+La placa corre `v0.32.0`, la imagen del CI, con las 73 apps del catálogo
+manejadas por la Tienda. `main` tiene además la 0.32.1 empezada (un
+arreglo de la Tienda), sin instalar. Esto es todo lo que queda abierto de
+noviembre, junto; el detalle de cada cosa está en su sección, más abajo.
+De antes de noviembre quedan 69 renglones sin tachar desde "Pendientes,
+en resumen": no se revisaron en esta pasada.
+
+**En `main`, sin instalar (0.32.1):**
+
+- [ ] La Tienda espera una descarga libre: tocar "Obtener" apenas se abre
+      la ficha de una app, mientras bajan sus imágenes, y que instale al
+      primer toque.
+
+**Las cuatro apps de la 0.32.0:**
+
+- [ ] **Estudio:** mandar todo a una computadora por el puerto OTG, con un
+      programa que muestre los canales y el reloj; las faltas que muestra
+      Canción → Audio en Baja, Normal y Segura; la latencia de verdad, de
+      una tecla al parlante, con un micrófono.
+- [ ] **Hockey de mesa:** dos dedos a la vez, las mesas de neón y de
+      hielo, y ajustar los niveles contra una persona.
+- [ ] **Traductor:** el diccionario de una palabra, la página del portal,
+      el modo en línea contra `fake_translate.py`; los packs de francés y
+      alemán bajados en la placa (italiano, español y portugués ya están).
+- [ ] **Oficina:** abrir en la computadora una planilla y un documento
+      guardados en la placa; el teclado físico; y en `fuentes.pdf` la
+      línea de la fuente TrueType simbólica, que sale sin tildes y no se
+      comparó con la Mac.
+- [ ] **Vuelos:** el paso solo de airplanes.live a adsb.lol (visto en el
+      simulador).
+- [ ] El chip "Nuevas" visto en la pantalla.
+
+**Las de la 0.31.0:**
+
+- [ ] **Sudoku y Bolsa:** sin abrir en la placa; Bolsa contra los
+      servicios de verdad.
+- [ ] **Metegol:** de a dos y con joystick; y volver a mirar el aviso de
+      memoria al cerrarla, ahora que no cuenta las fotos del fondo.
+- [ ] **Juegos de mesa:** los fps del 3D, el motor de ajedrez en el nivel
+      más alto, y los cuatro juegos que no se jugaron.
+- [ ] Abrir algunas de las 39 apps reemplazadas por las de la Tienda y ver
+      que lo guardado sigue.
+
+**Respaldos:**
+
+- [ ] Restaurar uno que cambie algo a la vista, uno simple, y deshacer una
+      restauración.
+- [ ] La copia de antes de un firmware, con un ajuste cambiado; la del
+      otro día; la semanal al servidor, sola.
+- [ ] Un pendrive de verdad: copiar, sacar en medio, traer en una tarjeta
+      nueva.
+- [ ] `sftp p4os.local` y `scp` desde la Mac.
+- [ ] Con la flash borrada: el cartel que ofrece el respaldo de la
+      tarjeta. Sólo cuando el usuario lo diga.
+
+**La Tienda:**
+
+- [ ] Cortar el Wi-Fi en medio de una bajada.
+- [ ] Proponer una fuente desde el portal, quitar una fuente con sus apps
+      y sin ellas, quitar un paquete suelto, y una fuente de terceros de
+      verdad.
+- [ ] Instalar el firmware del C6 que baja la Tienda.
+
+**El audio:**
+
+- [ ] Con Música sonando y "Mezclar música y apps", y empezar a grabar
+      con la salida corta abierta.
+
+**Ideas anotadas, que no son pruebas:**
+
+- **El portal y los gestos.** Sus toques ya llegan a los botones y a los
+  juegos que leen los dedos (`aos_touch_points`), no al lector de gestos
+  del sistema (`aos_gesture_attach`): no se puede desplazar un mapa ni una
+  página de PDF, ni presentar diapositivas, desde el portal. Tampoco pega
+  texto en los campos de Oficina, que usa el teclado de Notas.
+- **Traductor:** pasando por el inglés recarga los dos modelos en cada
+  traducción (3,2 s de los 5 a 11); y el camino int8 sólo rinde con el
+  SIMD del núcleo, que no está escrito.
+- **Packs:** el de fuentes de Oficina se subió a mano y podría armarlo el
+  CI, como el de Notas; los de idioma del Traductor también tienen fuentes
+  bajables. Los de idioma viven en la release `v0.31.0`, que por eso no se
+  borra.
+- **El simulador:** un comando de guion para el teclado físico (`hwkey`),
+  pedido por Oficina.
+
 ## Estado al 2026-09-30 (lo de después, en los resúmenes de abajo)
 
 - **La placa corre P4OS entero:** rev 1.3 del chip, perfil `rev1_3`, firmware
@@ -63,8 +150,11 @@ y un servidor de prueba en la Mac:
       por HTTPS y escrito en la otra ranura en 64 s.
 - [x] Reiniciar a ese firmware, el primero compilado por el CI que
       arranca en la placa: a prueba, confirmado a los 32 s (usuario).
-- [ ] Las imágenes de las apps desde un catálogo del CI (los cuatro tags
-      de prueba salieron sin ellas; corregido para el próximo).
+- [x] Las imágenes de las apps desde un catálogo del CI (los cuatro tags
+      de prueba salieron sin ellas): con la 0.32.0 la placa las bajó al
+      abrir cada ficha (en el registro, `shots/hockey-1-…jpg` y las de
+      Estudio, 2 s cada una). Los tags de prueba `v0.30.0-tienda.1` a `.4`
+      y sus releases se borraron el 2026-11-22.
 - [ ] Cortar el Wi-Fi en medio de una bajada.
 - [ ] Confirmar que proponer una fuente desde el portal se recorrió en la
       placa (en el simulador sí).
@@ -375,18 +465,21 @@ para la release siguiente.
       menos fuerza y puntería) **el usuario la jugó: "se siente bien"**.
 - [ ] Metegol: al cerrarla el sistema dice que no volvieron ~3,9 MB de
       PSRAM, con el asignador de la app en 0 KB (pedido en
-      `HANDOFF-NUEVAS-APPS.md`): ver si se acumula al abrirla y cerrarla.
+      `HANDOFF-NUEVAS-APPS.md`). Hasta la 0.32.0 ese aviso contaba como
+      de la app los 1,9 MB de las fotos del fondo (Hockey, Vuelos y Juegos
+      de mesa lo daban también, sin perder nada): con la 0.32.0 hay que
+      volver a mirarlo. Si sigue saliendo, son los 2 MB que no eran fotos.
 - [ ] Metegol de a dos en la misma pantalla, y con joystick.
 - [x] **Jugadas en la placa por el usuario** (2026-11-22, instaladas
       desde la Tienda): **Solitario**, una partida entera; **Juegos de
       mesa**, el cuatro en línea y una partida rápida de ajedrez. Sin
       caídas ni cuadros tardíos en lo que mostró la placa después.
-- [ ] Sudoku, Bolsa y Vuelos: abrirlas en la placa (instaladas, sin
-      probar). En Juegos de mesa, medir los fps del 3D y el tiempo del
-      motor de ajedrez en el nivel más alto; las damas, el reversi, el
-      ludo y el backgammon.
-- [ ] Bolsa y Vuelos contra los servicios de verdad (en el simulador, sólo
-      contra sus servidores falsos).
+- [ ] Sudoku y Bolsa: abrirlas en la placa (instaladas, sin probar;
+      Vuelos ya se probó, más arriba). En Juegos de mesa, medir los fps
+      del 3D y el tiempo del motor de ajedrez en el nivel más alto; las
+      damas, el reversi, el ludo y el backgammon.
+- [ ] Bolsa contra los servicios de verdad (en el simulador, sólo contra
+      su servidor falso).
 
 ### Pendientes, en resumen
 
