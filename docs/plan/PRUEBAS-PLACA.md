@@ -97,7 +97,7 @@ El plan y lo medido, en `docs/plan/RESPALDO.md` ("En la placa"). Con
 - [ ] Con la flash borrada: volver desde el archivo y que la Tienda
       ofrezca reinstalar. Sólo cuando el usuario lo diga.
 
-### Respaldos, las copias solas y el pendrive (rama `respaldo-2`)
+### Respaldos, las copias solas, el pendrive y el servidor (0.31)
 
 Instalado el 2026-11-21, `v0.30.0-16-g021f337`.
 

@@ -4,15 +4,17 @@ Pensado el 2026-11-21, con la Tienda a punto de entrar a `main`. Pedido del
 usuario: la placa junta cada vez más cosas (ajustes, cuentas, apps, datos de
 cada app) y no hay nada que las guarde.
 
-**Dónde está (2026-11-21):** la etapa 1 está escrita, probada en la placa
-y en `main`; sale con la 0.31.0, que espera a las apps nuevas de la
-Tienda. Las etapas 2 (las copias que hace sola) y 3 (el pendrive y el
-script de la computadora) están en la rama `respaldo-2` y **en la placa**
-(`v0.30.0-16-g021f337`). La etapa 4 (un servidor propio por SFTP) está
-en la misma rama, probada en la Mac y el simulador, e **instalada**
-(`v0.30.0-26-gac10384`), con la primera copia a un servidor de verdad
-hecha.
-Nada de la rama está en `main`.
+**Dónde está (2026-11-21):** las cuatro etapas están escritas, en `main`
+y en la placa (`v0.30.0-26-gac10384`); salen con la 0.31.0, que espera a
+las apps nuevas de la Tienda. Cada una tiene abajo lo que se hizo y lo que
+dio en la placa.
+
+**Lo que falta ver en la placa** (la lista está en `PRUEBAS-PLACA.md`):
+restaurar un respaldo que cambie algo a la vista y uno simple; la copia de
+antes de un firmware (en cuatro instalaciones no hubo cambios que la
+pidieran); un pendrive de verdad; `sftp` hacia la placa; la copia semanal
+al servidor saliendo sola; y la prueba con la flash borrada, que borra la
+placa y espera la palabra del usuario.
 
 ## Etapa 1, hecha en la Mac (2026-11-21)
 
@@ -123,7 +125,8 @@ sólo cuando el usuario lo diga.
 
 ## Etapa 2, hecha en la Mac (2026-11-21)
 
-Rama `respaldo-2`. Lo que cambió respecto del plan está dicho en cada
+Escrita en la rama `respaldo-2`, que entró a `main` el mismo día. Lo que
+cambió respecto del plan está dicho en cada
 punto.
 
 - **Una copia por día, si algo cambió.** El plan pedía un contador de
@@ -188,7 +191,7 @@ tarjeta. Esa borra la placa: sólo cuando el usuario lo diga.
 
 ## Etapa 3, hecha en la Mac (2026-11-21)
 
-Rama `respaldo-2`, sobre la etapa 2.
+En la misma rama, sobre la etapa 2.
 
 - **Al pendrive, archivo por archivo:** `p4os-backup/backups` (los
   respaldos) y `p4os-backup/card/<carpeta>` (las carpetas elegidas). Antes

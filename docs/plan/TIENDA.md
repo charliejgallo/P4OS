@@ -1289,9 +1289,11 @@ proyecto).
   fuente y quitar un paquete suelto en la placa (`PRUEBAS-PLACA.md`); los
   símbolos de las partes del sistema en la página del portal; borrar las
   releases de prueba `v0.30.0-tienda.1` a `.4` de GitHub.
-- **Lo que sigue por fuera de la Tienda:** `docs/plan/RESPALDO.md`. Su
-  etapa 1 (un respaldo en la tarjeta, simple o cifrado, y restaurarlo)
-  está en `main` desde el 2026-11-21, para la 0.31.0.
+- **Lo que sigue por fuera de la Tienda:** `docs/plan/RESPALDO.md`. Sus
+  cuatro etapas (el respaldo en la tarjeta, las copias que la placa hace
+  sola, el pendrive, y un servidor propio por SFTP) están en `main` desde
+  el 2026-11-21, para la 0.31.0, junto con SFTP hacia la placa
+  (`docs/SSH.md`).
 - **La 0.31.0 espera** a que terminen las sesiones que arman apps nuevas
   para la Tienda (pedido del usuario, 2026-11-21): hasta entonces no hay
   tag.

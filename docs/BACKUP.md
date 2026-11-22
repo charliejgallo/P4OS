@@ -248,3 +248,9 @@ key and opened on another board, the offer to a new board, the copy to a
 pendrive and back onto a new card, and what goes to a server and when
 nothing does (a make-believe server there). The SSH and SFTP client itself
 is `tests/sshc_host/run.sh`, against the simulator's own SFTP server.
+
+In the simulator: `P4_SIM_SSID=` starts a board that knows no network (the
+offer of a backup on the card), `P4_SIM_PENDRIVE=1` gives it a pendrive
+that is the folder `./sim_usb`, and `P4_SIM_SSH_PORT=<port>` with
+`ssh_on=1` in its preferences makes it the SFTP server another simulator
+sends its backups to.

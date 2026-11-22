@@ -27,14 +27,16 @@
   - **To a server of your own, by SFTP:** the sealed backups go once a
     week to an SSH server you name (a NAS, a Raspberry), with the board's
     key and no password; the server's key is accepted at the board, and
-    another one is refused.
+    another one is refused. **Make a new key** puts another in the place
+    of the board's SSH key, which is the SSH app's too.
   - **To a pendrive and back:** the backups and chosen folders of the
     card, file by file, to a drive on the USB host; and onto a new card.
   - `tools/backup.sh` keeps a backup, and chosen folders of the card, on a
     computer.
   - On the board: a plain backup in half a second and a sealed one in
     four, with 427 preferences; a sealed one made and restored at the
-    screen.
+    screen; the day's copy made by itself; and three sealed backups sent
+    to a NAS running OpenSSH, byte for byte.
 - **SFTP and `scp` into the board** ([docs/SSH.md](docs/SSH.md)): the SSH
   server gives the card's files to `sftp`, `scp` and a file manager, by
   the console's rules and keys. `/` is the card and nothing above it.
