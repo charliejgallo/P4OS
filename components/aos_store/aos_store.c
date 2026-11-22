@@ -804,7 +804,16 @@ static bool download(const char *url, const char *rel, const char *sha, uint32_t
 {
     char f[FULL_MAX];
     if (!url_allowed(url, e)) return false;
-    int id = aos_fetch_start(url, full(f, rel), sha, size);
+    /* -2 is every download taken. They are the pictures of the page the
+     * person is on, a couple of seconds each: on the board, "Get" tapped
+     * while Air Hockey's four pictures came failed there, and worked at the
+     * second tap (2026-11-22, with Office too). So wait for one to end. */
+    int id;
+    for (int tries = 0; ; tries++) {
+        id = aos_fetch_start(url, full(f, rel), sha, size);
+        if (id != -2 || tries >= 100 || s_cancel) break;
+        aos_hal_sleep_ms(200);
+    }
     if (id <= 0) return fail(e, AOS_STORE_E_NETWORK, "could not start the download (%d)", id);
     aos_fetch_info_t in;
     bool over = false;

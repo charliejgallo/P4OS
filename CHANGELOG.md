@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.32.1 — not released yet
+
+- **"Get" tapped while an app's pictures were still coming failed.** The
+  Store's page downloads an app's four pictures as it opens, and they took
+  every download there is: the install could not start and said so, and
+  worked at the second tap. Seen on the board with Air Hockey and Office,
+  updating to 0.32.0. The Store now waits for a download to be free.
+
 ## 0.32.0 — 2026-11-22
 
 Four new apps: an office suite, a translator with no network, a studio to

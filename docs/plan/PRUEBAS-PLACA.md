@@ -265,11 +265,27 @@ de la 0.30.0: se pone al día al abrir la Tienda o Ajustes → Actualización.
       al refrescar: firmware 0.32.0 para bajar, cuatro apps nuevas, tres
       actualizaciones (Vuelos, y los idiomas inglés y alemán del
       sistema), y Estudio pidiendo el firmware nuevo.
-- [ ] Actualizar el firmware desde Ajustes y las apps desde la Tienda.
-- [ ] El chip "Nuevas" en la pantalla; un idioma del Traductor bajado
-      solo, sin los otros; Vuelos sin "Actualizar" después de
-      actualizarla; Hockey, Traductor, Oficina y Estudio, que están
-      copiadas a mano, pasadas a la Tienda con "Reemplazarlas".
+- [x] **La placa se actualizó sola a la 0.32.0** (2026-11-22, el
+      usuario, desde Ajustes y la Tienda): corre `v0.32.0`, la imagen del
+      CI, confirmada a los 30 s. La Tienda quedó con 73 apps suyas, sin
+      actualizaciones pendientes y con todas entrando en el firmware;
+      sólo dos `.so` propios siguen "a mano" (no están en el catálogo).
+- [x] **Las cuatro apps copiadas a mano pasaron a la Tienda** y Vuelos se
+      actualizó: los cinco `.so` de la tarjeta son los publicados
+      (SHA-256 contra el catálogo).
+- [x] **Un idioma del Traductor, solo:** el usuario bajó el italiano. La
+      Tienda trajo sus 7 partes (46,5 MB en 134 s, 350 KB/s) y ninguna de
+      francés ni de alemán; español y portugués, que estaban copiados a
+      mano y son los del catálogo, quedaron anotados sin bajarse de
+      nuevo. Las 7 partes leídas de la tarjeta son iguales a las armadas.
+- [x] Sin caídas en el registro de toda la actualización.
+- [ ] **Encontrado:** "Obtener" tocado mientras la página de la app baja
+      sus cuatro imágenes falla ("could not start the download (-2)") y
+      anda al segundo toque; pasó con Hockey y con Oficina. Corregido en
+      `main` para la próxima versión: la Tienda espera a que se libere una
+      descarga. Falta verlo en la placa.
+- [ ] El chip "Nuevas" visto en la pantalla (la Tienda lo informa; no hay
+      captura).
 
 ### Hockey de mesa, Traductor y Oficina (2026-11-22, para la 0.32.0)
 
