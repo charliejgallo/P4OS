@@ -16,6 +16,7 @@
  * The file keeps its encoding and line ends; the menu changes them.
  */
 #include "of_ui.h"
+#include "of_doc.h"
 #include "aos_fonts.h"
 #include "aos_mono.h"
 #include "aos_gesture.h"
@@ -1176,10 +1177,12 @@ static void goto_done(const char *text, void *ud)
     refresh();
 }
 
+static int s_tmenu[13];
+
 static void menu_pick(int i, void *ud)
 {
     (void)ud;
-    switch (i) {
+    switch (i >= 0 && i < 13 ? s_tmenu[i] : -1) {
     case 0: of_textv_save(); break;
     case 1: find_toggle(); break;
     case 2:
@@ -1207,6 +1210,13 @@ static void menu_pick(int i, void *ud)
     case 9: T.anchor = 0; T.caret = of_text_len(&T.t); refresh(); break;
     case 10: copy(false); break;
     case 11: paste(); break;
+    case 12: {
+        if (T.modified) { of_app_toast(_("Guardá los cambios primero")); break; }
+        char p[300];
+        snprintf(p, sizeof p, "%s", T.path);
+        of_app_open_as(p, OF_OPEN_VIEW);
+        break;
+    }
     }
 }
 
@@ -1217,7 +1227,7 @@ static void menu_open(void)
     snprintf(enc, sizeof enc, _("Codificación: %s"), ENC[T.t.enc & 3]);
     snprintf(eol, sizeof eol, _("Fin de línea: %s"), T.t.eol == OT_EOL_CRLF ? "CRLF" : T.t.eol == OT_EOL_CR ? "CR" : "LF");
     snprintf(info, sizeof info, _("%d líneas"), T.t.nlines);
-    ofu_item_t items[12] = {
+    ofu_item_t all[13] = {
         { _("Guardar"), OF_IC_SAVE, false, false },
         { _("Buscar"), OF_IC_SEARCH, false, false },
         { _("Buscar y reemplazar"), OF_IC_SEARCH, false, false },
@@ -1230,8 +1240,18 @@ static void menu_open(void)
         { _("Seleccionar todo"), OF_IC_CHECKBOX, false, false },
         { _("Copiar"), OF_IC_COPY, false, false },
         { _("Pegar"), OF_IC_COPY, false, false },
+        { of_is_tree_ext(of_ext(T.path)) ? _("Ver como árbol") : _("Ver con formato"), OF_IC_DOC, false, false },
     };
-    ofu_sheet(info, items, 12, menu_pick, NULL);
+    /* "Ver con formato" second, after Guardar, when the file has a view */
+    ofu_item_t items[13];
+    int n = 0;
+    for (int k = 0; k < 13; k++) {
+        int id = k == 0 ? 0 : k == 1 ? 12 : k - 1;
+        if (id == 12 && !of_app_can_view(T.path)) continue;
+        s_tmenu[n] = id;
+        items[n++] = all[id];
+    }
+    ofu_sheet(info, items, n, menu_pick, NULL);
 }
 
 /* -------------------------------------------------------------------------- */

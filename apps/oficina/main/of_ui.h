@@ -127,6 +127,10 @@ void      ofu_kb_attach_textarea(lv_obj_t *ta, void (*done)(lv_obj_t *ta));
 const char *of_docs_dir(void);          /* /sdcard/documentos */
 void of_app_home(void);                 /* back to the files */
 void of_app_open(const char *path);
+enum { OF_OPEN_AUTO = 0, OF_OPEN_TEXT, OF_OPEN_VIEW };
+void of_app_open_as(const char *path, int how);   /* TEXT: in the text editor; VIEW: read and shown (md, html, the tree of a json) */
+bool of_app_can_text(const char *path);         /* a text format: "Editar como texto" */
+bool of_app_can_view(const char *path);         /* "Ver con formato", "Ver como árbol" */
 void of_recent_add(const char *path);
 void of_app_toast(const char *msg);
 bool of_app_landscape(void);

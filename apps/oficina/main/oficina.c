@@ -14,6 +14,7 @@
  */
 #include "of_ui.h"
 #include "of_doc.h"
+#include "of_arc.h"
 #include "aos_app.h"
 #include "aos_fonts.h"
 #include "aos_hal.h"
@@ -72,6 +73,8 @@ static struct {
     lv_obj_t  *list;
     int32_t    list_scroll;
     char       doc[300];        /* the open document */
+    of_arc_t  *arc;             /* an archive shown in Files */
+    char       arc_pre[260];    /* the folder inside it, "" or "a/b/" */
     /* the prompt */
     lv_obj_t  *pr_overlay, *pr_ta;
     void     (*pr_cb)(const char *, void *);
@@ -193,23 +196,25 @@ static void recent_remove(const char *path)
 /* Kinds of file                                                               */
 /* -------------------------------------------------------------------------- */
 
-enum { K_NONE = 0, K_TEXT, K_SHEET, K_LATER, K_BINARY, K_DOC };
+enum { K_NONE = 0, K_TEXT, K_SHEET, K_LATER, K_BINARY, K_DOC, K_READ, K_ARC };
 
 static const char *const TEXT_EXT[] = {
     "txt", "md", "markdown", "log", "ini", "conf", "cfg", "json", "xml", "yaml", "yml", "toml", "c", "h",
     "cpp", "hpp", "cc", "py", "js", "ts", "mjs", "css", "html", "htm", "sh", "lua", "java", "rs", "go",
     "sql", "srt", "vtt", "tex", "bib", "properties", "gitignore", "diff", "patch", "svg", "kml", "gpx",
-    "vcf", "ics", "nfo", "rst", "org", "env", "bat", "ps1", "cmake", "mk", "s", "asm", "pas", "bas" };
+    "vcf", "ics", "eml", "nfo", "rst", "org", "env", "bat", "ps1", "cmake", "mk", "s", "asm", "pas", "bas" };
 static const char *const LATER_EXT[] = {
-    "rtf", "doc", "pdf", "pptx", "ppsx", "potx", "odp", "ppt",
-    "xls", "epub", "fb2", "pages", "numbers", "key", "zip", "tar", "gz", "tgz", "eml", "mht", "cbz" };
+    "doc", "pdf", "pptx", "ppsx", "potx", "odp", "ppt", "xls" };
 
 static int kind_of(const char *path, bool dir)
 {
-    if (dir) return K_NONE;
     const char *e = of_ext(path);
+    /* Pages, Numbers and Keynote files copied from a Mac can be folders */
+    if (dir) return of_reader_for(e) == OF_RD_IWORK ? K_READ : K_NONE;
     if (of_is_sheet_ext(e) || !strcmp(e, "fods")) return K_SHEET;
     if (of_is_doc_ext(e)) return K_DOC;
+    if (of_reader_for(e)) return K_READ;
+    if (of_is_arc_ext(e)) return K_ARC;
     for (size_t i = 0; i < sizeof TEXT_EXT / sizeof TEXT_EXT[0]; i++)
         if (!strcmp(e, TEXT_EXT[i])) return K_TEXT;
     for (size_t i = 0; i < sizeof LATER_EXT / sizeof LATER_EXT[0]; i++)
@@ -240,6 +245,10 @@ static void badge_of(const char *name, bool dir, lv_color_t *c, char *txt)
     else if (!strcmp(e, "pdf")) rgb = 0xD93025;
     else if (!strcmp(e, "pptx") || !strcmp(e, "odp") || !strcmp(e, "ppt") || !strcmp(e, "key")) rgb = 0xE8710A;
     else if (!strcmp(e, "md") || !strcmp(e, "txt")) rgb = 0x6E6E73;
+    else if (!strcmp(e, "epub") || !strcmp(e, "fb2") || !strcmp(e, "cbz")) rgb = 0xA0522D;
+    else if (!strcmp(e, "zip") || !strcmp(e, "tar") || !strcmp(e, "gz") || !strcmp(e, "tgz")) rgb = 0xB8860B;
+    else if (!strcmp(e, "eml") || !strcmp(e, "mht") || !strcmp(e, "vcf") || !strcmp(e, "ics")) rgb = 0x0A84FF;
+    else if (!strcmp(e, "png") || !strcmp(e, "jpg") || !strcmp(e, "jpeg") || !strcmp(e, "bmp")) rgb = 0xC2185B;
     else if (!strcmp(e, "json") || !strcmp(e, "xml") || !strcmp(e, "yaml") || !strcmp(e, "yml") || !strcmp(e, "toml") ||
              !strcmp(e, "py") || !strcmp(e, "c") || !strcmp(e, "h") || !strcmp(e, "js") || !strcmp(e, "html")) rgb = 0x8E44AD;
     *c = lv_color_hex(rgb);
@@ -248,6 +257,8 @@ static void badge_of(const char *name, bool dir, lv_color_t *c, char *txt)
 /* -------------------------------------------------------------------------- */
 /* Opening and leaving documents                                               */
 /* -------------------------------------------------------------------------- */
+
+static const char *of_tr_app(const char *es) { return _(es); }
 
 static void clear_screen(void)
 {
@@ -271,7 +282,63 @@ void of_app_home(void)
     build();
 }
 
+bool of_app_can_text(const char *path)
+{
+    const char *e = of_ext(path);
+    for (size_t i = 0; i < sizeof TEXT_EXT / sizeof TEXT_EXT[0]; i++)
+        if (!strcmp(e, TEXT_EXT[i])) return true;
+    return !strcmp(e, "rtf") || !strcmp(e, "fb2") || !strcmp(e, "xhtml") || !strcmp(e, "markdown");
+}
+
+bool of_app_can_view(const char *path)
+{
+    const char *e = of_ext(path);
+    return of_reader_for(e) || of_is_tree_ext(e);
+}
+
+/* a file inside the app's cache (taken out of an archive): not a recent one */
+static bool in_cache(const char *path)
+{
+    char c[160];
+    snprintf(c, sizeof c, "%s/oficina/cache/", aos_hal_path_data());
+    return !strncmp(path, c, strlen(c));
+}
+
+static void arc_close(void)
+{
+    of_arc_free(A.arc);
+    A.arc = NULL;
+    A.arc_pre[0] = 0;
+}
+
+static void arc_open(const char *path)
+{
+    char err[32] = "";
+    of_arc_t *a = of_arc_open(path, err, sizeof err);
+    if (!a) {
+        of_app_toast(!strcmp(err, "big") ? _("El archivo comprimido es muy grande para abrirlo acá (más de 64 MB)")
+                                         : _("No se pudo leer el archivo comprimido"));
+        return;
+    }
+    arc_close();
+    A.arc = a;
+    /* shown in Files, in the folder it is in */
+    snprintf(A.dir, sizeof A.dir, "%s", path);
+    char *sl = strrchr(A.dir, '/');
+    if (sl) *sl = 0;
+    A.tab = TAB_FILES;
+    A.list_scroll = 0;
+    of_recent_add(path);
+    if (A.scr != SCR_HOME) of_app_home();
+    else build();
+}
+
 void of_app_open(const char *path)
+{
+    of_app_open_as(path, OF_OPEN_AUTO);
+}
+
+void of_app_open_as(const char *path, int how)
 {
     struct stat st;
     if (stat(path, &st) != 0) {
@@ -281,6 +348,9 @@ void of_app_open(const char *path)
         return;
     }
     int k = kind_of(path, S_ISDIR(st.st_mode));
+    if (how == OF_OPEN_TEXT) k = K_TEXT;
+    else if (how == OF_OPEN_VIEW) k = K_READ;
+    if (k == K_ARC) { arc_open(path); return; }
     if (k == K_LATER) {
         of_app_toast(_("Este formato todavía no se abre: llega en una próxima versión"));
         return;
@@ -291,9 +361,10 @@ void of_app_open(const char *path)
     }
     char p[300];
     snprintf(p, sizeof p, "%s", path);
-    if (k == K_DOC) {
+    if (k == K_DOC || k == K_READ) {
         char err[64] = "";
-        of_doc_t *d = of_doc_load(p, err, sizeof err);
+        of_tr = of_tr_app;
+        of_doc_t *d = k == K_DOC ? of_doc_load(p, err, sizeof err) : of_read_any(p, err, sizeof err);
         if (!d) {
             of_app_toast(!strcmp(err, "encrypted") ? _("El archivo tiene contraseña: la app no lo puede abrir")
                                                    : _("No se pudo leer el documento"));
@@ -337,7 +408,8 @@ void of_app_open(const char *path)
             return;
         }
     }
-    of_recent_add(p);
+    if (in_cache(p)) of_app_toast(_("Es una copia sacada del archivo comprimido: para quedártela, extraela con una pulsación larga"));
+    else of_recent_add(p);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -491,8 +563,9 @@ static void fmt_date(uint32_t t, char *out, size_t len)
 /* -------------------------------------------------------------------------- */
 
 typedef struct {
-    char    path[300];
+    char    path[300];          /* in an archive: a folder's prefix */
     bool    dir;
+    int     aidx;               /* an archive's entry, -1 a file of the card */
     lv_color_t color;
     char    badge[6];
 } row_t;
@@ -538,10 +611,89 @@ static void enter_dir(const char *path)
     build();
 }
 
+/* an archive's entry: taken out to the cache and opened */
+static void arc_open_entry(int i)
+{
+    if (!A.arc || i < 0 || i >= A.arc->n) return;
+    char dir[160], out[400], err[32] = "";
+    snprintf(dir, sizeof dir, "%s/oficina/cache", aos_hal_path_data());
+    mkdir(dir, 0777);
+    snprintf(dir, sizeof dir, "%s/oficina/cache/arc", aos_hal_path_data());
+    mkdir(dir, 0777);
+    snprintf(out, sizeof out, "%s/%s", dir, of_basename(A.arc->e[i].name));
+    if (!of_arc_extract(A.arc, i, out, err, sizeof err)) {
+        of_app_toast(!strcmp(err, "encrypted") ? _("Ese archivo tiene contraseña: la app no lo puede sacar") : _("No se pudo sacar el archivo"));
+        return;
+    }
+    of_app_open(out);
+}
+
+/* a name free in a folder: "a.txt", "a 2.txt"... */
+static void free_name(const char *dir, const char *name, char *out, size_t len)
+{
+    snprintf(out, len, "%.200s/%.90s", dir, name);
+    const char *e = of_ext(name);
+    int el = e[0] ? (int)strlen(e) + 1 : 0;
+    int bl = (int)strlen(name) - el;
+    for (int k = 2; k < 1000 && of_file_exists(out); k++)
+        snprintf(out, len, "%.200s/%.*s %d%s", dir, bl > 80 ? 80 : bl, name, k, el ? name + bl : "");
+}
+
+static int s_act_arc;
+
+static void arc_extract_here(int i)
+{
+    char out[320], err[32] = "";
+    free_name(A.dir, of_basename(A.arc->e[i].name), out, sizeof out);
+    if (!of_arc_extract(A.arc, i, out, err, sizeof err)) { of_app_toast(_("No se pudo sacar el archivo")); return; }
+    char m[200];
+    snprintf(m, sizeof m, _("Extraído en la carpeta: %s"), of_basename(out));
+    of_app_toast(m);
+}
+
+static void arc_extract_all(void)
+{
+    if (!A.arc) return;
+    char base[128], dest[320];
+    snprintf(base, sizeof base, "%s", of_basename(A.arc->path));
+    char *dot = strrchr(base, '.');
+    if (dot && dot != base) *dot = 0;
+    dot = strrchr(base, '.');
+    if (dot && !strcasecmp(dot, ".tar")) *dot = 0;
+    free_name(A.dir, base, dest, sizeof dest);
+    mkdir(dest, 0777);
+    int ok = 0, bad = 0;
+    for (int i = 0; i < A.arc->n; i++) {
+        if (A.arc->e[i].dir) continue;
+        char out[600], err[32];
+        snprintf(out, sizeof out, "%s/%s", dest, A.arc->e[i].name);
+        if (of_arc_extract(A.arc, i, out, err, sizeof err)) ok++;
+        else bad++;
+    }
+    char m[200];
+    if (bad) snprintf(m, sizeof m, _("Se extrajeron %d archivos en «%s»; %d no se pudieron"), ok, of_basename(dest), bad);
+    else snprintf(m, sizeof m, _("Se extrajeron %d archivos en «%s»"), ok, of_basename(dest));
+    of_app_toast(m);
+}
+
+static void arc_act_pick(int i, void *ud)
+{
+    (void)ud;
+    if (i == 0) arc_open_entry(s_act_arc);
+    else if (i == 1) arc_extract_here(s_act_arc);
+}
+
 static void row_click_cb(lv_event_t *e)
 {
     row_t *r = lv_event_get_user_data(e);
-    if (r->dir) enter_dir(r->path);
+    if (r->aidx >= 0) { arc_open_entry(r->aidx); return; }
+    if (A.arc && r->dir) {
+        snprintf(A.arc_pre, sizeof A.arc_pre, "%.259s", r->path);
+        A.list_scroll = 0;
+        build();
+        return;
+    }
+    if (r->dir && kind_of(r->path, true) == K_NONE) enter_dir(r->path);
     else of_app_open(r->path);
 }
 
@@ -622,6 +774,16 @@ static void act_pick(int i, void *ud)
 static void row_long_cb(lv_event_t *e)
 {
     row_t *r = lv_event_get_user_data(e);
+    if (r->aidx >= 0) {
+        s_act_arc = r->aidx;
+        ofu_item_t it[2] = {
+            { _("Abrir"), OF_IC_DOC, false, false },
+            { _("Extraer en esta carpeta"), OF_IC_FOLDER, false, false },
+        };
+        lv_indev_wait_release(lv_indev_active());
+        ofu_sheet(of_basename(A.arc->e[r->aidx].name), it, 2, arc_act_pick, NULL);
+        return;
+    }
     if (r->dir) return;
     snprintf(s_act_path, sizeof s_act_path, "%s", r->path);
     ofu_item_t items[5] = {
@@ -636,7 +798,7 @@ static void row_long_cb(lv_event_t *e)
 }
 
 static lv_obj_t *file_row(lv_obj_t *list, int32_t w, const char *path, const char *name, bool dir,
-                          const char *sub)
+                          const char *sub, int aidx)
 {
     lv_obj_t *r = lv_obj_create(list);
     lv_obj_remove_style_all(r);
@@ -650,6 +812,7 @@ static lv_obj_t *file_row(lv_obj_t *list, int32_t w, const char *path, const cha
     if (!u) return r;
     snprintf(u->path, sizeof u->path, "%s", path);
     u->dir = dir;
+    u->aidx = aidx;
     badge_of(name, dir, &u->color, u->badge);
     lv_obj_t *ic = ofu_box(r, 68, 68);
     lv_obj_align(ic, LV_ALIGN_LEFT_MID, 16, 0);
@@ -736,18 +899,23 @@ static void more_pick(int i, void *ud)
         statusbar();
         build();
     } else if (i == 1) {
+        arc_close();
         enter_dir(of_docs_dir());
+    } else if (i == 2) {
+        arc_extract_all();
+        build();
     }
 }
 
 static void more_cb(lv_event_t *e)
 {
     (void)e;
-    ofu_item_t items[2] = {
+    ofu_item_t items[3] = {
         { OFT.dark ? _("Fondo claro") : _("Fondo oscuro"), OFT.dark ? OF_IC_SUN : OF_IC_MOON, false, false },
         { _("Ir a la carpeta de documentos"), OF_IC_FOLDER, false, false },
+        { _("Extraer todo en una carpeta"), OF_IC_FOLDER, false, false },
     };
-    ofu_sheet(NULL, items, 2, more_pick, NULL);
+    ofu_sheet(NULL, items, A.arc && A.tab == TAB_FILES ? 3 : 2, more_pick, NULL);
 }
 
 static void tab_cb(lv_event_t *e)
@@ -762,6 +930,21 @@ static void tab_cb(lv_event_t *e)
 static void up_cb(lv_event_t *e)
 {
     (void)e;
+    if (A.arc) {
+        /* up a folder inside the archive, or out of it */
+        size_t l = strlen(A.arc_pre);
+        if (l) {
+            A.arc_pre[l - 1] = 0;
+            char *s2 = strrchr(A.arc_pre, '/');
+            if (s2) s2[1] = 0;
+            else A.arc_pre[0] = 0;
+        } else {
+            arc_close();
+        }
+        A.list_scroll = 0;
+        build();
+        return;
+    }
     char *sl = strrchr(A.dir, '/');
     const char *sd = aos_hal_path_sd_root();
     if (!sl || sl == A.dir || (sd && strlen(A.dir) <= strlen(sd))) return;
@@ -778,6 +961,54 @@ static void list_scroll_cb(lv_event_t *e)
 /* -------------------------------------------------------------------------- */
 /* The home screen                                                             */
 /* -------------------------------------------------------------------------- */
+
+static int aent_cmp(const void *a, const void *b)
+{
+    const of_aent_t *x = *(const of_aent_t *const *)a, *y = *(const of_aent_t *const *)b;
+    return strcasecmp(x->name, y->name);
+}
+
+/* The rows of an archive's folder: its subfolders, then its files. */
+static int arc_rows(int32_t cw)
+{
+    size_t pl = strlen(A.arc_pre);
+    const of_aent_t **v = of_alloc((size_t)(A.arc->n + 1) * sizeof *v);
+    if (!v) return 0;
+    int nv = 0;
+    for (int i = 0; i < A.arc->n; i++)
+        if (!strncmp(A.arc->e[i].name, A.arc_pre, pl) && A.arc->e[i].name[pl]) v[nv++] = &A.arc->e[i];
+    qsort(v, (size_t)nv, sizeof *v, aent_cmp);
+    int shown = 0;
+    /* folders: the first part of what is below, once each */
+    char last[200] = "";
+    for (int k = 0; k < nv; k++) {
+        const char *rest = v[k]->name + pl;
+        const char *sl = strchr(rest, '/');
+        if (!sl && !v[k]->dir) continue;
+        size_t l = sl ? (size_t)(sl - rest) : strlen(rest);
+        char nm[200];
+        snprintf(nm, sizeof nm, "%.*s", (int)(l < sizeof nm - 1 ? l : sizeof nm - 1), rest);
+        if (!strcmp(nm, last)) continue;
+        snprintf(last, sizeof last, "%s", nm);
+        char pre[300];
+        snprintf(pre, sizeof pre, "%.200s%.90s/", A.arc_pre, nm);
+        file_row(A.list, cw, pre, nm, true, "", -1);
+        shown++;
+    }
+    for (int k = 0; k < nv; k++) {
+        const char *rest = v[k]->name + pl;
+        if (v[k]->dir || strchr(rest, '/')) continue;
+        char sub[48], sz[24];
+        fmt_size((uint32_t)(v[k]->size > 0xFFFFFFFFu ? 0xFFFFFFFFu : v[k]->size), sz, sizeof sz);
+        fmt_date(v[k]->mtime, sub, sizeof sub);
+        char line[120];
+        snprintf(line, sizeof line, "%s%s%s%s%s", sub, sub[0] ? "  \xC2\xB7  " : "", sz, v[k]->locked ? "  \xC2\xB7  " : "", v[k]->locked ? _("con contraseña") : "");
+        file_row(A.list, cw, "", rest, false, line, (int)(v[k] - A.arc->e));
+        shown++;
+    }
+    of_free(v);
+    return shown;
+}
 
 static void build(void)
 {
@@ -824,7 +1055,8 @@ static void build(void)
         const char *shown = A.dir;
         if (sd && !strncmp(A.dir, sd, strlen(sd))) shown = A.dir + strlen(sd);
         char where[260];
-        snprintf(where, sizeof where, "%s", shown[0] ? shown : "/");
+        if (A.arc) snprintf(where, sizeof where, "%.120s/%.60s%s%.70s", shown, of_basename(A.arc->path), A.arc_pre[0] ? " \xE2\x80\xBA " : "", A.arc_pre);
+        else snprintf(where, sizeof where, "%s", shown[0] ? shown : "/");
         lv_obj_t *wl = ofu_text(bar, where, ofu_font(0, OF_SZ_S), OFT.dim);
         lv_label_set_long_mode(wl, LV_LABEL_LONG_MODE_DOTS);
         lv_obj_set_width(wl, cw - 80);
@@ -859,9 +1091,11 @@ static void build(void)
             const char *d = dir;
             if (sd && !strncmp(d, sd, strlen(sd))) d += strlen(sd);
             snprintf(sub, sizeof sub, "%.31s  \xC2\xB7  %.23s  \xC2\xB7  %.199s", dt, sz, d[0] ? d : "/");
-            file_row(A.list, cw, A.recent[i], of_basename(A.recent[i]), false, sub);
+            file_row(A.list, cw, A.recent[i], of_basename(A.recent[i]), false, sub, -1);
             shown_n++;
         }
+    } else if (A.arc) {
+        shown_n = arc_rows(cw);
     } else {
         scan();
         for (int i = 0; i < A.nfiles; i++) {
@@ -872,7 +1106,7 @@ static void build(void)
                 fmt_date(A.files[i].mtime, dt, sizeof dt);
                 snprintf(sub, sizeof sub, "%s  \xC2\xB7  %s", dt, sz);
             }
-            file_row(A.list, cw, p, A.files[i].name, A.files[i].dir, sub);
+            file_row(A.list, cw, p, A.files[i].name, A.files[i].dir && kind_of(p, true) == K_NONE, sub, -1);
             shown_n++;
         }
     }
@@ -935,6 +1169,7 @@ static void of_destroy(aos_app_t *self, void *inst)
     A.nrecent = 0;
     of_free(A.files);
     A.files = NULL;
+    arc_close();
     A.root = NULL;
     ofu_ui_root = NULL;
     ofu_kb_destroyed();
@@ -989,7 +1224,7 @@ static bool of_back(aos_app_t *self, void *inst)
         of_app_back_from_doc();
         return true;
     }
-    if (A.tab == TAB_FILES && strcmp(A.dir, of_docs_dir()) != 0) {
+    if (A.tab == TAB_FILES && (A.arc || strcmp(A.dir, of_docs_dir()) != 0)) {
         up_cb(NULL);
         return true;
     }

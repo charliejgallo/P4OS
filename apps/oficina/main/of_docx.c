@@ -1010,6 +1010,8 @@ static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
     of_sb_puts(&o, "<Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\">"
                    "<Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>"
                    "<Default Extension=\"xml\" ContentType=\"application/xml\"/>"
+                   "<Default Extension=\"png\" ContentType=\"image/png\"/><Default Extension=\"jpeg\" ContentType=\"image/jpeg\"/>"
+                   "<Default Extension=\"gif\" ContentType=\"image/gif\"/><Default Extension=\"bmp\" ContentType=\"image/bmp\"/>"
                    "<Override PartName=\"/word/document.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml\"/>"
                    "<Override PartName=\"/word/styles.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.wordprocessingml.styles+xml\"/>"
                    "<Override PartName=\"/word/numbering.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.wordprocessingml.numbering+xml\"/>"
@@ -1022,13 +1024,13 @@ static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
                    "</Relationships>");
     of_zipw_add(&w, "_rels/.rels", o.s, o.n, true);
     o.n = 0;
-    of_sb_puts(&o, HEAD);
-    of_sb_puts(&o, "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">"
-                   "<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles\" Target=\"styles.xml\"/>"
-                   "<Relationship Id=\"rId2\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering\" Target=\"numbering.xml\"/>"
-                   "</Relationships>");
-    of_zipw_add(&w, "word/_rels/document.xml.rels", o.s, o.n, true);
-    o.n = 0;
+    /* the document's relationships: styles, numbering, then pictures and links as the body needs them */
+    of_sb_t rels = { 0 };
+    of_sb_puts(&rels, HEAD);
+    of_sb_puts(&rels, "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">"
+                      "<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles\" Target=\"styles.xml\"/>"
+                      "<Relationship Id=\"rId2\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/numbering\" Target=\"numbering.xml\"/>");
+    int npics = 0;
     of_sb_puts(&o, HEAD);
     of_sb_puts(&o, "<w:styles xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\">"
                    "<w:docDefaults><w:rPrDefault><w:rPr><w:rFonts w:ascii=\"Calibri\" w:hAnsi=\"Calibri\"/><w:sz w:val=\"22\"/>"
@@ -1046,11 +1048,19 @@ static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
     o.n = 0;
     of_sb_puts(&o, HEAD);
     of_sb_puts(&o, "<w:numbering xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\">"
-                   "<w:abstractNum w:abstractNumId=\"0\"><w:lvl w:ilvl=\"0\"><w:start w:val=\"1\"/><w:numFmt w:val=\"bullet\"/>"
-                   "<w:lvlText w:val=\"\xE2\x80\xA2\"/><w:lvlJc w:val=\"left\"/><w:pPr><w:ind w:left=\"720\" w:hanging=\"360\"/></w:pPr></w:lvl></w:abstractNum>"
-                   "<w:abstractNum w:abstractNumId=\"1\"><w:lvl w:ilvl=\"0\"><w:start w:val=\"1\"/><w:numFmt w:val=\"decimal\"/>"
-                   "<w:lvlText w:val=\"%1.\"/><w:lvlJc w:val=\"left\"/><w:pPr><w:ind w:left=\"720\" w:hanging=\"360\"/></w:pPr></w:lvl></w:abstractNum>"
-                   "<w:num w:numId=\"1\"><w:abstractNumId w:val=\"0\"/></w:num><w:num w:numId=\"2\"><w:abstractNumId w:val=\"1\"/></w:num>"
+                   "");
+    /* bullets and numbers, nine levels each */
+    for (int a = 0; a < 2; a++) {
+        of_sb_printf(&o, "<w:abstractNum w:abstractNumId=\"%d\">", a);
+        static const char *const BUL[3] = { "\xE2\x80\xA2", "\xE2\x97\xA6", "\xE2\x96\xAA" };
+        for (int l = 0; l < 9; l++)
+            of_sb_printf(&o, "<w:lvl w:ilvl=\"%d\"><w:start w:val=\"1\"/><w:numFmt w:val=\"%s\"/><w:lvlText w:val=\"%s%s\"/>"
+                             "<w:lvlJc w:val=\"left\"/><w:pPr><w:ind w:left=\"%d\" w:hanging=\"360\"/></w:pPr></w:lvl>",
+                         l, a ? "decimal" : "bullet", a ? "%" : BUL[l % 3], a ? (const char *[]){ "1.", "2.", "3.", "4.", "5.", "6.", "7.", "8.", "9." }[l] : "",
+                         720 * (l + 1));
+        of_sb_puts(&o, "</w:abstractNum>");
+    }
+    of_sb_puts(&o, "<w:num w:numId=\"1\"><w:abstractNumId w:val=\"0\"/></w:num><w:num w:numId=\"2\"><w:abstractNumId w:val=\"1\"/></w:num>"
                    "</w:numbering>");
     of_zipw_add(&w, "word/numbering.xml", o.s, o.n, true);
     o.n = 0;
@@ -1058,7 +1068,17 @@ static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
     /* the body */
     of_sb_puts(&o, HEAD);
     of_sb_puts(&o, "<w:document xmlns:w=\"http://schemas.openxmlformats.org/wordprocessingml/2006/main\" "
-                   "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\"><w:body>");
+                   "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\" "
+                   "xmlns:wp=\"http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing\" "
+                   "xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" "
+                   "xmlns:pic=\"http://schemas.openxmlformats.org/drawingml/2006/picture\"><w:body>");
+    /* links that are URLs: one relationship each, rIdL<n> */
+    for (int l = 0; l < d->nlinks; l++) {
+        if (!of_link_is_url(d->links[l])) continue;
+        of_sb_printf(&rels, "<Relationship Id=\"rIdL%d\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink\" Target=\"", l);
+        of_sb_xml(&rels, d->links[l], strlen(d->links[l]));
+        of_sb_puts(&rels, "\" TargetMode=\"External\"/>");
+    }
     int cur_table = -1, cur_row = -1, cur_cell = 0;
     for (int i = 0; i < d->np; i++) {
         const of_para_t *p = &d->p[i];
@@ -1086,25 +1106,58 @@ static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
             of_sb_puts(&o, "</w:tcPr>");
         }
         of_sb_puts(&o, "<w:p>");
-        if (p->heading || p->align || p->list) {
+        if (p->heading || p->align || p->list || p->indent) {
             of_sb_puts(&o, "<w:pPr>");
             if (p->heading) of_sb_printf(&o, "<w:pStyle w:val=\"Heading%d\"/>", p->heading > 3 ? 3 : p->heading);
-            if (p->list) of_sb_printf(&o, "<w:numPr><w:ilvl w:val=\"0\"/><w:numId w:val=\"%d\"/></w:numPr>", p->list == OF_LIST_BULLET ? 1 : 2);
+            if (p->list) of_sb_printf(&o, "<w:numPr><w:ilvl w:val=\"%d\"/><w:numId w:val=\"%d\"/></w:numPr>", p->ilvl > 8 ? 8 : p->ilvl, p->list == OF_LIST_BULLET ? 1 : 2);
+            else if (p->indent) of_sb_printf(&o, "<w:ind w:left=\"%d\"/>", 567 * p->indent);
             if (p->align) {
                 static const char *const JC[4] = { "left", "center", "right", "both" };
                 of_sb_printf(&o, "<w:jc w:val=\"%s\"/>", JC[p->align & 3]);
             }
             of_sb_puts(&o, "</w:pPr>");
         }
-        int k = 0;
+        int k = 0, link = -1;
         for (int a = 0; a < p->len;) {
+            /* links open and close around the runs */
+            int lk = d->rs[p->at[a]].link;
+            if (lk >= 0 && (lk >= d->nlinks || !of_link_is_url(d->links[lk]))) lk = -1;
+            if (lk != link) {
+                if (link >= 0) of_sb_puts(&o, "</w:hyperlink>");
+                link = lk;
+                if (link >= 0) of_sb_printf(&o, "<w:hyperlink r:id=\"rIdL%d\">", link);
+            }
             if (a + 2 < p->len && !memcmp(p->txt + a, OF_OBJ_CHAR, 3)) {
                 int ob = k < p->nobj ? p->obj[k] : -1;
                 k++;
-                if (ob >= 0 && (d->obj[ob].kind == OF_OBJ_TEXT || d->obj[ob].kind == OF_OBJ_NOTE) && d->obj[ob].text) {
+                of_obj_t *obj = ob >= 0 && ob < d->nobj ? &d->obj[ob] : NULL;
+                if (obj && (obj->kind == OF_OBJ_TEXT || obj->kind == OF_OBJ_NOTE) && obj->text) {
                     of_sb_puts(&o, "<w:r>");
-                    w_text(&o, d->obj[ob].text, (int)strlen(d->obj[ob].text));
+                    w_text(&o, obj->text, (int)strlen(obj->text));
                     of_sb_puts(&o, "</w:r>");
+                } else if (obj && obj->kind == OF_OBJ_BREAK) {
+                    of_sb_puts(&o, "<w:r><w:br w:type=\"page\"/></w:r>");
+                } else if (obj && obj->kind == OF_OBJ_IMAGE) {
+                    size_t n;
+                    const char *ext = "png";
+                    uint8_t *bin = of_doc_obj_bytes(d, obj, &n, &ext);
+                    if (bin) {
+                        npics++;
+                        char name[48];
+                        snprintf(name, sizeof name, "word/media/image%d.%s", npics, ext);
+                        of_zipw_add(&w, name, bin, n, false);
+                        of_free(bin);
+                        of_sb_printf(&rels, "<Relationship Id=\"rIdP%d\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/image\" "
+                                            "Target=\"media/image%d.%s\"/>", npics, npics, ext);
+                        long cx = (long)(obj->w > 0 ? obj->w : 200) * 12700, cy = (long)(obj->h > 0 ? obj->h : 150) * 12700;
+                        of_sb_printf(&o, "<w:r><w:drawing><wp:inline distT=\"0\" distB=\"0\" distL=\"0\" distR=\"0\"><wp:extent cx=\"%ld\" cy=\"%ld\"/>"
+                                         "<wp:docPr id=\"%d\" name=\"Picture %d\"/><a:graphic><a:graphicData uri=\"http://schemas.openxmlformats.org/drawingml/2006/picture\">"
+                                         "<pic:pic><pic:nvPicPr><pic:cNvPr id=\"%d\" name=\"image%d.%s\"/><pic:cNvPicPr/></pic:nvPicPr>"
+                                         "<pic:blipFill><a:blip r:embed=\"rIdP%d\"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill>"
+                                         "<pic:spPr><a:xfrm><a:off x=\"0\" y=\"0\"/><a:ext cx=\"%ld\" cy=\"%ld\"/></a:xfrm><a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom></pic:spPr>"
+                                         "</pic:pic></a:graphicData></a:graphic></wp:inline></w:drawing></w:r>",
+                                     cx, cy, npics, npics, npics, npics, ext, npics, cx, cy);
+                    }
                 }
                 a += 3;
                 continue;
@@ -1115,14 +1168,16 @@ static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
             of_doc_effective(d, p, p->at[a], &e);
             const of_rstyle_t *r = &d->rs[p->at[a]];
             of_sb_puts(&o, "<w:r>");
-            if (r->b || r->i || r->u || r->s || r->color || r->half_pt || r->sup) {
+            if (r->b || r->i || r->u || r->s || r->color || r->half_pt || r->sup || r->hl || link >= 0) {
                 of_sb_puts(&o, "<w:rPr>");
                 if (r->b) of_sb_puts(&o, r->b == OF_TRI_ON ? "<w:b/>" : "<w:b w:val=\"0\"/>");
                 if (r->i) of_sb_puts(&o, r->i == OF_TRI_ON ? "<w:i/>" : "<w:i w:val=\"0\"/>");
                 if (r->s == OF_TRI_ON) of_sb_puts(&o, "<w:strike/>");
                 if (r->color) of_sb_printf(&o, "<w:color w:val=\"%06lX\"/>", (unsigned long)(r->color & 0xFFFFFF));
+                else if (link >= 0) of_sb_puts(&o, "<w:color w:val=\"0563C1\"/>");
                 if (r->half_pt) of_sb_printf(&o, "<w:sz w:val=\"%u\"/>", r->half_pt);
-                if (r->u == OF_TRI_ON) of_sb_puts(&o, "<w:u w:val=\"single\"/>");
+                if (r->hl) of_sb_printf(&o, "<w:shd w:val=\"clear\" w:color=\"auto\" w:fill=\"%06lX\"/>", (unsigned long)(r->hl & 0xFFFFFF));
+                if (r->u == OF_TRI_ON || (link >= 0 && !r->u)) of_sb_puts(&o, "<w:u w:val=\"single\"/>");
                 if (r->sup) of_sb_printf(&o, "<w:vertAlign w:val=\"%s\"/>", r->sup == 1 ? "superscript" : "subscript");
                 of_sb_puts(&o, "</w:rPr>");
             }
@@ -1131,6 +1186,7 @@ static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
             of_sb_puts(&o, "</w:r>");
             a = b;
         }
+        if (link >= 0) of_sb_puts(&o, "</w:hyperlink>");
         of_sb_puts(&o, "</w:p>");
         /* a cell's last paragraph, and the table's end */
     }
@@ -1140,7 +1196,10 @@ static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
     of_sb_puts(&o, "<w:sectPr><w:pgSz w:w=\"11906\" w:h=\"16838\"/><w:pgMar w:top=\"1417\" w:right=\"1701\" w:bottom=\"1417\" "
                    "w:left=\"1701\" w:header=\"708\" w:footer=\"708\" w:gutter=\"0\"/></w:sectPr></w:body></w:document>");
     of_zipw_add(&w, "word/document.xml", o.s, o.n, true);
-    bool ok = !o.oom && of_zipw_finish(&w, path);
+    of_sb_puts(&rels, "</Relationships>");
+    of_zipw_add(&w, "word/_rels/document.xml.rels", rels.s, rels.n, true);
+    bool ok = !o.oom && !rels.oom && of_zipw_finish(&w, path);
+    of_sb_free(&rels);
     of_sb_free(&o);
     of_zipw_free(&w);
     if (!ok) snprintf(err, errlen, "write");

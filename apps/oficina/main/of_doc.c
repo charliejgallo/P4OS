@@ -57,6 +57,7 @@ void of_doc_free(of_doc_t *d)
     of_free(d->src);
     of_free(d->span0);
     of_free(d->span1);
+    of_free(d->note);
     of_free(d);
 }
 
@@ -430,8 +431,12 @@ void of_doc_number(of_doc_t *d)
         }
         int slot = -1;
         for (int k = 0; k < nid; k++) if (ids[k] == p->numid) slot = k;
-        if (slot < 0 && nid < 32) { slot = nid++; ids[slot] = p->numid; }
-        if (slot < 0) continue;
+        if (slot < 0) {
+            /* past 32 lists, the oldest slot is reused */
+            slot = nid < 32 ? nid++ : (int)((unsigned)p->numid % 32);
+            ids[slot] = p->numid;
+            memset(cnt[slot], 0, sizeof cnt[slot]);
+        }
         cnt[slot][lv]++;
         for (int k = lv + 1; k < 9; k++) cnt[slot][k] = 0;
         int n = cnt[slot][lv];
@@ -514,6 +519,27 @@ bool of_doc_save(of_doc_t *d, int fmt, const char *path, char *err, size_t errle
         return ok;
     }
     return fmt == OF_DOC_ODT ? of_odt_save(d, path, err, errlen) : of_docx_save(d, path, err, errlen);
+}
+
+uint8_t *of_doc_obj_bytes(const of_doc_t *d, const of_obj_t *o, size_t *len, const char **ext)
+{
+    if (!o->target) return NULL;
+    const char *e = of_ext(o->target);
+    uint8_t *b = o->file ? of_file_read(o->target, len, 16u * 1024 * 1024) : of_doc_part(d, o->target, len);
+    if (!b || *len < 4) { of_free(b); return NULL; }
+    /* the kind from the bytes, the name may lie */
+    if (!memcmp(b, "\x89PNG", 4)) e = "png";
+    else if (b[0] == 0xFF && b[1] == 0xD8) e = "jpeg";
+    else if (!memcmp(b, "GIF8", 4)) e = "gif";
+    else if (b[0] == 'B' && b[1] == 'M') e = "bmp";
+    else { of_free(b); return NULL; }
+    if (ext) *ext = e;
+    return b;
+}
+
+bool of_link_is_url(const char *l)
+{
+    return l && l[0] != '<' && l[0];
 }
 
 uint8_t *of_doc_part(const of_doc_t *d, const char *name, size_t *len)

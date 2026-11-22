@@ -332,7 +332,7 @@ text. In the simulator: typing, bold for the next letters, saving from the
 ### Build, install, pack
 
 ```
-tools/build_apps.sh oficina                      # oficina.so, 268 KB, 202 symbols
+tools/build_apps.sh oficina                      # oficina.so, 324 KB, 203 symbols
 python3 apps/oficina/tools/pack_fonts.py         # build/oficina_p4.pak, 877 KB (--sim: a copy in sim/sim_fs/apps)
 tools/install_apps.sh p4os.local oficina         # the .so, the pack and the page; restarts the board
 tools/install_lang.sh p4os.local en              # and de
@@ -341,17 +341,72 @@ tools/install_lang.sh p4os.local en              # and de
 `oficina_p4.pak` is needed (`"need": true`): Inter 4.1 (SIL OFL 1.1), four
 styles in 20, 24, 28, 36 and 48 px, made with lv_font_conv.
 
-### Next: phase 3, the cheap readers
+### Phase 3: the readers (done, 2026-11-22)
 
-On top of the document model and screen: RTF, HTML (reader mode), EPUB
-(ZIP + spine + the HTML reader), FB2, Markdown rendered (md4c), EML; vCard
-and iCalendar as cards and days; ZIP and TAR to look inside and open an
-entry; the tree of JSON, XML, YAML and TOML; the preview picture of Apple's
-Pages, Numbers and Keynote files. Each reads into `of_doc_t` and shows on
-the same screen, read only, with "save a copy as docx or odt".
+Every format below reads into the same document model (`of_doc_t`, built
+through a small builder in `of_import.c`) and shows on the document screen,
+**read only**: no keyboard, no format bar, no undo; selecting, copying,
+finding, the contents ("Índice": the headings, to jump to), zoom and
+"Guardar una copia como" docx, odt or txt, which then opens the copy to be
+edited. Tapping a link shows where it goes. The top bar says what the file
+was read from.
 
-Left over from phases 1 and 2: renaming, adding and deleting sheets of an
-xlsx; inserting and deleting rows and columns; number formats in an existing
-ods; creating lists in a document (they need numbering definitions); tables
-added or resized in a document; pictures carried into a converted copy; the
-board's own measurements (laying out a long document, drawing a frame).
+| Format | File | What is read |
+|---|---|---|
+| HTML, XHTML | `of_import.c` | reader mode: headings, paragraphs, lists (nested, numbered), tables (colspan, a table in a cell goes in its text), bold, italics, underline, strikethrough, sub- and superscript, code, `<mark>`, colours from `style` and `<font>`, links, pictures (files beside it, `data:` URIs), `<pre>`, quotes indented, `<hr>`, the entities in use and the page's charset (UTF-8 or Latin-1). Scripts, styles and `<head>` skipped; no CSS layout |
+| EPUB 2 and 3 | `of_import.c` | `container.xml` → the OPF → the spine, chapter after chapter through the HTML reader, a page break between them; title and author on top; pictures read from inside the book |
+| Mail (.eml, .mht) | `of_import.c` | subject, from, to, copy, date (RFC 2047 words decoded); MIME parts nested; the HTML body if there is one, else the text one (quoted-printable, base64, the charset); quoted lines in italics; attachments listed with their sizes |
+| FB2 | `of_import.c` | the book's title, sections and their titles, paragraphs, poems and epigraphs, emphasis, strong, strikethrough, sub/sup, empty lines, pictures (`<binary>` base64, written to the cache) |
+| RTF | `of_rtf.c` | groups and control words: bold, italics, underline, strikethrough, sizes, colours (`colortbl`), highlight, sub/sup; alignment; headings from the stylesheet or `\outlinelevel`; `\'hh` (code page 1252) and `\uN` with its fallback; line, tab, page; tables (`\intbl`, `\cell`, `\row`); HYPERLINK fields; PNG and JPEG pictures (hex or `\bin`); footnotes in place, small and grey; the numbers of lists from `\listtext`. Font tables, headers, footers, list tables, info skipped |
+| Markdown | `of_text2.c` | an own renderer (md4c was the plan; 400 lines did it): ATX and setext headings, emphasis, strong, strikethrough, code spans, links and autolinks, pictures beside the file, bullet, numbered and task lists (nesting by the indents seen), quotes, rules, fenced and indented code, pipe tables, hard breaks, a few entities. Opens rendered; "Editar como texto" in the menu |
+| vCard 2.1 to 4.0 | `of_text2.c` | a heading per contact; organisation, title, phones, emails, addresses, web, birthday, nickname, note, with their kind (mobile, work, home); folded lines, quoted-printable, the embedded photo |
+| iCalendar | `of_text2.c` | events and tasks in date order, a heading per month; when (same day: one date), due, where, repeats (daily... yearly), notes; the calendar's name |
+| JSON, XML, YAML, TOML | `of_text2.c` | the tree: a line per value, indented by depth, keys in bold, values coloured by kind; `{3}` and `[12]` after containers; JSON lines too; an error says where. Up to 5 000 lines. These open in the text editor; "Ver como árbol" in its menu |
+| PNG, JPEG, BMP | `of_import.c` | the picture alone, the page's width, its size in pixels below |
+| Pages, Numbers, Keynote | `of_import.c` | the preview picture the file carries (`preview.jpg`, `QuickLook/Thumbnail.jpg`), also from a package copied as a folder; the content itself is Apple's IWA (protobuf + Snappy), not read |
+| ZIP, CBZ, TAR, TAR.GZ, TGZ, GZ | `of_archive.c` | shown in Files as a folder: its folders, its files with sizes; tapping one takes it to the cache and opens it; a long press extracts it next to the archive; "Extraer todo en una carpeta" in the ⋯ menu. ZIP up to 64 MB (read whole); TAR walked on the card; TAR.GZ inflated whole (up to 64 MB); ustar prefixes, GNU long names, pax paths; names in DOS code pages converted; encrypted ZIP entries marked and not extracted; `..` in names refused |
+
+Saving a copy as docx or odt (from these, and between docx and odt) now
+carries the pictures (into `word/media/` with their relationships, or
+`Pictures/` with the manifest), the hyperlinks that are URLs, page breaks,
+indents and list levels.
+
+From the text editor, "Ver con formato" (Markdown, HTML, contacts,
+calendars) or "Ver como árbol" (data files); from a read-only document,
+"Editar como texto".
+
+### Checking phase 3
+
+```
+cc -DOF_HOST -I apps/oficina/main apps/oficina/tools/host_test.c \
+   apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive}.c -o /tmp/host_test
+python3 apps/oficina/tools/samples_read.py /tmp/r                # (and --en) every reader's sample, invented
+/tmp/host_test read /tmp/r/receta.rtf                            # the paragraphs read, with styles, links, pictures
+/tmp/host_test read /tmp/r/cuentos.epub /tmp/out.odt             # and a copy saved
+/tmp/host_test arc /tmp/r/copia.tar.gz /tmp/x                    # the entries, extracted
+```
+
+Checked on 2026-11-22 with the invented samples (Spanish and English), under
+AddressSanitizer: every reader, and a docx and an odt copy of each, 52 files
+whose XML parts all parse and that macOS's `textutil` reads; the copies read
+back with their pictures, links and tables; ZIP, TAR (a 120-character
+name), TAR.GZ, GZ and CBZ listed and extracted byte for byte. In the
+simulator, portrait and landscape: HTML, EPUB, mail, FB2, Markdown (contents
+sheet, a docx copy saved and opened for editing), contacts, calendar, YAML
+and XML trees from the text editor, a picture, a Pages preview, a ZIP's
+folder and an entry opened from it. Phases 1 and 2 checked again.
+
+### Next: phase 4, PDF
+
+PDF text, reflowed: objects, xref tables and streams, Flate, fonts'
+ToUnicode, pages in order, the outline as the contents; PDF writing as the
+export of a document. Phase 7 draws PDF pages.
+
+Left over: going back from "Ver como árbol" returns to the files, not to
+the text editor; an HTML file taken out of an archive loses the pictures
+beside it in the archive; links inside an EPUB (notes, the table of
+contents) are not followed; RTF in code pages other than 1252; bigger ZIPs
+(the central directory read from the card). From phases 1 and 2: renaming,
+adding and deleting sheets of an xlsx; inserting and deleting rows and
+columns; number formats in an existing ods; creating lists in a document;
+tables added or resized in a document; the board's own measurements.

@@ -858,7 +858,9 @@ static const char NS[] =
     "xmlns:text=\"urn:oasis:names:tc:opendocument:xmlns:text:1.0\" "
     "xmlns:table=\"urn:oasis:names:tc:opendocument:xmlns:table:1.0\" "
     "xmlns:fo=\"urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0\" "
-    "xmlns:xlink=\"http://www.w3.org/1999/xlink\" office:version=\"1.3\"";
+    "xmlns:xlink=\"http://www.w3.org/1999/xlink\" "
+    "xmlns:draw=\"urn:oasis:names:tc:opendocument:xmlns:drawing:1.0\" "
+    "xmlns:svg=\"urn:oasis:names:tc:opendocument:xmlns:svg-compatible:1.0\" office:version=\"1.3\"";
 
 static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
 {
@@ -866,14 +868,14 @@ static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
     of_zipw_init(&w);
     of_zipw_add(&w, "mimetype", "application/vnd.oasis.opendocument.text", 39, false);
     of_sb_t o = { 0 };
-    of_sb_puts(&o, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-                   "<manifest:manifest xmlns:manifest=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\" manifest:version=\"1.3\">"
-                   "<manifest:file-entry manifest:full-path=\"/\" manifest:version=\"1.3\" manifest:media-type=\"application/vnd.oasis.opendocument.text\"/>"
-                   "<manifest:file-entry manifest:full-path=\"content.xml\" manifest:media-type=\"text/xml\"/>"
-                   "<manifest:file-entry manifest:full-path=\"styles.xml\" manifest:media-type=\"text/xml\"/>"
-                   "</manifest:manifest>");
-    of_zipw_add(&w, "META-INF/manifest.xml", o.s, o.n, true);
-    o.n = 0;
+    /* the manifest, finished after the body: its pictures */
+    of_sb_t man = { 0 };
+    of_sb_puts(&man, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+                     "<manifest:manifest xmlns:manifest=\"urn:oasis:names:tc:opendocument:xmlns:manifest:1.0\" manifest:version=\"1.3\">"
+                     "<manifest:file-entry manifest:full-path=\"/\" manifest:version=\"1.3\" manifest:media-type=\"application/vnd.oasis.opendocument.text\"/>"
+                     "<manifest:file-entry manifest:full-path=\"content.xml\" manifest:media-type=\"text/xml\"/>"
+                     "<manifest:file-entry manifest:full-path=\"styles.xml\" manifest:media-type=\"text/xml\"/>");
+    int npics = 0;
     of_sb_printf(&o, "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<office:document-styles %s><office:styles>"
                      "<style:default-style style:family=\"paragraph\"><style:text-properties fo:font-size=\"12pt\"/></style:default-style>"
                      "<style:style style:name=\"Standard\" style:family=\"paragraph\"/>", NS);
@@ -896,6 +898,12 @@ static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
     for (int a = 1; a < 4; a++)
         of_sb_printf(&o, "<style:style style:name=\"P%d\" style:family=\"paragraph\" style:parent-style-name=\"Standard\">"
                          "<style:paragraph-properties fo:text-align=\"%s\"/></style:style>", a, AL[a]);
+    /* indents (quotes, trees): PI<n> */
+    for (int k = 1; k <= 12; k++)
+        of_sb_printf(&o, "<style:style style:name=\"PI%d\" style:family=\"paragraph\" style:parent-style-name=\"Standard\">"
+                         "<style:paragraph-properties fo:margin-left=\"%.1fcm\"/></style:style>", k, k * 1.0);
+    of_sb_puts(&o, "<style:style style:name=\"PB\" style:family=\"paragraph\" style:parent-style-name=\"Standard\">"
+                   "<style:paragraph-properties fo:break-before=\"page\"/></style:style>");
     for (int s = 1; s < d->nrs; s++) {
         const of_rstyle_t *r = &d->rs[s];
         of_sb_printf(&o, "<style:style style:name=\"T%d\" style:family=\"text\"><style:text-properties", s);
@@ -935,13 +943,44 @@ static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
         const char *tag = p->heading ? "text:h" : "text:p";
         if (p->heading) of_sb_printf(&o, "<text:h text:style-name=\"Heading_20_%d\" text:outline-level=\"%d\">", p->heading > 3 ? 3 : p->heading, p->heading);
         else if (p->align) of_sb_printf(&o, "<text:p text:style-name=\"P%d\">", p->align & 3);
+        else if (p->indent) of_sb_printf(&o, "<text:p text:style-name=\"PI%d\">", p->indent > 12 ? 12 : p->indent);
+        else if (p->len == 3 && p->nobj == 1 && d->obj[p->obj[0]].kind == OF_OBJ_BREAK) of_sb_puts(&o, "<text:p text:style-name=\"PB\">");
         else of_sb_puts(&o, "<text:p text:style-name=\"Standard\">");
-        int k = 0;
+        int k = 0, link = -1;
         for (int a = 0; a < p->len;) {
+            int lk = d->rs[p->at[a]].link;
+            if (lk >= 0 && (lk >= d->nlinks || !of_link_is_url(d->links[lk]))) lk = -1;
+            if (lk != link) {
+                if (link >= 0) of_sb_puts(&o, "</text:a>");
+                link = lk;
+                if (link >= 0) {
+                    of_sb_puts(&o, "<text:a xlink:type=\"simple\" xlink:href=\"");
+                    of_sb_xml(&o, d->links[link], strlen(d->links[link]));
+                    of_sb_puts(&o, "\">");
+                }
+            }
             if (a + 2 < p->len && !memcmp(p->txt + a, OF_OBJ_CHAR, 3)) {
                 int ob = k < p->nobj ? p->obj[k] : -1;
                 k++;
-                if (ob >= 0 && (d->obj[ob].kind == OF_OBJ_TEXT || d->obj[ob].kind == OF_OBJ_NOTE) && d->obj[ob].text) w_text(&o, d->obj[ob].text, (int)strlen(d->obj[ob].text), false);
+                of_obj_t *obj = ob >= 0 && ob < d->nobj ? &d->obj[ob] : NULL;
+                if (obj && (obj->kind == OF_OBJ_TEXT || obj->kind == OF_OBJ_NOTE) && obj->text) {
+                    w_text(&o, obj->text, (int)strlen(obj->text), false);
+                } else if (obj && obj->kind == OF_OBJ_IMAGE) {
+                    size_t n;
+                    const char *ext = "png";
+                    uint8_t *bin = of_doc_obj_bytes(d, obj, &n, &ext);
+                    if (bin) {
+                        npics++;
+                        char name[48];
+                        snprintf(name, sizeof name, "Pictures/image%d.%s", npics, ext);
+                        of_zipw_add(&w, name, bin, n, false);
+                        of_free(bin);
+                        of_sb_printf(&man, "<manifest:file-entry manifest:full-path=\"%s\" manifest:media-type=\"image/%s\"/>", name, ext);
+                        of_sb_printf(&o, "<draw:frame draw:name=\"Imagen%d\" text:anchor-type=\"as-char\" svg:width=\"%ldpt\" svg:height=\"%ldpt\">"
+                                         "<draw:image xlink:href=\"%s\" xlink:type=\"simple\" xlink:show=\"embed\" xlink:actuate=\"onLoad\"/></draw:frame>",
+                                     npics, (long)(obj->w > 0 ? obj->w : 200), (long)(obj->h > 0 ? obj->h : 150), name);
+                    }
+                }
                 a += 3;
                 continue;
             }
@@ -952,6 +991,7 @@ static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
             if (p->at[a]) of_sb_puts(&o, "</text:span>");
             a = b;
         }
+        if (link >= 0) of_sb_puts(&o, "</text:a>");
         of_sb_printf(&o, "</%s>", tag);
         if (list) of_sb_puts(&o, "</text:list-item>");
     }
@@ -961,7 +1001,10 @@ static bool save_new(of_doc_t *d, const char *path, char *err, size_t errlen)
     if (cur_table >= 0) of_sb_puts(&o, "</table:table>");
     of_sb_puts(&o, "</office:text></office:body></office:document-content>");
     of_zipw_add(&w, "content.xml", o.s, o.n, true);
-    bool ok = !o.oom && of_zipw_finish(&w, path);
+    of_sb_puts(&man, "</manifest:manifest>");
+    of_zipw_add(&w, "META-INF/manifest.xml", man.s, man.n, true);
+    bool ok = !o.oom && !man.oom && of_zipw_finish(&w, path);
+    of_sb_free(&man);
     of_sb_free(&o);
     of_zipw_free(&w);
     if (!ok) snprintf(err, errlen, "write");

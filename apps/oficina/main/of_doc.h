@@ -25,7 +25,7 @@
 
 #define OF_OBJ_CHAR "\xEF\xBF\xBC"      /* U+FFFC */
 
-enum { OF_DOC_DOCX = 1, OF_DOC_ODT, OF_DOC_TEXT };
+enum { OF_DOC_DOCX = 1, OF_DOC_ODT, OF_DOC_TEXT, OF_DOC_RO };     /* RO: read from another format, shown only */
 
 /* tri-state of a run property: as the paragraph style says, on, off */
 enum { OF_TRI_UNSET = 0, OF_TRI_ON, OF_TRI_OFF };
@@ -56,7 +56,8 @@ typedef struct {
     uint8_t  kind;              /* OF_OBJ_* */
     char    *raw;               /* the XML, exactly as it was */
     char    *text;              /* what an OF_OBJ_TEXT shows (a field's result, a footnote's number) */
-    char    *target;            /* image: its part in the package ("word/media/image1.png") */
+    char    *target;            /* image: its part in the package ("word/media/image1.png"), or a file */
+    uint8_t  file;              /* target is a file of the card, not a part */
     int32_t  w, h;              /* image: size in points */
 } of_obj_t;
 
@@ -76,6 +77,7 @@ typedef struct {
     uint8_t   heading;          /* 1..9, 0 not a heading */
     uint8_t   align;
     uint8_t   list, ilvl;       /* OF_LIST_*, level */
+    uint8_t   indent;           /* read-only documents: levels of indent (quotes, trees) */
     int       numid;            /* docx numId / odt list style index, -1 */
     char      label[24];        /* the list's number or bullet, worked out */
     int       pstyle;           /* index of doc->ps, -1 none */
@@ -143,6 +145,9 @@ typedef struct of_doc_s {
     int         norig;
     bool        any_locked, has_track;
     int         nnew_styles;    /* odt: automatic styles added */
+    bool        readonly;       /* read from RTF, HTML, EPUB...: shown, saved only as a copy */
+    char        kind[16];       /* what it was read from, for the person: "EPUB" */
+    char       *note;           /* something to say when it opens */
 } of_doc_t;
 
 /* the model */
@@ -186,3 +191,63 @@ bool      of_doc_new_file(int fmt, const char *path, const char *title);
 bool      of_is_doc_ext(const char *ext);
 /* a part of the package, inflated (pictures) */
 uint8_t  *of_doc_part(const of_doc_t *d, const char *name, size_t *len);
+/* a picture object's bytes (from its part or its file) and its kind: "png", "jpeg", "gif", "bmp" */
+uint8_t  *of_doc_obj_bytes(const of_doc_t *d, const of_obj_t *o, size_t *len, const char **ext);
+/* links of documents read from other formats are URLs; those of docx and odt, start tags */
+bool      of_link_is_url(const char *l);
+
+/* -------------------------------------------------------------------------- */
+/* Building a document from another format (of_import.c)                       */
+/* -------------------------------------------------------------------------- */
+
+typedef struct {
+    of_doc_t   *d;
+    of_rstyle_t st;             /* the style of what is appended */
+    int         cur;            /* the paragraph being filled, -1 none */
+    bool        space;          /* collapsing white space: one is pending */
+    bool        pre;            /* keep white space as it is */
+    int         heading, list, ilvl, align, numid, indent;
+    int         cell;           /* the cell being filled, 0 none */
+    int         table, row, col;
+} of_bld_t;
+
+void of_bld_init(of_bld_t *b, of_doc_t *d);
+/* A new paragraph (the current one, if still empty, is reused). */
+void of_bld_para(of_bld_t *b);
+/* Text in the current style; white space collapsed unless b->pre. */
+void of_bld_text(of_bld_t *b, const char *s, size_t n);
+void of_bld_link(of_bld_t *b, const char *url);           /* NULL: the link ends */
+void of_bld_image(of_bld_t *b, const char *target, bool file, int w_pt, int h_pt);
+void of_bld_break(of_bld_t *b);
+void of_bld_table(of_bld_t *b);                           /* a new table */
+void of_bld_row(of_bld_t *b);
+void of_bld_cell(of_bld_t *b, int span);
+void of_bld_table_end(of_bld_t *b);
+void of_bld_done(of_bld_t *b);
+/* A file of the card for a piece of data (a picture in an RTF, an FB2, a mail). */
+bool of_cache_file(const char *name, const void *data, size_t n, char *out, size_t len);
+
+/* the readers; each gives a read-only document */
+of_doc_t *of_html_load(const char *path, char *err, size_t errlen);
+of_doc_t *of_epub_load(const char *path, char *err, size_t errlen);
+of_doc_t *of_eml_load(const char *path, char *err, size_t errlen);
+of_doc_t *of_fb2_load(const char *path, char *err, size_t errlen);
+of_doc_t *of_rtf_load(const char *path, char *err, size_t errlen);
+of_doc_t *of_md_load(const char *path, char *err, size_t errlen);
+of_doc_t *of_vcf_load(const char *path, char *err, size_t errlen);
+of_doc_t *of_ics_load(const char *path, char *err, size_t errlen);
+of_doc_t *of_tree_load(const char *path, char *err, size_t errlen);   /* json, xml, yaml, toml */
+of_doc_t *of_image_load(const char *path, char *err, size_t errlen);  /* a picture alone */
+of_doc_t *of_iwork_load(const char *path, char *err, size_t errlen);  /* the preview of Pages, Numbers, Keynote */
+/* HTML text into a builder (EPUB chapters, mail bodies); base: the folder
+ * of the HTML inside the package, for its pictures ("OEBPS/") */
+void of_html_into(of_bld_t *b, const char *html, size_t n, const char *base, bool in_zip);
+void of_md_into(of_bld_t *b, const char *md, size_t n, const char *dir);
+/* which reader takes this extension: 0 none */
+enum { OF_RD_NONE = 0, OF_RD_HTML, OF_RD_EPUB, OF_RD_EML, OF_RD_FB2, OF_RD_RTF, OF_RD_MD, OF_RD_VCF, OF_RD_ICS, OF_RD_IMG, OF_RD_IWORK };
+int  of_reader_for(const char *ext);
+bool of_is_tree_ext(const char *ext);                       /* json, xml, yaml, toml... */
+/* the reader for the file's extension (of_tree_load for the data files) */
+of_doc_t *of_read_any(const char *path, char *err, size_t errlen);
+/* the app's _(), for the words the readers write ("De", "Adjuntos") */
+extern const char *(*of_tr)(const char *es);

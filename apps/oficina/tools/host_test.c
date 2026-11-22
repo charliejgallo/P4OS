@@ -2,18 +2,21 @@
  * P4OS - Office: the formats on the Mac, without LVGL.
  *
  *     cc -DOF_HOST -I apps/oficina/main apps/oficina/tools/host_test.c \
- *        apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text}.c -o host_test
+ *        apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive}.c -o host_test
  *     ./host_test dump  book.xlsx                      the cells, shown and as typed
  *     ./host_test edit  book.xlsx out.xlsx 'A1=12' 'Resumen!B2==A1*2' ...
  *     ./host_test conv  book.csv out.xlsx              save in another format
  *     ./host_test text  in.txt out.txt 'line:text'    insert a line, save
  *     ./host_test sort  book.xlsx out.xlsx Sheet r1 r2 c1 c2 key desc
  *     ./host_test fx    '=SUMA(1;2)*3'                 parse, write back, evaluate
+ *     ./host_test read  file.rtf [copy.docx|.odt|.txt]  a reader's document (phase 3), and a copy
+ *     ./host_test arc   archive.zip [dir]              an archive's entries, extracted to dir
  *
  * tools/test_formats.sh runs it over the samples and checks what it saved.
  */
 #include "of.h"
 #include "of_doc.h"
+#include "of_arc.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -64,19 +67,27 @@ static void docdump(of_doc_t *d)
         of_para_t *p = &d->p[i];
         printf("%3d %s%s%s c%-2d ", i, p->heading ? "H" : " ", p->heading ? (char[2]){ (char)('0' + p->heading), 0 } : " ",
                p->locked ? "L" : " ", p->cell);
+        if (p->indent) printf("%*s", p->indent * 2, "");
+        if (p->align) printf("[%c] ", "LCRJ"[p->align & 3]);
         if (p->label[0]) printf("%s ", p->label);
         for (int k = 0; k < p->len; k++) {
             if (k + 2 < p->len && !memcmp(p->txt + k, OF_OBJ_CHAR, 3)) {
                 of_obj_t *o = of_para_obj_at(d, p, k);
                 static const char *const K[] = { "hid", "img", "mark", "txt", "brk", "note" };
-                printf("<%s%s%s>", o ? K[o->kind] : "?", o && o->text ? ":" : "", o && o->text ? o->text : "");
+                printf("<%s%s%s", o ? K[o->kind] : "?", o && o->text ? ":" : "", o && o->text ? o->text : "");
+                if (o && o->target) printf(" %s%s %dx%d", o->file ? "file:" : "", o->target, (int)o->w, (int)o->h);
+                printf(">");
                 k += 2;
                 continue;
             }
             of_rstyle_t e;
             of_doc_effective(d, p, p->at[k], &e);
-            if (k == 0 || p->at[k] != p->at[k - 1]) printf("%s%s%s", e.b == OF_TRI_ON ? "*" : "", e.i == OF_TRI_ON ? "/" : "", e.link >= 0 ? "_" : "");
-            putchar(p->txt[k]);
+            if (k == 0 || p->at[k] != p->at[k - 1]) {
+                printf("%s%s%s%s", e.b == OF_TRI_ON ? "*" : "", e.i == OF_TRI_ON ? "/" : "", e.s == OF_TRI_ON ? "-" : "", e.link >= 0 ? "_" : "");
+                if (e.color) printf("{%06X}", (unsigned)(e.color & 0xFFFFFF));
+                if (e.link >= 0 && e.link < d->nlinks && (k == 0 || d->rs[p->at[k - 1]].link != e.link)) printf("(%s)", d->links[e.link]);
+            }
+            putchar(p->txt[k] == '\n' ? '|' : p->txt[k]);
         }
         printf("\n");
     }
@@ -103,6 +114,35 @@ int main(int argc, char **argv)
         of_doc_t *d = of_doc_load(argv[2], err, sizeof err);
         if (!d) { printf("load failed: %s\n", err); return 1; }
         docdump(d);
+        of_doc_free(d);
+        return 0;
+    }
+    if (argc >= 3 && !strcmp(argv[1], "arc")) {
+        of_arc_t *a = of_arc_open(argv[2], err, sizeof err);
+        if (!a) { printf("open failed: %s\n", err); return 1; }
+        printf("== kind %d, %d entries\n", a->kind, a->n);
+        for (int i = 0; i < a->n; i++) {
+            printf("%3d %s %8llu %s%s\n", i, a->e[i].dir ? "d" : "-", (unsigned long long)a->e[i].size, a->e[i].name, a->e[i].locked ? " (locked)" : "");
+            if (argc >= 4 && !a->e[i].dir) {
+                char out[600];
+                snprintf(out, sizeof out, "%s/%s", argv[3], a->e[i].name);
+                if (!of_arc_extract(a, i, out, err, sizeof err)) printf("    extract failed: %s\n", err);
+            }
+        }
+        of_arc_free(a);
+        return 0;
+    }
+    if (argc >= 3 && !strcmp(argv[1], "read")) {
+        of_doc_t *d = of_read_any(argv[2], err, sizeof err);
+        if (!d) { printf("read failed: %s\n", err); return 1; }
+        printf("== %s, %d paragraphs, %d tables%s%s\n", d->kind, d->np, d->ntables, d->note ? ", " : "", d->note ? d->note : "");
+        docdump(d);
+        if (argc >= 4) {
+            const char *e = of_ext(argv[3]);
+            int fmt = !strcmp(e, "odt") ? OF_DOC_ODT : !strcmp(e, "txt") ? OF_DOC_TEXT : OF_DOC_DOCX;
+            if (!of_doc_save(d, fmt, argv[3], err, sizeof err)) { printf("save failed: %s\n", err); return 1; }
+            printf("saved %s\n", argv[3]);
+        }
         of_doc_free(d);
         return 0;
     }

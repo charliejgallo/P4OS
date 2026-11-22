@@ -78,7 +78,7 @@ typedef struct {
 static struct {
     of_doc_t  *d;
     char       path[300];
-    lv_obj_t  *root, *top, *title, *area, *kb, *fmt, *b_undo, *b_redo, *b_kb;
+    lv_obj_t  *root, *top, *title, *area, *kb, *fmt, *b_undo, *b_redo, *b_kb, *badge;
     lv_obj_t  *fb[4];
     int32_t    W, H, ax, ay, aw, ah;
     int        z;
@@ -177,6 +177,27 @@ static void pic_decode(pic_t *pc)
 {
     of_obj_t *o = &D.d->obj[pc->obj];
     if (!o->target) { pc->failed = true; return; }
+    if (o->file) {
+        /* a picture on the card (a picture opened alone, one an RTF carried) */
+        const char *fx = of_ext(o->target);
+        if (strcmp(fx, "png") && strcmp(fx, "jpg") && strcmp(fx, "jpeg") && strcmp(fx, "bmp")) { pc->failed = true; return; }
+        int32_t w, h;
+        obj_size(o, D.page_w, &w, &h);
+        int ow = 0, oh = 0;
+        pc->px = aos_hal_image_decode(o->target, 0, 0, (int)w, (int)h, false, &ow, &oh, NULL, NULL);
+        if (!pc->px) { pc->failed = true; return; }
+        pc->w = ow;
+        pc->h = oh;
+        memset(&pc->dsc, 0, sizeof pc->dsc);
+        pc->dsc.header.magic = LV_IMAGE_HEADER_MAGIC;
+        pc->dsc.header.cf = LV_COLOR_FORMAT_RGB565;
+        pc->dsc.header.w = (uint32_t)ow;
+        pc->dsc.header.h = (uint32_t)oh;
+        pc->dsc.header.stride = (uint32_t)ow * 2;
+        pc->dsc.data = (const uint8_t *)pc->px;
+        pc->dsc.data_size = (uint32_t)(ow * oh * 2);
+        return;
+    }
     int i = of_zip_find(&D.d->zip, o->target);
     if (i < 0) { pc->failed = true; return; }
     const of_zentry_t *e = &D.d->zip.e[i];
@@ -286,7 +307,7 @@ static void layout_para(int i, int32_t w)
     pl->n = 0;
     pl->w = w;
     int32_t em = (int32_t)(11 * ZPT[D.z]);
-    pl->indent = p->label[0] ? em * (2 + p->ilvl * 2) : 0;
+    pl->indent = p->label[0] ? em * (2 + p->ilvl * 2) : em * 3 / 2 * p->indent;
     int32_t maxw = w - pl->indent;
     if (maxw < em * 2) maxw = em * 2;
     int a = 0;
@@ -935,8 +956,17 @@ static void do_redo(void)
 /* Editing                                                                     */
 /* -------------------------------------------------------------------------- */
 
+/* A document read from another format is not edited: a copy is. */
+static bool refuse_ro(void)
+{
+    if (!D.d->readonly) return false;
+    of_app_toast(_("Sólo se lee: para editarlo, guardá una copia como docx u odt (en el menú ⋯)"));
+    return true;
+}
+
 static bool refuse_locked(int pi)
 {
+    if (refuse_ro()) return true;
     if (pi >= 0 && pi < D.d->np && D.d->p[pi].locked) {
         of_app_toast(_("Este párrafo tiene control de cambios u objetos que no se editan acá: se guarda como está"));
         return true;
@@ -956,6 +986,7 @@ static void edited(int from, int to)
 static bool delete_selection(bool record)
 {
     if (!sel_has()) return true;
+    if (refuse_ro()) return false;
     int p1, o1, p2, o2;
     sel_norm(&p1, &o1, &p2, &o2);
     for (int i = p1; i <= p2; i++) {
@@ -1134,6 +1165,7 @@ static void vmove(int dir, bool extend)
 /* formatting */
 static void toggle(uint8_t bit)
 {
+    if (refuse_ro()) return;
     of_rstyle_t cur;
     of_para_t *p = &D.d->p[D.cp];
     int pos = D.cpos > 0 ? prev_pos(p, D.cpos) : 0;
@@ -1171,6 +1203,7 @@ static void toggle(uint8_t bit)
 
 static void set_heading(int level)
 {
+    if (refuse_ro()) return;
     int p1, o1, p2, o2;
     sel_norm(&p1, &o1, &p2, &o2);
     for (int i = p1; i <= p2; i++) if (D.d->p[i].locked) { refuse_locked(i); return; }
@@ -1194,6 +1227,7 @@ static void set_heading(int level)
 
 static void set_align(int al)
 {
+    if (refuse_ro()) return;
     int p1, o1, p2, o2;
     sel_norm(&p1, &o1, &p2, &o2);
     for (int i = p1; i <= p2; i++) if (D.d->p[i].locked) { refuse_locked(i); return; }
@@ -1442,8 +1476,16 @@ static void gesture_cb(const aos_gesture_event_t *ev, void *user)
         if (!hit(px, py, &pi, &pos)) break;
         D.want_x = -1;
         move_to(pi, pos, false);
-        if (D.d->p[pi].locked) refuse_locked(pi);
-        else if (!D.kb) kb_show(true);
+        if (D.d->readonly) {
+            of_para_t *lp = &D.d->p[pi];
+            int at = pos < lp->len ? pos : pos - 1;
+            int lk = at >= 0 && lp->len ? D.d->rs[lp->at[at]].link : -1;
+            if (lk >= 0 && lk < D.d->nlinks && of_link_is_url(D.d->links[lk])) of_app_toast(D.d->links[lk]);
+        } else if (D.d->p[pi].locked) {
+            refuse_locked(pi);
+        } else if (!D.kb) {
+            kb_show(true);
+        }
         break;
     case AOS_GESTURE_DOUBLE_TAP:
         if (hit(px, py, &pi, &pos)) { select_word(pi, pos); refresh(); }
@@ -1533,8 +1575,10 @@ static void save_as_done(const char *text, void *ud)
     char err[64];
     if (!of_doc_save(D.d, s_as_fmt, p, err, sizeof err)) { of_app_toast(_("No se pudo guardar")); return; }
     of_recent_add(p);
-    of_app_toast(s_as_fmt == D.d->fmt || s_as_fmt == OF_DOC_TEXT ? _("Guardado")
-                 : _("Guardado. En la copia no van las imágenes ni lo que la app no entiende"));
+    of_app_toast(s_as_fmt == D.d->fmt || s_as_fmt == OF_DOC_TEXT || D.d->readonly ? _("Guardado")
+                 : _("Guardado. En la copia no va lo que la app no entiende"));
+    /* a copy of a read-only document opens, to be edited */
+    if (D.d->readonly && s_as_fmt != OF_DOC_TEXT) of_app_open(p);
 }
 
 static void save_as_pick(int i, void *ud)
@@ -1561,18 +1605,82 @@ static void info_open(void)
         in = !sp;
     }
     of_free(t);
-    char msg[200];
-    snprintf(msg, sizeof msg, _("%d párrafos, %d palabras, %d caracteres."), D.d->np, words, chars);
+    char msg[300];
+    int ml = snprintf(msg, sizeof msg, _("%d párrafos, %d palabras, %d caracteres."), D.d->np, words, chars);
+    if (D.d->readonly && ml > 0 && ml < (int)sizeof msg) {
+        snprintf(msg + ml, sizeof msg - (size_t)ml, _(" Leído de %s: se ve y se copia; para editarlo, se guarda una copia como docx u odt."),
+                 D.d->kind[0] ? D.d->kind : "?");
+    }
     ofu_confirm(of_basename(D.path), D.d->any_locked ? _("Algunos párrafos (marcados al costado) tienen control de cambios u otros objetos: se ven, y se guardan como estaban.") : msg,
                 _("Listo"), false, NULL, NULL);
 }
 
+/* the headings, to jump to */
+static int *s_toc;
+static int s_ntoc;
+
+static void toc_pick(int i, void *ud)
+{
+    (void)ud;
+    if (i < 0 || i >= s_ntoc) return;
+    int pi = s_toc[i];
+    D.ap = D.cp = pi;
+    D.apos = D.cpos = 0;
+    D.sy = D.pl && pi < D.npl ? D.pl[pi].y - 24 : 0;
+    clamp();
+    refresh();
+}
+
+static void toc_open(void)
+{
+    of_free(s_toc);
+    s_toc = NULL;
+    s_ntoc = 0;
+    for (int i = 0; i < D.d->np; i++)
+        if (D.d->p[i].heading && D.d->p[i].heading <= 3 && !D.d->p[i].cell && D.d->p[i].len) s_ntoc++;
+    if (!s_ntoc) { of_app_toast(_("El documento no tiene títulos")); return; }
+    if (s_ntoc > 200) s_ntoc = 200;
+    s_toc = of_alloc((size_t)s_ntoc * sizeof *s_toc);
+    ofu_item_t *items = of_alloc((size_t)s_ntoc * sizeof *items);
+    char (*lab)[96] = of_alloc((size_t)s_ntoc * sizeof *lab);
+    if (!s_toc || !items || !lab) { of_free(items); of_free(lab); s_ntoc = 0; return; }
+    int k = 0;
+    for (int i = 0; i < D.d->np && k < s_ntoc; i++) {
+        of_para_t *p = &D.d->p[i];
+        if (!p->heading || p->heading > 3 || p->cell || !p->len) continue;
+        /* indented by level, the objects and line breaks left out */
+        int w = 0;
+        for (int l = 1; l < p->heading && w < 8; l++) { memcpy(lab[k] + w, "   ", 3); w += 3; }
+        for (int c = 0; c < p->len && w < 90; c++) {
+            if (c + 2 < p->len && !memcmp(p->txt + c, OF_OBJ_CHAR, 3)) { c += 2; continue; }
+            char ch = p->txt[c] == '\n' ? ' ' : p->txt[c];
+            /* not a cut UTF-8 sequence at the end */
+            if (w >= 86 && ((unsigned char)ch & 0xC0) == 0xC0) break;
+            lab[k][w++] = ch;
+        }
+        while (w && ((unsigned char)lab[k][w - 1] & 0xC0) == 0xC0) w--;
+        lab[k][w] = 0;
+        items[k] = (ofu_item_t){ lab[k], -1, false, false };
+        s_toc[k] = i;
+        k++;
+    }
+    /* the one the caret is in, ticked */
+    for (int j = 0; j < k; j++) items[j].checked = s_toc[j] <= D.cp && (j + 1 >= k || s_toc[j + 1] > D.cp);
+    ofu_sheet(_("Índice"), items, k, toc_pick, NULL);
+    /* the sheet copies what it shows */
+    of_free(items);
+    of_free(lab);
+}
+
+enum { M_SAVE, M_SAVE_AS, M_TOC, M_FIND, M_BIGGER, M_SMALLER, M_ALL, M_COPY, M_PASTE, M_AS_TEXT, M_INFO };
+static int s_menu[12];
+
 static void menu_pick(int i, void *ud)
 {
     (void)ud;
-    switch (i) {
-    case 0: of_docv_save(); break;
-    case 1: {
+    switch (i >= 0 && i < 12 ? s_menu[i] : -1) {
+    case M_SAVE: of_docv_save(); break;
+    case M_SAVE_AS: {
         ofu_item_t items[3] = {
             { _("Documento de Word (.docx)"), OF_IC_DOC, false, D.d->fmt == OF_DOC_DOCX },
             { _("Documento de OpenDocument (.odt)"), OF_IC_DOC, false, D.d->fmt == OF_DOC_ODT },
@@ -1581,30 +1689,42 @@ static void menu_pick(int i, void *ud)
         ofu_sheet(_("Guardar una copia como"), items, 3, save_as_pick, NULL);
         break;
     }
-    case 2: ofu_prompt(_("Buscar en el documento"), D.find, _("Buscar"), find_done, NULL); break;
-    case 3: set_zoom(D.z + 1); break;
-    case 4: set_zoom(D.z - 1); break;
-    case 5: D.ap = 0; D.apos = 0; D.cp = D.d->np - 1; D.cpos = D.d->p[D.cp].len; refresh(); break;
-    case 6: copy(false); break;
-    case 7: paste(); break;
-    case 8: info_open(); break;
+    case M_TOC: toc_open(); break;
+    case M_FIND: ofu_prompt(_("Buscar en el documento"), D.find, _("Buscar"), find_done, NULL); break;
+    case M_BIGGER: set_zoom(D.z + 1); break;
+    case M_SMALLER: set_zoom(D.z - 1); break;
+    case M_ALL: D.ap = 0; D.apos = 0; D.cp = D.d->np - 1; D.cpos = D.d->p[D.cp].len; refresh(); break;
+    case M_COPY: copy(false); break;
+    case M_PASTE: paste(); break;
+    case M_AS_TEXT: {
+        char p[300];
+        snprintf(p, sizeof p, "%s", D.path);
+        of_app_open_as(p, OF_OPEN_TEXT);
+        break;
+    }
+    case M_INFO: info_open(); break;
     }
 }
 
 static void menu_open(void)
 {
-    ofu_item_t items[9] = {
-        { _("Guardar"), OF_IC_SAVE, false, false },
-        { _("Guardar una copia como..."), OF_IC_COPY, false, false },
-        { _("Buscar..."), OF_IC_SEARCH, false, false },
-        { _("Letra más grande"), OF_IC_ZOOM_IN, false, false },
-        { _("Letra más chica"), OF_IC_ZOOM_OUT, false, false },
-        { _("Seleccionar todo"), OF_IC_CHECKBOX, false, false },
-        { _("Copiar"), OF_IC_COPY, false, false },
-        { _("Pegar"), OF_IC_COPY, false, false },
-        { _("Información"), OF_IC_INFO, false, false },
-    };
-    ofu_sheet(NULL, items, 9, menu_pick, NULL);
+    ofu_item_t items[12];
+    int n = 0;
+    bool ro = D.d->readonly;
+#define ADD(id, label, icon) do { s_menu[n] = (id); items[n++] = (ofu_item_t){ (label), (icon), false, false }; } while (0)
+    if (!ro) ADD(M_SAVE, _("Guardar"), OF_IC_SAVE);
+    ADD(M_SAVE_AS, _("Guardar una copia como..."), OF_IC_COPY);
+    ADD(M_TOC, _("Índice"), OF_IC_LIST);
+    ADD(M_FIND, _("Buscar..."), OF_IC_SEARCH);
+    ADD(M_BIGGER, _("Letra más grande"), OF_IC_ZOOM_IN);
+    ADD(M_SMALLER, _("Letra más chica"), OF_IC_ZOOM_OUT);
+    ADD(M_ALL, _("Seleccionar todo"), OF_IC_CHECKBOX);
+    ADD(M_COPY, _("Copiar"), OF_IC_COPY);
+    if (!ro) ADD(M_PASTE, _("Pegar"), OF_IC_COPY);
+    if (ro && of_app_can_text(D.path)) ADD(M_AS_TEXT, _("Editar como texto"), OF_IC_TYPE);
+    ADD(M_INFO, _("Información"), OF_IC_INFO);
+#undef ADD
+    ofu_sheet(NULL, items, n, menu_pick, NULL);
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1613,6 +1733,7 @@ static void menu_open(void)
 
 bool of_docv_save(void)
 {
+    if (D.d->readonly) return true;
     char err[64] = "";
     if (!of_doc_save(D.d, D.d->fmt, D.path, err, sizeof err)) {
         of_app_toast(_("No se pudo guardar"));
@@ -1626,7 +1747,7 @@ bool of_docv_save(void)
 
 bool of_docv_save_recovery(void)
 {
-    if (!D.d) return false;
+    if (!D.d || D.d->readonly) return false;
     char p[340], err[32];
     const char *e = of_ext(D.path);
     int bl = (int)strlen(D.path) - (e[0] ? (int)strlen(e) + 1 : 0);
@@ -1741,7 +1862,7 @@ static void relayout(void)
     D.aw = D.W;
     D.ah = D.H - top - kbh;
     lv_obj_set_size(D.area, D.aw, D.ah);
-    lv_obj_set_width(D.title, D.W - 5 * 84 - 100);
+    lv_obj_set_width(D.title, D.d && D.d->readonly ? D.W - 2 * 84 - 200 : D.W - 5 * 84 - 100);
     /* the page: the screen's width upright, a column lying down */
     D.page_w = D.W > D.H ? (D.W * 70 / 100) : D.W - 16;
     D.page_x = (D.W - D.page_w) / 2;
@@ -1770,6 +1891,8 @@ bool of_docv_open(lv_obj_t *parent, const char *path, struct of_doc_s *d)
         D.want_x = -1;
         if (d->any_locked)
             of_app_toast(_("Algunos párrafos tienen control de cambios u objetos que no se editan acá: se ven y se guardan como están"));
+        else if (d->note)
+            of_app_toast(d->note);
     } else if (!D.d) {
         return false;
     }
@@ -1790,12 +1913,19 @@ bool of_docv_open(lv_obj_t *parent, const char *path, struct of_doc_s *d)
     lv_obj_align(D.title, LV_ALIGN_LEFT_MID, 92, 0);
     lv_obj_t *mo = ofu_icon_btn(D.top, OF_IC_MORE, 84, more_cb, NULL);
     lv_obj_align(mo, LV_ALIGN_RIGHT_MID, -4, 0);
-    D.b_kb = ofu_icon_btn(D.top, OF_IC_KEYBOARD, 84, kbb_cb, NULL);
-    lv_obj_align(D.b_kb, LV_ALIGN_RIGHT_MID, -88, 0);
-    D.b_redo = ofu_icon_btn(D.top, OF_IC_REDO, 84, redo_cb, NULL);
-    lv_obj_align(D.b_redo, LV_ALIGN_RIGHT_MID, -172, 0);
-    D.b_undo = ofu_icon_btn(D.top, OF_IC_UNDO, 84, undo_cb, NULL);
-    lv_obj_align(D.b_undo, LV_ALIGN_RIGHT_MID, -256, 0);
+    if (!D.d->readonly) {
+        D.b_kb = ofu_icon_btn(D.top, OF_IC_KEYBOARD, 84, kbb_cb, NULL);
+        lv_obj_align(D.b_kb, LV_ALIGN_RIGHT_MID, -88, 0);
+        D.b_redo = ofu_icon_btn(D.top, OF_IC_REDO, 84, redo_cb, NULL);
+        lv_obj_align(D.b_redo, LV_ALIGN_RIGHT_MID, -172, 0);
+        D.b_undo = ofu_icon_btn(D.top, OF_IC_UNDO, 84, undo_cb, NULL);
+        lv_obj_align(D.b_undo, LV_ALIGN_RIGHT_MID, -256, 0);
+    } else {
+        D.b_kb = D.b_redo = D.b_undo = NULL;
+        /* what it was read from, beside the menu */
+        D.badge = ofu_text(D.top, D.d->kind, ofu_font(OF_ST_BOLD, OF_SZ_XS), OFT.dim);
+        lv_obj_align(D.badge, LV_ALIGN_RIGHT_MID, -100, 0);
+    }
     D.area = ofu_box(parent, 10, 10);
     lv_obj_add_flag(D.area, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(D.area, area_draw_cb, LV_EVENT_DRAW_MAIN, NULL);
