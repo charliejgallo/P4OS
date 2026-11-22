@@ -74,6 +74,8 @@ uint32_t of_crc32(uint32_t crc, const void *p, size_t n);
 bool of_deflate(const uint8_t *in, size_t n, of_sb_t *out);
 /* Raw inflate of a whole buffer; NULL on a damaged stream. NUL-terminated. */
 uint8_t *of_inflate(const uint8_t *in, size_t n, size_t expect, size_t *out_len);
+/* Tolerant (PDF): zlib header or raw; what came out before an error. */
+uint8_t *of_inflate_lax(const uint8_t *in, size_t n, bool zlib, size_t *out_len);
 
 /* -------------------------------------------------------------------------- */
 /* ZIP (of_zip.c)                                                              */

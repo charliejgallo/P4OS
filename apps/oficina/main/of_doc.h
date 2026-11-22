@@ -239,12 +239,14 @@ of_doc_t *of_ics_load(const char *path, char *err, size_t errlen);
 of_doc_t *of_tree_load(const char *path, char *err, size_t errlen);   /* json, xml, yaml, toml */
 of_doc_t *of_image_load(const char *path, char *err, size_t errlen);  /* a picture alone */
 of_doc_t *of_iwork_load(const char *path, char *err, size_t errlen);  /* the preview of Pages, Numbers, Keynote */
+/* PDF's text, reflowed (of_pdftext.c); err "password": it needs one, or it was wrong */
+of_doc_t *of_pdf_load(const char *path, const char *password, char *err, size_t errlen);
 /* HTML text into a builder (EPUB chapters, mail bodies); base: the folder
  * of the HTML inside the package, for its pictures ("OEBPS/") */
 void of_html_into(of_bld_t *b, const char *html, size_t n, const char *base, bool in_zip);
 void of_md_into(of_bld_t *b, const char *md, size_t n, const char *dir);
 /* which reader takes this extension: 0 none */
-enum { OF_RD_NONE = 0, OF_RD_HTML, OF_RD_EPUB, OF_RD_EML, OF_RD_FB2, OF_RD_RTF, OF_RD_MD, OF_RD_VCF, OF_RD_ICS, OF_RD_IMG, OF_RD_IWORK };
+enum { OF_RD_NONE = 0, OF_RD_HTML, OF_RD_EPUB, OF_RD_EML, OF_RD_FB2, OF_RD_RTF, OF_RD_MD, OF_RD_VCF, OF_RD_ICS, OF_RD_IMG, OF_RD_IWORK, OF_RD_PDF };
 int  of_reader_for(const char *ext);
 bool of_is_tree_ext(const char *ext);                       /* json, xml, yaml, toml... */
 /* the reader for the file's extension (of_tree_load for the data files) */

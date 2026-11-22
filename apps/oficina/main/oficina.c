@@ -204,7 +204,7 @@ static const char *const TEXT_EXT[] = {
     "sql", "srt", "vtt", "tex", "bib", "properties", "gitignore", "diff", "patch", "svg", "kml", "gpx",
     "vcf", "ics", "eml", "nfo", "rst", "org", "env", "bat", "ps1", "cmake", "mk", "s", "asm", "pas", "bas" };
 static const char *const LATER_EXT[] = {
-    "doc", "pdf", "pptx", "ppsx", "potx", "odp", "ppt", "xls" };
+    "doc", "pptx", "ppsx", "potx", "odp", "ppt", "xls" };
 
 static int kind_of(const char *path, bool dir)
 {
@@ -338,6 +338,22 @@ void of_app_open(const char *path)
     of_app_open_as(path, OF_OPEN_AUTO);
 }
 
+static char s_pw_path[300];
+
+static bool show_doc(const char *p, of_doc_t *d);
+
+static void pw_done(const char *text, void *ud)
+{
+    (void)ud;
+    char err[32] = "";
+    of_doc_t *d = of_pdf_load(s_pw_path, text, err, sizeof err);
+    if (!d) {
+        of_app_toast(!strcmp(err, "password") ? _("La contraseña no es esa") : _("No se pudo leer el documento"));
+        return;
+    }
+    show_doc(s_pw_path, d);
+}
+
 void of_app_open_as(const char *path, int how)
 {
     struct stat st;
@@ -365,20 +381,22 @@ void of_app_open_as(const char *path, int how)
         char err[64] = "";
         of_tr = of_tr_app;
         of_doc_t *d = k == K_DOC ? of_doc_load(p, err, sizeof err) : of_read_any(p, err, sizeof err);
+        if (!d && !strcmp(err, "password")) {
+            /* a PDF with a password: asked, and opened with it */
+            snprintf(s_pw_path, sizeof s_pw_path, "%s", p);
+            ofu_prompt(_("Este PDF tiene contraseña"), "", _("Abrir"), pw_done, NULL);
+            return;
+        }
+        if (!d && !strcmp(err, "encrypted")) {
+            of_app_toast(_("El PDF está cifrado de una forma que la app no conoce"));
+            return;
+        }
         if (!d) {
             of_app_toast(!strcmp(err, "encrypted") ? _("El archivo tiene contraseña: la app no lo puede abrir")
                                                    : _("No se pudo leer el documento"));
             return;
         }
-        clear_screen();
-        A.scr = SCR_DOC;
-        snprintf(A.doc, sizeof A.doc, "%s", p);
-        doc_flags(true);
-        lv_obj_set_style_bg_color(A.root, OFT.bg, 0);
-        if (!of_docv_open(A.root, p, d)) {
-            of_app_home();
-            return;
-        }
+        if (!show_doc(p, d)) return;
     } else if (k == K_SHEET) {
         char err[64] = "";
         of_book_t *b = of_book_load(p, err, sizeof err);
@@ -410,6 +428,23 @@ void of_app_open_as(const char *path, int how)
     }
     if (in_cache(p)) of_app_toast(_("Es una copia sacada del archivo comprimido: para quedártela, extraela con una pulsación larga"));
     else of_recent_add(p);
+}
+
+static bool show_doc(const char *p, of_doc_t *d)
+{
+    char path[300];
+    snprintf(path, sizeof path, "%s", p);
+    clear_screen();
+    A.scr = SCR_DOC;
+    snprintf(A.doc, sizeof A.doc, "%s", path);
+    doc_flags(true);
+    lv_obj_set_style_bg_color(A.root, OFT.bg, 0);
+    if (!of_docv_open(A.root, path, d)) {
+        of_app_home();
+        return false;
+    }
+    if (!in_cache(path)) of_recent_add(path);
+    return true;
 }
 
 /* -------------------------------------------------------------------------- */

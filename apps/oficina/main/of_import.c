@@ -1326,6 +1326,7 @@ int of_reader_for(const char *e)
     if (!strcmp(e, "ics") || !strcmp(e, "ical")) return OF_RD_ICS;
     if (!strcmp(e, "jpg") || !strcmp(e, "jpeg") || !strcmp(e, "png") || !strcmp(e, "bmp")) return OF_RD_IMG;
     if (!strcmp(e, "pages") || !strcmp(e, "numbers") || !strcmp(e, "key")) return OF_RD_IWORK;
+    if (!strcmp(e, "pdf")) return OF_RD_PDF;
     return OF_RD_NONE;
 }
 
@@ -1353,6 +1354,7 @@ of_doc_t *of_read_any(const char *path, char *err, size_t errlen)
     case OF_RD_ICS: return of_ics_load(path, err, errlen);
     case OF_RD_IMG: return of_image_load(path, err, errlen);
     case OF_RD_IWORK: return of_iwork_load(path, err, errlen);
+    case OF_RD_PDF: return of_pdf_load(path, NULL, err, errlen);
     default: snprintf(err, errlen, "format"); return NULL;
     }
 }

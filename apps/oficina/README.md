@@ -53,7 +53,7 @@ There is no FreeType in the firmware: a page drawn with its own fonts needs
 | md4c | MIT | 6 500 lines | Markdown to blocks | **phase 3**, for the rendered view (CommonMark and GitHub tables) |
 | stb_truetype | MIT or public domain | 5 000 lines | TrueType and OpenType-CFF glyphs | **phase 7**, PDF pages drawn with their own fonts |
 | nanosvg + nanosvgrast | zlib | 3 000 lines | SVG pictures, and an anti-aliased path filler | **phase 7**: SVG in documents, and PDF's paths |
-| pdfio (Michael Sweet) | Apache-2.0 | 10 000 lines, needs zlib | PDF objects, xref, encryption | considered for phase 4; an own parser of objects and xref streams (1 500 lines) is about the same size once zlib is shimmed. Decide when phase 4 starts |
+| pdfio (Michael Sweet) | Apache-2.0 | 10 000 lines, needs zlib | PDF objects, xref, encryption | not taken: the own parser (of_pdf.c, 1 000 lines) with miniz's inflate already here, and own MD5, RC4, AES and SHA-2 (of_crypt.c, 400 lines) |
 | MuPDF | AGPL-3.0 | several MB | PDF, EPUB, XPS | no: too big for the card's RAM budget and its licence would make the whole app AGPL |
 | libxls | BSD-2 | 3 000 lines | `.xls` | an own BIFF8 reader is the same size and shares the CFB reader with `.doc` |
 | antiword, wvWare | GPL-2.0 | big | `.doc` | no: an own piece-table reader is 400 lines |
@@ -92,7 +92,7 @@ is drawn, so the app stays small for everyone who only opens spreadsheets.
 | `.zip`, `.cbz`, `.jar` | the list, open an entry with the app that takes it, extract | no | | `of_zip.c` | 3 |
 | `.tar`, `.tar.gz`, `.tgz`, `.gz` | list, open, extract | no | | own (ustar, GNU long names, pax) + tinfl | 3 |
 | Apple Pages, Numbers, Keynote | the preview picture they carry; text of Pages and Numbers' cells as a second step | no | | the file is a ZIP (or a folder on the card) with `preview.jpg` (or `QuickLook/Thumbnail.jpg`, `QuickLook/Preview.pdf` in the old ones): showing it is nearly free. The content is `Index/*.iwa`: Snappy-framed protobuf, no schema needed to pull the strings out (own Snappy, 150 lines, and a protobuf walk) | 3 / 6 |
-| `.pdf` | text reflowed to the screen first; the pages drawn later | no | to `.txt` | own: objects, xref tables and streams, object streams, Flate, `ToUnicode`, the standard encodings; RC4/AES only if pdfio is taken | 4, 7 |
+| `.pdf` | text reflowed to the screen first; the pages drawn later | no | to `.txt` | own: objects, xref tables and streams, object streams, Flate and the other filters, `ToUnicode`, the standard encodings, RC4 and AES (done in phase 4) | 4, 7 |
 | PDF writing | | | from documents and sheets | own, small: the 14 standard fonts need no embedding (WinAnsi covers Spanish and German), their widths in a table; JPEG pictures go in as they are (DCTDecode) | 4 |
 | `.pptx`, `.odp`, `.ppsx` | each slide: its boxes of text and pictures at their place, the notes | text of a box (phase 6, later) | to PDF | own: slide XML, layout and master placeholders for position | 5 |
 | `.doc` (Word 97-2003) | text, paragraphs, bold/italic if cheap | no (save as `.docx`) | to `.docx` | own: CFB container (300 lines), the piece table and the character runs (500) | 6 |
@@ -332,7 +332,7 @@ text. In the simulator: typing, bold for the next letters, saving from the
 ### Build, install, pack
 
 ```
-tools/build_apps.sh oficina                      # oficina.so, 324 KB, 203 symbols
+tools/build_apps.sh oficina                      # oficina.so, 396 KB, 205 symbols
 python3 apps/oficina/tools/pack_fonts.py         # build/oficina_p4.pak, 877 KB (--sim: a copy in sim/sim_fs/apps)
 tools/install_apps.sh p4os.local oficina         # the .so, the pack and the page; restarts the board
 tools/install_lang.sh p4os.local en              # and de
@@ -379,7 +379,7 @@ calendars) or "Ver como árbol" (data files); from a read-only document,
 
 ```
 cc -DOF_HOST -I apps/oficina/main apps/oficina/tools/host_test.c \
-   apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive}.c -o /tmp/host_test
+   apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive,crypt,pdf,pdftext,pdfw}.c -o /tmp/host_test
 python3 apps/oficina/tools/samples_read.py /tmp/r                # (and --en) every reader's sample, invented
 /tmp/host_test read /tmp/r/receta.rtf                            # the paragraphs read, with styles, links, pictures
 /tmp/host_test read /tmp/r/cuentos.epub /tmp/out.odt             # and a copy saved
@@ -396,13 +396,86 @@ sheet, a docx copy saved and opened for editing), contacts, calendar, YAML
 and XML trees from the text editor, a picture, a Pages preview, a ZIP's
 folder and an entry opened from it. Phases 1 and 2 checked again.
 
-### Next: phase 4, PDF
+### Phase 4: PDF, read and written (done, 2026-11-22)
 
-PDF text, reflowed: objects, xref tables and streams, Flate, fonts'
-ToUnicode, pages in order, the outline as the contents; PDF writing as the
-export of a document. Phase 7 draws PDF pages.
+**Reading** (`of_pdf.c`, `of_pdftext.c`, `of_crypt.c`): the text of a PDF,
+reflowed to the screen, on the read-only document screen of phase 3.
 
-Left over: going back from "Ver como árbol" returns to the files, not to
+- The file: objects, cross-reference tables and streams, `/Prev` chains and
+  hybrid files, object streams; Flate (tolerant: a cut stream gives what it
+  has), LZW, ASCII85, ASCIIHex, RunLength, the PNG and TIFF predictors; a
+  wrong `/Length` cut at its `endstream`; a damaged table rebuilt from the
+  objects themselves.
+- Encryption, the standard handler: RC4 40 to 128 bits (revisions 2 and 3),
+  AES-128 (4), AES-256 (5 and 6), with the user or the owner password.
+  Most protected PDFs open without asking (empty user password); otherwise
+  the app asks for it. The firmware gives apps no crypto, so MD5, RC4, AES
+  and SHA-256/384/512 are the app's own (checked against hashlib and the
+  FIPS-197 vectors).
+- Text: the content streams with their graphics and text states, form
+  XObjects, `/Rotate` (and pages whose text runs sideways are read turned);
+  fonts' ToUnicode maps, simple encodings (WinAnsi, MacRoman, Standard,
+  PDFDoc, `/Differences` with the glyph names), Type0 with UCS-2 CMaps,
+  Type3 matrices; widths from `/Widths` and `/W`, or the standard fonts'
+  own; ligatures split, symbol-font bullets as bullets.
+- Layout: glyphs to runs, runs to lines, lines to segments; two columns
+  found (prose on both sides, the gutter) and read one after the other;
+  table rows kept on one line with their cells apart; paragraphs by size,
+  the document's usual line spacing, indent and short last lines; headings
+  by size (and short bold lines); hyphens at line ends joined; lines that
+  repeat at the top or the bottom of the pages and page numbers dropped;
+  fixed-width text (code, logs) line by line with its indent; bold, italics,
+  colours, super- and subscript kept. A page scanned with an OCR layer shows
+  its text; a scan without one, its pictures.
+- Pictures: JPEG as it is, grey, RGB, CMYK and indexed samples (1 to 8
+  bits) written as PNG, into the cache, in their place in the text.
+- Up to 2 000 pages; 1 225 pages of text read in half a second on the Mac.
+
+**Writing** (`of_pdfw.c`): "Guardar una copia como" → PDF from a document
+(and from what phase 3 reads), "Guardar una copia como" → PDF from a
+spreadsheet (every sheet as tables; landscape when wide; wide sheets in
+groups of columns), "Exportar a PDF" from the text editor (Courier, the
+indent kept). A4, the standard fonts in WinAnsi (no embedding), headings,
+bold, italics, underline, strikethrough, colours, highlight, sizes, super-
+and subscript, alignment and justification (`Tw`), list labels, indents,
+tables with borders and rows kept whole, pictures (JPEG as it is, PNG with
+its predictor, alpha as a soft mask), page breaks, links as annotations,
+page numbers, the title. Words go out with their spaces so copy and search
+work in any reader.
+
+### Checking phase 4
+
+```
+python3 apps/oficina/tools/samples_pdf.py /tmp/pdfs --external    # hand-made PDFs, and cairo, Quartz, tesseract ones
+/tmp/host_test read /tmp/pdfs/clasico.pdf                         # the document read
+OF_PDF_PW=1234 /tmp/host_test read /tmp/pdfs/clave_aes.pdf
+/tmp/host_test pdf /tmp/docs/informe.docx /tmp/informe.pdf         # written; .xlsx, .md, .txt too
+swiftc -O apps/oficina/tools/pdfkit_text.swift -o /tmp/pdfkit_text && /tmp/pdfkit_text /tmp/informe.pdf
+```
+
+Checked on 2026-11-22: the hand-made samples (classic and stream xref,
+object streams, LZW and ASCII85, a Type0 font with ToUnicode, /Differences,
+two columns, running heads, a rotated page, a broken table, RC4, AES-128 and
+AES-256 with user and owner passwords) open in macOS's PDFKit, so they are
+right, and the app reads them all; PDFs made by cairo (pango-view,
+rsvg-convert), by Quartz (cupsfilter) and by tesseract (a scan with its OCR
+text) too. The app's own PDFs (a docx, an xlsx, HTML, Python, a 4 MB log of
+1 225 pages) read back in PDFKit with their words and spaces, and in the app
+with headings, lists, tables, pictures and indents; `sips` drew them to
+check the pages. In the simulator: reading, the password asked, a copy as
+PDF from a docx. Phases 1 to 3 checked again.
+
+### Next: phase 5, slides
+
+`.pptx` and `.odp`: each slide with its boxes of text and pictures at their
+place (layouts and masters for the positions), the speaker notes; read only,
+then editing a box's text.
+
+Left over from phase 4: PDF links and the outline (bookmarks) are not used
+yet (the contents come from the headings found); text in other scripts
+(CJK, Arabic) depends on the board's fonts; tables are cells in a line, not
+a table; a PDF written by the app has the standard fonts only, so letters
+outside WinAnsi go out as "?". From phase 3: going back from "Ver como árbol" returns to the files, not to
 the text editor; an HTML file taken out of an archive loses the pictures
 beside it in the archive; links inside an EPUB (notes, the table of
 contents) are not followed; RTF in code pages other than 1252; bigger ZIPs

@@ -20,6 +20,7 @@
  * Shift, Home, End, Ctrl+B/I/U, Ctrl+Z/Y/C/X/V/A/S/F.
  */
 #include "of_ui.h"
+#include "of_pdf.h"
 #include "of_doc.h"
 #include "aos_fonts.h"
 #include "aos_gesture.h"
@@ -173,6 +174,8 @@ static void obj_size(const of_obj_t *o, int32_t maxw, int32_t *w, int32_t *h)
     *h = hh;
 }
 
+/* Decoded at the box's size exactly (enlarged if small: the HAL never
+ * enlarges when only fitting, and a bitmap scaled up by the draw is clipped). */
 static void pic_decode(pic_t *pc)
 {
     of_obj_t *o = &D.d->obj[pc->obj];
@@ -184,7 +187,7 @@ static void pic_decode(pic_t *pc)
         int32_t w, h;
         obj_size(o, D.page_w, &w, &h);
         int ow = 0, oh = 0;
-        pc->px = aos_hal_image_decode(o->target, 0, 0, (int)w, (int)h, false, &ow, &oh, NULL, NULL);
+        pc->px = aos_hal_image_decode(o->target, 0, 0, (int)w, (int)h, true, &ow, &oh, NULL, NULL);
         if (!pc->px) { pc->failed = true; return; }
         pc->w = ow;
         pc->h = oh;
@@ -208,14 +211,14 @@ static void pic_decode(pic_t *pc)
     int ow = 0, oh = 0;
     if (e->method == 0) {
         /* stored: decoded straight from the document */
-        pc->px = aos_hal_image_decode(D.path, e->data, e->csize, (int)w, (int)h, false, &ow, &oh, NULL, NULL);
+        pc->px = aos_hal_image_decode(D.path, e->data, e->csize, (int)w, (int)h, true, &ow, &oh, NULL, NULL);
     } else {
         size_t n;
         uint8_t *data = of_zip_read(&D.d->zip, i, &n);
         if (data) {
             char tmp[200];
             snprintf(tmp, sizeof tmp, "%s/oficina/pic.%s", aos_hal_path_data(), ext);
-            if (of_file_write(tmp, data, n)) pc->px = aos_hal_image_decode(tmp, 0, 0, (int)w, (int)h, false, &ow, &oh, NULL, NULL);
+            if (of_file_write(tmp, data, n)) pc->px = aos_hal_image_decode(tmp, 0, 0, (int)w, (int)h, true, &ow, &oh, NULL, NULL);
             remove(tmp);
             of_free(data);
         }
@@ -1562,7 +1565,7 @@ static int s_as_fmt;
 static void save_as_done(const char *text, void *ud)
 {
     (void)ud;
-    static const char *const EXT[] = { "", "docx", "odt", "txt" };
+    static const char *const EXT[] = { "", "docx", "odt", "txt", "", "pdf" };
     if (!text[0] || strchr(text, '/')) return;
     char dir[300];
     snprintf(dir, sizeof dir, "%s", D.path);
@@ -1573,6 +1576,15 @@ static void save_as_done(const char *text, void *ud)
     snprintf(p, sizeof p, "%.200s/%.100s%s%s", dir, text, has ? "" : ".", has ? "" : EXT[s_as_fmt]);
     if (of_file_exists(p)) { of_app_toast(_("Ya hay un archivo con ese nombre")); return; }
     char err[64];
+    if (s_as_fmt == 5) {
+        char title[128];
+        snprintf(title, sizeof title, "%s", of_basename(D.path));
+        char *dot = strrchr(title, '.');
+        if (dot && dot != title) *dot = 0;
+        if (!of_pdf_write_doc(D.d, p, title, false, false, err, sizeof err)) { of_app_toast(_("No se pudo guardar")); return; }
+        of_app_toast(_("Guardado como PDF"));
+        return;
+    }
     if (!of_doc_save(D.d, s_as_fmt, p, err, sizeof err)) { of_app_toast(_("No se pudo guardar")); return; }
     of_recent_add(p);
     of_app_toast(s_as_fmt == D.d->fmt || s_as_fmt == OF_DOC_TEXT || D.d->readonly ? _("Guardado")
@@ -1584,7 +1596,7 @@ static void save_as_done(const char *text, void *ud)
 static void save_as_pick(int i, void *ud)
 {
     (void)ud;
-    static const int F[] = { OF_DOC_DOCX, OF_DOC_ODT, OF_DOC_TEXT };
+    static const int F[] = { OF_DOC_DOCX, OF_DOC_ODT, OF_DOC_TEXT, 5 };
     s_as_fmt = F[i];
     char base[128];
     snprintf(base, sizeof base, "%s", of_basename(D.path));
@@ -1681,12 +1693,14 @@ static void menu_pick(int i, void *ud)
     switch (i >= 0 && i < 12 ? s_menu[i] : -1) {
     case M_SAVE: of_docv_save(); break;
     case M_SAVE_AS: {
-        ofu_item_t items[3] = {
+        ofu_item_t items[4] = {
             { _("Documento de Word (.docx)"), OF_IC_DOC, false, D.d->fmt == OF_DOC_DOCX },
             { _("Documento de OpenDocument (.odt)"), OF_IC_DOC, false, D.d->fmt == OF_DOC_ODT },
             { _("Texto (.txt)"), OF_IC_DOC, false, false },
+            { _("PDF para imprimir o mandar (.pdf)"), OF_IC_DOC, false, false },
         };
-        ofu_sheet(_("Guardar una copia como"), items, 3, save_as_pick, NULL);
+        /* a PDF read is not written back as PDF */
+        ofu_sheet(_("Guardar una copia como"), items, strcmp(D.d->kind, "PDF") ? 4 : 3, save_as_pick, NULL);
         break;
     }
     case M_TOC: toc_open(); break;

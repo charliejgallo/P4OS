@@ -186,3 +186,41 @@ uint8_t *of_inflate(const uint8_t *in, size_t n, size_t expect, size_t *out_len)
     if (out_len) *out_len = out_pos;
     return o;
 }
+
+/* For PDF: a zlib or raw stream, and whatever came out before an error (a
+ * damaged or cut stream still gives its text); NULL only if nothing did. */
+uint8_t *of_inflate_lax(const uint8_t *in, size_t n, bool zlib, size_t *out_len)
+{
+    tinfl_decompressor *d = of_alloc(sizeof *d);
+    size_t cap = n * 4 + 1024;
+    uint8_t *o = of_alloc(cap + 1);
+    if (!d || !o) {
+        of_free(d);
+        of_free(o);
+        return NULL;
+    }
+    tinfl_init(d);
+    size_t in_pos = 0, out_pos = 0;
+    for (;;) {
+        size_t in_n = n - in_pos, out_n = cap - out_pos;
+        tinfl_status st = tinfl_decompress(d, in + in_pos, &in_n, o, o + out_pos, &out_n,
+                                           TINFL_FLAG_USING_NON_WRAPPING_OUTPUT_BUF | (zlib ? TINFL_FLAG_PARSE_ZLIB_HEADER : 0) |
+                                           (in_pos + in_n < n ? TINFL_FLAG_HAS_MORE_INPUT : 0));
+        in_pos += in_n;
+        out_pos += out_n;
+        if (st == TINFL_STATUS_HAS_MORE_OUTPUT) {
+            size_t nc = cap * 2;
+            uint8_t *no = of_realloc(o, nc + 1);
+            if (!no) break;
+            o = no;
+            cap = nc;
+            continue;
+        }
+        break;          /* done, or an error: keep what there is */
+    }
+    of_free(d);
+    if (!out_pos) { of_free(o); return NULL; }
+    o[out_pos] = 0;
+    if (out_len) *out_len = out_pos;
+    return o;
+}

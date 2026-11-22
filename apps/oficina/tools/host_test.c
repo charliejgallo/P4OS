@@ -2,7 +2,7 @@
  * P4OS - Office: the formats on the Mac, without LVGL.
  *
  *     cc -DOF_HOST -I apps/oficina/main apps/oficina/tools/host_test.c \
- *        apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive}.c -o host_test
+ *        apps/oficina/main/of_{util,deflate,tinfl,zip,xml,sheet,formula,numfmt,csv,xlsx,ods,text,doc,docx,odt,import,rtf,text2,archive,crypt,pdf,pdftext,pdfw}.c -o host_test
  *     ./host_test dump  book.xlsx                      the cells, shown and as typed
  *     ./host_test edit  book.xlsx out.xlsx 'A1=12' 'Resumen!B2==A1*2' ...
  *     ./host_test conv  book.csv out.xlsx              save in another format
@@ -11,12 +11,15 @@
  *     ./host_test fx    '=SUMA(1;2)*3'                 parse, write back, evaluate
  *     ./host_test read  file.rtf [copy.docx|.odt|.txt]  a reader's document (phase 3), and a copy
  *     ./host_test arc   archive.zip [dir]              an archive's entries, extracted to dir
+ *     ./host_test pdf   file.docx|xlsx|md|txt out.pdf  written as PDF (phase 4); "read out.pdf" reads one
+ *                       (OF_PDF_PW=... for a password)
  *
  * tools/test_formats.sh runs it over the samples and checks what it saved.
  */
 #include "of.h"
 #include "of_doc.h"
 #include "of_arc.h"
+#include "of_pdf.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -132,8 +135,32 @@ int main(int argc, char **argv)
         of_arc_free(a);
         return 0;
     }
+    if (argc >= 4 && !strcmp(argv[1], "pdf")) {
+        /* a document, a sheet or a text, written as PDF */
+        const char *e = of_ext(argv[2]);
+        bool ok;
+        if (of_is_sheet_ext(e)) {
+            of_book_t *b = of_book_load(argv[2], err, sizeof err);
+            if (!b) { printf("load failed: %s\n", err); return 1; }
+            ok = of_pdf_write_book(b, -1, argv[3], of_basename(argv[2]), err, sizeof err);
+            of_book_free(b);
+        } else if (of_is_doc_ext(e) || of_reader_for(e) || of_is_tree_ext(e)) {
+            of_doc_t *d = of_is_doc_ext(e) ? of_doc_load(argv[2], err, sizeof err) : of_read_any(argv[2], err, sizeof err);
+            if (!d) { printf("load failed: %s\n", err); return 1; }
+            ok = of_pdf_write_doc(d, argv[3], of_basename(argv[2]), false, false, err, sizeof err);
+            of_doc_free(d);
+        } else {
+            size_t n;
+            char *t = (char *)of_file_read(argv[2], &n, 64u << 20);
+            if (!t) { printf("read failed\n"); return 1; }
+            ok = of_pdf_write_text(t, n, argv[3], of_basename(argv[2]), err, sizeof err);
+            of_free(t);
+        }
+        printf("%s %s\n", ok ? "wrote" : "failed", argv[3]);
+        return ok ? 0 : 1;
+    }
     if (argc >= 3 && !strcmp(argv[1], "read")) {
-        of_doc_t *d = of_read_any(argv[2], err, sizeof err);
+        of_doc_t *d = getenv("OF_PDF_PW") ? of_pdf_load(argv[2], getenv("OF_PDF_PW"), err, sizeof err) : of_read_any(argv[2], err, sizeof err);
         if (!d) { printf("read failed: %s\n", err); return 1; }
         printf("== %s, %d paragraphs, %d tables%s%s\n", d->kind, d->np, d->ntables, d->note ? ", " : "", d->note ? d->note : "");
         docdump(d);
