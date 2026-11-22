@@ -75,7 +75,7 @@ typedef struct {
     uint8_t  design;
     uint32_t c1, c2, sleeves, collar, shorts, socks;
     char     stadium[24];
-    char     flag[96];
+    char     flag[160];
 } mg_team_t;
 
 typedef struct {

@@ -229,7 +229,7 @@ static void match_frame(mg_app_t *a)
             for (int s = 0; s < 2; s++) {
                 int team = mg_team_of_side(a, s);
                 bool human = a->cfg.mode == MODE_TWO || team == 0;
-                if (!human) continue;
+                if (!human || g->ai_on[s]) continue;
                 mg_input_hand(a, team, &h[s], steps == 0);
                 hp[s] = &h[s];
             }
@@ -566,6 +566,10 @@ static void start_play(mg_app_t *a)
     bool cpu = a->cfg.mode == MODE_CPU;
     /* side s holds team (s ^ p1_side) at the start */
     bool ai0 = cpu && ((0 ^ a->cfg.p1_side) == 1), ai1 = cpu && ((1 ^ a->cfg.p1_side) == 1);
+#if defined(AOS_SIM) || defined(AOS_SIM_BUILTIN)
+    /* MG_DEMO=1: the board plays both sides (screenshots) */
+    if (getenv("MG_DEMO")) ai0 = ai1 = true;
+#endif
     mg_game_start(g, a->cfg.format == FMT_TIME ? a->cfg.minutes : 0, a->cfg.format == FMT_GOALS ? a->cfg.goals : 0,
                   a->cfg.format == FMT_TIME && a->cfg.swap, ai0, a->cfg.diff, ai1, a->cfg.diff);
     memset(a->ui, 0, sizeof *a->ui);

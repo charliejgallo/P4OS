@@ -34,9 +34,9 @@ tools/build_apps.sh metegol                      # apps/metegol/build/metegol.so
 ```
 
 On the card everything goes in `/apps`: `metegol.so`, `metegol_p4.pak`
-(the figures' masks, the rods, the ball, fonts, sounds, and the two Buenos
+(4.1 MB: the figures' masks, the rods, the ball, fonts, sounds, and the two Buenos
 Aires stadiums) and one `metegol_<stadium>_p4.pak` for each of the other
-eight, optional. Neither the renders (`assets/`) nor the packs are in git.
+eight, optional (1.1 to 1.5 MB each). Neither the renders (`assets/`) nor the packs are in git.
 
 ## Playing
 

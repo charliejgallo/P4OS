@@ -626,7 +626,7 @@ void mg_game_step(mg_game_t *g, const mg_hand_t *hand0, const mg_hand_t *hand1)
         if (!reach) g->far_t += MG_DT;
         else g->far_t = 0;
         if (g->idle_t > 3.0f && g->idle_t - MG_DT <= 3.0f) g->stuck++;
-        if (g->far_t > 1.6f || g->idle_t > 9.0f) {
+        if (g->far_t > 1.6f || g->idle_t > 6.0f) {
             g->deads++;
 #ifdef MG_DEBUG
             printf("dead %s at %.0f %.0f\n", g->far_t > 1.6f ? "far" : "held", (double)g->bx, (double)g->by);

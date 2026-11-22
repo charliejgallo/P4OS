@@ -377,7 +377,7 @@ def houses(rng, x0, x1, y0, y1, n, cols, hmin=6, hmax=14, lit=None):
 
 
 def city(rng, y0, y1, n, night=True, hmax=60):
-    win = mat('windows', '1A2030', emit=('FFD890', 1.2) if night else None)
+    win = mat('windows', '1A2030', emit=('FFD890', 0.6) if night else None)
     dark = mat('blocks', '252A36' if night else '9AA4B4', rough=0.7)
     for i in range(n):
         x = rng.uniform(-420, 420)
@@ -406,8 +406,8 @@ def camera():
     cam = bpy.data.objects.new('cam', cd)
     C.sc.collection.objects.link(cam)
     C.sc.camera = cam
-    cam.location = (0, -float(C.arg('--back', 125)), float(C.arg('--up', 34)))
-    cam.rotation_euler = (math.radians(float(C.arg('--tilt', 84))), 0, 0)
+    cam.location = (0, -float(C.arg('--back', 115)), float(C.arg('--up', 32)))
+    cam.rotation_euler = (math.radians(float(C.arg('--tilt', 83))), 0, 0)
     C.sc.render.resolution_x = 1280
     C.sc.render.resolution_y = 720
     return cam
@@ -437,8 +437,8 @@ def build(sid, rng):
         sky('0A1330', '3A4F7A', 1.0)
         ground(g)
         trk = mat('track', 'B04A2A', rough=0.9)
-        stand('st', 'oval', PITCH_X + 18, PITCH_Y + 30, 26, 0.6, 0.8, ['F4F4F4', 'F4F4F4', 'D21F1F'], crowd, 0, rng,
-              tiers=2, gap=3.0, team_cols=['F4F4F4', 'D21F1F', 'F4F4F4', '1A1A1A'])
+        stand('st', 'oval', PITCH_X + 18, PITCH_Y + 30, 34, 0.85, 0.7, ['F4F4F4', 'F4F4F4', 'D21F1F'], crowd, 0, rng,
+              tiers=3, gap=3.0, team_cols=['F4F4F4', 'D21F1F', 'F4F4F4', '1A1A1A'])
         st['track'] = trk
         floodlights([(-90, 70), (90, 70), (-95, -40), (95, -40)], 50, col='F0F4FF')
         st['night'] = True
@@ -447,18 +447,18 @@ def build(sid, rng):
         sky('3A6EB0', 'F2B27A', 1.2)
         sun((80, 0, 200), 3.0, 'FFD0A0')
         ground(g)
-        stand('st', 'oval', PITCH_X + 14, PITCH_Y + 22, 30, 0.6, 0.9, ['2A8A3A', 'F2D21A', '1E54B0', 'F4F4F4'], crowd, 0,
-              rng, tiers=2)
+        stand('st', 'oval', PITCH_X + 14, PITCH_Y + 22, 34, 0.8, 0.75, ['2A8A3A', 'F2D21A', '1E54B0', 'F4F4F4'], crowd, 0,
+              rng, tiers=3)
         roof_ring('oval', PITCH_X + 40, PITCH_Y + 46, 30, 26, mat('ringroof', 'EDEDED', rough=0.4))
         hill = mat('hill', '2F5A2C', rough=0.9)
         bm = bmesh.new()
         bmesh.ops.create_uvsphere(bm, u_segments=32, v_segments=16, radius=1.0)
         o = obj('morro', bm, hill, smooth=True)
-        o.scale = (160, 90, 260)
-        o.location = (190, 520, -40)
-        stone = mat('statue', 'F2F0EA', emit=('FFF4E0', 1.5))
-        cube('body', (170, 470, 225), (6, 6, 32), stone)
-        cube('arms', (170, 470, 236), (30, 4, 4), stone)
+        o.scale = (170, 80, 255)
+        o.location = (230, 700, -30)
+        stone = mat('statue', 'F2F0EA', emit=('FFF4E0', 2.0))
+        cube('body', (230, 700, 241), (9, 9, 40), stone)
+        cube('arms', (230, 700, 255), (42, 6, 6), stone)
     elif sid == 'madrid':
         # towers at the corners, the city lit at night
         sky('060914', '1C2A48', 1.0)
@@ -467,16 +467,16 @@ def build(sid, rng):
               gap=2.5)
         tw = mat('tower', 'C8CCD4', rough=0.5)
         ramp = mat('ramp', '8A90A0', rough=0.6)
-        for (x, y) in ((-PITCH_X - 28, PITCH_Y + 40), (PITCH_X + 28, PITCH_Y + 40)):
+        for (x, y) in ((-PITCH_X - 40, PITCH_Y + 50), (PITCH_X + 40, PITCH_Y + 50)):
             bm = bmesh.new()
-            bmesh.ops.create_cone(bm, cap_ends=True, segments=32, radius1=9, radius2=9, depth=70)
+            bmesh.ops.create_cone(bm, cap_ends=True, segments=32, radius1=11, radius2=11, depth=120)
             o = obj('tw', bm, tw, smooth=True)
-            o.location = (x, y, 35)
-            for k in range(12):
-                c = cube('rmp', (x, y, 4 + k * 5.6), (19, 19, 0.8), ramp)
+            o.location = (x, y, 60)
+            for k in range(20):
+                c = cube('rmp', (x, y, 4 + k * 5.8), (23, 23, 0.9), ramp)
                 c.rotation_euler = (0, 0, k * 0.4)
         roof_ring('round', 80, 80, 62, 30, mat('roofm', 'BFC4CC', rough=0.4), mat('roofl', 'FFFFFF', emit=('FFFFFF', 8)))
-        city(rng, 160, 600, 220, night=True)
+        city(rng, 320, 700, 160, night=True)
         st['night'] = True
     elif sid == 'munich':
         # a shell of cushions that lights up in colour
@@ -501,10 +501,10 @@ def build(sid, rng):
         b.inputs['Base Color'].default_value = (0.9, 0.9, 0.9, 1)
         bm = bmesh.new()
         bmesh.ops.create_uvsphere(bm, u_segments=64, v_segments=32, radius=1.0)
-        bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.z > 0.55 or v.co.z < -0.2], context='VERTS')
+        bmesh.ops.delete(bm, geom=[v for v in bm.verts if v.co.z > 0.55 or v.co.z < -0.2 or v.co.y < 0.05], context='VERTS')
         o = obj('shell', bm, shell, smooth=True)
-        o.scale = (150, 120, 55)
-        o.location = (0, 10, 10)
+        o.scale = (150, 110, 105)
+        o.location = (0, 20, 0)
         st['night'] = True
     elif sid == 'londres':
         # the white arch over the stadium
@@ -518,7 +518,7 @@ def build(sid, rng):
         pts = []
         for i in range(41):
             a = math.pi * i / 40
-            pts.append((math.cos(a) * 165, 70 + math.sin(a) * 10, math.sin(a) * 133))
+            pts.append((math.cos(a) * 165, 90 + math.sin(a) * 10, math.sin(a) * 105))
         for i in range(40):
             p0, p1 = Vector(pts[i]), Vector(pts[i + 1])
             d = p1 - p0
@@ -543,7 +543,7 @@ def build(sid, rng):
             bmesh.ops.create_cone(bm, cap_ends=True, segments=6, radius1=1.0, radius2=0.0, depth=1.0)
             o = obj('mnt', bm, mnt)
             o.scale = (rng.uniform(200, 380), rng.uniform(120, 200), rng.uniform(140, 260))
-            o.location = (-700 + k * 240 + rng.uniform(-60, 60), 1300, 0)
+            o.location = (-700 + k * 240 + rng.uniform(-60, 60), 800, 0)
     elif sid == 'tokio':
         # the roof of wooden slats, cherry trees, the tower far off at dusk
         sky('3A2E60', 'F0A890', 1.1)
@@ -575,7 +575,7 @@ def build(sid, rng):
             bm = bmesh.new()
             bmesh.ops.create_cone(bm, cap_ends=True, segments=4, radius1=r0, radius2=r0 - 2.0, depth=36)
             o = obj('tower', bm, red if k % 2 == 0 else white)
-            o.location = (-260, 1100, 18 + k * 36)
+            o.location = (-200, 600, 18 + k * 34)
         city(rng, 500, 1000, 140, night=False, hmax=50)
     elif sid in ('avella_rojo', 'avella_celeste'):
         rojo = sid == 'avella_rojo'
