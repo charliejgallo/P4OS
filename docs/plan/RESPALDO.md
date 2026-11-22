@@ -290,6 +290,16 @@ clave de la Mac está autorizada para su usuario, así que la carpeta no se
 pudo ver. La contraseña no la escribe una sesión: el paso de autorizar una
 clave en el NAS es del usuario.
 
+**El mismo día, más tarde:** el usuario hizo la clave nueva en la placa y
+autorizó en el NAS, con comandos que corrió él, la clave de la Mac y la de
+la placa (esta limitada a SFTP con `restrict,command="internal-sftp"`).
+Lo que hubo en el camino: `ssh-copy-id` no sirvió (el NAS corta en su
+prueba con la clave; entrando sólo con contraseña anduvo); la carpeta
+personal del usuario no era suya y `~/.ssh` hubo que crearla con `sudo`; y
+la carpeta de los respaldos, creada desde el NAS, es de root y el usuario
+no la puede escribir: falta un `chown`. Con la clave de la Mac ya se ve la
+carpeta, vacía. Falta: ese `chown`, y la prueba desde la placa.
+
 **Falta:** SFTP hacia la placa con un cliente de verdad; y la
 copia a un servidor de verdad, que el plan pide probar **contra el NAS
 sólo cuando el usuario lo diga**, con un usuario y una carpeta que él arme

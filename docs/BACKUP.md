@@ -168,9 +168,16 @@ name and is renamed over it when whole. Nothing is deleted on the server:
 at 19 KB a week it is a megabyte a year. Changing the server's address
 forgets the key that was accepted.
 
-On a server you can restrict that key to SFTP and to one folder, in its
-`authorized_keys` line or with a `Match User` block in `sshd_config`
+On a server you can restrict that key to SFTP: put
+`restrict,command="internal-sftp" ` before the line in `authorized_keys`,
+and the key opens no shell. Or a `Match User` block in `sshd_config`
 (`ForceCommand internal-sftp`, `ChrootDirectory`).
+
+Two things a NAS can have in the way, both seen on one: the user's home is
+not theirs to write, so `~/.ssh` has to be made by an administrator
+(`sudo mkdir`, `sudo chown <user>`); and the folder for the backups, made
+from the NAS's own screens, belongs to root: it has to be the user's
+(`sudo chown <user> <folder>`), or the board is let in and then told no.
 
 ### From a computer, by itself
 
