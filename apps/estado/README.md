@@ -1,4 +1,4 @@
-# Estado de la casa
+# Mi casa
 
 A board of the services at home: whether they are up, how long they take
 and since when they are down. Id `aos.estado`; in English "Home Status".

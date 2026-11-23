@@ -303,7 +303,7 @@ Nada todavía: acá aparece cada vez que algo se cae o vuelve.	Rien pour l'insta
 
 #: apps/estado/web/estado.js:437
 #: apps/estado/web/estado.js:587
-Estado de la casa	État de la maison
+Mi casa	État de la maison
 
 #: apps/estado/web/estado.js:443
 #: apps/estado/web/estado.js:554
@@ -340,7 +340,7 @@ Probar todos	Tout vérifier
 Sin grupo	Sans groupe
 
 #: apps/estado/web/estado.js:497
-La app Estado de la casa no está abierta en la placa. 	L'app État de la maison n'est pas ouverte sur la carte. 
+La app Mi casa no está abierta en la placa. 	L'app État de la maison n'est pas ouverte sur la carte. 
 
 #: apps/estado/web/estado.js:498
 Abrirla	L'ouvrir

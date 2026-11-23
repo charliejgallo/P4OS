@@ -1,4 +1,4 @@
-/* Estado de la casa's page in the board's portal (apps/estado,
+/* Mi casa's page in the board's portal (apps/estado,
  * docs/PORTAL-PAGES.md).
  *
  * Three parts:
@@ -434,7 +434,7 @@ function historyTable(text, only) {
 
 P.registerPage({
   id: 'estado',
-  name: tr('Estado de la casa'),
+  name: tr('Mi casa'),
   icon: '◉',
   render(main) {
     style();
@@ -494,7 +494,7 @@ P.registerPage({
         const r = await fetch(`/api/live?app=${APP}&key=state`, { cache: 'no-store' });
         if (r.status === 404) {
           last = null;
-          put(status, tr('La app Estado de la casa no está abierta en la placa. '),
+          put(status, tr('La app Mi casa no está abierta en la placa. '),
             h('button', { class: 'btn', onclick: () => openApp(APP).catch(e => toast(e.message, true)) }, tr('Abrirla')));
           put(summary);
         } else if (r.ok) {
@@ -584,7 +584,7 @@ P.registerPage({
       if (t === 'now') drawLive();
     };
     const body = h('div', {});
-    put(main, h('h1', {}, tr('Estado de la casa')), tabs, body);
+    put(main, h('h1', {}, tr('Mi casa')), tabs, body);
     show('now');
 
     fsText(FILE).then(t => {

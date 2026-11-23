@@ -1,5 +1,5 @@
 /*
- * P4OS - Estado de la casa: one service.
+ * P4OS - Mi casa: one service.
  *
  * Four numbers (the latency now, the availability of the last day and of
  * the last week, and the certificate's days or when it was last tried), the

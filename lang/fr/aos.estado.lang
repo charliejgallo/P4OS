@@ -258,7 +258,7 @@ puerto TCP %d	port TCP %d
 
 #: apps/estado/main/ec_edit.c:335
 #: apps/estado/main/ec_list.c:429
-Las direcciones se cargan más cómodo desde la página Estado de la casa del portal.	Les adresses sont plus faciles à saisir depuis la page État de la maison du portail.
+Las direcciones se cargan más cómodo desde la página Mi casa del portal.	Les adresses sont plus faciles à saisir depuis la page État de la maison du portail.
 
 #: apps/estado/main/ec_edit.c:353
 Editar servicio	Modifier le service
@@ -358,7 +358,7 @@ caídos	hors ligne
 No entran más servicios	Plus de place pour d'autres services
 
 #: apps/estado/main/ec_list.c:219
-Estado de la casa	État de la maison
+Mi casa	État de la maison
 
 #: apps/estado/main/ec_list.c:252
 La placa no tiene red: los chequeos esperan a que vuelva.	La carte n'a pas de réseau : les vérifications attendent son retour.
@@ -367,7 +367,7 @@ La placa no tiene red: los chequeos esperan a que vuelva.	La carte n'a pas de r�
 Sin grupo	Sans groupe
 
 #: apps/estado/main/ec_list.c:287
-Todavía no hay servicios.\n\nAgregá uno con + (hay plantillas para Home Assistant, Frigate, un NAS, una impresora 3D, el router o una página), o cargalos cómodo desde la página Estado de la casa del portal.	Pas encore de services.\n\nAjoutes-en un avec + (il y a des modèles pour Home Assistant, Frigate, un NAS, une imprimante 3D, le routeur ou une page web), ou saisis-les plus facilement depuis la page État de la maison du portail.
+Todavía no hay servicios.\n\nAgregá uno con + (hay plantillas para Home Assistant, Frigate, un NAS, una impresora 3D, el router o una página), o cargalos cómodo desde la página Mi casa del portal.	Pas encore de services.\n\nAjoutes-en un avec + (il y a des modèles pour Home Assistant, Frigate, un NAS, une imprimante 3D, le routeur ou une page web), ou saisis-les plus facilement depuis la page État de la maison du portail.
 
 #: apps/estado/main/ec_list.c:292
 Agregar un servicio	Ajouter un service

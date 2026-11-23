@@ -303,7 +303,7 @@ Nada todavía: acá aparece cada vez que algo se cae o vuelve.	Noch nichts: hier
 
 #: apps/estado/web/estado.js:437
 #: apps/estado/web/estado.js:587
-Estado de la casa	Hausstatus
+Mi casa	Hausstatus
 
 #: apps/estado/web/estado.js:443
 #: apps/estado/web/estado.js:554
@@ -340,7 +340,7 @@ Probar todos	Alle prüfen
 Sin grupo	Ohne Gruppe
 
 #: apps/estado/web/estado.js:497
-La app Estado de la casa no está abierta en la placa. 	Die App Hausstatus ist auf der Platine nicht geöffnet. 
+La app Mi casa no está abierta en la placa. 	Die App Hausstatus ist auf der Platine nicht geöffnet. 
 
 #: apps/estado/web/estado.js:498
 Abrirla	Öffnen

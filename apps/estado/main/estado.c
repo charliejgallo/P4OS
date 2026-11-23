@@ -1,5 +1,5 @@
 /*
- * P4OS - Estado de la casa (aos.estado): a board of the services at home.
+ * P4OS - Mi casa (aos.estado): a board of the services at home.
  *
  * Each service (Home Assistant, the cameras' recorder, a NAS, a printer,
  * the router, a web page...) is tried every so often, over HTTP(S) or as a
@@ -524,7 +524,7 @@ static void destroy(aos_app_t *self, void *inst)
 static bool ec_init(aos_app_t *app)
 {
     app->desc.id       = "aos.estado";      /* literal: gen_lang.py looks for it here */
-    app->desc.name     = "Estado de la casa";
+    app->desc.name     = "Mi casa";
     app->desc.icon     = AOS_SYM_SERVER_NETWORK;
     app->desc.icon_vec = AOS_ICON_NONE;
     app->desc.color_a  = 0x34D399;

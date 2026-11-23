@@ -1,5 +1,5 @@
 /*
- * P4OS - Estado de la casa: estado.txt, the services and the options.
+ * P4OS - Mi casa: estado.txt, the services and the options.
  *
  * A text file in the app's data folder (/data/estado.txt for the portal),
  * which the app and its page both read and write. The options first, then

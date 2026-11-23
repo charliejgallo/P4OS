@@ -303,7 +303,7 @@ Nada todavía: acá aparece cada vez que algo se cae o vuelve.	Nothing yet: ever
 
 #: apps/estado/web/estado.js:437
 #: apps/estado/web/estado.js:587
-Estado de la casa	Home Status
+Mi casa	Home Status
 
 #: apps/estado/web/estado.js:443
 #: apps/estado/web/estado.js:554
@@ -340,7 +340,7 @@ Probar todos	Check all
 Sin grupo	No group
 
 #: apps/estado/web/estado.js:497
-La app Estado de la casa no está abierta en la placa. 	The Home Status app is not open on the board. 
+La app Mi casa no está abierta en la placa. 	The Home Status app is not open on the board. 
 
 #: apps/estado/web/estado.js:498
 Abrirla	Open it

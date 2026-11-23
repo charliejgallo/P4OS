@@ -1,5 +1,5 @@
 /*
- * P4OS - Estado de la casa: the pieces the screens share, the way numbers
+ * P4OS - Mi casa: the pieces the screens share, the way numbers
  * and times are written, and the notice's beeps.
  */
 #include "ec.h"

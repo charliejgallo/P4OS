@@ -303,7 +303,7 @@ Nada todavía: acá aparece cada vez que algo se cae o vuelve.	Ancora niente: qu
 
 #: apps/estado/web/estado.js:437
 #: apps/estado/web/estado.js:587
-Estado de la casa	Stato della casa
+Mi casa	Stato della casa
 
 #: apps/estado/web/estado.js:443
 #: apps/estado/web/estado.js:554
@@ -340,7 +340,7 @@ Probar todos	Verifica tutti
 Sin grupo	Senza gruppo
 
 #: apps/estado/web/estado.js:497
-La app Estado de la casa no está abierta en la placa. 	L'app Stato della casa non è aperta sulla scheda. 
+La app Mi casa no está abierta en la placa. 	L'app Stato della casa non è aperta sulla scheda. 
 
 #: apps/estado/web/estado.js:498
 Abrirla	Aprila
