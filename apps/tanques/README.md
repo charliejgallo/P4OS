@@ -34,8 +34,8 @@ parts (`tanques_p4.pak`, `.pak.1`...): the game reads across them.
    Touch a tile and the tank drives there; drag to look around. Uphill
    costs more; the steep, stones, trees and tanks are in the way; a mine
    stops the drive with a bang. Driving can go in stretches.
-2. **Aim** ("Apuntar"): the gunner's view from the turret, facing the
-   nearest enemy. Drag sideways to turn, up and down to raise the barrel,
+2. **Aim** ("Apuntar"): the gunner's view from the turret, which stays
+   where it was left (finding the enemy is part of the turn). Drag sideways to turn, up and down to raise the barrel,
    pick one of the weapons the tank carries (each with its AP and, for the
    strong ones, its uses per battle) and fire. Lobbed weapons show their
    whole arc and the ring where they land; straight ones a stretch that
@@ -88,7 +88,8 @@ when the one before is won, and earns one to three stars by the health left.
 The free battle picks the place, the size (28, 32, 36 or 44 m; the
 biggest takes two rivals at most, for the board's memory), one to three
 rivals, the difficulty (how far off the board's aim is: 3.5, 2 or 0.9
-degrees), the weather (clear, wind, storm, fog) and one or two players.
+degrees), the weather (clear, wind, storm, fog), how many trees and walls (five
+levels, from 0.3 to 2 times the missions' amount) and one or two players.
 Coins: the mission's reward or the free battle's, half the damage done and
 40 a tank knocked out.
 
@@ -110,7 +111,7 @@ a frozen lake, streets and squares, a volcano and lava), trees and walls
 | | per frame |
 | --- | --- |
 | battle view, camera still: only the boxes round what moves (~60-80 kpx) | 12-33 ms: ~30 fps |
-| battle view, camera gliding: whole frames | 70-136 ms: 8-14 fps |
+| battle view, the camera jumping half a screen when the action leaves the middle: whole frames | 70-136 ms, only on the jump |
 | first person, the PPA doubling it into the panel | 36-77 ms: 13-28 fps while dragging |
 | a free battle of two tanks, 32-36 m | 9.9-10.9 MB of PSRAM (16.5 free when the app opens) |
 
