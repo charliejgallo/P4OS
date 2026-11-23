@@ -562,6 +562,20 @@ jobs, apps, o = fw("n1", "refresh", "fresh", cat=with_first("new2.ndjson", "", {
 check("...none when the catalogue names no such release", jobs[0][0] and fresh(o) == [], o)
 jobs, apps, o = fw("n1", "refresh", "fresh")
 check("...nor with a catalogue from before there was one", jobs[0][0] and fresh(o) == [], o)
+# every download taken, as when an app's page is fetching its pictures: the
+# install waits for one instead of failing (the board, updating to 0.32.0)
+import time, urllib.request
+big = "http://localhost:%s/fake/p4os/releases/download/v9.0.0/mila_p4.pak" % PORT
+def fake_set(q):
+    urllib.request.urlopen(urllib.request.Request("http://localhost:%s/_fake?reset=1&%s" % (PORT, q), method="POST")).read()
+fake_set("kbps=1500")       # the two that hold the downloads take five seconds
+os.mkdir("h1")
+t0 = time.time()
+jobs, apps, o = fw("h1", "refresh", "hold=" + big, "install=dados", "list")
+took = time.time() - t0
+fake_set("kbps=0")
+check("every download taken: the install waits, and goes through", "held 2" in o and len(jobs) == 2 and jobs[1][0]
+      and apps["dados"][0] == "installed" and took > 3, "%.1f s\n%s" % (took, o))
 sys.exit(1 if fails else 0)
 PY
 echo "all passed"

@@ -3,6 +3,7 @@
  *
  *   P4_CARD=<folder> t url=<catalogue> refresh install=golf install=pinball:all
  *                      remove=golf adopt list
+ *   hold=<address>     starts downloads of it until none is left, and goes on
  *
  * A job prints "ok|FAILED <how it ended>"; "list" prints an app a line:
  * file state ver have fits, and after it "+" for an app of an added source,
@@ -10,8 +11,11 @@
  * "*" for a part of the system.
  */
 #include "aos_store.h"
+#include "aos_fetch.h"
 #include "aos_hal.h"
 
+#include <pthread.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -25,6 +29,15 @@ static void wait_done(uint32_t before)
         aos_hal_sleep_ms(5);
     }
     printf("%s %s kind=%d\n", st.last_ok ? "ok" : "FAILED", st.last, st.last_kind);
+}
+
+static void *hold_end(void *arg)
+{
+    int id = (int)(intptr_t)arg;
+    aos_fetch_info_t in;
+    while (aos_fetch_info(id, &in) && in.state == AOS_FETCH_BUSY) aos_hal_sleep_ms(50);
+    aos_fetch_release(id);
+    return NULL;
 }
 
 int main(int argc, char **argv)
@@ -90,6 +103,22 @@ int main(int argc, char **argv)
                 printf("%s %s %s %s %s%s\n", app.file, states[app.state], app.ver[0] ? app.ver : "-", app.have[0] ? app.have : "-",
                        app.fits ? "fits" : "no-fit",
                        app.system ? "*" : app.src > 0 ? "+" : app.origin == AOS_STORE_LOOSE ? "~" : app.origin == AOS_STORE_HAND ? "!" : "");
+            continue;
+        }
+        else if (!strcmp(a, "hold")) {          /* every download taken, as by an app's page fetching its pictures */
+            int held = 0;
+            for (int k = 0; k < 8; k++) {
+                char path[512];
+                snprintf(path, sizeof path, "%s/hold%d.bin", getenv("P4_CARD"), k);
+                int id = aos_fetch_start(v ? v : "", path, NULL, 0);
+                if (id <= 0) break;
+                /* and each let go when it ends, as the page does with a picture */
+                pthread_t th;
+                pthread_create(&th, NULL, hold_end, (void *)(intptr_t)id);
+                pthread_detach(th);
+                held++;
+            }
+            printf("held %d\n", held);
             continue;
         }
         else if (!strcmp(a, "fresh")) {         /* the apps the store shows as new, one line */

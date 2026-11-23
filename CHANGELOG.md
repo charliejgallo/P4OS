@@ -1,12 +1,16 @@
 # Changelog
 
-## 0.32.1 — not released yet
+## 0.32.1 — 2026-11-22
+
+One fix to the firmware; no app changed.
 
 - **"Get" tapped while an app's pictures were still coming failed.** The
   Store's page downloads an app's four pictures as it opens, and they took
   every download there is: the install could not start and said so, and
   worked at the second tap. Seen on the board with Air Hockey and Office,
-  updating to 0.32.0. The Store now waits for a download to be free.
+  updating to 0.32.0. The Store now waits for a download to be free
+  (up to twenty seconds). `tests/store_fw_host` has the case: it fails
+  without the wait, as the board did, and passes with it.
 
 ## 0.32.0 — 2026-11-22
 

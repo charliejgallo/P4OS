@@ -8,17 +8,20 @@ se prueba.
 ## Pendientes al 2026-11-22, después de la 0.32.0
 
 La placa corre `v0.32.0`, la imagen del CI, con las 73 apps del catálogo
-manejadas por la Tienda. `main` tiene además la 0.32.1 empezada (un
-arreglo de la Tienda), sin instalar. Esto es todo lo que queda abierto de
+manejadas por la Tienda. La 0.32.1 (un arreglo de la Tienda) salió después;
+la placa la toma desde Ajustes. Esto es todo lo que queda abierto de
 noviembre, junto; el detalle de cada cosa está en su sección, más abajo.
 De antes de noviembre quedan 69 renglones sin tachar desde "Pendientes,
 en resumen": no se revisaron en esta pasada.
 
-**En `main`, sin instalar (0.32.1):**
+**La 0.32.1 (publicada el 2026-11-22, un solo arreglo):**
 
 - [ ] La Tienda espera una descarga libre: tocar "Obtener" apenas se abre
       la ficha de una app, mientras bajan sus imágenes, y que instale al
-      primer toque.
+      primer toque. Probado en la Mac (`tests/store_fw_host` reproduce el
+      fallo de la placa sin el arreglo); en la placa falta verlo, y no es
+      fácil: con las 73 apps instaladas y sus imágenes ya en la tarjeta no
+      queda ficha que las baje.
 
 **Las cuatro apps de la 0.32.0:**
 
