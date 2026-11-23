@@ -68,7 +68,9 @@ typedef struct {
 
 typedef struct {
     aos_app_t  *self;
-    lv_obj_t   *root, *canvas, *load_box, *load_lbl, *load_bar;
+    lv_obj_t   *root, *canvas, *load_box, *load_lbl, *load_bar, *tap;
+    uint32_t    raw_btn_ms;         /* when a finger last landed on a button (raw) */
+    uint32_t    lv_btn_ms;          /* ... or LVGL said a button was pressed */
     lv_timer_t *timer;
     int         SW, SH;
     bool        closing, worker_ok;
@@ -352,6 +354,9 @@ static void perf_log(app_t *a)
     uint32_t now = aos_hal_uptime_ms();
     if (!a->perf_t0) {
         a->perf_t0 = now;
+        a->perf_frames = a->perf_presents = 0;
+        a->perf_frame_us = a->perf_ground_us = a->perf_turn_us = a->perf_hud_us = a->perf_present_us = 0;
+        a->perf_samples = a->perf_lines = a->perf_upx = 0;
         return;
     }
     uint32_t el = now - a->perf_t0;
@@ -362,7 +367,7 @@ static void perf_log(app_t *a)
     int W = RES[a->res][0], H = RES[a->res][1];
     unsigned upx = (unsigned)(a->perf_upx / n);
     aos_hal_log("vuelo", "%u.%u fps %dx%d (drawn %u, upright %u kpx), frame %u.%u ms (ground+sky %u.%u, turn+plane %u.%u, "
-                "hud %u.%u), present %u.%u ms, %u k samples, %u lines, %s, %s",
+                "hud %u.%u), present %u.%u ms, %u k samples, %u lines, %s, %s%s",
                 fps10 / 10, fps10 % 10, W, H, a->perf_frames, upx / 1000,
                 (unsigned)(a->perf_frame_us / n / 1000), (unsigned)(a->perf_frame_us / n / 100 % 10),
                 (unsigned)(a->perf_ground_us / n / 1000), (unsigned)(a->perf_ground_us / n / 100 % 10),
@@ -370,7 +375,7 @@ static void perf_log(app_t *a)
                 (unsigned)(a->perf_hud_us / n / 1000), (unsigned)(a->perf_hud_us / n / 100 % 10),
                 (unsigned)(a->perf_present_us / np / 1000), (unsigned)(a->perf_present_us / np / 100 % 10),
                 (unsigned)(a->perf_samples / n / 1000), (unsigned)(a->perf_lines / n), WORLD_HUD[a->biome % VW_BIOMES],
-                a->pl.view == VF_COCKPIT ? "cockpit" : "chase");
+                a->pl.view == VF_COCKPIT ? "cockpit" : "chase", a->in_auto ? ", autopilot" : "");
     a->perf_t0 = now;
     a->perf_frames = a->perf_presents = 0;
     a->perf_frame_us = a->perf_ground_us = a->perf_turn_us = a->perf_hud_us = a->perf_present_us = 0;
@@ -483,7 +488,11 @@ static void touch(app_t *a)
                 if (fx >= L.btn_x[b] - pad && fx < L.btn_x[b] + L.btn_s + pad && fy < L.btn_y + L.btn_s + pad) {
                     f->role = R_BTN;
                     f->btn = (uint8_t)b;
-                    button(a, b);
+                    /* LVGL may have taken this same press already */
+                    if (!(a->lv_btn_ms && lv_tick_get() - a->lv_btn_ms < 400)) {
+                        a->raw_btn_ms = lv_tick_get();
+                        button(a, b);
+                    }
                 }
             }
             if (!f->role && fx >= L.thr_x0 - 24 * L.u && fy >= L.thr_y0 - 20 * L.u) f->role = R_THR;
@@ -524,6 +533,33 @@ static void touch(app_t *a)
     a->stick_on = stick;
     if (!stick) a->stick_x = a->stick_y = 0;
     a->btn_held = held;
+}
+
+/* The buttons through LVGL as well: a touch the portal injects (POST
+ * /api/touch) never reaches the panel's raw samples. A finger on the panel
+ * reaches both: whichever of the two sees the press first takes it. */
+static void tap_cb(lv_event_t *e)
+{
+    app_t *a = (app_t *)lv_event_get_user_data(e);
+    if (a->closing) return;
+    lv_indev_t *indev = lv_indev_active();
+    if (!indev) return;
+    lv_point_t pt;
+    lv_indev_get_point(indev, &pt);
+    uint32_t now = lv_tick_get();
+    if (a->raw_btn_ms && now - a->raw_btn_ms < 400) return;
+    int W = RES[a->res][0], H = RES[a->res][1];
+    vh_layout_t L;
+    vh_layout(&L, W, H);
+    float fx = (float)pt.x * (float)W / (float)a->SW, fy = (float)pt.y * (float)H / (float)a->SH;
+    int pad = (int)(6 * L.u);
+    for (int b = 0; b < VH_BTNS; b++) {
+        if (fx >= L.btn_x[b] - pad && fx < L.btn_x[b] + L.btn_s + pad && fy < L.btn_y + L.btn_s + pad) {
+            a->lv_btn_ms = now;
+            button(a, b);
+            return;
+        }
+    }
 }
 
 static bool key_in(const uint8_t *k, int n, uint8_t u)
@@ -686,6 +722,12 @@ static void *vuelo_create(aos_app_t *self, lv_obj_t *root)
     lv_obj_set_style_bg_color(root, lv_color_hex(0x0A1420), 0);
     lv_obj_set_style_bg_opa(root, LV_OPA_COVER, 0);
     lv_obj_remove_flag(root, LV_OBJ_FLAG_SCROLLABLE);
+    a->tap = lv_obj_create(root);
+    lv_obj_remove_style_all(a->tap);
+    lv_obj_set_size(a->tap, a->SW, a->SH);
+    lv_obj_add_flag(a->tap, LV_OBJ_FLAG_CLICKABLE);
+    lv_obj_remove_flag(a->tap, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_GESTURE_BUBBLE);
+    lv_obj_add_event_cb(a->tap, tap_cb, LV_EVENT_PRESSED, a);
     vp_build();
     a->worker_ok = aos_hal_worker_start_on("vuelo", worker_fn, a, 12 * 1024, 0, 3);
     if (!a->worker_ok) {
