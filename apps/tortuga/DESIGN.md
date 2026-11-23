@@ -356,10 +356,28 @@ que cambia es lo justo que tiene que ser el programa.
 - **Los del juego van adentro de `tortuga.so`:** un script de la app
   (`tools/gen_levels.py`) arma un `.c` con los `.tl` de `levels/`. Son
   pocos KB.
-- **Mundos extra desde la tarjeta:** todo `.tl` de `/sdcard/apps/tortuga/`
-  aparece como un mundo más. Así se suman mundos sin recompilar, y una
-  maestra puede escribir los suyos (más adelante, con un editor de niveles
-  en la página del portal).
+- **Mundos extra, y historias (la puerta abierta a packs):** la app lee,
+  además de los suyos, todo `.tl` de `apps/tortuga/` en la tarjeta y el
+  texto de cualquier pack `apps/tortuga_<algo>_p4.pak` (entradas `PK_TEXT`
+  que se llamen `levels...`). Así la Tienda puede sumar mundos o historias
+  como packs optativos sin una app nueva, y una maestra puede escribir los
+  suyos (más adelante, con un editor de niveles en la página del portal).
+  Un pack usa los mundos del 10 en adelante y sus propios ids, y los nombra:
+
+  ```
+  @mundo 10
+  @titulo es: La isla del tesoro
+  @idea es: Una historia en cinco capítulos
+  @nivel 10-1
+  @carta es: Capítulo 1. La tortuga llegó a la isla en un barquito.
+  @carta es: Tiene que encontrar el cofre. ¿La ayudás?
+  ...
+  ```
+
+  `@carta` (hasta cuatro por nivel e idioma) son tarjetas que se muestran
+  antes del nivel mientras no tenga estrellas en ese lenguaje: el juego
+  las usa para presentar la idea de cada mundo, y una historia, para
+  contar su capítulo. Los mundos de un pack están siempre abiertos.
 - **El verificador:** `tools/tg_ref.py check` corre cada solución de
   referencia en cada mapa, en cada lenguaje y en los dos modos, y exige que
   las piezas den igual en todos y coincidan con las ★★★. Lo mismo corre el

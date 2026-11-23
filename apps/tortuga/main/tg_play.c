@@ -722,10 +722,21 @@ static void hint_show(void)
         /* the skeleton: the reference, with its numbers hidden */
         lv_obj_t *t = tg_label(p, _("Así empieza (cambiá los ?):"), aos_font_small, AOS_C_DIM);
         (void)t;
-        const char *src = l->sol[P->lang == TG_LANG_LUA ? TG_SOL_LUA : P->lang == TG_LANG_PY ? TG_SOL_PY : TG_SOL_LOGO];
-        static char sk[700];
+        /* the reference is Logo; the other languages are written from its
+         * tree, in the player's words */
+        static char src[1400];
+        src[0] = 0;
+        tg_prog_t pr;
+        if (l->sol[TG_SOL_LOGO] && tg_prog_init(&pr, 2048)) {
+            if (tg_logo_parse(&pr, l->sol[TG_SOL_LOGO])) {
+                int kind = P->lang == TG_LANG_LUA ? TG_GEN_LUA : P->lang == TG_LANG_PY ? TG_GEN_PY : TG_GEN_LOGO;
+                tg_logo_gen(&pr, kind, tg->tlang == TG_ES ? TG_ES : TG_EN, src, sizeof src);
+            }
+            tg_prog_free(&pr);
+        }
+        static char sk[1400];
         int k = 0;
-        for (const char *c = src ? src : ""; *c && k < (int)sizeof(sk) - 2; c++) {
+        for (const char *c = src; *c && k < (int)sizeof(sk) - 2; c++) {
             if (*c >= '0' && *c <= '9') {
                 if (k == 0 || sk[k - 1] != '?') sk[k++] = '?';
             } else {
@@ -796,6 +807,40 @@ static void view_cb(lv_event_t *e)
         lv_obj_set_width(b, LV_PCT(100));
     }
     tg_button(p, _("Cerrar"), lv_color_hex(0x2c3440), hint_close, NULL);
+}
+
+/* ----------------------------------------------------------------- cards */
+
+/* A level's cards (@carta): what a world is about, or a story's chapter,
+ * shown before the level until it has stars in this language. */
+static int s_card;
+
+static void card_next(lv_event_t *e);
+
+static void show_card(int i)
+{
+    const tg_level_t *l = lvl();
+    s_card = i;
+    lv_obj_t *p = panel(lv_color_hex(0x64B5FF));
+    if (l->ncard > 1) {
+        char buf[24];
+        snprintf(buf, sizeof buf, "%d / %d", i + 1, l->ncard);
+        tg_label(p, buf, aos_font_small, AOS_C_DIM);
+    }
+    lv_obj_t *t = tg_label(p, tg_level_text(l->card[i], tg->tlang), aos_font_body, AOS_C_TEXT);
+    lv_label_set_long_mode(t, LV_LABEL_LONG_WRAP);
+    lv_obj_set_width(t, LV_PCT(100));
+    lv_obj_t *b = tg_button(p, i + 1 < l->ncard ? _("Siguiente") : _("¡A jugar!"), lv_color_hex(0x0A84FF),
+                            card_next, NULL);
+    lv_obj_set_width(b, LV_PCT(100));
+}
+
+static void card_next(lv_event_t *e)
+{
+    (void)e;
+    tg_audio_play(SND_TAP);
+    if (s_card + 1 < lvl()->ncard) show_card(s_card + 1);
+    else close_panel();
 }
 
 /* ---------------------------------------------------------------- layout */
@@ -1031,6 +1076,7 @@ void tg_play_open(lv_obj_t *scr)
     P->sc.tick = 0;
     tg_view_draw(&P->sc);
     P->last_ms = lv_tick_get();
+    if (!tg->free_mode && lvl()->ncard && !tg->score[P->idx].stars[P->lang]) show_card(0);
 }
 
 void tg_play_close(void)

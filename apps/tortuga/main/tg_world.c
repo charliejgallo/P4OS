@@ -91,6 +91,8 @@ bool tg_levels_parse(tg_levels_t *s, const char *text, size_t len)
     s->buf[len] = 0;
 
     tg_level_t *cur = NULL;
+    int wcur = -1;                  /* a world header being read */
+    int card_n[TG_NL] = { 0 };
     enum { S_NONE, S_MAP, S_BLOCK } sect = S_NONE;
     const char **block = NULL;      /* where a multi-line section goes */
     char *block_start = NULL;
@@ -129,6 +131,23 @@ bool tg_levels_parse(tg_levels_t *s, const char *text, size_t len)
                 const char *d = strchr(val, '-');
                 cur->num = d ? atoi(d + 1) : 0;
                 memset(hint_n, 0, sizeof(hint_n));
+                memset(card_n, 0, sizeof(card_n));
+                wcur = -1;
+                continue;
+            }
+            if (!strcmp(key, "mundo")) {
+                if (s->nwh < TG_MAX_WORLDS) {
+                    wcur = s->nwh++;
+                    s->wh[wcur].world = atoi(val);
+                }
+                cur = NULL;
+                continue;
+            }
+            const char *wrest;
+            if (wcur >= 0 && !cur) {
+                int l = lang_of(val, &wrest);
+                if (l >= 0 && !strcmp(key, "titulo")) s->wh[wcur].title[l] = wrest;
+                if (l >= 0 && !strcmp(key, "idea")) s->wh[wcur].idea[l] = wrest;
                 continue;
             }
             if (!cur) continue;
@@ -141,6 +160,12 @@ bool tg_levels_parse(tg_levels_t *s, const char *text, size_t len)
                 if (l >= 0 && hint_n[l] < TG_HINTS) {
                     cur->hint[hint_n[l]++][l] = rest;
                     if (hint_n[l] > cur->nhint) cur->nhint = hint_n[l];
+                }
+            } else if (!strcmp(key, "carta")) {
+                int l = lang_of(val, &rest);
+                if (l >= 0 && card_n[l] < TG_CARDS) {
+                    cur->card[card_n[l]++][l] = rest;
+                    if (card_n[l] > cur->ncard) cur->ncard = card_n[l];
                 }
             } else if (!strcmp(key, "ordenes")) {
                 char *t = val;

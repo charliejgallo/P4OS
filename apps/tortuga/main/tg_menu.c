@@ -343,7 +343,7 @@ void tg_menu_worlds(lv_obj_t *scr)
     lv_obj_set_style_pad_row(grid, 14, 0);
     lv_obj_set_style_pad_column(grid, 16, 0);
     lv_obj_add_flag(grid, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
-    for (int w = 1; w <= TG_NWORLD; w++) {
+    for (int w = 1; w <= tg_world_max(); w++) {
         int n = tg_world_count(w);
         if (!n) continue;
         bool open = tg_world_open(w);

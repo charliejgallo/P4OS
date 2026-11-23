@@ -59,6 +59,8 @@ enum { TG_DIR_N, TG_DIR_E, TG_DIR_S, TG_DIR_W };
 enum { TG_SOL_LOGO, TG_SOL_LUA, TG_SOL_PY, TG_SOL_N };
 
 #define TG_HINTS 3
+#define TG_CARDS 4          /* the cards of a story, before a level */
+#define TG_MAX_WORLDS 24
 
 typedef struct {
     const char *id;                     /* "4-1" */
@@ -66,6 +68,8 @@ typedef struct {
     const char *title[TG_NL];           /* NULL: the Spanish one */
     const char *hint[TG_HINTS][TG_NL];
     int nhint;
+    const char *card[TG_CARDS][TG_NL];  /* shown before the level, first time */
+    int ncard;
     uint32_t orders;                    /* bit per order; 0: all */
     uint8_t goals;
     uint8_t star3, star2;
@@ -83,6 +87,13 @@ typedef struct {
     char *buf;                          /* the text, cut in place */
     tg_level_t *lv;
     int n;
+    /* worlds a file names (@mundo N, then @titulo and @idea): the game's
+     * own have their names in the app; a pack's come from here */
+    struct {
+        int world;
+        const char *title[TG_NL], *idea[TG_NL];
+    } wh[TG_MAX_WORLDS];
+    int nwh;
 } tg_levels_t;
 
 /* parses a .tl text (copied); false only without memory */

@@ -20,6 +20,7 @@ into one with:
 
 import ctypes
 import math
+import os
 import re
 import sys
 
@@ -125,7 +126,7 @@ def parse_levels(path):
                 cur = Level()
                 cur.id = val
                 levels.append(cur)
-            elif key == "titulo":
+            elif key == "titulo" and cur is not None:
                 lang, _, t = val.partition(":")
                 cur.title[lang.strip()] = t.strip()
             elif key == "ordenes":
@@ -138,8 +139,11 @@ def parse_levels(path):
             elif key == "inicio":
                 x, y, d = val.split()
                 cur.start = (float(x), float(y), d)
-            elif key == "pista":
-                cur.hints.append(val)
+            elif key in ("pista", "carta", "mundo", "idea"):
+                if cur is not None and key == "pista":
+                    cur.hints.append(val)
+                if key == "mundo":
+                    cur = None
             elif key in ("mapa", "figura", "logo", "lua", "python"):
                 sect = key
             continue
@@ -981,7 +985,10 @@ def pieces(lang, src):
     return logo_pieces(src) if lang == "logo" else text_pieces(src, lang)
 
 
-def check(path, lua_lib=None):
+def check(path, lua_lib=None, gen=None):
+    """gen: the folder where tools/tg_harness.c wrote every level's Logo
+    tree as Lua and Python (--gen): a level that brings only its Logo is
+    checked in the other two languages with those"""
     lua = LuaRunner(lua_lib) if lua_lib else None
     bad = 0
     for lv in parse_levels(path):
@@ -990,6 +997,10 @@ def check(path, lua_lib=None):
         counts = set()
         for lang in ("logo", "lua", "python"):
             src = lv.solutions.get(lang)
+            if src is None and gen and lang != "logo":
+                p = os.path.join(gen, "%s.%s" % (lv.id, "lua" if lang == "lua" else "py"))
+                if os.path.exists(p):
+                    src = open(p).read()
             if src is None or (lang == "lua" and not lua):
                 row.append("%s -" % lang)
                 continue
@@ -1023,8 +1034,13 @@ def main():
         i = args.index("--lua-lib")
         lua_lib = args[i + 1]
         del args[i:i + 2]
+    gen = None
+    if "--gen" in args:
+        i = args.index("--gen")
+        gen = args[i + 1]
+        del args[i:i + 2]
     if len(args) == 2 and args[0] == "check":
-        sys.exit(1 if check(args[1], lua_lib) else 0)
+        sys.exit(1 if check(args[1], lua_lib, gen) else 0)
     print(__doc__)
     sys.exit(2)
 

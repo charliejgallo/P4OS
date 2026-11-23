@@ -107,8 +107,34 @@ bool tg_lang_available(int lang)
 
 /* ------------------------------------------------------------ worlds */
 
+static const char *pack_world(int world, bool idea)
+{
+    for (int i = 0; i < tg->levels.nwh; i++) {
+        if (tg->levels.wh[i].world != world) continue;
+        const char *t = tg_level_text(idea ? tg->levels.wh[i].idea : tg->levels.wh[i].title, tg->tlang);
+        if (t && t[0]) return t;
+    }
+    return NULL;
+}
+
+int tg_world_max(void)
+{
+    int m = TG_NWORLD;
+    for (int i = 0; i < tg->levels.n; i++) {
+        if (tg->levels.lv[i].world > m) m = tg->levels.lv[i].world;
+    }
+    return m;
+}
+
 const char *tg_world_name(int world)
 {
+    if (world > TG_NWORLD) {
+        const char *t = pack_world(world, false);
+        static char buf[32];
+        if (t) return t;
+        snprintf(buf, sizeof buf, _("Mundo %d"), world);
+        return buf;
+    }
     static const char *const N[TG_NWORLD + 1] = {
         "", N_("Primeros pasos"), N_("Otra vez"), N_("Ponele nombre"), N_("Preguntar"), N_("Hasta que"),
         N_("Contar"), N_("A medida"), N_("El lápiz"), N_("La gran travesía"),
@@ -118,6 +144,10 @@ const char *tg_world_name(int world)
 
 const char *tg_world_idea(int world)
 {
+    if (world > TG_NWORLD) {
+        const char *t = pack_world(world, true);
+        return t ? t : "";
+    }
     static const char *const N[TG_NWORLD + 1] = {
         "", N_("Una orden detrás de otra"), N_("Repetir"), N_("Procedimientos"), N_("Si, sino y sensores"),
         N_("Mientras"), N_("Variables"), N_("Parámetros"), N_("Dibujar como en LOGO"), N_("Todo junto"),
@@ -170,7 +200,7 @@ bool tg_world_open(int world)
 {
     /* a world opens with half the stars of the one before, in any language,
      * and the first two are always open (the tutorial) */
-    if (world <= 2) return true;
+    if (world <= 2 || world > TG_NWORLD) return true;     /* a pack's worlds are a gift */
     int prev = world - 1;
     int have = tg_world_stars(prev, -1);
     int need = tg_world_count(prev) * 3 / 2;
@@ -297,6 +327,98 @@ void tg_program_save(const tg_level_t *lv, int lang, const char *text)
     fclose(f);
 }
 
+/* ------------------------------------------------- the levels, and more */
+
+/* The game's levels, then every world the card brings: loose .tl files in
+ * apps/tortuga/, and the text of packs named tortuga_<something>_p4.pak
+ * (entries "levels..."), which is how the Store can add worlds or stories
+ * later without a new app. A pack's levels use worlds 10 and up and ids
+ * of their own. */
+typedef struct {
+    char *buf;
+    size_t len, cap;
+} text_t;
+
+static void text_add(text_t *t, const char *s, size_t n)
+{
+    if (t->len + n + 2 > t->cap) {
+        size_t cap = (t->len + n + 2) * 2;
+        char *b = tg_alloc(cap);
+        if (!b) return;
+        if (t->buf) memcpy(b, t->buf, t->len);
+        tg_free(t->buf);
+        t->buf = b;
+        t->cap = cap;
+    }
+    memcpy(t->buf + t->len, s, n);
+    t->len += n;
+    t->buf[t->len++] = '\n';
+    t->buf[t->len] = 0;
+}
+
+static bool ends_with(const char *s, const char *end)
+{
+    size_t a = strlen(s), b = strlen(end);
+    return a >= b && !strcmp(s + a - b, end);
+}
+
+static bool scan_tl(const aos_dir_entry_t *e, void *ctx)
+{
+    text_t *t = ctx;
+    if (e->dir || e->name[0] == '.' || !ends_with(e->name, ".tl") || e->size > 256 * 1024) return true;
+    char p[320];
+    snprintf(p, sizeof p, "%s/tortuga/%s", aos_hal_path_apps(), e->name);
+    FILE *f = fopen(p, "rb");
+    if (!f) return true;
+    char *b = tg_alloc(e->size + 1);
+    if (b) {
+        size_t n = fread(b, 1, e->size, f);
+        text_add(t, b, n);
+        tg_free(b);
+        aos_hal_log("tortuga", "levels from %s", e->name);
+    }
+    fclose(f);
+    return true;
+}
+
+static bool scan_pak(const aos_dir_entry_t *e, void *ctx)
+{
+    text_t *t = ctx;
+    if (e->dir || e->name[0] == '.' || strncmp(e->name, "tortuga_", 8) || !ends_with(e->name, "_p4.pak") ||
+        !strcmp(e->name, TG_PACK)) {
+        return true;
+    }
+    char p[320];
+    snprintf(p, sizeof p, "%s/%s", aos_hal_path_apps(), e->name);
+    tg_pak_t pak;
+    if (!tg_pak_open(&pak, p)) return true;
+    for (int i = 0; i < pak.n; i++) {
+        const tg_entry_t *en = &pak.e[i];
+        if (en->type != PK_TEXT || strncmp(en->name, "levels", 6)) continue;
+        char *b = tg_pak_load(&pak, en);
+        if (b) {
+            text_add(t, b, en->rawlen);
+            tg_free(b);
+            aos_hal_log("tortuga", "levels from %s", e->name);
+        }
+    }
+    tg_pak_close(&pak);
+    return true;
+}
+
+static bool load_levels(void)
+{
+    text_t t = { 0 };
+    text_add(&t, tg_levels_text, tg_levels_len);
+    char p[200];
+    snprintf(p, sizeof p, "%s/tortuga", aos_hal_path_apps());
+    aos_hal_dir_scan(p, scan_tl, &t);
+    aos_hal_dir_scan(aos_hal_path_apps(), scan_pak, &t);
+    bool ok = t.buf && tg_levels_parse(&tg->levels, t.buf, t.len);
+    tg_free(t.buf);
+    return ok;
+}
+
 /* --------------------------------------------------------------- art */
 
 static void load_art(void)
@@ -390,7 +512,7 @@ static void *tg_create(aos_app_t *self, lv_obj_t *root)
     lv_obj_set_style_bg_color(root, lv_color_hex(0x101318), 0);
     lv_obj_remove_flag(root, LV_OBJ_FLAG_SCROLLABLE);
 
-    if (!tg_levels_parse(&tg->levels, tg_levels_text, tg_levels_len)) {
+    if (!load_levels()) {
         tg_free(tg);
         tg = NULL;
         return NULL;

@@ -101,7 +101,7 @@ int main(int argc, char **argv)
         int pl = tg_logo_pieces(&pr);
         int pu = lv->sol[TG_SOL_LUA] ? tg_text_pieces(lv->sol[TG_SOL_LUA], false) : -1;
         int pp = lv->sol[TG_SOL_PY] ? tg_text_pieces(lv->sol[TG_SOL_PY], true) : -1;
-        bool same = pl == lv->star3 && pu == pl && pp == pl;
+        bool same = pl == lv->star3 && (pu < 0 || pu == pl) && (pp < 0 || pp == pl);
         printf("%-5s %-34s %s logo %d lua %d python %d  ***<=%d%s\n", lv->id,
                lv->title[TG_ES] ? lv->title[TG_ES] : "", ok ? "ok " : "MAL", pl, pu, pp, lv->star3,
                same ? "" : "  <- no coincide");

@@ -92,6 +92,7 @@ int  tg_total_stars(void);
 bool tg_world_open(int world);
 int  tg_world_first(int world);             /* index of its first level, -1 */
 int  tg_world_count(int world);
+int  tg_world_max(void);                     /* the last world, the card's included */
 const char *tg_world_name(int world);
 const char *tg_world_idea(int world);
 const char *tg_lang_name(int lang);
