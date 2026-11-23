@@ -17,11 +17,15 @@ en resumen": no se revisaron en esta pasada.
 **La Terminal con cualquier velocidad y formato (2026-11-23, para la próxima release):**
 instalada en la placa por OTA (`v0.32.1-1-gadd4d83a-dirty`, confirmada).
 
-- [ ] Leer el tester del usuario (WH5500, 2400 baudios según su manual)
-      desde la hoja nueva: velocidad, formato (probar 8N1, 7E1, 7O1) y,
-      si va por un adaptador USB, DTR prendido con RTS apagado. En el
-      simulador anduvo contra un pty a 2400 7E1, a 1800 tipeado a mano y a
-      1234 8O2; con un adaptador de verdad no se probó todavía.
+- [x] **El tester del usuario, leído** (2026-11-23): un multímetro WH5000
+      ("USB True-RMS, 6000 counts") con su cable USB, que es un CP2102
+      (`usb0 Silicon Labs CP2102 USB to UART Bridge`), a **2400 8N1** con
+      DTR y RTS como quedan (prendidos). Llega una línea de texto por
+      lectura, como `+0265 4`: el signo, los cuatro dígitos de la pantalla
+      (026.5) y un número más (la posición del punto o el rango, sin
+      descifrar). 101 líneas seguidas sin basura. Antes no se podía: la
+      lista empezaba en 9600. En el simulador anduvo además contra un pty
+      a 2400 7E1, a 1800 tipeado a mano y a 1234 8O2.
 - [ ] Una velocidad baja en un UART del header (`uart.a`/`uart.b`) con algo
       real del otro lado.
 

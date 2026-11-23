@@ -11,7 +11,8 @@
   `rts`). Before, it started at 9600 and was always 8N1. For apps:
   `aos_io_uart_set_frame` and `aos_hal_usb_serial_set_frame` take the data
   bits too, and a change of speed on a USB port no longer puts its frame
-  back to 8N1.
+  back to 8N1. Tried on the board with a WH5000 multimeter on its USB
+  cable (a CP2102) at 2400 8N1.
 
 ## 0.32.1 — 2026-11-22
 

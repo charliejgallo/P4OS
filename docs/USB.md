@@ -383,7 +383,9 @@ CP210x and FTDI drivers turn into their own registers, all three with 5 to
 new speed keeps the frame. The optical cables of many multimeters take
 their power from DTR with RTS off, and talk 7E1, 7O1 or 7N2 at 1200 to
 19200 baud. The header's UARTs take the same frames; they have no DTR or
-RTS.
+RTS. Read on the board the same day: a WH5000 multimeter through its own
+USB cable (a CP2102), at 2400 8N1, one text line a reading (`+0265 4` for
+026.5 on its display).
 
 **The Programmer flashes an ESP32 through them** (since 0.9.2): the USB
 ports come after the header's UARTs in its list, in the app and in the
