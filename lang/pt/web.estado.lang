@@ -169,7 +169,11 @@ falló una vez, probando de nuevo	falhou uma vez, testando de novo
 falló %d veces, probando de nuevo	falhou %d vezes, testando de novo
 
 #: apps/estado/web/estado.js:310
-anda %s	no ar %s
+#: apps/estado/web/estado.js:456
+anda	no ar
+
+#: apps/estado/web/estado.js:310
+anda desde hace %s	no ar há %s
 
 #: apps/estado/web/estado.js:314
 24 h	24 h
@@ -307,9 +311,6 @@ Leyendo...	Lendo...
 
 #: apps/estado/web/estado.js:446
 Guardar en la tarjeta	Salvar no cartão
-
-#: apps/estado/web/estado.js:456
-anda	no ar
 
 #: apps/estado/web/estado.js:456
 andan	no ar

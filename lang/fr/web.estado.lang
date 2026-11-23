@@ -169,7 +169,11 @@ falló una vez, probando de nuevo	échec une fois, nouvel essai
 falló %d veces, probando de nuevo	%d échecs, nouvel essai
 
 #: apps/estado/web/estado.js:310
-anda %s	en ligne, changé %s
+#: apps/estado/web/estado.js:456
+anda	en ligne
+
+#: apps/estado/web/estado.js:310
+anda desde hace %s	en ligne depuis %s
 
 #: apps/estado/web/estado.js:314
 24 h	24 h
@@ -307,9 +311,6 @@ Leyendo...	Lecture...
 
 #: apps/estado/web/estado.js:446
 Guardar en la tarjeta	Enregistrer sur la carte SD
-
-#: apps/estado/web/estado.js:456
-anda	en ligne
 
 #: apps/estado/web/estado.js:456
 andan	en ligne

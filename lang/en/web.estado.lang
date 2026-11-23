@@ -169,7 +169,11 @@ falló una vez, probando de nuevo	failed once, trying again
 falló %d veces, probando de nuevo	failed %d times, trying again
 
 #: apps/estado/web/estado.js:310
-anda %s	up %s
+#: apps/estado/web/estado.js:456
+anda	up
+
+#: apps/estado/web/estado.js:310
+anda desde hace %s	up for %s
 
 #: apps/estado/web/estado.js:314
 24 h	24 h
@@ -307,9 +311,6 @@ Leyendo...	Reading...
 
 #: apps/estado/web/estado.js:446
 Guardar en la tarjeta	Save to the card
-
-#: apps/estado/web/estado.js:456
-anda	up
 
 #: apps/estado/web/estado.js:456
 andan	up

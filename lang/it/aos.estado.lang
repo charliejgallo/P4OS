@@ -78,16 +78,16 @@ Lento	Lento
 
 #: apps/estado/main/ec_check.c:754
 #: apps/estado/main/ec_desk.c:59
-#: apps/estado/main/ec_list.c:63
+#: apps/estado/main/ec_list.c:66
 Caído	Offline
 
 #: apps/estado/main/ec_check.c:755
-#: apps/estado/main/ec_list.c:69
+#: apps/estado/main/ec_list.c:72
 En pausa	In pausa
 
 #: apps/estado/main/ec_check.c:756
 #: apps/estado/main/ec_detail.c:258
-#: apps/estado/main/ec_list.c:75
+#: apps/estado/main/ec_list.c:78
 Probando	Verifica in corso
 
 #: apps/estado/main/ec_desk.c:77
@@ -127,10 +127,13 @@ Sin cortes registrados	Nessuna interruzione registrata
 %s · sigue caído	%s · ancora offline
 
 #: apps/estado/main/ec_detail.c:145
-Caído %s	Andato offline %s
+Caído desde hace %s	Offline da %s
 
 #: apps/estado/main/ec_detail.c:148
-desde	ultimo cambio
+Lento, anda desde hace %s	Lento, online da %s
+
+#: apps/estado/main/ec_detail.c:148
+Anda desde hace %s	Online da %s
 
 #: apps/estado/main/ec_detail.c:169
 #: apps/estado/main/ec_detail.c:311
@@ -153,16 +156,16 @@ En pausa: no se prueba	In pausa: nessuna verifica
 Todavía no se probó	Non ancora verificato
 
 #: apps/estado/main/ec_detail.c:190
-Último chequeo %s: el puerto abre en %s	Ultima verifica %s: la porta si apre in %s
+Último chequeo hace %s: el puerto abre en %s	Ultima verifica %s fa: la porta si apre in %s
 
 #: apps/estado/main/ec_detail.c:191
-Último chequeo %s: %d, contestó en %s (conectar: %s)	Ultima verifica %s: %d, risposta in %s (connessione: %s)
+Último chequeo hace %s: %d, contestó en %s (conectar: %s)	Ultima verifica %s fa: %d, risposta in %s (connessione: %s)
 
 #: apps/estado/main/ec_detail.c:193
 contestó %d	ha risposto %d
 
 #: apps/estado/main/ec_detail.c:195
-Último chequeo %s: %s	Ultima verifica %s: %s
+Último chequeo hace %s: %s	Ultima verifica %s fa: %s
 
 #: apps/estado/main/ec_detail.c:208
 No se pudo leer el certificado (el servidor sólo habla TLS 1.3, o no es HTTPS).	Impossibile leggere il certificato (il server parla solo TLS 1.3, o non è HTTPS).
@@ -254,7 +257,7 @@ Tocá de nuevo para borrar	Tocca di nuovo per eliminare
 puerto TCP %d	porta TCP %d
 
 #: apps/estado/main/ec_edit.c:335
-#: apps/estado/main/ec_list.c:426
+#: apps/estado/main/ec_list.c:429
 Las direcciones se cargan más cómodo desde la página Estado de la casa del portal.	Gli indirizzi si inseriscono più comodamente dalla pagina Stato della casa del portale.
 
 #: apps/estado/main/ec_edit.c:353
@@ -315,79 +318,94 @@ Avisar si al certificado le quedan menos días (0: no)	Avvisa se al certificato 
 Borrar este servicio	Elimina questo servizio
 
 #: apps/estado/main/ec_list.c:58
-#: apps/estado/main/ec_list.c:74
+#: apps/estado/main/ec_list.c:77
 falló una vez, probando de nuevo	fallito una volta, riprovo
 
 #: apps/estado/main/ec_list.c:58
-#: apps/estado/main/ec_list.c:74
+#: apps/estado/main/ec_list.c:77
 falló varias veces, probando de nuevo	fallito più volte, riprovo
 
 #: apps/estado/main/ec_list.c:59
-#: apps/estado/main/ec_list.c:167
+#: apps/estado/main/ec_list.c:170
 anda	online
 
-#: apps/estado/main/ec_list.c:60
-desde %s	ultimo cambio %s
+#: apps/estado/main/ec_list.c:62
+anda desde hace %s	online da %s
 
-#: apps/estado/main/ec_list.c:64
+#: apps/estado/main/ec_list.c:67
 #: apps/estado/main/estado.c:163
 Contestó %d	Ha risposto %d
 
-#: apps/estado/main/ec_list.c:167
+#: apps/estado/main/ec_list.c:89
+%d d	%d g
+
+#: apps/estado/main/ec_list.c:170
 lento	lento
 
-#: apps/estado/main/ec_list.c:167
+#: apps/estado/main/ec_list.c:170
 caído	offline
 
-#: apps/estado/main/ec_list.c:168
+#: apps/estado/main/ec_list.c:171
 andan	online
 
-#: apps/estado/main/ec_list.c:168
+#: apps/estado/main/ec_list.c:171
 lentos	lenti
 
-#: apps/estado/main/ec_list.c:168
+#: apps/estado/main/ec_list.c:171
 caídos	offline
 
-#: apps/estado/main/ec_list.c:189
+#: apps/estado/main/ec_list.c:192
 No entran más servicios	Non c'è posto per altri servizi
 
-#: apps/estado/main/ec_list.c:216
+#: apps/estado/main/ec_list.c:219
 Estado de la casa	Stato della casa
 
-#: apps/estado/main/ec_list.c:249
+#: apps/estado/main/ec_list.c:252
 La placa no tiene red: los chequeos esperan a que vuelva.	La scheda non ha rete: le verifiche aspettano che torni.
 
-#: apps/estado/main/ec_list.c:273
+#: apps/estado/main/ec_list.c:276
 Sin grupo	Senza gruppo
 
-#: apps/estado/main/ec_list.c:284
+#: apps/estado/main/ec_list.c:287
 Todavía no hay servicios.\n\nAgregá uno con + (hay plantillas para Home Assistant, Frigate, un NAS, una impresora 3D, el router o una página), o cargalos cómodo desde la página Estado de la casa del portal.	Ancora nessun servizio.\n\nAggiungine uno con + (ci sono modelli per Home Assistant, Frigate, un NAS, una stampante 3D, il router o una pagina web), oppure inseriscili comodamente dalla pagina Stato della casa del portale.
 
-#: apps/estado/main/ec_list.c:289
+#: apps/estado/main/ec_list.c:292
 Agregar un servicio	Aggiungi un servizio
 
-#: apps/estado/main/ec_list.c:362
+#: apps/estado/main/ec_list.c:365
 Probando todos	Verifico tutti
 
-#: apps/estado/main/ec_list.c:409
+#: apps/estado/main/ec_list.c:412
 Opciones	Opzioni
 
-#: apps/estado/main/ec_list.c:410
+#: apps/estado/main/ec_list.c:413
 Pitido con cada aviso	Bip a ogni avviso
 
-#: apps/estado/main/ec_list.c:412
+#: apps/estado/main/ec_list.c:415
 Vigilar desde que prende la placa	Monitora dall'accensione della scheda
 
-#: apps/estado/main/ec_list.c:414
+#: apps/estado/main/ec_list.c:417
 Fallas seguidas para darlo por caído	Errori consecutivi prima di segnarlo offline
 
-#: apps/estado/main/ec_list.c:433
+#: apps/estado/main/ec_list.c:436
 Probar todos	Verifica tutti
 
-#: apps/estado/main/ec_list.c:435
+#: apps/estado/main/ec_list.c:438
 Listo	Fine
 
-#: apps/estado/main/ec_ui.c:121
+#: apps/estado/main/ec_ui.c:112
+%d d %d h	%d g %d h
+
+#: apps/estado/main/ec_ui.c:113
+%d h %d min	%d h %d min
+
+#: apps/estado/main/ec_ui.c:114
+%d min	%d min
+
+#: apps/estado/main/ec_ui.c:115
+%d s	%d s
+
+#: apps/estado/main/ec_ui.c:125
 recién	proprio ora
 
 #: apps/estado/main/ec_ui.c:129

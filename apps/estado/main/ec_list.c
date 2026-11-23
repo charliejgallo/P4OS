@@ -57,7 +57,10 @@ static void tile_update(int i, const ec_rt_t *rt, uint32_t now)
         ec_fmt_ms(big, sizeof big, rt->ms);
         if (rt->fails_row > 0) ec_copy(sub, sizeof sub, rt->fails_row == 1 ? _("falló una vez, probando de nuevo") : _("falló varias veces, probando de nuevo"));
         else if (since < 10) ec_copy(sub, sizeof sub, _("anda"));
-        else snprintf(sub, sizeof sub, _("desde %s"), ago);
+        else {
+            ec_fmt_dur(d, sizeof d, since);
+            snprintf(sub, sizeof sub, _("anda desde hace %s"), d);
+        }
         break;
     case EC_ST_DOWN:
         ec_copy(big, sizeof big, _("Caído"));
@@ -83,7 +86,7 @@ static void tile_update(int i, const ec_rt_t *rt, uint32_t now)
     if (rt->cert_state == EC_CERT_SOON || rt->cert_state == EC_CERT_EXPIRED) {
         lv_color_t cc = rt->cert_days < 0 ? AOS_C_RED : AOS_C_ORANGE;
         if (rt->cert_days < 0) ec_copy(d, sizeof d, "!");
-        else snprintf(d, sizeof d, "%d d", rt->cert_days);
+        else snprintf(d, sizeof d, _("%d d"), rt->cert_days);
         ec_set_text(t->corner_g, AOS_SYM_LOCK);
         ec_set_text(t->corner_t, d);
         lv_obj_set_style_text_color(t->corner_g, cc, 0);

@@ -169,7 +169,11 @@ falló una vez, probando de nuevo	fallito una volta, riprovo
 falló %d veces, probando de nuevo	fallito %d volte, riprovo
 
 #: apps/estado/web/estado.js:310
-anda %s	online %s
+#: apps/estado/web/estado.js:456
+anda	online
+
+#: apps/estado/web/estado.js:310
+anda desde hace %s	online da %s
 
 #: apps/estado/web/estado.js:314
 24 h	24 h
@@ -307,9 +311,6 @@ Leyendo...	Lettura...
 
 #: apps/estado/web/estado.js:446
 Guardar en la tarjeta	Salva sulla microSD
-
-#: apps/estado/web/estado.js:456
-anda	online
 
 #: apps/estado/web/estado.js:456
 andan	online

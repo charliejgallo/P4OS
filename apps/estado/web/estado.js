@@ -307,7 +307,7 @@ function fill(el, s) {
   r.big.style.color = s.state === 1 ? '' : STATE_COLOR[s.state];
   let sub = '';
   if (s.state === 3) sub = errText(s) + ' · ' + ago(s.since);
-  else if (s.state === 1 || s.state === 2) sub = s.fails ? (s.fails === 1 ? tr('falló una vez, probando de nuevo') : tr('falló %d veces, probando de nuevo', s.fails)) : tr('anda %s', ago(s.since));
+  else if (s.state === 1 || s.state === 2) sub = s.fails ? (s.fails === 1 ? tr('falló una vez, probando de nuevo') : tr('falló %d veces, probando de nuevo', s.fails)) : (s.since < 10 ? tr('anda') : tr('anda desde hace %s', dur(s.since)));
   else sub = s.addr;
   r.sub.textContent = sub;
   r.sub.title = s.why || s.addr;
