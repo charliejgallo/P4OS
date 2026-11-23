@@ -7,14 +7,18 @@
 
 The pack (little-endian), read by tq_art.c:
 
-    'TQPK' u32 version (2), u32 count
+    'TQPK' u32 version (3), u32 count
     count x { char name[24]; u32 offset; u32 size }      (offset from the file's start)
     the sprites, each 4-byte aligned:
         'TSPR' u16 w, h, i16 ax, ay, u32 n
         h x { u16 x0, u16 len, u32 off }    each row's covered run: pixels x0..x0+len-1
                                             are planes[off .. off+len-1]
-        L[n] A[n] ID[n] Z[n]                 the planes (tanques_art.py), rows packed;
-                                            no Z when n has bit 31 (the fp set)
+        L[n] A[n] ID[n] Z[n] UV[n]           the planes (tanques_art.py), rows packed;
+                                            no Z when n has bit 31 (the fp set), a UV
+                                            (the badge's cell) when it has bit 30
+
+The entries of a group (a tank's top, low and fp sprites; a tank's
+turntable; a biome) are together, so the app reads each in one go.
 
 Only the covered run of each row is kept: a barrel across a big box, or a
 tank's corners, cost nothing.
@@ -32,7 +36,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 APP = os.path.dirname(HERE)
 ART = os.path.join(APP, "build", "art")
 PAK = os.path.join(APP, "build", "tanques_p4.pak")
-VERSION = 2
+VERSION = 3
 
 FIXED = {3: (0.25, 0.24, 0.27), 4: (0.62, 0.64, 0.68), 5: (1.0, 0.92, 0.60), 6: (0.97, 0.97, 0.95),
          8: (0.40, 0.72, 0.28), 9: (0.52, 0.34, 0.20), 10: (0.70, 0.67, 0.62), 11: (0.92, 0.77, 0.52)}
@@ -41,6 +45,19 @@ SCHEMES = {
     "azul": {1: (0.28, 0.55, 0.92), 2: (0.95, 0.95, 0.98)},
     "verde": {1: (0.48, 0.70, 0.30), 2: (0.93, 0.80, 0.40)},
 }
+
+
+# The scenery's paints per biome (tq_art.c, BIOME_RGB): over FIXED
+BIOMES = {
+    "pradera": {},
+    "desierto": {8: (0.37, 0.63, 0.35), 9: (0.60, 0.42, 0.26), 10: (0.88, 0.70, 0.48), 11: (0.95, 0.83, 0.61),
+                 5: (1.0, 0.50, 0.66)},
+    "nieve": {8: (0.25, 0.54, 0.35), 9: (0.43, 0.29, 0.20), 10: (0.66, 0.87, 0.94), 11: (0.85, 0.27, 0.23),
+              7: (0.96, 0.98, 1.0), 12: (1.0, 0.54, 0.16), 3: (0.18, 0.17, 0.20)},
+    "ruinas": {10: (0.72, 0.42, 0.31), 11: (0.85, 0.82, 0.77), 4: (0.42, 0.45, 0.50), 5: (1.0, 0.91, 0.63)},
+    "volcan": {9: (0.24, 0.20, 0.19), 10: (0.31, 0.29, 0.32), 11: (0.54, 0.50, 0.47), 12: (1.0, 0.42, 0.12)},
+}
+FIXED.update({7: (0.96, 0.97, 0.99), 12: (1.0, 0.54, 0.16)})
 
 
 def ramp(c, L):
@@ -62,21 +79,33 @@ def load_spr(path):
 
 
 def load_spr_bytes(b):
-    assert b[:4] == b"TSPR"
+    """tanques_art.py's sprite: 'TSPR' (four planes) or 'TSP5' (and the
+    badge's coordinates, UV = u * 16 + v, where the emblem goes)"""
+    assert b[:4] in (b"TSPR", b"TSP5")
     w, h, ax, ay = struct.unpack_from("<HHhh", b, 4)
     n = w * h
-    pl = [np.frombuffer(b, np.uint8, n, 12 + i * n).reshape(h, w) for i in range(4)]
-    return dict(w=w, h=h, ax=ax, ay=ay, L=pl[0], A=pl[1], ID=pl[2], Z=pl[3], raw=b)
+    k = 5 if b[:4] == b"TSP5" else 4
+    pl = [np.frombuffer(b, np.uint8, n, 12 + i * n).reshape(h, w) for i in range(k)]
+    return dict(w=w, h=h, ax=ax, ay=ay, L=pl[0], A=pl[1], ID=pl[2], Z=pl[3], UV=pl[4] if k == 5 else None, raw=b)
 
 
 def colorize(s, scheme="naranja"):
     pal = dict(FIXED)
-    pal.update(SCHEMES[scheme])
+    pal.update(SCHEMES[scheme] if scheme in SCHEMES else BIOMES[scheme])
     rgb = np.zeros((s["h"], s["w"], 3))
     for rid, c in pal.items():
         m = s["ID"] == rid
         if m.any():
             rgb[m] = ramp(c, s["L"][m].astype(np.float64))
+    if s.get("UV") is not None:
+        # a test emblem, a star, where the player's logo goes
+        m = (s["ID"] == 6)
+        u, v = (s["UV"] >> 4).astype(float), (s["UV"] & 15).astype(float)
+        ang = np.arctan2(v - 7.5, u - 7.5)
+        rad = np.hypot(u - 7.5, v - 7.5)
+        star = rad < 4.2 + 2.6 * np.cos(5 * ang)
+        sm = m & star
+        rgb[sm] = ramp((0.85, 0.15, 0.2), s["L"][sm].astype(np.float64))
     a = s["A"].astype(np.float64)[..., None] / 255.0
     return rgb, a
 
@@ -144,47 +173,96 @@ def tank(out, set_name="top"):
     save_png(canvas, out)
 
 
-def compact(raw, with_z=True):
+def halve(s):
+    """The low set travels at half its render's size (24 px a metre): the
+    first person sees tanks mostly far, and the memory is the board's.
+    Coverage and shade box-filtered, the rest from the most covered pixel."""
+    w, h = (s["w"] + 1) // 2, (s["h"] + 1) // 2
+    pad = lambda p: np.pad(p, ((0, h * 2 - s["h"]), (0, w * 2 - s["w"])))
+    A = pad(s["A"]).astype(np.int32)
+    L = pad(s["L"]).astype(np.int32)
+    blocks = lambda p: p.reshape(h, 2, w, 2).transpose(0, 2, 1, 3).reshape(h, w, 4)
+    Ab, Lb = blocks(A), blocks(L)
+    asum = Ab.sum(-1)
+    out = dict(w=w, h=h, ax=s["ax"] // 2, ay=s["ay"] // 2)
+    out["A"] = (asum // 4).astype(np.uint8)
+    out["L"] = np.where(asum > 0, (Ab * Lb).sum(-1) // np.maximum(asum, 1), 0).astype(np.uint8)
+    best = Ab.argmax(-1)
+    for key in ("ID", "Z", "UV"):
+        if s.get(key) is None:
+            out[key] = None
+            continue
+        out[key] = np.take_along_axis(blocks(pad(s[key]).astype(np.int32)), best[..., None], -1)[..., 0].astype(np.uint8)
+    return out
+
+
+def compact(raw, with_z=True, half=False):
     """tanques_art.py's sprite (full planes) in the pack's form. Without
     its depth (the gunner's own turret, drawn last and in order), n carries
     bit 31 and there is no Z plane."""
     s = load_spr_bytes(raw)
+    if half:
+        s = halve(s)
     w, h = s["w"], s["h"]
-    rows, planes, n = b"", [b"", b"", b"", b""], 0
+    rows, planes, n, runs = b"", [b"", b"", b"", b""], 0, []
     for y in range(h):
         xs = np.nonzero(s["A"][y])[0]
         x0, x1 = (int(xs[0]), int(xs[-1]) + 1) if len(xs) else (0, 0)
+        runs.append((x0, x1 - x0))
         rows += struct.pack("<HHI", x0, x1 - x0, n)
         for k, key in enumerate(("L", "A", "ID", "Z")):
             planes[k] += s[key][y, x0:x1].tobytes()
         n += x1 - x0
+    uv = s.get("UV") is not None
+    if uv:
+        planes.append(b"".join(s["UV"][y, r[0]:r[0] + r[1]].tobytes() for y, r in enumerate(runs)))
     if not with_z:
-        planes = planes[:3]
-    return b"TSPR" + struct.pack("<HHhhI", w, h, s["ax"], s["ay"], n | (0 if with_z else 1 << 31)) + rows + b"".join(planes)
+        del planes[3]
+    flags = (0 if with_z else 1 << 31) | (1 << 30 if uv else 0)
+    return b"TSPR" + struct.pack("<HHhhI", w, h, s["ax"], s["ay"], n | flags) + rows + b"".join(planes)
+
+
+def group_of(set_name, sprite):
+    """What the app loads together: a tank (its top, low and fp sprites),
+    a tank's turntable, a biome"""
+    key = sprite.split("_")[0]
+    return ("show:" if set_name == "show" else "") + key
 
 
 def pack():
     entries = []
     for set_name in sorted(os.listdir(ART)):
         d = os.path.join(ART, set_name)
-        if not os.path.isdir(d):
+        if not os.path.isdir(d) or set_name == "mesh":
             continue
         for n in sorted(os.listdir(d)):
             if n.endswith(".spr"):
                 name = "%s/%s" % (set_name, n[:-4])
                 assert len(name) < 24, name
                 with open(os.path.join(d, n), "rb") as f:
-                    entries.append((name, compact(f.read(), set_name != "fp")))
+                    # no depth where the sprite is drawn alone or over the
+                    # ground only (the tanks from above: their anchor's
+                    # depth is enough); the low set at half size
+                    tank_top = set_name == "top" and ("_h_" in n or "_t_" in n)
+                    with_z = set_name not in ("fp", "show") and not tank_top
+                    entries.append((group_of(set_name, n[:-4]), name,
+                                    compact(f.read(), with_z, half=set_name == "low")))
+    entries.sort(key=lambda e: (e[0], e[1]))
     off = 12 + 32 * len(entries)
     table, blobs = b"", b""
-    for name, b in entries:
+    for _, name, b in entries:
         table += struct.pack("<24sII", name.encode(), off + len(blobs), len(b))
         blobs += b
         while len(blobs) % 4:
             blobs += b"\0"
     with open(PAK, "wb") as f:
         f.write(b"TQPK" + struct.pack("<II", VERSION, len(entries)) + table + blobs)
+    groups = {}
+    for g, _, b in entries:
+        groups[g] = groups.get(g, 0) + len(b)
     print("%s: %d sprites, %.1f MB" % (PAK, len(entries), (off + len(blobs)) / 1e6))
+    for g in sorted(groups):
+        print("  %-14s %6.0f KB" % (g, groups[g] / 1024))
 
 
 if __name__ == "__main__":

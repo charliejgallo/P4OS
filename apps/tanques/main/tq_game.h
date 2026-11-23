@@ -1,53 +1,56 @@
 /*
  * TANQUES - the battle, without pixels: the map's things, the turn's
- * points, where a tank can drive, the shells' flight, what a blast does,
- * and the computer's tank.
+ * points, where a tank can drive, the shells and what each weapon does, the
+ * weather, and the computer's tanks.
  *
  * Everything here runs in LVGL's thread. The renderers get a copy of
  * tq_state_t every frame (tq_scene.h) and never write it.
  */
 #pragma once
 
+#include "tq_data.h"
 #include "tq_terrain.h"
 
-#define TQ_GRID        36           /* driving cells, 1 m */
-#define TQ_MAX_TREES   28
-#define TQ_MAX_BLOCKS  40
-#define TQ_MAX_PARTS   200
+#define TQ_MAX_TANKS   4
+#define TQ_GRIDMAX     36           /* driving cells, 1 m */
+#define TQ_MAX_TREES   34
+#define TQ_MAX_BLOCKS  64
+#define TQ_MAX_PARTS   240
+#define TQ_MAX_SHELLS  8
+#define TQ_MAX_MINES   12
+#define TQ_MAX_ZONES   8
 #define TQ_MAX_PATH    48
 #define TQ_MAX_ARC     120
 #define TQ_BLOCK_M     0.96f        /* a stone's height (they stack) */
 
-enum { TQ_W_CANNON = 0, TQ_W_MORTAR, TQ_WEAPONS };
-
 typedef struct {
-    const char *name;               /* N_() */
-    int   ap;
-    float speed;                    /* m/s at the muzzle */
-    float radius;                   /* the blast's reach, m */
-    int   damage;                   /* at the centre */
-    float crater_r, crater_d;
-    bool  full_guide;               /* the whole arc shown while aiming */
-} tq_weapon_t;
-
-extern const tq_weapon_t TQ_WEAPON[TQ_WEAPONS];
-
-typedef struct {
-    float x, y;                     /* on the ground */
-    float yaw;                      /* the hull, rad, CCW from +X */
-    float tyaw;                     /* the turret, world */
-    float pitch;                    /* the barrel's elevation, rad */
-    int   hp, hpmax;
-    int   ap, apmax;
-    int   scheme;
-    int   weapon;
-    float hit_flash;                /* s left of the hit's flash */
-    bool  ai;
+    int      type, team;
+    bool     ai;
+    int      diff;
+    char     name[20];
+    float    x, y;                  /* on the ground */
+    float    yaw;                   /* the hull, rad, CCW from +X */
+    float    tyaw;                  /* the turret, world */
+    float    pitch;                 /* the barrel's elevation, rad */
+    int      hp, hpmax, armor;
+    int      ap, apmax;
+    float    m_per_ap, climb, max_slope;
+    int      sel;                   /* the weapon picked: an index into load */
+    int      nload;
+    uint8_t  load[TQ_SLOTS_MAX];
+    uint8_t  level[TQ_SLOTS_MAX];
+    uint8_t  uses[TQ_SLOTS_MAX];    /* left this battle (0xFF: no limit) */
+    int      shield;                /* damage it still stops */
+    int      emp;                   /* AP it loses next turn */
+    float    hit_flash;
+    bool     alive;
+    int      dealt;                 /* damage done to others */
+    int      kills;
 } tq_tank_t;
 
 typedef struct {
     float x, y;
-    uint8_t kind;                   /* TQ_PROP_ROUND or TQ_PROP_PINE */
+    uint8_t kind;                   /* TQ_PROP_TA or TQ_PROP_TB */
     uint8_t alive;
 } tq_tree_t;
 
@@ -59,7 +62,8 @@ typedef struct {
     float   vz;                     /* falling */
 } tq_block_t;
 
-enum { TQ_PART_PUFF = 0, TQ_PART_FIRE, TQ_PART_CHUNK, TQ_PART_SMOKE, TQ_PART_LEAF, TQ_PART_RING, TQ_PART_FLASH };
+enum { TQ_PART_PUFF = 0, TQ_PART_FIRE, TQ_PART_CHUNK, TQ_PART_SMOKE, TQ_PART_LEAF, TQ_PART_RING, TQ_PART_FLASH,
+       TQ_PART_SPARK };
 
 typedef struct {
     tq_v3_t p, v;
@@ -72,75 +76,137 @@ typedef struct {
 typedef struct {
     bool    live;
     tq_v3_t p, v;
-    int     weapon;
-    int     owner;
+    int     weapon, level, owner;
     float   t;
+    int     bounces;
+    float   drill;                  /* metres dug */
+    bool    split;                  /* a cluster's bomblet */
+    bool    under;                  /* a drill below ground */
 } tq_shell_t;
 
 typedef struct {
-    tq_tank_t  tank[2];
+    float x, y;
+    int   team, owner;
+    bool  live;
+} tq_mine_t;
+
+enum { TQ_ZONE_FIRE = 0, TQ_ZONE_SMOKE };
+
+typedef struct {
+    float x, y, r;
+    int   kind, owner;
+    int   turns;                    /* the rounds it still lasts */
+    bool  live;
+} tq_zone_t;
+
+/* What happened this step, for the app to show */
+enum { TQ_EV_NONE = 0, TQ_EV_BLAST, TQ_EV_MISS, TQ_EV_HEAL, TQ_EV_SHIELD, TQ_EV_EMP, TQ_EV_TELEPORT, TQ_EV_MINE,
+       TQ_EV_BURN };
+
+typedef struct {
+    int       type;
+    tq_v3_t   at;
+    int       damage[TQ_MAX_TANKS];
+    bool      direct[TQ_MAX_TANKS];
+    int       value;                /* healed, shielded */
+    tq_vbox_t dirty;                /* the ground changed (x1 < x0: not) */
+} tq_event_t;
+
+#define TQ_MAX_EVENTS 8
+
+typedef struct {
+    tq_tank_t  tank[TQ_MAX_TANKS];
+    int        ntank;
+    int        cur;                 /* whose turn */
+    int        round;
     tq_tree_t  tree[TQ_MAX_TREES];
     int        ntree;
     tq_block_t block[TQ_MAX_BLOCKS];
     int        nblock;
     tq_part_t  part[TQ_MAX_PARTS];
     int        npart;
-    tq_shell_t shell;
-    int        cur;                 /* whose turn: 0 or 1 */
+    tq_shell_t shell[TQ_MAX_SHELLS];
+    tq_mine_t  mine[TQ_MAX_MINES];
+    tq_zone_t  zone[TQ_MAX_ZONES];
+    float      wind_x, wind_y;      /* m/s^2 on the shells */
+    int        weather, diff;
+    int        grid;                /* driving cells per side (the map's metres) */
+
+    /* the laser's beam, while it shows */
+    tq_v3_t    beam_a, beam_b;
+    float      beam_t;
+    uint32_t   beam_rgb;
 
     /* what the views show besides the things */
     bool       show_reach;
-    uint8_t    reach[TQ_GRID * TQ_GRID];    /* 0 out, 1 both weapons left, 2 the cannon, 3 none */
+    uint8_t    reach[TQ_GRIDMAX * TQ_GRIDMAX];  /* 0 out, 1 both weapons left, 2 one, 3 none */
     int        npath;
     float      path[TQ_MAX_PATH][2];
     int        narc;
     tq_v3_t    arc[TQ_MAX_ARC];
-    bool       arc_full;            /* else only its first part */
+    bool       arc_full;            /* the landing shows */
     bool       arc_landed;
     tq_v3_t    arc_end;
     float      pulse;               /* the turn's ring, 0..1 */
 } tq_state_t;
 
-/* The map, its trees and stones, the two tanks */
-void tq_game_new(tq_state_t *s, tq_terrain_t *t, uint32_t seed, int scheme0, int scheme1, bool vs_ai);
+/* A battle to set up: the map and who plays */
+typedef struct {
+    int      biome, size, weather, diff;
+    uint32_t seed;
+    int      ntank;
+    struct {
+        int      type, team;
+        bool     ai;
+        char     name[20];
+        uint8_t  up[TQ_UPGRADES];
+        uint8_t  load[TQ_SLOTS_MAX];    /* 0xFF empty */
+        uint8_t  level[TQ_WEAPONS];
+    } t[TQ_MAX_TANKS];
+} tq_setup_t;
 
-/* Where the tank whose turn it is can go: Dijkstra over the 1 m cells with
- * the slope's cost, into s->reach; cost[] (AP x 16) kept for the path. */
+void tq_game_new(tq_state_t *s, tq_terrain_t *t, const tq_setup_t *su);
+
+/* The turn's start: AP back (less an EMP), the weather's wind, fire
+ * burning whoever stands in it (into ev) */
+void tq_game_turn(tq_state_t *s, const tq_terrain_t *t, tq_event_t *ev);
+/* The next tank alive after the current one */
+int  tq_game_next(const tq_state_t *s);
+/* The team left alone, or -1 */
+int  tq_game_winner(const tq_state_t *s);
+
+/* Where the tank whose turn it is can go (s->reach) */
 void tq_game_reach(tq_state_t *s, const tq_terrain_t *t);
 /* The path to a cell (s->path), and its AP; false if out of reach */
 bool tq_game_route(tq_state_t *s, const tq_terrain_t *t, float x, float y, int *ap);
+/* A tank drove over a mine? The blast is in ev */
+bool tq_game_mines(tq_state_t *s, tq_terrain_t *t, int who, tq_event_t *ev);
 
-/* A muzzle and its velocity, for the tank's turret and barrel */
-void tq_game_muzzle(const tq_tank_t *k, const tq_terrain_t *t, tq_v3_t *p, tq_v3_t *v, int weapon);
-/* The arc the aim would fly (s->arc), up to its landing */
+/* The weapon picked by a tank, and its level */
+static inline int tq_weapon_of(const tq_tank_t *k)
+{
+    return k->load[k->sel];
+}
+
+void tq_game_muzzle(const tq_tank_t *k, const tq_terrain_t *t, tq_v3_t *p, tq_v3_t *v);
+/* The arc the aim would fly (s->arc), as much as the weapon's guide shows */
 void tq_game_arc(tq_state_t *s, const tq_terrain_t *t);
 
-/* Fires: s->shell flies */
-void tq_game_fire(tq_state_t *s, const tq_terrain_t *t);
+/* Fires the current tank's weapon. Self weapons and the laser act at once
+ * (their events in ev, *nev); the rest fly (tq_game_flying). */
+void tq_game_fire(tq_state_t *s, tq_terrain_t *t, tq_event_t *ev, int *nev);
+bool tq_game_flying(const tq_state_t *s);
+/* The first shell in the air (the camera follows it), or NULL */
+const tq_shell_t *tq_game_lead(const tq_state_t *s);
 
-/* Moves the shell and the particles by dt. Returns true when the shell
- * landed this step: *at is where; the blast is the caller's to apply
- * (tq_game_blast), so the renderer can be told about the crater. */
-bool tq_game_step(tq_state_t *s, const tq_terrain_t *t, float dt, tq_v3_t *at);
-
-typedef struct {
-    int   damage[2];
-    int   trees, blocks;
-    bool  direct[2];
-} tq_blast_t;
-
-/* The blast: damage, the crater (returns its vertex box in *dirty), trees
- * and stones, the fire and the clods */
-void tq_game_blast(tq_state_t *s, tq_terrain_t *t, tq_v3_t at, int weapon, int owner,
-                   tq_blast_t *out, tq_vbox_t *dirty);
+/* Moves shells, particles and falling stones by dt; landings and what
+ * they did are in ev[0..*nev) */
+void tq_game_step(tq_state_t *s, tq_terrain_t *t, float dt, tq_event_t *ev, int *nev);
 
 /* The computer's turn: where to drive (a path in s->path), then the aim
- * (yaw, pitch and weapon to turn to) from wherever it stopped */
+ * (yaw, pitch and the weapon's slot) from wherever it stopped */
 void tq_ai_plan_move(tq_state_t *s, const tq_terrain_t *t, int *ap_cost);
-void tq_ai_plan_aim(tq_state_t *s, const tq_terrain_t *t, float *yaw, float *pitch, int *weapon);
+void tq_ai_plan_aim(tq_state_t *s, const tq_terrain_t *t, float *yaw, float *pitch, int *slot);
 
-/* A random number 0..1, for the effects */
 float tq_rand(void);
-
-/* Heights the things stand on */
 float tq_tank_z(const tq_terrain_t *t, const tq_tank_t *k);

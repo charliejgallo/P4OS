@@ -75,7 +75,7 @@ bool tq_scene_init(void)
     tq_top_axes(&S.F, &S.R, &S.U);
     float x0 = 1e9f, x1 = -1e9f, y0 = 1e9f, y1 = -1e9f, d1 = -1e9f;
     for (int k = 0; k < 8; k++) {
-        tq_v3_t p = tq_v3(k & 1 ? TQ_MAP_M : 0, k & 2 ? TQ_MAP_M : 0, k & 4 ? 8.0f : TQ_BASE_Z);
+        tq_v3_t p = tq_v3(k & 1 ? TQ_MAP_MAX : 0, k & 2 ? TQ_MAP_MAX : 0, k & 4 ? 8.0f : TQ_BASE_Z);
         float x = TQ_TOP_S * tq_dot(p, S.R), y = -TQ_TOP_S * tq_dot(p, S.U), d = tq_dot(p, S.F);
         x0 = fminf(x0, x); x1 = fmaxf(x1, x);
         y0 = fminf(y0, y); y1 = fmaxf(y1, y);
@@ -91,12 +91,12 @@ bool tq_scene_init(void)
     size_t n = (size_t)S.ww * S.wh;
     S.wpx = (uint16_t *)tq_malloc(n * 2);
     S.wz = (uint16_t *)tq_malloc(n * 2);
-    S.wv = (float *)tq_malloc(sizeof(float) * 3 * TQ_NV * TQ_NV);
+    S.wv = (float *)tq_malloc(sizeof(float) * 3 * TQ_NVMAX * TQ_NVMAX);
     S.fpx = (uint16_t *)tq_malloc(MAXPX / 4 * 2);
     S.fz = (uint16_t *)tq_malloc(MAXPX / 4 * 2);
-    S.cv = (float *)tq_malloc(sizeof(float) * 4 * TQ_NV * TQ_NV);
-    S.code = (uint8_t *)tq_malloc(TQ_NV * TQ_NV);
-    S.fcol = (uint32_t *)tq_malloc(4 * TQ_NV * TQ_NV);
+    S.cv = (float *)tq_malloc(sizeof(float) * 4 * TQ_NVMAX * TQ_NVMAX);
+    S.code = (uint8_t *)tq_malloc(TQ_NVMAX * TQ_NVMAX);
+    S.fcol = (uint32_t *)tq_malloc(4 * TQ_NVMAX * TQ_NVMAX);
     if (!S.wpx || !S.wz || !S.wv || !S.fpx || !S.fz || !S.cv || !S.code || !S.fcol) {
         tq_scene_free();
         return false;
@@ -121,7 +121,7 @@ void tq_scene_free(void)
 
 size_t tq_scene_bytes(void)
 {
-    return (size_t)S.ww * S.wh * 4 + MAXPX + sizeof(float) * 7 * TQ_NV * TQ_NV + 5 * TQ_NV * TQ_NV;
+    return (size_t)S.ww * S.wh * 4 + MAXPX + sizeof(float) * 7 * TQ_NVMAX * TQ_NVMAX + 5 * TQ_NVMAX * TQ_NVMAX;
 }
 
 void tq_scene_world_all(void)
@@ -156,11 +156,11 @@ static inline void vcol(uint32_t c, tq_vtx_t *v)
 
 static void world_vertex(const tq_terrain_t *t, int i, int j, tq_vtx_t *v)
 {
-    const float *w = &S.wv[(j * TQ_NV + i) * 3];
+    const float *w = &S.wv[(j * t->nv + i) * 3];
     v->x = w[0];
     v->y = w[1];
     v->q = w[2];
-    vcol(t->col[j * TQ_NV + i], v);
+    vcol(t->col[j * t->nv + i], v);
     v->u = i * TQ_CELL * 16.0f;
     v->v = j * TQ_CELL * 16.0f;
 }
@@ -175,12 +175,13 @@ static void world_sides(const tq_terrain_t *t, const tq_tgt_t *g)
 {
     for (int side = 0; side < 4; side++) {
         float shade = side == 0 ? 0.95f : (side == 1 ? 0.72f : 0.55f);
-        for (int k = 0; k < TQ_N; k++) {
+        int N = t->n;
+        for (int k = 0; k < N; k++) {
             int ia, ja, ib, jb;
             switch (side) {
             case 0: ia = k; ja = 0; ib = k + 1; jb = 0; break;                       /* south */
-            case 1: ia = TQ_N; ja = k; ib = TQ_N; jb = k + 1; break;                 /* east */
-            case 2: ia = k; ja = TQ_N; ib = k + 1; jb = TQ_N; break;                 /* north */
+            case 1: ia = N; ja = k; ib = N; jb = k + 1; break;                       /* east */
+            case 2: ia = k; ja = N; ib = k + 1; jb = N; break;                       /* north */
             default: ia = 0; ja = k; ib = 0; jb = k + 1; break;                      /* west */
             }
             /* in bands, so the strata show */
@@ -194,7 +195,7 @@ static void world_sides(const tq_terrain_t *t, const tq_tgt_t *g)
                 for (int q = 0; q < 4; q++) {
                     tq_v3_t p = tq_v3(ii[q] * TQ_CELL, jj[q] * TQ_CELL, zs[q]);
                     wproj(p, &v[q].x, &v[q].y, &v[q].q);
-                    vcol(tq_ter_side_colour(zs[q], shade * (q < 2 && b == 0 ? 1.08f : 1.0f)), &v[q]);
+                    vcol(tq_ter_side_colour(t, zs[q], shade * (q < 2 && b == 0 ? 1.08f : 1.0f)), &v[q]);
                     v[q].u = (ii[q] + jj[q]) * TQ_CELL * 16.0f;
                     v[q].v = zs[q] * 16.0f;
                 }
@@ -225,10 +226,11 @@ static void world_part(void *arg, int part)
         }
     }
     const tq_terrain_t *t = j->t;
-    for (int cj = 0; cj < TQ_N; cj++) {
-        for (int ci = 0; ci < TQ_N; ci++) {
-            const float *a = &S.wv[(cj * TQ_NV + ci) * 3], *c = &S.wv[((cj + 1) * TQ_NV + ci + 1) * 3];
-            const float *b = &S.wv[(cj * TQ_NV + ci + 1) * 3], *d = &S.wv[((cj + 1) * TQ_NV + ci) * 3];
+    int N = t->n, NV = t->nv;
+    for (int cj = 0; cj < N; cj++) {
+        for (int ci = 0; ci < N; ci++) {
+            const float *a = &S.wv[(cj * NV + ci) * 3], *c = &S.wv[((cj + 1) * NV + ci + 1) * 3];
+            const float *b = &S.wv[(cj * NV + ci + 1) * 3], *d = &S.wv[((cj + 1) * NV + ci) * 3];
             float minx = fminf(fminf(a[0], b[0]), fminf(c[0], d[0])), maxx = fmaxf(fmaxf(a[0], b[0]), fmaxf(c[0], d[0]));
             float miny = fminf(fminf(a[1], b[1]), fminf(c[1], d[1])), maxy = fmaxf(fmaxf(a[1], b[1]), fmaxf(c[1], d[1]));
             if (maxx < g.cx0 || minx >= g.cx1 || maxy < g.cy0 || miny >= g.cy1) continue;
@@ -246,9 +248,9 @@ static void world_part(void *arg, int part)
 
 static void world_draw(const tq_terrain_t *t, int x0, int y0, int x1, int y1)
 {
-    for (int j = 0; j < TQ_NV; j++)
-        for (int i = 0; i < TQ_NV; i++) {
-            float *w = &S.wv[(j * TQ_NV + i) * 3];
+    for (int j = 0; j < t->nv; j++)
+        for (int i = 0; i < t->nv; i++) {
+            float *w = &S.wv[(j * t->nv + i) * 3];
             wproj(tq_v3(i * TQ_CELL, j * TQ_CELL, tq_ter_vh(t, i, j)), &w[0], &w[1], &w[2]);
         }
     wjob_t job;
@@ -354,7 +356,8 @@ bool tq_scene_top_pick(const tq_terrain_t *t, float cx, float cy, int w, int h, 
     float prev = -60;
     for (float s = -60; s < 60; s += 0.1f) {
         tq_v3_t p = tq_v3(P0.x + S.F.x * s, P0.y + S.F.y * s, P0.z + S.F.z * s);
-        if (p.x < 0 || p.y < 0 || p.x > TQ_MAP_M || p.y > TQ_MAP_M) {
+        float M = t->n * TQ_CELL;
+        if (p.x < 0 || p.y < 0 || p.x > M || p.y > M) {
             prev = s;
             continue;
         }
@@ -444,13 +447,14 @@ static int top_items(const tq_req_t *r, const tq_terrain_t *t, item_t *it)
 {
     const tq_state_t *s = &r->st;
     int n = 0;
-    const tq_lut_t *scen = tq_art_lut(0);
+    const tq_lut_t *scen = tq_art_scenery_lut();
     for (int k = 0; k < s->ntree && n < MAX_ITEMS; k++) {
         const tq_tree_t *tr = &s->tree[k];
         item_t *i = &it[n];
         i->kind = 0;
         i->p = tq_v3(tr->x, tr->y, tq_ter_height(t, tr->x, tr->y));
         i->spr = tq_art_prop(TQ_SET_TOP, tr->alive ? tr->kind : TQ_PROP_STUMP, 0, 0);
+        i->kind = 0;
         i->lut = scen;
         i->alpha = 256;
         i->shadow = tr->alive ? 1.15f : 0.4f;
@@ -463,26 +467,27 @@ static int top_items(const tq_req_t *r, const tq_terrain_t *t, item_t *it)
         i->kind = 0;
         i->p = tq_v3(b->i + 0.5f, b->j + 0.5f, b->z);
         i->spr = tq_art_prop(TQ_SET_TOP, TQ_PROP_BLOCK1 + b->variant, 0, 0);
+        i->kind = 0;
         i->lut = scen;
         i->alpha = 256;
         i->shadow = 0;
         if (i->spr) n++;
     }
-    for (int k = 0; k < 2 && n < MAX_ITEMS - 2; k++) {
+    for (int k = 0; k < s->ntank && n < MAX_ITEMS - 2; k++) {
         const tq_tank_t *tk = &s->tank[k];
         tq_v3_t p = tq_v3(tk->x, tk->y, tq_tank_z(t, tk));
-        const tq_lut_t *lut = tq_art_lut(tk->scheme);
-        const tq_spr_t *hull = tq_art_tank(TQ_SET_TOP, TQ_PART_HULL, tq_yaw_index(tk->yaw), 0);
-        const tq_spr_t *tur = tq_art_tank(TQ_SET_TOP, TQ_PART_TURRET, tq_yaw_index(tk->tyaw), 0);
-        if (!hull) continue;
+        const tq_lut_t *lut = r->lut[k];
+        const tq_spr_t *hull = tq_art_tank(TQ_SET_TOP, tk->type, TQ_PART_HULL, tq_yaw_index(tk->yaw), 0);
+        const tq_spr_t *tur = tq_art_tank(TQ_SET_TOP, tk->type, TQ_PART_TURRET, tq_yaw_index(tk->tyaw), 0);
+        if (!hull || !lut) continue;
         memset(&it[n], 0, sizeof it[n]);
         it[n].p = p;
         it[n].spr = hull;
-        it[n].lut = lut;
+        it[n].lut = tk->alive ? lut : r->wreck;
         it[n].alpha = 256;
         it[n].shadow = 1.6f;
         n++;
-        if (tur && tk->hp > 0) {
+        if (tur && tk->alive) {
             it[n] = it[n - 1];
             it[n].p.z += 0.001f;        /* the turret after its hull */
             it[n].spr = tur;
@@ -490,14 +495,41 @@ static int top_items(const tq_req_t *r, const tq_terrain_t *t, item_t *it)
             n++;
         }
     }
-    if (s->shell.live && n < MAX_ITEMS) {
+    for (int k = 0; k < TQ_MAX_SHELLS && n < MAX_ITEMS; k++) {
+        const tq_shell_t *sh = &s->shell[k];
+        if (!sh->live || sh->under) continue;
         item_t *i = &it[n++];
+        memset(i, 0, sizeof *i);
         i->kind = 1;
-        i->p = s->shell.p;
+        i->p = sh->p;
         i->r = 0.2f;
-        i->rgb = 0x3C3A40;
+        i->rgb = TQ_WEAPON[sh->weapon].rgb;
         i->alpha = 256;
         i->shadow = 0.25f;
+    }
+    for (int k = 0; k < TQ_MAX_MINES && n < MAX_ITEMS; k++) {
+        const tq_mine_t *mn = &s->mine[k];
+        if (!mn->live) continue;
+        item_t *i = &it[n++];
+        memset(i, 0, sizeof *i);
+        i->kind = 1;
+        i->p = tq_v3(mn->x, mn->y, tq_ter_height(t, mn->x, mn->y) + 0.12f);
+        i->r = 0.24f;
+        i->rgb = ((int)(s->pulse * 4) & 1) ? 0xFF4A3A : 0x4A4E56;
+        i->alpha = 256;
+    }
+    if (s->beam_t > 0) {
+        for (int k = 0; k <= 24 && n < MAX_ITEMS; k++) {
+            float f = k / 24.0f;
+            item_t *i = &it[n++];
+            memset(i, 0, sizeof *i);
+            i->kind = 1;
+            i->p = tq_v3(s->beam_a.x + (s->beam_b.x - s->beam_a.x) * f, s->beam_a.y + (s->beam_b.y - s->beam_a.y) * f,
+                         s->beam_a.z + (s->beam_b.z - s->beam_a.z) * f);
+            i->r = 0.16f;
+            i->rgb = s->beam_rgb;
+            i->alpha = (int)(512 * s->beam_t);
+        }
     }
     for (int k = 0; k < s->npart && n < MAX_ITEMS; k++) {
         const tq_part_t *q = &s->part[k];
@@ -535,10 +567,10 @@ static void top_part(void *arg, int part)
 
     /* the reach: tiles on the ground */
     if (s->show_reach) {
-        for (int c = 0; c < TQ_GRID * TQ_GRID; c++) {
+        for (int c = 0; c < s->grid * s->grid; c++) {
             int cls = s->reach[c];
             if (!cls) continue;
-            float x0 = c % TQ_GRID + 0.07f, y0 = c / TQ_GRID + 0.07f, x1 = x0 + 0.86f, y1 = y0 + 0.86f;
+            float x0 = c % s->grid + 0.07f, y0 = c / s->grid + 0.07f, x1 = x0 + 0.86f, y1 = y0 + 0.86f;
             float xy[8], q[4];
             float px[4] = { x0, x1, x1, x0 }, py[4] = { y0, y0, y1, y1 };
             bool any = false;
@@ -621,8 +653,9 @@ static void top_part(void *arg, int part)
     }
     /* the hit points over the tanks */
     if (r->hp_bars) {
-        for (int k = 0; k < 2; k++) {
+        for (int k = 0; k < s->ntank; k++) {
             const tq_tank_t *tk = &s->tank[k];
+            if (!tk->alive) continue;
             float sx, sy, q;
             wproj(tq_v3(tk->x, tk->y, tq_tank_z(t, tk) + 2.6f), &sx, &sy, &q);
             int x = (int)(sx + ox) - 34, y = (int)(sy + oy) - 20;
@@ -631,7 +664,8 @@ static void top_part(void *arg, int part)
             uint32_t c = tk->hp > 50 ? 0x5ED16A : (tk->hp > 25 ? 0xFFC83C : 0xFF5A46);
             if (tk->hit_flash > 0 && ((int)(tk->hit_flash * 12) & 1)) c = 0xFFFFFF;
             tq_rect(&g, x, y, fill, 8, c, 256);
-            tq_rect(&g, x, y, 68, 2, tq_art_scheme_rgb(tk->scheme), 256);
+            tq_rect(&g, x, y, 68, 2, r->rgb[k], 256);
+            if (tk->shield > 0) tq_rect(&g, x, y + 8, 68 * (tk->shield > 60 ? 60 : tk->shield) / 60, 3, 0x46C8FF, 256);
         }
     }
 }
@@ -677,9 +711,10 @@ typedef struct {
     int n;
     int tris[2];
     float yhz;                      /* the horizon's row */
+    uint32_t fog, sky_top, sky_low, far, near;
+    float fog_near, fog_max;
 } fpjob_t;
 
-#define FOG_RGB 0xC4DCE8
 
 static inline uint32_t mix_rgb(uint32_t a, uint32_t b, float f)
 {
@@ -693,9 +728,9 @@ static void fp_vertices(fpjob_t *j)
     const tq_terrain_t *t = j->t;
     tq_v3_t e = j->r->eye;
     float xmax = j->cx / j->f * 1.1f, ymax = j->cy / j->f * 1.6f;
-    for (int jj = 0; jj < TQ_NV; jj++) {
-        for (int ii = 0; ii < TQ_NV; ii++) {
-            int k = jj * TQ_NV + ii;
+    for (int jj = 0; jj < t->nv; jj++) {
+        for (int ii = 0; ii < t->nv; ii++) {
+            int k = jj * t->nv + ii;
             tq_v3_t d = tq_v3(ii * TQ_CELL - e.x, jj * TQ_CELL - e.y, t->h[k] - e.z);
             float xc = tq_dot(d, j->Rw), yc = tq_dot(d, j->Uw), zc = tq_dot(d, j->Fw);
             float *o = &S.cv[k * 4];
@@ -710,7 +745,7 @@ static void fp_vertices(fpjob_t *j)
             o[1] = yc;
             o[2] = zc;
             float dist = sqrtf(d.x * d.x + d.y * d.y);
-            S.fcol[k] = mix_rgb(t->col[k], FOG_RGB, tq_clampf((dist - 16.0f) / 40.0f, 0, 0.55f));
+            S.fcol[k] = mix_rgb(t->col[k], j->fog, tq_clampf((dist - j->fog_near) / 40.0f, 0, j->fog_max));
         }
     }
 }
@@ -737,7 +772,7 @@ static int fp_tri(const fpjob_t *j, const tq_tgt_t *g, int a, int b, int c)
         cam[k][1] = o[1];
         cam[k][2] = o[2];
         vcol(S.fcol[idx[k]], &v[k]);
-        int ii = idx[k] % TQ_NV, jj = idx[k] / TQ_NV;
+        int ii = idx[k] % j->t->nv, jj = idx[k] / j->t->nv;
         v[k].u = ii * TQ_CELL * 16.0f;
         v[k].v = jj * TQ_CELL * 16.0f;
     }
@@ -793,10 +828,10 @@ static void fp_sky(const fpjob_t *j, const tq_tgt_t *g)
         uint16_t c;
         if (y < yhz) {
             float f = tq_clampf((yhz - y) / (j->f * 0.9f), 0, 1);
-            c = tq_565(mix_rgb(0xD2E6F0, 0x5C9AD6, f));
+            c = tq_565(mix_rgb(j->sky_low, j->sky_top, f));
         } else {
             float f = tq_clampf((y - yhz) / (j->f * 0.5f), 0, 1);
-            c = tq_565(mix_rgb(0xA9C49A, 0x6E9A55, f));
+            c = tq_565(mix_rgb(j->far, j->near, f));
         }
         for (int x = 0; x < W; x++) {
             p[x] = c;
@@ -823,7 +858,7 @@ static int fp_items(const tq_req_t *r, const tq_terrain_t *t, fpjob_t *j, item_t
 {
     const tq_state_t *s = &r->st;
     int n = 0;
-    const tq_lut_t *scen = tq_art_lut(0);
+    const tq_lut_t *scen = tq_art_scenery_lut();
     for (int k = 0; k < s->ntree && n < MAX_ITEMS; k++) {
         const tq_tree_t *tr = &s->tree[k];
         it[n].kind = 0;
@@ -847,23 +882,47 @@ static int fp_items(const tq_req_t *r, const tq_terrain_t *t, fpjob_t *j, item_t
         it[n].rgb = 1;
         n++;
     }
-    for (int k = 0; k < 2 && n < MAX_ITEMS - 1; k++) {
+    for (int k = 0; k < s->ntank && n < MAX_ITEMS - 1; k++) {
         if (k == r->me) continue;
         const tq_tank_t *tk = &s->tank[k];
         it[n].kind = 2;
         it[n].p = tq_v3(tk->x, tk->y, tq_tank_z(t, tk));
-        it[n].lut = tq_art_lut(tk->scheme);
+        it[n].lut = tk->alive ? r->lut[k] : r->wreck;
         it[n].alpha = 256;
         it[n].r = (float)k;
-        n++;
+        if (it[n].lut) n++;
     }
-    if (s->shell.live && n < MAX_ITEMS) {
+    for (int k = 0; k < TQ_MAX_SHELLS && n < MAX_ITEMS; k++) {
+        const tq_shell_t *sh = &s->shell[k];
+        if (!sh->live || sh->under) continue;
         it[n].kind = 1;
-        it[n].p = s->shell.p;
+        it[n].p = sh->p;
         it[n].r = 0.2f;
-        it[n].rgb = 0x3C3A40;
+        it[n].rgb = TQ_WEAPON[sh->weapon].rgb;
         it[n].alpha = 256;
         n++;
+    }
+    for (int k = 0; k < TQ_MAX_MINES && n < MAX_ITEMS; k++) {
+        const tq_mine_t *mn = &s->mine[k];
+        if (!mn->live) continue;
+        it[n].kind = 1;
+        it[n].p = tq_v3(mn->x, mn->y, tq_ter_height(t, mn->x, mn->y) + 0.12f);
+        it[n].r = 0.24f;
+        it[n].rgb = ((int)(s->pulse * 4) & 1) ? 0xFF4A3A : 0x4A4E56;
+        it[n].alpha = 256;
+        n++;
+    }
+    if (s->beam_t > 0) {
+        for (int k = 0; k <= 40 && n < MAX_ITEMS; k++) {
+            float f = k / 40.0f;
+            it[n].kind = 1;
+            it[n].p = tq_v3(s->beam_a.x + (s->beam_b.x - s->beam_a.x) * f, s->beam_a.y + (s->beam_b.y - s->beam_a.y) * f,
+                            s->beam_a.z + (s->beam_b.z - s->beam_a.z) * f);
+            it[n].r = 0.12f;
+            it[n].rgb = s->beam_rgb;
+            it[n].alpha = (int)(512 * s->beam_t);
+            n++;
+        }
     }
     for (int k = 0; k < s->npart && n < MAX_ITEMS; k++) {
         const tq_part_t *q = &s->part[k];
@@ -902,7 +961,7 @@ static void fp_sprite(const fpjob_t *j, const tq_tgt_t *g, const tq_spr_t *s0, i
     float scale = j->f / zc / TQ_LOW_S;
     int mip = scale < 0.3f ? 2 : (scale < 0.6f ? 1 : 0);
     const tq_spr_t *s;
-    if (set_mip_from == 0) s = tq_art_tank(TQ_SET_LOW, part, yaw_idx, mip);
+    if (set_mip_from >= 100) s = tq_art_tank(TQ_SET_LOW, set_mip_from - 100, part, yaw_idx, mip);
     else s = tq_art_prop(TQ_SET_LOW, prop, yaw_idx, mip);
     if (!s) s = s0;
     if (!s) return;
@@ -923,9 +982,10 @@ static void fp_part(void *arg, int part)
     fp_sky(j, &g);
     /* the ground */
     int tris = 0;
-    for (int cj = 0; cj < TQ_N; cj++) {
-        for (int ci = 0; ci < TQ_N; ci++) {
-            int a = cj * TQ_NV + ci, b = a + 1, c = a + TQ_NV + 1, d = a + TQ_NV;
+    int N = j->t->n, NV = j->t->nv;
+    for (int cj = 0; cj < N; cj++) {
+        for (int ci = 0; ci < N; ci++) {
+            int a = cj * NV + ci, b = a + 1, c = a + NV + 1, d = a + NV;
             tris += fp_tri(j, &g, a, b, c);
             tris += fp_tri(j, &g, a, c, d);
         }
@@ -952,9 +1012,9 @@ static void fp_part(void *arg, int part)
             const tq_tank_t *tk = &s->tank[(int)i->r];
             tq_shadow(&g, sx + j->f * 0.5f / zc, sy, j->f * 1.7f / zc, j->f * 1.7f / zc * 0.25f, 150);
             int hy = tq_yaw_index(tk->yaw - r->yaw), ty = tq_yaw_index(tk->tyaw - r->yaw);
-            fp_sprite(j, &g, NULL, 0, 0, TQ_PART_HULL, hy, i->lut, sx, sy, zc, 256);
-            if (tk->hp > 0) fp_sprite(j, &g, NULL, 0, 0, TQ_PART_TURRET, ty, i->lut, sx, sy, zc, 256);
-            if (r->hp_bars) {
+            fp_sprite(j, &g, NULL, 100 + tk->type, 0, TQ_PART_HULL, hy, i->lut, sx, sy, zc, 256);
+            if (tk->alive) fp_sprite(j, &g, NULL, 100 + tk->type, 0, TQ_PART_TURRET, ty, i->lut, sx, sy, zc, 256);
+            if (r->hp_bars && tk->alive) {
                 float bx, by, bz;
                 fp_project_pt(j, tq_v3(i->p.x, i->p.y, i->p.z + 2.6f), &bx, &by, &bz);
                 int wbar = 44;
@@ -980,7 +1040,7 @@ static void fp_part(void *arg, int part)
             float sx, sy, zc;
             fp_project_pt(j, s->arc_end, &sx, &sy, &zc);
             if (zc > 1) {
-                float rr = j->f * TQ_WEAPON[s->tank[s->cur].weapon].radius / zc;
+                float rr = j->f * TQ_WEAPON[tq_weapon_of(&s->tank[s->cur])].radius / zc;
                 float k = tq_clampf((r->eye.z - s->arc_end.z) / zc, 0.12f, 1.0f);
                 tq_ring(&g, sx, sy, rr, rr * k, 2.5f, 0xFF5A46, 230);
                 tq_ring(&g, sx, sy, rr * 0.35f, rr * 0.35f * k, 2.0f, 0xFFFFFF, 230);
@@ -989,9 +1049,9 @@ static void fp_part(void *arg, int part)
     }
     /* the turret and the barrel, nearest of all */
     const tq_tank_t *me = &s->tank[r->me];
-    const tq_lut_t *lut = tq_art_lut(me->scheme);
+    const tq_lut_t *lut = r->lut[r->me];
     int pi = (int)floorf((me->pitch / TQ_DEG + 5.0f) / 5.0f + 0.5f);
-    const tq_spr_t *bar = tq_art_barrel(pi), *roof = tq_art_roof();
+    const tq_spr_t *bar = tq_art_barrel(me->type, pi), *roof = tq_art_roof(me->type);
     int ax = (int)floorf(j->cx + 0.5f), ay = (int)floorf(j->cy + 0.5f);
     if (bar) tq_spr_draw(&g, bar, lut, ax, ay, TQ_QMAX - 128, 1, 256, S.fz, j->fw, true);
     if (roof) tq_spr_draw(&g, roof, lut, ax, ay, TQ_QMAX - 128, 1, 256, S.fz, j->fw, true);
@@ -1029,6 +1089,15 @@ static void render_fp(const tq_req_t *r, const tq_terrain_t *t, uint16_t *fb, tq
     j.Rw = tq_v3(syw, -cyw, 0);
     j.Uw = tq_v3(j.Rw.y * j.Fw.z - j.Rw.z * j.Fw.y, j.Rw.z * j.Fw.x - j.Rw.x * j.Fw.z, j.Rw.x * j.Fw.y - j.Rw.y * j.Fw.x);
     j.yhz = j.cy + j.f * tanf(r->pitch);
+    j.sky_top = tq_ter_far_colour(t->biome, 0);
+    j.sky_low = tq_ter_far_colour(t->biome, 1);
+    j.far = tq_ter_far_colour(t->biome, 2);
+    j.near = mix_rgb(j.far, 0x203020, 0.25f);
+    j.fog = j.sky_low;
+    bool fog = r->st.weather == TQ_WX_FOG;
+    j.fog_near = fog ? 4.0f : 16.0f;
+    j.fog_max = fog ? 0.85f : 0.55f;
+    if (fog) j.far = j.sky_low;
     uint32_t t0 = now_us();
     fp_vertices(&j);
     j.items = items;
@@ -1048,10 +1117,34 @@ static void render_fp(const tq_req_t *r, const tq_terrain_t *t, uint16_t *fb, tq
     }
 }
 
+/* The hangar: a backdrop, a turntable, the tank */
+static void show_part(void *arg, int part)
+{
+    const tq_req_t *r = ((const void **)arg)[0];
+    uint16_t *fb = ((void **)arg)[1];
+    int W = r->w, H = r->h;
+    tq_tgt_t g = { fb, NULL, W, H, W, 0, part ? H / 2 : 0, W, part ? H : H / 2 };
+    for (int y = g.cy0; y < g.cy1; y++) {
+        float f = (float)y / H;
+        uint16_t c = tq_565(mix_rgb(0x34404E, 0x141A22, f));
+        uint16_t *p = fb + (size_t)y * W;
+        for (int x = 0; x < W; x++) p[x] = c;
+    }
+    float cx = r->show_x, cy = r->show_y;
+    tq_ring(&g, cx, cy + 6, 270, 70, 10, 0x56677A, 200);
+    tq_shadow(&g, cx, cy + 4, 250, 62, 120);
+    tq_shadow(&g, cx + 20, cy, 190, 40, 200);
+    const tq_spr_t *spr = tq_art_show(r->show_type, r->show_frame);
+    if (spr && r->lut[0]) tq_spr_draw(&g, spr, r->lut[0], (int)cx, (int)cy, 0, 0, 256, NULL, 0, false);
+}
+
 void tq_scene_render(const tq_req_t *r, const tq_terrain_t *t, uint16_t *fb, tq_prof_t *prof)
 {
     uint32_t t0 = now_us();
-    if (r->mode == TQ_VIEW_FP) render_fp(r, t, fb, prof);
+    if (r->mode == TQ_VIEW_SHOW) {
+        const void *arg[2] = { r, fb };
+        run(show_part, (void *)arg);
+    } else if (r->mode == TQ_VIEW_FP) render_fp(r, t, fb, prof);
     else render_top(r, t, fb, prof);
     if (prof) prof->total_us += now_us() - t0;
 }

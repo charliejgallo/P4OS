@@ -18,10 +18,11 @@
 #pragma once
 
 #include "tq_game.h"
+#include "tq_gfx.h"
 
 #include <stddef.h>
 
-enum { TQ_VIEW_TOP = 0, TQ_VIEW_FP };
+enum { TQ_VIEW_TOP = 0, TQ_VIEW_FP, TQ_VIEW_SHOW };
 
 typedef struct {
     int     mode;
@@ -31,6 +32,11 @@ typedef struct {
     float   yaw, pitch;             /* fp: heading (CCW from +X) and the eye's pitch, rad */
     int     me;                     /* fp: whose eye (that tank is not drawn) */
     bool    hp_bars;
+    const tq_lut_t *lut[TQ_MAX_TANKS];  /* each tank's paint */
+    const tq_lut_t *wreck;          /* a tank that lost */
+    uint32_t rgb[TQ_MAX_TANKS];     /* each tank's colour on the bars */
+    int     show_type, show_frame;  /* show: the hangar's turntable, painted with lut[0] */
+    float   show_x, show_y;         /* where its anchor goes */
     tq_state_t st;
 } tq_req_t;
 

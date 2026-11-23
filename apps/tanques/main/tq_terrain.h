@@ -1,24 +1,30 @@
 /*
  * TANQUES - the ground: a height map the shots dig into.
  *
- * TQ_NV x TQ_NV heights, TQ_CELL apart, with a material and a scorch per
- * vertex and the vertex's colour already lit (the sun with the shadows the
- * hills cast, the sky, a little occlusion in the hollows). A crater lowers
- * the heights and lights again only the vertices it can have changed; the
- * renderers draw the triangles with those colours.
+ * n x n cells of TQ_CELL (the map's size is the battle's: 28 to 40 m), with
+ * a material and a scorch per vertex and the vertex's colour already lit
+ * (the sun with the shadows the hills cast, the sky, a little occlusion in
+ * the hollows). Each biome shapes and colours it its own way. A crater
+ * lowers the heights and lights again only the vertices it can have
+ * changed; the renderers draw the triangles with those colours.
  */
 #pragma once
 
 #include "tq_view.h"
 
-enum { TQ_MAT_GRASS = 0, TQ_MAT_DIRT, TQ_MAT_ROCK, TQ_MAT_SAND };
+/* per biome: the ground, a path, rock, and the biome's own (ice, lava,
+ * paving) */
+enum { TQ_MAT_BASE = 0, TQ_MAT_PATH, TQ_MAT_ROCK, TQ_MAT_SPECIAL };
 
 typedef struct {
-    float    h[TQ_NV * TQ_NV];
-    float    burn[TQ_NV * TQ_NV];          /* scorch, 0..1 */
-    uint8_t  mat[TQ_NV * TQ_NV];
-    uint8_t  tint[TQ_NV * TQ_NV];          /* the grass's patches, 0..255 */
-    uint32_t col[TQ_NV * TQ_NV];           /* lit colour, 0xRRGGBB */
+    int      n, nv;                         /* cells and vertices per side */
+    float    size;                          /* metres */
+    int      biome;
+    float    h[TQ_NVMAX * TQ_NVMAX];
+    float    burn[TQ_NVMAX * TQ_NVMAX];     /* scorch, 0..1 */
+    uint8_t  mat[TQ_NVMAX * TQ_NVMAX];
+    uint8_t  tint[TQ_NVMAX * TQ_NVMAX];     /* the ground's patches, 0..255 */
+    uint32_t col[TQ_NVMAX * TQ_NVMAX];      /* lit colour, 0xRRGGBB */
     float    hmax;
 } tq_terrain_t;
 
@@ -27,18 +33,24 @@ typedef struct {
     int x0, y0, x1, y1;
 } tq_vbox_t;
 
-void  tq_ter_generate(tq_terrain_t *t, uint32_t seed);
+void  tq_ter_generate(tq_terrain_t *t, uint32_t seed, float size, int biome);
+/* Levels the ground around a spot (where a tank starts) */
+void  tq_ter_flatten(tq_terrain_t *t, float x, float y, float r);
+/* Lights everything again (after generating, flattening) */
+void  tq_ter_relight(tq_terrain_t *t);
 float tq_ter_height(const tq_terrain_t *t, float x, float y);
 void  tq_ter_normal(const tq_terrain_t *t, float x, float y, tq_v3_t *n);
 /* Lights the vertices in the box again */
 void  tq_ter_light(tq_terrain_t *t, tq_vbox_t b);
-/* Digs a crater (radius r, depth d metres) with a rim and a scorch; returns
- * the vertices whose colour changed (shadows reach downhill of it) */
-tq_vbox_t tq_ter_crater(tq_terrain_t *t, float x, float y, float r, float d);
+/* Digs a crater (radius r, depth d metres; d < 0 raises a mound) with a rim
+ * and a scorch; returns the vertices whose colour changed */
+tq_vbox_t tq_ter_crater(tq_terrain_t *t, float x, float y, float r, float d, bool scorch);
 /* The colour of the map's sides at a height (the diorama's cut) */
-uint32_t tq_ter_side_colour(float z, float shade);
+uint32_t tq_ter_side_colour(const tq_terrain_t *t, float z, float shade);
+/* The biome's ground beyond the map (the first person's far plane) and sky */
+uint32_t tq_ter_far_colour(int biome, int which);
 
 static inline float tq_ter_vh(const tq_terrain_t *t, int i, int j)
 {
-    return t->h[j * TQ_NV + i];
+    return t->h[j * t->nv + i];
 }

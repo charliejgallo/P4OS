@@ -1,6 +1,11 @@
 /*
- * TANQUES - the art pack (tools/pack.py): the tank, the trees, the stones
- * and the gunner's view, as sprites of four planes the app colours itself.
+ * TANQUES - the art pack (tools/pack.py): the six tanks, each biome's
+ * scenery, the gunner's views and the hangar's turntables, as sprites the
+ * app colours itself.
+ *
+ * The pack is big (all six tanks from every side); a battle loads only its
+ * tanks and its biome, the hangar only the tank on its turntable. Each is a
+ * group read in one go and freed as a whole.
  */
 #pragma once
 
@@ -8,26 +13,32 @@
 
 enum { TQ_SET_TOP = 0, TQ_SET_LOW, TQ_SETS };
 enum { TQ_PART_HULL = 0, TQ_PART_TURRET, TQ_PARTS };
-enum { TQ_PROP_ROUND = 0, TQ_PROP_PINE, TQ_PROP_STUMP, TQ_PROP_BLOCK1, TQ_PROP_BLOCK2, TQ_PROPS };
+/* a biome's five pieces */
+enum { TQ_PROP_TA = 0, TQ_PROP_TB, TQ_PROP_STUMP, TQ_PROP_BLOCK1, TQ_PROP_BLOCK2, TQ_PROPS };
 
-#define TQ_SCHEMES 3
 #define TQ_MIPS    3            /* the low set: full, half, quarter */
+#define TQ_SHOWS   16           /* the hangar's turntable */
 
-/* Loads the pack whole into PSRAM and makes the low set's smaller copies.
- * false: no pack (the app says so on screen). */
-bool tq_art_load(void);
-void tq_art_free(void);
+/* Opens the pack and reads its table; false: no pack */
+bool tq_art_open(void);
+void tq_art_close(void);
 bool tq_art_ready(void);
-size_t tq_art_bytes(void);
 
-/* NULL if the pack lacks it */
-const tq_spr_t *tq_art_tank(int set, int part, int yaw_index, int mip);
-/* props: the low set's blocks come in 8 yaws over 90 degrees */
+/* Loads these tank types (and frees the others); with_fp: their gunner's
+ * views too (bit per type). false: out of memory or a read failed. */
+bool tq_art_use_tanks(uint32_t types, uint32_t with_fp);
+bool tq_art_use_biome(int biome);
+bool tq_art_use_show(int type);
+size_t tq_art_bytes(void);      /* what is loaded */
+
+/* NULL if not loaded */
+const tq_spr_t *tq_art_tank(int set, int type, int part, int yaw_index, int mip);
 const tq_spr_t *tq_art_prop(int set, int prop, int yaw_index, int mip);
-const tq_spr_t *tq_art_roof(void);
-const tq_spr_t *tq_art_barrel(int pitch_index);
+const tq_spr_t *tq_art_roof(int type);
+const tq_spr_t *tq_art_barrel(int type, int pitch_index);
+const tq_spr_t *tq_art_show(int type, int index);
 
-/* The paints: 0 orange, 1 blue, 2 green. The scenery's regions are the same
- * in all three. */
-const tq_lut_t *tq_art_lut(int scheme);
-uint32_t tq_art_scheme_rgb(int scheme);
+/* A tank's colours: the two paints, the emblem and its paint */
+void tq_art_tank_lut(tq_lut_t *lut, uint32_t paint1, uint32_t paint2, int emblem, uint32_t emblem_paint);
+/* The scenery's colours in the loaded biome */
+const tq_lut_t *tq_art_scenery_lut(void);

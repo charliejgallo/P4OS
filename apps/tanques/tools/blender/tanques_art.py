@@ -53,6 +53,8 @@ ap.add_argument("--only", default="")
 ap.add_argument("--samples", type=int, default=48)
 ap.add_argument("--yaws", type=int, default=32)
 ap.add_argument("--cpu", action="store_true")
+ap.add_argument("--tanks", default="", help="which tanks (default: all six)")
+ap.add_argument("--biomes", default="", help="which biomes (default: all five)")
 ap.add_argument("--sets", default="top,low", help="which of top,low to render (tank, scenery)")
 ARGS = ap.parse_args(argv)
 OUT = os.path.abspath(ARGS.out)
@@ -139,7 +141,7 @@ REGION_LOOK = {   # id: (roughness, specular, emission)
     1: (0.42, 0.40, 0.0), 2: (0.42, 0.40, 0.0), 3: (0.85, 0.08, 0.0),
     4: (0.28, 0.65, 0.0), 5: (0.30, 0.50, 0.9), 6: (0.40, 0.40, 0.0),
     8: (0.80, 0.15, 0.0), 9: (0.85, 0.10, 0.0), 10: (0.75, 0.15, 0.0),
-    11: (0.80, 0.10, 0.0),
+    11: (0.80, 0.10, 0.0), 7: (0.60, 0.30, 0.0), 12: (0.40, 0.30, 1.4),
 }
 _mats = {}
 
@@ -184,6 +186,26 @@ def mat_id(rid):
     comb.inputs["R"].default_value = (rid + 0.5) / 16.0
     nt.links.new(geo.outputs["Position"], dot.inputs[0])
     nt.links.new(dot.outputs["Value"], comb.inputs["G"])
+    if rid == 6:
+        # the badge's own coordinates (its box, 0..1), 16 x 16 cells in B:
+        # where the app draws the player's emblem
+        tc = nt.nodes.new("ShaderNodeTexCoord")
+        sep = nt.nodes.new("ShaderNodeSeparateXYZ")
+        nt.links.new(tc.outputs["Generated"], sep.inputs[0])
+
+        def op(kind, a, b):
+            n = nt.nodes.new("ShaderNodeMath")
+            n.operation = kind
+            for i, v in enumerate((a, b)):
+                if isinstance(v, float):
+                    n.inputs[i].default_value = v
+                else:
+                    nt.links.new(v, n.inputs[i])
+            return n.outputs[0]
+        u = op("FLOOR", op("MULTIPLY", sep.outputs["X"], 15.999), 0.0)
+        v = op("FLOOR", op("MULTIPLY", sep.outputs["Y"], 15.999), 0.0)
+        b = op("DIVIDE", op("ADD", op("ADD", op("MULTIPLY", u, 16.0), v), 0.5), 256.0)
+        nt.links.new(b, comb.inputs["B"])
     nt.links.new(comb.outputs["Image"], em.inputs["Color"])
     nt.links.new(em.outputs["Emission"], out.inputs["Surface"])
     _mats[key] = m
@@ -302,63 +324,253 @@ def parent_all(objs, root_name):
 
 
 # ---------------------------------------------------------------------------
-# The tank. Origin: on the ground under the turret's pivot; +X forward.
+# The six tanks. Origin: on the ground under the turret's pivot; +X forward.
+# Each is a hull, a turret body and a barrel (with its mantlet) that pitches
+# about its pivot. TANKS at the end has what the app must know too
+# (tq_tanks.c, TQ_TANK: the barrel's pivot and muzzle, the gunner's eye).
 
-BARREL_PIVOT = V((0.64, 0.0, 1.38))
+def tracks(objs, y, length, width, height, wheels, wheel_r, x0=0.06):
+    for s in (-1, 1):
+        objs.append(rbox("track%d" % s, (x0, s * y, height / 2 + 0.01), (length, width, height), min(height / 2 - 0.03, 0.36), 3, seg=6))
+        n = int(length / 0.23)
+        for i in range(n):
+            x = x0 - length / 2 + 0.2 + i * (length - 0.4) / max(1, n - 1)
+            objs.append(rbox("tread%d_%d" % (s, i), (x, s * y, height + 0.02), (0.10, width - 0.02, 0.06), 0.025, 3, seg=2))
+        for i in range(wheels):
+            x = x0 - length / 2 + wheel_r + 0.12 + i * (length - 2 * wheel_r - 0.24) / max(1, wheels - 1)
+            objs.append(cyl("wheel%d_%d" % (s, i), (x, s * (y + width / 2 + 0.01), height / 2 + 0.01), wheel_r, 0.08, "Y", 4, bevel=0.03))
+            objs.append(cyl("hub%d_%d" % (s, i), (x, s * (y + width / 2 + 0.06), height / 2 + 0.01), wheel_r * 0.43, 0.05, "Y", 2, bevel=0.02))
 
 
-def build_hull():
-    objs = []
-
-    def wedge(v):        # a sloped glacis and a softer rear
+def wedge(front, back):
+    def f(v):
         if v.co.z > 0 and v.co.x > 0:
-            v.co.x -= 0.34
+            v.co.x -= front
         if v.co.z > 0 and v.co.x < 0:
-            v.co.x += 0.14
-    objs.append(rbox("body", (0.08, 0, 0.76), (2.50, 1.46, 0.70), 0.28, 1, shape=wedge))
-    # a band of the second paint round the body, under the deck
-    objs.append(rbox("band", (0.10, 0, 0.62), (2.58, 1.54, 0.16), 0.08, 2, seg=3))
+            v.co.x += back
+    return f
+
+
+def badges(objs, x, y, z, r):
     for s in (-1, 1):
-        objs.append(rbox("track%d" % s, (0.06, s * 0.95, 0.40), (2.86, 0.56, 0.80), 0.34, 3, seg=6))
-        for i in range(11):                      # tread ridges on the track's top
-            x = -1.15 + i * 0.23
-            objs.append(rbox("tread%d_%d" % (s, i), (x + 0.06, s * 0.95, 0.80), (0.10, 0.54, 0.06), 0.025, 3, seg=2))
-        for i, x in enumerate((-0.92, -0.31, 0.31, 0.92)):
-            objs.append(cyl("wheel%d_%d" % (s, i), (x + 0.06, s * 1.22, 0.38), 0.23, 0.08, "Y", 4, bevel=0.03))
-            objs.append(cyl("hub%d_%d" % (s, i), (x + 0.06, s * 1.27, 0.38), 0.10, 0.05, "Y", 2, bevel=0.02))
-        objs.append(ball("lamp%d" % s, (1.10, s * 0.50, 0.98), 0.11, 5))
-    objs.append(rbox("rearbox", (-1.08, 0, 0.98), (0.28, 0.70, 0.28), 0.08, 2, seg=3))
-    objs.append(cyl("exhaust", (-1.12, -0.48, 0.80), 0.08, 0.26, "X", 4, bevel=0.02))
-    return objs
+        objs.append(cyl("badge%d" % s, (x, s * y, z), r, 0.03, "Y", 6, bevel=0.01))
 
 
-def build_turret(pitch_deg=8.0, with_barrel=True):
-    objs = []
-    objs.append(rbox("turret", (-0.10, 0, 1.40), (1.50, 1.24, 0.66), 0.31, 1, seg=6))
-    objs.append(rbox("ring", (-0.10, 0, 1.10), (1.40, 1.16, 0.12), 0.05, 2, seg=3))
-    objs.append(cyl("hatch", (-0.34, 0.22, 1.74), 0.27, 0.09, "Z", 2, bevel=0.035))
-    objs.append(ball("knob", (-0.34, 0.22, 1.81), 0.06, 4))
+def lamps(objs, x, y, z, r=0.10):
     for s in (-1, 1):
-        objs.append(cyl("badge%d" % s, (-0.14, s * 0.625, 1.40), 0.21, 0.03, "Y", 6, bevel=0.01))
-    if with_barrel:
-        objs += build_barrel(pitch_deg)
-    return objs
+        objs.append(ball("lamp%d" % s, (x, s * y, z), r, 5))
 
 
-def build_barrel(pitch_deg):
-    parts = [
-        rbox("mantlet", (0.66, 0, 1.38), (0.36, 0.60, 0.42), 0.14, 2, seg=4),
-        cyl("barrel", (1.25, 0, 1.38), 0.13, 1.10, "X", 1, bevel=0.0),
-        cyl("muzzle", (1.86, 0, 1.38), 0.18, 0.30, "X", 4, bevel=0.05),
-        cyl("muzzle_in", (2.02, 0, 1.38), 0.085, 0.03, "X", 3),
-    ]
+# -- Bombo: the all-rounder (the sample's tank)
+
+def hull_bombo():
+    o = [rbox("body", (0.08, 0, 0.76), (2.50, 1.46, 0.70), 0.28, 1, shape=wedge(0.34, 0.14)),
+         rbox("band", (0.10, 0, 0.62), (2.58, 1.54, 0.16), 0.08, 2, seg=3),
+         rbox("rearbox", (-1.08, 0, 0.98), (0.28, 0.70, 0.28), 0.08, 2, seg=3),
+         cyl("exhaust", (-1.12, -0.48, 0.80), 0.08, 0.26, "X", 4, bevel=0.02)]
+    tracks(o, 0.95, 2.86, 0.56, 0.80, 4, 0.23)
+    lamps(o, 1.10, 0.50, 0.98, 0.11)
+    return o
+
+
+def turret_bombo():
+    o = [rbox("turret", (-0.10, 0, 1.40), (1.50, 1.24, 0.66), 0.31, 1, seg=6),
+         rbox("ring", (-0.10, 0, 1.10), (1.40, 1.16, 0.12), 0.05, 2, seg=3),
+         cyl("hatch", (-0.34, 0.22, 1.74), 0.27, 0.09, "Z", 2, bevel=0.035),
+         ball("knob", (-0.34, 0.22, 1.81), 0.06, 4)]
+    badges(o, -0.14, 0.625, 1.40, 0.24)
+    return o
+
+
+def barrel_bombo():
+    return [rbox("mantlet", (0.66, 0, 1.38), (0.36, 0.60, 0.42), 0.14, 2, seg=4),
+            cyl("barrel", (1.25, 0, 1.38), 0.13, 1.10, "X", 1),
+            cyl("muzzle", (1.86, 0, 1.38), 0.18, 0.30, "X", 4, bevel=0.05),
+            cyl("muzzle_in", (2.02, 0, 1.38), 0.085, 0.03, "X", 3)]
+
+
+# -- Pulga: light and quick, a dome and a thin gun
+
+def hull_pulga():
+    o = [rbox("body", (0.05, 0, 0.62), (2.10, 1.28, 0.54), 0.25, 1, shape=wedge(0.30, 0.18)),
+         rbox("band", (0.06, 0, 0.50), (2.16, 1.34, 0.12), 0.06, 2, seg=3),
+         rbox("fin", (-0.98, 0, 0.98), (0.22, 1.00, 0.10), 0.05, 2, seg=3),
+         rbox("finpost", (-0.98, 0, 0.86), (0.12, 0.12, 0.22), 0.04, 4, seg=2)]
+    tracks(o, 0.78, 2.30, 0.42, 0.62, 3, 0.19, x0=0.02)
+    lamps(o, 0.96, 0.42, 0.80, 0.09)
+    return o
+
+
+def turret_pulga():
+    o = [ball("dome", (-0.05, 0, 1.02), 0.5, 1, scale=(1.08, 0.96, 0.66)),
+         rbox("ring", (-0.05, 0, 0.90), (0.98, 0.86, 0.10), 0.04, 2, seg=3),
+         cyl("hatch", (-0.22, 0.14, 1.32), 0.17, 0.06, "Z", 2, bevel=0.025),
+         cyl("antenna", (-0.36, -0.26, 1.55), 0.03, 0.70, "Z", 4),
+         ball("tip", (-0.36, -0.26, 1.92), 0.075, 5)]
+    badges(o, -0.05, 0.465, 1.03, 0.18)
+    return o
+
+
+def barrel_pulga():
+    return [ball("mantlet", (0.40, 0, 1.02), 0.17, 2),
+            cyl("barrel", (0.90, 0, 1.02), 0.075, 0.95, "X", 1),
+            cyl("muzzle", (1.40, 0, 1.02), 0.11, 0.18, "X", 4, bevel=0.03)]
+
+
+# -- Mamut: heavy, armour skirts and twin guns
+
+def hull_mamut():
+    o = [rbox("body", (0.05, 0, 0.88), (2.90, 1.80, 0.80), 0.33, 1, shape=wedge(0.36, 0.14)),
+         rbox("band", (0.06, 0, 0.70), (2.98, 1.88, 0.16), 0.08, 2, seg=3),
+         rbox("rearbox_a", (-1.30, 0.40, 1.16), (0.30, 0.55, 0.30), 0.09, 2, seg=3),
+         rbox("rearbox_b", (-1.30, -0.40, 1.16), (0.30, 0.55, 0.30), 0.09, 2, seg=3)]
+    for s in (-1, 1):
+        o.append(rbox("skirt%d" % s, (0.06, s * 1.43, 0.70), (3.10, 0.14, 0.40), 0.07, 2, seg=3))
+    tracks(o, 1.12, 3.20, 0.62, 0.90, 5, 0.22)
+    lamps(o, 1.35, 0.62, 1.06, 0.12)
+    return o
+
+
+def turret_mamut():
+    o = [rbox("turret", (-0.15, 0, 1.62), (1.90, 1.56, 0.78), 0.34, 1, seg=6),
+         rbox("ring", (-0.15, 0, 1.26), (1.80, 1.48, 0.14), 0.05, 2, seg=3)]
+    for s in (-1, 1):
+        o.append(cyl("hatch%d" % s, (-0.55, s * 0.36, 2.03), 0.25, 0.09, "Z", 2, bevel=0.035))
+    o.append(ball("knob", (-0.55, 0.36, 2.10), 0.06, 4))
+    badges(o, -0.22, 0.785, 1.62, 0.27)
+    return o
+
+
+def barrel_mamut():
+    o = [rbox("mantlet", (0.86, 0, 1.62), (0.40, 0.96, 0.50), 0.16, 2, seg=4)]
+    for s in (-1, 1):
+        o.append(cyl("barrel%d" % s, (1.55, s * 0.25, 1.62), 0.12, 1.30, "X", 1))
+        o.append(cyl("muzzle%d" % s, (2.25, s * 0.25, 1.62), 0.17, 0.28, "X", 4, bevel=0.05))
+    return o
+
+
+# -- Obus: artillery, a long deck and a fat mortar tube
+
+def hull_obus():
+    o = [rbox("body", (0.42, 0, 0.72), (3.00, 1.50, 0.60), 0.27, 1, shape=wedge(0.30, 0.10)),
+         rbox("band", (0.44, 0, 0.58), (3.08, 1.58, 0.14), 0.07, 2, seg=3)]
+    for s in (-1, 1):
+        o.append(rbox("crate%d" % s, (1.25, s * 0.38, 1.12), (0.46, 0.40, 0.30), 0.08, 2, seg=3))
+        o.append(rbox("leg%d" % s, (-1.10, s * 0.62, 0.42), (0.20, 0.18, 0.62), 0.06, 4, seg=2))
+    tracks(o, 0.95, 3.20, 0.54, 0.76, 5, 0.21, x0=0.42)
+    lamps(o, 1.85, 0.50, 0.92, 0.10)
+    return o
+
+
+def turret_obus():
+    o = [rbox("casemate", (-0.10, 0, 1.30), (1.40, 1.36, 0.64), 0.29, 1, seg=6),
+         rbox("ring", (-0.10, 0, 1.03), (1.32, 1.28, 0.12), 0.05, 2, seg=3)]
+    badges(o, -0.25, 0.685, 1.30, 0.24)
+    return o
+
+
+def barrel_obus():
+    return [ball("breech", (0.32, 0, 1.48), 0.32, 2),
+            cyl("tube", (0.92, 0, 1.48), 0.20, 1.20, "X", 1),
+            cyl("muzzle", (1.52, 0, 1.48), 0.26, 0.22, "X", 4, bevel=0.06),
+            cyl("muzzle_in", (1.64, 0, 1.48), 0.15, 0.03, "X", 3)]
+
+
+# -- Avispa: a missile pod on a mast
+
+def hull_avispa():
+    o = [rbox("body", (0.05, 0, 0.68), (2.36, 1.42, 0.58), 0.26, 1, shape=wedge(0.34, 0.12)),
+         rbox("band", (0.06, 0, 0.56), (2.42, 1.48, 0.10), 0.05, 2, seg=3),
+         rbox("stripe", (0.30, 0, 0.98), (0.90, 0.30, 0.04), 0.02, 2, seg=2)]
+    tracks(o, 0.88, 2.56, 0.48, 0.68, 4, 0.20)
+    lamps(o, 1.05, 0.46, 0.86, 0.10)
+    return o
+
+
+def turret_avispa():
+    o = [cyl("base", (-0.05, 0, 1.06), 0.56, 0.20, "Z", 2, bevel=0.06),
+         rbox("mast", (-0.10, 0, 1.28), (0.52, 0.62, 0.36), 0.13, 1, seg=4)]
+    badges(o, -0.10, 0.315, 1.28, 0.15)
+    return o
+
+
+def barrel_avispa():
+    o = [rbox("pod", (0.28, 0, 1.46), (1.10, 1.00, 0.62), 0.23, 1, seg=5),
+         rbox("podband", (0.10, 0, 1.46), (0.20, 1.04, 0.66), 0.08, 2, seg=3)]
+    for sy in (-1, 1):
+        for sz in (-1, 1):
+            y, z = sy * 0.22, 1.46 + sz * 0.15
+            o.append(cyl("rim%d%d" % (sy, sz), (0.83, y, z), 0.12, 0.06, "X", 4, bevel=0.02))
+            o.append(ball("nose%d%d" % (sy, sz), (0.85, y, z), 0.085, 2))
+    return o
+
+
+# -- Topo: the engineer, a dozer blade and a crane
+
+def hull_topo():
+    def tilt(v):
+        if v.co.z > 0:
+            v.co.x += 0.12
+    o = [rbox("body", (0.00, 0, 0.70), (2.30, 1.46, 0.62), 0.27, 1, shape=wedge(0.28, 0.12)),
+         rbox("band", (0.02, 0, 0.56), (2.36, 1.52, 0.12), 0.06, 2, seg=3),
+         rbox("blade", (1.48, 0, 0.42), (0.16, 2.15, 0.64), 0.07, 4, seg=3, shape=tilt)]
+    for s in (-1, 1):
+        o.append(rbox("arm%d" % s, (1.12, s * 0.62, 0.50), (0.62, 0.12, 0.12), 0.04, 2, seg=2))
+    tracks(o, 0.90, 2.50, 0.50, 0.70, 4, 0.20, x0=0.0)
+    return o
+
+
+def turret_topo():
+    o = [rbox("cabin", (-0.20, 0, 1.28), (1.10, 1.06, 0.64), 0.27, 1, seg=6),
+         rbox("ring", (-0.20, 0, 1.01), (1.04, 1.00, 0.10), 0.04, 2, seg=3),
+         cyl("beacon", (-0.38, 0.26, 1.68), 0.10, 0.14, "Z", 5, bevel=0.03),
+         rbox("crane_v", (-0.62, -0.30, 1.92), (0.14, 0.14, 0.80), 0.05, 2, seg=2),
+         rbox("crane_h", (-0.30, -0.30, 2.30), (0.78, 0.13, 0.13), 0.05, 2, seg=2),
+         ball("hook", (0.05, -0.30, 2.12), 0.08, 4)]
+    badges(o, -0.20, 0.535, 1.28, 0.20)
+    return o
+
+
+def barrel_topo():
+    return [ball("mantlet", (0.40, 0, 1.30), 0.21, 2),
+            cyl("barrel", (0.78, 0, 1.30), 0.11, 0.70, "X", 1),
+            cyl("muzzle", (1.16, 0, 1.30), 0.15, 0.20, "X", 4, bevel=0.04)]
+
+
+# name: (hull, turret, barrel, barrel pivot, the sprites' barrel pitch,
+#        the gunner's eye, the muzzle's distance from the pivot)
+TANKS = {
+    "bombo":  (hull_bombo,  turret_bombo,  barrel_bombo,  V((0.64, 0, 1.38)), 8,  V((-0.75, 0.52, 2.42)), 1.40),
+    "pulga":  (hull_pulga,  turret_pulga,  barrel_pulga,  V((0.40, 0, 1.02)), 8,  V((-0.80, 0.40, 1.92)), 1.10),
+    "mamut":  (hull_mamut,  turret_mamut,  barrel_mamut,  V((0.82, 0, 1.62)), 6,  V((-1.20, 0.72, 2.80)), 1.55),
+    "obus":   (hull_obus,   turret_obus,   barrel_obus,   V((0.32, 0, 1.48)), 32, V((-1.10, 0.62, 2.40)), 1.30),
+    "avispa": (hull_avispa, turret_avispa, barrel_avispa, V((0.05, 0, 1.46)), 6,  V((-1.55, 0.78, 2.60)), 0.85),
+    "topo":   (hull_topo,   turret_topo,   barrel_topo,   V((0.40, 0, 1.30)), 8,  V((-0.95, 0.50, 2.20)), 0.86),
+}
+
+
+def build_barrel(kind, pitch_deg):
+    t = TANKS[kind]
+    parts = t[2]()
     root = link(bpy.data.objects.new("barrel_pivot", None))
-    root.location = BARREL_PIVOT
+    root.location = t[3]
     for ob in parts:
         ob.parent = root
-        ob.matrix_parent_inverse = Matrix.Translation(-BARREL_PIVOT)
+        ob.matrix_parent_inverse = Matrix.Translation(-t[3])
     root.rotation_euler = (0, -math.radians(pitch_deg), 0)
     return parts + [root]
+
+
+def build_tank(kind, pitch_deg=None, hull=True, turret=True, barrel=True):
+    t = TANKS[kind]
+    o = []
+    if hull:
+        o += t[0]()
+    if turret:
+        o += t[1]()
+    if barrel:
+        o += build_barrel(kind, t[4] if pitch_deg is None else pitch_deg)
+    return o
 
 
 # ---------------------------------------------------------------------------
@@ -407,6 +619,144 @@ def build_block(seed=1):
         v.co += V(tuple(float(x) for x in rng.uniform(-0.025, 0.025, 3)))
     ob = rbox("block", (0, 0, s[2] / 2), (s[0], s[1], s[2]), 0.13, 10, seg=4, shape=jitter)
     return [ob]
+
+
+def jagged_cyl(name, c, r, h, rid, seed, amount=0.12, r2=None):
+    bm = bmesh.new()
+    bmesh.ops.create_cone(bm, cap_ends=True, segments=24, radius1=r, radius2=r if r2 is None else r2, depth=h)
+    rng = np.random.default_rng(seed)
+    for v in bm.verts:
+        if v.co.z > 0:
+            v.co.z += float(rng.uniform(-amount, amount))
+    ob = mesh_ob(name, bm)
+    ob.location = c
+    smooth(ob)
+    return tag(ob, rid)
+
+
+def cactus_arm(o, s, x, z0, up):
+    o.append(cyl("armh%d" % s, (s * (0.32 + x / 2), 0, z0), 0.2, x, "X", 8, bevel=0.06))
+    o.append(cyl("armv%d" % s, (s * (0.32 + x), 0, z0 + up / 2), 0.2, up, "Z", 8, bevel=0.06))
+    o.append(ball("armtop%d" % s, (s * (0.32 + x), 0, z0 + up), 0.2, 8))
+
+
+def build_saguaro(seed=1):
+    o = [cyl("col", (0, 0, 1.3), 0.33, 2.6, "Z", 8, bevel=0.08), ball("top", (0, 0, 2.6), 0.33, 8)]
+    cactus_arm(o, 1, 0.35, 1.25, 0.8)
+    cactus_arm(o, -1, 0.3, 1.6, 0.6)
+    for i, (x, z) in enumerate(((0.12, 2.9), (-0.15, 2.85))):
+        o.append(ball("flower%d" % i, (x, 0.05, z), 0.09, 5))
+    return o
+
+
+def build_barrel_cactus(seed=2):
+    o = []
+    for i, (x, y, r) in enumerate(((0, 0, 0.55), (0.62, 0.25, 0.40), (-0.5, 0.35, 0.34))):
+        o.append(ball("barrel%d" % i, (x, y, r * 0.85), r, 8, scale=(1, 1, 1.15), noise=0.05, seed=seed + i))
+        o.append(ball("bloom%d" % i, (x, y, r * 1.85), r * 0.22, 5))
+    return o
+
+
+def build_cactus_stump(seed=3):
+    return [jagged_cyl("stub", (0, 0, 0.35), 0.33, 0.7, 8, seed), cyl("cut", (0, 0, 0.68), 0.24, 0.04, "Z", 11)]
+
+
+def build_snow_pine(seed=5):
+    o = [cyl("trunk", (0, 0, 0.6), 0.2, 1.2, "Z", 9, r2=0.14, bevel=0.03)]
+    for i, (z, r, h) in enumerate(((1.15, 1.15, 1.25), (1.95, 0.92, 1.1), (2.7, 0.66, 1.0), (3.35, 0.38, 0.8))):
+        ob = cyl("tier%d" % i, (0, 0, z + h / 2), r, h, "Z", 8, r2=0.08, verts=28, bevel=0.10)
+        md = ob.modifiers.new("sub", "SUBSURF")
+        md.levels = md.render_levels = 1
+        o.append(ob)
+        cap = cyl("snow%d" % i, (0, 0, z + h * 0.62), r * 0.80, h * 0.50, "Z", 7, r2=0.1, verts=28, bevel=0.08)
+        md = cap.modifiers.new("sub", "SUBSURF")
+        md.levels = md.render_levels = 1
+        o.append(cap)
+    return o
+
+
+def build_snowman(seed=6):
+    o = [ball("b0", (0, 0, 0.55), 0.62, 7), ball("b1", (0, 0, 1.4), 0.45, 7), ball("b2", (0, 0, 2.05), 0.33, 7),
+         cyl("nose", (0.42, 0, 2.05), 0.07, 0.3, "X", 12, r2=0.01),
+         ball("eye0", (0.27, 0.12, 2.15), 0.05, 3), ball("eye1", (0.27, -0.12, 2.15), 0.05, 3),
+         rbox("scarf", (0, 0, 1.75), (0.72, 0.72, 0.14), 0.07, 11, seg=3)]
+    for i in range(3):
+        o.append(ball("btn%d" % i, (0.43, 0, 1.15 + i * 0.22), 0.05, 3))
+    return o
+
+
+def build_snow_stump(seed=7):
+    o = build_stump(seed)
+    o.append(ball("snowcap", (0, 0, 0.62), 0.27, 7, scale=(1, 1, 0.45)))
+    return o
+
+
+def build_column(seed=8):
+    return [rbox("base", (0, 0, 0.2), (0.95, 0.95, 0.4), 0.08, 10, seg=3),
+            jagged_cyl("shaft", (0, 0, 1.35), 0.34, 1.9, 10, seed, amount=0.25),
+            cyl("ring", (0, 0, 0.5), 0.40, 0.12, "Z", 11, bevel=0.03)]
+
+
+def build_lamp(seed=9):
+    return [cyl("post", (0, 0, 1.5), 0.11, 3.0, "Z", 4, bevel=0.03),
+            cyl("foot", (0, 0, 0.15), 0.25, 0.3, "Z", 4, bevel=0.06),
+            rbox("head", (0.25, 0, 3.0), (0.65, 0.32, 0.18), 0.07, 4, seg=3),
+            ball("bulb", (0.42, 0, 2.86), 0.13, 5)]
+
+
+def build_rubble(seed=10):
+    rng = np.random.default_rng(seed)
+    o = []
+    for i in range(6):
+        c = (float(rng.uniform(-0.45, 0.45)), float(rng.uniform(-0.45, 0.45)), float(rng.uniform(0.1, 0.35)))
+        sz = tuple(float(x) for x in rng.uniform(0.25, 0.5, 3))
+        o.append(rbox("rub%d" % i, c, sz, 0.06, 10 if i % 3 else 11, seg=2))
+    return o
+
+
+def build_brick(seed=11):
+    o = build_block(seed)
+    for k in range(3):
+        o.append(rbox("mortar%d" % k, (0, 0, 0.24 + k * 0.24), (0.99, 0.99, 0.035), 0.012, 11, seg=1))
+    return o
+
+
+def build_dead_tree(seed=12):
+    o = [cyl("trunk", (0, 0, 1.2), 0.26, 2.4, "Z", 9, r2=0.12, bevel=0.04)]
+    for i, (ang, z, l, tilt) in enumerate(((20, 1.7, 1.1, 45), (150, 2.0, 0.9, 50), (260, 1.4, 0.8, 40))):
+        ob = cyl("branch%d" % i, (0, 0, 0), 0.09, l, "Z", 9, r2=0.04)
+        a, t = math.radians(ang), math.radians(tilt)
+        ob.rotation_euler = (0, t, a)
+        ob.location = (math.cos(a) * math.sin(t) * l / 2, math.sin(a) * math.sin(t) * l / 2, z + math.cos(t) * l / 2)
+        o.append(ob)
+    return o
+
+
+def build_lava_rock(seed=13):
+    o = [ball("rock", (0, 0, 1.1), 0.75, 10, scale=(1, 0.9, 1.6), noise=0.12, seed=seed)]
+    rng = np.random.default_rng(seed)
+    for i in range(5):
+        a = float(rng.uniform(0, 6.28))
+        z = float(rng.uniform(0.5, 1.9))
+        o.append(ball("ember%d" % i, (math.cos(a) * 0.62, math.sin(a) * 0.55, z), 0.12, 12))
+    return o
+
+
+def build_char_stump(seed=14):
+    o = build_stump(seed)
+    o[0]["rid"] = 9
+    o.append(ball("glow", (0.05, 0.02, 0.64), 0.1, 12))
+    return o
+
+
+# biome: (tree a, tree b, what a broken tree leaves, block, block seed)
+BIOMES = {
+    "pradera":  (build_tree_round, build_tree_pine, build_stump, build_block),
+    "desierto": (build_saguaro, build_barrel_cactus, build_cactus_stump, build_block),
+    "nieve":    (build_snow_pine, build_snowman, build_snow_stump, build_block),
+    "ruinas":   (build_column, build_lamp, build_rubble, build_brick),
+    "volcan":   (build_dead_tree, build_lava_rock, build_char_stump, build_block),
+}
 
 
 # ---------------------------------------------------------------------------
@@ -506,14 +856,16 @@ def render_planes(objs, F, depth_origin):
     Z = np.where(have, np.clip(np.round(128 + d / DEPTH_UNIT), 0, 254), 255).astype(np.int32)
     # the antialiased edge reaches pixels whose centre missed the object:
     # they take the nearest covered pixel's id and depth
-    rid, Z = grow(rid, Z, have, A > 0)
+    UV = np.where(have & (rid == 6), np.floor(idz[..., 2] * 256.0), 0).astype(np.int32) & 255
+    rid, Z, UV = grow(rid, Z, have, A > 0, UV)
     A[rid == 0] = 0
-    return L, A, rid.astype(np.uint8), Z.astype(np.uint8)
+    return L, A, rid.astype(np.uint8), Z.astype(np.uint8), UV.astype(np.uint8)
 
 
-def grow(rid, Z, have, want):
+def grow(rid, Z, have, want, UV):
     rid = rid.copy()
     Z = Z.copy()
+    UV = UV.copy()
     have = have.copy()
     for _ in range(3):
         need = want & ~have
@@ -524,23 +876,25 @@ def grow(rid, Z, have, want):
             take = need & src_have
             rid[take] = np.roll(np.roll(rid, dy, 0), dx, 1)[take]
             Z[take] = np.roll(np.roll(Z, dy, 0), dx, 1)[take]
+            UV[take] = np.roll(np.roll(UV, dy, 0), dx, 1)[take]
             have = have | take
             need = need & ~take
-    return rid, Z
+    return rid, Z, UV
 
 
 def save_spr(set_name, name, planes, ax, ay):
-    L, A, ID, Z = planes
+    L, A, ID, Z, UV = planes
+    has_uv = bool((ID[A > 0] == 6).any())
     ys, xs = np.nonzero(A)
     if len(xs) == 0:
         print("EMPTY sprite", set_name, name)
         return
     x0, x1, y0, y1 = xs.min(), xs.max() + 1, ys.min(), ys.max() + 1
-    crop = [p[y0:y1, x0:x1] for p in (L, A, ID, Z)]
+    crop = [p[y0:y1, x0:x1] for p in ((L, A, ID, Z, UV) if has_uv else (L, A, ID, Z))]
     d = os.path.join(OUT, set_name)
     os.makedirs(d, exist_ok=True)
     with open(os.path.join(d, name + ".spr"), "wb") as f:
-        f.write(b"TSPR")
+        f.write(b"TSP5" if has_uv else b"TSPR")
         f.write(struct.pack("<HHhh", x1 - x0, y1 - y0, int(round(ax - x0)), int(round(ay - y0))))
         for p in crop:
             f.write(np.ascontiguousarray(p, dtype=np.uint8).tobytes())
@@ -592,70 +946,99 @@ def want(k):
     return not ONLY or k in ONLY
 
 
+def tank_list():
+    return [t for t in ARGS.tanks.split(",") if t in TANKS] if ARGS.tanks else list(TANKS)
+
+
 def do_tank():
+    """Each tank's hull and turret (with its barrel at the sprites' pitch),
+    32 yaws, from the battle's camera and from low"""
     n = ARGS.yaws
     step = 360.0 / n
-    for part in ("hull", "turret"):
+    for kind in tank_list():
+        for part in ("h", "t"):
+            clear_scene_objects()
+            objs = build_tank(kind, hull=part == "h", turret=part == "t", barrel=part == "t")
+            for k in range(n):
+                yaw = k * step
+                rotate_all(objs, yaw)
+                if "top" in ARGS.sets:
+                    render_top(objs, "%s_%s_%02d" % (kind, part, k), 256, 256, 0.9)
+                # low: relative yaw k*step; the camera looks along +Y (world
+                # heading 90 deg), so the object turns to 90 + rel
+                rotate_all(objs, 90.0 + yaw)
+                if "low" in ARGS.sets:
+                    render_low(objs, "%s_%s_%02d" % (kind, part, k), 288, 192, 1.0)
+
+
+def do_show():
+    """The hangar's turntable: the whole tank, 16 yaws, close and low"""
+    F, R, UP = view_axes(0.0, 20.0)
+    for kind in tank_list():
         clear_scene_objects()
-        objs = build_hull() if part == "hull" else build_turret()
-        for k in range(n):
-            yaw = k * step
-            rotate_all(objs, yaw)
-            if "top" in ARGS.sets:
-                render_top(objs, "%s_%02d" % (part, k), 224, 224, 0.8)
-            # low: relative yaw k*step; the camera looks along +Y (world
-            # heading 90 deg), so the object turns to 90 + rel
-            rotate_all(objs, 90.0 + yaw)
-            if "low" in ARGS.sets:
-                render_low(objs, "%s_%02d" % (part, k), 272, 176, 0.95)
+        objs = build_tank(kind)
+        for k in range(16):
+            rotate_all(objs, 90.0 + 200.0 + k * 22.5)
+            target = V((0, 0, 1.0))
+            place_camera_ortho(F, R, UP, target, 96.0, 576, 384)
+            set_sun(SUN_AZ, SUN_ELEV)
+            planes = render_planes(objs, F, (0, 0, 0))
+            ax = 576 / 2 + 96.0 * (V((0, 0, 0)) - target).dot(R)
+            ay = 384 / 2 - 96.0 * (V((0, 0, 0)) - target).dot(UP)
+            save_spr("show", "%s_%02d" % (kind, k), planes, ax, ay)
 
 
 def do_fp():
     """The gunner's view at half the screen's size (the first-person view is
     drawn at half and doubled): the turret's roof once, and the barrel with
-    its mantlet per elevation. Their depth planes keep the roof over the
-    barrel's root."""
+    its mantlet per elevation, both from that tank's gunner's eye"""
     W = H = 640
     p = math.radians(FP_PITCH)
     F = V((math.cos(p), 0.0, math.sin(p)))
     R = V((0.0, -1.0, 0.0))
     UP = R.cross(F)
-    for k in range(-1, 14):
-        clear_scene_objects()
-        if k < 0:
-            objs = build_turret(with_barrel=False)
-        else:
-            objs = build_barrel(-5 + 5 * k)
-        place_camera_persp(FP_EYE, F, R, UP, FP_F / 2, W, H)
-        set_sun(135.0, 55.0)
-        planes = render_planes(objs, F, FP_EYE)
-        # the anchor is the principal point: the image centre
-        save_spr("fp", "roof" if k < 0 else "barrel_%02d" % k, planes, W / 2, H / 2)
+    for kind in tank_list():
+        eye = TANKS[kind][5]
+        for k in range(-1, 14):
+            clear_scene_objects()
+            if k < 0:
+                objs = build_tank(kind, hull=False, barrel=False)
+            else:
+                objs = build_barrel(kind, -5 + 5 * k)
+            place_camera_persp(eye, F, R, UP, FP_F / 2, W, H)
+            set_sun(135.0, 55.0)
+            planes = render_planes(objs, F, eye)
+            save_spr("fp", "%s_roof" % kind if k < 0 else "%s_b_%02d" % (kind, k), planes, W / 2, H / 2)
 
 
 def do_scenery():
-    items = [("tree_round", build_tree_round, 192, 256, 1.9),
-             ("tree_pine", build_tree_pine, 192, 256, 1.9),
-             ("stump", build_stump, 96, 96, 0.3)]
-    for name, fn, w, h, lift in items:
-        clear_scene_objects()
-        objs = fn()
-        rotate_all(objs, 0)
-        if "top" in ARGS.sets:
-            render_top(objs, name, w, h, lift)
-        if "low" in ARGS.sets:
-            render_low(objs, name, w * 3 // 2, h * 3 // 2, lift)
-    for v in (1, 2):
-        clear_scene_objects()
-        objs = build_block(seed=v * 11)
-        rotate_all(objs, 0)
-        if "top" in ARGS.sets:
-            render_top(objs, "block%d" % v, 96, 96, 0.5)
-        # a block looks the same every 90 deg: 8 relative yaws cover it
-        for k in range(8):
-            rotate_all(objs, 90.0 + k * 11.25)
+    """Each biome's five pieces: two kinds of tree (or what stands for one),
+    what a broken one leaves, two stones. Their colours are the biome's
+    (the app's scenery paints), not the model's."""
+    biomes = [b for b in ARGS.biomes.split(",") if b in BIOMES] if ARGS.biomes else list(BIOMES)
+    for biome in biomes:
+        ta, tb, st, blk = BIOMES[biome]
+        for slot, fn, w, h, lift in (("ta", ta, 192, 256, 1.9), ("tb", tb, 192, 256, 1.9), ("st", st, 112, 112, 0.3)):
+            clear_scene_objects()
+            objs = fn()
+            rotate_all(objs, 0)
+            name = "%s_%s" % (biome, slot)
+            if "top" in ARGS.sets:
+                render_top(objs, name, w, h, lift)
             if "low" in ARGS.sets:
-                render_low(objs, "block%d_%02d" % (v, k), 128, 128, 0.5)
+                rotate_all(objs, 90.0)
+                render_low(objs, name, w * 3 // 2, h * 3 // 2, lift)
+        for v in (1, 2):
+            clear_scene_objects()
+            objs = blk(seed=v * 11 + len(biome))
+            rotate_all(objs, 0)
+            if "top" in ARGS.sets:
+                render_top(objs, "%s_b%d" % (biome, v), 96, 96, 0.5)
+            # a block looks the same every 90 deg: 8 relative yaws cover it
+            for k in range(8):
+                rotate_all(objs, 90.0 + k * 11.25)
+                if "low" in ARGS.sets:
+                    render_low(objs, "%s_b%d_%02d" % (biome, v, k), 128, 128, 0.5)
 
 
 def export_obj():
@@ -663,7 +1046,7 @@ def export_obj():
     (tools/bench.c): full detail and decimated."""
     for ratio, tag_ in ((1.0, "full"), (0.25, "mid"), (0.08, "low")):
         clear_scene_objects()
-        objs = build_hull() + build_turret()
+        objs = build_tank("bombo")
         dg = bpy.context.evaluated_depsgraph_get()
         verts, faces, cols = [], [], []
         for ob in objs:
@@ -702,4 +1085,6 @@ if want("scenery"):
     do_scenery()
 if want("fp"):
     do_fp()
+if want("show"):
+    do_show()
 print("done ->", OUT)

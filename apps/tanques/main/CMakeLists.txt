@@ -1,5 +1,6 @@
 idf_component_register(
-    SRCS "tanques.c" "tq_game.c" "tq_scene.c" "tq_gfx.c" "tq_terrain.c" "tq_art.c" "tq_mem.c"
+    SRCS "tanques.c" "tq_battle.c" "tq_menu.c" "tq_hangar.c" "tq_game.c" "tq_data.c" "tq_scene.c" "tq_gfx.c"
+         "tq_terrain.c" "tq_art.c" "tq_mem.c"
     INCLUDE_DIRS "."
     REQUIRES lvgl
 )

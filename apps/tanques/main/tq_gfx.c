@@ -198,13 +198,13 @@ void tq_spr_draw(const tq_tgt_t *t, const tq_spr_t *s, const tq_lut_t *lut, int 
         uint16_t *pc = t->px + (size_t)dy * t->stride + x0;
         const uint16_t *pz = zt ? zt + (size_t)dy * zstride + x0 : NULL;
         uint16_t *pw = zwrite ? t->z + (size_t)dy * t->stride + x0 : NULL;
-        const uint8_t *A = s->A + k0, *L = s->L + k0, *I = s->I + k0, *Z = s->Z ? s->Z + k0 : NULL;
+        const uint8_t *A = s->A + k0, *Z = s->Z ? s->Z + k0 : NULL;
         for (int i = a0; i < a1; i++) {
             int a = A[i];
             if (!a) continue;
             int q = Z ? qb - Z[i] * qs : q0;
             if (pz && q <= pz[i]) continue;
-            uint16_t c = lut->c[(I[i] << 8) | L[i]];
+            uint16_t c = tq_spr_px(s, lut, k0 + i);
             int aa = (a * alpha) >> 8;
             if (aa >= 250) pc[i] = c;
             else pc[i] = tq_blend(pc[i], c, (aa + 4) >> 3);
@@ -245,7 +245,7 @@ void tq_spr_scaled(const tq_tgt_t *t, const tq_spr_t *s, const tq_lut_t *lut, fl
             if (!a) continue;
             int q = s->Z ? (qb - s->Z[k] * qs256) >> 8 : q0;
             if (q <= pz[dx]) continue;
-            uint16_t c = lut->c[(s->I[k] << 8) | s->L[k]];
+            uint16_t c = tq_spr_px(s, lut, k);
             int aa = (a * alpha) >> 8;
             if (aa >= 250) pc[dx] = c;
             else pc[dx] = tq_blend(pc[dx], c, (aa + 4) >> 3);

@@ -9,11 +9,12 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/* The map: a square of TQ_MAP_M metres, heights on a grid of TQ_CELL */
-#define TQ_MAP_M     36.0f
+/* The map: a square of up to TQ_MAP_MAX metres (the battle picks 28, 32 or
+ * 36), heights on a grid of TQ_CELL */
+#define TQ_MAP_MAX   36.0f
 #define TQ_CELL      0.5f
-#define TQ_N         72                     /* cells per side */
-#define TQ_NV        (TQ_N + 1)             /* vertices per side */
+#define TQ_NMAX      72                     /* cells per side, at most */
+#define TQ_NVMAX     (TQ_NMAX + 1)
 #define TQ_BASE_Z    (-1.4f)                /* the diorama's floor, under the map */
 
 /* The battle's camera (third person): orthographic, from the south-south-
@@ -23,17 +24,14 @@
 #define TQ_TOP_S     32.0f
 
 /* The far sprites of the first-person view: 8 degrees above the horizon,
- * 48 px per metre, indexed by the yaw relative to the view */
+ * 24 px per metre as packed (rendered at 48, halved by tools/pack.py),
+ * indexed by the yaw relative to the view */
 #define TQ_LOW_ELEV  8.0f
-#define TQ_LOW_S     48.0f
+#define TQ_LOW_S     24.0f
 
-/* The gunner's view: focal length in pixels of the whole screen, the eye in
- * the turret's frame (on the ground under the pivot, +X forward, +Y left:
- * beside the barrel, over the roof), looking this much down */
+/* The gunner's view: focal length in pixels of the whole screen, looking
+ * this much down; the eye is each tank's (tq_data.c, TQ_TANK) */
 #define TQ_FP_F      620.0f
-#define TQ_FP_EYE_X  (-0.75f)
-#define TQ_FP_EYE_Y  0.52f
-#define TQ_FP_EYE_Z  2.42f
 #define TQ_FP_PITCH  (-7.0f)
 
 /* Towards the sun: behind the battle camera, on its left */
@@ -84,11 +82,11 @@ static inline void tq_top_axes(tq_v3_t *F, tq_v3_t *R, tq_v3_t *U)
 }
 
 /* The gunner's eye in the world, for a tank at (x, y, z) with its turret at
- * yaw */
-static inline tq_v3_t tq_fp_eye(float x, float y, float z, float yaw)
+ * yaw, the eye at (ex, ey, ez) in the turret's frame */
+static inline tq_v3_t tq_fp_eye(float x, float y, float z, float yaw, float ex, float ey, float ez)
 {
     float c = cosf(yaw), s = sinf(yaw);
-    return tq_v3(x + c * TQ_FP_EYE_X - s * TQ_FP_EYE_Y, y + s * TQ_FP_EYE_X + c * TQ_FP_EYE_Y, z + TQ_FP_EYE_Z);
+    return tq_v3(x + c * ex - s * ey, y + s * ex + c * ey, z + ez);
 }
 
 /* A yaw in radians to the nearest of the TQ_YAWS sprite frames */

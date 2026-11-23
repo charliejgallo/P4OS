@@ -51,12 +51,27 @@ typedef struct {
     int16_t w, h, ax, ay;
     const tq_row_t *rows;
     const uint8_t *L, *A, *I, *Z;
+    const uint8_t *U;           /* the badge's cell (u * 16 + v), or NULL */
 } tq_spr_t;
 
-/* The colours of a paint: 16 regions x 256 shades, RGB565 */
+/* The colours of a paint: 16 regions x 256 shades, RGB565. A tank's has
+ * its emblem too: where a badge pixel's cell is set, region 7's colour. */
 typedef struct {
     uint16_t c[16 * 256];
+    uint16_t emblem[16];
+    bool     emblem_on;
 } tq_lut_t;
+
+/* The colour of a sprite's pixel k */
+static inline uint16_t tq_spr_px(const tq_spr_t *s, const tq_lut_t *lut, int k)
+{
+    int id = s->I[k];
+    if (id == 6 && s->U && lut->emblem_on) {
+        int uv = s->U[k];
+        if (lut->emblem[15 - (uv & 15)] & (0x8000u >> (uv >> 4))) id = 7;
+    }
+    return lut->c[(id << 8) | s->L[k]];
+}
 
 void tq_lut_build(tq_lut_t *lut, const uint32_t rgb[16]);
 
