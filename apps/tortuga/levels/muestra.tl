@@ -7,7 +7,7 @@ three languages count the same pieces as the three-star limit.
 @nivel 1-3
 @titulo es: La esquina
 @titulo en: The corner
-@ordenes avanzar derecha izquierda
+@ordenes avanzar girar_derecha girar_izquierda
 @meta llegar
 @estrellas 5 7
 @mapa
@@ -17,29 +17,29 @@ three languages count the same pieces as the three-star limit.
 ###.M#
 ######
 @pista es: Contá las casillas hasta la esquina antes de doblar.
-@tortuga
+@logo
 avanzar 2
-derecha
+girar derecha
 avanzar 2
-izquierda
+girar izquierda
 avanzar
 @lua
 avanzar(2)
-derecha()
+girar_derecha()
 avanzar(2)
-izquierda()
+girar_izquierda()
 avanzar()
 @python
 avanzar(2)
-derecha()
+girar_derecha()
 avanzar(2)
-izquierda()
+girar_izquierda()
 avanzar()
 
 @nivel 1-5
 @titulo es: La llave y la puerta
 @titulo en: The key and the door
-@ordenes avanzar derecha izquierda
+@ordenes avanzar girar_derecha girar_izquierda
 @meta llegar
 @estrellas 3 4
 @mapa
@@ -50,23 +50,23 @@ avanzar()
 ######M#
 ########
 @pista es: La llave se junta sola al pasar. La puerta se abre si la tenés.
-@tortuga
+@logo
 avanzar 5
-derecha
+girar derecha
 avanzar 3
 @lua
 avanzar(5)
-derecha()
+girar_derecha()
 avanzar(3)
 @python
 avanzar(5)
-derecha()
+girar_derecha()
 avanzar(3)
 
 @nivel 2-2
 @titulo es: La escalera
 @titulo en: The staircase
-@ordenes avanzar derecha izquierda
+@ordenes avanzar girar_derecha girar_izquierda
 @meta llegar
 @estrellas 5 9
 @mapa
@@ -77,32 +77,32 @@ avanzar(3)
 ##..###
 #>.####
 #######
-@pista es: Mirá un escalón: avanzar, izquierda, avanzar, derecha. ¿Cuántos hay?
-@tortuga
+@pista es: Mirá un escalón: avanzar, girar a la izquierda, avanzar, girar a la derecha. ¿Cuántos hay?
+@logo
 repetir 4 [
   avanzar
-  izquierda
+  girar izquierda
   avanzar
-  derecha
+  girar derecha
 ]
 @lua
 for i = 1, 4 do
   avanzar()
-  izquierda()
+  girar_izquierda()
   avanzar()
-  derecha()
+  girar_derecha()
 end
 @python
 for _ in range(4):
     avanzar()
-    izquierda()
+    girar_izquierda()
     avanzar()
-    derecha()
+    girar_derecha()
 
 @nivel 2-4
 @titulo es: La vuelta a la laguna
 @titulo en: Around the pond
-@ordenes avanzar derecha izquierda comer
+@ordenes avanzar girar_derecha girar_izquierda comer
 @meta lechugas llegar
 @estrellas 4 7
 @inicio 1 1 este
@@ -114,15 +114,15 @@ for _ in range(4):
 #L..L#
 ######
 @pista es: Hay que dar la vuelta entera y volver a la meta, que está donde arrancás.
-@tortuga
-repetir 4 [ avanzar 3 comer derecha ]
+@logo
+repetir 4 [ avanzar 3 comer girar derecha ]
 @lua
-for i = 1, 4 do avanzar(3) comer() derecha() end
+for i = 1, 4 do avanzar(3) comer() girar_derecha() end
 @python
 for _ in range(4):
     avanzar(3)
     comer()
-    derecha()
+    girar_derecha()
 
 @-- The pond: the turtle starts on the goal, so "@inicio" places it (x, y
 @-- from the top left, counting from 0) and the map keeps the "M".
@@ -130,7 +130,7 @@ for _ in range(4):
 @nivel 3-2
 @titulo es: Dos piedras
 @titulo en: Two rocks
-@ordenes avanzar derecha izquierda
+@ordenes avanzar girar_derecha girar_izquierda
 @meta llegar
 @estrellas 13 17
 @mapa
@@ -139,15 +139,15 @@ for _ in range(4):
 #>.#...#.M#
 ###########
 @pista es: Rodear una piedra lleva ocho órdenes. ¿Y si le ponés un nombre?
-@tortuga
+@logo
 para rodear
-  izquierda
+  girar izquierda
   avanzar
-  derecha
+  girar derecha
   avanzar 2
-  derecha
+  girar derecha
   avanzar
-  izquierda
+  girar izquierda
 fin
 avanzar
 rodear
@@ -156,13 +156,13 @@ rodear
 avanzar
 @lua
 function rodear()
-  izquierda()
+  girar_izquierda()
   avanzar()
-  derecha()
+  girar_derecha()
   avanzar(2)
-  derecha()
+  girar_derecha()
   avanzar()
-  izquierda()
+  girar_izquierda()
 end
 avanzar()
 rodear()
@@ -171,13 +171,13 @@ rodear()
 avanzar()
 @python
 def rodear():
-    izquierda()
+    girar_izquierda()
     avanzar()
-    derecha()
+    girar_derecha()
     avanzar(2)
-    derecha()
+    girar_derecha()
     avanzar()
-    izquierda()
+    girar_izquierda()
 
 avanzar()
 rodear()
@@ -188,7 +188,7 @@ avanzar()
 @nivel 4-1
 @titulo es: Lechugas salteadas
 @titulo en: Scattered lettuce
-@ordenes avanzar derecha izquierda comer hay_lechuga
+@ordenes avanzar girar_derecha girar_izquierda comer hay_lechuga
 @meta lechugas llegar
 @estrellas 4 6
 @mapa
@@ -204,7 +204,7 @@ avanzar()
 #>...L..M#
 ##########
 @pista es: Tu programa se prueba en tres caminos. En cada casilla preguntá si hay lechuga.
-@tortuga
+@logo
 repetir 7 [
   avanzar
   si hay_lechuga [ comer ]
@@ -223,7 +223,7 @@ for _ in range(7):
 @nivel 4-3
 @titulo es: Charcos
 @titulo en: Puddles
-@ordenes avanzar derecha izquierda agua_adelante
+@ordenes avanzar girar_derecha girar_izquierda agua_adelante
 @meta llegar
 @estrellas 12 16
 @mapa
@@ -242,41 +242,41 @@ for _ in range(7):
 #>~.~.~.~M#
 ###########
 @pista es: El camino va de a dos casillas. Si adelante hay agua, rodeala; si no, avanzá dos.
-@tortuga
+@logo
 para rodear
-  izquierda
+  girar izquierda
   avanzar
-  derecha
+  girar derecha
   avanzar 2
-  derecha
+  girar derecha
   avanzar
-  izquierda
+  girar izquierda
 fin
 repetir 4 [
   si agua_adelante [ rodear ] sino [ avanzar 2 ]
 ]
 @lua
 function rodear()
-  izquierda()
+  girar_izquierda()
   avanzar()
-  derecha()
+  girar_derecha()
   avanzar(2)
-  derecha()
+  girar_derecha()
   avanzar()
-  izquierda()
+  girar_izquierda()
 end
 for i = 1, 4 do
   if agua_adelante() then rodear() else avanzar(2) end
 end
 @python
 def rodear():
-    izquierda()
+    girar_izquierda()
     avanzar()
-    derecha()
+    girar_derecha()
     avanzar(2)
-    derecha()
+    girar_derecha()
     avanzar()
-    izquierda()
+    girar_izquierda()
 
 for _ in range(4):
     if agua_adelante():
@@ -287,7 +287,7 @@ for _ in range(4):
 @nivel 5-1
 @titulo es: Hasta el fondo
 @titulo en: All the way
-@ordenes avanzar derecha izquierda camino_adelante en_meta
+@ordenes avanzar girar_derecha girar_izquierda camino_adelante en_meta
 @meta llegar
 @estrellas 4 5
 @mapa
@@ -312,25 +312,25 @@ for _ in range(4):
 ##M#
 ####
 @pista es: No sabés cuánto mide cada tramo: avanzá mientras haya camino.
-@tortuga
+@logo
 mientras no en_meta [
-  si camino_adelante [ avanzar ] sino [ derecha ]
+  si camino_adelante [ avanzar ] sino [ girar derecha ]
 ]
 @lua
 while not en_meta() do
-  if camino_adelante() then avanzar() else derecha() end
+  if camino_adelante() then avanzar() else girar_derecha() end
 end
 @python
 while not en_meta():
     if camino_adelante():
         avanzar()
     else:
-        derecha()
+        girar_derecha()
 
 @nivel 5-4
 @titulo es: El laberinto
 @titulo en: The maze
-@ordenes avanzar derecha izquierda camino_adelante camino_derecha en_meta
+@ordenes avanzar girar_derecha girar_izquierda camino_adelante camino_derecha en_meta
 @meta llegar
 @estrellas 7 9
 @mapa
@@ -352,35 +352,35 @@ while not en_meta():
 #.......#
 #########
 @pista es: Una regla vieja de los laberintos: andá siempre con la mano derecha tocando la pared.
-@tortuga
+@logo
 mientras no en_meta [
   si camino_derecha [
-    derecha
+    girar derecha
     avanzar
   ] sino [
-    si camino_adelante [ avanzar ] sino [ izquierda ]
+    si camino_adelante [ avanzar ] sino [ girar izquierda ]
   ]
 ]
 @lua
 while not en_meta() do
   if camino_derecha() then
-    derecha()
+    girar_derecha()
     avanzar()
   elseif camino_adelante() then
     avanzar()
   else
-    izquierda()
+    girar_izquierda()
   end
 end
 @python
 while not en_meta():
     if camino_derecha():
-        derecha()
+        girar_derecha()
         avanzar()
     elif camino_adelante():
         avanzar()
     else:
-        izquierda()
+        girar_izquierda()
 
 @nivel 6-2
 @titulo es: Contá las lechugas
@@ -401,11 +401,11 @@ while not en_meta():
 #>.L.LL.LM#
 ###########
 @pista es: Hace falta una variable que arranque en 0 y sume uno por cada lechuga.
-@tortuga
-haz cuenta 0
+@logo
+cuenta = 0
 repetir 8 [
   avanzar
-  si hay_lechuga [ haz cuenta cuenta + 1 ]
+  si hay_lechuga [ cuenta = cuenta + 1 ]
 ]
 decir cuenta
 @lua
@@ -426,7 +426,7 @@ decir(cuenta)
 @nivel 7-2
 @titulo es: Escalones de todos los tamaños
 @titulo en: Steps of every size
-@ordenes avanzar derecha izquierda
+@ordenes avanzar girar_derecha girar_izquierda
 @meta llegar
 @estrellas 8 11
 @mapa
@@ -439,13 +439,13 @@ decir(cuenta)
 ##...####
 #>.######
 #########
-@pista es: Un escalón de tamaño n: avanzar n, izquierda, avanzar n, derecha.
-@tortuga
+@pista es: Un escalón de tamaño n: avanzar n, girar a la izquierda, avanzar n, girar a la derecha.
+@logo
 para escalon n
   avanzar n
-  izquierda
+  girar izquierda
   avanzar n
-  derecha
+  girar derecha
 fin
 escalon 1
 escalon 2
@@ -453,9 +453,9 @@ escalon 3
 @lua
 function escalon(n)
   avanzar(n)
-  izquierda()
+  girar_izquierda()
   avanzar(n)
-  derecha()
+  girar_derecha()
 end
 escalon(1)
 escalon(2)
@@ -463,9 +463,9 @@ escalon(3)
 @python
 def escalon(n):
     avanzar(n)
-    izquierda()
+    girar_izquierda()
     avanzar(n)
-    derecha()
+    girar_derecha()
 
 escalon(1)
 escalon(2)
@@ -474,106 +474,106 @@ escalon(3)
 @nivel 8-1
 @titulo es: El cuadrado
 @titulo en: The square
-@ordenes avanzar derecha izquierda bajar_lapiz subir_lapiz
+@ordenes avanzar girar_derecha girar_izquierda bajar_lapiz subir_lapiz
 @meta dibujo
 @estrellas 3 9
 @inicio -50 -50 norte
 @figura
-avanzar 100 derecha 90 avanzar 100 derecha 90
-avanzar 100 derecha 90 avanzar 100
+avanzar 100 girar derecha 90 avanzar 100 girar derecha 90
+avanzar 100 girar derecha 90 avanzar 100
 @pista es: Cuatro lados iguales, y en cada esquina un giro de 90.
-@tortuga
-repetir 4 [ avanzar 100 derecha 90 ]
+@logo
+repetir 4 [ avanzar 100 girar derecha 90 ]
 @lua
-for i = 1, 4 do avanzar(100) derecha(90) end
+for i = 1, 4 do avanzar(100) girar_derecha(90) end
 @python
 for _ in range(4):
     avanzar(100)
-    derecha(90)
+    girar_derecha(90)
 
 @nivel 8-3
 @titulo es: La estrella
 @titulo en: The star
-@ordenes avanzar derecha izquierda bajar_lapiz subir_lapiz
+@ordenes avanzar girar_derecha girar_izquierda bajar_lapiz subir_lapiz
 @meta dibujo
 @estrellas 3 11
 @inicio -75 -50 este
 @figura
-avanzar 150 derecha 144 avanzar 150 derecha 144 avanzar 150
-derecha 144 avanzar 150 derecha 144 avanzar 150
+avanzar 150 girar derecha 144 avanzar 150 girar derecha 144 avanzar 150
+girar derecha 144 avanzar 150 girar derecha 144 avanzar 150
 @pista es: Cinco puntas. En total la tortuga da dos vueltas enteras: 720 grados.
-@tortuga
-repetir 5 [ avanzar 150 derecha 144 ]
+@logo
+repetir 5 [ avanzar 150 girar derecha 144 ]
 @lua
-for i = 1, 5 do avanzar(150) derecha(144) end
+for i = 1, 5 do avanzar(150) girar_derecha(144) end
 @python
 for _ in range(5):
     avanzar(150)
-    derecha(144)
+    girar_derecha(144)
 
 @nivel 8-6
 @titulo es: La espiral
 @titulo en: The spiral
-@ordenes avanzar derecha izquierda bajar_lapiz subir_lapiz
+@ordenes avanzar girar_derecha girar_izquierda bajar_lapiz subir_lapiz
 @meta dibujo
 @estrellas 5 41
 @inicio 0 0 norte
 @figura
-avanzar 10 derecha 90 avanzar 20 derecha 90 avanzar 30 derecha 90
-avanzar 40 derecha 90 avanzar 50 derecha 90 avanzar 60 derecha 90
-avanzar 70 derecha 90 avanzar 80 derecha 90 avanzar 90 derecha 90
-avanzar 100 derecha 90 avanzar 110 derecha 90 avanzar 120 derecha 90
-avanzar 130 derecha 90 avanzar 140 derecha 90 avanzar 150 derecha 90
-avanzar 160 derecha 90 avanzar 170 derecha 90 avanzar 180 derecha 90
-avanzar 190 derecha 90 avanzar 200
+avanzar 10 girar derecha 90 avanzar 20 girar derecha 90 avanzar 30 girar derecha 90
+avanzar 40 girar derecha 90 avanzar 50 girar derecha 90 avanzar 60 girar derecha 90
+avanzar 70 girar derecha 90 avanzar 80 girar derecha 90 avanzar 90 girar derecha 90
+avanzar 100 girar derecha 90 avanzar 110 girar derecha 90 avanzar 120 girar derecha 90
+avanzar 130 girar derecha 90 avanzar 140 girar derecha 90 avanzar 150 girar derecha 90
+avanzar 160 girar derecha 90 avanzar 170 girar derecha 90 avanzar 180 girar derecha 90
+avanzar 190 girar derecha 90 avanzar 200
 @pista es: Cada lado es 10 más largo que el anterior: guardá el largo en una variable.
-@tortuga
-haz lado 10
+@logo
+lado = 10
 repetir 20 [
   avanzar lado
-  derecha 90
-  haz lado lado + 10
+  girar derecha 90
+  lado = lado + 10
 ]
 @lua
 local lado = 10
 for i = 1, 20 do
   avanzar(lado)
-  derecha(90)
+  girar_derecha(90)
   lado = lado + 10
 end
 @python
 lado = 10
 for _ in range(20):
     avanzar(lado)
-    derecha(90)
+    girar_derecha(90)
     lado += 10
 
 @nivel 8-8
 @titulo es: La flor
 @titulo en: The flower
-@ordenes avanzar derecha izquierda bajar_lapiz subir_lapiz
+@ordenes avanzar girar_derecha girar_izquierda bajar_lapiz subir_lapiz
 @meta dibujo
 @estrellas 7 10
 @inicio 0 0 norte
 @figura
-repetir 12 [ repetir 6 [ avanzar 50 derecha 60 ] derecha 30 ]
+repetir 12 [ repetir 6 [ avanzar 50 girar derecha 60 ] girar derecha 30 ]
 @pista es: Primero enseñale a dibujar un polígono de cualquier cantidad de lados.
-@tortuga
+@logo
 para poligono lados largo
-  repetir lados [ avanzar largo derecha 360 / lados ]
+  repetir lados [ avanzar largo girar derecha 360 / lados ]
 fin
-repetir 12 [ poligono 6 50 derecha 30 ]
+repetir 12 [ poligono 6 50 girar derecha 30 ]
 @lua
 function poligono(lados, largo)
-  for i = 1, lados do avanzar(largo) derecha(360 / lados) end
+  for i = 1, lados do avanzar(largo) girar_derecha(360 / lados) end
 end
-for i = 1, 12 do poligono(6, 50) derecha(30) end
+for i = 1, 12 do poligono(6, 50) girar_derecha(30) end
 @python
 def poligono(lados, largo):
     for _ in range(lados):
         avanzar(largo)
-        derecha(360 / lados)
+        girar_derecha(360 / lados)
 
 for _ in range(12):
     poligono(6, 50)
-    derecha(30)
+    girar_derecha(30)

@@ -3,10 +3,11 @@
 
 This is the specification the C code will follow, written so that it runs:
 the world (a grid of tiles, or a sheet of paper to draw on), the level files
-(levels/*.tl), the game's own LOGO ("Tortuga", in Spanish and English), the
+(levels/*.tl), the game's own LOGO ("Logo", in Spanish and English), the
 piece counter that gives the stars, and runners for the same level written
 in Lua and in Python. `check` runs every reference solution of every level
-on every map variant and says whether it wins and how many pieces it has.
+on every map variant, in the easy and the hard mode, and says whether it wins
+and how many pieces it has.
 
     python3 apps/tortuga/tools/tg_ref.py check apps/tortuga/levels/muestra.tl
     python3 apps/tortuga/tools/tg_ref.py check --lua-lib <liblua.dylib> ...
@@ -24,13 +25,16 @@ import sys
 
 # ---------------------------------------------------------------- the API --
 
-# canonical (Spanish) name, English name, LOGO abbreviations, kind,
-# minimum and maximum number of arguments.
+# canonical (Spanish) name, English name, other names (LOGO's classic
+# ones), kind, minimum and maximum number of arguments. In Logo the turns
+# are two words, "girar derecha" / "turn right" (LogoParser.statement).
 API = [
     ("avanzar", "forward", ("av", "fd"), "cmd", 0, 1),
     ("retroceder", "back", ("re", "bk"), "cmd", 0, 1),
-    ("derecha", "right", ("de", "rt"), "cmd", 0, 1),
-    ("izquierda", "left", ("iz", "lt"), "cmd", 0, 1),
+    ("girar_derecha", "turn_right", ("derecha", "right", "de", "rt"),
+     "cmd", 0, 1),
+    ("girar_izquierda", "turn_left", ("izquierda", "left", "iz", "lt"),
+     "cmd", 0, 1),
     ("comer", "eat", (), "cmd", 0, 0),
     ("decir", "say", (), "cmd", 1, 1),
     ("bajar_lapiz", "pen_down", ("bl", "pd"), "cmd", 0, 0),
@@ -105,7 +109,7 @@ def parse_levels(path):
             cur.maps.append([r for r in text.split("\n")])
         elif sect == "figura":
             cur.figure = text
-        elif sect in ("tortuga", "lua", "python"):
+        elif sect in ("logo", "lua", "python"):
             cur.solutions[sect] = text + "\n"
 
     for raw in open(path, encoding="utf-8"):
@@ -136,7 +140,7 @@ def parse_levels(path):
                 cur.start = (float(x), float(y), d)
             elif key == "pista":
                 cur.hints.append(val)
-            elif key in ("mapa", "figura", "tortuga", "lua", "python"):
+            elif key in ("mapa", "figura", "logo", "lua", "python"):
                 sect = key
             continue
         if sect:
@@ -151,8 +155,11 @@ def parse_levels(path):
 class World:
     """One run of one program on one map (or on the paper)."""
 
-    def __init__(self, level, variant=0, drawing=None):
+    def __init__(self, level, variant=0, drawing=None, hard=False):
         self.level = level
+        # easy: the level is won the moment its goals are met (passing over
+        # the goal counts); hard: only when the program ends, standing on it
+        self.hard = hard
         self.actions = 0
         self.said = []
         self.line = 0
@@ -207,6 +214,10 @@ class World:
                 return False
         return True
 
+    def check_win(self):
+        if not self.hard and self.goals_met():
+            raise Stop("win")
+
     def fail(self, msg):
         raise Stop("error", msg, self.line)
 
@@ -248,27 +259,24 @@ class World:
                     self.keys += 1
                     self.t[y][x] = "."
                 self.tx, self.ty = x, y
-                if self.goals_met():
-                    raise Stop("win")
+                self.check_win()
             return None
-        if name in ("derecha", "izquierda"):
+        if name in ("girar_derecha", "girar_izquierda"):
             g = args[0] if args else 90
             if g % 90:
                 self.fail("en este mundo la tortuga gira de a 90 grados")
-            q = int(g // 90) * (1 if name == "derecha" else -1)
+            q = int(g // 90) * (1 if name == "girar_derecha" else -1)
             self.dir = DIRS[(DIRS.index(self.dir) + q) % 4]
             return None
         if name == "comer":
             if self.t[self.ty][self.tx] != "L":
-                self.fail("acá no hay ninguna lechuga")
+                return None     # it chews grass: no harm, nothing gained
             self.t[self.ty][self.tx] = "."
-            if self.goals_met():
-                raise Stop("win")
+            self.check_win()
             return None
         if name == "decir":
             self.said.append(args[0])
-            if self.goals_met():
-                raise Stop("win")
+            self.check_win()
             return None
         if name in ("bajar_lapiz", "subir_lapiz", "color"):
             return None
@@ -302,9 +310,9 @@ class World:
                 self.segs.append((self.x, self.y, nx, ny))
             self.x, self.y = nx, ny
             return None
-        if name in ("derecha", "izquierda"):
+        if name in ("girar_derecha", "girar_izquierda"):
             g = args[0] if args else 90
-            self.heading = (self.heading + (g if name == "derecha" else -g)) % 360
+            self.heading = (self.heading + (g if name == "girar_derecha" else -g)) % 360
             return None
         if name == "bajar_lapiz":
             self.pen = True
@@ -325,7 +333,7 @@ class World:
         if self.goals_met():
             raise Stop("win")
         if self.tile(self.tx, self.ty) != "M" and "llegar" in self.level.goals:
-            self.fail("el programa terminó y la tortuga no llegó a la meta")
+            self.fail("el programa terminó y la tortuga no está en la meta")
         self.fail("el programa terminó sin cumplir todo lo que pide el nivel")
 
 
@@ -358,7 +366,7 @@ def same_drawing(drawn, target, tol=3.0):
     return True
 
 
-# ------------------------------------------------------------ Tortuga (LOGO) --
+# ---------------------------------------------------------------- Logo --
 
 KW = {
     "para": "to", "to": "to", "fin": "end", "end": "end",
@@ -374,7 +382,7 @@ TOKEN = re.compile(r"""
     (?P<ws>[ \t\r]+) | (?P<nl>\n) | (?P<com>;[^\n]*)
   | (?P<num>\d+(?:\.\d+)?)
   | (?P<str>"[^"\n\s\[\]]*"?|"[^"\n]*")
-  | (?P<op><=|>=|<>|[-+*/<>=()\[\]])
+  | (?P<op><=|>=|<>|==|\+=|-=|[-+*/<>=()\[\]])
   | (?P<name>:?[^\W\d]\w*)
 """, re.X | re.U)
 
@@ -468,8 +476,11 @@ class LogoParser:
         if k == "kw":
             return v in ("not", "true", "false")
         if k == "name":
+            after = self.t[self.i + 1]
+            if after[0] == "op" and after[1] in ("=", "+=", "-="):
+                return False        # the next statement is an assignment
             c = ALIAS.get(v)
-            return not (c in CMDS or v in self.procs)
+            return not (c in CMDS or v in self.procs or v in ("girar", "turn"))
         return False
 
     def statement(self):
@@ -518,6 +529,24 @@ class LogoParser:
                 return ("output", self.expr(), ln)
             raise LogoError("«%s» no va acá" % v, ln)
         if k == "name":
+            nxt = self.peek()
+            if nxt[0] == "op" and nxt[1] in ("=", "+=", "-="):
+                # an assignment: cuenta = 0, cuenta += 1
+                self.next()
+                e = self.expr()
+                if nxt[1] != "=":
+                    e = ("bin", nxt[1][0], ("var", v, ln), e)
+                return ("make", v, e, ln)
+            if v in ("girar", "turn"):
+                side = self.next()
+                c = {"derecha": "girar_derecha", "right": "girar_derecha",
+                     "izquierda": "girar_izquierda",
+                     "left": "girar_izquierda"}.get(side[1]) \
+                    if side[0] == "name" else None
+                if not c:
+                    raise LogoError("después de «%s» va derecha o izquierda"
+                                    % v, ln)
+                v = c
             c = ALIAS.get(v)
             if c in CMDS:
                 spec = SPEC[c]
@@ -558,8 +587,8 @@ class LogoParser:
 
     def cmp(self):
         a = self.add()
-        if self.peek()[0] == "op" and self.peek()[1] in ("<", ">", "=", "<=",
-                                                        ">=", "<>"):
+        if self.peek()[0] == "op" and self.peek()[1] in ("<", ">", "=", "==",
+                                                        "<=", ">=", "<>"):
             op = self.next()[1]
             a = ("cmp", op, a, self.add())
         return a
@@ -723,7 +752,7 @@ class Logo:
         if k == "cmp":
             a, b = self.eval(e[2]), self.eval(e[3])
             return {"<": a < b, ">": a > b, "=": a == b, "<=": a <= b,
-                    ">=": a >= b, "<>": a != b}[e[1]]
+                    ">=": a >= b, "<>": a != b, "==": a == b}[e[1]]
         raise AssertionError(e)
 
 
@@ -920,11 +949,11 @@ class LuaRunner:
 
 # ------------------------------------------------------------- running --
 
-def run(level, lang, src, variant=0, lua=None):
-    w = World(level, variant)
+def run(level, lang, src, variant=0, lua=None, hard=False):
+    w = World(level, variant, hard=hard)
     try:
         try:
-            if lang == "tortuga":
+            if lang == "logo":
                 Logo(w).run(src)
             elif lang == "python":
                 py_runner(src, w)
@@ -949,7 +978,7 @@ def run(level, lang, src, variant=0, lua=None):
 
 
 def pieces(lang, src):
-    return logo_pieces(src) if lang == "tortuga" else text_pieces(src, lang)
+    return logo_pieces(src) if lang == "logo" else text_pieces(src, lang)
 
 
 def check(path, lua_lib=None):
@@ -959,18 +988,20 @@ def check(path, lua_lib=None):
         variants = range(len(lv.maps)) if lv.maps else [0]
         row = []
         counts = set()
-        for lang in ("tortuga", "lua", "python"):
+        for lang in ("logo", "lua", "python"):
             src = lv.solutions.get(lang)
             if src is None or (lang == "lua" and not lua):
                 row.append("%s -" % lang)
                 continue
             ok = True
             for v in variants:
-                res, w = run(lv, lang, src, v, lua)
-                if res.kind != "win":
-                    ok = False
-                    print("  %s %s mapa %d: %s (línea %d)" % (
-                        lv.id, lang, v + 1, res.msg, res.line))
+                for hard in (False, True):
+                    res, w = run(lv, lang, src, v, lua, hard)
+                    if res.kind != "win":
+                        ok = False
+                        print("  %s %s mapa %d, modo %s: %s (línea %d)" % (
+                            lv.id, lang, v + 1, "difícil" if hard else "fácil",
+                            res.msg, res.line))
             p = pieces(lang, src)
             counts.add(p)
             row.append("%s %s %d" % (lang, "ok" if ok else "MAL", p))
