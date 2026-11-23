@@ -3572,7 +3572,7 @@ static const char blob_en__sistema_lang[] =
     "Tanques\tTanks\n"
     "Tortuga\tTurtle\n"
     "Monitor serie\tSerial Plotter\n"
-    "Estado de la casa\tHome Status\n"
+    "Mi casa\tHome Status\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -7137,7 +7137,7 @@ static const char blob_de__sistema_lang[] =
     "Tanques\tPanzer\n"
     "Tortuga\tSchildkröte\n"
     "Monitor serie\tSerieller Plotter\n"
-    "Estado de la casa\tHausstatus\n"
+    "Mi casa\tHausstatus\n"
     ;
 
 static const aos_lang_file_t files_de[] = {

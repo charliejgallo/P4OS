@@ -12,7 +12,7 @@
     a Logo of its own or Lua, through nine worlds of 47 levels.
   - **Monitor serie** (Serial Plotter): plots live what comes in on a serial
     port, on the Terminal's channels; profiles for meters.
-  - **Estado de la casa** (Home Status): the services at home, up or down,
+  - **Mi casa** (Home Status): the services at home, up or down,
     with latency, availability and notices.
 - **Brazilian Portuguese, French and Italian**, the whole system, the portal
   and every app, as System parts in the Store. **They were translated with

@@ -21,7 +21,7 @@ en resumen": no se revisaron en esta pasada.
       PSRAM de 16,5 libres). Falta abrir los dos DLC en la placa.
 - [ ] **Tortuga**, **Monitor serie** (con el WH5000: el perfil del
       multímetro supone qué es el último número; verificar con otros rangos)
-      y **Estado de la casa**: sólo probadas en el simulador.
+      y **Mi casa** (Estado de la casa): sólo probadas en el simulador.
 - [ ] **Portugués, francés e italiano** desde la Tienda: que Ajustes los
       liste con su nombre, recorrer el inicio, Ajustes y un par de apps.
 - [ ] La Tienda tras la release: casi todas las apps ofrecen actualizar
