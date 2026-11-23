@@ -3,6 +3,7 @@
  * settings and the results (see tq_app.h)
  */
 #include "tq_app.h"
+#include "aos_sys_glyphs.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -82,6 +83,23 @@ static void go(lv_event_t *e)
     tqa_screen(a, to);
 }
 
+/* The speaker button: the game's sound on or off, kept in the save */
+static void sound_text(app_t *a, lv_obj_t *b)
+{
+    tqa_btn_text(b, a->save.sfx ? AOS_SYM_VOLUME_HIGH : AOS_SYM_VOLUME_OFF);
+    lv_obj_set_style_bg_color(b, lv_color_hex(a->save.sfx ? 0x2A3A4C : 0x4A3030), 0);
+}
+
+static void sound_toggle(lv_event_t *e)
+{
+    app_t *a = (app_t *)lv_event_get_user_data(e);
+    a->save.sfx = !a->save.sfx;
+    tq_snd_enable(a->save.sfx);
+    tqa_save(a);
+    sound_text(a, (lv_obj_t *)lv_event_get_target(e));
+    tq_snd(TQ_SND_CLICK);
+}
+
 void tqm_build_menu(app_t *a)
 {
     bool land = a->W > a->H;
@@ -102,6 +120,10 @@ void tqm_build_menu(app_t *a)
         lv_obj_set_user_data(b, (void *)(intptr_t)B[i].to);
         lv_obj_align(b, LV_ALIGN_TOP_MID, 0, 180 + i * 116);
     }
+    lv_obj_t *snd = tqa_button(p, "", 0x2A3A4C, 72, 72, sound_toggle, a);
+    lv_obj_set_style_text_font(lv_obj_get_child(snd, 0), &aos_sym_28, 0);     /* the system's glyphs */
+    lv_obj_align(snd, LV_ALIGN_TOP_RIGHT, -18, 18);
+    sound_text(a, snd);
 }
 
 /* --------------------------------------------------------------------------

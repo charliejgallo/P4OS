@@ -120,11 +120,63 @@ static void say(app_t *a, tq_v3_t p, const char *txt, uint32_t rgb)
     a->lbl_p[slot] = p;
 }
 
+/* What a landing sounds like */
+static void event_sound(app_t *a, const tq_event_t *e, bool direct, bool ko)
+{
+    static uint32_t last_blast;
+    const tq_weapon_t *W = &TQ_WEAPON[e->weapon];
+    uint32_t now = lv_tick_get();
+    switch (e->type) {
+    case TQ_EV_BLAST:
+        if (W->fx == TQ_FX_QUAKE) {
+            tq_snd(TQ_SND_QUAKE);
+            break;
+        }
+        /* a cluster's or a shotgun's: not five big ones on top of each other */
+        if (now - last_blast < 90 && !ko) break;
+        last_blast = now;
+        tq_snd(e->split || W->radius < 1.5f ? TQ_SND_BLAST_S : W->radius < 3.5f ? TQ_SND_BLAST : TQ_SND_BLAST_L);
+        if (W->fx == TQ_FX_NAPALM) tq_snd(TQ_SND_BURN);
+        break;
+    case TQ_EV_MINE: tq_snd(TQ_SND_BLAST); break;
+    case TQ_EV_MISS: tq_snd(TQ_SND_MISS); break;
+    case TQ_EV_HEAL: tq_snd(TQ_SND_HEAL); break;
+    case TQ_EV_SHIELD: tq_snd(TQ_SND_SHIELD); break;
+    case TQ_EV_EMP: tq_snd(TQ_SND_EMP); break;
+    case TQ_EV_TELEPORT: tq_snd(TQ_SND_TELEPORT); break;
+    case TQ_EV_BURN: tq_snd(TQ_SND_BURN); break;
+    case TQ_EV_NONE:
+        if (W->fx == TQ_FX_MINES) tq_snd(TQ_SND_MINES);
+        else if (W->fx == TQ_FX_SMOKE) tq_snd(TQ_SND_SMOKE);
+        else if (W->fx == TQ_FX_WALL) tq_snd(TQ_SND_WALL);
+        break;
+    default:
+        break;
+    }
+    if (direct) tq_snd(TQ_SND_CLANG);
+    if (ko) tq_snd(TQ_SND_KO);
+    (void)a;
+}
+
+/* What a weapon sounds like leaving the barrel */
+static void fire_sound(int w)
+{
+    const tq_weapon_t *W = &TQ_WEAPON[w];
+    if (W->fx == TQ_FX_AIRSTRIKE) tq_snd(TQ_SND_FIRE_CALL);
+    else if (W->fx == TQ_FX_SCATTER) tq_snd(TQ_SND_FIRE_SCATTER);
+    else if (w == TQ_W_SNIPER) tq_snd(TQ_SND_FIRE_SNIPER);
+    else if (W->fly == TQ_FLY_BEAM) tq_snd(TQ_SND_FIRE_LASER);
+    else if (W->fly == TQ_FLY_GUIDED) tq_snd(TQ_SND_FIRE_ROCKET);
+    else if (W->fly == TQ_FLY_DRILL) tq_snd(TQ_SND_FIRE_DRILL);
+    else if (W->fly == TQ_FLY_LOB) tq_snd(TQ_SND_FIRE_LOB);
+    else if (W->fly != TQ_FLY_SELF) tq_snd(TQ_SND_FIRE);
+}
+
 static void show_event(app_t *a, const tq_event_t *e)
 {
     char txt[40];
     if (e->dirty.x1 >= e->dirty.x0) tq_scene_world_dirty(e->dirty);
-    bool any = false;
+    bool any = false, direct = false, ko = false;
     for (int k = 0; k < a->st.ntank; k++) {
         if (!e->damage[k]) continue;
         const tq_tank_t *tk = &a->st.tank[k];
@@ -132,11 +184,13 @@ static void show_event(app_t *a, const tq_event_t *e)
         say(a, tq_v3(tk->x, tk->y, tq_tank_z(a->ter, tk) + 4.2f), txt, 0xFF5A46);
         if (!tk->alive) say(a, tq_v3(tk->x, tk->y, tq_tank_z(a->ter, tk) + 6.0f), _("¡Fuera de combate!"), 0xFFE9A8);
         any = true;
+        direct |= e->direct[k];
+        ko |= !tk->alive;
     }
+    event_sound(a, e, direct, ko);
     switch (e->type) {
     case TQ_EV_BLAST:
         if (!any) say(a, tq_v3(e->at.x, e->at.y, e->at.z + 4.0f), _("¡Cerca!"), 0xFFFFFF);
-        aos_hal_beep(90, 120);
         break;
     case TQ_EV_MISS:
         say(a, e->at, _("¡Afuera!"), 0xFFFFFF);
@@ -156,7 +210,6 @@ static void show_event(app_t *a, const tq_event_t *e)
         break;
     case TQ_EV_MINE:
         say(a, tq_v3(e->at.x, e->at.y, e->at.z + 3.0f), _("¡Mina!"), 0xFFD23C);
-        aos_hal_beep(90, 120);
         break;
     case TQ_EV_BURN:
         say(a, tq_v3(e->at.x, e->at.y, e->at.z + 1.0f), _("¡Quema!"), 0xFF8A1E);
@@ -192,6 +245,9 @@ static void finish(app_t *a)
     a->save.battles++;
     if (won && a->humans == 1) a->save.wins++;
     if (a->story && won && stars > a->save.stars[a->mission]) a->save.stars[a->mission] = (uint8_t)stars;
+    tq_snd_engine(0);
+    tq_snd_flight(0, 0, 0);
+    tq_snd(won || a->humans > 1 ? TQ_SND_WIN : TQ_SND_LOSE);
     tqa_save(a);
     aos_hal_log("tanques", "battle over: team %d won, %d coins, %d stars", w, coins, stars);
     tqa_screen(a, SC_RESULT);
@@ -218,6 +274,7 @@ static void begin_turn(app_t *a)
     cam_to(a, k->x, k->y, false);
     s_cur_x = k->x;
     s_cur_y = k->y;
+    if (!k->ai) tq_snd(TQ_SND_TURN);
     if (k->ai) set_state(a, B_AI_THINK);
     else if (a->humans > 1) set_state(a, B_HANDOVER);
     else set_state(a, B_MOVE);
@@ -304,9 +361,9 @@ static void fire(app_t *a)
     tq_event_t ev[TQ_MAX_EVENTS];
     int nev = 0;
     tqa_wait_worker(a);
+    fire_sound(tq_weapon_of(k));
     tq_game_fire(&a->st, a->ter, ev, &nev);
     for (int i = 0; i < nev; i++) show_event(a, &ev[i]);
-    aos_hal_beep(140, 90);
     set_state(a, tq_game_flying(&a->st) ? B_FLY : B_BOOM);
 }
 
@@ -774,6 +831,7 @@ static void drive_step(app_t *a, float dt)
         } else if (!tq_can_fire(k)) {
             /* no AP left for a shot: the turn ends by itself */
             say(a, tq_v3(k->x, k->y, tq_tank_z(a->ter, k) + 3.5f), _("Sin AP"), 0xFFD23C);
+            tq_snd(TQ_SND_DENY);
             set_state(a, B_BOOM);
             a->st_t = 1.0f;
         } else if (k->ai) {
@@ -885,6 +943,19 @@ void tqb_tick(app_t *a, float dt)
         break;
     }
     if (a->screen != SC_BATTLE) return;         /* the battle ended */
+    /* the beds: the engine while driving, the shell in the air */
+    tq_snd_engine(a->bstate == B_DRIVE ? 1.0f : 0);
+    {
+        const tq_shell_t *sh = tq_game_lead(s);
+        if (sh && !sh->under && TQ_WEAPON[sh->weapon].fly != TQ_FLY_BEAM) {
+            float h = sh->p.z - tq_ter_height(a->ter, sh->p.x, sh->p.y);
+            bool rocket = TQ_WEAPON[sh->weapon].fly == TQ_FLY_GUIDED;
+            /* the whistle when it comes down; a rocket hisses all the way */
+            tq_snd_flight(rocket ? 1 : 0, rocket ? 0.8f : (sh->v.z < 0 ? 0.7f : 0), h);
+        } else {
+            tq_snd_flight(0, 0, 0);
+        }
+    }
     /* the world moves on: shells, particles, stones falling */
     tq_event_t ev[TQ_MAX_EVENTS];
     int nev = 0;

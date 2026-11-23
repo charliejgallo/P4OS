@@ -177,10 +177,27 @@ the 0.32 firmware): the world picture went to half size for that (it was
 | `main/tq_scene.c` | the views: battle, first person, the hangar's turntable |
 | `main/tq_gfx.c` | triangles, sprites, puffs, the doubling |
 | `main/tq_art.c` | the pack, read by groups |
+| `main/tq_snd.c` | the sound, synthesised |
 | `main/tq_view.h` | the cameras (the Blender script has the same numbers) |
 | `tools/blender/tanques_art.py` | every model and render |
 | `tools/pack.py` | the pack, and contact sheets of the renders |
 | `tools/bench.c` | the renderers on the Mac, the calibration, the weapons' test |
+
+## Sound
+
+`tq_snd.c` makes every sound on the streaming speaker (16 kHz, mono) from
+filtered noise and swept tones: nothing recorded, the pack does not grow.
+Each weapon has its shot (the cannon's crack, the mortar's thoomp, the
+missile's whoosh, the laser's zap...), the landings their blast in three
+sizes (and a clang on a direct hit, a longer one for a tank knocked out),
+the self weapons theirs (repair, shield, EMP, teleport, smoke, mines, wall,
+quake); a tank driving has its engine, a shell coming down whistles lower
+as it falls, a missile hisses. Buttons click; the hangar rings when it
+sells; a person's turn has two notes; the end, a fanfare or a sad one. The
+board's speaker gives nothing below ~150 Hz, so the blasts are a crack and a
+roar over a falling tone rather than bass. The speaker button on the title
+turns it all off (saved); the speaker is closed while the app is not in
+front, and without it the main events beep.
 
 ## Joystick
 
@@ -207,6 +224,5 @@ story's stars, the free battle's last settings.
 
 - Measure on the board: the log lines above, upright and lying down, and
   PSRAM free in a four-tank battle.
-- Sound beyond the system's beep.
 - The PPA for the first person's doubling, and the frames straight to the
   panel instead of through LVGL's canvas, if the board asks for it.

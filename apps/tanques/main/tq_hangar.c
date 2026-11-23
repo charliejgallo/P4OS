@@ -94,10 +94,11 @@ static bool spend(app_t *a, int price)
 {
     if (a->save.coins < price) {
         aos_ui_toast(_("No te alcanzan las monedas"), 1200);
+        tq_snd(TQ_SND_DENY);
         return false;
     }
     a->save.coins -= price;
-    aos_hal_beep(1200, 40);
+    tq_snd(TQ_SND_BUY);
     return true;
 }
 

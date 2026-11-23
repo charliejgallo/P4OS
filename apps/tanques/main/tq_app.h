@@ -16,6 +16,7 @@
 #include "aos_theme.h"
 #include "aos_ui.h"
 
+#include "tq_snd.h"
 #include "tq_art.h"
 #include "tq_data.h"
 #include "tq_game.h"

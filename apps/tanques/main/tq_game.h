@@ -112,6 +112,8 @@ typedef struct {
     bool      direct[TQ_MAX_TANKS];
     int       value;                /* healed, shielded */
     tq_vbox_t dirty;                /* the ground changed (x1 < x0: not) */
+    int       weapon;               /* a landing's: what landed (for the sound) */
+    bool      split;                /* ... and whether it was a bomblet */
 } tq_event_t;
 
 #define TQ_MAX_EVENTS 8

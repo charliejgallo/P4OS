@@ -52,7 +52,10 @@ static void worker_fn(void *arg)
 
 void tqa_wait_worker(app_t *a)
 {
-    for (int i = 0; i < 500 && __atomic_load_n(&a->job, __ATOMIC_ACQUIRE) == JOB_RENDER; i++) aos_hal_worker_sleep(2);
+    for (int i = 0; i < 500 && __atomic_load_n(&a->job, __ATOMIC_ACQUIRE) == JOB_RENDER; i++) {
+        aos_hal_worker_sleep(2);
+        if ((i & 7) == 7) tq_snd_tick();       /* a whole frame is long: the speaker must not run dry */
+    }
 }
 
 /* --------------------------------------------------------------------------
@@ -343,6 +346,12 @@ lv_obj_t *tqa_label(lv_obj_t *parent, const char *txt, const lv_font_t *font, ui
     return l;
 }
 
+static void click_cb(lv_event_t *e)
+{
+    (void)e;
+    tq_snd(TQ_SND_CLICK);
+}
+
 lv_obj_t *tqa_button(lv_obj_t *parent, const char *txt, uint32_t rgb, int w, int h, lv_event_cb_t cb, void *ud)
 {
     lv_obj_t *b = lv_button_create(parent);
@@ -356,6 +365,7 @@ lv_obj_t *tqa_button(lv_obj_t *parent, const char *txt, uint32_t rgb, int w, int
     lv_obj_t *l = tqa_label(b, txt, aos_font_body, 0xFFFFFF);
     lv_obj_set_style_text_align(l, LV_TEXT_ALIGN_CENTER, 0);
     lv_obj_center(l);
+    lv_obj_add_event_cb(b, click_cb, LV_EVENT_CLICKED, NULL);
     if (cb) lv_obj_add_event_cb(b, cb, LV_EVENT_CLICKED, ud);
     return b;
 }
@@ -542,6 +552,11 @@ static void frame_cb(lv_timer_t *t)
     float dt = a->last_ms ? (now - a->last_ms) / 1000.0f : FRAME_MS / 1000.0f;
     a->last_ms = now;
     if (dt > 0.1f) dt = 0.1f;
+    if (a->screen != SC_BATTLE) {
+        tq_snd_engine(0);
+        tq_snd_flight(0, 0, 0);
+    }
+    tq_snd_tick();
     if (aos_ui_overlay() & ~(uint32_t)AOS_UI_OVER_TOAST) return;
     if (a->art_ok) {
         if (a->screen == SC_BATTLE) tqb_tick(a, dt);
@@ -653,6 +668,7 @@ static void *tanques_create(aos_app_t *self, lv_obj_t *root)
     }
     memset(a->fb[0], 0, MAXPX * 2);
     if (!tq_save_load(&a->save)) tq_save_defaults(&a->save);
+    tq_snd_enable(a->save.sfx);
     a->art_ok = tq_art_open();
     a->screen = SC_MENU;
     if (a->art_ok) tqm_demo(a);
@@ -718,12 +734,28 @@ static void tanques_destroy(aos_app_t *self, void *inst)
     lv_display_remove_event_cb_with_user_data(lv_display_get_default(), refr_cb, a);
     if (a->worker_ok) aos_hal_worker_stop();
     if (a->timer) lv_timer_delete(a->timer);
+    tq_snd_close();
     if (a->root) lv_obj_clean(a->root);
     tqa_save(a);
     aos_hal_log("tanques", "closing | game %u KB, peak %u KB", (unsigned)(tq_mem_used() / 1024),
                 (unsigned)(tq_mem_peak() / 1024));
     free_all(a);
     lv_free(a);
+}
+
+/* The speaker is the app's only while it is in front */
+static void tanques_show(aos_app_t *self, void *inst)
+{
+    (void)self;
+    (void)inst;
+    tq_snd_open();
+}
+
+static void tanques_hide(aos_app_t *self, void *inst)
+{
+    (void)self;
+    (void)inst;
+    tq_snd_close();
 }
 
 /* The launcher icon: a toy tank, a round turret on a hull with tracks */
@@ -751,6 +783,8 @@ static bool tanques_init(aos_app_t *app)
 
     app->create  = tanques_create;
     app->destroy = tanques_destroy;
+    app->show    = tanques_show;
+    app->hide    = tanques_hide;
     app->back    = app_back;
     app->resize  = app_resize;
     return true;

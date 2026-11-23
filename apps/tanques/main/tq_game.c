@@ -899,6 +899,8 @@ static void land(tq_state_t *s, tq_terrain_t *t, tq_shell_t *sh, tq_v3_t at, tq_
     if (*nev >= TQ_MAX_EVENTS) return;
     tq_event_t *e = &ev[(*nev)++];
     ev_clear(e, TQ_EV_BLAST, at);
+    e->weapon = sh->weapon;
+    e->split = sh->split;
     tq_tank_t *o = &s->tank[sh->owner];
     float g = tq_ter_height(t, at.x, at.y);
     switch (sh->split ? TQ_FX_BLAST : W->fx) {
