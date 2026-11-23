@@ -1,0 +1,256 @@
+# amoledos-lang 1   es -> de
+# demo.sumar.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/sumar/main/fu_art.c:31
+Neón	Neon
+
+#: apps/sumar/main/fu_art.c:36
+Gemas	Edelsteine
+
+#: apps/sumar/main/fu_art.c:41
+Papel	Papier
+
+#: apps/sumar/main/fu_art.c:46
+Bosque	Wald
+
+#: apps/sumar/main/fu_save.c:22
+Primeros pasos	Erste Schritte
+
+#: apps/sumar/main/fu_save.c:22
+Llegá a 128.	Erreiche 128.
+
+#: apps/sumar/main/fu_save.c:23
+Buen pulso	Ruhige Hand
+
+#: apps/sumar/main/fu_save.c:23
+Llegá a 512.	Erreiche 512.
+
+#: apps/sumar/main/fu_save.c:24
+Mil y pico	Über tausend
+
+#: apps/sumar/main/fu_save.c:24
+Llegá a 1024.	Erreiche 1024.
+
+#: apps/sumar/main/fu_save.c:25
+Leyenda	Legende
+
+#: apps/sumar/main/fu_save.c:25
+Llegá a 4096.	Erreiche 4096.
+
+#: apps/sumar/main/fu_save.c:26
+De bolsillo	Im Taschenformat
+
+#: apps/sumar/main/fu_save.c:26
+En el tablero de 3×3, llegá a 256.	Erreiche 256 auf dem 3×3-Brett.
+
+#: apps/sumar/main/fu_save.c:27
+Sin red	Ohne Netz
+
+#: apps/sumar/main/fu_save.c:27
+Cumplí una meta sin deshacer.	Erreiche ein Ziel, ohne zurückzunehmen.
+
+#: apps/sumar/main/fu_save.c:28
+Triple	Dreifach
+
+#: apps/sumar/main/fu_save.c:28
+Hacé tres fusiones en un solo movimiento.	Schaffe drei Verschmelzungen in einem Zug.
+
+#: apps/sumar/main/fu_save.c:29
+A contrarreloj	Gegen die Uhr
+
+#: apps/sumar/main/fu_save.c:29
+Sumá 3000 puntos contra reloj.	Hole 3000 Punkte gegen die Uhr.
+
+#: apps/sumar/main/fu_save.c:30
+Entre piedras	Zwischen Steinen
+
+#: apps/sumar/main/fu_save.c:30
+Llegá a 512 con bloques.	Erreiche 512 mit Blöcken.
+
+#: apps/sumar/main/fu_save.c:31
+Mano a mano	Kopf an Kopf
+
+#: apps/sumar/main/fu_save.c:31
+Terminá una partida de a dos.	Beende ein Spiel zu zweit.
+
+#: apps/sumar/main/fu_save.c:32
+Maratón	Marathon
+
+#: apps/sumar/main/fu_save.c:32
+Hacé 500 movimientos en una partida.	Mache 500 Züge in einem Spiel.
+
+#: apps/sumar/main/fu_save.c:33
+Coleccionista	Sammler
+
+#: apps/sumar/main/fu_save.c:33
+Jugá con los cuatro temas.	Spiele mit allen vier Designs.
+
+#: apps/sumar/main/fu_ui.c:165
+Clásico	Klassisch
+
+#: apps/sumar/main/fu_ui.c:165
+Contra reloj	Gegen die Uhr
+
+#: apps/sumar/main/fu_ui.c:165
+Bloques	Blöcke
+
+#: apps/sumar/main/fu_ui.c:165
+De a dos	Zu zweit
+
+#: apps/sumar/main/fu_ui.c:172
+Juntá fichas iguales hasta la meta. Cada meta cumplida da otra más alta y un deshacer más.	Verbinde gleiche Steine bis zum Ziel. Jedes erreichte Ziel bringt ein höheres und eine Rücknahme mehr.
+
+#: apps/sumar/main/fu_ui.c:173
+Dos minutos para sumar todo lo que puedas. Cada meta da 20 segundos; deshacer cuesta 10.	Zwei Minuten für so viele Punkte wie möglich. Jedes Ziel bringt 20 Sekunden; Zurücknehmen kostet 10.
+
+#: apps/sumar/main/fu_ui.c:174
+Piedras fijas que no se mueven y cortan las filas. Las fichas frenan contra ellas.	Feste Steine, die sich nie bewegen und die Reihen teilen. Die Spielsteine halten an ihnen an.
+
+#: apps/sumar/main/fu_ui.c:175
+Una jugada cada uno, pasándose la placa. Gana quien llega a la meta, o quien sume más.	Abwechselnd ein Zug, das Board wird weitergereicht. Wer das Ziel erreicht, gewinnt, sonst wer mehr Punkte hat.
+
+#: apps/sumar/main/fu_ui.c:386
+Logro: %s	Erfolg: %s
+
+#: apps/sumar/main/fu_ui.c:473
+¡Meta %s!	Ziel %s!
+
+#: apps/sumar/main/fu_ui.c:481
++20 segundos. Ahora, %s.	+20 Sekunden. Als Nächstes %s.
+
+#: apps/sumar/main/fu_ui.c:484
+Ahora, %s. Un deshacer más.	Als Nächstes %s. Eine Rücknahme mehr.
+
+#: apps/sumar/main/fu_ui.c:620
+Jugador 1	Spieler 1
+
+#: apps/sumar/main/fu_ui.c:621
+Jugador 2	Spieler 2
+
+#: apps/sumar/main/fu_ui.c:626
+Puntos	Punkte
+
+#: apps/sumar/main/fu_ui.c:627
+Récord	Rekord
+
+#: apps/sumar/main/fu_ui.c:632
+Tiempo	Zeit
+
+#: apps/sumar/main/fu_ui.c:636
+Meta	Ziel
+
+#: apps/sumar/main/fu_ui.c:646
+%d×%d · De a dos · gana quien llegue a %s	%d×%d · Zu zweit · wer zuerst %s erreicht, gewinnt
+
+#: apps/sumar/main/fu_ui.c:648
+%d×%d · Contra reloj · meta %s	%d×%d · Gegen die Uhr · Ziel %s
+
+#: apps/sumar/main/fu_ui.c:650
+%d×%d · %s · nivel %d	%d×%d · %s · Level %d
+
+#: apps/sumar/main/fu_ui.c:659
+-10 s	-10 s
+
+#: apps/sumar/main/fu_ui.c:672
+Turno del jugador 2	Spieler 2 ist dran
+
+#: apps/sumar/main/fu_ui.c:672
+Turno del jugador 1	Spieler 1 ist dran
+
+#: apps/sumar/main/fu_ui.c:762
+#: apps/sumar/main/fu_ui.c:839
+#: apps/sumar/main/fu_ui.c:1169
+Sonido: sí	Ton: an
+
+#: apps/sumar/main/fu_ui.c:762
+#: apps/sumar/main/fu_ui.c:839
+#: apps/sumar/main/fu_ui.c:1169
+Sonido: no	Ton: aus
+
+#: apps/sumar/main/fu_ui.c:834
+Pausa	Pause
+
+#: apps/sumar/main/fu_ui.c:836
+Seguir	Weiter
+
+#: apps/sumar/main/fu_ui.c:837
+Empezar de nuevo	Neu beginnen
+
+#: apps/sumar/main/fu_ui.c:838
+#: apps/sumar/main/fu_ui.c:914
+Menú	Menü
+
+#: apps/sumar/main/fu_ui.c:853
+¡Empate!	Unentschieden!
+
+#: apps/sumar/main/fu_ui.c:854
+¡Gana el jugador %d!	Spieler %d gewinnt!
+
+#: apps/sumar/main/fu_ui.c:857
+¡Se acabó el tiempo!	Die Zeit ist um!
+
+#: apps/sumar/main/fu_ui.c:859
+No quedan movimientos	Keine Züge mehr
+
+#: apps/sumar/main/fu_ui.c:879
+Jugador 1: %s   Jugador 2: %s	Spieler 1: %s   Spieler 2: %s
+
+#: apps/sumar/main/fu_ui.c:883
+%s puntos	%s Punkte
+
+#: apps/sumar/main/fu_ui.c:887
+¡Récord nuevo!	Neuer Rekord!
+
+#: apps/sumar/main/fu_ui.c:890
+Récord: %s	Rekord: %s
+
+#: apps/sumar/main/fu_ui.c:895
+Ficha más alta: %s · %lu movimientos	Höchster Stein: %s · %lu Züge
+
+#: apps/sumar/main/fu_ui.c:913
+Otra vez	Nochmal
+
+#: apps/sumar/main/fu_ui.c:923
+#: apps/sumar/main/fu_ui.c:1168
+Logros	Erfolge
+
+#: apps/sumar/main/fu_ui.c:927
+%d de %d	%d von %d
+
+#: apps/sumar/main/fu_ui.c:973
+Cerrar	Schließen
+
+#: apps/sumar/main/fu_ui.c:1013
+Récord en %d×%d, %s: %s puntos, ficha %s	Rekord auf %d×%d, %s: %s Punkte, Stein %s
+
+#: apps/sumar/main/fu_ui.c:1016
+Todavía sin récord en %d×%d, %s	Noch kein Rekord auf %d×%d, %s
+
+#: apps/sumar/main/fu_ui.c:1022
+Seguir (%d×%d, %s)	Weiter (%d×%d, %s)
+
+#: apps/sumar/main/fu_ui.c:1025
+Partida nueva	Neues Spiel
+
+#: apps/sumar/main/fu_ui.c:1028
+#: apps/sumar/main/fu_ui.c:1164
+Jugar	Spielen
+
+#: apps/sumar/main/fu_ui.c:1115
+Deslizá, juntá dos iguales, llegá más alto.	Wischen, zwei gleiche verbinden, höher hinaus.
+
+#: apps/sumar/main/fu_ui.c:1121
+Tablero	Spielfeld
+
+#: apps/sumar/main/fu_ui.c:1127
+Modo	Modus
+
+#: apps/sumar/main/fu_ui.c:1135
+Tema	Design
+
+#: apps/sumar/main/fu_ui.c:1304
+Deslizá en cualquier dirección. Dos fichas iguales se funden en una.	In jede Richtung wischen. Zwei gleiche Steine verschmelzen zu einem.
