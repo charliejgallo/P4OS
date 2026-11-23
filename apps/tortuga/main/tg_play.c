@@ -1138,6 +1138,7 @@ void tg_play_frame(void)
             /* "right away": straight to the end */
             scene_at(w->nev);
             P->at = w->nev;
+            mark_line(0, false);
         }
         if (P->at < w->nev) {
             const tg_ev_t *e = &w->ev[P->at];
