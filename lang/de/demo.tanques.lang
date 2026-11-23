@@ -5,86 +5,94 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/tanques/main/tanques.c:275
+#: apps/tanques/main/tanques.c:381
 Falta el arte: copiá tanques_p4.pak en /apps de la tarjeta.	Die Grafik fehlt: kopiere tanques_p4.pak nach /apps auf der Karte.
 
-#: apps/tanques/main/tq_battle.c:117
+#: apps/tanques/main/tq_battle.c:130
 ¡Fuera de combate!	Ausgeschaltet!
 
-#: apps/tanques/main/tq_battle.c:122
+#: apps/tanques/main/tq_battle.c:135
 ¡Cerca!	Knapp!
 
-#: apps/tanques/main/tq_battle.c:126
+#: apps/tanques/main/tq_battle.c:139
 ¡Afuera!	Daneben!
 
-#: apps/tanques/main/tq_battle.c:133
+#: apps/tanques/main/tq_battle.c:146
 ¡Escudo!	Schild!
 
-#: apps/tanques/main/tq_battle.c:136
+#: apps/tanques/main/tq_battle.c:149
 ¡Sin energía!	Ohne Energie!
 
-#: apps/tanques/main/tq_battle.c:136
+#: apps/tanques/main/tq_battle.c:149
 EMP	EMP
 
-#: apps/tanques/main/tq_battle.c:139
+#: apps/tanques/main/tq_battle.c:152
 ¡Zas!	Zack!
 
-#: apps/tanques/main/tq_battle.c:142
+#: apps/tanques/main/tq_battle.c:155
 ¡Mina!	Mine!
 
-#: apps/tanques/main/tq_battle.c:146
+#: apps/tanques/main/tq_battle.c:159
 ¡Quema!	Es brennt!
 
-#: apps/tanques/main/tq_battle.c:236
-#: apps/tanques/main/tq_hangar.c:377
+#: apps/tanques/main/tq_battle.c:249
+#: apps/tanques/main/tq_hangar.c:380
 No hay memoria para el arte	Zu wenig Speicher für die Grafik
 
-#: apps/tanques/main/tq_battle.c:364
+#: apps/tanques/main/tq_battle.c:382
 Juega %s	%s ist dran
 
-#: apps/tanques/main/tq_battle.c:365
+#: apps/tanques/main/tq_battle.c:383
 Tu turno	Du bist dran
 
-#: apps/tanques/main/tq_battle.c:366
+#: apps/tanques/main/tq_battle.c:384
 Turno: %s	Am Zug: %s
 
-#: apps/tanques/main/tq_battle.c:377
+#: apps/tanques/main/tq_battle.c:395
 Viento %s %.0f	Wind %s %.0f
 
-#: apps/tanques/main/tq_battle.c:391
-#: apps/tanques/main/tq_battle.c:470
+#: apps/tanques/main/tq_battle.c:409
+#: apps/tanques/main/tq_battle.c:493
 Apuntar	Zielen
 
-#: apps/tanques/main/tq_battle.c:391
+#: apps/tanques/main/tq_battle.c:409
+#: apps/tanques/main/tq_battle.c:410
 Terminar	Zug beenden
 
 #: apps/tanques/main/tq_battle.c:410
-Elevación %d°   Giro %d°	Höhe %d°   Drehung %d°
-
-#: apps/tanques/main/tq_battle.c:472
-Tocá el mapa adonde ir. Arrastrá para mirar.	Tippe auf das Ziel. Ziehen zum Umsehen.
-
-#: apps/tanques/main/tq_battle.c:484
-¡Fuego!	Feuer!
-
-#: apps/tanques/main/tq_battle.c:494
+#: apps/tanques/main/tq_battle.c:508
 Mover	Fahren
 
-#: apps/tanques/main/tq_battle.c:515
+#: apps/tanques/main/tq_battle.c:429
+Elevación %d°   Giro %d°	Höhe %d°   Drehung %d°
+
+#: apps/tanques/main/tq_battle.c:432
+Segundo disparo: AP x2	Zweiter Schuss: AP x2
+
+#: apps/tanques/main/tq_battle.c:495
+Tocá el mapa adonde ir. Arrastrá para mirar.	Tippe auf das Ziel. Ziehen zum Umsehen.
+
+#: apps/tanques/main/tq_battle.c:518
+¡Fuego!	Feuer!
+
+#: apps/tanques/main/tq_battle.c:542
 ¿Dejar la batalla?	Schlacht verlassen?
 
-#: apps/tanques/main/tq_battle.c:517
+#: apps/tanques/main/tq_battle.c:544
 Dejar	Verlassen
 
-#: apps/tanques/main/tq_battle.c:520
-#: apps/tanques/main/tq_menu.c:344
+#: apps/tanques/main/tq_battle.c:547
+#: apps/tanques/main/tq_menu.c:343
 Seguir	Weiter
 
-#: apps/tanques/main/tq_battle.c:539
+#: apps/tanques/main/tq_battle.c:566
 Turno de %s\nPasale la placa	%s ist dran\nGib das Gerät weiter
 
-#: apps/tanques/main/tq_battle.c:593
+#: apps/tanques/main/tq_battle.c:626
 No llega hasta ahí	Zu weit weg
+
+#: apps/tanques/main/tq_battle.c:782
+Sin AP	Keine AP
 
 #: apps/tanques/main/tq_data.c:18
 Bombo	Pauke
@@ -338,6 +346,9 @@ Mediano	Mittel
 #: apps/tanques/main/tq_data.c:220
 Grande	Groß
 
+#: apps/tanques/main/tq_data.c:220
+Muy grande	Riesig
+
 #: apps/tanques/main/tq_data.c:221
 Fácil	Leicht
 
@@ -423,7 +434,7 @@ Emblema	Wappen
 Color del emblema	Wappenfarbe
 
 #: apps/tanques/main/tq_hangar.c:347
-#: apps/tanques/main/tq_menu.c:70
+#: apps/tanques/main/tq_menu.c:69
 %ld monedas	%ld Münzen
 
 #: apps/tanques/main/tq_hangar.c:355
@@ -438,83 +449,83 @@ El tuyo	Deiner
 #: apps/tanques/main/tq_hangar.c:366
 Usar este	Diesen nehmen
 
-#: apps/tanques/main/tq_hangar.c:441
-#: apps/tanques/main/tq_menu.c:98
+#: apps/tanques/main/tq_hangar.c:446
+#: apps/tanques/main/tq_menu.c:97
 Hangar	Hangar
 
-#: apps/tanques/main/tq_hangar.c:468
+#: apps/tanques/main/tq_hangar.c:473
 Mejoras	Upgrades
 
-#: apps/tanques/main/tq_hangar.c:468
+#: apps/tanques/main/tq_hangar.c:473
 Armas	Waffen
 
-#: apps/tanques/main/tq_hangar.c:468
+#: apps/tanques/main/tq_hangar.c:473
 Pintura	Lackierung
 
-#: apps/tanques/main/tq_menu.c:90
+#: apps/tanques/main/tq_menu.c:89
 Tanques	Panzer
 
-#: apps/tanques/main/tq_menu.c:96
-#: apps/tanques/main/tq_menu.c:140
+#: apps/tanques/main/tq_menu.c:95
+#: apps/tanques/main/tq_menu.c:139
 Historia	Story
 
-#: apps/tanques/main/tq_menu.c:97
-#: apps/tanques/main/tq_menu.c:270
+#: apps/tanques/main/tq_menu.c:96
+#: apps/tanques/main/tq_menu.c:269
 Batalla libre	Freie Schlacht
 
-#: apps/tanques/main/tq_menu.c:167
+#: apps/tanques/main/tq_menu.c:166
 %s · %d rivales · %d monedas	%s · %d Gegner · %d Münzen
 
-#: apps/tanques/main/tq_menu.c:169
+#: apps/tanques/main/tq_menu.c:168
 %s · 1 rival · %d monedas	%s · 1 Gegner · %d Münzen
 
-#: apps/tanques/main/tq_menu.c:170
+#: apps/tanques/main/tq_menu.c:169
 Ganá la anterior para jugarla	Gewinne die vorige, um sie zu spielen
 
-#: apps/tanques/main/tq_menu.c:246
+#: apps/tanques/main/tq_menu.c:245
 Jugador 1	Spieler 1
 
-#: apps/tanques/main/tq_menu.c:247
+#: apps/tanques/main/tq_menu.c:246
 Jugador 2	Spieler 2
 
-#: apps/tanques/main/tq_menu.c:272
+#: apps/tanques/main/tq_menu.c:271
 Lugar	Ort
 
-#: apps/tanques/main/tq_menu.c:272
+#: apps/tanques/main/tq_menu.c:271
 Tamaño	Größe
 
-#: apps/tanques/main/tq_menu.c:272
+#: apps/tanques/main/tq_menu.c:271
 Rivales	Gegner
 
-#: apps/tanques/main/tq_menu.c:272
+#: apps/tanques/main/tq_menu.c:271
 Dificultad	Schwierigkeit
 
-#: apps/tanques/main/tq_menu.c:272
+#: apps/tanques/main/tq_menu.c:271
 Clima	Wetter
 
-#: apps/tanques/main/tq_menu.c:273
+#: apps/tanques/main/tq_menu.c:272
 Jugadores	Spieler
 
-#: apps/tanques/main/tq_menu.c:273
+#: apps/tanques/main/tq_menu.c:272
 Tanque del 2	Panzer von Spieler 2
 
-#: apps/tanques/main/tq_menu.c:292
+#: apps/tanques/main/tq_menu.c:291
 ¡A la batalla!	Auf in die Schlacht!
 
-#: apps/tanques/main/tq_menu.c:318
+#: apps/tanques/main/tq_menu.c:317
 Empate	Unentschieden
 
-#: apps/tanques/main/tq_menu.c:319
+#: apps/tanques/main/tq_menu.c:318
 ¡Ganó %s!	%s gewinnt!
 
-#: apps/tanques/main/tq_menu.c:321
+#: apps/tanques/main/tq_menu.c:320
 ¡Ganaste!	Gewonnen!
 
-#: apps/tanques/main/tq_menu.c:321
+#: apps/tanques/main/tq_menu.c:320
 Perdiste	Verloren
 
-#: apps/tanques/main/tq_menu.c:325
+#: apps/tanques/main/tq_menu.c:324
 Daño hecho: %d   Tanques fuera: %d	Schaden: %d   Ausgeschaltet: %d
 
-#: apps/tanques/main/tq_menu.c:329
+#: apps/tanques/main/tq_menu.c:328
 +%d monedas	+%d Münzen

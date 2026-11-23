@@ -12,8 +12,8 @@
 #include "tq_terrain.h"
 
 #define TQ_MAX_TANKS   4
-#define TQ_GRIDMAX     36           /* driving cells, 1 m */
-#define TQ_MAX_TREES   34
+#define TQ_GRIDMAX     44           /* driving cells, 1 m */
+#define TQ_MAX_TREES   48
 #define TQ_MAX_BLOCKS  64
 #define TQ_MAX_PARTS   240
 #define TQ_MAX_SHELLS  8
@@ -46,6 +46,8 @@ typedef struct {
     bool     alive;
     int      dealt;                 /* damage done to others */
     int      kills;
+    bool     moved;                 /* drove this turn */
+    int      shots;                 /* fired this turn */
 } tq_tank_t;
 
 typedef struct {
@@ -186,6 +188,31 @@ bool tq_game_mines(tq_state_t *s, tq_terrain_t *t, int who, tq_event_t *ev);
 static inline int tq_weapon_of(const tq_tank_t *k)
 {
     return k->load[k->sel];
+}
+
+/* A turn has one shot, and a second one at twice the AP for a tank that
+ * did not drive */
+#define TQ_SHOTS_MAX 2
+
+/* What a slot's shot costs now */
+static inline int tq_shot_ap(const tq_tank_t *k, int slot)
+{
+    return TQ_WEAPON[k->load[slot]].ap * (k->shots + 1);
+}
+
+/* A slot the tank may fire now (AP, uses left, the turn's shots) */
+static inline bool tq_slot_ready(const tq_tank_t *k, int slot)
+{
+    if (k->shots >= TQ_SHOTS_MAX || (k->shots && k->moved)) return false;
+    return k->uses[slot] && tq_shot_ap(k, slot) <= k->ap;
+}
+
+/* Anything the tank may still fire this turn */
+static inline bool tq_can_fire(const tq_tank_t *k)
+{
+    for (int w = 0; w < k->nload; w++)
+        if (tq_slot_ready(k, w)) return true;
+    return false;
 }
 
 void tq_game_muzzle(const tq_tank_t *k, const tq_terrain_t *t, tq_v3_t *p, tq_v3_t *v);

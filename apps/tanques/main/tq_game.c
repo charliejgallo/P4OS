@@ -307,6 +307,8 @@ void tq_game_turn(tq_state_t *s, const tq_terrain_t *t, tq_event_t *ev)
     k->ap = k->apmax - k->emp;
     if (k->ap < 2) k->ap = 2;
     k->emp = 0;
+    k->moved = false;
+    k->shots = 0;
     new_wind(s);
     for (int z = 0; z < TQ_MAX_ZONES; z++) {
         tq_zone_t *zn = &s->zone[z];
@@ -405,7 +407,7 @@ void tq_game_reach(tq_state_t *s, const tq_terrain_t *t)
     /* the tile's colour: how much is left for shooting */
     int cheap = 99, dear = 0;
     for (int w = 0; w < k->nload; w++) {
-        int ap = TQ_WEAPON[k->load[w]].ap * 16;
+        int ap = tq_shot_ap(k, w) * 16;
         if (ap < cheap) cheap = ap;
         if (ap > dear) dear = ap;
     }
@@ -813,8 +815,9 @@ void tq_game_fire(tq_state_t *s, tq_terrain_t *t, tq_event_t *ev, int *nev)
     int w = tq_weapon_of(k);
     const tq_weapon_t *W = &TQ_WEAPON[w];
     *nev = 0;
-    k->ap -= W->ap;
+    k->ap -= tq_shot_ap(k, k->sel);
     if (k->ap < 0) k->ap = 0;
+    k->shots++;
     if (k->uses[k->sel] != 0xFF && k->uses[k->sel] > 0) k->uses[k->sel]--;
     tq_v3_t at = tq_v3(k->x, k->y, tq_tank_z(t, k) + 2.4f);
     if (W->fx == TQ_FX_SHIELD) {
@@ -1254,7 +1257,7 @@ static float slot_value(const tq_state_t *s, const tq_terrain_t *t, int who, int
     const tq_tank_t *k = &s->tank[who];
     int w = k->load[slot];
     const tq_weapon_t *W = &TQ_WEAPON[w];
-    if (W->ap > k->ap || k->uses[slot] == 0) return -1;
+    if (!tq_slot_ready(k, slot)) return -1;
     const tq_tank_t *e = &s->tank[target];
     *yaw = atan2f(e->y - k->y, e->x - k->x);
     *pitch = k->pitch;
@@ -1280,7 +1283,7 @@ static float slot_value(const tq_state_t *s, const tq_terrain_t *t, int who, int
     if (W->fx == TQ_FX_CLUSTER) dmg *= 2.2f;
     if (W->fx == TQ_FX_EMP) dmg = 15;
     if (W->fx == TQ_FX_NAPALM) dmg += 12;
-    return hit * dmg - W->ap * 0.5f;
+    return hit * dmg - tq_shot_ap(k, slot) * 0.5f;
 }
 
 void tq_ai_plan_move(tq_state_t *s, const tq_terrain_t *t, int *ap_cost)
@@ -1356,10 +1359,11 @@ void tq_ai_plan_aim(tq_state_t *s, const tq_terrain_t *t, float *yaw, float *pit
             *pitch = p;
         }
     }
-    if (*slot < 0) {
-        /* nothing lands near: the cheapest shot at the target anyway */
+    if (*slot < 0 && k->shots == 0) {
+        /* nothing lands near: the cheapest shot at the target anyway (a
+         * second shot only when it is worth it) */
         for (int w = 0; w < k->nload; w++) {
-            if (TQ_WEAPON[k->load[w]].ap <= k->ap && TQ_WEAPON[k->load[w]].fly != TQ_FLY_SELF && k->uses[w]) {
+            if (tq_slot_ready(k, w) && TQ_WEAPON[k->load[w]].fly != TQ_FLY_SELF) {
                 *slot = w;
                 float y;
                 slot_value(s, t, me, w, target, &y, pitch);

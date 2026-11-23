@@ -42,7 +42,10 @@ parts (`tanques_p4.pak`, `.pak.1`...): the game reads across them.
    grows with the weapon's level (and shrinks on Hard and in fog). Wind
    pushes the shells: its arrow and strength are on the top bar.
 3. The flight, the blast, the crater and the damage are watched from
-   above; then the next tank plays. The last team standing wins.
+   above. A tank that did not drive may fire a second time, at twice the
+   AP ("Terminar" ends the turn instead); after that, or when the AP left
+   cannot pay for any shot, the next tank plays. The last team standing
+   wins.
 
 Back (the system's gesture) leaves the gunner's view, or asks whether to
 leave the battle.
@@ -82,7 +85,8 @@ and prints what it did.
 Twelve missions (pradera, desierto, nieve, ruinas, volcán) with one to three
 rivals, the board's tanks upgraded by the mission's difficulty; each opens
 when the one before is won, and earns one to three stars by the health left.
-The free battle picks the place, the size (28, 32 or 36 m), one to three
+The free battle picks the place, the size (28, 32, 36 or 44 m; the
+biggest takes two rivals at most, for the board's memory), one to three
 rivals, the difficulty (how far off the board's aim is: 3.5, 2 or 0.9
 degrees), the weather (clear, wind, storm, fog) and one or two players.
 Coins: the mission's reward or the free battle's, half the damage done and
@@ -100,6 +104,19 @@ a frozen lake, streets and squares, a volcano and lava), trees and walls
 | the battle view | the fixed orthographic camera of the sprites (yaw 20, looking down 55 degrees, 32 px a metre): the whole map is drawn once into a picture with its depth, at half that scale (the ground is smooth; 2.3 MB instead of 9.3 for the biggest map), and a frame is a window of it doubled, with the sprites over it at full size, each pixel tested against that depth |
 | tanks, trees, stones | Blender sprites (`tools/blender/tanques_art.py`, built by code): hull and turret apart, 32 yaws each, from above and from 8 degrees for the first person; shade, coverage, region and depth planes; the app paints the regions |
 | the first person | drawn whole every frame at half the screen each way (the ground's triangles, the things scaled by distance, the turret and barrel rendered for that tank's gunner) and doubled |
+
+**Measured on the board** (2026-11-23, the user playing, portrait):
+
+| | per frame |
+| --- | --- |
+| battle view, camera still: only the boxes round what moves (~60-80 kpx) | 12-33 ms: ~30 fps |
+| battle view, camera gliding: whole frames | 70-136 ms: 8-14 fps |
+| first person, the PPA doubling it into the panel | 36-77 ms: 13-28 fps while dragging |
+| a free battle of two tanks, 32-36 m | 9.9-10.9 MB of PSRAM (16.5 free when the app opens) |
+
+Before the boxes and the PPA every battle-view frame was whole (115-148 ms)
+and the first person 96-194 ms (half of it doubling on the CPU). The rest
+of this section is what the 3D's road was chosen with, before the board.
 
 `tools/bench.c` runs the same code on the Mac next to Visor 3D's
 rasteriser, whose times on the board are known (mila_hd: 105 ms on one

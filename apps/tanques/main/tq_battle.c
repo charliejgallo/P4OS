@@ -269,21 +269,23 @@ static void aim_changed(app_t *a)
 
 static void enter_aim(app_t *a)
 {
-    if (a->bstate != B_MOVE) return;
+    if (a->bstate != B_MOVE && a->bstate != B_BOOM) return;
     tq_tank_t *k = cur_tank(a);
-    int cheap = 99;
-    for (int w = 0; w < k->nload; w++)
-        if (k->uses[w] && TQ_WEAPON[k->load[w]].ap < cheap) cheap = TQ_WEAPON[k->load[w]].ap;
-    if (k->ap < cheap) {
+    if (!tq_can_fire(k)) {
         next_turn(a);               /* no shot left: the turn ends */
         return;
     }
-    if (k->ap < TQ_WEAPON[tq_weapon_of(k)].ap || !k->uses[k->sel]) {
+    if (!tq_slot_ready(k, k->sel)) {
         for (int w = 0; w < k->nload; w++)
-            if (k->uses[w] && TQ_WEAPON[k->load[w]].ap <= k->ap) {
+            if (tq_slot_ready(k, w)) {
                 k->sel = w;
                 break;
             }
+    }
+    if (k->shots) {
+        /* the second shot: aimed where the first one was */
+        set_state(a, B_AIM);
+        return;
     }
     /* the turret starts facing the nearest enemy: the aim is the finger's */
     float bd = 1e9f;
@@ -304,7 +306,7 @@ static void enter_aim(app_t *a)
 static void fire(app_t *a)
 {
     tq_tank_t *k = cur_tank(a);
-    if (k->ap < TQ_WEAPON[tq_weapon_of(k)].ap || !k->uses[k->sel]) return;
+    if (!tq_slot_ready(k, k->sel)) return;
     tq_event_t ev[TQ_MAX_EVENTS];
     int nev = 0;
     tqa_wait_worker(a);
@@ -326,7 +328,10 @@ static void on_aim(lv_event_t *e)
 static void on_back(lv_event_t *e)
 {
     app_t *a = (app_t *)lv_event_get_user_data(e);
-    if (a->bstate == B_AIM) set_state(a, B_MOVE);
+    if (a->bstate != B_AIM) return;
+    /* after a shot there is no driving: the button ends the turn */
+    if (cur_tank(a)->shots) next_turn(a);
+    else set_state(a, B_MOVE);
 }
 
 static void on_weapon(lv_event_t *e)
@@ -336,7 +341,7 @@ static void on_weapon(lv_event_t *e)
     tq_tank_t *k = cur_tank(a);
     for (int w = 0; w < k->nload; w++) {
         if (b != a->btn_w[w]) continue;
-        if (k->ap < TQ_WEAPON[k->load[w]].ap || !k->uses[w]) return;
+        if (!tq_slot_ready(k, w)) return;
         k->sel = w;
         const tq_weapon_t *W = &TQ_WEAPON[k->load[w]];
         k->pitch = tq_clampf(k->pitch, W->min_pitch * TQ_DEG, W->max_pitch * TQ_DEG);
@@ -394,22 +399,23 @@ static void hud_refresh(app_t *a)
     lv_label_set_text(a->ap_lbl, txt);
     int cheap = 99;
     for (int w = 0; w < k->nload; w++)
-        if (TQ_WEAPON[k->load[w]].ap < cheap) cheap = TQ_WEAPON[k->load[w]].ap;
+        if (k->uses[w] && tq_shot_ap(k, w) < cheap) cheap = tq_shot_ap(k, w);
     for (int i = 0; i < 14; i++) {
         tqa_show(a->ap_dot[i], i < k->apmax);
         uint32_t c = 0x3A4652;
         if (i < k->ap) c = i >= k->ap - cheap ? 0xFFD23C : 0x46C8FF;
         lv_obj_set_style_bg_color(a->ap_dot[i], lv_color_hex(c), 0);
     }
-    tqa_btn_text(a->btn_aim, k->ap >= cheap ? _("Apuntar") : _("Terminar"));
+    tqa_btn_text(a->btn_aim, tq_can_fire(k) ? _("Apuntar") : _("Terminar"));
+    tqa_btn_text(a->btn_back, k->shots ? _("Terminar") : _("Mover"));
     for (int w = 0; w < TQ_SLOTS_MAX; w++) {
         tqa_show(a->btn_w[w], w < k->nload);
         if (w >= k->nload) continue;
         const tq_weapon_t *W = &TQ_WEAPON[k->load[w]];
-        if (k->uses[w] != 0xFF) snprintf(txt, sizeof txt, "%s\n%d AP  x%d", _(W->name), W->ap, k->uses[w]);
-        else snprintf(txt, sizeof txt, "%s\n%d AP", _(W->name), W->ap);
+        if (k->uses[w] != 0xFF) snprintf(txt, sizeof txt, "%s\n%d AP  x%d", _(W->name), tq_shot_ap(k, w), k->uses[w]);
+        else snprintf(txt, sizeof txt, "%s\n%d AP", _(W->name), tq_shot_ap(k, w));
         tqa_btn_text(a->btn_w[w], txt);
-        if (k->ap < W->ap || !k->uses[w]) lv_obj_add_state(a->btn_w[w], LV_STATE_DISABLED);
+        if (!tq_slot_ready(k, w)) lv_obj_add_state(a->btn_w[w], LV_STATE_DISABLED);
         else lv_obj_remove_state(a->btn_w[w], LV_STATE_DISABLED);
         lv_obj_set_style_border_width(a->btn_w[w], w == k->sel ? 5 : 0, 0);
         lv_obj_set_style_bg_color(a->btn_w[w], lv_color_hex(W->rgb), 0);
@@ -421,6 +427,10 @@ static void hud_refresh(app_t *a)
         snprintf(txt, sizeof txt, "%s", _(TQ_WEAPON[tq_weapon_of(k)].info));
     else
         snprintf(txt, sizeof txt, _("Elevación %d°   Giro %d°"), (int)roundf(k->pitch / TQ_DEG), (int)roundf(-yaw_rel));
+    if (k->shots) {
+        size_t l = strlen(txt);
+        snprintf(txt + l, sizeof txt - l, "   %s", _("Segundo disparo: AP x2"));
+    }
     lv_label_set_text(a->aim_lbl, txt);
 }
 
@@ -547,6 +557,7 @@ static void hud_for_state(app_t *a)
     tqa_show(a->top_bar, true);
     tqa_show(a->move_bar, s == B_MOVE);
     tqa_show(a->hint, s == B_MOVE && k->ap >= 3);
+    tqa_show(a->btn_back, s == B_AIM);
     tqa_show(a->aim_bar, s == B_AIM);
     tqa_show(a->banner, s == B_HANDOVER);
     tqa_show(a->leave, s == B_LEAVE);
@@ -760,12 +771,22 @@ static void drive_step(app_t *a, float dt)
     if (a->drive_seg >= s->npath || !k->alive) {
         k->ap -= a->drive_cost;
         if (k->ap < 0) k->ap = 0;
+        if (a->drive_cost) k->moved = true;
         s->npath = 0;
         tqa_wait_worker(a);
         tq_game_reach(s, a->ter);
-        if (!k->alive) next_turn(a);
-        else if (k->ai) set_state(a, B_AI_AIM);
-        else set_state(a, B_MOVE);
+        if (!k->alive) {
+            next_turn(a);
+        } else if (!tq_can_fire(k)) {
+            /* no AP left for a shot: the turn ends by itself */
+            say(a, tq_v3(k->x, k->y, tq_tank_z(a->ter, k) + 3.5f), _("Sin AP"), 0xFFD23C);
+            set_state(a, B_BOOM);
+            a->st_t = 1.0f;
+        } else if (k->ai) {
+            set_state(a, B_AI_AIM);
+        } else {
+            set_state(a, B_MOVE);
+        }
         return;
     }
     float tx = s->path[a->drive_seg][0], ty = s->path[a->drive_seg][1];
@@ -856,7 +877,15 @@ void tqb_tick(app_t *a, float dt)
         break;
     }
     case B_BOOM:
-        if (a->st_t > 1.8f && !tq_game_flying(s)) next_turn(a);
+        if (a->st_t > 1.8f && !tq_game_flying(s)) {
+            if (k->alive && k->shots && tq_can_fire(k) && tq_game_winner(s) == -1) {
+                /* it did not drive: a second shot, at twice the AP */
+                if (k->ai) set_state(a, B_AI_AIM);
+                else enter_aim(a);
+            } else {
+                next_turn(a);
+            }
+        }
         break;
     default:
         break;

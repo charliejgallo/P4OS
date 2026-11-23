@@ -9,11 +9,11 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-/* The map: a square of up to TQ_MAP_MAX metres (the battle picks 28, 32 or
- * 36), heights on a grid of TQ_CELL */
-#define TQ_MAP_MAX   36.0f
+/* The map: a square of up to TQ_MAP_MAX metres (the battle picks 28, 32, 36
+ * or 44), heights on a grid of TQ_CELL */
+#define TQ_MAP_MAX   44.0f
 #define TQ_CELL      0.5f
-#define TQ_NMAX      72                     /* cells per side, at most */
+#define TQ_NMAX      88                     /* cells per side, at most */
 #define TQ_NVMAX     (TQ_NMAX + 1)
 #define TQ_BASE_Z    (-1.4f)                /* the diorama's floor, under the map */
 

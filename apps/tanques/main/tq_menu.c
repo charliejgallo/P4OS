@@ -189,9 +189,17 @@ enum { F_BIOME = 0, F_SIZE, F_RIVALS, F_DIFF, F_WEATHER, F_PLAYERS, F_P2, F_ROWS
 static lv_obj_t *s_fval[F_ROWS];
 static int s_p2_type = TQ_T_BOMBO;
 
+/* The biggest map takes two rivals at most: four tanks on it would need
+ * more PSRAM than the board has free */
+static int max_rivals(const tq_save_t *s)
+{
+    return s->f_size % TQ_SIZES == TQ_SIZES - 1 ? 2 : 3;
+}
+
 static void free_text(app_t *a)
 {
     tq_save_t *s = &a->save;
+    if (s->f_rivals > max_rivals(s)) s->f_rivals = (uint8_t)max_rivals(s);
     char txt[96];
     lv_label_set_text(s_fval[F_BIOME], _(TQ_BIOME_NAME[s->f_biome % TQ_BIOMES]));
     lv_label_set_text(s_fval[F_SIZE], _(TQ_SIZE_NAME[s->f_size % TQ_SIZES]));
@@ -215,7 +223,11 @@ static void free_step(lv_event_t *e)
     switch (row) {
     case F_BIOME: s->f_biome = (uint8_t)((s->f_biome + TQ_BIOMES + d) % TQ_BIOMES); break;
     case F_SIZE: s->f_size = (uint8_t)((s->f_size + TQ_SIZES + d) % TQ_SIZES); break;
-    case F_RIVALS: s->f_rivals = (uint8_t)((s->f_rivals - 1 + 3 + d) % 3 + 1); break;
+    case F_RIVALS: {
+        int n = max_rivals(s);
+        s->f_rivals = (uint8_t)((s->f_rivals - 1 + n + d) % n + 1);
+        break;
+    }
     case F_DIFF: s->f_diff = (uint8_t)((s->f_diff + TQ_DIFFS + d) % TQ_DIFFS); break;
     case F_WEATHER: s->f_weather = (uint8_t)((s->f_weather + TQ_WEATHERS + d) % TQ_WEATHERS); break;
     case F_PLAYERS: s->f_players = s->f_players == 1 ? 2 : 1; break;

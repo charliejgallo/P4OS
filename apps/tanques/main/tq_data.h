@@ -155,7 +155,7 @@ extern const char *const TQ_BIOME_KEY[TQ_BIOMES];
 extern const char *const TQ_BIOME_NAME[TQ_BIOMES];        /* N_() */
 enum { TQ_WX_CLEAR = 0, TQ_WX_WIND, TQ_WX_STORM, TQ_WX_FOG, TQ_WEATHERS };
 extern const char *const TQ_WEATHER_NAME[TQ_WEATHERS];    /* N_() */
-#define TQ_SIZES 3
+#define TQ_SIZES 4
 extern const float TQ_SIZE_M[TQ_SIZES];
 extern const char *const TQ_SIZE_NAME[TQ_SIZES];          /* N_() */
 #define TQ_DIFFS 3

@@ -216,8 +216,8 @@ void tq_save_store(const tq_save_t *s)
 const char *const TQ_BIOME_KEY[TQ_BIOMES] = { "pradera", "desierto", "nieve", "ruinas", "volcan" };
 const char *const TQ_BIOME_NAME[TQ_BIOMES] = { N_("Pradera"), N_("Desierto"), N_("Nieve"), N_("Ruinas"), N_("Volcán") };
 const char *const TQ_WEATHER_NAME[TQ_WEATHERS] = { N_("Despejado"), N_("Viento"), N_("Tormenta"), N_("Niebla") };
-const float TQ_SIZE_M[TQ_SIZES] = { 28.0f, 32.0f, 36.0f };
-const char *const TQ_SIZE_NAME[TQ_SIZES] = { N_("Chico"), N_("Mediano"), N_("Grande") };
+const float TQ_SIZE_M[TQ_SIZES] = { 28.0f, 32.0f, 36.0f, 44.0f };
+const char *const TQ_SIZE_NAME[TQ_SIZES] = { N_("Chico"), N_("Mediano"), N_("Grande"), N_("Muy grande") };
 const char *const TQ_DIFF_NAME[TQ_DIFFS] = { N_("Fácil"), N_("Normal"), N_("Difícil") };
 
 const tq_mission_t TQ_MISSION[TQ_STORY_MISSIONS] = {

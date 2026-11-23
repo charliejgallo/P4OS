@@ -108,7 +108,7 @@ static bool animating(app_t *a)
 {
     if (a->screen == SC_HANGAR) return true;
     if (a->screen == SC_BATTLE) return tqb_animating(a);
-    return a->st.npart > 0;
+    return false;                   /* the menus redraw only when told */
 }
 
 static void fill_req(app_t *a)
@@ -627,7 +627,7 @@ static void *tanques_create(aos_app_t *self, lv_obj_t *root)
         tq_setup_t su;
         memset(&su, 0, sizeof su);
         su.biome = getenv("TQ_BIOME") ? atoi(getenv("TQ_BIOME")) % TQ_BIOMES : 0;
-        su.size = 1;
+        su.size = getenv("TQ_SIZE") ? atoi(getenv("TQ_SIZE")) % TQ_SIZES : 1;
         su.diff = 1;
         su.weather = getenv("TQ_WEATHER") ? atoi(getenv("TQ_WEATHER")) % TQ_WEATHERS : 0;
         su.seed = getenv("TQ_SEED") ? (uint32_t)atoi(getenv("TQ_SEED")) : 7;
