@@ -1,0 +1,306 @@
+# amoledos-lang 1   es -> it
+# demo.asteroides.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/asteroides/main/ast_menu.c:129
+El segundo jugador juega con un joystick USB: enchufá uno	Il secondo giocatore usa un controller USB: collegane uno
+
+#: apps/asteroides/main/ast_menu.c:171
+Seguir: sector %d	Continua: settore %d
+
+#: apps/asteroides/main/ast_menu.c:174
+Campaña nueva	Nuova campagna
+
+#: apps/asteroides/main/ast_menu.c:174
+Campaña	Campagna
+
+#: apps/asteroides/main/ast_menu.c:175
+Arcade	Arcade
+
+#: apps/asteroides/main/ast_menu.c:176
+Arcade de a dos	Arcade in due
+
+#: apps/asteroides/main/ast_menu.c:177
+#: apps/asteroides/main/ast_menu.c:257
+Ajustes	Impostazioni
+
+#: apps/asteroides/main/ast_menu.c:179
+Récord del arcade: %d (oleada %d)	Record arcade: %d (ondata %d)
+
+#: apps/asteroides/main/ast_menu.c:190
+Fácil	Facile
+
+#: apps/asteroides/main/ast_menu.c:190
+Difícil	Difficile
+
+#: apps/asteroides/main/ast_menu.c:190
+Normal	Normale
+
+#: apps/asteroides/main/ast_menu.c:197
+Dificultad: %s	Difficoltà: %s
+
+#: apps/asteroides/main/ast_menu.c:198
+Controles: palanca	Comandi: levetta
+
+#: apps/asteroides/main/ast_menu.c:198
+Controles: botones	Comandi: pulsanti
+
+#: apps/asteroides/main/ast_menu.c:199
+Disparo a la izquierda	Fuoco a sinistra
+
+#: apps/asteroides/main/ast_menu.c:199
+Disparo a la derecha	Fuoco a destra
+
+#: apps/asteroides/main/ast_menu.c:200
+#: apps/asteroides/main/asteroides.c:544
+#: apps/asteroides/main/asteroides.c:571
+Sonido: sí	Suono: sì
+
+#: apps/asteroides/main/ast_menu.c:200
+#: apps/asteroides/main/asteroides.c:544
+#: apps/asteroides/main/asteroides.c:571
+Sonido: no	Suono: no
+
+#: apps/asteroides/main/ast_menu.c:201
+#: apps/asteroides/main/asteroides.c:553
+#: apps/asteroides/main/asteroides.c:572
+Música: sí	Musica: sì
+
+#: apps/asteroides/main/ast_menu.c:201
+#: apps/asteroides/main/asteroides.c:553
+#: apps/asteroides/main/asteroides.c:572
+Música: no	Musica: no
+
+#: apps/asteroides/main/ast_menu.c:202
+Sacudidas: sí	Scossoni: sì
+
+#: apps/asteroides/main/ast_menu.c:202
+Sacudidas: no	Scossoni: no
+
+#: apps/asteroides/main/ast_menu.c:240
+La campaña vuelve a empezar	La campagna ricomincia
+
+#: apps/asteroides/main/ast_menu.c:273
+#: apps/asteroides/main/ast_menu.c:283
+Cómo se juega	Come si gioca
+
+#: apps/asteroides/main/ast_menu.c:274
+Empezar la campaña de cero	Ricomincia la campagna da zero
+
+#: apps/asteroides/main/ast_menu.c:275
+#: apps/asteroides/main/ast_menu.c:315
+Volver	Indietro
+
+#: apps/asteroides/main/ast_menu.c:294
+Con un pulgar en la palanca la nave gira hacia donde apuntás; llevada más allá de la mitad, además empuja. Sin nada que la frene, la nave sigue de largo: para parar hay que darse vuelta y empujar.	Con un pollice sulla levetta la nave gira dove punti; spinta oltre la metà, accelera anche. Niente la frena, quindi continua ad andare: per fermarti devi girarti e accelerare.
+
+#: apps/asteroides/main/ast_menu.c:296
+Con el otro pulgar: cualquier lugar de ese lado dispara, y el botón redondo es el salto, que te lleva a un lugar despejado y tarda en volver a cargarse.	Con l'altro pollice: ovunque su quel lato spari, e il pulsante rotondo è il salto, che ti porta in un punto libero e ci mette un po' a ricaricarsi.
+
+#: apps/asteroides/main/ast_menu.c:298
+Las rocas comunes se parten en dos, las violetas en tres. Las de metal aguantan varios tiros. Las naranjas explotan y se llevan lo que tienen cerca. Las verdes se te pegan: cada una te frena y tres te aplastan; un salto o un escudo te las sacan.	Le rocce comuni si spaccano in due, quelle viola in tre. Quelle di metallo reggono più colpi. Quelle arancioni esplodono e si portano via ciò che hanno vicino. Quelle verdi ti si attaccano: ognuna ti rallenta e tre ti schiacciano; un salto o uno scudo te le toglie.
+
+#: apps/asteroides/main/ast_menu.c:301
+Los enemigos y las rocas grandes dejan mejoras: disparo triple, escudo, rayo e imán. Los cristales se juntan pasando cerca y en la campaña se gastan en el taller entre sectores.	Nemici e rocce grandi lasciano potenziamenti: colpo triplo, scudo, raggio e magnete. I cristalli si raccolgono passandoci vicino e nella campagna si spendono in officina tra un settore e l'altro.
+
+#: apps/asteroides/main/ast_menu.c:303
+La campaña son doce sectores, con un jefe cada cuatro. El arcade son oleadas sin fin y el récord. Con dos joysticks USB, o uno más la pantalla, juegan dos.	La campagna ha dodici settori, con un boss ogni quattro. L'arcade sono ondate infinite e il record. Con due controller USB, o uno più lo schermo, si gioca in due.
+
+#: apps/asteroides/main/ast_menu.c:305
+Joystick: la palanca o la cruz para girar (arriba empuja), A dispara, B salta, START pausa.	Controller: levetta o croce per girare (su accelera), A spara, B salta, START mette in pausa.
+
+#: apps/asteroides/main/ast_menu.c:359
+Motor	Motore
+
+#: apps/asteroides/main/ast_menu.c:359
+Cañón	Cannone
+
+#: apps/asteroides/main/ast_menu.c:359
+Blindaje	Corazza
+
+#: apps/asteroides/main/ast_menu.c:359
+#: apps/asteroides/main/ast_scene.c:77
+Salto	Salto
+
+#: apps/asteroides/main/ast_menu.c:359
+#: apps/asteroides/main/ast_scene.c:46
+Imán	Magnete
+
+#: apps/asteroides/main/ast_menu.c:361
+empuja más y llega más rápido	più spinta e più velocità
+
+#: apps/asteroides/main/ast_menu.c:362
+dispara más seguido y más lejos	spara più spesso e più lontano
+
+#: apps/asteroides/main/ast_menu.c:363
+cada sector empieza con escudo	ogni settore inizia con lo scudo
+
+#: apps/asteroides/main/ast_menu.c:364
+el salto carga antes	il salto si ricarica prima
+
+#: apps/asteroides/main/ast_menu.c:365
+los cristales vienen de más lejos	i cristalli arrivano da più lontano
+
+#: apps/asteroides/main/ast_menu.c:375
+Nave extra (%d)  ·  %d	Nave extra (%d)  ·  %d
+
+#: apps/asteroides/main/ast_menu.c:379
+completo	completo
+
+#: apps/asteroides/main/ast_menu.c:392
+Faltan cristales	Cristalli insufficienti
+
+#: apps/asteroides/main/ast_menu.c:413
+Cristales: %d	Cristalli: %d
+
+#: apps/asteroides/main/ast_menu.c:430
+Taller	Officina
+
+#: apps/asteroides/main/ast_menu.c:444
+una vida más para lo que queda	una vita in più per il resto
+
+#: apps/asteroides/main/ast_scene.c:42
+Aurora	Aurora
+
+#: apps/asteroides/main/ast_scene.c:42
+Cuarzo	Quarzo
+
+#: apps/asteroides/main/ast_scene.c:42
+Ámbar	Ambra
+
+#: apps/asteroides/main/ast_scene.c:42
+Forja	Forgia
+
+#: apps/asteroides/main/ast_scene.c:42
+Coral	Corallo
+
+#: apps/asteroides/main/ast_scene.c:42
+Índigo	Indaco
+
+#: apps/asteroides/main/ast_scene.c:43
+Ceniza	Cenere
+
+#: apps/asteroides/main/ast_scene.c:43
+Panal	Favo
+
+#: apps/asteroides/main/ast_scene.c:43
+Jade	Giada
+
+#: apps/asteroides/main/ast_scene.c:43
+Magma	Magma
+
+#: apps/asteroides/main/ast_scene.c:43
+Vacío	Vuoto
+
+#: apps/asteroides/main/ast_scene.c:43
+Abismo	Abisso
+
+#: apps/asteroides/main/ast_scene.c:45
+El Coloso	Il Colosso
+
+#: apps/asteroides/main/ast_scene.c:45
+La Colmena	L'Alveare
+
+#: apps/asteroides/main/ast_scene.c:45
+La Serpiente	Il Serpente
+
+#: apps/asteroides/main/ast_scene.c:46
+Disparo triple	Colpo triplo
+
+#: apps/asteroides/main/ast_scene.c:46
+Escudo	Scudo
+
+#: apps/asteroides/main/ast_scene.c:46
+Rayo	Raggio
+
+#: apps/asteroides/main/ast_scene.c:46
+Una nave más	Una nave in più
+
+#: apps/asteroides/main/ast_scene.c:69
+Sector	Settore
+
+#: apps/asteroides/main/ast_scene.c:70
+Oleada	Ondata
+
+#: apps/asteroides/main/ast_scene.c:71
+Sector limpio	Settore ripulito
+
+#: apps/asteroides/main/ast_scene.c:72
+¡Cuidado!	Attenzione!
+
+#: apps/asteroides/main/ast_scene.c:73
+#: apps/asteroides/main/asteroides.c:670
+Sin naves	Navi finite
+
+#: apps/asteroides/main/ast_scene.c:74
+#: apps/asteroides/main/asteroides.c:703
+¡Campaña completa!	Campagna completata!
+
+#: apps/asteroides/main/ast_scene.c:75
+¡Listos!	Pronti!
+
+#: apps/asteroides/main/ast_scene.c:76
+Disparo	Fuoco
+
+#: apps/asteroides/main/ast_scene.c:78
+Récord	Record
+
+#: apps/asteroides/main/ast_scene.c:79
+#: apps/asteroides/main/asteroides.c:563
+Pausa	Pausa
+
+#: apps/asteroides/main/asteroides.c:565
+Sector %d, oleada %d de %d  ·  %d puntos	Settore %d, ondata %d di %d  ·  %d punti
+
+#: apps/asteroides/main/asteroides.c:566
+#: apps/asteroides/main/asteroides.c:679
+Oleada %d  ·  %d puntos	Ondata %d  ·  %d punti
+
+#: apps/asteroides/main/asteroides.c:569
+Seguir	Continua
+
+#: apps/asteroides/main/asteroides.c:570
+Empezar el sector de nuevo	Ricomincia il settore
+
+#: apps/asteroides/main/asteroides.c:570
+Empezar de nuevo	Ricomincia
+
+#: apps/asteroides/main/asteroides.c:573
+Salir al menú	Torna al menu
+
+#: apps/asteroides/main/asteroides.c:643
+Al sector %d	Al settore %d
+
+#: apps/asteroides/main/asteroides.c:674
+Sector %d  ·  %d puntos	Settore %d  ·  %d punti
+
+#: apps/asteroides/main/asteroides.c:676
+Los cristales y las mejoras quedan	Cristalli e potenziamenti restano
+
+#: apps/asteroides/main/asteroides.c:677
+Probar el sector otra vez	Riprova il settore
+
+#: apps/asteroides/main/asteroides.c:682
+¡Récord nuevo!	Nuovo record!
+
+#: apps/asteroides/main/asteroides.c:684
+El %d.º mejor	%dº in classifica
+
+#: apps/asteroides/main/asteroides.c:687
+Otra vez	Ancora
+
+#: apps/asteroides/main/asteroides.c:689
+#: apps/asteroides/main/asteroides.c:708
+Menú	Menu
+
+#: apps/asteroides/main/asteroides.c:705
+%d puntos y %d cristales	%d punti e %d cristalli
+
+#: apps/asteroides/main/asteroides.c:707
+Los doce sectores, limpios. Ahora, el arcade.	Tutti e dodici i settori ripuliti. Ora, l'arcade.
+
+#: apps/asteroides/main/asteroides.c:938
+No hay memoria para el juego	Memoria insufficiente per il gioco

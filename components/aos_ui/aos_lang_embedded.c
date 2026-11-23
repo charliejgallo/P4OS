@@ -3573,6 +3573,7 @@ static const char blob_en__sistema_lang[] =
     "Tortuga\tTurtle\n"
     "Monitor serie\tSerial Plotter\n"
     "Mi casa\tHome Status\n"
+    "Deriva\tDeriva\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -7138,6 +7139,7 @@ static const char blob_de__sistema_lang[] =
     "Tortuga\tSchildkröte\n"
     "Monitor serie\tSerieller Plotter\n"
     "Mi casa\tHausstatus\n"
+    "Deriva\tDeriva\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -7145,7 +7147,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3558, 0, files_en, 1 },
-    { "de", "Deutsch", 3558, 0, files_de, 1 },
+    { "en", "English", 3559, 0, files_en, 1 },
+    { "de", "Deutsch", 3559, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

@@ -10904,3 +10904,6 @@ Monitor serie	Serieller Plotter
 
 #: apps/estado  (nombre de app)
 Mi casa	Hausstatus
+
+#: apps/asteroides  (nombre de app)
+Deriva	Deriva

@@ -22,6 +22,8 @@ en resumen": no se revisaron en esta pasada.
 - [ ] **Tortuga**, **Monitor serie** (con el WH5000: el perfil del
       multímetro supone qué es el último número; verificar con otros rangos)
       y **Mi casa** (Estado de la casa): sólo probadas en el simulador.
+- [ ] **Deriva**: medir los fps en la placa (el registro da una línea cada
+      5 s) y jugarla con los pulgares y con joystick.
 - [ ] **Portugués, francés e italiano** desde la Tienda: que Ajustes los
       liste con su nombre, recorrer el inicio, Ajustes y un par de apps.
 - [ ] La Tienda tras la release: casi todas las apps ofrecen actualizar

@@ -40,6 +40,7 @@ by touch never sees it. Board games put a cursor on the board the same way.
 | Claude Jump | D-pad or stick walks · START pause · L/R costumes in the shop |
 | Claudito | left/right go along the action bar, A presses · with the sponge or the hand, the D-pad moves it and A held is the finger · B strokes it (or wakes it) |
 | Dados | D-pad over the dice and buttons · A or START rolls · L/R change the die |
+| Deriva | An analog stick aims the ship and, pushed past half way, thrusts · D-pad turns, up thrusts · A or L fires · B or R jumps · START pause · two players: with two gamepads each has one, with one gamepad it is player 2's and player 1 plays on the screen · menus and the workshop: D-pad and A, B back |
 | Doom | stick or D-pad moves and turns · A fire / Enter · B use / back · L/R strafe, both together next weapon · START menu (held 2 s leaves) |
 | Flappy | A flaps, starts and retries · START pause |
 | Gemas | D-pad moves a frame · A picks a jewel, a direction swaps it · START pause |

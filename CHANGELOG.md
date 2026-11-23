@@ -2,7 +2,10 @@
 
 ## 0.32.2 — not released yet
 
-- **Four new apps in the Store**, from the card:
+- **Five new apps in the Store**, from the card:
+  - **Deriva**: rocks in space in neon vectors: a ship with inertia, rocks
+    that split, enemies, bosses and powers; a campaign of twelve sectors with
+    a workshop between them, an endless arcade, alone or for two.
   - **Tanques** (Tanks): turn-based battles of toy tanks in 3D: drive from
     above, aim from the turret, fire. Six tanks to upgrade and paint, twenty
     weapons, a story and free battles on generated maps, against the board
