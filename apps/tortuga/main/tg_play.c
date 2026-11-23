@@ -119,7 +119,7 @@ static void run_variant(int v, tg_world_t *w, tg_ev_t *ev)
     }
     tg_prog_t pr;
     if (!tg_prog_init(&pr, 4096)) {
-        tg_world_fail(w, TG_F_RUNTIME, 0, TG_TR("no hay memoria"));
+        tg_world_fail(w, TG_F_RUNTIME, 0, _("no hay memoria"));
         return;
     }
     if (!tg_logo_parse(&pr, P->src)) {
@@ -567,12 +567,12 @@ static void show_result(void)
         lv_obj_set_flex_grow(b, 1);
         return;
     }
-    char m[260];
-    fail_text(w, m, sizeof m);
+    char m[420];
+    fail_text(w, m, 220);
     if (n > 1 && P->shown_variant > 0) {
         char t[300];
-        snprintf(t, sizeof t, _("En el primer camino anduvo, en el %d no: %s"), P->shown_variant + 1, m);
-        snprintf(m, sizeof m, "%s", t);
+        snprintf(t, sizeof t, _("En el primer camino anduvo, en el %d no: %.220s"), P->shown_variant + 1, m);
+        memcpy(m, t, sizeof t);
         if (P->shown_variant > 0 && w->reason != TG_F_SYNTAX) {
             size_t k = strlen(m);
             snprintf(m + k, sizeof m - k, " %s", _("Probá preguntar en vez de contar."));
@@ -823,8 +823,8 @@ static void show_card(int i)
     s_card = i;
     lv_obj_t *p = panel(lv_color_hex(0x64B5FF));
     if (l->ncard > 1) {
-        char buf[24];
-        snprintf(buf, sizeof buf, "%d / %d", i + 1, l->ncard);
+        char buf[32];
+        snprintf(buf, sizeof buf, "%d / %d", (i + 1) % 100, l->ncard % 100);
         tg_label(p, buf, aos_font_small, AOS_C_DIM);
     }
     lv_obj_t *t = tg_label(p, tg_level_text(l->card[i], tg->tlang), aos_font_body, AOS_C_TEXT);

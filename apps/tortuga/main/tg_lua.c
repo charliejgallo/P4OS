@@ -155,7 +155,7 @@ static int order(lua_State *L)
             str[i] = lua_tostring(L, i + 1);
         } else {
             char m[96];
-            snprintf(m, sizeof m, TG_TR("«%s» lleva un número"), tg_orders[o].es);
+            snprintf(m, sizeof m, _("«%s» lleva un número"), tg_orders[o].es);
             tg_world_fail(r->w, TG_F_RUNTIME, line, m);
             r->stopped = true;
             lua_pushstring(L, "");
@@ -195,11 +195,11 @@ static void explain(const char *msg, int *line, char *out, size_t n)
     if ((q = strstr(p, "(global '")) != NULL) {
         sscanf(q + 9, "%39[^']", name);
         if (strstr(p, "attempt to call")) {
-            snprintf(out, n, TG_TR("no conozco «%s»"), name);
+            snprintf(out, n, _("no conozco «%s»"), name);
             return;
         }
         if (strstr(p, "arithmetic") || strstr(p, "compare")) {
-            snprintf(out, n, TG_TR("«%s» no tiene valor todavía"), name);
+            snprintf(out, n, _("«%s» no tiene valor todavía"), name);
             return;
         }
     }
@@ -207,24 +207,24 @@ static void explain(const char *msg, int *line, char *out, size_t n)
         int at = 0;
         const char *l = strstr(q, "at line ");
         if (l) at = atoi(l + 8);
-        if (at) snprintf(out, n, TG_TR("falta un «end» para cerrar lo que abre la línea %d"), at);
-        else snprintf(out, n, "%s", TG_TR("falta un «end»"));
+        if (at) snprintf(out, n, _("falta un «end» para cerrar lo que abre la línea %d"), at);
+        else snprintf(out, n, "%s", _("falta un «end»"));
         return;
     }
     if (strstr(p, "'then' expected")) {
-        snprintf(out, n, "%s", TG_TR("falta el «then» del «if»"));
+        snprintf(out, n, "%s", _("falta el «then» del «if»"));
         return;
     }
     if (strstr(p, "'do' expected")) {
-        snprintf(out, n, "%s", TG_TR("falta el «do»"));
+        snprintf(out, n, "%s", _("falta el «do»"));
         return;
     }
     if (strstr(p, "')' expected")) {
-        snprintf(out, n, "%s", TG_TR("falta cerrar el paréntesis"));
+        snprintf(out, n, "%s", _("falta cerrar el paréntesis"));
         return;
     }
     if (strstr(p, "not enough memory")) {
-        snprintf(out, n, "%s", TG_TR("el programa usó demasiada memoria"));
+        snprintf(out, n, "%s", _("el programa usó demasiada memoria"));
         return;
     }
     snprintf(out, n, "%s", p);
@@ -235,7 +235,7 @@ void tg_lua_run(const char *src, tg_world_t *w)
     run_t r = { w, 0, 0, false };
     lua_State *L = lua_newstate(lalloc, &r);
     if (!L) {
-        tg_world_fail(w, TG_F_RUNTIME, 0, TG_TR("no hay memoria"));
+        tg_world_fail(w, TG_F_RUNTIME, 0, _("no hay memoria"));
         return;
     }
     static const luaL_Reg LIBS[] = {

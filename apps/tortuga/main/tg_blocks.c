@@ -20,9 +20,21 @@ enum { B_CMD, B_REPEAT, B_IF, B_ELSE, B_WHILE, B_END, B_TO, B_CALL, B_SET, B_ADD
 #define NVAR 3
 #define NPROC 3
 
-static const char *const VAR[NVAR] = { "cuenta", "lado", "n" };
-static const char *const VAR_EN[NVAR] = { "count", "side", "n" };
-static const char *const PROC[NPROC] = { "truco_a", "truco_b", "truco_c" };
+/* the names a program uses: the defaults, or the ones it brings (a
+ * level's reference, or a program typed in Logo, is shown as blocks) */
+static const char *const VAR0[NVAR] = { "cuenta", "lado", "n" };
+static const char *const VAR0_EN[NVAR] = { "count", "side", "n" };
+static const char *const PROC0[NPROC] = { "truco_a", "truco_b", "truco_c" };
+static char VAR[NVAR][24], VAR_EN[NVAR][24], PROC[NPROC][24];
+
+static void names_reset(void)
+{
+    for (int i = 0; i < NVAR; i++) {
+        snprintf(VAR[i], sizeof VAR[i], "%s", VAR0[i]);
+        snprintf(VAR_EN[i], sizeof VAR_EN[i], "%s", VAR0_EN[i]);
+    }
+    for (int i = 0; i < NPROC; i++) snprintf(PROC[i], sizeof PROC[i], "%s", PROC0[i]);
+}
 
 typedef struct {
     uint8_t kind, op;       /* op: the order, or the question */
@@ -131,7 +143,10 @@ static void line_of(int i, char *out, size_t n, bool display)
         snprintf(out, n, "%s", o >= 0 && K.b[o].kind == B_TO ? (E ? "end" : "fin") : "]");
         break;
     }
-    case B_TO: snprintf(out, n, "%s %s%s", E ? "to" : "para", PROC[b->proc], b->param ? " n" : ""); break;
+    case B_TO:
+        snprintf(out, n, "%s %s%s%s", E ? "to" : "para", PROC[b->proc], b->param ? " " : "",
+                 b->param ? VAR[b->who] : "");
+        break;
     case B_CALL:
         if (b->has) snprintf(out, n, "%s %s", PROC[b->proc], v);
         else snprintf(out, n, "%s", PROC[b->proc]);
@@ -165,12 +180,32 @@ static bool add(blk_t b)
     return true;
 }
 
-static int var_index(const tg_prog_t *p, int name)
+/* a name of the program: its slot, taking a default's slot the first time */
+static int slot(char (*tab)[24], char (*tab_en)[24], const char *const *dflt, int n, uint8_t *taken,
+                const char *name)
 {
-    for (int i = 0; i < NVAR; i++) {
-        if (!strcmp(p->name[name], VAR[i])) return i;
+    for (int i = 0; i < n; i++) {
+        if (!strcmp(name, tab[i])) {
+            *taken |= (uint8_t)(1u << i);
+            return i;
+        }
+    }
+    for (int i = 0; i < n; i++) {
+        if (!(*taken & (1u << i)) && !strcmp(tab[i], dflt[i])) {
+            snprintf(tab[i], 24, "%s", name);
+            if (tab_en) snprintf(tab_en[i], 24, "%s", name);
+            *taken |= (uint8_t)(1u << i);
+            return i;
+        }
     }
     return -1;
+}
+
+static uint8_t s_var_taken, s_proc_taken;
+
+static int var_index(const tg_prog_t *p, int name)
+{
+    return slot(VAR, VAR_EN, VAR0, NVAR, &s_var_taken, p->name[name]);
 }
 
 static bool value_of(const tg_prog_t *p, const tg_node_t *e, blk_t *b)
@@ -202,10 +237,7 @@ static bool sensor_of(const tg_node_t *e, blk_t *b)
 
 static int proc_index(const tg_prog_t *p, int name)
 {
-    for (int i = 0; i < NPROC; i++) {
-        if (!strcmp(p->name[name], PROC[i])) return i;
-    }
-    return -1;
+    return slot(PROC, NULL, PROC0, NPROC, &s_proc_taken, p->name[name]);
 }
 
 static bool walk(const tg_prog_t *p, const tg_node_t *s)
@@ -247,6 +279,11 @@ static bool walk(const tg_prog_t *p, const tg_node_t *s)
             b.kind = B_TO;
             b.proc = (uint8_t)pi;
             b.param = s->a != NULL;
+            if (s->a) {
+                int vi = var_index(p, s->a->name);
+                if (vi < 0) return false;
+                b.who = (uint8_t)vi;
+            }
             if (!add(b) || !walk(p, s->b)) return false;
             memset(&b, 0, sizeof b);
             b.kind = B_END;
@@ -285,6 +322,8 @@ static bool walk(const tg_prog_t *p, const tg_node_t *s)
 static void read_logo(const char *text)
 {
     K.n = 0;
+    names_reset();
+    s_var_taken = s_proc_taken = 0;
     if (!text || !text[0]) return;
     tg_prog_t p;
     if (!tg_prog_init(&p, 2048)) return;
@@ -450,9 +489,10 @@ static void render(void)
         lv_obj_set_width(l, w);
     }
     lv_obj_t *selobj = NULL;
+    int show = K.mark >= 0 ? K.mark : K.sel;     /* the running block wins */
     for (int i = 0; i < K.n; i++) {
         lv_obj_t *r = row(i, w);
-        if (i == K.sel || i == K.mark) selobj = r;
+        if (i == show) selobj = r;
     }
     if (selobj) lv_obj_scroll_to_view(selobj, LV_ANIM_OFF);
 }
@@ -772,6 +812,7 @@ static void pal_cb(lv_event_t *e)
         }
         b.proc = (used & 1) ? ((used & 2) ? 2 : 1) : 0;
         b.param = K.world >= 7;
+        b.who = 2;      /* n */
         put(b, true);
         break;
     }

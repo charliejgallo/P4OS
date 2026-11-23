@@ -428,14 +428,15 @@ mucho** (se puede volver a jugar sin pistas para la tercera).
 | 3. Ponele nombre | procedimientos | `para ... fin` | 5 | dos piedras que se rodean igual |
 | 4. Preguntar | si / sino, sensores | `si`, `sino`, `hay_lechuga`, `agua_adelante`, `camino_*`; **varios mapas** | 6 | charcos en lugares distintos en cada mapa |
 | 5. Hasta que | mientras | `mientras`, `no`, `en_meta` | 6 | el laberinto de la mano derecha |
-| 6. Contar | variables | `cuenta = 0`, `decir`, `+ -`, `==` | 5 | contar lechugas y decir cuántas hay |
-| 7. A medida | parámetros y valores | `para x n`, `devolver` | 5 | escalones de todos los tamaños |
+| 6. Contar | variables | `cuenta = 0`, `decir`, `+=`, `-=` | 4 | contar lechugas y decir cuántas hay |
+| 7. A medida | parámetros | `para fila n` | 3 | escalones de todos los tamaños |
 | 8. El lápiz | dibujo LOGO | la hoja, `girar derecha 144`, `bajar_lapiz`, `color` | 8 | cuadrado, triángulo, casa, estrella, polígono de n lados, espiral, flor, árbol |
-| 9. La gran travesía | todo junto | nada nuevo | 5 | mapas grandes que piden procedimientos con preguntas adentro |
+| 9. La gran travesía | todo junto | nada nuevo | 3 | el laberinto con lechugas, charcos sin contar, un molinete de cuadrados |
 
-Unos **52 niveles**. Cada mundo arranca con una tarjeta que presenta la
-idea con un ejemplo animado, y sigue con un nivel donde la idea es casi
-obligatoria, tres o cuatro de práctica y un **desafío** al final.
+**47 niveles**, en `levels/mundos.tl` (todos verificados con
+`tools/check_levels.sh`). Cada mundo arranca con tarjetas (`@carta`) que
+presentan la idea, y sigue con un nivel donde la idea es casi obligatoria,
+los de práctica y un **desafío** al final.
 
 **Modo libre:** la hoja en blanco, sin meta, con todas las órdenes, para
 dibujar lo que se quiera; el dibujo se guarda como imagen en la tarjeta. Y

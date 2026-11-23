@@ -6,7 +6,7 @@
  *
  * Nothing here draws or allocates on its own behind the caller's back:
  * buffers come from the caller (tg_malloc for what must be on the heap),
- * and messages go through TG_TR so the app can translate them.
+ * and messages go through _() so the app can translate them.
  */
 #pragma once
 
@@ -14,8 +14,12 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#ifndef TG_TR
-#define TG_TR(s) (s)
+/* the messages are the app's catalog's (aos_i18n.h); on the Mac (the
+ * harness, -DTG_NO_I18N) they stay in Spanish */
+#ifdef TG_NO_I18N
+#define _(s) (s)
+#else
+#include "aos_i18n.h"
 #endif
 
 void *tg_malloc(size_t n);      /* PSRAM on the board; zeroed */

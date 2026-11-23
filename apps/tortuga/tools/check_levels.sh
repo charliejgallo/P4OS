@@ -10,7 +10,7 @@ APP=$(dirname "$HERE")
 TL=${1:-$APP/levels/mundos.tl}
 OUT=$APP/build/check
 mkdir -p "$OUT/gen"
-cc -O1 -Wall -I"$APP/main" -o "$OUT/tg_harness" "$HERE/tg_harness.c" "$APP/main/tg_world.c" "$APP/main/tg_logo.c" -lm
+cc -O1 -Wall -DTG_NO_I18N -I"$APP/main" -o "$OUT/tg_harness" "$HERE/tg_harness.c" "$APP/main/tg_world.c" "$APP/main/tg_logo.c" -lm
 [ -f "$OUT/liblua.dylib" ] || cc -O2 -shared -fPIC -o "$OUT/liblua.dylib" "$APP"/lua/*.c
 echo "== C"
 "$OUT/tg_harness" "$TL" --gen "$OUT/gen"

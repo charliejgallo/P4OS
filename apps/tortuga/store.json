@@ -1,0 +1,26 @@
+{
+ "cat": "programar",
+ "about": {
+  "es": "Un juego para aprender a programar: guiá a una tortuga hasta la meta con bloques, con un Logo propio o con Lua, en nueve mundos que enseñan una idea cada uno.",
+  "en": "A game to learn programming: guide a turtle to the goal with blocks, with a Logo of its own or with Lua, across nine worlds that each teach one idea."
+ },
+ "desc": {
+  "es": "En cada nivel hay una tortuga, un mapa y su meta. Armás el programa que la lleva hasta ahí, lo corrés y la mirás hacerlo, rápido o paso a paso con la línea marcada. Si choca con una piedra, se mete al agua o no llega, el juego te dice qué pasó y en qué línea.\n\nSe programa como prefieras: con bloques que se tocan, sin teclado; en Logo, el lenguaje clásico de la tortuga, en castellano o en inglés; o en Lua. Los bloques se pueden ver escritos en Logo, Lua o Python. Los nueve mundos van de una orden detrás de otra a repetir, procedimientos, preguntas con sensores, mientras, variables y parámetros, y terminan dibujando como en LOGO: cuadrados, estrellas, una flor y un árbol que se dibuja a sí mismo.\n\nDesde el cuarto mundo cada nivel se prueba en varios mapas a la vez, así que hay que preguntar en vez de contar. Las estrellas premian los programas cortos, hay tres pistas por nivel, un modo difícil donde la tortuga tiene que terminar justo en la meta, y una hoja libre para dibujar. Se juega de pie o acostada, con el dedo, un teclado o un joystick.",
+  "en": "Every level has a turtle, a map and its goal. You build the program that takes it there, run it and watch it go, fast or a step at a time with the line marked. If it bumps into a rock, walks into the water or falls short, the game tells you what happened and on which line.\n\nYou program the way you like: with blocks you tap, no keyboard needed; in Logo, the turtle's classic language, in English or Spanish; or in Lua. Blocks can be seen written in Logo, Lua or Python. The nine worlds go from one order after another to repeat, procedures, questions with sensors, while, variables and parameters, and end up drawing as in LOGO: squares, stars, a flower and a tree that draws itself.\n\nFrom the fourth world on every level is tried on several maps at once, so you have to ask instead of count. Stars reward short programs, there are three hints per level, a hard mode where the turtle has to end right on the goal, and a free sheet to draw on. It plays upright or lying down, by touch, with a keyboard or a gamepad."
+ },
+ "tags": [
+  "3d"
+ ],
+ "shots": [
+  "app-tortuga.jpg",
+  "app-tortuga-lua.jpg",
+  "app-tortuga-dibujo.jpg",
+  "land-tortuga.jpg"
+ ],
+ "packs": [
+  {
+   "file": "tortuga_p4.pak",
+   "need": true
+  }
+ ]
+}

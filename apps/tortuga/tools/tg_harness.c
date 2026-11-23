@@ -4,7 +4,7 @@
  * pieces of the three languages, and the tree written back as Lua and
  * Python (which tg_ref.py then runs, with --gen).
  *
- *   cc -O1 -g -Wall -Iapps/tortuga/main -o <scratch>/tg_harness \
+ *   cc -O1 -g -Wall -DTG_NO_I18N -Iapps/tortuga/main -o <scratch>/tg_harness \
  *      apps/tortuga/tools/tg_harness.c apps/tortuga/main/tg_world.c apps/tortuga/main/tg_logo.c -lm
  *   <scratch>/tg_harness apps/tortuga/levels/muestra.tl [--gen <dir>]
  */

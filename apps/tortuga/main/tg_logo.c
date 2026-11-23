@@ -158,7 +158,7 @@ static void lex(parser_t *ps, tok_t *t)
         t->k = (uint8_t)c;
         return;
     }
-    perr(ps, ps->line, TG_TR("no entiendo «%c»"), c);
+    perr(ps, ps->line, _("no entiendo «%c»"), c);
     t->t = T_EOF;
 }
 
@@ -184,7 +184,7 @@ static tg_node_t *node(parser_t *ps, int kind, int line)
 {
     tg_prog_t *p = ps->p;
     if (p->nnode >= p->cap) {
-        perr(ps, line, TG_TR("el programa es demasiado largo"));
+        perr(ps, line, _("el programa es demasiado largo"));
         static tg_node_t spare;
         memset(&spare, 0, sizeof(spare));
         return &spare;
@@ -278,7 +278,7 @@ static tg_node_t *primary(parser_t *ps)
         advance(ps);
         tg_node_t *e = expr(ps);
         if (ps->cur.t == T_OP && ps->cur.k == O_RP) advance(ps);
-        else perr(ps, ps->cur.line, TG_TR("falta cerrar el paréntesis"));
+        else perr(ps, ps->cur.line, _("falta cerrar el paréntesis"));
         return e;
     }
     if (t.t == T_NAME) {
@@ -302,7 +302,7 @@ static tg_node_t *primary(parser_t *ps)
             return n;
         }
         if (o >= 0 || is_turn(t.s)) {
-            perr(ps, t.line, TG_TR("«%s» es una orden, no un valor"), t.s);
+            perr(ps, t.line, _("«%s» es una orden, no un valor"), t.s);
             return node(ps, TG_E_NUM, t.line);
         }
         advance(ps);
@@ -310,7 +310,7 @@ static tg_node_t *primary(parser_t *ps)
         n->name = (int16_t)name_id(ps->p, t.s);
         return n;
     }
-    perr(ps, t.line, TG_TR("falta un valor"));
+    perr(ps, t.line, _("falta un valor"));
     if (t.t != T_EOF) advance(ps);
     return node(ps, TG_E_NUM, t.line);
 }
@@ -414,7 +414,7 @@ static tg_node_t *expr(parser_t *ps)
 static tg_node_t *block(parser_t *ps)
 {
     if (!(ps->cur.t == T_OP && ps->cur.k == O_LB)) {
-        perr(ps, ps->cur.line, TG_TR("falta abrir el bloque con ["));
+        perr(ps, ps->cur.line, _("falta abrir el bloque con ["));
         return NULL;
     }
     int line = ps->cur.line;
@@ -422,7 +422,7 @@ static tg_node_t *block(parser_t *ps)
     tg_node_t *head = NULL, **tail = &head;
     while (!ps->fail && !(ps->cur.t == T_OP && ps->cur.k == O_RB)) {
         if (ps->cur.t == T_EOF) {
-            perr(ps, line, TG_TR("falta cerrar el bloque con ]"));
+            perr(ps, line, _("falta cerrar el bloque con ]"));
             return head;
         }
         *tail = statement(ps);
@@ -441,7 +441,7 @@ static tg_node_t *statement(parser_t *ps)
         case K_TO: {
             tg_node_t *n = node(ps, TG_N_TO, t.line);
             if (ps->cur.t != T_NAME) {
-                perr(ps, t.line, TG_TR("después de «para» va el nombre"));
+                perr(ps, t.line, _("después de «para» va el nombre"));
                 return n;
             }
             n->name = (int16_t)name_id(ps->p, ps->cur.s);
@@ -457,7 +457,7 @@ static tg_node_t *statement(parser_t *ps)
             tail = &n->b;
             while (!ps->fail && !(ps->cur.t == T_KW && ps->cur.k == K_END)) {
                 if (ps->cur.t == T_EOF) {
-                    perr(ps, t.line, TG_TR("falta el «fin» de «%s»"), ps->p->name[n->name]);
+                    perr(ps, t.line, _("falta el «fin» de «%s»"), ps->p->name[n->name]);
                     return n;
                 }
                 *tail = statement(ps);
@@ -492,7 +492,7 @@ static tg_node_t *statement(parser_t *ps)
         case K_MAKE: {
             tg_node_t *n = node(ps, TG_N_SET, t.line);
             if (ps->cur.t != T_NAME) {
-                perr(ps, t.line, TG_TR("después de «haz» va el nombre"));
+                perr(ps, t.line, _("después de «haz» va el nombre"));
                 return n;
             }
             n->name = (int16_t)name_id(ps->p, ps->cur.s);
@@ -508,7 +508,7 @@ static tg_node_t *statement(parser_t *ps)
             return n;
         }
         default:
-            perr(ps, t.line, TG_TR("«%s» no va acá"), t.s);
+            perr(ps, t.line, _("«%s» no va acá"), t.s);
             return node(ps, TG_N_STOP, t.line);
         }
     }
@@ -535,7 +535,7 @@ static tg_node_t *statement(parser_t *ps)
             if (!strcmp(side, "derecha") || !strcmp(side, "right")) o = TG_O_RIGHT;
             else if (!strcmp(side, "izquierda") || !strcmp(side, "left")) o = TG_O_LEFT;
             if (o < 0) {
-                perr(ps, t.line, TG_TR("después de «%s» va derecha o izquierda"), t.s);
+                perr(ps, t.line, _("después de «%s» va derecha o izquierda"), t.s);
                 return node(ps, TG_N_STOP, t.line);
             }
         } else {
@@ -567,15 +567,15 @@ static tg_node_t *statement(parser_t *ps)
             return n;
         }
         if (o >= 0) {
-            perr(ps, t.line, TG_TR("«%s» es una pregunta: va en un «si» o un «mientras»"), t.s);
+            perr(ps, t.line, _("«%s» es una pregunta: va en un «si» o un «mientras»"), t.s);
         } else {
-            perr(ps, t.line, TG_TR("no conozco «%s»"), t.s);
+            perr(ps, t.line, _("no conozco «%s»"), t.s);
         }
         advance(ps);
         return node(ps, TG_N_STOP, t.line);
     }
-    if (t.t == T_OP && t.k == O_RB) perr(ps, t.line, TG_TR("sobra un ]"));
-    else perr(ps, t.line, TG_TR("no entiendo lo que sigue"));
+    if (t.t == T_OP && t.k == O_RB) perr(ps, t.line, _("sobra un ]"));
+    else perr(ps, t.line, _("no entiendo lo que sigue"));
     advance(ps);
     return node(ps, TG_N_STOP, t.line);
 }
@@ -584,7 +584,7 @@ bool tg_logo_parse(tg_prog_t *p, const char *src)
 {
     parser_t *ps = tg_malloc(sizeof(parser_t));
     if (!ps) {
-        snprintf(p->err, sizeof(p->err), "%s", TG_TR("no hay memoria"));
+        snprintf(p->err, sizeof(p->err), "%s", _("no hay memoria"));
         return false;
     }
     p->nnode = 0;
@@ -699,11 +699,11 @@ static int call_proc(interp_t *I, const tg_node_t *call, val_t *out)
 {
     const tg_node_t *pr = I->proc[call->name];
     if (!pr) {
-        rt_err(I, call->line, TG_TR("«%s» todavía no está definido"), I->p->name[call->name]);
+        rt_err(I, call->line, _("«%s» todavía no está definido"), I->p->name[call->name]);
         return X_HALT;
     }
     if (I->depth >= MAX_DEPTH) {
-        rt_err(I, call->line, TG_TR("«%s» se llama a sí mismo demasiadas veces"), I->p->name[call->name]);
+        rt_err(I, call->line, _("«%s» se llama a sí mismo demasiadas veces"), I->p->name[call->name]);
         return X_HALT;
     }
     val_t args[8];
@@ -746,7 +746,7 @@ static val_t *var_slot(interp_t *I, int name, bool create)
 static float as_num(interp_t *I, val_t v, int line)
 {
     if (v.t != 0) {
-        rt_err(I, line, TG_TR("acá va un número"));
+        rt_err(I, line, _("acá va un número"));
         return 0;
     }
     return v.n;
@@ -755,7 +755,7 @@ static float as_num(interp_t *I, val_t v, int line)
 static bool as_bool(interp_t *I, val_t v, int line)
 {
     if (v.t != 1) {
-        rt_err(I, line, TG_TR("acá va una pregunta de sí o no"));
+        rt_err(I, line, _("acá va una pregunta de sí o no"));
         return false;
     }
     return v.n != 0;
@@ -779,7 +779,7 @@ static val_t eval(interp_t *I, const tg_node_t *e)
     case TG_E_VAR: {
         val_t *s = var_slot(I, e->name, false);
         if (!s) {
-            rt_err(I, e->line, TG_TR("«%s» no tiene valor todavía"), I->p->name[e->name]);
+            rt_err(I, e->line, _("«%s» no tiene valor todavía"), I->p->name[e->name]);
             return z;
         }
         return *s;
@@ -822,7 +822,7 @@ static val_t eval(interp_t *I, const tg_node_t *e)
         case TG_OP_MUL: return num(a * b);
         default:
             if (b == 0) {
-                rt_err(I, e->line, TG_TR("no se puede dividir por cero"));
+                rt_err(I, e->line, _("no se puede dividir por cero"));
                 return z;
             }
             return num(a / b);
@@ -874,7 +874,7 @@ static int exec(interp_t *I, const tg_node_t *s)
             } else if (v.t == 0) {
                 n[k] = v.n;
             } else {
-                rt_err(I, s->line, TG_TR("acá va un número"));
+                rt_err(I, s->line, _("acá va un número"));
                 return X_HALT;
             }
         }
@@ -942,7 +942,7 @@ void tg_logo_run(tg_prog_t *p, tg_world_t *w)
 {
     interp_t *I = tg_malloc(sizeof(interp_t));
     if (!I) {
-        tg_world_fail(w, TG_F_RUNTIME, 0, TG_TR("no hay memoria"));
+        tg_world_fail(w, TG_F_RUNTIME, 0, _("no hay memoria"));
         return;
     }
     I->p = p;
