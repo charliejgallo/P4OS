@@ -62,6 +62,8 @@ typedef struct {
     uint64_t reopen_ms;
     uint16_t vid, pid;              /* a usbN port's device, to know it when it comes back */
     uint32_t baud;
+    char     frame[4];              /* "8N1" */
+    uint8_t  ctl;                   /* AOS_SERIAL_DTR | AOS_SERIAL_RTS */
     line_t  *ring;
     volatile uint32_t lines;        /* committed so far */
     uint32_t first;
@@ -271,7 +273,7 @@ static void rec_open(chan_t *c)
     c->rec = fopen(c->rec_path, "a");
     c->rec_bytes = 0;
     if (c->rec) {
-        int n = fprintf(c->rec, "# %s at %u baud, P4OS %s\n", c->port, (unsigned)c->baud, aos_hal_firmware_version());
+        int n = fprintf(c->rec, "# %s at %u baud %s, P4OS %s\n", c->port, (unsigned)c->baud, c->frame, aos_hal_firmware_version());
         if (n > 0) c->rec_bytes += (uint64_t)n;
         aos_hal_log("serial", "recording %s to %s", c->port, c->rec_path);
     }
@@ -335,6 +337,20 @@ static void feed(chan_t *c, int ch, const uint8_t *b, int n)
     }
 }
 
+/* The frame and the USB lines on a port just opened (8N1, both asserted
+ * is what opening leaves) */
+static void apply_frame(chan_t *c)
+{
+    int bits;
+    char par;
+    int stop;
+    if (aos_io_frame_parse(c->frame, &bits, &par, &stop) && strcmp(c->frame, "8N1") &&
+        !aos_io_uart_set_frame(c->uart, bits, par, stop))
+        aos_hal_log("serial", "%s: the frame %s was not taken", c->port, c->frame);
+    if (!strncmp(c->port, "usb", 3) && c->ctl != (AOS_SERIAL_DTR | AOS_SERIAL_RTS))
+        aos_io_uart_dtr_rts(c->uart, c->ctl & AOS_SERIAL_DTR, c->ctl & AOS_SERIAL_RTS);
+}
+
 static void reader(void *arg)
 {
     chan_t *c = arg;
@@ -363,6 +379,7 @@ static void reader(void *arg)
                 bool was = c->uart != NULL;
                 if (c->uart) aos_io_uart_close(c->uart);
                 c->uart = aos_io_uart_open(c->port, c->baud, false, owner);
+                if (c->uart) apply_frame(c);
                 aos_hal_mutex_unlock(c->mutex);
                 if (c->uart && !was) aos_hal_log("serial", "channel %d: %s is back", ch, c->port);
                 if (c->uart) continue;
@@ -389,7 +406,13 @@ static void reader(void *arg)
 
 bool aos_serial_start(int ch, const char *port, uint32_t baud)
 {
+    return aos_serial_start_ex(ch, port, baud, NULL, AOS_SERIAL_DTR | AOS_SERIAL_RTS);
+}
+
+bool aos_serial_start_ex(int ch, const char *port, uint32_t baud, const char *frame, uint8_t ctl)
+{
     if (ch < 0 || ch >= AOS_SERIAL_CHANNELS) return false;
+    if (frame && !aos_io_frame_parse(frame, NULL, NULL, NULL)) return false;
     chan_t *c = &s_ch[ch];
     bool was_recording = c->rec != NULL;
     aos_serial_stop(ch);
@@ -407,6 +430,10 @@ bool aos_serial_start(int ch, const char *port, uint32_t baud)
     c->vid = c->pid = 0;
     if (!strncmp(port, "usb", 3)) aos_hal_usb_serial_ids(port[3] - '0', &c->vid, &c->pid);
     c->baud = baud;
+    snprintf(c->frame, sizeof c->frame, "%c%c%c", frame ? frame[0] : '8',
+             frame ? (char)toupper((unsigned char)frame[1]) : 'N', frame ? frame[2] : '1');
+    c->ctl = ctl & (AOS_SERIAL_DTR | AOS_SERIAL_RTS);
+    apply_frame(c);
     c->stop = false;
     c->running = true;
     c->cur_len = 0;
@@ -420,7 +447,7 @@ bool aos_serial_start(int ch, const char *port, uint32_t baud)
         c->running = false;
         return false;
     }
-    aos_hal_log("serial", "channel %d on %s at %u", ch, aos_io_uart_desc(c->uart), (unsigned)baud);
+    aos_hal_log("serial", "channel %d on %s at %u %s", ch, aos_io_uart_desc(c->uart), (unsigned)baud, c->frame);
     return true;
 }
 
@@ -461,6 +488,8 @@ bool aos_serial_stat(int ch, aos_serial_stat_t *out)
     snprintf(out->rec_path, sizeof out->rec_path, "%s", c->rec ? c->rec_path : "");
     out->rec_bytes = c->rec_bytes;
     out->raw_total = c->raw_total;
+    snprintf(out->frame, sizeof out->frame, "%s", c->frame[0] ? c->frame : "8N1");
+    out->ctl = c->ctl;
     return true;
 }
 

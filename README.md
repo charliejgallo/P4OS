@@ -470,7 +470,10 @@ The whole header, pin by pin, is under [The hardware](#the-40-pin-header).
   PIRs on plain pins, MH-Z19, PMS5003, PZEM-004T and LD2410 radars on a
   serial port. Every app reads them by name (`aos_sensors.h`); the
   catalogue is [docs/SENSORS.md](docs/SENSORS.md).
-- **Terminal:** two serial ports, hex, filters and alerts.
+- **Terminal:** two serial ports, hex, filters and alerts; any speed from
+  50 baud (300 to 2000000 in its list, any other typed in), any frame (8N1,
+  7E1, 8O2...), and on a USB adapter DTR and RTS on or off, for the
+  optical cables of multimeters.
 - **Programmer:** flashes another ESP32 from firmware on the card
   (esp-serial-flasher), wired to the header or plugged into the USB host
   (a dev board goes into its bootloader by itself, through RTS and DTR);

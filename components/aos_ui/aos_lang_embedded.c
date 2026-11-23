@@ -3553,6 +3553,21 @@ static const char blob_en__sistema_lang[] =
     "Abrir en Oficina\tOpen in Office\n"
     "No se pudo abrir Oficina\tCould not open Office\n"
     "Oficina lo abre: está en la Tienda\tOffice opens it: it is in the Store\n"
+    "Entre 50 y 5000000 baudios\tBetween 50 and 5000000 baud\n"
+    "Velocidad en baudios\tSpeed in baud\n"
+    "VELOCIDAD (BAUDIOS)\tSPEED (BAUD)\n"
+    "Otra…\tOther…\n"
+    "BITS DE DATOS\tDATA BITS\n"
+    "PARIDAD\tPARITY\n"
+    "Par\tEven\n"
+    "Impar\tOdd\n"
+    "BITS DE STOP\tSTOP BITS\n"
+    "LÍNEAS DEL ADAPTADOR USB\tUSB ADAPTER LINES\n"
+    "Prendidas, como las deja una computadora. El cable óptico de muchos multímetros se alimenta de DTR con RTS apagado: si no llega nada, probá apagar RTS. Los puertos del header no tienen estas líneas.\tOn, as a computer leaves them. The optical cable of many multimeters is powered by DTR with RTS off: if nothing comes, try turning RTS off. The header's ports have no such lines.\n"
+    "Lo más común es 8N1 (8 bits, sin paridad, 1 de stop). Muchos multímetros usan 7E1, 7O1 o 7N2 a 1200, 2400 o 19200; el manual o la etiqueta del cable lo dicen. Con la velocidad o el formato equivocados llegan caracteres raros: la vista Hexa ayuda a ver qué llega.\tThe most common is 8N1 (8 bits, no parity, 1 stop bit). Many multimeters use 7E1, 7O1 or 7N2 at 1200, 2400 or 19200; the manual or the cable's label says which. With the wrong speed or format, odd characters arrive: the Hex view helps to see what comes.\n"
+    "la velocidad va de 50 a 5000000 baudios\tthe speed goes from 50 to 5000000 baud\n"
+    "el formato es como 8N1 o 7E1\tthe format is like 8N1 or 7E1\n"
+    "el parlante está en uso\tthe speaker is in use\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -7098,6 +7113,21 @@ static const char blob_de__sistema_lang[] =
     "Abrir en Oficina\tIn Büro öffnen\n"
     "No se pudo abrir Oficina\tBüro ließ sich nicht öffnen\n"
     "Oficina lo abre: está en la Tienda\tBüro öffnet es: im Store erhältlich\n"
+    "Entre 50 y 5000000 baudios\tZwischen 50 und 5000000 Baud\n"
+    "Velocidad en baudios\tGeschwindigkeit in Baud\n"
+    "VELOCIDAD (BAUDIOS)\tGESCHWINDIGKEIT (BAUD)\n"
+    "Otra…\tAndere…\n"
+    "BITS DE DATOS\tDATENBITS\n"
+    "PARIDAD\tPARITÄT\n"
+    "Par\tGerade\n"
+    "Impar\tUngerade\n"
+    "BITS DE STOP\tSTOPPBITS\n"
+    "LÍNEAS DEL ADAPTADOR USB\tLEITUNGEN DES USB-ADAPTERS\n"
+    "Prendidas, como las deja una computadora. El cable óptico de muchos multímetros se alimenta de DTR con RTS apagado: si no llega nada, probá apagar RTS. Los puertos del header no tienen estas líneas.\tAn, wie ein Computer sie lässt. Das optische Kabel vieler Multimeter wird über DTR versorgt, bei ausgeschaltetem RTS: kommt nichts an, RTS ausschalten. Die Ports der Stiftleiste haben diese Leitungen nicht.\n"
+    "Lo más común es 8N1 (8 bits, sin paridad, 1 de stop). Muchos multímetros usan 7E1, 7O1 o 7N2 a 1200, 2400 o 19200; el manual o la etiqueta del cable lo dicen. Con la velocidad o el formato equivocados llegan caracteres raros: la vista Hexa ayuda a ver qué llega.\tAm häufigsten ist 8N1 (8 Bits, keine Parität, 1 Stoppbit). Viele Multimeter nutzen 7E1, 7O1 oder 7N2 bei 1200, 2400 oder 19200; das Handbuch oder das Etikett des Kabels sagt es. Mit falscher Geschwindigkeit oder falschem Format kommen seltsame Zeichen an: die Hex-Ansicht zeigt, was ankommt.\n"
+    "la velocidad va de 50 a 5000000 baudios\tdie Geschwindigkeit reicht von 50 bis 5000000 Baud\n"
+    "el formato es como 8N1 o 7E1\tdas Format ist wie 8N1 oder 7E1\n"
+    "el parlante está en uso\tder Lautsprecher ist belegt\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -7105,7 +7135,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3538, 0, files_en, 1 },
-    { "de", "Deutsch", 3538, 0, files_de, 1 },
+    { "en", "English", 3553, 0, files_en, 1 },
+    { "de", "Deutsch", 3553, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

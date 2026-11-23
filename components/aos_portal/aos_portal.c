@@ -37,7 +37,7 @@
  *   GET  /api/flash/log?from=          its log lines
  *   GET  /api/serial?ch=               a channel: state, ports, triggers
  *   GET  /api/serial/lines?ch=&from=   its lines since a position (with their marks)
- *   POST /api/serial/start {ch,port,baud}   /api/serial/stop {ch}   /api/serial/send {ch,text,eol}
+ *   POST /api/serial/start {ch,port,baud,frame,dtr,rts}   /api/serial/stop {ch}   /api/serial/send {ch,text,eol}
  *   POST /api/serial/record {ch,on}    /api/serial/trigger {add|remove|index,flags|index,text}
  *   GET  /api/bench ...                the Banco: supply, scope, logger (aos_portal_bench.c)
  *   GET  /api/eth, POST /api/eth       Ethernet on a W5500 of the header (aos_portal_eth.c)
@@ -1353,6 +1353,9 @@ static void api_serial(aos_httpd_req_t *r)
     cJSON_AddStringToObject(o, "port", st.port);
     cJSON_AddStringToObject(o, "desc", st.desc);
     cJSON_AddNumberToObject(o, "baud", st.baud);
+    cJSON_AddStringToObject(o, "frame", st.frame);
+    cJSON_AddBoolToObject(o, "dtr", st.ctl & AOS_SERIAL_DTR);
+    cJSON_AddBoolToObject(o, "rts", st.ctl & AOS_SERIAL_RTS);
     cJSON_AddNumberToObject(o, "lines", st.lines);
     cJSON_AddNumberToObject(o, "first", st.first);
     cJSON_AddNumberToObject(o, "rx", (double)st.rx_bytes);
@@ -1436,10 +1439,20 @@ static void api_serial_post(aos_httpd_req_t *r, const char *op)
     bool ok = true;
     const char *err = "";
     if (!strcmp(op, "start")) {
-        const char *port = jstr(b, "port");
+        const char *port = jstr(b, "port"), *frame = jstr(b, "frame");
         const cJSON *baud = cJSON_GetObjectItemCaseSensitive(b, "baud");
-        ok = port && cJSON_IsNumber(baud) && aos_serial_start(ch, port, (uint32_t)baud->valueint);
-        if (!ok) err = _("no se pudo abrir el puerto (¿lo tiene otra app?)");
+        const cJSON *dtr = cJSON_GetObjectItemCaseSensitive(b, "dtr"), *rts = cJSON_GetObjectItemCaseSensitive(b, "rts");
+        uint8_t ctl = (cJSON_IsFalse(dtr) ? 0 : AOS_SERIAL_DTR) | (cJSON_IsFalse(rts) ? 0 : AOS_SERIAL_RTS);
+        if (!port || !cJSON_IsNumber(baud) || baud->valuedouble < 50 || baud->valuedouble > 5000000) {
+            ok = false;
+            err = _("la velocidad va de 50 a 5000000 baudios");
+        } else if (frame && !aos_io_frame_parse(frame, NULL, NULL, NULL)) {
+            ok = false;
+            err = _("el formato es como 8N1 o 7E1");
+        } else {
+            ok = aos_serial_start_ex(ch, port, (uint32_t)baud->valuedouble, frame, ctl);
+            if (!ok) err = _("no se pudo abrir el puerto (¿lo tiene otra app?)");
+        }
     } else if (!strcmp(op, "stop")) {
         aos_serial_stop(ch);
     } else if (!strcmp(op, "send")) {

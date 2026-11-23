@@ -2218,6 +2218,8 @@ int  aos_hal_usb_serial_count(void);
 bool aos_hal_usb_serial_name(int index, char *out, size_t n);
 int  aos_hal_usb_serial_open(int index, uint32_t baud);
 bool aos_hal_usb_serial_set_format(int h, uint32_t baud, char parity, int stop_bits);   /* 'N' 'E' 'O'; 1 or 2 */
+/* The same with the data bits too, 5 to 8: many meters talk 7E1 or 7O1 */
+bool aos_hal_usb_serial_set_frame(int h, uint32_t baud, int data_bits, char parity, int stop_bits);
 int  aos_hal_usb_serial_read(int h, void *buf, int len, int timeout_ms);
 int  aos_hal_usb_serial_write(int h, const void *buf, int len);
 /* DTR and RTS (true = asserted, as a terminal leaves them on open): what

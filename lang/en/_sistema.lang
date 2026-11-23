@@ -10874,3 +10874,20 @@ Documento	Document
 Abrir en Oficina	Open in Office
 No se pudo abrir Oficina	Could not open Office
 Oficina lo abre: está en la Tienda	Office opens it: it is in the Store
+
+#: Terminal: speed, frame and the USB lines (2026-11-23)
+Entre 50 y 5000000 baudios	Between 50 and 5000000 baud
+Velocidad en baudios	Speed in baud
+VELOCIDAD (BAUDIOS)	SPEED (BAUD)
+Otra…	Other…
+BITS DE DATOS	DATA BITS
+PARIDAD	PARITY
+Par	Even
+Impar	Odd
+BITS DE STOP	STOP BITS
+LÍNEAS DEL ADAPTADOR USB	USB ADAPTER LINES
+Prendidas, como las deja una computadora. El cable óptico de muchos multímetros se alimenta de DTR con RTS apagado: si no llega nada, probá apagar RTS. Los puertos del header no tienen estas líneas.	On, as a computer leaves them. The optical cable of many multimeters is powered by DTR with RTS off: if nothing comes, try turning RTS off. The header's ports have no such lines.
+Lo más común es 8N1 (8 bits, sin paridad, 1 de stop). Muchos multímetros usan 7E1, 7O1 o 7N2 a 1200, 2400 o 19200; el manual o la etiqueta del cable lo dicen. Con la velocidad o el formato equivocados llegan caracteres raros: la vista Hexa ayuda a ver qué llega.	The most common is 8N1 (8 bits, no parity, 1 stop bit). Many multimeters use 7E1, 7O1 or 7N2 at 1200, 2400 or 19200; the manual or the cable's label says which. With the wrong speed or format, odd characters arrive: the Hex view helps to see what comes.
+la velocidad va de 50 a 5000000 baudios	the speed goes from 50 to 5000000 baud
+el formato es como 8N1 o 7E1	the format is like 8N1 or 7E1
+el parlante está en uso	the speaker is in use

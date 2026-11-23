@@ -88,8 +88,9 @@ static bool set_speed(int fd, uint32_t baud)
     struct termios t;
     if (tcgetattr(fd, &t)) return false;
     tcflag_t fmt = t.c_cflag & (PARENB | PARODD | CSTOPB);     /* a change of speed keeps the format */
+    tcflag_t size = t.c_cflag & CSIZE;                         /* and the data bits */
     cfmakeraw(&t);
-    t.c_cflag |= CLOCAL | CREAD | fmt;
+    t.c_cflag = (t.c_cflag & ~(tcflag_t)CSIZE) | CLOCAL | CREAD | fmt | (size ? size : CS8);
     t.c_cc[VMIN] = 0;
     t.c_cc[VTIME] = 0;
     cfsetspeed(&t, (speed_t)baud);     /* BSD: speed_t is the baud rate itself */
@@ -256,6 +257,18 @@ bool aos_io_be_uart_set_format(aos_io_uart_t *u, char parity, int stop_bits)
     t.c_cflag &= ~(tcflag_t)(PARENB | PARODD | CSTOPB);
     if (parity != 'N') t.c_cflag |= PARENB | (parity == 'O' ? PARODD : 0);
     if (stop_bits == 2) t.c_cflag |= CSTOPB;
+    return tcsetattr(s->fd, TCSANOW, &t) == 0;
+}
+
+bool aos_io_be_uart_set_bits(aos_io_uart_t *u, int data_bits)
+{
+    sim_uart_t *s = u->be;
+    if (data_bits < 5 || data_bits > 8) return false;
+    if (s->fd < 0) return true;
+    static const tcflag_t CS[4] = { CS5, CS6, CS7, CS8 };
+    struct termios t;
+    if (tcgetattr(s->fd, &t)) return false;
+    t.c_cflag = (t.c_cflag & ~(tcflag_t)CSIZE) | CS[data_bits - 5];
     return tcsetattr(s->fd, TCSANOW, &t) == 0;
 }
 

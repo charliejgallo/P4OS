@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.32.2 — not released yet
+
+- **The Terminal talks to multimeters.** Its speed is a button that opens
+  the connection's sheet: 300 to 2000000 baud in the list and any other
+  typed in (50 to 5000000), 5 to 8 data bits, parity and stop bits (7E1,
+  8O2...), and on a USB adapter whether DTR and RTS are up - the optical
+  cables of many multimeters are powered by DTR with RTS off. The same in
+  the portal's Terminal and in `POST /api/serial/start` (`frame`, `dtr`,
+  `rts`). Before, it started at 9600 and was always 8N1. For apps:
+  `aos_io_uart_set_frame` and `aos_hal_usb_serial_set_frame` take the data
+  bits too, and a change of speed on a USB port no longer puts its frame
+  back to 8N1.
+
 ## 0.32.1 — 2026-11-22
 
 One fix to the firmware; no app changed.

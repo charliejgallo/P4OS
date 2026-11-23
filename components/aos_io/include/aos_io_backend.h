@@ -26,6 +26,9 @@ struct aos_io_uart {
      * backend nor pins; -1 for a UART */
     int16_t  usb;
     bool     usb_jtag;              /* an Espressif chip's own USB-Serial-JTAG (303a:1001) */
+    /* the frame asked for last (8N1 when opened): a new speed keeps it */
+    uint8_t  bits, stop;
+    char     parity;
 };
 
 /* An I2C port is shared: every open of it is a handle of its own over the
@@ -42,6 +45,7 @@ int  aos_io_be_uart_read(aos_io_uart_t *u, void *buf, int len, int timeout_ms);
 int  aos_io_be_uart_write(aos_io_uart_t *u, const void *buf, int len);
 bool aos_io_be_uart_set_baud(aos_io_uart_t *u, uint32_t baud);
 bool aos_io_be_uart_set_format(aos_io_uart_t *u, char parity, int stop_bits);
+bool aos_io_be_uart_set_bits(aos_io_uart_t *u, int data_bits);   /* 5..8 */
 bool aos_io_be_uart_errors(aos_io_uart_t *u, aos_uart_errors_t *out, bool clear);
 void aos_io_be_uart_close(aos_io_uart_t *u);
 /* Drives the target's lines (u->en_gpio / u->boot_gpio, already claimed):

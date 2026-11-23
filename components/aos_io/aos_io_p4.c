@@ -135,6 +135,13 @@ bool aos_io_be_uart_set_format(aos_io_uart_t *u, char parity, int stop_bits)
            uart_set_stop_bits(num, stop_bits == 2 ? UART_STOP_BITS_2 : UART_STOP_BITS_1) == ESP_OK;
 }
 
+bool aos_io_be_uart_set_bits(aos_io_uart_t *u, int data_bits)
+{
+    static const uart_word_length_t W[4] = { UART_DATA_5_BITS, UART_DATA_6_BITS, UART_DATA_7_BITS, UART_DATA_8_BITS };
+    if (data_bits < 5 || data_bits > 8) return false;
+    return uart_set_word_length((int)(intptr_t)u->be, W[data_bits - 5]) == ESP_OK;
+}
+
 void aos_io_be_uart_close(aos_io_uart_t *u)
 {
     int num = (int)(intptr_t)u->be;

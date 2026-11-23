@@ -1101,6 +1101,9 @@ __attribute__((weak)) int aos_hal_usb_serial_open(int index, uint32_t baud)
 __attribute__((weak)) bool aos_hal_usb_serial_set_format(int h, uint32_t baud, char parity, int stop_bits)
 { bool v; memset(&v, 0, sizeof v); return v; }
 
+__attribute__((weak)) bool aos_hal_usb_serial_set_frame(int h, uint32_t baud, int data_bits, char parity, int stop_bits)
+{ bool v; memset(&v, 0, sizeof v); return v; }
+
 __attribute__((weak)) int aos_hal_usb_serial_read(int h, void *buf, int len, int timeout_ms)
 { int v; memset(&v, 0, sizeof v); return v; }
 

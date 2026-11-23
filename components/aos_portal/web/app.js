@@ -432,7 +432,9 @@ async function pageArchivos() {
 
 /* ---- Terminal ---- */
 let termT, termCh = 0, termNext = 0, termLines = [], termFollow = true, termStamps = false, termFilter = '', termPort = null;
-const TERM_BAUDS = [9600, 19200, 38400, 57600, 74880, 115200, 230400, 460800, 921600, 1500000, 2000000];
+let termBaud = 115200, termFrame = '8N1', termDtr = true, termRts = true;
+const TERM_BAUDS = [300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 74880, 115200, 230400, 460800, 921600, 1500000, 2000000];
+const TERM_FRAMES = ['8N1', '8E1', '8O1', '8N2', '7E1', '7O1', '7N1', '7N2', '7E2', '7O2', '6N1', '5N1'];
 const levelColor = t => t[1] === ' ' && t[2] === '(' ? ({ E: '#ff6b6b', W: '#ffc857', I: '#7bd88f', D: '#8a93a3', V: '#8a93a3' }[t[0]] || '') : '';
 
 async function pageTerminal() {
@@ -440,7 +442,19 @@ async function pageTerminal() {
   const status = h('div', { class: 'note' });
   const chSel = h('select', { onchange: e => { termCh = +e.target.value; termNext = 0; termLines = []; put(view); termPort = null; load(true); } },
     h('option', { value: 0, selected: termCh === 0 }, tr('Canal A')), h('option', { value: 1, selected: termCh === 1 }, tr('Canal B')));
-  const portSel = h('select'), baudSel = h('select', {}, TERM_BAUDS.map(b => h('option', { value: b, selected: b === 115200 }, b)));
+  const portSel = h('select');
+  /* the speed: one of the list, or any other typed in (50 to 5000000) */
+  const baudSel = h('input', { type: 'number', min: 50, max: 5000000, step: 1, list: 'term-bauds', value: termBaud,
+    title: tr('Velocidad en baudios'), style: 'width:118px' });
+  const baudList = h('datalist', { id: 'term-bauds' }, TERM_BAUDS.map(b => h('option', { value: b })));
+  const frameSel = h('select', { title: tr('Bits de datos, paridad y bits de stop') }, TERM_FRAMES.map(f => h('option', { value: f, selected: f === termFrame }, f)));
+  const lineBtn = (name, get, set) => {
+    const b = h('button', { class: 'btn' + (get() ? ' pri' : ''), title: tr('Línea %s del adaptador USB', name) }, name);
+    b.onclick = () => { set(!get()); b.className = 'btn' + (get() ? ' pri' : ''); restart(); };
+    return b;
+  };
+  const dtrBtn = lineBtn('DTR', () => termDtr, v => termDtr = v), rtsBtn = lineBtn('RTS', () => termRts, v => termRts = v);
+  const conn = () => ({ baud: +baudSel.value, frame: frameSel.value, dtr: termDtr, rts: termRts });
   const connBtn = h('button', { class: 'btn pri' }, tr('Conectar'));
   const recBtn = h('button', { class: 'btn' }, tr('Grabar'));
   const stampBtn = h('button', { class: 'btn' + (termStamps ? ' pri' : ''), onclick: () => { termStamps = !termStamps; stampBtn.className = 'btn' + (termStamps ? ' pri' : ''); redraw(); } }, tr('Hora'));
@@ -474,14 +488,20 @@ async function pageTerminal() {
     if (full || !portSel.options.length) {
       put(portSel, st.ports.map(p => h('option', { value: p.name, selected: st.running ? p.name === st.port : p.name === (termPort || (termCh ? 'uart.a' : 'uart.b')) },
         p.name + (p.desc ? ' · ' + p.desc : '') + (p.holder && !st.running ? ' · ' + tr('lo tiene %s', p.holder) : ''))));
-      if (st.running) baudSel.value = st.baud;
+      if (st.running) {
+        baudSel.value = termBaud = st.baud;
+        if (!TERM_FRAMES.includes(st.frame)) frameSel.append(h('option', { value: st.frame }, st.frame));
+        frameSel.value = termFrame = st.frame;
+        termDtr = st.dtr; termRts = st.rts;
+        dtrBtn.className = 'btn' + (termDtr ? ' pri' : ''); rtsBtn.className = 'btn' + (termRts ? ' pri' : '');
+      }
     }
     connBtn.textContent = st.running ? tr('Detener') : tr('Conectar');
     connBtn.className = 'btn ' + (st.running ? 'red' : 'pri');
     recBtn.textContent = st.recording ? tr('● Grabando') : tr('Grabar');
     recBtn.className = 'btn' + (st.recording ? ' red' : '');
     const rec = st.rec_path ? '/logs/' + st.rec_path.split('/logs/').pop() : '';
-    put(status, st.running ? `${st.desc} · ${st.baud} · ` + tr('%s líneas', st.lines) + ' · ' + tr('%s recibidos', fmtBytes(st.rx)) : tr('Sin conexión.'),
+    put(status, st.running ? `${st.desc} · ${st.baud} ${st.frame} · ` + tr('%s líneas', st.lines) + ' · ' + tr('%s recibidos', fmtBytes(st.rx)) : tr('Sin conexión.'),
       st.recording && rec ? [' · ' + tr('grabando en') + ' ', h('a', { href: '/api/fs/get?attachment=1&path=' + encodeURIComponent(rec) }, rec), ' (' + fmtBytes(st.rec_bytes) + ')'] : null);
     put(trigList, st.triggers.length ? st.triggers.map((t, i) => h('div', { class: 'row' },
       h('div', { class: 'grow', style: 'font-family:ui-monospace,Menlo,monospace;color:#ffe08a;cursor:text', title: tr('Tocá para cambiar el texto'),
@@ -514,17 +534,26 @@ async function pageTerminal() {
   connBtn.onclick = async () => {
     try {
       if (st && st.running) await post('serial/stop', { ch: termCh });
-      else { termPort = portSel.value; await post('serial/start', { ch: termCh, port: portSel.value, baud: +baudSel.value }); termNext = 0; termLines = []; put(view); }
+      else { termPort = portSel.value; await post('serial/start', { ch: termCh, port: portSel.value, ...conn() }); termNext = 0; termLines = []; put(view); }
       load(true);
     } catch (e) { toast(e.message, true); }
   };
-  baudSel.onchange = async () => { if (st && st.running) { await post('serial/stop', { ch: termCh }); await post('serial/start', { ch: termCh, port: st.port, baud: +baudSel.value }); load(true); } };
+  /* a change of speed, frame or lines restarts a running capture on its port */
+  async function restart() {
+    termBaud = +baudSel.value; termFrame = frameSel.value;
+    if (!(st && st.running)) return;
+    try { await post('serial/stop', { ch: termCh }); await post('serial/start', { ch: termCh, port: st.port, ...conn() }); }
+    catch (e) { toast(e.message, true); }
+    load(true);
+  }
+  baudSel.onchange = restart;
+  frameSel.onchange = restart;
   recBtn.onclick = async () => { try { await post('serial/record', { ch: termCh, on: !st.recording }); setTimeout(load, 400); } catch (e) { toast(e.message, true); } };
   const send = async () => { try { await post('serial/send', { ch: termCh, text: input.value, eol: eol.value }); input.value = ''; } catch (e) { toast(e.message, true); } };
   input.onkeydown = e => { if (e.key === 'Enter') send(); };
   trigIn.onkeydown = async e => { if (e.key === 'Enter' && trigIn.value.trim()) { try { await post('serial/trigger', { add: trigIn.value.trim(), flags: 1 }); trigIn.value = ''; load(); } catch (er) { toast(er.message, true); } } };
   put(main, h('h1', {}, tr('Terminal')),
-    h('div', { class: 'btns', style: 'margin-bottom:10px' }, chSel, portSel, baudSel, connBtn, recBtn, stampBtn, followBtn, filter,
+    h('div', { class: 'btns', style: 'margin-bottom:10px' }, chSel, portSel, baudSel, baudList, frameSel, dtrBtn, rtsBtn, connBtn, recBtn, stampBtn, followBtn, filter,
       h('button', { class: 'btn', onclick: () => { termLines = []; put(view); } }, tr('Limpiar'))),
     status, view,
     h('div', { class: 'btns', style: 'margin-top:10px;flex-wrap:nowrap' }, eol, h('div', { style: 'flex:1' }, input), h('button', { class: 'btn pri', onclick: send }, tr('Enviar'))),

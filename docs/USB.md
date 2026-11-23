@@ -374,6 +374,17 @@ through aos_io) opens `usb0`; DTR and RTS go up on open, as a computer's
 terminal does (an Arduino resets, a CDC device that waits for a terminal
 starts sending). Received bytes wait in 16 KB of PSRAM.
 
+**Any speed and frame** (2026-11-23): the Terminal's connection sheet (and
+the portal's Terminal) takes a speed from 50 to 5000000 baud, 5 to 8 data
+bits, parity and stop bits, and which of DTR and RTS are up. The line
+coding goes to the adapter as CDC's `SET_LINE_CODING`, which the CH34x,
+CP210x and FTDI drivers turn into their own registers, all three with 5 to
+8 data bits (`aos_hal_usb_serial_set_frame`, `aos_io_uart_set_frame`); a
+new speed keeps the frame. The optical cables of many multimeters take
+their power from DTR with RTS off, and talk 7E1, 7O1 or 7N2 at 1200 to
+19200 baud. The header's UARTs take the same frames; they have no DTR or
+RTS.
+
 **The Programmer flashes an ESP32 through them** (since 0.9.2): the USB
 ports come after the header's UARTs in its list, in the app and in the
 portal. EN and BOOT go through RTS and DTR (`aos_hal_usb_serial_lines`),

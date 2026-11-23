@@ -336,12 +336,20 @@ int aos_hal_usb_serial_open(int index, uint32_t baud)
     return i;
 }
 
+bool aos_hal_usb_serial_set_frame(int h, uint32_t baud, int data_bits, char parity, int stop_bits)
+{
+    if (h < 0 || h >= SER_MAX || !S.s[h].cdc || S.s[h].closed || data_bits < 5 || data_bits > 8) return false;
+    /* CDC's line coding, which the CH34x, CP210x and FTDI drivers turn into
+     * their own registers (all three take 5 to 8 data bits) */
+    cdc_acm_line_coding_t lc = { .dwDTERate = baud, .bCharFormat = stop_bits == 2 ? 2 : 0,
+                                 .bParityType = parity == 'O' ? 1 : parity == 'E' ? 2 : 0,
+                                 .bDataBits = (uint8_t)data_bits };
+    return cdc_acm_host_line_coding_set(S.s[h].cdc, &lc) == ESP_OK;
+}
+
 bool aos_hal_usb_serial_set_format(int h, uint32_t baud, char parity, int stop_bits)
 {
-    if (h < 0 || h >= SER_MAX || !S.s[h].cdc || S.s[h].closed) return false;
-    cdc_acm_line_coding_t lc = { .dwDTERate = baud, .bCharFormat = stop_bits == 2 ? 2 : 0,
-                                 .bParityType = parity == 'O' ? 1 : parity == 'E' ? 2 : 0, .bDataBits = 8 };
-    return cdc_acm_host_line_coding_set(S.s[h].cdc, &lc) == ESP_OK;
+    return aos_hal_usb_serial_set_frame(h, baud, 8, parity, stop_bits);
 }
 
 int aos_hal_usb_serial_read(int h, void *buf, int len, int timeout_ms)

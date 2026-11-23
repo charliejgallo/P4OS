@@ -115,9 +115,15 @@ aos_io_uart_t *aos_io_uart_open(const char *port, uint32_t baud, bool rs485, con
 int  aos_io_uart_read(aos_io_uart_t *u, void *buf, int len, int timeout_ms);   /* bytes, 0 on timeout, <0 error */
 int  aos_io_uart_write(aos_io_uart_t *u, const void *buf, int len);
 bool aos_io_uart_set_baud(aos_io_uart_t *u, uint32_t baud);
-/* 8 data bits always; parity 'N', 'E' or 'O', 1 or 2 stop bits. A port
+/* Parity 'N', 'E' or 'O', 1 or 2 stop bits, with 8 data bits. A port
  * opens as 8N1. Modbus RTU wants 8E1 by the book, and many meters do. */
 bool aos_io_uart_set_format(aos_io_uart_t *u, char parity, int stop_bits);
+/* The whole frame, 5 to 8 data bits: the multimeters with an optical
+ * cable often talk 7E1, 7O1 or 7N2 at 1200-19200. Kept across a change of
+ * speed. */
+bool aos_io_uart_set_frame(aos_io_uart_t *u, int data_bits, char parity, int stop_bits);
+/* "8N1", "7E1", "8O2": parsed into its three parts; false if it is not one */
+bool aos_io_frame_parse(const char *s, int *data_bits, char *parity, int *stop_bits);
 /* What the line did wrong since the port opened (or since the last call
  * with clear): bytes with a parity error, bytes with a framing error (no
  * stop bit where it should be), BREAKs (the line held low for longer than
@@ -583,6 +589,8 @@ typedef struct {
     char     rec_path[128];          /* the file, once open */
     uint64_t rec_bytes;
     uint64_t raw_total;              /* bytes ever received, for aos_serial_raw */
+    char     frame[4];               /* "8N1", "7E1"... */
+    uint8_t  ctl;                    /* AOS_SERIAL_DTR | AOS_SERIAL_RTS, for a USB adapter */
 } aos_serial_stat_t;
 
 /* A line's flags */
@@ -590,6 +598,14 @@ typedef struct {
 #define AOS_SERIAL_F_BOOT    0x02    /* looks like a chip starting (rst:0x, ESP-ROM:) */
 
 bool aos_serial_start(int ch, const char *port, uint32_t baud);
+/* The same, with the frame ("8N1", "7E1", "8E2"...; NULL is 8N1) and, on a
+ * USB adapter, which of DTR and RTS are asserted (aos_serial_start: both,
+ * as a computer's terminal leaves them). The optical cables of many
+ * multimeters take their power from DTR, with RTS off or the other way
+ * round. Both stay through an unplugging and a change of speed. */
+#define AOS_SERIAL_DTR 0x01
+#define AOS_SERIAL_RTS 0x02
+bool aos_serial_start_ex(int ch, const char *port, uint32_t baud, const char *frame, uint8_t ctl);
 void aos_serial_stop(int ch);
 bool aos_serial_stat(int ch, aos_serial_stat_t *out);
 /* Line 'index' (absolute, first..lines-1): its text, the time it ended

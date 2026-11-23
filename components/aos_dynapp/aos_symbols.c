@@ -4,7 +4,7 @@
  * Simbolos que el firmware le presta a las apps dinamicas.
  * Librerias: lvgl__lvgl, lvgl_port_lib, aos_hal, aos_ui, aos_apps, aos_board, aos_fonts, aos_usb, aos_io, monocypher, aos_ssh
  * Mas 188 funciones de libc/libm agregadas a mano.
- * Total: 3681 simbolos.
+ * Total: 3686 simbolos.
  */
 
 #include <stddef.h>
@@ -707,6 +707,7 @@ extern int aos_hal_usb_serial_name;
 extern int aos_hal_usb_serial_open;
 extern int aos_hal_usb_serial_read;
 extern int aos_hal_usb_serial_set_format;
+extern int aos_hal_usb_serial_set_frame;
 extern int aos_hal_usb_serial_write;
 extern int aos_hal_usb_type;
 extern int aos_hal_uvc_count;
@@ -854,6 +855,7 @@ extern int aos_io_be_uart_lines_release;
 extern int aos_io_be_uart_open;
 extern int aos_io_be_uart_read;
 extern int aos_io_be_uart_set_baud;
+extern int aos_io_be_uart_set_bits;
 extern int aos_io_be_uart_set_format;
 extern int aos_io_be_uart_take;
 extern int aos_io_be_uart_write;
@@ -886,6 +888,7 @@ extern int aos_io_edges_close;
 extern int aos_io_edges_get;
 extern int aos_io_edges_open;
 extern int aos_io_edges_wait;
+extern int aos_io_frame_parse;
 extern int aos_io_gpio_get;
 extern int aos_io_gpio_mode;
 extern int aos_io_gpio_set;
@@ -978,6 +981,7 @@ extern int aos_io_uart_open;
 extern int aos_io_uart_read;
 extern int aos_io_uart_set_baud;
 extern int aos_io_uart_set_format;
+extern int aos_io_uart_set_frame;
 extern int aos_io_uart_write;
 extern int aos_io_validate;
 extern int aos_ip4_canforward;
@@ -1207,6 +1211,7 @@ extern int aos_serial_raw;
 extern int aos_serial_record;
 extern int aos_serial_send;
 extern int aos_serial_start;
+extern int aos_serial_start_ex;
 extern int aos_serial_stat;
 extern int aos_serial_stop;
 extern int aos_serial_trigger_add;
@@ -4391,6 +4396,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_hal_usb_serial_open),
     ESP_ELFSYM_EXPORT(aos_hal_usb_serial_read),
     ESP_ELFSYM_EXPORT(aos_hal_usb_serial_set_format),
+    ESP_ELFSYM_EXPORT(aos_hal_usb_serial_set_frame),
     ESP_ELFSYM_EXPORT(aos_hal_usb_serial_write),
     ESP_ELFSYM_EXPORT(aos_hal_usb_type),
     ESP_ELFSYM_EXPORT(aos_hal_uvc_count),
@@ -4538,6 +4544,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_be_uart_open),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_read),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_set_baud),
+    ESP_ELFSYM_EXPORT(aos_io_be_uart_set_bits),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_set_format),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_take),
     ESP_ELFSYM_EXPORT(aos_io_be_uart_write),
@@ -4570,6 +4577,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_edges_get),
     ESP_ELFSYM_EXPORT(aos_io_edges_open),
     ESP_ELFSYM_EXPORT(aos_io_edges_wait),
+    ESP_ELFSYM_EXPORT(aos_io_frame_parse),
     ESP_ELFSYM_EXPORT(aos_io_gpio_get),
     ESP_ELFSYM_EXPORT(aos_io_gpio_mode),
     ESP_ELFSYM_EXPORT(aos_io_gpio_set),
@@ -4662,6 +4670,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_io_uart_read),
     ESP_ELFSYM_EXPORT(aos_io_uart_set_baud),
     ESP_ELFSYM_EXPORT(aos_io_uart_set_format),
+    ESP_ELFSYM_EXPORT(aos_io_uart_set_frame),
     ESP_ELFSYM_EXPORT(aos_io_uart_write),
     ESP_ELFSYM_EXPORT(aos_io_validate),
     ESP_ELFSYM_EXPORT(aos_ip4_canforward),
@@ -4891,6 +4900,7 @@ const struct esp_elfsym aos_symbol_table[] = {
     ESP_ELFSYM_EXPORT(aos_serial_record),
     ESP_ELFSYM_EXPORT(aos_serial_send),
     ESP_ELFSYM_EXPORT(aos_serial_start),
+    ESP_ELFSYM_EXPORT(aos_serial_start_ex),
     ESP_ELFSYM_EXPORT(aos_serial_stat),
     ESP_ELFSYM_EXPORT(aos_serial_stop),
     ESP_ELFSYM_EXPORT(aos_serial_trigger_add),

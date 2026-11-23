@@ -362,6 +362,7 @@ aos_io_uart_t *aos_io_uart_open(const char *port, uint32_t baud, bool rs485, con
         u->en = u->boot = 1;        /* EN and BOOT up: the board runs */
         uint16_t vid = 0, pid = 0;
         u->usb_jtag = aos_hal_usb_serial_ids(ui, &vid, &pid) && vid == 0x303A && pid == 0x1001;
+        u->bits = 8, u->parity = 'N', u->stop = 1;
         return u;
     }
     const aos_io_port_t *p = aos_io_port_find(port);
@@ -378,6 +379,7 @@ aos_io_uart_t *aos_io_uart_open(const char *port, uint32_t baud, bool rs485, con
     u->en_gpio = (int8_t)en;
     u->boot_gpio = (int8_t)boot;
     u->en = u->boot = -1;
+    u->bits = 8, u->parity = 'N', u->stop = 1;
     if (!aos_io_be_uart_open(u, rs485 && p->pins[2] >= 0)) {
         release_pins(p, owner);
         free(u);
@@ -402,7 +404,8 @@ bool aos_io_uart_set_baud(aos_io_uart_t *u, uint32_t baud)
 {
     if (!u) return false;
     if (u->usb >= 0) {
-        if (!aos_hal_usb_serial_set_format(u->usb, baud, 'N', 1)) return false;
+        /* the line coding carries the frame too: the one asked for stays */
+        if (!aos_hal_usb_serial_set_frame(u->usb, baud, u->bits, u->parity, u->stop)) return false;
         u->baud = baud;
         return true;
     }
@@ -411,11 +414,31 @@ bool aos_io_uart_set_baud(aos_io_uart_t *u, uint32_t baud)
     return true;
 }
 
+bool aos_io_uart_set_frame(aos_io_uart_t *u, int data_bits, char parity, int stop_bits)
+{
+    if (!u || data_bits < 5 || data_bits > 8 || (parity != 'N' && parity != 'E' && parity != 'O') ||
+        (stop_bits != 1 && stop_bits != 2)) return false;
+    bool ok;
+    if (u->usb >= 0) ok = aos_hal_usb_serial_set_frame(u->usb, u->baud, data_bits, parity, stop_bits);
+    else ok = aos_io_be_uart_set_bits(u, data_bits) && aos_io_be_uart_set_format(u, parity, stop_bits);
+    if (ok) u->bits = (uint8_t)data_bits, u->parity = parity, u->stop = (uint8_t)stop_bits;
+    return ok;
+}
+
 bool aos_io_uart_set_format(aos_io_uart_t *u, char parity, int stop_bits)
 {
-    if (!u || (parity != 'N' && parity != 'E' && parity != 'O') || (stop_bits != 1 && stop_bits != 2)) return false;
-    if (u->usb >= 0) return aos_hal_usb_serial_set_format(u->usb, u->baud, parity, stop_bits);
-    return aos_io_be_uart_set_format(u, parity, stop_bits);
+    return aos_io_uart_set_frame(u, 8, parity, stop_bits);
+}
+
+bool aos_io_frame_parse(const char *s, int *data_bits, char *parity, int *stop_bits)
+{
+    if (!s || s[0] < '5' || s[0] > '8' || s[3]) return false;
+    char p = (char)toupper((unsigned char)s[1]);
+    if ((p != 'N' && p != 'E' && p != 'O') || (s[2] != '1' && s[2] != '2')) return false;
+    if (data_bits) *data_bits = s[0] - '0';
+    if (parity) *parity = p;
+    if (stop_bits) *stop_bits = s[2] - '0';
+    return true;
 }
 
 /* The target's EN and BOOT: whatever the modules on this port say (the

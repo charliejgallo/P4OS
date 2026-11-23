@@ -14,6 +14,17 @@ noviembre, junto; el detalle de cada cosa está en su sección, más abajo.
 De antes de noviembre quedan 69 renglones sin tachar desde "Pendientes,
 en resumen": no se revisaron en esta pasada.
 
+**La Terminal con cualquier velocidad y formato (2026-11-23, para la próxima release):**
+instalada en la placa por OTA (`v0.32.1-1-gadd4d83a-dirty`, confirmada).
+
+- [ ] Leer el tester del usuario (WH5500, 2400 baudios según su manual)
+      desde la hoja nueva: velocidad, formato (probar 8N1, 7E1, 7O1) y,
+      si va por un adaptador USB, DTR prendido con RTS apagado. En el
+      simulador anduvo contra un pty a 2400 7E1, a 1800 tipeado a mano y a
+      1234 8O2; con un adaptador de verdad no se probó todavía.
+- [ ] Una velocidad baja en un UART del header (`uart.a`/`uart.b`) con algo
+      real del otro lado.
+
 **La 0.32.1 (publicada el 2026-11-22, un solo arreglo):**
 
 - [ ] La Tienda espera una descarga libre: tocar "Obtener" apenas se abre

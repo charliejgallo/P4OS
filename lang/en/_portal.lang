@@ -2438,3 +2438,8 @@ Las que no son iguales a las del catálogo: baja la de la Tienda para cada una. 
 ¿Reemplazar las %s apps copiadas a mano por las de la Tienda?	Replace the %s apps copied by hand with the Store's?
 Reemplazarlas por las de la Tienda	Replace them with the Store's
 Nuevas	New
+
+#: Terminal: speed, frame and the USB lines (2026-11-23)
+Velocidad en baudios	Speed in baud
+Bits de datos, paridad y bits de stop	Data bits, parity and stop bits
+Línea %s del adaptador USB	The USB adapter's %s line

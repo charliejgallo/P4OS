@@ -19,6 +19,11 @@
  *              when a line has them, for both channels
  * The bar below sends a line with CR LF, LF, CR or nothing after it.
  *
+ * The connection's button ("2400 · 7E1") opens its sheet: the speed (from
+ * 300 baud, or any other typed in), the data bits, parity and stop bits,
+ * and on a USB adapter which of DTR and RTS are up - the optical cables of
+ * many multimeters are powered by them.
+ *
  * The view is not a label with the whole ring in it: it is one label per
  * visible row, refilled from the ring when something changes. That costs
  * the same with ten lines as with three thousand.
@@ -40,8 +45,11 @@
 #define MAX_ROWS 64
 #define FILTER_MAX 3000
 
-static const uint32_t BAUDS[] = { 9600, 19200, 38400, 57600, 74880, 115200, 230400, 460800, 921600, 1500000, 2000000 };
+static const uint32_t BAUDS[] = { 300, 600, 1200, 2400, 4800, 9600, 19200, 38400, 57600, 74880, 115200,
+                                  230400, 460800, 921600, 1500000, 2000000 };
 #define N_BAUDS (sizeof BAUDS / sizeof BAUDS[0])
+#define BAUD_MIN 50                 /* what a typed-in speed may be */
+#define BAUD_MAX 5000000
 
 enum { EOL_CRLF, EOL_LF, EOL_CR, EOL_NONE, EOL_COUNT };
 static const char *const EOL_NAME[EOL_COUNT] = { "CR LF", "LF", "CR", N_("nada") };
@@ -59,7 +67,7 @@ static struct {
 } S;
 
 typedef struct {
-    lv_obj_t *root, *bar, *port_dd, *baud_dd, *connect, *connect_lbl, *status, *follow_btn;
+    lv_obj_t *root, *bar, *port_dd, *conn_btn, *conn_lbl, *connect, *connect_lbl, *status, *follow_btn;
     lv_obj_t *seg[2], *rec_btn, *hex_btn, *filter_btn, *filter_lbl, *trig_btn, *trig_lbl, *stamp_btn, *eol_lbl;
     lv_obj_t *view, *rows[MAX_ROWS];
     lv_obj_t *ta, *kb, *overlay, *sheet_ta, *sheet_kb, *trig_list;
@@ -84,6 +92,10 @@ typedef struct {
     void (*text_done)(const char *);
     int usb_n;              /* the host's USB serial ports the port list has */
     char gone[AOS_IO_PORT_NAME_MAX];    /* the chosen port, unplugged: chosen again when it is back */
+    /* the channel's connection, as chosen (or as the running capture has it) */
+    uint32_t baud;
+    char frame[4];          /* "8N1" */
+    uint8_t lines;          /* AOS_SERIAL_DTR | AOS_SERIAL_RTS */
 } term_t;
 
 static term_t T;
@@ -101,6 +113,8 @@ static void prefs_load(void)
 
 static const char *key_port(int ch) { return ch ? "ser_port1" : "ser_port"; }
 static const char *key_baud(int ch) { return ch ? "ser_baud1" : "ser_baud"; }
+static const char *key_frame(int ch) { return ch ? "ser_fmt1" : "ser_fmt"; }
+static const char *key_lines(int ch) { return ch ? "ser_lines1" : "ser_lines"; }
 
 static lv_color_t level_color(const char *s)
 {
@@ -362,11 +376,17 @@ static void refresh(bool force)
     if (st.running) {
         char rec[48] = "";
         if (st.recording) snprintf(rec, sizeof rec, "  ·  %s %llu KB", _("grabando"), (unsigned long long)(st.rec_bytes / 1024));
-        lv_label_set_text_fmt(T.status, "%s  ·  %u  ·  %u %s  ·  %llu B%s%s", st.desc, (unsigned)st.baud,
-                              (unsigned)st.lines, _("líneas"), (unsigned long long)st.rx_bytes, rec,
-                              S.filter[0] ? "" : "");
+        lv_label_set_text_fmt(T.status, "%s  ·  %u %s  ·  %u %s  ·  %llu B%s", st.desc, (unsigned)st.baud, st.frame,
+                              (unsigned)st.lines, _("líneas"), (unsigned long long)st.rx_bytes, rec);
     } else {
         lv_label_set_text(T.status, _("Sin conexión: elegí el puerto y la velocidad"));
+    }
+    if (st.running && (st.baud != T.baud || strcmp(st.frame, T.frame) || st.ctl != T.lines)) {
+        /* started from the portal, or with other settings: the button says what runs */
+        T.baud = st.baud;
+        snprintf(T.frame, sizeof T.frame, "%s", st.frame);
+        T.lines = st.ctl;
+        lv_label_set_text_fmt(T.conn_lbl, "%u · %s", (unsigned)T.baud, T.frame);
     }
     lv_label_set_text(T.connect_lbl, st.running ? _("Detener") : _("Conectar"));
     lv_obj_set_style_bg_color(T.connect, st.running ? AOS_C_RED : AOS_C_GREEN, 0);
@@ -446,10 +466,30 @@ static void load_port_baud(void)
     if (st.running) snprintf(saved, sizeof saved, "%s", st.port);
     int sel = lv_dropdown_get_option_index(T.port_dd, saved);
     if (sel >= 0) lv_dropdown_set_selected(T.port_dd, (uint32_t)sel);
-    int32_t baud = 115200;
+    int32_t baud = 115200, lines = AOS_SERIAL_DTR | AOS_SERIAL_RTS;
     aos_hal_pref_get_i32(key_baud(S.ch), &baud);
-    if (st.running) baud = (int32_t)st.baud;
-    for (size_t i = 0; i < N_BAUDS; i++) if (BAUDS[i] == (uint32_t)baud) lv_dropdown_set_selected(T.baud_dd, (uint32_t)i);
+    if (baud < BAUD_MIN || baud > BAUD_MAX) baud = 115200;
+    char frame[8] = "8N1";
+    aos_hal_pref_get_str(key_frame(S.ch), frame, sizeof frame);
+    if (!aos_io_frame_parse(frame, NULL, NULL, NULL)) snprintf(frame, sizeof frame, "8N1");
+    aos_hal_pref_get_i32(key_lines(S.ch), &lines);
+    T.baud = (uint32_t)baud;
+    snprintf(T.frame, sizeof T.frame, "%s", frame);
+    T.lines = (uint8_t)(lines & (AOS_SERIAL_DTR | AOS_SERIAL_RTS));
+    if (st.running) {
+        T.baud = st.baud;
+        snprintf(T.frame, sizeof T.frame, "%s", st.frame);
+        T.lines = st.ctl;
+    }
+    lv_label_set_text_fmt(T.conn_lbl, "%u · %s", (unsigned)T.baud, T.frame);
+}
+
+static void conn_save(void)
+{
+    aos_hal_pref_set_i32(key_baud(S.ch), (int32_t)T.baud);
+    aos_hal_pref_set_str(key_frame(S.ch), T.frame);
+    aos_hal_pref_set_i32(key_lines(S.ch), T.lines);
+    lv_label_set_text_fmt(T.conn_lbl, "%u · %s", (unsigned)T.baud, T.frame);
 }
 
 static void connect_cb(lv_event_t *e)
@@ -462,8 +502,7 @@ static void connect_cb(lv_event_t *e)
         char port[AOS_IO_PORT_NAME_MAX];
         lv_dropdown_get_selected_str(T.port_dd, port, sizeof port);
         T.gone[0] = 0;          /* chosen now: the unplugged one is forgotten */
-        uint32_t baud = BAUDS[lv_dropdown_get_selected(T.baud_dd)];
-        if (!aos_serial_start(S.ch, port, baud)) {
+        if (!aos_serial_start_ex(S.ch, port, T.baud, T.frame, T.lines)) {
             const aos_io_port_t *p = aos_io_port_find(port);
             const char *holder = p ? aos_io_owner(p->pins[0]) : NULL;
             char t[80];
@@ -472,23 +511,26 @@ static void connect_cb(lv_event_t *e)
             aos_ui_toast(t, 2500);
         }
         aos_hal_pref_set_str(key_port(S.ch), port);
-        aos_hal_pref_set_i32(key_baud(S.ch), (int32_t)baud);
+        conn_save();
         T.follow = true;
         filter_reset();
     }
     refresh(true);
 }
 
-static void baud_cb(lv_event_t *e)
+/* A change in the connection's sheet: saved, and a running capture starts
+ * again on the same port with it */
+static void conn_apply(void)
 {
-    /* changing the speed of a running capture restarts it on the same port */
+    conn_save();
     aos_serial_stat_t st;
     aos_serial_stat(S.ch, &st);
-    uint32_t baud = BAUDS[lv_dropdown_get_selected(T.baud_dd)];
-    aos_hal_pref_set_i32(key_baud(S.ch), (int32_t)baud);
     if (st.running) {
+        char port[AOS_IO_PORT_NAME_MAX];
+        snprintf(port, sizeof port, "%s", st.port);
         aos_serial_stop(S.ch);
-        aos_serial_start(S.ch, st.port, baud);
+        if (!aos_serial_start_ex(S.ch, port, T.baud, T.frame, T.lines))
+            aos_ui_toast(_("No se pudo abrir el puerto"), 2500);
     }
     refresh(true);
 }
@@ -757,6 +799,144 @@ static void trig_build(void)
 
 static void trig_cb(lv_event_t *e) { sheet_close(); trig_build(); }
 
+/* ---- the connection's sheet ---- */
+
+static void conn_build(void);
+
+static void conn_baud_cb(lv_event_t *e)
+{
+    T.baud = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+    conn_apply();
+    conn_build();
+}
+
+static void conn_other_done(const char *v)
+{
+    char *end;
+    unsigned long b = strtoul(v, &end, 10);
+    while (*end == ' ') end++;
+    if (*end || b < BAUD_MIN || b > BAUD_MAX) {
+        aos_ui_toast(_("Entre 50 y 5000000 baudios"), 2200);
+    } else {
+        T.baud = (uint32_t)b;
+        conn_apply();
+    }
+    conn_build();
+}
+
+static void conn_other_cb(lv_event_t *e)
+{
+    char v[16];
+    snprintf(v, sizeof v, "%u", (unsigned)T.baud);
+    text_entry(_("Velocidad en baudios"), v, conn_other_done);
+    lv_keyboard_set_mode(T.sheet_kb, LV_KEYBOARD_MODE_NUMBER);
+}
+
+/* ud: the frame's position (0 bits, 1 parity, 2 stop) << 8 | the character */
+static void conn_frame_cb(lv_event_t *e)
+{
+    uintptr_t v = (uintptr_t)lv_event_get_user_data(e);
+    T.frame[v >> 8] = (char)(v & 0xFF);
+    conn_apply();
+    conn_build();
+}
+
+static void conn_line_cb(lv_event_t *e)
+{
+    T.lines ^= (uint8_t)(uintptr_t)lv_event_get_user_data(e);
+    conn_apply();
+    conn_build();
+}
+
+static void conn_close_cb(lv_event_t *e) { sheet_close(); refresh(true); }
+
+static lv_obj_t *conn_section(lv_obj_t *col, int32_t w, const char *title)
+{
+    lv_obj_t *t = aos_label(col, title, aos_font_caption, AOS_C_DIM);
+    lv_obj_set_style_pad_left(t, 8, 0);
+    lv_obj_set_style_pad_top(t, 10, 0);
+    lv_obj_t *r = lv_obj_create(col);
+    lv_obj_remove_style_all(r);
+    lv_obj_set_size(r, w, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(r, LV_FLEX_FLOW_ROW_WRAP);
+    lv_obj_set_style_pad_gap(r, 10, 0);
+    lv_obj_remove_flag(r, LV_OBJ_FLAG_SCROLLABLE);
+    return r;
+}
+
+static void conn_build(void)
+{
+    if (!T.overlay) {
+        T.overlay = lv_obj_create(T.root);
+        lv_obj_remove_style_all(T.overlay);
+        lv_obj_set_size(T.overlay, T.W, T.H);
+        lv_obj_set_style_bg_color(T.overlay, lv_color_hex(0x0B0E12), 0);
+        lv_obj_set_style_bg_opa(T.overlay, LV_OPA_COVER, 0);
+        lv_obj_add_flag(T.overlay, LV_OBJ_FLAG_CLICKABLE);
+    }
+    lv_obj_clean(T.overlay);
+    int32_t w = T.W > T.H ? 820 : T.W - 2 * AOS_UI_PAD;
+    lv_obj_t *col = lv_obj_create(T.overlay);
+    lv_obj_remove_style_all(col);
+    lv_obj_set_size(col, w, T.H);
+    lv_obj_align(col, LV_ALIGN_TOP_MID, 0, 0);
+    lv_obj_set_flex_flow(col, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(col, 12, 0);
+    lv_obj_set_style_pad_bottom(col, 30, 0);
+    lv_obj_set_scroll_dir(col, LV_DIR_VER);
+    lv_obj_add_flag(col, LV_OBJ_FLAG_CLICKABLE);         /* or it does not scroll with a finger */
+    lv_obj_t *head = lv_obj_create(col);
+    lv_obj_remove_style_all(head);
+    lv_obj_set_size(head, w, 100);
+    lv_obj_t *tl = aos_label(head, "", aos_font_large, AOS_C_TEXT);
+    lv_label_set_text_fmt(tl, "%s %c", _("Conexión"), S.ch ? 'B' : 'A');
+    lv_obj_align(tl, LV_ALIGN_BOTTOM_LEFT, 4, 0);
+    lv_obj_t *done = mini(head, _("Listo"), true, AOS_C_ACCENT, conn_close_cb, NULL);
+    lv_obj_align(done, LV_ALIGN_BOTTOM_RIGHT, 0, 0);
+
+    lv_obj_t *r = conn_section(col, w, _("VELOCIDAD (BAUDIOS)"));
+    bool listed = false;
+    for (size_t i = 0; i < N_BAUDS; i++) {
+        char b[12];
+        snprintf(b, sizeof b, "%u", (unsigned)BAUDS[i]);
+        bool on = BAUDS[i] == T.baud;
+        listed |= on;
+        mini(r, b, on, AOS_C_ACCENT, conn_baud_cb, (void *)(uintptr_t)BAUDS[i]);
+    }
+    char other[32];
+    if (listed) snprintf(other, sizeof other, "%s", _("Otra…"));
+    else snprintf(other, sizeof other, "%u…", (unsigned)T.baud);
+    mini(r, other, !listed, AOS_C_ACCENT, conn_other_cb, NULL);
+
+    r = conn_section(col, w, _("BITS DE DATOS"));
+    for (char c = '5'; c <= '8'; c++) {
+        char b[2] = { c, 0 };
+        mini(r, b, T.frame[0] == c, AOS_C_ACCENT, conn_frame_cb, (void *)(uintptr_t)(0 << 8 | (uint8_t)c));
+    }
+    r = conn_section(col, w, _("PARIDAD"));
+    static const char PAR[3] = { 'N', 'E', 'O' };
+    const char *par_name[3] = { _("Ninguna"), _("Par"), _("Impar") };
+    for (int i = 0; i < 3; i++)
+        mini(r, par_name[i], T.frame[1] == PAR[i], AOS_C_ACCENT, conn_frame_cb, (void *)(uintptr_t)(1 << 8 | (uint8_t)PAR[i]));
+    r = conn_section(col, w, _("BITS DE STOP"));
+    mini(r, "1", T.frame[2] == '1', AOS_C_ACCENT, conn_frame_cb, (void *)(uintptr_t)(2 << 8 | '1'));
+    mini(r, "2", T.frame[2] == '2', AOS_C_ACCENT, conn_frame_cb, (void *)(uintptr_t)(2 << 8 | '2'));
+
+    r = conn_section(col, w, _("LÍNEAS DEL ADAPTADOR USB"));
+    mini(r, "DTR", T.lines & AOS_SERIAL_DTR, AOS_C_GREEN, conn_line_cb, (void *)(uintptr_t)AOS_SERIAL_DTR);
+    mini(r, "RTS", T.lines & AOS_SERIAL_RTS, AOS_C_GREEN, conn_line_cb, (void *)(uintptr_t)AOS_SERIAL_RTS);
+    lv_obj_t *note = aos_label(col, _("Prendidas, como las deja una computadora. El cable óptico de muchos multímetros se alimenta de DTR con RTS apagado: si no llega nada, probá apagar RTS. Los puertos del header no tienen estas líneas."),
+                               aos_font_caption, AOS_C_DIM);
+    lv_obj_set_width(note, w);
+    lv_label_set_long_mode(note, LV_LABEL_LONG_MODE_WRAP);
+    lv_obj_t *n2 = aos_label(col, _("Lo más común es 8N1 (8 bits, sin paridad, 1 de stop). Muchos multímetros usan 7E1, 7O1 o 7N2 a 1200, 2400 o 19200; el manual o la etiqueta del cable lo dicen. Con la velocidad o el formato equivocados llegan caracteres raros: la vista Hexa ayuda a ver qué llega."),
+                             aos_font_caption, AOS_C_DIM);
+    lv_obj_set_width(n2, w);
+    lv_label_set_long_mode(n2, LV_LABEL_LONG_MODE_WRAP);
+}
+
+static void conn_cb(lv_event_t *e) { sheet_close(); conn_build(); }
+
 /* ---- the view ---- */
 
 static void view_cb(lv_event_t *e)
@@ -912,14 +1092,9 @@ static void *create(aos_app_t *self, lv_obj_t *root)
     char ports[160];
     port_options(ports, sizeof ports);
     T.port_dd = dropdown(T.bar, ports, 150);
-    char bauds[160] = "";
-    for (size_t i = 0; i < N_BAUDS; i++) {
-        char b[12];
-        snprintf(b, sizeof b, "%s%u", i ? "\n" : "", (unsigned)BAUDS[i]);
-        strlcat(bauds, b, sizeof bauds);
-    }
-    T.baud_dd = dropdown(T.bar, bauds, 170);
-    lv_obj_add_event_cb(T.baud_dd, baud_cb, LV_EVENT_VALUE_CHANGED, NULL);
+    T.conn_btn = tool_btn(T.bar, NULL, "115200 · 8N1", conn_cb, NULL);
+    T.conn_lbl = lv_obj_get_child(T.conn_btn, 0);
+    lv_obj_set_style_max_width(T.conn_lbl, 240, 0);
     T.connect = tool_btn(T.bar, NULL, _("Conectar"), connect_cb, NULL);
     T.connect_lbl = lv_obj_get_child(T.connect, 0);
     lv_obj_set_flex_grow(T.connect, 1);

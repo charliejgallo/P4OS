@@ -10874,3 +10874,20 @@ Documento	Dokument
 Abrir en Oficina	In Büro öffnen
 No se pudo abrir Oficina	Büro ließ sich nicht öffnen
 Oficina lo abre: está en la Tienda	Büro öffnet es: im Store erhältlich
+
+#: Terminal: speed, frame and the USB lines (2026-11-23)
+Entre 50 y 5000000 baudios	Zwischen 50 und 5000000 Baud
+Velocidad en baudios	Geschwindigkeit in Baud
+VELOCIDAD (BAUDIOS)	GESCHWINDIGKEIT (BAUD)
+Otra…	Andere…
+BITS DE DATOS	DATENBITS
+PARIDAD	PARITÄT
+Par	Gerade
+Impar	Ungerade
+BITS DE STOP	STOPPBITS
+LÍNEAS DEL ADAPTADOR USB	LEITUNGEN DES USB-ADAPTERS
+Prendidas, como las deja una computadora. El cable óptico de muchos multímetros se alimenta de DTR con RTS apagado: si no llega nada, probá apagar RTS. Los puertos del header no tienen estas líneas.	An, wie ein Computer sie lässt. Das optische Kabel vieler Multimeter wird über DTR versorgt, bei ausgeschaltetem RTS: kommt nichts an, RTS ausschalten. Die Ports der Stiftleiste haben diese Leitungen nicht.
+Lo más común es 8N1 (8 bits, sin paridad, 1 de stop). Muchos multímetros usan 7E1, 7O1 o 7N2 a 1200, 2400 o 19200; el manual o la etiqueta del cable lo dicen. Con la velocidad o el formato equivocados llegan caracteres raros: la vista Hexa ayuda a ver qué llega.	Am häufigsten ist 8N1 (8 Bits, keine Parität, 1 Stoppbit). Viele Multimeter nutzen 7E1, 7O1 oder 7N2 bei 1200, 2400 oder 19200; das Handbuch oder das Etikett des Kabels sagt es. Mit falscher Geschwindigkeit oder falschem Format kommen seltsame Zeichen an: die Hex-Ansicht zeigt, was ankommt.
+la velocidad va de 50 a 5000000 baudios	die Geschwindigkeit reicht von 50 bis 5000000 Baud
+el formato es como 8N1 o 7E1	das Format ist wie 8N1 oder 7E1
+el parlante está en uso	der Lautsprecher ist belegt
