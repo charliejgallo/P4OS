@@ -902,9 +902,15 @@ void tqb_tick(app_t *a, float dt)
     }
     /* the camera */
     if (a->cam_follow) {
-        float f = tq_clampf(dt * (a->bstate == B_FLY ? 6.0f : 3.5f), 0, 1);
+        /* a short glide that ends: each step of it moves the picture */
+        float f = tq_clampf(dt * 6.0f, 0, 1);
         a->cam_x += (a->cam_tx - a->cam_x) * f;
         a->cam_y += (a->cam_ty - a->cam_y) * f;
+        float ex = a->cam_tx - a->cam_x, ey = a->cam_ty - a->cam_y;
+        if (ex * ex + ey * ey < 0.05f * 0.05f) {
+            a->cam_x = a->cam_tx;
+            a->cam_y = a->cam_ty;
+        }
     }
     /* the floating words follow the battle view */
     for (int i = 0; i < TQ_LABELS; i++) {

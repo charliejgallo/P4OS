@@ -1204,9 +1204,9 @@ uint32_t tq_scene_top_key(const tq_req_t *r, const tq_terrain_t *t)
     const tq_state_t *s = &r->st;
     int wx0, wy0;
     top_window(t, r->cx, r->cy, r->w, r->h, &wx0, &wy0);
+    (void)wx0;
+    (void)wy0;
     uint32_t h = 2166136261u;
-    h = fnv(h, (uint32_t)wx0);
-    h = fnv(h, (uint32_t)wy0);
     h = fnv(h, (uint32_t)(r->w << 16 | r->h));
     h = fnv(h, S.world_ver);
     h = fnv(h, (uint32_t)s->show_reach << 8 | (uint32_t)r->hp_bars);
@@ -1217,6 +1217,11 @@ uint32_t tq_scene_top_key(const tq_req_t *r, const tq_terrain_t *t)
     for (int k = 0; k < s->ntree; k++) h = fnv(h, s->tree[k].alive);
     for (int k = 0; k < s->nblock; k++) h = fnv(h, (uint32_t)s->block[k].alive << 16 ^ (uint32_t)(s->block[k].z * 64));
     return h ? h : 1;
+}
+
+void tq_scene_top_window(const tq_req_t *r, const tq_terrain_t *t, int *wx0, int *wy0)
+{
+    top_window(t, r->cx, r->cy, r->w, r->h, wx0, wy0);
 }
 
 void tq_rects_add(tq_rects_t *rs, int x0, int y0, int x1, int y1, int W, int H)

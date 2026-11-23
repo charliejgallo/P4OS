@@ -60,8 +60,9 @@ typedef struct app_s {
     uint32_t   last_ms;
     /* the frame shown, for redrawing only where things move */
     uint32_t   shown_key, req_key;
+    int        shown_wx, shown_wy, req_wx, req_wy;   /* their windows */
     tq_rects_t shown_rects, req_rects;
-    uint32_t   part_frames, part_us, part_px;
+    uint32_t   part_frames, part_us, part_px, scroll_frames;
     bool       part_counted;
     /* the first person through the PPA, straight to the panel */
     int        blit_ok;                 /* -1 not known yet, 0 no (the simulator), 1 yes */

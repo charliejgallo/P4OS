@@ -67,7 +67,7 @@ static void perf_frame(app_t *a, uint32_t now)
         a->perf_render_us = a->perf_world_us = 0;
         a->perf_mode = a->req->mode;
         memset(&a->prof_acc, 0, sizeof a->prof_acc);
-        a->part_frames = a->part_us = a->part_px = 0;
+        a->part_frames = a->part_us = a->part_px = a->scroll_frames = 0;
         a->part_counted = false;
         return;
     }
@@ -89,14 +89,14 @@ static void perf_frame(app_t *a, uint32_t now)
                         a->prof.tris);
         } else if (a->perf_mode == TQ_VIEW_TOP) {
             unsigned whole = n > a->part_frames ? n - a->part_frames : 0, part = a->part_frames;
-            aos_hal_log("tanques", "battle view %.1f fps %dx%d: %u whole, %u ms each (world again %u); %u in boxes, "
-                        "%u ms each, %u kpx; %d things",
+            aos_hal_log("tanques", "battle view %.1f fps %dx%d: %u whole, %u ms each (world again %u); %u in boxes "
+                        "(%u of them scrolled), %u ms each, %u kpx; %d things",
                         n * 1000.0f / el, a->W, a->H, whole, (unsigned)(whole ? a->perf_render_us / whole / 1000 : 0),
-                        (unsigned)(whole ? a->perf_world_us / whole / 1000 : 0), part,
+                        (unsigned)(whole ? a->perf_world_us / whole / 1000 : 0), part, (unsigned)a->scroll_frames,
                         (unsigned)(part ? a->part_us / part / 1000 : 0), (unsigned)(part ? a->part_px / part / 1000 : 0),
                         a->prof.sprites);
         }
-        a->part_frames = a->part_us = a->part_px = 0;
+        a->part_frames = a->part_us = a->part_px = a->scroll_frames = 0;
         a->perf_t0 = now;
         a->perf_frames = 0;
         a->perf_render_us = a->perf_world_us = 0;
@@ -143,31 +143,82 @@ static void fill_req(app_t *a)
 
 /* The battle view drawn again only where things move, into the frame the
  * canvas shows, here in LVGL's task (tq_scene.c says when it may) */
+/* The frame moved by (dx, dy) pixels of the world: what stays on screen is
+ * shifted, row by row, in the order that never reads a row already written */
+static void scroll_frame(uint16_t *fb, int W, int H, int dx, int dy)
+{
+    int n = W - (dx > 0 ? dx : -dx);
+    int dst_x = dx < 0 ? -dx : 0, src_x = dx > 0 ? dx : 0;
+    if (dy >= 0) {
+        for (int y = 0; y + dy < H; y++)
+            memmove(fb + (size_t)y * W + dst_x, fb + (size_t)(y + dy) * W + src_x, (size_t)n * 2);
+    } else {
+        for (int y = H - 1; y + dy >= 0; y--)
+            memmove(fb + (size_t)y * W + dst_x, fb + (size_t)(y + dy) * W + src_x, (size_t)n * 2);
+    }
+}
+
 static bool partial_frame(app_t *a, uint32_t now)
 {
     tq_req_t *r = a->req;
     uint32_t key = r->mode == TQ_VIEW_TOP ? tq_scene_top_key(r, a->ter) : 0;
     tq_rects_t cur;
     cur.n = 0;
-    if (key) tq_scene_top_rects(r, a->ter, &cur);
-    if (!key || !a->shown_key || key != a->shown_key) {
+    int wx = 0, wy = 0;
+    if (key) {
+        tq_scene_top_rects(r, a->ter, &cur);
+        tq_scene_top_window(r, a->ter, &wx, &wy);
+    }
+    int dx = wx - a->shown_wx, dy = wy - a->shown_wy;
+    if (!key || !a->shown_key || key != a->shown_key || abs(dx) >= a->W / 2 || abs(dy) >= a->H / 2) {
         /* a whole frame: the worker draws it, and these boxes go with it */
         a->req_key = key;
         a->req_rects = cur;
+        a->req_wx = wx;
+        a->req_wy = wy;
         return false;
     }
-    tq_rects_t draw = a->shown_rects;
-    for (int i = 0; i < cur.n; i++)
-        tq_rects_add(&draw, cur.r[i].x0, cur.r[i].y0, cur.r[i].x1, cur.r[i].y1, a->W, a->H);
     tq_prof_t p;
     memset(&p, 0, sizeof p);
-    if (draw.n) tq_scene_top_partial(r, a->ter, a->fb[a->shown], &draw, &p);
     uint32_t px = 0;
-    for (int i = 0; i < draw.n; i++) {
+    tq_rects_t draw;
+    draw.n = 0;
+    if (dx || dy) {
+        /* the camera moved: the picture moves with it, the strip coming in
+         * is drawn, and the things that moved are erased where they went */
+        uint32_t t0 = (uint32_t)aos_hal_uptime_us();
+        scroll_frame(a->fb[a->shown], a->W, a->H, dx, dy);
+        tq_rects_t strip;
+        strip.n = 0;
+        if (dx > 0) strip.r[strip.n++] = (tq_rect_t){ (int16_t)(a->W - dx), 0, (int16_t)a->W, (int16_t)a->H };
+        if (dx < 0) strip.r[strip.n++] = (tq_rect_t){ 0, 0, (int16_t)-dx, (int16_t)a->H };
+        if (dy > 0) strip.r[strip.n++] = (tq_rect_t){ 0, (int16_t)(a->H - dy), (int16_t)a->W, (int16_t)a->H };
+        if (dy < 0) strip.r[strip.n++] = (tq_rect_t){ 0, 0, (int16_t)a->W, (int16_t)-dy };
+        tq_scene_top_partial(r, a->ter, a->fb[a->shown], &strip, &p);
+        for (int i = 0; i < a->shown_rects.n; i++) {
+            const tq_rect_t *q = &a->shown_rects.r[i];
+            tq_rects_add(&draw, q->x0 - dx, q->y0 - dy, q->x1 - dx, q->y1 - dy, a->W, a->H);
+        }
+        lv_obj_invalidate(a->canvas);
+        px = (uint32_t)a->W * a->H;
+        p.total_us = (uint32_t)aos_hal_uptime_us() - t0;
+        a->scroll_frames++;
+    } else {
+        draw = a->shown_rects;
+    }
+    for (int i = 0; i < cur.n; i++)
+        tq_rects_add(&draw, cur.r[i].x0, cur.r[i].y0, cur.r[i].x1, cur.r[i].y1, a->W, a->H);
+    tq_prof_t p2;
+    memset(&p2, 0, sizeof p2);
+    if (draw.n) tq_scene_top_partial(r, a->ter, a->fb[a->shown], &draw, &p2);
+    p.total_us += p2.total_us;
+    for (int i = 0; i < draw.n && !(dx || dy); i++) {
         lv_area_t ar = { draw.r[i].x0, draw.r[i].y0, draw.r[i].x1 - 1, draw.r[i].y1 - 1 };
         lv_obj_invalidate_area(a->canvas, &ar);
         px += (uint32_t)(draw.r[i].x1 - draw.r[i].x0) * (uint32_t)(draw.r[i].y1 - draw.r[i].y0);
     }
+    a->shown_wx = wx;
+    a->shown_wy = wy;
     a->shown_rects = cur;
     a->part_counted = true;
     a->part_frames++;
@@ -241,6 +292,8 @@ static void push_frames(app_t *a, uint32_t now)
         lv_obj_invalidate(a->canvas);
         a->shown_key = a->req_key;
         a->shown_rects = a->req_rects;
+        a->shown_wx = a->req_wx;
+        a->shown_wy = a->req_wy;
         perf_frame(a, now);
         __atomic_store_n(&a->job, JOB_IDLE, __ATOMIC_RELEASE);
         job = JOB_IDLE;

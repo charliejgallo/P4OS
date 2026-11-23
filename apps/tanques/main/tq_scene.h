@@ -83,7 +83,11 @@ typedef struct {
     tq_rect_t r[TQ_RECTS];
 } tq_rects_t;
 
-uint32_t tq_scene_top_key(const tq_req_t *r, const tq_terrain_t *t);
+uint32_t tq_scene_top_key(const tq_req_t *r, const tq_terrain_t *t);     /* not the window: see below */
+/* Where the window of the world is (the frame's top-left in the world's
+ * pixels, at the view's scale; even): a frame of the same key drawn at
+ * another window is the same picture moved, plus the strip coming in */
+void     tq_scene_top_window(const tq_req_t *r, const tq_terrain_t *t, int *wx0, int *wy0);
 void     tq_scene_top_rects(const tq_req_t *r, const tq_terrain_t *t, tq_rects_t *out);
 void     tq_rects_add(tq_rects_t *rs, int x0, int y0, int x1, int y1, int W, int H);
 void     tq_scene_top_partial(const tq_req_t *r, const tq_terrain_t *t, uint16_t *fb, const tq_rects_t *rc,
