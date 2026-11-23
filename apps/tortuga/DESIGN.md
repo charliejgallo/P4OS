@@ -1097,19 +1097,46 @@ for _ in range(12):
 - **Sonido:** `aos_hal_beep` para pasos y choques, y un festejo corto al
   ganar.
 
-## 9. El arte (lo que viene en la etapa 2)
+## 9. El arte
 
-- **Vista desde arriba, inclinada, cámara ortográfica fija**: así un
-  mosaico de pasto o de agua sirve en cualquier lugar del mapa, igual que en
-  Bastión. De pie entran mapas de hasta ~10 casillas de ancho (casillas de
-  ~64-72 px); los mapas de ejemplo tienen entre 4 y 11.
-- **La tortuga** en 4 direcciones para el mapa y 16 o 32 para la hoja,
-  caminando (unos 8 cuadros), girando, chocando, cayéndose al agua,
-  comiendo y festejando. Cálida, de juguete, con caparazón de colores.
-- **El mapa:** pasto, agua (con borde de orilla), piedras, puente, llave,
-  puerta (cerrada y abierta), lechuga y la meta (una bandera o una casita).
-- **La hoja:** papel con una cuadrícula suave.
-- Todo modelado por código en Blender, renders livianos para la muestra.
+**La muestra (etapa 2, 2026-11-23).** Todo armado por código en Blender
+3.3 (Cycles en Metal), renders livianos de 24 muestras, unos 40 segundos
+en total:
+
+```
+Blender -b -P apps/tortuga/tools/blender/board.py  -- --out <dir>
+Blender -b -P apps/tortuga/tools/blender/turtle.py -- --out <dir>
+python3 apps/tortuga/tools/compose.py --art <dir> --out <dir>/muestra
+```
+
+- **La cámara** (`tools/blender/tg_common.py`, la base de Bastión con otras
+  medidas): ortográfica y fija, mirando 48,6° hacia abajo. Una casilla es
+  un metro: **64 px de ancho y 48 de fondo**, así entran 11 casillas en la
+  pantalla de pie. Al ser ortográfica, un mosaico o un sprite sirve en
+  cualquier lugar del tablero.
+- **El tablero es de juguete** (`tools/blender/board.py`): cada casilla es
+  un bloquecito, pasto arriba y tierra a los costados, y el agua está más
+  baja, así que el frente del pasto se ve sobre el agua. El juego dibuja
+  las filas de atrás para adelante, primero el piso, después lo que hay
+  encima y la tortuga, y **cualquier mapa sale de las mismas piezas**: los
+  niveles son datos, el arte no se dibuja por mapa. Las piezas son pasto
+  (cuatro, dos con flores), agua (cuatro cuadros que ondean), piedras,
+  lechuga, llave (flota), puerta (cerrada y abierta, de frente y de
+  costado), la meta (un pie dorado con una estrella y una bandera a
+  cuadros que flamea) y el puente (de los dos lados).
+- **La tortuga** (`tools/blender/turtle.py`): caparazón color caramelo con
+  las uniones de las placas en crema, piel verde clara, ojos grandes y una
+  bufanda roja. Caminar en 16 direcciones (girar es pasar por ellas) con 6
+  cuadros, y chocar, comer y festejar en 4 direcciones. Celda de 112 ×
+  112 px.
+- **La composición** (`tools/compose.py`): el mapa de `levels/arte.tl`
+  armado como lo va a hacer el juego, con el programa fijo corrido por el
+  modelo de referencia, y dos pantallas de ejemplo (de pie y acostada) con
+  el diseño de la sección 6, dibujadas con Pillow.
+
+**Lo que falta para el juego completo:** la hoja de dibujo, la caída al
+agua, el globito de `decir`, mundos con otro piso (arena, nieve) y el
+paquete `.pak`.
 
 ## 10. Lo que decidió el usuario (2026-11-23)
 
