@@ -1318,6 +1318,13 @@ proyecto).
   el firmware 0.32.0 para bajar, las cuatro apps en "Nuevas", y tres
   actualizaciones (Vuelos y los dos idiomas del sistema); Estudio le
   pide el firmware nuevo.
+- **La 0.32.1 salió el 2026-11-22** (tag `v0.32.1` en `e7908c5`), tres
+  horas después: un solo arreglo, la Tienda esperando una descarga libre.
+  Sin packs nuevos. El borrador trajo 58 archivos y su catálogo nombra los
+  mismos 398 que el de la 0.32.0, con sólo las dos imágenes de firmware
+  propias de esta release; ninguna app cambió, y "Nuevas" sigue marcando
+  las cuatro de la 0.32.0. Publicada, la placa (en `v0.32.0`) la ve como
+  firmware para bajar y nada más.
 - **Sueltos:** el avance sobre el ícono del inicio mientras una app se
   instala (fase 3); cortar el Wi-Fi en medio de una bajada, quitar una
   fuente y quitar un paquete suelto en la placa (`PRUEBAS-PLACA.md`); los
