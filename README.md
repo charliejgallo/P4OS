@@ -1009,9 +1009,9 @@ and their art comes in packs.
   It plays on the board's output for playing live: 14 to 18 ms from a key
   to the speaker.
 
-| Tanks | Turtle | Serial Plotter | Home Status | Deriva |
-|---|---|---|---|---|
-| <img src="docs/img/land-tanques.jpg" width="250"> | <img src="docs/img/app-tortuga.jpg" width="125"> | <img src="docs/img/app-plotter.png" width="125"> | <img src="docs/img/app-estado.png" width="125"> | <img src="docs/img/app-asteroides.jpg" width="125"> |
+| Tanks | Turtle | Serial Plotter | Home Status | Deriva | Fusion |
+|---|---|---|---|---|---|
+| <img src="docs/img/land-tanques.jpg" width="250"> | <img src="docs/img/app-tortuga.jpg" width="125"> | <img src="docs/img/app-plotter.png" width="125"> | <img src="docs/img/app-estado.png" width="125"> | <img src="docs/img/app-asteroides.jpg" width="125"> | <img src="docs/img/app-sumar.png" width="125"> |
 
 - **Tanks** ([apps/tanques/README.md](apps/tanques/README.md)): turn-based
   battles of toy tanks in 3D. Each turn you drive from above as far as your
@@ -1040,6 +1040,9 @@ and their art comes in packs.
   rocks in space drawn as neon vectors, a ship with inertia, rocks that
   split or explode or stick, enemies, three bosses and powers; a campaign
   of twelve sectors with a workshop, an endless arcade, alone or for two.
+- **Fusion** ([apps/sumar/README.md](apps/sumar/README.md)): numbered tiles
+  that slide and fuse into one of double value, on boards of 3×3 to 6×6;
+  classic goals, against the clock, fixed blocks, and two players.
 
 Doom is doomgeneric, with OPL2 music, and Duke Nukem 3D is Chocolate Duke3D,
 with the Sound Blaster's FM music; both on the board, from the shareware

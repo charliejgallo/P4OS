@@ -43,6 +43,7 @@ by touch never sees it. Board games put a cursor on the board the same way.
 | Deriva | An analog stick aims the ship and, pushed past half way, thrusts · D-pad turns, up thrusts · A or L fires · B or R jumps · START pause · two players: with two gamepads each has one, with one gamepad it is player 2's and player 1 plays on the screen · menus and the workshop: D-pad and A, B back |
 | Doom | stick or D-pad moves and turns · A fire / Enter · B use / back · L/R strafe, both together next weapon · START menu (held 2 s leaves) |
 | Flappy | A flaps, starts and retries · START pause |
+| Fusión | D-pad slides the tiles · B or L undo · START pause · menu, pause, achievements and the end: D-pad and A (START plays from the menu, B closes the pause and the achievements) |
 | Gemas | D-pad moves a frame · A picks a jewel, a direction swaps it · START pause |
 | Golf | stick turns the line by speed, D-pad by 0.25° · L/R club · A is every tap of the swing and the putt · B from the 3D view back to the map · up/down move the putt's marker · START pause |
 | Hockey de mesa | D-pad or stick pushes the mallet · A held pushes it fast (a shot) · B takes it back to the goal · START pause; a second gamepad plays player 2, with its directions turned (they sit at the other end) · against the board both gamepads play player 1 · menus: D-pad and A, B back, START plays |

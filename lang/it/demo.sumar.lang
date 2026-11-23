@@ -1,0 +1,256 @@
+# amoledos-lang 1   es -> it
+# demo.sumar.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/sumar/main/fu_art.c:31
+Neón	Neon
+
+#: apps/sumar/main/fu_art.c:36
+Gemas	Gemme
+
+#: apps/sumar/main/fu_art.c:41
+Papel	Carta
+
+#: apps/sumar/main/fu_art.c:46
+Bosque	Bosco
+
+#: apps/sumar/main/fu_save.c:22
+Primeros pasos	Primi passi
+
+#: apps/sumar/main/fu_save.c:22
+Llegá a 128.	Arriva a 128.
+
+#: apps/sumar/main/fu_save.c:23
+Buen pulso	Mano ferma
+
+#: apps/sumar/main/fu_save.c:23
+Llegá a 512.	Arriva a 512.
+
+#: apps/sumar/main/fu_save.c:24
+Mil y pico	Mille e rotti
+
+#: apps/sumar/main/fu_save.c:24
+Llegá a 1024.	Arriva a 1024.
+
+#: apps/sumar/main/fu_save.c:25
+Leyenda	Leggenda
+
+#: apps/sumar/main/fu_save.c:25
+Llegá a 4096.	Arriva a 4096.
+
+#: apps/sumar/main/fu_save.c:26
+De bolsillo	Tascabile
+
+#: apps/sumar/main/fu_save.c:26
+En el tablero de 3×3, llegá a 256.	Sulla griglia 3×3, arriva a 256.
+
+#: apps/sumar/main/fu_save.c:27
+Sin red	Senza rete
+
+#: apps/sumar/main/fu_save.c:27
+Cumplí una meta sin deshacer.	Raggiungi un obiettivo senza annullare.
+
+#: apps/sumar/main/fu_save.c:28
+Triple	Triplo
+
+#: apps/sumar/main/fu_save.c:28
+Hacé tres fusiones en un solo movimiento.	Fai tre fusioni in una sola mossa.
+
+#: apps/sumar/main/fu_save.c:29
+A contrarreloj	Contro il tempo
+
+#: apps/sumar/main/fu_save.c:29
+Sumá 3000 puntos contra reloj.	Fai 3000 punti contro il tempo.
+
+#: apps/sumar/main/fu_save.c:30
+Entre piedras	Tra le pietre
+
+#: apps/sumar/main/fu_save.c:30
+Llegá a 512 con bloques.	Arriva a 512 con i blocchi.
+
+#: apps/sumar/main/fu_save.c:31
+Mano a mano	Testa a testa
+
+#: apps/sumar/main/fu_save.c:31
+Terminá una partida de a dos.	Finisci una partita in due.
+
+#: apps/sumar/main/fu_save.c:32
+Maratón	Maratona
+
+#: apps/sumar/main/fu_save.c:32
+Hacé 500 movimientos en una partida.	Fai 500 mosse in una partita.
+
+#: apps/sumar/main/fu_save.c:33
+Coleccionista	Collezionista
+
+#: apps/sumar/main/fu_save.c:33
+Jugá con los cuatro temas.	Gioca con tutti e quattro i temi.
+
+#: apps/sumar/main/fu_ui.c:165
+Clásico	Classico
+
+#: apps/sumar/main/fu_ui.c:165
+Contra reloj	Contro il tempo
+
+#: apps/sumar/main/fu_ui.c:165
+Bloques	Blocchi
+
+#: apps/sumar/main/fu_ui.c:165
+De a dos	In due
+
+#: apps/sumar/main/fu_ui.c:172
+Juntá fichas iguales hasta la meta. Cada meta cumplida da otra más alta y un deshacer más.	Unisci tessere uguali fino all'obiettivo. Ogni obiettivo raggiunto ne porta uno più alto e un annullamento in più.
+
+#: apps/sumar/main/fu_ui.c:173
+Dos minutos para sumar todo lo que puedas. Cada meta da 20 segundos; deshacer cuesta 10.	Due minuti per fare più punti possibile. Ogni obiettivo dà 20 secondi; annullare ne costa 10.
+
+#: apps/sumar/main/fu_ui.c:174
+Piedras fijas que no se mueven y cortan las filas. Las fichas frenan contra ellas.	Pietre fisse che non si muovono e spezzano le file. Le tessere si fermano contro di esse.
+
+#: apps/sumar/main/fu_ui.c:175
+Una jugada cada uno, pasándose la placa. Gana quien llega a la meta, o quien sume más.	Una mossa a testa, passandosi la scheda. Vince chi arriva all'obiettivo, o chi fa più punti.
+
+#: apps/sumar/main/fu_ui.c:386
+Logro: %s	Trofeo: %s
+
+#: apps/sumar/main/fu_ui.c:473
+¡Meta %s!	Obiettivo %s!
+
+#: apps/sumar/main/fu_ui.c:481
++20 segundos. Ahora, %s.	+20 secondi. Ora, %s.
+
+#: apps/sumar/main/fu_ui.c:484
+Ahora, %s. Un deshacer más.	Ora, %s. Un annullamento in più.
+
+#: apps/sumar/main/fu_ui.c:620
+Jugador 1	Giocatore 1
+
+#: apps/sumar/main/fu_ui.c:621
+Jugador 2	Giocatore 2
+
+#: apps/sumar/main/fu_ui.c:626
+Puntos	Punti
+
+#: apps/sumar/main/fu_ui.c:627
+Récord	Record
+
+#: apps/sumar/main/fu_ui.c:632
+Tiempo	Tempo
+
+#: apps/sumar/main/fu_ui.c:636
+Meta	Obiettivo
+
+#: apps/sumar/main/fu_ui.c:646
+%d×%d · De a dos · gana quien llegue a %s	%d×%d · In due · vince chi arriva a %s
+
+#: apps/sumar/main/fu_ui.c:648
+%d×%d · Contra reloj · meta %s	%d×%d · Contro il tempo · obiettivo %s
+
+#: apps/sumar/main/fu_ui.c:650
+%d×%d · %s · nivel %d	%d×%d · %s · livello %d
+
+#: apps/sumar/main/fu_ui.c:659
+-10 s	-10 s
+
+#: apps/sumar/main/fu_ui.c:672
+Turno del jugador 2	Tocca al giocatore 2
+
+#: apps/sumar/main/fu_ui.c:672
+Turno del jugador 1	Tocca al giocatore 1
+
+#: apps/sumar/main/fu_ui.c:762
+#: apps/sumar/main/fu_ui.c:839
+#: apps/sumar/main/fu_ui.c:1169
+Sonido: sí	Suono: sì
+
+#: apps/sumar/main/fu_ui.c:762
+#: apps/sumar/main/fu_ui.c:839
+#: apps/sumar/main/fu_ui.c:1169
+Sonido: no	Suono: no
+
+#: apps/sumar/main/fu_ui.c:834
+Pausa	Pausa
+
+#: apps/sumar/main/fu_ui.c:836
+Seguir	Continua
+
+#: apps/sumar/main/fu_ui.c:837
+Empezar de nuevo	Ricomincia
+
+#: apps/sumar/main/fu_ui.c:838
+#: apps/sumar/main/fu_ui.c:914
+Menú	Menu
+
+#: apps/sumar/main/fu_ui.c:853
+¡Empate!	Pareggio!
+
+#: apps/sumar/main/fu_ui.c:854
+¡Gana el jugador %d!	Vince il giocatore %d!
+
+#: apps/sumar/main/fu_ui.c:857
+¡Se acabó el tiempo!	Tempo scaduto!
+
+#: apps/sumar/main/fu_ui.c:859
+No quedan movimientos	Nessuna mossa possibile
+
+#: apps/sumar/main/fu_ui.c:879
+Jugador 1: %s   Jugador 2: %s	Giocatore 1: %s   Giocatore 2: %s
+
+#: apps/sumar/main/fu_ui.c:883
+%s puntos	%s punti
+
+#: apps/sumar/main/fu_ui.c:887
+¡Récord nuevo!	Nuovo record!
+
+#: apps/sumar/main/fu_ui.c:890
+Récord: %s	Record: %s
+
+#: apps/sumar/main/fu_ui.c:895
+Ficha más alta: %s · %lu movimientos	Tessera più alta: %s · %lu mosse
+
+#: apps/sumar/main/fu_ui.c:913
+Otra vez	Ancora
+
+#: apps/sumar/main/fu_ui.c:923
+#: apps/sumar/main/fu_ui.c:1168
+Logros	Trofei
+
+#: apps/sumar/main/fu_ui.c:927
+%d de %d	%d su %d
+
+#: apps/sumar/main/fu_ui.c:973
+Cerrar	Chiudi
+
+#: apps/sumar/main/fu_ui.c:1013
+Récord en %d×%d, %s: %s puntos, ficha %s	Record su %d×%d, %s: %s punti, tessera %s
+
+#: apps/sumar/main/fu_ui.c:1016
+Todavía sin récord en %d×%d, %s	Ancora nessun record su %d×%d, %s
+
+#: apps/sumar/main/fu_ui.c:1022
+Seguir (%d×%d, %s)	Continua (%d×%d, %s)
+
+#: apps/sumar/main/fu_ui.c:1025
+Partida nueva	Nuova partita
+
+#: apps/sumar/main/fu_ui.c:1028
+#: apps/sumar/main/fu_ui.c:1164
+Jugar	Gioca
+
+#: apps/sumar/main/fu_ui.c:1115
+Deslizá, juntá dos iguales, llegá más alto.	Scorri, unisci due uguali, sali più in alto.
+
+#: apps/sumar/main/fu_ui.c:1121
+Tablero	Griglia
+
+#: apps/sumar/main/fu_ui.c:1127
+Modo	Modalità
+
+#: apps/sumar/main/fu_ui.c:1135
+Tema	Tema
+
+#: apps/sumar/main/fu_ui.c:1304
+Deslizá en cualquier dirección. Dos fichas iguales se funden en una.	Scorri in qualsiasi direzione. Due tessere uguali si fondono in una.

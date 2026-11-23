@@ -2,7 +2,10 @@
 
 ## 0.32.2 — not released yet
 
-- **Five new apps in the Store**, from the card:
+- **Six new apps in the Store**, from the card:
+  - **Fusión** (Fusion): numbered tiles that slide and fuse, on boards of
+    3×3 to 6×6, with classic goals, against the clock, fixed blocks and two
+    players passing the board; four themes and achievements.
   - **Deriva**: rocks in space in neon vectors: a ship with inertia, rocks
     that split, enemies, bosses and powers; a campaign of twelve sectors with
     a workshop between them, an endless arcade, alone or for two.

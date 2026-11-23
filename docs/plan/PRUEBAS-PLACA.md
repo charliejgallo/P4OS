@@ -24,6 +24,7 @@ en resumen": no se revisaron en esta pasada.
       y **Mi casa** (Estado de la casa): sólo probadas en el simulador.
 - [ ] **Deriva**: medir los fps en la placa (el registro da una línea cada
       5 s) y jugarla con los pulgares y con joystick.
+- [ ] **Fusión**: los fps en 6×6 y las flechas de un teclado a mano.
 - [ ] **Portugués, francés e italiano** desde la Tienda: que Ajustes los
       liste con su nombre, recorrer el inicio, Ajustes y un par de apps.
 - [ ] La Tienda tras la release: casi todas las apps ofrecen actualizar
