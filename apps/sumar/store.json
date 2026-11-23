@@ -1,0 +1,17 @@
+{
+ "cat": "juegos",
+ "about": {
+  "es": "Deslizá las fichas numeradas: dos iguales que chocan se funden en una del doble. Llegá a la meta, cuidá el lugar y no te quedes sin movimientos.",
+  "en": "Slide the numbered tiles: two equal ones that meet fuse into one of double the value. Reach the goal, keep some room and don't run out of moves."
+ },
+ "desc": {
+  "es": "Cada vez que deslizás el dedo, todas las fichas van hacia ese lado. Dos iguales que chocan se funden en una del doble y suman puntos, y después de cada movimiento aparece una ficha nueva. La partida termina cuando el tablero se llena y no queda ningún movimiento.\n\nHay tableros de 3×3 a 6×6 y cuatro modos. Clásico pone una meta por nivel: cada vez que llegás, aparece otra más alta y ganás un deshacer. Contra reloj da dos minutos; cada meta suma 20 segundos y deshacer cuesta 10. Bloques mete piedras fijas que cortan las filas. De a dos es una jugada cada uno pasándose la placa: gana quien llega a la meta, o quien sume más.\n\nTrae cuatro temas (Neón, Gemas, Papel y Bosque), doce logros y el récord de cada tamaño y modo. La partida queda guardada si cerrás la app. Se juega de pie o acostada, con el dedo, con las flechas de un teclado o con un joystick USB: la cruz mueve las fichas, B deshace y START pausa.",
+  "en": "Every swipe slides all the tiles that way. Two equal tiles that meet fuse into one of double the value and score points, and after each move a new tile appears. The game ends when the board fills up and no move is left.\n\nBoards go from 3×3 to 6×6, with four modes. Classic sets a goal per level: each time you reach it a higher one appears and you earn an undo. Time attack gives you two minutes; each goal adds 20 seconds and undoing costs 10. Blocks adds fixed stones that split the rows. Two players is one move each, passing the board around: whoever reaches the goal wins, or whoever scores more.\n\nIt comes with four themes (Neon, Gems, Paper and Forest), twelve achievements and a best score for each size and mode. The game in progress is kept if you close the app. It plays upright or lying down, by touch, with a keyboard's arrows or with a USB gamepad: the D-pad moves the tiles, B undoes and START pauses."
+ },
+ "shots": [
+  "app-sumar.png",
+  "app-sumar-duo.png",
+  "app-sumar-blocks.png",
+  "land-sumar.png"
+ ]
+}

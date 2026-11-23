@@ -1,0 +1,256 @@
+# amoledos-lang 1   es -> en
+# demo.sumar.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/sumar/main/fu_art.c:31
+Neón	Neon
+
+#: apps/sumar/main/fu_art.c:36
+Gemas	Gems
+
+#: apps/sumar/main/fu_art.c:41
+Papel	Paper
+
+#: apps/sumar/main/fu_art.c:46
+Bosque	Forest
+
+#: apps/sumar/main/fu_save.c:22
+Primeros pasos	First steps
+
+#: apps/sumar/main/fu_save.c:22
+Llegá a 128.	Reach 128.
+
+#: apps/sumar/main/fu_save.c:23
+Buen pulso	Steady hand
+
+#: apps/sumar/main/fu_save.c:23
+Llegá a 512.	Reach 512.
+
+#: apps/sumar/main/fu_save.c:24
+Mil y pico	A thousand and change
+
+#: apps/sumar/main/fu_save.c:24
+Llegá a 1024.	Reach 1024.
+
+#: apps/sumar/main/fu_save.c:25
+Leyenda	Legend
+
+#: apps/sumar/main/fu_save.c:25
+Llegá a 4096.	Reach 4096.
+
+#: apps/sumar/main/fu_save.c:26
+De bolsillo	Pocket size
+
+#: apps/sumar/main/fu_save.c:26
+En el tablero de 3×3, llegá a 256.	On the 3×3 board, reach 256.
+
+#: apps/sumar/main/fu_save.c:27
+Sin red	No safety net
+
+#: apps/sumar/main/fu_save.c:27
+Cumplí una meta sin deshacer.	Reach a goal without undoing.
+
+#: apps/sumar/main/fu_save.c:28
+Triple	Triple
+
+#: apps/sumar/main/fu_save.c:28
+Hacé tres fusiones en un solo movimiento.	Make three merges in a single move.
+
+#: apps/sumar/main/fu_save.c:29
+A contrarreloj	Beat the clock
+
+#: apps/sumar/main/fu_save.c:29
+Sumá 3000 puntos contra reloj.	Score 3000 points against the clock.
+
+#: apps/sumar/main/fu_save.c:30
+Entre piedras	Among stones
+
+#: apps/sumar/main/fu_save.c:30
+Llegá a 512 con bloques.	Reach 512 with blocks.
+
+#: apps/sumar/main/fu_save.c:31
+Mano a mano	Head to head
+
+#: apps/sumar/main/fu_save.c:31
+Terminá una partida de a dos.	Finish a two-player game.
+
+#: apps/sumar/main/fu_save.c:32
+Maratón	Marathon
+
+#: apps/sumar/main/fu_save.c:32
+Hacé 500 movimientos en una partida.	Make 500 moves in one game.
+
+#: apps/sumar/main/fu_save.c:33
+Coleccionista	Collector
+
+#: apps/sumar/main/fu_save.c:33
+Jugá con los cuatro temas.	Play with all four themes.
+
+#: apps/sumar/main/fu_ui.c:165
+Clásico	Classic
+
+#: apps/sumar/main/fu_ui.c:165
+Contra reloj	Time attack
+
+#: apps/sumar/main/fu_ui.c:165
+Bloques	Blocks
+
+#: apps/sumar/main/fu_ui.c:165
+De a dos	Two players
+
+#: apps/sumar/main/fu_ui.c:172
+Juntá fichas iguales hasta la meta. Cada meta cumplida da otra más alta y un deshacer más.	Join equal tiles up to the goal. Each goal reached brings a higher one and one more undo.
+
+#: apps/sumar/main/fu_ui.c:173
+Dos minutos para sumar todo lo que puedas. Cada meta da 20 segundos; deshacer cuesta 10.	Two minutes to score all you can. Each goal adds 20 seconds; undoing costs 10.
+
+#: apps/sumar/main/fu_ui.c:174
+Piedras fijas que no se mueven y cortan las filas. Las fichas frenan contra ellas.	Fixed stones that never move and split the rows. Tiles stop against them.
+
+#: apps/sumar/main/fu_ui.c:175
+Una jugada cada uno, pasándose la placa. Gana quien llega a la meta, o quien sume más.	One move each, passing the board around. Whoever reaches the goal wins, or whoever scores more.
+
+#: apps/sumar/main/fu_ui.c:386
+Logro: %s	Achievement: %s
+
+#: apps/sumar/main/fu_ui.c:473
+¡Meta %s!	Goal %s!
+
+#: apps/sumar/main/fu_ui.c:481
++20 segundos. Ahora, %s.	+20 seconds. Next, %s.
+
+#: apps/sumar/main/fu_ui.c:484
+Ahora, %s. Un deshacer más.	Next, %s. One more undo.
+
+#: apps/sumar/main/fu_ui.c:620
+Jugador 1	Player 1
+
+#: apps/sumar/main/fu_ui.c:621
+Jugador 2	Player 2
+
+#: apps/sumar/main/fu_ui.c:626
+Puntos	Score
+
+#: apps/sumar/main/fu_ui.c:627
+Récord	Best
+
+#: apps/sumar/main/fu_ui.c:632
+Tiempo	Time
+
+#: apps/sumar/main/fu_ui.c:636
+Meta	Goal
+
+#: apps/sumar/main/fu_ui.c:646
+%d×%d · De a dos · gana quien llegue a %s	%d×%d · Two players · first to %s wins
+
+#: apps/sumar/main/fu_ui.c:648
+%d×%d · Contra reloj · meta %s	%d×%d · Time attack · goal %s
+
+#: apps/sumar/main/fu_ui.c:650
+%d×%d · %s · nivel %d	%d×%d · %s · level %d
+
+#: apps/sumar/main/fu_ui.c:659
+-10 s	-10 s
+
+#: apps/sumar/main/fu_ui.c:672
+Turno del jugador 2	Player 2's turn
+
+#: apps/sumar/main/fu_ui.c:672
+Turno del jugador 1	Player 1's turn
+
+#: apps/sumar/main/fu_ui.c:762
+#: apps/sumar/main/fu_ui.c:839
+#: apps/sumar/main/fu_ui.c:1169
+Sonido: sí	Sound: on
+
+#: apps/sumar/main/fu_ui.c:762
+#: apps/sumar/main/fu_ui.c:839
+#: apps/sumar/main/fu_ui.c:1169
+Sonido: no	Sound: off
+
+#: apps/sumar/main/fu_ui.c:834
+Pausa	Paused
+
+#: apps/sumar/main/fu_ui.c:836
+Seguir	Resume
+
+#: apps/sumar/main/fu_ui.c:837
+Empezar de nuevo	Start over
+
+#: apps/sumar/main/fu_ui.c:838
+#: apps/sumar/main/fu_ui.c:914
+Menú	Menu
+
+#: apps/sumar/main/fu_ui.c:853
+¡Empate!	It's a tie!
+
+#: apps/sumar/main/fu_ui.c:854
+¡Gana el jugador %d!	Player %d wins!
+
+#: apps/sumar/main/fu_ui.c:857
+¡Se acabó el tiempo!	Time's up!
+
+#: apps/sumar/main/fu_ui.c:859
+No quedan movimientos	No moves left
+
+#: apps/sumar/main/fu_ui.c:879
+Jugador 1: %s   Jugador 2: %s	Player 1: %s   Player 2: %s
+
+#: apps/sumar/main/fu_ui.c:883
+%s puntos	%s points
+
+#: apps/sumar/main/fu_ui.c:887
+¡Récord nuevo!	New best!
+
+#: apps/sumar/main/fu_ui.c:890
+Récord: %s	Best: %s
+
+#: apps/sumar/main/fu_ui.c:895
+Ficha más alta: %s · %lu movimientos	Highest tile: %s · %lu moves
+
+#: apps/sumar/main/fu_ui.c:913
+Otra vez	Play again
+
+#: apps/sumar/main/fu_ui.c:923
+#: apps/sumar/main/fu_ui.c:1168
+Logros	Achievements
+
+#: apps/sumar/main/fu_ui.c:927
+%d de %d	%d of %d
+
+#: apps/sumar/main/fu_ui.c:973
+Cerrar	Close
+
+#: apps/sumar/main/fu_ui.c:1013
+Récord en %d×%d, %s: %s puntos, ficha %s	Best on %d×%d, %s: %s points, tile %s
+
+#: apps/sumar/main/fu_ui.c:1016
+Todavía sin récord en %d×%d, %s	No best yet on %d×%d, %s
+
+#: apps/sumar/main/fu_ui.c:1022
+Seguir (%d×%d, %s)	Resume (%d×%d, %s)
+
+#: apps/sumar/main/fu_ui.c:1025
+Partida nueva	New game
+
+#: apps/sumar/main/fu_ui.c:1028
+#: apps/sumar/main/fu_ui.c:1164
+Jugar	Play
+
+#: apps/sumar/main/fu_ui.c:1115
+Deslizá, juntá dos iguales, llegá más alto.	Swipe, join two of a kind, climb higher.
+
+#: apps/sumar/main/fu_ui.c:1121
+Tablero	Board
+
+#: apps/sumar/main/fu_ui.c:1127
+Modo	Mode
+
+#: apps/sumar/main/fu_ui.c:1135
+Tema	Theme
+
+#: apps/sumar/main/fu_ui.c:1304
+Deslizá en cualquier dirección. Dos fichas iguales se funden en una.	Swipe any way. Two equal tiles fuse into one.
