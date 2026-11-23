@@ -30,3 +30,5 @@ void tg_view_draw(const tg_scene_t *s);
 void tg_view_turtle_point(const tg_scene_t *s, int *x, int *y);
 void tg_view_tile_point(float x, float y, float *sx, float *sy);
 void tg_view_paper_point(float x, float y, float *sx, float *sy);
+/* one frame of a sheet into a buffer, its anchor on (x, y) (the start's turtle) */
+void tg_sheet_blit(const tg_sheet_t *sh, int frame, uint16_t *buf, int w, int h, int x, int y);

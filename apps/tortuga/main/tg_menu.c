@@ -7,6 +7,7 @@
 
 #include "aos_fonts.h"
 #include "aos_pad_menu.h"
+#include "tg_view.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -14,6 +15,49 @@
 static aos_pad_menu_t s_menu;
 static lv_obj_t *s_items[AOS_PAD_MENU_MAX];
 static int s_nitems;
+
+/* the start's turtle, cheering on a patch of grass */
+static struct {
+    lv_obj_t *canvas;
+    uint16_t *buf;
+    int frame;
+    uint32_t last;
+} H;
+
+#define HW 300
+#define HH 150
+
+static void home_draw(void)
+{
+    if (!H.buf) return;
+    uint16_t bg = tg_rgb(0x101318);
+    for (int i = 0; i < HW * HH; i++) H.buf[i] = bg;
+    if (tg->have_pak) {
+        const tg_sheet_t *g = &tg->sheet[SH_GROUND];
+        for (int k = 0; k < 4; k++) tg_sheet_blit(g, k == 1 ? 2 : k == 3 ? 3 : 0, H.buf, HW, HH, 54 + 64 * k, 90);
+        const tg_sheet_t *t = &tg->sheet[SH_PARTY];
+        static const int LIFT[6] = { 0, 8, 16, 14, 6, 0 };
+        tg_sheet_blit(t, (H.frame % 6) * t->cols + 3, H.buf, HW, HH, HW / 2, 102 - LIFT[H.frame % 6]);
+    }
+    lv_obj_invalidate(H.canvas);
+}
+
+void tg_menu_tick(void)
+{
+    if (tg->screen != SCR_HOME || !H.canvas) return;
+    uint32_t now = lv_tick_get();
+    if (now - H.last < 110) return;
+    H.last = now;
+    H.frame++;
+    home_draw();
+}
+
+static void home_free(lv_event_t *e)
+{
+    (void)e;
+    tg_free(H.buf);
+    memset(&H, 0, sizeof H);
+}
 
 static void menu_reset(void)
 {
@@ -160,14 +204,44 @@ void tg_menu_home(lv_obj_t *scr)
     menu_reset();
     lv_obj_t *c = column(scr, true);
     lv_obj_set_flex_align(c, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_t *left = c, *right = c;
+    if (tg->land) {
+        /* lying down: the turtle and the title on the left, the buttons on the right */
+        lv_obj_set_flex_flow(c, LV_FLEX_FLOW_ROW);
+        lv_obj_remove_flag(c, LV_OBJ_FLAG_SCROLLABLE);
+        for (int k = 0; k < 2; k++) {
+            lv_obj_t *col = lv_obj_create(c);
+            lv_obj_remove_style_all(col);
+            lv_obj_set_size(col, k ? 600 : 560, LV_PCT(100));
+            lv_obj_set_flex_flow(col, LV_FLEX_FLOW_COLUMN);
+            lv_obj_set_flex_align(col, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+            lv_obj_set_style_pad_row(col, 16, 0);
+            lv_obj_add_flag(col, LV_OBJ_FLAG_OVERFLOW_VISIBLE);
+            if (k) right = col;
+            else left = col;
+        }
+    }
 
-    lv_obj_t *t = tg_label(c, "Tortuga", aos_font_huge, lv_color_hex(0xF2C27A));
+    H.buf = tg_alloc(HW * HH * 2);
+    if (H.buf) {
+        H.canvas = lv_canvas_create(left);
+        lv_canvas_set_buffer(H.canvas, H.buf, HW, HH, LV_COLOR_FORMAT_RGB565);
+        lv_obj_add_event_cb(H.canvas, home_free, LV_EVENT_DELETE, NULL);
+        /* drawn at the board's size, shown bigger */
+        lv_obj_set_style_transform_scale(H.canvas, 420, 0);
+        lv_obj_set_style_transform_pivot_x(H.canvas, HW / 2, 0);
+        lv_obj_set_style_transform_pivot_y(H.canvas, HH, 0);
+        lv_obj_set_style_margin_top(H.canvas, 60, 0);
+        H.frame = 0;
+        home_draw();
+    }
+    lv_obj_t *t = tg_label(left, "Tortuga", aos_font_huge, lv_color_hex(0xF2C27A));
     (void)t;
-    tg_label(c, _("Programá a la tortuga hasta la meta"), aos_font_body, AOS_C_DIM);
+    tg_label(left, _("Programá a la tortuga hasta la meta"), aos_font_body, AOS_C_DIM);
 
     char buf[64];
     snprintf(buf, sizeof buf, "%d", tg_total_stars());
-    lv_obj_t *st = lv_obj_create(c);
+    lv_obj_t *st = lv_obj_create(left);
     lv_obj_remove_style_all(st);
     lv_obj_set_size(st, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(st, LV_FLEX_FLOW_ROW);
@@ -177,6 +251,7 @@ void tg_menu_home(lv_obj_t *scr)
     tg_label(st, buf, aos_font_title, AOS_C_TEXT);
 
     int w = tg->land ? 560 : tg->W - 80;
+    c = right;
     lv_obj_t *play = tg_button(c, NULL, lv_color_hex(0xFF9F0A), go_continue, NULL);
     lv_obj_set_size(play, w, 96);
     lv_obj_t *pl = tg_label(play, _("Jugar"), aos_font_title, lv_color_hex(0x2a1a05));

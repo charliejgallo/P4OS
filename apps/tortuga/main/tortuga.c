@@ -484,8 +484,9 @@ static void timer_cb(lv_timer_t *t)
     if (tg->screen == SCR_PLAY) {
         tg_play_frame();
         if (tg->pad.connected) tg_play_pad();
-    } else if (tg->pad.connected) {
-        tg_menu_pad();
+    } else {
+        tg_menu_tick();
+        if (tg->pad.connected) tg_menu_pad();
     }
     tg_audio_pump();
 }

@@ -365,3 +365,50 @@ void tg_view_turtle_point(const tg_scene_t *s, int *x, int *y)
     *x = (int)px;
     *y = (int)py;
 }
+
+/* ------------------------------------------------------------ one sprite */
+
+void tg_sheet_blit(const tg_sheet_t *sh, int frame, uint16_t *buf, int w, int h, int x, int y)
+{
+    if (!sh->data || frame < 0 || frame >= sh->nframes) return;
+    const tg_frame_t *f = &sh->fr[frame];
+    for (int r = 0; r < f->h; r++) {
+        int py = y + f->oy + r;
+        if (py < 0 || py >= h) continue;
+        uint32_t ro;
+        memcpy(&ro, sh->data + f->off + 4u * (uint32_t)r, 4);
+        const uint8_t *p = sh->data + ro;
+        int px = x + f->ox;
+        for (;;) {
+            uint16_t op;
+            memcpy(&op, p, 2);
+            p += 2;
+            int kind = op >> 14, n = op & 0x3FFF;
+            if (kind == 0) break;
+            if (kind == 1) {
+                px += n;
+                continue;
+            }
+            for (int i = 0; i < n; i++, px++) {
+                uint16_t c, a = 255;
+                memcpy(&c, p, 2);
+                p += 2;
+                if (kind == 3) {
+                    memcpy(&a, p, 2);
+                    p += 2;
+                }
+                if (px < 0 || px >= w) continue;
+                uint16_t *d = buf + (size_t)py * w + px;
+                if (a >= 250) {
+                    *d = c;
+                } else {
+                    uint32_t A = a, B = 255 - a, D = *d;
+                    uint32_t R = ((c >> 11) * A + (D >> 11) * B) / 255;
+                    uint32_t G = (((c >> 5) & 63) * A + ((D >> 5) & 63) * B) / 255;
+                    uint32_t Bl = ((c & 31) * A + (D & 31) * B) / 255;
+                    *d = (uint16_t)(R << 11 | G << 5 | Bl);
+                }
+            }
+        }
+    }
+}

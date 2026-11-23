@@ -112,6 +112,7 @@ void tg_menu_pick(lv_obj_t *scr);
 void tg_menu_worlds(lv_obj_t *scr);
 void tg_menu_levels(lv_obj_t *scr);
 bool tg_menu_back(void);
+void tg_menu_tick(void);
 void tg_menu_pad(void);
 
 /* tg_play.c */
