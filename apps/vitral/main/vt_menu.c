@@ -270,10 +270,14 @@ void vt_menu_levels(vt_app_t *a)
             lv_obj_align(st, LV_ALIGN_BOTTOM_MID, 0, 2);
             lv_obj_add_event_cb(b, on_level, LV_EVENT_CLICKED, (void *)(intptr_t)i);
             if (i == a->pz_level) sel = s_nitems;
+            item(b);
         } else {
-            lv_obj_add_state(b, LV_STATE_DISABLED);
+            /* not LV_STATE_DISABLED: the theme greys a disabled button
+             * light; a locked level is dark stone, and the pad skips it */
+            lv_obj_set_style_bg_color(b, lv_color_hex(0x16141B), 0);
+            lv_obj_set_style_border_color(b, lv_color_hex(0x34303A), 0);
+            lv_obj_remove_flag(b, LV_OBJ_FLAG_CLICKABLE);
         }
-        item(b);
     }
     button(c, _("Volver"), on_back, 0, false);
     done(a, sel);
@@ -478,7 +482,7 @@ void vt_menu_over(vt_app_t *a)
     fmt_pts(n, sizeof n, g->score);
     text(c, n, aos_font_large, INK);
     if (a->new_record) text(c, _("¡Récord nuevo!"), aos_font_body, 0xFFD060);
-    else {
+    else if (a->mode == VT_MODE_TIME ? a->hi_time : a->hi_marathon) {
         fmt_pts(n, sizeof n, a->mode == VT_MODE_TIME ? a->hi_time : a->hi_marathon);
         snprintf(b, sizeof b, "%s %s", _("Récord:"), n);
         text(c, b, aos_font_small, GOLD);
