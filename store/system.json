@@ -60,6 +60,96 @@
   ]
  },
  {
+  "file": "sys-lang-pt",
+  "name": {
+   "es": "Portugués (Brasil)",
+   "en": "Portuguese (Brazil)"
+  },
+  "about": {
+   "es": "El sistema y el portal web en portugués de Brasil.",
+   "en": "The system and the web portal in Brazilian Portuguese."
+  },
+  "desc": {
+   "es": "Las pantallas del sistema y el portal web en portugués de Brasil. A diferencia del inglés y el alemán, este idioma no viaja adentro del firmware: se lee sólo de la tarjeta, así que con este paquete aparece para elegirlo.\n\nEl idioma se elige en Ajustes, Idioma. Cada app trae sus propias traducciones; una app recién salida puede verse en castellano hasta la próxima pasada de traducción.\n\nTraducción sin revisar por hablantes nativos: puede tener errores. Si encontrás uno, reportalo como issue en el GitHub de P4OS.",
+   "en": "The system's screens and the web portal in Brazilian Portuguese. Unlike English and German, this language does not travel inside the firmware: it is only read from the card, so this package is what makes it selectable.\n\nThe language is chosen in Settings, Language. Each app brings its own translations; a brand-new app may show Spanish until the next translation pass.\n\nThis translation has not been reviewed by native speakers and may have mistakes. If you find one, please report it as an issue on P4OS's GitHub."
+  },
+  "glyph": "AOS_SYM_TRANSLATE",
+  "colors": [
+   "30B0C7",
+   "0B5E6B"
+  ],
+  "files": [
+   {
+    "path": "lang/pt/_sistema.lang",
+    "from": "lang/pt/_sistema.lang"
+   },
+   {
+    "path": "lang/pt/_portal.lang",
+    "from": "lang/pt/_portal.lang"
+   }
+  ]
+ },
+ {
+  "file": "sys-lang-fr",
+  "name": {
+   "es": "Francés",
+   "en": "French"
+  },
+  "about": {
+   "es": "El sistema y el portal web en francés.",
+   "en": "The system and the web portal in French."
+  },
+  "desc": {
+   "es": "Las pantallas del sistema y el portal web en francés. A diferencia del inglés y el alemán, este idioma no viaja adentro del firmware: se lee sólo de la tarjeta, así que con este paquete aparece para elegirlo.\n\nEl idioma se elige en Ajustes, Idioma. Cada app trae sus propias traducciones; una app recién salida puede verse en castellano hasta la próxima pasada de traducción.\n\nTraducción sin revisar por hablantes nativos: puede tener errores. Si encontrás uno, reportalo como issue en el GitHub de P4OS.",
+   "en": "The system's screens and the web portal in French. Unlike English and German, this language does not travel inside the firmware: it is only read from the card, so this package is what makes it selectable.\n\nThe language is chosen in Settings, Language. Each app brings its own translations; a brand-new app may show Spanish until the next translation pass.\n\nThis translation has not been reviewed by native speakers and may have mistakes. If you find one, please report it as an issue on P4OS's GitHub."
+  },
+  "glyph": "AOS_SYM_TRANSLATE",
+  "colors": [
+   "5E5CE6",
+   "2C2A8C"
+  ],
+  "files": [
+   {
+    "path": "lang/fr/_sistema.lang",
+    "from": "lang/fr/_sistema.lang"
+   },
+   {
+    "path": "lang/fr/_portal.lang",
+    "from": "lang/fr/_portal.lang"
+   }
+  ]
+ },
+ {
+  "file": "sys-lang-it",
+  "name": {
+   "es": "Italiano",
+   "en": "Italian"
+  },
+  "about": {
+   "es": "El sistema y el portal web en italiano.",
+   "en": "The system and the web portal in Italian."
+  },
+  "desc": {
+   "es": "Las pantallas del sistema y el portal web en italiano. A diferencia del inglés y el alemán, este idioma no viaja adentro del firmware: se lee sólo de la tarjeta, así que con este paquete aparece para elegirlo.\n\nEl idioma se elige en Ajustes, Idioma. Cada app trae sus propias traducciones; una app recién salida puede verse en castellano hasta la próxima pasada de traducción.\n\nTraducción sin revisar por hablantes nativos: puede tener errores. Si encontrás uno, reportalo como issue en el GitHub de P4OS.",
+   "en": "The system's screens and the web portal in Italian. Unlike English and German, this language does not travel inside the firmware: it is only read from the card, so this package is what makes it selectable.\n\nThe language is chosen in Settings, Language. Each app brings its own translations; a brand-new app may show Spanish until the next translation pass.\n\nThis translation has not been reviewed by native speakers and may have mistakes. If you find one, please report it as an issue on P4OS's GitHub."
+  },
+  "glyph": "AOS_SYM_TRANSLATE",
+  "colors": [
+   "FF375F",
+   "9E0A2B"
+  ],
+  "files": [
+   {
+    "path": "lang/it/_sistema.lang",
+    "from": "lang/it/_sistema.lang"
+   },
+   {
+    "path": "lang/it/_portal.lang",
+    "from": "lang/it/_portal.lang"
+   }
+  ]
+ },
+ {
   "file": "sys-emoji",
   "name": {
    "es": "Emojis en color",

@@ -1324,7 +1324,10 @@ from a pack on the card that the Store installs (System, Colour emoji;
 [docs/EMOJI.md](docs/EMOJI.md)).
 
 **Languages.** The interface is written in Spanish. English and German are
-complete. The system's texts travel twice: inside the firmware, so they
+complete, and so are Brazilian Portuguese, French and Italian, which come
+only from the card (the Store's System parts); new texts reach those three
+in a translation pass before each release. The system's texts in English
+and German travel twice: inside the firmware, so they
 work with no card, and as packs on the card. The two are joined string by
 string with the card's first, so a fix copied to the card wins, and a card
 older than the firmware still gets the new screens translated. An app's
@@ -1333,8 +1336,8 @@ too cost 438 KB): in its package when the Store installs it, and in
 `lang.zip` for a card filled by hand. A pseudo-locale is used to
 test layouts. The web portal and the apps' pages follow the same language
 (since 0.15.1): their catalogs live only on the card and only the browser
-reads them. The portal's own is one Get in the Store (System, English or
-German); an app's page brings its own with the app.
+reads them. The portal's own is one Get in the Store (System, and the
+language); an app's page brings its own with the app.
 
 ## What was tested, and what not yet
 
@@ -1597,7 +1600,7 @@ fills a card by hand. Only the games' art packs are attached by hand.
     /apps/.store/ the Store's own: the catalogues, a receipt for each app
                   it installed, downloads in hand, the pictures it showed
     /web/         <app>.js — the apps' own pages in the portal
-    /lang/        en/, de/ — the language packs
+    /lang/        en/, de/, pt/, fr/, it/ — the language packs
     /fonts/       emoji.pak — the colour emoji
     /firmware/    c6.bin — a firmware for the C6, to install from Settings
     /music/ /photos/ /videos/ /maps/ /notas/
