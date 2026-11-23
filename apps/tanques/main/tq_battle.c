@@ -359,7 +359,7 @@ static void hud_refresh(app_t *a)
         lv_obj_set_style_border_width(a->chip[k], k == s->cur ? 4 : 0, 0);
         lv_obj_set_style_opa(a->chip[k], tk->alive ? LV_OPA_COVER : LV_OPA_40, 0);
     }
-    char txt[96];
+    char txt[160];
     const tq_tank_t *k = &s->tank[s->cur];
     if (k->ai) snprintf(txt, sizeof txt, _("Juega %s"), k->name);
     else if (a->humans == 1) snprintf(txt, sizeof txt, "%s", _("Tu turno"));
@@ -535,7 +535,7 @@ static void hud_for_state(app_t *a)
     tqa_show(a->banner, s == B_HANDOVER);
     tqa_show(a->leave, s == B_LEAVE);
     if (s == B_HANDOVER && a->banner) {
-        char txt[96];
+        char txt[160];
         snprintf(txt, sizeof txt, _("Turno de %s\nPasale la placa"), k->name);
         lv_label_set_text(lv_obj_get_child(a->banner, 0), txt);
     }

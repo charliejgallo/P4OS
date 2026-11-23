@@ -558,7 +558,8 @@ static void blast(tq_state_t *s, tq_terrain_t *t, tq_v3_t at, int w, int level, 
         float d = sqrtf(dx * dx + dy * dy + dz * dz);
         bool direct = d < TQ_TANK[tk->type].body_r + 0.1f;
         if (d < radius || direct) {
-            int dmg = direct ? (int)(damage + 8) : (int)(damage * (1.0f - 0.75f * d / radius) + 0.5f);
+            int bonus = W->fx == TQ_FX_SCATTER ? 0 : 8;
+            int dmg = direct ? (int)(damage + bonus) : (int)(damage * (1.0f - 0.75f * d / radius) + 0.5f);
             ev->damage[k] += hurt(s, k, dmg, owner);
             ev->direct[k] |= direct;
         }
@@ -699,6 +700,12 @@ static int fly(const tq_state_t *s, const tq_terrain_t *t, tq_shell_t sh, tq_v3_
     return HIT_OUT;
 }
 
+static tq_v3_t barrel_dir(const tq_tank_t *k)
+{
+    float cp = cosf(k->pitch);
+    return tq_v3(cp * cosf(k->tyaw), cp * sinf(k->tyaw), sinf(k->pitch));
+}
+
 static tq_shell_t shell_for(const tq_tank_t *k, const tq_terrain_t *t, int who)
 {
     tq_shell_t sh;
@@ -734,9 +741,7 @@ void tq_game_arc(tq_state_t *s, const tq_terrain_t *t)
     if (TQ_WEAPON[w].fly == TQ_FLY_BEAM) {
         /* the laser: a straight line until something */
         int which;
-        tq_v3_t d = sh.v;
-        float l = sqrtf(d.x * d.x + d.y * d.y + d.z * d.z);
-        d = tq_v3(d.x / l, d.y / l, d.z / l);
+        tq_v3_t d = barrel_dir(k);
         int n = 0;
         for (float r = 0.3f; r < 40 && n < TQ_MAX_ARC; r += 0.35f) {
             tq_v3_t p = tq_v3(sh.p.x + d.x * r, sh.p.y + d.y * r, sh.p.z + d.z * r);
@@ -772,9 +777,7 @@ static tq_shell_t *new_shell(tq_state_t *s)
 static void beam(tq_state_t *s, tq_terrain_t *t, tq_tank_t *k, tq_event_t *ev, int *nev)
 {
     tq_shell_t sh = shell_for(k, t, s->cur);
-    tq_v3_t d = sh.v;
-    float l = sqrtf(d.x * d.x + d.y * d.y + d.z * d.z);
-    d = tq_v3(d.x / l, d.y / l, d.z / l);
+    tq_v3_t d = barrel_dir(k);
     if (in_smoke(s, k->x, k->y)) {
         float a = randr(-6, 6) * TQ_DEG, c = cosf(a), sn = sinf(a);
         d = tq_v3(d.x * c - d.y * sn, d.x * sn + d.y * c, d.z);
@@ -940,14 +943,13 @@ static void land(tq_state_t *s, tq_terrain_t *t, tq_shell_t *sh, tq_v3_t at, tq_
         /* five bombs along a line across the shot, from high up */
         e->type = TQ_EV_NONE;
         float dx = at.x - o->x, dy = at.y - o->y, l = sqrtf(dx * dx + dy * dy) + 1e-3f;
-        float px = -dy / l, py = dx / l;
         for (int i = 0; i < 5; i++) {
             tq_shell_t *b = new_shell(s);
             if (!b) break;
             memset(b, 0, sizeof *b);
-            float off = (i - 2) * 1.8f;
-            b->p = tq_v3(at.x + px * off - dx / l * 6, at.y + py * off - dy / l * 6, g + 18 + i * 2.5f);
-            b->v = tq_v3(dx / l * 3, dy / l * 3, -6);
+            float off = (i - 2) * 1.6f;
+            b->p = tq_v3(at.x + dx / l * off, at.y + dy / l * off, g + 16 + i * 2.0f);
+            b->v = tq_v3(0, 0, -8);
             b->weapon = TQ_W_AIRSTRIKE;
             b->level = sh->level;
             b->owner = sh->owner;
@@ -1207,11 +1209,10 @@ static float best_pitch(const tq_state_t *s, const tq_terrain_t *t, int who, int
         float pa = atan2f(dz, sqrtf(dx * dx + dy * dy));
         k.pitch = tq_clampf(pa, lo, hi);
         tq_shell_t sh = shell_for(&k, t, who);
-        tq_v3_t d = sh.v;
-        float l = sqrtf(d.x * d.x + d.y * d.y + d.z * d.z);
+        tq_v3_t d = barrel_dir(&k);
         int which = -1;
         for (float r = 0.3f; r < 40; r += 0.3f) {
-            tq_v3_t p = tq_v3(sh.p.x + d.x / l * r, sh.p.y + d.y / l * r, sh.p.z + d.z / l * r);
+            tq_v3_t p = tq_v3(sh.p.x + d.x * r, sh.p.y + d.y * r, sh.p.z + d.z * r);
             int h = hit_test(s, t, p, who, 1, true, &which);
             if (h == HIT_TREE) continue;
             if (h == HIT_TANK && which == target) {

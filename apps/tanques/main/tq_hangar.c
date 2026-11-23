@@ -209,7 +209,7 @@ static void build_body(app_t *a)
     lv_obj_clean(s_body);
     int w = lv_obj_get_width(s_body) - 10;
     tq_garage_t *g = &a->save.g[a->h_tank];
-    char txt[120];
+    char txt[160];
     switch (a->h_tab) {
     case TAB_UP:
         for (int u = 0; u < TQ_UPGRADES; u++) {
@@ -342,7 +342,7 @@ static void build_body(app_t *a)
 
 static void refresh_head(app_t *a)
 {
-    char txt[96];
+    char txt[240];
     if (a->coins_lbl) {
         snprintf(txt, sizeof txt, _("%ld monedas"), (long)a->save.coins);
         lv_label_set_text(a->coins_lbl, txt);
@@ -378,6 +378,11 @@ static void set_tank(app_t *a, int t)
     paint_lut(a);
     refresh_head(a);
     build_body(a);
+}
+
+void tqh_cycle(app_t *a, int d)
+{
+    set_tank(a, a->h_tank + d);
 }
 
 static void on_arrow(lv_event_t *e)

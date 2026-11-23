@@ -139,3 +139,4 @@ void tqh_touch(app_t *a, int ev, int x, int y, int dx, int dy);
 /* A player's tank as a setup entry */
 void tqh_player_tank(app_t *a, int slot, int type, bool full);
 void tqh_free(void);
+void tqh_cycle(app_t *a, int d);

@@ -66,7 +66,7 @@ static lv_obj_t *card(app_t *a, int w, int h)
 
 static void coins_text(app_t *a, lv_obj_t *l)
 {
-    char txt[48];
+    char txt[96];
     snprintf(txt, sizeof txt, _("%ld monedas"), (long)a->save.coins);
     lv_label_set_text(l, txt);
 }
@@ -160,7 +160,7 @@ void tqm_build_story(app_t *a)
         lv_obj_set_style_bg_color(row, lv_color_hex(open ? 0x2A3A4C : 0x20262E), 0);
         lv_obj_set_user_data(row, (void *)(intptr_t)m);
         if (open) lv_obj_add_event_cb(row, play_mission, LV_EVENT_CLICKED, a);
-        char txt[96];
+        char txt[160];
         snprintf(txt, sizeof txt, "%d. %s", m + 1, _(M->name));
         lv_obj_t *n = tqa_label(row, txt, aos_font_body, open ? 0xFFFFFF : 0x6A7684);
         lv_obj_align(n, LV_ALIGN_TOP_LEFT, 10, 4);
@@ -193,7 +193,7 @@ static int s_p2_type = TQ_T_BOMBO;
 static void free_text(app_t *a)
 {
     tq_save_t *s = &a->save;
-    char txt[48];
+    char txt[96];
     lv_label_set_text(s_fval[F_BIOME], _(TQ_BIOME_NAME[s->f_biome % TQ_BIOMES]));
     lv_label_set_text(s_fval[F_SIZE], _(TQ_SIZE_NAME[s->f_size % TQ_SIZES]));
     snprintf(txt, sizeof txt, "%d", s->f_rivals);
@@ -310,7 +310,7 @@ void tqm_build_result(app_t *a)
     int w = land ? 640 : a->W - 80;
     lv_obj_t *p = card(a, w, 470);
     const tq_tank_t *me = &a->st.tank[0];
-    char txt[96];
+    char txt[160];
     if (a->humans > 1) {
         const char *name = "";
         for (int k = 0; k < a->st.ntank; k++)

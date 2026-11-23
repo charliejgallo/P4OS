@@ -1,9 +1,12 @@
 /*
  * TANQUES - the renderers on the Mac, to choose the 3D's road and guess the
- * board's numbers.
+ * board's numbers; and the twenty weapons, each fired once by the board's
+ * aim, with what each did.
  *
- *   cc -O2 -DTQ_BENCH -DAOS_SIM -Iapps/tanques/main -Iapps/visor3d/main -Icomponents/aos_hal/include \
- *      -Icomponents/aos_ui/include apps/tanques/tools/bench.c apps/tanques/main/tq_*.c \
+ *   T=apps/tanques/main
+ *   cc -O2 -DTQ_BENCH -DAOS_SIM -I$T -Iapps/visor3d/main -Icomponents/aos_hal/include \
+ *      -Icomponents/aos_ui/include apps/tanques/tools/bench.c $T/tq_game.c $T/tq_data.c \
+ *      $T/tq_scene.c $T/tq_gfx.c $T/tq_terrain.c $T/tq_art.c $T/tq_mem.c \
  *      apps/visor3d/main/v3_raster.c apps/visor3d/main/v3_mesh.c -o apps/tanques/build/bench -lm
  *   apps/tanques/build/bench <out dir>
  *
@@ -42,6 +45,7 @@ uint64_t aos_hal_uptime_us(void)
     return (uint64_t)ts.tv_sec * 1000000u + (uint64_t)ts.tv_nsec / 1000u;
 }
 const char *aos_hal_path_apps(void) { return "apps/tanques/build"; }
+const char *aos_hal_path_data(void) { return "apps/tanques/build"; }
 bool aos_hal_worker_split(void (*fn)(void *arg, int part), void *arg) { (void)fn; (void)arg; return false; }
 const char *aos_tr(const char *s) { return s; }
 
@@ -192,23 +196,51 @@ int main(int argc, char **argv)
     }
 
     printf("\n== the art\n");
-    if (!tq_art_load()) {
+    if (!tq_art_open()) {
         printf("no pack: python3 apps/tanques/tools/pack.py\n");
         return 1;
     }
-    printf("pack %u KB, with the smaller copies %u KB\n", (unsigned)(tq_art_bytes() / 1024), (unsigned)(tq_mem_used() / 1024));
+    tq_setup_t su;
+    memset(&su, 0, sizeof su);
+    su.biome = 0;
+    su.size = 2;
+    su.diff = 1;
+    su.seed = 7;
+    su.ntank = 2;
+    for (int k = 0; k < 2; k++) {
+        su.t[k].type = k ? TQ_T_MAMUT : TQ_T_BOMBO;
+        su.t[k].team = k;
+        su.t[k].ai = k == 1;
+        snprintf(su.t[k].name, sizeof su.t[k].name, "t%d", k);
+        memset(su.t[k].load, 0xFF, sizeof su.t[k].load);
+        su.t[k].load[0] = TQ_W_CANNON;
+        su.t[k].load[1] = TQ_W_MORTAR;
+    }
+    double t0 = ms();
+    tq_art_use_biome(su.biome);
+    tq_art_use_tanks((1u << TQ_T_BOMBO) | (1u << TQ_T_MAMUT), 1u << TQ_T_BOMBO);
+    printf("a battle's art (pradera, bombo with its gunner's view, mamut): %u KB in %.1f ms\n",
+           (unsigned)(tq_art_bytes() / 1024), ms() - t0);
 
     tq_terrain_t *ter = malloc(sizeof *ter);
     tq_state_t *st = malloc(sizeof *st);
-    double t0 = ms();
-    tq_game_new(st, ter, 7, 0, 1, true);
-    printf("map: %.1f ms (heights, %d trees, %d stones, the light)\n", ms() - t0, st->ntree, st->nblock);
+    t0 = ms();
+    tq_game_new(st, ter, &su);
+    printf("map: %.1f ms (%.0f m, %d trees, %d stones, the light)\n", ms() - t0, TQ_SIZE_M[su.size], st->ntree, st->nblock);
     if (!tq_scene_init()) return 1;
     printf("views' buffers: %u KB\n", (unsigned)(tq_scene_bytes() / 1024));
-    size_t before = tq_mem_used();
+    static tq_lut_t lut[3];
+    tq_art_tank_lut(&lut[0], 0xF58C29, 0xFAE09E, 2, 0xE5483B);
+    tq_art_tank_lut(&lut[1], 0x478CEB, 0xF2F2FA, 4, 0x3A3D45);
+    tq_art_tank_lut(&lut[2], 0x3A3634, 0x2A2624, -1, 0);
 
     uint16_t *fb = malloc(720 * 1280 * 2);
     tq_req_t *r = calloc(1, sizeof *r);
+    r->lut[0] = &lut[0];
+    r->lut[1] = &lut[1];
+    r->wreck = &lut[2];
+    r->rgb[0] = 0xF58C29;
+    r->rgb[1] = 0x478CEB;
     int sizes[2][2] = { { 720, 1280 }, { 1280, 720 } };
 
     printf("\n== the battle view\n");
@@ -243,33 +275,6 @@ int main(int argc, char **argv)
         f = frame(r, ter, fb, 20, &p);
         printf("   the same without the reach: %.2f ms\n", f);
     }
-    /* a crater and what it costs to draw again */
-    {
-        tq_v3_t at = tq_v3(st->tank[0].x + 5, st->tank[0].y + 7, 0);
-        at.z = tq_ter_height(ter, at.x, at.y);
-        tq_blast_t bl;
-        tq_vbox_t dirty;
-        t0 = ms();
-        tq_game_blast(st, ter, at, TQ_W_MORTAR, 1, &bl, &dirty);
-        double tb = ms() - t0;
-        memcpy(&r->st, st, sizeof *st);
-        r->w = 720; r->h = 1280;
-        tq_scene_world_dirty(dirty);
-        tq_prof_t p;
-        memset(&p, 0, sizeof p);
-        tq_scene_render(r, ter, fb, &p);
-        printf("a mortar's crater: the blast %.2f ms (light again %dx%d vertices), the world again %.2f ms\n", tb,
-               dirty.x1 - dirty.x0 + 1, dirty.y1 - dirty.y0 + 1, p.world_us / 1000.0);
-        /* the blast a moment later */
-        for (int i = 0; i < 9; i++) {
-            tq_v3_t dummy;
-            tq_game_step(st, ter, 1.0f / 30, &dummy);
-        }
-        memcpy(&r->st, st, sizeof *st);
-        double f = frame(r, ter, fb, 10, &p);
-        printf("a frame with the blast's %d puffs and clods: %.2f ms\n", st->npart, f);
-        ppm(out, "bench_top_blast", fb, 720, 1280);
-    }
 
     printf("\n== the gunner's view (half size each way, then doubled)\n");
     for (int o = 0; o < 2; o++) {
@@ -277,18 +282,17 @@ int main(int argc, char **argv)
         tq_tank_t *me = &st->tank[0];
         const tq_tank_t *en = &st->tank[1];
         me->tyaw = atan2f(en->y - me->y, en->x - me->x);
-        me->pitch = 12 * TQ_DEG;
+        me->pitch = 48 * TQ_DEG;
+        me->sel = 1;
+        const tq_tank_type_t *T = &TQ_TANK[me->type];
         r->mode = TQ_VIEW_FP;
         r->w = W;
         r->h = H;
         r->me = 0;
-        r->eye = tq_fp_eye(me->x, me->y, tq_tank_z(ter, me), me->tyaw);
+        r->eye = tq_fp_eye(me->x, me->y, tq_tank_z(ter, me), me->tyaw, T->eye_x, T->eye_y, T->eye_z);
         r->yaw = me->tyaw;
         r->pitch = TQ_FP_PITCH * TQ_DEG;
-        r->hp_bars = true;
         st->cur = 0;
-        me->weapon = TQ_W_MORTAR;
-        me->pitch = 48 * TQ_DEG;
         tq_game_arc(st, ter);
         memcpy(&r->st, st, sizeof *st);
         tq_prof_t p;
@@ -299,9 +303,56 @@ int main(int argc, char **argv)
         snprintf(name, sizeof name, "bench_fp_%c", o ? 'l' : 'p');
         ppm(out, name, fb, W, H);
     }
-    printf("\nmemory: art %u KB, views %u KB, the game's state %u KB + a frame %u KB each\n",
-           (unsigned)(before / 1024 - tq_scene_bytes() / 1024), (unsigned)(tq_scene_bytes() / 1024),
-           (unsigned)((sizeof(tq_terrain_t) + sizeof(tq_state_t) * 2) / 1024), 720 * 1280 * 2 / 1024);
-    printf("board factor used: %.0f\n", K);
+
+    printf("\n== the twenty weapons, each fired by the board's aim at the mamut\n");
+    for (int w = 0; w < TQ_WEAPONS; w++) {
+        tq_setup_t s2 = su;
+        s2.t[0].load[0] = (uint8_t)w;
+        s2.t[0].load[1] = 0xFF;
+        s2.t[1].type = TQ_T_MAMUT;
+        tq_game_new(st, ter, &s2);
+        /* close enough for every weapon's reach */
+        st->tank[1].x = st->tank[0].x + 9;
+        st->tank[1].y = st->tank[0].y + 3;
+        st->cur = 0;
+        st->tank[0].ap = 20;
+        float yaw, pitch;
+        int slot;
+        tq_ai_plan_aim(st, ter, &yaw, &pitch, &slot);
+        tq_tank_t *k = &st->tank[0];
+        k->sel = 0;
+        if (slot < 0) {
+            yaw = atan2f(st->tank[1].y - k->y, st->tank[1].x - k->x);
+            pitch = (TQ_WEAPON[w].min_pitch + TQ_WEAPON[w].max_pitch) * 0.5f * TQ_DEG;
+        }
+        k->tyaw = yaw;
+        k->pitch = pitch;
+        int hp0 = st->tank[1].hp, hpme = k->hp, trees0 = 0, blocks0 = st->nblock;
+        float x0 = k->x, y0 = k->y;
+        for (int i = 0; i < st->ntree; i++) trees0 += st->tree[i].alive;
+        tq_event_t ev[TQ_MAX_EVENTS];
+        int nev = 0, events = 0, types = 0;
+        tq_game_fire(st, ter, ev, &nev);
+        for (int i = 0; i < nev; i++) types |= 1 << ev[i].type;
+        events += nev;
+        float t = 0;
+        while ((tq_game_flying(st) || t < 0.2f) && t < 12) {
+            tq_game_step(st, ter, 1.0f / 30, ev, &nev);
+            for (int i = 0; i < nev; i++) types |= 1 << ev[i].type;
+            events += nev;
+            t += 1.0f / 30;
+        }
+        int trees = 0, mines = 0, zones = 0, alive_blocks = 0;
+        for (int i = 0; i < st->ntree; i++) trees += st->tree[i].alive;
+        for (int i = 0; i < TQ_MAX_MINES; i++) mines += st->mine[i].live;
+        for (int i = 0; i < TQ_MAX_ZONES; i++) zones += st->zone[i].live;
+        for (int i = 0; i < st->nblock; i++) alive_blocks += st->block[i].alive;
+        printf("%-15s aim %s: %d events (types 0x%03x) after %.1f s, damage to it %d, to me %d, trees -%d, blocks %d->%d, "
+               "mines %d, zones %d, shield %d, its emp %d, moved %.1f m, hp me %d\n",
+               TQ_WEAPON[w].name, slot >= 0 ? "ai  " : "flat", events, types, t, hp0 - st->tank[1].hp, hpme - k->hp,
+               trees0 - trees, blocks0, alive_blocks, mines, zones, k->shield, st->tank[1].emp,
+               sqrtf((k->x - x0) * (k->x - x0) + (k->y - y0) * (k->y - y0)), k->hp);
+    }
+    printf("\nboard factor used: %.0f\n", K);
     return 0;
 }

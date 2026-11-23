@@ -19,6 +19,7 @@
  */
 #include "tq_app.h"
 #include "aos_icon_ops.h"
+#include "aos_pad_menu.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -332,6 +333,43 @@ static void touch_cb(lv_event_t *e)
     else if (a->screen == SC_HANGAR) tqh_touch(a, ev, x, y, dx, dy);
 }
 
+/* The menus and the hangar with a joystick: the d-pad walks the buttons on
+ * screen (whatever the screen built: they are gathered every tick), A
+ * presses, B goes back, L and R change the hangar's tank */
+static aos_pad_t s_pad;
+static aos_pad_menu_t s_menu;
+
+static void gather(lv_obj_t *o, lv_obj_t **it, int *n)
+{
+    uint32_t c = lv_obj_get_child_count(o);
+    for (uint32_t i = 0; i < c && *n < AOS_PAD_MENU_MAX; i++) {
+        lv_obj_t *ch = lv_obj_get_child(o, (int32_t)i);
+        if (lv_obj_has_flag(ch, LV_OBJ_FLAG_HIDDEN)) continue;
+        if (lv_obj_check_type(ch, &lv_button_class)) it[(*n)++] = ch;
+        else gather(ch, it, n);
+    }
+}
+
+static bool app_back(aos_app_t *self, void *inst);
+
+static void pad_menus(app_t *a)
+{
+    aos_pad_update(&s_pad, lv_tick_get());
+    if (!s_pad.connected || !a->ui) return;
+    lv_obj_t *it[AOS_PAD_MENU_MAX];
+    int n = 0;
+    gather(a->ui, it, &n);
+    bool same = n == s_menu.n;
+    for (int i = 0; i < n && same; i++) same = it[i] == s_menu.item[i];
+    if (!same) aos_pad_menu_set(&s_menu, it, n, s_menu.sel < n ? s_menu.sel : 0);
+    uint8_t before = s_menu.sel;
+    aos_pad_menu_step(&s_menu, &s_pad);
+    if (s_menu.sel != before && s_menu.sel < s_menu.n) lv_obj_scroll_to_view(s_menu.item[s_menu.sel], LV_ANIM_ON);
+    if (s_pad.pressed & AOS_PAD_B) app_back(a->self, a);
+    if (a->screen == SC_HANGAR && (s_pad.pressed & (AOS_PAD_L | AOS_PAD_R)))
+        tqh_cycle(a, s_pad.pressed & AOS_PAD_R ? 1 : -1);
+}
+
 /* --------------------------------------------------------------------------
  * The clock
  * -------------------------------------------------------------------------- */
@@ -350,6 +388,7 @@ static void frame_cb(lv_timer_t *t)
         else if (a->screen == SC_MENU || a->screen == SC_STORY || a->screen == SC_FREE || a->screen == SC_RESULT)
             tqm_menu_tick(a, dt);
         else if (a->screen == SC_HANGAR) a->h_spin += dt * 0.35f;
+        if (a->screen != SC_BATTLE) pad_menus(a);
     }
     push_frames(a, now);
 }
