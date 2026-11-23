@@ -1,0 +1,140 @@
+# amoledos-lang 1   es -> fr
+# web.visor3d.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/visor3d/web/visor3d.js:103
+#: apps/visor3d/web/visor3d.js:111
+no es un GLB	pas un GLB
+
+#: apps/visor3d/web/visor3d.js:112
+un GLB comprimido con Draco no se puede leer	un GLB compressé avec Draco ne peut pas être lu
+
+#: apps/visor3d/web/visor3d.js:167
+no es un M3D	pas un M3D
+
+#: apps/visor3d/web/visor3d.js:170
+el M3D está cortado	le M3D est tronqué
+
+#: apps/visor3d/web/visor3d.js:358
+Convertir y guardar en la placa	Convertir et enregistrer sur la carte
+
+#: apps/visor3d/web/visor3d.js:359
+Subir el STL tal cual	Envoyer le STL tel quel
+
+#: apps/visor3d/web/visor3d.js:362
+Soltá acá un STL, un OBJ (con su .mtl) o un GLB, o %s.	Dépose ici un STL, un OBJ (avec son .mtl) ou un GLB, ou %s.
+
+#: apps/visor3d/web/visor3d.js:364
+elegilo	choisis-le
+
+#: apps/visor3d/web/visor3d.js:379
+Ver	Voir
+
+#: apps/visor3d/web/visor3d.js:380
+Bajar	Télécharger
+
+#: apps/visor3d/web/visor3d.js:382
+¿Borrar %s de la placa?	Effacer %s de la carte ?
+
+#: apps/visor3d/web/visor3d.js:383
+Borrado %s	%s effacé
+
+#: apps/visor3d/web/visor3d.js:384
+Borrar	Effacer
+
+#: apps/visor3d/web/visor3d.js:385
+Todavía no hay modelos en la placa.	Pas encore de modèles sur la carte.
+
+#: apps/visor3d/web/visor3d.js:391
+Leyendo %s…	Lecture de %s…
+
+#: apps/visor3d/web/visor3d.js:398
+%s: %s triángulos, %s vértices, con colores.	%s : %s triangles, %s sommets, avec couleurs.
+
+#: apps/visor3d/web/visor3d.js:399
+%s: %s triángulos, %s vértices.	%s : %s triangles, %s sommets.
+
+#: apps/visor3d/web/visor3d.js:402
+%s: soldando %s triángulos…	%s : soudure de %s triangles…
+
+#: apps/visor3d/web/visor3d.js:404
+%s: %s triángulos en el archivo, %s al reducirlo.	%s : %s triangles dans le fichier, %s une fois réduit.
+
+#: apps/visor3d/web/visor3d.js:405
+%s: %s triángulos en el archivo.	%s : %s triangles dans le fichier.
+
+#: apps/visor3d/web/visor3d.js:415
+Leyendo…	Lecture…
+
+#: apps/visor3d/web/visor3d.js:418
+hace falta un .stl, un .obj o un .glb	il faut un .stl, un .obj ou un .glb
+
+#: apps/visor3d/web/visor3d.js:424
+no tiene triángulos	aucun triangle
+
+#: apps/visor3d/web/visor3d.js:428
+No se pudo leer: %s	Lecture impossible : %s
+
+#: apps/visor3d/web/visor3d.js:434
+Reduciendo…	Réduction…
+
+#: apps/visor3d/web/visor3d.js:434
+Soldando…	Soudure…
+
+#: apps/visor3d/web/visor3d.js:440
+%s triángulos en el archivo → %s al reducir, %s vértices, con colores.	%s triangles dans le fichier → %s une fois réduit, %s sommets, avec couleurs.
+
+#: apps/visor3d/web/visor3d.js:441
+%s triángulos en el archivo → %s al reducir, %s vértices.	%s triangles dans le fichier → %s une fois réduit, %s sommets.
+
+#: apps/visor3d/web/visor3d.js:442
+%s triángulos en el archivo → %s, sin reducir, %s vértices, con colores.	%s triangles dans le fichier → %s, sans réduire, %s sommets, avec couleurs.
+
+#: apps/visor3d/web/visor3d.js:443
+%s triángulos en el archivo → %s, sin reducir, %s vértices.	%s triangles dans le fichier → %s, sans réduire, %s sommets.
+
+#: apps/visor3d/web/visor3d.js:445
+%s pieza (%s abiertas), %s triángulos dados vuelta hacia afuera.	%s pièce (%s ouvertes), %s triangles retournés vers l'extérieur.
+
+#: apps/visor3d/web/visor3d.js:446
+%s piezas (%s abiertas), %s triángulos dados vuelta hacia afuera.	%s pièces (%s ouvertes), %s triangles retournés vers l'extérieur.
+
+#: apps/visor3d/web/visor3d.js:454
+Ya hay un %s en la placa. ¿Reemplazarlo?	Il y a déjà un %s sur la carte. Le remplacer ?
+
+#: apps/visor3d/web/visor3d.js:467
+Guardado %s (%s)	%s enregistré (%s)
+
+#: apps/visor3d/web/visor3d.js:488
+#: apps/visor3d/web/visor3d.js:520
+Visor 3D	Visionneuse 3D
+
+#: apps/visor3d/web/visor3d.js:490
+Abriendo el Visor 3D en la placa	Ouverture de la Visionneuse 3D sur la carte
+
+#: apps/visor3d/web/visor3d.js:490
+Abrir el Visor 3D en la placa	Ouvrir la Visionneuse 3D sur la carte
+
+#: apps/visor3d/web/visor3d.js:491
+Los modelos van en /3d de la tarjeta, STL o M3D.	Les modèles vont dans /3d sur la carte SD, en STL ou M3D.
+
+#: apps/visor3d/web/visor3d.js:493
+Agregar un modelo	Ajouter un modèle
+
+#: apps/visor3d/web/visor3d.js:496
+Triángulos como máximo:	Triangles au maximum :
+
+#: apps/visor3d/web/visor3d.js:498
+El visor dibuja hasta 150 000; más que eso lo reduciría él mismo al abrirlo. Menos triángulos es más fluido al girar.	La visionneuse dessine jusqu'à 150 000 ; au-delà, elle réduirait le modèle elle-même à l'ouverture. Moins de triangles, c'est plus fluide en rotation.
+
+#: apps/visor3d/web/visor3d.js:499
+Color, si el archivo no trae	Couleur, si le fichier n'en a pas
+
+#: apps/visor3d/web/visor3d.js:502
+Vista previa, con la luz de la placa: arrastrá para girar, la rueda acerca, doble clic vuelve al principio.	Aperçu, avec l'éclairage de la carte : glisse pour tourner, la molette zoome, double-clic pour revenir au début.
+
+#: apps/visor3d/web/visor3d.js:503
+Todo se hace en este navegador: el STL, el OBJ o el GLB se leen, se sueldan, cada pieza suelta se orienta hacia afuera (el visor no dibuja la cara de atrás de un modelo cerrado) y se guarda un .m3d con sus colores. De un GLB se toma el color base de cada material; las texturas no.	Tout se fait dans ce navigateur : le STL, l'OBJ ou le GLB est lu et soudé, chaque pièce détachée est orientée vers l'extérieur (la visionneuse ne dessine pas la face arrière d'un modèle fermé) et un .m3d est enregistré avec ses couleurs. D'un GLB on prend la couleur de base de chaque matériau ; les textures, non.

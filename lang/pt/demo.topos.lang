@@ -1,0 +1,80 @@
+# amoledos-lang 1   es -> pt
+# demo.topos.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/topos/main/topos.c:60
+Clásico	Clássico
+
+#: apps/topos/main/topos.c:60
+Supervivencia	Sobrevivência
+
+#: apps/topos/main/topos.c:60
+Frenesí	Frenesi
+
+#: apps/topos/main/topos.c:63
+60 segundos	60 segundos
+
+#: apps/topos/main/topos.c:63
+Tres vidas	Três vidas
+
+#: apps/topos/main/topos.c:63
+30 segundos a fondo	30 segundos a mil
+
+#: apps/topos/main/topos.c:384
+Sonido	Som
+
+#: apps/topos/main/topos.c:420
+¡Ya!	Já!
+
+#: apps/topos/main/topos.c:423
+Nivel	Nível
+
+#: apps/topos/main/topos.c:430
+¡Últimos 10 segundos!	Últimos 10 segundos!
+
+#: apps/topos/main/topos.c:433
+¡Tiempo!	Tempo!
+
+#: apps/topos/main/topos.c:439
+¡Sin vidas!	Sem vidas!
+
+#: apps/topos/main/topos.c:530
+¡Nuevo récord!	Novo recorde!
+
+#: apps/topos/main/topos.c:530
+¡Se acabó!	Acabou!
+
+#: apps/topos/main/topos.c:539
+Golpes	Acertos
+
+#: apps/topos/main/topos.c:540
+Mejor racha	Melhor série
+
+#: apps/topos/main/topos.c:543
+Récord	Recorde
+
+#: apps/topos/main/topos.c:952
+#: apps/topos/main/topos.c:956
+Topos	Toupeiras
+
+#: apps/topos/main/topos.c:986
+Tocá los topos; los de casco, dos veces. ¡Las bombas no!	Toque nas toupeiras; as de capacete, duas vezes. As bombas não!
+
+#: apps/topos/main/topos.c:1007
+Pausa	Pausa
+
+#: apps/topos/main/topos.c:1009
+Seguir	Retomar
+
+#: apps/topos/main/topos.c:1011
+#: apps/topos/main/topos.c:1050
+Menú	Menu
+
+#: apps/topos/main/topos.c:1013
+Salir	Sair
+
+#: apps/topos/main/topos.c:1047
+Otra vez	De novo

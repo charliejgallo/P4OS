@@ -1,0 +1,248 @@
+# amoledos-lang 1   es -> fr
+# web.rf.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/rf/web/rf.js:20
+Sin audio	Sans audio
+
+#: apps/rf/web/rf.js:20
+FM angosta	FM étroite
+
+#: apps/rf/web/rf.js:20
+Datos	Données
+
+#: apps/rf/web/rf.js:22
+Aire	Aviation
+
+#: apps/rf/web/rf.js:22
+Marina	Marine
+
+#: apps/rf/web/rf.js:76
+ID %s · canal %s · %s °C	ID %s · canal %s · %s °C
+
+#: apps/rf/web/rf.js:78
+batería baja	pile faible
+
+#: apps/rf/web/rf.js:79
+código %s · datos %s	code %s · données %s
+
+#: apps/rf/web/rf.js:80
+ID %s · botón %s	ID %s · bouton %s
+
+#: apps/rf/web/rf.js:81
+%s %s/%s µs · %s bits · %s	%s %s/%s µs · %s bits · %s
+
+#: apps/rf/web/rf.js:100
+Tocar para escribir una frecuencia	Clique pour taper une fréquence
+
+#: apps/rf/web/rf.js:102
+Frecuencia en MHz	Fréquence en MHz
+
+#: apps/rf/web/rf.js:120
+Silenciador	Squelch
+
+#: apps/rf/web/rf.js:125
+#: apps/rf/web/rf.js:290
+Silenciar	Muet
+
+#: apps/rf/web/rf.js:126
+Volumen	Volume
+
+#: apps/rf/web/rf.js:138
+Meshtastic, canal por defecto:	Meshtastic, canal par défaut :
+
+#: apps/rf/web/rf.js:140
+Escuchar ahí	Écouter là
+
+#: apps/rf/web/rf.js:142
+PSK en base64 (p. ej. AQ==)	PSK en base64 (ex. AQ==)
+
+#: apps/rf/web/rf.js:144
+Clave del canal:	Clé du canal :
+
+#: apps/rf/web/rf.js:146
+Poner	Mettre
+
+#: apps/rf/web/rf.js:147
+Canal público	Canal public
+
+#: apps/rf/web/rf.js:148
+Quitar	Retirer
+
+#: apps/rf/web/rf.js:149
+La clave se guarda en la tarjeta de la placa, no en el navegador ni en la nube. Los mensajes directos cifrados a otro nodo no se leen.	La clé est enregistrée sur la carte SD de la carte, pas dans le navigateur ni dans le cloud. Les messages directs chiffrés vers un autre noeud ne se lisent pas.
+
+#: apps/rf/web/rf.js:153
+Muestreo	Échantill.
+
+#: apps/rf/web/rf.js:153
+Ganancia	Gain
+
+#: apps/rf/web/rf.js:153
+Paso	Pas
+
+#: apps/rf/web/rf.js:183
+Tocar para ir a esa frecuencia; la rueda mueve de a un paso	Clique pour aller à cette fréquence ; la molette avance d'un pas à la fois
+
+#: apps/rf/web/rf.js:190
+La app RF no está abierta en la placa (o la placa no tiene la RTL-SDR).	L'app RF n'est pas ouverte sur la carte (ou la carte n'a pas la RTL-SDR).
+
+#: apps/rf/web/rf.js:191
+Abierta en la placa	Ouverte sur la carte
+
+#: apps/rf/web/rf.js:191
+Abrir RF en la placa	Ouvrir RF sur la carte
+
+#: apps/rf/web/rf.js:265
+Buscando la radio…	Recherche de la radio…
+
+#: apps/rf/web/rf.js:265
+Sin radio	Pas de radio
+
+#: apps/rf/web/rf.js:266
+señal %s dB	signal %s dB
+
+#: apps/rf/web/rf.js:266
+silenciado	muet
+
+#: apps/rf/web/rf.js:266
+estéreo	stéréo
+
+#: apps/rf/web/rf.js:267
+%s recibidos	%s reçus
+
+#: apps/rf/web/rf.js:268
+LoRa en el canal, el último minuto: %s paquetes, ocupado %s %	LoRa sur le canal, la dernière minute : %s paquets, occupé %s %
+
+#: apps/rf/web/rf.js:269
+reproduciendo %s	lecture de %s
+
+#: apps/rf/web/rf.js:270
+grabando la señal (%s MB, perdiendo)	enregistrement du signal (%s Mo, pertes)
+
+#: apps/rf/web/rf.js:270
+grabando la señal (%s MB)	enreg. du signal (%s Mo)
+
+#: apps/rf/web/rf.js:271
+grabando el audio (%s)	enreg. de l'audio (%s)
+
+#: apps/rf/web/rf.js:281
+Automática	Automatique
+
+#: apps/rf/web/rf.js:285
+no	non
+
+#: apps/rf/web/rf.js:290
+Activar el sonido	Réactiver le son
+
+#: apps/rf/web/rf.js:298
+puesta ✓	mise ✓
+
+#: apps/rf/web/rf.js:298
+ninguna	aucune
+
+#: apps/rf/web/rf.js:310
+Esperando transmisiones en la banda: controles remotos, sensores de temperatura, timbres…	En attente d'émissions dans la bande : télécommandes, sondes de température, sonnettes…
+
+#: apps/rf/web/rf.js:316
+Desconocido	Inconnu
+
+#: apps/rf/web/rf.js:320
+%s MHz · %s · corto %s µs · largo %s µs · pausa %s µs · %s bits: %s	%s MHz · %s · court %s µs · long %s µs · pause %s µs · %s bits : %s
+
+#: apps/rf/web/rf.js:323
+Tocá una fila para ver sus pulsos y sus bits. Todo queda también en rf/datos-<día>.csv de la tarjeta.	Clique sur une ligne pour voir ses impulsions et ses bits. Tout est aussi gardé dans rf/datos-<jour>.csv sur la carte SD.
+
+#: apps/rf/web/rf.js:337
+Esperando paquetes LoRa en la banda.	En attente de paquets LoRa dans la bande.
+
+#: apps/rf/web/rf.js:344
+Otra señal	Autre signal
+
+#: apps/rf/web/rf.js:345
+%s kHz de ancho	%s kHz de large
+
+#: apps/rf/web/rf.js:348
+todos (broadcast)	tous (broadcast)
+
+#: apps/rf/web/rf.js:349
+De %s a %s · %s saltos	De %s à %s · %s sauts
+
+#: apps/rf/web/rf.js:350
+Texto: %s	Texte : %s
+
+#: apps/rf/web/rf.js:350
+tipo %s (no es texto)	type %s (pas du texte)
+
+#: apps/rf/web/rf.js:353
+No se pudo decodificar.	Impossible de décoder.
+
+#: apps/rf/web/rf.js:357
+Tocá un paquete LoRa para leer su cabecera (y el texto, con la clave puesta). El SF y el ancho salen del preámbulo; todo queda en rf/lora-<día>.csv de la tarjeta.	Clique sur un paquet LoRa pour lire son en-tête (et le texte, avec la clé mise). Le SF et la largeur viennent du préambule ; tout est gardé dans rf/lora-<jour>.csv sur la carte SD.
+
+#: apps/rf/web/rf.js:366
+Guardar	Garder
+
+#: apps/rf/web/rf.js:368
+La placa guarda la captura en Fotos → Capturas	La carte enregistre la capture dans Photos → Captures d'écran
+
+#: apps/rf/web/rf.js:368
+Captura de la placa	Capture de la carte
+
+#: apps/rf/web/rf.js:369
+Imagen del espectro (PNG)	Image du spectre (PNG)
+
+#: apps/rf/web/rf.js:370
+Grabar el audio	Enregistrer l'audio
+
+#: apps/rf/web/rf.js:370
+Terminar el audio	Arrêter l'audio
+
+#: apps/rf/web/rf.js:371
+Grabar la señal (I/Q)	Enregistrer le signal (I/Q)
+
+#: apps/rf/web/rf.js:371
+Terminar la señal	Arrêter le signal
+
+#: apps/rf/web/rf.js:372
+Dejar de reproducir	Arrêter la lecture
+
+#: apps/rf/web/rf.js:373
+Guardar lo recibido en Datos y LoRa (rf/datos- y rf/lora-<día>.csv)	Garder ce que reçoivent Données et LoRa (rf/datos- et rf/lora-<jour>.csv)
+
+#: apps/rf/web/rf.js:374
+Publicarlo por MQTT	Le publier via MQTT
+
+#: apps/rf/web/rf.js:374
+Publicarlo por MQTT (no conectado)	Le publier via MQTT (non connecté)
+
+#: apps/rf/web/rf.js:375
+La señal ocupa %s MB por minuto a esta tasa; la tarjeta escribe unos 3 MB/s.	Le signal occupe %s Mo par minute à ce débit ; la carte SD écrit environ 3 Mo/s.
+
+#: apps/rf/web/rf.js:397
+¿Borrar %s?	Effacer %s ?
+
+#: apps/rf/web/rf.js:401
+Señales grabadas (I/Q)	Signaux enregistrés (I/Q)
+
+#: apps/rf/web/rf.js:402
+#: apps/rf/web/rf.js:411
+#: apps/rf/web/rf.js:416
+Todavía no hay.	Aucun encore.
+
+#: apps/rf/web/rf.js:406
+Reproducir	Lire
+
+#: apps/rf/web/rf.js:407
+#: apps/rf/web/rf.js:414
+#: apps/rf/web/rf.js:418
+Bajar	Télécharger
+
+#: apps/rf/web/rf.js:410
+Audio grabado	Audio enregistré
+
+#: apps/rf/web/rf.js:415
+Datos recibidos (CSV)	Données reçues (CSV)

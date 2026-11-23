@@ -10,7 +10,8 @@ catalog.
                                                any translations already there
     python3 tools/gen_lang.py check en         what the pack is missing, and
                                                what it has that the code lost
-    python3 tools/gen_lang.py stats            how much of the UI is marked up
+    python3 tools/gen_lang.py stats            how much of the UI is marked up,
+                                               and how far each language is
 
 Packs live in `lang/<code>/` at the root of the repo by default, tracked in
 git (sim/sim_fs is not). `tools/install_lang.sh <host> <code>` puts them on the
@@ -489,6 +490,11 @@ def cmd_template(args):
     print("  in %s" % out_dir)
 
 
+# printf conversions, for comparing a translation with its key. No space flag:
+# "50 % de" is text.
+FORMAT = re.compile(r"%%|%[-+#0]*[0-9*]*(?:\.[0-9*]+)?(?:hh|h|ll|l|z|j|t|L)?[diouxXeEfgGcsp]")
+
+
 def cmd_check(args):
     catalogs = collect()
     pack_dir = os.path.join(args.out, args.code)
@@ -506,7 +512,16 @@ def cmd_check(args):
                         if have.get(k) == (k.split("\\x04", 1)[1]
                                            if "\\x04" in k else k)]
 
-        if not (missing or orphan):
+        # The C code hands the arguments over in order, so a translation has
+        # to carry the same conversions in the same order: a %s turned into
+        # %d, or one dropped, reads the wrong argument and can crash the
+        # board. "% d" with a space is left out on purpose: it is the
+        # Spanish "50 % de...", text and not a conversion.
+        formats = [k for k in entries if k in have
+                   and FORMAT.findall(have[k]) != FORMAT.findall(
+                       k.split("\\x04", 1)[1] if "\\x04" in k else k)]
+
+        if not (missing or orphan or formats):
             # "identical" and not "untranslated": many of them are identical on
             # purpose - proper nouns, cities, SI units. Calling them pending
             # sends you hunting for work that does not exist.
@@ -525,6 +540,11 @@ def cmd_check(args):
                   " did the Spanish text change?):" % len(orphan))
             for k in orphan[:6]:
                 print("        %s" % k)
+        if formats:
+            print("     %d with other conversions than the Spanish (%%s, %%d..."
+                  " must be the same, in the same order):" % len(formats))
+            for k in formats[:6]:
+                print("        %s  ->  %s" % (k, have[k]))
 
     # The apps that draw with their own bitmap font have a MUCH smaller
     # character set than the screen, and whatever falls outside is silently
@@ -909,6 +929,39 @@ def cmd_stats(args):
     print("  of those, system          : %d" % len(catalogs.get(SYSTEM_CATALOG, {})))
     print("  app catalogues            : %d" % (len(catalogs) - 1))
     print("  calls to _() in the firmware: %d" % total_calls)
+
+    # How far each language is: the strings of the code that its pack has. A
+    # new text reaches English and German in the commit that adds it, and
+    # Portuguese, French and Italian in the pass before a release, which
+    # takes the catalogues this lists. Whether a string is equal to the
+    # Spanish says nothing - "Vertical", "Bluetooth", "Fotos" are right in
+    # Portuguese - so that is shown apart, as a hint and not as work. (Run
+    # `template` on a copy, never on lang/<code>: it fills every missing
+    # string with the Spanish, and this would count them as done.)
+    codes = sorted(d for d in os.listdir(args.out)
+                   if os.path.isfile(os.path.join(args.out, d, SYSTEM_CATALOG))
+                   and d != "xx")
+    if not codes:
+        return
+    print("\n  language   in the pack           same as es   catalogues behind")
+    for code in codes:
+        total = done = same = 0
+        behind = []
+        for filename, entries in catalogs.items():
+            have = read_pack(os.path.join(args.out, code, filename))
+            n = 0
+            for k in entries:
+                if k in have:
+                    n += 1
+                    if have[k] == (k.split("\\x04", 1)[1] if "\\x04" in k else k):
+                        same += 1
+            total += len(entries)
+            done += n
+            if n < len(entries):
+                behind.append("%s %d" % (filename, len(entries) - n))
+        print("  %-4s %6d/%-6d %5.1f%%   %6d       %s" % (
+            code, done, total, 100.0 * done / total if total else 0, same,
+            ", ".join(behind[:4]) + (" +%d more" % (len(behind) - 4) if len(behind) > 4 else "")))
 
 
 def main():

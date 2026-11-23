@@ -1,0 +1,681 @@
+# amoledos-lang 1   es -> it
+# aos.logica.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/logica/main/la_dec.c:250
+UART: muestreo muy lento para la velocidad	UART: campionamento troppo lento per la velocità
+
+#: apps/logica/main/la_dec.c:250
+UART: no hay datos para medir la velocidad	UART: nessun dato per misurare la velocità
+
+#: apps/logica/main/la_dec.c:254
+#: apps/logica/main/la_dec.c:409
+ (adivinada)	 (stimata)
+
+#: apps/logica/main/la_dec.c:301
+DMX: hace falta muestrear a 1 MHz o más	DMX: serve campionare a 1 MHz o più
+
+#: apps/logica/main/la_dec.c:312
+#: apps/logica/main/la_dec.c:331
+%d canales: %s	%d canali: %s
+
+#: apps/logica/main/la_dec.c:349
+leer bobinas	leggi coil
+
+#: apps/logica/main/la_dec.c:350
+leer entradas	leggi ingressi
+
+#: apps/logica/main/la_dec.c:351
+leer registros	leggi registri
+
+#: apps/logica/main/la_dec.c:352
+leer reg. de entrada	leggi reg. ingresso
+
+#: apps/logica/main/la_dec.c:353
+escribir bobina	scrivi coil
+
+#: apps/logica/main/la_dec.c:354
+escribir registro	scrivi registro
+
+#: apps/logica/main/la_dec.c:355
+escribir bobinas	scrivi coil
+
+#: apps/logica/main/la_dec.c:356
+escribir registros	scrivi registri
+
+#: apps/logica/main/la_dec.c:357
+leer/escribir registros	leggi/scrivi registri
+
+#: apps/logica/main/la_dec.c:358
+función	funzione
+
+#: apps/logica/main/la_dec.c:366
+trama corta (%d bytes)	trama corta (%d byte)
+
+#: apps/logica/main/la_dec.c:371
+Esclavo %u	Slave %u
+
+#: apps/logica/main/la_dec.c:379
+: excepción %u	: eccezione %u
+
+#: apps/logica/main/la_dec.c:381
+#: apps/logica/main/la_dec.c:393
+: %u desde %u	: %u da %u
+
+#: apps/logica/main/la_dec.c:389
+: %u en %u	: %u a %u
+
+#: apps/logica/main/la_dec.c:391
+: %u desde %u, hecho	: %u da %u, fatto
+
+#: apps/logica/main/la_dec.c:395
+#: apps/logica/main/la_dec.c:898
+ (CRC mal)	 (CRC errato)
+
+#: apps/logica/main/la_dec.c:405
+Modbus: muestreo muy lento o sin datos	Modbus: campionamento troppo lento o nessun dato
+
+#: apps/logica/main/la_dec.c:506
+ sin respuesta	 senza risposta
+
+#: apps/logica/main/la_dec.c:536
+SPI modo %d, %d bits%s	SPI modo %d, %d bit%s
+
+#: apps/logica/main/la_dec.c:537
+, LSB primero	, LSB prima
+
+#: apps/logica/main/la_dec.c:561
+%d bits	%d bit
+
+#: apps/logica/main/la_dec.c:660
+Reset sin presencia	Reset senza presenza
+
+#: apps/logica/main/la_dec.c:671
+ CRC mal	 CRC errato
+
+#: apps/logica/main/la_dec.c:684
+ · %.2f °C (DS18B20), CRC %s	 · %.2f °C (DS18B20), CRC %s
+
+#: apps/logica/main/la_dec.c:684
+mal	errato
+
+#: apps/logica/main/la_dec.c:698
+1-Wire: hace falta muestrear a 200 kHz o más	1-Wire: serve campionare a 200 kHz o più
+
+#: apps/logica/main/la_dec.c:725
+Presencia	Presenza
+
+#: apps/logica/main/la_dec.c:729
+Nadie	Nessuno
+
+#: apps/logica/main/la_dec.c:772
+CAN: muestreo muy lento para %u kbit/s	CAN: campionamento troppo lento per %u kbit/s
+
+#: apps/logica/main/la_dec.c:841
+Error de relleno	Errore di stuffing
+
+#: apps/logica/main/la_dec.c:842
+Trama rota (relleno)	Trama rotta (stuffing)
+
+#: apps/logica/main/la_dec.c:899
+ sin ACK	 senza ACK
+
+#: apps/logica/main/la_dec.c:912
+WS2812: hace falta muestrear a 4 MHz o más	WS2812: serve campionare a 4 MHz o più
+
+#: apps/logica/main/la_dec.c:927
+#: apps/logica/main/la_dec.c:950
+%d LEDs: %s	%d LED: %s
+
+#: apps/logica/main/la_dec.c:975
+Repetir	Ripeti
+
+#: apps/logica/main/la_dec.c:976
+repetición	ripetizione
+
+#: apps/logica/main/la_dec.c:981
+Inicio	Inizio
+
+#: apps/logica/main/la_dec.c:1009
+trama NEC incompleta	trama NEC incompleta
+
+#: apps/logica/main/la_dec.c:1015
+NEC dirección %02X, comando %02X%s	NEC indirizzo %02X, comando %02X%s
+
+#: apps/logica/main/la_dec.c:1015
+#: apps/logica/main/la_dec.c:1018
+ (no cierra)	 (non torna)
+
+#: apps/logica/main/la_dec.c:1017
+NEC extendido, dirección %04X, comando %02X%s	NEC esteso, indirizzo %04X, comando %02X%s
+
+#: apps/logica/main/la_dec.c:1037
+Paralelo, %d bits con reloj	Parallelo, %d bit con clock
+
+#: apps/logica/main/la_dec.c:1037
+Paralelo, %d bits	Parallelo, %d bit
+
+#: apps/logica/main/la_dec.c:1081
+Paralelo	Parallelo
+
+#: apps/logica/main/la_dec.c:1098
+Reloj	Clock
+
+#: apps/logica/main/la_dec.c:1156
+velocidad sola	velocità stimata
+
+#: apps/logica/main/la_dec.c:1162
+SPI modo %d · %s	SPI modo %d · %s
+
+#: apps/logica/main/la_dec.c:1222
+faltan canales	mancano canali
+
+#: apps/logica/main/la_demo.c:307
+Serie, I2C y SPI	Seriale, I2C e SPI
+
+#: apps/logica/main/la_demo.c:307
+1-Wire, CAN, LEDs, IR, DMX y Modbus	1-Wire, CAN, LED, IR, DMX e Modbus
+
+#: apps/logica/main/la_demo.c:308
+Pulsos y un bus paralelo	Impulsi e un bus parallelo
+
+#: apps/logica/main/la_demo.c:413
+#: apps/logica/main/la_fx2.c:455
+#: apps/logica/main/la_sr.c:427
+#: apps/logica/main/la_sump.c:301
+No hay memoria para tantas muestras	Memoria insufficiente per tanti campioni
+
+#: apps/logica/main/la_dev.c:76
+Demo (señales de prueba)	Demo (segnali di prova)
+
+#: apps/logica/main/la_dev.c:77
+sin hardware: para aprender y probar los decodificadores	senza hardware: per imparare e provare i decodificatori
+
+#: apps/logica/main/la_dev.c:262
+No llegó ninguna muestra	Non è arrivato nessun campione
+
+#: apps/logica/main/la_dev.c:272
+%s muestras a %s: el analizador se frenó antes (el USB no dio abasto, probá una velocidad menor)	%s campioni a %s: l'analizzatore si è fermato prima (l'USB non ce l'ha fatta, prova una velocità minore)
+
+#: apps/logica/main/la_dev.c:275
+%s muestras a %s, CON HUECOS: el USB perdió %u bytes (probá una velocidad menor)	%s campioni a %s, CON BUCHI: l'USB ha perso %u byte (prova una velocità minore)
+
+#: apps/logica/main/la_dev.c:278
+%s muestras a %s, detenida antes del disparo	%s campioni a %s, fermata prima del trigger
+
+#: apps/logica/main/la_dev.c:280
+%s muestras a %s en %.1f s	%s campioni a %s in %.1f s
+
+#: apps/logica/main/la_dev.c:297
+No hay memoria libre para capturar	Nessuna memoria libera per catturare
+
+#: apps/logica/main/la_dev.c:307
+%u anotaciones, %u paquetes%s	%u annotazioni, %u pacchetti%s
+
+#: apps/logica/main/la_dev.c:308
+ (no entró todo)	 (non è entrato tutto)
+
+#: apps/logica/main/la_dev.c:347
+Abierta: %s muestras a %s	Aperta: %s campioni a %s
+
+#: apps/logica/main/la_dev.c:375
+Guardada: %s	Salvata: %s
+
+#: apps/logica/main/la_dev.c:391
+#: apps/logica/main/la_ui.c:303
+SUMP: %s en %s	SUMP: %s su %s
+
+#: apps/logica/main/la_dev.c:394
+Ningún puerto serie USB contestó SUMP	Nessuna porta seriale USB ha risposto SUMP
+
+#: apps/logica/main/la_fx2.c:154
+USB de 12 Mbit/s, hasta 1 MHz	USB a 12 Mbit/s, fino a 1 MHz
+
+#: apps/logica/main/la_fx2.c:155
+fx2lafw cargado · %s	fx2lafw caricato · %s
+
+#: apps/logica/main/la_fx2.c:156
+se le carga fx2lafw · %s	fx2lafw da caricare · %s
+
+#: apps/logica/main/la_fx2.c:157
+falta %.40s en la tarjeta	manca %.40s sulla microSD
+
+#: apps/logica/main/la_fx2.c:219
+Falta %s en la carpeta logica/fx2lafw de la tarjeta	Manca %s nella cartella logica/fx2lafw della microSD
+
+#: apps/logica/main/la_fx2.c:223
+No se pudo leer el firmware	Impossibile leggere il firmware
+
+#: apps/logica/main/la_fx2.c:229
+#: apps/logica/main/la_fx2.c:252
+El archivo del firmware no parece fx2lafw	Il file del firmware non sembra fx2lafw
+
+#: apps/logica/main/la_fx2.c:237
+#: apps/logica/main/la_sr.c:362
+#: apps/logica/main/la_sr.c:439
+No hay memoria	Memoria insufficiente
+
+#: apps/logica/main/la_fx2.c:257
+#: apps/logica/main/la_fx2.c:383
+El analizador está ocupado o se desenchufó	L'analizzatore è occupato o è stato scollegato
+
+#: apps/logica/main/la_fx2.c:266
+El analizador no aceptó el firmware	L'analizzatore non ha accettato il firmware
+
+#: apps/logica/main/la_fx2.c:379
+El analizador no volvió después de cargarle fx2lafw	L'analizzatore non è tornato dopo aver caricato fx2lafw
+
+#: apps/logica/main/la_fx2.c:387
+El analizador no contesta: desenchufalo y enchufalo otra vez	L'analizzatore non risponde: scollegalo e ricollegalo
+
+#: apps/logica/main/la_fx2.c:391
+Esa versión de fx2lafw no es compatible (hace falta la 1.x)	Questa versione di fx2lafw non è compatibile (serve la 1.x)
+
+#: apps/logica/main/la_fx2.c:395
+No se pudo tomar el analizador	Impossibile prendere l'analizzatore
+
+#: apps/logica/main/la_fx2.c:446
+El analizador no puede muestrear a esa velocidad	L'analizzatore non può campionare a quella velocità
+
+#: apps/logica/main/la_fx2.c:493
+#: apps/logica/main/la_fx2.c:571
+El analizador no arrancó	L'analizzatore non è partito
+
+#: apps/logica/main/la_fx2.c:544
+#: apps/logica/main/la_fx2.c:564
+Se desenchufó el analizador	L'analizzatore è stato scollegato
+
+#: apps/logica/main/la_fx2.c:559
+El host USB no le acepta transferencias al analizador: apagá y prendé el host (Ajustes, USB)	L'host USB rifiuta i trasferimenti dell'analizzatore: spegni e riaccendi l'host (Impostazioni, USB)
+
+#: apps/logica/main/la_fx2.c:622
+El analizador se frenó antes del disparo: el USB no dio abasto. Probá una velocidad menor	L'analizzatore si è fermato prima del trigger: l'USB non ce l'ha fatta. Prova una velocità minore
+
+#: apps/logica/main/la_fx2.c:623
+El analizador no manda muestras	L'analizzatore non invia campioni
+
+#: apps/logica/main/la_sr.c:99
+No hay captura para guardar	Nessuna cattura da salvare
+
+#: apps/logica/main/la_sr.c:103
+#: apps/logica/main/la_sr.c:161
+No se pudo escribir en la tarjeta	Impossibile scrivere sulla microSD
+
+#: apps/logica/main/la_sr.c:158
+No se pudo escribir en la tarjeta (¿llena?)	Impossibile scrivere sulla microSD (piena?)
+
+#: apps/logica/main/la_sr.c:358
+No se pudo abrir el archivo	Impossibile aprire il file
+
+#: apps/logica/main/la_sr.c:369
+No es una sesión de sigrok (.sr)	Non è una sessione sigrok (.sr)
+
+#: apps/logica/main/la_sr.c:374
+#: apps/logica/main/la_sr.c:434
+#: apps/logica/main/la_sr.c:440
+No se pudo leer el archivo	Impossibile leggere il file
+
+#: apps/logica/main/la_sr.c:388
+La sesión no tiene canales lógicos	La sessione non ha canali logici
+
+#: apps/logica/main/la_sr.c:412
+La sesión está vacía	La sessione è vuota
+
+#: apps/logica/main/la_sr.c:417
+La captura no entra en la memoria	La cattura non entra in memoria
+
+#: apps/logica/main/la_sr.c:477
+La sesión tiene %d canales: se ven los primeros 8	La sessione ha %d canali: si vedono i primi 8
+
+#: apps/logica/main/la_sump.c:161
+SUMP en %s · hasta %s, %s muestras	SUMP su %s · fino a %s, %s campioni
+
+#: apps/logica/main/la_sump.c:163
+SUMP en %s a %u · hasta %s, %s muestras	SUMP su %s a %u · fino a %s, %s campioni
+
+#: apps/logica/main/la_sump.c:238
+No se pudo abrir el puerto serie	Impossibile aprire la porta seriale
+
+#: apps/logica/main/la_sump.c:241
+El analizador SUMP no contesta	L'analizzatore SUMP non risponde
+
+#: apps/logica/main/la_sump.c:321
+Detenida	Fermata
+
+#: apps/logica/main/la_sump.c:326
+Se cortó el puerto serie	La porta seriale è caduta
+
+#: apps/logica/main/la_sump.c:332
+El analizador dejó de mandar muestras	L'analizzatore ha smesso di inviare campioni
+
+#: apps/logica/main/la_ui.c:170
+Ocupada: se decodifica con la próxima captura	Occupata: si decodifica con la prossima cattura
+
+#: apps/logica/main/la_ui.c:286
+Preguntando a los puertos serie USB...	Interrogo le porte seriali USB...
+
+#: apps/logica/main/la_ui.c:306
+Nadie contestó SUMP en %s a %u	Nessuno ha risposto SUMP su %s a %u
+
+#: apps/logica/main/la_ui.c:321
+Analizador	Analizzat.
+
+#: apps/logica/main/la_ui.c:338
+Escena de la demo (pone sus decodificadores)	Scena della demo (imposta i decodificatori)
+
+#: apps/logica/main/la_ui.c:345
+Buscar SUMP en USB	Cerca SUMP su USB
+
+#: apps/logica/main/la_ui.c:350
+El host USB está apagado: prendelo en Ajustes, USB.	L'host USB è spento: accendilo in Impostazioni, USB.
+
+#: apps/logica/main/la_ui.c:351
+Analizador USB de 24 MHz y 8 canales (Saleae Logic y sus clones, y las demás placas FX2): enchufalo al host USB de la placa (pines 25/27 para alta velocidad; 21/23 llega hasta 1 MHz). La primera vez hay que copiar el firmware libre fx2lafw de sigrok a la carpeta logica/fx2lafw de la tarjeta (fx2lafw-saleae-logic.fw), o subirlo desde la página Lógica del portal.	Analizzatore USB a 24 MHz e 8 canali (Saleae Logic e i suoi cloni, e le altre schede FX2): collegalo all'host USB della scheda (pin 25/27 per l'alta velocità; 21/23 arriva fino a 1 MHz). La prima volta bisogna copiare il firmware libero fx2lafw di sigrok nella cartella logica/fx2lafw della microSD (fx2lafw-saleae-logic.fw), o caricarlo dalla pagina Logica del portale.
+
+#: apps/logica/main/la_ui.c:355
+SUMP: el firmware de la app para un ESP32-S3, C3 o C6 (carpeta firmware de la app), un Open Bench Logic Sniffer u otro compatible, por USB o por una UART del header. Sólo a 3,3 V.	SUMP: il firmware dell'app per un ESP32-S3, C3 o C6 (cartella firmware dell'app), un Open Bench Logic Sniffer o un altro compatibile, via USB o da una UART dell'header. Solo a 3,3 V.
+
+#: apps/logica/main/la_ui.c:368
+Duración de la captura: %s	Durata della cattura: %s
+
+#: apps/logica/main/la_ui.c:382
+Muestreo	Campionam.
+
+#: apps/logica/main/la_ui.c:395
+Velocidad (al menos 4 veces la señal más rápida)	Velocità (almeno 4 volte il segnale più veloce)
+
+#: apps/logica/main/la_ui.c:420
+Muestras (el analizador guarda hasta %s)	Campioni (l'analizzatore ne tiene fino a %s)
+
+#: apps/logica/main/la_ui.c:420
+Muestras (la memoria de la placa da hasta %s)	Campioni (la memoria della scheda dà fino a %s)
+
+#: apps/logica/main/la_ui.c:430
+Antes del disparo	Prima del trigger
+
+#: apps/logica/main/la_ui.c:432
+El FX2 manda todo en vivo: a 24 MHz son 24 MB/s por el USB. Si la captura sale con huecos, bajá la velocidad (12 MHz anda holgado).	L'FX2 invia tutto dal vivo: a 24 MHz sono 24 MB/s sull'USB. Se la cattura esce con buchi, abbassa la velocità (12 MHz va largo).
+
+#: apps/logica/main/la_ui.c:455
+Sube	Sale
+
+#: apps/logica/main/la_ui.c:455
+Baja	Scende
+
+#: apps/logica/main/la_ui.c:455
+Cambia	Cambia
+
+#: apps/logica/main/la_ui.c:467
+Disparo	Trigger
+
+#: apps/logica/main/la_ui.c:468
+La captura arranca cuando se cumplen todas las condiciones juntas. X: no importa. Un analizador SUMP que no sea el de la app sólo entiende niveles: Sube espera el 1 y Baja el 0.	La cattura parte quando tutte le condizioni valgono insieme. X: indifferente. Un analizzatore SUMP diverso da quello dell'app capisce solo livelli: Sale aspetta l'1 e Scende lo 0.
+
+#: apps/logica/main/la_ui.c:485
+#: apps/logica/main/la_ui.c:1082
+Sin disparo	Senza trigger
+
+#: apps/logica/main/la_ui.c:517
+Nombre de D%d	Nome di D%d
+
+#: apps/logica/main/la_ui.c:543
+#: apps/logica/main/la_ui.c:1266
+Canales	Canali
+
+#: apps/logica/main/la_ui.c:552
+Tocá un nombre para cambiarlo. Los nombres van con la captura cuando se guarda (PulseView los muestra).	Tocca un nome per cambiarlo. I nomi vanno con la cattura quando la salvi (PulseView li mostra).
+
+#: apps/logica/main/la_ui.c:568
+Nombre	Nome
+
+#: apps/logica/main/la_ui.c:569
+#: apps/logica/main/la_ui.c:894
+#: apps/logica/main/la_ui.c:1269
+Medir	Misura
+
+#: apps/logica/main/la_ui.c:570
+Se ve	Visibile
+
+#: apps/logica/main/la_ui.c:574
+Disparo en este canal	Trigger su questo canale
+
+#: apps/logica/main/la_ui.c:593
+Decodificadores	Decodificatori
+
+#: apps/logica/main/la_ui.c:608
+Tocá uno para elegir el protocolo, los canales y la velocidad. Se decodifica de nuevo al cerrar.	Toccane uno per scegliere protocollo, canali e velocità. Si decodifica di nuovo alla chiusura.
+
+#: apps/logica/main/la_ui.c:666
+Decodificador %d	Decodificatore %d
+
+#: apps/logica/main/la_ui.c:670
+Encendido	Acceso
+
+#: apps/logica/main/la_ui.c:670
+Apagado	Spento
+
+#: apps/logica/main/la_ui.c:674
+Protocolo	Protocollo
+
+#: apps/logica/main/la_ui.c:685
+ (optativo)	 (opzionale)
+
+#: apps/logica/main/la_ui.c:693
+Sola	Auto
+
+#: apps/logica/main/la_ui.c:698
+Velocidad (Sola: la adivina)	Velocità (Auto: la stima)
+
+#: apps/logica/main/la_ui.c:701
+Bits de datos	Bit di dati
+
+#: apps/logica/main/la_ui.c:703
+Ninguna	Nessuna
+
+#: apps/logica/main/la_ui.c:703
+Par	Pari
+
+#: apps/logica/main/la_ui.c:703
+Impar	Dispari
+
+#: apps/logica/main/la_ui.c:704
+Paridad	Parità
+
+#: apps/logica/main/la_ui.c:706
+Bits de parada	Bit di stop
+
+#: apps/logica/main/la_ui.c:707
+Normal	Normale
+
+#: apps/logica/main/la_ui.c:707
+Invertida	Invertita
+
+#: apps/logica/main/la_ui.c:708
+Línea	Linea
+
+#: apps/logica/main/la_ui.c:714
+Velocidad del bus	Velocità del bus
+
+#: apps/logica/main/la_ui.c:717
+Modo (CPOL y CPHA)	Modo (CPOL e CPHA)
+
+#: apps/logica/main/la_ui.c:723
+Bits por palabra	Bit per parola
+
+#: apps/logica/main/la_ui.c:724
+MSB primero	MSB prima
+
+#: apps/logica/main/la_ui.c:724
+LSB primero	LSB prima
+
+#: apps/logica/main/la_ui.c:725
+Orden	Ordine
+
+#: apps/logica/main/la_ui.c:726
+Activo en 0	Attivo a 0
+
+#: apps/logica/main/la_ui.c:726
+Activo en 1	Attivo a 1
+
+#: apps/logica/main/la_ui.c:729
+0 (receptor)	0 (ricevitore)
+
+#: apps/logica/main/la_ui.c:729
+1 (LED)	1 (LED)
+
+#: apps/logica/main/la_ui.c:730
+Nivel con portadora	Livello con portante
+
+#: apps/logica/main/la_ui.c:733
+Hexa	Hex
+
+#: apps/logica/main/la_ui.c:733
+Decimal	Decimale
+
+#: apps/logica/main/la_ui.c:733
+Binario	Binario
+
+#: apps/logica/main/la_ui.c:734
+Valores en	Valori in
+
+#: apps/logica/main/la_ui.c:737
+Medí del lado del transceptor (RX del controlador), nunca CANH/CANL directo: 3,3 V como mucho.	Misura dal lato del transceiver (RX del controller), mai CANH/CANL diretti: 3,3 V al massimo.
+
+#: apps/logica/main/la_ui.c:739
+En RS485 medí la salida RO del transceptor, no las líneas A/B.	Su RS485 misura l'uscita RO del transceiver, non le linee A/B.
+
+#: apps/logica/main/la_ui.c:778
+#: apps/logica/main/la_ui.c:1268
+Tabla	Tabella
+
+#: apps/logica/main/la_ui.c:780
+#: apps/logica/main/la_ui.c:1123
+Decodificando...	Decodifico...
+
+#: apps/logica/main/la_ui.c:780
+No hay paquetes: prendé un decodificador (Decodificar) y capturá.	Nessun pacchetto: accendi un decodificatore (Decodifica) e cattura.
+
+#: apps/logica/main/la_ui.c:786
+Todos	Tutti
+
+#: apps/logica/main/la_ui.c:825
+Anteriores	Precedenti
+
+#: apps/logica/main/la_ui.c:827
+%u a %u de %u	Da %u a %u di %u
+
+#: apps/logica/main/la_ui.c:829
+Siguientes	Successivi
+
+#: apps/logica/main/la_ui.c:830
+Hubo más de lo que entra: el final de la captura no se decodificó.	C'era più di quanto entra: la fine della cattura non è decodificata.
+
+#: apps/logica/main/la_ui.c:850
+No hay captura	Nessuna cattura
+
+#: apps/logica/main/la_ui.c:859
+Entre los cursores A y B	Tra i cursori A e B
+
+#: apps/logica/main/la_ui.c:859
+Lo que se ve en pantalla	Ciò che si vede a schermo
+
+#: apps/logica/main/la_ui.c:861
+Tramo: %s, %u muestras\n	Tratto: %s, %u campioni\n
+
+#: apps/logica/main/la_ui.c:862
+Flancos: %u de subida, %u de bajada\n	Fronti: %u di salita, %u di discesa\n
+
+#: apps/logica/main/la_ui.c:866
+Frecuencia: %s (período %s)\n	Frequenza: %s (periodo %s)\n
+
+#: apps/logica/main/la_ui.c:867
+Ciclo de trabajo: %.1f %%\n	Duty cycle: %.1f %%\n
+
+#: apps/logica/main/la_ui.c:873
+En 1: mín %s, prom %s, máx %s\n	A 1: min %s, media %s, max %s\n
+
+#: apps/logica/main/la_ui.c:879
+En 0: mín %s, prom %s, máx %s\n	A 0: min %s, media %s, max %s\n
+
+#: apps/logica/main/la_ui.c:881
+En 1 el %.1f %% del tramo	A 1 il %.1f %% del tratto
+
+#: apps/logica/main/la_ui.c:901
+Canal	Canale
+
+#: apps/logica/main/la_ui.c:906
+Con los dos cursores puestos se mide entre ellos (tocá la señal para ponerlos, mantené apretado para sacarlos); si no, lo que está en pantalla.	Con i due cursori posizionati misura tra di essi (tocca il segnale per metterli, tieni premuto per toglierli); altrimenti ciò che è a schermo.
+
+#: apps/logica/main/la_ui.c:920
+No hay tarjeta	Nessuna microSD
+
+#: apps/logica/main/la_ui.c:937
+Guardando...	Salvataggio...
+
+#: apps/logica/main/la_ui.c:957
+Tocá otra vez para borrarla	Tocca di nuovo per eliminarla
+
+#: apps/logica/main/la_ui.c:976
+#: apps/logica/main/la_ui.c:1270
+Archivos	File
+
+#: apps/logica/main/la_ui.c:979
+No hay tarjeta.	Nessuna microSD.
+
+#: apps/logica/main/la_ui.c:982
+Guardar la captura	Salva la cattura
+
+#: apps/logica/main/la_ui.c:1025
+Todavía no hay capturas guardadas.	Ancora nessuna cattura salvata.
+
+#: apps/logica/main/la_ui.c:1026
+Se guardan como sesiones de sigrok (.sr): PulseView las abre, y la placa abre las de PulseView. Con un decodificador encendido va también la tabla en .csv. Están en la carpeta logica de la tarjeta y en la página Lógica del portal.	Si salvano come sessioni sigrok (.sr): PulseView le apre, e la scheda apre quelle di PulseView. Con un decodificatore acceso va anche la tabella in .csv. Sono nella cartella logica della microSD e nella pagina Logica del portale.
+
+#: apps/logica/main/la_ui.c:1063
+No se pudo arrancar la captura	Impossibile avviare la cattura
+
+#: apps/logica/main/la_ui.c:1072
+sube	sale
+
+#: apps/logica/main/la_ui.c:1072
+baja	scende
+
+#: apps/logica/main/la_ui.c:1072
+cambia	cambia
+
+#: apps/logica/main/la_ui.c:1111
+Detener	Ferma
+
+#: apps/logica/main/la_ui.c:1111
+#: apps/logica/main/la_ui.c:1238
+Capturar	Cattura
+
+#: apps/logica/main/la_ui.c:1120
+Conectando con el analizador...	Connessione all'analizzatore...
+
+#: apps/logica/main/la_ui.c:1121
+Esperando el disparo (%d %% del búfer lleno)...	In attesa del trigger (buffer pieno al %d %%)...
+
+#: apps/logica/main/la_ui.c:1122
+Capturando: %d %%	Cattura: %d %%
+
+#: apps/logica/main/la_ui.c:1124
+Archivo: %d %%	File: %d %%
+
+#: apps/logica/main/la_ui.c:1148
+ · A-B %s (%s)	 · A-B %s (%s)
+
+#: apps/logica/main/la_ui.c:1267
+Decodificar	Decodifica
+
+#: apps/logica/main/la_view.c:448
+Capturando...	Cattura...
+
+#: apps/logica/main/la_view.c:448
+Sin captura: elegí el analizador y tocá Capturar	Nessuna cattura: scegli l'analizzatore e tocca Cattura
+
+#: apps/logica/main/la_view.c:593
+No hay memoria para la vista	Memoria insufficiente per la vista

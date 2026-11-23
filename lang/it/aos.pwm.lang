@@ -1,0 +1,394 @@
+# amoledos-lang 1   es -> it
+# aos.pwm.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/pwm/main/pw_draw.c:121
+%s V a la salida del filtro	%s V all'uscita del filtro
+
+#: apps/pwm/main/pw_draw.c:123
+pulsos a 1 MHz	impulsi a 1 MHz
+
+#: apps/pwm/main/pw_draw.c:158
+siempre abajo	sempre basso
+
+#: apps/pwm/main/pw_draw.c:159
+siempre arriba	sempre alto
+
+#: apps/pwm/main/pw_draw.c:160
+alto %s (%s %%)	alto %s (%s %%)
+
+#: apps/pwm/main/pw_draw.c:180
+invertida	invertita
+
+#: apps/pwm/main/pw_draw.c:220
+señal	segnale
+
+#: apps/pwm/main/pw_draw.c:221
+fuente	alim.
+
+#: apps/pwm/main/pw_draw.c:222
+5 V aparte	5 V a parte
+
+#: apps/pwm/main/pw_draw.c:228
+servo	servo
+
+#: apps/pwm/main/pw_draw.c:239
+#: apps/pwm/main/pw_sheets.c:779
+LED IR	LED IR
+
+#: apps/pwm/main/pw_draw.c:250
+salida	uscita
+
+#: apps/pwm/main/pw_draw.c:340
+PCA9685 %s, salida %d	PCA9685 %s, uscita %d
+
+#: apps/pwm/main/pw_draw.c:343
+GPIO%d (pata %d)	GPIO%d (pin %d)
+
+#: apps/pwm/main/pw_engine.c:196
+sin pin	senza pin
+
+#: apps/pwm/main/pw_engine.c:245
+Un servo tiene este PCA9685 a 50 Hz: sus 16 salidas comparten la frecuencia	Un servo tiene questo PCA9685 a 50 Hz: le sue 16 uscite condividono la frequenza
+
+#: apps/pwm/main/pw_engine.c:250
+El PCA9685 no tomó la frecuencia	Il PCA9685 non ha accettato la frequenza
+
+#: apps/pwm/main/pw_engine.c:253
+Un PCA9685 va de 24 Hz a 1526 Hz	Un PCA9685 va da 24 Hz a 1526 Hz
+
+#: apps/pwm/main/pw_engine.c:263
+#: apps/pwm/main/pw_sheets.c:165
+El pin lo tiene %s	Il pin lo usa %s
+
+#: apps/pwm/main/pw_engine.c:267
+No se pudo abrir el nivel analógico	Impossibile aprire il livello analogico
+
+#: apps/pwm/main/pw_engine.c:277
+Los siete canales del LEDC están ocupados	I sette canali del LEDC sono occupati
+
+#: apps/pwm/main/pw_engine.c:279
+Ya hay tres frecuencias distintas: el LEDC no da más	Ci sono già tre frequenze diverse: il LEDC non ne dà altre
+
+#: apps/pwm/main/pw_engine.c:281
+No se pudo abrir el PWM (mirá el registro)	Impossibile aprire il PWM (vedi il log)
+
+#: apps/pwm/main/pw_engine.c:290
+#: apps/pwm/main/pw_engine.c:426
+Un PCA9685 no da un nivel analógico: PWM, servo o LED	Un PCA9685 non dà un livello analogico: PWM, servo o LED
+
+#: apps/pwm/main/pw_engine.c:295
+No contesta el PCA9685 %s	Il PCA9685 %s non risponde
+
+#: apps/pwm/main/pw_engine.c:309
+Elegí un pin para este canal	Scegli un pin per questo canale
+
+#: apps/pwm/main/pw_engine.c:597
+%s no entra: el LEDC da tres frecuencias a la vez como máximo	%s non ci sta: il LEDC dà al massimo tre frequenze alla volta
+
+#: apps/pwm/main/pw_engine.c:717
+%s · %d bits	%s · %d bit
+
+#: apps/pwm/main/pw_engine.c:733
+ciclo %s %%	duty %s %%
+
+#: apps/pwm/main/pw_engine.c:738
+%d de 255	%d di 255
+
+#: apps/pwm/main/pw_engine.c:743
+PWM	PWM
+
+#: apps/pwm/main/pw_engine.c:743
+#: apps/pwm/main/pw_sheets.c:778
+Servo	Servo
+
+#: apps/pwm/main/pw_engine.c:743
+#: apps/pwm/main/pw_sheets.c:776
+LED	LED
+
+#: apps/pwm/main/pw_engine.c:743
+Nivel	Livello
+
+#: apps/pwm/main/pw_engine.c:745
+Fijo	Fisso
+
+#: apps/pwm/main/pw_engine.c:745
+Respirar	Respiro
+
+#: apps/pwm/main/pw_engine.c:745
+Barrido	Sweep
+
+#: apps/pwm/main/pw_engine.c:745
+Estrobo	Strobo
+
+#: apps/pwm/main/pw_engine.c:745
+Rampa	Rampa
+
+#: apps/pwm/main/pw_engine.c:745
+Seno	Seno
+
+#: apps/pwm/main/pw_engine.c:745
+#: apps/pwm/main/pw_sheets.c:506
+Pasos	Passi
+
+#: apps/pwm/main/pw_knob.c:131
+Con un patrón andando, la perilla gira la velocidad	Con un pattern attivo, la manopola regola la velocità
+
+#: apps/pwm/main/pw_knob.c:249
+fino ×0,1	fine ×0,1
+
+#: apps/pwm/main/pw_knob.c:295
+real %s · %d bits	reale %s · %d bit
+
+#: apps/pwm/main/pw_knob.c:297
+al encender	all'accensione
+
+#: apps/pwm/main/pw_knob.c:299
+FRECUENCIA	FREQUENZA
+
+#: apps/pwm/main/pw_knob.c:309
+PERÍODO	PERIODO
+
+#: apps/pwm/main/pw_knob.c:316
+CICLO	DUTY
+
+#: apps/pwm/main/pw_knob.c:316
+ÁNGULO	ANGOLO
+
+#: apps/pwm/main/pw_knob.c:316
+BRILLO	LUMINOSITÀ
+
+#: apps/pwm/main/pw_knob.c:316
+NIVEL	LIVELLO
+
+#: apps/pwm/main/pw_knob.c:317
+EN VIVO	LIVE
+
+#: apps/pwm/main/pw_sheets.c:122
+Listo	Fine
+
+#: apps/pwm/main/pw_sheets.c:159
+Ese pin lo usa el canal %d	Quel pin lo usa il canale %d
+
+#: apps/pwm/main/pw_sheets.c:187
+Esa salida la usa el canal %d	Quell'uscita la usa il canale %d
+
+#: apps/pwm/main/pw_sheets.c:235
+Pin del canal	Pin del canale
+
+#: apps/pwm/main/pw_sheets.c:236
+Los pines libres del header. Andan a 3,3 V: nunca 5 V en una pata. La pata es el número en el conector de 40.	I pin liberi dell'header. Lavorano a 3,3 V: mai 5 V su un pin. Il numero è quello sul connettore a 40 pin.
+
+#: apps/pwm/main/pw_sheets.c:270
+pata %d	pin %d
+
+#: apps/pwm/main/pw_sheets.c:274
+este canal	questo canale
+
+#: apps/pwm/main/pw_sheets.c:275
+canal %d	canale %d
+
+#: apps/pwm/main/pw_sheets.c:277
+VO4: medí antes	VO4: misura prima
+
+#: apps/pwm/main/pw_sheets.c:278
+strapping	strapping
+
+#: apps/pwm/main/pw_sheets.c:281
+libre	libero
+
+#: apps/pwm/main/pw_sheets.c:290
+Las 16 salidas de un PCA9685 comparten una frecuencia, de 24 Hz a 1526 Hz: un servo lo deja en 50 Hz. Los servos se alimentan por V+ del módulo, no por la placa.	Le 16 uscite di un PCA9685 condividono una frequenza, da 24 Hz a 1526 Hz: un servo la fissa a 50 Hz. I servo si alimentano dal V+ del modulo, non dalla scheda.
+
+#: apps/pwm/main/pw_sheets.c:291
+Con un PCA9685 declarado en Módulos (module servos i2c.ext chip=pca9685 addr=0x40) aparecen acá sus 16 salidas.	Con un PCA9685 dichiarato in Moduli (module servos i2c.ext chip=pca9685 addr=0x40) qui compaiono le sue 16 uscite.
+
+#: apps/pwm/main/pw_sheets.c:385
+Tocá otra vez para borrarlo	Tocca di nuovo per eliminarlo
+
+#: apps/pwm/main/pw_sheets.c:398
+Canal %d	Canale %d
+
+#: apps/pwm/main/pw_sheets.c:405
+Invertir la salida	Inverti l'uscita
+
+#: apps/pwm/main/pw_sheets.c:413
+Para un LED entre 3V3 y la pata: prende cuando la pata va a 0.	Per un LED tra 3V3 e il pin: si accende quando il pin va a 0.
+
+#: apps/pwm/main/pw_sheets.c:416
+Pulso mínimo	Impulso minimo
+
+#: apps/pwm/main/pw_sheets.c:417
+Pulso máximo	Impulso massimo
+
+#: apps/pwm/main/pw_sheets.c:418
+Recorrido	Corsa
+
+#: apps/pwm/main/pw_sheets.c:419
+La mayoría de los servos van de 500 a 2500 µs en 180°. Si el servo zumba o golpea en un extremo, acercá los topes.	La maggior parte dei servo va da 500 a 2500 µs su 180°. Se il servo ronza o sbatte a un estremo, avvicina i finecorsa.
+
+#: apps/pwm/main/pw_sheets.c:422
+Gamma	Gamma
+
+#: apps/pwm/main/pw_sheets.c:423
+El ojo ve la luz en escala logarítmica: con gamma 2,2, el brillo al 50 % es un ciclo del 22 %.	L'occhio vede la luce in scala logaritmica: con gamma 2,2, la luminosità al 50 % è un duty del 22 %.
+
+#: apps/pwm/main/pw_sheets.c:425
+El nivel analógico no tiene ajustes: 256 pasos de 0 a 3,3 V, con el filtro RC del cableado.	Il livello analogico non ha impostazioni: 256 passi da 0 a 3,3 V, con il filtro RC del cablaggio.
+
+#: apps/pwm/main/pw_sheets.c:427
+Borrar el canal	Elimina canale
+
+#: apps/pwm/main/pw_sheets.c:460
+%d pasos	%d passi
+
+#: apps/pwm/main/pw_sheets.c:507
+Cada paso dura lo mismo: el período dividido por la cantidad de pasos.	Ogni passo dura uguale: il periodo diviso per il numero di passi.
+
+#: apps/pwm/main/pw_sheets.c:554
+No se pudo leer el preset	Impossibile leggere il preset
+
+#: apps/pwm/main/pw_sheets.c:562
+Cargado: %s	Caricato: %s
+
+#: apps/pwm/main/pw_sheets.c:572
+¿Borrar?	Elimino?
+
+#: apps/pwm/main/pw_sheets.c:605
+Todavía no hay presets guardados.	Ancora nessun preset salvato.
+
+#: apps/pwm/main/pw_sheets.c:605
+No hay tarjeta.	Nessuna microSD.
+
+#: apps/pwm/main/pw_sheets.c:626
+Borrar	Elimina
+
+#: apps/pwm/main/pw_sheets.c:668
+No hay tarjeta	Nessuna microSD
+
+#: apps/pwm/main/pw_sheets.c:675
+Guardado: %s	Salvato: %s
+
+#: apps/pwm/main/pw_sheets.c:681
+No se pudo guardar	Impossibile salvare
+
+#: apps/pwm/main/pw_sheets.c:698
+#: apps/pwm/main/pw_ui.c:466
+Presets	Preset
+
+#: apps/pwm/main/pw_sheets.c:699
+Todos los canales con sus pines, modos y patrones, en /sdcard/pwm. Al cargar uno, los canales encendidos se encienden.	Tutti i canali con pin, modalità e pattern, in /sdcard/pwm. Caricandone uno, i canali che erano accesi si accendono.
+
+#: apps/pwm/main/pw_sheets.c:704
+nombre del preset	nome del preset
+
+#: apps/pwm/main/pw_sheets.c:714
+Guardar	Salva
+
+#: apps/pwm/main/pw_sheets.c:740
+La pata da 3,3 V y pocos mA: el LED con su resistencia (220 a 470 Ω) a GND. En modo LED, el brillo va con la curva de gamma.	Il pin dà 3,3 V e pochi mA: il LED con la sua resistenza (da 220 a 470 Ω) a GND. In modalità LED, la luminosità segue la curva gamma.
+
+#: apps/pwm/main/pw_sheets.c:741
+El LED prende cuando la pata va a 0: activá Invertir en los ajustes del canal.	Il LED si accende quando il pin va a 0: attiva Inverti nelle impostazioni del canale.
+
+#: apps/pwm/main/pw_sheets.c:742
+El servo se alimenta aparte, con 5 V externos y no de la placa: GND en común con el header y sólo la señal a la pata. Modo Servo: 50 Hz y un pulso de 500 a 2500 µs.	Il servo si alimenta a parte, con 5 V esterni e non dalla scheda: GND in comune con l'header e solo il segnale al pin. Modalità Servo: 50 Hz e un impulso da 500 a 2500 µs.
+
+#: apps/pwm/main/pw_sheets.c:743
+Un LED infrarrojo pide más corriente que la pata: un transistor NPN con 1 kΩ en la base. Para la portadora de un control remoto, PWM a 38 kHz con ciclo del 33 %.	Un LED infrarosso chiede più corrente del pin: un transistor NPN con 1 kΩ sulla base. Per la portante di un telecomando, PWM a 38 kHz con duty del 33 %.
+
+#: apps/pwm/main/pw_sheets.c:744
+El nivel analógico es un tren de pulsos a 1 MHz: 1 kΩ en serie y 1 µF a GND lo vuelven una tensión de 0 a 3,3 V, con pocos mV de ripple y ~5 ms para asentarse. Sin carga pesada a la salida.	Il livello analogico è un treno di impulsi a 1 MHz: 1 kΩ in serie e 1 µF a GND lo trasformano in una tensione da 0 a 3,3 V, con pochi mV di ripple e ~5 ms per assestarsi. Niente carichi pesanti in uscita.
+
+#: apps/pwm/main/pw_sheets.c:775
+#: apps/pwm/main/pw_ui.c:467
+Cableado	Cablaggio
+
+#: apps/pwm/main/pw_sheets.c:777
+LED a 3V3	LED a 3V3
+
+#: apps/pwm/main/pw_sheets.c:780
+Filtro RC	Filtro RC
+
+#: apps/pwm/main/pw_sheets.c:818
+Señal: salida %d del PCA9685 %s (sus pines PWM de esa columna).	Segnale: uscita %d del PCA9685 %s (i suoi pin PWM di quella colonna).
+
+#: apps/pwm/main/pw_sheets.c:821
+Señal: pata %d (GPIO%d).	Segnale: pin %d (GPIO%d).
+
+#: apps/pwm/main/pw_sheets.c:825
+GND: patas %s. 3V3: patas %s. 5V: patas %s (sólo para alimentar algo chico; un servo, mejor aparte).	GND: pin %s. 3V3: pin %s. 5V: pin %s (solo per alimentare qualcosa di piccolo; un servo, meglio a parte).
+
+#: apps/pwm/main/pw_ui.c:145
+Ya están los siete canales	Ci sono già tutti e sette i canali
+
+#: apps/pwm/main/pw_ui.c:154
+Salidas apagadas y pines sueltos	Uscite spente e pin liberati
+
+#: apps/pwm/main/pw_ui.c:182
+Con un patrón andando, el valor lo mueve el patrón	Con un pattern attivo, il valore lo muove il pattern
+
+#: apps/pwm/main/pw_ui.c:241
+Valor	Valore
+
+#: apps/pwm/main/pw_ui.c:242
+Frecuencia	Frequenza
+
+#: apps/pwm/main/pw_ui.c:243
+Velocidad	Velocità
+
+#: apps/pwm/main/pw_ui.c:321
+#: apps/pwm/main/pw_ui.c:328
+Canales	Canali
+
+#: apps/pwm/main/pw_ui.c:325
+#: apps/pwm/main/pw_ui.c:331
+Apagar todo	Spegni tutto
+
+#: apps/pwm/main/pw_ui.c:359
++ Canal	+ Canale
+
+#: apps/pwm/main/pw_ui.c:429
+Patrón	Pattern
+
+#: apps/pwm/main/pw_ui.c:456
+Editar los pasos	Modifica i passi
+
+#: apps/pwm/main/pw_ui.c:552
+Ningún PWM encendido	Nessun PWM acceso
+
+#: apps/pwm/main/pw_ui.c:564
+(%d de 3 frecuencias)	(%d di 3 frequenze)
+
+#: apps/pwm/main/pw_ui.c:568
+%sPCA9685 a %s	%sPCA9685 a %s
+
+#: apps/pwm/main/pw_ui.c:570
+%s%d PCA9685	%s%d PCA9685
+
+#: apps/pwm/main/pw_ui.c:589
+%.12s\nsalida %d	%.12s\nuscita %d
+
+#: apps/pwm/main/pw_ui.c:591
+Elegí\nun pin	Scegli\nun pin
+
+#: apps/pwm/main/pw_ui.c:594
+GPIO%d\npata %d	GPIO%d\npin %d
+
+#: apps/pwm/main/pw_ui.c:623
+período %s	periodo %s
+
+#: apps/pwm/main/pw_ui.c:638
+Entre %s y %s	Tra %s e %s
+
+#: apps/pwm/main/pw_ui.c:646
+Un patrón mueve el valor solo, y sigue con la app en segundo plano. Al cerrar la app, todo se apaga.	Un pattern muove il valore da solo e continua con l'app in background. Chiudendo l'app, tutto si spegne.
+
+#: apps/pwm/main/pw_ui.c:647
+Con fades del LEDC: el hardware va de un punto al siguiente.	Con i fade del LEDC: l'hardware va da un punto al successivo.
+
+#: apps/pwm/main/pw_ui.c:648
+La app escribe el valor cada 20 ms.	L'app scrive il valore ogni 20 ms.

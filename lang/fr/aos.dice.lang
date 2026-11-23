@@ -1,0 +1,24 @@
+# amoledos-lang 1   es -> fr
+# aos.dice.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/dados/main/dados.c:435
+1 dado	1 dé
+
+#: apps/dados/main/dados.c:437
+%d dados	%d dés
+
+#: apps/dados/main/dados.c:686
+TIRAR	LANCER
+
+#: apps/dados/main/dados.c:701
+Últimas	Derniers
+
+#: apps/dados/main/dados.c:716
+Agitá la placa o tocá los dados	Secoue la carte ou touche les dés
+
+#: apps/dados/main/dados.c:717
+Tocá los dados para tirar	Touche les dés pour lancer

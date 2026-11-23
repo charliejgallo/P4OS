@@ -1,0 +1,55 @@
+# amoledos-lang 1   es -> pt
+# web.recorder.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/recorder/web/recorder.js:39
+Grabación	Gravação
+
+#: apps/recorder/web/recorder.js:67
+#: apps/recorder/web/recorder.js:135
+Grabadora	Gravador
+
+#: apps/recorder/web/recorder.js:81
+grabación	gravação
+
+#: apps/recorder/web/recorder.js:81
+grabaciones	gravações
+
+#: apps/recorder/web/recorder.js:82
+en total	no total
+
+#: apps/recorder/web/recorder.js:83
+en la tarjeta	no cartão
+
+#: apps/recorder/web/recorder.js:85
+Abierta en la placa	Aberto na placa
+
+#: apps/recorder/web/recorder.js:85
+Abrir la Grabadora en la placa	Abrir o Gravador na placa
+
+#: apps/recorder/web/recorder.js:86
+Actualizar	Atualizar
+
+#: apps/recorder/web/recorder.js:87
+Se graba desde la placa. Acá se escuchan, se bajan como WAV y se borran; la app ve los cambios sola.	A gravação é feita na placa. Aqui você ouve, baixa como WAV e apaga as gravações; o app vê as mudanças sozinho.
+
+#: apps/recorder/web/recorder.js:91
+¿Borrar %s? No se puede deshacer.	Apagar %s? Não dá para desfazer.
+
+#: apps/recorder/web/recorder.js:92
+Borrada	Apagada
+
+#: apps/recorder/web/recorder.js:98
+Todavía no hay grabaciones. Se graban desde la app en la placa.	Ainda não há gravações. Elas são feitas pelo app na placa.
+
+#: apps/recorder/web/recorder.js:113
+Bajar	Baixar
+
+#: apps/recorder/web/recorder.js:114
+Borrar	Apagar
+
+#: apps/recorder/web/recorder.js:135
+Grabaciones	Gravações

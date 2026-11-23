@@ -1,0 +1,871 @@
+# amoledos-lang 1   es -> pt
+# aos.oficina.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/oficina/main/of_doc97.c:481
+Notas al pie	Notas de rodapé
+
+#: apps/oficina/main/of_docview.c:966
+Sólo se lee: para editarlo, guardá una copia como docx u odt (en el menú ⋯)	Só leitura: para editá-lo, salve uma cópia como docx ou odt (no menu ⋯)
+
+#: apps/oficina/main/of_docview.c:974
+Este párrafo tiene control de cambios u objetos que no se editan acá: se guarda como está	Este parágrafo tem controle de alterações ou objetos que não se editam aqui: é mantido como está
+
+#: apps/oficina/main/of_docview.c:998
+La selección pasa de una celda a otra: se borra de a una celda	A seleção passa de uma célula a outra: apague uma célula por vez
+
+#: apps/oficina/main/of_docview.c:1338
+#: apps/oficina/main/of_textview.c:1042
+No está	Não encontrado
+
+#: apps/oficina/main/of_docview.c:1366
+#: apps/oficina/main/of_docview.c:1707
+Buscar en el documento	Buscar no documento
+
+#: apps/oficina/main/of_docview.c:1366
+#: apps/oficina/main/of_docview.c:1707
+#: apps/oficina/main/of_sheetview.c:1597
+#: apps/oficina/main/of_textview.c:1124
+Buscar	Buscar
+
+#: apps/oficina/main/of_docview.c:1543
+Texto normal	Texto normal
+
+#: apps/oficina/main/of_docview.c:1544
+Título 1	Título 1
+
+#: apps/oficina/main/of_docview.c:1545
+Título 2	Título 2
+
+#: apps/oficina/main/of_docview.c:1546
+Título 3	Título 3
+
+#: apps/oficina/main/of_docview.c:1548
+Estilo del párrafo	Estilo do parágrafo
+
+#: apps/oficina/main/of_docview.c:1555
+A la izquierda	À esquerda
+
+#: apps/oficina/main/of_docview.c:1556
+Centrado	Ao centro
+
+#: apps/oficina/main/of_docview.c:1557
+A la derecha	À direita
+
+#: apps/oficina/main/of_docview.c:1558
+Justificado	Justificado
+
+#: apps/oficina/main/of_docview.c:1560
+Alineación	Alinhamento
+
+#: apps/oficina/main/of_docview.c:1577
+#: apps/oficina/main/of_sheetview.c:1617
+#: apps/oficina/main/of_slideview.c:721
+#: apps/oficina/main/of_textview.c:1194
+Ya hay un archivo con ese nombre	Já existe um arquivo com esse nome
+
+#: apps/oficina/main/of_docview.c:1584
+#: apps/oficina/main/of_docview.c:1588
+#: apps/oficina/main/of_docview.c:1760
+#: apps/oficina/main/of_sheetview.c:1621
+No se pudo guardar	Não foi possível salvar
+
+#: apps/oficina/main/of_docview.c:1585
+#: apps/oficina/main/of_sheetview.c:1622
+#: apps/oficina/main/of_slideview.c:737
+#: apps/oficina/main/of_textview.c:1200
+Guardado como PDF	Salvo como PDF
+
+#: apps/oficina/main/of_docview.c:1590
+#: apps/oficina/main/of_docview.c:1764
+#: apps/oficina/main/of_sheetview.c:1630
+#: apps/oficina/main/of_sheetview.c:1774
+Guardado	Salvo
+
+#: apps/oficina/main/of_docview.c:1591
+Guardado. En la copia no va lo que la app no entiende	Salvo. A cópia não leva o que o app não entende
+
+#: apps/oficina/main/of_docview.c:1605
+#: apps/oficina/main/of_docview.c:1703
+#: apps/oficina/main/of_sheetview.c:1643
+#: apps/oficina/main/of_sheetview.c:1654
+Guardar una copia como	Salvar uma cópia como
+
+#: apps/oficina/main/of_docview.c:1605
+#: apps/oficina/main/of_docview.c:1736
+#: apps/oficina/main/of_sheetview.c:1643
+#: apps/oficina/main/of_sheetview.c:1727
+Guardar	Salvar
+
+#: apps/oficina/main/of_docview.c:1621
+%d párrafos, %d palabras, %d caracteres.	%d parágrafos, %d palavras, %d caracteres.
+
+#: apps/oficina/main/of_docview.c:1623
+ Leído de %s: se ve y se copia; para editarlo, se guarda una copia como docx u odt.	 Lido de %s: pode ser visto e copiado; para editá-lo, salve uma cópia como docx ou odt.
+
+#: apps/oficina/main/of_docview.c:1626
+Algunos párrafos (marcados al costado) tienen control de cambios u otros objetos: se ven, y se guardan como estaban.	Alguns parágrafos (marcados ao lado) têm controle de alterações ou outros objetos: aparecem, e são salvos como estavam.
+
+#: apps/oficina/main/of_docview.c:1627
+#: apps/oficina/main/of_pdfview.c:622
+#: apps/oficina/main/of_slideview.c:768
+Listo	Pronto
+
+#: apps/oficina/main/of_docview.c:1653
+El documento no tiene títulos	O documento não tem títulos
+
+#: apps/oficina/main/of_docview.c:1681
+#: apps/oficina/main/of_docview.c:1738
+Índice	Índice
+
+#: apps/oficina/main/of_docview.c:1697
+#: apps/oficina/main/oficina.c:1013
+Documento de Word (.docx)	Documento do Word (.docx)
+
+#: apps/oficina/main/of_docview.c:1698
+#: apps/oficina/main/oficina.c:1014
+Documento de OpenDocument (.odt)	Documento OpenDocument (.odt)
+
+#: apps/oficina/main/of_docview.c:1699
+#: apps/oficina/main/oficina.c:1018
+Texto (.txt)	Texto (.txt)
+
+#: apps/oficina/main/of_docview.c:1700
+#: apps/oficina/main/of_sheetview.c:1652
+PDF para imprimir o mandar (.pdf)	PDF para imprimir ou enviar (.pdf)
+
+#: apps/oficina/main/of_docview.c:1735
+Ver las páginas como se imprimen	Ver as páginas como impressas
+
+#: apps/oficina/main/of_docview.c:1737
+#: apps/oficina/main/of_sheetview.c:1728
+#: apps/oficina/main/of_slideview.c:811
+Guardar una copia como...	Salvar uma cópia como...
+
+#: apps/oficina/main/of_docview.c:1739
+#: apps/oficina/main/of_sheetview.c:1741
+Buscar...	Buscar...
+
+#: apps/oficina/main/of_docview.c:1740
+Letra más grande	Letra maior
+
+#: apps/oficina/main/of_docview.c:1741
+Letra más chica	Letra menor
+
+#: apps/oficina/main/of_docview.c:1742
+#: apps/oficina/main/of_textview.c:1269
+Seleccionar todo	Selecionar tudo
+
+#: apps/oficina/main/of_docview.c:1743
+#: apps/oficina/main/of_sheetview.c:1736
+#: apps/oficina/main/of_textview.c:1270
+Copiar	Copiar
+
+#: apps/oficina/main/of_docview.c:1744
+#: apps/oficina/main/of_sheetview.c:1738
+#: apps/oficina/main/of_textview.c:1271
+Pegar	Colar
+
+#: apps/oficina/main/of_docview.c:1745
+Editar como texto	Editar como texto
+
+#: apps/oficina/main/of_docview.c:1746
+#: apps/oficina/main/of_pdfview.c:649
+#: apps/oficina/main/of_slideview.c:812
+Información	Informações
+
+#: apps/oficina/main/of_docview.c:1860
+Estilo	Estilo
+
+#: apps/oficina/main/of_docview.c:1861
+Alinear	Alinhar
+
+#: apps/oficina/main/of_docview.c:1914
+Algunos párrafos tienen control de cambios u objetos que no se editan acá: se ven y se guardan como están	Alguns parágrafos têm controle de alterações ou objetos que não se editam aqui: aparecem e são mantidos como estão
+
+#: apps/oficina/main/of_import.c:1073
+De	De
+
+#: apps/oficina/main/of_import.c:1073
+Para	Para
+
+#: apps/oficina/main/of_import.c:1073
+Copia	Cc
+
+#: apps/oficina/main/of_import.c:1073
+#: apps/oficina/main/of_sheetview.c:1388
+Fecha	Data
+
+#: apps/oficina/main/of_import.c:1098
+Adjuntos	Anexos
+
+#: apps/oficina/main/of_import.c:1285
+La vista previa que guarda el archivo. El contenido se edita en Pages, Numbers o Keynote.	A pré-visualização que o arquivo guarda. O conteúdo é editado no Pages, Numbers ou Keynote.
+
+#: apps/oficina/main/of_import.c:1286
+Este archivo no trae una vista previa.	Este arquivo não traz pré-visualização.
+
+#: apps/oficina/main/of_import.c:1320
+Los textos de sus tablas	Os textos das suas tabelas
+
+#: apps/oficina/main/of_import.c:1320
+Su texto	Seu texto
+
+#: apps/oficina/main/of_iwa.c:259
+#: apps/oficina/main/of_slides.c:222
+Diapositiva	Slide
+
+#: apps/oficina/main/of_odp.c:504
+#: apps/oficina/main/of_pptx.c:871
+Objeto	Objeto
+
+#: apps/oficina/main/of_pdftext.c:1723
+%d páginas. El PDF no tiene texto: son imágenes (escaneado)	%d páginas. O PDF não tem texto: são imagens (digitalizado)
+
+#: apps/oficina/main/of_pdftext.c:1724
+%d páginas. El PDF no tiene texto que se pueda leer	%d páginas. O PDF não tem texto que possa ser lido
+
+#: apps/oficina/main/of_pdftext.c:1725
+%d páginas. Parte del texto no se puede leer: sus letras no dicen qué son	%d páginas. Parte do texto não pode ser lida: suas letras não dizem o que são
+
+#: apps/oficina/main/of_pdftext.c:1726
+%d páginas	%d páginas
+
+#: apps/oficina/main/of_pdftext.c:1732
+Este PDF no tiene texto que la app pueda leer (puede ser una imagen escaneada en un formato que la app no muestra).	Este PDF não tem texto que o app possa ler (pode ser uma imagem digitalizada num formato que o app não mostra).
+
+#: apps/oficina/main/of_pdfview.c:366
+Falta memoria para dibujar la página	Falta memória para desenhar a página
+
+#: apps/oficina/main/of_pdfview.c:612
+No hay una página con ese número	Não há página com esse número
+
+#: apps/oficina/main/of_pdfview.c:620
+%d páginas; esta, de %.1f × %.1f cm. La app dibuja las páginas con las letras que trae el archivo; las que nombra y no trae, con las suyas.	%d páginas; esta, de %.1f × %.1f cm. O app desenha as páginas com as fontes que o arquivo traz; as que ele nomeia e não traz, com as suas.
+
+#: apps/oficina/main/of_pdfview.c:635
+Ir a la página	Ir para a página
+
+#: apps/oficina/main/of_pdfview.c:635
+#: apps/oficina/main/of_sheetview.c:1711
+#: apps/oficina/main/of_sheetview.c:1817
+#: apps/oficina/main/of_slideview.c:790
+Ir	Ir
+
+#: apps/oficina/main/of_pdfview.c:645
+Ver el texto acomodado	Ver o texto refluído
+
+#: apps/oficina/main/of_pdfview.c:646
+Ir a la página...	Ir para a página...
+
+#: apps/oficina/main/of_pdfview.c:647
+Ajustar al ancho	Ajustar à largura
+
+#: apps/oficina/main/of_pdfview.c:648
+Más grande	Maior
+
+#: apps/oficina/main/of_pptx.c:871
+Gráfico	Gráfico
+
+#: apps/oficina/main/of_pptx.c:871
+Diagrama (SmartArt)	Diagrama (SmartArt)
+
+#: apps/oficina/main/of_sheetview.c:653
+Esa celda es parte de una fórmula matricial: se cambia en la computadora	Essa célula é parte de uma fórmula matricial: altere-a no computador
+
+#: apps/oficina/main/of_sheetview.c:704
+#: apps/oficina/main/of_textview.c:802
+Es demasiado para copiar de una vez	É demais para copiar de uma vez
+
+#: apps/oficina/main/of_sheetview.c:727
+Cortado	Recortado
+
+#: apps/oficina/main/of_sheetview.c:727
+Copiado	Copiado
+
+#: apps/oficina/main/of_sheetview.c:736
+No hay nada para pegar	Não há nada para colar
+
+#: apps/oficina/main/of_sheetview.c:836
+Suma %s  ·  Prom. %s	Soma %s  ·  Méd. %s
+
+#: apps/oficina/main/of_sheetview.c:837
+%ld celdas	%ld células
+
+#: apps/oficina/main/of_sheetview.c:971
+La fórmula tiene un error	A fórmula tem um erro
+
+#: apps/oficina/main/of_sheetview.c:975
+La fórmula usa una función que la app no tiene	A fórmula usa uma função que o app não tem
+
+#: apps/oficina/main/of_sheetview.c:1347
+Un CSV no guarda formatos: guardalo como .xlsx o .ods	Um CSV não guarda formatos: salve-o como .xlsx ou .ods
+
+#: apps/oficina/main/of_sheetview.c:1351
+En los .ods los formatos se cambian en la computadora por ahora	Nos .ods os formatos são alterados no computador, por enquanto
+
+#: apps/oficina/main/of_sheetview.c:1386
+General	Geral
+
+#: apps/oficina/main/of_sheetview.c:1386
+Entero	Inteiro
+
+#: apps/oficina/main/of_sheetview.c:1386
+Entero con miles	Inteiro com milhares
+
+#: apps/oficina/main/of_sheetview.c:1386
+Dos decimales	Duas decimais
+
+#: apps/oficina/main/of_sheetview.c:1387
+Miles y dos decimales	Milhares e duas decimais
+
+#: apps/oficina/main/of_sheetview.c:1387
+Moneda	Moeda
+
+#: apps/oficina/main/of_sheetview.c:1387
+Porcentaje	Porcentagem
+
+#: apps/oficina/main/of_sheetview.c:1388
+Porcentaje con decimales	Porcentagem com decimais
+
+#: apps/oficina/main/of_sheetview.c:1388
+Fecha y hora	Data e hora
+
+#: apps/oficina/main/of_sheetview.c:1388
+Hora	Hora
+
+#: apps/oficina/main/of_sheetview.c:1389
+Texto	Texto
+
+#: apps/oficina/main/of_sheetview.c:1401
+Formato de número	Formato de número
+
+#: apps/oficina/main/of_sheetview.c:1423
+Es demasiado para ordenar en la placa	É demais para ordenar na placa
+
+#: apps/oficina/main/of_sheetview.c:1487
+Filtro: «%.40s» (%d filas escondidas)	Filtro: «%.40s» (%d linhas ocultas)
+
+#: apps/oficina/main/of_sheetview.c:1527
+Inmovilizar se ve en la placa; en el archivo queda como estaba	Congelar aparece na placa; no arquivo fica como estava
+
+#: apps/oficina/main/of_sheetview.c:1548
+Esa no es una celda (por ejemplo, B12)	Isso não é uma célula (por exemplo, B12)
+
+#: apps/oficina/main/of_sheetview.c:1585
+No está en esta hoja	Não está nesta planilha
+
+#: apps/oficina/main/of_sheetview.c:1597
+Buscar en la hoja	Buscar na planilha
+
+#: apps/oficina/main/of_sheetview.c:1628
+Guardado. El CSV tiene sólo la hoja que se veía	Salvo. O CSV tem só a planilha que estava visível
+
+#: apps/oficina/main/of_sheetview.c:1629
+#: apps/oficina/main/of_sheetview.c:1772
+Guardado. En el CSV las fórmulas quedaron como valores	Salvo. No CSV as fórmulas ficaram como valores
+
+#: apps/oficina/main/of_sheetview.c:1649
+#: apps/oficina/main/oficina.c:1015
+Planilla de Excel (.xlsx)	Planilha do Excel (.xlsx)
+
+#: apps/oficina/main/of_sheetview.c:1650
+#: apps/oficina/main/oficina.c:1016
+Planilla de OpenDocument (.ods)	Planilha OpenDocument (.ods)
+
+#: apps/oficina/main/of_sheetview.c:1651
+#: apps/oficina/main/oficina.c:1017
+Datos separados por comas (.csv)	Valores separados por vírgula (.csv)
+
+#: apps/oficina/main/of_sheetview.c:1667
+Fórmulas que la app calcula	Fórmulas que o app calcula
+
+#: apps/oficina/main/of_sheetview.c:1672
+Se escriben con = adelante, y con ; o , entre los argumentos. En el archivo quedan con los nombres en inglés, como los guarda Excel. Las que la app no tiene conservan el valor que traía el archivo.	Escreva-as com = na frente, e com ; ou , entre os argumentos. No arquivo ficam com os nomes em inglês, como o Excel as salva. As que o app não tem conservam o valor que o arquivo trazia.
+
+#: apps/oficina/main/of_sheetview.c:1685
+Cambiar el nombre de una hoja de un .xlsx todavía no se puede	Ainda não é possível renomear uma planilha de um .xlsx
+
+#: apps/oficina/main/of_sheetview.c:1711
+#: apps/oficina/main/of_sheetview.c:1817
+Ir a la celda	Ir para a célula
+
+#: apps/oficina/main/of_sheetview.c:1717
+Nombre de la hoja	Nome da planilha
+
+#: apps/oficina/main/of_sheetview.c:1717
+#: apps/oficina/main/oficina.c:891
+Cambiar	Mudar
+
+#: apps/oficina/main/of_sheetview.c:1729
+Formato de número...	Formato de número...
+
+#: apps/oficina/main/of_sheetview.c:1730
+Ordenar de menor a mayor	Ordenar do menor ao maior
+
+#: apps/oficina/main/of_sheetview.c:1731
+Ordenar de mayor a menor	Ordenar do maior ao menor
+
+#: apps/oficina/main/of_sheetview.c:1732
+Sacar el filtro	Tirar o filtro
+
+#: apps/oficina/main/of_sheetview.c:1732
+Filtrar por este valor	Filtrar por este valor
+
+#: apps/oficina/main/of_sheetview.c:1733
+Ancho de columna justo	Ajustar largura da coluna
+
+#: apps/oficina/main/of_sheetview.c:1734
+Liberar filas y columnas	Descongelar linhas e colunas
+
+#: apps/oficina/main/of_sheetview.c:1734
+Inmovilizar hasta acá	Congelar até aqui
+
+#: apps/oficina/main/of_sheetview.c:1737
+Cortar	Recortar
+
+#: apps/oficina/main/of_sheetview.c:1739
+Borrar el contenido	Apagar o conteúdo
+
+#: apps/oficina/main/of_sheetview.c:1740
+Ir a la celda...	Ir para a célula...
+
+#: apps/oficina/main/of_sheetview.c:1742
+Fórmulas que calcula	Fórmulas que calcula
+
+#: apps/oficina/main/of_sheetview.c:1743
+Cambiar el nombre de la hoja	Renomear a planilha
+
+#: apps/oficina/main/of_sheetview.c:1759
+Un .xls no se puede guardar: se guarda una copia como xlsx u ods	Um .xls não pode ser salvo: salve uma cópia como xlsx ou ods
+
+#: apps/oficina/main/of_sheetview.c:1773
+Guardado. Hay fórmulas que la app no calcula: el programa de la computadora las recalcula al abrir	Salvo. Há fórmulas que o app não calcula: o programa do computador as recalcula ao abrir
+
+#: apps/oficina/main/of_sheetview.c:1899
+Hay fórmulas con funciones que la app no tiene: se ve el valor que trae el archivo	Há fórmulas com funções que o app não tem: aparece o valor que o arquivo traz
+
+#: apps/oficina/main/of_slides.c:291
+Notas: 	Notas: 
+
+#: apps/oficina/main/of_slideview.c:593
+  ·  oculta	  ·  oculto
+
+#: apps/oficina/main/of_slideview.c:665
+Es la última	É o último
+
+#: apps/oficina/main/of_slideview.c:665
+Es la primera	É o primeiro
+
+#: apps/oficina/main/of_slideview.c:737
+Guardado: el texto de las diapositivas y sus notas	Salvo: o texto dos slides e suas notas
+
+#: apps/oficina/main/of_slideview.c:755
+No hay una diapositiva con ese número	Não há slide com esse número
+
+#: apps/oficina/main/of_slideview.c:766
+%d diapositivas (%d ocultas, %d con notas), de %.1f × %.1f cm. Se ven y se presentan; para editarlas hace falta PowerPoint o Impress.	%d slides (%d ocultos, %d com notas), de %.1f × %.1f cm. Podem ser vistos e apresentados; para editá-los é preciso o PowerPoint ou o Impress.
+
+#: apps/oficina/main/of_slideview.c:790
+Ir a la diapositiva	Ir para o slide
+
+#: apps/oficina/main/of_slideview.c:793
+PDF, una página por diapositiva (.pdf)	PDF, uma página por slide (.pdf)
+
+#: apps/oficina/main/of_slideview.c:794
+El texto, como documento de Word (.docx)	O texto, como documento do Word (.docx)
+
+#: apps/oficina/main/of_slideview.c:795
+El texto, como OpenDocument (.odt)	O texto, como OpenDocument (.odt)
+
+#: apps/oficina/main/of_slideview.c:796
+El texto (.txt)	O texto (.txt)
+
+#: apps/oficina/main/of_slideview.c:808
+Presentar	Apresentar
+
+#: apps/oficina/main/of_slideview.c:809
+Notas del orador	Notas do orador
+
+#: apps/oficina/main/of_slideview.c:810
+Ir a la diapositiva...	Ir para o slide...
+
+#: apps/oficina/main/of_text2.c:716
+Celular	Celular
+
+#: apps/oficina/main/of_text2.c:717
+Trabajo	Trabalho
+
+#: apps/oficina/main/of_text2.c:718
+Casa	Casa
+
+#: apps/oficina/main/of_text2.c:719
+Fax	Fax
+
+#: apps/oficina/main/of_text2.c:760
+(sin nombre)	(sem nome)
+
+#: apps/oficina/main/of_text2.c:766
+Organización	Organização
+
+#: apps/oficina/main/of_text2.c:766
+Cargo	Cargo
+
+#: apps/oficina/main/of_text2.c:766
+Teléfono	Telefone
+
+#: apps/oficina/main/of_text2.c:766
+Correo	E-mail
+
+#: apps/oficina/main/of_text2.c:767
+Dirección	Endereço
+
+#: apps/oficina/main/of_text2.c:767
+Web	Web
+
+#: apps/oficina/main/of_text2.c:767
+Cumpleaños	Aniversário
+
+#: apps/oficina/main/of_text2.c:767
+Apodo	Apelido
+
+#: apps/oficina/main/of_text2.c:767
+Nota	Nota
+
+#: apps/oficina/main/of_text2.c:841
+No hay contactos en este archivo.	Não há contatos neste arquivo.
+
+#: apps/oficina/main/of_text2.c:846
+%d contactos	%d contatos
+
+#: apps/oficina/main/of_text2.c:919
+Enero	Janeiro
+
+#: apps/oficina/main/of_text2.c:919
+Febrero	Fevereiro
+
+#: apps/oficina/main/of_text2.c:919
+Marzo	Março
+
+#: apps/oficina/main/of_text2.c:919
+Abril	Abril
+
+#: apps/oficina/main/of_text2.c:919
+Mayo	Maio
+
+#: apps/oficina/main/of_text2.c:919
+Junio	Junho
+
+#: apps/oficina/main/of_text2.c:920
+Julio	Julho
+
+#: apps/oficina/main/of_text2.c:920
+Agosto	Agosto
+
+#: apps/oficina/main/of_text2.c:920
+Septiembre	Setembro
+
+#: apps/oficina/main/of_text2.c:920
+Octubre	Outubro
+
+#: apps/oficina/main/of_text2.c:920
+Noviembre	Novembro
+
+#: apps/oficina/main/of_text2.c:921
+Diciembre	Dezembro
+
+#: apps/oficina/main/of_text2.c:950
+(sin título)	(sem título)
+
+#: apps/oficina/main/of_text2.c:957
+Cuándo	Quando
+
+#: apps/oficina/main/of_text2.c:958
+Vence	Vence
+
+#: apps/oficina/main/of_text2.c:959
+Dónde	Onde
+
+#: apps/oficina/main/of_text2.c:962
+Todos los días	Todos os dias
+
+#: apps/oficina/main/of_text2.c:962
+Todas las semanas	Todas as semanas
+
+#: apps/oficina/main/of_text2.c:963
+Todos los meses	Todos os meses
+
+#: apps/oficina/main/of_text2.c:963
+Todos los años	Todos os anos
+
+#: apps/oficina/main/of_text2.c:964
+Se repite	Repete
+
+#: apps/oficina/main/of_text2.c:966
+Notas	Notas
+
+#: apps/oficina/main/of_text2.c:970
+No hay eventos en este archivo.	Não há eventos neste arquivo.
+
+#: apps/oficina/main/of_text2.c:979
+%d eventos	%d eventos
+
+#: apps/oficina/main/of_text2.c:1297
+El archivo tiene un error a partir de acá.	O arquivo tem um erro a partir daqui.
+
+#: apps/oficina/main/of_text2.c:1301
+Se muestran las primeras %d líneas.	Mostrando as primeiras %d linhas.
+
+#: apps/oficina/main/of_textview.c:1075
+%d reemplazos	%d substituídos
+
+#: apps/oficina/main/of_textview.c:1134
+Reemplazar por	Substituir por
+
+#: apps/oficina/main/of_textview.c:1136
+Este	Este
+
+#: apps/oficina/main/of_textview.c:1138
+Todos	Todos
+
+#: apps/oficina/main/of_textview.c:1214
+Ir a la línea	Ir para a linha
+
+#: apps/oficina/main/of_textview.c:1222
+Se va a guardar en UTF-8	Será salvo em UTF-8
+
+#: apps/oficina/main/of_textview.c:1222
+Se va a guardar en Latin-1 (Windows-1252)	Será salvo em Latin-1 (Windows-1252)
+
+#: apps/oficina/main/of_textview.c:1228
+Finales de línea de Windows (CRLF)	Finais de linha do Windows (CRLF)
+
+#: apps/oficina/main/of_textview.c:1228
+Finales de línea de Unix y Mac (LF)	Finais de linha de Unix e Mac (LF)
+
+#: apps/oficina/main/of_textview.c:1239
+Exportar a PDF	Exportar para PDF
+
+#: apps/oficina/main/of_textview.c:1243
+Guardá los cambios primero	Salve as alterações primeiro
+
+#: apps/oficina/main/of_textview.c:1256
+Codificación: %s	Codificação: %s
+
+#: apps/oficina/main/of_textview.c:1257
+Fin de línea: %s	Fim de linha: %s
+
+#: apps/oficina/main/of_textview.c:1258
+%d líneas	%d linhas
+
+#: apps/oficina/main/of_textview.c:1262
+Buscar y reemplazar	Buscar e substituir
+
+#: apps/oficina/main/of_textview.c:1263
+Ir a la línea...	Ir para a linha...
+
+#: apps/oficina/main/of_textview.c:1264
+Ajustar las líneas	Quebrar as linhas
+
+#: apps/oficina/main/of_textview.c:1265
+Números de línea	Números de linha
+
+#: apps/oficina/main/of_textview.c:1266
+Letra de ancho fijo	Fonte de largura fixa
+
+#: apps/oficina/main/of_textview.c:1272
+Ver como árbol	Ver como árvore
+
+#: apps/oficina/main/of_textview.c:1272
+Ver con formato	Ver com formato
+
+#: apps/oficina/main/of_textview.c:1273
+Exportar a PDF...	Exportar para PDF...
+
+#: apps/oficina/main/of_ui.c:672
+#: apps/oficina/main/oficina.c:629
+Cancelar	Cancelar
+
+#: apps/oficina/main/oficina.c:323
+El archivo comprimido es muy grande para abrirlo acá (más de 64 MB)	O arquivo compactado é grande demais para abri-lo aqui (mais de 64 MB)
+
+#: apps/oficina/main/oficina.c:324
+No se pudo leer el archivo comprimido	Não foi possível ler o arquivo compactado
+
+#: apps/oficina/main/oficina.c:366
+#: apps/oficina/main/oficina.c:374
+#: apps/oficina/main/oficina.c:397
+#: apps/oficina/main/oficina.c:402
+No se pudo leer el documento	Não foi possível ler o documento
+
+#: apps/oficina/main/oficina.c:369
+#: apps/oficina/main/oficina.c:374
+La contraseña no es esa	A senha não é essa
+
+#: apps/oficina/main/oficina.c:374
+#: apps/oficina/main/oficina.c:435
+#: apps/oficina/main/oficina.c:475
+#: apps/oficina/main/oficina.c:484
+Es del formato de Office 95 o anterior: la app no lo lee	É do formato do Office 95 ou anterior: o app não o lê
+
+#: apps/oficina/main/oficina.c:394
+#: apps/oficina/main/oficina.c:450
+#: apps/oficina/main/oficina.c:466
+Este PDF tiene contraseña	Este PDF tem senha
+
+#: apps/oficina/main/oficina.c:394
+#: apps/oficina/main/oficina.c:450
+#: apps/oficina/main/oficina.c:466
+#: apps/oficina/main/oficina.c:911
+Abrir	Abrir
+
+#: apps/oficina/main/oficina.c:397
+#: apps/oficina/main/oficina.c:453
+Otra app está usando el dibujo en segundo plano: cerrala y probá de nuevo	Outro app está usando o desenho em segundo plano: feche-o e tente de novo
+
+#: apps/oficina/main/oficina.c:410
+Ese archivo ya no está	Esse arquivo não existe mais
+
+#: apps/oficina/main/oficina.c:420
+Este formato todavía no se abre: llega en una próxima versión	Este formato ainda não abre: chega numa próxima versão
+
+#: apps/oficina/main/oficina.c:424
+No es un documento que la app conozca	Não é um documento que o app conheça
+
+#: apps/oficina/main/oficina.c:434
+#: apps/oficina/main/oficina.c:474
+#: apps/oficina/main/oficina.c:483
+El archivo tiene contraseña: la app no lo puede abrir	O arquivo tem senha: o app não pode abri-lo
+
+#: apps/oficina/main/oficina.c:435
+No se pudo leer la presentación	Não foi possível ler a apresentação
+
+#: apps/oficina/main/oficina.c:452
+#: apps/oficina/main/oficina.c:470
+El PDF está cifrado de una forma que la app no conoce	O PDF está criptografado de um jeito que o app não conhece
+
+#: apps/oficina/main/oficina.c:484
+No se pudo leer la planilla	Não foi possível ler a planilha
+
+#: apps/oficina/main/oficina.c:503
+#: apps/oficina/main/oficina.c:867
+No se pudo leer el archivo	Não foi possível ler o arquivo
+
+#: apps/oficina/main/oficina.c:508
+Es una copia sacada del archivo comprimido: para quedártela, extraela con una pulsación larga	É uma cópia tirada do arquivo compactado: para ficar com ela, extraia-a com um toque longo
+
+#: apps/oficina/main/oficina.c:756
+Ese archivo tiene contraseña: la app no lo puede sacar	Esse arquivo tem senha: o app não pode tirá-lo
+
+#: apps/oficina/main/oficina.c:756
+#: apps/oficina/main/oficina.c:779
+No se pudo sacar el archivo	Não foi possível tirar o arquivo
+
+#: apps/oficina/main/oficina.c:781
+Extraído en la carpeta: %s	Extraído na pasta: %s
+
+#: apps/oficina/main/oficina.c:805
+Se extrajeron %d archivos en «%s»; %d no se pudieron	%d arquivos extraídos em «%s»; %d não foram
+
+#: apps/oficina/main/oficina.c:806
+Se extrajeron %d archivos en «%s»	%d arquivos extraídos em «%s»
+
+#: apps/oficina/main/oficina.c:849
+No se pudo cambiar el nombre	Não foi possível renomear
+
+#: apps/oficina/main/oficina.c:858
+No se pudo borrar	Não foi possível apagar
+
+#: apps/oficina/main/oficina.c:876
+No se pudo copiar	Não foi possível copiar
+
+#: apps/oficina/main/oficina.c:891
+Nuevo nombre	Novo nome
+
+#: apps/oficina/main/oficina.c:897
+¿Borrar «%s»?	Apagar «%s»?
+
+#: apps/oficina/main/oficina.c:898
+No se puede deshacer.	Não é possível desfazer.
+
+#: apps/oficina/main/oficina.c:898
+#: apps/oficina/main/oficina.c:924
+Borrar	Apagar
+
+#: apps/oficina/main/oficina.c:912
+Extraer en esta carpeta	Extrair nesta pasta
+
+#: apps/oficina/main/oficina.c:922
+Cambiar el nombre	Renomear
+
+#: apps/oficina/main/oficina.c:923
+Duplicar	Duplicar
+
+#: apps/oficina/main/oficina.c:925
+Sacar de recientes	Tirar dos recentes
+
+#: apps/oficina/main/oficina.c:990
+Hoja1	Planilha1
+
+#: apps/oficina/main/oficina.c:996
+No se pudo crear el archivo	Não foi possível criar o arquivo
+
+#: apps/oficina/main/oficina.c:1005
+Nombre de la planilla	Nome da planilha
+
+#: apps/oficina/main/oficina.c:1005
+Nombre del documento	Nome do documento
+
+#: apps/oficina/main/oficina.c:1005
+Planilla	Planilha
+
+#: apps/oficina/main/oficina.c:1005
+Documento	Documento
+
+#: apps/oficina/main/oficina.c:1006
+Crear	Criar
+
+#: apps/oficina/main/oficina.c:1019
+Markdown (.md)	Markdown (.md)
+
+#: apps/oficina/main/oficina.c:1021
+Nuevo	Novo
+
+#: apps/oficina/main/oficina.c:1045
+Fondo claro	Fundo claro
+
+#: apps/oficina/main/oficina.c:1045
+Fondo oscuro	Fundo escuro
+
+#: apps/oficina/main/oficina.c:1046
+Ir a la carpeta de documentos	Ir para a pasta de documentos
+
+#: apps/oficina/main/oficina.c:1047
+Extraer todo en una carpeta	Extrair tudo numa pasta
+
+#: apps/oficina/main/oficina.c:1136
+con contraseña	com senha
+
+#: apps/oficina/main/oficina.c:1160
+Oficina	Escritório
+
+#: apps/oficina/main/oficina.c:1174
+Recientes	Recentes
+
+#: apps/oficina/main/oficina.c:1175
+Archivos	Arquivos
+
+#: apps/oficina/main/oficina.c:1246
+Todavía no abriste ningún documento. En Archivos están los de la tarjeta, y con + se empieza uno nuevo.	Você ainda não abriu nenhum documento. Em Arquivos estão os do cartão, e com + se começa um novo.
+
+#: apps/oficina/main/oficina.c:1247
+No hay archivos en esta carpeta. Se suben desde la página Oficina del portal, o con + se crea uno.	Não há arquivos nesta pasta. Envie-os pela página Escritório do portal, ou crie um com +.
+
+#: apps/oficina/main/oficina.c:1342
+Salir sin guardar	Sair sem salvar
+
+#: apps/oficina/main/oficina.c:1344
+Hay cambios sin guardar	Há alterações não salvas

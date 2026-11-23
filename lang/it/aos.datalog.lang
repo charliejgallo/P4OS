@@ -1,0 +1,689 @@
+# amoledos-lang 1   es -> it
+# aos.datalog.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/datalog/main/datalog.c:139
+Alarma de Datalog	Allarme Datalog
+
+#: apps/datalog/main/datalog.c:148
+ya volvió a lo normal	già tornato normale
+
+#: apps/datalog/main/datalog.c:156
+y %d más	e altri %d
+
+#: apps/datalog/main/datalog.c:160
+Ver	Vedi
+
+#: apps/datalog/main/datalog.c:162
+Entendido	Ho capito
+
+#: apps/datalog/main/dl_cfg.c:91
+a las	alle
+
+#: apps/datalog/main/dl_cfg.c:94
+sin horario	senza orari
+
+#: apps/datalog/main/dl_cfg.c:98
+cada %u h	ogni %u h
+
+#: apps/datalog/main/dl_cfg.c:99
+cada %u min	ogni %u min
+
+#: apps/datalog/main/dl_cfg.c:100
+cada %u s	ogni %u s
+
+#: apps/datalog/main/dl_csv.c:111
+fecha	data
+
+#: apps/datalog/main/dl_csv.c:113
+hora	ora
+
+#: apps/datalog/main/dl_csv.c:117
+nota	nota
+
+#: apps/datalog/main/dl_edit.c:52
+Analógica %s	Analogica %s
+
+#: apps/datalog/main/dl_edit.c:71
+#: apps/datalog/main/dl_edit.c:644
+Nombre	Nome
+
+#: apps/datalog/main/dl_edit.c:119
+Cada cuántas horas	Ogni quante ore
+
+#: apps/datalog/main/dl_edit.c:119
+Cada cuántos minutos	Ogni quanti minuti
+
+#: apps/datalog/main/dl_edit.c:119
+Cada cuántos segundos	Ogni quanti secondi
+
+#: apps/datalog/main/dl_edit.c:126
+Hasta 8 horas por lectura	Fino a 8 orari per lettura
+
+#: apps/datalog/main/dl_edit.c:136
+A qué hora lee	A che ora legge
+
+#: apps/datalog/main/dl_edit.c:220
+Rango de ±%s V guardado en modules.txt	Portata di ±%s V salvata in modules.txt
+
+#: apps/datalog/main/dl_edit.c:223
+No se pudo cambiar modules.txt	Impossibile modificare modules.txt
+
+#: apps/datalog/main/dl_edit.c:227
+Buscando sensores…	Ricerca sensori…
+
+#: apps/datalog/main/dl_edit.c:232
+Alarma baja: menos de	Allarme basso: sotto
+
+#: apps/datalog/main/dl_edit.c:233
+Alarma alta: más de	Allarme alto: sopra
+
+#: apps/datalog/main/dl_edit.c:234
+#: apps/datalog/main/dl_edit.c:571
+Histéresis	Isteresi
+
+#: apps/datalog/main/dl_edit.c:239
+Tensión del punto 1 (V)	Tensione del punto 1 (V)
+
+#: apps/datalog/main/dl_edit.c:240
+Valor del punto 1	Valore del punto 1
+
+#: apps/datalog/main/dl_edit.c:241
+Tensión del punto 2 (V)	Tensione del punto 2 (V)
+
+#: apps/datalog/main/dl_edit.c:242
+Valor del punto 2	Valore del punto 2
+
+#: apps/datalog/main/dl_edit.c:244
+#: apps/datalog/main/dl_edit.c:502
+Unidad	Unità
+
+#: apps/datalog/main/dl_edit.c:258
+Falta elegir qué lee	Prima scegli cosa legge
+
+#: apps/datalog/main/dl_edit.c:259
+Agregá al menos una hora	Aggiungi almeno un orario
+
+#: apps/datalog/main/dl_edit.c:261
+La alarma baja tiene que ser menor que la alta	L'allarme basso deve stare sotto quello alto
+
+#: apps/datalog/main/dl_edit.c:263
+La salida de la alarma no puede ser el pin que lee	L'uscita dell'allarme non può essere il pin che legge
+
+#: apps/datalog/main/dl_edit.c:273
+El GPIO%d lo lee «%s»	Il GPIO%d è letto da «%s»
+
+#: apps/datalog/main/dl_edit.c:275
+El GPIO%d es la salida de una alarma de «%s»	Il GPIO%d è l'uscita di un allarme di «%s»
+
+#: apps/datalog/main/dl_edit.c:280
+Lectura	Lettura
+
+#: apps/datalog/main/dl_edit.c:281
+No se pudo guardar	Impossibile salvare
+
+#: apps/datalog/main/dl_edit.c:285
+Guardado	Salvato
+
+#: apps/datalog/main/dl_edit.c:285
+Guardado. Tocá ▶ para empezar a registrar.	Salvato. Tocca ▶ per iniziare a registrare.
+
+#: apps/datalog/main/dl_edit.c:294
+Lectura borrada; su CSV queda en la tarjeta	Lettura eliminata; il suo CSV resta sulla microSD
+
+#: apps/datalog/main/dl_edit.c:301
+¿Borrar esta lectura? Deja de leer; el archivo con lo que ya anotó queda en la tarjeta.	Eliminare questa lettura? Smette di leggere; il file con quanto già registrato resta sulla microSD.
+
+#: apps/datalog/main/dl_edit.c:301
+#: apps/datalog/main/dl_view.c:283
+Borrar	Elimina
+
+#: apps/datalog/main/dl_edit.c:326
+CADA CUÁNTO LEE	OGNI QUANTO LEGGE
+
+#: apps/datalog/main/dl_edit.c:328
+Cada cierto tiempo	A intervalli
+
+#: apps/datalog/main/dl_edit.c:329
+A ciertas horas	A orari fissi
+
+#: apps/datalog/main/dl_edit.c:334
+Cada	Ogni
+
+#: apps/datalog/main/dl_edit.c:336
+segundos	secondi
+
+#: apps/datalog/main/dl_edit.c:337
+minutos	minuti
+
+#: apps/datalog/main/dl_edit.c:338
+horas	ore
+
+#: apps/datalog/main/dl_edit.c:345
+Lee apenas empieza a registrar y después a horario fijo: cada 5 min es a las :00, :05, :10…	Legge appena inizia a registrare e poi a orario fisso: ogni 5 min è alle :00, :05, :10…
+
+#: apps/datalog/main/dl_edit.c:353
++ Hora	+ Ora
+
+#: apps/datalog/main/dl_edit.c:354
+Todos los días a esas horas. Necesita la hora de la red: sin ella no lee.	Tutti i giorni a quegli orari. Serve l'ora di rete: senza, non legge.
+
+#: apps/datalog/main/dl_edit.c:366
+Buscar de nuevo	Cerca di nuovo
+
+#: apps/datalog/main/dl_edit.c:367
+Abrir Módulos	Apri Moduli
+
+#: apps/datalog/main/dl_edit.c:395
+No hay ningún ADS1115. Conectalo a i2c.ext (SDA GPIO21 pin 15, SCL GPIO22 pin 17, 3V3 y GND): se reconoce solo en unos segundos.	Non c'è nessun ADS1115. Collegalo a i2c.ext (SDA GPIO21 pin 15, SCL GPIO22 pin 17, 3V3 e GND): viene riconosciuto da solo in pochi secondi.
+
+#: apps/datalog/main/dl_edit.c:396
+No hay sensores I2C. Los conocidos se reconocen solos en i2c.ext (SDA GPIO21, SCL GPIO22); los pocos que no se pueden reconocer sin riesgo (PCF8591, PCF8574, LM75…) se declaran en Módulos.	Nessun sensore I2C. Quelli noti vengono riconosciuti da soli su i2c.ext (SDA GPIO21, SCL GPIO22); i pochi che non si possono riconoscere senza rischi (PCF8591, PCF8574, LM75…) si dichiarano in Moduli.
+
+#: apps/datalog/main/dl_edit.c:397
+No hay sensores SPI. Una termocupla (MAX6675, MAX31855), una PT100 (MAX31865) o un MCP3008 se declaran en Módulos (Puertos, Agregar): el puerto spi.a y su CS.	Nessun sensore SPI. Una termocoppia (MAX6675, MAX31855), una PT100 (MAX31865) o un MCP3008 si dichiarano in Moduli (Porte, Aggiungi): la porta spi.a e il suo CS.
+
+#: apps/datalog/main/dl_edit.c:398
+No hay sensores de pines. Un DHT22, un HC-SR04, una balanza HX711, un caudalímetro o un PIR se declaran en Módulos (Puertos, Agregar): se eligen sus pines.	Nessun sensore su pin. Un DHT22, un HC-SR04, una bilancia HX711, un flussimetro o un PIR si dichiarano in Moduli (Porte, Aggiungi): se ne scelgono i pin.
+
+#: apps/datalog/main/dl_edit.c:399
+No hay sensores por puerto serie. Un MH-Z19, un PMS5003, un PZEM-004T o un radar LD2410 se declaran en Módulos (Puertos, Agregar), en uart.a.	Nessun sensore seriale. Un MH-Z19, un PMS5003, un PZEM-004T o un radar LD2410 si dichiarano in Moduli (Porte, Aggiungi), su uart.a.
+
+#: apps/datalog/main/dl_edit.c:400
+No hay sensores 1-Wire. Un bus de DS18B20 se declara en Módulos (Puertos, Agregar, DS18B20): se elige el pin.	Nessun sensore 1-Wire. Un bus di DS18B20 si dichiara in Moduli (Porte, Aggiungi, DS18B20): si sceglie il pin.
+
+#: apps/datalog/main/dl_edit.c:407
+BUS 1-WIRE	BUS 1-WIRE
+
+#: apps/datalog/main/dl_edit.c:407
+BUS	BUS
+
+#: apps/datalog/main/dl_edit.c:420
+SENSOR	SENSORE
+
+#: apps/datalog/main/dl_edit.c:433
+Ese sensor no está ahora: la lectura anota el error hasta que vuelva.	Quel sensore ora non c'è: la lettura registra l'errore finché non torna.
+
+#: apps/datalog/main/dl_edit.c:448
+ENTRADA	INGRESSO
+
+#: apps/datalog/main/dl_edit.c:448
+VARIABLE	VALORE
+
+#: apps/datalog/main/dl_edit.c:473
+RANGO	PORTATA
+
+#: apps/datalog/main/dl_edit.c:481
+Es el gain= del ADS1115 en modules.txt y vale para sus cuatro entradas; se guarda al elegirlo. Nunca más de 3,3 V en una entrada, sea cual sea el rango.	È il gain= dell'ADS1115 in modules.txt e vale per i suoi quattro ingressi; si salva quando lo scegli. Mai più di 3,3 V su un ingresso, qualunque sia la portata.
+
+#: apps/datalog/main/dl_edit.c:482
+QUÉ ANOTA	COSA REGISTRA
+
+#: apps/datalog/main/dl_edit.c:484
+Tensión (V)	Tensione (V)
+
+#: apps/datalog/main/dl_edit.c:485
+Crudo (cuentas)	Grezzo (conteggi)
+
+#: apps/datalog/main/dl_edit.c:486
+Estimado (escala)	Stimato (scala)
+
+#: apps/datalog/main/dl_edit.c:490
+Las cuentas del convertidor, de -32768 a 32767: 32767 son %s V con este rango.	I conteggi del convertitore, da -32768 a 32767: 32767 sono %s V con questa portata.
+
+#: apps/datalog/main/dl_edit.c:495
+Punto 1: tensión	Punto 1: tensione
+
+#: apps/datalog/main/dl_edit.c:497
+Punto 1: valor	Punto 1: valore
+
+#: apps/datalog/main/dl_edit.c:499
+Punto 2: tensión	Punto 2: tensione
+
+#: apps/datalog/main/dl_edit.c:501
+Punto 2: valor	Punto 2: valore
+
+#: apps/datalog/main/dl_edit.c:502
+ninguna	nessuna
+
+#: apps/datalog/main/dl_edit.c:503
+Una recta por los dos puntos: un sensor de presión que da 0,5 V a 0 bar y 4,5 V a 10 bar es 0,5 → 0 y 4,5 → 10, en bar.	Una retta per i due punti: un sensore di pressione che dà 0,5 V a 0 bar e 4,5 V a 10 bar è 0,5 → 0 e 4,5 → 10, in bar.
+
+#: apps/datalog/main/dl_edit.c:509
+PIN	PIN
+
+#: apps/datalog/main/dl_edit.c:529
+Es el pin %d del header; ahora lo tiene %s.	È il pin %d dell'header; ora lo usa %s.
+
+#: apps/datalog/main/dl_edit.c:530
+Es el pin %d del header. Sólo 3,3 V: nunca 5 V en un GPIO.	È il pin %d dell'header. Solo 3,3 V: mai 5 V su un GPIO.
+
+#: apps/datalog/main/dl_edit.c:533
+Los pines que no son de un bus de sensores (i2c.ext, spi.a, un 1-Wire) ni de otra app; los de un puerto serie o un módulo, al final.	I pin che non sono di un bus di sensori (i2c.ext, spi.a, un 1-Wire) né di un'altra app; quelli di una porta seriale o di un modulo, in fondo.
+
+#: apps/datalog/main/dl_edit.c:535
+RESISTENCIA	RESISTENZA
+
+#: apps/datalog/main/dl_edit.c:539
+#: apps/datalog/main/dl_edit.c:581
+Ninguna	Nessuna
+
+#: apps/datalog/main/dl_edit.c:540
+Con pull-up un contacto o botón a GND lee 0 cuando se cierra.	Con pull-up un contatto o pulsante verso GND legge 0 quando si chiude.
+
+#: apps/datalog/main/dl_edit.c:541
+Con pull-down un contacto a 3V3 lee 1 cuando se cierra.	Con pull-down un contatto verso 3V3 legge 1 quando si chiude.
+
+#: apps/datalog/main/dl_edit.c:542
+Sin resistencia: para una salida que siempre maneja el nivel (un módulo con su propio pull-up).	Senza resistenza: per un'uscita che pilota sempre il livello (un modulo con il proprio pull-up).
+
+#: apps/datalog/main/dl_edit.c:543
+LÓGICA	LOGICA
+
+#: apps/datalog/main/dl_edit.c:545
+Normal: alto es 1	Normale: alto è 1
+
+#: apps/datalog/main/dl_edit.c:546
+Invertida: alto es 0	Invertita: alto è 0
+
+#: apps/datalog/main/dl_edit.c:551
+QUÉ VALOR	QUALE VALORE
+
+#: apps/datalog/main/dl_edit.c:554
+Valores de la placa misma, para seguir la red o la memoria a lo largo de un día.	Valori della scheda stessa, per seguire la rete o la memoria nell'arco di un giorno.
+
+#: apps/datalog/main/dl_edit.c:559
+#: apps/datalog/main/dl_view.c:290
+ALARMAS	ALLARMI
+
+#: apps/datalog/main/dl_edit.c:561
+Baja	Basso
+
+#: apps/datalog/main/dl_edit.c:562
+Alta	Alto
+
+#: apps/datalog/main/dl_edit.c:564
+Una alarma avisa cuando el valor pasa un límite: con sonido y un mensaje, o sólo con una nota en el CSV; y puede manejar un GPIO (un relé, una luz).	Un allarme avvisa quando il valore supera un limite: con un suono e un messaggio, o solo con una nota nel CSV; e può pilotare un GPIO (un relè, una luce).
+
+#: apps/datalog/main/dl_edit.c:568
+Baja: menos de	Basso: sotto
+
+#: apps/datalog/main/dl_edit.c:569
+Alta: más de	Alto: sopra
+
+#: apps/datalog/main/dl_edit.c:572
+Para que no se prenda y se apague cerca del límite: una alarma alta termina cuando el valor baja de alta menos la histéresis (y una baja, al revés).	Per evitare che si accenda e si spenga vicino al limite: un allarme alto finisce quando il valore scende sotto alto meno l'isteresi (e uno basso, al contrario).
+
+#: apps/datalog/main/dl_edit.c:573
+AVISO	AVVISO
+
+#: apps/datalog/main/dl_edit.c:575
+Sonido y mensaje en pantalla	Suono e messaggio sullo schermo
+
+#: apps/datalog/main/dl_edit.c:576
+Sólo una nota en el CSV	Solo una nota nel CSV
+
+#: apps/datalog/main/dl_edit.c:577
+SALIDA	USCITA
+
+#: apps/datalog/main/dl_edit.c:596
+NIVEL CON ALARMA	LIVELLO IN ALLARME
+
+#: apps/datalog/main/dl_edit.c:598
+Alto (3V3)	Alto (3V3)
+
+#: apps/datalog/main/dl_edit.c:599
+Bajo (GND)	Basso (GND)
+
+#: apps/datalog/main/dl_edit.c:602
+El GPIO%d (pin %d) queda en ese nivel mientras dure la alarma, y en el otro el resto del tiempo y en pausa. Para un módulo de relé, el nivel con el que se activa (muchos, con GND).	Il GPIO%d (pin %d) resta a quel livello finché dura l'allarme, e all'altro il resto del tempo e in pausa. Per un modulo relè, il livello che lo attiva (per molti, GND).
+
+#: apps/datalog/main/dl_edit.c:612
+Elegí qué lee	Scegli cosa legge
+
+#: apps/datalog/main/dl_edit.c:613
+El pin se lee una vez guardada la lectura	Il pin si legge una volta salvata la lettura
+
+#: apps/datalog/main/dl_edit.c:617
+Ahora: %s	Adesso: %s
+
+#: apps/datalog/main/dl_edit.c:644
+(se pone solo)	(automatico)
+
+#: apps/datalog/main/dl_edit.c:647
+TIPO DE SENSOR	TIPO DI SENSORE
+
+#: apps/datalog/main/dl_edit.c:652
+Digital	Digitale
+
+#: apps/datalog/main/dl_edit.c:653
+Analógica (ADS1115)	Analogica (ADS1115)
+
+#: apps/datalog/main/dl_edit.c:673
+Borrar esta lectura	Elimina questa lettura
+
+#: apps/datalog/main/dl_edit.c:717
+#: apps/datalog/main/dl_ui.c:346
+Cancelar	Annulla
+
+#: apps/datalog/main/dl_edit.c:719
+Guardar	Salva
+
+#: apps/datalog/main/dl_edit.c:721
+Editar	Modifica
+
+#: apps/datalog/main/dl_edit.c:721
+Nueva lectura	Nuova lettura
+
+#: apps/datalog/main/dl_engine.c:201
+El GPIO%d lo tiene %s	Il GPIO%d lo usa %s
+
+#: apps/datalog/main/dl_engine.c:202
+No se pudo tomar el GPIO%d	Impossibile prendere il GPIO%d
+
+#: apps/datalog/main/dl_engine.c:315
+sin hora	senza ora
+
+#: apps/datalog/main/dl_engine.c:332
+ALTA: más de %s	ALTO: sopra %s
+
+#: apps/datalog/main/dl_engine.c:333
+BAJA: menos de %s	BASSO: sotto %s
+
+#: apps/datalog/main/dl_engine.c:334
+Vuelve a lo normal	Torna normale
+
+#: apps/datalog/main/dl_engine.c:335
+alta	alto
+
+#: apps/datalog/main/dl_engine.c:336
+baja	basso
+
+#: apps/datalog/main/dl_engine.c:356
+No se pudo escribir en la tarjeta	Impossibile scrivere sulla microSD
+
+#: apps/datalog/main/dl_list.c:40
+Primero agregá una lectura con +	Prima aggiungi una lettura con +
+
+#: apps/datalog/main/dl_list.c:43
+Todavía no hay hora de la red: anota el tiempo desde el arranque	Ancora nessuna ora di rete: registra il tempo dall'avvio
+
+#: apps/datalog/main/dl_list.c:44
+#: apps/datalog/main/dl_list.c:96
+Registrando	Registrazione
+
+#: apps/datalog/main/dl_list.c:44
+#: apps/datalog/main/dl_list.c:96
+En pausa	In pausa
+
+#: apps/datalog/main/dl_list.c:54
+Ya hay 16 lecturas: es el máximo	Ci sono già 16 letture: è il massimo
+
+#: apps/datalog/main/dl_list.c:88
+sin hora de la red	senza ora di rete
+
+#: apps/datalog/main/dl_list.c:222
+#: apps/datalog/main/dl_list.c:242
+Formato del CSV	Formato CSV
+
+#: apps/datalog/main/dl_list.c:224
+Coma y punto decimal	Virgola, punto decimale
+
+#: apps/datalog/main/dl_list.c:225
+Punto y coma y coma decimal	Punto e virgola, virgola decimale
+
+#: apps/datalog/main/dl_list.c:226
+Coma y punto es el estándar (LibreOffice, Google Sheets, Python). Punto y coma con coma decimal es lo que espera Excel en castellano. Vale para las líneas nuevas: un archivo que ya existe sigue con lo suyo hasta que se borre.	Virgola e punto è lo standard (LibreOffice, Google Sheets, Python). Punto e virgola con virgola decimale è ciò che si aspetta Excel in italiano. Vale per le righe nuove: un file che esiste già mantiene il suo finché non viene eliminato.
+
+#: apps/datalog/main/dl_list.c:241
+AJUSTES	IMPOSTAZIONI
+
+#: apps/datalog/main/dl_list.c:242
+Punto y coma	Punto e virgola
+
+#: apps/datalog/main/dl_list.c:242
+Coma	Virgola
+
+#: apps/datalog/main/dl_list.c:243
+Sensores y puertos	Sensori e porte
+
+#: apps/datalog/main/dl_list.c:243
+Módulos	Moduli
+
+#: apps/datalog/main/dl_list.c:248
+Cada lectura va a su archivo en %s de la tarjeta (se bajan desde el portal, en Datalog). Mientras registra, la app sigue con la pantalla en otra cosa y arranca sola con la placa; en pausa no.	Ogni lettura va nel suo file in %s della microSD (si scaricano dal portale, in Datalog). Mentre registra, l'app continua anche con altro sullo schermo e parte da sola con la scheda; in pausa no.
+
+#: apps/datalog/main/dl_list.c:278
+Todavía no hay lecturas	Ancora nessuna lettura
+
+#: apps/datalog/main/dl_list.c:279
+Cada lectura es un valor que se anota en un CSV con la fecha y la hora: un sensor (I2C, SPI, 1-Wire, de pines o por puerto serie), una entrada del ADS1115 o un pin del header, cada tanto o a ciertas horas, con alarmas si querés.	Ogni lettura è un valore che si registra in un CSV con data e ora: un sensore (I2C, SPI, 1-Wire, su pin o su porta seriale), un ingresso dell'ADS1115 o un pin dell'header, a intervalli o a orari fissi, con allarmi se vuoi.
+
+#: apps/datalog/main/dl_list.c:280
+Agregar una lectura	Aggiungi una lettura
+
+#: apps/datalog/main/dl_list.c:337
+ALTA	ALTO
+
+#: apps/datalog/main/dl_list.c:337
+BAJA	BASSO
+
+#: apps/datalog/main/dl_src.c:79
+Pines	Pin
+
+#: apps/datalog/main/dl_src.c:80
+Serie	Seriale
+
+#: apps/datalog/main/dl_src.c:81
+Otros	Altri
+
+#: apps/datalog/main/dl_src.c:88
+Señal Wi-Fi	Segnale Wi-Fi
+
+#: apps/datalog/main/dl_src.c:89
+PSRAM libre	PSRAM libera
+
+#: apps/datalog/main/dl_src.c:90
+RAM interna libre	RAM interna libera
+
+#: apps/datalog/main/dl_src.c:91
+Tiempo encendida	Tempo acceso
+
+#: apps/datalog/main/dl_src.c:97
+Temperatura	Temperatura
+
+#: apps/datalog/main/dl_src.c:98
+Humedad	Umidità
+
+#: apps/datalog/main/dl_src.c:99
+Presión	Pressione
+
+#: apps/datalog/main/dl_src.c:100
+Luz	Luce
+
+#: apps/datalog/main/dl_src.c:101
+Tensión	Tensione
+
+#: apps/datalog/main/dl_src.c:102
+Corriente	Corrente
+
+#: apps/datalog/main/dl_src.c:103
+Potencia	Potenza
+
+#: apps/datalog/main/dl_src.c:104
+En el shunt	Sullo shunt
+
+#: apps/datalog/main/dl_src.c:271
+No contesta: MISO quedó en 1. ¿Alimentación, CS, cables?	Non risponde: MISO è rimasto a 1. Alimentazione, CS, cavi?
+
+#: apps/datalog/main/dl_src.c:272
+No contesta en el bus 1-Wire. ¿Alimentación, la resistencia de 4,7 kΩ, cables?	Non risponde sul bus 1-Wire. Alimentazione, la resistenza da 4,7 kΩ, cavi?
+
+#: apps/datalog/main/dl_src.c:273
+No contesta en el pin. ¿Alimentación, cables, el modelo?	Non risponde sul pin. Alimentazione, cavi, il modello?
+
+#: apps/datalog/main/dl_src.c:274
+No contesta por el puerto serie. ¿TX y RX cruzados, alimentación?	Non risponde sulla porta seriale. TX e RX incrociati, alimentazione?
+
+#: apps/datalog/main/dl_src.c:275
+No contesta en esa dirección	Non risponde a quell'indirizzo
+
+#: apps/datalog/main/dl_src.c:276
+No se entiende lo que manda: ¿otra velocidad u otro sensor?	Non si capisce cosa invia: un'altra velocità o un altro sensore?
+
+#: apps/datalog/main/dl_src.c:277
+Llegó una lectura con el CRC mal	È arrivata una lettura con CRC errato
+
+#: apps/datalog/main/dl_src.c:278
+En esa dirección hay otro chip (dice %s)	A quell'indirizzo c'è un altro chip (dice %s)
+
+#: apps/datalog/main/dl_src.c:279
+#: apps/datalog/main/dl_src.c:460
+Todavía no midió	Non ancora misurato
+
+#: apps/datalog/main/dl_src.c:280
+Los pines los tiene %s	I pin li usa %s
+
+#: apps/datalog/main/dl_src.c:281
+No se pudo abrir el puerto	Impossibile aprire la porta
+
+#: apps/datalog/main/dl_src.c:282
+Ahí está el %s de la placa	Lì c'è il %s della scheda
+
+#: apps/datalog/main/dl_src.c:283
+La RTD está abierta o le falta un cable	La RTD è aperta o manca un filo
+
+#: apps/datalog/main/dl_src.c:284
+La termocupla está en corto a GND	La termocoppia è in corto a GND
+
+#: apps/datalog/main/dl_src.c:285
+La termocupla está en corto a VCC	La termocoppia è in corto a VCC
+
+#: apps/datalog/main/dl_src.c:286
+Una punta de la termocupla toca VCC o GND	Un capo della termocoppia tocca VCC o GND
+
+#: apps/datalog/main/dl_src.c:287
+La termocupla está abierta (o no está conectada)	La termocoppia è aperta (o non è collegata)
+
+#: apps/datalog/main/dl_src.c:288
+La RTD está en corto	La RTD è in corto
+
+#: apps/datalog/main/dl_src.c:289
+Fuera de rango	Fuori scala
+
+#: apps/datalog/main/dl_src.c:290
+Falta %s= en la línea del módulo	Manca %s= nella riga del modulo
+
+#: apps/datalog/main/dl_src.c:439
+No se pudo leer el pin	Impossibile leggere il pin
+
+#: apps/datalog/main/dl_src.c:447
+Sin Wi-Fi	No Wi-Fi
+
+#: apps/datalog/main/dl_src.c:458
+El sensor no está: ¿se desconectó o se borró de modules.txt?	Il sensore non c'è: scollegato o rimosso da modules.txt?
+
+#: apps/datalog/main/dl_src.c:467
+La escala tiene los dos puntos en la misma tensión	La scala ha i due punti alla stessa tensione
+
+#: apps/datalog/main/dl_src.c:485
+sin resistencia	senza resistenza
+
+#: apps/datalog/main/dl_src.c:486
+ · invertida	 · invertita
+
+#: apps/datalog/main/dl_src.c:498
+en volts	in volt
+
+#: apps/datalog/main/dl_src.c:498
+crudo	grezzo
+
+#: apps/datalog/main/dl_src.c:498
+escalado	scalato
+
+#: apps/datalog/main/dl_ui.c:215
+No es un número	Non è un numero
+
+#: apps/datalog/main/dl_ui.c:322
+Listo	Fatto
+
+#: apps/datalog/main/dl_view.c:18
+7 días	7 gg
+
+#: apps/datalog/main/dl_view.c:19
+30 días	30 gg
+
+#: apps/datalog/main/dl_view.c:19
+Todo	Tutto
+
+#: apps/datalog/main/dl_view.c:101
+No hay lecturas en este rango.	Nessuna lettura in questo intervallo.
+
+#: apps/datalog/main/dl_view.c:101
+Todavía no hay lecturas en el archivo.	Ancora nessuna lettura nel file.
+
+#: apps/datalog/main/dl_view.c:161
+mín %s · máx %s · promedio %s\nde %d lecturas tomadas a lo largo del archivo	min %s · max %s · media %s\nsu %d letture prese lungo tutto il file
+
+#: apps/datalog/main/dl_view.c:162
+mín %s · máx %s · promedio %s\n%d lecturas en el rango	min %s · max %s · media %s\n%d letture nell'intervallo
+
+#: apps/datalog/main/dl_view.c:180
+la última: %s	l'ultima: %s
+
+#: apps/datalog/main/dl_view.c:181
+todavía sin leer	non ancora letto
+
+#: apps/datalog/main/dl_view.c:220
+mantené apretado para leer	tieni premuto per leggere
+
+#: apps/datalog/main/dl_view.c:241
+sin lecturas	nessuna lettura
+
+#: apps/datalog/main/dl_view.c:274
+Datos borrados	Dati eliminati
+
+#: apps/datalog/main/dl_view.c:274
+No había datos	Non c'erano dati
+
+#: apps/datalog/main/dl_view.c:282
+¿Borrar %s.csv con todas sus lecturas? La línea sigue y empieza un archivo nuevo.	Eliminare %s.csv con tutte le sue letture? La lettura continua e inizia un nuovo file.
+
+#: apps/datalog/main/dl_view.c:297
+Sin alarmas. Se agregan desde Editar.	Nessun allarme. Si aggiungono da Modifica.
+
+#: apps/datalog/main/dl_view.c:302
+Alta: más de %s	Alto: sopra %s
+
+#: apps/datalog/main/dl_view.c:307
+Baja: menos de %s	Basso: sotto %s
+
+#: apps/datalog/main/dl_view.c:313
+Histéresis %s. 	Isteresi %s. 
+
+#: apps/datalog/main/dl_view.c:315
+Avisa con sonido y en pantalla, y lo anota en el CSV.	Avvisa con un suono e sullo schermo, e lo registra nel CSV.
+
+#: apps/datalog/main/dl_view.c:315
+Sólo lo anota en el CSV.	Lo registra solo nel CSV.
+
+#: apps/datalog/main/dl_view.c:317
+ El GPIO%d va a %s mientras dure.	 Il GPIO%d va a %s finché dura.
+
+#: apps/datalog/main/dl_view.c:323
+ARCHIVO	FILE
+
+#: apps/datalog/main/dl_view.c:330
+todavía no existe	non esiste ancora
+
+#: apps/datalog/main/dl_view.c:336
+Se baja desde el portal (Datalog) o se abre en Archivos, que también lo grafica.	Si scarica dal portale (Datalog) o si apre in File, che ne fa anche il grafico.
+
+#: apps/datalog/main/dl_view.c:337
+Borrar los datos	Elimina i dati
+
+#: apps/datalog/main/dl_view.c:377
+Cargando…	Carico…

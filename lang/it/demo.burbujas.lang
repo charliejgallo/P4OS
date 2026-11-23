@@ -1,0 +1,102 @@
+# amoledos-lang 1   es -> it
+# demo.burbujas.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/burbujas/main/burbujas.c:57
+Clásico	Classico
+
+#: apps/burbujas/main/burbujas.c:57
+Niveles	Livelli
+
+#: apps/burbujas/main/burbujas.c:57
+Contrarreloj	A tempo
+
+#: apps/burbujas/main/burbujas.c:60
+Sin fin	Infinito
+
+#: apps/burbujas/main/burbujas.c:60
+Despejá el tablero	Svuota il campo
+
+#: apps/burbujas/main/burbujas.c:60
+Dos minutos	Due minuti
+
+#: apps/burbujas/main/burbujas.c:370
+#: apps/burbujas/main/burbujas.c:416
+#: apps/burbujas/main/burbujas.c:563
+Nivel	Liv.
+
+#: apps/burbujas/main/burbujas.c:383
+Sonido	Suono
+
+#: apps/burbujas/main/burbujas.c:420
+¡Un color más!	Un colore in più!
+
+#: apps/burbujas/main/burbujas.c:423
+¡Tablero limpio!	Campo libero!
+
+#: apps/burbujas/main/burbujas.c:426
+¡Bomba!	Bomba!
+
+#: apps/burbujas/main/burbujas.c:426
+¡Comodín!	Jolly!
+
+#: apps/burbujas/main/burbujas.c:430
+¡Últimos 10 segundos!	Ultimi 10 secondi!
+
+#: apps/burbujas/main/burbujas.c:433
+#: apps/burbujas/main/burbujas.c:555
+¡Tiempo!	Tempo!
+
+#: apps/burbujas/main/burbujas.c:437
+#: apps/burbujas/main/burbujas.c:553
+¡Nivel superado!	Livello superato!
+
+#: apps/burbujas/main/burbujas.c:441
+#: apps/burbujas/main/burbujas.c:553
+#: apps/burbujas/main/burbujas.c:556
+¡Se acabó!	Finita!
+
+#: apps/burbujas/main/burbujas.c:554
+¡Nuevo récord!	Nuovo record!
+
+#: apps/burbujas/main/burbujas.c:573
+Reventadas	Scoppiate
+
+#: apps/burbujas/main/burbujas.c:574
+Mejor caída	Miglior cascata
+
+#: apps/burbujas/main/burbujas.c:578
+Mejor nivel	Liv. migliore
+
+#: apps/burbujas/main/burbujas.c:581
+Récord	Record
+
+#: apps/burbujas/main/burbujas.c:586
+Siguiente	Avanti
+
+#: apps/burbujas/main/burbujas.c:586
+#: apps/burbujas/main/burbujas.c:1054
+Otra vez	Ancora
+
+#: apps/burbujas/main/burbujas.c:991
+#: apps/burbujas/main/burbujas.c:995
+Burbujas	Bolle
+
+#: apps/burbujas/main/burbujas.c:1010
+Arrastrá para apuntar y soltá para tirar. Tocá abajo para cambiar la burbuja.	Trascina per mirare e rilascia per tirare. Tocca in basso per cambiare bolla.
+
+#: apps/burbujas/main/burbujas.c:1028
+Pausa	Pausa
+
+#: apps/burbujas/main/burbujas.c:1029
+Seguir	Riprendi
+
+#: apps/burbujas/main/burbujas.c:1031
+#: apps/burbujas/main/burbujas.c:1058
+Menú	Menu
+
+#: apps/burbujas/main/burbujas.c:1033
+Salir	Esci

@@ -1,0 +1,88 @@
+# amoledos-lang 1   es -> pt
+# aos.cotiz.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/cotiz/main/cotiz.c:241
+dólar	dólar
+
+#: apps/cotiz/main/cotiz.c:241
+moneda	moeda
+
+#: apps/cotiz/main/cotiz.c:283
+compra %s	compra %s
+
+#: apps/cotiz/main/cotiz.c:308
+actualizando…	atualizando…
+
+#: apps/cotiz/main/cotiz.c:312
+dolarapi.com  ·  al día	dolarapi.com  ·  em dia
+
+#: apps/cotiz/main/cotiz.c:314
+la más vieja, %s	mais antiga, %s
+
+#: apps/cotiz/main/cotiz.c:319
+#: apps/cotiz/main/cotiz.c:498
+sin conexión	sem conexão
+
+#: apps/cotiz/main/cotiz.c:321
+esperando la hora de la red…	esperando a hora da rede…
+
+#: apps/cotiz/main/cotiz.c:323
+no pude verificar el servidor	falha ao verificar o servidor
+
+#: apps/cotiz/main/cotiz.c:325
+no se pudo consultar (%d)	falha na consulta (%d)
+
+#: apps/cotiz/main/cotiz.c:327
+tocá para actualizar  ·  elegí cuáles en el portal	toque para atualizar  ·  escolha quais no portal
+
+#: apps/cotiz/main/cotiz.c:522
+Cotizaciones	Cotações
+
+#: apps/cotiz/main/cz_api.c:23
+Oficial	Oficial
+
+#: apps/cotiz/main/cz_api.c:24
+Blue	Blue
+
+#: apps/cotiz/main/cz_api.c:25
+Bolsa (MEP)	Bolsa (MEP)
+
+#: apps/cotiz/main/cz_api.c:26
+Contado c/liqui	Contado c/liqui (CCL)
+
+#: apps/cotiz/main/cz_api.c:27
+Mayorista	Atacado
+
+#: apps/cotiz/main/cz_api.c:28
+Cripto	Cripto
+
+#: apps/cotiz/main/cz_api.c:29
+Tarjeta	Cartão
+
+#: apps/cotiz/main/cz_api.c:30
+Euro	Euro
+
+#: apps/cotiz/main/cz_api.c:31
+Real	Real
+
+#: apps/cotiz/main/cz_api.c:32
+Peso chileno	Peso chileno
+
+#: apps/cotiz/main/cz_api.c:33
+Peso uruguayo	Peso uruguaio
+
+#: apps/cotiz/main/cz_api.c:275
+recien	agora
+
+#: apps/cotiz/main/cz_api.c:277
+hace %d min	há %d min
+
+#: apps/cotiz/main/cz_api.c:279
+hace %d h	há %d h
+
+#: apps/cotiz/main/cz_api.c:281
+hace %d días	há %d dias

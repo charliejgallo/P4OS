@@ -1,0 +1,82 @@
+# amoledos-lang 1   es -> fr
+# web.estudio.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/estudio/web/estudio.js:65
+#: apps/estudio/web/estudio.js:169
+Estudio	Studio
+
+#: apps/estudio/web/estudio.js:78
+¿Borrar %s? No se puede deshacer.	Effacer %s ? C'est irréversible.
+
+#: apps/estudio/web/estudio.js:79
+Borrado	Effacé
+
+#: apps/estudio/web/estudio.js:96
+Bajar	Télécharger
+
+#: apps/estudio/web/estudio.js:97
+Borrar	Effacer
+
+#: apps/estudio/web/estudio.js:127
+%s no es un archivo que el Estudio lea	%s n'est pas un fichier que le Studio lit
+
+#: apps/estudio/web/estudio.js:130
+Subido	Envoyé
+
+#: apps/estudio/web/estudio.js:130
+Subidos	Envoyés
+
+#: apps/estudio/web/estudio.js:156
+Subir proyectos	Envoyer des projets
+
+#: apps/estudio/web/estudio.js:156
+Todavía no hay proyectos: el Estudio guarda el suyo solo.	Pas encore de projets : le Studio enregistre le sien tout seul.
+
+#: apps/estudio/web/estudio.js:157
+En la placa se abren desde Canción → Abrir. Un proyecto lleva sus patrones, la canción, los sonidos y la mezcla; las muestras que use van aparte, en Muestras.	Sur la carte, ils s'ouvrent depuis Chanson → Ouvrir. Un projet contient ses motifs, la chanson, les sons et le mixage ; les samples qu'il utilise sont à part, dans Samples.
+
+#: apps/estudio/web/estudio.js:160
+Subir muestras WAV	Envoyer samples WAV
+
+#: apps/estudio/web/estudio.js:160
+No hay muestras. Subí WAV tuyos para tocarlos en la batería.	Pas de samples. Envoie tes WAV pour les jouer à la batterie.
+
+#: apps/estudio/web/estudio.js:161
+WAV PCM de 8, 16, 24 o 32 bits o en coma flotante, mono o estéreo, de cualquier frecuencia; se usan hasta 12 segundos de cada uno. En la placa: Ritmo → el sonido de la pista.	WAV PCM 8, 16, 24 ou 32 bits ou en virgule flottante, mono ou stéréo, à toute fréquence ; jusqu'à 12 secondes de chacun sont utilisées. Sur la carte : Rythme → le son de la piste.
+
+#: apps/estudio/web/estudio.js:163
+Nada exportado todavía. Se exporta desde Canción → Exportar, en WAV o en MIDI.	Rien d'exporté encore. On exporte depuis Chanson → Exporter, en WAV ou en MIDI.
+
+#: apps/estudio/web/estudio.js:166
+Subir sonidos	Envoyer des sons
+
+#: apps/estudio/web/estudio.js:166
+Ninguno todavía. En la placa: Sonido → Guardar este sonido como…	Aucun encore. Sur la carte : Son → Enregistrer ce son sous…
+
+#: apps/estudio/web/estudio.js:171
+Lo que el Estudio guarda en la tarjeta: los proyectos, tus muestras, lo exportado y tus sonidos del sintetizador.	Ce que le Studio garde sur la carte SD : les projets, tes samples, ce qui est exporté et tes sons du synthé.
+
+#: apps/estudio/web/estudio.js:173
+Abierto en la placa	Ouvert sur la carte
+
+#: apps/estudio/web/estudio.js:173
+Abrir el Estudio en la placa	Ouvrir le Studio sur la carte
+
+#: apps/estudio/web/estudio.js:174
+Actualizar	Actualiser
+
+#: apps/estudio/web/estudio.js:175
+Proyectos	Projets
+
+#: apps/estudio/web/estudio.js:176
+Muestras	Samples
+
+#: apps/estudio/web/estudio.js:177
+Exportado	Exporté
+
+#: apps/estudio/web/estudio.js:178
+Mis sonidos	Mes sons

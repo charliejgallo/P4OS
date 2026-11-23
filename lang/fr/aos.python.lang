@@ -1,0 +1,39 @@
+# amoledos-lang 1   es -> fr
+# aos.python.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/python/main/mod_p4.c:145
+El Python de P4OS es MicroPython 1.29.\n\nEscribí una expresión y Enter:\n  2**100, sum(range(10)), 'hola'.upper()\ndef, for, if... siguen con '...'; una\n  línea vacía los corre.\nMódulos: math, random, json, re, time,\n  os, struct, collections, gc...\n  help('modules') los lista;\n  help(math) muestra uno.\nArchivos: la tarjeta es '/' y se\n  empieza en /python. open(), os e\n  import como en cualquier Python.\nRed: requests.get(url), socket.\nBibliotecas: import mip, y\n  mip.install('nombre') la baja de\n  micropython-lib a /python/lib.\nApps: cada .py de /python/apps es una\n  app del inicio que dibuja con aos.\nDetener corta lo que está corriendo.\n	Le Python de P4OS est MicroPython 1.29.\n\nTape une expression puis Entrée :\n  2**100, sum(range(10)), 'salut'.upper()\ndef, for, if... continuent avec '...' ;\n  une ligne vide les exécute.\nModules : math, random, json, re, time,\n  os, struct, collections, gc...\n  help('modules') les liste ;\n  help(math) en montre un.\nFichiers : la carte SD est '/' et on\n  démarre dans /python. open(), os et\n  import comme dans tout Python.\nRéseau : requests.get(url), socket.\nBibliothèques : import mip, et\n  mip.install('nom') en télécharge une de\n  micropython-lib vers /python/lib.\nApps : chaque .py de /python/apps est une\n  app de l'accueil qui dessine avec aos.\nArrêter interrompt ce qui tourne.\n
+
+#: apps/python/main/mod_p4.c:189
+Y los .py y .mpy de /python y /python/lib.\n	Et les .py et .mpy de /python et /python/lib.\n
+
+#: apps/python/main/py_app.c:405
+Hay algo corriendo: detenelo primero\n	Quelque chose tourne : arrête-le d'abord\n
+
+#: apps/python/main/py_app.c:423
+No se pudo leer %s\n	Impossible de lire %s\n
+
+#: apps/python/main/py_app.c:488
+MicroPython no arrancó	MicroPython n'a pas démarré
+
+#: apps/python/main/py_app.c:489
+esperando una línea	en attente d'une ligne
+
+#: apps/python/main/py_app.c:490
+corriendo…	exécution…
+
+#: apps/python/main/py_app.c:589
+Detener	Arrêter
+
+#: apps/python/main/py_app.c:592
+Limpiar	Effacer
+
+#: apps/python/main/py_app.c:636
+MicroPython 1.29 en P4OS · help() para empezar\n	MicroPython 1.29 sur P4OS · help() pour commencer\n
+
+#: apps/python/main/py_script.c:278
+Tocá para correrlo de nuevo	Touche pour le relancer

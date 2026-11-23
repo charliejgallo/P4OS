@@ -1,0 +1,40 @@
+# amoledos-lang 1   es -> pt
+# web.hello.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/hello_app/web/hello.js:21
+#: apps/hello_app/web/hello.js:35
+Hola	Olá
+
+#: apps/hello_app/web/hello.js:31
+Guardado en %s	Salvo em %s
+
+#: apps/hello_app/web/hello.js:32
+No se pudo guardar: %s	Não foi possível salvar: %s
+
+#: apps/hello_app/web/hello.js:37
+Esta página la trae la app hello_app en su carpeta web/, y el portal la carga de la tarjeta: se actualiza sin tocar el firmware.	Esta página vem com o app hello_app, na pasta web/, e o portal a carrega do cartão: ela é atualizada sem mexer no firmware.
+
+#: apps/hello_app/web/hello.js:38
+Encendida hace	Ligada há
+
+#: apps/hello_app/web/hello.js:40
+Un archivo de la tarjeta: %s	Um arquivo do cartão: %s
+
+#: apps/hello_app/web/hello.js:43
+Guardar	Salvar
+
+#: apps/hello_app/web/hello.js:44
+Abierta en la placa	Aberto na placa
+
+#: apps/hello_app/web/hello.js:45
+Abrir la app en la placa	Abrir o app na placa
+
+#: apps/hello_app/web/hello.js:46
+¡Hola desde la tarjeta!	Olá do cartão!
+
+#: apps/hello_app/web/hello.js:47
+%s min	%s min

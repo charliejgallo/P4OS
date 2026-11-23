@@ -1,0 +1,51 @@
+# amoledos-lang 1   es -> fr
+# web.metegol.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/metegol/web/metegol.js:133
+Metegol	Baby-foot
+
+#: apps/metegol/web/metegol.js:139
+Cargando…	Chargement…
+
+#: apps/metegol/web/metegol.js:141
+Guardar	Enregistrer
+
+#: apps/metegol/web/metegol.js:160
+Nombre	Nom
+
+#: apps/metegol/web/metegol.js:162
+Bandera (trazos)	Drapeau (bandes)
+
+#: apps/metegol/web/metegol.js:170
+Clubes	Clubs
+
+#: apps/metegol/web/metegol.js:170
+Selecciones	Sélections
+
+#: apps/metegol/web/metegol.js:179
+Guardado: la placa los toma al volver al menú	Enregistré : la carte les prend au retour au menu
+
+#: apps/metegol/web/metegol.js:184
+¿Volver a los equipos de fábrica? Se pierden los cambios.	Revenir aux équipes d'usine ? Les changements sont perdus.
+
+#: apps/metegol/web/metegol.js:187
+Listo: la app los escribe de nuevo al abrirse	C'est fait : l'app les réécrit à l'ouverture
+
+#: apps/metegol/web/metegol.js:194
+Metegol: los equipos	Baby-foot : les équipes
+
+#: apps/metegol/web/metegol.js:195
+Los nombres, las tres letras del marcador y los colores de cada camiseta. Sin escudos: el diseño y los colores alcanzan.	Les noms, les trois lettres du tableau d'affichage et les couleurs de chaque maillot. Pas d'écussons : le dessin et les couleurs suffisent.
+
+#: apps/metegol/web/metegol.js:198
+Abrir en la placa	Ouvrir sur la carte
+
+#: apps/metegol/web/metegol.js:199
+Volver a los de fábrica	Revenir à celles d'usine
+
+#: apps/metegol/web/metegol.js:202
+Todavía no hay equipos: abrí Metegol una vez en la placa.	Pas encore d'équipes : ouvre Baby-foot une fois sur la carte.

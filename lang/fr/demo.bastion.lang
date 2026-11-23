@@ -1,0 +1,633 @@
+# amoledos-lang 1   es -> fr
+# demo.bastion.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/bastion/main/bastion.c:370
+#: apps/bastion/main/bastion.c:405
+#: apps/bastion/main/bs_menu.c:354
+#: apps/bastion/main/bs_menu.c:429
+Efectos: sí	Effets : oui
+
+#: apps/bastion/main/bastion.c:370
+#: apps/bastion/main/bastion.c:405
+#: apps/bastion/main/bs_menu.c:354
+#: apps/bastion/main/bs_menu.c:429
+Efectos: no	Effets : non
+
+#: apps/bastion/main/bastion.c:379
+#: apps/bastion/main/bastion.c:406
+#: apps/bastion/main/bs_menu.c:363
+#: apps/bastion/main/bs_menu.c:430
+Música: sí	Musique : oui
+
+#: apps/bastion/main/bastion.c:379
+#: apps/bastion/main/bastion.c:406
+#: apps/bastion/main/bs_menu.c:363
+#: apps/bastion/main/bs_menu.c:430
+Música: no	Musique : non
+
+#: apps/bastion/main/bastion.c:396
+Pausa	Pause
+
+#: apps/bastion/main/bastion.c:399
+#: apps/bastion/main/bastion.c:755
+#: apps/bastion/main/bs_menu.c:560
+Supervivencia	Survie
+
+#: apps/bastion/main/bastion.c:400
+#: apps/bastion/main/bastion.c:756
+#: apps/bastion/main/bs_menu.c:510
+Sector	Secteur
+
+#: apps/bastion/main/bastion.c:401
+#: apps/bastion/main/bs_menu.c:516
+#: apps/bastion/main/bs_menu.c:560
+Libre	Libre
+
+#: apps/bastion/main/bastion.c:403
+Seguir	Reprendre
+
+#: apps/bastion/main/bastion.c:404
+Empezar de nuevo	Recommencer
+
+#: apps/bastion/main/bastion.c:410
+Próxima meta: oleada %d	Objectif : vague %d
+
+#: apps/bastion/main/bastion.c:412
+Retirarse y cobrar	Se retirer et encaisser
+
+#: apps/bastion/main/bastion.c:414
+Salir al mapa	Vers la carte
+
+#: apps/bastion/main/bastion.c:488
+Fin de la supervivencia	Fin de la survie
+
+#: apps/bastion/main/bastion.c:488
+¡Victoria!	Victoire !
+
+#: apps/bastion/main/bastion.c:488
+El fuerte cayó	Le fort est tombé
+
+#: apps/bastion/main/bastion.c:520
+#: apps/bastion/main/bastion.c:523
+Oleadas aguantadas: %d	Vagues tenues : %d
+
+#: apps/bastion/main/bastion.c:521
+Vida del fuerte: %d de %d	Vie du fort : %d sur %d
+
+#: apps/bastion/main/bastion.c:525
+Llegaste a la oleada %d de %d	Tu as atteint la vague %d sur %d
+
+#: apps/bastion/main/bastion.c:529
+¡Récord nuevo!	Nouveau record !
+
+#: apps/bastion/main/bastion.c:530
+Tu récord en este mundo: %d	Ton record dans ce monde : %d
+
+#: apps/bastion/main/bastion.c:534
+Bajas: %d	Tués : %d
+
+#: apps/bastion/main/bastion.c:536
+El modo libre no da núcleos ni experiencia.	Le mode libre ne donne ni noyaux ni expérience.
+
+#: apps/bastion/main/bastion.c:538
+Bajas: %d    Núcleos: +%d    Experiencia: +%d	Tués : %d    Noyaux : +%d    Expérience : +%d
+
+#: apps/bastion/main/bastion.c:543
+¡Subiste al rango %d! Tus torres pegan un 1 %% más.	Tu passes au rang %d ! Tes tours frappent 1 %% plus fort.
+
+#: apps/bastion/main/bastion.c:547
+Gastá los núcleos en el laboratorio y volvé más fuerte.	Dépense les noyaux au laboratoire et reviens plus fort.
+
+#: apps/bastion/main/bastion.c:555
+Sector siguiente	Secteur suivant
+
+#: apps/bastion/main/bastion.c:555
+Mundo siguiente	Monde suivant
+
+#: apps/bastion/main/bastion.c:556
+#: apps/bastion/main/bastion.c:560
+#: apps/bastion/main/bs_menu.c:423
+#: apps/bastion/main/bs_menu.c:667
+Laboratorio	Laboratoire
+
+#: apps/bastion/main/bastion.c:557
+#: apps/bastion/main/bastion.c:559
+Otra vez	Encore
+
+#: apps/bastion/main/bastion.c:562
+Mapa	Carte
+
+#: apps/bastion/main/bastion.c:689
+No hay memoria para la batalla: cerrá otras apps y probá de nuevo	Pas assez de mémoire pour la bataille : ferme d'autres apps et réessaie
+
+#: apps/bastion/main/bastion.c:690
+No se pudo cargar el mundo	Impossible de charger le monde
+
+#: apps/bastion/main/bastion.c:759
+Desplegando defensas...	Déploiement des défenses...
+
+#: apps/bastion/main/bs_data.c:17
+Ametralladora	Mitrailleuse
+
+#: apps/bastion/main/bs_data.c:17
+Barata y rápida. Floja contra las corazas.	Pas chère et rapide. Faible face aux blindés.
+
+#: apps/bastion/main/bs_data.c:18
+Cañón	Canon
+
+#: apps/bastion/main/bs_data.c:18
+Obuses que explotan. No llega a los que vuelan.	Obus explosifs. N'atteint pas les ennemis volants.
+
+#: apps/bastion/main/bs_data.c:19
+Láser	Laser
+
+#: apps/bastion/main/bs_data.c:19
+Un rayo que quema más cuanto más dura sobre el mismo.	Un rayon qui brûle plus fort plus il reste sur une cible.
+
+#: apps/bastion/main/bs_data.c:20
+Misiles	Missiles
+
+#: apps/bastion/main/bs_data.c:20
+Persiguen de lejos. Lo mejor contra los que vuelan.	Poursuivent de loin. Le mieux contre les volants.
+
+#: apps/bastion/main/bs_data.c:21
+Tesla	Tesla
+
+#: apps/bastion/main/bs_data.c:21
+Un rayo que salta de uno a otro.	Un éclair qui saute de l'un à l'autre.
+
+#: apps/bastion/main/bs_data.c:22
+Criogénica	Cryogénique
+
+#: apps/bastion/main/bs_data.c:22
+Frena a todos los que tiene cerca.	Ralentit tout ce qui est proche.
+
+#: apps/bastion/main/bs_data.c:23
+Lanzallamas	Lance-flammes
+
+#: apps/bastion/main/bs_data.c:23
+Un chorro corto que deja ardiendo a la fila entera.	Un jet court qui embrase toute la file.
+
+#: apps/bastion/main/bs_data.c:24
+Cañón de riel	Canon à rail
+
+#: apps/bastion/main/bs_data.c:24
+Atraviesa a todos los de la línea. Lento y carísimo.	Traverse tous ceux de la ligne. Lent et très cher.
+
+#: apps/bastion/main/bs_data.c:25
+Mortero de plasma	Mortier à plasma
+
+#: apps/bastion/main/bs_data.c:25
+Explosiones enormes muy lejos. Ciego de cerca.	Énormes explosions très loin. Aveugle de près.
+
+#: apps/bastion/main/bs_data.c:26
+Hangar de drones	Hangar à drones
+
+#: apps/bastion/main/bs_data.c:26
+Drones que salen a buscar a los que se escapan.	Des drones qui traquent ceux qui s'échappent.
+
+#: apps/bastion/main/bs_data.c:27
+Pulso EMP	Choc EMP
+
+#: apps/bastion/main/bs_data.c:27
+Paraliza a los de alrededor y les apaga los escudos.	Paralyse ceux d'autour et éteint leurs boucliers.
+
+#: apps/bastion/main/bs_data.c:28
+Pozo de gravedad	Puits de gravité
+
+#: apps/bastion/main/bs_data.c:28
+Los frena y cada tanto los tira para atrás.	Les ralentit et parfois les repousse.
+
+#: apps/bastion/main/bs_data.c:29
+Amplificador	Amplificateur
+
+#: apps/bastion/main/bs_data.c:29
+Las torres vecinas pegan más y ven a los espectros.	Les tours voisines tapent plus fort et voient les spectres.
+
+#: apps/bastion/main/bs_data.c:30
+Refinería	Raffinerie
+
+#: apps/bastion/main/bs_data.c:30
+Da créditos al final de cada oleada.	Des crédits à la fin de chaque vague.
+
+#: apps/bastion/main/bs_data.c:37
+Larva	Larve
+
+#: apps/bastion/main/bs_data.c:38
+Corredor	Coureur
+
+#: apps/bastion/main/bs_data.c:39
+Ácaro	Tique
+
+#: apps/bastion/main/bs_data.c:40
+Coraza	Coque
+
+#: apps/bastion/main/bs_data.c:41
+Avispa	Guêpe
+
+#: apps/bastion/main/bs_data.c:42
+#: apps/bastion/main/bs_data.c:52
+Divisor	Diviseur
+
+#: apps/bastion/main/bs_data.c:43
+Escudero	Écuyer
+
+#: apps/bastion/main/bs_data.c:44
+Sanador	Soigneur
+
+#: apps/bastion/main/bs_data.c:45
+Bruto	Brute
+
+#: apps/bastion/main/bs_data.c:46
+Espectro	Spectre
+
+#: apps/bastion/main/bs_data.c:47
+Saboteador	Saboteur
+
+#: apps/bastion/main/bs_data.c:48
+Portador	Porteur
+
+#: apps/bastion/main/bs_data.c:49
+Reina	Reine
+
+#: apps/bastion/main/bs_data.c:50
+Titán	Titan
+
+#: apps/bastion/main/bs_data.c:51
+Mente	Esprit
+
+#: apps/bastion/main/bs_data.c:56
+#: apps/bastion/main/bs_gallery.c:204
+Blindaje	Blindage
+
+#: apps/bastion/main/bs_data.c:56
++3 de vida del fuerte por nivel	+3 de vie du fort par niveau
+
+#: apps/bastion/main/bs_data.c:57
+Financiación	Financement
+
+#: apps/bastion/main/bs_data.c:57
++10 % de créditos al empezar	+10 % de crédits au départ
+
+#: apps/bastion/main/bs_data.c:58
+Recompensas	Primes
+
+#: apps/bastion/main/bs_data.c:58
++6 % de créditos por cada alien	+6 % de crédits par alien
+
+#: apps/bastion/main/bs_data.c:59
+Munición	Munitions
+
+#: apps/bastion/main/bs_data.c:59
++5 % de daño de todas las torres	+5 % de dégâts, toutes les tours
+
+#: apps/bastion/main/bs_data.c:60
+Óptica	Optique
+
+#: apps/bastion/main/bs_data.c:60
++3 % de alcance de todas las torres	+3 % de portée, toutes les tours
+
+#: apps/bastion/main/bs_data.c:61
+Reciclaje	Recyclage
+
+#: apps/bastion/main/bs_data.c:61
++6 % al vender una torre	+6 % à la vente d'une tour
+
+#: apps/bastion/main/bs_data.c:62
+Interés	Intérêts
+
+#: apps/bastion/main/bs_data.c:62
++2 % de lo ahorrado al terminar cada oleada	+2 % de tes économies à la fin de chaque vague
+
+#: apps/bastion/main/bs_data.c:63
+Puntería	Précision
+
+#: apps/bastion/main/bs_data.c:63
++4 % de golpes críticos, que pegan el doble	+4 % de coups critiques, qui frappent double
+
+#: apps/bastion/main/bs_data.c:67
+Ataque orbital	Frappe orbitale
+
+#: apps/bastion/main/bs_data.c:67
+Un rayo del cielo donde toques.	Un rayon du ciel là où tu touches.
+
+#: apps/bastion/main/bs_data.c:68
+Criobomba	Cryobombe
+
+#: apps/bastion/main/bs_data.c:68
+Congela a todos unos segundos.	Gèle tout le monde quelques secondes.
+
+#: apps/bastion/main/bs_data.c:69
+Reparación	Réparation
+
+#: apps/bastion/main/bs_data.c:69
+Le devuelve vida al fuerte.	Rend de la vie au fort.
+
+#: apps/bastion/main/bs_gallery.c:28
+El más común. Lento y blando: llegan de a muchos.	Le plus courant. Lent et mou : ils arrivent en masse.
+
+#: apps/bastion/main/bs_gallery.c:29
+Rápido y frágil. Pasa de largo si nada dispara seguido.	Rapide et fragile. Passe si rien ne tire vite.
+
+#: apps/bastion/main/bs_gallery.c:30
+Diminuto y por docenas. Las explosiones y los rayos en cadena lo barren.	Minuscule et par douzaines. Explosions et éclairs en chaîne les balaient.
+
+#: apps/bastion/main/bs_gallery.c:31
+Su coraza le resta 7 a cada golpe. Hacen falta golpes fuertes, o fuego.	Sa carapace retire 7 à chaque coup. Il faut des coups forts, ou du feu.
+
+#: apps/bastion/main/bs_gallery.c:32
+Vuela y corta las curvas del camino. Cañón, Lanzallamas, Riel y Mortero no le llegan.	Vole et coupe les virages du chemin. Canon, Lance-flammes, Rail et Mortier ne l'atteignent pas.
+
+#: apps/bastion/main/bs_gallery.c:33
+Al morir se parte en tres más chicos y más rápidos.	En mourant il donne trois petits plus rapides.
+
+#: apps/bastion/main/bs_gallery.c:34
+Lleva un escudo que se recarga si lo dejan de golpear. El pulso EMP se lo apaga.	Porte un bouclier qui se recharge si on cesse de le frapper. Le choc EMP l'éteint.
+
+#: apps/bastion/main/bs_gallery.c:35
+Cura a los que tiene alrededor. Conviene matarlo primero.	Soigne ceux qui l'entourent. Mieux vaut le tuer en premier.
+
+#: apps/bastion/main/bs_gallery.c:36
+Mucha vida, algo de coraza, y le saca tres vidas al fuerte.	Beaucoup de vie, un peu de carapace, et il retire trois vies au fort.
+
+#: apps/bastion/main/bs_gallery.c:37
+Se vuelve invisible de a ratos: sólo un Amplificador o un pulso EMP lo delatan.	Devient invisible par moments : seul un Amplificateur ou un choc EMP le trahit.
+
+#: apps/bastion/main/bs_gallery.c:38
+Cada tanto apaga por dos segundos las torres que tiene cerca.	Éteint parfois pendant deux secondes les tours proches de lui.
+
+#: apps/bastion/main/bs_gallery.c:39
+Vuela, aguanta mucho y va soltando ácaros por el camino.	Vole, encaisse beaucoup et lâche des tiques en chemin.
+
+#: apps/bastion/main/bs_gallery.c:40
+La madre de la colmena: va poniendo larvas mientras avanza.	La mère de la ruche : elle pond des larves en avançant.
+
+#: apps/bastion/main/bs_gallery.c:41
+Coraza pesada, y sus pisotones apagan las torres cercanas.	Carapace lourde, ses piétinements éteignent les tours proches.
+
+#: apps/bastion/main/bs_gallery.c:42
+Un gran escudo, cura a los suyos y cada tanto salta hacia adelante.	Un grand bouclier, soigne les siens et parfois bondit en avant.
+
+#: apps/bastion/main/bs_gallery.c:165
+Cerrar	Fermer
+
+#: apps/bastion/main/bs_gallery.c:176
+#: apps/bastion/main/bs_gallery.c:299
+#: apps/bastion/main/bs_menu.c:516
+#: apps/bastion/main/bs_menu.c:522
+Jefe	Chef
+
+#: apps/bastion/main/bs_gallery.c:176
+Vuela	Vole
+
+#: apps/bastion/main/bs_gallery.c:176
+Camina	Marche
+
+#: apps/bastion/main/bs_gallery.c:200
+Vida	Vie
+
+#: apps/bastion/main/bs_gallery.c:202
+Velocidad	Vitesse
+
+#: apps/bastion/main/bs_gallery.c:206
+Escudo	Bouclier
+
+#: apps/bastion/main/bs_gallery.c:209
+Recompensa	Prime
+
+#: apps/bastion/main/bs_gallery.c:211
+Daño al fuerte	Dégâts au fort
+
+#: apps/bastion/main/bs_gallery.c:213
+La vida es la de base: cada sector la multiplica.	Vie de base : chaque secteur la multiplie.
+
+#: apps/bastion/main/bs_gallery.c:243
+Créditos por oleada	Crédits par vague
+
+#: apps/bastion/main/bs_gallery.c:245
+Daño de las vecinas	Dégâts des voisines
+
+#: apps/bastion/main/bs_gallery.c:249
+#: apps/bastion/main/bs_hud.c:43
+Daño	Dégâts
+
+#: apps/bastion/main/bs_gallery.c:254
+#: apps/bastion/main/bs_hud.c:44
+Alcance	Portée
+
+#: apps/bastion/main/bs_gallery.c:258
+Cadencia	Cadence
+
+#: apps/bastion/main/bs_gallery.c:261
+Costo	Coût
+
+#: apps/bastion/main/bs_gallery.c:262
+Ataca	Attaque
+
+#: apps/bastion/main/bs_gallery.c:262
+tierra y aire	sol et air
+
+#: apps/bastion/main/bs_gallery.c:262
+sólo tierra	sol seul
+
+#: apps/bastion/main/bs_gallery.c:262
+no ataca	rien
+
+#: apps/bastion/main/bs_gallery.c:265
+#: apps/bastion/main/bs_menu.c:829
+Maestría	Maîtrise
+
+#: apps/bastion/main/bs_gallery.c:266
+Los tres números son los tres niveles de la torre.	Les trois nombres sont les trois niveaux de la tour.
+
+#: apps/bastion/main/bs_gallery.c:296
+Estrellas	Étoiles
+
+#: apps/bastion/main/bs_gallery.c:298
+Récord	Record
+
+#: apps/bastion/main/bs_gallery.c:349
+Todavía no lo viste en batalla	Tu ne l'as pas encore vu en bataille
+
+#: apps/bastion/main/bs_gallery.c:350
+Se desbloquea en el laboratorio	Se débloque au laboratoire
+
+#: apps/bastion/main/bs_gallery.c:351
+Llegá a este mundo en la campaña	Atteins ce monde dans la campagne
+
+#: apps/bastion/main/bs_gallery.c:395
+Aliens	Aliens
+
+#: apps/bastion/main/bs_gallery.c:395
+#: apps/bastion/main/bs_menu.c:806
+Torres	Tours
+
+#: apps/bastion/main/bs_gallery.c:395
+Mundos	Mondes
+
+#: apps/bastion/main/bs_gallery.c:404
+#: apps/bastion/main/bs_menu.c:425
+Galería	Galerie
+
+#: apps/bastion/main/bs_hud.c:34
+Oleada	Vague
+
+#: apps/bastion/main/bs_hud.c:35
+¡OLEADA!	VAGUE !
+
+#: apps/bastion/main/bs_hud.c:36
+#: apps/bastion/main/bs_menu.c:854
+Mejorar	Améliorer
+
+#: apps/bastion/main/bs_hud.c:37
+Vender	Vendre
+
+#: apps/bastion/main/bs_hud.c:38
+#: apps/bastion/main/bs_menu.c:770
+Al máximo	Au max
+
+#: apps/bastion/main/bs_hud.c:39
+Primero	Premier
+
+#: apps/bastion/main/bs_hud.c:40
+Más fuerte	Plus fort
+
+#: apps/bastion/main/bs_hud.c:41
+Más débil	Plus faible
+
+#: apps/bastion/main/bs_hud.c:42
+Más cercano	Plus proche
+
+#: apps/bastion/main/bs_hud.c:45
+Bajas	Tués
+
+#: apps/bastion/main/bs_hud.c:46
+Quedan	Reste
+
+#: apps/bastion/main/bs_hud.c:47
+Tocá una plataforma para poner una torre	Touche une plateforme pour poser une tour
+
+#: apps/bastion/main/bs_hud.c:48
+Tocá de nuevo para construirla	Touche encore pour la construire
+
+#: apps/bastion/main/bs_hud.c:49
+Tocá dónde cae el rayo (o el botón otra vez: apunta solo)	Touche où tombe le rayon (ou le bouton encore : il vise seul)
+
+#: apps/bastion/main/bs_hud.c:50
+Entre oleadas podés construir, mejorar y vender con calma	Entre les vagues : construis, améliore et vends au calme
+
+#: apps/bastion/main/bs_hud.c:51
+No alcanzan los créditos	Pas assez de crédits
+
+#: apps/bastion/main/bs_hud.c:52
+¡JEFE!	CHEF !
+
+#: apps/bastion/main/bs_hud.c:53
+Saboteada	Sabotée
+
+#: apps/bastion/main/bs_hud.c:54
+por oleada	par vague
+
+#: apps/bastion/main/bs_hud.c:55
+por segundo	par seconde
+
+#: apps/bastion/main/bs_hud.c:56
+ÚLTIMA OLEADA	DERNIÈRE VAGUE
+
+#: apps/bastion/main/bs_hud.c:57
+aire	air
+
+#: apps/bastion/main/bs_hud.c:58
+tierra	sol
+
+#: apps/bastion/main/bs_hud.c:59
+amplificada	amplifiée
+
+#: apps/bastion/main/bs_hud.c:60
+Oleada final	Vague finale
+
+#: apps/bastion/main/bs_hud.c:61
+¡%d OLEADAS!	%d VAGUES !
+
+#: apps/bastion/main/bs_hud.c:62
++%d núcleos   +%d créditos   +%d vidas	+%d noyaux   +%d crédits   +%d vies
+
+#: apps/bastion/main/bs_hud.c:63
+Voladores: no les llegan Cañón, Lanzallamas, Riel ni Mortero	Volants : hors d'atteinte de Canon, Lance-flammes, Rail, Mortier
+
+#: apps/bastion/main/bs_menu.c:369
+Dificultad: fácil (más créditos)	Difficulté : facile (plus de crédits)
+
+#: apps/bastion/main/bs_menu.c:370
+Dificultad: difícil (menos créditos)	Difficulté : difficile (moins de crédits)
+
+#: apps/bastion/main/bs_menu.c:371
+Dificultad: normal	Difficulté : normale
+
+#: apps/bastion/main/bs_menu.c:391
+El último fuerte entre ellos y nosotros	Le dernier fort entre eux et nous
+
+#: apps/bastion/main/bs_menu.c:396
+Falta bastion_p4.pak en la carpeta apps de la tarjeta.	bastion_p4.pak manque dans le dossier apps de la carte SD.
+
+#: apps/bastion/main/bs_menu.c:397
+No hay ningún mundo (bastion_<mundo>_p4.pak) en la tarjeta.	Aucun monde (bastion_<monde>_p4.pak) sur la carte SD.
+
+#: apps/bastion/main/bs_menu.c:405
+#: apps/bastion/main/bs_menu.c:792
+#: apps/bastion/main/bs_menu.c:794
+Rango	Rang
+
+#: apps/bastion/main/bs_menu.c:418
+#: apps/bastion/main/bs_menu.c:495
+Jugar	Jouer
+
+#: apps/bastion/main/bs_menu.c:462
+Llegá a este mundo en la campaña para jugarlo acá	Atteins ce monde dans la campagne pour y jouer ici
+
+#: apps/bastion/main/bs_menu.c:463
+Ganá el sector anterior para abrir este	Gagne le secteur précédent pour ouvrir celui-ci
+
+#: apps/bastion/main/bs_menu.c:463
+Ganá el último sector del mundo anterior	Gagne le dernier secteur du monde précédent
+
+#: apps/bastion/main/bs_menu.c:479
+El doble de vida y oleadas sin fin. Cada 20 hay premio, y te retirás cuando quieras.	Double vie et vagues sans fin. Une prime toutes les 20, et tu te retires quand tu veux.
+
+#: apps/bastion/main/bs_menu.c:481
+Todas las torres y poderes, y el triple de créditos, para probar. No da núcleos.	Toutes les tours et pouvoirs, triple de crédits, pour tester. Pas de noyaux.
+
+#: apps/bastion/main/bs_menu.c:500
+Récord: %d oleadas	Record : %d vagues
+
+#: apps/bastion/main/bs_menu.c:505
+Sin récord todavía	Pas encore de record
+
+#: apps/bastion/main/bs_menu.c:522
+Nuevo	Nouveau
+
+#: apps/bastion/main/bs_menu.c:560
+Campaña	Campagne
+
+#: apps/bastion/main/bs_menu.c:713
+Te faltan núcleos: se ganan en las batallas	Il te manque des noyaux : on les gagne en bataille
+
+#: apps/bastion/main/bs_menu.c:806
+Tecnología	Technologie
+
+#: apps/bastion/main/bs_menu.c:806
+Poderes	Pouvoirs
+
+#: apps/bastion/main/bs_menu.c:827
++8 % de daño y -3 % de costo por nivel de maestría.	+8 % de dégâts et -3 % de coût par niveau de maîtrise.
+
+#: apps/bastion/main/bs_menu.c:829
+#: apps/bastion/main/bs_menu.c:854
+Desbloquear	Débloquer
+
+#: apps/bastion/main/bs_menu.c:844
+Investigar	Rechercher

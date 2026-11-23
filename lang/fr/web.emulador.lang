@@ -1,0 +1,107 @@
+# amoledos-lang 1   es -> fr
+# web.emulador.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/emulador/web/emulador.js:24
+Opcional: disksys.rom para el Famicom Disk System.	Optionnel : disksys.rom pour le Famicom Disk System.
+
+#: apps/emulador/web/emulador.js:25
+Opcional: gba_bios.bin (la BIOS original mejora la compatibilidad; sin ella se usa una libre que trae el emulador).	Optionnel : gba_bios.bin (le BIOS d'origine améliore la compatibilité ; sans lui, l'émulateur en utilise un libre).
+
+#: apps/emulador/web/emulador.js:26
+Necesaria: coleco.rom (o colecovision.rom), 8 KB.	Requis : coleco.rom (ou colecovision.rom), 8 Ko.
+
+#: apps/emulador/web/emulador.js:27
+Necesaria: neogeo.zip de MAME (sp-s2.sp1, sfix.sfix...). Los juegos van como zip de MAME, con su nombre corto.	Requis : neogeo.zip de MAME (sp-s2.sp1, sfix.sfix...). Les jeux vont en zip MAME, avec leur nom court.
+
+#: apps/emulador/web/emulador.js:85
+menos de 1 min	moins d'1 min
+
+#: apps/emulador/web/emulador.js:86
+%d min	%d min
+
+#: apps/emulador/web/emulador.js:87
+%d h %d min	%d h %d min
+
+#: apps/emulador/web/emulador.js:152
+#: apps/emulador/web/emulador.js:307
+Emulador	Émulateur
+
+#: apps/emulador/web/emulador.js:153
+Abrir en la placa	Ouvrir sur la carte
+
+#: apps/emulador/web/emulador.js:154
+Los juegos van en la tarjeta, una carpeta por consola (%s). También pueden ir en subcarpetas.	Les jeux vont sur la carte SD, un dossier par console (%s). Les sous-dossiers marchent aussi.
+
+#: apps/emulador/web/emulador.js:181
+%s no es un juego de %s (%s)	%s n'est pas un jeu %s (%s)
+
+#: apps/emulador/web/emulador.js:193
+%d archivos subidos	%d fichiers envoyés
+
+#: apps/emulador/web/emulador.js:209
+Leyendo la tarjeta...	Lecture de la carte SD...
+
+#: apps/emulador/web/emulador.js:224
+Buscar	Chercher
+
+#: apps/emulador/web/emulador.js:229
+<b>Soltá acá juegos de %s</b> o tocá para elegirlos<br><span class="small">%s</span>	<b>Dépose ici des jeux %s</b> ou clique pour les choisir<br><span class="small">%s</span>
+
+#: apps/emulador/web/emulador.js:233
+1 juego	1 jeu
+
+#: apps/emulador/web/emulador.js:233
+%d juegos	%d jeux
+
+#: apps/emulador/web/emulador.js:235
+BIOS y archivos de sistema	BIOS et fichiers système
+
+#: apps/emulador/web/emulador.js:237
+Los archivos de sistema que pida la consola (el emulador avisa cuáles).	Les fichiers système que demande la console (l'émulateur dit lesquels).
+
+#: apps/emulador/web/emulador.js:240
+¿Borrar %s?	Effacer %s ?
+
+#: apps/emulador/web/emulador.js:241
+#: apps/emulador/web/emulador.js:289
+Borrar	Effacer
+
+#: apps/emulador/web/emulador.js:242
+Soltá acá los archivos de sistema	Dépose ici les fichiers système
+
+#: apps/emulador/web/emulador.js:254
+jugado %s	joué %s
+
+#: apps/emulador/web/emulador.js:255
+%d estados	%d états
+
+#: apps/emulador/web/emulador.js:259
+Partida guardada subida	Sauvegarde envoyée
+
+#: apps/emulador/web/emulador.js:268
+Bajar partida	Télécharger partie
+
+#: apps/emulador/web/emulador.js:274
+Abriendo %s en la placa	Ouverture de %s sur la carte
+
+#: apps/emulador/web/emulador.js:276
+Jugar en la placa	Jouer sur la carte
+
+#: apps/emulador/web/emulador.js:277
+Subir partida	Envoyer partie
+
+#: apps/emulador/web/emulador.js:279
+¿Borrar los %d estados de %s?	Effacer les %d états de %s ?
+
+#: apps/emulador/web/emulador.js:285
+Borrar estados	Effacer les états
+
+#: apps/emulador/web/emulador.js:287
+¿Borrar %s de la tarjeta? Las partidas guardadas quedan.	Effacer %s de la carte SD ? Les sauvegardes restent.
+
+#: apps/emulador/web/emulador.js:293
+Todavía no hay juegos de %s.	Pas encore de jeux %s.

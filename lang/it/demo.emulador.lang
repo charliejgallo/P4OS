@@ -1,0 +1,509 @@
+# amoledos-lang 1   es -> it
+# demo.emulador.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/emulador/main/em_files.c:99
+Juegos	Giochi
+
+#: apps/emulador/main/em_files.c:100
+Copiá acá los juegos de esta consola (también en subcarpetas).\nbios/ guarda los archivos de sistema que la consola pueda usar;\nsaves/ y states/ los escribe el emulador.	Copia qui i giochi di questa console (anche in sottocartelle).\nbios/ contiene i file di sistema che la console può usare;\nsaves/ e states/ li scrive l'emulatore.
+
+#: apps/emulador/main/em_game.c:1154
+#: apps/emulador/main/em_game.c:1296
+Tocá para volver	Tocca per tornare
+
+#: apps/emulador/main/em_game.c:1289
+#: apps/emulador/main/em_game.c:1342
+#: apps/emulador/main/em_menu.c:210
+Cargando...	Caricamento...
+
+#: apps/emulador/main/em_lib.c:90
+menos de 1 min	meno di 1 min
+
+#: apps/emulador/main/em_lib.c:216
+Empezar desde el principio borra el estado automático. Las partidas guardadas por el juego y las ranuras quedan.	Ricominciare dall'inizio cancella lo stato automatico. I salvataggi del gioco e gli slot restano.
+
+#: apps/emulador/main/em_lib.c:221
+Seguir donde quedó	Continua da dov'era
+
+#: apps/emulador/main/em_lib.c:221
+Desde el principio	Dall'inizio
+
+#: apps/emulador/main/em_lib.c:347
+CONTINUAR	CONTINUA
+
+#: apps/emulador/main/em_lib.c:347
+JUGAR DE NUEVO	GIOCA ANCORA
+
+#: apps/emulador/main/em_lib.c:405
+Todos	Tutti
+
+#: apps/emulador/main/em_lib.c:415
+Recientes	Recenti
+
+#: apps/emulador/main/em_lib.c:415
+A-Z	A-Z
+
+#: apps/emulador/main/em_lib.c:483
+Todavía no hay juegos	Ancora nessun gioco
+
+#: apps/emulador/main/em_lib.c:491
+Copiá los juegos a la tarjeta, una carpeta por consola:	Copia i giochi sulla microSD, una cartella per console:
+
+#: apps/emulador/main/em_lib.c:492
+También se pueden subir desde el portal web de la placa, en la página Emulador. Los archivos de sistema (como la BIOS de la GBA) van en la carpeta bios de cada consola.	Si possono anche caricare dal portale web della scheda, nella pagina Emulador. I file di sistema (come la BIOS della GBA) vanno nella cartella bios di ogni console.
+
+#: apps/emulador/main/em_lib.c:529
+Emulador	Emulatore
+
+#: apps/emulador/main/em_lib.c:560
+%d juego	%d gioco
+
+#: apps/emulador/main/em_lib.c:560
+%d juegos	%d giochi
+
+#: apps/emulador/main/em_menu.c:66
+Ajustada	Adattata
+
+#: apps/emulador/main/em_menu.c:66
+Entera	Intera
+
+#: apps/emulador/main/em_menu.c:66
+Estirada	Estesa
+
+#: apps/emulador/main/em_menu.c:67
+#: apps/emulador/main/em_menu.c:147
+Automático	Automatico
+
+#: apps/emulador/main/em_menu.c:67
+Nunca	Mai
+
+#: apps/emulador/main/em_menu.c:67
+1 de cada 2	1 su 2
+
+#: apps/emulador/main/em_menu.c:67
+2 de cada 3	2 su 3
+
+#: apps/emulador/main/em_menu.c:68
+#: apps/emulador/main/em_strings.c:16
+No	No
+
+#: apps/emulador/main/em_menu.c:68
+#: apps/emulador/main/em_strings.c:16
+Sí	Sì
+
+#: apps/emulador/main/em_menu.c:69
+Jugador 1	Player 1
+
+#: apps/emulador/main/em_menu.c:69
+Jugador 2	Player 2
+
+#: apps/emulador/main/em_menu.c:150
+Ranura %d	Slot %d
+
+#: apps/emulador/main/em_menu.c:154
+vacía	vuoto
+
+#: apps/emulador/main/em_menu.c:161
+guardado	salvato
+
+#: apps/emulador/main/em_menu.c:210
+Guardando...	Salvataggio...
+
+#: apps/emulador/main/em_menu.c:421
+Continuar	Continua
+
+#: apps/emulador/main/em_menu.c:422
+Reiniciar	Riavvia
+
+#: apps/emulador/main/em_menu.c:423
+Salir	Esci
+
+#: apps/emulador/main/em_menu.c:426
+Estados	Stati
+
+#: apps/emulador/main/em_menu.c:432
+Guardar	Salva
+
+#: apps/emulador/main/em_menu.c:432
+Cargar	Carica
+
+#: apps/emulador/main/em_menu.c:458
+Opciones	Opzioni
+
+#: apps/emulador/main/em_menu.c:459
+Tamaño de la imagen	Dimensione immagine
+
+#: apps/emulador/main/em_menu.c:460
+Saltear cuadros	Salta fotogrammi
+
+#: apps/emulador/main/em_menu.c:461
+Sonido	Suono
+
+#: apps/emulador/main/em_menu.c:462
+Mostrar cuadros por segundo	Mostra fotogrammi al secondo
+
+#: apps/emulador/main/em_menu.c:463
+Seguir donde quedó al abrir	Riprendi all'apertura
+
+#: apps/emulador/main/em_menu.c:464
+Pantalla al ritmo de la consola	Schermo al ritmo della console
+
+#: apps/emulador/main/em_menu.c:466
+El teclado USB juega como	La tastiera USB gioca come
+
+#: apps/emulador/main/em_menu.c:469
+Recompilador (al abrir un juego)	Ricompilatore (quando apri un gioco)
+
+#: apps/emulador/main/em_menu.c:558
+Estado guardado	Stato salvato
+
+#: apps/emulador/main/em_menu.c:558
+No se pudo guardar el estado	Impossibile salvare lo stato
+
+#: apps/emulador/main/em_menu.c:566
+No se pudo cargar el estado	Impossibile caricare lo stato
+
+#: apps/emulador/main/em_run.c:405
+#: apps/emulador/main/em_strings.c:30
+No se pudo cargar el juego	Impossibile caricare il gioco
+
+#: apps/emulador/main/em_run.c:589
+Falta memoria	Memoria esaurita
+
+#: apps/emulador/main/em_run.c:595
+Otra app está usando el procesador	Un'altra app sta usando il processore
+
+#: apps/emulador/main/em_strings.c:14
+Paleta	Palette
+
+#: apps/emulador/main/em_strings.c:14
+Compuesta	Composito
+
+#: apps/emulador/main/em_strings.c:14
+Suave	Soft
+
+#: apps/emulador/main/em_strings.c:15
+Recortar bordes	Ritaglia bordi
+
+#: apps/emulador/main/em_strings.c:15
+Recortar costados	Ritaglia lati
+
+#: apps/emulador/main/em_strings.c:15
+Límite de sprites	Limite sprite
+
+#: apps/emulador/main/em_strings.c:17
+No se pudo abrir el archivo	Impossibile aprire il file
+
+#: apps/emulador/main/em_strings.c:17
+No es un juego de NES	Non è un gioco NES
+
+#: apps/emulador/main/em_strings.c:18
+El archivo es demasiado grande	Il file è troppo grande
+
+#: apps/emulador/main/em_strings.c:18
+No hay memoria	Memoria esaurita
+
+#: apps/emulador/main/em_strings.c:19
+Falta la BIOS del Famicom Disk System (disksys.rom)	Manca la BIOS del Famicom Disk System (disksys.rom)
+
+#: apps/emulador/main/em_strings.c:21
+Paleta (juegos de Game Boy)	Palette (giochi Game Boy)
+
+#: apps/emulador/main/em_strings.c:21
+Verde (DMG)	Verde (DMG)
+
+#: apps/emulador/main/em_strings.c:21
+Gris	Grigio
+
+#: apps/emulador/main/em_strings.c:21
+Pocket	Pocket
+
+#: apps/emulador/main/em_strings.c:22
+Color automático	Colore automatico
+
+#: apps/emulador/main/em_strings.c:22
+No es un juego de Game Boy	Non è un gioco Game Boy
+
+#: apps/emulador/main/em_strings.c:23
+Este tipo de cartucho no está soportado	Questo tipo di cartuccia non è supportato
+
+#: apps/emulador/main/em_strings.c:23
+No se pudo leer el juego	Impossibile leggere il gioco
+
+#: apps/emulador/main/em_strings.c:25
+BIOS	BIOS
+
+#: apps/emulador/main/em_strings.c:25
+Automática	Automatica
+
+#: apps/emulador/main/em_strings.c:25
+Integrada	Integrata
+
+#: apps/emulador/main/em_strings.c:26
+Corrección de color	Correzione colore
+
+#: apps/emulador/main/em_strings.c:26
+Mezcla de cuadros	Fusione fotogrammi
+
+#: apps/emulador/main/em_strings.c:27
+El archivo no es un juego de Game Boy Advance	Il file non è un gioco Game Boy Advance
+
+#: apps/emulador/main/em_strings.c:28
+El juego es más grande que un cartucho de Game Boy Advance	Il gioco è più grande di una cartuccia Game Boy Advance
+
+#: apps/emulador/main/em_strings.c:29
+No hay memoria suficiente para el juego	Memoria insufficiente per il gioco
+
+#: apps/emulador/main/em_strings.c:30
+No se pudo abrir el juego	Impossibile aprire il gioco
+
+#: apps/emulador/main/em_strings.c:32
+Calidad del sonido	Qualità del suono
+
+#: apps/emulador/main/em_strings.c:32
+Alta	Alta
+
+#: apps/emulador/main/em_strings.c:32
+Normal	Normale
+
+#: apps/emulador/main/em_strings.c:32
+Rápida	Veloce
+
+#: apps/emulador/main/em_strings.c:32
+Sin sonido	Senza suono
+
+#: apps/emulador/main/em_strings.c:33
+No se pudo leer el archivo	Impossibile leggere il file
+
+#: apps/emulador/main/em_strings.c:33
+No es un juego de Super Nintendo	Non è un gioco Super Nintendo
+
+#: apps/emulador/main/em_strings.c:34
+Este juego usa el chip Super FX, que el emulador no tiene	Questo gioco usa il chip Super FX, che l'emulatore non ha
+
+#: apps/emulador/main/em_strings.c:35
+Este juego usa el chip SA-1, que el emulador no tiene	Questo gioco usa il chip SA-1, che l'emulatore non ha
+
+#: apps/emulador/main/em_strings.c:36
+Este juego usa el chip S-DD1, que el emulador no tiene	Questo gioco usa il chip S-DD1, che l'emulatore non ha
+
+#: apps/emulador/main/em_strings.c:37
+Este juego usa el chip SPC7110, que el emulador no tiene	Questo gioco usa il chip SPC7110, che l'emulatore non ha
+
+#: apps/emulador/main/em_strings.c:39
+Región	Regione
+
+#: apps/emulador/main/em_strings.c:39
+Estados Unidos	Stati Uniti
+
+#: apps/emulador/main/em_strings.c:39
+Europa	Europa
+
+#: apps/emulador/main/em_strings.c:39
+Japón	Giappone
+
+#: apps/emulador/main/em_strings.c:40
+Modos anchos	Modi larghi
+
+#: apps/emulador/main/em_strings.c:40
+Proporción de TV	Proporzioni TV
+
+#: apps/emulador/main/em_strings.c:40
+Píxeles enteros	Pixel interi
+
+#: apps/emulador/main/em_strings.c:40
+Izq	Sx
+
+#: apps/emulador/main/em_strings.c:40
+Der	Dx
+
+#: apps/emulador/main/em_strings.c:41
+No es un juego de Master System	Non è un gioco Master System
+
+#: apps/emulador/main/em_strings.c:41
+No es un juego de Game Gear	Non è un gioco Game Gear
+
+#: apps/emulador/main/em_strings.c:42
+No es un juego de ColecoVision	Non è un gioco ColecoVision
+
+#: apps/emulador/main/em_strings.c:42
+No es un juego de PC Engine	Non è un gioco PC Engine
+
+#: apps/emulador/main/em_strings.c:43
+El juego es más grande que un cartucho de ColecoVision	Il gioco è più grande di una cartuccia ColecoVision
+
+#: apps/emulador/main/em_strings.c:44
+Falta la BIOS de ColecoVision (coleco.rom)	Manca la BIOS ColecoVision (coleco.rom)
+
+#: apps/emulador/main/em_strings.c:46
+Mando	Controller
+
+#: apps/emulador/main/em_strings.c:46
+3 botones	3 pulsanti
+
+#: apps/emulador/main/em_strings.c:46
+6 botones	6 pulsanti
+
+#: apps/emulador/main/em_strings.c:46
+América	America
+
+#: apps/emulador/main/em_strings.c:46
+Completo	Completo
+
+#: apps/emulador/main/em_strings.c:46
+Rápido	Veloce
+
+#: apps/emulador/main/em_strings.c:47
+Sin FM	Senza FM
+
+#: apps/emulador/main/em_strings.c:47
+No es un juego de Mega Drive	Non è un gioco Mega Drive
+
+#: apps/emulador/main/em_strings.c:47
+Los juegos de 32X no se pueden jugar	I giochi 32X non si possono giocare
+
+#: apps/emulador/main/em_strings.c:49
+Sistema	Sistema
+
+#: apps/emulador/main/em_strings.c:49
+MVS (arcade)	MVS (arcade)
+
+#: apps/emulador/main/em_strings.c:49
+AES (consola)	AES (console)
+
+#: apps/emulador/main/em_strings.c:49
+EE. UU.	USA
+
+#: apps/emulador/main/em_strings.c:49
+Asia	Asia
+
+#: apps/emulador/main/em_strings.c:50
+Calidad de sonido	Qualità del suono
+
+#: apps/emulador/main/em_strings.c:50
+Alta (44 kHz)	Alta (44 kHz)
+
+#: apps/emulador/main/em_strings.c:50
+Media (22 kHz)	Media (22 kHz)
+
+#: apps/emulador/main/em_strings.c:50
+Baja (11 kHz)	Bassa (11 kHz)
+
+#: apps/emulador/main/em_strings.c:51
+Caché de sprites	Cache sprite
+
+#: apps/emulador/main/em_strings.c:52
+No es un juego de Neo Geo conocido (el zip tiene que llamarse como en MAME)	Non è un gioco Neo Geo noto (lo zip deve chiamarsi come in MAME)
+
+#: apps/emulador/main/em_strings.c:53
+#: apps/emulador/main/em_zip.c:148
+No se pudo abrir el zip del juego	Impossibile aprire lo zip del gioco
+
+#: apps/emulador/main/em_strings.c:53
+No se pudo leer el zip del juego	Impossibile leggere lo zip del gioco
+
+#: apps/emulador/main/em_strings.c:54
+#: apps/emulador/main/em_zip.c:181
+#: apps/emulador/main/em_zip.c:198
+El zip del juego está dañado	Lo zip del gioco è danneggiato
+
+#: apps/emulador/main/em_strings.c:54
+Falta un archivo del juego en el zip	Manca un file del gioco nello zip
+
+#: apps/emulador/main/em_strings.c:55
+Falta el zip del juego original (este es una variante)	Manca lo zip del gioco originale (questo è una variante)
+
+#: apps/emulador/main/em_strings.c:56
+Falta la BIOS de Neo Geo: neogeo.zip de MAME (sp-s2.sp1, sfix.sfix) en la carpeta bios	Manca la BIOS Neo Geo: neogeo.zip di MAME (sp-s2.sp1, sfix.sfix) nella cartella bios
+
+#: apps/emulador/main/em_strings.c:57
+Falta sfix.sfix (la BIOS de Neo Geo está incompleta)	Manca sfix.sfix (la BIOS Neo Geo è incompleta)
+
+#: apps/emulador/main/em_strings.c:58
+Este juego tiene los gráficos cifrados: hace falta su caché hecha en una computadora	Questo gioco ha la grafica cifrata: serve la sua cache creata su un computer
+
+#: apps/emulador/main/em_strings.c:59
+No hay lugar en la tarjeta para la caché del juego	Non c'è spazio sulla microSD per la cache del gioco
+
+#: apps/emulador/main/em_strings.c:60
+No se pudo escribir la caché del juego en la tarjeta	Impossibile scrivere la cache del gioco sulla microSD
+
+#: apps/emulador/main/em_strings.c:61
+No se pudo leer la caché del juego	Impossibile leggere la cache del gioco
+
+#: apps/emulador/main/em_strings.c:63
+Dificultad izquierda	Difficoltà sinistra
+
+#: apps/emulador/main/em_strings.c:63
+Dificultad derecha	Difficoltà destra
+
+#: apps/emulador/main/em_strings.c:63
+Televisor	Televisore
+
+#: apps/emulador/main/em_strings.c:63
+Suavizar parpadeo	Riduci sfarfallio
+
+#: apps/emulador/main/em_strings.c:64
+BIOS de la 7800	BIOS della 7800
+
+#: apps/emulador/main/em_strings.c:64
+Girar la pantalla	Ruota lo schermo
+
+#: apps/emulador/main/em_strings.c:64
+Según el juego	Secondo il gioco
+
+#: apps/emulador/main/em_strings.c:64
+A (difícil)	A (esperto)
+
+#: apps/emulador/main/em_strings.c:65
+B (fácil)	B (facile)
+
+#: apps/emulador/main/em_strings.c:65
+Color	Colore
+
+#: apps/emulador/main/em_strings.c:65
+Blanco y negro	Bianco e nero
+
+#: apps/emulador/main/em_strings.c:65
+No usar	Non usare
+
+#: apps/emulador/main/em_strings.c:65
+Usar si está	Usa se c'è
+
+#: apps/emulador/main/em_strings.c:66
+Izquierda	Sinistra
+
+#: apps/emulador/main/em_strings.c:66
+Derecha	Destra
+
+#: apps/emulador/main/em_strings.c:67
+No es un juego de Atari 2600	Non è un gioco Atari 2600
+
+#: apps/emulador/main/em_strings.c:67
+No es un juego de Atari 7800	Non è un gioco Atari 7800
+
+#: apps/emulador/main/em_strings.c:68
+No es un juego de Atari Lynx	Non è un gioco Atari Lynx
+
+#: apps/emulador/main/em_strings.c:68
+Tipo de cartucho no soportado	Cartuccia non supportata
+
+#: apps/emulador/main/em_zip.c:154
+El zip no tiene un juego de esta consola	Lo zip non ha un gioco di questa console
+
+#: apps/emulador/main/em_zip.c:189
+#: apps/emulador/main/em_zip.c:204
+No hay lugar en la tarjeta para descomprimir el juego	Non c'è spazio sulla microSD per decomprimere il gioco
+
+#: apps/emulador/main/emu_cores.c:378
+No está el módulo de esta consola	Manca il modulo di questa console
+
+#: apps/emulador/main/emu_cores.c:388
+No se pudo cargar el módulo	Impossibile caricare il modulo
+
+#: apps/emulador/main/emu_cores.c:395
+El módulo es de otra versión del emulador	Il modulo è di un'altra versione dell'emulatore

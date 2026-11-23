@@ -1,0 +1,79 @@
+# amoledos-lang 1   es -> fr
+# web.cotiz.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/cotiz/web/cotiz.js:17
+Oficial	Officiel
+
+#: apps/cotiz/web/cotiz.js:18
+Blue	Blue
+
+#: apps/cotiz/web/cotiz.js:19
+Bolsa (MEP)	Bourse (MEP)
+
+#: apps/cotiz/web/cotiz.js:20
+Contado c/liqui	Contado c/liqui (CCL)
+
+#: apps/cotiz/web/cotiz.js:21
+Mayorista	De gros
+
+#: apps/cotiz/web/cotiz.js:22
+Cripto	Crypto
+
+#: apps/cotiz/web/cotiz.js:23
+Tarjeta	Carte
+
+#: apps/cotiz/web/cotiz.js:24
+Euro	Euro
+
+#: apps/cotiz/web/cotiz.js:25
+Real	Réal brésilien
+
+#: apps/cotiz/web/cotiz.js:26
+Peso chileno	Peso chilien
+
+#: apps/cotiz/web/cotiz.js:27
+Peso uruguayo	Peso uruguayen
+
+#: apps/cotiz/web/cotiz.js:35
+#: apps/cotiz/web/cotiz.js:87
+Cotizaciones	Devises
+
+#: apps/cotiz/web/cotiz.js:39
+Cargando…	Chargement…
+
+#: apps/cotiz/web/cotiz.js:50
+Dólar %s	Dollar %s
+
+#: apps/cotiz/web/cotiz.js:57
+Elegí al menos una	Choisis-en au moins une
+
+#: apps/cotiz/web/cotiz.js:61
+Guardado: la placa lo toma en unos segundos	Enregistré : la carte le prend en quelques secondes
+
+#: apps/cotiz/web/cotiz.js:82
+Compra / venta, de dolarapi.com, actualizado %s.	Achat / vente, de dolarapi.com, mis à jour %s.
+
+#: apps/cotiz/web/cotiz.js:83
+Compra / venta, de dolarapi.com.	Achat / vente, de dolarapi.com.
+
+#: apps/cotiz/web/cotiz.js:84
+No se pudieron traer los valores: %s	Impossible d'obtenir les cours : %s
+
+#: apps/cotiz/web/cotiz.js:88
+Qué muestra la placa	Ce que la carte affiche
+
+#: apps/cotiz/web/cotiz.js:90
+Guardar	Enregistrer
+
+#: apps/cotiz/web/cotiz.js:91
+Abierta en la placa	Ouverte sur la carte
+
+#: apps/cotiz/web/cotiz.js:91
+Abrir Cotizaciones en la placa	Ouvrir Devises sur la carte
+
+#: apps/cotiz/web/cotiz.js:92
+La placa las muestra siempre en este orden; si la app está abierta, cambia sola en unos segundos.	La carte les affiche toujours dans cet ordre ; si l'app est ouverte, elle se met à jour seule en quelques secondes.

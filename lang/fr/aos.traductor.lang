@@ -1,0 +1,318 @@
+# amoledos-lang 1   es -> fr
+# aos.traductor.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/traductor/main/td_cfg.c:43
+Automático	Automatique
+
+#: apps/traductor/main/td_cfg.c:44
+En la placa	Sur la carte
+
+#: apps/traductor/main/td_cfg.c:45
+Servidor propio	Serveur perso
+
+#: apps/traductor/main/td_cfg.c:46
+En línea	En ligne
+
+#: apps/traductor/main/td_job.c:260
+Cargando el modelo…	Chargement du modèle…
+
+#: apps/traductor/main/td_job.c:261
+Traduciendo en la placa…	Traduction sur la carte…
+
+#: apps/traductor/main/td_job.c:262
+Traduciendo por el inglés…	Traduction via l'anglais…
+
+#: apps/traductor/main/td_job.c:263
+Esperando al servidor…	En attente du serveur…
+
+#: apps/traductor/main/td_job.c:263
+Esperando a MyMemory…	En attente de MyMemory…
+
+#: apps/traductor/main/td_lang.c:21
+Español	Espagnol
+
+#: apps/traductor/main/td_lang.c:21
+Inglés	Anglais
+
+#: apps/traductor/main/td_lang.c:21
+Portugués	Portugais
+
+#: apps/traductor/main/td_lang.c:22
+Italiano	Italien
+
+#: apps/traductor/main/td_lang.c:22
+Francés	Français
+
+#: apps/traductor/main/td_lang.c:22
+Alemán	Allemand
+
+#: apps/traductor/main/td_lang.c:23
+Catalán	Catalan
+
+#: apps/traductor/main/td_lang.c:23
+Gallego	Galicien
+
+#: apps/traductor/main/td_lang.c:23
+Euskera	Basque
+
+#: apps/traductor/main/td_lang.c:24
+Neerlandés	Néerlandais
+
+#: apps/traductor/main/td_lang.c:24
+Sueco	Suédois
+
+#: apps/traductor/main/td_lang.c:24
+Polaco	Polonais
+
+#: apps/traductor/main/td_lang.c:25
+Ruso	Russe
+
+#: apps/traductor/main/td_lang.c:25
+Ucraniano	Ukrainien
+
+#: apps/traductor/main/td_lang.c:25
+Griego	Grec
+
+#: apps/traductor/main/td_lang.c:26
+Turco	Turc
+
+#: apps/traductor/main/td_lang.c:26
+Árabe	Arabe
+
+#: apps/traductor/main/td_lang.c:26
+Hebreo	Hébreu
+
+#: apps/traductor/main/td_lang.c:27
+Hindi	Hindi
+
+#: apps/traductor/main/td_lang.c:27
+Japonés	Japonais
+
+#: apps/traductor/main/td_lang.c:27
+Coreano	Coréen
+
+#: apps/traductor/main/td_lang.c:28
+Chino	Chinois
+
+#: apps/traductor/main/td_lang.c:73
+#: apps/traductor/main/traductor.c:285
+Detectar	Détecter
+
+#: apps/traductor/main/traductor.c:281
+Traducir del	Traduire de
+
+#: apps/traductor/main/traductor.c:281
+Traducir al	Traduire en
+
+#: apps/traductor/main/traductor.c:285
+La placa reconoce español, inglés, portugués, italiano, francés y alemán	La carte reconnaît l'espagnol, l'anglais, le portugais, l'italien, le français et l'allemand
+
+#: apps/traductor/main/traductor.c:298
+Sin red, en la placa	Hors ligne, sur la carte
+
+#: apps/traductor/main/traductor.c:298
+Con red	Avec réseau
+
+#: apps/traductor/main/traductor.c:303
+Paquete de idioma	Pack de langue
+
+#: apps/traductor/main/traductor.c:303
+Pasando por el inglés, tarda el doble	Via l'anglais, ça prend deux fois plus
+
+#: apps/traductor/main/traductor.c:304
+Sólo el diccionario	Dictionnaire seul
+
+#: apps/traductor/main/traductor.c:342
+Tocá de nuevo para borrar el historial	Touche encore pour effacer l'historique
+
+#: apps/traductor/main/traductor.c:351
+Historial borrado; los favoritos quedan	Historique effacé ; les favoris restent
+
+#: apps/traductor/main/traductor.c:356
+Ajustes	Réglages
+
+#: apps/traductor/main/traductor.c:358
+Motor	Moteur
+
+#: apps/traductor/main/traductor.c:363
+La placa si hay paquete; si no, tu servidor o MyMemory	La carte s'il y a un pack ; sinon, ton serveur ou MyMemory
+
+#: apps/traductor/main/traductor.c:366
+Sin red, con los paquetes de idioma de la tarjeta	Hors ligne, avec les packs de langue de la carte SD
+
+#: apps/traductor/main/traductor.c:370
+LibreTranslate; la dirección va en la página del portal	LibreTranslate ; l'adresse se met sur la page du portail
+
+#: apps/traductor/main/traductor.c:373
+MyMemory, gratis: %d de %d caracteres hoy	MyMemory, gratuit : %d sur %d caractères aujourd'hui
+
+#: apps/traductor/main/traductor.c:379
+Paquetes de idioma	Packs de langue
+
+#: apps/traductor/main/traductor.c:381
+No hay paquetes en la tarjeta. Se bajan de la Tienda, en los extras del Traductor: cada par trae los dos modelos y los diccionarios.	Aucun pack sur la carte SD. Ils viennent de la Boutique, dans les extras du Traducteur : chaque paire a les deux modèles et les dictionnaires.
+
+#: apps/traductor/main/traductor.c:395
+Traducción y diccionario, %lu MB	Traduction et dictionnaire, %lu Mo
+
+#: apps/traductor/main/traductor.c:396
+Traducción, %lu MB	Traduction, %lu Mo
+
+#: apps/traductor/main/traductor.c:397
+Diccionario, %lu MB	Dictionnaire, %lu Mo
+
+#: apps/traductor/main/traductor.c:400
+#: apps/traductor/main/traductor.c:1073
+Historial	Historique
+
+#: apps/traductor/main/traductor.c:401
+Borrar el historial	Effacer l'historique
+
+#: apps/traductor/main/traductor.c:401
+Los favoritos no se borran	Les favoris restent
+
+#: apps/traductor/main/traductor.c:402
+La dirección del servidor, su clave y el correo para MyMemory se escriben en la página Traductor del portal.	L'adresse du serveur, sa clé et l'e-mail pour MyMemory se saisissent sur la page Traducteur du portail.
+
+#: apps/traductor/main/traductor.c:482
+El portapapeles está vacío	Le presse-papiers est vide
+
+#: apps/traductor/main/traductor.c:512
+La traducción aparece acá.	La traduction s'affiche ici.
+
+#: apps/traductor/main/traductor.c:541
+sustantivo	nom
+
+#: apps/traductor/main/traductor.c:541
+verbo	verbe
+
+#: apps/traductor/main/traductor.c:541
+adjetivo	adjectif
+
+#: apps/traductor/main/traductor.c:542
+adverbio	adverbe
+
+#: apps/traductor/main/traductor.c:542
+pronombre	pronom
+
+#: apps/traductor/main/traductor.c:542
+preposición	préposition
+
+#: apps/traductor/main/traductor.c:543
+conjunción	conjonction
+
+#: apps/traductor/main/traductor.c:543
+interjección	interjection
+
+#: apps/traductor/main/traductor.c:544
+frase	locution
+
+#: apps/traductor/main/traductor.c:544
+nombre propio	nom propre
+
+#: apps/traductor/main/traductor.c:544
+numeral	numéral
+
+#: apps/traductor/main/traductor.c:545
+artículo	article
+
+#: apps/traductor/main/traductor.c:545
+determinante	déterminant
+
+#: apps/traductor/main/traductor.c:545
+prefijo	préfixe
+
+#: apps/traductor/main/traductor.c:546
+sufijo	suffixe
+
+#: apps/traductor/main/traductor.c:546
+abreviatura	abréviation
+
+#: apps/traductor/main/traductor.c:546
+modismo	expression
+
+#: apps/traductor/main/traductor.c:706
+Copiado	Copié
+
+#: apps/traductor/main/traductor.c:735
+No reconocí el idioma: elegilo arriba.	Langue non reconnue : choisis-la en haut.
+
+#: apps/traductor/main/traductor.c:736
+No hay paquete de idioma para este par. Bajalo de la Tienda o elegí un motor en línea en Ajustes.	Pas de pack de langue pour cette paire. Prends-le dans la Boutique ou choisis un moteur en ligne dans Réglages.
+
+#: apps/traductor/main/traductor.c:737
+Sin red. Sin red sólo traducen los paquetes de idioma.	Pas de réseau. Hors ligne, seuls les packs traduisent.
+
+#: apps/traductor/main/traductor.c:738
+No se pudo llegar al servicio.	Impossible de joindre le service.
+
+#: apps/traductor/main/traductor.c:739
+El servicio no pudo traducir.	Le service n'a pas pu traduire.
+
+#: apps/traductor/main/traductor.c:741
+Se terminaron los caracteres gratis de MyMemory por hoy. Un correo en la página del portal da diez veces más.	Les caractères gratuits de MyMemory sont épuisés pour aujourd'hui. Un e-mail sur la page du portail en donne dix fois plus.
+
+#: apps/traductor/main/traductor.c:742
+El servidor pidió esperar un poco.	Le serveur demande d'attendre un peu.
+
+#: apps/traductor/main/traductor.c:743
+El servidor pide una clave, o la clave no es la suya: va en la página del portal.	Le serveur demande une clé, ou ce n'est pas la sienne : elle va sur la page du portail.
+
+#: apps/traductor/main/traductor.c:744
+No hay memoria para el modelo: cerrá otras apps.	Pas assez de mémoire pour le modèle : ferme d'autres apps.
+
+#: apps/traductor/main/traductor.c:745
+Cancelado.	Annulé.
+
+#: apps/traductor/main/traductor.c:746
+Falta la dirección del servidor: se escribe en la página del portal.	Adresse du serveur manquante : elle se saisit sur la page du portail.
+
+#: apps/traductor/main/traductor.c:754
+Cancelar	Annuler
+
+#: apps/traductor/main/traductor.c:754
+#: apps/traductor/main/traductor.c:1019
+Traducir	Traduire
+
+#: apps/traductor/main/traductor.c:774
+Sin modelo para este par: lo que dice el diccionario.	Pas de modèle pour cette paire : selon le dictionnaire.
+
+#: apps/traductor/main/traductor.c:790
+por inglés	via l'anglais
+
+#: apps/traductor/main/traductor.c:795
+Diccionario	Dictionnaire
+
+#: apps/traductor/main/traductor.c:807
+Detectado: %s	Détecté : %s
+
+#: apps/traductor/main/traductor.c:826
+No se pudo empezar	Impossible de démarrer
+
+#: apps/traductor/main/traductor.c:860
+Favorito	Favori
+
+#: apps/traductor/main/traductor.c:860
+Del historial	De l'historique
+
+#: apps/traductor/main/traductor.c:875
+Ya no es favorito	N'est plus favori
+
+#: apps/traductor/main/traductor.c:878
+Borrado del historial	Effacé de l'historique
+
+#: apps/traductor/main/traductor.c:948
+Tocá la estrella de una traducción para tenerla acá.	Touche l'étoile d'une traduction pour la garder ici.
+
+#: apps/traductor/main/traductor.c:949
+Lo que traduzcas queda acá. Mantené apretada una línea para borrarla.	Ce que tu traduis reste ici. Maintiens une ligne appuyée pour l'effacer.
+
+#: apps/traductor/main/traductor.c:1004
+Escribí lo que quieras traducir	Tape ce que tu veux traduire
+
+#: apps/traductor/main/traductor.c:1075
+Favoritos	Favoris

@@ -1,0 +1,140 @@
+# amoledos-lang 1   es -> it
+# web.visor3d.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/visor3d/web/visor3d.js:103
+#: apps/visor3d/web/visor3d.js:111
+no es un GLB	non è un GLB
+
+#: apps/visor3d/web/visor3d.js:112
+un GLB comprimido con Draco no se puede leer	un GLB compresso con Draco non si può leggere
+
+#: apps/visor3d/web/visor3d.js:167
+no es un M3D	non è un M3D
+
+#: apps/visor3d/web/visor3d.js:170
+el M3D está cortado	l'M3D è troncato
+
+#: apps/visor3d/web/visor3d.js:358
+Convertir y guardar en la placa	Converti e salva sulla scheda
+
+#: apps/visor3d/web/visor3d.js:359
+Subir el STL tal cual	Carica l'STL così com'è
+
+#: apps/visor3d/web/visor3d.js:362
+Soltá acá un STL, un OBJ (con su .mtl) o un GLB, o %s.	Trascina qui un STL, un OBJ (col suo .mtl) o un GLB, o %s.
+
+#: apps/visor3d/web/visor3d.js:364
+elegilo	sceglilo
+
+#: apps/visor3d/web/visor3d.js:379
+Ver	Vedi
+
+#: apps/visor3d/web/visor3d.js:380
+Bajar	Scarica
+
+#: apps/visor3d/web/visor3d.js:382
+¿Borrar %s de la placa?	Eliminare %s dalla scheda?
+
+#: apps/visor3d/web/visor3d.js:383
+Borrado %s	Eliminato %s
+
+#: apps/visor3d/web/visor3d.js:384
+Borrar	Elimina
+
+#: apps/visor3d/web/visor3d.js:385
+Todavía no hay modelos en la placa.	Ancora nessun modello sulla scheda.
+
+#: apps/visor3d/web/visor3d.js:391
+Leyendo %s…	Lettura di %s…
+
+#: apps/visor3d/web/visor3d.js:398
+%s: %s triángulos, %s vértices, con colores.	%s: %s triangoli, %s vertici, con colori.
+
+#: apps/visor3d/web/visor3d.js:399
+%s: %s triángulos, %s vértices.	%s: %s triangoli, %s vertici.
+
+#: apps/visor3d/web/visor3d.js:402
+%s: soldando %s triángulos…	%s: saldo %s triangoli…
+
+#: apps/visor3d/web/visor3d.js:404
+%s: %s triángulos en el archivo, %s al reducirlo.	%s: %s triangoli nel file, %s una volta ridotto.
+
+#: apps/visor3d/web/visor3d.js:405
+%s: %s triángulos en el archivo.	%s: %s triangoli nel file.
+
+#: apps/visor3d/web/visor3d.js:415
+Leyendo…	Lettura…
+
+#: apps/visor3d/web/visor3d.js:418
+hace falta un .stl, un .obj o un .glb	serve un .stl, un .obj o un .glb
+
+#: apps/visor3d/web/visor3d.js:424
+no tiene triángulos	non ha triangoli
+
+#: apps/visor3d/web/visor3d.js:428
+No se pudo leer: %s	Impossibile leggere: %s
+
+#: apps/visor3d/web/visor3d.js:434
+Reduciendo…	Riduzione…
+
+#: apps/visor3d/web/visor3d.js:434
+Soldando…	Saldatura…
+
+#: apps/visor3d/web/visor3d.js:440
+%s triángulos en el archivo → %s al reducir, %s vértices, con colores.	%s triangoli nel file → %s ridotti, %s vertici, con colori.
+
+#: apps/visor3d/web/visor3d.js:441
+%s triángulos en el archivo → %s al reducir, %s vértices.	%s triangoli nel file → %s ridotti, %s vertici.
+
+#: apps/visor3d/web/visor3d.js:442
+%s triángulos en el archivo → %s, sin reducir, %s vértices, con colores.	%s triangoli nel file → %s, senza ridurre, %s vertici, con colori.
+
+#: apps/visor3d/web/visor3d.js:443
+%s triángulos en el archivo → %s, sin reducir, %s vértices.	%s triangoli nel file → %s, senza ridurre, %s vertici.
+
+#: apps/visor3d/web/visor3d.js:445
+%s pieza (%s abiertas), %s triángulos dados vuelta hacia afuera.	%s pezzo (%s aperti), %s triangoli girati verso l'esterno.
+
+#: apps/visor3d/web/visor3d.js:446
+%s piezas (%s abiertas), %s triángulos dados vuelta hacia afuera.	%s pezzi (%s aperti), %s triangoli girati verso l'esterno.
+
+#: apps/visor3d/web/visor3d.js:454
+Ya hay un %s en la placa. ¿Reemplazarlo?	C'è già un %s sulla scheda. Sostituirlo?
+
+#: apps/visor3d/web/visor3d.js:467
+Guardado %s (%s)	Salvato %s (%s)
+
+#: apps/visor3d/web/visor3d.js:488
+#: apps/visor3d/web/visor3d.js:520
+Visor 3D	Visore 3D
+
+#: apps/visor3d/web/visor3d.js:490
+Abriendo el Visor 3D en la placa	Apertura del Visore 3D sulla scheda
+
+#: apps/visor3d/web/visor3d.js:490
+Abrir el Visor 3D en la placa	Apri il Visore 3D sulla scheda
+
+#: apps/visor3d/web/visor3d.js:491
+Los modelos van en /3d de la tarjeta, STL o M3D.	I modelli vanno in /3d sulla microSD, in STL o M3D.
+
+#: apps/visor3d/web/visor3d.js:493
+Agregar un modelo	Aggiungi un modello
+
+#: apps/visor3d/web/visor3d.js:496
+Triángulos como máximo:	Triangoli al massimo:
+
+#: apps/visor3d/web/visor3d.js:498
+El visor dibuja hasta 150 000; más que eso lo reduciría él mismo al abrirlo. Menos triángulos es más fluido al girar.	Il visore disegna fino a 150 000; oltre, lo ridurrebbe lui stesso all'apertura. Meno triangoli, rotazione più fluida.
+
+#: apps/visor3d/web/visor3d.js:499
+Color, si el archivo no trae	Colore, se il file non ne ha
+
+#: apps/visor3d/web/visor3d.js:502
+Vista previa, con la luz de la placa: arrastrá para girar, la rueda acerca, doble clic vuelve al principio.	Anteprima, con la luce della scheda: trascina per ruotare, la rotella ingrandisce, doppio clic torna all'inizio.
+
+#: apps/visor3d/web/visor3d.js:503
+Todo se hace en este navegador: el STL, el OBJ o el GLB se leen, se sueldan, cada pieza suelta se orienta hacia afuera (el visor no dibuja la cara de atrás de un modelo cerrado) y se guarda un .m3d con sus colores. De un GLB se toma el color base de cada material; las texturas no.	Tutto avviene in questo browser: l'STL, l'OBJ o il GLB si leggono, si saldano, ogni pezzo sciolto si orienta verso l'esterno (il visore non disegna la faccia posteriore di un modello chiuso) e si salva un .m3d coi suoi colori. Da un GLB si prende il colore base di ogni materiale; le texture no.

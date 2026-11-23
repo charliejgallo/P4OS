@@ -1,0 +1,360 @@
+# amoledos-lang 1   es -> pt
+# web.luces.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/luces/web/luces.js:25
+Rojo	Verm.
+
+#: apps/luces/web/luces.js:25
+Naranja	Laranja
+
+#: apps/luces/web/luces.js:25
+Ámbar	Âmbar
+
+#: apps/luces/web/luces.js:25
+Amarillo	Amarelo
+
+#: apps/luces/web/luces.js:26
+Verde	Verde
+
+#: apps/luces/web/luces.js:26
+Cian	Ciano
+
+#: apps/luces/web/luces.js:26
+Azul	Azul
+
+#: apps/luces/web/luces.js:26
+Violeta	Violeta
+
+#: apps/luces/web/luces.js:27
+Magenta	Magenta
+
+#: apps/luces/web/luces.js:27
+Cálido	Quente
+
+#: apps/luces/web/luces.js:27
+Blanco	Branco
+
+#: apps/luces/web/luces.js:28
+Sin strobe	Sem strobe
+
+#: apps/luces/web/luces.js:28
+Lento	Lento
+
+#: apps/luces/web/luces.js:28
+Medio	Médio
+
+#: apps/luces/web/luces.js:28
+Rápido	Rápido
+
+#: apps/luces/web/luces.js:29
+#: apps/luces/web/luces.js:159
+Ninguno	Nenhum
+
+#: apps/luces/web/luces.js:29
+Arcoíris	Arco-íris
+
+#: apps/luces/web/luces.js:29
+Ola	Onda
+
+#: apps/luces/web/luces.js:29
+Destellos	Brilhos
+
+#: apps/luces/web/luces.js:29
+Recorrido	Percurso
+
+#: apps/luces/web/luces.js:29
+Colores	Cores
+
+#: apps/luces/web/luces.js:29
+Respirar	Respirar
+
+#: apps/luces/web/luces.js:30
+#: apps/luces/web/luces.js:31
+Corte	Corte
+
+#: apps/luces/web/luces.js:30
+0,5 s	0,5 s
+
+#: apps/luces/web/luces.js:30
+1 s	1 s
+
+#: apps/luces/web/luces.js:30
+2 s	2 s
+
+#: apps/luces/web/luces.js:30
+3 s	3 s
+
+#: apps/luces/web/luces.js:30
+5 s	5 s
+
+#: apps/luces/web/luces.js:31
+Mitad	Metade
+
+#: apps/luces/web/luces.js:31
+Todo fundido	Fade total
+
+#: apps/luces/web/luces.js:118
+#: apps/luces/web/luces.js:520
+Luces	Luzes
+
+#: apps/luces/web/luces.js:125
+La app Luces no está abierta en la placa (%s)	O app Luzes não está aberto na placa (%s)
+
+#: apps/luces/web/luces.js:128
+Buscando la app…	Buscando o app…
+
+#: apps/luces/web/luces.js:129
+#: apps/luces/web/luces.js:482
+Abrir salida	Abrir saída
+
+#: apps/luces/web/luces.js:151
+Posición (pan y tilt)	Posição (pan e tilt)
+
+#: apps/luces/web/luces.js:152
+Al centro	Centro
+
+#: apps/luces/web/luces.js:158
+Todos	Todos
+
+#: apps/luces/web/luces.js:160
+Pares	Pares
+
+#: apps/luces/web/luces.js:161
+Impares	Ímpares
+
+#: apps/luces/web/luces.js:166
+Intensidad	Intensidade
+
+#: apps/luces/web/luces.js:168
+Color	Cor
+
+#: apps/luces/web/luces.js:172
+Otro	Outro
+
+#: apps/luces/web/luces.js:174
+Efectos y pruebas	Efeitos e testes
+
+#: apps/luces/web/luces.js:175
+Velocidad	Velocidade
+
+#: apps/luces/web/luces.js:176
+El efecto corre sobre los aparatos elegidos al tocarlo (todos, si no hay ninguno elegido), encima de la escena.	O efeito roda sobre os aparelhos escolhidos ao tocá-lo (todos, se nenhum estiver escolhido), por cima da cena.
+
+#: apps/luces/web/luces.js:177
+Pruebas: Recorrido prende un aparato por vez en blanco (cuál es cuál; uno fuera de turno tiene la dirección mal). Colores pasa todos por rojo, verde, azul y blanco (uno de otro color tiene los canales en otro orden que su tipo). Respirar sube y baja la intensidad despacio (escalones o parpadeo abajo son la curva del aparato).	Testes: Percurso acende um aparelho por vez em branco (qual é qual; um fora de ordem está com o endereço errado). Cores passa todos por vermelho, verde, azul e branco (um de outra cor tem os canais em outra ordem que a do seu tipo). Respirar sobe e desce a intensidade devagar (degraus ou piscadas embaixo são a curva do aparelho).
+
+#: apps/luces/web/luces.js:214
+#: apps/luces/web/luces.js:471
+Andar	Rodar
+
+#: apps/luces/web/luces.js:217
+Hacen falta al menos dos escenas distintas: con una sola, la secuencia llama siempre a la misma. "Escenas de muestra" agrega cinco.	São necessárias pelo menos duas cenas diferentes: com uma só, a sequência chama sempre a mesma. "Cenas de exemplo" adiciona cinco.
+
+#: apps/luces/web/luces.js:221
+Guardar lo que hay	Guardar o que há
+
+#: apps/luces/web/luces.js:222
+Escenas de muestra	Cenas de exemplo
+
+#: apps/luces/web/luces.js:223
+Fundido de las escenas nuevas (cada una guarda el suyo)	Fade das cenas novas (cada uma guarda o seu)
+
+#: apps/luces/web/luces.js:225
+Secuencia: una escena tras otra, al tiempo	Sequência: uma cena após a outra, no tempo
+
+#: apps/luces/web/luces.js:230
+Pasa por todas las escenas en orden, una por golpe. Tap: tocalo al ritmo de la música, tres o cuatro veces.	Passa por todas as cenas em ordem, uma por batida. Tap: toque nele no ritmo da música, três ou quatro vezes.
+
+#: apps/luces/web/luces.js:245
+#: apps/luces/web/luces.js:258
+Nombre de la escena	Nome da cena
+
+#: apps/luces/web/luces.js:245
+Escena %d	Cena %d
+
+#: apps/luces/web/luces.js:251
+%s: 1 volver a grabar con lo que hay ahora, 2 cambiar el nombre, 3 borrar, 4 su fundido	%s: 1 gravar de novo com o que há agora, 2 renomear, 3 apagar, 4 seu fade
+
+#: apps/luces/web/luces.js:254
+Fundido de %s al llamarla, en segundos	Fade de %s ao chamá-la, em segundos
+
+#: apps/luces/web/luces.js:260
+¿Borrar la escena %s?	Apagar a cena %s?
+
+#: apps/luces/web/luces.js:269
+PAR de 8 canales	PAR de 8 canais
+
+#: apps/luces/web/luces.js:272
+Agregar aparatos	Adicionar aparelhos
+
+#: apps/luces/web/luces.js:274
+#: apps/luces/web/luces.js:328
+Tipo	Tipo
+
+#: apps/luces/web/luces.js:275
+Cuántos	Quantos
+
+#: apps/luces/web/luces.js:276
+#: apps/luces/web/luces.js:328
+Universo	Universo
+
+#: apps/luces/web/luces.js:277
+Agregar	Adicionar
+
+#: apps/luces/web/luces.js:278
+Van desde la primera dirección libre, uno tras otro.	Vão a partir do primeiro endereço livre, um após o outro.
+
+#: apps/luces/web/luces.js:280
+Tipos de aparato	Tipos de aparelho
+
+#: apps/luces/web/luces.js:281
+Un tipo nuevo	Um tipo novo
+
+#: apps/luces/web/luces.js:282
+#: apps/luces/web/luces.js:328
+Nombre	Nome
+
+#: apps/luces/web/luces.js:282
+Canales, en orden	Canais, em ordem
+
+#: apps/luces/web/luces.js:283
+Guardar en la tarjeta	Salvar no cartão
+
+#: apps/luces/web/luces.js:284
+Una palabra por canal, como dice el manual del aparato: %s; o un número, para un canal fijo en ese valor (un modo, una macro en 0).	Uma palavra por canal, como diz o manual do aparelho: %s; ou um número, para um canal fixo nesse valor (um modo, uma macro em 0). As palavras ficam em espanhol.
+
+#: apps/luces/web/luces.js:288
+Falta el nombre o los canales	Falta o nome ou os canais
+
+#: apps/luces/web/luces.js:290
+No entiendo: %s	Não entendi: %s
+
+#: apps/luces/web/luces.js:298
+Guardado en %s	Salvo em %s
+
+#: apps/luces/web/luces.js:320
+Se pisa con otro aparato o se pasa del canal 512	Sobrepõe outro aparelho ou passa do canal 512
+
+#: apps/luces/web/luces.js:322
+Sacar del patch	Tirar do patch
+
+#: apps/luces/web/luces.js:323
+¿Sacar %s del patch?	Tirar %s do patch?
+
+#: apps/luces/web/luces.js:326
+%d aparatos, %d canales de 512	%d aparelhos, %d canais de 512
+
+#: apps/luces/web/luces.js:328
+Dirección	Endereço
+
+#: apps/luces/web/luces.js:328
+Canales	Canais
+
+#: apps/luces/web/luces.js:330
+incluido	incluído
+
+#: apps/luces/web/luces.js:337
+vacío: a toda la red	vazio: a rede toda
+
+#: apps/luces/web/luces.js:353
+Puerto	Porta
+
+#: apps/luces/web/luces.js:356
+Mandar por la red	Enviar pela rede
+
+#: apps/luces/web/luces.js:357
+IP del nodo	IP do nó
+
+#: apps/luces/web/luces.js:358
+Universo Art-Net del U1	Universo Art-Net do U1
+
+#: apps/luces/web/luces.js:360
+Cada universo con algún aparato sale 40 veces por segundo como Art-Net (UDP 6454). U1 lleva el universo elegido, U2 el siguiente, y así. El U1 también sale por RS485.	Cada universo com algum aparelho sai 40 vezes por segundo como Art-Net (UDP 6454). U1 leva o universo escolhido, U2 o seguinte, e assim por diante. O U1 também sai pela RS485.
+
+#: apps/luces/web/luces.js:361
+Los 512 canales como salen	Os 512 canais como saem
+
+#: apps/luces/web/luces.js:362
+Oscuros: sin aparato. Tocá un canal para ver qué es.	Escuros: sem aparelho. Toque em um canal para ver o que é.
+
+#: apps/luces/web/luces.js:390
+Canal %d: %d	Canal %d: %d
+
+#: apps/luces/web/luces.js:390
+fijo	fixo
+
+#: apps/luces/web/luces.js:390
+sin aparato	sem aparelho
+
+#: apps/luces/web/luces.js:392
+Saliendo por %s: %s paquetes/s, %d mandados.	Saindo por %s: %s pacotes/s, %d enviados.
+
+#: apps/luces/web/luces.js:393
+Salida cerrada (%s).	Saída fechada (%s).
+
+#: apps/luces/web/luces.js:402
+Apagado.	Desligado.
+
+#: apps/luces/web/luces.js:402
+%s paquetes mandados a %s	%s pacotes enviados a %s
+
+#: apps/luces/web/luces.js:411
+Elegí aparatos antes de guardar un grupo	Escolha aparelhos antes de salvar um grupo
+
+#: apps/luces/web/luces.js:412
+Nombre del grupo (con los aparatos elegidos)	Nome do grupo (com os aparelhos escolhidos)
+
+#: apps/luces/web/luces.js:412
+Grupo %d	Grupo %d
+
+#: apps/luces/web/luces.js:421
+¿Borrar el grupo %s? Los aparatos quedan.	Apagar o grupo %s? Os aparelhos ficam.
+
+#: apps/luces/web/luces.js:422
++ Grupo	+ Grupo
+
+#: apps/luces/web/luces.js:445
+%d elegidos	%d marcados
+
+#: apps/luces/web/luces.js:445
+ninguno elegido: todos	nenhum escolhido: todos
+
+#: apps/luces/web/luces.js:463
+corte	corte
+
+#: apps/luces/web/luces.js:464
+Grabar, renombrar o borrar	Gravar, renomear ou apagar
+
+#: apps/luces/web/luces.js:465
+Todavía no hay escenas. Armá un look en Escenario y guardalo acá.	Ainda não há cenas. Monte um visual em Palco e guarde aqui.
+
+#: apps/luces/web/luces.js:471
+Parar	Parar
+
+#: apps/luces/web/luces.js:480
+Saliendo por %s · %s paquetes/s	Saindo por %s · %s pacotes/s
+
+#: apps/luces/web/luces.js:481
+Salida cerrada (%s)	Saída fechada (%s)
+
+#: apps/luces/web/luces.js:482
+Cerrar salida	Fechar saída
+
+#: apps/luces/web/luces.js:502
+La app Luces no está abierta en la placa: abrila ahí (o desde Apps) y esta página la maneja.	O app Luzes não está aberto na placa: abra-o lá (ou em Apps) e esta página o controla.
+
+#: apps/luces/web/luces.js:510
+Escenario	Palco
+
+#: apps/luces/web/luces.js:510
+Escenas	Cenas
+
+#: apps/luces/web/luces.js:510
+Patch	Patch
+
+#: apps/luces/web/luces.js:510
+Salida	Saída

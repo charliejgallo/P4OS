@@ -1,0 +1,163 @@
+# amoledos-lang 1   es -> fr
+# web.traductor.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/traductor/web/traductor.js:19
+Automático	Automatique
+
+#: apps/traductor/web/traductor.js:19
+La placa cuando hay paquete de idioma; si no, tu servidor, y si no hay, MyMemory.	La carte quand il y a un pack de langue ; sinon, ton serveur, et s'il n'y en a pas, MyMemory.
+
+#: apps/traductor/web/traductor.js:20
+En la placa	Sur la carte
+
+#: apps/traductor/web/traductor.js:20
+Sin red: sólo los pares de los paquetes de idioma de la tarjeta.	Hors ligne : seulement les paires des packs de langue de la carte SD.
+
+#: apps/traductor/web/traductor.js:21
+Servidor propio	Serveur perso
+
+#: apps/traductor/web/traductor.js:21
+Un LibreTranslate en tu red (una computadora o una Raspberry).	Un LibreTranslate sur ton réseau (un ordinateur ou un Raspberry Pi).
+
+#: apps/traductor/web/traductor.js:22
+En línea	En ligne
+
+#: apps/traductor/web/traductor.js:22
+MyMemory: gratis y sin cuenta, 5000 caracteres por día; con un correo, 50 000.	MyMemory : gratuit et sans compte, 5000 caractères par jour ; avec un e-mail, 50 000.
+
+#: apps/traductor/web/traductor.js:25
+Español	Espagnol
+
+#: apps/traductor/web/traductor.js:25
+Inglés	Anglais
+
+#: apps/traductor/web/traductor.js:25
+Portugués	Portugais
+
+#: apps/traductor/web/traductor.js:25
+Italiano	Italien
+
+#: apps/traductor/web/traductor.js:25
+Francés	Français
+
+#: apps/traductor/web/traductor.js:26
+Alemán	Allemand
+
+#: apps/traductor/web/traductor.js:26
+Catalán	Catalan
+
+#: apps/traductor/web/traductor.js:26
+Neerlandés	Néerlandais
+
+#: apps/traductor/web/traductor.js:26
+Japonés	Japonais
+
+#: apps/traductor/web/traductor.js:26
+Chino	Chinois
+
+#: apps/traductor/web/traductor.js:26
+Ruso	Russe
+
+#: apps/traductor/web/traductor.js:85
+#: apps/traductor/web/traductor.js:199
+Traductor	Traducteur
+
+#: apps/traductor/web/traductor.js:90
+Cargando…	Chargement…
+
+#: apps/traductor/web/traductor.js:106
+Guardado: la placa lo toma en unos segundos	Enregistré : la carte le prend en quelques secondes
+
+#: apps/traductor/web/traductor.js:120
+Sólo si tu servidor la pide	Seulement si ton serveur en demande une
+
+#: apps/traductor/web/traductor.js:122
+nombre@ejemplo.com	nom@exemple.com
+
+#: apps/traductor/web/traductor.js:128
+Escribí la dirección del servidor	Tape l'adresse du serveur
+
+#: apps/traductor/web/traductor.js:129
+Probando…	Test…
+
+#: apps/traductor/web/traductor.js:133
+Anda: %d idiomas.	Ça marche : %d langues.
+
+#: apps/traductor/web/traductor.js:135
+El navegador no llegó (puede ser el CORS del servidor); la placa quizás sí.	Le navigateur n'y est pas arrivé (peut-être le CORS du serveur) ; la carte, peut-être que si.
+
+#: apps/traductor/web/traductor.js:139
+Motor	Moteur
+
+#: apps/traductor/web/traductor.js:141
+Servidor propio (LibreTranslate)	Serveur perso (LibreTranslate)
+
+#: apps/traductor/web/traductor.js:142
+Dirección	Adresse
+
+#: apps/traductor/web/traductor.js:143
+Clave	Clé
+
+#: apps/traductor/web/traductor.js:144
+Probar desde el navegador	Tester depuis le navigateur
+
+#: apps/traductor/web/traductor.js:145
+MyMemory	MyMemory
+
+#: apps/traductor/web/traductor.js:146
+Correo (opcional): sube el límite diario de 5000 a 50 000 caracteres	E-mail (optionnel) : monte la limite quotidienne de 5000 à 50 000 caractères
+
+#: apps/traductor/web/traductor.js:147
+Lo que se traduce en línea viaja al servicio, que puede guardarlo. Sin red, en la placa, no sale de la tarjeta.	Ce qui est traduit en ligne part vers le service, qui peut le garder. Hors ligne, sur la carte, rien ne quitte la carte SD.
+
+#: apps/traductor/web/traductor.js:148
+No guardar el historial	Pas d'historique
+
+#: apps/traductor/web/traductor.js:150
+Guardar	Enregistrer
+
+#: apps/traductor/web/traductor.js:151
+Abrir en la placa	Ouvrir sur la carte
+
+#: apps/traductor/web/traductor.js:167
+Paquetes de idioma en la tarjeta	Packs de langue sur la carte SD
+
+#: apps/traductor/web/traductor.js:168
+Ninguno todavía.	Aucun encore.
+
+#: apps/traductor/web/traductor.js:169
+Se bajan desde la Tienda de la placa, en los extras del Traductor. Cada par trae los modelos de las dos direcciones (sin red, unos segundos por oración) y los diccionarios. Entre dos idiomas que no son el inglés, la placa traduce pasando por el inglés.	Ils se téléchargent depuis la Boutique de la carte, dans les extras du Traducteur. Chaque paire apporte les modèles des deux sens (hors ligne, quelques secondes par phrase) et les dictionnaires. Entre deux langues autres que l'anglais, la carte traduit en passant par l'anglais.
+
+#: apps/traductor/web/traductor.js:179
+Favorito	Favori
+
+#: apps/traductor/web/traductor.js:181
+Copiar	Copier
+
+#: apps/traductor/web/traductor.js:182
+Copiado	Copié
+
+#: apps/traductor/web/traductor.js:183
+Borrar	Effacer
+
+#: apps/traductor/web/traductor.js:191
+Historial	Historique
+
+#: apps/traductor/web/traductor.js:193
+Todo (%d)	Tout (%d)
+
+#: apps/traductor/web/traductor.js:194
+Favoritos (%d)	Favoris (%d)
+
+#: apps/traductor/web/traductor.js:195
+Bajar como texto	Télécharger en texte
+
+#: apps/traductor/web/traductor.js:196
+No hay favoritos.	Aucun favori.
+
+#: apps/traductor/web/traductor.js:196
+Todavía no hay traducciones.	Pas encore de traductions.

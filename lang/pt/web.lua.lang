@@ -1,0 +1,186 @@
+# amoledos-lang 1   es -> pt
+# web.lua.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/lua/web/lua.js:66
+Funciones	Funções
+
+#: apps/lua/web/lua.js:66
+una vez, antes del primer cuadro	uma vez, antes do primeiro quadro
+
+#: apps/lua/web/lua.js:66
+cada cuadro; dt en milisegundos	cada quadro; dt em milissegundos
+
+#: apps/lua/web/lua.js:66
+cada cuadro, después de tick	cada quadro, depois de tick
+
+#: apps/lua/web/lua.js:67
+ev es "down", "move" o "up"	ev é "down", "move" ou "up"
+
+#: apps/lua/web/lua.js:68
+la pantalla giró (lienzo por defecto)	a tela girou (canvas padrão)
+
+#: apps/lua/web/lua.js:69
+La tabla aos	A tabela aos
+
+#: apps/lua/web/lua.js:69
+el lienzo: 240 × 426 parado, a ×3	o canvas: 240 × 426 em pé, a ×3
+
+#: apps/lua/web/lua.js:69
+llena todo	enche tudo
+
+#: apps/lua/web/lua.js:69
+#: apps/lua/web/lua.js:70
+relleno	cheio
+
+#: apps/lua/web/lua.js:70
+#: apps/lua/web/lua.js:70
+contorno	contorno
+
+#: apps/lua/web/lua.js:71
+5×7, mayúsculas, dígitos y signos	5×7, maiúsculas, dígitos e símbolos
+
+#: apps/lua/web/lua.js:71
+oscurece (f<0) o aclara, en dieciseisavos	escurece (f<0) ou clareia, em dezesseis avos
+
+#: apps/lua/web/lua.js:72
+x, y, apoyado	x, y, apertado
+
+#: apps/lua/web/lua.js:72
+desde que arrancó el guión	desde que o script começou
+
+#: apps/lua/web/lua.js:73
+congela lo dibujado como fondo	congela o que foi desenhado como fundo
+
+#: apps/lua/web/lua.js:73
+guión, pantalla y cuadro en ms, filas, píxeles	script, tela e quadro em ms, linhas, pixels
+
+#: apps/lua/web/lua.js:74
+En las primeras líneas	Nas primeiras linhas
+
+#: apps/lua/web/lua.js:74
+otro lienzo (16..1280 por lado), a la escala entera que entre	outro canvas (16..1280 por lado), na escala inteira que couber
+
+#: apps/lua/web/lua.js:74
+o landscape: gira la pantalla al abrirlo desde el inicio	ou landscape: gira a tela ao abri-lo pela tela de início
+
+#: apps/lua/web/lua.js:81
+nombre.lua	nome.lua
+
+#: apps/lua/web/lua.js:97
+el último que corrió la placa	o último que a placa rodou
+
+#: apps/lua/web/lua.js:99
+Correr	Rodar
+
+#: apps/lua/web/lua.js:100
+Bajar	Baixar
+
+#: apps/lua/web/lua.js:101
+Editar	Editar
+
+#: apps/lua/web/lua.js:102
+Todavía no hay guiones. Creá el primero con «Nuevo guión».	Ainda não há scripts. Crie o primeiro com "Novo script".
+
+#: apps/lua/web/lua.js:115
+En la placa: %s	Na placa: %s
+
+#: apps/lua/web/lua.js:115
+corriendo, sin errores	rodando, sem erros
+
+#: apps/lua/web/lua.js:115
+La placa todavía no corrió ningún guión.	A placa ainda não rodou nenhum script.
+
+#: apps/lua/web/lua.js:122
+No existe %s	%s não existe
+
+#: apps/lua/web/lua.js:139
+Hay cambios sin guardar. ¿Volver igual?	Há alterações não salvas. Voltar mesmo assim?
+
+#: apps/lua/web/lua.js:145
+Ponele un nombre al guión	Dê um nome ao script
+
+#: apps/lua/web/lua.js:146
+El nombre no puede tener barras ni empezar con punto o guion bajo	O nome não pode ter barras nem começar com ponto ou sublinhado
+
+#: apps/lua/web/lua.js:147
+Ya hay un %s. ¿Reemplazarlo?	Já existe %s. Substituir?
+
+#: apps/lua/web/lua.js:148
+Guardando…	Salvando…
+
+#: apps/lua/web/lua.js:158
+Guardado: la placa lo está recargando	Salvo: a placa está recarregando
+
+#: apps/lua/web/lua.js:158
+Guardado en la placa	Salvo na placa
+
+#: apps/lua/web/lua.js:161
+No se pudo guardar: %s	Não foi possível salvar: %s
+
+#: apps/lua/web/lua.js:168
+Corriendo %s en la placa	Rodando %s na placa
+
+#: apps/lua/web/lua.js:169
+%s es nuevo: aparece en el inicio después de reiniciar. Abrí la lista de Lua y tocalo ahí.	%s é novo: aparece na tela de início depois de reiniciar. Abra a lista de Lua e toque nele ali.
+
+#: apps/lua/web/lua.js:176
+¿Borrar %s de la placa?	Apagar %s da placa?
+
+#: apps/lua/web/lua.js:177
+Borrado %s	Apagado %s
+
+#: apps/lua/web/lua.js:182
+Sólo archivos .lua (y sus íconos .aic)	Só arquivos .lua (e seus ícones .aic)
+
+#: apps/lua/web/lua.js:186
+Subido %s	Enviado %s
+
+#: apps/lua/web/lua.js:186
+Subidos %d archivos	Enviados %d arquivos
+
+#: apps/lua/web/lua.js:202
+Soltá acá archivos .lua para subirlos a %s	Solte aqui arquivos .lua para enviá-los a %s
+
+#: apps/lua/web/lua.js:209
+Nuevo guión	Novo script
+
+#: apps/lua/web/lua.js:210
+Subir…	Enviar…
+
+#: apps/lua/web/lua.js:211
+Abriendo Lua en la placa	Abrindo Lua na placa
+
+#: apps/lua/web/lua.js:211
+Abrir la app en la placa	Abrir o app na placa
+
+#: apps/lua/web/lua.js:214
+← Guiones	← Scripts
+
+#: apps/lua/web/lua.js:219
+Guardar en la placa	Salvar na placa
+
+#: apps/lua/web/lua.js:220
+Guardar y correr	Salvar e rodar
+
+#: apps/lua/web/lua.js:221
+Borrar de la placa	Apagar da placa
+
+#: apps/lua/web/lua.js:222
+⌘S / Ctrl+S guarda	⌘S / Ctrl+S salva
+
+#: apps/lua/web/lua.js:224
+Los colores son 0xRRGGBB. Están string, table, math, utf8 y coroutine; no están io, os, package ni debug. Una llamada que tarda más de 400 ms se corta con un error.	As cores são 0xRRGGBB. Estão disponíveis string, table, math, utf8 e coroutine; io, os, package e debug não. Uma chamada que demora mais de 400 ms é cortada com um erro.
+
+#: apps/lua/web/lua.js:225
+#: apps/lua/web/lua.js:235
+Lua	Lua
+
+#: apps/lua/web/lua.js:226
+Los .lua viven en /lua de la tarjeta. La placa vigila el archivo del guión que está corriendo y lo recarga cuando cambia, así que guardar acá alcanza. Un error no reinicia nada: sale en la pantalla y acá, con su número de línea. Un guión nuevo es una app del inicio desde el próximo arranque.	Os .lua ficam em /lua no cartão. A placa vigia o arquivo do script que está rodando e o recarrega quando muda, então salvar aqui basta. Um erro não reinicia nada: aparece na tela e aqui, com o número da linha. Um script novo vira um app da tela de início a partir da próxima inicialização.
+
+#: apps/lua/web/lua.js:227
+Hay cambios sin guardar	Há alterações não salvas

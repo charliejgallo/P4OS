@@ -1,0 +1,1825 @@
+# amoledos-lang 1   es -> it
+# demo.chatarra.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/chatarra/main/ch_battle.c:127
+ATACAR	ATTACCA
+
+#: apps/chatarra/main/ch_battle.c:127
+OBJETO	ZAINO
+
+#: apps/chatarra/main/ch_battle.c:128
+CAMBIAR	CAMBIA
+
+#: apps/chatarra/main/ch_battle.c:128
+ANALIZAR	ANALIZZA
+
+#: apps/chatarra/main/ch_battle.c:129
+HUIR	FUGGI
+
+#: apps/chatarra/main/ch_battle.c:226
+TE ATACA %s!	%s ATTACCA!
+
+#: apps/chatarra/main/ch_battle.c:310
+%s USA %s	%s USA %s
+
+#: apps/chatarra/main/ch_battle.c:311
+#: apps/chatarra/main/ch_battle.c:318
+#: apps/chatarra/main/ch_battle.c:770
+EL RIVAL	RIVALE
+
+#: apps/chatarra/main/ch_battle.c:311
+#: apps/chatarra/main/ch_battle.c:318
+#: apps/chatarra/main/ch_battle.c:770
+TU ROBOT	TUO ROBOT
+
+#: apps/chatarra/main/ch_battle.c:317
+%s ESTA	%s E
+
+#: apps/chatarra/main/ch_battle.c:319
+EN CORTOCIRCUITO Y	IN CORTOCIRCUITO E
+
+#: apps/chatarra/main/ch_battle.c:319
+NO PUEDE MOVERSE.	NON PUO MUOVERSI.
+
+#: apps/chatarra/main/ch_battle.c:325
+PERO NO TIENE ENERGIA.	MA NON HA ENERGIA.
+
+#: apps/chatarra/main/ch_battle.c:331
+PERO FALLA.	MA MANCA IL COLPO.
+
+#: apps/chatarra/main/ch_battle.c:359
+CRITICO! %d DE DANO	CRITICO! %d DANNI
+
+#: apps/chatarra/main/ch_battle.c:363
+MUY EFICAZ! %d DE DANO	SUPEREFFICACE! %d DANNI
+
+#: apps/chatarra/main/ch_battle.c:364
+POCO EFICAZ. %d DE DANO	POCO EFFICACE. %d DANNI
+
+#: apps/chatarra/main/ch_battle.c:365
+%d DE DANO.	%d DANNI.
+
+#: apps/chatarra/main/ch_battle.c:375
+SE CURA %d.	RECUPERA %d.
+
+#: apps/chatarra/main/ch_battle.c:380
+Y OTRA VEZ: %d MAS.	E ANCORA: ALTRI %d.
+
+#: apps/chatarra/main/ch_battle.c:389
+BAJA SU DEFENSA.	CALA LA DIFESA.
+
+#: apps/chatarra/main/ch_battle.c:393
+BAJA SU ATAQUE.	CALA L'ATTACCO.
+
+#: apps/chatarra/main/ch_battle.c:397
+SUBE SU ATAQUE.	SALE L'ATTACCO.
+
+#: apps/chatarra/main/ch_battle.c:401
+#: apps/chatarra/main/ch_battle.c:856
+SUBE SU DEFENSA.	SALE LA DIFESA.
+
+#: apps/chatarra/main/ch_battle.c:405
+QUEDA RECALENTADO.	SI SURRISCALDA.
+
+#: apps/chatarra/main/ch_battle.c:409
+QUEDA EN CORTOCIRCUITO.	VA IN CORTOCIRCUITO.
+
+#: apps/chatarra/main/ch_battle.c:415
+ABSORBE %d DE VIDA.	ASSORBE %d DI VITA.
+
+#: apps/chatarra/main/ch_battle.c:420
+RECARGA LA BATERIA.	RICARICA BATTERIA.
+
+#: apps/chatarra/main/ch_battle.c:426
+SE REPARA %d.	RIPARA %d.
+
+#: apps/chatarra/main/ch_battle.c:517
+#: apps/chatarra/main/ch_battle.c:667
+#: apps/chatarra/main/ch_battle.c:679
+%s SE APAGO!	%s SI SPEGNE!
+
+#: apps/chatarra/main/ch_battle.c:519
+SACAN A %s!	MANDANO %s!
+
+#: apps/chatarra/main/ch_battle.c:530
+GANAS %d EXP.	OTTIENI %d EXP.
+
+#: apps/chatarra/main/ch_battle.c:533
+#: apps/chatarra/main/ch_battle.c:604
+GANASTE EL COMBATE!	HAI VINTO LA LOTTA!
+
+#: apps/chatarra/main/ch_battle.c:534
+SUBISTE DE NIVEL!	SALI DI LIVELLO!
+
+#: apps/chatarra/main/ch_battle.c:579
+TE DEJA: %s	LASCIA: %s
+
+#: apps/chatarra/main/ch_battle.c:583
+GANAS %d EXP Y %d CRED.	OTTIENI %d EXP E %d CR.
+
+#: apps/chatarra/main/ch_battle.c:587
+#: apps/chatarra/main/ch_ui.c:1890
+MOCHILA LLENA!	ZAINO PIENO!
+
+#: apps/chatarra/main/ch_battle.c:589
+ARRANCAS: %s	STRAPPI: %s
+
+#: apps/chatarra/main/ch_battle.c:592
+SUBISTE AL NIVEL %d!	SEI AL LIVELLO %d!
+
+#: apps/chatarra/main/ch_battle.c:638
+TU EQUIPO SE APAGO.	SQUADRA FUORI USO.
+
+#: apps/chatarra/main/ch_battle.c:638
+GANARON ELLOS.	HANNO VINTO LORO.
+
+#: apps/chatarra/main/ch_battle.c:649
+PIERDES %d CREDITOS.	PERDI %d CREDITI.
+
+#: apps/chatarra/main/ch_battle.c:650
+TU ROBOT SE APAGO...	IL ROBOT SI SPEGNE...
+
+#: apps/chatarra/main/ch_battle.c:650
+TE LLEVAN AL TALLER.	RITORNI IN OFFICINA.
+
+#: apps/chatarra/main/ch_battle.c:681
+SACA OTRO ROBOT.	MANDA UN ALTRO ROBOT.
+
+#: apps/chatarra/main/ch_battle.c:769
+%s SE RECALIENTA	%s SI SURRISCALDA
+
+#: apps/chatarra/main/ch_battle.c:771
+Y PIERDE %d DE VIDA.	E PERDE %d DI VITA.
+
+#: apps/chatarra/main/ch_battle.c:807
+SALE %s!	ESCE %s!
+
+#: apps/chatarra/main/ch_battle.c:848
+SE REPARA SOLO!	SI RIPARA DA SOLO!
+
+#: apps/chatarra/main/ch_battle.c:849
+VUELVE A EMPEZAR.	SI RICOMINCIA.
+
+#: apps/chatarra/main/ch_battle.c:856
+SE BLINDA.	SI BLINDA.
+
+#: apps/chatarra/main/ch_battle.c:915
+REPARA %d DE VIDA.	RIPARA %d DI VITA.
+
+#: apps/chatarra/main/ch_battle.c:923
+RECUPERA %d DE ENERGIA.	RECUPERA %d DI ENERGIA.
+
+#: apps/chatarra/main/ch_battle.c:928
+LO USARAS AL GANAR.	SERVE QUANDO VINCI.
+
+#: apps/chatarra/main/ch_battle.c:931
+NO PASA NADA.	NON ACCADE NULLA.
+
+#: apps/chatarra/main/ch_battle.c:941
+USAS %s	USI %s
+
+#: apps/chatarra/main/ch_battle.c:955
+NO SE PUEDE HUIR	NON SI PUO FUGGIRE
+
+#: apps/chatarra/main/ch_battle.c:955
+DE UN COMBATE ASI.	DA UNO SCONTRO COSI.
+
+#: apps/chatarra/main/ch_battle.c:961
+TE ESCAPASTE.	SEI SCAPPATO.
+
+#: apps/chatarra/main/ch_battle.c:966
+NO PUDISTE ESCAPAR!	NON SEI SCAPPATO!
+
+#: apps/chatarra/main/ch_battle.c:1061
+%s  NV %d	%s  LV %d
+
+#: apps/chatarra/main/ch_battle.c:1062
+TIPO %s   A%d D%d V%d	TIPO %s   A%d D%d V%d
+
+#: apps/chatarra/main/ch_battle.c:1200
+CAMBIAN DE ROBOT.	CAMBIANO ROBOT.
+
+#: apps/chatarra/main/ch_battle.c:1201
+NADIE ATACA ESTE TURNO.	TURNO SENZA ATTACCHI.
+
+#: apps/chatarra/main/ch_battle.c:1244
+#: apps/chatarra/main/ch_ui.c:344
+#: apps/chatarra/main/ch_ui.c:1279
+#: apps/chatarra/main/ch_ui.c:1742
+N%d	L%d
+
+#: apps/chatarra/main/ch_battle.c:1717
+#: apps/chatarra/main/ch_ui.c:1810
+VOLVER	TORNA
+
+#: apps/chatarra/main/ch_battle.c:1725
+#: apps/chatarra/main/ch_link.c:781
+ESPERANDO...	ATTESA...
+
+#: apps/chatarra/main/ch_feria.c:171
+CINTA DE CHATARRA	NASTRO DI ROTTAMI
+
+#: apps/chatarra/main/ch_feria.c:201
+%d PIEZAS	%d PEZZI
+
+#: apps/chatarra/main/ch_feria.c:203
++%d CREDITOS	+%d CREDITI
+
+#: apps/chatarra/main/ch_feria.c:205
+RECORD %d	RECORD %d
+
+#: apps/chatarra/main/ch_feria.c:208
+TE GANASTE UNA PIEZA!	HAI VINTO UN PEZZO!
+
+#: apps/chatarra/main/ch_feria.c:211
+TE GANASTE UNA PIEZA	HAI VINTO UN PEZZO
+
+#: apps/chatarra/main/ch_feria.c:213
+PERO NO TENES LUGAR	MA NON HAI SPAZIO
+
+#: apps/chatarra/main/ch_feria.c:216
+TOCA PARA SALIR	TOCCA PER USCIRE
+
+#: apps/chatarra/main/ch_feria.c:226
+PIEZAS %d	PEZZI %d
+
+#: apps/chatarra/main/ch_link.c:279
+LA CABINA ESTA CERRADA:	LA CABINA E CHIUSA:
+
+#: apps/chatarra/main/ch_link.c:279
+ESTE EQUIPO TODAVIA NO	QUESTO APPARECCHIO NON
+
+#: apps/chatarra/main/ch_link.c:280
+TIENE ENLACE.	HA ANCORA IL LINK.
+
+#: apps/chatarra/main/ch_link.c:289
+BUSCANDO EL OTRO EQUIPO...	CERCO L'ALTRO APPARECCHIO
+
+#: apps/chatarra/main/ch_link.c:405
+#: apps/chatarra/main/ch_link.c:556
+BUEN COMBATE.	BELLO SCONTRO.
+
+#: apps/chatarra/main/ch_link.c:405
+#: apps/chatarra/main/ch_link.c:556
+#: apps/chatarra/main/ch_map.c:844
+TU EQUIPO QUEDO COMO NUEVO.	LA SQUADRA E COME NUOVA.
+
+#: apps/chatarra/main/ch_link.c:427
+#: apps/chatarra/main/ch_link.c:433
+CAMBIO HECHO!	SCAMBIO FATTO!
+
+#: apps/chatarra/main/ch_link.c:474
+EL OTRO EQUIPO TIENE	L'ALTRO APPARECCHIO HA
+
+#: apps/chatarra/main/ch_link.c:474
+OTRA VERSION DEL JUEGO.	UN'ALTRA VERSIONE.
+
+#: apps/chatarra/main/ch_link.c:483
+#: apps/chatarra/main/ch_link.c:487
+#: apps/chatarra/main/ch_link.c:938
+CONECTADO CON	CONNESSO CON
+
+#: apps/chatarra/main/ch_link.c:544
+LOS DOS COMBATES	I DUE SCONTRI
+
+#: apps/chatarra/main/ch_link.c:544
+SE DESINCRONIZARON.	SI SONO SFASATI.
+
+#: apps/chatarra/main/ch_link.c:545
+SE CORTO LA PELEA.	LA LOTTA E SALTATA.
+
+#: apps/chatarra/main/ch_link.c:572
+TE OFRECEN UN ROBOT:	TI OFFRONO UN ROBOT:
+
+#: apps/chatarra/main/ch_link.c:573
+#: apps/chatarra/main/ch_link.c:577
+ELEGI QUE DAS A CAMBIO.	SCEGLI COSA DARE.
+
+#: apps/chatarra/main/ch_link.c:575
+TE OFRECEN UNA PIEZA:	TI OFFRONO UN PEZZO:
+
+#: apps/chatarra/main/ch_link.c:589
+COLGARON DEL OTRO LADO.	HANNO RIATTACCATO.
+
+#: apps/chatarra/main/ch_link.c:614
+SE CORTO LA LLAMADA.	LA CHIAMATA E CADUTA.
+
+#: apps/chatarra/main/ch_link.c:614
+EL OTRO NO CONTESTA.	L'ALTRO NON RISPONDE.
+
+#: apps/chatarra/main/ch_link.c:650
+SE FUE DE CHATARRA.	HA LASCIATO CHATARRA.
+
+#: apps/chatarra/main/ch_link.c:658
+#: apps/chatarra/main/ch_link.c:691
+NO CONTESTAN.	NON RISPONDONO.
+
+#: apps/chatarra/main/ch_link.c:658
+SE CORTO LA ESPERA.	ATTESA FINITA.
+
+#: apps/chatarra/main/ch_link.c:672
+#: apps/chatarra/main/ch_link.c:686
+LLAMANDO...	CHIAMATA...
+
+#: apps/chatarra/main/ch_link.c:676
+NO HAY OTRO EQUIPO	NESSUN APPARECCHIO
+
+#: apps/chatarra/main/ch_link.c:677
+EMPAREJADO. EMPAREJALOS	ABBINATO. ABBINALI
+
+#: apps/chatarra/main/ch_link.c:677
+EN LA APP ENLACE.	NELL'APP LINK.
+
+#: apps/chatarra/main/ch_link.c:687
+NO ESTA EN CHATARRA.	NON E IN CHATARRA.
+
+#: apps/chatarra/main/ch_link.c:692
+QUE ABRAN CHATARRA Y	CHE APRANO CHATARRA
+
+#: apps/chatarra/main/ch_link.c:692
+ENTREN A UNA CABINA.	ED ENTRINO IN CABINA.
+
+#: apps/chatarra/main/ch_link.c:733
+CABINA	CABINA
+
+#: apps/chatarra/main/ch_link.c:734
+SIN PAREJA	NO PARTNER
+
+#: apps/chatarra/main/ch_link.c:742
+SALIR	ESCI
+
+#: apps/chatarra/main/ch_link.c:751
+COMBATIR	LOTTA
+
+#: apps/chatarra/main/ch_link.c:752
+ROBOT	ROBOT
+
+#: apps/chatarra/main/ch_link.c:753
+PIEZA	PEZZO
+
+#: apps/chatarra/main/ch_link.c:754
+COLGAR	CHIUDI
+
+#: apps/chatarra/main/ch_link.c:771
+%d-%d DE %d	%d-%d DI %d
+
+#: apps/chatarra/main/ch_link.c:782
+RETIRAR	RITIRA
+
+#: apps/chatarra/main/ch_link.c:823
+DESAFIO MANDADO.	SFIDA INVIATA.
+
+#: apps/chatarra/main/ch_link.c:823
+#: apps/chatarra/main/ch_link.c:859
+ESPERANDO AL OTRO EQUIPO.	IN ATTESA DELL'ALTRO.
+
+#: apps/chatarra/main/ch_link.c:828
+QUE ROBOT OFRECES?	CHE ROBOT OFFRI?
+
+#: apps/chatarra/main/ch_link.c:829
+QUE PIEZA OFRECES?	CHE PEZZO OFFRI?
+
+#: apps/chatarra/main/ch_link.c:859
+OFERTA MANDADA.	OFFERTA INVIATA.
+
+#: apps/chatarra/main/ch_link.c:872
+RETIRADO.	RITIRATO.
+
+#: apps/chatarra/main/ch_map.c:782
+%s\nENCONTRASTE %s!	%s\nHAI TROVATO %s!
+
+#: apps/chatarra/main/ch_map.c:830
+ENCONTRASTE %s!	HAI TROVATO %s!
+
+#: apps/chatarra/main/ch_map.c:845
+TU ROBOT QUEDO COMO NUEVO.	IL ROBOT E COME NUOVO.
+
+#: apps/chatarra/main/ch_parts.c:74
+IMPACTO	IMPATTO
+
+#: apps/chatarra/main/ch_parts.c:74
+PLASMA	PLASMA
+
+#: apps/chatarra/main/ch_parts.c:74
+FUEGO	FUOCO
+
+#: apps/chatarra/main/ch_parts.c:75
+CRIO	CRIO
+
+#: apps/chatarra/main/ch_parts.c:75
+VOLT	VOLT
+
+#: apps/chatarra/main/ch_parts.c:75
+ACIDO	ACIDO
+
+#: apps/chatarra/main/ch_parts.c:111
+Golpe	Pugno
+
+#: apps/chatarra/main/ch_parts.c:114
+Martillazo	Martellata
+
+#: apps/chatarra/main/ch_parts.c:115
+Embestida	Carica
+
+#: apps/chatarra/main/ch_parts.c:116
+Doble Puno	Doppio Pugno
+
+#: apps/chatarra/main/ch_parts.c:117
+Aplastar	Schiaccia
+
+#: apps/chatarra/main/ch_parts.c:118
+Barrido	Spazzata
+
+#: apps/chatarra/main/ch_parts.c:119
+Pisoton	Pestone
+
+#: apps/chatarra/main/ch_parts.c:120
+Cabezazo	Testata
+
+#: apps/chatarra/main/ch_parts.c:123
+Rayo Plasma	Raggio Plasma
+
+#: apps/chatarra/main/ch_parts.c:124
+Lanza Ionica	Lancia Ionica
+
+#: apps/chatarra/main/ch_parts.c:125
+Pulso	Onda
+
+#: apps/chatarra/main/ch_parts.c:126
+Sobrecarga	Sovraccarico
+
+#: apps/chatarra/main/ch_parts.c:127
+Haz Guia	Fascio Guida
+
+#: apps/chatarra/main/ch_parts.c:128
+Absorber Carga	Assorbi Carica
+
+#: apps/chatarra/main/ch_parts.c:131
+Lanzallamas	Lanciafiamme
+
+#: apps/chatarra/main/ch_parts.c:132
+Chispa Termica	Scintilla Calda
+
+#: apps/chatarra/main/ch_parts.c:133
+Fundicion	Fusione
+
+#: apps/chatarra/main/ch_parts.c:134
+Soplete	Cannello
+
+#: apps/chatarra/main/ch_parts.c:135
+Horno	Forno
+
+#: apps/chatarra/main/ch_parts.c:138
+Escarcha	Brina
+
+#: apps/chatarra/main/ch_parts.c:139
+Nitrogeno	Azoto
+
+#: apps/chatarra/main/ch_parts.c:140
+Congelador	Congelatore
+
+#: apps/chatarra/main/ch_parts.c:141
+Viento Polar	Vento Polare
+
+#: apps/chatarra/main/ch_parts.c:142
+Rocio Helado	Nebbia Gelida
+
+#: apps/chatarra/main/ch_parts.c:145
+Descarga	Scarica
+
+#: apps/chatarra/main/ch_parts.c:146
+Chispazo	Scossa
+
+#: apps/chatarra/main/ch_parts.c:147
+Tormenta	Tempesta
+
+#: apps/chatarra/main/ch_parts.c:148
+Electroiman	Calamita
+
+#: apps/chatarra/main/ch_parts.c:149
+Cortocircuito	Cortocircuito
+
+#: apps/chatarra/main/ch_parts.c:152
+Salpicon	Schizzo
+
+#: apps/chatarra/main/ch_parts.c:153
+Corrosion	Corrosione
+
+#: apps/chatarra/main/ch_parts.c:154
+Bidon Acido	Fusto Acido
+
+#: apps/chatarra/main/ch_parts.c:155
+Oxido	Ruggine
+
+#: apps/chatarra/main/ch_parts.c:156
+Parasito	Parassita
+
+#: apps/chatarra/main/ch_parts.c:157
+Vapor Toxico	Gas Tossico
+
+#: apps/chatarra/main/ch_parts.c:160
+Diagnostico	Diagnostica
+
+#: apps/chatarra/main/ch_parts.c:161
+Blindaje	Blindatura
+
+#: apps/chatarra/main/ch_parts.c:162
+Recarga	Ricarica
+
+#: apps/chatarra/main/ch_parts.c:163
+Autoreparar	Autoripara
+
+#: apps/chatarra/main/ch_parts.c:164
+Mira Laser	Mirino Laser
+
+#: apps/chatarra/main/ch_parts.c:165
+Placa Extra	Piastra Extra
+
+#: apps/chatarra/main/ch_parts.c:166
+Refrigerar	Raffredda
+
+#: apps/chatarra/main/ch_parts.c:167
+Turbo	Turbo
+
+#: apps/chatarra/main/ch_parts.c:168
+Purga	Spurgo
+
+#: apps/chatarra/main/ch_parts.c:178
+Aceite	Olio
+
+#: apps/chatarra/main/ch_parts.c:178
+Repara 40 de vida.	Ripara 40 di vita.
+
+#: apps/chatarra/main/ch_parts.c:179
+Aceite Puro	Olio Puro
+
+#: apps/chatarra/main/ch_parts.c:179
+Repara 120 de vida.	Ripara 120 di vita.
+
+#: apps/chatarra/main/ch_parts.c:180
+Bateria	Batteria
+
+#: apps/chatarra/main/ch_parts.c:180
+Devuelve 30 de energia.	Rende 30 di energia.
+
+#: apps/chatarra/main/ch_parts.c:181
+Bateria Densa	Batteria Densa
+
+#: apps/chatarra/main/ch_parts.c:181
+Devuelve toda la energia.	Rende tutta l'energia.
+
+#: apps/chatarra/main/ch_parts.c:182
+Soldador	Saldatore
+
+#: apps/chatarra/main/ch_parts.c:182
+Revive con media vida.	Rianima con meta vita.
+
+#: apps/chatarra/main/ch_parts.c:183
+Chip de Datos	Chip Dati
+
+#: apps/chatarra/main/ch_parts.c:183
+Suma 300 de experiencia.	+300 di esperienza.
+
+#: apps/chatarra/main/ch_parts.c:184
+Iman de Rescate	Magnete Recupero
+
+#: apps/chatarra/main/ch_parts.c:184
+Mas chance de arrancar una pieza.	Piu facile strappare un pezzo.
+
+#: apps/chatarra/main/ch_parts.c:185
+Llave Oxidada	Chiave Rugginosa
+
+#: apps/chatarra/main/ch_parts.c:185
+Abre una puerta trabada.	Apre una porta bloccata.
+
+#: apps/chatarra/main/ch_parts.c:186
+Pase de Sector	Pass di Settore
+
+#: apps/chatarra/main/ch_parts.c:186
+Permite cruzar un control.	Ti fa superare un controllo.
+
+#: apps/chatarra/main/ch_parts.c:194
+Caja de Tornillos	Scatola di Viti
+
+#: apps/chatarra/main/ch_parts.c:194
+Alguien la esta buscando.	Qualcuno la sta cercando.
+
+#: apps/chatarra/main/ch_parts.c:195
+Ancla Oxidada	Ancora Rugginosa
+
+#: apps/chatarra/main/ch_parts.c:195
+Pesa como para hundir un barco.	Pesa da affondare una barca.
+
+#: apps/chatarra/main/ch_parts.c:196
+Fusible Grueso	Fusibile Grosso
+
+#: apps/chatarra/main/ch_parts.c:196
+Aguanta lo que le tires.	Regge qualsiasi cosa.
+
+#: apps/chatarra/main/ch_parts.c:197
+Molde de Acero	Stampo Acciaio
+
+#: apps/chatarra/main/ch_parts.c:197
+Sigue caliente.	Ancora caldo.
+
+#: apps/chatarra/main/ch_parts.c:198
+Termo	Termos
+
+#: apps/chatarra/main/ch_parts.c:198
+Todavia tiene agua caliente.	Ha ancora acqua calda.
+
+#: apps/chatarra/main/ch_parts.c:199
+Clave Maestra	Chiave Maestra
+
+#: apps/chatarra/main/ch_parts.c:199
+Abre lo que no deberia.	Apre cio che non dovrebbe.
+
+#: apps/chatarra/main/ch_parts.c:200
+Engranaje Grande	Ingranaggio
+
+#: apps/chatarra/main/ch_parts.c:200
+De una maquina que ya no existe.	Di una macchina che non c'e piu.
+
+#: apps/chatarra/main/ch_parts.c:205
+Repelente	Repellente
+
+#: apps/chatarra/main/ch_parts.c:205
+200 pasos sin encuentros.	200 passi senza incontri.
+
+#: apps/chatarra/main/ch_parts.c:206
+#: apps/chatarra/main/ch_parts.c:303
+Orugas	Cingoli
+
+#: apps/chatarra/main/ch_parts.c:206
+Caminas al doble. Para siempre.	Vai al doppio. Per sempre.
+
+#: apps/chatarra/main/ch_parts.c:207
+Bolsa Grande	Borsa Grande
+
+#: apps/chatarra/main/ch_parts.c:207
++2 lugares en la mochila.	+2 posti nello zaino.
+
+#: apps/chatarra/main/ch_parts.c:247
+Ojo Simple	Occhio Base
+
+#: apps/chatarra/main/ch_parts.c:248
+Visor	Visore
+
+#: apps/chatarra/main/ch_parts.c:249
+Casco	Casco
+
+#: apps/chatarra/main/ch_parts.c:250
+Cupula	Cupola
+
+#: apps/chatarra/main/ch_parts.c:251
+Antena	Antenna
+
+#: apps/chatarra/main/ch_parts.c:252
+Radar	Radar
+
+#: apps/chatarra/main/ch_parts.c:253
+Ciclope	Ciclope
+
+#: apps/chatarra/main/ch_parts.c:254
+Faro	Faro
+
+#: apps/chatarra/main/ch_parts.c:255
+Craneo	Teschio
+
+#: apps/chatarra/main/ch_parts.c:256
+Tri-Ojo	Triocchio
+
+#: apps/chatarra/main/ch_parts.c:257
+Yelmo	Elmo
+
+#: apps/chatarra/main/ch_parts.c:258
+Sensor	Sensore
+
+#: apps/chatarra/main/ch_parts.c:259
+Farola	Lampione
+
+#: apps/chatarra/main/ch_parts.c:260
+Mascara	Maschera
+
+#: apps/chatarra/main/ch_parts.c:261
+Torreta	Torretta
+
+#: apps/chatarra/main/ch_parts.c:262
+Nucleo	Nucleo
+
+#: apps/chatarra/main/ch_parts.c:265
+Caja	Cassa
+
+#: apps/chatarra/main/ch_parts.c:266
+Barril	Barile
+
+#: apps/chatarra/main/ch_parts.c:267
+Coraza	Corazza
+
+#: apps/chatarra/main/ch_parts.c:268
+Reactor	Reattore
+
+#: apps/chatarra/main/ch_parts.c:269
+Panel	Lastra
+
+#: apps/chatarra/main/ch_parts.c:270
+Blindado	Blindato
+
+#: apps/chatarra/main/ch_parts.c:271
+Cofre	Scrigno
+
+#: apps/chatarra/main/ch_parts.c:272
+Nucleo V	Nucleo V
+
+#: apps/chatarra/main/ch_parts.c:273
+Chasis	Telaio
+
+#: apps/chatarra/main/ch_parts.c:274
+Fragua	Forgia
+
+#: apps/chatarra/main/ch_parts.c:275
+Celda	Cella
+
+#: apps/chatarra/main/ch_parts.c:276
+Boveda	Caveau
+
+#: apps/chatarra/main/ch_parts.c:277
+Turbina	Turbina
+
+#: apps/chatarra/main/ch_parts.c:278
+Placa Madre	Scheda Madre
+
+#: apps/chatarra/main/ch_parts.c:279
+Motor	Motore
+
+#: apps/chatarra/main/ch_parts.c:280
+Prisma	Prisma
+
+#: apps/chatarra/main/ch_parts.c:283
+Garras	Artigli
+
+#: apps/chatarra/main/ch_parts.c:284
+Pinzas	Pinze
+
+#: apps/chatarra/main/ch_parts.c:285
+Martillos	Martelli
+
+#: apps/chatarra/main/ch_parts.c:286
+Canones	Cannoni
+
+#: apps/chatarra/main/ch_parts.c:287
+Muelles	Bobine
+
+#: apps/chatarra/main/ch_parts.c:288
+Tenazas	Tenaglie
+
+#: apps/chatarra/main/ch_parts.c:289
+Sierras	Seghe
+
+#: apps/chatarra/main/ch_parts.c:290
+Puas	Punte
+
+#: apps/chatarra/main/ch_parts.c:291
+Guantes	Guanti
+
+#: apps/chatarra/main/ch_parts.c:292
+Taladros	Trapani
+
+#: apps/chatarra/main/ch_parts.c:293
+Latigos	Fruste
+
+#: apps/chatarra/main/ch_parts.c:294
+Escudos	Scudi
+
+#: apps/chatarra/main/ch_parts.c:295
+Lanzas	Lance
+
+#: apps/chatarra/main/ch_parts.c:296
+Imanes	Magneti
+
+#: apps/chatarra/main/ch_parts.c:297
+Sopletes	Cannelli
+
+#: apps/chatarra/main/ch_parts.c:298
+Rotores	Rotori
+
+#: apps/chatarra/main/ch_parts.c:301
+Patas	Gambe
+
+#: apps/chatarra/main/ch_parts.c:302
+Zancos	Trampoli
+
+#: apps/chatarra/main/ch_parts.c:304
+Rueda	Ruota
+
+#: apps/chatarra/main/ch_parts.c:305
+Triciclo	Triciclo
+
+#: apps/chatarra/main/ch_parts.c:306
+Flotador	Hover
+
+#: apps/chatarra/main/ch_parts.c:307
+Aracnidas	Aracnidi
+
+#: apps/chatarra/main/ch_parts.c:308
+Resortes	Molle
+
+#: apps/chatarra/main/ch_parts.c:309
+Botas	Stivali
+
+#: apps/chatarra/main/ch_parts.c:310
+Cadenas	Catene
+
+#: apps/chatarra/main/ch_parts.c:311
+Monociclo	Monociclo
+
+#: apps/chatarra/main/ch_parts.c:312
+Cuadrupedas	Quadrupedi
+
+#: apps/chatarra/main/ch_parts.c:313
+Cohetes	Razzi
+
+#: apps/chatarra/main/ch_parts.c:314
+Garras Sup.	Uncini
+
+#: apps/chatarra/main/ch_parts.c:315
+Pistones	Pistoni
+
+#: apps/chatarra/main/ch_parts.c:316
+Deslizador	Aliante
+
+#: apps/chatarra/main/ch_parts.c:1436
+JUEGO PURO	SET PURO
+
+#: apps/chatarra/main/ch_parts.c:1437
+TRIO	TRIS
+
+#: apps/chatarra/main/ch_parts.c:1438
+DUO	DUO
+
+#: apps/chatarra/main/ch_ui.c:280
+#: apps/chatarra/main/ch_ui.c:1018
+MENU	MENU
+
+#: apps/chatarra/main/ch_ui.c:280
+#: apps/chatarra/main/ch_ui.c:984
+#: apps/chatarra/main/ch_ui.c:2609
+#: apps/chatarra/main/ch_ui.c:2610
+MAPA	MAPPA
+
+#: apps/chatarra/main/ch_ui.c:324
+#: apps/chatarra/main/ch_ui.c:372
+#: apps/chatarra/main/ch_ui.c:2384
+%dC	%dC
+
+#: apps/chatarra/main/ch_ui.c:327
+#: apps/chatarra/main/ch_ui.c:354
+VID	PV
+
+#: apps/chatarra/main/ch_ui.c:332
+#: apps/chatarra/main/ch_ui.c:359
+ENE	ENE
+
+#: apps/chatarra/main/ch_ui.c:339
+#: apps/chatarra/main/ch_ui.c:366
+EXP	EXP
+
+#: apps/chatarra/main/ch_ui.c:370
+%s  N%d	%s  L%d
+
+#: apps/chatarra/main/ch_ui.c:976
+#: apps/chatarra/main/ch_ui.c:1014
+LO TUYO	TUE COSE
+
+#: apps/chatarra/main/ch_ui.c:977
+#: apps/chatarra/main/ch_ui.c:1016
+EL JUEGO	IL GIOCO
+
+#: apps/chatarra/main/ch_ui.c:980
+#: apps/chatarra/main/ch_ui.c:1256
+#: apps/chatarra/main/ch_ui.c:1331
+#: apps/chatarra/main/ch_zonas.c:2805
+TALLER	OFFICINA
+
+#: apps/chatarra/main/ch_ui.c:981
+#: apps/chatarra/main/ch_ui.c:1515
+OBJETOS	OGGETTI
+
+#: apps/chatarra/main/ch_ui.c:982
+EQUIPO	SQUADRA
+
+#: apps/chatarra/main/ch_ui.c:983
+#: apps/chatarra/main/ch_ui.c:2053
+#: apps/chatarra/main/ch_ui.c:2055
+REGISTRO	REGISTRO
+
+#: apps/chatarra/main/ch_ui.c:985
+#: apps/chatarra/main/ch_ui.c:2446
+#: apps/chatarra/main/ch_ui.c:2448
+DIARIO	DIARIO
+
+#: apps/chatarra/main/ch_ui.c:988
+#: apps/chatarra/main/ch_ui.c:2505
+AYUDA	AIUTO
+
+#: apps/chatarra/main/ch_ui.c:989
+SONIDO	SUONO
+
+#: apps/chatarra/main/ch_ui.c:990
+DIFICULTAD	DIFFICOLTA
+
+#: apps/chatarra/main/ch_ui.c:991
+GUARDAR	SALVA
+
+#: apps/chatarra/main/ch_ui.c:992
+CERRAR	CHIUDI
+
+#: apps/chatarra/main/ch_ui.c:996
+NORMAL	NORMALE
+
+#: apps/chatarra/main/ch_ui.c:996
+FACIL	FACILE
+
+#: apps/chatarra/main/ch_ui.c:996
+DURO	DURO
+
+#: apps/chatarra/main/ch_ui.c:999
+MUDO	MUTO
+
+#: apps/chatarra/main/ch_ui.c:999
+EFECTOS	EFFETTI
+
+#: apps/chatarra/main/ch_ui.c:999
+TODO	TUTTO
+
+#: apps/chatarra/main/ch_ui.c:1056
+DESLIZA PARA VOLVER	SCORRI PER TORNARE
+
+#: apps/chatarra/main/ch_ui.c:1118
+CAB	TES
+
+#: apps/chatarra/main/ch_ui.c:1118
+TOR	TOR
+
+#: apps/chatarra/main/ch_ui.c:1119
+BRA	BRA
+
+#: apps/chatarra/main/ch_ui.c:1119
+PIE	GAM
+
+#: apps/chatarra/main/ch_ui.c:1250
+#: apps/chatarra/main/ch_ui.c:1716
+%s  %s +%d%%	%s  %s +%d%%
+
+#: apps/chatarra/main/ch_ui.c:1253
+TIPO %s	TIPO %s
+
+#: apps/chatarra/main/ch_ui.c:1316
+GANA COMBATES	VINCI SCONTRI
+
+#: apps/chatarra/main/ch_ui.c:1318
+PARA PIEZAS	PER I PEZZI
+
+#: apps/chatarra/main/ch_ui.c:1332
+TOCA 2 VECES	TOCCA 2 VOLTE
+
+#: apps/chatarra/main/ch_ui.c:1336
+NO TENES OTRA DE ESTE TIPO	NON NE HAI ALTRE COSI
+
+#: apps/chatarra/main/ch_ui.c:1349
+#: apps/chatarra/main/ch_ui.c:1349
+#: apps/chatarra/main/ch_ui.c:2387
+#: apps/chatarra/main/ch_ui.c:2388
+TOCA 2X	TOCCA 2X
+
+#: apps/chatarra/main/ch_ui.c:1359
+JUEGO %d>%d	SET %d>%d
+
+#: apps/chatarra/main/ch_ui.c:1387
+#: apps/chatarra/main/ch_ui.c:2382
+PV%d E%d	PV%d E%d
+
+#: apps/chatarra/main/ch_ui.c:1398
+#: apps/chatarra/main/ch_ui.c:1399
+PUESTA	MONTATA
+
+#: apps/chatarra/main/ch_ui.c:1515
+TOCA UNO PARA USARLO	TOCCA PER USARLO
+
+#: apps/chatarra/main/ch_ui.c:1522
+NO TENES NADA.	NON HAI NIENTE.
+
+#: apps/chatarra/main/ch_ui.c:1554
+NADA SE TE ACERCA	NIENTE TI SI AVVICINA
+
+#: apps/chatarra/main/ch_ui.c:1562
+AHORA CAMINAS AL DOBLE	ORA VAI AL DOPPIO
+
+#: apps/chatarra/main/ch_ui.c:1570
+MOCHILA: %d LUGARES	ZAINO: %d POSTI
+
+#: apps/chatarra/main/ch_ui.c:1581
++%d DE VIDA	+%d DI VITA
+
+#: apps/chatarra/main/ch_ui.c:1590
++%d DE ENERGIA	+%d DI ENERGIA
+
+#: apps/chatarra/main/ch_ui.c:1601
+#: apps/chatarra/main/ch_ui.c:2193
+NIVEL %d	LIVELLO %d
+
+#: apps/chatarra/main/ch_ui.c:1719
+NIVEL %d   TIPO %s	LIVELLO %d   TIPO %s
+
+#: apps/chatarra/main/ch_ui.c:1735
+VACIO	VUOTO
+
+#: apps/chatarra/main/ch_ui.c:1745
+SALE	ESCE
+
+#: apps/chatarra/main/ch_ui.c:1745
+ROTO	KO
+
+#: apps/chatarra/main/ch_ui.c:1760
+NUMEROS	DATI
+
+#: apps/chatarra/main/ch_ui.c:1761
+GOLPES	MOSSE
+
+#: apps/chatarra/main/ch_ui.c:1765
+VIDA	VITA
+
+#: apps/chatarra/main/ch_ui.c:1765
+ENER	ENER
+
+#: apps/chatarra/main/ch_ui.c:1765
+ATAQ	ATT
+
+#: apps/chatarra/main/ch_ui.c:1766
+DEFE	DIF
+
+#: apps/chatarra/main/ch_ui.c:1766
+VELO	VEL
+
+#: apps/chatarra/main/ch_ui.c:1800
+%d/%dE	%d/%dE
+
+#: apps/chatarra/main/ch_ui.c:1809
+ARMAR OTRO	COSTRUISCI
+
+#: apps/chatarra/main/ch_ui.c:1813
+QUE SALGA ESTE	MANDA QUESTO
+
+#: apps/chatarra/main/ch_ui.c:1814
+DESARMAR	SMONTA
+
+#: apps/chatarra/main/ch_ui.c:1831
+#: apps/chatarra/main/ch_ui.c:1862
+ROBOT ARMADO!	ROBOT MONTATO!
+
+#: apps/chatarra/main/ch_ui.c:1836
+#: apps/chatarra/main/ch_ui.c:1867
+FALTAN PIEZAS SUELTAS	MANCANO PEZZI SCIOLTI
+
+#: apps/chatarra/main/ch_ui.c:1873
+ESTA ROTO: AL TALLER	E KO: IN OFFICINA
+
+#: apps/chatarra/main/ch_ui.c:1878
+CAMBIASTE DE ROBOT	HAI CAMBIATO ROBOT
+
+#: apps/chatarra/main/ch_ui.c:1886
+PIEZAS A LA MOCHILA	PEZZI NELLO ZAINO
+
+#: apps/chatarra/main/ch_ui.c:1929
+#: apps/chatarra/main/ch_ui.c:2353
+TENES %d CREDITOS	HAI %d CREDITI
+
+#: apps/chatarra/main/ch_ui.c:1930
+TIENDA	NEGOZIO
+
+#: apps/chatarra/main/ch_ui.c:1937
+%dC x%d	%dC x%d
+
+#: apps/chatarra/main/ch_ui.c:1979
+NO TE ALCANZA	NON BASTANO
+
+#: apps/chatarra/main/ch_ui.c:1985
+COMPRADO	COMPRATO
+
+#: apps/chatarra/main/ch_ui.c:2068
+SIN DATOS	NESSUN DATO
+
+#: apps/chatarra/main/ch_ui.c:2072
+PV%d A%d D%d V%d E%d	PV%d A%d D%d V%d E%d
+
+#: apps/chatarra/main/ch_ui.c:2181
+#: apps/chatarra/main/ch_ui.c:2181
+CAMPEON	CAMPIONE
+
+#: apps/chatarra/main/ch_ui.c:2194
+COMBATES %d	SCONTRI %d
+
+#: apps/chatarra/main/ch_ui.c:2195
+PIEZAS %d/%d	PEZZI %d/%d
+
+#: apps/chatarra/main/ch_ui.c:2196
+PASOS %d	PASSI %d
+
+#: apps/chatarra/main/ch_ui.c:2208
+NI UNA PIEZA TE LA REGALARON	NEMMENO UN PEZZO REGALATO
+
+#: apps/chatarra/main/ch_ui.c:2223
+TU ROBOT SON CUATRO PIEZAS:\nCABEZA, TORSO, BRAZOS Y\nPIERNAS.\n\nCADA UNA APORTA VIDA,\nATAQUE, DEFENSA, VELOCIDAD\nY ENERGIA, Y TRAE SUS\nPROPIOS ATAQUES.\n\nEL TORSO ADEMAS DECIDE EL\nTIPO DE TU ROBOT.	IL TUO ROBOT E FATTO DI\nQUATTRO PEZZI: TESTA,\nTORSO, BRACCIA E GAMBE.\n\nOGNUNO DA VITA, ATTACCO,\nDIFESA, VELOCITA ED\nENERGIA, E PORTA I SUOI\nATTACCHI.\n\nIL TORSO DECIDE ANCHE IL\nTIPO DEL TUO ROBOT.
+
+#: apps/chatarra/main/ch_ui.c:2234
+AL GANAR UN COMBATE PODES\nARRANCARLE UNA PIEZA AL\nRIVAL.\n\nVA A LA MOCHILA Y SE MONTA\nEN EL MENU, EN TALLER.\n\nLA QUE TENIAS PUESTA VUELVE\nA LA MOCHILA: NUNCA SE\nPIERDE NADA.	SE VINCI UNO SCONTRO PUOI\nSTRAPPARE UN PEZZO AL\nRIVALE.\n\nVA NELLO ZAINO E SI MONTA\nDAL MENU, IN OFFICINA.\n\nQUELLO CHE AVEVI TORNA\nNELLO ZAINO: NON SI PERDE\nMAI NIENTE.
+
+#: apps/chatarra/main/ch_ui.c:2244
+HAY SEIS TIPOS Y SE GANAN\nENTRE ELLOS:\n\nIMPACTO > CRIO Y ACIDO\nPLASMA  > IMPACTO Y VOLT\nFUEGO   > CRIO Y ACIDO\nCRIO    > PLASMA Y VOLT\nVOLT    > FUEGO E IMPACTO\nACIDO   > VOLT Y PLASMA\n\nPEGAR CON TU PROPIO TIPO\nHACE MAS DANO.	CI SONO SEI TIPI E SI\nBATTONO TRA LORO:\n\nIMPATTO > CRIO E ACIDO\nPLASMA  > IMPATTO E VOLT\nFUOCO   > CRIO E ACIDO\nCRIO    > PLASMA E VOLT\nVOLT    > FUOCO E IMPATTO\nACIDO   > VOLT E PLASMA\n\nCOLPIRE COL TUO STESSO\nTIPO FA PIU DANNI.
+
+#: apps/chatarra/main/ch_ui.c:2256
+CADA ZONA TIENE UN DUNGEON\nY UN SUBJEFE AL FONDO.\n\nVENCERLO TE DA UN PASE DE\nSECTOR, Y ESE PASE ABRE EL\nCONTROL DE LA ZONA QUE\nSIGUE.\n\nTOCA DONDE QUERES CAMINAR.\nEL BOTON MENU, O TOCAR TU\nROBOT, ABRE ESTE MENU.\nCON DOS DEDOS ACERCAS O\nALEJAS EL MAPA.	OGNI ZONA HA UN DUNGEON\nE UN SOTTOCAPO IN FONDO.\n\nBATTERLO TI DA UN PASS DI\nSETTORE, E QUEL PASS APRE\nIL CONTROLLO DELLA ZONA\nSUCCESSIVA.\n\nTOCCA DOVE VUOI ANDARE.\nIL TASTO MENU, O TOCCARE\nIL ROBOT, APRE IL MENU.\nCON DUE DITA AVVICINI O\nALLONTANI LA MAPPA.
+
+#: apps/chatarra/main/ch_ui.c:2354
+CHATARRERO	ROTTAMAIO
+
+#: apps/chatarra/main/ch_ui.c:2357
+NO TENES PIEZAS SUELTAS	NON HAI PEZZI SCIOLTI
+
+#: apps/chatarra/main/ch_ui.c:2425
++%dC	+%dC
+
+#: apps/chatarra/main/ch_ui.c:2446
+LO QUE TE PIDIERON	COSE RICHIESTE
+
+#: apps/chatarra/main/ch_ui.c:2452
+NADIE TE PIDIO NADA	NESSUNO TI HA CHIESTO NIENTE
+
+#: apps/chatarra/main/ch_ui.c:2477
+ENTREGADO	CONSEGNATO
+
+#: apps/chatarra/main/ch_ui.c:2479
+LO TENES: VOLVE	CE L'HAI: TORNA
+
+#: apps/chatarra/main/ch_ui.c:2481
+TRAE: %s	PORTA: %s
+
+#: apps/chatarra/main/ch_ui.c:2484
+PENDIENTE	DA FARE
+
+#: apps/chatarra/main/ch_ui.c:2516
+TOCA PARA SEGUIR	TOCCA E PROSEGUI
+
+#: apps/chatarra/main/ch_ui.c:2576
+TODAVIA NO ESTUVISTE AHI	NON CI SEI ANCORA STATO
+
+#: apps/chatarra/main/ch_ui.c:2581
+YA ESTAS AHI	CI SEI GIA
+
+#: apps/chatarra/main/ch_ui.c:2585
+VIAJANDO...	IN VIAGGIO...
+
+#: apps/chatarra/main/ch_ui.c:2609
+TOCA PARA VIAJAR	TOCCA E VIAGGIA
+
+#: apps/chatarra/main/ch_ui.c:2642
+SIN EXPLORAR	INESPLORATO
+
+#: apps/chatarra/main/ch_ui.c:2643
+ESTAS AQUI	SEI QUI
+
+#: apps/chatarra/main/ch_ui.c:2644
+VENCIDA - VIAJAR	VINTA - VIAGGIA
+
+#: apps/chatarra/main/ch_ui.c:2645
+VIAJAR	VIAGGIA
+
+#: apps/chatarra/main/ch_ui.c:2741
+RPG DE ROBOTS	RPG DI ROBOT
+
+#: apps/chatarra/main/ch_ui.c:2747
+#: apps/chatarra/main/ch_ui.c:2748
+EMPEZAR	INIZIA
+
+#: apps/chatarra/main/ch_ui.c:2754
+TOCA DONDE QUERES CAMINAR	TOCCA DOVE VUOI ANDARE
+
+#: apps/chatarra/main/ch_ui.c:2756
+DOS DEDOS: ACERCAR Y ALEJAR	DUE DITA: INGRANDISCI
+
+#: apps/chatarra/main/ch_ui.c:2758
+EL BOTON MENU, O TU ROBOT	IL TASTO MENU, O IL ROBOT
+
+#: apps/chatarra/main/ch_ui.c:2911
+PARTIDA GUARDADA	PARTITA SALVATA
+
+#: apps/chatarra/main/ch_zonas.c:233
+ABUELA TUERCA: BUEN DIA,\nDORMILON.\nTE ARME UN ROBOT CON LO\nQUE HABIA EN EL GALPON.\nNO ES GRAN COSA, PERO\nCAMINA Y PEGA.\nANDA AL TALLER Y TE\nEXPLICO COMO SE CAMBIAN\nLAS PIEZAS.	NONNA BULLONE: BUONGIORNO,\nDORMIGLIONE.\nTI HO FATTO UN ROBOT CON\nLA ROBA DEL CAPANNONE.\nNON E GRAN CHE, MA\nCAMMINA E PICCHIA.\nVIENI IN OFFICINA E TI\nSPIEGO COME SI CAMBIANO\nI PEZZI.
+
+#: apps/chatarra/main/ch_zonas.c:244
+UNA FOTO VIEJA: TU\nABUELA JOVEN, AL LADO\nDE UN ROBOT ENORME.\nABAJO DICE:\nCAMPEONA, ANO 12.	UNA FOTO VECCHIA: TUA\nNONNA DA GIOVANE, ACCANTO\nA UN ROBOT ENORME.\nSOTTO C'E SCRITTO:\nCAMPIONESSA, ANNO 12.
+
+#: apps/chatarra/main/ch_zonas.c:250
+#: apps/chatarra/main/ch_zonas.c:518
+#: apps/chatarra/main/ch_zonas.c:1000
+#: apps/chatarra/main/ch_zonas.c:1248
+UNA ESTANTERIA DE\nREPUESTOS.\nTODO ETIQUETADO A MANO.	UNO SCAFFALE DI\nRICAMBI.\nTUTTO ETICHETTATO A MANO.
+
+#: apps/chatarra/main/ch_zonas.c:254
+#: apps/chatarra/main/ch_zonas.c:522
+#: apps/chatarra/main/ch_zonas.c:1004
+#: apps/chatarra/main/ch_zonas.c:1251
+UNA PLANTA EN UN RINCON.\nSOBREVIVE AL ACEITE.	UNA PIANTA IN UN ANGOLO.\nSOPRAVVIVE ALL'OLIO.
+
+#: apps/chatarra/main/ch_zonas.c:257
+#: apps/chatarra/main/ch_zonas.c:525
+#: apps/chatarra/main/ch_zonas.c:1007
+#: apps/chatarra/main/ch_zonas.c:1253
+UN PLANO DE UN ROBOT,\nCLAVADO A LA PARED.\nTIENE CORRECCIONES DE\nTRES LETRAS DISTINTAS.	IL PROGETTO DI UN ROBOT,\nAPPESO AL MURO.\nHA CORREZIONI DI TRE\nCALLIGRAFIE DIVERSE.
+
+#: apps/chatarra/main/ch_zonas.c:263
+#: apps/chatarra/main/ch_zonas.c:531
+#: apps/chatarra/main/ch_zonas.c:1013
+#: apps/chatarra/main/ch_zonas.c:1258
+UNA VASIJA CON RETAZOS\nDE CHAPA.	UN VASO PIENO DI RITAGLI\nDI LAMIERA.
+
+#: apps/chatarra/main/ch_zonas.c:358
+VECINO: SE ME CAYERON\nLOS TORNILLOS EN EL\nDEPOSITO DEL DESGUACE.\nESTA AL NORTE, PASANDO\nEL SENDERO.\nSI ME LOS TRAES TE DOY\nALGO QUE TE VA A SERVIR.	VICINO: MI SONO CADUTE\nLE VITI NEL MAGAZZINO\nDELLA DISCARICA.\nE A NORD, OLTRE IL\nSENTIERO.\nSE ME LE RIPORTI TI DO\nQUALCOSA DI UTILE.
+
+#: apps/chatarra/main/ch_zonas.c:365
+VECINO: MIS TORNILLOS!\nTOMA, ESTE SOLDADOR ERA\nDE MI PADRE.	VICINO: LE MIE VITI!\nTIENI, QUESTO SALDATORE\nERA DI MIO PADRE.
+
+#: apps/chatarra/main/ch_zonas.c:369
+UN BANCO DE PLAZA.\nMIRA AL ESTANQUE.	UNA PANCHINA DEL PARCO.\nGUARDA LO STAGNO.
+
+#: apps/chatarra/main/ch_zonas.c:373
+UNA MACETA DE LA VEREDA.\nALGUIEN LE PUSO UN\nCARTELITO: NO PISAR.	UN VASO SUL MARCIAPIEDE.\nQUALCUNO CI HA MESSO UN\nCARTELLO: NON CALPESTARE.
+
+#: apps/chatarra/main/ch_zonas.c:377
+UN GATO NEGRO.\nTE MIRA, BOSTEZA, Y\nSIGUE EN LO SUYO.	UN GATTO NERO.\nTI GUARDA, SBADIGLIA E\nTORNA AI FATTI SUOI.
+
+#: apps/chatarra/main/ch_zonas.c:408
+MECANICO: EL TALLER ES\nDE LA ABUELA TUERCA.\nSI TE ROMPEN EL ROBOT,\nTE LO DEJA COMO NUEVO\nY NO TE COBRA.	MECCANICO: L'OFFICINA E\nDI NONNA BULLONE.\nSE TI ROMPONO IL ROBOT,\nTE LO RIMETTE A NUOVO\nE NON TI FA PAGARE.
+
+#: apps/chatarra/main/ch_zonas.c:414
+UN BANCO GASTADO.\nACA ESPERAN LOS QUE\nDEJAN EL ROBOT EN EL\nTALLER.	UNA PANCA CONSUMATA.\nQUI ASPETTA CHI HA\nLASCIATO IL ROBOT IN\nOFFICINA.
+
+#: apps/chatarra/main/ch_zonas.c:420
+UN PAJARO PICOTEA\nTORNILLOS DEL PISO.\nNO PARECE UNA BUENA\nDIETA.	UN UCCELLO BECCA VITI\nDA TERRA.\nNON SEMBRA UNA BUONA\nDIETA.
+
+#: apps/chatarra/main/ch_zonas.c:438
+VILLA TUERCA\nPOBLACION: 34 PERSONAS\nY UNOS CUANTOS ROBOTS.	BULLONIA\nPOPOLAZIONE: 34 PERSONE\nE QUALCHE ROBOT.
+
+#: apps/chatarra/main/ch_zonas.c:442
+CHICO: MI HERMANA DICE\nQUE EN EL DESGUACE HAY\nPIEZAS BUENISIMAS.\nYO NO ENTRARIA. HAY\nROBOTS SUELTOS.	BAMBINO: MIA SORELLA DICE\nCHE IN DISCARICA CI SONO\nPEZZI BELLISSIMI.\nIO NON CI ENTREREI. CI\nSONO ROBOT IN GIRO.
+
+#: apps/chatarra/main/ch_zonas.c:448
+UN BANCO FRENTE A LA\nFUENTE.\nABAJO HAY ALGO.	UNA PANCHINA DAVANTI\nALLA FONTANA.\nSOTTO C'E QUALCOSA.
+
+#: apps/chatarra/main/ch_zonas.c:454
+OTRO GATO. O EL MISMO,\nQUE SE MUEVE MAS RAPIDO\nDE LO QUE PARECE.	UN ALTRO GATTO. O LO\nSTESSO, CHE SI MUOVE PIU\nIN FRETTA DI QUANTO PARE.
+
+#: apps/chatarra/main/ch_zonas.c:472
+UN BANCO AL LADO DE LA\nCABINA.\nPARA ESPERAR TURNO.	UNA PANCHINA ACCANTO\nALLA CABINA.\nPER ASPETTARE IL TURNO.
+
+#: apps/chatarra/main/ch_zonas.c:477
+UN PAJARO EN EL CANTERO.\nSE VA APENAS TE ACERCAS.	UN UCCELLO NELL'AIUOLA.\nSE NE VA SE TI AVVICINI.
+
+#: apps/chatarra/main/ch_zonas.c:480
+#: apps/chatarra/main/ch_zonas.c:968
+#: apps/chatarra/main/ch_zonas.c:2596
+#: apps/chatarra/main/ch_zonas.c:2636
+CHATARRERO: TRAEME LO\nQUE NO USES.\nTE LO PAGO POR LO QUE\nPESA, NO POR LO QUE FUE.	ROTTAMAIO: PORTAMI CIO\nCHE NON USI.\nLO PAGO PER QUANTO PESA,\nNON PER QUELLO CHE ERA.
+
+#: apps/chatarra/main/ch_zonas.c:494
+EL BANCO DE TRABAJO DE\nLA ABUELA.\nTU ROBOT QUEDA COMO\nNUEVO.	IL BANCO DA LAVORO DELLA\nNONNA.\nIL TUO ROBOT TORNA COME\nNUOVO.
+
+#: apps/chatarra/main/ch_zonas.c:499
+ABUELA TUERCA: TENGO\nACEITE, BATERIAS Y\nALGUNA COSA MAS.\nMIRA TRANQUILO.	NONNA BULLONE: HO OLIO,\nBATTERIE E QUALCHE\nALTRA COSA.\nGUARDA CON CALMA.
+
+#: apps/chatarra/main/ch_zonas.c:504
+ABUELA TUERCA: UN ROBOT\nSON CUATRO PIEZAS:\nCABEZA, TORSO, BRAZOS\nY PIERNAS.\nCADA UNA CAMBIA LAS\nESTADISTICAS Y TRAE SUS\nPROPIOS ATAQUES.\nCUANDO GANES UN COMBATE\nA VECES PODES ARRANCARLE\nUNA PIEZA AL RIVAL.\nESAS VAN A LA MOCHILA\nY SE MONTAN DESDE EL\nMENU, EN TALLER.	NONNA BULLONE: UN ROBOT\nE FATTO DI QUATTRO PEZZI:\nTESTA, TORSO, BRACCIA\nE GAMBE.\nOGNUNO CAMBIA LE\nSTATISTICHE E PORTA I\nSUOI ATTACCHI.\nQUANDO VINCI UNO SCONTRO\nA VOLTE PUOI STRAPPARE\nUN PEZZO AL RIVALE.\nQUELLI VANNO NELLO ZAINO\nE SI MONTANO DAL MENU,\nIN OFFICINA.
+
+#: apps/chatarra/main/ch_zonas.c:559
+UN CUADRO DE UN LAGO.\nLA FIRMA DICE: TUERCA,\nANO 9.	UN QUADRO DI UN LAGO.\nLA FIRMA DICE: BULLONE,\nANNO 9.
+
+#: apps/chatarra/main/ch_zonas.c:563
+LA FOTO DE UN ROBOT\nVIEJO, CON UNA MEDALLA.\nATRAS ALGUIEN ESCRIBIO:\nSIEMPRE VOLVIA.	LA FOTO DI UN ROBOT\nVECCHIO, CON UNA MEDAGLIA.\nSUL RETRO HANNO SCRITTO:\nTORNAVA SEMPRE.
+
+#: apps/chatarra/main/ch_zonas.c:568
+UNA BIBLIOTECA LLENA DE\nMANUALES.\nATRAS DE UN TOMO HAY\nALGO GUARDADO.	UNA LIBRERIA PIENA DI\nMANUALI.\nDIETRO UN VOLUME C'E\nQUALCOSA DI NASCOSTO.
+
+#: apps/chatarra/main/ch_zonas.c:573
+UNA TERMINAL VIEJA.\nEN LA PANTALLA PARPADEA\nUNA PARTIDA DE AJEDREZ\nSIN TERMINAR.	UN VECCHIO TERMINALE.\nSULLO SCHERMO LAMPEGGIA\nUNA PARTITA A SCACCHI\nNON FINITA.
+
+#: apps/chatarra/main/ch_zonas.c:578
+UNA VASIJA DE BARRO.\nADENTRO HAY TORNILLOS\nDE TODAS LAS MEDIDAS.	UN VASO DI TERRACOTTA.\nDENTRO CI SONO VITI DI\nTUTTE LE MISURE.
+
+#: apps/chatarra/main/ch_zonas.c:582
+LA MESA, PUESTA PARA\nDOS.\nHACE RATO QUE ESPERA.	LA TAVOLA, APPARECCHIATA\nPER DUE.\nASPETTA DA UN PEZZO.
+
+#: apps/chatarra/main/ch_zonas.c:588
+LA CAMA, TENDIDA.\nMEJOR NO.	IL LETTO, RIFATTO.\nMEGLIO DI NO.
+
+#: apps/chatarra/main/ch_zonas.c:591
+UNA PLANTA DE INTERIOR.\nALGUIEN LA RIEGA TODOS\nLOS DIAS.	UNA PIANTA DA INTERNO.\nQUALCUNO LA INNAFFIA OGNI\nGIORNO.
+
+#: apps/chatarra/main/ch_zonas.c:632
+UN CONTROL BAJADO.\nCARTEL: PROHIBIDO PASAR AL\nESTE SIN PASE DE SECTOR.\nEL PASE LO DA EL GUARDIAN\nDEL DESGUACE.	UNA SBARRA ABBASSATA.\nCARTELLO: VIETATO A EST\nSENZA PASS DI SETTORE.\nIL PASS LO DA IL GUARDIANO\nDELLA DISCARICA.
+
+#: apps/chatarra/main/ch_zonas.c:637
+EL CONTROL ESTA LEVANTADO.\nAL ESTE: PUERTO BUJIA.	LA SBARRA E ALZATA.\nA EST: PORTO CANDELA.
+
+#: apps/chatarra/main/ch_zonas.c:640
+UN CONTROL BAJADO.\nAL ESTE NO SE PASA SIN\nPASE DE SECTOR.	UNA SBARRA ABBASSATA.\nA EST NON SI PASSA SENZA\nPASS DI SETTORE.
+
+#: apps/chatarra/main/ch_zonas.c:643
+EL CONTROL ESTA LEVANTADO.	LA SBARRA E ALZATA.
+
+#: apps/chatarra/main/ch_zonas.c:645
+SENDERO NORTE\nAL DESGUACE.\nCUIDADO: HAY ROBOTS\nSUELTOS ENTRE LOS\nYUYOS.	SENTIERO NORD\nPER LA DISCARICA.\nATTENZIONE: CI SONO ROBOT\nIN GIRO TRA LE\nERBACCE.
+
+#: apps/chatarra/main/ch_zonas.c:686
+UN CARTEL TORCIDO:\nDESGUACE MUNICIPAL\nNO ALIMENTE A LOS\nROBOTS.	UN CARTELLO STORTO:\nDISCARICA COMUNALE\nNON DATE DA MANGIARE AI\nROBOT.
+
+#: apps/chatarra/main/ch_zonas.c:790
+GUARDIAN DEL DESGUACE:\nALTO AHI.\nNADIE SE LLEVA CHATARRA\nDE ACA SIN PASAR POR\nENCIMA MIO.\nA VER QUE TRAJISTE.	GUARDIANO DELLA DISCARICA:\nALT.\nNESSUNO SI PORTA VIA\nROTTAMI DA QUI SENZA\nPASSARE SU DI ME.\nVEDIAMO COSA HAI PORTATO.
+
+#: apps/chatarra/main/ch_zonas.c:834
+PLAYA DEL CANGREJO.\nNO SE PERMITE OXIDARSE\nEN LA ARENA.	SPIAGGIA DEL GRANCHIO.\nVIETATO ARRUGGINIRSI\nSULLA SABBIA.
+
+#: apps/chatarra/main/ch_zonas.c:874
+PUERTO BUJIA\nAQUI SE DESCARGA TODO LO\nQUE SE OXIDA DESPUES.\nAL NORTE: LA BODEGA.	PORTO CANDELA\nQUI SI SCARICA TUTTO CIO\nCHE POI ARRUGGINISCE.\nA NORD: LA STIVA.
+
+#: apps/chatarra/main/ch_zonas.c:879
+CHICO: EN LA BODEGA HAY\nAGUA HASTA LAS RODILLAS\nY ROBOTS QUE NO SALEN\nNUNCA DE AHI.	BAMBINO: NELLA STIVA C'E\nACQUA FINO ALLE GINOCCHIA\nE ROBOT CHE NON ESCONO\nMAI DA LI.
+
+#: apps/chatarra/main/ch_zonas.c:929
+CONTROL DEL PUERTO.\nAL ESTE SUBE LA CUESTA\nHACIA ALTO VOLTIO.\nNO SE PASA SIN PASE.	CONTROLLO DEL PORTO.\nA EST LA SALITA PORTA\nAD ALTO VOLT.\nSENZA PASS NON SI PASSA.
+
+#: apps/chatarra/main/ch_zonas.c:933
+EL CONTROL ESTA ABIERTO.\nAL ESTE: LA CUESTA.	IL CONTROLLO E APERTO.\nA EST: LA SALITA.
+
+#: apps/chatarra/main/ch_zonas.c:936
+#: apps/chatarra/main/ch_zonas.c:940
+CONTROL DEL PUERTO.\nAL ESTE SUBE LA CUESTA.	CONTROLLO DEL PORTO.\nA EST C'E LA SALITA.
+
+#: apps/chatarra/main/ch_zonas.c:938
+#: apps/chatarra/main/ch_zonas.c:942
+EL CONTROL ESTA ABIERTO.	IL CONTROLLO E APERTO.
+
+#: apps/chatarra/main/ch_zonas.c:944
+PESCADORA: EL AGUA SALADA\nSE COME LOS CIRCUITOS.\nPOR ESO ACA TODO PEGA\nCON ACIDO.	PESCATRICE: L'ACQUA SALATA\nSI MANGIA I CIRCUITI.\nPER QUESTO QUI TUTTI\nPICCHIANO CON L'ACIDO.
+
+#: apps/chatarra/main/ch_zonas.c:949
+CAPITAN: PERDI EL ANCLA\nDE MI BARCO EN LA BODEGA.\nTRAEMELA Y TE DOY LA\nMEJOR BATERIA QUE TENGO.	CAPITANO: HO PERSO\nL'ANCORA NELLA STIVA.\nRIPORTAMELA E TI DO LA\nMIGLIOR BATTERIA CHE HO.
+
+#: apps/chatarra/main/ch_zonas.c:953
+CAPITAN: EL ANCLA! AHORA\nSI PUEDO SALIR A PESCAR.\nTOMA, TE LA GANASTE.	CAPITANO: L'ANCORA! ORA\nPOSSO TORNARE A PESCARE.\nTIENI, TE LA SEI MERITATA.
+
+#: apps/chatarra/main/ch_zonas.c:961
+FERIANTE: PASA, PASA.\nLA CINTA TRAE CHATARRA\nDE TODO EL PUERTO.\nAGARRA LAS VERDES Y\nDEJA PASAR LAS OXIDADAS.\nTE PAGO POR PIEZA.	AMBULANTE: AVANTI, AVANTI.\nIL NASTRO PORTA ROTTAMI\nDA TUTTO IL PORTO.\nPRENDI QUELLI VERDI E\nSCARTA I RUGGINOSI.\nTI PAGO A PEZZO.
+
+#: apps/chatarra/main/ch_zonas.c:982
+EL BANCO DEL PUERTO.\nHUELE A SALITRE PERO\nDEJA EL ROBOT COMO NUEVO.	IL BANCO DEL PORTO.\nSA DI SALSEDINE MA\nRIMETTE A NUOVO IL ROBOT.
+
+#: apps/chatarra/main/ch_zonas.c:986
+MECANICO: TENGO DE TODO,\nY TODO UN POCO OXIDADO.\nMIRA TRANQUILO.	MECCANICO: HO DI TUTTO,\nE TUTTO UN PO' RUGGINOSO.\nGUARDA CON CALMA.
+
+#: apps/chatarra/main/ch_zonas.c:990
+ABUELA TUERCA: TE SEGUI\nHASTA ACA PARA DECIRTE\nUNA COSA.\nEL TIPO DEL TORSO MANDA:\nSI PEGAS CON TU PROPIO\nTIPO, HACES MAS DANO.\nACA TODOS PEGAN CON\nACIDO. LLEVA ALGO QUE\nRESISTA.	NONNA BULLONE: TI HO\nSEGUITO FIN QUI PER DIRTI\nUNA COSA.\nIL TIPO DEL TORSO COMANDA:\nSE COLPISCI COL TUO TIPO,\nFAI PIU DANNI.\nQUI TUTTI PICCHIANO CON\nL'ACIDO. PORTA QUALCOSA\nCHE RESISTA.
+
+#: apps/chatarra/main/ch_zonas.c:1047
+BODEGA MUNICIPAL\nNIVEL DEL AGUA: ALTO.\nNO RESPONDEMOS POR\nCIRCUITOS MOJADOS.	STIVA COMUNALE\nLIVELLO DELL'ACQUA: ALTO.\nNON RISPONDIAMO DEI\nCIRCUITI BAGNATI.
+
+#: apps/chatarra/main/ch_zonas.c:1110
+CAPATAZ DE LA BODEGA:\nASI QUE VOS SOS EL QUE\nANDA LEVANTANDO PIEZAS.\nACA ABAJO TODO SE OXIDA,\nPIBE. TAMBIEN VOS.	CAPOSQUADRA DELLA STIVA:\nCOSI SEI TU CHE VAI IN\nGIRO A RACCATTARE PEZZI.\nQUAGGIU TUTTO SI OSSIDA,\nRAGAZZO. ANCHE TU.
+
+#: apps/chatarra/main/ch_zonas.c:1151
+LA CUESTA.\nARRIBA: ALTO VOLTIO.\nNO TOQUE LOS CABLES\nCON LAS MANOS.	LA SALITA.\nIN CIMA: ALTO VOLT.\nNON TOCCATE I CAVI\nCON LE MANI.
+
+#: apps/chatarra/main/ch_zonas.c:1190
+ALTO VOLTIO\nALTURA: 900 METROS\nCONSUMO: TODO EL QUE\nHAGA FALTA.	ALTO VOLT\nALTITUDINE: 900 METRI\nCONSUMO: TUTTO QUELLO\nCHE SERVE.
+
+#: apps/chatarra/main/ch_zonas.c:1194
+CHICO: SI TOCAS UN CABLE\nPELADO se te frien los\nCIRCUITOS.\nA MI HERMANO LE PASO.	BAMBINO: SE TOCCHI UN CAVO\nSCOPERTO ti friggi i\nCIRCUITI.\nA MIO FRATELLO E SUCCESSO.
+
+#: apps/chatarra/main/ch_zonas.c:1198
+SENORA: LA SUBESTACION\nSE LLENO DE ROBOTS Y\nNADIE PUEDE ENTRAR.\nSIN ELLA NO HAY LUZ.	SIGNORA: LA SOTTOSTAZIONE\nSI E RIEMPITA DI ROBOT E\nNESSUNO PUO ENTRARE.\nSENZA DI LEI NON C'E LUCE.
+
+#: apps/chatarra/main/ch_zonas.c:1202
+TECNICO: NECESITO UN\nFUSIBLE GRUESO DE LOS\nQUE HAY EN LA SUBESTACION.\nSI ME LO TRAES TE DOY\nUN CHIP DE DATOS.	TECNICO: MI SERVE UN\nFUSIBILE GROSSO DI QUELLI\nDELLA SOTTOSTAZIONE.\nSE ME LO PORTI TI DO\nUN CHIP DATI.
+
+#: apps/chatarra/main/ch_zonas.c:1206
+TECNICO: EL FUSIBLE!\nAHORA SI PUEDO ARREGLAR\nEL TABLERO. TOMA.	TECNICO: IL FUSIBILE!\nORA POSSO AGGIUSTARE IL\nQUADRO. TIENI.
+
+#: apps/chatarra/main/ch_zonas.c:1235
+EL BANCO DE ALTO VOLTIO.\nAca la corriente sobra.	IL BANCO DI ALTO VOLT.\nQui la corrente avanza.
+
+#: apps/chatarra/main/ch_zonas.c:1237
+TENDERA: BATERIAS,\nACEITE Y LO DE SIEMPRE.\nTODO CON GARANTIA DE\nTRES DIAS.	NEGOZIANTE: BATTERIE,\nOLIO E IL SOLITO.\nTUTTO CON GARANZIA DI\nTRE GIORNI.
+
+#: apps/chatarra/main/ch_zonas.c:1241
+ABUELA TUERCA: PRESTA\nATENCION A LA VELOCIDAD.\nEL QUE PEGA PRIMERO PEGA\nDOS VECES, PORQUE EL OTRO\nPUEDE NO LLEGAR A PEGAR.\nUNAS PIERNAS BUENAS VALEN\nMAS QUE UN BRAZO CARO.	NONNA BULLONE: FAI\nATTENZIONE ALLA VELOCITA.\nCHI COLPISCE PER PRIMO\nCOLPISCE DUE VOLTE, PERCHE\nL'ALTRO PUO NON FARCELA.\nDELLE BUONE GAMBE VALGONO\nPIU DI UN BRACCIO CARO.
+
+#: apps/chatarra/main/ch_zonas.c:1291
+TABLERO GENERAL.\nNO OPERAR SIN GUANTES.\n(ALGUIEN TACHO LO DE\nLOS GUANTES.)	QUADRO GENERALE.\nNON OPERARE SENZA GUANTI.\n(QUALCUNO HA CANCELLATO\nLA PARTE DEI GUANTI.)
+
+#: apps/chatarra/main/ch_zonas.c:1351
+INGENIERA JEFA:\nASI QUE VENIS A ARREGLAR\nLA SUBESTACION.\nPRIMERO ARREGLA ESTO:\nMI ROBOT CONTRA EL TUYO.	INGEGNERE CAPO:\nCOSI VIENI AD AGGIUSTARE\nLA SOTTOSTAZIONE.\nPRIMA AGGIUSTA QUESTO:\nIL MIO ROBOT VS IL TUO.
+
+#: apps/chatarra/main/ch_zonas.c:1390
+VALLE DEL HUMO.\nNO SE DETENGA.\nEL AIRE NO ES BUENO\nPARA NADIE.	VALLE DEL FUMO.\nNON FERMATEVI.\nL'ARIA NON FA BENE\nA NESSUNO.
+
+#: apps/chatarra/main/ch_zonas.c:1429
+FUNDICION\nAQUI SE FUNDE TODO LO\nQUE EL PUERTO OXIDA.\nAL NORTE: EL HORNO.	FONDERIA\nQUI SI FONDE TUTTO CIO\nCHE IL PORTO ARRUGGINISCE.\nA NORD: IL FORNO.
+
+#: apps/chatarra/main/ch_zonas.c:1433
+FUNDIDOR: EL METAL\nCALIENTE NO PERDONA.\nSI TU ROBOT ES DE HIELO,\nACA LA VAS A PASAR MAL.	FONDITORE: IL METALLO\nCALDO NON PERDONA.\nSE IL TUO ROBOT E DI\nGHIACCIO, QUI SOFFRIRAI.
+
+#: apps/chatarra/main/ch_zonas.c:1437
+CHICA: DICEN QUE EN EL\nHORNO VIVE UN ROBOT\nHECHO DE LAVA.\nYO NO LO VI, EH.	RAGAZZA: DICONO CHE NEL\nFORNO VIVE UN ROBOT\nFATTO DI LAVA.\nIO NON L'HO VISTO, EH.
+
+#: apps/chatarra/main/ch_zonas.c:1441
+MOLDEADORA: SE ME QUEDO\nUN MOLDE ADENTRO DEL\nHORNO Y NO PIENSO IR.\nTRAEMELO Y ARREGLAMOS.	STAMPISTA: HO LASCIATO UNO\nSTAMPO DENTRO IL FORNO\nE NON CI TORNO DI SICURO.\nPORTAMELO E CI ACCORDIAMO.
+
+#: apps/chatarra/main/ch_zonas.c:1444
+MOLDEADORA: EL MOLDE!\nSOS DE FIERRO, PIBE.\nTOMA ESTO PARA EL CAMINO.	STAMPISTA: LO STAMPO!\nSEI DI FERRO, RAGAZZO.\nPRENDI QUESTO PER STRADA.
+
+#: apps/chatarra/main/ch_zonas.c:1473
+EL BANCO DE LA FUNDICION.\nSe suelda todo de una.	IL BANCO DELLA FONDERIA.\nSalda tutto in un colpo.
+
+#: apps/chatarra/main/ch_zonas.c:1475
+HERRERO: LO QUE NECESITES\nPARA AGUANTAR EL CALOR.	FABBRO: TUTTO QUELLO CHE\nSERVE CONTRO IL CALDO.
+
+#: apps/chatarra/main/ch_zonas.c:1477
+ABUELA TUERCA: ACORDATE\nDE MIRAR LOS TIPOS.\nEL FUEGO DERRITE EL HIELO\nY CORROE EL ACIDO, PERO\nCONTRA EL VOLT NO HACE\nNADA.\nMIRA LA FICHA ANTES DE\nPEGAR.	NONNA BULLONE: RICORDATI\nDI GUARDARE I TIPI.\nIL FUOCO SCIOGLIE IL\nGHIACCIO E MANGIA L'ACIDO,\nMA CONTRO IL VOLT NON FA\nNIENTE.\nGUARDA LA SCHEDA PRIMA DI\nCOLPIRE.
+
+#: apps/chatarra/main/ch_zonas.c:1582
+MAESTRO FUNDIDOR:\nTREINTA ANOS METIENDO\nCHATARRA EN ESE HORNO.\nSE CUANDO UNA PIEZA\nSIRVE Y CUANDO NO.\nLA TUYA TODAVIA NO SE.	MAESTRO FONDITORE:\nTRENT'ANNI A BUTTARE\nROTTAMI IN QUEL FORNO.\nSO QUANDO UN PEZZO\nSERVE E QUANDO NO.\nIL TUO ANCORA NON LO SO.
+
+#: apps/chatarra/main/ch_zonas.c:1624
+PASO HELADO.\nSI SE LE CONGELAN LOS\nSERVOS, NO INSISTA.\nESPERE AL DESHIELO.	PASSO GELATO.\nSE SI CONGELANO I SERVO,\nNON INSISTETE.\nASPETTATE IL DISGELO.
+
+#: apps/chatarra/main/ch_zonas.c:1663
+CRIOVALLE\nTEMPERATURA MEDIA: -12.\nLOS CIRCUITOS DURAN MAS\nPERO LAS BATERIAS MENOS.	CRIOVALLE\nTEMPERATURA MEDIA: -12.\nI CIRCUITI DURANO DI PIU\nMA LE BATTERIE MENO.
+
+#: apps/chatarra/main/ch_zonas.c:1667
+CHICO: EN LA CUEVA EL\nPISO ES DE HIELO PURO.\nMI PAPA DICE QUE ADENTRO\nHAY ALGO QUE NO SE\nDERRITE NUNCA.	BAMBINO: NELLA GROTTA IL\nPAVIMENTO E GHIACCIO PURO.\nMIO PAPA DICE CHE DENTRO\nC'E QUALCOSA CHE NON SI\nSCIOGLIE MAI.
+
+#: apps/chatarra/main/ch_zonas.c:1672
+LENADOR: LOS BICHOS DE\nACA PEGAN CON CRIO.\nSI LLEVAS ALGO DE FUEGO\nLA VAS A PASAR MEJOR.	TAGLIALEGNA: LE BESTIE\nDI QUI PICCHIANO CON CRIO.\nSE PORTI QUALCOSA DI FUOCO\nTE LA CAVERAI MEGLIO.
+
+#: apps/chatarra/main/ch_zonas.c:1676
+ABUELA DEL VALLE: SE ME\nQUEDO EL TERMO EN LA\nCUEVA Y SIN EL NO HAY\nMATE.\nTRAEMELO, SI?	NONNA DELLA VALLE: HO\nLASCIATO IL TERMOS NELLA\nGROTTA E SENZA NON C'E\nCAFFE.\nME LO PORTI?
+
+#: apps/chatarra/main/ch_zonas.c:1680
+ABUELA DEL VALLE: MI\nTERMO! GRACIAS, HIJO.\nTOMA ESTE SOLDADOR QUE\nERA DE MI MARIDO.	NONNA DELLA VALLE: IL MIO\nTERMOS! GRAZIE, CARO.\nPRENDI QUESTO SALDATORE,\nERA DI MIO MARITO.
+
+#: apps/chatarra/main/ch_zonas.c:1710
+EL BANCO DE CRIOVALLE.\nHay que soplarle el hielo\nantes de usarlo.	IL BANCO DI CRIOVALLE.\nBisogna soffiargli via il\nghiaccio prima dell'uso.
+
+#: apps/chatarra/main/ch_zonas.c:1713
+TENDERO: ACEITE QUE NO\nSE CONGELA. LO DEMAS SI.	NEGOZIANTE: OLIO CHE NON\nGELA. IL RESTO SI.
+
+#: apps/chatarra/main/ch_zonas.c:1715
+ABUELA TUERCA: TE VOY A\nDECIR LO ULTIMO Y DESPUES\nTE DEJO EN PAZ.\nNO TE ENAMORES DE UNA\nPIEZA. LA MEJOR CABEZA\nDEL MUNDO NO SIRVE SI EL\nTORSO NO LE DA ENERGIA.\nMIRA EL CONJUNTO.	NONNA BULLONE: TI DICO\nL'ULTIMA COSA E POI TI\nLASCIO IN PACE.\nNON INNAMORARTI DI UN\nPEZZO. LA TESTA MIGLIORE\nDEL MONDO NON SERVE SE IL\nTORSO NON LE DA ENERGIA.\nGUARDA L'INSIEME.
+
+#: apps/chatarra/main/ch_zonas.c:1821
+GUARDABOSQUE:\nTE VI SUBIR DESDE EL\nPASO. TARDASTE MENOS DE\nLO QUE PENSE.\nVEAMOS SI TU ROBOT\nAGUANTA EL FRIO.	GUARDIABOSCHI:\nTI HO VISTO SALIRE DAL\nPASSO. CI HAI MESSO MENO\nDI QUANTO PENSAVO.\nVEDIAMO SE IL TUO ROBOT\nREGGE IL FREDDO.
+
+#: apps/chatarra/main/ch_zonas.c:1863
+AUTOPISTA A MALLA.\nVELOCIDAD MAXIMA: LA QUE\nTE DEN LAS PIERNAS.	AUTOSTRADA PER MAGLIA.\nVELOCITA MASSIMA: QUELLA\nCHE TI DANNO LE GAMBE.
+
+#: apps/chatarra/main/ch_zonas.c:1901
+CIUDAD MALLA\nAQUI NO SE FABRICA NADA.\nSOLO SE PIENSA.	CITTA MAGLIA\nQUI NON SI FABBRICA NULLA.\nSI PENSA SOLTANTO.
+
+#: apps/chatarra/main/ch_zonas.c:1904
+CHICA: TODO EL PUEBLO\nCORRE SOBRE EL SERVIDOR\nDE ABAJO.\nSI SE APAGA, SE APAGA\nTODO.	RAGAZZA: TUTTO IL PAESE\nGIRA SUL SERVER DI\nSOTTO.\nSE SI SPEGNE, SI SPEGNE\nTUTTO.
+
+#: apps/chatarra/main/ch_zonas.c:1909
+PROGRAMADOR: LOS BICHOS\nDE ACA PEGAN CON PLASMA.\nEL PLASMA NO PUEDE CON\nEL CRIO. PENSALO.	PROGRAMMATORE: QUI TUTTI\nPICCHIANO COL PLASMA.\nIL PLASMA NON REGGE IL\nCRIO. PENSACI.
+
+#: apps/chatarra/main/ch_zonas.c:1913
+ARCHIVISTA: PERDI LA\nCLAVE MAESTRA EN EL\nSERVIDOR.\nSIN ELLA NO PUEDO ENTRAR\nA MI PROPIA OFICINA.	ARCHIVISTA: HO PERSO LA\nCHIAVE MAESTRA NEL\nSERVER.\nSENZA NON POSSO ENTRARE\nNEL MIO STESSO UFFICIO.
+
+#: apps/chatarra/main/ch_zonas.c:1917
+ARCHIVISTA: LA CLAVE!\nTOMA UN CHIP, TE LO\nGANASTE.	ARCHIVISTA: LA CHIAVE!\nPRENDI UN CHIP, TE LO\nSEI MERITATO.
+
+#: apps/chatarra/main/ch_zonas.c:1946
+EL BANCO DE MALLA.\nTe lo diagnostica solo.	IL BANCO DI MAGLIA.\nSi fa la diagnosi da solo.
+
+#: apps/chatarra/main/ch_zonas.c:1948
+TENDERA: TODO CARO, TODO\nBUENO. Es una ciudad.	NEGOZIANTE: TUTTO CARO,\nTUTTO BUONO. E una citta.
+
+#: apps/chatarra/main/ch_zonas.c:1950
+TECNICO: DEJAME VER TU\nROBOT... MIRA, LE SOBRA\nATAQUE Y LE FALTA VIDA.\nUN TORSO GRANDE TE\nSALVARIA MAS DE UN\nCOMBATE.	TECNICO: FAMMI VEDERE IL\nROBOT... GUARDA, HA TROPPO\nATTACCO E POCA VITA.\nUN TORSO GRANDE TI\nSALVEREBBE PIU DI UNO\nSCONTRO.
+
+#: apps/chatarra/main/ch_zonas.c:2054
+ADMINISTRADORA:\nTE ESTUVE MIRANDO DESDE\nQUE ENTRASTE AL PUEBLO.\nSE QUE PIEZAS LLEVAS Y\nSE COMO PELEAS.\nIGUAL VENIS, CLARO.	AMMINISTRATRICE:\nTI GUARDO DA QUANDO SEI\nENTRATO IN PAESE.\nSO CHE PEZZI PORTI E\nSO COME COMBATTI.\nSEI VENUTO LO STESSO, EH.
+
+#: apps/chatarra/main/ch_zonas.c:2097
+EL PARAMO.\nACA TERMINA TODO LO QUE\nNO SIRVE.\nUSTED TAMBIEN, SI SE\nDESCUIDA.	LA LANDA.\nQUI FINISCE TUTTO CIO\nCHE NON SERVE.\nANCHE VOI, SE NON STATE\nATTENTI.
+
+#: apps/chatarra/main/ch_zonas.c:2137
+VILLA OXIDO\nEL PUEBLO MAS VIEJO Y EL\nMAS CERCANO A LA TORRE.\nNADIE SABE CUAL DE LAS\nDOS COSAS ES PEOR.	RUGGINOPOLI\nIL PAESE PIU VECCHIO E IL\nPIU VICINO ALLA TORRE.\nNESSUNO SA QUALE DELLE\nDUE COSE SIA PEGGIO.
+
+#: apps/chatarra/main/ch_zonas.c:2142
+VIEJO: YO SUBI A LA TORRE\nUNA VEZ. HACE MUCHO.\nNO TE VOY A CONTAR COMO\nME FUE.	VECCHIO: SONO SALITO SULLA\nTORRE UNA VOLTA. ANNI FA.\nNON TI DIRO COME MI E\nANDATA.
+
+#: apps/chatarra/main/ch_zonas.c:2146
+CHICO: EN EL CEMENTERIO\nLOS ROBOTS SE ARMAN SOLOS\nCON LO QUE ENCUENTRAN.\nPOR ESO SON TAN RAROS.	BAMBINO: NEL CIMITERO I\nROBOT SI MONTANO DA SOLI\nCON QUELLO CHE TROVANO.\nPER QUESTO SONO STRANI.
+
+#: apps/chatarra/main/ch_zonas.c:2150
+CHATARRERA: BUSCO UN\nENGRANAJE GRANDE, DE LOS\nVIEJOS. EN EL CEMENTERIO\nTIENE QUE HABER.\nTE PAGO BIEN.	ROTTAMAIA: CERCO UN GROSSO\nINGRANAGGIO, DI QUELLI\nVECCHI. AL CIMITERO CE\nNE DEV'ESSERE UNO.\nTI PAGO BENE.
+
+#: apps/chatarra/main/ch_zonas.c:2154
+CHATARRERA: MIRA ESO.\nHACIA VEINTE ANOS QUE NO\nVEIA UNO ENTERO.\nTOMA, TE LO GANASTE.	ROTTAMAIA: GUARDA QUA.\nERANO VENT'ANNI CHE NON\nNE VEDEVO UNO INTERO.\nTIENI, TE LO SEI MERITATO.
+
+#: apps/chatarra/main/ch_zonas.c:2184
+EL BANCO DE VILLA OXIDO.\nViejo pero impecable.	IL BANCO DI RUGGINOPOLI.\nVecchio ma impeccabile.
+
+#: apps/chatarra/main/ch_zonas.c:2186
+CHATARRERO: LO QUE VES\nes lo que hay. Alcanza.	ROTTAMAIO: QUELLO CHE VEDI\ne quello che c'e. Basta.
+
+#: apps/chatarra/main/ch_zonas.c:2188
+ABUELA TUERCA: LLEGASTE\nLEJOS, EH.\nARRIBA DE LA TORRE ESTA\nEL CAMPEON. NO TE VOY A\nMENTIR: SU ROBOT ES MEJOR\nQUE EL TUYO.\nPERO EL NO ARMO EL SUYO.\nSE LO ARMARON.	NONNA BULLONE: SEI\nARRIVATO LONTANO, EH.\nIN CIMA ALLA TORRE C'E\nIL CAMPIONE. NON TI DIRO\nBUGIE: IL SUO ROBOT E\nMEGLIO DEL TUO.\nMA NON L'HA MONTATO LUI.\nGLIEL'HANNO MONTATO.
+
+#: apps/chatarra/main/ch_zonas.c:2296
+CHATARRERO MAYOR:\nTODO ESTO ERAN ROBOTS\nCOMO EL TUYO.\nCADA UNO CREYO QUE ERA\nDISTINTO.\nA VER VOS.	ROTTAMAIO CAPO:\nTUTTO QUESTO ERANO ROBOT\nCOME IL TUO.\nOGNUNO CREDEVA DI ESSERE\nDIVERSO.\nVEDIAMO TE.
+
+#: apps/chatarra/main/ch_zonas.c:2337
+ULTIMO TRAMO.\nDE ACA NO SE VUELVE\nIGUAL QUE COMO SE VINO.	ULTIMO TRATTO.\nDA QUI NON SI TORNA\nUGUALI A COME SI E VENUTI.
+
+#: apps/chatarra/main/ch_zonas.c:2373
+PRISMA\nAL NORTE: LA TORRE.\nSUBEN MUCHOS. BAJAN\nBASTANTES MENOS.	PRISMA\nA NORD: LA TORRE.\nSALGONO IN TANTI. SCENDONO\nPARECCHI MENO.
+
+#: apps/chatarra/main/ch_zonas.c:2377
+CHICO: MI HERMANA SUBIO\nAYER. TODAVIA NO BAJO.\nDICE MAMA QUE NO ME\nPREOCUPE.	BAMBINO: MIA SORELLA E\nSALITA IERI. NON E ANCORA\nSCESA. LA MAMMA DICE DI\nNON PREOCCUPARMI.
+
+#: apps/chatarra/main/ch_zonas.c:2381
+GUARDIA: DOS PISOS Y LA\nCUMBRE.\nREPARA ANTES DE SUBIR.\nARRIBA NO HAY BANCO.	GUARDIA: DUE PIANI E LA\nCIMA.\nRIPARA PRIMA DI SALIRE.\nLASSU NON C'E BANCO.
+
+#: apps/chatarra/main/ch_zonas.c:2411
+EL ULTIMO BANCO ANTES\nDE LA TORRE.\nUsalo bien.	L'ULTIMO BANCO PRIMA\nDELLA TORRE.\nUsalo bene.
+
+#: apps/chatarra/main/ch_zonas.c:2414
+TENDERO: LLEVA TODO LO\nQUE PUEDAS PAGAR.\nArriba no se compra nada.	NEGOZIANTE: PRENDI TUTTO\nQUELLO CHE PUOI PAGARE.\nLassu non si compra nulla.
+
+#: apps/chatarra/main/ch_zonas.c:2417
+ABUELA TUERCA: BUENO.\nHASTA ACA TE ACOMPANO.\nACORDATE DE UNA COSA\nSOLA: EL ROBOT QUE VAS A\nPELEAR ES EL QUE VOS\nARMASTE.\nNINGUNA PIEZA TE LA\nREGALARON.\nANDA.	NONNA BULLONE: BENE.\nFIN QUI TI ACCOMPAGNO.\nRICORDA SOLO UNA\nCOSA: IL ROBOT CON CUI\nCOMBATTERAI E QUELLO CHE\nHAI MONTATO TU.\nNESSUN PEZZO TE L'HANNO\nREGALATO.\nVAI.
+
+#: apps/chatarra/main/ch_zonas.c:2522
+CAMPEON:\nTE VI SUBIR PISO POR\nPISO. NO SALTEASTE\nNINGUNO.\nESO YA TE HACE DISTINTO\nA CASI TODOS.\nAHORA VEAMOS EL ROBOT.	CAMPIONE:\nTI HO VISTO SALIRE PIANO\nPER PIANO. NON NE HAI\nSALTATO NESSUNO.\nGIA QUESTO TI DISTINGUE\nDA QUASI TUTTI.\nORA VEDIAMO IL ROBOT.
+
+#: apps/chatarra/main/ch_zonas.c:2529
+GUARDIANA DE LA CUMBRE:\nESE SILLON DE METAL ES\nDEL CAMPEON.\nTODAVIA NO ES TUYO.	CUSTODE DELLA CIMA:\nQUELLA POLTRONA DI METALLO\nE DEL CAMPIONE.\nNON E ANCORA TUA.
+
+#: apps/chatarra/main/ch_zonas.c:2532
+GUARDIANA: SENTATE, DALE.\nTE LO GANASTE.\nDESDE ACA SE VE TODO:\nEL PARAMO, LA CIUDAD,\nEL VALLE, EL PUERTO.\nY ALLA LEJOS, CHIQUITO,\nVILLA TUERCA.\nTU ROBOT NO SE PARECE EN\nNADA AL QUE TE ARMO LA\nABUELA.\nNI UNA PIEZA.\nFIN.	CUSTODE: SIEDITI, DAI.\nTE LO SEI MERITATO.\nDA QUI SI VEDE TUTTO:\nLA LANDA, LA CITTA,\nLA VALLE, IL PORTO.\nE LAGGIU, PICCOLINO,\nBULLONIA.\nIL TUO ROBOT NON SOMIGLIA\nPER NIENTE A QUELLO DELLA\nNONNA.\nNEMMENO UN PEZZO.\nFINE.
+
+#: apps/chatarra/main/ch_zonas.c:2585
+CONTROL DE ALTO VOLTIO.\nAL ESTE BAJA AL VALLE\nDEL HUMO. CERRADO HASTA\nQUE ALGUIEN ARREGLE LA\nSUBESTACION.	CONTROLLO DI ALTO VOLT.\nA EST SCENDE NELLA VALLE\nDEL FUMO. CHIUSO FINCHE\nQUALCUNO NON AGGIUSTA LA\nSOTTOSTAZIONE.
+
+#: apps/chatarra/main/ch_zonas.c:2589
+CONTROL ABIERTO.\nAL ESTE: EL VALLE DEL\nHUMO.	CONTROLLO APERTO.\nA EST: LA VALLE DEL\nFUMO.
+
+#: apps/chatarra/main/ch_zonas.c:2592
+CONTROL DE ALTO VOLTIO.\nCERRADO.	CONTROLLO DI ALTO VOLT.\nCHIUSO.
+
+#: apps/chatarra/main/ch_zonas.c:2593
+#: apps/chatarra/main/ch_zonas.c:2633
+#: apps/chatarra/main/ch_zonas.c:2673
+#: apps/chatarra/main/ch_zonas.c:2713
+CONTROL ABIERTO.	CONTROLLO APERTO.
+
+#: apps/chatarra/main/ch_zonas.c:2627
+CONTROL DE LA FUNDICION.\nAL ESTE EMPIEZA EL PASO\nHELADO. NO SE PASA SIN\nPASE DE SECTOR.	CONTROLLO DELLA FONDERIA.\nA EST INIZIA IL PASSO\nGELATO. NON SI PASSA SENZA\nPASS DI SETTORE.
+
+#: apps/chatarra/main/ch_zonas.c:2630
+CONTROL ABIERTO.\nAL ESTE: EL PASO HELADO.	CONTROLLO APERTO.\nA EST: IL PASSO GELATO.
+
+#: apps/chatarra/main/ch_zonas.c:2632
+CONTROL DE LA FUNDICION.\nCERRADO.	CONTROLLO DELLA FONDERIA.\nCHIUSO.
+
+#: apps/chatarra/main/ch_zonas.c:2667
+CONTROL DE CRIOVALLE.\nAL ESTE BAJA LA AUTOPISTA\nA CIUDAD MALLA.\nCERRADO POR NIEVE.	CONTROLLO DI CRIOVALLE.\nA EST SCENDE L'AUTOSTRADA\nPER CITTA MAGLIA.\nCHIUSO PER NEVE.
+
+#: apps/chatarra/main/ch_zonas.c:2670
+CONTROL ABIERTO.\nAL ESTE: LA AUTOPISTA.	CONTROLLO APERTO.\nA EST: L'AUTOSTRADA.
+
+#: apps/chatarra/main/ch_zonas.c:2672
+CONTROL DE CRIOVALLE.\nCERRADO POR NIEVE.	CONTROLLO DI CRIOVALLE.\nCHIUSO PER NEVE.
+
+#: apps/chatarra/main/ch_zonas.c:2707
+CONTROL DE MALLA.\nAL ESTE EMPIEZA EL\nPARAMO. NO SE PASA SIN\nPASE DE SECTOR.	CONTROLLO DI MAGLIA.\nA EST INIZIA LA\nLANDA. NON SI PASSA SENZA\nPASS DI SETTORE.
+
+#: apps/chatarra/main/ch_zonas.c:2710
+CONTROL ABIERTO.\nAL ESTE: EL PARAMO.	CONTROLLO APERTO.\nA EST: LA LANDA.
+
+#: apps/chatarra/main/ch_zonas.c:2712
+CONTROL DE MALLA.\nCERRADO.	CONTROLLO DI MAGLIA.\nCHIUSO.
+
+#: apps/chatarra/main/ch_zonas.c:2747
+CONTROL DE VILLA OXIDO.\nAL ESTE SOLO QUEDA LA\nTORRE PRISMA.\nNO SE PASA SIN PASE.	CONTROLLO DI RUGGINOPOLI.\nA EST RESTA SOLO LA\nTORRE PRISMA.\nSENZA PASS NON SI PASSA.
+
+#: apps/chatarra/main/ch_zonas.c:2750
+CONTROL ABIERTO.\nAL ESTE: LA TORRE.	CONTROLLO APERTO.\nA EST: LA TORRE.
+
+#: apps/chatarra/main/ch_zonas.c:2752
+CONTROL DE VILLA OXIDO.\nCERRADO.	CONTROLLO DI RUGGINOPOLI.\nCHIUSO.
+
+#: apps/chatarra/main/ch_zonas.c:2795
+TU CASA	CASA TUA
+
+#: apps/chatarra/main/ch_zonas.c:2797
+#: apps/chatarra/main/ch_zonas.c:2992
+VILLA TUERCA	BULLONIA
+
+#: apps/chatarra/main/ch_zonas.c:2799
+TUERCA NORTE	BULLONIA NORD
+
+#: apps/chatarra/main/ch_zonas.c:2801
+PLAZA DE LA FUENTE	PIAZZA FONTANA
+
+#: apps/chatarra/main/ch_zonas.c:2803
+TUERCA ESTE	BULLONIA EST
+
+#: apps/chatarra/main/ch_zonas.c:2807
+CASA VECINA	CASA VICINA
+
+#: apps/chatarra/main/ch_zonas.c:2809
+SENDERO NORTE	SENTIERO NORD
+
+#: apps/chatarra/main/ch_zonas.c:2811
+DESGUACE	LA DISCARICA
+
+#: apps/chatarra/main/ch_zonas.c:2813
+DESGUACE -2	DISCARICA -2
+
+#: apps/chatarra/main/ch_zonas.c:2815
+DEPOSITO	MAGAZZINO
+
+#: apps/chatarra/main/ch_zonas.c:2817
+SALA DEL GUARDIAN	SALA DEL GUARDIANO
+
+#: apps/chatarra/main/ch_zonas.c:2821
+COSTA DEL CANGREJO	COSTA DEL GRANCHIO
+
+#: apps/chatarra/main/ch_zonas.c:2823
+#: apps/chatarra/main/ch_zonas.c:2993
+PUERTO BUJIA	PORTO CANDELA
+
+#: apps/chatarra/main/ch_zonas.c:2825
+MUELLES DE BUJIA	MOLI DI CANDELA
+
+#: apps/chatarra/main/ch_zonas.c:2827
+TALLER DEL PUERTO	OFFICINA DEL PORTO
+
+#: apps/chatarra/main/ch_zonas.c:2829
+LA BODEGA	LA STIVA
+
+#: apps/chatarra/main/ch_zonas.c:2831
+BODEGA -2	STIVA -2
+
+#: apps/chatarra/main/ch_zonas.c:2833
+MUELLE HUNDIDO	MOLO AFFONDATO
+
+#: apps/chatarra/main/ch_zonas.c:2837
+LA CUESTA	LA SALITA
+
+#: apps/chatarra/main/ch_zonas.c:2839
+#: apps/chatarra/main/ch_zonas.c:2994
+ALTO VOLTIO	ALTO VOLT
+
+#: apps/chatarra/main/ch_zonas.c:2841
+ALTO VOLTIO ESTE	ALTO VOLT EST
+
+#: apps/chatarra/main/ch_zonas.c:2843
+TALLER DE ALTO VOLTIO	OFFICINA DI ALTO VOLT
+
+#: apps/chatarra/main/ch_zonas.c:2845
+LA SUBESTACION	SOTTOSTAZIONE
+
+#: apps/chatarra/main/ch_zonas.c:2847
+SUBESTACION -2	SOTTOSTAZIONE -2
+
+#: apps/chatarra/main/ch_zonas.c:2849
+SALA DE BARRAS	SALA SBARRE
+
+#: apps/chatarra/main/ch_zonas.c:2853
+VALLE DEL HUMO	VALLE DEL FUMO
+
+#: apps/chatarra/main/ch_zonas.c:2855
+#: apps/chatarra/main/ch_zonas.c:2995
+FUNDICION	FONDERIA
+
+#: apps/chatarra/main/ch_zonas.c:2857
+PLAZA DEL HORNO	PIAZZA DEL FORNO
+
+#: apps/chatarra/main/ch_zonas.c:2859
+TALLER DE FUNDICION	OFFICINA FONDERIA
+
+#: apps/chatarra/main/ch_zonas.c:2861
+EL HORNO	IL FORNO
+
+#: apps/chatarra/main/ch_zonas.c:2863
+HORNO -2	FORNO -2
+
+#: apps/chatarra/main/ch_zonas.c:2865
+BOCA DE COLADA	FORO DI COLATA
+
+#: apps/chatarra/main/ch_zonas.c:2869
+PASO HELADO	PASSO GELATO
+
+#: apps/chatarra/main/ch_zonas.c:2871
+#: apps/chatarra/main/ch_zonas.c:2996
+CRIOVALLE	CRIOVALLE
+
+#: apps/chatarra/main/ch_zonas.c:2873
+CRIOVALLE ESTE	CRIOVALLE EST
+
+#: apps/chatarra/main/ch_zonas.c:2875
+TALLER DE CRIOVALLE	OFFICINA CRIOVALLE
+
+#: apps/chatarra/main/ch_zonas.c:2877
+CUEVA DE HIELO	GROTTA GELATA
+
+#: apps/chatarra/main/ch_zonas.c:2879
+CUEVA -2	GROTTA -2
+
+#: apps/chatarra/main/ch_zonas.c:2881
+EL NUCLEO HELADO	IL NUCLEO GELATO
+
+#: apps/chatarra/main/ch_zonas.c:2885
+AUTOPISTA	AUTOSTRADA
+
+#: apps/chatarra/main/ch_zonas.c:2887
+#: apps/chatarra/main/ch_zonas.c:2997
+CIUDAD MALLA	CITTA MAGLIA
+
+#: apps/chatarra/main/ch_zonas.c:2889
+MALLA ESTE	MAGLIA EST
+
+#: apps/chatarra/main/ch_zonas.c:2891
+TALLER DE MALLA	OFFICINA MAGLIA
+
+#: apps/chatarra/main/ch_zonas.c:2893
+EL SERVIDOR	IL SERVER
+
+#: apps/chatarra/main/ch_zonas.c:2895
+SERVIDOR -2	SERVER -2
+
+#: apps/chatarra/main/ch_zonas.c:2897
+SALA DE MAQUINAS	SALA MACCHINE
+
+#: apps/chatarra/main/ch_zonas.c:2901
+LLANURA MUERTA	PIANA MORTA
+
+#: apps/chatarra/main/ch_zonas.c:2903
+#: apps/chatarra/main/ch_zonas.c:2998
+VILLA OXIDO	RUGGINOPOLI
+
+#: apps/chatarra/main/ch_zonas.c:2905
+PLAZA DEL OXIDO	PIAZZA RUGGINE
+
+#: apps/chatarra/main/ch_zonas.c:2907
+TALLER DE VILLA OXIDO	OFFICINA RUGGINOPOLI
+
+#: apps/chatarra/main/ch_zonas.c:2909
+CEMENTERIO DE ROBOTS	CIMITERO DI ROBOT
+
+#: apps/chatarra/main/ch_zonas.c:2911
+CEMENTERIO -2	CIMITERO -2
+
+#: apps/chatarra/main/ch_zonas.c:2913
+LA FOSA	LA FOSSA
+
+#: apps/chatarra/main/ch_zonas.c:2917
+ULTIMO TRAMO	ULTIMO TRATTO
+
+#: apps/chatarra/main/ch_zonas.c:2919
+#: apps/chatarra/main/ch_zonas.c:2999
+PRISMA	PRISMA
+
+#: apps/chatarra/main/ch_zonas.c:2921
+PRISMA ESTE	PRISMA EST
+
+#: apps/chatarra/main/ch_zonas.c:2923
+TALLER DE PRISMA	OFFICINA PRISMA
+
+#: apps/chatarra/main/ch_zonas.c:2925
+LA TORRE	LA TORRE
+
+#: apps/chatarra/main/ch_zonas.c:2927
+TORRE -2	TORRE -2
+
+#: apps/chatarra/main/ch_zonas.c:2929
+LA CUMBRE	LA CIMA
+
+#: apps/chatarra/main/chatarra.c:309
+EL OTRO EQUIPO	L'ALTRO APPARECCHIO

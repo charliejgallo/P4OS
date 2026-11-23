@@ -1,0 +1,76 @@
+# amoledos-lang 1   es -> it
+# web.oficina.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/oficina/web/oficina.js:81
+#: apps/oficina/web/oficina.js:199
+Oficina	Ufficio
+
+#: apps/oficina/web/oficina.js:91
+Soltá acá los documentos para subirlos a esta carpeta, o tocá para elegirlos	Trascina qui i documenti per caricarli in questa cartella, o tocca per sceglierli
+
+#: apps/oficina/web/oficina.js:100
+Subiendo %s: %s	Carico %s: %s
+
+#: apps/oficina/web/oficina.js:101
+No se pudo subir %s: %s	Impossibile caricare %s: %s
+
+#: apps/oficina/web/oficina.js:104
+Subido	Caricato
+
+#: apps/oficina/web/oficina.js:104
+%s archivos subidos	%s file caricati
+
+#: apps/oficina/web/oficina.js:113
+#: apps/oficina/web/oficina.js:130
+Cerrar	Chiudi
+
+#: apps/oficina/web/oficina.js:113
+Cargando…	Caricamento…
+
+#: apps/oficina/web/oficina.js:128
+(el principio)	(l'inizio)
+
+#: apps/oficina/web/oficina.js:129
+#: apps/oficina/web/oficina.js:148
+#: apps/oficina/web/oficina.js:188
+Bajar	Scarica
+
+#: apps/oficina/web/oficina.js:142
+Carpeta	Cartella
+
+#: apps/oficina/web/oficina.js:144
+¿Borrar «%s»? No se puede deshacer.	Eliminare «%s»? Non si può annullare.
+
+#: apps/oficina/web/oficina.js:145
+Borrado	Eliminato
+
+#: apps/oficina/web/oficina.js:146
+Borrar	Elimina
+
+#: apps/oficina/web/oficina.js:171
+No hay archivos en esta carpeta.	Nessun file in questa cartella.
+
+#: apps/oficina/web/oficina.js:183
+Abiertos hace poco en la placa	Aperti di recente sulla scheda
+
+#: apps/oficina/web/oficina.js:193
+Nombre de la carpeta nueva	Nome della nuova cartella
+
+#: apps/oficina/web/oficina.js:201
+Los documentos de la tarjeta. La app Oficina abre y edita documentos (docx, odt), planillas (xlsx, ods, csv) y textos; los demás formatos llegan en las próximas versiones.	I documenti della microSD. L'app Ufficio apre e modifica documenti (docx, odt), fogli di calcolo (xlsx, ods, csv) e testi; gli altri formati arrivano nelle prossime versioni.
+
+#: apps/oficina/web/oficina.js:203
+Documentos	Documenti
+
+#: apps/oficina/web/oficina.js:204
+Carpeta nueva	Nuova cartella
+
+#: apps/oficina/web/oficina.js:205
+Abierta en la placa	Aperta sulla scheda
+
+#: apps/oficina/web/oficina.js:206
+Abrir la app en la placa	Apri l'app sulla scheda

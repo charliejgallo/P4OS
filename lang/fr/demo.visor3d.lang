@@ -1,0 +1,91 @@
+# amoledos-lang 1   es -> fr
+# demo.visor3d.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/visor3d/main/v3_mesh.c:363
+archivo demasiado corto	fichier trop court
+
+#: apps/visor3d/main/v3_mesh.c:371
+no es un STL	pas un STL
+
+#: apps/visor3d/main/v3_mesh.c:379
+no tiene triángulos	aucun triangle
+
+#: apps/visor3d/main/v3_mesh.c:387
+#: apps/visor3d/main/v3_mesh.c:420
+cancelado	annulé
+
+#: apps/visor3d/main/v3_mesh.c:387
+#: apps/visor3d/main/v3_mesh.c:424
+error de lectura	erreur de lecture
+
+#: apps/visor3d/main/v3_mesh.c:397
+#: apps/visor3d/main/v3_mesh.c:460
+#: apps/visor3d/main/v3_mesh.c:497
+sin memoria	mémoire pleine
+
+#: apps/visor3d/main/v3_mesh.c:446
+no se pudo reducir	réduction impossible
+
+#: apps/visor3d/main/v3_mesh.c:478
+no es un M3D	pas un M3D
+
+#: apps/visor3d/main/v3_mesh.c:486
+demasiados triángulos	trop de triangles
+
+#: apps/visor3d/main/v3_mesh.c:507
+índice inválido	index invalide
+
+#: apps/visor3d/main/v3_mesh.c:515
+archivo incompleto	fichier incomplet
+
+#: apps/visor3d/main/v3_mesh.c:526
+no se pudo abrir el archivo	impossible d'ouvrir le fichier
+
+#: apps/visor3d/main/visor3d.c:742
+Reduciendo...	Réduction...
+
+#: apps/visor3d/main/visor3d.c:742
+Cargando...	Chargement...
+
+#: apps/visor3d/main/visor3d.c:745
+No se pudo abrir	Impossible d'ouvrir
+
+#: apps/visor3d/main/visor3d.c:779
+Fondo oscuro	Fond sombre
+
+#: apps/visor3d/main/visor3d.c:779
+Fondo gris	Fond gris
+
+#: apps/visor3d/main/visor3d.c:779
+Fondo claro	Fond clair
+
+#: apps/visor3d/main/visor3d.c:783
+alambre	filaire
+
+#: apps/visor3d/main/visor3d.c:783
+sólido	solide
+
+#: apps/visor3d/main/visor3d.c:982
+no se pudo leer	illisible
+
+#: apps/visor3d/main/visor3d.c:1081
+Visor 3D	Visionneuse 3D
+
+#: apps/visor3d/main/visor3d.c:1082
+Un dedo lo gira; dos lo acercan, lo mueven y lo tuercen	Un doigt pour tourner ; deux pour zoomer, déplacer et pivoter
+
+#: apps/visor3d/main/visor3d.c:1090
+No hay modelos.\nCopiá archivos .stl o .m3d a\n%s\n(o subilos desde el portal: Archivos).	Aucun modèle.\nCopie des fichiers .stl ou .m3d dans\n%s\n(ou envoie-les depuis le portail : Fichiers).
+
+#: apps/visor3d/main/visor3d.c:1112
+Carpeta	Dossier
+
+#: apps/visor3d/main/visor3d.c:1237
+Girar	Tourner
+
+#: apps/visor3d/main/visor3d.c:1406
+Sin memoria	Mémoire pleine

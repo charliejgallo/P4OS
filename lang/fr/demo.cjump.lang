@@ -1,0 +1,130 @@
+# amoledos-lang 1   es -> fr
+# demo.cjump.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/cjump/main/cj_skins.c:32
+Clásico	Classique
+
+#: apps/cjump/main/cj_skins.c:33
+Nerd	Geek
+
+#: apps/cjump/main/cj_skins.c:34
+Café	Café
+
+#: apps/cjump/main/cj_skins.c:35
+Idea	Idée
+
+#: apps/cjump/main/cj_skins.c:36
+Auriculares	Écouteurs
+
+#: apps/cjump/main/cj_skins.c:37
+Obrero	Ouvrier
+
+#: apps/cjump/main/cj_skins.c:38
+Dormilón	Dormeur
+
+#: apps/cjump/main/cj_skins.c:39
+Graduado	Diplômé
+
+#: apps/cjump/main/cj_skins.c:40
+Hipnótico	Hypnotique
+
+#: apps/cjump/main/cj_skins.c:41
+Navegador	Navigateur
+
+#: apps/cjump/main/cj_skins.c:42
+Forzudo	Costaud
+
+#: apps/cjump/main/cj_skins.c:43
+Mago	Sorcier
+
+#: apps/cjump/main/cj_skins.c:44
+Ninja	Ninja
+
+#: apps/cjump/main/cj_skins.c:45
+Rey	Roi
+
+#: apps/cjump/main/cj_skins.c:46
+Astronauta	Astronaute
+
+#: apps/cjump/main/cj_skins.c:47
+Fiesta	Fête
+
+#: apps/cjump/main/cjump.c:496
+SONIDO	SON
+
+#: apps/cjump/main/cjump.c:500
+Botones a los costados, o arrastrá el dedo	Boutons sur les côtés, ou glisse le doigt
+
+#: apps/cjump/main/cjump.c:508
+Récord	Record
+
+#: apps/cjump/main/cjump.c:511
+#: apps/cjump/main/cjump.c:534
+Monedas	Pièces
+
+#: apps/cjump/main/cjump.c:541
+#: apps/cjump/main/cjump.c:731
+monedas	pièces
+
+#: apps/cjump/main/cjump.c:547
+Comprar	Acheter
+
+#: apps/cjump/main/cjump.c:547
+No alcanza	Pas assez
+
+#: apps/cjump/main/cjump.c:553
+Puesto	Porté
+
+#: apps/cjump/main/cjump.c:556
+Comprado	Acheté
+
+#: apps/cjump/main/cjump.c:558
+Ponerme este	Le porter
+
+#: apps/cjump/main/cjump.c:586
+Todavía no alcanza	Pas encore assez
+
+#: apps/cjump/main/cjump.c:594
+Disfraz desbloqueado	Costume débloqué
+
+#: apps/cjump/main/cjump.c:723
+Nuevo récord	Record battu
+
+#: apps/cjump/main/cjump.c:724
+Se acabó	Perdu
+
+#: apps/cjump/main/cjump.c:735
+Juntadas	Ramassées
+
+#: apps/cjump/main/cjump.c:736
+por altura	en hauteur
+
+#: apps/cjump/main/cjump.c:1062
+Jugar	Jouer
+
+#: apps/cjump/main/cjump.c:1064
+#: apps/cjump/main/cjump.c:1083
+Tienda	Magasin
+
+#: apps/cjump/main/cjump.c:1103
+Deslizá para ver los demás	Glisse pour voir les autres
+
+#: apps/cjump/main/cjump.c:1114
+Pausa	Pause
+
+#: apps/cjump/main/cjump.c:1116
+Seguir	Suite
+
+#: apps/cjump/main/cjump.c:1118
+#: apps/cjump/main/cjump.c:1138
+Menú	Menu
+
+#: apps/cjump/main/cjump.c:1120
+Salir	Quitter
+
+#: apps/cjump/main/cjump.c:1136
+Otra vez	Rejouer

@@ -1,0 +1,68 @@
+# amoledos-lang 1   es -> fr
+# demo.duke3d.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/duke3d/main/duke3d.c:387
+FUEGO	FEU
+
+#: apps/duke3d/main/duke3d.c:388
+USAR	ACTION
+
+#: apps/duke3d/main/duke3d.c:389
+SALTAR	SAUTER
+
+#: apps/duke3d/main/duke3d.c:390
+AGACHAR	BAISSER
+
+#: apps/duke3d/main/duke3d.c:391
+MENÚ	MENU
+
+#: apps/duke3d/main/duke3d.c:392
+MAPA	PLAN
+
+#: apps/duke3d/main/duke3d.c:393
+ÍTEM	OBJET
+
+#: apps/duke3d/main/duke3d.c:394
+OTRO	AUTRE
+
+#: apps/duke3d/main/duke3d.c:395
+ARMA	ARME
+
+#: apps/duke3d/main/duke3d.c:396
+LATERAL	LATÉRAL
+
+#: apps/duke3d/main/duke3d.c:551
+No está DUKE3D.GRP	DUKE3D.GRP absent
+
+#: apps/duke3d/main/duke3d.c:552
+Copiá DUKE3D.GRP (shareware o el juego completo) a la carpeta	Copie DUKE3D.GRP (shareware ou jeu complet) dans le dossier
+
+#: apps/duke3d/main/duke3d.c:554
+#: apps/duke3d/main/duke3d.c:789
+#: apps/duke3d/main/duke3d.c:932
+Tocá para salir	Touche pour quitter
+
+#: apps/duke3d/main/duke3d.c:788
+Duke Nukem 3D se detuvo	Duke Nukem 3D s'est arrêté
+
+#: apps/duke3d/main/duke3d.c:832
+Duke Nukem 3D se juega con la pantalla horizontal	Duke Nukem 3D se joue avec l'écran en paysage
+
+#: apps/duke3d/main/duke3d.c:833
+Girá la pantalla para seguir	Tourne l'écran pour continuer
+
+#: apps/duke3d/main/duke3d.c:912
+Duke Nukem 3D corre en la placa, no en el simulador	Duke Nukem 3D tourne sur la carte, pas dans le simulateur
+
+#: apps/duke3d/main/duke3d.c:928
+Cargando...	Chargement...
+
+#: apps/duke3d/main/duke3d.c:931
+Duke Nukem 3D no pudo arrancar	Duke Nukem 3D n'a pas pu démarrer
+
+#: apps/duke3d/main/duke3d.c:932
+Falta memoria	Mémoire insuffisante

@@ -1,0 +1,147 @@
+# amoledos-lang 1   es -> pt
+# web.pato.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/pato/web/pato.js:65
+Escribir	Digitar
+
+#: apps/pato/web/pato.js:65
+Tecla	Tecla
+
+#: apps/pato/web/pato.js:65
+Esperar	Esperar
+
+#: apps/pato/web/pato.js:65
+Mouse	Mouse
+
+#: apps/pato/web/pato.js:66
+Rueda	Roda
+
+#: apps/pato/web/pato.js:66
+Clic	Clique
+
+#: apps/pato/web/pato.js:66
+Repetir	Repetir
+
+#: apps/pato/web/pato.js:66
+Comentario	Comentário
+
+#: apps/pato/web/pato.js:66
+Otro	Outro
+
+#: apps/pato/web/pato.js:125
+#: apps/pato/web/pato.js:186
+Pato goma	Pato goma
+
+#: apps/pato/web/pato.js:139
+Todavía no hay scripts. Creá el primero con «Nuevo script».	Ainda não há scripts. Crie o primeiro com "Novo script".
+
+#: apps/pato/web/pato.js:142
+Scripts	Scripts
+
+#: apps/pato/web/pato.js:143
+Nuevo script	Novo script
+
+#: apps/pato/web/pato.js:146
+Nombre del script	Nome do script
+
+#: apps/pato/web/pato.js:152
+Constructor	Construtor
+
+#: apps/pato/web/pato.js:153
+Texto	Texto
+
+#: apps/pato/web/pato.js:158
+Agregar paso	Adicionar passo
+
+#: apps/pato/web/pato.js:162
+Comandos	Comandos
+
+#: apps/pato/web/pato.js:164
+teclea el texto	digita o texto
+
+#: apps/pato/web/pato.js:165
+una tecla o combo: <code>enter</code>, <code>cmd+space</code>, <code>f5</code>	uma tecla ou combinação: <code>enter</code>, <code>cmd+space</code>, <code>f5</code>
+
+#: apps/pato/web/pato.js:166
+milisegundos	milissegundos
+
+#: apps/pato/web/pato.js:167
+mueve el puntero <code>dx dy</code>	move o ponteiro <code>dx dy</code>
+
+#: apps/pato/web/pato.js:168
++ arriba, − abajo	+ cima, − baixo
+
+#: apps/pato/web/pato.js:169
+izquierdo o derecho	esquerdo ou direito
+
+#: apps/pato/web/pato.js:170
+repite el paso anterior n veces	repete o passo anterior n vezes
+
+#: apps/pato/web/pato.js:171
+no se ejecuta	não é executado
+
+#: apps/pato/web/pato.js:173
+Prefijos de combo: cmd+ ctrl+ alt+ shift+ sobre una tecla.	Prefixos de combinação: cmd+ ctrl+ alt+ shift+ antes de uma tecla.
+
+#: apps/pato/web/pato.js:177
+← Scripts	← Scripts
+
+#: apps/pato/web/pato.js:182
+Guardar en la placa	Salvar na placa
+
+#: apps/pato/web/pato.js:183
+Borrar de la placa	Apagar da placa
+
+#: apps/pato/web/pato.js:188
+Los scripts de teclado y mouse que la placa puede ejecutar por USB (o como teclado Bluetooth) en la computadora. Se guardan en la tarjeta; en la placa los elegís y confirmás antes de que se envíe nada. También podés editarlos ahí.	Os scripts de teclado e mouse que a placa pode executar no computador por USB (ou como teclado Bluetooth). Ficam salvos no cartão; na placa você os escolhe e confirma antes que qualquer coisa seja enviada. Também dá para editá-los lá.
+
+#: apps/pato/web/pato.js:191
+Los archivos .pato viven en /pato de la tarjeta. No pongas contraseñas: cualquier computadora lee lo que escribe un teclado USB.	Os arquivos .pato ficam em /pato no cartão. Não coloque senhas: qualquer computador lê o que um teclado USB digita.
+
+#: apps/pato/web/pato.js:193
+Esta app es sólo con fines educativos y demostrativos de las capacidades HID de la placa. No nos hacemos responsables de los scripts que ejecuten terceros ni de los malos usos que le puedan dar.	Este app tem fins apenas educativos e de demonstração das capacidades HID da placa. Não nos responsabilizamos pelos scripts executados por terceiros nem pelo mau uso que possam fazer dele.
+
+#: apps/pato/web/pato.js:211
+Editar	Editar
+
+#: apps/pato/web/pato.js:233
+texto a escribir	texto a digitar
+
+#: apps/pato/web/pato.js:238
+izquierdo	esquerdo
+
+#: apps/pato/web/pato.js:238
+derecho	direito
+
+#: apps/pato/web/pato.js:240
+nota	nota
+
+#: apps/pato/web/pato.js:309
+No se pudo leer el script: %s	Não foi possível ler o script: %s
+
+#: apps/pato/web/pato.js:315
+Ponele un nombre al script	Dê um nome ao script
+
+#: apps/pato/web/pato.js:319
+Ya hay un script con ese nombre	Já existe um script com esse nome
+
+#: apps/pato/web/pato.js:321
+Guardando…	Salvando…
+
+#: apps/pato/web/pato.js:329
+Guardado · %d pasos	Salvo · %d passos
+
+#: apps/pato/web/pato.js:331
+No se pudo guardar: %s	Não foi possível salvar: %s
+
+#: apps/pato/web/pato.js:335
+#: apps/pato/web/pato.js:341
+¿Borrar este script de la placa?	Apagar este script da placa?
+
+#: apps/pato/web/pato.js:336
+#: apps/pato/web/pato.js:342
+Borrado	Apagado

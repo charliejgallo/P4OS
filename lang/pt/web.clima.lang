@@ -1,0 +1,106 @@
+# amoledos-lang 1   es -> pt
+# web.clima.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/clima/web/clima.js:35
+Despejado	Limpo
+
+#: apps/clima/web/clima.js:36
+Parcialmente nublado	Parcialmente nublado
+
+#: apps/clima/web/clima.js:37
+Nublado	Nublado
+
+#: apps/clima/web/clima.js:38
+Niebla	Neblina
+
+#: apps/clima/web/clima.js:39
+Llovizna	Garoa
+
+#: apps/clima/web/clima.js:40
+Lluvia	Chuva
+
+#: apps/clima/web/clima.js:41
+Nieve	Neve
+
+#: apps/clima/web/clima.js:42
+Tormenta	Trovoada
+
+#: apps/clima/web/clima.js:50
+dom	dom
+
+#: apps/clima/web/clima.js:50
+lun	seg
+
+#: apps/clima/web/clima.js:50
+mar	ter
+
+#: apps/clima/web/clima.js:50
+mié	qua
+
+#: apps/clima/web/clima.js:50
+jue	qui
+
+#: apps/clima/web/clima.js:50
+vie	sex
+
+#: apps/clima/web/clima.js:50
+sáb	sáb
+
+#: apps/clima/web/clima.js:54
+#: apps/clima/web/clima.js:135
+Clima	Clima
+
+#: apps/clima/web/clima.js:58
+Cargando…	Carregando…
+
+#: apps/clima/web/clima.js:59
+Ciudad, pueblo o barrio	Cidade, vila ou bairro
+
+#: apps/clima/web/clima.js:65
+La placa todavía no tiene un lugar elegido: buscalo abajo.	A placa ainda não tem um lugar escolhido: busque-o abaixo.
+
+#: apps/clima/web/clima.js:68
+%s · cargando el pronóstico…	%s · carregando a previsão…
+
+#: apps/clima/web/clima.js:82
+Sensación %s° · humedad %s % · viento %s km/h	Sensação %s° · umidade %s % · vento %s km/h
+
+#: apps/clima/web/clima.js:86
+hoy	hoje
+
+#: apps/clima/web/clima.js:94
+No se pudo traer el pronóstico: %s	Não foi possível obter a previsão: %s
+
+#: apps/clima/web/clima.js:111
+%s: la placa lo toma en unos segundos	%s: a placa o aplica em alguns segundos
+
+#: apps/clima/web/clima.js:123
+Buscando…	Buscando…
+
+#: apps/clima/web/clima.js:130
+Elegir	Escolher
+
+#: apps/clima/web/clima.js:130
+No se encontró ningún lugar con ese nombre.	Nenhum lugar encontrado com esse nome.
+
+#: apps/clima/web/clima.js:131
+No se pudo buscar: %s	Não foi possível buscar: %s
+
+#: apps/clima/web/clima.js:136
+Cambiar el lugar	Mudar o lugar
+
+#: apps/clima/web/clima.js:138
+Buscar	Buscar
+
+#: apps/clima/web/clima.js:139
+El pronóstico es de Open-Meteo. La app lo toma en unos segundos si está abierta, o la próxima vez que se abra.	A previsão é do Open-Meteo. O app a aplica em alguns segundos se estiver aberto, ou na próxima vez que for aberto.
+
+#: apps/clima/web/clima.js:142
+Abierta en la placa	Aberto na placa
+
+#: apps/clima/web/clima.js:142
+Abrir Clima en la placa	Abrir Clima na placa

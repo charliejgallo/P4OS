@@ -1,0 +1,125 @@
+# amoledos-lang 1   es -> fr
+# web.camaras.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/camaras/web/camaras.js:113
+cámara %d	caméra %d
+
+#: apps/camaras/web/camaras.js:114
+%s: el nombre, de 1 a 31 caracteres y sin corchetes	%s : le nom, de 1 à 31 caractères et sans crochets
+
+#: apps/camaras/web/camaras.js:115
+%s: hay dos con ese nombre	%s : deux ont ce nom
+
+#: apps/camaras/web/camaras.js:116
+Frigate va en su propio lugar, abajo	Frigate va à sa propre place, plus bas
+
+#: apps/camaras/web/camaras.js:118
+%s: la dirección empieza con rtsp://, http:// o https://	%s : l'adresse commence par rtsp://, http:// ou https://
+
+#: apps/camaras/web/camaras.js:119
+%s: la dirección de pantalla completa no es válida	%s : l'adresse plein écran n'est pas valide
+
+#: apps/camaras/web/camaras.js:120
+%s: el refresco es un número de segundos	%s : le rafraîchissement est un nombre de secondes
+
+#: apps/camaras/web/camaras.js:122
+Frigate: la dirección empieza con http:// o https://	Frigate : l'adresse commence par http:// ou https://
+
+#: apps/camaras/web/camaras.js:131
++ Agregar una cámara	+ Ajouter une caméra
+
+#: apps/camaras/web/camaras.js:132
+Guardar en la tarjeta	Enregistrer sur la carte SD
+
+#: apps/camaras/web/camaras.js:139
+#: apps/camaras/web/camaras.js:177
+Sin nombre	Sans nom
+
+#: apps/camaras/web/camaras.js:148
+Separé el usuario y la contraseña de la dirección	Utilisateur et mot de passe séparés de l'adresse
+
+#: apps/camaras/web/camaras.js:158
+RTSP no se puede ver en el navegador: miralo en la placa.	RTSP ne peut pas se voir dans le navigateur : regarde-le sur la carte.
+
+#: apps/camaras/web/camaras.js:163
+No se pudo ver desde este navegador (la cámara pide usuario y contraseña, que el navegador no manda en una imagen).	Impossible de la voir depuis ce navigateur (la caméra demande utilisateur et mot de passe, que le navigateur n'envoie pas pour une image).
+
+#: apps/camaras/web/camaras.js:164
+No se pudo ver desde este navegador.	Impossible à voir dans ce navigateur.
+
+#: apps/camaras/web/camaras.js:170
+Todavía no hay cámaras: agregá una.	Pas encore de caméras : ajoutes-en une.
+
+#: apps/camaras/web/camaras.js:178
+Ver acá	Voir ici
+
+#: apps/camaras/web/camaras.js:179
+Subir	Monter
+
+#: apps/camaras/web/camaras.js:180
+Bajar	Descendre
+
+#: apps/camaras/web/camaras.js:182
+¿Quitar %s?	Retirer %s ?
+
+#: apps/camaras/web/camaras.js:182
+¿Quitar esta cámara?	Retirer cette caméra ?
+
+#: apps/camaras/web/camaras.js:183
+Quitar	Retirer
+
+#: apps/camaras/web/camaras.js:185
+Nombre	Nom
+
+#: apps/camaras/web/camaras.js:185
+Timbre	Sonnette
+
+#: apps/camaras/web/camaras.js:186
+Refresco (s, sólo para un JPEG suelto)	Rafraîchissement (s, pour un JPEG seul)
+
+#: apps/camaras/web/camaras.js:187
+Dirección (la grilla: el stream secundario)	Adresse (la grille : le flux secondaire)
+
+#: apps/camaras/web/camaras.js:188
+Pantalla completa (opcional: el stream principal)	Plein écran (optionnel : le flux principal)
+
+#: apps/camaras/web/camaras.js:189
+Usuario	Utilisateur
+
+#: apps/camaras/web/camaras.js:190
+Contraseña	Mot de passe
+
+#: apps/camaras/web/camaras.js:212
+Guardado. La app lo lee al abrirse.	Enregistré. L'app le lit à l'ouverture.
+
+#: apps/camaras/web/camaras.js:213
+No se pudo guardar: %s	Impossible d'enregistrer : %s
+
+#: apps/camaras/web/camaras.js:219
+No se pudo leer %s: %s	Impossible de lire %s : %s
+
+#: apps/camaras/web/camaras.js:224
+#: apps/camaras/web/camaras.js:241
+Cámaras	Caméras
+
+#: apps/camaras/web/camaras.js:226
+Abrir Cámaras en la placa	Ouvrir Caméras sur la carte
+
+#: apps/camaras/web/camaras.js:227
+Las cámaras	Les caméras
+
+#: apps/camaras/web/camaras.js:232
+Opcional: la pestaña Frigate de la app, con los eventos y los clips.	Optionnel : l'onglet Frigate de l'app, avec les événements et les clips.
+
+#: apps/camaras/web/camaras.js:233
+Qué puede mostrar la placa	Ce que la carte peut afficher
+
+#: apps/camaras/web/camaras.js:234
+Directo de la cámara, con rtsp://: H.264 en perfil Baseline o MJPEG (en una Hikvision, el segundo stream: rtsp://IP/Streaming/Channels/102). Para todo lo demás, un transcodificador que lo entregue como MJPEG por http://, como go2rtc (el que trae Home Assistant): http://IP:1984/api/stream.mjpeg?src=NOMBRE. Si pegás una dirección con usuario y contraseña adentro, se separan solos. Las contraseñas quedan en /cameras.txt de la tarjeta, como las guarda la app.	En direct de la caméra, avec rtsp:// : H.264 en profil Baseline ou MJPEG (sur une Hikvision, le second flux : rtsp://IP/Streaming/Channels/102). Pour tout le reste, un transcodeur qui le livre en MJPEG par http://, comme go2rtc (celui fourni avec Home Assistant) : http://IP:1984/api/stream.mjpeg?src=NOM. Si tu colles une adresse avec utilisateur et mot de passe dedans, ils sont séparés tout seuls. Les mots de passe restent dans /cameras.txt de la carte SD, comme l'app les garde.
+
+#: apps/camaras/web/camaras.js:236
+Hay cambios sin guardar	Modifications non enregistrées

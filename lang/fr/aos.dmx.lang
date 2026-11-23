@@ -1,0 +1,365 @@
+# amoledos-lang 1   es -> fr
+# aos.dmx.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/dmx/main/dmx.c:25
+Consola	Console
+
+#: apps/dmx/main/dmx.c:25
+Aparato	Appareil
+
+#: apps/dmx/main/dmx.c:25
+Analizador	Analyseur
+
+#: apps/dmx/main/dmx.c:25
+Red	Réseau
+
+#: apps/dmx/main/dmx.c:25
+Cableado	Câblage
+
+#: apps/dmx/main/dmx.c:259
+Cancelar	Annuler
+
+#: apps/dmx/main/dmx.c:259
+Aplicar	Appliquer
+
+#: apps/dmx/main/dmx.c:286
+no se pudo abrir %s (¿lo tiene otra app?)	impossible d'ouvrir %s (une autre app l'utilise ?)
+
+#: apps/dmx/main/dmx.c:316
+#: apps/dmx/main/dx_tabs.c:432
+cerrado	fermé
+
+#: apps/dmx/main/dmx.c:319
+mandando · %u canales · %.0f paquetes/s	envoi · %u canaux · %.0f paquets/s
+
+#: apps/dmx/main/dmx.c:324
+recibiendo · %u canales · %.0f paquetes/s	réception · %u canaux · %.0f paquets/s
+
+#: apps/dmx/main/dmx.c:325
+escuchando · sin señal	écoute · pas de signal
+
+#: apps/dmx/main/dmx.c:331
+Cerrar	Fermer
+
+#: apps/dmx/main/dmx.c:331
+#: apps/dmx/main/dmx.c:464
+Abrir	Ouvrir
+
+#: apps/dmx/main/dmx.c:368
+Puerto	Port
+
+#: apps/dmx/main/dmx.c:377
+DMX necesita un puerto UART del header con un transceptor RS485. Un puerto con DE lo deja arriba para mandar y abajo para escuchar.	Le DMX a besoin d'un port UART du connecteur avec un transceiver RS485. Un port avec DE le met à l'état haut pour envoyer et bas pour écouter.
+
+#: apps/dmx/main/dx_net.c:97
+no se pudo escuchar el puerto %u	impossible d'écouter le port %u
+
+#: apps/dmx/main/dx_rdm.c:156
+Buscando…	Recherche…
+
+#: apps/dmx/main/dx_rdm.c:188
+Buscando… %d encontrados	Recherche… %d trouvés
+
+#: apps/dmx/main/dx_rdm.c:193
+Leyendo %d de %d…	Lecture %d sur %d…
+
+#: apps/dmx/main/dx_rdm.c:197
+%d aparatos RDM	%d appareils RDM
+
+#: apps/dmx/main/dx_rdm.c:198
+Ningún aparato contestó RDM.	Aucun appareil RDM n'a répondu.
+
+#: apps/dmx/main/dx_rdm.c:228
+Hecho.	Fait.
+
+#: apps/dmx/main/dx_rdm.c:229
+El aparato no lo acepta (NACK).	L'appareil ne l'accepte pas (NACK).
+
+#: apps/dmx/main/dx_rdm.c:230
+El aparato no contestó.	L'appareil n'a pas répondu.
+
+#: apps/dmx/main/dx_tabs.c:55
+Ir al canal	Aller au canal
+
+#: apps/dmx/main/dx_tabs.c:73
+Todos los canales a	Tous les canaux à
+
+#: apps/dmx/main/dx_tabs.c:147
+#: apps/dmx/main/dx_tabs.c:457
+Canales %d a %d	Canaux %d à %d
+
+#: apps/dmx/main/dx_tabs.c:149
+Ir a…	Aller à…
+
+#: apps/dmx/main/dx_tabs.c:186
+Todo a 0	Tout à 0
+
+#: apps/dmx/main/dx_tabs.c:187
+Todo a 255	Tout à 255
+
+#: apps/dmx/main/dx_tabs.c:188
+Todo a…	Tout à…
+
+#: apps/dmx/main/dx_tabs.c:189
+PATRONES	MOTIFS
+
+#: apps/dmx/main/dx_tabs.c:191
+Quieto	Fixe
+
+#: apps/dmx/main/dx_tabs.c:191
+Recorrer canal por canal	Parcourir canal par canal
+
+#: apps/dmx/main/dx_tabs.c:191
+Rampa en todos	Rampe sur tous
+
+#: apps/dmx/main/dx_tabs.c:191
+Arcoíris en 8 pixeles RGB	Arc-en-ciel sur 8 pixels RGB
+
+#: apps/dmx/main/dx_tabs.c:193
+Recorrer prende un canal por vez a 255, tres por segundo: para encontrar qué canal mueve qué. El arcoíris va en los canales 1 a 24 (ocho pixeles RGB, como la tira del ESP32 del banco).	Parcourir allume un canal à la fois à 255, trois par seconde : pour trouver quel canal fait bouger quoi. L'arc-en-ciel va sur les canaux 1 à 24 (huit pixels RGB, comme le ruban de l'ESP32 du banc).
+
+#: apps/dmx/main/dx_tabs.c:195
+EL PAQUETE	LE PAQUET
+
+#: apps/dmx/main/dx_tabs.c:202
+%u canales	%u canaux
+
+#: apps/dmx/main/dx_tabs.c:208
+%u por segundo	%u par seconde
+
+#: apps/dmx/main/dx_tabs.c:209
+El estándar pide BREAK de 88 µs o más y MAB de 8 µs o más; 176 y 16 es lo de casi todas las consolas. Con los límites y con paquetes cortos se ve si un aparato los aguanta.	Le standard demande un BREAK de 88 µs ou plus et un MAB de 8 µs ou plus ; 176 et 16, c'est ce que font presque toutes les consoles. Aux limites et avec des paquets courts, on voit si un appareil les supporte.
+
+#: apps/dmx/main/dx_tabs.c:217
+Dimmer (1 canal)	Dimmer (1 canal)
+
+#: apps/dmx/main/dx_tabs.c:217
+Intensidad	Intensité
+
+#: apps/dmx/main/dx_tabs.c:218
+RGB (3 canales)	RGB (3 canaux)
+
+#: apps/dmx/main/dx_tabs.c:218
+#: apps/dmx/main/dx_tabs.c:219
+#: apps/dmx/main/dx_tabs.c:220
+#: apps/dmx/main/dx_tabs.c:221
+Rojo	Rouge
+
+#: apps/dmx/main/dx_tabs.c:218
+#: apps/dmx/main/dx_tabs.c:219
+#: apps/dmx/main/dx_tabs.c:220
+#: apps/dmx/main/dx_tabs.c:221
+Verde	Vert
+
+#: apps/dmx/main/dx_tabs.c:218
+#: apps/dmx/main/dx_tabs.c:219
+#: apps/dmx/main/dx_tabs.c:220
+#: apps/dmx/main/dx_tabs.c:221
+Azul	Bleu
+
+#: apps/dmx/main/dx_tabs.c:219
+RGBW (4 canales)	RGBW (4 canaux)
+
+#: apps/dmx/main/dx_tabs.c:219
+Blanco	Blanc
+
+#: apps/dmx/main/dx_tabs.c:220
+PAR de 7 canales	PAR 7 canaux
+
+#: apps/dmx/main/dx_tabs.c:220
+#: apps/dmx/main/dx_tabs.c:221
+Dimmer	Dimmer
+
+#: apps/dmx/main/dx_tabs.c:220
+Strobe	Strobe
+
+#: apps/dmx/main/dx_tabs.c:220
+Macro	Macro
+
+#: apps/dmx/main/dx_tabs.c:220
+Velocidad	Vitesse
+
+#: apps/dmx/main/dx_tabs.c:221
+Cabeza móvil (6 canales)	Lyre (6 canaux)
+
+#: apps/dmx/main/dx_tabs.c:221
+Pan	Pan
+
+#: apps/dmx/main/dx_tabs.c:221
+Tilt	Tilt
+
+#: apps/dmx/main/dx_tabs.c:222
+Barra de 8 pixeles (24 canales)	Barre de 8 pixels (24 canaux)
+
+#: apps/dmx/main/dx_tabs.c:309
+Abrí la conexión para escuchar.	Ouvre la liaison pour écouter.
+
+#: apps/dmx/main/dx_tabs.c:310
+Sin señal: nadie manda DMX.	Pas de signal : aucun DMX envoyé.
+
+#: apps/dmx/main/dx_tabs.c:312
+La consola manda %d canales: este aparato necesita hasta el %d.	La console envoie %d canaux : cet appareil en a besoin jusqu'au %d.
+
+#: apps/dmx/main/dx_tabs.c:313
+Recibiendo: canales %d a %d.	Réception : canaux %d à %d.
+
+#: apps/dmx/main/dx_tabs.c:323
+Pixel	Pixel
+
+#: apps/dmx/main/dx_tabs.c:338
+Dirección de inicio (1-512)	Adresse de départ (1-512)
+
+#: apps/dmx/main/dx_tabs.c:348
+#: apps/dmx/main/dx_tabs.c:703
+Dirección	Adresse
+
+#: apps/dmx/main/dx_tabs.c:360
+La placa hace de aparato: escucha el bus y dibuja lo que haría uno de estos con esa dirección. Sirve para ver si una consola manda, y qué manda en cada canal.	La carte joue le rôle d'un appareil : elle écoute le bus et dessine ce que ferait l'un d'eux à cette adresse. Pour voir si une console envoie, et ce qu'elle envoie sur chaque canal.
+
+#: apps/dmx/main/dx_tabs.c:432
+hay señal	signal
+
+#: apps/dmx/main/dx_tabs.c:432
+sin señal	sans signal
+
+#: apps/dmx/main/dx_tabs.c:438
+niveles	niveaux
+
+#: apps/dmx/main/dx_tabs.c:438
+texto	texte
+
+#: apps/dmx/main/dx_tabs.c:476
+Estado	État
+
+#: apps/dmx/main/dx_tabs.c:476
+Paquetes/s	Paquets/s
+
+#: apps/dmx/main/dx_tabs.c:476
+Canales	Canaux
+
+#: apps/dmx/main/dx_tabs.c:476
+Código de inicio	Code de départ
+
+#: apps/dmx/main/dx_tabs.c:477
+Paquetes	Paquets
+
+#: apps/dmx/main/dx_tabs.c:477
+Malos	Mauvais
+
+#: apps/dmx/main/dx_tabs.c:477
+Otros códigos	Autres codes
+
+#: apps/dmx/main/dx_tabs.c:477
+BREAK cortos	BREAK courts
+
+#: apps/dmx/main/dx_tabs.c:491
+LOS 512 CANALES (NARANJA: SE MUEVEN)	LES 512 CANAUX (ORANGE : EN MOUVEMENT)
+
+#: apps/dmx/main/dx_tabs.c:508
+BREAK y MAB medidos en el pin, con unos pocos µs de error. Un BREAK de menos de 88 µs o un MAB de menos de 8 son de una consola fuera de norma: muchos aparatos parpadean o ignoran esos paquetes. Malos: con error de trama o cortados. Tocá el mapa para ver esos canales en números.	BREAK et MAB mesurés sur la broche, à quelques µs près. Un BREAK de moins de 88 µs ou un MAB de moins de 8 viennent d'une console hors norme : beaucoup d'appareils clignotent ou ignorent ces paquets. Mauvais : avec erreur de trame ou coupés. Touche la grille pour voir ces canaux en chiffres.
+
+#: apps/dmx/main/dx_tabs.c:553
+Universo sACN (1 a 63999)	Univers sACN (1 à 63999)
+
+#: apps/dmx/main/dx_tabs.c:553
+Universo Art-Net (0 a 32767)	Univers Art-Net (0 à 32767)
+
+#: apps/dmx/main/dx_tabs.c:567
+Apagado: prendelo para que la placa reciba de la red.	Désactivé : active-le pour que la carte reçoive du réseau.
+
+#: apps/dmx/main/dx_tabs.c:569
+Esperando %s del universo %u en %s…	Attente de %s de l'univers %u sur %s…
+
+#: apps/dmx/main/dx_tabs.c:573
+%.0f paquetes/s de %s · %lu en total · el último hace %lu ms · %lu de otros universos · %lu ArtPoll contestados%s	%.0f paquets/s de %s · %lu au total · le dernier il y a %lu ms · %lu d'autres univers · %lu ArtPoll répondus%s
+
+#: apps/dmx/main/dx_tabs.c:575
+ · SIN DATOS (la salida mantiene lo último)	 · SANS DONNÉES (la sortie garde le dernier état)
+
+#: apps/dmx/main/dx_tabs.c:603
+Recibir de la red y sacarlo por DMX	Recevoir du réseau et sortir en DMX
+
+#: apps/dmx/main/dx_tabs.c:615
+Universo	Univers
+
+#: apps/dmx/main/dx_tabs.c:620
+LOS PRIMEROS 32 CANALES COMO SALEN	LES 32 PREMIERS CANAUX EN SORTIE
+
+#: apps/dmx/main/dx_tabs.c:626
+La placa hace de nodo: lo que una consola, un programa de la PC o Luces en otra placa mandan por la red para ese universo sale por el puerto RS485 como DMX. Art-Net por UDP 6454 (contesta el ArtPoll, así la consola la ve en su lista de nodos); sACN por multicast 239.255.x.y, puerto 5568. Si la red deja de mandar, la salida mantiene lo último. Sigue andando con la app en segundo plano.	La carte joue le rôle de noeud : ce qu'une console, un programme sur PC ou Lumières sur une autre carte envoie par le réseau pour cet univers sort par le port RS485 en DMX. Art-Net sur UDP 6454 (elle répond à ArtPoll, donc la console la voit dans sa liste de noeuds) ; sACN en multicast 239.255.x.y, port 5568. Si le réseau n'envoie plus rien, la sortie garde les derniers niveaux. Ça continue avec l'app en arrière-plan.
+
+#: apps/dmx/main/dx_tabs.c:640
+Abriendo el puerto: tocá Buscar otra vez.	Ouverture du port : touche à nouveau Rechercher.
+
+#: apps/dmx/main/dx_tabs.c:667
+Dirección DMX nueva (1 a 512)	Nouvelle adresse DMX (1 à 512)
+
+#: apps/dmx/main/dx_tabs.c:680
+Nombre del aparato (DEVICE_LABEL)	Nom de l'appareil (DEVICE_LABEL)
+
+#: apps/dmx/main/dx_tabs.c:693
+(sin nombre)	(sans nom)
+
+#: apps/dmx/main/dx_tabs.c:698
+Canales %u a %u (%u canales)	Canaux %u à %u (%u canaux)
+
+#: apps/dmx/main/dx_tabs.c:699
+No contestó DEVICE_INFO.	Pas de réponse à DEVICE_INFO.
+
+#: apps/dmx/main/dx_tabs.c:702
+Dejar de identificar	Arrêter d'identifier
+
+#: apps/dmx/main/dx_tabs.c:702
+Identificar	Identifier
+
+#: apps/dmx/main/dx_tabs.c:704
+Nombre	Nom
+
+#: apps/dmx/main/dx_tabs.c:712
+Tocá Buscar: la app pregunta en la línea quién habla RDM.	Touche Rechercher : l'app demande sur la ligne qui parle RDM.
+
+#: apps/dmx/main/dx_tabs.c:714
+ · %lu pedidos, %lu respuestas, %lu choques en la búsqueda, %lu respuestas malas	 · %lu requêtes, %lu réponses, %lu collisions pendant la recherche, %lu réponses erronées
+
+#: apps/dmx/main/dx_tabs.c:730
+Buscar aparatos	Rechercher
+
+#: apps/dmx/main/dx_tabs.c:735
+RDM va por el mismo par que DMX: entre paquete y paquete la placa pregunta y el aparato contesta. La búsqueda encuentra a cada uno por su UID sin conocerlo (partiendo el espacio en dos cuando contestan varios a la vez); después se le puede cambiar la dirección y el nombre o pedirle que se muestre. Sólo los aparatos con RDM contestan, y un splitter DMX común corta la vuelta.	Le RDM passe par la même paire que le DMX : entre deux paquets, la carte demande et l'appareil répond. La recherche trouve chacun par son UID sans le connaître (en coupant l'espace en deux quand plusieurs répondent à la fois) ; ensuite on peut changer son adresse et son nom ou lui demander de se signaler. Seuls les appareils RDM répondent, et un splitter DMX ordinaire coupe le retour.
+
+#: apps/dmx/main/dx_tabs.c:773
+LOS CONECTORES (DE FRENTE, LADO HEMBRA)	LES CONNECTEURS (DE FACE, CÔTÉ FEMELLE)
+
+#: apps/dmx/main/dx_tabs.c:775
+XLR de 3 (lo común)	XLR 3 (courant)
+
+#: apps/dmx/main/dx_tabs.c:776
+XLR de 5 (el estándar)	XLR 5 (le standard)
+
+#: apps/dmx/main/dx_tabs.c:777
+1: masa o malla. 2 (azul): D−, al B− del módulo. 3 (ámbar): D+, al A+. 4 y 5 no se usan.	1 : masse ou blindage. 2 (bleu) : D−, au B− du module. 3 (ambre) : D+, au A+. 4 et 5 ne servent pas.
+
+#: apps/dmx/main/dx_tabs.c:779
+LO QUE HAY QUE SABER	À SAVOIR
+
+#: apps/dmx/main/dx_tabs.c:781
+En cadena: consola → DMX IN del aparato 1 → su DMX OUT → aparato 2… El último lleva un terminador de 120 Ω entre los pines 2 y 3. Sin él, las luces parpadean o tiemblan.	En chaîne : console → DMX IN de l'appareil 1 → son DMX OUT → appareil 2… Le dernier porte un terminateur de 120 Ω entre les broches 2 et 3. Sans lui, les lumières clignotent ou tremblent.
+
+#: apps/dmx/main/dx_tabs.c:782
+Nunca un cable en Y: para ramificar se usa un splitter DMX. Hasta 32 aparatos por tramo.	Jamais de câble en Y : pour dériver, on utilise un splitter DMX. Jusqu'à 32 appareils par segment.
+
+#: apps/dmx/main/dx_tabs.c:783
+Cable de 110-120 Ω (cable DMX o de datos), no de micrófono: en tramos cortos anda igual, en tramos largos da errores.	Câble 110-120 Ω (câble DMX ou de données), pas de micro : sur de courtes longueurs ça marche quand même, sur de longues ça donne des erreurs.
+
+#: apps/dmx/main/dx_tabs.c:784
+Algunos equipos baratos traen D+ y D− al revés. Si un aparato no responde, probá invertir los pines 2 y 3.	Certains appareils bon marché ont D+ et D− inversés. Si un appareil ne répond pas, essaie d'inverser les broches 2 et 3.
+
+#: apps/dmx/main/dx_tabs.c:785
+A 250 000 baudios, un módulo RS485 automático puede no llegar: si los paquetes salen malos, un módulo con pin DE (MAX3485, SP3485) resuelve.	À 250 000 bauds, un module RS485 automatique peut ne pas suivre : si les paquets sortent mauvais, un module avec broche DE (MAX3485, SP3485) règle le problème.
+
+#: apps/dmx/main/dx_tabs.c:786
+Cada aparato tiene una dirección de inicio y una cantidad de canales según su modo; dos aparatos con la misma dirección hacen lo mismo.	Chaque appareil a une adresse de départ et un nombre de canaux selon son mode ; deux appareils à la même adresse font la même chose.

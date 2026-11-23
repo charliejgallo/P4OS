@@ -1,0 +1,1858 @@
+# amoledos-lang 1   es -> pt
+# aos.cas.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/cas/main/cas_app.c:127
+Motor apagado	Motor desligado
+
+#: apps/cas/main/cas_app.c:128
+Iniciando...	Iniciando...
+
+#: apps/cas/main/cas_app.c:129
+Calculando...	Calculando...
+
+#: apps/cas/main/cas_app.c:256
+El motor no aceptó el cálculo	O motor não aceitou o cálculo
+
+#: apps/cas/main/cas_app.c:358
+Memoria del motor: %u KB	Memória do motor: %u KB
+
+#: apps/cas/main/cas_app.c:366
+Parar el cálculo	Parar o cálculo
+
+#: apps/cas/main/cas_app.c:367
+Borrar el historial	Apagar o histórico
+
+#: apps/cas/main/cas_app.c:368
+Banco de pruebas	Banco de testes
+
+#: apps/cas/main/cas_app.c:442
+Cálculo	Cálculo
+
+#: apps/cas/main/cas_app.c:442
+#: apps/cas/main/cas_stats.c:976
+Gráfico	Gráfico
+
+#: apps/cas/main/cas_app.c:442
+Geometría	Geometria
+
+#: apps/cas/main/cas_app.c:442
+Estadística	Estatística
+
+#: apps/cas/main/cas_app.c:442
+Finanzas	Finanças
+
+#: apps/cas/main/cas_app.c:442
+Ciencias	Ciências
+
+#: apps/cas/main/cas_app.c:528
+No se pudo arrancar el motor. Cerrá la app y volvé a abrirla.	Não foi possível iniciar o motor. Feche o app e abra-o de novo.
+
+#: apps/cas/main/cas_bio.c:33
+#: apps/cas/main/cas_bio.c:47
+hasta %d genes	até %d genes
+
+#: apps/cas/main/cas_bio.c:38
+sólo letras: AaBb	só letras: AaBb
+
+#: apps/cas/main/cas_bio.c:43
+cada gen son dos letras: AaBb	cada gene são duas letras: AaBb
+
+#: apps/cas/main/cas_bio.c:52
+%c y %c no son el mismo gen	%c e %c não são o mesmo gene
+
+#: apps/cas/main/cas_bio.c:84
+los dos padres necesitan los mismos genes	os dois pais precisam dos mesmos genes
+
+#: apps/cas/main/cas_bio.c:89
+los dos padres necesitan los mismos genes, en el mismo orden	os dois pais precisam dos mesmos genes, na mesma ordem
+
+#: apps/cas/main/cas_calc.c:155
+Error	Erro
+
+#: apps/cas/main/cas_calc.c:205
+El motor no está listo	O motor não está pronto
+
+#: apps/cas/main/cas_chem.c:120
+#: apps/cas/main/cas_chem.c:438
+demasiados elementos	elementos demais
+
+#: apps/cas/main/cas_chem.c:149
+#: apps/cas/main/cas_chem.c:191
+falta cerrar un paréntesis	falta fechar um parêntese
+
+#: apps/cas/main/cas_chem.c:157
+paréntesis mal cerrado	parêntese mal fechado
+
+#: apps/cas/main/cas_chem.c:175
+#: apps/cas/main/cas_chem.c:181
+no hay elemento %s	não há elemento %s
+
+#: apps/cas/main/cas_chem.c:184
+un subíndice no puede ser 0	um subíndice não pode ser 0
+
+#: apps/cas/main/cas_chem.c:195
+#: apps/cas/main/cas_chem.c:258
+no se entiende: %s	não entendi: %s
+
+#: apps/cas/main/cas_chem.c:195
+#: apps/cas/main/cas_chem.c:267
+falta la fórmula	falta a fórmula
+
+#: apps/cas/main/cas_chem.c:226
+la carga va así: ^2+ o ^-	a carga se escreve assim: ^2+ ou ^-
+
+#: apps/cas/main/cas_chem.c:386
+falta una sustancia	falta uma substância
+
+#: apps/cas/main/cas_chem.c:390
+demasiadas sustancias	substâncias demais
+
+#: apps/cas/main/cas_chem.c:413
+separá los lados con = o ->	separe os lados com = ou ->
+
+#: apps/cas/main/cas_chem.c:423
+falta un lado	falta um lado
+
+#: apps/cas/main/cas_chem.c:489
+#: apps/cas/main/cas_chem.c:519
+no se puede balancear: revisá las fórmulas	não dá para balancear: revise as fórmulas
+
+#: apps/cas/main/cas_chem.c:493
+tiene más de una forma de balancearse: son varias reacciones juntas	tem mais de um jeito de balancear: são várias reações juntas
+
+#: apps/cas/main/cas_elements.c:10
+Hidrógeno	Hidrogênio
+
+#: apps/cas/main/cas_elements.c:11
+Helio	Hélio
+
+#: apps/cas/main/cas_elements.c:12
+Litio	Lítio
+
+#: apps/cas/main/cas_elements.c:13
+Berilio	Berílio
+
+#: apps/cas/main/cas_elements.c:14
+Boro	Boro
+
+#: apps/cas/main/cas_elements.c:15
+Carbono	Carbono
+
+#: apps/cas/main/cas_elements.c:16
+Nitrógeno	Nitrogênio
+
+#: apps/cas/main/cas_elements.c:17
+Oxígeno	Oxigênio
+
+#: apps/cas/main/cas_elements.c:18
+Flúor	Flúor
+
+#: apps/cas/main/cas_elements.c:19
+Neón	Neon
+
+#: apps/cas/main/cas_elements.c:20
+Sodio	Sódio
+
+#: apps/cas/main/cas_elements.c:21
+Magnesio	Magnésio
+
+#: apps/cas/main/cas_elements.c:22
+Aluminio	Alumínio
+
+#: apps/cas/main/cas_elements.c:23
+Silicio	Silício
+
+#: apps/cas/main/cas_elements.c:24
+Fósforo	Fósforo
+
+#: apps/cas/main/cas_elements.c:25
+Azufre	Enxofre
+
+#: apps/cas/main/cas_elements.c:26
+Cloro	Cloro
+
+#: apps/cas/main/cas_elements.c:27
+Argón	Argônio
+
+#: apps/cas/main/cas_elements.c:28
+Potasio	Potássio
+
+#: apps/cas/main/cas_elements.c:29
+Calcio	Cálcio
+
+#: apps/cas/main/cas_elements.c:30
+Escandio	Escândio
+
+#: apps/cas/main/cas_elements.c:31
+Titanio	Titânio
+
+#: apps/cas/main/cas_elements.c:32
+Vanadio	Vanádio
+
+#: apps/cas/main/cas_elements.c:33
+Cromo	Cromo
+
+#: apps/cas/main/cas_elements.c:34
+Manganeso	Manganês
+
+#: apps/cas/main/cas_elements.c:35
+Hierro	Ferro
+
+#: apps/cas/main/cas_elements.c:36
+Cobalto	Cobalto
+
+#: apps/cas/main/cas_elements.c:37
+Níquel	Níquel
+
+#: apps/cas/main/cas_elements.c:38
+Cobre	Cobre
+
+#: apps/cas/main/cas_elements.c:39
+Zinc	Zinco
+
+#: apps/cas/main/cas_elements.c:40
+Galio	Gálio
+
+#: apps/cas/main/cas_elements.c:41
+Germanio	Germânio
+
+#: apps/cas/main/cas_elements.c:42
+Arsénico	Arsênio
+
+#: apps/cas/main/cas_elements.c:43
+Selenio	Selênio
+
+#: apps/cas/main/cas_elements.c:44
+Bromo	Bromo
+
+#: apps/cas/main/cas_elements.c:45
+Kriptón	Criptônio
+
+#: apps/cas/main/cas_elements.c:46
+Rubidio	Rubídio
+
+#: apps/cas/main/cas_elements.c:47
+Estroncio	Estrôncio
+
+#: apps/cas/main/cas_elements.c:48
+Itrio	Ítrio
+
+#: apps/cas/main/cas_elements.c:49
+Circonio	Zircônio
+
+#: apps/cas/main/cas_elements.c:50
+Niobio	Nióbio
+
+#: apps/cas/main/cas_elements.c:51
+Molibdeno	Molibdênio
+
+#: apps/cas/main/cas_elements.c:52
+Tecnecio	Tecnécio
+
+#: apps/cas/main/cas_elements.c:53
+Rutenio	Rutênio
+
+#: apps/cas/main/cas_elements.c:54
+Rodio	Ródio
+
+#: apps/cas/main/cas_elements.c:55
+Paladio	Paládio
+
+#: apps/cas/main/cas_elements.c:56
+Plata	Prata
+
+#: apps/cas/main/cas_elements.c:57
+Cadmio	Cádmio
+
+#: apps/cas/main/cas_elements.c:58
+Indio	Índio
+
+#: apps/cas/main/cas_elements.c:59
+Estaño	Estanho
+
+#: apps/cas/main/cas_elements.c:60
+Antimonio	Antimônio
+
+#: apps/cas/main/cas_elements.c:61
+Telurio	Telúrio
+
+#: apps/cas/main/cas_elements.c:62
+Yodo	Iodo
+
+#: apps/cas/main/cas_elements.c:63
+Xenón	Xenônio
+
+#: apps/cas/main/cas_elements.c:64
+Cesio	Césio
+
+#: apps/cas/main/cas_elements.c:65
+Bario	Bário
+
+#: apps/cas/main/cas_elements.c:66
+Lantano	Lantânio
+
+#: apps/cas/main/cas_elements.c:67
+Cerio	Cério
+
+#: apps/cas/main/cas_elements.c:68
+Praseodimio	Praseodímio
+
+#: apps/cas/main/cas_elements.c:69
+Neodimio	Neodímio
+
+#: apps/cas/main/cas_elements.c:70
+Prometio	Promécio
+
+#: apps/cas/main/cas_elements.c:71
+Samario	Samário
+
+#: apps/cas/main/cas_elements.c:72
+Europio	Európio
+
+#: apps/cas/main/cas_elements.c:73
+Gadolinio	Gadolínio
+
+#: apps/cas/main/cas_elements.c:74
+Terbio	Térbio
+
+#: apps/cas/main/cas_elements.c:75
+Disprosio	Disprósio
+
+#: apps/cas/main/cas_elements.c:76
+Holmio	Hólmio
+
+#: apps/cas/main/cas_elements.c:77
+Erbio	Érbio
+
+#: apps/cas/main/cas_elements.c:78
+Tulio	Túlio
+
+#: apps/cas/main/cas_elements.c:79
+Iterbio	Itérbio
+
+#: apps/cas/main/cas_elements.c:80
+Lutecio	Lutécio
+
+#: apps/cas/main/cas_elements.c:81
+Hafnio	Háfnio
+
+#: apps/cas/main/cas_elements.c:82
+Tantalio	Tântalo
+
+#: apps/cas/main/cas_elements.c:83
+Wolframio	Tungstênio
+
+#: apps/cas/main/cas_elements.c:84
+Renio	Rênio
+
+#: apps/cas/main/cas_elements.c:85
+Osmio	Ósmio
+
+#: apps/cas/main/cas_elements.c:86
+Iridio	Irídio
+
+#: apps/cas/main/cas_elements.c:87
+Platino	Platina
+
+#: apps/cas/main/cas_elements.c:88
+Oro	Ouro
+
+#: apps/cas/main/cas_elements.c:89
+Mercurio	Mercúrio
+
+#: apps/cas/main/cas_elements.c:90
+Talio	Tálio
+
+#: apps/cas/main/cas_elements.c:91
+Plomo	Chumbo
+
+#: apps/cas/main/cas_elements.c:92
+Bismuto	Bismuto
+
+#: apps/cas/main/cas_elements.c:93
+Polonio	Polônio
+
+#: apps/cas/main/cas_elements.c:94
+Astato	Astato
+
+#: apps/cas/main/cas_elements.c:95
+Radón	Radônio
+
+#: apps/cas/main/cas_elements.c:96
+Francio	Frâncio
+
+#: apps/cas/main/cas_elements.c:97
+Radio	Rádio
+
+#: apps/cas/main/cas_elements.c:98
+Actinio	Actínio
+
+#: apps/cas/main/cas_elements.c:99
+Torio	Tório
+
+#: apps/cas/main/cas_elements.c:100
+Protactinio	Protactínio
+
+#: apps/cas/main/cas_elements.c:101
+Uranio	Urânio
+
+#: apps/cas/main/cas_elements.c:102
+Neptunio	Netúnio
+
+#: apps/cas/main/cas_elements.c:103
+Plutonio	Plutônio
+
+#: apps/cas/main/cas_elements.c:104
+Americio	Amerício
+
+#: apps/cas/main/cas_elements.c:105
+Curio	Cúrio
+
+#: apps/cas/main/cas_elements.c:106
+Berkelio	Berquélio
+
+#: apps/cas/main/cas_elements.c:107
+Californio	Califórnio
+
+#: apps/cas/main/cas_elements.c:108
+Einstenio	Einstênio
+
+#: apps/cas/main/cas_elements.c:109
+Fermio	Férmio
+
+#: apps/cas/main/cas_elements.c:110
+Mendelevio	Mendelévio
+
+#: apps/cas/main/cas_elements.c:111
+Nobelio	Nobélio
+
+#: apps/cas/main/cas_elements.c:112
+Lawrencio	Laurêncio
+
+#: apps/cas/main/cas_elements.c:113
+Rutherfordio	Rutherfórdio
+
+#: apps/cas/main/cas_elements.c:114
+Dubnio	Dúbnio
+
+#: apps/cas/main/cas_elements.c:115
+Seaborgio	Seabórgio
+
+#: apps/cas/main/cas_elements.c:116
+Bohrio	Bóhrio
+
+#: apps/cas/main/cas_elements.c:117
+Hasio	Hássio
+
+#: apps/cas/main/cas_elements.c:118
+Meitnerio	Meitnério
+
+#: apps/cas/main/cas_elements.c:119
+Darmstatio	Darmstácio
+
+#: apps/cas/main/cas_elements.c:120
+Roentgenio	Roentgênio
+
+#: apps/cas/main/cas_elements.c:121
+Copernicio	Copernício
+
+#: apps/cas/main/cas_elements.c:122
+Nihonio	Nihônio
+
+#: apps/cas/main/cas_elements.c:123
+Flerovio	Fleróvio
+
+#: apps/cas/main/cas_elements.c:124
+Moscovio	Moscóvio
+
+#: apps/cas/main/cas_elements.c:125
+Livermorio	Livermório
+
+#: apps/cas/main/cas_elements.c:126
+Teneso	Tenesso
+
+#: apps/cas/main/cas_elements.c:127
+Oganesón	Oganessônio
+
+#: apps/cas/main/cas_fin.c:174
+#: apps/cas/main/cas_sci.c:348
+No tiene solución con esos valores	Não tem solução com esses valores
+
+#: apps/cas/main/cas_fin.c:194
+N (períodos)	N (períodos)
+
+#: apps/cas/main/cas_fin.c:194
+I% anual	I% anual
+
+#: apps/cas/main/cas_fin.c:194
+VA (valor actual)	VP (valor presente)
+
+#: apps/cas/main/cas_fin.c:195
+PAGO (por período)	PGTO (por período)
+
+#: apps/cas/main/cas_fin.c:195
+VF (valor final)	VF (valor futuro)
+
+#: apps/cas/main/cas_fin.c:201
+pagos por año	pagamentos por ano
+
+#: apps/cas/main/cas_fin.c:202
+capitalizaciones por año	capitalizações por ano
+
+#: apps/cas/main/cas_fin.c:203
+Pago al final	Pagamento no fim
+
+#: apps/cas/main/cas_fin.c:203
+Pago al inicio	Pagamento no início
+
+#: apps/cas/main/cas_fin.c:206
+Completá cuatro y tocá =? en la que falta. El dinero que recibís va positivo, el que pagás negativo: un préstamo de 200 000 se paga con cuotas negativas.	Preencha quatro e toque em =? na que falta. O dinheiro que você recebe vai positivo, o que você paga negativo: um empréstimo de 200 000 se paga com parcelas negativas.
+
+#: apps/cas/main/cas_fin.c:272
+interés	juros
+
+#: apps/cas/main/cas_fin.c:273
+capital	capital
+
+#: apps/cas/main/cas_fin.c:314
+#: apps/cas/main/cas_fin.c:341
+Cuota	Parcela
+
+#: apps/cas/main/cas_fin.c:314
+#: apps/cas/main/cas_fin.c:429
+Interés	Juros
+
+#: apps/cas/main/cas_fin.c:314
+Saldo	Saldo
+
+#: apps/cas/main/cas_fin.c:333
+Francés	Price
+
+#: apps/cas/main/cas_fin.c:333
+Alemán	SAC
+
+#: apps/cas/main/cas_fin.c:333
+Americano	Americano
+
+#: apps/cas/main/cas_fin.c:337
+Monto	Valor
+
+#: apps/cas/main/cas_fin.c:338
+TNA %	Taxa a.a. %
+
+#: apps/cas/main/cas_fin.c:339
+Plazo (meses)	Prazo (meses)
+
+#: apps/cas/main/cas_fin.c:341
+Primera cuota	Primeira parcela
+
+#: apps/cas/main/cas_fin.c:342
+Última cuota	Última parcela
+
+#: apps/cas/main/cas_fin.c:343
+Total de intereses	Total de juros
+
+#: apps/cas/main/cas_fin.c:344
+Total a pagar	Total a pagar
+
+#: apps/cas/main/cas_fin.c:356
+La tasa del período es la TNA dividida por 12. Sin IVA ni gastos: el costo financiero total del banco puede ser mayor.	A taxa do período é a taxa anual dividida por 12. Sem impostos nem tarifas: o custo efetivo total do banco pode ser maior.
+
+#: apps/cas/main/cas_fin.c:415
+Tasa %	Taxa %
+
+#: apps/cas/main/cas_fin.c:417
+capitaliza cada (días)	capitaliza a cada (dias)
+
+#: apps/cas/main/cas_fin.c:419
+Equivalentes	Equivalentes
+
+#: apps/cas/main/cas_fin.c:421
+TNA (cada %.0f días)	Nominal (cada %.0f dias)
+
+#: apps/cas/main/cas_fin.c:424
+TEM (30 días)	Efetiva mensal (30 dias)
+
+#: apps/cas/main/cas_fin.c:425
+Diaria efectiva	Diária efetiva
+
+#: apps/cas/main/cas_fin.c:426
+Plazo fijo	Prazo fixo
+
+#: apps/cas/main/cas_fin.c:427
+Capital	Capital
+
+#: apps/cas/main/cas_fin.c:428
+Días	Dias
+
+#: apps/cas/main/cas_fin.c:430
+Monto al vencer	Valor no vencim.
+
+#: apps/cas/main/cas_fin.c:431
+Contra la inflación	Contra a inflação
+
+#: apps/cas/main/cas_fin.c:432
+Inflación mensual %	Inflação mensal %
+
+#: apps/cas/main/cas_fin.c:433
+Tasa real mensual	Taxa real mensal
+
+#: apps/cas/main/cas_fin.c:450
+no hay	não há
+
+#: apps/cas/main/cas_fin.c:454
+nunca	nunca
+
+#: apps/cas/main/cas_fin.c:490
+Tasa de descuento %	Taxa de desconto %
+
+#: apps/cas/main/cas_fin.c:492
+VAN	VPL
+
+#: apps/cas/main/cas_fin.c:493
+TIR	TIR
+
+#: apps/cas/main/cas_fin.c:494
+Recupero (períodos)	Payback (períodos)
+
+#: apps/cas/main/cas_fin.c:495
+Flujos	Fluxos
+
+#: apps/cas/main/cas_fin.c:498
+período %d	período %d
+
+#: apps/cas/main/cas_fin.c:498
+inversión (0)	investimento (0)
+
+#: apps/cas/main/cas_fin.c:507
++ período	+ período
+
+#: apps/cas/main/cas_fin.c:508
+Quitar el último	Tirar o último
+
+#: apps/cas/main/cas_fin.c:530
+Préstamo	Empréstimo
+
+#: apps/cas/main/cas_fin.c:530
+Tasas	Taxas
+
+#: apps/cas/main/cas_fin.c:530
+VAN / TIR	VPL / TIR
+
+#: apps/cas/main/cas_form.c:123
+Eso no es un número	Isso não é um número
+
+#: apps/cas/main/cas_geo.c:52
+Mover	Mover
+
+#: apps/cas/main/cas_geo.c:52
+Punto	Ponto
+
+#: apps/cas/main/cas_geo.c:52
+Punto medio	Ponto médio
+
+#: apps/cas/main/cas_geo.c:52
+Intersección	Interseção
+
+#: apps/cas/main/cas_geo.c:53
+Segmento	Segmento
+
+#: apps/cas/main/cas_geo.c:53
+#: apps/cas/main/cas_geom.c:692
+#: apps/cas/main/cas_geom.c:696
+Recta	Reta
+
+#: apps/cas/main/cas_geo.c:53
+Semirrecta	Semirreta
+
+#: apps/cas/main/cas_geo.c:53
+#: apps/cas/main/cas_geom.c:694
+Perpendicular	Perpendicular
+
+#: apps/cas/main/cas_geo.c:53
+#: apps/cas/main/cas_geom.c:694
+Paralela	Paralela
+
+#: apps/cas/main/cas_geo.c:53
+#: apps/cas/main/cas_geom.c:694
+Mediatriz	Mediatriz
+
+#: apps/cas/main/cas_geo.c:53
+#: apps/cas/main/cas_geom.c:694
+Bisectriz	Bissetriz
+
+#: apps/cas/main/cas_geo.c:54
+Circunferencia	Circunferência
+
+#: apps/cas/main/cas_geo.c:54
+Circ. por 3 puntos	Circ. por 3 pontos
+
+#: apps/cas/main/cas_geo.c:54
+Polígono	Polígono
+
+#: apps/cas/main/cas_geo.c:55
+Longitud	Comprimento
+
+#: apps/cas/main/cas_geo.c:55
+#: apps/cas/main/cas_geom.c:675
+Ángulo	Ângulo
+
+#: apps/cas/main/cas_geo.c:55
+#: apps/cas/main/cas_geom.c:683
+Área	Área
+
+#: apps/cas/main/cas_geo.c:55
+#: apps/cas/main/cas_sci.c:1173
+Ecuación	Equação
+
+#: apps/cas/main/cas_geo.c:55
+Coordenadas	Coordenadas
+
+#: apps/cas/main/cas_geo.c:56
+Eliminar	Excluir
+
+#: apps/cas/main/cas_geo.c:147
+Nada para deshacer	Nada para desfazer
+
+#: apps/cas/main/cas_geo.c:319
+La figura está llena	A figura está cheia
+
+#: apps/cas/main/cas_geo.c:367
+Arrastrá un punto, o tocá algo para verlo	Arraste um ponto, ou toque em algo para vê-lo
+
+#: apps/cas/main/cas_geo.c:368
+Tocá donde va el punto	Toque onde vai o ponto
+
+#: apps/cas/main/cas_geo.c:370
+#: apps/cas/main/cas_geo.c:374
+#: apps/cas/main/cas_geo.c:380
+#: apps/cas/main/cas_geo.c:382
+Tocá el segundo punto	Toque no segundo ponto
+
+#: apps/cas/main/cas_geo.c:370
+Tocá un segmento o el primer punto	Toque num segmento ou no primeiro ponto
+
+#: apps/cas/main/cas_geo.c:371
+Tocá la otra línea	Toque na outra linha
+
+#: apps/cas/main/cas_geo.c:371
+Tocá dos líneas, o donde se cruzan	Toque em duas linhas, ou onde se cruzam
+
+#: apps/cas/main/cas_geo.c:374
+#: apps/cas/main/cas_geo.c:380
+Tocá el primer punto	Toque no primeiro ponto
+
+#: apps/cas/main/cas_geo.c:376
+Ahora el otro: la recta o el punto	Agora o outro: a reta ou o ponto
+
+#: apps/cas/main/cas_geo.c:376
+Tocá una recta y un punto	Toque numa reta e num ponto
+
+#: apps/cas/main/cas_geo.c:378
+Tocá un punto del primer lado	Toque num ponto do primeiro lado
+
+#: apps/cas/main/cas_geo.c:378
+Tocá el vértice	Toque no vértice
+
+#: apps/cas/main/cas_geo.c:378
+Tocá un punto del otro lado	Toque num ponto do outro lado
+
+#: apps/cas/main/cas_geo.c:379
+Tocá un punto de la circunferencia	Toque num ponto da circunferência
+
+#: apps/cas/main/cas_geo.c:379
+Tocá el centro	Toque no centro
+
+#: apps/cas/main/cas_geo.c:380
+Tocá el tercer punto	Toque no terceiro ponto
+
+#: apps/cas/main/cas_geo.c:381
+Tocá los vértices	Toque nos vértices
+
+#: apps/cas/main/cas_geo.c:381
+Tocá el primero para cerrarlo	Toque no primeiro para fechá-lo
+
+#: apps/cas/main/cas_geo.c:382
+Tocá dos puntos, un segmento o una figura	Toque em dois pontos, um segmento ou uma figura
+
+#: apps/cas/main/cas_geo.c:383
+Tocá un polígono o un círculo	Toque num polígono ou num círculo
+
+#: apps/cas/main/cas_geo.c:384
+Tocá una recta o una circunferencia	Toque numa reta ou numa circunferência
+
+#: apps/cas/main/cas_geo.c:385
+Tocá un punto	Toque num ponto
+
+#: apps/cas/main/cas_geo.c:386
+Tocá lo que querés borrar	Toque no que quer apagar
+
+#: apps/cas/main/cas_geo.c:570
+No se cruzan	Não se cruzam
+
+#: apps/cas/main/cas_geo.c:1171
+Puntos	Pontos
+
+#: apps/cas/main/cas_geo.c:1172
+Líneas	Linhas
+
+#: apps/cas/main/cas_geo.c:1173
+Figuras	Figuras
+
+#: apps/cas/main/cas_geo.c:1174
+Medir y editar	Medir e editar
+
+#: apps/cas/main/cas_geo.c:1184
+Cuadrícula	Grade
+
+#: apps/cas/main/cas_geo.c:1184
+Ajustar a la grilla	Ajustar à grade
+
+#: apps/cas/main/cas_geo.c:1184
+Borrar todo	Apagar tudo
+
+#: apps/cas/main/cas_geo.c:1251
+Las medidas aparecen acá: elegí Longitud, Ángulo, Área o Ecuación.	As medidas aparecem aqui: escolha Comprimento, Ângulo, Área ou Equação.
+
+#: apps/cas/main/cas_geo.c:1380
+#: apps/cas/main/cas_geo.c:1424
+Sin memoria para la figura	Sem memória para a figura
+
+#: apps/cas/main/cas_geom.c:639
+#: apps/cas/main/cas_geom.c:642
+Circ.	Circ.
+
+#: apps/cas/main/cas_geom.c:679
+Perímetro	Perímetro
+
+#: apps/cas/main/cas_geom.c:734
+no existe	não existe
+
+#: apps/cas/main/cas_graph.c:96
+#: apps/cas/main/cas_graph.c:113
+no se puede graficar	não dá para plotar
+
+#: apps/cas/main/cas_graph.c:96
+no se entiende	não entendi
+
+#: apps/cas/main/cas_graph.c:494
+#: apps/cas/main/cas_sci.c:317
+tocá para escribir	toque para escrever
+
+#: apps/cas/main/cas_graph.c:703
+Listo	OK
+
+#: apps/cas/main/cas_graph.c:735
+Sin memoria para el gráfico	Sem memória para o gráfico
+
+#: apps/cas/main/cas_keypad.c:66
+mcd	mdc
+
+#: apps/cas/main/cas_keypad.c:67
+mcm	mmc
+
+#: apps/cas/main/cas_keypad.c:67
+primos	primos
+
+#: apps/cas/main/cas_keypad.c:84
+#: apps/cas/main/cas_stats.c:234
+#: apps/cas/main/cas_stats.c:918
+media	média
+
+#: apps/cas/main/cas_keypad.c:84
+desv	desv
+
+#: apps/cas/main/cas_phys.c:22
+masa	massa
+
+#: apps/cas/main/cas_phys.c:23
+velocidad	velocidade
+
+#: apps/cas/main/cas_phys.c:24
+velocidad inicial	velocidade inicial
+
+#: apps/cas/main/cas_phys.c:25
+aceleración	aceleração
+
+#: apps/cas/main/cas_phys.c:26
+tiempo	tempo
+
+#: apps/cas/main/cas_phys.c:27
+gravedad	gravidade
+
+#: apps/cas/main/cas_phys.c:28
+altura	altura
+
+#: apps/cas/main/cas_phys.c:29
+fuerza	força
+
+#: apps/cas/main/cas_phys.c:30
+distancia	distância
+
+#: apps/cas/main/cas_phys.c:31
+radio	raio
+
+#: apps/cas/main/cas_phys.c:32
+constante del resorte	constante da mola
+
+#: apps/cas/main/cas_phys.c:33
+estiramiento	deformação
+
+#: apps/cas/main/cas_phys.c:34
+densidad	densidade
+
+#: apps/cas/main/cas_phys.c:35
+#: apps/cas/main/cas_sci.c:41
+volumen	volume
+
+#: apps/cas/main/cas_phys.c:39
+#: apps/cas/main/cas_phys.c:41
+#: apps/cas/main/cas_phys.c:42
+#: apps/cas/main/cas_phys.c:44
+Cinemática	Cinemática
+
+#: apps/cas/main/cas_phys.c:39
+Movimiento uniforme	Movimento uniforme
+
+#: apps/cas/main/cas_phys.c:40
+#: apps/cas/main/cas_phys.c:43
+posición	posição
+
+#: apps/cas/main/cas_phys.c:40
+#: apps/cas/main/cas_phys.c:43
+posición inicial	posição inicial
+
+#: apps/cas/main/cas_phys.c:41
+Velocidad (MRUV)	Velocidade (MUV)
+
+#: apps/cas/main/cas_phys.c:42
+Posición (MRUV)	Posição (MUV)
+
+#: apps/cas/main/cas_phys.c:44
+Torricelli	Torricelli
+
+#: apps/cas/main/cas_phys.c:45
+Caída libre	Queda livre
+
+#: apps/cas/main/cas_phys.c:47
+#: apps/cas/main/cas_phys.c:48
+#: apps/cas/main/cas_phys.c:49
+#: apps/cas/main/cas_phys.c:52
+Dinámica	Dinâmica
+
+#: apps/cas/main/cas_phys.c:47
+Segunda ley de Newton	Segunda lei de Newton
+
+#: apps/cas/main/cas_phys.c:48
+Peso	Peso
+
+#: apps/cas/main/cas_phys.c:48
+peso	peso
+
+#: apps/cas/main/cas_phys.c:49
+Rozamiento	Atrito
+
+#: apps/cas/main/cas_phys.c:50
+fuerza de rozamiento	força de atrito
+
+#: apps/cas/main/cas_phys.c:50
+coeficiente de rozamiento	coeficiente de atrito
+
+#: apps/cas/main/cas_phys.c:51
+fuerza normal	força normal
+
+#: apps/cas/main/cas_phys.c:52
+Ley de Hooke	Lei de Hooke
+
+#: apps/cas/main/cas_phys.c:53
+Cantidad de movimiento	Quantidade de movimento
+
+#: apps/cas/main/cas_phys.c:54
+cantidad de movimiento	quantidade de movimento
+
+#: apps/cas/main/cas_phys.c:55
+Impulso	Impulso
+
+#: apps/cas/main/cas_phys.c:55
+impulso	impulso
+
+#: apps/cas/main/cas_phys.c:57
+#: apps/cas/main/cas_phys.c:59
+#: apps/cas/main/cas_phys.c:61
+#: apps/cas/main/cas_phys.c:63
+Energía	Energia
+
+#: apps/cas/main/cas_phys.c:57
+Energía cinética	Energia cinética
+
+#: apps/cas/main/cas_phys.c:58
+energía cinética	energia cinética
+
+#: apps/cas/main/cas_phys.c:59
+Energía potencial	Energia potencial
+
+#: apps/cas/main/cas_phys.c:60
+energía potencial	energia potencial
+
+#: apps/cas/main/cas_phys.c:61
+Energía elástica	Energia elástica
+
+#: apps/cas/main/cas_phys.c:62
+energía elástica	energia elástica
+
+#: apps/cas/main/cas_phys.c:63
+Trabajo	Trabalho
+
+#: apps/cas/main/cas_phys.c:64
+#: apps/cas/main/cas_phys.c:66
+trabajo	trabalho
+
+#: apps/cas/main/cas_phys.c:64
+ángulo	ângulo
+
+#: apps/cas/main/cas_phys.c:65
+Potencia	Potência
+
+#: apps/cas/main/cas_phys.c:66
+#: apps/cas/main/cas_phys.c:98
+potencia	potência
+
+#: apps/cas/main/cas_phys.c:68
+#: apps/cas/main/cas_phys.c:70
+#: apps/cas/main/cas_phys.c:72
+#: apps/cas/main/cas_phys.c:74
+Circular y gravitación	Circular e gravitação
+
+#: apps/cas/main/cas_phys.c:68
+Aceleración centrípeta	Aceleração centrípeta
+
+#: apps/cas/main/cas_phys.c:69
+aceleración centrípeta	aceleração centrípeta
+
+#: apps/cas/main/cas_phys.c:70
+Velocidad angular	Velocidade angular
+
+#: apps/cas/main/cas_phys.c:71
+#: apps/cas/main/cas_phys.c:73
+velocidad angular	velocidade angular
+
+#: apps/cas/main/cas_phys.c:72
+Período	Período
+
+#: apps/cas/main/cas_phys.c:73
+#: apps/cas/main/cas_phys.c:78
+#: apps/cas/main/cas_phys.c:93
+período	período
+
+#: apps/cas/main/cas_phys.c:74
+Gravitación universal	Gravitação universal
+
+#: apps/cas/main/cas_phys.c:75
+#: apps/cas/main/cas_phys.c:145
+constante de gravitación	constante gravitacional
+
+#: apps/cas/main/cas_phys.c:76
+masa 1	massa 1
+
+#: apps/cas/main/cas_phys.c:76
+masa 2	massa 2
+
+#: apps/cas/main/cas_phys.c:77
+Péndulo simple	Pêndulo simples
+
+#: apps/cas/main/cas_phys.c:78
+largo	compr.
+
+#: apps/cas/main/cas_phys.c:80
+#: apps/cas/main/cas_phys.c:81
+#: apps/cas/main/cas_phys.c:83
+#: apps/cas/main/cas_phys.c:85
+Fluidos	Fluidos
+
+#: apps/cas/main/cas_phys.c:80
+#: apps/cas/main/cas_sci.c:524
+Densidad	Densidade
+
+#: apps/cas/main/cas_phys.c:81
+#: apps/cas/main/cas_sci.c:1185
+#: apps/cas/main/cas_sci.c:1186
+Presión	Pressão
+
+#: apps/cas/main/cas_phys.c:82
+#: apps/cas/main/cas_phys.c:84
+#: apps/cas/main/cas_phys.c:114
+#: apps/cas/main/cas_sci.c:41
+presión	pressão
+
+#: apps/cas/main/cas_phys.c:82
+área	área
+
+#: apps/cas/main/cas_phys.c:83
+Presión hidrostática	Pressão hidrostática
+
+#: apps/cas/main/cas_phys.c:84
+profundidad	profundidade
+
+#: apps/cas/main/cas_phys.c:85
+Empuje (Arquímedes)	Empuxo (Arquimedes)
+
+#: apps/cas/main/cas_phys.c:86
+empuje	empuxo
+
+#: apps/cas/main/cas_phys.c:87
+Caudal	Vazão
+
+#: apps/cas/main/cas_phys.c:88
+caudal	vazão
+
+#: apps/cas/main/cas_phys.c:88
+sección	seção
+
+#: apps/cas/main/cas_phys.c:90
+#: apps/cas/main/cas_phys.c:92
+Ondas	Ondas
+
+#: apps/cas/main/cas_phys.c:90
+Velocidad de una onda	Velocidade de uma onda
+
+#: apps/cas/main/cas_phys.c:91
+longitud de onda	comprimento de onda
+
+#: apps/cas/main/cas_phys.c:91
+#: apps/cas/main/cas_phys.c:93
+#: apps/cas/main/cas_phys.c:131
+frecuencia	frequência
+
+#: apps/cas/main/cas_phys.c:92
+Frecuencia y período	Frequência e período
+
+#: apps/cas/main/cas_phys.c:95
+#: apps/cas/main/cas_phys.c:97
+#: apps/cas/main/cas_phys.c:99
+#: apps/cas/main/cas_phys.c:102
+Electricidad	Eletricidade
+
+#: apps/cas/main/cas_phys.c:95
+Ley de Ohm	Lei de Ohm
+
+#: apps/cas/main/cas_phys.c:96
+#: apps/cas/main/cas_phys.c:98
+#: apps/cas/main/cas_phys.c:106
+#: apps/cas/main/cas_phys.c:108
+tensión	tensão
+
+#: apps/cas/main/cas_phys.c:96
+#: apps/cas/main/cas_phys.c:98
+corriente	corrente
+
+#: apps/cas/main/cas_phys.c:96
+resistencia	resistência
+
+#: apps/cas/main/cas_phys.c:97
+Potencia eléctrica	Potência elétrica
+
+#: apps/cas/main/cas_phys.c:99
+Ley de Coulomb	Lei de Coulomb
+
+#: apps/cas/main/cas_phys.c:100
+#: apps/cas/main/cas_phys.c:153
+constante de Coulomb	constante de Coulomb
+
+#: apps/cas/main/cas_phys.c:101
+carga 1	carga 1
+
+#: apps/cas/main/cas_phys.c:101
+carga 2	carga 2
+
+#: apps/cas/main/cas_phys.c:102
+Resistencias en paralelo	Resistores em paralelo
+
+#: apps/cas/main/cas_phys.c:103
+resistencia total	resistência total
+
+#: apps/cas/main/cas_phys.c:103
+resistencia 1	resistência 1
+
+#: apps/cas/main/cas_phys.c:104
+resistencia 2	resistência 2
+
+#: apps/cas/main/cas_phys.c:105
+Capacitor	Capacitor
+
+#: apps/cas/main/cas_phys.c:106
+carga	carga
+
+#: apps/cas/main/cas_phys.c:106
+#: apps/cas/main/cas_phys.c:108
+capacidad	capacidade
+
+#: apps/cas/main/cas_phys.c:107
+Energía en un capacitor	Energia num capacitor
+
+#: apps/cas/main/cas_phys.c:108
+#: apps/cas/main/cas_phys.c:128
+#: apps/cas/main/cas_phys.c:130
+energía	energia
+
+#: apps/cas/main/cas_phys.c:110
+#: apps/cas/main/cas_phys.c:113
+#: apps/cas/main/cas_phys.c:116
+Calor	Calor
+
+#: apps/cas/main/cas_phys.c:110
+Calor sensible	Calor sensível
+
+#: apps/cas/main/cas_phys.c:111
+calor	calor
+
+#: apps/cas/main/cas_phys.c:111
+calor específico	calor específico
+
+#: apps/cas/main/cas_phys.c:112
+#: apps/cas/main/cas_phys.c:118
+cambio de temperatura	variação de temperatura
+
+#: apps/cas/main/cas_phys.c:113
+#: apps/cas/main/cas_sci.c:40
+Gas ideal	Gás ideal
+
+#: apps/cas/main/cas_phys.c:114
+#: apps/cas/main/cas_sci.c:42
+moles	mols
+
+#: apps/cas/main/cas_phys.c:115
+#: apps/cas/main/cas_phys.c:142
+#: apps/cas/main/cas_phys.c:143
+#: apps/cas/main/cas_sci.c:42
+constante de los gases	constante dos gases
+
+#: apps/cas/main/cas_phys.c:115
+#: apps/cas/main/cas_sci.c:43
+temperatura	temperatura
+
+#: apps/cas/main/cas_phys.c:116
+Dilatación lineal	Dilatação linear
+
+#: apps/cas/main/cas_phys.c:117
+cambio de largo	dilatação
+
+#: apps/cas/main/cas_phys.c:117
+coeficiente de dilatación	coeficiente de dilatação
+
+#: apps/cas/main/cas_phys.c:118
+largo inicial	compr. inicial
+
+#: apps/cas/main/cas_phys.c:120
+#: apps/cas/main/cas_phys.c:123
+Óptica	Óptica
+
+#: apps/cas/main/cas_phys.c:120
+Ley de Snell	Lei de Snell
+
+#: apps/cas/main/cas_phys.c:121
+índice 1	índice 1
+
+#: apps/cas/main/cas_phys.c:121
+ángulo de incidencia	ângulo de incidência
+
+#: apps/cas/main/cas_phys.c:122
+índice 2	índice 2
+
+#: apps/cas/main/cas_phys.c:122
+ángulo de refracción	ângulo de refração
+
+#: apps/cas/main/cas_phys.c:123
+Lente delgada	Lente delgada
+
+#: apps/cas/main/cas_phys.c:124
+distancia focal	distância focal
+
+#: apps/cas/main/cas_phys.c:124
+distancia al objeto	distância ao objeto
+
+#: apps/cas/main/cas_phys.c:125
+distancia a la imagen	distância à imagem
+
+#: apps/cas/main/cas_phys.c:127
+#: apps/cas/main/cas_phys.c:129
+Moderna	Moderna
+
+#: apps/cas/main/cas_phys.c:127
+Masa y energía	Massa e energia
+
+#: apps/cas/main/cas_phys.c:128
+#: apps/cas/main/cas_phys.c:136
+velocidad de la luz	velocidade da luz
+
+#: apps/cas/main/cas_phys.c:129
+Energía de un fotón	Energia de um fóton
+
+#: apps/cas/main/cas_phys.c:130
+#: apps/cas/main/cas_phys.c:137
+constante de Planck	constante de Planck
+
+#: apps/cas/main/cas_phys.c:138
+constante de Planck reducida	constante de Planck reduzida
+
+#: apps/cas/main/cas_phys.c:139
+carga elemental	carga elementar
+
+#: apps/cas/main/cas_phys.c:140
+número de Avogadro	número de Avogadro
+
+#: apps/cas/main/cas_phys.c:141
+constante de Boltzmann	constante de Boltzmann
+
+#: apps/cas/main/cas_phys.c:144
+constante de Faraday	constante de Faraday
+
+#: apps/cas/main/cas_phys.c:146
+gravedad estándar	gravidade padrão
+
+#: apps/cas/main/cas_phys.c:147
+masa del electrón	massa do elétron
+
+#: apps/cas/main/cas_phys.c:148
+masa del protón	massa do próton
+
+#: apps/cas/main/cas_phys.c:149
+masa del neutrón	massa do nêutron
+
+#: apps/cas/main/cas_phys.c:150
+unidad de masa atómica	unidade de massa atômica
+
+#: apps/cas/main/cas_phys.c:151
+permitividad del vacío	permissividade do vácuo
+
+#: apps/cas/main/cas_phys.c:152
+permeabilidad del vacío	permeabilidade do vácuo
+
+#: apps/cas/main/cas_phys.c:154
+constante de Stefan-Boltzmann	constante de Stefan-Boltzmann
+
+#: apps/cas/main/cas_phys.c:155
+radio de Bohr	raio de Bohr
+
+#: apps/cas/main/cas_phys.c:156
+volumen molar (0 °C, 1 atm)	volume molar (0 °C, 1 atm)
+
+#: apps/cas/main/cas_phys.c:157
+atmósfera estándar	atmosfera padrão
+
+#: apps/cas/main/cas_phys.c:158
+electronvoltio	elétron-volt
+
+#: apps/cas/main/cas_phys.c:159
+masa de la Tierra	massa da Terra
+
+#: apps/cas/main/cas_phys.c:160
+radio medio de la Tierra	raio médio da Terra
+
+#: apps/cas/main/cas_sci.c:45
+Molaridad	Molaridade
+
+#: apps/cas/main/cas_sci.c:46
+concentración	concentração
+
+#: apps/cas/main/cas_sci.c:46
+masa de soluto	massa de soluto
+
+#: apps/cas/main/cas_sci.c:47
+#: apps/cas/main/cas_sci.c:584
+masa molar	massa molar
+
+#: apps/cas/main/cas_sci.c:47
+volumen de solución	volume de solução
+
+#: apps/cas/main/cas_sci.c:49
+Dilución	Diluição
+
+#: apps/cas/main/cas_sci.c:50
+#: apps/cas/main/cas_sci.c:1150
+concentración inicial	concentração inicial
+
+#: apps/cas/main/cas_sci.c:50
+volumen inicial	volume inicial
+
+#: apps/cas/main/cas_sci.c:51
+concentración final	concentração final
+
+#: apps/cas/main/cas_sci.c:51
+volumen final	volume final
+
+#: apps/cas/main/cas_sci.c:57
+Metal alcalino	Metal alcalino
+
+#: apps/cas/main/cas_sci.c:57
+Alcalinotérreo	Alcalinoterroso
+
+#: apps/cas/main/cas_sci.c:57
+Metal de transición	Metal de transição
+
+#: apps/cas/main/cas_sci.c:57
+Otro metal	Outro metal
+
+#: apps/cas/main/cas_sci.c:57
+Metaloide	Semimetal
+
+#: apps/cas/main/cas_sci.c:58
+No metal	Não metal
+
+#: apps/cas/main/cas_sci.c:58
+Halógeno	Halogênio
+
+#: apps/cas/main/cas_sci.c:58
+Gas noble	Gás nobre
+
+#: apps/cas/main/cas_sci.c:58
+Lantánido	Lantanídeo
+
+#: apps/cas/main/cas_sci.c:58
+Actínido	Actinídeo
+
+#: apps/cas/main/cas_sci.c:340
+Falta %s	Falta %s
+
+#: apps/cas/main/cas_sci.c:355
+También es solución: %s = %s	Também é solução: %s = %s
+
+#: apps/cas/main/cas_sci.c:501
+Masa atómica	Massa atômica
+
+#: apps/cas/main/cas_sci.c:502
+Configuración	Configuração
+
+#: apps/cas/main/cas_sci.c:506
+Grupo · período	Grupo · período
+
+#: apps/cas/main/cas_sci.c:507
+sólido	sólido
+
+#: apps/cas/main/cas_sci.c:507
+líquido	líquido
+
+#: apps/cas/main/cas_sci.c:507
+gas	gás
+
+#: apps/cas/main/cas_sci.c:508
+ (previsto)	 (previsto)
+
+#: apps/cas/main/cas_sci.c:509
+Estado a 25 °C	Estado a 25 °C
+
+#: apps/cas/main/cas_sci.c:512
+Electronegatividad	Eletronegatividade
+
+#: apps/cas/main/cas_sci.c:519
+Fusión · ebullición	Fusão · ebulição
+
+#: apps/cas/main/cas_sci.c:526
+Estados de oxidación	Estados de oxidação
+
+#: apps/cas/main/cas_sci.c:531
+Sumar %s a la fórmula	Somar %s à fórmula
+
+#: apps/cas/main/cas_sci.c:571
+Fórmula (Ca(OH)2, CuSO4.5H2O, SO4^2-)	Fórmula (Ca(OH)2, CuSO4.5H2O, SO4^2-)
+
+#: apps/cas/main/cas_sci.c:596
+Gramos y moles	Gramas e mols
+
+#: apps/cas/main/cas_sci.c:597
+masa (g)	massa (g)
+
+#: apps/cas/main/cas_sci.c:598
+cantidad (mol)	quantidade (mol)
+
+#: apps/cas/main/cas_sci.c:601
+partículas	partículas
+
+#: apps/cas/main/cas_sci.c:616
+Sustancia	Substância
+
+#: apps/cas/main/cas_sci.c:616
+Coef.	Coef.
+
+#: apps/cas/main/cas_sci.c:653
+Gramos de %s	Gramas de %s
+
+#: apps/cas/main/cas_sci.c:659
+Ecuación (Fe + O2 = Fe2O3; iones: Fe^3+)	Equação (Fe + O2 = Fe2O3; íons: Fe^3+)
+
+#: apps/cas/main/cas_sci.c:669
+Estequiometría: tocá una sustancia para escribir cuántos gramos hay; el resto sale de ahí.	Estequiometria: toque numa substância para escrever quantos gramas há; o resto sai daí.
+
+#: apps/cas/main/cas_sci.c:682
+Llená cuatro y tocá =? en el que falta. La temperatura va en kelvin: 0 °C son 273,15 K.	Preencha quatro e toque em =? no que falta. A temperatura é em kelvin: 0 °C = 273,15 K.
+
+#: apps/cas/main/cas_sci.c:707
+Ácido fuerte	Ácido forte
+
+#: apps/cas/main/cas_sci.c:707
+Base fuerte	Base forte
+
+#: apps/cas/main/cas_sci.c:707
+Ácido débil	Ácido fraco
+
+#: apps/cas/main/cas_sci.c:707
+Base débil	Base fraca
+
+#: apps/cas/main/cas_sci.c:711
+concentración (mol/L)	concentração (mol/L)
+
+#: apps/cas/main/cas_sci.c:719
+A 25 °C (Kw = 10⁻¹⁴).	A 25 °C (Kw = 10⁻¹⁴).
+
+#: apps/cas/main/cas_sci.c:738
+ionizado	ionizado
+
+#: apps/cas/main/cas_sci.c:767
+#: apps/cas/main/cas_sci.c:1227
+Fórmulas	Fórmulas
+
+#: apps/cas/main/cas_sci.c:770
+Llená los datos y tocá =? en el que querés saber. Los ángulos van en grados.	Preencha os dados e toque em =? no que quer saber. Os ângulos são em graus.
+
+#: apps/cas/main/cas_sci.c:850
+Con esa altura no llega al suelo.	Dessa altura não chega ao chão.
+
+#: apps/cas/main/cas_sci.c:856
+Tiempo de vuelo	Tempo de voo
+
+#: apps/cas/main/cas_sci.c:857
+Alcance	Alcance
+
+#: apps/cas/main/cas_sci.c:858
+Altura máxima	Altura máxima
+
+#: apps/cas/main/cas_sci.c:859
+Velocidad al caer	Velocidade ao cair
+
+#: apps/cas/main/cas_sci.c:860
+Ángulo al caer	Ângulo ao cair
+
+#: apps/cas/main/cas_sci.c:867
+v₀ velocidad inicial (m/s)	v₀ velocidade inicial (m/s)
+
+#: apps/cas/main/cas_sci.c:867
+θ ángulo (°)	θ ângulo (°)
+
+#: apps/cas/main/cas_sci.c:868
+h₀ altura inicial (m)	h₀ altura inicial (m)
+
+#: apps/cas/main/cas_sci.c:868
+g gravedad (m/s²)	g gravidade (m/s²)
+
+#: apps/cas/main/cas_sci.c:893
+CODATA 2018. Desde 2019 c, h, e, Nₐ y kB son exactas por definición.	CODATA 2018. Desde 2019 c, h, e, Nₐ e kB são exatas por definição.
+
+#: apps/cas/main/cas_sci.c:923
+#: apps/cas/main/cas_sci.c:1173
+Padre 1	Pai 1
+
+#: apps/cas/main/cas_sci.c:924
+#: apps/cas/main/cas_sci.c:1173
+Padre 2	Pai 2
+
+#: apps/cas/main/cas_sci.c:938
+Fenotipos	Fenótipos
+
+#: apps/cas/main/cas_sci.c:944
+Genotipos	Genótipos
+
+#: apps/cas/main/cas_sci.c:950
+Mayúscula: el alelo dominante. A_ quiere decir AA o Aa.	Maiúscula: o alelo dominante. A_ quer dizer AA ou Aa.
+
+#: apps/cas/main/cas_sci.c:963
+Con los genotipos contados	Com os genótipos contados
+
+#: apps/cas/main/cas_sci.c:968
+Con la frecuencia del fenotipo recesivo	Com a frequência do fenótipo recessivo
+
+#: apps/cas/main/cas_sci.c:986
+Esperados (AA, Aa, aa)	Esperados (AA, Aa, aa)
+
+#: apps/cas/main/cas_sci.c:991
+#: apps/cas/main/cas_stats.c:944
+valor p	valor p
+
+#: apps/cas/main/cas_sci.c:992
+No está en equilibrio (p < 0,05)	Não está em equilíbrio (p < 0,05)
+
+#: apps/cas/main/cas_sci.c:992
+Compatible con el equilibrio (p ≥ 0,05)	Compatível com o equilíbrio (p ≥ 0,05)
+
+#: apps/cas/main/cas_sci.c:1003
+AA (p²)	AA (p²)
+
+#: apps/cas/main/cas_sci.c:1004
+portadores Aa (2pq)	portadores Aa (2pq)
+
+#: apps/cas/main/cas_sci.c:1028
+Secuencia (ADN o ARN)	Sequência (DNA ou RNA)
+
+#: apps/cas/main/cas_sci.c:1031
+Se dejaron afuera %d letras que no son bases.	Foram deixadas de fora %d letras que não são bases.
+
+#: apps/cas/main/cas_sci.c:1039
+Largo	Compr.
+
+#: apps/cas/main/cas_sci.c:1042
+Masa (hebra simple)	Massa (fita simples)
+
+#: apps/cas/main/cas_sci.c:1044
+Complementaria	Complementar
+
+#: apps/cas/main/cas_sci.c:1046
+Reversa complementaria	Reversa complementar
+
+#: apps/cas/main/cas_sci.c:1048
+ARN mensajero	RNA mensageiro
+
+#: apps/cas/main/cas_sci.c:1049
+Marco 1	Quadro 1
+
+#: apps/cas/main/cas_sci.c:1049
+Marco 2	Quadro 2
+
+#: apps/cas/main/cas_sci.c:1049
+Marco 3	Quadro 3
+
+#: apps/cas/main/cas_sci.c:1049
+Desde ATG	Desde ATG
+
+#: apps/cas/main/cas_sci.c:1054
+Proteína (código estándar; * es stop)	Proteína (código padrão; * é stop)
+
+#: apps/cas/main/cas_sci.c:1055
+Tm: regla de Wallace hasta 13 bases, la fórmula de GC desde 14. Una estimación: no reemplaza a la de la sal y la concentración.	Tm: regra de Wallace até 13 bases, a fórmula de GC a partir de 14. Uma estimativa: não substitui a do sal e da concentração.
+
+#: apps/cas/main/cas_sci.c:1097
+exponencial	exponencial
+
+#: apps/cas/main/cas_sci.c:1098
+logística	logística
+
+#: apps/cas/main/cas_sci.c:1109
+Exponencial N(t)	Exponencial N(t)
+
+#: apps/cas/main/cas_sci.c:1110
+Logística N(t)	Logística N(t)
+
+#: apps/cas/main/cas_sci.c:1111
+Tiempo de duplicación	Tempo de duplicação
+
+#: apps/cas/main/cas_sci.c:1122
+Tubo %d	Tubo %d
+
+#: apps/cas/main/cas_sci.c:1128
+Dilución total	Diluição total
+
+#: apps/cas/main/cas_sci.c:1135
+Crecimiento de una población	Crescimento de uma população
+
+#: apps/cas/main/cas_sci.c:1136
+N₀ población inicial	N₀ população inicial
+
+#: apps/cas/main/cas_sci.c:1136
+r tasa de crecimiento	r taxa de crescimento
+
+#: apps/cas/main/cas_sci.c:1137
+K capacidad de carga	K capacidade de suporte
+
+#: apps/cas/main/cas_sci.c:1137
+t tiempo	t tempo
+
+#: apps/cas/main/cas_sci.c:1149
+Diluciones seriadas	Diluições seriadas
+
+#: apps/cas/main/cas_sci.c:1150
+factor por paso	fator por passo
+
+#: apps/cas/main/cas_sci.c:1150
+pasos	passos
+
+#: apps/cas/main/cas_sci.c:1173
+Fórmula	Fórmula
+
+#: apps/cas/main/cas_sci.c:1173
+Secuencia	Sequência
+
+#: apps/cas/main/cas_sci.c:1184
+Temperatura	Temperatura
+
+#: apps/cas/main/cas_sci.c:1221
+Química	Química
+
+#: apps/cas/main/cas_sci.c:1221
+Física	Física
+
+#: apps/cas/main/cas_sci.c:1221
+Biología	Biologia
+
+#: apps/cas/main/cas_sci.c:1226
+Tabla	Tabela
+
+#: apps/cas/main/cas_sci.c:1226
+Masa molar	Massa molar
+
+#: apps/cas/main/cas_sci.c:1226
+Balancear	Balancear
+
+#: apps/cas/main/cas_sci.c:1226
+Gases	Gases
+
+#: apps/cas/main/cas_sci.c:1226
+Soluciones	Soluções
+
+#: apps/cas/main/cas_sci.c:1227
+Tiro oblicuo	Lanç. oblíquo
+
+#: apps/cas/main/cas_sci.c:1227
+Constantes	Constantes
+
+#: apps/cas/main/cas_sci.c:1228
+Punnett	Punnett
+
+#: apps/cas/main/cas_sci.c:1228
+Hardy-W.	Hardy-W.
+
+#: apps/cas/main/cas_sci.c:1228
+ADN	DNA
+
+#: apps/cas/main/cas_sci.c:1228
+Crecimiento	Crescimento
+
+#: apps/cas/main/cas_stats.c:235
+Med	Med
+
+#: apps/cas/main/cas_stats.c:235
+Rango	Amplitude
+
+#: apps/cas/main/cas_stats.c:246
+Sin datos: tocá una celda para escribir	Sem dados: toque numa célula para escrever
+
+#: apps/cas/main/cas_stats.c:269
+Resumen de L%d	Resumo de L%d
+
+#: apps/cas/main/cas_stats.c:350
+Ordenar	Ordenar
+
+#: apps/cas/main/cas_stats.c:351
+Borrar	Apagar
+
+#: apps/cas/main/cas_stats.c:427
+L%d: %d clases de ancho %.4g	L%d: %d classes de largura %.4g
+
+#: apps/cas/main/cas_stats.c:485
+Dispersión: hacen falta datos en L1 (x) y L2 (y)	Dispersão: são necessários dados em L1 (x) e L2 (y)
+
+#: apps/cas/main/cas_stats.c:524
+Sin datos en esta lista	Sem dados nesta lista
+
+#: apps/cas/main/cas_stats.c:538
+Histograma	Histograma
+
+#: apps/cas/main/cas_stats.c:538
+Cajas	Caixas
+
+#: apps/cas/main/cas_stats.c:538
+Dispersión	Dispersão
+
+#: apps/cas/main/cas_stats.c:577
+Hacen falta al menos dos pares en L1 (x) y L2 (y)	São necessários ao menos dois pares em L1 (x) e L2 (y)
+
+#: apps/cas/main/cas_stats.c:578
+Este modelo no se ajusta a estos datos (¿valores negativos o cero?)	Este modelo não se ajusta a estes dados (valores negativos ou zero?)
+
+#: apps/cas/main/cas_stats.c:637
+Va al gráfico como f%d(x)	Vai ao gráfico como f%d(x)
+
+#: apps/cas/main/cas_stats.c:639
+El gráfico ya tiene seis funciones	O gráfico já tem seis funções
+
+#: apps/cas/main/cas_stats.c:657
+Lineal	Linear
+
+#: apps/cas/main/cas_stats.c:657
+Cuadr.	Quadr.
+
+#: apps/cas/main/cas_stats.c:657
+Cúbica	Cúbica
+
+#: apps/cas/main/cas_stats.c:657
+Pot.	Pot.
+
+#: apps/cas/main/cas_stats.c:662
+x en L1, y en L2	x em L1, y em L2
+
+#: apps/cas/main/cas_stats.c:673
+Al gráfico como f(x)	Ao gráfico como f(x)
+
+#: apps/cas/main/cas_stats.c:675
+Ver los puntos	Ver os pontos
+
+#: apps/cas/main/cas_stats.c:784
+Binomial	Binomial
+
+#: apps/cas/main/cas_stats.c:789
+#: apps/cas/main/cas_stats.c:789
+grados de libertad	graus de liberdade
+
+#: apps/cas/main/cas_stats.c:798
+Inversa	Inversa
+
+#: apps/cas/main/cas_stats.c:850
+Se rechaza H₀ (p < %.2g)	H₀ rejeitada (p < %.2g)
+
+#: apps/cas/main/cas_stats.c:850
+No se rechaza H₀ (p ≥ %.2g)	H₀ não rejeitada (p ≥ %.2g)
+
+#: apps/cas/main/cas_stats.c:903
+t media	t média
+
+#: apps/cas/main/cas_stats.c:903
+z proporción	z proporção
+
+#: apps/cas/main/cas_stats.c:903
+t dos medias	t duas médias
+
+#: apps/cas/main/cas_stats.c:923
+éxitos x	sucessos x
+
+#: apps/cas/main/cas_stats.c:927
+media ₁	média ₁
+
+#: apps/cas/main/cas_stats.c:930
+media ₂	média ₂
+
+#: apps/cas/main/cas_stats.c:934
+nivel de confianza	nível de confiança
+
+#: apps/cas/main/cas_stats.c:937
+Tomar media, s y n de L%d	Tomar média, s e n de L%d
+
+#: apps/cas/main/cas_stats.c:938
+Tomar de L1 y L2	Tomar de L1 e L2
+
+#: apps/cas/main/cas_stats.c:943
+gl	gl
+
+#: apps/cas/main/cas_stats.c:945
+intervalo	intervalo
+
+#: apps/cas/main/cas_stats.c:976
+Datos	Dados
+
+#: apps/cas/main/cas_stats.c:976
+Regresión	Regressão
+
+#: apps/cas/main/cas_stats.c:976
+Distrib.	Distrib.
+
+#: apps/cas/main/cas_stats.c:976
+Pruebas	Testes

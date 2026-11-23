@@ -1,0 +1,180 @@
+# amoledos-lang 1   es -> it
+# web.radio.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/radio/web/radio.js:100
+conectando	connessione
+
+#: apps/radio/web/radio.js:100
+cargando	buffering
+
+#: apps/radio/web/radio.js:100
+en vivo	in diretta
+
+#: apps/radio/web/radio.js:101
+reconectando	riconnessione
+
+#: apps/radio/web/radio.js:101
+falló	non riuscita
+
+#: apps/radio/web/radio.js:101
+detenida	ferma
+
+#: apps/radio/web/radio.js:119
+Reproducir o pausar	Riproduci o pausa
+
+#: apps/radio/web/radio.js:138
+suena la música de la tarjeta	suona la musica della microSD
+
+#: apps/radio/web/radio.js:138
+no suena nada	non suona niente
+
+#: apps/radio/web/radio.js:142
+en pausa	in pausa
+
+#: apps/radio/web/radio.js:145
+búfer %s s	buffer %s s
+
+#: apps/radio/web/radio.js:148
+falló: %s	errore: %s
+
+#: apps/radio/web/radio.js:176
+libre	libero
+
+#: apps/radio/web/radio.js:178
+▶ Poner	▶ Suona
+
+#: apps/radio/web/radio.js:180
+Vaciar	Svuota
+
+#: apps/radio/web/radio.js:241
+%s quedó en la tecla %d	%s salvata sul tasto %d
+
+#: apps/radio/web/radio.js:243
+no se pudo hablar con la placa	impossibile parlare con la scheda
+
+#: apps/radio/web/radio.js:261
+no se pudo guardar la lista: %s	impossibile salvare la lista: %s
+
+#: apps/radio/web/radio.js:283
+no suena en la placa	non suona sulla scheda
+
+#: apps/radio/web/radio.js:285
+Escuchar acá	Ascolta qui
+
+#: apps/radio/web/radio.js:288
+Probar en la placa	Prova sulla scheda
+
+#: apps/radio/web/radio.js:298
+La lista está vacía: buscá radios abajo.	La lista è vuota: cerca radio qui sotto.
+
+#: apps/radio/web/radio.js:302
+Tecla…	Tasto…
+
+#: apps/radio/web/radio.js:306
+¿Quitar esta radio de tu lista?	Togliere questa radio dalla tua lista?
+
+#: apps/radio/web/radio.js:307
+Quitar	Togli
+
+#: apps/radio/web/radio.js:309
+Arrastrala a una tecla	Trascinala su un tasto
+
+#: apps/radio/web/radio.js:316
+Todos	Tutti
+
+#: apps/radio/web/radio.js:325
+buscando…	ricerca…
+
+#: apps/radio/web/radio.js:338
+radio-browser.info no contestó	radio-browser.info non ha risposto
+
+#: apps/radio/web/radio.js:349
+#: apps/radio/web/radio.js:350
+✓ en tu lista	✓ nella lista
+
+#: apps/radio/web/radio.js:349
++ Agregar	+ Aggiungi
+
+#: apps/radio/web/radio.js:354
+No se encontró nada.	Nessun risultato.
+
+#: apps/radio/web/radio.js:361
+#: apps/radio/web/radio.js:388
+Nombre	Nome
+
+#: apps/radio/web/radio.js:361
+Dirección del stream	Indirizzo dello stream
+
+#: apps/radio/web/radio.js:361
+Agregar	Aggiungi
+
+#: apps/radio/web/radio.js:365
+la dirección tiene que empezar con http:// o https://	l'indirizzo deve iniziare con http:// o https://
+
+#: apps/radio/web/radio.js:388
+País	Paese
+
+#: apps/radio/web/radio.js:388
+Género	Genere
+
+#: apps/radio/web/radio.js:389
+Buscar	Cerca
+
+#: apps/radio/web/radio.js:391
+Sólo las que suenan en la placa (MP3, AAC, HLS)	Solo quelle che suonano sulla scheda (MP3, AAC, HLS)
+
+#: apps/radio/web/radio.js:395
+#: apps/radio/web/radio.js:431
+Radio	Radio
+
+#: apps/radio/web/radio.js:397
+Abrir la Radio en la placa	Apri Radio sulla scheda
+
+#: apps/radio/web/radio.js:398
+En la placa ahora	Ora sulla scheda
+
+#: apps/radio/web/radio.js:402
+Anterior	Precedente
+
+#: apps/radio/web/radio.js:404
+Siguiente	Successiva
+
+#: apps/radio/web/radio.js:405
+Detener	Stop
+
+#: apps/radio/web/radio.js:406
+Volumen	Volume
+
+#: apps/radio/web/radio.js:407
+Las teclas	I tasti
+
+#: apps/radio/web/radio.js:408
+Arrastrá una radio de tu lista a una tecla, o una tecla sobre otra para cambiarlas de lugar.	Trascina una radio dalla tua lista su un tasto, o un tasto su un altro per scambiarli di posto.
+
+#: apps/radio/web/radio.js:410
+Mi lista	La mia lista
+
+#: apps/radio/web/radio.js:412
+Buscar radios	Cerca radio
+
+#: apps/radio/web/radio.js:413
+En el directorio abierto de radio-browser.info, con más de 50.000 estaciones de todo el mundo.	Nella directory aperta di radio-browser.info, con più di 50.000 stazioni da tutto il mondo.
+
+#: apps/radio/web/radio.js:416
+Agregar a mano	Aggiungi a mano
+
+#: apps/radio/web/radio.js:418
+Ajustes	Impostazioni
+
+#: apps/radio/web/radio.js:420
+Tapas de los discos	Copertine degli album
+
+#: apps/radio/web/radio.js:421
+Busca en iTunes la tapa del tema que suena. Lo único que sale de la placa es "artista tema".	Cerca su iTunes la copertina del brano in onda. L'unica cosa che esce dalla scheda è "artista brano".
+
+#: apps/radio/web/radio.js:422
+Suenan MP3 y AAC (también HE-AAC) por http:// o https://, con redirecciones y listas .pls o .m3u, y HLS (.m3u8) con segmentos TS o AAC. Ogg, Opus, FLAC, HLS en fMP4 y HLS cifrado no: el buscador los marca. La radio sigue sonando con la app cerrada.	Suonano MP3 e AAC (anche HE-AAC) via http:// o https://, con reindirizzamenti e playlist .pls o .m3u, e HLS (.m3u8) con segmenti TS o AAC. Ogg, Opus, FLAC, HLS in fMP4 e HLS cifrato no: la ricerca li segnala. La radio continua a suonare con l'app chiusa.

@@ -1,0 +1,150 @@
+# amoledos-lang 1   es -> fr
+# demo.arkanos.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/arkanos/main/ak_draw.c:687
+NIVEL 	NIVEAU 
+
+#: apps/arkanos/main/ak_draw.c:697
+SUPERADO	REUSSI
+
+#: apps/arkanos/main/ak_draw.c:700
+#: apps/arkanos/main/arkanos.c:520
+#: apps/arkanos/main/arkanos.c:543
+OTRA VEZ	ENCORE
+
+#: apps/arkanos/main/ak_level.c:72
+ANCHA	LARGE
+
+#: apps/arkanos/main/ak_level.c:73
+LENTA	LENTE
+
+#: apps/arkanos/main/ak_level.c:74
+TRIPLE	TRIPLE
+
+#: apps/arkanos/main/ak_level.c:75
+DISPARO	TIR
+
+#: apps/arkanos/main/ak_level.c:76
+IMAN	AIMANT
+
+#: apps/arkanos/main/ak_level.c:77
+VIDA	VIE
+
+#: apps/arkanos/main/ak_level.c:227
+PRIMER MURO	PREMIER MUR
+
+#: apps/arkanos/main/ak_level.c:228
+TORRES	TOURS
+
+#: apps/arkanos/main/ak_level.c:229
+PIRAMIDE	PYRAMIDE
+
+#: apps/arkanos/main/ak_level.c:230
+PANAL	RUCHE
+
+#: apps/arkanos/main/ak_level.c:231
+FORTALEZA	FORTERESSE
+
+#: apps/arkanos/main/ak_level.c:232
+REJA	GRILLE
+
+#: apps/arkanos/main/ak_level.c:233
+CALAVERA	CRANE
+
+#: apps/arkanos/main/ak_level.c:234
+NAVE	VAISSEAU
+
+#: apps/arkanos/main/ak_level.c:235
+ESPIRAL	SPIRALE
+
+#: apps/arkanos/main/ak_level.c:236
+CORAZON	COEUR
+
+#: apps/arkanos/main/ak_level.c:237
+CLAUDITO	CLAUDITO
+
+#: apps/arkanos/main/ak_level.c:238
+EL JEFE	LE CHEF
+
+#: apps/arkanos/main/arkanos.c:340
+#: apps/arkanos/main/arkanos.c:341
+SONIDO SI	SON OUI
+
+#: apps/arkanos/main/arkanos.c:340
+#: apps/arkanos/main/arkanos.c:341
+SONIDO NO	SON NON
+
+#: apps/arkanos/main/arkanos.c:342
+#: apps/arkanos/main/arkanos.c:343
+FPS SI	FPS OUI
+
+#: apps/arkanos/main/arkanos.c:342
+#: apps/arkanos/main/arkanos.c:343
+FPS NO	FPS NON
+
+#: apps/arkanos/main/arkanos.c:349
+RECORD  %lu	RECORD  %lu
+
+#: apps/arkanos/main/arkanos.c:456
+ARKANOS	ARKANOS
+
+#: apps/arkanos/main/arkanos.c:457
+DOCE MUROS Y UNA BOLA	DOUZE MURS ET UNE BALLE
+
+#: apps/arkanos/main/arkanos.c:459
+JUGAR	JOUER
+
+#: apps/arkanos/main/arkanos.c:459
+arrastra el dedo	glisse le doigt
+
+#: apps/arkanos/main/arkanos.c:473
+EL DEDO SOBRE LA CANCHA MUEVE LA PALETA	LE DOIGT SUR LE TERRAIN BOUGE LA RAQUETTE
+
+#: apps/arkanos/main/arkanos.c:474
+EL DEDO EN LA FRANJA DE ABAJO MUEVE LA PALETA	LE DOIGT SUR LA BANDE DU BAS BOUGE LA RAQUETTE
+
+#: apps/arkanos/main/arkanos.c:476
+SUELTA EL DEDO PARA SACAR	LEVE LE DOIGT POUR SERVIR
+
+#: apps/arkanos/main/arkanos.c:477
+CON DISPARO, EL DEDO APOYADO DISPARA	AVEC LE TIR, LE DOIGT POSE TIRE
+
+#: apps/arkanos/main/arkanos.c:478
+EL BOTON II DE LA DERECHA PAUSA	LE BOUTON II A DROITE MET EN PAUSE
+
+#: apps/arkanos/main/arkanos.c:479
+TOCA EL MARCADOR PARA PAUSAR	TOUCHE LE SCORE POUR LA PAUSE
+
+#: apps/arkanos/main/arkanos.c:487
+RECORD 0	RECORD 0
+
+#: apps/arkanos/main/arkanos.c:490
+#: apps/arkanos/main/arkanos.c:503
+#: apps/arkanos/main/arkanos.c:525
+SALIR	QUITTER
+
+#: apps/arkanos/main/arkanos.c:499
+PAUSA	PAUSE
+
+#: apps/arkanos/main/arkanos.c:500
+SEGUIR	SUITE
+
+#: apps/arkanos/main/arkanos.c:517
+#: apps/arkanos/main/arkanos.c:535
+FIN DEL JUEGO	FIN DE PARTIE
+
+#: apps/arkanos/main/arkanos.c:524
+MENU	MENU
+
+#: apps/arkanos/main/arkanos.c:535
+TERMINASTE	TU AS FINI
+
+#: apps/arkanos/main/arkanos.c:539
+%lu  (RECORD %lu)	%lu  (RECORD %lu)
+
+#: apps/arkanos/main/arkanos.c:543
+OTRA VUELTA	UN TOUR DE PLUS

@@ -1,0 +1,180 @@
+# amoledos-lang 1   es -> fr
+# web.mapas.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/mapas/web/mapas.js:340
+no es un AMP1	pas un AMP1
+
+#: apps/mapas/web/mapas.js:429
+Acercar	Zoom avant
+
+#: apps/mapas/web/mapas.js:429
+Alejar	Zoom arrière
+
+#: apps/mapas/web/mapas.js:459
+El mapa necesita internet en esta computadora (OpenFreeMap).	Le plan a besoin d'internet sur cet ordinateur (OpenFreeMap).
+
+#: apps/mapas/web/mapas.js:588
+Buscar un lugar: ciudad, calle, barrio…	Chercher un lieu : ville, rue, quartier…
+
+#: apps/mapas/web/mapas.js:590
+#: apps/mapas/web/mapas.js:591
+Nombre de la zona	Nom de la zone
+
+#: apps/mapas/web/mapas.js:592
+Calles, con sus nombres (lo más completo)	Rues, avec leurs noms (le plus complet)
+
+#: apps/mapas/web/mapas.js:592
+Avenidas y barrios	Avenues et quartiers
+
+#: apps/mapas/web/mapas.js:592
+Rutas y ciudades	Routes et villes
+
+#: apps/mapas/web/mapas.js:594
+Descargar y guardar en la placa	Télécharger et enregistrer sur la carte
+
+#: apps/mapas/web/mapas.js:595
+#: apps/mapas/web/mapas.js:700
+Cancelar	Annuler
+
+#: apps/mapas/web/mapas.js:604
+Centro %s, %s · zoom %s en la placa	Centre %s, %s · zoom %s sur la carte
+
+#: apps/mapas/web/mapas.js:620
+No se encontró nada.	Rien trouvé.
+
+#: apps/mapas/web/mapas.js:657
+Enviado: la placa abre Mapas ahí	Envoyé : la carte ouvre Plans là
+
+#: apps/mapas/web/mapas.js:664
+Ir	Aller
+
+#: apps/mapas/web/mapas.js:665
+En la placa	Sur la carte
+
+#: apps/mapas/web/mapas.js:667
+Nuevo nombre	Nouveau nom
+
+#: apps/mapas/web/mapas.js:671
+Renombrar	Renommer
+
+#: apps/mapas/web/mapas.js:673
+¿Borrar la zona «%s»?	Effacer la zone « %s » ?
+
+#: apps/mapas/web/mapas.js:677
+#: apps/mapas/web/mapas.js:732
+Borrar	Effacer
+
+#: apps/mapas/web/mapas.js:678
+Todavía no hay zonas. Mové el mapa hasta un lugar y guardalo: en la placa aparece en el menú ☰ de la app.	Pas encore de zones. Déplace le plan jusqu'à un lieu et enregistre-le : sur la carte, il apparaît dans le menu ☰ de l'app.
+
+#: apps/mapas/web/mapas.js:687
+#: apps/mapas/web/mapas.js:788
+Primero ponele un nombre	Donne-lui d'abord un nom
+
+#: apps/mapas/web/mapas.js:690
+Zona guardada	Zone enregistrée
+
+#: apps/mapas/web/mapas.js:699
+nombre ⇥ lat×1e6 ⇥ lon×1e6 ⇥ zoom×10	nom ⇥ lat×1e6 ⇥ lon×1e6 ⇥ zoom×10
+
+#: apps/mapas/web/mapas.js:704
+Una línea no es una zona y la app la va a ignorar:	Une ligne n'est pas une zone et l'app va l'ignorer :
+
+#: apps/mapas/web/mapas.js:704
+%s líneas no son una zona y la app las va a ignorar:	%s lignes ne sont pas des zones et l'app va les ignorer :
+
+#: apps/mapas/web/mapas.js:705
+¿Guardar igual?	Enregistrer quand même ?
+
+#: apps/mapas/web/mapas.js:706
+zones.txt guardado	zones.txt enregistré
+
+#: apps/mapas/web/mapas.js:707
+Guardar	Enregistrer
+
+#: apps/mapas/web/mapas.js:729
+¿Borrar «%s» de la placa?	Effacer « %s » de la carte ?
+
+#: apps/mapas/web/mapas.js:730
+Borrado %s	%s effacé
+
+#: apps/mapas/web/mapas.js:733
+No hay mapas guardados en la placa.	Aucun plan enregistré sur la carte.
+
+#: apps/mapas/web/mapas.js:734
+/maps/cache: lo visto en línea, que la app guarda sola (se vacía desde su menú).	/maps/cache : ce qui a été vu en ligne, que l'app garde toute seule (se vide depuis son menu).
+
+#: apps/mapas/web/mapas.js:762
+%s teselas: demasiado grande. Acercá el mapa o elegí menos detalle.	%s tuiles : trop gros. Zoome le plan ou choisis moins de détail.
+
+#: apps/mapas/web/mapas.js:764
+%s teselas del zoom %s al %s: calculando el tamaño…	%s tuiles du zoom %s au %s : calcul de la taille…
+
+#: apps/mapas/web/mapas.js:780
+%s teselas del zoom %s al %s: unos %s en la tarjeta (medido sobre %s teselas de muestra).	%s tuiles du zoom %s au %s : environ %s sur la carte SD (mesuré sur %s tuiles d'exemple).
+
+#: apps/mapas/web/mapas.js:781
+%s teselas del zoom %s al %s. No se pudo calcular el tamaño (¿sin internet?).	%s tuiles du zoom %s au %s. Impossible de calculer la taille (pas d'internet ?).
+
+#: apps/mapas/web/mapas.js:793
+Empezando…	Démarrage…
+
+#: apps/mapas/web/mapas.js:804
+No se pudo bajar la tesela %s	Impossible de télécharger la tuile %s
+
+#: apps/mapas/web/mapas.js:812
+Descargando %s de %s teselas…	Téléchargement de %s sur %s tuiles…
+
+#: apps/mapas/web/mapas.js:816
+Cancelado.	Annulé.
+
+#: apps/mapas/web/mapas.js:818
+Guardado: %s teselas en %s (%s), %s nombres para buscar.	Enregistré : %s tuiles dans %s (%s), %s noms à chercher.
+
+#: apps/mapas/web/mapas.js:830
+Armando el paquete…	Création du paquet…
+
+#: apps/mapas/web/mapas.js:834
+#: apps/mapas/web/mapas.js:835
+Guardando en la placa: %s (%s)…	Enregistrement sur la carte : %s (%s)…
+
+#: apps/mapas/web/mapas.js:836
+Guardando el índice de nombres…	Enregistrement de l'index des noms…
+
+#: apps/mapas/web/mapas.js:851
+#: apps/mapas/web/mapas.js:879
+Mapas	Plans
+
+#: apps/mapas/web/mapas.js:852
+Buscar	Chercher
+
+#: apps/mapas/web/mapas.js:854
+Zonas	Zones
+
+#: apps/mapas/web/mapas.js:856
+Guardar lo que se ve como zona	Enregistrer la vue comme zone
+
+#: apps/mapas/web/mapas.js:857
+Mostrarlo en la placa	L'afficher sur la carte
+
+#: apps/mapas/web/mapas.js:858
+Editar zones.txt	Modifier zones.txt
+
+#: apps/mapas/web/mapas.js:859
+Sin conexión	Hors ligne
+
+#: apps/mapas/web/mapas.js:861
+Se descarga lo que se ve en el mapa de arriba, con este nombre:	Ce que montre le plan ci-dessus est téléchargé, sous ce nom :
+
+#: apps/mapas/web/mapas.js:862
+Hasta qué detalle	Niveau de détail
+
+#: apps/mapas/web/mapas.js:866
+Todo se hace en este navegador: baja las teselas de OpenFreeMap, les quita lo que la placa no dibuja, arma el índice de nombres para buscar y las guarda en /maps de la tarjeta, un archivo por zona. En la app, lo guardado se usa antes que la red y lo que se ve en línea queda en la tarjeta para la próxima vez. Datos © colaboradores de OpenStreetMap, OpenMapTiles y OpenFreeMap; búsqueda de Photon (komoot).	Tout se fait dans ce navigateur : il télécharge les tuiles d'OpenFreeMap, enlève ce que la carte ne dessine pas, construit l'index des noms pour la recherche et les enregistre dans /maps sur la carte SD, un fichier par zone. Dans l'app, ce qui est enregistré passe avant le réseau, et ce qui est vu en ligne reste sur la carte SD pour la prochaine fois. Données © contributeurs OpenStreetMap, OpenMapTiles et OpenFreeMap ; recherche par Photon (komoot).
+
+#: apps/mapas/web/mapas.js:868
+Hay una descarga en curso	Un téléchargement est en cours

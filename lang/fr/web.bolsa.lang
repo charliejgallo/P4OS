@@ -1,0 +1,221 @@
+# amoledos-lang 1   es -> fr
+# web.bolsa.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/bolsa/web/bolsa.js:25
+Oficial	Officiel
+
+#: apps/bolsa/web/bolsa.js:25
+Dólar oficial	Dollar officiel
+
+#: apps/bolsa/web/bolsa.js:25
+Blue	Blue
+
+#: apps/bolsa/web/bolsa.js:25
+Dólar blue	Dollar blue
+
+#: apps/bolsa/web/bolsa.js:26
+MEP	MEP
+
+#: apps/bolsa/web/bolsa.js:26
+Dólar MEP (bolsa)	Dollar MEP (Bourse)
+
+#: apps/bolsa/web/bolsa.js:26
+CCL	CCL
+
+#: apps/bolsa/web/bolsa.js:26
+Dólar contado con liqui	Dollar CCL (contado)
+
+#: apps/bolsa/web/bolsa.js:27
+#: apps/bolsa/web/bolsa.js:41
+Cripto	Crypto
+
+#: apps/bolsa/web/bolsa.js:27
+Dólar cripto	Dollar crypto
+
+#: apps/bolsa/web/bolsa.js:27
+Mayorista	De gros
+
+#: apps/bolsa/web/bolsa.js:27
+Dólar mayorista	Dollar de gros
+
+#: apps/bolsa/web/bolsa.js:28
+Euro en pesos	Euro en pesos
+
+#: apps/bolsa/web/bolsa.js:28
+Real en pesos	Réal en pesos
+
+#: apps/bolsa/web/bolsa.js:29
+Peso chileno en pesos	Peso chilien en pesos
+
+#: apps/bolsa/web/bolsa.js:29
+Peso uruguayo en pesos	Peso uruguayen en pesos
+
+#: apps/bolsa/web/bolsa.js:30
+Riesgo	Risque
+
+#: apps/bolsa/web/bolsa.js:30
+Riesgo país	Risque pays
+
+#: apps/bolsa/web/bolsa.js:41
+Mías	Perso
+
+#: apps/bolsa/web/bolsa.js:41
+Argentina	Argentine
+
+#: apps/bolsa/web/bolsa.js:41
+EE. UU.	USA
+
+#: apps/bolsa/web/bolsa.js:41
+Índices	Indices
+
+#: apps/bolsa/web/bolsa.js:46
+8 consultas por minuto y 800 por día. Cotizaciones con las 52 semanas, gráficos del día (cada 5 minutos) y diarios.	8 requêtes par minute et 800 par jour. Cours avec les 52 semaines, graphiques du jour (toutes les 5 minutes) et quotidiens.
+
+#: apps/bolsa/web/bolsa.js:48
+Históricos diarios con apertura, máximo, mínimo y volumen; índices. La clave se saca en su página, en la descarga de datos.	Historiques quotidiens avec ouverture, haut, bas et volume ; indices. La clé s'obtient sur son site, dans le téléchargement de données.
+
+#: apps/bolsa/web/bolsa.js:50
+25 consultas por día: cotizaciones, los últimos 100 días y semanales.	25 requêtes par jour : cours, les 100 derniers jours et hebdomadaires.
+
+#: apps/bolsa/web/bolsa.js:52
+Sólo cotizaciones (sus gráficos son de pago): sirve junto con otro para los históricos.	Cours seulement (ses graphiques sont payants) : à utiliser avec un autre pour les historiques.
+
+#: apps/bolsa/web/bolsa.js:152
+#: apps/bolsa/web/bolsa.js:307
+Bolsa	Bourse
+
+#: apps/bolsa/web/bolsa.js:158
+Cargando…	Chargement…
+
+#: apps/bolsa/web/bolsa.js:161
+#: apps/bolsa/web/bolsa.js:273
+Guardar	Enregistrer
+
+#: apps/bolsa/web/bolsa.js:162
+Guardar cambios	Enregistrer
+
+#: apps/bolsa/web/bolsa.js:185
+Subir	Monter
+
+#: apps/bolsa/web/bolsa.js:186
+Bajar	Descendre
+
+#: apps/bolsa/web/bolsa.js:187
+Sacar	Retirer
+
+#: apps/bolsa/web/bolsa.js:189
+Símbolo: NANDU, YERBA.BA, ^MERV, USD.BLUE, cg:bitcoin…	Symbole : NANDU, YERBA.BA, ^MERV, USD.BLUE, cg:bitcoin…
+
+#: apps/bolsa/web/bolsa.js:195
+Ya está en la lista	Déjà dans la liste
+
+#: apps/bolsa/web/bolsa.js:196
+La lista está llena (30)	La liste est pleine (30)
+
+#: apps/bolsa/web/bolsa.js:203
+¿Borrar la lista %s?	Supprimer la liste %s ?
+
+#: apps/bolsa/web/bolsa.js:205
+Borrar lista	Suppr. liste
+
+#: apps/bolsa/web/bolsa.js:209
+Sumar	Ajouter
+
+#: apps/bolsa/web/bolsa.js:212
+Nueva	Neuve
+
+#: apps/bolsa/web/bolsa.js:212
+Agregar una lista	Ajouter une liste
+
+#: apps/bolsa/web/bolsa.js:217
+sin clave	sans clé
+
+#: apps/bolsa/web/bolsa.js:220
+sacar una clave gratis	obtenir une clé gratuite
+
+#: apps/bolsa/web/bolsa.js:223
+#: apps/bolsa/web/bolsa.js:223
+Ver	Voir
+
+#: apps/bolsa/web/bolsa.js:223
+Ocultar	Masquer
+
+#: apps/bolsa/web/bolsa.js:226
+Automático (el primero con clave)	Automatique (le 1er avec une clé)
+
+#: apps/bolsa/web/bolsa.js:232
+Proveedor preferido para acciones	Fournisseur préféré pour les actions
+
+#: apps/bolsa/web/bolsa.js:233
+Actualizar las cotizaciones cada (minutos)	Actualiser les cours toutes les (minutes)
+
+#: apps/bolsa/web/bolsa.js:240
+si sube a %s	s'il monte à %s
+
+#: apps/bolsa/web/bolsa.js:240
+si baja a %s	s'il baisse à %s
+
+#: apps/bolsa/web/bolsa.js:241
+ya avisó	déjà averti
+
+#: apps/bolsa/web/bolsa.js:242
+ahora %s	actuel %s
+
+#: apps/bolsa/web/bolsa.js:243
+Rearmar	Réarmer
+
+#: apps/bolsa/web/bolsa.js:244
+Borrar	Suppr.
+
+#: apps/bolsa/web/bolsa.js:246
+si sube a	s'il monte à
+
+#: apps/bolsa/web/bolsa.js:246
+si baja a	s'il baisse à
+
+#: apps/bolsa/web/bolsa.js:247
+#: apps/bolsa/web/bolsa.js:248
+precio	prix
+
+#: apps/bolsa/web/bolsa.js:254
+Elegí un símbolo y escribí un precio	Choisis un symbole et tape un prix
+
+#: apps/bolsa/web/bolsa.js:256
+Agregar aviso	Ajouter alerte
+
+#: apps/bolsa/web/bolsa.js:274
+Guardado: la placa lo toma en unos segundos	Enregistré : la carte le prend en quelques secondes
+
+#: apps/bolsa/web/bolsa.js:298
+Todavía no hay configuración: abrí Bolsa en la placa una vez y volvé.	Pas encore de configuration : ouvre Bourse sur la carte une fois et reviens.
+
+#: apps/bolsa/web/bolsa.js:308
+Datos con demora. La app muestra cotizaciones y gráficos; no es un consejo de inversión.	Données différées. L'app affiche des cours et des graphiques ; ce n'est pas un conseil en investissement.
+
+#: apps/bolsa/web/bolsa.js:309
+Listas	Listes
+
+#: apps/bolsa/web/bolsa.js:310
+Acciones de EE. UU. con su símbolo (NANDU), de Buenos Aires con .BA (YERBA.BA), índices con ^ (^MERV), monedas como cg:bitcoin. El dólar, las monedas, el riesgo país y la cripto andan sin clave.	Actions US avec leur symbole (NANDU), de Buenos Aires avec .BA (YERBA.BA), indices avec ^ (^MERV), cryptos comme cg:bitcoin. Le dollar, les devises, le risque pays et la crypto marchent sans clé.
+
+#: apps/bolsa/web/bolsa.js:311
+Claves de los proveedores	Clés des fournisseurs
+
+#: apps/bolsa/web/bolsa.js:312
+Las acciones y los índices necesitan la clave gratis de al menos uno. Se guardan sólo en la tarjeta de la placa, en /data/bolsa/bolsa.txt.	Les actions et les indices ont besoin de la clé gratuite d'au moins un. Elles sont gardées seulement sur la carte SD de la carte, dans /data/bolsa/bolsa.txt.
+
+#: apps/bolsa/web/bolsa.js:313
+Avisos de precio	Alertes de prix
+
+#: apps/bolsa/web/bolsa.js:314
+La placa avisa con un mensaje y un pitido cuando el precio cruza el valor, mientras la app esté abierta (aunque esté atrás).	La carte prévient par un message et un bip quand le prix franchit la valeur, tant que l'app est ouverte (même en arrière-plan).
+
+#: apps/bolsa/web/bolsa.js:316
+Abierta en la placa	Ouverte sur la carte
+
+#: apps/bolsa/web/bolsa.js:316
+Abrir Bolsa en la placa	Ouvrir Bourse sur la carte

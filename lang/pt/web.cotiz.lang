@@ -1,0 +1,79 @@
+# amoledos-lang 1   es -> pt
+# web.cotiz.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/cotiz/web/cotiz.js:17
+Oficial	Oficial
+
+#: apps/cotiz/web/cotiz.js:18
+Blue	Blue
+
+#: apps/cotiz/web/cotiz.js:19
+Bolsa (MEP)	Bolsa (MEP)
+
+#: apps/cotiz/web/cotiz.js:20
+Contado c/liqui	Contado c/liqui
+
+#: apps/cotiz/web/cotiz.js:21
+Mayorista	Atacado
+
+#: apps/cotiz/web/cotiz.js:22
+Cripto	Cripto
+
+#: apps/cotiz/web/cotiz.js:23
+Tarjeta	Cartão
+
+#: apps/cotiz/web/cotiz.js:24
+Euro	Euro
+
+#: apps/cotiz/web/cotiz.js:25
+Real	Real
+
+#: apps/cotiz/web/cotiz.js:26
+Peso chileno	Peso chileno
+
+#: apps/cotiz/web/cotiz.js:27
+Peso uruguayo	Peso uruguaio
+
+#: apps/cotiz/web/cotiz.js:35
+#: apps/cotiz/web/cotiz.js:87
+Cotizaciones	Cotações
+
+#: apps/cotiz/web/cotiz.js:39
+Cargando…	Carregando…
+
+#: apps/cotiz/web/cotiz.js:50
+Dólar %s	Dólar %s
+
+#: apps/cotiz/web/cotiz.js:57
+Elegí al menos una	Escolha pelo menos uma
+
+#: apps/cotiz/web/cotiz.js:61
+Guardado: la placa lo toma en unos segundos	Salvo: a placa o aplica em alguns segundos
+
+#: apps/cotiz/web/cotiz.js:82
+Compra / venta, de dolarapi.com, actualizado %s.	Compra / venda, de dolarapi.com, atualizado %s.
+
+#: apps/cotiz/web/cotiz.js:83
+Compra / venta, de dolarapi.com.	Compra / venda, de dolarapi.com.
+
+#: apps/cotiz/web/cotiz.js:84
+No se pudieron traer los valores: %s	Não foi possível obter os valores: %s
+
+#: apps/cotiz/web/cotiz.js:88
+Qué muestra la placa	O que a placa mostra
+
+#: apps/cotiz/web/cotiz.js:90
+Guardar	Salvar
+
+#: apps/cotiz/web/cotiz.js:91
+Abierta en la placa	Aberto na placa
+
+#: apps/cotiz/web/cotiz.js:91
+Abrir Cotizaciones en la placa	Abrir Cotações na placa
+
+#: apps/cotiz/web/cotiz.js:92
+La placa las muestra siempre en este orden; si la app está abierta, cambia sola en unos segundos.	A placa sempre as mostra nesta ordem; se o app estiver aberto, muda sozinho em alguns segundos.

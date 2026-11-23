@@ -1,0 +1,127 @@
+# amoledos-lang 1   es -> it
+# web.cas.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/cas/web/cas.js:65
+columna %d	colonna %d
+
+#: apps/cas/web/cas.js:90
+No se pudo leer la pantalla (%s)	Impossibile leggere lo schermo (%s)
+
+#: apps/cas/web/cas.js:118
+#: apps/cas/web/cas.js:274
+CAS	CAS
+
+#: apps/cas/web/cas.js:126
+CAS abierta en la placa	CAS aperta sulla scheda
+
+#: apps/cas/web/cas.js:126
+Abrir CAS en la placa	Apri CAS sulla scheda
+
+#: apps/cas/web/cas.js:160
+Copiar abajo	Copia sotto
+
+#: apps/cas/web/cas.js:161
+Sumar al final de lo que escribís	Aggiungi in fondo a ciò che scrivi
+
+#: apps/cas/web/cas.js:163
+calculando…	calcolo…
+
+#: apps/cas/web/cas.js:164
+Todavía no hay cuentas.	Ancora nessun calcolo.
+
+#: apps/cas/web/cas.js:189
+Abrí CAS en la placa primero	Apri prima CAS sulla scheda
+
+#: apps/cas/web/cas.js:198
+Funciones enviadas	Funzioni inviate
+
+#: apps/cas/web/cas.js:203
+Pegá una tabla (de una planilla, separada por comas, punto y coma o tabulaciones) o elegí un archivo .csv	Incolla una tabella (da un foglio di calcolo, separata da virgole, punti e virgola o tabulazioni) o scegli un file .csv
+
+#: apps/cas/web/cas.js:208
+No encontré columnas de números.	Nessuna colonna di numeri trovata.
+
+#: apps/cas/web/cas.js:217
+Hay %d columnas: van las cuatro primeras.	Ci sono %d colonne: vengono usate le prime quattro.
+
+#: apps/cas/web/cas.js:218
+Cada lista toma hasta 500 valores.	Ogni lista prende fino a 500 valori.
+
+#: apps/cas/web/cas.js:227
+No hay columnas de números para cargar	Nessuna colonna di numeri da caricare
+
+#: apps/cas/web/cas.js:232
+Listas cargadas en la placa	Liste caricate sulla scheda
+
+#: apps/cas/web/cas.js:232
+Listas guardadas: las ve CAS cuando abra Estadística	Liste salvate: CAS le vede quando apre Statistica
+
+#: apps/cas/web/cas.js:239
+Las listas están vacías	Le liste sono vuote
+
+#: apps/cas/web/cas.js:248
+Guardar el gráfico como PNG	Salva il grafico come PNG
+
+#: apps/cas/web/cas.js:252
+La placa no muestra ningún gráfico ahora	La scheda non mostra nessun grafico ora
+
+#: apps/cas/web/cas.js:276
+En la placa	Sulla scheda
+
+#: apps/cas/web/cas.js:278
+Calculadora	Calcolatrice
+
+#: apps/cas/web/cas.js:280
+Calcular	Calcola
+
+#: apps/cas/web/cas.js:281
+Sintaxis de Xcas: factor(x^4-1), int(sin(x)^2,x), solve(x^2=2,x), diff(f1(x),x), limit(sin(x)/x,x,0).	Sintassi di Xcas: factor(x^4-1), int(sin(x)^2,x), solve(x^2=2,x), diff(f1(x),x), limit(sin(x)/x,x,0).
+
+#: apps/cas/web/cas.js:282
+La cuenta se hace en la placa y queda en su historial. ↑ y ↓ traen lo que escribiste antes; tocar una cuenta la copia abajo, tocar un resultado lo suma.	Il calcolo si fa sulla scheda e resta nella sua cronologia. ↑ e ↓ richiamano ciò che hai scritto prima; toccare un calcolo lo copia sotto, toccare un risultato lo aggiunge.
+
+#: apps/cas/web/cas.js:283
+Funciones del gráfico	Funzioni del grafico
+
+#: apps/cas/web/cas.js:286
+Enviar	Invia
+
+#: apps/cas/web/cas.js:287
+Mostrar el gráfico en la placa	Mostra il grafico sulla scheda
+
+#: apps/cas/web/cas.js:288
+Listas de Estadística	Liste di Statistica
+
+#: apps/cas/web/cas.js:291
+Cargar en L1…L4	Carica in L1…L4
+
+#: apps/cas/web/cas.js:292
+Bajar las listas (CSV)	Scarica le liste (CSV)
+
+#: apps/cas/web/cas.js:293
+Cargar reemplaza las cuatro listas de la placa.	Caricare sostituisce le quattro liste della scheda.
+
+#: apps/cas/web/cas.js:294
+Imagen	Immagine
+
+#: apps/cas/web/cas.js:295
+Lo que la placa muestra ahora: el gráfico solo (de Gráfico, Geometría, Estadística, Finanzas o Ciencias) o la pantalla entera.	Ciò che la scheda mostra ora: solo il grafico (da Grafico, Geometria, Statistica, Finanza o Scienze) o lo schermo intero.
+
+#: apps/cas/web/cas.js:297
+Guardar la pantalla	Salva lo schermo
+
+#: apps/cas/web/cas.js:328
+Abierta, arrancando el motor	Aperta, avvio del motore
+
+#: apps/cas/web/cas.js:328
+Abierta, calculando	Aperta, calcolo in corso
+
+#: apps/cas/web/cas.js:328
+Abierta	Aperta
+
+#: apps/cas/web/cas.js:328
+Cerrada	Chiusa

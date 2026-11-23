@@ -283,3 +283,49 @@ Environment:
 writes a weak "not available" version of every function in `aos_hal.h`, so
 the board's HAL can be written a block at a time. Run it again after
 changing the header.
+
+## Translations
+
+The interface is written in Rioplatense Spanish, and the Spanish text is the
+key: `_("Ajustes")` in C, `tr('Ajustes')` in the portal's scripts.
+`tools/gen_lang.py` collects them into one plain-text catalogue per piece,
+`lang/<code>/<file>.lang` (one line per string: the Spanish, a TAB, the
+translation):
+
+| Catalogue | Holds | Travels |
+|---|---|---|
+| `_sistema.lang` | the system's screens and every app's name on the home screen | in the firmware (English and German only) and on the card |
+| `_portal.lang` | the web portal | on the card; the browser reads it |
+| `<app id>.lang`, `web.<page>.lang` | one app, one app's portal page | in the app's package |
+
+Five languages besides Spanish: English (`en`) and German (`de`), which are
+also embedded in the firmware, and Brazilian Portuguese (`pt`), French (`fr`)
+and Italian (`it`), which are read only from the card (the Store's System
+parts bring the first two catalogues). `lang/GLOSSARY-<code>.md` fixes the
+terms, the tone and the app names of each of the last three.
+Those three have not been reviewed by native speakers and may have
+mistakes: whoever finds one does us a favour reporting it as an issue on
+GitHub.
+
+```
+cp -R lang <scratch>/lang
+python3 tools/gen_lang.py --out <scratch>/lang template en   # rewrites EVERY catalogue
+python3 tools/gen_lang.py check pt      # missing, left over, %s/%d that differ
+python3 tools/gen_lang.py stats         # how far each language is
+tools/install_lang.sh sim pt            # the simulator reads sim/sim_fs/lang
+```
+
+**Who translates what.** Whoever writes or changes a text translates it into
+English and German in the same commit: those two are always complete.
+Portuguese, French and Italian are completed by a translation pass before
+each release; until then a new text shows in Spanish in those three, which
+is what the catalogue does with a string it does not have. `stats` lists, per
+language, the percentage done and the catalogues that are behind: that list
+is the pass's work.
+
+Rules that break things when ignored: the `%s`, `%d`, `%.1f`... stay the
+same and in the same order (`check` compares them); `\n` stays escaped; a
+translation never starts with `#` (the line becomes a comment); the
+no-break space is the literal character. Demo 2043, ARKANOS, Claudito and
+Chatarra draw with their own ASCII-only font: no accents in their
+catalogues (`check` warns).

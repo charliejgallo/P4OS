@@ -1,0 +1,412 @@
+# amoledos-lang 1   es -> pt
+# demo.mesa.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/mesa/main/g_ajedrez.c:38
+Jaque mate	Xeque-mate
+
+#: apps/mesa/main/g_ajedrez.c:38
+Rey ahogado	Rei afogado
+
+#: apps/mesa/main/g_ajedrez.c:38
+Triple repetición	Tripla repetição
+
+#: apps/mesa/main/g_ajedrez.c:38
+Cincuenta movimientos	Cinquenta lances
+
+#: apps/mesa/main/g_ajedrez.c:39
+Material insuficiente	Material insuficiente
+
+#: apps/mesa/main/g_ajedrez.c:45
+#: apps/mesa/main/g_ajedrez.c:51
+#: apps/mesa/main/g_damas.c:59
+#: apps/mesa/main/g_damas.c:61
+Peón	Peão
+
+#: apps/mesa/main/g_ajedrez.c:46
+#: apps/mesa/main/g_ajedrez.c:52
+Caballo	Cavalo
+
+#: apps/mesa/main/g_ajedrez.c:47
+#: apps/mesa/main/g_ajedrez.c:53
+Alfil	Bispo
+
+#: apps/mesa/main/g_ajedrez.c:48
+#: apps/mesa/main/g_ajedrez.c:54
+Torre	Torre
+
+#: apps/mesa/main/g_ajedrez.c:49
+#: apps/mesa/main/g_ajedrez.c:55
+#: apps/mesa/main/g_damas.c:60
+#: apps/mesa/main/g_damas.c:62
+Dama	Dama
+
+#: apps/mesa/main/g_ajedrez.c:50
+#: apps/mesa/main/g_ajedrez.c:56
+Rey	Rei
+
+#: apps/mesa/main/g_ajedrez.c:120
+#: apps/mesa/main/g_damas.c:96
+#: apps/mesa/main/g_reversi.c:58
+Negras	Pretas
+
+#: apps/mesa/main/g_ajedrez.c:120
+#: apps/mesa/main/g_backgammon.c:88
+#: apps/mesa/main/g_damas.c:96
+#: apps/mesa/main/g_reversi.c:58
+Blancas	Brancas
+
+#: apps/mesa/main/g_ajedrez.c:164
+Jaque	Xeque
+
+#: apps/mesa/main/g_ajedrez.c:325
+Ajedrez	Xadrez
+
+#: apps/mesa/main/g_ajedrez.c:326
+Reglas completas, reloj y planilla	Regras completas, relógio e súmula
+
+#: apps/mesa/main/g_backgammon.c:57
+Sacó todas sus fichas	Tirou todas as peças
+
+#: apps/mesa/main/g_backgammon.c:57
+Gammon	Gammon
+
+#: apps/mesa/main/g_backgammon.c:57
+#: apps/mesa/main/g_backgammon.c:571
+Backgammon	Gamão
+
+#: apps/mesa/main/g_backgammon.c:88
+Rojas	Verm.
+
+#: apps/mesa/main/g_backgammon.c:572
+Carrera de quince fichas con dos dados	Corrida de quinze peças com dois dados
+
+#: apps/mesa/main/g_cuatro.c:99
+#: apps/mesa/main/g_ludo.c:59
+Amarillo	Amarelo
+
+#: apps/mesa/main/g_cuatro.c:99
+#: apps/mesa/main/g_ludo.c:59
+Rojo	Verm.
+
+#: apps/mesa/main/g_cuatro.c:122
+El tablero está lleno	O tabuleiro está cheio
+
+#: apps/mesa/main/g_cuatro.c:122
+#: apps/mesa/main/g_cuatro.c:461
+Cuatro en línea	Quatro em linha
+
+#: apps/mesa/main/g_cuatro.c:462
+Cuatro fichas en fila, a lo ancho, a lo alto o en diagonal	Quatro peças em fila, na horizontal, na vertical ou na diagonal
+
+#: apps/mesa/main/g_damas.c:56
+Sin jugadas	Sem jogadas
+
+#: apps/mesa/main/g_damas.c:56
+Cincuenta jugadas de damas	Cinquenta lances de damas
+
+#: apps/mesa/main/g_damas.c:65
+De acá (8 × 8)	Daqui (8 × 8)
+
+#: apps/mesa/main/g_damas.c:65
+Internacionales (10 × 10)	Internacionais (10 × 10)
+
+#: apps/mesa/main/g_damas.c:66
+#: apps/mesa/main/g_damas.c:67
+#: apps/mesa/main/jm_setup.c:418
+#: apps/mesa/main/jm_setup.c:419
+No	Não
+
+#: apps/mesa/main/g_damas.c:66
+#: apps/mesa/main/g_damas.c:67
+#: apps/mesa/main/jm_setup.c:418
+#: apps/mesa/main/jm_setup.c:419
+Sí	Sim
+
+#: apps/mesa/main/g_damas.c:69
+Reglas	Regras
+
+#: apps/mesa/main/g_damas.c:70
+Los peones comen para atrás	Peões capturam para trás
+
+#: apps/mesa/main/g_damas.c:71
+Comer la mayor cantidad	Capturar o máximo
+
+#: apps/mesa/main/g_damas.c:562
+Damas	Damas
+
+#: apps/mesa/main/g_damas.c:563
+Las de acá y las internacionales	As daqui e as internacionais
+
+#: apps/mesa/main/g_ludo.c:59
+Verde	Verde
+
+#: apps/mesa/main/g_ludo.c:59
+Azul	Azul
+
+#: apps/mesa/main/g_ludo.c:62
+#: apps/mesa/main/jm_setup.c:277
+Jugadores	Jogadores
+
+#: apps/mesa/main/g_ludo.c:150
+Llevó sus cuatro fichas a casa	Levou suas quatro peças para casa
+
+#: apps/mesa/main/g_ludo.c:445
+Ludo	Ludo
+
+#: apps/mesa/main/g_ludo.c:446
+De dos a cuatro, con dados	De dois a quatro, com dados
+
+#: apps/mesa/main/g_reversi.c:135
+No quedan jugadas	Não restam jogadas
+
+#: apps/mesa/main/g_reversi.c:381
+Reversi	Reversi
+
+#: apps/mesa/main/g_reversi.c:382
+Encerrá las fichas del otro y dalas vuelta	Cerque as peças do outro e vire-as
+
+#: apps/mesa/main/jm_hud.c:158
+#: apps/mesa/main/jm_setup.c:290
+Placa	Placa
+
+#: apps/mesa/main/jm_hud.c:240
+RDTAC	RDTBC
+
+#: apps/mesa/main/jm_hud.c:320
+Planilla	Súmula
+
+#: apps/mesa/main/jm_hud.c:526
+Piensa...	Pensando...
+
+#: apps/mesa/main/jm_hud.c:557
+Tirá los dados	Jogue os dados
+
+#: apps/mesa/main/jm_hud.c:703
+Guardada en	Salva em
+
+#: apps/mesa/main/jm_hud.c:706
+No se pudo guardar	Não foi possível salvar
+
+#: apps/mesa/main/jm_hud.c:716
+No se pudo leer la partida	Não foi possível ler a partida
+
+#: apps/mesa/main/jm_hud.c:723
+#: apps/mesa/main/jm_hud.c:738
+Abrir una partida	Abrir uma partida
+
+#: apps/mesa/main/jm_hud.c:723
+No hay partidas guardadas en /sdcard/mesa/ajedrez	Não há partidas salvas em /sdcard/mesa/ajedrez
+
+#: apps/mesa/main/jm_hud.c:725
+#: apps/mesa/main/jm_hud.c:804
+Cancelar	Cancelar
+
+#: apps/mesa/main/jm_hud.c:733
+Seguir	Seguir
+
+#: apps/mesa/main/jm_hud.c:734
+Partida nueva	Nova partida
+
+#: apps/mesa/main/jm_hud.c:735
+Abandonar	Abandonar
+
+#: apps/mesa/main/jm_hud.c:737
+#: apps/mesa/main/jm_hud.c:775
+Guardar la partida	Salvar a partida
+
+#: apps/mesa/main/jm_hud.c:740
+#: apps/mesa/main/jm_setup.c:404
+#: apps/mesa/main/mesa.c:294
+Ajustes	Ajustes
+
+#: apps/mesa/main/jm_hud.c:741
+#: apps/mesa/main/jm_hud.c:776
+Salir al menú	Voltar ao menu
+
+#: apps/mesa/main/jm_hud.c:755
+Se acabó el tiempo	Acabou o tempo
+
+#: apps/mesa/main/jm_hud.c:758
+Abandono	Abandono
+
+#: apps/mesa/main/jm_hud.c:767
+Tablas	Empate
+
+#: apps/mesa/main/jm_hud.c:768
+¡Ganaste!	Você venceu!
+
+#: apps/mesa/main/jm_hud.c:768
+Ganó la placa	A placa venceu
+
+#: apps/mesa/main/jm_hud.c:769
+Gana	Vence
+
+#: apps/mesa/main/jm_hud.c:770
+Partida terminada	Partida encerrada
+
+#: apps/mesa/main/jm_hud.c:773
+Revancha	Revanche
+
+#: apps/mesa/main/jm_hud.c:774
+Ver el tablero	Ver o tabuleiro
+
+#: apps/mesa/main/jm_hud.c:797
+¿En qué se convierte?	Promover para?
+
+#: apps/mesa/main/jm_play.c:305
+No hay jugada: pasa el turno	Sem jogada: passa a vez
+
+#: apps/mesa/main/jm_play.c:349
+No hay memoria	Sem memória
+
+#: apps/mesa/main/jm_play.c:453
+Esta es la que haría la placa	Esta é a que a placa faria
+
+#: apps/mesa/main/jm_play.c:562
+Piensa la placa...	A placa está pensando...
+
+#: apps/mesa/main/jm_play.c:699
+Pensando...	Pensando...
+
+#: apps/mesa/main/jm_save.c:412
+jugadas	lances
+
+#: apps/mesa/main/jm_setup.c:49
+Sin reloj	Sem relógio
+
+#: apps/mesa/main/jm_setup.c:50
+por jugada	por lance
+
+#: apps/mesa/main/jm_setup.c:277
+De a dos	A dois
+
+#: apps/mesa/main/jm_setup.c:277
+Contra la placa	Contra a placa
+
+#: apps/mesa/main/jm_setup.c:280
+Jugás con	Você joga
+
+#: apps/mesa/main/jm_setup.c:280
+Al azar	Aleatório
+
+#: apps/mesa/main/jm_setup.c:282
+#: apps/mesa/main/jm_setup.c:293
+Nivel de la placa	Nível da placa
+
+#: apps/mesa/main/jm_setup.c:285
+Cómo	Como
+
+#: apps/mesa/main/jm_setup.c:285
+Pasando la placa	Passando a placa
+
+#: apps/mesa/main/jm_setup.c:285
+Cara a cara	Frente a frente
+
+#: apps/mesa/main/jm_setup.c:290
+Persona	Pessoa
+
+#: apps/mesa/main/jm_setup.c:296
+Reloj	Relógio
+
+#: apps/mesa/main/jm_setup.c:297
+Incremento	Incremento
+
+#: apps/mesa/main/jm_setup.c:297
+Bronstein	Bronstein
+
+#: apps/mesa/main/jm_setup.c:297
+Fischer	Fischer
+
+#: apps/mesa/main/jm_setup.c:299
+Jugar	Jogar
+
+#: apps/mesa/main/jm_setup.c:303
+Volver	Voltar
+
+#: apps/mesa/main/jm_setup.c:360
+Madera	Madeira
+
+#: apps/mesa/main/jm_setup.c:360
+Mármol	Mármore
+
+#: apps/mesa/main/jm_setup.c:360
+Vidrio	Vidro
+
+#: apps/mesa/main/jm_setup.c:360
+Metal	Metal
+
+#: apps/mesa/main/jm_setup.c:410
+Piezas y tablero	Peças e tabuleiro
+
+#: apps/mesa/main/jm_setup.c:412
+Los juegos de mármol, vidrio y metal se bajan aparte desde la Tienda.	Os jogos de mármore, vidro e metal são baixados à parte na Loja.
+
+#: apps/mesa/main/jm_setup.c:417
+Vista	Vista
+
+#: apps/mesa/main/jm_setup.c:417
+Plana	Plana
+
+#: apps/mesa/main/jm_setup.c:417
+En 3D	Em 3D
+
+#: apps/mesa/main/jm_setup.c:418
+Marcar las jugadas posibles	Marcar os lances possíveis
+
+#: apps/mesa/main/jm_setup.c:419
+Coordenadas	Coordenadas
+
+#: apps/mesa/main/jm_setup.c:420
+Sonido	Som
+
+#: apps/mesa/main/jm_setup.c:421
+Lentas	Lentas
+
+#: apps/mesa/main/jm_setup.c:421
+Normales	Normais
+
+#: apps/mesa/main/jm_setup.c:421
+Rápidas	Rápidas
+
+#: apps/mesa/main/jm_setup.c:422
+Las piezas se mueven	As peças se movem
+
+#: apps/mesa/main/jm_setup.c:423
+Listo	Pronto
+
+#: apps/mesa/main/jm_setup.c:461
+Jugadas	Lances
+
+#: apps/mesa/main/mesa.c:53
+damas	damas
+
+#: apps/mesa/main/mesa.c:53
+fichas	peças
+
+#: apps/mesa/main/mesa.c:53
+en casa	em casa
+
+#: apps/mesa/main/mesa.c:53
+afuera	fora
+
+#: apps/mesa/main/mesa.c:171
+No se pudo abrir la partida	Não foi possível abrir a partida
+
+#: apps/mesa/main/mesa.c:272
+Juegos de mesa	Jogos de mesa
+
+#: apps/mesa/main/mesa.c:280
+Seguir la partida	Seguir a partida
+
+#: apps/mesa/main/mesa.c:293
+Reloj de ajedrez	Relógio de xadrez
+
+#: apps/mesa/main/mesa.c:293
+Para una partida en un tablero de verdad	Para uma partida num tabuleiro de verdade
+
+#: apps/mesa/main/mesa.c:296
+Falta el paquete de arte mesa_p4.pak: los juegos se ven con piezas de reemplazo.	Falta o pacote de arte mesa_p4.pak: os jogos aparecem com peças substitutas.

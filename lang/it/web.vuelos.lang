@@ -1,0 +1,185 @@
+# amoledos-lang 1   es -> it
+# web.vuelos.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/vuelos/web/vuelos.js:52
+Sin cuenta. Un pedido por segundo como mucho y sólo para uso no comercial: la placa pregunta cada 5 s.	Senza account. Al massimo una richiesta al secondo e solo per uso non commerciale: la scheda chiede ogni 5 s.
+
+#: apps/vuelos/web/vuelos.js:53
+Datos abiertos (ODbL). Sin clave, 500 pedidos por día desde tu dirección: la placa los reparte en el día (uno cada 3 minutos). Con una clave, poné cuántos te da.	Dati aperti (ODbL). Senza chiave, 500 richieste al giorno dal tuo indirizzo: la scheda le distribuisce nella giornata (una ogni 3 minuti). Con una chiave, metti quante te ne dà.
+
+#: apps/vuelos/web/vuelos.js:54
+Para investigación y uso no comercial. Sin cuenta, 400 créditos por día (un pedido cada 4 minutos más o menos); con un cliente de la API de tu cuenta, 4000.	Per ricerca e uso non commerciale. Senza account, 400 crediti al giorno (una richiesta ogni 4 minuti circa); con un client API del tuo account, 4000.
+
+#: apps/vuelos/web/vuelos.js:55
+Receptor propio	Ricevitore proprio
+
+#: apps/vuelos/web/vuelos.js:55
+Un receptor ADS-B en tu red (readsb, dump1090, tar1090): la dirección de su aircraft.json. Cada 2 s.	Un ricevitore ADS-B nella tua rete (readsb, dump1090, tar1090): l'indirizzo del suo aircraft.json. Ogni 2 s.
+
+#: apps/vuelos/web/vuelos.js:85
+#: apps/vuelos/web/vuelos.js:267
+Vuelos	Voli
+
+#: apps/vuelos/web/vuelos.js:91
+Cargando…	Caricamento…
+
+#: apps/vuelos/web/vuelos.js:92
+Ciudad, pueblo o aeropuerto	Città, paese o aeroporto
+
+#: apps/vuelos/web/vuelos.js:96
+#: apps/vuelos/web/vuelos.js:240
+Abrí Vuelos en la placa para ver acá lo que ve.	Apri Voli sulla scheda per vedere qui ciò che vede.
+
+#: apps/vuelos/web/vuelos.js:122
+Sin nombre	Senza nome
+
+#: apps/vuelos/web/vuelos.js:123
+Todavía no hay un lugar elegido: la placa usa la ciudad de Clima.	Ancora nessun luogo scelto: la scheda usa la città di Meteo.
+
+#: apps/vuelos/web/vuelos.js:136
+Clave (opcional)	Chiave (opzionale)
+
+#: apps/vuelos/web/vuelos.js:137
+Pedidos por día que te da	Richieste al giorno che dà
+
+#: apps/vuelos/web/vuelos.js:140
+Client ID (opcional)	Client ID (opzionale)
+
+#: apps/vuelos/web/vuelos.js:141
+Client secret	Client secret
+
+#: apps/vuelos/web/vuelos.js:142
+Se crean en la página de tu cuenta de OpenSky. Quedan en la tarjeta de la placa, en /data/vuelos.txt.	Si creano nella pagina del tuo account OpenSky. Restano sulla microSD della scheda, in /data/vuelos.txt.
+
+#: apps/vuelos/web/vuelos.js:144
+Dirección del aircraft.json	Indirizzo di aircraft.json
+
+#: apps/vuelos/web/vuelos.js:159
+Guardado: la placa lo toma en unos segundos	Salvato: la scheda lo prende in pochi secondi
+
+#: apps/vuelos/web/vuelos.js:160
+No se pudo guardar: %s	Impossibile salvare: %s
+
+#: apps/vuelos/web/vuelos.js:177
+Clima no tiene un lugar elegido	Meteo non ha un luogo scelto
+
+#: apps/vuelos/web/vuelos.js:186
+Buscando…	Ricerca…
+
+#: apps/vuelos/web/vuelos.js:193
+Elegir	Scegli
+
+#: apps/vuelos/web/vuelos.js:193
+No se encontró ningún lugar con ese nombre.	Nessun luogo trovato con quel nome.
+
+#: apps/vuelos/web/vuelos.js:194
+No se pudo buscar: %s	Impossibile cercare: %s
+
+#: apps/vuelos/web/vuelos.js:199
+en tierra	a terra
+
+#: apps/vuelos/web/vuelos.js:215
+Vuelo	Volo
+
+#: apps/vuelos/web/vuelos.js:215
+Matrícula	Marche
+
+#: apps/vuelos/web/vuelos.js:215
+Tipo	Tipo
+
+#: apps/vuelos/web/vuelos.js:215
+Altitud	Quota
+
+#: apps/vuelos/web/vuelos.js:215
+Vel. vertical	Vel. vert.
+
+#: apps/vuelos/web/vuelos.js:215
+Rumbo	Rotta
+
+#: apps/vuelos/web/vuelos.js:215
+Distancia	Distanza
+
+#: apps/vuelos/web/vuelos.js:222
+%s aviones · %s · %s	%s aerei · %s · %s
+
+#: apps/vuelos/web/vuelos.js:250
+Radio (km)	Raggio (km)
+
+#: apps/vuelos/web/vuelos.js:251
+Unidades	Unità
+
+#: apps/vuelos/web/vuelos.js:251
+De aviación (ft, kt, NM)	Aeronautiche (ft, kt, NM)
+
+#: apps/vuelos/web/vuelos.js:251
+Métricas (m, km/h, km)	Metriche (m, km/h, km)
+
+#: apps/vuelos/web/vuelos.js:252
+Estelas	Scie
+
+#: apps/vuelos/web/vuelos.js:252
+No	No
+
+#: apps/vuelos/web/vuelos.js:254
+Nombres en el mapa	Nomi sulla mappa
+
+#: apps/vuelos/web/vuelos.js:254
+Origen y destino (adsbdb)	Origine e destinazione (adsbdb)
+
+#: apps/vuelos/web/vuelos.js:257
+Un avión pasa encima	Un aereo passa sopra
+
+#: apps/vuelos/web/vuelos.js:257
+Emergencias (7500, 7600, 7700)	Emergenze (7500, 7600, 7700)
+
+#: apps/vuelos/web/vuelos.js:258
+Militares	Militari
+
+#: apps/vuelos/web/vuelos.js:258
+Con sonido	Con suono
+
+#: apps/vuelos/web/vuelos.js:260
+"Encima" es a menos de (km)	"Sopra" è a meno di (km)
+
+#: apps/vuelos/web/vuelos.js:261
+y por debajo de (ft)	e sotto (ft)
+
+#: apps/vuelos/web/vuelos.js:268
+Lugar	Luogo
+
+#: apps/vuelos/web/vuelos.js:270
+Buscar	Cerca
+
+#: apps/vuelos/web/vuelos.js:271
+Usar el lugar de Clima	Usa il luogo di Meteo
+
+#: apps/vuelos/web/vuelos.js:272
+La búsqueda es de Open-Meteo. En la placa, una pulsación larga sobre el mapa también elige el lugar.	La ricerca è di Open-Meteo. Sulla scheda, una pressione prolungata sulla mappa sceglie anche il luogo.
+
+#: apps/vuelos/web/vuelos.js:274
+Fuente de los datos	Fonte dei dati
+
+#: apps/vuelos/web/vuelos.js:276
+Mapa y datos	Mappa e dati
+
+#: apps/vuelos/web/vuelos.js:278
+Avisos	Avvisi
+
+#: apps/vuelos/web/vuelos.js:280
+Los avisos salen mientras Vuelos está abierta en la placa.	Gli avvisi appaiono mentre Voli è aperta sulla scheda.
+
+#: apps/vuelos/web/vuelos.js:282
+Guardar	Salva
+
+#: apps/vuelos/web/vuelos.js:283
+Abierta en la placa	Aperta sulla scheda
+
+#: apps/vuelos/web/vuelos.js:283
+Abrir Vuelos en la placa	Apri Voli sulla scheda
+
+#: apps/vuelos/web/vuelos.js:284
+Lo que ve la placa	Ciò che vede la scheda

@@ -1,0 +1,51 @@
+# amoledos-lang 1   es -> pt
+# web.metegol.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/metegol/web/metegol.js:133
+Metegol	Pebolim
+
+#: apps/metegol/web/metegol.js:139
+Cargando…	Carregando…
+
+#: apps/metegol/web/metegol.js:141
+Guardar	Salvar
+
+#: apps/metegol/web/metegol.js:160
+Nombre	Nome
+
+#: apps/metegol/web/metegol.js:162
+Bandera (trazos)	Bandeira (faixas)
+
+#: apps/metegol/web/metegol.js:170
+Clubes	Clubes
+
+#: apps/metegol/web/metegol.js:170
+Selecciones	Seleções
+
+#: apps/metegol/web/metegol.js:179
+Guardado: la placa los toma al volver al menú	Salvo: a placa os carrega ao voltar ao menu
+
+#: apps/metegol/web/metegol.js:184
+¿Volver a los equipos de fábrica? Se pierden los cambios.	Voltar aos times de fábrica? As alterações serão perdidas.
+
+#: apps/metegol/web/metegol.js:187
+Listo: la app los escribe de nuevo al abrirse	Pronto: o app os escreve de novo ao abrir
+
+#: apps/metegol/web/metegol.js:194
+Metegol: los equipos	Pebolim: os times
+
+#: apps/metegol/web/metegol.js:195
+Los nombres, las tres letras del marcador y los colores de cada camiseta. Sin escudos: el diseño y los colores alcanzan.	Os nomes, as três letras do placar e as cores de cada camisa. Sem escudos: o desenho e as cores bastam.
+
+#: apps/metegol/web/metegol.js:198
+Abrir en la placa	Abrir na placa
+
+#: apps/metegol/web/metegol.js:199
+Volver a los de fábrica	Voltar aos de fábrica
+
+#: apps/metegol/web/metegol.js:202
+Todavía no hay equipos: abrí Metegol una vez en la placa.	Ainda não há times: abra o Pebolim uma vez na placa.

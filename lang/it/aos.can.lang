@@ -1,0 +1,769 @@
+# amoledos-lang 1   es -> it
+# aos.can.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/can/main/can.c:54
+Tramas	Frame
+
+#: apps/can/main/can.c:54
+Por id	Per id
+
+#: apps/can/main/can.c:54
+#: apps/can/main/can_send.c:409
+Enviar	Invia
+
+#: apps/can/main/can.c:54
+Señales	Segnali
+
+#: apps/can/main/can.c:54
+OBD	OBD
+
+#: apps/can/main/can.c:241
+#: apps/can/main/can_send.c:148
+#: apps/can/main/can_sheets.c:441
+Conectá el bus primero	Prima collega il bus
+
+#: apps/can/main/can.c:242
+No hay tarjeta	Nessuna microSD
+
+#: apps/can/main/can.c:243
+Grabando en la tarjeta, carpeta can	Registrazione sulla microSD, cartella can
+
+#: apps/can/main/can.c:279
+Recuperando: 128 silencios de 11 bits y vuelve	Recupero: 128 silenzi da 11 bit e torna
+
+#: apps/can/main/can.c:314
+Desconectar	Scollega
+
+#: apps/can/main/can.c:314
+#: apps/can/main/can.c:446
+#: apps/can/main/can_sheets.c:287
+Conectar	Collega
+
+#: apps/can/main/can.c:323
+Desconectado. Tocá la conexión para elegir pines, velocidad y modo.	Scollegato. Tocca la connessione per scegliere pin, velocità e modalità.
+
+#: apps/can/main/can.c:328
+%s · errores TX %u RX %u · de bus %u · %.0f tramas/s · carga %.0f %%	%s · errori TX %u RX %u · bus %u · %.0f frame/s · carico %.0f %%
+
+#: apps/can/main/can.c:333
+%u recibidas · %u enviadas · %u perdidas	%u ricevuti · %u inviati · %u persi
+
+#: apps/can/main/can.c:335
+ · %u sin confirmar	 · %u senza conferma
+
+#: apps/can/main/can.c:338
+ · grabando %s, %u:%02u, %u tramas	 · registro %s, %u:%02u, %u frame
+
+#: apps/can/main/can.c:340
+ (%u perdidas)	 (%u persi)
+
+#: apps/can/main/can.c:342
+ · repitiendo %s, %u	 · ripeto %s, %u
+
+#: apps/can/main/can.c:449
+Recuperar	Recupera
+
+#: apps/can/main/can.c:515
+No hay memoria para el espía	Memoria insufficiente per lo sniffer
+
+#: apps/can/main/can_bus.c:335
+Un solo pin para TX y RX sirve sólo en la autoprueba	Un solo pin per TX e RX va bene solo in autotest
+
+#: apps/can/main/can_bus.c:340
+El GPIO%d lo tiene %s	Il GPIO%d è usato da %s
+
+#: apps/can/main/can_bus.c:346
+El controlador no arrancó: mirá el registro	Il controller non è partito: guarda il log
+
+#: apps/can/main/can_bus.c:371
+No hay lugar para otra tarea	Non c'è posto per un altro task
+
+#: apps/can/main/can_dbc.c:441
+No está can/%s	Manca can/%s
+
+#: apps/can/main/can_dbc.c:449
+El archivo pasa de 4 MB	Il file supera i 4 MB
+
+#: apps/can/main/can_dbc.c:449
+El archivo está vacío	Il file è vuoto
+
+#: apps/can/main/can_dbc.c:455
+#: apps/can/main/can_dbc.c:471
+No hay memoria para leerlo	Memoria insufficiente per leggerlo
+
+#: apps/can/main/can_dbc.c:506
+El archivo no tiene señales (BO_ y SG_)	Il file non ha segnali (BO_ e SG_)
+
+#: apps/can/main/can_frame.c:122
+desconectado	scollegato
+
+#: apps/can/main/can_frame.c:123
+activo	attivo
+
+#: apps/can/main/can_frame.c:124
+con avisos	con avvisi
+
+#: apps/can/main/can_frame.c:125
+pasivo	passivo
+
+#: apps/can/main/can_frame.c:126
+fuera del bus	fuori dal bus
+
+#: apps/can/main/can_frame.c:142
+Normal	Normale
+
+#: apps/can/main/can_frame.c:143
+Autoprueba	Autotest
+
+#: apps/can/main/can_frame.c:144
+Solo escucha	Solo ascolto
+
+#: apps/can/main/can_frame.c:191
+No se pudo guardar en la tarjeta	Impossibile salvare sulla microSD
+
+#: apps/can/main/can_obd.c:71
+Luz de falla y códigos	Spia motore e codici
+
+#: apps/can/main/can_obd.c:72
+Carga calculada	Carico calcolato
+
+#: apps/can/main/can_obd.c:73
+Refrigerante	Refrigerante
+
+#: apps/can/main/can_obd.c:74
+Corrección corta, banco 1	Correzione breve, banco 1
+
+#: apps/can/main/can_obd.c:75
+Corrección larga, banco 1	Correzione lunga, banco 1
+
+#: apps/can/main/can_obd.c:76
+Corrección corta, banco 2	Correzione breve, banco 2
+
+#: apps/can/main/can_obd.c:77
+Corrección larga, banco 2	Correzione lunga, banco 2
+
+#: apps/can/main/can_obd.c:78
+Presión de combustible	Pressione carburante
+
+#: apps/can/main/can_obd.c:79
+Presión del múltiple	Pressione collettore
+
+#: apps/can/main/can_obd.c:80
+Régimen del motor	Regime motore
+
+#: apps/can/main/can_obd.c:81
+#: apps/can/main/can_sheets.c:249
+Velocidad	Velocità
+
+#: apps/can/main/can_obd.c:82
+Avance del encendido	Anticipo accensione
+
+#: apps/can/main/can_obd.c:83
+Aire de admisión	Aria aspirata
+
+#: apps/can/main/can_obd.c:84
+Caudal de aire (MAF)	Portata d'aria (MAF)
+
+#: apps/can/main/can_obd.c:85
+Mariposa	Farfalla
+
+#: apps/can/main/can_obd.c:86
+Sonda de oxígeno, banco 1, 1	Sonda lambda, banco 1, 1
+
+#: apps/can/main/can_obd.c:87
+Sonda de oxígeno, banco 1, 2	Sonda lambda, banco 1, 2
+
+#: apps/can/main/can_obd.c:88
+Norma OBD	Norma OBD
+
+#: apps/can/main/can_obd.c:89
+Desde el arranque	Dall'avviamento
+
+#: apps/can/main/can_obd.c:90
+Recorrido con la luz de falla	Percorso con spia accesa
+
+#: apps/can/main/can_obd.c:91
+Presión del riel (relativa)	Pressione rail (relativa)
+
+#: apps/can/main/can_obd.c:92
+Presión del riel	Pressione rail
+
+#: apps/can/main/can_obd.c:93
+EGR comandada	EGR comandata
+
+#: apps/can/main/can_obd.c:94
+Error de la EGR	Errore EGR
+
+#: apps/can/main/can_obd.c:95
+Purga del cánister	Spurgo canister
+
+#: apps/can/main/can_obd.c:96
+Nivel de combustible	Livello carburante
+
+#: apps/can/main/can_obd.c:97
+Calentamientos desde el borrado	Riscaldamenti dalla cancellazione
+
+#: apps/can/main/can_obd.c:98
+Recorrido desde el borrado	Percorso dalla cancellazione
+
+#: apps/can/main/can_obd.c:99
+Presión barométrica	Pressione barometrica
+
+#: apps/can/main/can_obd.c:100
+Catalizador, banco 1, 1	Catalizzatore, banco 1, 1
+
+#: apps/can/main/can_obd.c:101
+Catalizador, banco 2, 1	Catalizzatore, banco 2, 1
+
+#: apps/can/main/can_obd.c:102
+Tensión del módulo	Tensione del modulo
+
+#: apps/can/main/can_obd.c:103
+Carga absoluta	Carico assoluto
+
+#: apps/can/main/can_obd.c:104
+Lambda comandada	Lambda comandata
+
+#: apps/can/main/can_obd.c:105
+Mariposa relativa	Farfalla relativa
+
+#: apps/can/main/can_obd.c:106
+Temperatura ambiente	Temperatura ambiente
+
+#: apps/can/main/can_obd.c:107
+Mariposa absoluta B	Farfalla assoluta B
+
+#: apps/can/main/can_obd.c:108
+Pedal D	Pedale D
+
+#: apps/can/main/can_obd.c:109
+Pedal E	Pedale E
+
+#: apps/can/main/can_obd.c:110
+Mariposa comandada	Farfalla comandata
+
+#: apps/can/main/can_obd.c:111
+Tiempo con la luz de falla	Tempo con spia accesa
+
+#: apps/can/main/can_obd.c:112
+Tiempo desde el borrado	Tempo dalla cancellazione
+
+#: apps/can/main/can_obd.c:113
+Combustible	Carburante
+
+#: apps/can/main/can_obd.c:114
+Etanol	Etanolo
+
+#: apps/can/main/can_obd.c:115
+Presión del riel (absoluta)	Pressione rail (assoluta)
+
+#: apps/can/main/can_obd.c:116
+Pedal relativo	Pedale relativo
+
+#: apps/can/main/can_obd.c:117
+Batería del híbrido	Batteria ibrida
+
+#: apps/can/main/can_obd.c:118
+Aceite	Olio
+
+#: apps/can/main/can_obd.c:119
+Inyección	Iniezione
+
+#: apps/can/main/can_obd.c:120
+Consumo	Consumo
+
+#: apps/can/main/can_obd.c:121
+Par pedido	Coppia richiesta
+
+#: apps/can/main/can_obd.c:122
+Par real	Coppia reale
+
+#: apps/can/main/can_obd.c:123
+Par de referencia	Coppia di riferimento
+
+#: apps/can/main/can_obd.c:124
+Odómetro	Contachilometri
+
+#: apps/can/main/can_obd.c:359
+sin dato	n.d.
+
+#: apps/can/main/can_obd.c:359
+nafta	benzina
+
+#: apps/can/main/can_obd.c:359
+metanol	metanolo
+
+#: apps/can/main/can_obd.c:359
+etanol	etanolo
+
+#: apps/can/main/can_obd.c:359
+diésel	diesel
+
+#: apps/can/main/can_obd.c:360
+GLP	GPL
+
+#: apps/can/main/can_obd.c:360
+GNC	GNC
+
+#: apps/can/main/can_obd.c:360
+propano	propano
+
+#: apps/can/main/can_obd.c:360
+eléctrico	elettrico
+
+#: apps/can/main/can_obd.c:362
+bicombustible (%d)	bifuel (%d)
+
+#: apps/can/main/can_obd.c:363
+híbrido (%d)	ibrido (%d)
+
+#: apps/can/main/can_obd.c:364
+#: apps/can/main/can_obd.c:375
+código %d	codice %d
+
+#: apps/can/main/can_obd.c:370
+sin OBD	no OBD
+
+#: apps/can/main/can_obd.c:390
+encendida · %d códigos	accesa · %d codici
+
+#: apps/can/main/can_obd.c:390
+apagada · %d códigos	spenta · %d codici
+
+#: apps/can/main/can_obd.c:412
+Conectá el bus primero, en modo Normal	Prima collega il bus, in modalità Normale
+
+#: apps/can/main/can_obd.c:415
+Preguntar necesita el modo Normal	Chiedere richiede la modalità Normale
+
+#: apps/can/main/can_obd.c:467
+Detenido	Fermo
+
+#: apps/can/main/can_obd.c:467
+Preguntando qué PIDs conoce…	Chiedo quali PID conosce…
+
+#: apps/can/main/can_obd.c:467
+En vivo	Live
+
+#: apps/can/main/can_obd.c:468
+Nadie contestó	Nessuno ha risposto
+
+#: apps/can/main/can_obd.c:468
+Detenido: hace falta el modo Normal	Fermo: serve la modalità Normale
+
+#: apps/can/main/can_obd.c:469
+Detenido: nadie confirma lo que manda	Fermo: nessuno conferma ciò che invia
+
+#: apps/can/main/can_obd.c:493
+Contestan:	Rispondono:
+
+#: apps/can/main/can_obd.c:499
+ · %d PIDs · %u respuestas	 · %d PID · %u risposte
+
+#: apps/can/main/can_obd.c:501
+Pregunta a 18DB33F1; contestan desde 18DAF1xx	Chiede a 18DB33F1; rispondono da 18DAF1xx
+
+#: apps/can/main/can_obd.c:501
+Pregunta a 7DF; contestan desde 7E8 a 7EF	Chiede a 7DF; rispondono da 7E8 a 7EF
+
+#: apps/can/main/can_obd.c:504
+#: apps/can/main/can_obd.c:565
+#: apps/can/main/can_sheets.c:488
+Parar	Ferma
+
+#: apps/can/main/can_obd.c:504
+#: apps/can/main/can_obd.c:565
+Preguntar	Chiedi
+
+#: apps/can/main/can_obd.c:521
+PID %02X · %s · hace %u s	PID %02X · %s · %u s fa
+
+#: apps/can/main/can_obd.c:522
+PID %02X · %s	PID %02X · %s
+
+#: apps/can/main/can_obd.c:567
+#: apps/can/main/can_sheets.c:272
+11 bits	11 bit
+
+#: apps/can/main/can_obd.c:568
+#: apps/can/main/can_send.c:369
+#: apps/can/main/can_sheets.c:273
+29 bits	29 bit
+
+#: apps/can/main/can_obd.c:573
+El bus está desconectado	Il bus è scollegato
+
+#: apps/can/main/can_obd.c:574
+La app está en Solo escucha	L'app è in Solo ascolto
+
+#: apps/can/main/can_obd.c:575
+La app está en Autoprueba	L'app è in Autotest
+
+#: apps/can/main/can_obd.c:578
+El escáner pregunta, así que necesita el modo Normal: la app abre siempre en Solo escucha para no tocar un bus ajeno. Cambialo en la conexión. En un auto, casi siempre 500 kbit/s (algunos, 250), con el motor en marcha o el contacto puesto. En Solo escucha sí se ven las respuestas a las preguntas de otro escáner enchufado al mismo conector.	Lo scanner chiede, quindi serve la modalità Normale: l'app si apre sempre in Solo ascolto per non toccare un bus altrui. Cambiala nella connessione. In un'auto, quasi sempre 500 kbit/s (alcune, 250), con il motore acceso o il quadro acceso. In Solo ascolto si vedono invece le risposte alle domande di un altro scanner collegato allo stesso connettore.
+
+#: apps/can/main/can_obd.c:583
+#: apps/can/main/can_sheets.c:236
+Conexión	Connessione
+
+#: apps/can/main/can_obd.c:587
+El filtro del controlador está puesto: si no deja pasar 7E8-7EF (o 18DAF1xx), las respuestas no llegan.	Il filtro del controller è attivo: se non lascia passare 7E8-7EF (o 18DAF1xx), le risposte non arrivano.
+
+#: apps/can/main/can_obd.c:614
+PID %02X, sin fórmula	PID %02X, senza formula
+
+#: apps/can/main/can_obd.c:630
+Esperando el mapa de PIDs…	In attesa della mappa dei PID…
+
+#: apps/can/main/can_obd.c:631
+Preguntar pide primero el PID 00, el mapa de los que conoce el auto, y después da vueltas por esos con las fórmulas de SAE J1979.	Chiedi richiede prima il PID 00, la mappa di quelli che l'auto conosce, poi gira su quelli con le formule di SAE J1979.
+
+#: apps/can/main/can_obd.c:636
+Sin fórmula en la tabla de la app (se muestran los bytes):%s	Senza formula nella tabella dell'app (si mostrano i byte):%s
+
+#: apps/can/main/can_obd.c:639
+OBD-II es lo único igual en todos los autos: el diagnóstico de emisiones (modo 01 de SAE J1979). En muchos autos modernos el conector OBD da sólo eso: un gateway separa los buses internos (motor, carrocería, tablero), así que en Tramas se ve poco o nada más que estas respuestas, y los .dbc del auto sirven conectado detrás del gateway.	OBD-II è l'unica cosa uguale in tutte le auto: la diagnosi delle emissioni (modo 01 di SAE J1979). In molte auto moderne il connettore OBD dà solo quello: un gateway separa i bus interni (motore, carrozzeria, cruscotto), quindi in Frame si vede poco o nulla oltre a queste risposte, e i .dbc dell'auto servono collegati dietro il gateway.
+
+#: apps/can/main/can_send.c:144
+#: apps/can/main/can_send.c:170
+Un id de 11 bits llega hasta 7FF: marcá 29 bits	Un id da 11 bit arriva fino a 7FF: segna 29 bit
+
+#: apps/can/main/can_send.c:152
+En solo escucha no sale nada: cambiá el modo	In solo ascolto non esce nulla: cambia modalità
+
+#: apps/can/main/can_send.c:161
+La cola de envío está llena	La coda di invio è piena
+
+#: apps/can/main/can_send.c:174
+La lista está llena	La lista è piena
+
+#: apps/can/main/can_send.c:224
+Ya hay 8 periódicas andando	Già 8 periodici in corso
+
+#: apps/can/main/can_send.c:254
+Sin tramas guardadas. Armá una arriba y tocá Guardar; también se editan desde el portal.	Nessun frame salvato. Componine uno sopra e tocca Salva; si modificano anche dal portale.
+
+#: apps/can/main/can_send.c:287
+#: apps/can/main/can_send.c:416
+cada %u ms	ogni %u ms
+
+#: apps/can/main/can_send.c:288
+#: apps/can/main/can_send.c:417
+a mano	a mano
+
+#: apps/can/main/can_send.c:316
+Sin bus: conectalo arriba para mandar.	Niente bus: collegalo sopra per inviare.
+
+#: apps/can/main/can_send.c:317
+En solo escucha no sale nada: cambiá el modo en la conexión.	In solo ascolto non esce nulla: cambia modalità nella connessione.
+
+#: apps/can/main/can_send.c:318
+Autoprueba: lo que mandes vuelve sólo a esta placa.	Autotest: ciò che invii torna solo a questa scheda.
+
+#: apps/can/main/can_send.c:319
+Normal: lo que mandes sale al bus.	Normale: ciò che invii esce sul bus.
+
+#: apps/can/main/can_send.c:370
+Remota	Remoto
+
+#: apps/can/main/can_send.c:434
+Guardar	Salva
+
+#: apps/can/main/can_sheets.c:91
+Entre 25 y 1000 kbit/s	Tra 25 e 1000 kbit/s
+
+#: apps/can/main/can_sheets.c:104
+Velocidad en kbit/s	Velocità in kbit/s
+
+#: apps/can/main/can_sheets.c:111
+Normal: la placa confirma tramas y puede mandar. En un auto, no.	Normale: la scheda conferma i frame e può inviare. In un'auto, no.
+
+#: apps/can/main/can_sheets.c:127
+En hexa, como 0C0	In esadec., es. 0C0
+
+#: apps/can/main/can_sheets.c:135
+En hexa, como 7FF	In esadec., es. 7FF
+
+#: apps/can/main/can_sheets.c:144
+Id del filtro, en hexa	Id del filtro, in esadec.
+
+#: apps/can/main/can_sheets.c:152
+Máscara del filtro, en hexa	Maschera del filtro, in esadec.
+
+#: apps/can/main/can_sheets.c:181
+pata	pin
+
+#: apps/can/main/can_sheets.c:239
+Pines del header	Pin dell'header
+
+#: apps/can/main/can_sheets.c:246
+TX va a la D (CTX) del transceptor y RX a su R (CRX). En la autoprueba alcanza un pin: elegí el mismo en los dos y no hace falta cablear nada.	TX va al D (CTX) del transceiver e RX al suo R (CRX). In autotest basta un pin: scegli lo stesso per entrambi e non serve cablare nulla.
+
+#: apps/can/main/can_sheets.c:258
+Otra…	Altra…
+
+#: apps/can/main/can_sheets.c:259
+Otra: %u.%u k	Altra: %u.%u k
+
+#: apps/can/main/can_sheets.c:262
+Modo	Modo
+
+#: apps/can/main/can_sheets.c:264
+No confirma ni manda nada: para espiar un bus ajeno, como el de un auto. Arranca siempre así.	Non conferma né invia nulla: per spiare un bus altrui, come quello di un'auto. Parte sempre così.
+
+#: apps/can/main/can_sheets.c:266
+Participa: confirma las tramas de los otros y puede mandar.	Partecipa: conferma i frame degli altri e può inviare.
+
+#: apps/can/main/can_sheets.c:267
+Sin transceptor: manda y se escucha a sí misma. No sale al bus.	Senza transceiver: invia e ascolta sé stessa. Non esce sul bus.
+
+#: apps/can/main/can_sheets.c:269
+Filtro del controlador	Filtro del controller
+
+#: apps/can/main/can_sheets.c:271
+Sin filtro	Nessun filtro
+
+#: apps/can/main/can_sheets.c:277
+Id %X	Id %X
+
+#: apps/can/main/can_sheets.c:279
+Máscara %X	Maschera %X
+
+#: apps/can/main/can_sheets.c:281
+Pasa la trama cuyo id coincide con el del filtro en los bits de la máscara: 7FF deja un id solo, 700 los de 0x100 en 0x100. Lo que no pasa no llega ni a la grabación.	Passa il frame il cui id coincide con quello del filtro nei bit della maschera: 7FF lascia un solo id, 700 quelli da 0x100 in 0x100. Ciò che non passa non arriva nemmeno alla registrazione.
+
+#: apps/can/main/can_sheets.c:287
+Reconectar con esto	Ricollega con questo
+
+#: apps/can/main/can_sheets.c:289
+#: apps/can/main/can_sheets.c:335
+Cableado	Cablaggio
+
+#: apps/can/main/can_sheets.c:347
+P4 · header	P4 · header
+
+#: apps/can/main/can_sheets.c:351
+TX GPIO%d · p%u	TX GPIO%d · p%u
+
+#: apps/can/main/can_sheets.c:353
+RX GPIO%d · p%u	RX GPIO%d · p%u
+
+#: apps/can/main/can_sheets.c:355
+3V3 · p18	3V3 · p18
+
+#: apps/can/main/can_sheets.c:356
+GND · p19	GND · p19
+
+#: apps/can/main/can_sheets.c:374
+bus	bus
+
+#: apps/can/main/can_sheets.c:383
+En un auto, sólo escucha. Una trama mandada al bus de un auto puede apagar el motor, el tablero o los frenos asistidos, y un nodo que no confirma bien lo puede trabar entero. La app arranca siempre en Solo escucha.	In un'auto, solo ascolto. Un frame inviato sul bus di un'auto può spegnere il motore, il cruscotto o il servofreno, e un nodo che conferma male può bloccarlo tutto. L'app parte sempre in Solo ascolto.
+
+#: apps/can/main/can_sheets.c:390
+· El transceptor tiene que ser de 3,3 V: SN65HVD230, 231 o 232. Uno de 5 V (MCP2551, TJA1050) le devuelve 5 V al pin RX, y el header no los aguanta.	· Il transceiver dev'essere da 3,3 V: SN65HVD230, 231 o 232. Uno da 5 V (MCP2551, TJA1050) rimanda 5 V al pin RX, e l'header non li regge.
+
+#: apps/can/main/can_sheets.c:392
+· Una resistencia de 120 Ω en cada punta del bus: con todo apagado se miden 60 Ω entre CANH y CANL. Muchos módulos traen la suya; si la placa no va en una punta, sacala.	· Una resistenza da 120 Ω a ogni capo del bus: con tutto spento si misurano 60 Ω tra CANH e CANL. Molti moduli hanno la loro; se la scheda non sta a un capo, toglila.
+
+#: apps/can/main/can_sheets.c:394
+· GND común con el resto del bus, y la misma velocidad en todos los nodos.	· GND in comune con il resto del bus, e la stessa velocità su tutti i nodi.
+
+#: apps/can/main/can_sheets.c:395
+· En el conector OBD-II de un auto: CANH en la pata 6, CANL en la 14, masa en la 4 o 5; casi siempre a 500 kbit/s.	· Nel connettore OBD-II di un'auto: CANH al pin 6, CANL al 14, massa al 4 o 5; quasi sempre a 500 kbit/s.
+
+#: apps/can/main/can_sheets.c:397
+· Sin transceptor: modo Autoprueba con TX y RX en el mismo pin. La placa se manda y se escucha.	· Senza transceiver: modalità Autotest con TX e RX sullo stesso pin. La scheda invia e ascolta sé stessa.
+
+#: apps/can/main/can_sheets.c:442
+Para repetir hace falta modo Normal o Autoprueba	Per ripetere serve modalità Normale o Autotest
+
+#: apps/can/main/can_sheets.c:443
+Ya hay una repitiéndose	Ce n'è già una in ripetizione
+
+#: apps/can/main/can_sheets.c:462
+Se está grabando: pará la grabación primero	È in registrazione: ferma prima la registrazione
+
+#: apps/can/main/can_sheets.c:469
+¿Borrar?	Eliminare?
+
+#: apps/can/main/can_sheets.c:482
+Grabaciones	Registrazioni
+
+#: apps/can/main/can_sheets.c:486
+Repitiendo %s	Ripeto %s
+
+#: apps/can/main/can_sheets.c:490
+En la tarjeta, carpeta can, en el CSV de SavvyCAN (GVRET). Se bajan desde la página CAN del portal. Repetir manda cada trama a su tiempo: hace falta modo Normal o Autoprueba.	Sulla microSD, cartella can, nel CSV di SavvyCAN (GVRET). Si scaricano dalla pagina CAN del portale. Ripeti invia ogni frame al suo tempo: serve modalità Normale o Autotest.
+
+#: apps/can/main/can_sheets.c:493
+Todavía no hay grabaciones: el botón rojo de arriba graba.	Ancora nessuna registrazione: il tasto rosso sopra registra.
+
+#: apps/can/main/can_sheets.c:514
+Repetir	Ripeti
+
+#: apps/can/main/can_sheets.c:515
+En bucle	In loop
+
+#: apps/can/main/can_sheets.c:516
+Borrar	Elimina
+
+#: apps/can/main/can_sig.c:310
+30 s · de %s a %s	30 s · da %s a %s
+
+#: apps/can/main/can_sig.c:313
+Esperando su id…	In attesa del suo id…
+
+#: apps/can/main/can_sig.c:313
+Sin bus	No bus
+
+#: apps/can/main/can_sig.c:321
+Sin señales	Nessun segnale
+
+#: apps/can/main/can_sig.c:358
+Señales leídas de nuevo	Segnali riletti
+
+#: apps/can/main/can_sig.c:411
+%d mensajes, %d señales	%d messaggi, %d segnali
+
+#: apps/can/main/can_sig.c:421
+Archivo .dbc	File .dbc
+
+#: apps/can/main/can_sig.c:422
+Los .dbc de la carpeta can/dbc de la tarjeta, y can/senales.dbc. Se bajan de bibliotecas abiertas (opendbc de comma.ai, nberlette/canbus; las dos MIT) y se copian ahí desde la computadora o se suben desde la página CAN del portal.	I .dbc della cartella can/dbc della microSD, e can/senales.dbc. Si scaricano da librerie aperte (opendbc di comma.ai, nberlette/canbus; entrambe MIT) e si copiano lì dal computer o si caricano dalla pagina CAN del portale.
+
+#: apps/can/main/can_sig.c:426
+Todavía no hay ninguno.	Ancora nessuno.
+
+#: apps/can/main/can_sig.c:454
+Elegidos: %d	Scelti: %d
+
+#: apps/can/main/can_sig.c:470
+Tocá los mensajes que querés ver	Tocca i messaggi che vuoi vedere
+
+#: apps/can/main/can_sig.c:495
+Hasta 64 mensajes	Fino a 64 messaggi
+
+#: apps/can/main/can_sig.c:528
+El archivo no tiene mensajes	Il file non ha messaggi
+
+#: apps/can/main/can_sig.c:531
+Mensajes	Messaggi
+
+#: apps/can/main/can_sig.c:533
+Los que pasan por el bus	Quelli che passano sul bus
+
+#: apps/can/main/can_sig.c:535
+Ninguno	Nessuno
+
+#: apps/can/main/can_sig.c:539
+%s: %d mensajes. Tocá uno para sumarlo o sacarlo (hasta 64); arriba, los que se vieron en el bus. La lista entera, con buscador, está en la página CAN del portal.	%s: %d messaggi. Toccane uno per aggiungerlo o toglierlo (fino a 64); sopra, quelli visti sul bus. La lista intera, con ricerca, è nella pagina CAN del portale.
+
+#: apps/can/main/can_sig.c:566
+%u · en el bus	%u · sul bus
+
+#: apps/can/main/can_sig.c:573
+Y %d más: se eligen desde el portal.	E altri %d: si scelgono dal portale.
+
+#: apps/can/main/can_sig.c:646
+En el bus	Sul bus
+
+#: apps/can/main/can_sig.c:647
+%d elegidos	%d scelti
+
+#: apps/can/main/can_sig.c:665
+De Por id	Da Per id
+
+#: apps/can/main/can_sig.c:696
+%s: %d mensajes, %d señales.	%s: %d messaggi, %d segnali.
+
+#: apps/can/main/can_sig.c:698
+ %d de más de 32 bits, salteadas.	 %d oltre 32 bit, saltati.
+
+#: apps/can/main/can_sig.c:701
+ Se muestran los que pasan por el bus: todavía no pasó ninguno.	 Si mostrano quelli che passano sul bus: non ne è ancora passato nessuno.
+
+#: apps/can/main/can_sig.c:703
+ Y %d señales más: elegí menos mensajes.	 E altri %d segnali: scegli meno messaggi.
+
+#: apps/can/main/can_sig.c:708
+Leer de nuevo	Rileggi
+
+#: apps/can/main/can_spy.c:213
+   tiempo   id        n  datos                    ascii	   tempo   id        n  dati                     ascii
+
+#: apps/can/main/can_spy.c:214
+   tiempo   id        n  datos	   tempo   id        n  dati
+
+#: apps/can/main/can_spy.c:229
+#: apps/can/main/can_spy.c:449
+Esperando tramas…	In attesa di frame…
+
+#: apps/can/main/can_spy.c:229
+#: apps/can/main/can_spy.c:449
+Sin bus. Conectalo arriba.	Niente bus. Collegalo sopra.
+
+#: apps/can/main/can_spy.c:231
+Seguir	Segui
+
+#: apps/can/main/can_spy.c:335
+Filtro: sólo un id	Filtro: un solo id
+
+#: apps/can/main/can_spy.c:335
+Filtro: %d ocultos	Filtro: %d nascosti
+
+#: apps/can/main/can_spy.c:338
+1 id	1 id
+
+#: apps/can/main/can_spy.c:339
+%d ids	%d id
+
+#: apps/can/main/can_spy.c:413
+id	id
+
+#: apps/can/main/can_spy.c:414
+datos	dati
+
+#: apps/can/main/can_spy.c:415
+por s	al s
+
+#: apps/can/main/can_spy.c:416
+vistas	visti
+
+#: apps/can/main/can_spy.c:469
+%u bytes · %u.%u por segundo · cada %u.%u ms · %u vistas	%u byte · %u.%u al secondo · ogni %u.%u ms · %u visti
+
+#: apps/can/main/can_spy.c:543
+16 bits: Intel	16 bit: Intel
+
+#: apps/can/main/can_spy.c:543
+#: apps/can/main/can_spy.c:646
+16 bits: Motorola	16 bit: Motorola
+
+#: apps/can/main/can_spy.c:574
+Id %s (29 bits)	Id %s (29 bit)
+
+#: apps/can/main/can_spy.c:574
+Id %s	Id %s
+
+#: apps/can/main/can_spy.c:625
+Naranja: bits que cambiaron alguna vez; amarillo: recién.	Arancione: bit cambiati almeno una volta; giallo: adesso.
+
+#: apps/can/main/can_spy.c:631
+Sólo este id	Solo questo id
+
+#: apps/can/main/can_spy.c:632
+Ocultarlo	Nascondilo
+
+#: apps/can/main/can_spy.c:633
+Mostrar todos	Mostra tutti
+
+#: apps/can/main/can_spy.c:634
+Llevar a Enviar	Porta in Invia
+
+#: apps/can/main/can_spy.c:636
+Graficar un byte, o dos juntos:	Grafico di un byte, o due insieme:

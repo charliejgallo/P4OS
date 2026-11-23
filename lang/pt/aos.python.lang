@@ -1,0 +1,39 @@
+# amoledos-lang 1   es -> pt
+# aos.python.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/python/main/mod_p4.c:145
+El Python de P4OS es MicroPython 1.29.\n\nEscribí una expresión y Enter:\n  2**100, sum(range(10)), 'hola'.upper()\ndef, for, if... siguen con '...'; una\n  línea vacía los corre.\nMódulos: math, random, json, re, time,\n  os, struct, collections, gc...\n  help('modules') los lista;\n  help(math) muestra uno.\nArchivos: la tarjeta es '/' y se\n  empieza en /python. open(), os e\n  import como en cualquier Python.\nRed: requests.get(url), socket.\nBibliotecas: import mip, y\n  mip.install('nombre') la baja de\n  micropython-lib a /python/lib.\nApps: cada .py de /python/apps es una\n  app del inicio que dibuja con aos.\nDetener corta lo que está corriendo.\n	O Python do P4OS é MicroPython 1.29.\n\nDigite uma expressão e Enter:\n  2**100, sum(range(10)), 'oi'.upper()\ndef, for, if... continuam com '...'; uma\n  linha vazia os executa.\nMódulos: math, random, json, re, time,\n  os, struct, collections, gc...\n  help('modules') os lista;\n  help(math) mostra um.\nArquivos: o cartão é '/' e se\n  começa em /python. open(), os e\n  import como em qualquer Python.\nRede: requests.get(url), socket.\nBibliotecas: import mip, e\n  mip.install('nome') baixa uma do\n  micropython-lib para /python/lib.\nApps: cada .py de /python/apps é um\n  app do Início que desenha com aos.\nParar interrompe o que está rodando.\n
+
+#: apps/python/main/mod_p4.c:189
+Y los .py y .mpy de /python y /python/lib.\n	E os .py e .mpy de /python e /python/lib.\n
+
+#: apps/python/main/py_app.c:405
+Hay algo corriendo: detenelo primero\n	Há algo rodando: pare primeiro\n
+
+#: apps/python/main/py_app.c:423
+No se pudo leer %s\n	Não foi possível ler %s\n
+
+#: apps/python/main/py_app.c:488
+MicroPython no arrancó	O MicroPython não iniciou
+
+#: apps/python/main/py_app.c:489
+esperando una línea	esperando uma linha
+
+#: apps/python/main/py_app.c:490
+corriendo…	rodando…
+
+#: apps/python/main/py_app.c:589
+Detener	Parar
+
+#: apps/python/main/py_app.c:592
+Limpiar	Limpar
+
+#: apps/python/main/py_app.c:636
+MicroPython 1.29 en P4OS · help() para empezar\n	MicroPython 1.29 no P4OS · help() para começar\n
+
+#: apps/python/main/py_script.c:278
+Tocá para correrlo de nuevo	Toque para rodá-lo de novo

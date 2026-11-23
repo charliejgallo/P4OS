@@ -1,0 +1,428 @@
+# amoledos-lang 1   es -> pt
+# aos.notas.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/notas/main/notas.c:114
+Ayer	Ontem
+
+#: apps/notas/main/notas.c:189
+No se pudo guardar la nota	Não foi possível salvar a nota
+
+#: apps/notas/main/notas.c:264
+Escritura cancelada	Digitação cancelada
+
+#: apps/notas/main/notas.c:266
+Conectá una computadora en modo Teclado (USB o Bluetooth)	Conecte um computador no modo Teclado (USB ou Bluetooth)
+
+#: apps/notas/main/notas.c:276
+Nota escrita en la computadora	Nota digitada no computador
+
+#: apps/notas/main/notas.c:285
+En 3 segundos: poné el cursor donde va el texto	Em 3 segundos: ponha o cursor onde vai o texto
+
+#: apps/notas/main/notas.c:297
+Escaneá con el teléfono	Escaneie com o celular
+
+#: apps/notas/main/notas.c:316
+La nota es larga: el código lleva el principio.	A nota é longa: o código leva o começo.
+
+#: apps/notas/main/notas.c:339
+#: apps/notas/main/notas.c:488
+Información	Informações
+
+#: apps/notas/main/notas.c:344
+Palabras	Palavras
+
+#: apps/notas/main/notas.c:346
+Caracteres	Caracteres
+
+#: apps/notas/main/notas.c:353
+Párrafos	Parágrafos
+
+#: apps/notas/main/notas.c:355
+#: apps/notas/main/nt_tasks.c:565
+%d de %d	%d de %d
+
+#: apps/notas/main/notas.c:356
+Tareas hechas	Tarefas feitas
+
+#: apps/notas/main/notas.c:360
+Creada	Criada
+
+#: apps/notas/main/notas.c:362
+Modificada	Modificada
+
+#: apps/notas/main/notas.c:363
+(sin guardar)	(não salva)
+
+#: apps/notas/main/notas.c:364
+Archivo	Arquivo
+
+#: apps/notas/main/notas.c:391
+#: apps/notas/main/notas.c:483
+#: apps/notas/main/notas.c:1121
+Color	Cor
+
+#: apps/notas/main/notas.c:409
+#: apps/notas/main/notas.c:1072
+Movida a la papelera	Movida para a lixeira
+
+#: apps/notas/main/notas.c:438
+#: apps/notas/main/notas.c:1102
+Duplicada	Duplicada
+
+#: apps/notas/main/notas.c:451
+Fijada arriba	Fixada no topo
+
+#: apps/notas/main/notas.c:451
+Ya no está fijada	Não está mais fixada
+
+#: apps/notas/main/notas.c:458
+#: apps/notas/main/notas.c:1107
+¿Mover a la papelera?	Mover para a lixeira?
+
+#: apps/notas/main/notas.c:458
+Se puede recuperar desde la papelera.	Pode ser recuperada na lixeira.
+
+#: apps/notas/main/notas.c:459
+#: apps/notas/main/notas.c:1107
+Mover	Mover
+
+#: apps/notas/main/notas.c:477
+Mostrar completadas	Mostrar concluídas
+
+#: apps/notas/main/notas.c:477
+Ocultar completadas	Ocultar concluídas
+
+#: apps/notas/main/notas.c:478
+Desmarcar todas	Desmarcar todas
+
+#: apps/notas/main/notas.c:479
+Borrar completadas	Apagar concluídas
+
+#: apps/notas/main/notas.c:480
+Ordenar por prioridad	Ordenar por prioridade
+
+#: apps/notas/main/notas.c:482
+#: apps/notas/main/notas.c:1120
+Desfijar	Desafixar
+
+#: apps/notas/main/notas.c:482
+#: apps/notas/main/notas.c:1120
+Fijar arriba	Fixar no topo
+
+#: apps/notas/main/notas.c:484
+Convertir en nota	Converter em nota
+
+#: apps/notas/main/notas.c:484
+Convertir en lista de tareas	Converter em lista de tarefas
+
+#: apps/notas/main/notas.c:486
+Compartir con un QR	Compartilhar via QR
+
+#: apps/notas/main/notas.c:487
+Parar de escribir	Parar de digitar
+
+#: apps/notas/main/notas.c:487
+Escribir en la computadora	Digitar no computador
+
+#: apps/notas/main/notas.c:489
+#: apps/notas/main/notas.c:1122
+#: apps/notas/main/nt_tasks.c:279
+Duplicar	Duplicar
+
+#: apps/notas/main/notas.c:490
+#: apps/notas/main/notas.c:1123
+Mover a la papelera	Mover para a lixeira
+
+#: apps/notas/main/notas.c:492
+#: apps/notas/main/notas.c:1125
+#: apps/notas/main/notas.c:1196
+#: apps/notas/main/notas.c:1535
+Sin título	Sem título
+
+#: apps/notas/main/notas.c:642
+#: apps/notas/main/notas.c:1372
+#: apps/notas/main/nt_editor.c:522
+#: apps/notas/main/nt_tasks.c:541
+Título	Título
+
+#: apps/notas/main/notas.c:642
+Encabezado	Cabeçalho
+
+#: apps/notas/main/notas.c:642
+Subtítulo	Subtítulo
+
+#: apps/notas/main/notas.c:643
+Cuerpo	Corpo
+
+#: apps/notas/main/notas.c:643
+Cita	Citação
+
+#: apps/notas/main/notas.c:643
+Línea	Linha
+
+#: apps/notas/main/notas.c:655
+Tamaño	Tamanho
+
+#: apps/notas/main/notas.c:658
+Chica	Pequeno
+
+#: apps/notas/main/notas.c:658
+Normal	Normal
+
+#: apps/notas/main/notas.c:658
+Grande	Grande
+
+#: apps/notas/main/notas.c:658
+Enorme	Enorme
+
+#: apps/notas/main/notas.c:662
+Color del texto	Cor do texto
+
+#: apps/notas/main/notas.c:664
+Resaltado	Realce
+
+#: apps/notas/main/notas.c:711
+Viñetas	Marcadores
+
+#: apps/notas/main/notas.c:729
+#: apps/notas/main/nt_store.c:416
+Numeradas	Numeradas
+
+#: apps/notas/main/notas.c:735
+Casillas	Caixas
+
+#: apps/notas/main/notas.c:736
+Sin lista	Sem lista
+
+#: apps/notas/main/notas.c:947
+#: apps/notas/main/notas.c:1398
+#: apps/notas/main/notas.c:1410
+#: apps/notas/main/notas.c:1455
+Notas	Notas
+
+#: apps/notas/main/notas.c:1119
+Abrir	Abrir
+
+#: apps/notas/main/notas.c:1262
+Otras	Outras
+
+#: apps/notas/main/notas.c:1262
+Fijadas	Fixadas
+
+#: apps/notas/main/notas.c:1276
+Nada coincide con la búsqueda	Nada corresponde à busca
+
+#: apps/notas/main/notas.c:1277
+Todavía no hay listas	Ainda não há listas
+
+#: apps/notas/main/notas.c:1277
+Todavía no hay notas	Ainda não há notas
+
+#: apps/notas/main/notas.c:1281
+Tocá + para crear una	Toque em + para criar uma
+
+#: apps/notas/main/notas.c:1309
+Nota	Nota
+
+#: apps/notas/main/notas.c:1310
+Lista de tareas	Lista de tarefas
+
+#: apps/notas/main/notas.c:1312
+Crear	Criar
+
+#: apps/notas/main/notas.c:1353
+%d borradas	%d apagadas
+
+#: apps/notas/main/notas.c:1370
+Última modificación	Última modificação
+
+#: apps/notas/main/notas.c:1371
+Fecha de creación	Data de criação
+
+#: apps/notas/main/notas.c:1374
+Ordenar por	Ordenar por
+
+#: apps/notas/main/notas.c:1393
+Fondo claro	Fundo claro
+
+#: apps/notas/main/notas.c:1393
+Fondo oscuro	Fundo escuro
+
+#: apps/notas/main/notas.c:1394
+Ordenar por...	Ordenar por...
+
+#: apps/notas/main/notas.c:1395
+Ver en cuadrícula	Ver em grade
+
+#: apps/notas/main/notas.c:1395
+Ver en lista	Ver em lista
+
+#: apps/notas/main/notas.c:1396
+#: apps/notas/main/notas.c:1557
+Papelera	Lixeira
+
+#: apps/notas/main/notas.c:1436
+Buscar	Buscar
+
+#: apps/notas/main/notas.c:1455
+Todas	Todas
+
+#: apps/notas/main/notas.c:1455
+#: apps/notas/main/nt_store.c:412
+Listas	Listas
+
+#: apps/notas/main/notas.c:1520
+Restaurada	Restaurada
+
+#: apps/notas/main/notas.c:1532
+Restaurar	Restaurar
+
+#: apps/notas/main/notas.c:1533
+Borrar para siempre	Apagar para sempre
+
+#: apps/notas/main/notas.c:1542
+¿Vaciar la papelera?	Esvaziar a lixeira?
+
+#: apps/notas/main/notas.c:1542
+Las notas se borran para siempre.	As notas serão apagadas para sempre.
+
+#: apps/notas/main/notas.c:1542
+#: apps/notas/main/notas.c:1552
+Vaciar	Esvaziar
+
+#: apps/notas/main/notas.c:1591
+La papelera está vacía	A lixeira está vazia
+
+#: apps/notas/main/notas.c:1773
+La nota se borró desde el portal	A nota foi apagada pelo portal
+
+#: apps/notas/main/notas.c:1787
+Actualizada desde el portal	Atualizada pelo portal
+
+#: apps/notas/main/nt_editor.c:549
+Escribí acá	Escreva aqui
+
+#: apps/notas/main/nt_editor.c:695
+Copiado	Copiado
+
+#: apps/notas/main/nt_editor.c:746
+Cortar	Recortar
+
+#: apps/notas/main/nt_editor.c:747
+Copiar	Copiar
+
+#: apps/notas/main/nt_editor.c:748
+#: apps/notas/main/nt_editor.c:753
+Pegar	Colar
+
+#: apps/notas/main/nt_editor.c:749
+#: apps/notas/main/nt_editor.c:752
+Todo	Tudo
+
+#: apps/notas/main/nt_editor.c:751
+Seleccionar	Selecionar
+
+#: apps/notas/main/nt_store.c:385
+(copia)	(cópia)
+
+#: apps/notas/main/nt_store.c:409
+Lo que se puede hacer	O que dá para fazer
+
+#: apps/notas/main/nt_store.c:410
+Texto en **negrita**, *cursiva*, <u>subrayado</u> y ~~tachado~~.	Texto em **negrito**, *itálico*, <u>sublinhado</u> e ~~tachado~~.
+
+#: apps/notas/main/nt_store.c:411
+<span style=\"color:red\">Colores</span>, <span style=\"background:yellow\">resaltado</span> y <span style=\"font-size:x-large\">tamaños</span>.	<span style=\"color:red\">Cores</span>, <span style=\"background:yellow\">realce</span> e <span style=\"font-size:x-large\">tamanhos</span>.
+
+#: apps/notas/main/nt_store.c:413
+Con viñetas	Com marcadores
+
+#: apps/notas/main/nt_store.c:414
+y con sangría	e com recuo
+
+#: apps/notas/main/nt_store.c:415
+De varios tipos	De vários tipos
+
+#: apps/notas/main/nt_store.c:417
+Que se cuentan solas	Que se numeram sozinhas
+
+#: apps/notas/main/nt_store.c:418
+Y con casillas	E com caixas
+
+#: apps/notas/main/nt_store.c:419
+Que se tildan con un toque	Que se marcam com um toque
+
+#: apps/notas/main/nt_store.c:420
+Las notas son archivos Markdown en la carpeta notas de la tarjeta: también se editan desde el portal.	As notas são arquivos Markdown na pasta notas do cartão: também podem ser editadas pelo portal.
+
+#: apps/notas/main/nt_store.c:422
+Tocá **Aa** para el formato. Escribir \"- \", \"1. \" o \"[] \" al principio de una línea también arma la lista.	Toque em **Aa** para o formato. Digitar \"- \", \"1. \" ou \"[] \" no começo de uma linha também cria a lista.
+
+#: apps/notas/main/nt_store.c:426
+Pan	Pão
+
+#: apps/notas/main/nt_store.c:427
+Leche	Leite
+
+#: apps/notas/main/nt_store.c:428
+Alimento para Mila	Ração para a Mila
+
+#: apps/notas/main/nt_store.c:429
+Café	Café
+
+#: apps/notas/main/nt_store.c:430
+Pilas AA	Pilhas AA
+
+#: apps/notas/main/nt_store.c:469
+Compras	Compras
+
+#: apps/notas/main/nt_store.c:470
+Bienvenida a Notas	Bem-vindo ao Notas
+
+#: apps/notas/main/nt_tasks.c:240
+Sin prioridad	Sem prioridade
+
+#: apps/notas/main/nt_tasks.c:241
+Baja	Baixa
+
+#: apps/notas/main/nt_tasks.c:242
+Media	Média
+
+#: apps/notas/main/nt_tasks.c:243
+Alta	Alta
+
+#: apps/notas/main/nt_tasks.c:245
+#: apps/notas/main/nt_tasks.c:276
+Prioridad	Prioridade
+
+#: apps/notas/main/nt_tasks.c:275
+Editar	Editar
+
+#: apps/notas/main/nt_tasks.c:277
+Más adentro	Mais recuo
+
+#: apps/notas/main/nt_tasks.c:278
+Más afuera	Menos recuo
+
+#: apps/notas/main/nt_tasks.c:280
+Borrar	Apagar
+
+#: apps/notas/main/nt_tasks.c:430
+Nueva tarea	Nova tarefa
+
+#: apps/notas/main/nt_tasks.c:605
+Todavía no hay tareas	Ainda não há tarefas
+
+#: apps/notas/main/nt_tasks.c:619
+Agregar tarea	Adicionar tarefa
+
+#: apps/notas/main/nt_tasks.c:624
+Completadas (%d)	Concluídas (%d)
+
+#: apps/notas/main/nt_ui.c:628
+Cancelar	Cancelar

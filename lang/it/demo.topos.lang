@@ -1,0 +1,80 @@
+# amoledos-lang 1   es -> it
+# demo.topos.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/topos/main/topos.c:60
+Clásico	Classico
+
+#: apps/topos/main/topos.c:60
+Supervivencia	Sopravvivenza
+
+#: apps/topos/main/topos.c:60
+Frenesí	Frenesia
+
+#: apps/topos/main/topos.c:63
+60 segundos	60 secondi
+
+#: apps/topos/main/topos.c:63
+Tres vidas	Tre vite
+
+#: apps/topos/main/topos.c:63
+30 segundos a fondo	30 secondi a tutta
+
+#: apps/topos/main/topos.c:384
+Sonido	Suono
+
+#: apps/topos/main/topos.c:420
+¡Ya!	Via!
+
+#: apps/topos/main/topos.c:423
+Nivel	Livello
+
+#: apps/topos/main/topos.c:430
+¡Últimos 10 segundos!	Ultimi 10 secondi!
+
+#: apps/topos/main/topos.c:433
+¡Tiempo!	Tempo!
+
+#: apps/topos/main/topos.c:439
+¡Sin vidas!	Niente vite!
+
+#: apps/topos/main/topos.c:530
+¡Nuevo récord!	Nuovo record!
+
+#: apps/topos/main/topos.c:530
+¡Se acabó!	Finita!
+
+#: apps/topos/main/topos.c:539
+Golpes	Colpi
+
+#: apps/topos/main/topos.c:540
+Mejor racha	Serie record
+
+#: apps/topos/main/topos.c:543
+Récord	Record
+
+#: apps/topos/main/topos.c:952
+#: apps/topos/main/topos.c:956
+Topos	Talpe
+
+#: apps/topos/main/topos.c:986
+Tocá los topos; los de casco, dos veces. ¡Las bombas no!	Tocca le talpe; quelle col casco, due volte. Le bombe no!
+
+#: apps/topos/main/topos.c:1007
+Pausa	Pausa
+
+#: apps/topos/main/topos.c:1009
+Seguir	Avanti
+
+#: apps/topos/main/topos.c:1011
+#: apps/topos/main/topos.c:1050
+Menú	Menu
+
+#: apps/topos/main/topos.c:1013
+Salir	Esci
+
+#: apps/topos/main/topos.c:1047
+Otra vez	Ancora

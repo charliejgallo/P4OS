@@ -1,0 +1,163 @@
+# amoledos-lang 1   es -> it
+# web.traductor.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/traductor/web/traductor.js:19
+Automático	Automatico
+
+#: apps/traductor/web/traductor.js:19
+La placa cuando hay paquete de idioma; si no, tu servidor, y si no hay, MyMemory.	La scheda se c'è il pacchetto di lingua; se no, il tuo server, e se non c'è, MyMemory.
+
+#: apps/traductor/web/traductor.js:20
+En la placa	Sulla scheda
+
+#: apps/traductor/web/traductor.js:20
+Sin red: sólo los pares de los paquetes de idioma de la tarjeta.	Senza rete: solo le coppie dei pacchetti di lingua sulla microSD.
+
+#: apps/traductor/web/traductor.js:21
+Servidor propio	Server proprio
+
+#: apps/traductor/web/traductor.js:21
+Un LibreTranslate en tu red (una computadora o una Raspberry).	Un LibreTranslate nella tua rete (un computer o un Raspberry Pi).
+
+#: apps/traductor/web/traductor.js:22
+En línea	Online
+
+#: apps/traductor/web/traductor.js:22
+MyMemory: gratis y sin cuenta, 5000 caracteres por día; con un correo, 50 000.	MyMemory: gratis e senza account, 5000 caratteri al giorno; con un'e-mail, 50 000.
+
+#: apps/traductor/web/traductor.js:25
+Español	Spagnolo
+
+#: apps/traductor/web/traductor.js:25
+Inglés	Inglese
+
+#: apps/traductor/web/traductor.js:25
+Portugués	Portoghese
+
+#: apps/traductor/web/traductor.js:25
+Italiano	Italiano
+
+#: apps/traductor/web/traductor.js:25
+Francés	Francese
+
+#: apps/traductor/web/traductor.js:26
+Alemán	Tedesco
+
+#: apps/traductor/web/traductor.js:26
+Catalán	Catalano
+
+#: apps/traductor/web/traductor.js:26
+Neerlandés	Olandese
+
+#: apps/traductor/web/traductor.js:26
+Japonés	Giapponese
+
+#: apps/traductor/web/traductor.js:26
+Chino	Cinese
+
+#: apps/traductor/web/traductor.js:26
+Ruso	Russo
+
+#: apps/traductor/web/traductor.js:85
+#: apps/traductor/web/traductor.js:199
+Traductor	Traduttore
+
+#: apps/traductor/web/traductor.js:90
+Cargando…	Caricamento…
+
+#: apps/traductor/web/traductor.js:106
+Guardado: la placa lo toma en unos segundos	Salvato: la scheda lo prende in pochi secondi
+
+#: apps/traductor/web/traductor.js:120
+Sólo si tu servidor la pide	Solo se il tuo server la chiede
+
+#: apps/traductor/web/traductor.js:122
+nombre@ejemplo.com	nome@esempio.com
+
+#: apps/traductor/web/traductor.js:128
+Escribí la dirección del servidor	Scrivi l'indirizzo del server
+
+#: apps/traductor/web/traductor.js:129
+Probando…	Prova…
+
+#: apps/traductor/web/traductor.js:133
+Anda: %d idiomas.	Funziona: %d lingue.
+
+#: apps/traductor/web/traductor.js:135
+El navegador no llegó (puede ser el CORS del servidor); la placa quizás sí.	Il browser non ci è arrivato (può essere il CORS del server); la scheda forse sì.
+
+#: apps/traductor/web/traductor.js:139
+Motor	Motore
+
+#: apps/traductor/web/traductor.js:141
+Servidor propio (LibreTranslate)	Server proprio (LibreTranslate)
+
+#: apps/traductor/web/traductor.js:142
+Dirección	Indirizzo
+
+#: apps/traductor/web/traductor.js:143
+Clave	Chiave
+
+#: apps/traductor/web/traductor.js:144
+Probar desde el navegador	Prova dal browser
+
+#: apps/traductor/web/traductor.js:145
+MyMemory	MyMemory
+
+#: apps/traductor/web/traductor.js:146
+Correo (opcional): sube el límite diario de 5000 a 50 000 caracteres	E-mail (opzionale): alza il limite giornaliero da 5000 a 50 000 caratteri
+
+#: apps/traductor/web/traductor.js:147
+Lo que se traduce en línea viaja al servicio, que puede guardarlo. Sin red, en la placa, no sale de la tarjeta.	Ciò che si traduce online viaggia verso il servizio, che può conservarlo. Senza rete, sulla scheda, non esce dalla microSD.
+
+#: apps/traductor/web/traductor.js:148
+No guardar el historial	Non salvare la cronologia
+
+#: apps/traductor/web/traductor.js:150
+Guardar	Salva
+
+#: apps/traductor/web/traductor.js:151
+Abrir en la placa	Apri sulla scheda
+
+#: apps/traductor/web/traductor.js:167
+Paquetes de idioma en la tarjeta	Pacchetti di lingua sulla microSD
+
+#: apps/traductor/web/traductor.js:168
+Ninguno todavía.	Ancora nessuno.
+
+#: apps/traductor/web/traductor.js:169
+Se bajan desde la Tienda de la placa, en los extras del Traductor. Cada par trae los modelos de las dos direcciones (sin red, unos segundos por oración) y los diccionarios. Entre dos idiomas que no son el inglés, la placa traduce pasando por el inglés.	Si scaricano dallo Store della scheda, negli extra del Traduttore. Ogni coppia porta i modelli delle due direzioni (senza rete, qualche secondo a frase) e i dizionari. Tra due lingue che non sono l'inglese, la scheda traduce passando per l'inglese.
+
+#: apps/traductor/web/traductor.js:179
+Favorito	Preferito
+
+#: apps/traductor/web/traductor.js:181
+Copiar	Copia
+
+#: apps/traductor/web/traductor.js:182
+Copiado	Copiato
+
+#: apps/traductor/web/traductor.js:183
+Borrar	Elimina
+
+#: apps/traductor/web/traductor.js:191
+Historial	Cronologia
+
+#: apps/traductor/web/traductor.js:193
+Todo (%d)	Tutto (%d)
+
+#: apps/traductor/web/traductor.js:194
+Favoritos (%d)	Preferiti (%d)
+
+#: apps/traductor/web/traductor.js:195
+Bajar como texto	Scarica come testo
+
+#: apps/traductor/web/traductor.js:196
+No hay favoritos.	Nessun preferito.
+
+#: apps/traductor/web/traductor.js:196
+Todavía no hay traducciones.	Ancora nessuna traduzione.
