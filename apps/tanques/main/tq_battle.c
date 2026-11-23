@@ -73,7 +73,6 @@ bool tqb_animating(app_t *a)
     case B_AI_AIM:
     case B_FLY:
     case B_BOOM:
-    case B_MOVE:                    /* the turn's ring pulses */
         return true;
     default:
         break;

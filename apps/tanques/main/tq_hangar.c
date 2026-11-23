@@ -374,7 +374,12 @@ static void set_tank(app_t *a, int t)
 {
     a->h_tank = (t + TQ_TANK_TYPES) % TQ_TANK_TYPES;
     tqa_wait_worker(a);
+    /* the hangar draws only its turntable: the menu's battle gives its
+     * tanks back first (the Mamut's turntable alone is 5.4 MB) */
+    tq_art_use_tanks(0, 0);
     if (!tq_art_use_show(a->h_tank)) aos_ui_toast(_("No hay memoria para el arte"), 1500);
+    aos_hal_log("tanques", "hangar: %s, art %u KB, game %u KB", TQ_TANK[a->h_tank].key, (unsigned)(tq_art_bytes() / 1024),
+                (unsigned)(tq_mem_used() / 1024));
     paint_lut(a);
     refresh_head(a);
     build_body(a);

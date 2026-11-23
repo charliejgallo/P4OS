@@ -19,10 +19,12 @@ typedef struct {
     uint32_t off, size;
 } entry_t;
 
-/* A group of sprites read in one go: its bytes, and the smaller copies
- * made of its low sprites */
+/* A group of sprites loaded together: each sprite in a block of its own
+ * (the board's PSRAM gets fragmented by other apps: a few MB in one piece is
+ * not always there), and the smaller copies made of its low sprites */
 typedef struct {
-    uint8_t *blob;
+    uint8_t **blob;
+    int      nblob;
     size_t   bytes;
     uint8_t *mips[160];
     int      nmips;
@@ -173,71 +175,106 @@ static void mips(group_t *g, tq_spr_t *m)
 static void group_free(group_t *g)
 {
     for (int i = 0; i < g->nmips; i++) tq_free(g->mips[i]);
+    for (int i = 0; i < g->nblob; i++) tq_free(g->blob[i]);
     tq_free(g->blob);
     memset(g, 0, sizeof *g);
 }
 
-/* Reads [off, off + n) of the pack, which may be in parts on the card
- * (tanques_p4.pak, .pak.1, .pak.2...: packs over 8 MB travel so) */
+/* The pack on the card, which may be in parts (tanques_p4.pak, .pak.1,
+ * .pak.2...: packs over 8 MB travel so); a reader keeps one part open */
+typedef struct {
+    FILE    *f;
+    int      part;
+    uint32_t base, end;
+} reader_t;
+
+static void rd_close(reader_t *r)
+{
+    if (r->f) fclose(r->f);
+    r->f = NULL;
+}
+
+static bool rd_part(reader_t *r, int part, uint32_t base)
+{
+    rd_close(r);
+    char path[176];
+    if (part) snprintf(path, sizeof path, "%s/%s.%d", aos_hal_path_apps(), PACK_NAME, part);
+    else snprintf(path, sizeof path, "%s/%s", aos_hal_path_apps(), PACK_NAME);
+    r->f = fopen(path, "rb");
+    if (!r->f) return false;
+    fseek(r->f, 0, SEEK_END);
+    long size = ftell(r->f);
+    if (size <= 0) {
+        rd_close(r);
+        return false;
+    }
+    r->part = part;
+    r->base = base;
+    r->end = base + (uint32_t)size;
+    return true;
+}
+
+/* [off, off + n) of the pack */
+static bool rd_read(reader_t *r, uint32_t off, uint32_t n, uint8_t *dst)
+{
+    while (n) {
+        if (!r->f || off < r->base) {
+            if (!rd_part(r, 0, 0)) return false;
+        }
+        while (off >= r->end) {
+            if (r->part >= 15 || !rd_part(r, r->part + 1, r->end)) return false;
+        }
+        uint32_t take = r->end - off < n ? r->end - off : n;
+        if (fseek(r->f, (long)(off - r->base), SEEK_SET) != 0 || fread(dst, 1, take, r->f) != take) return false;
+        dst += take;
+        off += take;
+        n -= take;
+    }
+    return true;
+}
+
 static bool pak_read(uint32_t off, uint32_t n, uint8_t *dst)
 {
-    uint32_t base = 0;
-    for (int part = 0; part < 16 && n; part++) {
-        char path[176];
-        if (part) snprintf(path, sizeof path, "%s/%s.%d", aos_hal_path_apps(), PACK_NAME, part);
-        else snprintf(path, sizeof path, "%s/%s", aos_hal_path_apps(), PACK_NAME);
-        FILE *f = fopen(path, "rb");
-        if (!f) return false;
-        fseek(f, 0, SEEK_END);
-        long size = ftell(f);
-        if (size <= 0) {
-            fclose(f);
-            return false;
-        }
-        uint32_t end = base + (uint32_t)size;
-        if (off < end) {
-            uint32_t take = end - off < n ? end - off : n;
-            bool ok = fseek(f, (long)(off - base), SEEK_SET) == 0 && fread(dst, 1, take, f) == take;
-            if (!ok) {
-                fclose(f);
-                return false;
-            }
-            dst += take;
-            off += take;
-            n -= take;
-        }
-        fclose(f);
-        base = end;
-    }
-    return n == 0;
+    reader_t r = { 0 };
+    bool ok = rd_read(&r, off, n, dst);
+    rd_close(&r);
+    return ok;
 }
 
 typedef bool (*match_fn)(const char *name, const void *arg);
 
-/* Reads every entry the test takes, in one read of the span they cover
- * (pack.py keeps a group's entries together), and parses each with cb */
+/* Loads every entry the test takes, each in its own block, and parses each
+ * with cb. On a failure the group is left empty. */
 static bool group_load(group_t *g, match_fn match, const void *arg,
                        void (*cb)(group_t *g, const char *name, const tq_spr_t *s, const void *arg))
 {
-    uint32_t lo = 0xFFFFFFFFu, hi = 0;
-    for (int i = 0; i < s_nent; i++) {
+    int n = 0;
+    for (int i = 0; i < s_nent; i++)
+        if (match(s_ent[i].name, arg)) n++;
+    if (!n) return false;
+    g->blob = (uint8_t **)tq_calloc(sizeof(uint8_t *) * (size_t)n);
+    if (!g->blob) return false;
+    reader_t r = { 0 };
+    bool ok = true;
+    for (int i = 0; i < s_nent && ok; i++) {
         if (!match(s_ent[i].name, arg)) continue;
-        if (s_ent[i].off < lo) lo = s_ent[i].off;
-        if (s_ent[i].off + s_ent[i].size > hi) hi = s_ent[i].off + s_ent[i].size;
+        uint8_t *b = (uint8_t *)tq_malloc(s_ent[i].size);
+        if (!b || !rd_read(&r, s_ent[i].off, s_ent[i].size, b)) {
+            tq_free(b);
+            ok = false;
+            break;
+        }
+        g->blob[g->nblob++] = b;
+        g->bytes += s_ent[i].size;
+        tq_spr_t sp;
+        if (parse(b, s_ent[i].size, &sp)) cb(g, s_ent[i].name, &sp, arg);
     }
-    if (hi <= lo) return false;
-    g->blob = (uint8_t *)tq_malloc(hi - lo);
-    g->bytes = hi - lo;
-    if (!g->blob || !pak_read(lo, hi - lo, g->blob)) {
+    rd_close(&r);
+    if (!ok) {
+        aos_hal_log("tanques", "art: out of memory after %u KB", (unsigned)(g->bytes / 1024));
         group_free(g);
-        return false;
     }
-    for (int i = 0; i < s_nent; i++) {
-        if (!match(s_ent[i].name, arg)) continue;
-        tq_spr_t s;
-        if (parse(g->blob + (s_ent[i].off - lo), s_ent[i].size, &s)) cb(g, s_ent[i].name, &s, arg);
-    }
-    return true;
+    return ok;
 }
 
 static int set_of(const char *name, const char **rest)
@@ -308,6 +345,11 @@ bool tq_art_use_tanks(uint32_t types, uint32_t with_fp)
         }
         if (!want || have) continue;
         if (!group_load(&s_tank_g[t], fp ? match_tank : match_tank_nofp, &t, take_tank)) {
+            /* what was taken before the failure points at freed blocks */
+            memset(s_tank[0][t], 0, sizeof s_tank[0][t]);
+            memset(s_tank[1][t], 0, sizeof s_tank[1][t]);
+            memset(&s_roof[t], 0, sizeof s_roof[t]);
+            memset(s_barrel[t], 0, sizeof s_barrel[t]);
             ok = false;
             continue;
         }
@@ -378,7 +420,10 @@ bool tq_art_use_biome(int biome)
     group_free(&s_biome_g);
     memset(s_prop, 0, sizeof s_prop);
     s_biome = -1;
-    if (!group_load(&s_biome_g, match_biome, &biome, take_prop)) return false;
+    if (!group_load(&s_biome_g, match_biome, &biome, take_prop)) {
+        memset(s_prop, 0, sizeof s_prop);
+        return false;
+    }
     for (int p = 0; p < TQ_PROPS; p++) {
         for (int y = 0; y < 8; y++) {
             if (y > 0 && s_prop[TQ_SET_LOW][p][y][0].L == s_prop[TQ_SET_LOW][p][0][0].L) {
@@ -416,7 +461,10 @@ bool tq_art_use_show(int type)
     memset(s_showspr, 0, sizeof s_showspr);
     s_show = -1;
     if (type < 0) return true;
-    if (!group_load(&s_show_g, match_show, &type, take_show)) return false;
+    if (!group_load(&s_show_g, match_show, &type, take_show)) {
+        memset(s_showspr, 0, sizeof s_showspr);
+        return false;
+    }
     s_show = type;
     return true;
 }
