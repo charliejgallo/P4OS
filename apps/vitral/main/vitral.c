@@ -227,7 +227,10 @@ void vt_start(vt_app_t *a, vt_mode_t mode, int level)
     if (mode == VT_MODE_PUZZLE) {
         a->pz_level = level;
         vt_init(&a->p[0].g, VT_MODE_PUZZLE, 1, 1);
-        if (!vt_pz_build(&a->p[0].g, level)) aos_hal_log(TAG, "puzzle %d did not build", level);
+        uint32_t t0 = (uint32_t)aos_hal_uptime_us();
+        bool ok = vt_pz_build(&a->p[0].g, level);
+        aos_hal_log(TAG, "puzzle %d %s in %u us (try %d, %d pieces)", level + 1, ok ? "built" : "FAILED",
+                    (unsigned)((uint32_t)aos_hal_uptime_us() - t0), a->p[0].g.pz_try, a->p[0].g.pz_n);
     } else if (mode == VT_MODE_VERSUS) {
         /* the same pieces for both, in the same order */
         vt_init(&a->p[0].g, mode, a->seed, 3);
