@@ -24,8 +24,9 @@
 
 static struct {
     /* the world: the battle camera's picture of the whole map */
-    uint16_t *wpx, *wz;
-    int ww, wh;
+    uint16_t *wpx, *wz;             /* at half the battle view's scale */
+    int ww, wh;                     /* the battle view's size of it (even) */
+    int hw, hh;                     /* what is kept: half that */
     float ox, oy;                   /* image position of the world's origin */
     float dfar;                     /* depth at nearness 0 */
     tq_v3_t F, R, U;
@@ -85,10 +86,16 @@ bool tq_scene_init(void)
     S.wh = (int)(y1 - y0) + 2 * WMARGIN;
     if (S.ww < 1280) S.ww = 1280;
     if (S.wh < 1280) S.wh = 1280;
+    S.ww = (S.ww + 1) & ~1;
+    S.wh = (S.wh + 1) & ~1;
+    S.hw = S.ww / 2;
+    S.hh = S.wh / 2;
     S.ox = (S.ww - (x1 - x0)) * 0.5f - x0;
     S.oy = (S.wh - (y1 - y0)) * 0.5f - y0;
     S.dfar = d1 + 2.0f;
-    size_t n = (size_t)S.ww * S.wh;
+    /* the world at half the view's scale: the ground is smooth, the
+     * sprites over it stay sharp, and the 36 m map takes 2.3 MB, not 9.3 */
+    size_t n = (size_t)S.hw * S.hh;
     S.wpx = (uint16_t *)tq_malloc(n * 2);
     S.wz = (uint16_t *)tq_malloc(n * 2);
     S.wv = (float *)tq_malloc(sizeof(float) * 3 * TQ_NVMAX * TQ_NVMAX);
@@ -121,7 +128,7 @@ void tq_scene_free(void)
 
 size_t tq_scene_bytes(void)
 {
-    return (size_t)S.ww * S.wh * 4 + MAXPX + sizeof(float) * 7 * TQ_NVMAX * TQ_NVMAX + 5 * TQ_NVMAX * TQ_NVMAX;
+    return (size_t)S.hw * S.hh * 4 + MAXPX + sizeof(float) * 7 * TQ_NVMAX * TQ_NVMAX + 5 * TQ_NVMAX * TQ_NVMAX;
 }
 
 void tq_scene_world_all(void)
@@ -157,8 +164,8 @@ static inline void vcol(uint32_t c, tq_vtx_t *v)
 static void world_vertex(const tq_terrain_t *t, int i, int j, tq_vtx_t *v)
 {
     const float *w = &S.wv[(j * t->nv + i) * 3];
-    v->x = w[0];
-    v->y = w[1];
+    v->x = w[0] * 0.5f;
+    v->y = w[1] * 0.5f;
     v->q = w[2];
     vcol(t->col[j * t->nv + i], v);
     v->u = i * TQ_CELL * 16.0f;
@@ -195,6 +202,8 @@ static void world_sides(const tq_terrain_t *t, const tq_tgt_t *g)
                 for (int q = 0; q < 4; q++) {
                     tq_v3_t p = tq_v3(ii[q] * TQ_CELL, jj[q] * TQ_CELL, zs[q]);
                     wproj(p, &v[q].x, &v[q].y, &v[q].q);
+                    v[q].x *= 0.5f;
+                    v[q].y *= 0.5f;
                     vcol(tq_ter_side_colour(t, zs[q], shade * (q < 2 && b == 0 ? 1.08f : 1.0f)), &v[q]);
                     v[q].u = (ii[q] + jj[q]) * TQ_CELL * 16.0f;
                     v[q].v = zs[q] * 16.0f;
@@ -216,10 +225,10 @@ static void world_part(void *arg, int part)
     if (g.cy0 >= g.cy1) return;
     /* the background: a soft sky behind the diorama */
     for (int y = g.cy0; y < g.cy1; y++) {
-        float f = (float)y / S.wh;
+        float f = (float)y / S.hh;
         uint32_t r = (uint32_t)(150 - 70 * f), gg = (uint32_t)(196 - 72 * f), b = (uint32_t)(226 - 60 * f);
         uint16_t c = tq_565((r << 16) | (gg << 8) | b);
-        uint16_t *p = S.wpx + (size_t)y * S.ww, *z = S.wz + (size_t)y * S.ww;
+        uint16_t *p = S.wpx + (size_t)y * S.hw, *z = S.wz + (size_t)y * S.hw;
         for (int x = g.cx0; x < g.cx1; x++) {
             p[x] = c;
             z[x] = 0;
@@ -233,7 +242,7 @@ static void world_part(void *arg, int part)
             const float *b = &S.wv[(cj * NV + ci + 1) * 3], *d = &S.wv[((cj + 1) * NV + ci) * 3];
             float minx = fminf(fminf(a[0], b[0]), fminf(c[0], d[0])), maxx = fmaxf(fmaxf(a[0], b[0]), fmaxf(c[0], d[0]));
             float miny = fminf(fminf(a[1], b[1]), fminf(c[1], d[1])), maxy = fmaxf(fmaxf(a[1], b[1]), fmaxf(c[1], d[1]));
-            if (maxx < g.cx0 || minx >= g.cx1 || maxy < g.cy0 || miny >= g.cy1) continue;
+            if (maxx * 0.5f < g.cx0 || minx * 0.5f >= g.cx1 || maxy * 0.5f < g.cy0 || miny * 0.5f >= g.cy1) continue;
             tq_vtx_t v00, v10, v11, v01;
             world_vertex(t, ci, cj, &v00);
             world_vertex(t, ci + 1, cj, &v10);
@@ -257,13 +266,18 @@ static void world_draw(const tq_terrain_t *t, int x0, int y0, int x1, int y1)
     job.t = t;
     job.tgt.px = S.wpx;
     job.tgt.z = S.wz;
-    job.tgt.w = S.ww;
-    job.tgt.h = S.wh;
-    job.tgt.stride = S.ww;
-    job.tgt.cx0 = x0 < 0 ? 0 : x0;
-    job.tgt.cy0 = y0 < 0 ? 0 : y0;
-    job.tgt.cx1 = x1 > S.ww ? S.ww : x1;
-    job.tgt.cy1 = y1 > S.wh ? S.wh : y1;
+    /* the box comes in the view's pixels; the world is kept at half */
+    x0 = x0 < 0 ? 0 : x0 / 2;
+    y0 = y0 < 0 ? 0 : y0 / 2;
+    x1 = (x1 + 1) / 2;
+    y1 = (y1 + 1) / 2;
+    job.tgt.w = S.hw;
+    job.tgt.h = S.hh;
+    job.tgt.stride = S.hw;
+    job.tgt.cx0 = x0;
+    job.tgt.cy0 = y0;
+    job.tgt.cx1 = x1 > S.hw ? S.hw : x1;
+    job.tgt.cy1 = y1 > S.hh ? S.hh : y1;
     if (job.tgt.cx0 >= job.tgt.cx1 || job.tgt.cy0 >= job.tgt.cy1) return;
     run(world_part, &job);
 }
@@ -308,8 +322,8 @@ static void top_window(const tq_terrain_t *t, float cx, float cy, int w, int h, 
     if (b < 0) b = 0;
     if (a > S.ww - w) a = S.ww - w;
     if (b > S.wh - h) b = S.wh - h;
-    *wx0 = a;
-    *wy0 = b;
+    *wx0 = a & ~1;                  /* even: the half-size world lines up */
+    *wy0 = b & ~1;
 }
 
 void tq_scene_top_clamp(const tq_terrain_t *t, int w, int h, float *cx, float *cy)
@@ -559,10 +573,10 @@ static void top_part(void *arg, int part)
     if (part == 0) g.cy1 = H / 2;
     else g.cy0 = H / 2;
     /* the window of the world */
-    for (int y = g.cy0; y < g.cy1; y++)
-        memcpy(j->fb + (size_t)y * W, S.wpx + (size_t)(y + j->wy0) * S.ww + j->wx0, (size_t)W * 2);
-    const uint16_t *zt = S.wz + (size_t)j->wy0 * S.ww + j->wx0;
-    int zs = S.ww;
+    /* the window of the world, doubled */
+    tq_up2_window(j->fb, W, W, S.wpx, S.hw, S.hh, S.hw, j->wx0 / 2, j->wy0 / 2, g.cy0, g.cy1);
+    const uint16_t *zt = S.wz + (size_t)(j->wy0 / 2) * S.hw + j->wx0 / 2;
+    int zs = S.hw;
     float ox = -(float)j->wx0, oy = -(float)j->wy0;
 
     /* the reach: tiles on the ground */
@@ -645,7 +659,11 @@ static void top_part(void *arg, int part)
         float sx, sy, q;
         wproj(i->p, &sx, &sy, &q);
         if (i->kind == 0) {
-            tq_spr_draw(&g, i->spr, i->lut, (int)floorf(sx + ox + 0.5f), (int)floorf(sy + oy + 0.5f), (int)q, TQ_QZS,
+            /* a sprite without depth (the tanks from above) is tested as if
+             * its front were nearer: the ground just in front of the anchor
+             * would hide its tracks otherwise */
+            int qa = (int)q + (i->spr->Z ? 0 : (int)(1.6f * TQ_QS));
+            tq_spr_draw(&g, i->spr, i->lut, (int)floorf(sx + ox + 0.5f), (int)floorf(sy + oy + 0.5f), qa, TQ_QZS,
                         i->alpha, zt, zs, false);
         } else {
             tq_ball(&g, sx + ox, sy + oy, i->r * TQ_TOP_S, i->rgb, i->alpha, (int)q, zt, zs);
@@ -682,7 +700,9 @@ static void render_top(const tq_req_t *r, const tq_terrain_t *t, uint16_t *fb, t
     uint32_t t0 = now_us();
     j.items = items;
     j.n = top_items(r, t, items);
+    tq_gfx_zshift(1);
     run(top_part, &j);
+    tq_gfx_zshift(0);
     if (prof) {
         prof->things_us += now_us() - t0;
         prof->sprites = j.n;

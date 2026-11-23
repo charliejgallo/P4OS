@@ -97,7 +97,7 @@ a frozen lake, streets and squares, a volcano and lava), trees and walls
 | | how |
 | --- | --- |
 | the ground | a height map (a vertex every 0.5 m) drawn by the app in both views, its colours lit per vertex (the sun, the hills' shadows, the hollows) with a grain texture. A crater lowers heights and lights again only what it changed |
-| the battle view | the fixed orthographic camera of the sprites (yaw 20, looking down 55 degrees, 32 px a metre): the whole map is drawn once into a picture with its depth, and a frame is a window of it with the sprites over it, each pixel tested against that depth |
+| the battle view | the fixed orthographic camera of the sprites (yaw 20, looking down 55 degrees, 32 px a metre): the whole map is drawn once into a picture with its depth, at half that scale (the ground is smooth; 2.3 MB instead of 9.3 for the biggest map), and a frame is a window of it doubled, with the sprites over it at full size, each pixel tested against that depth |
 | tanks, trees, stones | Blender sprites (`tools/blender/tanques_art.py`, built by code): hull and turret apart, 32 yaws each, from above and from 8 degrees for the first person; shade, coverage, region and depth planes; the app paints the regions |
 | the first person | drawn whole every frame at half the screen each way (the ground's triangles, the things scaled by distance, the turret and barrel rendered for that tank's gunner) and doubled |
 
@@ -135,11 +135,15 @@ the simulator:
 
 | | |
 | --- | --- |
-| two screen frames, the world picture (36 m) and depth, the first person's | ~14 MB |
+| two screen frames, the world picture (36 m, half size) and depth, the first person's | ~7 MB |
 | a tank seen by the board (above, and far for the first person, at 24 px a metre) | ~1.5 MB |
 | a person's tank, with its gunner's view | ~2.4 MB |
 | a biome's scenery | ~0.3 MB |
-| **a free battle of four different tanks** | **20.8 MB** |
+| **a free battle of four different tanks** | **14.0 MB** |
+
+The board had 16.8 MB of PSRAM free when the app opened (2026-11-23, with
+the 0.32 firmware): the world picture went to half size for that (it was
+20.8 MB with it whole).
 
 ## Files
 

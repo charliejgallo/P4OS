@@ -15,6 +15,12 @@
 #endif
 
 static uint8_t s_grain[64 * 64];
+static int s_zsh;                   /* the depth to test against is this much smaller (log2) */
+
+void tq_gfx_zshift(int shift)
+{
+    s_zsh = shift;
+}
 
 /* ceil(v - 0.5): the first pixel centre at or after v */
 static inline int px_start(float v)
@@ -196,14 +202,14 @@ void tq_spr_draw(const tq_tgt_t *t, const tq_spr_t *s, const tq_lut_t *lut, int 
         int dy = y0 + j;
         int k0 = (int)rw->off - rw->x0;         /* plane index = k0 + i */
         uint16_t *pc = t->px + (size_t)dy * t->stride + x0;
-        const uint16_t *pz = zt ? zt + (size_t)dy * zstride + x0 : NULL;
+        const uint16_t *pz = zt ? zt + (size_t)(dy >> s_zsh) * zstride : NULL;
         uint16_t *pw = zwrite ? t->z + (size_t)dy * t->stride + x0 : NULL;
         const uint8_t *A = s->A + k0, *Z = s->Z ? s->Z + k0 : NULL;
         for (int i = a0; i < a1; i++) {
             int a = A[i];
             if (!a) continue;
             int q = Z ? qb - Z[i] * qs : q0;
-            if (pz && q <= pz[i]) continue;
+            if (pz && q <= pz[(x0 + i) >> s_zsh]) continue;
             uint16_t c = tq_spr_px(s, lut, k0 + i);
             int aa = (a * alpha) >> 8;
             if (aa >= 250) pc[i] = c;
@@ -269,12 +275,12 @@ void tq_ball(const tq_tgt_t *t, float x, float y, float r, uint32_t rgb, int alp
     for (int py = y0; py < y1; py++) {
         float dy = ((float)py + 0.5f - y) * ir;
         uint16_t *pc = t->px + (size_t)py * t->stride;
-        const uint16_t *pz = zt ? zt + (size_t)py * zstride : NULL;
+        const uint16_t *pz = zt ? zt + (size_t)(py >> s_zsh) * zstride : NULL;
         for (int px = x0; px < x1; px++) {
             float dx = ((float)px + 0.5f - x) * ir;
             float d2 = dx * dx + dy * dy;
             if (d2 >= 1) continue;
-            if (pz && q <= pz[px]) continue;
+            if (pz && q <= pz[px >> s_zsh]) continue;
             float nz = sqrtf(1 - d2);
             float sh = 0.50f + 0.62f * tq_clampf(-0.42f * dx - 0.52f * dy + 0.74f * nz, 0, 1);
             float edge = tq_clampf((1 - sqrtf(d2)) * r, 0, 1);
@@ -374,10 +380,10 @@ static void tint_tri(const tq_tgt_t *t, const float *p0, const float *p1, const 
         if (xa > xb) { float s = xa; xa = xb; xb = s; }
         int xs = maxi(px_start(xa), t->cx0), xe = mini(px_start(xb), t->cx1);
         uint16_t *pc = t->px + (size_t)y * t->stride;
-        const uint16_t *pz = zt + (size_t)y * zstride;
+        const uint16_t *pz = zt + (size_t)(y >> s_zsh) * zstride;
         float q = q0 + gdx * ((float)xs + 0.5f - p0[0]) + gdy * (py - p0[1]);
         for (int x = xs; x < xe; x++, q += gdx) {
-            if ((int)q + bias < pz[x]) continue;
+            if ((int)q + bias < pz[x >> s_zsh]) continue;
             pc[x] = tq_blend(pc[x], c, a32);
         }
     }
@@ -412,25 +418,36 @@ static inline uint32_t spread(uint16_t c)
     return (c | ((uint32_t)c << 16)) & 0x07E0F81Fu;
 }
 
-void tq_up2(uint16_t *dst, int dstride, const uint16_t *src, int w, int h, int y0, int y1)
+void tq_up2_window(uint16_t *dst, int dstride, int W, const uint16_t *src, int sw, int sh, int sstride, int sx0,
+                   int sy0, int y0, int y1)
 {
+    int hw = W / 2;
     for (int Y = y0; Y < y1; Y++) {
         /* output row Y samples source rows sa (weight 3) and sb (weight 1) */
-        int sa = Y >> 1, sb = (Y & 1) ? sa + 1 : sa - 1;
+        int sa = sy0 + (Y >> 1), sb = (Y & 1) ? sa + 1 : sa - 1;
+        if (sa >= sh) sa = sh - 1;
         if (sb < 0) sb = 0;
-        if (sb >= h) sb = h - 1;
-        const uint16_t *ra = src + (size_t)sa * w, *rb = src + (size_t)sb * w;
+        if (sb >= sh) sb = sh - 1;
+        const uint16_t *ra = src + (size_t)sa * sstride, *rb = src + (size_t)sb * sstride;
         uint16_t *o = dst + (size_t)Y * dstride;
-        uint32_t pa = spread(ra[0]) * 3 + spread(rb[0]);         /* column -1 clamps to 0 */
-        for (int x = 0; x < w; x++) {
-            uint32_t ca = spread(ra[x]) * 3 + spread(rb[x]);
-            int xn = x + 1 < w ? x + 1 : x;
-            uint32_t cn = spread(ra[xn]) * 3 + spread(rb[xn]);
+        int c0 = sx0 > 0 ? sx0 - 1 : sx0;
+        uint32_t pa = spread(ra[c0]) * 3 + spread(rb[c0]);
+        for (int x = 0; x < hw; x++) {
+            int c = sx0 + x;
+            if (c >= sw) c = sw - 1;
+            int cn = c + 1 < sw ? c + 1 : c;
+            uint32_t ca = spread(ra[c]) * 3 + spread(rb[c]);
+            uint32_t nn = spread(ra[cn]) * 3 + spread(rb[cn]);
             uint32_t l = ((ca * 3 + pa) >> 4) & 0x07E0F81Fu;
-            uint32_t r = ((ca * 3 + cn) >> 4) & 0x07E0F81Fu;
+            uint32_t r = ((ca * 3 + nn) >> 4) & 0x07E0F81Fu;
             o[2 * x] = (uint16_t)(l | (l >> 16));
             o[2 * x + 1] = (uint16_t)(r | (r >> 16));
             pa = ca;
         }
     }
+}
+
+void tq_up2(uint16_t *dst, int dstride, const uint16_t *src, int w, int h, int y0, int y1)
+{
+    tq_up2_window(dst, dstride, 2 * w, src, w, h, w, 0, 0, y0, y1);
 }

@@ -102,6 +102,13 @@ void tq_rect(const tq_tgt_t *t, int x, int y, int w, int h, uint32_t rgb, int al
 /* src (w x h) doubled into dst (stride dstride) by bilinear filtering,
  * rows y0..y1-1 of the destination */
 void tq_up2(uint16_t *dst, int dstride, const uint16_t *src, int w, int h, int y0, int y1);
+/* The same from a window of a bigger source: dst's W columns (even) come
+ * from src's columns sx0.., its rows y0..y1-1 from rows sy0 + y/2 */
+void tq_up2_window(uint16_t *dst, int dstride, int W, const uint16_t *src, int sw, int sh, int sstride, int sx0,
+                   int sy0, int y0, int y1);
+/* The depth the next draws test against (zt) is 2^shift times smaller than
+ * the target: the battle view's world is kept at half size */
+void tq_gfx_zshift(int shift);
 
 static inline uint16_t tq_565(uint32_t rgb)
 {
