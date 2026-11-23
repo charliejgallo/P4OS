@@ -10882,8 +10882,9 @@ VELOCIDAD (BAUDIOS)	GESCHWINDIGKEIT (BAUD)
 Otra…	Andere…
 BITS DE DATOS	DATENBITS
 PARIDAD	PARITÄT
-Par	Gerade
-Impar	Ungerade
+Ninguna (N)	Keine (N)
+Par (E)	Gerade (E)
+Impar (O)	Ungerade (O)
 BITS DE STOP	STOPPBITS
 LÍNEAS DEL ADAPTADOR USB	LEITUNGEN DES USB-ADAPTERS
 Prendidas, como las deja una computadora. El cable óptico de muchos multímetros se alimenta de DTR con RTS apagado: si no llega nada, probá apagar RTS. Los puertos del header no tienen estas líneas.	An, wie ein Computer sie lässt. Das optische Kabel vieler Multimeter wird über DTR versorgt, bei ausgeschaltetem RTS: kommt nichts an, RTS ausschalten. Die Ports der Stiftleiste haben diese Leitungen nicht.

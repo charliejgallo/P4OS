@@ -915,7 +915,9 @@ static void conn_build(void)
     }
     r = conn_section(col, w, _("PARIDAD"));
     static const char PAR[3] = { 'N', 'E', 'O' };
-    const char *par_name[3] = { _("Ninguna"), _("Par"), _("Impar") };
+    /* with the frame's letter: "Par" alone is golf's word too, and a catalogue that
+     * keeps it as is would fall back to this one (aos_i18n.c) */
+    const char *par_name[3] = { _("Ninguna (N)"), _("Par (E)"), _("Impar (O)") };
     for (int i = 0; i < 3; i++)
         mini(r, par_name[i], T.frame[1] == PAR[i], AOS_C_ACCENT, conn_frame_cb, (void *)(uintptr_t)(1 << 8 | (uint8_t)PAR[i]));
     r = conn_section(col, w, _("BITS DE STOP"));

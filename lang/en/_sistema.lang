@@ -10882,8 +10882,9 @@ VELOCIDAD (BAUDIOS)	SPEED (BAUD)
 Otra…	Other…
 BITS DE DATOS	DATA BITS
 PARIDAD	PARITY
-Par	Even
-Impar	Odd
+Ninguna (N)	None (N)
+Par (E)	Even (E)
+Impar (O)	Odd (O)
 BITS DE STOP	STOP BITS
 LÍNEAS DEL ADAPTADOR USB	USB ADAPTER LINES
 Prendidas, como las deja una computadora. El cable óptico de muchos multímetros se alimenta de DTR con RTS apagado: si no llega nada, probá apagar RTS. Los puertos del header no tienen estas líneas.	On, as a computer leaves them. The optical cable of many multimeters is powered by DTR with RTS off: if nothing comes, try turning RTS off. The header's ports have no such lines.

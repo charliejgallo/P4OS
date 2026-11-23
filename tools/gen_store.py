@@ -606,6 +606,8 @@ def build_app(app_dir, m, a, since, icons, abi):
         files["web/" + os.path.basename(page)] = open(page, "rb").read()
         pages.append(os.path.splitext(os.path.basename(page))[0])
     for code in sorted(os.listdir(os.path.join(ROOT, "lang"))):
+        if code == "xx":
+            continue                    # the pseudo-language of the tests
         for lang_id in [app_id] + ["web." + p for p in pages]:
             path = os.path.join(ROOT, "lang", code, lang_id + ".lang")
             if os.path.isfile(path):

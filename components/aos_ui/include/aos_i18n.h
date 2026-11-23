@@ -109,7 +109,7 @@ void aos_i18n_init(void);
 
 #define AOS_LANG_CODE_MAX   12
 #define AOS_LANG_NAME_MAX   28
-#define AOS_LANG_MAX        8
+#define AOS_LANG_MAX        16
 
 typedef struct {
     char code[AOS_LANG_CODE_MAX];   /* directory name under /lang: "en", "pt" */

@@ -3559,8 +3559,9 @@ static const char blob_en__sistema_lang[] =
     "Otra…\tOther…\n"
     "BITS DE DATOS\tDATA BITS\n"
     "PARIDAD\tPARITY\n"
-    "Par\tEven\n"
-    "Impar\tOdd\n"
+    "Ninguna (N)\tNone (N)\n"
+    "Par (E)\tEven (E)\n"
+    "Impar (O)\tOdd (O)\n"
     "BITS DE STOP\tSTOP BITS\n"
     "LÍNEAS DEL ADAPTADOR USB\tUSB ADAPTER LINES\n"
     "Prendidas, como las deja una computadora. El cable óptico de muchos multímetros se alimenta de DTR con RTS apagado: si no llega nada, probá apagar RTS. Los puertos del header no tienen estas líneas.\tOn, as a computer leaves them. The optical cable of many multimeters is powered by DTR with RTS off: if nothing comes, try turning RTS off. The header's ports have no such lines.\n"
@@ -7119,8 +7120,9 @@ static const char blob_de__sistema_lang[] =
     "Otra…\tAndere…\n"
     "BITS DE DATOS\tDATENBITS\n"
     "PARIDAD\tPARITÄT\n"
-    "Par\tGerade\n"
-    "Impar\tUngerade\n"
+    "Ninguna (N)\tKeine (N)\n"
+    "Par (E)\tGerade (E)\n"
+    "Impar (O)\tUngerade (O)\n"
     "BITS DE STOP\tSTOPPBITS\n"
     "LÍNEAS DEL ADAPTADOR USB\tLEITUNGEN DES USB-ADAPTERS\n"
     "Prendidas, como las deja una computadora. El cable óptico de muchos multímetros se alimenta de DTR con RTS apagado: si no llega nada, probá apagar RTS. Los puertos del header no tienen estas líneas.\tAn, wie ein Computer sie lässt. Das optische Kabel vieler Multimeter wird über DTR versorgt, bei ausgeschaltetem RTS: kommt nichts an, RTS ausschalten. Die Ports der Stiftleiste haben diese Leitungen nicht.\n"
@@ -7135,7 +7137,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3553, 0, files_en, 1 },
-    { "de", "Deutsch", 3553, 0, files_de, 1 },
+    { "en", "English", 3554, 0, files_en, 1 },
+    { "de", "Deutsch", 3554, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

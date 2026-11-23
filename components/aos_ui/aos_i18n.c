@@ -616,11 +616,33 @@ void aos_i18n_init(void)
     }
 }
 
+/* A language's own name by its code, for a pack with no meta.txt: the
+ * Store installs only lang/<code>/_*.lang (aos_store.c, sys_allowed), so a
+ * language it brings would otherwise show up in Settings as "pt". */
+static const char *native_name(const char *code)
+{
+    /* only scripts the interface's fonts draw (Latin, Greek: aos_fonts) */
+    static const char *const N[][2] = {
+        { "en", "English" }, { "de", "Deutsch" }, { "pt", "Português (Brasil)" }, { "fr", "Français" },
+        { "it", "Italiano" }, { "ca", "Català" }, { "gl", "Galego" }, { "eu", "Euskara" },
+        { "nl", "Nederlands" }, { "pl", "Polski" }, { "cs", "Čeština" }, { "sk", "Slovenčina" },
+        { "ro", "Română" }, { "hu", "Magyar" }, { "sv", "Svenska" }, { "da", "Dansk" },
+        { "nb", "Norsk" }, { "fi", "Suomi" }, { "tr", "Türkçe" }, { "el", "Ελληνικά" },
+        { "hr", "Hrvatski" }, { "sl", "Slovenščina" }, { "lt", "Lietuvių" }, { "lv", "Latviešu" },
+        { "et", "Eesti" }, { "id", "Bahasa Indonesia" }, { "ms", "Bahasa Melayu" },
+    };
+    for (size_t i = 0; i < sizeof N / sizeof N[0]; i++)
+        if (!strcmp(N[i][0], code)) return N[i][1];
+    return NULL;
+}
+
 /* Reads the display name out of a pack's meta.txt. Falls back to the
- * directory name, so a pack with a broken meta is still selectable. */
+ * language's own name when the firmware knows it, then to the directory
+ * name, so a pack with a broken meta is still selectable. */
 static void read_meta_name(const char *code, char *out, size_t len)
 {
-    snprintf(out, len, "%s", code);
+    const char *own = native_name(code);
+    snprintf(out, len, "%s", own ? own : code);
 
     char path[192];
     pack_path(path, sizeof(path), code, META_FILE);
