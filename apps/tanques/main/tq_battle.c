@@ -26,8 +26,21 @@ static tq_tank_t *cur_tank(app_t *a)
     return &a->st.tank[a->st.cur];
 }
 
+/* The camera goes to (x, y). Unless snapping, it only moves when the spot
+ * leaves the middle of the screen (and then glides to it): a battle view
+ * that stands still is redrawn only round what moves. */
 static void cam_to(app_t *a, float x, float y, bool snap)
 {
+    if (!snap) {
+        tq_v3_t F, R, U;
+        tq_top_axes(&F, &R, &U);
+        float dx = x - a->cam_x, dy = y - a->cam_y;
+        float sx = TQ_TOP_S * (dx * R.x + dy * R.y), sy = -TQ_TOP_S * (dx * U.x + dy * U.y);
+        bool gliding = a->cam_follow && ((a->cam_tx - a->cam_x) * (a->cam_tx - a->cam_x) +
+                                         (a->cam_ty - a->cam_y) * (a->cam_ty - a->cam_y)) > 0.0004f;
+        if (!gliding && fabsf(sx) < a->W * 0.27f && fabsf(sy) < a->H * 0.25f) return;
+    }
+    tq_scene_top_clamp(a->ter, a->W, a->H, &x, &y);
     a->cam_tx = x;
     a->cam_ty = y;
     a->cam_follow = true;
@@ -48,6 +61,7 @@ void tqb_fill(app_t *a, tq_req_t *r)
         r->eye = tq_fp_eye(k->x, k->y, tq_tank_z(a->ter, k), k->tyaw, T->eye_x, T->eye_y, T->eye_z);
         r->yaw = k->tyaw;
         r->pitch = TQ_FP_PITCH * TQ_DEG;
+        r->fp_half = a->blit_ok == 1;
         return;
     }
     r->mode = TQ_VIEW_TOP;
@@ -476,22 +490,26 @@ void tqb_build(app_t *a)
     lv_obj_set_style_radius(a->hint, 18, 0);
     lv_obj_align(a->hint, LV_ALIGN_BOTTOM_MID, 0, -(mbh + m + 12));
 
-    /* aiming: back, the weapons, fire */
-    int abw = land ? 1000 : W - 2 * m, abh = land ? 130 : 236;
+    /* aiming: the weapons, fire, and back to driving */
+    int abw = land ? 1000 : W - 2 * m, abh = land ? 150 : 262;
     a->aim_bar = tqa_panel(ui, (W - abw) / 2, H - abh - m, abw, abh, 30);
     a->aim_lbl = tqa_label(a->aim_bar, "", aos_font_caption, 0xFFE9A8);
-    a->btn_fire = tqa_button(a->aim_bar, _("¡Fuego!"), 0xE23B2E, land ? 200 : 230, land ? 96 : 120, on_fire, a);
+    lv_obj_align(a->aim_lbl, LV_ALIGN_TOP_LEFT, 22, 14);
+    a->btn_back = tqa_button(a->aim_bar, _("Mover"), 0x3A4652, 150, land ? 44 : 52, on_back, a);
+    lv_obj_set_style_text_font(lv_obj_get_child(a->btn_back, 0), aos_font_caption, 0);
+    lv_obj_align(a->btn_back, LV_ALIGN_TOP_RIGHT, -16, 6);
     int bw = land ? 178 : 208, bh = land ? 80 : 84;
     for (int w = 0; w < TQ_SLOTS_MAX; w++) {
         a->btn_w[w] = tqa_button(a->aim_bar, "", 0x2E6FB0, bw, bh, on_weapon, a);
         lv_obj_set_style_text_font(lv_obj_get_child(a->btn_w[w], 0), aos_font_tiny, 0);
-        if (land) lv_obj_set_pos(a->btn_w[w], 16 + w * (bw + 10), 38);
-        else lv_obj_set_pos(a->btn_w[w], 16 + (w % 2) * (bw + 10), 44 + (w / 2) * (bh + 8));
+        if (land) lv_obj_set_pos(a->btn_w[w], 16 + w * (bw + 10), 58);
+        else lv_obj_set_pos(a->btn_w[w], 16 + (w % 2) * (bw + 10), 68 + (w / 2) * (bh + 8));
     }
-    lv_obj_align(a->aim_lbl, LV_ALIGN_TOP_LEFT, 22, 8);
-    lv_obj_align(a->btn_fire, LV_ALIGN_RIGHT_MID, -16, land ? 10 : 16);
-    a->btn_back = tqa_button(ui, _("Mover"), 0x2A3440, 160, 70, on_back, a);
-    lv_obj_align(a->btn_back, LV_ALIGN_TOP_LEFT, m, 112 + 2 * m);
+    a->btn_fire = tqa_button(a->aim_bar, _("¡Fuego!"), 0xE23B2E, land ? 200 : 230, land ? 80 : 160, on_fire, a);
+    lv_obj_align(a->btn_fire, LV_ALIGN_BOTTOM_RIGHT, -16, land ? -12 : -14);
+    /* the first person's picture goes between the bars */
+    a->fp_y0 = (m + 112 + m + 1) & ~1;
+    a->fp_y1 = (H - abh - 2 * m) & ~1;
 
     /* the floating words */
     for (int i = 0; i < TQ_LABELS; i++) {
@@ -530,7 +548,6 @@ static void hud_for_state(app_t *a)
     tqa_show(a->move_bar, s == B_MOVE);
     tqa_show(a->hint, s == B_MOVE && k->ap >= 3);
     tqa_show(a->aim_bar, s == B_AIM);
-    tqa_show(a->btn_back, s == B_AIM);
     tqa_show(a->banner, s == B_HANDOVER);
     tqa_show(a->leave, s == B_LEAVE);
     if (s == B_HANDOVER && a->banner) {
@@ -543,6 +560,12 @@ static void hud_for_state(app_t *a)
 
 static void set_state(app_t *a, int s)
 {
+    if (a->bstate == B_AIM && s != B_AIM) {
+        /* the canvas under the picture is stale: the next frame is whole */
+        a->fp_shown = false;
+        a->fp_dark = false;
+        a->shown_key = 0;
+    }
     a->bstate = s;
     a->st_t = 0;
     a->st.show_reach = s == B_MOVE;

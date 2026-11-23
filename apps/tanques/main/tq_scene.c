@@ -33,12 +33,14 @@ static struct {
     bool all_dirty;
     tq_vbox_t dirty;
     bool have_dirty;
+    uint32_t world_ver;             /* counts the world's redraws */
     float *wv;                      /* per vertex: image x, y, nearness */
     /* first person */
     uint16_t *fpx, *fz;             /* half size */
     float *cv;                      /* per vertex: x, y, q (projected), zc */
     uint8_t *code;                  /* per vertex: off-frustum bits */
     uint32_t *fcol;                 /* per vertex: fogged colour */
+    int fpw, fph;                   /* the last first-person picture's size */
 } S;
 
 static bool (*s_split)(void (*fn)(void *arg, int part), void *arg);
@@ -285,6 +287,7 @@ static void world_draw(const tq_terrain_t *t, int x0, int y0, int x1, int y1)
 static void world_update(const tq_terrain_t *t, tq_prof_t *prof)
 {
     uint32_t t0 = now_us();
+    if (S.all_dirty || S.have_dirty) S.world_ver++;
     if (S.all_dirty) {
         world_draw(t, 0, 0, S.ww, S.wh);
         S.all_dirty = false;
@@ -562,19 +565,16 @@ static int top_items(const tq_req_t *r, const tq_terrain_t *t, item_t *it)
 
 static const uint32_t REACH_RGB[4] = { 0, 0x46C8FF, 0xFFD23C, 0xFF7A3C };
 
-static void top_part(void *arg, int part)
+/* The battle view inside a box of the frame: the world's window doubled,
+ * then everything over it, clipped to the box */
+static void top_draw(topjob_t *j, int cx0, int cy0, int cx1, int cy1)
 {
-    topjob_t *j = (topjob_t *)arg;
     const tq_req_t *r = j->r;
     const tq_state_t *s = &r->st;
     const tq_terrain_t *t = j->t;
     int W = r->w, H = r->h;
-    tq_tgt_t g = { j->fb, NULL, W, H, W, 0, 0, W, H };
-    if (part == 0) g.cy1 = H / 2;
-    else g.cy0 = H / 2;
-    /* the window of the world */
-    /* the window of the world, doubled */
-    tq_up2_window(j->fb, W, W, S.wpx, S.hw, S.hh, S.hw, j->wx0 / 2, j->wy0 / 2, g.cy0, g.cy1);
+    tq_tgt_t g = { j->fb, NULL, W, H, W, cx0 & ~1, cy0, cx1, cy1 };
+    tq_up2_rect(j->fb, W, S.wpx, S.hw, S.hh, S.hw, j->wx0 / 2, j->wy0 / 2, g.cx0, g.cx1, g.cy0, g.cy1);
     const uint16_t *zt = S.wz + (size_t)(j->wy0 / 2) * S.hw + j->wx0 / 2;
     int zs = S.hw;
     float ox = -(float)j->wx0, oy = -(float)j->wy0;
@@ -688,10 +688,20 @@ static void top_part(void *arg, int part)
     }
 }
 
+static void top_part(void *arg, int part)
+{
+    topjob_t *j = (topjob_t *)arg;
+    int W = j->r->w, H = j->r->h;
+    if (part == 0) top_draw(j, 0, 0, W, H / 2);
+    else top_draw(j, 0, H / 2, W, H);
+}
+
+static item_t s_items[MAX_ITEMS];
+
 static void render_top(const tq_req_t *r, const tq_terrain_t *t, uint16_t *fb, tq_prof_t *prof)
 {
     world_update(t, prof);
-    static item_t items[MAX_ITEMS];
+    item_t *items = s_items;
     topjob_t j;
     j.r = r;
     j.t = t;
@@ -1126,7 +1136,9 @@ static void render_fp(const tq_req_t *r, const tq_terrain_t *t, uint16_t *fb, tq
     run(fp_part, &j);
     uint32_t t2 = now_us();
     upjob_t u = { fb, r->w, r->h, j.fw, j.fh };
-    run(up_part, &u);
+    S.fpw = j.fw;
+    S.fph = j.fh;
+    if (!r->fp_half) run(up_part, &u);
     uint32_t t3 = now_us();
     if (prof) {
         prof->base_us += t2 - t0;
@@ -1167,4 +1179,189 @@ void tq_scene_render(const tq_req_t *r, const tq_terrain_t *t, uint16_t *fb, tq_
     } else if (r->mode == TQ_VIEW_FP) render_fp(r, t, fb, prof);
     else render_top(r, t, fb, prof);
     if (prof) prof->total_us += now_us() - t0;
+}
+
+/* --------------------------------------------------------------------------
+ * The battle view drawn again only where things move
+ *
+ * A full frame of the battle view is the world's window doubled (1.8 MB
+ * written) and every sprite: ~130 ms on the board. Most frames change only
+ * round the tanks, the shells and the puffs, so the app keeps the frame it
+ * shows and redraws just those boxes (and where they were the frame
+ * before), as long as nothing else changed: the window, the world, the
+ * tiles, the path, the trees and stones. tq_scene_top_key says whether
+ * that holds.
+ * -------------------------------------------------------------------------- */
+
+static inline uint32_t fnv(uint32_t h, uint32_t v)
+{
+    return (h ^ v) * 16777619u;
+}
+
+uint32_t tq_scene_top_key(const tq_req_t *r, const tq_terrain_t *t)
+{
+    if (r->mode != TQ_VIEW_TOP || S.all_dirty || S.have_dirty) return 0;
+    const tq_state_t *s = &r->st;
+    int wx0, wy0;
+    top_window(t, r->cx, r->cy, r->w, r->h, &wx0, &wy0);
+    uint32_t h = 2166136261u;
+    h = fnv(h, (uint32_t)wx0);
+    h = fnv(h, (uint32_t)wy0);
+    h = fnv(h, (uint32_t)(r->w << 16 | r->h));
+    h = fnv(h, S.world_ver);
+    h = fnv(h, (uint32_t)s->show_reach << 8 | (uint32_t)r->hp_bars);
+    if (s->show_reach)
+        for (int c = 0; c < s->grid * s->grid; c++) h = fnv(h, s->reach[c]);
+    h = fnv(h, (uint32_t)s->npath);
+    for (int k = 0; k < s->npath; k++) h = fnv(h, (uint32_t)(s->path[k][0] * 64) << 16 ^ (uint32_t)(s->path[k][1] * 64));
+    for (int k = 0; k < s->ntree; k++) h = fnv(h, s->tree[k].alive);
+    for (int k = 0; k < s->nblock; k++) h = fnv(h, (uint32_t)s->block[k].alive << 16 ^ (uint32_t)(s->block[k].z * 64));
+    return h ? h : 1;
+}
+
+void tq_rects_add(tq_rects_t *rs, int x0, int y0, int x1, int y1, int W, int H)
+{
+    if (x0 < 0) x0 = 0;
+    if (y0 < 0) y0 = 0;
+    if (x1 > W) x1 = W;
+    if (y1 > H) y1 = H;
+    if (x0 >= x1 || y0 >= y1) return;
+    x0 &= ~1;
+    for (;;) {
+        /* one that touches it swallows it (and the result may touch others) */
+        int hit = -1;
+        for (int i = 0; i < rs->n; i++) {
+            const tq_rect_t *q = &rs->r[i];
+            if (x0 <= q->x1 + 8 && x1 >= q->x0 - 8 && y0 <= q->y1 + 8 && y1 >= q->y0 - 8) {
+                hit = i;
+                break;
+            }
+        }
+        if (hit < 0) break;
+        tq_rect_t q = rs->r[hit];
+        rs->r[hit] = rs->r[--rs->n];
+        if (q.x0 < x0) x0 = q.x0;
+        if (q.y0 < y0) y0 = q.y0;
+        if (q.x1 > x1) x1 = q.x1;
+        if (q.y1 > y1) y1 = q.y1;
+    }
+    if (rs->n == TQ_RECTS) {
+        /* full: grow the one that grows least */
+        int best = 0;
+        long bg = -1;
+        for (int i = 0; i < rs->n; i++) {
+            const tq_rect_t *q = &rs->r[i];
+            long a0 = (long)(q->x1 - q->x0) * (q->y1 - q->y0);
+            int ux0 = q->x0 < x0 ? q->x0 : x0, uy0 = q->y0 < y0 ? q->y0 : y0;
+            int ux1 = q->x1 > x1 ? q->x1 : x1, uy1 = q->y1 > y1 ? q->y1 : y1;
+            long g = (long)(ux1 - ux0) * (uy1 - uy0) - a0;
+            if (bg < 0 || g < bg) {
+                bg = g;
+                best = i;
+            }
+        }
+        tq_rect_t q = rs->r[best];
+        rs->r[best] = rs->r[--rs->n];
+        tq_rects_add(rs, q.x0 < x0 ? q.x0 : x0, q.y0 < y0 ? q.y0 : y0, q.x1 > x1 ? q.x1 : x1, q.y1 > y1 ? q.y1 : y1, W, H);
+        return;
+    }
+    rs->r[rs->n++] = (tq_rect_t){ (int16_t)x0, (int16_t)y0, (int16_t)x1, (int16_t)y1 };
+}
+
+static void rect_ball(tq_rects_t *rs, float x, float y, float r, int W, int H)
+{
+    int e = (int)ceilf(r) + 3;
+    tq_rects_add(rs, (int)x - e, (int)y - e, (int)x + e + 1, (int)y + e + 1, W, H);
+}
+
+void tq_scene_top_rects(const tq_req_t *r, const tq_terrain_t *t, tq_rects_t *out)
+{
+    const tq_state_t *s = &r->st;
+    int W = r->w, H = r->h;
+    out->n = 0;
+    int wx0, wy0;
+    top_window(t, r->cx, r->cy, W, H, &wx0, &wy0);
+    float ox = -(float)wx0, oy = -(float)wy0;
+    float sx, sy, q;
+    tq_v3_t L = tq_sun();
+    float lh = sqrtf(L.x * L.x + L.y * L.y);
+    /* the tanks: the sprite, its bar, its ring, its shadow */
+    for (int k = 0; k < s->ntank; k++) {
+        const tq_tank_t *tk = &s->tank[k];
+        wproj(tq_v3(tk->x, tk->y, tq_tank_z(t, tk)), &sx, &sy, &q);
+        sx += ox;
+        sy += oy;
+        tq_rects_add(out, (int)sx - 82, (int)sy - 112, (int)sx + 82, (int)sy + 62, W, H);
+    }
+    for (int k = 0; k < TQ_MAX_SHELLS; k++) {
+        const tq_shell_t *sh = &s->shell[k];
+        if (!sh->live || sh->under) continue;
+        wproj(sh->p, &sx, &sy, &q);
+        rect_ball(out, sx + ox, sy + oy, 10, W, H);
+        float hgt = sh->p.z - tq_ter_height(t, sh->p.x, sh->p.y);
+        wproj(tq_v3(sh->p.x - L.x / lh * hgt * 0.9f, sh->p.y - L.y / lh * hgt * 0.9f, tq_ter_height(t, sh->p.x, sh->p.y)),
+              &sx, &sy, &q);
+        rect_ball(out, sx + ox, sy + oy, 10, W, H);
+    }
+    for (int k = 0; k < s->npart; k++) {
+        const tq_part_t *p = &s->part[k];
+        wproj(p->p, &sx, &sy, &q);
+        float rr = part_radius(p) * TQ_TOP_S;
+        if (p->kind == TQ_PART_RING) {
+            tq_rects_add(out, (int)(sx + ox - rr - 8), (int)(sy + oy - rr - 8), (int)(sx + ox + rr + 9),
+                         (int)(sy + oy + rr + 9), W, H);
+            continue;
+        }
+        rect_ball(out, sx + ox, sy + oy, rr, W, H);
+        if (p->kind == TQ_PART_CHUNK) {
+            wproj(tq_v3(p->p.x, p->p.y, tq_ter_height(t, p->p.x, p->p.y)), &sx, &sy, &q);
+            rect_ball(out, sx + ox, sy + oy, rr * 1.3f, W, H);
+        }
+    }
+    for (int k = 0; k < TQ_MAX_MINES; k++) {
+        const tq_mine_t *mn = &s->mine[k];
+        if (!mn->live) continue;
+        wproj(tq_v3(mn->x, mn->y, tq_ter_height(t, mn->x, mn->y)), &sx, &sy, &q);
+        rect_ball(out, sx + ox, sy + oy, 10, W, H);
+    }
+    if (s->beam_t > 0) {
+        float ax, ay, bx, by;
+        wproj(s->beam_a, &ax, &ay, &q);
+        wproj(s->beam_b, &bx, &by, &q);
+        tq_rects_add(out, (int)(fminf(ax, bx) + ox) - 8, (int)(fminf(ay, by) + oy) - 8, (int)(fmaxf(ax, bx) + ox) + 9,
+                     (int)(fmaxf(ay, by) + oy) + 9, W, H);
+    }
+    /* stones falling */
+    for (int k = 0; k < s->nblock; k++) {
+        const tq_block_t *b = &s->block[k];
+        if (!b->alive || b->vz == 0) continue;
+        wproj(tq_v3(b->i + 0.5f, b->j + 0.5f, b->z), &sx, &sy, &q);
+        tq_rects_add(out, (int)(sx + ox) - 30, (int)(sy + oy) - 50, (int)(sx + ox) + 30, (int)(sy + oy) + 30, W, H);
+    }
+}
+
+void tq_scene_top_partial(const tq_req_t *r, const tq_terrain_t *t, uint16_t *fb, const tq_rects_t *rc, tq_prof_t *prof)
+{
+    uint32_t t0 = now_us();
+    topjob_t j;
+    j.r = r;
+    j.t = t;
+    j.fb = fb;
+    top_window(t, r->cx, r->cy, r->w, r->h, &j.wx0, &j.wy0);
+    j.items = s_items;
+    j.n = top_items(r, t, s_items);
+    tq_gfx_zshift(1);
+    for (int i = 0; i < rc->n; i++) top_draw(&j, rc->r[i].x0, rc->r[i].y0, rc->r[i].x1, rc->r[i].y1);
+    tq_gfx_zshift(0);
+    if (prof) {
+        prof->total_us += now_us() - t0;
+        prof->sprites = j.n;
+    }
+}
+
+const uint16_t *tq_scene_fp_half(int *w, int *h)
+{
+    *w = S.fpw;
+    *h = S.fph;
+    return S.fpx;
 }

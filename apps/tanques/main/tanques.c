@@ -67,11 +67,16 @@ static void perf_frame(app_t *a, uint32_t now)
         a->perf_render_us = a->perf_world_us = 0;
         a->perf_mode = a->req->mode;
         memset(&a->prof_acc, 0, sizeof a->prof_acc);
+        a->part_frames = a->part_us = a->part_px = 0;
+        a->part_counted = false;
         return;
     }
     a->perf_frames++;
-    a->perf_render_us += a->prof.total_us;
-    a->perf_world_us += a->prof.world_us;
+    if (!a->part_counted) {
+        a->perf_render_us += a->prof.total_us;
+        a->perf_world_us += a->prof.world_us;
+    }
+    a->part_counted = false;
     a->prof_acc.base_us += a->prof.base_us;
     a->prof_acc.up_us += a->prof.up_us;
     uint32_t el = now - a->perf_t0;
@@ -83,10 +88,15 @@ static void perf_frame(app_t *a, uint32_t now)
                         (unsigned)(a->prof_acc.base_us / n / 1000), (unsigned)(a->prof_acc.up_us / n / 1000),
                         a->prof.tris);
         } else if (a->perf_mode == TQ_VIEW_TOP) {
-            aos_hal_log("tanques", "battle view %.1f fps %dx%d, render %u ms (world again %u), %d things",
-                        n * 1000.0f / el, a->W, a->H, (unsigned)(a->perf_render_us / n / 1000),
-                        (unsigned)(a->perf_world_us / n / 1000), a->prof.sprites);
+            unsigned whole = n > a->part_frames ? n - a->part_frames : 0, part = a->part_frames;
+            aos_hal_log("tanques", "battle view %.1f fps %dx%d: %u whole, %u ms each (world again %u); %u in boxes, "
+                        "%u ms each, %u kpx; %d things",
+                        n * 1000.0f / el, a->W, a->H, whole, (unsigned)(whole ? a->perf_render_us / whole / 1000 : 0),
+                        (unsigned)(whole ? a->perf_world_us / whole / 1000 : 0), part,
+                        (unsigned)(part ? a->part_us / part / 1000 : 0), (unsigned)(part ? a->part_px / part / 1000 : 0),
+                        a->prof.sprites);
         }
+        a->part_frames = a->part_us = a->part_px = 0;
         a->perf_t0 = now;
         a->perf_frames = 0;
         a->perf_render_us = a->perf_world_us = 0;
@@ -96,7 +106,7 @@ static void perf_frame(app_t *a, uint32_t now)
 
 static bool animating(app_t *a)
 {
-    if (a->screen == SC_MENU || a->screen == SC_HANGAR) return true;
+    if (a->screen == SC_HANGAR) return true;
     if (a->screen == SC_BATTLE) return tqb_animating(a);
     return a->st.npart > 0;
 }
@@ -131,14 +141,106 @@ static void fill_req(app_t *a)
     r->hp_bars = false;
 }
 
+/* The battle view drawn again only where things move, into the frame the
+ * canvas shows, here in LVGL's task (tq_scene.c says when it may) */
+static bool partial_frame(app_t *a, uint32_t now)
+{
+    tq_req_t *r = a->req;
+    uint32_t key = r->mode == TQ_VIEW_TOP ? tq_scene_top_key(r, a->ter) : 0;
+    tq_rects_t cur;
+    cur.n = 0;
+    if (key) tq_scene_top_rects(r, a->ter, &cur);
+    if (!key || !a->shown_key || key != a->shown_key) {
+        /* a whole frame: the worker draws it, and these boxes go with it */
+        a->req_key = key;
+        a->req_rects = cur;
+        return false;
+    }
+    tq_rects_t draw = a->shown_rects;
+    for (int i = 0; i < cur.n; i++)
+        tq_rects_add(&draw, cur.r[i].x0, cur.r[i].y0, cur.r[i].x1, cur.r[i].y1, a->W, a->H);
+    tq_prof_t p;
+    memset(&p, 0, sizeof p);
+    if (draw.n) tq_scene_top_partial(r, a->ter, a->fb[a->shown], &draw, &p);
+    uint32_t px = 0;
+    for (int i = 0; i < draw.n; i++) {
+        lv_area_t ar = { draw.r[i].x0, draw.r[i].y0, draw.r[i].x1 - 1, draw.r[i].y1 - 1 };
+        lv_obj_invalidate_area(a->canvas, &ar);
+        px += (uint32_t)(draw.r[i].x1 - draw.r[i].x0) * (uint32_t)(draw.r[i].y1 - draw.r[i].y0);
+    }
+    a->shown_rects = cur;
+    a->part_counted = true;
+    a->part_frames++;
+    a->part_us += p.total_us;
+    a->part_px += px;
+    (void)now;
+    return true;
+}
+
+/* The first person's half-size picture, doubled by the PPA straight into
+ * the panel between the bars (the board; the simulator says no and the
+ * worker doubles it into the canvas instead). The canvas under it is
+ * painted dark once, so the bars' margins do not show a stale battle. */
+static bool fp_blit(app_t *a)
+{
+    int w, h;
+    const uint16_t *px = tq_scene_fp_half(&w, &h);
+    if (!px || w * 2 != a->W) return false;
+    int r0 = a->fp_y0 / 2, r1 = a->fp_y1 / 2;
+    if (r1 > h) r1 = h;
+    if (r1 <= r0) return false;
+    return aos_hal_display_blit_scaled(0, r0 * 2, w, r1 - r0, px + (size_t)r0 * w, 2, false);
+}
+
+static void fp_dark(app_t *a)
+{
+    if (a->fp_dark) return;
+    uint16_t *fb = a->fb[a->shown];
+    for (size_t i = 0; i < (size_t)a->W * a->H; i++) fb[i] = 0x10A2;
+    lv_obj_invalidate(a->canvas);
+    a->fp_dark = true;
+}
+
+/* LVGL drew over the screen: the first person's picture goes up again */
+static void refr_cb(lv_event_t *e)
+{
+    app_t *a = (app_t *)lv_event_get_user_data(e);
+    if (a->closing || !a->fp_shown || a->blit_ok != 1 || a->screen != SC_BATTLE || a->bstate != B_AIM) return;
+    if (aos_ui_overlay() & ~(uint32_t)AOS_UI_OVER_TOAST) return;
+    /* not while the worker draws the next picture into the same buffer */
+    if (__atomic_load_n(&a->job, __ATOMIC_ACQUIRE) == JOB_RENDER) return;
+    fp_blit(a);
+}
+
 static void push_frames(app_t *a, uint32_t now)
 {
     if (!a->fb[0]) return;
     int job = __atomic_load_n(&a->job, __ATOMIC_ACQUIRE);
-    if (job == JOB_DONE) {
+    if (job == JOB_DONE && a->req->mode == TQ_VIEW_FP && a->req->fp_half) {
+        /* through the PPA: the canvas keeps its buffer */
+        if (!fp_blit(a)) {
+            a->blit_ok = 0;
+            a->dirty = true;
+            aos_hal_log("tanques", "the PPA said no: the first person goes through the canvas");
+        } else {
+            fp_dark(a);
+            a->fp_shown = true;
+        }
+        a->shown_key = 0;
+        perf_frame(a, now);
+        __atomic_store_n(&a->job, JOB_IDLE, __ATOMIC_RELEASE);
+        job = JOB_IDLE;
+    } else if (job == JOB_DONE) {
+        if (a->req->mode == TQ_VIEW_FP && a->blit_ok < 0) {
+            /* the first whole picture: does the PPA take it? */
+            a->blit_ok = fp_blit(a) ? 1 : 0;
+            aos_hal_log("tanques", "first person through %s", a->blit_ok ? "the PPA" : "the canvas");
+        }
         a->shown = a->target;
         lv_canvas_set_buffer(a->canvas, a->fb[a->shown], a->W, a->H, LV_COLOR_FORMAT_RGB565);
         lv_obj_invalidate(a->canvas);
+        a->shown_key = a->req_key;
+        a->shown_rects = a->req_rects;
         perf_frame(a, now);
         __atomic_store_n(&a->job, JOB_IDLE, __ATOMIC_RELEASE);
         job = JOB_IDLE;
@@ -148,6 +250,10 @@ static void push_frames(app_t *a, uint32_t now)
     if (aos_ui_overlay() & ~(uint32_t)AOS_UI_OVER_TOAST) return;
     a->dirty = false;
     fill_req(a);
+    if (partial_frame(a, now)) {
+        perf_frame(a, now);
+        return;
+    }
     a->target = a->shown ^ 1;
     if (a->worker_ok) {
         __atomic_store_n(&a->job, JOB_RENDER, __ATOMIC_RELEASE);
@@ -288,6 +394,7 @@ void tqa_screen(app_t *a, int screen)
     if (a->ui) lv_obj_delete(a->ui);
     a->ui = NULL;
     a->screen = screen;
+    a->shown_key = 0;
     if (screen == SC_MENU) tqm_demo(a);
     build_ui(a);
     a->dirty = true;
@@ -432,6 +539,9 @@ static bool app_resize(aos_app_t *self, void *inst, lv_obj_t *root)
     lv_obj_clean(root);
     build_all(a);
     a->perf_t0 = 0;
+    a->shown_key = 0;
+    a->fp_dark = false;
+    a->fp_shown = false;
     a->dirty = true;
     aos_hal_log("tanques", "the screen turned: %dx%d", a->W, a->H);
     return true;
@@ -498,6 +608,8 @@ static void *tanques_create(aos_app_t *self, lv_obj_t *root)
     if (!a->worker_ok) aos_hal_log("tanques", "no worker: drawing in LVGL's task");
     a->dirty = true;
     a->timer = lv_timer_create(frame_cb, FRAME_MS, a);
+    a->blit_ok = -1;
+    lv_display_add_event_cb(lv_display_get_default(), refr_cb, LV_EVENT_REFR_READY, a);
     aos_hal_log("tanques", "ready %dx%d in %u ms | game %u KB, psram free before %u KB", a->W, a->H,
                 (unsigned)((aos_hal_uptime_us() - t0) / 1000), (unsigned)(tq_mem_used() / 1024), (unsigned)(hp / 1024));
 #ifdef AOS_SIM_BUILTIN
@@ -549,6 +661,7 @@ static void tanques_destroy(aos_app_t *self, void *inst)
     app_t *a = (app_t *)inst;
     if (!a) return;
     a->closing = true;
+    lv_display_remove_event_cb_with_user_data(lv_display_get_default(), refr_cb, a);
     if (a->worker_ok) aos_hal_worker_stop();
     if (a->timer) lv_timer_delete(a->timer);
     if (a->root) lv_obj_clean(a->root);

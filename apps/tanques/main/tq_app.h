@@ -58,6 +58,15 @@ typedef struct app_s {
     int        perf_mode;
     lv_timer_t *timer;
     uint32_t   last_ms;
+    /* the frame shown, for redrawing only where things move */
+    uint32_t   shown_key, req_key;
+    tq_rects_t shown_rects, req_rects;
+    uint32_t   part_frames, part_us, part_px;
+    bool       part_counted;
+    /* the first person through the PPA, straight to the panel */
+    int        blit_ok;                 /* -1 not known yet, 0 no (the simulator), 1 yes */
+    bool       fp_shown, fp_dark;
+    int        fp_y0, fp_y1;            /* the picture's rows between the bars */
 
     /* the world */
     tq_terrain_t *ter;

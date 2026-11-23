@@ -418,10 +418,10 @@ static inline uint32_t spread(uint16_t c)
     return (c | ((uint32_t)c << 16)) & 0x07E0F81Fu;
 }
 
-void tq_up2_window(uint16_t *dst, int dstride, int W, const uint16_t *src, int sw, int sh, int sstride, int sx0,
-                   int sy0, int y0, int y1)
+void tq_up2_rect(uint16_t *dst, int dstride, const uint16_t *src, int sw, int sh, int sstride, int sx0, int sy0,
+                 int X0, int X1, int y0, int y1)
 {
-    int hw = W / 2;
+    X0 &= ~1;
     for (int Y = y0; Y < y1; Y++) {
         /* output row Y samples source rows sa (weight 3) and sb (weight 1) */
         int sa = sy0 + (Y >> 1), sb = (Y & 1) ? sa + 1 : sa - 1;
@@ -430,21 +430,28 @@ void tq_up2_window(uint16_t *dst, int dstride, int W, const uint16_t *src, int s
         if (sb >= sh) sb = sh - 1;
         const uint16_t *ra = src + (size_t)sa * sstride, *rb = src + (size_t)sb * sstride;
         uint16_t *o = dst + (size_t)Y * dstride;
-        int c0 = sx0 > 0 ? sx0 - 1 : sx0;
-        uint32_t pa = spread(ra[c0]) * 3 + spread(rb[c0]);
-        for (int x = 0; x < hw; x++) {
-            int c = sx0 + x;
+        int c0 = sx0 + X0 / 2;
+        int cp = c0 > 0 ? c0 - 1 : c0;
+        uint32_t pa = spread(ra[cp]) * 3 + spread(rb[cp]);
+        for (int X = X0; X < X1; X += 2) {
+            int c = sx0 + (X >> 1);
             if (c >= sw) c = sw - 1;
             int cn = c + 1 < sw ? c + 1 : c;
             uint32_t ca = spread(ra[c]) * 3 + spread(rb[c]);
             uint32_t nn = spread(ra[cn]) * 3 + spread(rb[cn]);
             uint32_t l = ((ca * 3 + pa) >> 4) & 0x07E0F81Fu;
             uint32_t r = ((ca * 3 + nn) >> 4) & 0x07E0F81Fu;
-            o[2 * x] = (uint16_t)(l | (l >> 16));
-            o[2 * x + 1] = (uint16_t)(r | (r >> 16));
+            o[X] = (uint16_t)(l | (l >> 16));
+            if (X + 1 < X1) o[X + 1] = (uint16_t)(r | (r >> 16));
             pa = ca;
         }
     }
+}
+
+void tq_up2_window(uint16_t *dst, int dstride, int W, const uint16_t *src, int sw, int sh, int sstride, int sx0,
+                   int sy0, int y0, int y1)
+{
+    tq_up2_rect(dst, dstride, src, sw, sh, sstride, sx0, sy0, 0, W, y0, y1);
 }
 
 void tq_up2(uint16_t *dst, int dstride, const uint16_t *src, int w, int h, int y0, int y1)

@@ -35,6 +35,7 @@ typedef struct {
     const tq_lut_t *lut[TQ_MAX_TANKS];  /* each tank's paint */
     const tq_lut_t *wreck;          /* a tank that lost */
     uint32_t rgb[TQ_MAX_TANKS];     /* each tank's colour on the bars */
+    bool    fp_half;                /* fp: leave it at half size (the PPA doubles it) */
     int     show_type, show_frame;  /* show: the hangar's turntable, painted with lut[0] */
     float   show_x, show_y;         /* where its anchor goes */
     tq_state_t st;
@@ -67,6 +68,29 @@ void tq_scene_top_clamp(const tq_terrain_t *t, int w, int h, float *cx, float *c
 void tq_scene_top_project(const tq_terrain_t *t, float cx, float cy, int w, int h, tq_v3_t p, float *sx, float *sy);
 bool tq_scene_top_pick(const tq_terrain_t *t, float cx, float cy, int w, int h, float sx, float sy,
                        float *wx, float *wy);
+
+/* Redrawing only where things move (see tq_scene.c): the key of what else
+ * the frame depends on (0: draw it whole), the boxes of what moves, and
+ * those boxes drawn again into a frame drawn with the same key */
+typedef struct {
+    int16_t x0, y0, x1, y1;
+} tq_rect_t;
+
+#define TQ_RECTS 20
+
+typedef struct {
+    int       n;
+    tq_rect_t r[TQ_RECTS];
+} tq_rects_t;
+
+uint32_t tq_scene_top_key(const tq_req_t *r, const tq_terrain_t *t);
+void     tq_scene_top_rects(const tq_req_t *r, const tq_terrain_t *t, tq_rects_t *out);
+void     tq_rects_add(tq_rects_t *rs, int x0, int y0, int x1, int y1, int W, int H);
+void     tq_scene_top_partial(const tq_req_t *r, const tq_terrain_t *t, uint16_t *fb, const tq_rects_t *rc,
+                              tq_prof_t *prof);
+
+/* The first person's last picture at half size (w x h) */
+const uint16_t *tq_scene_fp_half(int *w, int *h);
 
 /* The gunner's principal point and focal length on the screen */
 void tq_scene_fp_frame(int w, int h, float *cx, float *cy, float *f);

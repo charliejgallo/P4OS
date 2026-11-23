@@ -106,6 +106,9 @@ void tq_up2(uint16_t *dst, int dstride, const uint16_t *src, int w, int h, int y
  * from src's columns sx0.., its rows y0..y1-1 from rows sy0 + y/2 */
 void tq_up2_window(uint16_t *dst, int dstride, int W, const uint16_t *src, int sw, int sh, int sstride, int sx0,
                    int sy0, int y0, int y1);
+/* The same for the columns X0..X1-1 only (X0 even) */
+void tq_up2_rect(uint16_t *dst, int dstride, const uint16_t *src, int sw, int sh, int sstride, int sx0, int sy0,
+                 int X0, int X1, int y0, int y1);
 /* The depth the next draws test against (zt) is 2^shift times smaller than
  * the target: the battle view's world is kept at half size */
 void tq_gfx_zshift(int shift);

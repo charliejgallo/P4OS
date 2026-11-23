@@ -43,17 +43,16 @@ void tqm_demo(app_t *a)
 
 void tqm_menu_tick(app_t *a, float dt)
 {
-    /* the map drifts behind the menus */
-    s_t += dt * 0.12f;
+    /* the map stands still behind the menus: a whole frame of it costs
+     * ~130 ms on the board */
     float M = a->ter->n * TQ_CELL;
-    a->cam_x = M / 2 + M / 6 * cosf(s_t);
-    a->cam_y = M / 2 + M / 6 * sinf(s_t);
-    a->st.pulse = fmodf(a->st.pulse + dt, 1.0f);
-    if (a->st.npart) {
-        tq_event_t ev[TQ_MAX_EVENTS];
-        int nev;
-        tq_game_step(&a->st, a->ter, dt, ev, &nev);
+    if (s_t == 0) {
+        a->cam_x = M * 0.55f;
+        a->cam_y = M * 0.5f;
+        a->dirty = true;
+        s_t = 1;
     }
+    (void)dt;
 }
 
 static lv_obj_t *card(app_t *a, int w, int h)
