@@ -1,0 +1,17 @@
+{
+ "cat": "red",
+ "about": {
+  "es": "Un tablero de los servicios de la casa: si andan, cuánto tardan y desde cuándo están caídos, con avisos cuando algo se cae o vuelve.",
+  "en": "A board of the services at home: whether they are up, how long they take and since when they are down, with a notice when something goes down or comes back."
+ },
+ "desc": {
+  "es": "Cada servicio se prueba solo, cada tanto: un pedido HTTP o HTTPS que tiene que contestar con el código esperado y, si se pide, traer una palabra; o un puerto TCP que tiene que abrir. La pantalla los muestra por grupos con un semáforo (verde anda, amarillo lento, rojo caído), la latencia y hace cuánto cambió. Hay plantillas para la domótica, el grabador de las cámaras, un NAS, una impresora 3D, el router o una página cualquiera.\n\nTocá uno para ver su latencia de las últimas 6 o 24 horas, cuánto anduvo en el día y en la semana, el último chequeo, los últimos cortes y cuántos días le quedan a su certificado. Si el certificado es propio de un equipo de la casa, se puede confiar en él desde ahí. El modo escritorio deja todo en baldosas grandes y con la hora, para tener la placa en un estante.\n\nLa app sigue en segundo plano y arranca con la placa: cuando algo se cae o vuelve avisa encima de lo que estés usando, con un pitido, y mientras haya algo caído queda un ícono rojo en la barra. El historial se guarda en la tarjeta.\n\nLos servicios se cargan y ordenan cómodo desde su página del portal, que también muestra el estado en vivo, el día y la semana de cada uno, y el historial de cortes.",
+  "en": "Each service is checked on its own every so often: an HTTP or HTTPS request that must answer with the expected code and, if asked, contain a word; or a TCP port that must open. The screen shows them by group with a traffic light (green up, yellow slow, red down), their latency and how long ago that changed. There are templates for home automation, the cameras' recorder, a NAS, a 3D printer, the router or any web page.\n\nTap one to see its latency over the last 6 or 24 hours, how much it was up in the day and the week, the last check, the latest outages and how many days its certificate has left. If the certificate is a home device's own, you can trust it right there. Desk mode puts everything in big tiles with the time, to keep the board on a shelf.\n\nThe app stays in the background and starts with the board: when something goes down or comes back it says so over whatever you are using, with a beep, and while anything is down a red icon stays in the status bar. The history is kept on the card.\n\nServices are added and put in order comfortably from its page in the portal, which also shows the live state, each one's day and week, and the history of outages."
+ },
+ "shots": [
+  "app-estado.png",
+  "app-estado-detail.png",
+  "app-estado-desk.png",
+  "land-estado.png"
+ ]
+}

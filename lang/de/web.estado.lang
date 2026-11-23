@@ -1,0 +1,399 @@
+# amoledos-lang 1   es -> de
+# web.estado.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/estado/web/estado.js:27
+Casa	Zuhause
+
+#: apps/estado/web/estado.js:28
+Cámaras	Kameras
+
+#: apps/estado/web/estado.js:29
+NAS	NAS
+
+#: apps/estado/web/estado.js:29
+#: apps/estado/web/estado.js:31
+#: apps/estado/web/estado.js:33
+Red	Netzwerk
+
+#: apps/estado/web/estado.js:30
+Impresora 3D	3D-Drucker
+
+#: apps/estado/web/estado.js:30
+Taller	Werkstatt
+
+#: apps/estado/web/estado.js:31
+Router	Router
+
+#: apps/estado/web/estado.js:32
+Página web	Webseite
+
+#: apps/estado/web/estado.js:32
+Internet	Internet
+
+#: apps/estado/web/estado.js:33
+Puerto TCP	TCP-Port
+
+#: apps/estado/web/estado.js:38
+Probando	Wird geprüft
+
+#: apps/estado/web/estado.js:38
+Anda	Läuft
+
+#: apps/estado/web/estado.js:38
+Lento	Langsam
+
+#: apps/estado/web/estado.js:38
+#: apps/estado/web/estado.js:304
+Caído	Ausgefallen
+
+#: apps/estado/web/estado.js:38
+#: apps/estado/web/estado.js:401
+En pausa	Pausiert
+
+#: apps/estado/web/estado.js:41
+No se encuentra el nombre	Name nicht gefunden
+
+#: apps/estado/web/estado.js:41
+Rechaza la conexión	Verbindung abgelehnt
+
+#: apps/estado/web/estado.js:41
+No contesta	Keine Antwort
+
+#: apps/estado/web/estado.js:42
+Certificado no válido	Ungültiges Zertifikat
+
+#: apps/estado/web/estado.js:42
+La placa todavía no tiene hora	Die Platine hat noch keine Uhrzeit
+
+#: apps/estado/web/estado.js:42
+Contestó otro código	Anderer Statuscode
+
+#: apps/estado/web/estado.js:43
+Falta la palabra	Das Wort fehlt
+
+#: apps/estado/web/estado.js:43
+No contesta HTTP	Antwortet nicht per HTTP
+
+#: apps/estado/web/estado.js:43
+Cortó la conexión	Verbindung abgebrochen
+
+#: apps/estado/web/estado.js:44
+Sin memoria	Kein Speicher
+
+#: apps/estado/web/estado.js:44
+La dirección no sirve	Die Adresse taugt nicht
+
+#: apps/estado/web/estado.js:178
+servicio %d	Dienst %d
+
+#: apps/estado/web/estado.js:179
+%s: el nombre, de 1 a 39 caracteres y sin corchetes	%s: der Name, 1 bis 39 Zeichen und ohne eckige Klammern
+
+#: apps/estado/web/estado.js:180
+%s: hay dos con ese nombre	%s: es gibt zwei mit diesem Namen
+
+#: apps/estado/web/estado.js:182
+%s: el grupo, de 23 caracteres como mucho	%s: die Gruppe, höchstens 23 Zeichen
+
+#: apps/estado/web/estado.js:184
+%s: falta la dirección (IP o nombre, sin espacios)	%s: die Adresse fehlt (IP oder Name, ohne Leerzeichen)
+
+#: apps/estado/web/estado.js:185
+%s: el puerto va de 1 a 65535	%s: der Port geht von 1 bis 65535
+
+#: apps/estado/web/estado.js:187
+%s: falta la IP o el nombre en la dirección	%s: in der Adresse fehlt die IP oder der Name
+
+#: apps/estado/web/estado.js:188
+%s: la dirección tiene que empezar con http:// o https://	%s: die Adresse muss mit http:// oder https:// beginnen
+
+#: apps/estado/web/estado.js:189
+%s: los códigos que valen, como 200, 200-399 o 200,401	%s: die gültigen Codes, etwa 200, 200-399 oder 200,401
+
+#: apps/estado/web/estado.js:216
+%d d %d h	%d T %d h
+
+#: apps/estado/web/estado.js:217
+%d h %d min	%d h %d min
+
+#: apps/estado/web/estado.js:218
+%d min	%d min
+
+#: apps/estado/web/estado.js:219
+%d s	%d s
+
+#: apps/estado/web/estado.js:224
+recién	gerade eben
+
+#: apps/estado/web/estado.js:225
+hace %s	vor %s
+
+#: apps/estado/web/estado.js:233
+Contestó %d	Antwort %d
+
+#: apps/estado/web/estado.js:239
+La placa no tomó la orden (%d)	Die Platine hat den Befehl nicht angenommen (%d)
+
+#: apps/estado/web/estado.js:283
+Probando %s	%s wird geprüft
+
+#: apps/estado/web/estado.js:283
+Probar	Prüfen
+
+#: apps/estado/web/estado.js:284
+Seguir	Fortsetzen
+
+#: apps/estado/web/estado.js:284
+Pausar	Pausieren
+
+#: apps/estado/web/estado.js:285
+Ver más	Mehr
+
+#: apps/estado/web/estado.js:289
+¿Confiar en el certificado que muestra %s? Desde ahora sólo vale ese: si el servidor lo cambia, va a salir caído hasta que confíes en el nuevo.	Dem Zertifikat von %s vertrauen? Ab jetzt gilt nur dieses: wechselt der Server es, erscheint er als ausgefallen, bis du dem neuen vertraust.
+
+#: apps/estado/web/estado.js:289
+Listo: se confía en este certificado	Fertig: diesem Zertifikat wird vertraut
+
+#: apps/estado/web/estado.js:290
+Confiar en este certificado	Diesem Zertifikat vertrauen
+
+#: apps/estado/web/estado.js:310
+falló una vez, probando de nuevo	einmal fehlgeschlagen, neuer Versuch
+
+#: apps/estado/web/estado.js:310
+falló %d veces, probando de nuevo	%d-mal fehlgeschlagen, neuer Versuch
+
+#: apps/estado/web/estado.js:310
+anda %s	läuft %s
+
+#: apps/estado/web/estado.js:314
+24 h	24 h
+
+#: apps/estado/web/estado.js:314
+7 días	7 Tage
+
+#: apps/estado/web/estado.js:315
+conectar	verbinden
+
+#: apps/estado/web/estado.js:320
+Certificado de %s: venció	Zertifikat für %s: abgelaufen
+
+#: apps/estado/web/estado.js:320
+Certificado de %s: %d días	Zertifikat für %s: %d Tage
+
+#: apps/estado/web/estado.js:323
+No se pudo leer el certificado	Zertifikat nicht lesbar
+
+#: apps/estado/web/estado.js:332
+%s: las últimas 24 horas	%s: die letzten 24 Stunden
+
+#: apps/estado/web/estado.js:334
+Pidiendo el historial a la placa...	Verlauf wird von der Platine geholt...
+
+#: apps/estado/web/estado.js:349
+%s, %s: %s	%s, %s: %s
+
+#: apps/estado/web/estado.js:349
+%s: sigue caído (%s)	%s: noch ausgefallen (%s)
+
+#: apps/estado/web/estado.js:350
+Sin cortes registrados	Keine Ausfälle verzeichnet
+
+#: apps/estado/web/estado.js:352
+Latencia de cada cinco minutos (arriba: %s); en rojo, los que no contestó	Latenz alle fünf Minuten (oben: %s); rot, wenn keine Antwort kam
+
+#: apps/estado/web/estado.js:354
+Disponibilidad por día	Verfügbarkeit pro Tag
+
+#: apps/estado/web/estado.js:355
+Últimos cortes	Letzte Ausfälle
+
+#: apps/estado/web/estado.js:373
+Pedido HTTP(S)	HTTP(S)-Anfrage
+
+#: apps/estado/web/estado.js:374
+Puerto TCP abierto	Offener TCP-Port
+
+#: apps/estado/web/estado.js:381
+Sin nombre	Ohne Namen
+
+#: apps/estado/web/estado.js:382
+Más arriba	Nach oben
+
+#: apps/estado/web/estado.js:383
+Más abajo	Nach unten
+
+#: apps/estado/web/estado.js:384
+¿Sacar %s de la lista?	%s von der Liste nehmen?
+
+#: apps/estado/web/estado.js:384
+este servicio	diesen Dienst
+
+#: apps/estado/web/estado.js:384
+Borrar	Löschen
+
+#: apps/estado/web/estado.js:386
+Nombre	Name
+
+#: apps/estado/web/estado.js:387
+Grupo	Gruppe
+
+#: apps/estado/web/estado.js:387
+Casa, Red, Cámaras...	Zuhause, Netzwerk, Kameras...
+
+#: apps/estado/web/estado.js:388
+Ícono	Symbol
+
+#: apps/estado/web/estado.js:389
+Cómo se prueba	Wie geprüft wird
+
+#: apps/estado/web/estado.js:391
+Dirección (IP o nombre)	Adresse (IP oder Name)
+
+#: apps/estado/web/estado.js:392
+Puerto	Port
+
+#: apps/estado/web/estado.js:393
+Dirección	Adresse
+
+#: apps/estado/web/estado.js:394
+Códigos que valen	Gültige Codes
+
+#: apps/estado/web/estado.js:395
+Palabra que tiene que estar (opcional)	Wort, das vorkommen muss (optional)
+
+#: apps/estado/web/estado.js:396
+Avisar si al certificado le quedan menos días (0: no)	Warnen, wenn das Zertifikat weniger Tage hat (0: nie)
+
+#: apps/estado/web/estado.js:397
+Probar cada	Prüfen alle
+
+#: apps/estado/web/estado.js:398
+Lento desde (ms)	Langsam ab (ms)
+
+#: apps/estado/web/estado.js:399
+Esperar hasta (ms)	Warten bis (ms)
+
+#: apps/estado/web/estado.js:416
+se cayó: contestó %s	ausgefallen: antwortete %s
+
+#: apps/estado/web/estado.js:416
+se cayó: %s	ausgefallen: %s
+
+#: apps/estado/web/estado.js:419
+volvió después de %s	wieder da nach %s
+
+#: apps/estado/web/estado.js:423
+su certificado venció	sein Zertifikat ist abgelaufen
+
+#: apps/estado/web/estado.js:423
+a su certificado le quedan %s días	sein Zertifikat hat noch %s Tage
+
+#: apps/estado/web/estado.js:430
+Nada todavía: acá aparece cada vez que algo se cae o vuelve.	Noch nichts: hier erscheint jedes Mal, wenn etwas ausfällt oder zurückkommt.
+
+#: apps/estado/web/estado.js:437
+#: apps/estado/web/estado.js:587
+Estado de la casa	Hausstatus
+
+#: apps/estado/web/estado.js:443
+#: apps/estado/web/estado.js:554
+Leyendo...	Wird gelesen...
+
+#: apps/estado/web/estado.js:446
+Guardar en la tarjeta	Auf der Karte speichern
+
+#: apps/estado/web/estado.js:456
+anda	läuft
+
+#: apps/estado/web/estado.js:456
+andan	laufen
+
+#: apps/estado/web/estado.js:457
+lento	langsam
+
+#: apps/estado/web/estado.js:457
+lentos	langsam
+
+#: apps/estado/web/estado.js:458
+caído	ausgefallen
+
+#: apps/estado/web/estado.js:458
+caídos	ausgefallen
+
+#: apps/estado/web/estado.js:459
+La placa no tiene red: los chequeos esperan.	Die Platine hat kein Netzwerk: die Prüfungen warten.
+
+#: apps/estado/web/estado.js:461
+Probando todos	Alle werden geprüft
+
+#: apps/estado/web/estado.js:461
+Probar todos	Alle prüfen
+
+#: apps/estado/web/estado.js:471
+Sin grupo	Ohne Gruppe
+
+#: apps/estado/web/estado.js:497
+La app Estado de la casa no está abierta en la placa. 	Die App Hausstatus ist auf der Platine nicht geöffnet. 
+
+#: apps/estado/web/estado.js:498
+Abrirla	Öffnen
+
+#: apps/estado/web/estado.js:502
+Ningún servicio todavía: agregalos en Servicios.	Noch keine Dienste: füge sie unter Dienste hinzu.
+
+#: apps/estado/web/estado.js:509
+No se puede leer el estado: %s	Status nicht lesbar: %s
+
+#: apps/estado/web/estado.js:524
+Guardado: la placa empieza a probarlos	Gespeichert: die Platine beginnt mit der Prüfung
+
+#: apps/estado/web/estado.js:526
+No se pudo guardar: %s	Speichern fehlgeschlagen: %s
+
+#: apps/estado/web/estado.js:530
+IP o nombre: 10.20.30.40	IP oder Name: 10.20.30.40
+
+#: apps/estado/web/estado.js:532
+No entran más de 32 servicios	Mehr als 32 Dienste passen nicht
+
+#: apps/estado/web/estado.js:541
++ Agregar	+ Hinzufügen
+
+#: apps/estado/web/estado.js:546
+Pitido con cada aviso	Signalton bei jeder Meldung
+
+#: apps/estado/web/estado.js:546
+Vigilar desde que prende la placa	Ab dem Einschalten überwachen
+
+#: apps/estado/web/estado.js:547
+Fallas seguidas para darlo por caído	Fehler in Folge bis „ausgefallen“
+
+#: apps/estado/web/estado.js:559
+Todos	Alle
+
+#: apps/estado/web/estado.js:568
+Cada servicio se prueba solo: un pedido HTTP(S) que tiene que contestar con uno de los códigos (y, si se pide, tener una palabra), o un puerto TCP que tiene que abrir. Probá sólo tus equipos.	Jeder Dienst wird selbst geprüft: eine HTTP(S)-Anfrage, die mit einem der Codes antworten (und, falls verlangt, ein Wort enthalten) muss, oder ein TCP-Port, der sich öffnen muss. Prüfe nur deine eigenen Geräte.
+
+#: apps/estado/web/estado.js:570
+Agregar desde una plantilla	Aus einer Vorlage hinzufügen
+
+#: apps/estado/web/estado.js:574
+Actualizar	Aktualisieren
+
+#: apps/estado/web/estado.js:575
+Bajar	Herunterladen
+
+#: apps/estado/web/estado.js:580
+Ahora	Jetzt
+
+#: apps/estado/web/estado.js:580
+Servicios	Dienste
+
+#: apps/estado/web/estado.js:580
+Historial	Verlauf
