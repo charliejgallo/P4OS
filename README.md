@@ -9,7 +9,7 @@ An iPhone-style operating system for the
 It has a home screen with pages, folders and a dock, a control centre and
 notifications, and a lock screen with an optional code, and it runs in
 portrait or landscape. There are twenty-three built-in apps and, since
-0.30, a **Store** that installs more than sixty others on the microSD,
+0.30, a **Store** that installs more than seventy others on the microSD,
 loaded as shared objects:
 
 - **A store of its own:** the board lists, installs and updates its apps
@@ -1009,6 +1009,34 @@ and their art comes in packs.
   It plays on the board's output for playing live: 14 to 18 ms from a key
   to the speaker.
 
+| Tanks | Turtle | Serial Plotter | Home Status |
+|---|---|---|---|
+| <img src="docs/img/land-tanques.jpg" width="250"> | <img src="docs/img/app-tortuga.jpg" width="125"> | <img src="docs/img/app-plotter.png" width="125"> | <img src="docs/img/app-estado.png" width="125"> |
+
+- **Tanks** ([apps/tanques/README.md](apps/tanques/README.md)): turn-based
+  battles of toy tanks in 3D. Each turn you drive from above as far as your
+  action points reach, then aim from the turret in first person and fire;
+  shells leave craters and break trees and walls. Six tanks to upgrade and
+  paint in the hangar, twenty weapons, a story of twelve missions in five
+  places and free battles on generated maps, against the board or two
+  people passing it round. Two optional packs add a mission to the Moon and
+  a day at the beach, each with its tank, weapon, modes and missions.
+- **Turtle** ([apps/tortuga/README.md](apps/tortuga/README.md)): a game to
+  learn programming. Guide a turtle to the goal with blocks, with a Logo of
+  its own (in Spanish or English) or with Lua, across nine worlds that each
+  teach one idea, from one order after another to loops, procedures,
+  sensors, variables and parameters, ending in drawings as in LOGO.
+- **Serial Plotter** ([apps/plotter/README.md](apps/plotter/README.md)):
+  plots live the numbers that come in on a serial port, from a multimeter,
+  a board with sensors or a scale, on the same channel the Terminal reads;
+  numbers, `name:value` and CSV by themselves, profiles for the rest (a
+  multimeter's `+0265 4` is 26.5), alerts, CSV on the card and the chart in
+  the portal.
+- **Home Status** ([apps/estado/README.md](apps/estado/README.md)): a board
+  of the services at home, checked by HTTP(S) or a TCP port: up or down,
+  latency, availability over a day and a week, the certificate's days
+  left, and a notice when something goes down or comes back.
+
 Doom is doomgeneric, with OPL2 music, and Duke Nukem 3D is Chocolate Duke3D,
 with the Sound Blaster's FM music; both on the board, from the shareware
 episodes. Doom needs a WAD of your own and Duke a GRP (the shareware one
@@ -1326,7 +1354,10 @@ from a pack on the card that the Store installs (System, Colour emoji;
 **Languages.** The interface is written in Spanish. English and German are
 complete, and so are Brazilian Portuguese, French and Italian, which come
 only from the card (the Store's System parts); new texts reach those three
-in a translation pass before each release. The system's texts in English
+in a translation pass before each release. **Those three were translated
+with no native speaker reviewing them, and may have mistakes: if you find a
+bad translation, please report it as an issue, and we will fix it.** The
+system's texts in English
 and German travel twice: inside the firmware, so they
 work with no card, and as packs on the card. The two are joined string by
 string with the card's first, so a fix copied to the card wins, and a card
@@ -1721,7 +1752,7 @@ idioma de la tarjeta, la de la placa y la del portal web. Los documentos del pla
 
 | | |
 |---|---|
-| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 22 apps propias y más de 60 de la tarjeta (juegos, un pinball 3D de seis mesas, un metegol 3D de uno o dos jugadores, un hockey de mesa, juegos de mesa en 3D (ajedrez, damas, ludo, backgammon...), sudoku, solitarios, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE, la bolsa con gráficos de velas, un radar de vuelos, un traductor que anda sin red con paquetes de idioma, planillas xlsx y ods), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR (que puede compartir la salida de la placa), Ethernet optativo con un módulo W5500 y herramientas para la red por cable (probador de boca, encontrar un equipo de dirección desconocida, captura para Wireshark, vigía con Wake-on-LAN), Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN, tiras LED direccionables y RS485: Modbus (maestro, esclavo, monitor, perfiles de equipos y pasarela TCP), DMX con RDM y nodo Art-Net/sACN, y una consola de luces que también se maneja desde el celular; y un analizador lógico (Lógica) con diez decodificadores, para las cajitas USB de 24 MHz y 8 canales o un ESP32 con su firmware propio, que se graba desde el Programador |
+| Qué hace | inicio con carpetas, pantalla de bloqueo con código, fotos de fondo para el inicio y el bloqueo, grabación de pantalla en MP4, 22 apps propias y más de 60 de la tarjeta (juegos, un pinball 3D de seis mesas, un metegol 3D de uno o dos jugadores, un hockey de mesa, tanques de juguete por turnos en 3D, un juego para aprender a programar con una tortuga, juegos de mesa en 3D (ajedrez, damas, ludo, backgammon...), sudoku, solitarios, un juego de caños con seis líquidos, Doom y Duke Nukem 3D, un emulador de catorce consolas, notas, mapas, radio, video, Lua, Python (MicroPython, con consola, red y apps propias), una calculadora algebraica con gráficos y geometría, un registrador de datos de los sensores del header, una radio definida por software con RTL-SDR, un analizador de Bluetooth LE, la bolsa con gráficos de velas, un radar de vuelos, un traductor que anda sin red con paquetes de idioma, planillas xlsx y ods, un graficador de lo que llega por serie, el estado de los servicios de la casa), portal web con las páginas que trae cada app, USB como teclado, mouse, joystick, MIDI, red o disco, red Wi-Fi propia con QR (que puede compartir la salida de la placa), Ethernet optativo con un módulo W5500 y herramientas para la red por cable (probador de boca, encontrar un equipo de dirección desconocida, captura para Wireshark, vigía con Wake-on-LAN), Bluetooth con el iPhone (notificaciones con emojis en color, su música y atender o rechazar llamadas) y como teclado y mouse inalámbrico de una computadora, el firmware del C6 actualizable desde la placa, SSH en los dos sentidos (una consola de la placa y un terminal a otras máquinas), un teclado con ñ y acentos, copiar y pegar (también desde la computadora por el portal), un buscador que se abre deslizando hacia abajo en el inicio, y taller con I2C, SPI, 1-Wire, GPIO, CAN, tiras LED direccionables y RS485: Modbus (maestro, esclavo, monitor, perfiles de equipos y pasarela TCP), DMX con RDM y nodo Art-Net/sACN, y una consola de luces que también se maneja desde el celular; y un analizador lógico (Lógica) con diez decodificadores, para las cajitas USB de 24 MHz y 8 canales o un ESP32 con su firmware propio, que se graba desde el Programador |
 | Qué se probó | Wi-Fi y red propia, portal, OTA con vuelta atrás, USB contra una Mac, tarjeta, sonido, juegos y casi todas las herramientas, el emulador (GBA y Neo Geo a 60 cuadros, el táctil con varios dedos a la vez), el botón BOOT, un BME280 por I2C, SPI en lazo a 40 MHz, una termocupla MAX6675 y un DS18B20 registrados por Datalog en segundo plano, el C6 actualizado a esp_hosted 3.0.9 y vuelta al de fábrica sin cables, Bluetooth con un iPhone y una MacBook a la vez (notificaciones, música y llamadas), los barridos de red con las MAC, y el host USB con pendrive, teclado, mouse, joystick en los juegos, webcam, placa de sonido y adaptadores serie, RF con una RTL-SDR (2,4 Msps sin pérdidas, FM escuchada en el parlante), BLE escuchando con el iPhone y la Mac conectados y leyendo un termómetro Xiaomi cifrado con su clave, dos cámaras IP (un timbre H.264 directo a la pantalla y una MJPEG), la grabación de pantalla en MP4 por el codificador H.264 del P4, SSH desde la Mac y hacia una Raspberry Pi, un bus CAN real con un ESP32, el teclado, copiar y pegar y el buscador, y RS485 con un ESP32 y dos módulos automáticos: Modbus en las dos direcciones, DMX con una tira de pixeles, RDM y Art-Net desde la Mac, y Ethernet con un módulo W5500 (enlace a 100 Mbit/s, noches enteras sin cortes, el probador de boca, la lista de equipos, una captura de nueve minutos sin pérdidas y el vigía), y Lógica con un FX2 clonado y un ESP32-C3: hasta 24 MHz sin perder muestras, la prueba del header decodificada y una línea UART real leída entera |
 | Qué falta | probar en la placa el RC522, RF con un sensor de 433 MHz y con tráfico real de AM y FM angosta, encontrar por qué se cortó la red durante dos OTA, y con una computadora por cable: la red de banco, sus servicios y compartir la conexión en los dos sentidos |
 | El conector de 40 pines | el dibujo de referencia de todos los pines, con los puertos, los pines con que arranca cada app y los sugeridos, está en [The 40-pin header](#the-40-pin-header); la carcasa impresa, en [case/](case) |

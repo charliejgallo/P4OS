@@ -10892,3 +10892,15 @@ Lo más común es 8N1 (8 bits, sin paridad, 1 de stop). Muchos multímetros usan
 la velocidad va de 50 a 5000000 baudios	the speed goes from 50 to 5000000 baud
 el formato es como 8N1 o 7E1	the format is like 8N1 or 7E1
 el parlante está en uso	the speaker is in use
+
+#: apps/tanques  (nombre de app)
+Tanques	Tanks
+
+#: apps/tortuga  (nombre de app)
+Tortuga	Turtle
+
+#: apps/plotter  (nombre de app)
+Monitor serie	Serial Plotter
+
+#: apps/estado  (nombre de app)
+Estado de la casa	Home Status

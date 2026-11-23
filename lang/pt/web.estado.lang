@@ -1,0 +1,399 @@
+# amoledos-lang 1   es -> pt
+# web.estado.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/estado/web/estado.js:27
+Casa	Casa
+
+#: apps/estado/web/estado.js:28
+Cámaras	Câmeras
+
+#: apps/estado/web/estado.js:29
+NAS	NAS
+
+#: apps/estado/web/estado.js:29
+#: apps/estado/web/estado.js:31
+#: apps/estado/web/estado.js:33
+Red	Rede
+
+#: apps/estado/web/estado.js:30
+Impresora 3D	Impressora 3D
+
+#: apps/estado/web/estado.js:30
+Taller	Oficina
+
+#: apps/estado/web/estado.js:31
+Router	Roteador
+
+#: apps/estado/web/estado.js:32
+Página web	Página web
+
+#: apps/estado/web/estado.js:32
+Internet	Internet
+
+#: apps/estado/web/estado.js:33
+Puerto TCP	Porta TCP
+
+#: apps/estado/web/estado.js:38
+Probando	Testando
+
+#: apps/estado/web/estado.js:38
+Anda	No ar
+
+#: apps/estado/web/estado.js:38
+Lento	Lento
+
+#: apps/estado/web/estado.js:38
+#: apps/estado/web/estado.js:304
+Caído	Fora do ar
+
+#: apps/estado/web/estado.js:38
+#: apps/estado/web/estado.js:401
+En pausa	Em pausa
+
+#: apps/estado/web/estado.js:41
+No se encuentra el nombre	Nome não encontrado
+
+#: apps/estado/web/estado.js:41
+Rechaza la conexión	Conexão recusada
+
+#: apps/estado/web/estado.js:41
+No contesta	Não responde
+
+#: apps/estado/web/estado.js:42
+Certificado no válido	Certificado inválido
+
+#: apps/estado/web/estado.js:42
+La placa todavía no tiene hora	A placa ainda não tem hora
+
+#: apps/estado/web/estado.js:42
+Contestó otro código	Respondeu outro código
+
+#: apps/estado/web/estado.js:43
+Falta la palabra	Falta a palavra
+
+#: apps/estado/web/estado.js:43
+No contesta HTTP	Não responde HTTP
+
+#: apps/estado/web/estado.js:43
+Cortó la conexión	Cortou a conexão
+
+#: apps/estado/web/estado.js:44
+Sin memoria	Sem memória
+
+#: apps/estado/web/estado.js:44
+La dirección no sirve	Endereço inválido
+
+#: apps/estado/web/estado.js:178
+servicio %d	serviço %d
+
+#: apps/estado/web/estado.js:179
+%s: el nombre, de 1 a 39 caracteres y sin corchetes	%s: o nome, de 1 a 39 caracteres e sem colchetes
+
+#: apps/estado/web/estado.js:180
+%s: hay dos con ese nombre	%s: há dois com esse nome
+
+#: apps/estado/web/estado.js:182
+%s: el grupo, de 23 caracteres como mucho	%s: o grupo, com no máximo 23 caracteres
+
+#: apps/estado/web/estado.js:184
+%s: falta la dirección (IP o nombre, sin espacios)	%s: falta o endereço (IP ou nome, sem espaços)
+
+#: apps/estado/web/estado.js:185
+%s: el puerto va de 1 a 65535	%s: a porta vai de 1 a 65535
+
+#: apps/estado/web/estado.js:187
+%s: falta la IP o el nombre en la dirección	%s: falta o IP ou o nome no endereço
+
+#: apps/estado/web/estado.js:188
+%s: la dirección tiene que empezar con http:// o https://	%s: o endereço precisa começar com http:// ou https://
+
+#: apps/estado/web/estado.js:189
+%s: los códigos que valen, como 200, 200-399 o 200,401	%s: os códigos aceitos, como 200, 200-399 ou 200,401
+
+#: apps/estado/web/estado.js:216
+%d d %d h	%d d %d h
+
+#: apps/estado/web/estado.js:217
+%d h %d min	%d h %d min
+
+#: apps/estado/web/estado.js:218
+%d min	%d min
+
+#: apps/estado/web/estado.js:219
+%d s	%d s
+
+#: apps/estado/web/estado.js:224
+recién	agora mesmo
+
+#: apps/estado/web/estado.js:225
+hace %s	há %s
+
+#: apps/estado/web/estado.js:233
+Contestó %d	Respondeu %d
+
+#: apps/estado/web/estado.js:239
+La placa no tomó la orden (%d)	A placa não aceitou o comando (%d)
+
+#: apps/estado/web/estado.js:283
+Probando %s	Testando %s
+
+#: apps/estado/web/estado.js:283
+Probar	Testar
+
+#: apps/estado/web/estado.js:284
+Seguir	Retomar
+
+#: apps/estado/web/estado.js:284
+Pausar	Pausar
+
+#: apps/estado/web/estado.js:285
+Ver más	Ver mais
+
+#: apps/estado/web/estado.js:289
+¿Confiar en el certificado que muestra %s? Desde ahora sólo vale ese: si el servidor lo cambia, va a salir caído hasta que confíes en el nuevo.	Confiar no certificado que %s mostra? A partir de agora só ele vale: se o servidor trocá-lo, o serviço vai aparecer fora do ar até você confiar no novo.
+
+#: apps/estado/web/estado.js:289
+Listo: se confía en este certificado	Pronto: este certificado é confiável
+
+#: apps/estado/web/estado.js:290
+Confiar en este certificado	Confiar neste certificado
+
+#: apps/estado/web/estado.js:310
+falló una vez, probando de nuevo	falhou uma vez, testando de novo
+
+#: apps/estado/web/estado.js:310
+falló %d veces, probando de nuevo	falhou %d vezes, testando de novo
+
+#: apps/estado/web/estado.js:310
+anda %s	no ar %s
+
+#: apps/estado/web/estado.js:314
+24 h	24 h
+
+#: apps/estado/web/estado.js:314
+7 días	7 dias
+
+#: apps/estado/web/estado.js:315
+conectar	conectar
+
+#: apps/estado/web/estado.js:320
+Certificado de %s: venció	Certificado de %s: expirou
+
+#: apps/estado/web/estado.js:320
+Certificado de %s: %d días	Certificado de %s: %d dias
+
+#: apps/estado/web/estado.js:323
+No se pudo leer el certificado	Não foi possível ler o certificado
+
+#: apps/estado/web/estado.js:332
+%s: las últimas 24 horas	%s: as últimas 24 horas
+
+#: apps/estado/web/estado.js:334
+Pidiendo el historial a la placa...	Pedindo o histórico à placa...
+
+#: apps/estado/web/estado.js:349
+%s, %s: %s	%s, %s: %s
+
+#: apps/estado/web/estado.js:349
+%s: sigue caído (%s)	%s: continua fora do ar (%s)
+
+#: apps/estado/web/estado.js:350
+Sin cortes registrados	Nenhuma queda registrada
+
+#: apps/estado/web/estado.js:352
+Latencia de cada cinco minutos (arriba: %s); en rojo, los que no contestó	Latência a cada cinco minutos (topo: %s); em vermelho, quando não respondeu
+
+#: apps/estado/web/estado.js:354
+Disponibilidad por día	Disponibilidade por dia
+
+#: apps/estado/web/estado.js:355
+Últimos cortes	Últimas quedas
+
+#: apps/estado/web/estado.js:373
+Pedido HTTP(S)	Requisição HTTP(S)
+
+#: apps/estado/web/estado.js:374
+Puerto TCP abierto	Porta TCP aberta
+
+#: apps/estado/web/estado.js:381
+Sin nombre	Sem nome
+
+#: apps/estado/web/estado.js:382
+Más arriba	Mover para cima
+
+#: apps/estado/web/estado.js:383
+Más abajo	Mover para baixo
+
+#: apps/estado/web/estado.js:384
+¿Sacar %s de la lista?	Tirar %s da lista?
+
+#: apps/estado/web/estado.js:384
+este servicio	este serviço
+
+#: apps/estado/web/estado.js:384
+Borrar	Apagar
+
+#: apps/estado/web/estado.js:386
+Nombre	Nome
+
+#: apps/estado/web/estado.js:387
+Grupo	Grupo
+
+#: apps/estado/web/estado.js:387
+Casa, Red, Cámaras...	Casa, Rede, Câmeras...
+
+#: apps/estado/web/estado.js:388
+Ícono	Ícone
+
+#: apps/estado/web/estado.js:389
+Cómo se prueba	Como é testado
+
+#: apps/estado/web/estado.js:391
+Dirección (IP o nombre)	Endereço (IP ou nome)
+
+#: apps/estado/web/estado.js:392
+Puerto	Porta
+
+#: apps/estado/web/estado.js:393
+Dirección	Endereço
+
+#: apps/estado/web/estado.js:394
+Códigos que valen	Códigos aceitos
+
+#: apps/estado/web/estado.js:395
+Palabra que tiene que estar (opcional)	Palavra que precisa aparecer (opcional)
+
+#: apps/estado/web/estado.js:396
+Avisar si al certificado le quedan menos días (0: no)	Avisar se faltarem menos dias para o certificado expirar (0: não)
+
+#: apps/estado/web/estado.js:397
+Probar cada	Testar a cada
+
+#: apps/estado/web/estado.js:398
+Lento desde (ms)	Lento a partir de (ms)
+
+#: apps/estado/web/estado.js:399
+Esperar hasta (ms)	Esperar até (ms)
+
+#: apps/estado/web/estado.js:416
+se cayó: contestó %s	caiu: respondeu %s
+
+#: apps/estado/web/estado.js:416
+se cayó: %s	caiu: %s
+
+#: apps/estado/web/estado.js:419
+volvió después de %s	voltou depois de %s
+
+#: apps/estado/web/estado.js:423
+su certificado venció	o certificado expirou
+
+#: apps/estado/web/estado.js:423
+a su certificado le quedan %s días	o certificado expira em %s dias
+
+#: apps/estado/web/estado.js:430
+Nada todavía: acá aparece cada vez que algo se cae o vuelve.	Nada ainda: aqui aparece cada vez que algo cai ou volta.
+
+#: apps/estado/web/estado.js:437
+#: apps/estado/web/estado.js:587
+Estado de la casa	Status da casa
+
+#: apps/estado/web/estado.js:443
+#: apps/estado/web/estado.js:554
+Leyendo...	Lendo...
+
+#: apps/estado/web/estado.js:446
+Guardar en la tarjeta	Salvar no cartão
+
+#: apps/estado/web/estado.js:456
+anda	no ar
+
+#: apps/estado/web/estado.js:456
+andan	no ar
+
+#: apps/estado/web/estado.js:457
+lento	lento
+
+#: apps/estado/web/estado.js:457
+lentos	lentos
+
+#: apps/estado/web/estado.js:458
+caído	fora do ar
+
+#: apps/estado/web/estado.js:458
+caídos	fora do ar
+
+#: apps/estado/web/estado.js:459
+La placa no tiene red: los chequeos esperan.	A placa está sem rede: os testes estão esperando.
+
+#: apps/estado/web/estado.js:461
+Probando todos	Testando todos
+
+#: apps/estado/web/estado.js:461
+Probar todos	Testar todos
+
+#: apps/estado/web/estado.js:471
+Sin grupo	Sem grupo
+
+#: apps/estado/web/estado.js:497
+La app Estado de la casa no está abierta en la placa. 	O app Status da casa não está aberto na placa. 
+
+#: apps/estado/web/estado.js:498
+Abrirla	Abrir
+
+#: apps/estado/web/estado.js:502
+Ningún servicio todavía: agregalos en Servicios.	Nenhum serviço ainda: adicione-os em Serviços.
+
+#: apps/estado/web/estado.js:509
+No se puede leer el estado: %s	Não dá para ler o status: %s
+
+#: apps/estado/web/estado.js:524
+Guardado: la placa empieza a probarlos	Salvo: a placa começa a testá-los
+
+#: apps/estado/web/estado.js:526
+No se pudo guardar: %s	Não foi possível salvar: %s
+
+#: apps/estado/web/estado.js:530
+IP o nombre: 10.20.30.40	IP ou nome: 10.20.30.40
+
+#: apps/estado/web/estado.js:532
+No entran más de 32 servicios	Não cabem mais de 32 serviços
+
+#: apps/estado/web/estado.js:541
++ Agregar	+ Adicionar
+
+#: apps/estado/web/estado.js:546
+Pitido con cada aviso	Bipe a cada aviso
+
+#: apps/estado/web/estado.js:546
+Vigilar desde que prende la placa	Monitorar desde que a placa liga
+
+#: apps/estado/web/estado.js:547
+Fallas seguidas para darlo por caído	Falhas seguidas para considerar fora do ar
+
+#: apps/estado/web/estado.js:559
+Todos	Todos
+
+#: apps/estado/web/estado.js:568
+Cada servicio se prueba solo: un pedido HTTP(S) que tiene que contestar con uno de los códigos (y, si se pide, tener una palabra), o un puerto TCP que tiene que abrir. Probá sólo tus equipos.	Cada serviço é testado sozinho: uma requisição HTTP(S) que precisa responder com um dos códigos (e, se pedido, conter uma palavra), ou uma porta TCP que precisa abrir. Teste só os seus equipamentos.
+
+#: apps/estado/web/estado.js:570
+Agregar desde una plantilla	Adicionar a partir de um modelo
+
+#: apps/estado/web/estado.js:574
+Actualizar	Atualizar
+
+#: apps/estado/web/estado.js:575
+Bajar	Baixar
+
+#: apps/estado/web/estado.js:580
+Ahora	Agora
+
+#: apps/estado/web/estado.js:580
+Servicios	Serviços
+
+#: apps/estado/web/estado.js:580
+Historial	Histórico

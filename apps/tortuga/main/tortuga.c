@@ -493,10 +493,14 @@ static void timer_cb(lv_timer_t *t)
 
 static int text_lang(void)
 {
+    /* Spanish keeps its own words; German has its texts; any other language
+     * (en, pt, fr, it...) plays with the English keywords and level texts, as
+     * German does with the keywords: programming is written in English
+     * everywhere, and the catalogues of those languages say so */
     const char *c = aos_i18n_current();
-    if (c && !strncmp(c, "en", 2)) return TG_EN;
-    if (c && !strncmp(c, "de", 2)) return TG_DE;
-    return TG_ES;
+    if (!c || !strncmp(c, "es", 2)) return TG_ES;
+    if (!strncmp(c, "de", 2)) return TG_DE;
+    return TG_EN;
 }
 
 static void *tg_create(aos_app_t *self, lv_obj_t *root)

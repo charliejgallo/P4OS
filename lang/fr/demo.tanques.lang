@@ -1,0 +1,749 @@
+# amoledos-lang 1   es -> fr
+# demo.tanques.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/tanques/main/tanques.c:444
+Falta el arte: copiá tanques_p4.pak en /apps de la tarjeta.	Graphismes manquants : copie tanques_p4.pak dans /apps sur la carte SD.
+
+#: apps/tanques/main/tq_battle.c:201
+¡Fuera de combate!	Hors de combat !
+
+#: apps/tanques/main/tq_battle.c:209
+¡Cerca!	Presque !
+
+#: apps/tanques/main/tq_battle.c:212
+¡Afuera!	Dehors !
+
+#: apps/tanques/main/tq_battle.c:219
+¡Escudo!	Bouclier !
+
+#: apps/tanques/main/tq_battle.c:222
+¡Sin energía!	À plat !
+
+#: apps/tanques/main/tq_battle.c:222
+EMP	IEM
+
+#: apps/tanques/main/tq_battle.c:225
+¡Zas!	Paf !
+
+#: apps/tanques/main/tq_battle.c:228
+¡Mina!	Mine !
+
+#: apps/tanques/main/tq_battle.c:231
+¡Quema!	Ça brûle !
+
+#: apps/tanques/main/tq_battle.c:234
+¡Zap!	Zap !
+
+#: apps/tanques/main/tq_battle.c:240
+¡Bandera!	Drapeau !
+
+#: apps/tanques/main/tq_battle.c:243
+¡Recuperada!	Récupéré !
+
+#: apps/tanques/main/tq_battle.c:246
+¡Captura!	Capturé !
+
+#: apps/tanques/main/tq_battle.c:249
+¡Un cofre!	Un coffre !
+
+#: apps/tanques/main/tq_battle.c:331
+¡Oleada %d!	Vague %d !
+
+#: apps/tanques/main/tq_battle.c:361
+#: apps/tanques/main/tq_hangar.c:394
+No hay memoria para el arte	Pas assez de mémoire pour les graphismes
+
+#: apps/tanques/main/tq_battle.c:495
+Oleada %d de %d	Vague %d sur %d
+
+#: apps/tanques/main/tq_battle.c:496
+Oleada %d	Vague %d
+
+#: apps/tanques/main/tq_battle.c:498
+Puntos %d-%d (a %d)	Points %d-%d (en %d)
+
+#: apps/tanques/main/tq_battle.c:499
+Banderas %d-%d (a %d)	Drapeaux %d-%d (en %d)
+
+#: apps/tanques/main/tq_battle.c:503
+Cofres %d-%d (quedan %d)	Coffres %d-%d (reste %d)
+
+#: apps/tanques/main/tq_battle.c:508
+Ronda %d de %d	Manche %d sur %d
+
+#: apps/tanques/main/tq_battle.c:515
+Juega %s	%s joue
+
+#: apps/tanques/main/tq_battle.c:516
+Tu turno	À toi
+
+#: apps/tanques/main/tq_battle.c:517
+Turno: %s	Tour : %s
+
+#: apps/tanques/main/tq_battle.c:521
+Gravedad baja	Gravité faible
+
+#: apps/tanques/main/tq_battle.c:528
+Viento %s %.0f	Vent %s %.0f
+
+#: apps/tanques/main/tq_battle.c:542
+#: apps/tanques/main/tq_battle.c:628
+Apuntar	Viser
+
+#: apps/tanques/main/tq_battle.c:542
+#: apps/tanques/main/tq_battle.c:543
+Terminar	Fin du tour
+
+#: apps/tanques/main/tq_battle.c:543
+#: apps/tanques/main/tq_battle.c:643
+Mover	Bouger
+
+#: apps/tanques/main/tq_battle.c:562
+Elevación %d°   Giro %d°	Élévation %d°   Rotation %d°
+
+#: apps/tanques/main/tq_battle.c:565
+Segundo disparo: AP x2	Deuxième tir : AP x2
+
+#: apps/tanques/main/tq_battle.c:630
+Tocá el mapa adonde ir. Arrastrá para mirar.	Touche le terrain là où aller. Glisse pour regarder autour.
+
+#: apps/tanques/main/tq_battle.c:653
+¡Fuego!	Feu !
+
+#: apps/tanques/main/tq_battle.c:677
+¿Dejar la batalla?	Quitter la bataille ?
+
+#: apps/tanques/main/tq_battle.c:679
+Dejar	Quitter
+
+#: apps/tanques/main/tq_battle.c:682
+#: apps/tanques/main/tq_menu.c:482
+Seguir	Continuer
+
+#: apps/tanques/main/tq_battle.c:701
+Turno de %s\nPasale la placa	Au tour de %s\nPasse-lui la carte
+
+#: apps/tanques/main/tq_battle.c:761
+No llega hasta ahí	Trop loin
+
+#: apps/tanques/main/tq_battle.c:917
+Sin AP	Plus d'AP
+
+#: apps/tanques/main/tq_data.c:19
+Bombo	Tambour
+
+#: apps/tanques/main/tq_data.c:19
+Para todo: buen blindaje, buen motor, tres armas	Polyvalent : bon blindage, bon moteur, trois armes
+
+#: apps/tanques/main/tq_data.c:20
+Pulga	Puce
+
+#: apps/tanques/main/tq_data.c:20
+Liviana y rápida: llega lejos, aguanta poco	Légère et rapide : va loin, encaisse peu
+
+#: apps/tanques/main/tq_data.c:21
+Mamut	Mammouth
+
+#: apps/tanques/main/tq_data.c:21
+Pesado: mucho blindaje, dos cañones, lento	Lourd : gros blindage, deux canons, lent
+
+#: apps/tanques/main/tq_data.c:22
+Obús	Obusier
+
+#: apps/tanques/main/tq_data.c:22
+Artillería: lo que va por arriba pega más	Artillerie : les tirs en cloche frappent plus fort
+
+#: apps/tanques/main/tq_data.c:23
+Avispa	Guêpe
+
+#: apps/tanques/main/tq_data.c:23
+Misiles: los guiados y los láser pegan más	Missiles : les tirs guidés et laser frappent plus fort
+
+#: apps/tanques/main/tq_data.c:24
+Topo	Taupe
+
+#: apps/tanques/main/tq_data.c:24
+Ingeniero: cava, arregla y planta minas mejor	Ingénieur : meilleur pour creuser, réparer et poser des mines
+
+#: apps/tanques/main/tq_data.c:26
+Tortuga	Tortue
+
+#: apps/tanques/main/tq_data.c:26
+Caparazón: empieza con escudo; su escudo y la Tesla rinden más	Carapace : commence avec un bouclier ; son bouclier et la Tesla sont plus efficaces
+
+#: apps/tanques/main/tq_data.c:28
+Anfibio	Amphibie
+
+#: apps/tanques/main/tq_data.c:28
+Anda por el agua; el cañón doble le pega más	Roule sur l'eau ; son canon double frappe plus fort
+
+#: apps/tanques/main/tq_data.c:35
+#: apps/tanques/main/tq_menu.c:110
+Tanques	Tanks
+
+#: apps/tanques/main/tq_data.c:35
+Misión a la Luna	Mission sur la Lune
+
+#: apps/tanques/main/tq_data.c:35
+Día de playa	Journée à la plage
+
+#: apps/tanques/main/tq_data.c:70
+Clásico	Classique
+
+#: apps/tanques/main/tq_data.c:70
+Oleadas	Vagues
+
+#: apps/tanques/main/tq_data.c:70
+Rey de la colina	Roi de la colline
+
+#: apps/tanques/main/tq_data.c:71
+Captura la bandera	Capture du drapeau
+
+#: apps/tanques/main/tq_data.c:71
+#: apps/tanques/main/tq_data.c:362
+Búsqueda del tesoro	Chasse au trésor
+
+#: apps/tanques/main/tq_data.c:73
+Gana el último equipo en pie	La dernière équipe debout gagne
+
+#: apps/tanques/main/tq_data.c:74
+Tandas de tanques cada vez más duros: ¿cuántas aguantás?	Des vagues de tanks de plus en plus coriaces : combien vas-tu en tenir ?
+
+#: apps/tanques/main/tq_data.c:75
+Un punto por turno empezado dentro de la colina: gana el primero a 4	Un point par tour commencé sur la colline : le premier à 4 gagne
+
+#: apps/tanques/main/tq_data.c:76
+Traé la bandera del otro a la tuya: gana el primero a 2	Ramène le drapeau adverse au tien : le premier à 2 gagne
+
+#: apps/tanques/main/tq_data.c:77
+Cofres por el mapa: gana el que junta más	Des coffres sur le terrain : celui qui en ramasse le plus gagne
+
+#: apps/tanques/main/tq_data.c:80
+Blindaje	Blindage
+
+#: apps/tanques/main/tq_data.c:80
+Motor	Moteur
+
+#: apps/tanques/main/tq_data.c:80
+Velocidad	Vitesse
+
+#: apps/tanques/main/tq_data.c:80
+Energía	Énergie
+
+#: apps/tanques/main/tq_data.c:82
+Más vida y menos daño por golpe	Plus de vie et moins de dégâts par coup
+
+#: apps/tanques/main/tq_data.c:83
+Sube mejor las lomas	Grimpe mieux les pentes
+
+#: apps/tanques/main/tq_data.c:84
+Más metros por punto de acción	Plus de mètres par point d'action
+
+#: apps/tanques/main/tq_data.c:85
+Un punto de acción más por turno	Un point d'action de plus par tour
+
+#: apps/tanques/main/tq_data.c:114
+Cañón	Canon
+
+#: apps/tanques/main/tq_data.c:114
+Rápido y recto: el de siempre	Rapide et droit : le classique
+
+#: apps/tanques/main/tq_data.c:115
+Mortero	Mortier
+
+#: apps/tanques/main/tq_data.c:115
+Por arriba de lo que tapa	Passe par-dessus les obstacles
+
+#: apps/tanques/main/tq_data.c:116
+Misil guiado	Missile guidé
+
+#: apps/tanques/main/tq_data.c:116
+Se tuerce hacia el tanque más cercano	Dévie vers le tank le plus proche
+
+#: apps/tanques/main/tq_data.c:117
+Racimo	Grappe
+
+#: apps/tanques/main/tq_data.c:117
+Se abre arriba en cinco bombitas	S'ouvre en l'air en cinq petites bombes
+
+#: apps/tanques/main/tq_data.c:118
+Láser	Laser
+
+#: apps/tanques/main/tq_data.c:118
+Derecho, sin caer, corta lo que encuentra	Tout droit, sans tomber, tranche ce qu'il touche
+
+#: apps/tanques/main/tq_data.c:119
+Napalm	Napalm
+
+#: apps/tanques/main/tq_data.c:119
+Deja fuego dos turnos	Laisse du feu deux tours
+
+#: apps/tanques/main/tq_data.c:120
+Minas	Mines
+
+#: apps/tanques/main/tq_data.c:120
+Tres minas: explotan al pasar	Trois mines : elles explosent au passage
+
+#: apps/tanques/main/tq_data.c:121
+Pulso EMP	Impulsion IEM
+
+#: apps/tanques/main/tq_data.c:121
+Sin daño: el de al lado pierde la mitad de AP	Sans dégâts : les tanks proches perdent la moitié de leurs AP
+
+#: apps/tanques/main/tq_data.c:122
+Escudo	Bouclier
+
+#: apps/tanques/main/tq_data.c:122
+Frena los próximos 40 de daño	Arrête les 40 prochains points de dégâts
+
+#: apps/tanques/main/tq_data.c:123
+Reparación	Réparation
+
+#: apps/tanques/main/tq_data.c:123
+Recupera 30 de vida	Rend 30 points de vie
+
+#: apps/tanques/main/tq_data.c:124
+Humo	Fumée
+
+#: apps/tanques/main/tq_data.c:124
+Una nube: lo que tira desde ahí o hacia ahí se desvía	Un nuage : les tirs qui en partent ou y entrent sont déviés
+
+#: apps/tanques/main/tq_data.c:125
+Rebote	Rebond
+
+#: apps/tanques/main/tq_data.c:125
+Pica dos veces antes de explotar	Rebondit deux fois avant d'exploser
+
+#: apps/tanques/main/tq_data.c:126
+Perforador	Foreuse
+
+#: apps/tanques/main/tq_data.c:126
+Se mete en la tierra y explota abajo	S'enfonce dans le sol et explose dessous
+
+#: apps/tanques/main/tq_data.c:127
+Bombardeo	Bombardement
+
+#: apps/tanques/main/tq_data.c:127
+Marcás un punto y caen cinco bombas	Marque un point et cinq bombes tombent
+
+#: apps/tanques/main/tq_data.c:128
+Francotirador	Sniper
+
+#: apps/tanques/main/tq_data.c:128
+Muy rápido, poco radio, mucho daño	Très rapide, petit rayon, gros dégâts
+
+#: apps/tanques/main/tq_data.c:129
+Escopeta	Fusil à pompe
+
+#: apps/tanques/main/tq_data.c:129
+Cinco perdigones abiertos	Cinq plombs en éventail
+
+#: apps/tanques/main/tq_data.c:130
+Terremoto	Séisme
+
+#: apps/tanques/main/tq_data.c:130
+Levanta y hunde el suelo alrededor	Soulève et creuse le sol autour
+
+#: apps/tanques/main/tq_data.c:131
+Teletransporte	Téléport
+
+#: apps/tanques/main/tq_data.c:131
+Tu tanque aparece donde cae	Ton tank apparaît là où il tombe
+
+#: apps/tanques/main/tq_data.c:132
+Muro	Mur
+
+#: apps/tanques/main/tq_data.c:132
+Levanta tres piedras donde cae	Dresse trois pierres là où il tombe
+
+#: apps/tanques/main/tq_data.c:133
+Bomba gorda	Grosse bombe
+
+#: apps/tanques/main/tq_data.c:133
+Lenta y enorme	Lente et énorme
+
+#: apps/tanques/main/tq_data.c:135
+Bobina Tesla	Bobine Tesla
+
+#: apps/tanques/main/tq_data.c:135
+Un rayo que salta a todo lo que hay cerca	Un éclair qui saute sur tout ce qui est proche
+
+#: apps/tanques/main/tq_data.c:136
+Cañón doble	Canon double
+
+#: apps/tanques/main/tq_data.c:136
+Dos tiros seguidos: el segundo se abre por el retroceso	Deux tirs de suite : le recul dévie le second
+
+#: apps/tanques/main/tq_data.c:177
+Naranja	Orange
+
+#: apps/tanques/main/tq_data.c:177
+Crema	Crème
+
+#: apps/tanques/main/tq_data.c:177
+Azul	Bleu
+
+#: apps/tanques/main/tq_data.c:177
+Blanco	Blanc
+
+#: apps/tanques/main/tq_data.c:177
+Verde	Vert
+
+#: apps/tanques/main/tq_data.c:177
+Arena	Sable
+
+#: apps/tanques/main/tq_data.c:178
+Rojo	Rouge
+
+#: apps/tanques/main/tq_data.c:178
+Gris	Gris
+
+#: apps/tanques/main/tq_data.c:178
+Carbón	Charbon
+
+#: apps/tanques/main/tq_data.c:178
+Violeta	Violet
+
+#: apps/tanques/main/tq_data.c:178
+Rosa	Rose
+
+#: apps/tanques/main/tq_data.c:178
+Celeste	Bleu ciel
+
+#: apps/tanques/main/tq_data.c:320
+Pradera	Prairie
+
+#: apps/tanques/main/tq_data.c:320
+Desierto	Désert
+
+#: apps/tanques/main/tq_data.c:320
+Nieve	Neige
+
+#: apps/tanques/main/tq_data.c:320
+Ruinas	Ruines
+
+#: apps/tanques/main/tq_data.c:320
+Volcán	Volcan
+
+#: apps/tanques/main/tq_data.c:321
+Luna	Lune
+
+#: apps/tanques/main/tq_data.c:321
+Playa	Plage
+
+#: apps/tanques/main/tq_data.c:322
+Despejado	Dégagé
+
+#: apps/tanques/main/tq_data.c:322
+Viento	Vent
+
+#: apps/tanques/main/tq_data.c:322
+Tormenta	Orage
+
+#: apps/tanques/main/tq_data.c:322
+Niebla	Brouillard
+
+#: apps/tanques/main/tq_data.c:324
+Chico	Petit
+
+#: apps/tanques/main/tq_data.c:324
+Mediano	Moyen
+
+#: apps/tanques/main/tq_data.c:324
+Grande	Grand
+
+#: apps/tanques/main/tq_data.c:324
+Muy grande	Très grand
+
+#: apps/tanques/main/tq_data.c:325
+Fácil	Facile
+
+#: apps/tanques/main/tq_data.c:325
+#: apps/tanques/main/tq_data.c:327
+Normal	Normal
+
+#: apps/tanques/main/tq_data.c:325
+Difícil	Difficile
+
+#: apps/tanques/main/tq_data.c:327
+Muy pocos	Très peu
+
+#: apps/tanques/main/tq_data.c:327
+Pocos	Peu
+
+#: apps/tanques/main/tq_data.c:327
+Muchos	Beaucoup
+
+#: apps/tanques/main/tq_data.c:328
+Un montón	Des tonnes
+
+#: apps/tanques/main/tq_data.c:334
+El primer día	Le premier jour
+
+#: apps/tanques/main/tq_data.c:335
+La loma del medio	La colline du milieu
+
+#: apps/tanques/main/tq_data.c:336
+Dos contra uno	Deux contre un
+
+#: apps/tanques/main/tq_data.c:337
+Arena en los ojos	Du sable dans les yeux
+
+#: apps/tanques/main/tq_data.c:338
+El oasis	L'oasis
+
+#: apps/tanques/main/tq_data.c:339
+Tormenta de arena	Tempête de sable
+
+#: apps/tanques/main/tq_data.c:340
+Bajo cero	Sous zéro
+
+#: apps/tanques/main/tq_data.c:341
+El muñeco de nieve	Le bonhomme de neige
+
+#: apps/tanques/main/tq_data.c:342
+Avalancha	Avalanche
+
+#: apps/tanques/main/tq_data.c:343
+La ciudad vacía	La ville vide
+
+#: apps/tanques/main/tq_data.c:344
+La plaza	La place
+
+#: apps/tanques/main/tq_data.c:345
+El volcán	Le volcan
+
+#: apps/tanques/main/tq_data.c:347
+Alunizaje	Alunissage
+
+#: apps/tanques/main/tq_data.c:347
+Acá todo cae más despacio: apuntá más bajo	Ici tout tombe plus lentement : vise plus bas
+
+#: apps/tanques/main/tq_data.c:349
+Defensa de la base	Défense de la base
+
+#: apps/tanques/main/tq_data.c:349
+Aguantá 6 rondas	Tiens 6 manches
+
+#: apps/tanques/main/tq_data.c:351
+El rey del cráter	Le roi du cratère
+
+#: apps/tanques/main/tq_data.c:351
+Rey de la colina: 4 puntos	Roi de la colline : 4 points
+
+#: apps/tanques/main/tq_data.c:353
+Escolta al rover	Escorte le rover
+
+#: apps/tanques/main/tq_data.c:353
+El rover tiene que sobrevivir	Le rover doit survivre
+
+#: apps/tanques/main/tq_data.c:355
+Lluvia de meteoritos	Pluie de météorites
+
+#: apps/tanques/main/tq_data.c:355
+Oleadas: aguantá 3	Vagues : tiens-en 3
+
+#: apps/tanques/main/tq_data.c:357
+La cara oculta	La face cachée
+
+#: apps/tanques/main/tq_data.c:357
+#: apps/tanques/main/tq_data.c:370
+El jefe tiene el triple de vida	Le boss a trois fois plus de vie
+
+#: apps/tanques/main/tq_data.c:360
+Desembarco	Débarquement
+
+#: apps/tanques/main/tq_data.c:360
+Un solo puente une las islas	Un seul pont relie les îles
+
+#: apps/tanques/main/tq_data.c:362
+Cofres en la arena	Coffres dans le sable
+
+#: apps/tanques/main/tq_data.c:364
+La bandera pirata	Le drapeau pirate
+
+#: apps/tanques/main/tq_data.c:364
+Captura la bandera: 2 veces	Capture du drapeau : 2 fois
+
+#: apps/tanques/main/tq_data.c:366
+Marea alta	Marée haute
+
+#: apps/tanques/main/tq_data.c:366
+Ganá en 7 rondas o menos	Gagne en 7 manches ou moins
+
+#: apps/tanques/main/tq_data.c:368
+Que no crucen	Qu'ils ne passent pas
+
+#: apps/tanques/main/tq_data.c:368
+Aguantá 7 rondas	Tiens 7 manches
+
+#: apps/tanques/main/tq_data.c:370
+El almirante	L'amiral
+
+#: apps/tanques/main/tq_hangar.c:46
+Vos	Toi
+
+#: apps/tanques/main/tq_hangar.c:100
+No te alcanzan las monedas	Pas assez de pièces
+
+#: apps/tanques/main/tq_hangar.c:150
+Tiene que llevar por lo menos un arma	Il doit emporter au moins une arme
+
+#: apps/tanques/main/tq_hangar.c:235
+Al máximo	Au maximum
+
+#: apps/tanques/main/tq_hangar.c:236
+Mejorar\n%d	Améliorer\n%d
+
+#: apps/tanques/main/tq_hangar.c:248
+Lleva %d de %d armas	Emporte %d armes sur %d
+
+#: apps/tanques/main/tq_hangar.c:278
+Viene con\n%s	Livré avec\n%s
+
+#: apps/tanques/main/tq_hangar.c:284
+Comprar\n%d	Acheter\n%d
+
+#: apps/tanques/main/tq_hangar.c:290
+Quitar	Retirer
+
+#: apps/tanques/main/tq_hangar.c:290
+Llevar	Emporter
+
+#: apps/tanques/main/tq_hangar.c:307
+Color	Couleur
+
+#: apps/tanques/main/tq_hangar.c:307
+Segundo color	Deuxième couleur
+
+#: apps/tanques/main/tq_hangar.c:307
+Emblema	Emblème
+
+#: apps/tanques/main/tq_hangar.c:307
+Color del emblema	Couleur de l'emblème
+
+#: apps/tanques/main/tq_hangar.c:360
+#: apps/tanques/main/tq_menu.c:73
+%ld monedas	%ld pièces
+
+#: apps/tanques/main/tq_hangar.c:368
+%s\nVida %d · Blindaje %d%% · %d AP · %d armas	%s\nVie %d · Blindage %d%% · %d AP · %d armes
+
+#: apps/tanques/main/tq_hangar.c:372
+Comprar · %d	Acheter · %d
+
+#: apps/tanques/main/tq_hangar.c:376
+El tuyo	Le tien
+
+#: apps/tanques/main/tq_hangar.c:379
+Usar este	Prendre celui-ci
+
+#: apps/tanques/main/tq_hangar.c:466
+#: apps/tanques/main/tq_menu.c:118
+Hangar	Hangar
+
+#: apps/tanques/main/tq_hangar.c:493
+Mejoras	Améliorations
+
+#: apps/tanques/main/tq_hangar.c:493
+Armas	Armes
+
+#: apps/tanques/main/tq_hangar.c:493
+Pintura	Peinture
+
+#: apps/tanques/main/tq_menu.c:116
+#: apps/tanques/main/tq_menu.c:188
+Historia	Histoire
+
+#: apps/tanques/main/tq_menu.c:117
+#: apps/tanques/main/tq_menu.c:393
+Batalla libre	Bataille libre
+
+#: apps/tanques/main/tq_menu.c:166
+Jefe %s	Boss %s
+
+#: apps/tanques/main/tq_menu.c:174
+Rover	Rover
+
+#: apps/tanques/main/tq_menu.c:205
+Campaña	Campagne
+
+#: apps/tanques/main/tq_menu.c:208
+No instalado: llega con su paquete	Non installé : vient avec son pack
+
+#: apps/tanques/main/tq_menu.c:226
+%s · %s · %d monedas	%s · %s · %d pièces
+
+#: apps/tanques/main/tq_menu.c:228
+%s · 1 rival · %d monedas	%s · 1 rival · %d pièces
+
+#: apps/tanques/main/tq_menu.c:229
+%s · %d rivales · %d monedas	%s · %d rivaux · %d pièces
+
+#: apps/tanques/main/tq_menu.c:230
+Ganá la anterior para jugarla	Gagne la précédente pour la jouer
+
+#: apps/tanques/main/tq_menu.c:288
+Sin aire	Sans air
+
+#: apps/tanques/main/tq_menu.c:294
+#: apps/tanques/main/tq_menu.c:396
+Objetos	Objets
+
+#: apps/tanques/main/tq_menu.c:364
+Jugador 1	Joueur 1
+
+#: apps/tanques/main/tq_menu.c:365
+Jugador 2	Joueur 2
+
+#: apps/tanques/main/tq_menu.c:395
+Modo	Mode
+
+#: apps/tanques/main/tq_menu.c:395
+Lugar	Lieu
+
+#: apps/tanques/main/tq_menu.c:395
+Tamaño	Taille
+
+#: apps/tanques/main/tq_menu.c:395
+Rivales	Rivaux
+
+#: apps/tanques/main/tq_menu.c:395
+Dificultad	Difficulté
+
+#: apps/tanques/main/tq_menu.c:396
+Clima	Météo
+
+#: apps/tanques/main/tq_menu.c:396
+Jugadores	Joueurs
+
+#: apps/tanques/main/tq_menu.c:396
+Tanque del 2	Tank du joueur 2
+
+#: apps/tanques/main/tq_menu.c:427
+¡A la batalla!	À l'attaque !
+
+#: apps/tanques/main/tq_menu.c:451
+%d oleadas	%d vagues
+
+#: apps/tanques/main/tq_menu.c:456
+Empate	Égalité
+
+#: apps/tanques/main/tq_menu.c:457
+¡Ganó %s!	%s gagne !
+
+#: apps/tanques/main/tq_menu.c:459
+¡Ganaste!	Tu as gagné !
+
+#: apps/tanques/main/tq_menu.c:459
+Perdiste	Tu as perdu
+
+#: apps/tanques/main/tq_menu.c:463
+Daño hecho: %d   Tanques fuera: %d	Dégâts infligés : %d   Tanks détruits : %d
+
+#: apps/tanques/main/tq_menu.c:467
++%d monedas	+%d pièces

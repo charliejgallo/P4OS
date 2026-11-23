@@ -1,0 +1,383 @@
+# amoledos-lang 1   es -> fr
+# aos.plotter.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/plotter/main/pl_cfg.c:67
+Multímetro	Multimètre
+
+#: apps/plotter/main/pl_cfg.c:68
+Lectura	Lecture
+
+#: apps/plotter/main/pl_cfg.c:72
+Perfil %d	Profil %d
+
+#: apps/plotter/main/pl_chart.c:301
+Elegí el puerto y tocá Conectar	Choisis le port et touche Connecter
+
+#: apps/plotter/main/pl_chart.c:302
+Llegan líneas pero sin números: mirá Formato	Des lignes arrivent, mais sans nombres : regarde Format
+
+#: apps/plotter/main/pl_chart.c:303
+Esperando datos…	En attente de données…
+
+#: apps/plotter/main/pl_chart.c:304
+#: apps/plotter/main/pl_sheets.c:830
+Hacen falta dos series con datos	Il faut deux séries avec des données
+
+#: apps/plotter/main/pl_csv.c:49
+fecha y hora	date et heure
+
+#: apps/plotter/main/pl_csv.c:51
+segundos	secondes
+
+#: apps/plotter/main/pl_parse.c:177
+#: apps/plotter/main/pl_parse.c:207
+#: apps/plotter/main/pl_parse.c:293
+#: apps/plotter/main/pl_sheets.c:650
+Valor %d	Valeur %d
+
+#: apps/plotter/main/pl_sheets.c:23
+nada	rien
+
+#: apps/plotter/main/pl_sheets.c:103
+Listo	OK
+
+#: apps/plotter/main/pl_sheets.c:253
+#: apps/plotter/main/pl_sheets.c:642
+(todavía no llegó nada)	(rien n'est encore arrivé)
+
+#: apps/plotter/main/pl_sheets.c:324
+#: apps/plotter/main/plotter.c:315
+No se pudo abrir el puerto	Impossible d'ouvrir le port
+
+#: apps/plotter/main/pl_sheets.c:342
+Entre 50 y 5000000 baudios	Entre 50 et 5000000 bauds
+
+#: apps/plotter/main/pl_sheets.c:356
+Velocidad en baudios	Vitesse en bauds
+
+#: apps/plotter/main/pl_sheets.c:378
+Conexión	Connexion
+
+#: apps/plotter/main/pl_sheets.c:380
+VELOCIDAD (BAUDIOS)	VITESSE (BAUDS)
+
+#: apps/plotter/main/pl_sheets.c:390
+Otra…	Autre…
+
+#: apps/plotter/main/pl_sheets.c:393
+BITS DE DATOS	BITS DE DONNÉES
+
+#: apps/plotter/main/pl_sheets.c:398
+PARIDAD	PARITÉ
+
+#: apps/plotter/main/pl_sheets.c:400
+Ninguna (N)	Aucune (N)
+
+#: apps/plotter/main/pl_sheets.c:400
+Par (E)	Paire (E)
+
+#: apps/plotter/main/pl_sheets.c:400
+Impar (O)	Impaire (O)
+
+#: apps/plotter/main/pl_sheets.c:403
+BITS DE STOP	BITS DE STOP
+
+#: apps/plotter/main/pl_sheets.c:406
+LÍNEAS DEL ADAPTADOR USB	LIGNES DE L'ADAPTATEUR USB
+
+#: apps/plotter/main/pl_sheets.c:409
+Prendidas, como las deja una computadora. El cable óptico de muchos multímetros se alimenta de DTR con RTS apagado: si no llega nada, probá apagar RTS. Los puertos del header no tienen estas líneas.	Activées, comme les laisse un ordinateur. Le câble optique de nombreux multimètres est alimenté par DTR avec RTS désactivé : si rien n'arrive, essaie de désactiver RTS. Les ports du connecteur n'ont pas ces lignes.
+
+#: apps/plotter/main/pl_sheets.c:410
+El canal es el mismo de la Terminal: los dos miran el mismo aparato a la vez, y la captura sigue con la app cerrada. Con la velocidad o el formato equivocados llegan caracteres raros: la vista de Formato muestra qué llega.	Le canal est le même que celui du Terminal : les deux regardent le même appareil en même temps, et la capture continue avec l'app fermée. Avec une mauvaise vitesse ou un mauvais format, des caractères bizarres arrivent : la vue Format montre ce qui arrive.
+
+#: apps/plotter/main/pl_sheets.c:431
+Ya hay 12 perfiles	Il y a déjà 12 profils
+
+#: apps/plotter/main/pl_sheets.c:446
+Formato	Format
+
+#: apps/plotter/main/pl_sheets.c:447
+CÓMO LEER LAS LÍNEAS	COMMENT LIRE LES LIGNES
+
+#: apps/plotter/main/pl_sheets.c:448
+#: apps/plotter/main/plotter.c:105
+Automático	Automatique
+
+#: apps/plotter/main/pl_sheets.c:451
+Automático entiende números separados por espacios, comas, punto y coma o tabs (una serie por columna), el formato nombre:valor de los plotters serie (temp:21.5,hum:40), una palabra antes de cada número (Temp 21.5) y CSV con encabezado. Las líneas sin números se saltean.	Automatique comprend les nombres séparés par des espaces, des virgules, des points-virgules ou des tabulations (une série par colonne), le format nom:valeur des traceurs série (temp:21.5,hum:40), un mot avant chaque nombre (Temp 21.5) et le CSV avec en-tête. Les lignes sans nombres sont ignorées.
+
+#: apps/plotter/main/pl_sheets.c:454
+Editar el perfil…	Modifier le profil…
+
+#: apps/plotter/main/pl_sheets.c:456
+PERFIL NUEVO	NOUVEAU PROFIL
+
+#: apps/plotter/main/pl_sheets.c:457
+En blanco	Vierge
+
+#: apps/plotter/main/pl_sheets.c:458
+Valor y punto decimal	Valeur et point décimal
+
+#: apps/plotter/main/pl_sheets.c:459
+Un perfil sirve para lo que el automático no entiende: elige qué campo de la línea es cada serie, con una escala y un desplazamiento, o con el punto decimal según otro campo (el «+0265 4» de un multímetro es 26.5). Cambiar el formato vuelve a leer las últimas 3000 líneas del canal.	Un profil sert à ce que le mode automatique ne comprend pas : il choisit quel champ de la ligne correspond à chaque série, avec une échelle et un décalage, ou avec le point décimal donné par un autre champ (le « +0265 4 » d'un multimètre vaut 26.5). Changer le format relit les 3000 dernières lignes du canal.
+
+#: apps/plotter/main/pl_sheets.c:460
+LO QUE LLEGA	CE QUI ARRIVE
+
+#: apps/plotter/main/pl_sheets.c:486
+Nombre del perfil	Nom du profil
+
+#: apps/plotter/main/pl_sheets.c:498
+Usar sólo las líneas que tengan… (vacío: todas)	N'utiliser que les lignes contenant… (vide : toutes)
+
+#: apps/plotter/main/pl_sheets.c:569
+Nombre de la serie	Nom de la série
+
+#: apps/plotter/main/pl_sheets.c:570
+Unidad (V, °C, kg…)	Unité (V, °C, kg…)
+
+#: apps/plotter/main/pl_sheets.c:573
+Multiplicar por	Multiplier par
+
+#: apps/plotter/main/pl_sheets.c:577
+Y sumarle	Puis ajouter
+
+#: apps/plotter/main/pl_sheets.c:580
+Código:decimales, separados por comas (vacío: el campo dice los decimales)	Code:décimales, séparés par des virgules (vide : le champ donne les décimales)
+
+#: apps/plotter/main/pl_sheets.c:598
+EL PERFIL	LE PROFIL
+
+#: apps/plotter/main/pl_sheets.c:599
+Nombre	Nom
+
+#: apps/plotter/main/pl_sheets.c:601
+Sólo líneas con	Seules les lignes avec
+
+#: apps/plotter/main/pl_sheets.c:601
+todas	toutes
+
+#: apps/plotter/main/pl_sheets.c:603
+Coma decimal	Virgule décimale
+
+#: apps/plotter/main/pl_sheets.c:606
+LA ÚLTIMA LÍNEA, POR CAMPOS	LA DERNIÈRE LIGNE, PAR CHAMPS
+
+#: apps/plotter/main/pl_sheets.c:620
+(sin campos)	(aucun champ)
+
+#: apps/plotter/main/pl_sheets.c:626
+#: apps/plotter/main/plotter.c:137
+(no coincide: salteada)	(ne correspond pas : ignorée)
+
+#: apps/plotter/main/pl_sheets.c:627
+#: apps/plotter/main/plotter.c:144
+(sin números)	(sans nombres)
+
+#: apps/plotter/main/pl_sheets.c:652
+Campo	Champ
+
+#: apps/plotter/main/pl_sheets.c:656
+Nombre…	Nom…
+
+#: apps/plotter/main/pl_sheets.c:657
+Unidad	Unité
+
+#: apps/plotter/main/pl_sheets.c:666
+Punto según el campo	Point selon le champ
+
+#: apps/plotter/main/pl_sheets.c:667
+Punto: como viene	Point : tel quel
+
+#: apps/plotter/main/pl_sheets.c:672
+Códigos	Codes
+
+#: apps/plotter/main/pl_sheets.c:672
+el valor	la valeur
+
+#: apps/plotter/main/pl_sheets.c:675
+Quitar	Retirer
+
+#: apps/plotter/main/pl_sheets.c:678
+Agregar una serie	Ajouter une série
+
+#: apps/plotter/main/pl_sheets.c:679
+Los campos se cuentan cortando la línea en espacios, tabs, comas, punto y coma, «:» y «=». Con el punto según otro campo, el número se divide por 10 a la cantidad de decimales que dice ese campo; los códigos traducen su valor (4:1 quiere decir que un 4 son un decimal).	Les champs se comptent en coupant la ligne aux espaces, tabulations, virgules, points-virgules, « : » et « = ». Avec le point selon un autre champ, le nombre est divisé par 10 puissance le nombre de décimales indiqué par ce champ ; les codes traduisent sa valeur (4:1 veut dire qu'un 4 vaut une décimale).
+
+#: apps/plotter/main/pl_sheets.c:681
+Borrar el perfil	Supprimer le profil
+
+#: apps/plotter/main/pl_sheets.c:720
+Avisar por debajo de… (vacío: sin aviso)	Alerte en dessous de… (vide : aucune)
+
+#: apps/plotter/main/pl_sheets.c:720
+Avisar por encima de… (vacío: sin aviso)	Alerte au-dessus de… (vide : aucune)
+
+#: apps/plotter/main/pl_sheets.c:732
+Series y avisos	Séries et alertes
+
+#: apps/plotter/main/pl_sheets.c:734
+Todavía no llegaron números. Cada nombre que aparece en las líneas (o cada columna) es una serie.	Aucun nombre n'est encore arrivé. Chaque nom qui apparaît dans les lignes (ou chaque colonne) est une série.
+
+#: apps/plotter/main/pl_sheets.c:745
+Oculta	Masquée
+
+#: apps/plotter/main/pl_sheets.c:745
+Se ve	Visible
+
+#: apps/plotter/main/pl_sheets.c:746
+Grande	Grande
+
+#: apps/plotter/main/pl_sheets.c:749
+Mínimo	Minimum
+
+#: apps/plotter/main/pl_sheets.c:752
+Máximo	Maximum
+
+#: apps/plotter/main/pl_sheets.c:754
+Pitido	Bip
+
+#: apps/plotter/main/pl_sheets.c:756
+Cuando una serie sale de su mínimo o su máximo aparece un aviso, también con otra app adelante, y si tiene pitido, suena; como mucho una vez cada 10 segundos. Los límites se guardan por el nombre de la serie y se ven en el gráfico como líneas punteadas. Tocar una serie en el gráfico la pone grande; tocarla de nuevo la oculta.	Quand une série sort de son minimum ou de son maximum, une alerte apparaît, même avec une autre app au premier plan, et si elle a un bip, il sonne ; au plus une fois toutes les 10 secondes. Les limites sont gardées par nom de série et apparaissent sur le graphique en pointillés. Toucher une série sur le graphique l'agrandit ; la toucher encore la masque.
+
+#: apps/plotter/main/pl_sheets.c:771
+El máximo tiene que ser mayor que el mínimo	Le maximum doit être supérieur au minimum
+
+#: apps/plotter/main/pl_sheets.c:798
+Abajo del gráfico	Sous le graphique
+
+#: apps/plotter/main/pl_sheets.c:798
+Arriba del gráfico	Au-dessus du graphique
+
+#: apps/plotter/main/pl_sheets.c:817
+Vista	Affichage
+
+#: apps/plotter/main/pl_sheets.c:819
+VENTANA DE TIEMPO	FENÊTRE DE TEMPS
+
+#: apps/plotter/main/pl_sheets.c:822
+GRÁFICO	GRAPHIQUE
+
+#: apps/plotter/main/pl_sheets.c:823
+Contra el tiempo	En fonction du temps
+
+#: apps/plotter/main/pl_sheets.c:824
+XY: una contra otra	XY : l'une contre l'autre
+
+#: apps/plotter/main/pl_sheets.c:826
+EJE X	AXE X
+
+#: apps/plotter/main/pl_sheets.c:828
+EJE Y	AXE Y
+
+#: apps/plotter/main/pl_sheets.c:832
+ESCALA	ÉCHELLE
+
+#: apps/plotter/main/pl_sheets.c:833
+Automática	Automatique
+
+#: apps/plotter/main/pl_sheets.c:834
+Fija	Fixe
+
+#: apps/plotter/main/pl_sheets.c:838
+Desde	De
+
+#: apps/plotter/main/pl_sheets.c:840
+Hasta	À
+
+#: apps/plotter/main/pl_sheets.c:843
+DATOS	DONNÉES
+
+#: apps/plotter/main/pl_sheets.c:844
+Borrar el gráfico	Effacer le graphique
+
+#: apps/plotter/main/pl_sheets.c:849
+%u lecturas en %s. En memoria quedan las filas de los últimos minutos u horas, según cuántas lleguen, y un resumen por segundo de las últimas 8 horas.	%u lectures en %s. La mémoire garde les lignes des dernières minutes ou heures, selon le débit, et un résumé par seconde des 8 dernières heures.
+
+#: apps/plotter/main/pl_sheets.c:852
+En el gráfico: un dedo lee el punto que toca; dos dedos acercan o alejan, y arrastrados van hacia atrás en el tiempo (el gráfico se pausa; En vivo vuelve).	Sur le graphique : un doigt lit le point qu'il touche ; deux doigts zooment, et en les faisant glisser on remonte dans le temps (le graphique se met en pause ; Direct y revient).
+
+#: apps/plotter/main/pl_sheets.c:871
+Conectá un puerto primero	Connecte d'abord un port
+
+#: apps/plotter/main/pl_sheets.c:878
+Enviar al puerto	Envoyer au port
+
+#: apps/plotter/main/pl_sheets.c:879
+FIN DE LÍNEA	FIN DE LIGNE
+
+#: apps/plotter/main/pl_sheets.c:884
+Línea para enviar…	Ligne à envoyer…
+
+#: apps/plotter/main/plotter.c:126
+%s: %s %s, por debajo de %s	%s : %s %s, sous %s
+
+#: apps/plotter/main/plotter.c:126
+%s: %s %s, por encima de %s	%s : %s %s, au-dessus de %s
+
+#: apps/plotter/main/plotter.c:139
+encabezado:	en-tête :
+
+#: apps/plotter/main/plotter.c:207
+(¿serie nueva?)	(nouvelle série ?)
+
+#: apps/plotter/main/plotter.c:314
+%s lo tiene %s	%s est utilisé par %s
+
+#: apps/plotter/main/plotter.c:355
+Guardado en	Enregistré dans
+
+#: apps/plotter/main/plotter.c:358
+Hace falta la tarjeta	Il faut la carte SD
+
+#: apps/plotter/main/plotter.c:360
+Grabando a CSV en la tarjeta	Enregistrement CSV sur la carte SD
+
+#: apps/plotter/main/plotter.c:387
+Sin datos todavía	Pas encore de données
+
+#: apps/plotter/main/plotter.c:415
+mín	min
+
+#: apps/plotter/main/plotter.c:415
+máx	max
+
+#: apps/plotter/main/plotter.c:415
+prom	moy
+
+#: apps/plotter/main/plotter.c:435
+Detener	Arrêter
+
+#: apps/plotter/main/plotter.c:435
+#: apps/plotter/main/plotter.c:600
+#: apps/plotter/main/plotter.c:609
+Conectar	Connecter
+
+#: apps/plotter/main/plotter.c:458
+líneas	lignes
+
+#: apps/plotter/main/plotter.c:459
+sin números	sans nombres
+
+#: apps/plotter/main/plotter.c:460
+perdidas	perdues
+
+#: apps/plotter/main/plotter.c:461
+grabando	enregistrement
+
+#: apps/plotter/main/plotter.c:463
+Desconectado: el gráfico guarda lo que llegó	Déconnecté : le graphique garde ce qui est arrivé
+
+#: apps/plotter/main/plotter.c:463
+Sin conexión: elegí el puerto y la velocidad	Pas de connexion : choisis le port et la vitesse
+
+#: apps/plotter/main/plotter.c:661
+En vivo	Direct
+
+#: apps/plotter/main/plotter.c:727
+No hay memoria para los datos	Pas de mémoire pour les données

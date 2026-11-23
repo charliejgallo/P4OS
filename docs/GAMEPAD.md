@@ -55,7 +55,9 @@ by touch never sees it. Board games put a cursor on the board the same way.
 | Simon | the four directions are the four pads, clockwise from the top left (up green) · A or START starts |
 | Solitario | D-pad walks the piles (up/down in a column choose how many cards) · A picks up and drops (on the same pile, to its best place) · B cancels · L undo · R hint · START menu; in the panels D-pad + A, B back |
 | Sudoku | D-pad walks the cells · A places the chosen number · B notes it · L/R change the number · START pause (with hint, undo, restart and menu); menus and shop D-pad + A, B back |
+| Tanques | Driving: D-pad or stick moves a cursor on the map, A drives there, START or R aims · Aiming: left/right turn the turret, up/down raise the barrel, L/R change weapon, A fires, B back to driving · menus and hangar: D-pad and A, B back, L/R change the hangar's tank |
 | Topos | D-pad moves a frame over the holes · A or B whacks · START pause |
+| Tortuga | START runs or stops · R steps · L changes the speed · blocks: D-pad up/down chooses a block, left/right a piece of the palette, A puts it, B deletes · menus: D-pad and A, B back |
 | Truco | D-pad over your cards and the calls · A lifts and plays a card, answers · B puts a lifted card back · START menu |
 | Turbo | stick is an analog wheel (D-pad the arrows) · A gas · B brake · START pause · L/R car in the garage |
 | Vuelos (not a game) | D-pad or stick moves the map · L/R zoom out/in · A picks the aircraft nearest the centre, the next one at every press · B lets it go · START the list; in the panels B or START goes back |

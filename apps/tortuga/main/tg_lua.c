@@ -33,6 +33,10 @@
 #pragma GCC diagnostic ignored "-Wunused-but-set-variable"
 #endif
 
+/* lua_ident is the one global LUA_API cannot make static (lua.h declares it
+ * extern): renamed, or it collides with the Lua app's in the simulator, where
+ * every app is linked into one binary */
+#define lua_ident tg_lua_ident
 #define LUA_32BITS 1
 #define LUA_CORE
 #define LUA_LIB

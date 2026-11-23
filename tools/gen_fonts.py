@@ -105,7 +105,10 @@ EXTRA_TEXT = ",".join([
     "0x25A0-0x25FF",                        # geometric shapes
     "0x2600-0x27BF",                        # miscellaneous symbols and dingbats (check marks, stars)
 ])
-EXTRA_BIG = EXTRA_PUNCT
+# P4OS, 2026-11-23: the big sizes also get French's oe ligature (0x152-0x153),
+# two glyphs, so a French title does not lose a letter; the rest of Latin
+# Extended-A would be ~200 KB more for two sizes and is left out.
+EXTRA_BIG = EXTRA_PUNCT + ",0x152-0x153"
 BIG_SIZES = (48, 64)
 
 

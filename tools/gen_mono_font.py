@@ -16,7 +16,10 @@ REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 URL = "https://cdn.jsdelivr.net/gh/JetBrains/JetBrainsMono@2.304/fonts/ttf/JetBrainsMono-Regular.ttf"
 CACHE = os.path.expanduser("~/.cache/p4os-fonts/JetBrainsMono-Regular.ttf")
 SIZES = [18, 22]
-RANGE = "0x20-0x7E,0xA0-0xFF,0x2022,0x2026,0x2500-0x257F,0x2580-0x259F"
+# P4OS, 2026-11-23: Latin Extended-A (Polish, Czech, Turkish, Romanian, the
+# French oe) and the typographic quotes, for the languages past Spanish, English
+# and German; measured below in the commit
+RANGE = "0x20-0x7E,0xA0-0xFF,0x100-0x17F,0x2018-0x201E,0x2022,0x2026,0x2500-0x257F,0x2580-0x259F"
 OUT = os.path.join(REPO, "components", "aos_fonts")
 
 

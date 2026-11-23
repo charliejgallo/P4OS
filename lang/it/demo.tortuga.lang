@@ -1,0 +1,404 @@
+# amoledos-lang 1   es -> it
+# demo.tortuga.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/tortuga/main/tg_blocks.c:486
+Tocá las piezas de abajo para armar el programa.	Tocca i pezzi qui sotto per costruire il programma.
+
+#: apps/tortuga/main/tg_blocks.c:681
+(sin número)	(senza numero)
+
+#: apps/tortuga/main/tg_blocks.c:711
+sin número	senza numero
+
+#: apps/tortuga/main/tg_blocks.c:712
+Listo	Fine
+
+#: apps/tortuga/main/tg_blocks.c:728
+¿Qué pregunta?	Quale domanda?
+
+#: apps/tortuga/main/tg_blocks.c:734
+quitar «no»	togli «not»
+
+#: apps/tortuga/main/tg_blocks.c:734
+poner «no»	metti «not»
+
+#: apps/tortuga/main/tg_blocks.c:877
+repetir	repeat
+
+#: apps/tortuga/main/tg_blocks.c:879
+truco nuevo	new trick
+
+#: apps/tortuga/main/tg_blocks.c:880
+usar truco	use trick
+
+#: apps/tortuga/main/tg_edit.c:344
+Escribí el programa, o tocá las órdenes de abajo	Scrivi il programma, o tocca i comandi qui sotto
+
+#: apps/tortuga/main/tg_edit.c:345
+Escribí el programa en Lua, o tocá las órdenes de abajo	Scrivi il programma in Lua, o tocca i comandi qui sotto
+
+#: apps/tortuga/main/tg_logo.c:161
+no entiendo «%c»	non capisco «%c»
+
+#: apps/tortuga/main/tg_logo.c:187
+el programa es demasiado largo	il programma è troppo lungo
+
+#: apps/tortuga/main/tg_logo.c:281
+#: apps/tortuga/main/tg_lua.c:223
+falta cerrar el paréntesis	manca la parentesi chiusa
+
+#: apps/tortuga/main/tg_logo.c:305
+«%s» es una orden, no un valor	«%s» è un comando, non un valore
+
+#: apps/tortuga/main/tg_logo.c:313
+falta un valor	manca un valore
+
+#: apps/tortuga/main/tg_logo.c:417
+falta abrir el bloque con [	il blocco deve aprirsi con [
+
+#: apps/tortuga/main/tg_logo.c:425
+falta cerrar el bloque con ]	il blocco deve chiudersi con ]
+
+#: apps/tortuga/main/tg_logo.c:444
+después de «para» va el nombre	dopo «to» va il nome
+
+#: apps/tortuga/main/tg_logo.c:460
+falta el «fin» de «%s»	manca l'«end» di «%s»
+
+#: apps/tortuga/main/tg_logo.c:495
+después de «haz» va el nombre	dopo «make» va il nome
+
+#: apps/tortuga/main/tg_logo.c:511
+«%s» no va acá	«%s» non va qui
+
+#: apps/tortuga/main/tg_logo.c:538
+después de «%s» va derecha o izquierda	dopo «%s» va right o left
+
+#: apps/tortuga/main/tg_logo.c:570
+«%s» es una pregunta: va en un «si» o un «mientras»	«%s» è una domanda: va in un «if» o in un «while»
+
+#: apps/tortuga/main/tg_logo.c:572
+#: apps/tortuga/main/tg_lua.c:198
+no conozco «%s»	non conosco «%s»
+
+#: apps/tortuga/main/tg_logo.c:577
+sobra un ]	c'è una ] di troppo
+
+#: apps/tortuga/main/tg_logo.c:578
+no entiendo lo que sigue	non capisco quello che segue
+
+#: apps/tortuga/main/tg_logo.c:587
+#: apps/tortuga/main/tg_logo.c:945
+#: apps/tortuga/main/tg_lua.c:238
+#: apps/tortuga/main/tg_play.c:122
+no hay memoria	memoria esaurita
+
+#: apps/tortuga/main/tg_logo.c:702
+«%s» todavía no está definido	«%s» non è ancora definito
+
+#: apps/tortuga/main/tg_logo.c:706
+«%s» se llama a sí mismo demasiadas veces	«%s» chiama se stesso troppe volte
+
+#: apps/tortuga/main/tg_logo.c:749
+#: apps/tortuga/main/tg_logo.c:877
+acá va un número	qui va un numero
+
+#: apps/tortuga/main/tg_logo.c:758
+acá va una pregunta de sí o no	qui va una domanda sì o no
+
+#: apps/tortuga/main/tg_logo.c:782
+#: apps/tortuga/main/tg_lua.c:202
+«%s» no tiene valor todavía	«%s» non ha ancora un valore
+
+#: apps/tortuga/main/tg_logo.c:825
+no se puede dividir por cero	non si può dividere per zero
+
+#: apps/tortuga/main/tg_lua.c:158
+«%s» lleva un número	«%s» vuole un numero
+
+#: apps/tortuga/main/tg_lua.c:210
+falta un «end» para cerrar lo que abre la línea %d	manca un «end» per chiudere quello che apre la riga %d
+
+#: apps/tortuga/main/tg_lua.c:211
+falta un «end»	manca un «end»
+
+#: apps/tortuga/main/tg_lua.c:215
+falta el «then» del «if»	manca il «then» dell'«if»
+
+#: apps/tortuga/main/tg_lua.c:219
+falta el «do»	manca il «do»
+
+#: apps/tortuga/main/tg_lua.c:227
+el programa usó demasiada memoria	il programma ha usato troppa memoria
+
+#: apps/tortuga/main/tg_menu.c:240
+Programá a la tortuga hasta la meta	Programma la tartaruga fino al traguardo
+
+#: apps/tortuga/main/tg_menu.c:257
+Jugar	Gioca
+
+#: apps/tortuga/main/tg_menu.c:261
+#: apps/tortuga/main/tg_menu.c:411
+Mundos	Mondi
+
+#: apps/tortuga/main/tg_menu.c:264
+#: apps/tortuga/main/tg_play.c:940
+Hoja libre	Foglio libero
+
+#: apps/tortuga/main/tg_menu.c:275
+Difícil	Difficile
+
+#: apps/tortuga/main/tg_menu.c:275
+Fácil	Facile
+
+#: apps/tortuga/main/tg_menu.c:277
+Sonido	Suono
+
+#: apps/tortuga/main/tg_menu.c:279
+Difícil: la tortuga tiene que terminar justo en la meta.	Difficile: la tartaruga deve finire proprio sul traguardo.
+
+#: apps/tortuga/main/tg_menu.c:280
+Fácil: se gana al pasar por la meta.	Facile: si vince passando sul traguardo.
+
+#: apps/tortuga/main/tg_menu.c:314
+¿Cómo querés programar?	Come vuoi programmare?
+
+#: apps/tortuga/main/tg_menu.c:350
+Sin teclado: se tocan las piezas	Senza tastiera: si toccano i pezzi
+
+#: apps/tortuga/main/tg_menu.c:350
+El clásico de la tortuga, con palabras	Il classico della tartaruga, con le parole
+
+#: apps/tortuga/main/tg_menu.c:351
+Un lenguaje de verdad, chico	Un linguaggio vero, piccolo
+
+#: apps/tortuga/main/tg_menu.c:351
+Se instala aparte	Si installa a parte
+
+#: apps/tortuga/main/tg_menu.c:363
+repetir 4	repeat 4
+
+#: apps/tortuga/main/tg_menu.c:363
+avanzar 2	forward 2
+
+#: apps/tortuga/main/tg_menu.c:363
+girar derecha	turn right
+
+#: apps/tortuga/main/tg_menu.c:385
+pronto	presto
+
+#: apps/tortuga/main/tg_play.c:377
+sí	sì
+
+#: apps/tortuga/main/tg_play.c:377
+no	no
+
+#: apps/tortuga/main/tg_play.c:434
+En la línea %d, la tortuga chocó con una piedra.	Alla riga %d, la tartaruga ha sbattuto contro una pietra.
+
+#: apps/tortuga/main/tg_play.c:435
+En la línea %d, la tortuga chocó con el borde.	Alla riga %d, la tartaruga ha sbattuto contro il bordo.
+
+#: apps/tortuga/main/tg_play.c:437
+En la línea %d, la tortuga se metió al agua. ¿Había un puente?	Alla riga %d, la tartaruga è finita in acqua. C'era un ponte?
+
+#: apps/tortuga/main/tg_play.c:439
+En la línea %d, la puerta estaba cerrada: falta la llave.	Alla riga %d, la porta era chiusa: manca la chiave.
+
+#: apps/tortuga/main/tg_play.c:440
+En este nivel todavía no está «%s».	In questo livello «%s» non c'è ancora.
+
+#: apps/tortuga/main/tg_play.c:441
+Línea %d: «%s» no lleva esos datos.	Riga %d: «%s» non accetta questi valori.
+
+#: apps/tortuga/main/tg_play.c:442
+Línea %d: en el mapa la tortuga gira de a 90 grados.	Riga %d: sulla mappa la tartaruga gira di 90 gradi alla volta.
+
+#: apps/tortuga/main/tg_play.c:443
+Línea %d: en el mapa se avanza de a casillas enteras.	Riga %d: sulla mappa si avanza di caselle intere.
+
+#: apps/tortuga/main/tg_play.c:444
+Línea %d: la tortuga se salió de la hoja.	Riga %d: la tartaruga è uscita dal foglio.
+
+#: apps/tortuga/main/tg_play.c:445
+Línea %d: «%s» no sirve en la hoja.	Riga %d: «%s» non funziona sul foglio.
+
+#: apps/tortuga/main/tg_play.c:447
+El programa terminó y la tortuga quedó a %d casillas de la meta.	Il programma è finito e la tartaruga è rimasta a %d caselle dal traguardo.
+
+#: apps/tortuga/main/tg_play.c:449
+El programa terminó y la tortuga no llegó a la meta.	Il programma è finito e la tartaruga non è arrivata al traguardo.
+
+#: apps/tortuga/main/tg_play.c:451
+Llegó, pero quedan %d lechugas sin comer.	È arrivata, ma restano %d lattughe da mangiare.
+
+#: apps/tortuga/main/tg_play.c:453
+La tortuga tenía que decir cuántas lechugas había.	La tartaruga doveva dire quante lattughe c'erano.
+
+#: apps/tortuga/main/tg_play.c:457
+La tortuga pasó por la meta pero no se quedó ahí: en el modo difícil tiene que terminar justo encima.	La tartaruga è passata sul traguardo ma non ci è rimasta: in modalità difficile deve finire proprio sopra.
+
+#: apps/tortuga/main/tg_play.c:460
+La tortuga se quedó dando vueltas: ¿el mientras tiene cómo terminar?	La tartaruga continua a girare: il tuo «while» può finire?
+
+#: apps/tortuga/main/tg_play.c:463
+El dibujo no es igual a la figura. Mirá la de puntitos.	Il disegno non è uguale alla figura. Guarda quella tratteggiata.
+
+#: apps/tortuga/main/tg_play.c:467
+Línea %d: %s	Riga %d: %s
+
+#: apps/tortuga/main/tg_play.c:470
+No anduvo.	Non ha funzionato.
+
+#: apps/tortuga/main/tg_play.c:521
+#: apps/tortuga/main/tg_play.c:585
+Volver a intentar	Riprova
+
+#: apps/tortuga/main/tg_play.c:542
+¡Llegó!	È arrivata!
+
+#: apps/tortuga/main/tg_play.c:545
+%d piezas: ¡perfecto!	%d pezzi: perfetto!
+
+#: apps/tortuga/main/tg_play.c:546
+%d piezas. Para tres estrellas: %d o menos.	%d pezzi. Per tre stelle: %d o meno.
+
+#: apps/tortuga/main/tg_play.c:551
+Con la tercera pista, dos estrellas como mucho.	Con il terzo suggerimento, al massimo due stelle.
+
+#: apps/tortuga/main/tg_play.c:556
+Anduvo en los %d caminos.	Ha funzionato su tutti i %d percorsi.
+
+#: apps/tortuga/main/tg_play.c:564
+#: apps/tortuga/main/tortuga.c:139
+Otra vez	Ancora
+
+#: apps/tortuga/main/tg_play.c:566
+#: apps/tortuga/main/tg_play.c:833
+Siguiente	Avanti
+
+#: apps/tortuga/main/tg_play.c:574
+En el primer camino anduvo, en el %d no: %.220s	Sul primo percorso ha funzionato, sul %d no: %.220s
+
+#: apps/tortuga/main/tg_play.c:578
+Probá preguntar en vez de contar.	Prova a chiedere invece di contare.
+
+#: apps/tortuga/main/tg_play.c:602
+Todavía no hay bloques: tocá las piezas de abajo.	Ancora nessun blocco: tocca i pezzi qui sotto.
+
+#: apps/tortuga/main/tg_play.c:603
+Todavía no hay programa: escribilo o tocá las órdenes de abajo.	Ancora nessun programma: scrivilo o tocca i comandi qui sotto.
+
+#: apps/tortuga/main/tg_play.c:679
+Lento	Lento
+
+#: apps/tortuga/main/tg_play.c:679
+Normal	Normale
+
+#: apps/tortuga/main/tg_play.c:679
+Rápido	Veloce
+
+#: apps/tortuga/main/tg_play.c:679
+Muy rápido	Molto veloce
+
+#: apps/tortuga/main/tg_play.c:679
+Al toque	Subito
+
+#: apps/tortuga/main/tg_play.c:712
+Pista %d de %d	Suggerimento %d di %d
+
+#: apps/tortuga/main/tg_play.c:723
+Así empieza (cambiá los ?):	Inizia così (cambia i ?):
+
+#: apps/tortuga/main/tg_play.c:755
+#: apps/tortuga/main/tg_play.c:796
+#: apps/tortuga/main/tg_play.c:809
+Cerrar	Chiudi
+
+#: apps/tortuga/main/tg_play.c:758
+Ver el esqueleto	Mostra lo schema
+
+#: apps/tortuga/main/tg_play.c:758
+Otra pista	Altro suggerimento
+
+#: apps/tortuga/main/tg_play.c:794
+(vacío)	(vuoto)
+
+#: apps/tortuga/main/tg_play.c:803
+Ver estos bloques escritos en...	Mostra questi blocchi scritti in...
+
+#: apps/tortuga/main/tg_play.c:833
+¡A jugar!	Si gioca!
+
+#: apps/tortuga/main/tg_play.c:958
+%d mapas	%d mappe
+
+#: apps/tortuga/main/tg_play.c:1028
+Correr	Esegui
+
+#: apps/tortuga/main/tg_play.c:1030
+Paso	Passo
+
+#: apps/tortuga/main/tg_play.c:1162
+paso %d de %d	passo %d di %d
+
+#: apps/tortuga/main/tortuga.c:96
+Bloques	Blocchi
+
+#: apps/tortuga/main/tortuga.c:135
+Mundo %d	Mondo %d
+
+#: apps/tortuga/main/tortuga.c:139
+Primeros pasos	Primi passi
+
+#: apps/tortuga/main/tortuga.c:139
+Ponele nombre	Dagli un nome
+
+#: apps/tortuga/main/tortuga.c:139
+Preguntar	Chiedere
+
+#: apps/tortuga/main/tortuga.c:139
+Hasta que	Fino a quando
+
+#: apps/tortuga/main/tortuga.c:140
+Contar	Contare
+
+#: apps/tortuga/main/tortuga.c:140
+A medida	Su misura
+
+#: apps/tortuga/main/tortuga.c:140
+El lápiz	La matita
+
+#: apps/tortuga/main/tortuga.c:140
+La gran travesía	La grande traversata
+
+#: apps/tortuga/main/tortuga.c:152
+Una orden detrás de otra	Un comando dopo l'altro
+
+#: apps/tortuga/main/tortuga.c:152
+Repetir	Ripetizioni
+
+#: apps/tortuga/main/tortuga.c:152
+Procedimientos	Procedure
+
+#: apps/tortuga/main/tortuga.c:152
+Si, sino y sensores	Se, altrimenti e sensori
+
+#: apps/tortuga/main/tortuga.c:153
+Mientras	Finché
+
+#: apps/tortuga/main/tortuga.c:153
+Variables	Variabili
+
+#: apps/tortuga/main/tortuga.c:153
+Parámetros	Parametri
+
+#: apps/tortuga/main/tortuga.c:153
+Dibujar como en LOGO	Disegnare come in LOGO
+
+#: apps/tortuga/main/tortuga.c:153
+Todo junto	Tutto insieme

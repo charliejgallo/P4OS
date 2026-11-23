@@ -8,7 +8,35 @@
   "es": "Cada turno tiene dos partes. Primero manejás: la vista de arriba muestra hasta dónde llegan tus puntos de acción, y las lomas cuestan más. Después apuntás desde la torreta, en primera persona: girás, subís el cañón, elegís el arma y disparás. El tiro vuela, explota, deja su cráter y rompe árboles y paredes.\n\nEn el hangar hay seis tanques, del liviano y rápido al pesado de dos cañones, con mejoras de blindaje, motor, velocidad y energía, dos colores y un emblema propio. Las veinte armas van del cañón y el mortero al racimo, el napalm, las minas, el láser, el escudo, el bombardeo o el teletransporte, y también se mejoran.\n\nLa historia son doce misiones en cinco lugares (pradera, desierto, nieve, ruinas y volcán) contra rivales que suben. La batalla libre arma un mapa nuevo con el lugar, el tamaño, los rivales, la dificultad y el clima que elijas, contra la placa o de a dos pasándose la placa.",
   "en": "Every turn has two parts. First you drive: the view from above shows how far your action points reach, and hills cost more. Then you aim from the turret, first person: turn, raise the barrel, pick the weapon and fire. The shot flies, blows up, leaves its crater and breaks trees and walls.\n\nThe hangar has six tanks, from the light quick one to the heavy one with twin guns, with upgrades to armour, engine, speed and energy, two colours and an emblem of your own. The twenty weapons go from the cannon and the mortar to cluster bombs, napalm, mines, a laser, a shield, an air strike or a teleport, and they upgrade too.\n\nThe story is twelve missions in five places (meadow, desert, snow, ruins and a volcano) against rivals that get tougher. The free battle makes a new map with the place, size, rivals, difficulty and weather you choose, against the board or two people passing it round."
  },
- "shots": ["app-tanques.jpg", "app-tanques-aim.jpg", "app-tanques-hangar.jpg", "land-tanques.jpg"],
- "packs": [{"file": "tanques_p4.pak", "need": true}],
- "tags": ["3d"]
+ "shots": [
+  "app-tanques.jpg",
+  "app-tanques-aim.jpg",
+  "app-tanques-hangar.jpg",
+  "land-tanques.jpg"
+ ],
+ "packs": [
+  {
+   "file": "tanques_p4.pak",
+   "need": true
+  },
+  {
+   "file": "tanques_luna.pak",
+   "need": false,
+   "name": {
+    "es": "Misión a la Luna",
+    "en": "Mission to the Moon"
+   }
+  },
+  {
+   "file": "tanques_playa.pak",
+   "need": false,
+   "name": {
+    "es": "Día de playa",
+    "en": "Beach Day"
+   }
+  }
+ ],
+ "tags": [
+  "3d"
+ ]
 }

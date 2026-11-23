@@ -2,6 +2,28 @@
 
 ## 0.32.2 — not released yet
 
+- **Four new apps in the Store**, from the card:
+  - **Tanques** (Tanks): turn-based battles of toy tanks in 3D: drive from
+    above, aim from the turret, fire. Six tanks to upgrade and paint, twenty
+    weapons, a story and free battles on generated maps, against the board
+    or two people. Two optional packs, Misión a la Luna and Día de playa,
+    each with its tank, weapon, modes and missions.
+  - **Tortuga** (Turtle): learn to program by guiding a turtle with blocks,
+    a Logo of its own or Lua, through nine worlds of 47 levels.
+  - **Monitor serie** (Serial Plotter): plots live what comes in on a serial
+    port, on the Terminal's channels; profiles for meters.
+  - **Estado de la casa** (Home Status): the services at home, up or down,
+    with latency, availability and notices.
+- **Brazilian Portuguese, French and Italian**, the whole system, the portal
+  and every app, as System parts in the Store. **They were translated with
+  no native speaker reviewing them and may have mistakes: if you find a bad
+  translation, please report it as an issue so we can fix it.** Since every
+  app's package carries its languages, almost every app shows an update in
+  the Store this time (about 20 MB, once). A language the Store installs
+  gets its own name in Settings without its meta.txt. The monospaced font
+  (Terminal, Notes, code) gains Latin Extended-A and the typographic quotes,
+  and the big sizes the French oe; Tortuga plays with the English keywords
+  in every language but Spanish (German and the three new ones).
 - **The Terminal talks to multimeters.** Its speed is a button that opens
   the connection's sheet: 300 to 2000000 baud in the list and any other
   typed in (50 to 5000000), 5 to 8 data bits, parity and stop bits (7E1,

@@ -10892,3 +10892,15 @@ Lo más común es 8N1 (8 bits, sin paridad, 1 de stop). Muchos multímetros usan
 la velocidad va de 50 a 5000000 baudios	die Geschwindigkeit reicht von 50 bis 5000000 Baud
 el formato es como 8N1 o 7E1	das Format ist wie 8N1 oder 7E1
 el parlante está en uso	der Lautsprecher ist belegt
+
+#: apps/tanques  (nombre de app)
+Tanques	Panzer
+
+#: apps/tortuga  (nombre de app)
+Tortuga	Schildkröte
+
+#: apps/plotter  (nombre de app)
+Monitor serie	Serieller Plotter
+
+#: apps/estado  (nombre de app)
+Estado de la casa	Hausstatus

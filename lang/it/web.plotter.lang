@@ -1,0 +1,184 @@
+# amoledos-lang 1   es -> it
+# web.plotter.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/plotter/web/plotter.js:131
+#: apps/plotter/web/plotter.js:162
+Monitor serie	Monitor seriale
+
+#: apps/plotter/web/plotter.js:140
+Monitor serie no está abierto en la placa: el gráfico en vivo aparece cuando la app está abierta (al frente o atrás).	Monitor seriale non è aperto sulla scheda: il grafico dal vivo compare quando l'app è aperta (in primo piano o in background).
+
+#: apps/plotter/web/plotter.js:141
+Abrir en la placa	Apri sulla scheda
+
+#: apps/plotter/web/plotter.js:151
+Línea para enviar…	Riga da inviare…
+
+#: apps/plotter/web/plotter.js:157
+Enviado	Inviato
+
+#: apps/plotter/web/plotter.js:166
+Bajar la imagen	Scarica l'immagine
+
+#: apps/plotter/web/plotter.js:167
+Bajar lo que se ve (CSV)	Scarica ciò che si vede (CSV)
+
+#: apps/plotter/web/plotter.js:168
+Series	Serie
+
+#: apps/plotter/web/plotter.js:169
+Enviar al puerto	Invia alla porta
+
+#: apps/plotter/web/plotter.js:170
+Enviar	Invia
+
+#: apps/plotter/web/plotter.js:171
+Con el fin de línea que se eligió en la app.	Con il fine riga scelto nell'app.
+
+#: apps/plotter/web/plotter.js:172
+Lo que llega	Cosa arriva
+
+#: apps/plotter/web/plotter.js:173
+Grabaciones (CSV)	Registrazioni (CSV)
+
+#: apps/plotter/web/plotter.js:174
+Perfiles y avisos	Profili e avvisi
+
+#: apps/plotter/web/plotter.js:189
+Esperando datos…	In attesa di dati…
+
+#: apps/plotter/web/plotter.js:288
+Canal %s · %s a %s %s	Canale %s · %s a %s %s
+
+#: apps/plotter/web/plotter.js:288
+Canal %s · sin conexión	Canale %s · non connesso
+
+#: apps/plotter/web/plotter.js:289
+%s líneas	%s righe
+
+#: apps/plotter/web/plotter.js:289
+%s perdidas	%s perse
+
+#: apps/plotter/web/plotter.js:290
+grabando	in registrazione
+
+#: apps/plotter/web/plotter.js:295
+En vivo	Live
+
+#: apps/plotter/web/plotter.js:295
+Pausa	Pausa
+
+#: apps/plotter/web/plotter.js:297
+Detener la grabación	Ferma la registrazione
+
+#: apps/plotter/web/plotter.js:297
+Grabar CSV	Registra CSV
+
+#: apps/plotter/web/plotter.js:298
+¿Borrar el gráfico?	Cancellare il grafico?
+
+#: apps/plotter/web/plotter.js:298
+Borrar	Cancella
+
+#: apps/plotter/web/plotter.js:302
+#: apps/plotter/web/plotter.js:361
+#: apps/plotter/web/plotter.js:372
+Serie	Serie
+
+#: apps/plotter/web/plotter.js:302
+Último	Ultimo
+
+#: apps/plotter/web/plotter.js:302
+Mín.	Min.
+
+#: apps/plotter/web/plotter.js:302
+Máx.	Max.
+
+#: apps/plotter/web/plotter.js:302
+Prom.	Media
+
+#: apps/plotter/web/plotter.js:302
+#: apps/plotter/web/plotter.js:370
+Avisos	Avvisi
+
+#: apps/plotter/web/plotter.js:307
+Todavía no llegaron números.	Non sono ancora arrivati numeri.
+
+#: apps/plotter/web/plotter.js:339
+Todavía no hay: el botón de grabar de la app (o Grabar CSV acá) las deja en /plotter de la tarjeta.	Ancora nessuna: il pulsante di registrazione dell'app (o Registra CSV qui) le salva in /plotter sulla microSD.
+
+#: apps/plotter/web/plotter.js:342
+Bajar	Scarica
+
+#: apps/plotter/web/plotter.js:343
+¿Borrar %s?	Eliminare %s?
+
+#: apps/plotter/web/plotter.js:354
+Guardado: la app lo toma en un segundo	Salvato: l'app lo carica entro un secondo
+
+#: apps/plotter/web/plotter.js:356
+Un perfil es para las líneas que el modo automático no entiende: cada serie es un campo de la línea (cortada en espacios, tabs, comas, punto y coma, «:» y «=»), por una escala más un desplazamiento; el punto decimal puede venir de otro campo, con códigos como 0:0,1:3,2:2,4:1 (código:decimales).	Un profilo serve per le righe che la modalità automatica non capisce: ogni serie è un campo della riga (tagliata a spazi, tab, virgole, punti e virgola, «:» e «=»), per una scala più un offset; il punto decimale può venire da un altro campo, con codici come 0:0,1:3,2:2,4:1 (codice:decimali).
+
+#: apps/plotter/web/plotter.js:358
+Nombre	Nome
+
+#: apps/plotter/web/plotter.js:358
+Sólo líneas con	Solo righe con
+
+#: apps/plotter/web/plotter.js:359
+Coma decimal	Virgola decimale
+
+#: apps/plotter/web/plotter.js:361
+Campo	Campo
+
+#: apps/plotter/web/plotter.js:361
+Unidad	Unità
+
+#: apps/plotter/web/plotter.js:362
+Multiplicar por	Moltiplica per
+
+#: apps/plotter/web/plotter.js:362
+Sumar	Somma
+
+#: apps/plotter/web/plotter.js:363
+Punto según el campo (0: no)	Punto dal campo (0: no)
+
+#: apps/plotter/web/plotter.js:363
+Códigos	Codici
+
+#: apps/plotter/web/plotter.js:364
+Quitar la serie	Rimuovi la serie
+
+#: apps/plotter/web/plotter.js:366
+Agregar una serie	Aggiungi una serie
+
+#: apps/plotter/web/plotter.js:367
+Borrar el perfil	Elimina il profilo
+
+#: apps/plotter/web/plotter.js:369
+Perfil %d	Profilo %d
+
+#: apps/plotter/web/plotter.js:369
+Perfil nuevo	Nuovo profilo
+
+#: apps/plotter/web/plotter.js:371
+Por el nombre de la serie: un aviso en la placa (y un pitido, si se pide) cuando el valor sale de los límites. Vacío: sin límite.	Per nome della serie: un avviso sulla scheda (e un bip, se richiesto) quando il valore esce dai limiti. Vuoto: nessun limite.
+
+#: apps/plotter/web/plotter.js:372
+Mínimo	Minimo
+
+#: apps/plotter/web/plotter.js:372
+Máximo	Massimo
+
+#: apps/plotter/web/plotter.js:373
+Pitido	Bip
+
+#: apps/plotter/web/plotter.js:376
+Agregar un aviso	Aggiungi un avviso
+
+#: apps/plotter/web/plotter.js:377
+Guardar	Salva

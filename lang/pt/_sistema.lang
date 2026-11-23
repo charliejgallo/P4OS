@@ -6240,10 +6240,8 @@ PARIDAD	PARIDADE
 Ninguna	Nenhuma
 
 #: components/aos_apps/aos_app_serial.c:918
-Par	Par
 
 #: components/aos_apps/aos_app_serial.c:918
-Impar	Ímpar
 
 #: components/aos_apps/aos_app_serial.c:921
 BITS DE STOP	BITS DE STOP
@@ -11415,3 +11413,69 @@ VNC	VNC
 
 #: apps/vuelos  (nombre de app)
 Vuelos	Voos
+
+#: components/aos_apps/aos_app_serial.c:920
+Ninguna (N)	Nenhuma (N)
+
+#: components/aos_apps/aos_app_serial.c:920
+Par (E)	Par (E)
+
+#: components/aos_apps/aos_app_serial.c:920
+Impar (O)	Ímpar (O)
+
+#: components/aos_apps/_pending/aos_app_pato.c:295
+Escribiendo	Digitando
+
+#: components/aos_apps/_pending/aos_app_pato.c:296
+Tecla	Tecla
+
+#: components/aos_apps/_pending/aos_app_pato.c:297
+Espera	Espera
+
+#: components/aos_apps/_pending/aos_app_pato.c:298
+Mouse	Mouse
+
+#: components/aos_apps/_pending/aos_app_pato.c:316
+Volver	Voltar
+
+#: components/aos_apps/_pending/aos_app_pato.c:330
+Se perdio el teclado USB	O teclado USB foi perdido
+
+#: components/aos_apps/_pending/aos_app_pato.c:428
+Pasa el USB a Teclado	Mude o USB para Teclado
+
+#: components/aos_apps/_pending/aos_app_pato.c:432
+El script esta vacio	O script está vazio
+
+#: components/aos_apps/_pending/aos_app_pato.c:455
+No se pudo leer el script	Não foi possível ler o script
+
+#: components/aos_apps/_pending/aos_app_pato.c:475
+pasos	passos
+
+#: components/aos_apps/_pending/aos_app_pato.c:526
+No hay scripts.\nCrealos en el portal,\npagina Pato goma.	Não há scripts.\nCrie-os no portal,\npágina Pato goma.
+
+#: components/aos_apps/_pending/aos_app_pato.c:578
+USB: teclado listo	USB: teclado pronto
+
+#: components/aos_apps/_pending/aos_app_pato.c:579
+USB: pasalo a \"Teclado y red\"	USB: mude para \"Teclado e rede\"
+
+#: components/aos_apps/_pending/aos_app_pato.c:642
+Pasar a Teclado	Mudar para Teclado
+
+#: components/aos_apps/_pending/aos_app_pato.c:686
+Se enviara al teclado y mouse de la computadora.	Será enviado ao teclado e ao mouse do computador.
+
+#: apps/estado  (nombre de app)
+Estado de la casa	Status da casa
+
+#: apps/plotter  (nombre de app)
+Monitor serie	Monitor serial
+
+#: apps/tanques  (nombre de app)
+Tanques	Tanques
+
+#: apps/tortuga  (nombre de app)
+Tortuga	Tartaruga

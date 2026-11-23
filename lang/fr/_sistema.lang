@@ -6240,10 +6240,8 @@ PARIDAD	PARITÉ
 Ninguna	Aucune
 
 #: components/aos_apps/aos_app_serial.c:918
-Par	Paire
 
 #: components/aos_apps/aos_app_serial.c:918
-Impar	Impaire
 
 #: components/aos_apps/aos_app_serial.c:921
 BITS DE STOP	BITS DE STOP
@@ -11415,3 +11413,69 @@ VNC	VNC
 
 #: apps/vuelos  (nombre de app)
 Vuelos	Vols
+
+#: components/aos_apps/aos_app_serial.c:920
+Ninguna (N)	Aucune (N)
+
+#: components/aos_apps/aos_app_serial.c:920
+Par (E)	Paire (E)
+
+#: components/aos_apps/aos_app_serial.c:920
+Impar (O)	Impaire (O)
+
+#: components/aos_apps/_pending/aos_app_pato.c:295
+Escribiendo	Saisie
+
+#: components/aos_apps/_pending/aos_app_pato.c:296
+Tecla	Touche
+
+#: components/aos_apps/_pending/aos_app_pato.c:297
+Espera	Attente
+
+#: components/aos_apps/_pending/aos_app_pato.c:298
+Mouse	Souris
+
+#: components/aos_apps/_pending/aos_app_pato.c:316
+Volver	Retour
+
+#: components/aos_apps/_pending/aos_app_pato.c:330
+Se perdio el teclado USB	Clavier USB perdu
+
+#: components/aos_apps/_pending/aos_app_pato.c:428
+Pasa el USB a Teclado	Passe l'USB en Clavier
+
+#: components/aos_apps/_pending/aos_app_pato.c:432
+El script esta vacio	Le script est vide
+
+#: components/aos_apps/_pending/aos_app_pato.c:455
+No se pudo leer el script	Impossible de lire le script
+
+#: components/aos_apps/_pending/aos_app_pato.c:475
+pasos	étapes
+
+#: components/aos_apps/_pending/aos_app_pato.c:526
+No hay scripts.\nCrealos en el portal,\npagina Pato goma.	Pas de scripts.\nCrée-les sur le portail,\npage Pato goma.
+
+#: components/aos_apps/_pending/aos_app_pato.c:578
+USB: teclado listo	USB : clavier prêt
+
+#: components/aos_apps/_pending/aos_app_pato.c:579
+USB: pasalo a \"Teclado y red\"	USB : passe-le en « Clavier et réseau »
+
+#: components/aos_apps/_pending/aos_app_pato.c:642
+Pasar a Teclado	Passer en Clavier
+
+#: components/aos_apps/_pending/aos_app_pato.c:686
+Se enviara al teclado y mouse de la computadora.	Sera envoyé au clavier et à la souris de l'ordinateur.
+
+#: apps/estado  (nombre de app)
+Estado de la casa	État de la maison
+
+#: apps/plotter  (nombre de app)
+Monitor serie	Traceur série
+
+#: apps/tanques  (nombre de app)
+Tanques	Tanks
+
+#: apps/tortuga  (nombre de app)
+Tortuga	Tortue

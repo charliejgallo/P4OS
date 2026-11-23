@@ -14,6 +14,20 @@ noviembre, junto; el detalle de cada cosa está en su sección, más abajo.
 De antes de noviembre quedan 69 renglones sin tachar desde "Pendientes,
 en resumen": no se revisaron en esta pasada.
 
+**Lo que entra en la 0.32.2 (2026-11-23):**
+
+- [ ] **Tanques**: el usuario lo jugó en la placa (vista de arriba ~30 fps
+      quieta y 16-22 fps deslizando; primera persona 36-77 ms; 9,9-12,6 MB de
+      PSRAM de 16,5 libres). Falta abrir los dos DLC en la placa.
+- [ ] **Tortuga**, **Monitor serie** (con el WH5000: el perfil del
+      multímetro supone qué es el último número; verificar con otros rangos)
+      y **Estado de la casa**: sólo probadas en el simulador.
+- [ ] **Portugués, francés e italiano** desde la Tienda: que Ajustes los
+      liste con su nombre, recorrer el inicio, Ajustes y un par de apps.
+- [ ] La Tienda tras la release: casi todas las apps ofrecen actualizar
+      (traen sus idiomas nuevos); que se actualicen todas de una sin
+      problemas.
+
 **La Terminal con cualquier velocidad y formato (2026-11-23, para la próxima release):**
 instalada en la placa por OTA (`v0.32.1-1-gadd4d83a-dirty`, confirmada).
 

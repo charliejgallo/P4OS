@@ -3569,6 +3569,10 @@ static const char blob_en__sistema_lang[] =
     "la velocidad va de 50 a 5000000 baudios\tthe speed goes from 50 to 5000000 baud\n"
     "el formato es como 8N1 o 7E1\tthe format is like 8N1 or 7E1\n"
     "el parlante está en uso\tthe speaker is in use\n"
+    "Tanques\tTanks\n"
+    "Tortuga\tTurtle\n"
+    "Monitor serie\tSerial Plotter\n"
+    "Estado de la casa\tHome Status\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -7130,6 +7134,10 @@ static const char blob_de__sistema_lang[] =
     "la velocidad va de 50 a 5000000 baudios\tdie Geschwindigkeit reicht von 50 bis 5000000 Baud\n"
     "el formato es como 8N1 o 7E1\tdas Format ist wie 8N1 oder 7E1\n"
     "el parlante está en uso\tder Lautsprecher ist belegt\n"
+    "Tanques\tPanzer\n"
+    "Tortuga\tSchildkröte\n"
+    "Monitor serie\tSerieller Plotter\n"
+    "Estado de la casa\tHausstatus\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -7137,7 +7145,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3554, 0, files_en, 1 },
-    { "de", "Deutsch", 3554, 0, files_de, 1 },
+    { "en", "English", 3558, 0, files_en, 1 },
+    { "de", "Deutsch", 3558, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;
