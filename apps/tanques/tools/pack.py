@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """Tanques - the art pack, and contact sheets to look at the renders.
 
-    python3 apps/tanques/tools/pack.py                 # build/art -> build/tanques_p4.pak
+    python3 apps/tanques/tools/pack.py                 # build/art -> build/tanques_p4.pak and the DLCs'
+                                                       # tanques_luna.pak, tanques_playa.pak
     python3 apps/tanques/tools/pack.py sheet top out.png [scheme]
     python3 apps/tanques/tools/pack.py tank out.png    # hull + turret together, every yaw
 
@@ -38,6 +39,22 @@ ART = os.path.join(APP, "build", "art")
 PAK = os.path.join(APP, "build", "tanques_p4.pak")
 VERSION = 3
 
+# The DLCs: what each one's pack carries (a sprite's name after its set
+# starts with one of these and "_"); the rest is the game's pack. A DLC is
+# installed when its pack is on the card (tq_art.c).
+DLCS = {
+    "tanques_luna.pak": ("tortuga", "luna", "marks_bc"),
+    "tanques_playa.pak": ("anfibio", "playa", "marks_fl", "marks_ch"),
+}
+
+
+def pack_of(sprite):
+    for pak, keys in DLCS.items():
+        for k in keys:
+            if sprite == k or sprite.startswith(k + "_"):
+                return pak
+    return os.path.basename(PAK)
+
 FIXED = {3: (0.25, 0.24, 0.27), 4: (0.62, 0.64, 0.68), 5: (1.0, 0.92, 0.60), 6: (0.97, 0.97, 0.95),
          8: (0.40, 0.72, 0.28), 9: (0.52, 0.34, 0.20), 10: (0.70, 0.67, 0.62), 11: (0.92, 0.77, 0.52)}
 SCHEMES = {
@@ -56,6 +73,9 @@ BIOMES = {
               7: (0.96, 0.98, 1.0), 12: (1.0, 0.54, 0.16), 3: (0.18, 0.17, 0.20)},
     "ruinas": {10: (0.72, 0.42, 0.31), 11: (0.85, 0.82, 0.77), 4: (0.42, 0.45, 0.50), 5: (1.0, 0.91, 0.63)},
     "volcan": {9: (0.24, 0.20, 0.19), 10: (0.31, 0.29, 0.32), 11: (0.54, 0.50, 0.47), 12: (1.0, 0.42, 0.12)},
+    "luna": {8: (0.52, 0.88, 1.0), 9: (0.36, 0.37, 0.42), 10: (0.70, 0.70, 0.73), 11: (0.93, 0.94, 0.96)},
+    "playa": {8: (0.36, 0.70, 0.30), 9: (0.66, 0.47, 0.29), 10: (0.68, 0.64, 0.58), 11: (0.92, 0.82, 0.62),
+              2: (0.95, 0.32, 0.30)},
 }
 FIXED.update({7: (0.96, 0.97, 0.99), 12: (1.0, 0.54, 0.16)})
 
@@ -230,6 +250,11 @@ def group_of(set_name, sprite):
 
 
 def pack():
+    for name in [os.path.basename(PAK)] + list(DLCS):
+        pack_one(name)
+
+
+def pack_one(pak_name):
     entries = []
     for set_name in sorted(os.listdir(ART)):
         d = os.path.join(ART, set_name)
@@ -237,6 +262,8 @@ def pack():
             continue
         for n in sorted(os.listdir(d)):
             if n.endswith(".spr"):
+                if pack_of(n[:-4]) != pak_name:
+                    continue
                 name = "%s/%s" % (set_name, n[:-4])
                 assert len(name) < 24, name
                 with open(os.path.join(d, n), "rb") as f:
@@ -255,12 +282,13 @@ def pack():
         blobs += b
         while len(blobs) % 4:
             blobs += b"\0"
-    with open(PAK, "wb") as f:
+    out = os.path.join(os.path.dirname(PAK), pak_name)
+    with open(out, "wb") as f:
         f.write(b"TQPK" + struct.pack("<II", VERSION, len(entries)) + table + blobs)
     groups = {}
     for g, _, b in entries:
         groups[g] = groups.get(g, 0) + len(b)
-    print("%s: %d sprites, %.1f MB" % (PAK, len(entries), (off + len(blobs)) / 1e6))
+    print("%s: %d sprites, %.1f MB" % (out, len(entries), (off + len(blobs)) / 1e6))
     for g in sorted(groups):
         print("  %-14s %6.0f KB" % (g, groups[g] / 1024))
 

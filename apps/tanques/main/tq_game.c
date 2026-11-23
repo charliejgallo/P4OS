@@ -124,25 +124,135 @@ static bool near_tank(const tq_state_t *s, float x, float y, float r)
     return false;
 }
 
+/* Something of a mode's on the ground there: the trees and walls keep off */
+static bool near_mark(const tq_state_t *s, float x, float y, float r)
+{
+    if (s->mode == TQ_MODE_HILL) {
+        float d = sqrtf((x - s->hill_x) * (x - s->hill_x) + (y - s->hill_y) * (y - s->hill_y));
+        if (d < s->hill_r + r) return true;
+    }
+    if (s->mode == TQ_MODE_FLAG)
+        for (int f = 0; f < 2; f++)
+            if ((x - s->flag[f].hx) * (x - s->flag[f].hx) + (y - s->flag[f].hy) * (y - s->flag[f].hy) < r * r) return true;
+    for (int c = 0; c < s->nchest; c++)
+        if ((x - s->chest[c][0]) * (x - s->chest[c][0]) + (y - s->chest[c][1]) * (y - s->chest[c][1]) < r * r) return true;
+    return false;
+}
+
+/* Where a side starts: the beach, its island; elsewhere a side of the map
+ * (the modes) or a place round it (the usual) */
+static void start_spot(const tq_state_t *s, const tq_terrain_t *t, const tq_setup_t *su, int i, float a0, float *x,
+                       float *y)
+{
+    float M = map_m(t);
+    int team = su->t[i].team & 1;
+    /* this tank's place among its side's */
+    int nth = 0, nside = 0;
+    for (int q = 0; q < su->ntank; q++) {
+        if ((su->t[q].team & 1) != team) continue;
+        if (q < i) nth++;
+        nside++;
+    }
+    bool sides = t->biome == TQ_B_PLAYA || s->mode != TQ_MODE_CLASSIC;
+    if (t->biome == TQ_B_PLAYA) {
+        const float *I = t->isl[team];
+        bool long_y = I[3] > I[2];
+        float off = nside > 1 ? (nth - (nside - 1) * 0.5f) * 0.9f / (nside - 1 > 0 ? nside - 1 : 1) : 0;
+        *x = I[0] + (long_y ? 0 : off * I[2]);
+        *y = I[1] + (long_y ? off * I[3] : 0);
+    } else if (sides) {
+        float a = a0 + team * TQ_PI + (nside > 1 ? (nth - (nside - 1) * 0.5f) * 0.55f : 0);
+        *x = M / 2 + cosf(a) * M * 0.36f;
+        *y = M / 2 + sinf(a) * M * 0.36f;
+    } else {
+        float a = a0 + i * 2 * TQ_PI / su->ntank + randr(-0.25f, 0.25f);
+        *x = M / 2 + cosf(a) * M * 0.34f;
+        *y = M / 2 + sinf(a) * M * 0.34f;
+    }
+    tq_ter_land(t, x, y);
+}
+
+/* A spot for a chest: on land, clear of the tanks and the other chests */
+static bool chest_spot(const tq_state_t *s, const tq_terrain_t *t, float *x, float *y)
+{
+    float M = map_m(t);
+    for (int tries = 0; tries < 400; tries++) {
+        float px = randr(3.5f, M - 3.5f), py = randr(3.5f, M - 3.5f);
+        if (tq_ter_water(t, px, py) || near_tank(s, px, py, 5.0f) || near_mark(s, px, py, 4.5f)) continue;
+        int ci = (int)(px / TQ_CELL + 0.5f), cj = (int)(py / TQ_CELL + 0.5f);
+        int m = t->mat[cj * t->nv + ci];
+        if (m == TQ_MAT_DECK || (m == TQ_MAT_SPECIAL && t->biome == TQ_B_VOLCAN)) continue;
+        *x = px;
+        *y = py;
+        return true;
+    }
+    return false;
+}
+
+static void tank_reset(tq_tank_t *k, const tq_setup_t *su, int i, int wave)
+{
+    tq_stats_t st;
+    tq_stats(k->type, su->t[i].up, &st);
+    k->hp = k->hpmax = st.hpmax * (su->t[i].boss ? 3 : 1) * (10 + 2 * wave) / 10;
+    k->armor = st.armor + (su->t[i].boss ? 10 : 0);
+    k->apmax = k->ap = st.apmax;
+    k->m_per_ap = st.m_per_ap;
+    k->climb = st.climb;
+    k->max_slope = st.max_slope;
+    k->shield = k->type == TQ_T_TORTUGA ? 20 : 0;
+    k->emp = 0;
+    k->hit_flash = 0;
+    k->boss = su->t[i].boss;
+    k->nload = 0;
+    for (int w = 0; w < TQ_SLOTS_MAX && w < TQ_TANK[k->type].slots + 1; w++) {
+        uint8_t id = su->t[i].load[w];
+        if (id >= TQ_WEAPONS || k->nload >= TQ_TANK[k->type].slots) continue;
+        k->load[k->nload] = id;
+        k->level[k->nload] = su->t[i].level[id];
+        k->uses[k->nload] = TQ_WEAPON[id].uses ? (uint8_t)TQ_WEAPON[id].uses : 0xFF;
+        if (k->type == TQ_T_TOPO && id == TQ_W_MINES) k->uses[k->nload]++;
+        k->nload++;
+    }
+    if (!k->nload) {
+        k->load[0] = TQ_W_CANNON;
+        k->uses[0] = 0xFF;
+        k->nload = 1;
+    }
+    k->sel = 0;
+    k->alive = true;
+    k->gone = false;
+}
+
+static tq_setup_t s_setup;          /* the battle's, for the waves */
+
 void tq_game_new(tq_state_t *s, tq_terrain_t *t, const tq_setup_t *su)
 {
     memset(s, 0, sizeof *s);
+    s_setup = *su;
     s_rng = su->seed * 2654435761u + 12345u;
     tq_ter_generate(t, su->seed, TQ_SIZE_M[su->size % TQ_SIZES], su->biome);
     float M = map_m(t);
     s->grid = (int)M;
-    s->weather = su->weather;
+    s->weather = su->biome == TQ_B_LUNA ? TQ_WX_CLEAR : su->weather;     /* no air, no wind */
+    s->grav_k = su->biome == TQ_B_LUNA ? TQ_MOON_G : 1.0f;
     s->diff = su->diff;
     s->ntank = su->ntank;
+    s->mode = su->mode;
+    s->goal = su->goal;
+    s->goal_n = su->goal_n;
+    s->protect = -1;
+    switch (s->mode) {
+    case TQ_MODE_HILL: s->target = su->goal_n ? su->goal_n : 4; break;
+    case TQ_MODE_FLAG: s->target = su->goal_n ? su->goal_n : 2; break;
+    case TQ_MODE_WAVES: s->target = su->goal_n; s->wave = 1; break;
+    default: break;
+    }
 
-    /* the tanks round the map, facing its middle */
+    /* the tanks: each side together in the modes and on the beach */
     float a0 = randr(0, 2 * TQ_PI);
     for (int i = 0; i < s->ntank; i++) {
         tq_tank_t *k = &s->tank[i];
-        float a = a0 + i * 2 * TQ_PI / s->ntank + randr(-0.25f, 0.25f);
-        float r = M * 0.34f;
-        k->x = M / 2 + cosf(a) * r;
-        k->y = M / 2 + sinf(a) * r;
+        start_spot(s, t, su, i, a0, &k->x, &k->y);
         k->yaw = atan2f(M / 2 - k->y, M / 2 - k->x);
         k->tyaw = k->yaw;
         k->type = su->t[i].type;
@@ -150,31 +260,71 @@ void tq_game_new(tq_state_t *s, tq_terrain_t *t, const tq_setup_t *su)
         k->ai = su->t[i].ai;
         k->diff = su->diff;
         memcpy(k->name, su->t[i].name, sizeof k->name);
-        tq_stats_t st;
-        tq_stats(k->type, su->t[i].up, &st);
-        k->hp = k->hpmax = st.hpmax;
-        k->armor = st.armor;
-        k->apmax = k->ap = st.apmax;
-        k->m_per_ap = st.m_per_ap;
-        k->climb = st.climb;
-        k->max_slope = st.max_slope;
+        tank_reset(k, su, i, 0);
         k->pitch = TQ_TANK[k->type].sprite_pitch * TQ_DEG;
-        for (int w = 0; w < TQ_SLOTS_MAX && w < TQ_TANK[k->type].slots + 1; w++) {
-            uint8_t id = su->t[i].load[w];
-            if (id >= TQ_WEAPONS || k->nload >= TQ_TANK[k->type].slots) continue;
-            k->load[k->nload] = id;
-            k->level[k->nload] = su->t[i].level[id];
-            k->uses[k->nload] = TQ_WEAPON[id].uses ? (uint8_t)TQ_WEAPON[id].uses : 0xFF;
-            if (k->type == TQ_T_TOPO && id == TQ_W_MINES) k->uses[k->nload]++;
-            k->nload++;
+        if (s->mode == TQ_MODE_WAVES && su->t[i].later) {
+            k->alive = false;
+            k->gone = true;
         }
-        if (!k->nload) {
-            k->load[0] = TQ_W_CANNON;
-            k->uses[0] = 0xFF;
-            k->nload = 1;
-        }
-        k->alive = true;
+        if (s->goal == TQ_GOAL_PROTECT && k->team == 0 && k->ai && s->protect < 0) s->protect = i;
         tq_ter_flatten(t, k->x, k->y, 2.2f);
+    }
+
+    /* the modes' marks, before the trees and walls keep off them */
+    if (s->mode == TQ_MODE_HILL) {
+        if (t->biome == TQ_B_PLAYA) {
+            /* the hill is the bridge's middle: the one way across */
+            s->hill_x = (t->bridge[0] + t->bridge[2]) / 2;
+            s->hill_y = (t->bridge[1] + t->bridge[3]) / 2;
+        } else {
+            s->hill_x = M / 2 + randr(-1.5f, 1.5f);
+            s->hill_y = M / 2 + randr(-1.5f, 1.5f);
+            tq_ter_flatten(t, s->hill_x, s->hill_y, 2.0f);
+        }
+        s->hill_r = 3.0f;
+    }
+    if (s->mode == TQ_MODE_FLAG) {
+        for (int f = 0; f < 2; f++) {
+            float cx = 0, cy = 0;
+            int n = 0;
+            for (int i = 0; i < s->ntank; i++)
+                if ((s->tank[i].team & 1) == f) {
+                    cx += s->tank[i].x;
+                    cy += s->tank[i].y;
+                    n++;
+                }
+            if (!n) {
+                cx = M / 2;
+                cy = M / 2;
+            } else {
+                cx /= n;
+                cy /= n;
+            }
+            /* home: a little behind the side's start */
+            float dx = cx - M / 2, dy = cy - M / 2, l = sqrtf(dx * dx + dy * dy) + 1e-3f;
+            float hx = tq_clampf(cx + dx / l * 3.0f, 3.5f, M - 3.5f), hy = tq_clampf(cy + dy / l * 3.0f, 3.5f, M - 3.5f);
+            tq_ter_land(t, &hx, &hy);
+            s->flag[f].hx = s->flag[f].x = hx;
+            s->flag[f].hy = s->flag[f].y = hy;
+            s->flag[f].carrier = -1;
+        }
+    }
+    if (s->mode == TQ_MODE_TREASURE) {
+        int want = 5 + (s->ntank > 2 ? 2 : 0);
+        /* the beach: one on each islet, for the boat */
+        if (t->biome == TQ_B_PLAYA)
+            for (int q = 2; q < t->nisl && s->nchest < want; q++) {
+                s->chest[s->nchest][0] = t->isl[q][0];
+                s->chest[s->nchest][1] = t->isl[q][1];
+                s->chest_alive[s->nchest++] = 1;
+            }
+        while (s->nchest < want) {
+            float x, y;
+            if (!chest_spot(s, t, &x, &y)) break;
+            s->chest[s->nchest][0] = x;
+            s->chest[s->nchest][1] = y;
+            s->chest_alive[s->nchest++] = 1;
+        }
     }
 
     /* walls: a few lines of stones, some two high (houses in the ruins) */
@@ -183,7 +333,19 @@ void tq_game_new(tq_state_t *s, tq_terrain_t *t, const tq_setup_t *su)
     for (int w = 0; w < walls; w++) {
         for (int tries = 0; tries < 30; tries++) {
             int i0 = (int)randr(4, s->grid - 8), j0 = (int)randr(4, s->grid - 8);
-            if (near_tank(s, i0 + 2.0f, j0 + 2.0f, 6.0f)) continue;
+            if (near_tank(s, i0 + 2.0f, j0 + 2.0f, 6.0f) || near_mark(s, i0 + 2.0f, j0 + 2.0f, 4.5f)) continue;
+            if (t->biome == TQ_B_PLAYA) {
+                /* on the islands, not in the sea nor on the bridge */
+                bool wet = false;
+                for (int q = 0; q < 5 && !wet; q++) {
+                    float x = i0 + q + 0.5f, y = j0 + 0.5f;
+                    int ci = (int)(x / TQ_CELL + 0.5f), cj = (int)(y / TQ_CELL + 0.5f);
+                    if (tq_ter_water(t, x, y) || tq_ter_water(t, i0 + 0.5f, j0 + q + 0.5f) ||
+                        t->mat[cj * t->nv + ci] == TQ_MAT_DECK)
+                        wet = true;
+                }
+                if (wet) continue;
+            }
             if (su->biome == TQ_B_RUINAS && w % 2) {
                 /* a house: three walls of a 4 x 4 square */
                 int side = (int)randr(0, 3.99f);
@@ -210,11 +372,11 @@ void tq_game_new(tq_state_t *s, tq_terrain_t *t, const tq_setup_t *su)
     }
 
     /* trees where there is room: off the paths, the walls and the tanks */
-    int want = (int)(M * M / 60.0f * dens + 0.5f);
+    int want = (int)(M * M / 60.0f * dens * (t->biome == TQ_B_PLAYA ? 0.6f : 1.0f) + 0.5f);
     if (want > TQ_MAX_TREES) want = TQ_MAX_TREES;
     for (int tries = 0; tries < 1500 && s->ntree < want; tries++) {
         float x = randr(3.0f, M - 3.0f), y = randr(3.0f, M - 3.0f);
-        bool ok = !near_tank(s, x, y, 4.5f);
+        bool ok = !near_tank(s, x, y, 4.5f) && !near_mark(s, x, y, 2.5f);
         for (int k = 0; k < s->ntree && ok; k++) {
             float dx = x - s->tree[k].x, dy = y - s->tree[k].y;
             if (dx * dx + dy * dy < 2.6f * 2.6f) ok = false;
@@ -247,13 +409,166 @@ int tq_game_next(const tq_state_t *s)
 
 int tq_game_winner(const tq_state_t *s)
 {
+    /* the goals that end it besides the fighting */
+    if (s->protect >= 0 && !s->tank[s->protect].alive) return 1;
+    for (int f = 0; f < 2; f++)
+        if (s->target && s->mode != TQ_MODE_WAVES && s->score[f] >= s->target) return f;
+    bool side[2] = { false, false };
     int team = -1;
+    bool mixed = false;
     for (int k = 0; k < s->ntank; k++) {
         if (!s->tank[k].alive) continue;
-        if (team >= 0 && s->tank[k].team != team) return -1;
+        side[s->tank[k].team & 1] = true;
+        if (team >= 0 && s->tank[k].team != team) mixed = true;
         team = s->tank[k].team;
     }
-    return team < 0 ? -2 : team;
+    if (team < 0) return -2;
+    if (s->mode == TQ_MODE_WAVES) {
+        if (!side[0]) return 1;
+        if (!side[1]) return s->target && s->wave >= s->target ? 0 : -1;    /* else another wave */
+        return -1;
+    }
+    if (s->goal == TQ_GOAL_HOLD && side[0] && s->round > s->goal_n) return 0;
+    if (s->goal == TQ_GOAL_FAST && mixed && s->round > s->goal_n) return 1;
+    if (s->mode == TQ_MODE_TREASURE && mixed) {
+        int left = 0;
+        for (int c = 0; c < s->nchest; c++) left += s->chest_alive[c];
+        if (!left) {
+            if (s->score[0] != s->score[1]) return s->score[0] > s->score[1] ? 0 : 1;
+            /* a tie: the side with more health */
+            int hp[2] = { 0, 0 };
+            for (int k = 0; k < s->ntank; k++)
+                if (s->tank[k].alive) hp[s->tank[k].team & 1] += s->tank[k].hp;
+            return hp[0] >= hp[1] ? 0 : 1;
+        }
+    }
+    return mixed ? -1 : team;
+}
+
+bool tq_game_wave_due(const tq_state_t *s)
+{
+    if (s->mode != TQ_MODE_WAVES) return false;
+    bool side[2] = { false, false };
+    for (int k = 0; k < s->ntank; k++)
+        if (s->tank[k].alive) side[s->tank[k].team & 1] = true;
+    return side[0] && !side[1] && !(s->target && s->wave >= s->target);
+}
+
+int tq_game_wave(tq_state_t *s, tq_terrain_t *t)
+{
+    s->wave++;
+    float M = map_m(t);
+    /* where the people are; the wave comes from the other side */
+    float cx = 0, cy = 0;
+    int n = 0, slots = 0;
+    for (int k = 0; k < s->ntank; k++) {
+        if (s->tank[k].team & 1) {
+            slots++;
+            continue;
+        }
+        if (!s->tank[k].alive) continue;
+        cx += s->tank[k].x;
+        cy += s->tank[k].y;
+        n++;
+    }
+    if (n) {
+        cx /= n;
+        cy /= n;
+    }
+    float a = atan2f(M / 2 - cy, M / 2 - cx);
+    int want = s->wave < slots ? s->wave : slots, come = 0;
+    for (int k = 0; k < s->ntank && come < want; k++) {
+        tq_tank_t *tk = &s->tank[k];
+        if (!(tk->team & 1)) continue;
+        tank_reset(tk, &s_setup, k, s->wave - 1);
+        float b = a + (come - (want - 1) * 0.5f) * 0.6f;
+        tk->x = M / 2 + cosf(b) * M * 0.36f;
+        tk->y = M / 2 + sinf(b) * M * 0.36f;
+        tq_ter_land(t, &tk->x, &tk->y);
+        /* not on anything */
+        for (int q = 0; q < 12 && near_tank(s, tk->x, tk->y, 0.1f); q++) tk->x += 1.0f;
+        tk->yaw = tk->tyaw = atan2f(cy - tk->y, cx - tk->x);
+        tk->diff = s->diff + s->wave / 3 > 2 ? 2 : s->diff + s->wave / 3;
+        come++;
+    }
+    for (int k = 0; k < s->ntank; k++) {
+        tq_tank_t *tk = &s->tank[k];
+        if ((tk->team & 1) && !tk->alive && come >= want) tk->gone = true;
+        /* the people get a little health back between waves */
+        if (!(tk->team & 1) && tk->alive) {
+            tk->hp += tk->hpmax / 4;
+            if (tk->hp > tk->hpmax) tk->hp = tk->hpmax;
+        }
+    }
+    return come;
+}
+
+bool tq_game_pickups(tq_state_t *s, const tq_terrain_t *t, int who, tq_event_t *ev)
+{
+    tq_tank_t *k = &s->tank[who];
+    if (!k->alive) return false;
+    int side = k->team & 1;
+    float z = tq_tank_z(t, k) + 3.0f;
+    if (s->mode == TQ_MODE_FLAG) {
+        for (int f = 0; f < 2; f++) {
+            if (s->flag[f].carrier == who) {
+                s->flag[f].x = k->x;
+                s->flag[f].y = k->y;
+            }
+        }
+        int mine = side, theirs = side ^ 1;
+        /* theirs, lying anywhere: take it */
+        if (s->flag[theirs].carrier < 0) {
+            float dx = k->x - s->flag[theirs].x, dy = k->y - s->flag[theirs].y;
+            if (dx * dx + dy * dy < 1.7f * 1.7f) {
+                s->flag[theirs].carrier = who;
+                ev_clear(ev, TQ_EV_FLAG_TAKE, tq_v3(k->x, k->y, z));
+                ev->value = side;
+                return true;
+            }
+        }
+        /* mine, dropped: back home */
+        bool home = s->flag[mine].x == s->flag[mine].hx && s->flag[mine].y == s->flag[mine].hy;
+        if (s->flag[mine].carrier < 0 && !home) {
+            float dx = k->x - s->flag[mine].x, dy = k->y - s->flag[mine].y;
+            if (dx * dx + dy * dy < 1.7f * 1.7f) {
+                s->flag[mine].x = s->flag[mine].hx;
+                s->flag[mine].y = s->flag[mine].hy;
+                ev_clear(ev, TQ_EV_FLAG_BACK, tq_v3(k->x, k->y, z));
+                ev->value = side;
+                return true;
+            }
+        }
+        /* carrying theirs to mine at home: a capture */
+        if (s->flag[theirs].carrier == who && home) {
+            float dx = k->x - s->flag[mine].hx, dy = k->y - s->flag[mine].hy;
+            if (dx * dx + dy * dy < 2.0f * 2.0f) {
+                s->flag[theirs].carrier = -1;
+                s->flag[theirs].x = s->flag[theirs].hx;
+                s->flag[theirs].y = s->flag[theirs].hy;
+                s->score[side]++;
+                ev_clear(ev, TQ_EV_CAPTURE, tq_v3(k->x, k->y, z));
+                ev->value = side;
+                return true;
+            }
+        }
+    }
+    if (s->mode == TQ_MODE_TREASURE) {
+        for (int c = 0; c < s->nchest; c++) {
+            if (!s->chest_alive[c]) continue;
+            float dx = k->x - s->chest[c][0], dy = k->y - s->chest[c][1];
+            if (dx * dx + dy * dy > 1.6f * 1.6f) continue;
+            s->chest_alive[c] = 0;
+            s->score[side]++;
+            ev_clear(ev, TQ_EV_CHEST, tq_v3(s->chest[c][0], s->chest[c][1], z));
+            ev->value = side;
+            for (int q = 0; q < 10; q++)
+                add_part(s, TQ_PART_SPARK, tq_v3(s->chest[c][0], s->chest[c][1], z - 2.4f),
+                         tq_v3(randr(-1.5f, 1.5f), randr(-1.5f, 1.5f), randr(1.5f, 3.5f)), 0.9f, 0.14f, 0.04f, 0xFFD23C);
+            return true;
+        }
+    }
+    return false;
 }
 
 static void new_wind(tq_state_t *s)
@@ -284,6 +599,14 @@ static int hurt(tq_state_t *s, int who, int dmg, int by)
     }
     k->hp -= dmg;
     k->hit_flash = 0.6f;
+    /* hit, a carrier drops the flag where it is */
+    for (int f = 0; f < 2; f++) {
+        if (s->mode == TQ_MODE_FLAG && s->flag[f].carrier == who && dmg > 0) {
+            s->flag[f].carrier = -1;
+            s->flag[f].x = k->x;
+            s->flag[f].y = k->y;
+        }
+    }
     if (by >= 0 && by != who) s->tank[by].dealt += dmg;
     if (k->hp <= 0) {
         k->hp = 0;
@@ -321,6 +644,16 @@ void tq_game_turn(tq_state_t *s, const tq_terrain_t *t, tq_event_t *ev)
             ev->damage[s->cur] += hurt(s, s->cur, 10, zn->owner);
         }
     }
+    /* the hill: a point for a turn begun on it */
+    if (s->mode == TQ_MODE_HILL && k->alive && ev->type == TQ_EV_NONE) {
+        float dx = k->x - s->hill_x, dy = k->y - s->hill_y;
+        if (dx * dx + dy * dy < s->hill_r * s->hill_r) {
+            s->score[k->team & 1]++;
+            ev->type = TQ_EV_POINT;
+            ev->at = tq_v3(k->x, k->y, tq_tank_z(t, k) + 3.2f);
+            ev->value = k->team & 1;
+        }
+    }
 }
 
 /* --------------------------------------------------------------------------
@@ -331,14 +664,16 @@ static uint16_t s_cost[TQ_GRIDMAX * TQ_GRIDMAX];
 static int16_t s_parent[TQ_GRIDMAX * TQ_GRIDMAX];
 static uint8_t s_block[TQ_GRIDMAX * TQ_GRIDMAX];
 
-static void build_blocked(const tq_state_t *s, int who)
+static void build_blocked(const tq_state_t *s, const tq_terrain_t *t, int who)
 {
     int G = s->grid;
+    bool swims = s->tank[who].type == TQ_T_ANFIBIO;
     memset(s_block, 0, sizeof s_block);
     for (int j = 0; j < G; j++) {
         for (int i = 0; i < G; i++) {
             float x = i + 0.5f, y = j + 0.5f;
             bool b = i < 2 || j < 2 || i > G - 3 || j > G - 3;
+            if (!b && !swims && tq_ter_water(t, x, y)) b = true;
             for (int k = 0; k < s->nblock && !b; k++) {
                 const tq_block_t *o = &s->block[k];
                 if (!o->alive) continue;
@@ -365,7 +700,7 @@ void tq_game_reach(tq_state_t *s, const tq_terrain_t *t)
 {
     const tq_tank_t *k = &s->tank[s->cur];
     int G = s->grid;
-    build_blocked(s, s->cur);
+    build_blocked(s, t, s->cur);
     for (int i = 0; i < G * G; i++) {
         s_cost[i] = 0xFFFF;
         s_parent[i] = -1;
@@ -484,6 +819,8 @@ static float weapon_k(const tq_tank_t *k, int w, bool radius)
     if (k->type == TQ_T_OBUS && fly == TQ_FLY_LOB) b = radius ? 1.12f : 1.2f;
     if (k->type == TQ_T_AVISPA && (fly == TQ_FLY_GUIDED || fly == TQ_FLY_BEAM) && !radius) b = 1.25f;
     if (k->type == TQ_T_TOPO && fly == TQ_FLY_DRILL && !radius) b = 1.25f;
+    if (k->type == TQ_T_TORTUGA && w == TQ_W_TESLA && !radius) b = 1.25f;
+    if (k->type == TQ_T_ANFIBIO && w == TQ_W_TWIN && !radius) b = 1.2f;
     return b;
 }
 
@@ -496,7 +833,8 @@ static void scatter_props(tq_state_t *s, const tq_terrain_t *t, tq_v3_t at, floa
         if (dx * dx + dy * dy > (radius * 0.8f) * (radius * 0.8f)) continue;
         tr->alive = 0;
         float h = tq_ter_height(t, tr->x, tr->y);
-        uint32_t leaf = t->biome == TQ_B_NIEVE ? 0xF2F6FA : (t->biome == TQ_B_VOLCAN ? 0x4A403C : 0x5FB042);
+        uint32_t leaf = t->biome == TQ_B_NIEVE ? 0xF2F6FA : (t->biome == TQ_B_VOLCAN ? 0x4A403C :
+                        (t->biome == TQ_B_LUNA ? 0x84E0FF : 0x5FB042));
         for (int i = 0; i < 16; i++) {
             tq_v3_t p = tq_v3(tr->x + randr(-0.8f, 0.8f), tr->y + randr(-0.8f, 0.8f), h + randr(1.6f, 3.4f));
             tq_v3_t v = tq_v3((p.x - at.x) * 1.5f + randr(-1, 1), (p.y - at.y) * 1.5f + randr(-1, 1), randr(1.5f, 4.5f));
@@ -511,7 +849,8 @@ static void scatter_props(tq_state_t *s, const tq_terrain_t *t, tq_v3_t at, floa
         float dx = at.x - (b->i + 0.5f), dy = at.y - (b->j + 0.5f), dz = at.z - (b->z + 0.5f);
         if (dx * dx + dy * dy + dz * dz > (radius * 0.7f) * (radius * 0.7f)) continue;
         b->alive = 0;
-        uint32_t c = t->biome == TQ_B_RUINAS ? 0xB86B4F : (t->biome == TQ_B_NIEVE ? 0xA8DDF0 : 0xB3AB9E);
+        uint32_t c = t->biome == TQ_B_RUINAS ? 0xB86B4F : (t->biome == TQ_B_NIEVE ? 0xA8DDF0 :
+                     (t->biome == TQ_B_PLAYA ? 0xA8784A : 0xB3AB9E));
         for (int i = 0; i < 7; i++) {
             tq_v3_t p = tq_v3(b->i + randr(0.2f, 0.8f), b->j + randr(0.2f, 0.8f), b->z + randr(0.2f, 0.8f));
             tq_v3_t v = tq_v3((p.x - at.x) * 2.0f + randr(-1, 1), (p.y - at.y) * 2.0f + randr(-1, 1), randr(2, 5));
@@ -538,11 +877,19 @@ static void fireball(tq_state_t *s, const tq_terrain_t *t, tq_v3_t at, float rad
         add_part(s, TQ_PART_SMOKE, p, tq_v3(randr(-0.6f, 0.6f), randr(-0.6f, 0.6f), randr(0.8f, 1.6f)), randr(1.6f, 2.4f),
                  0.4f, randr(1.0f, 1.5f) * k, tq_rand() < 0.5f ? 0x8C8A86 : 0x6E6C6A);
     }
-    uint32_t soil = t->biome == TQ_B_NIEVE ? 0xE8EEF4 : (t->biome == TQ_B_DESIERTO ? 0xD2A86E : 0x7A5C3E);
+    uint32_t soil = t->biome == TQ_B_NIEVE ? 0xE8EEF4 : (t->biome == TQ_B_DESIERTO ? 0xD2A86E :
+                    (t->biome == TQ_B_LUNA ? 0x9A9AA2 : (t->biome == TQ_B_PLAYA ? 0xE6D29E : 0x7A5C3E)));
+    bool sea = tq_ter_water(t, at.x, at.y);
     for (int i = 0; i < nf + 3; i++) {
         float a = randr(0, 2 * TQ_PI), sp = randr(2.0f, 5.5f);
+        if (sea) {
+            /* a splash: white and blue drops */
+            add_part(s, TQ_PART_CHUNK, tq_v3(at.x, at.y, at.z + 0.2f), tq_v3(cosf(a) * sp * 0.6f, sinf(a) * sp * 0.6f,
+                     randr(5.0f, 9.0f)), randr(0.9f, 1.4f), randr(0.12f, 0.2f), 0.1f, i & 1 ? 0xF2FAFF : 0x5CB8E0);
+            continue;
+        }
         add_part(s, TQ_PART_CHUNK, tq_v3(at.x, at.y, at.z + 0.2f), tq_v3(cosf(a) * sp, sinf(a) * sp, randr(3.5f, 7.0f)),
-                 randr(1.1f, 1.7f), randr(0.09f, 0.17f), 0.12f, i & 1 ? soil : 0x5E4630);
+                 randr(1.1f, 1.7f), randr(0.09f, 0.17f), 0.12f, i & 1 ? soil : (t->biome == TQ_B_LUNA ? 0x55555C : 0x5E4630));
     }
 }
 
@@ -672,7 +1019,7 @@ static void shell_move(const tq_state_t *s, tq_shell_t *sh)
             sh->v.y = sinf(have) * hs;
         }
     }
-    sh->v.z -= GRAV * W->gravity * STEP;
+    sh->v.z -= GRAV * W->gravity * s->grav_k * STEP;
     if (W->fly != TQ_FLY_BEAM && !sh->under) {
         sh->v.x += s->wind_x * STEP;
         sh->v.y += s->wind_y * STEP;
@@ -822,7 +1169,7 @@ void tq_game_fire(tq_state_t *s, tq_terrain_t *t, tq_event_t *ev, int *nev)
     if (k->uses[k->sel] != 0xFF && k->uses[k->sel] > 0) k->uses[k->sel]--;
     tq_v3_t at = tq_v3(k->x, k->y, tq_tank_z(t, k) + 2.4f);
     if (W->fx == TQ_FX_SHIELD) {
-        k->shield += (int)(W->damage * tq_w_damage_k(k->level[k->sel]));
+        k->shield += (int)(W->damage * tq_w_damage_k(k->level[k->sel]) * (k->type == TQ_T_TORTUGA ? 1.5f : 1.0f));
         ev_clear(&ev[0], TQ_EV_SHIELD, at);
         ev[0].value = k->shield;
         *nev = 1;
@@ -850,7 +1197,22 @@ void tq_game_fire(tq_state_t *s, tq_terrain_t *t, tq_event_t *ev, int *nev)
         float a = randr(-6, 6) * TQ_DEG, c = cosf(a), sn = sinf(a);
         base.v = tq_v3(base.v.x * c - base.v.y * sn, base.v.x * sn + base.v.y * c, base.v.z);
     }
-    int n = W->fx == TQ_FX_SCATTER ? 5 : 1;
+    if (w == TQ_W_TWIN) {
+        /* two: the second a moment later, kicked off by the first's recoil */
+        for (int i = 0; i < 2; i++) {
+            tq_shell_t *sh = new_shell(s);
+            if (!sh) break;
+            *sh = base;
+            if (i) {
+                float a = (tq_rand() < 0.5f ? -1 : 1) * randr(1.5f, 3.5f) * TQ_DEG, c = cosf(a), sn = sinf(a);
+                float up = randr(0.4f, 1.8f) * TQ_DEG;
+                float hs = sqrtf(base.v.x * base.v.x + base.v.y * base.v.y);
+                sh->v = tq_v3(base.v.x * c - base.v.y * sn, base.v.x * sn + base.v.y * c, base.v.z + hs * up);
+                sh->wait = 0.3f;
+            }
+        }
+    }
+    int n = w == TQ_W_TWIN ? 0 : (W->fx == TQ_FX_SCATTER ? 5 : 1);
     for (int i = 0; i < n; i++) {
         tq_shell_t *sh = new_shell(s);
         if (!sh) break;
@@ -901,6 +1263,7 @@ static void land(tq_state_t *s, tq_terrain_t *t, tq_shell_t *sh, tq_v3_t at, tq_
     ev_clear(e, TQ_EV_BLAST, at);
     e->weapon = sh->weapon;
     e->split = sh->split;
+    e->water = tq_ter_water(t, at.x, at.y);
     tq_tank_t *o = &s->tank[sh->owner];
     float g = tq_ter_height(t, at.x, at.y);
     switch (sh->split ? TQ_FX_BLAST : W->fx) {
@@ -979,6 +1342,7 @@ static void land(tq_state_t *s, tq_terrain_t *t, tq_shell_t *sh, tq_v3_t at, tq_
         e->type = TQ_EV_TELEPORT;
         float M = map_m(t);
         float x = tq_clampf(at.x, 2.5f, M - 2.5f), y = tq_clampf(at.y, 2.5f, M - 2.5f);
+        if (o->type != TQ_T_ANFIBIO) tq_ter_land(t, &x, &y);
         bool clear = true;
         for (int k = 0; k < s->ntank; k++)
             if (k != sh->owner && s->tank[k].alive &&
@@ -1007,6 +1371,64 @@ static void land(tq_state_t *s, tq_terrain_t *t, tq_shell_t *sh, tq_v3_t at, tq_
         for (int i = 0; i < 8; i++)
             add_part(s, TQ_PART_PUFF, tq_v3(at.x + randr(-1.5f, 1.5f), at.y + randr(-1.5f, 1.5f), g + 0.3f),
                      tq_v3(0, 0, 0.5f), 0.9f, 0.3f, 0.8f, 0xC9B48E);
+        break;
+    }
+    case TQ_FX_TESLA: {
+        /* the lightning jumps from where it fell to whatever is near, the
+         * nearest first, each jump from the last one hit */
+        e->type = TQ_EV_TESLA;
+        float R = W->radius * tq_w_radius_k(sh->level);
+        float dmg = W->damage * tq_w_damage_k(sh->level) * weapon_k(o, sh->weapon, false);
+        tq_v3_t from = tq_v3(at.x, at.y, at.z + 0.4f);
+        bool hit_t[TQ_MAX_TANKS] = { false }, hit_tr[TQ_MAX_TREES] = { false }, hit_b[TQ_MAX_BLOCKS] = { false };
+        s->nbolt = 0;
+        while (s->nbolt < TQ_MAX_BOLTS) {
+            int kind = -1, idx = -1;
+            float best = R * R;
+            tq_v3_t to = from;
+            for (int k = 0; k < s->ntank; k++) {
+                const tq_tank_t *tk = &s->tank[k];
+                if (!tk->alive || hit_t[k] || k == sh->owner) continue;
+                float d = (tk->x - at.x) * (tk->x - at.x) + (tk->y - at.y) * (tk->y - at.y);
+                if (d < best) { best = d; kind = 0; idx = k; to = tq_v3(tk->x, tk->y, tq_tank_z(t, tk) + 1.1f); }
+            }
+            for (int k = 0; k < s->ntree; k++) {
+                const tq_tree_t *tr = &s->tree[k];
+                if (!tr->alive || hit_tr[k]) continue;
+                float d = (tr->x - at.x) * (tr->x - at.x) + (tr->y - at.y) * (tr->y - at.y);
+                if (d < best) { best = d; kind = 1; idx = k; to = tq_v3(tr->x, tr->y, tq_ter_height(t, tr->x, tr->y) + 2.0f); }
+            }
+            for (int k = 0; k < s->nblock; k++) {
+                const tq_block_t *b = &s->block[k];
+                if (!b->alive || hit_b[k]) continue;
+                float bx = b->i + 0.5f, by = b->j + 0.5f;
+                float d = (bx - at.x) * (bx - at.x) + (by - at.y) * (by - at.y);
+                if (d < best) { best = d; kind = 2; idx = k; to = tq_v3(bx, by, b->z + 0.6f); }
+            }
+            if (kind < 0) break;
+            s->bolt_a[s->nbolt] = from;
+            s->bolt_b[s->nbolt] = to;
+            s->nbolt++;
+            if (kind == 0) {
+                hit_t[idx] = true;
+                e->damage[idx] += hurt(s, idx, (int)(dmg + 0.5f), sh->owner);
+                e->direct[idx] = true;
+            } else if (kind == 1) {
+                hit_tr[idx] = true;
+                scatter_props(s, t, to, 0.3f);
+            } else {
+                hit_b[idx] = true;
+                s->block[idx].alive = 0;
+            }
+            for (int q = 0; q < 6; q++)
+                add_part(s, TQ_PART_SPARK, to, tq_v3(randr(-2, 2), randr(-2, 2), randr(0, 3)), 0.5f, 0.10f, 0.03f, W->rgb);
+            from = to;
+        }
+        s->bolt_t = 0.9f;
+        add_part(s, TQ_PART_FLASH, tq_v3(at.x, at.y, at.z + 0.4f), tq_v3(0, 0, 0), 0.3f, 0.6f, 2.4f, 0xCFF6FF);
+        add_part(s, TQ_PART_RING, tq_v3(at.x, at.y, g + 0.08f), tq_v3(0, 0, 0), 0.5f, 0.3f, R, W->rgb);
+        ev_dirty(e, tq_ter_crater(t, at.x, at.y, W->crater_r, W->crater_d, true));
+        if (s->nbolt) e->at = s->bolt_b[0];
         break;
     }
     case TQ_FX_CLUSTER:
@@ -1039,6 +1461,20 @@ void tq_game_step(tq_state_t *s, tq_terrain_t *t, float dt, tq_event_t *ev, int 
         tq_shell_t *sh = &s->shell[i];
         if (!sh->live) continue;
         const tq_weapon_t *W = &TQ_WEAPON[sh->weapon];
+        if (sh->wait > 0) {
+            /* the double cannon's second, still in the barrel */
+            sh->wait -= dt;
+            if (sh->wait <= 0 && *nev < TQ_MAX_EVENTS) {
+                tq_event_t *e = &ev[(*nev)++];
+                ev_clear(e, TQ_EV_FIRE2, sh->p);
+                e->weapon = sh->weapon;
+                for (int q = 0; q < 5; q++)
+                    add_part(s, q < 2 ? TQ_PART_FIRE : TQ_PART_SMOKE, sh->p,
+                             tq_v3(sh->v.x * 0.06f + randr(-0.5f, 0.5f), sh->v.y * 0.06f + randr(-0.5f, 0.5f), randr(0.2f, 0.9f)),
+                             q < 2 ? 0.18f : randr(0.6f, 1.0f), q < 2 ? 0.35f : 0.2f, q < 2 ? 0.6f : 0.7f, 0xE8E4DC);
+            }
+            continue;
+        }
         for (int st = 0; st < steps && sh->live; st++) {
             float vz0 = sh->v.z;
             shell_move(s, sh);
@@ -1090,6 +1526,10 @@ void tq_game_step(tq_state_t *s, tq_terrain_t *t, float dt, tq_event_t *ev, int 
                      W->fly == TQ_FLY_GUIDED ? 0xFFD2B0 : 0xF0EEE8);
     }
     if (s->beam_t > 0) s->beam_t -= dt;
+    if (s->bolt_t > 0) {
+        s->bolt_t -= dt;
+        if (s->bolt_t <= 0) s->nbolt = 0;
+    }
     /* the particles */
     for (int i = 0; i < s->npart;) {
         tq_part_t *q = &s->part[i];
@@ -1099,7 +1539,7 @@ void tq_game_step(tq_state_t *s, tq_terrain_t *t, float dt, tq_event_t *ev, int 
             continue;
         }
         if (q->kind == TQ_PART_CHUNK || q->kind == TQ_PART_LEAF) {
-            q->v.z -= GRAV * dt * (q->kind == TQ_PART_LEAF ? 0.35f : 1.0f);
+            q->v.z -= GRAV * s->grav_k * dt * (q->kind == TQ_PART_LEAF ? 0.35f : 1.0f);
             q->p.x += q->v.x * dt;
             q->p.y += q->v.y * dt;
             q->p.z += q->v.z * dt;
@@ -1289,6 +1729,73 @@ static float slot_value(const tq_state_t *s, const tq_terrain_t *t, int who, int
     return hit * dmg - tq_shot_ap(k, slot) * 0.5f;
 }
 
+/* What the mode wants of a tank of the board's: a spot to head for, how
+ * much it matters, and a bonus for being right there; false: nothing */
+static bool objective(const tq_state_t *s, int me, float *ox, float *oy, float *w, float *near_r, float *bonus)
+{
+    const tq_tank_t *k = &s->tank[me];
+    int side = k->team & 1;
+    switch (s->mode) {
+    case TQ_MODE_HILL:
+        *ox = s->hill_x;
+        *oy = s->hill_y;
+        *w = 1.2f;
+        *near_r = s->hill_r - 0.6f;
+        *bonus = 12;
+        return true;
+    case TQ_MODE_FLAG: {
+        int mine = side, theirs = side ^ 1;
+        if (s->flag[theirs].carrier == me) {
+            *ox = s->flag[mine].hx;
+            *oy = s->flag[mine].hy;
+            *w = 2.0f;
+            *near_r = 1.6f;
+            *bonus = 20;
+            return true;
+        }
+        bool home = s->flag[mine].x == s->flag[mine].hx && s->flag[mine].y == s->flag[mine].hy;
+        if (s->flag[mine].carrier < 0 && !home) {
+            *ox = s->flag[mine].x;
+            *oy = s->flag[mine].y;
+        } else if (s->flag[mine].carrier >= 0) {
+            /* chase whoever runs with ours */
+            *ox = s->tank[s->flag[mine].carrier].x;
+            *oy = s->tank[s->flag[mine].carrier].y;
+        } else if (s->flag[theirs].carrier < 0) {
+            *ox = s->flag[theirs].x;
+            *oy = s->flag[theirs].y;
+        } else {
+            return false;
+        }
+        *w = 1.2f;
+        *near_r = 1.4f;
+        *bonus = 14;
+        return true;
+    }
+    case TQ_MODE_TREASURE: {
+        float bd = 1e9f;
+        int bc = -1;
+        for (int c = 0; c < s->nchest; c++) {
+            if (!s->chest_alive[c]) continue;
+            float d = (s->chest[c][0] - k->x) * (s->chest[c][0] - k->x) + (s->chest[c][1] - k->y) * (s->chest[c][1] - k->y);
+            if (d < bd) {
+                bd = d;
+                bc = c;
+            }
+        }
+        if (bc < 0) return false;
+        *ox = s->chest[bc][0];
+        *oy = s->chest[bc][1];
+        *w = 1.5f;
+        *near_r = 1.3f;
+        *bonus = 14;
+        return true;
+    }
+    default:
+        return false;
+    }
+}
+
 void tq_ai_plan_move(tq_state_t *s, const tq_terrain_t *t, int *ap_cost)
 {
     int me = s->cur;
@@ -1298,6 +1805,8 @@ void tq_ai_plan_move(tq_state_t *s, const tq_terrain_t *t, int *ap_cost)
     if (target < 0) return;
     const tq_tank_t *e = &s->tank[target];
     int G = s->grid;
+    float ox = 0, oy = 0, ow = 0, onear = 0, obonus = 0;
+    bool obj = objective(s, me, &ox, &oy, &ow, &onear, &obonus);
     typedef struct { int c; float score; } cand_t;
     cand_t top[10];
     int ntop = 0;
@@ -1307,6 +1816,10 @@ void tq_ai_plan_move(tq_state_t *s, const tq_terrain_t *t, int *ap_cost)
         float d = sqrtf((x - e->x) * (x - e->x) + (y - e->y) * (y - e->y));
         float sc = -fabsf(d - 14.0f) * 0.5f + tq_ter_height(t, x, y) * 0.6f + (s->reach[c] == 1 ? 1.5f : 0) +
                    tq_rand() * 2.0f;
+        if (obj) {
+            float od = sqrtf((x - ox) * (x - ox) + (y - oy) * (y - oy));
+            sc += -od * ow * 0.5f + (od < onear ? obonus : 0);
+        }
         for (int z = 0; z < TQ_MAX_ZONES; z++) {
             const tq_zone_t *zn = &s->zone[z];
             if (zn->live && zn->kind == TQ_ZONE_FIRE && (x - zn->x) * (x - zn->x) + (y - zn->y) * (y - zn->y) < zn->r * zn->r)
@@ -1325,7 +1838,7 @@ void tq_ai_plan_move(tq_state_t *s, const tq_terrain_t *t, int *ap_cost)
     /* of the best spots, the first from which a shot lands near */
     static tq_state_t tmp;
     int pick = -1;
-    int tries = s->diff == 0 ? 3 : 8;
+    int tries = s->diff == 0 ? 3 : (obj ? 3 : 8);
     for (int i = 0; i < ntop && i < tries && pick < 0; i++) {
         memcpy(&tmp, s, sizeof tmp);
         tq_tank_t *k = &tmp.tank[me];

@@ -6,6 +6,7 @@
 #include "aos_sys_glyphs.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 static float s_t;
@@ -21,6 +22,7 @@ void tqm_demo(app_t *a)
     tq_setup_t su;
     memset(&su, 0, sizeof su);
     su.biome = (int)(a->save.battles % TQ_BIOMES);
+    while (!tq_dlc_have(tq_dlc_of_biome(su.biome))) su.biome = (su.biome + 1) % TQ_BIOMES;
     su.size = 1;
     su.seed = 7 + a->save.battles;
     su.objects = TQ_OBJECT_LEVELS / 2;
@@ -133,8 +135,12 @@ void tqm_build_menu(app_t *a)
 static void play_mission(lv_event_t *e)
 {
     app_t *a = (app_t *)lv_event_get_user_data(e);
-    int m = (int)(intptr_t)lv_obj_get_user_data((lv_obj_t *)lv_event_get_target(e));
-    const tq_mission_t *M = &TQ_MISSION[m];
+    tqm_play(a, (int)(intptr_t)lv_obj_get_user_data((lv_obj_t *)lv_event_get_target(e)));
+}
+
+void tqm_play(app_t *a, int m)
+{
+    const tq_mission_t *M = &TQ_MISSION[m % TQ_STORY_MISSIONS];
     tq_setup_t su;
     memset(&su, 0, sizeof su);
     su.biome = M->biome;
@@ -143,6 +149,9 @@ static void play_mission(lv_event_t *e)
     su.weather = M->weather;
     su.objects = TQ_OBJECT_LEVELS / 2;
     su.seed = M->seed;
+    su.mode = M->mode;
+    su.goal = M->goal;
+    su.goal_n = M->goal_n;
     su.ntank = 1 + M->rivals;
     a->setup = su;
     tqh_player_tank(a, 0, a->save.tank, true);
@@ -150,7 +159,23 @@ static void play_mission(lv_event_t *e)
         tqh_player_tank(a, k, M->rival_tank[k - 1], false);
         a->setup.t[k].ai = true;
         a->setup.t[k].team = 1;
+        if (M->mode == TQ_MODE_WAVES && k > 1) a->setup.t[k].later = true;
     }
+    if (M->goal == TQ_GOAL_BOSS) {
+        a->setup.t[1].boss = true;
+        snprintf(a->setup.t[1].name, sizeof a->setup.t[1].name, _("Jefe %s"), _(TQ_TANK[M->rival_tank[0]].name));
+    }
+    if (M->goal == TQ_GOAL_PROTECT && a->setup.ntank < TQ_MAX_TANKS) {
+        /* the one to look after: the board drives it, on our side */
+        int k = a->setup.ntank++;
+        tqh_player_tank(a, k, M->ally_tank, false);
+        a->setup.t[k].ai = true;
+        a->setup.t[k].team = 0;
+        snprintf(a->setup.t[k].name, sizeof a->setup.t[k].name, "%s", _("Rover"));
+    }
+#ifdef AOS_SIM_BUILTIN
+    if (getenv("TQ_AUTO")) a->setup.t[0].ai = true;      /* development: the board plays it */
+#endif
     su = a->setup;
     tqb_start(a, &su, true, m);
 }
@@ -173,9 +198,20 @@ void tqm_build_story(app_t *a)
     lv_obj_set_style_pad_row(list, 10, 0);
     lv_obj_add_flag(list, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_CLICKABLE);
     lv_obj_set_scroll_dir(list, LV_DIR_VER);
-    for (int m = 0; m < TQ_STORY_MISSIONS; m++) {
+    for (int d = 0; d < TQ_DLCS; d++) {
+        int first, n = tq_missions_of(d, &first);
+        if (!n) continue;
+        /* each campaign under its name; a DLC not installed says so */
+        lv_obj_t *hd = tqa_label(list, d ? _(TQ_DLC_NAME[d]) : _("Campaña"), aos_font_body, 0xFFD23C);
+        lv_obj_set_style_pad_top(hd, d ? 14 : 0, 0);
+        if (!tq_dlc_have(d)) {
+            lv_obj_t *no = tqa_label(list, _("No instalado: llega con su paquete"), aos_font_caption, 0x8A96A4);
+            (void)no;
+            continue;
+        }
+        for (int m = first; m < first + n; m++) {
         const tq_mission_t *M = &TQ_MISSION[m];
-        bool open = m == 0 || a->save.stars[m - 1] > 0;
+        bool open = m == first || a->save.stars[m - 1] > 0;
         lv_obj_t *row = lv_button_create(list);
         lv_obj_set_size(row, w - 50, 100);
         lv_obj_set_style_radius(row, 22, 0);
@@ -184,23 +220,27 @@ void tqm_build_story(app_t *a)
         lv_obj_set_user_data(row, (void *)(intptr_t)m);
         if (open) lv_obj_add_event_cb(row, play_mission, LV_EVENT_CLICKED, a);
         char txt[160];
-        snprintf(txt, sizeof txt, "%d. %s", m + 1, _(M->name));
-        lv_obj_t *n = tqa_label(row, txt, aos_font_body, open ? 0xFFFFFF : 0x6A7684);
-        lv_obj_align(n, LV_ALIGN_TOP_LEFT, 10, 4);
-        snprintf(txt, sizeof txt, _("%s · %d rivales · %d monedas"), _(TQ_BIOME_NAME[M->biome]), M->rivals, M->reward);
-        if (M->rivals == 1)
+        snprintf(txt, sizeof txt, "%d. %s", m - first + 1, _(M->name));
+        lv_obj_t *nm = tqa_label(row, txt, aos_font_body, open ? 0xFFFFFF : 0x6A7684);
+        lv_obj_align(nm, LV_ALIGN_TOP_LEFT, 10, 4);
+        if (M->info) snprintf(txt, sizeof txt, _("%s · %s · %d monedas"), _(TQ_BIOME_NAME[M->biome]), _(M->info), M->reward);
+        else if (M->rivals == 1)
             snprintf(txt, sizeof txt, _("%s · 1 rival · %d monedas"), _(TQ_BIOME_NAME[M->biome]), M->reward);
-        lv_obj_t *d = tqa_label(row, open ? txt : _("Ganá la anterior para jugarla"), aos_font_tiny, 0xB8C4CF);
-        lv_obj_align(d, LV_ALIGN_BOTTOM_LEFT, 10, -6);
-        for (int s = 0; s < 3; s++) {
+        else snprintf(txt, sizeof txt, _("%s · %d rivales · %d monedas"), _(TQ_BIOME_NAME[M->biome]), M->rivals, M->reward);
+        lv_obj_t *ds = tqa_label(row, open ? txt : _("Ganá la anterior para jugarla"), aos_font_tiny, 0xB8C4CF);
+        lv_obj_set_width(ds, w - 50 - 130);
+        lv_label_set_long_mode(ds, LV_LABEL_LONG_MODE_DOTS);
+        lv_obj_align(ds, LV_ALIGN_BOTTOM_LEFT, 10, -6);
+        for (int st_ = 0; st_ < 3; st_++) {
             lv_obj_t *st = lv_obj_create(row);
             lv_obj_remove_style_all(st);
             lv_obj_set_size(st, 22, 22);
             lv_obj_set_style_radius(st, 11, 0);
             lv_obj_set_style_bg_opa(st, LV_OPA_COVER, 0);
-            lv_obj_set_style_bg_color(st, lv_color_hex(s < a->save.stars[m] ? 0xFFD23C : 0x3A4652), 0);
-            lv_obj_align(st, LV_ALIGN_RIGHT_MID, -10 - (2 - s) * 28, 0);
+            lv_obj_set_style_bg_color(st, lv_color_hex(st_ < a->save.stars[m] ? 0xFFD23C : 0x3A4652), 0);
+            lv_obj_align(st, LV_ALIGN_RIGHT_MID, -10 - (2 - st_) * 28, 0);
             lv_obj_remove_flag(st, LV_OBJ_FLAG_CLICKABLE);
+        }
         }
     }
 }
@@ -209,7 +249,7 @@ void tqm_build_story(app_t *a)
  * The free battle
  * -------------------------------------------------------------------------- */
 
-enum { F_BIOME = 0, F_SIZE, F_RIVALS, F_DIFF, F_WEATHER, F_OBJECTS, F_PLAYERS, F_P2, F_ROWS };
+enum { F_MODE = 0, F_BIOME, F_SIZE, F_RIVALS, F_DIFF, F_WEATHER, F_OBJECTS, F_PLAYERS, F_P2, F_ROWS };
 static lv_obj_t *s_fval[F_ROWS];
 static lv_obj_t *s_fname_obj, *s_fslider;
 static int s_p2_type = TQ_T_BOMBO;
@@ -221,17 +261,32 @@ static int max_rivals(const tq_save_t *s)
     return s->f_size % TQ_SIZES == TQ_SIZES - 1 ? 2 : 3;
 }
 
+/* Steps a choice by d among those installed (a DLC's only with its pack) */
+static int step_have(int v, int d, int n, int (*dlc_of)(int))
+{
+    for (int i = 0; i < n; i++) {
+        v = (v + n + d) % n;
+        if (tq_dlc_have(dlc_of(v))) return v;
+    }
+    return 0;
+}
+
 static void free_text(app_t *a)
 {
     tq_save_t *s = &a->save;
     if (s->f_rivals > max_rivals(s)) s->f_rivals = (uint8_t)max_rivals(s);
+    if (!tq_dlc_have(tq_dlc_of_mode(s->f_mode % TQ_MODES))) s->f_mode = 0;
+    if (!tq_dlc_have(tq_dlc_of_biome(s->f_biome % TQ_BIOMES))) s->f_biome = 0;
+    if (!tq_dlc_have(tq_dlc_of_tank(s_p2_type))) s_p2_type = TQ_T_BOMBO;
     char txt[96];
+    lv_label_set_text(s_fval[F_MODE], _(TQ_MODE_NAME[s->f_mode % TQ_MODES]));
     lv_label_set_text(s_fval[F_BIOME], _(TQ_BIOME_NAME[s->f_biome % TQ_BIOMES]));
     lv_label_set_text(s_fval[F_SIZE], _(TQ_SIZE_NAME[s->f_size % TQ_SIZES]));
     snprintf(txt, sizeof txt, "%d", s->f_rivals);
     lv_label_set_text(s_fval[F_RIVALS], txt);
     lv_label_set_text(s_fval[F_DIFF], _(TQ_DIFF_NAME[s->f_diff % TQ_DIFFS]));
-    lv_label_set_text(s_fval[F_WEATHER], _(TQ_WEATHER_NAME[s->f_weather % TQ_WEATHERS]));
+    lv_label_set_text(s_fval[F_WEATHER], s->f_biome % TQ_BIOMES == TQ_B_LUNA ? _("Sin aire")
+                                                                              : _(TQ_WEATHER_NAME[s->f_weather % TQ_WEATHERS]));
     {
         /* the objects: a slider, its level's name beside the row's */
         char txt[64];
@@ -254,7 +309,8 @@ static void free_step(lv_event_t *e)
     int row = v / 2, d = (v & 1) ? 1 : -1;
     tq_save_t *s = &a->save;
     switch (row) {
-    case F_BIOME: s->f_biome = (uint8_t)((s->f_biome + TQ_BIOMES + d) % TQ_BIOMES); break;
+    case F_MODE: s->f_mode = (uint8_t)step_have(s->f_mode % TQ_MODES, d, TQ_MODES, tq_dlc_of_mode); break;
+    case F_BIOME: s->f_biome = (uint8_t)step_have(s->f_biome % TQ_BIOMES, d, TQ_BIOMES, tq_dlc_of_biome); break;
     case F_SIZE: s->f_size = (uint8_t)((s->f_size + TQ_SIZES + d) % TQ_SIZES); break;
     case F_RIVALS: {
         int n = max_rivals(s);
@@ -271,7 +327,7 @@ static void free_step(lv_event_t *e)
         s->f_objects = (uint8_t)(1 + lv);
         break;
     }
-    case F_P2: s_p2_type = (s_p2_type + TQ_TANK_TYPES + d) % TQ_TANK_TYPES; break;
+    case F_P2: s_p2_type = step_have(s_p2_type, d, TQ_TANK_TYPES, tq_dlc_of_tank); break;
     default: break;
     }
     free_text(a);
@@ -295,23 +351,31 @@ static void free_go(lv_event_t *e)
     su.diff = s->f_diff % TQ_DIFFS;
     su.weather = s->f_weather % TQ_WEATHERS;
     su.objects = tq_objects_level(s);
+    su.mode = s->f_mode % TQ_MODES;
     su.seed = lv_tick_get() ^ (s->battles * 7919u);
     a->setup = su;
     int k = 0;
     tqh_player_tank(a, k++, s->tank, true);
+    bool waves = su.mode == TQ_MODE_WAVES, sides = su.mode != TQ_MODE_CLASSIC;
     if (s->f_players > 1) {
         tqh_player_tank(a, k, s_p2_type, false);
-        a->setup.t[k].team = 1;
+        /* the waves: the two together against the board */
+        a->setup.t[k].team = waves ? 0 : 1;
         snprintf(a->setup.t[0].name, sizeof a->setup.t[0].name, "%s", _("Jugador 1"));
         snprintf(a->setup.t[k].name, sizeof a->setup.t[k].name, "%s", _("Jugador 2"));
         k++;
     }
-    int rivals = s->f_players > 1 ? s->f_rivals - 1 : s->f_rivals;
+    int rivals = s->f_players > 1 && !waves ? s->f_rivals - 1 : s->f_rivals;
+    if (waves && s->f_players > 1 && rivals > TQ_MAX_TANKS - 2) rivals = TQ_MAX_TANKS - 2;
     for (int r = 0; r < rivals && k < TQ_MAX_TANKS; r++, k++) {
         int type = (int)((su.seed >> (r * 3)) % TQ_TANK_TYPES);
+        if (!tq_dlc_have(tq_dlc_of_tank(type))) type = step_have(type, 1, TQ_TANK_TYPES, tq_dlc_of_tank);
         tqh_player_tank(a, k, type, false);
         a->setup.t[k].ai = true;
-        a->setup.t[k].team = 2;
+        /* the usual: everyone against everyone; the modes: two sides
+         * (two people: each with half the board's tanks) */
+        a->setup.t[k].team = !sides ? 2 : (waves || s->f_players == 1 ? 1 : (r & 1) ^ 1);
+        if (waves && r > 0) a->setup.t[k].later = true;
     }
     a->setup.ntank = k;
     tqa_save(a);
@@ -322,14 +386,14 @@ static void free_go(lv_event_t *e)
 void tqm_build_free(app_t *a)
 {
     bool land = a->W > a->H;
-    int w = land ? 760 : a->W - 40, rh = land ? 64 : 84;
+    int w = land ? 760 : a->W - 40, rh = land ? 56 : 84;
     int h = 130 + F_ROWS * rh + 120;
     if (h > a->H - 30) h = a->H - 30;
     lv_obj_t *p = card(a, w, h);
     lv_obj_t *t = tqa_label(p, _("Batalla libre"), aos_font_title, 0xFFE9A8);
     lv_obj_align(t, LV_ALIGN_TOP_LEFT, 30, 18);
-    static const char *const NAME[F_ROWS] = { N_("Lugar"), N_("Tamaño"), N_("Rivales"), N_("Dificultad"), N_("Clima"),
-                                              N_("Objetos"), N_("Jugadores"), N_("Tanque del 2") };
+    static const char *const NAME[F_ROWS] = { N_("Modo"), N_("Lugar"), N_("Tamaño"), N_("Rivales"), N_("Dificultad"),
+                                              N_("Clima"), N_("Objetos"), N_("Jugadores"), N_("Tanque del 2") };
     for (int r = 0; r < F_ROWS; r++) {
         lv_obj_t *row = lv_obj_create(p);
         lv_obj_remove_style_all(row);
@@ -360,8 +424,8 @@ void tqm_build_free(app_t *a)
             lv_obj_add_event_cb(s_fslider, free_slide, LV_EVENT_VALUE_CHANGED, a);
         }
     }
-    lv_obj_t *b = tqa_button(p, _("¡A la batalla!"), 0xE8572E, w - 120, 90, free_go, a);
-    lv_obj_align(b, LV_ALIGN_BOTTOM_MID, 0, -20);
+    lv_obj_t *b = tqa_button(p, _("¡A la batalla!"), 0xE8572E, w - 120, land ? 70 : 90, free_go, a);
+    lv_obj_align(b, LV_ALIGN_BOTTOM_MID, 0, land ? -14 : -20);
     free_text(a);
 }
 
@@ -382,10 +446,13 @@ void tqm_build_result(app_t *a)
     lv_obj_t *p = card(a, w, 470);
     const tq_tank_t *me = &a->st.tank[0];
     char txt[160];
-    if (a->humans > 1) {
+    bool sides = a->st.mode != TQ_MODE_CLASSIC;
+    if (a->st.mode == TQ_MODE_WAVES && !(a->winner == 0 && a->st.target)) {
+        snprintf(txt, sizeof txt, _("%d oleadas"), a->waves_done);
+    } else if (a->humans > 1) {
         const char *name = "";
-        for (int k = 0; k < a->st.ntank; k++)
-            if (a->st.tank[k].alive) name = a->st.tank[k].name;
+        for (int k = a->st.ntank - 1; k >= 0; k--)
+            if ((sides ? (a->st.tank[k].team & 1) : a->st.tank[k].team) == a->winner) name = a->st.tank[k].name;
         if (a->winner < 0) snprintf(txt, sizeof txt, "%s", _("Empate"));
         else snprintf(txt, sizeof txt, _("¡Ganó %s!"), name);
     } else {

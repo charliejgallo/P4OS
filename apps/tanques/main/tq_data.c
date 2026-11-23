@@ -22,6 +22,59 @@ const tq_tank_type_t TQ_TANK[TQ_TANK_TYPES] = {
     { "obus",   N_("Obús"),   N_("Artillería: lo que va por arriba pega más"),         1200,  90,  5, 10, 1.3f, 2.6f, 3, 0.32f, 1.48f, 1.30f, -1.10f, 0.62f, 2.40f, 32, 1.60f },
     { "avispa", N_("Avispa"), N_("Misiles: los guiados y los láser pegan más"),        1400,  85,  0, 11, 1.9f, 2.0f, 3, 0.05f, 1.46f, 0.85f, -1.55f, 0.78f, 2.60f,  6, 1.40f },
     { "topo",   N_("Topo"),   N_("Ingeniero: cava, arregla y planta minas mejor"),     1000, 110, 10, 10, 1.5f, 1.8f, 3, 0.40f, 1.30f, 0.86f, -0.95f, 0.50f, 2.20f,  8, 1.45f },
+    /* the DLCs' */
+    { "tortuga", N_("Tortuga"), N_("Caparazón: empieza con escudo; su escudo y la Tesla rinden más"),
+                                                                                       1600, 150, 15,  9, 1.2f, 2.6f, 3, 0.55f, 1.30f, 1.26f, -0.95f, 0.55f, 2.30f,  8, 1.55f },
+    { "anfibio", N_("Anfibio"), N_("Anda por el agua; el cañón doble le pega más"),    1300,  95,  5, 10, 1.8f, 2.0f, 3, 0.45f, 1.25f, 1.16f, -0.90f, 0.48f, 2.22f,  8, 1.45f },
+};
+
+/* --------------------------------------------------------------------------
+ * The DLCs
+ * -------------------------------------------------------------------------- */
+
+const char *const TQ_DLC_NAME[TQ_DLCS] = { N_("Tanques"), N_("Misión a la Luna"), N_("Día de playa") };
+const char *const TQ_DLC_PACK[TQ_DLCS] = { "tanques_p4.pak", "tanques_luna.pak", "tanques_playa.pak" };
+static uint32_t s_dlc = 1;
+
+void tq_dlc_set(uint32_t mask)
+{
+    s_dlc = mask | 1u;
+}
+
+bool tq_dlc_have(int dlc)
+{
+    return dlc >= 0 && dlc < TQ_DLCS && (s_dlc & (1u << dlc));
+}
+
+int tq_dlc_of_tank(int type)
+{
+    return type == TQ_T_TORTUGA ? TQ_DLC_LUNA : (type == TQ_T_ANFIBIO ? TQ_DLC_PLAYA : TQ_DLC_BASE);
+}
+
+int tq_dlc_of_weapon(int w)
+{
+    return w == TQ_W_TESLA ? TQ_DLC_LUNA : (w == TQ_W_TWIN ? TQ_DLC_PLAYA : TQ_DLC_BASE);
+}
+
+int tq_dlc_of_biome(int b)
+{
+    return b == TQ_B_LUNA ? TQ_DLC_LUNA : (b == TQ_B_PLAYA ? TQ_DLC_PLAYA : TQ_DLC_BASE);
+}
+
+int tq_dlc_of_mode(int m)
+{
+    return (m == TQ_MODE_WAVES || m == TQ_MODE_HILL) ? TQ_DLC_LUNA
+         : ((m == TQ_MODE_FLAG || m == TQ_MODE_TREASURE) ? TQ_DLC_PLAYA : TQ_DLC_BASE);
+}
+
+const char *const TQ_MODE_NAME[TQ_MODES] = { N_("Clásico"), N_("Oleadas"), N_("Rey de la colina"),
+                                             N_("Captura la bandera"), N_("Búsqueda del tesoro") };
+const char *const TQ_MODE_INFO[TQ_MODES] = {
+    N_("Gana el último equipo en pie"),
+    N_("Tandas de tanques cada vez más duros: ¿cuántas aguantás?"),
+    N_("Un punto por turno empezado dentro de la colina: gana el primero a 4"),
+    N_("Traé la bandera del otro a la tuya: gana el primero a 2"),
+    N_("Cofres por el mapa: gana el que junta más"),
 };
 
 const char *const TQ_UP_NAME[TQ_UPGRADES] = { N_("Blindaje"), N_("Motor"), N_("Velocidad"), N_("Energía") };
@@ -78,6 +131,9 @@ const tq_weapon_t TQ_WEAPON[TQ_WEAPONS] = {
     { N_("Teletransporte"), N_("Tu tanque aparece donde cae"),                     5,  700, TQ_FLY_LOB,    TQ_FX_TELEPORT, 15, 1.0f, 0.0f,  0, 0.0f, 0.00f, 2, 20, 75, 0xC77DFF },
     { N_("Muro"),           N_("Levanta tres piedras donde cae"),                  3,  350, TQ_FLY_LOB,    TQ_FX_WALL,     14, 1.0f, 0.0f,  0, 0.0f, 0.00f, 2, 20, 75, 0xB3AB9E },
     { N_("Bomba gorda"),    N_("Lenta y enorme"),                                  8, 1500, TQ_FLY_LOB,    TQ_FX_BLAST,    13, 1.0f, 4.2f, 55, 2.8f, 1.20f, 1, 30, 75, 0x2A2D34 },
+    /* the DLCs': radius is how far the Tesla's lightning jumps */
+    { N_("Bobina Tesla"),   N_("Un rayo que salta a todo lo que hay cerca"),       6,  900, TQ_FLY_SHELL,  TQ_FX_TESLA,    19, 0.35f,6.0f, 18, 0.6f, 0.20f, 2, -5, 40, 0x7FE0FF },
+    { N_("Cañón doble"),    N_("Dos tiros seguidos: el segundo se abre por el retroceso"), 5, 800, TQ_FLY_SHELL, TQ_FX_BLAST, 22, 1.0f, 2.0f, 20, 1.1f, 0.40f, 0, -5, 45, 0xF5A623 },
 };
 
 int tq_w_price(int w, int level)
@@ -149,7 +205,25 @@ void tq_emblem(int k, uint16_t out[16])
  * The save
  * -------------------------------------------------------------------------- */
 
-#define SAVE_VERSION 2
+#define SAVE_VERSION 3
+
+/* Version 2's save, as it was on the card (six tanks, twenty weapons,
+ * twelve missions); version 1 is the same without its last four bytes */
+typedef struct {
+    uint32_t version;
+    int32_t  coins;
+    uint8_t  tank;
+    tq_garage_t g[6];
+    uint8_t  w_owned[20];
+    uint8_t  w_level[20];
+    uint8_t  stars[12];
+    uint8_t  f_biome, f_size, f_rivals, f_diff, f_weather, f_players;
+    uint8_t  sfx;
+    uint32_t wins, battles;
+    uint8_t  was_cam;
+    uint8_t  f_objects;
+    uint8_t  spare[2];
+} save_v2_t;
 
 void tq_save_defaults(tq_save_t *s)
 {
@@ -174,7 +248,6 @@ void tq_save_defaults(tq_save_t *s)
     s->f_diff = 1;
     s->f_players = 1;
     s->sfx = 1;
-    s->was_cam = 1;
     s->f_objects = 1 + TQ_OBJECT_LEVELS / 2;
 }
 
@@ -189,13 +262,34 @@ bool tq_save_load(tq_save_t *s)
     path(p, sizeof p);
     FILE *f = fopen(p, "rb");
     if (!f) return false;
-    tq_save_t t;
+    static tq_save_t t;
     memset(&t, 0, sizeof t);
     size_t n = fread(&t, 1, sizeof t, f);
     fclose(f);
-    if (t.version == 1 && n == offsetof(tq_save_t, was_cam)) {
-        /* the first version ended there: it keeps all it had */
-        t.version = SAVE_VERSION;
+    if ((t.version == 1 && n == offsetof(save_v2_t, was_cam)) || (t.version == 2 && n == sizeof(save_v2_t))) {
+        /* an older save: all it had, in the new places, the rest new */
+        save_v2_t o;
+        memset(&o, 0, sizeof o);
+        memcpy(&o, &t, n);
+        if (o.version == 1) o.f_objects = 1 + TQ_OBJECT_LEVELS / 2;
+        tq_save_defaults(&t);
+        t.coins = o.coins;
+        t.tank = o.tank < 6 ? o.tank : 0;
+        memcpy(t.g, o.g, sizeof o.g);
+        memcpy(t.w_owned, o.w_owned, sizeof o.w_owned);
+        memcpy(t.w_level, o.w_level, sizeof o.w_level);
+        memcpy(t.stars, o.stars, sizeof o.stars);
+        t.f_biome = o.f_biome;
+        t.f_size = o.f_size;
+        t.f_rivals = o.f_rivals;
+        t.f_diff = o.f_diff;
+        t.f_weather = o.f_weather;
+        t.f_players = o.f_players;
+        t.sfx = o.sfx;
+        t.wins = o.wins;
+        t.battles = o.battles;
+        t.f_objects = o.f_objects;
+        aos_hal_log("tanques", "save: version %u brought to %d", (unsigned)o.version, SAVE_VERSION);
         n = sizeof t;
     }
     if (n != sizeof t || t.version != SAVE_VERSION) return false;
@@ -222,8 +316,9 @@ void tq_save_store(const tq_save_t *s)
  * The story, places and weather
  * -------------------------------------------------------------------------- */
 
-const char *const TQ_BIOME_KEY[TQ_BIOMES] = { "pradera", "desierto", "nieve", "ruinas", "volcan" };
-const char *const TQ_BIOME_NAME[TQ_BIOMES] = { N_("Pradera"), N_("Desierto"), N_("Nieve"), N_("Ruinas"), N_("Volcán") };
+const char *const TQ_BIOME_KEY[TQ_BIOMES] = { "pradera", "desierto", "nieve", "ruinas", "volcan", "luna", "playa" };
+const char *const TQ_BIOME_NAME[TQ_BIOMES] = { N_("Pradera"), N_("Desierto"), N_("Nieve"), N_("Ruinas"), N_("Volcán"),
+                                               N_("Luna"), N_("Playa") };
 const char *const TQ_WEATHER_NAME[TQ_WEATHERS] = { N_("Despejado"), N_("Viento"), N_("Tormenta"), N_("Niebla") };
 const float TQ_SIZE_M[TQ_SIZES] = { 28.0f, 32.0f, 36.0f, 44.0f };
 const char *const TQ_SIZE_NAME[TQ_SIZES] = { N_("Chico"), N_("Mediano"), N_("Grande"), N_("Muy grande") };
@@ -232,18 +327,60 @@ const float TQ_OBJECTS_K[TQ_OBJECT_LEVELS] = { 0.3f, 0.6f, 1.0f, 1.5f, 2.0f };
 const char *const TQ_OBJECTS_NAME[TQ_OBJECT_LEVELS] = { N_("Muy pocos"), N_("Pocos"), N_("Normal"), N_("Muchos"),
                                                         N_("Un montón") };
 
+#define M_  TQ_MODE_CLASSIC
+#define G_  TQ_GOAL_ALL
 const tq_mission_t TQ_MISSION[TQ_STORY_MISSIONS] = {
-    /* name                         biome           size rv df weather        rival tanks                               seed  reward */
-    { N_("El primer día"),          TQ_B_PRADERA,   0, 1, 0, TQ_WX_CLEAR, { TQ_T_PULGA, 0, 0 },                         11,  200 },
-    { N_("La loma del medio"),      TQ_B_PRADERA,   1, 1, 0, TQ_WX_WIND,  { TQ_T_BOMBO, 0, 0 },                         23,  250 },
-    { N_("Dos contra uno"),         TQ_B_PRADERA,   1, 2, 1, TQ_WX_CLEAR, { TQ_T_PULGA, TQ_T_PULGA, 0 },                37,  320 },
-    { N_("Arena en los ojos"),      TQ_B_DESIERTO,  1, 1, 1, TQ_WX_WIND,  { TQ_T_OBUS, 0, 0 },                          41,  350 },
-    { N_("El oasis"),               TQ_B_DESIERTO,  1, 2, 1, TQ_WX_CLEAR, { TQ_T_BOMBO, TQ_T_TOPO, 0 },                 53,  420 },
-    { N_("Tormenta de arena"),      TQ_B_DESIERTO,  2, 2, 1, TQ_WX_STORM, { TQ_T_AVISPA, TQ_T_PULGA, 0 },               67,  480 },
-    { N_("Bajo cero"),              TQ_B_NIEVE,     1, 2, 1, TQ_WX_FOG,   { TQ_T_MAMUT, TQ_T_PULGA, 0 },                71,  520 },
-    { N_("El muñeco de nieve"),     TQ_B_NIEVE,     2, 2, 2, TQ_WX_WIND,  { TQ_T_OBUS, TQ_T_TOPO, 0 },                  83,  580 },
-    { N_("Avalancha"),              TQ_B_NIEVE,     2, 3, 1, TQ_WX_STORM, { TQ_T_PULGA, TQ_T_BOMBO, TQ_T_AVISPA },      97,  650 },
-    { N_("La ciudad vacía"),        TQ_B_RUINAS,    1, 2, 2, TQ_WX_FOG,   { TQ_T_AVISPA, TQ_T_MAMUT, 0 },              101,  720 },
-    { N_("La plaza"),               TQ_B_RUINAS,    2, 3, 2, TQ_WX_WIND,  { TQ_T_OBUS, TQ_T_TOPO, TQ_T_AVISPA },       113,  800 },
-    { N_("El volcán"),              TQ_B_VOLCAN,    2, 3, 2, TQ_WX_STORM, { TQ_T_MAMUT, TQ_T_OBUS, TQ_T_AVISPA },      127, 1000 },
+    /* name                     info  dlc           biome          size rv df weather      rival tanks                                mode             goal             n ally  seed  reward */
+    { N_("El primer día"),       NULL, TQ_DLC_BASE, TQ_B_PRADERA,  0, 1, 0, TQ_WX_CLEAR, { TQ_T_PULGA, 0, 0 },                        M_, G_, 0, 0,  11,  200 },
+    { N_("La loma del medio"),   NULL, TQ_DLC_BASE, TQ_B_PRADERA,  1, 1, 0, TQ_WX_WIND,  { TQ_T_BOMBO, 0, 0 },                        M_, G_, 0, 0,  23,  250 },
+    { N_("Dos contra uno"),      NULL, TQ_DLC_BASE, TQ_B_PRADERA,  1, 2, 1, TQ_WX_CLEAR, { TQ_T_PULGA, TQ_T_PULGA, 0 },               M_, G_, 0, 0,  37,  320 },
+    { N_("Arena en los ojos"),   NULL, TQ_DLC_BASE, TQ_B_DESIERTO, 1, 1, 1, TQ_WX_WIND,  { TQ_T_OBUS, 0, 0 },                         M_, G_, 0, 0,  41,  350 },
+    { N_("El oasis"),            NULL, TQ_DLC_BASE, TQ_B_DESIERTO, 1, 2, 1, TQ_WX_CLEAR, { TQ_T_BOMBO, TQ_T_TOPO, 0 },                M_, G_, 0, 0,  53,  420 },
+    { N_("Tormenta de arena"),   NULL, TQ_DLC_BASE, TQ_B_DESIERTO, 2, 2, 1, TQ_WX_STORM, { TQ_T_AVISPA, TQ_T_PULGA, 0 },              M_, G_, 0, 0,  67,  480 },
+    { N_("Bajo cero"),           NULL, TQ_DLC_BASE, TQ_B_NIEVE,    1, 2, 1, TQ_WX_FOG,   { TQ_T_MAMUT, TQ_T_PULGA, 0 },               M_, G_, 0, 0,  71,  520 },
+    { N_("El muñeco de nieve"),  NULL, TQ_DLC_BASE, TQ_B_NIEVE,    2, 2, 2, TQ_WX_WIND,  { TQ_T_OBUS, TQ_T_TOPO, 0 },                 M_, G_, 0, 0,  83,  580 },
+    { N_("Avalancha"),           NULL, TQ_DLC_BASE, TQ_B_NIEVE,    2, 3, 1, TQ_WX_STORM, { TQ_T_PULGA, TQ_T_BOMBO, TQ_T_AVISPA },     M_, G_, 0, 0,  97,  650 },
+    { N_("La ciudad vacía"),     NULL, TQ_DLC_BASE, TQ_B_RUINAS,   1, 2, 2, TQ_WX_FOG,   { TQ_T_AVISPA, TQ_T_MAMUT, 0 },              M_, G_, 0, 0, 101,  720 },
+    { N_("La plaza"),            NULL, TQ_DLC_BASE, TQ_B_RUINAS,   2, 3, 2, TQ_WX_WIND,  { TQ_T_OBUS, TQ_T_TOPO, TQ_T_AVISPA },       M_, G_, 0, 0, 113,  800 },
+    { N_("El volcán"),           NULL, TQ_DLC_BASE, TQ_B_VOLCAN,   2, 3, 2, TQ_WX_STORM, { TQ_T_MAMUT, TQ_T_OBUS, TQ_T_AVISPA },      M_, G_, 0, 0, 127, 1000 },
+    /* Misión a la Luna */
+    { N_("Alunizaje"),           N_("Acá todo cae más despacio: apuntá más bajo"),
+                                       TQ_DLC_LUNA, TQ_B_LUNA,     0, 1, 0, TQ_WX_CLEAR, { TQ_T_BOMBO, 0, 0 },                        M_, G_, 0, 0, 211,  400 },
+    { N_("Defensa de la base"),  N_("Aguantá 6 rondas"),
+                                       TQ_DLC_LUNA, TQ_B_LUNA,     1, 2, 1, TQ_WX_CLEAR, { TQ_T_PULGA, TQ_T_OBUS, 0 },                M_, TQ_GOAL_HOLD, 6, 0, 223,  480 },
+    { N_("El rey del cráter"),   N_("Rey de la colina: 4 puntos"),
+                                       TQ_DLC_LUNA, TQ_B_LUNA,     1, 2, 1, TQ_WX_CLEAR, { TQ_T_AVISPA, TQ_T_BOMBO, 0 },              TQ_MODE_HILL, G_, 4, 0, 239,  550 },
+    { N_("Escolta al rover"),    N_("El rover tiene que sobrevivir"),
+                                       TQ_DLC_LUNA, TQ_B_LUNA,     1, 2, 1, TQ_WX_CLEAR, { TQ_T_MAMUT, TQ_T_PULGA, 0 },               M_, TQ_GOAL_PROTECT, 0, TQ_T_PULGA, 241, 620 },
+    { N_("Lluvia de meteoritos"), N_("Oleadas: aguantá 3"),
+                                       TQ_DLC_LUNA, TQ_B_LUNA,     2, 3, 1, TQ_WX_CLEAR, { TQ_T_PULGA, TQ_T_AVISPA, TQ_T_OBUS },      TQ_MODE_WAVES, G_, 3, 0, 257, 700 },
+    { N_("La cara oculta"),      N_("El jefe tiene el triple de vida"),
+                                       TQ_DLC_LUNA, TQ_B_LUNA,     2, 2, 2, TQ_WX_CLEAR, { TQ_T_TORTUGA, TQ_T_AVISPA, 0 },            M_, TQ_GOAL_BOSS, 0, 0, 263, 900 },
+    /* Día de playa */
+    { N_("Desembarco"),          N_("Un solo puente une las islas"),
+                                       TQ_DLC_PLAYA, TQ_B_PLAYA,   1, 1, 0, TQ_WX_CLEAR, { TQ_T_BOMBO, 0, 0 },                        M_, G_, 0, 0, 307,  400 },
+    { N_("Cofres en la arena"),  N_("Búsqueda del tesoro"),
+                                       TQ_DLC_PLAYA, TQ_B_PLAYA,   1, 1, 1, TQ_WX_WIND,  { TQ_T_PULGA, 0, 0 },                        TQ_MODE_TREASURE, G_, 0, 0, 311, 480 },
+    { N_("La bandera pirata"),   N_("Captura la bandera: 2 veces"),
+                                       TQ_DLC_PLAYA, TQ_B_PLAYA,   2, 1, 1, TQ_WX_CLEAR, { TQ_T_ANFIBIO, 0, 0 },                      TQ_MODE_FLAG, G_, 2, 0, 331, 560 },
+    { N_("Marea alta"),          N_("Ganá en 7 rondas o menos"),
+                                       TQ_DLC_PLAYA, TQ_B_PLAYA,   1, 2, 1, TQ_WX_WIND,  { TQ_T_OBUS, TQ_T_TOPO, 0 },                 M_, TQ_GOAL_FAST, 7, 0, 347, 620 },
+    { N_("Que no crucen"),       N_("Aguantá 7 rondas"),
+                                       TQ_DLC_PLAYA, TQ_B_PLAYA,   2, 3, 1, TQ_WX_STORM, { TQ_T_PULGA, TQ_T_BOMBO, TQ_T_ANFIBIO },    M_, TQ_GOAL_HOLD, 7, 0, 353, 720 },
+    { N_("El almirante"),        N_("El jefe tiene el triple de vida"),
+                                       TQ_DLC_PLAYA, TQ_B_PLAYA,   2, 2, 2, TQ_WX_WIND,  { TQ_T_ANFIBIO, TQ_T_MAMUT, 0 },             M_, TQ_GOAL_BOSS, 0, 0, 367, 900 },
 };
+#undef M_
+#undef G_
+
+int tq_missions_of(int dlc, int *first)
+{
+    int f = -1, n = 0;
+    for (int m = 0; m < TQ_STORY_MISSIONS; m++) {
+        if (TQ_MISSION[m].dlc != dlc) continue;
+        if (f < 0) f = m;
+        n++;
+    }
+    if (first) *first = f < 0 ? 0 : f;
+    return n;
+}

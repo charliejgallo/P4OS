@@ -22,11 +22,15 @@ static const uint8_t RIVAL_LOAD[TQ_TANK_TYPES][TQ_SLOTS_MAX] = {
     { TQ_W_MORTAR, TQ_W_CLUSTER, TQ_W_NAPALM, 0xFF },
     { TQ_W_CANNON, TQ_W_MISSILE, TQ_W_LASER, 0xFF },
     { TQ_W_CANNON, TQ_W_DRILL, TQ_W_REPAIR, 0xFF },
+    { TQ_W_CANNON, TQ_W_TESLA, TQ_W_SHIELD, 0xFF },
+    { TQ_W_TWIN, TQ_W_MORTAR, TQ_W_MISSILE, 0xFF },
 };
 
 void tqh_player_tank(app_t *a, int slot, int type, bool full)
 {
     tq_setup_t *su = &a->setup;
+    /* a DLC's tank whose pack is gone: its art too */
+    if (!tq_dlc_have(tq_dlc_of_tank(type))) type = TQ_T_BOMBO;
     memset(&su->t[slot], 0, sizeof su->t[slot]);
     su->t[slot].type = type;
     su->t[slot].team = slot == 0 ? 0 : 1;
@@ -268,7 +272,15 @@ static void build_body(app_t *a)
             lv_obj_set_width(i, w - 300);
             lv_label_set_long_mode(i, LV_LABEL_LONG_MODE_DOTS);
             lv_obj_align(i, LV_ALIGN_BOTTOM_LEFT, 46, -12);
-            if (!own) {
+            int dlc = tq_dlc_of_weapon(wpn);
+            if (!tq_dlc_have(dlc)) {
+                /* a DLC's, not installed: what brings it */
+                snprintf(txt, sizeof txt, _("Viene con\n%s"), _(TQ_DLC_NAME[dlc]));
+                lv_obj_t *l = tqa_label(row, txt, aos_font_tiny, 0x8A96A4);
+                lv_obj_set_style_text_align(l, LV_TEXT_ALIGN_RIGHT, 0);
+                lv_obj_align(l, LV_ALIGN_RIGHT_MID, -14, 0);
+                lv_obj_set_style_opa(row, LV_OPA_60, 0);
+            } else if (!own) {
                 snprintf(txt, sizeof txt, _("Comprar\n%d"), W->price);
                 lv_obj_t *b = tqa_button(row, txt, 0xE8572E, 130, 80, on_weapon, a);
                 lv_obj_set_style_text_font(lv_obj_get_child(b, 0), aos_font_caption, 0);
@@ -374,6 +386,7 @@ static void refresh_head(app_t *a)
 static void set_tank(app_t *a, int t)
 {
     a->h_tank = (t + TQ_TANK_TYPES) % TQ_TANK_TYPES;
+    if (!tq_dlc_have(tq_dlc_of_tank(a->h_tank))) a->h_tank = TQ_T_BOMBO;
     tqa_wait_worker(a);
     /* the hangar draws only its turntable: the menu's battle gives its
      * tanks back first (the Mamut's turntable alone is 5.4 MB) */
@@ -388,7 +401,13 @@ static void set_tank(app_t *a, int t)
 
 void tqh_cycle(app_t *a, int d)
 {
-    set_tank(a, a->h_tank + d);
+    /* the DLCs' tanks only with their packs */
+    int t = a->h_tank;
+    for (int i = 0; i < TQ_TANK_TYPES; i++) {
+        t = (t + TQ_TANK_TYPES + d) % TQ_TANK_TYPES;
+        if (tq_dlc_have(tq_dlc_of_tank(t))) break;
+    }
+    set_tank(a, t);
 }
 
 static void on_arrow(lv_event_t *e)

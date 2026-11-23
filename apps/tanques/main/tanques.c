@@ -691,6 +691,10 @@ static void *tanques_create(aos_app_t *self, lv_obj_t *root)
     if (e && e[0] == 's') tqa_screen(a, SC_STORY);
     if (e && e[0] == 'f') tqa_screen(a, SC_FREE);
     if (e && e[0] == 'h') tqa_screen(a, SC_HANGAR);
+    e = getenv("TQ_MISSION");
+    if (e && e[0] && a->art_ok) {
+        tqm_play(a, atoi(e));
+    }
     e = getenv("TQ_START");
     if (e && e[0] && a->art_ok) {
         tq_setup_t su;
@@ -701,8 +705,10 @@ static void *tanques_create(aos_app_t *self, lv_obj_t *root)
         su.weather = getenv("TQ_WEATHER") ? atoi(getenv("TQ_WEATHER")) % TQ_WEATHERS : 0;
         su.objects = getenv("TQ_OBJECTS") ? atoi(getenv("TQ_OBJECTS")) % TQ_OBJECT_LEVELS : TQ_OBJECT_LEVELS / 2;
         su.seed = getenv("TQ_SEED") ? (uint32_t)atoi(getenv("TQ_SEED")) : 7;
+        su.mode = getenv("TQ_MODE") ? atoi(getenv("TQ_MODE")) % TQ_MODES : 0;
         a->setup = su;
-        tqh_player_tank(a, 0, a->save.tank, true);
+        tqh_player_tank(a, 0, getenv("TQ_ME") ? atoi(getenv("TQ_ME")) % TQ_TANK_TYPES : a->save.tank, !getenv("TQ_ME"));
+        a->setup.t[0].team = 0;
         if (e[0] == '2') {
             tqh_player_tank(a, 1, TQ_T_BOMBO, false);
             a->setup.t[1].team = 1;
@@ -710,9 +716,15 @@ static void *tanques_create(aos_app_t *self, lv_obj_t *root)
         } else {
             int rivals = getenv("TQ_RIVALS") ? atoi(getenv("TQ_RIVALS")) : 1;
             for (int k = 1; k <= rivals && k < TQ_MAX_TANKS; k++) {
-                tqh_player_tank(a, k, (k * 2 + 1) % TQ_TANK_TYPES, false);
+                /* TQ_TYPES=a,b,c: the board's tanks */
+                int type = (k * 2 + 1) % TQ_TANK_TYPES;
+                const char *ty = getenv("TQ_TYPES");
+                for (int q = 1; ty && q < k && strchr(ty, ','); q++) ty = strchr(ty, ',') + 1;
+                if (ty) type = atoi(ty) % TQ_TANK_TYPES;
+                tqh_player_tank(a, k, type, false);
                 a->setup.t[k].ai = true;
                 a->setup.t[k].team = 1;
+                if (su.mode == TQ_MODE_WAVES && k > 1) a->setup.t[k].later = true;
             }
             a->setup.ntank = 1 + rivals;
         }

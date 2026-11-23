@@ -12,9 +12,13 @@
 
 #include "tq_view.h"
 
-/* per biome: the ground, a path, rock, and the biome's own (ice, lava,
- * paving) */
-enum { TQ_MAT_BASE = 0, TQ_MAT_PATH, TQ_MAT_ROCK, TQ_MAT_SPECIAL };
+/* per biome: the ground, a path, rock, the biome's own (ice, lava,
+ * paving, the beach's sea) and a bridge's deck */
+enum { TQ_MAT_BASE = 0, TQ_MAT_PATH, TQ_MAT_ROCK, TQ_MAT_SPECIAL, TQ_MAT_DECK, TQ_MATS };
+
+/* The beach's sea: flat at this height; only the Anfibio drives on it */
+#define TQ_SEA_Z 0.10f
+#define TQ_ISLANDS_MAX 4
 
 typedef struct {
     int      n, nv;                         /* cells and vertices per side */
@@ -26,6 +30,11 @@ typedef struct {
     uint8_t  tint[TQ_NVMAX * TQ_NVMAX];     /* the ground's patches, 0..255 */
     uint32_t col[TQ_NVMAX * TQ_NVMAX];      /* lit colour, 0xRRGGBB */
     float    hmax;
+    /* the beach: its islands (x, y, half-sizes along x and y; the first two
+     * are the sides', the rest islets) and the bridge between the two */
+    int      nisl;
+    float    isl[TQ_ISLANDS_MAX][4];
+    float    bridge[4];                     /* x0, y0, x1, y1 of its middle line */
 } tq_terrain_t;
 
 /* A box of vertices, inclusive: what a change touched */
@@ -49,6 +58,11 @@ tq_vbox_t tq_ter_crater(tq_terrain_t *t, float x, float y, float r, float d, boo
 uint32_t tq_ter_side_colour(const tq_terrain_t *t, float z, float shade);
 /* The biome's ground beyond the map (the first person's far plane) and sky */
 uint32_t tq_ter_far_colour(int biome, int which);
+
+/* Sea where (the beach only): the vertex nearest */
+bool tq_ter_water(const tq_terrain_t *t, float x, float y);
+/* A spot on land near (x, y) (the beach: off the sea; elsewhere itself) */
+void tq_ter_land(const tq_terrain_t *t, float *x, float *y);
 
 static inline float tq_ter_vh(const tq_terrain_t *t, int i, int j)
 {

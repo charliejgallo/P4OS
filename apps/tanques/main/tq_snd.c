@@ -314,6 +314,41 @@ void tq_snd(int id)
         tone(392, 370, 260, 4200, 6, 280, V_SQUARE);
         tone(330, 220, 700, 4400, 6, 560, V_SQUARE);
         break;
+    case TQ_SND_TESLA:
+        for (int i = 0; i < 5; i++) {
+            noise(60, 9000, 0, 250, true, i * 70);
+            tone(2400 - i * 250, 600, 90, 3000, 1, i * 70, V_SQUARE);
+        }
+        noise(500, 4000, 20, 200, true, 0);
+        tone(120, 60, 600, 3000, 20, 0, V_SQUARE);
+        break;
+    case TQ_SND_SPLASH:
+        noise(500, 8000, 5, 170, true, 0);
+        noise(300, 5000, 0, 60, false, 0);
+        for (int i = 0; i < 5; i++) tone(900 + (int)(rnd() % 900), 1800, 40, 1600, 2, 80 + i * 60, V_TONE);
+        break;
+    case TQ_SND_POINT:
+        tone(1047, 1047, 90, 4000, 2, 0, V_TONE);
+        tone(1568, 1568, 220, 4000, 2, 90, V_TONE);
+        break;
+    case TQ_SND_FLAG:
+        tone(659, 659, 100, 4200, 3, 0, V_SQUARE);
+        tone(880, 880, 100, 4200, 3, 110, V_SQUARE);
+        tone(1175, 1175, 260, 4200, 3, 220, V_SQUARE);
+        break;
+    case TQ_SND_CAPTURE: {
+        static const int N[] = { 784, 988, 1175, 1568, 1175, 1568 };
+        for (int i = 0; i < 6; i++) tone(N[i], N[i], i == 5 ? 500 : 120, 4800, 3, i * 110, V_TONE);
+        noise(300, 3000, 0, 220, true, 0);
+        break;
+    }
+    case TQ_SND_COIN:
+        tone(1976, 1976, 70, 4200, 1, 0, V_SQUARE);
+        tone(2637, 2637, 320, 4200, 1, 70, V_SQUARE);
+        break;
+    case TQ_SND_WAVE:
+        for (int i = 0; i < 2; i++) tone(440, 660, 380, 4600, 30, i * 450, V_SQUARE);
+        break;
     default:
         break;
     }

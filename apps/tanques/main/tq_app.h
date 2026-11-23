@@ -93,6 +93,8 @@ typedef struct app_s {
     float      ai_yaw, ai_pitch;
     int        ai_slot;
     int        coins_won, stars_won, winner;
+    int        waves_done;                  /* the waves: lived through */
+    int        chest_coins;                 /* the chests the person took this battle */
 
     /* the hangar */
     int        h_tank, h_tab;
@@ -103,7 +105,7 @@ typedef struct app_s {
     int        px0, py0, plx, ply;
 
     /* the battle's HUD */
-    lv_obj_t  *top_bar, *chip[TQ_MAX_TANKS], *chip_hp[TQ_MAX_TANKS], *turn_lbl, *wind_lbl;
+    lv_obj_t  *top_bar, *chip[TQ_MAX_TANKS], *chip_hp[TQ_MAX_TANKS], *turn_lbl, *wind_lbl, *mode_lbl;
     lv_obj_t  *move_bar, *ap_lbl, *ap_dot[14], *btn_aim, *hint;
     lv_obj_t  *aim_bar, *btn_w[TQ_SLOTS_MAX], *btn_fire, *btn_back, *aim_lbl;
     lv_obj_t  *banner, *leave;
@@ -137,6 +139,7 @@ bool tqb_animating(app_t *a);
 
 /* tq_menu.c */
 void tqm_build_menu(app_t *a);
+void tqm_play(app_t *a, int mission);
 void tqm_build_story(app_t *a);
 void tqm_build_free(app_t *a);
 void tqm_build_result(app_t *a);

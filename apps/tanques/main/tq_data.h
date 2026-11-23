@@ -1,6 +1,13 @@
 /*
- * TANQUES - the game's tables: the six tanks, their upgrades, the twenty
- * weapons, the paints and the emblems, and what the player owns (the save).
+ * TANQUES - the game's tables: the tanks, their upgrades, the weapons, the
+ * paints and the emblems, the places, the modes, the story, and what the
+ * player owns (the save).
+ *
+ * Two DLCs add to the game: "Misión a la Luna" (the Tortuga, the Tesla coil,
+ * the Moon, waves and the hill, six missions) and "Día de playa" (the
+ * Anfibio, the double cannon, the beach, the flag and the treasure, six
+ * missions). Their code is all here; what makes one installed is its art
+ * pack on the card (tq_art.c), and what is not installed shows locked.
  */
 #pragma once
 
@@ -10,7 +17,23 @@
  * Tanks
  * -------------------------------------------------------------------------- */
 
-enum { TQ_T_BOMBO = 0, TQ_T_PULGA, TQ_T_MAMUT, TQ_T_OBUS, TQ_T_AVISPA, TQ_T_TOPO, TQ_TANK_TYPES };
+enum { TQ_T_BOMBO = 0, TQ_T_PULGA, TQ_T_MAMUT, TQ_T_OBUS, TQ_T_AVISPA, TQ_T_TOPO, TQ_T_TORTUGA, TQ_T_ANFIBIO,
+       TQ_TANK_TYPES };
+
+/* --------------------------------------------------------------------------
+ * The DLCs
+ * -------------------------------------------------------------------------- */
+
+enum { TQ_DLC_BASE = 0, TQ_DLC_LUNA, TQ_DLC_PLAYA, TQ_DLCS };
+extern const char *const TQ_DLC_NAME[TQ_DLCS];      /* N_() */
+extern const char *const TQ_DLC_PACK[TQ_DLCS];      /* the art pack that makes it installed */
+/* Which DLCs are installed (bit per DLC; the base always): set by the art */
+void tq_dlc_set(uint32_t mask);
+bool tq_dlc_have(int dlc);
+int  tq_dlc_of_tank(int type);
+int  tq_dlc_of_weapon(int w);
+int  tq_dlc_of_biome(int biome);
+int  tq_dlc_of_mode(int mode);
 
 /* What the art knows too (tools/blender/tanques_art.py, TANKS) */
 typedef struct {
@@ -56,6 +79,7 @@ enum {
     TQ_W_NAPALM, TQ_W_MINES, TQ_W_EMP, TQ_W_SHIELD, TQ_W_REPAIR,
     TQ_W_SMOKE, TQ_W_BOUNCER, TQ_W_DRILL, TQ_W_AIRSTRIKE, TQ_W_SNIPER,
     TQ_W_SCATTER, TQ_W_QUAKE, TQ_W_TELEPORT, TQ_W_WALL, TQ_W_BIGBOMB,
+    TQ_W_TESLA, TQ_W_TWIN,      /* the DLCs' */
     TQ_WEAPONS
 };
 
@@ -64,7 +88,7 @@ enum { TQ_FLY_SHELL = 0, TQ_FLY_LOB, TQ_FLY_GUIDED, TQ_FLY_BEAM, TQ_FLY_BOUNCE, 
 /* What it does where it lands */
 enum {
     TQ_FX_BLAST = 0, TQ_FX_CLUSTER, TQ_FX_NAPALM, TQ_FX_MINES, TQ_FX_EMP, TQ_FX_SHIELD, TQ_FX_REPAIR,
-    TQ_FX_SMOKE, TQ_FX_AIRSTRIKE, TQ_FX_SCATTER, TQ_FX_QUAKE, TQ_FX_TELEPORT, TQ_FX_WALL,
+    TQ_FX_SMOKE, TQ_FX_AIRSTRIKE, TQ_FX_SCATTER, TQ_FX_QUAKE, TQ_FX_TELEPORT, TQ_FX_WALL, TQ_FX_TESLA,
 };
 
 typedef struct {
@@ -108,7 +132,7 @@ void tq_emblem(int k, uint16_t out[16]);
  * The save: what the player has
  * -------------------------------------------------------------------------- */
 
-#define TQ_STORY_MISSIONS 12
+#define TQ_STORY_MISSIONS 24     /* twelve of the game, six of each DLC */
 #define TQ_SLOTS_MAX 4
 
 typedef struct {
@@ -130,9 +154,10 @@ typedef struct {
     uint8_t  f_biome, f_size, f_rivals, f_diff, f_weather, f_players;
     uint8_t  sfx;
     uint32_t wins, battles;
-    uint8_t  was_cam;                   /* version 2's camera setting: it always jumps now */
     uint8_t  f_objects;                 /* the free battle's trees and walls: 1 + level (0: the middle) */
-    uint8_t  spare[2];
+    uint8_t  f_mode;                    /* the free battle's mode */
+    uint8_t  best_wave;                 /* the most waves lived through */
+    uint8_t  spare[5];
 } tq_save_t;
 
 /* How many trees and walls: five levels, the middle one the usual */
@@ -152,17 +177,40 @@ void tq_save_store(const tq_save_t *s);
  * The story
  * -------------------------------------------------------------------------- */
 
+/* The modes: the usual (the last team standing), and the DLCs' four. In
+ * each, knocking all the others out wins too. */
+enum { TQ_MODE_CLASSIC = 0, TQ_MODE_WAVES, TQ_MODE_HILL, TQ_MODE_FLAG, TQ_MODE_TREASURE, TQ_MODES };
+extern const char *const TQ_MODE_NAME[TQ_MODES];   /* N_() */
+extern const char *const TQ_MODE_INFO[TQ_MODES];   /* N_(): one line */
+
+/* What a mission asks besides its mode */
+enum {
+    TQ_GOAL_ALL = 0,        /* knock them all out */
+    TQ_GOAL_BOSS,           /* the first rival is a boss: three times the health */
+    TQ_GOAL_HOLD,           /* still standing after n rounds */
+    TQ_GOAL_PROTECT,        /* an ally of the board's must live */
+    TQ_GOAL_FAST,           /* win within n rounds */
+};
+
 typedef struct {
     const char *name;           /* N_() */
+    const char *info;           /* N_(): what it asks, one line (NULL: knock them out) */
+    uint8_t dlc;
     uint8_t biome, size, rivals, diff, weather;
     uint8_t rival_tank[3];
+    uint8_t mode, goal, goal_n; /* goal_n: rounds, waves, points... */
+    uint8_t ally_tank;          /* TQ_GOAL_PROTECT's */
     uint32_t seed;
     int reward;
 } tq_mission_t;
 
 extern const tq_mission_t TQ_MISSION[TQ_STORY_MISSIONS];
+/* The first mission of a DLC's six (or of the game's twelve), and how many */
+int tq_missions_of(int dlc, int *first);
 
-enum { TQ_B_PRADERA = 0, TQ_B_DESIERTO, TQ_B_NIEVE, TQ_B_RUINAS, TQ_B_VOLCAN, TQ_BIOMES };
+enum { TQ_B_PRADERA = 0, TQ_B_DESIERTO, TQ_B_NIEVE, TQ_B_RUINAS, TQ_B_VOLCAN, TQ_B_LUNA, TQ_B_PLAYA, TQ_BIOMES };
+/* The Moon pulls less: the shells' gravity there */
+#define TQ_MOON_G 0.55f
 extern const char *const TQ_BIOME_KEY[TQ_BIOMES];
 extern const char *const TQ_BIOME_NAME[TQ_BIOMES];        /* N_() */
 enum { TQ_WX_CLEAR = 0, TQ_WX_WIND, TQ_WX_STORM, TQ_WX_FOG, TQ_WEATHERS };

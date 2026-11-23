@@ -43,6 +43,14 @@ enum {
     TQ_SND_QUAKE,
     TQ_SND_WIN,
     TQ_SND_LOSE,
+    /* the DLCs' */
+    TQ_SND_TESLA,           /* the coil's lightning */
+    TQ_SND_SPLASH,          /* into the sea */
+    TQ_SND_POINT,           /* a point on the hill */
+    TQ_SND_FLAG,            /* a flag taken or brought back */
+    TQ_SND_CAPTURE,
+    TQ_SND_COIN,            /* a chest */
+    TQ_SND_WAVE,            /* a wave comes */
 };
 
 void tq_snd_open(void);

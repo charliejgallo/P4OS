@@ -1,7 +1,13 @@
 # Tanques: ideas for DLC
 
-Thought out with the user on 2026-11-23, after playing it on the board. Not
-planned yet: what could come after the game, cheapest first, with what each
+Thought out with the user on 2026-11-23, after playing it on the board.
+**Made the same day: the two first DLCs, "Misión a la Luna" and "Día de
+playa"** (README, The DLCs). The user's own: the Tortuga for the Moon with a
+Tesla coil whose lightning hits several things round it, the Moon map, and
+the Anfibio for the beach, islands with a single bridge that only the
+Anfibio need not cross, a double cannon whose second shot the recoil throws
+off; new mission goals and two modes each. What follows is what was thought
+before, cheapest first, with what each
 costs against the board's limits (PSRAM ~16.5 MB free when the app opens, a
 four-tank battle ~14-15 MB; the pack 34 MB).
 

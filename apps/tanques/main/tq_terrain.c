@@ -59,24 +59,34 @@ static float smooth01(float e0, float e1, float v)
  * -------------------------------------------------------------------------- */
 
 typedef struct {
-    float mat[4][3];        /* base, path, rock, special */
+    float mat[TQ_MATS][3];  /* base, path, rock, special, deck */
     float patch[3];         /* how the patches shift the base */
     bool  special_glows;    /* lava: lit by itself */
+    bool  special_water;    /* the sea: flat, shining, foam on the shore */
     uint32_t side_top, sky_top, sky_low, far;
 } biome_look_t;
 
+#define DECK_ { 0.62f, 0.44f, 0.28f }
 static const biome_look_t LOOK[TQ_BIOMES] = {
-    { { { 0.44f, 0.70f, 0.30f }, { 0.70f, 0.55f, 0.37f }, { 0.62f, 0.58f, 0.54f }, { 0.86f, 0.78f, 0.56f } },
-      { 0.16f, 0.06f, -0.05f }, false, 0x8C5E3C, 0x5C9AD6, 0xD2E6F0, 0xA9C49A },
-    { { { 0.90f, 0.75f, 0.50f }, { 0.80f, 0.62f, 0.42f }, { 0.76f, 0.50f, 0.36f }, { 0.36f, 0.70f, 0.70f } },
-      { 0.08f, 0.06f, 0.02f }, false, 0xB0784A, 0x6AA6DA, 0xF0E2C8, 0xE0C89A },
-    { { { 0.93f, 0.96f, 0.99f }, { 0.74f, 0.80f, 0.87f }, { 0.50f, 0.52f, 0.57f }, { 0.66f, 0.86f, 0.95f } },
-      { -0.05f, -0.03f, 0.0f }, false, 0x6E6A70, 0x8FB3D6, 0xE6EEF4, 0xDCE6EE },
-    { { { 0.52f, 0.62f, 0.38f }, { 0.36f, 0.37f, 0.41f }, { 0.60f, 0.58f, 0.55f }, { 0.74f, 0.71f, 0.66f } },
-      { 0.10f, 0.08f, -0.02f }, false, 0x6E5A48, 0x7C98B0, 0xCED6DC, 0x9CA690 },
-    { { { 0.33f, 0.29f, 0.28f }, { 0.42f, 0.34f, 0.28f }, { 0.21f, 0.20f, 0.22f }, { 1.00f, 0.46f, 0.12f } },
-      { 0.06f, 0.03f, 0.03f }, true, 0x3E3430, 0x5A4A58, 0xC89070, 0x6A5450 },
+    { { { 0.44f, 0.70f, 0.30f }, { 0.70f, 0.55f, 0.37f }, { 0.62f, 0.58f, 0.54f }, { 0.86f, 0.78f, 0.56f }, DECK_ },
+      { 0.16f, 0.06f, -0.05f }, false, false, 0x8C5E3C, 0x5C9AD6, 0xD2E6F0, 0xA9C49A },
+    { { { 0.90f, 0.75f, 0.50f }, { 0.80f, 0.62f, 0.42f }, { 0.76f, 0.50f, 0.36f }, { 0.36f, 0.70f, 0.70f }, DECK_ },
+      { 0.08f, 0.06f, 0.02f }, false, false, 0xB0784A, 0x6AA6DA, 0xF0E2C8, 0xE0C89A },
+    { { { 0.93f, 0.96f, 0.99f }, { 0.74f, 0.80f, 0.87f }, { 0.50f, 0.52f, 0.57f }, { 0.66f, 0.86f, 0.95f }, DECK_ },
+      { -0.05f, -0.03f, 0.0f }, false, false, 0x6E6A70, 0x8FB3D6, 0xE6EEF4, 0xDCE6EE },
+    { { { 0.52f, 0.62f, 0.38f }, { 0.36f, 0.37f, 0.41f }, { 0.60f, 0.58f, 0.55f }, { 0.74f, 0.71f, 0.66f }, DECK_ },
+      { 0.10f, 0.08f, -0.02f }, false, false, 0x6E5A48, 0x7C98B0, 0xCED6DC, 0x9CA690 },
+    { { { 0.33f, 0.29f, 0.28f }, { 0.42f, 0.34f, 0.28f }, { 0.21f, 0.20f, 0.22f }, { 1.00f, 0.46f, 0.12f }, DECK_ },
+      { 0.06f, 0.03f, 0.03f }, true, false, 0x3E3430, 0x5A4A58, 0xC89070, 0x6A5450 },
+    /* the Moon: grey dust, darker tracks, bright ejecta round the craters,
+     * a black sky */
+    { { { 0.66f, 0.66f, 0.69f }, { 0.54f, 0.54f, 0.58f }, { 0.40f, 0.40f, 0.44f }, { 0.84f, 0.84f, 0.87f }, DECK_ },
+      { 0.12f, 0.12f, 0.12f }, false, false, 0x55555C, 0x04050C, 0x1E2234, 0x5E5E66 },
+    /* the beach: sand, wet sand, rock, the sea, the bridge's planks */
+    { { { 0.95f, 0.86f, 0.64f }, { 0.84f, 0.74f, 0.54f }, { 0.62f, 0.58f, 0.52f }, { 0.16f, 0.58f, 0.76f }, DECK_ },
+      { 0.05f, 0.05f, 0.02f }, false, true, 0x2C7FA2, 0x4FAEE6, 0xDDF2FA, 0x3C9CC0 },
 };
+#undef DECK_
 
 uint32_t tq_ter_far_colour(int biome, int which)
 {
@@ -108,8 +118,38 @@ void tq_ter_generate(tq_terrain_t *t, uint32_t seed, float size, int biome)
         hr[k] = rnd(4.0f, 7.5f) * M / 36.0f + 1.0f;
         hh[k] = rnd(1.0f, 2.6f) * (k == nh - 1 ? -0.35f : 1.0f);
     }
-    if (biome == TQ_B_RUINAS)
+    if (biome == TQ_B_RUINAS || biome == TQ_B_PLAYA)
         for (int k = 0; k < nh; k++) hh[k] *= 0.45f;
+    /* the Moon's craters, each a bowl with a rim */
+    float cx[12], cy[12], cr[12];
+    int ncr = biome == TQ_B_LUNA ? 7 + (int)rnd(0, 4.99f) : 0;
+    for (int k = 0; k < ncr; k++) {
+        cx[k] = rnd(0.08f, 0.92f) * M;
+        cy[k] = rnd(0.08f, 0.92f) * M;
+        cr[k] = rnd(1.6f, k < 2 ? 5.5f : 3.4f);
+    }
+    /* the beach: two long islands side by side (along x or y), two islets
+     * between them at the ends, and the one bridge */
+    bool along_y = rnd(0, 1) < 0.5f;
+    if (biome == TQ_B_PLAYA) {
+        float j0 = rnd(-0.04f, 0.04f) * M;
+        t->nisl = 4;
+        float I[4][4] = { { 0.24f * M, 0.5f * M + j0, 0.19f * M, 0.37f * M },
+                          { 0.76f * M, 0.5f * M - j0, 0.19f * M, 0.37f * M },
+                          { 0.5f * M, 0.10f * M, 0.065f * M, 0.065f * M },
+                          { 0.5f * M, 0.90f * M, 0.065f * M, 0.065f * M } };
+        for (int k = 0; k < 4; k++) {
+            t->isl[k][0] = along_y ? I[k][1] : I[k][0];
+            t->isl[k][1] = along_y ? I[k][0] : I[k][1];
+            t->isl[k][2] = along_y ? I[k][3] : I[k][2];
+            t->isl[k][3] = along_y ? I[k][2] : I[k][3];
+        }
+        float by = rnd(0.38f, 0.62f) * M;
+        t->bridge[0] = along_y ? by : 0.24f * M;
+        t->bridge[1] = along_y ? 0.24f * M : by;
+        t->bridge[2] = along_y ? by : 0.76f * M;
+        t->bridge[3] = along_y ? 0.76f * M : by;
+    }
     float rp = rnd(0, 6.28f), rq = rnd(0, 6.28f), ra = rnd(0.12f, 0.2f), ryy = rnd(0.35f, 0.65f) * M;
     float dune = rnd(0, 3.14f);
     float vx = rnd(0.35f, 0.65f) * M, vy = rnd(0.35f, 0.65f) * M;    /* the volcano */
@@ -145,6 +185,47 @@ void tq_ter_generate(tq_terrain_t *t, uint32_t seed, float size, int biome)
                 else if (noise2(x / 9.0f + 3, y / 9.0f + 1) > 0.62f) mat = TQ_MAT_SPECIAL;
                 break;
             }
+            case TQ_B_LUNA: {
+                for (int k = 0; k < ncr; k++) {
+                    float d = sqrtf((x - cx[k]) * (x - cx[k]) + (y - cy[k]) * (y - cy[k])) / cr[k];
+                    if (d < 1) h -= 0.55f * cr[k] * 0.35f * (1 - d * d);
+                    else if (d < 1.45f) {
+                        float f = sinf((d - 1) / 0.45f * TQ_PI);
+                        h += 0.22f * cr[k] * 0.35f * f;
+                        if (f > 0.55f && mat == TQ_MAT_BASE) mat = TQ_MAT_SPECIAL;
+                    }
+                }
+                break;
+            }
+            case TQ_B_PLAYA: {
+                /* how far inside the islands, 0 at the shore */
+                float in = -1;
+                for (int k = 0; k < t->nisl; k++) {
+                    float ex = (x - t->isl[k][0]) / t->isl[k][2], ey = (y - t->isl[k][1]) / t->isl[k][3];
+                    float wob = 0.85f + 0.3f * noise2(x / 3.0f + k * 7, y / 3.0f + 5);
+                    float v = 1 - sqrtf(ex * ex + ey * ey) / wob;
+                    if (v > in) in = v;
+                }
+                on_path = 0;
+                if (in <= 0) {
+                    h = TQ_SEA_Z;
+                    mat = TQ_MAT_SPECIAL;
+                } else {
+                    /* the beach rises from the sea to the dunes inland */
+                    float k2 = smooth01(0.0f, 0.45f, in);
+                    h = TQ_SEA_Z + 0.12f + k2 * (0.35f + (h - 0.35f) * 0.8f);
+                    if (in < 0.12f) mat = TQ_MAT_PATH;          /* wet sand */
+                }
+                /* the bridge: a deck 2 m wide from one island to the other */
+                float bx0 = t->bridge[0], by0 = t->bridge[1], bx1 = t->bridge[2], by1 = t->bridge[3];
+                float along = along_y ? (y - by0) / (by1 - by0) : (x - bx0) / (bx1 - bx0);
+                float across = along_y ? fabsf(x - bx0) : fabsf(y - by0);
+                if (along > 0 && along < 1 && across < 1.05f && (in < 0.25f)) {
+                    h = h > 0.62f ? h : 0.62f;
+                    mat = TQ_MAT_DECK;
+                }
+                break;
+            }
             case TQ_B_VOLCAN: {
                 float cone = bump(x, y, vx, vy, 8.0f * M / 36.0f);
                 h += 4.0f * cone - 3.2f * bump(x, y, vx, vy, 2.6f * M / 36.0f);
@@ -158,9 +239,10 @@ void tq_ter_generate(tq_terrain_t *t, uint32_t seed, float size, int biome)
             default:
                 break;
             }
-            /* hills all round, so the arena reads as a valley */
+            /* hills all round, so the arena reads as a valley (the beach:
+             * the sea) */
             float e = fminf(fminf(x, M - x), fminf(y, M - y));
-            float rim = 1 - smooth01(0.5f, 4.5f, e);
+            float rim = biome == TQ_B_PLAYA ? 0 : 1 - smooth01(0.5f, 4.5f, e);
             h += rim * (1.6f + 1.4f * noise2(x / 4.0f + 11, y / 4.0f + 5));
             if (on_path > 0.5f && mat == TQ_MAT_BASE) mat = TQ_MAT_PATH;
             h -= on_path * 0.12f;
@@ -183,6 +265,7 @@ void tq_ter_flatten(tq_terrain_t *t, float x, float y, float r)
             if (d >= 1.6f) continue;
             float f = d < 1 ? 1 : 1 - smooth01(1, 1.6f, d);
             int k = j * t->nv + i;
+            if (t->biome == TQ_B_PLAYA && (t->mat[k] == TQ_MAT_SPECIAL || t->mat[k] == TQ_MAT_DECK)) continue;
             t->h[k] += (h0 - t->h[k]) * f;
             if (t->mat[k] == TQ_MAT_SPECIAL) t->mat[k] = TQ_MAT_BASE;
         }
@@ -300,7 +383,21 @@ void tq_ter_light(tq_terrain_t *t, tq_vbox_t b)
             float sun = 0.72f * dif * lit;
             float li = sky * ao + sun;
             float cr = r * li, cg = g * li, cb = bl * li;
-            if (m == TQ_MAT_SPECIAL && LK->special_glows) {
+            if (m == TQ_MAT_SPECIAL && LK->special_water) {
+                /* the sea: ripples, the sky's light, foam where it meets land */
+                float f = 0.86f + 0.26f * (t->tint[k] / 255.0f);
+                bool shore = false;
+                for (int q = 0; q < 8 && !shore; q++) {
+                    static const int8_t QX[8] = { 1, -1, 0, 0, 2, -2, 0, 0 }, QY[8] = { 0, 0, 1, -1, 0, 0, 2, -2 };
+                    int ii = i + QX[q], jj = j + QY[q];
+                    if (ii < 0 || jj < 0 || ii >= nv || jj >= nv) continue;
+                    if (t->mat[jj * nv + ii] != TQ_MAT_SPECIAL) shore = true;
+                }
+                float foam = shore ? 0.45f : 0.0f;
+                cr = r * f + (0.95f - r * f) * foam;
+                cg = g * f + (0.97f - g * f) * foam;
+                cb = bl * f + (1.0f - bl * f) * foam;
+            } else if (m == TQ_MAT_SPECIAL && LK->special_glows) {
                 /* lava: its own light, a little noisy */
                 float f = 0.85f + 0.3f * (t->tint[k] / 255.0f);
                 cr = r * f;
@@ -332,6 +429,8 @@ tq_vbox_t tq_ter_crater(tq_terrain_t *t, float x, float y, float r, float d, boo
             float dx = i * TQ_CELL - x, dy = j * TQ_CELL - y;
             float q = sqrtf(dx * dx + dy * dy) / r;
             int k = j * nv + i;
+            /* the sea stays flat and the bridge stands */
+            if (t->biome == TQ_B_PLAYA && (t->mat[k] == TQ_MAT_SPECIAL || t->mat[k] == TQ_MAT_DECK)) continue;
             if (q < 1) {
                 float f = 1 - q * q;
                 t->h[k] -= d * f * f * 1.15f;
@@ -367,6 +466,33 @@ tq_vbox_t tq_ter_crater(tq_terrain_t *t, float x, float y, float r, float d, boo
     if (b.y1 > nv - 1) b.y1 = nv - 1;
     tq_ter_light(t, b);
     return b;
+}
+
+bool tq_ter_water(const tq_terrain_t *t, float x, float y)
+{
+    if (t->biome != TQ_B_PLAYA) return false;
+    int i = (int)(x / TQ_CELL + 0.5f), j = (int)(y / TQ_CELL + 0.5f);
+    if (i < 0 || j < 0 || i >= t->nv || j >= t->nv) return true;
+    return t->mat[j * t->nv + i] == TQ_MAT_SPECIAL;
+}
+
+void tq_ter_land(const tq_terrain_t *t, float *x, float *y)
+{
+    if (!tq_ter_water(t, *x, *y)) return;
+    /* rings outwards, a half metre a step */
+    for (float r = 0.5f; r < 30; r += 0.5f) {
+        for (int a = 0; a < 24; a++) {
+            float px = *x + cosf(a * TQ_PI / 12) * r, py = *y + sinf(a * TQ_PI / 12) * r;
+            float M = t->n * TQ_CELL;
+            if (px < 2.5f || py < 2.5f || px > M - 2.5f || py > M - 2.5f) continue;
+            if (!tq_ter_water(t, px, py) && !tq_ter_water(t, px + 1, py) && !tq_ter_water(t, px - 1, py) &&
+                !tq_ter_water(t, px, py + 1) && !tq_ter_water(t, px, py - 1)) {
+                *x = px;
+                *y = py;
+                return;
+            }
+        }
+    }
 }
 
 uint32_t tq_ter_side_colour(const tq_terrain_t *t, float z, float shade)

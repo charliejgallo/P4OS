@@ -225,18 +225,35 @@ static void world_part(void *arg, int part)
     if (part == 0) g.cy1 = mid;
     else g.cy0 = mid;
     if (g.cy0 >= g.cy1) return;
-    /* the background: a soft sky behind the diorama */
+    /* the background: a soft sky behind the diorama (the Moon: space and
+     * its stars; the beach: the sea all round) */
+    const tq_terrain_t *t = j->t;
     for (int y = g.cy0; y < g.cy1; y++) {
         float f = (float)y / S.hh;
         uint32_t r = (uint32_t)(150 - 70 * f), gg = (uint32_t)(196 - 72 * f), b = (uint32_t)(226 - 60 * f);
+        if (t->biome == TQ_B_LUNA) {
+            r = (uint32_t)(10 + 14 * f);
+            gg = (uint32_t)(12 + 16 * f);
+            b = (uint32_t)(26 + 30 * f);
+        } else if (t->biome == TQ_B_PLAYA) {
+            r = (uint32_t)(70 - 40 * f);
+            gg = (uint32_t)(170 - 60 * f);
+            b = (uint32_t)(210 - 50 * f);
+        }
         uint16_t c = tq_565((r << 16) | (gg << 8) | b);
         uint16_t *p = S.wpx + (size_t)y * S.hw, *z = S.wz + (size_t)y * S.hw;
         for (int x = g.cx0; x < g.cx1; x++) {
             p[x] = c;
             z[x] = 0;
         }
+        if (t->biome == TQ_B_LUNA) {
+            for (int x = g.cx0; x < g.cx1; x++) {
+                uint32_t h = (uint32_t)x * 73856093u ^ (uint32_t)y * 19349663u;
+                h = (h ^ (h >> 13)) * 1274126177u;
+                if ((h & 1023) < 3) p[x] = tq_565((h >> 20 & 1) ? 0xFFFFFF : 0xB8C8FF);
+            }
+        }
     }
-    const tq_terrain_t *t = j->t;
     int N = t->n, NV = t->nv;
     for (int cj = 0; cj < N; cj++) {
         for (int ci = 0; ci < N; ci++) {
@@ -408,7 +425,7 @@ typedef struct {
     float shadow;                   /* top: the blob's radius under it, m (0: none) */
 } item_t;
 
-#define MAX_ITEMS 400
+#define MAX_ITEMS 640
 
 typedef struct {
     const tq_req_t *r;
@@ -459,6 +476,66 @@ static float part_radius(const tq_part_t *q)
     return q->r0 + (q->r1 - q->r0) * e;
 }
 
+/* The modes' marks where they stand: kind TQ_PROP_FLAG.. , the paint */
+typedef struct {
+    int prop;
+    tq_v3_t p;
+    const tq_lut_t *lut;
+} mark_t;
+
+static const tq_lut_t *side_lut(const tq_req_t *r, int side)
+{
+    for (int k = 0; k < r->st.ntank; k++)
+        if ((r->st.tank[k].team & 1) == side && r->lut[k]) return r->lut[k];
+    return tq_art_marks_lut();
+}
+
+static int marks_of(const tq_req_t *r, const tq_terrain_t *t, mark_t *out)
+{
+    const tq_state_t *s = &r->st;
+    int n = 0;
+    if (s->mode == TQ_MODE_HILL)
+        out[n++] = (mark_t){ TQ_PROP_BEACON, tq_v3(s->hill_x, s->hill_y, tq_ter_height(t, s->hill_x, s->hill_y)),
+                             tq_art_marks_lut() };
+    if (s->mode == TQ_MODE_FLAG) {
+        for (int f = 0; f < 2; f++) {
+            tq_v3_t p;
+            int c = s->flag[f].carrier;
+            if (c >= 0) {
+                /* on its carrier's back */
+                const tq_tank_t *k = &s->tank[c];
+                p = tq_v3(k->x - cosf(k->yaw) * 0.9f, k->y - sinf(k->yaw) * 0.9f, tq_tank_z(t, k) + 1.2f);
+            } else {
+                p = tq_v3(s->flag[f].x, s->flag[f].y, tq_ter_height(t, s->flag[f].x, s->flag[f].y));
+            }
+            out[n++] = (mark_t){ TQ_PROP_FLAG, p, side_lut(r, f) };
+        }
+    }
+    for (int c = 0; c < s->nchest; c++)
+        if (s->chest_alive[c])
+            out[n++] = (mark_t){ TQ_PROP_CHEST, tq_v3(s->chest[c][0], s->chest[c][1],
+                                                       tq_ter_height(t, s->chest[c][0], s->chest[c][1])),
+                                 tq_art_marks_lut() };
+    return n;
+}
+
+/* A bolt of the Tesla's lightning: a jagged line, the same every frame of it */
+static int bolt_points(const tq_state_t *s, int b, tq_v3_t *pts, int max)
+{
+    tq_v3_t a = s->bolt_a[b], c = s->bolt_b[b];
+    int n = max;
+    uint32_t h = (uint32_t)(b * 2654435761u) ^ (uint32_t)(a.x * 97 + c.y * 31);
+    for (int k = 0; k < n; k++) {
+        float f = (float)k / (n - 1);
+        h = h * 1664525u + 1013904223u;
+        float jx = (k && k < n - 1) ? ((h >> 8 & 255) / 255.0f - 0.5f) * 0.7f : 0;
+        float jy = (k && k < n - 1) ? ((h >> 16 & 255) / 255.0f - 0.5f) * 0.7f : 0;
+        float jz = (k && k < n - 1) ? ((h >> 24 & 255) / 255.0f - 0.5f) * 0.6f : 0;
+        pts[k] = tq_v3(a.x + (c.x - a.x) * f + jx, a.y + (c.y - a.y) * f + jy, a.z + (c.z - a.z) * f + jz);
+    }
+    return n;
+}
+
 /* What the battle view draws over the world, far first */
 static int top_items(const tq_req_t *r, const tq_terrain_t *t, item_t *it)
 {
@@ -490,8 +567,49 @@ static int top_items(const tq_req_t *r, const tq_terrain_t *t, item_t *it)
         i->shadow = 0;
         if (i->spr) n++;
     }
+    {
+        mark_t mk[2 + TQ_MAX_CHESTS];
+        int nm = marks_of(r, t, mk);
+        for (int k = 0; k < nm && n < MAX_ITEMS; k++) {
+            item_t *i = &it[n];
+            memset(i, 0, sizeof *i);
+            i->spr = tq_art_prop(TQ_SET_TOP, mk[k].prop, 0, 0);
+            i->p = mk[k].p;
+            i->lut = mk[k].lut;
+            i->alpha = 256;
+            i->shadow = mk[k].prop == TQ_PROP_CHEST ? 0.8f : 0.5f;
+            if (i->spr && i->lut) n++;
+        }
+    }
+    for (int b = 0; b < s->nbolt && s->bolt_t > 0; b++) {
+        /* a glow, and a white core over it */
+        tq_v3_t pts[40];
+        int np = bolt_points(s, b, pts, 10);
+        for (int k = 0; k + 1 < np; k++) {
+            for (int q = 0; q < 3 && n < MAX_ITEMS - 1; q++) {
+                float f = q / 3.0f;
+                tq_v3_t p = tq_v3(pts[k].x + (pts[k + 1].x - pts[k].x) * f, pts[k].y + (pts[k + 1].y - pts[k].y) * f,
+                                  pts[k].z + (pts[k + 1].z - pts[k].z) * f);
+                item_t *i = &it[n++];
+                memset(i, 0, sizeof *i);
+                i->kind = 1;
+                i->p = p;
+                i->r = 0.34f;
+                i->rgb = 0x5CC8F0;
+                i->alpha = (int)(200 * s->bolt_t);
+                i = &it[n++];
+                memset(i, 0, sizeof *i);
+                i->kind = 1;
+                i->p = tq_v3(p.x, p.y, p.z + 0.01f);
+                i->r = 0.15f;
+                i->rgb = 0xF4FDFF;
+                i->alpha = (int)(330 * s->bolt_t);
+            }
+        }
+    }
     for (int k = 0; k < s->ntank && n < MAX_ITEMS - 2; k++) {
         const tq_tank_t *tk = &s->tank[k];
+        if (tk->gone) continue;
         tq_v3_t p = tq_v3(tk->x, tk->y, tq_tank_z(t, tk));
         const tq_lut_t *lut = r->lut[k];
         const tq_spr_t *hull = tq_art_tank(TQ_SET_TOP, tk->type, TQ_PART_HULL, tq_yaw_index(tk->yaw), 0);
@@ -514,7 +632,7 @@ static int top_items(const tq_req_t *r, const tq_terrain_t *t, item_t *it)
     }
     for (int k = 0; k < TQ_MAX_SHELLS && n < MAX_ITEMS; k++) {
         const tq_shell_t *sh = &s->shell[k];
-        if (!sh->live || sh->under) continue;
+        if (!sh->live || sh->under || sh->wait > 0) continue;
         item_t *i = &it[n++];
         memset(i, 0, sizeof *i);
         i->kind = 1;
@@ -596,6 +714,32 @@ static void top_draw(topjob_t *j, int cx0, int cy0, int cx1, int cy1)
                 if (xy[2 * k + 1] >= g.cy0 - 40 && xy[2 * k + 1] < g.cy1 + 40) any = true;
             }
             if (any) tq_tint_quad(&g, xy, q, REACH_RGB[cls], 96, zt, zs, 60);
+        }
+    }
+    /* the hill: its ground in gold */
+    if (s->mode == TQ_MODE_HILL) {
+        int i0 = (int)(s->hill_x - s->hill_r), j0 = (int)(s->hill_y - s->hill_r);
+        for (int cj = j0; cj <= j0 + (int)(2 * s->hill_r) + 1; cj++) {
+            for (int ci = i0; ci <= i0 + (int)(2 * s->hill_r) + 1; ci++) {
+                float cx = ci + 0.5f, cy = cj + 0.5f;
+                if ((cx - s->hill_x) * (cx - s->hill_x) + (cy - s->hill_y) * (cy - s->hill_y) > s->hill_r * s->hill_r) continue;
+                if (ci < 0 || cj < 0 || ci >= s->grid || cj >= s->grid) continue;
+                float x0 = ci + 0.04f, y0 = cj + 0.04f, x1 = x0 + 0.92f, y1 = y0 + 0.92f;
+                float xy[8], q[4];
+                float px[4] = { x0, x1, x1, x0 }, py[4] = { y0, y0, y1, y1 };
+                bool any = false;
+                for (int k = 0; k < 4; k++) {
+                    tq_v3_t p = tq_v3(px[k], py[k], tq_ter_height(t, px[k], py[k]) + 0.03f);
+                    wproj(p, &xy[2 * k], &xy[2 * k + 1], &q[k]);
+                    xy[2 * k] += ox;
+                    xy[2 * k + 1] += oy;
+                    if (xy[2 * k + 1] >= g.cy0 - 40 && xy[2 * k + 1] < g.cy1 + 40) any = true;
+                }
+                /* filled, and its edge white to stand out of the reach's tiles */
+                float d = sqrtf((cx - s->hill_x) * (cx - s->hill_x) + (cy - s->hill_y) * (cy - s->hill_y));
+                bool edge = d > s->hill_r - 1.0f;
+                if (any) tq_tint_quad(&g, xy, q, edge ? 0xFFFFFF : 0xFFC21A, edge ? 150 : 90, zt, zs, 60);
+            }
         }
     }
     /* the active tank's ring */
@@ -871,7 +1015,11 @@ static void fp_sky(const fpjob_t *j, const tq_tgt_t *g)
     /* the hills, column by column: two ranges, the nearer greener */
     float phi = j->r->yaw;
     uint16_t far = tq_565(0xA4BDD0), nearc = tq_565(0x8DB394);
-    for (int x = 0; x < W; x++) {
+    if (j->t->biome == TQ_B_LUNA) {
+        far = tq_565(0x4A4A54);
+        nearc = tq_565(0x6A6A74);
+    }
+    for (int x = 0; x < W && j->t->biome != TQ_B_PLAYA; x++) {     /* the beach: the sea's horizon, no hills */
         float az = phi - atan2f((float)x + 0.5f - j->cx, j->f);
         for (int layer = 0; layer < 2; layer++) {
             float top = yhz - j->f * hills(az, layer);
@@ -912,9 +1060,40 @@ static int fp_items(const tq_req_t *r, const tq_terrain_t *t, fpjob_t *j, item_t
         it[n].rgb = 1;
         n++;
     }
+    {
+        mark_t mk[2 + TQ_MAX_CHESTS];
+        int nm = marks_of(r, t, mk);
+        for (int k = 0; k < nm && n < MAX_ITEMS; k++) {
+            it[n].kind = 0;
+            it[n].p = mk[k].p;
+            it[n].spr = NULL;
+            it[n].r = (float)mk[k].prop;
+            it[n].lut = mk[k].lut;
+            it[n].alpha = 256;
+            it[n].rgb = 0;
+            if (it[n].lut) n++;
+        }
+    }
+    for (int b = 0; b < s->nbolt && s->bolt_t > 0; b++) {
+        tq_v3_t pts[10];
+        int np = bolt_points(s, b, pts, 10);
+        for (int k = 0; k + 1 < np; k++) {
+            for (int q = 0; q < 5 && n < MAX_ITEMS; q++) {
+                float f = q / 5.0f;
+                it[n].kind = 1;
+                it[n].p = tq_v3(pts[k].x + (pts[k + 1].x - pts[k].x) * f, pts[k].y + (pts[k + 1].y - pts[k].y) * f,
+                                pts[k].z + (pts[k + 1].z - pts[k].z) * f);
+                it[n].r = 0.12f;
+                it[n].rgb = 0xE8FBFF;
+                it[n].alpha = (int)(330 * s->bolt_t);
+                n++;
+            }
+        }
+    }
     for (int k = 0; k < s->ntank && n < MAX_ITEMS - 1; k++) {
         if (k == r->me) continue;
         const tq_tank_t *tk = &s->tank[k];
+        if (tk->gone) continue;
         it[n].kind = 2;
         it[n].p = tq_v3(tk->x, tk->y, tq_tank_z(t, tk));
         it[n].lut = tk->alive ? r->lut[k] : r->wreck;
@@ -924,7 +1103,7 @@ static int fp_items(const tq_req_t *r, const tq_terrain_t *t, fpjob_t *j, item_t
     }
     for (int k = 0; k < TQ_MAX_SHELLS && n < MAX_ITEMS; k++) {
         const tq_shell_t *sh = &s->shell[k];
-        if (!sh->live || sh->under) continue;
+        if (!sh->live || sh->under || sh->wait > 0) continue;
         it[n].kind = 1;
         it[n].p = sh->p;
         it[n].r = 0.2f;
@@ -1029,13 +1208,13 @@ static void fp_part(void *arg, int part)
         if (i->kind == 0) {
             int prop = (int)i->r;
             int yi = 0;
-            if (prop >= TQ_PROP_BLOCK1) {
+            if (prop >= TQ_PROP_BLOCK1 && prop < TQ_PROPS) {
                 float rel = -r->yaw;
                 rel = fmodf(rel, TQ_PI / 2);
                 if (rel < 0) rel += TQ_PI / 2;
                 yi = (int)(rel / (11.25f * TQ_DEG) + 0.5f) & 7;
             }
-            float rad = prop == TQ_PROP_STUMP ? 0.4f : (prop >= TQ_PROP_BLOCK1 ? 0.75f : 1.2f);
+            float rad = prop == TQ_PROP_STUMP ? 0.4f : (prop >= TQ_PROPS ? 0.6f : (prop >= TQ_PROP_BLOCK1 ? 0.75f : 1.2f));
             tq_shadow(&g, sx + j->f * rad * 0.35f / zc, sy, j->f * rad / zc, j->f * rad / zc * 0.25f, 110);
             fp_sprite(j, &g, NULL, 1, prop, 0, yi, i->lut, sx, sy, zc, i->alpha);
         } else if (i->kind == 2) {
@@ -1216,6 +1395,10 @@ uint32_t tq_scene_top_key(const tq_req_t *r, const tq_terrain_t *t)
     for (int k = 0; k < s->npath; k++) h = fnv(h, (uint32_t)(s->path[k][0] * 64) << 16 ^ (uint32_t)(s->path[k][1] * 64));
     for (int k = 0; k < s->ntree; k++) h = fnv(h, s->tree[k].alive);
     for (int k = 0; k < s->nblock; k++) h = fnv(h, (uint32_t)s->block[k].alive << 16 ^ (uint32_t)(s->block[k].z * 64));
+    for (int k = 0; k < s->ntank; k++) h = fnv(h, s->tank[k].gone);
+    for (int f = 0; f < 2; f++)
+        h = fnv(h, (uint32_t)(s->flag[f].x * 64) << 16 ^ (uint32_t)(s->flag[f].y * 64) ^ (uint32_t)(s->flag[f].carrier + 1) << 30);
+    for (int c = 0; c < s->nchest; c++) h = fnv(h, s->chest_alive[c]);
     return h ? h : 1;
 }
 
@@ -1293,10 +1476,13 @@ void tq_scene_top_rects(const tq_req_t *r, const tq_terrain_t *t, tq_rects_t *ou
     /* the tanks: the sprite, its bar, its ring, its shadow */
     for (int k = 0; k < s->ntank; k++) {
         const tq_tank_t *tk = &s->tank[k];
+        if (tk->gone) continue;
         wproj(tq_v3(tk->x, tk->y, tq_tank_z(t, tk)), &sx, &sy, &q);
         sx += ox;
         sy += oy;
-        tq_rects_add(out, (int)sx - 82, (int)sy - 112, (int)sx + 82, (int)sy + 62, W, H);
+        /* a carrier's flag stands taller */
+        bool flag = s->mode == TQ_MODE_FLAG && (s->flag[0].carrier == k || s->flag[1].carrier == k);
+        tq_rects_add(out, (int)sx - 82, (int)sy - (flag ? 190 : 112), (int)sx + 82, (int)sy + 62, W, H);
     }
     for (int k = 0; k < TQ_MAX_SHELLS; k++) {
         const tq_shell_t *sh = &s->shell[k];
@@ -1328,6 +1514,13 @@ void tq_scene_top_rects(const tq_req_t *r, const tq_terrain_t *t, tq_rects_t *ou
         if (!mn->live) continue;
         wproj(tq_v3(mn->x, mn->y, tq_ter_height(t, mn->x, mn->y)), &sx, &sy, &q);
         rect_ball(out, sx + ox, sy + oy, 10, W, H);
+    }
+    for (int b = 0; b < s->nbolt; b++) {
+        float ax, ay, bx, by;
+        wproj(s->bolt_a[b], &ax, &ay, &q);
+        wproj(s->bolt_b[b], &bx, &by, &q);
+        tq_rects_add(out, (int)(fminf(ax, bx) + ox) - 24, (int)(fminf(ay, by) + oy) - 24, (int)(fmaxf(ax, bx) + ox) + 25,
+                     (int)(fmaxf(ay, by) + oy) + 25, W, H);
     }
     if (s->beam_t > 0) {
         float ax, ay, bx, by;

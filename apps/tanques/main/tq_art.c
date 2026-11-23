@@ -11,13 +11,19 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define PACK_NAME "tanques_p4.pak"
 #define VERSION   3
 
 typedef struct {
     char     name[24];
     uint32_t off, size;
 } entry_t;
+
+/* the tables of every pack open, each entry with its pack */
+typedef struct {
+    char     name[24];
+    uint32_t off, size;
+    uint8_t  pack;              /* TQ_DLC_* */
+} ent_t;
 
 /* A group of sprites loaded together: each sprite in a block of its own
  * (the board's PSRAM gets fragmented by other apps: a few MB in one piece is
@@ -30,11 +36,13 @@ typedef struct {
     int      nmips;
 } group_t;
 
-static entry_t *s_ent;
+static ent_t *s_ent;
 static int s_nent;
 static bool s_open;
 
-static group_t s_tank_g[TQ_TANK_TYPES], s_biome_g, s_show_g;
+static group_t s_tank_g[TQ_TANK_TYPES], s_biome_g, s_show_g, s_marks_g;
+static tq_spr_t s_mark[TQ_SETS][TQ_PROPS_ALL - TQ_PROPS][TQ_MIPS];
+static tq_lut_t *s_marks_lut;
 static uint32_t s_tanks, s_fps;
 static int s_biome = -1, s_show = -1;
 
@@ -180,10 +188,12 @@ static void group_free(group_t *g)
     memset(g, 0, sizeof *g);
 }
 
-/* The pack on the card, which may be in parts (tanques_p4.pak, .pak.1,
- * .pak.2...: packs over 8 MB travel so); a reader keeps one part open */
+/* A pack on the card, which may be in parts (tanques_p4.pak, .pak.1,
+ * .pak.2...: packs over 8 MB travel so); a reader keeps one part of one
+ * pack open */
 typedef struct {
     FILE    *f;
+    int      pack;
     int      part;
     uint32_t base, end;
 } reader_t;
@@ -198,8 +208,9 @@ static bool rd_part(reader_t *r, int part, uint32_t base)
 {
     rd_close(r);
     char path[176];
-    if (part) snprintf(path, sizeof path, "%s/%s.%d", aos_hal_path_apps(), PACK_NAME, part);
-    else snprintf(path, sizeof path, "%s/%s", aos_hal_path_apps(), PACK_NAME);
+    const char *name = TQ_DLC_PACK[r->pack];
+    if (part) snprintf(path, sizeof path, "%s/%s.%d", aos_hal_path_apps(), name, part);
+    else snprintf(path, sizeof path, "%s/%s", aos_hal_path_apps(), name);
     r->f = fopen(path, "rb");
     if (!r->f) return false;
     fseek(r->f, 0, SEEK_END);
@@ -214,9 +225,13 @@ static bool rd_part(reader_t *r, int part, uint32_t base)
     return true;
 }
 
-/* [off, off + n) of the pack */
-static bool rd_read(reader_t *r, uint32_t off, uint32_t n, uint8_t *dst)
+/* [off, off + n) of a pack */
+static bool rd_read(reader_t *r, int pack, uint32_t off, uint32_t n, uint8_t *dst)
 {
+    if (r->pack != pack) {
+        rd_close(r);
+        r->pack = pack;
+    }
     while (n) {
         if (!r->f || off < r->base) {
             if (!rd_part(r, 0, 0)) return false;
@@ -231,14 +246,6 @@ static bool rd_read(reader_t *r, uint32_t off, uint32_t n, uint8_t *dst)
         n -= take;
     }
     return true;
-}
-
-static bool pak_read(uint32_t off, uint32_t n, uint8_t *dst)
-{
-    reader_t r = { 0 };
-    bool ok = rd_read(&r, off, n, dst);
-    rd_close(&r);
-    return ok;
 }
 
 typedef bool (*match_fn)(const char *name, const void *arg);
@@ -259,7 +266,7 @@ static bool group_load(group_t *g, match_fn match, const void *arg,
     for (int i = 0; i < s_nent && ok; i++) {
         if (!match(s_ent[i].name, arg)) continue;
         uint8_t *b = (uint8_t *)tq_malloc(s_ent[i].size);
-        if (!b || !rd_read(&r, s_ent[i].off, s_ent[i].size, b)) {
+        if (!b || !rd_read(&r, s_ent[i].pack, s_ent[i].off, s_ent[i].size, b)) {
             tq_free(b);
             ok = false;
             break;
@@ -404,6 +411,9 @@ static void scenery_lut(int biome)
         { TQ_B_RUINAS, 5, 0xFFE8A1 },
         { TQ_B_VOLCAN, 9, 0x3D3330 }, { TQ_B_VOLCAN, 10, 0x4F4A52 }, { TQ_B_VOLCAN, 11, 0x8A8078 },
         { TQ_B_VOLCAN, 12, 0xFF6B1F },
+        { TQ_B_LUNA, 8, 0x84E0FF }, { TQ_B_LUNA, 9, 0x5C5E6B }, { TQ_B_LUNA, 10, 0xB3B3BA }, { TQ_B_LUNA, 11, 0xEDEFF5 },
+        { TQ_B_PLAYA, 8, 0x5CB34D }, { TQ_B_PLAYA, 9, 0xA8784A }, { TQ_B_PLAYA, 10, 0xADA394 },
+        { TQ_B_PLAYA, 11, 0xEBD19E }, { TQ_B_PLAYA, 2, 0xF2524D },
     };
     uint32_t c[16];
     memcpy(c, BASE, sizeof c);
@@ -473,37 +483,92 @@ bool tq_art_use_show(int type)
  * The pack
  * -------------------------------------------------------------------------- */
 
+/* "<set>/marks_<slot>": the modes' marks, whichever DLC brought them */
+static bool match_marks(const char *name, const void *arg)
+{
+    (void)arg;
+    const char *rest;
+    return set_of(name, &rest) >= 0 && !strncmp(rest, "marks_", 6);
+}
+
+static void take_mark(group_t *g, const char *name, const tq_spr_t *s, const void *arg)
+{
+    (void)g;
+    (void)arg;
+    static const char *const SLOT[TQ_PROPS_ALL - TQ_PROPS] = { "fl", "ch", "bc" };
+    const char *rest;
+    int set = set_of(name, &rest);
+    for (int m = 0; m < TQ_PROPS_ALL - TQ_PROPS; m++)
+        if (!strcmp(rest + 6, SLOT[m])) s_mark[set][m][0] = *s;
+}
+
+/* One pack's table into s_ent; false: not there or not a pack */
+static bool open_pack(int pack)
+{
+    reader_t r = { 0 };
+    uint8_t hdr[12];
+    uint32_t ver = 0, count = 0;
+    if (!rd_read(&r, pack, 0, 12, hdr)) {
+        rd_close(&r);
+        return false;
+    }
+    memcpy(&ver, hdr + 4, 4);
+    memcpy(&count, hdr + 8, 4);
+    if (memcmp(hdr, "TQPK", 4) || ver != VERSION || count == 0 || count > 8192) {
+        aos_hal_log("tanques", "%s: not a version %d pack", TQ_DLC_PACK[pack], VERSION);
+        rd_close(&r);
+        return false;
+    }
+    entry_t *tab = (entry_t *)tq_malloc(sizeof(entry_t) * count);
+    ent_t *all = (ent_t *)tq_malloc(sizeof(ent_t) * (s_nent + count));
+    bool ok = tab && all && rd_read(&r, pack, 12, (uint32_t)(sizeof(entry_t) * count), (uint8_t *)tab);
+    rd_close(&r);
+    if (ok) {
+        if (s_nent) memcpy(all, s_ent, sizeof(ent_t) * s_nent);
+        for (uint32_t i = 0; i < count; i++) {
+            ent_t *e = &all[s_nent + i];
+            memcpy(e->name, tab[i].name, 24);
+            e->name[23] = 0;
+            e->off = tab[i].off;
+            e->size = tab[i].size;
+            e->pack = (uint8_t)pack;
+        }
+        tq_free(s_ent);
+        s_ent = all;
+        s_nent += (int)count;
+        aos_hal_log("tanques", "%s: %u sprites", TQ_DLC_PACK[pack], (unsigned)count);
+    } else {
+        tq_free(all);
+    }
+    tq_free(tab);
+    return ok;
+}
+
 bool tq_art_open(void)
 {
     if (s_open) return true;
-    char path[160];
-    snprintf(path, sizeof path, "%s/%s", aos_hal_path_apps(), PACK_NAME);
-    FILE *f = fopen(path, "rb");
-    if (!f) {
-        aos_hal_log("tanques", "no pack: %s", path);
-        return false;
-    }
-    fclose(f);
-    uint8_t hdr[12];
-    uint32_t ver = 0, count = 0;
-    if (pak_read(0, 12, hdr)) {
-        memcpy(&ver, hdr + 4, 4);
-        memcpy(&count, hdr + 8, 4);
-    }
-    if (memcmp(hdr, "TQPK", 4) || ver != VERSION || count == 0 || count > 8192) {
-        aos_hal_log("tanques", "pack: not a version %d pack", VERSION);
-        return false;
-    }
-    s_ent = (entry_t *)tq_malloc(sizeof(entry_t) * count);
     s_scen = (tq_lut_t *)tq_malloc(sizeof(tq_lut_t));
-    if (!s_ent || !s_scen || !pak_read(12, (uint32_t)(sizeof(entry_t) * count), (uint8_t *)s_ent)) {
+    s_marks_lut = (tq_lut_t *)tq_malloc(sizeof(tq_lut_t));
+    if (!s_scen || !s_marks_lut || !open_pack(TQ_DLC_BASE)) {
+        aos_hal_log("tanques", "no pack: %s in %s", TQ_DLC_PACK[TQ_DLC_BASE], aos_hal_path_apps());
         tq_art_close();
         return false;
     }
-    for (uint32_t i = 0; i < count; i++) s_ent[i].name[23] = 0;
-    s_nent = (int)count;
+    uint32_t have = 1;
+    for (int d = 1; d < TQ_DLCS; d++)
+        if (open_pack(d)) have |= 1u << d;
+    tq_dlc_set(have);
     s_open = true;
-    aos_hal_log("tanques", "pack: %d sprites", s_nent);
+    /* the marks are small: they stay */
+    if (group_load(&s_marks_g, match_marks, NULL, take_mark))
+        for (int m = 0; m < TQ_PROPS_ALL - TQ_PROPS; m++) mips(&s_marks_g, s_mark[TQ_SET_LOW][m]);
+    static const uint32_t MC[16] = {
+        [1] = 0xF58C29, [2] = 0xFAE09E, [3] = 0x403D45, [4] = 0x9EA3AD, [5] = 0xFFEB99, [6] = 0xF7F7F2,
+        [7] = 0xF5F7FC, [9] = 0x9A6A3E, [10] = 0xB3AB9E, [11] = 0xEBC485,
+    };
+    tq_lut_build(s_marks_lut, MC);
+    s_marks_lut->emblem_on = false;
+    aos_hal_log("tanques", "pack: %d sprites, DLCs %s%s", s_nent, (have & 2) ? "luna " : "", (have & 4) ? "playa" : "");
     return true;
 }
 
@@ -512,10 +577,14 @@ void tq_art_close(void)
     for (int t = 0; t < TQ_TANK_TYPES; t++) group_free(&s_tank_g[t]);
     group_free(&s_biome_g);
     group_free(&s_show_g);
+    group_free(&s_marks_g);
     tq_free(s_ent);
     tq_free(s_scen);
+    tq_free(s_marks_lut);
     s_ent = NULL;
     s_scen = NULL;
+    s_marks_lut = NULL;
+    memset(s_mark, 0, sizeof s_mark);
     s_nent = 0;
     s_tanks = s_fps = 0;
     s_biome = s_show = -1;
@@ -534,7 +603,7 @@ bool tq_art_ready(void)
 
 size_t tq_art_bytes(void)
 {
-    size_t n = s_biome_g.bytes + s_show_g.bytes;
+    size_t n = s_biome_g.bytes + s_show_g.bytes + s_marks_g.bytes;
     for (int t = 0; t < TQ_TANK_TYPES; t++) n += s_tank_g[t].bytes;
     return n;
 }
@@ -555,7 +624,13 @@ const tq_spr_t *tq_art_prop(int set, int prop, int yaw_index, int mip)
 {
     if (mip >= TQ_MIPS) mip = TQ_MIPS - 1;
     if (set == TQ_SET_TOP) mip = 0;
+    if (prop >= TQ_PROPS) return prop < TQ_PROPS_ALL ? ok(&s_mark[set][prop - TQ_PROPS][mip]) : NULL;
     return ok(&s_prop[set][prop][yaw_index & 7][mip]);
+}
+
+const tq_lut_t *tq_art_marks_lut(void)
+{
+    return s_marks_lut;
 }
 
 const tq_spr_t *tq_art_roof(int type)

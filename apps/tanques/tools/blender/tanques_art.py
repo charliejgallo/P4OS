@@ -537,6 +537,89 @@ def barrel_topo():
             cyl("muzzle", (1.16, 0, 1.30), 0.15, 0.20, "X", 4, bevel=0.04)]
 
 
+# -- Tortuga (Misión a la Luna): a shell of plates on a low body, a coil gun
+
+def hull_tortuga():
+    o = [rbox("body", (0.0, 0, 0.62), (2.40, 1.56, 0.46), 0.22, 2, shape=wedge(0.20, 0.20)),
+         cyl("rim", (-0.05, 0, 0.88), 1.18, 0.16, "Z", 1, verts=48, bevel=0.06),
+         ball("head", (1.30, 0, 0.84), 0.36, 2, scale=(1.15, 1.0, 0.85)),
+         ball("visor", (1.52, 0, 0.90), 0.20, 5, scale=(0.7, 1.35, 0.6))]
+    for s_ in (-1, 1):
+        o.append(rbox("pod%d" % s_, (0.0, s_ * 0.88, 0.36), (2.10, 0.48, 0.56), 0.22, 3, seg=5))
+        for i in range(3):
+            x = -0.70 + i * 0.70
+            o.append(cyl("foot%d_%d" % (s_, i), (x, s_ * 1.13, 0.30), 0.22, 0.10, "Y", 4, bevel=0.03))
+        o.append(cyl("tail%d" % s_, (-1.24, s_ * 0.26, 0.70), 0.08, 0.30, "X", 4, bevel=0.02))
+    return o
+
+
+def turret_tortuga():
+    o = [ball("shell", (-0.10, 0, 1.10), 0.78, 1, scale=(1.25, 1.05, 0.62), sub=4),
+         cyl("ring", (-0.10, 0, 1.02), 0.92, 0.10, "Z", 2, verts=48, bevel=0.03)]
+    # the shell's plates
+    for i, (x, y) in enumerate(((-0.10, 0.0), (0.42, 0.30), (0.42, -0.30), (-0.62, 0.30), (-0.62, -0.30),
+                                (-0.10, 0.56), (-0.10, -0.56))):
+        z = 1.10 + 0.40 * (1 - (x * x / 1.0 + y * y / 0.75)) ** 0.5
+        o.append(ball("plate%d" % i, (x, y, z), 0.26, 2, scale=(1.0, 1.0, 0.32)))
+    o.append(cyl("mast", (-0.55, -0.20, 1.80), 0.035, 0.80, "Z", 4))
+    o.append(ball("mast_tip", (-0.55, -0.20, 2.22), 0.08, 5))
+    badges(o, -0.10, 0.80, 1.12, 0.20)
+    return o
+
+
+def barrel_tortuga():
+    o = [ball("mantlet", (0.55, 0, 1.30), 0.26, 2),
+         cyl("barrel", (1.10, 0, 1.30), 0.10, 1.00, "X", 4)]
+    for i in range(3):
+        o.append(cyl("coil%d" % i, (0.88 + i * 0.22, 0, 1.30), 0.17, 0.07, "X", 1, bevel=0.02))
+    o.append(ball("orb", (1.66, 0, 1.30), 0.15, 5))
+    return o
+
+
+# -- Anfibio (Día de playa): a boat on wheels, a propeller, twin guns
+
+def hull_anfibio():
+    def bow(v):
+        if v.co.x > 0:
+            v.co.y *= 0.55 if v.co.z < 0 else 0.85
+            v.co.x += 0.25 if v.co.z > 0 else -0.05
+        if v.co.z < 0:
+            v.co.y *= 0.85
+    o = [rbox("body", (0.05, 0, 0.82), (2.60, 1.50, 0.64), 0.26, 1, shape=bow),
+         rbox("stripe", (0.0, 0, 0.62), (2.50, 1.38, 0.14), 0.06, 2, seg=3, shape=bow),
+         cyl("prop_hub", (-1.36, 0, 0.62), 0.10, 0.20, "X", 4, bevel=0.03)]
+    for k in range(3):
+        b = rbox("blade%d" % k, (-1.44, 0, 0.62), (0.04, 0.10, 0.52), 0.02, 4, seg=2)
+        b.rotation_euler = (math.radians(k * 120), 0, 0)
+        o.append(b)
+    for s_ in (-1, 1):
+        for i in range(3):
+            x = -0.80 + i * 0.80
+            o.append(cyl("wheel%d_%d" % (s_, i), (x, s_ * 0.72, 0.34), 0.32, 0.26, "Y", 3, bevel=0.06))
+            o.append(cyl("hub%d_%d" % (s_, i), (x, s_ * 0.86, 0.34), 0.13, 0.04, "Y", 4, bevel=0.02))
+        o.append(cyl("buoy%d" % s_, (-0.55, s_ * 0.78, 1.00), 0.20, 0.10, "Y", 2, bevel=0.04))
+    lamps(o, 1.20, 0.38, 1.02, 0.09)
+    return o
+
+
+def turret_anfibio():
+    o = [rbox("cabin", (-0.20, 0, 1.34), (1.20, 1.04, 0.52), 0.24, 1, seg=6),
+         rbox("ring", (-0.20, 0, 1.10), (1.14, 0.98, 0.10), 0.04, 2, seg=3),
+         rbox("glass", (0.30, 0, 1.44), (0.26, 0.86, 0.24), 0.08, 4, seg=3),
+         cyl("horn", (-0.55, 0.28, 1.72), 0.07, 0.22, "Z", 2, bevel=0.02),
+         ball("flag_pole", (-0.62, -0.30, 1.70), 0.05, 4)]
+    badges(o, -0.25, 0.525, 1.34, 0.19)
+    return o
+
+
+def barrel_anfibio():
+    o = [rbox("mantlet", (0.45, 0, 1.25), (0.30, 0.66, 0.34), 0.12, 2, seg=4)]
+    for s_ in (-1, 1):
+        o.append(cyl("barrel%d" % s_, (1.00, s_ * 0.17, 1.25), 0.075, 1.00, "X", 1))
+        o.append(cyl("muzzle%d" % s_, (1.52, s_ * 0.17, 1.25), 0.11, 0.18, "X", 4, bevel=0.03))
+    return o
+
+
 # name: (hull, turret, barrel, barrel pivot, the sprites' barrel pitch,
 #        the gunner's eye, the muzzle's distance from the pivot)
 TANKS = {
@@ -546,6 +629,9 @@ TANKS = {
     "obus":   (hull_obus,   turret_obus,   barrel_obus,   V((0.32, 0, 1.48)), 32, V((-1.10, 0.62, 2.40)), 1.30),
     "avispa": (hull_avispa, turret_avispa, barrel_avispa, V((0.05, 0, 1.46)), 6,  V((-1.55, 0.78, 2.60)), 0.85),
     "topo":   (hull_topo,   turret_topo,   barrel_topo,   V((0.40, 0, 1.30)), 8,  V((-0.95, 0.50, 2.20)), 0.86),
+    # the DLCs': Misión a la Luna, Día de playa
+    "tortuga": (hull_tortuga, turret_tortuga, barrel_tortuga, V((0.55, 0, 1.30)), 8, V((-0.95, 0.55, 2.30)), 1.26),
+    "anfibio": (hull_anfibio, turret_anfibio, barrel_anfibio, V((0.45, 0, 1.25)), 8, V((-0.90, 0.48, 2.22)), 1.16),
 }
 
 
@@ -749,6 +835,98 @@ def build_char_stump(seed=14):
     return o
 
 
+# -- the Moon: a dish on a mast, crystals, boulders and crates
+
+def build_dish(seed=15):
+    o = [cyl("foot", (0, 0, 0.18), 0.45, 0.36, "Z", 4, bevel=0.06),
+         cyl("mast", (0, 0, 1.20), 0.10, 1.80, "Z", 4),
+         cyl("joint", (0, 0, 2.12), 0.18, 0.20, "Y", 3, bevel=0.04)]
+    d = cyl("dish", (0.18, 0, 2.55), 0.95, 0.30, "Z", 11, verts=40, r2=0.30, bevel=0.06)
+    d.rotation_euler = (0, math.radians(-55), 0)
+    o.append(d)
+    o.append(cyl("feed", (0.62, 0, 2.85), 0.04, 0.70, "X", 4))
+    o.append(ball("lamp", (0.98, 0, 2.86), 0.09, 5))
+    return o
+
+
+def build_crystals(seed=16):
+    rng = np.random.default_rng(seed)
+    o = [ball("bed", (0, 0, 0.20), 0.70, 10, scale=(1, 1, 0.45), noise=0.15, seed=seed)]
+    for i in range(6):
+        a = float(rng.uniform(0, 6.28))
+        r = float(rng.uniform(0.0, 0.45))
+        h = float(rng.uniform(1.0, 2.4)) * (1.3 if i == 0 else 1.0)
+        c = cyl("cr%d" % i, (0, 0, 0), float(rng.uniform(0.16, 0.26)), h, "Z", 8, verts=6, r2=0.02)
+        t = float(rng.uniform(5, 28)) * (0 if i == 0 else 1)
+        c.rotation_euler = (0, math.radians(t), a)
+        c.location = (math.cos(a) * (r + math.sin(math.radians(t)) * h / 2),
+                      math.sin(a) * (r + math.sin(math.radians(t)) * h / 2), 0.25 + math.cos(math.radians(t)) * h / 2)
+        o.append(c)
+    return o
+
+
+def build_moon_stump(seed=17):
+    return [cyl("foot", (0, 0, 0.18), 0.45, 0.36, "Z", 4, bevel=0.06),
+            jagged_cyl("stub", (0, 0, 0.55), 0.10, 0.55, 4, seed, amount=0.15),
+            ball("debris", (0.30, 0.20, 0.10), 0.14, 11, scale=(1.4, 1, 0.5))]
+
+
+def build_moon_rock(seed=18):
+    return [ball("rock", (0, 0, 0.46), 0.56, 10, scale=(1.0, 0.95, 0.85), noise=0.18, seed=seed)]
+
+
+# -- the beach: palms, an umbrella, crates and rocks
+
+def build_palm(seed=19, lean=14.0):
+    rng = np.random.default_rng(seed)
+    o = []
+    n = 7
+    x = z = 0.0
+    a = math.radians(lean)
+    for i in range(n):
+        h = 0.48
+        seg = cyl("seg%d" % i, (0, 0, 0), 0.19 - i * 0.012, h, "Z", 9, r2=0.15 - i * 0.012, bevel=0.03)
+        t = a * (i / n) * 1.6
+        seg.rotation_euler = (0, t, 0)
+        seg.location = (x + math.sin(t) * h / 2, 0, z + math.cos(t) * h / 2)
+        x += math.sin(t) * h
+        z += math.cos(t) * h * 0.97
+        o.append(seg)
+    top = V((x, 0, z))
+    for k in range(7):
+        ang = k * 2 * math.pi / 7 + float(rng.uniform(-0.2, 0.2))
+        f = ball("frond%d" % k, (0, 0, 0), 0.5, 8, scale=(1.9, 0.42, 0.10))
+        f.rotation_euler = (0, math.radians(22), ang)
+        f.location = (top.x + math.cos(ang) * 0.78, top.y + math.sin(ang) * 0.78, top.z - 0.12)
+        o.append(f)
+    for k in range(3):
+        ang = k * 2.1
+        o.append(ball("nut%d" % k, (top.x + math.cos(ang) * 0.18, math.sin(ang) * 0.18, top.z - 0.22), 0.12, 9))
+    return o
+
+
+def build_umbrella(seed=20):
+    o = [cyl("pole", (0, 0, 1.25), 0.05, 2.50, "Z", 4),
+         cyl("foot", (0, 0, 0.06), 0.30, 0.12, "Z", 4, bevel=0.03),
+         cyl("canopy", (0, 0, 2.40), 1.30, 0.50, "Z", 2, verts=16, r2=0.06, bevel=0.04),
+         cyl("rim", (0, 0, 2.15), 1.32, 0.08, "Z", 7, verts=16, bevel=0.02),
+         ball("top", (0, 0, 2.68), 0.09, 7)]
+    return o
+
+
+def build_palm_stump(seed=21):
+    return [jagged_cyl("stub", (0, 0, 0.32), 0.19, 0.64, 9, seed, amount=0.14),
+            cyl("cut", (0, 0, 0.62), 0.14, 0.04, "Z", 11),
+            ball("frond", (0.35, 0.1, 0.06), 0.4, 8, scale=(1.4, 0.4, 0.12))]
+
+
+def build_crate(seed=22):
+    o = [rbox("crate", (0, 0, 0.47), (0.92, 0.92, 0.92), 0.06, 9, seg=3)]
+    for k in range(2):
+        o.append(rbox("slat%d" % k, (0, 0, 0.22 + k * 0.50), (0.96, 0.96, 0.10), 0.03, 11, seg=2))
+    return o
+
+
 # biome: (tree a, tree b, what a broken tree leaves, block, block seed)
 BIOMES = {
     "pradera":  (build_tree_round, build_tree_pine, build_stump, build_block),
@@ -756,7 +934,49 @@ BIOMES = {
     "nieve":    (build_snow_pine, build_snowman, build_snow_stump, build_block),
     "ruinas":   (build_column, build_lamp, build_rubble, build_brick),
     "volcan":   (build_dead_tree, build_lava_rock, build_char_stump, build_block),
+    "luna":     (build_dish, build_crystals, build_moon_stump, build_moon_rock),
+    "playa":    (build_palm, build_umbrella, build_palm_stump, build_crate),
 }
+
+
+# -- the modes' marks: a team's flag (painted with the team's colour, region
+# 1), a chest, the hill's beacon
+
+def build_flag(seed=23):
+    o = [cyl("base", (0, 0, 0.10), 0.36, 0.20, "Z", 3, bevel=0.05),
+         cyl("pole", (0, 0, 1.40), 0.05, 2.60, "Z", 4),
+         ball("knob", (0, 0, 2.74), 0.08, 5)]
+    cloth = rbox("cloth", (0.62, 0, 2.30), (1.10, 0.05, 0.70), 0.02, 1, seg=2)
+    o.append(cloth)
+    o.append(rbox("stripe", (0.62, 0, 2.30), (1.12, 0.07, 0.16), 0.02, 2, seg=2))
+    return o
+
+
+def build_chest(seed=24):
+    o = [rbox("box", (0, 0, 0.32), (1.00, 0.70, 0.56), 0.06, 9, seg=3),
+         cyl("lid", (0, 0, 0.62), 0.35, 1.00, "X", 9, verts=24, bevel=0.03)]
+    for x in (-0.36, 0.36):
+        o.append(rbox("band%d" % int(x * 10), (x, 0, 0.45), (0.10, 0.74, 0.62), 0.02, 4, seg=2))
+    o.append(rbox("lock", (0, -0.37, 0.56), (0.16, 0.06, 0.20), 0.02, 5, seg=2))
+    for k in range(4):
+        o.append(cyl("coin%d" % k, (-0.30 + k * 0.2, 0.1, 0.92), 0.10, 0.03, "Z", 5))
+    return o
+
+
+def build_beacon(seed=25):
+    o = [cyl("base", (0, 0, 0.12), 0.55, 0.24, "Z", 3, bevel=0.06)]
+    for k in range(3):
+        a = k * 2 * math.pi / 3
+        leg = cyl("leg%d" % k, (0, 0, 0), 0.05, 2.6, "Z", 4)
+        leg.rotation_euler = (0, math.radians(8), a + math.pi)
+        leg.location = (math.cos(a) * 0.20, math.sin(a) * 0.20, 1.40)
+        o.append(leg)
+    o.append(cyl("cap", (0, 0, 2.70), 0.22, 0.12, "Z", 4, bevel=0.03))
+    o.append(ball("light", (0, 0, 2.95), 0.22, 5))
+    return o
+
+
+MARKS = {"fl": build_flag, "ch": build_chest, "bc": build_beacon}
 
 
 # ---------------------------------------------------------------------------
@@ -1041,6 +1261,20 @@ def do_scenery():
                     render_low(objs, "%s_b%d_%02d" % (biome, v, k), 128, 128, 0.5)
 
 
+def do_marks():
+    """The modes' marks, like a tree: one top and one low sprite each"""
+    for slot, fn in MARKS.items():
+        clear_scene_objects()
+        objs = fn()
+        rotate_all(objs, 0)
+        name = "marks_%s" % slot
+        if "top" in ARGS.sets:
+            render_top(objs, name, 160, 192, 1.4)
+        if "low" in ARGS.sets:
+            rotate_all(objs, 90.0)
+            render_low(objs, name, 240, 288, 1.4)
+
+
 def export_obj():
     """The tank as triangles, for the real-time rasteriser's bench
     (tools/bench.c): full detail and decimated."""
@@ -1083,6 +1317,8 @@ if want("tank"):
     do_tank()
 if want("scenery"):
     do_scenery()
+if want("marks"):
+    do_marks()
 if want("fp"):
     do_fp()
 if want("show"):

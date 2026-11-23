@@ -48,6 +48,8 @@ typedef struct {
     int      kills;
     bool     moved;                 /* drove this turn */
     int      shots;                 /* fired this turn */
+    bool     gone;                  /* not on the map (a wave not come yet): never drawn, never hit */
+    bool     boss;
 } tq_tank_t;
 
 typedef struct {
@@ -84,6 +86,7 @@ typedef struct {
     float   drill;                  /* metres dug */
     bool    split;                  /* a cluster's bomblet */
     bool    under;                  /* a drill below ground */
+    float   wait;                   /* the double cannon's second: seconds before it leaves */
 } tq_shell_t;
 
 typedef struct {
@@ -103,7 +106,13 @@ typedef struct {
 
 /* What happened this step, for the app to show */
 enum { TQ_EV_NONE = 0, TQ_EV_BLAST, TQ_EV_MISS, TQ_EV_HEAL, TQ_EV_SHIELD, TQ_EV_EMP, TQ_EV_TELEPORT, TQ_EV_MINE,
-       TQ_EV_BURN };
+       TQ_EV_BURN,
+       TQ_EV_TESLA,                 /* the coil's lightning, at its first target */
+       TQ_EV_FIRE2,                 /* the double cannon's second shot leaves */
+       TQ_EV_POINT,                 /* the hill: a point (value: the team) */
+       TQ_EV_FLAG_TAKE, TQ_EV_FLAG_BACK, TQ_EV_CAPTURE,     /* value: the team that did it */
+       TQ_EV_CHEST,                 /* value: the team */
+};
 
 typedef struct {
     int       type;
@@ -114,9 +123,12 @@ typedef struct {
     tq_vbox_t dirty;                /* the ground changed (x1 < x0: not) */
     int       weapon;               /* a landing's: what landed (for the sound) */
     bool      split;                /* ... and whether it was a bomblet */
+    bool      water;                /* it fell in the sea */
 } tq_event_t;
 
 #define TQ_MAX_EVENTS 8
+#define TQ_MAX_CHESTS 8
+#define TQ_MAX_BOLTS  6
 
 typedef struct {
     tq_tank_t  tank[TQ_MAX_TANKS];
@@ -152,12 +164,38 @@ typedef struct {
     bool       arc_landed;
     tq_v3_t    arc_end;
     float      pulse;               /* the turn's ring, 0..1 */
+
+    float      grav_k;              /* the shells' gravity here (the Moon less) */
+    /* the Tesla's lightning, while it shows */
+    int        nbolt;
+    tq_v3_t    bolt_a[TQ_MAX_BOLTS], bolt_b[TQ_MAX_BOLTS];
+    float      bolt_t;
+
+    /* the mode and the mission's goal */
+    int        mode, goal, goal_n;
+    int        target;              /* points, captures or waves that win (0: none) */
+    int        score[2];            /* per side: points, captures, chests */
+    int        protect;             /* TQ_GOAL_PROTECT: the tank that must live (-1) */
+    /* the hill */
+    float      hill_x, hill_y, hill_r;
+    /* the flags, one a side: where they are, home, who carries each (-1) */
+    struct {
+        float x, y, hx, hy;
+        int   carrier;
+    } flag[2];
+    /* the chests */
+    int        nchest;
+    float      chest[TQ_MAX_CHESTS][2];
+    uint8_t    chest_alive[TQ_MAX_CHESTS];
+    /* the waves */
+    int        wave;
 } tq_state_t;
 
 /* A battle to set up: the map and who plays */
 typedef struct {
     int      biome, size, weather, diff;
     int      objects;               /* trees and walls: 0..TQ_OBJECT_LEVELS-1, the middle the usual */
+    int      mode, goal, goal_n;    /* TQ_MODE_*, TQ_GOAL_* and its number (0: the mode's usual) */
     uint32_t seed;
     int      ntank;
     struct {
@@ -167,6 +205,8 @@ typedef struct {
         uint8_t  up[TQ_UPGRADES];
         uint8_t  load[TQ_SLOTS_MAX];    /* 0xFF empty */
         uint8_t  level[TQ_WEAPONS];
+        bool     boss;                  /* three times the health */
+        bool     later;                 /* the waves: a slot that comes in a later wave */
     } t[TQ_MAX_TANKS];
 } tq_setup_t;
 
@@ -177,8 +217,15 @@ void tq_game_new(tq_state_t *s, tq_terrain_t *t, const tq_setup_t *su);
 void tq_game_turn(tq_state_t *s, const tq_terrain_t *t, tq_event_t *ev);
 /* The next tank alive after the current one */
 int  tq_game_next(const tq_state_t *s);
-/* The team left alone, or -1 */
+/* The side that won (the last standing, or the mode's or the goal's), -1
+ * if none yet, -2 if nobody is left */
 int  tq_game_winner(const tq_state_t *s);
+/* The waves: the board's side is out and another wave is to come */
+bool tq_game_wave_due(const tq_state_t *s);
+/* Brings the next wave in (the board's slots back, tougher); its size */
+int  tq_game_wave(tq_state_t *s, tq_terrain_t *t);
+/* A tank drove onto a flag, a chest: what it did (ev), false if nothing */
+bool tq_game_pickups(tq_state_t *s, const tq_terrain_t *t, int who, tq_event_t *ev);
 
 /* Where the tank whose turn it is can go (s->reach) */
 void tq_game_reach(tq_state_t *s, const tq_terrain_t *t);

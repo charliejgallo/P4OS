@@ -3,7 +3,8 @@
 Turn-based battles of chubby toy tanks, in Monster Hop's style. Drive from
 above, aim from the turret, fire; between battles, the hangar. Six tanks,
 twenty weapons, twelve story missions in five places, and free battles of up
-to four tanks against the board or two people passing it round.
+to four tanks against the board or two people passing it round. Two DLCs
+add a tank, a weapon, a place, two modes and six missions each (below).
 
 ![The battle view](../../docs/img/app-tanques.jpg)
 
@@ -12,9 +13,10 @@ to four tanks against the board or two people passing it round.
 B=/Applications/Blender.app/Contents/MacOS/Blender
 (cd apps/tanques/tools/blender && $B -b -P tanques_art.py)   # -> build/art (every set)
 python3 apps/tanques/tools/pack.py                          # -> build/tanques_p4.pak (34 MB)
+                                                            #    and the DLCs' tanques_luna.pak, tanques_playa.pak (5 MB each)
 
 # in the simulator
-mkdir -p sim/sim_fs/apps && cp apps/tanques/build/tanques_p4.pak sim/sim_fs/apps/
+mkdir -p sim/sim_fs/apps && cp apps/tanques/build/tanques_*.pak sim/sim_fs/apps/
 cmake -S sim -B sim/build-tanques -DCMAKE_BUILD_TYPE=Release -DP4OS_SIM_APPS="hello_app;tanques"
 cmake --build sim/build-tanques -j8
 cd sim && P4_SIM_SCRIPT="wait 1500; open demo.tanques" ./build-tanques/p4os_sim
@@ -23,8 +25,11 @@ cd sim && P4_SIM_SCRIPT="wait 1500; open demo.tanques" ./build-tanques/p4os_sim
 tools/build_apps.sh tanques                 # apps/tanques/build/tanques.so (112 KB)
 ```
 
-On the card both go in `/apps`. Neither is in git. The pack may travel in
-parts (`tanques_p4.pak`, `.pak.1`...): the game reads across them.
+On the card they go in `/apps`. None is in git. A pack may travel in parts
+(`tanques_p4.pak`, `.pak.1`...): the game reads across them. A DLC's pack
+on the card is what makes it installed; without it its things show locked
+(its campaign says so, its weapon says what brings it, its tank, place and
+modes are not offered).
 
 ## The turn
 
@@ -60,6 +65,8 @@ leave the battle.
 | Obús | artillery: lobbed shots +20% | 90 | 5% | 10 | 1.3 | 3 | 1200 |
 | Avispa | missiles: guided and laser +25% | 85 | 0 | 11 | 1.9 | 3 | 1400 |
 | Topo | engineer: drill +25%, repair x1.5, four mines | 110 | 10% | 10 | 1.5 | 3 | 1000 |
+| Tortuga (Luna) | a shell: starts with a 20 shield, shield x1.5, Tesla +25% | 150 | 15% | 9 | 1.2 | 3 | 1600 |
+| Anfibio (Playa) | drives on the sea, double cannon +20% | 95 | 5% | 10 | 1.8 | 3 | 1300 |
 
 Each has four upgrades of four levels (`tq_data.c`, `tq_stats`): armour
 (+12% HP and +4% armour a level), engine (climbs cheaper and steeper),
@@ -76,7 +83,11 @@ the Topo), EMP (no damage, half the AP lost), shield (stops 40), repair (+30),
 smoke (shots from or into it go astray, and no guide there), bouncer, driller
 (digs in, blows up below), air strike (five bombs along the line), sniper,
 shotgun (five pellets), earthquake (sinks and raises the ground), teleport,
-wall (three stones) and the big bomb. Each has three upgrade levels (+15%
+wall (three stones) and the big bomb; the DLCs' Tesla coil (its lightning
+jumps from where it falls to up to six things within 6 m, nearest first:
+18 to each tank, trees and stones broken) and double cannon (two shells,
+the second 0.3 s later thrown off a few degrees by the recoil). Each has
+three upgrade levels (+15%
 damage and +7% radius a level). `tools/bench.c` fires each once at a Mamut
 and prints what it did.
 
@@ -96,6 +107,24 @@ Coins: the mission's reward or the free battle's, half the damage done and
 Every map is made from its seed: hills, a path, the biome's own (dunes,
 a frozen lake, streets and squares, a volcano and lava), trees and walls
 (houses in the ruins), the tanks round the middle on flattened ground.
+
+## The DLCs
+
+| | Misión a la Luna | Día de playa |
+| --- | --- | --- |
+| pack | `tanques_luna.pak` | `tanques_playa.pak` |
+| tank | Tortuga | Anfibio |
+| weapon | Bobina Tesla | Cañón doble |
+| place | the Moon: craters with rims, grey dust, black sky with stars; the shells' gravity x0.55, no air (no wind, no fog) | the beach: two long islands and two islets in the sea, one bridge between the islands (it never breaks; the sea never digs); only the Anfibio drives on water |
+| modes | Oleadas: the board's tanks come in waves (one, two, three...), each tougher (+20% health a wave, sharper aim); the people get a quarter of their health back between waves. Rey de la colina: a point for each turn begun inside the hill (3 m round the beacon; on the beach, the bridge's middle), first to 4 | Captura la bandera: each side's flag behind its start; drive over theirs to take it, bring it to yours (at home) to score, first to 2; hit, a carrier drops it; drive over yours lying out to send it home. Búsqueda del tesoro: five or seven chests (on the beach one on each islet): when all are taken, the side with the most wins (a tie: the side with more health) |
+| missions | Alunizaje, Defensa de la base (6 rounds), El rey del cráter, Escolta al rover (an ally of the board's must live), Lluvia de meteoritos (3 waves), La cara oculta (a boss with three times the health) | Desembarco, Cofres en la arena, La bandera pirata, Marea alta (win within 7 rounds), Que no crucen (7 rounds), El almirante (a boss) |
+
+The modes are in the free battle on any place; knocking everyone out wins
+in all of them. The board's tanks play them: they head for the hill, the
+flags (theirs, ours lying out, the one they carry home) or the nearest
+chest, and still shoot. `DLC.md` has what was thought before they were
+made. Measured in the simulator: a three-tank battle on the Moon 13.6 MB, on
+the 44 m beach 14.1 MB.
 
 ## The 3D: what was measured and what was chosen
 
@@ -211,14 +240,16 @@ front, and without it the main events beep.
 
 `TQ_SCREEN=story|free|hangar`, `TQ_COINS=n`, `TQ_START=1|2` straight into
 a free battle (against the board, two players) with `TQ_RIVALS`, `TQ_BIOME`,
-`TQ_WEATHER`, `TQ_SEED`; `TQ_AIM=1` then into the gunner's view;
-`TQ_AUTO=1` the board plays all.
+`TQ_WEATHER`, `TQ_SEED`, `TQ_MODE`, `TQ_ME` (my tank's type), `TQ_TYPES=a,b`
+(the board's); `TQ_MISSION=n` straight into a mission (0-23); `TQ_AIM=1`
+then into the gunner's view; `TQ_AUTO=1` the board plays all.
 
 ## The save
 
 `tanques.sav` in the data folder: coins, the tanks owned with their
 upgrades, weapons and paint, the weapons owned and their levels, the
-story's stars, the free battle's last settings.
+story's stars (the DLCs' too), the free battle's last settings, the most
+waves lived through. Version 3; versions 1 and 2 are brought to it.
 
 ## Pending
 

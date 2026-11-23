@@ -136,6 +136,7 @@ static void event_sound(app_t *a, const tq_event_t *e, bool direct, bool ko)
         if (now - last_blast < 90 && !ko) break;
         last_blast = now;
         tq_snd(e->split || W->radius < 1.5f ? TQ_SND_BLAST_S : W->radius < 3.5f ? TQ_SND_BLAST : TQ_SND_BLAST_L);
+        if (e->water) tq_snd(TQ_SND_SPLASH);
         if (W->fx == TQ_FX_NAPALM) tq_snd(TQ_SND_BURN);
         break;
     case TQ_EV_MINE: tq_snd(TQ_SND_BLAST); break;
@@ -145,6 +146,13 @@ static void event_sound(app_t *a, const tq_event_t *e, bool direct, bool ko)
     case TQ_EV_EMP: tq_snd(TQ_SND_EMP); break;
     case TQ_EV_TELEPORT: tq_snd(TQ_SND_TELEPORT); break;
     case TQ_EV_BURN: tq_snd(TQ_SND_BURN); break;
+    case TQ_EV_TESLA: tq_snd(TQ_SND_TESLA); break;
+    case TQ_EV_FIRE2: tq_snd(TQ_SND_FIRE); break;
+    case TQ_EV_POINT: tq_snd(TQ_SND_POINT); break;
+    case TQ_EV_FLAG_TAKE:
+    case TQ_EV_FLAG_BACK: tq_snd(TQ_SND_FLAG); break;
+    case TQ_EV_CAPTURE: tq_snd(TQ_SND_CAPTURE); break;
+    case TQ_EV_CHEST: tq_snd(TQ_SND_COIN); break;
     case TQ_EV_NONE:
         if (W->fx == TQ_FX_MINES) tq_snd(TQ_SND_MINES);
         else if (W->fx == TQ_FX_SMOKE) tq_snd(TQ_SND_SMOKE);
@@ -170,6 +178,14 @@ static void fire_sound(int w)
     else if (W->fly == TQ_FLY_DRILL) tq_snd(TQ_SND_FIRE_DRILL);
     else if (W->fly == TQ_FLY_LOB) tq_snd(TQ_SND_FIRE_LOB);
     else if (W->fly != TQ_FLY_SELF) tq_snd(TQ_SND_FIRE);
+}
+
+/* The first tank of a side (its colour) */
+static int side_first(app_t *a, int side)
+{
+    for (int k = 0; k < a->st.ntank; k++)
+        if ((a->st.tank[k].team & 1) == side) return k;
+    return 0;
 }
 
 static void show_event(app_t *a, const tq_event_t *e)
@@ -214,6 +230,25 @@ static void show_event(app_t *a, const tq_event_t *e)
     case TQ_EV_BURN:
         say(a, tq_v3(e->at.x, e->at.y, e->at.z + 1.0f), _("¡Quema!"), 0xFF8A1E);
         break;
+    case TQ_EV_TESLA:
+        if (!any) say(a, e->at, _("¡Zap!"), 0x7FE0FF);
+        break;
+    case TQ_EV_POINT:
+        say(a, e->at, "+1", 0xFFD23C);
+        break;
+    case TQ_EV_FLAG_TAKE:
+        say(a, e->at, _("¡Bandera!"), a->rgb[side_first(a, e->value)]);
+        break;
+    case TQ_EV_FLAG_BACK:
+        say(a, e->at, _("¡Recuperada!"), 0xFFFFFF);
+        break;
+    case TQ_EV_CAPTURE:
+        say(a, e->at, _("¡Captura!"), 0xFFD23C);
+        break;
+    case TQ_EV_CHEST:
+        say(a, e->at, _("¡Un cofre!"), 0xFFD23C);
+        if (e->value == 0 && a->humans == 1) a->chest_coins += 30;
+        break;
     default:
         break;
     }
@@ -232,7 +267,13 @@ static void finish(app_t *a)
     int coins = 0, stars = 0;
     const tq_tank_t *me = &a->st.tank[0];
     bool won = w == me->team;
-    coins += me->dealt / 2 + me->kills * 40;
+    coins += me->dealt / 2 + me->kills * 40 + a->chest_coins;
+    if (a->st.mode == TQ_MODE_WAVES) {
+        /* the waves lived through: the one it ended in did not count */
+        a->waves_done = won ? a->st.wave : a->st.wave - 1;
+        coins += 60 * a->waves_done;
+        if (a->humans == 1 && a->waves_done > a->save.best_wave) a->save.best_wave = (uint8_t)a->waves_done;
+    }
     if (won) {
         if (a->story) coins += TQ_MISSION[a->mission].reward;
         else coins += 120 + 80 * (a->st.ntank - 1) + 60 * a->setup.diff;
@@ -249,7 +290,8 @@ static void finish(app_t *a)
     tq_snd_flight(0, 0, 0);
     tq_snd(won || a->humans > 1 ? TQ_SND_WIN : TQ_SND_LOSE);
     tqa_save(a);
-    aos_hal_log("tanques", "battle over: team %d won, %d coins, %d stars", w, coins, stars);
+    aos_hal_log("tanques", "battle over: team %d won, %d coins, %d stars | %s, round %d, score %d-%d, wave %d", w, coins,
+                stars, TQ_MODE_NAME[a->st.mode], a->st.round, a->st.score[0], a->st.score[1], a->st.wave);
     tqa_screen(a, SC_RESULT);
 }
 
@@ -282,6 +324,16 @@ static void begin_turn(app_t *a)
 
 static void next_turn(app_t *a)
 {
+    if (tq_game_wave_due(&a->st)) {
+        tqa_wait_worker(a);
+        int n = tq_game_wave(&a->st, a->ter);
+        char txt[48];
+        snprintf(txt, sizeof txt, _("¡Oleada %d!"), a->st.wave);
+        const tq_tank_t *k = &a->st.tank[0];
+        say(a, tq_v3(k->x, k->y, tq_tank_z(a->ter, k) + 5.0f), txt, 0xFFD23C);
+        tq_snd(TQ_SND_WAVE);
+        aos_hal_log("tanques", "wave %d: %d tanks", a->st.wave, n);
+    }
     if (tq_game_winner(&a->st) != -1) {
         finish(a);
         return;
@@ -309,7 +361,15 @@ void tqb_start(app_t *a, const tq_setup_t *su, bool story, int mission)
     if (!tq_art_use_biome(su->biome) || !tq_art_use_tanks(types, fps)) aos_ui_toast(_("No hay memoria para el arte"), 2000);
     tqa_paints(a);
     tq_game_new(&a->st, a->ter, su);
+    a->chest_coins = 0;
+    a->waves_done = 0;
     tq_scene_world_all();
+    {
+        /* what this battle asks, if it asks more than knocking them out */
+        const char *info = story ? TQ_MISSION[mission].info : NULL;
+        if (!info && su->mode != TQ_MODE_CLASSIC) info = TQ_MODE_INFO[su->mode];
+        if (info) aos_ui_toast(_(info), 3000);
+    }
     a->st.cur = 0;
     cam_to(a, a->st.tank[0].x, a->st.tank[0].y, true);
     a->screen = SC_BATTLE;
@@ -426,7 +486,29 @@ static void hud_refresh(app_t *a)
         const tq_tank_t *tk = &s->tank[k];
         lv_bar_set_value(a->chip_hp[k], tk->hp * 100 / (tk->hpmax ? tk->hpmax : 1), LV_ANIM_ON);
         lv_obj_set_style_border_width(a->chip[k], k == s->cur ? 4 : 0, 0);
-        lv_obj_set_style_opa(a->chip[k], tk->alive ? LV_OPA_COVER : LV_OPA_40, 0);
+        lv_obj_set_style_opa(a->chip[k], tk->alive ? LV_OPA_COVER : (tk->gone ? LV_OPA_20 : LV_OPA_40), 0);
+    }
+    if (a->mode_lbl) {
+        char m[64] = "";
+        switch (s->mode) {
+        case TQ_MODE_WAVES:
+            if (s->target) snprintf(m, sizeof m, _("Oleada %d de %d"), s->wave, s->target);
+            else snprintf(m, sizeof m, _("Oleada %d"), s->wave);
+            break;
+        case TQ_MODE_HILL: snprintf(m, sizeof m, _("Puntos %d-%d (a %d)"), s->score[0], s->score[1], s->target); break;
+        case TQ_MODE_FLAG: snprintf(m, sizeof m, _("Banderas %d-%d (a %d)"), s->score[0], s->score[1], s->target); break;
+        case TQ_MODE_TREASURE: {
+            int left = 0;
+            for (int c = 0; c < s->nchest; c++) left += s->chest_alive[c];
+            snprintf(m, sizeof m, _("Cofres %d-%d (quedan %d)"), s->score[0], s->score[1], left);
+            break;
+        }
+        default:
+            if (s->goal == TQ_GOAL_HOLD || s->goal == TQ_GOAL_FAST)
+                snprintf(m, sizeof m, _("Ronda %d de %d"), s->round, s->goal_n);
+            break;
+        }
+        lv_label_set_text(a->mode_lbl, m);
     }
     char txt[160];
     const tq_tank_t *k = &s->tank[s->cur];
@@ -436,7 +518,7 @@ static void hud_refresh(app_t *a)
     lv_label_set_text(a->turn_lbl, txt);
     float wv = sqrtf(s->wind_x * s->wind_x + s->wind_y * s->wind_y);
     if (wv < 0.2f) {
-        lv_label_set_text(a->wind_lbl, "");
+        lv_label_set_text(a->wind_lbl, s->grav_k < 0.99f ? _("Gravedad baja") : "");
     } else {
         /* the wind's arrow as seen on the battle view (yaw 20 deg) */
         static const char *const ARROW[8] = { "\xE2\x86\x92", "\xE2\x86\x97", "\xE2\x86\x91", "\xE2\x86\x96",
@@ -526,6 +608,8 @@ void tqb_build(app_t *a)
     lv_obj_align(a->turn_lbl, LV_ALIGN_BOTTOM_LEFT, 18, -6);
     a->wind_lbl = tqa_label(a->top_bar, "", aos_font_caption, 0xB8E4FF);
     lv_obj_align(a->wind_lbl, LV_ALIGN_BOTTOM_RIGHT, -18, -6);
+    a->mode_lbl = tqa_label(a->top_bar, "", aos_font_caption, 0xFFD23C);
+    lv_obj_align(a->mode_lbl, LV_ALIGN_BOTTOM_MID, 0, -6);
 
     /* driving: the points and the button to aim */
     int mbw = land ? 700 : W - 2 * m, mbh = 112;
@@ -877,6 +961,7 @@ static void drive_step(app_t *a, float dt)
             show_event(a, &ev);
             a->drive_seg = s->npath;            /* the mine stops it */
         }
+        if (tq_game_pickups(s, a->ter, s->cur, &ev)) show_event(a, &ev);
     }
     cam_to(a, k->x, k->y, false);
 }
