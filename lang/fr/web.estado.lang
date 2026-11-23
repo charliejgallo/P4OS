@@ -169,7 +169,11 @@ falló una vez, probando de nuevo	échec une fois, nouvel essai
 falló %d veces, probando de nuevo	%d échecs, nouvel essai
 
 #: apps/estado/web/estado.js:310
-anda %s	en ligne, changé %s
+#: apps/estado/web/estado.js:456
+anda	en ligne
+
+#: apps/estado/web/estado.js:310
+anda desde hace %s	en ligne depuis %s
 
 #: apps/estado/web/estado.js:314
 24 h	24 h
@@ -299,7 +303,7 @@ Nada todavía: acá aparece cada vez que algo se cae o vuelve.	Rien pour l'insta
 
 #: apps/estado/web/estado.js:437
 #: apps/estado/web/estado.js:587
-Estado de la casa	État de la maison
+Mi casa	État de la maison
 
 #: apps/estado/web/estado.js:443
 #: apps/estado/web/estado.js:554
@@ -307,9 +311,6 @@ Leyendo...	Lecture...
 
 #: apps/estado/web/estado.js:446
 Guardar en la tarjeta	Enregistrer sur la carte SD
-
-#: apps/estado/web/estado.js:456
-anda	en ligne
 
 #: apps/estado/web/estado.js:456
 andan	en ligne
@@ -339,7 +340,7 @@ Probar todos	Tout vérifier
 Sin grupo	Sans groupe
 
 #: apps/estado/web/estado.js:497
-La app Estado de la casa no está abierta en la placa. 	L'app État de la maison n'est pas ouverte sur la carte. 
+La app Mi casa no está abierta en la placa. 	L'app État de la maison n'est pas ouverte sur la carte. 
 
 #: apps/estado/web/estado.js:498
 Abrirla	L'ouvrir

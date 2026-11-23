@@ -169,7 +169,11 @@ falló una vez, probando de nuevo	failed once, trying again
 falló %d veces, probando de nuevo	failed %d times, trying again
 
 #: apps/estado/web/estado.js:310
-anda %s	up %s
+#: apps/estado/web/estado.js:456
+anda	up
+
+#: apps/estado/web/estado.js:310
+anda desde hace %s	up for %s
 
 #: apps/estado/web/estado.js:314
 24 h	24 h
@@ -299,7 +303,7 @@ Nada todavía: acá aparece cada vez que algo se cae o vuelve.	Nothing yet: ever
 
 #: apps/estado/web/estado.js:437
 #: apps/estado/web/estado.js:587
-Estado de la casa	Home Status
+Mi casa	Home Status
 
 #: apps/estado/web/estado.js:443
 #: apps/estado/web/estado.js:554
@@ -307,9 +311,6 @@ Leyendo...	Reading...
 
 #: apps/estado/web/estado.js:446
 Guardar en la tarjeta	Save to the card
-
-#: apps/estado/web/estado.js:456
-anda	up
 
 #: apps/estado/web/estado.js:456
 andan	up
@@ -339,7 +340,7 @@ Probar todos	Check all
 Sin grupo	No group
 
 #: apps/estado/web/estado.js:497
-La app Estado de la casa no está abierta en la placa. 	The Home Status app is not open on the board. 
+La app Mi casa no está abierta en la placa. 	The Home Status app is not open on the board. 
 
 #: apps/estado/web/estado.js:498
 Abrirla	Open it

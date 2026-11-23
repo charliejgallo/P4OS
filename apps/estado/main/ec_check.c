@@ -1,5 +1,5 @@
 /*
- * P4OS - Estado de la casa: the checkers.
+ * P4OS - Mi casa: the checkers.
  *
  * Two threads (aos_hal_thread_start, PSRAM stacks) share the list: each
  * takes the service whose turn came first, tries it with a copy of its

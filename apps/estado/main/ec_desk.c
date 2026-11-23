@@ -1,5 +1,5 @@
 /*
- * P4OS - Estado de la casa: desk mode.
+ * P4OS - Mi casa: desk mode.
  *
  * To leave the board on a shelf: the whole screen (over the status bar, on
  * the display's top layer), the time and one line of summary at the top,

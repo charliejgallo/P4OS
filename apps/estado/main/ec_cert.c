@@ -1,5 +1,5 @@
 /*
- * P4OS - Estado de la casa: the server's certificate, and when it ends.
+ * P4OS - Mi casa: the server's certificate, and when it ends.
  *
  * The HAL's TLS (aos_tls.c) verifies a certificate and says yes or no, but
  * does not hand it to the app, and mbedtls is not in the symbol table. So

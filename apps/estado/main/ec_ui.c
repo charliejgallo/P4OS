@@ -1,5 +1,5 @@
 /*
- * P4OS - Estado de la casa: the pieces the screens share, the way numbers
+ * P4OS - Mi casa: the pieces the screens share, the way numbers
  * and times are written, and the notice's beeps.
  */
 #include "ec.h"
@@ -105,27 +105,27 @@ void ec_fmt_ms(char *out, size_t n, int ms)
     else snprintf(out, n, "%d%c%d s", ms / 1000, dec_point(), ms % 1000 / 100);
 }
 
+/* a duration, whole: each unit through _(), since "d" is "j" in French and "g" in Italian */
 void ec_fmt_dur(char *out, size_t n, uint32_t s)
 {
-    uint32_t d = s / 86400, h = s % 86400 / 3600, m = s % 3600 / 60;
-    if (d) snprintf(out, n, "%lu d %lu h", (unsigned long)d, (unsigned long)h);
-    else if (h) snprintf(out, n, "%lu h %lu min", (unsigned long)h, (unsigned long)m);
-    else if (m) snprintf(out, n, "%lu min", (unsigned long)m);
-    else snprintf(out, n, "%lu s", (unsigned long)s);
+    int d = (int)(s / 86400), h = (int)(s % 86400 / 3600), m = (int)(s % 3600 / 60);
+    if (d) snprintf(out, n, _("%d d %d h"), d, h);
+    else if (h) snprintf(out, n, _("%d h %d min"), h, m);
+    else if (m) snprintf(out, n, _("%d min"), m);
+    else snprintf(out, n, _("%d s"), (int)s);
 }
 
+/* "hace 5 min", a phrase of its own; one that says since when is a sentence
+ * of its own too ("Caído desde hace %s" with ec_fmt_dur), never this glued
+ * after another word */
 void ec_fmt_ago(char *out, size_t n, uint32_t s)
 {
-    char d[32];
+    char d[40];
     if (s < 10) {
         ec_copy(out, n, _("recién"));
         return;
     }
-    uint32_t h = s / 3600, m = s % 3600 / 60;
-    if (s >= 86400) snprintf(d, sizeof d, "%lu d", (unsigned long)(s / 86400));
-    else if (h) snprintf(d, sizeof d, "%lu h %lu min", (unsigned long)h, (unsigned long)m);
-    else if (m) snprintf(d, sizeof d, "%lu min", (unsigned long)m);
-    else snprintf(d, sizeof d, "%lu s", (unsigned long)s);
+    ec_fmt_dur(d, sizeof d, s);
     snprintf(out, n, _("hace %s"), d);
 }
 

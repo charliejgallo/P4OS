@@ -1,5 +1,5 @@
 /*
- * P4OS - Estado de la casa: the board.
+ * P4OS - Mi casa: the board.
  *
  * The services in their groups, in the order of the file, as tiles: the
  * traffic light, the name, the latency in big (or "Caído" in red, with the
@@ -57,7 +57,10 @@ static void tile_update(int i, const ec_rt_t *rt, uint32_t now)
         ec_fmt_ms(big, sizeof big, rt->ms);
         if (rt->fails_row > 0) ec_copy(sub, sizeof sub, rt->fails_row == 1 ? _("falló una vez, probando de nuevo") : _("falló varias veces, probando de nuevo"));
         else if (since < 10) ec_copy(sub, sizeof sub, _("anda"));
-        else snprintf(sub, sizeof sub, _("desde %s"), ago);
+        else {
+            ec_fmt_dur(d, sizeof d, since);
+            snprintf(sub, sizeof sub, _("anda desde hace %s"), d);
+        }
         break;
     case EC_ST_DOWN:
         ec_copy(big, sizeof big, _("Caído"));
@@ -83,7 +86,7 @@ static void tile_update(int i, const ec_rt_t *rt, uint32_t now)
     if (rt->cert_state == EC_CERT_SOON || rt->cert_state == EC_CERT_EXPIRED) {
         lv_color_t cc = rt->cert_days < 0 ? AOS_C_RED : AOS_C_ORANGE;
         if (rt->cert_days < 0) ec_copy(d, sizeof d, "!");
-        else snprintf(d, sizeof d, "%d d", rt->cert_days);
+        else snprintf(d, sizeof d, _("%d d"), rt->cert_days);
         ec_set_text(t->corner_g, AOS_SYM_LOCK);
         ec_set_text(t->corner_t, d);
         lv_obj_set_style_text_color(t->corner_g, cc, 0);
@@ -213,7 +216,7 @@ void ec_list_build(void)
     const int32_t head = A.land ? 112 : 140;
 
     int32_t bw = 3 * AOS_UI_TAP_MIN + 2 * 12;
-    lv_obj_t *title = ec_text(page, _("Estado de la casa"), aos_font_title, AOS_C_TEXT, A.W - 2 * AOS_UI_PAD - bw - 12);
+    lv_obj_t *title = ec_text(page, _("Mi casa"), aos_font_title, AOS_C_TEXT, A.W - 2 * AOS_UI_PAD - bw - 12);
     lv_obj_set_pos(title, AOS_UI_PAD, A.land ? 14 : 22);
     lv_obj_t *row = ec_box(page, A.W - 2 * AOS_UI_PAD - bw, 40);
     lv_obj_set_pos(row, AOS_UI_PAD, A.land ? 62 : 74);
@@ -281,7 +284,7 @@ void ec_list_build(void)
         }
     }
     if (!A.cfg.n) {
-        lv_obj_t *l = aos_label(list, _("Todavía no hay servicios.\n\nAgregá uno con + (hay plantillas para Home Assistant, Frigate, un NAS, una impresora 3D, el router o una página), o cargalos cómodo desde la página Estado de la casa del portal."),
+        lv_obj_t *l = aos_label(list, _("Todavía no hay servicios.\n\nAgregá uno con + (hay plantillas para Home Assistant, Frigate, un NAS, una impresora 3D, el router o una página), o cargalos cómodo desde la página Mi casa del portal."),
                                 aos_font_body, AOS_C_DIM);
         lv_label_set_long_mode(l, LV_LABEL_LONG_MODE_WRAP);
         lv_obj_set_width(l, inner);
@@ -423,7 +426,7 @@ void ec_settings_open(void)
     V.fails_l = aos_label(box, "", aos_font_body, AOS_C_TEXT);
     lv_obj_center(V.fails_l);
     fails_show();
-    lv_obj_t *hint = aos_label(c, _("Las direcciones se cargan más cómodo desde la página Estado de la casa del portal."),
+    lv_obj_t *hint = aos_label(c, _("Las direcciones se cargan más cómodo desde la página Mi casa del portal."),
                                aos_font_caption, AOS_C_DIM);
     lv_label_set_long_mode(hint, LV_LABEL_LONG_MODE_WRAP);
     lv_obj_set_width(hint, iw);

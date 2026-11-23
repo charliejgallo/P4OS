@@ -1,5 +1,5 @@
 /*
- * P4OS - Estado de la casa: the editor.
+ * P4OS - Mi casa: the editor.
  *
  * A new service starts from a template (Home Assistant, Frigate, a NAS, a
  * 3D printer, the router, a web page, any TCP port), which fills in the
@@ -332,7 +332,7 @@ static void build_templates(lv_obj_t *page)
         lv_obj_t *p = ec_text(c, b, aos_font_caption, AOS_C_DIM, w - 44);
         lv_obj_set_pos(p, 22, 112);
     }
-    lv_obj_t *hint = aos_label(col, _("Las direcciones se cargan más cómodo desde la página Estado de la casa del portal."),
+    lv_obj_t *hint = aos_label(col, _("Las direcciones se cargan más cómodo desde la página Mi casa del portal."),
                                aos_font_caption, AOS_C_DIM);
     lv_label_set_long_mode(hint, LV_LABEL_LONG_MODE_WRAP);
     lv_obj_set_width(hint, inner);

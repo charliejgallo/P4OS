@@ -1,5 +1,5 @@
 /*
- * P4OS - Estado de la casa: the app's own copy of its catalog.
+ * P4OS - Mi casa: the app's own copy of its catalog.
  *
  * aos_tr() looks up the catalog of the app in FRONT (aos_i18n.h), and frees
  * it when that app closes. This app speaks while it is hidden: its tick puts

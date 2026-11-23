@@ -1,4 +1,4 @@
-/* Estado de la casa's page in the board's portal (apps/estado,
+/* Mi casa's page in the board's portal (apps/estado,
  * docs/PORTAL-PAGES.md).
  *
  * Three parts:
@@ -307,7 +307,7 @@ function fill(el, s) {
   r.big.style.color = s.state === 1 ? '' : STATE_COLOR[s.state];
   let sub = '';
   if (s.state === 3) sub = errText(s) + ' · ' + ago(s.since);
-  else if (s.state === 1 || s.state === 2) sub = s.fails ? (s.fails === 1 ? tr('falló una vez, probando de nuevo') : tr('falló %d veces, probando de nuevo', s.fails)) : tr('anda %s', ago(s.since));
+  else if (s.state === 1 || s.state === 2) sub = s.fails ? (s.fails === 1 ? tr('falló una vez, probando de nuevo') : tr('falló %d veces, probando de nuevo', s.fails)) : (s.since < 10 ? tr('anda') : tr('anda desde hace %s', dur(s.since)));
   else sub = s.addr;
   r.sub.textContent = sub;
   r.sub.title = s.why || s.addr;
@@ -434,7 +434,7 @@ function historyTable(text, only) {
 
 P.registerPage({
   id: 'estado',
-  name: tr('Estado de la casa'),
+  name: tr('Mi casa'),
   icon: '◉',
   render(main) {
     style();
@@ -494,7 +494,7 @@ P.registerPage({
         const r = await fetch(`/api/live?app=${APP}&key=state`, { cache: 'no-store' });
         if (r.status === 404) {
           last = null;
-          put(status, tr('La app Estado de la casa no está abierta en la placa. '),
+          put(status, tr('La app Mi casa no está abierta en la placa. '),
             h('button', { class: 'btn', onclick: () => openApp(APP).catch(e => toast(e.message, true)) }, tr('Abrirla')));
           put(summary);
         } else if (r.ok) {
@@ -584,7 +584,7 @@ P.registerPage({
       if (t === 'now') drawLive();
     };
     const body = h('div', {});
-    put(main, h('h1', {}, tr('Estado de la casa')), tabs, body);
+    put(main, h('h1', {}, tr('Mi casa')), tabs, body);
     show('now');
 
     fsText(FILE).then(t => {

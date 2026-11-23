@@ -1,5 +1,5 @@
 /*
- * P4OS - Estado de la casa: one service.
+ * P4OS - Mi casa: one service.
  *
  * Four numbers (the latency now, the availability of the last day and of
  * the last week, and the certificate's days or when it was last tried), the
@@ -141,11 +141,11 @@ static void fill(void)
     /* the state */
     lv_color_t col = ec_state_color(rt.state);
     if (rt.state == EC_ST_DOWN) {
-        ec_fmt_ago(ago, sizeof ago, (now - rt.since_ms) / 1000u);
-        snprintf(b, sizeof b, _("Caído %s"), ago);
+        ec_fmt_dur(ago, sizeof ago, (now - rt.since_ms) / 1000u);
+        snprintf(b, sizeof b, _("Caído desde hace %s"), ago);
     } else if (rt.state == EC_ST_UP || rt.state == EC_ST_SLOW) {
-        ec_fmt_ago(ago, sizeof ago, (now - rt.since_ms) / 1000u);
-        snprintf(b, sizeof b, "%s · %s %s", ec_state_name(rt.state), _("desde"), ago);
+        ec_fmt_dur(ago, sizeof ago, (now - rt.since_ms) / 1000u);
+        snprintf(b, sizeof b, rt.state == EC_ST_SLOW ? _("Lento, anda desde hace %s") : _("Anda desde hace %s"), ago);
     } else {
         ec_copy(b, sizeof b, ec_state_name(rt.state));
     }
@@ -182,17 +182,17 @@ static void fill(void)
     if (!rt.checked_ms) {
         ec_copy(b, sizeof b, s->paused ? _("En pausa: no se prueba") : _("Todavía no se probó"));
     } else {
-        ec_fmt_ago(ago, sizeof ago, (now - rt.checked_ms) / 1000u);
+        ec_fmt_dur(ago, sizeof ago, (now - rt.checked_ms) / 1000u);
         if (rt.err == EC_E_NONE) {
             char ms[24], cm[24];
             ec_fmt_ms(ms, sizeof ms, rt.ms);
             ec_fmt_ms(cm, sizeof cm, rt.conn_ms);
-            if (s->kind == EC_TCP) snprintf(b, sizeof b, _("Último chequeo %s: el puerto abre en %s"), ago, ms);
-            else snprintf(b, sizeof b, _("Último chequeo %s: %d, contestó en %s (conectar: %s)"), ago, rt.code, ms, cm);
+            if (s->kind == EC_TCP) snprintf(b, sizeof b, _("Último chequeo hace %s: el puerto abre en %s"), ago, ms);
+            else snprintf(b, sizeof b, _("Último chequeo hace %s: %d, contestó en %s (conectar: %s)"), ago, rt.code, ms, cm);
         } else {
             if (rt.err == EC_E_CODE) snprintf(d, sizeof d, _("contestó %d"), rt.code);
             else ec_copy(d, sizeof d, ec_err_text(rt.err));
-            snprintf(b, sizeof b, _("Último chequeo %s: %s"), ago, d);
+            snprintf(b, sizeof b, _("Último chequeo hace %s: %s"), ago, d);
             if (rt.why[0]) {
                 size_t k = strlen(b);
                 snprintf(b + k, sizeof b - k, " (%.80s)", rt.why);

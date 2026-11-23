@@ -169,7 +169,11 @@ falló una vez, probando de nuevo	einmal fehlgeschlagen, neuer Versuch
 falló %d veces, probando de nuevo	%d-mal fehlgeschlagen, neuer Versuch
 
 #: apps/estado/web/estado.js:310
-anda %s	läuft %s
+#: apps/estado/web/estado.js:456
+anda	läuft
+
+#: apps/estado/web/estado.js:310
+anda desde hace %s	läuft seit %s
 
 #: apps/estado/web/estado.js:314
 24 h	24 h
@@ -299,7 +303,7 @@ Nada todavía: acá aparece cada vez que algo se cae o vuelve.	Noch nichts: hier
 
 #: apps/estado/web/estado.js:437
 #: apps/estado/web/estado.js:587
-Estado de la casa	Hausstatus
+Mi casa	Hausstatus
 
 #: apps/estado/web/estado.js:443
 #: apps/estado/web/estado.js:554
@@ -307,9 +311,6 @@ Leyendo...	Wird gelesen...
 
 #: apps/estado/web/estado.js:446
 Guardar en la tarjeta	Auf der Karte speichern
-
-#: apps/estado/web/estado.js:456
-anda	läuft
 
 #: apps/estado/web/estado.js:456
 andan	laufen
@@ -339,7 +340,7 @@ Probar todos	Alle prüfen
 Sin grupo	Ohne Gruppe
 
 #: apps/estado/web/estado.js:497
-La app Estado de la casa no está abierta en la placa. 	Die App Hausstatus ist auf der Platine nicht geöffnet. 
+La app Mi casa no está abierta en la placa. 	Die App Hausstatus ist auf der Platine nicht geöffnet. 
 
 #: apps/estado/web/estado.js:498
 Abrirla	Öffnen
