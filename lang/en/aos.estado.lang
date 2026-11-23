@@ -1,0 +1,412 @@
+# amoledos-lang 1   es -> en
+# aos.estado.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/estado/main/ec_cfg.c:40
+Casa	Home
+
+#: apps/estado/main/ec_cfg.c:41
+Cámaras	Cameras
+
+#: apps/estado/main/ec_cfg.c:42
+NAS	NAS
+
+#: apps/estado/main/ec_cfg.c:42
+#: apps/estado/main/ec_cfg.c:44
+#: apps/estado/main/ec_cfg.c:46
+Red	Network
+
+#: apps/estado/main/ec_cfg.c:43
+Impresora 3D	3D printer
+
+#: apps/estado/main/ec_cfg.c:43
+Taller	Workshop
+
+#: apps/estado/main/ec_cfg.c:44
+Router	Router
+
+#: apps/estado/main/ec_cfg.c:45
+Página web	Web page
+
+#: apps/estado/main/ec_cfg.c:45
+Internet	Internet
+
+#: apps/estado/main/ec_cfg.c:46
+Puerto TCP	TCP port
+
+#: apps/estado/main/ec_check.c:716
+No se encuentra el nombre	Name not found
+
+#: apps/estado/main/ec_check.c:717
+Rechaza la conexión	Connection refused
+
+#: apps/estado/main/ec_check.c:718
+No contesta	No answer
+
+#: apps/estado/main/ec_check.c:719
+Certificado no válido	Invalid certificate
+
+#: apps/estado/main/ec_check.c:720
+La placa todavía no tiene hora	The board has no time yet
+
+#: apps/estado/main/ec_check.c:721
+Contestó otro código	Answered another code
+
+#: apps/estado/main/ec_check.c:722
+Falta la palabra	The word is missing
+
+#: apps/estado/main/ec_check.c:723
+No contesta HTTP	Not answering HTTP
+
+#: apps/estado/main/ec_check.c:724
+Cortó la conexión	Connection dropped
+
+#: apps/estado/main/ec_check.c:725
+Sin memoria	Out of memory
+
+#: apps/estado/main/ec_check.c:726
+La dirección no sirve	The address is no good
+
+#: apps/estado/main/ec_check.c:752
+Anda	Up
+
+#: apps/estado/main/ec_check.c:753
+Lento	Slow
+
+#: apps/estado/main/ec_check.c:754
+#: apps/estado/main/ec_desk.c:59
+#: apps/estado/main/ec_list.c:63
+Caído	Down
+
+#: apps/estado/main/ec_check.c:755
+#: apps/estado/main/ec_list.c:69
+En pausa	Paused
+
+#: apps/estado/main/ec_check.c:756
+#: apps/estado/main/ec_detail.c:258
+#: apps/estado/main/ec_list.c:75
+Probando	Checking
+
+#: apps/estado/main/ec_desk.c:77
+Sin servicios	No services
+
+#: apps/estado/main/ec_desk.c:79
+Sin red	No network
+
+#: apps/estado/main/ec_desk.c:82
+%d caído	%d down
+
+#: apps/estado/main/ec_desk.c:82
+%d caídos	%d down
+
+#: apps/estado/main/ec_desk.c:85
+%d lento	%d slow
+
+#: apps/estado/main/ec_desk.c:85
+%d lentos	%d slow
+
+#: apps/estado/main/ec_desk.c:88
+Todo anda	All up
+
+#: apps/estado/main/ec_desk.c:179
+Sin servicios todavía	No services yet
+
+#: apps/estado/main/ec_detail.c:64
+hace 24 h	24 h ago
+
+#: apps/estado/main/ec_detail.c:64
+hace 6 h	6 h ago
+
+#: apps/estado/main/ec_detail.c:108
+Sin cortes registrados	No outages recorded
+
+#: apps/estado/main/ec_detail.c:122
+%s · sigue caído	%s · still down
+
+#: apps/estado/main/ec_detail.c:145
+Caído %s	Down %s
+
+#: apps/estado/main/ec_detail.c:148
+desde	since
+
+#: apps/estado/main/ec_detail.c:169
+#: apps/estado/main/ec_detail.c:311
+Certificado	Certificate
+
+#: apps/estado/main/ec_detail.c:170
+%d días	%d days
+
+#: apps/estado/main/ec_detail.c:171
+#: apps/estado/main/estado.c:169
+Venció	Expired
+
+#: apps/estado/main/ec_detail.c:175
+Conexión	Connect
+
+#: apps/estado/main/ec_detail.c:183
+En pausa: no se prueba	Paused: not checked
+
+#: apps/estado/main/ec_detail.c:183
+Todavía no se probó	Not checked yet
+
+#: apps/estado/main/ec_detail.c:190
+Último chequeo %s: el puerto abre en %s	Last check %s: the port opens in %s
+
+#: apps/estado/main/ec_detail.c:191
+Último chequeo %s: %d, contestó en %s (conectar: %s)	Last check %s: %d, answered in %s (connecting: %s)
+
+#: apps/estado/main/ec_detail.c:193
+contestó %d	answered %d
+
+#: apps/estado/main/ec_detail.c:195
+Último chequeo %s: %s	Last check %s: %s
+
+#: apps/estado/main/ec_detail.c:208
+No se pudo leer el certificado (el servidor sólo habla TLS 1.3, o no es HTTPS).	Could not read the certificate (the server speaks TLS 1.3 only, or it is not HTTPS).
+
+#: apps/estado/main/ec_detail.c:212
+Certificado de %s: venció.	Certificate for %s: expired.
+
+#: apps/estado/main/ec_detail.c:213
+Certificado de %s: vence en %d días.	Certificate for %s: expires in %d days.
+
+#: apps/estado/main/ec_detail.c:216
+Lo firmó él mismo.	Self-signed.
+
+#: apps/estado/main/ec_detail.c:220
+Se confía en él.	Trusted.
+
+#: apps/estado/main/ec_detail.c:230
+Seguir	Resume
+
+#: apps/estado/main/ec_detail.c:230
+#: apps/estado/main/ec_detail.c:402
+Pausar	Pause
+
+#: apps/estado/main/ec_detail.c:276
+No se pudo guardar el certificado	Could not save the certificate
+
+#: apps/estado/main/ec_detail.c:282
+Listo: se confía en este certificado	Done: this certificate is trusted
+
+#: apps/estado/main/ec_detail.c:311
+#: apps/estado/main/ec_detail.c:332
+Latencia	Latency
+
+#: apps/estado/main/ec_detail.c:311
+En 24 h	In 24 h
+
+#: apps/estado/main/ec_detail.c:311
+En 7 días	In 7 days
+
+#: apps/estado/main/ec_detail.c:366
+Sin datos todavía	No data yet
+
+#: apps/estado/main/ec_detail.c:382
+ahora	now
+
+#: apps/estado/main/ec_detail.c:401
+Probar ahora	Check now
+
+#: apps/estado/main/ec_detail.c:404
+Confiar en este certificado	Trust this certificate
+
+#: apps/estado/main/ec_detail.c:411
+Últimos cortes	Latest outages
+
+#: apps/estado/main/ec_detail.c:452
+%s · cada %s	%s · every %s
+
+#: apps/estado/main/ec_edit.c:99
+Falta el nombre	The name is missing
+
+#: apps/estado/main/ec_edit.c:100
+El nombre no puede llevar corchetes	The name cannot have brackets
+
+#: apps/estado/main/ec_edit.c:102
+Ya hay un servicio con ese nombre	There is already a service with that name
+
+#: apps/estado/main/ec_edit.c:108
+Falta la IP o el nombre en la dirección	The address is missing its IP or name
+
+#: apps/estado/main/ec_edit.c:110
+La dirección tiene que empezar con http:// o https://	The address must start with http:// or https://
+
+#: apps/estado/main/ec_edit.c:112
+El código esperado: 200, 200-399 o 200,401	The expected code: 200, 200-399 or 200,401
+
+#: apps/estado/main/ec_edit.c:116
+Falta la dirección (IP o nombre)	The address is missing (IP or name)
+
+#: apps/estado/main/ec_edit.c:117
+El puerto va de 1 a 65535	The port goes from 1 to 65535
+
+#: apps/estado/main/ec_edit.c:139
+No se pudo guardar en la tarjeta	Could not save to the card
+
+#: apps/estado/main/ec_edit.c:149
+Tocá de nuevo para borrar	Tap again to delete
+
+#: apps/estado/main/ec_edit.c:330
+puerto TCP %d	TCP port %d
+
+#: apps/estado/main/ec_edit.c:335
+#: apps/estado/main/ec_list.c:426
+Las direcciones se cargan más cómodo desde la página Estado de la casa del portal.	Addresses are easier to type on the Home Status page of the portal.
+
+#: apps/estado/main/ec_edit.c:353
+Editar servicio	Edit service
+
+#: apps/estado/main/ec_edit.c:353
+Servicio nuevo	New service
+
+#: apps/estado/main/ec_edit.c:353
+¿Qué querés vigilar?	What do you want to watch?
+
+#: apps/estado/main/ec_edit.c:360
+Guardar	Save
+
+#: apps/estado/main/ec_edit.c:378
+Nombre	Name
+
+#: apps/estado/main/ec_edit.c:379
+Grupo	Group
+
+#: apps/estado/main/ec_edit.c:379
+Casa, Red, Cámaras...	Home, Network, Cameras...
+
+#: apps/estado/main/ec_edit.c:380
+Cómo se prueba	How it is checked
+
+#: apps/estado/main/ec_edit.c:381
+Pedido HTTP(S)	HTTP(S) request
+
+#: apps/estado/main/ec_edit.c:382
+Puerto TCP abierto	Open TCP port
+
+#: apps/estado/main/ec_edit.c:386
+Dirección	Address
+
+#: apps/estado/main/ec_edit.c:387
+Códigos que valen	Codes that count as up
+
+#: apps/estado/main/ec_edit.c:388
+Palabra que tiene que estar (opcional)	Word that must be there (optional)
+
+#: apps/estado/main/ec_edit.c:390
+Dirección (IP o nombre)	Address (IP or name)
+
+#: apps/estado/main/ec_edit.c:392
+Puerto	Port
+
+#: apps/estado/main/ec_edit.c:394
+Probar cada	Check every
+
+#: apps/estado/main/ec_edit.c:409
+Lento desde (ms)	Slow from (ms)
+
+#: apps/estado/main/ec_edit.c:412
+Avisar si al certificado le quedan menos días (0: no)	Warn when the certificate has fewer days left (0: never)
+
+#: apps/estado/main/ec_edit.c:415
+Borrar este servicio	Delete this service
+
+#: apps/estado/main/ec_list.c:58
+#: apps/estado/main/ec_list.c:74
+falló una vez, probando de nuevo	failed once, trying again
+
+#: apps/estado/main/ec_list.c:58
+#: apps/estado/main/ec_list.c:74
+falló varias veces, probando de nuevo	failed a few times, trying again
+
+#: apps/estado/main/ec_list.c:59
+#: apps/estado/main/ec_list.c:167
+anda	up
+
+#: apps/estado/main/ec_list.c:60
+desde %s	since %s
+
+#: apps/estado/main/ec_list.c:64
+#: apps/estado/main/estado.c:163
+Contestó %d	Answered %d
+
+#: apps/estado/main/ec_list.c:167
+lento	slow
+
+#: apps/estado/main/ec_list.c:167
+caído	down
+
+#: apps/estado/main/ec_list.c:168
+andan	up
+
+#: apps/estado/main/ec_list.c:168
+lentos	slow
+
+#: apps/estado/main/ec_list.c:168
+caídos	down
+
+#: apps/estado/main/ec_list.c:189
+No entran más servicios	No room for more services
+
+#: apps/estado/main/ec_list.c:216
+Estado de la casa	Home Status
+
+#: apps/estado/main/ec_list.c:249
+La placa no tiene red: los chequeos esperan a que vuelva.	The board has no network: checks wait for it to come back.
+
+#: apps/estado/main/ec_list.c:273
+Sin grupo	No group
+
+#: apps/estado/main/ec_list.c:284
+Todavía no hay servicios.\n\nAgregá uno con + (hay plantillas para Home Assistant, Frigate, un NAS, una impresora 3D, el router o una página), o cargalos cómodo desde la página Estado de la casa del portal.	No services yet.\n\nAdd one with + (there are templates for Home Assistant, Frigate, a NAS, a 3D printer, the router or a web page), or enter them comfortably on the Home Status page of the portal.
+
+#: apps/estado/main/ec_list.c:289
+Agregar un servicio	Add a service
+
+#: apps/estado/main/ec_list.c:362
+Probando todos	Checking all
+
+#: apps/estado/main/ec_list.c:409
+Opciones	Options
+
+#: apps/estado/main/ec_list.c:410
+Pitido con cada aviso	Beep with each notice
+
+#: apps/estado/main/ec_list.c:412
+Vigilar desde que prende la placa	Watch from when the board starts
+
+#: apps/estado/main/ec_list.c:414
+Fallas seguidas para darlo por caído	Failures in a row before it is down
+
+#: apps/estado/main/ec_list.c:433
+Probar todos	Check all
+
+#: apps/estado/main/ec_list.c:435
+Listo	Done
+
+#: apps/estado/main/ec_ui.c:121
+recién	just now
+
+#: apps/estado/main/ec_ui.c:129
+hace %s	%s ago
+
+#: apps/estado/main/ec_ui.c:156
+hoy %02d:%02d	today %02d:%02d
+
+#: apps/estado/main/estado.c:158
+%s se cayó	%s went down
+
+#: apps/estado/main/estado.c:159
+%s volvió	%s is back
+
+#: apps/estado/main/estado.c:160
+Certificado de %s	Certificate for %s
+
+#: apps/estado/main/estado.c:167
+Estuvo caído %s	It was down %s
+
+#: apps/estado/main/estado.c:171
+Vence en %d días	Expires in %d days

@@ -1,0 +1,399 @@
+# amoledos-lang 1   es -> en
+# web.estado.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/estado/web/estado.js:27
+Casa	Home
+
+#: apps/estado/web/estado.js:28
+Cámaras	Cameras
+
+#: apps/estado/web/estado.js:29
+NAS	NAS
+
+#: apps/estado/web/estado.js:29
+#: apps/estado/web/estado.js:31
+#: apps/estado/web/estado.js:33
+Red	Network
+
+#: apps/estado/web/estado.js:30
+Impresora 3D	3D printer
+
+#: apps/estado/web/estado.js:30
+Taller	Workshop
+
+#: apps/estado/web/estado.js:31
+Router	Router
+
+#: apps/estado/web/estado.js:32
+Página web	Web page
+
+#: apps/estado/web/estado.js:32
+Internet	Internet
+
+#: apps/estado/web/estado.js:33
+Puerto TCP	TCP port
+
+#: apps/estado/web/estado.js:38
+Probando	Checking
+
+#: apps/estado/web/estado.js:38
+Anda	Up
+
+#: apps/estado/web/estado.js:38
+Lento	Slow
+
+#: apps/estado/web/estado.js:38
+#: apps/estado/web/estado.js:304
+Caído	Down
+
+#: apps/estado/web/estado.js:38
+#: apps/estado/web/estado.js:401
+En pausa	Paused
+
+#: apps/estado/web/estado.js:41
+No se encuentra el nombre	Name not found
+
+#: apps/estado/web/estado.js:41
+Rechaza la conexión	Connection refused
+
+#: apps/estado/web/estado.js:41
+No contesta	No answer
+
+#: apps/estado/web/estado.js:42
+Certificado no válido	Invalid certificate
+
+#: apps/estado/web/estado.js:42
+La placa todavía no tiene hora	The board has no time yet
+
+#: apps/estado/web/estado.js:42
+Contestó otro código	Answered another code
+
+#: apps/estado/web/estado.js:43
+Falta la palabra	The word is missing
+
+#: apps/estado/web/estado.js:43
+No contesta HTTP	Not answering HTTP
+
+#: apps/estado/web/estado.js:43
+Cortó la conexión	Connection dropped
+
+#: apps/estado/web/estado.js:44
+Sin memoria	Out of memory
+
+#: apps/estado/web/estado.js:44
+La dirección no sirve	The address is no good
+
+#: apps/estado/web/estado.js:178
+servicio %d	service %d
+
+#: apps/estado/web/estado.js:179
+%s: el nombre, de 1 a 39 caracteres y sin corchetes	%s: the name, 1 to 39 characters and no brackets
+
+#: apps/estado/web/estado.js:180
+%s: hay dos con ese nombre	%s: there are two with that name
+
+#: apps/estado/web/estado.js:182
+%s: el grupo, de 23 caracteres como mucho	%s: the group, 23 characters at most
+
+#: apps/estado/web/estado.js:184
+%s: falta la dirección (IP o nombre, sin espacios)	%s: the address is missing (IP or name, no spaces)
+
+#: apps/estado/web/estado.js:185
+%s: el puerto va de 1 a 65535	%s: the port goes from 1 to 65535
+
+#: apps/estado/web/estado.js:187
+%s: falta la IP o el nombre en la dirección	%s: the address is missing its IP or name
+
+#: apps/estado/web/estado.js:188
+%s: la dirección tiene que empezar con http:// o https://	%s: the address must start with http:// or https://
+
+#: apps/estado/web/estado.js:189
+%s: los códigos que valen, como 200, 200-399 o 200,401	%s: the codes that count, like 200, 200-399 or 200,401
+
+#: apps/estado/web/estado.js:216
+%d d %d h	%d d %d h
+
+#: apps/estado/web/estado.js:217
+%d h %d min	%d h %d min
+
+#: apps/estado/web/estado.js:218
+%d min	%d min
+
+#: apps/estado/web/estado.js:219
+%d s	%d s
+
+#: apps/estado/web/estado.js:224
+recién	just now
+
+#: apps/estado/web/estado.js:225
+hace %s	%s ago
+
+#: apps/estado/web/estado.js:233
+Contestó %d	Answered %d
+
+#: apps/estado/web/estado.js:239
+La placa no tomó la orden (%d)	The board did not take the order (%d)
+
+#: apps/estado/web/estado.js:283
+Probando %s	Checking %s
+
+#: apps/estado/web/estado.js:283
+Probar	Check
+
+#: apps/estado/web/estado.js:284
+Seguir	Resume
+
+#: apps/estado/web/estado.js:284
+Pausar	Pause
+
+#: apps/estado/web/estado.js:285
+Ver más	More
+
+#: apps/estado/web/estado.js:289
+¿Confiar en el certificado que muestra %s? Desde ahora sólo vale ese: si el servidor lo cambia, va a salir caído hasta que confíes en el nuevo.	Trust the certificate %s shows? From now on only that one counts: if the server changes it, it will show as down until you trust the new one.
+
+#: apps/estado/web/estado.js:289
+Listo: se confía en este certificado	Done: this certificate is trusted
+
+#: apps/estado/web/estado.js:290
+Confiar en este certificado	Trust this certificate
+
+#: apps/estado/web/estado.js:310
+falló una vez, probando de nuevo	failed once, trying again
+
+#: apps/estado/web/estado.js:310
+falló %d veces, probando de nuevo	failed %d times, trying again
+
+#: apps/estado/web/estado.js:310
+anda %s	up %s
+
+#: apps/estado/web/estado.js:314
+24 h	24 h
+
+#: apps/estado/web/estado.js:314
+7 días	7 days
+
+#: apps/estado/web/estado.js:315
+conectar	connect
+
+#: apps/estado/web/estado.js:320
+Certificado de %s: venció	Certificate for %s: expired
+
+#: apps/estado/web/estado.js:320
+Certificado de %s: %d días	Certificate for %s: %d days
+
+#: apps/estado/web/estado.js:323
+No se pudo leer el certificado	Could not read the certificate
+
+#: apps/estado/web/estado.js:332
+%s: las últimas 24 horas	%s: the last 24 hours
+
+#: apps/estado/web/estado.js:334
+Pidiendo el historial a la placa...	Asking the board for the history...
+
+#: apps/estado/web/estado.js:349
+%s, %s: %s	%s, %s: %s
+
+#: apps/estado/web/estado.js:349
+%s: sigue caído (%s)	%s: still down (%s)
+
+#: apps/estado/web/estado.js:350
+Sin cortes registrados	No outages recorded
+
+#: apps/estado/web/estado.js:352
+Latencia de cada cinco minutos (arriba: %s); en rojo, los que no contestó	Latency every five minutes (top: %s); in red, when it did not answer
+
+#: apps/estado/web/estado.js:354
+Disponibilidad por día	Availability by day
+
+#: apps/estado/web/estado.js:355
+Últimos cortes	Latest outages
+
+#: apps/estado/web/estado.js:373
+Pedido HTTP(S)	HTTP(S) request
+
+#: apps/estado/web/estado.js:374
+Puerto TCP abierto	Open TCP port
+
+#: apps/estado/web/estado.js:381
+Sin nombre	No name
+
+#: apps/estado/web/estado.js:382
+Más arriba	Move up
+
+#: apps/estado/web/estado.js:383
+Más abajo	Move down
+
+#: apps/estado/web/estado.js:384
+¿Sacar %s de la lista?	Take %s off the list?
+
+#: apps/estado/web/estado.js:384
+este servicio	this service
+
+#: apps/estado/web/estado.js:384
+Borrar	Delete
+
+#: apps/estado/web/estado.js:386
+Nombre	Name
+
+#: apps/estado/web/estado.js:387
+Grupo	Group
+
+#: apps/estado/web/estado.js:387
+Casa, Red, Cámaras...	Home, Network, Cameras...
+
+#: apps/estado/web/estado.js:388
+Ícono	Icon
+
+#: apps/estado/web/estado.js:389
+Cómo se prueba	How it is checked
+
+#: apps/estado/web/estado.js:391
+Dirección (IP o nombre)	Address (IP or name)
+
+#: apps/estado/web/estado.js:392
+Puerto	Port
+
+#: apps/estado/web/estado.js:393
+Dirección	Address
+
+#: apps/estado/web/estado.js:394
+Códigos que valen	Codes that count as up
+
+#: apps/estado/web/estado.js:395
+Palabra que tiene que estar (opcional)	Word that must be there (optional)
+
+#: apps/estado/web/estado.js:396
+Avisar si al certificado le quedan menos días (0: no)	Warn when the certificate has fewer days left (0: never)
+
+#: apps/estado/web/estado.js:397
+Probar cada	Check every
+
+#: apps/estado/web/estado.js:398
+Lento desde (ms)	Slow from (ms)
+
+#: apps/estado/web/estado.js:399
+Esperar hasta (ms)	Wait up to (ms)
+
+#: apps/estado/web/estado.js:416
+se cayó: contestó %s	went down: answered %s
+
+#: apps/estado/web/estado.js:416
+se cayó: %s	went down: %s
+
+#: apps/estado/web/estado.js:419
+volvió después de %s	came back after %s
+
+#: apps/estado/web/estado.js:423
+su certificado venció	its certificate expired
+
+#: apps/estado/web/estado.js:423
+a su certificado le quedan %s días	its certificate has %s days left
+
+#: apps/estado/web/estado.js:430
+Nada todavía: acá aparece cada vez que algo se cae o vuelve.	Nothing yet: every time something goes down or comes back, it shows here.
+
+#: apps/estado/web/estado.js:437
+#: apps/estado/web/estado.js:587
+Estado de la casa	Home Status
+
+#: apps/estado/web/estado.js:443
+#: apps/estado/web/estado.js:554
+Leyendo...	Reading...
+
+#: apps/estado/web/estado.js:446
+Guardar en la tarjeta	Save to the card
+
+#: apps/estado/web/estado.js:456
+anda	up
+
+#: apps/estado/web/estado.js:456
+andan	up
+
+#: apps/estado/web/estado.js:457
+lento	slow
+
+#: apps/estado/web/estado.js:457
+lentos	slow
+
+#: apps/estado/web/estado.js:458
+caído	down
+
+#: apps/estado/web/estado.js:458
+caídos	down
+
+#: apps/estado/web/estado.js:459
+La placa no tiene red: los chequeos esperan.	The board has no network: checks are waiting.
+
+#: apps/estado/web/estado.js:461
+Probando todos	Checking all
+
+#: apps/estado/web/estado.js:461
+Probar todos	Check all
+
+#: apps/estado/web/estado.js:471
+Sin grupo	No group
+
+#: apps/estado/web/estado.js:497
+La app Estado de la casa no está abierta en la placa. 	The Home Status app is not open on the board. 
+
+#: apps/estado/web/estado.js:498
+Abrirla	Open it
+
+#: apps/estado/web/estado.js:502
+Ningún servicio todavía: agregalos en Servicios.	No services yet: add them under Services.
+
+#: apps/estado/web/estado.js:509
+No se puede leer el estado: %s	Cannot read the status: %s
+
+#: apps/estado/web/estado.js:524
+Guardado: la placa empieza a probarlos	Saved: the board starts checking them
+
+#: apps/estado/web/estado.js:526
+No se pudo guardar: %s	Could not save: %s
+
+#: apps/estado/web/estado.js:530
+IP o nombre: 10.20.30.40	IP or name: 10.20.30.40
+
+#: apps/estado/web/estado.js:532
+No entran más de 32 servicios	No more than 32 services fit
+
+#: apps/estado/web/estado.js:541
++ Agregar	+ Add
+
+#: apps/estado/web/estado.js:546
+Pitido con cada aviso	Beep with each notice
+
+#: apps/estado/web/estado.js:546
+Vigilar desde que prende la placa	Watch from when the board starts
+
+#: apps/estado/web/estado.js:547
+Fallas seguidas para darlo por caído	Failures in a row before it is down
+
+#: apps/estado/web/estado.js:559
+Todos	All
+
+#: apps/estado/web/estado.js:568
+Cada servicio se prueba solo: un pedido HTTP(S) que tiene que contestar con uno de los códigos (y, si se pide, tener una palabra), o un puerto TCP que tiene que abrir. Probá sólo tus equipos.	Each service is checked on its own: an HTTP(S) request that must answer with one of the codes (and, if asked, contain a word), or a TCP port that must open. Only check your own devices.
+
+#: apps/estado/web/estado.js:570
+Agregar desde una plantilla	Add from a template
+
+#: apps/estado/web/estado.js:574
+Actualizar	Refresh
+
+#: apps/estado/web/estado.js:575
+Bajar	Download
+
+#: apps/estado/web/estado.js:580
+Ahora	Now
+
+#: apps/estado/web/estado.js:580
+Servicios	Services
+
+#: apps/estado/web/estado.js:580
+Historial	History
