@@ -5,393 +5,393 @@
 # Los \n van escapados a proposito; el cargador los desescapa.
 # Una linea sin traducir (las dos mitades iguales) se ve en espanol.
 
-#: apps/tanques/main/tanques.c:381
+#: apps/tanques/main/tanques.c:434
 Falta el arte: copiá tanques_p4.pak en /apps de la tarjeta.	Die Grafik fehlt: kopiere tanques_p4.pak nach /apps auf der Karte.
 
-#: apps/tanques/main/tq_battle.c:130
+#: apps/tanques/main/tq_battle.c:133
 ¡Fuera de combate!	Ausgeschaltet!
 
-#: apps/tanques/main/tq_battle.c:135
+#: apps/tanques/main/tq_battle.c:138
 ¡Cerca!	Knapp!
 
-#: apps/tanques/main/tq_battle.c:139
+#: apps/tanques/main/tq_battle.c:142
 ¡Afuera!	Daneben!
 
-#: apps/tanques/main/tq_battle.c:146
+#: apps/tanques/main/tq_battle.c:149
 ¡Escudo!	Schild!
 
-#: apps/tanques/main/tq_battle.c:149
+#: apps/tanques/main/tq_battle.c:152
 ¡Sin energía!	Ohne Energie!
 
-#: apps/tanques/main/tq_battle.c:149
+#: apps/tanques/main/tq_battle.c:152
 EMP	EMP
 
-#: apps/tanques/main/tq_battle.c:152
+#: apps/tanques/main/tq_battle.c:155
 ¡Zas!	Zack!
 
-#: apps/tanques/main/tq_battle.c:155
+#: apps/tanques/main/tq_battle.c:158
 ¡Mina!	Mine!
 
-#: apps/tanques/main/tq_battle.c:159
+#: apps/tanques/main/tq_battle.c:162
 ¡Quema!	Es brennt!
 
-#: apps/tanques/main/tq_battle.c:249
+#: apps/tanques/main/tq_battle.c:252
 #: apps/tanques/main/tq_hangar.c:380
 No hay memoria para el arte	Zu wenig Speicher für die Grafik
 
-#: apps/tanques/main/tq_battle.c:382
+#: apps/tanques/main/tq_battle.c:385
 Juega %s	%s ist dran
 
-#: apps/tanques/main/tq_battle.c:383
+#: apps/tanques/main/tq_battle.c:386
 Tu turno	Du bist dran
 
-#: apps/tanques/main/tq_battle.c:384
+#: apps/tanques/main/tq_battle.c:387
 Turno: %s	Am Zug: %s
 
-#: apps/tanques/main/tq_battle.c:395
+#: apps/tanques/main/tq_battle.c:398
 Viento %s %.0f	Wind %s %.0f
 
-#: apps/tanques/main/tq_battle.c:409
-#: apps/tanques/main/tq_battle.c:493
+#: apps/tanques/main/tq_battle.c:412
+#: apps/tanques/main/tq_battle.c:496
 Apuntar	Zielen
 
-#: apps/tanques/main/tq_battle.c:409
-#: apps/tanques/main/tq_battle.c:410
+#: apps/tanques/main/tq_battle.c:412
+#: apps/tanques/main/tq_battle.c:413
 Terminar	Zug beenden
 
-#: apps/tanques/main/tq_battle.c:410
-#: apps/tanques/main/tq_battle.c:508
+#: apps/tanques/main/tq_battle.c:413
+#: apps/tanques/main/tq_battle.c:511
 Mover	Fahren
 
-#: apps/tanques/main/tq_battle.c:429
+#: apps/tanques/main/tq_battle.c:432
 Elevación %d°   Giro %d°	Höhe %d°   Drehung %d°
 
-#: apps/tanques/main/tq_battle.c:432
+#: apps/tanques/main/tq_battle.c:435
 Segundo disparo: AP x2	Zweiter Schuss: AP x2
 
-#: apps/tanques/main/tq_battle.c:495
+#: apps/tanques/main/tq_battle.c:498
 Tocá el mapa adonde ir. Arrastrá para mirar.	Tippe auf das Ziel. Ziehen zum Umsehen.
 
-#: apps/tanques/main/tq_battle.c:518
+#: apps/tanques/main/tq_battle.c:521
 ¡Fuego!	Feuer!
 
-#: apps/tanques/main/tq_battle.c:542
+#: apps/tanques/main/tq_battle.c:545
 ¿Dejar la batalla?	Schlacht verlassen?
 
-#: apps/tanques/main/tq_battle.c:544
+#: apps/tanques/main/tq_battle.c:547
 Dejar	Verlassen
 
-#: apps/tanques/main/tq_battle.c:547
-#: apps/tanques/main/tq_menu.c:343
+#: apps/tanques/main/tq_battle.c:550
+#: apps/tanques/main/tq_menu.c:357
 Seguir	Weiter
 
-#: apps/tanques/main/tq_battle.c:566
+#: apps/tanques/main/tq_battle.c:569
 Turno de %s\nPasale la placa	%s ist dran\nGib das Gerät weiter
 
-#: apps/tanques/main/tq_battle.c:626
+#: apps/tanques/main/tq_battle.c:629
 No llega hasta ahí	Zu weit weg
 
-#: apps/tanques/main/tq_battle.c:782
+#: apps/tanques/main/tq_battle.c:785
 Sin AP	Keine AP
 
-#: apps/tanques/main/tq_data.c:18
+#: apps/tanques/main/tq_data.c:19
 Bombo	Pauke
 
-#: apps/tanques/main/tq_data.c:18
+#: apps/tanques/main/tq_data.c:19
 Para todo: buen blindaje, buen motor, tres armas	Allrounder: gute Panzerung, guter Motor, drei Waffen
 
-#: apps/tanques/main/tq_data.c:19
+#: apps/tanques/main/tq_data.c:20
 Pulga	Floh
 
-#: apps/tanques/main/tq_data.c:19
+#: apps/tanques/main/tq_data.c:20
 Liviana y rápida: llega lejos, aguanta poco	Leicht und flink: fährt weit, hält wenig aus
 
-#: apps/tanques/main/tq_data.c:20
+#: apps/tanques/main/tq_data.c:21
 Mamut	Mammut
 
-#: apps/tanques/main/tq_data.c:20
+#: apps/tanques/main/tq_data.c:21
 Pesado: mucho blindaje, dos cañones, lento	Schwer: dicke Panzerung, zwei Kanonen, langsam
 
-#: apps/tanques/main/tq_data.c:21
+#: apps/tanques/main/tq_data.c:22
 Obús	Haubitze
 
-#: apps/tanques/main/tq_data.c:21
+#: apps/tanques/main/tq_data.c:22
 Artillería: lo que va por arriba pega más	Artillerie: Steilschüsse treffen härter
 
-#: apps/tanques/main/tq_data.c:22
+#: apps/tanques/main/tq_data.c:23
 Avispa	Wespe
 
-#: apps/tanques/main/tq_data.c:22
+#: apps/tanques/main/tq_data.c:23
 Misiles: los guiados y los láser pegan más	Raketen: Lenk- und Laserschüsse treffen härter
 
-#: apps/tanques/main/tq_data.c:23
+#: apps/tanques/main/tq_data.c:24
 Topo	Maulwurf
 
-#: apps/tanques/main/tq_data.c:23
+#: apps/tanques/main/tq_data.c:24
 Ingeniero: cava, arregla y planta minas mejor	Pionier: gräbt, repariert und legt Minen besser
 
-#: apps/tanques/main/tq_data.c:26
+#: apps/tanques/main/tq_data.c:27
 Blindaje	Panzerung
 
-#: apps/tanques/main/tq_data.c:26
+#: apps/tanques/main/tq_data.c:27
 Motor	Antrieb
 
-#: apps/tanques/main/tq_data.c:26
+#: apps/tanques/main/tq_data.c:27
 Velocidad	Tempo
 
-#: apps/tanques/main/tq_data.c:26
+#: apps/tanques/main/tq_data.c:27
 Energía	Energie
 
-#: apps/tanques/main/tq_data.c:28
+#: apps/tanques/main/tq_data.c:29
 Más vida y menos daño por golpe	Mehr Leben, weniger Schaden pro Treffer
 
-#: apps/tanques/main/tq_data.c:29
+#: apps/tanques/main/tq_data.c:30
 Sube mejor las lomas	Kommt besser bergauf
 
-#: apps/tanques/main/tq_data.c:30
+#: apps/tanques/main/tq_data.c:31
 Más metros por punto de acción	Mehr Meter pro Aktionspunkt
 
-#: apps/tanques/main/tq_data.c:31
+#: apps/tanques/main/tq_data.c:32
 Un punto de acción más por turno	Ein Aktionspunkt mehr pro Zug
 
-#: apps/tanques/main/tq_data.c:60
+#: apps/tanques/main/tq_data.c:61
 Cañón	Kanone
 
-#: apps/tanques/main/tq_data.c:60
+#: apps/tanques/main/tq_data.c:61
 Rápido y recto: el de siempre	Schnell und gerade: der Klassiker
 
-#: apps/tanques/main/tq_data.c:61
+#: apps/tanques/main/tq_data.c:62
 Mortero	Mörser
 
-#: apps/tanques/main/tq_data.c:61
+#: apps/tanques/main/tq_data.c:62
 Por arriba de lo que tapa	Über jedes Hindernis
 
-#: apps/tanques/main/tq_data.c:62
+#: apps/tanques/main/tq_data.c:63
 Misil guiado	Lenkrakete
 
-#: apps/tanques/main/tq_data.c:62
+#: apps/tanques/main/tq_data.c:63
 Se tuerce hacia el tanque más cercano	Biegt zum nächsten Panzer ab
 
-#: apps/tanques/main/tq_data.c:63
+#: apps/tanques/main/tq_data.c:64
 Racimo	Streubombe
 
-#: apps/tanques/main/tq_data.c:63
+#: apps/tanques/main/tq_data.c:64
 Se abre arriba en cinco bombitas	Teilt sich oben in fünf Bömbchen
 
-#: apps/tanques/main/tq_data.c:64
+#: apps/tanques/main/tq_data.c:65
 Láser	Laser
 
-#: apps/tanques/main/tq_data.c:64
+#: apps/tanques/main/tq_data.c:65
 Derecho, sin caer, corta lo que encuentra	Schnurgerade, schneidet durch alles
 
-#: apps/tanques/main/tq_data.c:65
+#: apps/tanques/main/tq_data.c:66
 Napalm	Napalm
 
-#: apps/tanques/main/tq_data.c:65
+#: apps/tanques/main/tq_data.c:66
 Deja fuego dos turnos	Brennt zwei Runden lang
 
-#: apps/tanques/main/tq_data.c:66
+#: apps/tanques/main/tq_data.c:67
 Minas	Minen
 
-#: apps/tanques/main/tq_data.c:66
+#: apps/tanques/main/tq_data.c:67
 Tres minas: explotan al pasar	Drei Minen: explodieren beim Drüberfahren
 
-#: apps/tanques/main/tq_data.c:67
+#: apps/tanques/main/tq_data.c:68
 Pulso EMP	EMP-Puls
 
-#: apps/tanques/main/tq_data.c:67
+#: apps/tanques/main/tq_data.c:68
 Sin daño: el de al lado pierde la mitad de AP	Kein Schaden: Panzer daneben verlieren die Hälfte der AP
 
-#: apps/tanques/main/tq_data.c:68
+#: apps/tanques/main/tq_data.c:69
 Escudo	Schild
 
-#: apps/tanques/main/tq_data.c:68
+#: apps/tanques/main/tq_data.c:69
 Frena los próximos 40 de daño	Hält die nächsten 40 Schaden ab
 
-#: apps/tanques/main/tq_data.c:69
+#: apps/tanques/main/tq_data.c:70
 Reparación	Reparatur
 
-#: apps/tanques/main/tq_data.c:69
+#: apps/tanques/main/tq_data.c:70
 Recupera 30 de vida	Gibt 30 Leben zurück
 
-#: apps/tanques/main/tq_data.c:70
+#: apps/tanques/main/tq_data.c:71
 Humo	Rauch
 
-#: apps/tanques/main/tq_data.c:70
+#: apps/tanques/main/tq_data.c:71
 Una nube: lo que tira desde ahí o hacia ahí se desvía	Eine Wolke: Schüsse aus ihr oder hinein gehen daneben
 
-#: apps/tanques/main/tq_data.c:71
+#: apps/tanques/main/tq_data.c:72
 Rebote	Springer
 
-#: apps/tanques/main/tq_data.c:71
+#: apps/tanques/main/tq_data.c:72
 Pica dos veces antes de explotar	Springt zweimal, dann knallt's
 
-#: apps/tanques/main/tq_data.c:72
+#: apps/tanques/main/tq_data.c:73
 Perforador	Bohrer
 
-#: apps/tanques/main/tq_data.c:72
+#: apps/tanques/main/tq_data.c:73
 Se mete en la tierra y explota abajo	Gräbt sich ein und explodiert unten
 
-#: apps/tanques/main/tq_data.c:73
+#: apps/tanques/main/tq_data.c:74
 Bombardeo	Luftschlag
 
-#: apps/tanques/main/tq_data.c:73
+#: apps/tanques/main/tq_data.c:74
 Marcás un punto y caen cinco bombas	Markiere einen Punkt, fünf Bomben fallen
 
-#: apps/tanques/main/tq_data.c:74
+#: apps/tanques/main/tq_data.c:75
 Francotirador	Scharfschütze
 
-#: apps/tanques/main/tq_data.c:74
+#: apps/tanques/main/tq_data.c:75
 Muy rápido, poco radio, mucho daño	Sehr schnell, kleiner Radius, viel Schaden
 
-#: apps/tanques/main/tq_data.c:75
+#: apps/tanques/main/tq_data.c:76
 Escopeta	Schrotflinte
 
-#: apps/tanques/main/tq_data.c:75
+#: apps/tanques/main/tq_data.c:76
 Cinco perdigones abiertos	Fünf gestreute Kugeln
 
-#: apps/tanques/main/tq_data.c:76
+#: apps/tanques/main/tq_data.c:77
 Terremoto	Erdbeben
 
-#: apps/tanques/main/tq_data.c:76
+#: apps/tanques/main/tq_data.c:77
 Levanta y hunde el suelo alrededor	Hebt und senkt den Boden ringsum
 
-#: apps/tanques/main/tq_data.c:77
+#: apps/tanques/main/tq_data.c:78
 Teletransporte	Teleporter
 
-#: apps/tanques/main/tq_data.c:77
+#: apps/tanques/main/tq_data.c:78
 Tu tanque aparece donde cae	Dein Panzer erscheint, wo er landet
 
-#: apps/tanques/main/tq_data.c:78
+#: apps/tanques/main/tq_data.c:79
 Muro	Mauer
 
-#: apps/tanques/main/tq_data.c:78
+#: apps/tanques/main/tq_data.c:79
 Levanta tres piedras donde cae	Baut drei Steine, wo er landet
 
-#: apps/tanques/main/tq_data.c:79
+#: apps/tanques/main/tq_data.c:80
 Bomba gorda	Dicke Bombe
 
-#: apps/tanques/main/tq_data.c:79
+#: apps/tanques/main/tq_data.c:80
 Lenta y enorme	Langsam und riesig
 
-#: apps/tanques/main/tq_data.c:120
+#: apps/tanques/main/tq_data.c:121
 Naranja	Orange
 
-#: apps/tanques/main/tq_data.c:120
+#: apps/tanques/main/tq_data.c:121
 Crema	Creme
 
-#: apps/tanques/main/tq_data.c:120
+#: apps/tanques/main/tq_data.c:121
 Azul	Blau
 
-#: apps/tanques/main/tq_data.c:120
+#: apps/tanques/main/tq_data.c:121
 Blanco	Weiß
 
-#: apps/tanques/main/tq_data.c:120
+#: apps/tanques/main/tq_data.c:121
 Verde	Grün
 
-#: apps/tanques/main/tq_data.c:120
+#: apps/tanques/main/tq_data.c:121
 Arena	Sand
 
-#: apps/tanques/main/tq_data.c:121
+#: apps/tanques/main/tq_data.c:122
 Rojo	Rot
 
-#: apps/tanques/main/tq_data.c:121
+#: apps/tanques/main/tq_data.c:122
 Gris	Grau
 
-#: apps/tanques/main/tq_data.c:121
+#: apps/tanques/main/tq_data.c:122
 Carbón	Anthrazit
 
-#: apps/tanques/main/tq_data.c:121
+#: apps/tanques/main/tq_data.c:122
 Violeta	Violett
 
-#: apps/tanques/main/tq_data.c:121
+#: apps/tanques/main/tq_data.c:122
 Rosa	Rosa
 
-#: apps/tanques/main/tq_data.c:121
+#: apps/tanques/main/tq_data.c:122
 Celeste	Himmelblau
 
-#: apps/tanques/main/tq_data.c:217
+#: apps/tanques/main/tq_data.c:226
 Pradera	Wiese
 
-#: apps/tanques/main/tq_data.c:217
+#: apps/tanques/main/tq_data.c:226
 Desierto	Wüste
 
-#: apps/tanques/main/tq_data.c:217
+#: apps/tanques/main/tq_data.c:226
 Nieve	Schnee
 
-#: apps/tanques/main/tq_data.c:217
+#: apps/tanques/main/tq_data.c:226
 Ruinas	Ruinen
 
-#: apps/tanques/main/tq_data.c:217
+#: apps/tanques/main/tq_data.c:226
 Volcán	Vulkan
 
-#: apps/tanques/main/tq_data.c:218
+#: apps/tanques/main/tq_data.c:227
 Despejado	Klar
 
-#: apps/tanques/main/tq_data.c:218
+#: apps/tanques/main/tq_data.c:227
 Viento	Windig
 
-#: apps/tanques/main/tq_data.c:218
+#: apps/tanques/main/tq_data.c:227
 Tormenta	Sturm
 
-#: apps/tanques/main/tq_data.c:218
+#: apps/tanques/main/tq_data.c:227
 Niebla	Nebel
 
-#: apps/tanques/main/tq_data.c:220
+#: apps/tanques/main/tq_data.c:229
 Chico	Klein
 
-#: apps/tanques/main/tq_data.c:220
+#: apps/tanques/main/tq_data.c:229
 Mediano	Mittel
 
-#: apps/tanques/main/tq_data.c:220
+#: apps/tanques/main/tq_data.c:229
 Grande	Groß
 
-#: apps/tanques/main/tq_data.c:220
+#: apps/tanques/main/tq_data.c:229
 Muy grande	Riesig
 
-#: apps/tanques/main/tq_data.c:221
+#: apps/tanques/main/tq_data.c:230
 Fácil	Leicht
 
-#: apps/tanques/main/tq_data.c:221
+#: apps/tanques/main/tq_data.c:230
 Normal	Normal
 
-#: apps/tanques/main/tq_data.c:221
+#: apps/tanques/main/tq_data.c:230
 Difícil	Schwer
 
-#: apps/tanques/main/tq_data.c:225
+#: apps/tanques/main/tq_data.c:234
 El primer día	Der erste Tag
 
-#: apps/tanques/main/tq_data.c:226
+#: apps/tanques/main/tq_data.c:235
 La loma del medio	Der Hügel in der Mitte
 
-#: apps/tanques/main/tq_data.c:227
+#: apps/tanques/main/tq_data.c:236
 Dos contra uno	Zwei gegen einen
 
-#: apps/tanques/main/tq_data.c:228
+#: apps/tanques/main/tq_data.c:237
 Arena en los ojos	Sand in den Augen
 
-#: apps/tanques/main/tq_data.c:229
+#: apps/tanques/main/tq_data.c:238
 El oasis	Die Oase
 
-#: apps/tanques/main/tq_data.c:230
+#: apps/tanques/main/tq_data.c:239
 Tormenta de arena	Sandsturm
 
-#: apps/tanques/main/tq_data.c:231
+#: apps/tanques/main/tq_data.c:240
 Bajo cero	Unter null
 
-#: apps/tanques/main/tq_data.c:232
+#: apps/tanques/main/tq_data.c:241
 El muñeco de nieve	Der Schneemann
 
-#: apps/tanques/main/tq_data.c:233
+#: apps/tanques/main/tq_data.c:242
 Avalancha	Lawine
 
-#: apps/tanques/main/tq_data.c:234
+#: apps/tanques/main/tq_data.c:243
 La ciudad vacía	Die leere Stadt
 
-#: apps/tanques/main/tq_data.c:235
+#: apps/tanques/main/tq_data.c:244
 La plaza	Der Platz
 
-#: apps/tanques/main/tq_data.c:236
+#: apps/tanques/main/tq_data.c:245
 El volcán	Der Vulkan
 
 #: apps/tanques/main/tq_hangar.c:42
@@ -470,7 +470,7 @@ Tanques	Panzer
 Historia	Story
 
 #: apps/tanques/main/tq_menu.c:96
-#: apps/tanques/main/tq_menu.c:269
+#: apps/tanques/main/tq_menu.c:283
 Batalla libre	Freie Schlacht
 
 #: apps/tanques/main/tq_menu.c:166
@@ -482,50 +482,59 @@ Batalla libre	Freie Schlacht
 #: apps/tanques/main/tq_menu.c:169
 Ganá la anterior para jugarla	Gewinne die vorige, um sie zu spielen
 
-#: apps/tanques/main/tq_menu.c:245
+#: apps/tanques/main/tq_menu.c:210
+Salta	Springt
+
+#: apps/tanques/main/tq_menu.c:210
+Se desliza	Gleitet
+
+#: apps/tanques/main/tq_menu.c:259
 Jugador 1	Spieler 1
 
-#: apps/tanques/main/tq_menu.c:246
+#: apps/tanques/main/tq_menu.c:260
 Jugador 2	Spieler 2
 
-#: apps/tanques/main/tq_menu.c:271
+#: apps/tanques/main/tq_menu.c:285
 Lugar	Ort
 
-#: apps/tanques/main/tq_menu.c:271
+#: apps/tanques/main/tq_menu.c:285
 Tamaño	Größe
 
-#: apps/tanques/main/tq_menu.c:271
+#: apps/tanques/main/tq_menu.c:285
 Rivales	Gegner
 
-#: apps/tanques/main/tq_menu.c:271
+#: apps/tanques/main/tq_menu.c:285
 Dificultad	Schwierigkeit
 
-#: apps/tanques/main/tq_menu.c:271
+#: apps/tanques/main/tq_menu.c:285
 Clima	Wetter
 
-#: apps/tanques/main/tq_menu.c:272
+#: apps/tanques/main/tq_menu.c:286
+Cámara	Kamera
+
+#: apps/tanques/main/tq_menu.c:286
 Jugadores	Spieler
 
-#: apps/tanques/main/tq_menu.c:272
+#: apps/tanques/main/tq_menu.c:286
 Tanque del 2	Panzer von Spieler 2
 
-#: apps/tanques/main/tq_menu.c:291
+#: apps/tanques/main/tq_menu.c:305
 ¡A la batalla!	Auf in die Schlacht!
 
-#: apps/tanques/main/tq_menu.c:317
+#: apps/tanques/main/tq_menu.c:331
 Empate	Unentschieden
 
-#: apps/tanques/main/tq_menu.c:318
+#: apps/tanques/main/tq_menu.c:332
 ¡Ganó %s!	%s gewinnt!
 
-#: apps/tanques/main/tq_menu.c:320
+#: apps/tanques/main/tq_menu.c:334
 ¡Ganaste!	Gewonnen!
 
-#: apps/tanques/main/tq_menu.c:320
+#: apps/tanques/main/tq_menu.c:334
 Perdiste	Verloren
 
-#: apps/tanques/main/tq_menu.c:324
+#: apps/tanques/main/tq_menu.c:338
 Daño hecho: %d   Tanques fuera: %d	Schaden: %d   Ausgeschaltet: %d
 
-#: apps/tanques/main/tq_menu.c:328
+#: apps/tanques/main/tq_menu.c:342
 +%d monedas	+%d Münzen

@@ -130,6 +130,8 @@ typedef struct {
     uint8_t  f_biome, f_size, f_rivals, f_diff, f_weather, f_players;
     uint8_t  sfx;
     uint32_t wins, battles;
+    uint8_t  cam_jump;                  /* the battle camera jumps (1) or glides (0); version 2 */
+    uint8_t  spare[3];
 } tq_save_t;
 
 void tq_save_defaults(tq_save_t *s);

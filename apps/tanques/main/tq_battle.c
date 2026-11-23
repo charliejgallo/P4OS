@@ -39,6 +39,9 @@ static void cam_to(app_t *a, float x, float y, bool snap)
         bool gliding = a->cam_follow && ((a->cam_tx - a->cam_x) * (a->cam_tx - a->cam_x) +
                                          (a->cam_ty - a->cam_y) * (a->cam_ty - a->cam_y)) > 0.0004f;
         if (!gliding && fabsf(sx) < a->W * 0.27f && fabsf(sy) < a->H * 0.25f) return;
+        /* the camera jumps by default: one frame where a glide is many,
+         * and each costs about the same on the board */
+        if (a->save.cam_jump) snap = true;
     }
     tq_scene_top_clamp(a->ter, a->W, a->H, &x, &y);
     a->cam_tx = x;

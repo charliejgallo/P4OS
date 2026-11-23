@@ -7,6 +7,7 @@
 #include "aos_i18n.h"
 
 #include <stdio.h>
+#include <stddef.h>
 #include <string.h>
 
 /* --------------------------------------------------------------------------
@@ -148,7 +149,7 @@ void tq_emblem(int k, uint16_t out[16])
  * The save
  * -------------------------------------------------------------------------- */
 
-#define SAVE_VERSION 1
+#define SAVE_VERSION 2
 
 void tq_save_defaults(tq_save_t *s)
 {
@@ -173,6 +174,7 @@ void tq_save_defaults(tq_save_t *s)
     s->f_diff = 1;
     s->f_players = 1;
     s->sfx = 1;
+    s->cam_jump = 1;
 }
 
 static void path(char *out, size_t n)
@@ -187,8 +189,15 @@ bool tq_save_load(tq_save_t *s)
     FILE *f = fopen(p, "rb");
     if (!f) return false;
     tq_save_t t;
+    memset(&t, 0, sizeof t);
     size_t n = fread(&t, 1, sizeof t, f);
     fclose(f);
+    if (t.version == 1 && n == offsetof(tq_save_t, cam_jump)) {
+        /* the first version had no camera setting: it keeps all the rest */
+        t.version = SAVE_VERSION;
+        t.cam_jump = 1;
+        n = sizeof t;
+    }
     if (n != sizeof t || t.version != SAVE_VERSION) return false;
     *s = t;
     return true;
