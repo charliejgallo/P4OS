@@ -261,7 +261,7 @@ void tg_menu_pick(lv_obj_t *scr)
     for (int lang = 0; lang < TG_LANG_N; lang++) {
         bool ok = tg_lang_available(lang);
         lv_obj_t *card = lv_button_create(grid);
-        lv_obj_set_size(card, cw, tg->land ? 250 : 230);
+        lv_obj_set_size(card, cw, tg->land ? 270 : 262);
         lv_obj_set_style_bg_color(card, lv_color_hex(0x1f242b), 0);
         lv_obj_set_style_border_color(card, tg_lang_color(lang), 0);
         lv_obj_set_style_border_width(card, lang == tg->prefs.lang && tg->prefs.chosen ? 4 : 2, 0);

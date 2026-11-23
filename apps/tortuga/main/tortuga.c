@@ -305,7 +305,7 @@ static void load_art(void)
     char p[160];
     snprintf(p, sizeof p, "%s/%s", aos_hal_path_apps(), TG_PACK);
     if (!tg_pak_open(&tg->pak, p)) {
-        aos_hal_log("tortuga: no pack at %s", p);
+        aos_hal_log("tortuga", "no pack at %s", p);
         return;
     }
     int ok = 0;
@@ -317,7 +317,7 @@ static void load_art(void)
     }
     tg_pak_close(&tg->pak);
     tg->have_pak = ok == SH_N;
-    aos_hal_log("tortuga: %d of %d sheets, %u KB", ok, SH_N, (unsigned)(tg_mem_used() / 1024));
+    aos_hal_log("tortuga", "%d of %d sheets, %u KB", ok, SH_N, (unsigned)(tg_mem_used() / 1024));
 }
 
 static void free_art(void)
@@ -401,7 +401,7 @@ static void *tg_create(aos_app_t *self, lv_obj_t *root)
     tg->world = 1;
     tg_go(tg->prefs.chosen ? SCR_HOME : SCR_PICK);
     tg->timer = lv_timer_create(timer_cb, 33, NULL);
-    aos_hal_log("tortuga: %d levels, %s", tg->levels.n, tg->have_pak ? "with art" : "no art");
+    aos_hal_log("tortuga", "%d levels, %s", tg->levels.n, tg->have_pak ? "with art" : "no art");
     return tg;
 }
 
@@ -431,11 +431,12 @@ static bool tg_back(aos_app_t *self, void *inst)
     return tg_menu_back();
 }
 
-static bool tg_resize(aos_app_t *self, void *inst)
+static bool tg_resize(aos_app_t *self, void *inst, lv_obj_t *root)
 {
     (void)self;
     (void)inst;
     if (!tg) return false;
+    tg->root = root;
     lv_obj_update_layout(tg->root);
     tg->W = lv_obj_get_width(tg->root);
     tg->H = lv_obj_get_height(tg->root);

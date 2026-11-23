@@ -20,6 +20,7 @@
 #include "aos_i18n.h"
 #include "aos_pad.h"
 #include "aos_sys_glyphs.h"
+#include "aos_mono.h"
 #include "aos_theme.h"
 
 #include "tg_core.h"
