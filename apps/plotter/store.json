@@ -1,0 +1,17 @@
+{
+ "cat": "taller",
+ "about": {
+  "es": "Grafica en vivo los números que llegan por un puerto serie: un multímetro, una placa con sensores, una balanza. Varias series, avisos con pitido, CSV en la tarjeta y el gráfico en el portal.",
+  "en": "Plots live the numbers that come in on a serial port: a multimeter, a board with sensors, a scale. Several series, alerts with a beep, CSV on the card and the chart in the portal."
+ },
+ "desc": {
+  "es": "Lee el mismo canal A o B que la Terminal, por un puerto del header o un adaptador USB, a cualquier velocidad y formato (7E1, 8N1...) y con DTR y RTS para los cables de multímetro. La captura sigue con la app cerrada, y al abrirla grafica también las últimas 3000 líneas.\n\nEntiende solo los números separados por espacios, comas o tabs, el formato nombre:valor (temp:21.5,hum:40) y CSV con encabezado. Para lo demás hay perfiles: qué campo de la línea es cada serie, con escala y desplazamiento, o con el punto decimal según otro campo, como el +0265 4 de un multímetro que es 26.5. Una vista muestra cada línea y lo que se sacó de ella.\n\nEl último valor se ve grande, con el mínimo, el máximo y el promedio. Un dedo lee un punto, dos acercan y van hacia atrás en el tiempo, de 10 segundos a 8 horas; también una serie contra otra. Cada serie puede avisar con un pitido al pasar un límite. Graba a CSV con la hora, envía líneas al puerto y la página del portal muestra el gráfico en vivo y edita los perfiles. De pie o acostada.",
+  "en": "It reads the same channel A or B as the Terminal, on a header port or a USB adapter, at any speed and frame (7E1, 8N1...) and with DTR and RTS for multimeter cables. Capture goes on with the app closed, and opening it plots the last 3000 lines too.\n\nIt understands on its own numbers separated by spaces, commas or tabs, the name:value format (temp:21.5,hum:40) and CSV with a header. For the rest there are profiles: which field of the line each series is, with a scale and an offset, or with the decimal point given by another field, like a multimeter's +0265 4 that is 26.5. A view shows each line and what came out of it.\n\nThe last value shows big, with the minimum, maximum and average. One finger reads a point, two zoom and go back in time, from 10 seconds to 8 hours; one series against another too. Each series can alert with a beep when it passes a limit. It records to CSV with the time, sends lines to the port, and the portal page shows the chart live and edits the profiles. Upright or lying down."
+ },
+ "shots": [
+  "app-plotter.png",
+  "app-plotter-meter.png",
+  "app-plotter-profile.png",
+  "land-plotter.png"
+ ]
+}
