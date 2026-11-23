@@ -40,10 +40,10 @@ static void put_data(void)
     if (!s_buf) s_buf = pl_ps_alloc(sizeof(float) * (4 + LIVE_COLS * (1 + PL_MAXS)));
     if (!s_buf || !pl_cols_alloc(&s_cols, LIVE_COLS)) return;
     uint32_t now = pl_now();
-    uint32_t t1 = A.paused ? A.end_t : now;
-    uint32_t t0 = t1 > A.win_ms ? t1 - A.win_ms : 0;
+    uint32_t t1 = PLA.paused ? PLA.end_t : now;
+    uint32_t t0 = t1 > PLA.win_ms ? t1 - PLA.win_ms : 0;
     pl_data_columns(&s_cols, t0, t1, LIVE_COLS);
-    int ns = PD.ns, n = 0;
+    int ns = PLD.ns, n = 0;
     float *o = s_buf + 4;
     for (int k = 0; k < s_cols.ncols; k++) {
         bool any = false;
@@ -57,8 +57,8 @@ static void put_data(void)
     }
     s_buf[0] = (float)ns;
     s_buf[1] = (float)n;
-    s_buf[2] = (float)A.win_ms / 1000.0f;
-    s_buf[3] = A.paused ? (float)(now - t1) / 1000.0f : 0;
+    s_buf[2] = (float)PLA.win_ms / 1000.0f;
+    s_buf[3] = PLA.paused ? (float)(now - t1) / 1000.0f : 0;
     aos_hal_live_put(PL_ID, "data", "application/octet-stream", s_buf, sizeof(float) * (size_t)(4 + n * (1 + ns)));
 }
 
@@ -93,21 +93,21 @@ static void put_state(void)
     if (!s_json) s_json = pl_ps_alloc(JSON_MAX);
     if (!s_json) return;
     aos_serial_stat_t st;
-    aos_serial_stat(PS.ch, &st);
+    aos_serial_stat(PLS.ch, &st);
     size_t k = 0;
-    ADD("{\"ch\":\"%c\",\"running\":%s,\"port\":", PS.ch ? 'B' : 'A', st.running ? "true" : "false");
+    ADD("{\"ch\":\"%c\",\"running\":%s,\"port\":", PLS.ch ? 'B' : 'A', st.running ? "true" : "false");
     ADDS(st.running ? st.port : "");
-    ADD(",\"baud\":%u,\"frame\":", (unsigned)(st.running ? st.baud : A.baud));
-    ADDS(st.running ? st.frame : A.frame);
-    ADD(",\"lines\":%u,\"used\":%u,\"lost\":%u,\"rows\":%u,\"fmt\":", (unsigned)A.lines, (unsigned)A.used,
-        (unsigned)A.lost, (unsigned)PD.rows);
+    ADD(",\"baud\":%u,\"frame\":", (unsigned)(st.running ? st.baud : PLA.baud));
+    ADDS(st.running ? st.frame : PLA.frame);
+    ADD(",\"lines\":%u,\"used\":%u,\"lost\":%u,\"rows\":%u,\"fmt\":", (unsigned)PLA.lines, (unsigned)PLA.used,
+        (unsigned)PLA.lost, (unsigned)PLD.rows);
     ADDS(pl_fmt_name());
-    ADD(",\"paused\":%s,\"win\":%u,\"mode\":\"%s\",\"rec\":%s,\"recpath\":", A.paused ? "true" : "false",
-        (unsigned)(A.win_ms / 1000), PS.mode == PL_MODE_XY ? "xy" : "time", pl_csv_on() ? "true" : "false");
+    ADD(",\"paused\":%s,\"win\":%u,\"mode\":\"%s\",\"rec\":%s,\"recpath\":", PLA.paused ? "true" : "false",
+        (unsigned)(PLA.win_ms / 1000), PLS.mode == PL_MODE_XY ? "xy" : "time", pl_csv_on() ? "true" : "false");
     ADDS(pl_csv_on() ? pl_csv_path() : "");
-    ADD(",\"big\":%d,\"series\":[", PS.big);
-    for (int i = 0; i < PD.ns; i++) {
-        const pl_series_t *s = &PD.s[i];
+    ADD(",\"big\":%d,\"series\":[", PLS.big);
+    for (int i = 0; i < PLD.ns; i++) {
+        const pl_series_t *s = &PLD.s[i];
         float mn = NAN, mx = NAN, avg = NAN, last = NAN;
         if (s_cols.ncols && s_cols.sn[i]) {
             mn = s_cols.smin[i];
@@ -115,7 +115,7 @@ static void put_state(void)
             avg = s_cols.ssum[i] / (float)s_cols.sn[i];
             last = s_cols.slast[i];
         }
-        if (!A.paused && s->has) last = s->last;
+        if (!PLA.paused && s->has) last = s->last;
         ADD("%s{\"name\":", i ? "," : "");
         ADDS(s->name);
         ADD(",\"unit\":");
@@ -136,9 +136,9 @@ static void put_state(void)
         ADD(",\"state\":%d}", s->state);
     }
     ADD("],\"raw\":[");
-    uint32_t have = A.nraw < 10 ? A.nraw : 10;
+    uint32_t have = PLA.nraw < 10 ? PLA.nraw : 10;
     for (uint32_t i = 0; i < have; i++) {
-        const pl_rawline_t *r = &A.raw[(A.nraw - have + i) % PL_RAW_N];
+        const pl_rawline_t *r = &PLA.raw[(PLA.nraw - have + i) % PL_RAW_N];
         ADD("%s[", i ? "," : "");
         ADDS(r->text);
         ADD(",");
@@ -162,24 +162,24 @@ static void take(void)
         if (v) *v++ = 0;
         else v = m + n;
         if (!strcmp(m, "pause")) {
-            A.paused = atoi(v) != 0;
-            if (A.paused) A.end_t = pl_now();
+            PLA.paused = atoi(v) != 0;
+            if (PLA.paused) PLA.end_t = pl_now();
         } else if (!strcmp(m, "win")) {
             long s = strtol(v, NULL, 10);
-            if (s >= 2 && s <= 36000) A.win_ms = (uint32_t)s * 1000;
+            if (s >= 2 && s <= 36000) PLA.win_ms = (uint32_t)s * 1000;
         } else if (!strcmp(m, "clear")) {
             aos_serial_stat_t st;
-            aos_serial_stat(PS.ch, &st);
+            aos_serial_stat(PLS.ch, &st);
             pl_data_clear();
-            A.next = st.lines;
+            PLA.next = st.lines;
         } else if (!strcmp(m, "rec")) {
             if (atoi(v) && !pl_csv_on()) pl_csv_start();
             else if (!atoi(v)) pl_csv_stop();
         } else if (!strcmp(m, "send")) {
             static const char *const EOL[4] = { "\r\n", "\n", "\r", "" };
             char b[280];
-            int len = snprintf(b, sizeof b, "%.250s%s", v, EOL[PS.eol & 3]);
-            if (len > 0) aos_serial_send(PS.ch, b, len);
+            int len = snprintf(b, sizeof b, "%.250s%s", v, EOL[PLS.eol & 3]);
+            if (len > 0) aos_serial_send(PLS.ch, b, len);
         }
         pl_chart_want();
         pl_refresh(true);

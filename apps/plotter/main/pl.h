@@ -142,7 +142,7 @@ typedef struct {
     uint32_t    gen;           /* bumps when the series change or the data is cleared */
 } pl_data_t;
 
-extern pl_data_t PD;
+extern pl_data_t PLD;
 
 bool pl_data_init(void);
 void pl_data_free(void);
@@ -190,7 +190,7 @@ typedef struct {
     int          na;
 } pl_cfg_t;
 
-extern pl_cfg_t PC;
+extern pl_cfg_t PLC;
 
 void pl_cfg_load(void);
 void pl_cfg_save(void);
@@ -204,7 +204,7 @@ void pl_profile_default(pl_profile_t *p, int tmpl);
 enum { PL_MODE_TIME, PL_MODE_XY };
 
 typedef struct {               /* what is saved in the preferences */
-    int      ch;               /* 0 A, 1 B */
+    int      ch;               /* 0 PLA, 1 B */
     int      fmt;              /* -1 automatic, else a profile */
     int      win;              /* index into PL_WINDOWS */
     int      mode;
@@ -215,7 +215,7 @@ typedef struct {               /* what is saved in the preferences */
     int      big;              /* the series shown big */
 } pl_set_t;
 
-extern pl_set_t PS;
+extern pl_set_t PLS;
 
 typedef struct {
     char     text[AOS_SERIAL_LINE_MAX];
@@ -256,7 +256,7 @@ typedef struct {
     int        usb_n;
 } pl_app_t;
 
-extern pl_app_t A;
+extern pl_app_t PLA;
 
 extern const uint32_t PL_WINDOWS[];
 extern const int PL_NWIN;

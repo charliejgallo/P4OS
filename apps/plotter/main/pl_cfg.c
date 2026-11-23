@@ -18,7 +18,7 @@
 
 #include <sys/stat.h>
 
-pl_cfg_t PC;
+pl_cfg_t PLC;
 static long s_mtime;
 
 static void path(char *out, size_t cap)
@@ -69,7 +69,7 @@ void pl_profile_default(pl_profile_t *p, int tmpl)
         p->f[0].dp_field = 2;
         pl_scpy(p->f[0].dp_map, sizeof p->f[0].dp_map, "0:0,1:3,2:2,4:1");
     } else {
-        snprintf(p->name, sizeof p->name, _("Perfil %d"), PC.np + 1);
+        snprintf(p->name, sizeof p->name, _("Perfil %d"), PLC.np + 1);
     }
 }
 
@@ -79,11 +79,11 @@ void pl_cfg_load(void)
     path(p, sizeof p);
     FILE *f = fopen(p, "r");
     s_mtime = file_mtime();
-    memset(&PC, 0, sizeof PC);
+    memset(&PLC, 0, sizeof PLC);
     if (!f) {
         /* the first time: an example for a meter that says where its point goes */
-        pl_profile_default(&PC.p[0], 1);
-        PC.np = 1;
+        pl_profile_default(&PLC.p[0], 1);
+        PLC.np = 1;
         pl_cfg_save();
         return;
     }
@@ -93,7 +93,7 @@ void pl_cfg_load(void)
         const char *s = token(line, tk, sizeof tk);
         if (!tk[0] || tk[0] == '#') continue;
         if (!strcmp(tk, "profile")) {
-            cur = PC.np < PL_MAXP ? &PC.p[PC.np++] : NULL;
+            cur = PLC.np < PL_MAXP ? &PLC.p[PLC.np++] : NULL;
             if (!cur) continue;
             memset(cur, 0, sizeof *cur);
             token(s, cur->name, sizeof cur->name);
@@ -127,8 +127,8 @@ void pl_cfg_load(void)
             if (fl->field < 1) fl->field = 1;
             if (fl->scale == 0) fl->scale = 1;
             cur->nf++;
-        } else if (!strcmp(tk, "alarm") && PC.na < (int)(sizeof PC.al / sizeof PC.al[0])) {
-            pl_alarm_t *a = &PC.al[PC.na];
+        } else if (!strcmp(tk, "alarm") && PLC.na < (int)(sizeof PLC.al / sizeof PLC.al[0])) {
+            pl_alarm_t *a = &PLC.al[PLC.na];
             memset(a, 0, sizeof *a);
             s = token(s, a->name, sizeof a->name);
             if (!a->name[0]) continue;
@@ -143,11 +143,11 @@ void pl_cfg_load(void)
                 else if (!strcmp(tk, "hi")) { a->hi_on = !PL_ISNAN(v); a->hi = a->hi_on ? v : 0; }
                 else if (!strcmp(tk, "beep")) a->beep = atoi(eq + 1) != 0;
             }
-            PC.na++;
+            PLC.na++;
         }
     }
     fclose(f);
-    for (int i = 0; i < PC.np; i++) if (!PC.p[i].name[0]) snprintf(PC.p[i].name, sizeof PC.p[i].name, "%d", i + 1);
+    for (int i = 0; i < PLC.np; i++) if (!PLC.p[i].name[0]) snprintf(PLC.p[i].name, sizeof PLC.p[i].name, "%d", i + 1);
 }
 
 static void clean(char *dst, size_t cap, const char *src)
@@ -174,8 +174,8 @@ void pl_cfg_save(void)
     if (!f) return;
     fputs("# Monitor serie: perfiles y avisos (los edita la app y la página del portal)\n", f);
     char a[64], b[64], c[64], s1[32], s2[32];
-    for (int i = 0; i < PC.np; i++) {
-        const pl_profile_t *pr = &PC.p[i];
+    for (int i = 0; i < PLC.np; i++) {
+        const pl_profile_t *pr = &PLC.p[i];
         clean(a, sizeof a, pr->name);
         clean(b, sizeof b, pr->match);
         fprintf(f, "\nprofile \"%s\"\nmatch \"%s\"\ncomma %d\n", a, b, pr->comma ? 1 : 0);
@@ -191,12 +191,12 @@ void pl_cfg_save(void)
         }
         fputs("end\n", f);
     }
-    if (PC.na) fputs("\n", f);
-    for (int i = 0; i < PC.na; i++) {
-        clean(a, sizeof a, PC.al[i].name);
-        if (PC.al[i].lo_on) num(s1, sizeof s1, PC.al[i].lo); else pl_scpy(s1, sizeof s1, "-");
-        if (PC.al[i].hi_on) num(s2, sizeof s2, PC.al[i].hi); else pl_scpy(s2, sizeof s2, "-");
-        fprintf(f, "alarm \"%s\" lo=%s hi=%s beep=%d\n", a, s1, s2, PC.al[i].beep ? 1 : 0);
+    if (PLC.na) fputs("\n", f);
+    for (int i = 0; i < PLC.na; i++) {
+        clean(a, sizeof a, PLC.al[i].name);
+        if (PLC.al[i].lo_on) num(s1, sizeof s1, PLC.al[i].lo); else pl_scpy(s1, sizeof s1, "-");
+        if (PLC.al[i].hi_on) num(s2, sizeof s2, PLC.al[i].hi); else pl_scpy(s2, sizeof s2, "-");
+        fprintf(f, "alarm \"%s\" lo=%s hi=%s beep=%d\n", a, s1, s2, PLC.al[i].beep ? 1 : 0);
     }
     fclose(f);
     remove(p);
@@ -215,13 +215,13 @@ bool pl_cfg_changed(void)
 void pl_cfg_alarm_apply(pl_series_t *s)
 {
     s->lo_on = s->hi_on = s->beep = false;
-    for (int i = 0; i < PC.na; i++)
-        if (!strcmp(PC.al[i].name, s->name)) {
-            s->lo_on = PC.al[i].lo_on;
-            s->hi_on = PC.al[i].hi_on;
-            s->lo = PC.al[i].lo;
-            s->hi = PC.al[i].hi;
-            s->beep = PC.al[i].beep;
+    for (int i = 0; i < PLC.na; i++)
+        if (!strcmp(PLC.al[i].name, s->name)) {
+            s->lo_on = PLC.al[i].lo_on;
+            s->hi_on = PLC.al[i].hi_on;
+            s->lo = PLC.al[i].lo;
+            s->hi = PLC.al[i].hi;
+            s->beep = PLC.al[i].beep;
             return;
         }
 }
@@ -229,28 +229,28 @@ void pl_cfg_alarm_apply(pl_series_t *s)
 void pl_cfg_alarm_store(const pl_series_t *s)
 {
     int k = -1;
-    for (int i = 0; i < PC.na; i++)
-        if (!strcmp(PC.al[i].name, s->name)) { k = i; break; }
+    for (int i = 0; i < PLC.na; i++)
+        if (!strcmp(PLC.al[i].name, s->name)) { k = i; break; }
     bool any = s->lo_on || s->hi_on;
     if (k < 0) {
         if (!any) return;
-        if (PC.na >= (int)(sizeof PC.al / sizeof PC.al[0])) {
+        if (PLC.na >= (int)(sizeof PLC.al / sizeof PLC.al[0])) {
             /* full: the oldest goes */
-            memmove(&PC.al[0], &PC.al[1], sizeof PC.al[0] * (size_t)(PC.na - 1));
-            PC.na--;
+            memmove(&PLC.al[0], &PLC.al[1], sizeof PLC.al[0] * (size_t)(PLC.na - 1));
+            PLC.na--;
         }
-        k = PC.na++;
+        k = PLC.na++;
     }
     if (!any) {
-        memmove(&PC.al[k], &PC.al[k + 1], sizeof PC.al[0] * (size_t)(PC.na - k - 1));
-        PC.na--;
+        memmove(&PLC.al[k], &PLC.al[k + 1], sizeof PLC.al[0] * (size_t)(PLC.na - k - 1));
+        PLC.na--;
     } else {
-        pl_scpy(PC.al[k].name, PL_NAME, s->name);
-        PC.al[k].lo_on = s->lo_on;
-        PC.al[k].hi_on = s->hi_on;
-        PC.al[k].lo = s->lo;
-        PC.al[k].hi = s->hi;
-        PC.al[k].beep = s->beep;
+        pl_scpy(PLC.al[k].name, PL_NAME, s->name);
+        PLC.al[k].lo_on = s->lo_on;
+        PLC.al[k].hi_on = s->hi_on;
+        PLC.al[k].lo = s->lo;
+        PLC.al[k].hi = s->hi;
+        PLC.al[k].beep = s->beep;
     }
     pl_cfg_save();
 }

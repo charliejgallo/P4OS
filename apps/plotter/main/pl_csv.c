@@ -49,16 +49,16 @@ static bool open_file(void)
     fputs(_("fecha y hora"), s_f);
     fputs(",", s_f);
     fputs(_("segundos"), s_f);
-    for (int i = 0; i < PD.ns; i++) {
+    for (int i = 0; i < PLD.ns; i++) {
         char h[48];
-        if (PD.s[i].unit[0]) snprintf(h, sizeof h, ",%s (%s)", PD.s[i].name, PD.s[i].unit);
-        else snprintf(h, sizeof h, ",%s", PD.s[i].name);
+        if (PLD.s[i].unit[0]) snprintf(h, sizeof h, ",%s (%s)", PLD.s[i].name, PLD.s[i].unit);
+        else snprintf(h, sizeof h, ",%s", PLD.s[i].name);
         for (char *p = h + 1; *p; p++) if (*p == ',' || *p == '"') *p = ' ';
         fputs(h, s_f);
     }
     fputs("\n", s_f);
-    s_cols = PD.ns;
-    s_gen = PD.gen;
+    s_cols = PLD.ns;
+    s_gen = PLD.gen;
     s_flush = s_t0;
     aos_hal_log("plotter", "recording to %s", s_path);
     return true;
@@ -81,15 +81,15 @@ void pl_csv_stop(void)
 void pl_csv_row(const pl_row_t *r)
 {
     if (!s_f) return;
-    if (PD.ns != s_cols || PD.gen != s_gen) {
-        if (PD.ns != s_cols) {
+    if (PLD.ns != s_cols || PLD.gen != s_gen) {
+        if (PLD.ns != s_cols) {
             /* a new series: a new file, with its header */
             fclose(s_f);
             s_f = NULL;
             s_part++;
             if (!open_file()) return;
         }
-        s_gen = PD.gen;
+        s_gen = PLD.gen;
     }
     char b[64];
     if (s_wall) {
@@ -110,7 +110,7 @@ void pl_csv_row(const pl_row_t *r)
     for (int i = 0; i < s_cols; i++) {
         if (PL_ISNAN(r->v[i])) { fputs(",", s_f); continue; }
         b[0] = ',';
-        pl_fmt(b + 1, sizeof b - 1, r->v[i], PD.s[i].dec < 0 ? 4 : PD.s[i].dec);
+        pl_fmt(b + 1, sizeof b - 1, r->v[i], PLD.s[i].dec < 0 ? 4 : PLD.s[i].dec);
         fputs(b, s_f);
     }
     fputs("\n", s_f);

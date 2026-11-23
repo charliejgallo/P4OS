@@ -26,7 +26,7 @@
 #define BKT_MS    1000u
 #define RAW_SCAN_MAX 60000u    /* more rows than this in a window: buckets */
 
-pl_data_t PD;
+pl_data_t PLD;
 
 static const uint32_t PALETTE[PL_MAXS] = {
     0x40C8E0, 0xFF9F0A, 0x30D158, 0xFF375F, 0xFFD60A, 0xBF5AF2, 0x0A84FF, 0xFF453A,
@@ -71,84 +71,84 @@ void pl_fmt(char *out, size_t cap, float v, int dec)
 
 bool pl_data_init(void)
 {
-    if (PD.raw) return true;
-    PD.raw_cap = RAW_BYTES / sizeof(pl_row_t);
-    PD.bk_cap = BKT_BYTES / sizeof(pl_bkt_t);
-    PD.raw = pl_ps_alloc(PD.raw_cap * sizeof(pl_row_t));
-    PD.bk = pl_ps_alloc(PD.bk_cap * sizeof(pl_bkt_t));
-    if (!PD.raw || !PD.bk) {
+    if (PLD.raw) return true;
+    PLD.raw_cap = RAW_BYTES / sizeof(pl_row_t);
+    PLD.bk_cap = BKT_BYTES / sizeof(pl_bkt_t);
+    PLD.raw = pl_ps_alloc(PLD.raw_cap * sizeof(pl_row_t));
+    PLD.bk = pl_ps_alloc(PLD.bk_cap * sizeof(pl_bkt_t));
+    if (!PLD.raw || !PLD.bk) {
         /* half, then nothing */
-        free(PD.raw);
-        free(PD.bk);
-        PD.raw_cap /= 4;
-        PD.bk_cap /= 4;
-        PD.raw = pl_ps_alloc(PD.raw_cap * sizeof(pl_row_t));
-        PD.bk = pl_ps_alloc(PD.bk_cap * sizeof(pl_bkt_t));
-        if (!PD.raw || !PD.bk) {
-            free(PD.raw);
-            free(PD.bk);
-            PD.raw = NULL;
-            PD.bk = NULL;
+        free(PLD.raw);
+        free(PLD.bk);
+        PLD.raw_cap /= 4;
+        PLD.bk_cap /= 4;
+        PLD.raw = pl_ps_alloc(PLD.raw_cap * sizeof(pl_row_t));
+        PLD.bk = pl_ps_alloc(PLD.bk_cap * sizeof(pl_bkt_t));
+        if (!PLD.raw || !PLD.bk) {
+            free(PLD.raw);
+            free(PLD.bk);
+            PLD.raw = NULL;
+            PLD.bk = NULL;
             return false;
         }
     }
-    aos_hal_log("plotter", "%u rows, %u seconds", (unsigned)PD.raw_cap, (unsigned)PD.bk_cap);
+    aos_hal_log("plotter", "%u rows, %u seconds", (unsigned)PLD.raw_cap, (unsigned)PLD.bk_cap);
     pl_data_clear();
     return true;
 }
 
 void pl_data_free(void)
 {
-    free(PD.raw);
-    free(PD.bk);
-    memset(&PD, 0, sizeof PD);
+    free(PLD.raw);
+    free(PLD.bk);
+    memset(&PLD, 0, sizeof PLD);
 }
 
 void pl_data_clear(void)
 {
-    PD.raw_n = PD.raw_head = 0;
-    PD.bk_n = PD.bk_head = 0;
-    PD.cur_open = false;
-    PD.rows = 0;
+    PLD.raw_n = PLD.raw_head = 0;
+    PLD.bk_n = PLD.bk_head = 0;
+    PLD.cur_open = false;
+    PLD.rows = 0;
     /* the series stay (their names, colours and alarms), without values */
-    for (int i = 0; i < PD.ns; i++) {
-        pl_series_t *s = &PD.s[i];
+    for (int i = 0; i < PLD.ns; i++) {
+        pl_series_t *s = &PLD.s[i];
         s->has = false;
         s->last = NAN;
         s->count = 0;
         s->dt = 0;
         s->state = 0;
     }
-    PD.gen++;
+    PLD.gen++;
 }
 
 int pl_series_get(const char *name, const char *unit)
 {
-    for (int i = 0; i < PD.ns; i++)
-        if (!strcmp(PD.s[i].name, name)) {
-            if (unit && unit[0] && !PD.s[i].unit[0]) pl_scpy(PD.s[i].unit, PL_UNIT, unit);
+    for (int i = 0; i < PLD.ns; i++)
+        if (!strcmp(PLD.s[i].name, name)) {
+            if (unit && unit[0] && !PLD.s[i].unit[0]) pl_scpy(PLD.s[i].unit, PL_UNIT, unit);
             return i;
         }
-    if (PD.ns >= PL_MAXS) return -1;
-    pl_series_t *s = &PD.s[PD.ns];
+    if (PLD.ns >= PL_MAXS) return -1;
+    pl_series_t *s = &PLD.s[PLD.ns];
     memset(s, 0, sizeof *s);
     pl_scpy(s->name, PL_NAME, name);
     pl_scpy(s->unit, PL_UNIT, unit);
-    s->col = PALETTE[PD.ns];
+    s->col = PALETTE[PLD.ns];
     s->last = NAN;
     s->dec = -1;
     pl_cfg_alarm_apply(s);
-    PD.gen++;
-    return PD.ns++;
+    PLD.gen++;
+    return PLD.ns++;
 }
 
 static void bkt_push(void)
 {
-    if (!PD.cur_open) return;
-    PD.bk[PD.bk_head] = PD.cur;
-    PD.bk_head = (PD.bk_head + 1) % PD.bk_cap;
-    if (PD.bk_n < PD.bk_cap) PD.bk_n++;
-    PD.cur_open = false;
+    if (!PLD.cur_open) return;
+    PLD.bk[PLD.bk_head] = PLD.cur;
+    PLD.bk_head = (PLD.bk_head + 1) % PLD.bk_cap;
+    if (PLD.bk_n < PLD.bk_cap) PLD.bk_n++;
+    PLD.cur_open = false;
 }
 
 void pl_data_add(uint32_t t, const pl_parsed_t *p, pl_row_t *row)
@@ -160,7 +160,7 @@ void pl_data_add(uint32_t t, const pl_parsed_t *p, pl_row_t *row)
         int i = pl_series_get(p->name[k], p->unit[k]);
         if (i < 0) continue;
         r.v[i] = p->v[k];
-        pl_series_t *s = &PD.s[i];
+        pl_series_t *s = &PLD.s[i];
         /* the decimals: the most seen lately, so 26.50 does not flicker to 26.5 */
         if (s->count == 0 || p->dec[k] > s->dec || s->count % 256 == 0) s->dec = p->dec[k];
         if (s->has && t > s->last_t) {
@@ -173,57 +173,57 @@ void pl_data_add(uint32_t t, const pl_parsed_t *p, pl_row_t *row)
         s->count++;
     }
     if (row) *row = r;
-    if (!PD.raw) return;
+    if (!PLD.raw) return;
     /* a clock that went back (a restarted simulator): start again */
-    if (PD.raw_n && t < pl_data_last_t()) pl_data_clear();
-    PD.raw[PD.raw_head] = r;
-    PD.raw_head = (PD.raw_head + 1) % PD.raw_cap;
-    if (PD.raw_n < PD.raw_cap) PD.raw_n++;
-    PD.rows++;
+    if (PLD.raw_n && t < pl_data_last_t()) pl_data_clear();
+    PLD.raw[PLD.raw_head] = r;
+    PLD.raw_head = (PLD.raw_head + 1) % PLD.raw_cap;
+    if (PLD.raw_n < PLD.raw_cap) PLD.raw_n++;
+    PLD.rows++;
     /* the second's bucket */
     uint32_t bt = t - t % BKT_MS;
-    if (PD.cur_open && PD.cur.t != bt) bkt_push();
-    if (!PD.cur_open) {
-        memset(&PD.cur, 0, sizeof PD.cur);
-        PD.cur.t = bt;
-        PD.cur_open = true;
+    if (PLD.cur_open && PLD.cur.t != bt) bkt_push();
+    if (!PLD.cur_open) {
+        memset(&PLD.cur, 0, sizeof PLD.cur);
+        PLD.cur.t = bt;
+        PLD.cur_open = true;
     }
     for (int i = 0; i < PL_MAXS; i++) {
         float v = r.v[i];
         if (PL_ISNAN(v)) continue;
-        if (!PD.cur.n[i] || v < PD.cur.mn[i]) PD.cur.mn[i] = v;
-        if (!PD.cur.n[i] || v > PD.cur.mx[i]) PD.cur.mx[i] = v;
-        PD.cur.sum[i] += v;
-        if (PD.cur.n[i] < 65535) PD.cur.n[i]++;
+        if (!PLD.cur.n[i] || v < PLD.cur.mn[i]) PLD.cur.mn[i] = v;
+        if (!PLD.cur.n[i] || v > PLD.cur.mx[i]) PLD.cur.mx[i] = v;
+        PLD.cur.sum[i] += v;
+        if (PLD.cur.n[i] < 65535) PLD.cur.n[i]++;
     }
 }
 
 static const pl_row_t *row_at(uint32_t i)
 {
-    return &PD.raw[(PD.raw_head + PD.raw_cap - PD.raw_n + i) % PD.raw_cap];
+    return &PLD.raw[(PLD.raw_head + PLD.raw_cap - PLD.raw_n + i) % PLD.raw_cap];
 }
 
 static const pl_bkt_t *bkt_at(uint32_t i)
 {
-    if (i == PD.bk_n) return &PD.cur;
-    return &PD.bk[(PD.bk_head + PD.bk_cap - PD.bk_n + i) % PD.bk_cap];
+    if (i == PLD.bk_n) return &PLD.cur;
+    return &PLD.bk[(PLD.bk_head + PLD.bk_cap - PLD.bk_n + i) % PLD.bk_cap];
 }
 
 uint32_t pl_data_first_t(void)
 {
-    if (PD.bk_n) return bkt_at(0)->t;
-    return PD.raw_n ? row_at(0)->t : 0;
+    if (PLD.bk_n) return bkt_at(0)->t;
+    return PLD.raw_n ? row_at(0)->t : 0;
 }
 
 uint32_t pl_data_last_t(void)
 {
-    return PD.raw_n ? row_at(PD.raw_n - 1)->t : 0;
+    return PLD.raw_n ? row_at(PLD.raw_n - 1)->t : 0;
 }
 
 /* the first row at or after t */
 static uint32_t raw_lower(uint32_t t)
 {
-    uint32_t lo = 0, hi = PD.raw_n;
+    uint32_t lo = 0, hi = PLD.raw_n;
     while (lo < hi) {
         uint32_t m = (lo + hi) / 2;
         if (row_at(m)->t < t) lo = m + 1;
@@ -234,7 +234,7 @@ static uint32_t raw_lower(uint32_t t)
 
 static uint32_t bkt_lower(uint32_t t)
 {
-    uint32_t n = PD.bk_n + (PD.cur_open ? 1 : 0);
+    uint32_t n = PLD.bk_n + (PLD.cur_open ? 1 : 0);
     uint32_t lo = 0, hi = n;
     while (lo < hi) {
         uint32_t m = (lo + hi) / 2;
@@ -297,14 +297,14 @@ void pl_data_columns(pl_cols_t *c, uint32_t t0, uint32_t t1, int ncols)
         c->sn[s] = 0;
         c->slast_t[s] = 0;
     }
-    if (!PD.raw) return;
+    if (!PLD.raw) return;
     float span = (float)(t1 - t0);
     uint32_t i0 = 0, i1 = 0;
-    bool use_raw = PD.raw_n && row_at(0)->t <= t0;
-    if (PD.raw_n && !use_raw) {
+    bool use_raw = PLD.raw_n && row_at(0)->t <= t0;
+    if (PLD.raw_n && !use_raw) {
         /* the rows started inside the window, and nothing older was ever
          * dropped: the rows have it all */
-        use_raw = PD.raw_n == PD.rows;
+        use_raw = PLD.raw_n == PLD.rows;
     }
     if (use_raw) {
         i0 = raw_lower(t0);
@@ -317,7 +317,7 @@ void pl_data_columns(pl_cols_t *c, uint32_t t0, uint32_t t1, int ncols)
             const pl_row_t *r = row_at(i);
             int col = (int)((float)(r->t - t0) * (float)ncols / span);
             if (col >= ncols) col = ncols - 1;
-            for (int s = 0; s < PD.ns; s++) {
+            for (int s = 0; s < PLD.ns; s++) {
                 float v = r->v[s];
                 if (PL_ISNAN(v)) continue;
                 put(c, s, col, v, v, v, r->t);
@@ -331,14 +331,14 @@ void pl_data_columns(pl_cols_t *c, uint32_t t0, uint32_t t1, int ncols)
         }
         return;
     }
-    uint32_t n = PD.bk_n + (PD.cur_open ? 1 : 0);
+    uint32_t n = PLD.bk_n + (PLD.cur_open ? 1 : 0);
     for (uint32_t i = bkt_lower(t0); i < n; i++) {
         const pl_bkt_t *b = bkt_at(i);
         if (b->t > t1) break;
         uint32_t tm = b->t + BKT_MS / 2;
         int col = tm < t0 ? 0 : (int)((float)(tm - t0) * (float)ncols / span);
         if (col >= ncols) col = ncols - 1;
-        for (int s = 0; s < PD.ns; s++) {
+        for (int s = 0; s < PLD.ns; s++) {
             if (!b->n[s]) continue;
             float avg = b->sum[s] / (float)b->n[s];
             put(c, s, col, b->mn[s], b->mx[s], avg, tm);
@@ -351,16 +351,16 @@ void pl_data_columns(pl_cols_t *c, uint32_t t0, uint32_t t1, int ncols)
         }
     }
     /* the very last value is the last sample, not a second's average */
-    for (int s = 0; s < PD.ns; s++)
-        if (c->sn[s] && PD.s[s].has && PD.s[s].last_t >= t0 && PD.s[s].last_t <= t1) {
-            c->slast[s] = PD.s[s].last;
-            c->slast_t[s] = PD.s[s].last_t;
+    for (int s = 0; s < PLD.ns; s++)
+        if (c->sn[s] && PLD.s[s].has && PLD.s[s].last_t >= t0 && PLD.s[s].last_t <= t1) {
+            c->slast[s] = PLD.s[s].last;
+            c->slast_t[s] = PLD.s[s].last_t;
         }
 }
 
 int pl_data_rows(uint32_t t0, uint32_t t1, int max, pl_row_cb_t cb, void *ud)
 {
-    if (!PD.raw_n || max < 1) return 0;
+    if (!PLD.raw_n || max < 1) return 0;
     uint32_t i0 = raw_lower(t0), i1 = raw_lower(t1 + 1);
     if (i1 <= i0) return 0;
     uint32_t n = i1 - i0;

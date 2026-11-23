@@ -51,8 +51,8 @@ lv_obj_t *pl_mini(lv_obj_t *parent, const char *text, bool on, lv_color_t on_col
 
 void pl_sheet_close(void)
 {
-    if (A.overlay) lv_obj_delete(A.overlay);
-    A.overlay = A.sheet_ta = A.sheet_kb = A.raw_box = NULL;
+    if (PLA.overlay) lv_obj_delete(PLA.overlay);
+    PLA.overlay = PLA.sheet_ta = PLA.sheet_kb = PLA.raw_box = NULL;
     s_col = NULL;
     s_raw_n = 0;
     s_kind = SH_NONE;
@@ -66,25 +66,25 @@ static void close_cb(lv_event_t *e) { (void)e; pl_sheet_close(); pl_chart_want()
 static lv_obj_t *sheet_begin(int kind, const char *title, int32_t *wout)
 {
     int32_t keep = 0;
-    if (A.overlay && s_kind == kind && s_col) keep = lv_obj_get_scroll_y(s_col);
-    if (!A.overlay) {
-        A.overlay = lv_obj_create(A.root);
-        lv_obj_remove_style_all(A.overlay);
-        lv_obj_set_size(A.overlay, A.W, A.H);
-        lv_obj_set_style_bg_color(A.overlay, lv_color_hex(0x0B0E12), 0);
-        lv_obj_set_style_bg_opa(A.overlay, LV_OPA_COVER, 0);
-        lv_obj_add_flag(A.overlay, LV_OBJ_FLAG_CLICKABLE);
-        lv_obj_remove_flag(A.overlay, LV_OBJ_FLAG_SCROLLABLE);
+    if (PLA.overlay && s_kind == kind && s_col) keep = lv_obj_get_scroll_y(s_col);
+    if (!PLA.overlay) {
+        PLA.overlay = lv_obj_create(PLA.root);
+        lv_obj_remove_style_all(PLA.overlay);
+        lv_obj_set_size(PLA.overlay, PLA.W, PLA.H);
+        lv_obj_set_style_bg_color(PLA.overlay, lv_color_hex(0x0B0E12), 0);
+        lv_obj_set_style_bg_opa(PLA.overlay, LV_OPA_COVER, 0);
+        lv_obj_add_flag(PLA.overlay, LV_OBJ_FLAG_CLICKABLE);
+        lv_obj_remove_flag(PLA.overlay, LV_OBJ_FLAG_SCROLLABLE);
     }
-    lv_obj_clean(A.overlay);
-    A.sheet_ta = A.sheet_kb = A.raw_box = NULL;
+    lv_obj_clean(PLA.overlay);
+    PLA.sheet_ta = PLA.sheet_kb = PLA.raw_box = NULL;
     s_raw_n = 0;
     s_kind = kind;
     pl_view_flags(false);
-    int32_t w = A.land ? 900 : A.W - 2 * AOS_UI_PAD;
-    lv_obj_t *col = lv_obj_create(A.overlay);
+    int32_t w = PLA.land ? 900 : PLA.W - 2 * AOS_UI_PAD;
+    lv_obj_t *col = lv_obj_create(PLA.overlay);
     lv_obj_remove_style_all(col);
-    lv_obj_set_size(col, w, A.H);
+    lv_obj_set_size(col, w, PLA.H);
     lv_obj_align(col, LV_ALIGN_TOP_MID, 0, 0);
     lv_obj_set_flex_flow(col, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_style_pad_row(col, 12, 0);
@@ -165,12 +165,12 @@ static void text_cb(lv_event_t *e)
     lv_event_code_t c = lv_event_get_code(e);
     if (c != LV_EVENT_READY && c != LV_EVENT_CANCEL) return;
     char v[64];
-    pl_scpy(v, sizeof v, lv_textarea_get_text(A.sheet_ta));
-    void (*done)(const char *) = c == LV_EVENT_READY ? A.text_done : NULL;
-    void (*back)(const char *) = A.text_done;
+    pl_scpy(v, sizeof v, lv_textarea_get_text(PLA.sheet_ta));
+    void (*done)(const char *) = c == LV_EVENT_READY ? PLA.text_done : NULL;
+    void (*back)(const char *) = PLA.text_done;
     (void)back;
     if (done) done(v);
-    else if (A.text_done) A.text_done(NULL);       /* cancelled: the sheet again */
+    else if (PLA.text_done) PLA.text_done(NULL);       /* cancelled: the sheet again */
 }
 
 void pl_text_entry(const char *title, const char *value, bool numeric, void (*done)(const char *))
@@ -179,27 +179,27 @@ void pl_text_entry(const char *title, const char *value, bool numeric, void (*do
     lv_obj_t *col = sheet_begin(-1, title, &w);
     (void)col;
     lv_obj_add_flag(lv_obj_get_child(lv_obj_get_child(s_col, 0), 1), LV_OBJ_FLAG_HIDDEN);   /* no "Listo" */
-    A.text_done = done;
-    A.sheet_ta = lv_textarea_create(A.overlay);
-    lv_textarea_set_one_line(A.sheet_ta, true);
-    lv_textarea_set_max_length(A.sheet_ta, 60);
-    lv_textarea_set_text(A.sheet_ta, value);
-    lv_obj_set_size(A.sheet_ta, w, 88);
-    lv_obj_align(A.sheet_ta, LV_ALIGN_TOP_MID, 0, 120);
-    lv_obj_set_style_text_font(A.sheet_ta, &aos_mono_22, 0);
-    lv_obj_set_style_bg_color(A.sheet_ta, AOS_C_CARD, 0);
-    lv_obj_set_style_text_color(A.sheet_ta, AOS_C_TEXT, 0);
-    lv_obj_set_style_border_width(A.sheet_ta, 0, 0);
-    lv_obj_set_style_radius(A.sheet_ta, 20, 0);
-    lv_obj_set_style_pad_hor(A.sheet_ta, 24, 0);
-    lv_obj_set_style_pad_ver(A.sheet_ta, 24, 0);
-    A.sheet_kb = lv_keyboard_create(A.overlay);
-    lv_obj_set_size(A.sheet_kb, A.W, A.land ? A.H / 2 : A.H * 2 / 5);
-    lv_obj_align(A.sheet_kb, LV_ALIGN_BOTTOM_MID, 0, 0);
-    aos_keyboard_style(A.sheet_kb, aos_font_body);
-    lv_keyboard_set_textarea(A.sheet_kb, A.sheet_ta);
-    if (numeric) lv_keyboard_set_mode(A.sheet_kb, LV_KEYBOARD_MODE_NUMBER);
-    lv_obj_add_event_cb(A.sheet_kb, text_cb, LV_EVENT_ALL, NULL);
+    PLA.text_done = done;
+    PLA.sheet_ta = lv_textarea_create(PLA.overlay);
+    lv_textarea_set_one_line(PLA.sheet_ta, true);
+    lv_textarea_set_max_length(PLA.sheet_ta, 60);
+    lv_textarea_set_text(PLA.sheet_ta, value);
+    lv_obj_set_size(PLA.sheet_ta, w, 88);
+    lv_obj_align(PLA.sheet_ta, LV_ALIGN_TOP_MID, 0, 120);
+    lv_obj_set_style_text_font(PLA.sheet_ta, &aos_mono_22, 0);
+    lv_obj_set_style_bg_color(PLA.sheet_ta, AOS_C_CARD, 0);
+    lv_obj_set_style_text_color(PLA.sheet_ta, AOS_C_TEXT, 0);
+    lv_obj_set_style_border_width(PLA.sheet_ta, 0, 0);
+    lv_obj_set_style_radius(PLA.sheet_ta, 20, 0);
+    lv_obj_set_style_pad_hor(PLA.sheet_ta, 24, 0);
+    lv_obj_set_style_pad_ver(PLA.sheet_ta, 24, 0);
+    PLA.sheet_kb = lv_keyboard_create(PLA.overlay);
+    lv_obj_set_size(PLA.sheet_kb, PLA.W, PLA.land ? PLA.H / 2 : PLA.H * 2 / 5);
+    lv_obj_align(PLA.sheet_kb, LV_ALIGN_BOTTOM_MID, 0, 0);
+    aos_keyboard_style(PLA.sheet_kb, aos_font_body);
+    lv_keyboard_set_textarea(PLA.sheet_kb, PLA.sheet_ta);
+    if (numeric) lv_keyboard_set_mode(PLA.sheet_kb, LV_KEYBOARD_MODE_NUMBER);
+    lv_obj_add_event_cb(PLA.sheet_kb, text_cb, LV_EVENT_ALL, NULL);
 }
 
 /* ---- the raw view: the last lines and what came out of them ---- */
@@ -228,7 +228,7 @@ static void raw_box(lv_obj_t *col, int32_t w, int lines)
     lv_obj_set_flex_flow(b, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_style_pad_row(b, 2, 0);
     lv_obj_remove_flag(b, LV_OBJ_FLAG_SCROLLABLE);
-    A.raw_box = b;
+    PLA.raw_box = b;
     s_raw_n = lines > 8 ? 8 : lines;
     for (int i = 0; i < s_raw_n; i++) {
         s_raw_l[i] = aos_label(b, "", &aos_mono_18, AOS_C_TEXT);
@@ -244,8 +244,8 @@ static void raw_box(lv_obj_t *col, int32_t w, int lines)
 
 void pl_sheet_raw_update(void)
 {
-    if (!A.raw_box || !s_raw_n) return;
-    uint32_t have = A.nraw < PL_RAW_N ? A.nraw : PL_RAW_N;
+    if (!PLA.raw_box || !s_raw_n) return;
+    uint32_t have = PLA.nraw < PL_RAW_N ? PLA.nraw : PL_RAW_N;
     for (int i = 0; i < s_raw_n; i++) {
         /* the newest at the bottom */
         int back = s_raw_n - 1 - i;
@@ -254,7 +254,7 @@ void pl_sheet_raw_update(void)
             lv_label_set_text(s_raw_g[i], "");
             continue;
         }
-        const pl_rawline_t *r = &A.raw[(A.nraw - 1 - (uint32_t)back) % PL_RAW_N];
+        const pl_rawline_t *r = &PLA.raw[(PLA.nraw - 1 - (uint32_t)back) % PL_RAW_N];
         char t[AOS_SERIAL_LINE_MAX + 4];
         pl_scpy(t, sizeof t, r->text);
         utf8_clean(t);
@@ -280,30 +280,30 @@ void pl_conn_load(void)
     char saved[AOS_IO_PORT_NAME_MAX];
     pl_scpy(saved, sizeof saved, "uart.b");
     /* the Terminal's choice for the channel, until this app has its own */
-    aos_hal_pref_get_str(PS.ch ? "ser_port1" : "ser_port", saved, sizeof saved);
-    aos_hal_pref_get_str(key("port", PS.ch, k, sizeof k), saved, sizeof saved);
+    aos_hal_pref_get_str(PLS.ch ? "ser_port1" : "ser_port", saved, sizeof saved);
+    aos_hal_pref_get_str(key("port", PLS.ch, k, sizeof k), saved, sizeof saved);
     aos_serial_stat_t st;
-    aos_serial_stat(PS.ch, &st);
+    aos_serial_stat(PLS.ch, &st);
     if (st.running) pl_scpy(saved, sizeof saved, st.port);
-    if (A.port_dd) {
-        int sel = lv_dropdown_get_option_index(A.port_dd, saved);
-        if (sel >= 0) lv_dropdown_set_selected(A.port_dd, (uint32_t)sel);
+    if (PLA.port_dd) {
+        int sel = lv_dropdown_get_option_index(PLA.port_dd, saved);
+        if (sel >= 0) lv_dropdown_set_selected(PLA.port_dd, (uint32_t)sel);
     }
     int32_t baud = 115200, ctl = AOS_SERIAL_DTR | AOS_SERIAL_RTS;
-    aos_hal_pref_get_i32(PS.ch ? "ser_baud1" : "ser_baud", &baud);
-    aos_hal_pref_get_i32(key("baud", PS.ch, k, sizeof k), &baud);
+    aos_hal_pref_get_i32(PLS.ch ? "ser_baud1" : "ser_baud", &baud);
+    aos_hal_pref_get_i32(key("baud", PLS.ch, k, sizeof k), &baud);
     if (baud < BAUD_MIN || baud > BAUD_MAX) baud = 115200;
     char frame[8] = "8N1";
-    aos_hal_pref_get_str(key("frame", PS.ch, k, sizeof k), frame, sizeof frame);
+    aos_hal_pref_get_str(key("frame", PLS.ch, k, sizeof k), frame, sizeof frame);
     if (!aos_io_frame_parse(frame, NULL, NULL, NULL)) pl_scpy(frame, sizeof frame, "8N1");
-    aos_hal_pref_get_i32(key("ctl", PS.ch, k, sizeof k), &ctl);
-    A.baud = (uint32_t)baud;
-    pl_scpy(A.frame, sizeof A.frame, frame);
-    A.ctl = (uint8_t)(ctl & (AOS_SERIAL_DTR | AOS_SERIAL_RTS));
+    aos_hal_pref_get_i32(key("ctl", PLS.ch, k, sizeof k), &ctl);
+    PLA.baud = (uint32_t)baud;
+    pl_scpy(PLA.frame, sizeof PLA.frame, frame);
+    PLA.ctl = (uint8_t)(ctl & (AOS_SERIAL_DTR | AOS_SERIAL_RTS));
     if (st.running) {
-        A.baud = st.baud;
-        pl_scpy(A.frame, sizeof A.frame, st.frame);
-        A.ctl = st.ctl;
+        PLA.baud = st.baud;
+        pl_scpy(PLA.frame, sizeof PLA.frame, st.frame);
+        PLA.ctl = st.ctl;
     }
 }
 
@@ -311,23 +311,23 @@ void pl_conn_load(void)
 void pl_conn_apply(void)
 {
     char k[20];
-    aos_hal_pref_set_i32(key("baud", PS.ch, k, sizeof k), (int32_t)A.baud);
-    aos_hal_pref_set_str(key("frame", PS.ch, k, sizeof k), A.frame);
-    aos_hal_pref_set_i32(key("ctl", PS.ch, k, sizeof k), A.ctl);
+    aos_hal_pref_set_i32(key("baud", PLS.ch, k, sizeof k), (int32_t)PLA.baud);
+    aos_hal_pref_set_str(key("frame", PLS.ch, k, sizeof k), PLA.frame);
+    aos_hal_pref_set_i32(key("ctl", PLS.ch, k, sizeof k), PLA.ctl);
     aos_serial_stat_t st;
-    aos_serial_stat(PS.ch, &st);
-    if (st.running && (st.baud != A.baud || strcmp(st.frame, A.frame) || st.ctl != A.ctl)) {
+    aos_serial_stat(PLS.ch, &st);
+    if (st.running && (st.baud != PLA.baud || strcmp(st.frame, PLA.frame) || st.ctl != PLA.ctl)) {
         char port[AOS_IO_PORT_NAME_MAX];
         pl_scpy(port, sizeof port, st.port);
-        aos_serial_stop(PS.ch);
-        if (!aos_serial_start_ex(PS.ch, port, A.baud, A.frame, A.ctl))
+        aos_serial_stop(PLS.ch);
+        if (!aos_serial_start_ex(PLS.ch, port, PLA.baud, PLA.frame, PLA.ctl))
             aos_ui_toast(_("No se pudo abrir el puerto"), 2500);
     }
 }
 
 static void conn_baud_cb(lv_event_t *e)
 {
-    A.baud = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
+    PLA.baud = (uint32_t)(uintptr_t)lv_event_get_user_data(e);
     pl_conn_apply();
     pl_sheet_conn();
 }
@@ -341,7 +341,7 @@ static void conn_other_done(const char *v)
         if (*end || b < BAUD_MIN || b > BAUD_MAX) {
             aos_ui_toast(_("Entre 50 y 5000000 baudios"), 2200);
         } else {
-            A.baud = (uint32_t)b;
+            PLA.baud = (uint32_t)b;
             pl_conn_apply();
         }
     }
@@ -352,21 +352,21 @@ static void conn_other_cb(lv_event_t *e)
 {
     (void)e;
     char v[16];
-    snprintf(v, sizeof v, "%u", (unsigned)A.baud);
+    snprintf(v, sizeof v, "%u", (unsigned)PLA.baud);
     pl_text_entry(_("Velocidad en baudios"), v, true, conn_other_done);
 }
 
 static void conn_frame_cb(lv_event_t *e)
 {
     uintptr_t v = (uintptr_t)lv_event_get_user_data(e);
-    A.frame[v >> 8] = (char)(v & 0xFF);
+    PLA.frame[v >> 8] = (char)(v & 0xFF);
     pl_conn_apply();
     pl_sheet_conn();
 }
 
 static void conn_line_cb(lv_event_t *e)
 {
-    A.ctl ^= (uint8_t)(uintptr_t)lv_event_get_user_data(e);
+    PLA.ctl ^= (uint8_t)(uintptr_t)lv_event_get_user_data(e);
     pl_conn_apply();
     pl_sheet_conn();
 }
@@ -375,37 +375,37 @@ void pl_sheet_conn(void)
 {
     int32_t w;
     char title[48];
-    snprintf(title, sizeof title, "%s %c", _("Conexión"), PS.ch ? 'B' : 'A');
+    snprintf(title, sizeof title, "%s %c", _("Conexión"), PLS.ch ? 'B' : 'A');
     lv_obj_t *col = sheet_begin(SH_CONN, title, &w);
     lv_obj_t *r = section(col, w, _("VELOCIDAD (BAUDIOS)"));
     bool listed = false;
     for (size_t i = 0; i < N_BAUDS; i++) {
         char b[12];
         snprintf(b, sizeof b, "%u", (unsigned)BAUDS[i]);
-        bool on = BAUDS[i] == A.baud;
+        bool on = BAUDS[i] == PLA.baud;
         listed |= on;
         pl_mini(r, b, on, AOS_C_ACCENT, conn_baud_cb, (void *)(uintptr_t)BAUDS[i]);
     }
     char other[32];
     if (listed) pl_scpy(other, sizeof other, _("Otra…"));
-    else snprintf(other, sizeof other, "%u…", (unsigned)A.baud);
+    else snprintf(other, sizeof other, "%u…", (unsigned)PLA.baud);
     pl_mini(r, other, !listed, AOS_C_ACCENT, conn_other_cb, NULL);
     r = section(col, w, _("BITS DE DATOS"));
     for (char c = '5'; c <= '8'; c++) {
         char b[2] = { c, 0 };
-        pl_mini(r, b, A.frame[0] == c, AOS_C_ACCENT, conn_frame_cb, (void *)(uintptr_t)(0 << 8 | (uint8_t)c));
+        pl_mini(r, b, PLA.frame[0] == c, AOS_C_ACCENT, conn_frame_cb, (void *)(uintptr_t)(0 << 8 | (uint8_t)c));
     }
     r = section(col, w, _("PARIDAD"));
     static const char PAR[3] = { 'N', 'E', 'O' };
     const char *par_name[3] = { _("Ninguna (N)"), _("Par (E)"), _("Impar (O)") };
     for (int i = 0; i < 3; i++)
-        pl_mini(r, par_name[i], A.frame[1] == PAR[i], AOS_C_ACCENT, conn_frame_cb, (void *)(uintptr_t)(1 << 8 | (uint8_t)PAR[i]));
+        pl_mini(r, par_name[i], PLA.frame[1] == PAR[i], AOS_C_ACCENT, conn_frame_cb, (void *)(uintptr_t)(1 << 8 | (uint8_t)PAR[i]));
     r = section(col, w, _("BITS DE STOP"));
-    pl_mini(r, "1", A.frame[2] == '1', AOS_C_ACCENT, conn_frame_cb, (void *)(uintptr_t)(2 << 8 | '1'));
-    pl_mini(r, "2", A.frame[2] == '2', AOS_C_ACCENT, conn_frame_cb, (void *)(uintptr_t)(2 << 8 | '2'));
+    pl_mini(r, "1", PLA.frame[2] == '1', AOS_C_ACCENT, conn_frame_cb, (void *)(uintptr_t)(2 << 8 | '1'));
+    pl_mini(r, "2", PLA.frame[2] == '2', AOS_C_ACCENT, conn_frame_cb, (void *)(uintptr_t)(2 << 8 | '2'));
     r = section(col, w, _("LÍNEAS DEL ADAPTADOR USB"));
-    pl_mini(r, "DTR", A.ctl & AOS_SERIAL_DTR, AOS_C_GREEN, conn_line_cb, (void *)(uintptr_t)AOS_SERIAL_DTR);
-    pl_mini(r, "RTS", A.ctl & AOS_SERIAL_RTS, AOS_C_GREEN, conn_line_cb, (void *)(uintptr_t)AOS_SERIAL_RTS);
+    pl_mini(r, "DTR", PLA.ctl & AOS_SERIAL_DTR, AOS_C_GREEN, conn_line_cb, (void *)(uintptr_t)AOS_SERIAL_DTR);
+    pl_mini(r, "RTS", PLA.ctl & AOS_SERIAL_RTS, AOS_C_GREEN, conn_line_cb, (void *)(uintptr_t)AOS_SERIAL_RTS);
     note(col, w, _("Prendidas, como las deja una computadora. El cable óptico de muchos multímetros se alimenta de DTR con RTS apagado: si no llega nada, probá apagar RTS. Los puertos del header no tienen estas líneas."));
     note(col, w, _("El canal es el mismo de la Terminal: los dos miran el mismo aparato a la vez, y la captura sigue con la app cerrada. Con la velocidad o el formato equivocados llegan caracteres raros: la vista de Formato muestra qué llega."));
 }
@@ -415,8 +415,8 @@ void pl_sheet_conn(void)
 static void fmt_pick_cb(lv_event_t *e)
 {
     int f = (int)(intptr_t)lv_event_get_user_data(e);
-    if (f != PS.fmt) {
-        PS.fmt = f;
+    if (f != PLS.fmt) {
+        PLS.fmt = f;
         pl_set_save();
         pl_restart_reading();
     }
@@ -428,26 +428,26 @@ static void prof_edit(int p);
 static void fmt_new_cb(lv_event_t *e)
 {
     int tmpl = (int)(intptr_t)lv_event_get_user_data(e);
-    if (PC.np >= PL_MAXP) { aos_ui_toast(_("Ya hay 12 perfiles"), 1800); return; }
-    pl_profile_default(&PC.p[PC.np], tmpl);
-    PC.np++;
+    if (PLC.np >= PL_MAXP) { aos_ui_toast(_("Ya hay 12 perfiles"), 1800); return; }
+    pl_profile_default(&PLC.p[PLC.np], tmpl);
+    PLC.np++;
     pl_cfg_save();
-    PS.fmt = PC.np - 1;
+    PLS.fmt = PLC.np - 1;
     pl_set_save();
     pl_restart_reading();
-    prof_edit(PS.fmt);
+    prof_edit(PLS.fmt);
 }
 
-static void fmt_edit_cb(lv_event_t *e) { (void)e; if (PS.fmt >= 0) prof_edit(PS.fmt); }
+static void fmt_edit_cb(lv_event_t *e) { (void)e; if (PLS.fmt >= 0) prof_edit(PLS.fmt); }
 
 void pl_sheet_format(void)
 {
     int32_t w;
     lv_obj_t *col = sheet_begin(SH_FMT, _("Formato"), &w);
     lv_obj_t *r = section(col, w, _("CÓMO LEER LAS LÍNEAS"));
-    pl_mini(r, _("Automático"), PS.fmt < 0, AOS_C_ACCENT, fmt_pick_cb, (void *)(intptr_t)-1);
-    for (int i = 0; i < PC.np; i++) pl_mini(r, PC.p[i].name, PS.fmt == i, AOS_C_ACCENT, fmt_pick_cb, (void *)(intptr_t)i);
-    if (PS.fmt < 0) {
+    pl_mini(r, _("Automático"), PLS.fmt < 0, AOS_C_ACCENT, fmt_pick_cb, (void *)(intptr_t)-1);
+    for (int i = 0; i < PLC.np; i++) pl_mini(r, PLC.p[i].name, PLS.fmt == i, AOS_C_ACCENT, fmt_pick_cb, (void *)(intptr_t)i);
+    if (PLS.fmt < 0) {
         note(col, w, _("Automático entiende números separados por espacios, comas, punto y coma o tabs (una serie por columna), el formato nombre:valor de los plotters serie (temp:21.5,hum:40), una palabra antes de cada número (Temp 21.5) y CSV con encabezado. Las líneas sin números se saltean."));
     } else {
         r = section(col, w, NULL);
@@ -460,21 +460,21 @@ void pl_sheet_format(void)
     lv_obj_t *t = aos_label(col, _("LO QUE LLEGA"), aos_font_caption, AOS_C_DIM);
     lv_obj_set_style_pad_left(t, 8, 0);
     lv_obj_set_style_pad_top(t, 10, 0);
-    raw_box(col, w, A.land ? 5 : 8);
+    raw_box(col, w, PLA.land ? 5 : 8);
 }
 
 /* ---- one profile ---- */
 
-static pl_profile_t *P(void) { return A.edit_p >= 0 && A.edit_p < PC.np ? &PC.p[A.edit_p] : NULL; }
+static pl_profile_t *P(void) { return PLA.edit_p >= 0 && PLA.edit_p < PLC.np ? &PLC.p[PLA.edit_p] : NULL; }
 
 static void prof_changed(void)
 {
     pl_cfg_save();
-    if (A.edit_p == PS.fmt) pl_restart_reading();
-    prof_edit(A.edit_p);
+    if (PLA.edit_p == PLS.fmt) pl_restart_reading();
+    prof_edit(PLA.edit_p);
 }
 
-static void prof_again(const char *v) { (void)v; prof_edit(A.edit_p); }
+static void prof_again(const char *v) { (void)v; prof_edit(PLA.edit_p); }
 
 static void prof_name_done(const char *v)
 {
@@ -516,12 +516,12 @@ static void prof_add_cb(lv_event_t *e)
 static void prof_del_cb(lv_event_t *e)
 {
     (void)e;
-    if (A.edit_p < 0 || A.edit_p >= PC.np) return;
-    memmove(&PC.p[A.edit_p], &PC.p[A.edit_p + 1], sizeof PC.p[0] * (size_t)(PC.np - A.edit_p - 1));
-    PC.np--;
+    if (PLA.edit_p < 0 || PLA.edit_p >= PLC.np) return;
+    memmove(&PLC.p[PLA.edit_p], &PLC.p[PLA.edit_p + 1], sizeof PLC.p[0] * (size_t)(PLC.np - PLA.edit_p - 1));
+    PLC.np--;
     pl_cfg_save();
-    if (PS.fmt == A.edit_p) PS.fmt = -1;
-    else if (PS.fmt > A.edit_p) PS.fmt--;
+    if (PLS.fmt == PLA.edit_p) PLS.fmt = -1;
+    else if (PLS.fmt > PLA.edit_p) PLS.fmt--;
     pl_set_save();
     pl_restart_reading();
     pl_sheet_format();
@@ -533,9 +533,9 @@ enum { FD_FIELD_DN, FD_FIELD_UP, FD_NAME, FD_UNIT, FD_SCALE, FD_OFFSET, FD_DP_DN
 static void field_done(const char *v)
 {
     pl_profile_t *p = P();
-    if (!v || !p || A.edit_f < 0 || A.edit_f >= p->nf) { prof_again(NULL); return; }
-    pl_pfield_t *f = &p->f[A.edit_f];
-    switch (A.edit_s) {
+    if (!v || !p || PLA.edit_f < 0 || PLA.edit_f >= p->nf) { prof_again(NULL); return; }
+    pl_pfield_t *f = &p->f[PLA.edit_f];
+    switch (PLA.edit_s) {
     case FD_NAME: pl_scpy(f->name, sizeof f->name, v); break;
     case FD_UNIT: pl_scpy(f->unit, sizeof f->unit, v); break;
     case FD_SCALE: { float x = strtof(v, NULL); f->scale = x == 0 ? 1 : x; break; }
@@ -553,8 +553,8 @@ static void field_cb(lv_event_t *e)
     int fi = (int)(u >> 8), what = (int)(u & 0xFF);
     if (!p || fi >= p->nf) return;
     pl_pfield_t *f = &p->f[fi];
-    A.edit_f = fi;
-    A.edit_s = what;
+    PLA.edit_f = fi;
+    PLA.edit_s = what;
     char v[48];
     switch (what) {
     case FD_FIELD_DN: if (f->field > 1) f->field--; prof_changed(); return;
@@ -587,7 +587,7 @@ static void field_cb(lv_event_t *e)
 
 static void prof_edit(int pi)
 {
-    A.edit_p = pi;
+    PLA.edit_p = pi;
     pl_profile_t *p = P();
     if (!p) { pl_sheet_format(); return; }
     int32_t w;
@@ -607,8 +607,8 @@ static void prof_edit(int pi)
     lv_obj_set_style_pad_left(t, 8, 0);
     lv_obj_set_style_pad_top(t, 10, 0);
     lv_obj_t *cb = card(col, w);
-    if (A.nraw) {
-        const pl_rawline_t *rl = &A.raw[(A.nraw - 1) % PL_RAW_N];
+    if (PLA.nraw) {
+        const pl_rawline_t *rl = &PLA.raw[(PLA.nraw - 1) % PL_RAW_N];
         char tok[24][24];
         int nt = pl_tokens(rl->text, p->comma, tok, 24);
         char line[400];
@@ -687,12 +687,12 @@ enum { SE_SHOW, SE_BIG, SE_LO, SE_HI, SE_BEEP };
 
 static void series_done(const char *v)
 {
-    if (v && A.edit_f >= 0 && A.edit_f < PD.ns) {
-        pl_series_t *s = &PD.s[A.edit_f];
+    if (v && PLA.edit_f >= 0 && PLA.edit_f < PLD.ns) {
+        pl_series_t *s = &PLD.s[PLA.edit_f];
         char *end;
         float x = strtof(v, &end);
         bool on = end != v;
-        if (A.edit_s == SE_LO) { s->lo_on = on; if (on) s->lo = x; }
+        if (PLA.edit_s == SE_LO) { s->lo_on = on; if (on) s->lo = x; }
         else { s->hi_on = on; if (on) s->hi = x; }
         s->state = 0;
         pl_cfg_alarm_store(s);
@@ -704,14 +704,14 @@ static void series_cb(lv_event_t *e)
 {
     uintptr_t u = (uintptr_t)lv_event_get_user_data(e);
     int si = (int)(u >> 8), what = (int)(u & 0xFF);
-    if (si >= PD.ns) return;
-    pl_series_t *s = &PD.s[si];
+    if (si >= PLD.ns) return;
+    pl_series_t *s = &PLD.s[si];
     char v[32] = "";
-    A.edit_f = si;
-    A.edit_s = what;
+    PLA.edit_f = si;
+    PLA.edit_s = what;
     switch (what) {
     case SE_SHOW: s->hidden = !s->hidden; break;
-    case SE_BIG: PS.big = si; s->hidden = false; pl_set_save(); break;
+    case SE_BIG: PLS.big = si; s->hidden = false; pl_set_save(); break;
     case SE_BEEP: s->beep = !s->beep; pl_cfg_alarm_store(s); break;
     case SE_LO:
     case SE_HI: {
@@ -730,12 +730,12 @@ void pl_sheet_series(void)
 {
     int32_t w;
     lv_obj_t *col = sheet_begin(SH_SERIES, _("Series y avisos"), &w);
-    if (!PD.ns) {
+    if (!PLD.ns) {
         note(col, w, _("Todavía no llegaron números. Cada nombre que aparece en las líneas (o cada columna) es una serie."));
         return;
     }
-    for (int i = 0; i < PD.ns; i++) {
-        pl_series_t *s = &PD.s[i];
+    for (int i = 0; i < PLD.ns; i++) {
+        pl_series_t *s = &PLD.s[i];
         lv_obj_t *c = card(col, w);
         char v[24], t[80];
         pl_fmt(v, sizeof v, s->last, s->dec);
@@ -743,7 +743,7 @@ void pl_sheet_series(void)
         lv_obj_t *tl = card_title(c, w, t, lv_color_hex(s->col));
         if (s->state) lv_obj_set_style_text_color(tl, AOS_C_RED, 0);
         pl_mini(c, s->hidden ? _("Oculta") : _("Se ve"), !s->hidden, lv_color_hex(0x2E7D4F), series_cb, FUD(i, SE_SHOW));
-        pl_mini(c, _("Grande"), PS.big == i, AOS_C_ACCENT, series_cb, FUD(i, SE_BIG));
+        pl_mini(c, _("Grande"), PLS.big == i, AOS_C_ACCENT, series_cb, FUD(i, SE_BIG));
         char a[24];
         if (s->lo_on) pl_fmt(a, sizeof a, s->lo, s->dec < 0 ? 2 : s->dec); else pl_scpy(a, sizeof a, "-");
         snprintf(t, sizeof t, "%s %s", _("Mínimo"), a);
@@ -766,9 +766,9 @@ static void view_done(const char *v)
         char *end;
         float x = strtof(v, &end);
         if (end != v) {
-            if (A.edit_s == VW_MIN) PS.ymin = x;
-            else PS.ymax = x;
-            if (PS.ymax <= PS.ymin) aos_ui_toast(_("El máximo tiene que ser mayor que el mínimo"), 2200);
+            if (PLA.edit_s == VW_MIN) PLS.ymin = x;
+            else PLS.ymax = x;
+            if (PLS.ymax <= PLS.ymin) aos_ui_toast(_("El máximo tiene que ser mayor que el mínimo"), 2200);
             pl_set_save();
         }
     }
@@ -781,28 +781,28 @@ static void view_cb(lv_event_t *e)
     uintptr_t u = (uintptr_t)lv_event_get_user_data(e);
     int arg = (int)(u >> 8), what = (int)(u & 0xFF);
     char v[24];
-    A.edit_s = what;
+    PLA.edit_s = what;
     switch (what) {
-    case VW_WIN: PS.win = arg; A.win_ms = PL_WINDOWS[arg]; break;
-    case VW_MODE: PS.mode = arg; break;
-    case VW_X: PS.xs = arg; break;
-    case VW_Y: PS.ys = arg; break;
-    case VW_AUTO: PS.yfix = false; break;
+    case VW_WIN: PLS.win = arg; PLA.win_ms = PL_WINDOWS[arg]; break;
+    case VW_MODE: PLS.mode = arg; break;
+    case VW_X: PLS.xs = arg; break;
+    case VW_Y: PLS.ys = arg; break;
+    case VW_AUTO: PLS.yfix = false; break;
     case VW_FIX:
-        PS.yfix = true;
-        if (PS.ymax <= PS.ymin) { PS.ymin = 0; PS.ymax = 100; }
+        PLS.yfix = true;
+        if (PLS.ymax <= PLS.ymin) { PLS.ymin = 0; PLS.ymax = 100; }
         break;
     case VW_MIN:
     case VW_MAX:
-        snprintf(v, sizeof v, "%g", (double)(what == VW_MIN ? PS.ymin : PS.ymax));
+        snprintf(v, sizeof v, "%g", (double)(what == VW_MIN ? PLS.ymin : PLS.ymax));
         pl_text_entry(what == VW_MIN ? _("Abajo del gráfico") : _("Arriba del gráfico"), v, true, view_done);
         return;
     case VW_CLEAR: {
         aos_serial_stat_t st;
-        aos_serial_stat(PS.ch, &st);
+        aos_serial_stat(PLS.ch, &st);
         pl_data_clear();
-        A.next = st.lines;          /* and not read the ring again */
-        A.paused = false;
+        PLA.next = st.lines;          /* and not read the ring again */
+        PLA.paused = false;
         break;
     }
     }
@@ -818,26 +818,26 @@ void pl_sheet_view(void)
     static const char *const WN[] = { "10 s", "30 s", "1 min", "5 min", "15 min", "1 h", "4 h", "8 h" };
     lv_obj_t *r = section(col, w, _("VENTANA DE TIEMPO"));
     for (int i = 0; i < PL_NWIN; i++)
-        pl_mini(r, WN[i], A.win_ms == PL_WINDOWS[i], AOS_C_ACCENT, view_cb, FUD(i, VW_WIN));
+        pl_mini(r, WN[i], PLA.win_ms == PL_WINDOWS[i], AOS_C_ACCENT, view_cb, FUD(i, VW_WIN));
     r = section(col, w, _("GRÁFICO"));
-    pl_mini(r, _("Contra el tiempo"), PS.mode == PL_MODE_TIME, AOS_C_ACCENT, view_cb, FUD(PL_MODE_TIME, VW_MODE));
-    pl_mini(r, _("XY: una contra otra"), PS.mode == PL_MODE_XY, AOS_C_ACCENT, view_cb, FUD(PL_MODE_XY, VW_MODE));
-    if (PS.mode == PL_MODE_XY) {
+    pl_mini(r, _("Contra el tiempo"), PLS.mode == PL_MODE_TIME, AOS_C_ACCENT, view_cb, FUD(PL_MODE_TIME, VW_MODE));
+    pl_mini(r, _("XY: una contra otra"), PLS.mode == PL_MODE_XY, AOS_C_ACCENT, view_cb, FUD(PL_MODE_XY, VW_MODE));
+    if (PLS.mode == PL_MODE_XY) {
         r = section(col, w, _("EJE X"));
-        for (int i = 0; i < PD.ns; i++) pl_mini(r, PD.s[i].name, PS.xs == i, lv_color_hex(PD.s[i].col), view_cb, FUD(i, VW_X));
+        for (int i = 0; i < PLD.ns; i++) pl_mini(r, PLD.s[i].name, PLS.xs == i, lv_color_hex(PLD.s[i].col), view_cb, FUD(i, VW_X));
         r = section(col, w, _("EJE Y"));
-        for (int i = 0; i < PD.ns; i++) pl_mini(r, PD.s[i].name, PS.ys == i, lv_color_hex(PD.s[i].col), view_cb, FUD(i, VW_Y));
-        if (PD.ns < 2) note(col, w, _("Hacen falta dos series con datos"));
+        for (int i = 0; i < PLD.ns; i++) pl_mini(r, PLD.s[i].name, PLS.ys == i, lv_color_hex(PLD.s[i].col), view_cb, FUD(i, VW_Y));
+        if (PLD.ns < 2) note(col, w, _("Hacen falta dos series con datos"));
     }
     r = section(col, w, _("ESCALA"));
-    pl_mini(r, _("Automática"), !PS.yfix, AOS_C_ACCENT, view_cb, FUD(0, VW_AUTO));
-    pl_mini(r, _("Fija"), PS.yfix, AOS_C_ACCENT, view_cb, FUD(0, VW_FIX));
-    if (PS.yfix) {
+    pl_mini(r, _("Automática"), !PLS.yfix, AOS_C_ACCENT, view_cb, FUD(0, VW_AUTO));
+    pl_mini(r, _("Fija"), PLS.yfix, AOS_C_ACCENT, view_cb, FUD(0, VW_FIX));
+    if (PLS.yfix) {
         char b[48], v[24];
-        pl_fmt(v, sizeof v, PS.ymin, 3);
-        snprintf(b, sizeof b, "%s %g", _("Desde"), (double)PS.ymin);
+        pl_fmt(v, sizeof v, PLS.ymin, 3);
+        snprintf(b, sizeof b, "%s %g", _("Desde"), (double)PLS.ymin);
         pl_mini(r, b, false, AOS_C_ACCENT, view_cb, FUD(0, VW_MIN));
-        snprintf(b, sizeof b, "%s %g", _("Hasta"), (double)PS.ymax);
+        snprintf(b, sizeof b, "%s %g", _("Hasta"), (double)PLS.ymax);
         pl_mini(r, b, false, AOS_C_ACCENT, view_cb, FUD(0, VW_MAX));
     }
     r = section(col, w, _("DATOS"));
@@ -845,9 +845,9 @@ void pl_sheet_view(void)
     char t[200];
     uint32_t first = pl_data_first_t(), now = pl_now();
     char dur[24];
-    pl_fmt_dur(dur, sizeof dur, PD.rows ? now - first : 0);
+    pl_fmt_dur(dur, sizeof dur, PLD.rows ? now - first : 0);
     snprintf(t, sizeof t, _("%u lecturas en %s. En memoria quedan las filas de los últimos minutos u horas, según cuántas lleguen, y un resumen por segundo de las últimas 8 horas."),
-             (unsigned)PD.rows, dur);
+             (unsigned)PLD.rows, dur);
     note(col, w, t);
     note(col, w, _("En el gráfico: un dedo lee el punto que toca; dos dedos acercan o alejan, y arrastrados van hacia atrás en el tiempo (el gráfico se pausa; En vivo vuelve)."));
 }
@@ -856,7 +856,7 @@ void pl_sheet_view(void)
 
 static void send_eol_cb(lv_event_t *e)
 {
-    PS.eol = (int)(intptr_t)lv_event_get_user_data(e);
+    PLS.eol = (int)(intptr_t)lv_event_get_user_data(e);
     pl_set_save();
     pl_sheet_send();
 }
@@ -864,12 +864,12 @@ static void send_eol_cb(lv_event_t *e)
 static void send_ta_cb(lv_event_t *e)
 {
     if (lv_event_get_code(e) != LV_EVENT_READY) return;
-    const char *txt = lv_textarea_get_text(A.sheet_ta);
+    const char *txt = lv_textarea_get_text(PLA.sheet_ta);
     char buf[260];
-    int n = snprintf(buf, sizeof buf, "%s%s", txt, EOL_SEQ[PS.eol]);
+    int n = snprintf(buf, sizeof buf, "%s%s", txt, EOL_SEQ[PLS.eol]);
     if (n > (int)sizeof buf - 1) n = (int)sizeof buf - 1;
-    if (n > 0 && aos_serial_send(PS.ch, buf, n) < 0) aos_ui_toast(_("Conectá un puerto primero"), 1800);
-    lv_textarea_set_text(A.sheet_ta, "");
+    if (n > 0 && aos_serial_send(PLS.ch, buf, n) < 0) aos_ui_toast(_("Conectá un puerto primero"), 1800);
+    lv_textarea_set_text(PLA.sheet_ta, "");
 }
 
 void pl_sheet_send(void)
@@ -877,24 +877,24 @@ void pl_sheet_send(void)
     int32_t w;
     lv_obj_t *col = sheet_begin(SH_SEND, _("Enviar al puerto"), &w);
     lv_obj_t *r = section(col, w, _("FIN DE LÍNEA"));
-    for (int i = 0; i < 4; i++) pl_mini(r, _(EOL_NAME[i]), PS.eol == i, AOS_C_ACCENT, send_eol_cb, (void *)(intptr_t)i);
-    raw_box(col, w, A.land ? 2 : 5);
-    A.sheet_ta = lv_textarea_create(col);
-    lv_textarea_set_one_line(A.sheet_ta, true);
-    lv_textarea_set_placeholder_text(A.sheet_ta, _("Línea para enviar…"));
-    lv_obj_set_size(A.sheet_ta, w, 80);
-    lv_obj_set_style_text_font(A.sheet_ta, &aos_mono_22, 0);
-    lv_obj_set_style_bg_color(A.sheet_ta, AOS_C_CARD, 0);
-    lv_obj_set_style_text_color(A.sheet_ta, AOS_C_TEXT, 0);
-    lv_obj_set_style_border_width(A.sheet_ta, 0, 0);
-    lv_obj_set_style_radius(A.sheet_ta, 20, 0);
-    lv_obj_set_style_pad_hor(A.sheet_ta, 20, 0);
-    lv_obj_set_style_pad_ver(A.sheet_ta, 22, 0);
-    lv_obj_add_event_cb(A.sheet_ta, send_ta_cb, LV_EVENT_READY, NULL);
-    A.sheet_kb = lv_keyboard_create(A.overlay);
-    lv_obj_set_size(A.sheet_kb, A.W, A.land ? A.H / 2 : A.H * 2 / 5);
-    lv_obj_align(A.sheet_kb, LV_ALIGN_BOTTOM_MID, 0, 0);
-    aos_keyboard_style(A.sheet_kb, aos_font_body);
-    lv_keyboard_set_textarea(A.sheet_kb, A.sheet_ta);
-    lv_obj_set_height(s_col, A.H - lv_obj_get_height(A.sheet_kb));
+    for (int i = 0; i < 4; i++) pl_mini(r, _(EOL_NAME[i]), PLS.eol == i, AOS_C_ACCENT, send_eol_cb, (void *)(intptr_t)i);
+    raw_box(col, w, PLA.land ? 2 : 5);
+    PLA.sheet_ta = lv_textarea_create(col);
+    lv_textarea_set_one_line(PLA.sheet_ta, true);
+    lv_textarea_set_placeholder_text(PLA.sheet_ta, _("Línea para enviar…"));
+    lv_obj_set_size(PLA.sheet_ta, w, 80);
+    lv_obj_set_style_text_font(PLA.sheet_ta, &aos_mono_22, 0);
+    lv_obj_set_style_bg_color(PLA.sheet_ta, AOS_C_CARD, 0);
+    lv_obj_set_style_text_color(PLA.sheet_ta, AOS_C_TEXT, 0);
+    lv_obj_set_style_border_width(PLA.sheet_ta, 0, 0);
+    lv_obj_set_style_radius(PLA.sheet_ta, 20, 0);
+    lv_obj_set_style_pad_hor(PLA.sheet_ta, 20, 0);
+    lv_obj_set_style_pad_ver(PLA.sheet_ta, 22, 0);
+    lv_obj_add_event_cb(PLA.sheet_ta, send_ta_cb, LV_EVENT_READY, NULL);
+    PLA.sheet_kb = lv_keyboard_create(PLA.overlay);
+    lv_obj_set_size(PLA.sheet_kb, PLA.W, PLA.land ? PLA.H / 2 : PLA.H * 2 / 5);
+    lv_obj_align(PLA.sheet_kb, LV_ALIGN_BOTTOM_MID, 0, 0);
+    aos_keyboard_style(PLA.sheet_kb, aos_font_body);
+    lv_keyboard_set_textarea(PLA.sheet_kb, PLA.sheet_ta);
+    lv_obj_set_height(s_col, PLA.H - lv_obj_get_height(PLA.sheet_kb));
 }

@@ -168,20 +168,20 @@ static void fmt_clock(char *out, size_t cap, uint32_t t)
 static void win_range(uint32_t *t0, uint32_t *t1)
 {
     uint32_t now = pl_now();
-    uint32_t end = A.paused ? A.end_t : now;
+    uint32_t end = PLA.paused ? PLA.end_t : now;
     if (end > now) end = now;
     *t1 = end;
-    *t0 = end > A.win_ms ? end - A.win_ms : 0;
+    *t0 = end > PLA.win_ms ? end - PLA.win_ms : 0;
 }
 
 /* ---- the legend: chips that wrap, measured in the timer ---- */
 
 static void legend_text(int s, char *out, size_t cap)
 {
-    const pl_series_t *se = &PD.s[s];
+    const pl_series_t *se = &PLD.s[s];
     char v[24];
     float last = C.cols.ncols ? C.cols.slast[s] : NAN;
-    if (PL_ISNAN(last) && se->has && !A.paused) last = se->last;
+    if (PL_ISNAN(last) && se->has && !PLA.paused) last = se->last;
     pl_fmt(v, sizeof v, last, se->dec);
     snprintf(out, cap, "%s  %s%s%s", se->name, v, se->unit[0] ? " " : "", se->unit);
 }
@@ -191,7 +191,7 @@ static void legend_layout(int32_t w)
     const lv_font_t *f = aos_font_caption;
     int32_t x = 0, y = 0;
     C.nleg = 0;
-    for (int s = 0; s < PD.ns; s++) {
+    for (int s = 0; s < PLD.ns; s++) {
         char t[64];
         legend_text(s, t, sizeof t);
         int32_t iw = 34 + text_w(t, f) + 18;
@@ -201,7 +201,7 @@ static void legend_layout(int32_t w)
         x += iw + 8;
         C.nleg = s + 1;
     }
-    C.leg_h = PD.ns ? y + LEG_ROW + 4 : 0;
+    C.leg_h = PLD.ns ? y + LEG_ROW + 4 : 0;
 }
 
 /* ---- the timer's part ---- */
@@ -209,8 +209,8 @@ static void legend_layout(int32_t w)
 static void xy_cb(const pl_row_t *r, void *ud)
 {
     float *carry = ud;
-    if (!PL_ISNAN(r->v[PS.xs])) carry[0] = r->v[PS.xs];
-    if (!PL_ISNAN(r->v[PS.ys])) carry[1] = r->v[PS.ys];
+    if (!PL_ISNAN(r->v[PLS.xs])) carry[0] = r->v[PLS.xs];
+    if (!PL_ISNAN(r->v[PLS.ys])) carry[1] = r->v[PLS.ys];
     if (PL_ISNAN(carry[0]) || PL_ISNAN(carry[1]) || C.nxy >= XY_MAX) return;
     C.xy[2 * C.nxy] = carry[0];
     C.xy[2 * C.nxy + 1] = carry[1];
@@ -257,11 +257,11 @@ static void build(void)
         C.ph = H - C.py - TIME_H - 8;
     }
 
-    if (PS.mode == PL_MODE_XY) {
+    if (PLS.mode == PL_MODE_XY) {
         C.nxy = 0;
         if (!C.xy) C.xy = pl_ps_alloc(sizeof(float) * 2 * XY_MAX);
         float carry[2] = { NAN, NAN };
-        if (C.xy && PS.xs < PD.ns && PS.ys < PD.ns) pl_data_rows(t0, t1, XY_MAX, xy_cb, carry);
+        if (C.xy && PLS.xs < PLD.ns && PLS.ys < PLD.ns) pl_data_rows(t0, t1, XY_MAX, xy_cb, carry);
         float xl = NAN, xh = NAN, yl = NAN, yh = NAN;
         for (int i = 0; i < C.nxy; i++) {
             float x = C.xy[2 * i], y = C.xy[2 * i + 1];
@@ -271,19 +271,19 @@ static void build(void)
             if (PL_ISNAN(yh) || y > yh) yh = y;
         }
         autorange(&xl, &xh);
-        if (PS.yfix && PS.ymax > PS.ymin) { yl = PS.ymin; yh = PS.ymax; }
+        if (PLS.yfix && PLS.ymax > PLS.ymin) { yl = PLS.ymin; yh = PLS.ymax; }
         else autorange(&yl, &yh);
         C.xlo = xl;
         C.xhi = xh;
         C.lo = yl;
         C.hi = yh;
-    } else if (PS.yfix && PS.ymax > PS.ymin) {
-        C.lo = PS.ymin;
-        C.hi = PS.ymax;
+    } else if (PLS.yfix && PLS.ymax > PLS.ymin) {
+        C.lo = PLS.ymin;
+        C.hi = PLS.ymax;
     } else {
         float lo = NAN, hi = NAN;
-        for (int s = 0; s < PD.ns; s++) {
-            if (PD.s[s].hidden || !C.cols.sn[s]) continue;
+        for (int s = 0; s < PLD.ns; s++) {
+            if (PLD.s[s].hidden || !C.cols.sn[s]) continue;
             if (PL_ISNAN(lo) || C.cols.smin[s] < lo) lo = C.cols.smin[s];
             if (PL_ISNAN(hi) || C.cols.smax[s] > hi) hi = C.cols.smax[s];
         }
@@ -297,11 +297,11 @@ static void build(void)
     /* what to say when there is nothing to draw */
     C.msg[0] = 0;
     aos_serial_stat_t st;
-    aos_serial_stat(PS.ch, &st);
-    if (!st.running && !PD.rows) pl_scpy(C.msg, sizeof C.msg, _("Elegí el puerto y tocá Conectar"));
-    else if (!PD.rows && A.lines) pl_scpy(C.msg, sizeof C.msg, _("Llegan líneas pero sin números: mirá Formato"));
-    else if (!PD.rows) pl_scpy(C.msg, sizeof C.msg, _("Esperando datos…"));
-    else if (PS.mode == PL_MODE_XY && C.nxy < 2) pl_scpy(C.msg, sizeof C.msg, _("Hacen falta dos series con datos"));
+    aos_serial_stat(PLS.ch, &st);
+    if (!st.running && !PLD.rows) pl_scpy(C.msg, sizeof C.msg, _("Elegí el puerto y tocá Conectar"));
+    else if (!PLD.rows && PLA.lines) pl_scpy(C.msg, sizeof C.msg, _("Llegan líneas pero sin números: mirá Formato"));
+    else if (!PLD.rows) pl_scpy(C.msg, sizeof C.msg, _("Esperando datos…"));
+    else if (PLS.mode == PL_MODE_XY && C.nxy < 2) pl_scpy(C.msg, sizeof C.msg, _("Hacen falta dos series con datos"));
     C.built_at = pl_now();
     lv_obj_invalidate(C.obj);
 }
@@ -330,7 +330,7 @@ static void draw_axes(lv_layer_t *L, int32_t ox, int32_t oy)
                  LV_TEXT_ALIGN_LEFT);
     }
     int32_t by = oy + C.py + C.ph;
-    if (PS.mode == PL_MODE_XY) {
+    if (PLS.mode == PL_MODE_XY) {
         float xs = nice_step(C.xhi - C.xlo, C.pw > 800 ? 6 : 4);
         int xd = step_dec(xs);
         for (float v = ceilf(C.xlo / xs) * xs; v <= C.xhi; v += xs) {
@@ -369,7 +369,7 @@ static void draw_axes(lv_layer_t *L, int32_t ox, int32_t oy)
 
 static void draw_series(lv_layer_t *L, int32_t ox, int32_t oy, int s)
 {
-    const pl_series_t *se = &PD.s[s];
+    const pl_series_t *se = &PLD.s[s];
     const pl_cols_t *c = &C.cols;
     lv_point_precise_t *pts = lv_malloc(sizeof *pts * (size_t)(c->ncols * 3 + 2));
     if (!pts) return;
@@ -452,7 +452,7 @@ static void draw_xy(lv_layer_t *L, int32_t ox, int32_t oy)
         pts[i].x = ox + C.px + (int32_t)((C.xy[2 * i] - C.xlo) / xr * (float)C.pw);
         pts[i].y = oy + ys(C.xy[2 * i + 1]);
     }
-    lv_color_t col = lv_color_hex(PD.s[PS.ys].col);
+    lv_color_t col = lv_color_hex(PLD.s[PLS.ys].col);
     if (C.nxy >= 2) {
         lv_draw_line_dsc_t d;
         lv_draw_line_dsc_init(&d);
@@ -468,15 +468,15 @@ static void draw_xy(lv_layer_t *L, int32_t ox, int32_t oy)
     rect(L, x - 6, y - 6, x + 6, y + 6, col, LV_OPA_COVER, 6);
     lv_free(pts);
     char b[64];
-    snprintf(b, sizeof b, "X: %s   Y: %s", PD.s[PS.xs].name, PD.s[PS.ys].name);
+    snprintf(b, sizeof b, "X: %s   Y: %s", PLD.s[PLS.xs].name, PLD.s[PLS.ys].name);
     label_at(L, b, aos_font_caption, lv_color_hex(0x8E8E93), ox + C.px + 8, oy + C.py + 6, ox + C.px + C.pw - 8,
              oy + C.py + 32, LV_TEXT_ALIGN_RIGHT);
 }
 
 static void draw_alarms(lv_layer_t *L, int32_t ox, int32_t oy)
 {
-    for (int s = 0; s < PD.ns; s++) {
-        const pl_series_t *se = &PD.s[s];
+    for (int s = 0; s < PLD.ns; s++) {
+        const pl_series_t *se = &PLD.s[s];
         if (se->hidden) continue;
         for (int k = 0; k < 2; k++) {
             if (!(k ? se->hi_on : se->lo_on)) continue;
@@ -502,8 +502,8 @@ static void draw_cursor(lv_layer_t *L, int32_t ox, int32_t oy)
     lv_color_t cols[PL_MAXS + 1];
     int nr = 1;
     uint32_t t = c->t0 + (uint32_t)((float)k * (float)(c->t1 - c->t0) / (float)c->ncols);
-    for (int s = 0; s < PD.ns; s++) {
-        if (PD.s[s].hidden) continue;
+    for (int s = 0; s < PLD.ns; s++) {
+        if (PLD.s[s].hidden) continue;
         int best = -1;
         for (int d = 0; d <= 8 && best < 0; d++) {
             if (k - d >= 0 && !PL_ISNAN(c->last[s * c->cap + k - d])) best = k - d;
@@ -512,17 +512,17 @@ static void draw_cursor(lv_layer_t *L, int32_t ox, int32_t oy)
         if (best < 0) continue;
         int i = s * c->cap + best;
         char v[24];
-        pl_fmt(v, sizeof v, c->last[i], PD.s[s].dec);
+        pl_fmt(v, sizeof v, c->last[i], PLD.s[s].dec);
         if (best == k) t = c->lt[i];
         if (c->mx[i] > c->mn[i] && !c->buckets) {
             char a[24], b[24];
-            pl_fmt(a, sizeof a, c->mn[i], PD.s[s].dec);
-            pl_fmt(b, sizeof b, c->mx[i], PD.s[s].dec);
-            snprintf(rows[nr], sizeof rows[0], "%.14s %s %s (%s…%s)", PD.s[s].name, v, PD.s[s].unit, a, b);
+            pl_fmt(a, sizeof a, c->mn[i], PLD.s[s].dec);
+            pl_fmt(b, sizeof b, c->mx[i], PLD.s[s].dec);
+            snprintf(rows[nr], sizeof rows[0], "%.14s %s %s (%s…%s)", PLD.s[s].name, v, PLD.s[s].unit, a, b);
         } else {
-            snprintf(rows[nr], sizeof rows[0], "%.14s %s %s", PD.s[s].name, v, PD.s[s].unit);
+            snprintf(rows[nr], sizeof rows[0], "%.14s %s %s", PLD.s[s].name, v, PLD.s[s].unit);
         }
-        cols[nr] = lv_color_hex(PD.s[s].col);
+        cols[nr] = lv_color_hex(PLD.s[s].col);
         nr++;
         int32_t y = oy + ys(c->last[i]);
         rect(L, ox + C.px + best - 7, y - 7, ox + C.px + best + 7, y + 7, lv_color_white(), LV_OPA_COVER, 7);
@@ -558,8 +558,8 @@ static void draw_cb(lv_event_t *e)
     /* the legend */
     for (int s = 0; s < C.nleg; s++) {
         const lv_area_t *r = &C.leg[s];
-        const pl_series_t *se = &PD.s[s];
-        bool big = s == PS.big;
+        const pl_series_t *se = &PLD.s[s];
+        bool big = s == PLS.big;
         rect(L, ox + 12 + r->x1, oy + 10 + r->y1, ox + 12 + r->x2, oy + 10 + r->y2,
              big ? lv_color_hex(0x2C3440) : lv_color_hex(0x181C22), LV_OPA_COVER, 16);
         rect(L, ox + 12 + r->x1 + 12, oy + 10 + r->y1 + 10, ox + 12 + r->x1 + 24, oy + 10 + r->y1 + 22,
@@ -572,17 +572,17 @@ static void draw_cb(lv_event_t *e)
     if (C.msg[0]) {
         label_at(L, C.msg, aos_font_small, lv_color_hex(0x8E8E93), ox + 30, oy + C.py + C.ph / 2 - 40,
                  ox + C.px + C.pw - 30, oy + C.py + C.ph / 2 + 60, LV_TEXT_ALIGN_CENTER);
-        if (!PD.rows) return;
+        if (!PLD.rows) return;
     }
     draw_axes(L, ox, oy);
-    if (PS.mode == PL_MODE_XY) {
+    if (PLS.mode == PL_MODE_XY) {
         draw_xy(L, ox, oy);
         return;
     }
     draw_alarms(L, ox, oy);
-    for (int s = 0; s < PD.ns; s++)
-        if (!PD.s[s].hidden && s != PS.big) draw_series(L, ox, oy, s);
-    if (PS.big < PD.ns && !PD.s[PS.big].hidden) draw_series(L, ox, oy, PS.big);     /* on top */
+    for (int s = 0; s < PLD.ns; s++)
+        if (!PLD.s[s].hidden && s != PLS.big) draw_series(L, ox, oy, s);
+    if (PLS.big < PLD.ns && !PLD.s[PLS.big].hidden) draw_series(L, ox, oy, PLS.big);     /* on top */
     draw_cursor(L, ox, oy);
 }
 
@@ -592,7 +592,7 @@ static void win_set(uint32_t w)
 {
     if (w < WIN_MIN) w = WIN_MIN;
     if (w > WIN_MAX) w = WIN_MAX;
-    A.win_ms = w;
+    PLA.win_ms = w;
 }
 
 static void gesture_cb(const aos_gesture_event_t *ev, void *ud)
@@ -606,15 +606,15 @@ static void gesture_cb(const aos_gesture_event_t *ev, void *ud)
         for (int s = 0; s < C.nleg; s++) {
             const lv_area_t *r = &C.leg[s];
             if (lx >= 12 + r->x1 && lx <= 12 + r->x2 && ly >= 10 + r->y1 && ly <= 10 + r->y2) {
-                if (PS.big == s) PD.s[s].hidden = !PD.s[s].hidden;
-                else { PS.big = s; PD.s[s].hidden = false; }
+                if (PLS.big == s) PLD.s[s].hidden = !PLD.s[s].hidden;
+                else { PLS.big = s; PLD.s[s].hidden = false; }
                 pl_set_save();
                 C.want = true;
                 pl_refresh(true);
                 return;
             }
         }
-        if (PS.mode == PL_MODE_XY) return;
+        if (PLS.mode == PL_MODE_XY) return;
         if (C.cursor && (int32_t)(C.hold_until - pl_now()) > 0 && abs(lx - C.px - C.cx) < 30) {
             C.cursor = false;
         } else {
@@ -626,7 +626,7 @@ static void gesture_cb(const aos_gesture_event_t *ev, void *ud)
         break;
     case AOS_GESTURE_DRAG_BEGIN:
     case AOS_GESTURE_DRAG:
-        if (PS.mode == PL_MODE_XY) return;
+        if (PLS.mode == PL_MODE_XY) return;
         C.cursor = true;
         C.dragging = true;
         C.cx = lx - C.px;
@@ -649,22 +649,22 @@ static void gesture_cb(const aos_gesture_event_t *ev, void *ud)
         float frac = (float)(lx - C.px) / (float)(C.pw > 0 ? C.pw : 1);
         if (frac < 0) frac = 0;
         if (frac > 1) frac = 1;
-        float tc = (float)t0 + frac * (float)A.win_ms;
-        float nw = (float)A.win_ms / ev->scale;
+        float tc = (float)t0 + frac * (float)PLA.win_ms;
+        float nw = (float)PLA.win_ms / ev->scale;
         C.pan_acc += ev->dx;
-        bool pan = A.paused || fabsf(C.pan_acc) > 24;
-        uint32_t old = A.win_ms;
+        bool pan = PLA.paused || fabsf(C.pan_acc) > 24;
+        uint32_t old = PLA.win_ms;
         win_set((uint32_t)nw);
         if (pan) {
-            float end = tc + (1 - frac) * (float)A.win_ms - ev->dx * (float)A.win_ms / (float)C.pw;
+            float end = tc + (1 - frac) * (float)PLA.win_ms - ev->dx * (float)PLA.win_ms / (float)C.pw;
             uint32_t now = pl_now();
-            if (!A.paused) { A.paused = true; pl_refresh(true); }
+            if (!PLA.paused) { PLA.paused = true; pl_refresh(true); }
             if (end > (float)now) end = (float)now;
             uint32_t first = pl_data_first_t();
-            if (end < (float)first + (float)A.win_ms * 0.2f) end = (float)first + (float)A.win_ms * 0.2f;
-            A.end_t = (uint32_t)end;
+            if (end < (float)first + (float)PLA.win_ms * 0.2f) end = (float)first + (float)PLA.win_ms * 0.2f;
+            PLA.end_t = (uint32_t)end;
         }
-        if (old != A.win_ms || pan) {
+        if (old != PLA.win_ms || pan) {
             C.want = true;
             pl_refresh(false);
         }
@@ -713,18 +713,18 @@ void pl_chart_poll(void)
         C.cursor = false;
         lv_obj_invalidate(C.obj);
     }
-    bool live = !A.paused && (PD.rows != 0);
-    if (!C.want && !(live && A.dirty) && (int32_t)(now - C.built_at) < 1000) return;
+    bool live = !PLA.paused && (PLD.rows != 0);
+    if (!C.want && !(live && PLA.dirty) && (int32_t)(now - C.built_at) < 1000) return;
     if (!C.want && (int32_t)(now - C.built_at) < 100) return;
     C.want = false;
-    A.dirty = false;
+    PLA.dirty = false;
     build();
 }
 
 /* The statistics of the window, for the big value */
 bool pl_chart_stats(int s, float *mn, float *mx, float *avg, float *last)
 {
-    if (s < 0 || s >= PD.ns || !C.cols.ncols || !C.cols.sn[s]) return false;
+    if (s < 0 || s >= PLD.ns || !C.cols.ncols || !C.cols.sn[s]) return false;
     *mn = C.cols.smin[s];
     *mx = C.cols.smax[s];
     *avg = C.cols.ssum[s] / (float)C.cols.sn[s];
