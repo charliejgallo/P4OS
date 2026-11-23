@@ -1,0 +1,17 @@
+{
+ "cat": "juegos",
+ "about": {
+  "es": "Rocas en el espacio con gráficos de neón: una nave que gira, empuja con inercia y dispara, rocas que se parten, enemigos, jefes y mejoras. Campaña de doce sectores y arcade sin fin, solo o de a dos.",
+  "en": "Rocks in space in neon: a ship that turns, thrusts with inertia and shoots, rocks that split, enemies, bosses and powers. A twelve-sector campaign and an endless arcade, alone or for two."
+ },
+ "desc": {
+  "es": "Todo lo que se ve son trazos de luz dibujados por código: rocas, naves, chispas y estelas, con sacudidas en cada explosión. La nave sigue de largo por la inercia y la pantalla da la vuelta por los bordes. Hay rocas que se parten en dos o en tres, de metal que aguantan varios tiros, naranjas que explotan y se llevan lo que tienen cerca, y verdes que se te pegan y te frenan. Los enemigos persiguen, siembran minas, cargan en línea recta o disparan orbes, y caen mejoras: disparo triple, escudo, rayo e imán.\n\nLa campaña son doce sectores, cada uno con su cielo y sus colores, y un jefe cada cuatro: el Coloso, la Colmena y la Serpiente. Los cristales que juntás se gastan en el taller entre sectores para mejorar el motor, el cañón, el blindaje, el salto y el imán. El arcade son oleadas sin fin, con sus récords.\n\nSe juega con los dos pulgares, de pie o acostada: de un lado una palanca que apunta y empuja (o botones para girar y empujar), del otro el disparo y el salto. También con joystick USB, y con dos joysticks, o uno más la pantalla, juegan dos a la vez, una nave cada uno. Tres dificultades, y sonido y música sintetizados.",
+  "en": "Everything on screen is a stroke of light drawn by code: rocks, ships, sparks and trails, with a shake at every explosion. The ship keeps drifting on its inertia and the screen wraps at the edges. Some rocks split in two or in three, metal ones take several shots, orange ones blow up and take whatever is near with them, and green ones stick to you and slow you down. Enemies chase you, lay mines, charge in a straight line or shoot orbs, and powers drop: triple shot, shield, beam and magnet.\n\nThe campaign is twelve sectors, each with its own sky and colours, and a boss every fourth: the Colossus, the Hive and the Serpent. The crystals you gather are spent in the workshop between sectors on the engine, the gun, the armour, the jump and the magnet. The arcade is endless waves, with its records.\n\nIt plays with both thumbs, upright or lying down: on one side a stick that aims and thrusts (or buttons to turn and thrust), on the other fire and the jump. It also plays with a USB gamepad, and with two gamepads, or one plus the screen, two play at once, a ship each. Three difficulties, and synthesised sound and music."
+ },
+ "shots": [
+  "app-asteroides.jpg",
+  "app-asteroides-jefe.jpg",
+  "land-asteroides.jpg",
+  "app-asteroides-menu.jpg"
+ ]
+}
