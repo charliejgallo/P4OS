@@ -102,7 +102,7 @@ char *tg_program_load(const tg_level_t *lv, int lang);      /* tg_free; NULL: no
 void tg_program_save(const tg_level_t *lv, int lang, const char *text);
 lv_obj_t *tg_button(lv_obj_t *parent, const char *text, lv_color_t bg, lv_event_cb_t cb, void *ud);
 lv_obj_t *tg_label(lv_obj_t *parent, const char *text, const lv_font_t *font, lv_color_t color);
-void tg_stars_draw(lv_obj_t *parent, int n, int size);
+lv_obj_t *tg_stars_draw(lv_obj_t *parent, int n, int size);
 lv_color_t tg_lang_color(int lang);
 
 /* tg_menu.c */

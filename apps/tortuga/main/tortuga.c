@@ -69,7 +69,7 @@ lv_obj_t *tg_button(lv_obj_t *parent, const char *text, lv_color_t bg, lv_event_
     return b;
 }
 
-void tg_stars_draw(lv_obj_t *parent, int n, int size)
+lv_obj_t *tg_stars_draw(lv_obj_t *parent, int n, int size)
 {
     lv_obj_t *row = lv_obj_create(parent);
     lv_obj_remove_style_all(row);
@@ -81,6 +81,7 @@ void tg_stars_draw(lv_obj_t *parent, int n, int size)
         tg_label(row, AOS_SYM_STAR, size >= 36 ? &aos_sym_44 : &aos_sym_28,
                  i < n ? AOS_C_YELLOW : lv_color_hex(0x48484A));
     }
+    return row;
 }
 
 lv_color_t tg_lang_color(int lang)
@@ -333,7 +334,9 @@ static void free_art(void)
 
 void tg_go(int screen)
 {
-    if (tg->screen == SCR_PLAY && screen != SCR_PLAY) tg_play_close();
+    /* the level's objects live in the screen about to go: close it first,
+     * also when the same level opens again (the screen turned) */
+    if (tg->screen == SCR_PLAY) tg_play_close();
     tg->screen = screen;
     if (tg->scr) lv_obj_delete(tg->scr);
     tg->scr = lv_obj_create(tg->root);

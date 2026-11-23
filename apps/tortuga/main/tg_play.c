@@ -31,7 +31,7 @@ struct tg_play {
     int lang;                       /* TG_LANG_* this level is played in */
     int idx;                        /* the level's index, -1 in free mode */
 
-    lv_obj_t *scr, *head, *title, *hint_btn, *view_btn, *stars, *dots;
+    lv_obj_t *scr, *head, *title, *hint_btn, *view_btn, *stars, *dots;  /* stars: the header's row */
     lv_obj_t *ctrl, *b_run, *b_step, *b_stop, *b_speed, *speed_lbl, *step_lbl;
     lv_obj_t *edit_box, *bubble, *panel, *note;
     int bx, by, bw, bh;
@@ -160,6 +160,14 @@ static void run_thread(void *arg)
     if (p->paper && p->wa.state == TG_ST_WIN && p->have_fig) {
         p->same_drawing = tg_world_same_drawing(&p->wa, &p->fig);
         p->vres[0] = p->same_drawing;
+        if (!p->same_drawing && p->wa.nev) {
+            /* no cheering for a drawing that is not the figure */
+            tg_ev_t *last = &p->wa.ev[p->wa.nev - 1];
+            last->kind = TG_EV_FAIL;
+            last->a = TG_F_DRAWING;
+            p->wa.state = TG_ST_FAIL;
+            p->wa.reason = TG_F_DRAWING;
+        }
     }
     for (int v = 1; v < n; v++) {
         run_variant(v, &p->wb, p->ev_b);
@@ -395,6 +403,7 @@ static void reset_run(void)
     scene_reset();
     P->sc.ev = NULL;
     lv_label_set_text(P->step_lbl, "");
+    lv_obj_add_flag(P->step_lbl, LV_OBJ_FLAG_HIDDEN);
 }
 
 static void retry_cb(lv_event_t *e)
@@ -449,6 +458,9 @@ static void fail_text(const tg_world_t *w, char *out, size_t n)
         break;
     case TG_F_LOOP:
         snprintf(m, sizeof m, "%s", _("La tortuga se quedó dando vueltas: ¿el mientras tiene cómo terminar?"));
+        break;
+    case TG_F_DRAWING:
+        snprintf(m, sizeof m, "%s", _("El dibujo no es igual a la figura. Mirá la de puntitos."));
         break;
     case TG_F_SYNTAX:
     case TG_F_RUNTIME:
@@ -515,7 +527,14 @@ static void show_result(void)
         int s = stars_for(true);
         tg_score_t *sc = &tg->score[P->idx];
         bool better = s > sc->stars[P->lang];
-        if (better) sc->stars[P->lang] = (uint8_t)s;
+        if (better) {
+            sc->stars[P->lang] = (uint8_t)s;
+            /* the header's stars follow */
+            for (int k = 0; k < 3 && P->stars; k++) {
+                lv_obj_set_style_text_color(lv_obj_get_child(P->stars, k),
+                                            k < s ? AOS_C_YELLOW : lv_color_hex(0x48484A), 0);
+            }
+        }
         if (tg->prefs.hard) sc->medal |= (uint8_t)(1u << P->lang);
         tg_save_scores();
         save_program();
@@ -559,9 +578,6 @@ static void show_result(void)
             snprintf(m + k, sizeof m - k, " %s", _("Probá preguntar en vez de contar."));
         }
     }
-    if (P->paper && w->state == TG_ST_WIN && !P->same_drawing) {
-        snprintf(m, sizeof m, "%s", _("El dibujo no es igual a la figura. Mirá la de puntitos."));
-    }
     lv_obj_t *p = panel(AOS_C_ORANGE);
     lv_obj_t *l = tg_label(p, m, aos_font_body, AOS_C_TEXT);
     lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
@@ -579,6 +595,17 @@ static bool start_job(void)
     tg_free(P->src);
     P->src = program_text();
     if (!P->src) return false;
+    bool empty = true;
+    for (const char *c = P->src; *c && empty; c++) empty = *c == ' ' || *c == '\n' || *c == '\t' || *c == '\r';
+    if (empty) {
+        lv_obj_t *p = panel(AOS_C_ORANGE);
+        lv_obj_t *l = tg_label(p, P->blocks ? _("Todavía no hay bloques: tocá las piezas de abajo.")
+                                            : _("Todavía no hay programa: escribilo o tocá las órdenes de abajo."),
+                               aos_font_body, AOS_C_TEXT);
+        lv_label_set_long_mode(l, LV_LABEL_LONG_WRAP);
+        lv_obj_set_width(l, LV_PCT(100));
+        return false;
+    }
     save_program();
     if (P->blocks || P->lang == TG_LANG_LOGO) {
         tg_prog_t pr;
@@ -886,7 +913,7 @@ static void build_header(void)
             snprintf(buf, sizeof buf, _("%d mapas"), n);
             lv_label_set_text(d, buf);
         }
-        tg_stars_draw(r, tg->score[P->idx].stars[P->lang], 28);
+        P->stars = tg_stars_draw(r, tg->score[P->idx].stars[P->lang], 28);
         P->hint_btn = lv_button_create(r);
         lv_obj_remove_style_all(P->hint_btn);
         lv_obj_set_size(P->hint_btn, 56, 56);
@@ -970,8 +997,13 @@ void tg_play_open(lv_obj_t *scr)
     speed_text();
 
     /* the step counter, over the board's corner */
-    P->step_lbl = tg_label(scr, "", aos_font_small, lv_color_hex(0x3a3f47));
-    lv_obj_set_pos(P->step_lbl, 14, 80);
+    P->step_lbl = tg_label(scr, "", aos_font_small, AOS_C_TEXT);
+    lv_obj_set_style_bg_color(P->step_lbl, lv_color_hex(0x101318), 0);
+    lv_obj_set_style_bg_opa(P->step_lbl, LV_OPA_60, 0);
+    lv_obj_set_style_radius(P->step_lbl, 12, 0);
+    lv_obj_set_style_pad_hor(P->step_lbl, 10, 0);
+    lv_obj_set_style_pad_ver(P->step_lbl, 2, 0);
+    lv_obj_set_pos(P->step_lbl, 10, 80);
 
     /* the program */
     char *prog = tg_program_load(tg->free_mode ? NULL : lvl(), P->lang);
@@ -1082,6 +1114,7 @@ void tg_play_frame(void)
         char buf[48];
         snprintf(buf, sizeof buf, _("paso %d de %d"), P->at < w->nev ? P->at + 1 : w->nev, w->nev);
         lv_label_set_text(P->step_lbl, buf);
+        lv_obj_remove_flag(P->step_lbl, LV_OBJ_FLAG_HIDDEN);
         if (P->at >= w->nev) {
             P->mode = P_DONE;
             if (w->nev && w->ev[w->nev - 1].kind == TG_EV_WIN) {
