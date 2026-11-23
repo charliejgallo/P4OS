@@ -683,6 +683,7 @@ static void *tanques_create(aos_app_t *self, lv_obj_t *root)
         su.size = getenv("TQ_SIZE") ? atoi(getenv("TQ_SIZE")) % TQ_SIZES : 1;
         su.diff = 1;
         su.weather = getenv("TQ_WEATHER") ? atoi(getenv("TQ_WEATHER")) % TQ_WEATHERS : 0;
+        su.objects = getenv("TQ_OBJECTS") ? atoi(getenv("TQ_OBJECTS")) % TQ_OBJECT_LEVELS : TQ_OBJECT_LEVELS / 2;
         su.seed = getenv("TQ_SEED") ? (uint32_t)atoi(getenv("TQ_SEED")) : 7;
         a->setup = su;
         tqh_player_tank(a, 0, a->save.tank, true);

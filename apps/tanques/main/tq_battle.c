@@ -39,9 +39,9 @@ static void cam_to(app_t *a, float x, float y, bool snap)
         bool gliding = a->cam_follow && ((a->cam_tx - a->cam_x) * (a->cam_tx - a->cam_x) +
                                          (a->cam_ty - a->cam_y) * (a->cam_ty - a->cam_y)) > 0.0004f;
         if (!gliding && fabsf(sx) < a->W * 0.27f && fabsf(sy) < a->H * 0.25f) return;
-        /* the camera jumps by default: one frame where a glide is many,
-         * and each costs about the same on the board */
-        if (a->save.cam_jump) snap = true;
+        /* it jumps: one frame where a glide is many, and each costs about
+         * the same on the board (the user chose it, 2026-11-23) */
+        snap = true;
     }
     tq_scene_top_clamp(a->ter, a->W, a->H, &x, &y);
     a->cam_tx = x;
@@ -290,17 +290,8 @@ static void enter_aim(app_t *a)
         set_state(a, B_AIM);
         return;
     }
-    /* the turret starts facing the nearest enemy: the aim is the finger's */
-    float bd = 1e9f;
-    for (int i = 0; i < a->st.ntank; i++) {
-        const tq_tank_t *e = &a->st.tank[i];
-        if (!e->alive || e->team == k->team) continue;
-        float d = (e->x - k->x) * (e->x - k->x) + (e->y - k->y) * (e->y - k->y);
-        if (d < bd) {
-            bd = d;
-            k->tyaw = atan2f(e->y - k->y, e->x - k->x);
-        }
-    }
+    /* the turret stays where it was left (turning with the hull as it
+     * drives): finding the other tank is the player's */
     const tq_weapon_t *W = &TQ_WEAPON[tq_weapon_of(k)];
     k->pitch = tq_clampf(k->pitch, W->min_pitch * TQ_DEG, W->max_pitch * TQ_DEG);
     set_state(a, B_AIM);

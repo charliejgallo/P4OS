@@ -22,6 +22,7 @@ void tqm_demo(app_t *a)
     su.biome = (int)(a->save.battles % TQ_BIOMES);
     su.size = 1;
     su.seed = 7 + a->save.battles;
+    su.objects = TQ_OBJECT_LEVELS / 2;
     su.ntank = 2;
     for (int k = 0; k < 2; k++) {
         su.t[k].type = k ? TQ_T_MAMUT : a->save.tank;
@@ -118,6 +119,7 @@ static void play_mission(lv_event_t *e)
     su.size = M->size;
     su.diff = M->diff;
     su.weather = M->weather;
+    su.objects = TQ_OBJECT_LEVELS / 2;
     su.seed = M->seed;
     su.ntank = 1 + M->rivals;
     a->setup = su;
@@ -185,8 +187,9 @@ void tqm_build_story(app_t *a)
  * The free battle
  * -------------------------------------------------------------------------- */
 
-enum { F_BIOME = 0, F_SIZE, F_RIVALS, F_DIFF, F_WEATHER, F_CAM, F_PLAYERS, F_P2, F_ROWS };
+enum { F_BIOME = 0, F_SIZE, F_RIVALS, F_DIFF, F_WEATHER, F_OBJECTS, F_PLAYERS, F_P2, F_ROWS };
 static lv_obj_t *s_fval[F_ROWS];
+static lv_obj_t *s_fname_obj, *s_fslider;
 static int s_p2_type = TQ_T_BOMBO;
 
 /* The biggest map takes two rivals at most: four tanks on it would need
@@ -207,7 +210,14 @@ static void free_text(app_t *a)
     lv_label_set_text(s_fval[F_RIVALS], txt);
     lv_label_set_text(s_fval[F_DIFF], _(TQ_DIFF_NAME[s->f_diff % TQ_DIFFS]));
     lv_label_set_text(s_fval[F_WEATHER], _(TQ_WEATHER_NAME[s->f_weather % TQ_WEATHERS]));
-    lv_label_set_text(s_fval[F_CAM], s->cam_jump ? _("Salta") : _("Se desliza"));
+    {
+        /* the objects: a slider, its level's name beside the row's */
+        char txt[64];
+        int lv = tq_objects_level(s);
+        snprintf(txt, sizeof txt, "%s: %s", _("Objetos"), _(TQ_OBJECTS_NAME[lv]));
+        lv_label_set_text(s_fname_obj, txt);
+        lv_slider_set_value(s_fslider, lv, LV_ANIM_OFF);
+    }
     snprintf(txt, sizeof txt, "%d", s->f_players);
     lv_label_set_text(s_fval[F_PLAYERS], txt);
     lv_label_set_text(s_fval[F_P2], _(TQ_TANK[s_p2_type].name));
@@ -232,10 +242,23 @@ static void free_step(lv_event_t *e)
     case F_DIFF: s->f_diff = (uint8_t)((s->f_diff + TQ_DIFFS + d) % TQ_DIFFS); break;
     case F_WEATHER: s->f_weather = (uint8_t)((s->f_weather + TQ_WEATHERS + d) % TQ_WEATHERS); break;
     case F_PLAYERS: s->f_players = s->f_players == 1 ? 2 : 1; break;
-    case F_CAM: s->cam_jump = !s->cam_jump; break;
+    case F_OBJECTS: {
+        int lv = tq_objects_level(s) + d;
+        if (lv < 0) lv = 0;
+        if (lv >= TQ_OBJECT_LEVELS) lv = TQ_OBJECT_LEVELS - 1;
+        s->f_objects = (uint8_t)(1 + lv);
+        break;
+    }
     case F_P2: s_p2_type = (s_p2_type + TQ_TANK_TYPES + d) % TQ_TANK_TYPES; break;
     default: break;
     }
+    free_text(a);
+}
+
+static void free_slide(lv_event_t *e)
+{
+    app_t *a = (app_t *)lv_event_get_user_data(e);
+    a->save.f_objects = (uint8_t)(1 + lv_slider_get_value((lv_obj_t *)lv_event_get_target(e)));
     free_text(a);
 }
 
@@ -249,6 +272,7 @@ static void free_go(lv_event_t *e)
     su.size = s->f_size % TQ_SIZES;
     su.diff = s->f_diff % TQ_DIFFS;
     su.weather = s->f_weather % TQ_WEATHERS;
+    su.objects = tq_objects_level(s);
     su.seed = lv_tick_get() ^ (s->battles * 7919u);
     a->setup = su;
     int k = 0;
@@ -283,7 +307,7 @@ void tqm_build_free(app_t *a)
     lv_obj_t *t = tqa_label(p, _("Batalla libre"), aos_font_title, 0xFFE9A8);
     lv_obj_align(t, LV_ALIGN_TOP_LEFT, 30, 18);
     static const char *const NAME[F_ROWS] = { N_("Lugar"), N_("Tamaño"), N_("Rivales"), N_("Dificultad"), N_("Clima"),
-                                              N_("Cámara"), N_("Jugadores"), N_("Tanque del 2") };
+                                              N_("Objetos"), N_("Jugadores"), N_("Tanque del 2") };
     for (int r = 0; r < F_ROWS; r++) {
         lv_obj_t *row = lv_obj_create(p);
         lv_obj_remove_style_all(row);
@@ -301,6 +325,18 @@ void tqm_build_free(app_t *a)
         lv_obj_set_width(s_fval[r], land ? 220 : 200);
         lv_obj_set_style_text_align(s_fval[r], LV_TEXT_ALIGN_CENTER, 0);
         lv_obj_align(s_fval[r], LV_ALIGN_RIGHT_MID, -(land ? 80 : 75), 0);
+        if (r == F_OBJECTS) {
+            /* a slider between the arrows, the level's name with the row's */
+            s_fname_obj = n;
+            lv_obj_add_flag(s_fval[r], LV_OBJ_FLAG_HIDDEN);
+            s_fslider = lv_slider_create(row);
+            lv_slider_set_range(s_fslider, 0, TQ_OBJECT_LEVELS - 1);
+            lv_obj_set_size(s_fslider, land ? 180 : 160, 14);
+            lv_obj_align(s_fslider, LV_ALIGN_RIGHT_MID, -(land ? 100 : 95), 0);
+            lv_obj_set_style_bg_color(s_fslider, lv_color_hex(0xFFE9A8), LV_PART_INDICATOR);
+            lv_obj_set_style_bg_color(s_fslider, lv_color_hex(0xFFE9A8), LV_PART_KNOB);
+            lv_obj_add_event_cb(s_fslider, free_slide, LV_EVENT_VALUE_CHANGED, a);
+        }
     }
     lv_obj_t *b = tqa_button(p, _("¡A la batalla!"), 0xE8572E, w - 120, 90, free_go, a);
     lv_obj_align(b, LV_ALIGN_BOTTOM_MID, 0, -20);

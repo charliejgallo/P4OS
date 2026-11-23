@@ -130,9 +130,19 @@ typedef struct {
     uint8_t  f_biome, f_size, f_rivals, f_diff, f_weather, f_players;
     uint8_t  sfx;
     uint32_t wins, battles;
-    uint8_t  cam_jump;                  /* the battle camera jumps (1) or glides (0); version 2 */
-    uint8_t  spare[3];
+    uint8_t  was_cam;                   /* version 2's camera setting: it always jumps now */
+    uint8_t  f_objects;                 /* the free battle's trees and walls: 1 + level (0: the middle) */
+    uint8_t  spare[2];
 } tq_save_t;
+
+/* How many trees and walls: five levels, the middle one the usual */
+#define TQ_OBJECT_LEVELS 5
+extern const float TQ_OBJECTS_K[TQ_OBJECT_LEVELS];
+extern const char *const TQ_OBJECTS_NAME[TQ_OBJECT_LEVELS];   /* N_() */
+static inline int tq_objects_level(const tq_save_t *s)
+{
+    return s->f_objects ? (s->f_objects - 1) % TQ_OBJECT_LEVELS : TQ_OBJECT_LEVELS / 2;
+}
 
 void tq_save_defaults(tq_save_t *s);
 bool tq_save_load(tq_save_t *s);

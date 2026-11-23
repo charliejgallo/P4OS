@@ -13,8 +13,8 @@
 
 #define TQ_MAX_TANKS   4
 #define TQ_GRIDMAX     44           /* driving cells, 1 m */
-#define TQ_MAX_TREES   48
-#define TQ_MAX_BLOCKS  64
+#define TQ_MAX_TREES   80
+#define TQ_MAX_BLOCKS  128
 #define TQ_MAX_PARTS   240
 #define TQ_MAX_SHELLS  8
 #define TQ_MAX_MINES   12
@@ -155,6 +155,7 @@ typedef struct {
 /* A battle to set up: the map and who plays */
 typedef struct {
     int      biome, size, weather, diff;
+    int      objects;               /* trees and walls: 0..TQ_OBJECT_LEVELS-1, the middle the usual */
     uint32_t seed;
     int      ntank;
     struct {

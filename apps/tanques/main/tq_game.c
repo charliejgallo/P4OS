@@ -178,7 +178,8 @@ void tq_game_new(tq_state_t *s, tq_terrain_t *t, const tq_setup_t *su)
     }
 
     /* walls: a few lines of stones, some two high (houses in the ruins) */
-    int walls = s->grid / 8 + 1 + (su->biome == TQ_B_RUINAS ? 3 : 0);
+    float dens = TQ_OBJECTS_K[su->objects % TQ_OBJECT_LEVELS];
+    int walls = (int)((s->grid / 8 + 1 + (su->biome == TQ_B_RUINAS ? 3 : 0)) * dens + 0.5f);
     for (int w = 0; w < walls; w++) {
         for (int tries = 0; tries < 30; tries++) {
             int i0 = (int)randr(4, s->grid - 8), j0 = (int)randr(4, s->grid - 8);
@@ -209,9 +210,9 @@ void tq_game_new(tq_state_t *s, tq_terrain_t *t, const tq_setup_t *su)
     }
 
     /* trees where there is room: off the paths, the walls and the tanks */
-    int want = (int)(M * M / 60.0f);
+    int want = (int)(M * M / 60.0f * dens + 0.5f);
     if (want > TQ_MAX_TREES) want = TQ_MAX_TREES;
-    for (int tries = 0; tries < 600 && s->ntree < want; tries++) {
+    for (int tries = 0; tries < 1500 && s->ntree < want; tries++) {
         float x = randr(3.0f, M - 3.0f), y = randr(3.0f, M - 3.0f);
         bool ok = !near_tank(s, x, y, 4.5f);
         for (int k = 0; k < s->ntree && ok; k++) {

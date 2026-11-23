@@ -174,7 +174,8 @@ void tq_save_defaults(tq_save_t *s)
     s->f_diff = 1;
     s->f_players = 1;
     s->sfx = 1;
-    s->cam_jump = 1;
+    s->was_cam = 1;
+    s->f_objects = 1 + TQ_OBJECT_LEVELS / 2;
 }
 
 static void path(char *out, size_t n)
@@ -192,10 +193,9 @@ bool tq_save_load(tq_save_t *s)
     memset(&t, 0, sizeof t);
     size_t n = fread(&t, 1, sizeof t, f);
     fclose(f);
-    if (t.version == 1 && n == offsetof(tq_save_t, cam_jump)) {
-        /* the first version had no camera setting: it keeps all the rest */
+    if (t.version == 1 && n == offsetof(tq_save_t, was_cam)) {
+        /* the first version ended there: it keeps all it had */
         t.version = SAVE_VERSION;
-        t.cam_jump = 1;
         n = sizeof t;
     }
     if (n != sizeof t || t.version != SAVE_VERSION) return false;
@@ -228,6 +228,9 @@ const char *const TQ_WEATHER_NAME[TQ_WEATHERS] = { N_("Despejado"), N_("Viento")
 const float TQ_SIZE_M[TQ_SIZES] = { 28.0f, 32.0f, 36.0f, 44.0f };
 const char *const TQ_SIZE_NAME[TQ_SIZES] = { N_("Chico"), N_("Mediano"), N_("Grande"), N_("Muy grande") };
 const char *const TQ_DIFF_NAME[TQ_DIFFS] = { N_("Fácil"), N_("Normal"), N_("Difícil") };
+const float TQ_OBJECTS_K[TQ_OBJECT_LEVELS] = { 0.3f, 0.6f, 1.0f, 1.5f, 2.0f };
+const char *const TQ_OBJECTS_NAME[TQ_OBJECT_LEVELS] = { N_("Muy pocos"), N_("Pocos"), N_("Normal"), N_("Muchos"),
+                                                        N_("Un montón") };
 
 const tq_mission_t TQ_MISSION[TQ_STORY_MISSIONS] = {
     /* name                         biome           size rv df weather        rival tanks                               seed  reward */

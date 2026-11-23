@@ -39,59 +39,59 @@ EMP	EMP
 #: apps/tanques/main/tq_hangar.c:380
 No hay memoria para el arte	Not enough memory for the art
 
-#: apps/tanques/main/tq_battle.c:385
+#: apps/tanques/main/tq_battle.c:376
 Juega %s	%s plays
 
-#: apps/tanques/main/tq_battle.c:386
+#: apps/tanques/main/tq_battle.c:377
 Tu turno	Your turn
 
-#: apps/tanques/main/tq_battle.c:387
+#: apps/tanques/main/tq_battle.c:378
 Turno: %s	Turn: %s
 
-#: apps/tanques/main/tq_battle.c:398
+#: apps/tanques/main/tq_battle.c:389
 Viento %s %.0f	Wind %s %.0f
 
-#: apps/tanques/main/tq_battle.c:412
-#: apps/tanques/main/tq_battle.c:496
+#: apps/tanques/main/tq_battle.c:403
+#: apps/tanques/main/tq_battle.c:487
 Apuntar	Aim
 
-#: apps/tanques/main/tq_battle.c:412
-#: apps/tanques/main/tq_battle.c:413
+#: apps/tanques/main/tq_battle.c:403
+#: apps/tanques/main/tq_battle.c:404
 Terminar	End turn
 
-#: apps/tanques/main/tq_battle.c:413
-#: apps/tanques/main/tq_battle.c:511
+#: apps/tanques/main/tq_battle.c:404
+#: apps/tanques/main/tq_battle.c:502
 Mover	Move
 
-#: apps/tanques/main/tq_battle.c:432
+#: apps/tanques/main/tq_battle.c:423
 Elevación %d°   Giro %d°	Elevation %d°   Turn %d°
 
-#: apps/tanques/main/tq_battle.c:435
+#: apps/tanques/main/tq_battle.c:426
 Segundo disparo: AP x2	Second shot: AP x2
 
-#: apps/tanques/main/tq_battle.c:498
+#: apps/tanques/main/tq_battle.c:489
 Tocá el mapa adonde ir. Arrastrá para mirar.	Tap the map where to go. Drag to look around.
 
-#: apps/tanques/main/tq_battle.c:521
+#: apps/tanques/main/tq_battle.c:512
 ¡Fuego!	Fire!
 
-#: apps/tanques/main/tq_battle.c:545
+#: apps/tanques/main/tq_battle.c:536
 ¿Dejar la batalla?	Leave the battle?
 
-#: apps/tanques/main/tq_battle.c:547
+#: apps/tanques/main/tq_battle.c:538
 Dejar	Leave
 
-#: apps/tanques/main/tq_battle.c:550
-#: apps/tanques/main/tq_menu.c:357
+#: apps/tanques/main/tq_battle.c:541
+#: apps/tanques/main/tq_menu.c:393
 Seguir	Continue
 
-#: apps/tanques/main/tq_battle.c:569
+#: apps/tanques/main/tq_battle.c:560
 Turno de %s\nPasale la placa	%s's turn\nPass the board
 
-#: apps/tanques/main/tq_battle.c:629
+#: apps/tanques/main/tq_battle.c:620
 No llega hasta ahí	Can't reach that
 
-#: apps/tanques/main/tq_battle.c:785
+#: apps/tanques/main/tq_battle.c:776
 Sin AP	Out of AP
 
 #: apps/tanques/main/tq_data.c:19
@@ -353,45 +353,58 @@ Muy grande	Extra large
 Fácil	Easy
 
 #: apps/tanques/main/tq_data.c:230
+#: apps/tanques/main/tq_data.c:232
 Normal	Normal
 
 #: apps/tanques/main/tq_data.c:230
 Difícil	Hard
 
-#: apps/tanques/main/tq_data.c:234
-El primer día	The first day
+#: apps/tanques/main/tq_data.c:232
+Muy pocos	Very few
 
-#: apps/tanques/main/tq_data.c:235
-La loma del medio	The hill in the middle
+#: apps/tanques/main/tq_data.c:232
+Pocos	Few
 
-#: apps/tanques/main/tq_data.c:236
-Dos contra uno	Two against one
+#: apps/tanques/main/tq_data.c:232
+Muchos	Many
+
+#: apps/tanques/main/tq_data.c:233
+Un montón	Loads
 
 #: apps/tanques/main/tq_data.c:237
-Arena en los ojos	Sand in your eyes
+El primer día	The first day
 
 #: apps/tanques/main/tq_data.c:238
-El oasis	The oasis
+La loma del medio	The hill in the middle
 
 #: apps/tanques/main/tq_data.c:239
-Tormenta de arena	Sandstorm
+Dos contra uno	Two against one
 
 #: apps/tanques/main/tq_data.c:240
-Bajo cero	Below zero
+Arena en los ojos	Sand in your eyes
 
 #: apps/tanques/main/tq_data.c:241
-El muñeco de nieve	The snowman
+El oasis	The oasis
 
 #: apps/tanques/main/tq_data.c:242
-Avalancha	Avalanche
+Tormenta de arena	Sandstorm
 
 #: apps/tanques/main/tq_data.c:243
-La ciudad vacía	The empty town
+Bajo cero	Below zero
 
 #: apps/tanques/main/tq_data.c:244
-La plaza	The square
+El muñeco de nieve	The snowman
 
 #: apps/tanques/main/tq_data.c:245
+Avalancha	Avalanche
+
+#: apps/tanques/main/tq_data.c:246
+La ciudad vacía	The empty town
+
+#: apps/tanques/main/tq_data.c:247
+La plaza	The square
+
+#: apps/tanques/main/tq_data.c:248
 El volcán	The volcano
 
 #: apps/tanques/main/tq_hangar.c:42
@@ -434,7 +447,7 @@ Emblema	Emblem
 Color del emblema	Emblem colour
 
 #: apps/tanques/main/tq_hangar.c:347
-#: apps/tanques/main/tq_menu.c:69
+#: apps/tanques/main/tq_menu.c:70
 %ld monedas	%ld coins
 
 #: apps/tanques/main/tq_hangar.c:355
@@ -450,7 +463,7 @@ El tuyo	Yours
 Usar este	Use this one
 
 #: apps/tanques/main/tq_hangar.c:446
-#: apps/tanques/main/tq_menu.c:97
+#: apps/tanques/main/tq_menu.c:98
 Hangar	Hangar
 
 #: apps/tanques/main/tq_hangar.c:473
@@ -462,79 +475,74 @@ Armas	Weapons
 #: apps/tanques/main/tq_hangar.c:473
 Pintura	Paint
 
-#: apps/tanques/main/tq_menu.c:89
+#: apps/tanques/main/tq_menu.c:90
 Tanques	Tanks
 
-#: apps/tanques/main/tq_menu.c:95
-#: apps/tanques/main/tq_menu.c:139
+#: apps/tanques/main/tq_menu.c:96
+#: apps/tanques/main/tq_menu.c:141
 Historia	Story
 
-#: apps/tanques/main/tq_menu.c:96
-#: apps/tanques/main/tq_menu.c:283
+#: apps/tanques/main/tq_menu.c:97
+#: apps/tanques/main/tq_menu.c:307
 Batalla libre	Free battle
 
-#: apps/tanques/main/tq_menu.c:166
+#: apps/tanques/main/tq_menu.c:168
 %s · %d rivales · %d monedas	%s · %d rivals · %d coins
 
-#: apps/tanques/main/tq_menu.c:168
+#: apps/tanques/main/tq_menu.c:170
 %s · 1 rival · %d monedas	%s · 1 rival · %d coins
 
-#: apps/tanques/main/tq_menu.c:169
+#: apps/tanques/main/tq_menu.c:171
 Ganá la anterior para jugarla	Win the one before to play it
 
-#: apps/tanques/main/tq_menu.c:210
-Salta	Jumps
+#: apps/tanques/main/tq_menu.c:217
+#: apps/tanques/main/tq_menu.c:310
+Objetos	Objects
 
-#: apps/tanques/main/tq_menu.c:210
-Se desliza	Glides
-
-#: apps/tanques/main/tq_menu.c:259
+#: apps/tanques/main/tq_menu.c:283
 Jugador 1	Player 1
 
-#: apps/tanques/main/tq_menu.c:260
+#: apps/tanques/main/tq_menu.c:284
 Jugador 2	Player 2
 
-#: apps/tanques/main/tq_menu.c:285
+#: apps/tanques/main/tq_menu.c:309
 Lugar	Place
 
-#: apps/tanques/main/tq_menu.c:285
+#: apps/tanques/main/tq_menu.c:309
 Tamaño	Size
 
-#: apps/tanques/main/tq_menu.c:285
+#: apps/tanques/main/tq_menu.c:309
 Rivales	Rivals
 
-#: apps/tanques/main/tq_menu.c:285
+#: apps/tanques/main/tq_menu.c:309
 Dificultad	Difficulty
 
-#: apps/tanques/main/tq_menu.c:285
+#: apps/tanques/main/tq_menu.c:309
 Clima	Weather
 
-#: apps/tanques/main/tq_menu.c:286
-Cámara	Camera
-
-#: apps/tanques/main/tq_menu.c:286
+#: apps/tanques/main/tq_menu.c:310
 Jugadores	Players
 
-#: apps/tanques/main/tq_menu.c:286
+#: apps/tanques/main/tq_menu.c:310
 Tanque del 2	Player 2's tank
 
-#: apps/tanques/main/tq_menu.c:305
+#: apps/tanques/main/tq_menu.c:341
 ¡A la batalla!	To battle!
 
-#: apps/tanques/main/tq_menu.c:331
+#: apps/tanques/main/tq_menu.c:367
 Empate	A draw
 
-#: apps/tanques/main/tq_menu.c:332
+#: apps/tanques/main/tq_menu.c:368
 ¡Ganó %s!	%s wins!
 
-#: apps/tanques/main/tq_menu.c:334
+#: apps/tanques/main/tq_menu.c:370
 ¡Ganaste!	You won!
 
-#: apps/tanques/main/tq_menu.c:334
+#: apps/tanques/main/tq_menu.c:370
 Perdiste	You lost
 
-#: apps/tanques/main/tq_menu.c:338
+#: apps/tanques/main/tq_menu.c:374
 Daño hecho: %d   Tanques fuera: %d	Damage done: %d   Tanks knocked out: %d
 
-#: apps/tanques/main/tq_menu.c:342
+#: apps/tanques/main/tq_menu.c:378
 +%d monedas	+%d coins
