@@ -231,6 +231,15 @@ the 1200-baud touch.</em></p>
 the Programador, the same MD5 its Linux gives.</em></p>
 
 <p align="center">
+  <img src="docs/img/photo-terminal-wh5000.jpg" width="300" alt="The Terminal on usb0 at 2400 8N1 reading a WH5000 multimeter through its USB cable, a CP2102: one line a reading, +0265 4 while the meter shows 026.5">
+</p>
+
+<p align="center"><em>A WH5000 multimeter through its own USB cable (a
+CP2102 inside), at 2400 baud: one line a reading, the digits on its
+display. Any speed from 50 baud and any frame, 7E1 included, since
+0.32.2.</em></p>
+
+<p align="center">
   <img src="docs/img/bench-w5500-cable.jpg" width="300" alt="The board with Network on its Cable tab: 100 Mbit/s full duplex, a lease of two hours, the gateway, a name and the internet answering in green, and the W5500 module wired to the header with a network cable in it. The network's addresses are blurred">
   <img src="docs/img/bench-w5500.svg" width="420" alt="Wiring diagram: a W5500 Lite module on the header's spi.a, SCK, MOSI, MISO and CS on GPIO52, 50, 51 and 49, with 3V3 and GND">
 </p>
