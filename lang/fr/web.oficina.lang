@@ -1,0 +1,76 @@
+# amoledos-lang 1   es -> fr
+# web.oficina.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/oficina/web/oficina.js:81
+#: apps/oficina/web/oficina.js:199
+Oficina	Bureau
+
+#: apps/oficina/web/oficina.js:91
+Soltá acá los documentos para subirlos a esta carpeta, o tocá para elegirlos	Dépose ici les documents pour les envoyer dans ce dossier, ou touche pour les choisir
+
+#: apps/oficina/web/oficina.js:100
+Subiendo %s: %s	Envoi %s : %s
+
+#: apps/oficina/web/oficina.js:101
+No se pudo subir %s: %s	Impossible d'envoyer %s : %s
+
+#: apps/oficina/web/oficina.js:104
+Subido	Envoyé
+
+#: apps/oficina/web/oficina.js:104
+%s archivos subidos	%s fichiers envoyés
+
+#: apps/oficina/web/oficina.js:113
+#: apps/oficina/web/oficina.js:130
+Cerrar	Fermer
+
+#: apps/oficina/web/oficina.js:113
+Cargando…	Chargement…
+
+#: apps/oficina/web/oficina.js:128
+(el principio)	(le début)
+
+#: apps/oficina/web/oficina.js:129
+#: apps/oficina/web/oficina.js:148
+#: apps/oficina/web/oficina.js:188
+Bajar	Télécharger
+
+#: apps/oficina/web/oficina.js:142
+Carpeta	Dossier
+
+#: apps/oficina/web/oficina.js:144
+¿Borrar «%s»? No se puede deshacer.	Effacer « %s » ? C'est irréversible.
+
+#: apps/oficina/web/oficina.js:145
+Borrado	Effacé
+
+#: apps/oficina/web/oficina.js:146
+Borrar	Effacer
+
+#: apps/oficina/web/oficina.js:171
+No hay archivos en esta carpeta.	Aucun fichier dans ce dossier.
+
+#: apps/oficina/web/oficina.js:183
+Abiertos hace poco en la placa	Ouverts récemment sur la carte
+
+#: apps/oficina/web/oficina.js:193
+Nombre de la carpeta nueva	Nom du nouveau dossier
+
+#: apps/oficina/web/oficina.js:201
+Los documentos de la tarjeta. La app Oficina abre y edita documentos (docx, odt), planillas (xlsx, ods, csv) y textos; los demás formatos llegan en las próximas versiones.	Les documents de la carte SD. L'app Bureau ouvre et modifie documents (docx, odt), tableurs (xlsx, ods, csv) et textes ; les autres formats arrivent dans les prochaines versions.
+
+#: apps/oficina/web/oficina.js:203
+Documentos	Documents
+
+#: apps/oficina/web/oficina.js:204
+Carpeta nueva	Nouveau dossier
+
+#: apps/oficina/web/oficina.js:205
+Abierta en la placa	Ouverte sur la carte
+
+#: apps/oficina/web/oficina.js:206
+Abrir la app en la placa	Ouvrir l'app sur la carte

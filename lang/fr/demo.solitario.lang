@@ -1,0 +1,507 @@
+# amoledos-lang 1   es -> fr
+# demo.solitario.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/solitario/main/so_data.c:27
+Verde de siempre	Vert classique
+
+#: apps/solitario/main/so_data.c:27
+Azul	Bleu
+
+#: apps/solitario/main/so_data.c:27
+Rojo	Rouge
+
+#: apps/solitario/main/so_data.c:27
+Madera	Bois
+
+#: apps/solitario/main/so_data.c:28
+Cuero	Cuir
+
+#: apps/solitario/main/so_data.c:28
+Noche	Nuit
+
+#: apps/solitario/main/so_data.c:28
+Océano	Océan
+
+#: apps/solitario/main/so_data.c:28
+Damasco	Damas
+
+#: apps/solitario/main/so_data.c:32
+Clásico rojo	Rouge classique
+
+#: apps/solitario/main/so_data.c:32
+Clásico azul	Bleu classique
+
+#: apps/solitario/main/so_data.c:32
+Art déco	Art déco
+
+#: apps/solitario/main/so_data.c:32
+Luna	Lune
+
+#: apps/solitario/main/so_data.c:33
+Olas	Vagues
+
+#: apps/solitario/main/so_data.c:33
+Escocés	Écossais
+
+#: apps/solitario/main/so_data.c:33
+Arlequín	Arlequin
+
+#: apps/solitario/main/so_data.c:33
+Dorado	Doré
+
+#: apps/solitario/main/so_data.c:37
+Clásica	Classique
+
+#: apps/solitario/main/so_data.c:37
+Cuatro colores	Quatre couleurs
+
+#: apps/solitario/main/so_data.c:37
+Grande	Grand
+
+#: apps/solitario/main/so_data.c:41
+Estándar	Standard
+
+#: apps/solitario/main/so_data.c:41
+Vegas	Vegas
+
+#: apps/solitario/main/so_data.c:41
+Vegas acumulativo	Vegas cumulé
+
+#: apps/solitario/main/so_data.c:41
+Por tiempo	Chrono
+
+#: apps/solitario/main/so_data.c:41
+Sin puntaje	Sans score
+
+#: apps/solitario/main/so_data.c:45
+Rebote	Rebond
+
+#: apps/solitario/main/so_data.c:45
+Fuegos artificiales	Feu d'artifice
+
+#: apps/solitario/main/so_data.c:45
+Espiral	Spirale
+
+#: apps/solitario/main/so_data.c:45
+Al azar	Aléatoire
+
+#: apps/solitario/main/so_data.c:49
+Primera mano	Premiers pas
+
+#: apps/solitario/main/so_data.c:49
+Ganá una mano.	Gagne une partie.
+
+#: apps/solitario/main/so_data.c:50
+De a tres	Par trois
+
+#: apps/solitario/main/so_data.c:50
+Ganá Klondike de a 3.	Gagne Klondike par trois.
+
+#: apps/solitario/main/so_data.c:51
+Tejedora	Tisseuse
+
+#: apps/solitario/main/so_data.c:51
+Ganá Spider de un palo.	Gagne Spider à une couleur.
+
+#: apps/solitario/main/so_data.c:52
+Dos palos	Deux couleurs
+
+#: apps/solitario/main/so_data.c:52
+Ganá Spider de dos palos.	Gagne Spider à deux couleurs.
+
+#: apps/solitario/main/so_data.c:53
+Cuatro palos	Quatre couleurs
+
+#: apps/solitario/main/so_data.c:53
+Ganá Spider de cuatro palos.	Gagne Spider à quatre couleurs.
+
+#: apps/solitario/main/so_data.c:54
+Celdas libres	Cellules libres
+
+#: apps/solitario/main/so_data.c:54
+Ganá FreeCell.	Gagne FreeCell.
+
+#: apps/solitario/main/so_data.c:55
+Faraón	Pharaon
+
+#: apps/solitario/main/so_data.c:55
+Ganá la Pirámide.	Gagne la Pyramide.
+
+#: apps/solitario/main/so_data.c:56
+Tres cumbres	Trois sommets
+
+#: apps/solitario/main/so_data.c:56
+Ganá TriPeaks.	Gagne TriPeaks.
+
+#: apps/solitario/main/so_data.c:57
+Hoyo en uno	Trou en un
+
+#: apps/solitario/main/so_data.c:57
+Ganá Golf.	Gagne Golf.
+
+#: apps/solitario/main/so_data.c:58
+Al norte	Plein nord
+
+#: apps/solitario/main/so_data.c:58
+Ganá Yukon.	Gagne Yukon.
+
+#: apps/solitario/main/so_data.c:59
+Con la española	À l'espagnole
+
+#: apps/solitario/main/so_data.c:59
+Ganá la Española.	Gagne l'Espagnole.
+
+#: apps/solitario/main/so_data.c:60
+Todos los días	Tous les jours
+
+#: apps/solitario/main/so_data.c:60
+Ganá una mano del día.	Gagne une partie du jour.
+
+#: apps/solitario/main/so_data.c:61
+Racha de cinco	Série de cinq
+
+#: apps/solitario/main/so_data.c:61
+Ganá cinco manos seguidas de un mismo juego.	Gagne cinq parties d'affilée au même jeu.
+
+#: apps/solitario/main/so_data.c:62
+Diez victorias	Dix victoires
+
+#: apps/solitario/main/so_data.c:62
+Ganá diez manos en total.	Gagne dix parties en tout.
+
+#: apps/solitario/main/so_data.c:63
+A pulmón	Sans aide
+
+#: apps/solitario/main/so_data.c:63
+Ganá sin deshacer ni pedir pistas.	Gagne sans annuler ni demander d'indice.
+
+#: apps/solitario/main/so_data.c:64
+Contrarreloj	Express
+
+#: apps/solitario/main/so_data.c:64
+Ganá Klondike en menos de tres minutos.	Gagne Klondike en moins de trois minutes.
+
+#: apps/solitario/main/so_data.c:65
+Casa ganadora	La banque gagne
+
+#: apps/solitario/main/so_data.c:65
+Terminá una mano de Vegas con ganancia.	Finis une partie de Vegas en bénéfice.
+
+#: apps/solitario/main/so_game.c:14
+Klondike	Klondike
+
+#: apps/solitario/main/so_game.c:15
+Klondike de a 3	Klondike par 3
+
+#: apps/solitario/main/so_game.c:16
+Spider, 1 palo	Spider, 1 couleur
+
+#: apps/solitario/main/so_game.c:17
+Spider, 2 palos	Spider, 2 couleurs
+
+#: apps/solitario/main/so_game.c:18
+Spider, 4 palos	Spider, 4 couleurs
+
+#: apps/solitario/main/so_game.c:19
+FreeCell	FreeCell
+
+#: apps/solitario/main/so_game.c:20
+Pirámide	Pyramide
+
+#: apps/solitario/main/so_game.c:21
+TriPeaks	TriPeaks
+
+#: apps/solitario/main/so_game.c:22
+Golf	Golf
+
+#: apps/solitario/main/so_game.c:23
+Yukon	Yukon
+
+#: apps/solitario/main/so_game.c:24
+Española	Espagnole
+
+#: apps/solitario/main/so_ui.c:140
+#: apps/solitario/main/so_ui.c:170
+Nueva	Nouvelle
+
+#: apps/solitario/main/so_ui.c:141
+#: apps/solitario/main/so_ui.c:171
+#: apps/solitario/main/so_ui.c:503
+#: apps/solitario/main/so_ui.c:904
+Deshacer	Annuler
+
+#: apps/solitario/main/so_ui.c:142
+#: apps/solitario/main/so_ui.c:173
+Pista	Indice
+
+#: apps/solitario/main/so_ui.c:144
+#: apps/solitario/main/so_ui.c:175
+Completar	Terminer
+
+#: apps/solitario/main/so_ui.c:155
+Menú	Menu
+
+#: apps/solitario/main/so_ui.c:215
+#: apps/solitario/main/so_ui.c:427
+Mano del día	Partie du jour
+
+#: apps/solitario/main/so_ui.c:221
+#: apps/solitario/main/so_ui.c:852
+Tiempo	Temps
+
+#: apps/solitario/main/so_ui.c:231
+#: apps/solitario/main/so_ui.c:233
+#: apps/solitario/main/so_ui.c:866
+Saldo	Solde
+
+#: apps/solitario/main/so_ui.c:235
+#: apps/solitario/main/so_ui.c:868
+Puntos	Points
+
+#: apps/solitario/main/so_ui.c:238
+#: apps/solitario/main/so_ui.c:853
+Movidas	Coups
+
+#: apps/solitario/main/so_ui.c:393
+La mano del día espera a que la placa tenga hora.	La partie du jour attend que la carte ait l'heure.
+
+#: apps/solitario/main/so_ui.c:411
+Solitario	Solitaire
+
+#: apps/solitario/main/so_ui.c:414
+Seguir	Reprendre
+
+#: apps/solitario/main/so_ui.c:415
+Nueva mano	Nouvelle partie
+
+#: apps/solitario/main/so_ui.c:416
+Repetir esta mano	Rejouer la partie
+
+#: apps/solitario/main/so_ui.c:417
+#: apps/solitario/main/so_ui.c:464
+#: apps/solitario/main/so_ui.c:891
+#: apps/solitario/main/so_ui.c:907
+Elegir juego	Choisir un jeu
+
+#: apps/solitario/main/so_ui.c:423
+ · ganada	 · gagnée
+
+#: apps/solitario/main/so_ui.c:425
+Sin hora todavía	Pas encore l'heure
+
+#: apps/solitario/main/so_ui.c:429
+#: apps/solitario/main/so_ui.c:532
+Opciones	Options
+
+#: apps/solitario/main/so_ui.c:430
+#: apps/solitario/main/so_ui.c:660
+Apariencia	Apparence
+
+#: apps/solitario/main/so_ui.c:430
+Paños, dorsos y barajas	Tapis, dos et cartes
+
+#: apps/solitario/main/so_ui.c:431
+#: apps/solitario/main/so_ui.c:713
+Estadísticas	Statistiques
+
+#: apps/solitario/main/so_ui.c:432
+#: apps/solitario/main/so_ui.c:774
+Logros	Succès
+
+#: apps/solitario/main/so_ui.c:433
+Cómo se juega	Comment jouer
+
+#: apps/solitario/main/so_ui.c:435
+Salir	Quitter
+
+#: apps/solitario/main/so_ui.c:441
+Siete columnas, se da vuelta de a una	Sept colonnes, on retourne une à une
+
+#: apps/solitario/main/so_ui.c:442
+Siete columnas, se da vuelta de a tres	Sept colonnes, on retourne par trois
+
+#: apps/solitario/main/so_ui.c:443
+Dos mazos, todo de un palo	Deux jeux, tout d'une couleur
+
+#: apps/solitario/main/so_ui.c:444
+Dos mazos, picas y corazones	Deux jeux, piques et coeurs
+
+#: apps/solitario/main/so_ui.c:445
+Dos mazos, los cuatro palos	Deux jeux, les quatre couleurs
+
+#: apps/solitario/main/so_ui.c:446
+Cuatro celdas libres, todo a la vista	Quatre cellules libres, tout visible
+
+#: apps/solitario/main/so_ui.c:447
+Parejas que suman trece	Paires qui font treize
+
+#: apps/solitario/main/so_ui.c:448
+Tres picos, una más o una menos	Trois pics, un de plus ou de moins
+
+#: apps/solitario/main/so_ui.c:449
+Siete columnas, una más o una menos	Sept colonnes, un de plus ou de moins
+
+#: apps/solitario/main/so_ui.c:450
+Sin mazo: se mueve cualquier carta	Sans pioche : toute carte peut bouger
+
+#: apps/solitario/main/so_ui.c:451
+Klondike con la baraja de cuarenta	Klondike avec le jeu de quarante
+
+#: apps/solitario/main/so_ui.c:492
+Tres vueltas	Trois tours
+
+#: apps/solitario/main/so_ui.c:492
+Sin límite	Sans limite
+
+#: apps/solitario/main/so_ui.c:493
+#: apps/solitario/main/so_ui.c:494
+#: apps/solitario/main/so_ui.c:495
+#: apps/solitario/main/so_ui.c:496
+Sí	Oui
+
+#: apps/solitario/main/so_ui.c:493
+#: apps/solitario/main/so_ui.c:494
+#: apps/solitario/main/so_ui.c:495
+#: apps/solitario/main/so_ui.c:496
+No	Non
+
+#: apps/solitario/main/so_ui.c:503
+Puntaje	Score
+
+#: apps/solitario/main/so_ui.c:503
+Vueltas al mazo	Tours de pioche
+
+#: apps/solitario/main/so_ui.c:503
+Pistas	Indices
+
+#: apps/solitario/main/so_ui.c:504
+Manos con solución	Parties gagnables
+
+#: apps/solitario/main/so_ui.c:504
+Completar solo	Fin automatique
+
+#: apps/solitario/main/so_ui.c:504
+Al ganar	Victoire
+
+#: apps/solitario/main/so_ui.c:504
+Sonido	Son
+
+#: apps/solitario/main/so_ui.c:550
+El puntaje y las vueltas al mazo valen desde la próxima mano. Vegas: cada mano cuesta una moneda por carta y cada carta que llega a la base paga cinco.	Score et tours de pioche valent dès la prochaine partie. Vegas : chaque partie coûte une pièce par carte, et chaque carte posée sur une fondation en rapporte cinq.
+
+#: apps/solitario/main/so_ui.c:662
+Paños	Tapis
+
+#: apps/solitario/main/so_ui.c:662
+Dorsos	Dos
+
+#: apps/solitario/main/so_ui.c:662
+Barajas	Cartes
+
+#: apps/solitario/main/so_ui.c:701
+La Española usa siempre la baraja de cuarenta.	L'Espagnole utilise toujours le jeu de quarante.
+
+#: apps/solitario/main/so_ui.c:730
+Jugadas	Jouées
+
+#: apps/solitario/main/so_ui.c:731
+#: apps/solitario/main/so_ui.c:875
+Ganadas	Gagnées
+
+#: apps/solitario/main/so_ui.c:731
+#: apps/solitario/main/so_ui.c:875
+Racha	Série
+
+#: apps/solitario/main/so_ui.c:741
+Mejor tiempo	Meilleur temps
+
+#: apps/solitario/main/so_ui.c:741
+Mejor puntaje	Meilleur score
+
+#: apps/solitario/main/so_ui.c:747
+Saldo de Vegas	Solde Vegas
+
+#: apps/solitario/main/so_ui.c:748
+Manos del día ganadas	Parties du jour gagnées
+
+#: apps/solitario/main/so_ui.c:752
+#: apps/solitario/main/so_ui.c:826
+Listo	OK
+
+#: apps/solitario/main/so_ui.c:761
+Paño	Tapis
+
+#: apps/solitario/main/so_ui.c:762
+Dorso	Dos
+
+#: apps/solitario/main/so_ui.c:763
+Baraja	Cartes
+
+#: apps/solitario/main/so_ui.c:791
+Llevá las cuatro bases del as al rey, cada una de un palo. En las columnas se baja de a uno alternando rojo y negro, y una columna vacía sólo toma un rey. Tocá el mazo para dar vuelta una carta.	Monte les quatre fondations de l'as au roi, une par couleur. Dans les colonnes, on descend une carte à la fois en alternant rouge et noir, et une colonne vide ne prend qu'un roi. Touche la pioche pour retourner une carte.
+
+#: apps/solitario/main/so_ui.c:793
+Como Klondike, pero el mazo se da vuelta de a tres cartas y sólo se juega la de arriba.	Comme Klondike, mais la pioche se retourne par trois cartes et seule celle du dessus se joue.
+
+#: apps/solitario/main/so_ui.c:794
+Armá en las columnas escaleras del rey al as de un mismo palo: completas, se van solas. Se puede bajar sobre cualquier palo, pero sólo se mueve junto lo que es del mismo palo. El mazo reparte una carta en cada columna, si ninguna está vacía.	Forme dans les colonnes des suites du roi à l'as d'une couleur : complètes, elles partent seules. On descend sur toute couleur, mais seules les cartes d'une même couleur bougent ensemble. La pioche donne une carte par colonne, si aucune n'est vide.
+
+#: apps/solitario/main/so_ui.c:797
+Spider con dos palos: picas y corazones.	Spider à deux couleurs : piques et coeurs.
+
+#: apps/solitario/main/so_ui.c:798
+Spider con los cuatro palos: el más difícil.	Spider à quatre couleurs : le plus difficile.
+
+#: apps/solitario/main/so_ui.c:799
+Todas las cartas a la vista. Las cuatro celdas guardan una carta cada una. En las columnas se baja alternando colores; se mueven tantas cartas juntas como celdas y columnas libres alcancen.	Toutes les cartes visibles. Chacune des quatre cellules garde une carte. Dans les colonnes, on descend en alternant rouge et noir ; on déplace autant de cartes à la fois que le permettent cellules et colonnes libres.
+
+#: apps/solitario/main/so_ui.c:801
+Sacá parejas de cartas libres que sumen trece (la J vale 11, la Q 12; el rey sale solo). Una carta está libre si no tiene nada encima. El mazo da vuelta de a una.	Retire des paires de cartes libres qui font treize (J vaut 11, Q vaut 12 ; le roi part seul). Une carte est libre si rien n'est dessus. La pioche se retourne une à une.
+
+#: apps/solitario/main/so_ui.c:803
+Pasá a la pila de abajo cartas libres que sean una más o una menos que la de arriba (del rey se sigue al as). Despejá los tres picos. Si no hay jugada, tocá el mazo.	Passe sur la pile du bas des cartes libres d'un de plus ou de moins que celle du dessus (le roi suit l'as). Dégage les trois pics. Sans coup possible, touche la pioche.
+
+#: apps/solitario/main/so_ui.c:805
+Pasá a la pila cartas de abajo de las columnas que sean una más o una menos que la de arriba, sin dar la vuelta del rey al as. Despejá las siete columnas.	Passe sur la pile les cartes du bas des colonnes qui ont un de plus ou de moins que celle du dessus, sans boucler du roi à l'as. Dégage les sept colonnes.
+
+#: apps/solitario/main/so_ui.c:807
+Como Klondike, sin mazo: todo está repartido y se puede mover cualquier carta dada vuelta, con todo lo que tiene encima, sobre una de un número más y del otro color.	Comme Klondike, sans pioche : tout est distribué et on peut bouger toute carte retournée, avec ce qu'elle porte, sur une carte d'une valeur de plus et de l'autre couleur.
+
+#: apps/solitario/main/so_ui.c:809
+Klondike con la baraja española de cuarenta: después del 7 viene la sota. En las columnas se alternan oros y copas con espadas y bastos, y una columna vacía sólo toma un rey.	Klondike avec le jeu espagnol de quarante : après le 7 vient le valet (sota). Dans les colonnes, deniers et coupes alternent avec épées et bâtons, et une colonne vide ne prend qu'un roi.
+
+#: apps/solitario/main/so_ui.c:820
+Arrastrá una carta o una pila, o tocala para que vaya sola al mejor lugar; dos toques la mandan a la base. Con joystick: la cruz recorre las pilas, A toma y suelta, B cancela, L deshace, R da una pista.	Fais glisser une carte ou une pile, ou touche-la pour qu'elle aille seule à la meilleure place ; un double toucher l'envoie à la fondation. À la manette : la croix parcourt les piles, A prend et pose, B annule, L revient en arrière, R donne un indice.
+
+#: apps/solitario/main/so_ui.c:846
+#: apps/solitario/main/so_win.c:174
+¡Ganaste!	Gagné !
+
+#: apps/solitario/main/so_ui.c:852
+ · Mano del día	 · Partie du jour
+
+#: apps/solitario/main/so_ui.c:890
+#: apps/solitario/main/so_ui.c:906
+Otra mano	Autre partie
+
+#: apps/solitario/main/so_ui.c:896
+No quedan jugadas	Plus de coups
+
+#: apps/solitario/main/so_ui.c:899
+Esta mano ya no tiene movimientos.	Cette partie n'a plus de coups.
+
+#: apps/solitario/main/solitario.c:156
+Para repartir no puede haber columnas vacías.	Pour distribuer, pas de colonne vide.
+
+#: apps/solitario/main/solitario.c:331
+No hay jugadas.	Aucun coup.
+
+#: apps/solitario/main/solitario.c:335
+Sólo queda el mazo.	Reste la pioche.
+
+#: apps/solitario/main/solitario.c:405
+Buscando una mano con solución...	Recherche d'une partie soluble...

@@ -1,0 +1,121 @@
+# amoledos-lang 1   es -> it
+# demo.claudito.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/claudito/main/cl_scene.c:861
+PATIO	PARCO
+
+#: apps/claudito/main/cl_scene.c:861
+CASA	CASA
+
+#: apps/claudito/main/claudito.c:272
+PELOTA	PALLA
+
+#: apps/claudito/main/claudito.c:273
+GLOBO	PALLONCINO
+
+#: apps/claudito/main/claudito.c:274
+BURBUJAS	BOLLE
+
+#: apps/claudito/main/claudito.c:275
+CUBOS	CUBI
+
+#: apps/claudito/main/claudito.c:925
+DIA %d	GIORNO %d
+
+#: apps/claudito/main/claudito.c:1079
+QUE COMEMOS?	COSA MANGIAMO?
+
+#: apps/claudito/main/claudito.c:1079
+A QUE JUGAMOS?	A COSA GIOCHIAMO?
+
+#: apps/claudito/main/claudito.c:1170
+NO ENTRA	NON CI STA
+
+#: apps/claudito/main/claudito.c:1170
+#: apps/claudito/main/claudito.c:2057
+MAS!	PIU!
+
+#: apps/claudito/main/claudito.c:1204
+RICO!	BUONO!
+
+#: apps/claudito/main/claudito.c:1229
+FROTAME!	GRATTAMI!
+
+#: apps/claudito/main/claudito.c:1242
+TOCAME LA	GRATTAMI LA
+
+#: apps/claudito/main/claudito.c:1242
+PANZA!	PANCIA!
+
+#: apps/claudito/main/claudito.c:1249
+BUEN DIA!	BUONGIORNO!
+
+#: apps/claudito/main/claudito.c:1254
+A DORMIR...	A NANNA...
+
+#: apps/claudito/main/claudito.c:1263
+AL PATIO!	AL PARCO!
+
+#: apps/claudito/main/claudito.c:1263
+A CASA!	A CASA!
+
+#: apps/claudito/main/claudito.c:1307
+TENGO	HO
+
+#: apps/claudito/main/claudito.c:1307
+HAMBRE	FAME
+
+#: apps/claudito/main/claudito.c:1309
+ESTOY	SONO
+
+#: apps/claudito/main/claudito.c:1309
+SUCIO	SPORCO
+
+#: apps/claudito/main/claudito.c:1311
+QUE SUENO	CHE SONNO
+
+#: apps/claudito/main/claudito.c:1313
+JUGAMOS?	GIOCHI?
+
+#: apps/claudito/main/claudito.c:1315
+#: apps/claudito/main/claudito.c:2532
+HOLA!	CIAO!
+
+#: apps/claudito/main/claudito.c:1315
+TODO BIEN	TUTTO OK
+
+#: apps/claudito/main/claudito.c:1316
+QUE LINDO	CHE BELLO
+
+#: apps/claudito/main/claudito.c:1316
+HOLA HOLA	CIAO CIAO
+
+#: apps/claudito/main/claudito.c:1523
+LIMPIO!	PULITO!
+
+#: apps/claudito/main/claudito.c:1699
+DIA 1!	GIORNO 1!
+
+#: apps/claudito/main/claudito.c:1699
+DE NUEVO	DA CAPO
+
+#: apps/claudito/main/claudito.c:2056
+JI JI JI!	HI HI HI!
+
+#: apps/claudito/main/claudito.c:2056
+JA JA!	AH AH!
+
+#: apps/claudito/main/claudito.c:2057
+BASTA!	BASTA!
+
+#: apps/claudito/main/claudito.c:2193
+#: apps/claudito/main/claudito.c:2288
+MANTENE PARA	TIENI PER
+
+#: apps/claudito/main/claudito.c:2193
+#: apps/claudito/main/claudito.c:2288
+REINICIAR	RIAVVIARE

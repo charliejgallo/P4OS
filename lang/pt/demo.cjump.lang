@@ -1,0 +1,130 @@
+# amoledos-lang 1   es -> pt
+# demo.cjump.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/cjump/main/cj_skins.c:32
+Clásico	Clássico
+
+#: apps/cjump/main/cj_skins.c:33
+Nerd	Nerd
+
+#: apps/cjump/main/cj_skins.c:34
+Café	Café
+
+#: apps/cjump/main/cj_skins.c:35
+Idea	Ideia
+
+#: apps/cjump/main/cj_skins.c:36
+Auriculares	Fones
+
+#: apps/cjump/main/cj_skins.c:37
+Obrero	Operário
+
+#: apps/cjump/main/cj_skins.c:38
+Dormilón	Dorminhoco
+
+#: apps/cjump/main/cj_skins.c:39
+Graduado	Formado
+
+#: apps/cjump/main/cj_skins.c:40
+Hipnótico	Hipnótico
+
+#: apps/cjump/main/cj_skins.c:41
+Navegador	Navegador
+
+#: apps/cjump/main/cj_skins.c:42
+Forzudo	Fortão
+
+#: apps/cjump/main/cj_skins.c:43
+Mago	Mago
+
+#: apps/cjump/main/cj_skins.c:44
+Ninja	Ninja
+
+#: apps/cjump/main/cj_skins.c:45
+Rey	Rei
+
+#: apps/cjump/main/cj_skins.c:46
+Astronauta	Astronauta
+
+#: apps/cjump/main/cj_skins.c:47
+Fiesta	Festa
+
+#: apps/cjump/main/cjump.c:496
+SONIDO	SOM
+
+#: apps/cjump/main/cjump.c:500
+Botones a los costados, o arrastrá el dedo	Botões nas laterais, ou arraste o dedo
+
+#: apps/cjump/main/cjump.c:508
+Récord	Melhor
+
+#: apps/cjump/main/cjump.c:511
+#: apps/cjump/main/cjump.c:534
+Monedas	Moedas
+
+#: apps/cjump/main/cjump.c:541
+#: apps/cjump/main/cjump.c:731
+monedas	moedas
+
+#: apps/cjump/main/cjump.c:547
+Comprar	Comprar
+
+#: apps/cjump/main/cjump.c:547
+No alcanza	Não dá
+
+#: apps/cjump/main/cjump.c:553
+Puesto	Usando
+
+#: apps/cjump/main/cjump.c:556
+Comprado	Comprado
+
+#: apps/cjump/main/cjump.c:558
+Ponerme este	Usar este
+
+#: apps/cjump/main/cjump.c:586
+Todavía no alcanza	Moedas insuficientes
+
+#: apps/cjump/main/cjump.c:594
+Disfraz desbloqueado	Fantasia desbloqueada
+
+#: apps/cjump/main/cjump.c:723
+Nuevo récord	Novo recorde
+
+#: apps/cjump/main/cjump.c:724
+Se acabó	Acabou
+
+#: apps/cjump/main/cjump.c:735
+Juntadas	Coletadas
+
+#: apps/cjump/main/cjump.c:736
+por altura	por altura
+
+#: apps/cjump/main/cjump.c:1062
+Jugar	Jogar
+
+#: apps/cjump/main/cjump.c:1064
+#: apps/cjump/main/cjump.c:1083
+Tienda	Loja
+
+#: apps/cjump/main/cjump.c:1103
+Deslizá para ver los demás	Deslize para ver os outros
+
+#: apps/cjump/main/cjump.c:1114
+Pausa	Pausa
+
+#: apps/cjump/main/cjump.c:1116
+Seguir	Seguir
+
+#: apps/cjump/main/cjump.c:1118
+#: apps/cjump/main/cjump.c:1138
+Menú	Menu
+
+#: apps/cjump/main/cjump.c:1120
+Salir	Sair
+
+#: apps/cjump/main/cjump.c:1136
+Otra vez	De novo

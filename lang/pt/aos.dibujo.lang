@@ -1,0 +1,396 @@
+# amoledos-lang 1   es -> pt
+# aos.dibujo.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/dibujo/main/dib_editor.c:750
+Copiado	Copiado
+
+#: apps/dibujo/main/dib_editor.c:927
+La capa está oculta	A camada está oculta
+
+#: apps/dibujo/main/dib_editor.c:1437
+Tamaño	Tamanho
+
+#: apps/dibujo/main/dib_editor.c:1443
+Opacidad	Opacidade
+
+#: apps/dibujo/main/dib_editor.c:1448
+Borde	Borda
+
+#: apps/dibujo/main/dib_editor.c:1452
+Tolerancia	Tolerância
+
+#: apps/dibujo/main/dib_editor.c:1633
+Tocá para agregar puntos; el primero lo cierra	Toque para adicionar pontos; o primeiro fecha
+
+#: apps/dibujo/main/dib_editor.c:1637
+Editar texto	Editar texto
+
+#: apps/dibujo/main/dib_editor.c:1639
+#: apps/dibujo/main/dib_editor.c:1643
+Arrastrá, las esquinas escalan, el círculo gira	Arraste; os cantos escalam, o círculo gira
+
+#: apps/dibujo/main/dib_editor.c:1648
+#: apps/dibujo/main/dib_editor.c:1682
+Relleno sí	Preenchido
+
+#: apps/dibujo/main/dib_editor.c:1648
+#: apps/dibujo/main/dib_editor.c:1682
+Relleno no	Só contorno
+
+#: apps/dibujo/main/dib_editor.c:1690
+Tocá el lienzo donde va el texto	Toque na tela onde vai o texto
+
+#: apps/dibujo/main/dib_editor.c:1694
+#: apps/dibujo/main/dib_editor.c:1698
+Mira: todo	Olha: tudo
+
+#: apps/dibujo/main/dib_editor.c:1694
+#: apps/dibujo/main/dib_editor.c:1698
+Mira: la capa	Olha: a camada
+
+#: apps/dibujo/main/dib_editor.c:1697
+Tocá un color del dibujo	Toque numa cor do desenho
+
+#: apps/dibujo/main/dib_editor.c:1703
+Arrastrá para elegir una zona	Arraste para escolher uma área
+
+#: apps/dibujo/main/dib_editor.c:1704
+Todo	Tudo
+
+#: apps/dibujo/main/dib_editor.c:1705
+#: apps/dibujo/main/dib_editor.c:1710
+Pegar	Colar
+
+#: apps/dibujo/main/dib_editor.c:1708
+#: apps/dibujo/main/dib_panels.c:688
+#: apps/dibujo/main/dibujo.c:558
+Duplicar	Duplicar
+
+#: apps/dibujo/main/dib_editor.c:1709
+Copiar	Copiar
+
+#: apps/dibujo/main/dib_editor.c:1712
+#: apps/dibujo/main/dib_panels.c:688
+#: apps/dibujo/main/dibujo.c:559
+Borrar	Apagar
+
+#: apps/dibujo/main/dib_editor.c:1719
+Ajustar	Ajustar
+
+#: apps/dibujo/main/dib_editor.c:2114
+#: apps/dibujo/main/dib_panels.c:782
+Guardado	Salvo
+
+#: apps/dibujo/main/dib_editor.c:2287
+Sin memoria: se borró historia o no entra más	Sem memória: o histórico foi cortado ou não cabe mais
+
+#: apps/dibujo/main/dib_panels.c:176
+#: apps/dibujo/main/dib_panels.c:232
+Suavizado del trazo	Suavização do traço
+
+#: apps/dibujo/main/dib_panels.c:225
+Pinceles	Pincéis
+
+#: apps/dibujo/main/dib_panels.c:227
+Lápiz	Lápis
+
+#: apps/dibujo/main/dib_panels.c:227
+Pincel suave	Pincel suave
+
+#: apps/dibujo/main/dib_panels.c:227
+Aerógrafo	Aerógrafo
+
+#: apps/dibujo/main/dib_panels.c:227
+Marcador	Marcador
+
+#: apps/dibujo/main/dib_panels.c:234
+#: apps/dibujo/main/dib_panels.c:850
+Simetría	Simetria
+
+#: apps/dibujo/main/dib_panels.c:235
+Ninguna	Nenhuma
+
+#: apps/dibujo/main/dib_panels.c:235
+Lado a lado	Lado a lado
+
+#: apps/dibujo/main/dib_panels.c:235
+Arriba y abajo	Cima e baixo
+
+#: apps/dibujo/main/dib_panels.c:235
+Las dos	As duas
+
+#: apps/dibujo/main/dib_panels.c:262
+#: apps/dibujo/main/dib_panels.c:293
+Esquinas redondeadas	Cantos arredondados
+
+#: apps/dibujo/main/dib_panels.c:286
+Formas	Formas
+
+#: apps/dibujo/main/dib_panels.c:288
+Línea	Linha
+
+#: apps/dibujo/main/dib_panels.c:288
+Rectángulo	Retângulo
+
+#: apps/dibujo/main/dib_panels.c:288
+Elipse	Elipse
+
+#: apps/dibujo/main/dib_panels.c:288
+Polígono	Polígono
+
+#: apps/dibujo/main/dib_panels.c:288
+Flecha	Seta
+
+#: apps/dibujo/main/dib_panels.c:296
+Con borde	Com borda
+
+#: apps/dibujo/main/dib_panels.c:296
+Sin borde	Sem borda
+
+#: apps/dibujo/main/dib_panels.c:298
+El borde va con el color de trazo y el relleno con el de relleno (los dos cuadrados de arriba).	A borda usa a cor do traço e o preenchimento a de preenchimento (os dois quadrados lá em cima).
+
+#: apps/dibujo/main/dib_panels.c:396
+Quitado de la paleta	Removida da paleta
+
+#: apps/dibujo/main/dib_panels.c:423
+La paleta está llena	A paleta está cheia
+
+#: apps/dibujo/main/dib_panels.c:445
+Color	Cor
+
+#: apps/dibujo/main/dib_panels.c:464
+Relleno	Preench.
+
+#: apps/dibujo/main/dib_panels.c:464
+Trazo	Traço
+
+#: apps/dibujo/main/dib_panels.c:531
+Recientes	Recentes
+
+#: apps/dibujo/main/dib_panels.c:566
+Mantené apretado un color para sacarlo de la paleta	Mantenha pressionada uma cor para tirá-la da paleta
+
+#: apps/dibujo/main/dib_panels.c:611
+#: apps/dibujo/main/dibujo.c:763
+#: apps/dibujo/main/dibujo.c:789
+Ya hay 8 capas	Já há 8 camadas
+
+#: apps/dibujo/main/dib_panels.c:620
+#: apps/dibujo/main/dibujo.c:375
+Capa	Camada
+
+#: apps/dibujo/main/dib_panels.c:649
+No se pudo	Não deu
+
+#: apps/dibujo/main/dib_panels.c:662
+#: apps/dibujo/main/dib_panels.c:701
+Opacidad de la capa	Opacidade da camada
+
+#: apps/dibujo/main/dib_panels.c:682
+Capas	Camadas
+
+#: apps/dibujo/main/dib_panels.c:688
+Nueva	Nova
+
+#: apps/dibujo/main/dib_panels.c:688
+Subir	Subir
+
+#: apps/dibujo/main/dib_panels.c:688
+Bajar	Descer
+
+#: apps/dibujo/main/dib_panels.c:688
+Unir	Unir
+
+#: apps/dibujo/main/dib_panels.c:690
+¿Seguro?	Certeza?
+
+#: apps/dibujo/main/dib_panels.c:762
+Blanco	Branco
+
+#: apps/dibujo/main/dib_panels.c:762
+Negro	Preto
+
+#: apps/dibujo/main/dib_panels.c:763
+Transparente	Transparente
+
+#: apps/dibujo/main/dib_panels.c:763
+De color	Colorido
+
+#: apps/dibujo/main/dib_panels.c:765
+Fondo	Fundo
+
+#: apps/dibujo/main/dib_panels.c:838
+Menú	Menu
+
+#: apps/dibujo/main/dib_panels.c:842
+ninguna	nenhuma
+
+#: apps/dibujo/main/dib_panels.c:842
+lado a lado	lado a lado
+
+#: apps/dibujo/main/dib_panels.c:842
+arriba y abajo	cima e baixo
+
+#: apps/dibujo/main/dib_panels.c:842
+las dos	as duas
+
+#: apps/dibujo/main/dib_panels.c:843
+Guardar	Salvar
+
+#: apps/dibujo/main/dib_panels.c:844
+#: apps/dibujo/main/dibujo.c:557
+Exportar PNG	Exportar PNG
+
+#: apps/dibujo/main/dib_panels.c:845
+#: apps/dibujo/main/dib_panels.c:905
+Importar una imagen	Importar uma imagem
+
+#: apps/dibujo/main/dib_panels.c:846
+Grilla	Grade
+
+#: apps/dibujo/main/dib_panels.c:846
+#: apps/dibujo/main/dib_panels.c:848
+#: apps/dibujo/main/dib_panels.c:849
+sí	sim
+
+#: apps/dibujo/main/dib_panels.c:846
+#: apps/dibujo/main/dib_panels.c:848
+#: apps/dibujo/main/dib_panels.c:849
+no	não
+
+#: apps/dibujo/main/dib_panels.c:847
+Paso de la grilla	Passo da grade
+
+#: apps/dibujo/main/dib_panels.c:848
+Reglas y guías	Réguas e guias
+
+#: apps/dibujo/main/dib_panels.c:849
+Imán	Ímã
+
+#: apps/dibujo/main/dib_panels.c:851
+Ajustar a la pantalla	Ajustar à tela
+
+#: apps/dibujo/main/dib_panels.c:852
+Volver a la galería	Voltar à galeria
+
+#: apps/dibujo/main/dib_panels.c:862
+capa	camada
+
+#: apps/dibujo/main/dib_panels.c:862
+capas	camadas
+
+#: apps/dibujo/main/dib_panels.c:920
+Va a una capa nueva, abajo de todo; después se mueve y se escala. Las de la carpeta dibujo/importar se suben desde el portal.	Vai para uma camada nova, embaixo de tudo; depois é só mover e escalar. As da pasta dibujo/importar são enviadas pelo portal.
+
+#: apps/dibujo/main/dib_panels.c:923
+No hay imágenes (JPG, PNG o BMP) en dibujo/importar ni en fotos.	Não há imagens (JPG, PNG ou BMP) em dibujo/importar nem em fotos.
+
+#: apps/dibujo/main/dib_panels.c:1107
+Escribí el texto	Digite o texto
+
+#: apps/dibujo/main/dib_panels.c:1130
+#: apps/dibujo/main/dibujo.c:560
+Cancelar	Cancelar
+
+#: apps/dibujo/main/dib_panels.c:1132
+Listo	Pronto
+
+#: apps/dibujo/main/dib_panels.c:1216
+Tamaño del dibujo	Tamanho do desenho
+
+#: apps/dibujo/main/dib_panels.c:1218
+Pantalla	Tela
+
+#: apps/dibujo/main/dib_panels.c:1218
+Pantalla acostada	Tela deitada
+
+#: apps/dibujo/main/dib_panels.c:1218
+A4	A4
+
+#: apps/dibujo/main/dib_panels.c:1218
+A4 acostada	A4 deitada
+
+#: apps/dibujo/main/dib_panels.c:1219
+Cuadrado	Quadrado
+
+#: apps/dibujo/main/dibujo.c:160
+Básica	Básica
+
+#: apps/dibujo/main/dibujo.c:160
+Pastel	Pastel
+
+#: apps/dibujo/main/dibujo.c:160
+Tierra	Terra
+
+#: apps/dibujo/main/dibujo.c:160
+Mía	Minha
+
+#: apps/dibujo/main/dibujo.c:301
+No se pudo guardar	Não foi possível salvar
+
+#: apps/dibujo/main/dibujo.c:330
+#: apps/dibujo/main/dibujo.c:629
+Dibujo	Desenho
+
+#: apps/dibujo/main/dibujo.c:360
+No se pudo abrir	Não foi possível abrir
+
+#: apps/dibujo/main/dibujo.c:372
+No hay memoria para un dibujo de ese tamaño	Não há memória para um desenho desse tamanho
+
+#: apps/dibujo/main/dibujo.c:507
+Duplicado	Duplicado
+
+#: apps/dibujo/main/dibujo.c:507
+No se pudo duplicar	Não foi possível duplicar
+
+#: apps/dibujo/main/dibujo.c:519
+¿Seguro? Tocá de nuevo	Certeza? Toque de novo
+
+#: apps/dibujo/main/dibujo.c:571
+Todavía no hay dibujos. Tocá «Nuevo» para empezar uno.	Ainda não há desenhos. Toque em «Novo» para começar um.
+
+#: apps/dibujo/main/dibujo.c:634
+Nuevo	Novo
+
+#: apps/dibujo/main/dibujo.c:708
+Ocupado, probá de nuevo	Ocupado, tente de novo
+
+#: apps/dibujo/main/dibujo.c:720
+#: apps/dibujo/main/dibujo.c:782
+Exportando…	Exportando…
+
+#: apps/dibujo/main/dibujo.c:735
+Exportado:	Exportado:
+
+#: apps/dibujo/main/dibujo.c:735
+No se pudo exportar	Falha ao exportar
+
+#: apps/dibujo/main/dibujo.c:741
+No se pudo leer la imagen	Não foi possível ler a imagem
+
+#: apps/dibujo/main/dibujo.c:750
+No hay memoria para la imagen	Não há memória para a imagem
+
+#: apps/dibujo/main/dibujo.c:761
+Imagen	Imagem
+
+#: apps/dibujo/main/dibujo.c:792
+Leyendo la imagen…	Lendo a imagem…
+
+#: apps/dibujo/main/dibujo.c:821
+Cielo	Céu
+
+#: apps/dibujo/main/dibujo.c:838
+Paisaje	Paisagem
+
+#: apps/dibujo/main/dibujo.c:882
+Texto	Texto
+
+#: apps/dibujo/main/dibujo.c:887
+¡Hola, Dibujo!	Olá, Desenho!

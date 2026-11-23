@@ -1,0 +1,426 @@
+# amoledos-lang 1   es -> it
+# demo.sudoku.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/sudoku/main/sd_board.c:471
+Sin memoria	Memoria piena
+
+#: apps/sudoku/main/sd_game.c:27
+#: apps/sudoku/main/sd_theme.c:32
+Clásico	Classico
+
+#: apps/sudoku/main/sd_game.c:27
+6×6	6×6
+
+#: apps/sudoku/main/sd_game.c:27
+Killer	Killer
+
+#: apps/sudoku/main/sd_game.c:27
+Diagonal	Diagonale
+
+#: apps/sudoku/main/sd_game.c:28
+#: apps/sudoku/main/sd_ui.c:328
+Desafío del día	Sfida del giorno
+
+#: apps/sudoku/main/sd_game.c:29
+Fácil	Facile
+
+#: apps/sudoku/main/sd_game.c:29
+Medio	Medio
+
+#: apps/sudoku/main/sd_game.c:29
+Difícil	Difficile
+
+#: apps/sudoku/main/sd_game.c:29
+Experto	Esperto
+
+#: apps/sudoku/main/sd_game.c:30
+Maestro	Maestro
+
+#: apps/sudoku/main/sd_game.c:144
+El tablero está lleno, pero hay errores	La griglia è piena, ma ci sono errori
+
+#: apps/sudoku/main/sd_game.c:391
+Última celda libre	Ultima cella libera
+
+#: apps/sudoku/main/sd_game.c:392
+Único candidato	Candidato unico
+
+#: apps/sudoku/main/sd_game.c:393
+Único lugar	Unico posto
+
+#: apps/sudoku/main/sd_game.c:394
+Combinaciones de la jaula	Combinazioni della gabbia
+
+#: apps/sudoku/main/sd_game.c:395
+La regla del 45	La regola del 45
+
+#: apps/sudoku/main/sd_game.c:396
+#: apps/sudoku/main/sd_game.c:397
+Candidatos bloqueados	Candidati bloccati
+
+#: apps/sudoku/main/sd_game.c:398
+Par desnudo	Coppia nuda
+
+#: apps/sudoku/main/sd_game.c:399
+Par oculto	Coppia nascosta
+
+#: apps/sudoku/main/sd_game.c:400
+Trío desnudo	Tripla nuda
+
+#: apps/sudoku/main/sd_game.c:401
+Trío oculto	Tripla nascosta
+
+#: apps/sudoku/main/sd_game.c:402
+X-Wing	X-Wing
+
+#: apps/sudoku/main/sd_game.c:403
+Cuarteto desnudo	Quartetto nudo
+
+#: apps/sudoku/main/sd_game.c:404
+Cuarteto oculto	Quartetto nascosto
+
+#: apps/sudoku/main/sd_game.c:405
+Pez espada	Pesce spada
+
+#: apps/sudoku/main/sd_game.c:406
+Ala XY	XY-Wing
+
+#: apps/sudoku/main/sd_game.c:407
+Ala XYZ	XYZ-Wing
+
+#: apps/sudoku/main/sd_game.c:408
+Cadena corta	Catena corta
+
+#: apps/sudoku/main/sd_game.c:409
+Medusa	Medusa
+
+#: apps/sudoku/main/sd_game.c:410
+Cadena larga	Catena lunga
+
+#: apps/sudoku/main/sd_game.c:411
+#: apps/sudoku/main/sd_ui.c:678
+#: apps/sudoku/main/sd_ui.c:824
+Pista	Aiuto
+
+#: apps/sudoku/main/sd_game.c:412
+Un error	Un errore
+
+#: apps/sudoku/main/sd_game.c:419
+#: apps/sudoku/main/sd_game.c:421
+fila	riga
+
+#: apps/sudoku/main/sd_game.c:422
+columna	colonna
+
+#: apps/sudoku/main/sd_game.c:423
+caja	box
+
+#: apps/sudoku/main/sd_game.c:424
+diagonal	diagonale
+
+#: apps/sudoku/main/sd_game.c:437
+ y 	 e 
+
+#: apps/sudoku/main/sd_game.c:450
+El %d de la celda marcada no va ahí. Aplicar lo borra.	Il %d nella cella segnata non va lì. Applica lo cancella.
+
+#: apps/sudoku/main/sd_game.c:453
+No hay un paso simple que explicar desde acá: la celda marcada es un %d.	Non c'è un passo semplice da spiegare da qui: la cella segnata è un %d.
+
+#: apps/sudoku/main/sd_game.c:456
+Es la única celda vacía de su %s: le falta el %d.	È l'unica cella vuota della sua %s: le manca il %d.
+
+#: apps/sudoku/main/sd_game.c:459
+En esta celda sólo puede ir el %d: los demás números ya están en su fila, su columna o su caja.	In questa cella può andare solo il %d: gli altri numeri sono già nella sua riga, colonna o box.
+
+#: apps/sudoku/main/sd_game.c:464
+En esta %s el %d sólo puede ir acá.	In questa %s il %d può andare solo qui.
+
+#: apps/sudoku/main/sd_game.c:467
+Esta jaula suma %d: con lo que ya hay alrededor sólo le entran el %s. Lo demás sale.	Questa gabbia somma %d: con ciò che c'è già intorno ci stanno solo %s. Il resto esce.
+
+#: apps/sudoku/main/sd_game.c:472
+Toda %s suma 45. Las jaulas que caen enteras adentro dejan %d para la celda marcada: es un %d.	Ogni %s somma 45. Le gabbie che vi stanno tutte dentro lasciano %d per la cella segnata: è un %d.
+
+#: apps/sudoku/main/sd_game.c:476
+Toda %s suma 45. Las jaulas que caen enteras adentro dejan %d para las celdas marcadas: sólo les entran el %s.	Ogni %s somma 45. Le gabbie che vi stanno tutte dentro lasciano %d per le celle segnate: ci stanno solo %s.
+
+#: apps/sudoku/main/sd_game.c:481
+En esta caja el %s sólo puede ir sobre una %s: sale del resto de esa %s.	In questo box il %s può andare solo su una %s: esce dal resto di quella %s.
+
+#: apps/sudoku/main/sd_game.c:485
+En esta %s el %s sólo puede ir dentro de una caja: sale del resto de esa caja.	In questa %s il %s può andare solo dentro un box: esce dal resto di quel box.
+
+#: apps/sudoku/main/sd_game.c:490
+Las celdas marcadas sólo pueden ser %s, entre todas: esos números salen del resto de la %s.	Le celle segnate, tra tutte, possono essere solo %s: quei numeri escono dal resto della %s.
+
+#: apps/sudoku/main/sd_game.c:497
+En esta %s el %s sólo pueden ir en las celdas marcadas: ahí sale todo lo demás.	In questa %s i %s possono andare solo nelle celle segnate: da lì esce tutto il resto.
+
+#: apps/sudoku/main/sd_game.c:505
+En %d filas el %s sólo puede ir en las mismas %d columnas: sale del resto de esas columnas.	In %d righe il %s può andare solo nelle stesse %d colonne: esce dal resto di quelle colonne.
+
+#: apps/sudoku/main/sd_game.c:509
+En %d columnas el %s sólo puede ir en las mismas %d filas: sale del resto de esas filas.	In %d colonne il %s può andare solo nelle stesse %d righe: esce dal resto di quelle righe.
+
+#: apps/sudoku/main/sd_game.c:515
+La celda del medio tiene dos opciones y cada una obliga a una punta a ser %d. Una de las dos puntas lo es: el %d sale de las celdas que ven a las dos.	La cella centrale ha due opzioni e ognuna obbliga un estremo a essere %d. Uno dei due estremi lo è: il %d esce dalle celle che vedono entrambi.
+
+#: apps/sudoku/main/sd_game.c:520
+Entre la celda del medio y sus dos puntas, alguna es %d: el %d sale de las celdas que ven a las tres.	Tra la cella centrale e i suoi due estremi, una è %d: il %d esce dalle celle che vedono tutte e tre.
+
+#: apps/sudoku/main/sd_game.c:527
+Si la celda marcada no fuera %d, siguiendo la cadena terminaría siéndolo: es un %d.	Se la cella segnata non fosse %d, seguendo la catena finirebbe per esserlo: è un %d.
+
+#: apps/sudoku/main/sd_game.c:530
+Seguí la cadena: en cada línea llena, uno de los dos es cierto; en cada punteada, no pueden serlo los dos. Una de las dos puntas es cierta, así que lo tachado sale.	Segui la catena: su ogni linea piena, uno dei due è vero; su ogni tratteggiata, non possono esserlo entrambi. Uno dei due estremi è vero, quindi ciò che è barrato esce.
+
+#: apps/sudoku/main/sd_theme.c:37
+Campo	Campi
+
+#: apps/sudoku/main/sd_theme.c:42
+Madera	Legno
+
+#: apps/sudoku/main/sd_theme.c:47
+Papiro	Papiro
+
+#: apps/sudoku/main/sd_theme.c:52
+Playa	Mare
+
+#: apps/sudoku/main/sd_theme.c:57
+Nieve	Neve
+
+#: apps/sudoku/main/sd_theme.c:62
+Piedra	Pietra
+
+#: apps/sudoku/main/sd_theme.c:67
+Bajo el mar	Sotto il mare
+
+#: apps/sudoku/main/sd_theme.c:72
+Ciudad	Città
+
+#: apps/sudoku/main/sd_theme.c:77
+Metal	Metallo
+
+#: apps/sudoku/main/sd_theme.c:82
+Jardín japonés	Giardino giapponese
+
+#: apps/sudoku/main/sd_theme.c:87
+Desierto	Deserto
+
+#: apps/sudoku/main/sd_theme.c:92
+Neón	Neon
+
+#: apps/sudoku/main/sd_theme.c:97
+Espacio	Spazio
+
+#: apps/sudoku/main/sd_theme.c:102
+Casa embrujada	Casa stregata
+
+#: apps/sudoku/main/sd_theme.c:107
+Aliens	Alieni
+
+#: apps/sudoku/main/sd_ui.c:253
+Todavía no hay hora: el desafío del día espera al reloj de la red	Ancora senza ora: la sfida del giorno aspetta l'orologio di rete
+
+#: apps/sudoku/main/sd_ui.c:301
+Seguir la partida	Riprendi partita
+
+#: apps/sudoku/main/sd_ui.c:339
+Esperando la hora...	In attesa dell'ora...
+
+#: apps/sudoku/main/sd_ui.c:348
+Hecho en %s	Fatto in %s
+
+#: apps/sudoku/main/sd_ui.c:351
+Racha %u	Serie %u
+
+#: apps/sudoku/main/sd_ui.c:365
+#: apps/sudoku/main/sd_ui.c:921
+Temas	Temi
+
+#: apps/sudoku/main/sd_ui.c:365
+#: apps/sudoku/main/sd_ui.c:1087
+Estadísticas	Statistiche
+
+#: apps/sudoku/main/sd_ui.c:365
+#: apps/sudoku/main/sd_ui.c:1186
+Ajustes	Impostazioni
+
+#: apps/sudoku/main/sd_ui.c:382
+Partida nueva	Nuova partita
+
+#: apps/sudoku/main/sd_ui.c:415
+Mejor %s	Migliore %s
+
+#: apps/sudoku/main/sd_ui.c:522
+Notas: sí	Note: sì
+
+#: apps/sudoku/main/sd_ui.c:522
+#: apps/sudoku/main/sd_ui.c:823
+Notas: no	Note: no
+
+#: apps/sudoku/main/sd_ui.c:607
+Aplicar	Applica
+
+#: apps/sudoku/main/sd_ui.c:609
+Cerrar	Chiudi
+
+#: apps/sudoku/main/sd_ui.c:669
+Pausa	Pausa
+
+#: apps/sudoku/main/sd_ui.c:678
+Seguir	Avanti
+
+#: apps/sudoku/main/sd_ui.c:678
+#: apps/sudoku/main/sd_ui.c:823
+Deshacer	Annulla
+
+#: apps/sudoku/main/sd_ui.c:678
+Reiniciar	Ricomincia
+
+#: apps/sudoku/main/sd_ui.c:678
+#: apps/sudoku/main/sd_ui.c:759
+Menú	Menu
+
+#: apps/sudoku/main/sd_ui.c:700
+Preparando el tablero...	Preparo la griglia...
+
+#: apps/sudoku/main/sd_ui.c:702
+Buscando uno que pida justo esas técnicas	Ne cerco uno che richieda proprio quelle tecniche
+
+#: apps/sudoku/main/sd_ui.c:724
+¡Resuelto!	Risolto!
+
+#: apps/sudoku/main/sd_ui.c:727
+%s, récord	%s, record
+
+#: apps/sudoku/main/sd_ui.c:731
+Base	Base
+
+#: apps/sudoku/main/sd_ui.c:731
+Sin pistas	Senza aiuti
+
+#: apps/sudoku/main/sd_ui.c:731
+Sin errores	Senza errori
+
+#: apps/sudoku/main/sd_ui.c:731
+A tiempo	In tempo
+
+#: apps/sudoku/main/sd_ui.c:732
+Sin ayudas	Senza aiuto
+
+#: apps/sudoku/main/sd_ui.c:732
+Racha de días	Giorni di fila
+
+#: apps/sudoku/main/sd_ui.c:751
+%u monedas	%u monete
+
+#: apps/sudoku/main/sd_ui.c:757
+Listo	Fine
+
+#: apps/sudoku/main/sd_ui.c:757
+Otra igual	Un'altra
+
+#: apps/sudoku/main/sd_ui.c:823
+Rehacer	Ripeti
+
+#: apps/sudoku/main/sd_ui.c:823
+Borrar	Cancella
+
+#: apps/sudoku/main/sd_ui.c:824
+Auto	Auto
+
+#: apps/sudoku/main/sd_ui.c:965
+En uso	In uso
+
+#: apps/sudoku/main/sd_ui.c:966
+Tuyo	Tuo
+
+#: apps/sudoku/main/sd_ui.c:993
+¡Es tuyo!	È tuo!
+
+#: apps/sudoku/main/sd_ui.c:1039
+Es el tema que estás usando.	È il tema che stai usando.
+
+#: apps/sudoku/main/sd_ui.c:1040
+Ya es tuyo: ponelo cuando quieras.	È già tuo: mettilo quando vuoi.
+
+#: apps/sudoku/main/sd_ui.c:1041
+Gratis.	Gratis.
+
+#: apps/sudoku/main/sd_ui.c:1042
+Cuesta %u monedas. Tenés %u.	Costa %u monete. Ne hai %u.
+
+#: apps/sudoku/main/sd_ui.c:1047
+El fondo, las celdas, los números, las notas y el sonido cambian con el tema.	Lo sfondo, le celle, i numeri, le note e il suono cambiano con il tema.
+
+#: apps/sudoku/main/sd_ui.c:1057
+Volver	Torna
+
+#: apps/sudoku/main/sd_ui.c:1060
+Usar este tema	Usa questo tema
+
+#: apps/sudoku/main/sd_ui.c:1063
+Comprar por %u	Compra per %u
+
+#: apps/sudoku/main/sd_ui.c:1070
+Te faltan %u monedas	Ti mancano %u monete
+
+#: apps/sudoku/main/sd_ui.c:1110
+%u monedas ganadas en total	%u monete vinte in totale
+
+#: apps/sudoku/main/sd_ui.c:1112
+Racha: %u días seguidos (la mejor, %u)	Serie: %u giorni di fila (la migliore, %u)
+
+#: apps/sudoku/main/sd_ui.c:1115
+Desafío del día: %u seguidos	Sfida del giorno: %u di fila
+
+#: apps/sudoku/main/sd_ui.c:1129
+Jugadas: %u · ganadas: %u	Giocate: %u · vinte: %u
+
+#: apps/sudoku/main/sd_ui.c:1136
+Mejor %s · promedio %s	Migliore %s · media %s
+
+#: apps/sudoku/main/sd_ui.c:1138
+Sin tiempos todavía	Ancora nessun tempo
+
+#: apps/sudoku/main/sd_ui.c:1187
+Marcar los errores	Segna gli errori
+
+#: apps/sudoku/main/sd_ui.c:1187
+Resaltar los números iguales	Evidenzia i numeri uguali
+
+#: apps/sudoku/main/sd_ui.c:1188
+Resaltar fila, columna y caja	Evidenzia riga, colonna e box
+
+#: apps/sudoku/main/sd_ui.c:1188
+Borrar las notas solas	Cancella le note da sole
+
+#: apps/sudoku/main/sd_ui.c:1189
+Sonido	Suono
+
+#: apps/sudoku/main/sd_ui.c:1189
+Fondo animado	Sfondo animato
+
+#: apps/sudoku/main/sd_ui.c:1191
+Sin marcarlos, cada partida paga más	Senza segnarli, ogni partita paga di più
+
+#: apps/sudoku/main/sd_ui.c:1191
+Y las notas de ese número	E le note di quel numero
+
+#: apps/sudoku/main/sd_ui.c:1191
+Las de la celda elegida	Quelle della cella scelta
+
+#: apps/sudoku/main/sd_ui.c:1192
+Al poner un número, sale de las notas que lo ven	Mettendo un numero, esce dalle note che lo vedono
+
+#: apps/sudoku/main/sd_ui.c:1192
+Con el sonido de cada tema	Con il suono di ogni tema
+
+#: apps/sudoku/main/sd_ui.c:1193
+Burbujas, fantasmas, nieve...: según el tema	Bolle, fantasmi, neve...: secondo il tema

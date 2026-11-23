@@ -1,0 +1,149 @@
+# amoledos-lang 1   es -> pt
+# web.vnc.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/vnc/web/vnc.js:43
+Automática (Tight, ZRLE, Hextile)	Automática (Tight, ZRLE, Hextile)
+
+#: apps/vnc/web/vnc.js:43
+Tight (JPEG en las fotos)	Tight (JPEG nas fotos)
+
+#: apps/vnc/web/vnc.js:44
+ZRLE (la de la Mac)	ZRLE (a do Mac)
+
+#: apps/vnc/web/vnc.js:44
+Raw (sin comprimir)	Raw (sem compressão)
+
+#: apps/vnc/web/vnc.js:90
+computadora %d	computador %d
+
+#: apps/vnc/web/vnc.js:91
+%s: el nombre, de 1 a 47 caracteres y sin corchetes	%s: o nome, de 1 a 47 caracteres e sem colchetes
+
+#: apps/vnc/web/vnc.js:92
+%s: hay dos con ese nombre	%s: há dois com esse nome
+
+#: apps/vnc/web/vnc.js:94
+%s: falta la dirección (IP o nombre, sin espacios)	%s: falta o endereço (IP ou nome, sem espaços)
+
+#: apps/vnc/web/vnc.js:96
+%s: el puerto va de 1 a 65535 (VNC suele ser 5900)	%s: a porta vai de 1 a 65535 (VNC costuma ser 5900)
+
+#: apps/vnc/web/vnc.js:97
+%s: la calidad va de 0 a 9	%s: a qualidade vai de 0 a 9
+
+#: apps/vnc/web/vnc.js:98
+%s: la contraseña es muy larga	%s: a senha é longa demais
+
+#: apps/vnc/web/vnc.js:100
+%s: la zona va como x,y,ancho,alto (o vacía: toda la pantalla)	%s: a área vai como x,y,largura,altura (ou vazia: a tela toda)
+
+#: apps/vnc/web/vnc.js:108
++ Agregar una computadora	+ Adicionar computador
+
+#: apps/vnc/web/vnc.js:109
+Guardar en la tarjeta	Salvar no cartão
+
+#: apps/vnc/web/vnc.js:118
+#: apps/vnc/web/vnc.js:144
+Sin nombre	Sem nome
+
+#: apps/vnc/web/vnc.js:132
+Todavía no hay computadoras: agregá una.	Ainda não há computadores: adicione um.
+
+#: apps/vnc/web/vnc.js:140
+Contraseña VNC	Senha VNC
+
+#: apps/vnc/web/vnc.js:145
+con contraseña	com senha
+
+#: apps/vnc/web/vnc.js:146
+Subir	Subir
+
+#: apps/vnc/web/vnc.js:147
+Bajar	Descer
+
+#: apps/vnc/web/vnc.js:149
+¿Quitar %s?	Remover %s?
+
+#: apps/vnc/web/vnc.js:149
+¿Quitar esta computadora?	Remover este computador?
+
+#: apps/vnc/web/vnc.js:150
+Quitar	Remover
+
+#: apps/vnc/web/vnc.js:152
+Nombre	Nome
+
+#: apps/vnc/web/vnc.js:152
+Mac del estudio	Mac do estúdio
+
+#: apps/vnc/web/vnc.js:153
+Dirección (IP o nombre)	Endereço (IP ou nome)
+
+#: apps/vnc/web/vnc.js:154
+Puerto	Porta
+
+#: apps/vnc/web/vnc.js:156
+Mostrar la contraseña	Mostrar a senha
+
+#: apps/vnc/web/vnc.js:157
+Codificación	Codificação
+
+#: apps/vnc/web/vnc.js:158
+Colores	Cores
+
+#: apps/vnc/web/vnc.js:158
+16 bits (rápido)	16 bits (rápido)
+
+#: apps/vnc/web/vnc.js:158
+24 bits (exactos)	24 bits (exatas)
+
+#: apps/vnc/web/vnc.js:159
+Calidad JPEG (Tight)	Qualidade JPEG (Tight)
+
+#: apps/vnc/web/vnc.js:160
+Sólo mirar: no manda el mouse ni el teclado	Só olhar: não envia o mouse nem o teclado
+
+#: apps/vnc/web/vnc.js:161
+Monitor (zona x,y,ancho,alto; vacía: todos)	Monitor (área x,y,largura,altura; vazia: todos)
+
+#: apps/vnc/web/vnc.js:162
+se elige en la app, con el botón de monitor	é escolhido no app, com o botão de monitor
+
+#: apps/vnc/web/vnc.js:163
+La contraseña queda en /data/vnc.txt de la tarjeta, legible. VNC usa sólo los primeros 8 caracteres.	A senha fica em /data/vnc.txt no cartão, legível. O VNC usa só os primeiros 8 caracteres.
+
+#: apps/vnc/web/vnc.js:183
+Guardado. La app lo toma sola.	Salvo. O app aplica sozinho.
+
+#: apps/vnc/web/vnc.js:184
+No se pudo guardar: %s	Não foi possível salvar: %s
+
+#: apps/vnc/web/vnc.js:190
+No se pudo leer %s: %s	Não foi possível ler %s: %s
+
+#: apps/vnc/web/vnc.js:195
+#: apps/vnc/web/vnc.js:210
+VNC	VNC
+
+#: apps/vnc/web/vnc.js:197
+Abrir VNC en la placa	Abrir VNC na placa
+
+#: apps/vnc/web/vnc.js:198
+Las computadoras	Os computadores
+
+#: apps/vnc/web/vnc.js:201
+Cómo prepararlas	Como prepará-los
+
+#: apps/vnc/web/vnc.js:202
+En una Mac: Ajustes del Sistema → General → Compartir → Compartir pantalla → (i) → «Los visores VNC pueden controlar la pantalla con contraseña», y una contraseña de hasta 8 caracteres. La Mac manda su resolución real (en una Retina, el doble): la placa la achica sola. En Windows o Linux, un servidor VNC como TightVNC, TigerVNC o x11vnc; Tight es la codificación más rápida con fotos y video.	Em um Mac: Ajustes do Sistema → Geral → Compartilhamento → Compartilhamento de Tela → (i) → "Visualizadores VNC podem controlar a tela com senha", e uma senha de até 8 caracteres. O Mac envia sua resolução real (em uma Retina, o dobro): a placa a reduz sozinha. No Windows ou Linux, um servidor VNC como TightVNC, TigerVNC ou x11vnc; Tight é a codificação mais rápida com fotos e vídeo.
+
+#: apps/vnc/web/vnc.js:203
+En la placa: un toque es un clic, arrastrar arrastra, dos dedos tocando son clic derecho, pellizcar hace zoom. El mouse y el teclado USB pasan directo.	Na placa: um toque é um clique, arrastar arrasta, um toque com dois dedos é clique direito, pinçar faz zoom. O mouse e o teclado USB passam direto.
+
+#: apps/vnc/web/vnc.js:205
+Hay cambios sin guardar	Há alterações não salvas

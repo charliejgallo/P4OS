@@ -1,0 +1,25 @@
+# amoledos-lang 1   es -> it
+# demo.flappy.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/flappy/main/flappy.c:275
+Tocá para empezar\nRécord  %d	Tocca per iniziare\nRecord  %d
+
+#: apps/flappy/main/flappy.c:296
+¡Nuevo récord!	Nuovo record!
+
+#: apps/flappy/main/flappy.c:298
+Récord  %d	Record  %d
+
+#: apps/flappy/main/flappy.c:300
+Perdiste	Hai perso
+
+#: apps/flappy/main/flappy.c:433
+#: apps/flappy/main/flappy.c:686
+Pausa	Pausa
+
+#: apps/flappy/main/flappy.c:686
+Tocá para reiniciar	Tocca per rigiocare

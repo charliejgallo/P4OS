@@ -1,0 +1,357 @@
+# amoledos-lang 1   es -> fr
+# aos.bolsa.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/bolsa/main/bolsa.c:326
+%s superó %s: ahora %s	%s a dépassé %s : %s
+
+#: apps/bolsa/main/bolsa.c:326
+%s bajó de %s: ahora %s	%s est passé sous %s : %s
+
+#: apps/bolsa/main/bolsa.c:363
+Datos con demora · Fuente: %s · No es un consejo de inversión	Données différées · Source : %s · Pas un conseil en investissement
+
+#: apps/bolsa/main/bolsa.c:364
+Datos con demora · No es un consejo de inversión	Données différées · Pas un conseil en investissement
+
+#: apps/bolsa/main/bs_cfg.c:111
+Mías	Perso
+
+#: apps/bolsa/main/bs_cfg.c:112
+Argentina	Argentine
+
+#: apps/bolsa/main/bs_cfg.c:113
+EE. UU.	É.-U.
+
+#: apps/bolsa/main/bs_cfg.c:114
+#: apps/bolsa/main/bs_sym.c:32
+Cripto	Crypto
+
+#: apps/bolsa/main/bs_cfg.c:115
+Índices	Indices
+
+#: apps/bolsa/main/bs_chart.c:459
+#: apps/bolsa/main/bs_detail.c:203
+Cargando…	Chargement…
+
+#: apps/bolsa/main/bs_chart.c:569
+#: apps/bolsa/main/bs_chart.c:570
+#: apps/bolsa/main/bs_detail.c:607
+MM	MM
+
+#: apps/bolsa/main/bs_chart.c:705
+%s  A %s  Mx %s  Mn %s  C %s	%s  O %s  H %s  B %s  C %s
+
+#: apps/bolsa/main/bs_chart.c:712
+   vol. %s	   vol. %s
+
+#: apps/bolsa/main/bs_detail.c:19
+5D	5J
+
+#: apps/bolsa/main/bs_detail.c:20
+1M	1M
+
+#: apps/bolsa/main/bs_detail.c:21
+6M	6M
+
+#: apps/bolsa/main/bs_detail.c:22
+1A	1A
+
+#: apps/bolsa/main/bs_detail.c:23
+5A	5A
+
+#: apps/bolsa/main/bs_detail.c:24
+Máx	Max
+
+#: apps/bolsa/main/bs_detail.c:28
+Línea	Ligne
+
+#: apps/bolsa/main/bs_detail.c:28
+Área	Aire
+
+#: apps/bolsa/main/bs_detail.c:28
+Velas	Bougies
+
+#: apps/bolsa/main/bs_detail.c:69
+hoy	auj.
+
+#: apps/bolsa/main/bs_detail.c:81
+Dato del %s · %s · consultado %s	Cours du %s · %s · consulté %s
+
+#: apps/bolsa/main/bs_detail.c:82
+Dato del %s · %s · de la tarjeta	Cours du %s · %s · de la carte SD
+
+#: apps/bolsa/main/bs_detail.c:88
+Necesita una clave de un proveedor: se carga en la página del portal	Il faut la clé d'un fournisseur : elle se saisit sur la page du portail
+
+#: apps/bolsa/main/bs_detail.c:90
+Consultando %s…	Requête à %s…
+
+#: apps/bolsa/main/bs_detail.c:94
+#: apps/bolsa/main/bs_list.c:517
+puntos básicos	points de base
+
+#: apps/bolsa/main/bs_detail.c:146
+ (avisado)	 (alerté)
+
+#: apps/bolsa/main/bs_detail.c:149
+Sin avisos de precio	Aucune alerte de prix
+
+#: apps/bolsa/main/bs_detail.c:185
+Para ver el gráfico de acciones e índices hace falta la clave gratis de un proveedor (Stooq, Twelve Data o Alpha Vantage), que se escribe en la página Bolsa del portal.	Pour voir le graphique des actions et indices, il faut la clé gratuite d'un fournisseur (Stooq, Twelve Data ou Alpha Vantage), à saisir sur la page Bourse du portail.
+
+#: apps/bolsa/main/bs_detail.c:194
+%s no da datos de a minutos: probá 5D o más.	%s n'a pas de données à la minute : essaie 5J ou plus.
+
+#: apps/bolsa/main/bs_detail.c:200
+Sin clave, CoinGecko da hasta un año.	Sans clé, CoinGecko donne jusqu'à un an.
+
+#: apps/bolsa/main/bs_detail.c:298
+Velas: esta fuente da sólo cierres en este rango	Bougies : seulement les clôtures sur cette période
+
+#: apps/bolsa/main/bs_detail.c:325
+Elegí hasta dos para ver todo en % desde el comienzo del rango.	Choisis-en deux max. pour tout voir en %, depuis le début de la période.
+
+#: apps/bolsa/main/bs_detail.c:385
+Hasta dos a la vez	Deux à la fois au plus
+
+#: apps/bolsa/main/bs_detail.c:405
+Comparar %s	Comparer %s
+
+#: apps/bolsa/main/bs_detail.c:457
+Si sube a %s	S'il monte à %s
+
+#: apps/bolsa/main/bs_detail.c:457
+Si baja a %s	S'il baisse à %s
+
+#: apps/bolsa/main/bs_detail.c:458
+ · ya avisó	 · déjà alerté
+
+#: apps/bolsa/main/bs_detail.c:466
+Todavía no hay avisos para este símbolo.	Pas encore d'alertes pour ce symbole.
+
+#: apps/bolsa/main/bs_detail.c:475
+#: apps/bolsa/main/bs_detail.c:533
+Si sube a	S'il monte à
+
+#: apps/bolsa/main/bs_detail.c:475
+Si baja a	S'il baisse à
+
+#: apps/bolsa/main/bs_detail.c:497
+Escribí un precio	Saisis un prix
+
+#: apps/bolsa/main/bs_detail.c:498
+Hay demasiados avisos	Trop d'alertes
+
+#: apps/bolsa/main/bs_detail.c:508
+Aviso guardado: avisa mientras la app esté abierta, aunque esté atrás	Alerte enregistrée : elle marche tant que l'app est ouverte, même en arrière-plan
+
+#: apps/bolsa/main/bs_detail.c:525
+Avisos de %s	Alertes %s
+
+#: apps/bolsa/main/bs_detail.c:546
+Avisa con un mensaje y un pitido cuando el precio cruza el valor, mientras la app esté abierta (aunque esté atrás). También se cargan en el portal.	Un message et un bip quand le prix franchit la valeur, tant que l'app est ouverte (même en arrière-plan). On peut aussi les régler sur le portail.
+
+#: apps/bolsa/main/bs_detail.c:606
+Vol	Vol
+
+#: apps/bolsa/main/bs_detail.c:609
+Comparar	Comparer
+
+#: apps/bolsa/main/bs_detail.c:702
+Apertura	Ouverture
+
+#: apps/bolsa/main/bs_detail.c:703
+Máximo	Haut
+
+#: apps/bolsa/main/bs_detail.c:704
+Mínimo	Bas
+
+#: apps/bolsa/main/bs_detail.c:705
+Cierre anterior	Clôture veille
+
+#: apps/bolsa/main/bs_detail.c:706
+Volumen	Volume
+
+#: apps/bolsa/main/bs_detail.c:717
+Rango de 52 semanas	Plage 52 semaines
+
+#: apps/bolsa/main/bs_list.c:83
+sin clave	sans clé
+
+#: apps/bolsa/main/bs_list.c:83
+error	erreur
+
+#: apps/bolsa/main/bs_list.c:85
+Necesita una clave: portal	Clé requise : portail
+
+#: apps/bolsa/main/bs_list.c:241
+Sumar un símbolo	Ajouter un symbole
+
+#: apps/bolsa/main/bs_list.c:241
+Lista vacía: tocá para sumar un símbolo	Liste vide : touche pour ajouter un symbole
+
+#: apps/bolsa/main/bs_list.c:301
+Bolsa	Bourse
+
+#: apps/bolsa/main/bs_list.c:381
+Sin conexión · lo último, %s	Hors ligne · données de %s
+
+#: apps/bolsa/main/bs_list.c:382
+Sin conexión	Hors ligne
+
+#: apps/bolsa/main/bs_list.c:386
+Actualizando…	Mise à jour…
+
+#: apps/bolsa/main/bs_list.c:388
+Acciones e índices: cargá una clave en la página del portal	Actions et indices : saisis une clé sur la page du portail
+
+#: apps/bolsa/main/bs_list.c:392
+Actualizado %s	Mis à jour %s
+
+#: apps/bolsa/main/bs_list.c:433
+%s ya está en la lista	%s est déjà dans la liste
+
+#: apps/bolsa/main/bs_list.c:438
+Sumado a %s	Ajouté à %s
+
+#: apps/bolsa/main/bs_list.c:440
+La lista está llena	La liste est pleine
+
+#: apps/bolsa/main/bs_list.c:517
+índice	indice
+
+#: apps/bolsa/main/bs_list.c:528
+Sumar «%s» tal cual	Ajouter « %s » tel quel
+
+#: apps/bolsa/main/bs_list.c:540
+Buscando…	Recherche…
+
+#: apps/bolsa/main/bs_list.c:541
+Tocá ✓ en el teclado para buscar acciones en %s y monedas en CoinGecko.	Touche ✓ au clavier pour chercher actions sur %s et cryptos sur CoinGecko.
+
+#: apps/bolsa/main/bs_list.c:542
+Tocá ✓ en el teclado para buscar monedas en CoinGecko. Para buscar acciones por nombre, cargá una clave en la página del portal; si sabés el símbolo, escribilo.	Touche ✓ au clavier pour chercher des cryptos sur CoinGecko. Pour chercher des actions par nom, saisis une clé sur la page du portail ; si tu connais le symbole, écris-le.
+
+#: apps/bolsa/main/bs_list.c:556
+El proveedor pidió esperar un minuto	Le fournisseur demande d'attendre une minute
+
+#: apps/bolsa/main/bs_list.c:556
+No se pudo buscar	Recherche impossible
+
+#: apps/bolsa/main/bs_list.c:595
+Sumar a %s	Ajouter à %s
+
+#: apps/bolsa/main/bs_list.c:603
+Nombre o símbolo	Nom ou symbole
+
+#: apps/bolsa/main/bs_net.c:148
+%s rechazó la clave	%s a rejeté la clé
+
+#: apps/bolsa/main/bs_net.c:152
+%s pidió esperar	%s demande d'attendre
+
+#: apps/bolsa/main/bs_net.c:162
+clave rechazada	clé rejetée
+
+#: apps/bolsa/main/bs_net.c:162
+límite del plan gratis	limite du plan gratuit
+
+#: apps/bolsa/main/bs_net.c:163
+no conoce el símbolo	symbole inconnu
+
+#: apps/bolsa/main/bs_net.c:163
+no está en el plan	hors du plan
+
+#: apps/bolsa/main/bs_net.c:164
+sin datos	sans données
+
+#: apps/bolsa/main/bs_net.c:164
+respuesta rara	réponse bizarre
+
+#: apps/bolsa/main/bs_net.c:164
+sin respuesta	pas de réponse
+
+#: apps/bolsa/main/bs_net.c:221
+%s: sin conexión (%d)	%s : pas de connexion (%d)
+
+#: apps/bolsa/main/bs_series.c:378
+recién	à l'instant
+
+#: apps/bolsa/main/bs_series.c:379
+hace %d min	il y a %d min
+
+#: apps/bolsa/main/bs_series.c:380
+hace %d h	il y a %d h
+
+#: apps/bolsa/main/bs_series.c:381
+hace %d días	il y a %d jours
+
+#: apps/bolsa/main/bs_series.c:470
+%s B	%s T
+
+#: apps/bolsa/main/bs_series.c:471
+%s mil M	%s Md
+
+#: apps/bolsa/main/bs_series.c:472
+%s M	%s M
+
+#: apps/bolsa/main/bs_series.c:473
+%s mil	%s k
+
+#: apps/bolsa/main/bs_sym.c:28
+Oficial	Officiel
+
+#: apps/bolsa/main/bs_sym.c:28
+Dólar oficial	Dollar officiel
+
+#: apps/bolsa/main/bs_sym.c:29
+Blue	Blue
+
+#: apps/bolsa/main/bs_sym.c:29
+Dólar blue	Dollar blue
+
+#: apps/bolsa/main/bs_sym.c:30
+MEP	MEP
+
+#: apps/bolsa/main/bs_sym.c:30
+Dólar MEP (bolsa)	Dollar MEP (bourse)
+
+#: apps/bolsa/main/bs_sym.c:31
+CCL	CCL
+
+#: apps/bolsa/main/bs_sym.c:31
+Dólar contado con liqui	Dollar CCL (liquidation)
+
+#: apps/bolsa/main/bs_sym.c:32
+Dólar cripto	Dollar crypto
+
+#: apps/bolsa/main/bs_sym.c:33
+Mayorista	De gros
+
+#: apps/bolsa/main/bs_sym.c:33
+Dólar mayorista	Dollar de gros
+
+#: apps/bolsa/main/bs_sym.c:34
+Euro en pesos	Euro en pesos
+
+#: apps/bolsa/main/bs_sym.c:35
+Real en pesos	Réal en pesos
+
+#: apps/bolsa/main/bs_sym.c:36
+Peso chileno en pesos	Peso chilien en pesos
+
+#: apps/bolsa/main/bs_sym.c:37
+Peso uruguayo en pesos	Peso uruguayen en pesos
+
+#: apps/bolsa/main/bs_sym.c:38
+Riesgo	Risque
+
+#: apps/bolsa/main/bs_sym.c:38
+Riesgo país	Risque pays
+
+#: apps/bolsa/main/bs_sym.c:124
+Bolsa de Buenos Aires	Bourse de Buenos Aires

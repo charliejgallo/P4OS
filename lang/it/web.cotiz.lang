@@ -1,0 +1,79 @@
+# amoledos-lang 1   es -> it
+# web.cotiz.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/cotiz/web/cotiz.js:17
+Oficial	Ufficiale
+
+#: apps/cotiz/web/cotiz.js:18
+Blue	Blue
+
+#: apps/cotiz/web/cotiz.js:19
+Bolsa (MEP)	Borsa (MEP)
+
+#: apps/cotiz/web/cotiz.js:20
+Contado c/liqui	Contado c/liqui
+
+#: apps/cotiz/web/cotiz.js:21
+Mayorista	Ingrosso
+
+#: apps/cotiz/web/cotiz.js:22
+Cripto	Cripto
+
+#: apps/cotiz/web/cotiz.js:23
+Tarjeta	Carta
+
+#: apps/cotiz/web/cotiz.js:24
+Euro	Euro
+
+#: apps/cotiz/web/cotiz.js:25
+Real	Real
+
+#: apps/cotiz/web/cotiz.js:26
+Peso chileno	Peso cileno
+
+#: apps/cotiz/web/cotiz.js:27
+Peso uruguayo	Peso uruguaiano
+
+#: apps/cotiz/web/cotiz.js:35
+#: apps/cotiz/web/cotiz.js:87
+Cotizaciones	Valute
+
+#: apps/cotiz/web/cotiz.js:39
+Cargando…	Caricamento…
+
+#: apps/cotiz/web/cotiz.js:50
+Dólar %s	Dollaro %s
+
+#: apps/cotiz/web/cotiz.js:57
+Elegí al menos una	Scegline almeno una
+
+#: apps/cotiz/web/cotiz.js:61
+Guardado: la placa lo toma en unos segundos	Salvato: la scheda lo applica tra pochi secondi
+
+#: apps/cotiz/web/cotiz.js:82
+Compra / venta, de dolarapi.com, actualizado %s.	Acquisto / vendita, da dolarapi.com, aggiornato %s.
+
+#: apps/cotiz/web/cotiz.js:83
+Compra / venta, de dolarapi.com.	Acquisto / vendita, da dolarapi.com.
+
+#: apps/cotiz/web/cotiz.js:84
+No se pudieron traer los valores: %s	Impossibile ottenere i valori: %s
+
+#: apps/cotiz/web/cotiz.js:88
+Qué muestra la placa	Cosa mostra la scheda
+
+#: apps/cotiz/web/cotiz.js:90
+Guardar	Salva
+
+#: apps/cotiz/web/cotiz.js:91
+Abierta en la placa	Aperta sulla scheda
+
+#: apps/cotiz/web/cotiz.js:91
+Abrir Cotizaciones en la placa	Apri Valute sulla scheda
+
+#: apps/cotiz/web/cotiz.js:92
+La placa las muestra siempre en este orden; si la app está abierta, cambia sola en unos segundos.	La scheda le mostra sempre in questo ordine; se l'app è aperta, si aggiorna da sola in pochi secondi.

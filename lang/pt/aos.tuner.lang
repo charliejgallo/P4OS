@@ -1,0 +1,92 @@
+# amoledos-lang 1   es -> pt
+# aos.tuner.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/afinador/main/afinador.c:497
+referencia	referência
+
+#: apps/afinador/main/afinador.c:501
+soltando el códec	liberando o codec
+
+#: apps/afinador/main/afinador.c:501
+sonando	tocando
+
+#: apps/afinador/main/afinador.c:514
+#: apps/afinador/main/afinador.c:668
+no abrió el micrófono	o microfone não abriu
+
+#: apps/afinador/main/afinador.c:515
+#: apps/afinador/main/afinador.c:668
+abriendo el micrófono	abrindo o microfone
+
+#: apps/afinador/main/afinador.c:529
+satura: alejate del micrófono	satura: afaste-se do microfone
+
+#: apps/afinador/main/afinador.c:530
+tocá una cuerda	toque uma corda
+
+#: apps/afinador/main/afinador.c:546
+afinada	afinada
+
+#: apps/afinador/main/afinador.c:549
+casi: subila un poco	quase: suba um pouco
+
+#: apps/afinador/main/afinador.c:549
+casi: bajala un poco	quase: desça um pouco
+
+#: apps/afinador/main/afinador.c:551
+subila	suba
+
+#: apps/afinador/main/afinador.c:551
+bajala	desça
+
+#: apps/afinador/main/afinador.c:565
+satura	satura
+
+#: apps/afinador/main/afinador.c:703
+Leq de %u:%02u	Leq de %u:%02u
+
+#: apps/afinador/main/afinador.c:708
+%u kHz  ·  PGA %d dB  ·  ponderación A, rápida	%u kHz  ·  PGA %d dB  ·  ponderação A, rápida
+
+#: apps/afinador/main/afinador.c:716
+SATURA: el número no vale	SATURA: o número não vale
+
+#: apps/afinador/main/afinador.c:719
+a %u Hz la curva A vale hasta 4 kHz	a %u Hz a curva A vale até 4 kHz
+
+#: apps/afinador/main/afinador.c:725
+dB relativos hasta que lo calibres	dB relativos até você calibrar
+
+#: apps/afinador/main/afinador.c:1129
+Tono	Tom
+
+#: apps/afinador/main/afinador.c:1144
+tocá una cuerda para oír su nota	toque uma corda para ouvir sua nota
+
+#: apps/afinador/main/afinador.c:1145
+escuchar y sonar no van juntos	ouvir e tocar não vão juntos
+
+#: apps/afinador/main/afinador.c:1251
+mínimo	mínimo
+
+#: apps/afinador/main/afinador.c:1253
+máximo	máximo
+
+#: apps/afinador/main/afinador.c:1261
+últimos 60 s	últimos 60 s
+
+#: apps/afinador/main/afinador.c:1305
+Reiniciar	Zerar
+
+#: apps/afinador/main/afinador.c:1353
+Afinador	Afinador
+
+#: apps/afinador/main/afinador.c:1353
+Sonómetro	Sonômetro
+
+#: apps/afinador/main/afinador.c:1394
+sin memoria	sem memória

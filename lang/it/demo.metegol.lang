@@ -1,0 +1,222 @@
+# amoledos-lang 1   es -> it
+# demo.metegol.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/metegol/main/metegol.c:449
+#: apps/metegol/main/metegol.c:481
+Sonido: sí	Suono: sì
+
+#: apps/metegol/main/metegol.c:449
+#: apps/metegol/main/metegol.c:481
+Sonido: no	Suono: no
+
+#: apps/metegol/main/metegol.c:459
+#: apps/metegol/main/metegol.c:482
+Hinchada: sí	Tifosi: sì
+
+#: apps/metegol/main/metegol.c:459
+#: apps/metegol/main/metegol.c:482
+Hinchada: no	Tifosi: no
+
+#: apps/metegol/main/metegol.c:473
+Pausa	Pausa
+
+#: apps/metegol/main/metegol.c:479
+Seguir	Riprendi
+
+#: apps/metegol/main/metegol.c:480
+Empezar de nuevo	Ricomincia
+
+#: apps/metegol/main/metegol.c:483
+Salir al menú	Torna al menu
+
+#: apps/metegol/main/metegol.c:495
+Empate	Pareggio
+
+#: apps/metegol/main/metegol.c:496
+¡Ganaste!	Hai vinto!
+
+#: apps/metegol/main/metegol.c:496
+Ganó la placa	Ha vinto la scheda
+
+#: apps/metegol/main/metegol.c:497
+¡Ganó %s!	Ha vinto %s!
+
+#: apps/metegol/main/metegol.c:503
+Revancha	Rivincita
+
+#: apps/metegol/main/metegol.c:504
+Menú	Menu
+
+#: apps/metegol/main/metegol.c:631
+#: apps/metegol/main/mg_menu.c:193
+Falta el paquete del juego: bajalo de la Tienda	Manca il pack: scaricalo dallo Store
+
+#: apps/metegol/main/metegol.c:648
+Preparando la cancha...	Preparo il campo...
+
+#: apps/metegol/main/metegol.c:723
+No se pudo cargar el estadio	Impossibile caricare lo stadio
+
+#: apps/metegol/main/mg_menu.c:182
+Fútbol de mesa	Calcio balilla
+
+#: apps/metegol/main/mg_menu.c:189
+#: apps/metegol/main/mg_menu.c:365
+Contra la placa	Contro la scheda
+
+#: apps/metegol/main/mg_menu.c:190
+#: apps/metegol/main/mg_menu.c:365
+Dos jugadores	Due giocatori
+
+#: apps/metegol/main/mg_menu.c:191
+#: apps/metegol/main/mg_menu.c:484
+Ajustes	Impostazioni
+
+#: apps/metegol/main/mg_menu.c:322
+Estadio: el del local	Stadio: quello di casa
+
+#: apps/metegol/main/mg_menu.c:325
+Por tiempo	A tempo
+
+#: apps/metegol/main/mg_menu.c:325
+A goles	A gol
+
+#: apps/metegol/main/mg_menu.c:326
+Dos tiempos de %d min	Due tempi da %d min
+
+#: apps/metegol/main/mg_menu.c:327
+El primero a %d	Il primo a %d
+
+#: apps/metegol/main/mg_menu.c:367
+Selecciones	Nazionali
+
+#: apps/metegol/main/mg_menu.c:367
+Clubes	Club
+
+#: apps/metegol/main/mg_menu.c:418
+Vos (local)	Tu (casa)
+
+#: apps/metegol/main/mg_menu.c:418
+Jugador 1 (local)	Giocatore 1 (casa)
+
+#: apps/metegol/main/mg_menu.c:419
+La placa (visitante)	La scheda (ospite)
+
+#: apps/metegol/main/mg_menu.c:419
+Jugador 2 (visitante)	Giocatore 2 (ospite)
+
+#: apps/metegol/main/mg_menu.c:429
+¡A jugar!	Si gioca!
+
+#: apps/metegol/main/mg_menu.c:446
+Dificultad	Difficoltà
+
+#: apps/metegol/main/mg_menu.c:446
+fácil	facile
+
+#: apps/metegol/main/mg_menu.c:446
+#: apps/metegol/main/mg_menu.c:449
+normal	normale
+
+#: apps/metegol/main/mg_menu.c:446
+difícil	difficile
+
+#: apps/metegol/main/mg_menu.c:446
+crack	asso
+
+#: apps/metegol/main/mg_menu.c:447
+Varillas	Aste
+
+#: apps/metegol/main/mg_menu.c:447
+todas juntas	tutte insieme
+
+#: apps/metegol/main/mg_menu.c:447
+de a una	una a una
+
+#: apps/metegol/main/mg_menu.c:448
+Jugador 1	Giocatore 1
+
+#: apps/metegol/main/mg_menu.c:448
+arco izquierdo	porta sinistra
+
+#: apps/metegol/main/mg_menu.c:448
+arco derecho	porta destra
+
+#: apps/metegol/main/mg_menu.c:449
+Pelota	Palla
+
+#: apps/metegol/main/mg_menu.c:449
+lenta	lenta
+
+#: apps/metegol/main/mg_menu.c:449
+rápida	veloce
+
+#: apps/metegol/main/mg_menu.c:450
+Ayuda para patear	Aiuto al tiro
+
+#: apps/metegol/main/mg_menu.c:450
+#: apps/metegol/main/mg_menu.c:451
+#: apps/metegol/main/mg_menu.c:452
+#: apps/metegol/main/mg_menu.c:453
+no	no
+
+#: apps/metegol/main/mg_menu.c:450
+#: apps/metegol/main/mg_menu.c:451
+#: apps/metegol/main/mg_menu.c:452
+#: apps/metegol/main/mg_menu.c:453
+sí	sì
+
+#: apps/metegol/main/mg_menu.c:451
+Sonido	Suono
+
+#: apps/metegol/main/mg_menu.c:452
+Música	Musica
+
+#: apps/metegol/main/mg_menu.c:453
+Hinchada	Tifosi
+
+#: apps/metegol/main/mg_menu.c:454
+Vibración al gol	Vibrazione al gol
+
+#: apps/metegol/main/mg_menu.c:455
+Cambio de lado	Cambio campo
+
+#: apps/metegol/main/mg_menu.c:456
+Marcador	Tabellone
+
+#: apps/metegol/main/mg_menu.c:456
+como el sistema	come il sistema
+
+#: apps/metegol/main/mg_menu.c:456
+castellano	spagnolo
+
+#: apps/metegol/main/mg_menu.c:456
+inglés	inglese
+
+#: apps/metegol/main/mg_scene.c:49
+¡GOL!	GOL!
+
+#: apps/metegol/main/mg_scene.c:50
+REPETICIÓN	REPLAY
+
+#: apps/metegol/main/mg_scene.c:51
+ENTRETIEMPO	INTERVALLO
+
+#: apps/metegol/main/mg_scene.c:52
+FINAL DEL PARTIDO	FINE PARTITA
+
+#: apps/metegol/main/mg_scene.c:53
+Deslizá para mover · tocá para patear · mantené para levantar	Scorri per muovere · tocca per tirare · tieni per alzare
+
+#: apps/metegol/main/mg_scene.c:54
+1T	1T
+
+#: apps/metegol/main/mg_scene.c:55
+2T	2T
+
+#: apps/metegol/main/mg_scene.c:56
+A %d	A %d

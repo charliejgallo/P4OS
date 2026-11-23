@@ -1,0 +1,91 @@
+# amoledos-lang 1   es -> it
+# app.recorder.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/recorder/main/rec_files.c:233
+Grabación	Registrazione
+
+#: apps/recorder/main/rec_files.c:304
+sin fecha	senza data
+
+#: apps/recorder/main/rec_files.c:320
+hoy %02d:%02d	oggi %02d:%02d
+
+#: apps/recorder/main/rec_files.c:322
+ayer %02d:%02d	ieri %02d:%02d
+
+#: apps/recorder/main/recorder.c:292
+Borrar	Elimina
+
+#: apps/recorder/main/recorder.c:361
+en pausa: el archivo sigue abierto	in pausa: il file resta aperto
+
+#: apps/recorder/main/recorder.c:362
+grabando	registra
+
+#: apps/recorder/main/recorder.c:363
+PAUSA	PAUSA
+
+#: apps/recorder/main/recorder.c:371
+tocá el botón rojo para grabar	tocca il pulsante rosso per registrare
+
+#: apps/recorder/main/recorder.c:372
+LISTO	PRONTO
+
+#: apps/recorder/main/recorder.c:392
+quedan %u h	restano %u h
+
+#: apps/recorder/main/recorder.c:394
+quedan %u min	restano %u min
+
+#: apps/recorder/main/recorder.c:397
+sin tarjeta	no microSD
+
+#: apps/recorder/main/recorder.c:404
+estéreo	stereo
+
+#: apps/recorder/main/recorder.c:404
+mono	mono
+
+#: apps/recorder/main/recorder.c:428
+No hay tarjeta	Nessuna microSD
+
+#: apps/recorder/main/recorder.c:439
+No se pudo grabar	Impossibile registrare
+
+#: apps/recorder/main/recorder.c:467
+Guardado	Salvata
+
+#: apps/recorder/main/recorder.c:518
+No se pudo reproducir	Impossibile riprodurre
+
+#: apps/recorder/main/recorder.c:538
+Primero pará la grabación	Prima ferma la registrazione
+
+#: apps/recorder/main/recorder.c:606
+Tocá de nuevo para borrar	Tocca di nuovo per eliminare
+
+#: apps/recorder/main/recorder.c:614
+No se pudo borrar	Impossibile eliminare
+
+#: apps/recorder/main/recorder.c:618
+Borrada	Eliminata
+
+#: apps/recorder/main/recorder.c:659
+Se cortó la grabación	Registrazione interrotta
+
+#: apps/recorder/main/recorder.c:725
+Esa grabación ya no está	Quella registrazione non c'è più
+
+#: apps/recorder/main/recorder.c:846
+#: apps/recorder/main/recorder.c:904
+Grabaciones	Registrazioni
+
+#: apps/recorder/main/recorder.c:861
+Todavía no grabaste nada.\nLo que grabes aparece acá.	Non hai ancora registrato nulla.\nLe registrazioni appaiono qui.
+
+#: apps/recorder/main/recorder.c:937
+tocá la onda para saltar	tocca l'onda per saltare

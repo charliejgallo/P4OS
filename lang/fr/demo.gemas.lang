@@ -1,0 +1,104 @@
+# amoledos-lang 1   es -> fr
+# demo.gemas.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/gemas/main/gemas.c:164
+Fácil	Facile
+
+#: apps/gemas/main/gemas.c:165
+Normal	Normal
+
+#: apps/gemas/main/gemas.c:166
+Difícil	Difficile
+
+#: apps/gemas/main/gemas.c:447
+#: apps/gemas/main/gemas.c:485
+Nivel %d	Niveau %d
+
+#: apps/gemas/main/gemas.c:451
+#: apps/gemas/main/gemas.c:1783
+Mejor %s	Record %s
+
+#: apps/gemas/main/gemas.c:720
+Cadena x%d	Chaîne x%d
+
+#: apps/gemas/main/gemas.c:879
+Sin jugadas	Aucun coup
+
+#: apps/gemas/main/gemas.c:1238
+Se acabó el tiempo	Temps écoulé
+
+#: apps/gemas/main/gemas.c:1762
+Contrarreloj	Chrono
+
+#: apps/gemas/main/gemas.c:1762
+Sin apuro	Zen
+
+#: apps/gemas/main/gemas.c:1767
+Sí	Oui
+
+#: apps/gemas/main/gemas.c:1767
+No	Non
+
+#: apps/gemas/main/gemas.c:1805
+Nivel %d  ·  Mejor %s	Niveau %d  ·  Record %s
+
+#: apps/gemas/main/gemas.c:2146
+Próximo nivel	Niveau suivant
+
+#: apps/gemas/main/gemas.c:2186
+Cuatro en línea	Quatre alignées
+
+#: apps/gemas/main/gemas.c:2186
+Llama: explota alrededor	Flamme : explose autour
+
+#: apps/gemas/main/gemas.c:2187
+En L o en T	En L ou en T
+
+#: apps/gemas/main/gemas.c:2187
+Estrella: fila y columna	Étoile : ligne et colonne
+
+#: apps/gemas/main/gemas.c:2188
+Cinco en línea	Cinq alignées
+
+#: apps/gemas/main/gemas.c:2188
+Hipercubo: todo un color	Hypercube : toute une couleur
+
+#: apps/gemas/main/gemas.c:2293
+Gemas	Gemmes
+
+#: apps/gemas/main/gemas.c:2294
+Alineá tres o más	Aligne-en trois ou plus
+
+#: apps/gemas/main/gemas.c:2315
+Modo	Mode
+
+#: apps/gemas/main/gemas.c:2316
+Dificultad	Difficulté
+
+#: apps/gemas/main/gemas.c:2317
+#: apps/gemas/main/gemas.c:2343
+Sonido	Son
+
+#: apps/gemas/main/gemas.c:2325
+Jugar	Jouer
+
+#: apps/gemas/main/gemas.c:2339
+Pausa	Pause
+
+#: apps/gemas/main/gemas.c:2340
+Seguir	Suite
+
+#: apps/gemas/main/gemas.c:2346
+#: apps/gemas/main/gemas.c:2373
+Menú	Menu
+
+#: apps/gemas/main/gemas.c:2348
+#: apps/gemas/main/gemas.c:2375
+Salir	Quitter
+
+#: apps/gemas/main/gemas.c:2370
+Otra vez	Rejouer

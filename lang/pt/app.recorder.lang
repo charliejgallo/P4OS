@@ -1,0 +1,91 @@
+# amoledos-lang 1   es -> pt
+# app.recorder.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/recorder/main/rec_files.c:233
+Grabación	Gravação
+
+#: apps/recorder/main/rec_files.c:304
+sin fecha	sem data
+
+#: apps/recorder/main/rec_files.c:320
+hoy %02d:%02d	hoje %02d:%02d
+
+#: apps/recorder/main/rec_files.c:322
+ayer %02d:%02d	ontem %02d:%02d
+
+#: apps/recorder/main/recorder.c:292
+Borrar	Apagar
+
+#: apps/recorder/main/recorder.c:361
+en pausa: el archivo sigue abierto	em pausa: o arquivo continua aberto
+
+#: apps/recorder/main/recorder.c:362
+grabando	gravando
+
+#: apps/recorder/main/recorder.c:363
+PAUSA	PAUSA
+
+#: apps/recorder/main/recorder.c:371
+tocá el botón rojo para grabar	toque no botão vermelho para gravar
+
+#: apps/recorder/main/recorder.c:372
+LISTO	PRONTO
+
+#: apps/recorder/main/recorder.c:392
+quedan %u h	restam %u h
+
+#: apps/recorder/main/recorder.c:394
+quedan %u min	restam %u min
+
+#: apps/recorder/main/recorder.c:397
+sin tarjeta	sem cartão
+
+#: apps/recorder/main/recorder.c:404
+estéreo	estéreo
+
+#: apps/recorder/main/recorder.c:404
+mono	mono
+
+#: apps/recorder/main/recorder.c:428
+No hay tarjeta	Sem cartão
+
+#: apps/recorder/main/recorder.c:439
+No se pudo grabar	Não foi possível gravar
+
+#: apps/recorder/main/recorder.c:467
+Guardado	Salvo
+
+#: apps/recorder/main/recorder.c:518
+No se pudo reproducir	Não foi possível reproduzir
+
+#: apps/recorder/main/recorder.c:538
+Primero pará la grabación	Primeiro pare a gravação
+
+#: apps/recorder/main/recorder.c:606
+Tocá de nuevo para borrar	Toque de novo para apagar
+
+#: apps/recorder/main/recorder.c:614
+No se pudo borrar	Não foi possível apagar
+
+#: apps/recorder/main/recorder.c:618
+Borrada	Apagada
+
+#: apps/recorder/main/recorder.c:659
+Se cortó la grabación	A gravação foi interrompida
+
+#: apps/recorder/main/recorder.c:725
+Esa grabación ya no está	Essa gravação não existe mais
+
+#: apps/recorder/main/recorder.c:846
+#: apps/recorder/main/recorder.c:904
+Grabaciones	Gravações
+
+#: apps/recorder/main/recorder.c:861
+Todavía no grabaste nada.\nLo que grabes aparece acá.	Você ainda não gravou nada.\nO que gravar aparece aqui.
+
+#: apps/recorder/main/recorder.c:937
+tocá la onda para saltar	toque na onda para pular

@@ -1,0 +1,24 @@
+# amoledos-lang 1   es -> it
+# aos.dice.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/dados/main/dados.c:435
+1 dado	1 dado
+
+#: apps/dados/main/dados.c:437
+%d dados	%d dadi
+
+#: apps/dados/main/dados.c:686
+TIRAR	LANCIA
+
+#: apps/dados/main/dados.c:701
+Últimas	Ultimi
+
+#: apps/dados/main/dados.c:716
+Agitá la placa o tocá los dados	Scuoti la scheda o tocca i dadi
+
+#: apps/dados/main/dados.c:717
+Tocá los dados para tirar	Tocca i dadi per lanciare

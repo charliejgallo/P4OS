@@ -1,0 +1,392 @@
+# amoledos-lang 1   es -> fr
+# web.modbus.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/modbus/web/modbus.js:152
+Importado de ESPHome	Importé d'ESPHome
+
+#: apps/modbus/web/modbus.js:152
+Importado de Home Assistant	Importé de Home Assistant
+
+#: apps/modbus/web/modbus.js:152
+%s entradas sin traer	%s entrées non reprises
+
+#: apps/modbus/web/modbus.js:215
+01 Coils	01 Coils
+
+#: apps/modbus/web/modbus.js:215
+02 Entradas	02 Entrées
+
+#: apps/modbus/web/modbus.js:215
+03 Holding	03 Holding
+
+#: apps/modbus/web/modbus.js:215
+04 Input	04 Input
+
+#: apps/modbus/web/modbus.js:215
+05 Coil	05 Coil
+
+#: apps/modbus/web/modbus.js:215
+06 Registro	06 Registre
+
+#: apps/modbus/web/modbus.js:216
+15 Coils	15 Coils
+
+#: apps/modbus/web/modbus.js:216
+16 Registros	16 Registres
+
+#: apps/modbus/web/modbus.js:216
+08 Eco	08 Écho
+
+#: apps/modbus/web/modbus.js:216
+17 Id	17 Id
+
+#: apps/modbus/web/modbus.js:216
+43 Identificación	43 Identification
+
+#: apps/modbus/web/modbus.js:217
+Normal	Normal
+
+#: apps/modbus/web/modbus.js:217
+Mudo	Muet
+
+#: apps/modbus/web/modbus.js:217
+Lento	Lent
+
+#: apps/modbus/web/modbus.js:217
+CRC malo	CRC erroné
+
+#: apps/modbus/web/modbus.js:217
+Ocupado (06)	Occupé (06)
+
+#: apps/modbus/web/modbus.js:217
+Falla (04)	Défaut (04)
+
+#: apps/modbus/web/modbus.js:219
+#: apps/modbus/web/modbus.js:262
+Maestro	Maître
+
+#: apps/modbus/web/modbus.js:219
+#: apps/modbus/web/modbus.js:289
+Esclavo	Esclave
+
+#: apps/modbus/web/modbus.js:219
+#: apps/modbus/web/modbus.js:301
+Monitor	Moniteur
+
+#: apps/modbus/web/modbus.js:224
+La app Modbus no está abierta en la placa (%s)	L'app Modbus n'est pas ouverte sur la carte (%s)
+
+#: apps/modbus/web/modbus.js:246
+valores (escrituras)	valeurs (écritures)
+
+#: apps/modbus/web/modbus.js:264
+#: apps/modbus/web/modbus.js:291
+#: apps/modbus/web/modbus.js:392
+#: apps/modbus/web/modbus.js:551
+Unidad	Unité
+
+#: apps/modbus/web/modbus.js:264
+Función	Fonction
+
+#: apps/modbus/web/modbus.js:264
+Desde	Début
+
+#: apps/modbus/web/modbus.js:265
+Cantidad	Quantité
+
+#: apps/modbus/web/modbus.js:265
+Valores	Valeurs
+
+#: apps/modbus/web/modbus.js:267
+Enviar	Envoyer
+
+#: apps/modbus/web/modbus.js:268
+En vivo	En direct
+
+#: apps/modbus/web/modbus.js:271
+Buscar unidades	Chercher unités
+
+#: apps/modbus/web/modbus.js:272
+Buscar velocidad	Chercher la vitesse
+
+#: apps/modbus/web/modbus.js:273
+Detener	Arrêter
+
+#: apps/modbus/web/modbus.js:274
+#: apps/modbus/web/modbus.js:295
+#: apps/modbus/web/modbus.js:302
+Borrar cuentas	Effacer compteurs
+
+#: apps/modbus/web/modbus.js:276
+Pasarela Modbus TCP → RTU	Passerelle Modbus TCP → RTU
+
+#: apps/modbus/web/modbus.js:278
+Atender clientes TCP	Servir les clients TCP
+
+#: apps/modbus/web/modbus.js:279
+#: apps/modbus/web/modbus.js:319
+Puerto	Port
+
+#: apps/modbus/web/modbus.js:280
+#: apps/modbus/web/modbus.js:293
+Aplicar	Appliquer
+
+#: apps/modbus/web/modbus.js:282
+Un programa de la PC (Modbus Poll, un SCADA, Home Assistant) pide por la red a la placa, y ella le pregunta al equipo por el bus. Si el equipo no contesta, el cliente recibe la excepción 0B.	Un programme du PC (Modbus Poll, un SCADA, Home Assistant) interroge la carte via le réseau, et elle interroge l'appareil sur le bus. Si l'appareil ne répond pas, le client reçoit l'exception 0B.
+
+#: apps/modbus/web/modbus.js:291
+Falla	Défaut
+
+#: apps/modbus/web/modbus.js:291
+Demora (ms)	Délai (ms)
+
+#: apps/modbus/web/modbus.js:294
+Valores que se mueven	Valeurs qui bougent
+
+#: apps/modbus/web/modbus.js:309
+Tráfico	Trafic
+
+#: apps/modbus/web/modbus.js:311
+Pausa	Pause
+
+#: apps/modbus/web/modbus.js:311
+Sólo errores	Erreurs seules
+
+#: apps/modbus/web/modbus.js:312
+#: apps/modbus/web/modbus.js:560
+Borrar	Effacer
+
+#: apps/modbus/web/modbus.js:319
+#: apps/modbus/web/modbus.js:547
+Velocidad	Vitesse
+
+#: apps/modbus/web/modbus.js:319
+#: apps/modbus/web/modbus.js:548
+Formato	Format
+
+#: apps/modbus/web/modbus.js:320
+Espera (ms)	Attente (ms)
+
+#: apps/modbus/web/modbus.js:320
+Silencio (ms)	Silence (ms)
+
+#: apps/modbus/web/modbus.js:322
+Aplicar conexión	Appliquer liaison
+
+#: apps/modbus/web/modbus.js:323
+Abierta en la placa	Ouverte sur la carte
+
+#: apps/modbus/web/modbus.js:323
+Abrir la app en la placa	Ouvrir l'app sur la carte
+
+#: apps/modbus/web/modbus.js:345
+Con el perfil "%s" la app lo lee entero: los valores están en la pestaña Perfiles.	Avec le profil « %s » l'app le lit en entier : les valeurs sont dans l'onglet Profils.
+
+#: apps/modbus/web/modbus.js:346
+Pasar a pedido a mano	Passer en requêtes manuelles
+
+#: apps/modbus/web/modbus.js:347
+Todavía no hay respuesta.	Pas encore de réponse.
+
+#: apps/modbus/web/modbus.js:352
+OK · %s ms	OK · %s ms
+
+#: apps/modbus/web/modbus.js:358
+%s pedidos · %s respuestas · %s sin respuesta · %s CRC · %s excepciones · promedio %s ms, máximo %s ms	%s requêtes · %s réponses · %s sans réponse · %s CRC · %s exceptions · moyenne %s ms, max %s ms
+
+#: apps/modbus/web/modbus.js:362
+Herramienta en curso: %s de %s	Outil en cours : %s sur %s
+
+#: apps/modbus/web/modbus.js:367
+Lo marcado contestó sin errores de línea: ése es el formato. Los otros contestaron con bytes de paridad o de parada malos.	Celui qui est marqué a répondu sans erreurs de ligne : c'est le format. Les autres ont répondu avec des bits de parité ou de stop erronés.
+
+#: apps/modbus/web/modbus.js:368
+La velocidad es segura; el formato no salió claro (contestaron varios sin errores, o todos con errores). El manual del equipo dice cuál (el estándar pide 8E1).	La vitesse est sûre ; le format n'est pas clair (plusieurs ont répondu sans erreurs, ou tous avec erreurs). Le manuel de l'appareil dit lequel (le standard demande 8E1).
+
+#: apps/modbus/web/modbus.js:377
+Apagada.	Éteinte.
+
+#: apps/modbus/web/modbus.js:377
+Cliente: %s · %s pedidos, %s contestados, %s sin respuesta	Client : %s · %s requêtes, %s répondues, %s sans réponse
+
+#: apps/modbus/web/modbus.js:378
+#: apps/modbus/web/modbus.js:383
+ninguno	aucun
+
+#: apps/modbus/web/modbus.js:383
+Modbus TCP en el puerto %s · cliente: %s	Modbus TCP sur le port %s · client : %s
+
+#: apps/modbus/web/modbus.js:383
+%s tramas oídas · %s para esta unidad · %s para otras · %s broadcast · %s CRC malos · %s excepciones	%s trames entendues · %s pour cette unité · %s pour d'autres · %s broadcast · %s CRC erronés · %s exceptions
+
+#: apps/modbus/web/modbus.js:384
+Último pedido:	Dernière requête :
+
+#: apps/modbus/web/modbus.js:389
+%s tramas · %s bytes · %s con CRC malo · %s bytes de ruido · %s bytes con error de línea	%s trames · %s octets · %s avec CRC erroné · %s octets de bruit · %s octets avec erreur de ligne
+
+#: apps/modbus/web/modbus.js:392
+Pedidos	Requêtes
+
+#: apps/modbus/web/modbus.js:392
+Respuestas	Réponses
+
+#: apps/modbus/web/modbus.js:392
+Sin respuesta	Sans réponse
+
+#: apps/modbus/web/modbus.js:392
+Excepciones	Exceptions
+
+#: apps/modbus/web/modbus.js:392
+Demora	Délai
+
+#: apps/modbus/web/modbus.js:392
+Último	Dernier
+
+#: apps/modbus/web/modbus.js:404
+abriendo…	ouverture…
+
+#: apps/modbus/web/modbus.js:404
+cerrado	fermé
+
+#: apps/modbus/web/modbus.js:405
+Cerrar	Fermer
+
+#: apps/modbus/web/modbus.js:405
+Abrir	Ouvrir
+
+#: apps/modbus/web/modbus.js:433
+La app Modbus no está abierta en la placa.	L'app Modbus n'est pas ouverte sur la carte.
+
+#: apps/modbus/web/modbus.js:449
+contestó en %s ms	a répondu en %s ms
+
+#: apps/modbus/web/modbus.js:472
+#: apps/modbus/web/modbus.js:675
+Modbus	Modbus
+
+#: apps/modbus/web/modbus.js:494
+#: apps/modbus/web/modbus.js:671
+Perfiles	Profils
+
+#: apps/modbus/web/modbus.js:495
+No hay perfiles todavía. La app escribe cuatro de ejemplo la primera vez que se abre.	Pas encore de profils. L'app en écrit quatre d'exemple à sa première ouverture.
+
+#: apps/modbus/web/modbus.js:498
+Nuevo	Nouveau
+
+#: apps/modbus/web/modbus.js:499
+Subir .csv o importar YAML	Envoyer .csv ou importer YAML
+
+#: apps/modbus/web/modbus.js:501
+Un perfil dice qué tiene un equipo Modbus y dónde. En Maestro la app lo lee entero; en Esclavo hace de ese equipo.	Un profil dit ce qu'a un appareil Modbus et où. En Maître, l'app le lit en entier ; en Esclave, elle joue cet appareil.
+
+#: apps/modbus/web/modbus.js:502
+Importar: un YAML de Home Assistant (modbus:) o de ESPHome (modbus_controller) se vuelve un perfil con sus registros, tipos, escalas y unidades.	Importer : un YAML de Home Assistant (modbus:) ou d'ESPHome (modbus_controller) devient un profil avec ses registres, types, échelles et unités.
+
+#: apps/modbus/web/modbus.js:506
+Hay cambios sin guardar. ¿Descartarlos?	Il y a des modifications non enregistrées. Les abandonner ?
+
+#: apps/modbus/web/modbus.js:512
+%s líneas sin entender	%s lignes non comprises
+
+#: apps/modbus/web/modbus.js:534
+Elegí un perfil de la lista, o hacé uno nuevo.	Choisis un profil dans la liste, ou crées-en un nouveau.
+
+#: apps/modbus/web/modbus.js:540
+Quitar	Retirer
+
+#: apps/modbus/web/modbus.js:545
+#: apps/modbus/web/modbus.js:551
+Nombre	Nom
+
+#: apps/modbus/web/modbus.js:545
+Nota	Note
+
+#: apps/modbus/web/modbus.js:546
+Esclavo (unidad)	Esclave (unité)
+
+#: apps/modbus/web/modbus.js:549
+Leerlo cada (ms)	Lire toutes les (ms)
+
+#: apps/modbus/web/modbus.js:551
+Tabla	Table
+
+#: apps/modbus/web/modbus.js:551
+Dirección	Adresse
+
+#: apps/modbus/web/modbus.js:551
+Tipo	Type
+
+#: apps/modbus/web/modbus.js:551
+Escala	Échelle
+
+#: apps/modbus/web/modbus.js:551
+Acceso	Accès
+
+#: apps/modbus/web/modbus.js:552
+Mín	Min
+
+#: apps/modbus/web/modbus.js:552
+Máx	Max
+
+#: apps/modbus/web/modbus.js:552
+Simulación	Simulation
+
+#: apps/modbus/web/modbus.js:552
+Inicial	Initial
+
+#: apps/modbus/web/modbus.js:552
+En la placa	Sur la carte
+
+#: apps/modbus/web/modbus.js:555
+Agregar punto	Ajouter point
+
+#: apps/modbus/web/modbus.js:556
+Guardar	Enregistrer
+
+#: apps/modbus/web/modbus.js:557
+Usar en la placa	Utiliser sur la carte
+
+#: apps/modbus/web/modbus.js:558
+Descargar	Télécharger
+
+#: apps/modbus/web/modbus.js:559
+Duplicar	Dupliquer
+
+#: apps/modbus/web/modbus.js:561
+Tablas: coil, di (entradas), hr (holding), ir (input). Tipos de 32 bits: el registro alto primero; los "cdab", el bajo primero. Valor = crudo × escala. La simulación es para cuando la app hace de esclavo: se mueve entre mín y máx (contador: sube máx por hora). La columna "En la placa" muestra lo que la app lee o hace ahora, si está abierta con este perfil.	Tables : coil, di (entrées), hr (holding), ir (input). Types 32 bits : le registre haut d'abord ; les « cdab », le bas d'abord. Valeur = brut × échelle. La simulation sert quand l'app joue l'esclave : elle bouge entre min et max (contador : monte de max par heure). La colonne « Sur la carte » montre ce que l'app lit ou fait maintenant, si elle est ouverte avec ce profil.
+
+#: apps/modbus/web/modbus.js:568
+Valor %s	Valeur %s
+
+#: apps/modbus/web/modbus.js:579
+Guardado: la app lo vuelve a leer sola	Enregistré : l'app le relit toute seule
+
+#: apps/modbus/web/modbus.js:589
+La placa usa %s	La carte utilise %s
+
+#: apps/modbus/web/modbus.js:607
+Nombre del perfil nuevo	Nom du nouveau profil
+
+#: apps/modbus/web/modbus.js:614
+Nombre de la copia	Nom de la copie
+
+#: apps/modbus/web/modbus.js:621
+¿Borrar %s de la tarjeta? No se puede deshacer.	Effacer %s de la carte SD ? C'est irréversible.
+
+#: apps/modbus/web/modbus.js:637
+%s no parece un perfil: no tiene puntos	%s ne ressemble pas à un profil : il n'a pas de points
+
+#: apps/modbus/web/modbus.js:638
+Importados %s puntos: revisalos y guardá	%s points importés : vérifie-les et enregistre
+
+#: apps/modbus/web/modbus.js:638
+Subido	Envoyé
+
+#: apps/modbus/web/modbus.js:671
+Control	Contrôle

@@ -1,0 +1,168 @@
+# amoledos-lang 1   es -> pt
+# web.eeprom.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/eeprom/web/eeprom.js:143
+lectura	leitura
+
+#: apps/eeprom/web/eeprom.js:143
+antes de escribir	antes de gravar
+
+#: apps/eeprom/web/eeprom.js:143
+escrita	gravada
+
+#: apps/eeprom/web/eeprom.js:143
+del portal	do portal
+
+#: apps/eeprom/web/eeprom.js:143
+guardada	salva
+
+#: apps/eeprom/web/eeprom.js:153
+EEPROM	EEPROM
+
+#: apps/eeprom/web/eeprom.js:172
+La app todavía no escribió su chip.json: abrila en la placa.	O app ainda não escreveu seu chip.json: abra-o na placa.
+
+#: apps/eeprom/web/eeprom.js:173
+#: apps/eeprom/web/eeprom.js:213
+trabajando	trabalhando
+
+#: apps/eeprom/web/eeprom.js:173
+abierta	aberto
+
+#: apps/eeprom/web/eeprom.js:174
+%d bytes sin escribir en la placa	%d bytes não gravados na placa
+
+#: apps/eeprom/web/eeprom.js:176
+Leer el chip	Ler o chip
+
+#: apps/eeprom/web/eeprom.js:176
+Leer el chip ahora	Ler o chip agora
+
+#: apps/eeprom/web/eeprom.js:177
+Abierta en la placa	Aberto na placa
+
+#: apps/eeprom/web/eeprom.js:177
+Abrir la app	Abrir o app
+
+#: apps/eeprom/web/eeprom.js:178
+Chip en la placa:	Chip na placa:
+
+#: apps/eeprom/web/eeprom.js:179
+Cambiar el chip	Trocar o chip
+
+#: apps/eeprom/web/eeprom.js:193
+¿Escribir %s en el %s? Antes la placa guarda una copia de lo que tiene, y después lo verifica.	Gravar %s no %s? Antes a placa salva uma cópia do que ele tem, e depois verifica.
+
+#: apps/eeprom/web/eeprom.js:200
+%s: esperando a la app…	%s: esperando o app…
+
+#: apps/eeprom/web/eeprom.js:209
+La app no contestó. ¿Está la placa encendida?	O app não respondeu. A placa está ligada?
+
+#: apps/eeprom/web/eeprom.js:218
+Listo.	Pronto.
+
+#: apps/eeprom/web/eeprom.js:218
+Falló.	Falhou.
+
+#: apps/eeprom/web/eeprom.js:237
+Elegí un chip.	Escolha um chip.
+
+#: apps/eeprom/web/eeprom.js:251
+archivo	arquivo
+
+#: apps/eeprom/web/eeprom.js:254
+Comparar desde esta	Comparar a partir desta
+
+#: apps/eeprom/web/eeprom.js:255
+Ver esta	Ver esta
+
+#: apps/eeprom/web/eeprom.js:258
+Ver	Ver
+
+#: apps/eeprom/web/eeprom.js:259
+#: apps/eeprom/web/eeprom.js:393
+Bajar	Baixar
+
+#: apps/eeprom/web/eeprom.js:260
+Nota	Nota
+
+#: apps/eeprom/web/eeprom.js:261
+Escribir %s	Gravar %s
+
+#: apps/eeprom/web/eeprom.js:263
+En la placa está elegido otro chip	Na placa está escolhido outro chip
+
+#: apps/eeprom/web/eeprom.js:263
+Escribir en el chip	Gravar no chip
+
+#: apps/eeprom/web/eeprom.js:264
+Borrar	Apagar
+
+#: apps/eeprom/web/eeprom.js:268
+Versiones	Versões
+
+#: apps/eeprom/web/eeprom.js:269
+%d en %s	%d em %s
+
+#: apps/eeprom/web/eeprom.js:271
+Subir un .bin	Enviar um .bin
+
+#: apps/eeprom/web/eeprom.js:272
+Todavía no hay versiones de este chip. Cada lectura en la placa guarda una.	Ainda não há versões deste chip. Cada leitura na placa salva uma.
+
+#: apps/eeprom/web/eeprom.js:276
+Nota de %s	Nota de %s
+
+#: apps/eeprom/web/eeprom.js:284
+¿Borrar %s de la tarjeta? No se puede deshacer.	Apagar %s do cartão? Não é possível desfazer.
+
+#: apps/eeprom/web/eeprom.js:298
+%s tiene %s y el %s %s: no se va a poder escribir. ¿Subirlo igual?	%s tem %s e o %s %s: não vai ser possível gravá-lo. Enviar mesmo assim?
+
+#: apps/eeprom/web/eeprom.js:300
+subido: %s	enviado: %s
+
+#: apps/eeprom/web/eeprom.js:305
+Subiendo %s	Enviando %s
+
+#: apps/eeprom/web/eeprom.js:307
+✓ Subido como %s	✓ Enviado como %s
+
+#: apps/eeprom/web/eeprom.js:324
+Tocá Ver en una versión para verla en hexa; con A y B, las diferencias.	Clique em Ver numa versão para vê-la em hexa; com A e B, as diferenças.
+
+#: apps/eeprom/web/eeprom.js:325
+#: apps/eeprom/web/eeprom.js:409
+Cargando…	Carregando…
+
+#: apps/eeprom/web/eeprom.js:372
+dirección (hexa)	endereço (hexa)
+
+#: apps/eeprom/web/eeprom.js:373
+texto o DE AD BE EF	texto ou DE AD BE EF
+
+#: apps/eeprom/web/eeprom.js:385
+No está	Não encontrado
+
+#: apps/eeprom/web/eeprom.js:391
+comparada con %s:	comparada com %s:
+
+#: apps/eeprom/web/eeprom.js:391
+%d bytes distintos en %d tramos	%d bytes diferentes em %d trechos
+
+#: apps/eeprom/web/eeprom.js:391
+iguales	iguais
+
+#: apps/eeprom/web/eeprom.js:392
+Buscar	Buscar
+
+#: apps/eeprom/web/eeprom.js:396
+y %d tramos más	e mais %d trechos
+
+#: apps/eeprom/web/eeprom.js:404
+Las versiones están en la tarjeta, en /eeprom/<chip>. Cada lectura en la placa guarda una; antes de cada escritura se guarda lo que había.	As versões estão no cartão, em /eeprom/<chip>. Cada leitura na placa salva uma; antes de cada gravação, salva-se o que havia.

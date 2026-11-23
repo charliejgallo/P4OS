@@ -1,0 +1,280 @@
+# amoledos-lang 1   es -> fr
+# aos.vuelos.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/vuelos/main/vl_feed.c:516
+en tierra	au sol
+
+#: apps/vuelos/main/vl_feed.c:891
+emergencia	urgence
+
+#: apps/vuelos/main/vl_feed.c:891
+falla de radio	panne radio
+
+#: apps/vuelos/main/vl_feed.c:891
+interferencia ilícita	intervention illicite
+
+#: apps/vuelos/main/vl_feed.c:892
+Atención	Alerte
+
+#: apps/vuelos/main/vl_feed.c:894
+Pasa encima	Au-dessus
+
+#: apps/vuelos/main/vl_feed.c:896
+Militar	Militaire
+
+#: apps/vuelos/main/vl_frame.c:654
+de fuselaje ancho	gros-porteur
+
+#: apps/vuelos/main/vl_frame.c:655
+regional	régional
+
+#: apps/vuelos/main/vl_frame.c:656
+liviano	avion léger
+
+#: apps/vuelos/main/vl_frame.c:657
+helicóptero	hélicoptère
+
+#: apps/vuelos/main/vl_frame.c:658
+planeador	planeur
+
+#: apps/vuelos/main/vl_frame.c:659
+globo	ballon
+
+#: apps/vuelos/main/vl_frame.c:660
+dron	drone
+
+#: apps/vuelos/main/vl_frame.c:661
+vehículo	véhicule
+
+#: apps/vuelos/main/vl_frame.c:662
+de línea	avion de ligne
+
+#: apps/vuelos/main/vl_frame.c:743
+Buscando la ruta...	Recherche de la route...
+
+#: apps/vuelos/main/vl_frame.c:745
+Ruta desconocida	Route inconnue
+
+#: apps/vuelos/main/vl_frame.c:760
+N	N
+
+#: apps/vuelos/main/vl_frame.c:760
+NE	NE
+
+#: apps/vuelos/main/vl_frame.c:760
+E	E
+
+#: apps/vuelos/main/vl_frame.c:760
+SE	SE
+
+#: apps/vuelos/main/vl_frame.c:760
+S	S
+
+#: apps/vuelos/main/vl_frame.c:760
+SO	SO
+
+#: apps/vuelos/main/vl_frame.c:760
+O	O
+
+#: apps/vuelos/main/vl_frame.c:760
+NO	NO
+
+#: apps/vuelos/main/vl_frame.c:762
+Altitud	Altitude
+
+#: apps/vuelos/main/vl_frame.c:762
+Velocidad	Vitesse
+
+#: apps/vuelos/main/vl_frame.c:762
+Vel. vertical	Vit. verticale
+
+#: apps/vuelos/main/vl_frame.c:762
+Rumbo	Cap
+
+#: apps/vuelos/main/vl_frame.c:762
+Squawk	Squawk
+
+#: apps/vuelos/main/vl_frame.c:762
+Distancia	Distance
+
+#: apps/vuelos/main/vl_frame.c:776
+Squawk de emergencia	Squawk d'urgence
+
+#: apps/vuelos/main/vl_frame.c:776
+Squawk de falla de radio	Squawk de panne radio
+
+#: apps/vuelos/main/vl_frame.c:777
+Squawk de interferencia ilícita	Squawk d'intervention illicite
+
+#: apps/vuelos/main/vl_frame.c:780
+visto hace %u s · %06X%s	vu il y a %u s · %06X%s
+
+#: apps/vuelos/main/vl_frame.c:781
+ · militar	 · militaire
+
+#: apps/vuelos/main/vl_frame.c:797
+Sin conexión	Pas de connexion
+
+#: apps/vuelos/main/vl_frame.c:800
+Falta la dirección del receptor	Adresse du récepteur manquante
+
+#: apps/vuelos/main/vl_frame.c:803
+Cupo de pedidos agotado	Quota de requêtes épuisé
+
+#: apps/vuelos/main/vl_frame.c:804
+Esperando la hora	En attente de l'heure
+
+#: apps/vuelos/main/vl_frame.c:805
+Respuesta inesperada	Réponse inattendue
+
+#: apps/vuelos/main/vl_frame.c:806
+Acceso rechazado	Accès refusé
+
+#: apps/vuelos/main/vl_frame.c:807
+#: apps/vuelos/main/vuelos.c:854
+Sin memoria	Mémoire pleine
+
+#: apps/vuelos/main/vl_frame.c:808
+Sin respuesta	Pas de réponse
+
+#: apps/vuelos/main/vl_frame.c:809
+Error %d	Erreur %d
+
+#: apps/vuelos/main/vl_frame.c:812
+Buscando aviones...	Recherche d'avions...
+
+#: apps/vuelos/main/vl_frame.c:817
+1 avión	1 avion
+
+#: apps/vuelos/main/vl_frame.c:818
+%d aviones	%d avions
+
+#: apps/vuelos/main/vl_ui.c:252
+No hay aviones en el radio elegido.	Aucun avion dans le rayon choisi.
+
+#: apps/vuelos/main/vl_ui.c:288
+#: apps/vuelos/main/vl_ui.c:312
+Por altitud	Par altitude
+
+#: apps/vuelos/main/vl_ui.c:288
+#: apps/vuelos/main/vl_ui.c:312
+Por distancia	Par distance
+
+#: apps/vuelos/main/vl_ui.c:298
+Aviones	Avions
+
+#: apps/vuelos/main/vl_ui.c:333
+sí	oui
+
+#: apps/vuelos/main/vl_ui.c:333
+#: apps/vuelos/main/vl_ui.c:345
+no	non
+
+#: apps/vuelos/main/vl_ui.c:341
+receptor propio	récepteur perso
+
+#: apps/vuelos/main/vl_ui.c:347
+métricas	métriques
+
+#: apps/vuelos/main/vl_ui.c:347
+de aviación	aviation
+
+#: apps/vuelos/main/vl_ui.c:362
+Cada 5 s. Uso no comercial.	Toutes les 5 s. Non commercial.
+
+#: apps/vuelos/main/vl_ui.c:364
+Cada %d s: %d pedidos por día.	Toutes les %d s : %d requêtes par jour.
+
+#: apps/vuelos/main/vl_ui.c:367
+Cada %d s, con tu cliente de la API.	Toutes les %d s, avec ton client API.
+
+#: apps/vuelos/main/vl_ui.c:367
+Cada %d s, sin cuenta.	Toutes les %d s, sans compte.
+
+#: apps/vuelos/main/vl_ui.c:370
+La dirección se escribe en la página del portal.	L'adresse se saisit sur la page du portail.
+
+#: apps/vuelos/main/vl_ui.c:453
+Fuente	Source
+
+#: apps/vuelos/main/vl_ui.c:454
+Radio	Rayon
+
+#: apps/vuelos/main/vl_ui.c:455
+Estelas	Traînées
+
+#: apps/vuelos/main/vl_ui.c:456
+Unidades	Unités
+
+#: apps/vuelos/main/vl_ui.c:457
+Nombres en el mapa	Noms sur la carte
+
+#: apps/vuelos/main/vl_ui.c:458
+Origen y destino	Départ et arrivée
+
+#: apps/vuelos/main/vl_ui.c:459
+Un avión pasa encima	Un avion passe au-dessus
+
+#: apps/vuelos/main/vl_ui.c:460
+Emergencias	Urgences
+
+#: apps/vuelos/main/vl_ui.c:461
+Militares	Militaires
+
+#: apps/vuelos/main/vl_ui.c:462
+Sonido de los avisos	Son des alertes
+
+#: apps/vuelos/main/vl_ui.c:464
+Datos	Infos
+
+#: apps/vuelos/main/vl_ui.c:466
+Mapa	Carte
+
+#: apps/vuelos/main/vl_ui.c:467
+Avisos	Alertes
+
+#: apps/vuelos/main/vl_ui.c:474
+A menos de %s y %d ft	À moins de %s et %d ft
+
+#: apps/vuelos/main/vl_ui.c:477
+Según adsbdb, por el número de vuelo	Selon adsbdb, par numéro de vol
+
+#: apps/vuelos/main/vl_ui.c:478
+Squawk 7500, 7600 o 7700	Squawk 7500, 7600 ou 7700
+
+#: apps/vuelos/main/vl_ui.c:479
+Si la fuente lo dice	Si la source le dit
+
+#: apps/vuelos/main/vl_ui.c:483
+Lugar	Lieu
+
+#: apps/vuelos/main/vl_ui.c:485
+Lugar elegido	Lieu choisi
+
+#: apps/vuelos/main/vl_ui.c:486
+Usar el centro del mapa	Centre de la carte
+
+#: apps/vuelos/main/vl_ui.c:491
+Ciudad de Clima	Ville de Météo
+
+#: apps/vuelos/main/vl_ui.c:497
+Una pulsación larga en el mapa también elige el lugar. La dirección del receptor, las claves de los servicios y un lugar por su nombre se escriben en la página Vuelos del portal.	Un appui long sur la carte choisit aussi le lieu. L'adresse du récepteur, les clés des services et un lieu par son nom se saisissent sur la page Vols du portail.
+
+#: apps/vuelos/main/vl_ui.c:498
+Mapa: OpenFreeMap, OpenMapTiles, OpenStreetMap. Aeropuertos: OurAirports.	Carte : OpenFreeMap, OpenMapTiles, OpenStreetMap. Aéroports : OurAirports.
+
+#: apps/vuelos/main/vl_ui.c:499
+Última lectura:	Dernier relevé :
+
+#: apps/vuelos/main/vl_ui.c:499
+aeropuertos en la tarjeta	aéroports sur la carte SD
+
+#: apps/vuelos/main/vl_ui.c:514
+Ajustes	Réglages
+
+#: apps/vuelos/main/vuelos.c:784
+El lugar pasa a	Le lieu devient

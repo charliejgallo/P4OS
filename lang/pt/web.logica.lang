@@ -1,0 +1,372 @@
+# amoledos-lang 1   es -> pt
+# web.logica.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/logica/web/logica.js:30
+Paralelo	Paralelo
+
+#: apps/logica/web/logica.js:32
+Reloj	Clock
+
+#: apps/logica/web/logica.js:34
+↑ sube	↑ sobe
+
+#: apps/logica/web/logica.js:34
+↓ baja	↓ desce
+
+#: apps/logica/web/logica.js:34
+↕ cambia	↕ muda
+
+#: apps/logica/web/logica.js:35
+Lista	Pronto
+
+#: apps/logica/web/logica.js:35
+Conectando con el analizador...	Conectando ao analisador...
+
+#: apps/logica/web/logica.js:35
+Esperando el disparo...	Esperando o disparo...
+
+#: apps/logica/web/logica.js:35
+Capturando...	Capturando...
+
+#: apps/logica/web/logica.js:35
+Decodificando...	Decodificando...
+
+#: apps/logica/web/logica.js:35
+Archivo...	Arquivo...
+
+#: apps/logica/web/logica.js:183
+No es un zip	Não é um zip
+
+#: apps/logica/web/logica.js:218
+No es una sesión de sigrok (.sr)	Não é uma sessão do sigrok (.sr)
+
+#: apps/logica/web/logica.js:323
+#: apps/logica/web/logica.js:367
+Lógica	Lógica
+
+#: apps/logica/web/logica.js:338
+%s antes	%s antes
+
+#: apps/logica/web/logica.js:340
+#: apps/logica/web/logica.js:725
+Capturar	Capturar
+
+#: apps/logica/web/logica.js:354
+Rueda o pellizco: zoom · arrastrar: moverse · clic: cursores A y B · doble clic: acercar · Esc: sacar los cursores	Roda ou pinça: zoom · arrastar: mover · clique: cursores A e B · duplo clique: aproximar · Esc: tirar os cursores
+
+#: apps/logica/web/logica.js:370
+Analizador	Analisador
+
+#: apps/logica/web/logica.js:371
+Preguntando a los puertos serie USB...	Perguntando às portas seriais USB...
+
+#: apps/logica/web/logica.js:371
+Buscar SUMP	Buscar SUMP
+
+#: apps/logica/web/logica.js:372
+Abierta en la placa	Aberto na placa
+
+#: apps/logica/web/logica.js:372
+#: apps/logica/web/logica.js:895
+Abrir en la placa	Abrir na placa
+
+#: apps/logica/web/logica.js:375
+repetir	repetir
+
+#: apps/logica/web/logica.js:376
+Disparo (todas las condiciones juntas)	Disparo (todas as condições juntas)
+
+#: apps/logica/web/logica.js:377
+Sin disparo	Sem disparo
+
+#: apps/logica/web/logica.js:383
+Todo	Tudo
+
+#: apps/logica/web/logica.js:384
+Al disparo	Ao disparo
+
+#: apps/logica/web/logica.js:385
+Sacar cursores	Tirar cursores
+
+#: apps/logica/web/logica.js:386
+Decodificadores	Decodificadores
+
+#: apps/logica/web/logica.js:387
+Paquetes	Pacotes
+
+#: apps/logica/web/logica.js:388
+Medir	Medir
+
+#: apps/logica/web/logica.js:389
+Canales	Canais
+
+#: apps/logica/web/logica.js:390
+Capturas	Capturas
+
+#: apps/logica/web/logica.js:391
+Firmware fx2lafw (analizadores FX2)	Firmware fx2lafw (analisadores FX2)
+
+#: apps/logica/web/logica.js:458
+La app no está abierta en la placa: tocá "Abrir en la placa", o abrí un archivo.	O app não está aberto na placa: clique em "Abrir na placa" ou abra um arquivo.
+
+#: apps/logica/web/logica.js:458
+Sin captura todavía.	Sem captura ainda.
+
+#: apps/logica/web/logica.js:609
+muestra	amostra
+
+#: apps/logica/web/logica.js:637
+La placa no mandó la captura	A placa não enviou a captura
+
+#: apps/logica/web/logica.js:641
+La captura vino cortada	A captura veio cortada
+
+#: apps/logica/web/logica.js:658
+Bajando la captura: %s	Baixando a captura: %s
+
+#: apps/logica/web/logica.js:715
+el host USB está apagado (Ajustes, USB)	o host USB está desligado (Ajustes, USB)
+
+#: apps/logica/web/logica.js:721
+#: apps/logica/web/logica.js:737
+#: apps/logica/web/logica.js:853
+%s muestras	%s amostras
+
+#: apps/logica/web/logica.js:725
+Detener	Parar
+
+#: apps/logica/web/logica.js:738
+Archivo en la computadora	Arquivo no computador
+
+#: apps/logica/web/logica.js:738
+Captura de la placa	Captura da placa
+
+#: apps/logica/web/logica.js:739
+Volver a la placa	Voltar à placa
+
+#: apps/logica/web/logica.js:740
+Bajar .sr	Baixar .sr
+
+#: apps/logica/web/logica.js:741
+Bajar VCD	Baixar VCD
+
+#: apps/logica/web/logica.js:742
+CSV de lo visible	CSV do visível
+
+#: apps/logica/web/logica.js:752
+Demasiadas muestras: acercá la vista o poné los cursores	Amostras demais: aproxime a vista ou coloque os cursores
+
+#: apps/logica/web/logica.js:775
+Cerrar	Fechar
+
+#: apps/logica/web/logica.js:775
+Editar	Editar
+
+#: apps/logica/web/logica.js:778
+Los decodificadores corren en la placa: al aplicar, decodifica de nuevo la captura que tiene.	Os decodificadores rodam na placa: ao aplicar, ela decodifica de novo a captura que tem.
+
+#: apps/logica/web/logica.js:786
+Protocolo	Protocolo
+
+#: apps/logica/web/logica.js:787
+ (optativo)	 (opcional)
+
+#: apps/logica/web/logica.js:789
+Velocidad	Velocidade
+
+#: apps/logica/web/logica.js:789
+Sola (la adivina)	Auto (adivinha)
+
+#: apps/logica/web/logica.js:790
+Bits de datos	Bits de dados
+
+#: apps/logica/web/logica.js:791
+Paridad	Paridade
+
+#: apps/logica/web/logica.js:791
+Ninguna	Nenhuma
+
+#: apps/logica/web/logica.js:791
+Par	Par
+
+#: apps/logica/web/logica.js:791
+Impar	Ímpar
+
+#: apps/logica/web/logica.js:792
+Bits de parada	Bits de parada
+
+#: apps/logica/web/logica.js:793
+Línea	Linha
+
+#: apps/logica/web/logica.js:793
+Normal	Normal
+
+#: apps/logica/web/logica.js:793
+Invertida	Invertida
+
+#: apps/logica/web/logica.js:795
+Velocidad del bus	Velocidade do bus
+
+#: apps/logica/web/logica.js:797
+Modo (CPOL y CPHA)	Modo (CPOL e CPHA)
+
+#: apps/logica/web/logica.js:798
+Bits por palabra	Bits por palavra
+
+#: apps/logica/web/logica.js:799
+Orden	Ordem
+
+#: apps/logica/web/logica.js:799
+MSB primero	MSB primeiro
+
+#: apps/logica/web/logica.js:799
+LSB primero	LSB primeiro
+
+#: apps/logica/web/logica.js:800
+Activo en 0	Ativo em 0
+
+#: apps/logica/web/logica.js:800
+Activo en 1	Ativo em 1
+
+#: apps/logica/web/logica.js:802
+Nivel con portadora	Nível com portadora
+
+#: apps/logica/web/logica.js:802
+0 (receptor)	0 (receptor)
+
+#: apps/logica/web/logica.js:802
+1 (LED)	1 (LED)
+
+#: apps/logica/web/logica.js:805
+Valores en	Valores em
+
+#: apps/logica/web/logica.js:805
+Hexa	Hexa
+
+#: apps/logica/web/logica.js:805
+Decimal	Decimal
+
+#: apps/logica/web/logica.js:805
+Binario	Binário
+
+#: apps/logica/web/logica.js:809
+Aplicar	Aplicar
+
+#: apps/logica/web/logica.js:813
+Los paquetes los arma la placa: abrí el archivo en la placa para decodificarlo.	Os pacotes são montados pela placa: abra o arquivo na placa para decodificá-lo.
+
+#: apps/logica/web/logica.js:813
+No hay paquetes: encendé un decodificador.	Não há pacotes: ative um decodificador.
+
+#: apps/logica/web/logica.js:825
+Todos	Todos
+
+#: apps/logica/web/logica.js:827
+#: apps/logica/web/logica.js:839
+Buscar	Buscar
+
+#: apps/logica/web/logica.js:830
+%s paquetes	%s pacotes
+
+#: apps/logica/web/logica.js:837
+Bajar CSV	Baixar CSV
+
+#: apps/logica/web/logica.js:844
+No hay captura.	Não há captura.
+
+#: apps/logica/web/logica.js:851
+entre los cursores A y B	entre os cursores A e B
+
+#: apps/logica/web/logica.js:851
+lo que se ve	o que se vê
+
+#: apps/logica/web/logica.js:853
+Tramo	Trecho
+
+#: apps/logica/web/logica.js:854
+Flancos	Bordas
+
+#: apps/logica/web/logica.js:854
+%s de subida, %s de bajada	%s de subida, %s de descida
+
+#: apps/logica/web/logica.js:855
+Frecuencia	Frequência
+
+#: apps/logica/web/logica.js:856
+Ciclo de trabajo	Ciclo de trabalho
+
+#: apps/logica/web/logica.js:857
+En 1 (mín/prom/máx)	Em 1 (mín/méd/máx)
+
+#: apps/logica/web/logica.js:858
+En 0 (mín/prom/máx)	Em 0 (mín/méd/máx)
+
+#: apps/logica/web/logica.js:859
+En 1	Em 1
+
+#: apps/logica/web/logica.js:884
+Subida	Enviada
+
+#: apps/logica/web/logica.js:889
+Guardar la captura de la placa	Salvar a captura da placa
+
+#: apps/logica/web/logica.js:890
+Ver un .sr de la computadora	Ver um .sr do computador
+
+#: apps/logica/web/logica.js:891
+Subir un .sr a la placa	Enviar um .sr à placa
+
+#: apps/logica/web/logica.js:895
+Abriendo en la placa	Abrindo na placa
+
+#: apps/logica/web/logica.js:901
+Ver acá	Ver aqui
+
+#: apps/logica/web/logica.js:902
+Bajar	Baixar
+
+#: apps/logica/web/logica.js:905
+¿Borrar %s?	Apagar %s?
+
+#: apps/logica/web/logica.js:907
+Borrar	Apagar
+
+#: apps/logica/web/logica.js:907
+Todavía no hay capturas guardadas en la tarjeta.	Ainda não há capturas salvas no cartão.
+
+#: apps/logica/web/logica.js:908
+Son sesiones de sigrok: PulseView las abre tal cual (Archivo, Abrir), y la placa abre las que guarda PulseView.	São sessões do sigrok: o PulseView as abre do jeito que estão (Arquivo, Abrir), e a placa abre as que o PulseView salva.
+
+#: apps/logica/web/logica.js:921
+No encontré ningún fx2lafw-*.fw ahí adentro	Não encontrei nenhum fx2lafw-*.fw aí dentro
+
+#: apps/logica/web/logica.js:924
+%s archivos de firmware en la tarjeta	%s arquivos de firmware no cartão
+
+#: apps/logica/web/logica.js:930
+Los analizadores "24 MHz 8 canales" (clones del Saleae Logic, con un Cypress FX2LP) no tienen programa propio: la app les carga fx2lafw, el firmware libre de sigrok, cada vez que se enchufan. Bajá "sigrok-firmware-fx2lafw" (el .tar.gz de binarios) y subilo acá tal cual: la página saca los .fw y los pone en la carpeta logica/fx2lafw.	Os analisadores "24 MHz 8 canais" (clones do Saleae Logic, com um Cypress FX2LP) não têm programa próprio: o app carrega neles o fx2lafw, o firmware livre do sigrok, toda vez que são conectados. Baixe "sigrok-firmware-fx2lafw" (o .tar.gz de binários) e envie aqui do jeito que está: a página extrai os .fw e os coloca na pasta logica/fx2lafw.
+
+#: apps/logica/web/logica.js:932
+Subir el .tar.gz o los .fw	Enviar o .tar.gz ou os .fw
+
+#: apps/logica/web/logica.js:933
+fx2lafw en sigrok.org	fx2lafw em sigrok.org
+
+#: apps/logica/web/logica.js:934
+Descargas	Downloads
+
+#: apps/logica/web/logica.js:935
+En la tarjeta: %s	No cartão: %s
+
+#: apps/logica/web/logica.js:935
+Todavía no hay firmware en la tarjeta.	Ainda não há firmware no cartão.
+
+#: apps/logica/web/logica.js:936
+Conexión: el analizador va al host USB de la placa (Ajustes, USB): en los pines 25/27 corre a alta velocidad y llega a 24 MHz; en 21/23 hasta 1 MHz. Medí señales de 3,3 V (de 5 V sólo si tu analizador dice que las aguanta) y uní su masa con la del circuito.	Conexão: o analisador vai no host USB da placa (Ajustes, USB): nos pinos 25/27 funciona em alta velocidade e chega a 24 MHz; nos 21/23, até 1 MHz. Meça sinais de 3,3 V (de 5 V só se o seu analisador disser que aguenta) e ligue o terra dele ao do circuito.
+
+#: apps/logica/web/logica.js:954
+La app Lógica no está abierta en la placa.	O app Lógica não está aberto na placa.

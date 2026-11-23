@@ -1,0 +1,37 @@
+# amoledos-lang 1   es -> it
+# aos.simon.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/simon/main/simon.c:181
+#: apps/simon/main/simon.c:561
+TOCA	TOCCA
+
+#: apps/simon/main/simon.c:182
+Tocá el centro para empezar	Tocca il centro per iniziare
+
+#: apps/simon/main/simon.c:217
+Mirá y escuchá	Guarda e ascolta
+
+#: apps/simon/main/simon.c:240
+¡Nuevo récord! %d pasos	Nuovo record! %d passi
+
+#: apps/simon/main/simon.c:243
+Fallaste en el paso %d	Hai sbagliato al passo %d
+
+#: apps/simon/main/simon.c:307
+¡Bien!	Bene!
+
+#: apps/simon/main/simon.c:389
+Tu turno	Tocca a te
+
+#: apps/simon/main/simon.c:521
+SIMON	SIMON
+
+#: apps/simon/main/simon.c:526
+Paso	Passo
+
+#: apps/simon/main/simon.c:527
+Récord	Record

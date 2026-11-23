@@ -1,0 +1,149 @@
+# amoledos-lang 1   es -> fr
+# web.vnc.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/vnc/web/vnc.js:43
+Automática (Tight, ZRLE, Hextile)	Automatique (Tight, ZRLE, Hextile)
+
+#: apps/vnc/web/vnc.js:43
+Tight (JPEG en las fotos)	Tight (JPEG pour les photos)
+
+#: apps/vnc/web/vnc.js:44
+ZRLE (la de la Mac)	ZRLE (celle du Mac)
+
+#: apps/vnc/web/vnc.js:44
+Raw (sin comprimir)	Raw (non compressé)
+
+#: apps/vnc/web/vnc.js:90
+computadora %d	ordinateur %d
+
+#: apps/vnc/web/vnc.js:91
+%s: el nombre, de 1 a 47 caracteres y sin corchetes	%s : le nom, de 1 à 47 caractères et sans crochets
+
+#: apps/vnc/web/vnc.js:92
+%s: hay dos con ese nombre	%s : deux portent ce nom
+
+#: apps/vnc/web/vnc.js:94
+%s: falta la dirección (IP o nombre, sin espacios)	%s : l'adresse manque (IP ou nom, sans espaces)
+
+#: apps/vnc/web/vnc.js:96
+%s: el puerto va de 1 a 65535 (VNC suele ser 5900)	%s : le port va de 1 à 65535 (VNC, c'est souvent 5900)
+
+#: apps/vnc/web/vnc.js:97
+%s: la calidad va de 0 a 9	%s : la qualité va de 0 à 9
+
+#: apps/vnc/web/vnc.js:98
+%s: la contraseña es muy larga	%s : le mot de passe est trop long
+
+#: apps/vnc/web/vnc.js:100
+%s: la zona va como x,y,ancho,alto (o vacía: toda la pantalla)	%s : la zone s'écrit x,y,largeur,hauteur (ou vide : tout l'écran)
+
+#: apps/vnc/web/vnc.js:108
++ Agregar una computadora	+ Ajouter un ordinateur
+
+#: apps/vnc/web/vnc.js:109
+Guardar en la tarjeta	Enregistrer sur la carte SD
+
+#: apps/vnc/web/vnc.js:118
+#: apps/vnc/web/vnc.js:144
+Sin nombre	Sans nom
+
+#: apps/vnc/web/vnc.js:132
+Todavía no hay computadoras: agregá una.	Pas encore d'ordinateurs : ajoutes-en un.
+
+#: apps/vnc/web/vnc.js:140
+Contraseña VNC	Mot de passe VNC
+
+#: apps/vnc/web/vnc.js:145
+con contraseña	avec mot de passe
+
+#: apps/vnc/web/vnc.js:146
+Subir	Monter
+
+#: apps/vnc/web/vnc.js:147
+Bajar	Descendre
+
+#: apps/vnc/web/vnc.js:149
+¿Quitar %s?	Retirer %s ?
+
+#: apps/vnc/web/vnc.js:149
+¿Quitar esta computadora?	Retirer cet ordinateur ?
+
+#: apps/vnc/web/vnc.js:150
+Quitar	Retirer
+
+#: apps/vnc/web/vnc.js:152
+Nombre	Nom
+
+#: apps/vnc/web/vnc.js:152
+Mac del estudio	Mac du studio
+
+#: apps/vnc/web/vnc.js:153
+Dirección (IP o nombre)	Adresse (IP ou nom)
+
+#: apps/vnc/web/vnc.js:154
+Puerto	Port
+
+#: apps/vnc/web/vnc.js:156
+Mostrar la contraseña	Afficher le mot de passe
+
+#: apps/vnc/web/vnc.js:157
+Codificación	Encodage
+
+#: apps/vnc/web/vnc.js:158
+Colores	Couleurs
+
+#: apps/vnc/web/vnc.js:158
+16 bits (rápido)	16 bits (rapide)
+
+#: apps/vnc/web/vnc.js:158
+24 bits (exactos)	24 bits (exactes)
+
+#: apps/vnc/web/vnc.js:159
+Calidad JPEG (Tight)	Qualité JPEG (Tight)
+
+#: apps/vnc/web/vnc.js:160
+Sólo mirar: no manda el mouse ni el teclado	Voir seulement : n'envoie ni souris ni clavier
+
+#: apps/vnc/web/vnc.js:161
+Monitor (zona x,y,ancho,alto; vacía: todos)	Moniteur (zone x,y,largeur,hauteur ; vide : tous)
+
+#: apps/vnc/web/vnc.js:162
+se elige en la app, con el botón de monitor	se choisit dans l'app, avec le bouton moniteur
+
+#: apps/vnc/web/vnc.js:163
+La contraseña queda en /data/vnc.txt de la tarjeta, legible. VNC usa sólo los primeros 8 caracteres.	Le mot de passe reste dans /data/vnc.txt sur la carte SD, lisible. VNC n'utilise que les 8 premiers caractères.
+
+#: apps/vnc/web/vnc.js:183
+Guardado. La app lo toma sola.	Enregistré. L'app le prend toute seule.
+
+#: apps/vnc/web/vnc.js:184
+No se pudo guardar: %s	Impossible d'enregistrer : %s
+
+#: apps/vnc/web/vnc.js:190
+No se pudo leer %s: %s	Impossible de lire %s : %s
+
+#: apps/vnc/web/vnc.js:195
+#: apps/vnc/web/vnc.js:210
+VNC	VNC
+
+#: apps/vnc/web/vnc.js:197
+Abrir VNC en la placa	Ouvrir VNC sur la carte
+
+#: apps/vnc/web/vnc.js:198
+Las computadoras	Les ordinateurs
+
+#: apps/vnc/web/vnc.js:201
+Cómo prepararlas	Comment les préparer
+
+#: apps/vnc/web/vnc.js:202
+En una Mac: Ajustes del Sistema → General → Compartir → Compartir pantalla → (i) → «Los visores VNC pueden controlar la pantalla con contraseña», y una contraseña de hasta 8 caracteres. La Mac manda su resolución real (en una Retina, el doble): la placa la achica sola. En Windows o Linux, un servidor VNC como TightVNC, TigerVNC o x11vnc; Tight es la codificación más rápida con fotos y video.	Sur un Mac : Réglages Système → Général → Partage → Partage d'écran → (i) → « Les utilisateurs de VNC peuvent contrôler l'écran avec un mot de passe », et un mot de passe de 8 caractères maximum. Le Mac envoie sa résolution réelle (le double sur un Retina) : la carte la réduit toute seule. Sous Windows ou Linux, un serveur VNC comme TightVNC, TigerVNC ou x11vnc ; Tight est l'encodage le plus rapide avec photos et vidéo.
+
+#: apps/vnc/web/vnc.js:203
+En la placa: un toque es un clic, arrastrar arrastra, dos dedos tocando son clic derecho, pellizcar hace zoom. El mouse y el teclado USB pasan directo.	Sur la carte : un toucher est un clic, glisser fait glisser, toucher à deux doigts est un clic droit, pincer zoome. La souris et le clavier USB passent directement.
+
+#: apps/vnc/web/vnc.js:205
+Hay cambios sin guardar	Il y a des modifications non enregistrées

@@ -1,0 +1,504 @@
+# amoledos-lang 1   es -> fr
+# web.can.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/can/web/can.js:71
+activo	actif
+
+#: apps/can/web/can.js:71
+con avisos	alertes
+
+#: apps/can/web/can.js:71
+pasivo	passif
+
+#: apps/can/web/can.js:71
+fuera del bus	hors du bus
+
+#: apps/can/web/can.js:72
+Solo escucha	Écoute seule
+
+#: apps/can/web/can.js:72
+Normal	Normal
+
+#: apps/can/web/can.js:72
+Autoprueba	Autotest
+
+#: apps/can/web/can.js:153
+Luz de falla y códigos	Témoin moteur et codes
+
+#: apps/can/web/can.js:153
+Carga calculada	Charge calculée
+
+#: apps/can/web/can.js:154
+Refrigerante	Liq. refroid.
+
+#: apps/can/web/can.js:154
+Corrección corta, banco 1	Correction courte, banc 1
+
+#: apps/can/web/can.js:155
+Corrección larga, banco 1	Correction longue, banc 1
+
+#: apps/can/web/can.js:155
+Corrección corta, banco 2	Correction courte, banc 2
+
+#: apps/can/web/can.js:156
+Corrección larga, banco 2	Correction longue, banc 2
+
+#: apps/can/web/can.js:156
+Presión de combustible	Pression de carburant
+
+#: apps/can/web/can.js:157
+Presión del múltiple	Pression collecteur
+
+#: apps/can/web/can.js:157
+Régimen del motor	Régime moteur
+
+#: apps/can/web/can.js:158
+Velocidad	Vitesse
+
+#: apps/can/web/can.js:158
+Avance del encendido	Avance à l'allumage
+
+#: apps/can/web/can.js:159
+Aire de admisión	Air d'admission
+
+#: apps/can/web/can.js:159
+Caudal de aire (MAF)	Débit d'air (MAF)
+
+#: apps/can/web/can.js:160
+Mariposa	Papillon
+
+#: apps/can/web/can.js:160
+Sonda de oxígeno, banco 1, 1	Sonde à oxygène, banc 1, 1
+
+#: apps/can/web/can.js:161
+Sonda de oxígeno, banco 1, 2	Sonde à oxygène, banc 1, 2
+
+#: apps/can/web/can.js:161
+Norma OBD	Norme OBD
+
+#: apps/can/web/can.js:162
+Desde el arranque	Depuis le démarrage
+
+#: apps/can/web/can.js:162
+Recorrido con la luz de falla	Distance avec le témoin allumé
+
+#: apps/can/web/can.js:163
+Presión del riel (relativa)	Pression rampe (relative)
+
+#: apps/can/web/can.js:163
+Presión del riel	Pression rampe
+
+#: apps/can/web/can.js:164
+EGR comandada	EGR commandée
+
+#: apps/can/web/can.js:164
+Error de la EGR	Erreur de l'EGR
+
+#: apps/can/web/can.js:165
+Purga del cánister	Purge du canister
+
+#: apps/can/web/can.js:165
+Nivel de combustible	Niveau de carburant
+
+#: apps/can/web/can.js:166
+Calentamientos desde el borrado	Chauffes depuis l'effacement
+
+#: apps/can/web/can.js:166
+Recorrido desde el borrado	Distance depuis l'effacement
+
+#: apps/can/web/can.js:167
+Presión barométrica	Pression atmosph.
+
+#: apps/can/web/can.js:167
+Catalizador, banco 1, 1	Catalyseur, banc 1, 1
+
+#: apps/can/web/can.js:168
+Catalizador, banco 2, 1	Catalyseur, banc 2, 1
+
+#: apps/can/web/can.js:168
+Tensión del módulo	Tension du module
+
+#: apps/can/web/can.js:169
+Carga absoluta	Charge absolue
+
+#: apps/can/web/can.js:169
+Lambda comandada	Lambda commandé
+
+#: apps/can/web/can.js:170
+Mariposa relativa	Papillon relatif
+
+#: apps/can/web/can.js:170
+Temperatura ambiente	Température ambiante
+
+#: apps/can/web/can.js:171
+Mariposa absoluta B	Papillon absolu B
+
+#: apps/can/web/can.js:171
+Pedal D	Pédale D
+
+#: apps/can/web/can.js:172
+Pedal E	Pédale E
+
+#: apps/can/web/can.js:172
+Mariposa comandada	Papillon commandé
+
+#: apps/can/web/can.js:173
+Tiempo con la luz de falla	Temps avec le témoin allumé
+
+#: apps/can/web/can.js:173
+Tiempo desde el borrado	Temps depuis l'effacement
+
+#: apps/can/web/can.js:174
+Combustible	Carburant
+
+#: apps/can/web/can.js:174
+Etanol	Éthanol
+
+#: apps/can/web/can.js:175
+Presión del riel (absoluta)	Pression rampe (absolue)
+
+#: apps/can/web/can.js:175
+Pedal relativo	Pédale relative
+
+#: apps/can/web/can.js:176
+Batería del híbrido	Batterie hybride
+
+#: apps/can/web/can.js:176
+Aceite	Huile
+
+#: apps/can/web/can.js:177
+Inyección	Injection
+
+#: apps/can/web/can.js:177
+Consumo	Conso
+
+#: apps/can/web/can.js:178
+Par pedido	Couple demandé
+
+#: apps/can/web/can.js:178
+Par real	Couple réel
+
+#: apps/can/web/can.js:179
+Par de referencia	Couple de réf.
+
+#: apps/can/web/can.js:179
+Odómetro	Odomètre
+
+#: apps/can/web/can.js:182
+sin dato	n/d
+
+#: apps/can/web/can.js:182
+nafta	essence
+
+#: apps/can/web/can.js:182
+metanol	méthanol
+
+#: apps/can/web/can.js:182
+etanol	éthanol
+
+#: apps/can/web/can.js:182
+diésel	diesel
+
+#: apps/can/web/can.js:182
+GLP	GPL
+
+#: apps/can/web/can.js:182
+GNC	GNV
+
+#: apps/can/web/can.js:182
+propano	propane
+
+#: apps/can/web/can.js:182
+eléctrico	électrique
+
+#: apps/can/web/can.js:183
+sin OBD	sans OBD
+
+#: apps/can/web/can.js:191
+#: apps/can/web/can.js:192
+código %d	code %d
+
+#: apps/can/web/can.js:202
+#: apps/can/web/can.js:579
+CAN	CAN
+
+#: apps/can/web/can.js:231
+Abierta en la placa	Ouverte sur la carte
+
+#: apps/can/web/can.js:231
+Abrir CAN en la placa	Ouvrir CAN sur la carte
+
+#: apps/can/web/can.js:244
+Parar la grabación	Arrêter l'enreg.
+
+#: apps/can/web/can.js:245
+Grabar	Enregistrer
+
+#: apps/can/web/can.js:246
+Limpiar	Effacer
+
+#: apps/can/web/can.js:251
+La app dejó de contestar.	L'app a cessé de répondre.
+
+#: apps/can/web/can.js:251
+Esperando a la app…	En attente de l'app…
+
+#: apps/can/web/can.js:252
+La página ve el bus a través de la app CAN: tiene que estar abierta en la placa (al frente o atrás). El bus se conecta desde ahí.	La page voit le bus à travers l'app CAN : elle doit être ouverte sur la carte (au premier plan ou en arrière-plan). Le bus se connecte depuis là.
+
+#: apps/can/web/can.js:256
+desconectado	déconnecté
+
+#: apps/can/web/can.js:260
+Sin bus: se conecta desde la app, tocando la conexión.	Pas de bus : connecte-le depuis l'app, en touchant la connexion.
+
+#: apps/can/web/can.js:264
+tramas/s	trames/s
+
+#: apps/can/web/can.js:265
+de carga	charge
+
+#: apps/can/web/can.js:266
+recibidas	reçues
+
+#: apps/can/web/can.js:267
+enviadas	envoyées
+
+#: apps/can/web/can.js:268
+perdidas	perdues
+
+#: apps/can/web/can.js:269
+errores TX / RX	erreurs TX / RX
+
+#: apps/can/web/can.js:270
+Grabando %s: %d tramas.	Enreg. %s : %d trames.
+
+#: apps/can/web/can.js:271
+Repitiendo %s.	Rejeu de %s.
+
+#: apps/can/web/can.js:276
+Esperando tramas…	Attente de trames…
+
+#: apps/can/web/can.js:276
+Sin tramas.	Aucune trame.
+
+#: apps/can/web/can.js:281
+id	id
+
+#: apps/can/web/can.js:281
+n	n
+
+#: apps/can/web/can.js:281
+datos	data
+
+#: apps/can/web/can.js:281
+por s	par s
+
+#: apps/can/web/can.js:281
+vistas	vues
+
+#: apps/can/web/can.js:310
+Buscar un mensaje por id o nombre	Chercher un message par id ou nom
+
+#: apps/can/web/can.js:358
+No está can/%s	can/%s absent
+
+#: apps/can/web/can.js:369
+%s no es un .dbc	%s n'est pas un .dbc
+
+#: apps/can/web/can.js:372
+Subido a can/dbc	Envoyé dans can/dbc
+
+#: apps/can/web/can.js:388
+Subir .dbc	Envoyer .dbc
+
+#: apps/can/web/can.js:390
+¿Borrar %s de la tarjeta? No se puede deshacer.	Supprimer %s de la carte SD ? C'est irréversible.
+
+#: apps/can/web/can.js:393
+#: apps/can/web/can.js:552
+Borrar	Suppr.
+
+#: apps/can/web/can.js:394
+%d mensajes, %d señales. La placa muestra los mensajes elegidos acá, o los que pasan por el bus.	%d messages, %d signaux. La carte affiche les messages choisis ici, ou ceux qui passent sur le bus.
+
+#: apps/can/web/can.js:394
+Leyendo…	Lecture…
+
+#: apps/can/web/can.js:395
+Los .dbc van en la carpeta can/dbc de la tarjeta. Bibliotecas abiertas: opendbc de comma.ai (github.com/commaai/opendbc, carpeta opendbc/dbc) y nberlette/canbus (carpeta dbc, con OBD-II y J1939 genéricos); las dos con licencia MIT.	Les .dbc vont dans le dossier can/dbc de la carte SD. Bibliothèques ouvertes : opendbc de comma.ai (github.com/commaai/opendbc, dossier opendbc/dbc) et nberlette/canbus (dossier dbc, avec OBD-II et J1939 génériques) ; les deux sous licence MIT.
+
+#: apps/can/web/can.js:397
+Los que pasan por el bus	Ceux qui passent sur le bus
+
+#: apps/can/web/can.js:399
+Marcá los mensajes que querés ver	Coche les messages que tu veux voir
+
+#: apps/can/web/can.js:401
+Elegidos: %d	Choisis : %d
+
+#: apps/can/web/can.js:419
+Hasta %d mensajes	Jusqu'à %d messages
+
+#: apps/can/web/can.js:428
+%d señales	%d signaux
+
+#: apps/can/web/can.js:429
+en el bus	sur le bus
+
+#: apps/can/web/can.js:430
+Y %d más: buscá para acotar.	Et %d de plus : cherche pour affiner.
+
+#: apps/can/web/can.js:447
+Ningún mensaje del archivo pasa por el bus (o la app no está mirando).	Aucun message du fichier ne passe sur le bus (ou l'app ne regarde pas).
+
+#: apps/can/web/can.js:447
+Sin mensajes elegidos.	Aucun message choisi.
+
+#: apps/can/web/can.js:472
+Preguntar (11 bits)	Demander (11 bits)
+
+#: apps/can/web/can.js:473
+Preguntar (29 bits)	Demander (29 bits)
+
+#: apps/can/web/can.js:474
+Parar	Stop
+
+#: apps/can/web/can.js:475
+Pregunta los PIDs del modo 01 de SAE J1979 a 7DF (o 18DB33F1): primero el PID 00, el mapa de los que conoce el auto, y después esos, en vuelta. Necesita el modo Normal, que se elige en la placa: la app abre siempre en Solo escucha. En muchos autos modernos el conector OBD da sólo diagnóstico, porque un gateway separa los buses internos.	Demande à 7DF (ou 18DB33F1) les PIDs du mode 01 de SAE J1979 : d'abord le PID 00, la carte de ceux que la voiture connaît, puis ceux-là, en boucle. Il faut le mode Normal, qui se choisit sur la carte : l'app s'ouvre toujours en Écoute seule. Sur beaucoup de voitures récentes, la prise OBD ne donne que le diagnostic, car une passerelle sépare les bus internes.
+
+#: apps/can/web/can.js:477
+Detenido	Arrêté
+
+#: apps/can/web/can.js:477
+Preguntando qué PIDs conoce…	Recherche des PIDs connus…
+
+#: apps/can/web/can.js:477
+En vivo	Direct
+
+#: apps/can/web/can.js:477
+Nadie contestó	Personne n'a répondu
+
+#: apps/can/web/can.js:477
+Detenido: hace falta el modo Normal	Arrêté : il faut le mode Normal
+
+#: apps/can/web/can.js:477
+Detenido: nadie confirma lo que manda	Arrêté : personne n'acquitte ce qu'il envoie
+
+#: apps/can/web/can.js:480
+Sin datos de la app.	Pas de données de l'app.
+
+#: apps/can/web/can.js:484
+contestan %s · %d respuestas	répondent %s · %d réponses
+
+#: apps/can/web/can.js:485
+#: apps/can/web/can.js:509
+El bus está desconectado en la app.	Le bus est déconnecté dans l'app.
+
+#: apps/can/web/can.js:485
+La app está en %s: para preguntar hace falta Normal, y se cambia en la placa.	L'app est en %s : pour demander, il faut Normal, qui se change sur la carte.
+
+#: apps/can/web/can.js:488
+PID	PID
+
+#: apps/can/web/can.js:488
+qué	quoi
+
+#: apps/can/web/can.js:488
+valor	valeur
+
+#: apps/can/web/can.js:488
+de	de
+
+#: apps/can/web/can.js:488
+hace	il y a
+
+#: apps/can/web/can.js:493
+sin fórmula	sans formule
+
+#: apps/can/web/can.js:508
+La app no está contestando: lo que mandes se manda cuando vuelva.	L'app ne répond pas : ce que tu envoies partira quand elle reviendra.
+
+#: apps/can/web/can.js:510
+La app está en Solo escucha: no sale nada. El modo se cambia en la placa.	L'app est en Écoute seule : rien ne sort. Le mode se change sur la carte.
+
+#: apps/can/web/can.js:511
+Autoprueba: vuelve sólo a la placa, no sale al bus.	Autotest : ça revient seulement à la carte, rien ne sort sur le bus.
+
+#: apps/can/web/can.js:512
+Normal: sale al bus. Nunca al de un auto en marcha.	Normal : ça sort sur le bus. Jamais sur celui d'une voiture en marche.
+
+#: apps/can/web/can.js:517
+Como en candump: 123#11223344, 18FEF100#FF00 o 7DF#R	Comme dans candump : 123#11223344, 18FEF100#FF00 ou 7DF#R
+
+#: apps/can/web/can.js:519
+Mandada a la app: %s	Envoyée à l'app : %s
+
+#: apps/can/web/can.js:526
+cada %d ms (las periódicas se arrancan en la placa)	toutes les %d ms (les périodiques se lancent sur la carte)
+
+#: apps/can/web/can.js:527
+#: apps/can/web/can.js:531
+#: apps/can/web/can.js:585
+Mandar	Envoyer
+
+#: apps/can/web/can.js:527
+Sin tramas guardadas.	Aucune trame enregistrée.
+
+#: apps/can/web/can.js:533
+Guardadas en la placa	Enregistrées sur la carte
+
+#: apps/can/web/can.js:547
+Bajar	Télécharger
+
+#: apps/can/web/can.js:549
+Se está grabando: pararla primero	Enregistrement en cours : arrête-le d'abord
+
+#: apps/can/web/can.js:550
+¿Borrar %s? No se puede deshacer.	Supprimer %s ? C'est irréversible.
+
+#: apps/can/web/can.js:551
+Borrada	Supprimée
+
+#: apps/can/web/can.js:553
+Todavía no hay grabaciones: se graba desde la placa o con el botón de arriba.	Pas encore d'enregistrements : enregistre depuis la carte ou avec le bouton ci-dessus.
+
+#: apps/can/web/can.js:566
+Guardado: la app lo vuelve a leer	Enregistré : l'app le relit
+
+#: apps/can/web/can.js:569
+Guardar	Enregistrer
+
+#: apps/can/web/can.js:575
+Tramas guardadas	Trames enregistrées
+
+#: apps/can/web/can.js:575
+can/enviar.txt: una por línea, la trama, el período en ms (0 a mano) y un nombre.	can/enviar.txt : une par ligne, la trame, la période en ms (0 à la main) et un nom.
+
+#: apps/can/web/can.js:576
+Señales propias	Signaux perso
+
+#: apps/can/web/can.js:576
+can/senales.dbc: un .dbc propio (BO_, SG_, VAL_). Los bajados van en can/dbc y se eligen arriba.	can/senales.dbc : un .dbc à toi (BO_, SG_, VAL_). Ceux téléchargés vont dans can/dbc et se choisissent plus haut.
+
+#: apps/can/web/can.js:580
+Por id	Par id
+
+#: apps/can/web/can.js:581
+Señales	Signaux
+
+#: apps/can/web/can.js:583
+OBD-II	OBD-II
+
+#: apps/can/web/can.js:584
+Últimas tramas	Dernières trames
+
+#: apps/can/web/can.js:586
+Grabaciones	Captures
+
+#: apps/can/web/can.js:587
+Archivos de la app	Fichiers de l'app

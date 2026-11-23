@@ -1,0 +1,189 @@
+# amoledos-lang 1   es -> it
+# demo.canos.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/canos/main/canos.c:315
+Girar	Ruota
+
+#: apps/canos/main/canos.c:315
+Completar	Completa
+
+#: apps/canos/main/canos.c:320
+Fácil	Facile
+
+#: apps/canos/main/canos.c:320
+Normal	Normale
+
+#: apps/canos/main/canos.c:320
+Difícil	Difficile
+
+#: apps/canos/main/canos.c:340
+Sin reloj: abrís la llave cuando el recorrido esté listo.	Senza tempo: apri la valvola quando il percorso è pronto.
+
+#: apps/canos/main/canos.c:341
+Cuando se acaba el tiempo, la llave se abre sola.	Quando il tempo finisce, la valvola si apre da sola.
+
+#: apps/canos/main/canos.c:342
+Menos tiempo, y el líquido corre más rápido.	Meno tempo, e il liquido scorre più veloce.
+
+#: apps/canos/main/canos.c:366
+5 niveles del anterior	5 livelli del precedente
+
+#: apps/canos/main/canos.c:402
+Completá 5 niveles del mundo anterior	Completa 5 livelli del mondo precedente
+
+#: apps/canos/main/canos.c:465
+Caños	Tubi
+
+#: apps/canos/main/canos.c:467
+Armá el recorrido antes de que corra el líquido	Costruisci il percorso prima che scorra il liquido
+
+#: apps/canos/main/canos.c:475
+Modo	Modo
+
+#: apps/canos/main/canos.c:479
+Tocá los caños para girarlos hasta unir el tanque con el desagüe.	Tocca i tubi per ruotarli finché il serbatoio non raggiunge lo scarico.
+
+#: apps/canos/main/canos.c:480
+Faltan caños: poné los que ofrece la bandeja, tal como vienen.	Mancano tubi: posa quelli del vassoio, così come arrivano.
+
+#: apps/canos/main/canos.c:497
+Dificultad	Difficoltà
+
+#: apps/canos/main/canos.c:510
+Mundos	Mondi
+
+#: apps/canos/main/canos.c:585
+Primero pasá el nivel anterior	Prima supera il livello precedente
+
+#: apps/canos/main/canos.c:945
+Elegí un caño de la bandeja	Scegli un tubo dal vassoio
+
+#: apps/canos/main/canos.c:1017
+Girá los caños y abrí la llave	Ruota i tubi e apri la valvola
+
+#: apps/canos/main/canos.c:1017
+Poné los caños y abrí la llave	Posa i tubi e apri la valvola
+
+#: apps/canos/main/canos.c:1019
+Abrir llave	Apri valvola
+
+#: apps/canos/main/canos.c:1026
+Abriendo la llave...	Apertura valvola...
+
+#: apps/canos/main/canos.c:1028
+Corre el líquido: %d caños	Il liquido scorre: %d tubi
+
+#: apps/canos/main/canos.c:1030
+#: apps/canos/main/canos.c:1303
+¡Llegó al desagüe!	Arrivato allo scarico!
+
+#: apps/canos/main/canos.c:1032
+#: apps/canos/main/canos.c:1324
+¡Fuga!	Perdita!
+
+#: apps/canos/main/canos.c:1036
+Más despacio	Più piano
+
+#: apps/canos/main/canos.c:1036
+Acelerar	Accelera
+
+#: apps/canos/main/canos.c:1295
+Pausa	Pausa
+
+#: apps/canos/main/canos.c:1296
+nivel	liv.
+
+#: apps/canos/main/canos.c:1298
+Seguir	Riprendi
+
+#: apps/canos/main/canos.c:1299
+#: apps/canos/main/canos.c:1319
+#: apps/canos/main/canos.c:1326
+Otra vez	Ancora
+
+#: apps/canos/main/canos.c:1300
+#: apps/canos/main/canos.c:1318
+#: apps/canos/main/canos.c:1320
+#: apps/canos/main/canos.c:1327
+Niveles	Livelli
+
+#: apps/canos/main/canos.c:1309
+#: apps/canos/main/canos.c:1312
+Puntos	Punti
+
+#: apps/canos/main/canos.c:1309
+#: apps/canos/main/canos.c:1312
+Caños llenos	Tubi pieni
+
+#: apps/canos/main/canos.c:1310
+Giros	Rotazioni
+
+#: apps/canos/main/canos.c:1313
+Piezas	Pezzi
+
+#: apps/canos/main/canos.c:1318
+Siguiente	Avanti
+
+#: apps/canos/main/canos.c:1414
+No hay memoria para el tablero	Memoria insufficiente per il campo
+
+#: apps/canos/main/canos.c:1560
+¡Se abrió la llave!	La valvola si è aperta!
+
+#: apps/canos/main/cn_world.c:10
+Agua	Acqua
+
+#: apps/canos/main/cn_world.c:10
+Planta de agua	Acquedotto
+
+#: apps/canos/main/cn_world.c:10
+¡Se inundó la planta!	L'impianto è allagato!
+
+#: apps/canos/main/cn_world.c:23
+Combustible	Carburante
+
+#: apps/canos/main/cn_world.c:23
+Refinería	Raffineria
+
+#: apps/canos/main/cn_world.c:23
+¡Combustible por todos lados!	Carburante dappertutto!
+
+#: apps/canos/main/cn_world.c:36
+Ácido	Acido
+
+#: apps/canos/main/cn_world.c:36
+Laboratorio	Laboratorio
+
+#: apps/canos/main/cn_world.c:36
+¡El ácido se está comiendo el piso!	L'acido sta corrodendo il pavimento!
+
+#: apps/canos/main/cn_world.c:49
+Petróleo	Petrolio
+
+#: apps/canos/main/cn_world.c:49
+Yacimiento	Giacimento
+
+#: apps/canos/main/cn_world.c:49
+¡Derrame de petróleo!	Fuoriuscita di petrolio!
+
+#: apps/canos/main/cn_world.c:62
+Lava	Lava
+
+#: apps/canos/main/cn_world.c:62
+Fundición	Fonderia
+
+#: apps/canos/main/cn_world.c:62
+¡La lava se escapó del canal!	La lava è uscita dal canale!
+
+#: apps/canos/main/cn_world.c:75
+Nitrógeno	Azoto
+
+#: apps/canos/main/cn_world.c:75
+Criogenia	Criogenia
+
+#: apps/canos/main/cn_world.c:75
+¡Una nube de nitrógeno helado!	Una nube di azoto gelato!

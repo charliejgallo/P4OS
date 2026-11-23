@@ -1,0 +1,225 @@
+# amoledos-lang 1   es -> pt
+# demo.turbo.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/turbo/main/tb_link.c:134
+#: apps/turbo/main/tb_link.c:367
+Esperando a	Esperando
+
+#: apps/turbo/main/tb_link.c:135
+El tramo lo elige el reloj anfitrión.	O trecho é escolhido pelo relógio anfitrião.
+
+#: apps/turbo/main/tb_link.c:142
+El enlace no arrancó	A conexão não iniciou
+
+#: apps/turbo/main/tb_link.c:224
+El otro reloj tiene otra versión de Turbo.	O outro relógio tem outra versão do Turbo.
+
+#: apps/turbo/main/tb_link.c:225
+Actualizá los dos para correr juntos.	Atualize os dois para correr juntos.
+
+#: apps/turbo/main/tb_link.c:252
+#: apps/turbo/main/tb_link.c:332
+#: apps/turbo/main/tb_link.c:394
+%s salió de la carrera	%s saiu da corrida
+
+#: apps/turbo/main/tb_link.c:344
+#: apps/turbo/main/tb_link.c:376
+Sin señal de %s	Sem sinal de %s
+
+#: apps/turbo/main/turbo.c:987
+TIEMPO	TEMPO
+
+#: apps/turbo/main/turbo.c:988
+km/h	km/h
+
+#: apps/turbo/main/turbo.c:989
+¡TIEMPO EXTRA!	TEMPO EXTRA!
+
+#: apps/turbo/main/turbo.c:990
+¡YA!	JÁ!
+
+#: apps/turbo/main/turbo.c:991
+#: apps/turbo/main/turbo.c:1250
+¡LLEGADA!	CHEGADA!
+
+#: apps/turbo/main/turbo.c:992
+#: apps/turbo/main/turbo.c:1250
+SIN TIEMPO	SEM TEMPO
+
+#: apps/turbo/main/turbo.c:993
+¡APURATE!	RÁPIDO!
+
+#: apps/turbo/main/turbo.c:1096
+Cargando	Carregando
+
+#: apps/turbo/main/turbo.c:1189
+Tiempo	Tempo
+
+#: apps/turbo/main/turbo.c:1190
+Recorrido	Percurso
+
+#: apps/turbo/main/turbo.c:1191
+Récord	Recorde
+
+#: apps/turbo/main/turbo.c:1192
+  ¡nuevo!	  novo!
+
+#: apps/turbo/main/turbo.c:1193
+Punta	Máxima
+
+#: apps/turbo/main/turbo.c:1194
+choques	batidas
+
+#: apps/turbo/main/turbo.c:1198
+Gira	Turnê
+
+#: apps/turbo/main/turbo.c:1199
+¡Gira completa!	Turnê completa!
+
+#: apps/turbo/main/turbo.c:1204
+todavía corre...	ainda correndo...
+
+#: apps/turbo/main/turbo.c:1211
+¡Ganaste!	Vitória!
+
+#: apps/turbo/main/turbo.c:1211
+Ganó el otro reloj	O outro relógio venceu
+
+#: apps/turbo/main/turbo.c:1221
+monedas	moedas
+
+#: apps/turbo/main/turbo.c:1253
+Siguiente	Próximo
+
+#: apps/turbo/main/turbo.c:1253
+Menú	Menu
+
+#: apps/turbo/main/turbo.c:1534
+Contra	Contra
+
+#: apps/turbo/main/turbo.c:1554
+carreras contra el reloj	corridas contra o relógio
+
+#: apps/turbo/main/turbo.c:1560
+Gira completa	Turnê completa
+
+#: apps/turbo/main/turbo.c:1561
+#: apps/turbo/main/turbo.c:1604
+Contrarreloj	Contrarrelógio
+
+#: apps/turbo/main/turbo.c:1564
+#: apps/turbo/main/turbo.c:1746
+Garage	Garagem
+
+#: apps/turbo/main/turbo.c:1565
+#: apps/turbo/main/turbo.c:1893
+Ajustes	Ajustes
+
+#: apps/turbo/main/turbo.c:1578
+Se abre con una gira	Abre com uma turnê
+
+#: apps/turbo/main/turbo.c:1579
+Terminá	Termine
+
+#: apps/turbo/main/turbo.c:1604
+Elegí el tramo	Escolha o trecho
+
+#: apps/turbo/main/turbo.c:1618
+récord	recorde
+
+#: apps/turbo/main/turbo.c:1676
+Comprar	Comprar
+
+#: apps/turbo/main/turbo.c:1677
+Tu auto	Seu carro
+
+#: apps/turbo/main/turbo.c:1677
+Elegir	Escolher
+
+#: apps/turbo/main/turbo.c:1711
+No alcanzan las monedas	Moedas insuficientes
+
+#: apps/turbo/main/turbo.c:1762
+Velocidad	Velocidade
+
+#: apps/turbo/main/turbo.c:1762
+Aceleración	Aceleração
+
+#: apps/turbo/main/turbo.c:1762
+Agarre	Aderência
+
+#: apps/turbo/main/turbo.c:1762
+Todo terreno	Off-road
+
+#: apps/turbo/main/turbo.c:1894
+Fácil	Fácil
+
+#: apps/turbo/main/turbo.c:1894
+Normal	Normal
+
+#: apps/turbo/main/turbo.c:1894
+Difícil	Difícil
+
+#: apps/turbo/main/turbo.c:1895
+Dificultad	Dificuldade
+
+#: apps/turbo/main/turbo.c:1896
+Volante	Volante
+
+#: apps/turbo/main/turbo.c:1896
+Flechas	Setas
+
+#: apps/turbo/main/turbo.c:1897
+Dirección	Direção
+
+#: apps/turbo/main/turbo.c:1898
+Suave	Suave
+
+#: apps/turbo/main/turbo.c:1898
+Medio	Médio
+
+#: apps/turbo/main/turbo.c:1898
+Rápido	Rápido
+
+#: apps/turbo/main/turbo.c:1899
+Sensibilidad	Sensibilidade
+
+#: apps/turbo/main/turbo.c:1901
+Acelerar solo	Acelerar sozinho
+
+#: apps/turbo/main/turbo.c:1902
+Sonido	Som
+
+#: apps/turbo/main/turbo.c:1907
+Volante: arrastrá el pulgar izquierdo de costado. Pedales a la derecha: freno y acelerador.	Volante: arraste o polegar esquerdo para os lados. Pedais à direita: freio e acelerador.
+
+#: apps/turbo/main/turbo.c:1980
+Otra vez	De novo
+
+#: apps/turbo/main/turbo.c:1989
+Pausa	Pausa
+
+#: apps/turbo/main/turbo.c:1990
+Seguir	Retomar
+
+#: apps/turbo/main/turbo.c:1991
+Reiniciar	Recomeçar
+
+#: apps/turbo/main/turbo.c:1992
+Salir al menú	Voltar ao menu
+
+#: apps/turbo/main/turbo.c:1996
+Contra el otro reloj	Contra o outro relógio
+
+#: apps/turbo/main/turbo.c:1998
+Cancelar	Cancelar
+
+#: apps/turbo/main/turbo.c:2004
+Cargando...	Carregando...
+
+#: apps/turbo/main/turbo.c:2244
+No hay memoria para el tramo	Sem memória para o trecho

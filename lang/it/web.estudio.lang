@@ -1,0 +1,82 @@
+# amoledos-lang 1   es -> it
+# web.estudio.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/estudio/web/estudio.js:65
+#: apps/estudio/web/estudio.js:169
+Estudio	Studio
+
+#: apps/estudio/web/estudio.js:78
+¿Borrar %s? No se puede deshacer.	Eliminare %s? Non si può annullare.
+
+#: apps/estudio/web/estudio.js:79
+Borrado	Eliminato
+
+#: apps/estudio/web/estudio.js:96
+Bajar	Scarica
+
+#: apps/estudio/web/estudio.js:97
+Borrar	Cancella
+
+#: apps/estudio/web/estudio.js:127
+%s no es un archivo que el Estudio lea	%s non è un file che Studio legge
+
+#: apps/estudio/web/estudio.js:130
+Subido	Caricato
+
+#: apps/estudio/web/estudio.js:130
+Subidos	Caricati
+
+#: apps/estudio/web/estudio.js:156
+Subir proyectos	Carica progetti
+
+#: apps/estudio/web/estudio.js:156
+Todavía no hay proyectos: el Estudio guarda el suyo solo.	Ancora nessun progetto: Studio salva il suo da solo.
+
+#: apps/estudio/web/estudio.js:157
+En la placa se abren desde Canción → Abrir. Un proyecto lleva sus patrones, la canción, los sonidos y la mezcla; las muestras que use van aparte, en Muestras.	Sulla scheda si aprono da Brano → Apri. Un progetto contiene i pattern, il brano, i suoni e il mix; i campioni che usa vanno a parte, in Campioni.
+
+#: apps/estudio/web/estudio.js:160
+Subir muestras WAV	Carica campioni WAV
+
+#: apps/estudio/web/estudio.js:160
+No hay muestras. Subí WAV tuyos para tocarlos en la batería.	Nessun campione. Carica i tuoi WAV per suonarli sulla batteria.
+
+#: apps/estudio/web/estudio.js:161
+WAV PCM de 8, 16, 24 o 32 bits o en coma flotante, mono o estéreo, de cualquier frecuencia; se usan hasta 12 segundos de cada uno. En la placa: Ritmo → el sonido de la pista.	WAV PCM a 8, 16, 24 o 32 bit o in virgola mobile, mono o stereo, a qualsiasi frequenza; se ne usano fino a 12 secondi. Sulla scheda: Ritmo → il suono della traccia.
+
+#: apps/estudio/web/estudio.js:163
+Nada exportado todavía. Se exporta desde Canción → Exportar, en WAV o en MIDI.	Ancora niente di esportato. Si esporta da Brano → Esporta, in WAV o MIDI.
+
+#: apps/estudio/web/estudio.js:166
+Subir sonidos	Carica suoni
+
+#: apps/estudio/web/estudio.js:166
+Ninguno todavía. En la placa: Sonido → Guardar este sonido como…	Ancora nessuno. Sulla scheda: Suono → Salva questo suono come…
+
+#: apps/estudio/web/estudio.js:171
+Lo que el Estudio guarda en la tarjeta: los proyectos, tus muestras, lo exportado y tus sonidos del sintetizador.	Ciò che Studio salva sulla microSD: i progetti, i tuoi campioni, ciò che è esportato e i tuoi suoni del synth.
+
+#: apps/estudio/web/estudio.js:173
+Abierto en la placa	Aperto sulla scheda
+
+#: apps/estudio/web/estudio.js:173
+Abrir el Estudio en la placa	Apri Studio sulla scheda
+
+#: apps/estudio/web/estudio.js:174
+Actualizar	Aggiorna
+
+#: apps/estudio/web/estudio.js:175
+Proyectos	Progetti
+
+#: apps/estudio/web/estudio.js:176
+Muestras	Campioni
+
+#: apps/estudio/web/estudio.js:177
+Exportado	Esportati
+
+#: apps/estudio/web/estudio.js:178
+Mis sonidos	I miei suoni

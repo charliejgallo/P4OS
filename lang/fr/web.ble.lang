@@ -1,0 +1,485 @@
+# amoledos-lang 1   es -> fr
+# web.ble.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/ble/web/ble.js:67
+Teléfono	Téléphone
+
+#: apps/ble/web/ble.js:67
+Computadora	Ordinateur
+
+#: apps/ble/web/ble.js:67
+Tableta	Tablette
+
+#: apps/ble/web/ble.js:67
+Reloj	Montre
+
+#: apps/ble/web/ble.js:67
+Audio	Audio
+
+#: apps/ble/web/ble.js:68
+Rastreador	Traceur
+
+#: apps/ble/web/ble.js:68
+#: apps/ble/web/ble.js:478
+Sensor	Capteur
+
+#: apps/ble/web/ble.js:68
+#: apps/ble/web/ble.js:483
+Baliza	Balise
+
+#: apps/ble/web/ble.js:68
+Teclado o mouse	Clavier ou souris
+
+#: apps/ble/web/ble.js:68
+Joystick	Joystick
+
+#: apps/ble/web/ble.js:69
+Tele	TV
+
+#: apps/ble/web/ble.js:69
+Salud	Santé
+
+#: apps/ble/web/ble.js:69
+Luz	Lampe
+
+#: apps/ble/web/ble.js:69
+Deporte	Sport
+
+#: apps/ble/web/ble.js:69
+Placa de desarrollo	Carte de dév.
+
+#: apps/ble/web/ble.js:70
+Desconocido	Inconnu
+
+#: apps/ble/web/ble.js:74
+ahora	à l'instant
+
+#: apps/ble/web/ble.js:76
+Sin nombre	Sans nom
+
+#: apps/ble/web/ble.js:81
+#: apps/ble/web/ble.js:294
+cifrado	chiffré
+
+#: apps/ble/web/ble.js:88
+abierto	ouvert
+
+#: apps/ble/web/ble.js:88
+cerrado	fermé
+
+#: apps/ble/web/ble.js:89
+movimiento	mouvement
+
+#: apps/ble/web/ble.js:89
+quieto	immobile
+
+#: apps/ble/web/ble.js:90
+%s lpm	%s bpm
+
+#: apps/ble/web/ble.js:91
+bat. %s	bat. %s
+
+#: apps/ble/web/ble.js:121
+Buscar por nombre, dirección o fabricante	Chercher par nom, adresse ou fabricant
+
+#: apps/ble/web/ble.js:123
+#: apps/ble/web/ble.js:253
+Todo	Tout
+
+#: apps/ble/web/ble.js:138
+Bajar la tabla (CSV)	Télécharger la table (CSV)
+
+#: apps/ble/web/ble.js:139
+Bajar todo (JSON)	Tout télécharger (JSON)
+
+#: apps/ble/web/ble.js:140
+Equipos	Appareils
+
+#: apps/ble/web/ble.js:141
+Sólo los que se oyen	Seulement ceux entendus
+
+#: apps/ble/web/ble.js:155
+La app BLE no está abierta en la placa: los datos en vivo salen de ella.	L'app BLE n'est pas ouverte sur la carte : les données en direct viennent d'elle.
+
+#: apps/ble/web/ble.js:156
+Abriendo BLE en la placa	Ouverture de BLE sur la carte
+
+#: apps/ble/web/ble.js:156
+Abrir BLE en la placa	Ouvrir BLE sur la carte
+
+#: apps/ble/web/ble.js:166
+Seguir	Reprise
+
+#: apps/ble/web/ble.js:166
+Pausa	Pause
+
+#: apps/ble/web/ble.js:167
+Escaneo	Scan
+
+#: apps/ble/web/ble.js:167
+#: apps/ble/web/ble.js:220
+activo	actif
+
+#: apps/ble/web/ble.js:167
+#: apps/ble/web/ble.js:220
+pasivo	passif
+
+#: apps/ble/web/ble.js:168
+Escuchando	Écoute
+
+#: apps/ble/web/ble.js:169
+Entorno	Lieu
+
+#: apps/ble/web/ble.js:169
+al aire libre	en plein air
+
+#: apps/ble/web/ble.js:169
+casa	maison
+
+#: apps/ble/web/ble.js:169
+oficina	bureau
+
+#: apps/ble/web/ble.js:170
+Señal mínima	Signal minimum
+
+#: apps/ble/web/ble.js:170
+todos	tous
+
+#: apps/ble/web/ble.js:171
+CSV de los sensores	CSV des capteurs
+
+#: apps/ble/web/ble.js:172
+MQTT (no conectado)	MQTT (non connecté)
+
+#: apps/ble/web/ble.js:173
+¿Vaciar la lista? Los favoritos quedan.	Vider la liste ? Les favoris restent.
+
+#: apps/ble/web/ble.js:173
+Vaciar la lista	Vider la liste
+
+#: apps/ble/web/ble.js:180
+el teléfono	le téléphone
+
+#: apps/ble/web/ble.js:180
+la computadora	l'ordinateur
+
+#: apps/ble/web/ble.js:180
+el teléfono y la computadora	le téléphone et l'ordinateur
+
+#: apps/ble/web/ble.js:180
+el Wi-Fi	le Wi-Fi
+
+#: apps/ble/web/ble.js:181
+el teléfono y el Wi-Fi	le téléphone et le Wi-Fi
+
+#: apps/ble/web/ble.js:181
+la computadora y el Wi-Fi	l'ordinateur et le Wi-Fi
+
+#: apps/ble/web/ble.js:181
+el teléfono, la computadora y el Wi-Fi	le téléphone, l'ordinateur et le Wi-Fi
+
+#: apps/ble/web/ble.js:182
+recién	à l'instant
+
+#: apps/ble/web/ble.js:182
+hace %s	il y a %s
+
+#: apps/ble/web/ble.js:184
+⚠ Mientras escaneaba se desconectó %s (%s). El Bluetooth y el Wi-Fi de la placa comparten una sola radio: escuchar menos tiempo o pausar el escaneo les deja más aire.	⚠ Pendant le scan, %s s'est déconnecté (%s). Le Bluetooth et le Wi-Fi de la carte partagent une seule radio : écouter moins longtemps ou mettre le scan en pause leur laisse plus d'air.
+
+#: apps/ble/web/ble.js:185
+Entendido	Compris
+
+#: apps/ble/web/ble.js:208
+paquetes/s (máx. %s)	paquets/s (max. %s)
+
+#: apps/ble/web/ble.js:211
+equipos/s (máx. %s)	appareils/s (max. %s)
+
+#: apps/ble/web/ble.js:218
+Bluetooth apagado en la placa (se prende en Ajustes o desde la app).	Bluetooth désactivé sur la carte (s'active dans Réglages ou depuis l'app).
+
+#: apps/ble/web/ble.js:219
+%s cerca	%s à proximité
+
+#: apps/ble/web/ble.js:219
+%s vistos	%s vus
+
+#: apps/ble/web/ble.js:219
+%s paquetes/s	%s paquets/s
+
+#: apps/ble/web/ble.js:219
+%s en total	%s au total
+
+#: apps/ble/web/ble.js:219
+%s perdidos	%s perdus
+
+#: apps/ble/web/ble.js:220
+en pausa	en pause
+
+#: apps/ble/web/ble.js:222
+la placa guarda %s equipos y olvidó %s para hacer lugar	la carte garde %s appareils et en a oublié %s pour faire de la place
+
+#: apps/ble/web/ble.js:223
+la tabla de abajo muestra los %s más fuertes de %s	la table ci-dessous montre les %s plus forts sur %s
+
+#: apps/ble/web/ble.js:231
+Nombre	Nom
+
+#: apps/ble/web/ble.js:231
+#: apps/ble/web/ble.js:469
+Qué es	Ce que c'est
+
+#: apps/ble/web/ble.js:232
+#: apps/ble/web/ble.js:470
+Fabricante	Fabricant
+
+#: apps/ble/web/ble.js:232
+#: apps/ble/web/ble.js:469
+Dirección	Adresse
+
+#: apps/ble/web/ble.js:232
+#: apps/ble/web/ble.js:471
+Señal	Signal
+
+#: apps/ble/web/ble.js:233
+#: apps/ble/web/ble.js:472
+Distancia	Distance
+
+#: apps/ble/web/ble.js:233
+#: apps/ble/web/ble.js:472
+Intervalo	Intervalle
+
+#: apps/ble/web/ble.js:233
+#: apps/ble/web/ble.js:473
+Paquetes	Paquets
+
+#: apps/ble/web/ble.js:234
+#: apps/ble/web/ble.js:473
+Oído	Entendu
+
+#: apps/ble/web/ble.js:234
+Datos	Données
+
+#: apps/ble/web/ble.js:276
+Nadie con este filtro.	Rien avec ce filtre.
+
+#: apps/ble/web/ble.js:276
+Escuchando...	Écoute...
+
+#: apps/ble/web/ble.js:291
+Sensores	Capteurs
+
+#: apps/ble/web/ble.js:295
+%s de humedad	%s d'humidité
+
+#: apps/ble/web/ble.js:297
+Ninguno a la vista. Aparecen solos los que anuncian en BTHome, pvvx/ATC, MiBeacon sin cifrar, Govee, Ruuvi, SwitchBot, Qingping, Inkbird o Eddystone TLM.	Aucun en vue. Ceux qui émettent en BTHome, pvvx/ATC, MiBeacon non chiffré, Govee, Ruuvi, SwitchBot, Qingping, Inkbird ou Eddystone TLM apparaissent tout seuls.
+
+#: apps/ble/web/ble.js:351
+Desconectado	Déconnecté
+
+#: apps/ble/web/ble.js:351
+Conectando...	Connexion...
+
+#: apps/ble/web/ble.js:351
+Conectado, listando servicios...	Connecté, liste des services...
+
+#: apps/ble/web/ble.js:351
+Conectado	Connecté
+
+#: apps/ble/web/ble.js:351
+Sin conexión	Sans connexion
+
+#: apps/ble/web/ble.js:352
+lee	lit
+
+#: apps/ble/web/ble.js:352
+escribe	écrit
+
+#: apps/ble/web/ble.js:352
+escribe sin respuesta	écrit sans réponse
+
+#: apps/ble/web/ble.js:352
+notifica	notifie
+
+#: apps/ble/web/ble.js:352
+indica	indique
+
+#: apps/ble/web/ble.js:365
+Activar este sensor Xiaomi: le da una clave nueva y la guarda en la placa. El sensor olvida la que tenía: Mi Home y quien lo lea con la clave vieja (Home Assistant, por ejemplo) van a necesitar la nueva. ¿Seguir?	Activer ce capteur Xiaomi : il reçoit une nouvelle clé, gardée sur la carte. Le capteur oublie l'ancienne : Mi Home et qui le lit avec l'ancienne clé (Home Assistant, par exemple) auront besoin de la nouvelle. Continuer ?
+
+#: apps/ble/web/ble.js:369
+Escribir: texto, o bytes con 0x (por ejemplo 0x01 A0)	Écrire : texte, ou octets avec 0x (par exemple 0x01 A0)
+
+#: apps/ble/web/ble.js:378
+Conectarse para ver sus servicios y características, leerlas, escribirlas y escuchar sus notificaciones. Mientras tanto la placa deja de escanear un momento; muchos equipos aceptan una sola conexión a la vez.	Se connecter pour voir ses services et caractéristiques, les lire, les écrire et écouter leurs notifications. Pendant ce temps la carte arrête de scanner un moment ; beaucoup d'appareils n'acceptent qu'une connexion à la fois.
+
+#: apps/ble/web/ble.js:379
+Conectar por GATT	Connecter par GATT
+
+#: apps/ble/web/ble.js:383
+señal %s dBm	signal %s dBm
+
+#: apps/ble/web/ble.js:383
+leyendo %s de %s	lecture %s sur %s
+
+#: apps/ble/web/ble.js:389
+Servicio %s · handles %s a %s	Service %s · handles %s à %s
+
+#: apps/ble/web/ble.js:394
+Leer	Lire
+
+#: apps/ble/web/ble.js:395
+Escribir	Écrire
+
+#: apps/ble/web/ble.js:396
+Pedir los datos (Hi-Link)	Demander (Hi-Link)
+
+#: apps/ble/web/ble.js:397
+Dejar de escuchar	Arrêter l'écoute
+
+#: apps/ble/web/ble.js:397
+Notificaciones	Notifications
+
+#: apps/ble/web/ble.js:397
+Indicaciones	Indications
+
+#: apps/ble/web/ble.js:408
+Activando: %s...	Activation : %s...
+
+#: apps/ble/web/ble.js:409
+Sensor activado.	Capteur activé.
+
+#: apps/ble/web/ble.js:410
+Clave nueva (bindkey), ya guardada en la placa para leerlo:	Nouvelle clé (bindkey), déjà enregistrée sur la carte pour le lire :
+
+#: apps/ble/web/ble.js:412
+No se activó: %s	Non activé : %s
+
+#: apps/ble/web/ble.js:414
+Leer todo	Tout lire
+
+#: apps/ble/web/ble.js:415
+Probar de nuevo la activación	Réessayer l'activation
+
+#: apps/ble/web/ble.js:415
+Activar (Xiaomi)	Activer (Xiaomi)
+
+#: apps/ble/web/ble.js:416
+Desconectar	Déconnecter
+
+#: apps/ble/web/ble.js:416
+Conectar de nuevo	Reconnecter
+
+#: apps/ble/web/ble.js:419
+Lo último	Dernier
+
+#: apps/ble/web/ble.js:430
+32 cifras hexadecimales (la bindkey)	32 chiffres hexadécimaux (la bindkey)
+
+#: apps/ble/web/ble.js:431
+Sin clave: sus lecturas van cifradas.	Sans clé : ses lectures sont chiffrées.
+
+#: apps/ble/web/ble.js:431
+Clave correcta: las lecturas se descifran.	Clé correcte : les lectures sont déchiffrées.
+
+#: apps/ble/web/ble.js:432
+La clave no coincide con lo que anuncia.	La clé ne correspond pas à ce qu'il annonce.
+
+#: apps/ble/web/ble.js:432
+Usa un cifrado viejo (MiBeacon v2/v3) que la app no descifra.	Il utilise un ancien chiffrement (MiBeacon v2/v3) que l'app ne déchiffre pas.
+
+#: apps/ble/web/ble.js:433
+Clave cargada: esperando un paquete cifrado para probarla.	Clé chargée : en attente d'un paquet chiffré pour l'essayer.
+
+#: apps/ble/web/ble.js:434
+Clave	Clé
+
+#: apps/ble/web/ble.js:438
+Tienen que ser 32 cifras hexadecimales	Il faut 32 chiffres hexadécimaux
+
+#: apps/ble/web/ble.js:441
+Clave enviada: la app la guarda y la prueba con el próximo paquete	Clé envoyée : l'app l'enregistre et l'essaie avec le prochain paquet
+
+#: apps/ble/web/ble.js:442
+Guardar la clave	Enregistrer la clé
+
+#: apps/ble/web/ble.js:443
+Borrar la clave	Supprimer la clé
+
+#: apps/ble/web/ble.js:444
+La bindkey de un sensor Xiaomi sale de su cuenta de Mi Home (por ejemplo con "Xiaomi Cloud Tokens Extractor"), o de Home Assistant si ya lo lee. BTHome cifrado usa la clave que le pusiste al configurarlo.	La bindkey d'un capteur Xiaomi vient de son compte Mi Home (par exemple avec "Xiaomi Cloud Tokens Extractor"), ou de Home Assistant s'il le lit déjà. BTHome chiffré utilise la clé que tu lui as donnée en le configurant.
+
+#: apps/ble/web/ble.js:458
+Un nombre propio	Un nom à toi
+
+#: apps/ble/web/ble.js:461
+★ Favorito	★ Favori
+
+#: apps/ble/web/ble.js:461
+☆ Marcar	☆ Marquer
+
+#: apps/ble/web/ble.js:462
+Guardar el nombre	Enregistrer le nom
+
+#: apps/ble/web/ble.js:463
+Cerrar	Fermer
+
+#: apps/ble/web/ble.js:471
+%s dBm · prom. %s · mín. %s · máx. %s	%s dBm · moy. %s · min. %s · max. %s
+
+#: apps/ble/web/ble.js:472
+≈ %s m (estimada por la señal)	≈ %s m (estimée par le signal)
+
+#: apps/ble/web/ble.js:473
+%s anuncios, %s respuestas, cambió %s veces	%s annonces, %s réponses, a changé %s fois
+
+#: apps/ble/web/ble.js:473
+hace %s · desde hace %s	il y a %s · depuis %s
+
+#: apps/ble/web/ble.js:474
+Conectable	Connectable
+
+#: apps/ble/web/ble.js:474
+sí (abajo, GATT)	oui (en bas, GATT)
+
+#: apps/ble/web/ble.js:474
+no	non
+
+#: apps/ble/web/ble.js:475
+Señal, dos minutos	Signal, deux minutes
+
+#: apps/ble/web/ble.js:479
+Temperatura, dos horas	Température, deux heures
+
+#: apps/ble/web/ble.js:483
+Mayor / menor	Major / minor
+
+#: apps/ble/web/ble.js:483
+Potencia de referencia	Puissance de référence
+
+#: apps/ble/web/ble.js:486
+Anuncio · %s bytes	Annonce · %s octets
+
+#: apps/ble/web/ble.js:487
+Respuesta al escaneo · %s bytes	Réponse au scan · %s octets
+
+#: apps/ble/web/ble.js:488
+Pidiendo los paquetes a la placa...	Demande des paquets à la carte...
+
+#: apps/ble/web/ble.js:503
+Lecturas guardadas (CSV)	Lectures enregistrées (CSV)
+
+#: apps/ble/web/ble.js:504
+Todavía no hay. Se prende con "CSV de los sensores", arriba o en los ajustes de la app.	Pas encore. S'active avec « CSV des capteurs », ci-dessus ou dans les réglages de l'app.
+
+#: apps/ble/web/ble.js:506
+Bajar	Télécharger
+
+#: apps/ble/web/ble.js:507
+¿Borrar %s?	Supprimer %s ?

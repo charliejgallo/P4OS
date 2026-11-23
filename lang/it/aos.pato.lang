@@ -1,0 +1,173 @@
+# amoledos-lang 1   es -> it
+# aos.pato.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/pato/main/pato.c:437
+Escribiendo	Digitando
+
+#: apps/pato/main/pato.c:438
+#: apps/pato/main/pato.c:697
+#: apps/pato/main/pato.c:923
+Tecla	Tasto
+
+#: apps/pato/main/pato.c:439
+Espera	Attesa
+
+#: apps/pato/main/pato.c:440
+#: apps/pato/main/pato.c:699
+#: apps/pato/main/pato.c:925
+Mouse	Mouse
+
+#: apps/pato/main/pato.c:441
+#: apps/pato/main/pato.c:700
+#: apps/pato/main/pato.c:926
+Rueda	Ruota
+
+#: apps/pato/main/pato.c:442
+#: apps/pato/main/pato.c:701
+#: apps/pato/main/pato.c:927
+Clic	Clic
+
+#: apps/pato/main/pato.c:457
+#: apps/pato/main/pato.c:1602
+Listo	Fine
+
+#: apps/pato/main/pato.c:458
+#: apps/pato/main/pato.c:1486
+Volver	Torna
+
+#: apps/pato/main/pato.c:471
+Se perdió el teclado	Tastiera persa
+
+#: apps/pato/main/pato.c:541
+#: apps/pato/main/pato.c:1522
+Parar	Ferma
+
+#: apps/pato/main/pato.c:696
+#: apps/pato/main/pato.c:922
+Escribir	Scrivi
+
+#: apps/pato/main/pato.c:698
+#: apps/pato/main/pato.c:924
+Esperar	Attendi
+
+#: apps/pato/main/pato.c:702
+#: apps/pato/main/pato.c:928
+Repetir	Ripeti
+
+#: apps/pato/main/pato.c:703
+Comentario	Commento
+
+#: apps/pato/main/pato.c:824
+texto a escribir	testo da scrivere
+
+#: apps/pato/main/pato.c:827
+Se escribe tal cual en la computadora.	Viene scritto così com'è sul computer.
+
+#: apps/pato/main/pato.c:836
+Una tecla o combo: enter, esc, up, cmd+space,\nctrl+alt+supr, f5. Prefijos: cmd+ ctrl+ alt+ shift+	Un tasto o una combinazione: enter, esc, up, cmd+space,\nctrl+alt+del, f5. Prefissi: cmd+ ctrl+ alt+ shift+
+
+#: apps/pato/main/pato.c:845
+Espera, en milisegundos (0 a 60000).	Attende, in millisecondi (da 0 a 60000).
+
+#: apps/pato/main/pato.c:857
+Mueve el puntero: dx a la derecha, dy hacia abajo.	Muove il puntatore: dx a destra, dy in basso.
+
+#: apps/pato/main/pato.c:865
+Rueda: positivo arriba, negativo abajo.	Rotella: positivo su, negativo giù.
+
+#: apps/pato/main/pato.c:872
+#: apps/pato/main/pato.c:927
+izquierdo	sinistro
+
+#: apps/pato/main/pato.c:872
+#: apps/pato/main/pato.c:927
+derecho	destro
+
+#: apps/pato/main/pato.c:884
+Repite el paso anterior esta cantidad de veces.	Ripete il passo precedente questo numero di volte.
+
+#: apps/pato/main/pato.c:889
+nota	nota
+
+#: apps/pato/main/pato.c:892
+No se ejecuta: sólo una nota para vos.	Non viene eseguito: solo una nota per te.
+
+#: apps/pato/main/pato.c:983
+Flujo vacío. Agregá el primer paso.	Flusso vuoto. Aggiungi il primo passo.
+
+#: apps/pato/main/pato.c:1088
+Ponele un nombre	Dagli un nome
+
+#: apps/pato/main/pato.c:1100
+No se pudo guardar	Impossibile salvare
+
+#: apps/pato/main/pato.c:1116
+Guardado	Salvato
+
+#: apps/pato/main/pato.c:1116
+#: apps/pato/main/pato.c:1221
+pasos	passi
+
+#: apps/pato/main/pato.c:1125
+Demasiados pasos	Troppi passi
+
+#: apps/pato/main/pato.c:1147
+Borrado	Eliminato
+
+#: apps/pato/main/pato.c:1172
+Pasá el USB a Teclado, o emparejá por Bluetooth	Passa l'USB a Tastiera, o abbina via Bluetooth
+
+#: apps/pato/main/pato.c:1176
+El script está vacío	Lo script è vuoto
+
+#: apps/pato/main/pato.c:1203
+No se pudo leer el script	Impossibile leggere lo script
+
+#: apps/pato/main/pato.c:1240
+Detenido	Fermato
+
+#: apps/pato/main/pato.c:1265
+El USB está cambiando de modo	L'USB sta cambiando modalità
+
+#: apps/pato/main/pato.c:1299
+No hay scripts todavía.\nCreá uno con «Nuevo script»,\no desde el portal (página Pato goma).	Ancora nessuno script.\nCreane uno con «Nuovo script»,\no dal portale (pagina Pato goma).
+
+#: apps/pato/main/pato.c:1378
+Teclado listo (USB o Bluetooth)	Tastiera pronta (USB o Bluetooth)
+
+#: apps/pato/main/pato.c:1379
+Pasalo a «Teclado» o emparejá Bluetooth	Passalo a «Tastiera» o abbina il Bluetooth
+
+#: apps/pato/main/pato.c:1431
+Nuevo script	Nuovo script
+
+#: apps/pato/main/pato.c:1436
+Pasar el USB a Teclado	Passa l'USB a Tastiera
+
+#: apps/pato/main/pato.c:1480
+Se enviará al teclado y mouse de la computadora.	Verrà inviato a tastiera e mouse del computer.
+
+#: apps/pato/main/pato.c:1491
+Editar	Modifica
+
+#: apps/pato/main/pato.c:1496
+Ejecutar	Esegui
+
+#: apps/pato/main/pato.c:1539
+Nombre del script	Nome dello script
+
+#: apps/pato/main/pato.c:1563
+Agregar paso	Aggiungi passo
+
+#: apps/pato/main/pato.c:1568
+Guardar	Salva
+
+#: apps/pato/main/pato.c:1573
+Borrar	Elimina
+
+#: apps/pato/main/pato.c:1600
+Paso	Passo

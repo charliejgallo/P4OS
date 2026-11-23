@@ -1,0 +1,597 @@
+# amoledos-lang 1   es -> fr
+# aos.impresoras.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/impresoras/main/drv_bambu.c:96
+Error %04X-%04X	Erreur %04X-%04X
+
+#: apps/impresoras/main/drv_bambu.c:220
+Bambu no acepta eso por la red	Bambu n'accepte pas ça par le réseau
+
+#: apps/impresoras/main/drv_bambu.c:238
+Faltan el número de serie y el código de acceso	Il manque le numéro de série et le code d'accès
+
+#: apps/impresoras/main/drv_bambu.c:251
+El certificado de la impresora no es de ese número de serie	Le certificat de l'imprimante n'est pas pour ce numéro de série
+
+#: apps/impresoras/main/drv_bambu.c:253
+La impresora no tiene un certificado de Bambu	L'imprimante n'a pas de certificat Bambu
+
+#: apps/impresoras/main/drv_bambu.c:255
+Esperando la hora de la red para verificar el certificado	Attente de l'heure réseau pour vérifier le certificat
+
+#: apps/impresoras/main/drv_bambu.c:257
+Código de acceso incorrecto	Code d'accès incorrect
+
+#: apps/impresoras/main/drv_bambu.c:259
+#: apps/impresoras/main/drv_creality.c:227
+#: apps/impresoras/main/drv_duet.c:76
+#: apps/impresoras/main/drv_duet.c:161
+No responde	Pas de réponse
+
+#: apps/impresoras/main/drv_bambu.c:292
+#: apps/impresoras/main/drv_creality.c:257
+#: apps/impresoras/main/drv_elegoo.c:319
+Se cortó la conexión	Connexion coupée
+
+#: apps/impresoras/main/drv_bambu.c:302
+X1, X1E, P1P, P1S, A1, A1 mini y H2D, en modo LAN (con el modo desarrollador para manejarlas)	X1, X1E, P1P, P1S, A1, A1 mini et H2D, en mode LAN (avec le mode développeur pour les piloter)
+
+#: apps/impresoras/main/drv_bambu.c:303
+Código de acceso	Code d'accès
+
+#: apps/impresoras/main/drv_bambu.c:304
+En la impresora: Ajustes, Red (WLAN): el código de acceso de 8 caracteres	Sur l'imprimante : Réglages, Réseau (WLAN) : le code d'accès à 8 caractères
+
+#: apps/impresoras/main/drv_creality.c:158
+#: apps/impresoras/main/drv_elegoo.c:119
+Error %d	Erreur %d
+
+#: apps/impresoras/main/drv_creality.c:266
+K1, K1C, K1 Max, K2 Plus, Ender-3 V3 y Creality Hi (sin root)	K1, K1C, K1 Max, K2 Plus, Ender-3 V3 et Creality Hi (sans root)
+
+#: apps/impresoras/main/drv_duet.c:72
+No es una Duet	Pas une Duet
+
+#: apps/impresoras/main/drv_duet.c:76
+#: apps/impresoras/main/drv_duet.c:161
+#: apps/impresoras/main/drv_duet.c:175
+#: apps/impresoras/main/drv_prusalink.c:95
+Respuesta inesperada	Réponse inattendue
+
+#: apps/impresoras/main/drv_duet.c:83
+#: apps/impresoras/main/drv_duet.c:175
+Contraseña incorrecta	Mot de passe incorrect
+
+#: apps/impresoras/main/drv_duet.c:88
+La Duet no acepta más sesiones	La Duet n'accepte plus de sessions
+
+#: apps/impresoras/main/drv_duet.c:325
+#: apps/impresoras/main/drv_flashforge.c:254
+#: apps/impresoras/main/drv_moonraker.c:296
+#: apps/impresoras/main/drv_octoprint.c:338
+No se pudo leer la lista	Impossible de lire la liste
+
+#: apps/impresoras/main/drv_duet.c:416
+Placas Duet 2 y 3 con RepRapFirmware 3, solas o con SBC	Cartes Duet 2 et 3 avec RepRapFirmware 3, seules ou avec SBC
+
+#: apps/impresoras/main/drv_duet.c:417
+Contraseña (si tiene)	Mot de passe (si besoin)
+
+#: apps/impresoras/main/drv_duet.c:418
+La de M551; vacía si la Duet no pide	Celui de M551 ; vide si la Duet n'en demande pas
+
+#: apps/impresoras/main/drv_elegoo.c:183
+La impresora no aceptó la orden	L'imprimante n'a pas accepté l'ordre
+
+#: apps/impresoras/main/drv_elegoo.c:241
+Elegoo no acepta G-code por la red	Elegoo n'accepte pas de G-code par le réseau
+
+#: apps/impresoras/main/drv_elegoo.c:303
+Falta el número de la placa (MainboardID): escribilo en Serie	Il manque le numéro de la carte (MainboardID) : écris-le dans Série
+
+#: apps/impresoras/main/drv_elegoo.c:329
+Centauri Carbon y las de resina Saturn y Mars con Wi-Fi	Centauri Carbon et les Saturn et Mars à résine avec Wi-Fi
+
+#: apps/impresoras/main/drv_flashforge.c:126
+Número de serie o código incorrectos	Numéro de série ou code incorrect
+
+#: apps/impresoras/main/drv_flashforge.c:247
+Esta impresora no da la lista de archivos por la red	Cette imprimante ne donne pas la liste des fichiers par le réseau
+
+#: apps/impresoras/main/drv_flashforge.c:355
+Esta impresora no lo acepta por la red	Cette imprimante ne l'accepte pas par le réseau
+
+#: apps/impresoras/main/drv_flashforge.c:400
+Adventurer 5M, 5M Pro y AD5X (con código); Adventurer 3 y 4, Creator, Finder (sin código)	Adventurer 5M, 5M Pro et AD5X (avec code) ; Adventurer 3 et 4, Creator, Finder (sans code)
+
+#: apps/impresoras/main/drv_flashforge.c:401
+Código de verificación (check code)	Code de vérification (check code)
+
+#: apps/impresoras/main/drv_flashforge.c:402
+En la impresora: Ajustes, Red, Sólo LAN. Vacío: las viejas, por el puerto 8899	Sur l'imprimante : Réglages, Réseau, LAN uniquement. Vide : les anciennes, par le port 8899
+
+#: apps/impresoras/main/drv_moonraker.c:204
+Moonraker pide una clave	Moonraker demande une clé
+
+#: apps/impresoras/main/drv_moonraker.c:205
+#: apps/impresoras/main/drv_octoprint.c:214
+#: apps/impresoras/main/drv_octoprint.c:445
+Contestó %d	Réponse %d
+
+#: apps/impresoras/main/drv_moonraker.c:361
+#: apps/impresoras/main/drv_octoprint.c:441
+#: apps/impresoras/main/drv_prusalink.c:278
+La impresora no está lista para eso	L'imprimante n'est pas prête pour ça
+
+#: apps/impresoras/main/drv_moonraker.c:397
+Voron, Sovol, Elegoo Neptune 4, Qidi, RatRig y toda impresora con Klipper, Mainsail o Fluidd	Voron, Sovol, Elegoo Neptune 4, Qidi, RatRig et toute imprimante avec Klipper, Mainsail ou Fluidd
+
+#: apps/impresoras/main/drv_moonraker.c:398
+Clave de la API (opcional)	Clé API (optionnelle)
+
+#: apps/impresoras/main/drv_moonraker.c:399
+Sólo si Moonraker tiene [authorization]: la clave de /access/api_key	Seulement si Moonraker a [authorization] : la clé de /access/api_key
+
+#: apps/impresoras/main/drv_octoprint.c:185
+Clave de la API incorrecta	Clé API incorrecte
+
+#: apps/impresoras/main/drv_octoprint.c:206
+OctoPrint no está conectado a la impresora	OctoPrint n'est pas connecté à l'imprimante
+
+#: apps/impresoras/main/drv_octoprint.c:485
+Cualquier impresora con OctoPrint (Prusa, Ender, Anet...)	Toute imprimante avec OctoPrint (Prusa, Ender, Anet...)
+
+#: apps/impresoras/main/drv_octoprint.c:486
+Clave de la API	Clé API
+
+#: apps/impresoras/main/drv_octoprint.c:487
+En OctoPrint: Ajustes, API (o la clave de una aplicación del usuario)	Dans OctoPrint : Réglages, API (ou la clé d'une application de l'utilisateur)
+
+#: apps/impresoras/main/drv_prusalink.c:95
+Usuario o contraseña incorrectos	Utilisateur ou mot de passe incorrect
+
+#: apps/impresoras/main/drv_prusalink.c:274
+PrusaLink no acepta G-code: usá la pantalla de la impresora	PrusaLink n'accepte pas de G-code : utilise l'écran de l'imprimante
+
+#: apps/impresoras/main/drv_prusalink.c:279
+No se pudo	Échec
+
+#: apps/impresoras/main/drv_prusalink.c:327
+Prusa MK4, MK3.9, MINI, XL, CORE One y MK3S con PrusaLink (las de Prusa Connect)	Prusa MK4, MK3.9, MINI, XL, CORE One et MK3S avec PrusaLink (celles de Prusa Connect)
+
+#: apps/impresoras/main/drv_prusalink.c:328
+Contraseña de PrusaLink	Mot de passe PrusaLink
+
+#: apps/impresoras/main/drv_prusalink.c:329
+En la impresora: Ajustes, Red, PrusaLink (usuario maker)	Sur l'imprimante : Réglages, Réseau, PrusaLink (utilisateur maker)
+
+#: apps/impresoras/main/impresoras.c:94
+No entran más impresoras	Plus d'imprimantes possibles
+
+#: apps/impresoras/main/impresoras.c:152
+#: apps/impresoras/main/p3d_detail.c:432
+Sin trabajo	Pas de tâche
+
+#: apps/impresoras/main/impresoras.c:158
+faltan %s · %s	reste %s · %s
+
+#: apps/impresoras/main/impresoras.c:159
+faltan %s	reste %s
+
+#: apps/impresoras/main/impresoras.c:161
+capa %d de %d	couche %d sur %d
+
+#: apps/impresoras/main/impresoras.c:179
+#: apps/impresoras/main/impresoras.c:179
+imprimiendo	impression
+
+#: apps/impresoras/main/impresoras.c:180
+#: apps/impresoras/main/impresoras.c:180
+en pausa	en pause
+
+#: apps/impresoras/main/impresoras.c:181
+#: apps/impresoras/main/impresoras.c:181
+preparando	préparation
+
+#: apps/impresoras/main/impresoras.c:182
+terminada	terminée
+
+#: apps/impresoras/main/impresoras.c:182
+terminadas	terminées
+
+#: apps/impresoras/main/impresoras.c:183
+#: apps/impresoras/main/impresoras.c:183
+con error	en erreur
+
+#: apps/impresoras/main/impresoras.c:184
+lista	prête
+
+#: apps/impresoras/main/impresoras.c:184
+listas	prêtes
+
+#: apps/impresoras/main/impresoras.c:185
+#: apps/impresoras/main/impresoras.c:185
+sin conexión	hors ligne
+
+#: apps/impresoras/main/impresoras.c:205
+Impresoras 3D	Imprimantes 3D
+
+#: apps/impresoras/main/impresoras.c:299
+Ninguna impresora todavía.\n\nAgregala con + o desde la página Impresoras 3D del portal. Andan OctoPrint, PrusaLink (Prusa), Bambu Lab, Klipper, Duet, Elegoo, FlashForge y Creality.	Aucune imprimante pour l'instant.\n\nAjoute-la avec + ou depuis la page Imprimantes 3D du portail. Compatibles : OctoPrint, PrusaLink (Prusa), Bambu Lab, Klipper, Duet, Elegoo, FlashForge et Creality.
+
+#: apps/impresoras/main/impresoras.c:304
+Agregar una impresora	Ajouter une imprimante
+
+#: apps/impresoras/main/impresoras.c:401
+terminó de imprimir	a fini d'imprimer
+
+#: apps/impresoras/main/impresoras.c:402
+tiene un error	a une erreur
+
+#: apps/impresoras/main/impresoras.c:405
+se pausó	est en pause
+
+#: apps/impresoras/main/impresoras.c:407
+canceló la impresión	a annulé l'impression
+
+#: apps/impresoras/main/p3d_cam.c:228
+La dirección de la cámara no sirve	L'adresse de la caméra ne va pas
+
+#: apps/impresoras/main/p3d_cam.c:229
+La cámara pide usuario y contraseña	La caméra demande un identifiant
+
+#: apps/impresoras/main/p3d_cam.c:230
+La cámara no responde	La caméra ne répond pas
+
+#: apps/impresoras/main/p3d_cam.c:231
+La cámara contestó %d	La caméra a répondu %d
+
+#: apps/impresoras/main/p3d_cam.c:277
+La cámara no tiene un certificado de Bambu para este número de serie	La caméra n'a pas de certificat Bambu pour ce numéro de série
+
+#: apps/impresoras/main/p3d_cam.c:278
+La cámara no responde (las X1 usan RTSP, que no se puede ver acá)	La caméra ne répond pas (les X1 utilisent RTSP, impossible à afficher ici)
+
+#: apps/impresoras/main/p3d_cam.c:375
+Conectando con la cámara...	Connexion à la caméra...
+
+#: apps/impresoras/main/p3d_detail.c:38
+Estado	État
+
+#: apps/impresoras/main/p3d_detail.c:38
+Control	Contrôle
+
+#: apps/impresoras/main/p3d_detail.c:38
+Archivos	Fichiers
+
+#: apps/impresoras/main/p3d_detail.c:38
+Cámara	Caméra
+
+#: apps/impresoras/main/p3d_detail.c:38
+Consola	Console
+
+#: apps/impresoras/main/p3d_detail.c:133
+Boquilla	Buse
+
+#: apps/impresoras/main/p3d_detail.c:133
+Boquilla 2	Buse 2
+
+#: apps/impresoras/main/p3d_detail.c:133
+Cama	Plateau
+
+#: apps/impresoras/main/p3d_detail.c:133
+Recinto	Caisson
+
+#: apps/impresoras/main/p3d_detail.c:179
+Apagada	Éteinte
+
+#: apps/impresoras/main/p3d_detail.c:234
+Ahora: %s	Actuel : %s
+
+#: apps/impresoras/main/p3d_detail.c:254
+Apagar	Éteindre
+
+#: apps/impresoras/main/p3d_detail.c:260
+Aplicar	Appliquer
+
+#: apps/impresoras/main/p3d_detail.c:269
+Reanudando...	Reprise...
+
+#: apps/impresoras/main/p3d_detail.c:269
+Pausando...	Mise en pause...
+
+#: apps/impresoras/main/p3d_detail.c:279
+¿Cancelar? Tocá otra vez	Annuler ? Touche encore
+
+#: apps/impresoras/main/p3d_detail.c:284
+Cancelando la impresión	Annulation de l'impression
+
+#: apps/impresoras/main/p3d_detail.c:302
+Enfriando	Refroidit
+
+#: apps/impresoras/main/p3d_detail.c:308
+Precalentando para %s	Préchauffage pour %s
+
+#: apps/impresoras/main/p3d_detail.c:329
+Reanudar	Reprendre
+
+#: apps/impresoras/main/p3d_detail.c:329
+Pausar	Pause
+
+#: apps/impresoras/main/p3d_detail.c:333
+Cancelar	Annuler
+
+#: apps/impresoras/main/p3d_detail.c:336
+Imprimir un archivo	Imprimer un fichier
+
+#: apps/impresoras/main/p3d_detail.c:426
+capa %d/%d	couche %d/%d
+
+#: apps/impresoras/main/p3d_detail.c:436
+Lleva %s	Écoulé %s
+
+#: apps/impresoras/main/p3d_detail.c:439
+Faltan %s	Reste %s
+
+#: apps/impresoras/main/p3d_detail.c:442
+Termina %s	Fin %s
+
+#: apps/impresoras/main/p3d_detail.c:468
+objetivo %d°	cible %d°
+
+#: apps/impresoras/main/p3d_detail.c:469
+sensor	capteur
+
+#: apps/impresoras/main/p3d_detail.c:470
+apagado	éteint
+
+#: apps/impresoras/main/p3d_detail.c:476
+Velocidad %d%%	Vitesse %d%%
+
+#: apps/impresoras/main/p3d_detail.c:478
+silencioso	silencieux
+
+#: apps/impresoras/main/p3d_detail.c:478
+estándar	standard
+
+#: apps/impresoras/main/p3d_detail.c:478
+deportivo	sport
+
+#: apps/impresoras/main/p3d_detail.c:478
+a fondo	à fond
+
+#: apps/impresoras/main/p3d_detail.c:481
+#: apps/impresoras/main/p3d_detail.c:702
+Flujo	Débit
+
+#: apps/impresoras/main/p3d_detail.c:482
+#: apps/impresoras/main/p3d_detail.c:694
+Ventilador	Ventilateur
+
+#: apps/impresoras/main/p3d_detail.c:587
+Temperaturas (tocá para cambiar)	Températures (touche pour changer)
+
+#: apps/impresoras/main/p3d_detail.c:587
+Temperaturas	Températures
+
+#: apps/impresoras/main/p3d_detail.c:595
+Enfriar	Refroidir
+
+#: apps/impresoras/main/p3d_detail.c:600
+Últimos 20 minutos	20 dernières minutes
+
+#: apps/impresoras/main/p3d_detail.c:655
+Mientras imprime no se mueve a mano	Pas de mouvement manuel pendant l'impression
+
+#: apps/impresoras/main/p3d_detail.c:675
+Haciendo home	Retour origine
+
+#: apps/impresoras/main/p3d_detail.c:682
+La boquilla está fría: calentala antes de extruir	La buse est froide : chauffe-la avant d'extruder
+
+#: apps/impresoras/main/p3d_detail.c:698
+#: apps/impresoras/main/p3d_detail.c:879
+Velocidad	Vitesse
+
+#: apps/impresoras/main/p3d_detail.c:735
+Enviado	Envoyé
+
+#: apps/impresoras/main/p3d_detail.c:742
+Conectando OctoPrint con la impresora	Connexion d'OctoPrint à l'imprimante
+
+#: apps/impresoras/main/p3d_detail.c:742
+Desconectando	Déconnexion
+
+#: apps/impresoras/main/p3d_detail.c:752
+¿Parar todo? Tocá otra vez	Tout arrêter ? Touche encore
+
+#: apps/impresoras/main/p3d_detail.c:757
+#: apps/impresoras/main/p3d_detail.c:904
+Parada de emergencia	Arrêt d'urgence
+
+#: apps/impresoras/main/p3d_detail.c:783
+Silencioso	Silencieux
+
+#: apps/impresoras/main/p3d_detail.c:783
+Estándar	Standard
+
+#: apps/impresoras/main/p3d_detail.c:783
+Deportivo	Sport
+
+#: apps/impresoras/main/p3d_detail.c:783
+A fondo	À fond
+
+#: apps/impresoras/main/p3d_detail.c:823
+Mover el cabezal	Déplacer la tête
+
+#: apps/impresoras/main/p3d_detail.c:856
+Home	Origine
+
+#: apps/impresoras/main/p3d_detail.c:858
+Todos	Tous
+
+#: apps/impresoras/main/p3d_detail.c:863
+Mientras imprime, sólo velocidad, flujo, ventilador y luz.	Pendant l'impression, seulement vitesse, débit, ventilateur et lumière.
+
+#: apps/impresoras/main/p3d_detail.c:867
+Extrusor	Extrudeur
+
+#: apps/impresoras/main/p3d_detail.c:870
+Extruir	Extruder
+
+#: apps/impresoras/main/p3d_detail.c:871
+Retraer	Rétracter
+
+#: apps/impresoras/main/p3d_detail.c:888
+Luz	Lumière
+
+#: apps/impresoras/main/p3d_detail.c:898
+Soltar motores	Moteurs libres
+
+#: apps/impresoras/main/p3d_detail.c:901
+Desconectar	Déconnecter
+
+#: apps/impresoras/main/p3d_detail.c:901
+Conectar	Connecter
+
+#: apps/impresoras/main/p3d_detail.c:945
+Ya está imprimiendo	Imprime déjà
+
+#: apps/impresoras/main/p3d_detail.c:951
+Empezando a imprimir	Début d'impression
+
+#: apps/impresoras/main/p3d_detail.c:966
+#: apps/impresoras/main/p3d_edit.c:317
+Tocá otra vez para borrar	Touche encore pour supprimer
+
+#: apps/impresoras/main/p3d_detail.c:998
+Leyendo los archivos...	Lecture des fichiers...
+
+#: apps/impresoras/main/p3d_detail.c:1006
+No hay archivos	Aucun fichier
+
+#: apps/impresoras/main/p3d_detail.c:1038
+Imprimir	Imprimer
+
+#: apps/impresoras/main/p3d_detail.c:1039
+#: apps/impresoras/main/p3d_edit.c:429
+Borrar	Effacer
+
+#: apps/impresoras/main/p3d_detail.c:1063
+Tocá un archivo para imprimirlo	Touche un fichier pour l'imprimer
+
+#: apps/impresoras/main/p3d_detail.c:1133
+La cámara manda imágenes grandes: con 640x480 en su configuración va más rápido.	La caméra envoie de grandes images : règle-la en 640x480 et ça ira plus vite.
+
+#: apps/impresoras/main/p3d_detail.c:1157
+Esta impresora no tiene cámara conocida. Se puede poner su dirección en el editor (Cámara).	Cette imprimante n'a pas de caméra connue. Tu peux mettre son adresse dans l'éditeur (Caméra).
+
+#: apps/impresoras/main/p3d_detail.c:1229
+Lo que mandes aparece acá.	Ce que tu envoies s'affiche ici.
+
+#: apps/impresoras/main/p3d_detail.c:1239
+Esta impresora no devuelve las respuestas: sólo se ve lo que se manda.	Cette imprimante ne renvoie pas ses réponses : on ne voit que ce qui est envoyé.
+
+#: apps/impresoras/main/p3d_edit.c:124
+Buscando en la red...	Recherche sur le réseau...
+
+#: apps/impresoras/main/p3d_edit.c:128
+#: apps/impresoras/main/p3d_edit.c:145
+No hay red	Pas de réseau
+
+#: apps/impresoras/main/p3d_edit.c:276
+Falta la dirección	Adresse manquante
+
+#: apps/impresoras/main/p3d_edit.c:281
+Falta: %s	Manque : %s
+
+#: apps/impresoras/main/p3d_edit.c:286
+Falta el número de serie	Numéro de série manquant
+
+#: apps/impresoras/main/p3d_edit.c:302
+No se pudo guardar en la tarjeta	Impossible d'enregistrer sur la carte SD
+
+#: apps/impresoras/main/p3d_edit.c:305
+Guardada	Enregistrée
+
+#: apps/impresoras/main/p3d_edit.c:357
+Nueva impresora	Nouvelle imprimante
+
+#: apps/impresoras/main/p3d_edit.c:357
+Impresora	Imprimante
+
+#: apps/impresoras/main/p3d_edit.c:362
+Qué es	Type
+
+#: apps/impresoras/main/p3d_edit.c:373
+Buscar en la red	Chercher sur le réseau
+
+#: apps/impresoras/main/p3d_edit.c:381
+Nombre	Nom
+
+#: apps/impresoras/main/p3d_edit.c:383
+Dirección (IP o nombre)	Adresse (IP ou nom)
+
+#: apps/impresoras/main/p3d_edit.c:387
+Puerto (vacío: el de siempre)	Port (vide : celui par défaut)
+
+#: apps/impresoras/main/p3d_edit.c:393
+Usuario	Utilisateur
+
+#: apps/impresoras/main/p3d_edit.c:401
+Número de la placa (MainboardID, opcional)	Numéro de la carte (MainboardID, optionnel)
+
+#: apps/impresoras/main/p3d_edit.c:401
+Número de serie	Numéro de série
+
+#: apps/impresoras/main/p3d_edit.c:403
+En la impresora: Ajustes, Dispositivo; o en Bambu Studio	Sur l'imprimante : Réglages, Appareil ; ou dans Bambu Studio
+
+#: apps/impresoras/main/p3d_edit.c:404
+En la impresora: Ajustes, Acerca de	Sur l'imprimante : Réglages, À propos
+
+#: apps/impresoras/main/p3d_edit.c:408
+HTTPS (con certificado válido)	HTTPS (avec certificat valide)
+
+#: apps/impresoras/main/p3d_edit.c:418
+Cámara (vacío: la que diga la impresora; off: ninguna)	Caméra (vide : celle de l'imprimante ; off : aucune)
+
+#: apps/impresoras/main/p3d_edit.c:421
+La clave queda guardada en la tarjeta (impresoras.txt) y se puede leer.	La clé reste enregistrée sur la carte SD (impresoras.txt) et peut être lue.
+
+#: apps/impresoras/main/p3d_edit.c:428
+Guardar	Enregistrer
+
+#: apps/impresoras/main/p3d_edit.c:445
+No se encontró ninguna (Bambu y Elegoo no se anuncian así)	Aucune trouvée (Bambu et Elegoo ne s'annoncent pas ainsi)
+
+#: apps/impresoras/main/p3d_ui.c:92
+Sin conexión	Hors ligne
+
+#: apps/impresoras/main/p3d_ui.c:93
+Conectando	Connexion
+
+#: apps/impresoras/main/p3d_ui.c:94
+Lista	Prête
+
+#: apps/impresoras/main/p3d_ui.c:95
+Preparando	Préparation
+
+#: apps/impresoras/main/p3d_ui.c:96
+Imprimiendo	Impression
+
+#: apps/impresoras/main/p3d_ui.c:97
+En pausa	En pause
+
+#: apps/impresoras/main/p3d_ui.c:98
+Terminó	Terminé
+
+#: apps/impresoras/main/p3d_ui.c:99
+Cancelada	Annulée
+
+#: apps/impresoras/main/p3d_ui.c:100
+Error	Erreur

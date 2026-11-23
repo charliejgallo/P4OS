@@ -1,0 +1,127 @@
+# amoledos-lang 1   es -> pt
+# web.datalog.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/datalog/web/datalog.js:50
+1 h	1 h
+
+#: apps/datalog/web/datalog.js:50
+6 h	6 h
+
+#: apps/datalog/web/datalog.js:50
+24 h	24 h
+
+#: apps/datalog/web/datalog.js:50
+7 días	7 dias
+
+#: apps/datalog/web/datalog.js:50
+30 días	30 dias
+
+#: apps/datalog/web/datalog.js:50
+Todo	Tudo
+
+#: apps/datalog/web/datalog.js:86
+No hay lecturas en este rango.	Não há leituras neste intervalo.
+
+#: apps/datalog/web/datalog.js:133
+#: apps/datalog/web/datalog.js:141
+Datalog	Datalog
+
+#: apps/datalog/web/datalog.js:154
+La app no está abierta en la placa	O app não está aberto na placa
+
+#: apps/datalog/web/datalog.js:155
+Los archivos se ven igual; los valores en vivo, cuando la abras.	Os arquivos aparecem mesmo assim; os valores ao vivo, quando você abri-lo.
+
+#: apps/datalog/web/datalog.js:156
+Abrir en la placa	Abrir na placa
+
+#: apps/datalog/web/datalog.js:163
+Registrando	Registrando
+
+#: apps/datalog/web/datalog.js:163
+En pausa	Em pausa
+
+#: apps/datalog/web/datalog.js:164
+%s lecturas configuradas	%s leituras configuradas
+
+#: apps/datalog/web/datalog.js:164
+La placa todavía no tiene hora de la red: anota el tiempo desde el arranque.	A placa ainda não tem hora da rede: anota o tempo desde a inicialização.
+
+#: apps/datalog/web/datalog.js:166
+CSV con coma	CSV com vírgula
+
+#: apps/datalog/web/datalog.js:167
+CSV con punto y coma	CSV ponto e vírgula
+
+#: apps/datalog/web/datalog.js:168
+Pausar	Pausar
+
+#: apps/datalog/web/datalog.js:168
+Registrar	Registrar
+
+#: apps/datalog/web/datalog.js:179
+No hay lecturas: se agregan en la placa, con el + de la app.	Não há leituras: adicione-as na placa, com o + do app.
+
+#: apps/datalog/web/datalog.js:189
+Lectura	Leitura
+
+#: apps/datalog/web/datalog.js:189
+Valor	Valor
+
+#: apps/datalog/web/datalog.js:189
+Cuándo	Quando
+
+#: apps/datalog/web/datalog.js:189
+Alarmas y errores	Alarmes e erros
+
+#: apps/datalog/web/datalog.js:198
+baja < %s	baixa < %s
+
+#: apps/datalog/web/datalog.js:198
+alta > %s	alta > %s
+
+#: apps/datalog/web/datalog.js:224
+Archivos en %s	Arquivos em %s
+
+#: apps/datalog/web/datalog.js:230
+Bajar	Baixar
+
+#: apps/datalog/web/datalog.js:231
+Borrar	Apagar
+
+#: apps/datalog/web/datalog.js:233
+Todavía no hay archivos.	Ainda não há arquivos.
+
+#: apps/datalog/web/datalog.js:237
+¿Borrar %s con todas sus lecturas? La lectura sigue y empieza un archivo nuevo.	Apagar %s com todas as suas leituras? A leitura continua e começa um arquivo novo.
+
+#: apps/datalog/web/datalog.js:238
+Borrado	Apagado
+
+#: apps/datalog/web/datalog.js:262
+Cargando…	Carregando…
+
+#: apps/datalog/web/datalog.js:275
+Elegí una lectura para ver su gráfico.	Escolha uma leitura para ver seu gráfico.
+
+#: apps/datalog/web/datalog.js:294
+mín	mín
+
+#: apps/datalog/web/datalog.js:295
+máx	máx
+
+#: apps/datalog/web/datalog.js:296
+promedio	média
+
+#: apps/datalog/web/datalog.js:297
+lecturas	leituras
+
+#: apps/datalog/web/datalog.js:299
+Archivo grande: se leyeron los últimos 8 MB.	Arquivo grande: foram lidos os últimos 8 MB.
+
+#: apps/datalog/web/datalog.js:300
+Notas	Notas

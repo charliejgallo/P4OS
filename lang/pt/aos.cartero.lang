@@ -1,0 +1,604 @@
+# amoledos-lang 1   es -> pt
+# aos.cartero.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/cartero/main/cartero.c:133
+Ese pedido ya no está en la colección	Esse pedido não está mais na coleção
+
+#: apps/cartero/main/cartero.c:155
+#: apps/cartero/main/cartero.c:158
+#: apps/cartero/main/ct_ui_home.c:177
+#: apps/cartero/main/ct_ui_home.c:470
+Pedido nuevo	Pedido novo
+
+#: apps/cartero/main/cartero.c:212
+#: apps/cartero/main/cartero.c:248
+Ya hay un pedido en curso	Já há um pedido em curso
+
+#: apps/cartero/main/cartero.c:216
+#: apps/cartero/main/cartero.c:252
+No hay red	Sem rede
+
+#: apps/cartero/main/cartero.c:222
+#: apps/cartero/main/ct_ui.c:264
+No hay memoria	Sem memória
+
+#: apps/cartero/main/cartero.c:237
+No se pudo empezar el pedido	Não foi possível iniciar o pedido
+
+#: apps/cartero/main/cartero.c:287
+Los scripts cambiaron variables del entorno, pero no hay ninguno activo	Os scripts mudaram variáveis do ambiente, mas não há nenhum ativo
+
+#: apps/cartero/main/ct_ui.c:259
+No se encontró el servidor (DNS)	Servidor não encontrado (DNS)
+
+#: apps/cartero/main/ct_ui.c:260
+No se pudo conectar	Não foi possível conectar
+
+#: apps/cartero/main/ct_ui.c:261
+No se pudo enviar el pedido	Não foi possível enviar o pedido
+
+#: apps/cartero/main/ct_ui.c:262
+La respuesta se cortó	A resposta foi cortada
+
+#: apps/cartero/main/ct_ui.c:263
+La respuesta no es HTTP	A resposta não é HTTP
+
+#: apps/cartero/main/ct_ui.c:265
+La placa todavía no tiene hora: no puede verificar el certificado	A placa ainda não tem hora: não pode verificar o certificado
+
+#: apps/cartero/main/ct_ui.c:267
+El certificado del servidor no se pudo verificar	Não foi possível verificar o certificado do servidor
+
+#: apps/cartero/main/ct_ui.c:268
+No se pudo establecer la conexión segura (TLS)	Não foi possível estabelecer a conexão segura (TLS)
+
+#: apps/cartero/main/ct_ui.c:269
+La dirección no es http:// ni https://	O endereço não é http:// nem https://
+
+#: apps/cartero/main/ct_ui.c:270
+Se acabó el tiempo de espera	O tempo de espera acabou
+
+#: apps/cartero/main/ct_ui.c:271
+Cancelado	Cancelado
+
+#: apps/cartero/main/ct_ui.c:272
+Demasiadas redirecciones	Redirecionamentos demais
+
+#: apps/cartero/main/ct_ui.c:273
+Falló el pedido	O pedido falhou
+
+#: apps/cartero/main/ct_ui.c:565
+#: apps/cartero/main/ct_ui.c:597
+#: apps/cartero/main/ct_ui_resp.c:651
+Cancelar	Cancelar
+
+#: apps/cartero/main/ct_ui.c:566
+Listo	OK
+
+#: apps/cartero/main/ct_ui_env.c:42
+#: apps/cartero/main/ct_ui_home.c:146
+No se pudo borrar	Não foi possível apagar
+
+#: apps/cartero/main/ct_ui_env.c:50
+¿Borrar el entorno «%.100s»?	Apagar o ambiente «%.100s»?
+
+#: apps/cartero/main/ct_ui_env.c:51
+#: apps/cartero/main/ct_ui_home.c:186
+#: apps/cartero/main/ct_ui_home.c:211
+#: apps/cartero/main/ct_ui_home.c:487
+Borrar	Apagar
+
+#: apps/cartero/main/ct_ui_env.c:60
+No se pudo crear el entorno	Não foi possível criar o ambiente
+
+#: apps/cartero/main/ct_ui_env.c:70
+Nombre del entorno	Nome do ambiente
+
+#: apps/cartero/main/ct_ui_env.c:133
+Entornos	Ambientes
+
+#: apps/cartero/main/ct_ui_env.c:138
+El entorno en uso cambia los {{valores}} de los pedidos: el mismo pedido va a desarrollo o a producción sin tocarlo. Tocá el círculo para usarlo.	O ambiente em uso muda os {{valores}} dos pedidos: o mesmo pedido vai para desenvolvimento ou produção sem mexer nele. Toque no círculo para usá-lo.
+
+#: apps/cartero/main/ct_ui_env.c:143
+#: apps/cartero/main/ct_ui_home.c:428
+No se pudo leer: %.60s	Não foi possível ler: %.60s
+
+#: apps/cartero/main/ct_ui_env.c:146
+%d variable	%d variável
+
+#: apps/cartero/main/ct_ui_env.c:146
+%d variables	%d variáveis
+
+#: apps/cartero/main/ct_ui_env.c:152
+Valen en todos los entornos: %d	Valem em todos os ambientes: %d
+
+#: apps/cartero/main/ct_ui_env.c:153
+#: apps/cartero/main/ct_ui_env.c:286
+Globales	Globais
+
+#: apps/cartero/main/ct_ui_env.c:157
+Ajustes	Ajustes
+
+#: apps/cartero/main/ct_ui_env.c:158
+Tiempo máximo de un pedido	Tempo máximo de um pedido
+
+#: apps/cartero/main/ct_ui_env.c:162
+Cuerpo más grande que se guarda	Maior corpo que se salva
+
+#: apps/cartero/main/ct_ui_env.c:169
+Seguir las redirecciones	Seguir os redirecionamentos
+
+#: apps/cartero/main/ct_ui_env.c:228
+#: apps/cartero/main/ct_ui_home.c:111
+#: apps/cartero/main/ct_ui_home.c:127
+#: apps/cartero/main/ct_ui_home.c:163
+No se pudo guardar	Não foi possível salvar
+
+#: apps/cartero/main/ct_ui_env.c:236
+#: apps/cartero/main/ct_ui_req.c:412
+Guardado	Salvo
+
+#: apps/cartero/main/ct_ui_env.c:312
+nombre	nome
+
+#: apps/cartero/main/ct_ui_env.c:319
+#: apps/cartero/main/ct_ui_req.c:642
+#: apps/cartero/main/ct_ui_req.c:659
+#: apps/cartero/main/ct_ui_req.c:790
+valor	valor
+
+#: apps/cartero/main/ct_ui_env.c:327
+Sin variables. Agregá una con +, o dejá que un test la cree con pm.environment.set(...).	Sem variáveis. Adicione uma com +, ou deixe que um teste a crie com pm.environment.set(...).
+
+#: apps/cartero/main/ct_ui_env.c:329
+Se guardan en la tarjeta tal cual, también los secretos (sólo se tapan en la pantalla).	São salvas no cartão tal como estão, inclusive os segredos (só são ocultados na tela).
+
+#: apps/cartero/main/ct_ui_home.c:96
+#: apps/cartero/main/ct_ui_home.c:397
+Sin entorno	Sem ambiente
+
+#: apps/cartero/main/ct_ui_home.c:98
+Editar los entornos…	Editar os ambientes…
+
+#: apps/cartero/main/ct_ui_home.c:99
+Entorno	Ambiente
+
+#: apps/cartero/main/ct_ui_home.c:158
+%s (copia)	%s (cópia)
+
+#: apps/cartero/main/ct_ui_home.c:177
+#: apps/cartero/main/ct_ui_req.c:472
+#: apps/cartero/main/ct_ui_req.c:976
+Nombre del pedido	Nome do pedido
+
+#: apps/cartero/main/ct_ui_home.c:178
+Nombre de la carpeta	Nome da pasta
+
+#: apps/cartero/main/ct_ui_home.c:185
+¿Borrar «%.120s»? No se puede deshacer.	Apagar «%.120s»? Não é possível desfazer.
+
+#: apps/cartero/main/ct_ui_home.c:199
+Correr la carpeta	Executar a pasta
+
+#: apps/cartero/main/ct_ui_home.c:199
+Correr la colección	Executar a coleção
+
+#: apps/cartero/main/ct_ui_home.c:201
+Pedido nuevo acá	Pedido novo aqui
+
+#: apps/cartero/main/ct_ui_home.c:203
+Carpeta nueva acá	Pasta nova aqui
+
+#: apps/cartero/main/ct_ui_home.c:206
+Abrir	Abrir
+
+#: apps/cartero/main/ct_ui_home.c:208
+Duplicar	Duplicar
+
+#: apps/cartero/main/ct_ui_home.c:332
+No se pudo crear la colección	Não foi possível criar a coleção
+
+#: apps/cartero/main/ct_ui_home.c:345
+Nombre de la colección	Nome da coleção
+
+#: apps/cartero/main/ct_ui_home.c:352
+Pedido nuevo (suelto)	Pedido novo (avulso)
+
+#: apps/cartero/main/ct_ui_home.c:352
+Colección nueva	Coleção nova
+
+#: apps/cartero/main/ct_ui_home.c:352
+Entornos y variables	Ambientes e variáveis
+
+#: apps/cartero/main/ct_ui_home.c:382
+Cartero	Cartero
+
+#: apps/cartero/main/ct_ui_home.c:402
+Última corrida	Última execução
+
+#: apps/cartero/main/ct_ui_home.c:402
+Última respuesta	Última resposta
+
+#: apps/cartero/main/ct_ui_home.c:431
+%d pedido	%d pedido
+
+#: apps/cartero/main/ct_ui_home.c:431
+%d pedidos	%d pedidos
+
+#: apps/cartero/main/ct_ui_home.c:441
+Vacía. Agregá un pedido desde el menú ⋯ de la colección.	Vazia. Adicione um pedido pelo menu ⋯ da coleção.
+
+#: apps/cartero/main/ct_ui_home.c:448
+Todavía no hay colecciones.\n\nCreá un pedido suelto o una colección con +, o importá una colección de Postman desde la página Cartero del portal (los archivos son los de Postman).	Ainda não há coleções.\n\nCrie um pedido avulso ou uma coleção com +, ou importe uma coleção do Postman pela página Cartero do portal (os arquivos são os do Postman).
+
+#: apps/cartero/main/ct_ui_home.c:455
+Crear	Criar
+
+#: apps/cartero/main/ct_ui_home.c:487
+¿Borrar todo el historial?	Apagar todo o histórico?
+
+#: apps/cartero/main/ct_ui_home.c:497
+recién	agora
+
+#: apps/cartero/main/ct_ui_home.c:498
+hace %ld min	há %ld min
+
+#: apps/cartero/main/ct_ui_home.c:499
+hace %ld h	há %ld h
+
+#: apps/cartero/main/ct_ui_home.c:500
+hace %ld d	há %ld d
+
+#: apps/cartero/main/ct_ui_home.c:506
+Historial	Histórico
+
+#: apps/cartero/main/ct_ui_home.c:537
+sin respuesta	sem resposta
+
+#: apps/cartero/main/ct_ui_home.c:544
+Los pedidos que mandes van a aparecer acá, del más nuevo al más viejo (los últimos 50).	Os pedidos que você enviar vão aparecer aqui, do mais novo ao mais antigo (os últimos 50).
+
+#: apps/cartero/main/ct_ui_req.c:140
+Sin definir:	Sem definir:
+
+#: apps/cartero/main/ct_ui_req.c:367
+Método	Método
+
+#: apps/cartero/main/ct_ui_req.c:444
+Primero creá una colección (+ en el inicio)	Primeiro crie uma coleção (+ no início)
+
+#: apps/cartero/main/ct_ui_req.c:447
+Guardar en	Salvar em
+
+#: apps/cartero/main/ct_ui_req.c:484
+Cambiar el nombre	Renomear
+
+#: apps/cartero/main/ct_ui_req.c:484
+Guardar como…	Salvar como…
+
+#: apps/cartero/main/ct_ui_req.c:484
+Ver la última respuesta	Ver a última resposta
+
+#: apps/cartero/main/ct_ui_req.c:628
+Agregar	Adicionar
+
+#: apps/cartero/main/ct_ui_req.c:640
+Los parámetros de la dirección (?clave=valor) se editan acá o en la dirección misma.	Os parâmetros do endereço (?chave=valor) são editados aqui ou no próprio endereço.
+
+#: apps/cartero/main/ct_ui_req.c:642
+clave	chave
+
+#: apps/cartero/main/ct_ui_req.c:659
+encabezado	cabeçalho
+
+#: apps/cartero/main/ct_ui_req.c:660
+Rápidos:	Rápidos:
+
+#: apps/cartero/main/ct_ui_req.c:666
+La placa agrega Host, User-Agent, Accept, Accept-Encoding: identity, Connection y Content-Length si no están.	A placa adiciona Host, User-Agent, Accept, Accept-Encoding: identity, Connection e Content-Length se faltarem.
+
+#: apps/cartero/main/ct_ui_req.c:670
+Ninguno	Nenhum
+
+#: apps/cartero/main/ct_ui_req.c:670
+Texto	Texto
+
+#: apps/cartero/main/ct_ui_req.c:670
+Formulario	Formulário
+
+#: apps/cartero/main/ct_ui_req.c:719
+Con variables: se resuelven al enviar	Com variáveis: são resolvidas ao enviar
+
+#: apps/cartero/main/ct_ui_req.c:730
+JSON válido	JSON válido
+
+#: apps/cartero/main/ct_ui_req.c:753
+No es JSON (o tiene variables sin comillas)	Não é JSON (ou tem variáveis sem aspas)
+
+#: apps/cartero/main/ct_ui_req.c:784
+Formatear	Formatar
+
+#: apps/cartero/main/ct_ui_req.c:790
+campo	campo
+
+#: apps/cartero/main/ct_ui_req.c:798
+El pedido va sin cuerpo.	O pedido vai sem corpo.
+
+#: apps/cartero/main/ct_ui_req.c:803
+Heredada	Herdada
+
+#: apps/cartero/main/ct_ui_req.c:803
+Ninguna	Nenhuma
+
+#: apps/cartero/main/ct_ui_req.c:870
+Usa la de «%.80s»: %s	Usa a de «%.80s»: %s
+
+#: apps/cartero/main/ct_ui_req.c:875
+Suelto, no hereda nada: va sin auth.	Avulso, não herda nada: vai sem auth.
+
+#: apps/cartero/main/ct_ui_req.c:875
+Ni la carpeta ni la colección tienen: va sin auth.	Nem a pasta nem a coleção têm: vai sem auth.
+
+#: apps/cartero/main/ct_ui_req.c:890
+Va sin auth, aunque la carpeta o la colección tengan.	Vai sem auth, mesmo que a pasta ou a coleção tenham.
+
+#: apps/cartero/main/ct_ui_req.c:891
+Token	Token
+
+#: apps/cartero/main/ct_ui_req.c:893
+Usuario	Usuário
+
+#: apps/cartero/main/ct_ui_req.c:894
+Contraseña	Senha
+
+#: apps/cartero/main/ct_ui_req.c:897
+Nombre (encabezado o parámetro)	Nome (cabeçalho ou parâmetro)
+
+#: apps/cartero/main/ct_ui_req.c:898
+Valor	Valor
+
+#: apps/cartero/main/ct_ui_req.c:899
+En un encabezado	Num cabeçalho
+
+#: apps/cartero/main/ct_ui_req.c:899
+En la dirección	No endereço
+
+#: apps/cartero/main/ct_ui_req.c:906
+Se puede usar {{variables}}. Queda guardado en la colección, en la tarjeta, tal cual: mejor una variable del entorno.	Dá para usar {{variáveis}}. Fica salvo na coleção, no cartão, tal como está: melhor uma variável do ambiente.
+
+#: apps/cartero/main/ct_ui_req.c:921
+Estado 200	Status 200
+
+#: apps/cartero/main/ct_ui_req.c:922
+Tiempo < 500 ms	Tempo < 500 ms
+
+#: apps/cartero/main/ct_ui_req.c:923
+Es JSON	É JSON
+
+#: apps/cartero/main/ct_ui_req.c:924
+Tiene una propiedad	Tem uma propriedade
+
+#: apps/cartero/main/ct_ui_req.c:925
+Guardar en el entorno	Salvar no ambiente
+
+#: apps/cartero/main/ct_ui_req.c:926
+Encabezado	Cabeçalho
+
+#: apps/cartero/main/ct_ui_req.c:930
+Variable con la hora	Variável com a hora
+
+#: apps/cartero/main/ct_ui_req.c:931
+Agregar encabezado	Adicionar cabeçalho
+
+#: apps/cartero/main/ct_ui_req.c:932
+Registrar la URL	Registrar a URL
+
+#: apps/cartero/main/ct_ui_req.c:933
+Saltear si no hay token	Pular se não há token
+
+#: apps/cartero/main/ct_ui_req.c:953
+Antes (pre-request)	Antes (pre-request)
+
+#: apps/cartero/main/ct_ui_req.c:953
+#: apps/cartero/main/ct_ui_resp.c:657
+Tests	Testes
+
+#: apps/cartero/main/ct_ui_req.c:966
+JavaScript con pm, como en Postman. La placa corre lo común (sin expresiones regulares ni clases); el portal, todo.	JavaScript com pm, como no Postman. A placa executa o comum (sem expressões regulares nem classes); o portal, tudo.
+
+#: apps/cartero/main/ct_ui_req.c:1006
+Suelto: sin guardar en una colección	Avulso: sem salvar numa coleção
+
+#: apps/cartero/main/ct_ui_req.c:1037
+Enviar	Enviar
+
+#: apps/cartero/main/ct_ui_req.c:1045
+Parámetros	Parâmetros
+
+#: apps/cartero/main/ct_ui_req.c:1045
+#: apps/cartero/main/ct_ui_resp.c:657
+Encabezados	Cabeçalhos
+
+#: apps/cartero/main/ct_ui_req.c:1045
+#: apps/cartero/main/ct_ui_resp.c:657
+Cuerpo	Corpo
+
+#: apps/cartero/main/ct_ui_req.c:1045
+Auth	Auth
+
+#: apps/cartero/main/ct_ui_req.c:1045
+Scripts	Scripts
+
+#: apps/cartero/main/ct_ui_req.c:1095
+Guardar	Salvar
+
+#: apps/cartero/main/ct_ui_req.c:1095
+Descartar los cambios	Descartar as alterações
+
+#: apps/cartero/main/ct_ui_req.c:1095
+Seguir editando	Continuar editando
+
+#: apps/cartero/main/ct_ui_req.c:1096
+El pedido suelto no está guardado	O pedido avulso não está salvo
+
+#: apps/cartero/main/ct_ui_req.c:1096
+El pedido tiene cambios sin guardar	O pedido tem alterações não salvas
+
+#: apps/cartero/main/ct_ui_resp.c:114
+Conexión	Conexão
+
+#: apps/cartero/main/ct_ui_resp.c:114
+Envío	Envio
+
+#: apps/cartero/main/ct_ui_resp.c:114
+Espera	Espera
+
+#: apps/cartero/main/ct_ui_resp.c:114
+Descarga	Download
+
+#: apps/cartero/main/ct_ui_resp.c:147
+El script de antes salteó el pedido (skipRequest).	O script de antes pulou o pedido (skipRequest).
+
+#: apps/cartero/main/ct_ui_resp.c:151
+No se envió: falló el script de antes.	Não enviado: o script de antes falhou.
+
+#: apps/cartero/main/ct_ui_resp.c:164
+después de %s	depois de %s
+
+#: apps/cartero/main/ct_ui_resp.c:179
+ (cortado)	 (cortado)
+
+#: apps/cartero/main/ct_ui_resp.c:185
+%d redirección, terminó en:	%d redirecionamento, terminou em:
+
+#: apps/cartero/main/ct_ui_resp.c:185
+%d redirecciones, terminó en:	%d redirecionamentos, terminou em:
+
+#: apps/cartero/main/ct_ui_resp.c:207
+No hay un entorno activo: elegilo en el inicio	Não há um ambiente ativo: escolha um no início
+
+#: apps/cartero/main/ct_ui_resp.c:227
+Guardado en las globales: %.80s	Salvo nas globais: %.80s
+
+#: apps/cartero/main/ct_ui_resp.c:227
+Guardado en el entorno: %.80s	Salvo no ambiente: %.80s
+
+#: apps/cartero/main/ct_ui_resp.c:235
+Nombre de la variable del entorno	Nome da variável do ambiente
+
+#: apps/cartero/main/ct_ui_resp.c:236
+Nombre de la variable global	Nome da variável global
+
+#: apps/cartero/main/ct_ui_resp.c:252
+Guardar en una variable del entorno	Salvar numa variável do ambiente
+
+#: apps/cartero/main/ct_ui_resp.c:252
+Guardar en una variable global	Salvar numa variável global
+
+#: apps/cartero/main/ct_ui_resp.c:347
+… y %u más (el resto, en Crudo o en el portal)	… e mais %u (o resto, em Bruto ou no portal)
+
+#: apps/cartero/main/ct_ui_resp.c:387
+Se muestran %s de %s: el resto, guardándolo o en el portal.	Mostrando %s de %s: o resto, salvando-o ou no portal.
+
+#: apps/cartero/main/ct_ui_resp.c:407
+La respuesta no trae cuerpo.	A resposta não traz corpo.
+
+#: apps/cartero/main/ct_ui_resp.c:415
+Cuerpo binario (%.60s, %s). Guardalo en la tarjeta (⬇ arriba) para abrirlo, o miralo en el portal.	Corpo binário (%.60s, %s). Salve-o no cartão (⬇ acima) para abri-lo, ou veja-o no portal.
+
+#: apps/cartero/main/ct_ui_resp.c:422
+Árbol	Árvore
+
+#: apps/cartero/main/ct_ui_resp.c:424
+Ordenado	Ordenado
+
+#: apps/cartero/main/ct_ui_resp.c:425
+Crudo	Bruto
+
+#: apps/cartero/main/ct_ui_resp.c:452
+Tocá un valor para guardarlo en una variable.	Toque num valor para salvá-lo numa variável.
+
+#: apps/cartero/main/ct_ui_resp.c:499
+Script de antes	Script de antes
+
+#: apps/cartero/main/ct_ui_resp.c:506
+Script de tests	Script de testes
+
+#: apps/cartero/main/ct_ui_resp.c:513
+Este pedido no tiene tests. Se escriben en Scripts, Tests: pm.test(\"nombre\", () => ...).	Este pedido não tem testes. Eles são escritos em Scripts, Testes: pm.test(\"nome\", () => ...).
+
+#: apps/cartero/main/ct_ui_resp.c:517
+%d de %d pasaron	%d de %d passaram
+
+#: apps/cartero/main/ct_ui_resp.c:547
+Nada en la consola. Los scripts escriben con console.log(...).	Nada no console. Os scripts escrevem com console.log(...).
+
+#: apps/cartero/main/ct_ui_resp.c:581
+Cuerpo enviado	Corpo enviado
+
+#: apps/cartero/main/ct_ui_resp.c:603
+Guardado en /data/cartero/%s	Salvo em /data/cartero/%s
+
+#: apps/cartero/main/ct_ui_resp.c:603
+No se pudo guardar %s	Não foi possível salvar %s
+
+#: apps/cartero/main/ct_ui_resp.c:612
+No hay cuerpo para guardar	Não há corpo para salvar
+
+#: apps/cartero/main/ct_ui_resp.c:615
+Nombre del archivo	Nome do arquivo
+
+#: apps/cartero/main/ct_ui_resp.c:632
+Respuesta	Resposta
+
+#: apps/cartero/main/ct_ui_resp.c:642
+Todavía no se mandó nada.	Nada foi enviado ainda.
+
+#: apps/cartero/main/ct_ui_resp.c:650
+#: apps/cartero/main/ct_ui_resp.c:701
+Enviando…	Enviando…
+
+#: apps/cartero/main/ct_ui_resp.c:657
+Consola	Console
+
+#: apps/cartero/main/ct_ui_resp.c:657
+Enviado	Enviado
+
+#: apps/cartero/main/ct_ui_run.c:69
+salteado	pulado
+
+#: apps/cartero/main/ct_ui_run.c:70
+error	erro
+
+#: apps/cartero/main/ct_ui_run.c:87
+%d pedidos · %d de %d tests pasaron · %d con error · %s	%d pedidos · %d de %d testes passaram · %d com erro · %s
+
+#: apps/cartero/main/ct_ui_run.c:90
+%d de %d pedidos · %d de %d tests pasaron	%d de %d pedidos · %d de %d testes passaram
+
+#: apps/cartero/main/ct_ui_run.c:139
+Vueltas	Voltas
+
+#: apps/cartero/main/ct_ui_run.c:145
+Pausa entre pedidos	Pausa entre pedidos
+
+#: apps/cartero/main/ct_ui_run.c:151
+Parar en la primera falla	Parar na primeira falha
+
+#: apps/cartero/main/ct_ui_run.c:157
+Correr otra vez	Executar de novo
+
+#: apps/cartero/main/ct_ui_run.c:168
+Corrida	Execução
+
+#: apps/cartero/main/ct_ui_run.c:177
+No hay ninguna corrida. Se empieza con ▶ en una colección o en el menú de una carpeta.	Não há nenhuma execução. Comece com ▶ numa coleção ou no menu de uma pasta.
+
+#: apps/cartero/main/ct_ui_run.c:183
+Entorno: %.100s	Ambiente: %.100s

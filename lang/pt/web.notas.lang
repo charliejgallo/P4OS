@@ -1,0 +1,304 @@
+# amoledos-lang 1   es -> pt
+# web.notas.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/notas/web/notas.js:97
+Punto	Ponto
+
+#: apps/notas/web/notas.js:97
+Círculo	Círculo
+
+#: apps/notas/web/notas.js:97
+Cuadrado	Quadrado
+
+#: apps/notas/web/notas.js:97
+Guion	Traço
+
+#: apps/notas/web/notas.js:97
+Flecha	Seta
+
+#: apps/notas/web/notas.js:97
+Estrella	Estrela
+
+#: apps/notas/web/notas.js:97
+Tilde	Check
+
+#: apps/notas/web/notas.js:97
+Rombo	Losango
+
+#: apps/notas/web/notas.js:332
+#: apps/notas/web/notas.js:514
+Sin título	Sem título
+
+#: apps/notas/web/notas.js:482
+Leyendo %s notas…	Lendo %s notas…
+
+#: apps/notas/web/notas.js:493
+Buscar	Buscar
+
+#: apps/notas/web/notas.js:498
+Todas	Todas
+
+#: apps/notas/web/notas.js:498
+#: apps/notas/web/notas.js:500
+#: apps/notas/web/notas.js:930
+#: apps/notas/web/notas.js:941
+Notas	Notas
+
+#: apps/notas/web/notas.js:498
+Listas	Listas
+
+#: apps/notas/web/notas.js:500
+Papelera (%s)	Lixeira (%s)
+
+#: apps/notas/web/notas.js:500
+Papelera	Lixeira
+
+#: apps/notas/web/notas.js:505
+La papelera está vacía.	A lixeira está vazia.
+
+#: apps/notas/web/notas.js:505
+Nada coincide con la búsqueda.	Nada corresponde à busca.
+
+#: apps/notas/web/notas.js:505
+Todavía no hay notas.	Ainda não há notas.
+
+#: apps/notas/web/notas.js:514
+Fijada	Fixada
+
+#: apps/notas/web/notas.js:517
+lista	lista
+
+#: apps/notas/web/notas.js:517
+nota	nota
+
+#: apps/notas/web/notas.js:519
+Restaurar	Restaurar
+
+#: apps/notas/web/notas.js:520
+Borrar para siempre	Apagar para sempre
+
+#: apps/notas/web/notas.js:530
+Restaurada	Restaurada
+
+#: apps/notas/web/notas.js:535
+¿Borrar "%s" para siempre?	Apagar "%s" para sempre?
+
+#: apps/notas/web/notas.js:536
+Borrada	Apagada
+
+#: apps/notas/web/notas.js:551
+#: apps/notas/web/notas.js:662
+Título	Título
+
+#: apps/notas/web/notas.js:575
+sin color	sem cor
+
+#: apps/notas/web/notas.js:577
+Fijada arriba	Fixada no topo
+
+#: apps/notas/web/notas.js:584
+Nueva: se guarda al tocar Guardar	Nova: é salva ao clicar em Salvar na placa
+
+#: apps/notas/web/notas.js:586
+#: apps/notas/web/notas.js:878
+Convertir en nota	Converter em nota
+
+#: apps/notas/web/notas.js:586
+#: apps/notas/web/notas.js:878
+Convertir en lista	Converter em lista
+
+#: apps/notas/web/notas.js:598
+Ver el Markdown	Ver o Markdown
+
+#: apps/notas/web/notas.js:598
+Ver la lista	Ver a lista
+
+#: apps/notas/web/notas.js:598
+Ver con formato	Ver formatado
+
+#: apps/notas/web/notas.js:661
+Estilo del párrafo	Estilo do parágrafo
+
+#: apps/notas/web/notas.js:662
+Cuerpo	Corpo
+
+#: apps/notas/web/notas.js:662
+Encabezado	Título
+
+#: apps/notas/web/notas.js:662
+Subtítulo	Subtítulo
+
+#: apps/notas/web/notas.js:662
+Cita	Citação
+
+#: apps/notas/web/notas.js:663
+#: apps/notas/web/notas.js:664
+Tamaño	Tamanho
+
+#: apps/notas/web/notas.js:664
+Chica	Menor
+
+#: apps/notas/web/notas.js:664
+Normal	Normal
+
+#: apps/notas/web/notas.js:664
+Grande	Grande
+
+#: apps/notas/web/notas.js:664
+Enorme	Enorme
+
+#: apps/notas/web/notas.js:665
+#: apps/notas/web/notas.js:666
+Viñetas	Marcadores
+
+#: apps/notas/web/notas.js:667
+#: apps/notas/web/notas.js:668
+Numeradas	Numeradas
+
+#: apps/notas/web/notas.js:671
+normal	normal
+
+#: apps/notas/web/notas.js:671
+sin resaltado	sem destaque
+
+#: apps/notas/web/notas.js:674
+Color del texto	Cor do texto
+
+#: apps/notas/web/notas.js:676
+Resaltado	Destaque
+
+#: apps/notas/web/notas.js:680
+Negrita (⌘B)	Negrito (⌘B)
+
+#: apps/notas/web/notas.js:681
+Cursiva (⌘I)	Itálico (⌘I)
+
+#: apps/notas/web/notas.js:682
+Subrayado (⌘U)	Sublinhado (⌘U)
+
+#: apps/notas/web/notas.js:683
+Tachado	Tachado
+
+#: apps/notas/web/notas.js:685
+Casillas	Caixas
+
+#: apps/notas/web/notas.js:686
+Menos sangría (⇧Tab)	Menos recuo (⇧Tab)
+
+#: apps/notas/web/notas.js:687
+Más sangría (Tab)	Mais recuo (Tab)
+
+#: apps/notas/web/notas.js:688
+Línea	Linha
+
+#: apps/notas/web/notas.js:689
+Borrar el formato	Limpar a formatação
+
+#: apps/notas/web/notas.js:690
+Deshacer (⌘Z)	Desfazer (⌘Z)
+
+#: apps/notas/web/notas.js:691
+Rehacer	Refazer
+
+#: apps/notas/web/notas.js:790
+Prioridad	Prioridade
+
+#: apps/notas/web/notas.js:793
+Más afuera	Para fora
+
+#: apps/notas/web/notas.js:794
+Más adentro	Para dentro
+
+#: apps/notas/web/notas.js:795
+Subir	Subir
+
+#: apps/notas/web/notas.js:796
+Bajar	Descer
+
+#: apps/notas/web/notas.js:797
+Borrar	Apagar
+
+#: apps/notas/web/notas.js:802
++ Agregar tarea (Enter)	+ Adicionar tarefa (Enter)
+
+#: apps/notas/web/notas.js:813
+%s de %s	%s de %s
+
+#: apps/notas/web/notas.js:815
+Completadas (%s)	Concluídas (%s)
+
+#: apps/notas/web/notas.js:824
+La nota está vacía	A nota está vazia
+
+#: apps/notas/web/notas.js:826
+Guardando…	Salvando…
+
+#: apps/notas/web/notas.js:833
+La nota cambió en la placa mientras la editabas. ¿Reemplazarla con esta versión?	A nota mudou na placa enquanto você a editava. Substituí-la por esta versão?
+
+#: apps/notas/web/notas.js:846
+Guardada en notas/%s	Salva em notas/%s
+
+#: apps/notas/web/notas.js:848
+No se pudo guardar: %s	Não foi possível salvar: %s
+
+#: apps/notas/web/notas.js:854
+¿Mover "%s" a la papelera?	Mover "%s" para a lixeira?
+
+#: apps/notas/web/notas.js:859
+Movida a la papelera	Movida para a lixeira
+
+#: apps/notas/web/notas.js:882
+Hay cambios sin guardar. ¿Volver igual?	Há alterações não salvas. Voltar mesmo assim?
+
+#: apps/notas/web/notas.js:891
+Sólo archivos .md o .txt	Só arquivos .md ou .txt
+
+#: apps/notas/web/notas.js:897
+Subida %s	Enviada %s
+
+#: apps/notas/web/notas.js:897
+Subidas %s notas	Enviadas %s notas
+
+#: apps/notas/web/notas.js:902
+Convertir	Converter
+
+#: apps/notas/web/notas.js:914
+Soltá acá archivos .md o .txt para sumarlos a %s	Solte aqui arquivos .md ou .txt para adicioná-los a %s
+
+#: apps/notas/web/notas.js:922
+Nueva nota	Nova nota
+
+#: apps/notas/web/notas.js:923
+Nueva lista	Nova lista
+
+#: apps/notas/web/notas.js:925
+Subir…	Enviar…
+
+#: apps/notas/web/notas.js:926
+Abriendo Notas en la placa	Abrindo Notas na placa
+
+#: apps/notas/web/notas.js:926
+Abrir la app en la placa	Abrir o app na placa
+
+#: apps/notas/web/notas.js:936
+Guardar en la placa	Salvar na placa
+
+#: apps/notas/web/notas.js:938
+Descargar .md	Baixar .md
+
+#: apps/notas/web/notas.js:939
+Mover a la papelera	Mover para a lixeira
+
+#: apps/notas/web/notas.js:940
+⌘S / Ctrl+S guarda	⌘S / Ctrl+S salva
+
+#: apps/notas/web/notas.js:942
+Las notas son archivos Markdown en /notas de la tarjeta, los mismos que abre la app. Si la app tiene abierta la nota que guardás acá, la vuelve a leer sola. Lo borrado va a /notas/papelera.	As notas são arquivos Markdown em /notas no cartão, os mesmos que o app abre. Se o app estiver com a nota que você salva aqui aberta, ele a relê sozinho. O que é apagado vai para /notas/papelera.
+
+#: apps/notas/web/notas.js:943
+Hay cambios sin guardar	Há alterações não salvas

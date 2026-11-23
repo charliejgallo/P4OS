@@ -1,0 +1,137 @@
+# amoledos-lang 1   es -> it
+# aos.pixel.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/pixel/main/pixel.c:527
+No se pudo guardar	Impossibile salvare
+
+#: apps/pixel/main/pixel.c:727
+no se lee	illeggibile
+
+#: apps/pixel/main/pixel.c:732
+cuadros	frame
+
+#: apps/pixel/main/pixel.c:739
+vacío	vuoto
+
+#: apps/pixel/main/pixel.c:747
+sin tarjeta: memoria interna	niente microSD: memoria interna
+
+#: apps/pixel/main/pixel.c:789
+No se pudo leer la tarjeta	Impossibile leggere la microSD
+
+#: apps/pixel/main/pixel.c:853
+Tocá un lienzo para editarlo	Tocca una tela per modificarla
+
+#: apps/pixel/main/pixel.c:871
+Nuevo lienzo	Nuova tela
+
+#: apps/pixel/main/pixel.c:883
+Cancelar	Annulla
+
+#: apps/pixel/main/pixel.c:1201
+#: apps/pixel/main/pixel.c:1613
+Zoom	Zoom
+
+#: apps/pixel/main/pixel.c:1242
+Hace falta más de un cuadro	Serve più di un frame
+
+#: apps/pixel/main/pixel.c:1294
+Velocidad	Velocità
+
+#: apps/pixel/main/pixel.c:1296
+Cuadrícula	Griglia
+
+#: apps/pixel/main/pixel.c:1296
+sí	sì
+
+#: apps/pixel/main/pixel.c:1296
+no	no
+
+#: apps/pixel/main/pixel.c:1298
+¿Seguro? Tocá de nuevo	Sicuro? Tocca di nuovo
+
+#: apps/pixel/main/pixel.c:1298
+#: apps/pixel/main/pixel.c:1546
+Borrar lienzo	Elimina tela
+
+#: apps/pixel/main/pixel.c:1352
+#: apps/pixel/main/pixel.c:1369
+Máximo 16 cuadros	Massimo 16 frame
+
+#: apps/pixel/main/pixel.c:1453
+Exportado:	Esportato:
+
+#: apps/pixel/main/pixel.c:1457
+No se pudo exportar	Impossibile esportare
+
+#: apps/pixel/main/pixel.c:1529
+Reproducir	Riproduci
+
+#: apps/pixel/main/pixel.c:1530
+Duplicar cuadro	Duplica frame
+
+#: apps/pixel/main/pixel.c:1531
+Cuadro en blanco	Frame vuoto
+
+#: apps/pixel/main/pixel.c:1533
+Exportar GIF	Esporta GIF
+
+#: apps/pixel/main/pixel.c:1534
+Exportar PNG	Esporta PNG
+
+#: apps/pixel/main/pixel.c:1537
+Enviar a %s	Invia a %s
+
+#: apps/pixel/main/pixel.c:1544
+Borrar cuadro	Elimina frame
+
+#: apps/pixel/main/pixel.c:1545
+Limpiar cuadro	Pulisci frame
+
+#: apps/pixel/main/pixel.c:1603
+Lápiz	Matita
+
+#: apps/pixel/main/pixel.c:1603
+Rellenar	Riempi
+
+#: apps/pixel/main/pixel.c:1603
+Tomar color	Preleva colore
+
+#: apps/pixel/main/pixel.c:1611
+Deshacer	Annulla
+
+#: apps/pixel/main/pixel.c:1688
+No se pudo abrir	Impossibile aprire
+
+#: apps/pixel/main/pixel.c:1758
+Dibujo de %s en el lienzo %d	Disegno di %s nella tela %d
+
+#: apps/pixel/main/pixel.c:1802
+Llegó al lienzo %d de %s	Arrivato nella tela %d di %s
+
+#: apps/pixel/main/pixel.c:1805
+%s no tiene lugar	%s non ha spazio
+
+#: apps/pixel/main/pixel.c:1807
+%s no pudo guardarlo	%s non è riuscito a salvarlo
+
+#: apps/pixel/main/pixel.c:1825
+#: apps/pixel/main/pixel.c:1859
+#: apps/pixel/main/pixel.c:1865
+No se pudo enviar	Impossibile inviare
+
+#: apps/pixel/main/pixel.c:1840
+Sólo viajan los de 8×8 y 16×16	Si inviano solo quelli 8×8 e 16×16
+
+#: apps/pixel/main/pixel.c:1846
+%s no está en Pixel Art	%s non è in Pixel Art
+
+#: apps/pixel/main/pixel.c:1873
+Enviando a %s...	Invio a %s...
+
+#: apps/pixel/main/pixel.c:1962
+Actualizado desde el portal	Aggiornato dal portale

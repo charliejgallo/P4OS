@@ -1,0 +1,109 @@
+# amoledos-lang 1   es -> pt
+# web.dibujo.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/dibujo/web/dibujo.js:158
+Dibujo %s	Desenho %s
+
+#: apps/dibujo/web/dibujo.js:178
+Cargando…	Carregando…
+
+#: apps/dibujo/web/dibujo.js:188
+no se lee	ilegível
+
+#: apps/dibujo/web/dibujo.js:190
+%d × %d · %d capa	%d × %d · %d camada
+
+#: apps/dibujo/web/dibujo.js:190
+%d × %d · %d capas	%d × %d · %d camadas
+
+#: apps/dibujo/web/dibujo.js:197
+Armando el dibujo…	Montando o desenho…
+
+#: apps/dibujo/web/dibujo.js:201
+%s no se lee	%s ilegível
+
+#: apps/dibujo/web/dibujo.js:216
+Capa	Camada
+
+#: apps/dibujo/web/dibujo.js:217
+oculta en la placa	oculta na placa
+
+#: apps/dibujo/web/dibujo.js:222
+%d × %d px · fondo %s	%d × %d px · fundo %s
+
+#: apps/dibujo/web/dibujo.js:222
+%d × %d px · fondo transparente	%d × %d px · fundo transparente
+
+#: apps/dibujo/web/dibujo.js:224
+Bajar PNG	Baixar PNG
+
+#: apps/dibujo/web/dibujo.js:225
+Bajar .dib	Baixar .dib
+
+#: apps/dibujo/web/dibujo.js:226
+Abrir la app	Abrir o app
+
+#: apps/dibujo/web/dibujo.js:227
+Capas (destildá una para sacarla del PNG; el archivo no cambia)	Camadas (desmarque uma para tirá-la do PNG; o arquivo não muda)
+
+#: apps/dibujo/web/dibujo.js:229
+¿Borrar %s de la tarjeta? No se puede deshacer.	Apagar %s do cartão? Não é possível desfazer.
+
+#: apps/dibujo/web/dibujo.js:230
+Borrado	Apagado
+
+#: apps/dibujo/web/dibujo.js:231
+Borrar de la tarjeta	Apagar do cartão
+
+#: apps/dibujo/web/dibujo.js:239
+Bajar	Baixar
+
+#: apps/dibujo/web/dibujo.js:241
+¿Borrar %s?	Apagar %s?
+
+#: apps/dibujo/web/dibujo.js:243
+Borrar	Apagar
+
+#: apps/dibujo/web/dibujo.js:258
+Todavía no hay dibujos. Se hacen en la placa, con la app Dibujo.	Ainda não há desenhos. Eles são feitos na placa, com o app Desenho.
+
+#: apps/dibujo/web/dibujo.js:260
+Ninguno todavía: en la app, Menú → Exportar PNG.	Nenhum ainda: no app, Menu → Exportar PNG.
+
+#: apps/dibujo/web/dibujo.js:262
+No hay imágenes subidas.	Não há imagens enviadas.
+
+#: apps/dibujo/web/dibujo.js:271
+Preparando %s…	Preparando %s…
+
+#: apps/dibujo/web/dibujo.js:274
+Subiendo %s: %d	Enviando %s: %d
+
+#: apps/dibujo/web/dibujo.js:275
+%s (%d × %d) subida	%s (%d × %d) enviada
+
+#: apps/dibujo/web/dibujo.js:282
+#: apps/dibujo/web/dibujo.js:295
+Dibujo	Desenho
+
+#: apps/dibujo/web/dibujo.js:283
+Dibujos	Desenhos
+
+#: apps/dibujo/web/dibujo.js:285
+Exportados	Exportados
+
+#: apps/dibujo/web/dibujo.js:286
+Imágenes para importar	Imagens para importar
+
+#: apps/dibujo/web/dibujo.js:287
+En la app: Menú → Importar una imagen. Van a una capa nueva, abajo de todo, para calcar o pintar encima.	No app: Menu → Importar uma imagem. Elas vão para uma camada nova, abaixo de tudo, para decalcar ou pintar por cima.
+
+#: apps/dibujo/web/dibujo.js:289
+Subir imágenes	Enviar imagens
+
+#: apps/dibujo/web/dibujo.js:290
+Los dibujos están en /dibujo de la tarjeta, con sus capas (.dib). El PNG que se baja acá lo arma el navegador, igual al que exporta la app.	Os desenhos estão em /dibujo do cartão, com suas camadas (.dib). O PNG baixado aqui é montado pelo navegador, igual ao que o app exporta.

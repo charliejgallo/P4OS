@@ -1,0 +1,92 @@
+# amoledos-lang 1   es -> it
+# aos.tuner.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/afinador/main/afinador.c:497
+referencia	riferimento
+
+#: apps/afinador/main/afinador.c:501
+soltando el códec	rilascio il codec
+
+#: apps/afinador/main/afinador.c:501
+sonando	suona
+
+#: apps/afinador/main/afinador.c:514
+#: apps/afinador/main/afinador.c:668
+no abrió el micrófono	il microfono non si è aperto
+
+#: apps/afinador/main/afinador.c:515
+#: apps/afinador/main/afinador.c:668
+abriendo el micrófono	apertura del microfono
+
+#: apps/afinador/main/afinador.c:529
+satura: alejate del micrófono	satura: allontanati dal microfono
+
+#: apps/afinador/main/afinador.c:530
+tocá una cuerda	suona una corda
+
+#: apps/afinador/main/afinador.c:546
+afinada	accordata
+
+#: apps/afinador/main/afinador.c:549
+casi: subila un poco	quasi: alzala un po'
+
+#: apps/afinador/main/afinador.c:549
+casi: bajala un poco	quasi: abbassala un po'
+
+#: apps/afinador/main/afinador.c:551
+subila	alzala
+
+#: apps/afinador/main/afinador.c:551
+bajala	abbassala
+
+#: apps/afinador/main/afinador.c:565
+satura	satura
+
+#: apps/afinador/main/afinador.c:703
+Leq de %u:%02u	Leq su %u:%02u
+
+#: apps/afinador/main/afinador.c:708
+%u kHz  ·  PGA %d dB  ·  ponderación A, rápida	%u kHz  ·  PGA %d dB  ·  ponderazione A, rapida
+
+#: apps/afinador/main/afinador.c:716
+SATURA: el número no vale	SATURA: valore non valido
+
+#: apps/afinador/main/afinador.c:719
+a %u Hz la curva A vale hasta 4 kHz	a %u Hz la curva A vale fino a 4 kHz
+
+#: apps/afinador/main/afinador.c:725
+dB relativos hasta que lo calibres	dB relativi finché non lo calibri
+
+#: apps/afinador/main/afinador.c:1129
+Tono	Tono
+
+#: apps/afinador/main/afinador.c:1144
+tocá una cuerda para oír su nota	tocca una corda per sentire la sua nota
+
+#: apps/afinador/main/afinador.c:1145
+escuchar y sonar no van juntos	ascoltare e suonare non vanno insieme
+
+#: apps/afinador/main/afinador.c:1251
+mínimo	minimo
+
+#: apps/afinador/main/afinador.c:1253
+máximo	massimo
+
+#: apps/afinador/main/afinador.c:1261
+últimos 60 s	ultimi 60 s
+
+#: apps/afinador/main/afinador.c:1305
+Reiniciar	Azzera
+
+#: apps/afinador/main/afinador.c:1353
+Afinador	Accordatore
+
+#: apps/afinador/main/afinador.c:1353
+Sonómetro	Fonometro
+
+#: apps/afinador/main/afinador.c:1394
+sin memoria	memoria esaurita

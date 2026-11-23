@@ -1,0 +1,150 @@
+# amoledos-lang 1   es -> it
+# demo.arkanos.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/arkanos/main/ak_draw.c:687
+NIVEL 	LIVELLO 
+
+#: apps/arkanos/main/ak_draw.c:697
+SUPERADO	SUPERATO
+
+#: apps/arkanos/main/ak_draw.c:700
+#: apps/arkanos/main/arkanos.c:520
+#: apps/arkanos/main/arkanos.c:543
+OTRA VEZ	ANCORA
+
+#: apps/arkanos/main/ak_level.c:72
+ANCHA	LARGA
+
+#: apps/arkanos/main/ak_level.c:73
+LENTA	LENTA
+
+#: apps/arkanos/main/ak_level.c:74
+TRIPLE	TRIPLA
+
+#: apps/arkanos/main/ak_level.c:75
+DISPARO	SPARO
+
+#: apps/arkanos/main/ak_level.c:76
+IMAN	MAGNETE
+
+#: apps/arkanos/main/ak_level.c:77
+VIDA	VITA
+
+#: apps/arkanos/main/ak_level.c:227
+PRIMER MURO	PRIMO MURO
+
+#: apps/arkanos/main/ak_level.c:228
+TORRES	TORRI
+
+#: apps/arkanos/main/ak_level.c:229
+PIRAMIDE	PIRAMIDE
+
+#: apps/arkanos/main/ak_level.c:230
+PANAL	FAVO
+
+#: apps/arkanos/main/ak_level.c:231
+FORTALEZA	FORTEZZA
+
+#: apps/arkanos/main/ak_level.c:232
+REJA	GRATA
+
+#: apps/arkanos/main/ak_level.c:233
+CALAVERA	TESCHIO
+
+#: apps/arkanos/main/ak_level.c:234
+NAVE	NAVE
+
+#: apps/arkanos/main/ak_level.c:235
+ESPIRAL	SPIRALE
+
+#: apps/arkanos/main/ak_level.c:236
+CORAZON	CUORE
+
+#: apps/arkanos/main/ak_level.c:237
+CLAUDITO	CLAUDITO
+
+#: apps/arkanos/main/ak_level.c:238
+EL JEFE	IL CAPO
+
+#: apps/arkanos/main/arkanos.c:340
+#: apps/arkanos/main/arkanos.c:341
+SONIDO SI	SUONO SI
+
+#: apps/arkanos/main/arkanos.c:340
+#: apps/arkanos/main/arkanos.c:341
+SONIDO NO	SUONO NO
+
+#: apps/arkanos/main/arkanos.c:342
+#: apps/arkanos/main/arkanos.c:343
+FPS SI	FPS SI
+
+#: apps/arkanos/main/arkanos.c:342
+#: apps/arkanos/main/arkanos.c:343
+FPS NO	FPS NO
+
+#: apps/arkanos/main/arkanos.c:349
+RECORD  %lu	RECORD  %lu
+
+#: apps/arkanos/main/arkanos.c:456
+ARKANOS	ARKANOS
+
+#: apps/arkanos/main/arkanos.c:457
+DOCE MUROS Y UNA BOLA	DODICI MURI E UNA PALLA
+
+#: apps/arkanos/main/arkanos.c:459
+JUGAR	GIOCA
+
+#: apps/arkanos/main/arkanos.c:459
+arrastra el dedo	trascina il dito
+
+#: apps/arkanos/main/arkanos.c:473
+EL DEDO SOBRE LA CANCHA MUEVE LA PALETA	IL DITO SUL CAMPO MUOVE LA RACCHETTA
+
+#: apps/arkanos/main/arkanos.c:474
+EL DEDO EN LA FRANJA DE ABAJO MUEVE LA PALETA	IL DITO NELLA FASCIA IN BASSO MUOVE LA RACCHETTA
+
+#: apps/arkanos/main/arkanos.c:476
+SUELTA EL DEDO PARA SACAR	ALZA IL DITO PER LANCIARE
+
+#: apps/arkanos/main/arkanos.c:477
+CON DISPARO, EL DEDO APOYADO DISPARA	CON SPARO, IL DITO APPOGGIATO SPARA
+
+#: apps/arkanos/main/arkanos.c:478
+EL BOTON II DE LA DERECHA PAUSA	IL TASTO II A DESTRA: PAUSA
+
+#: apps/arkanos/main/arkanos.c:479
+TOCA EL MARCADOR PARA PAUSAR	TOCCA IL PUNTEGGIO: PAUSA
+
+#: apps/arkanos/main/arkanos.c:487
+RECORD 0	RECORD 0
+
+#: apps/arkanos/main/arkanos.c:490
+#: apps/arkanos/main/arkanos.c:503
+#: apps/arkanos/main/arkanos.c:525
+SALIR	ESCI
+
+#: apps/arkanos/main/arkanos.c:499
+PAUSA	PAUSA
+
+#: apps/arkanos/main/arkanos.c:500
+SEGUIR	AVANTI
+
+#: apps/arkanos/main/arkanos.c:517
+#: apps/arkanos/main/arkanos.c:535
+FIN DEL JUEGO	FINE PARTITA
+
+#: apps/arkanos/main/arkanos.c:524
+MENU	MENU
+
+#: apps/arkanos/main/arkanos.c:535
+TERMINASTE	HAI FINITO
+
+#: apps/arkanos/main/arkanos.c:539
+%lu  (RECORD %lu)	%lu  (RECORD %lu)
+
+#: apps/arkanos/main/arkanos.c:543
+OTRA VUELTA	UN ALTRO GIRO

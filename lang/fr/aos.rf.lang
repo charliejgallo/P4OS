@@ -1,0 +1,365 @@
+# amoledos-lang 1   es -> fr
+# aos.rf.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/rf/main/rf.c:85
+#: apps/rf/main/rf.c:97
+FM	FM
+
+#: apps/rf/main/rf.c:86
+Aire	Aviation
+
+#: apps/rf/main/rf.c:87
+Marina	Marine
+
+#: apps/rf/main/rf.c:97
+Sin audio	Sans son
+
+#: apps/rf/main/rf.c:97
+AM	AM
+
+#: apps/rf/main/rf.c:97
+FM angosta	FM étroite
+
+#: apps/rf/main/rf.c:97
+Datos	Données
+
+#: apps/rf/main/rf.c:99
+Sólo el espectro y la cascada	Spectre et cascade seulement
+
+#: apps/rf/main/rf.c:100
+Radio comercial, de 88 a 108 MHz	Radiodiffusion, de 88 à 108 MHz
+
+#: apps/rf/main/rf.c:101
+La banda de aviación (118 a 137 MHz) y otras en AM	La bande aviation (118 à 137 MHz) et d'autres en AM
+
+#: apps/rf/main/rf.c:102
+Radioaficionados, PMR, la banda marina, servicios	Radioamateurs, PMR, la bande marine, services
+
+#: apps/rf/main/rf.c:103
+Controles remotos, sensores y timbres de 433 y 868 MHz	Télécommandes, capteurs et sonnettes en 433 et 868 MHz
+
+#: apps/rf/main/rf.c:104
+Paquetes LoRa: Meshtastic, LoRaWAN, sensores. Cuánto ocupan el canal y con qué ajustes	Paquets LoRa : Meshtastic, LoRaWAN, capteurs. Occupation du canal et avec quels réglages
+
+#: apps/rf/main/rf.c:535
+#: apps/rf/main/rf.c:2804
+Sin memoria	Mémoire pleine
+
+#: apps/rf/main/rf.c:692
+La RTL-SDR no empezó a mandar muestras	La RTL-SDR n'a pas commencé à envoyer d'échantillons
+
+#: apps/rf/main/rf.c:709
+Se desconectó la RTL-SDR	La RTL-SDR a été débranchée
+
+#: apps/rf/main/rf.c:1092
+Reproduciendo una grabación: no se puede sintonizar	Lecture d'un enregistrement : pas de syntonisation
+
+#: apps/rf/main/rf.c:1380
+Buscando una RTL-SDR…	Recherche d'une RTL-SDR…
+
+#: apps/rf/main/rf.c:1384
+Enchufala en el host USB: pines 25/27 del conector de atrás (High Speed, cables de menos de 15 cm) y 5 V del pin 1. Los pines 21/23 son Full Speed: alcanzan para 240 mil muestras por segundo.	Branche-la sur l'hôte USB : broches 25/27 du connecteur arrière (High Speed, fils de moins de 15 cm) et 5 V de la broche 1. Les broches 21/23 sont en Full Speed : assez pour 240 000 échantillons par seconde.
+
+#: apps/rf/main/rf.c:1385
+El host USB está apagado: prendelo en Ajustes → USB → Host USB, y enchufá la RTL-SDR en los pines 25/27 del conector de atrás.	L'hôte USB est éteint : active-le dans Réglages → USB → Hôte USB, et branche la RTL-SDR sur les broches 25/27 du connecteur arrière.
+
+#: apps/rf/main/rf.c:1390
+Si el conector OTG de la placa está enchufado a una computadora, sacalo: son los mismos cables que los pines 25/27 y la computadora se queda con la RTL-SDR.	Si le connecteur OTG de la carte est branché à un ordinateur, débranche-le : ce sont les mêmes fils que les broches 25/27 et l'ordinateur prend la RTL-SDR.
+
+#: apps/rf/main/rf.c:1445
+señal	signal
+
+#: apps/rf/main/rf.c:1446
+silenciado	son coupé
+
+#: apps/rf/main/rf.c:1449
+estéreo	stéréo
+
+#: apps/rf/main/rf.c:1453
+perdidos	perdus
+
+#: apps/rf/main/rf.c:1455
+Sin radio	Pas de radio
+
+#: apps/rf/main/rf.c:1460
+reproduciendo	lecture
+
+#: apps/rf/main/rf.c:1468
+recibidos	reçus
+
+#: apps/rf/main/rf.c:1474
+LoRa · en el canal, el último minuto: %u paquetes, ocupado %d,%d %%	LoRa · sur le canal, la dernière minute : %u paquets, occupé %d,%d %%
+
+#: apps/rf/main/rf.c:1483
+Señal ahora: %d dB sobre el ruido	Signal actuel : %d dB au-dessus du bruit
+
+#: apps/rf/main/rf.c:1499
+#: apps/rf/main/rf.c:2348
+No se pudo decodificar (muy débil, o ya salió del buffer).	Décodage impossible (trop faible, ou sorti du tampon).
+
+#: apps/rf/main/rf.c:1668
+Frecuencia en MHz	Fréquence en MHz
+
+#: apps/rf/main/rf.c:1692
+Automática	Automatique
+
+#: apps/rf/main/rf.c:1710
+Todo a la izquierda es automática. Subila hasta que aparezcan las señales sin que suba el piso de ruido.	Tout à gauche, c'est automatique. Monte-le jusqu'à voir les signaux sans que le plancher de bruit monte.
+
+#: apps/rf/main/rf.c:1723
+Siempre abierto	Toujours ouvert
+
+#: apps/rf/main/rf.c:1740
+Activar el sonido	Réactiver le son
+
+#: apps/rf/main/rf.c:1740
+Silenciar	Silence
+
+#: apps/rf/main/rf.c:1768
+Volumen	Volume
+
+#: apps/rf/main/rf.c:1777
+El volumen es el de la placa, el mismo de todo el sistema. Silenciar calla sólo la radio, que sigue sintonizada.	Le volume est celui de la carte, le même pour tout le système. Silence ne coupe que la radio, qui reste syntonisée.
+
+#: apps/rf/main/rf.c:1794
+Corta el audio de AM y FM angosta mientras el canal no supera al ruido por esos dB; entre 6 y 15 suele andar. Todo a la izquierda, siempre abierto. La FM comercial no lo usa.	Coupe le son en AM et FM étroite tant que le canal ne dépasse pas le bruit de ces dB ; entre 6 et 15 marche souvent. Tout à gauche, toujours ouvert. La FM classique ne l'utilise pas.
+
+#: apps/rf/main/rf.c:1842
+En los pines 21/23 (Full Speed) sólo entran 240 mil muestras por segundo	Broches 21/23 (Full Speed) : 240 000 échantillons par seconde au plus
+
+#: apps/rf/main/rf.c:1863
+Canal público puesto (AQ==)	Canal public réglé (AQ==)
+
+#: apps/rf/main/rf.c:1863
+Clave quitada	Clé retirée
+
+#: apps/rf/main/rf.c:1870
+Ajustes de la radio	Réglages de la radio
+
+#: apps/rf/main/rf.c:1873
+Muestras por segundo (cuánto se ve a la vez)	Échantillons par seconde (largeur visible)
+
+#: apps/rf/main/rf.c:1884
+El modo Datos escucha siempre a 240 mil.	Le mode Données écoute toujours à 240 k.
+
+#: apps/rf/main/rf.c:1887
+LoRa abre a 0,96: un canal y sus vecinos. Más muestras muestran más banda, pero la placa puede perder muestras y con ellas paquetes.	LoRa ouvre à 0,96 : un canal et ses voisins. Plus d'échantillons montrent plus de bande, mais la carte peut en perdre, et des paquets avec.
+
+#: apps/rf/main/rf.c:1892
+Paso de las flechas	Pas des flèches
+
+#: apps/rf/main/rf.c:1900
+Qué lista LoRa (el CSV guarda todo)	Ce que LoRa liste (le CSV garde tout)
+
+#: apps/rf/main/rf.c:1901
+Sólo paquetes LoRa: lo que no tiene chirps no se muestra	Paquets LoRa seulement : sans chirps, rien n'est affiché
+
+#: apps/rf/main/rf.c:1902
+Sólo el canal sintonizado (el paso de ancho)	Seulement le canal syntonisé (largeur du pas)
+
+#: apps/rf/main/rf.c:1904
+Clave del canal (Meshtastic): %s	Clé du canal (Meshtastic) : %s
+
+#: apps/rf/main/rf.c:1905
+Clave del canal (Meshtastic): ninguna	Clé du canal (Meshtastic) : aucune
+
+#: apps/rf/main/rf.c:1908
+Canal público	Canal public
+
+#: apps/rf/main/rf.c:1909
+Ninguna	Aucune
+
+#: apps/rf/main/rf.c:1910
+Para un canal privado, pegá su PSK (base64) en la página del portal; la clave se guarda en la tarjeta, no en el teléfono ni en la nube.	Pour un canal privé, colle sa PSK (base64) sur la page du portail ; la clé est gardée sur la carte SD, pas sur le téléphone ni dans le cloud.
+
+#: apps/rf/main/rf.c:1915
+Ganancia	Gain
+
+#: apps/rf/main/rf.c:1918
+Silenciador	Squelch
+
+#: apps/rf/main/rf.c:1961
+Modo	Mode
+
+#: apps/rf/main/rf.c:2030
+#: apps/rf/main/rf.c:2718
+Bandas	Bandes
+
+#: apps/rf/main/rf.c:2041
+Meshtastic: el canal por defecto de una región y un preset	Meshtastic : le canal par défaut d'une région et d'un preset
+
+#: apps/rf/main/rf.c:2054
+Escuchar ahí	Écouter là
+
+#: apps/rf/main/rf.c:2056
+Con un nombre de canal propio el número de canal cambia: la frecuencia está en la app de Meshtastic, en LoRa.	Avec un nom de canal à soi, le numéro de canal change : la fréquence est dans l'app Meshtastic, sous LoRa.
+
+#: apps/rf/main/rf.c:2076
+ID %u · canal %d · %.1f °C	ID %u · canal %d · %.1f °C
+
+#: apps/rf/main/rf.c:2078
+batería baja	batterie faible
+
+#: apps/rf/main/rf.c:2080
+código %.8s · datos %s	code %.8s · données %s
+
+#: apps/rf/main/rf.c:2082
+ID %05X · botón %X	ID %05X · bouton %X
+
+#: apps/rf/main/rf.c:2095
+#: apps/rf/main/rf.c:2364
+Desconocido	Inconnu
+
+#: apps/rf/main/rf.c:2148
+Esperando transmisiones en la banda: controles remotos, sensores de temperatura, timbres…	En attente d'émissions dans la bande : télécommandes, capteurs de température, sonnettes…
+
+#: apps/rf/main/rf.c:2187
+Otra señal	Autre signal
+
+#: apps/rf/main/rf.c:2197
+%u kHz de ancho · 	%u kHz de large · 
+
+#: apps/rf/main/rf.c:2275
+Esperando paquetes LoRa en la banda. Bandas tiene el canal por defecto de cada región y preset de Meshtastic.	En attente de paquets LoRa dans la bande. Bandes a le canal par défaut de chaque région et preset Meshtastic.
+
+#: apps/rf/main/rf.c:2288
+De !%08x a todos (broadcast)\n%d saltos%s\n	De !%08x à tous (broadcast)\n%d sauts%s\n
+
+#: apps/rf/main/rf.c:2289
+#: apps/rf/main/rf.c:2292
+ · pide acuse	 · demande accusé
+
+#: apps/rf/main/rf.c:2291
+De !%08x a !%08x\n%d saltos%s\n	De !%08x à !%08x\n%d sauts%s\n
+
+#: apps/rf/main/rf.c:2293
+Texto: %s	Texte : %s
+
+#: apps/rf/main/rf.c:2294
+No es un mensaje de texto (tipo %d, %d bytes)	Pas un message texte (type %d, %d octets)
+
+#: apps/rf/main/rf.c:2295
+Sin clave de canal: solo la cabecera. Cargá una en Ajustes o en la página del portal.	Pas de clé de canal : l'en-tête seulement. Mets-en une dans Réglages ou sur la page du portail.
+
+#: apps/rf/main/rf.c:2303
+Descifrando…	Déchiffrement…
+
+#: apps/rf/main/rf.c:2319
+Hora: %02d:%02d:%02d\n	Heure : %02d:%02d:%02d\n
+
+#: apps/rf/main/rf.c:2320
+Frecuencia: %s (%+d kHz del centro) · %u kHz de ancho\n	Fréquence : %s (%+d kHz du centre) · %u kHz de large\n
+
+#: apps/rf/main/rf.c:2322
+En el aire: %u ms · %.0f dB sobre el ruido en su ancho\n	Durée : %u ms · %.0f dB au-dessus du bruit sur sa largeur\n
+
+#: apps/rf/main/rf.c:2325
+LoRa: SF%d, %u kHz (el preámbulo concentró el %.0f %% de su energía)	LoRa : SF%d, %u kHz (le préambule a concentré %.0f %% de son énergie)
+
+#: apps/rf/main/rf.c:2334
+\nEn el canal por defecto de Meshtastic %s en %s	\nSur le canal Meshtastic par défaut de %s en %s
+
+#: apps/rf/main/rf.c:2338
+No se encontraron chirps de LoRa en su comienzo: es otra cosa, o llegó demasiado débil para saberlo.	Aucun chirp LoRa à son début : c'est autre chose, ou c'est arrivé trop faible pour le savoir.
+
+#: apps/rf/main/rf.c:2349
+Leer y descifrar (Meshtastic)	Lire et déchiffrer (Meshtastic)
+
+#: apps/rf/main/rf.c:2349
+Leer la cabecera (Meshtastic)	Lire l'en-tête (Meshtastic)
+
+#: apps/rf/main/rf.c:2369
+Hora: %02d:%02d:%02d · %d veces\n	Heure : %02d:%02d:%02d · %d fois\n
+
+#: apps/rf/main/rf.c:2371
+Frecuencia: %u,%03u MHz (%+d kHz del centro) · %.0f dB sobre el ruido\n	Fréquence : %u,%03u MHz (%+d kHz du centre) · %.0f dB au-dessus du bruit\n
+
+#: apps/rf/main/rf.c:2374
+Modulación: %s · corto %d µs · largo %d µs · pausa %d µs\n	Modulation : %s · court %d µs · long %d µs · pause %d µs\n
+
+#: apps/rf/main/rf.c:2376
+%d bits: %s	%d bits : %s
+
+#: apps/rf/main/rf.c:2378
+\nTambién se lee como PT2262: %.8s %s	\nSe lit aussi comme PT2262 : %.8s %s
+
+#: apps/rf/main/rf.c:2393
+Captura guardada: %s	Capture enregistrée : %s
+
+#: apps/rf/main/rf.c:2395
+No se pudo guardar la captura	Impossible d'enregistrer la capture
+
+#: apps/rf/main/rf.c:2409
+Grabando el audio en la carpeta de la Grabadora	Enregistrement audio dans le dossier Enregistreur
+
+#: apps/rf/main/rf.c:2409
+Grabación de audio terminada	Enregistrement audio terminé
+
+#: apps/rf/main/rf.c:2413
+Grabando la señal en rf/iq de la tarjeta	Enregistrement du signal dans rf/iq
+
+#: apps/rf/main/rf.c:2413
+Grabación de la señal terminada	Enregistrement du signal terminé
+
+#: apps/rf/main/rf.c:2470
+Guardar	Garder
+
+#: apps/rf/main/rf.c:2471
+Captura de pantalla	Capture d'écran
+
+#: apps/rf/main/rf.c:2474
+Terminar la grabación de audio	Arrêter l'enregistrement audio
+
+#: apps/rf/main/rf.c:2474
+Grabar el audio	Enregistrer l'audio
+
+#: apps/rf/main/rf.c:2475
+Terminar la grabación de la señal	Arrêter l'enregistrement du signal
+
+#: apps/rf/main/rf.c:2475
+Grabar la señal (I/Q)	Enregistrer le signal (I/Q)
+
+#: apps/rf/main/rf.c:2477
+Dejar de reproducir	Arrêter la lecture
+
+#: apps/rf/main/rf.c:2478
+Reproducir una grabación	Lire un enregistrement
+
+#: apps/rf/main/rf.c:2479
+Guardar lo recibido en Datos y LoRa (rf/datos- y rf/lora-<día>.csv)	Garder ce que reçoivent Données et LoRa (rf/datos- et rf/lora-<jour>.csv)
+
+#: apps/rf/main/rf.c:2480
+Publicarlo por MQTT	Le publier par MQTT
+
+#: apps/rf/main/rf.c:2480
+Publicarlo por MQTT (no conectado)	Le publier par MQTT (non connecté)
+
+#: apps/rf/main/rf.c:2483
+La señal ocupa %u MB por minuto a la tasa de ahora; la tarjeta escribe unos 3 MB/s.	Le signal prend %u Mo par minute au débit actuel ; la carte SD écrit environ 3 Mo/s.
+
+#: apps/rf/main/rf.c:2495
+Grabaciones	Enregistrements
+
+#: apps/rf/main/rf.c:2520
+No hay grabaciones todavía.	Pas encore d'enregistrements.
+
+#: apps/rf/main/rf.c:2544
+No sé a qué frecuencia está grabada	Sa fréquence n'est pas dans son nom
+
+#: apps/rf/main/rf.c:2814
+No pude arrancar la radio	Impossible de démarrer la radio
+
+#: apps/rf/main/rf_src_file.c:55
+#: apps/rf/main/rf_src_file.c:64
+#: apps/rf/main/rf_src_rtl.c:33
+No hay ninguna RTL-SDR en el host USB	Aucune RTL-SDR sur l'hôte USB
+
+#: apps/rf/main/rf_src_file.c:74
+archivo	fichier
+
+#: apps/rf/main/rf_src_rtl.c:40
+La RTL-SDR no respondió al abrirla	La RTL-SDR n'a pas répondu à l'ouverture

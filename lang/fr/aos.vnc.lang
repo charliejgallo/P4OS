@@ -1,0 +1,232 @@
+# amoledos-lang 1   es -> fr
+# aos.vnc.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/vnc/main/vnc.c:235
+No entran más computadoras	Plus de place pour un ordinateur
+
+#: apps/vnc/main/vnc.c:290
+sólo mirar	vue seule
+
+#: apps/vnc/main/vnc.c:301
+Ninguna computadora todavía.\nAgregala con + o desde la página VNC del portal.\n\nEn la Mac: Compartir pantalla, con «Los visores VNC pueden controlar la pantalla con contraseña».	Aucun ordinateur pour l'instant.\nAjoute-le avec + ou depuis la page VNC du portail.\n\nSur un Mac : Partage d'écran, avec « Les utilisateurs VNC peuvent contrôler l'écran avec un mot de passe ».
+
+#: apps/vnc/main/vnc.c:311
+Automática	Automatique
+
+#: apps/vnc/main/vnc.c:334
+16 bits (rápido)	16 bits (rapide)
+
+#: apps/vnc/main/vnc.c:335
+24 bits	24 bits
+
+#: apps/vnc/main/vnc.c:421
+Falta la dirección	Adresse manquante
+
+#: apps/vnc/main/vnc.c:433
+No se pudo guardar en la tarjeta	Impossible d'enregistrer sur la carte SD
+
+#: apps/vnc/main/vnc.c:437
+Guardada	Enregistré
+
+#: apps/vnc/main/vnc.c:448
+Tocá otra vez para borrar	Retouche pour supprimer
+
+#: apps/vnc/main/vnc.c:478
+Nueva computadora	Nouvel ordinateur
+
+#: apps/vnc/main/vnc.c:478
+Computadora	Ordinateur
+
+#: apps/vnc/main/vnc.c:484
+Nombre	Nom
+
+#: apps/vnc/main/vnc.c:485
+Dirección (IP o nombre)	Adresse (IP ou nom)
+
+#: apps/vnc/main/vnc.c:487
+Puerto	Port
+
+#: apps/vnc/main/vnc.c:489
+Contraseña VNC	Mot de passe VNC
+
+#: apps/vnc/main/vnc.c:491
+Queda guardada en la tarjeta (vnc.txt) y se puede leer. VNC usa sólo los primeros 8 caracteres.	Il est gardé sur la carte SD (vnc.txt), lisible. VNC n'utilise que les 8 premiers caractères.
+
+#: apps/vnc/main/vnc.c:497
+Codificación	Encodage
+
+#: apps/vnc/main/vnc.c:501
+Colores	Couleurs
+
+#: apps/vnc/main/vnc.c:509
+Sólo mirar (no manda mouse ni teclado)	Vue seule (sans souris ni clavier)
+
+#: apps/vnc/main/vnc.c:521
+Guardar	Enregistrer
+
+#: apps/vnc/main/vnc.c:524
+Borrar	Effacer
+
+#: apps/vnc/main/vnc.c:834
+Trackpad: el dedo mueve el puntero	Trackpad : le doigt bouge le pointeur
+
+#: apps/vnc/main/vnc.c:834
+Toque: el dedo es el mouse	Tactile : le doigt est la souris
+
+#: apps/vnc/main/vnc.c:845
+Ajustar	Ajuster
+
+#: apps/vnc/main/vnc.c:845
+Llenar	Remplir
+
+#: apps/vnc/main/vnc.c:964
+Muy chico: arrastrá un rectángulo más grande	Trop petit : glisse un rectangle plus grand
+
+#: apps/vnc/main/vnc.c:990
+Arrastrá un rectángulo sobre la parte que querés ver	Glisse un rectangle sur la partie que tu veux voir
+
+#: apps/vnc/main/vnc.c:1034
+Qué pantalla ver	Quel écran voir
+
+#: apps/vnc/main/vnc.c:1041
+Todas · %d×%d	Tous · %d×%d
+
+#: apps/vnc/main/vnc.c:1048
+Monitor %d · %d×%d	Moniteur %d · %d×%d
+
+#: apps/vnc/main/vnc.c:1053
+Zona elegida · %d×%d	Zone choisie · %d×%d
+
+#: apps/vnc/main/vnc.c:1056
+Marcar con el dedo	Marquer au doigt
+
+#: apps/vnc/main/vnc.c:1057
+La lista la manda la computadora.	L'ordinateur envoie cette liste.
+
+#: apps/vnc/main/vnc.c:1058
+Para ver una sola parte (un monitor de varios), marcala con el dedo; acercá antes con dos dedos si querés más precisión.	Pour voir une seule partie (un moniteur parmi plusieurs), marque-la au doigt ; zoome d'abord à deux doigts pour plus de précision.
+
+#: apps/vnc/main/vnc.c:1342
+Reintentar	Réessayer
+
+#: apps/vnc/main/vnc.c:1343
+Volver	Retour
+
+#: apps/vnc/main/vnc.c:1428
+No se pudo empezar: la conexión anterior todavía se está cerrando	Impossible de démarrer : la connexion précédente se ferme encore
+
+#: apps/vnc/main/vnc.c:1467
+Conectando…	Connexion…
+
+#: apps/vnc/main/vnc.c:1468
+Entrando…	Accès…
+
+#: apps/vnc/main/vnc_rfb.c:209
+Se cortó la conexión	La connexion a été coupée
+
+#: apps/vnc/main/vnc_rfb.c:322
+El servidor dejó de mandar datos	Le serveur n'envoie plus de données
+
+#: apps/vnc/main/vnc_rfb.c:324
+#: apps/vnc/main/vnc_rfb.c:1278
+El servidor cerró la conexión	Le serveur a fermé la connexion
+
+#: apps/vnc/main/vnc_rfb.c:447
+Datos comprimidos incompletos	Données compressées incomplètes
+
+#: apps/vnc/main/vnc_rfb.c:457
+#: apps/vnc/main/vnc_rfb.c:466
+Datos comprimidos dañados	Données compressées abîmées
+
+#: apps/vnc/main/vnc_rfb.c:642
+Rectángulo demasiado ancho	Rectangle trop large
+
+#: apps/vnc/main/vnc_rfb.c:712
+Sin memoria para ZRLE	Pas de mémoire pour ZRLE
+
+#: apps/vnc/main/vnc_rfb.c:749
+ZRLE: una tira se pasa del bloque	ZRLE : une suite dépasse le bloc
+
+#: apps/vnc/main/vnc_rfb.c:763
+#: apps/vnc/main/vnc_rfb.c:767
+ZRLE: datos inválidos	ZRLE : données invalides
+
+#: apps/vnc/main/vnc_rfb.c:791
+JPEG demasiado grande	JPEG trop grand
+
+#: apps/vnc/main/vnc_rfb.c:798
+Sin memoria para el JPEG	Pas de mémoire pour le JPEG
+
+#: apps/vnc/main/vnc_rfb.c:802
+El decodificador JPEG no abrió	Le décodeur JPEG ne s'est pas ouvert
+
+#: apps/vnc/main/vnc_rfb.c:829
+Tight: compresión desconocida	Tight : compression inconnue
+
+#: apps/vnc/main/vnc_rfb.c:830
+Tight: rectángulo demasiado ancho	Tight : rectangle trop large
+
+#: apps/vnc/main/vnc_rfb.c:843
+Tight: filtro desconocido	Tight : filtre inconnu
+
+#: apps/vnc/main/vnc_rfb.c:854
+Sin memoria para Tight	Pas de mémoire pour Tight
+
+#: apps/vnc/main/vnc_rfb.c:939
+La pantalla remota no entra en la memoria	L'écran distant ne tient pas en mémoire
+
+#: apps/vnc/main/vnc_rfb.c:957
+Tamaño de pantalla inválido	Taille d'écran invalide
+
+#: apps/vnc/main/vnc_rfb.c:1009
+Un rectángulo cae fuera de la pantalla	Un rectangle tombe hors de l'écran
+
+#: apps/vnc/main/vnc_rfb.c:1024
+Codificación %d no soportada	Encodage %d non pris en charge
+
+#: apps/vnc/main/vnc_rfb.c:1067
+Mensaje desconocido del servidor (%d)	Message inconnu du serveur (%d)
+
+#: apps/vnc/main/vnc_rfb.c:1080
+El servidor rechazó la conexión: %s	Le serveur a refusé la connexion : %s
+
+#: apps/vnc/main/vnc_rfb.c:1081
+#: apps/vnc/main/vnc_rfb.c:1154
+El servidor rechazó la conexión	Le serveur a refusé la connexion
+
+#: apps/vnc/main/vnc_rfb.c:1087
+El servidor pide contraseña: cargala en la computadora	Le serveur demande un mot de passe : saisis-le pour cet ordinateur
+
+#: apps/vnc/main/vnc_rfb.c:1097
+No es un servidor VNC	Pas un serveur VNC
+
+#: apps/vnc/main/vnc_rfb.c:1130
+La Mac no ofrece contraseña VNC: activá «Los visores VNC pueden controlar la pantalla con contraseña» en Compartir pantalla	Le Mac n'offre pas de mot de passe VNC : active « Les utilisateurs VNC peuvent contrôler l'écran avec un mot de passe » dans Partage d'écran
+
+#: apps/vnc/main/vnc_rfb.c:1132
+Ningún tipo de seguridad que la placa conozca (%s)	Aucun type de sécurité connu de la carte (%s)
+
+#: apps/vnc/main/vnc_rfb.c:1143
+Tipo de seguridad %d no soportado	Type de sécurité %d non pris en charge
+
+#: apps/vnc/main/vnc_rfb.c:1154
+Contraseña incorrecta	Mot de passe incorrect
+
+#: apps/vnc/main/vnc_rfb.c:1255
+Sin memoria	Mémoire pleine
+
+#: apps/vnc/main/vnc_rfb.c:1259
+No se encontró la computadora (DNS)	Ordinateur introuvable (DNS)
+
+#: apps/vnc/main/vnc_rfb.c:1260
+Sin conexiones libres en la placa	Plus de connexion libre sur la carte
+
+#: apps/vnc/main/vnc_rfb.c:1261
+La computadora no contesta	L'ordinateur ne répond pas
+
+#: apps/vnc/main/vnc_rfb.c:1262
+No se pudo conectar (¿VNC activado? ¿puerto?)	Connexion impossible (VNC activé ? port ?)
