@@ -2,7 +2,11 @@
 
 ## 0.32.2 — not released yet
 
-- **Six new apps in the Store**, from the card:
+- **Seven new apps in the Store**, from the card:
+  - **Vitral**: pieces of coloured glass of three and five squares fall in a
+    lead window twelve wide; a row of one colour is a stained glass worth
+    triple. Marathon, against the clock, thirty puzzle windows and two
+    players on one screen.
   - **Fusión** (Fusion): numbered tiles that slide and fuse, on boards of
     3×3 to 6×6, with classic goals, against the clock, fixed blocks and two
     players passing the board; four themes and achievements.

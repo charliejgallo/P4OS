@@ -1,0 +1,213 @@
+# amoledos-lang 1   es -> it
+# demo.vitral.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/vitral/main/vitral.c:178
+#: apps/vitral/main/vt_menu.c:472
+Deshacer	Annulla
+
+#: apps/vitral/main/vitral.c:181
+Pista	Indizio
+
+#: apps/vitral/main/vt_game.c:778
+Flecha	Freccia
+
+#: apps/vitral/main/vt_game.c:780
+Cohete	Razzo
+
+#: apps/vitral/main/vt_game.c:782
+Pez	Pesce
+
+#: apps/vitral/main/vt_game.c:783
+Corona	Corona
+
+#: apps/vitral/main/vt_game.c:784
+Montañas	Montagne
+
+#: apps/vitral/main/vt_game.c:786
+Escalera	Scala
+
+#: apps/vitral/main/vt_game.c:788
+Rombo	Rombo
+
+#: apps/vitral/main/vt_game.c:790
+Barco	Barca
+
+#: apps/vitral/main/vt_game.c:792
+Casa	Casa
+
+#: apps/vitral/main/vt_game.c:794
+Corazón	Cuore
+
+#: apps/vitral/main/vt_game.c:796
+Árbol	Albero
+
+#: apps/vitral/main/vt_game.c:798
+Gota	Goccia
+
+#: apps/vitral/main/vt_game.c:800
+Gato	Gatto
+
+#: apps/vitral/main/vt_game.c:802
+Ventana	Finestra
+
+#: apps/vitral/main/vt_game.c:804
+Torre	Torre
+
+#: apps/vitral/main/vt_menu.c:189
+#: apps/vitral/main/vt_menu.c:487
+Récord:	Record:
+
+#: apps/vitral/main/vt_menu.c:191
+Piezas de vidrio que caen	Pezzi di vetro che cadono
+
+#: apps/vitral/main/vt_menu.c:195
+Maratón	Maratona
+
+#: apps/vitral/main/vt_menu.c:197
+Contrarreloj	Contro il tempo
+
+#: apps/vitral/main/vt_menu.c:198
+#: apps/vitral/main/vt_menu.c:235
+Rompecabezas	Puzzle
+
+#: apps/vitral/main/vt_menu.c:199
+De a dos	In due
+
+#: apps/vitral/main/vt_menu.c:206
+#: apps/vitral/main/vt_menu.c:330
+#: apps/vitral/main/vt_menu.c:426
+Opciones	Opzioni
+
+#: apps/vitral/main/vt_menu.c:209
+#: apps/vitral/main/vt_menu.c:344
+Cómo se juega	Come si gioca
+
+#: apps/vitral/main/vt_menu.c:236
+Llená el vitral con las piezas que te tocan, sin que sobre nada.	Riempi la vetrata con i pezzi che ti toccano, senza che avanzi nulla.
+
+#: apps/vitral/main/vt_menu.c:282
+#: apps/vitral/main/vt_menu.c:359
+Volver	Indietro
+
+#: apps/vitral/main/vt_menu.c:317
+Controles	Comandi
+
+#: apps/vitral/main/vt_menu.c:317
+teclas en pantalla	tasti sullo schermo
+
+#: apps/vitral/main/vt_menu.c:317
+gestos	gesti
+
+#: apps/vitral/main/vt_menu.c:319
+Sonido	Suono
+
+#: apps/vitral/main/vt_menu.c:319
+#: apps/vitral/main/vt_menu.c:321
+sí	sì
+
+#: apps/vitral/main/vt_menu.c:319
+#: apps/vitral/main/vt_menu.c:321
+no	no
+
+#: apps/vitral/main/vt_menu.c:321
+Sombra de la pieza	Ombra del pezzo
+
+#: apps/vitral/main/vt_menu.c:323
+Nivel inicial	Livello iniziale
+
+#: apps/vitral/main/vt_menu.c:333
+Listo	Fine
+
+#: apps/vitral/main/vt_menu.c:345
+Caen piezas de vidrio de tres y de cinco cuadros. Una fila completa se rompe y suma puntos; varias juntas suman más. Una fila completa de un solo color es un vitral: vale el triple y se lleva también la fila de abajo. El vidrio transparente va con cualquier color.	Cadono pezzi di vetro da tre e da cinque quadretti. Una riga completa si rompe e fa punti; più righe insieme ne fanno di più. Una riga completa di un solo colore è una vetrata: vale il triplo e si porta via anche la riga sotto. Il vetro trasparente va con qualsiasi colore.
+
+#: apps/vitral/main/vt_menu.c:350
+Con el dedo: deslizá a los costados para mover la pieza y hacia abajo para bajarla; un golpe rápido hacia abajo la tira, uno hacia arriba la guarda. Un toque la gira: en la mitad derecha a la derecha, en la izquierda al revés.	Con il dito: scorri di lato per muovere il pezzo e in basso per abbassarlo; un colpo rapido in basso lo fa cadere, uno in alto lo mette da parte. Un tocco lo ruota: nella metà destra in senso orario, nella sinistra al contrario.
+
+#: apps/vitral/main/vt_menu.c:355
+Con joystick: la cruz mueve y baja, arriba la tira, A y B giran, L o R la guardan y START pausa. Con teclado: flechas, Z y X giran, espacio la tira y C la guarda.	Con il controller: la croce muove e abbassa, su lo fa cadere, A e B ruotano, L o R lo mettono da parte e START mette in pausa. Con la tastiera: frecce, Z e X ruotano, spazio lo fa cadere e C lo mette da parte.
+
+#: apps/vitral/main/vt_menu.c:422
+Pausa	Pausa
+
+#: apps/vitral/main/vt_menu.c:423
+Seguir	Continua
+
+#: apps/vitral/main/vt_menu.c:424
+#: apps/vitral/main/vt_menu.c:473
+Empezar de nuevo	Ricomincia
+
+#: apps/vitral/main/vt_menu.c:425
+#: apps/vitral/main/vt_menu.c:466
+#: apps/vitral/main/vt_menu.c:474
+Niveles	Livelli
+
+#: apps/vitral/main/vt_menu.c:427
+#: apps/vitral/main/vt_menu.c:449
+#: apps/vitral/main/vt_menu.c:493
+Menú	Menu
+
+#: apps/vitral/main/vt_menu.c:444
+Ganó el jugador %d	Ha vinto il giocatore %d
+
+#: apps/vitral/main/vt_menu.c:448
+Revancha	Rivincita
+
+#: apps/vitral/main/vt_menu.c:456
+¡Vitral completo!	Vetrata completa!
+
+#: apps/vitral/main/vt_menu.c:462
+Tiempo:	Tempo:
+
+#: apps/vitral/main/vt_menu.c:464
+Siguiente	Avanti
+
+#: apps/vitral/main/vt_menu.c:465
+#: apps/vitral/main/vt_menu.c:492
+Otra vez	Ancora
+
+#: apps/vitral/main/vt_menu.c:470
+Se acabaron las piezas	Pezzi finiti
+
+#: apps/vitral/main/vt_menu.c:471
+Quedó vidrio sin llenar. Deshacé la última o empezá de nuevo.	È rimasto vetro vuoto. Annulla l'ultimo o ricomincia.
+
+#: apps/vitral/main/vt_menu.c:481
+¡Tiempo!	Tempo scaduto!
+
+#: apps/vitral/main/vt_menu.c:481
+Se llenó el vitral	La vetrata è piena
+
+#: apps/vitral/main/vt_menu.c:484
+¡Récord nuevo!	Nuovo record!
+
+#: apps/vitral/main/vt_menu.c:490
+%d filas, %d vitrales, nivel %d	%d righe, %d vetrate, livello %d
+
+#: apps/vitral/main/vt_view.c:663
+¡Vitral!	Vetrata!
+
+#: apps/vitral/main/vt_view.c:872
+PIEZAS	PEZZI
+
+#: apps/vitral/main/vt_view.c:872
+NIVEL	LIVELLO
+
+#: apps/vitral/main/vt_view.c:878
+TIEMPO	TEMPO
+
+#: apps/vitral/main/vt_view.c:878
+FILAS	RIGHE
+
+#: apps/vitral/main/vt_view.c:885
+QUEDA	RESTA
+
+#: apps/vitral/main/vt_view.c:901
+SIGUE	PROSSIMO
+
+#: apps/vitral/main/vt_view.c:905
+GUARDADA	RISERVA

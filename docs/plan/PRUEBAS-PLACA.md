@@ -25,6 +25,10 @@ en resumen": no se revisaron en esta pasada.
 - [ ] **Deriva**: medir los fps en la placa (el registro da una línea cada
       5 s) y jugarla con los pulgares y con joystick.
 - [ ] **Fusión**: los fps en 6×6 y las flechas de un teclado a mano.
+- [x] **Vitral** en la placa (2026-11-23, sin el usuario): 59,5-59,9 fps en
+      maratón, 1,6-2,6 ms de dibujo; 1,1 MB de PSRAM.
+- [ ] **Vitral** a mano: los gestos, dos pulgares de a dos, un vitral de
+      verdad con los rayos, acostada y el rompecabezas 19.
 - [ ] **Portugués, francés e italiano** desde la Tienda: que Ajustes los
       liste con su nombre, recorrer el inicio, Ajustes y un par de apps.
 - [ ] La Tienda tras la release: casi todas las apps ofrecen actualizar

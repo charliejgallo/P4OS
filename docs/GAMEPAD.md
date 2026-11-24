@@ -62,6 +62,7 @@ by touch never sees it. Board games put a cursor on the board the same way.
 | Tortuga | START runs or stops · R steps · L changes the speed · blocks: D-pad up/down chooses a block, left/right a piece of the palette, A puts it, B deletes · menus: D-pad and A, B back |
 | Truco | D-pad over your cards and the calls · A lifts and plays a card, answers · B puts a lifted card back · START menu |
 | Turbo | stick is an analog wheel (D-pad the arrows) · A gas · B brake · START pause · L/R car in the garage |
+| Vitral | left/right move (repeating) · down soft drop · up drops · A turns clockwise, B the other way · L or R hold · START pause; a second gamepad plays player 2 in a match · menus: D-pad and A, B back, START plays |
 | Vuelos (not a game) | D-pad or stick moves the map · L/R zoom out/in · A picks the aircraft nearest the centre, the next one at every press · B lets it go · START the list; in the panels B or START goes back |
 
 Two-board games (Neon Snakes, Monster Hop's race, Mila's visits, Truco,
