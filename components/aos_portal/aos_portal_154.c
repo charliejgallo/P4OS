@@ -39,7 +39,11 @@
  *                                  the P4 with the C6 as its radio, a
  *                                  coordinator forming a network of its own,
  *                                  closed (a measuring step); its state in
- *                                  GET /api/154 as "zbhost"
+ *                                  GET /api/154 as "zbhost", with the
+ *                                  devices that joined ("devices") and the
+ *                                  seconds it stays open ("open_s")
+ *   POST /api/154/zbpermit         {"seconds": 180}: lets devices join for
+ *                                  that long (0 closes it, at most 254)
  */
 #include "aos_portal_154.h"
 #include "aos_154.h"
@@ -99,6 +103,30 @@ static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
         cJSON_AddNumberToObject(h, "channel", z.channel);
         cJSON_AddNumberToObject(h, "to_c6", z.to_c6);
         cJSON_AddNumberToObject(h, "from_c6", z.from_c6);
+        cJSON_AddNumberToObject(h, "open_s", aos_zigbee_permit_left());
+        static aos_zigbee_dev_t dev[AOS_ZB_DEVICES_MAX];     /* the portal's one task */
+        static const char *STEP[] = { "endpoints", "basic", "done", "failed", "left" };
+        int n = aos_zigbee_devices(dev, AOS_ZB_DEVICES_MAX);
+        cJSON *a = cJSON_AddArrayToObject(h, "devices");
+        for (int i = 0; i < n; i++) {
+            const aos_zigbee_dev_t *d = &dev[i];
+            char ieee[17];
+            snprintf(ieee, sizeof ieee, "%02x%02x%02x%02x%02x%02x%02x%02x", d->ieee[7], d->ieee[6], d->ieee[5],
+                     d->ieee[4], d->ieee[3], d->ieee[2], d->ieee[1], d->ieee[0]);
+            cJSON *e = cJSON_CreateObject();
+            cJSON_AddStringToObject(e, "ieee", ieee);
+            cJSON_AddNumberToObject(e, "nwk", d->nwk);
+            cJSON_AddStringToObject(e, "step", d->step < 5 ? STEP[d->step] : "?");
+            cJSON_AddBoolToObject(e, "router", (d->cap & 0x02) != 0);
+            cJSON_AddNumberToObject(e, "ep", d->ep);
+            cJSON_AddNumberToObject(e, "eps", d->eps);
+            cJSON_AddStringToObject(e, "manufacturer", d->manuf);
+            cJSON_AddStringToObject(e, "model", d->model);
+            cJSON_AddNumberToObject(e, "power", d->power);
+            if (d->rssi) cJSON_AddNumberToObject(e, "rssi", d->rssi);
+            cJSON_AddNumberToObject(e, "ago_s", (double)(((uint32_t)aos_hal_uptime_ms() - d->seen_ms) / 1000));
+            cJSON_AddItemToArray(a, e);
+        }
     }
     if (in.proto >= 3) {
         cJSON *z = cJSON_AddObjectToObject(o, "zigbee");
@@ -243,6 +271,7 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
     else if (!strcmp(what, "unguard")) ok = aos_154_unguard();
     else if (!strcmp(what, "rcp")) ok = aos_154_rcp_start();
     else if (!strcmp(what, "zbhost")) ok = aos_zigbee_start((int)num(b, "channel", 26));
+    else if (!strcmp(what, "zbpermit")) ok = aos_zigbee_permit((int)num(b, "seconds", 180));
     else if (!strcmp(what, "c6log")) ok = aos_154_c6_log(cJSON_IsTrue(cJSON_GetObjectItem(b, "on")));
     else if (!strcmp(what, "zigbee"))
         ok = cJSON_IsTrue(cJSON_GetObjectItem(b, "on")) ? aos_154_zigbee_start((int)num(b, "channel", 26)) : aos_154_zigbee_stop();

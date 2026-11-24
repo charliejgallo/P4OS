@@ -110,8 +110,13 @@ static void commission(void *ctx)
     aos_hal_log(TAG, "commissioning 0x%x asked: %d", (unsigned)mode, e);
 }
 
+/* aos_zigbee_devices.c */
+void aos_zigbee_devices_init(void);
+bool aos_zigbee_devices_signal(const ezb_app_signal_t *sig);
+
 static bool on_signal(const ezb_app_signal_t *sig)
 {
+    if (aos_zigbee_devices_signal(sig)) return true;
     ezb_app_signal_type_t t = ezb_app_signal_get_type(sig);
     const ezb_bdb_signal_simple_params_t *p = ezb_app_signal_get_params(sig);
     aos_hal_log(TAG, "signal %s (0x%04x) status %d", ezb_app_signal_to_string(t), t, p ? p->status : -1);
@@ -225,6 +230,7 @@ static void stack_task(void *arg)
     ezb_bdb_set_primary_channel_set(1u << s_channel);
     ezb_bdb_set_secondary_channel_set(0x07FFF800u);   /* as Espressif's example: all */
     ezb_app_signal_add_handler(on_signal);
+    aos_zigbee_devices_init();
     static esp_timer_handle_t t;
     const esp_timer_create_args_t ta = { .callback = probe_timer, .name = "zb_probe" };
     if (!t && esp_timer_create(&ta, &t) == ESP_OK) esp_timer_start_periodic(t, 3000000);
