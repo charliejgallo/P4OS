@@ -45,7 +45,7 @@ static void make_lines(void)
     s_nlz = 0;
     while (z < 1400.0f && s_nlz < VR_MAXL) {
         s_lz[s_nlz++] = z;
-        float dz = z * (0.0085f + z * 0.000012f);
+        float dz = z * (0.0115f + z * 0.000016f);
         if (dz < 0.2f) dz = 0.2f;
         z += dz;
     }

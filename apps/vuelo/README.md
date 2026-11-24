@@ -58,6 +58,15 @@ autopilot. The log has a line every 5 s:
 | 512 x 288 | 14-15 | 67-75 ms |
 | 640 x 360 | 11-12 | 82-89 ms |
 
+Again on 2026-11-24, with the map's tiles, the cheaper noise and fewer
+far lines (367 instead of 461), in free flight with the autopilot:
+426 x 240 at 26-34 fps (about 30), a frame 29-38 ms (the ground and sky
+21-29), the PPA 12-13 ms beside it; a world made in 4.0 s (the heights
+2.3). The drops with the heading are gone. What costs now is filling the
+columns of the upright picture, which is in PSRAM and written down its
+columns: each pixel is another cache line. The next step is to keep it
+by columns.
+
 The spread at 426 x 240 came from the heading: a line looking north or
 south took every sample from another row of the map. The tiles are the
 fix, still to be measured. Making a world took 5.3-6.6 s, before the
