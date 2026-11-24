@@ -36,6 +36,10 @@ Reglas del pack, además de la receta del estilo B (abajo):
 - Nada de logos ni marcas: Python es una víbora, Lua una luna, Claude un
   robot, Home Assistant una casa.
 - La miniatura (`mini`): el juguete ×1,1-1,25 y sin las piezas chicas.
+- **Un juguete grande y plano se hunde en la ficha** de un lado al
+  inclinarlo (gira alrededor de z = 0): levantarlo con `loc=(…, …, 0.08-0.1)`
+  en `group()`. Y para un juguete chico, armarlo a tamaño normal y achicar
+  el grupo (`scale`), no las medidas: los redondeos no achican bien.
 - Las letras de Blender no tienen − ni ÷: los signos se arman con piezas
   (`_sign` en `models_sistema1.py`).
 
