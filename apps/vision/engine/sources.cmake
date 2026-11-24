@@ -29,7 +29,9 @@ file(GLOB VE_SRCS_BOARD CONFIGURE_DEPENDS
     ${VE_DL}/dl/tool/isa/esp32p4/*.S
     ${VE_DL}/vision/image/isa/esp32p4/*.S)
 list(APPEND VE_SRCS_BOARD ${VE_DIR}/ve_rt.cpp ${VE_DIR}/rt/tree.cc ${VE_DIR}/rt/list.cc
-    ${VE_DIR}/rt/hashtable_c++0x.cc ${VE_DIR}/rt/hash_bytes.cc)
+    ${VE_DIR}/rt/hashtable_c++0x.cc ${VE_DIR}/rt/hash_bytes.cc
+    # last: the end of the constructor table (ve_ctors_end.c)
+    ${VE_DIR}/ve_ctors_end.c)
 
 file(GLOB VE_SRCS_SIM CONFIGURE_DEPENDS ${VE_DL}/dl/base/isa/c/*.cpp)
 

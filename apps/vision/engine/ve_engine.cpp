@@ -303,7 +303,30 @@ static const ve_api_t API = {
     VE_ABI, net_open, net_close, net_run, net_set_threshold, net_threshold,
 };
 
+#ifndef AOS_SIM
+/* The loader does not run a module's .init_array (CAS found it first,
+ * apps/cas/engine/cas_end.c): esp-dl's globals with constructors (this
+ * file's POINT_STAGES, its operator registry) would stay empty. They run
+ * once, before the first use, between two markers: this one, sorted first,
+ * and ve_ctors_end.c's, the last object of the link. */
+typedef void (*ve_ctor_t)(void);
+__attribute__((used, section(".init_array.00000"))) static const ve_ctor_t ve_ctor_begin[1] = {0};
+extern "C" const ve_ctor_t ve_ctor_end[];
+
+static void run_ctors(void)
+{
+    static bool done;
+    if (done) return;
+    done = true;
+    for (const ve_ctor_t *f = ve_ctor_begin + 1; f < ve_ctor_end; f++)
+        if (*f && *f != (ve_ctor_t)-1) (*f)();
+}
+#endif
+
 extern "C" __attribute__((visibility("default"))) const ve_api_t *ve_module_api(void)
 {
+#ifndef AOS_SIM
+    run_ctors();
+#endif
     return &API;
 }

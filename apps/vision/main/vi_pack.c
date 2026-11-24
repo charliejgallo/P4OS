@@ -78,6 +78,9 @@ const ve_api_t *vi_engine(char *err, size_t errlen)
         return NULL;
     }
     s_api = api;
+    /* where the module landed: a panic's pc in it, minus this, is an
+     * address of engine.so (nm -D: ve_module_api) */
+    aos_hal_log("vision", "engine.so: ve_module_api at %p", (void *)get);
     return api;
 }
 

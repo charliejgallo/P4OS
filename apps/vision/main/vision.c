@@ -71,6 +71,7 @@ typedef struct {
     vi_code_t codes[CODE_KEEP];
     int ncodes;
     float thr_shown;
+    bool no_draw;
 } vi_ui_t;
 
 static vi_ui_t *U;
@@ -104,8 +105,12 @@ static void place_image(int w, int h)
     if (w == U->img_w && h == U->img_h) return;
     U->img_w = w;
     U->img_h = h;
+    /* 1:1 when it fits: LVGL scales a picture in software, and doing it for
+     * every frame took half the cores' time from the detector (measured on
+     * the board: people 115 -> 62 ms a frame without it) */
     int sx = U->stage_w * 256 / w, sy = U->stage_h * 256 / h;
     U->scale = sx < sy ? sx : sy;
+    if (U->scale > 256) U->scale = 256;
     lv_image_set_pivot(U->canvas, w / 2, h / 2);
     lv_image_set_scale(U->canvas, U->scale == 256 ? LV_SCALE_NONE : U->scale);
     lv_obj_center(U->canvas);
@@ -365,6 +370,9 @@ static void apply_portal(void)
             if (t > 0.04f && t < 0.96f) vi.want_thr = t;
         } else if (strncmp(msg, "test=", 5) == 0) {
             vi.want_test = msg[5] == '1';
+        } else if (strncmp(msg, "draw=", 5) == 0) {
+            /* measuring: the picture left undrawn, to see what LVGL costs */
+            U->no_draw = msg[5] == '0';
         }
     }
 }
@@ -388,7 +396,7 @@ static void tick_cb(lv_timer_t *t)
     bool fresh = f && f->seq != U->seq_shown;
     if (fresh) {
         U->seq_shown = f->seq;
-        draw_frame(f);
+        if (!U->no_draw) draw_frame(f);
         if (f->mode == VI_M_CODES) remember_codes(f);
         check_alert(f);
     }
@@ -703,6 +711,13 @@ static void *vision_create(aos_app_t *self, lv_obj_t *root)
     U = (vi_ui_t *)lv_malloc_zeroed(sizeof(vi_ui_t));
     if (!U) return NULL;
     U->root = root;
+#if !defined(AOS_SIM) && !defined(AOS_SIM_BUILTIN)
+    {   /* where the app landed: a panic's pc minus this is an address of
+         * vision.so (nm -D: __assert_func, in vi_codes.c) */
+        extern void __assert_func(const char *, int, const char *, const char *);
+        aos_hal_log("vision", "vision.so: __assert_func at %p", (void *)__assert_func);
+    }
+#endif
     memset(&vi, 0, sizeof vi);
     vi.shown = vi.ready = -1;
     vi.want = (vi_mode_t)pref_int("vi_mode", VI_M_PERSON);
