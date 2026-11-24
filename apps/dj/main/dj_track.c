@@ -67,7 +67,7 @@ float dj_clampf(float v, float lo, float hi)
 
 static char s_dir[160];
 
-const char *dj_dir(void)
+const char *dj_data_dir(void)
 {
     if (!s_dir[0]) snprintf(s_dir, sizeof s_dir, "%s/dj", aos_hal_path_data());
     return s_dir;
@@ -76,7 +76,7 @@ const char *dj_dir(void)
 void dj_mkdirs(void)
 {
     mkdir(aos_hal_path_data(), 0775);
-    mkdir(dj_dir(), 0775);
+    mkdir(dj_data_dir(), 0775);
     mkdir(aos_hal_path_recordings(), 0775);
 }
 

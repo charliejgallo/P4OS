@@ -287,4 +287,4 @@ static inline void dj_copy(char *dst, size_t n, const char *src)
     if (n) dst[i] = 0;
 }
 void     dj_mkdirs(void);
-const char *dj_dir(void);                  /* the app's data folder */
+const char *dj_data_dir(void);                  /* the app's data folder */

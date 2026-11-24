@@ -36,7 +36,7 @@ static int   s_pending = -1;       /* the screen control waiting for its message
 static int8_t s_jog_touch[DJ_NDECK];
 static uint32_t s_jog_ms[DJ_NDECK];
 
-static void path(char *out, size_t n) { snprintf(out, n, "%s/midi.txt", dj_dir()); }
+static void path(char *out, size_t n) { snprintf(out, n, "%s/midi.txt", dj_data_dir()); }
 
 void dj_midi_load(void)
 {

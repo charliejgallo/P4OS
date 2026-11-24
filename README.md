@@ -1009,9 +1009,9 @@ and their art comes in packs.
   It plays on the board's output for playing live: 14 to 18 ms from a key
   to the speaker.
 
-| Tanks | Turtle | Serial Plotter | Home Status | Deriva | Fusion | Vitral |
-|---|---|---|---|---|---|---|
-| <img src="docs/img/land-tanques.jpg" width="250"> | <img src="docs/img/app-tortuga.jpg" width="125"> | <img src="docs/img/app-plotter.png" width="125"> | <img src="docs/img/app-estado.png" width="125"> | <img src="docs/img/app-asteroides.jpg" width="125"> | <img src="docs/img/app-sumar.png" width="125"> | <img src="docs/img/app-vitral.jpg" width="125"> |
+| Tanks | Turtle | Serial Plotter | Home Status | Deriva | Fusion | Vitral | DJ |
+|---|---|---|---|---|---|---|---|
+| <img src="docs/img/land-tanques.jpg" width="250"> | <img src="docs/img/app-tortuga.jpg" width="125"> | <img src="docs/img/app-plotter.png" width="125"> | <img src="docs/img/app-estado.png" width="125"> | <img src="docs/img/app-asteroides.jpg" width="125"> | <img src="docs/img/app-sumar.png" width="125"> | <img src="docs/img/app-vitral.jpg" width="125"> | <img src="docs/img/land-dj.png" width="250"> |
 
 - **Tanks** ([apps/tanques/README.md](apps/tanques/README.md)): turn-based
   battles of toy tanks in 3D. Each turn you drive from above as far as your
@@ -1047,6 +1047,10 @@ and their art comes in packs.
   coloured glass of three and five squares fall in a lead window; a full
   row breaks, and a row of one colour is a stained glass worth triple.
   Marathon, against the clock, puzzles and two players.
+- **DJ** ([apps/dj/README.md](apps/dj/README.md)): two decks and a mixer.
+  The platters scratch under the fingers (all five at once), the decks
+  find the tempo and the beats and SYNC lines them up, with EQ, filter,
+  effects, loops and hot cues, and the mix is recorded to WAV.
 
 Doom is doomgeneric, with OPL2 music, and Duke Nukem 3D is Chocolate Duke3D,
 with the Sound Blaster's FM music; both on the board, from the shareware

@@ -32,7 +32,7 @@ static const char *base(const char *path)
 
 static void file_path(char *out, size_t n)
 {
-    snprintf(out, n, "%s/tracks.txt", dj_dir());
+    snprintf(out, n, "%s/tracks.txt", dj_data_dir());
 }
 
 /* splits 'line' at the tabs; returns how many fields */

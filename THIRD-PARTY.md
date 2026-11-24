@@ -65,6 +65,7 @@ hardware has to replace them.
 | musl's double-precision maths (`lib/libm_dbl`), **re1.5** (Russ Cox, Paul Sokolovsky), **uzlib** (Jørgen Ibsen, Paul Sokolovsky), **crypto-algorithms** SHA-256 (Brad Conte) | **vendored** with MicroPython, `apps/python/main/upy/lib/` | MIT; BSD-3-Clause; Zlib; public domain | as MicroPython carries them |
 | **requests 1.1.1** and **mip 0.5.0** of **micropython-lib** (`90028be`) | **vendored** and frozen into `python.so`, `apps/python/frozen/` | MIT | one change in `requests` (reading a body whole), marked `P4OS:`; `apps/python/frozen/VENDOR.md` |
 | compact AES (forward cipher), after **tiny-AES-c** (kokke) | **vendored**, `apps/rf/main/aes.c` | public domain (the Unlicense) | the standard AES S-box and schedule, generalised to a runtime key size, for `rf_mesh.c`'s AES-CTR (reading a Meshtastic channel the user has the key to) |
+| **minimp3** (lieff) | **vendored**, `apps/dj/main/minimp3/` (the copy in `components/aos_hal/minimp3/`, with its `AmoledOS:` change), its functions renamed `dj_mp3dec_*` | CC0-1.0 | the DJ mixer's decks; its FLAC decoder (`dj_flac.c`) is its own |
 | **miniz**'s tinfl (Rich Geldreich), renamed `of_tinfl_decompress` | **vendored**, `apps/oficina/third/` | MIT | the same copy the Emulador and VNC carry, for reading `.xlsx` and `.ods`; the notice stays in the file |
 
 The firmware that loads `doom.so`, `duke3d.so`, `emulador.so`, `rf.so` and `cas.so` stays MIT.

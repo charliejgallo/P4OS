@@ -1,0 +1,228 @@
+# amoledos-lang 1   es -> fr
+# aos.dj.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/dj/main/dj.c:43
+El parlante está ocupado	Le haut-parleur est occupé
+
+#: apps/dj/main/dj_lib.c:334
+No hay temas. Copiá MP3, WAV o FLAC a la carpeta music de la tarjeta.	Aucun morceau. Copie des MP3, WAV ou FLAC dans le dossier music de la carte SD.
+
+#: apps/dj/main/dj_lib.c:335
+Nada coincide con la búsqueda.	Rien ne correspond à la recherche.
+
+#: apps/dj/main/dj_lib.c:341
+%d de %d	%d sur %d
+
+#: apps/dj/main/dj_lib.c:342
+%d temas	%d morceaux
+
+#: apps/dj/main/dj_lib.c:352
+Cargar en la bandeja %c	Charger sur la platine %c
+
+#: apps/dj/main/dj_lib.c:353
+Temas	Morceaux
+
+#: apps/dj/main/dj_lib.c:361
+Buscar	Chercher
+
+#: apps/dj/main/dj_lib.c:366
+Música	Musique
+
+#: apps/dj/main/dj_lib.c:367
+Grabaciones	Enregistrements
+
+#: apps/dj/main/dj_lib.c:449
+Tocá el control de la pantalla que querés manejar	Touche le contrôle de l'écran que tu veux piloter
+
+#: apps/dj/main/dj_lib.c:457
+Controles MIDI borrados	Contrôles MIDI effacés
+
+#: apps/dj/main/dj_lib.c:462
+Ajustes	Réglages
+
+#: apps/dj/main/dj_lib.c:465
+Suave	Douce
+
+#: apps/dj/main/dj_lib.c:465
+Corte (scratch)	Sèche (scratch)
+
+#: apps/dj/main/dj_lib.c:466
+Sí	Oui
+
+#: apps/dj/main/dj_lib.c:466
+No	Non
+
+#: apps/dj/main/dj_lib.c:467
+Scratch	Scratch
+
+#: apps/dj/main/dj_lib.c:467
+Sólo empujar	Pousser seulement
+
+#: apps/dj/main/dj_lib.c:468
+Muy cerca	Très près
+
+#: apps/dj/main/dj_lib.c:468
+Cerca	Près
+
+#: apps/dj/main/dj_lib.c:468
+Lejos	Loin
+
+#: apps/dj/main/dj_lib.c:468
+Muy lejos	Très loin
+
+#: apps/dj/main/dj_lib.c:469
+Rango del pitch	Plage du pitch
+
+#: apps/dj/main/dj_lib.c:470
+Curva del crossfader	Courbe du crossfader
+
+#: apps/dj/main/dj_lib.c:471
+Cue, hot cues y loops a tiempo	Cue, hot cues et loops sur le temps
+
+#: apps/dj/main/dj_lib.c:472
+Al tocar el centro del plato	En touchant le centre du plateau
+
+#: apps/dj/main/dj_lib.c:473
+Forma de onda	Forme d'onde
+
+#: apps/dj/main/dj_lib.c:474
+Controlador MIDI por USB	Contrôleur MIDI USB
+
+#: apps/dj/main/dj_lib.c:477
+Aprender	Apprendre
+
+#: apps/dj/main/dj_lib.c:478
+Borrar	Effacer
+
+#: apps/dj/main/dj_lib.c:480
+%d controles	%d contrôles
+
+#: apps/dj/main/dj_lib.c:482
+Aprender: tocá un control de la pantalla y después movelo en el aparato. La placa tiene un solo parlante: suena la suma de las dos bandejas; la mezcla se graba en estéreo.	Apprendre : touche un contrôle de l'écran, puis bouge-le sur l'appareil. La carte n'a qu'un haut-parleur : il joue la somme des deux platines ; le mix est enregistré en stéréo.
+
+#: apps/dj/main/dj_lib.c:500
+Sin tempo todavía	Pas encore de tempo
+
+#: apps/dj/main/dj_lib.c:545
+Tempo y grilla: bandeja %c	Tempo et grille : platine %c
+
+#: apps/dj/main/dj_lib.c:553
+Mover la grilla	Déplacer la grille
+
+#: apps/dj/main/dj_lib.c:555
+< 1 tiempo	< 1 temps
+
+#: apps/dj/main/dj_lib.c:558
+1 tiempo >	1 temps >
+
+#: apps/dj/main/dj_lib.c:560
+Un tiempo acá	Temps ici
+
+#: apps/dj/main/dj_lib.c:561
+La grilla se guarda con el tema. \"Un tiempo acá\" pone una línea de la grilla donde está el cabezal: pausá el tema justo en un golpe y tocalo.	La grille est gardée avec le morceau. \"Temps ici\" place une ligne de grille à la tête de lecture : mets le morceau en pause pile sur un coup et touche le bouton.
+
+#: apps/dj/main/dj_midi.c:112
+Control aprendido	Contrôle appris
+
+#: apps/dj/main/dj_track.c:319
+No se pudo abrir	Impossible d'ouvrir
+
+#: apps/dj/main/dj_track.c:347
+Demasiado largo	Trop long
+
+#: apps/dj/main/dj_track.c:352
+Formato no soportado	Format non pris en charge
+
+#: apps/dj/main/dj_track.c:362
+#: apps/dj/main/dj_ui.c:777
+#: apps/dj/main/dj_ui.c:789
+Sin memoria	Pas de mémoire
+
+#: apps/dj/main/dj_ui.c:30
+Eco	Écho
+
+#: apps/dj/main/dj_ui.c:30
+Flanger	Flanger
+
+#: apps/dj/main/dj_ui.c:30
+Filtro LFO	Filtre LFO
+
+#: apps/dj/main/dj_ui.c:30
+Bitcrush	Bitcrush
+
+#: apps/dj/main/dj_ui.c:94
+#: apps/dj/main/dj_ui.c:158
+Pitch	Pitch
+
+#: apps/dj/main/dj_ui.c:98
+#: apps/dj/main/dj_ui.c:162
+SYNC	SYNC
+
+#: apps/dj/main/dj_ui.c:99
+#: apps/dj/main/dj_ui.c:163
+#: apps/dj/main/dj_ui.c:375
+#: apps/dj/main/dj_ui.c:376
+LOOP	LOOP
+
+#: apps/dj/main/dj_ui.c:104
+#: apps/dj/main/dj_ui.c:173
+CARGAR	LOAD
+
+#: apps/dj/main/dj_ui.c:106
+#: apps/dj/main/dj_ui.c:176
+CUE	CUE
+
+#: apps/dj/main/dj_ui.c:114
+#: apps/dj/main/dj_ui.c:170
+FX	FX
+
+#: apps/dj/main/dj_ui.c:129
+#: apps/dj/main/dj_ui.c:185
+AGUDOS	AIGU
+
+#: apps/dj/main/dj_ui.c:129
+#: apps/dj/main/dj_ui.c:185
+MEDIOS	MÉDIUM
+
+#: apps/dj/main/dj_ui.c:129
+#: apps/dj/main/dj_ui.c:185
+GRAVES	GRAVE
+
+#: apps/dj/main/dj_ui.c:129
+#: apps/dj/main/dj_ui.c:185
+FILTRO	FILTRE
+
+#: apps/dj/main/dj_ui.c:139
+#: apps/dj/main/dj_ui.c:198
+MÁSTER	MASTER
+
+#: apps/dj/main/dj_ui.c:397
+tiempo	temps
+
+#: apps/dj/main/dj_ui.c:417
+GRABAR	REC
+
+#: apps/dj/main/dj_ui.c:603
+Cargando...	Chargement...
+
+#: apps/dj/main/dj_ui.c:612
+Sin tema	Aucun morceau
+
+#: apps/dj/main/dj_ui.c:613
+Tocá CARGAR para elegir uno	Touche LOAD pour en choisir un
+
+#: apps/dj/main/dj_ui.c:626
+BPM	BPM
+
+#: apps/dj/main/dj_ui.c:791
+Grabando la mezcla en Grabaciones	Enregistrement du mix dans Enregistrements
+
+#: apps/dj/main/dj_ui.c:865
+Ahora mové o apretá el control del aparato MIDI	Maintenant, bouge ou appuie sur le contrôle de l'appareil MIDI
+
+#: apps/dj/main/dj_ui.c:988
+Hot cue borrado	Hot cue effacé

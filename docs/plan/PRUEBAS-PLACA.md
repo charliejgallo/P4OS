@@ -27,6 +27,11 @@ en resumen": no se revisaron en esta pasada.
 - [ ] **Fusión**: los fps en 6×6 y las flechas de un teclado a mano.
 - [x] **Vitral** en la placa (2026-11-23, sin el usuario): 59,5-59,9 fps en
       maratón, 1,6-2,6 ms de dibujo; 1,1 MB de PSRAM.
+- [x] **DJ** en la placa (2026-11-23, sin el usuario, con temas sintetizados y
+      leyendo sus MP3): el hilo de audio 20 % con dos bandejas, 25 % con
+      efectos; cola 8 ms + 10 ms de salida; sin faltas; la interfaz 28-30 fps;
+      8,7 MB de PSRAM libres con la app abierta.
+- [ ] **DJ** a mano: escucharla, los dos platos con las dos manos, MIDI.
 - [ ] **Vitral** a mano: los gestos, dos pulgares de a dos, un vitral de
       verdad con los rayos, acostada y el rompecabezas 19.
 - [ ] **Portugués, francés e italiano** desde la Tienda: que Ajustes los

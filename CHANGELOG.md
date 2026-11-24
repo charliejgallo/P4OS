@@ -2,7 +2,12 @@
 
 ## 0.32.2 — not released yet
 
-- **Seven new apps in the Store**, from the card:
+- **Eight new apps in the Store**, from the card:
+  - **DJ**: two decks that play MP3, WAV and FLAC from the card, platters
+    to scratch with the fingers, pitch, cues, loops, tempo and beat
+    detection with SYNC, a three-band EQ, filter and effects per deck, and
+    the mix recorded to WAV. On the board two decks with effects take a
+    quarter of a core.
   - **Vitral**: pieces of coloured glass of three and five squares fall in a
     lead window twelve wide; a row of one colour is a stained glass worth
     triple. Marathon, against the clock, thirty puzzle windows and two
