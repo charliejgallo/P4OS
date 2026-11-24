@@ -21,7 +21,8 @@
 
 #define N       VW_N
 #define MASK    (VW_N - 1)
-#define IDX(x, y) ((((y) & MASK) << VW_LG) | ((x) & MASK))
+#define IDX(x, y) ((((y) & MASK) << VW_LG) | ((x) & MASK))     /* the generation's own arrays, by rows */
+#define TIX(x, y) vw_idx((uint32_t)(x) & MASK, (uint32_t)(y) & MASK, VW_LG)   /* level 0, in tiles */
 
 /* what a texel is: the high nibble of the kind byte (the low one is the
  * shadow, 0 dark .. 15 lit) */
@@ -72,19 +73,47 @@ static inline float grad(uint32_t h, float x, float y)
     }
 }
 
-/* Perlin noise of period P (a power of two) lattice cells, about -1..1 */
+/* The lattice's hash: a shuffled table of 1024, made once per world. The
+ * seed moves where each octave reads it. (Four multiplications a corner
+ * made the heights take 4 s on the board.) */
+static uint16_t s_perm[1024];
+
+static void perm_make(uint32_t seed)
+{
+    for (int i = 0; i < 1024; i++) s_perm[i] = (uint16_t)i;
+    uint32_t r = seed * 2654435761u + 1u;
+    for (int i = 1023; i > 0; i--) {
+        r ^= r << 13;
+        r ^= r >> 17;
+        r ^= r << 5;
+        int j = (int)(r % (uint32_t)(i + 1));
+        uint16_t t = s_perm[i];
+        s_perm[i] = s_perm[j];
+        s_perm[j] = t;
+    }
+}
+
+static inline uint32_t lat(uint32_t x, uint32_t y, uint32_t s)
+{
+    return s_perm[(s_perm[(x + s) & 1023] + y + (s >> 10)) & 1023];
+}
+
+/* Perlin noise of period P (a power of two, up to 1024) lattice cells, about -1..1 */
 static float perlin(float x, float y, int P, uint32_t s)
 {
-    int ix = (int)floorf(x), iy = (int)floorf(y);
+    int ix = (int)x, iy = (int)y;
+    ix -= x < (float)ix;            /* floor, without the library's call */
+    iy -= y < (float)iy;
     float fx = x - (float)ix, fy = y - (float)iy;
     uint32_t m = (uint32_t)P - 1;
     uint32_t x0 = (uint32_t)ix & m, y0 = (uint32_t)iy & m, x1 = (x0 + 1) & m, y1 = (y0 + 1) & m;
+    s &= 0xFFFFF;
     float u = fx * fx * fx * (fx * (fx * 6 - 15) + 10);
     float v = fy * fy * fy * (fy * (fy * 6 - 15) + 10);
-    float a = grad(hash3(x0, y0, s), fx, fy);
-    float b = grad(hash3(x1, y0, s), fx - 1, fy);
-    float c = grad(hash3(x0, y1, s), fx, fy - 1);
-    float d = grad(hash3(x1, y1, s), fx - 1, fy - 1);
+    float a = grad(lat(x0, y0, s), fx, fy);
+    float b = grad(lat(x1, y0, s), fx - 1, fy);
+    float c = grad(lat(x0, y1, s), fx, fy - 1);
+    float d = grad(lat(x1, y1, s), fx - 1, fy - 1);
     float ab = a + (b - a) * u, cd = c + (d - c) * u;
     return (ab + (cd - ab) * v) * 0.7f;
 }
@@ -98,7 +127,8 @@ static float fbm(float x, float y, int cell, int oct, float gain, uint32_t s)
 {
     float sum = 0, amp = 1, norm = 0;
     for (int o = 0; o < oct && cell >= s_mincell; o++) {
-        sum += amp * perlin(x / (float)cell, y / (float)cell, N / cell, s + (uint32_t)o * 7919u);
+        float k = 1.0f / (float)cell;
+        sum += amp * perlin(x * k, y * k, N / cell, s + (uint32_t)o * 7919u);
         norm += amp;
         amp *= gain;
         cell >>= 1;
@@ -111,7 +141,8 @@ static float ridged(float x, float y, int cell, int oct, float gain, uint32_t s)
 {
     float sum = 0, amp = 1, norm = 0, w = 1;
     for (int o = 0; o < oct && cell >= s_mincell; o++) {
-        float n = 1.0f - fabsf(perlin(x / (float)cell, y / (float)cell, N / cell, s + (uint32_t)o * 104729u) * 1.3f);
+        float k = 1.0f / (float)cell;
+        float n = 1.0f - fabsf(perlin(x * k, y * k, N / cell, s + (uint32_t)o * 104729u) * 1.3f);
         if (n < 0) n = 0;
         n *= n;
         sum += amp * n * w;
@@ -164,7 +195,39 @@ typedef struct {
     float      *hh;     /* the heights at half resolution, metres */
     uint8_t    *kh;     /* ... and the kinds */
     int8_t     *pat;    /* a tiling noise of 256 x 256 for the colours' patches */
+    float      *warp;   /* the slow bending of the shapes, every 8 texels: x then y */
+    float      *detail; /* the finest octave, 128 x 128 texels repeated (256 m: not seen) */
 } gen_t;
+
+/* x^1.5 and x^1.7 without powf (slow on the board), for 0..1 */
+static inline float pow15(float x)
+{
+    return x * sqrtf(x);
+}
+
+static inline float pow17(float x)
+{
+    float r = sqrtf(x);
+    return x * r * sqrtf(sqrtf(r)) * 0.94f + x * r * 0.06f;   /* x^1.6875, close enough */
+}
+
+#define WG      (N / 8)
+/* The warp at (x, y), from the grid, between its points */
+static inline void warp_at(const gen_t *g, float x, float y, float *wx, float *wy)
+{
+    float gx = x * 0.125f, gy = y * 0.125f;
+    int ix = (int)gx, iy = (int)gy;
+    float fx = gx - (float)ix, fy = gy - (float)iy;
+    int x0 = ix & (WG - 1), y0 = iy & (WG - 1), x1 = (x0 + 1) & (WG - 1), y1 = (y0 + 1) & (WG - 1);
+    for (int k = 0; k < 2; k++) {
+        const float *w = g->warp + k * WG * WG;
+        float a = w[y0 * WG + x0], b = w[y0 * WG + x1], c = w[y1 * WG + x0], d = w[y1 * WG + x1];
+        float ab = a + (b - a) * fx, cd = c + (d - c) * fx;
+        float v = ab + (cd - ab) * fy;
+        if (k) *wy = y + v;
+        else *wx = x + v;
+    }
+}
 
 static void prog(gen_t *g, int row, int part)
 {
@@ -188,25 +251,25 @@ static inline uint16_t to_u(float m)
 static float h_islas(gen_t *g, float x, float y, uint8_t *k)
 {
     uint32_t s = g->seed;
-    float wx = x + 60.0f * fbm(x, y, 256, 3, 0.5f, s + 11);
-    float wy = y + 60.0f * fbm(x + 300, y, 256, 3, 0.5f, s + 12);
+    float wx, wy;
+    warp_at(g, x, y, &wx, &wy);
     float e = fbm(wx, wy, 256, 7, 0.5f, s) * 1.7f + 0.02f;
     *k = K_LAND;
     if (e < 0) return g->wl + e * 70.0f;
     float m = ridged(wx, wy, 128, 5, 0.5f, s + 5);
-    return g->wl + 0.8f + 190.0f * powf(e, 1.5f) + 70.0f * e * m;
+    return g->wl + 0.8f + 190.0f * pow15(e) + 70.0f * e * m;
 }
 
 static float h_canones(gen_t *g, float x, float y, uint8_t *k)
 {
     uint32_t s = g->seed;
     *k = K_LAND;
-    float wx = x + 30.0f * fbm(x, y, 128, 3, 0.5f, s + 21);
-    float wy = y + 30.0f * fbm(x, y + 200, 128, 3, 0.5f, s + 22);
+    float wx, wy;
+    warp_at(g, x, y, &wx, &wy);
     /* the mesas: the noise in terraces with soft risers */
     float p = fbm(wx, wy, 256, 5, 0.55f, s) * 2.2f + 0.5f;
     float t = p * 5.0f;
-    float fl = floorf(t), fr = t - fl;
+    float fl = (float)(int)t, fr = t - fl;      /* t > 0 here */
     fr = smooth(0.70f, 0.95f, fr);
     float h = 50.0f + (fl + fr) * 32.0f + fbm(x, y, 16, 3, 0.5f, s + 3) * 3.0f;
     /* the river: where a second noise crosses zero, a gorge to the water */
@@ -222,12 +285,12 @@ static float h_nieve(gen_t *g, float x, float y, uint8_t *k)
 {
     uint32_t s = g->seed;
     *k = K_LAND;
-    float wx = x + 40.0f * fbm(x, y, 256, 3, 0.5f, s + 31);
-    float wy = y + 40.0f * fbm(x, y + 500, 256, 3, 0.5f, s + 32);
+    float wx, wy;
+    warp_at(g, x, y, &wx, &wy);
     float m = ridged(wx, wy, 256, 6, 0.45f, s);
     float base = fbm(x, y, 512, 2, 0.5f, s + 7) * 0.5f + 0.5f;
     float hills = fbm(x, y, 128, 4, 0.5f, s + 2) * 0.5f + 0.5f;
-    float h = 30.0f + 330.0f * powf(m, 1.7f) * (0.45f + 0.9f * base) + 60.0f * hills;
+    float h = 30.0f + 330.0f * pow17(m) * (0.45f + 0.9f * base) + 60.0f * hills;
     /* the valleys' lakes stay; a frozen one now and then */
     if (h < g->wl && fbm(x, y, 256, 2, 0.5f, s + 8) > 0.18f) *k = K_ICE;
     return h;
@@ -248,8 +311,8 @@ static float h_volcan(gen_t *g, float x, float y, uint8_t *k)
     float q = 1.0f - d / R;
     if (q > 0) {
         float gul = ridged(ang * 40.0f + 500.0f, d * 0.6f, 32, 3, 0.5f, s + 4);
-        float cone = 470.0f * powf(q, 1.7f) * (0.92f + 0.12f * gul);
-        float rim = 470.0f * powf(1.0f - rc / R, 1.7f);
+        float cone = 470.0f * pow17(q) * (0.92f + 0.12f * gul);
+        float rim = 470.0f * pow17(1.0f - rc / R);
         if (d < rc) cone = rim - 70.0f * sqrtf(1.0f - d / rc);
         if (cone > h) h = cone;
         if (d < rc * 0.78f) {
@@ -287,7 +350,9 @@ static float river_y(float x, uint32_t s)
 static float h_ciudad(gen_t *g, float x, float y, uint8_t *k)
 {
     uint32_t s = g->seed;
-    float ground = 20.0f + 7.0f * fbm(x, y, 256, 3, 0.5f, s + 1);
+    float gx, gy;
+    warp_at(g, x, y, &gx, &gy);             /* the city's grid holds its gentle ground */
+    float ground = 20.0f + (gx - x);
     /* the river */
     float ry = river_y(x, s);
     float dr = fabsf(y - ry);
@@ -416,7 +481,7 @@ static void stage_heights(void *arg, int part)
                 h = ab + (cd - ab) * fy;
                 k = g->kh[hy * NH + hx];
                 if (h > g->wl + 1.0f && k != K_LAVA && k != K_ICE)
-                    h += amp * perlin((float)x * 0.25f, (float)y * 0.25f, N / 4, g->seed + 999);
+                    h += amp * g->detail[((y & 127) << 7) | (x & 127)];
             }
             g->hq[IDX(x, y)] = to_u(h);
             g->kind[IDX(x, y)] = (uint8_t)(k << 4);
@@ -729,7 +794,7 @@ static void stage_colours(void *arg, int part)
                 }
             }
             uint32_t hh = water ? wl_u : (uint32_t)hu;
-            w->lev[0][i] = (uint32_t)to565(r, gg, b) | (hh << 16) | (water ? VW_WATER : 0);
+            w->lev[0][TIX(x, y)] = (uint32_t)to565(r, gg, b) | (hh << 16) | (water ? VW_WATER : 0);
         }
         if ((y & 15) == 0) prog(g, y - y0, part);
     }
@@ -744,11 +809,12 @@ static void make_level(vw_world_t *w, int l)
     int n = N >> l, lg = VW_LG - l;
     const uint32_t *src = w->lev[l - 1];
     uint32_t *dst = w->lev[l];
-    int sn = n * 2;
+    int slg = lg + 1;
     for (int y = 0; y < n; y++) {
         for (int x = 0; x < n; x++) {
-            uint32_t t[4] = { src[(2 * y) * sn + 2 * x], src[(2 * y) * sn + 2 * x + 1], src[(2 * y + 1) * sn + 2 * x],
-                              src[(2 * y + 1) * sn + 2 * x + 1] };
+            uint32_t X = (uint32_t)(2 * x), Y = (uint32_t)(2 * y);
+            uint32_t t[4] = { src[vw_idx(X, Y, slg)], src[vw_idx(X + 1, Y, slg)], src[vw_idx(X, Y + 1, slg)],
+                              src[vw_idx(X + 1, Y + 1, slg)] };
             int r = 0, g = 0, b = 0, hs = 0, hx = 0, wet = 0;
             for (int i = 0; i < 4; i++) {
                 r += (t[i] >> 11) & 31;
@@ -761,7 +827,7 @@ static void make_level(vw_world_t *w, int l)
             }
             /* between the mean and the highest: towers and crests keep some of their skyline */
             uint32_t h = (uint32_t)((hs / 4 + hx) / 2);
-            dst[(y << lg) | x] = (uint32_t)(((r / 4) << 11) | ((g / 4) << 5) | (b / 4)) | (h << 16) |
+            dst[vw_idx((uint32_t)x, (uint32_t)y, lg)] = (uint32_t)(((r / 4) << 11) | ((g / 4) << 5) | (b / 4)) | (h << 16) |
                                  (wet >= 2 ? VW_WATER : 0);
         }
     }
@@ -936,6 +1002,7 @@ bool vw_generate(vw_world_t *w, int biome, uint32_t seed, int hour, vw_split_fn 
         w->fog_far *= 0.8f;
     }
     w->water = g.wl;
+    perm_make(g.seed);
     g.hq = (uint16_t *)vu_malloc((size_t)N * N * 2);
     if (!g.hq) return false;
     g.kind = (uint8_t *)w->lev[1];          /* 1 MB: level 1 is made last */
@@ -945,7 +1012,11 @@ bool vw_generate(vw_world_t *w, int biome, uint32_t seed, int hour, vw_split_fn 
     g.hh = (float *)vu_malloc((size_t)NH * NH * 4);
     g.kh = (uint8_t *)vu_malloc((size_t)NH * NH);
     g.pat = (int8_t *)vu_malloc(256 * 256);
-    if (!g.hh || !g.kh || !g.pat) {
+    g.warp = (float *)vu_malloc(sizeof(float) * WG * WG * 2);
+    g.detail = (float *)vu_malloc(sizeof(float) * 128 * 128);
+    if (!g.hh || !g.kh || !g.pat || !g.warp || !g.detail) {
+        vu_free(g.warp);
+        vu_free(g.detail);
         vu_free(g.hh);
         vu_free(g.kh);
         vu_free(g.pat);
@@ -960,6 +1031,28 @@ bool vw_generate(vw_world_t *w, int biome, uint32_t seed, int hour, vw_split_fn 
             int q = (int)(v / 1.5f * 160.0f);
             g.pat[y * 256 + x] = (int8_t)(q < -127 ? -127 : q > 127 ? 127 : q);
         }
+    for (int y = 0; y < 128; y++)
+        for (int x = 0; x < 128; x++)
+            g.detail[y * 128 + x] = perlin((float)x * 0.25f, (float)y * 0.25f, 32, g.seed + 999);
+    /* the warp: as each world bends its shapes */
+    {
+        float amp = 0, xo = 0, yo = 0;
+        int cell = 256;
+        uint32_t s1 = 0, s2 = 0;
+        switch (w->biome) {
+        case VW_ISLAS: amp = 60, cell = 256, s1 = 11, s2 = 12, xo = 300; break;
+        case VW_CANONES: amp = 30, cell = 128, s1 = 21, s2 = 22, yo = 200; break;
+        case VW_NIEVE: amp = 40, cell = 256, s1 = 31, s2 = 32, yo = 500; break;
+        case VW_CIUDAD: amp = 7, cell = 256, s1 = 1, s2 = 2; break;
+        default: break;
+        }
+        for (int y = 0; y < WG; y++)
+            for (int x = 0; x < WG; x++) {
+                float px = (float)(x * 8), py = (float)(y * 8);
+                g.warp[y * WG + x] = amp ? amp * fbm(px + xo, py, cell, 3, 0.5f, g.seed + s1) : 0;
+                g.warp[WG * WG + y * WG + x] = amp ? amp * fbm(px, py + yo, cell, 3, 0.5f, g.seed + s2) : 0;
+            }
+    }
     if (w->biome != VW_CIUDAD) {
         s_mincell = 4;
         g.prog1 = 35;
@@ -994,6 +1087,8 @@ bool vw_generate(vw_world_t *w, int biome, uint32_t seed, int hour, vw_split_fn 
     vu_free(g.hh);
     vu_free(g.kh);
     vu_free(g.pat);
+    vu_free(g.warp);
+    vu_free(g.detail);
     for (int l = 1; l < VW_LEVELS; l++) make_level(w, l);
     uint32_t tq4 = vr_now_us();
     w->gen_ms[0] = (tq1 - tq0) / 1000;
@@ -1018,8 +1113,8 @@ float vw_height(const vw_world_t *w, float x, float y)
     int ix = (int)floorf(fx), iy = (int)floorf(fy);
     float ax = fx - (float)ix, ay = fy - (float)iy;
     const uint32_t *m = w->lev[0];
-    float a = (float)vw_h(m[IDX(ix, iy)]), b = (float)vw_h(m[IDX(ix + 1, iy)]);
-    float c = (float)vw_h(m[IDX(ix, iy + 1)]), d = (float)vw_h(m[IDX(ix + 1, iy + 1)]);
+    float a = (float)vw_h(m[TIX(ix, iy)]), b = (float)vw_h(m[TIX(ix + 1, iy)]);
+    float c = (float)vw_h(m[TIX(ix, iy + 1)]), d = (float)vw_h(m[TIX(ix + 1, iy + 1)]);
     float ab = a + (b - a) * ax, cd = c + (d - c) * ax;
     return (ab + (cd - ab) * ay) / VW_HU;
 }
@@ -1027,5 +1122,5 @@ float vw_height(const vw_world_t *w, float x, float y)
 bool vw_is_water(const vw_world_t *w, float x, float y)
 {
     int ix = (int)floorf(x / VW_TEXM), iy = (int)floorf(y / VW_TEXM);
-    return (w->lev[0][IDX(ix, iy)] & VW_WATER) != 0;
+    return (w->lev[0][TIX(ix, iy)] & VW_WATER) != 0;
 }

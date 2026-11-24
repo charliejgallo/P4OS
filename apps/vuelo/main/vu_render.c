@@ -211,7 +211,7 @@ static void ground_half(job_t *j, int part)
         for (int x = x0; x < x1; x++, u += du, v += dv) {
             int yt = yb[x];
             if (yt <= 0) continue;
-            uint32_t t = map[((((uint32_t)v >> 16) & mk) << lg) | (((uint32_t)u >> 16) & mk)];
+            uint32_t t = map[vw_idx(((uint32_t)u >> 16) & mk, ((uint32_t)v >> 16) & mk, lg)];
             int h = (int)((t >> 16) & VW_HMASK);
             int y = (int)(base - (float)h * kf);
             samples++;

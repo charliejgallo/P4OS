@@ -27,6 +27,16 @@
 #define VW_WATER    0x80000000u             /* the texel is water */
 #define VW_HMASK    0x7FFFu
 
+/* Where texel (x, y) of a level of 2^lg a side is kept: in tiles of 8 x 8
+ * (256 bytes), row after row of tiles, so the samples a line of the
+ * renderer takes stay close in memory whichever way it runs (a plain row
+ * order made every sample of a line looking north or south a miss in the
+ * cache, on the board half the frame's time). x and y already wrapped. */
+static inline uint32_t vw_idx(uint32_t x, uint32_t y, int lg)
+{
+    return ((y >> 3) << (lg + 3)) | ((x >> 3) << 6) | ((y & 7) << 3) | (x & 7);
+}
+
 static inline int vw_h(uint32_t t)          /* height units */
 {
     return (int)((t >> 16) & VW_HMASK);
