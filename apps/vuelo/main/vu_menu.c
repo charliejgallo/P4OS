@@ -323,7 +323,7 @@ static void build_settings(app_t *a)
     back_button(a, p, VN_MAIN);
     lv_obj_t *t = label(p, _("Ajustes"), aos_font_title, 0xFFFFFF);
     lv_obj_align(t, LV_ALIGN_TOP_LEFT, 124, 40);
-    static const char *const ONOFF[2] = { N_("No"), N_("Sí") };
+    static const char *const ONOFF[2] = { N_("Apagado"), N_("Prendido") };
     static const char *const STICK[2] = { N_("Arriba sube"), N_("Arriba baja") };
     static const char *const VIEW[2] = { N_("Detrás"), N_("Cabina") };
     setting_row(a, p, 130, _("Sonido"), 0, a->cfg.sound, ONOFF, 2, 220);

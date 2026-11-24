@@ -251,7 +251,7 @@ void vh_draw(const vh_layout_t *L, const vh_state_t *s, const vt_set_t *t, uint1
             if (s->clock < 0) {
                 int n = (int)ceilf(-s->clock);
                 snprintf(b, sizeof b, "%d", n);
-                vt_num(out, W, H, t, VT_L, b, cx, H / 2 - t->dig[VT_L][0].h, amber, VT_CENTER);
+                vt_num(out, W, H, t, VT_L, b, cx, y, amber, VT_CENTER);   /* where the clock goes */
             }
         }
         /* a banner, a moment */
@@ -271,6 +271,8 @@ void vh_draw(const vh_layout_t *L, const vh_state_t *s, const vt_set_t *t, uint1
             if (s->target_on) {
                 ax = s->tx;
                 ay = s->ty - 16 * u;
+                /* never over the clock */
+                if (ay < 84 * u) ay = 84 * u;
             } else {
                 /* from the centre along the direction, to the frame's edge */
                 float cx = (float)W * 0.5f, cy = (float)H * 0.5f;

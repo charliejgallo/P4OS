@@ -93,6 +93,8 @@ void vf_reset(vf_plane_t *pl, const vw_world_t *w)
     pl->thr = pl->in_thr = 0.6f;
     memcpy(pl->cam_d, pl->f, sizeof pl->cam_d);
     derive(pl);
+    pl->ground = vw_height(w, pl->p[0], pl->p[1]);
+    pl->agl = pl->p[2] - pl->ground;
 }
 
 void vf_step(vf_plane_t *pl, const vw_world_t *w, float dt)

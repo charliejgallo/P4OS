@@ -65,8 +65,9 @@ static void make_world(app_t *a, int req)
     a->biome = biome;
     a->hour = hour;
     if (!a->flying) vf_reset(&a->pl, &a->world);
-    a->world_ok = ok;
-    __atomic_store_n(&a->gen_req, -1, __ATOMIC_RELEASE);
+    /* only the request this was: another may have come while it was made */
+    int expect = req;
+    if (__atomic_compare_exchange_n(&a->gen_req, &expect, -1, false, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)) a->world_ok = ok;
 }
 
 static int free_slot(app_t *a)

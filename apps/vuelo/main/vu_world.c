@@ -746,8 +746,8 @@ static void stage_colours(void *arg, int part)
     L.sun = RGB(w->sun_col);
     rgb_t sky = RGB(w->sky_top), hor = RGB(w->sky_hor);
     L.amb = mixc(sky, hor, 0.5f);
-    float ambk = w->hour == VW_NIGHT ? 0.35f : 0.55f;
-    float sunk = w->hour == VW_NIGHT ? 0.55f : 1.0f;
+    float ambk = w->hour == VW_NIGHT ? 0.55f : 0.55f;
+    float sunk = w->hour == VW_NIGHT ? 0.85f : 1.0f;
     uint16_t wl_u = g->wl >= 0 ? to_u(g->wl) : 0;
     int y0 = part ? N / 2 : 0, y1 = part ? N : N / 2;
     for (int y = y0; y < y1; y++) {
@@ -861,10 +861,10 @@ static void set_hour(vw_world_t *w, int hour)
         break;
     case VW_NIGHT:
         el = 0.75f, az = 3.6f;
-        w->sun_col = 0x8496C8;
-        w->sky_top = 0x060A1C;
-        w->sky_hor = 0x1C2848;
-        w->fog = 0x18203A;
+        w->sun_col = 0x9CB0E0;
+        w->sky_top = 0x0A1028;
+        w->sky_hor = 0x2A3A64;
+        w->fog = 0x26345A;
         w->cloud_lit = 0x4A5472;
         w->cloud_dark = 0x1A2034;
         break;
