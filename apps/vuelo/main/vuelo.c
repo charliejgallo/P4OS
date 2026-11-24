@@ -1,125 +1,50 @@
 /*
- * PLANEO - a flight over worlds drawn live in 3D.
+ * PLANEO - a flight over worlds drawn live in 3D (see vu_app.h for the
+ * map of the files).
  *
- * The prototype of the engine: a world made from a seed, the plane, the
- * flight, and the numbers of what it costs. Lying down only.
+ * Missions in five worlds made from seeds (rings against the clock, a race
+ * against a rival, packages to carry) and a free flight; records and stars.
+ * Lying down only.
  *
  * Threads. The worker (core 0) makes the worlds and flies: it steps the
- * plane, draws the frame small (426 x 240 unless asked otherwise) with
- * both cores (vr_frame splits every pass) and leaves it in one of three
- * slots. LVGL's timer, every 8 ms, reads the fingers, the gamepad and the
- * keyboard, and puts the newest finished frame on the panel: the PPA
- * scales it up and turns it into the panel's free buffer, which is then
- * flipped to (aos_hal_display_blit_into_fit + flip), while the worker
- * already draws the next. Where there is no panel to flip (the simulator)
- * the frame is scaled into a canvas instead.
+ * plane and the mission, draws the frame small (426 x 240 at the normal
+ * quality) with both cores (vr_frame splits every pass) and leaves it in
+ * one of three slots. LVGL's timer, every 8 ms, reads the fingers, the
+ * gamepad and the keyboard, plays the sound, and puts the newest finished
+ * frame on the panel: the PPA scales it up and turns it into the panel's
+ * free buffer, which is then flipped to (aos_hal_display_blit_into_fit +
+ * flip), while the worker already draws the next. The menus, the pause and
+ * the results are LVGL panels over a still frame scaled into a canvas;
+ * where there is no panel to flip (the simulator) the flight goes through
+ * the canvas too.
  *
  * The log says every 5 s what a frame costs (on the board: /api/log).
  */
-#include "aos_app.h"
-#include "aos_fonts.h"
-#include "aos_gesture.h"
-#include "aos_hal.h"
-#include "aos_i18n.h"
+#include "vu_app.h"
 #include "aos_icon_ops.h"
-#include "aos_pad.h"
-#include "aos_theme.h"
-#include "aos_ui.h"
-
-#include "vu_flight.h"
-#include "vu_hud.h"
-#include "vu_mem.h"
-#include "vu_plane.h"
-#include "vu_render.h"
-#include "vu_world.h"
 
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define TICK_MS     8
-#define NF          3
-#define MAXW        640
-#define MAXH        360
+#define TICK_MS      8
 #define FRAME_MIN_US 16000          /* 60 fps at most: the panel's refresh */
-#define PERF_MS     5000
+#define PERF_MS      5000
+#define RESULT_AFTER 2.4f           /* seconds from the finish to the results */
 
 /* The frame's sizes: each scales by a whole number of sixteenths into the
- * 1280 x 720 screen (the PPA's steps), so nothing of the panel is left
- * stale round it; 426 is 1278 wide, a pixel short each side. */
-static const int RES[][2] = { { 320, 180 }, { 426, 240 }, { 512, 288 }, { 640, 360 } };
-#define NRES 4
-#define RES_DEFAULT 1
-
-enum { F_FREE = 0, F_BUSY, F_READY, F_SHOWN };
-enum { R_NONE = 0, R_STICK, R_THR, R_BTN };
-
-static const char *const WORLD_NAME[VW_BIOMES] = { N_("Islas"), N_("Cañones"), N_("Nieve"), N_("Volcán"),
-                                                    N_("Ciudad") };
-/* the frame's font is ASCII: the names as it can draw them */
-static const char *const WORLD_HUD[VW_BIOMES] = { "ISLAS", "CANONES", "NIEVE", "VOLCAN", "CIUDAD" };
-static const uint8_t WORLD_HOUR[VW_BIOMES] = { VW_NOON, VW_EVENING, VW_MORNING, VW_EVENING, VW_NOON };
-
-typedef struct {
-    uint8_t id, role, btn;
-    float   x0, y0;
-} finger_t;
-
-typedef struct {
-    aos_app_t  *self;
-    lv_obj_t   *root, *canvas, *load_box, *load_lbl, *load_bar, *tap;
-    uint32_t    raw_btn_ms;         /* when a finger last landed on a button (raw) */
-    uint32_t    lv_btn_ms;          /* ... or LVGL said a button was pressed */
-    lv_timer_t *timer;
-    int         SW, SH;
-    bool        closing, worker_ok;
-    /* frames */
-    uint16_t   *fr_mem[NF], *fr[NF];
-    int         fst[NF], fw[NF], fh[NF];
-    uint32_t    fseq[NF], seq;
-    int         shown;
-    uint16_t   *cv_buf;
-    int         ppa;                /* -1 not tried, 1 the PPA flips, 0 the canvas */
-    volatile int res;               /* index into RES */
-    /* the world */
-    vw_world_t  world;
-    volatile int gen_req;           /* biome * 8 + hour, -1 none */
-    volatile int progress;
-    volatile bool world_ok;
-    uint32_t    seed;
-    int         biome, hour;
-    /* the flight: the worker's */
-    vf_plane_t  pl;
-    float       t;
-    vp_draw_t   draw;
-    vh_layout_t lay;
-    vh_state_t  hs;
-    /* what the hands ask: LVGL's thread writes, the worker reads */
-    volatile float in_x, in_y, in_thr;
-    volatile bool  in_auto, stick_on, paused;
-    volatile float stick_bx, stick_by, stick_x, stick_y;   /* screen pixels; -1..1 */
-    volatile int   in_view_n;                              /* camera presses, counted */
-    volatile uint8_t btn_held;
-    int            view_seen;
-    finger_t       fing[AOS_TOUCH_MAX];
-    aos_pad_t      pad;
-    uint8_t        keys_prev[8];
-    int            nkeys_prev;
-    /* the measurement: the worker's sums, the UI's presents */
-    uint32_t perf_t0, perf_frames, perf_presents;
-    uint64_t perf_frame_us, perf_ground_us, perf_turn_us, perf_hud_us, perf_present_us, perf_samples, perf_lines;
-    uint64_t perf_upx;
-    volatile int fps10;
-    /* what LVGL redraws while the frames are flipped: it paints over them */
-    lv_area_t inv[6];
-    int       ninv, inv_count;
-} app_t;
+ * 1280 x 720 screen (the PPA's steps); 426 is 1278 wide, a pixel short
+ * each side. Measured on the board (2026-11-23, before the map's tiles):
+ * 320 x 180 20-36 fps, 426 x 240 17-37, 512 x 288 14-15, 640 x 360 11-12. */
+static const int RES[VA_QUALITIES][2] = { { 320, 180 }, { 426, 240 }, { 512, 288 } };
 
 uint32_t vr_now_us(void)
 {
     return (uint32_t)aos_hal_uptime_us();
 }
+
+static const char *const WORLD_LOG[VW_BIOMES] = { "islas", "canones", "nieve", "volcan", "ciudad" };
 
 /* --------------------------------------------------------------------------
  * The worker
@@ -130,24 +55,23 @@ static void make_world(app_t *a, int req)
     int biome = req >> 3, hour = req & 7;
     uint32_t t0 = vr_now_us();
     a->progress = 0;
-    bool ok = vw_generate(&a->world, biome, a->seed + (uint32_t)biome * 101u, hour, aos_hal_worker_split, &a->progress);
+    bool ok = vw_generate(&a->world, biome, 7u + (uint32_t)biome * 101u, hour, aos_hal_worker_split, &a->progress);
     uint32_t ms = (vr_now_us() - t0) / 1000;
-    aos_hal_log("vuelo", "world %d hour %d seed %u made in %u ms (heights %u, trees+shadows %u, colours %u, levels %u), "
+    aos_hal_log("vuelo", "world %s hour %d made in %u ms (heights %u, trees+shadows %u, colours %u, levels %u), "
                 "highest %d m | psram held %u KB",
-                biome, hour, (unsigned)a->seed, (unsigned)ms, (unsigned)a->world.gen_ms[0],
+                WORLD_LOG[biome % VW_BIOMES], hour, (unsigned)ms, (unsigned)a->world.gen_ms[0],
                 (unsigned)a->world.gen_ms[1], (unsigned)a->world.gen_ms[2], (unsigned)a->world.gen_ms[3],
                 (int)a->world.hmax, (unsigned)(vu_mem_used() / 1024));
     a->biome = biome;
     a->hour = hour;
-    vf_reset(&a->pl, &a->world);
-    a->t = 0;
+    if (!a->flying) vf_reset(&a->pl, &a->world);
     a->world_ok = ok;
     __atomic_store_n(&a->gen_req, -1, __ATOMIC_RELEASE);
 }
 
 static int free_slot(app_t *a)
 {
-    for (int i = 0; i < NF; i++)
+    for (int i = 0; i < VA_NF; i++)
         if (__atomic_load_n(&a->fst[i], __ATOMIC_ACQUIRE) == F_FREE) return i;
     return -1;
 }
@@ -155,88 +79,215 @@ static int free_slot(app_t *a)
 static void over_fn(void *arg, uint16_t *out, int W, int H, int y0, int y1)
 {
     app_t *a = (app_t *)arg;
-    vp_draw(&a->draw, out, W, H, y0, y1);
+    vm_draw(&a->marks, out, W, H, y0, y1);
+    /* the two planes, the farther first */
+    const vp_draw_t *first = a->rival_first ? &a->draw2 : &a->draw, *second = a->rival_first ? &a->draw : &a->draw2;
+    vp_draw(first, out, W, H, y0, y1);
+    vp_draw(second, out, W, H, y0, y1);
 }
 
-static void fly_frame(app_t *a, int slot, float dt)
+static const uint32_t PAINT[3] = { 0xF2E6C8, 0xD8352A, 0xF2E6C8 };
+static const uint32_t RIVAL_PAINT[3] = { 0x2C3E66, 0xF2C230, 0x2C3E66 };
+
+/* A frame of the flight: the camera, the planes, the marks, the instruments.
+ * still: for the menus and the pause (no instruments; in the menus a view
+ * from beside the plane). */
+static void render(app_t *a, int slot, float dt, bool still)
 {
     uint32_t t0 = vr_now_us();
-    int W = RES[a->res][0], H = RES[a->res][1];
+    int W = a->W, H = a->H;
     vf_plane_t *pl = &a->pl;
-    /* the hands */
-    if (a->in_auto) {
-        vf_autopilot(pl, &a->world, a->t);
+    vr_cam_t cam;
+    bool menu = still && !a->flying;
+    if (menu) {
+        /* beside and a little behind, looking along the plane */
+        float eye[3], f[3] = { pl->f[0], pl->f[1], pl->f[2] };
+        for (int k = 0; k < 3; k++) eye[k] = pl->p[k] - f[k] * 13.0f + pl->r[k] * 9.0f;
+        eye[2] += 3.0f;
+        float tgt[3] = { pl->p[0] + f[0] * 18.0f, pl->p[1] + f[1] * 18.0f, pl->p[2] + f[2] * 18.0f };
+        float d[3] = { tgt[0] - eye[0], tgt[1] - eye[1], tgt[2] - eye[2] };
+        float l = sqrtf(d[0] * d[0] + d[1] * d[1] + d[2] * d[2]);
+        cam.x = vw_wrap(eye[0]);
+        cam.y = vw_wrap(eye[1]);
+        cam.z = eye[2];
+        cam.yaw = atan2f(d[1], d[0]);
+        cam.pitch = asinf(d[2] / l);
+        cam.roll = 0.08f;
+        cam.tanfov = 0.78f;
+        cam.time = a->t;
     } else {
-        pl->in_x = a->in_x;
-        pl->in_y = a->in_y;
-        pl->in_thr = a->in_thr;
+        vf_camera(pl, &a->world, still ? 0 : dt, a->t, &cam);
     }
+    vr_proj_t pr;
+    vr_setup(&cam, W, H, &pr);
+    vp_pose_t pose;
+    vf_pose(pl, &pose);
+    memcpy(pose.paint, PAINT, sizeof pose.paint);
+    a->draw.n = 0;
+    a->draw.disc = false;
+    a->draw2.n = 0;
+    a->draw2.disc = false;
+    if (pl->view != VF_COCKPIT || menu) vp_prepare(&a->draw, &pose, &pr, a->world.sun, a->world.sky_hor);
+    vg_game_t *g = &a->game;
+    if (a->flying && vg_rival(g)) {
+        vp_pose_t rp;
+        memcpy(rp.p, g->rival_p, sizeof rp.p);
+        memcpy(rp.f, g->rival_f, sizeof rp.f);
+        memcpy(rp.r, g->rival_r, sizeof rp.r);
+        memcpy(rp.u, g->rival_u, sizeof rp.u);
+        rp.prop = 0.9f;
+        rp.ground = vw_height(&a->world, rp.p[0], rp.p[1]);
+        memcpy(rp.paint, RIVAL_PAINT, sizeof rp.paint);
+        vp_prepare(&a->draw2, &rp, &pr, a->world.sun, a->world.sky_hor);
+        float d1 = 0, d2 = 0;
+        for (int k = 0; k < 2; k++) {
+            float e = k ? cam.y : cam.x;
+            float q1 = pl->p[k] - e, q2 = rp.p[k] - e;
+            if (q1 > VW_SIZE / 2) q1 -= VW_SIZE;
+            if (q1 < -VW_SIZE / 2) q1 += VW_SIZE;
+            if (q2 > VW_SIZE / 2) q2 -= VW_SIZE;
+            if (q2 < -VW_SIZE / 2) q2 += VW_SIZE;
+            d1 += q1 * q1;
+            d2 += q2 * q2;
+        }
+        a->rival_first = d2 > d1;
+    }
+    if (a->flying) {
+        vm_prepare(&a->marks, g, &a->world, &pr, a->t);
+    } else {
+        a->marks.n = 0;
+        a->marks.target = false;
+    }
+    vr_prof_t prof;
+    uint16_t *out = a->fr[slot];
+    vr_frame(&a->world, &cam, &pr, out, over_fn, a, &prof);
+    uint32_t t1 = vr_now_us();
+    if (!still) {
+        if (a->lay.W != W || a->lay.H != H) vh_layout(&a->lay, W, H);
+        vh_state_t *s = &a->hs;
+        s->speed_kmh = pl->v * 3.6f;
+        s->alt_m = pl->p[2];
+        s->agl_m = pl->agl;
+        s->thr = a->in_thr;
+        float kx = (float)W / (float)a->SW, ky = (float)H / (float)a->SH;
+        s->stick_on = a->stick_on;
+        s->stick_bx = a->stick_bx * kx;
+        s->stick_by = a->stick_by * ky;
+        s->stick_x = a->stick_x;
+        s->stick_y = a->stick_y;
+        s->stall = pl->stall > 0.2f;
+        s->crashed = pl->crashed;
+        s->pressed = a->btn_held;
+        s->kind = g->kind;
+        s->next = g->next;
+        s->npt = g->npt;
+        s->done = g->state == VG_ST_DONE;
+        s->clock = s->done ? g->final_t : g->t + g->penalty;
+        if (g->state == VG_ST_COUNT) s->clock = g->t;
+        s->carrying = g->carrying;
+        s->place = 0;
+        if (g->kind == VG_RACE && g->state != VG_ST_COUNT) {
+            if (s->done) {
+                s->place = g->won ? 1 : 2;
+            } else {
+                /* ahead of the rival: further along the course */
+                float mine = 0;
+                for (int i = 0; i < g->next && i < g->npt; i++) mine += g->seglen[i];
+                if (g->next < g->npt) {
+                    const vg_pt_t *c = &g->pt[g->next];
+                    float dx = c->p[0] - pl->p[0], dy = c->p[1] - pl->p[1];
+                    if (dx > VW_SIZE / 2) dx -= VW_SIZE;
+                    if (dx < -VW_SIZE / 2) dx += VW_SIZE;
+                    if (dy > VW_SIZE / 2) dy -= VW_SIZE;
+                    if (dy < -VW_SIZE / 2) dy += VW_SIZE;
+                    float left = sqrtf(dx * dx + dy * dy);
+                    float seg = g->seglen[g->next];
+                    mine += seg - (left < seg ? left : seg);
+                }
+                s->place = mine >= g->rival_v * g->t ? 1 : 2;
+            }
+        }
+        s->banner = g->banner;
+        s->banner_t = g->banner_t;
+        s->target = a->marks.target;
+        s->target_on = a->marks.on_screen;
+        s->tx = a->marks.tx;
+        s->ty = a->marks.ty;
+        s->tdist = a->marks.dist;
+        s->tdx = a->marks.dir_x;
+        s->tdy = a->marks.dir_y;
+        s->fps10 = a->cfg.fps ? a->fps10 : 0;
+        s->res_w = W;
+        s->res_h = H;
+        vh_draw(&a->lay, s, &a->text, out);
+    }
+    uint32_t t2 = vr_now_us();
+    a->fw[slot] = W;
+    a->fh[slot] = H;
+    a->fstill[slot] = still;
+    a->fseq[slot] = ++a->seq;
+    __atomic_store_n(&a->fst[slot], F_READY, __ATOMIC_RELEASE);
+    if (!still) {
+        a->perf_frames++;
+        a->perf_frame_us += t2 - t0;
+        a->perf_ground_us += prof.us_ground;
+        a->perf_turn_us += prof.us_turn;
+        a->perf_hud_us += t2 - t1;
+        a->perf_samples += prof.samples;
+        a->perf_lines += prof.lines;
+        a->perf_upx += (uint64_t)prof.wu * (uint64_t)prof.hu;
+    }
+}
+
+static void step(app_t *a, float dt)
+{
+    vf_plane_t *pl = &a->pl;
+    vg_game_t *g = &a->game;
+    pl->in_x = a->in_x;
+    pl->in_y = a->in_y;
+    pl->in_thr = a->in_thr;
+#ifdef AOS_SIM_BUILTIN
+    /* development: VU_AUTO=1 flies the missions by itself */
+    static int s_auto = -1;
+    if (s_auto < 0) s_auto = getenv("VU_AUTO") ? 1 : 0;
+    if (s_auto && g->state == VG_ST_FLY && g->next < g->npt) {
+        float tgt[3];
+        memcpy(tgt, g->pt[g->next].p, sizeof tgt);
+        if (g->kind == VG_DELIVER) tgt[2] += 20.0f;
+        else {
+            /* aim a little before the ring, along its facing */
+            for (int k = 0; k < 3; k++) tgt[k] -= g->pt[g->next].n[k] * 40.0f;
+            float dx = g->pt[g->next].p[0] - pl->p[0], dy = g->pt[g->next].p[1] - pl->p[1];
+            if (dx * dx + dy * dy < 90.0f * 90.0f) memcpy(tgt, g->pt[g->next].p, sizeof tgt);
+        }
+        vf_autopilot_to(pl, &a->world, tgt);
+    }
+#endif
     int vn = a->in_view_n;
     if (vn != a->view_seen) {
         a->view_seen = vn;
         pl->view = (pl->view + 1) % VF_VIEWS;
         pl->cam_ok = false;
     }
-    /* the step, in pieces no longer than 1/60 s */
     float left = dt;
     while (left > 0) {
         float h = left > 1.0f / 60.0f ? 1.0f / 60.0f : left;
-        vf_step(pl, &a->world, h);
+        if (g->state == VG_ST_COUNT) {
+            /* the countdown: the plane hangs where it starts, the engine running */
+            pl->thr = a->in_thr;
+            vg_step(g, &a->world, pl, pl->p, h);
+        } else {
+            float p0[3] = { pl->p[0], pl->p[1], pl->p[2] };
+            vf_step(pl, &a->world, h);
+            vg_step(g, &a->world, pl, p0, h);
+        }
         left -= h;
     }
     a->t += dt;
-    if (pl->crashed && pl->crash_t > 2.0f) vf_reset(pl, &a->world);
-    vr_cam_t cam;
-    vf_camera(pl, &a->world, dt, a->t, &cam);
-    vr_proj_t pr;
-    vr_setup(&cam, W, H, &pr);
-    vp_pose_t pose;
-    vf_pose(pl, &pose);
-    pose.paint[0] = 0xF2E6C8;
-    pose.paint[1] = 0xD8352A;
-    pose.paint[2] = 0xF2E6C8;
-    if (pl->view == VF_COCKPIT) a->draw.n = 0, a->draw.disc = false;
-    else vp_prepare(&a->draw, &pose, &pr, a->world.sun, a->world.sky_hor);
-    vr_prof_t prof;
-    uint16_t *out = a->fr[slot];
-    vr_frame(&a->world, &cam, &pr, out, pl->view == VF_COCKPIT ? NULL : over_fn, a, &prof);
-    uint32_t t1 = vr_now_us();
-    /* the instruments */
-    if (a->lay.W != W || a->lay.H != H) vh_layout(&a->lay, W, H);
-    vh_state_t *s = &a->hs;
-    s->speed_kmh = pl->v * 3.6f;
-    s->alt_m = pl->p[2];
-    s->agl_m = pl->agl;
-    s->thr = a->in_auto ? pl->in_thr : a->in_thr;
-    float kx = (float)W / (float)a->SW, ky = (float)H / (float)a->SH;
-    s->stick_on = a->stick_on;
-    s->stick_bx = a->stick_bx * kx;
-    s->stick_by = a->stick_by * ky;
-    s->stick_x = a->in_auto ? pl->in_x : a->stick_x;
-    s->stick_y = a->in_auto ? pl->in_y : a->stick_y;
-    s->stall = pl->stall > 0.2f;
-    s->crashed = pl->crashed;
-    s->autopilot = a->in_auto;
-    s->fps10 = a->fps10;
-    s->res_w = W;
-    s->res_h = H;
-    s->pressed = a->btn_held;
-    s->world = WORLD_HUD[a->biome % VW_BIOMES];
-    vh_draw(&a->lay, s, out);
-    uint32_t t2 = vr_now_us();
-    a->fw[slot] = W;
-    a->fh[slot] = H;
-    a->fseq[slot] = ++a->seq;
-    __atomic_store_n(&a->fst[slot], F_READY, __ATOMIC_RELEASE);
-    /* the sums for the log line */
-    a->perf_frames++;
-    a->perf_frame_us += t2 - t0;
-    a->perf_ground_us += prof.us_ground;
-    a->perf_turn_us += prof.us_turn;
-    a->perf_hud_us += t2 - t1;
-    a->perf_samples += prof.samples;
-    a->perf_lines += prof.lines;
-    a->perf_upx += (uint64_t)prof.wu * (uint64_t)prof.hu;
+    if (g->events) {
+        __atomic_fetch_or(&a->events, g->events, __ATOMIC_RELAXED);
+        g->events = 0;
+    }
 }
 
 static void worker_fn(void *arg)
@@ -251,12 +302,35 @@ static void worker_fn(void *arg)
             last = 0;
             continue;
         }
-        if (!a->world_ok || a->paused) {
+        if (!a->world_ok) {
+            aos_hal_worker_sleep(10);
+            continue;
+        }
+        if (__atomic_load_n(&a->start_req, __ATOMIC_ACQUIRE)) {
+            vg_start(&a->game, &a->world, a->mission, &a->pl);
+            a->pl.view = a->cfg.view;
+            a->view_seen = a->in_view_n;
+            a->t = 0;
+            a->flying = true;
+            last = 0;
+            __atomic_store_n(&a->start_req, 0, __ATOMIC_RELEASE);
+        }
+        int i = free_slot(a);
+        if (__atomic_load_n(&a->still_req, __ATOMIC_ACQUIRE)) {
+            if (i < 0) {
+                aos_hal_worker_sleep(2);
+                continue;
+            }
+            __atomic_store_n(&a->fst[i], F_BUSY, __ATOMIC_RELEASE);
+            render(a, i, 0, true);
+            __atomic_store_n(&a->still_req, 0, __ATOMIC_RELEASE);
+            continue;
+        }
+        if (!a->flying || a->paused || a->hold) {
             aos_hal_worker_sleep(10);
             last = 0;
             continue;
         }
-        int i = free_slot(a);
         uint32_t now = vr_now_us();
         if (i < 0 || (last && now - last < FRAME_MIN_US)) {
             aos_hal_worker_sleep(1);
@@ -266,7 +340,8 @@ static void worker_fn(void *arg)
         if (dt > 0.05f) dt = 0.05f;
         last = now;
         __atomic_store_n(&a->fst[i], F_BUSY, __ATOMIC_RELEASE);
-        fly_frame(a, i, dt);
+        step(a, dt);
+        render(a, i, dt, false);
     }
     vr_set_split(NULL);
 }
@@ -280,11 +355,7 @@ static void canvas_show(app_t *a, int i)
     if (!a->cv_buf) {
         a->cv_buf = (uint16_t *)vu_malloc((size_t)a->SW * a->SH * 2);
         if (!a->cv_buf) return;
-        a->canvas = lv_canvas_create(a->root);
         lv_canvas_set_buffer(a->canvas, a->cv_buf, a->SW, a->SH, LV_COLOR_FORMAT_RGB565);
-        lv_obj_set_pos(a->canvas, 0, 0);
-        lv_obj_remove_flag(a->canvas, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
-        lv_obj_move_to_index(a->canvas, 0);
     }
     /* nearest, 16.16 */
     int W = a->fw[i], H = a->fh[i];
@@ -318,19 +389,25 @@ static void present(app_t *a)
 {
     int best = -1;
     uint32_t bs = 0;
-    for (int i = 0; i < NF; i++) {
+    for (int i = 0; i < VA_NF; i++) {
         if (__atomic_load_n(&a->fst[i], __ATOMIC_ACQUIRE) == F_READY && (best < 0 || a->fseq[i] > bs)) {
             best = i;
             bs = a->fseq[i];
         }
     }
     if (best < 0) return;
-    for (int i = 0; i < NF; i++)
+    for (int i = 0; i < VA_NF; i++)
         if (i != best && __atomic_load_n(&a->fst[i], __ATOMIC_ACQUIRE) == F_READY)
             __atomic_store_n(&a->fst[i], F_FREE, __ATOMIC_RELEASE);
+    /* a flight frame that came after the flight stopped: dropped */
+    if (!a->fstill[best] && a->state != VA_FLY) {
+        __atomic_store_n(&a->fst[best], F_FREE, __ATOMIC_RELEASE);
+        return;
+    }
     uint32_t t0 = vr_now_us();
     bool shown = false;
-    if (a->ppa != 0) {
+    /* a flight frame with nothing of LVGL's over it: through the PPA */
+    if (!a->fstill[best] && a->ppa != 0) {
         shown = ppa_show(a, best);
         if (a->ppa < 0) {
             a->ppa = shown ? 1 : 0;
@@ -339,7 +416,7 @@ static void present(app_t *a)
         if (shown) {
             /* the panel keeps its own copy: the frame is free at once */
             __atomic_store_n(&a->fst[best], F_FREE, __ATOMIC_RELEASE);
-            if (a->canvas) lv_obj_add_flag(a->canvas, LV_OBJ_FLAG_HIDDEN);
+            if (!lv_obj_has_flag(a->canvas, LV_OBJ_FLAG_HIDDEN)) lv_obj_add_flag(a->canvas, LV_OBJ_FLAG_HIDDEN);
         }
     }
     if (!shown) {
@@ -348,31 +425,39 @@ static void present(app_t *a)
         __atomic_store_n(&a->fst[best], F_SHOWN, __ATOMIC_RELEASE);
         a->shown = best;
     }
-    a->perf_present_us += vr_now_us() - t0;
-    a->perf_presents++;
+    if (!a->fstill[best]) {
+        a->perf_present_us += vr_now_us() - t0;
+        a->perf_presents++;
+    }
 }
 
 /* LVGL marked an area to draw again: over a flipped frame that shows as a
- * patch of the root's colour until the next flip. Gathered for the log. */
+ * patch of the root's colour until the next flip. Gathered for the log
+ * (two such patches were seen to flicker once, 2026-11-23). */
 static void inval_cb(lv_event_t *e)
 {
     app_t *a = (app_t *)lv_event_get_user_data(e);
     const lv_area_t *ar = (const lv_area_t *)lv_event_get_param(e);
-    if (!a || !ar || a->closing) return;
+    if (!a || !ar || a->closing || a->state != VA_FLY) return;
     a->inv_count++;
     for (int i = 0; i < a->ninv; i++)
         if (a->inv[i].x1 == ar->x1 && a->inv[i].y1 == ar->y1 && a->inv[i].x2 == ar->x2 && a->inv[i].y2 == ar->y2) return;
     if (a->ninv < 6) a->inv[a->ninv++] = *ar;
 }
 
+static void perf_reset(app_t *a, uint32_t now)
+{
+    a->perf_t0 = now;
+    a->perf_frames = a->perf_presents = 0;
+    a->perf_frame_us = a->perf_ground_us = a->perf_turn_us = a->perf_hud_us = a->perf_present_us = 0;
+    a->perf_samples = a->perf_lines = a->perf_upx = 0;
+}
+
 static void perf_log(app_t *a)
 {
     uint32_t now = aos_hal_uptime_ms();
     if (!a->perf_t0) {
-        a->perf_t0 = now;
-        a->perf_frames = a->perf_presents = 0;
-        a->perf_frame_us = a->perf_ground_us = a->perf_turn_us = a->perf_hud_us = a->perf_present_us = 0;
-        a->perf_samples = a->perf_lines = a->perf_upx = 0;
+        perf_reset(a, now);
         return;
     }
     uint32_t el = now - a->perf_t0;
@@ -380,18 +465,30 @@ static void perf_log(app_t *a)
     unsigned n = a->perf_frames ? a->perf_frames : 1, np = a->perf_presents ? a->perf_presents : 1;
     unsigned fps10 = a->perf_presents * 10000u / el;
     a->fps10 = (int)fps10;
-    int W = RES[a->res][0], H = RES[a->res][1];
     unsigned upx = (unsigned)(a->perf_upx / n);
-    aos_hal_log("vuelo", "%u.%u fps %dx%d (drawn %u, upright %u kpx), frame %u.%u ms (ground+sky %u.%u, turn+plane %u.%u, "
-                "hud %u.%u), present %u.%u ms, %u k samples, %u lines, %s, %s%s",
-                fps10 / 10, fps10 % 10, W, H, a->perf_frames, upx / 1000,
+    aos_hal_log("vuelo", "%u.%u fps %dx%d (drawn %u, upright %u kpx), frame %u.%u ms (ground+sky %u.%u, turn+over %u.%u, "
+                "hud %u.%u), present %u.%u ms, %u k samples, %u lines, %s, mission %d",
+                fps10 / 10, fps10 % 10, a->W, a->H, a->perf_frames, upx / 1000,
                 (unsigned)(a->perf_frame_us / n / 1000), (unsigned)(a->perf_frame_us / n / 100 % 10),
                 (unsigned)(a->perf_ground_us / n / 1000), (unsigned)(a->perf_ground_us / n / 100 % 10),
                 (unsigned)(a->perf_turn_us / n / 1000), (unsigned)(a->perf_turn_us / n / 100 % 10),
                 (unsigned)(a->perf_hud_us / n / 1000), (unsigned)(a->perf_hud_us / n / 100 % 10),
                 (unsigned)(a->perf_present_us / np / 1000), (unsigned)(a->perf_present_us / np / 100 % 10),
-                (unsigned)(a->perf_samples / n / 1000), (unsigned)(a->perf_lines / n), WORLD_HUD[a->biome % VW_BIOMES],
-                a->pl.view == VF_COCKPIT ? "cockpit" : "chase", a->in_auto ? ", autopilot" : "");
+                (unsigned)(a->perf_samples / n / 1000), (unsigned)(a->perf_lines / n), WORLD_LOG[a->biome % VW_BIOMES],
+                a->mission);
+#ifdef AOS_SIM_BUILTIN
+    if (getenv("VU_AUTO") && a->game.next < a->game.npt) {
+        const vg_pt_t *c = &a->game.pt[a->game.next];
+        float dx = c->p[0] - a->pl.p[0], dy = c->p[1] - a->pl.p[1];
+        if (dx > VW_SIZE / 2) dx -= VW_SIZE;
+        if (dx < -VW_SIZE / 2) dx += VW_SIZE;
+        if (dy > VW_SIZE / 2) dy -= VW_SIZE;
+        if (dy < -VW_SIZE / 2) dy += VW_SIZE;
+        aos_hal_log("vuelo", "dbg next %d dist %d dz %d bearing %d heading %d bank %d v %d", a->game.next,
+                    (int)sqrtf(dx * dx + dy * dy), (int)(c->p[2] - a->pl.p[2]), (int)(atan2f(dy, dx) * 57.3f),
+                    (int)(a->pl.heading * 57.3f), (int)(a->pl.bank * 57.3f), (int)a->pl.v);
+    }
+#endif
     if (a->inv_count) {
         char b[200];
         int o = 0;
@@ -401,10 +498,7 @@ static void perf_log(app_t *a)
         aos_hal_log("vuelo", "LVGL redrew %d areas over the flight:%s", a->inv_count, b);
         a->inv_count = a->ninv = 0;
     }
-    a->perf_t0 = now;
-    a->perf_frames = a->perf_presents = 0;
-    a->perf_frame_us = a->perf_ground_us = a->perf_turn_us = a->perf_hud_us = a->perf_present_us = 0;
-    a->perf_samples = a->perf_lines = a->perf_upx = 0;
+    perf_reset(a, now);
 }
 
 /* --------------------------------------------------------------------------
@@ -416,7 +510,7 @@ static void load_show(app_t *a, bool on)
     if (on && !a->load_box) {
         a->load_box = lv_obj_create(a->root);
         lv_obj_remove_style_all(a->load_box);
-        lv_obj_set_size(a->load_box, 520, 150);
+        lv_obj_set_size(a->load_box, 560, 150);
         lv_obj_center(a->load_box);
         lv_obj_set_style_bg_color(a->load_box, lv_color_hex(0x102030), 0);
         lv_obj_set_style_bg_opa(a->load_box, LV_OPA_90, 0);
@@ -427,7 +521,7 @@ static void load_show(app_t *a, bool on)
         lv_obj_set_style_text_color(a->load_lbl, lv_color_hex(0xFFFFFF), 0);
         lv_obj_align(a->load_lbl, LV_ALIGN_TOP_MID, 0, 30);
         a->load_bar = lv_bar_create(a->load_box);
-        lv_obj_set_size(a->load_bar, 420, 14);
+        lv_obj_set_size(a->load_bar, 460, 14);
         lv_obj_align(a->load_bar, LV_ALIGN_BOTTOM_MID, 0, -34);
         lv_obj_set_style_bg_color(a->load_bar, lv_color_hex(0x2A4258), 0);
         lv_obj_set_style_bg_color(a->load_bar, lv_color_hex(0xFF8A1E), LV_PART_INDICATOR);
@@ -447,55 +541,148 @@ static void load_update(app_t *a)
     int req = a->gen_req;
     int biome = req >= 0 ? req >> 3 : a->biome;
     char b[96];
-    snprintf(b, sizeof b, _("Armando el mundo: %s"), _(WORLD_NAME[biome % VW_BIOMES]));
+    snprintf(b, sizeof b, _("Armando el mundo: %s"), _(VN_WORLD_NAME[biome % VW_BIOMES]));
     lv_label_set_text(a->load_lbl, b);
     lv_bar_set_value(a->load_bar, a->progress, LV_ANIM_OFF);
 }
 
 static void ask_world(app_t *a, int biome, int hour)
 {
-    /* the frames in flight are dropped: the worker makes the world first */
+    biome %= VW_BIOMES;
+    hour %= VW_HOURS;
+    if (a->world_ok && a->gen_req < 0 && a->biome == biome && a->hour == hour) return;
     a->world_ok = false;
-    __atomic_store_n(&a->gen_req, (biome % VW_BIOMES) * 8 + (hour % VW_HOURS), __ATOMIC_RELEASE);
-    a->ppa = a->ppa == 1 ? 1 : -1;
-    load_show(a, true);
-    load_update(a);
+    __atomic_store_n(&a->gen_req, biome * 8 + hour, __ATOMIC_RELEASE);
 }
 
 /* --------------------------------------------------------------------------
- * The hands: fingers, the gamepad, the keyboard
+ * The flights, for the screens
+ * -------------------------------------------------------------------------- */
+
+static void flight_begin(app_t *a)
+{
+    vn_close(a);
+    a->state = VA_FLY;
+    a->paused = false;
+    a->result_up = false;
+    a->done_t = 0;
+    a->was_stall = false;
+    a->perf_t0 = 0;
+    a->events = 0;
+    __atomic_store_n(&a->start_req, 1, __ATOMIC_RELEASE);
+    aos_hal_display_refresh_request(60);
+}
+
+void va_start_mission(app_t *a, int mission)
+{
+    int b, h;
+    vg_mission_world(mission, &b, &h);
+    a->flying = false;
+    a->mission = mission;
+    ask_world(a, b, h);
+    flight_begin(a);
+}
+
+void va_start_free(app_t *a, int biome, int hour)
+{
+    a->flying = false;
+    a->mission = -1;
+    ask_world(a, biome, hour);
+    flight_begin(a);
+}
+
+void va_restart(app_t *a)
+{
+    a->flying = false;
+    flight_begin(a);
+}
+
+void va_pause(app_t *a)
+{
+    if (a->state != VA_FLY || !a->flying) return;
+    a->state = VA_PAUSE;
+    a->paused = true;
+    __atomic_store_n(&a->still_req, 1, __ATOMIC_RELEASE);
+    vn_show(a, VN_PAUSE);
+}
+
+void va_resume(app_t *a)
+{
+    vn_close(a);
+    a->state = VA_FLY;
+    a->paused = false;
+    a->perf_t0 = 0;
+}
+
+void va_to_menu(app_t *a)
+{
+    a->flying = false;
+    a->paused = false;
+    a->state = VA_MENU;
+    if (a->world_ok) vf_reset(&a->pl, &a->world);
+    __atomic_store_n(&a->still_req, 1, __ATOMIC_RELEASE);
+    vn_show(a, VN_MAIN);
+}
+
+bool va_world_open(app_t *a, int biome)
+{
+    return vg_total_stars(&a->save) >= vg_world_needs(biome);
+}
+
+void va_cfg_store(app_t *a)
+{
+    aos_hal_pref_set_i32("pl_snd", a->cfg.sound);
+    aos_hal_pref_set_i32("pl_inv", a->cfg.invert);
+    aos_hal_pref_set_i32("pl_q", a->cfg.quality);
+    aos_hal_pref_set_i32("pl_cam", a->cfg.view);
+    aos_hal_pref_set_i32("pl_fps", a->cfg.fps);
+    vs_enable(a->cfg.sound);
+}
+
+void va_quality(app_t *a, int q)
+{
+    q = q < 0 ? 0 : q >= VA_QUALITIES ? VA_QUALITIES - 1 : q;
+    a->cfg.quality = q;
+    a->W = RES[q][0];
+    a->H = RES[q][1];
+    /* the words at the frame's new size (the worker is not flying here) */
+    vt_build(&a->text, a->H);
+    vh_layout(&a->lay, a->W, a->H);
+}
+
+static void cfg_load(app_t *a)
+{
+    int32_t v;
+    a->cfg.sound = !aos_hal_pref_get_i32("pl_snd", &v) || v;
+    a->cfg.invert = aos_hal_pref_get_i32("pl_inv", &v) && v;
+    a->cfg.quality = aos_hal_pref_get_i32("pl_q", &v) && v >= 0 && v < VA_QUALITIES ? v : 1;
+    a->cfg.view = aos_hal_pref_get_i32("pl_cam", &v) && v >= 0 && v < VF_VIEWS ? v : VF_CHASE;
+    a->cfg.fps = aos_hal_pref_get_i32("pl_fps", &v) && v;
+}
+
+/* --------------------------------------------------------------------------
+ * The hands: fingers, the gamepad, the keyboard (in flight)
  * -------------------------------------------------------------------------- */
 
 static void button(app_t *a, int b)
 {
-    switch (b) {
-    case VH_BTN_WORLD: {
-        int nb = (a->biome + 1) % VW_BIOMES;
-        ask_world(a, nb, WORLD_HOUR[nb]);
-        break;
-    }
-    case VH_BTN_VIEW: a->in_view_n++; break;
-    case VH_BTN_AUTO: a->in_auto = !a->in_auto; break;
-    default:
-        a->res = (a->res + 1) % NRES;
-        a->perf_t0 = 0;
-        aos_hal_log("vuelo", "frame size %dx%d", RES[a->res][0], RES[a->res][1]);
-        break;
-    }
+    vs_cue(VS_CLICK);
+    if (b == VH_BTN_PAUSE) va_pause(a);
+    else a->in_view_n++;
 }
 
 static void touch(app_t *a)
 {
     aos_touch_point_t pts[AOS_TOUCH_MAX];
     aos_touch_points_n(pts, AOS_TOUCH_MAX);
-    int W = RES[a->res][0], H = RES[a->res][1];
+    int W = a->W, H = a->H;
     vh_layout_t L;
     vh_layout(&L, W, H);
     float kx = (float)W / (float)a->SW, ky = (float)H / (float)a->SH;
     bool stick = false;
     uint8_t held = 0;
     for (int i = 0; i < AOS_TOUCH_MAX; i++) {
-        finger_t *f = &a->fing[i];
+        va_finger_t *f = &a->fing[i];
         const aos_touch_point_t *p = &pts[i];
         if (!p->down) {
             f->id = 0;
@@ -508,7 +695,7 @@ static void touch(app_t *a)
             f->id = p->id ? p->id : 0xFF;
             f->x0 = p->x;
             f->y0 = p->y;
-            int pad = (int)(6 * L.u);
+            int pad = (int)(8 * L.u);
             for (int b = 0; b < VH_BTNS && !f->role; b++) {
                 if (fx >= L.btn_x[b] - pad && fx < L.btn_x[b] + L.btn_s + pad && fy < L.btn_y + L.btn_s + pad) {
                     f->role = R_BTN;
@@ -525,9 +712,8 @@ static void touch(app_t *a)
                 f->role = R_STICK;
                 /* the base where the thumb landed, kept off the edges */
                 float m = L.stick_r * 1.1f / kx;
-                float bx = p->x < m ? m : p->x, by = p->y > (float)a->SH - m ? (float)a->SH - m : p->y;
-                f->x0 = bx;
-                f->y0 = by;
+                f->x0 = p->x < m ? m : p->x;
+                f->y0 = p->y > (float)a->SH - m ? (float)a->SH - m : p->y;
             }
         }
         switch (f->role) {
@@ -566,18 +752,17 @@ static void touch(app_t *a)
 static void tap_cb(lv_event_t *e)
 {
     app_t *a = (app_t *)lv_event_get_user_data(e);
-    if (a->closing) return;
+    if (a->closing || a->state != VA_FLY) return;
     lv_indev_t *indev = lv_indev_active();
     if (!indev) return;
     lv_point_t pt;
     lv_indev_get_point(indev, &pt);
     uint32_t now = lv_tick_get();
     if (a->raw_btn_ms && now - a->raw_btn_ms < 400) return;
-    int W = RES[a->res][0], H = RES[a->res][1];
     vh_layout_t L;
-    vh_layout(&L, W, H);
-    float fx = (float)pt.x * (float)W / (float)a->SW, fy = (float)pt.y * (float)H / (float)a->SH;
-    int pad = (int)(6 * L.u);
+    vh_layout(&L, a->W, a->H);
+    float fx = (float)pt.x * (float)a->W / (float)a->SW, fy = (float)pt.y * (float)a->H / (float)a->SH;
+    int pad = (int)(8 * L.u);
     for (int b = 0; b < VH_BTNS; b++) {
         if (fx >= L.btn_x[b] - pad && fx < L.btn_x[b] + L.btn_s + pad && fy < L.btn_y + L.btn_s + pad) {
             a->lv_btn_ms = now;
@@ -598,9 +783,8 @@ static void hands(app_t *a, float dt)
 {
     touch(a);
     float x = a->stick_x, y = a->stick_y;
-    /* the gamepad: the stick as the touch stick, the d-pad full over;
-     * A and B the throttle, L the camera, R the autopilot, START the world */
-    aos_pad_update(&a->pad, lv_tick_get());
+    /* the gamepad: the stick as the touch stick, the d-pad full over; A and
+     * B the throttle, L the camera, START the pause */
     if (a->pad.connected) {
         if (a->pad.x || a->pad.y) {
             x = (float)a->pad.x / 32767.0f;
@@ -615,12 +799,10 @@ static void hands(app_t *a, float dt)
         if (aos_pad_held(&a->pad, AOS_PAD_B)) t -= dt * 0.7f;
         a->in_thr = t < 0 ? 0 : t > 1 ? 1 : t;
         if (aos_pad_pressed(&a->pad, AOS_PAD_L)) button(a, VH_BTN_VIEW);
-        if (aos_pad_pressed(&a->pad, AOS_PAD_R)) button(a, VH_BTN_AUTO);
-        if (aos_pad_pressed(&a->pad, AOS_PAD_START)) button(a, VH_BTN_WORLD);
+        if (aos_pad_pressed(&a->pad, AOS_PAD_START)) button(a, VH_BTN_PAUSE);
     }
     /* a keyboard (the Mac's in the simulator): the arrows, W and S the
-     * throttle, C the camera, P the autopilot, N the world, H the hour,
-     * R the frame's size */
+     * throttle, C the camera, P the pause */
     uint8_t k[8], mods = 0;
     int n = aos_hal_usb_kbd_held(k, 8, &mods);
     if (n > 0 || a->nkeys_prev > 0) {
@@ -632,27 +814,64 @@ static void hands(app_t *a, float dt)
         if (key_in(k, n, 0x1A)) t += dt * 0.7f;
         if (key_in(k, n, 0x16)) t -= dt * 0.7f;
         a->in_thr = t < 0 ? 0 : t > 1 ? 1 : t;
-        static const uint8_t EDGE[] = { 0x06, 0x13, 0x11, 0x0B, 0x15 };
-        for (size_t e = 0; e < sizeof EDGE; e++) {
-            if (!key_in(k, n, EDGE[e]) || key_in(a->keys_prev, a->nkeys_prev, EDGE[e])) continue;
-            switch (EDGE[e]) {
-            case 0x06: button(a, VH_BTN_VIEW); break;
-            case 0x13: button(a, VH_BTN_AUTO); break;
-            case 0x11: button(a, VH_BTN_WORLD); break;
-            case 0x0B: ask_world(a, a->biome, a->hour + 1); break;
-            default: button(a, VH_BTN_RES); break;
-            }
-        }
+        if (key_in(k, n, 0x06) && !key_in(a->keys_prev, a->nkeys_prev, 0x06)) button(a, VH_BTN_VIEW);
+        if (key_in(k, n, 0x13) && !key_in(a->keys_prev, a->nkeys_prev, 0x13)) button(a, VH_BTN_PAUSE);
         memcpy(a->keys_prev, k, sizeof k);
         a->nkeys_prev = n;
     }
     a->in_x = x;
-    a->in_y = y;
+    a->in_y = a->cfg.invert ? -y : y;
 }
 
 /* --------------------------------------------------------------------------
  * The clock
  * -------------------------------------------------------------------------- */
+
+static void sounds(app_t *a)
+{
+    uint32_t ev = __atomic_exchange_n(&a->events, 0, __ATOMIC_ACQ_REL);
+    const vg_game_t *g = &a->game;
+    if (ev & VG_EV_COUNT) vs_cue(VS_COUNT);
+    if (ev & VG_EV_GO) vs_cue(VS_GO);
+    if (ev & VG_EV_RING) vs_cue(VS_RING);
+    if (ev & VG_EV_PICK) vs_cue(VS_PICK);
+    if (ev & VG_EV_DROP) vs_cue(VS_DROP);
+    if (ev & VG_EV_CRASH) vs_cue(VS_CRASH);
+    if (ev & VG_EV_FINISH) vs_cue(g->kind == VG_RACE && !g->won ? VS_LOST : VS_FINISH);
+    bool stall = a->pl.stall > 0.2f && !a->pl.crashed && a->state == VA_FLY;
+    if (stall && !a->was_stall) vs_cue(VS_STALL);
+    a->was_stall = stall;
+    bool fly = a->state == VA_FLY && a->flying && !a->pl.crashed;
+    vs_set(a->pl.thr, a->pl.v, fly);
+}
+
+static void results(app_t *a, float dt)
+{
+    vg_game_t *g = &a->game;
+    if (a->state != VA_FLY || !a->flying || g->state != VG_ST_DONE || a->result_up) return;
+    a->done_t += dt;
+    if (a->done_t < RESULT_AFTER) return;
+    a->result_up = true;
+    int m = a->mission;
+    a->result_stars = g->stars;
+    a->result_time = g->final_t;
+    a->result_record = false;
+    if (m >= 0 && m < VG_MISSIONS) {
+        uint32_t ms = (uint32_t)(g->final_t * 1000.0f);
+        if (!a->save.best_ms[m] || ms < a->save.best_ms[m]) {
+            a->result_record = a->save.best_ms[m] != 0;
+            a->save.best_ms[m] = ms;
+        }
+        if (g->stars > a->save.stars[m]) a->save.stars[m] = (uint8_t)g->stars;
+        vg_store(&a->save, m);
+        aos_hal_log("vuelo", "mission %d done in %d.%d s, %d stars%s", m, (int)g->final_t,
+                    (int)(g->final_t * 10.0f) % 10, g->stars, a->result_record ? ", a record" : "");
+    }
+    a->state = VA_RESULT;
+    a->paused = true;
+    __atomic_store_n(&a->still_req, 1, __ATOMIC_RELEASE);
+    vn_show(a, VN_RESULT);
+}
 
 static void frame_cb(lv_timer_t *t)
 {
@@ -663,24 +882,41 @@ static void frame_cb(lv_timer_t *t)
     float dt = last ? (float)(now - last) / 1000.0f : 0.008f;
     last = now;
     if (dt > 0.1f) dt = 0.1f;
-    bool over = (aos_ui_overlay() & ~(uint32_t)AOS_UI_OVER_TOAST) != 0;
-    if (over != a->paused) {
-        a->paused = over;
-        if (!over) a->perf_t0 = 0;
-    }
-    if (over) return;
-    hands(a, dt);
-    if (a->gen_req >= 0 || !a->world_ok) {
-        load_show(a, true);
-        load_update(a);
+    vs_tick();
+    uint32_t over = aos_ui_overlay() & ~(uint32_t)AOS_UI_OVER_TOAST;
+    /* a panel, the switcher, the way home or the lock: the flight waits in
+     * the pause; the zoom from the icon or a banner only hold it a moment */
+    const uint32_t PAUSING = AOS_UI_OVER_PANEL | AOS_UI_OVER_SWITCHER | AOS_UI_OVER_GESTURE | AOS_UI_OVER_LOCK |
+                             AOS_UI_OVER_NOT_FRONT;
+    a->hold = over != 0;
+    if (over) {
+        if ((over & PAUSING) && a->state == VA_FLY && a->flying) va_pause(a);
+        vs_set(0, 0, false);
         return;
     }
-    if (a->load_box) {
+    aos_pad_update(&a->pad, now);
+    if (a->boot_press) {
+        a->boot_press = false;
+        if (a->state == VA_FLY) va_pause(a);
+        else if (a->state == VA_PAUSE) va_resume(a);
+    }
+    bool loading = a->gen_req >= 0 || !a->world_ok;
+    if (loading) {
+        load_show(a, true);
+        load_update(a);
+    } else if (a->load_box) {
         load_show(a, false);
         a->perf_t0 = 0;
     }
-    present(a);
-    perf_log(a);
+    if (a->state == VA_FLY) {
+        hands(a, dt);
+        results(a, dt);
+    } else {
+        vn_pad(a);
+    }
+    sounds(a);
+    if (!loading) present(a);
+    if (a->state == VA_FLY && a->flying && !loading) perf_log(a);
 }
 
 /* --------------------------------------------------------------------------
@@ -689,14 +925,42 @@ static void frame_cb(lv_timer_t *t)
 
 static void free_all(app_t *a)
 {
-    for (int i = 0; i < NF; i++) {
+    for (int i = 0; i < VA_NF; i++) {
         vu_free(a->fr_mem[i]);
         a->fr_mem[i] = a->fr[i] = NULL;
     }
     vu_free(a->cv_buf);
     a->cv_buf = NULL;
+    vt_free(&a->text);
     vw_free(&a->world);
     vr_free();
+}
+
+static bool app_back(aos_app_t *self, void *inst)
+{
+    (void)self;
+    app_t *a = (app_t *)inst;
+    if (!a) return false;
+    switch (a->state) {
+    case VA_FLY: va_pause(a); return true;
+    case VA_PAUSE: va_resume(a); return true;
+    case VA_RESULT: va_to_menu(a); return true;
+    default:
+        if (a->screen != VN_MAIN) {
+            vn_show(a, VN_MAIN);
+            return true;
+        }
+        return false;
+    }
+}
+
+static bool app_button(aos_app_t *self, void *inst, int action)
+{
+    (void)self;
+    app_t *a = (app_t *)inst;
+    if (!a || (a->state != VA_FLY && a->state != VA_PAUSE)) return false;
+    if (action == AOS_BUTTON_CLICK) a->boot_press = true;
+    return action == AOS_BUTTON_CLICK || action == AOS_BUTTON_PRESS;
 }
 
 static void *vuelo_create(aos_app_t *self, lv_obj_t *root)
@@ -714,10 +978,10 @@ static void *vuelo_create(aos_app_t *self, lv_obj_t *root)
     }
     uint32_t hi = 0, hp = 0;
     aos_hal_heap_info(&hi, &hp);
-    bool ok = vw_alloc(&a->world) && vr_init(MAXW, MAXH);
-    for (int i = 0; i < NF && ok; i++) {
+    bool ok = vw_alloc(&a->world) && vr_init(VA_MAXW, VA_MAXH);
+    for (int i = 0; i < VA_NF && ok; i++) {
         /* 64-byte aligned: the PPA reads them by DMA */
-        a->fr_mem[i] = (uint16_t *)vu_malloc((size_t)MAXW * MAXH * 2 + 64);
+        a->fr_mem[i] = (uint16_t *)vu_malloc((size_t)VA_MAXW * VA_MAXH * 2 + 64);
         if (!a->fr_mem[i]) ok = false;
         else a->fr[i] = (uint16_t *)(((uintptr_t)a->fr_mem[i] + 63) & ~(uintptr_t)63);
     }
@@ -729,45 +993,60 @@ static void *vuelo_create(aos_app_t *self, lv_obj_t *root)
     }
     a->shown = -1;
     a->ppa = -1;
-    a->res = RES_DEFAULT;
     a->in_thr = 0.6f;
     a->gen_req = -1;
-    a->seed = 7;
-    int biome = VW_ISLAS, hour = -1;
+    a->mission = -1;
+    a->state = VA_MENU;
+    a->screen = VN_NONE;
+    cfg_load(a);
+    vg_load(&a->save);
+    vs_enable(a->cfg.sound);
 #ifdef AOS_SIM_BUILTIN
-    /* development: VU_WORLD=0..4, VU_HOUR=0..3, VU_SEED, VU_RES=0..3,
-     * VU_AUTO=1 flies by itself, VU_VIEW=1 from the cockpit */
-    if (getenv("VU_WORLD")) biome = atoi(getenv("VU_WORLD")) % VW_BIOMES;
-    if (getenv("VU_HOUR")) hour = atoi(getenv("VU_HOUR")) % VW_HOURS;
-    if (getenv("VU_SEED")) a->seed = (uint32_t)atoi(getenv("VU_SEED"));
-    if (getenv("VU_RES")) a->res = atoi(getenv("VU_RES")) % NRES;
-    if (getenv("VU_AUTO")) a->in_auto = true;
-    if (getenv("VU_VIEW")) a->pl.view = atoi(getenv("VU_VIEW")) % VF_VIEWS;
+    /* development: VU_STARS=n the first n missions with three stars (not kept) */
+    if (getenv("VU_STARS")) {
+        for (int m = 0; m < VG_MISSIONS && m < atoi(getenv("VU_STARS")); m++) a->save.stars[m] = 3;
+    }
 #endif
     lv_obj_set_style_bg_color(root, lv_color_hex(0x0A1420), 0);
     lv_obj_set_style_bg_opa(root, LV_OPA_COVER, 0);
     lv_obj_remove_flag(root, LV_OBJ_FLAG_SCROLLABLE);
+    a->canvas = lv_canvas_create(root);
+    lv_obj_set_pos(a->canvas, 0, 0);
+    lv_obj_set_size(a->canvas, a->SW, a->SH);
+    lv_obj_remove_flag(a->canvas, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_add_flag(a->canvas, LV_OBJ_FLAG_HIDDEN);
     a->tap = lv_obj_create(root);
     lv_obj_remove_style_all(a->tap);
     lv_obj_set_size(a->tap, a->SW, a->SH);
     lv_obj_add_flag(a->tap, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_remove_flag(a->tap, LV_OBJ_FLAG_SCROLLABLE | LV_OBJ_FLAG_GESTURE_BUBBLE);
     lv_obj_add_event_cb(a->tap, tap_cb, LV_EVENT_PRESSED, a);
+    va_quality(a, a->cfg.quality);
     vp_build();
     a->worker_ok = aos_hal_worker_start_on("vuelo", worker_fn, a, 12 * 1024, 0, 3);
     if (!a->worker_ok) {
         aos_hal_log("vuelo", "no worker");
+        lv_obj_clean(root);
         free_all(a);
         vu_free(a);
         return NULL;
     }
-    ask_world(a, biome, hour >= 0 ? hour : WORLD_HOUR[biome]);
+    a->menu_world = 0;
+    a->free_world = 0;
+    a->free_hour = VW_NOON;
+    ask_world(a, VW_ISLAS, VW_NOON);
+    __atomic_store_n(&a->still_req, 1, __ATOMIC_RELEASE);
+    vn_show(a, VN_MAIN);
     a->timer = lv_timer_create(frame_cb, TICK_MS, a);
     lv_display_add_event_cb(lv_display_get_default(), inval_cb, LV_EVENT_INVALIDATE_AREA, a);
-    int hz = aos_hal_display_refresh_request(60);
-    aos_hal_log("vuelo", "panel at %d Hz", hz);
-    aos_hal_log("vuelo", "ready %dx%d | psram free before %u KB, held %u KB", a->SW, a->SH, (unsigned)(hp / 1024),
-                (unsigned)(vu_mem_used() / 1024));
+    vs_open();
+    aos_hal_log("vuelo", "ready %dx%d, frames %dx%d | psram free before %u KB, held %u KB, %d stars", a->SW, a->SH,
+                a->W, a->H, (unsigned)(hp / 1024), (unsigned)(vu_mem_used() / 1024), vg_total_stars(&a->save));
+#ifdef AOS_SIM_BUILTIN
+    /* development: VU_MISSION=0..14 straight into it, VU_FREE=world*10+hour */
+    if (getenv("VU_MISSION")) va_start_mission(a, atoi(getenv("VU_MISSION")) % VG_MISSIONS);
+    else if (getenv("VU_FREE")) va_start_free(a, atoi(getenv("VU_FREE")) / 10, atoi(getenv("VU_FREE")) % 10);
+#endif
     return a;
 }
 
@@ -780,6 +1059,7 @@ static void vuelo_destroy(aos_app_t *self, void *inst)
     lv_display_remove_event_cb_with_user_data(lv_display_get_default(), inval_cb, a);
     if (a->worker_ok) aos_hal_worker_stop();
     if (a->timer) lv_timer_delete(a->timer);
+    vs_close();
     aos_hal_display_refresh_request(0);
     if (a->root) lv_obj_clean(a->root);
     aos_hal_log("vuelo", "closing | peak %u KB", (unsigned)(vu_mem_peak() / 1024));
@@ -792,17 +1072,20 @@ static void vuelo_show(aos_app_t *self, void *inst)
     (void)self;
     app_t *a = (app_t *)inst;
     if (a) a->perf_t0 = 0;
+    vs_open();
     aos_hal_display_refresh_request(60);
 }
 
 static void vuelo_hide(aos_app_t *self, void *inst)
 {
     (void)self;
-    (void)inst;
+    app_t *a = (app_t *)inst;
+    if (a && a->state == VA_FLY && a->flying) va_pause(a);
+    vs_close();
     aos_hal_display_refresh_request(0);
 }
 
-/* The launcher icon: a small red plane climbing across a blue sky */
+/* The launcher icon: a small red plane seen from above, on a blue sky */
 static const uint8_t VU_ICON[] = {
     AIC_HEADER,
     AIC_RECT(AIC_CENTER,   0,   4, 60, 12, AIC_CIRCLE, AIC_C_LIT(0xF2E6C8), 255),
@@ -829,6 +1112,8 @@ static bool vuelo_init(aos_app_t *app)
     app->destroy = vuelo_destroy;
     app->show    = vuelo_show;
     app->hide    = vuelo_hide;
+    app->back    = app_back;
+    app->button  = app_button;
     return true;
 }
 

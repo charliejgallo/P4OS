@@ -2,6 +2,7 @@
  * PLANEO - the instruments (see vu_hud.h)
  */
 #include "vu_hud.h"
+#include "vu_plane.h"
 #include "vu_render.h"
 
 #include <math.h>
@@ -134,20 +135,11 @@ static void ring(uint16_t *out, int W, int H, float cx, float cy, float r1, floa
     }
 }
 
-static void line(uint16_t *out, int W, int H, float x0, float y0, float x1, float y1, float w, uint16_t c, int a)
-{
-    float dx = x1 - x0, dy = y1 - y0;
-    float len = sqrtf(dx * dx + dy * dy);
-    int n = (int)(len * 2) + 1;
-    for (int i = 0; i <= n; i++) {
-        float t = (float)i / (float)n;
-        ring(out, W, H, x0 + dx * t, y0 + dy * t, 0, w * 0.5f, c, a);
-    }
-}
-
 /* --------------------------------------------------------------------------
  * Layout and drawing
  * -------------------------------------------------------------------------- */
+
+#include "vu_game.h"
 
 void vh_layout(vh_layout_t *L, int W, int H)
 {
@@ -156,14 +148,13 @@ void vh_layout(vh_layout_t *L, int W, int H)
     L->H = H;
     float u = (float)H / 240.0f;
     L->u = u;
-    L->btn_s = (int)(22 * u);
+    L->btn_s = (int)(24 * u);
     L->btn_y = (int)(6 * u);
-    int gap = (int)(6 * u), total = VH_BTNS * L->btn_s + (VH_BTNS - 1) * gap;
-    int x0 = (W - total) / 2;
-    for (int i = 0; i < VH_BTNS; i++) L->btn_x[i] = x0 + i * (L->btn_s + gap);
+    L->btn_x[VH_BTN_PAUSE] = (int)(6 * u);
+    L->btn_x[VH_BTN_VIEW] = W - (int)(6 * u) - L->btn_s;
     L->thr_x0 = W - (int)(30 * u);
     L->thr_x1 = W - (int)(14 * u);
-    L->thr_y0 = (int)(70 * u);
+    L->thr_y0 = (int)(76 * u);
     L->thr_y1 = H - (int)(26 * u);
     L->stick_r = 30 * u;
     L->stick_home_x = 58 * u;
@@ -172,60 +163,129 @@ void vh_layout(vh_layout_t *L, int W, int H)
 
 static void icon(uint16_t *out, int W, int H, int i, int x, int y, int s, uint16_t c, float u)
 {
-    float cx = (float)x + (float)s * 0.5f, cy = (float)y + (float)s * 0.5f, r = (float)s * 0.32f;
-    switch (i) {
-    case VH_BTN_WORLD:      /* a globe */
-        ring(out, W, H, cx, cy, r - 1.2f * u, r, c, 32);
-        line(out, W, H, cx - r, cy, cx + r, cy, 1.0f * u, c, 32);
-        line(out, W, H, cx, cy - r, cx, cy + r, 1.0f * u, c, 32);
-        ring(out, W, H, cx, cy, r * 0.45f - 1.0f * u, r * 0.45f, c, 24);
-        break;
-    case VH_BTN_VIEW:       /* an eye */
-        ring(out, W, H, cx, cy, r * 0.9f - 1.2f * u, r * 0.9f, c, 32);
-        ring(out, W, H, cx, cy, 0, r * 0.38f, c, 32);
-        break;
-    case VH_BTN_AUTO: {     /* the letter A in a ring: the autopilot */
-        ring(out, W, H, cx, cy, r - 1.2f * u, r, c, 32);
-        int sc = u >= 1.4f ? 2 : 1;
-        vh_text(out, W, H, (int)(cx - 2.5f * (float)sc), (int)(cy - 3.5f * (float)sc), sc, "A", c);
-        break;
-    }
-    default: {              /* the resolution: a small screen */
-        int w = (int)(r * 1.8f), h = (int)(r * 1.2f);
-        rect(out, W, H, (int)cx - w / 2, (int)cy - h / 2, w, (int)(1.2f * u + 0.5f), c, 32);
-        rect(out, W, H, (int)cx - w / 2, (int)cy + h / 2 - (int)(1.2f * u + 0.5f), w, (int)(1.2f * u + 0.5f), c, 32);
-        rect(out, W, H, (int)cx - w / 2, (int)cy - h / 2, (int)(1.2f * u + 0.5f), h, c, 32);
-        rect(out, W, H, (int)cx + w / 2 - (int)(1.2f * u + 0.5f), (int)cy - h / 2, (int)(1.2f * u + 0.5f), h, c, 32);
-        break;
-    }
+    float cx = (float)x + (float)s * 0.5f, cy = (float)y + (float)s * 0.5f, r = (float)s * 0.3f;
+    int t = (int)(2.2f * u + 0.5f);
+    if (i == VH_BTN_PAUSE) {
+        rect(out, W, H, (int)(cx - r * 0.7f), (int)(cy - r), t, (int)(r * 2), c, 32);
+        rect(out, W, H, (int)(cx + r * 0.7f) - t, (int)(cy - r), t, (int)(r * 2), c, 32);
+    } else {
+        /* a camera: a body and its lens */
+        rect(out, W, H, (int)(cx - r * 1.1f), (int)(cy - r * 0.6f), (int)(r * 2.2f), (int)(r * 1.4f), c, 32);
+        ring(out, W, H, cx, cy + r * 0.1f, 0, r * 0.45f, 0x2124, 32);
+        rect(out, W, H, (int)(cx - r * 0.4f), (int)(cy - r * 0.95f), (int)(r * 0.8f), (int)(r * 0.4f), c, 32);
     }
 }
 
-void vh_draw(const vh_layout_t *L, const vh_state_t *s, uint16_t *out)
+/* an arrowhead at (x, y) pointing along (dx, dy) */
+static void arrow(uint16_t *out, int W, int H, float x, float y, float dx, float dy, float sz, uint16_t c)
+{
+    float px = -dy, py = dx;
+    float xs[3] = { x + dx * sz, x - dx * sz * 0.6f + px * sz * 0.8f, x - dx * sz * 0.6f - px * sz * 0.8f };
+    float ys[3] = { y + dy * sz, y - dy * sz * 0.6f + py * sz * 0.8f, y - dy * sz * 0.6f - py * sz * 0.8f };
+    float xo[3], yo[3];
+    for (int k = 0; k < 3; k++) {
+        xo[k] = x + (xs[k] - x) * 1.35f;
+        yo[k] = y + (ys[k] - y) * 1.35f;
+    }
+    vp_fill(out, W, 0, H, xo, yo, 0x0841, 18);
+    vp_fill(out, W, 0, H, xs, ys, c, 32);
+}
+
+static const int KIND_WORD[] = { VT_W_RINGS, VT_W_RACE, VT_W_DELIVER };
+
+void vh_draw(const vh_layout_t *L, const vh_state_t *s, const vt_set_t *t, uint16_t *out)
 {
     int W = L->W, H = L->H;
     float u = L->u;
-    int sc = u >= 1.4f ? 2 : 1;
     char b[48];
-    uint16_t white = 0xFFFF, amber = vr_565(0xFFC23C), red = vr_565(0xFF4A3A);
-    /* the speed, left; the height, right */
-    snprintf(b, sizeof b, "%d", (int)(s->speed_kmh + 0.5f));
-    int x = (int)(10 * u), y = (int)(8 * u);
-    int w = vh_text(out, W, H, x, y, sc * 2, b, white);
-    vh_text(out, W, H, x + w + 3 * sc, y + 7 * sc, sc, "KM/H", white);
-    snprintf(b, sizeof b, "%d", (int)(s->alt_m + 0.5f));
-    int wa = vh_text_w(b, sc * 2), wm = vh_text_w("M", sc);
-    int xr = W - (int)(10 * u) - wa - wm - 3 * sc;
-    vh_text(out, W, H, xr, y, sc * 2, b, s->agl_m < 25 ? amber : white);
-    vh_text(out, W, H, xr + wa + 3 * sc, y + 7 * sc, sc, "M", white);
+    uint16_t white = 0xFFFF, amber = vr_565(0xFFC23C), red = vr_565(0xFF4A3A), green = vr_565(0x7CFF8C);
+    int top = (int)(6 * u);
     /* the buttons */
     for (int i = 0; i < VH_BTNS; i++) {
         bool on = (s->pressed >> i) & 1;
-        if (i == VH_BTN_AUTO && s->autopilot) on = true;
         int bx = L->btn_x[i], by = L->btn_y, bs = L->btn_s;
         ring(out, W, H, (float)bx + (float)bs * 0.5f, (float)by + (float)bs * 0.5f, 0, (float)bs * 0.5f,
              on ? vr_565(0xFF8A1E) : 0x0000, on ? 26 : 13);
         icon(out, W, H, i, bx, by, bs, white, u);
+    }
+    if (t && t->ok) {
+        /* the speed, after the pause button; the height before the camera's */
+        int x = L->btn_x[VH_BTN_PAUSE] + L->btn_s + (int)(8 * u);
+        snprintf(b, sizeof b, "%d", (int)(s->speed_kmh + 0.5f));
+        int w = vt_num(out, W, H, t, VT_M, b, x, top, white, VT_LEFT);
+        int dy = t->dig[VT_M][0].h - t->word[VT_S][VT_W_KMH].h - (int)(2 * u);
+        vt_draw(out, W, H, &t->word[VT_S][VT_W_KMH], x + w + (int)(3 * u), top + dy, white, VT_LEFT);
+        int xr = L->btn_x[VH_BTN_VIEW] - (int)(8 * u);
+        int wm = vt_draw(out, W, H, &t->word[VT_S][VT_W_M], xr, top + dy, white, VT_RIGHT);
+        snprintf(b, sizeof b, "%d", (int)(s->alt_m + 0.5f));
+        vt_num(out, W, H, t, VT_M, b, xr - wm - (int)(3 * u), top, s->agl_m < 20 ? amber : white, VT_RIGHT);
+        /* the mission: what, how far along, the clock */
+        if (s->kind != VG_FREE && s->kind >= 0 && s->kind < VG_KINDS) {
+            int cx = W / 2;
+            int y = top;
+            const vt_mask_t *kw = &t->word[VT_S][KIND_WORD[s->kind]];
+            int prog = s->kind == VG_DELIVER ? s->next / 2 : s->next;
+            int total = s->kind == VG_DELIVER ? s->npt / 2 : s->npt;
+            snprintf(b, sizeof b, "%d/%d", prog, total);
+            int wn = vt_num_w(t, VT_S, b);
+            int ww = kw->w + (int)(5 * u) + wn;
+            vt_draw(out, W, H, kw, cx - ww / 2, y, amber, VT_LEFT);
+            vt_num(out, W, H, t, VT_S, b, cx - ww / 2 + kw->w + (int)(5 * u), y, white, VT_LEFT);
+            y += kw->h;
+            if (s->clock >= 0 || s->done) {
+                vg_fmt_time(b, sizeof b, s->clock);
+                vt_num(out, W, H, t, VT_M, b, cx, y, white, VT_CENTER);
+                if (s->place) {
+                    const vt_mask_t *pm = &t->word[VT_S][s->place == 1 ? VT_W_FIRST : VT_W_SECOND];
+                    vt_draw(out, W, H, pm, cx + vt_num_w(t, VT_M, b) / 2 + (int)(6 * u),
+                            y + t->dig[VT_M][0].h - pm->h - (int)(2 * u), s->place == 1 ? green : amber, VT_LEFT);
+                }
+                y += t->dig[VT_M][0].h;
+            }
+            if (s->kind == VG_DELIVER && !s->done)
+                vt_draw(out, W, H, &t->word[VT_S][s->carrying ? VT_W_TODROP : VT_W_TOFIND], cx, y, white, VT_CENTER);
+            /* the countdown */
+            if (s->clock < 0) {
+                int n = (int)ceilf(-s->clock);
+                snprintf(b, sizeof b, "%d", n);
+                vt_num(out, W, H, t, VT_L, b, cx, H / 2 - t->dig[VT_L][0].h, amber, VT_CENTER);
+            }
+        }
+        /* a banner, a moment */
+        if (s->banner >= 0 && s->banner < VT_WORDS && (s->banner_t < 1.6f || s->done)) {
+            const vt_mask_t *m = &t->word[VT_L][s->banner];
+            uint16_t c = s->banner == VT_W_CRASH || s->banner == VT_W_LOST ? red : amber;
+            vt_draw(out, W, H, m, W / 2, H / 2 - (int)(52 * u), c, VT_CENTER);
+        } else if (s->stall && !s->crashed) {
+            vt_draw(out, W, H, &t->word[VT_M][VT_W_STALL], W / 2, (int)(64 * u), amber, VT_CENTER);
+        } else if (s->agl_m < 12 && !s->crashed && s->kind != VG_DELIVER) {
+            vt_draw(out, W, H, &t->word[VT_M][VT_W_LOW], W / 2, (int)(64 * u), amber, VT_CENTER);
+        }
+        /* the arrow to the next target, at the edge when it is off the frame */
+        if (s->target && !s->done) {
+            float ax, ay;
+            float m = 26 * u;
+            if (s->target_on) {
+                ax = s->tx;
+                ay = s->ty - 16 * u;
+            } else {
+                /* from the centre along the direction, to the frame's edge */
+                float cx = (float)W * 0.5f, cy = (float)H * 0.5f;
+                /* below the top's numbers, inside the thumbs' sides */
+                float top_m = 50 * u;
+                float kx = s->tdx != 0 ? ((s->tdx > 0 ? (float)W - m - 20 * u : m) - cx) / s->tdx : 1e9f;
+                float ky = s->tdy != 0 ? ((s->tdy > 0 ? (float)H - m : top_m) - cy) / s->tdy : 1e9f;
+                float k = kx < ky ? kx : ky;
+                ax = cx + s->tdx * k;
+                ay = cy + s->tdy * k;
+            }
+            if (s->target_on) arrow(out, W, H, ax, ay, 0, 1, 6 * u, amber);
+            else arrow(out, W, H, ax, ay, s->tdx, s->tdy, 7 * u, amber);
+            snprintf(b, sizeof b, "%d", (int)(s->tdist + 0.5f));
+            float lx = ax - s->tdx * 14 * u, ly = ay - s->tdy * 14 * u - (float)t->dig[VT_S][0].h * 0.5f;
+            if (s->target_on) ly = ay - 12 * u - (float)t->dig[VT_S][0].h;
+            vt_num(out, W, H, t, VT_S, b, (int)lx, (int)ly, white, VT_CENTER);
+        }
     }
     /* the throttle */
     {
@@ -243,18 +303,9 @@ void vh_draw(const vh_layout_t *L, const vh_state_t *s, uint16_t *out)
         float kx = bx + s->stick_x * r, ky = by - s->stick_y * r;
         ring(out, W, H, kx, ky, 0, 9.0f * u, white, s->stick_on ? 22 : 8);
     }
-    /* warnings */
-    if (s->crashed) {
-        const char *t = "!!!";
-        vh_text(out, W, H, (W - vh_text_w(t, sc * 3)) / 2, H / 2 - 30 * sc, sc * 3, t, red);
-    } else if (s->stall) {
-        const char *t = "STALL";
-        vh_text(out, W, H, (W - vh_text_w(t, sc * 2)) / 2, (int)(40 * u), sc * 2, t, amber);
-    }
     /* the measurement */
     if (s->fps10 > 0) {
         snprintf(b, sizeof b, "%d.%d FPS %dX%d", s->fps10 / 10, s->fps10 % 10, s->res_w, s->res_h);
-        vh_text(out, W, H, (W - vh_text_w(b, sc)) / 2, H - (int)(12 * u), sc, b, white);
+        vh_text(out, W, H, (W - vh_text_w(b, 1)) / 2, H - (int)(10 * u), 1, b, white);
     }
-    if (s->world) vh_text(out, W, H, x, y + 18 * sc, sc, s->world, white);
 }

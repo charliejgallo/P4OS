@@ -118,8 +118,15 @@ void vf_step(vf_plane_t *pl, const vw_world_t *w, float dt)
     turn2(pl->r, pl->u, -roll * dt);       /* the right wing towards down */
     turn2(pl->f, pl->u, pitch * dt);       /* the nose towards up */
     /* the bank turns it: the lift leans with the wings */
-    float v = pl->v < 20.0f ? 20.0f : pl->v;
-    float turn = G * (-pl->r[2]) / v * 1.25f;
+    /* tan(bank) from the axes, kept finite near the vertical; an arcade's
+     * quick turn: about 30 degrees a second at 60 of bank (a real plane's
+     * physics gave 7, and circles of 750 m) */
+    float v = pl->v < 25.0f ? 25.0f : pl->v;
+    float uz = pl->u[2] > 0.35f ? pl->u[2] : 0.35f;
+    float tb = -pl->r[2] / uz;
+    float turn = G * tb / v * 2.6f;
+    if (turn > 0.9f) turn = 0.9f;
+    if (turn < -0.9f) turn = -0.9f;
     float ff = sqrtf(pl->f[0] * pl->f[0] + pl->f[1] * pl->f[1]);
     turn *= ff;
     yaw_world(pl->f, -turn * dt);
@@ -241,4 +248,37 @@ void vf_autopilot(vf_plane_t *pl, const vw_world_t *w, float t)
     if (pl->in_y > 1) pl->in_y = 1;
     if (pl->in_y < -1) pl->in_y = -1;
     pl->in_thr = pl->pitch > 0.15f ? 0.9f : 0.62f;
+}
+
+void vf_autopilot_to(vf_plane_t *pl, const vw_world_t *w, const float target[3])
+{
+    float dx = target[0] - pl->p[0], dy = target[1] - pl->p[1];
+    if (dx > VW_SIZE / 2) dx -= VW_SIZE;
+    if (dx < -VW_SIZE / 2) dx += VW_SIZE;
+    if (dy > VW_SIZE / 2) dy -= VW_SIZE;
+    if (dy < -VW_SIZE / 2) dy += VW_SIZE;
+    float dh = atan2f(dy, dx) - pl->heading;
+    while (dh > 3.14159f) dh -= 6.28318f;
+    while (dh < -3.14159f) dh += 6.28318f;
+    float want_bank = -dh * 2.2f;
+    if (want_bank > 1.0f) want_bank = 1.0f;
+    if (want_bank < -1.0f) want_bank = -1.0f;
+    pl->in_x = (want_bank - pl->bank) * 2.0f;
+    float dist = sqrtf(dx * dx + dy * dy);
+    float want_z = target[2];
+    for (int i = 1; i <= 3; i++) {
+        float d = (float)i * 40.0f;
+        float h = vw_height(w, vw_wrap(pl->p[0] + pl->f[0] * d), vw_wrap(pl->p[1] + pl->f[1] * d)) + 18.0f;
+        if (h > want_z) want_z = h;
+    }
+    float want_pitch = atan2f(want_z - pl->p[2], dist > 60.0f ? dist : 60.0f);
+    if (want_pitch > 0.5f) want_pitch = 0.5f;
+    if (want_pitch < -0.45f) want_pitch = -0.45f;
+    float cb = cosf(pl->bank);
+    pl->in_y = (want_pitch - pl->pitch) * 3.0f / (cb > 0.3f ? cb : 0.3f) + fabsf(sinf(pl->bank)) * 0.4f;
+    if (pl->in_x > 1) pl->in_x = 1;
+    if (pl->in_x < -1) pl->in_x = -1;
+    if (pl->in_y > 1) pl->in_y = 1;
+    if (pl->in_y < -1) pl->in_y = -1;
+    pl->in_thr = 0.85f;
 }

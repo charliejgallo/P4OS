@@ -1,5 +1,6 @@
 idf_component_register(
     SRCS "vuelo.c" "vu_world.c" "vu_render.c" "vu_plane.c" "vu_flight.c" "vu_hud.c" "vu_mem.c"
+         "vu_game.c" "vu_marks.c" "vu_text.c" "vu_snd.c" "vu_menu.c"
     INCLUDE_DIRS "."
     REQUIRES lvgl
 )

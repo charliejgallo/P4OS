@@ -47,3 +47,5 @@ void vf_pose(const vf_plane_t *pl, vp_pose_t *pose);
 /* Flies by itself (the demo and the board's measurement): turns gently,
  * follows the ground at a height, sweeps over the world */
 void vf_autopilot(vf_plane_t *pl, const vw_world_t *w, float t);
+/* Flies towards a point (the simulator's tests of the missions) */
+void vf_autopilot_to(vf_plane_t *pl, const vw_world_t *w, const float target[3]);
