@@ -1,0 +1,138 @@
+/*
+ * P4OS - /api/154: the C6's 802.15.4 radio (components/aos_154,
+ * docs/plan/ZIGBEE.md), for the portal and for scripts.
+ *
+ *   GET  /api/154                  the radio's state and every channel's last
+ *                                  measure (energy in dBm, frames heard)
+ *   POST /api/154/hello            asks the C6 how it is (the answer shows in
+ *                                  the state a moment later)
+ *   POST /api/154/scan             {"first": 11, "last": 26, "dwell": 200}
+ *   POST /api/154/sniff            {"channel": 15, "pcap": true}: listens on
+ *                                  it; pcap writes a capture to the card's
+ *                                  /zigbee, for Wireshark
+ *   POST /api/154/stop
+ *   POST /api/154/unguard          lets the radio on again after the C6's
+ *                                  guard kept it off
+ *   GET  /api/154/frames?from=N    the frames kept from N on (200 at most),
+ *                                  each with its bytes in hex
+ */
+#include "aos_portal_154.h"
+#include "aos_154.h"
+#include "aos_154_proto.h"
+#include "aos_hal.h"
+#include "cJSON.h"
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define FRAMES_MAX 200
+
+static void send_cjson(aos_httpd_req_t *r, int status, cJSON *o)
+{
+    char *s = cJSON_PrintUnformatted(o);
+    aos_httpd_send_json(r, status, s ? s : "{}");
+    free(s);
+    cJSON_Delete(o);
+}
+
+static const char *STATE[] = { "idle", "scanning", "sniffing" };
+
+static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
+{
+    aos_154_info_t in;
+    aos_154_info(&in);
+    cJSON *o = cJSON_CreateObject();
+    cJSON_AddBoolToObject(o, "ok", ok);
+    if (error) cJSON_AddStringToObject(o, "error", error);
+    cJSON_AddBoolToObject(o, "reachable", in.reachable);
+    cJSON_AddNumberToObject(o, "proto", in.proto);
+    cJSON_AddStringToObject(o, "state", in.state < 3 ? STATE[in.state] : "?");
+    cJSON_AddNumberToObject(o, "channel", in.channel);
+    cJSON_AddBoolToObject(o, "guarded", in.guarded);
+    cJSON_AddNumberToObject(o, "faults", in.faults);
+    cJSON_AddNumberToObject(o, "err", in.err);
+    cJSON_AddNumberToObject(o, "frames", in.frames);
+    cJSON_AddNumberToObject(o, "dropped", in.dropped);
+    cJSON_AddNumberToObject(o, "last", in.last_seq);
+    cJSON_AddNumberToObject(o, "scan_seq", in.scan_seq);
+    cJSON_AddStringToObject(o, "pcap", in.pcap);
+    cJSON_AddNumberToObject(o, "pcap_frames", in.pcap_frames);
+    cJSON_AddStringToObject(o, "c6", aos_hal_net_coprocessor_fw());
+    aos_154_chan_t ch[16];
+    aos_154_channels(ch);
+    uint32_t now = (uint32_t)aos_hal_uptime_ms();
+    cJSON *a = cJSON_AddArrayToObject(o, "channels");
+    for (int i = 0; i < 16; i++) {
+        cJSON *c = cJSON_CreateObject();
+        cJSON_AddNumberToObject(c, "ch", AOS_154_CH_FIRST + i);
+        if (ch[i].when_ms) {
+            cJSON_AddNumberToObject(c, "ed_max", ch[i].ed_max);
+            cJSON_AddNumberToObject(c, "ed_avg", ch[i].ed_avg);
+            cJSON_AddNumberToObject(c, "frames", ch[i].frames);
+            cJSON_AddNumberToObject(c, "bytes", ch[i].bytes);
+            cJSON_AddNumberToObject(c, "dwell", ch[i].dwell_ms);
+            cJSON_AddNumberToObject(c, "age_ms", now - ch[i].when_ms);
+        }
+        cJSON_AddItemToArray(a, c);
+    }
+    send_cjson(r, ok ? 200 : 400, o);
+}
+
+static void api_frames(aos_httpd_req_t *r)
+{
+    long from = aos_httpd_query_int(r, "from", 1);
+    aos_154_frame_t *f = malloc(sizeof *f * FRAMES_MAX);
+    if (!f) { aos_httpd_send_json(r, 503, "{\"ok\":false,\"error\":\"no memory\"}"); return; }
+    int n = aos_154_frames(from < 1 ? 1 : (uint32_t)from, f, FRAMES_MAX);
+    aos_154_info_t in;
+    aos_154_info(&in);
+    cJSON *o = cJSON_CreateObject();
+    cJSON_AddNumberToObject(o, "last", in.last_seq);
+    cJSON *a = cJSON_AddArrayToObject(o, "frames");
+    char hex[2 * 127 + 1];
+    for (int i = 0; i < n; i++) {
+        cJSON *x = cJSON_CreateObject();
+        cJSON_AddNumberToObject(x, "seq", f[i].seq);
+        cJSON_AddNumberToObject(x, "t", (double)f[i].t_us);
+        cJSON_AddNumberToObject(x, "rssi", f[i].rssi);
+        cJSON_AddNumberToObject(x, "lqi", f[i].lqi);
+        cJSON_AddNumberToObject(x, "ch", f[i].channel);
+        for (int k = 0; k < f[i].len; k++) snprintf(hex + 2 * k, 3, "%02x", f[i].data[k]);
+        hex[2 * f[i].len] = '\0';
+        cJSON_AddStringToObject(x, "hex", hex);
+        cJSON_AddItemToArray(a, x);
+    }
+    free(f);
+    send_cjson(r, 200, o);
+}
+
+static long num(cJSON *b, const char *k, long def)
+{
+    cJSON *v = cJSON_GetObjectItem(b, k);
+    return cJSON_IsNumber(v) ? (long)v->valuedouble : def;
+}
+
+bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
+{
+    if (strncmp(p, "154", 3) || (p[3] && p[3] != '/')) return false;
+    const char *what = p[3] ? p + 4 : "";
+    bool get = !strcmp(m, "GET"), post = !strcmp(m, "POST");
+    if (get && !what[0]) { api_state(r, true, NULL); return true; }
+    if (get && !strcmp(what, "frames")) { api_frames(r); return true; }
+    if (!post) return false;
+    char *raw = aos_httpd_body_all(r, 512);
+    cJSON *b = raw ? cJSON_Parse(raw) : NULL;
+    free(raw);
+    if (!b) b = cJSON_CreateObject();
+    bool ok;
+    if (!strcmp(what, "hello")) ok = aos_154_hello();
+    else if (!strcmp(what, "scan")) ok = aos_154_scan((int)num(b, "first", 11), (int)num(b, "last", 26), (int)num(b, "dwell", 200));
+    else if (!strcmp(what, "sniff")) ok = aos_154_sniff((int)num(b, "channel", 0), cJSON_IsTrue(cJSON_GetObjectItem(b, "pcap")));
+    else if (!strcmp(what, "stop")) ok = aos_154_stop();
+    else if (!strcmp(what, "unguard")) ok = aos_154_unguard();
+    else { cJSON_Delete(b); return false; }
+    cJSON_Delete(b);
+    api_state(r, ok, ok ? NULL : "the C6 did not take it");
+    return true;
+}

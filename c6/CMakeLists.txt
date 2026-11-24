@@ -6,7 +6,8 @@
 # tools/build_c6.sh; the P4 installs it into the C6 (docs/C6.md).
 cmake_minimum_required(VERSION 3.5)
 # the version the P4 shows for an image (Settings, Update): esp_hosted's, which
-# is what matters to the P4, not this repo's git describe
-set(PROJECT_VER "3.0.9")
+# is what matters to the P4, not this repo's git describe; after the dash,
+# P4OS's own additions (154.1: the 802.15.4 radio, AOS_154_PROTO 1)
+set(PROJECT_VER "3.0.9-154.1")
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(p4os_c6)

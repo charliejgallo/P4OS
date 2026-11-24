@@ -100,6 +100,10 @@ CONFIG_ESP_HOSTED_DFLT_TASK_FROM_SPIRAM=y
 # (the phone); keys in NVS; NimBLE's memory in PSRAM. AmoledOS' settings,
 # with the 4.2 feature set Espressif's hosted examples use.
 CONFIG_ESP_HOSTED_HOST_FEAT_BT=y
+# The C6's 802.15.4 radio (components/aos_154, docs/plan/ZIGBEE.md) travels
+# on esp_hosted's peer_data channel: three messages come back from the C6.
+CONFIG_ESP_HOSTED_HOST_FEAT_PEER_DATA=y
+CONFIG_ESP_HOSTED_HOST_FEAT_PEER_DATA_MAX_CUSTOM_MSG_HANDLERS=4
 CONFIG_BT_ENABLED=y
 CONFIG_BT_CONTROLLER_DISABLED=y
 CONFIG_BT_BLUEDROID_ENABLED=n

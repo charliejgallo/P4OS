@@ -24,3 +24,10 @@ CONFIG_ESP_WIFI_NVS_ENABLED=y
 CONFIG_ESP_DEFAULT_CPU_FREQ_MHZ_160=y
 CONFIG_ESP_CACHE_MALLOC=y
 CONFIG_COMPILER_OPTIMIZATION_PERF=y
+
+# P4OS: the 802.15.4 radio lent to the P4 over esp_hosted's peer_data channel
+# (main/radio154.c, docs/plan/ZIGBEE.md), sharing the antenna with the Wi-Fi
+# and the BLE by Espressif's software coexistence
+CONFIG_ESP_HOSTED_CP_FEAT_PEER_DATA=y
+CONFIG_IEEE802154_ENABLED=y
+CONFIG_ESP_COEX_SW_COEXIST_ENABLE=y

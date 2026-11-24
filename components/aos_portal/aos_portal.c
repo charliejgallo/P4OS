@@ -69,6 +69,7 @@
 #include "aos_portal_bench.h"
 #include "aos_portal_eth.h"
 #include "aos_portal_radio.h"
+#include "aos_portal_154.h"
 #include "aos_portal_live.h"
 #include "aos_portal_store.h"
 #include "aos_portal_backup.h"
@@ -1737,6 +1738,7 @@ static void handler(aos_httpd_req_t *r)
     else if (post && !strncmp(p, "serial/", 7)) api_serial_post(r, p + 7);
     else if (aos_portal_bench(r, m, p)) {}
     else if (aos_portal_radio(r, m, p)) {}
+    else if (aos_portal_154(r, m, p)) {}
     else if (aos_portal_live(r, m, p)) {}
     else if (aos_portal_store(r, m, p)) {}
     else if (aos_portal_backup(r, m, p)) {}

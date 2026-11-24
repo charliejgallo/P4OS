@@ -182,6 +182,7 @@ add_executable(p4os_sim
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_bench.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_radio.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_154.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_live.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_store.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/aos_portal_backup.c
@@ -217,6 +218,8 @@ add_executable(p4os_sim
     jpeg_sim.c
     usb_sim.c
     ble_sim.c
+    aos_154_link_sim.c
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_154/aos_154.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_hid_keys.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_http.c
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_hal/aos_tcp.c
@@ -279,6 +282,7 @@ target_include_directories(p4os_sim PRIVATE
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_io/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_portal/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_store/include
+    ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_154/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_backup/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/aos_ssh/include
     ${CMAKE_CURRENT_SOURCE_DIR}/../components/monocypher/include

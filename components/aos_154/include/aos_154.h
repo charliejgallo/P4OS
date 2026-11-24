@@ -1,0 +1,86 @@
+/*
+ * P4OS - the 802.15.4 radio (Zigbee, Thread), the C6's, lent to the P4
+ * (docs/plan/ZIGBEE.md).
+ *
+ * The C6 does the Wi-Fi and the BLE for the P4 and, since its firmware
+ * 3.0.9-154.1, listens on 802.15.4 when asked: a scan of the sixteen
+ * channels' energy and traffic, and every frame heard on one (a sniffer).
+ * What they say to each other is in aos_154_proto.h; this is the P4's side,
+ * for the screens and the portal.
+ *
+ * A C6 with an older firmware does not answer: aos_154_info() says
+ * 'reachable' false and the screens offer the C6's update.
+ *
+ * A capture goes to the card as pcap (Wireshark reads it: the link type is
+ * IEEE 802.15.4 TAP, so each frame keeps its channel, RSSI and LQI) in
+ * <card>/zigbee/, and the last AOS_154_KEEP frames stay in PSRAM for the
+ * screens, numbered from 1.
+ */
+#pragma once
+
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define AOS_154_KEEP 4096
+
+typedef struct {
+    bool     reachable;         /* the C6 answered since the board started */
+    uint8_t  proto;             /* AOS_154_PROTO of the C6's firmware */
+    uint8_t  state;             /* AOS_154_IDLE, _SCANNING, _SNIFFING */
+    uint8_t  channel;
+    bool     guarded;           /* the C6 fell over with the radio on: it keeps it off */
+    uint8_t  faults;
+    int8_t   err;               /* the C6's answer to the last request, 0 when it went well */
+    uint32_t frames;            /* heard on this sniff, as the C6 counts them */
+    uint32_t dropped;           /* lost in the C6, its buffer full */
+    uint32_t last_seq;          /* the newest frame kept here, 0 for none */
+    uint32_t scan_seq;          /* goes up with every channel a scan measures */
+    char     pcap[128];         /* the capture being written, "" for none */
+    uint32_t pcap_frames;
+} aos_154_info_t;
+
+typedef struct {
+    uint8_t  channel;
+    int8_t   ed_max, ed_avg;    /* dBm */
+    uint16_t frames, bytes;     /* heard while listening */
+    uint16_t dwell_ms;
+    uint32_t when_ms;           /* aos_hal_uptime_ms() when it came; 0: never measured */
+} aos_154_chan_t;
+
+typedef struct {
+    uint32_t seq;
+    uint64_t t_us;              /* the C6's clock */
+    int8_t   rssi;
+    uint8_t  lqi, channel, len;
+    uint8_t  data[127];         /* the PSDU, FCS included */
+} aos_154_frame_t;
+
+/* Asks the C6 how it is; the answer comes by itself (aos_154_info). */
+bool aos_154_hello(void);
+/* Each channel from first to last (11..26), dwell_ms on each. */
+bool aos_154_scan(int first, int last, int dwell_ms);
+/* The last measure of every channel, 11..26 at [0..15]. */
+void aos_154_channels(aos_154_chan_t out[16]);
+/* Listens on one channel; 'pcap' writes what it hears to the card too. */
+bool aos_154_sniff(int channel, bool pcap);
+bool aos_154_stop(void);
+/* After the C6 kept the radio off by its guard: lets it on again. */
+bool aos_154_unguard(void);
+void aos_154_info(aos_154_info_t *out);
+/* The frames kept, from 'from' (a seq) on, up to max; how many. */
+int  aos_154_frames(uint32_t from, aos_154_frame_t *out, int max);
+
+/* ---- for the link (aos_154_link_p4.c, sim/aos_154_link_sim.c) ---- */
+bool aos_154_link_send(const uint8_t *data, size_t len);
+bool aos_154_link_open(void);
+/* what the C6 sent, from the link's task */
+void aos_154_on_msg(uint32_t id, const uint8_t *data, size_t len);
+
+#ifdef __cplusplus
+}
+#endif

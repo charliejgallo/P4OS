@@ -1,0 +1,115 @@
+# P4OS — La placa como hub Zigbee / Thread
+
+Plan del pedido G25 (`docs/internal/PEDIDOS-APPS-2026-11.md`): **una de las
+dos estrellas de la versión que sigue a la 0.33.0**, junto con los íconos
+nuevos (`ICONOS.md`). Empezado el 2026-11-24.
+
+## La idea
+
+El ESP32-C6 de la placa tiene la radio 802.15.4 (la de Zigbee y Thread) y
+hasta ahora sólo hacía de Wi-Fi y BLE para el P4 (esp_hosted, `docs/C6.md`).
+Con un firmware propio en el C6 que preste también esa radio, la placa sirve
+para:
+
+1. **El taller:** escanear los 16 canales (energía y tráfico, el Wi-Fi de
+   al lado), un sniffer con decodificación y captura para Wireshark.
+2. **Probar equipos:** unir sensores y lámparas como coordinador, ver sus
+   mensajes, atributos, batería y señal, mandarles comandos; puente a MQTT
+   o Home Assistant.
+3. **Emular un equipo** (pedido del usuario): unirse a una red Zigbee
+   existente como sensor, botón, enchufe o módulo de relés, para probar el
+   lado del coordinador. Lo mismo con Thread.
+
+Un papel a la vez. Sólo en redes del usuario.
+
+## Cómo hablan el P4 y el C6
+
+No hay un UART entre el P4 y el C6 en esta placa (sólo el SDIO, y el UART
+del C6 sale afuera por J7). Los ejemplos de Espressif para Zigbee y Thread
+con un P4 (`examples/zigbee`, `examples/openthread` de esp_hosted 3.0.9)
+usan el C6 como "RCP" y le piden **un UART dedicado** para los datos de la
+radio, y además lo dejan sin Wi-Fi: no sirven tal cual.
+
+Lo que sí trae esp_hosted 3.0.9 es **peer_data**: mensajes propios entre el
+P4 y el C6 por el mismo SDIO, un número y hasta 8166 bytes. Por ahí va
+todo: el P4 pide (`AOS_154_MSG_CMD`) y el C6 contesta y manda lo que oye.
+El protocolo está en `components/aos_154/include/aos_154_proto.h`.
+
+## Etapa 1: escáner y sniffer (hecha el 2026-11-24)
+
+- **El C6** (`c6/main/radio154.c`, firmware `3.0.9-154.1`): el driver de la
+  radio de la IDF (`esp_ieee802154`) sin pila Zigbee ni Thread. Escaneo:
+  por canal, 8 medidas de energía de 1 ms y después escucha el resto del
+  tiempo pedido, contando paquetes. Sniffer: modo promiscuo en un canal; la
+  interrupción copia cada paquete a un anillo de 8 KB y una tarea lo manda
+  al P4 cada 40 ms, con el estado (paquetes, perdidos) cada segundo. Comparte
+  la antena con el Wi-Fi y el BLE por la coexistencia de Espressif.
+- **La guarda:** la radio arranca apagada siempre y sólo la prende un pedido
+  del P4. Si el C6 se cae dos veces seguidas con la radio prendida, en el
+  arranque siguiente la deja apagada hasta que el P4 diga `UNGUARD`. Es para
+  que esto nunca deje la placa sin Wi-Fi: un C6 que no habla con el P4 sólo
+  se recupera con el cable en J7 (`docs/C6.md`).
+- **El P4** (`components/aos_154`): guarda los últimos 4096 paquetes en
+  PSRAM (~590 KB, cuando se escucha por primera vez) y escribe la captura en
+  `<tarjeta>/zigbee/captura-<fecha>.pcap` con una tarea propia. El formato es
+  **IEEE 802.15.4 TAP** (linktype 283): cada paquete con su canal, RSSI y
+  LQI, y Wireshark lo abre directo.
+- **El FCS:** la radio del C6 verifica el FCS y en esos dos bytes deja el
+  RSSI y el LQI (lo dice el driver de la IDF). El P4 lo recalcula al
+  recibir, o Wireshark marcaría todos los paquetes como dañados.
+- **El portal:** `/api/154` (estado y canales), `/api/154/scan`, `/sniff`,
+  `/stop`, `/unguard`, `/hello`, `/api/154/frames?from=N`
+  (`components/aos_portal/aos_portal_154.c`).
+- **El simulador:** un C6 falso (`sim/aos_154_link_sim.c`) con un barrio
+  inventado: una red Zigbee en el 15, una Thread en el 25 y un Wi-Fi que
+  sube la energía del 16 al 19. `P4_SIM_154=0` hace de C6 viejo, que no
+  contesta.
+
+### Medido en la placa (2026-11-24)
+
+- El C6 nuevo se instaló desde el P4 como siempre y la placa volvió con
+  Wi-Fi; el P4 nuevo con el C6 viejo también anda (el pedido se rechaza y
+  nada más).
+- **Escaneo** de los 16 canales: 250 ms por canal en ~5 s; con 2 s por
+  canal se encontró la red Zigbee del usuario (17 paquetes en 2 s en un
+  canal, nada en los demás). Más energía en los canales 16 a 19: el Wi-Fi.
+- **Sniffer:** 348 paquetes en 30 s (datos, acuses, comandos); en otra
+  prueba 918 seguidos, **todos con el FCS bien** y ninguno perdido, la
+  captura completa en la tarjeta.
+- **El Wi-Fi con la radio prendida:** bajando 8 MB del portal mientras se
+  escucha, 0,31 a 0,40 MB/s; con la radio apagada 0,31 a 0,44; con el C6
+  anterior 0,40 a 0,47. Ese día la red andaba lenta (en octubre eran 0,8 a
+  1,3 MB/s) y el ping iba de 5 a 80 ms: la diferencia está dentro del ruido.
+  **Falta medirlo mejor**, alternando varias veces.
+
+## Etapa 2: la pantalla (lo que sigue)
+
+Una app del sistema, "Zigbee" (o "Radio 802.15.4"), con:
+
+- **Canales:** las 16 barras de energía y de tráfico, con los canales de
+  Wi-Fi 1, 6 y 11 dibujados encima (para elegir el canal de una red nueva).
+- **Sniffer:** la lista de lo que se oye, decodificado: el tipo de trama de
+  802.15.4 (beacon, datos, acuse, comando), PAN y direcciones; encima, la
+  capa de red de Zigbee (NWK: datos o comando, origen y destino, radio,
+  seguridad) o 6LoWPAN de Thread. Filtros por PAN y por dirección, y un
+  resumen por dispositivo (cuántos paquetes, RSSI).
+- **Captura:** empezar y parar, con el archivo en `/zigbee` y su tamaño.
+- **La página del portal** con lo mismo, y el `.pcap` para bajar.
+
+## Etapa 3 y siguientes: unirse a redes (a decidir)
+
+Para ser coordinador, router o dispositivo hace falta una pila Zigbee
+(`esp-zigbee-lib`) o Thread (OpenThread). Dos caminos:
+
+- **La pila en el C6** ("Zigbee en el SoC", que el C6 soporta), con el P4
+  pidiendo por peer_data cosas de alto nivel: abrir la red, la lista de
+  equipos, leer y escribir atributos. Lo más simple, pero el C6 tiene
+  ~240 KB de RAM libres con el Wi-Fi y el BLE, y la pila ocupa bastante:
+  hay que medir; quizá sin BLE mientras se usa.
+- **La pila en el P4** con el C6 como RCP, llevando el protocolo spinel por
+  peer_data en vez del UART dedicado. La RAM sobra, pero `esp-zigbee-lib` es
+  cerrada y espera un UART: puede no dejarse.
+
+El primer paso es probar el primer camino con el ejemplo de un sensor de
+Espressif en el C6. La emulación de equipos (un sensor de temperatura, un
+módulo de relés de 1 a 4 canales) sale de ahí casi sola.
