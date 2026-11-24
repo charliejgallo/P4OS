@@ -1,0 +1,15 @@
+# P4OS: the C6's firmware with Espressif's Zigbee stack on request
+# (main/zigbee_test.c, docs/plan/ZIGBEE.md, stage 3), a measuring build:
+#
+#   cd c6 && idf.py -B build-zigbee -D SDKCONFIG=build-zigbee/sdkconfig \
+#       -D "SDKCONFIG_DEFAULTS=sdkconfig.defaults;sdkconfig.zigbee" build
+#
+# It has to fit the C6's slot: 1.5 MB with the factory partition table
+# (a board's C6 keeps the table it came with; changing it takes the cable on
+# J7). With the stack, -O2 makes 1.66 MB; -Os and no error names, 1.56 MB.
+CONFIG_ZB_ENABLED=y
+CONFIG_ZB_ZCZR=y
+CONFIG_ZB_RADIO_NATIVE=y
+CONFIG_COMPILER_OPTIMIZATION_PERF=n
+CONFIG_COMPILER_OPTIMIZATION_SIZE=y
+CONFIG_ESP_ERR_TO_NAME_LOOKUP=n

@@ -19,11 +19,21 @@
  *   STOP                           the radio off; a STATUS
  *   UNGUARD                        lets the radio on again after the guard
  *                                  took it off (below)
+ *   ZB_START u8 channel            (protocol 3, a measuring step) Espressif's
+ *                                  Zigbee stack as a coordinator forming a
+ *                                  network of its own on that channel, closed
+ *                                  to joining; the radio is the stack's
+ *                                  until ZB_STOP
+ *   ZB_STOP
+ *   LOG u8 on                      (protocol 3) the C6's log lines to the P4,
+ *                                  as LOG messages, while on: its own
+ *                                  serial port is on J7, out of reach
  *
  * C6 -> P4:
  *
  *   STATUS  aos_154_status_t
  *   SCAN    aos_154_scan_t, one channel
+ *   LOG     one or more log lines of the C6, text
  *   FRAMES  records one after another, each aos_154_rec_t and then its
  *           frame: the PSDU as the radio gave it (len bytes). The radio has
  *           checked the FCS and put the RSSI and the LQI in its two bytes;
@@ -39,16 +49,22 @@
 
 #include <stdint.h>
 
-#define AOS_154_PROTO       2           /* 2: the status says the C6's free memory */
+#define AOS_154_PROTO       3           /* 2: the status says the C6's free memory;
+                                           3: Espressif's Zigbee stack on request */
 
 #define AOS_154_MSG_CMD     0x15400001u
 #define AOS_154_MSG_STATUS  0x15400081u
 #define AOS_154_MSG_SCAN    0x15400082u
 #define AOS_154_MSG_FRAMES  0x15400083u
+#define AOS_154_MSG_LOG     0x15400084u
 
-enum { AOS_154_OP_HELLO = 1, AOS_154_OP_SCAN, AOS_154_OP_SNIFF, AOS_154_OP_STOP, AOS_154_OP_UNGUARD };
+enum { AOS_154_OP_HELLO = 1, AOS_154_OP_SCAN, AOS_154_OP_SNIFF, AOS_154_OP_STOP, AOS_154_OP_UNGUARD,
+       AOS_154_OP_ZB_START, AOS_154_OP_ZB_STOP, AOS_154_OP_LOG };
 
-enum { AOS_154_IDLE = 0, AOS_154_SCANNING, AOS_154_SNIFFING };
+enum { AOS_154_IDLE = 0, AOS_154_SCANNING, AOS_154_SNIFFING, AOS_154_ZIGBEE };
+
+/* the stack's state in the status (protocol 3) */
+enum { AOS_154_ZB_OFF = 0, AOS_154_ZB_STARTING, AOS_154_ZB_FORMED, AOS_154_ZB_FAILED };
 
 #define AOS_154_CH_FIRST    11
 #define AOS_154_CH_LAST     26
@@ -63,10 +79,14 @@ typedef struct __attribute__((packed)) {
     uint32_t uptime_s;          /* the C6's */
     int8_t   err;               /* the last operation's, 0 when it went well */
     uint8_t  faults;            /* restarts by a fault with the radio on, in a row */
-    uint16_t reserved;
+    uint8_t  zb;                /* AOS_154_ZB_* (protocol 3; 0 before) */
+    uint8_t  zb_channel;
     /* since protocol 2 (a protocol 1 status ends above: AOS_154_STATUS_V1) */
     uint32_t heap_free;         /* the C6's free internal memory, bytes */
     uint32_t heap_min;          /* the least it had since it started */
+    /* since protocol 3 */
+    uint32_t zb_heap_before;    /* free memory when the stack was asked for */
+    uint32_t zb_heap_after;     /* and when its network was formed */
 } aos_154_status_t;
 
 #define AOS_154_STATUS_V1   20          /* the bytes of a protocol 1 status */

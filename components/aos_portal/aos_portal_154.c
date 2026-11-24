@@ -18,6 +18,13 @@
  *   GET  /api/154/devices          every device heard: PAN, short and long
  *                                  address, channel, frames, RSSI, when
  *   POST /api/154/devices/clear    forgets them
+ *   POST /api/154/zigbee           {"on": true, "channel": 26}: Espressif's
+ *                                  Zigbee stack on the C6, a coordinator with
+ *                                  a network of its own, closed (a measuring
+ *                                  step: the state says the C6's memory before
+ *                                  and after); {"on": false} stops it
+ *   POST /api/154/c6log            {"on": true}: the C6's log lines into the
+ *                                  board's log, as "c6: ..."
  */
 #include "aos_portal_154.h"
 #include "aos_154.h"
@@ -39,7 +46,8 @@ static void send_cjson(aos_httpd_req_t *r, int status, cJSON *o)
     cJSON_Delete(o);
 }
 
-static const char *STATE[] = { "idle", "scanning", "sniffing" };
+static const char *STATE[] = { "idle", "scanning", "sniffing", "zigbee" };
+static const char *ZB[] = { "off", "starting", "formed", "failed" };
 
 static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
 {
@@ -50,7 +58,7 @@ static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
     if (error) cJSON_AddStringToObject(o, "error", error);
     cJSON_AddBoolToObject(o, "reachable", in.reachable);
     cJSON_AddNumberToObject(o, "proto", in.proto);
-    cJSON_AddStringToObject(o, "state", in.state < 3 ? STATE[in.state] : "?");
+    cJSON_AddStringToObject(o, "state", in.state < 4 ? STATE[in.state] : "?");
     cJSON_AddNumberToObject(o, "channel", in.channel);
     cJSON_AddBoolToObject(o, "guarded", in.guarded);
     cJSON_AddNumberToObject(o, "faults", in.faults);
@@ -65,6 +73,13 @@ static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
     if (in.heap_free) {
         cJSON_AddNumberToObject(o, "c6_heap_free", in.heap_free);
         cJSON_AddNumberToObject(o, "c6_heap_min", in.heap_min);
+    }
+    if (in.proto >= 3) {
+        cJSON *z = cJSON_AddObjectToObject(o, "zigbee");
+        cJSON_AddStringToObject(z, "state", in.zb < 4 ? ZB[in.zb] : "?");
+        cJSON_AddNumberToObject(z, "channel", in.zb_channel);
+        cJSON_AddNumberToObject(z, "heap_before", in.zb_heap_before);
+        cJSON_AddNumberToObject(z, "heap_after", in.zb_heap_after);
     }
     aos_154_chan_t ch[16];
     aos_154_channels(ch);
@@ -170,6 +185,9 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
     else if (!strcmp(what, "sniff")) ok = aos_154_sniff((int)num(b, "channel", 0), cJSON_IsTrue(cJSON_GetObjectItem(b, "pcap")));
     else if (!strcmp(what, "stop")) ok = aos_154_stop();
     else if (!strcmp(what, "unguard")) ok = aos_154_unguard();
+    else if (!strcmp(what, "c6log")) ok = aos_154_c6_log(cJSON_IsTrue(cJSON_GetObjectItem(b, "on")));
+    else if (!strcmp(what, "zigbee"))
+        ok = cJSON_IsTrue(cJSON_GetObjectItem(b, "on")) ? aos_154_zigbee_start((int)num(b, "channel", 26)) : aos_154_zigbee_stop();
     else { cJSON_Delete(b); return false; }
     cJSON_Delete(b);
     api_state(r, ok, ok ? NULL : "the C6 did not take it");

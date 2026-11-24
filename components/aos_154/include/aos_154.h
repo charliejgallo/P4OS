@@ -43,6 +43,8 @@ typedef struct {
     char     pcap[128];         /* the capture being written, "" for none */
     uint32_t pcap_frames;
     uint32_t heap_free, heap_min;   /* the C6's free memory (protocol 2), 0 when it does not say */
+    uint8_t  zb, zb_channel;        /* Espressif's Zigbee stack on the C6 (protocol 3): AOS_154_ZB_* */
+    uint32_t zb_heap_before, zb_heap_after;
 } aos_154_info_t;
 
 typedef struct {
@@ -93,6 +95,13 @@ void aos_154_channels(aos_154_chan_t out[16]);
 /* Listens on one channel; 'pcap' writes what it hears to the card too. */
 bool aos_154_sniff(int channel, bool pcap);
 bool aos_154_stop(void);
+/* Espressif's Zigbee stack on the C6, a measuring step (protocol 3): a
+ * coordinator forming a network of its own on 'channel', closed to joining;
+ * the radio is the stack's until aos_154_zigbee_stop(). */
+bool aos_154_zigbee_start(int channel);
+bool aos_154_zigbee_stop(void);
+/* The C6's log lines into the P4's log ("c6: ..."), on or off (protocol 3). */
+bool aos_154_c6_log(bool on);
 /* After the C6 kept the radio off by its guard: lets it on again. */
 bool aos_154_unguard(void);
 void aos_154_info(aos_154_info_t *out);

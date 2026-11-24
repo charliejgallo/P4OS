@@ -16,6 +16,8 @@
  * ring and given back to the driver at once, and the task sends the ring to
  * the P4 every 40 ms, or sooner when it fills.
  */
+#include <stdarg.h>
+#include <stdio.h>
 #include <string.h>
 #include "esp_log.h"
 #include "esp_system.h"
@@ -29,6 +31,7 @@
 #include "eh_cp_feat_peer_data.h"
 #include "aos_154_proto.h"
 #include "radio154.h"
+#include "zigbee_test.h"
 
 static const char *TAG = "radio154";
 
@@ -79,6 +82,50 @@ static void guard_boot(void)
                                  guarded() ? ": it stays off" : "");
 }
 
+/* ---- the log to the P4 ---------------------------------------------------- */
+
+/* While the P4 wants it (LOG 1), every log line also goes into a ring that
+ * the task sends as LOG messages; the line still goes to the serial port
+ * as before. A line written while the ring is being sent (peer_data logs
+ * too) is not taken, or it would feed itself. */
+#define LOGRING 4096
+static char s_log[LOGRING];
+static volatile uint32_t s_log_head, s_log_tail;
+static volatile bool s_log_on, s_log_sending;
+static vprintf_like_t s_log_prev;
+static portMUX_TYPE s_log_mux = portMUX_INITIALIZER_UNLOCKED;
+
+static int log_hook(const char *fmt, va_list ap)
+{
+    va_list copy;
+    va_copy(copy, ap);
+    int r = s_log_prev ? s_log_prev(fmt, ap) : vprintf(fmt, ap);
+    if (s_log_on && !s_log_sending && !xPortInIsrContext()) {
+        char line[160];
+        int n = vsnprintf(line, sizeof line, fmt, copy);
+        if (n > (int)sizeof line - 1) n = sizeof line - 1;
+        portENTER_CRITICAL(&s_log_mux);
+        if (n > 0 && LOGRING - (s_log_head - s_log_tail) >= (uint32_t)n)
+            for (int i = 0; i < n; i++) s_log[s_log_head++ % LOGRING] = line[i];
+        portEXIT_CRITICAL(&s_log_mux);
+    }
+    va_end(copy);
+    return r;
+}
+
+static void log_flush(void)
+{
+    static char out[1024];
+    uint32_t n = 0;
+    portENTER_CRITICAL(&s_log_mux);
+    while (s_log_tail != s_log_head && n < sizeof out) out[n++] = s_log[s_log_tail++ % LOGRING];
+    portEXIT_CRITICAL(&s_log_mux);
+    if (!n) return;
+    s_log_sending = true;
+    eh_cp_feat_peer_data_send(AOS_154_MSG_LOG, (const uint8_t *)out, n);
+    s_log_sending = false;
+}
+
 /* ---- the interrupt's side ------------------------------------------------ */
 
 static void IRAM_ATTR rx_done(uint8_t *frame, esp_ieee802154_frame_info_t *info)
@@ -126,6 +173,8 @@ static void send_status(void)
         .uptime_s = (uint32_t)(esp_timer_get_time() / 1000000), .err = s_err, .faults = s_guard.faults,
         .heap_free = (uint32_t)heap_caps_get_free_size(MALLOC_CAP_8BIT),
         .heap_min = (uint32_t)heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT),
+        .zb = zigbee_test_state(), .zb_channel = s_state == AOS_154_ZIGBEE ? s_channel : 0,
+        .zb_heap_before = zigbee_test_heap_before(), .zb_heap_after = zigbee_test_heap_after(),
     };
     eh_cp_feat_peer_data_send(AOS_154_MSG_STATUS, (const uint8_t *)&st, sizeof st);
 }
@@ -218,7 +267,36 @@ static void scan(uint8_t first, uint8_t last, uint16_t dwell)
 static void run(const cmd_t *c)
 {
     s_err = 0;
+    /* while the Zigbee stack has the radio, only its stop, a hello and the guard */
+    if (s_state == AOS_154_ZIGBEE && c->b[0] != AOS_154_OP_ZB_STOP && c->b[0] != AOS_154_OP_HELLO &&
+        c->b[0] != AOS_154_OP_UNGUARD && c->b[0] != AOS_154_OP_LOG) {
+        s_err = -5;
+        send_status();
+        return;
+    }
     switch (c->b[0]) {
+    case AOS_154_OP_ZB_START:
+        if (c->n < 2 || c->b[1] < AOS_154_CH_FIRST || c->b[1] > AOS_154_CH_LAST) { s_err = -1; break; }
+        if (guarded()) { s_err = -2; break; }
+        if (s_state == AOS_154_SNIFFING) flush();
+        radio_off();
+        s_cb_set = false;               /* the stack registers its own; ours again afterwards */
+        s_guard.on = 1;
+        s_channel = c->b[1];
+        if (zigbee_test_start(s_channel)) s_state = AOS_154_ZIGBEE;
+        else {
+            s_guard.on = 0;
+            s_err = -6;
+        }
+        break;
+    case AOS_154_OP_ZB_STOP:
+        if (s_state == AOS_154_ZIGBEE) {
+            zigbee_test_stop();
+            s_state = AOS_154_IDLE;
+            s_guard.on = 0;
+            s_guard.faults = 0;
+        }
+        break;
     case AOS_154_OP_HELLO:
         break;
     case AOS_154_OP_SCAN:
@@ -250,6 +328,11 @@ static void run(const cmd_t *c)
     case AOS_154_OP_UNGUARD:
         s_guard.faults = 0;
         break;
+    case AOS_154_OP_LOG:
+        if (c->n < 2) { s_err = -1; break; }
+        if (!s_log_prev && c->b[1]) s_log_prev = esp_log_set_vprintf(log_hook);
+        s_log_on = c->b[1] != 0;
+        break;
     default:
         s_err = -1;
     }
@@ -263,8 +346,9 @@ static void task(void *arg)
     for (;;) {
         cmd_t c;
         if (xQueueReceive(s_cmds, &c, pdMS_TO_TICKS(FLUSH_MS)) == pdTRUE) run(&c);
-        if (s_state == AOS_154_SNIFFING) {
-            flush();
+        if (s_log_on) log_flush();
+        if (s_state == AOS_154_SNIFFING || s_state == AOS_154_ZIGBEE) {
+            if (s_state == AOS_154_SNIFFING) flush();
             /* the counters once a second, for the screens */
             if (++ticks >= 1000 / FLUSH_MS) {
                 ticks = 0;

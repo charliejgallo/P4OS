@@ -213,6 +213,26 @@ bool aos_154_stop(void)
     return cmd(b, sizeof b);
 }
 
+bool aos_154_zigbee_start(int channel)
+{
+    if (channel < AOS_154_CH_FIRST || channel > AOS_154_CH_LAST) return false;
+    pcap_stop();
+    uint8_t b[] = { AOS_154_OP_ZB_START, (uint8_t)channel };
+    return cmd(b, sizeof b);
+}
+
+bool aos_154_zigbee_stop(void)
+{
+    uint8_t b[] = { AOS_154_OP_ZB_STOP };
+    return cmd(b, sizeof b);
+}
+
+bool aos_154_c6_log(bool on)
+{
+    uint8_t b[] = { AOS_154_OP_LOG, on };
+    return cmd(b, sizeof b);
+}
+
 bool aos_154_unguard(void)
 {
     uint8_t b[] = { AOS_154_OP_UNGUARD };
@@ -425,8 +445,25 @@ static void fix_fcs(uint8_t *f, int len)
     f[len - 1] = (uint8_t)(c >> 8);
 }
 
+/* The C6's log lines, into the P4's log as "c6: ..." */
+static void c6_log(const uint8_t *d, size_t n)
+{
+    char line[200];
+    size_t at = 0;
+    for (size_t i = 0; i <= n; i++) {
+        if (i == n || d[i] == '\n' || at == sizeof line - 1) {
+            line[at] = '\0';
+            /* the C6's colour codes and its "I (1234) tag:" stay as they come */
+            if (at) aos_hal_log("c6", "%s", line);
+            at = 0;
+            if (i < n && d[i] != '\n') line[at++] = (char)d[i];
+        } else if (d[i] != '\r') line[at++] = (char)d[i];
+    }
+}
+
 void aos_154_on_msg(uint32_t id, const uint8_t *d, size_t n)
 {
+    if (id == AOS_154_MSG_LOG) { c6_log(d, n); return; }
     if (!s_lock) return;
     lock();
     if (id == AOS_154_MSG_STATUS && n >= AOS_154_STATUS_V1) {
@@ -444,6 +481,10 @@ void aos_154_on_msg(uint32_t id, const uint8_t *d, size_t n)
         s_info.dropped = st.dropped;
         s_info.heap_free = st.heap_free;
         s_info.heap_min = st.heap_min;
+        s_info.zb = st.zb;
+        s_info.zb_channel = st.zb_channel;
+        s_info.zb_heap_before = st.zb_heap_before;
+        s_info.zb_heap_after = st.zb_heap_after;
         if (first) aos_hal_log(TAG, "the C6 answers: protocol %u, up %u s%s", st.proto, (unsigned)st.uptime_s,
                                st.guarded ? ", the radio guarded off" : "");
     } else if (id == AOS_154_MSG_SCAN && n >= sizeof(aos_154_scan_t)) {

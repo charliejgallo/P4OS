@@ -25,6 +25,7 @@ static int s_qn;
 static uint8_t s_state, s_channel;
 static uint32_t s_frames;
 static uint8_t s_seq = 1;
+static uint8_t s_zb;
 
 static uint16_t crc_kermit(const uint8_t *p, size_t n)
 {
@@ -44,6 +45,8 @@ static void status(int8_t err)
         .proto = AOS_154_PROTO, .state = s_state, .channel = s_state ? s_channel : 0, .frames = s_frames,
         .uptime_s = (uint32_t)(aos_hal_uptime_ms() / 1000), .err = err,
         .heap_free = 150000, .heap_min = 120000,
+        .zb = s_zb, .zb_channel = s_state == AOS_154_ZIGBEE ? s_channel : 0,
+        .zb_heap_before = s_zb ? 78000 : 0, .zb_heap_after = s_zb == AOS_154_ZB_FORMED ? 41000 : 0,
     };
     aos_154_on_msg(AOS_154_MSG_STATUS, (const uint8_t *)&st, sizeof st);
 }
@@ -134,8 +137,18 @@ static void *thread(void *arg)
             case AOS_154_OP_STOP:
                 s_state = AOS_154_IDLE;
                 break;
+            case AOS_154_OP_ZB_START:
+                s_state = AOS_154_ZIGBEE;
+                s_channel = c.b[1];
+                s_zb = AOS_154_ZB_FORMED;
+                break;
+            case AOS_154_OP_ZB_STOP:
+                s_state = AOS_154_IDLE;
+                s_zb = AOS_154_ZB_OFF;
+                break;
             case AOS_154_OP_HELLO:
             case AOS_154_OP_UNGUARD:
+            case AOS_154_OP_LOG:            /* the make-believe C6 has nothing to say */
                 break;
             default:
                 err = -1;

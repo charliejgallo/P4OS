@@ -150,11 +150,36 @@ módulo de relés de 1 a 4 canales) sale de ahí casi sola.
   estado, protocolo 2, `c6_heap_free`/`c6_heap_min` en `/api/154`): ~78 KB
   libres con el Wi-Fi y el BLE; **el mínimo, 67 KB**, bajando 8 MB del
   portal mientras escuchaba.
-- **Lo que falta saber:** cuánto pide la pila al arrancar como coordinador.
-  La prueba: un C6 que la arranque sólo cuando el P4 lo pide (con la guarda,
-  como la radio) e informe la memoria después. Si no entra con el BLE, se
-  apaga el BLE mientras se usa Zigbee (el teléfono por Bluetooth se corta),
-  o se va al segundo camino.
+- **La prueba en la placa (2026-11-24, tarde):** un C6 que arranca la pila
+  sólo cuando el P4 lo pide (`c6/main/zigbee_test.c`, `AOS_154_OP_ZB_START`,
+  `POST /api/154/zigbee`), con la guarda. Lo medido:
+  - **La ranura del C6 es de 1,5 MB**, no 1,75: el C6 conserva la tabla de
+    particiones de fábrica (cambiarla pide el cable en J7). Con la pila y
+    `-O2` la imagen es de 1,66 MB y la OTA se cortó en el límite (el C6
+    quedó con su firmware, nada roto). **Con `-Os` y sin los nombres de los
+    errores entra: 1,56 MB**, 8 KB de margen (`c6/sdkconfig.zigbee`).
+  - **La pila pide ~43 KB al arrancar:** el C6 pasa de ~78 a ~35 KB libres
+    (mínimo 27-31 KB) con el Wi-Fi y el BLE; con el BLE apagado, de 109 a
+    68 KB.
+  - **El Wi-Fi aguanta con la pila adentro:** 0,40 MB/s bajando 8 MB (lo
+    mismo que sin ella ese día). Pararla devuelve la memoria y el escáner y
+    el sniffer vuelven a andar.
+  - **La red no se forma:** la pila arranca (señales "Skip Start Up" y "BDB
+    Device Start"), el pedido de formar se acepta (0) con el canal 26 solo,
+    pero la señal de "formada" no llega en 60 s, ni con el BLE apagado ni
+    con `esp_coex_wifi_i154_enable()`. Pedir la formación desde adentro del
+    manejador de señales colgaba: va por `esp_zigbee_task_queue_post`.
+    **Falta encontrar por qué**: el próximo paso es el registro de depuración
+    de la pila (`CONFIG_ZB_DEBUG_MODE`, si entra) y el sniffer de otra placa
+    o del mismo P4 mirando el canal 26 para ver si el C6 transmite.
+  - **El registro del C6 llega al P4:** `POST /api/154/c6log {"on": true}`
+    pone las líneas del C6 en el registro de la placa como "c6: ..." (su
+    puerto serie está en J7). Sirve para todo lo que sigue.
+- **El firmware normal del C6 no trae la pila** (`CONFIG_ZB_ENABLED=n`,
+  1,40 MB con `-O2`): las releases siguen igual. La variante de prueba se
+  compila con `sdkconfig.zigbee` (el comando está en el archivo).
+- **El usuario** (2026-11-24): en otro proyecto suyo, Zigbee y Bluetooth
+  andan juntos en un C6, pero no los tres con el Wi-Fi.
 
 ### Qué equipo es: la base de Zigbee2MQTT (pedido del usuario, 2026-11-24)
 

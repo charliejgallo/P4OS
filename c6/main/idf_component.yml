@@ -3,3 +3,5 @@ dependencies:
   # co-processor move together
   espressif/esp_hosted: "==3.0.9"
   idf: ">=5.5,<6.0"
+  # Espressif's Zigbee stack, started only when the P4 asks (zigbee_test.c)
+  espressif/esp-zigbee-lib: "==2.1.0"

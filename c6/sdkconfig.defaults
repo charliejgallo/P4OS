@@ -31,3 +31,9 @@ CONFIG_COMPILER_OPTIMIZATION_PERF=y
 CONFIG_ESP_HOSTED_CP_FEAT_PEER_DATA=y
 CONFIG_IEEE802154_ENABLED=y
 CONFIG_ESP_COEX_SW_COEXIST_ENABLE=y
+
+# P4OS: Espressif's Zigbee stack (main/zigbee_test.c) is off here, in the
+# image releases carry; sdkconfig.zigbee turns it on for a measuring build
+# (docs/plan/ZIGBEE.md): it does not fit the factory slot of 1.5 MB without
+# -Os, which the Wi-Fi's data path is better without.
+CONFIG_ZB_ENABLED=n

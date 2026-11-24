@@ -16,7 +16,7 @@ static void on_msg(uint32_t id, const uint8_t *data, size_t len, void *ctx)
 
 bool aos_154_link_open(void)
 {
-    static const uint32_t IDS[] = { AOS_154_MSG_STATUS, AOS_154_MSG_SCAN, AOS_154_MSG_FRAMES };
+    static const uint32_t IDS[] = { AOS_154_MSG_STATUS, AOS_154_MSG_SCAN, AOS_154_MSG_FRAMES, AOS_154_MSG_LOG };
     for (size_t i = 0; i < sizeof IDS / sizeof IDS[0]; i++)
         if (eh_host_peer_data_register(IDS[i], on_msg, NULL) != ESP_OK) {
             aos_hal_log("154", "could not register with esp_hosted's peer_data");
