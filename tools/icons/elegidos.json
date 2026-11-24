@@ -76,6 +76,9 @@
   "demo.canos": "b",
   "demo.chatarra": "a",
   "demo.cjump": "e",
+  "demo.claudito": "g",
+  "demo.doom": "g",
+  "demo.duke3d": "g",
   "demo.emulador": "a",
   "demo.flappy": "b",
   "demo.gemas": "b",
@@ -93,6 +96,7 @@
   "demo.sudoku": "a",
   "demo.sumar": "a",
   "demo.tanques": "a",
+  "demo.topos": "g",
   "demo.tortuga": "a",
   "demo.turbo": "a",
   "demo.visor3d": "a",
@@ -100,10 +104,5 @@
   "demo.vuelo": "a",
   "dev.blittest": "a"
  },
- "rehacer": [
-  "demo.claudito",
-  "demo.duke3d",
-  "demo.doom",
-  "demo.topos"
- ]
+ "rehacer": []
 }

@@ -5,6 +5,7 @@ sheets, and the pack from what was chosen.
     python3 tools/icons/juguete/post.py                 shrink every new render
     python3 tools/icons/juguete/post.py sheets [group]  the variant sheets
     python3 tools/icons/juguete/post.py pack            elegidos.json -> out/juguete/juguete.pak
+    python3 tools/icons/juguete/post.py chosen          laminas/juguete_elegidos.jpg, every chosen icon
 
 Shrink: out/juguete/raw/<id>_<v>_big.png (480) -> out/juguete/<id>_<v>_120.png
 and _108.png; _mini.png (104) -> _26.png. Premultiplied alpha, so the
@@ -132,6 +133,35 @@ def sheet(group):
     print(dst)
 
 
+def chosen_sheet():
+    """Every chosen icon at 120 on the home screen's gradient, 8 across, with
+    its name, and the 26 px miniature in the corner."""
+    chosen = json.load(open(os.path.join(ICONS, "elegidos.json")))["juguete"]
+    lst = [a for a in apps()["apps"] if a["id"] in chosen]
+    cols, cw, ch = 8, 150, 176
+    rows = (len(lst) + cols - 1) // cols
+    W, H = 24 + cols * cw, 80 + rows * ch
+    im = gradient(W, H)
+    d = ImageDraw.Draw(im)
+    d.text((24, 20), f"Juguete · los {len(lst)} elegidos", font=font(30, True), fill=(255, 255, 255))
+    fs = font(14)
+    for i, a in enumerate(lst):
+        v = chosen[a["id"]]
+        x, y = 24 + (i % cols) * cw, 80 + (i // cols) * ch
+        p = sized(a["id"], v, 120)
+        if os.path.exists(p):
+            ic = Image.open(p).convert("RGBA")
+            im.paste(ic, (x, y), ic)
+            m = Image.open(sized(a["id"], v, 26)).convert("RGBA")
+            im.paste(m, (x + 112, y + 100), m)
+        name = a["name"] if len(a["name"]) <= 16 else a["name"][:15] + "…"
+        w = d.textlength(name, font=fs)
+        d.text((x + 60 - w / 2, y + 132), name, font=fs, fill=(230, 230, 240))
+    dst = os.path.join(SHEETS, "juguete_elegidos.jpg")
+    im.save(dst, quality=90)
+    print(dst)
+
+
 def pack():
     chosen = json.load(open(os.path.join(ICONS, "elegidos.json")))["juguete"]
     d = os.path.join(OUT, "pack")
@@ -161,3 +191,6 @@ if __name__ == "__main__":
             sheet(g)
     elif a[0] == "pack":
         pack()
+    elif a[0] == "chosen":
+        do_shrink()
+        chosen_sheet()
