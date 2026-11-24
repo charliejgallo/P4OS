@@ -1,5 +1,44 @@
 # tools/icons — los íconos HD
 
+**Producción: el pack `juguete` (estilo B)**, elegido el 2026-11-24. Más
+abajo, la etapa Estilo que lo eligió (las muestras de A, B y C).
+
+## El pack juguete
+
+| Archivo | Qué es |
+|---|---|
+| `apps.json` | Las 102 apps con ícono HD: id, nombre, grupo (una lámina), colores de hoy y qué dibuja cada variante |
+| `juguete/lib.py` | La escena y las piezas (ficha, `slab`, `rbox`, `ball`, `cyl`, `tube`, `capsule`, `blob`, `text`) |
+| `juguete/models_<grupo>.py` | Los modelos: `MODELS = {id: {"a": build, "b": build}}`, `build(mini)` |
+| `juguete/render.py` | Blender `-b`: renderiza las variantes (`--group`, `--only`, `--variants`, `--chosen`) |
+| `juguete/post.py` | Achica a 120/108/26, arma las láminas de variantes y el pack |
+| `elegidos.json` | La letra que eligió el usuario para cada app |
+| `laminas/juguete_<grupo>.jpg` | Las láminas de variantes, para elegir |
+
+```bash
+B=/Applications/Blender.app/Contents/MacOS/Blender
+$B -b -P tools/icons/juguete/render.py -- --group sistema-1 --samples 64   # para la lámina
+python3 tools/icons/juguete/post.py sheets sistema-1
+# el usuario elige -> elegidos.json
+$B -b -P tools/icons/juguete/render.py -- --chosen --samples 128 --force
+python3 tools/icons/juguete/post.py pack                                  # -> out/juguete.pak
+```
+
+Los renders y el pack quedan en `out/` (fuera de git). Un archivo de modelos
+por grupo, así dos sesiones pueden trabajar a la vez sin pisarse;
+`lib.py` es de las dos, y conviene sólo agregarle cosas.
+
+Reglas del pack, además de la receta del estilo B (abajo):
+
+- Cada app con dos o tres **ideas distintas**, no la misma con otro ángulo.
+- El juguete entra en la ficha con margen (nada fuera de ±0,42), inclinado
+  10-25° para que se vea el volumen.
+- Nada de logos ni marcas: Python es una víbora, Lua una luna, Claude un
+  robot, Home Assistant una casa.
+- La miniatura (`mini`): el juguete ×1,1-1,25 y sin las piezas chicas.
+- Las letras de Blender no tienen − ni ÷: los signos se arman con piezas
+  (`_sign` en `models_sistema1.py`).
+
 La etapa "Estilo" de `docs/plan/ICONOS.md`: tres estilos de muestra para
 elegir, y el método para hacer los ~95 íconos de la producción con el que
 se elija. Todo se dibuja por código acá (SVG escrito a mano o modelos de

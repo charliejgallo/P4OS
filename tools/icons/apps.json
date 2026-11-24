@@ -1,0 +1,1347 @@
+{
+ "about": "Las apps que llevan ícono HD: id, nombre, grupo (una lámina), los dos colores de hoy y, por pack, qué dibuja cada variante. tools/icons/README.md.",
+ "groups": [
+  "sistema-1",
+  "sistema-2",
+  "taller",
+  "red",
+  "crear-medios",
+  "utiles-programar",
+  "juegos-1",
+  "juegos-2",
+  "juegos-3",
+  "pruebas"
+ ],
+ "apps": [
+  {
+   "id": "aos.settings",
+   "name": "Ajustes",
+   "group": "sistema-1",
+   "colors": [
+    "#8E8E93",
+    "#48484A"
+   ],
+   "juguete": {
+    "a": "un engranaje blanco gordito (el de la muestra)",
+    "b": "dos engranajes encastrados, plata y naranja",
+    "c": "llave inglesa y destornillador cruzados"
+   }
+  },
+  {
+   "id": "aos.store",
+   "name": "Tienda",
+   "group": "sistema-1",
+   "colors": [
+    "#2F9BFF",
+    "#0A5ADB"
+   ],
+   "juguete": {
+    "a": "caja de cartón con cinta (la de la muestra)",
+    "b": "bolsa de compras con manijas",
+    "c": "caja abierta con una estrella que sale"
+   }
+  },
+  {
+   "id": "aos.files",
+   "name": "Archivos",
+   "group": "sistema-1",
+   "colors": [
+    "#0A84FF",
+    "#0050C8"
+   ],
+   "juguete": {
+    "a": "carpeta azul gordita con hojas asomando",
+    "b": "cajón de archivo con carpetas de colores"
+   }
+  },
+  {
+   "id": "aos.photos",
+   "name": "Fotos",
+   "group": "sistema-1",
+   "colors": [
+    "#FBBF24",
+    "#EC4899"
+   ],
+   "juguete": {
+    "a": "un cuadro con montañas y sol (el de la muestra)",
+    "b": "cámara de fotos de juguete",
+    "c": "una foto instantánea inclinada"
+   }
+  },
+  {
+   "id": "aos.music",
+   "name": "Música",
+   "group": "sistema-1",
+   "colors": [
+    "#FF375F",
+    "#B0123F"
+   ],
+   "juguete": {
+    "a": "corchea doble roja brillante",
+    "b": "auriculares",
+    "c": "disco de vinilo con etiqueta roja"
+   }
+  },
+  {
+   "id": "aos.calendar",
+   "name": "Calendario",
+   "group": "sistema-1",
+   "colors": [
+    "#F87171",
+    "#DC2626"
+   ],
+   "juguete": {
+    "a": "taco de calendario con anillos y el número 24",
+    "b": "hoja de calendario con grilla de días"
+   }
+  },
+  {
+   "id": "aos.clock",
+   "name": "Reloj",
+   "group": "sistema-1",
+   "colors": [
+    "#2C2C2E",
+    "#000000"
+   ],
+   "juguete": {
+    "a": "reloj de pared con borde naranja (el de la muestra)",
+    "b": "despertador con dos campanas"
+   }
+  },
+  {
+   "id": "aos.calc",
+   "name": "Calculadora",
+   "group": "sistema-1",
+   "colors": [
+    "#E0A21A",
+    "#7A5230"
+   ],
+   "juguete": {
+    "a": "calculadora blanca (la de la muestra)",
+    "b": "cuatro bloques con + − × ÷"
+   }
+  },
+  {
+   "id": "aos.convert",
+   "name": "Conversor",
+   "group": "sistema-1",
+   "colors": [
+    "#40C8E0",
+    "#1C5C77"
+   ],
+   "juguete": {
+    "a": "dos flechas gordas opuestas",
+    "b": "balanza de platillos"
+   }
+  },
+  {
+   "id": "aos.claude",
+   "name": "Claude",
+   "group": "sistema-1",
+   "colors": [
+    "#D97757",
+    "#A8492B"
+   ],
+   "juguete": {
+    "a": "cabeza de robot naranja con antena",
+    "b": "robot entero chiquito saludando"
+   }
+  },
+  {
+   "id": "aos.life",
+   "name": "Vida",
+   "group": "sistema-1",
+   "colors": [
+    "#30D158",
+    "#0E4622"
+   ],
+   "juguete": {
+    "a": "grilla de cubitos con un planeador encendido",
+    "b": "placa de Petri con células verdes"
+   }
+  },
+  {
+   "id": "aos.sysmon",
+   "name": "Monitor",
+   "group": "sistema-1",
+   "colors": [
+    "#64748B",
+    "#1E293B"
+   ],
+   "juguete": {
+    "a": "chip de memoria con barras de uso",
+    "b": "velocímetro con aguja"
+   }
+  },
+  {
+   "id": "aos.serial",
+   "name": "Terminal",
+   "group": "sistema-2",
+   "colors": [
+    "#2F3B45",
+    "#10161B"
+   ],
+   "juguete": {
+    "a": "ficha serie con cable (la de la muestra)",
+    "b": "monitor de juguete con >_"
+   }
+  },
+  {
+   "id": "aos.flasher",
+   "name": "Programador",
+   "group": "sistema-2",
+   "colors": [
+    "#8B5CF6",
+    "#4C1D95"
+   ],
+   "juguete": {
+    "a": "chip violeta con patitas y un rayo",
+    "b": "chip con una flecha que baja"
+   }
+  },
+  {
+   "id": "aos.ha",
+   "name": "Home Assistant",
+   "group": "sistema-2",
+   "colors": [
+    "#41BDF5",
+    "#0B6FB0"
+   ],
+   "juguete": {
+    "a": "casita celeste con techo a dos aguas",
+    "b": "casa con tres nodos conectados al frente"
+   }
+  },
+  {
+   "id": "aos.bus",
+   "name": "Bus",
+   "group": "sistema-2",
+   "colors": [
+    "#F59E0B",
+    "#B45309"
+   ],
+   "juguete": {
+    "a": "dos fichas que se enchufan",
+    "b": "cables de colores con puntas"
+   }
+  },
+  {
+   "id": "aos.bench",
+   "name": "Banco",
+   "group": "sistema-2",
+   "colors": [
+    "#EF4444",
+    "#991B1B"
+   ],
+   "juguete": {
+    "a": "manómetro rojo con aguja",
+    "b": "multímetro de juguete"
+   }
+  },
+  {
+   "id": "aos.elec",
+   "name": "Electrónica",
+   "group": "sistema-2",
+   "colors": [
+    "#FACC15",
+    "#CA8A04"
+   ],
+   "juguete": {
+    "a": "rayo amarillo gordito",
+    "b": "resistencia con bandas de colores",
+    "c": "capacitor"
+   }
+  },
+  {
+   "id": "aos.leds",
+   "name": "Tiras LED",
+   "group": "sistema-2",
+   "colors": [
+    "#FF9F0A",
+    "#B45309"
+   ],
+   "juguete": {
+    "a": "tira de LED enrulada con luces de colores",
+    "b": "un LED gigante encendido"
+   }
+  },
+  {
+   "id": "aos.macropad",
+   "name": "Macro pad",
+   "group": "sistema-2",
+   "colors": [
+    "#22D3EE",
+    "#0E7490"
+   ],
+   "juguete": {
+    "a": "teclado de 3×3 teclas cian",
+    "b": "cuatro teclas y una perilla"
+   }
+  },
+  {
+   "id": "aos.modules",
+   "name": "Módulos",
+   "group": "sistema-2",
+   "colors": [
+    "#94A3B8",
+    "#475569"
+   ],
+   "juguete": {
+    "a": "placa de expansión verde con un chip",
+    "b": "dos bloques que encastran"
+   }
+  },
+  {
+   "id": "aos.mqtt",
+   "name": "MQTT",
+   "group": "sistema-2",
+   "colors": [
+    "#A78BFA",
+    "#6D28D9"
+   ],
+   "juguete": {
+    "a": "antena con ondas",
+    "b": "tres globos de mensaje conectados"
+   }
+  },
+  {
+   "id": "aos.net",
+   "name": "Red",
+   "group": "sistema-2",
+   "colors": [
+    "#38BDF8",
+    "#0369A1"
+   ],
+   "juguete": {
+    "a": "servidor de rack con luces",
+    "b": "tres nodos de red conectados"
+   }
+  },
+  {
+   "id": "aos.can",
+   "name": "CAN",
+   "group": "taller",
+   "colors": [
+    "#1B9C8F",
+    "#0B4A44"
+   ],
+   "juguete": {
+    "a": "dos fichas y un cable trenzado",
+    "b": "autito con un cable"
+   }
+  },
+  {
+   "id": "aos.datalog",
+   "name": "Datalog",
+   "group": "taller",
+   "colors": [
+    "#2DD4BF",
+    "#0F766E"
+   ],
+   "juguete": {
+    "a": "pizarra con una curva",
+    "b": "libreta con una curva y un reloj"
+   }
+  },
+  {
+   "id": "aos.dmx",
+   "name": "DMX",
+   "group": "taller",
+   "colors": [
+    "#7C3AED",
+    "#3B0764"
+   ],
+   "juguete": {
+    "a": "reflector de escenario con su haz",
+    "b": "ficha XLR de cinco pines"
+   }
+  },
+  {
+   "id": "aos.eeprom",
+   "name": "EEPROM",
+   "group": "taller",
+   "colors": [
+    "#10B981",
+    "#047857"
+   ],
+   "juguete": {
+    "a": "chip negro de ocho patas con etiqueta verde",
+    "b": "chip en su zócalo"
+   }
+  },
+  {
+   "id": "aos.equipos",
+   "name": "Equipos",
+   "group": "taller",
+   "colors": [
+    "#F59E0B",
+    "#92400E"
+   ],
+   "juguete": {
+    "a": "fuente de laboratorio con perillas y display",
+    "b": "enchufe con un rayo"
+   }
+  },
+  {
+   "id": "aos.infrarrojo",
+   "name": "Infrarrojo",
+   "group": "taller",
+   "colors": [
+    "#E0303A",
+    "#5C0E26"
+   ],
+   "juguete": {
+    "a": "control remoto con un LED rojo",
+    "b": "LED que tira ondas"
+   }
+  },
+  {
+   "id": "aos.logica",
+   "name": "Lógica",
+   "group": "taller",
+   "colors": [
+    "#2E7D32",
+    "#103A14"
+   ],
+   "juguete": {
+    "a": "onda cuadrada verde gruesa",
+    "b": "pinza de prueba con cables"
+   }
+  },
+  {
+   "id": "aos.luces",
+   "name": "Luces",
+   "group": "taller",
+   "colors": [
+    "#EC4899",
+    "#6D28D9"
+   ],
+   "juguete": {
+    "a": "lamparita encendida",
+    "b": "tres lamparitas de colores"
+   }
+  },
+  {
+   "id": "aos.modbus",
+   "name": "Modbus",
+   "group": "taller",
+   "colors": [
+    "#10B981",
+    "#047857"
+   ],
+   "juguete": {
+    "a": "módulo verde en un riel DIN",
+    "b": "dos fichas enlazadas"
+   }
+  },
+  {
+   "id": "aos.plotter",
+   "name": "Monitor serie",
+   "group": "taller",
+   "colors": [
+    "#125565",
+    "#061A20"
+   ],
+   "juguete": {
+    "a": "osciloscopio de juguete con una onda",
+    "b": "una onda senoidal hecha caño"
+   }
+  },
+  {
+   "id": "aos.pwm",
+   "name": "PWM",
+   "group": "taller",
+   "colors": [
+    "#FF9F0A",
+    "#B34700"
+   ],
+   "juguete": {
+    "a": "perilla naranja grande con marcas",
+    "b": "servo motor con su brazo"
+   }
+  },
+  {
+   "id": "aos.rf",
+   "name": "RF",
+   "group": "taller",
+   "colors": [
+    "#2F6BFF",
+    "#7A2BD9"
+   ],
+   "juguete": {
+    "a": "antena con ondas",
+    "b": "radio con dial de frecuencia"
+   }
+  },
+  {
+   "id": "aos.ble",
+   "name": "BLE",
+   "group": "red",
+   "colors": [
+    "#3B82F6",
+    "#1E3A8A"
+   ],
+   "juguete": {
+    "a": "llavero redondo con ondas azules",
+    "b": "chip con ondas de radio"
+   }
+  },
+  {
+   "id": "aos.cameras",
+   "name": "Cámaras",
+   "group": "red",
+   "colors": [
+    "#334155",
+    "#0F172A"
+   ],
+   "juguete": {
+    "a": "cámara de seguridad en su soporte",
+    "b": "cámara domo"
+   }
+  },
+  {
+   "id": "aos.cartero",
+   "name": "Cartero",
+   "group": "red",
+   "colors": [
+    "#5E5CE6",
+    "#2C2A8C"
+   ],
+   "juguete": {
+    "a": "avión de papel",
+    "b": "sobre con una flecha"
+   }
+  },
+  {
+   "id": "aos.estado",
+   "name": "Mi casa",
+   "group": "red",
+   "colors": [
+    "#34D399",
+    "#047857"
+   ],
+   "juguete": {
+    "a": "casa con un semáforo de tres luces",
+    "b": "tablero con tres luces"
+   }
+  },
+  {
+   "id": "aos.impresoras",
+   "name": "Impresoras 3D",
+   "group": "red",
+   "colors": [
+    "#F97316",
+    "#9A3412"
+   ],
+   "juguete": {
+    "a": "impresora 3D de juguete imprimiendo",
+    "b": "carrete de filamento"
+   }
+  },
+  {
+   "id": "aos.ssh",
+   "name": "SSH",
+   "group": "red",
+   "colors": [
+    "#2F3640",
+    "#0D1117"
+   ],
+   "juguete": {
+    "a": "llave dorada",
+    "b": "terminal con un candado"
+   }
+  },
+  {
+   "id": "aos.vnc",
+   "name": "VNC",
+   "group": "red",
+   "colors": [
+    "#2563EB",
+    "#1E3A8A"
+   ],
+   "juguete": {
+    "a": "monitor con una flecha de mouse",
+    "b": "laptop abierta"
+   }
+  },
+  {
+   "id": "aos.vuelos",
+   "name": "Vuelos",
+   "group": "red",
+   "colors": [
+    "#16405E",
+    "#081826"
+   ],
+   "juguete": {
+    "a": "avión de línea visto de arriba",
+    "b": "radar con un avioncito"
+   }
+  },
+  {
+   "id": "aos.dibujo",
+   "name": "Dibujo",
+   "group": "crear-medios",
+   "colors": [
+    "#F0795A",
+    "#7A2E8C"
+   ],
+   "juguete": {
+    "a": "pincel con una gota de pintura",
+    "b": "paleta de pintor"
+   }
+  },
+  {
+   "id": "aos.notas",
+   "name": "Notas",
+   "group": "crear-medios",
+   "colors": [
+    "#FFD60A",
+    "#FF9F0A"
+   ],
+   "juguete": {
+    "a": "anotador con lápiz (el de la muestra)",
+    "b": "nota adhesiva con chinche"
+   }
+  },
+  {
+   "id": "aos.oficina",
+   "name": "Oficina",
+   "group": "crear-medios",
+   "colors": [
+    "#34C759",
+    "#0A7A3A"
+   ],
+   "juguete": {
+    "a": "pila de documentos con una planilla verde",
+    "b": "maletín"
+   }
+  },
+  {
+   "id": "aos.pixel",
+   "name": "Pixel Art",
+   "group": "crear-medios",
+   "colors": [
+    "#D93A6A",
+    "#5B2A86"
+   ],
+   "juguete": {
+    "a": "corazón hecho de cubitos",
+    "b": "lápiz con cubitos de colores"
+   }
+  },
+  {
+   "id": "aos.dj",
+   "name": "DJ",
+   "group": "crear-medios",
+   "colors": [
+    "#3DA5FF",
+    "#FF7A3D"
+   ],
+   "juguete": {
+    "a": "bandeja con disco",
+    "b": "mezclador con dos perillas"
+   }
+  },
+  {
+   "id": "aos.estudio",
+   "name": "Estudio",
+   "group": "crear-medios",
+   "colors": [
+    "#FF6A3D",
+    "#7A2BD8"
+   ],
+   "juguete": {
+    "a": "teclado de sintetizador",
+    "b": "caja de ritmos de 4×4 pads"
+   }
+  },
+  {
+   "id": "aos.radio",
+   "name": "Radio",
+   "group": "crear-medios",
+   "colors": [
+    "#FF9F0A",
+    "#8A4B00"
+   ],
+   "juguete": {
+    "a": "radio antigua naranja",
+    "b": "parlante con antena"
+   }
+  },
+  {
+   "id": "aos.tuner",
+   "name": "Afinador",
+   "group": "crear-medios",
+   "colors": [
+    "#40C8E0",
+    "#0A6070"
+   ],
+   "juguete": {
+    "a": "diapasón",
+    "b": "aguja de afinador en su dial"
+   }
+  },
+  {
+   "id": "aos.video",
+   "name": "Video",
+   "group": "crear-medios",
+   "colors": [
+    "#FF453A",
+    "#8E1A12"
+   ],
+   "juguete": {
+    "a": "claqueta de cine",
+    "b": "televisor con un triángulo de play"
+   }
+  },
+  {
+   "id": "app.recorder",
+   "name": "Grabadora",
+   "group": "crear-medios",
+   "colors": [
+    "#FF453A",
+    "#7A1512"
+   ],
+   "juguete": {
+    "a": "micrófono de estudio",
+    "b": "casete"
+   }
+  },
+  {
+   "id": "aos.bolsa",
+   "name": "Bolsa",
+   "group": "utiles-programar",
+   "colors": [
+    "#1E3A5F",
+    "#0A1424"
+   ],
+   "juguete": {
+    "a": "barras que suben con una flecha",
+    "b": "moneda y barras"
+   }
+  },
+  {
+   "id": "aos.cas",
+   "name": "CAS",
+   "group": "utiles-programar",
+   "colors": [
+    "#5856D6",
+    "#2B2A7A"
+   ],
+   "juguete": {
+    "a": "f(x) en bloques",
+    "b": "pizarra con una fórmula"
+   }
+  },
+  {
+   "id": "aos.clima",
+   "name": "Clima",
+   "group": "utiles-programar",
+   "colors": [
+    "#0A84FF",
+    "#00C2D1"
+   ],
+   "juguete": {
+    "a": "nube y sol (los de la muestra)",
+    "b": "paraguas con gotas"
+   }
+  },
+  {
+   "id": "aos.cotiz",
+   "name": "Cotizaciones",
+   "group": "utiles-programar",
+   "colors": [
+    "#30D158",
+    "#0B5227"
+   ],
+   "juguete": {
+    "a": "billetes y una moneda",
+    "b": "moneda de oro con $"
+   }
+  },
+  {
+   "id": "aos.pato",
+   "name": "Pato goma",
+   "group": "utiles-programar",
+   "colors": [
+    "#0A84FF",
+    "#0050A0"
+   ],
+   "juguete": {
+    "a": "pato de goma amarillo",
+    "b": "pato con un pendrive"
+   }
+  },
+  {
+   "id": "aos.traductor",
+   "name": "Traductor",
+   "group": "utiles-programar",
+   "colors": [
+    "#1D3557",
+    "#0B1622"
+   ],
+   "juguete": {
+    "a": "dos globos de diálogo con A y Z",
+    "b": "un libro abierto con un globo"
+   }
+  },
+  {
+   "id": "demo.mapas",
+   "name": "Mapas",
+   "group": "utiles-programar",
+   "colors": [
+    "#1F5C3A",
+    "#0B2418"
+   ],
+   "juguete": {
+    "a": "mapa plegado con un pin rojo",
+    "b": "un pin rojo sobre el verde"
+   }
+  },
+  {
+   "id": "demo.visor3d",
+   "name": "Visor 3D",
+   "group": "utiles-programar",
+   "colors": [
+    "#1C3A6B",
+    "#0A1428"
+   ],
+   "juguete": {
+    "a": "cubo de vidrio con los tres ejes",
+    "b": "un icosaedro facetado"
+   }
+  },
+  {
+   "id": "aos.lua",
+   "name": "Lua",
+   "group": "utiles-programar",
+   "colors": [
+    "#2C2D72",
+    "#000080"
+   ],
+   "juguete": {
+    "a": "luna creciente azul con una estrella",
+    "b": "pergamino de código"
+   }
+  },
+  {
+   "id": "aos.python",
+   "name": "Python",
+   "group": "utiles-programar",
+   "colors": [
+    "#3776AB",
+    "#1E4A75"
+   ],
+   "juguete": {
+    "a": "víbora gordita verde y amarilla",
+    "b": ">>> en bloques"
+   }
+  },
+  {
+   "id": "demo.tortuga",
+   "name": "Tortuga",
+   "group": "utiles-programar",
+   "colors": [
+    "#5CAE3E",
+    "#2E7D32"
+   ],
+   "juguete": {
+    "a": "tortuga de juguete",
+    "b": "tortuga con un bloque de programar"
+   }
+  },
+  {
+   "id": "demo.hello",
+   "name": "Hola",
+   "group": "utiles-programar",
+   "colors": [
+    "#0A84FF",
+    "#0050A0"
+   ],
+   "juguete": {
+    "a": "globo de diálogo saludando"
+   }
+  },
+  {
+   "id": "aos.dice",
+   "name": "Dados",
+   "group": "juegos-1",
+   "colors": [
+    "#BF5AF2",
+    "#5B2078"
+   ],
+   "juguete": {
+    "a": "dos dados",
+    "b": "un dado grande"
+   }
+  },
+  {
+   "id": "aos.mines",
+   "name": "Buscaminas",
+   "group": "juegos-1",
+   "colors": [
+    "#5A5A5E",
+    "#1C1C1E"
+   ],
+   "juguete": {
+    "a": "bomba negra con mecha",
+    "b": "bandera roja sobre un casillero"
+   }
+  },
+  {
+   "id": "aos.simon",
+   "name": "Simon",
+   "group": "juegos-1",
+   "colors": [
+    "#2C2C2E",
+    "#000000"
+   ],
+   "juguete": {
+    "a": "disco de cuatro colores",
+    "b": "cuatro botones de colores"
+   }
+  },
+  {
+   "id": "aos.truco",
+   "name": "Truco",
+   "group": "juegos-1",
+   "colors": [
+    "#1E7A45",
+    "#0A3C21"
+   ],
+   "juguete": {
+    "a": "tres naipes españoles en abanico",
+    "b": "el ancho de espadas",
+    "c": "un mate"
+   }
+  },
+  {
+   "id": "demo.2043",
+   "name": "2043",
+   "group": "juegos-1",
+   "colors": [
+    "#FF4A3D",
+    "#6A2FB5"
+   ],
+   "juguete": {
+    "a": "nave espacial roja",
+    "b": "nave disparando"
+   }
+  },
+  {
+   "id": "demo.arkanos",
+   "name": "ARKANOS",
+   "group": "juegos-1",
+   "colors": [
+    "#FF9F0A",
+    "#0A84FF"
+   ],
+   "juguete": {
+    "a": "paleta, pelota y ladrillos",
+    "b": "ladrillos apilados"
+   }
+  },
+  {
+   "id": "demo.asteroides",
+   "name": "Deriva",
+   "group": "juegos-1",
+   "colors": [
+    "#123A5C",
+    "#050A18"
+   ],
+   "juguete": {
+    "a": "nave triangular y una roca",
+    "b": "roca con cráteres"
+   }
+  },
+  {
+   "id": "demo.atasco",
+   "name": "Atasco",
+   "group": "juegos-1",
+   "colors": [
+    "#FF453A",
+    "#48484A"
+   ],
+   "juguete": {
+    "a": "auto rojo de juguete",
+    "b": "auto rojo entre bloques"
+   }
+  },
+  {
+   "id": "demo.bastion",
+   "name": "Bastión",
+   "group": "juegos-1",
+   "colors": [
+    "#1B3A6E",
+    "#070A18"
+   ],
+   "juguete": {
+    "a": "fuerte espacial con torres",
+    "b": "torreta con cañón"
+   }
+  },
+  {
+   "id": "demo.blackjack",
+   "name": "Blackjack",
+   "group": "juegos-1",
+   "colors": [
+    "#1F6B3E",
+    "#0B3320"
+   ],
+   "juguete": {
+    "a": "un as y un rey con una ficha",
+    "b": "pila de fichas de casino"
+   }
+  },
+  {
+   "id": "demo.burbujas",
+   "name": "Burbujas",
+   "group": "juegos-1",
+   "colors": [
+    "#1B2A6B",
+    "#101430"
+   ],
+   "juguete": {
+    "a": "burbujas de colores",
+    "b": "lanzador con una burbuja"
+   }
+  },
+  {
+   "id": "demo.canos",
+   "name": "Caños",
+   "group": "juegos-1",
+   "colors": [
+    "#2A6E9A",
+    "#0C2238"
+   ],
+   "juguete": {
+    "a": "caño en codo con agua",
+    "b": "llave de paso"
+   }
+  },
+  {
+   "id": "demo.chatarra",
+   "name": "Chatarra",
+   "group": "juegos-2",
+   "colors": [
+    "#8E4630",
+    "#2B1810"
+   ],
+   "juguete": {
+    "a": "robot de chatarra",
+    "b": "engranaje con tornillos"
+   }
+  },
+  {
+   "id": "demo.cjump",
+   "name": "Claude Jump",
+   "group": "juegos-2",
+   "colors": [
+    "#4A9DF5",
+    "#2E9E52"
+   ],
+   "juguete": {
+    "a": "personajito saltando entre plataformas",
+    "b": "resorte con plataforma"
+   }
+  },
+  {
+   "id": "demo.claudito",
+   "name": "Claudito",
+   "group": "juegos-2",
+   "colors": [
+    "#D97757",
+    "#9C4A32"
+   ],
+   "juguete": {
+    "a": "mascota naranja con ojitos",
+    "b": "mascota con su plato"
+   }
+  },
+  {
+   "id": "demo.doom",
+   "name": "Doom",
+   "group": "juegos-2",
+   "colors": [
+    "#5A1208",
+    "#140404"
+   ],
+   "juguete": {
+    "a": "casco verde con visor",
+    "b": "puerta con una llave roja"
+   }
+  },
+  {
+   "id": "demo.duke3d",
+   "name": "Duke Nukem 3D",
+   "group": "juegos-2",
+   "colors": [
+    "#F5C800",
+    "#B06A00"
+   ],
+   "juguete": {
+    "a": "anteojos de sol sobre amarillo",
+    "b": "3D en bloques"
+   }
+  },
+  {
+   "id": "demo.emulador",
+   "name": "Emulador",
+   "group": "juegos-2",
+   "colors": [
+    "#FF2D95",
+    "#5B2EFF"
+   ],
+   "juguete": {
+    "a": "joystick de arcade",
+    "b": "cartucho de juego"
+   }
+  },
+  {
+   "id": "demo.flappy",
+   "name": "Flappy",
+   "group": "juegos-2",
+   "colors": [
+    "#30D158",
+    "#0E7A32"
+   ],
+   "juguete": {
+    "a": "pajarito amarillo gordito",
+    "b": "caño verde con el pajarito"
+   }
+  },
+  {
+   "id": "demo.gemas",
+   "name": "Gemas",
+   "group": "juegos-2",
+   "colors": [
+    "#E81E32",
+    "#2E7BFF"
+   ],
+   "juguete": {
+    "a": "gema roja facetada",
+    "b": "tres gemas"
+   }
+  },
+  {
+   "id": "demo.golf",
+   "name": "Golf",
+   "group": "juegos-2",
+   "colors": [
+    "#1E6B34",
+    "#0E3A5C"
+   ],
+   "juguete": {
+    "a": "pelota en el tee",
+    "b": "bandera en el hoyo"
+   }
+  },
+  {
+   "id": "demo.hockey",
+   "name": "Hockey de mesa",
+   "group": "juegos-2",
+   "colors": [
+    "#D3262B",
+    "#1A1C22"
+   ],
+   "juguete": {
+    "a": "mazo y disco",
+    "b": "mesa de hockey de aire"
+   }
+  },
+  {
+   "id": "demo.mesa",
+   "name": "Juegos de mesa",
+   "group": "juegos-2",
+   "colors": [
+    "#7A4E2A",
+    "#2A170A"
+   ],
+   "juguete": {
+    "a": "peón y dado",
+    "b": "tablero de damas"
+   }
+  },
+  {
+   "id": "demo.metegol",
+   "name": "Metegol",
+   "group": "juegos-2",
+   "colors": [
+    "#1F7A3A",
+    "#08200F"
+   ],
+   "juguete": {
+    "a": "jugadores en sus barras (los de la muestra)",
+    "b": "un jugador con la pelota"
+   }
+  },
+  {
+   "id": "demo.mila",
+   "name": "Mila",
+   "group": "juegos-3",
+   "colors": [
+    "#F07AA0",
+    "#3A2A5A"
+   ],
+   "juguete": {
+    "a": "gatita negra",
+    "b": "gatita empujando una caja"
+   }
+  },
+  {
+   "id": "demo.monsterhop",
+   "name": "Monster Hop",
+   "group": "juegos-3",
+   "colors": [
+    "#7A3AE0",
+    "#1A6A3A"
+   ],
+   "juguete": {
+    "a": "monstruito violeta saltando",
+    "b": "llave dorada"
+   }
+  },
+  {
+   "id": "demo.neon",
+   "name": "Neon Snakes",
+   "group": "juegos-3",
+   "colors": [
+    "#1A1040",
+    "#05030F"
+   ],
+   "juguete": {
+    "a": "víbora de neón",
+    "b": "fruta de neón"
+   }
+  },
+  {
+   "id": "demo.pinball",
+   "name": "Pinball 3D",
+   "group": "juegos-3",
+   "colors": [
+    "#5A1E8C",
+    "#10082A"
+   ],
+   "juguete": {
+    "a": "paleta con una bola",
+    "b": "bola plateada y un hongo"
+   }
+  },
+  {
+   "id": "demo.solitario",
+   "name": "Solitario",
+   "group": "juegos-3",
+   "colors": [
+    "#23784A",
+    "#0C3A22"
+   ],
+   "juguete": {
+    "a": "pila de naipes con un as",
+    "b": "naipes en cascada"
+   }
+  },
+  {
+   "id": "demo.sudoku",
+   "name": "Sudoku",
+   "group": "juegos-3",
+   "colors": [
+    "#2F6BFF",
+    "#16205E"
+   ],
+   "juguete": {
+    "a": "grilla con números",
+    "b": "un 9 gordo"
+   }
+  },
+  {
+   "id": "demo.sumar",
+   "name": "Fusión",
+   "group": "juegos-3",
+   "colors": [
+    "#3B2C9E",
+    "#0D1233"
+   ],
+   "juguete": {
+    "a": "dos fichas 2 que chocan",
+    "b": "ficha con un +"
+   }
+  },
+  {
+   "id": "demo.tanques",
+   "name": "Tanques",
+   "group": "juegos-3",
+   "colors": [
+    "#6FB04A",
+    "#2E6FB0"
+   ],
+   "juguete": {
+    "a": "tanque de juguete",
+    "b": "torreta"
+   }
+  },
+  {
+   "id": "demo.topos",
+   "name": "Topos",
+   "group": "juegos-3",
+   "colors": [
+    "#3E8E2E",
+    "#6B4020"
+   ],
+   "juguete": {
+    "a": "topo saliendo de un agujero",
+    "b": "martillo y topo"
+   }
+  },
+  {
+   "id": "demo.turbo",
+   "name": "Turbo",
+   "group": "juegos-3",
+   "colors": [
+    "#E0501E",
+    "#3A1060"
+   ],
+   "juguete": {
+    "a": "auto deportivo rojo",
+    "b": "volante"
+   }
+  },
+  {
+   "id": "demo.vitral",
+   "name": "Vitral",
+   "group": "juegos-3",
+   "colors": [
+    "#C8203C",
+    "#2A5CE6"
+   ],
+   "juguete": {
+    "a": "ventana de vitral de colores",
+    "b": "pieza de vidrio cayendo"
+   }
+  },
+  {
+   "id": "demo.vuelo",
+   "name": "Planeo",
+   "group": "juegos-3",
+   "colors": [
+    "#3C8CE0",
+    "#9AD8F4"
+   ],
+   "juguete": {
+    "a": "avioneta",
+    "b": "isla con la avioneta"
+   }
+  },
+  {
+   "id": "dev.blittest",
+   "name": "Blit test",
+   "group": "pruebas",
+   "colors": [
+    "#636366",
+    "#2C2C2E"
+   ],
+   "juguete": {
+    "a": "barras de colores de prueba"
+   }
+  }
+ ]
+}

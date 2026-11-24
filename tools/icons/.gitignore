@@ -3,3 +3,5 @@ muestra/b_chubby/raw/
 # the simulator runs of sim_shots.py: packs, links, prefs, screenshots
 muestra/sim/
 __pycache__/
+# the production renders and the pack (made again from the scripts)
+out/
