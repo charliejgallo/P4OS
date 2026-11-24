@@ -359,13 +359,34 @@ velocidad que sin Zigbee. Lo de cada paso:
   Wi-Fi (en MEDIO se perdían los beacons que el equipo busca para unirse)
   y los bytes del RCP llegan a la pila en datagramas de 64 (la pila lee su
   "UART" de a 128 y lo que sobraba de uno más largo se perdía: la respuesta
-  del Basic llegaba rota). **Falta:** guardar la lista (hoy está en RAM y
-  se vacía al reiniciar, aunque la pila los sigue teniendo en su red),
-  recibir lo que mandan (temperatura, contacto, movimiento, agua), mandar
-  órdenes (los relés), y buscar el modelo en la base de Zigbee2MQTT. Los
-  equipos del usuario quedaron en la red de la placa: hay que volver a
-  emparejarlos con su red de siempre.
-- **Cuelgues al arrancar:** cuatro veces en el día, siempre en el primer
+  del Basic llegaba rota). Los equipos del usuario quedaron en la red de
+  la placa: hay que volver a emparejarlos con su red de siempre.
+- **Lo que mandan** (2026-11-24, noche). Cada equipo que entra se
+  configura como lo hace Zigbee2MQTT, un pedido por vez (los "jobs" de
+  `aos_zigbee_devices.c`, cada uno a la respuesta del anterior o a los 5 s):
+  endpoints, Basic, los clusters de cada endpoint, un *binding* a la placa
+  de cada cluster que puede reportar (un Sonoff sólo reporta a lo que está
+  atado), la placa como central de alarma de una zona IAS (la dirección
+  CIE y el *enroll response*: muchos sensores de puerta, agua o movimiento
+  no mandan nada sin eso) y una primera lectura. Lo que llega se lee del
+  marco ZCL crudo (el manejador "raw" de la pila, que ve todos los
+  clusters): temperatura, humedad, batería, salidas, presencia y zonas IAS
+  con nombre, y **todo lo demás crudo** (cluster, atributo o comando,
+  valor), para probar cualquier equipo. La app tiene la pestaña **Mi red**:
+  armar la red, "Sumar equipos" (254 s con cuenta regresiva) y una tarjeta
+  por equipo con sus valores y lo crudo. Probado: el módulo de relés
+  (configurado entero, las dos salidas) y el de temperatura (25,9 °C,
+  62,1 %, batería 78 %, llegados solos aunque dormido no terminó de
+  configurarse). **Falta:** el contacto de puerta, el PIR y el de agua con
+  esta versión, mandar órdenes (prender una salida), guardar la lista,
+  buscar el modelo en la base de Zigbee2MQTT.
+- **Para qué** (el usuario, 2026-11-24): un banco de pruebas de campo. Si
+  un equipo en una obra no se une al Home Assistant o anda raro, se lo une
+  a la placa y se ve qué es, qué manda y si sus salidas responden; y al
+  revés, que la placa **emule** un equipo así (un sensor, un relé) para ver
+  si el coordinador de Home Assistant lo lee o lo maneja bien. Por eso
+  nada está atado a los equipos de la prueba: cualquier cluster se muestra.
+- **Cuelgues al arrancar (aclarado al final del día: fila 14 de la bitácora):** cuatro veces en el día, siempre en el primer
   arranque después de instalar por OTA un firmware de esta rama, la placa
   quedó colgada (la pantalla celeste del arranque, o negra, sin red ni USB);
   un reset la trae, y arranca bien. Sin volcado, sin causa aclarada: no
@@ -397,6 +418,7 @@ quien siga no repita las vueltas:
 | 11 | El primer sensor entró y a los 14 s lo echaron ("authorization timeout") | la pila exigía el intercambio de clave de Zigbee 3.0, que los equipos anteriores no hacen | no se exige, como en Zigbee2MQTT |
 | 12 | El sensor no encontraba la red | el Wi-Fi rechazaba 4 de 5 beacons que le contestaban (prioridad MEDIO) | prioridad ALTA al mandar: 0 rechazos |
 | 13 | El fabricante y el modelo llegaban rotos ("dropping radio frame: Parse") | la pila lee su "UART" de a 128 bytes y, de un datagrama más largo, el resto se pierde | el túnel le entrega datagramas de 64 bytes |
+| 14 | La placa "colgada" en el primer arranque después de un OTA (cuatro veces en el día) | la microSD y el C6 comparten el único controlador SDMMC del P4, y esp_hosted levanta el C6 por su cuenta mientras se lee la tarjeta: cuando se cruzaron, la tarjeta falló tres veces y el enlace del C6 se cayó (sin tarjeta y sin Wi-Fi) | la tarjeta espera a que el enlace del C6 esté arriba (`aos_hal_p4.c`, `sd_mount`, a lo sumo 4 s; ~1,6 s más de arranque); seis reinicios seguidos, limpios. **No es de Zigbee: `main` lo necesita también** |
 
 Y lo que lo hizo visible: contadores en cada llamada entre la pila y su
 plataforma (`aos_zigbee_trace.c`), el volcado de los bytes de spinel en cada
