@@ -1359,6 +1359,23 @@ proyecto).
     nombra el catálogo existen con su tamaño y su SHA-256 (34 en esta
     release, el resto en las tres anteriores), y que las dos imágenes
     dicen `v0.31.0`. Publicado, `releases/latest` sirve ese catálogo.
+- **La 0.33.0 salió el 2026-11-24** (tag `v0.33.0` en `eef973cb`): nueve
+  apps nuevas (Planeo, Tanques con dos DLC opcionales, Tortuga, DJ,
+  Deriva, Vitral, Fusión, Monitor serie, Mi casa), portugués, francés e
+  italiano como partes del sistema, y la Terminal para multímetros. Orden:
+  los cuatro packs nuevos (Tanques y Tortuga) subidos a `v0.32.1`, la
+  última publicada, y anotados con `gen_store.py packs --tag v0.32.1`
+  (otra vez quiso mover `c6.bin`: se dejó como estaba) y en
+  `CARRIED_PACKS`; `main` y su CI (26 min, recompiló todo por los
+  encabezados); el catálogo de ese CI revisado (84 entradas: 77 apps y 7
+  partes del sistema); tag; CI del tag (borrador con 185 archivos); los
+  453 archivos que nombra el catálogo buscados en su release (125 en
+  `v0.33.0`, 4 en `v0.32.1`, 16 en `v0.32.0`, 65 en `v0.31.0`, 214 en
+  `v0.30.0`, 14 en `v0.29.0`, 15 en `v0.28.0`), con su tamaño, y 178 por
+  SHA-256, sin un error; las dos imágenes dicen `v0.33.0`; notas
+  (`docs/internal/RELEASE-0.33.0.md`), publicada, y `releases/latest`
+  sirve su catálogo. Casi todas las apps se actualizan una vez: cada
+  paquete trae ahora sus textos en los tres idiomas nuevos.
 
 ## Preguntas abiertas
 
