@@ -27,6 +27,9 @@ static aos_154_info_t s_info;
 static aos_154_chan_t s_chan[16];
 static aos_154_frame_t *s_ring;         /* AOS_154_KEEP of them, PSRAM (malloc puts them there) */
 static uint32_t s_seq;                  /* the newest frame's */
+static aos_154_device_t *s_dev;         /* AOS_154_DEVICES, PSRAM */
+static int32_t  s_rssi_acc[AOS_154_DEVICES];
+static int s_ndev;
 
 /* the capture */
 static FILE *s_pcap;
@@ -240,6 +243,122 @@ int aos_154_frames(uint32_t from, aos_154_frame_t *out, int max)
     return n;
 }
 
+/* ---- the devices heard ---------------------------------------------------- */
+
+static aos_154_device_t *dev_find(uint16_t pan, uint16_t sh, const uint8_t *ext)
+{
+    if (!s_dev) {
+        s_dev = calloc(AOS_154_DEVICES, sizeof *s_dev);
+        if (!s_dev) return NULL;
+    }
+    for (int i = 0; i < s_ndev; i++) {
+        aos_154_device_t *d = &s_dev[i];
+        if (ext && d->has_ext && !memcmp(d->ext, ext, 8)) return d;
+        if (!ext && sh != 0xffff && d->short_addr == sh && (d->pan == pan || pan == 0xffff)) return d;
+    }
+    int at = s_ndev;
+    if (at == AOS_154_DEVICES) {        /* full: the one heard longest ago goes */
+        at = 0;
+        for (int i = 1; i < s_ndev; i++) if ((int32_t)(s_dev[i].last_ms - s_dev[at].last_ms) < 0) at = i;
+    } else s_ndev++;
+    aos_154_device_t *d = &s_dev[at];
+    memset(d, 0, sizeof *d);
+    s_rssi_acc[at] = 0;
+    d->pan = pan;
+    d->short_addr = ext ? 0xffff : sh;
+    if (ext) { memcpy(d->ext, ext, 8); d->has_ext = true; }
+    d->first_ms = (uint32_t)aos_hal_uptime_ms();
+    return d;
+}
+
+static void dev_heard(aos_154_device_t *d, const aos_154_frame_t *f)
+{
+    int i = (int)(d - s_dev);
+    d->frames++;
+    d->channel = f->channel;
+    d->rssi_last = f->rssi;
+    s_rssi_acc[i] += f->rssi;
+    d->rssi_avg = (int8_t)(s_rssi_acc[i] / (int32_t)d->frames);
+    d->last_ms = (uint32_t)aos_hal_uptime_ms();
+}
+
+/* The sender of a frame, from its MAC header, and on a Zigbee data frame the
+ * long address its network header may carry for the short one. */
+static void dev_note(const aos_154_frame_t *fr)
+{
+    const uint8_t *f = fr->data;
+    int len = fr->len - 2;
+    if (len < 3) return;
+    uint16_t fcf = f[0] | f[1] << 8;
+    int type = fcf & 7, comp = fcf >> 6 & 1, dm = fcf >> 10 & 3, sm = fcf >> 14 & 3;
+    if (type == 2 || !sm) return;       /* an acknowledgement says nobody */
+    int at = 3;
+    uint16_t pan = 0xffff;
+    if (dm) {
+        pan = f[at] | f[at + 1] << 8;
+        at += 2 + (dm == 3 ? 8 : 2);
+    }
+    if (!comp) {
+        if (at + 2 > len) return;
+        pan = f[at] | f[at + 1] << 8;
+        at += 2;
+    }
+    if (at + (sm == 3 ? 8 : 2) > len) return;
+    aos_154_device_t *d;
+    if (sm == 3) {
+        uint8_t ext[8];
+        for (int i = 0; i < 8; i++) ext[i] = f[at + 7 - i];
+        at += 8;
+        d = dev_find(pan, 0xffff, ext);
+    } else {
+        uint16_t sh = f[at] | f[at + 1] << 8;
+        at += 2;
+        d = dev_find(pan, sh, NULL);
+        /* Zigbee's network header: frame control, destination, source,
+         * radius, sequence, then the long destination and source when its
+         * bits 11 and 12 say so */
+        if (d && type == 1 && !(fcf >> 3 & 1) && at + 8 <= len && ((f[at] >> 2) & 0x0f) == 2) {
+            uint16_t nf = f[at] | f[at + 1] << 8;
+            uint16_t nsrc = f[at + 4] | f[at + 5] << 8;
+            int x = at + 8 + (nf >> 11 & 1 ? 8 : 0);
+            if (nsrc == sh && nf >> 12 & 1 && x + 8 <= len && !d->has_ext) {
+                for (int i = 0; i < 8; i++) d->ext[i] = f[x + 7 - i];
+                d->has_ext = true;
+            }
+        }
+    }
+    if (d) {
+        if (d->pan == 0xffff) d->pan = pan;
+        dev_heard(d, fr);
+    }
+}
+
+int aos_154_devices(aos_154_device_t *out, int max)
+{
+    if (!s_lock) return 0;
+    lock();
+    int n = 0;
+    if (s_dev)
+        for (int i = 0; i < s_ndev && n < max; i++) out[n++] = s_dev[i];
+    unlock();
+    /* the most recently heard first */
+    for (int i = 1; i < n; i++)
+        for (int j = i; j > 0 && (int32_t)(out[j].last_ms - out[j - 1].last_ms) > 0; j--) {
+            aos_154_device_t t = out[j];
+            out[j] = out[j - 1];
+            out[j - 1] = t;
+        }
+    return n;
+}
+
+void aos_154_devices_clear(void)
+{
+    if (!s_lock) return;
+    lock();
+    s_ndev = 0;
+    unlock();
+}
+
 /* ---- what the C6 says ----------------------------------------------------- */
 
 /* The 802.15.4 FCS: CRC-16/KERMIT, little-endian. The C6's radio checks it
@@ -310,6 +429,7 @@ void aos_154_on_msg(uint32_t id, const uint8_t *d, size_t n)
             f->len = rec.len;
             memcpy(f->data, d + at, rec.len);
             fix_fcs(f->data, rec.len);
+            dev_note(f);
             at += rec.len;
         }
     }

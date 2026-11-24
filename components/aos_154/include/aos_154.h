@@ -60,6 +60,25 @@ typedef struct {
     uint8_t  data[127];         /* the PSDU, FCS included */
 } aos_154_frame_t;
 
+/* A device heard: by its short address on a PAN, or by its long one. The
+ * long one of a short comes from Zigbee's network header when it carries it. */
+#define AOS_154_DEVICES 64
+typedef struct {
+    uint16_t pan;               /* 0xffff when the frame did not say */
+    uint16_t short_addr;        /* 0xffff: known only by its long address */
+    uint8_t  ext[8];            /* the long address, most significant byte first */
+    bool     has_ext;
+    uint8_t  channel;
+    uint32_t frames;
+    int8_t   rssi_last, rssi_avg;
+    uint32_t first_ms, last_ms; /* aos_hal_uptime_ms() */
+} aos_154_device_t;
+
+/* The devices heard since the board started (or since aos_154_devices_clear),
+ * the most recently heard first; how many. */
+int  aos_154_devices(aos_154_device_t *out, int max);
+void aos_154_devices_clear(void);
+
 /* Asks the C6 how it is; the answer comes by itself (aos_154_info). */
 bool aos_154_hello(void);
 /* Each channel from first to last (11..26), dwell_ms on each. */

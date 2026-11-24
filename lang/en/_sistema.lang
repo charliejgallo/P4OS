@@ -10969,3 +10969,9 @@ guardando %u en %s	saving %u to %s
 Zigbee y Thread	Zigbee and Thread
 Canales	Channels
 Zigbee	Zigbee
+Olvidarlos	Forget them
+Lo que se oyó mientras se escuchaba, el más reciente arriba. La dirección larga de una corta aparece cuando la red la manda.	What was heard while listening, the most recent on top. A short address's long one shows when the network sends it.
+Todavía nadie: escuchá un canal con tráfico.	Nobody yet: listen on a channel with traffic.
+coordinador	coordinator
+%u paquetes · %d dBm, promedio %d · hace %u s	%u packets · %d dBm, average %d · %u s ago
+canal	channel

@@ -3628,6 +3628,12 @@ static const char blob_en__sistema_lang[] =
     "Zigbee y Thread\tZigbee and Thread\n"
     "Canales\tChannels\n"
     "Zigbee\tZigbee\n"
+    "Olvidarlos\tForget them\n"
+    "Lo que se oyó mientras se escuchaba, el más reciente arriba. La dirección larga de una corta aparece cuando la red la manda.\tWhat was heard while listening, the most recent on top. A short address's long one shows when the network sends it.\n"
+    "Todavía nadie: escuchá un canal con tráfico.\tNobody yet: listen on a channel with traffic.\n"
+    "coordinador\tcoordinator\n"
+    "%u paquetes · %d dBm, promedio %d · hace %u s\t%u packets · %d dBm, average %d · %u s ago\n"
+    "canal\tchannel\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -7248,6 +7254,12 @@ static const char blob_de__sistema_lang[] =
     "Zigbee y Thread\tZigbee und Thread\n"
     "Canales\tKanäle\n"
     "Zigbee\tZigbee\n"
+    "Olvidarlos\tVergessen\n"
+    "Lo que se oyó mientras se escuchaba, el más reciente arriba. La dirección larga de una corta aparece cuando la red la manda.\tWas beim Zuhören empfangen wurde, das Neueste oben. Die lange Adresse zu einer kurzen erscheint, wenn das Netz sie sendet.\n"
+    "Todavía nadie: escuchá un canal con tráfico.\tNoch niemand: auf einem Kanal mit Verkehr zuhören.\n"
+    "coordinador\tKoordinator\n"
+    "%u paquetes · %d dBm, promedio %d · hace %u s\t%u Pakete · %d dBm, Mittel %d · vor %u s\n"
+    "canal\tKanal\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -7255,7 +7267,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3613, 0, files_en, 1 },
-    { "de", "Deutsch", 3613, 0, files_de, 1 },
+    { "en", "English", 3619, 0, files_en, 1 },
+    { "de", "Deutsch", 3619, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

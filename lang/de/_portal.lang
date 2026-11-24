@@ -2446,3 +2446,39 @@ Línea %s del adaptador USB	%s-Leitung des USB-Adapters
 %s actualizaciones en cola	%s Aktualisierungen in der Warteschlange
 Hasta %s: un pack que la tarjeta ya tiene no se baja de nuevo	Bis zu %s: Ein Paket, das schon auf der Karte ist, wird nicht noch einmal geladen
 Actualizar todas (%s)	Alle aktualisieren (%s)
+Zigbee	Zigbee
+trama corta	kurzer Rahmen
+Acuse	Bestätigung
+Comando	Befehl
+trama de tipo %s	Rahmen vom Typ %s
+Datos	Daten
+cifrada en la capa MAC	auf der MAC-Schicht verschlüsselt
+comando de red	Netzwerkbefehl
+datos	Daten
+cifrada	verschlüsselt
+Canal %s	Kanal %s
+Radio	Funk
+el C6 no contesta	der C6 antwortet nicht
+escaneando, canal %s	scanne, Kanal %s
+escuchando el canal %s	höre auf Kanal %s
+apagada	aus
+Firmware del C6	C6-Firmware
+El C6 necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6, en la placa.	Der C6 braucht seine Firmware 3.0.9-154.1 oder neuer: Einstellungen, Aktualisierung, Auf dem C6 installieren, auf der Platine.
+El C6 se cayó con la radio prendida y la dejó apagada; escanear o escuchar la vuelve a probar.	Der C6 ist mit eingeschaltetem Funk abgestürzt und lässt ihn aus; Scannen oder Zuhören versucht es erneut.
+Escuchar	Zuhören
+%s paquetes	%s Pakete
+%s perdidos en el C6	%s im C6 verloren
+guardando %s en %s	speichere %s in %s
+coordinador	Koordinator
+%s paquetes · %s dBm · hace %s s	%s Pakete · %s dBm · vor %s s
+Todavía nadie: escuchá un canal con tráfico.	Noch niemand: auf einem Kanal mit Verkehr zuhören.
+Olvidarlos	Vergessen
+Capturas en la tarjeta	Aufnahmen auf der Karte
+Ninguna todavía.	Noch keine.
+Se abren con Wireshark: cada paquete trae su canal, RSSI y LQI.	Sie öffnen sich in Wireshark: jedes Paket mit Kanal, RSSI und LQI.
+Canales	Kanäle
+Escanear	Scannen
+A fondo (2 s por canal)	Gründlich (2 s pro Kanal)
+La barra es la energía del canal; el número, los paquetes oídos. Una red Zigbee o Thread se ve como un canal con paquetes.	Der Balken ist die Energie des Kanals, die Zahl die empfangenen Pakete. Ein Zigbee- oder Thread-Netz zeigt sich als Kanal mit Paketen.
+Guardar para Wireshark	Für Wireshark speichern
+Zigbee y Thread	Zigbee und Thread

@@ -15,6 +15,9 @@
  *                                  guard kept it off
  *   GET  /api/154/frames?from=N    the frames kept from N on (200 at most),
  *                                  each with its bytes in hex
+ *   GET  /api/154/devices          every device heard: PAN, short and long
+ *                                  address, channel, frames, RSSI, when
+ *   POST /api/154/devices/clear    forgets them
  */
 #include "aos_portal_154.h"
 #include "aos_154.h"
@@ -107,6 +110,35 @@ static void api_frames(aos_httpd_req_t *r)
     send_cjson(r, 200, o);
 }
 
+static void api_devices(aos_httpd_req_t *r)
+{
+    aos_154_device_t *d = malloc(sizeof *d * AOS_154_DEVICES);
+    if (!d) { aos_httpd_send_json(r, 503, "{\"ok\":false,\"error\":\"no memory\"}"); return; }
+    int n = aos_154_devices(d, AOS_154_DEVICES);
+    uint32_t now = (uint32_t)aos_hal_uptime_ms();
+    cJSON *o = cJSON_CreateObject();
+    cJSON *a = cJSON_AddArrayToObject(o, "devices");
+    for (int i = 0; i < n; i++) {
+        cJSON *x = cJSON_CreateObject();
+        char t[24];
+        if (d[i].pan != 0xffff) { snprintf(t, sizeof t, "0x%04X", d[i].pan); cJSON_AddStringToObject(x, "pan", t); }
+        if (d[i].short_addr != 0xffff) { snprintf(t, sizeof t, "0x%04X", d[i].short_addr); cJSON_AddStringToObject(x, "short", t); }
+        if (d[i].has_ext) {
+            const uint8_t *e = d[i].ext;
+            snprintf(t, sizeof t, "%02X%02X%02X%02X%02X%02X%02X%02X", e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7]);
+            cJSON_AddStringToObject(x, "ext", t);
+        }
+        cJSON_AddNumberToObject(x, "ch", d[i].channel);
+        cJSON_AddNumberToObject(x, "frames", d[i].frames);
+        cJSON_AddNumberToObject(x, "rssi", d[i].rssi_last);
+        cJSON_AddNumberToObject(x, "rssi_avg", d[i].rssi_avg);
+        cJSON_AddNumberToObject(x, "ago_ms", now - d[i].last_ms);
+        cJSON_AddItemToArray(a, x);
+    }
+    free(d);
+    send_cjson(r, 200, o);
+}
+
 static long num(cJSON *b, const char *k, long def)
 {
     cJSON *v = cJSON_GetObjectItem(b, k);
@@ -120,6 +152,8 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
     bool get = !strcmp(m, "GET"), post = !strcmp(m, "POST");
     if (get && !what[0]) { api_state(r, true, NULL); return true; }
     if (get && !strcmp(what, "frames")) { api_frames(r); return true; }
+    if (get && !strcmp(what, "devices")) { api_devices(r); return true; }
+    if (post && !strcmp(what, "devices/clear")) { aos_154_devices_clear(); api_state(r, true, NULL); return true; }
     if (!post) return false;
     char *raw = aos_httpd_body_all(r, 512);
     cJSON *b = raw ? cJSON_Parse(raw) : NULL;

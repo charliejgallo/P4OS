@@ -2446,3 +2446,39 @@ Línea %s del adaptador USB	The USB adapter's %s line
 %s actualizaciones en cola	%s updates queued
 Hasta %s: un pack que la tarjeta ya tiene no se baja de nuevo	Up to %s: a pack the card already has is not downloaded again
 Actualizar todas (%s)	Update all (%s)
+Zigbee	Zigbee
+trama corta	short frame
+Acuse	Ack
+Comando	Command
+trama de tipo %s	frame of type %s
+Datos	Data
+cifrada en la capa MAC	encrypted at the MAC layer
+comando de red	network command
+datos	data
+cifrada	encrypted
+Canal %s	Channel %s
+Radio	Radio
+el C6 no contesta	the C6 does not answer
+escaneando, canal %s	scanning, channel %s
+escuchando el canal %s	listening on channel %s
+apagada	off
+Firmware del C6	C6 firmware
+El C6 necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6, en la placa.	The C6 needs its firmware 3.0.9-154.1 or newer: Settings, Update, Install on the C6, on the board.
+El C6 se cayó con la radio prendida y la dejó apagada; escanear o escuchar la vuelve a probar.	The C6 fell over with the radio on and kept it off; scanning or listening tries it again.
+Escuchar	Listen
+%s paquetes	%s packets
+%s perdidos en el C6	%s lost in the C6
+guardando %s en %s	saving %s to %s
+coordinador	coordinator
+%s paquetes · %s dBm · hace %s s	%s packets · %s dBm · %s s ago
+Todavía nadie: escuchá un canal con tráfico.	Nobody yet: listen on a channel with traffic.
+Olvidarlos	Forget them
+Capturas en la tarjeta	Captures on the card
+Ninguna todavía.	None yet.
+Se abren con Wireshark: cada paquete trae su canal, RSSI y LQI.	They open in Wireshark: each packet brings its channel, RSSI and LQI.
+Canales	Channels
+Escanear	Scan
+A fondo (2 s por canal)	Thorough (2 s per channel)
+La barra es la energía del canal; el número, los paquetes oídos. Una red Zigbee o Thread se ve como un canal con paquetes.	The bar is the channel's energy; the number, the packets heard. A Zigbee or Thread network shows as a channel with packets.
+Guardar para Wireshark	Save for Wireshark
+Zigbee y Thread	Zigbee and Thread

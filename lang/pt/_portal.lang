@@ -2791,3 +2791,39 @@ La autoridad HTTPS de la placa	A autoridade HTTPS da placa
 %s actualizaciones en cola	%s atualizações na fila
 Hasta %s: un pack que la tarjeta ya tiene no se baja de nuevo	Até %s: um pacote que o cartão já tem não é baixado de novo
 Actualizar todas (%s)	Atualizar todos (%s)
+Zigbee	Zigbee
+trama corta	quadro curto
+Acuse	Confirmação
+Comando	Comando
+trama de tipo %s	quadro do tipo %s
+Datos	Dados
+cifrada en la capa MAC	cifrado na camada MAC
+comando de red	comando de rede
+datos	dados
+cifrada	cifrado
+Canal %s	Canal %s
+Radio	Rádio
+el C6 no contesta	o C6 não responde
+escaneando, canal %s	escaneando, canal %s
+escuchando el canal %s	escutando o canal %s
+apagada	desligado
+Firmware del C6	Firmware do C6
+El C6 necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6, en la placa.	O C6 precisa do firmware 3.0.9-154.1 ou mais novo: Ajustes, Atualização, Instalar no C6, na placa.
+El C6 se cayó con la radio prendida y la dejó apagada; escanear o escuchar la vuelve a probar.	O C6 caiu com o rádio ligado e o deixou desligado; escanear ou escutar tenta de novo.
+Escuchar	Escutar
+%s paquetes	%s pacotes
+%s perdidos en el C6	%s perdidos no C6
+guardando %s en %s	salvando %s em %s
+coordinador	coordenador
+%s paquetes · %s dBm · hace %s s	%s pacotes · %s dBm · há %s s
+Todavía nadie: escuchá un canal con tráfico.	Ninguém ainda: escute um canal com tráfego.
+Olvidarlos	Esquecê-los
+Capturas en la tarjeta	Capturas no cartão
+Ninguna todavía.	Nenhuma ainda.
+Se abren con Wireshark: cada paquete trae su canal, RSSI y LQI.	Abrem no Wireshark: cada pacote traz seu canal, RSSI e LQI.
+Canales	Canais
+Escanear	Escanear
+A fondo (2 s por canal)	A fundo (2 s por canal)
+La barra es la energía del canal; el número, los paquetes oídos. Una red Zigbee o Thread se ve como un canal con paquetes.	A barra é a energia do canal; o número, os pacotes ouvidos. Uma rede Zigbee ou Thread aparece como um canal com pacotes.
+Guardar para Wireshark	Salvar para o Wireshark
+Zigbee y Thread	Zigbee e Thread

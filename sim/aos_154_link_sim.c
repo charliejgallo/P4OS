@@ -159,6 +159,11 @@ static void *thread(void *arg)
                 s_frames++;
             }
             if (at) aos_154_on_msg(AOS_154_MSG_FRAMES, batch, at);
+            static int ticks;
+            if (++ticks >= 25) {        /* the counters once a second, as radio154.c */
+                ticks = 0;
+                status(0);
+            }
         }
         usleep(40000);
     }

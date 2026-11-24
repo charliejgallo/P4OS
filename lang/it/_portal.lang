@@ -2791,3 +2791,39 @@ La autoridad HTTPS de la placa	L'autorità HTTPS della scheda
 %s actualizaciones en cola	%s aggiornamenti in coda
 Hasta %s: un pack que la tarjeta ya tiene no se baja de nuevo	Fino a %s: un pacchetto già presente sulla scheda non viene riscaricato
 Actualizar todas (%s)	Aggiorna tutte (%s)
+Zigbee	Zigbee
+trama corta	frame corto
+Acuse	Conferma
+Comando	Comando
+trama de tipo %s	frame di tipo %s
+Datos	Dati
+cifrada en la capa MAC	cifrato a livello MAC
+comando de red	comando di rete
+datos	dati
+cifrada	cifrato
+Canal %s	Canale %s
+Radio	Radio
+el C6 no contesta	il C6 non risponde
+escaneando, canal %s	scansione, canale %s
+escuchando el canal %s	in ascolto sul canale %s
+apagada	spenta
+Firmware del C6	Firmware del C6
+El C6 necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6, en la placa.	Il C6 ha bisogno del firmware 3.0.9-154.1 o più recente: Impostazioni, Aggiornamento, Installa sul C6, sulla scheda.
+El C6 se cayó con la radio prendida y la dejó apagada; escanear o escuchar la vuelve a probar.	Il C6 è andato in crash con la radio accesa e l'ha lasciata spenta; scansionare o ascoltare la riprova.
+Escuchar	Ascolta
+%s paquetes	%s pacchetti
+%s perdidos en el C6	%s persi nel C6
+guardando %s en %s	salvataggio di %s in %s
+coordinador	coordinatore
+%s paquetes · %s dBm · hace %s s	%s pacchetti · %s dBm · %s s fa
+Todavía nadie: escuchá un canal con tráfico.	Ancora nessuno: ascolta un canale con traffico.
+Olvidarlos	Dimenticali
+Capturas en la tarjeta	Catture sulla scheda
+Ninguna todavía.	Nessuna ancora.
+Se abren con Wireshark: cada paquete trae su canal, RSSI y LQI.	Si aprono con Wireshark: ogni pacchetto porta il suo canale, RSSI e LQI.
+Canales	Canali
+Escanear	Scansiona
+A fondo (2 s por canal)	A fondo (2 s per canale)
+La barra es la energía del canal; el número, los paquetes oídos. Una red Zigbee o Thread se ve como un canal con paquetes.	La barra è l'energia del canale; il numero, i pacchetti sentiti. Una rete Zigbee o Thread appare come un canale con pacchetti.
+Guardar para Wireshark	Salva per Wireshark
+Zigbee y Thread	Zigbee e Thread

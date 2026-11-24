@@ -93,8 +93,16 @@ captura para Wireshark, la lista de lo que se oye decodificado: tipo,
 direcciones y PAN, y encima Zigbee NWK o 6LoWPAN). Al salir de la app la
 radio se apaga. Textos en los cinco idiomas.
 
-**Falta:** el resumen por equipo y los filtros, la página del portal, mirar
-la app en la placa, y el ícono (hoy el glifo de "access point").
+**Hecho después (2026-11-24):** la página **Equipos** (la app y el portal):
+cada dirección oída con su PAN, canal, paquetes, RSSI y cuándo; la dirección
+larga de una corta sale del encabezado de red de Zigbee cuando lo trae
+(`aos_154_devices()`, `GET /api/154/devices`). **La página del portal**
+`#zigbee`: los canales como barras, el sniffer con la lista decodificada,
+los equipos y las capturas de la tarjeta para bajar. En la red del usuario:
+16 equipos en 25 s, 9 con su dirección larga, 235 paquetes sin pérdidas.
+
+**Falta:** mirar la app en la placa, filtros por PAN o por equipo, el
+fabricante por prefijo (abajo) y el ícono (hoy el glifo de "access point").
 
 Lo pensado:
 
@@ -148,4 +156,6 @@ humedad") y **si Zigbee2MQTT lo soporta** y qué expone.
 - **Antes, con el sniffer:** la dirección larga de un equipo empieza con el
   prefijo de su fabricante (OUI, la tabla pública del IEEE): "chip Telink",
   "Silicon Labs", "Espressif" sin unirse a nada. Es menos, pero sale ya
-  (etapa 2).
+  (etapa 2). **La tabla:** el sitio del IEEE (`standards-oui.ieee.org`)
+  rechaza las descargas automáticas; hay que bajar `oui.csv` a mano desde el
+  navegador y que un script arme el índice (no se esquiva el bloqueo).

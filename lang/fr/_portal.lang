@@ -2791,3 +2791,39 @@ La autoridad HTTPS de la placa	L'autorité HTTPS de la carte
 %s actualizaciones en cola	%s mises à jour en file d'attente
 Hasta %s: un pack que la tarjeta ya tiene no se baja de nuevo	Jusqu'à %s : un pack que la carte a déjà n'est pas retéléchargé
 Actualizar todas (%s)	Tout mettre à jour (%s)
+Zigbee	Zigbee
+trama corta	trame courte
+Acuse	Acquittement
+Comando	Commande
+trama de tipo %s	trame de type %s
+Datos	Données
+cifrada en la capa MAC	chiffrée au niveau MAC
+comando de red	commande réseau
+datos	données
+cifrada	chiffrée
+Canal %s	Canal %s
+Radio	Radio
+el C6 no contesta	le C6 ne répond pas
+escaneando, canal %s	analyse, canal %s
+escuchando el canal %s	écoute du canal %s
+apagada	éteinte
+Firmware del C6	Firmware du C6
+El C6 necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6, en la placa.	Le C6 a besoin du firmware 3.0.9-154.1 ou plus récent : Réglages, Mise à jour, Installer sur le C6, sur la carte.
+El C6 se cayó con la radio prendida y la dejó apagada; escanear o escuchar la vuelve a probar.	Le C6 a planté avec la radio allumée et l'a laissée éteinte ; analyser ou écouter la réessaie.
+Escuchar	Écouter
+%s paquetes	%s paquets
+%s perdidos en el C6	%s perdus dans le C6
+guardando %s en %s	enregistrement de %s dans %s
+coordinador	coordinateur
+%s paquetes · %s dBm · hace %s s	%s paquets · %s dBm · il y a %s s
+Todavía nadie: escuchá un canal con tráfico.	Personne pour l'instant : écoutez un canal avec du trafic.
+Olvidarlos	Les oublier
+Capturas en la tarjeta	Captures sur la carte
+Ninguna todavía.	Aucune pour l'instant.
+Se abren con Wireshark: cada paquete trae su canal, RSSI y LQI.	Elles s'ouvrent dans Wireshark : chaque paquet porte son canal, son RSSI et son LQI.
+Canales	Canaux
+Escanear	Scanner
+A fondo (2 s por canal)	En profondeur (2 s par canal)
+La barra es la energía del canal; el número, los paquetes oídos. Una red Zigbee o Thread se ve como un canal con paquetes.	La barre est l'énergie du canal ; le nombre, les paquets entendus. Un réseau Zigbee ou Thread apparaît comme un canal avec des paquets.
+Guardar para Wireshark	Enregistrer pour Wireshark
+Zigbee y Thread	Zigbee et Thread

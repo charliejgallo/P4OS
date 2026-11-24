@@ -2,13 +2,15 @@
  * P4OS - Zigbee: the C6's 802.15.4 radio as a workshop tool
  * (components/aos_154, docs/plan/ZIGBEE.md, stage 2).
  *
- * Two pages:
+ * Three pages:
  *   Canales    the sixteen channels' energy and traffic, as bars, with
  *              Wi-Fi's channels 1, 6 and 11 drawn over them: where a network
  *              is, and where to put a new one
  *   Escuchar   every frame heard on one channel, decoded (802.15.4, and on
  *              top Zigbee's network layer or Thread's 6LoWPAN), and a
  *              capture to the card for Wireshark
+ *   Equipos    every device heard while listening: its addresses, how much
+ *              it talks and how well it is heard
  *
  * Nothing is sent on the air: the radio only listens. Leaving the app stops
  * it. A C6 with an older firmware does not answer, and the app says how to
@@ -33,10 +35,10 @@
 #define DB_MIN      (-100)
 #define DB_MAX      (-35)
 
-enum { P_CHANNELS = 0, P_SNIFF };
+enum { P_CHANNELS = 0, P_SNIFF, P_DEVICES, P_COUNT };
 
 static struct {
-    lv_obj_t *root, *col, *sub, *warn, *page, *tabs[2];
+    lv_obj_t *root, *col, *sub, *warn, *page, *tabs[P_COUNT], *devs, *devs_note;
     lv_obj_t *bars[16], *bar_lbl[16], *scan_btn, *scan_lbl, *scan_note;
     lv_obj_t *ch_chips[16], *rec_sw, *go_btn, *go_lbl, *counts, *list;
     lv_timer_t *timer;
@@ -49,6 +51,7 @@ static struct {
     uint32_t t_open;
     int rows;
     bool deep;                          /* a scan of 2 s a channel, not 250 ms */
+    uint32_t devs_tick;
 } U;
 
 static lv_obj_t *box(lv_obj_t *parent, int32_t w, int32_t h)
@@ -362,12 +365,72 @@ static void add_row(const aos_154_frame_t *fr, int32_t w)
     }
 }
 
+static void clear_cb(lv_event_t *e)
+{
+    (void)e;
+    aos_154_devices_clear();
+    U.devs_tick = 0;
+}
+
+static void build_devices(lv_obj_t *page, int32_t w)
+{
+    lv_obj_t *row = box(page, w, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(row, LV_FLEX_FLOW_ROW);
+    lv_obj_set_flex_align(row, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+    lv_obj_set_style_pad_column(row, 20, 0);
+    pill(row, _("Olvidarlos"), false, clear_cb, NULL, NULL);
+    U.devs_note = wrap(page, "", aos_font_caption, AOS_C_DIM, w);
+    U.devs = box(page, w, LV_SIZE_CONTENT);
+    lv_obj_set_flex_flow(U.devs, LV_FLEX_FLOW_COLUMN);
+    lv_obj_set_style_pad_row(U.devs, 6, 0);
+    U.devs_tick = 0;
+}
+
+static void fill_devices(int32_t w)
+{
+    static aos_154_device_t d[AOS_154_DEVICES];
+    int n = aos_154_devices(d, AOS_154_DEVICES);
+    lv_obj_clean(U.devs);
+    lv_label_set_text(U.devs_note, n ? _("Lo que se oyó mientras se escuchaba, el más reciente arriba. La dirección larga "
+                                         "de una corta aparece cuando la red la manda.")
+                                     : _("Todavía nadie: escuchá un canal con tráfico."));
+    uint32_t now = (uint32_t)aos_hal_uptime_ms();
+    for (int i = 0; i < n; i++) {
+        char a[64], b[120], ext[24] = "";
+        if (d[i].has_ext)
+            snprintf(ext, sizeof ext, "%02X%02X:%02X%02X:%02X%02X:%02X%02X", d[i].ext[0], d[i].ext[1], d[i].ext[2], d[i].ext[3],
+                     d[i].ext[4], d[i].ext[5], d[i].ext[6], d[i].ext[7]);
+        if (d[i].short_addr != 0xffff)
+            snprintf(a, sizeof a, "0x%04X%s%s", d[i].short_addr, d[i].short_addr == 0 ? "  " : "",
+                     d[i].short_addr == 0 ? _("coordinador") : "");
+        else snprintf(a, sizeof a, "%s", ext);
+        uint32_t ago = (now - d[i].last_ms) / 1000;
+        int k = snprintf(b, sizeof b, _("%u paquetes · %d dBm, promedio %d · hace %u s"), (unsigned)d[i].frames,
+                         d[i].rssi_last, d[i].rssi_avg, (unsigned)ago);
+        if (d[i].short_addr != 0xffff && ext[0]) snprintf(b + k, sizeof b - (size_t)k, " · %s", ext);
+        lv_obj_t *r = card(U.devs, w, LV_SIZE_CONTENT);
+        lv_obj_set_style_pad_hor(r, 18, 0);
+        lv_obj_set_style_pad_ver(r, 10, 0);
+        lv_obj_set_flex_flow(r, LV_FLEX_FLOW_COLUMN);
+        lv_obj_t *top = box(r, lv_pct(100), LV_SIZE_CONTENT);
+        aos_label(top, a, aos_font_caption, AOS_C_TEXT);
+        char pc[24];
+        if (d[i].pan != 0xffff) snprintf(pc, sizeof pc, "PAN %04X · %u", d[i].pan, d[i].channel);
+        else snprintf(pc, sizeof pc, "%s %u", _("canal"), d[i].channel);
+        lv_obj_align(aos_label(top, pc, aos_font_tiny, AOS_C_DIM), LV_ALIGN_TOP_RIGHT, 0, 2);
+        lv_obj_t *c = aos_label(r, b, aos_font_tiny, AOS_C_DIM);
+        lv_obj_set_width(c, w - 36);
+        lv_label_set_long_mode(c, LV_LABEL_LONG_MODE_DOTS);
+    }
+}
+
 /* -------------------------------------------------------------------------- */
 /* Refresh                                                                     */
 /* -------------------------------------------------------------------------- */
 
 static void refresh(void)
 {
+    if (U.page_no == P_DEVICES && U.devs && U.devs_tick++ % 4 == 0) fill_devices(U.W - 2 * AOS_UI_PAD);
     aos_154_info_t in;
     aos_154_info(&in);
     int32_t w = U.W - 2 * AOS_UI_PAD;
@@ -442,14 +505,16 @@ static void build(void)
     if (U.page) lv_obj_delete(U.page);
     memset(U.bars, 0, sizeof U.bars);
     U.list = NULL;
+    U.devs = NULL;
     int32_t w = U.W - 2 * AOS_UI_PAD;
-    for (int i = 0; i < 2; i++)
+    for (int i = 0; i < P_COUNT; i++)
         lv_obj_set_style_bg_color(U.tabs[i], i == U.page_no ? AOS_C_ACCENT : AOS_C_CARD, 0);
     U.page = box(U.col, w, LV_SIZE_CONTENT);
     lv_obj_set_flex_flow(U.page, LV_FLEX_FLOW_COLUMN);
     lv_obj_set_style_pad_row(U.page, 16, 0);
     if (U.page_no == P_CHANNELS) build_channels(U.page, w);
-    else build_sniff(U.page, w);
+    else if (U.page_no == P_SNIFF) build_sniff(U.page, w);
+    else build_devices(U.page, w);
     refresh();
 }
 
@@ -484,8 +549,8 @@ static void *create(aos_app_t *self, lv_obj_t *root)
     lv_obj_t *tabs = box(U.col, w, 60);
     lv_obj_set_flex_flow(tabs, LV_FLEX_FLOW_ROW);
     lv_obj_set_style_pad_column(tabs, 10, 0);
-    static const char *const TABS[2] = { N_("Canales"), N_("Escuchar") };
-    for (int i = 0; i < 2; i++) {
+    static const char *const TABS[P_COUNT] = { N_("Canales"), N_("Escuchar"), N_("Equipos") };
+    for (int i = 0; i < P_COUNT; i++) {
         lv_obj_t *c = box(tabs, LV_SIZE_CONTENT, 60);
         lv_obj_set_style_radius(c, 30, 0);
         lv_obj_set_style_pad_hor(c, 24, 0);

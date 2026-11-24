@@ -10969,3 +10969,9 @@ guardando %u en %s	speichere %u in %s
 Zigbee y Thread	Zigbee und Thread
 Canales	Kanäle
 Zigbee	Zigbee
+Olvidarlos	Vergessen
+Lo que se oyó mientras se escuchaba, el más reciente arriba. La dirección larga de una corta aparece cuando la red la manda.	Was beim Zuhören empfangen wurde, das Neueste oben. Die lange Adresse zu einer kurzen erscheint, wenn das Netz sie sendet.
+Todavía nadie: escuchá un canal con tráfico.	Noch niemand: auf einem Kanal mit Verkehr zuhören.
+coordinador	Koordinator
+%u paquetes · %d dBm, promedio %d · hace %u s	%u Pakete · %d dBm, Mittel %d · vor %u s
+canal	Kanal

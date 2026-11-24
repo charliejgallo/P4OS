@@ -11544,3 +11544,9 @@ guardando %u en %s	salvataggio di %u in %s
 Zigbee y Thread	Zigbee e Thread
 Canales	Canali
 Zigbee	Zigbee
+Olvidarlos	Dimenticali
+Lo que se oyó mientras se escuchaba, el más reciente arriba. La dirección larga de una corta aparece cuando la red la manda.	Ciò che si è sentito durante l'ascolto, il più recente in alto. L'indirizzo lungo di uno corto appare quando la rete lo invia.
+Todavía nadie: escuchá un canal con tráfico.	Ancora nessuno: ascolta un canale con traffico.
+coordinador	coordinatore
+%u paquetes · %d dBm, promedio %d · hace %u s	%u pacchetti · %d dBm, media %d · %u s fa
+canal	canale

@@ -41,7 +41,7 @@ async function loadCatalog(file) {
   } catch {}
 }
 /* the menu that index.html brings, translated where it stands */
-const NAV_NAMES = [N_('Pantalla'), N_('Inicio'), N_('Tienda'), N_('Wi-Fi'), N_('Red'), N_('Terminal'), N_('Programador'), N_('Banco'),
+const NAV_NAMES = [N_('Pantalla'), N_('Inicio'), N_('Tienda'), N_('Wi-Fi'), N_('Red'), N_('Terminal'), N_('Programador'), N_('Banco'), N_('Zigbee'),
   N_('Macro pad'), N_('Expansión'), N_('Archivos'), N_('Ajustes'), N_('Respaldo'), N_('Firmware'), N_('Registro')];
 async function setLang(code) {
   LANG = /^[a-z]{2,8}$/.test(code || '') ? code : 'es';
@@ -3514,7 +3514,133 @@ function pageRespaldo() {
   return () => { gone = true; clearTimeout(timer); };
 }
 
-const PAGES = { pantalla: pagePantalla, inicio: pageInicio, tienda: pageTienda, wifi: pageWifi, red: pageRed, ha: pageHa, terminal: pageTerminal, programador: pageProgramador, banco: pageBanco, claude: pageClaude, mqtt: pageMqtt, macropad: pageMacropad, expansion: pageExpansion, archivos: pageArchivos, ajustes: pageAjustes, respaldo: pageRespaldo, firmware: pageFirmware, registro: pageRegistro };
+/* ---- Zigbee y Thread ----
+ * The C6's 802.15.4 radio (/api/154, components/aos_154): the channels'
+ * energy and traffic, what is heard on one, decoded, the captures on the
+ * card for Wireshark, and the devices heard. The board's Zigbee app does
+ * the same; the radio only listens. */
+let zbT;
+function zbDecode(hex) {
+  const f = hex.match(/../g).map(x => parseInt(x, 16)), len = f.length - 2;
+  if (len < 3) return [tr('trama corta'), ''];
+  const fcf = f[0] | f[1] << 8, type = fcf & 7, sec = fcf >> 3 & 1, comp = fcf >> 6 & 1, dm = fcf >> 10 & 3, sm = fcf >> 14 & 3;
+  let at = 3, pan = '', da = '-', sa = '-';
+  const adr = m => { if (m === 2) { const v = (f[at] | f[at + 1] << 8).toString(16).toUpperCase().padStart(4, '0'); at += 2; return '0x' + v; }
+    if (m === 3) { const v = f.slice(at, at + 8).reverse().map(x => x.toString(16).padStart(2, '0')).join('').toUpperCase(); at += 8; return v; } return '-'; };
+  if (dm) { pan = (f[at] | f[at + 1] << 8).toString(16).toUpperCase().padStart(4, '0'); at += 2; da = adr(dm); }
+  if (sm) { if (!comp) at += 2; sa = adr(sm); }
+  if (type === 2) return [tr('Acuse') + ' #' + f[2], ''];
+  if (type === 0) return ['Beacon ' + sa, ''];
+  if (type === 3) return [tr('Comando') + ' ' + sa + ' → ' + da, ''];
+  if (type !== 1) return [tr('trama de tipo %s', type), ''];
+  const l1 = tr('Datos') + ' ' + sa + ' → ' + da + (pan ? '  PAN ' + pan : '');
+  if (sec) return [l1, tr('cifrada en la capa MAC')];
+  if (at + 8 <= len && ((f[at] >> 2) & 15) === 2 && (f[at] & 3) <= 1) {
+    const nf = f[at] | f[at + 1] << 8, h4 = v => '0x' + v.toString(16).toUpperCase().padStart(4, '0');
+    return [l1, 'Zigbee ' + ((nf & 3) ? tr('comando de red') : tr('datos')) + '  ' + h4(f[at + 4] | f[at + 5] << 8) + ' → ' + h4(f[at + 2] | f[at + 3] << 8) +
+      (nf >> 9 & 1 ? ', ' + tr('cifrada') : '')];
+  }
+  if (at < len && (f[at] & 0xe0) === 0x60) return [l1, '6LoWPAN (Thread)'];
+  return [l1, ''];
+}
+async function pageZigbee() {
+  const status = h('div', { class: 'card pad' }), chans = h('div', { class: 'card pad' }), sniff = h('div', { class: 'card pad' });
+  const devs = h('div', { class: 'card pad' }), caps = h('div', { class: 'card pad' });
+  const canvas = h('canvas', { width: 1200, height: 400, style: 'width:100%;height:auto;display:block' });
+  let st = null, from = 1, rows = [], chan = 15, pcap = true;
+  const act = (what, body) => post('154/' + what, body).then(s => { st = s; draw(); }).catch(e => toast(e.message, true));
+  const chSel = h('select', { onchange: e => { chan = +e.target.value; if (st && st.state === 'sniffing') act('sniff', { channel: chan, pcap }); } },
+    Array.from({ length: 16 }, (_, i) => h('option', { value: 11 + i }, tr('Canal %s', 11 + i))));
+  const pcapBox = h('input', { type: 'checkbox', checked: true, onchange: e => { pcap = e.target.checked; } });
+  const goBtn = h('button', { class: 'btn pri', onclick: () => {
+    if (st && st.state === 'sniffing') return act('stop');
+    from = (st ? st.last : 0) + 1;      // the list and the count start over
+    rows = [];
+    act('sniff', { channel: chan, pcap });
+  } });
+  const counts = h('div', { class: 'note' }), list = h('div', { style: 'max-height:480px;overflow-y:auto;margin-top:8px' });
+  function bars() {
+    const c = canvas.getContext('2d'), W = canvas.width, H = canvas.height, cw = W / 16, top = 40, bot = H - 40;
+    c.clearRect(0, 0, W, H);
+    for (const w of [1, 6, 11]) {      // Wi-Fi 1, 6, 11: 22 MHz around 2407 + 5w
+      const x0 = ((2407 + 5 * w - 11) - 2405 + 2.5) / 5 * cw;
+      c.fillStyle = 'rgba(10,132,255,.12)'; c.fillRect(x0, top - 10, 22 / 5 * cw, bot - top + 10);
+      c.fillStyle = '#0a84ff'; c.font = '28px system-ui'; c.textAlign = 'left'; c.fillText('Wi-Fi ' + w, Math.max(6, x0 + 6), top - 14);
+    }
+    (st ? st.channels : []).forEach((ch, i) => {
+      c.fillStyle = '#8e8e93'; c.font = '30px system-ui'; c.textAlign = 'center'; c.fillText(ch.ch, i * cw + cw / 2, H - 6);
+      if (ch.ed_max == null) return;
+      const db = Math.max(-100, Math.min(-35, ch.ed_max)), hgt = 6 + (bot - top - 40) * (db + 100) / 65;
+      c.fillStyle = ch.frames ? '#eb0443' : db > -75 ? '#ff9f0a' : '#30d158';
+      c.fillRect(i * cw + 6, bot - hgt, cw - 12, hgt);
+      if (ch.frames) { c.fillStyle = '#fff'; c.fillText(ch.frames, i * cw + cw / 2, bot - hgt - 8); }
+      c.textAlign = 'left';
+    });
+  }
+  function draw() {
+    if (!st) return;
+    put(status, row(tr('Radio'), !st.reachable ? tr('el C6 no contesta') : st.state === 'scanning' ? tr('escaneando, canal %s', st.channel)
+        : st.state === 'sniffing' ? tr('escuchando el canal %s', st.channel) : tr('apagada'), st.reachable ? '' : 'warn'),
+      row(tr('Firmware del C6'), st.c6 || '?'),
+      !st.reachable ? h('p', { class: 'note' }, tr('El C6 necesita su firmware 3.0.9-154.1 o más nuevo: Ajustes, Actualización, Instalar en el C6, en la placa.')) : null,
+      st.guarded ? h('p', { class: 'note warn' }, tr('El C6 se cayó con la radio prendida y la dejó apagada; escanear o escuchar la vuelve a probar.')) : null);
+    bars();
+    goBtn.textContent = st.state === 'sniffing' ? tr('Parar') : tr('Escuchar');
+    chSel.value = String(chan);
+    counts.textContent = tr('%s paquetes', st.frames) + (st.dropped ? ' · ' + tr('%s perdidos en el C6', st.dropped) : '') +
+      (st.pcap ? ' · ' + tr('guardando %s en %s', st.pcap_frames, st.pcap.replace(/^.*\//, '')) : '');
+    put(list, rows.slice(-80).reverse().map(fr => { const [a, b] = zbDecode(fr.hex);
+      return h('div', { class: 'row', style: 'flex-direction:column;align-items:stretch' },
+        h('div', { class: 'btns', style: 'justify-content:space-between;flex-wrap:nowrap' }, h('span', { class: 'small' }, a),
+          h('span', { class: 'small muted' }, fr.rssi + ' dBm · ' + fr.hex.length / 2 + ' B')),
+        b ? h('div', { class: 'small muted' }, b) : null); }));
+  }
+  async function loadDevs() {
+    try {
+      const d = await api('154/devices');
+      put(devs, h('h2', {}, tr('Equipos')), d.devices.length ? d.devices.map(x => row(
+        h('span', {}, (x.short || x.ext) + (x.short === '0x0000' ? ' · ' + tr('coordinador') : ''), x.short && x.ext ? h('div', { class: 'small muted mono' }, x.ext) : null),
+        tr('%s paquetes · %s dBm · hace %s s', x.frames, x.rssi_avg, Math.round(x.ago_ms / 1000)) + (x.pan ? ' · PAN ' + x.pan : ''))) :
+        h('p', { class: 'note' }, tr('Todavía nadie: escuchá un canal con tráfico.')),
+        h('div', { class: 'btns', style: 'margin-top:8px' }, h('button', { class: 'btn', onclick: () => post('154/devices/clear').then(loadDevs) }, tr('Olvidarlos'))));
+    } catch {}
+  }
+  async function loadCaps() {
+    const es = (await fsList('/zigbee').catch(() => [])).filter(e => /\.pcap$/.test(e.name)).sort((a, b) => b.mtime - a.mtime);
+    put(caps, h('h2', {}, tr('Capturas en la tarjeta')),
+      es.length ? es.slice(0, 12).map(e => row(h('a', { href: fsUrl('/zigbee/' + e.name, true) }, e.name), fmtBytes(e.size))) :
+        h('p', { class: 'note' }, tr('Ninguna todavía.')),
+      h('p', { class: 'note' }, tr('Se abren con Wireshark: cada paquete trae su canal, RSSI y LQI.')));
+  }
+  async function load() {
+    try { st = await api('154'); } catch { return; }
+    if (st.state === 'sniffing' || st.last >= from) {
+      try { const r = await api('154/frames?from=' + from); if (r.frames.length) { rows = rows.concat(r.frames).slice(-200); from = r.frames[r.frames.length - 1].seq + 1; } } catch {}
+    }
+    const best = (st.channels || []).filter(c => c.frames).sort((a, b) => b.frames - a.frames)[0];
+    if (best && st.state !== 'sniffing') chan = best.ch;
+    draw();
+  }
+  put(chans, h('h2', {}, tr('Canales')), canvas,
+    h('div', { class: 'btns', style: 'margin-top:10px' },
+      h('button', { class: 'btn pri', onclick: () => act('scan', { first: 11, last: 26, dwell: 250 }) }, tr('Escanear')),
+      h('button', { class: 'btn', onclick: () => act('scan', { first: 11, last: 26, dwell: 2000 }) }, tr('A fondo (2 s por canal)'))),
+    h('p', { class: 'note' }, tr('La barra es la energía del canal; el número, los paquetes oídos. Una red Zigbee o Thread se ve como un canal con paquetes.')));
+  put(sniff, h('h2', {}, tr('Escuchar')),
+    h('div', { class: 'btns' }, chSel, h('label', { class: 'small' }, pcapBox, ' ', tr('Guardar para Wireshark')), goBtn), counts, list);
+  put(main, h('h1', {}, tr('Zigbee y Thread')), status, h('div', { style: 'height:16px' }), chans, h('div', { style: 'height:16px' }), sniff,
+    h('div', { style: 'height:16px' }), devs, h('div', { style: 'height:16px' }), caps);
+  clearTimeout(zbT);
+  post('154/hello').catch(() => {});
+  await load();
+  loadDevs();
+  loadCaps();
+  let n = 0;
+  const tick = () => { if (location.hash !== '#zigbee') return; load(); if (++n % 3 === 0) loadDevs(); if (n % 10 === 0) loadCaps(); zbT = setTimeout(tick, 1000); };
+  zbT = setTimeout(tick, 1000);
+}
+
+const PAGES = { pantalla: pagePantalla, inicio: pageInicio, tienda: pageTienda, wifi: pageWifi, red: pageRed, ha: pageHa, terminal: pageTerminal, programador: pageProgramador, banco: pageBanco, claude: pageClaude, zigbee: pageZigbee, mqtt: pageMqtt, macropad: pageMacropad, expansion: pageExpansion, archivos: pageArchivos, ajustes: pageAjustes, respaldo: pageRespaldo, firmware: pageFirmware, registro: pageRegistro };
 
 /* ---- the apps' own pages (docs/PORTAL-PAGES.md) ----
  * An app brings its page in apps/<x>/web/<x>.js; tools/install_apps.sh puts
