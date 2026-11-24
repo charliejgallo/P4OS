@@ -156,6 +156,9 @@ void vh_layout(vh_layout_t *L, int W, int H)
     L->thr_x1 = W - (int)(14 * u);
     L->thr_y0 = (int)(76 * u);
     L->thr_y1 = H - (int)(26 * u);
+    L->rud_x0 = W - (int)(150 * u);
+    L->rud_x1 = W - (int)(46 * u);
+    L->rud_y = H - (int)(20 * u);
     L->stick_r = 30 * u;
     L->stick_home_x = 58 * u;
     L->stick_home_y = (float)H - 58 * u;
@@ -294,6 +297,26 @@ void vh_draw(const vh_layout_t *L, const vh_state_t *s, const vt_set_t *t, uint1
         int fy = y1 - (int)((float)(y1 - y0) * s->thr);
         rect(out, W, H, x0 + 2, fy, x1 - x0 - 4, y1 - fy, vr_565(0xFF8A1E), 22);
         rect(out, W, H, x0 - 3, fy - (int)(2 * u), x1 - x0 + 6, (int)(4 * u), white, 30);
+    }
+    /* the pedals: a track that springs back to the middle */
+    {
+        int x0 = L->rud_x0, x1 = L->rud_x1, y = L->rud_y, h = (int)(12 * u);
+        rect(out, W, H, x0, y - h / 2, x1 - x0, h, 0x0000, 11);
+        int cx = (x0 + x1) / 2;
+        rect(out, W, H, cx - (int)u, y - h / 2, (int)(2 * u + 0.5f), h, white, 14);
+        float kx = (float)cx + s->rud * (float)(x1 - x0) * 0.5f;
+        int kw = (int)(14 * u);
+        if (s->rud > 0.02f || s->rud < -0.02f) {
+            int a = s->rud > 0 ? cx : (int)kx, b = s->rud > 0 ? (int)kx : cx;
+            rect(out, W, H, a, y - h / 2 + 2, b - a, h - 4, vr_565(0xFF8A1E), 22);
+        }
+        rect(out, W, H, (int)kx - kw / 2, y - (int)(9 * u), kw, (int)(18 * u), white, s->rud_on ? 30 : 18);
+        /* little arrows at its ends */
+        float ah = 4 * u;
+        float lx[3] = { (float)x0 - 3 * u, (float)x0 + 3 * u, (float)x0 + 3 * u }, ly[3] = { (float)y, (float)y - ah, (float)y + ah };
+        float rx[3] = { (float)x1 + 3 * u, (float)x1 - 3 * u, (float)x1 - 3 * u }, ry[3] = { (float)y, (float)y - ah, (float)y + ah };
+        vp_fill(out, W, 0, H, lx, ly, white, 20);
+        vp_fill(out, W, 0, H, rx, ry, white, 20);
     }
     /* the stick */
     {

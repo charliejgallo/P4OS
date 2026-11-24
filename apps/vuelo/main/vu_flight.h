@@ -5,6 +5,8 @@
  * a bank turns it (the more banked, the tighter, the slower the tighter),
  * the throttle and the climb set the speed, and below the stall speed the
  * nose drops by itself. Let go of the stick and the wings come level.
+ * The pedals (the rudder) swing the nose sideways without banking: a slow
+ * flat turn, for lining up with a ring.
  * The world repeats, so the plane's place is kept within one copy of it.
  */
 #pragma once
@@ -25,6 +27,7 @@ typedef struct {
     /* what the hands ask */
     float in_x, in_y;           /* the stick: right rolls right, up raises the nose; -1..1 */
     float in_thr;               /* 0..1 */
+    float in_rud;               /* the pedals: right turns the nose right, wings level; -1..1 */
     /* read back */
     float bank, pitch, heading;
     float agl;                  /* metres over what is under it */

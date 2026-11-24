@@ -21,6 +21,8 @@ typedef struct {
     bool  stick_on;             /* a thumb on the stick */
     float stick_bx, stick_by;   /* its base, frame pixels */
     float stick_x, stick_y;     /* -1..1 */
+    float rud;                  /* the pedals, -1..1 */
+    bool  rud_on;               /* a thumb on them */
     bool  stall, crashed;
     uint8_t pressed;            /* buttons held, a bit each */
     /* the mission */
@@ -44,6 +46,7 @@ typedef struct {
     /* the touch zones, frame pixels */
     int btn_x[VH_BTNS], btn_y, btn_s;
     int thr_x0, thr_x1, thr_y0, thr_y1;
+    int rud_x0, rud_x1, rud_y;  /* the pedals' track, its middle row */
     float stick_r;              /* how far the knob goes */
     float stick_home_x, stick_home_y;
 } vh_layout_t;

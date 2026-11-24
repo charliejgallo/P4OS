@@ -450,7 +450,7 @@ void vg_step(vg_game_t *g, const vw_world_t *w, vf_plane_t *pl, const float p0[3
         float k = s0 / (s0 - s1);
         float x[3] = { a0[0] + d[0] * k, a0[1] + d[1] * k, a0[2] + d[2] * k };
         float r2 = x[0] * x[0] + x[1] * x[1] + x[2] * x[2];
-        if (r2 < VG_RING_R * VG_RING_R * 1.25f) {
+        if (r2 < VG_RING_R * VG_RING_R * 1.5f) {
             g->events |= VG_EV_RING;
             memcpy(g->safe_p, c->p, sizeof g->safe_p);
             g->safe_yaw = atan2f(c->n[1], c->n[0]);

@@ -175,6 +175,8 @@ static void render(app_t *a, int slot, float dt, bool still)
         s->stick_by = a->stick_by * ky;
         s->stick_x = a->stick_x;
         s->stick_y = a->stick_y;
+        s->rud = pl->in_rud;
+        s->rud_on = a->rud_on;
         s->stall = pl->stall > 0.2f;
         s->crashed = pl->crashed;
         s->pressed = a->btn_held;
@@ -246,6 +248,7 @@ static void step(app_t *a, float dt)
     pl->in_x = a->in_x;
     pl->in_y = a->in_y;
     pl->in_thr = a->in_thr;
+    pl->in_rud = a->in_rud;
 #ifdef AOS_SIM_BUILTIN
     /* development: VU_AUTO=1 flies the missions by itself */
     static int s_auto = -1;
@@ -255,10 +258,15 @@ static void step(app_t *a, float dt)
         memcpy(tgt, g->pt[g->next].p, sizeof tgt);
         if (g->kind == VG_DELIVER) tgt[2] += 20.0f;
         else {
-            /* aim a little before the ring, along its facing */
-            for (int k = 0; k < 3; k++) tgt[k] -= g->pt[g->next].n[k] * 40.0f;
+            /* from afar, a point on the ring's axis before it; near, the ring */
             float dx = g->pt[g->next].p[0] - pl->p[0], dy = g->pt[g->next].p[1] - pl->p[1];
-            if (dx * dx + dy * dy < 90.0f * 90.0f) memcpy(tgt, g->pt[g->next].p, sizeof tgt);
+            if (dx > VW_SIZE / 2) dx -= VW_SIZE;
+            if (dx < -VW_SIZE / 2) dx += VW_SIZE;
+            if (dy > VW_SIZE / 2) dy -= VW_SIZE;
+            if (dy < -VW_SIZE / 2) dy += VW_SIZE;
+            float along = -(dx * g->pt[g->next].n[0] + dy * g->pt[g->next].n[1]);
+            if (dx * dx + dy * dy > 150.0f * 150.0f || along < 30.0f)
+                for (int k = 0; k < 2; k++) tgt[k] -= g->pt[g->next].n[k] * 100.0f;
         }
         vf_autopilot_to(pl, &a->world, tgt);
     }
@@ -679,7 +687,7 @@ static void touch(app_t *a)
     vh_layout_t L;
     vh_layout(&L, W, H);
     float kx = (float)W / (float)a->SW, ky = (float)H / (float)a->SH;
-    bool stick = false;
+    bool stick = false, rud = false;
     uint8_t held = 0;
     for (int i = 0; i < AOS_TOUCH_MAX; i++) {
         va_finger_t *f = &a->fing[i];
@@ -707,6 +715,8 @@ static void touch(app_t *a)
                     }
                 }
             }
+            if (!f->role && fx >= L.rud_x0 - 12 * L.u && fx < L.rud_x1 + 8 * L.u && fy >= L.rud_y - 20 * L.u)
+                f->role = R_RUD;
             if (!f->role && fx >= L.thr_x0 - 24 * L.u && fy >= L.thr_y0 - 20 * L.u) f->role = R_THR;
             if (!f->role && fx < (float)W * 0.5f && fy > (float)H * 0.2f) {
                 f->role = R_STICK;
@@ -737,12 +747,22 @@ static void touch(app_t *a)
             a->in_thr = t < 0 ? 0 : t > 1 ? 1 : t;
             break;
         }
+        case R_RUD: {
+            /* from where the thumb landed, like a pedal: half the track is full over */
+            float half = (float)(L.rud_x1 - L.rud_x0) * 0.5f / kx;
+            float r = (p->x - f->x0) / half * 1.6f;
+            a->rud_touch = r < -1 ? -1 : r > 1 ? 1 : r;
+            rud = true;
+            break;
+        }
         case R_BTN: held |= (uint8_t)(1u << f->btn); break;
         default: break;
         }
     }
     a->stick_on = stick;
     if (!stick) a->stick_x = a->stick_y = 0;
+    a->rud_on = rud;
+    if (!rud) a->rud_touch = 0;
     a->btn_held = held;
 }
 
@@ -782,9 +802,10 @@ static bool key_in(const uint8_t *k, int n, uint8_t u)
 static void hands(app_t *a, float dt)
 {
     touch(a);
-    float x = a->stick_x, y = a->stick_y;
+    float x = a->stick_x, y = a->stick_y, r = a->rud_touch;
     /* the gamepad: the stick as the touch stick, the d-pad full over; A and
-     * B the throttle, L the camera, START the pause */
+     * B the throttle, L and R the pedals (both at once: the camera), START
+     * the pause */
     if (a->pad.connected) {
         if (a->pad.x || a->pad.y) {
             x = (float)a->pad.x / 32767.0f;
@@ -798,11 +819,18 @@ static void hands(app_t *a, float dt)
         if (aos_pad_held(&a->pad, AOS_PAD_A)) t += dt * 0.7f;
         if (aos_pad_held(&a->pad, AOS_PAD_B)) t -= dt * 0.7f;
         a->in_thr = t < 0 ? 0 : t > 1 ? 1 : t;
-        if (aos_pad_pressed(&a->pad, AOS_PAD_L)) button(a, VH_BTN_VIEW);
+        bool pl_ = aos_pad_held(&a->pad, AOS_PAD_L), pr_ = aos_pad_held(&a->pad, AOS_PAD_R);
+        if (pl_ && pr_) {
+            if (aos_pad_pressed(&a->pad, AOS_PAD_L | AOS_PAD_R)) button(a, VH_BTN_VIEW);
+        } else if (pl_) {
+            r = -1;
+        } else if (pr_) {
+            r = 1;
+        }
         if (aos_pad_pressed(&a->pad, AOS_PAD_START)) button(a, VH_BTN_PAUSE);
     }
     /* a keyboard (the Mac's in the simulator): the arrows, W and S the
-     * throttle, C the camera, P the pause */
+     * throttle, A and D the pedals, C the camera, P the pause */
     uint8_t k[8], mods = 0;
     int n = aos_hal_usb_kbd_held(k, 8, &mods);
     if (n > 0 || a->nkeys_prev > 0) {
@@ -810,6 +838,8 @@ static void hands(app_t *a, float dt)
         if (key_in(k, n, 0x4F)) x = 1;
         if (key_in(k, n, 0x52)) y = 1;
         if (key_in(k, n, 0x51)) y = -1;
+        if (key_in(k, n, 0x04)) r = -1;
+        if (key_in(k, n, 0x07)) r = 1;
         float t = a->in_thr;
         if (key_in(k, n, 0x1A)) t += dt * 0.7f;
         if (key_in(k, n, 0x16)) t -= dt * 0.7f;
@@ -821,6 +851,7 @@ static void hands(app_t *a, float dt)
     }
     a->in_x = x;
     a->in_y = a->cfg.invert ? -y : y;
+    a->in_rud = r;
 }
 
 /* --------------------------------------------------------------------------

@@ -43,7 +43,7 @@
 
 enum { VA_MENU = 0, VA_FLY, VA_PAUSE, VA_RESULT };
 enum { F_FREE = 0, F_BUSY, F_READY, F_SHOWN };
-enum { R_NONE = 0, R_STICK, R_THR, R_BTN };
+enum { R_NONE = 0, R_STICK, R_THR, R_BTN, R_RUD };
 /* the menus' screens */
 enum { VN_MAIN = 0, VN_MISSIONS, VN_FREE, VN_SETTINGS, VN_PAUSE, VN_RESULT, VN_NONE };
 
@@ -101,7 +101,9 @@ typedef struct app_s {
     vt_set_t    text;
     volatile uint32_t events;       /* VG_EV_* for the UI: the worker ORs, the UI takes */
     /* the hands: LVGL's thread writes, the worker reads */
-    volatile float in_x, in_y, in_thr;
+    volatile float in_x, in_y, in_thr, in_rud;
+    volatile float rud_touch;       /* the pedals under a thumb, -1..1 */
+    volatile bool  rud_on;
     volatile bool  stick_on;
     volatile float stick_bx, stick_by, stick_x, stick_y;
     volatile int   in_view_n;

@@ -13,6 +13,7 @@
 #define DRAG        (THRUST / (V_MAX * V_MAX))
 #define ROLL_RATE   2.4f        /* rad/s at full stick */
 #define PITCH_RATE  1.15f
+#define RUDDER_RATE 0.55f       /* rad/s at full pedal: about 30 degrees a second */
 #define CEILING     560.0f
 #define CAM_BACK    15.0f
 #define CAM_UP      4.6f
@@ -116,6 +117,8 @@ void vf_step(vf_plane_t *pl, const vw_world_t *w, float dt)
     /* the ceiling: the air too thin to climb */
     if (pl->p[2] > CEILING && pl->f[2] > 0) pitch -= (pl->p[2] - CEILING) * 0.04f;
     turn2(pl->r, pl->u, -roll * dt);       /* the right wing towards down */
+    /* the rudder: the nose towards the right wing, round the plane's up */
+    turn2(pl->f, pl->r, pl->in_rud * RUDDER_RATE * auth * dt);
     turn2(pl->f, pl->u, pitch * dt);       /* the nose towards up */
     /* the bank turns it: the lift leans with the wings */
     /* tan(bank) from the axes, kept finite near the vertical; an arcade's
@@ -136,6 +139,7 @@ void vf_step(vf_plane_t *pl, const vw_world_t *w, float dt)
     derive(pl);
     /* speed: thrust, drag, and gravity along the path */
     float acc = THRUST * (0.15f + 0.85f * pl->thr) - DRAG * pl->v * pl->v - G * pl->f[2];
+    acc -= fabsf(pl->in_rud) * 2.5f;        /* skidding sideways costs speed */
     pl->v += acc * dt;
     if (pl->v < 8.0f) pl->v = 8.0f;
     for (int k = 0; k < 3; k++) pl->p[k] += pl->f[k] * pl->v * dt;
@@ -248,6 +252,7 @@ void vf_autopilot(vf_plane_t *pl, const vw_world_t *w, float t)
     if (pl->in_y > 1) pl->in_y = 1;
     if (pl->in_y < -1) pl->in_y = -1;
     pl->in_thr = pl->pitch > 0.15f ? 0.9f : 0.62f;
+    pl->in_rud = 0;
 }
 
 void vf_autopilot_to(vf_plane_t *pl, const vw_world_t *w, const float target[3])
@@ -263,8 +268,11 @@ void vf_autopilot_to(vf_plane_t *pl, const vw_world_t *w, const float target[3])
     float want_bank = -dh * 2.2f;
     if (want_bank > 1.0f) want_bank = 1.0f;
     if (want_bank < -1.0f) want_bank = -1.0f;
-    pl->in_x = (want_bank - pl->bank) * 2.0f;
     float dist = sqrtf(dx * dx + dy * dy);
+    /* inside the turn's circle: straight on until there is room to turn */
+    float radius = pl->v * pl->v / (9.81f * 2.6f * 1.4f) + 20.0f;
+    if (fabsf(dh) > 0.6f && dist < radius * 1.6f * sinf(fabsf(dh) > 1.5f ? 1.5f : fabsf(dh))) want_bank = 0;
+    pl->in_x = (want_bank - pl->bank) * 2.0f;
     float want_z = target[2];
     for (int i = 1; i <= 3; i++) {
         float d = (float)i * 40.0f;
@@ -281,4 +289,8 @@ void vf_autopilot_to(vf_plane_t *pl, const vw_world_t *w, const float target[3])
     if (pl->in_y > 1) pl->in_y = 1;
     if (pl->in_y < -1) pl->in_y = -1;
     pl->in_thr = 0.85f;
+    /* near the ring the pedals line it up */
+    pl->in_rud = dist < 160.0f ? -dh * 3.0f : 0;
+    if (pl->in_rud > 1) pl->in_rud = 1;
+    if (pl->in_rud < -1) pl->in_rud = -1;
 }
