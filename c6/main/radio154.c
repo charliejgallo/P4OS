@@ -33,6 +33,7 @@
 #include "radio154.h"
 #include "zigbee_test.h"
 #include "slots.h"
+#include "rcp.h"
 
 static const char *TAG = "radio154";
 
@@ -268,6 +269,13 @@ static void scan(uint8_t first, uint8_t last, uint16_t dwell)
 static void run(const cmd_t *c)
 {
     s_err = 0;
+    /* while the RCP has the radio (for good), only a hello, the log and the slots */
+    if (s_state == AOS_154_RCP && c->b[0] != AOS_154_OP_HELLO && c->b[0] != AOS_154_OP_LOG &&
+        c->b[0] != AOS_154_OP_SLOTS && c->b[0] != AOS_154_OP_RCP_START) {
+        s_err = -5;
+        send_status();
+        return;
+    }
     /* while the Zigbee stack has the radio, only its stop, a hello and the guard */
     if (s_state == AOS_154_ZIGBEE && c->b[0] != AOS_154_OP_ZB_STOP && c->b[0] != AOS_154_OP_HELLO &&
         c->b[0] != AOS_154_OP_UNGUARD && c->b[0] != AOS_154_OP_LOG && c->b[0] != AOS_154_OP_SLOTS) {
@@ -329,6 +337,23 @@ static void run(const cmd_t *c)
     case AOS_154_OP_UNGUARD:
         s_guard.faults = 0;
         break;
+    case AOS_154_OP_RCP_START:
+        if (s_state == AOS_154_RCP) break;
+        if (guarded()) { s_err = -2; break; }
+        if (s_state == AOS_154_SNIFFING) flush();
+        radio_off();
+        /* the radio's events go to OpenThread's port now, not to radio154's list */
+        if (s_cb_set) {
+            esp_ieee802154_event_callback_list_unregister();
+            s_cb_set = false;
+        }
+        s_guard.on = 1;                 /* the RCP's radio counts for the guard too */
+        if (rcp_start()) s_state = AOS_154_RCP;
+        else {
+            s_guard.on = 0;
+            s_err = -7;
+        }
+        break;
     case AOS_154_OP_SLOTS:
     case AOS_154_OP_SLOTS_GROW: {
         int8_t grow = 0;
@@ -362,7 +387,7 @@ static void task(void *arg)
         cmd_t c;
         if (xQueueReceive(s_cmds, &c, pdMS_TO_TICKS(FLUSH_MS)) == pdTRUE) run(&c);
         if (s_log_on) log_flush();
-        if (s_state == AOS_154_SNIFFING || s_state == AOS_154_ZIGBEE) {
+        if (s_state == AOS_154_SNIFFING || s_state == AOS_154_ZIGBEE || s_state == AOS_154_RCP) {
             if (s_state == AOS_154_SNIFFING) flush();
             /* the counters once a second, for the screens */
             if (++ticks >= 1000 / FLUSH_MS) {
@@ -384,11 +409,21 @@ static void on_cmd(uint32_t id, const uint8_t *data, size_t len, void *ctx)
     if (xQueueSend(s_cmds, &c, 0) != pdTRUE) ESP_LOGW(TAG, "a request was lost: the queue is full");
 }
 
+/* the P4's spinel for the RCP */
+static void on_spinel(uint32_t id, const uint8_t *data, size_t len, void *ctx)
+{
+    (void)id;
+    (void)ctx;
+    rcp_from_host(data, len);
+}
+
 void radio154_init(void)
 {
     guard_boot();
     s_cmds = xQueueCreate(8, sizeof(cmd_t));
     xTaskCreate(task, "radio154", 4096, NULL, 5, &s_task);
+    if (eh_cp_feat_peer_data_register_callback(AOS_154_MSG_SPINEL_IN, on_spinel, NULL) != ESP_OK)
+        ESP_LOGE(TAG, "could not register the RCP's spinel with peer_data");
     if (eh_cp_feat_peer_data_register_callback(AOS_154_MSG_CMD, on_cmd, NULL) != ESP_OK)
         ESP_LOGE(TAG, "could not register with peer_data");
     else ESP_LOGI(TAG, "ready, the radio off%s", guarded() ? " and guarded" : "");

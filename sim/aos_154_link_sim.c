@@ -158,6 +158,7 @@ static void *thread(void *arg)
                 aos_154_on_msg(AOS_154_MSG_SLOTS, (const uint8_t *)&r, sizeof r);
                 break;
             }
+            case AOS_154_OP_RCP_START:
             case AOS_154_OP_LOG:            /* the make-believe C6 has nothing to say */
                 break;
             default:
@@ -221,4 +222,12 @@ bool aos_154_link_send(const uint8_t *data, size_t len)
     }
     pthread_mutex_unlock(&s_mx);
     return ok;
+}
+
+/* the make-believe C6 has no RCP: spinel goes nowhere */
+bool aos_154_link_spinel(const uint8_t *data, size_t len)
+{
+    (void)data;
+    (void)len;
+    return !off();
 }

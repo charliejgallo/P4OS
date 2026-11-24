@@ -31,6 +31,10 @@
  *                                  again, so call twice a moment apart
  *   POST /api/154/slots/grow       writes the repository's table over the
  *                                  factory one (docs/C6.md, "The slots")
+ *   POST /api/154/rcp              the C6 becomes a radio co-processor for a
+ *                                  stack on the P4 (until it restarts)
+ *   GET  /api/154/rcp/probe        asks the RCP its version in spinel, through
+ *                                  the whole link
  */
 #include "aos_portal_154.h"
 #include "aos_154.h"
@@ -52,7 +56,7 @@ static void send_cjson(aos_httpd_req_t *r, int status, cJSON *o)
     cJSON_Delete(o);
 }
 
-static const char *STATE[] = { "idle", "scanning", "sniffing", "zigbee" };
+static const char *STATE[] = { "idle", "scanning", "sniffing", "zigbee", "rcp" };
 static const char *ZB[] = { "off", "starting", "formed", "failed" };
 
 static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
@@ -64,7 +68,7 @@ static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
     if (error) cJSON_AddStringToObject(o, "error", error);
     cJSON_AddBoolToObject(o, "reachable", in.reachable);
     cJSON_AddNumberToObject(o, "proto", in.proto);
-    cJSON_AddStringToObject(o, "state", in.state < 4 ? STATE[in.state] : "?");
+    cJSON_AddStringToObject(o, "state", in.state < 5 ? STATE[in.state] : "?");
     cJSON_AddNumberToObject(o, "channel", in.channel);
     cJSON_AddBoolToObject(o, "guarded", in.guarded);
     cJSON_AddNumberToObject(o, "faults", in.faults);
@@ -199,6 +203,15 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
     if (get && !strcmp(what, "frames")) { api_frames(r); return true; }
     if (get && !strcmp(what, "devices")) { api_devices(r); return true; }
     if (get && !strcmp(what, "slots")) { api_slots(r, false); return true; }
+    if (get && !strcmp(what, "rcp/probe")) {
+        char v[200];
+        bool ok = aos_154_rcp_probe(v, sizeof v, 1500);
+        cJSON *o = cJSON_CreateObject();
+        cJSON_AddBoolToObject(o, "ok", ok);
+        if (ok) cJSON_AddStringToObject(o, "version", v);
+        send_cjson(r, ok ? 200 : 504, o);
+        return true;
+    }
     if (post && !strcmp(what, "slots/grow")) { api_slots(r, true); return true; }
     if (post && !strcmp(what, "devices/clear")) { aos_154_devices_clear(); api_state(r, true, NULL); return true; }
     if (!post) return false;
@@ -212,6 +225,7 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
     else if (!strcmp(what, "sniff")) ok = aos_154_sniff((int)num(b, "channel", 0), cJSON_IsTrue(cJSON_GetObjectItem(b, "pcap")));
     else if (!strcmp(what, "stop")) ok = aos_154_stop();
     else if (!strcmp(what, "unguard")) ok = aos_154_unguard();
+    else if (!strcmp(what, "rcp")) ok = aos_154_rcp_start();
     else if (!strcmp(what, "c6log")) ok = aos_154_c6_log(cJSON_IsTrue(cJSON_GetObjectItem(b, "on")));
     else if (!strcmp(what, "zigbee"))
         ok = cJSON_IsTrue(cJSON_GetObjectItem(b, "on")) ? aos_154_zigbee_start((int)num(b, "channel", 26)) : aos_154_zigbee_stop();

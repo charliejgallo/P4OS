@@ -229,3 +229,24 @@ humedad") y **si Zigbee2MQTT lo soporta** y qué expone.
   `store/system.json`, asset `zigbee_oui.bin` (la Tienda acepta
   `zigbee/*.bin`); se sube a mano antes de la release (`docs/plan/TIENDA.md`,
   "Dónde quedó").
+
+### La pila en el P4, con el C6 de radio (empezado el 2026-11-24, noche)
+
+- **El túnel de spinel anda** (`3.0.9-154.5`, protocolo 5): el C6 corre el
+  RCP de OpenThread de la IDF (`c6/main/rcp.c`), y su spinel, en vez de un
+  UART, va y viene por peer_data: `otPlatUartSend` está envuelto con
+  `-Wl,--wrap` y lo que llega del P4 entra por `otPlatUartReceived` con el
+  candado de OpenThread. Esp_hosted tiene esto previsto ("spinel over the
+  ESP-Hosted transport") pero "not implemented yet". **Probado en la placa:**
+  el P4 le pide la versión en spinel (`GET /api/154/rcp/probe`) y contesta
+  `openthread-esp32/...; esp32c6`.
+- **El C6:** la imagen con el RCP es de 1,49 MB (entra en un C6 de fábrica);
+  le quedan 53 KB libres con el RCP enlazado y 37 KB con el RCP andando
+  (contra ~35 KB con la pila Zigbee entera adentro, que además no cabía
+  cómoda). El RCP arranca sólo a pedido (`POST /api/154/rcp`) y queda hasta
+  que el C6 se reinicia.
+- **Lo que sigue:** la pila de Espressif en el P4 en modo "radio por UART"
+  (`CONFIG_ZB_RADIO_SPINEL_UART`): su conexión al RCP es código abierto
+  (`esp_zigbee_radio_spinel_config_uart`, que le pasa a `esp_radio_spinel` un
+  descriptor de archivo); se envuelve para darle un socket UDP local cuyo
+  otro extremo va al túnel.

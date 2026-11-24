@@ -32,6 +32,11 @@ static int32_t  s_rssi_acc[AOS_154_DEVICES];
 static int s_ndev;
 static aos_154_slots_info_t s_slots;
 
+/* the RCP's spinel: to a stack's transport, and a little of it kept for the probe */
+static void (*volatile s_spinel_sink)(const uint8_t *, size_t);
+static uint8_t s_probe[512];
+static volatile size_t s_probe_n;
+
 /* the capture */
 static FILE *s_pcap;
 static bool  s_pcap_run;
@@ -240,6 +245,85 @@ void aos_154_slots(aos_154_slots_info_t *out)
     lock();
     *out = s_slots;
     unlock();
+}
+
+bool aos_154_rcp_start(void)
+{
+    uint8_t b[] = { AOS_154_OP_RCP_START };
+    return cmd(b, sizeof b);
+}
+
+void aos_154_spinel_sink(void (*sink)(const uint8_t *, size_t))
+{
+    s_spinel_sink = sink;
+}
+
+bool aos_154_spinel_send(const uint8_t *data, size_t len)
+{
+    return open_link() && aos_154_link_spinel(data, len);
+}
+
+/* HDLC-lite, as spinel frames it: 0x7E, the bytes with 0x7E/0x7D/0x11/0x13
+ * escaped (0x7D, byte ^ 0x20), the FCS-16 (PPP's) complemented, 0x7E */
+static uint16_t fcs16(uint16_t f, uint8_t b)
+{
+    f ^= b;
+    for (int i = 0; i < 8; i++) f = (f & 1) ? (uint16_t)((f >> 1) ^ 0x8408) : (uint16_t)(f >> 1);
+    return f;
+}
+
+static size_t hdlc_put(uint8_t *o, uint8_t b)
+{
+    if (b == 0x7E || b == 0x7D || b == 0x11 || b == 0x13 || b == 0xF8) {
+        o[0] = 0x7D;
+        o[1] = b ^ 0x20;
+        return 2;
+    }
+    o[0] = b;
+    return 1;
+}
+
+bool aos_154_rcp_probe(char *out, size_t n, uint32_t ms)
+{
+    /* PROP_VALUE_GET (2) of PROP_NCP_VERSION (2), header 0x81 (IID 0, TID 1) */
+    static const uint8_t ask[] = { 0x81, 0x02, 0x02 };
+    uint8_t f[16];
+    size_t k = 0;
+    uint16_t fcs = 0xFFFF;
+    f[k++] = 0x7E;
+    for (size_t i = 0; i < sizeof ask; i++) { fcs = fcs16(fcs, ask[i]); k += hdlc_put(f + k, ask[i]); }
+    fcs ^= 0xFFFF;
+    k += hdlc_put(f + k, (uint8_t)fcs);
+    k += hdlc_put(f + k, (uint8_t)(fcs >> 8));
+    f[k++] = 0x7E;
+    s_probe_n = 0;
+    if (!aos_154_spinel_send(f, k)) return false;
+    /* the answer: a frame with header 0x81, PROP_VALUE_IS (6), PROP_NCP_VERSION (2), a string */
+    for (uint32_t t = 0; t < ms; t += 20) {
+        aos_hal_sleep_ms(20);
+        uint8_t d[512];
+        size_t m = 0;
+        bool esc = false;
+        for (size_t i = 0; i < s_probe_n && m < sizeof d; i++) {
+            uint8_t b = s_probe[i];
+            if (b == 0x7E) {
+                if (m >= 5 && d[0] == 0x81 && d[1] == 0x06 && d[2] == 0x02) {
+                    size_t len = m - 2 - 3;             /* without the FCS and the header */
+                    if (len >= n) len = n - 1;
+                    memcpy(out, d + 3, len);
+                    out[len] = '\0';
+                    return true;
+                }
+                m = 0;
+                esc = false;
+            } else if (b == 0x7D) esc = true;
+            else {
+                d[m++] = esc ? b ^ 0x20 : b;
+                esc = false;
+            }
+        }
+    }
+    return false;
 }
 
 bool aos_154_c6_log(bool on)
@@ -479,6 +563,15 @@ static void c6_log(const uint8_t *d, size_t n)
 void aos_154_on_msg(uint32_t id, const uint8_t *d, size_t n)
 {
     if (id == AOS_154_MSG_LOG) { c6_log(d, n); return; }
+    if (id == AOS_154_MSG_SPINEL) {
+        void (*sink)(const uint8_t *, size_t) = s_spinel_sink;
+        if (sink) sink(d, n);
+        size_t at = s_probe_n;
+        size_t k = n < sizeof s_probe - at ? n : sizeof s_probe - at;
+        memcpy(s_probe + at, d, k);
+        s_probe_n = at + k;
+        return;
+    }
     if (!s_lock) return;
     lock();
     if (id == AOS_154_MSG_SLOTS && n >= sizeof(aos_154_slots_t)) {

@@ -121,8 +121,21 @@ void aos_154_info(aos_154_info_t *out);
 /* The frames kept, from 'from' (a seq) on, up to max; how many. */
 int  aos_154_frames(uint32_t from, aos_154_frame_t *out, int max);
 
+/* The C6 as a radio co-processor for a stack on the P4 (protocol 5): from
+ * the request on, the C6's radio is the RCP's until it restarts, and spinel
+ * goes both ways (aos_154_spinel_*). */
+bool aos_154_rcp_start(void);
+/* A test of the link: asks the RCP its version in spinel and waits up to
+ * 'ms' for the answer; true with the version in 'out'. */
+bool aos_154_rcp_probe(char *out, size_t n, uint32_t ms);
+/* Where the RCP's spinel bytes go (a stack's transport), or NULL. Called
+ * from the link's task: it must not wait. */
+void aos_154_spinel_sink(void (*sink)(const uint8_t *data, size_t len));
+bool aos_154_spinel_send(const uint8_t *data, size_t len);
+
 /* ---- for the link (aos_154_link_p4.c, sim/aos_154_link_sim.c) ---- */
 bool aos_154_link_send(const uint8_t *data, size_t len);
+bool aos_154_link_spinel(const uint8_t *data, size_t len);
 bool aos_154_link_open(void);
 /* what the C6 sent, from the link's task */
 void aos_154_on_msg(uint32_t id, const uint8_t *data, size_t len);

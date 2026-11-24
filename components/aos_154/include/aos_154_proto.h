@@ -31,6 +31,10 @@
  *                                  app slots of 1.94 MB) over the factory one
  *                                  (1.5 MB), with c6/main/slots.c's checks;
  *                                  a SLOTS answer, used from the next start
+ *   RCP_START                      (protocol 5) the C6 becomes a radio
+ *                                  co-processor for a stack on the P4: the IDF's
+ *                                  OpenThread RCP, its spinel (HDLC-framed) in
+ *                                  SPINEL messages both ways, until it restarts
  *   LOG u8 on                      (protocol 3) the C6's log lines to the P4,
  *                                  as LOG messages, while on: its own
  *                                  serial port is on J7, out of reach
@@ -41,6 +45,8 @@
  *   SCAN    aos_154_scan_t, one channel
  *   LOG     one or more log lines of the C6, text
  *   SLOTS   aos_154_slots_t
+ *   SPINEL  bytes of the RCP's spinel stream, as they come (either way: the
+ *           P4's go as AOS_154_MSG_SPINEL_IN)
  *   FRAMES  records one after another, each aos_154_rec_t and then its
  *           frame: the PSDU as the radio gave it (len bytes). The radio has
  *           checked the FCS and put the RSSI and the LQI in its two bytes;
@@ -56,20 +62,24 @@
 
 #include <stdint.h>
 
-#define AOS_154_PROTO       4           /* 2: the status says the C6's free memory;
+#define AOS_154_PROTO       5           /* 2: the status says the C6's free memory;
                                            3: Espressif's Zigbee stack on request;
                                            4: the C6's app slots (not the radio's, but
-                                              this is the P4's channel to the C6) */
+                                              this is the P4's channel to the C6);
+                                           5: the C6 as an RCP, spinel both ways */
 
 #define AOS_154_MSG_CMD     0x15400001u
+#define AOS_154_MSG_SPINEL_IN 0x15400002u       /* P4 -> C6: spinel for the RCP */
 #define AOS_154_MSG_STATUS  0x15400081u
 #define AOS_154_MSG_SCAN    0x15400082u
 #define AOS_154_MSG_FRAMES  0x15400083u
 #define AOS_154_MSG_LOG     0x15400084u
 #define AOS_154_MSG_SLOTS   0x15400085u
+#define AOS_154_MSG_SPINEL  0x15400086u
 
 enum { AOS_154_OP_HELLO = 1, AOS_154_OP_SCAN, AOS_154_OP_SNIFF, AOS_154_OP_STOP, AOS_154_OP_UNGUARD,
-       AOS_154_OP_ZB_START, AOS_154_OP_ZB_STOP, AOS_154_OP_LOG, AOS_154_OP_SLOTS, AOS_154_OP_SLOTS_GROW };
+       AOS_154_OP_ZB_START, AOS_154_OP_ZB_STOP, AOS_154_OP_LOG, AOS_154_OP_SLOTS, AOS_154_OP_SLOTS_GROW,
+       AOS_154_OP_RCP_START };
 
 /* the table on the C6's flash (protocol 4) */
 enum { AOS_154_SLOTS_UNKNOWN = 0, AOS_154_SLOTS_FACTORY, AOS_154_SLOTS_GROWN, AOS_154_SLOTS_OTHER };
@@ -82,7 +92,7 @@ typedef struct __attribute__((packed)) {
     uint32_t running_addr;      /* where the running image is: 0x10000 is ota_0 */
 } aos_154_slots_t;
 
-enum { AOS_154_IDLE = 0, AOS_154_SCANNING, AOS_154_SNIFFING, AOS_154_ZIGBEE };
+enum { AOS_154_IDLE = 0, AOS_154_SCANNING, AOS_154_SNIFFING, AOS_154_ZIGBEE, AOS_154_RCP };
 
 /* the stack's state in the status (protocol 3) */
 enum { AOS_154_ZB_OFF = 0, AOS_154_ZB_STARTING, AOS_154_ZB_FORMED, AOS_154_ZB_FAILED };

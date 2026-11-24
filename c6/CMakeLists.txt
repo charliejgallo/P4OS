@@ -10,7 +10,8 @@ cmake_minimum_required(VERSION 3.5)
 # P4OS's own additions (154.1: the 802.15.4 radio, AOS_154_PROTO 1; 154.2:
 # its free memory in the status, AOS_154_PROTO 2; 154.3: Espressif's Zigbee
 # stack on request, AOS_154_PROTO 3; 154.4: grows its own app slots on
-# request, AOS_154_PROTO 4)
-set(PROJECT_VER "3.0.9-154.4")
+# request, AOS_154_PROTO 4; 154.5: an RCP for a stack on the P4, spinel over
+# peer_data, AOS_154_PROTO 5)
+set(PROJECT_VER "3.0.9-154.5")
 include($ENV{IDF_PATH}/tools/cmake/project.cmake)
 project(p4os_c6)
