@@ -14,7 +14,7 @@ noviembre, junto; el detalle de cada cosa está en su sección, más abajo.
 De antes de noviembre quedan 69 renglones sin tachar desde "Pendientes,
 en resumen": no se revisaron en esta pasada.
 
-**Lo que entra en la 0.33.0 (2026-11-23/24):**
+**Lo que entra en la 0.33.0 (2026-11-23/24), publicada el 2026-11-24:**
 
 - [ ] **Tanques**: el usuario lo jugó en la placa (vista de arriba ~30 fps
       quieta y 16-22 fps deslizando; primera persona 36-77 ms; 9,9-12,6 MB de
@@ -35,9 +35,13 @@ en resumen": no se revisaron en esta pasada.
       a 26-34 fps sin caídas por el rumbo (mapa en mosaicos), PPA 12-13 ms en
       paralelo, un mundo en 4,0 s, 8 MB de PSRAM. El usuario lo miró en la
       pantalla: se ve bien.
-- [ ] **Planeo** a mano: jugarlo con los dedos y con joystick.
+- [x] **Planeo** jugado a mano por el usuario un rato (2026-11-24): sin
+      problemas.
+- [ ] **Planeo** con joystick, y las misiones enteras.
 - [ ] **DJ** a mano: escucharla, los dos platos con las dos manos, MIDI.
-- [ ] **Vitral** a mano: los gestos, dos pulgares de a dos, un vitral de
+- [x] **Vitral** probado a mano por el usuario (2026-11-24): "funciona todo
+      bien".
+- [ ] **Vitral**, lo que falta a mano: los gestos, dos pulgares de a dos, un vitral de
       verdad con los rayos, acostada y el rompecabezas 19.
 - [ ] **Portugués, francés e italiano** desde la Tienda: que Ajustes los
       liste con su nombre, recorrer el inicio, Ajustes y un par de apps.

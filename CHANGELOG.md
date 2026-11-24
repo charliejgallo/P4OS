@@ -1,6 +1,8 @@
 # Changelog
 
-## 0.33.0 — not released yet
+## 0.33.0 — 2026-11-24
+
+Nine new apps, three new languages, and a Terminal that reads multimeters.
 
 - **Nine new apps in the Store**, from the card:
   - **Planeo** (Glide): a light plane over worlds the board draws live in
