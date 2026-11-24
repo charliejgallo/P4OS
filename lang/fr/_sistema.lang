@@ -11550,3 +11550,8 @@ Todavía nadie: escuchá un canal con tráfico.	Personne pour l'instant : écout
 coordinador	coordinateur
 %u paquetes · %d dBm, promedio %d · hace %u s	%u paquets · %d dBm, moyenne %d · il y a %u s
 canal	canal
+Zigbee: 0x%04x no contestó (dormido): tocale el botón	Zigbee : 0x%04x n'a pas répondu (en veille) : appuyez sur son bouton
+Zigbee: entró un equipo (0x%04x), preguntándole qué es	Zigbee : un appareil a rejoint (0x%04x), on lui demande ce qu'il est
+Zigbee: 0x%04x salió de la red	Zigbee : 0x%04x a quitté le réseau
+Zigbee: se pueden sumar equipos por %u s	Zigbee : des appareils peuvent rejoindre pendant %u s
+Zigbee: ya no se pueden sumar equipos	Zigbee : plus aucun appareil ne peut rejoindre

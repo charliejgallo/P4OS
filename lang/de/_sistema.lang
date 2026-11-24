@@ -10975,3 +10975,8 @@ Todavía nadie: escuchá un canal con tráfico.	Noch niemand: auf einem Kanal mi
 coordinador	Koordinator
 %u paquetes · %d dBm, promedio %d · hace %u s	%u Pakete · %d dBm, Mittel %d · vor %u s
 canal	Kanal
+Zigbee: 0x%04x no contestó (dormido): tocale el botón	Zigbee: 0x%04x hat nicht geantwortet (schläft): Taste drücken
+Zigbee: entró un equipo (0x%04x), preguntándole qué es	Zigbee: ein Gerät ist beigetreten (0x%04x), frage, was es ist
+Zigbee: 0x%04x salió de la red	Zigbee: 0x%04x hat das Netz verlassen
+Zigbee: se pueden sumar equipos por %u s	Zigbee: Geräte können %u s lang beitreten
+Zigbee: ya no se pueden sumar equipos	Zigbee: keine weiteren Geräte können beitreten

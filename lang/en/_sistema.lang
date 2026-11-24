@@ -10975,3 +10975,8 @@ Todavía nadie: escuchá un canal con tráfico.	Nobody yet: listen on a channel 
 coordinador	coordinator
 %u paquetes · %d dBm, promedio %d · hace %u s	%u packets · %d dBm, average %d · %u s ago
 canal	channel
+Zigbee: 0x%04x no contestó (dormido): tocale el botón	Zigbee: 0x%04x did not answer (asleep): press its button
+Zigbee: entró un equipo (0x%04x), preguntándole qué es	Zigbee: a device joined (0x%04x), asking what it is
+Zigbee: 0x%04x salió de la red	Zigbee: 0x%04x left the network
+Zigbee: se pueden sumar equipos por %u s	Zigbee: devices can join for %u s
+Zigbee: ya no se pueden sumar equipos	Zigbee: no more devices can join

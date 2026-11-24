@@ -251,11 +251,16 @@ humedad") y **si Zigbee2MQTT lo soporta** y qué expone.
   descriptor de archivo); se envuelve para darle un socket UDP local cuyo
   otro extremo va al túnel.
 
-### La pila en el P4: dónde quedó (2026-11-24, noche; rama `zigbee-p4`)
+### La pila en el P4: forma su red y se unen equipos (2026-11-24; rama `zigbee-p4`)
 
-En la rama `zigbee-p4`, no en `main` (agranda la imagen del P4 a 8-9 %
-libre, todavía lleva contadores de medición y hubo cuelgues al arrancar sin
-causa aclarada). Lo hecho y lo aprendido:
+En la rama `zigbee-p4`, no en `main` todavía: agranda la imagen del P4 (8 %
+libre), lleva contadores de medición (`aos_zigbee_trace.c`, los de
+`c6/main/rcp.c`) y hubo cuelgues al arrancar sin causa aclarada (abajo).
+**Al final del día:** el P4 corre la pila de Espressif como coordinador con
+el C6 de radio, forma su red en el canal 26, vuelve a ella después de
+reiniciar, y se le unieron cinco equipos de tres marcas, cada uno
+identificado (fabricante y modelo) en segundos, con el Wi-Fi a la misma
+velocidad que sin Zigbee. Lo de cada paso:
 
 - **La pila corre en el P4** (`components/aos_154/aos_zigbee_p4.c`,
   `CONFIG_ZB_RADIO_SPINEL_UART`, `CONFIG_OPENTHREAD_SPINEL_ONLY`) con el C6
@@ -303,8 +308,9 @@ causa aclarada). Lo hecho y lo aprendido:
      el turno de 802.15.4 frente al Wi-Fi (OpenThread lo fija por el rol
      sólo cuando arma la red él). El driver tiene uno solo para mandar y
      para escuchar, y un coordinador escucha todo el tiempo: ahora es BAJO
-     mientras escucha y MEDIO mientras sale una trama (se sube antes de
-     mandar y se baja en su "done"/"failed"; medido abajo).
+     mientras escucha y ALTO mientras sale una trama (se sube antes de
+     mandar y se baja en su "done"/"failed"; medido abajo; primero fue
+     MEDIO, y con equipos uniéndose no alcanzó).
   Lo mismo explicaría por qué tampoco formaba con la pila en el C6 (la
   medida larga). **Falta:** que se una un equipo (abrir la red) y sacar los
   contadores de medición (`aos_zigbee_trace.c`, los de `rcp.c`).
@@ -319,7 +325,8 @@ causa aclarada). Lo hecho y lo aprendido:
   | Zigbee, 802.15.4 en MEDIO, BLE conectado | 68-75 ms | 190-260 KB/s | 1 de 9 rechazada por coex |
   | Igual, con el BLE apagado | 80-83 ms | 180-270 KB/s | 9 de 25 rechazadas |
   | Zigbee, 802.15.4 en BAJO | 37-42 ms | 220-570 KB/s | 16 de 22 rechazadas, una llegó como falla a la pila |
-  | **Zigbee, BAJO al escuchar y MEDIO al mandar** (154.14) | 45-58 ms | 270-570 KB/s | 4 de 13 rechazadas al primer intento, ninguna falla |
+  | Zigbee, BAJO al escuchar y MEDIO al mandar (154.14) | 45-58 ms | 270-570 KB/s | 4 de 13 rechazadas al primer intento, ninguna falla |
+  | **Zigbee, BAJO al escuchar y ALTO al mandar** (154.15, con cinco equipos uniéndose) | - | - | 0 de 37 rechazadas |
 
   - **El BLE no es el problema:** apagarlo no mejoró nada. Lo que le quita
     aire al Wi-Fi es que el coordinador escucha todo el tiempo; con el turno
@@ -358,7 +365,41 @@ causa aclarada). Lo hecho y lo aprendido:
   órdenes (los relés), y buscar el modelo en la base de Zigbee2MQTT. Los
   equipos del usuario quedaron en la red de la placa: hay que volver a
   emparejarlos con su red de siempre.
-- **Cuelgues al arrancar:** dos veces, en el primer arranque después de
-  instalar, la placa quedó colgada y la Mac dejó de ver su USB; el usuario
-  la reinició. Sin volcado. Sin causa aclarada (no siempre pasa, ni se ató a
-  que el RCP estuviera andando).
+- **Cuelgues al arrancar:** cuatro veces en el día, siempre en el primer
+  arranque después de instalar por OTA un firmware de esta rama, la placa
+  quedó colgada (la pantalla celeste del arranque, o negra, sin red ni USB);
+  un reset la trae, y arranca bien. Sin volcado, sin causa aclarada: no
+  siempre pasa (de unas quince instalaciones del día), y las secciones de
+  RAM interna eran iguales entre una imagen que colgó y una que no. Una vez
+  se vio que esp_hosted no conseguía sus buffers de SDIO (eso se arregló
+  mandando estáticos a PSRAM, arriba), pero volvió a pasar después. **Para
+  la próxima:** dejar `tools/console_log.py` grabando antes de instalar, para
+  ver dónde se queda.
+
+### Bitácora del 2026-11-24: las vueltas que dio Zigbee
+
+Un día entero, de la mañana a la noche, para pasar de "escuchar" a
+"coordinar una red". En orden, lo que trabó y cómo se destrabó, para que
+quien siga no repita las vueltas:
+
+| # | Qué pasó | Por qué | Cómo quedó |
+|---|---|---|---|
+| 1 | La pila Zigbee de Espressif no cabía en el C6: la actualización se cortaba a 1 572 200 bytes | las ranuras de fábrica del C6 son de 1,5 MB (tiene 4 MB, 960 KB sin usar) | el C6 agranda sus ranuras a 1,94 MB a pedido, sin cable (`c6/main/slots.c`, `docs/C6.md` "The slots") |
+| 2 | Con la pila adentro, el C6 se quedó sin memoria al arrancarla (con `-O2`) o corrió sin formar la red (con `-Os`, 78 KB libres) | el C6 comparte su RAM con el Wi-Fi y el BLE | la pila va al P4 y el C6 queda de radio (RCP), como pide el usuario |
+| 3 | No hay UART entre el P4 y el C6, y esp_hosted no implementa "spinel por su transporte" | - | túnel propio: el spinel del RCP por peer_data (`rcp.c` envuelve `otPlatUartSend`), y en el P4 un par de sockets UDP locales en lugar del UART que espera la pila |
+| 4 | El lector de la pila se quedaba colgado en el socket | lee "hasta que no hay más", y un socket bloqueante espera para siempre | el socket es `O_NONBLOCK`, como un UART abierto así |
+| 5 | Instrucción ilegal en `esp_zigbee_task_queue_post` | la librería para el P4 está compilada para el rev 3 y lee el CSR 0x347 (`mintthresh`), que el rev 1.3 no tiene | el módulo de la cola de tareas reemplazado entero por `--wrap` (`aos_zigbee_taskq.c`); **avisarle a Espressif** |
+| 6 | La placa colgada al arrancar, `assert(buf_mp_g)` en el SDIO | los estáticos de OpenThread y de la pila se comían la RAM interna que esp_hosted necesita | van a PSRAM (`psram.lf`) |
+| 7 | La pila no tenía dónde guardar su red | la `nvs` de la tabla está llena de preferencias | usa el almacén grande de las preferencias |
+| 8 | **La formación quedaba "en curso" para siempre**, sin nada al radio (igual que en el C6) | el escaneo de energía de 138 ms nunca terminaba en el C6 con su Wi-Fi andando, y el driver no decía ni "listo" ni "falló" (`esp_ieee802154_ed_failed` es débil y vacía) | el RCP hace la medida en pedazos de 1 ms con espera, como el escáner (`rcp.c`) |
+| 9 | Formada la red, cada trama tardaba 6 s, fallaba (481) y la pila reiniciaba el RCP | el lazo de OpenThread del C6 no se despertaba al llegar un pedido desde el túnel, y el timer del CSMA no se revisaba | el `feeder` despierta el lazo (`otTaskletsSignalPending`) |
+| 10 | Con Zigbee, el Wi-Fi a la mitad (250 contra 500 KB/s) | el turno de 802.15.4 en MEDIO todo el tiempo, y un coordinador escucha siempre | BAJO al escuchar, ALTO al mandar; el BLE no tenía que ver (medido apagándolo) |
+| 11 | El primer sensor entró y a los 14 s lo echaron ("authorization timeout") | la pila exigía el intercambio de clave de Zigbee 3.0, que los equipos anteriores no hacen | no se exige, como en Zigbee2MQTT |
+| 12 | El sensor no encontraba la red | el Wi-Fi rechazaba 4 de 5 beacons que le contestaban (prioridad MEDIO) | prioridad ALTA al mandar: 0 rechazos |
+| 13 | El fabricante y el modelo llegaban rotos ("dropping radio frame: Parse") | la pila lee su "UART" de a 128 bytes y, de un datagrama más largo, el resto se pierde | el túnel le entrega datagramas de 64 bytes |
+
+Y lo que lo hizo visible: contadores en cada llamada entre la pila y su
+plataforma (`aos_zigbee_trace.c`), el volcado de los bytes de spinel en cada
+dirección (decodificados a mano: así se vio el pedido de escaneo aceptado y
+sin resultado, y la trama sin respuesta seguida del reset), el log del C6
+traído al P4, y el puerto serie grabando.

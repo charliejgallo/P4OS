@@ -61,7 +61,9 @@ FIRMWARE_DIRS = ["components/aos_ui", "components/aos_apps", "components/aos_dyn
                  # the API's messages, which the portal shows as they come
                  "components/aos_portal",
                  # the SSH shell's, which an ssh client shows as they come
-                 "components/aos_ssh"]
+                 "components/aos_ssh",
+                 # the Zigbee stack's notices on the screen
+                 "components/aos_154"]
 
 # `_("...")` and `N_("...")`, allowing the adjacent-literal concatenation C
 # does for you:

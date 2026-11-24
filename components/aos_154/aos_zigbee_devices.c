@@ -222,8 +222,8 @@ bool aos_zigbee_devices_signal(const ezb_app_signal_t *sig)
         if (!j) return true;
         s_permit_until_ms = j->duration ? (int64_t)aos_hal_uptime_ms() + (int64_t)j->duration * 1000 : 0;
         aos_hal_log(TAG, j->duration ? "the network is open for %u s" : "the network is closed", j->duration);
-        if (j->duration) notice(_("Zigbee: red abierta %u s para sumar equipos"), j->duration);
-        else notice("%s", _("Zigbee: red cerrada"));
+        if (j->duration) notice(_("Zigbee: se pueden sumar equipos por %u s"), j->duration);
+        else notice("%s", _("Zigbee: ya no se pueden sumar equipos"));
         return true;
     }
     default:
