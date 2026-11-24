@@ -103,11 +103,33 @@ Lo que más pesa es el diseño coherente, no el firmware.
   otras sesiones, el simulador corre desde otra carpeta con un `sim_fs` de
   enlaces a `sim/sim_fs` y su propio `icons/`.
 
+### Medido en la placa (2026-11-24)
+
+Con un pack de prueba de las 112 apps de la placa del usuario (iniciales
+sobre el color de cada app, 1,2 MB, 336 imágenes):
+
+- **El inicio arma todas sus páginas y las carpetas al arrancar**, no sólo
+  la que se ve: 117 imágenes (23 primero y 94 cuando se cargan las apps de
+  la tarjeta), **unos 2,5 MB de PSRAM** (de 15,2 MB libres quedaron 13,4).
+- **Tiempo:** abriendo el pack para cada ícono, 485 ms en total (~4 ms cada
+  uno, casi todo abrir el archivo en la tarjeta). Dejándolo abierto mientras
+  se arma una tanda (se cierra medio segundo después): **211 ms** (48 + 163),
+  ~1,8 ms cada uno. El registro lo dice en cada tanda: `icon: HD icons: N
+  pictures in X ms, Y KB`.
+- No hace falta una caché por ahora. Si la PSRAM aprieta, guardar las
+  imágenes en RGB565A8 (3 bytes por punto en vez de 4) o armar sólo la
+  página que se ve.
+
+## Las variantes (pedido del usuario, 2026-11-24)
+
+En la producción, **dos o tres variantes de cada ícono** para que el
+usuario elija una por app: una hoja con las variantes lado a lado (en el
+tamaño real, 120 y 26, sobre el fondo de pantalla) y lo que elige queda
+anotado; el pack se arma con las elegidas.
+
 ### Lo que falta
 
-- **En la placa:** medir cuánto tarda en armarse una página del inicio con
-  24 íconos HD (cada uno abre el pack, lee ~10 KB y decodifica) y la PSRAM.
-  Si tarda, una caché chica de imágenes decodificadas por id y tamaño.
+- **El estilo y los dibujos** (las etapas de arriba).
 - **El portal** sigue dibujando el AIC; mostraría el PNG si la placa sirve
   los íconos del pack (por ejemplo `/api/icon/<id>.png`).
 - **Ajustes:** el interruptor de `icon_hd` y, más adelante, los temas
