@@ -327,6 +327,37 @@ causa aclarada). Lo hecho y lo aprendido:
     rechazadas se reintentan solas: OpenThread las manda de nuevo).
   - Con poco tráfico Zigbee (sólo los "link status" cada 15 s, sin equipos
     unidos): con equipos reales hay que medir de nuevo.
+- **Equipos que se unen** (2026-11-24, noche; `aos_zigbee_devices.c`).
+  `POST /api/154/zbpermit {"seconds": N}` abre la red (hasta 254 s); el que
+  entra se anuncia, se le piden sus endpoints y después, al Basic del
+  primero, fabricante, modelo y alimentación, con el mismo juego de
+  atributos que pide Zigbee2MQTT (`0x0004, 0x0000, 0x0001, 0x0005, 0x0007,
+  0xFFFE`: algunos Tuya no contestan otra cosa hasta que se les pide ese).
+  `GET /api/154` los lista en `zbhost.devices`, y la pantalla de la placa
+  avisa cada paso (red abierta/cerrada, entró, quién es, no contestó, se
+  fue). Probado con los equipos del usuario, reseteados a mano:
+
+  | Equipo | Fabricante | Modelo | Rol | Señal |
+  |---|---|---|---|---|
+  | Contacto de puerta | ORVIBO | `e70f96b3773a4c9283c6862dbafb6a99` | a pila | -15 dBm |
+  | Sensor de agua | SONOFF | `SNZB-05P` | a pila | -41 dBm |
+  | PIR | ORVIBO | `895a2d80097f4ae2b2d40500d5e03dcc` | a pila | -23 dBm |
+  | Módulo de 2 relés | `_TZ3000_ruxexjfz` (Tuya) | `TS0002` | router, 220 V, 3 endpoints | -41 dBm |
+  | Temperatura y humedad | SONOFF | `SNZB-02D` | a pila | -26 dBm |
+
+  Cada uno quedó identificado en 1 a 3 s. Lo que hubo que arreglar en el
+  camino: el centro de confianza ya no exige el intercambio de clave (los
+  equipos de antes de Zigbee 3.0 no lo piden y la pila los echaba a los
+  14 s, como hace Zigbee2MQTT), el C6 manda en prioridad ALTA frente al
+  Wi-Fi (en MEDIO se perdían los beacons que el equipo busca para unirse)
+  y los bytes del RCP llegan a la pila en datagramas de 64 (la pila lee su
+  "UART" de a 128 y lo que sobraba de uno más largo se perdía: la respuesta
+  del Basic llegaba rota). **Falta:** guardar la lista (hoy está en RAM y
+  se vacía al reiniciar, aunque la pila los sigue teniendo en su red),
+  recibir lo que mandan (temperatura, contacto, movimiento, agua), mandar
+  órdenes (los relés), y buscar el modelo en la base de Zigbee2MQTT. Los
+  equipos del usuario quedaron en la red de la placa: hay que volver a
+  emparejarlos con su red de siempre.
 - **Cuelgues al arrancar:** dos veces, en el primer arranque después de
   instalar, la placa quedó colgada y la Mac dejó de ver su USB; el usuario
   la reinició. Sin volcado. Sin causa aclarada (no siempre pasa, ni se ató a
