@@ -33,6 +33,22 @@ static long     s_mtime;
 static uint32_t s_looked_ms;
 static bool     s_looked;
 static int8_t   s_on = -1;              /* -1: not read from the preferences yet */
+static FILE    *s_file;                 /* open while a batch of icons is made */
+
+/* What a screenful of icons cost, for the log: the pictures made since the
+ * first one of a batch, the time spent reading and decoding them and the
+ * PSRAM they took, written half a second after the batch began. */
+static lv_timer_t *s_batch;
+static int         s_batch_n;
+static uint64_t    s_batch_us;
+static size_t      s_batch_bytes;
+/* The pack stays open for the batch: opening a file on the card costs more
+ * than reading and decoding a picture (measured on the board, 2026-11-24). */
+static void close_file(void)
+{
+    if (s_file) fclose(s_file);
+    s_file = NULL;
+}
 
 static void pack_path(char *out, size_t n)
 {
@@ -60,6 +76,7 @@ static uint32_t rd32(const uint8_t *p) { return (uint32_t)p[0] | (uint32_t)p[1] 
 
 static void drop_index(void)
 {
+    close_file();
     lv_free(s_idx);
     s_idx = NULL;
     s_count = 0;
@@ -173,10 +190,28 @@ static void free_cb(lv_event_t *e)
     lv_free(dsc);                       /* the header and the pixels are one block */
 }
 
+static void batch_cb(lv_timer_t *t)
+{
+    (void)t;
+    close_file();
+    if (s_batch_n)
+        aos_hal_log("icon", "HD icons: %d pictures in %u ms, %u KB", s_batch_n,
+                    (unsigned)((s_batch_us + 500) / 1000), (unsigned)(s_batch_bytes / 1024));
+    s_batch = NULL;
+    s_batch_n = 0;
+    s_batch_us = 0;
+    s_batch_bytes = 0;
+}
+
 lv_obj_t *aos_icon_pack_create(lv_obj_t *parent, const char *id, int32_t size)
 {
     const entry_t *e = find(id, size);
     if (!e) return NULL;
+    uint64_t t0 = aos_hal_uptime_us();
+    if (!s_batch) {
+        s_batch = lv_timer_create(batch_cb, 500, NULL);
+        lv_timer_set_repeat_count(s_batch, 1);
+    }
     int side = e->size;
     char path[192];
     pack_path(path, sizeof path);
@@ -185,11 +220,11 @@ lv_obj_t *aos_icon_pack_create(lv_obj_t *parent, const char *id, int32_t size)
     lv_image_dsc_t *dsc = lv_malloc(sizeof *dsc + px_bytes);
     uint8_t *px = dsc ? (uint8_t *)(dsc + 1) : NULL;
     bool ok = false;
-    FILE *f = (q && dsc) ? fopen(path, "rb") : NULL;
-    if (f) {
-        ok = fseek(f, (long)e->off, SEEK_SET) == 0 && fread(q, 1, e->len, f) == e->len &&
+    if (q && dsc && !s_file) s_file = fopen(path, "rb");
+    if (q && dsc && s_file) {
+        ok = fseek(s_file, (long)e->off, SEEK_SET) == 0 && fread(q, 1, e->len, s_file) == e->len &&
              aos_qoi_decode(q, e->len, px, side, side);
-        fclose(f);
+        if (!ok) close_file();
     }
     lv_free(q);
     if (!ok) {
@@ -223,5 +258,9 @@ lv_obj_t *aos_icon_pack_create(lv_obj_t *parent, const char *id, int32_t size)
     lv_obj_remove_flag(img, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_remove_flag(img, LV_OBJ_FLAG_CLICKABLE);
     lv_obj_add_event_cb(img, free_cb, LV_EVENT_DELETE, dsc);
+
+    s_batch_n++;
+    s_batch_us += aos_hal_uptime_us() - t0;
+    s_batch_bytes += sizeof *dsc + px_bytes;
     return img;
 }
