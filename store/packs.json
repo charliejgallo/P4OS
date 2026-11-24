@@ -229,6 +229,26 @@
   "size": 3532955,
   "sha256": "d001b9e54fb1d1c6dabcdfb6738401ddcd0dad5d74f2ffb8735f96c92a797a01"
  },
+ "tanques_luna.pak": {
+  "tag": "v0.32.1",
+  "size": 5043220,
+  "sha256": "97072b72ee2c601098c62b8dd13af7bfdf350f9aaa72d707b5c3627f8b018c51"
+ },
+ "tanques_p4.pak": {
+  "tag": "v0.32.1",
+  "size": 34336676,
+  "sha256": "d5d52b1bc7275f2fba559be531fbf7956d921797bbcc81036187da7509f7b960"
+ },
+ "tanques_playa.pak": {
+  "tag": "v0.32.1",
+  "size": 4878420,
+  "sha256": "174f32cbef0f94a7e5f119878f9e76c5b3309f46c64fecdb216d95c5e6115904"
+ },
+ "tortuga_p4.pak": {
+  "tag": "v0.32.1",
+  "size": 881778,
+  "sha256": "cac0fa483b6bc3d38ccea6d6412bf6848bbe9ca7a829b1540d335e5ede5bde33"
+ },
  "traductor_de_en_p4.pak": {
   "tag": "v0.31.0",
   "size": 7500000,

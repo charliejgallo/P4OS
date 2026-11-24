@@ -1,8 +1,12 @@
 # Changelog
 
-## 0.32.2 — not released yet
+## 0.33.0 — not released yet
 
-- **Eight new apps in the Store**, from the card:
+- **Nine new apps in the Store**, from the card:
+  - **Planeo** (Glide): a light plane over worlds the board draws live in
+    3D, made afresh each time (islands, canyons, snow, a volcano, a city),
+    with rings against the clock, races, deliveries and free flight. About
+    30 fps on the board at 426×240, scaled to the screen by the PPA.
   - **DJ**: two decks that play MP3, WAV and FLAC from the card, platters
     to scratch with the fingers, pitch, cues, loops, tempo and beat
     detection with SYNC, a three-band EQ, filter and effects per deck, and

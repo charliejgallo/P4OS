@@ -1,0 +1,240 @@
+# amoledos-lang 1   es -> pt
+# demo.vuelo.lang
+#
+# Una linea por cadena: el espanol, un TAB, la traduccion.
+# Los \n van escapados a proposito; el cargador los desescapa.
+# Una linea sin traducir (las dos mitades iguales) se ve en espanol.
+
+#: apps/vuelo/main/vu_menu.c:14
+Islas	Ilhas
+
+#: apps/vuelo/main/vu_menu.c:14
+Cañones	Cânions
+
+#: apps/vuelo/main/vu_menu.c:14
+Nieve	Neve
+
+#: apps/vuelo/main/vu_menu.c:14
+Volcán	Vulcão
+
+#: apps/vuelo/main/vu_menu.c:14
+Ciudad	Cidade
+
+#: apps/vuelo/main/vu_menu.c:15
+Mañana	Manhã
+
+#: apps/vuelo/main/vu_menu.c:15
+Mediodía	Meio-dia
+
+#: apps/vuelo/main/vu_menu.c:15
+Atardecer	Entardecer
+
+#: apps/vuelo/main/vu_menu.c:15
+Noche	Noite
+
+#: apps/vuelo/main/vu_menu.c:16
+Anillos	Anéis
+
+#: apps/vuelo/main/vu_menu.c:16
+Carrera	Corrida
+
+#: apps/vuelo/main/vu_menu.c:16
+Entregas	Entregas
+
+#: apps/vuelo/main/vu_menu.c:18
+Pasá por los anillos en orden, lo más rápido que puedas.	Passe pelos anéis em ordem, o mais rápido que puder.
+
+#: apps/vuelo/main/vu_menu.c:19
+Una carrera por los anillos contra otro avión.	Uma corrida pelos anéis contra outro avião.
+
+#: apps/vuelo/main/vu_menu.c:20
+Pasá bajo por la luz verde a buscar cada paquete y llevalo a la naranja.	Passe baixo pela luz verde para pegar cada pacote e leve-o até a laranja.
+
+#: apps/vuelo/main/vu_menu.c:22
+Rápida	Rápida
+
+#: apps/vuelo/main/vu_menu.c:22
+Normal	Normal
+
+#: apps/vuelo/main/vu_menu.c:22
+Fina	Fina
+
+#: apps/vuelo/main/vu_menu.c:130
+Volá sobre mundos que el P4 dibuja en vivo	Voe sobre mundos que o P4 desenha ao vivo
+
+#: apps/vuelo/main/vu_menu.c:138
+#: apps/vuelo/main/vu_menu.c:174
+Misiones	Missões
+
+#: apps/vuelo/main/vu_menu.c:140
+#: apps/vuelo/main/vu_menu.c:262
+Vuelo libre	Voo livre
+
+#: apps/vuelo/main/vu_menu.c:142
+#: apps/vuelo/main/vu_menu.c:324
+Ajustes	Ajustes
+
+#: apps/vuelo/main/vu_menu.c:200
+Se abre con %d estrellas (tenés %d).	Abre com %d estrelas (você tem %d).
+
+#: apps/vuelo/main/vu_menu.c:227
+Récord: %s	Recorde: %s
+
+#: apps/vuelo/main/vu_menu.c:229
+Sin récord	Sem recorde
+
+#: apps/vuelo/main/vu_menu.c:264
+Sin reloj ni anillos: elegí un mundo y una hora, y volá.	Sem relógio nem anéis: escolha um mundo e uma hora do dia, e voe.
+
+#: apps/vuelo/main/vu_menu.c:266
+Mundo	Mundo
+
+#: apps/vuelo/main/vu_menu.c:275
+Hora	Hora do dia
+
+#: apps/vuelo/main/vu_menu.c:281
+Volar	Voar
+
+#: apps/vuelo/main/vu_menu.c:326
+Apagado	Desligado
+
+#: apps/vuelo/main/vu_menu.c:326
+Prendido	Ligado
+
+#: apps/vuelo/main/vu_menu.c:327
+Arriba sube	Para cima sobe
+
+#: apps/vuelo/main/vu_menu.c:327
+Arriba baja	Para cima desce
+
+#: apps/vuelo/main/vu_menu.c:328
+Detrás	Atrás
+
+#: apps/vuelo/main/vu_menu.c:328
+Cabina	Cabine
+
+#: apps/vuelo/main/vu_menu.c:329
+Sonido	Som
+
+#: apps/vuelo/main/vu_menu.c:330
+Palanca	Manche
+
+#: apps/vuelo/main/vu_menu.c:331
+Calidad	Qualidade
+
+#: apps/vuelo/main/vu_menu.c:332
+Cámara	Câmera
+
+#: apps/vuelo/main/vu_menu.c:333
+Cuadros por segundo	Quadros por segundo
+
+#: apps/vuelo/main/vu_menu.c:334
+\"Arriba baja\" es como en un avión: tirar hacia vos levanta la nariz. La calidad fina dibuja más puntos y va más lenta.	\"Para cima desce\" é como num avião: puxar para você levanta o nariz. A qualidade fina desenha mais pontos e fica mais lenta.
+
+#: apps/vuelo/main/vu_menu.c:362
+Pausa	Pausa
+
+#: apps/vuelo/main/vu_menu.c:364
+Seguir	Continuar
+
+#: apps/vuelo/main/vu_menu.c:366
+Empezar de nuevo	Recomeçar
+
+#: apps/vuelo/main/vu_menu.c:369
+Salir al menú	Voltar ao menu
+
+#: apps/vuelo/main/vu_menu.c:385
+¡Ganaste la carrera!	Você venceu a corrida!
+
+#: apps/vuelo/main/vu_menu.c:385
+Te ganó por poco	Perdeu por pouco
+
+#: apps/vuelo/main/vu_menu.c:386
+¡Misión cumplida!	Missão cumprida!
+
+#: apps/vuelo/main/vu_menu.c:403
+¡Récord nuevo!	Novo recorde!
+
+#: apps/vuelo/main/vu_menu.c:409
+Ganale para la segunda estrella.	Vença-o para ganhar a segunda estrela.
+
+#: apps/vuelo/main/vu_menu.c:412
+Tercera estrella: ganale por seis segundos (%s).	Terceira estrela: vença por seis segundos (%s).
+
+#: apps/vuelo/main/vu_menu.c:416
+Próxima estrella: %s	Próxima estrela: %s
+
+#: apps/vuelo/main/vu_menu.c:424
+Otra vez	De novo
+
+#: apps/vuelo/main/vu_menu.c:427
+Siguiente	Próximo
+
+#: apps/vuelo/main/vu_menu.c:430
+Menú	Menu
+
+#: apps/vuelo/main/vu_text.c:19
+ANILLOS	ANÉIS
+
+#: apps/vuelo/main/vu_text.c:19
+CARRERA	CORRIDA
+
+#: apps/vuelo/main/vu_text.c:19
+ENTREGAS	ENTREGAS
+
+#: apps/vuelo/main/vu_text.c:19
+VUELO LIBRE	VOO LIVRE
+
+#: apps/vuelo/main/vu_text.c:20
+¡YA!	JÁ!
+
+#: apps/vuelo/main/vu_text.c:20
+¡LLEGASTE!	CHEGOU!
+
+#: apps/vuelo/main/vu_text.c:20
+¡GANASTE!	VENCEU!
+
+#: apps/vuelo/main/vu_text.c:20
+TE GANÓ	PERDEU
+
+#: apps/vuelo/main/vu_text.c:20
+¡PAQUETE!	PACOTE!
+
+#: apps/vuelo/main/vu_text.c:20
+¡ENTREGADO!	ENTREGUE!
+
+#: apps/vuelo/main/vu_text.c:21
+¡PÉRDIDA!	ESTOL!
+
+#: apps/vuelo/main/vu_text.c:21
+¡CHOQUE!	BATEU!
+
+#: apps/vuelo/main/vu_text.c:21
+¡RÉCORD!	RECORDE!
+
+#: apps/vuelo/main/vu_text.c:21
+km/h	km/h
+
+#: apps/vuelo/main/vu_text.c:21
+m	m
+
+#: apps/vuelo/main/vu_text.c:21
+1.º	1º
+
+#: apps/vuelo/main/vu_text.c:21
+2.º	2º
+
+#: apps/vuelo/main/vu_text.c:22
+¡MUY BAJO!	MUITO BAIXO!
+
+#: apps/vuelo/main/vu_text.c:22
+Buscá el paquete	Pegue o pacote
+
+#: apps/vuelo/main/vu_text.c:22
+Llevalo a destino	Leve ao destino
+
+#: apps/vuelo/main/vu_text.c:22
+ÚLTIMO	ÚLTIMO
+
+#: apps/vuelo/main/vuelo.c:555
+Armando el mundo: %s	Criando o mundo: %s

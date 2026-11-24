@@ -54,6 +54,7 @@ by touch never sees it. Board games put a cursor on the board the same way.
 | Monster Hop | D-pad hops (held, it keeps hopping) · A action · START pause, Play on the title · L/R tabs and zones |
 | Neon Snakes | D-pad or stick turns · START pause |
 | Pinball 3D | L or left the left flippers, R or right the right ones · A launches (held, it charges) · up nudges · START pause · in the carousel left/right pick a table, A or START plays, up the settings |
+| Planeo | Left stick or D-pad: roll and pitch · A / B throttle up / down · L / R the pedals (rudder), both together change the camera · START pause · menus: D-pad and A, B back |
 | Simon | the four directions are the four pads, clockwise from the top left (up green) · A or START starts |
 | Solitario | D-pad walks the piles (up/down in a column choose how many cards) · A picks up and drops (on the same pile, to its best place) · B cancels · L undo · R hint · START menu; in the panels D-pad + A, B back |
 | Sudoku | D-pad walks the cells · A places the chosen number · B notes it · L/R change the number · START pause (with hint, undo, restart and menu); menus and shop D-pad + A, B back |

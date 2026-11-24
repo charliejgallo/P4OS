@@ -237,7 +237,7 @@ the Programador, the same MD5 its Linux gives.</em></p>
 <p align="center"><em>A WH5000 multimeter through its own USB cable (a
 CP2102 inside), at 2400 baud: one line a reading, the digits on its
 display. Any speed from 50 baud and any frame, 7E1 included, since
-0.32.2.</em></p>
+0.33.0.</em></p>
 
 <p align="center">
   <img src="docs/img/bench-w5500-cable.jpg" width="300" alt="The board with Network on its Cable tab: 100 Mbit/s full duplex, a lease of two hours, the gateway, a name and the internet answering in green, and the W5500 module wired to the header with a network cable in it. The network's addresses are blurred">
@@ -1009,9 +1009,9 @@ and their art comes in packs.
   It plays on the board's output for playing live: 14 to 18 ms from a key
   to the speaker.
 
-| Tanks | Turtle | Serial Plotter | Home Status | Deriva | Fusion | Vitral | DJ |
-|---|---|---|---|---|---|---|---|
-| <img src="docs/img/land-tanques.jpg" width="250"> | <img src="docs/img/app-tortuga.jpg" width="125"> | <img src="docs/img/app-plotter.png" width="125"> | <img src="docs/img/app-estado.png" width="125"> | <img src="docs/img/app-asteroides.jpg" width="125"> | <img src="docs/img/app-sumar.png" width="125"> | <img src="docs/img/app-vitral.jpg" width="125"> | <img src="docs/img/land-dj.png" width="250"> |
+| Tanks | Turtle | Serial Plotter | Home Status | Deriva | Fusion | Vitral | DJ | Glide |
+|---|---|---|---|---|---|---|---|---|
+| <img src="docs/img/land-tanques.jpg" width="250"> | <img src="docs/img/app-tortuga.jpg" width="125"> | <img src="docs/img/app-plotter.png" width="125"> | <img src="docs/img/app-estado.png" width="125"> | <img src="docs/img/app-asteroides.jpg" width="125"> | <img src="docs/img/app-sumar.png" width="125"> | <img src="docs/img/app-vitral.jpg" width="125"> | <img src="docs/img/land-dj.png" width="250"> | <img src="docs/img/app-vuelo.jpg" width="250"> |
 
 - **Tanks** ([apps/tanques/README.md](apps/tanques/README.md)): turn-based
   battles of toy tanks in 3D. Each turn you drive from above as far as your
@@ -1051,6 +1051,10 @@ and their art comes in packs.
   The platters scratch under the fingers (all five at once), the decks
   find the tempo and the beats and SYNC lines them up, with EQ, filter,
   effects, loops and hot cues, and the mix is recorded to WAV.
+- **Glide** ([apps/vuelo/README.md](apps/vuelo/README.md)): a light plane
+  over worlds drawn live in 3D by both cores, a heightmap in tiles with
+  forests, rivers, buildings and the light of the hour, scaled by the PPA;
+  rings, races, deliveries and free flight, about 30 fps on the board.
 
 Doom is doomgeneric, with OPL2 music, and Duke Nukem 3D is Chocolate Duke3D,
 with the Sound Blaster's FM music; both on the board, from the shareware
