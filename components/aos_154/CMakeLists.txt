@@ -6,7 +6,7 @@ idf_component_register(SRCS "aos_154.c" "aos_154_link_p4.c" "aos_zigbee_p4.c" "a
                              "aos_zigbee_devices.c"
                        INCLUDE_DIRS "include"
                        REQUIRES aos_hal
-                       PRIV_REQUIRES espressif__esp_hosted espressif__esp-zigbee-lib openthread lwip vfs
+                       PRIV_REQUIRES espressif__esp_hosted espressif__esp-zigbee-lib openthread lwip vfs aos_ui
                        # whole: nothing of ours calls the __wrap_ functions of
                        # aos_zigbee_taskq.c, only Espressif's libraries do
                        WHOLE_ARCHIVE)

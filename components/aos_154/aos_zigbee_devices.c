@@ -20,6 +20,11 @@
  */
 #include "aos_zigbee.h"
 #include "aos_hal.h"
+#include "aos_ui.h"
+#include "aos_i18n.h"
+
+#include <stdarg.h>
+#include <stdio.h>
 
 #include <string.h>
 #include "esp_zigbee.h"
@@ -34,6 +39,19 @@ static aos_zigbee_dev_t s_dev[AOS_ZB_DEVICES_MAX];
 static int s_n;
 static SemaphoreHandle_t s_lock;
 static int64_t s_permit_until_ms;
+
+/* What happens, on the screen too: a notice at the bottom, whatever is open
+ * (a device joining shows nowhere else, and pairing is done with the
+ * device in hand, away from a computer) */
+static void notice(const char *fmt, ...)
+{
+    char t[96];                         /* a toast holds 96 */
+    va_list ap;
+    va_start(ap, fmt);
+    vsnprintf(t, sizeof t, fmt, ap);
+    va_end(ap);
+    aos_ui_request_toast(t);
+}
 
 static void lock(void)
 {
@@ -78,6 +96,7 @@ static void on_active_ep(const ezb_zdo_active_ep_req_result_t *res, void *ctx)
     uint16_t nwk = (uint16_t)(uintptr_t)ctx;
     if (!res || res->error || !res->rsp || res->rsp->status != EZB_ZDP_STATUS_SUCCESS || !res->rsp->active_ep_count) {
         aos_hal_log(TAG, "0x%04x: no endpoints (%d)", nwk, res ? res->error : -1);
+        notice(_("Zigbee: 0x%04x no contestó (dormido): tocale el botón"), nwk);
         lock();
         aos_zigbee_dev_t *d = find(nwk, NULL, false);
         if (d) d->step = AOS_ZB_DEV_FAILED;
@@ -139,6 +158,7 @@ static void on_zcl(ezb_zcl_core_action_callback_id_t id, void *message)
         }
         d->step = AOS_ZB_DEV_DONE;
         aos_hal_log(TAG, "0x%04x: \"%s\" \"%s\", power source %u", nwk, d->manuf, d->model, d->power);
+        notice("Zigbee: %s %s", d->manuf[0] ? d->manuf : "?", d->model);
     }
     unlock();
 }
@@ -170,7 +190,10 @@ bool aos_zigbee_devices_signal(const ezb_app_signal_t *sig)
         const uint8_t *e = a->device_addr.u8;
         aos_hal_log(TAG, "a device announced itself: 0x%04x, %02x%02x%02x%02x%02x%02x%02x%02x, capability 0x%02x",
                     a->short_addr, e[7], e[6], e[5], e[4], e[3], e[2], e[1], e[0], a->capability);
-        if (d && d->step != AOS_ZB_DEV_DONE) interview(a->short_addr);
+        if (d && d->step != AOS_ZB_DEV_DONE) {
+            notice(_("Zigbee: entró un equipo (0x%04x), preguntándole qué es"), a->short_addr);
+            interview(a->short_addr);
+        }
         return true;
     }
     case EZB_ZDO_SIGNAL_DEVICE_AUTHORIZED: {
@@ -191,6 +214,7 @@ bool aos_zigbee_devices_signal(const ezb_app_signal_t *sig)
         if (d) d->step = AOS_ZB_DEV_LEFT;
         unlock();
         aos_hal_log(TAG, "0x%04x left the network (rejoin %u)", l->short_addr, l->leave_type);
+        notice(_("Zigbee: 0x%04x salió de la red"), l->short_addr);
         return true;
     }
     case EZB_NWK_SIGNAL_PERMIT_JOIN_STATUS: {
@@ -198,6 +222,8 @@ bool aos_zigbee_devices_signal(const ezb_app_signal_t *sig)
         if (!j) return true;
         s_permit_until_ms = j->duration ? (int64_t)aos_hal_uptime_ms() + (int64_t)j->duration * 1000 : 0;
         aos_hal_log(TAG, j->duration ? "the network is open for %u s" : "the network is closed", j->duration);
+        if (j->duration) notice(_("Zigbee: red abierta %u s para sumar equipos"), j->duration);
+        else notice("%s", _("Zigbee: red cerrada"));
         return true;
     }
     default:
