@@ -225,8 +225,8 @@ size_t aos_emoji_match(const char *str, size_t len, uint32_t *out)
 
 /* ---- images ---- */
 
-/* QOI (qoiformat.org) into RGBA. */
-static bool qoi_decode(const uint8_t *b, size_t len, uint8_t *px, int w, int h)
+/* QOI (qoiformat.org) into RGBA; the HD icon pack uses it too. */
+bool aos_qoi_decode(const uint8_t *b, size_t len, uint8_t *px, int w, int h)
 {
     if (len < 22 || memcmp(b, "qoif", 4)) return false;
     uint32_t bw = (uint32_t)b[4] << 24 | b[5] << 16 | b[6] << 8 | b[7];
@@ -329,7 +329,7 @@ static lv_image_dsc_t *image(uint32_t id, int d)
     uint8_t *q = lv_malloc(e->len), *px = lv_malloc((size_t)s_size * s_size * 4);
     lv_image_dsc_t *img = NULL;
     if (q && px && !fseek(s_f, (long)(s_data_off + e->off), SEEK_SET) && fread(q, 1, e->len, s_f) == e->len &&
-        qoi_decode(q, e->len, px, s_size, s_size))
+        aos_qoi_decode(q, e->len, px, s_size, s_size))
         img = scaled(px, s_size, d);
     lv_free(q);
     lv_free(px);

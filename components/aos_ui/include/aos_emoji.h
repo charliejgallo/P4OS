@@ -31,6 +31,10 @@ size_t aos_emoji_match(const char *s, size_t len, uint32_t *cp);
  * 'font' itself when the pack is not there. */
 const lv_font_t *aos_emoji_font(const lv_font_t *font);
 
+/* A QOI picture (b, len bytes) of exactly w x h into RGBA, w*h*4 bytes at px;
+ * false if it is not that. The emoji and the HD icons are stored this way. */
+bool aos_qoi_decode(const uint8_t *b, size_t len, uint8_t *px, int w, int h);
+
 #ifdef __cplusplus
 }
 #endif

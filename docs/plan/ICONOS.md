@@ -2,7 +2,8 @@
 
 Plan para la versión después de la 0.33.0. **Es una de las dos estrellas de
 esa versión, junto con el hub Zigbee/Thread** (`docs/internal/PEDIDOS-APPS-2026-11.md`,
-G25). Pensado con el usuario el 2026-11-24; todavía no se empezó.
+G25). Pensado con el usuario el 2026-11-23; **la parte del firmware se hizo el
+2026-11-24** (abajo, "Lo hecho"); falta el estilo y los dibujos.
 
 ## Por qué
 
@@ -33,8 +34,9 @@ los emojis), un ícono por id de app:
   9 por carpeta en 3×3, `folder_icon()` en `aos_home.c`), esta última hecha a
   propósito y simplificada si hace falta (menos detalle, trazos más gruesos),
   no achicada en la placa. Más un PNG para el portal y la Tienda.
-- Comprimidos con un formato simple (RGB565 + alfa con RLE o LZ4); unos
-  10-20 KB los grandes y ~2 KB la miniatura.
+- Guardados como QOI (RGBA sin pérdida, el decodificador de los emojis):
+  unos 7-10 KB los grandes y 0,2-1,5 KB la miniatura, medido con los de
+  prueba.
 - **Ninguna app se actualiza** (los íconos no van en cada `.so`): no hay
   otra actualización masiva.
 - **Respaldo:** sin el pack, o una app sin ícono en él (una de terceros),
@@ -67,3 +69,54 @@ y el costo de dibujar).
 | Release | el pack como parte del sistema (~1-2 MB) | dentro de un release |
 
 Lo que más pesa es el diseño coherente, no el firmware.
+
+## Lo hecho (firmware, 2026-11-24)
+
+- **El pack:** `<tarjeta>/icons/hd.pak`. Un índice (id de la app, tamaño,
+  dónde está) y las imágenes en QOI; el formato está en
+  `components/aos_ui/include/aos_icon_pack.h`. El índice se lee a PSRAM y
+  se vuelve a leer si el archivo cambia (se mira cada 2 s como mucho), así
+  que la Tienda puede reemplazarlo sin reiniciar.
+- **El dibujo:** `aos_icon_create()` y `aos_icon_create_ops()` (`aos_icon.c`)
+  preguntan primero al pack por el id; si tiene imagen, el ícono es un
+  `lv_image` con su propia imagen decodificada en PSRAM (ARGB8888, 57 KB uno
+  de 120 px, 2,7 KB una miniatura), que se libera con el objeto. Si no, se
+  dibuja como siempre (AIC o glifo). Eso cubre el inicio, el dock, las
+  carpetas y sus miniaturas, la Tienda (también las apps no instaladas, por
+  su id) y la pantalla de "pronto".
+- **Tamaños:** se usa el del pack igual o más grande más cercano y se
+  achica; lo justo es tener 120, 108 y 26.
+- **La preferencia** `icon_hd` (1 por defecto) lo apaga; todavía no hay
+  botón en Ajustes.
+- **La Tienda** acepta `icons/<nombre>.pak` como parte del sistema
+  (`sys_allowed()` en `aos_store.c`, `SYS_PATH` en `tools/gen_store.py`).
+- **La herramienta:** `tools/icons/mkpack.py <carpeta> [salida]` arma el
+  pack con `<id>.png` (el original, cuadrado, de 120 px o más, que se achica
+  a los tamaños que falten) y `<id>@<N>.png` (uno hecho para ese tamaño, como
+  la miniatura de 26). `--list` muestra lo que tiene un pack. Las imágenes
+  son RGBA con transparencia afuera de la forma del ícono: la placa no
+  dibuja el fondo redondeado, va en la imagen.
+- **Probado en el simulador** con un pack de prueba de dos íconos (Reloj y
+  Calculadora, y los mismos con ids del Taller para ver las miniaturas):
+  inicio, dock, carpeta abierta y miniaturas, la de 26 hecha a mano y la
+  achicada por la herramienta. Para probar sin tocar el `sim_fs` de las
+  otras sesiones, el simulador corre desde otra carpeta con un `sim_fs` de
+  enlaces a `sim/sim_fs` y su propio `icons/`.
+
+### Lo que falta
+
+- **En la placa:** medir cuánto tarda en armarse una página del inicio con
+  24 íconos HD (cada uno abre el pack, lee ~10 KB y decodifica) y la PSRAM.
+  Si tarda, una caché chica de imágenes decodificadas por id y tamaño.
+- **El portal** sigue dibujando el AIC; mostraría el PNG si la placa sirve
+  los íconos del pack (por ejemplo `/api/icon/<id>.png`).
+- **Ajustes:** el interruptor de `icon_hd` y, más adelante, los temas
+  (`icons/<tema>.pak` y una preferencia con el nombre).
+- **La release:** en `store/system.json`, una parte nueva así (los
+  textos, el glifo y los colores a gusto):
+
+  ```json
+  {"file": "sys-icons", "files": [{"path": "icons/hd.pak", "asset": "icons_hd.pak"}], ...}
+  ```
+
+  y el pack subido a la release publicada antes del tag, como los demás.

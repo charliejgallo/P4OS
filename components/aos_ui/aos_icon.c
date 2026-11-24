@@ -17,6 +17,7 @@
 #include "aos_sys_glyphs.h"
 #include "aos_ui.h"
 #include "aos_icon_ops.h"
+#include "aos_icon_pack.h"
 #include "aos_hal.h"
 #ifndef AOS_SIM
 #include "esp_heap_caps.h"
@@ -602,6 +603,11 @@ static lv_obj_t *make_base(lv_obj_t *parent, const aos_app_desc_t *desc, int32_t
 lv_obj_t *aos_icon_create_ops(lv_obj_t *parent, const aos_app_desc_t *desc,
                               const uint8_t *ops, size_t len, int32_t size)
 {
+    lv_obj_t *hd = aos_icon_pack_create(parent, desc->id, size);
+    if (hd) {
+        aos_make_decorative(hd);
+        return hd;
+    }
     lv_obj_t *base = make_base(parent, desc, size);
     size_t bad_at = 0;
     if (walk_ops(base, ops, len, size, &bad_at) < 0) {
@@ -614,6 +620,13 @@ lv_obj_t *aos_icon_create_ops(lv_obj_t *parent, const aos_app_desc_t *desc,
 
 lv_obj_t *aos_icon_create(lv_obj_t *parent, const aos_app_desc_t *desc, int32_t size)
 {
+    /* The HD icon pack's picture, when the card has one for this app
+     * (aos_icon_pack.h); otherwise it is drawn as always. */
+    lv_obj_t *hd = aos_icon_pack_create(parent, desc->id, size);
+    if (hd) {
+        aos_make_decorative(hd);
+        return hd;
+    }
     lv_obj_t *base = make_base(parent, desc, size);
 
     /* Precedence (docs/ICONS.md 4.3): the blob the app registered, then a
