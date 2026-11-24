@@ -338,7 +338,7 @@ static void batch_cb(lv_timer_t *t)
     (void)t;
     close_file();
     if (s_batch_n)
-        aos_hal_log("icon", "HD icons: %d pictures (%d decoded again) in %u ms, %u KB new", s_batch_n,
+        aos_hal_log("icon", "HD icons: %d pictures (%d decoded, the rest shared or kept) in %u ms, %u KB new", s_batch_n,
                     s_batch_n - s_batch_hits, (unsigned)((s_batch_us + 500) / 1000), (unsigned)(s_batch_bytes / 1024));
     s_batch = NULL;
     s_batch_n = 0;
