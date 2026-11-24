@@ -1,0 +1,21 @@
+{
+ "cat": "medios",
+ "about": {
+  "es": "Dos bandejas y un mezclador: tocá los platos para hacer scratch, sincronizá los temas, cortá graves, sumá eco y grabá la mezcla.",
+  "en": "Two decks and a mixer: touch the platters to scratch, sync the tracks, cut the bass, add echo and record the mix."
+ },
+ "desc": {
+  "es": "Acostada, una bandeja a cada lado y el mezclador en el medio, con las formas de onda de los dos temas arriba, una sobre la otra, con su grilla de tiempos. De pie, una bandeja arriba y otra abajo. Los cinco dedos andan a la vez: un plato en cada mano y el crossfader.\n\nCada bandeja toca MP3, WAV y FLAC de la carpeta music de la tarjeta: plato para scratch o para empujar, pitch de 8, 16 o 50 %, cue, cuatro hot cues, loops de 1/16 a 32 tiempos y saltos. La app detecta el tempo y los tiempos de cada tema, y SYNC iguala el tempo y los golpes de las dos. Recuerda la grilla, el cue y los hot cues de cada tema.\n\nEl mezclador tiene ecualizador de tres bandas que corta del todo, filtro, volumen y vúmetros por canal, crossfader suave o de corte, y en cada bandeja un efecto a tiempo: eco, flanger, filtro con LFO o bitcrush. La mezcla se graba en estéreo a WAV en Grabaciones.\n\nUn controlador MIDI por USB maneja lo que le enseñes, control por control. La placa tiene un solo parlante: suena la suma de las dos bandejas.",
+  "en": "Lying down, a deck on each side and the mixer in the middle, with both tracks' waveforms across the top, one over the other, with their beat grid. Upright, one deck above the other. All five fingers work at once: a hand on each platter and one on the crossfader.\n\nEach deck plays MP3, WAV and FLAC from the card's music folder: a platter to scratch or nudge, pitch of 8, 16 or 50 %, cue, four hot cues, loops from 1/16 to 32 beats and beat jumps. The app finds each track's tempo and beats, and SYNC matches the tempo and the beats of the two. It remembers each track's grid, cue and hot cues.\n\nThe mixer has a three-band EQ that kills each band, a filter, volume and meters per channel, a smooth or sharp crossfader, and on each deck an effect in time: echo, flanger, LFO filter or bitcrush. The mix is recorded in stereo to a WAV in Recordings.\n\nA USB MIDI controller drives what you teach it, control by control. The board has one speaker: it plays the sum of both decks."
+ },
+ "user_files": {
+  "es": "Tus temas en MP3, WAV o FLAC en la carpeta music de la tarjeta.",
+  "en": "Your tracks as MP3, WAV or FLAC in the card's music folder."
+ },
+ "shots": [
+  "land-dj.png",
+  "app-dj-mix.png",
+  "app-dj.png",
+  "app-dj-lib.png"
+ ]
+}
