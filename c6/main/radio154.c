@@ -21,6 +21,7 @@
 #include "esp_system.h"
 #include "esp_timer.h"
 #include "esp_attr.h"
+#include "esp_heap_caps.h"
 #include "esp_ieee802154.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
@@ -123,6 +124,8 @@ static void send_status(void)
         .proto = AOS_154_PROTO, .state = s_state, .channel = s_state ? s_channel : 0,
         .guarded = guarded(), .frames = s_frames, .dropped = s_dropped,
         .uptime_s = (uint32_t)(esp_timer_get_time() / 1000000), .err = s_err, .faults = s_guard.faults,
+        .heap_free = (uint32_t)heap_caps_get_free_size(MALLOC_CAP_8BIT),
+        .heap_min = (uint32_t)heap_caps_get_minimum_free_size(MALLOC_CAP_8BIT),
     };
     eh_cp_feat_peer_data_send(AOS_154_MSG_STATUS, (const uint8_t *)&st, sizeof st);
 }

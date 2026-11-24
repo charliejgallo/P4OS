@@ -43,6 +43,7 @@ static void status(int8_t err)
     aos_154_status_t st = {
         .proto = AOS_154_PROTO, .state = s_state, .channel = s_state ? s_channel : 0, .frames = s_frames,
         .uptime_s = (uint32_t)(aos_hal_uptime_ms() / 1000), .err = err,
+        .heap_free = 150000, .heap_min = 120000,
     };
     aos_154_on_msg(AOS_154_MSG_STATUS, (const uint8_t *)&st, sizeof st);
 }

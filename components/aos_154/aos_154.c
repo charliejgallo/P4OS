@@ -429,9 +429,9 @@ void aos_154_on_msg(uint32_t id, const uint8_t *d, size_t n)
 {
     if (!s_lock) return;
     lock();
-    if (id == AOS_154_MSG_STATUS && n >= sizeof(aos_154_status_t)) {
-        aos_154_status_t st;
-        memcpy(&st, d, sizeof st);
+    if (id == AOS_154_MSG_STATUS && n >= AOS_154_STATUS_V1) {
+        aos_154_status_t st = { 0 };    /* a protocol 1 C6 leaves the newer fields at zero */
+        memcpy(&st, d, n < sizeof st ? n : sizeof st);
         bool first = !s_info.reachable;
         s_info.reachable = true;
         s_info.proto = st.proto;
@@ -442,6 +442,8 @@ void aos_154_on_msg(uint32_t id, const uint8_t *d, size_t n)
         s_info.err = st.err;
         s_info.frames = st.frames;
         s_info.dropped = st.dropped;
+        s_info.heap_free = st.heap_free;
+        s_info.heap_min = st.heap_min;
         if (first) aos_hal_log(TAG, "the C6 answers: protocol %u, up %u s%s", st.proto, (unsigned)st.uptime_s,
                                st.guarded ? ", the radio guarded off" : "");
     } else if (id == AOS_154_MSG_SCAN && n >= sizeof(aos_154_scan_t)) {

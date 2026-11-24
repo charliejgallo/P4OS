@@ -42,6 +42,7 @@ typedef struct {
     uint32_t scan_seq;          /* goes up with every channel a scan measures */
     char     pcap[128];         /* the capture being written, "" for none */
     uint32_t pcap_frames;
+    uint32_t heap_free, heap_min;   /* the C6's free memory (protocol 2), 0 when it does not say */
 } aos_154_info_t;
 
 typedef struct {

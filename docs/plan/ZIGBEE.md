@@ -134,6 +134,28 @@ El primer paso es probar el primer camino con el ejemplo de un sensor de
 Espressif en el C6. La emulación de equipos (un sensor de temperatura, un
 módulo de relés de 1 a 4 canales) sale de ahí casi sola.
 
+### Lo medido para la pila en el C6 (2026-11-24)
+
+- **La pila:** `espressif/esp-zigbee-lib` **2.1.0** (Apache-2.0, binaria,
+  la API nueva "ezbee"). Guarda la red en una partición NVS con el nombre
+  que se le dé (`storage_partition_name`, "nvs" por defecto): **no hace
+  falta cambiar la tabla de particiones del C6**, que sólo se cambia por el
+  cable en J7. Trae también la versión para el P4 (`lib/esp32p4`), con el
+  radio en el SoC o por UART a un RCP.
+- **Compila** como coordinador con el radio del C6, junto a esp_hosted, el
+  Wi-Fi y el BLE: la imagen pasa de 1,41 a **1,58 MB** (queda el 10 % de la
+  ranura de 1,75 MB); la RAM fija casi no cambia (+2 KB): la pila pide la
+  suya al arrancar. Armado en una copia aparte, no en `c6/`.
+- **La RAM libre del C6 andando** (el C6 `3.0.9-154.2` la informa en el
+  estado, protocolo 2, `c6_heap_free`/`c6_heap_min` en `/api/154`): ~78 KB
+  libres con el Wi-Fi y el BLE; **el mínimo, 67 KB**, bajando 8 MB del
+  portal mientras escuchaba.
+- **Lo que falta saber:** cuánto pide la pila al arrancar como coordinador.
+  La prueba: un C6 que la arranque sólo cuando el P4 lo pide (con la guarda,
+  como la radio) e informe la memoria después. Si no entra con el BLE, se
+  apaga el BLE mientras se usa Zigbee (el teléfono por Bluetooth se corta),
+  o se va al segundo camino.
+
 ### Qué equipo es: la base de Zigbee2MQTT (pedido del usuario, 2026-11-24)
 
 Cuando la placa sea coordinador, al unirse un equipo se le leen del cluster

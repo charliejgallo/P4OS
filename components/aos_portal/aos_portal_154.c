@@ -62,6 +62,10 @@ static void api_state(aos_httpd_req_t *r, bool ok, const char *error)
     cJSON_AddStringToObject(o, "pcap", in.pcap);
     cJSON_AddNumberToObject(o, "pcap_frames", in.pcap_frames);
     cJSON_AddStringToObject(o, "c6", aos_hal_net_coprocessor_fw());
+    if (in.heap_free) {
+        cJSON_AddNumberToObject(o, "c6_heap_free", in.heap_free);
+        cJSON_AddNumberToObject(o, "c6_heap_min", in.heap_min);
+    }
     aos_154_chan_t ch[16];
     aos_154_channels(ch);
     uint32_t now = (uint32_t)aos_hal_uptime_ms();

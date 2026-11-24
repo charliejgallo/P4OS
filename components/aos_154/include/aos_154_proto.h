@@ -39,7 +39,7 @@
 
 #include <stdint.h>
 
-#define AOS_154_PROTO       1
+#define AOS_154_PROTO       2           /* 2: the status says the C6's free memory */
 
 #define AOS_154_MSG_CMD     0x15400001u
 #define AOS_154_MSG_STATUS  0x15400081u
@@ -64,7 +64,12 @@ typedef struct __attribute__((packed)) {
     int8_t   err;               /* the last operation's, 0 when it went well */
     uint8_t  faults;            /* restarts by a fault with the radio on, in a row */
     uint16_t reserved;
+    /* since protocol 2 (a protocol 1 status ends above: AOS_154_STATUS_V1) */
+    uint32_t heap_free;         /* the C6's free internal memory, bytes */
+    uint32_t heap_min;          /* the least it had since it started */
 } aos_154_status_t;
+
+#define AOS_154_STATUS_V1   20          /* the bytes of a protocol 1 status */
 
 typedef struct __attribute__((packed)) {
     uint8_t  channel;
