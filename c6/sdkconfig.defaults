@@ -37,3 +37,8 @@ CONFIG_ESP_COEX_SW_COEXIST_ENABLE=y
 # (docs/plan/ZIGBEE.md): it does not fit the factory slot of 1.5 MB without
 # -Os, which the Wi-Fi's data path is better without.
 CONFIG_ZB_ENABLED=n
+
+# P4OS: main/slots.c rewrites the partition table at 0x8000 (the factory
+# slots of 1.5 MB grown to 1.94 MB), only when the P4 asks and after its
+# checks; the IDF refuses a write there unless this allows it.
+CONFIG_SPI_FLASH_DANGEROUS_WRITE_ALLOWED=y

@@ -148,6 +148,16 @@ static void *thread(void *arg)
                 break;
             case AOS_154_OP_HELLO:
             case AOS_154_OP_UNGUARD:
+            case AOS_154_OP_SLOTS:
+            case AOS_154_OP_SLOTS_GROW: {   /* a factory C6 on ota_0, grown when asked */
+                static uint8_t grown;
+                int8_t g = 0;
+                if (c.b[0] == AOS_154_OP_SLOTS_GROW) { g = grown ? 0 : 1; grown = 1; }
+                aos_154_slots_t r = { .layout = grown ? AOS_154_SLOTS_GROWN : AOS_154_SLOTS_FACTORY, .grow = g,
+                                      .slot_size = 0x180000, .running_addr = 0x10000 };
+                aos_154_on_msg(AOS_154_MSG_SLOTS, (const uint8_t *)&r, sizeof r);
+                break;
+            }
             case AOS_154_OP_LOG:            /* the make-believe C6 has nothing to say */
                 break;
             default:

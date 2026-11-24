@@ -32,6 +32,7 @@
 #include "aos_154_proto.h"
 #include "radio154.h"
 #include "zigbee_test.h"
+#include "slots.h"
 
 static const char *TAG = "radio154";
 
@@ -269,7 +270,7 @@ static void run(const cmd_t *c)
     s_err = 0;
     /* while the Zigbee stack has the radio, only its stop, a hello and the guard */
     if (s_state == AOS_154_ZIGBEE && c->b[0] != AOS_154_OP_ZB_STOP && c->b[0] != AOS_154_OP_HELLO &&
-        c->b[0] != AOS_154_OP_UNGUARD && c->b[0] != AOS_154_OP_LOG) {
+        c->b[0] != AOS_154_OP_UNGUARD && c->b[0] != AOS_154_OP_LOG && c->b[0] != AOS_154_OP_SLOTS) {
         s_err = -5;
         send_status();
         return;
@@ -328,6 +329,20 @@ static void run(const cmd_t *c)
     case AOS_154_OP_UNGUARD:
         s_guard.faults = 0;
         break;
+    case AOS_154_OP_SLOTS:
+    case AOS_154_OP_SLOTS_GROW: {
+        int8_t grow = 0;
+        if (c->b[0] == AOS_154_OP_SLOTS_GROW) {
+            if (s_state != AOS_154_IDLE) { s_err = -5; break; }
+            grow = (int8_t)slots_grow();
+        }
+        slots_info_t si;
+        slots_info(&si);
+        aos_154_slots_t r = { .layout = si.layout, .grow = grow, .slot_size = si.slot_size,
+                              .running_addr = si.running_addr };
+        eh_cp_feat_peer_data_send(AOS_154_MSG_SLOTS, (const uint8_t *)&r, sizeof r);
+        break;
+    }
     case AOS_154_OP_LOG:
         if (c->n < 2) { s_err = -1; break; }
         if (!s_log_prev && c->b[1]) s_log_prev = esp_log_set_vprintf(log_hook);

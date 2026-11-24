@@ -100,6 +100,19 @@ bool aos_154_stop(void);
  * the radio is the stack's until aos_154_zigbee_stop(). */
 bool aos_154_zigbee_start(int channel);
 bool aos_154_zigbee_stop(void);
+/* The C6's app slots (protocol 4, docs/C6.md "The slots"): a request, the
+ * answer comes by itself into aos_154_slots(). Growing writes the C6's
+ * partition table (two slots of 1.94 MB for the factory 1.5 MB), with its
+ * checks; it is used from the next start. */
+typedef struct {
+    bool     known;             /* the C6 answered */
+    uint8_t  layout;            /* AOS_154_SLOTS_* */
+    int8_t   grow;              /* the last growing's result */
+    uint32_t slot_size, running_addr;
+    uint32_t seq;               /* goes up with every answer */
+} aos_154_slots_info_t;
+bool aos_154_slots_ask(bool grow);
+void aos_154_slots(aos_154_slots_info_t *out);
 /* The C6's log lines into the P4's log ("c6: ..."), on or off (protocol 3). */
 bool aos_154_c6_log(bool on);
 /* After the C6 kept the radio off by its guard: lets it on again. */

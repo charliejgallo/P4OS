@@ -25,6 +25,12 @@
  *                                  to joining; the radio is the stack's
  *                                  until ZB_STOP
  *   ZB_STOP
+ *   SLOTS                          (protocol 4) the C6 answers with SLOTS: its
+ *                                  partition table and where it runs
+ *   SLOTS_GROW                     writes the repository's partition table (two
+ *                                  app slots of 1.94 MB) over the factory one
+ *                                  (1.5 MB), with c6/main/slots.c's checks;
+ *                                  a SLOTS answer, used from the next start
  *   LOG u8 on                      (protocol 3) the C6's log lines to the P4,
  *                                  as LOG messages, while on: its own
  *                                  serial port is on J7, out of reach
@@ -34,6 +40,7 @@
  *   STATUS  aos_154_status_t
  *   SCAN    aos_154_scan_t, one channel
  *   LOG     one or more log lines of the C6, text
+ *   SLOTS   aos_154_slots_t
  *   FRAMES  records one after another, each aos_154_rec_t and then its
  *           frame: the PSDU as the radio gave it (len bytes). The radio has
  *           checked the FCS and put the RSSI and the LQI in its two bytes;
@@ -49,17 +56,31 @@
 
 #include <stdint.h>
 
-#define AOS_154_PROTO       3           /* 2: the status says the C6's free memory;
-                                           3: Espressif's Zigbee stack on request */
+#define AOS_154_PROTO       4           /* 2: the status says the C6's free memory;
+                                           3: Espressif's Zigbee stack on request;
+                                           4: the C6's app slots (not the radio's, but
+                                              this is the P4's channel to the C6) */
 
 #define AOS_154_MSG_CMD     0x15400001u
 #define AOS_154_MSG_STATUS  0x15400081u
 #define AOS_154_MSG_SCAN    0x15400082u
 #define AOS_154_MSG_FRAMES  0x15400083u
 #define AOS_154_MSG_LOG     0x15400084u
+#define AOS_154_MSG_SLOTS   0x15400085u
 
 enum { AOS_154_OP_HELLO = 1, AOS_154_OP_SCAN, AOS_154_OP_SNIFF, AOS_154_OP_STOP, AOS_154_OP_UNGUARD,
-       AOS_154_OP_ZB_START, AOS_154_OP_ZB_STOP, AOS_154_OP_LOG };
+       AOS_154_OP_ZB_START, AOS_154_OP_ZB_STOP, AOS_154_OP_LOG, AOS_154_OP_SLOTS, AOS_154_OP_SLOTS_GROW };
+
+/* the table on the C6's flash (protocol 4) */
+enum { AOS_154_SLOTS_UNKNOWN = 0, AOS_154_SLOTS_FACTORY, AOS_154_SLOTS_GROWN, AOS_154_SLOTS_OTHER };
+
+typedef struct __attribute__((packed)) {
+    uint8_t  layout;            /* AOS_154_SLOTS_*: the table on the flash now */
+    int8_t   grow;              /* SLOTS_GROW's result: 1 written, 0 already; below 0 slots.h */
+    uint16_t reserved;
+    uint32_t slot_size;         /* ota_0's as this start read the table (the layout in use) */
+    uint32_t running_addr;      /* where the running image is: 0x10000 is ota_0 */
+} aos_154_slots_t;
 
 enum { AOS_154_IDLE = 0, AOS_154_SCANNING, AOS_154_SNIFFING, AOS_154_ZIGBEE };
 

@@ -25,6 +25,12 @@
  *                                  and after); {"on": false} stops it
  *   POST /api/154/c6log            {"on": true}: the C6's log lines into the
  *                                  board's log, as "c6: ..."
+ *   GET  /api/154/slots            the C6's app slots: its partition table
+ *                                  ("factory", 1.5 MB, or "grown", 1.94 MB),
+ *                                  the size in use and where it runs; asks it
+ *                                  again, so call twice a moment apart
+ *   POST /api/154/slots/grow       writes the repository's table over the
+ *                                  factory one (docs/C6.md, "The slots")
  */
 #include "aos_portal_154.h"
 #include "aos_154.h"
@@ -159,6 +165,25 @@ static void api_devices(aos_httpd_req_t *r)
     send_cjson(r, 200, o);
 }
 
+static void api_slots(aos_httpd_req_t *r, bool grow)
+{
+    static const char *LAYOUT[] = { "unknown", "factory", "grown", "other" };
+    bool ok = aos_154_slots_ask(grow);
+    aos_154_slots_info_t s;
+    aos_154_slots(&s);
+    cJSON *o = cJSON_CreateObject();
+    cJSON_AddBoolToObject(o, "ok", ok);
+    cJSON_AddBoolToObject(o, "known", s.known);
+    if (s.known) {
+        cJSON_AddStringToObject(o, "table", s.layout < 4 ? LAYOUT[s.layout] : "?");
+        cJSON_AddNumberToObject(o, "slot_size", s.slot_size);
+        cJSON_AddStringToObject(o, "running", s.running_addr == 0x10000 ? "ota_0" : "ota_1");
+        cJSON_AddNumberToObject(o, "grow", s.grow);
+        cJSON_AddNumberToObject(o, "seq", s.seq);
+    }
+    send_cjson(r, ok ? 200 : 400, o);
+}
+
 static long num(cJSON *b, const char *k, long def)
 {
     cJSON *v = cJSON_GetObjectItem(b, k);
@@ -173,6 +198,8 @@ bool aos_portal_154(aos_httpd_req_t *r, const char *m, const char *p)
     if (get && !what[0]) { api_state(r, true, NULL); return true; }
     if (get && !strcmp(what, "frames")) { api_frames(r); return true; }
     if (get && !strcmp(what, "devices")) { api_devices(r); return true; }
+    if (get && !strcmp(what, "slots")) { api_slots(r, false); return true; }
+    if (post && !strcmp(what, "slots/grow")) { api_slots(r, true); return true; }
     if (post && !strcmp(what, "devices/clear")) { aos_154_devices_clear(); api_state(r, true, NULL); return true; }
     if (!post) return false;
     char *raw = aos_httpd_body_all(r, 512);

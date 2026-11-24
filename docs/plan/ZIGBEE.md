@@ -175,6 +175,17 @@ módulo de relés de 1 a 4 canales) sale de ahí casi sola.
   - **El registro del C6 llega al P4:** `POST /api/154/c6log {"on": true}`
     pone las líneas del C6 en el registro de la placa como "c6: ..." (su
     puerto serie está en J7). Sirve para todo lo que sigue.
+- **Las ranuras del C6 agrandadas (2026-11-24, noche):** a pedido del
+  usuario, el C6 de su placa reescribió su tabla de particiones sin cable
+  (`c6/main/slots.c`, `POST /api/154/slots/grow`, `docs/C6.md` "The
+  slots"): de 1,5 a 1,94 MB por ranura. Con eso entra la pila compilada con
+  `-O2` (1,66 MB, probado: se instaló y corrió). **Pero con `-O2` el C6
+  arranca con ~53 KB libres** (el código ocupa más de la RAM interna que
+  comparte), **y al arrancar la pila se quedó sin memoria y se cayó**: el P4
+  reinició la placa y volvió con el Wi-Fi (la radio apagada al arrancar, como
+  estaba pensado). Con `-Os`, 78 KB libres, la pila corre pero no forma la
+  red. **Conclusión: en el C6 no entra cómoda junto al Wi-Fi y el BLE**; el
+  camino es la pila en el P4 con el C6 de radio.
 - **El firmware normal del C6 no trae la pila** (`CONFIG_ZB_ENABLED=n`,
   1,40 MB con `-O2`): las releases siguen igual. La variante de prueba se
   compila con `sdkconfig.zigbee` (el comando está en el archivo).

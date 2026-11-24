@@ -30,6 +30,7 @@ static uint32_t s_seq;                  /* the newest frame's */
 static aos_154_device_t *s_dev;         /* AOS_154_DEVICES, PSRAM */
 static int32_t  s_rssi_acc[AOS_154_DEVICES];
 static int s_ndev;
+static aos_154_slots_info_t s_slots;
 
 /* the capture */
 static FILE *s_pcap;
@@ -225,6 +226,20 @@ bool aos_154_zigbee_stop(void)
 {
     uint8_t b[] = { AOS_154_OP_ZB_STOP };
     return cmd(b, sizeof b);
+}
+
+bool aos_154_slots_ask(bool grow)
+{
+    uint8_t b[] = { grow ? AOS_154_OP_SLOTS_GROW : AOS_154_OP_SLOTS };
+    return cmd(b, sizeof b);
+}
+
+void aos_154_slots(aos_154_slots_info_t *out)
+{
+    if (!s_lock) { memset(out, 0, sizeof *out); return; }
+    lock();
+    *out = s_slots;
+    unlock();
 }
 
 bool aos_154_c6_log(bool on)
@@ -466,6 +481,19 @@ void aos_154_on_msg(uint32_t id, const uint8_t *d, size_t n)
     if (id == AOS_154_MSG_LOG) { c6_log(d, n); return; }
     if (!s_lock) return;
     lock();
+    if (id == AOS_154_MSG_SLOTS && n >= sizeof(aos_154_slots_t)) {
+        aos_154_slots_t r;
+        memcpy(&r, d, sizeof r);
+        s_slots.known = true;
+        s_slots.layout = r.layout;
+        s_slots.grow = r.grow;
+        s_slots.slot_size = r.slot_size;
+        s_slots.running_addr = r.running_addr;
+        s_slots.seq++;
+        aos_hal_log(TAG, "the C6's slots: table %u, %u KB in use, running at 0x%x%s", r.layout,
+                    (unsigned)(r.slot_size / 1024), (unsigned)r.running_addr,
+                    r.grow == 1 ? "; the new table is written, from the next start" : "");
+    }
     if (id == AOS_154_MSG_STATUS && n >= AOS_154_STATUS_V1) {
         aos_154_status_t st = { 0 };    /* a protocol 1 C6 leaves the newer fields at zero */
         memcpy(&st, d, n < sizeof st ? n : sizeof st);
