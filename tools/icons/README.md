@@ -21,7 +21,7 @@ $B -b -P tools/icons/juguete/render.py -- --group sistema-1 --samples 64   # par
 python3 tools/icons/juguete/post.py sheets sistema-1
 # el usuario elige -> elegidos.json
 $B -b -P tools/icons/juguete/render.py -- --chosen --samples 128 --force
-python3 tools/icons/juguete/post.py pack                                  # -> out/juguete.pak
+python3 tools/icons/juguete/post.py pack                     # -> out/juguete/juguete.pak
 ```
 
 Los renders y el pack quedan en `out/` (fuera de git). Un archivo de modelos

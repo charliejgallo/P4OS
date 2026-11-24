@@ -4,7 +4,7 @@ sheets, and the pack from what was chosen.
 
     python3 tools/icons/juguete/post.py                 shrink every new render
     python3 tools/icons/juguete/post.py sheets [group]  the variant sheets
-    python3 tools/icons/juguete/post.py pack            elegidos.json -> out/juguete.pak
+    python3 tools/icons/juguete/post.py pack            elegidos.json -> out/juguete/juguete.pak
 
 Shrink: out/juguete/raw/<id>_<v>_big.png (480) -> out/juguete/<id>_<v>_120.png
 and _108.png; _mini.png (104) -> _26.png. Premultiplied alpha, so the
@@ -18,7 +18,7 @@ tools/icons/elegidos.json:  {"juguete": {"aos.clock": "a", ...}}.
 
 Pack: for every app in elegidos.json, <id>.png (120), <id>@108.png and
 <id>@26.png into out/juguete/pack/, then tools/icons/mkpack.py makes
-out/juguete.pak (the card's icons/juguete.pak).
+out/juguete/juguete.pak (the card's icons/juguete.pak).
 """
 
 import json
