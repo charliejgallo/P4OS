@@ -20,6 +20,8 @@
 #define MAX_SIDE    256                 /* a picture bigger than this is refused */
 #define LOOK_MS     2000                /* how often the file's date is looked at */
 #define PREF_PACK   "icon_pack"         /* "" the first pack there is, "off" none, or a name */
+#define KEEP_BYTES  (1024 * 1024)       /* decoded pictures no icon shows, kept for the next screen */
+#define KEEP_MS     1500                /* how long a screen being made again has to take them back */
 
 typedef struct {
     char     id[AOS_ICON_PACK_ID_MAX + 1];
@@ -38,11 +40,35 @@ static bool     s_choice_read;
 static char     s_cur[AOS_ICON_PACK_NAME_MAX + 1];     /* the pack in use, "" none */
 static FILE    *s_file;                 /* open while a batch of icons is made */
 
+/* The decoded pictures, shared by the icons that show the same one (the home
+ * screen's and its folder's, the Store's list made again at every change of
+ * a job: measured on the board, 65 pictures read again in 700 ms each time).
+ * One that no icon shows any more stays a while, so a screen made again
+ * takes it back; then they are let go, oldest first, down to KEEP_BYTES.
+ * A picture of a pack that was read again or replaced is never handed out:
+ * its generation is old. */
+typedef struct pic {
+    struct pic    *next;
+    char           id[AOS_ICON_PACK_ID_MAX + 1];
+    uint16_t       side;
+    uint32_t       gen;
+    int            refs;
+    uint32_t       used_ms;
+    size_t         bytes;
+    lv_image_dsc_t dsc;                 /* its pixels follow the struct */
+} pic_t;
+
+static pic_t      *s_pics;
+static uint32_t    s_gen = 1;
+static size_t      s_idle_bytes;
+static lv_timer_t *s_trim;
+
 /* What a screenful of icons cost, for the log: the pictures made since the
  * first one of a batch, the time spent reading and decoding them and the
  * PSRAM they took, written half a second after the batch began. */
 static lv_timer_t *s_batch;
 static int         s_batch_n;
+static int         s_batch_hits;
 static uint64_t    s_batch_us;
 static size_t      s_batch_bytes;
 /* The pack stays open for the batch: opening a file on the card costs more
@@ -134,6 +160,15 @@ static void resolve(char *out)
             return;
         }
     }
+    /* the pack in use, while it is there (a card busy with a download may
+     * fail a listing: the icons must not go back and forth with it) */
+    if (s_cur[0]) {
+        pack_path(path, sizeof path, s_cur);
+        if (stat(path, &st) == 0) {
+            strcpy(out, s_cur);
+            return;
+        }
+    }
     char all[16][AOS_ICON_PACK_NAME_MAX + 1];
     int n = aos_icon_pack_list(all, 16);
     if (n) strcpy(out, all[0]);
@@ -142,9 +177,44 @@ static void resolve(char *out)
 static uint16_t rd16(const uint8_t *p) { return (uint16_t)(p[0] | p[1] << 8); }
 static uint32_t rd32(const uint8_t *p) { return (uint32_t)p[0] | (uint32_t)p[1] << 8 | (uint32_t)p[2] << 16 | (uint32_t)p[3] << 24; }
 
+static void pic_free(pic_t *p)
+{
+    lv_image_cache_drop(&p->dsc);
+    lv_free(p);
+}
+
+/* Lets go of the pictures no icon shows: all of them, or down to 'keep' bytes,
+ * the oldest first, and every one of an old generation. */
+static void trim(size_t keep)
+{
+    for (;;) {
+        pic_t **oldest = NULL;
+        for (pic_t **pp = &s_pics; *pp; pp = &(*pp)->next) {
+            pic_t *p = *pp;
+            if (p->refs) continue;
+            if (p->gen != s_gen) { oldest = pp; break; }
+            if (!oldest || (int32_t)(p->used_ms - (*oldest)->used_ms) < 0) oldest = pp;
+        }
+        if (!oldest || ((*oldest)->gen == s_gen && s_idle_bytes <= keep)) return;
+        pic_t *p = *oldest;
+        *oldest = p->next;
+        s_idle_bytes -= p->bytes;
+        pic_free(p);
+    }
+}
+
+static void trim_cb(lv_timer_t *t)
+{
+    (void)t;
+    s_trim = NULL;
+    trim(KEEP_BYTES);
+}
+
 static void drop_index(void)
 {
     close_file();
+    s_gen++;
+    trim(0);
     lv_free(s_idx);
     s_idx = NULL;
     s_count = 0;
@@ -250,12 +320,17 @@ bool aos_icon_pack_has(const char *id)
     return find(id, 0) != NULL;
 }
 
-static void free_cb(lv_event_t *e)
+static void release_cb(lv_event_t *e)
 {
-    lv_image_dsc_t *dsc = lv_event_get_user_data(e);
-    if (!dsc) return;
-    lv_image_cache_drop(dsc);
-    lv_free(dsc);                       /* the header and the pixels are one block */
+    pic_t *p = lv_event_get_user_data(e);
+    if (!p || --p->refs > 0) return;
+    p->used_ms = (uint32_t)aos_hal_uptime_ms();
+    s_idle_bytes += p->bytes;
+    if (p->gen != s_gen) trim(KEEP_BYTES);
+    else if (!s_trim) {
+        s_trim = lv_timer_create(trim_cb, KEEP_MS, NULL);
+        lv_timer_set_repeat_count(s_trim, 1);
+    } else lv_timer_reset(s_trim);
 }
 
 static void batch_cb(lv_timer_t *t)
@@ -263,10 +338,11 @@ static void batch_cb(lv_timer_t *t)
     (void)t;
     close_file();
     if (s_batch_n)
-        aos_hal_log("icon", "HD icons: %d pictures in %u ms, %u KB", s_batch_n,
-                    (unsigned)((s_batch_us + 500) / 1000), (unsigned)(s_batch_bytes / 1024));
+        aos_hal_log("icon", "HD icons: %d pictures (%d decoded again) in %u ms, %u KB new", s_batch_n,
+                    s_batch_n - s_batch_hits, (unsigned)((s_batch_us + 500) / 1000), (unsigned)(s_batch_bytes / 1024));
     s_batch = NULL;
     s_batch_n = 0;
+    s_batch_hits = 0;
     s_batch_us = 0;
     s_batch_bytes = 0;
 }
@@ -281,42 +357,58 @@ lv_obj_t *aos_icon_pack_create(lv_obj_t *parent, const char *id, int32_t size)
         lv_timer_set_repeat_count(s_batch, 1);
     }
     int side = e->size;
-    char path[192];
-    pack_path(path, sizeof path, s_cur);
-    uint8_t *q = lv_malloc(e->len);
-    size_t px_bytes = (size_t)side * side * 4;
-    lv_image_dsc_t *dsc = lv_malloc(sizeof *dsc + px_bytes);
-    uint8_t *px = dsc ? (uint8_t *)(dsc + 1) : NULL;
-    bool ok = false;
-    if (q && dsc && !s_file) s_file = fopen(path, "rb");
-    if (q && dsc && s_file) {
-        ok = fseek(s_file, (long)e->off, SEEK_SET) == 0 && fread(q, 1, e->len, s_file) == e->len &&
-             aos_qoi_decode(q, e->len, px, side, side);
-        if (!ok) close_file();
+    pic_t *pic = NULL;
+    for (pic_t *p = s_pics; p; p = p->next)
+        if (p->gen == s_gen && p->side == side && !strncmp(p->id, e->id, AOS_ICON_PACK_ID_MAX)) { pic = p; break; }
+    if (pic) {
+        if (!pic->refs) s_idle_bytes -= pic->bytes;
+        s_batch_hits++;
+    } else {
+        char path[192];
+        pack_path(path, sizeof path, s_cur);
+        uint8_t *q = lv_malloc(e->len);
+        size_t px_bytes = (size_t)side * side * 4;
+        pic = lv_malloc(sizeof *pic + px_bytes);
+        uint8_t *px = pic ? (uint8_t *)(pic + 1) : NULL;
+        bool ok = false;
+        if (q && pic && !s_file) s_file = fopen(path, "rb");
+        if (q && pic && s_file) {
+            ok = fseek(s_file, (long)e->off, SEEK_SET) == 0 && fread(q, 1, e->len, s_file) == e->len &&
+                 aos_qoi_decode(q, e->len, px, side, side);
+            if (!ok) close_file();
+        }
+        lv_free(q);
+        if (!ok) {
+            lv_free(pic);
+            aos_hal_log("icon", "%s: its %d px picture could not be read; drawn as before", id, side);
+            return NULL;
+        }
+        /* RGBA from QOI into LVGL's ARGB8888, which in memory is B, G, R, A */
+        for (size_t i = 0; i < (size_t)side * side; i++) {
+            uint8_t *c = px + i * 4, r = c[0];
+            c[0] = c[2];
+            c[2] = r;
+        }
+        memset(pic, 0, sizeof *pic);
+        memcpy(pic->id, e->id, sizeof pic->id);
+        pic->side = (uint16_t)side;
+        pic->gen = s_gen;
+        pic->bytes = sizeof *pic + px_bytes;
+        pic->dsc.header.magic = LV_IMAGE_HEADER_MAGIC;
+        pic->dsc.header.cf = LV_COLOR_FORMAT_ARGB8888;
+        pic->dsc.header.w = side;
+        pic->dsc.header.h = side;
+        pic->dsc.header.stride = side * 4;
+        pic->dsc.data_size = px_bytes;
+        pic->dsc.data = px;
+        pic->next = s_pics;
+        s_pics = pic;
+        s_batch_bytes += pic->bytes;
     }
-    lv_free(q);
-    if (!ok) {
-        lv_free(dsc);
-        aos_hal_log("icon", "%s: its %d px picture could not be read; drawn as before", id, side);
-        return NULL;
-    }
-    /* RGBA from QOI into LVGL's ARGB8888, which in memory is B, G, R, A */
-    for (size_t i = 0; i < (size_t)side * side; i++) {
-        uint8_t *p = px + i * 4, r = p[0];
-        p[0] = p[2];
-        p[2] = r;
-    }
-    memset(dsc, 0, sizeof *dsc);
-    dsc->header.magic = LV_IMAGE_HEADER_MAGIC;
-    dsc->header.cf = LV_COLOR_FORMAT_ARGB8888;
-    dsc->header.w = side;
-    dsc->header.h = side;
-    dsc->header.stride = side * 4;
-    dsc->data_size = px_bytes;
-    dsc->data = px;
+    pic->refs++;
 
     lv_obj_t *img = lv_image_create(parent);
-    lv_image_set_src(img, dsc);
+    lv_image_set_src(img, &pic->dsc);
     lv_obj_set_size(img, size, size);
     lv_image_set_inner_align(img, LV_IMAGE_ALIGN_CENTER);
     if (side != size) {
@@ -325,10 +417,9 @@ lv_obj_t *aos_icon_pack_create(lv_obj_t *parent, const char *id, int32_t size)
     }
     lv_obj_remove_flag(img, LV_OBJ_FLAG_SCROLLABLE);
     lv_obj_remove_flag(img, LV_OBJ_FLAG_CLICKABLE);
-    lv_obj_add_event_cb(img, free_cb, LV_EVENT_DELETE, dsc);
+    lv_obj_add_event_cb(img, release_cb, LV_EVENT_DELETE, pic);
 
     s_batch_n++;
     s_batch_us += aos_hal_uptime_us() - t0;
-    s_batch_bytes += sizeof *dsc + px_bytes;
     return img;
 }
