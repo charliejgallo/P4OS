@@ -1852,6 +1852,17 @@ static bool enqueue(int kind, const char *file, const char *packs)
 {
     aos_store_init();
     lock();
+    /* an install that waits already, or is in hand, is not queued twice
+     * ("Actualizar todas" after tapping one, or a tap that went twice) */
+    if (kind == J_INSTALL && file) {
+        bool there = s_st.busy && !strcmp(s_st.job, "install") && !strcmp(s_st.file, file);
+        for (int i = 0; i < s_qn && !there; i++)
+            there = s_queue[i].kind == J_INSTALL && !strcmp(s_queue[i].file, file);
+        if (there) {
+            unlock();
+            return true;
+        }
+    }
     bool ok = s_qn < QUEUE;
     if (ok) {
         job_t *j = &s_queue[s_qn++];

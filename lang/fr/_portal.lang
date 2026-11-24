@@ -2788,3 +2788,6 @@ La autoridad HTTPS de la placa	L'autorité HTTPS de la carte
 
 #: components/aos_portal/web/app.js:3615
 , para que el navegador confíe en ella.	, pour que le navigateur lui fasse confiance.
+%s actualizaciones en cola	%s mises à jour en file d'attente
+Hasta %s: un pack que la tarjeta ya tiene no se baja de nuevo	Jusqu'à %s : un pack que la carte a déjà n'est pas retéléchargé
+Actualizar todas (%s)	Tout mettre à jour (%s)

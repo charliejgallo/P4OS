@@ -2443,3 +2443,6 @@ Nuevas	New
 Velocidad en baudios	Speed in baud
 Bits de datos, paridad y bits de stop	Data bits, parity and stop bits
 Línea %s del adaptador USB	The USB adapter's %s line
+%s actualizaciones en cola	%s updates queued
+Hasta %s: un pack que la tarjeta ya tiene no se baja de nuevo	Up to %s: a pack the card already has is not downloaded again
+Actualizar todas (%s)	Update all (%s)

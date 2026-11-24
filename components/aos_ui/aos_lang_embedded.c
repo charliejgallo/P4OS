@@ -3584,6 +3584,10 @@ static const char blob_en__sistema_lang[] =
     "Los de siempre\tThe usual ones\n"
     "Los íconos dibujados de un pack; las apps que no están en él se ven como siempre.\tThe drawn icons of a pack; apps that are not in it look as usual.\n"
     "Los packs de íconos se bajan de la Tienda, en Sistema.\tIcon packs are downloaded from the Store, under System.\n"
+    "%d actualizaciones en cola\t%d updates queued\n"
+    "%d actualizaciones, hasta %s\t%d updates, up to %s\n"
+    "%d necesitan un P4OS más nuevo: actualizá el sistema primero.\t%d need a newer P4OS: update the system first.\n"
+    "Actualizar todas\tUpdate all\n"
     ;
 
 static const aos_lang_file_t files_en[] = {
@@ -7160,6 +7164,10 @@ static const char blob_de__sistema_lang[] =
     "Los de siempre\tDie üblichen\n"
     "Los íconos dibujados de un pack; las apps que no están en él se ven como siempre.\tDie gezeichneten Symbole eines Pakets; Apps, die nicht darin sind, sehen aus wie immer.\n"
     "Los packs de íconos se bajan de la Tienda, en Sistema.\tSymbolpakete gibt es im Store unter System.\n"
+    "%d actualizaciones en cola\t%d Aktualisierungen in der Warteschlange\n"
+    "%d actualizaciones, hasta %s\t%d Aktualisierungen, bis zu %s\n"
+    "%d necesitan un P4OS más nuevo: actualizá el sistema primero.\t%d brauchen ein neueres P4OS: zuerst das System aktualisieren.\n"
+    "Actualizar todas\tAlle aktualisieren\n"
     ;
 
 static const aos_lang_file_t files_de[] = {
@@ -7167,7 +7175,7 @@ static const aos_lang_file_t files_de[] = {
 };
 
 const aos_lang_pack_t aos_lang_packs[] = {
-    { "en", "English", 3569, 0, files_en, 1 },
-    { "de", "Deutsch", 3569, 0, files_de, 1 },
+    { "en", "English", 3573, 0, files_en, 1 },
+    { "de", "Deutsch", 3573, 0, files_de, 1 },
 };
 const int aos_lang_pack_count = 2;

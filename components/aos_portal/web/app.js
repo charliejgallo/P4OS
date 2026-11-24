@@ -3234,9 +3234,21 @@ function pageTienda() {
             onclick: () => { if (confirm(tr('¿Quitar %s de la placa? Lo que la app guardó queda en la tarjeta.', L(e.name)))) act('remove', { file: e.file }); } }, tr('Quitar')) : null,
           (a.state === 'installed' || a.state === 'by_hand') && e.id ? h('button', { class: 'btn', onclick: () => post('open?id=' + encodeURIComponent(e.id)).catch(x => toast(x.message, true)) }, tr('Abrir')) : null)));
   }
+  // "Actualizar todas": every update this firmware can run, queued one after
+  // another (the board's queue does not take one twice)
+  async function updateAll(files) {
+    try {
+      for (const f of files) st = await post('store/install', { file: f, packs: 'need' });
+      toast(tr('%s actualizaciones en cola', files.length));
+    } catch (e) { toast(e.message, true); }
+    draw(); poll(400);
+  }
   function draw() {
     if (gone || !st) return;
     const by = new Map(st.apps.map(a => [a.file, a]));
+    const upAll = st.apps.filter(a => a.state === 'update' && a.fits).map(a => a.file);
+    const upBytes = upAll.reduce((n, f) => { const e = cat.find(x => x.file === f);
+      return n + (e ? (e.pkg.size || 0) + (e.packs || []).filter(p => p.need).reduce((m, p) => m + p.size, 0) : 0); }, 0);
     const ups = st.apps.filter(a => a.state === 'update').length, hand = st.apps.filter(a => a.state === 'by_hand').length,
           ours = st.apps.filter(a => a.state === 'by_hand' && a.src >= 0).length;
     const j = st.job;
@@ -3264,6 +3276,8 @@ function pageTienda() {
       h('div', { class: 'small mono muted', style: 'word-break:break-all;margin:6px 0' }, st.url),
       ups ? row(tr('Actualizaciones'), String(ups), 'warn') : null,
       h('div', { class: 'btns', style: 'margin-top:10px' },
+        upAll.length > 1 ? h('button', { class: 'btn pri', title: tr('Hasta %s: un pack que la tarjeta ya tiene no se baja de nuevo', fmtBytes(upBytes)),
+                                         onclick: () => updateAll(upAll) }, tr('Actualizar todas (%s)', upAll.length)) : null,
         h('button', { class: 'btn', disabled: st.busy, onclick: () => act('refresh', {}) }, tr('Buscar de nuevo')),
         ours ? h('button', { class: 'btn', disabled: st.busy, title: tr('Un recibo para las que son las del catálogo: no cambia ninguna app'),
                              onclick: () => act('adopt', {}) }, tr('Que la Tienda maneje las %s copiadas a mano', ours)) : null,

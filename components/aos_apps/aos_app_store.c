@@ -665,6 +665,65 @@ static void row(lv_obj_t *parent, int i)
         pill(r, action_text(it, buf), it->st.state == AOS_STORE_UPDATE, action_cb, (void *)(intptr_t)i);
 }
 
+/* "Actualizar todas": every update this firmware can run, queued one after
+ * another (the queue takes a backup's whole list, aos_store.c QUEUE). */
+static void update_all_cb(lv_event_t *e)
+{
+    (void)e;
+    int queued = 0;
+    bool full = false;
+    for (int i = 0; i < S.n && !full; i++) {
+        const item_t *it = &S.items[i];
+        if (it->st.state != AOS_STORE_UPDATE || !it->st.fits) continue;
+        if (aos_store_install(it->file, NULL)) queued++;
+        else full = true;
+    }
+    if (full) aos_ui_toast(_("Hay demasiadas cosas en cola"), 2500);
+    else if (queued) {
+        char msg[80];
+        snprintf(msg, sizeof msg, _("%d actualizaciones en cola"), queued);
+        aos_ui_toast(msg, 2500);
+    }
+    build();
+}
+
+/* At the head of "Actualizaciones": how many, how much at most (the packages
+ * and the packs they need; a pack the card has already is not downloaded
+ * again), and the button; the ones that need a newer P4OS are left out. */
+static void update_all_card(lv_obj_t *list)
+{
+    int n = 0, later = 0;
+    uint64_t bytes = 0;
+    for (int i = 0; i < S.n; i++) {
+        const item_t *it = &S.items[i];
+        if (it->st.state != AOS_STORE_UPDATE) continue;
+        if (!it->st.fits) { later++; continue; }
+        n++;
+        bytes += it->size;
+    }
+    if (n < 2 && !later) return;        /* one is its own button */
+    lv_obj_t *card = box(list);
+    lv_obj_set_size(card, lv_pct(100), LV_SIZE_CONTENT);
+    lv_obj_set_style_bg_color(card, AOS_C_CARD, 0);
+    lv_obj_set_style_bg_opa(card, LV_OPA_COVER, 0);
+    lv_obj_set_style_radius(card, AOS_UI_RADIUS, 0);
+    lv_obj_set_style_pad_all(card, 24, 0);
+    lv_obj_set_style_pad_row(card, 18, 0);
+    lv_obj_set_flex_flow(card, LV_FLEX_FLOW_COLUMN);
+    char buf[120], sz[20];
+    if (n) {
+        snprintf(buf, sizeof buf, _("%d actualizaciones, hasta %s"), n, size_text(bytes > UINT32_MAX ? UINT32_MAX : (uint32_t)bytes, sz));
+        aos_label(card, buf, aos_font_body, AOS_C_TEXT);
+    }
+    if (later) {
+        snprintf(buf, sizeof buf, _("%d necesitan un P4OS más nuevo: actualizá el sistema primero."), later);
+        lv_obj_t *l = aos_label(card, buf, aos_font_caption, AOS_C_DIM);
+        lv_obj_set_width(l, lv_pct(100));
+        lv_label_set_long_mode(l, LV_LABEL_LONG_MODE_WRAP);
+    }
+    if (n) pill(card, _("Actualizar todas"), true, update_all_cb, NULL);
+}
+
 static void build_list(lv_obj_t *page)
 {
     char buf[64];
@@ -761,6 +820,7 @@ static void build_list(lv_obj_t *page)
             pill(card, buf, true, replace_cb, NULL);
         } else pill(card, _("Reemplazarlas por las de la Tienda"), false, replace_cb, NULL);
     }
+    if (S.filter == F_UPDATES) update_all_card(S.list);
     for (int i = 0; i < S.n; i++) {
         if (!shown(&S.items[i])) continue;
         row(S.list, i);

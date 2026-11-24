@@ -10925,3 +10925,7 @@ Línea	Line
 Los de siempre	The usual ones
 Los íconos dibujados de un pack; las apps que no están en él se ven como siempre.	The drawn icons of a pack; apps that are not in it look as usual.
 Los packs de íconos se bajan de la Tienda, en Sistema.	Icon packs are downloaded from the Store, under System.
+%d actualizaciones en cola	%d updates queued
+%d actualizaciones, hasta %s	%d updates, up to %s
+%d necesitan un P4OS más nuevo: actualizá el sistema primero.	%d need a newer P4OS: update the system first.
+Actualizar todas	Update all

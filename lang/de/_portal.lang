@@ -2443,3 +2443,6 @@ Nuevas	Neu
 Velocidad en baudios	Geschwindigkeit in Baud
 Bits de datos, paridad y bits de stop	Datenbits, Parität und Stoppbits
 Línea %s del adaptador USB	%s-Leitung des USB-Adapters
+%s actualizaciones en cola	%s Aktualisierungen in der Warteschlange
+Hasta %s: un pack que la tarjeta ya tiene no se baja de nuevo	Bis zu %s: Ein Paket, das schon auf der Karte ist, wird nicht noch einmal geladen
+Actualizar todas (%s)	Alle aktualisieren (%s)
