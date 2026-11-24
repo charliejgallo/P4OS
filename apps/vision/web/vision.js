@@ -98,8 +98,8 @@ P.registerPage({
         h('div', { style: 'margin-top:12px' }, thrRow),
         h('div', { class: 'btns', style: 'margin-top:8px' }, testBtn, openBtn)),
       h('div', { class: 'card pad' }, listTitle, list),
-      h('p', { class: 'note' }, tr('La placa manda la imagen y lo que encuentra mientras esta página está abierta. ' +
-        'Las fotos quedan en la carpeta de Fotos de la tarjeta, con los recuadros.')));
+      h('p', { class: 'note' },
+        tr('La placa manda la imagen y lo que encuentra mientras esta página está abierta. Las fotos quedan en la carpeta de Fotos de la tarjeta, con los recuadros.')));
 
     const ctx = canvas.getContext('2d');
     function draw() {
