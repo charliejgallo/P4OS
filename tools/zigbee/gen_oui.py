@@ -33,6 +33,7 @@ TAIL = re.compile(r"[ ,.]*\b(co\.?,? ?ltd|company limited|corporation|corp|incor
 
 def short(name):
     n = " ".join(name.split())
+    n = re.sub(r"\s*\([^)]*\)\s*", " ", n).strip()      # "Telink Semiconductor (Taipei) Co., Ltd."
     for _ in range(3):
         m = TAIL.search(n)
         if not m:

@@ -163,5 +163,8 @@ humedad") y **si Zigbee2MQTT lo soporta** y qué expone.
   `oui.bin` (registros de 32 bytes ordenados por prefijo, ~1 MB) para
   `<tarjeta>/zigbee/`; el P4 busca ahí el fabricante la primera vez que
   conoce la dirección larga de un equipo (`aos_154_devices()`), y la app y el
-  portal lo muestran. Probado en el simulador con una tabla de prueba. Falta
-  el `oui.csv` de verdad y llevar `oui.bin` como parte del sistema.
+  portal lo muestran. **En la placa** (con el `oui.csv` que el usuario bajó
+  el 2026-11-24: 40 554 fabricantes, 1,2 MB): de 13 equipos con dirección
+  larga, 7 Silicon Labs, 4 Telink, 1 Espressif y 1 "IEEE Registration
+  Authority" (un bloque repartido en partes: haría falta también la tabla
+  MA-M/MA-S). Falta llevar `oui.bin` como parte del sistema en la Tienda.
