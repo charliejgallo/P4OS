@@ -440,3 +440,27 @@ def tile(top, bottom, stripes=0):
 def on_tile(objs):
     """Things that lie on the tile (lines of a pitch, a shadow) - no tilt."""
     return objs
+
+
+def arc_band(cx, cy, r_in, r_out, a0, a1, n=24):
+    """A ring sector (degrees a0..a1): radio waves, rainbows, dials."""
+    outer = [(cx + r_out * math.cos(math.radians(a0 + (a1 - a0) * i / n)),
+              cy + r_out * math.sin(math.radians(a0 + (a1 - a0) * i / n))) for i in range(n + 1)]
+    inner = [(cx + r_in * math.cos(math.radians(a1 - (a1 - a0) * i / n)),
+              cy + r_in * math.sin(math.radians(a1 - (a1 - a0) * i / n))) for i in range(n + 1)]
+    return outer + inner
+
+
+BOLT = [(0.06, 0.36), (-0.2, -0.02), (-0.02, -0.02), (-0.08, -0.36), (0.2, 0.06), (0.02, 0.06)]
+
+
+def waves(cx, cy, m, n=2, r0=0.12, step=0.09, w=0.045, a0=-50, a1=50, depth=0.05, z=0.0):
+    """Radio waves: n arcs (round tubes) around (cx, cy), from a0 to a1 degrees.
+    depth is unused (kept so old calls work): a tube is as thick as it is wide."""
+    out = []
+    for i in range(n):
+        r = r0 + i * step + w / 2
+        pts = [(cx + r * math.cos(math.radians(a0 + (a1 - a0) * k / 8)),
+                cy + r * math.sin(math.radians(a0 + (a1 - a0) * k / 8)), z + w / 2) for k in range(9)]
+        out.append(tube(pts, w / 2, m, name="wave"))
+    return out
